@@ -101,9 +101,9 @@ This field is used to determine the heat transfer algorithm that is to be applie
 
 \begin{lstlisting}
 SurfaceProperty:HeatTransferAlgorithm:MultipleSurface,
-      my exterior wall override,
-      AllExteriorWalls,
-      ConductionFiniteDifference;
+  my exterior wall override,
+  AllExteriorWalls,
+  ConductionFiniteDifference;
 \end{lstlisting}
 
 \subsection{SurfaceProperty:HeatTransferAlgorithm:SurfaceList}\label{surfacepropertyheattransferalgorithmsurfacelist}
@@ -149,14 +149,13 @@ This is the name of the ``Nth'' surface that will be assigned to use the heat tr
 An example IDF object follows.
 
 \begin{lstlisting}
-
 SurfaceProperty:HeatTransferAlgorithm:SurfaceList,
-      my wall construct override,   !- Name
-      ConductionFiniteDifference,   !- Algorithm
-      Zn001:Wall001,                !- Surface Name 1
-      Zn001:Wall002,                !- Surface Name 2
-      Zn001:Wall003,                !- Surface Name 3
-      Zn001:Wall004;                !- Surface Name 4
+  my wall construct override, !- Name
+  ConductionFiniteDifference, !- Algorithm
+  Zn001:Wall001,              !- Surface Name 1
+  Zn001:Wall002,              !- Surface Name 2
+  Zn001:Wall003,              !- Surface Name 3
+  Zn001:Wall004;              !- Surface Name 4
 \end{lstlisting}
 
 \subsection{SurfaceProperty:HeatTransferAlgorithm:Construction}\label{surfacepropertyheattransferalgorithmconstruction}
@@ -202,11 +201,10 @@ This field is the name of a \hyperref[construction-000]{Construction} object def
 An example IDF object follows.
 
 \begin{lstlisting}
-
 SurfaceProperty:HeatTransferAlgorithm:Construction,
-      my wall construct override,  !- Name
-      ConductionFiniteDifference,  !- Algorithm
-      R13WALL;                     !- Construction Name
+  my wall construct override, !- Name
+  ConductionFiniteDifference, !- Algorithm
+  R13WALL;                    !- Construction Name
 \end{lstlisting}
 
 \subsection{SurfaceControl:MovableInsulation}\label{surfacecontrolmovableinsulation}
@@ -217,7 +215,7 @@ Exterior and interior movable insulation have undergone some testing and appears
 
 TIM exterior layers can be used with the ConductionFiniteDifference (CondFD) solution algorithm. With this addition, TIM layers can be used in conjunction with wall layers that have phase change materials (PCM) included, or any other advanced capability of the CondFD algorithm such as variable conductivity. The input requirements are exactly the same as when used with the CTF algorithm. The Solution Algorithm needs to be changed to CondFD, and as with CTF, the ``SurfaceControl:MovableInsulation'' object must be completed to specify the insulated surface and the ``\hyperref[windowmaterialglazing]{WindowMaterial:Glazing}'' or ``\hyperref[windowmaterialglazingequivalentlayer]{WindowMaterial:Glazing:EquivalentLayer}'' object is needed to provide the TIM layer properties.
 
-Basically, the addition of movable insulation allows the user to schedule an extra amount of insulation on either the inside or outside surface of a wall (or both). The insulation must be a simple, homogenous material layer (linked to a material definition within the input data file). Note that EnergyPlus allows the exterior movable insulation layer to be transparent to short wavelength radiation (solar). In this case, incident solar is split between the plane between the movable insulation and the surface and the plane between the movable insulation and the surrounding air. This calculation is fairly basic and based on the solar transmittance of the insulation layer (material properties). Using transparent layers for exterior movable insulation allows solar energy to penetrate deeper into a construction where it can be stored for later use in the building (similar in concept to a Trombe Wall).
+Basically, the addition of movable insulation allows the user to schedule an extra amount of insulation on either the inside or outside surface of a wall (or both). The insulation must be a simple, homogeneous material layer (linked to a material definition within the input data file). Note that EnergyPlus allows the exterior movable insulation layer to be transparent to short wavelength radiation (solar). In this case, incident solar is split between the plane between the movable insulation and the surface and the plane between the movable insulation and the surrounding air. This calculation is fairly basic and based on the solar transmittance of the insulation layer (material properties). Using transparent layers for exterior movable insulation allows solar energy to penetrate deeper into a construction where it can be stored for later use in the building (similar in concept to a Trombe Wall).
 
 \subsubsection{Field: Insulation Type}\label{field-insulation-type}
 
@@ -238,12 +236,11 @@ This field is a schedule that theoretically can be any positive real number but 
 An example of this syntax implemented in an input file is:
 
 \begin{lstlisting}
-
 SurfaceControl:MoveableInsulation,
-    Exterior,                      ! Insulation Type
-    Zone001:Wall001,               ! Surface Name
-    TransparentInsulationMaterial, ! Material Name
-    PresentInWinterSchedule;       ! Schedule Name
+  Exterior,                   !- Insulation Type
+  Zone001:Wall001,            !- Surface Name
+  TransparentInsulationMaterial,  !- Material Name
+  PresentInWinterSchedule;    !- Schedule Name
 \end{lstlisting}
 
 \subsection{SurfaceProperty:OtherSideCoefficients}\label{surfacepropertyothersidecoefficients}
@@ -351,34 +348,34 @@ Tpast = Other side temperature from previous zone timestep (°C)
 \begin{lstlisting}
 !  Example input using temperature schedule
 SurfaceProperty:OtherSideCoefficients,
-      OSCCoef:Zn005:Wall003,   !- Name
-      0,                       !- Combined Convective/Radiative Film Coefficient {W/m2-K}
-      0.000000,                !- Constant Temperature {C}
-      1.000000,                !- Constant Temperature Coefficient
-      0.000000,                !- External Dry-Bulb Temperature Coefficient
-      0.000000,                !- Ground Temperature Coefficient
-      0.000000,                !- Wind Speed Coefficient
-      0.000000,                !- Zone Air Temperature Coefficient
-      Zn005Wall003OtherSideTempSched;  !- Constant Temperature Schedule Name
+  OSCCoef:Zn005:Wall003,      !- Name
+  0,                          !- Combined Convective/Radiative Film Coefficient {W/m2-K}
+  0.000000,                   !- Constant Temperature {C}
+  1.000000,                   !- Constant Temperature Coefficient
+  0.000000,                   !- External Dry-Bulb Temperature Coefficient
+  0.000000,                   !- Ground Temperature Coefficient
+  0.000000,                   !- Wind Speed Coefficient
+  0.000000,                   !- Zone Air Temperature Coefficient
+  Zn005Wall003OtherSideTempSched;  !- Constant Temperature Schedule Name
 \end{lstlisting}
 
 \begin{lstlisting}
 !  Example input for outside heat transfer coefficient of 1.23, using Toadb
 SurfaceProperty:OtherSideCoefficients,
-      OSCCoef:Zn005:Wall004,   !- Name
-      1.230000,                !- Combined Convective/Radiative Film Coefficient {W/m2-K}
-      0.000000,                !- Constant Temperature {C}
-      0.000000,                !- Constant Temperature Coefficient
-      1.000000,                !- External Dry-Bulb Temperature Coefficient
-      0.000000,                !- Ground Temperature Coefficient
-      0.000000,                !- Wind Speed Coefficient
-      0.000000,                !- Zone Air Temperature Coefficient
-      ,                        !- Constant Temperature Schedule Name
-      No,                      !- Sinusoidal Variation of Constant Temperature Coefficient
-      24,                      !- Period of Sinusoidal Variation {hr}
-      0.,                      !- Previous Other Side Temperature Coefficient
-      ,                        !- Minimum Other Side Temperature Limit {C}
-      ;                        !- Maximum Other Side Temperature Limit {C}
+  OSCCoef:Zn005:Wall004,      !- Name
+  1.230000,                   !- Combined Convective/Radiative Film Coefficient {W/m2-K}
+  0.000000,                   !- Constant Temperature {C}
+  0.000000,                   !- Constant Temperature Coefficient
+  1.000000,                   !- External Dry-Bulb Temperature Coefficient
+  0.000000,                   !- Ground Temperature Coefficient
+  0.000000,                   !- Wind Speed Coefficient
+  0.000000,                   !- Zone Air Temperature Coefficient
+  ,                           !- Constant Temperature Schedule Name
+  No,                         !- Sinusoidal Variation of Constant Temperature Coefficient
+  24,                         !- Period of Sinusoidal Variation {hr}
+  0.,                         !- Previous Other Side Temperature Coefficient
+  ,                           !- Minimum Other Side Temperature Limit {C}
+  ;                           !- Maximum Other Side Temperature Limit {C}
 \end{lstlisting}
 
 \subsubsection{Outputs}
@@ -422,10 +419,9 @@ This is a string key selection used to identify the type of model that will be u
 An example specification is:
 
 \begin{lstlisting}
-
 SurfaceProperty:OtherSideConditionsModel,
-      UTSC OSCM ZN11,          ! OtherSideConditionsModel Name
-      GapConvectionRadiation; ! Type of Modeling used to determine Boundary Conditions
+  UTSC OSCM ZN11,             !- OtherSideConditionsModel Name
+  GapConvectionRadiation;     !- Type of Modeling used to determine Boundary Conditions
 \end{lstlisting}
 
 \subsubsection{Outputs}\label{outputs-1}
@@ -486,21 +482,21 @@ This schedule could be the water velocity as it moves past stationary surface, t
 An example specification is:
 
 \begin{lstlisting}
-  SurfaceProperty:Underwater,
-    Underwater,              !- Name
-    140,                     !- Distance from Surface Centroid to Leading Edge of Boundary Layer
-    WaterTempSchedule,       !- Free Stream Water Temperature Schedule
-    VelocitySchedule;        !- Free Stream Water Velocity Schedule
+SurfaceProperty:Underwater,
+  Underwater,                 !- Name
+  140,                        !- Distance from Surface Centroid to Leading Edge of Boundary Layer
+  WaterTempSchedule,          !- Free Stream Water Temperature Schedule
+  VelocitySchedule;           !- Free Stream Water Velocity Schedule
 
-  Schedule:Constant,
-    WaterTempSchedule,
-    Any Number,
-    23;
+Schedule:Constant,
+  WaterTempSchedule,
+  Any Number,
+  23;
 
-  Schedule:Constant,
-    VelocitySchedule,
-    Any Number,
-    10.2;
+Schedule:Constant,
+  VelocitySchedule,
+  Any Number,
+  10.2;
 \end{lstlisting}
 
 \subsection{Foundation:Kiva}\label{foundationkiva}
@@ -645,63 +641,63 @@ of Foundation:Kiva objects. These components include:
 
 \begin{lstlisting}
 BuildingSurface:Detailed,
-  Slab Floor,         !- Name
-  Floor,              !- Surface Type
-  Slab Construction,  !- Construction Name
-  Living Room,        !- Zone Name
-  Foundation,         !- Outside Boundary Condition
-  Slab Details,       !- Outside Boundary Condition Object
-  No,                 !- Sun Exposure
-  No,                 !- Wind Exposure
-  0.0,                !- View Factor to Ground
-  4,                  !- Number of Vertices
-  0.0, 0.0, 0.0,      !- Vertex 1
-  0.0, 20.0, 0.0,     !- Vertex 2
-  20.0, 20.0, 0.0,    !- Vertex 3
-  20.0, 0.0, 0.0;     !- Vertex 4
+  Slab Floor,                 !- Name
+  Floor,                      !- Surface Type
+  Slab Construction,          !- Construction Name
+  Living Room,                !- Zone Name
+  Foundation,                 !- Outside Boundary Condition
+  Slab Details,               !- Outside Boundary Condition Object
+  No,                         !- Sun Exposure
+  No,                         !- Wind Exposure
+  0.0,                        !- View Factor to Ground
+  4,                          !- Number of Vertices
+  0.0, 0.0, 0.0,              !- Vertex 1
+  0.0, 20.0, 0.0,             !- Vertex 2
+  20.0, 20.0, 0.0,            !- Vertex 3
+  20.0, 0.0, 0.0;             !- Vertex 4
 
 Foundation:Kiva,
-  Slab Details,              !- Name
-  ,                          !- Initial Indoor Air Temperature
-  XPS,                       !- Interior Horizontal Insulation Material Name
-  0.2,                       !- Interior Horizontal Insulation Depth
-  0.6,                       !- Interior Horizontal Insulation Width
-  XPS,                       !- Interior Vertical Insulation Material Name
-  0.2,                       !- Interior Vertical Insulation Depth
-  ,                          !- Exterior Horizontal Insulation Material Name
-  ,                          !- Exterior Horizontal Insulation Depth
-  ,                          !- Exterior Horizontal Insulation Width
-  ,                          !- Exterior Vertical Insulation Material Name
-  ,                          !- Exterior Vertical Insulation Depth
-  0.2,                       !- Wall Height Above Grade
-  0.3,                       !- Wall Depth Below Slab
-  Slab Footing Construction; !- Footing Wall Construction Name
+  Slab Details,               !- Name
+  ,                           !- Initial Indoor Air Temperature
+  XPS,                        !- Interior Horizontal Insulation Material Name
+  0.2,                        !- Interior Horizontal Insulation Depth
+  0.6,                        !- Interior Horizontal Insulation Width
+  XPS,                        !- Interior Vertical Insulation Material Name
+  0.2,                        !- Interior Vertical Insulation Depth
+  ,                           !- Exterior Horizontal Insulation Material Name
+  ,                           !- Exterior Horizontal Insulation Depth
+  ,                           !- Exterior Horizontal Insulation Width
+  ,                           !- Exterior Vertical Insulation Material Name
+  ,                           !- Exterior Vertical Insulation Depth
+  0.2,                        !- Wall Height Above Grade
+  0.3,                        !- Wall Depth Below Slab
+  Slab Footing Construction;  !- Footing Wall Construction Name
 
 Material,
-  XPS,    !- Name
-  Rough,  !- Roughness
-  0.05,   !- Thickness
-  0.029,  !- Conductivity
-  28,     !- Density
-  1450,   !- Specific Heat
-  0.9,    !- Thermal Absorptance
-  0.7,    !- Solar Absorptance
-  0.7;    !- Visible Absorptance
+  XPS,                        !- Name
+  Rough,                      !- Roughness
+  0.05,                       !- Thickness
+  0.029,                      !- Conductivity
+  28,                         !- Density
+  1450,                       !- Specific Heat
+  0.9,                        !- Thermal Absorptance
+  0.7,                        !- Solar Absorptance
+  0.7;                        !- Visible Absorptance
 
 Material,
-  Concrete,  !- Name
-  Rough,     !- Roughness
-  0.3,       !- Thickness
-  1.95,      !- Conductivity
-  2400,      !- Density
-  900,       !- Specific Heat
-  0.9,       !- Thermal Absorptance
-  0.7,       !- Solar Absorptance
-  0.7;       !- Visible Absorptance
+  Concrete,                   !- Name
+  Rough,                      !- Roughness
+  0.3,                        !- Thickness
+  1.95,                       !- Conductivity
+  2400,                       !- Density
+  900,                        !- Specific Heat
+  0.9,                        !- Thermal Absorptance
+  0.7,                        !- Solar Absorptance
+  0.7;                        !- Visible Absorptance
 
 Construction,
-  Slab Footing Construction, !- Name
-  Concrete;                  !- Outside Layer Name
+  Slab Footing Construction,  !- Name
+  Concrete;                   !- Outside Layer Name
 \end{lstlisting}
 
 \subsubsection{Inputs}
@@ -1485,11 +1481,11 @@ The key choice options include: BeausoleilMorrisonMixedAssistedWall, AlamdariHam
 
 The SurfaceConvectionAlgorithm:UserCurve named in this field is used when the previous field is set to UserCurve.
 
-\paragraph{Field: Mixed Regime Buoyancy Opposing Flow on Walls Equation Source}\label{field-mixed-regime-buoyancy-oppossing-flow-on-walls-equation-source}
+\paragraph{Field: Mixed Regime Buoyancy Opposing Flow on Walls Equation Source}\label{field-mixed-regime-buoyancy-opposing-flow-on-walls-equation-source}
 
 The key choice options include: BeausoleilMorrisonMixedOpposingWall, AlamdariHammondVerticalWall, FohannoPolidoriVerticalWall, ASHRAEVerticalWall, FisherPedersenCeilingDiffuserWalls, GoldsteinNovoselacCeilingDiffuserWalls, or UserCurve
 
-\paragraph{Field: Mixed Regime Buoyancy Opposing Flow on Walls Equation User Curve Name}\label{field-mixed-regime-buoyancy-oppossing-flow-on-walls-equation-user-curve-name}
+\paragraph{Field: Mixed Regime Buoyancy Opposing Flow on Walls Equation User Curve Name}\label{field-mixed-regime-buoyancy-opposing-flow-on-walls-equation-user-curve-name}
 
 The SurfaceConvectionAlgorithm:UserCurve named in this field is used when the previous field is set to UserCurve
 
@@ -1759,37 +1755,36 @@ If the Convection type was ``UserCurve'', then this field contains the name of a
 In IDF usage:
 
 \begin{lstlisting}
+SurfaceProperty:ConvectionCoefficients,
+  Zn001:Wall001,              !- Surface Name
+  Outside,                    !- Convection Coefficient 1 Location
+  Value,                      !- Convection Coefficient 1 Type
+  9.8,                        !- Convection Coefficient 1
+  ,                           !- Convection Coefficient 1 Schedule Name
+  ,                           !- Convection Coefficient 1 User Curve Name
+  Inside,                     !- Convection Coefficient 2 Location
+  Schedule,                   !- Convection Coefficient 2 Type
+  ,                           !- Convection Coefficient 2 {blank because using schedule}
+  MyInteriorCC,               !- Convection Coefficient 2 Schedule Name
+  ;                           !- Convection Coefficient 2 User Curve Name
 
 SurfaceProperty:ConvectionCoefficients,
-  Zn001:Wall001,  ! Surface Name
-  Outside,        ! Convection Coefficient 1 Location
-  Value,          ! Convection Coefficient 1 Type
-  9.8,            ! Convection Coefficient 1
-  ,               ! Convection Coefficient 1 Schedule Name
-  ,               ! Convection Coefficient 1 User Curve Name
-  Inside,         ! Convection Coefficient 2 Location
-  Schedule,       ! Convection Coefficient 2 Type
-  ,               ! Convection Coefficient 2 {blank because using schedule}
-  MyInteriorCC,   ! Convection Coefficient 2 Schedule Name
-  ;               ! Convection Coefficient 2 User Curve Name
+  Zn001:Wall002,              !- Surface Name
+  Inside,                     !- Convection Coefficient 1 Location
+  Value,                      !- Convection Coefficient 1 Type
+  .8,                         !- Convection Coefficient 1
+  ,                           !- Convection Coefficient 1 Schedule Name
+  ,                           !- Convection Coefficient 1 User Curve Name
+  Outside,                    !- Convection Coefficient 2 Location
+  Value,                      !- Convection Coefficient 2 Type
+  5.5,                        !- Convection Coefficient 2
+  ;                           !- Convection Coefficient 2 User Curve Name
 
-  SurfaceProperty:ConvectionCoefficients,
-  Zn001:Wall002,  ! Surface Name
-  Inside,         ! Convection Coefficient 1 Location
-  Value,          ! Convection Coefficient 1 Type
-  .8,             ! Convection Coefficient 1
-  ,               ! Convection Coefficient 1 Schedule Name
-  ,               ! Convection Coefficient 1 User Curve Name
-  Outside,        ! Convection Coefficient 2 Location
-  Value,          ! Convection Coefficient 2 Type
-  5.5,            ! Convection Coefficient 2
-  ;               ! Convection Coefficient 2 User Curve Name
-
-  SurfaceProperty:ConvectionCoefficients,
-  Zn001:Wall003,  ! Surface Name
-  Outside,        ! Convection Coefficient 1 Location
-  Value,          ! Convection Coefficient 1 Type
-  9.8;            ! Convection Coefficient 1
+SurfaceProperty:ConvectionCoefficients,
+  Zn001:Wall003,              !- Surface Name
+  Outside,                    !- Convection Coefficient 1 Location
+  Value,                      !- Convection Coefficient 1 Type
+  9.8;                        !- Convection Coefficient 1
 \end{lstlisting}
 
 \subsection{SurfaceProperty:ConvectionCoefficients:MultipleSurface}\label{surfacepropertyconvectioncoefficientsmultiplesurface}
@@ -1923,11 +1918,10 @@ If the Convection type was ``UserCurve'', then this field contains the name of a
 In IDF usage:
 
 \begin{lstlisting}
-
 SurfaceProperty:ConvectionCoefficients:MultipleSurface,
-  AllExteriorWindows,  ! Surface Types
-  Outside,             ! Convection Coefficient 1 Location
-  MoWitt;              ! Convection Coefficient 1 Type
+  AllExteriorWindows,         !- Surface Types
+  Outside,                    !- Convection Coefficient 1 Location
+  MoWitt;                     !- Convection Coefficient 1 Type
 \end{lstlisting}
 
 \subsection{Convection Coefficient Application Hierarchy}\label{convection-coefficient-application-hierarchy}
@@ -2058,7 +2052,7 @@ Code & Zone Airflow Regime & Type of surface & Heat Flow \tabularnewline
 
 \subsubsection{Surface Inside Face Convection Model Equation Index}\label{surface-inside-face-convection-model-equation-index}
 
-This variable reports the specific model equation used to calculate the inside face convection coefficient.~ This can vary when using the adaptive convection algorithm and so the result of that selection algorithm is reported here.~ The following table lists the models associated with specific interger codes reported here.~ The models correspond to key words used in input objects.
+This variable reports the specific model equation used to calculate the inside face convection coefficient.~ This can vary when using the adaptive convection algorithm and so the result of that selection algorithm is reported here.~ The following table lists the models associated with specific integer codes reported here.~ The models correspond to key words used in input objects.
 
 \begin{longtable}[c]{@{}ll@{}}
 \toprule
@@ -2091,7 +2085,7 @@ Report Code & Related key and model \tabularnewline
 217 & AwbiHattonHeatedFloor~~~~~~~~~~~~~~~~~~ \tabularnewline
 218 & AwbiHattonHeatedWall~~~~~~~~~~~~~~~~~~~ \tabularnewline
 219 & BeausoleilMorrisonMixedAssistingWall~~~ \tabularnewline
-220 & BeausoleilMorrisonMixedOppossingWall~~~ \tabularnewline
+220 & BeausoleilMorrisonMixedopposingWall~~~ \tabularnewline
 221 & BeausoleilMorrisonMixedStableCeiling~~~ \tabularnewline
 222 & BeausoleilMorrisonMixedUnstableCeiling~ \tabularnewline
 223 & BeausoleilMorrisonMixedStableFloor~~~~~ \tabularnewline
@@ -2223,13 +2217,12 @@ The CombinedHeatAndMoistureFiniteElement algorithm will use this value to calcul
 Below is an example input of vapor transfer coefficients for a surface.
 
 \begin{lstlisting}
-
 SurfaceProperties:VaporCoefficients,
-        South wall,     !- Surface Name
-        Yes,     !- Constant External Vapor Transfer Coefficient
-        0.0000000625,     !- External Vapor Coefficient Value
-        Yes,     !- Constant Internal vapor Transfer Coefficient
-        0.00000002;     !- Internal Vapor Coefficient Value
+  South wall,                 !- Surface Name
+  Yes,                        !- Constant External Vapor Transfer Coefficient
+  0.0000000625,               !- External Vapor Coefficient Value
+  Yes,                        !- Constant Internal vapor Transfer Coefficient
+  0.00000002;                 !- Internal Vapor Coefficient Value
 \end{lstlisting}
 
 \subsection{SurfaceProperty:ExteriorNaturalVentedCavity}\label{surfacepropertyexteriornaturalventedcavity}
@@ -2304,18 +2297,18 @@ An example IDF entry is
 
 \begin{lstlisting}
 SurfaceProperty:ExteriorNaturalVentedCavity,
-  PVRoofPaverExtVentCav1 ,   ! Name
-  PVRoofPaverSystem1,        ! OtherSideConditionsModel Object Name
-  0.02,    ! Area Fraction of Openings
-  0.9,     ! Thermal Emissivity of Exterior Baffle Material
-  0.92,    ! Solar Absorbtivity of Exterior Baffle
-  0.05,    ! Height scale for buoyancy-driven ventilation
-  0.05,    ! Effective Thickness of Cavity Behind Exterior Baffle
-  0.97,    ! Ratio of Actual surface area to projected surface area
-  Smooth , ! Roughness of collector
-  0.1 ,    ! Cv, Effectiveness for perforations with respect to Wind
-  0.5 ,    ! Cd, Discharge Coefficient for Openings with respect to buoyancy-driven flow
-  Zn001:Roof001 ;    ! Surface Name
+  PVRoofPaverExtVentCav1,     !- Name
+  PVRoofPaverSystem1,         !- OtherSideConditionsModel Object Name
+  0.02,                       !- Area Fraction of Openings
+  0.9,                        !- Thermal Emissivity of Exterior Baffle Material
+  0.92,                       !- Solar Absorbtivity of Exterior Baffle
+  0.05,                       !- Height scale for buoyancy-driven ventilation
+  0.05,                       !- Effective Thickness of Cavity Behind Exterior Baffle
+  0.97,                       !- Ratio of Actual surface area to projected surface area
+  Smooth,                     !- Roughness of collector
+  0.1,                        !- Cv, Effectiveness for perforations with respect to Wind
+  0.5,                        !- Cd, Discharge Coefficient for Openings with respect to buoyancy-driven flow
+  Zn001:Roof001;              !- Surface Name
 \end{lstlisting}
 
 \subsubsection{Outputs}\label{outputs-2}
@@ -2386,22 +2379,20 @@ This field specifies the name of a schedule that contains the values for inciden
 Example for SurfaceProperty:SolarIncidentInside using a compact schedule:
 
 \begin{lstlisting}
+Schedule:Compact,
+  North Wall SSG,             !- Name
+  Positive Number,            !- Schedule Type Limits Name
+  Through: 12/31,             !- Field 1
+  For: AllDays,               !- Field 2
+  Until: 07:00,10,            !- Field 3
+  Until: 17:00,20,            !- Field 5
+  Until: 24:00,15;            !- Field 7
 
-  Schedule:Compact,
-      North Wall SSG,          !- Name
-      Positive Number,         !- Schedule Type Limits Name
-      Through: 12/31,          !- Field 1
-      For: AllDays,            !- Field 2
-      Until: 07:00,10,         !- Field 3
-      Until: 17:00,20,         !- Field 5
-      Until: 24:00,15;         !- Field 7
-
-
-    SurfaceProperty:SolarIncidentInside,
-      North Wall Solar Incident,  !- Name
-      Room102 North Wall,         !- Surface Name
-      Room Wall - North,          !- Construction Name
-      North Wall SSG;             !- Schedule Name
+SurfaceProperty:SolarIncidentInside,
+  North Wall Solar Incident,  !- Name
+  Room102 North Wall,         !- Surface Name
+  Room Wall - North,          !- Construction Name
+  North Wall SSG;             !- Schedule Name
 \end{lstlisting}
 
 \subsection{SurfaceProperty:IncidentSolarMultiplier}
@@ -2432,7 +2423,7 @@ window surface, the following error message will be shown:
 \paragraph{Field: Incident Solar Multiplier}\label{field-shading-multiplier-IncidentSolarMultiplier}
 
 A constant multiplier for the incident solar radiation. The value should be
-between 0 and 1 (both inclussive). If not specified, the default 1.0 will be
+between 0 and 1 (both inclusive). If not specified, the default 1.0 will be
 used. If the Incident Solar Multiplier Schedule Name is defined, the product of
 these two will be the final Incident Solar Multiplier. Otherwise, this constant
 multiplier will be applied throughout the simulation.
@@ -2485,44 +2476,40 @@ Specifies the name of a schedule that contains absorbed solar radiation values i
 Example for ComplexFenestrationProperty:SolarAbsorbedLayers with compact schedules:
 
 \begin{lstlisting}
+Schedule:Compact,
+  Layer 1,                    !- Name
+  Positive Number,            !- Schedule Type Limits Name
+  Through: 12/31,             !- Field 1
+  For: AllDays,               !- Field 2
+  Until: 07:00,1,             !- Field 3
+  Until: 17:00,2,             !- Field 5
+  Until: 24:00,1.5;           !- Field 7
 
-  Schedule:Compact,
-      Layer 1,                 !- Name
-      Positive Number,         !- Schedule Type Limits Name
-      Through: 12/31,          !- Field 1
-      For: AllDays,            !- Field 2
-      Until: 07:00,1,         !- Field 3
-      Until: 17:00,2,         !- Field 5
-      Until: 24:00,1.5;         !- Field 7
+Schedule:Compact,
+  Layer 2,                    !- Name
+  Positive Number,            !- Schedule Type Limits Name
+  Through: 12/31,             !- Field 1
+  For: AllDays,               !- Field 2
+  Until: 07:00,0.8,           !- Field 3
+  Until: 17:00,1.2,           !- Field 5
+  Until: 24:00,1.0;           !- Field 7
 
+Schedule:Compact,
+  Layer 3,                    !- Name
+  Positive Number,            !- Schedule Type Limits Name
+  Through: 12/31,             !- Field 1
+  For: AllDays,               !- Field 2
+  Until: 07:00,1,             !- Field 3
+  Until: 17:00,2.1,           !- Field 5
+  Until: 24:00,1.7;           !- Field 7
 
-    Schedule:Compact,
-      Layer 2,                 !- Name
-      Positive Number,         !- Schedule Type Limits Name
-      Through: 12/31,          !- Field 1
-      For: AllDays,            !- Field 2
-      Until: 07:00,0.8,        !- Field 3
-      Until: 17:00,1.2,        !- Field 5
-      Until: 24:00,1.0;        !- Field 7
-
-
-    Schedule:Compact,
-      Layer 3,                 !- Name
-      Positive Number,         !- Schedule Type Limits Name
-      Through: 12/31,          !- Field 1
-      For: AllDays,            !- Field 2
-      Until: 07:00,1,          !- Field 3
-      Until: 17:00,2.1,        !- Field 5
-      Until: 24:00,1.7;        !- Field 7
-
-
-    ComplexFenestrationProperty:SolarAbsorbedLayers,
-      South Window Solar Absorbed Layers, !- Name
-      Room 102 South Window,              !- Fenestration surface name
-      CFS_Glz_2,                          !- Construction Surface name
-      Layer 1,                            !- Absorbed solar energy in layer 1
-      Layer 2,                            !- Absorbed solar energy in layer 2
-      Layer 3;                            !- Absorbed solar energy in layer 3
+ComplexFenestrationProperty:SolarAbsorbedLayers,
+  South Window Solar Absorbed Layers,  !- Name
+  Room 102 South Window,      !- Fenestration surface name
+  CFS_Glz_2,                  !- Construction Surface name
+  Layer 1,                    !- Absorbed solar energy in layer 1
+  Layer 2,                    !- Absorbed solar energy in layer 2
+  Layer 3;                    !- Absorbed solar energy in layer 3
 \end{lstlisting}
 
 \subsection{GeometryTransform}\label{geometrytransform}
@@ -2565,7 +2552,7 @@ The object is used to calculate long wave radiation to an external surface from 
 
 The object also defines the sky and ground temperature and view factors to the external surface. The sum of all defined view factors should not exceed 1.0. If only sky view is defined in this object, the ground view factor to this surface will be 1.0 subtracted with the ground view factor and all other defined surface view factors. If only ground view is defined in this object, the sky view factor to this surface will be 1.0 subtracted with the sky view factor and all other defined surface view factors. If neither of the sky and ground view factors are explicitly declared here, the sum of the sky and ground view factor would be 1.0 subtracted with all other defined surface view factors and the proportion will be set as the same with the global setting.
 
-If ground surfaces view factors are defined in \textit{SurfaceProperty:GroundSurfaces} object, then this ground view factors overrides the gorund view factors specified in \textit{SurfaceProperty:SurroundingSurfaces} object. The sum of the sky view factors and the surrounding surfaces view factors defined in \textit{SurfaceProperty:SurroundingSurfaces} and the ground surfaces view factors defined in \textit{SurfaceProperty:GroundSurfaces} object should not exceed 1.0. The \textit{SurfaceProperty:GroundSurfaces} object allows specifying multiple ground surfaces viewed by an exterior surfaces.
+If ground surfaces view factors are defined in \textit{SurfaceProperty:GroundSurfaces} object, then this ground view factors overrides the ground view factors specified in \textit{SurfaceProperty:SurroundingSurfaces} object. The sum of the sky view factors and the surrounding surfaces view factors defined in \textit{SurfaceProperty:SurroundingSurfaces} and the ground surfaces view factors defined in \textit{SurfaceProperty:GroundSurfaces} object should not exceed 1.0. The \textit{SurfaceProperty:GroundSurfaces} object allows specifying multiple ground surfaces viewed by an exterior surfaces.
 
 \subsubsection{Field: Name}\label{field-srd-surfs-name}
 
@@ -2573,7 +2560,7 @@ This is the unique name of the surface property.
 
 \subsubsection{Field: Sky View Factor}\label{field-sky-view-factor}
 
-This field defines the constant sky view factor to an external surface. The sky view factor used in solar radiation calculation of the surface would be overwritten with the value of the fraction if defined here. If the field is left blank, the sky view factor of this surface will be calculated with the rules demonstrated above.
+This field defines the constant sky view factor to an external surface. The sky view factor used in solar radiation calculation of the surface would be overwritten with the value of the fraction if defined here. This value can be autocalculated (the default); if it is, the sky view factor of this surface will be calculated with the rules demonstrated above.
 
 \subsubsection{Field: Sky Temperature Schedule Name}\label{field-sky-temperature-schedule-name}
 
@@ -2581,7 +2568,7 @@ This field is used to supply a schedule name of the sky temperature. The sky tem
 
 \subsubsection{Field: Ground View Factor}\label{field-ground-view-factor}
 
-This field defines the constant ground view factor to an external surface. The ground view factor used in solar radiation calculation of the surface would be overwritten with the value of the fraction if defined here. If the field is left blank, the ground view factor of this surface will be calculated with the rules demonstrated above. Ground surface view factor defined in \textit{SurfaceProperty:GroundSurfaces} object overrides the value specified in this field.
+This field defines the constant ground view factor to an external surface. The ground view factor used in solar radiation calculation of the surface would be overwritten with the value of the fraction if defined here. This value can be autocalculated (the default); if it is, the ground view factor of this surface will be calculated with the rules demonstrated above. Ground surface view factor defined in \textit{SurfaceProperty:GroundSurfaces} object overrides the value specified in this field.
 
 \subsubsection{Field: Ground Temperature Schedule Name}\label{field-ground-temperature-schedule-name}
 
@@ -2605,28 +2592,28 @@ An example IDF object follows.
 
 \begin{lstlisting}
 SurfaceProperty:SurroundingSurfaces,
-  SrdSurfs:Window,             !- Name
-  0.3,                         !- Sky View Factor
-  ,                            !- Sky Temperature Schedule Name
-  0.1,                         !- Ground View Factor
-  ,                            !- Ground Temperature Schedule Name
-  SurroundingSurface1,         !- Surrounding Surface 1 Name
-  0.6,                         !- Surrounding Surface 1 View Factor
-  Surrounding Temp Sch 1;      !- Surrounding Surface 1 Temperature Schedule Name
+  SrdSurfs:Window,            !- Name
+  0.3,                        !- Sky View Factor
+  ,                           !- Sky Temperature Schedule Name
+  0.1,                        !- Ground View Factor
+  ,                           !- Ground Temperature Schedule Name
+  SurroundingSurface1,        !- Surrounding Surface 1 Name
+  0.6,                        !- Surrounding Surface 1 View Factor
+  Surrounding Temp Sch 1;     !- Surrounding Surface 1 Temperature Schedule Name
 
 Schedule:Compact,
-  Surrounding Temp Sch 1,       !- Name
-  Any Number,                   !- Schedule Type Limits Name
-  Through: 12/31,               !- Field 1
-  For: AllDays,                 !- Field 2
-  Until: 24:00, 15.0;           !- Field 3
+  Surrounding Temp Sch 1,     !- Name
+  Any Number,                 !- Schedule Type Limits Name
+  Through: 12/31,             !- Field 1
+  For: AllDays,               !- Field 2
+  Until: 24:00, 15.0;         !- Field 3
 \end{lstlisting}
 
 \subsection{SurfaceProperty:GroundSurfaces}\label{surfacePropertyGroundSurfaces}
 
-This object is used for calculating building exterior surfaces long-wave radation exchange with the ground and the calculation of solar radiation reflection from ground surfaces to a building exterior surface. A given exterior surface can view multiple ground surfaces with different surface properties and view factors. Thus, this object allows specifying multiple ground view factors, ground surfaces temperature, and ground surfaces refelectance properties viewed by a given exterior surface. View factors are assumed to be constant values. The ground surface temperature and ground surface reflectance are specified using schedule object. Ground surface view factors and ground surface temperature defined in this object overrides the ground surface view factor and ground temperature specified in \textit{SurfaceProperty:SurroundingSurfaces} object.
+This object is used for calculating building exterior surfaces long-wave radiation exchange with the ground and the calculation of solar radiation reflection from ground surfaces to a building exterior surface. A given exterior surface can view multiple ground surfaces with different surface properties and view factors. Thus, this object allows specifying multiple ground view factors, ground surfaces temperature, and ground surfaces reflectance properties viewed by a given exterior surface. View factors are assumed to be constant values. The ground surface temperature and ground surface reflectance are specified using schedule object. Ground surface view factors and ground surface temperature defined in this object overrides the ground surface view factor and ground temperature specified in \textit{SurfaceProperty:SurroundingSurfaces} object.
 
-The sum of all defined view factors that include the sky virew factor, the ground surfaces view factors and surrounding surfaces view factors seen by a given building exterior surface should be 1.0, or the sum of the ground view factors for a given exterior surface should not exceed 1 subtracted the sky view factor and the sum of view factors of all surrounding surfaces defined in \textit{SurfaceProperty:SurroundingSurfaces} object. If the ground view factor input field is blank in \textbf{SurfaceProperty:GroundSurfaces} object, the ground view factor to this surface will be 1.0 subtracted the sky view factor and all other defined surrounding surface view factors defined in \textit{SurfaceProperty:SurroundingSurfaces} object. If neither \textbf{SurfaceProperty:GroundSurfaces} object nor the \textbf{SurfaceProperty:SurroundingSurfaces} object is specified for an exterior surface, the default view factor specified in \textbf{BuildingSurface:Detailed} or \textbf{FenestrationSurface:Detailed} object is used.
+The sum of all defined view factors that include the sky view factor, the ground surfaces view factors and surrounding surfaces view factors seen by a given building exterior surface should be 1.0, or the sum of the ground view factors for a given exterior surface should not exceed 1 subtracted the sky view factor and the sum of view factors of all surrounding surfaces defined in \textit{SurfaceProperty:SurroundingSurfaces} object. If the ground view factor input field is blank in \textbf{SurfaceProperty:GroundSurfaces} object, the ground view factor to this surface will be 1.0 subtracted the sky view factor and all other defined surrounding surface view factors defined in \textit{SurfaceProperty:SurroundingSurfaces} object. If neither \textbf{SurfaceProperty:GroundSurfaces} object nor the \textbf{SurfaceProperty:SurroundingSurfaces} object is specified for an exterior surface, the default view factor specified in \textbf{BuildingSurface:Detailed} or \textbf{FenestrationSurface:Detailed} object is used.
 
 \subsubsection{Field: Name}\label{field-gnd-surfs-name}
 
@@ -2634,7 +2621,7 @@ This is a unique name of the surface property ground surfaces object.
 
 \subsubsection{Field: Ground Surface 1 Name}\label{field-ground-surface-1-name}
 
-This is a unique name for ground surface 1. 
+This is a unique name for ground surface 1.
 
 \subsubsection{Field: Ground Surface 1 View Factor}\label{field-ground-surface-1-view-factor}
 
@@ -2646,11 +2633,11 @@ This field is used to provide a schedule name of the ground surface 1 temperatur
 
 \subsubsection{Field: Ground Surface 1 Reflectance Schedule Name}\label{field-ground-surface-1-reflectance-schedule-name}
 
-This field is used to provide a schedule name of a ground surface reflectance. The ground surface reflectance is used to calculate ground surface reflected solar radition to a building exterior surface. If the field is left blank, the global reflectance object defined else where or default values will be used.
+This field is used to provide a schedule name of a ground surface reflectance. The ground surface reflectance is used to calculate ground surface reflected solar radiation to a building exterior surface. If the field is left blank, the global reflectance object defined else where or default values will be used.
 
-This object is extensible, so the last four fields can be repeated to define ground surface name, ground surface view factor, ground surface temperature, and ground surface reflectace sets.
+This object is extensible, so the last four fields can be repeated to define ground surface name, ground surface view factor, ground surface temperature, and ground surface reflectance sets.
 
-Ground surfaces solar reflectance values derived from satelite data for common ground surfaces obtained from Ground Albedo Measurements and Modeling (Bill Marion, 2018) are summerized in table below.
+Ground surfaces solar reflectance values derived from satellite data for common ground surfaces obtained from Ground Albedo Measurements and Modeling (Bill Marion, 2018) are summarized in table below.
 
 \begin{longtable}[c]{p{1.0in}p{2.5in}p{2.5in}}
 \toprule
@@ -2677,29 +2664,29 @@ An example IDF objects.
 
 \begin{lstlisting}
 SurfaceProperty:GroundSurfaces,
-  GndSurfs:South,              !- Name
-  GndSurfSouth_Parking,        !- Ground Surface 1 Name
-  0.2,                         !- Ground Surface 1 View Factor
-  GndSurfsSouth_Parking_Sch,   !- Ground Surface 1 Temperature Schedule Name
-  GndSurfsSouth_Parking_Sch,   !- Ground Surface 1 Reflectance Schedule Name
-  GndSurfSouth_Grass,          !- Ground Surface 2 Name
-  0.2,                         !- Ground Surface 2 View Factor
-  GndSurfsSouth_Grass_Sch,     !- Ground Surface 2 Temperature Schedule Name
-  GndSurfsSouth_Grass_Sch,     !- Ground Surface 2 Reflectance Schedule Name
-  GndSurfSouth_Water,          !- Ground Surface 3 Name
-  0.1,                         !- Ground Surface 3 View Factor
-  GndSurfsSouth_Water_Sch,     !- Ground Surface 3 Temperature Schedule Name
-  GndSurfsSouth_Water_Sch;     !- Ground Surface 3 Reflectance Schedule Name
+  GndSurfs:South,             !- Name
+  GndSurfSouth_Parking,       !- Ground Surface 1 Name
+  0.2,                        !- Ground Surface 1 View Factor
+  GndSurfsSouth_Parking_Sch,  !- Ground Surface 1 Temperature Schedule Name
+  GndSurfsSouth_Parking_Sch,  !- Ground Surface 1 Reflectance Schedule Name
+  GndSurfSouth_Grass,         !- Ground Surface 2 Name
+  0.2,                        !- Ground Surface 2 View Factor
+  GndSurfsSouth_Grass_Sch,    !- Ground Surface 2 Temperature Schedule Name
+  GndSurfsSouth_Grass_Sch,    !- Ground Surface 2 Reflectance Schedule Name
+  GndSurfSouth_Water,         !- Ground Surface 3 Name
+  0.1,                        !- Ground Surface 3 View Factor
+  GndSurfsSouth_Water_Sch,    !- Ground Surface 3 Temperature Schedule Name
+  GndSurfsSouth_Water_Sch;    !- Ground Surface 3 Reflectance Schedule Name
 \end{lstlisting}
 
 \begin{lstlisting}
 SurfaceProperty:LocalEnvironment,
-    LocEnv:Zn001:Wall001,      !- Name
-    Zn001:Wall001,             !- Exterior Surface Name
-    ,                          !- External Shading Fraction Schedule Name
-    ,                          !- Surrounding Surfaces Object Name
-    OutdoorAirNode:0001,       !- Outdoor Air Node Name
-    GndSurfs:South;            !- Ground Surfaces Object Name
+  LocEnv:Zn001:Wall001,       !- Name
+  Zn001:Wall001,              !- Exterior Surface Name
+  ,                           !- External Shading Fraction Schedule Name
+  ,                           !- Surrounding Surfaces Object Name
+  OutdoorAirNode:0001,        !- Outdoor Air Node Name
+  GndSurfs:South;             !- Ground Surfaces Object Name
 \end{lstlisting}
 
 \subsubsection{Outputs}\label{outputs-gndSrfs}
@@ -2719,14 +2706,14 @@ This is an average surface temperature of multiple ground surfaces in deg C view
 
 This is an average surface reflectance of multiple ground surfaces viewed by an exterior surface for each time step. If there is only one ground surface specified in a given \textit{SurfaceProperty:GroundSurfaces} object, then the average surface reflectance will be the same as the specified ground surface reflectance. This output variable is not generated when all ground surface reflectance schedule name fields are blank.
 
-\subsection{References}\label{references-gnd-srfs}
+\subsubsection{References}\label{references-gnd-srfs}
 
 Bill Marion. 2018. Ground Albedo Measurements and Modeling. Bifacial PV Workshop Lakewood, Colorado. September 11, 2018.
-NREL/PR-5K00-72589. https://www.nrel.gov/docs/fy20osti/72589.pdf
+NREL/PR-5K00-72589. https://www.nlr.gov/docs/fy20osti/72589.pdf
 
 \subsection{SurfaceProperty:LocalEnvironment}\label{surfacePropertylocalEnvironment}
 
-The object links to an exterior surface object \textbf{BuildingSurface:Detailed} or an exterior fenestration object \textbf{FenestrationSurface:Detailed} and is used when there is a need to calculate surface level environmental data externally and import them into the simulation to override existing environmental data, including external solar shading fractions, local air velocity, temperature and humidity, and surrounding surface temperatures, sky view factor, ground surfaces view factors, ground surfaces temperature and ground surfaces refelectance. The object links to four optional objects including a schedule object declared by \textbf{Field: External Shading Fraction Schedule Name}, a \textbf{\hyperref[surfacePropertySurroundingSurfaces]{SurfaceProperty:SurroundingSurfaces}} object declared by \textbf{Field: Surrounding Surfaces Object Name}, an \textbf{\hyperref[outdoorairnode]{OutdoorAir:Node}} object declared by \textbf{Field: Outdoor Air Node Name}, and a \textbf{\hyperref[surfacePropertyGroundSurfaces]{SurfaceProperty:GroundSurfaces}} object declared by 
+The object links to an exterior surface object (e.g., \textbf{BuildingSurface:Detailed}) or an exterior fenestration object (e.g., \textbf{FenestrationSurface:Detailed}) and is used when there is a need to calculate surface level environmental data externally and import them into the simulation to override existing environmental data, including external solar shading fractions, local air velocity, temperature and humidity, and surrounding surface temperatures, sky view factor, ground surfaces view factors, ground surfaces temperature and ground surfaces reflectance. The object links to four optional objects including a schedule object declared by \textbf{Field: Sunlit Fraction Schedule Name}, a \textbf{\hyperref[surfacePropertySurroundingSurfaces]{SurfaceProperty:SurroundingSurfaces}} object declared by \textbf{Field: Surrounding Surfaces Object Name}, an \textbf{\hyperref[outdoorairnode]{OutdoorAir:Node}} object declared by \textbf{Field: Outdoor Air Node Name}, and a \textbf{\hyperref[surfacePropertyGroundSurfaces]{SurfaceProperty:GroundSurfaces}} object declared by
 \textbf{Field: Ground Surfaces Object Name}. The object provides inputs to calculate shading, solar radiation, zone air balance, and surface exterior heat balance.
 
 \subsubsection{Field: Name}\label{field-surf-localenv-name}
@@ -2737,9 +2724,9 @@ This is the unique name of the surface property.
 
 This is the name of the surface that will be assigned to use the local environmental data defined in the next three fields.  This should be a name of a surface defined elsewhere.
 
-\subsubsection{Field: External Shading Fraction Schedule Name}\label{field-external-shading-fraction-schedule-name}
+\subsubsection{Field: Sunlit Fraction Schedule Name}\label{field-sunlit-fraction-schedule-name}
 
-This field is used to import external shading fraction data from external calculation. This should be a name of a schedule object with fraction input.
+This field is used to import sunlit fraction data from an external calculation. This should be the name of a schedule object that exists in the user input file with fraction input. It is important to note that for this field/schedule to have meaning, the user must select the ``Scheduled'' option in the \textbf{\hyperref[field-shading-calculation-method]{Shading Calculation Method}} field of the ShadowCalculation input object. When this is done, surfaces that have this sunlit fraction schedule defined will use the values set by this schedule to determine what fraction of the surface is sunlit or not in shadow.  However, when the user selects the ``Scheduled'' option in the ShadowCalculation object and then does not have this sunlit fraction defined for a particular surface, the program will assume that surface is completely sunlit. See the  \textbf{\hyperref[shadowcalculation]{ShadowCalculation}} object for more details.
 
 \subsubsection{Field: Surrounding Surfaces Object Name}\label{field-surrounding-surfaces-object-name}
 
@@ -2757,12 +2744,12 @@ An example IDF object follows.
 
 \begin{lstlisting}
 SurfaceProperty:LocalEnvironment,
-    LocEnv:Zn001:Wall001,         !- Name
-    Zn001:Wall001,                !- Exterior Surface Name
-    ExtShadingSch:Zn001:Wall001,  !- External Shading Fraction Schedule Name
-    SrdSurf:Zn001:Wall001,        !- Surrounding Surfaces Object Name
-    OutdoorAirNode:0001,          !- Outdoor Air Node Name
-    GndSurfs:South;               !- Ground Surfaces Object Name	
+  LocEnv:Zn001:Wall001,       !- Name
+  Zn001:Wall001,              !- Exterior Surface Name
+  ExtShadingSch:Zn001:Wall001,!- Sunlit Fraction Schedule Name
+  SrdSurf:Zn001:Wall001,      !- Surrounding Surfaces Object Name
+  OutdoorAirNode:0001,        !- Outdoor Air Node Name
+  GndSurfs:South;             !- Ground Surfaces Object Name
 \end{lstlisting}
 
 \subsection{ZoneProperty:LocalEnvironment}\label{ZonePropertylocalEnvironment}
@@ -2785,9 +2772,9 @@ An example IDF object follows.
 
 \begin{lstlisting}
 ZoneProperty:LocalEnvironment,
-    LocEnv:Zn001,                 !- Name
-    Zn001,                        !- Exterior Surface Name
-    OutdoorAirNode:0001;          !- Outdoor Air Node Name
+  LocEnv:Zn001,               !- Name
+  Zn001,                      !- Exterior Surface Name
+  OutdoorAirNode:0001;        !- Outdoor Air Node Name
 \end{lstlisting}
 
 \subsection{SurfaceProperty:HeatBalanceSourceTerm}\label{surfacePropertyHeatBalanceSourceTerm}
@@ -2808,9 +2795,9 @@ The value of this schedule is the source term value for the outside face of this
 
 \begin{lstlisting}
 SurfaceProperty:HeatBalanceSourceTerm,
-    Zn001:Wall001,                !- Surface Name
-    ,                                      !- Inside Face Heat Source Term Schedule Name
-    HeatSourceSch:001;          !- Outside Face Heat Source Term Schedule Name
+  Zn001:Wall001,              !- Surface Name
+  ,                           !- Inside Face Heat Source Term Schedule Name
+  HeatSourceSch:001;          !- Outside Face Heat Source Term Schedule Name
 \end{lstlisting}
 
 \subsection{Zone Property View Factors}\label{zone-property-view-factors}
@@ -2859,7 +2846,7 @@ surfaces in a radiant/solar enclosure which may consist of one space, one zone o
 
 \paragraph{Field: Zone or ZoneList or Space or SpaceList Name}\label{zonepropertyuserviewfactorsbysurfacename-field-zone-name}
 
-An enclosure for radiant exchange may be a single space or zone, or a group of spaces or zones connected by one or more air boundaries (see \hyperref[constructionairboundary]{Construction:AirBoundary}).  An enclosure may also be a group of spaces in the same zone with implied air boundaries because the spaces are defined only by floor surfaces (see \hyperref[space]{Space}. 
+An enclosure for radiant exchange may be a single space or zone, or a group of spaces or zones connected by one or more air boundaries (see \hyperref[constructionairboundary]{Construction:AirBoundary}).  An enclosure may also be a group of spaces in the same zone with implied air boundaries because the spaces are defined only by floor surfaces (see \hyperref[space]{Space}.
 If a ZoneList name is specified, the referenced ``\hyperref[zonelist]{ZoneList}'') must match a group of zones connected with Construction:AirBoundary.
 
 Enter the applicable surface pairs with non-zero view factors. Any omitted surface pair is assumed to have a zero view factor.
@@ -2880,7 +2867,7 @@ An IDF Example:
 
 \begin{lstlisting}
 ZoneProperty:UserViewFactors:BySurfaceName,Lshaped Zone,
-    Lshaped Zone:South Wall,Lshaped Zone:South Wall,0.000000,
-    Lshaped Zone:South Wall,Lshaped Zone:East Wall,0.101310,
+  Lshaped Zone:South Wall,Lshaped Zone:South Wall,0.000000,
+  Lshaped Zone:South Wall,Lshaped Zone:East Wall,0.101310,
   <snip>
 \end{lstlisting}

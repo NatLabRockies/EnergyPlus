@@ -1,7 +1,7 @@
-// EnergyPlus, Copyright (c) 1996-2023, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
-// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other
+// National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
 // contributors. All rights reserved.
 //
 // NOTICE: This Software was developed under funding from the U.S. Department of Energy and the
@@ -57,75 +57,67 @@ namespace EnergyPlus {
 // Forward declarations
 struct EnergyPlusData;
 
-namespace RoomAirModelAirflowNetwork {
+namespace RoomAir {
 
     // Data
-    class RAFNData
-    {
+    void InitRoomAirModelAFN(EnergyPlusData &state,
+                             int const zoneNum,
+                             int const roomAirNodeNum); // index number for the specified zone and room air node
 
-    private:
-    public:
-        int ZoneNum;
-        int RoomAirNode;
+    void CalcRoomAirModelAFN(EnergyPlusData &state,
+                             int const zoneNum,
+                             int const roomAirNodeNum); // index number for the specified zone and room air node
 
-        // constructor
-        RAFNData() : ZoneNum(0), RoomAirNode(0)
-        {
-        }
+    void UpdateRoomAirModelAFN(EnergyPlusData &state,
+                               int const zoneNum); // index number for the specified zone
 
-        // functions
+    void CalcNodeSums(EnergyPlusData &state, int const zoneNum,
+                      int const roomAirNodeNum); // index number for the specified zone and room air node
 
-        //*****************************************************************************************
-        void InitRoomAirModelAirflowNetwork(EnergyPlusData &state, int const RoomAirNode); // index number for the specified zone and room air node
+    void SumNonAirSystemResponseForNode(EnergyPlusData &state,
+                                        int const zoneNum,
+                                        int const roomAirNodeNum); // index number for the specified zone and room air node
 
-        //*****************************************************************************************
-        void CalcRoomAirModelAirflowNetwork(EnergyPlusData &state,
-                                            int const ThisRoomAirNode); // index number for the specified zone and room air node
+    void SumSystemDepResponseForNode(EnergyPlusData &state,
+                                     int const zoneNum); // index number for the specified zone and room air node
 
-        //*****************************************************************************************
-        void UpdateRoomAirModelAirflowNetwork(EnergyPlusData &state); // index number for the specified zone
+    void CalcSurfaceMoistureSums(EnergyPlusData &state,
+                                 int const zoneNum,
+                                 int const roomAirNodeNum,
+                                 Real64 &SumHmAW,
+                                 Real64 &SumHmARa,
+                                 Real64 &SumHmARaW,
+                                 Array1D<bool> const &SurfMask);
 
-        //*****************************************************************************************
-        void CalcNodeSums(EnergyPlusData &state, int const RoomAirNode); // index number for the specified zone and room air node
+    void SimRoomAirModelAFN(EnergyPlusData &state, int const ZoneNum); // index number for the specified zone
 
-        //*****************************************************************************************
-        void SumNonAirSystemResponseForNode(EnergyPlusData &state, int const RoomAirNode); // index number for the specified zone and room air node
-        //*****************************************************************************************
-        void SumSystemDepResponseForNode(EnergyPlusData &state); // index number for the specified zone and room air node
-
-        //*****************************************************************************************
-
-        void CalcSurfaceMoistureSums(
-            EnergyPlusData &state, int const RoomAirNode, Real64 &SumHmAW, Real64 &SumHmARa, Real64 &SumHmARaW, Array1D<bool> const &SurfMask);
-    };
-
-    // Object data
-
-    void SimRoomAirModelAirflowNetwork(EnergyPlusData &state, int const ZoneNum); // index number for the specified zone
-
-    void LoadPredictionRoomAirModelAirflowNetwork(EnergyPlusData &state,
-                                                  int const ZoneNum,
-                                                  int const RoomAirNode); // index number for the specified zone and node
+    void LoadPredictionRoomAirModelAFN(EnergyPlusData &state,
+                                       int const zoneNum,
+                                       int const roomAirNodeNum); // index number for the specified zone and node
 
     //*****************************************************************************************
 
-} // namespace RoomAirModelAirflowNetwork
+} // namespace RoomAir
 
 struct RoomAirModelAirflowNetworkData : BaseGlobalStruct
 {
-    bool InitRoomAirModelAirflowNetworkOneTimeFlag = true;
-    bool InitRoomAirModelAirflowNetworkOneTimeFlagConf = true;
-    bool InitRoomAirModelAirflowNetworkEnvrnFlag = true;
-    bool LoadPredictionRoomAirModelAirflowNetworkOneTimeFlag = true;
-    Array1D<RoomAirModelAirflowNetwork::RAFNData> RAFN;
+    bool OneTimeFlag = true;
+    bool OneTimeFlagConf = true;
+    bool EnvrnFlag = true;
+
+    void init_constant_state([[maybe_unused]] EnergyPlusData &state) override
+    {
+    }
+
+    void init_state([[maybe_unused]] EnergyPlusData &state) override
+    {
+    }
 
     void clear_state() override
     {
-        this->InitRoomAirModelAirflowNetworkOneTimeFlag = true;
-        this->InitRoomAirModelAirflowNetworkOneTimeFlagConf = true;
-        this->InitRoomAirModelAirflowNetworkEnvrnFlag = true;
-        this->LoadPredictionRoomAirModelAirflowNetworkOneTimeFlag = true;
-        this->RAFN.clear();
+        this->OneTimeFlag = true;
+        this->OneTimeFlagConf = true;
+        this->EnvrnFlag = true;
     }
 };
 

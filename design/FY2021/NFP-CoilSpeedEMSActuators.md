@@ -22,7 +22,7 @@ Currently, both `AirLoopHVAC:UnitarySystem` or `AirLoopHVAC:UnitaryHeatPump` hav
 
 The actuators will be implemented to override the unitary system DX coil speed level.
 
-Actuator-specific unique key values are determined from the unitary system (or unitary heat pump) name. 
+Actuator-specific unique key values are determined from the unitary system (or unitary heat pump) name.
 The following example Python codes show a possible implementation of the unique handler.
 
 ```python
@@ -46,4 +46,3 @@ The feature and implementation details were discussed at one of the EnergyPlus T
 ## References
 
 Another branch `HVACFlexMeasures`, owned by ORNL, is working on developing HVAC flexibility measures in EnergyPlus to assess impact of grid-responsive building equipment technologies and energy storage. The coil side focuses on variable-speed coils.
-

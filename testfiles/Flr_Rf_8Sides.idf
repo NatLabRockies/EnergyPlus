@@ -89,7 +89,7 @@
 ! Environmental Emissions:        None
 ! Utility Tariffs:                None
 
-  Version,23.1;
+  Version,26.2;
 
   Timestep,4;
 
@@ -702,7 +702,7 @@
 
   Output:Surfaces:List,DetailsWithVertices;
 
-  Output:Meter,DistrictHeating:Facility,runperiod;
+  Output:Meter,DistrictHeatingWater:Facility,runperiod;
 
   Output:Meter,DistrictCooling:Facility,runperiod;
 

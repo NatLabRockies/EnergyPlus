@@ -263,7 +263,7 @@ static void FinishRegion( TESStesselator *tess, ActiveRegion *reg )
 	TESShalfEdge *e = reg->eUp;
 	TESSface *f = e->Lface;
 
-	f->inside = reg->inside;
+	f->inside = (char)reg->inside;
 	f->anEdge = e;   /* optimization for tessMeshTessellateMonoRegion() */
 	DeleteRegion( tess, reg );
 }
@@ -538,7 +538,7 @@ static int CheckForLeftSplice( TESStesselator *tess, ActiveRegion *regUp )
 		e = tessMeshSplitEdge( tess->mesh, eUp );
 		if (e == NULL) longjmp(tess->env,1);
 		if ( !tessMeshSplice( tess->mesh, eLo->Sym, e ) ) longjmp(tess->env,1);
-		e->Lface->inside = regUp->inside;
+		e->Lface->inside = (char)regUp->inside;
 	} else {
 		if( EdgeSign( eLo->Dst, eUp->Dst, eLo->Org ) > 0 ) return FALSE;
 
@@ -547,7 +547,7 @@ static int CheckForLeftSplice( TESStesselator *tess, ActiveRegion *regUp )
 		e = tessMeshSplitEdge( tess->mesh, eLo );
 		if (e == NULL) longjmp(tess->env,1);    
 		if ( !tessMeshSplice( tess->mesh, eUp->Lnext, eLo->Sym ) ) longjmp(tess->env,1);
-		e->Rface->inside = regUp->inside;
+		e->Rface->inside = (char)regUp->inside;
 	}
 	return TRUE;
 }
@@ -1135,7 +1135,9 @@ static void InitEdgeDict( TESStesselator *tess )
 static void DoneEdgeDict( TESStesselator *tess )
 {
 	ActiveRegion *reg;
+#ifndef NDEBUG	
 	int fixedEdges = 0;
+#endif
 
 	while( (reg = (ActiveRegion *)dictKey( dictMin( tess->dict ))) != NULL ) {
 		/*

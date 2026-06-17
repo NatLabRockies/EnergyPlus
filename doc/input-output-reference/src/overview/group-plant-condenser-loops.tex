@@ -92,7 +92,7 @@ The Load Distribution Scheme selects the algorithm used to sequence equipment op
 \item
   \textbf{Optimal} operates each piece of equipment at its optimal part load ratio. Any remaining loop demand is distributed evenly to all of the components.
 \item
-  \textbf{SequentialLoad} loads each piece of equipment sequentially in the order specified in the PlantEquipmentList to its maximum part load ratio and will operate the last required piece of equipment between its minimum and maximum part load ratio in order to meet the loop demand. 
+  \textbf{SequentialLoad} loads each piece of equipment sequentially in the order specified in the PlantEquipmentList to its maximum part load ratio and will operate the last required piece of equipment between its minimum and maximum part load ratio in order to meet the loop demand.
 \item
   \textbf{UniformLoad} evenly distributes the loop demand among all available components on the equipment list for a given load range. If some components do not have the capacity to meet the uniformly distributed load, the remaining load is distributed sequentially to the other available components.
 
@@ -132,27 +132,26 @@ This field specifies the time it takes the fluid to circulate through the entire
 An example of this statement used in an IDF is:
 
 \begin{lstlisting}
-
-  PlantLoop,
-      Hot Water Loop,         !- Plant Loop Name
-      Water,                  !- Fluid Type
-      ,                       !- User Defined Fluid Type
-      Hot Loop Operation,     !- Plant Operation Scheme List Name
-      HW Loop Outlet Node,    !- Loop Temperature Setpoint Schedule Name
-      100,                    !- Maximum Loop Temperature {C}
-      10,                     !- Minimum Loop Temperature {C}
-      autosize,               !- Maximum Loop Volumetric Flow Rate {m3/s}
-      0.0,                    !- Minimum Loop Volumetric Flow Rate {m3/s}
-      autosize,               !- volume of the plant loop {m3}
-      HW Supply Inlet Node,   !- Plant Side Inlet Node Name
-      HW Supply Outlet Node,  !- Plant Side Outlet Node Name
-      Heating Supply Side Branches,    !- Plant Side Branch List Name
-      Heating Supply Side Connectors,  !- Plant Side Connector List Name
-      HW Demand Inlet Node,   !- Demand Side Inlet Node Name
-      HW Demand Outlet Node,  !- Demand Side Outlet Nodes Name
-      Heating Demand Side Branches,    !- Demand Side Branch List Name
-      Heating Demand Side Connectors,  !- Demand Side Connector List Name
-      Optimal;                !- Load Distribution Scheme
+PlantLoop,
+  Hot Water Loop,             !- Plant Loop Name
+  Water,                      !- Fluid Type
+  ,                           !- User Defined Fluid Type
+  Hot Loop Operation,         !- Plant Operation Scheme List Name
+  HW Loop Outlet Node,        !- Loop Temperature Setpoint Schedule Name
+  100,                        !- Maximum Loop Temperature {C}
+  10,                         !- Minimum Loop Temperature {C}
+  autosize,                   !- Maximum Loop Volumetric Flow Rate {m3/s}
+  0.0,                        !- Minimum Loop Volumetric Flow Rate {m3/s}
+  autosize,                   !- volume of the plant loop {m3}
+  HW Supply Inlet Node,       !- Plant Side Inlet Node Name
+  HW Supply Outlet Node,      !- Plant Side Outlet Node Name
+  Heating Supply Side Branches,  !- Plant Side Branch List Name
+  Heating Supply Side Connectors,  !- Plant Side Connector List Name
+  HW Demand Inlet Node,       !- Demand Side Inlet Node Name
+  HW Demand Outlet Node,      !- Demand Side Outlet Nodes Name
+  Heating Demand Side Branches,  !- Demand Side Branch List Name
+  Heating Demand Side Connectors,  !- Demand Side Connector List Name
+  Optimal;                    !- Load Distribution Scheme
 \end{lstlisting}
 
 In the above example input there is no system availability manager specified and the Demand Calculation Scheme will default to SingleSetpoint using a single setpoint manager. Common pipe simulation field in the above example will default to ``NONE'' since it is not specified.
@@ -460,57 +459,56 @@ This field specifies the time it takes the fluid to circulate through the entire
 An example of this statement used in an IDF is:
 
 \begin{lstlisting}
+CondenserLoop,
+  Condenser Water Loop,       !- Name
+  Water,                      !- Fluid Type
+  ,                           !- User Defined Fluid Type
+  Tower Loop Operation,       !- Condenser Equipment Operation Scheme Name
+  Condenser Supply Outlet Node,  !- Condenser Loop Temperature Setpoint Node Name
+  80,                         !- Maximum Loop Temperature {C}
+  10,                         !- Minimum Loop Temperature {C}
+  autosize,                   !- Maximum Loop Flow Rate {m3/s}
+  0.0,                        !- Minimum Loop Flow Rate {m3/s}
+  autocalculate,              !- Condenser Loop Volume {m3}
+  Condenser Supply Inlet Node,!- Condenser Side Inlet Node Name
+  Condenser Supply Outlet Node,  !- Condenser Side Outlet Node Name
+  Condenser Supply Side Branches,  !- Condenser Side Branch List Name
+  Condenser Supply Side Connectors,  !- Condenser Side Connector List Name
+  Condenser Demand Inlet Node,!- Demand Side Inlet Node Name
+  Condenser Demand Outlet Node,  !- Demand Side Outlet Node Name
+  Condenser Demand Side Branches,  !- Condenser Demand Side Branch List Name
+  Condenser Demand Side Connectors,  !- Condenser Demand Side Connector List Name
+  SequentialLoad;             !- Load Distribution Scheme
 
-  CondenserLoop,
-      Condenser Water Loop,    !- Name
-      Water,                   !- Fluid Type
-      ,                        !- User Defined Fluid Type
-      Tower Loop Operation,    !- Condenser Equipment Operation Scheme Name
-      Condenser Supply Outlet Node,  !- Condenser Loop Temperature Setpoint Node Name
-      80,                      !- Maximum Loop Temperature {C}
-      10,                      !- Minimum Loop Temperature {C}
-      autosize,                !- Maximum Loop Flow Rate {m3/s}
-      0.0,                     !- Minimum Loop Flow Rate {m3/s}
-      autocalculate,           !- Condenser Loop Volume {m3}
-      Condenser Supply Inlet Node,  !- Condenser Side Inlet Node Name
-      Condenser Supply Outlet Node,  !- Condenser Side Outlet Node Name
-      Condenser Supply Side Branches,  !- Condenser Side Branch List Name
-      Condenser Supply Side Connectors,  !- Condenser Side Connector List Name
-      Condenser Demand Inlet Node,  !- Demand Side Inlet Node Name
-      Condenser Demand Outlet Node,  !- Demand Side Outlet Node Name
-      Condenser Demand Side Branches,  !- Condenser Demand Side Branch List Name
-      Condenser Demand Side Connectors,  !- Condenser Demand Side Connector List Name
-      SequentialLoad;              !- Load Distribution Scheme
+SetpointManager:FollowOutdoorAirTemperature,
+  MyCondenserControl,         !- Name
+  Temperature,                !- Control Variable
+  OutdoorAirWetBulb,          !- Reference Temperature Type
+  0,                          !- Offset Temperature Difference {deltaC}
+  80,                         !- Maximum Setpoint Temperature {C}
+  10,                         !- Minimum Setpoint Temperature {C}
+  Condenser Supply Outlet Node;  !- Setpoint Node or NodeList Name
 
-    SetpointManager:FollowOutdoorAirTemperature,
-      MyCondenserControl,      !- Name
-      Temperature,             !- Control Variable
-      OutdoorAirWetBulb,       !- Reference Temperature Type
-      0,                       !- Offset Temperature Difference {deltaC}
-      80,                      !- Maximum Setpoint Temperature {C}
-      10,                      !- Minimum Setpoint Temperature {C}
-      Condenser Supply Outlet Node;  !- Setpoint Node or NodeList Name
-
-    CondenserLoop,
-      Chilled Water Condenser Loop,  !- Name
-      UserDefinedFluidType,    !- Fluid Type
-      PropyleneGlycol15Percent,!- User Defined Fluid Type
-      Tower Loop Operation,    !- Condenser Equipment Operation Scheme Name
-      Condenser Supply Outlet Node,  !- Condenser Loop Temperature Setpoint Node Name
-      80,                      !- Maximum Loop Temperature {C}
-      10,                      !- Minimum Loop Temperature {C}
-      0.00330000,              !- Maximum Loop Flow Rate {m3/s}
-      0,                       !- Minimum Loop Flow Rate {m3/s}
-      autocalculate,           !- Condenser Loop Volume {m3}
-      Condenser Supply Inlet Node,  !- Condenser Side Inlet Node Name
-      Condenser Supply Outlet Node,  !- Condenser Side Outlet Node Name
-      Condenser Supply Side Branches,  !- Condenser Side Branch List Name
-      Condenser Supply Side Connectors,  !- Condenser Side Connector List Name
-      Condenser Demand Inlet Node,  !- Demand Side Inlet Node Name
-      Condenser Demand Outlet Node,  !- Demand Side Outlet Node Name
-      Condenser Demand Side Branches,  !- Condenser Demand Side Branch List Name
-      Condenser Demand Side Connectors,  !- Condenser Demand Side Connector List Name
-      SequentialLoad;              !- Load Distribution Scheme
+CondenserLoop,
+  Chilled Water Condenser Loop,  !- Name
+  UserDefinedFluidType,       !- Fluid Type
+  PropyleneGlycol15Percent,   !- User Defined Fluid Type
+  Tower Loop Operation,       !- Condenser Equipment Operation Scheme Name
+  Condenser Supply Outlet Node,  !- Condenser Loop Temperature Setpoint Node Name
+  80,                         !- Maximum Loop Temperature {C}
+  10,                         !- Minimum Loop Temperature {C}
+  0.00330000,                 !- Maximum Loop Flow Rate {m3/s}
+  0,                          !- Minimum Loop Flow Rate {m3/s}
+  autocalculate,              !- Condenser Loop Volume {m3}
+  Condenser Supply Inlet Node,!- Condenser Side Inlet Node Name
+  Condenser Supply Outlet Node,  !- Condenser Side Outlet Node Name
+  Condenser Supply Side Branches,  !- Condenser Side Branch List Name
+  Condenser Supply Side Connectors,  !- Condenser Side Connector List Name
+  Condenser Demand Inlet Node,!- Demand Side Inlet Node Name
+  Condenser Demand Outlet Node,  !- Demand Side Outlet Node Name
+  Condenser Demand Side Branches,  !- Condenser Demand Side Branch List Name
+  Condenser Demand Side Connectors,  !- Condenser Demand Side Connector List Name
+  SequentialLoad;             !- Load Distribution Scheme
 \end{lstlisting}
 
 \subsubsection{Outputs}\label{outputs-1-018}

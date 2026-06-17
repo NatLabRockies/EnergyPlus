@@ -60,7 +60,7 @@
 ! Environmental Emissions:        None
 ! Utility Tariffs:                None
 
-  Version,23.1;
+  Version,26.2;
 
   Building,
     LBuildingAppGPar,        !- Name
@@ -228,12 +228,6 @@
   Output:Table:SummaryReports,
     AllSummary;              !- Report 1 Name
 
-                             !- type
-                             !- Variable
-                             !- Variable
-                             !- Variable
-                             !- Variable
-
   Output:Table:Monthly,
     Building Loads - Cooling,!- Name
     2,                       !- Digits After Decimal
@@ -253,9 +247,6 @@
     ValueWhenMaximumOrMinimum,  !- Aggregation Type for Variable or Meter 7
     Site Outdoor Air Wetbulb Temperature,  !- Variable or Meter 8 Name
     ValueWhenMaximumOrMinimum;  !- Aggregation Type for Variable or Meter 8
-
-                             !- Variable
-                             !- Variable
 
   Output:Table:Monthly,
     Building Loads - Heating,!- Name
@@ -424,8 +415,6 @@
     0.92,                    !- Solar Absorptance
     0.92;                    !- Visible Absorptance
 
-                             !- Name
-
   Construction,
     FaceBrkIns4LWConcBlkGyp_R-17,  !- Name
     HF-A2,                   !- Outside Layer
@@ -485,8 +474,6 @@
     0.32,                    !- Solar Absorptance
     0.32;                    !- Visible Absorptance
 
-                             !- Name
-
   Construction,
     SlagFeltIns6LWConcGapAcoTile_R-21,  !- Name
     HF-E2,                   !- Outside Layer
@@ -522,8 +509,6 @@
     CLEAR 6MM,               !- Outside Layer
     AIR 6MM,                 !- Layer 2
     CLEAR 6MM;               !- Layer 3
-
-                             !- Construction Name
 
   BuildingSurface:Detailed,
     Main_ExtWall_a_b,        !- Name
@@ -662,8 +647,6 @@
     0,43.24563,0.7619628,  !- X,Y,Z ==> Vertex 3 {m}
     0,43.24563,2.285888;  !- X,Y,Z ==> Vertex 4 {m}
 
-                             !- Construction Name
-
   BuildingSurface:Detailed,
     Main_ExtWall_b_c,        !- Name
     Wall,                    !- Surface Type
@@ -725,8 +708,6 @@
     12.11521,48.76562,0.7619628,  !- X,Y,Z ==> Vertex 2 {m}
     11.20085,48.76562,0.7619628,  !- X,Y,Z ==> Vertex 3 {m}
     11.20085,48.76562,2.285888;  !- X,Y,Z ==> Vertex 4 {m}
-
-                             !- Construction Name
 
   BuildingSurface:Detailed,
     Main_ExtWall_c_d,        !- Name
@@ -850,8 +831,6 @@
     15.23926,19.54435,0.7619628,  !- X,Y,Z ==> Vertex 3 {m}
     15.23926,19.54435,2.285888;  !- X,Y,Z ==> Vertex 4 {m}
 
-                             !- Construction Name
-
   BuildingSurface:Detailed,
     Main_ExtWall_d_e,        !- Name
     Wall,                    !- Surface Type
@@ -913,8 +892,6 @@
     27.35447,15.23926,0.7619628,  !- X,Y,Z ==> Vertex 2 {m}
     26.44011,15.23926,0.7619628,  !- X,Y,Z ==> Vertex 3 {m}
     26.44011,15.23926,2.285888;  !- X,Y,Z ==> Vertex 4 {m}
-
-                             !- Construction Name
 
   BuildingSurface:Detailed,
     Main_ExtWall_e_f,        !- Name
@@ -992,8 +969,6 @@
     30.47851,2.316367,0.7619628,  !- X,Y,Z ==> Vertex 2 {m}
     30.47851,3.230722,0.7619628,  !- X,Y,Z ==> Vertex 3 {m}
     30.47851,3.230722,2.285888;  !- X,Y,Z ==> Vertex 4 {m}
-
-                             !- Construction Name
 
   BuildingSurface:Detailed,
     Main_ExtWall_f_a,        !- Name
@@ -1280,8 +1255,6 @@
     10.66748,10.66748,0,  !- X,Y,Z ==> Vertex 3 {m}
     10.66748,10.66748,3.047851;  !- X,Y,Z ==> Vertex 4 {m}
 
-                             !- Name
-                             !- Construction Name
 ! ========== ADDD INTERIOR WALLS ==========
 
   BuildingSurface:Detailed,
@@ -1405,9 +1378,6 @@
     0,48.76562,3.047851,  !- X,Y,Z ==> Vertex 3 {m}
     0,0,3.047851;  !- X,Y,Z ==> Vertex 4 {m}
 
-                             !- Name
-                             !- Construction Name
-
   BuildingSurface:Detailed,
     RoofAbove_Main_Zone_b_c_h_g,  !- Name
     Roof,                    !- Surface Type
@@ -1424,9 +1394,6 @@
     10.66748,44.19384,3.047851,  !- X,Y,Z ==> Vertex 2 {m}
     15.23926,48.76562,3.047851,  !- X,Y,Z ==> Vertex 3 {m}
     0,48.76562,3.047851;  !- X,Y,Z ==> Vertex 4 {m}
-
-                             !- Name
-                             !- Construction Name
 
   BuildingSurface:Detailed,
     RoofAbove_Main_Zone_c_d_i_h,  !- Name
@@ -1445,9 +1412,6 @@
     15.23926,15.23926,3.047851,  !- X,Y,Z ==> Vertex 3 {m}
     15.23926,48.76562,3.047851;  !- X,Y,Z ==> Vertex 4 {m}
 
-                             !- Name
-                             !- Construction Name
-
   BuildingSurface:Detailed,
     RoofAbove_Main_Zone_d_e_j_i,  !- Name
     Roof,                    !- Surface Type
@@ -1464,9 +1428,6 @@
     25.90674,10.66748,3.047851,  !- X,Y,Z ==> Vertex 2 {m}
     30.47851,15.23926,3.047851,  !- X,Y,Z ==> Vertex 3 {m}
     15.23926,15.23926,3.047851;  !- X,Y,Z ==> Vertex 4 {m}
-
-                             !- Name
-                             !- Construction Name
 
   BuildingSurface:Detailed,
     RoofAbove_Main_Zone_e_f_k_j,  !- Name
@@ -1485,9 +1446,6 @@
     30.47851,0,3.047851,  !- X,Y,Z ==> Vertex 3 {m}
     30.47851,15.23926,3.047851;  !- X,Y,Z ==> Vertex 4 {m}
 
-                             !- Name
-                             !- Construction Name
-
   BuildingSurface:Detailed,
     RoofAbove_Main_Zone_l_k_f_a,  !- Name
     Roof,                    !- Surface Type
@@ -1504,9 +1462,6 @@
     30.47851,0,3.047851,  !- X,Y,Z ==> Vertex 2 {m}
     25.90674,4.571777,3.047851,  !- X,Y,Z ==> Vertex 3 {m}
     4.571777,4.571777,3.047851;  !- X,Y,Z ==> Vertex 4 {m}
-
-                             !- Name
-                             !- Construction Name
 
   BuildingSurface:Detailed,
     RoofAbove_Main_Zone_g_h_i_l,  !- Name
@@ -1525,9 +1480,6 @@
     10.66748,44.19384,3.047851,  !- X,Y,Z ==> Vertex 3 {m}
     4.571777,44.19384,3.047851;  !- X,Y,Z ==> Vertex 4 {m}
 
-                             !- Name
-                             !- Construction Name
-
   BuildingSurface:Detailed,
     RoofAbove_Main_Zone_i_j_k_l,  !- Name
     Roof,                    !- Surface Type
@@ -1544,8 +1496,6 @@
     25.90674,4.571777,3.047851,  !- X,Y,Z ==> Vertex 2 {m}
     25.90674,10.66748,3.047851,  !- X,Y,Z ==> Vertex 3 {m}
     10.66748,10.66748,3.047851;  !- X,Y,Z ==> Vertex 4 {m}
-
-                             !- Name
 
   BuildingSurface:Detailed,
     Foundation_Main_Zone_a_b_g_l,  !- Name
@@ -1564,8 +1514,6 @@
     4.571777,44.19384,0,  !- X,Y,Z ==> Vertex 3 {m}
     4.571777,4.571777,0;  !- X,Y,Z ==> Vertex 4 {m}
 
-                             !- Name
-
   BuildingSurface:Detailed,
     Foundation_Main_Zone_b_c_h_g,  !- Name
     Floor,                   !- Surface Type
@@ -1582,8 +1530,6 @@
     15.23926,48.76562,0,  !- X,Y,Z ==> Vertex 2 {m}
     10.66748,44.19384,0,  !- X,Y,Z ==> Vertex 3 {m}
     4.571777,44.19384,0;  !- X,Y,Z ==> Vertex 4 {m}
-
-                             !- Name
 
   BuildingSurface:Detailed,
     Foundation_Main_Zone_c_d_i_h,  !- Name
@@ -1602,8 +1548,6 @@
     10.66748,10.66748,0,  !- X,Y,Z ==> Vertex 3 {m}
     10.66748,44.19384,0;  !- X,Y,Z ==> Vertex 4 {m}
 
-                             !- Name
-
   BuildingSurface:Detailed,
     Foundation_Main_Zone_d_e_j_i,  !- Name
     Floor,                   !- Surface Type
@@ -1620,8 +1564,6 @@
     30.47851,15.23926,0,  !- X,Y,Z ==> Vertex 2 {m}
     25.90674,10.66748,0,  !- X,Y,Z ==> Vertex 3 {m}
     10.66748,10.66748,0;  !- X,Y,Z ==> Vertex 4 {m}
-
-                             !- Name
 
   BuildingSurface:Detailed,
     Foundation_Main_Zone_e_f_k_j,  !- Name
@@ -1640,8 +1582,6 @@
     25.90674,4.571777,0,  !- X,Y,Z ==> Vertex 3 {m}
     25.90674,10.66748,0;  !- X,Y,Z ==> Vertex 4 {m}
 
-                             !- Name
-
   BuildingSurface:Detailed,
     Foundation_Main_Zone_l_k_f_a,  !- Name
     Floor,                   !- Surface Type
@@ -1659,8 +1599,6 @@
     30.47851,0,0,  !- X,Y,Z ==> Vertex 3 {m}
     0,0,0;  !- X,Y,Z ==> Vertex 4 {m}
 
-                             !- Name
-
   BuildingSurface:Detailed,
     Foundation_Main_Zone_g_h_i_l,  !- Name
     Floor,                   !- Surface Type
@@ -1677,8 +1615,6 @@
     10.66748,44.19384,0,  !- X,Y,Z ==> Vertex 2 {m}
     10.66748,10.66748,0,  !- X,Y,Z ==> Vertex 3 {m}
     4.571777,4.571777,0;  !- X,Y,Z ==> Vertex 4 {m}
-
-                             !- Name
 
   BuildingSurface:Detailed,
     Foundation_Main_Zone_i_j_k_l,  !- Name
@@ -1728,7 +1664,7 @@
     Lights_office_Sch,       !- Schedule Name
     Watts/area,              !- Design Level Calculation Method
     ,                        !- Lighting Level {W}
-    5.52125,                 !- Watts per Zone Floor Area {W/m2}
+    5.52125,                 !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0,                       !- Return Air Fraction
     0.37,                    !- Fraction Radiant
@@ -1742,14 +1678,12 @@
     Elec_office_Sch,         !- Schedule Name
     Watts/area,              !- Design Level Calculation Method
     ,                        !- Design Level {W}
-    2.36625,                 !- Watts per Zone Floor Area {W/m2}
+    2.36625,                 !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0,                       !- Fraction Latent
     0.25,                    !- Fraction Radiant
     0,                       !- Fraction Lost
     0;                       !- End-Use Subcategory
-
-                             !- Name
 
   InternalMass,
     Main_Zone_a_b_g_l_Furniture1,  !- Name
@@ -1757,8 +1691,6 @@
     Main_Zone_a_b_g_l,       !- Zone or ZoneList Name
     ,                        !- Space or SpaceList Name
     90.7638663194365;        !- Surface Area {m2}
-
-                             !- Name
 
   InternalMass,
     Main_Zone_a_b_g_l_Furniture2,  !- Name
@@ -1798,7 +1730,7 @@
     Lights_office_Sch,       !- Schedule Name
     Watts/area,              !- Design Level Calculation Method
     ,                        !- Lighting Level {W}
-    5.52125,                 !- Watts per Zone Floor Area {W/m2}
+    5.52125,                 !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0,                       !- Return Air Fraction
     0.37,                    !- Fraction Radiant
@@ -1812,14 +1744,12 @@
     Elec_office_Sch,         !- Schedule Name
     Watts/area,              !- Design Level Calculation Method
     ,                        !- Design Level {W}
-    2.36625,                 !- Watts per Zone Floor Area {W/m2}
+    2.36625,                 !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0,                       !- Fraction Latent
     0.25,                    !- Fraction Radiant
     0,                       !- Fraction Lost
     0;                       !- End-Use Subcategory
-
-                             !- Name
 
   InternalMass,
     Main_Zone_b_c_h_g_Furniture1,  !- Name
@@ -1827,8 +1757,6 @@
     Main_Zone_b_c_h_g,       !- Zone or ZoneList Name
     ,                        !- Space or SpaceList Name
     21.908520224611;         !- Surface Area {m2}
-
-                             !- Name
 
   InternalMass,
     Main_Zone_b_c_h_g_Furniture2,  !- Name
@@ -1868,7 +1796,7 @@
     Lights_office_Sch,       !- Schedule Name
     Watts/area,              !- Design Level Calculation Method
     ,                        !- Lighting Level {W}
-    5.52125,                 !- Watts per Zone Floor Area {W/m2}
+    5.52125,                 !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0,                       !- Return Air Fraction
     0.37,                    !- Fraction Radiant
@@ -1882,14 +1810,12 @@
     Elec_office_Sch,         !- Schedule Name
     Watts/area,              !- Design Level Calculation Method
     ,                        !- Design Level {W}
-    2.36625,                 !- Watts per Zone Floor Area {W/m2}
+    2.36625,                 !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0,                       !- Fraction Latent
     0.25,                    !- Fraction Radiant
     0,                       !- Fraction Lost
     0;                       !- End-Use Subcategory
-
-                             !- Name
 
   InternalMass,
     Main_Zone_c_d_i_h_Furniture1,  !- Name
@@ -1897,8 +1823,6 @@
     Main_Zone_c_d_i_h,       !- Zone or ZoneList Name
     ,                        !- Space or SpaceList Name
     68.8553478084919;        !- Surface Area {m2}
-
-                             !- Name
 
   InternalMass,
     Main_Zone_c_d_i_h_Furniture2,  !- Name
@@ -1938,7 +1862,7 @@
     Lights_office_Sch,       !- Schedule Name
     Watts/area,              !- Design Level Calculation Method
     ,                        !- Lighting Level {W}
-    5.52125,                 !- Watts per Zone Floor Area {W/m2}
+    5.52125,                 !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0,                       !- Return Air Fraction
     0.37,                    !- Fraction Radiant
@@ -1952,14 +1876,12 @@
     Elec_office_Sch,         !- Schedule Name
     Watts/area,              !- Design Level Calculation Method
     ,                        !- Design Level {W}
-    2.36625,                 !- Watts per Zone Floor Area {W/m2}
+    2.36625,                 !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0,                       !- Fraction Latent
     0.25,                    !- Fraction Radiant
     0,                       !- Fraction Lost
     0;                       !- End-Use Subcategory
-
-                             !- Name
 
   InternalMass,
     Main_Zone_d_e_j_i_Furniture1,  !- Name
@@ -1967,8 +1889,6 @@
     Main_Zone_d_e_j_i,       !- Zone or ZoneList Name
     ,                        !- Space or SpaceList Name
     31.2978850559206;        !- Surface Area {m2}
-
-                             !- Name
 
   InternalMass,
     Main_Zone_d_e_j_i_Furniture2,  !- Name
@@ -2008,7 +1928,7 @@
     Lights_office_Sch,       !- Schedule Name
     Watts/area,              !- Design Level Calculation Method
     ,                        !- Lighting Level {W}
-    5.52125,                 !- Watts per Zone Floor Area {W/m2}
+    5.52125,                 !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0,                       !- Return Air Fraction
     0.37,                    !- Fraction Radiant
@@ -2022,14 +1942,12 @@
     Elec_office_Sch,         !- Schedule Name
     Watts/area,              !- Design Level Calculation Method
     ,                        !- Design Level {W}
-    2.36625,                 !- Watts per Zone Floor Area {W/m2}
+    2.36625,                 !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0,                       !- Fraction Latent
     0.25,                    !- Fraction Radiant
     0,                       !- Fraction Lost
     0;                       !- End-Use Subcategory
-
-                             !- Name
 
   InternalMass,
     Main_Zone_e_f_k_j_Furniture1,  !- Name
@@ -2037,8 +1955,6 @@
     Main_Zone_e_f_k_j,       !- Zone or ZoneList Name
     ,                        !- Space or SpaceList Name
     21.908520224611;         !- Surface Area {m2}
-
-                             !- Name
 
   InternalMass,
     Main_Zone_e_f_k_j_Furniture2,  !- Name
@@ -2078,7 +1994,7 @@
     Lights_office_Sch,       !- Schedule Name
     Watts/area,              !- Design Level Calculation Method
     ,                        !- Lighting Level {W}
-    5.52125,                 !- Watts per Zone Floor Area {W/m2}
+    5.52125,                 !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0,                       !- Return Air Fraction
     0.37,                    !- Fraction Radiant
@@ -2092,14 +2008,12 @@
     Elec_office_Sch,         !- Schedule Name
     Watts/area,              !- Design Level Calculation Method
     ,                        !- Design Level {W}
-    2.36625,                 !- Watts per Zone Floor Area {W/m2}
+    2.36625,                 !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0,                       !- Fraction Latent
     0.25,                    !- Fraction Radiant
     0,                       !- Fraction Lost
     0;                       !- End-Use Subcategory
-
-                             !- Name
 
   InternalMass,
     Main_Zone_l_k_f_a_Furniture1,  !- Name
@@ -2107,8 +2021,6 @@
     Main_Zone_l_k_f_a,       !- Zone or ZoneList Name
     ,                        !- Space or SpaceList Name
     53.206406994198;         !- Surface Area {m2}
-
-                             !- Name
 
   InternalMass,
     Main_Zone_l_k_f_a_Furniture2,  !- Name
@@ -2148,7 +2060,7 @@
     Lights_office_Sch,       !- Schedule Name
     Watts/area,              !- Design Level Calculation Method
     ,                        !- Lighting Level {W}
-    5.52125,                 !- Watts per Zone Floor Area {W/m2}
+    5.52125,                 !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0,                       !- Return Air Fraction
     0.37,                    !- Fraction Radiant
@@ -2162,14 +2074,12 @@
     Elec_office_Sch,         !- Schedule Name
     Watts/area,              !- Design Level Calculation Method
     ,                        !- Design Level {W}
-    2.36625,                 !- Watts per Zone Floor Area {W/m2}
+    2.36625,                 !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0,                       !- Fraction Latent
     0.25,                    !- Fraction Radiant
     0,                       !- Fraction Lost
     0;                       !- End-Use Subcategory
-
-                             !- Name
 
   InternalMass,
     Main_Zone_g_h_i_l_Furniture1,  !- Name
@@ -2177,8 +2087,6 @@
     Main_Zone_g_h_i_l,       !- Zone or ZoneList Name
     ,                        !- Space or SpaceList Name
     100.153236291745;        !- Surface Area {m2}
-
-                             !- Name
 
   InternalMass,
     Main_Zone_g_h_i_l_Furniture2,  !- Name
@@ -2218,7 +2126,7 @@
     Lights_office_Sch,       !- Schedule Name
     Watts/area,              !- Design Level Calculation Method
     ,                        !- Lighting Level {W}
-    5.52125,                 !- Watts per Zone Floor Area {W/m2}
+    5.52125,                 !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0,                       !- Return Air Fraction
     0.37,                    !- Fraction Radiant
@@ -2232,14 +2140,12 @@
     Elec_office_Sch,         !- Schedule Name
     Watts/area,              !- Design Level Calculation Method
     ,                        !- Design Level {W}
-    2.36625,                 !- Watts per Zone Floor Area {W/m2}
+    2.36625,                 !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0,                       !- Fraction Latent
     0.25,                    !- Fraction Radiant
     0,                       !- Fraction Lost
     0;                       !- End-Use Subcategory
-
-                             !- Name
 
   InternalMass,
     Main_Zone_i_j_k_l_Furniture1,  !- Name
@@ -2247,8 +2153,6 @@
     Main_Zone_i_j_k_l,       !- Zone or ZoneList Name
     ,                        !- Space or SpaceList Name
     50.0766181458726;        !- Surface Area {m2}
-
-                             !- Name
 
   InternalMass,
     Main_Zone_i_j_k_l_Furniture2,  !- Name

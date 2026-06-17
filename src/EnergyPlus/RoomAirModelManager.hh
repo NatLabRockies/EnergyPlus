@@ -1,7 +1,7 @@
-// EnergyPlus, Copyright (c) 1996-2023, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
-// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other
+// National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
 // contributors. All rights reserved.
 //
 // NOTICE: This Software was developed under funding from the U.S. Department of Energy and the
@@ -57,7 +57,7 @@ namespace EnergyPlus {
 // Forward declarations
 struct EnergyPlusData;
 
-namespace RoomAirModelManager {
+namespace RoomAir {
 
     void ManageAirModel(EnergyPlusData &state, int const ZoneNum);
 
@@ -86,69 +86,12 @@ namespace RoomAirModelManager {
                         bool &Errorfound); // find zone number and node number based on the node name
 
     bool CheckEquipName(EnergyPlusData &state,
-                        std::string const &EquipType, // Equipment type
-                        std::string const &EquipName, // Equipment Name
-                        std::string &SupplyNodeName,  // Supply node name
-                        std::string &ReturnNodeName,  // Return node name
-                        int TotNumEquip,              // how many of this equipment type
-                        int TypeNum);                 // equipment type number
+                        std::string const &EquipName,                    // Equipment Name
+                        std::string &SupplyNodeName,                     // Supply node name
+                        std::string &ReturnNodeName,                     // Return node name
+                        DataZoneEquipment::ZoneEquipType zoneEquipType); // equipment type number
 
-} // namespace RoomAirModelManager
-
-struct RoomAirModelManagerData : BaseGlobalStruct
-{
-
-    bool GetUCSDDVDataFlag = true; // UCSD
-    bool GetAirModelData = true;   // Used to "get" all air model data
-    bool MyOneTimeFlag = true;
-    int CompNum = 0;
-    int TypeNum = 0;
-    int NodeNum1 = 0;
-    int NodeNum2 = 0;
-    int CompNumber = 0;                    // AirflowNetwork Component number
-    int TypeNumber = 0;                    // Airflownetwork Type Number within a component
-    int NodeNumber1 = 0;                   // The first node number in an AirflowNetwork linkage data
-    int NodeNumber2 = 0;                   // The Second node number in an AirflowNetwork linkage data
-    int contFloorBegin = 0;                // counter
-    int contFloorLast = 0;                 // counter
-    int contFloor = 0;                     // counter
-    int contCeilingBegin = 0;              // counter
-    int contCeilingLast = 0;               // counter
-    int contCeiling = 0;                   // counter
-    int contWallBegin = 0;                 // counter
-    int contWallLast = 0;                  // counter
-    int contWall = 0;                      // counter
-    int contWindowBegin = 0;               // counter
-    int contWindowLast = 0;                // counter
-    int contWindow = 0;                    // counter
-    int contInternalBegin = 0;             // counter
-    int contInternalLast = 0;              // counter
-    int contInternal = 0;                  // counter
-    int contDoorBegin = 0;                 // counter
-    int contDoorLast = 0;                  // counter
-    int contDoor = 0;                      // counter
-    int Loop = 0;                          // counter
-    int Loop2 = 0;                         // counter
-    int Loop3 = 0;                         // counter
-    int i = 0;                             // counter
-    int N = 0;                             // counter
-    Real64 Z1ZoneAux = 0.0;                // Auxiliary variables
-    Real64 Z2ZoneAux = 0.0;                // Auxiliary variables
-    Real64 Z1Zone = 0.0;                   // Auxiliary variables
-    Real64 Z2Zone = 0.0;                   // Auxiliary variables
-    Real64 CeilingHeightDiffMax = 0.1;     // Maximum difference between wall height and ceiling height
-    Real64 Z1ofZoneAux = 0.0;              // Auxiliary variables
-    Real64 Z2ofZoneAux = 0.0;              // Auxiliary variables
-    Real64 Z1ofZone = 0.0;                 // Auxiliary variables
-    Real64 Z2ofZone = 0.0;                 // Auxiliary variables
-    Real64 CeilingHeightDiffMaximum = 0.1; // Maximum difference between wall height and ceiling height
-    Array1D_bool MyEnvrnFlag;
-
-    void clear_state() override
-    {
-        *this = RoomAirModelManagerData();
-    }
-};
+} // namespace RoomAir
 
 } // namespace EnergyPlus
 

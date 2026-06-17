@@ -1,7 +1,0 @@
-\section{Begin Zone Timestep Before SetCurrentWeather}\label{begin-zone-timestep-before-setcurrentweather}
-
-The calling point referred to with the keyword ``BeginZoneTimestepBeforeSetCurrentWeather'' occurs near the beginning of each timestep during weather data setup. It is called from ``ManageWeather'' before ``SetCurrentWeather'' which sets the environment variables for a given timstep. ``SetCurrentWeather'' is where the Weather Data actuators may override certain environment variables. Note that this calling point is not active during sizing.
-
-\section{After New Environment Warmup Is Complete}\label{after-new-environment-warmup-is-complete}
-
-The calling point referred to with the keyword ``AfterNewEnvironmentWarmUpIsComplete'' occurs once near at the beginning of each environment period but after any warmup days are complete. This is similar to the previous calling point. Warmup days are used to condition the transient aspects of the model before proceeding with the first day. This will not be useful for control actions, but would be useful for reinitializing Erl programs with fresh values after the warmup days have finished running and the model is about to start the final timestep calculations for a particular environment period.

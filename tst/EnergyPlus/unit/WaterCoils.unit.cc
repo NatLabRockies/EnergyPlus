@@ -1,7 +1,7 @@
-// EnergyPlus, Copyright (c) 1996-2023, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
-// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other
+// National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
 // contributors. All rights reserved.
 //
 // NOTICE: This Software was developed under funding from the U.S. Department of Energy and the
@@ -57,8 +57,14 @@
 // The water coil should size to use sizing data or Data* globals. After a coil is sized, the Data* variables should all be reset.
 // Defect file showed a second coil in the input that autosized the same as the first (incorrect based on zone flow rates).
 
+// C++ Headers
+#include <format>
+
 // Google Test Headers
 #include <gtest/gtest.h>
+
+// Fixture Headers
+#include "Fixtures/EnergyPlusFixture.hh"
 
 // EnergyPlus Headers
 #include <EnergyPlus/Data/EnergyPlusData.hh>
@@ -80,14 +86,13 @@
 #include <EnergyPlus/MixedAir.hh>
 #include <EnergyPlus/OutputReportPredefined.hh>
 #include <EnergyPlus/Plant/DataPlant.hh>
+#include <EnergyPlus/PlantUtilities.hh>
 #include <EnergyPlus/Psychrometrics.hh>
 #include <EnergyPlus/ReportCoilSelection.hh>
 #include <EnergyPlus/ScheduleManager.hh>
 #include <EnergyPlus/SizingManager.hh>
 #include <EnergyPlus/UtilityRoutines.hh>
 #include <EnergyPlus/WaterCoils.hh>
-
-#include "Fixtures/EnergyPlusFixture.hh"
 
 using namespace EnergyPlus;
 using namespace DataAirLoop;
@@ -97,19 +102,15 @@ using namespace EnergyPlus::DataPlant;
 using namespace EnergyPlus::DataSizing;
 using namespace EnergyPlus::DataHeatBalance;
 using namespace EnergyPlus::DataHeatBalFanSys;
-using namespace EnergyPlus::DataHVACGlobals;
-using namespace EnergyPlus::DataLoopNode;
 using namespace EnergyPlus::DataZoneEnergyDemands;
 using namespace EnergyPlus::DataZoneEquipment;
 using namespace EnergyPlus::FanCoilUnits;
 using namespace EnergyPlus::Fans;
-using namespace EnergyPlus::FluidProperties;
 using namespace EnergyPlus::General;
 using namespace EnergyPlus::GlobalNames;
 using namespace EnergyPlus::HeatBalanceManager;
 using namespace EnergyPlus::MixedAir;
 using namespace EnergyPlus::Psychrometrics;
-using namespace EnergyPlus::ScheduleManager;
 using namespace EnergyPlus::SizingManager;
 using namespace EnergyPlus::WaterCoils;
 using namespace EnergyPlus::Psychrometrics;
@@ -157,7 +158,6 @@ public:
         state->dataSize->FinalZoneSizing.allocate(1);
         state->dataAirSystemsData->PrimaryAirSystems.allocate(1);
         state->dataAirLoop->AirLoopControlInfo.allocate(1);
-        InitializePsychRoutines(*state);
     }
 
     virtual void TearDown()
@@ -168,6 +168,7 @@ public:
 
 TEST_F(WaterCoilsTest, WaterCoolingCoilSizing)
 {
+    Fluid::GetFluidPropertiesData(*state);
     state->dataEnvrn->OutBaroPress = 101325.0;
     state->dataEnvrn->StdRhoAir = PsyRhoAirFnPbTdbW(*state, state->dataEnvrn->OutBaroPress, 20.0, 0.0);
 
@@ -189,10 +190,8 @@ TEST_F(WaterCoilsTest, WaterCoolingCoilSizing)
         loopsidebranch.Comp.allocate(1);
     }
     state->dataPlnt->PlantLoop(1).Name = "WaterLoop";
-    state->dataPlnt->PlantLoop(1).FluidName = "FluidWaterLoop";
-    state->dataPlnt->PlantLoop(1).FluidIndex = 1;
     state->dataPlnt->PlantLoop(1).FluidName = "WATER";
-    state->dataPlnt->PlantLoop(1).FluidIndex = 1;
+    state->dataPlnt->PlantLoop(1).glycol = Fluid::GetWater(*state);
 
     // set up sizing data
     state->dataSize->FinalSysSizing(1).MixTempAtCoolPeak = 20.0;
@@ -205,22 +204,26 @@ TEST_F(WaterCoilsTest, WaterCoolingCoilSizing)
 
     // set up water coil
     int CoilNum = 1;
-    state->dataWaterCoils->WaterCoil(CoilNum).Name = "Test Water Cooling Coil";
-    state->dataWaterCoils->WaterCoil(CoilNum).WaterPlantLoc.loopNum = 1;
-    state->dataWaterCoils->WaterCoil(CoilNum).WaterCoilType = DataPlant::PlantEquipmentType::CoilWaterCooling;
-    state->dataWaterCoils->WaterCoil(CoilNum).RequestingAutoSize = true;
-    state->dataWaterCoils->WaterCoil(CoilNum).DesAirVolFlowRate = AutoSize;
-    state->dataWaterCoils->WaterCoil(CoilNum).DesInletAirTemp = AutoSize;
-    state->dataWaterCoils->WaterCoil(CoilNum).DesOutletAirTemp = AutoSize;
-    state->dataWaterCoils->WaterCoil(CoilNum).DesInletWaterTemp = AutoSize;
-    state->dataWaterCoils->WaterCoil(CoilNum).DesInletAirHumRat = AutoSize;
-    state->dataWaterCoils->WaterCoil(CoilNum).DesOutletAirHumRat = AutoSize;
-    state->dataWaterCoils->WaterCoil(CoilNum).MaxWaterVolFlowRate = AutoSize;
+    auto &waterCoil1 = state->dataWaterCoils->WaterCoil(CoilNum);
+    waterCoil1.Name = "Test Water Cooling Coil";
+    waterCoil1.coilType = HVAC::CoilType::CoolingWater;
+    waterCoil1.coilReportNum = ReportCoilSelection::getReportIndex(*state, waterCoil1.Name, waterCoil1.coilType);
+
+    waterCoil1.WaterPlantLoc.loopNum = 1;
+    PlantUtilities::SetPlantLocationLinks(*state, waterCoil1.WaterPlantLoc);
+    waterCoil1.WaterCoilType = DataPlant::PlantEquipmentType::CoilWaterCooling;
+    waterCoil1.RequestingAutoSize = true;
+    waterCoil1.DesAirVolFlowRate = AutoSize;
+    waterCoil1.DesInletAirTemp = AutoSize;
+    waterCoil1.DesOutletAirTemp = AutoSize;
+    waterCoil1.DesInletWaterTemp = AutoSize;
+    waterCoil1.DesInletAirHumRat = AutoSize;
+    waterCoil1.DesOutletAirHumRat = AutoSize;
+    waterCoil1.MaxWaterVolFlowRate = AutoSize;
 
     state->dataWaterCoils->WaterCoilNumericFields(CoilNum).FieldNames(3) = "Maximum Flow Rate";
-    state->dataWaterCoils->WaterCoil(CoilNum).WaterInletNodeNum = 1;
-    state->dataPlnt->PlantLoop(1).LoopSide(DataPlant::LoopSideLocation::Demand).Branch(1).Comp(1).NodeNumIn =
-        state->dataWaterCoils->WaterCoil(CoilNum).WaterInletNodeNum;
+    waterCoil1.WaterInletNodeNum = 1;
+    state->dataPlnt->PlantLoop(1).LoopSide(DataPlant::LoopSideLocation::Demand).Branch(1).Comp(1).NodeNumIn = waterCoil1.WaterInletNodeNum;
 
     state->dataSize->CurZoneEqNum = 0;
     state->dataSize->CurSysNum = 1;
@@ -230,12 +233,10 @@ TEST_F(WaterCoilsTest, WaterCoolingCoilSizing)
     state->dataSize->PlantSizData(1).DeltaT = 5.0;
     state->dataSize->FinalSysSizing(1).MassFlowAtCoolPeak = state->dataSize->FinalSysSizing(1).DesMainVolFlow * state->dataEnvrn->StdRhoAir;
     state->dataSize->DataWaterLoopNum = 1;
-    state->dataFluidProps->NumOfGlycols = 1;
 
-    createCoilSelectionReportObj(*state);
     SizeWaterCoil(*state, CoilNum);
 
-    EXPECT_DOUBLE_EQ(0.00159, state->dataWaterCoils->WaterCoil(CoilNum).DesAirVolFlowRate);
+    EXPECT_DOUBLE_EQ(0.00159, waterCoil1.DesAirVolFlowRate);
     // Check that all Data* variables have been reset
     EXPECT_EQ(0, state->dataSize->DataPltSizCoolNum);
     EXPECT_EQ(0, state->dataSize->DataWaterLoopNum);
@@ -255,18 +256,18 @@ TEST_F(WaterCoilsTest, WaterCoolingCoilSizing)
     state->dataSize->FinalSysSizing(1).DesMainVolFlow = 0.00259;
     state->dataSize->FinalSysSizing(1).MassFlowAtCoolPeak = state->dataSize->FinalSysSizing(1).DesMainVolFlow * state->dataEnvrn->StdRhoAir;
 
-    state->dataWaterCoils->WaterCoil(CoilNum).Name = "Test Water Cooling Coil 2";
-    state->dataWaterCoils->WaterCoil(CoilNum).DesAirVolFlowRate = AutoSize;
-    state->dataWaterCoils->WaterCoil(CoilNum).DesInletAirTemp = AutoSize;
-    state->dataWaterCoils->WaterCoil(CoilNum).DesOutletAirTemp = AutoSize;
-    state->dataWaterCoils->WaterCoil(CoilNum).DesInletWaterTemp = AutoSize;
-    state->dataWaterCoils->WaterCoil(CoilNum).DesInletAirHumRat = AutoSize;
-    state->dataWaterCoils->WaterCoil(CoilNum).DesOutletAirHumRat = AutoSize;
-    state->dataWaterCoils->WaterCoil(CoilNum).MaxWaterVolFlowRate = AutoSize;
+    waterCoil1.Name = "Test Water Cooling Coil 2";
+    waterCoil1.DesAirVolFlowRate = AutoSize;
+    waterCoil1.DesInletAirTemp = AutoSize;
+    waterCoil1.DesOutletAirTemp = AutoSize;
+    waterCoil1.DesInletWaterTemp = AutoSize;
+    waterCoil1.DesInletAirHumRat = AutoSize;
+    waterCoil1.DesOutletAirHumRat = AutoSize;
+    waterCoil1.MaxWaterVolFlowRate = AutoSize;
 
     SizeWaterCoil(*state, CoilNum);
 
-    EXPECT_DOUBLE_EQ(0.00259, state->dataWaterCoils->WaterCoil(CoilNum).DesAirVolFlowRate);
+    EXPECT_DOUBLE_EQ(0.00259, waterCoil1.DesAirVolFlowRate);
     EXPECT_EQ(0, state->dataSize->DataPltSizCoolNum);
     EXPECT_EQ(0, state->dataSize->DataWaterLoopNum);
     EXPECT_DOUBLE_EQ(0.0, state->dataSize->DataConstantUsedForSizing);
@@ -289,19 +290,19 @@ TEST_F(WaterCoilsTest, WaterCoolingCoilSizing)
     state->dataSize->FinalSysSizing(1).MassFlowAtCoolPeak = state->dataSize->FinalSysSizing(1).DesMainVolFlow * state->dataEnvrn->StdRhoAir;
     state->dataAirLoop->AirLoopControlInfo(1).UnitarySys = true;
 
-    state->dataWaterCoils->WaterCoil(CoilNum).Name = "Test Water Heating Coil";
-    state->dataWaterCoils->WaterCoil(CoilNum).WaterCoilType = DataPlant::PlantEquipmentType::CoilWaterSimpleHeating;
-    state->dataWaterCoils->WaterCoil(CoilNum).DesAirVolFlowRate = AutoSize;
-    state->dataWaterCoils->WaterCoil(CoilNum).DesInletAirTemp = AutoSize;
-    state->dataWaterCoils->WaterCoil(CoilNum).DesOutletAirTemp = AutoSize;
-    state->dataWaterCoils->WaterCoil(CoilNum).DesInletWaterTemp = AutoSize;
-    state->dataWaterCoils->WaterCoil(CoilNum).DesInletAirHumRat = AutoSize;
-    state->dataWaterCoils->WaterCoil(CoilNum).DesOutletAirHumRat = AutoSize;
-    state->dataWaterCoils->WaterCoil(CoilNum).MaxWaterVolFlowRate = AutoSize;
+    waterCoil1.Name = "Test Water Heating Coil";
+    waterCoil1.WaterCoilType = DataPlant::PlantEquipmentType::CoilWaterSimpleHeating;
+    waterCoil1.DesAirVolFlowRate = AutoSize;
+    waterCoil1.DesInletAirTemp = AutoSize;
+    waterCoil1.DesOutletAirTemp = AutoSize;
+    waterCoil1.DesInletWaterTemp = AutoSize;
+    waterCoil1.DesInletAirHumRat = AutoSize;
+    waterCoil1.DesOutletAirHumRat = AutoSize;
+    waterCoil1.MaxWaterVolFlowRate = AutoSize;
 
     SizeWaterCoil(*state, CoilNum);
 
-    EXPECT_DOUBLE_EQ(0.00359, state->dataWaterCoils->WaterCoil(CoilNum).DesAirVolFlowRate);
+    EXPECT_DOUBLE_EQ(0.00359, waterCoil1.DesAirVolFlowRate);
     EXPECT_EQ(0, state->dataSize->DataPltSizCoolNum);
     EXPECT_EQ(0, state->dataSize->DataWaterLoopNum);
     EXPECT_DOUBLE_EQ(0.0, state->dataSize->DataConstantUsedForSizing);
@@ -320,19 +321,19 @@ TEST_F(WaterCoilsTest, WaterCoolingCoilSizing)
     state->dataSize->FinalSysSizing(1).DesMainVolFlow = 0.00459;
     state->dataSize->FinalSysSizing(1).MassFlowAtCoolPeak = state->dataSize->FinalSysSizing(1).DesMainVolFlow * state->dataEnvrn->StdRhoAir;
 
-    state->dataWaterCoils->WaterCoil(CoilNum).Name = "Test Water Heating Coil 2";
-    state->dataWaterCoils->WaterCoil(CoilNum).WaterCoilType = DataPlant::PlantEquipmentType::CoilWaterSimpleHeating;
-    state->dataWaterCoils->WaterCoil(CoilNum).DesAirVolFlowRate = AutoSize;
-    state->dataWaterCoils->WaterCoil(CoilNum).DesInletAirTemp = AutoSize;
-    state->dataWaterCoils->WaterCoil(CoilNum).DesOutletAirTemp = AutoSize;
-    state->dataWaterCoils->WaterCoil(CoilNum).DesInletWaterTemp = AutoSize;
-    state->dataWaterCoils->WaterCoil(CoilNum).DesInletAirHumRat = AutoSize;
-    state->dataWaterCoils->WaterCoil(CoilNum).DesOutletAirHumRat = AutoSize;
-    state->dataWaterCoils->WaterCoil(CoilNum).MaxWaterVolFlowRate = AutoSize;
+    waterCoil1.Name = "Test Water Heating Coil 2";
+    waterCoil1.WaterCoilType = DataPlant::PlantEquipmentType::CoilWaterSimpleHeating;
+    waterCoil1.DesAirVolFlowRate = AutoSize;
+    waterCoil1.DesInletAirTemp = AutoSize;
+    waterCoil1.DesOutletAirTemp = AutoSize;
+    waterCoil1.DesInletWaterTemp = AutoSize;
+    waterCoil1.DesInletAirHumRat = AutoSize;
+    waterCoil1.DesOutletAirHumRat = AutoSize;
+    waterCoil1.MaxWaterVolFlowRate = AutoSize;
 
     SizeWaterCoil(*state, CoilNum);
 
-    EXPECT_DOUBLE_EQ(0.00459, state->dataWaterCoils->WaterCoil(CoilNum).DesAirVolFlowRate);
+    EXPECT_DOUBLE_EQ(0.00459, waterCoil1.DesAirVolFlowRate);
     EXPECT_EQ(0, state->dataSize->DataPltSizCoolNum);
     EXPECT_EQ(0, state->dataSize->DataWaterLoopNum);
     EXPECT_DOUBLE_EQ(0.0, state->dataSize->DataConstantUsedForSizing);
@@ -355,7 +356,7 @@ TEST_F(WaterCoilsTest, WaterCoolingCoilSizing)
     state->dataSize->ZoneSizingRunDone = true;
     state->dataSize->ZoneSizingInput(1).ZoneNum = state->dataSize->CurZoneEqNum;
     state->dataSize->ZoneEqSizing(1).SizingMethod.allocate(25);
-    state->dataSize->ZoneEqSizing(1).SizingMethod(DataHVACGlobals::SystemAirflowSizing) = DataSizing::SupplyAirFlowRate;
+    state->dataSize->ZoneEqSizing(1).SizingMethod(HVAC::SystemAirflowSizing) = DataSizing::SupplyAirFlowRate;
     state->dataSize->FinalZoneSizing(1).ZoneTempAtHeatPeak = 20.0;
     state->dataSize->FinalZoneSizing(1).OutTempAtHeatPeak = -20.0;
     state->dataSize->FinalZoneSizing(1).DesHeatCoilInTemp = -20.0; // simulates zone heating air flow rate <= zone OA flow rate
@@ -371,21 +372,21 @@ TEST_F(WaterCoilsTest, WaterCoolingCoilSizing)
     state->dataWaterCoils->MyUAAndFlowCalcFlag.allocate(1);
     state->dataWaterCoils->MyUAAndFlowCalcFlag(CoilNum) = true;
 
-    state->dataWaterCoils->WaterCoil(CoilNum).UACoil = AutoSize;
-    state->dataWaterCoils->WaterCoil(CoilNum).DesTotWaterCoilLoad = AutoSize;
-    state->dataWaterCoils->WaterCoil(CoilNum).DesAirVolFlowRate = AutoSize;
-    state->dataWaterCoils->WaterCoil(CoilNum).DesInletAirTemp = AutoSize;
-    state->dataWaterCoils->WaterCoil(CoilNum).DesOutletAirTemp = AutoSize;
-    state->dataWaterCoils->WaterCoil(CoilNum).DesInletWaterTemp = AutoSize;
-    state->dataWaterCoils->WaterCoil(CoilNum).DesInletAirHumRat = AutoSize;
-    state->dataWaterCoils->WaterCoil(CoilNum).DesOutletAirHumRat = AutoSize;
-    state->dataWaterCoils->WaterCoil(CoilNum).MaxWaterVolFlowRate = AutoSize;
+    waterCoil1.UACoil = AutoSize;
+    waterCoil1.DesTotWaterCoilLoad = AutoSize;
+    waterCoil1.DesAirVolFlowRate = AutoSize;
+    waterCoil1.DesInletAirTemp = AutoSize;
+    waterCoil1.DesOutletAirTemp = AutoSize;
+    waterCoil1.DesInletWaterTemp = AutoSize;
+    waterCoil1.DesInletAirHumRat = AutoSize;
+    waterCoil1.DesOutletAirHumRat = AutoSize;
+    waterCoil1.MaxWaterVolFlowRate = AutoSize;
 
     SizeWaterCoil(*state, CoilNum);
-    EXPECT_NEAR(state->dataWaterCoils->WaterCoil(CoilNum).InletAirTemp, 16.0, 0.0001); // a mixture of zone air (20 C) and 10% OA (-20 C) = 16 C
-    EXPECT_NEAR(state->dataWaterCoils->WaterCoil(CoilNum).DesTotWaterCoilLoad, 1709.8638, 0.0001);
-    EXPECT_NEAR(state->dataWaterCoils->WaterCoil(CoilNum).UACoil, 51.2456, 0.0001);
-    EXPECT_NEAR(state->dataWaterCoils->WaterCoil(CoilNum).OutletAirTemp, 30.1302, 0.0001); // reasonable delta T above inlet air temp
+    EXPECT_NEAR(waterCoil1.InletAirTemp, 16.0, 0.0001); // a mixture of zone air (20 C) and 10% OA (-20 C) = 16 C
+    EXPECT_NEAR(waterCoil1.DesTotWaterCoilLoad, 1709.8638, 0.0001);
+    EXPECT_NEAR(waterCoil1.UACoil, 51.2456, 0.0001);
+    EXPECT_NEAR(waterCoil1.OutletAirTemp, 30.1302, 0.0001); // reasonable delta T above inlet air temp
 }
 
 TEST_F(WaterCoilsTest, TdbFnHRhPbTest)
@@ -402,6 +403,7 @@ TEST_F(WaterCoilsTest, TdbFnHRhPbTest)
 
 TEST_F(WaterCoilsTest, CoilHeatingWaterUASizing)
 {
+    Fluid::GetFluidPropertiesData(*state);
     state->dataEnvrn->OutBaroPress = 101325.0;
     state->dataEnvrn->StdRhoAir = PsyRhoAirFnPbTdbW(*state, state->dataEnvrn->OutBaroPress, 20.0, 0.0);
 
@@ -425,10 +427,8 @@ TEST_F(WaterCoilsTest, CoilHeatingWaterUASizing)
         loopsidebranch.Comp.allocate(1);
     }
     state->dataPlnt->PlantLoop(1).Name = "HotWaterLoop";
-    state->dataPlnt->PlantLoop(1).FluidName = "FluidWaterLoop";
-    state->dataPlnt->PlantLoop(1).FluidIndex = 1;
     state->dataPlnt->PlantLoop(1).FluidName = "WATER";
-    state->dataPlnt->PlantLoop(1).FluidIndex = 1;
+    state->dataPlnt->PlantLoop(1).glycol = Fluid::GetWater(*state);
 
     // set up sizing data
     state->dataSize->FinalSysSizing(1).DesMainVolFlow = 1.00;
@@ -439,33 +439,33 @@ TEST_F(WaterCoilsTest, CoilHeatingWaterUASizing)
 
     // set up water coil
     int CoilNum = 1;
-    state->dataWaterCoils->WaterCoil(CoilNum).Name = "Water Heating Coil";
-    state->dataWaterCoils->WaterCoil(CoilNum).WaterPlantLoc.loopNum = 1;
-    state->dataWaterCoils->WaterCoil(CoilNum).WaterCoilType = DataPlant::PlantEquipmentType::CoilWaterSimpleHeating;
-    state->dataWaterCoils->WaterCoil(CoilNum).WaterCoilModel = WaterCoils::CoilModel::HeatingSimple;
-    state->dataWaterCoils->WaterCoil(CoilNum).SchedPtr = DataGlobalConstants::ScheduleAlwaysOn;
+    auto &waterCoil1 = state->dataWaterCoils->WaterCoil(CoilNum);
+    waterCoil1.Name = "Water Heating Coil";
+    waterCoil1.WaterPlantLoc.loopNum = 1;
+    PlantUtilities::SetPlantLocationLinks(*state, waterCoil1.WaterPlantLoc);
+    waterCoil1.WaterCoilType = DataPlant::PlantEquipmentType::CoilWaterSimpleHeating;
+    waterCoil1.WaterCoilModel = WaterCoils::CoilModel::HeatingSimple;
+    waterCoil1.availSched = Sched::GetScheduleAlwaysOn(*state);
 
-    state->dataWaterCoils->WaterCoil(CoilNum).RequestingAutoSize = true;
-    state->dataWaterCoils->WaterCoil(CoilNum).DesAirVolFlowRate = AutoSize;
-    state->dataWaterCoils->WaterCoil(CoilNum).UACoil = AutoSize;
-    state->dataWaterCoils->WaterCoil(CoilNum).MaxWaterVolFlowRate = AutoSize;
-    state->dataWaterCoils->WaterCoil(CoilNum).CoilPerfInpMeth = state->dataWaterCoils->UAandFlow;
-    state->dataWaterCoils->WaterCoil(CoilNum).DesInletAirTemp = AutoSize;
-    state->dataWaterCoils->WaterCoil(CoilNum).DesOutletAirTemp = AutoSize;
-    state->dataWaterCoils->WaterCoil(CoilNum).DesInletWaterTemp = AutoSize;
-    state->dataWaterCoils->WaterCoil(CoilNum).DesInletAirHumRat = AutoSize;
-    state->dataWaterCoils->WaterCoil(CoilNum).DesOutletAirHumRat = AutoSize;
+    waterCoil1.RequestingAutoSize = true;
+    waterCoil1.DesAirVolFlowRate = AutoSize;
+    waterCoil1.UACoil = AutoSize;
+    waterCoil1.MaxWaterVolFlowRate = AutoSize;
+    waterCoil1.CoilPerfInpMeth = state->dataWaterCoils->UAandFlow;
+    waterCoil1.DesInletAirTemp = AutoSize;
+    waterCoil1.DesOutletAirTemp = AutoSize;
+    waterCoil1.DesInletWaterTemp = AutoSize;
+    waterCoil1.DesInletAirHumRat = AutoSize;
+    waterCoil1.DesOutletAirHumRat = AutoSize;
 
     state->dataWaterCoils->WaterCoilNumericFields(CoilNum).FieldNames(2) = "Maximum Water Flow Rate";
-    state->dataWaterCoils->WaterCoil(CoilNum).WaterInletNodeNum = 1;
-    state->dataPlnt->PlantLoop(1).LoopSide(DataPlant::LoopSideLocation::Demand).Branch(1).Comp(1).NodeNumIn =
-        state->dataWaterCoils->WaterCoil(CoilNum).WaterInletNodeNum;
+    waterCoil1.WaterInletNodeNum = 1;
+    state->dataPlnt->PlantLoop(1).LoopSide(DataPlant::LoopSideLocation::Demand).Branch(1).Comp(1).NodeNumIn = waterCoil1.WaterInletNodeNum;
 
     state->dataSize->CurZoneEqNum = 0;
     state->dataSize->CurSysNum = 1;
     state->dataSize->CurOASysNum = 0;
     state->dataSize->DataWaterLoopNum = 1;
-    state->dataFluidProps->NumOfGlycols = 1;
 
     state->dataWaterCoils->MyUAAndFlowCalcFlag.allocate(1);
     state->dataWaterCoils->MyUAAndFlowCalcFlag(1) = true;
@@ -474,36 +474,33 @@ TEST_F(WaterCoilsTest, CoilHeatingWaterUASizing)
     state->dataWaterCoils->MySizeFlag(1) = true;
 
     // run water coil sizing
-    createCoilSelectionReportObj(*state);
     SizeWaterCoil(*state, CoilNum);
-    EXPECT_DOUBLE_EQ(1.0, state->dataWaterCoils->WaterCoil(CoilNum).DesAirVolFlowRate);
+    EXPECT_DOUBLE_EQ(1.0, waterCoil1.DesAirVolFlowRate);
 
     Real64 CpAirStd = 0.0;
     Real64 DesMassFlow = 0.0;
     Real64 DesCoilHeatingLoad = 0.0;
 
     CpAirStd = PsyCpAirFnW(0.0);
-    DesMassFlow = state->dataWaterCoils->WaterCoil(CoilNum).DesAirVolFlowRate * state->dataEnvrn->StdRhoAir;
+    DesMassFlow = waterCoil1.DesAirVolFlowRate * state->dataEnvrn->StdRhoAir;
     DesCoilHeatingLoad = CpAirStd * DesMassFlow * (40.0 - 5.0);
 
     // check heating coil design load
-    EXPECT_DOUBLE_EQ(DesCoilHeatingLoad, state->dataWaterCoils->WaterCoil(CoilNum).DesWaterHeatingCoilRate);
+    EXPECT_DOUBLE_EQ(DesCoilHeatingLoad, waterCoil1.DesWaterHeatingCoilRate);
 
     Real64 Cp = 0;
     Real64 rho = 0;
     Real64 DesWaterFlowRate = 0;
 
-    Cp = GetSpecificHeatGlycol(
-        *state, state->dataPlnt->PlantLoop(1).FluidName, DataGlobalConstants::HWInitConvTemp, state->dataPlnt->PlantLoop(1).FluidIndex, "Unit Test");
-    rho = GetDensityGlycol(
-        *state, state->dataPlnt->PlantLoop(1).FluidName, DataGlobalConstants::HWInitConvTemp, state->dataPlnt->PlantLoop(1).FluidIndex, "Unit Test");
-    DesWaterFlowRate = state->dataWaterCoils->WaterCoil(CoilNum).DesWaterHeatingCoilRate / (10.0 * Cp * rho);
+    Cp = state->dataPlnt->PlantLoop(1).glycol->getSpecificHeat(*state, Constant::HWInitConvTemp, "Unit Test");
+    rho = state->dataPlnt->PlantLoop(1).glycol->getDensity(*state, Constant::HWInitConvTemp, "Unit Test");
+    DesWaterFlowRate = waterCoil1.DesWaterHeatingCoilRate / (10.0 * Cp * rho);
 
     // check heating coil design water flow rate
-    EXPECT_DOUBLE_EQ(DesWaterFlowRate, state->dataWaterCoils->WaterCoil(CoilNum).MaxWaterVolFlowRate);
+    EXPECT_DOUBLE_EQ(DesWaterFlowRate, waterCoil1.MaxWaterVolFlowRate);
 
     // check coil UA-value sizing
-    EXPECT_NEAR(1435.01, state->dataWaterCoils->WaterCoil(CoilNum).UACoil, 0.01);
+    EXPECT_NEAR(1435.01, waterCoil1.UACoil, 0.01);
 
     // test single zone VAV reheat coil sizing
     state->dataSize->CurZoneEqNum = 1;
@@ -511,22 +508,20 @@ TEST_F(WaterCoilsTest, CoilHeatingWaterUASizing)
     state->dataSize->CurSysNum = 0;
     state->dataSize->TermUnitSizing.allocate(1);
     state->dataSize->TermUnitFinalZoneSizing.allocate(1);
-    state->dataSize->TermUnitSizing(state->dataSize->CurTermUnitSizingNum).AirVolFlow =
-        state->dataWaterCoils->WaterCoil(CoilNum).DesAirVolFlowRate / 3.0; // DesAirVolFlowRate = 1.0
-    state->dataSize->TermUnitSizing(state->dataSize->CurTermUnitSizingNum).MaxHWVolFlow =
-        state->dataWaterCoils->WaterCoil(CoilNum).MaxWaterVolFlowRate / 3.0;
-    state->dataSize->TermUnitSizing(state->dataSize->CurTermUnitSizingNum).MinFlowFrac = 0.5;
+    state->dataSize->TermUnitSizing(state->dataSize->CurTermUnitSizingNum).AirVolFlow = waterCoil1.DesAirVolFlowRate / 3.0; // DesAirVolFlowRate = 1.0
+    state->dataSize->TermUnitSizing(state->dataSize->CurTermUnitSizingNum).MaxHWVolFlow = waterCoil1.MaxWaterVolFlowRate / 3.0;
+    state->dataSize->TermUnitSizing(state->dataSize->CurTermUnitSizingNum).MinPriFlowFrac = 0.5;
     state->dataSize->TermUnitSingDuct = true;
 
-    state->dataWaterCoils->WaterCoil(CoilNum).DesAirVolFlowRate = AutoSize;
-    state->dataWaterCoils->WaterCoil(CoilNum).UACoil = AutoSize;
-    state->dataWaterCoils->WaterCoil(CoilNum).MaxWaterVolFlowRate = AutoSize;
-    state->dataWaterCoils->WaterCoil(CoilNum).CoilPerfInpMeth = state->dataWaterCoils->UAandFlow;
-    state->dataWaterCoils->WaterCoil(CoilNum).DesInletAirTemp = AutoSize;
-    state->dataWaterCoils->WaterCoil(CoilNum).DesOutletAirTemp = AutoSize;
-    state->dataWaterCoils->WaterCoil(CoilNum).DesInletWaterTemp = AutoSize;
-    state->dataWaterCoils->WaterCoil(CoilNum).DesInletAirHumRat = AutoSize;
-    state->dataWaterCoils->WaterCoil(CoilNum).DesOutletAirHumRat = AutoSize;
+    waterCoil1.DesAirVolFlowRate = AutoSize;
+    waterCoil1.UACoil = AutoSize;
+    waterCoil1.MaxWaterVolFlowRate = AutoSize;
+    waterCoil1.CoilPerfInpMeth = state->dataWaterCoils->UAandFlow;
+    waterCoil1.DesInletAirTemp = AutoSize;
+    waterCoil1.DesOutletAirTemp = AutoSize;
+    waterCoil1.DesInletWaterTemp = AutoSize;
+    waterCoil1.DesInletAirHumRat = AutoSize;
+    waterCoil1.DesOutletAirHumRat = AutoSize;
 
     state->dataSize->SysSizingRunDone = false;
     state->dataSize->ZoneSizingRunDone = true;
@@ -535,8 +530,7 @@ TEST_F(WaterCoilsTest, CoilHeatingWaterUASizing)
     state->dataSize->ZoneSizingInput(1).ZoneNum = 1;
     state->dataSize->ZoneEqSizing.allocate(1);
     state->dataSize->ZoneEqSizing(state->dataSize->CurZoneEqNum).SizingMethod.allocate(20);
-    state->dataSize->ZoneEqSizing(state->dataSize->CurZoneEqNum).SizingMethod(DataHVACGlobals::HeatingAirflowSizing) =
-        DataHVACGlobals::HeatingAirflowSizing;
+    state->dataSize->ZoneEqSizing(state->dataSize->CurZoneEqNum).SizingMethod(HVAC::HeatingAirflowSizing) = HVAC::HeatingAirflowSizing;
     state->dataSize->ZoneEqSizing(state->dataSize->CurZoneEqNum).CoolingAirVolFlow = 0.0;
     state->dataSize->ZoneEqSizing(state->dataSize->CurZoneEqNum).HeatingAirVolFlow = 1.0;
     state->dataSize->FinalZoneSizing.allocate(1);
@@ -546,18 +540,20 @@ TEST_F(WaterCoilsTest, CoilHeatingWaterUASizing)
     state->dataSize->FinalZoneSizing(state->dataSize->CurZoneEqNum).ZoneTempAtHeatPeak = 21.0;
     state->dataSize->FinalZoneSizing(state->dataSize->CurZoneEqNum).DesHeatCoilInHumRatTU = 0.006;
     state->dataSize->FinalZoneSizing(state->dataSize->CurZoneEqNum).ZoneHumRatAtHeatPeak = 0.008;
-    state->dataSize->TermUnitFinalZoneSizing(state->dataSize->CurTermUnitSizingNum) = state->dataSize->FinalZoneSizing(state->dataSize->CurZoneEqNum);
+    state->dataSize->TermUnitFinalZoneSizing(state->dataSize->CurTermUnitSizingNum)
+        .copyFromZoneSizing(state->dataSize->FinalZoneSizing(state->dataSize->CurZoneEqNum));
 
     state->dataWaterCoils->MySizeFlag(1) = true;
     // run water coil sizing
     SizeWaterCoil(*state, CoilNum);
 
     // check coil UA-value sizing
-    EXPECT_NEAR(577.686, state->dataWaterCoils->WaterCoil(CoilNum).UACoil, 0.01); // smaller UA than result above at 1435.00
+    EXPECT_NEAR(577.686, waterCoil1.UACoil, 0.01); // smaller UA than result above at 1435.00
 }
 
 TEST_F(WaterCoilsTest, CoilHeatingWaterLowAirFlowUASizing)
 {
+    Fluid::GetFluidPropertiesData(*state);
     state->dataEnvrn->OutBaroPress = 101325.0;
     state->dataEnvrn->StdRhoAir = PsyRhoAirFnPbTdbW(*state, state->dataEnvrn->OutBaroPress, 20.0, 0.0);
 
@@ -581,10 +577,8 @@ TEST_F(WaterCoilsTest, CoilHeatingWaterLowAirFlowUASizing)
         loopsidebranch.Comp.allocate(1);
     }
     state->dataPlnt->PlantLoop(1).Name = "HotWaterLoop";
-    state->dataPlnt->PlantLoop(1).FluidName = "FluidWaterLoop";
-    state->dataPlnt->PlantLoop(1).FluidIndex = 1;
     state->dataPlnt->PlantLoop(1).FluidName = "WATER";
-    state->dataPlnt->PlantLoop(1).FluidIndex = 1;
+    state->dataPlnt->PlantLoop(1).glycol = Fluid::GetWater(*state);
 
     // set up sizing data
     state->dataSize->FinalSysSizing(1).DesMainVolFlow = 1.00;
@@ -595,33 +589,33 @@ TEST_F(WaterCoilsTest, CoilHeatingWaterLowAirFlowUASizing)
 
     // set up water coil
     int CoilNum = 1;
-    state->dataWaterCoils->WaterCoil(CoilNum).Name = "Water Heating Coil";
-    state->dataWaterCoils->WaterCoil(CoilNum).WaterPlantLoc.loopNum = 1;
-    state->dataWaterCoils->WaterCoil(CoilNum).WaterCoilType = DataPlant::PlantEquipmentType::CoilWaterSimpleHeating;
-    state->dataWaterCoils->WaterCoil(CoilNum).WaterCoilModel = WaterCoils::CoilModel::HeatingSimple;
-    state->dataWaterCoils->WaterCoil(CoilNum).SchedPtr = DataGlobalConstants::ScheduleAlwaysOn;
+    auto &waterCoil1 = state->dataWaterCoils->WaterCoil(CoilNum);
+    waterCoil1.Name = "Water Heating Coil";
+    waterCoil1.WaterPlantLoc.loopNum = 1;
+    PlantUtilities::SetPlantLocationLinks(*state, waterCoil1.WaterPlantLoc);
+    waterCoil1.WaterCoilType = DataPlant::PlantEquipmentType::CoilWaterSimpleHeating;
+    waterCoil1.WaterCoilModel = WaterCoils::CoilModel::HeatingSimple;
+    waterCoil1.availSched = Sched::GetScheduleAlwaysOn(*state);
 
-    state->dataWaterCoils->WaterCoil(CoilNum).RequestingAutoSize = true;
-    state->dataWaterCoils->WaterCoil(CoilNum).DesAirVolFlowRate = AutoSize;
-    state->dataWaterCoils->WaterCoil(CoilNum).UACoil = AutoSize;
-    state->dataWaterCoils->WaterCoil(CoilNum).MaxWaterVolFlowRate = AutoSize;
-    state->dataWaterCoils->WaterCoil(CoilNum).CoilPerfInpMeth = state->dataWaterCoils->UAandFlow;
-    state->dataWaterCoils->WaterCoil(CoilNum).DesInletAirTemp = AutoSize;
-    state->dataWaterCoils->WaterCoil(CoilNum).DesOutletAirTemp = AutoSize;
-    state->dataWaterCoils->WaterCoil(CoilNum).DesInletWaterTemp = AutoSize;
-    state->dataWaterCoils->WaterCoil(CoilNum).DesInletAirHumRat = AutoSize;
-    state->dataWaterCoils->WaterCoil(CoilNum).DesOutletAirHumRat = AutoSize;
+    waterCoil1.RequestingAutoSize = true;
+    waterCoil1.DesAirVolFlowRate = AutoSize;
+    waterCoil1.UACoil = AutoSize;
+    waterCoil1.MaxWaterVolFlowRate = AutoSize;
+    waterCoil1.CoilPerfInpMeth = state->dataWaterCoils->UAandFlow;
+    waterCoil1.DesInletAirTemp = AutoSize;
+    waterCoil1.DesOutletAirTemp = AutoSize;
+    waterCoil1.DesInletWaterTemp = AutoSize;
+    waterCoil1.DesInletAirHumRat = AutoSize;
+    waterCoil1.DesOutletAirHumRat = AutoSize;
 
     state->dataWaterCoils->WaterCoilNumericFields(CoilNum).FieldNames(2) = "Maximum Water Flow Rate";
-    state->dataWaterCoils->WaterCoil(CoilNum).WaterInletNodeNum = 1;
-    state->dataPlnt->PlantLoop(1).LoopSide(DataPlant::LoopSideLocation::Demand).Branch(1).Comp(1).NodeNumIn =
-        state->dataWaterCoils->WaterCoil(CoilNum).WaterInletNodeNum;
+    waterCoil1.WaterInletNodeNum = 1;
+    state->dataPlnt->PlantLoop(1).LoopSide(DataPlant::LoopSideLocation::Demand).Branch(1).Comp(1).NodeNumIn = waterCoil1.WaterInletNodeNum;
 
     state->dataSize->CurZoneEqNum = 0;
     state->dataSize->CurSysNum = 1;
     state->dataSize->CurOASysNum = 0;
     state->dataSize->DataWaterLoopNum = 1;
-    state->dataFluidProps->NumOfGlycols = 1;
 
     state->dataWaterCoils->MyUAAndFlowCalcFlag.allocate(1);
     state->dataWaterCoils->MyUAAndFlowCalcFlag(1) = true;
@@ -630,36 +624,33 @@ TEST_F(WaterCoilsTest, CoilHeatingWaterLowAirFlowUASizing)
     state->dataWaterCoils->MySizeFlag(1) = true;
 
     // run water coil sizing
-    createCoilSelectionReportObj(*state);
     SizeWaterCoil(*state, CoilNum);
-    EXPECT_DOUBLE_EQ(1.0, state->dataWaterCoils->WaterCoil(CoilNum).DesAirVolFlowRate);
+    EXPECT_DOUBLE_EQ(1.0, waterCoil1.DesAirVolFlowRate);
 
     Real64 CpAirStd = 0.0;
     Real64 DesMassFlow = 0.0;
     Real64 DesCoilHeatingLoad = 0.0;
 
     CpAirStd = PsyCpAirFnW(0.0);
-    DesMassFlow = state->dataWaterCoils->WaterCoil(CoilNum).DesAirVolFlowRate * state->dataEnvrn->StdRhoAir;
+    DesMassFlow = waterCoil1.DesAirVolFlowRate * state->dataEnvrn->StdRhoAir;
     DesCoilHeatingLoad = CpAirStd * DesMassFlow * (40.0 - 5.0);
 
     // check heating coil design load
-    EXPECT_DOUBLE_EQ(DesCoilHeatingLoad, state->dataWaterCoils->WaterCoil(CoilNum).DesWaterHeatingCoilRate);
+    EXPECT_DOUBLE_EQ(DesCoilHeatingLoad, waterCoil1.DesWaterHeatingCoilRate);
 
     Real64 Cp = 0;
     Real64 rho = 0;
     Real64 DesWaterFlowRate = 0;
 
-    Cp = GetSpecificHeatGlycol(
-        *state, state->dataPlnt->PlantLoop(1).FluidName, DataGlobalConstants::HWInitConvTemp, state->dataPlnt->PlantLoop(1).FluidIndex, "Unit Test");
-    rho = GetDensityGlycol(
-        *state, state->dataPlnt->PlantLoop(1).FluidName, DataGlobalConstants::HWInitConvTemp, state->dataPlnt->PlantLoop(1).FluidIndex, "Unit Test");
-    DesWaterFlowRate = state->dataWaterCoils->WaterCoil(CoilNum).DesWaterHeatingCoilRate / (10.0 * Cp * rho);
+    Cp = state->dataPlnt->PlantLoop(1).glycol->getSpecificHeat(*state, Constant::HWInitConvTemp, "Unit Test");
+    rho = state->dataPlnt->PlantLoop(1).glycol->getDensity(*state, Constant::HWInitConvTemp, "Unit Test");
+    DesWaterFlowRate = waterCoil1.DesWaterHeatingCoilRate / (10.0 * Cp * rho);
 
     // check heating coil design water flow rate
-    EXPECT_DOUBLE_EQ(DesWaterFlowRate, state->dataWaterCoils->WaterCoil(CoilNum).MaxWaterVolFlowRate);
+    EXPECT_DOUBLE_EQ(DesWaterFlowRate, waterCoil1.MaxWaterVolFlowRate);
 
     // check coil UA-value sizing
-    EXPECT_NEAR(1435.01, state->dataWaterCoils->WaterCoil(CoilNum).UACoil, 0.01);
+    EXPECT_NEAR(1435.01, waterCoil1.UACoil, 0.01);
 
     // test single zone VAV reheat coil sizing
     state->dataSize->CurZoneEqNum = 1;
@@ -668,21 +659,20 @@ TEST_F(WaterCoilsTest, CoilHeatingWaterLowAirFlowUASizing)
     state->dataSize->TermUnitSizing.allocate(1);
     state->dataSize->TermUnitFinalZoneSizing.allocate(1);
     state->dataSize->TermUnitSizing(state->dataSize->CurTermUnitSizingNum).AirVolFlow =
-        state->dataWaterCoils->WaterCoil(CoilNum).DesAirVolFlowRate / 1500.0; // DesAirVolFlowRate = 1.0 so TU air flow = 0.00067 (lower than 0.001)
-    state->dataSize->TermUnitSizing(state->dataSize->CurTermUnitSizingNum).MaxHWVolFlow =
-        state->dataWaterCoils->WaterCoil(CoilNum).MaxWaterVolFlowRate / 1500.0;
-    state->dataSize->TermUnitSizing(state->dataSize->CurTermUnitSizingNum).MinFlowFrac = 0.5;
+        waterCoil1.DesAirVolFlowRate / 1500.0; // DesAirVolFlowRate = 1.0 so TU air flow = 0.00067 (lower than 0.001)
+    state->dataSize->TermUnitSizing(state->dataSize->CurTermUnitSizingNum).MaxHWVolFlow = waterCoil1.MaxWaterVolFlowRate / 1500.0;
+    state->dataSize->TermUnitSizing(state->dataSize->CurTermUnitSizingNum).MinPriFlowFrac = 0.5;
     state->dataSize->TermUnitSingDuct = true;
 
-    state->dataWaterCoils->WaterCoil(CoilNum).DesAirVolFlowRate = AutoSize;
-    state->dataWaterCoils->WaterCoil(CoilNum).UACoil = AutoSize;
-    state->dataWaterCoils->WaterCoil(CoilNum).MaxWaterVolFlowRate = AutoSize;
-    state->dataWaterCoils->WaterCoil(CoilNum).CoilPerfInpMeth = state->dataWaterCoils->UAandFlow;
-    state->dataWaterCoils->WaterCoil(CoilNum).DesInletAirTemp = AutoSize;
-    state->dataWaterCoils->WaterCoil(CoilNum).DesOutletAirTemp = AutoSize;
-    state->dataWaterCoils->WaterCoil(CoilNum).DesInletWaterTemp = AutoSize;
-    state->dataWaterCoils->WaterCoil(CoilNum).DesInletAirHumRat = AutoSize;
-    state->dataWaterCoils->WaterCoil(CoilNum).DesOutletAirHumRat = AutoSize;
+    waterCoil1.DesAirVolFlowRate = AutoSize;
+    waterCoil1.UACoil = AutoSize;
+    waterCoil1.MaxWaterVolFlowRate = AutoSize;
+    waterCoil1.CoilPerfInpMeth = state->dataWaterCoils->UAandFlow;
+    waterCoil1.DesInletAirTemp = AutoSize;
+    waterCoil1.DesOutletAirTemp = AutoSize;
+    waterCoil1.DesInletWaterTemp = AutoSize;
+    waterCoil1.DesInletAirHumRat = AutoSize;
+    waterCoil1.DesOutletAirHumRat = AutoSize;
 
     state->dataSize->SysSizingRunDone = false;
     state->dataSize->ZoneSizingRunDone = true;
@@ -691,8 +681,7 @@ TEST_F(WaterCoilsTest, CoilHeatingWaterLowAirFlowUASizing)
     state->dataSize->ZoneSizingInput(1).ZoneNum = 1;
     state->dataSize->ZoneEqSizing.allocate(1);
     state->dataSize->ZoneEqSizing(state->dataSize->CurZoneEqNum).SizingMethod.allocate(20);
-    state->dataSize->ZoneEqSizing(state->dataSize->CurZoneEqNum).SizingMethod(DataHVACGlobals::HeatingAirflowSizing) =
-        DataHVACGlobals::HeatingAirflowSizing;
+    state->dataSize->ZoneEqSizing(state->dataSize->CurZoneEqNum).SizingMethod(HVAC::HeatingAirflowSizing) = HVAC::HeatingAirflowSizing;
     state->dataSize->ZoneEqSizing(state->dataSize->CurZoneEqNum).CoolingAirVolFlow = 0.0;
     state->dataSize->ZoneEqSizing(state->dataSize->CurZoneEqNum).HeatingAirVolFlow = 1.0;
     state->dataSize->FinalZoneSizing.allocate(1);
@@ -702,21 +691,23 @@ TEST_F(WaterCoilsTest, CoilHeatingWaterLowAirFlowUASizing)
     state->dataSize->FinalZoneSizing(state->dataSize->CurZoneEqNum).ZoneTempAtHeatPeak = 21.0;
     state->dataSize->FinalZoneSizing(state->dataSize->CurZoneEqNum).DesHeatCoilInHumRatTU = 0.006;
     state->dataSize->FinalZoneSizing(state->dataSize->CurZoneEqNum).ZoneHumRatAtHeatPeak = 0.008;
-    state->dataSize->TermUnitFinalZoneSizing(state->dataSize->CurTermUnitSizingNum) = state->dataSize->FinalZoneSizing(state->dataSize->CurZoneEqNum);
+    state->dataSize->TermUnitFinalZoneSizing(state->dataSize->CurTermUnitSizingNum)
+        .copyFromZoneSizing(state->dataSize->FinalZoneSizing(state->dataSize->CurZoneEqNum));
 
     state->dataWaterCoils->MySizeFlag(1) = true;
     // run water coil sizing
     SizeWaterCoil(*state, CoilNum);
 
     // water flow rate should be non-zero, and air flow rate being so small will get set to 0 during sizing
-    EXPECT_GT(state->dataWaterCoils->WaterCoil(CoilNum).InletWaterMassFlowRate, 0.0);
-    EXPECT_EQ(0.0, state->dataWaterCoils->WaterCoil(CoilNum).InletAirMassFlowRate);
+    EXPECT_GT(waterCoil1.InletWaterMassFlowRate, 0.0);
+    EXPECT_EQ(0.0, waterCoil1.InletAirMassFlowRate);
     // check coil UA-value sizing
-    EXPECT_NEAR(1.0, state->dataWaterCoils->WaterCoil(CoilNum).UACoil, 0.0001); // TU air flow is too low to size, set to 0, so UA is set to 1.0
+    EXPECT_NEAR(1.0, waterCoil1.UACoil, 0.0001); // TU air flow is too low to size, set to 0, so UA is set to 1.0
 }
 
 TEST_F(WaterCoilsTest, CoilHeatingWaterUASizingLowHwaterInletTemp)
 {
+    Fluid::GetFluidPropertiesData(*state);
     state->dataEnvrn->OutBaroPress = 101325.0;
     state->dataEnvrn->StdRhoAir = PsyRhoAirFnPbTdbW(*state, state->dataEnvrn->OutBaroPress, 20.0, 0.0);
 
@@ -740,10 +731,8 @@ TEST_F(WaterCoilsTest, CoilHeatingWaterUASizingLowHwaterInletTemp)
         loopsidebranch.Comp.allocate(1);
     }
     state->dataPlnt->PlantLoop(1).Name = "HotWaterLoop";
-    state->dataPlnt->PlantLoop(1).FluidName = "FluidWaterLoop";
-    state->dataPlnt->PlantLoop(1).FluidIndex = 1;
     state->dataPlnt->PlantLoop(1).FluidName = "WATER";
-    state->dataPlnt->PlantLoop(1).FluidIndex = 1;
+    state->dataPlnt->PlantLoop(1).glycol = Fluid::GetWater(*state);
 
     // set up sizing data
     state->dataSize->FinalSysSizing(1).DesMainVolFlow = 1.00;
@@ -754,34 +743,34 @@ TEST_F(WaterCoilsTest, CoilHeatingWaterUASizingLowHwaterInletTemp)
 
     // set up water coil
     int CoilNum = 1;
-    state->dataWaterCoils->WaterCoil(CoilNum).Name = "Water Heating Coil";
-    state->dataWaterCoils->WaterCoil(CoilNum).WaterPlantLoc.loopNum = 1;
-    state->dataWaterCoils->WaterCoil(CoilNum).WaterCoilType = DataPlant::PlantEquipmentType::CoilWaterSimpleHeating;
-    state->dataWaterCoils->WaterCoil(CoilNum).WaterCoilModel = WaterCoils::CoilModel::HeatingSimple;
-    state->dataWaterCoils->WaterCoil(CoilNum).SchedPtr = DataGlobalConstants::ScheduleAlwaysOn;
+    auto &waterCoil1 = state->dataWaterCoils->WaterCoil(CoilNum);
+    waterCoil1.Name = "Water Heating Coil";
+    waterCoil1.WaterPlantLoc.loopNum = 1;
+    PlantUtilities::SetPlantLocationLinks(*state, waterCoil1.WaterPlantLoc);
+    waterCoil1.WaterCoilType = DataPlant::PlantEquipmentType::CoilWaterSimpleHeating;
+    waterCoil1.WaterCoilModel = WaterCoils::CoilModel::HeatingSimple;
+    waterCoil1.availSched = Sched::GetScheduleAlwaysOn(*state);
 
-    state->dataWaterCoils->WaterCoil(CoilNum).RequestingAutoSize = true;
-    state->dataWaterCoils->WaterCoil(CoilNum).DesAirVolFlowRate = AutoSize;
-    state->dataWaterCoils->WaterCoil(CoilNum).UACoil = AutoSize;
-    state->dataWaterCoils->WaterCoil(CoilNum).MaxWaterVolFlowRate = AutoSize;
-    state->dataWaterCoils->WaterCoil(CoilNum).CoilPerfInpMeth = state->dataWaterCoils->UAandFlow;
-    state->dataWaterCoils->WaterCoil(CoilNum).DesInletAirTemp = AutoSize;
-    state->dataWaterCoils->WaterCoil(CoilNum).DesOutletAirTemp = AutoSize;
-    state->dataWaterCoils->WaterCoil(CoilNum).DesInletWaterTemp = AutoSize;
-    state->dataWaterCoils->WaterCoil(CoilNum).DesInletAirHumRat = AutoSize;
-    state->dataWaterCoils->WaterCoil(CoilNum).DesOutletAirHumRat = AutoSize;
+    waterCoil1.RequestingAutoSize = true;
+    waterCoil1.DesAirVolFlowRate = AutoSize;
+    waterCoil1.UACoil = AutoSize;
+    waterCoil1.MaxWaterVolFlowRate = AutoSize;
+    waterCoil1.CoilPerfInpMeth = state->dataWaterCoils->UAandFlow;
+    waterCoil1.DesInletAirTemp = AutoSize;
+    waterCoil1.DesOutletAirTemp = AutoSize;
+    waterCoil1.DesInletWaterTemp = AutoSize;
+    waterCoil1.DesInletAirHumRat = AutoSize;
+    waterCoil1.DesOutletAirHumRat = AutoSize;
 
     state->dataWaterCoils->WaterCoilNumericFields(CoilNum).FieldNames(2) = "Maximum Water Flow Rate";
-    state->dataWaterCoils->WaterCoil(CoilNum).WaterInletNodeNum = 1;
-    state->dataPlnt->PlantLoop(1).LoopSide(DataPlant::LoopSideLocation::Demand).Branch(1).Comp(1).NodeNumIn =
-        state->dataWaterCoils->WaterCoil(CoilNum).WaterInletNodeNum;
+    waterCoil1.WaterInletNodeNum = 1;
+    state->dataPlnt->PlantLoop(1).LoopSide(DataPlant::LoopSideLocation::Demand).Branch(1).Comp(1).NodeNumIn = waterCoil1.WaterInletNodeNum;
 
     state->dataSize->CurZoneEqNum = 0;
     state->dataSize->CurSysNum = 1;
     state->dataSize->CurOASysNum = 0;
 
     state->dataSize->DataWaterLoopNum = 1;
-    state->dataFluidProps->NumOfGlycols = 1;
 
     state->dataWaterCoils->MyUAAndFlowCalcFlag.allocate(1);
     state->dataWaterCoils->MyUAAndFlowCalcFlag(1) = true;
@@ -790,50 +779,48 @@ TEST_F(WaterCoilsTest, CoilHeatingWaterUASizingLowHwaterInletTemp)
     state->dataWaterCoils->MySizeFlag(1) = true;
 
     // run water coil sizing
-    createCoilSelectionReportObj(*state);
     SizeWaterCoil(*state, CoilNum);
-    EXPECT_DOUBLE_EQ(1.0, state->dataWaterCoils->WaterCoil(CoilNum).DesAirVolFlowRate);
+    EXPECT_DOUBLE_EQ(1.0, waterCoil1.DesAirVolFlowRate);
 
     Real64 CpAirStd = 0.0;
     Real64 DesMassFlow = 0.0;
     Real64 DesCoilHeatingLoad = 0.0;
 
     CpAirStd = PsyCpAirFnW(0.0);
-    DesMassFlow = state->dataWaterCoils->WaterCoil(CoilNum).DesAirVolFlowRate * state->dataEnvrn->StdRhoAir;
+    DesMassFlow = waterCoil1.DesAirVolFlowRate * state->dataEnvrn->StdRhoAir;
     DesCoilHeatingLoad = CpAirStd * DesMassFlow * (40.0 - 5.0);
 
     // check heating coil design load
-    EXPECT_DOUBLE_EQ(DesCoilHeatingLoad, state->dataWaterCoils->WaterCoil(CoilNum).DesWaterHeatingCoilRate);
+    EXPECT_DOUBLE_EQ(DesCoilHeatingLoad, waterCoil1.DesWaterHeatingCoilRate);
 
     Real64 Cp = 0;
     Real64 rho = 0;
     Real64 DesWaterFlowRate = 0;
 
-    Cp = GetSpecificHeatGlycol(
-        *state, state->dataPlnt->PlantLoop(1).FluidName, DataGlobalConstants::HWInitConvTemp, state->dataPlnt->PlantLoop(1).FluidIndex, "Unit Test");
-    rho = GetDensityGlycol(
-        *state, state->dataPlnt->PlantLoop(1).FluidName, DataGlobalConstants::HWInitConvTemp, state->dataPlnt->PlantLoop(1).FluidIndex, "Unit Test");
-    DesWaterFlowRate = state->dataWaterCoils->WaterCoil(CoilNum).DesWaterHeatingCoilRate / (10.0 * Cp * rho);
+    Cp = state->dataPlnt->PlantLoop(1).glycol->getSpecificHeat(*state, Constant::HWInitConvTemp, "Unit Test");
+    rho = state->dataPlnt->PlantLoop(1).glycol->getDensity(*state, Constant::HWInitConvTemp, "Unit Test");
+    DesWaterFlowRate = waterCoil1.DesWaterHeatingCoilRate / (10.0 * Cp * rho);
 
     // check heating coil design water flow rate
-    EXPECT_DOUBLE_EQ(DesWaterFlowRate, state->dataWaterCoils->WaterCoil(CoilNum).MaxWaterVolFlowRate);
+    EXPECT_DOUBLE_EQ(DesWaterFlowRate, waterCoil1.MaxWaterVolFlowRate);
 
     // check coil UA-value sizing for low design loop exit temp
-    EXPECT_NEAR(2479.27, state->dataWaterCoils->WaterCoil(CoilNum).UACoil, 0.01);
+    EXPECT_NEAR(2479.27, waterCoil1.UACoil, 0.01);
 
     Real64 DesCoilInletWaterTempUsed = 0.0;
-    Real64 DataFanOpMode = ContFanCycCoil;
-    Real64 UAMax = state->dataWaterCoils->WaterCoil(CoilNum).DesWaterHeatingCoilRate;
+    HVAC::FanOp fanOp = HVAC::FanOp::Continuous;
+    Real64 UAMax = waterCoil1.DesWaterHeatingCoilRate;
 
     // check if coil design inlet water temperature is increased above the plant loop exit temp
-    EstimateCoilInletWaterTemp(*state, CoilNum, DataFanOpMode, 1.0, UAMax, DesCoilInletWaterTempUsed);
+    EstimateCoilInletWaterTemp(*state, CoilNum, fanOp, 1.0, UAMax, DesCoilInletWaterTempUsed);
     EXPECT_GT(DesCoilInletWaterTempUsed, state->dataSize->PlantSizData(1).ExitTemp);
     EXPECT_NEAR(48.73, DesCoilInletWaterTempUsed, 0.01);
 }
 
 TEST_F(WaterCoilsTest, CoilCoolingWaterSimpleSizing)
 {
-    InitializePsychRoutines(*state);
+    state->init_state(*state);
+
     state->dataEnvrn->OutBaroPress = 101325.0;
     state->dataEnvrn->StdRhoAir = PsyRhoAirFnPbTdbW(*state, state->dataEnvrn->OutBaroPress, 20.0, 0.0);
     ShowMessage(*state, "Begin Test: state->dataWaterCoils->WaterCoilsTest, CoilCoolingWaterSimpleSizing");
@@ -856,10 +843,8 @@ TEST_F(WaterCoilsTest, CoilCoolingWaterSimpleSizing)
         loopsidebranch.Comp.allocate(1);
     }
     state->dataPlnt->PlantLoop(1).Name = "WaterLoop";
-    state->dataPlnt->PlantLoop(1).FluidName = "FluidWaterLoop";
-    state->dataPlnt->PlantLoop(1).FluidIndex = 1;
     state->dataPlnt->PlantLoop(1).FluidName = "WATER";
-    state->dataPlnt->PlantLoop(1).FluidIndex = 1;
+    state->dataPlnt->PlantLoop(1).glycol = Fluid::GetWater(*state);
 
     // set up sizing data
     state->dataSize->FinalSysSizing(1).MixTempAtCoolPeak = 20.0;
@@ -871,27 +856,28 @@ TEST_F(WaterCoilsTest, CoilCoolingWaterSimpleSizing)
 
     // set up water coil
     int CoilNum = 1;
-    state->dataWaterCoils->WaterCoil(CoilNum).Name = "Test Simple Water Cooling Coil";
-    state->dataWaterCoils->WaterCoil(CoilNum).WaterPlantLoc.loopNum = 1;
-    state->dataWaterCoils->WaterCoil(CoilNum).WaterCoilType = DataPlant::PlantEquipmentType::CoilWaterCooling;
-    state->dataWaterCoils->WaterCoil(CoilNum).WaterCoilModel = WaterCoils::CoilModel::CoolingSimple;
+    auto &waterCoil1 = state->dataWaterCoils->WaterCoil(CoilNum);
+    waterCoil1.Name = "Test Simple Water Cooling Coil";
+    waterCoil1.WaterPlantLoc.loopNum = 1;
+    PlantUtilities::SetPlantLocationLinks(*state, waterCoil1.WaterPlantLoc);
+    waterCoil1.WaterCoilType = DataPlant::PlantEquipmentType::CoilWaterCooling;
+    waterCoil1.WaterCoilModel = WaterCoils::CoilModel::CoolingSimple;
 
-    state->dataWaterCoils->WaterCoil(CoilNum).RequestingAutoSize = true;
-    state->dataWaterCoils->WaterCoil(CoilNum).DesAirVolFlowRate = AutoSize;
-    state->dataWaterCoils->WaterCoil(CoilNum).DesInletAirTemp = AutoSize;
-    state->dataWaterCoils->WaterCoil(CoilNum).DesOutletAirTemp = AutoSize;
-    state->dataWaterCoils->WaterCoil(CoilNum).DesInletWaterTemp = AutoSize;
-    state->dataWaterCoils->WaterCoil(CoilNum).DesInletAirHumRat = AutoSize;
-    state->dataWaterCoils->WaterCoil(CoilNum).DesOutletAirHumRat = AutoSize;
-    state->dataWaterCoils->WaterCoil(CoilNum).MaxWaterVolFlowRate = AutoSize;
+    waterCoil1.RequestingAutoSize = true;
+    waterCoil1.DesAirVolFlowRate = AutoSize;
+    waterCoil1.DesInletAirTemp = AutoSize;
+    waterCoil1.DesOutletAirTemp = AutoSize;
+    waterCoil1.DesInletWaterTemp = AutoSize;
+    waterCoil1.DesInletAirHumRat = AutoSize;
+    waterCoil1.DesOutletAirHumRat = AutoSize;
+    waterCoil1.MaxWaterVolFlowRate = AutoSize;
 
-    state->dataWaterCoils->WaterCoil(CoilNum).DesignWaterDeltaTemp = 6.67;
-    state->dataWaterCoils->WaterCoil(CoilNum).UseDesignWaterDeltaTemp = true;
+    waterCoil1.DesignWaterDeltaTemp = 6.67;
+    waterCoil1.UseDesignWaterDeltaTemp = true;
 
     state->dataWaterCoils->WaterCoilNumericFields(CoilNum).FieldNames(1) = "Design Water Flow Rate";
-    state->dataWaterCoils->WaterCoil(CoilNum).WaterInletNodeNum = 1;
-    state->dataPlnt->PlantLoop(1).LoopSide(DataPlant::LoopSideLocation::Demand).Branch(1).Comp(1).NodeNumIn =
-        state->dataWaterCoils->WaterCoil(CoilNum).WaterInletNodeNum;
+    waterCoil1.WaterInletNodeNum = 1;
+    state->dataPlnt->PlantLoop(1).LoopSide(DataPlant::LoopSideLocation::Demand).Branch(1).Comp(1).NodeNumIn = waterCoil1.WaterInletNodeNum;
 
     state->dataSize->CurZoneEqNum = 0;
     state->dataSize->CurSysNum = 1;
@@ -901,12 +887,10 @@ TEST_F(WaterCoilsTest, CoilCoolingWaterSimpleSizing)
     state->dataSize->PlantSizData(1).DeltaT = 5.0;
 
     state->dataSize->DataWaterLoopNum = 1;
-    state->dataFluidProps->NumOfGlycols = 1;
 
     // run water coil sizing
-    createCoilSelectionReportObj(*state);
     SizeWaterCoil(*state, CoilNum);
-    EXPECT_DOUBLE_EQ(1.0, state->dataWaterCoils->WaterCoil(CoilNum).DesAirVolFlowRate);
+    EXPECT_DOUBLE_EQ(1.0, waterCoil1.DesAirVolFlowRate);
 
     Real64 DesCoilCoolingLoad = 0.0;
     Real64 CoilInEnth = 0.0;
@@ -914,29 +898,27 @@ TEST_F(WaterCoilsTest, CoilCoolingWaterSimpleSizing)
 
     CoilInEnth = PsyHFnTdbW(20.0, 0.01);
     CoilOutEnth = PsyHFnTdbW(10.0, 0.0085);
-    DesCoilCoolingLoad = state->dataWaterCoils->WaterCoil(CoilNum).DesAirVolFlowRate * state->dataEnvrn->StdRhoAir * (CoilInEnth - CoilOutEnth);
+    DesCoilCoolingLoad = waterCoil1.DesAirVolFlowRate * state->dataEnvrn->StdRhoAir * (CoilInEnth - CoilOutEnth);
 
     // check cooling coil design load
-    EXPECT_DOUBLE_EQ(DesCoilCoolingLoad, state->dataWaterCoils->WaterCoil(CoilNum).DesWaterCoolingCoilRate);
+    EXPECT_DOUBLE_EQ(DesCoilCoolingLoad, waterCoil1.DesWaterCoolingCoilRate);
 
     Real64 Cp = 0;
     Real64 rho = 0;
     Real64 DesWaterFlowRate = 0;
 
-    Cp = GetSpecificHeatGlycol(
-        *state, state->dataPlnt->PlantLoop(1).FluidName, DataGlobalConstants::CWInitConvTemp, state->dataPlnt->PlantLoop(1).FluidIndex, "Unit Test");
-    rho = GetDensityGlycol(
-        *state, state->dataPlnt->PlantLoop(1).FluidName, DataGlobalConstants::CWInitConvTemp, state->dataPlnt->PlantLoop(1).FluidIndex, "Unit Test");
-    DesWaterFlowRate = state->dataWaterCoils->WaterCoil(CoilNum).DesWaterCoolingCoilRate /
-                       (state->dataWaterCoils->WaterCoil(CoilNum).DesignWaterDeltaTemp * Cp * rho);
+    Cp = state->dataPlnt->PlantLoop(1).glycol->getSpecificHeat(*state, Constant::CWInitConvTemp, "Unit Test");
+    rho = state->dataPlnt->PlantLoop(1).glycol->getDensity(*state, Constant::CWInitConvTemp, "Unit Test");
+    DesWaterFlowRate = waterCoil1.DesWaterCoolingCoilRate / (waterCoil1.DesignWaterDeltaTemp * Cp * rho);
 
     // check cooling coil design water flow rate
-    EXPECT_DOUBLE_EQ(DesWaterFlowRate, state->dataWaterCoils->WaterCoil(CoilNum).MaxWaterVolFlowRate);
+    EXPECT_DOUBLE_EQ(DesWaterFlowRate, waterCoil1.MaxWaterVolFlowRate);
 }
 
 TEST_F(WaterCoilsTest, CoilCoolingWaterDetailedSizing)
 {
-    InitializePsychRoutines(*state);
+    state->init_state(*state);
+
     state->dataEnvrn->OutBaroPress = 101325.0;
     state->dataEnvrn->StdRhoAir = PsyRhoAirFnPbTdbW(*state, state->dataEnvrn->OutBaroPress, 20.0, 0.0);
     ShowMessage(*state, "Begin Test: state->dataWaterCoils->WaterCoilsTest, CoilCoolingWaterDetailedSizing");
@@ -959,10 +941,8 @@ TEST_F(WaterCoilsTest, CoilCoolingWaterDetailedSizing)
         loopsidebranch.Comp.allocate(1);
     }
     state->dataPlnt->PlantLoop(1).Name = "WaterLoop";
-    state->dataPlnt->PlantLoop(1).FluidName = "FluidWaterLoop";
-    state->dataPlnt->PlantLoop(1).FluidIndex = 1;
     state->dataPlnt->PlantLoop(1).FluidName = "WATER";
-    state->dataPlnt->PlantLoop(1).FluidIndex = 1;
+    state->dataPlnt->PlantLoop(1).glycol = Fluid::GetWater(*state);
 
     // set up sizing data
     state->dataSize->FinalSysSizing(1).MixTempAtCoolPeak = 20.0;
@@ -974,43 +954,44 @@ TEST_F(WaterCoilsTest, CoilCoolingWaterDetailedSizing)
 
     // set up water coil
     int CoilNum = 1;
-    state->dataWaterCoils->WaterCoil(CoilNum).Name = "Test Detailed Water Cooling Coil";
-    state->dataWaterCoils->WaterCoil(CoilNum).WaterPlantLoc.loopNum = 1;
-    state->dataWaterCoils->WaterCoil(CoilNum).WaterCoilType = DataPlant::PlantEquipmentType::CoilWaterCooling;
-    state->dataWaterCoils->WaterCoil(CoilNum).WaterCoilModel = WaterCoils::CoilModel::CoolingDetailed;
+    auto &waterCoil1 = state->dataWaterCoils->WaterCoil(CoilNum);
+    waterCoil1.Name = "Test Detailed Water Cooling Coil";
+    waterCoil1.WaterPlantLoc.loopNum = 1;
+    PlantUtilities::SetPlantLocationLinks(*state, waterCoil1.WaterPlantLoc);
+    waterCoil1.WaterCoilType = DataPlant::PlantEquipmentType::CoilWaterCooling;
+    waterCoil1.WaterCoilModel = WaterCoils::CoilModel::CoolingDetailed;
 
-    state->dataWaterCoils->WaterCoil(CoilNum).TubeOutsideSurfArea = 6.23816;
-    state->dataWaterCoils->WaterCoil(CoilNum).TotTubeInsideArea = 6.20007018;
-    state->dataWaterCoils->WaterCoil(CoilNum).FinSurfArea = 101.7158224;
-    state->dataWaterCoils->WaterCoil(CoilNum).MinAirFlowArea = 0.810606367;
-    state->dataWaterCoils->WaterCoil(CoilNum).CoilDepth = 0.165097968;
-    state->dataWaterCoils->WaterCoil(CoilNum).FinDiam = 0.43507152;
-    state->dataWaterCoils->WaterCoil(CoilNum).FinThickness = 0.001499982;
-    state->dataWaterCoils->WaterCoil(CoilNum).TubeInsideDiam = 0.014449958;
-    state->dataWaterCoils->WaterCoil(CoilNum).TubeOutsideDiam = 0.015879775;
-    state->dataWaterCoils->WaterCoil(CoilNum).TubeThermConductivity = 385.764854;
-    state->dataWaterCoils->WaterCoil(CoilNum).FinThermConductivity = 203.882537;
-    state->dataWaterCoils->WaterCoil(CoilNum).FinSpacing = 0.001814292;
-    state->dataWaterCoils->WaterCoil(CoilNum).TubeDepthSpacing = 0.02589977;
-    state->dataWaterCoils->WaterCoil(CoilNum).NumOfTubeRows = 6;
-    state->dataWaterCoils->WaterCoil(CoilNum).NumOfTubesPerRow = 16;
-    state->dataWaterCoils->WaterCoil(CoilNum).DesignWaterDeltaTemp = 6.67;
-    state->dataWaterCoils->WaterCoil(CoilNum).UseDesignWaterDeltaTemp = true;
+    waterCoil1.TubeOutsideSurfArea = 6.23816;
+    waterCoil1.TotTubeInsideArea = 6.20007018;
+    waterCoil1.FinSurfArea = 101.7158224;
+    waterCoil1.MinAirFlowArea = 0.810606367;
+    waterCoil1.CoilDepth = 0.165097968;
+    waterCoil1.FinDiam = 0.43507152;
+    waterCoil1.FinThickness = 0.001499982;
+    waterCoil1.TubeInsideDiam = 0.014449958;
+    waterCoil1.TubeOutsideDiam = 0.015879775;
+    waterCoil1.TubeThermConductivity = 385.764854;
+    waterCoil1.FinThermConductivity = 203.882537;
+    waterCoil1.FinSpacing = 0.001814292;
+    waterCoil1.TubeDepthSpacing = 0.02589977;
+    waterCoil1.NumOfTubeRows = 6;
+    waterCoil1.NumOfTubesPerRow = 16;
+    waterCoil1.DesignWaterDeltaTemp = 6.67;
+    waterCoil1.UseDesignWaterDeltaTemp = true;
 
-    state->dataWaterCoils->WaterCoil(CoilNum).RequestingAutoSize = true;
-    state->dataWaterCoils->WaterCoil(CoilNum).DesAirVolFlowRate = AutoSize;
-    state->dataWaterCoils->WaterCoil(CoilNum).MaxWaterVolFlowRate = AutoSize;
-    state->dataWaterCoils->WaterCoil(CoilNum).DesInletAirTemp = AutoSize;
-    state->dataWaterCoils->WaterCoil(CoilNum).DesOutletAirTemp = AutoSize;
-    state->dataWaterCoils->WaterCoil(CoilNum).DesInletWaterTemp = AutoSize;
-    state->dataWaterCoils->WaterCoil(CoilNum).DesInletAirHumRat = AutoSize;
-    state->dataWaterCoils->WaterCoil(CoilNum).DesOutletAirHumRat = AutoSize;
-    state->dataWaterCoils->WaterCoil(CoilNum).MaxWaterVolFlowRate = AutoSize;
+    waterCoil1.RequestingAutoSize = true;
+    waterCoil1.DesAirVolFlowRate = AutoSize;
+    waterCoil1.MaxWaterVolFlowRate = AutoSize;
+    waterCoil1.DesInletAirTemp = AutoSize;
+    waterCoil1.DesOutletAirTemp = AutoSize;
+    waterCoil1.DesInletWaterTemp = AutoSize;
+    waterCoil1.DesInletAirHumRat = AutoSize;
+    waterCoil1.DesOutletAirHumRat = AutoSize;
+    waterCoil1.MaxWaterVolFlowRate = AutoSize;
 
     state->dataWaterCoils->WaterCoilNumericFields(CoilNum).FieldNames(1) = "Design Water Flow Rate";
-    state->dataWaterCoils->WaterCoil(CoilNum).WaterInletNodeNum = 1;
-    state->dataPlnt->PlantLoop(1).LoopSide(DataPlant::LoopSideLocation::Demand).Branch(1).Comp(1).NodeNumIn =
-        state->dataWaterCoils->WaterCoil(CoilNum).WaterInletNodeNum;
+    waterCoil1.WaterInletNodeNum = 1;
+    state->dataPlnt->PlantLoop(1).LoopSide(DataPlant::LoopSideLocation::Demand).Branch(1).Comp(1).NodeNumIn = waterCoil1.WaterInletNodeNum;
 
     state->dataSize->CurZoneEqNum = 0;
     state->dataSize->CurSysNum = 1;
@@ -1019,12 +1000,10 @@ TEST_F(WaterCoilsTest, CoilCoolingWaterDetailedSizing)
     state->dataSize->PlantSizData(1).ExitTemp = 5.7;
     state->dataSize->PlantSizData(1).DeltaT = 5.0;
     state->dataSize->DataWaterLoopNum = 1;
-    state->dataFluidProps->NumOfGlycols = 1;
 
     // run water coil sizing
-    createCoilSelectionReportObj(*state);
     SizeWaterCoil(*state, CoilNum);
-    EXPECT_DOUBLE_EQ(1.0, state->dataWaterCoils->WaterCoil(CoilNum).DesAirVolFlowRate);
+    EXPECT_DOUBLE_EQ(1.0, waterCoil1.DesAirVolFlowRate);
 
     Real64 DesCoilCoolingLoad = 0.0;
     Real64 CoilInEnth = 0.0;
@@ -1032,26 +1011,25 @@ TEST_F(WaterCoilsTest, CoilCoolingWaterDetailedSizing)
 
     CoilInEnth = PsyHFnTdbW(state->dataSize->FinalSysSizing(1).MixTempAtCoolPeak, state->dataSize->FinalSysSizing(1).MixHumRatAtCoolPeak);
     CoilOutEnth = PsyHFnTdbW(state->dataSize->FinalSysSizing(1).CoolSupTemp, state->dataSize->FinalSysSizing(1).CoolSupHumRat);
-    DesCoilCoolingLoad = state->dataWaterCoils->WaterCoil(CoilNum).DesAirVolFlowRate * state->dataEnvrn->StdRhoAir * (CoilInEnth - CoilOutEnth);
+    DesCoilCoolingLoad = waterCoil1.DesAirVolFlowRate * state->dataEnvrn->StdRhoAir * (CoilInEnth - CoilOutEnth);
     // check cooling coil design load
-    EXPECT_DOUBLE_EQ(DesCoilCoolingLoad, state->dataWaterCoils->WaterCoil(CoilNum).DesWaterCoolingCoilRate);
+    EXPECT_DOUBLE_EQ(DesCoilCoolingLoad, waterCoil1.DesWaterCoolingCoilRate);
 
     Real64 Cp = 0;
     Real64 rho = 0;
     Real64 DesWaterFlowRate = 0;
 
-    Cp = GetSpecificHeatGlycol(
-        *state, state->dataPlnt->PlantLoop(1).FluidName, DataGlobalConstants::CWInitConvTemp, state->dataPlnt->PlantLoop(1).FluidIndex, "Unit Test");
-    rho = GetDensityGlycol(
-        *state, state->dataPlnt->PlantLoop(1).FluidName, DataGlobalConstants::CWInitConvTemp, state->dataPlnt->PlantLoop(1).FluidIndex, "Unit Test");
-    DesWaterFlowRate = state->dataWaterCoils->WaterCoil(CoilNum).DesWaterCoolingCoilRate / (6.67 * Cp * rho);
+    Cp = state->dataPlnt->PlantLoop(1).glycol->getSpecificHeat(*state, Constant::CWInitConvTemp, "Unit Test");
+    rho = state->dataPlnt->PlantLoop(1).glycol->getDensity(*state, Constant::CWInitConvTemp, "Unit Test");
+    DesWaterFlowRate = waterCoil1.DesWaterCoolingCoilRate / (6.67 * Cp * rho);
     // check cooling coil design water flow rate
-    EXPECT_DOUBLE_EQ(DesWaterFlowRate, state->dataWaterCoils->WaterCoil(CoilNum).MaxWaterVolFlowRate);
+    EXPECT_DOUBLE_EQ(DesWaterFlowRate, waterCoil1.MaxWaterVolFlowRate);
 }
 
 TEST_F(WaterCoilsTest, CoilCoolingWaterDetailed_WarningMath)
 {
-    InitializePsychRoutines(*state);
+    state->init_state(*state);
+
     state->dataEnvrn->OutBaroPress = 101325.0;
     state->dataEnvrn->StdRhoAir = PsyRhoAirFnPbTdbW(*state, state->dataEnvrn->OutBaroPress, 20.0, 0.0);
 
@@ -1072,10 +1050,8 @@ TEST_F(WaterCoilsTest, CoilCoolingWaterDetailed_WarningMath)
         loopsidebranch.Comp.allocate(1);
     }
     state->dataPlnt->PlantLoop(1).Name = "WaterLoop";
-    state->dataPlnt->PlantLoop(1).FluidName = "FluidWaterLoop";
-    state->dataPlnt->PlantLoop(1).FluidIndex = 1;
     state->dataPlnt->PlantLoop(1).FluidName = "WATER";
-    state->dataPlnt->PlantLoop(1).FluidIndex = 1;
+    state->dataPlnt->PlantLoop(1).glycol = Fluid::GetWater(*state);
 
     // set up sizing data
     state->dataSize->FinalSysSizing(1).MixTempAtCoolPeak = 20.0;
@@ -1087,55 +1063,59 @@ TEST_F(WaterCoilsTest, CoilCoolingWaterDetailed_WarningMath)
 
     // set up water coil
     int CoilNum = 1;
-    state->dataWaterCoils->WaterCoil(CoilNum).Name = "Test Detailed Water Cooling Coil";
+    auto &waterCoil1 = state->dataWaterCoils->WaterCoil(CoilNum);
+    waterCoil1.Name = "Test Detailed Water Cooling Coil";
+    waterCoil1.coilType = HVAC::CoilType::CoolingWaterDetailed;
+    waterCoil1.coilReportNum = ReportCoilSelection::getReportIndex(*state, waterCoil1.Name, waterCoil1.coilType);
 
-    state->dataWaterCoils->WaterCoil(CoilNum).WaterCoilType = DataPlant::PlantEquipmentType::CoilWaterDetailedFlatCooling;
-    state->dataWaterCoils->WaterCoil(CoilNum).WaterCoilModel = WaterCoils::CoilModel::CoolingDetailed;
+    waterCoil1.availSched = Sched::GetScheduleAlwaysOff(*state);
 
-    state->dataWaterCoils->WaterCoil(CoilNum).TubeOutsideSurfArea = 6.23816;
-    state->dataWaterCoils->WaterCoil(CoilNum).TotTubeInsideArea = 6.20007018;
-    state->dataWaterCoils->WaterCoil(CoilNum).FinSurfArea = 101.7158224;
-    state->dataWaterCoils->WaterCoil(CoilNum).MinAirFlowArea = 0.810606367;
-    state->dataWaterCoils->WaterCoil(CoilNum).CoilDepth = 0.165097968;
-    state->dataWaterCoils->WaterCoil(CoilNum).FinDiam = 0.43507152;
-    state->dataWaterCoils->WaterCoil(CoilNum).FinThickness = 0.001499982;
-    state->dataWaterCoils->WaterCoil(CoilNum).TubeInsideDiam = 0.014449958;
-    state->dataWaterCoils->WaterCoil(CoilNum).TubeOutsideDiam = 0.015879775;
-    state->dataWaterCoils->WaterCoil(CoilNum).TubeThermConductivity = 385.764854;
-    state->dataWaterCoils->WaterCoil(CoilNum).FinThermConductivity = 203.882537;
-    state->dataWaterCoils->WaterCoil(CoilNum).FinSpacing = 0.001814292;
-    state->dataWaterCoils->WaterCoil(CoilNum).TubeDepthSpacing = 0.02589977;
-    state->dataWaterCoils->WaterCoil(CoilNum).NumOfTubeRows = 6;
-    state->dataWaterCoils->WaterCoil(CoilNum).NumOfTubesPerRow = 16;
-    state->dataWaterCoils->WaterCoil(CoilNum).DesignWaterDeltaTemp = 6.67;
-    state->dataWaterCoils->WaterCoil(CoilNum).UseDesignWaterDeltaTemp = true;
+    waterCoil1.WaterCoilType = DataPlant::PlantEquipmentType::CoilWaterDetailedFlatCooling;
+    waterCoil1.WaterCoilModel = WaterCoils::CoilModel::CoolingDetailed;
 
-    state->dataWaterCoils->WaterCoil(CoilNum).RequestingAutoSize = true;
-    state->dataWaterCoils->WaterCoil(CoilNum).DesAirVolFlowRate = AutoSize;
-    state->dataWaterCoils->WaterCoil(CoilNum).MaxWaterVolFlowRate = AutoSize;
-    state->dataWaterCoils->WaterCoil(CoilNum).DesInletAirTemp = AutoSize;
-    state->dataWaterCoils->WaterCoil(CoilNum).DesOutletAirTemp = AutoSize;
-    state->dataWaterCoils->WaterCoil(CoilNum).DesInletWaterTemp = AutoSize;
-    state->dataWaterCoils->WaterCoil(CoilNum).DesInletAirHumRat = AutoSize;
-    state->dataWaterCoils->WaterCoil(CoilNum).DesOutletAirHumRat = AutoSize;
-    state->dataWaterCoils->WaterCoil(CoilNum).MaxWaterVolFlowRate = AutoSize;
+    waterCoil1.TubeOutsideSurfArea = 6.23816;
+    waterCoil1.TotTubeInsideArea = 6.20007018;
+    waterCoil1.FinSurfArea = 101.7158224;
+    waterCoil1.MinAirFlowArea = 0.810606367;
+    waterCoil1.CoilDepth = 0.165097968;
+    waterCoil1.FinDiam = 0.43507152;
+    waterCoil1.FinThickness = 0.001499982;
+    waterCoil1.TubeInsideDiam = 0.014449958;
+    waterCoil1.TubeOutsideDiam = 0.015879775;
+    waterCoil1.TubeThermConductivity = 385.764854;
+    waterCoil1.FinThermConductivity = 203.882537;
+    waterCoil1.FinSpacing = 0.001814292;
+    waterCoil1.TubeDepthSpacing = 0.02589977;
+    waterCoil1.NumOfTubeRows = 6;
+    waterCoil1.NumOfTubesPerRow = 16;
+    waterCoil1.DesignWaterDeltaTemp = 6.67;
+    waterCoil1.UseDesignWaterDeltaTemp = true;
+
+    waterCoil1.RequestingAutoSize = true;
+    waterCoil1.DesAirVolFlowRate = AutoSize;
+    waterCoil1.MaxWaterVolFlowRate = AutoSize;
+    waterCoil1.DesInletAirTemp = AutoSize;
+    waterCoil1.DesOutletAirTemp = AutoSize;
+    waterCoil1.DesInletWaterTemp = AutoSize;
+    waterCoil1.DesInletAirHumRat = AutoSize;
+    waterCoil1.DesOutletAirHumRat = AutoSize;
+    waterCoil1.MaxWaterVolFlowRate = AutoSize;
 
     state->dataWaterCoils->WaterCoilNumericFields(CoilNum).FieldNames(1) = "Design Water Flow Rate";
-    state->dataWaterCoils->WaterCoil(CoilNum).WaterInletNodeNum = 1;
-    state->dataWaterCoils->WaterCoil(CoilNum).WaterOutletNodeNum = 2;
-    state->dataWaterCoils->WaterCoil(CoilNum).AirInletNodeNum = 3;
-    state->dataWaterCoils->WaterCoil(CoilNum).AirOutletNodeNum = 4;
-    state->dataWaterCoils->WaterCoil(1).WaterPlantLoc.loopNum = 1;
-    state->dataWaterCoils->WaterCoil(1).WaterPlantLoc.loopSideNum = DataPlant::LoopSideLocation::Demand;
-    state->dataWaterCoils->WaterCoil(1).WaterPlantLoc.branchNum = 1;
-    state->dataWaterCoils->WaterCoil(1).WaterPlantLoc.compNum = 1;
-    state->dataPlnt->PlantLoop(1).LoopSide(DataPlant::LoopSideLocation::Demand).Branch(1).Comp(1).Name = state->dataWaterCoils->WaterCoil(1).Name;
+    waterCoil1.WaterInletNodeNum = 1;
+    waterCoil1.WaterOutletNodeNum = 2;
+    waterCoil1.AirInletNodeNum = 3;
+    waterCoil1.AirOutletNodeNum = 4;
+    waterCoil1.WaterPlantLoc.loopNum = 1;
+    waterCoil1.WaterPlantLoc.loopSideNum = DataPlant::LoopSideLocation::Demand;
+    waterCoil1.WaterPlantLoc.branchNum = 1;
+    waterCoil1.WaterPlantLoc.compNum = 1;
+    PlantUtilities::SetPlantLocationLinks(*state, waterCoil1.WaterPlantLoc);
+    state->dataPlnt->PlantLoop(1).LoopSide(DataPlant::LoopSideLocation::Demand).Branch(1).Comp(1).Name = waterCoil1.Name;
     state->dataPlnt->PlantLoop(1).LoopSide(DataPlant::LoopSideLocation::Demand).Branch(1).Comp(1).Type =
         DataPlant::PlantEquipmentType::CoilWaterDetailedFlatCooling;
-    state->dataPlnt->PlantLoop(1).LoopSide(DataPlant::LoopSideLocation::Demand).Branch(1).Comp(1).NodeNumIn =
-        state->dataWaterCoils->WaterCoil(1).WaterInletNodeNum;
-    state->dataPlnt->PlantLoop(1).LoopSide(DataPlant::LoopSideLocation::Demand).Branch(1).Comp(1).NodeNumOut =
-        state->dataWaterCoils->WaterCoil(1).WaterOutletNodeNum;
+    state->dataPlnt->PlantLoop(1).LoopSide(DataPlant::LoopSideLocation::Demand).Branch(1).Comp(1).NodeNumIn = waterCoil1.WaterInletNodeNum;
+    state->dataPlnt->PlantLoop(1).LoopSide(DataPlant::LoopSideLocation::Demand).Branch(1).Comp(1).NodeNumOut = waterCoil1.WaterOutletNodeNum;
 
     state->dataSize->CurZoneEqNum = 0;
     state->dataSize->CurSysNum = 1;
@@ -1144,14 +1124,10 @@ TEST_F(WaterCoilsTest, CoilCoolingWaterDetailed_WarningMath)
     state->dataSize->PlantSizData(1).ExitTemp = 5.7;
     state->dataSize->PlantSizData(1).DeltaT = 5.0;
     state->dataSize->DataWaterLoopNum = 1;
-    state->dataFluidProps->NumOfGlycols = 1;
-
-    OutputReportPredefined::SetPredefinedTables(*state);
 
     // run water coil sizing
-    createCoilSelectionReportObj(*state);
     SizeWaterCoil(*state, CoilNum);
-    EXPECT_DOUBLE_EQ(1.0, state->dataWaterCoils->WaterCoil(CoilNum).DesAirVolFlowRate);
+    EXPECT_DOUBLE_EQ(1.0, waterCoil1.DesAirVolFlowRate);
 
     Real64 DesCoilCoolingLoad = 0.0;
     Real64 CoilInEnth = 0.0;
@@ -1159,21 +1135,19 @@ TEST_F(WaterCoilsTest, CoilCoolingWaterDetailed_WarningMath)
 
     CoilInEnth = PsyHFnTdbW(state->dataSize->FinalSysSizing(1).MixTempAtCoolPeak, state->dataSize->FinalSysSizing(1).MixHumRatAtCoolPeak);
     CoilOutEnth = PsyHFnTdbW(state->dataSize->FinalSysSizing(1).CoolSupTemp, state->dataSize->FinalSysSizing(1).CoolSupHumRat);
-    DesCoilCoolingLoad = state->dataWaterCoils->WaterCoil(CoilNum).DesAirVolFlowRate * state->dataEnvrn->StdRhoAir * (CoilInEnth - CoilOutEnth);
+    DesCoilCoolingLoad = waterCoil1.DesAirVolFlowRate * state->dataEnvrn->StdRhoAir * (CoilInEnth - CoilOutEnth);
     // check cooling coil design load
-    EXPECT_DOUBLE_EQ(DesCoilCoolingLoad, state->dataWaterCoils->WaterCoil(CoilNum).DesWaterCoolingCoilRate);
+    EXPECT_DOUBLE_EQ(DesCoilCoolingLoad, waterCoil1.DesWaterCoolingCoilRate);
 
     Real64 Cp = 0;
     Real64 rho = 0;
     Real64 DesWaterFlowRate = 0;
 
-    Cp = GetSpecificHeatGlycol(
-        *state, state->dataPlnt->PlantLoop(1).FluidName, DataGlobalConstants::CWInitConvTemp, state->dataPlnt->PlantLoop(1).FluidIndex, "Unit Test");
-    rho = GetDensityGlycol(
-        *state, state->dataPlnt->PlantLoop(1).FluidName, DataGlobalConstants::CWInitConvTemp, state->dataPlnt->PlantLoop(1).FluidIndex, "Unit Test");
-    DesWaterFlowRate = state->dataWaterCoils->WaterCoil(CoilNum).DesWaterCoolingCoilRate / (6.67 * Cp * rho);
+    Cp = state->dataPlnt->PlantLoop(1).glycol->getSpecificHeat(*state, Constant::CWInitConvTemp, "Unit Test");
+    rho = state->dataPlnt->PlantLoop(1).glycol->getDensity(*state, Constant::CWInitConvTemp, "Unit Test");
+    DesWaterFlowRate = waterCoil1.DesWaterCoolingCoilRate / (6.67 * Cp * rho);
     // check cooling coil design water flow rate
-    EXPECT_DOUBLE_EQ(DesWaterFlowRate, state->dataWaterCoils->WaterCoil(CoilNum).MaxWaterVolFlowRate);
+    EXPECT_DOUBLE_EQ(DesWaterFlowRate, waterCoil1.MaxWaterVolFlowRate);
 
     state->dataLoopNodes->Node.allocate(10);
 
@@ -1181,61 +1155,59 @@ TEST_F(WaterCoilsTest, CoilCoolingWaterDetailed_WarningMath)
 
     // Force getting the warning
     Real64 PartLoadRatio = 1.0;
-    Real64 TempAirIn = state->dataWaterCoils->WaterCoil(CoilNum).InletAirTemp;
-    Real64 InletAirHumRat = state->dataWaterCoils->WaterCoil(CoilNum).InletAirHumRat;
-    Real64 TempWaterIn = state->dataWaterCoils->WaterCoil(CoilNum).InletWaterTemp;
+    Real64 TempAirIn = waterCoil1.InletAirTemp;
+    Real64 InletAirHumRat = waterCoil1.InletAirHumRat;
+    Real64 TempWaterIn = waterCoil1.InletWaterTemp;
     Real64 AirDensity = Psychrometrics::PsyRhoAirFnPbTdbW(*state, state->dataEnvrn->OutBaroPress, TempAirIn, InletAirHumRat, "RoutineName");
-    Real64 MinAirMassFlow = 5.0 * state->dataWaterCoils->WaterCoil(CoilNum).MinAirFlowArea * AirDensity;
-    state->dataWaterCoils->WaterCoil(CoilNum).InletAirMassFlowRate = 1.1 * MinAirMassFlow;
-    Real64 AirMassFlow = state->dataWaterCoils->WaterCoil(CoilNum).InletAirMassFlowRate / PartLoadRatio;
+    Real64 MinAirMassFlow = 5.0 * waterCoil1.MinAirFlowArea * AirDensity;
+    waterCoil1.InletAirMassFlowRate = 1.1 * MinAirMassFlow;
+    Real64 AirMassFlow = waterCoil1.InletAirMassFlowRate / PartLoadRatio;
 
-    EXPECT_EQ(0.81060636699999999, state->dataWaterCoils->WaterCoil(CoilNum).MinAirFlowArea);
+    EXPECT_EQ(0.81060636699999999, waterCoil1.MinAirFlowArea);
     std::string expected_error = delimited_string({
+        std::format("   ** Warning ** Version: missing in IDF, processing for EnergyPlus version=\"{}\"", DataStringGlobals::MatchVersion),
         "   ** Warning ** Coil:Cooling:Water:DetailedGeometry in Coil =Test Detailed Water Cooling Coil",
         "   **   ~~~   ** Air Flow Rate Velocity has greatly exceeded upper design guidelines of ~2.5 m/s",
-        format("   **   ~~~   ** Air Mass Flow Rate[kg/s]={:.6T}", state->dataWaterCoils->WaterCoil(CoilNum).InletAirMassFlowRate),
-        format("   **   ~~~   ** Air Face Velocity[m/s]={:.6T}",
-               AirMassFlow / (state->dataWaterCoils->WaterCoil(CoilNum).MinAirFlowArea * AirDensity)),
-        format("   **   ~~~   ** Approximate Mass Flow Rate limit for Face Area[kg/s]={:.6T}",
-               2.5 * state->dataWaterCoils->WaterCoil(CoilNum).MinAirFlowArea * AirDensity),
+        std::format("   **   ~~~   ** Air Mass Flow Rate[kg/s]={:.6f}", waterCoil1.InletAirMassFlowRate),
+        std::format("   **   ~~~   ** Air Face Velocity[m/s]={:.6f}", AirMassFlow / (waterCoil1.MinAirFlowArea * AirDensity)),
+        std::format("   **   ~~~   ** Approximate Mass Flow Rate limit for Face Area[kg/s]={:.6f}", 2.5 * waterCoil1.MinAirFlowArea * AirDensity),
         "   **   ~~~   ** Coil:Cooling:Water:DetailedGeometry could be resized/autosized to handle capacity",
     });
 
-    CalcDetailFlatFinCoolingCoil(*state, CoilNum, 2, 2, 1);
+    CalcDetailFlatFinCoolingCoil(*state, CoilNum, 2, HVAC::FanOp::Continuous, 1);
 
     compare_err_stream(expected_error, true);
 
-    AirMassFlow = state->dataWaterCoils->WaterCoil(CoilNum).InletAirMassFlowRate / PartLoadRatio;
-    TempAirIn = state->dataWaterCoils->WaterCoil(CoilNum).InletAirTemp;
-    InletAirHumRat = state->dataWaterCoils->WaterCoil(CoilNum).InletAirHumRat;
-    TempWaterIn = state->dataWaterCoils->WaterCoil(CoilNum).InletWaterTemp;
+    AirMassFlow = waterCoil1.InletAirMassFlowRate / PartLoadRatio;
+    TempAirIn = waterCoil1.InletAirTemp;
+    InletAirHumRat = waterCoil1.InletAirHumRat;
+    TempWaterIn = waterCoil1.InletWaterTemp;
     AirDensity = Psychrometrics::PsyRhoAirFnPbTdbW(*state, state->dataEnvrn->OutBaroPress, TempAirIn, InletAirHumRat, "RoutineName");
-    MinAirMassFlow = 44.7 * state->dataWaterCoils->WaterCoil(CoilNum).MinAirFlowArea * AirDensity;
-    state->dataWaterCoils->WaterCoil(CoilNum).InletAirMassFlowRate = 1.1 * MinAirMassFlow;
-    AirMassFlow = state->dataWaterCoils->WaterCoil(CoilNum).InletAirMassFlowRate / PartLoadRatio;
+    MinAirMassFlow = 44.7 * waterCoil1.MinAirFlowArea * AirDensity;
+    waterCoil1.InletAirMassFlowRate = 1.1 * MinAirMassFlow;
+    AirMassFlow = waterCoil1.InletAirMassFlowRate / PartLoadRatio;
 
     std::string expected_fatal_error = delimited_string({
         "   ** Severe  ** Coil:Cooling:Water:DetailedGeometry in Coil =Test Detailed Water Cooling Coil",
         "   **   ~~~   ** Air Flow Rate Velocity is > 100MPH (44.7m/s) and simulation cannot continue",
-        format("   **   ~~~   ** Air Mass Flow Rate[kg/s]={:.6T}", state->dataWaterCoils->WaterCoil(CoilNum).InletAirMassFlowRate),
-        format("   **   ~~~   ** Air Face Velocity[m/s]={:.6T}",
-               AirMassFlow / (state->dataWaterCoils->WaterCoil(CoilNum).MinAirFlowArea * AirDensity)),
-        format("   **   ~~~   ** Approximate Mass Flow Rate limit for Face Area[kg/s]={:.6T}",
-               44.7 * state->dataWaterCoils->WaterCoil(CoilNum).MinAirFlowArea * AirDensity),
+        std::format("   **   ~~~   ** Air Mass Flow Rate[kg/s]={:.6f}", waterCoil1.InletAirMassFlowRate),
+        std::format("   **   ~~~   ** Air Face Velocity[m/s]={:.6f}", AirMassFlow / (waterCoil1.MinAirFlowArea * AirDensity)),
+        std::format("   **   ~~~   ** Approximate Mass Flow Rate limit for Face Area[kg/s]={:.6f}", 44.7 * waterCoil1.MinAirFlowArea * AirDensity),
         "   **  Fatal  ** Coil:Cooling:Water:DetailedGeometry needs to be resized/autosized to handle capacity",
         "   ...Summary of Errors that led to program termination:",
         "   ..... Reference severe error count=1",
         "   ..... Last severe error=Coil:Cooling:Water:DetailedGeometry in Coil =Test Detailed Water Cooling Coil",
     });
 
-    EXPECT_ANY_THROW(CalcDetailFlatFinCoolingCoil(*state, CoilNum, 2, 2, 1));
+    EXPECT_ANY_THROW(CalcDetailFlatFinCoolingCoil(*state, CoilNum, 2, HVAC::FanOp::Continuous, 1));
 
     compare_err_stream(expected_fatal_error, true);
 }
 
 TEST_F(WaterCoilsTest, CoilHeatingWaterSimpleSizing)
 {
-    InitializePsychRoutines(*state);
+    state->init_state(*state);
+
     state->dataEnvrn->OutBaroPress = 101325.0;
     state->dataEnvrn->StdRhoAir = PsyRhoAirFnPbTdbW(*state, state->dataEnvrn->OutBaroPress, 20.0, 0.0);
     ShowMessage(*state, "Begin Test: state->dataWaterCoils->WaterCoilsTest, CoilHeatingWaterSimpleSizing");
@@ -1257,10 +1229,8 @@ TEST_F(WaterCoilsTest, CoilHeatingWaterSimpleSizing)
         loopsidebranch.Comp.allocate(1);
     }
     state->dataPlnt->PlantLoop(1).Name = "WaterLoop";
-    state->dataPlnt->PlantLoop(1).FluidName = "FluidWaterLoop";
-    state->dataPlnt->PlantLoop(1).FluidIndex = 1;
     state->dataPlnt->PlantLoop(1).FluidName = "WATER";
-    state->dataPlnt->PlantLoop(1).FluidIndex = 1;
+    state->dataPlnt->PlantLoop(1).glycol = Fluid::GetWater(*state);
 
     // set up sizing data
     state->dataSize->FinalSysSizing(1).DesMainVolFlow = 1.00;
@@ -1271,26 +1241,28 @@ TEST_F(WaterCoilsTest, CoilHeatingWaterSimpleSizing)
 
     // set up water coil
     int CoilNum = 1;
-    state->dataWaterCoils->WaterCoil(CoilNum).Name = "Test Simple Water Heating Coil";
-    state->dataWaterCoils->WaterCoil(CoilNum).WaterPlantLoc.loopNum = 1;
-    state->dataWaterCoils->WaterCoil(CoilNum).WaterCoilType = DataPlant::PlantEquipmentType::CoilWaterSimpleHeating;
-    state->dataWaterCoils->WaterCoil(CoilNum).WaterCoilModel = WaterCoils::CoilModel::HeatingSimple;
-    state->dataWaterCoils->WaterCoil(CoilNum).RequestingAutoSize = true;
-    state->dataWaterCoils->WaterCoil(CoilNum).DesAirVolFlowRate = AutoSize;
-    state->dataWaterCoils->WaterCoil(CoilNum).DesInletAirTemp = AutoSize;
-    state->dataWaterCoils->WaterCoil(CoilNum).DesOutletAirTemp = AutoSize;
-    state->dataWaterCoils->WaterCoil(CoilNum).DesInletWaterTemp = AutoSize;
-    state->dataWaterCoils->WaterCoil(CoilNum).DesInletAirHumRat = AutoSize;
-    state->dataWaterCoils->WaterCoil(CoilNum).DesOutletAirHumRat = AutoSize;
-    state->dataWaterCoils->WaterCoil(CoilNum).MaxWaterVolFlowRate = AutoSize;
+    auto &waterCoil1 = state->dataWaterCoils->WaterCoil(CoilNum);
+    waterCoil1.Name = "Test Simple Water Heating Coil";
+    waterCoil1.WaterPlantLoc.loopNum = 1;
+    PlantUtilities::SetPlantLocationLinks(*state, waterCoil1.WaterPlantLoc);
 
-    state->dataWaterCoils->WaterCoil(CoilNum).DesignWaterDeltaTemp = 11.0;
-    state->dataWaterCoils->WaterCoil(CoilNum).UseDesignWaterDeltaTemp = true;
+    waterCoil1.WaterCoilType = DataPlant::PlantEquipmentType::CoilWaterSimpleHeating;
+    waterCoil1.WaterCoilModel = WaterCoils::CoilModel::HeatingSimple;
+    waterCoil1.RequestingAutoSize = true;
+    waterCoil1.DesAirVolFlowRate = AutoSize;
+    waterCoil1.DesInletAirTemp = AutoSize;
+    waterCoil1.DesOutletAirTemp = AutoSize;
+    waterCoil1.DesInletWaterTemp = AutoSize;
+    waterCoil1.DesInletAirHumRat = AutoSize;
+    waterCoil1.DesOutletAirHumRat = AutoSize;
+    waterCoil1.MaxWaterVolFlowRate = AutoSize;
+
+    waterCoil1.DesignWaterDeltaTemp = 11.0;
+    waterCoil1.UseDesignWaterDeltaTemp = true;
 
     state->dataWaterCoils->WaterCoilNumericFields(CoilNum).FieldNames(2) = "Maximum Water Flow Rate";
-    state->dataWaterCoils->WaterCoil(CoilNum).WaterInletNodeNum = 1;
-    state->dataPlnt->PlantLoop(1).LoopSide(DataPlant::LoopSideLocation::Demand).Branch(1).Comp(1).NodeNumIn =
-        state->dataWaterCoils->WaterCoil(CoilNum).WaterInletNodeNum;
+    waterCoil1.WaterInletNodeNum = 1;
+    state->dataPlnt->PlantLoop(1).LoopSide(DataPlant::LoopSideLocation::Demand).Branch(1).Comp(1).NodeNumIn = waterCoil1.WaterInletNodeNum;
 
     state->dataSize->CurZoneEqNum = 0;
     state->dataSize->CurSysNum = 1;
@@ -1300,12 +1272,10 @@ TEST_F(WaterCoilsTest, CoilHeatingWaterSimpleSizing)
     state->dataSize->PlantSizData(1).DeltaT = 10.0;
 
     state->dataSize->DataWaterLoopNum = 1;
-    state->dataFluidProps->NumOfGlycols = 1;
 
     // run water coil sizing
-    createCoilSelectionReportObj(*state);
     SizeWaterCoil(*state, CoilNum);
-    EXPECT_DOUBLE_EQ(1.0, state->dataWaterCoils->WaterCoil(CoilNum).DesAirVolFlowRate);
+    EXPECT_DOUBLE_EQ(1.0, waterCoil1.DesAirVolFlowRate);
 
     Real64 CpAirStd = 0.0;
     Real64 DesMassFlow = 0.0;
@@ -1316,23 +1286,22 @@ TEST_F(WaterCoilsTest, CoilHeatingWaterSimpleSizing)
     DesCoilHeatingLoad = CpAirStd * DesMassFlow * (40.0 - 5.0);
 
     // check heating coil design load
-    EXPECT_DOUBLE_EQ(DesCoilHeatingLoad, state->dataWaterCoils->WaterCoil(CoilNum).DesWaterHeatingCoilRate);
+    EXPECT_DOUBLE_EQ(DesCoilHeatingLoad, waterCoil1.DesWaterHeatingCoilRate);
 
     Real64 Cp = 0;
     Real64 rho = 0;
     Real64 DesWaterFlowRate = 0;
 
-    Cp = GetSpecificHeatGlycol(
-        *state, state->dataPlnt->PlantLoop(1).FluidName, DataGlobalConstants::HWInitConvTemp, state->dataPlnt->PlantLoop(1).FluidIndex, "Unit Test");
-    rho = GetDensityGlycol(
-        *state, state->dataPlnt->PlantLoop(1).FluidName, DataGlobalConstants::HWInitConvTemp, state->dataPlnt->PlantLoop(1).FluidIndex, "Unit Test");
-    DesWaterFlowRate = state->dataWaterCoils->WaterCoil(CoilNum).DesWaterHeatingCoilRate / (11.0 * Cp * rho);
+    Cp = state->dataPlnt->PlantLoop(1).glycol->getSpecificHeat(*state, Constant::HWInitConvTemp, "Unit Test");
+    rho = state->dataPlnt->PlantLoop(1).glycol->getDensity(*state, Constant::HWInitConvTemp, "Unit Test");
+    DesWaterFlowRate = waterCoil1.DesWaterHeatingCoilRate / (11.0 * Cp * rho);
 
     // check heating coil design water flow rate
-    EXPECT_DOUBLE_EQ(DesWaterFlowRate, state->dataWaterCoils->WaterCoil(CoilNum).MaxWaterVolFlowRate);
+    EXPECT_DOUBLE_EQ(DesWaterFlowRate, waterCoil1.MaxWaterVolFlowRate);
 }
 TEST_F(WaterCoilsTest, HotWaterHeatingCoilAutoSizeTempTest)
 {
+    Fluid::GetFluidPropertiesData(*state);
     state->dataEnvrn->OutBaroPress = 101325.0;
     state->dataEnvrn->StdRhoAir = PsyRhoAirFnPbTdbW(*state, state->dataEnvrn->OutBaroPress, 20.0, 0.0);
 
@@ -1355,10 +1324,8 @@ TEST_F(WaterCoilsTest, HotWaterHeatingCoilAutoSizeTempTest)
         loopsidebranch.Comp.allocate(1);
     }
     state->dataPlnt->PlantLoop(1).Name = "HotWaterLoop";
-    state->dataPlnt->PlantLoop(1).FluidName = "FluidWaterLoop";
-    state->dataPlnt->PlantLoop(1).FluidIndex = 1;
     state->dataPlnt->PlantLoop(1).FluidName = "WATER";
-    state->dataPlnt->PlantLoop(1).FluidIndex = 1;
+    state->dataPlnt->PlantLoop(1).glycol = Fluid::GetWater(*state);
 
     // set up sizing data
     state->dataSize->FinalSysSizing(1).DesMainVolFlow = 1.00;
@@ -1369,34 +1336,36 @@ TEST_F(WaterCoilsTest, HotWaterHeatingCoilAutoSizeTempTest)
 
     // set up water coil
     int CoilNum = 1;
-    state->dataWaterCoils->WaterCoil(CoilNum).Name = "Water Heating Coil";
-    state->dataWaterCoils->WaterCoil(CoilNum).WaterPlantLoc.loopNum = 1;
-    state->dataWaterCoils->WaterCoil(CoilNum).WaterCoilModel = WaterCoils::CoilModel::HeatingSimple;
-    state->dataWaterCoils->WaterCoil(CoilNum).WaterCoilType = DataPlant::PlantEquipmentType::CoilWaterSimpleHeating;
-    state->dataWaterCoils->WaterCoil(CoilNum).SchedPtr = DataGlobalConstants::ScheduleAlwaysOn;
+    auto &waterCoil1 = state->dataWaterCoils->WaterCoil(CoilNum);
+    waterCoil1.Name = "Water Heating Coil";
+    waterCoil1.coilType = HVAC::CoilType::HeatingWater;
+    waterCoil1.coilReportNum = ReportCoilSelection::getReportIndex(*state, waterCoil1.Name, waterCoil1.coilType);
+    waterCoil1.WaterPlantLoc.loopNum = 1;
+    PlantUtilities::SetPlantLocationLinks(*state, waterCoil1.WaterPlantLoc);
+    waterCoil1.WaterCoilModel = WaterCoils::CoilModel::HeatingSimple;
+    waterCoil1.WaterCoilType = DataPlant::PlantEquipmentType::CoilWaterSimpleHeating;
+    waterCoil1.availSched = Sched::GetScheduleAlwaysOn(*state);
 
-    state->dataWaterCoils->WaterCoil(CoilNum).RequestingAutoSize = true;
-    state->dataWaterCoils->WaterCoil(CoilNum).DesAirVolFlowRate = AutoSize;
-    state->dataWaterCoils->WaterCoil(CoilNum).UACoil = AutoSize;
-    state->dataWaterCoils->WaterCoil(CoilNum).MaxWaterVolFlowRate = AutoSize;
-    state->dataWaterCoils->WaterCoil(CoilNum).CoilPerfInpMeth = state->dataWaterCoils->UAandFlow;
-    state->dataWaterCoils->WaterCoil(CoilNum).DesInletAirTemp = AutoSize;
-    state->dataWaterCoils->WaterCoil(CoilNum).DesOutletAirTemp = AutoSize;
-    state->dataWaterCoils->WaterCoil(CoilNum).DesInletWaterTemp = AutoSize;
-    state->dataWaterCoils->WaterCoil(CoilNum).DesInletAirHumRat = AutoSize;
-    state->dataWaterCoils->WaterCoil(CoilNum).DesOutletAirHumRat = AutoSize;
+    waterCoil1.RequestingAutoSize = true;
+    waterCoil1.DesAirVolFlowRate = AutoSize;
+    waterCoil1.UACoil = AutoSize;
+    waterCoil1.MaxWaterVolFlowRate = AutoSize;
+    waterCoil1.CoilPerfInpMeth = state->dataWaterCoils->UAandFlow;
+    waterCoil1.DesInletAirTemp = AutoSize;
+    waterCoil1.DesOutletAirTemp = AutoSize;
+    waterCoil1.DesInletWaterTemp = AutoSize;
+    waterCoil1.DesInletAirHumRat = AutoSize;
+    waterCoil1.DesOutletAirHumRat = AutoSize;
 
     state->dataWaterCoils->WaterCoilNumericFields(CoilNum).FieldNames(2) = "Maximum Water Flow Rate";
-    state->dataWaterCoils->WaterCoil(CoilNum).WaterInletNodeNum = 1;
-    state->dataPlnt->PlantLoop(1).LoopSide(DataPlant::LoopSideLocation::Demand).Branch(1).Comp(1).NodeNumIn =
-        state->dataWaterCoils->WaterCoil(CoilNum).WaterInletNodeNum;
+    waterCoil1.WaterInletNodeNum = 1;
+    state->dataPlnt->PlantLoop(1).LoopSide(DataPlant::LoopSideLocation::Demand).Branch(1).Comp(1).NodeNumIn = waterCoil1.WaterInletNodeNum;
 
     state->dataSize->CurZoneEqNum = 0;
     state->dataSize->CurSysNum = 1;
     state->dataSize->CurOASysNum = 0;
 
     state->dataSize->DataWaterLoopNum = 1;
-    state->dataFluidProps->NumOfGlycols = 1;
 
     state->dataWaterCoils->MyUAAndFlowCalcFlag.allocate(1);
     state->dataWaterCoils->MyUAAndFlowCalcFlag(1) = true;
@@ -1406,30 +1375,30 @@ TEST_F(WaterCoilsTest, HotWaterHeatingCoilAutoSizeTempTest)
 
     // run water coil sizing
     SizeWaterCoil(*state, CoilNum);
-    EXPECT_DOUBLE_EQ(1.0, state->dataWaterCoils->WaterCoil(CoilNum).DesAirVolFlowRate);
+    EXPECT_DOUBLE_EQ(1.0, waterCoil1.DesAirVolFlowRate);
 
     Real64 CpAirStd(0.0);
     Real64 DesMassFlow(0.0);
     Real64 DesCoilHeatingLoad(0.0);
 
     CpAirStd = PsyCpAirFnW(0.0);
-    DesMassFlow = state->dataWaterCoils->WaterCoil(CoilNum).DesAirVolFlowRate * state->dataEnvrn->StdRhoAir;
+    DesMassFlow = waterCoil1.DesAirVolFlowRate * state->dataEnvrn->StdRhoAir;
     DesCoilHeatingLoad = DesMassFlow * CpAirStd * (40.0 - 5.0);
 
     // check heating coil design load
-    EXPECT_DOUBLE_EQ(DesCoilHeatingLoad, state->dataWaterCoils->WaterCoil(CoilNum).DesWaterHeatingCoilRate);
+    EXPECT_DOUBLE_EQ(DesCoilHeatingLoad, waterCoil1.DesWaterHeatingCoilRate);
 
     Real64 Cp(0.0);
     Real64 rho(0.0);
     Real64 DesWaterFlowRate(0.0);
 
     // now size heating coil hot water flow rate at 60.0C
-    Cp = GetSpecificHeatGlycol(*state, state->dataPlnt->PlantLoop(1).FluidName, 60.0, state->dataPlnt->PlantLoop(1).FluidIndex, "Unit Test");
-    rho = GetDensityGlycol(*state, state->dataPlnt->PlantLoop(1).FluidName, 60.0, state->dataPlnt->PlantLoop(1).FluidIndex, "Unit Test");
+    Cp = state->dataPlnt->PlantLoop(1).glycol->getSpecificHeat(*state, 60.0, "Unit Test");
+    rho = state->dataPlnt->PlantLoop(1).glycol->getDensity(*state, 60.0, "Unit Test");
     DesWaterFlowRate = DesCoilHeatingLoad / (state->dataSize->PlantSizData(1).DeltaT * Cp * rho);
 
     // check heating coil design water flow rate calculated here and sizing results are identical
-    EXPECT_DOUBLE_EQ(DesWaterFlowRate, state->dataWaterCoils->WaterCoil(CoilNum).MaxWaterVolFlowRate);
+    EXPECT_DOUBLE_EQ(DesWaterFlowRate, waterCoil1.MaxWaterVolFlowRate);
 }
 
 TEST_F(WaterCoilsTest, FanCoilCoolingWaterFlowTest)
@@ -1459,11 +1428,9 @@ TEST_F(WaterCoilsTest, FanCoilCoolingWaterFlowTest)
     state->dataEnvrn->StdRhoAir = 1.20;
     state->dataWaterCoils->GetWaterCoilsInputFlag = true;
     state->dataGlobalNames->NumCoils = 0;
-    state->dataGlobal->NumOfTimeStepInHour = 1;
+    state->dataGlobal->TimeStepsInHour = 1;
     state->dataGlobal->TimeStep = 1;
-    state->dataGlobal->MinutesPerTimeStep = 60;
-
-    InitializePsychRoutines(*state);
+    state->dataGlobal->MinutesInTimeStep = 60;
 
     std::string const idf_objects = delimited_string({
         "	Zone,",
@@ -1588,20 +1555,19 @@ TEST_F(WaterCoilsTest, FanCoilCoolingWaterFlowTest)
     });
 
     ASSERT_TRUE(process_idf(idf_objects));
+    state->init_state(*state);
 
     GetZoneData(*state, ErrorsFound);
     EXPECT_EQ("EAST ZONE", state->dataHeatBal->Zone(1).Name);
 
     GetZoneEquipmentData(*state);
-    ProcessScheduleInput(*state);
-    state->dataScheduleMgr->ScheduleInputProcessed = true;
     GetFanInput(*state);
-    EXPECT_EQ(DataHVACGlobals::FanType_SimpleOnOff, state->dataFans->Fan(1).FanType_Num);
+    EXPECT_EQ((int)HVAC::FanType::OnOff, (int)state->dataFans->fans(1)->type);
 
     GetFanCoilUnits(*state);
-    EXPECT_EQ("CONSTANTFANVARIABLEFLOW", state->dataFanCoilUnits->FanCoil(1).CapCtrlMeth);
+    EXPECT_ENUM_EQ(CCM::ConsFanVarFlow, state->dataFanCoilUnits->FanCoil(1).CapCtrlMeth_Num);
     EXPECT_EQ("OUTDOORAIR:MIXER", state->dataFanCoilUnits->FanCoil(1).OAMixType);
-    EXPECT_EQ("FAN:ONOFF", state->dataFanCoilUnits->FanCoil(1).FanType);
+    EXPECT_EQ((int)HVAC::FanType::OnOff, (int)state->dataFanCoilUnits->FanCoil(1).fanType);
     EXPECT_EQ("COIL:COOLING:WATER", state->dataFanCoilUnits->FanCoil(1).CCoilType);
     EXPECT_EQ("COIL:HEATING:WATER", state->dataFanCoilUnits->FanCoil(1).HCoilType);
 
@@ -1649,13 +1615,13 @@ TEST_F(WaterCoilsTest, FanCoilCoolingWaterFlowTest)
     state->dataLoopNodes->Node(state->dataFanCoilUnits->FanCoil(1).CoolCoilFluidInletNode).MassFlowRateMaxAvail = 0.14;
     state->dataLoopNodes->Node(state->dataFanCoilUnits->FanCoil(1).HeatCoilFluidInletNode).MassFlowRateMaxAvail = 0.14;
 
-    state->dataFans->Fan(1).InletAirMassFlowRate = AirMassFlow;
-    state->dataFans->Fan(1).MaxAirMassFlowRate = MaxAirMassFlow;
+    state->dataFans->fans(1)->inletAirMassFlowRate = AirMassFlow;
+    state->dataFans->fans(1)->maxAirMassFlowRate = MaxAirMassFlow;
 
-    state->dataLoopNodes->Node(state->dataFans->Fan(1).InletNodeNum).MassFlowRate = AirMassFlow;
-    state->dataLoopNodes->Node(state->dataFans->Fan(1).InletNodeNum).MassFlowRateMin = AirMassFlow;
-    state->dataLoopNodes->Node(state->dataFans->Fan(1).InletNodeNum).MassFlowRateMax = AirMassFlow;
-    state->dataLoopNodes->Node(state->dataFans->Fan(1).InletNodeNum).MassFlowRateMaxAvail = AirMassFlow;
+    state->dataLoopNodes->Node(state->dataFans->fans(1)->inletNodeNum).MassFlowRate = AirMassFlow;
+    state->dataLoopNodes->Node(state->dataFans->fans(1)->inletNodeNum).MassFlowRateMin = AirMassFlow;
+    state->dataLoopNodes->Node(state->dataFans->fans(1)->inletNodeNum).MassFlowRateMax = AirMassFlow;
+    state->dataLoopNodes->Node(state->dataFans->fans(1)->inletNodeNum).MassFlowRateMaxAvail = AirMassFlow;
 
     state->dataWaterCoils->WaterCoil(2).UACoilTotal = 470.0;
     state->dataWaterCoils->WaterCoil(2).UACoilExternal = 611.0;
@@ -1697,22 +1663,23 @@ TEST_F(WaterCoilsTest, FanCoilCoolingWaterFlowTest)
     }
 
     state->dataHeatBalFanSys->TempControlType.allocate(1);
-    state->dataHeatBalFanSys->TempControlType(1) = DataHVACGlobals::ThermostatType::DualSetPointWithDeadBand;
+    state->dataHeatBalFanSys->TempControlType(1) = HVAC::SetptType::DualHeatCool;
 
     state->dataWaterCoils->WaterCoil(2).WaterPlantLoc.loopNum = 1;
     state->dataWaterCoils->WaterCoil(2).WaterPlantLoc.loopSideNum = DataPlant::LoopSideLocation::Demand;
     state->dataWaterCoils->WaterCoil(2).WaterPlantLoc.branchNum = 1;
     state->dataWaterCoils->WaterCoil(2).WaterPlantLoc.compNum = 1;
+    PlantUtilities::SetPlantLocationLinks(*state, state->dataWaterCoils->WaterCoil(2).WaterPlantLoc);
 
     state->dataWaterCoils->WaterCoil(1).WaterPlantLoc.loopNum = 2;
     state->dataWaterCoils->WaterCoil(1).WaterPlantLoc.loopSideNum = DataPlant::LoopSideLocation::Demand;
     state->dataWaterCoils->WaterCoil(1).WaterPlantLoc.branchNum = 1;
     state->dataWaterCoils->WaterCoil(1).WaterPlantLoc.compNum = 1;
+    PlantUtilities::SetPlantLocationLinks(*state, state->dataWaterCoils->WaterCoil(1).WaterPlantLoc);
 
     state->dataPlnt->PlantLoop(2).Name = "ChilledWaterLoop";
-    state->dataPlnt->PlantLoop(2).FluidName = "ChilledWater";
-    state->dataPlnt->PlantLoop(2).FluidIndex = 1;
     state->dataPlnt->PlantLoop(2).FluidName = "WATER";
+    state->dataPlnt->PlantLoop(2).glycol = Fluid::GetWater(*state);
     state->dataPlnt->PlantLoop(2).LoopSide(DataPlant::LoopSideLocation::Demand).Branch(1).Comp(1).Name = state->dataWaterCoils->WaterCoil(2).Name;
     state->dataPlnt->PlantLoop(2).LoopSide(DataPlant::LoopSideLocation::Demand).Branch(1).Comp(1).Type =
         DataPlant::PlantEquipmentType::CoilWaterCooling;
@@ -1723,9 +1690,8 @@ TEST_F(WaterCoilsTest, FanCoilCoolingWaterFlowTest)
     state->dataPlnt->PlantLoop(2).LoopSide(DataPlant::LoopSideLocation::Demand).FlowLock = DataPlant::FlowLock::Unlocked;
 
     state->dataPlnt->PlantLoop(1).Name = "HotWaterLoop";
-    state->dataPlnt->PlantLoop(1).FluidName = "HotWater";
-    state->dataPlnt->PlantLoop(1).FluidIndex = 1;
     state->dataPlnt->PlantLoop(1).FluidName = "WATER";
+    state->dataPlnt->PlantLoop(1).glycol = Fluid::GetWater(*state);
     state->dataPlnt->PlantLoop(1).LoopSide(DataPlant::LoopSideLocation::Demand).Branch(1).Comp(1).Name = state->dataWaterCoils->WaterCoil(1).Name;
     state->dataPlnt->PlantLoop(1).LoopSide(DataPlant::LoopSideLocation::Demand).Branch(1).Comp(1).Type =
         DataPlant::PlantEquipmentType::CoilWaterSimpleHeating;
@@ -1745,6 +1711,8 @@ TEST_F(WaterCoilsTest, FanCoilCoolingWaterFlowTest)
     state->dataFanCoilUnits->FanCoil(1).CoolCoilPlantLoc.compNum = 1;
     state->dataFanCoilUnits->FanCoil(1).HeatCoilPlantLoc.branchNum = 1;
     state->dataFanCoilUnits->FanCoil(1).HeatCoilPlantLoc.compNum = 1;
+    PlantUtilities::SetPlantLocationLinks(*state, state->dataFanCoilUnits->FanCoil(1).CoolCoilPlantLoc);
+    PlantUtilities::SetPlantLocationLinks(*state, state->dataFanCoilUnits->FanCoil(1).HeatCoilPlantLoc);
 
     state->dataFanCoilUnits->HeatingLoad = false;
     state->dataFanCoilUnits->CoolingLoad = true;

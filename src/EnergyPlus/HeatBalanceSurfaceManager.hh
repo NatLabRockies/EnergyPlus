@@ -1,7 +1,7 @@
-// EnergyPlus, Copyright (c) 1996-2023, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
-// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other
+// National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
 // contributors. All rights reserved.
 //
 // NOTICE: This Software was developed under funding from the U.S. Department of Energy and the
@@ -55,6 +55,7 @@
 #include <EnergyPlus/Data/BaseData.hh>
 #include <EnergyPlus/DataWindowEquivalentLayer.hh>
 #include <EnergyPlus/EnergyPlus.hh>
+#include <EnergyPlus/Material.hh>
 #include <EnergyPlus/WeatherManager.hh>
 
 #include "WCETarcog.hpp"
@@ -91,6 +92,8 @@ namespace HeatBalanceSurfaceManager {
     // Beginning Initialization Section of the Module
     //******************************************************************************
 
+    void UpdateVariableAbsorptances(EnergyPlusData &state);
+
     void InitSurfaceHeatBalance(EnergyPlusData &state);
 
     void GatherForPredefinedReport(EnergyPlusData &state);
@@ -111,7 +114,7 @@ namespace HeatBalanceSurfaceManager {
 
     void ComputeIntSWAbsorpFactors(EnergyPlusData &state);
 
-    void ComputeDifSolExcZonesWIZWindows(EnergyPlusData &state, int NumberOfEnclosures); // Number of solar enclosures
+    void ComputeDifSolExcZonesWIZWindows(EnergyPlusData &state);
 
     void InitEMSControlledSurfaceProperties(EnergyPlusData &state);
 
@@ -165,7 +168,7 @@ namespace HeatBalanceSurfaceManager {
     CalcHeatBalanceOutsideSurf(EnergyPlusData &state,
                                ObjexxFCL::Optional_int_const ZoneToResimulate = _); // if passed in, then only calculate surfaces that have this zone
 
-    Real64 GetSurfQdotRadHVACInPerArea(EnergyPlusData &state, int SurfNum);
+    void sumSurfQdotRadHVAC(EnergyPlusData &state);
 
     Real64 GetQdotConvOutPerArea(EnergyPlusData &state, const int SurfNum);
 
@@ -191,7 +194,7 @@ namespace HeatBalanceSurfaceManager {
 
     void CalcOutsideSurfTemp(EnergyPlusData &state,
                              int SurfNum,      // Surface number DO loop counter
-                             int ZoneNum,      // Zone number the current surface is attached to
+                             int spaceNum,     // Space number the current surface is attached to
                              int ConstrNum,    // Construction index for the current surface
                              Real64 HMovInsul, // "Convection" coefficient of movable insulation
                              Real64 TempExt,   // Exterior temperature boundary condition
@@ -212,6 +215,8 @@ namespace HeatBalanceSurfaceManager {
 
     void ReSetGroundSurfacesViewFactor(EnergyPlusData &state, int const SurfNum);
 
+    void GetSurroundingSurfacesTemperatureAverage(EnergyPlusData &state);
+
 } // namespace HeatBalanceSurfaceManager
 
 struct HeatBalSurfMgr : BaseGlobalStruct
@@ -230,9 +235,6 @@ struct HeatBalSurfMgr : BaseGlobalStruct
     Array1D<Real64> ZoneAESum; // Sum of area times emissivity for all zone surfaces
 
     Array2D<Real64> DiffuseArray;
-
-    Real64 curQL = 0.0; // radiant value prior to adjustment for pulse for load component report
-    Real64 adjQL = 0.0; // radiant value including adjustment for pulse for load component report
 
     bool ManageSurfaceHeatBalancefirstTime = true;
     bool InitSurfaceHeatBalancefirstTime = true;
@@ -262,6 +264,14 @@ struct HeatBalSurfMgr : BaseGlobalStruct
     Array1D<Real64> AbsDiffWinSky =
         Array1D<Real64>(DataWindowEquivalentLayer::CFSMAXNL); // Sky diffuse solar absorptance of glass layers //Tuned Made static
 
+    void init_constant_state([[maybe_unused]] EnergyPlusData &state) override
+    {
+    }
+
+    void init_state([[maybe_unused]] EnergyPlusData &state) override
+    {
+    }
+
     void clear_state() override
     {
         QExt1.clear();
@@ -277,8 +287,6 @@ struct HeatBalSurfMgr : BaseGlobalStruct
         ZoneAESum.clear();
 
         DiffuseArray.clear();
-        curQL = 0.0;
-        adjQL = 0.0;
 
         ManageSurfaceHeatBalancefirstTime = true;
         InitSurfaceHeatBalancefirstTime = true;

@@ -52,9 +52,6 @@ function Component()
         component.addElevatedOperation("Execute", "ln", "-sf", "@TargetDir@/energyplus", linktarget + "/EnergyPlus",
                                        "UNDOEXECUTE", "rm", linktarget + "/EnergyPlus")
 
-        component.addElevatedOperation("Execute", "ln", "-sf", "@TargetDir@/PostProcess/EP-Compare/EP-Compare", linktarget,
-                                       "UNDOEXECUTE", "rm", linktarget + "/EP-Compare");
-
         component.addElevatedOperation("Execute", "ln", "-sf", "@TargetDir@/PreProcess/IDFVersionUpdater/IDFVersionUpdater", linktarget,
                                        "UNDOEXECUTE", "rm", linktarget + "/IDFVersionUpdater");
 
@@ -62,9 +59,8 @@ function Component()
                                        "UNDOEXECUTE", "rm", linktarget + "/parser");
       }
 
-      // TODO: we should perhaps create symlinks to EP-Compare,
+      // TODO: we should perhaps create symlinks to
       // IDFVersionUpdater and and FMUparser on mac too, eg:
-      // "@TargetDir@/PostProcess/EP-Compare/EP-Compare.app/Contents/MacOS/EP-Compare"
 
       // man page:
       linktarget = "/usr/local/share/man/man1";
@@ -76,12 +72,3 @@ function Component()
     }
   }
 }
-
-
-
-
-
-
-
-
-

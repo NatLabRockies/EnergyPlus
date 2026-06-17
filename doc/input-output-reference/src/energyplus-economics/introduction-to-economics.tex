@@ -5,20 +5,18 @@ While it is true that monthly utility bills are often directly related to monthl
 To show you how simple the specification of a rate can be here is a simple example for a flat charge of 8 cents for every kWh sold.
 
 \begin{lstlisting}
-
 UtilityCost:Tariff,
-    TariffExample1,          ! Name
-    Electricity:Facility,    ! Output Meter Name
-    kWh;               ! Conversion Factor Choice
+  TariffExample1,             !- Name
+  Electricity:Facility,       !- Output Meter Name
+  kWh;                        !- Conversion Factor Choice
 
-
-  UtilityCost:Charge:Simple,
-    ChargeExample1,          ! Charge Variable Name
-    TariffExample1,          ! Tariff Name
-    totalEnergy,             ! Source Variable
-    Annual,                   ! Season
-    EnergyCharges,           ! Category Variable Name
-    0.08;                    ! Cost Per Unit Value or Variable Name
+UtilityCost:Charge:Simple,
+  ChargeExample1,             !- Charge Variable Name
+  TariffExample1,             !- Tariff Name
+  totalEnergy,                !- Source Variable
+  Annual,                     !- Season
+  EnergyCharges,              !- Category Variable Name
+  0.08;                       !- Cost Per Unit Value or Variable Name
 \end{lstlisting}
 
 Overall, the goals of the economics section of EnergyPlus are to make simple tariffs easy to model and complex tariffs possible to model.

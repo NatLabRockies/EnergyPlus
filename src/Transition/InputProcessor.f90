@@ -4814,6 +4814,28 @@ FUNCTION IPTrimSigDigits(IntegerValue) RESULT(OutputString)
 
 END FUNCTION IPTrimSigDigits
 
+FUNCTION GetFieldOrIDDDefault(InArgString, FldDefaultString)  RESULT (ResultString)
+
+          ! PURPOSE OF THIS SUBROUTINE:
+          ! If InArgString is Blank, replace with FldDefaultString
+
+  IMPLICIT NONE    ! Enforce explicit typing of all variables in this routine
+
+
+          ! FUNCTION ARGUMENT DEFINITIONS:
+  CHARACTER(len=*), INTENT(IN)    :: InArgString        ! Input String
+  CHARACTER(len=*), INTENT(IN)    :: FldDefaultString   ! Default String
+  CHARACTER(len=LEN(InArgString)) :: ResultString       ! Result String
+
+  ResultString=InArgString
+  IF (ResultString == Blank) THEN
+    ResultString = FldDefaultString
+  ENDIF
+
+  RETURN
+
+END FUNCTION GetFieldOrIDDDefault
+
 !     NOTICE
 !
 !     Copyright © 1996-2009 The Board of Trustees of the University of Illinois
@@ -4839,4 +4861,3 @@ END FUNCTION IPTrimSigDigits
 !
 
 END MODULE InputProcessor
-

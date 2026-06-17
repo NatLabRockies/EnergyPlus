@@ -5,7 +5,7 @@ Edwin Lee, NREL
 
  - 2018-May-30
  - Revision Date
- 
+
 
 ## Justification for New Feature ##
 
@@ -92,6 +92,3 @@ To be completed...
 ## References ##
 
 To be completed...
-
-
-

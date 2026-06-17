@@ -232,7 +232,12 @@ foreach( name ${DEPENDENCIES} )
 endforeach()
 
 if (UNIX)
-	target_link_libraries(ssc -lpthread -lm -ldl -lstdc++)
+  find_package(Threads REQUIRED)
+  target_link_libraries(ssc Threads::Threads ${CMAKE_DL_LIBS})
+  find_library(MATH_LIBRARY m)
+  if(MATH_LIBRARY)
+    target_link_libraries(ssc ${MATH_LIBRARY})
+  endif()
 endif()
 
 

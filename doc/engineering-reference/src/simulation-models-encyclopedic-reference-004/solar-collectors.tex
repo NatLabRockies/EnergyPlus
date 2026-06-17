@@ -186,7 +186,7 @@ Solar Rating and Certification Corporation.~ 2004.~ Directory of SRCC Certified 
 
 \subsection{Integral-collector-storage (ICS) Solar Collector}\label{integral-collector-storage-ics-solar-collector}
 
-Solar collectors with integral storage unit models use SolarCollector:IntegralCollectorStorage object, and the characteristics parameter inputs of this collector are provided by the SolarCollectorPerformance:IntegralCollectorStorage object. This model is based on detailed Energy Balance equations of solar collectors that integrates storage in it. This model has two options to represent the collector bottom outside boundary conditions: AmbientAir, and OtherSideConditionsModel. AmbientAir simply applies outside air temperature using combined convection and radiation conductance, and the OtherSideConditionsModel applies combined radiation and convection models that exiats in a naturally ventilated cavity to represent the collector bottom outside boundary condition. The later boundary condition accounts for the shading of the collector on the underlying surface, hence, the ICS collector can be assumed as an integral part of the building envelope. Schematic diagram of a rectangular ICS solar collector is shown in Figure~\ref{fig:schematic-diagram-of-rectangular-integrated} below:
+Solar collectors with integral storage unit models use SolarCollector:IntegralCollectorStorage object, and the characteristics parameter inputs of this collector are provided by the SolarCollectorPerformance:IntegralCollectorStorage object. This model is based on detailed Energy Balance equations of solar collectors that integrates storage in it. This model has two options to represent the collector bottom outside boundary conditions: AmbientAir, and OtherSideConditionsModel. AmbientAir simply applies outside air temperature using combined convection and radiation conductance, and the OtherSideConditionsModel applies combined radiation and convection models that exist in a naturally ventilated cavity to represent the collector bottom outside boundary condition. The later boundary condition accounts for the shading of the collector on the underlying surface, hence, the ICS collector can be assumed as an integral part of the building envelope. Schematic diagram of a rectangular ICS solar collector is shown in Figure~\ref{fig:schematic-diagram-of-rectangular-integrated} below:
 
 \begin{figure}[hbtp] % fig 295
 \centering
@@ -700,17 +700,17 @@ Duffie, J.A., and W.A. Beckman. 1991. \emph{Solar Engineering of Thermal Process
 
 Kumar, R. and M.A.~Rosen. Thermal performance of integrated collector storage solar water heater with corrugated absorber surface. Applied Thermal Engineering:~ 30 (2010) 1764--1768.
 
-Fujii, T., and H. Imura. Natural convection heat transfer from aplate with arbitrary inclination. International Journal of Heat and Mass Transfer: 15(4), (1972), 755-764.
+Fujii, T., and H. Imura. Natural convection heat transfer from a plate with arbitrary inclination. International Journal of Heat and Mass Transfer: 15(4), (1972), 755-764.
 
 \subsection{Photovoltaic Thermal Flat-Plate Solar Collectors}\label{photovoltaic-thermal-flat-plate-solar-collectors}
 
-Photovoltaic-Thermal solar collectors (PVT) combine solar electric cells and thermal working fluid to collect both electricity and heat.~ Athough there are currently comparatively few commercial products, PVT research has been conducted for the past 30 years and many different types of collectors have been studied.~ Zondag (2008) and Charalambous et. al (2007) provide reviews of the PVT literature.~ Because PVT is much less commercially-mature, there are no standards or rating systems such as for thermal-only, hot-water collectors.~ EnergyPlus currently has one simple model based on user-defined efficiencies.
+Photovoltaic-Thermal solar collectors (PVT) combine solar electric cells and thermal working fluid to collect both electricity and heat.~ Although there are currently comparatively few commercial products, PVT research has been conducted for the past 30 years and many different types of collectors have been studied.~ Zondag (2008) and Charalambous et. al (2007) provide reviews of the PVT literature.~ Because PVT is much less commercially-mature, there are no standards or rating systems such as for thermal-only, hot-water collectors.~ EnergyPlus currently has one simple model based on user-defined efficiencies.
 
 The PVT models reuse the PV models for electrical production. These are described elsewhere in this document in the section on Photovoltaic Arrays-Simple Model
 
 \subsubsection{Simple PVT Thermal Model}\label{simple-pvt-thermal-model}
 
-The input object SolarCollector:FlatPlate:PhotovoltaicThermal provides a simple PVT model that is provided for quick use during design or policy studies.~ The user simply provides values for a thermal efficiency and the incident solar heats the working fuild.~ The model also includes a cooling mode for air-based systems where a user-provided surface emmittance is used to model cooling of the working fluid to the night sky (water-based cooling will be made available once a chilled water storage tank is available).~ No other details of the PVT collector's construction are required as input data.
+The input object SolarCollector:FlatPlate:PhotovoltaicThermal provides a simple PVT model that is provided for quick use during design or policy studies.~ The user simply provides values for a thermal efficiency and the incident solar heats the working fluid.~ The model also includes a cooling mode for air-based systems where a user-provided surface emittance is used to model cooling of the working fluid to the night sky (water-based cooling will be made available once a chilled water storage tank is available).~ No other details of the PVT collector's construction are required as input data.
 
 The simple model can heat either air or liquid.~ If it heats air, then the PVT is part of HVAC air system loop with air nodes connected to an air system.~ If it heats liquid, then the PVT is part of plant loop with nodes connected to a plant loop and the plant operating scheme determines flows.
 
@@ -718,7 +718,7 @@ Air-system-based PVT modeling include a modulating bypass damper arrangement.~ C
 
 Plant-based PVT do not include a bypass (although one could be used in the plant loop).~ The collector requests its design flow rate but it otherwise relies on the larger plant loop for control.
 
-When the PVT themal collector is controlled to be ``on,'' in heating mode, and working fluid is flowing, the model calculates the outlet temperature based on the inlet temperature and the collected heat using the following equations.
+When the PVT thermal collector is controlled to be ``on,'' in heating mode, and working fluid is flowing, the model calculates the outlet temperature based on the inlet temperature and the collected heat using the following equations.
 
 \begin{equation}
 {Q_{therm}} = {A_{surf}} \cdot {f_{activ}} \cdot {G_T} \cdot {\eta_{thermal}}
@@ -730,7 +730,7 @@ where:
 
 \({A_{surf}}\) is the net area of the surface (m\(^{2}\))
 
-\({f_{activ}}\) is the fraction of surface aire with active PV/T collector
+\({f_{activ}}\) is the fraction of surface area with active PV/T collector
 
 \({\eta_{thermal}}\) is the thermal conversion efficiency.
 
@@ -754,7 +754,7 @@ For air-based systems, the value of \({T_{out}}\) is then compared to the temper
 {f_{bypass}} = \frac{{\left( {{T_{set,out}} - {T_{out}}} \right)}}{{\left( {{T_{in}} - {T_{out}}} \right)}}
 \end{equation}
 
-When the PVT themal collector is controlled to be ``on,'' in cooling mode, and working fluid is flowing, the model calculates the outlet temperature based on the inlet temperature and the heat radiated and convected to the ambient using a heat balance on the outside face of the collector:
+When the PVT thermal collector is controlled to be ``on,'' in cooling mode, and working fluid is flowing, the model calculates the outlet temperature based on the inlet temperature and the heat radiated and convected to the ambient using a heat balance on the outside face of the collector:
 
 \begin{equation}
 \dot m{c_p}\left( {{T_{in}} - {T_{out}}} \right) = {\dot Q_{LWR}} + {\dot Q_{conv}}
@@ -935,7 +935,7 @@ where:
 
 \(q''_{LWR,plen}\) is net long wavelength (thermal) radiation flux exchange with the outside face of the underlying surface(s).
 
-\({q''_{source}}\) is a source/sink term that accounts for energy exported out of the control volume when the collecter's absorber plate is a hybrid device such as a photovoltaic panel.
+\({q''_{source}}\) is a source/sink term that accounts for energy exported out of the control volume when the collector's absorber plate is a hybrid device such as a photovoltaic panel.
 
 While the heat balance on the passive collector surface control volume is:
 
@@ -979,7 +979,7 @@ where h\(_{co}\) is the convection coefficient.~ This coefficient will differ de
 
 where \({T_{{\rm{a,HX}}}}\) is determined using correlations described above.~ When the UTSC is active, the air mass flow is determined from the operation of the outdoor air mixer component.~ When the UTSC is off, this term is zero.
 
-\subsubsection{Plenum LW Radation}\label{plenum-lw-radation}
+\subsubsection{Plenum LW Radiation}\label{plenum-lw-radation}
 
 \({q''_{LWR,plen}}\) is a standard radiation exchange formulation between the collector surface and the underlying heat transfer surface located across the plenum.~ Radiation is modeled using linearized coefficients.
 
@@ -1155,7 +1155,7 @@ where:
 
 \(z\) is the height of the centroid of the UTSC
 
-\(z_{met}\) is the height of the standard metereological wind speed measurement
+\(z_{met}\) is the height of the standard meteorological wind speed measurement
 
 \(a\) and \({\delta}\) are terrain-dependent coefficients.~ \({\delta}\) is the boundary layer thickness for the given terrain type.~ The values of a and \({\delta}\) are shown in the Table~\ref{table:terrain-dependent-coefficients-ashrae-2001.-001}.
 
@@ -1227,9 +1227,9 @@ where all temperatures are converted to Kelvin and:
 
 \({\sigma_{SB}}\) is the Stefan-Boltzmann constant
 
-\({e_{coll}}\) is the longwave thermal emmittance of the collector
+\({e_{coll}}\) is the longwave thermal emittance of the collector
 
-\({e_{so}}\) is the longwave thermal emmittance of the underlying heat transfer surface.
+\({e_{so}}\) is the longwave thermal emittance of the underlying heat transfer surface.
 
 The three other coefficients, \({h_{r,atm}}\), \({h_{r,sky}}\), and \({h_{r,gnd}}\) are used elsewhere in EnergyPlus for the outside face surface heat balance and are calculated in the same manner as equation for UTSC collectors.~ {[}This is accomplished by calling subroutine InitExteriorConvectionCoeffs in the file HeatBalanceConvectionCoeffs.f90.{]}
 
@@ -1274,3 +1274,436 @@ Kutscher, C.F. 1994. Heat exchange effectiveness and pressure drop for air flow 
 Van Decker, G.W.E., K.G.T. Hollands, and A.P. Brunger. 2001. Heat-exchange relations for unglazed transpired solar collectors with circular holes on a square of triangular pitch. \emph{Solar Energy}. Vol. 71, No. 1. pp 33-45, 2001.
 
 ISO. 2003. ISO 15099:2003. Thermal performance of windows, doors, and shading devices -- Detailed calculations. International Organization for Standardization.
+
+\subsection{Air-Based Building Integrated Parallel Flow PV/Thermal Collector}\label{building-integrated-pv-thermal-collector}
+This section discusses the implementation of an air-based parallel flow building-integrated PV/Thermal collector model. These collectors are directly integrated in the building fa\c{c}ade or roof. The photovoltaic panels become the cladding material. Air is blown in the cavity behind the photovoltaic panels to pick up heat from the photovoltaic panels. This heat usually helps to reduce ventilation air heating requirements during the heating season. It also helps to marginally improve the PV efficiency by keeping the cells cool.
+
+\subsubsection{Energy Balance}\label{BIPVT-energy-balance}
+The input object SolarCollector:FlatPlate:PhotovoltaicThermal provides models for flat plate photovoltaic/thermal collectors. To use the BIPVT collector model, use the SolarCollectorPerformance:PhotovoltaicThermal:BIPVT object and specify its name under the parameter `Photovoltaic-Thermal Model Performance Name' of the SolarCollector:FlatPlate:PhotovoltaicThermal object.
+The heat balances for the various layers of the BIPVT collector discussed here is taken from work by Delisle and Kummert (2014), but the solution methodology is different (discussed in a later section). The thermal resistance circuit representation is shown in Figure~\ref{fig:BIPVT-resistance-circuit}.
+The equations \ref{eq:BIPVT-pv-outer-surf} through \ref{eq:BIPVT-cavity-air} describe energy balances on the various layers of interest. These are the PV glazing outer layer, the PV cells, the PV backing outer surface, and the air cavity. The energy balances are for a length (along flow direction) of collector \(dx\).
+
+
+\begin{figure}[hbtp] % fig 301
+\centering
+\includegraphics[width=0.9\textwidth, height=0.9\textheight, keepaspectratio=true]{media/BIPVT.png}
+\caption{Resistance circuit representation of BIPV/T collector - Adapted from Delisle and Kummert, 2014. Light grey portion is representative of building side and is solved by E+ building solver. \protect \label{fig:BIPVT-resistance-circuit}}
+\end{figure}
+
+PV glazing outer surface:
+\begin{equation}
+0=h_{conv,t}\left(T_{PVg}-T_{a}\right)+h_{rad,t}\left(T_{PVg}-T_{sur}\right)+\left(\frac{T_{PVg}-T_{PV}}{R_{PVg-PV}}\right)
+\label{eq:BIPVT-pv-outer-surf}
+\end{equation}
+
+PV cells:
+\begin{equation}
+S+\left(\frac{T_{PVg}-T_{PV}}{R_{PVg-PV}}\right)=\left(\frac{T_{PV}-T_{1}}{R_{PV-1}}\right)
+\label{eq:BIPVT-pv-cells}
+\end{equation}
+
+PV backing outer surface:
+\begin{equation}
+\left(\frac{T_{PV}-T_{1}}{R_{PV-1}}\right)+S_{1}=h_{conv,f1}\left(T_{1}-T_{f}\right)+h_{rad,1-2}\left(T_{1}-T_{2}\right)
+\label{eq:BIPVT-PV-back}
+\end{equation}
+
+Fluid (air) in cavity:
+\begin{equation}
+\dot{m}C_{p}\frac{dT_{f}}{dx}=\left[h_{conv,f1}\left(T_{1}-T_{f}\right)+h_{conv,f2}\left(T_{2}-T_{f}\right)\right]\cdot W
+\label{eq:BIPVT-cavity-air}
+\end{equation}
+
+where:
+
+\begin{equation}
+S=G_{PV}\cdot\tau\alpha (0)_{PV}\cdot F_{cell}\cdot F_{module}-\eta_{PV}\cdot G_{PV}\cdot F_{module}
+\label{eq:BIPVT-S}
+\end{equation}
+
+\begin{equation}
+S_{1}=G_{bs}\cdot\tau\alpha (0)_{bs}\cdot \left(1-F_{cell}\right)\cdot F_{module}+\tau\alpha (0)_{clad}\cdot G_{clad}\cdot \left(1-F_{module}\right)
+\label{eq:BIPVT-S1}
+\end{equation}
+
+\begin{equation}
+G_{PV}=G_{beam}\cdot IAM_{beam,PV}+G_{sky}\cdot IAM_{sky,PV}+G_{ground}\cdot IAM_{ground,PV}
+\label{eq:BIPVT-G-PV}
+\end{equation}
+
+\begin{equation}
+G_{bs}=G_{beam}\cdot IAM_{beam,bs}+G_{sky}\cdot IAM_{sky,bs}+G_{ground}\cdot IAM_{ground,bs}
+\label{eq:BIPVT-G-bs}
+\end{equation}
+
+\begin{equation}
+G_{clad}=G_{beam}\cdot IAM_{beam,clad}+G_{sky}\cdot IAM_{sky,clad}+G_{ground}\cdot IAM_{ground,clad}
+\label{eq:BIPVT-G-clad}
+\end{equation}
+
+Note: For simplicity, incident angle modifier of the PV backing material, cladding, and of the PV cell are assumed to be the same here, so \(G_{bs} = G_{clad} = G_{PV}\). This is a generally good assumption, as can be calculated using work by Beckman et al. (1977) for a flat black surface, presented in Duffie and Beckman (2006), and comparing to the PV/glass interface model using Snell's, Fresnel's and Bouguer's law (described in the next section). The results for both are very similar.
+
+\begin{equation}
+\begin{split}
+T_{sur}=\\ &\left[\left(T_{a}+273.15\right)^{4}\cdot 0.5 \cdot \left(1-\cos\left(\beta \right)\right)+\left(T_{sky}+273.15\right)^{4}\cdot 0.5 \cdot \left(1+\cos\left(\beta \right)\right)\right]^{1/4} - 273.15
+\end{split}
+\label{eq:BIPVT-T-sur}
+\end{equation}
+
+\(C_{p}\) is specific heat of the fluid (air) (\(J\cdot kg^{-1}K^{-1}\))
+
+\(F_{cell}\) is the area fraction of cells on PV modules (i.e. percentage of PV module area that is covered with PV cells) (-)
+
+\(F_{module}\) is the area fraction of PV modules on wall/roof surface (i.e. percentage of roof or wall area that is covered by PV modules) (-)
+
+\(G_{beam}\) is the incident beam radiation on the collector (\(W\cdot m^{-2}\))
+
+\(G_{sky}\) is the incident sky diffuse radiation on the collector (\(W\cdot m^{-2}\))
+
+\(G_{ground}\) is the incident ground reflected diffuse radiation on the collector (\(W\cdot m^{-2}\))
+
+\(h_{conv,t}\) is the convective heat transfer coefficient between the PV glazing and the ambient air (\(W\cdot m^{-2}K^{-1}\))
+
+\(h_{rad,t}\) is the radiative heat transfer coefficient between the PV glazing and the surrounding surfaces (\(W\cdot m^{-2}K^{-1}\))
+
+\(h_{conv,f1}\) is the convective heat transfer coefficient between the air in the cavity and the back of the PV modules (\(W\cdot m^{-2}K^{-1}\))
+
+\(h_{conv,f2}\) is the convective heat transfer coefficient between the air in the cavity and the building wall/roof (\(W\cdot m^{-2}K^{-1}\))
+
+\(h_{rad,1-2}\) is the radiative heat transfer coefficient between the back of the PV modules and the building wall/roof (\(W\cdot m^{-2}K^{-1}\))
+
+\(IAM_{a,b}\) is the incident angle modifier for incident radiation a, on surface b (-)
+
+\(\dot{m}\) is the flow rate of the fluid (air) (\(kg\cdot s^{-1}\))
+
+\(R_{PVg-PV}\) is the thermal resistance between the surface PV glazing and the PV cells (\(m^{2}K\cdot W^{-1}\))
+
+\(R_{PV-1}\) is the thermal resistance between the PV cells and the back of the PV modules (\(m^{2}K\cdot W^{-1}\))
+
+\(T_{PVg}\) is the temperature of the surface of the PV glazing (\(^{\circ}C\))
+
+\(T_{PV}\) is the temperature of the PV cells (\(^{\circ}C\))
+
+\(T_{a}\) is the ambient temperature (\(^{\circ}C\))
+
+\(T_{sky}\) is the effective sky temperature (\(^{\circ}C\))
+
+\(T_{1}\) is the temperature of the back of the PV modules (\(^{\circ}C\))
+
+\(T_{2}\) is the temperature of the surface of the building wall/roof (\(^{\circ}C\))
+
+\(T_{f}\) is the temperature of the fluid (air) between the PV module and the building surface (\(^{\circ}C\))
+
+\(W\) is the width of the collector (\(m\))
+
+\(\beta\) is the slope of the collector surface (0\(^{\circ}\) is horizontal, 90\(^{\circ}\) is vertical) (degrees)
+
+\(\eta_{PV}\) is the PV efficiency at current (operating) condition, calculated by Generator:Photovoltaic (-)
+
+\(\tau\alpha (0)_{a}\) is the nominal or measured transmittance-absorptance product of surface \(a\) at normal incidence angle (-)
+
+\subsubsection{Incident angle modifier}\label{BIPVT-IAM}
+
+The incident angle modifiers \(IAM_{a,b}\) were calculated using Snell's Fresnel's and Bouguer's law, as described in Duffie and Beckman (2006). As mentioned previously, the \(IAM\) for the PV cells is assumed to be the very similar to the IAM for other surfaces, so the PV cell IAM is used for all surfaces. This section shows the calculation for the IAM of the PV cells. Equation~\ref{eq:BIPVT-IAM} shows the \(IAM\) for an incident angle \(\theta\). This can be applied to any source of incident solar radiation (beam, sky, ground). Equation~\ref{eq:BIPVT-IAM-2} assumed no reflection from the PV cell (hence the subscript \(\alpha=1\)), which is not true in reality, but simplifies the calculations. The absorption of the cell (or other material) is accounted for in Equations~\ref{eq:BIPVT-S} and \ref{eq:BIPVT-S} with the use of the `nominal' or `measured' \(\tau\alpha\).
+
+\begin{equation}
+IAM_{\theta}=\frac{\tau\alpha(\theta)_{\alpha=1}}{\tau\alpha(0)_{\alpha=1}}
+\label{eq:BIPVT-IAM}
+\end{equation}
+
+where:
+\begin{equation}
+\tau\alpha(\theta)_{\alpha=1}=e^{-\left(K\cdot d/\cos\left(\theta_{r}\right)\right)}\left[1-\frac{1}{2}\left(\frac{\sin^{2}(\theta_{r}-\theta)}{\sin^{2}(\theta_{r}+\theta)}+\frac{\tan^{2}(\theta_{r}-\theta)}{\tan^{2}(\theta_{r}+\theta)}\right)\right]
+\label{eq:BIPVT-IAM-2}
+\end{equation}
+
+\begin{equation}
+\theta_{r}=\sin^{-1}\left(\sin(\theta)/n_{glass}\right)
+\label{eq:BIPVT-theta-r}
+\end{equation}
+
+\(n_{glass}\) is the refractive index of glass (around 1.526) (-)
+
+\(\theta_{r}\) is the angle of refraction in the glazing (degrees)
+
+\(\theta\) is the angle of incidence (degrees)
+
+\(K\) is the glazing extinction coefficient (\(m^{-1}\))
+
+\(d\) is the thickness of the glazing (\(m\))
+
+\(\tau\alpha(\theta)_{\alpha=1}\) and \(\tau\alpha(0)_{\alpha=1}\) are the calculated transmittance-absorptance products at incidence angle \(\theta\) and 0 respectively. For calculating the incident angle modifier, these are calculated assuming that absorptivity of the PV cell is equal to 1.
+
+\subsubsection{Conduction heat transfer coefficients}\label{BIPVT-htc-c}
+
+Conduction heat transfer coefficients can be calculated as the inverse of their associated resistances as shown below.
+
+\begin{equation}
+h_{PVg-PV}=\frac{1}{R_{PVg-PV}}
+\label{eq:BIPVT-h-glass-cell}
+\end{equation}
+
+\begin{equation}
+h_{PV-1}=\frac{1}{R_{PV-1}}
+\label{eq:BIPVT-h-cell-1}
+\end{equation}
+
+\subsubsection{Radiative heat transfer coefficients}\label{BIPVT-htc-r}
+
+The radiative heat transfer coefficients are given by:
+
+
+\begin{equation}
+h_{rad,t}=\epsilon_{PVg} \sigma \left(T^{2}_{PVg}+T^{2}_{sur} \right)\left(T_{PVg}+T_{sur}\right)
+\label{eq:BIPVT-h-rad-t}
+\end{equation}
+
+
+\begin{equation}
+h_{1,2}=\sigma \frac{\left(T^{2}_{1}+T^{2}_{2} \right)\left(T_{1}+T_{2}\right)}{\frac{1}{\epsilon_{1}}+\frac{1}{\epsilon_{2}}-1}
+\label{eq:BIPVT-h-rad-1-2}
+\end{equation}
+
+where:
+
+\(\sigma\) is the Stefan-Boltzmann constant (approx. 5.67E-8 \(W\cdot m^{−2}K^{−4}\))
+
+\(\epsilon_{a}\) is the long wave emissivity of surface \(a\) (-)
+
+\(h_{1,2}\) is the radiant heat transfer coefficient between surfaces 1 and 2 (\(W\cdot m^{−2}K^{−1}\))
+
+\(h_{rad,t}\) is the radiant heat transfer coefficient between the top surface of the collector and the surroundings (\(W\cdot m^{−2}K^{−1}\))
+
+\subsubsection{Convective heat transfer coefficients}\label{BIPVT-htc-conv}
+
+Internal and external heat transfer coefficients have a great impact on the results of unglazed collectors. Therefore, heat transfer coefficients must be carefully chosen, while acknowledging that there will always be a certain level of uncertainty resulting from models like this.
+
+When the flow is turbulent inside the air channel, the heat transfer coefficients \(h_{conv,f1}\) and \(h_{conv,f2}\) are calculated using the correlations by Candanedo et al. (2011) (Equations~\ref{eq:BIPVT-NuTop} and \ref{eq:BIPVT-NuBott}) for the Nusselt Number of the top an bottom surfaces respectively.
+
+\begin{equation}
+Nu_{D_{h,c}}=0.052Re^{0.78}Pr^{0.4}
+\label{eq:BIPVT-NuTop}
+\end{equation}
+
+\begin{equation}
+Nu_{D_{h,c}}=1.017Re^{0.471}Pr^{0.4}
+\label{eq:BIPVT-NuBott}
+\end{equation}
+
+where:
+
+\(Re\) is the Reynold number (-)
+
+\(Pr\) is the Prandlt number (-)
+
+\(D_{h,c}\) is the hydraulic diameter of the collector channel (-)
+
+The external forced convective heat transfer coefficient is derived from results by Gorman et al (2019). Data from Figure~\ref{fig:BIPVT-external-htc}  shows graphical results for external heat transfer coefficients. A correlation of the form shown in equation~\ref{eq:BIPVT-ext-htc} was used to fit to the data from Gorman et al.
+
+\begin{equation}
+h_{conv,ext,forced}=\frac{Y\cdot V^{m}}{L^{1-m}_{ch}}
+\label{eq:BIPVT-ext-htc}
+\end{equation}
+
+where:
+
+\(L_{ch}\) is the characteristic length (for roof – length along flow direction, for leeward and windward vertical surfaces – hydraulic diameter of surface, vertical sides – length of surfaces along flow direction) (\(m\))
+
+\(V\) is wind velocity (\(m\cdot s^{-1}\))
+
+\(Y\) and \(m\) are calculated coefficient and exponent
+
+The exponents \(m\) derived for the various surfaces are consistent with theory and literature. Laminar flow has a relationship of \(Nu\propto{Re}^{0.5}\), fully developed turbulent flow \(Nu\propto{Re}^{0.8}\) (Incropera et al, 2007), and fully separated flow \(Nu\propto{Re}^{0.67}\)(Sparrow et al, 1982). As shown in Table~\ref{tab:BIPVT-table-htc-ext}, the windward roof has an exponent nearing 0.8 (fully developed, turbulent flow), and the other surfaces have exponents between 0.6 and 0.7 (this could mean that either the flow is separating, or that the flow is not fully developed).
+
+\begin{figure}[hbtp] % fig 301
+\centering
+\includegraphics[width=0.8\textwidth, height=0.8\textheight, keepaspectratio=true]{media/BIPVT_2.png}
+\caption{Results by Gorman et al. (2019) for external heat transfer coefficients on buildings. Reproduced from Gorman et al., 2019. \protect \label{fig:BIPVT-external-htc}}
+\end{figure}
+
+\begin{table}[htbp]
+	\centering
+		\begin{tabular}{lll}
+\hline
+Surface           & Y      & m     \\ \hline
+Windward Roof     & 7.728  & 0.759 \\
+Leeward Roof      & 5.617  & 0.657 \\
+Windward Vertical & 10.925 & 0.643 \\
+Side Vertical     & 8.851  & 0.677 \\
+Leeward Vertical  & 7.514  & 0.624 \\ \hline
+
+		\end{tabular}
+	\caption{Variables for external heat transfer coefficients}
+	\label{tab:BIPVT-table-htc-ext}
+\end{table}
+
+
+External natural convection is calculated from Incropera et al. (2007) (shown in equation~\ref{eq:BIPVT-htc-nat}).
+
+\begin{equation}
+h_{conv,ext,nat}=0.15\cdot{Ra}^{1/3}\cdot\frac{k}{D_{h,s}}
+\label{eq:BIPVT-htc-nat}
+\end{equation}
+
+where:
+
+\(Ra\) is Raleigh number (-)
+
+\(k\) is thermal conductivity of air (\(W\cdot m^{-1}K^{-1}\))
+
+\(D_{h,s}\) is hydraulic diameter of the heat transfer surface (\(m\))
+
+The combined external heat transfer coefficient is calculated with the method described in Incropera et al. (2007) This is shown in equation~\ref{eq:BIPVT-htc-conv-ext}, with an exponent of 3 which, as explained by Incropera et al. (2007), is a good value for most cases.
+
+\begin{equation}
+h_{conv,ext}=\left({h_{conv,ext,forced}}^3+{h_{conv,ext,nat}}^3\right)^{1/3}
+\label{eq:BIPVT-htc-conv-ext}
+\end{equation}
+
+\subsubsection{Solving energy balance equations for positive flow condition}\label{BIPVT-solving}
+
+To solve the energy balance equations when \(\dot{m}>0\) (air is flowing through collector) shown in equations~\ref{eq:BIPVT-pv-outer-surf} through \ref{eq:BIPVT-cavity-air}, first let:
+\begin{equation}
+A=-\frac{W}{\dot{m}C_p}\left(h_{conv,f1}+h_{conv,f2}\right)
+\label{eq:BIPVT-A}
+\end{equation}
+
+\begin{equation}
+B=\frac{W}{\dot{m}C_p}\left(h_{conv,f1}\cdot T_1+h_{conv,f2}\cdot T_2\right)
+\label{eq:BIPVT-B}
+\end{equation}
+
+re-arranging equation~\ref{eq:BIPVT-cavity-air} yields:
+\begin{equation}
+\frac{dT_f}{dx}=A\cdot T_f+B
+\label{eq:BIPVT-dtdx}
+\end{equation}
+
+Re-arrange equation~\ref{eq:BIPVT-dtdx} and integrate both sides for the entire length of the collector (length=\(L\)).
+
+\begin{equation}
+\int_{x=0}^{x=L}{\frac{dT_f}{{A\cdot T}_f+B}=\int_{x=0}^{x=L}dx}
+\label{eq:BIPVT-integral}
+\end{equation}
+
+For this solution, we assume that \(T_{1}\) and \(T_{2}\) are not a function of distance \(x\) (i.e. \(T_{1}\) and \(T_{2}\) are average temperatures over collector length, \(\bar{T_{1}}\) and \(\bar{T_{2}}\)). Solving equation~\ref{eq:BIPVT-integral} gives equation~\ref{eq:BIPVT-Tfl}.
+
+\begin{equation}
+T_f(L)=\left(T_f(0)+\frac{B}{A}\right)e^{A\cdot L}-\frac{B}{A}
+\label{eq:BIPVT-Tfl}
+\end{equation}
+
+If the fluid temperature along another point along the collector is required, replace \(L\) with required distance \(x\).
+
+The average fluid temperature over the length of the collector is calculated in the following manner:
+
+\begin{equation}
+\bar{T_f}=\frac{1}{L}\int_{x=0}^{x=L}{T_f(x})dx=\frac{1}{A\cdot L}\left(T_f\left(0\right)+\frac{B}{A}\right)\left(e^{A\cdot L}-1\right)-\frac{B}{A}
+\label{eq:BIPVT-tfl-avg}
+\end{equation}
+
+We have previously assumed that all other layer's temperatures are not functions of \(x\) (i.e. they are average temperatures over the length of the collector). If we also assume that \(T_{f}(0)\), \(\bar{T_{2}}\), \(S\), and \(S_{1}\) are known, we can solve equations~\ref{eq:BIPVT-pv-outer-surf},\ref{eq:BIPVT-pv-cells}, and \ref{eq:BIPVT-PV-back}. Equations~\ref{eq:BIPVT-pv-outer-surf} through \ref{eq:BIPVT-PV-back} can be re-written in the following form:
+
+\begin{equation}
+\begin{split}
+\left[\begin{matrix}h_{conv,t}+h_{rad,t}+h_{PVg-PV}&-h_{PVg-PV}&0\\h_{PVg-PV}&-h_{PVg-PV}-h_{PV-1}&h_{PV-1}\\0&h_{PV-1}&-h_{PV-1}-h_{conv,f1}-h_{rad,1-2}\\\end{matrix}\right]\left[\begin{matrix}{\bar{T}}_{PVg}\\{\bar{T}}_{PV}\\{\bar{T}}_1\\\end{matrix}\right] \\
+=\left[\begin{matrix}h_{conv,t}T_a+h_{rad,t}T_{sur}\\-S\\-S_1-h_{rad,1-2}{\bar{T}}_2-h_{conv,f1}\bar{T_f}\\\end{matrix}\right]
+\end{split}
+\label{eq:BIPVT-matrix}
+\end{equation}
+
+Equation~\ref{eq:BIPVT-matrix} can then be solved with matrix inversion.
+
+The PV temperature will be passed directly to the proper \emph{Photovoltaics} subroutine to calculate the PV efficiency.
+
+The following steps are used to solve the above equations at each time step:
+
+\begin{enumerate}
+	\item Assume (guess) values \(\bar{T}_{f}\) and \(\bar{T}_{PV}\). If not the first time step, use previous time step values.
+	\item Get current values of all boundary conditions
+	\item Get PV efficiency \(\eta_{PV}\) from PV model using \(\bar{T}_{PV}\) from step 1
+	\item Update all the coefficients and constants in Equation~\ref{eq:BIPVT-matrix}
+	\item Solve Equation~\ref{eq:BIPVT-matrix} (Gives values for \(\bar{T}_{PVg}\), \(\bar{T}_{PV}\), \(\bar{T}_{1}\))
+	\item Solve Equation~\ref{eq:BIPVT-tfl-avg} (Gives \(\bar{T}_{f}\))
+	\item Iterate steps 2-6 until convergence
+	\item Calculate \(T_{f}(L)\) using Equation~\ref{eq:BIPVT-Tfl}
+	\item Calculate \(\dot{Q}=\dot{m}C_{p}\left(T_{f}(L)-T_{f}(0)\right)\)
+\end{enumerate}
+
+\subsubsection{Solving energy balance equations for zero flow condition}\label{BIPVT-solving-zero-flow}
+
+A similar approach is taken when the collector is stagnating. Calculations of the temperatures in the collector is required to accurately assess the PV efficiency even though no thermal output is generated during stagnation.
+
+In stagnation conditions, Equations~\ref{eq:BIPVT-pv-outer-surf}-\ref{eq:BIPVT-cavity-air} with \(\dot{m}=0\) are summed to give:
+
+\begin{equation}
+T_{f,avg}=-\frac{D}{E}
+\label{eq:BIPVT-Tfavg}
+\end{equation}
+
+where:
+
+\begin{equation}
+C=S+S_1+h_{conv,t}\left({T_a-T}_{PVg}\right)+h_{rad,t}\left(T_{sur}-T_{PVg}\right)+h_{rad,1-2}\left(T_2-T_1\right)
+\label{eq:BIPVT-C}
+\end{equation}
+
+\begin{equation}
+D=C+h_{conv,f2}\cdot T_2
+\label{eq:BIPVT-D}
+\end{equation}
+
+\begin{equation}
+E=-h_{conv,f2}
+\label{eq:BIPVT-E}
+\end{equation}
+
+We use the correlation by Hollands et al (1976) for the entire cavity heat transfer coefficient (i.e. heat transfer coefficient between the plates) as shown in equation~\ref{eq:BIPVT-h-cavity}. Since the correlation by Hollands et al was for the entire cavity, and if we assume both that the internal heat transfer coefficients \(h_{conv,f2}\) and \(h_{conv,f1}\) are equal, we can calculate \(h_{conv,f2}\) using equation~\ref{eq:BIPVT-h-cavity-2}.
+
+\begin{equation}
+h_{cavity} = \frac{k_{air}}{d}\left(1+1.44\cdot\left[1-\frac{1708\cdot\left(\sin 1.8\beta\right)^{1.6})}{Ra_{d}\cos \beta}\right]\left[1-\frac{1708}{Ra_{d}\cos \beta} \right]^{*}+\left[\left(\frac{Ra_{d}\cos\beta}{5830}\right)^{1/3}-1\right]^{*} \right)
+\label{eq:BIPVT-h-cavity}
+\end{equation}
+
+where:
+
+
+
+\begin{equation}
+Ra = \frac{g \left(\frac{1}{T_{f}+273.15}\right) \left|T_{2}-T_{1}\right| d^{3}}{\nu\alpha}
+\label{eq:BIPVT-Ra}
+\end{equation}
+
+\([\:]^{*}\) denotes that if the value in brackets is must be positive, else be set to zero.
+
+\(d\) is the thickness of the channel (\(m\))
+
+\(k_{air}\) is the thermal conductivity of air in the cavity (\(W\cdot m^{-1}K^{-1}\))
+
+\(g\) is gravity (\(m\cdot s^{2}\))
+
+\(\nu\) is the kinematic viscosity of air (\(m^{2}s^{-1}\))
+
+\(\alpha\) is the thermal diffusivity of air (\(m^{2}s^{-1}\))
+
+
+\begin{equation}
+\frac{1}{h_{cavity}}= \frac{1}{h_{conv,f1}}+\frac{1}{h_{conv,f2}} = \frac{2}{h_{conv,f2}}
+\label{eq:BIPVT-h-cavity-2}
+\end{equation}
+
+\subsubsection{References}\label{BIPVT-references}
+
+Candanedo, L.M., Athienitis, A., Park, K.W., 2011. Convective heat transfer coefficients in a building-integrated photovoltaic/thermal system. \emph{Journal of Solar Energy Engineering}. March 2011, Vol. 133
+
+Delisle, V., Kummert, M., 2014. A novel approach to compare building-integrated \mbox{photovoltaics/thermal} air collectors to side-by-side PV modules and solar thermal collectors. \emph{Solar Energy}. February 2014, Vol. 100, p.~50.
+
+Duffie, J.A., Beckman, W.A., 2006. Solar engineering of thermal processes. 3rd edition, \emph{John Willey \& Sons Inc.}, Hoboken, NJ
+
+Gorman, J.M., Sparrow, E.M., Katz, S.D.M., Minkowycz, W.J., 2019 Convective heat transfer coefficients on all external surfaces of a generic residential building in crossflow. \emph{Numerical Heat Transfer, Part A:Applications}, 2019, Vol. 75, p.~71
+
+Holland, K.G.T., Unny, T.E., Raithby, G.D., Konicek, L., 1976 Free convective heat transfer across inclined air layers. \emph{Journal of Heat Transfer}, May 1976, Vol 98, p.~189
+
+Incropera, F.P., Dewitt, D.P., Bergman, T.L., Lavine, A.S., 2007. Fundamentals of heat and mass transfer. 6th edition, \emph{John Willey \& Sons Inc.}, Hoboken, NJ
+
+Sparrow, E.M., Nelson, J.S., Tao, W.Q., 1982 Effect of leeward orientation, adiabatic framing surfaces, and eaves on solar-collector-related heat transfer coefficients. \emph{Solar Energy}, 2019, Vol. 29, p.~33

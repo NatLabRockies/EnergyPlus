@@ -5,9 +5,15 @@ namespace tk205  {
 
 	namespace rs0002_ns  {
 	
+		const std::string_view Schema::schema_title = "Unitary Cooling Air-Conditioning Equipment";
+
+		const std::string_view Schema::schema_version = "1.0.0";
+
+		const std::string_view Schema::schema_description = "Schema for ASHRAE 205 annex RS0002: Unitary Cooling Air-Conditioning Equipment";
+
 		void from_json(const nlohmann::json& j, ProductInformation& x) {
-			a205_json_get<std::string>(j, "manufacturer", x.manufacturer, x.manufacturer_is_set, false);
-			a205_json_get<ashrae205_ns::Pattern>(j, "model_number", x.model_number, x.model_number_is_set, false);
+			a205_json_get<std::string>(j, *RS0002::logger, "manufacturer", x.manufacturer, x.manufacturer_is_set, false);
+			a205_json_get<ashrae205_ns::Pattern>(j, *RS0002::logger, "model_number", x.model_number, x.model_number_is_set, false);
 		}
 		const std::string_view ProductInformation::manufacturer_units = "";
 
@@ -22,26 +28,31 @@ namespace tk205  {
 		const std::string_view ProductInformation::model_number_name = "model_number";
 
 		void from_json(const nlohmann::json& j, RatingAHRI210240& x) {
-			a205_json_get<std::string>(j, "certified_reference_number", x.certified_reference_number, x.certified_reference_number_is_set, true);
-			a205_json_get<rs0002_ns::AHRI210240TestStandardYear>(j, "test_standard_year", x.test_standard_year, x.test_standard_year_is_set, true);
-			a205_json_get<std::string>(j, "rating_source", x.rating_source, x.rating_source_is_set, false);
-			a205_json_get<rs0002_ns::AHRI210240CompressorStagingType>(j, "staging_type", x.staging_type, x.staging_type_is_set, true);
-			a205_json_get<double>(j, "seer", x.seer, x.seer_is_set, true);
-			a205_json_get<double>(j, "eer_a_full", x.eer_a_full, x.eer_a_full_is_set, true);
-			a205_json_get<double>(j, "eer_b_full", x.eer_b_full, x.eer_b_full_is_set, true);
-			a205_json_get<double>(j, "cooling_a_full_capacity", x.cooling_a_full_capacity, x.cooling_a_full_capacity_is_set, true);
-			a205_json_get<double>(j, "cooling_b_full_capacity", x.cooling_b_full_capacity, x.cooling_b_full_capacity_is_set, true);
-			a205_json_get<double>(j, "cooling_b_low_capacity", x.cooling_b_low_capacity, x.cooling_b_low_capacity_is_set, true);
-			a205_json_get<double>(j, "cooling_f_low_capacity", x.cooling_f_low_capacity, x.cooling_f_low_capacity_is_set, true);
-			a205_json_get<double>(j, "cooling_a_full_power", x.cooling_a_full_power, x.cooling_a_full_power_is_set, true);
-			a205_json_get<double>(j, "cooling_b_full_power", x.cooling_b_full_power, x.cooling_b_full_power_is_set, true);
-			a205_json_get<double>(j, "cooling_b_low_power", x.cooling_b_low_power, x.cooling_b_low_power_is_set, true);
-			a205_json_get<double>(j, "cooling_f_low_power", x.cooling_f_low_power, x.cooling_f_low_power_is_set, true);
-			a205_json_get<double>(j, "cooling_full_fan_power", x.cooling_full_fan_power, x.cooling_full_fan_power_is_set, true);
-			a205_json_get<double>(j, "cooling_full_air_volumetric_flow_rate", x.cooling_full_air_volumetric_flow_rate, x.cooling_full_air_volumetric_flow_rate_is_set, true);
-			a205_json_get<double>(j, "cooling_low_fan_power", x.cooling_low_fan_power, x.cooling_low_fan_power_is_set, true);
-			a205_json_get<double>(j, "cooling_low_air_volumetric_flow_rate", x.cooling_low_air_volumetric_flow_rate, x.cooling_low_air_volumetric_flow_rate_is_set, true);
-			a205_json_get<bool>(j, "rating_reproducible_from_performance_data", x.rating_reproducible_from_performance_data, x.rating_reproducible_from_performance_data_is_set, true);
+			a205_json_get<std::string>(j, *RS0002::logger, "certified_reference_number", x.certified_reference_number, x.certified_reference_number_is_set, true);
+			a205_json_get<rs0002_ns::AHRI210240TestStandardYear>(j, *RS0002::logger, "test_standard_year", x.test_standard_year, x.test_standard_year_is_set, true);
+			a205_json_get<std::string>(j, *RS0002::logger, "rating_source", x.rating_source, x.rating_source_is_set, false);
+			a205_json_get<rs0002_ns::AHRI210240CompressorStagingType>(j, *RS0002::logger, "staging_type", x.staging_type, x.staging_type_is_set, true);
+			a205_json_get<double>(j, *RS0002::logger, "seer", x.seer, x.seer_is_set, true);
+			a205_json_get<double>(j, *RS0002::logger, "eer_a_full", x.eer_a_full, x.eer_a_full_is_set, true);
+			a205_json_get<double>(j, *RS0002::logger, "eer_b_full", x.eer_b_full, x.eer_b_full_is_set, true);
+			a205_json_get<double>(j, *RS0002::logger, "cooling_a_full_capacity", x.cooling_a_full_capacity, x.cooling_a_full_capacity_is_set, true);
+			a205_json_get<double>(j, *RS0002::logger, "cooling_b_full_capacity", x.cooling_b_full_capacity, x.cooling_b_full_capacity_is_set, true);
+			a205_json_get<double>(j, *RS0002::logger, "cooling_b_low_capacity", x.cooling_b_low_capacity, x.cooling_b_low_capacity_is_set, true);
+			a205_json_get<double>(j, *RS0002::logger, "cooling_f_low_capacity", x.cooling_f_low_capacity, x.cooling_f_low_capacity_is_set, true);
+			a205_json_get<double>(j, *RS0002::logger, "cooling_g_low_capacity", x.cooling_g_low_capacity, x.cooling_g_low_capacity_is_set, true);
+			a205_json_get<double>(j, *RS0002::logger, "cooling_i_low_capacity", x.cooling_i_low_capacity, x.cooling_i_low_capacity_is_set, true);
+			a205_json_get<double>(j, *RS0002::logger, "cooling_a_full_power", x.cooling_a_full_power, x.cooling_a_full_power_is_set, true);
+			a205_json_get<double>(j, *RS0002::logger, "cooling_b_full_power", x.cooling_b_full_power, x.cooling_b_full_power_is_set, true);
+			a205_json_get<double>(j, *RS0002::logger, "cooling_b_low_power", x.cooling_b_low_power, x.cooling_b_low_power_is_set, true);
+			a205_json_get<double>(j, *RS0002::logger, "cooling_f_low_power", x.cooling_f_low_power, x.cooling_f_low_power_is_set, true);
+			a205_json_get<double>(j, *RS0002::logger, "cooling_g_low_power", x.cooling_g_low_power, x.cooling_g_low_power_is_set, true);
+			a205_json_get<double>(j, *RS0002::logger, "cooling_i_low_power", x.cooling_i_low_power, x.cooling_i_low_power_is_set, true);
+			a205_json_get<double>(j, *RS0002::logger, "cooling_full_fan_power", x.cooling_full_fan_power, x.cooling_full_fan_power_is_set, true);
+			a205_json_get<double>(j, *RS0002::logger, "cooling_full_air_volumetric_flow_rate", x.cooling_full_air_volumetric_flow_rate, x.cooling_full_air_volumetric_flow_rate_is_set, true);
+			a205_json_get<double>(j, *RS0002::logger, "cooling_low_fan_power", x.cooling_low_fan_power, x.cooling_low_fan_power_is_set, true);
+			a205_json_get<double>(j, *RS0002::logger, "cooling_low_air_volumetric_flow_rate", x.cooling_low_air_volumetric_flow_rate, x.cooling_low_air_volumetric_flow_rate_is_set, true);
+			a205_json_get<bool>(j, *RS0002::logger, "rating_recalculatable_from_performance_data", x.rating_recalculatable_from_performance_data, x.rating_recalculatable_from_performance_data_is_set, true);
+			a205_json_get<std::string>(j, *RS0002::logger, "rating_recalculatable_explanation", x.rating_recalculatable_explanation, x.rating_recalculatable_explanation_is_set, false);
 		}
 		const std::string_view RatingAHRI210240::certified_reference_number_units = "";
 
@@ -65,6 +76,10 @@ namespace tk205  {
 
 		const std::string_view RatingAHRI210240::cooling_f_low_capacity_units = "Btu/h";
 
+		const std::string_view RatingAHRI210240::cooling_g_low_capacity_units = "Btu/h";
+
+		const std::string_view RatingAHRI210240::cooling_i_low_capacity_units = "Btu/h";
+
 		const std::string_view RatingAHRI210240::cooling_a_full_power_units = "W";
 
 		const std::string_view RatingAHRI210240::cooling_b_full_power_units = "W";
@@ -72,6 +87,10 @@ namespace tk205  {
 		const std::string_view RatingAHRI210240::cooling_b_low_power_units = "W";
 
 		const std::string_view RatingAHRI210240::cooling_f_low_power_units = "W";
+
+		const std::string_view RatingAHRI210240::cooling_g_low_power_units = "W";
+
+		const std::string_view RatingAHRI210240::cooling_i_low_power_units = "W";
 
 		const std::string_view RatingAHRI210240::cooling_full_fan_power_units = "W";
 
@@ -81,7 +100,9 @@ namespace tk205  {
 
 		const std::string_view RatingAHRI210240::cooling_low_air_volumetric_flow_rate_units = "cfm";
 
-		const std::string_view RatingAHRI210240::rating_reproducible_from_performance_data_units = "";
+		const std::string_view RatingAHRI210240::rating_recalculatable_from_performance_data_units = "";
+
+		const std::string_view RatingAHRI210240::rating_recalculatable_explanation_units = "";
 
 		const std::string_view RatingAHRI210240::certified_reference_number_description = "AHRI certified reference number";
 
@@ -105,6 +126,10 @@ namespace tk205  {
 
 		const std::string_view RatingAHRI210240::cooling_f_low_capacity_description = "Low stage net total cooling capacity (at 'F' operating conditions)";
 
+		const std::string_view RatingAHRI210240::cooling_g_low_capacity_description = "Low stage net total cooling capacity (at 'G' operating conditions)";
+
+		const std::string_view RatingAHRI210240::cooling_i_low_capacity_description = "Low stage net total cooling capacity (at 'I' operating conditions)";
+
 		const std::string_view RatingAHRI210240::cooling_a_full_power_description = "Full stage net total cooling power (at 'A' operating conditions)";
 
 		const std::string_view RatingAHRI210240::cooling_b_full_power_description = "Full stage net total cooling power (at 'B' operating conditions)";
@@ -112,6 +137,10 @@ namespace tk205  {
 		const std::string_view RatingAHRI210240::cooling_b_low_power_description = "Low stage net total cooling power (at 'B' operating conditions)";
 
 		const std::string_view RatingAHRI210240::cooling_f_low_power_description = "Low stage net total cooling power (at 'F' operating conditions)";
+
+		const std::string_view RatingAHRI210240::cooling_g_low_power_description = "Low stage net total cooling power (at 'G' operating conditions)";
+
+		const std::string_view RatingAHRI210240::cooling_i_low_power_description = "Low stage net total cooling power (at 'I' operating conditions)";
 
 		const std::string_view RatingAHRI210240::cooling_full_fan_power_description = "Power of the indoor fan at full load";
 
@@ -121,7 +150,9 @@ namespace tk205  {
 
 		const std::string_view RatingAHRI210240::cooling_low_air_volumetric_flow_rate_description = "Standard air volumetric rate of the indoor fan at low stage";
 
-		const std::string_view RatingAHRI210240::rating_reproducible_from_performance_data_description = "Whether this rating can be reproduced using the performance data in the representation";
+		const std::string_view RatingAHRI210240::rating_recalculatable_from_performance_data_description = "Whether this rating can be recalculated using the performance data in the representation";
+
+		const std::string_view RatingAHRI210240::rating_recalculatable_explanation_description = "An explanation of the value for `rating_recalculatable_from_performance_data`";
 
 		const std::string_view RatingAHRI210240::certified_reference_number_name = "certified_reference_number";
 
@@ -145,6 +176,10 @@ namespace tk205  {
 
 		const std::string_view RatingAHRI210240::cooling_f_low_capacity_name = "cooling_f_low_capacity";
 
+		const std::string_view RatingAHRI210240::cooling_g_low_capacity_name = "cooling_g_low_capacity";
+
+		const std::string_view RatingAHRI210240::cooling_i_low_capacity_name = "cooling_i_low_capacity";
+
 		const std::string_view RatingAHRI210240::cooling_a_full_power_name = "cooling_a_full_power";
 
 		const std::string_view RatingAHRI210240::cooling_b_full_power_name = "cooling_b_full_power";
@@ -152,6 +187,10 @@ namespace tk205  {
 		const std::string_view RatingAHRI210240::cooling_b_low_power_name = "cooling_b_low_power";
 
 		const std::string_view RatingAHRI210240::cooling_f_low_power_name = "cooling_f_low_power";
+
+		const std::string_view RatingAHRI210240::cooling_g_low_power_name = "cooling_g_low_power";
+
+		const std::string_view RatingAHRI210240::cooling_i_low_power_name = "cooling_i_low_power";
 
 		const std::string_view RatingAHRI210240::cooling_full_fan_power_name = "cooling_full_fan_power";
 
@@ -161,14 +200,16 @@ namespace tk205  {
 
 		const std::string_view RatingAHRI210240::cooling_low_air_volumetric_flow_rate_name = "cooling_low_air_volumetric_flow_rate";
 
-		const std::string_view RatingAHRI210240::rating_reproducible_from_performance_data_name = "rating_reproducible_from_performance_data";
+		const std::string_view RatingAHRI210240::rating_recalculatable_from_performance_data_name = "rating_recalculatable_from_performance_data";
+
+		const std::string_view RatingAHRI210240::rating_recalculatable_explanation_name = "rating_recalculatable_explanation";
 
 		void from_json(const nlohmann::json& j, RatingAHRI340360CoolingPartLoadPoint& x) {
-			a205_json_get<double>(j, "capacity", x.capacity, x.capacity_is_set, true);
-			a205_json_get<double>(j, "net_power", x.net_power, x.net_power_is_set, true);
-			a205_json_get<double>(j, "indoor_fan_power", x.indoor_fan_power, x.indoor_fan_power_is_set, true);
-			a205_json_get<double>(j, "auxiliary_power", x.auxiliary_power, x.auxiliary_power_is_set, true);
-			a205_json_get<double>(j, "air_volumetric_flow_rate", x.air_volumetric_flow_rate, x.air_volumetric_flow_rate_is_set, true);
+			a205_json_get<double>(j, *RS0002::logger, "capacity", x.capacity, x.capacity_is_set, true);
+			a205_json_get<double>(j, *RS0002::logger, "net_power", x.net_power, x.net_power_is_set, true);
+			a205_json_get<double>(j, *RS0002::logger, "indoor_fan_power", x.indoor_fan_power, x.indoor_fan_power_is_set, false);
+			a205_json_get<double>(j, *RS0002::logger, "auxiliary_power", x.auxiliary_power, x.auxiliary_power_is_set, true);
+			a205_json_get<double>(j, *RS0002::logger, "air_volumetric_flow_rate", x.air_volumetric_flow_rate, x.air_volumetric_flow_rate_is_set, true);
 		}
 		const std::string_view RatingAHRI340360CoolingPartLoadPoint::capacity_units = "Btu/h";
 
@@ -201,15 +242,16 @@ namespace tk205  {
 		const std::string_view RatingAHRI340360CoolingPartLoadPoint::air_volumetric_flow_rate_name = "air_volumetric_flow_rate";
 
 		void from_json(const nlohmann::json& j, RatingAHRI340360& x) {
-			a205_json_get<std::string>(j, "certified_reference_number", x.certified_reference_number, x.certified_reference_number_is_set, true);
-			a205_json_get<rs0002_ns::AHRI340360TestStandardYear>(j, "test_standard_year", x.test_standard_year, x.test_standard_year_is_set, true);
-			a205_json_get<std::string>(j, "rating_source", x.rating_source, x.rating_source_is_set, false);
-			a205_json_get<rs0002_ns::AHRI340360CapacityControlType>(j, "capacity_control_type", x.capacity_control_type, x.capacity_control_type_is_set, true);
-			a205_json_get<double>(j, "ieer", x.ieer, x.ieer_is_set, true);
-			a205_json_get<double>(j, "eer", x.eer, x.eer_is_set, true);
-			a205_json_get<double>(j, "cooling_capacity", x.cooling_capacity, x.cooling_capacity_is_set, true);
-			a205_json_get<std::vector<rs0002_ns::RatingAHRI340360CoolingPartLoadPoint>>(j, "part_load_points", x.part_load_points, x.part_load_points_is_set, false);
-			a205_json_get<bool>(j, "rating_reproducible_from_performance_data", x.rating_reproducible_from_performance_data, x.rating_reproducible_from_performance_data_is_set, true);
+			a205_json_get<std::string>(j, *RS0002::logger, "certified_reference_number", x.certified_reference_number, x.certified_reference_number_is_set, true);
+			a205_json_get<rs0002_ns::AHRI340360TestStandardYear>(j, *RS0002::logger, "test_standard_year", x.test_standard_year, x.test_standard_year_is_set, true);
+			a205_json_get<std::string>(j, *RS0002::logger, "rating_source", x.rating_source, x.rating_source_is_set, false);
+			a205_json_get<rs0002_ns::AHRI340360CapacityControlType>(j, *RS0002::logger, "capacity_control_type", x.capacity_control_type, x.capacity_control_type_is_set, true);
+			a205_json_get<double>(j, *RS0002::logger, "ieer", x.ieer, x.ieer_is_set, true);
+			a205_json_get<double>(j, *RS0002::logger, "eer", x.eer, x.eer_is_set, true);
+			a205_json_get<double>(j, *RS0002::logger, "cooling_capacity", x.cooling_capacity, x.cooling_capacity_is_set, true);
+			a205_json_get<std::vector<rs0002_ns::RatingAHRI340360CoolingPartLoadPoint>>(j, *RS0002::logger, "part_load_points", x.part_load_points, x.part_load_points_is_set, false);
+			a205_json_get<bool>(j, *RS0002::logger, "rating_recalculatable_from_performance_data", x.rating_recalculatable_from_performance_data, x.rating_recalculatable_from_performance_data_is_set, true);
+			a205_json_get<std::string>(j, *RS0002::logger, "rating_recalculatable_explanation", x.rating_recalculatable_explanation, x.rating_recalculatable_explanation_is_set, false);
 		}
 		const std::string_view RatingAHRI340360::certified_reference_number_units = "";
 
@@ -227,7 +269,9 @@ namespace tk205  {
 
 		const std::string_view RatingAHRI340360::part_load_points_units = "";
 
-		const std::string_view RatingAHRI340360::rating_reproducible_from_performance_data_units = "";
+		const std::string_view RatingAHRI340360::rating_recalculatable_from_performance_data_units = "";
+
+		const std::string_view RatingAHRI340360::rating_recalculatable_explanation_units = "";
 
 		const std::string_view RatingAHRI340360::certified_reference_number_description = "AHRI Certified Reference Number";
 
@@ -245,7 +289,9 @@ namespace tk205  {
 
 		const std::string_view RatingAHRI340360::part_load_points_description = "Four part load rating points";
 
-		const std::string_view RatingAHRI340360::rating_reproducible_from_performance_data_description = "Whether this rating can be reproduced using the performance data in the representation";
+		const std::string_view RatingAHRI340360::rating_recalculatable_from_performance_data_description = "Whether this rating can be recalculated using the performance data in the representation";
+
+		const std::string_view RatingAHRI340360::rating_recalculatable_explanation_description = "An explanation of the value for `rating_recalculatable_from_performance_data`";
 
 		const std::string_view RatingAHRI340360::certified_reference_number_name = "certified_reference_number";
 
@@ -263,12 +309,14 @@ namespace tk205  {
 
 		const std::string_view RatingAHRI340360::part_load_points_name = "part_load_points";
 
-		const std::string_view RatingAHRI340360::rating_reproducible_from_performance_data_name = "rating_reproducible_from_performance_data";
+		const std::string_view RatingAHRI340360::rating_recalculatable_from_performance_data_name = "rating_recalculatable_from_performance_data";
+
+		const std::string_view RatingAHRI340360::rating_recalculatable_explanation_name = "rating_recalculatable_explanation";
 
 		void from_json(const nlohmann::json& j, Description& x) {
-			a205_json_get<rs0002_ns::ProductInformation>(j, "product_information", x.product_information, x.product_information_is_set, false);
-			a205_json_get<rs0002_ns::RatingAHRI210240>(j, "rating_ahri_210_240", x.rating_ahri_210_240, x.rating_ahri_210_240_is_set, false);
-			a205_json_get<rs0002_ns::RatingAHRI340360>(j, "rating_ahri_340_360", x.rating_ahri_340_360, x.rating_ahri_340_360_is_set, false);
+			a205_json_get<rs0002_ns::ProductInformation>(j, *RS0002::logger, "product_information", x.product_information, x.product_information_is_set, false);
+			a205_json_get<rs0002_ns::RatingAHRI210240>(j, *RS0002::logger, "rating_ahri_210_240", x.rating_ahri_210_240, x.rating_ahri_210_240_is_set, false);
+			a205_json_get<rs0002_ns::RatingAHRI340360>(j, *RS0002::logger, "rating_ahri_340_360", x.rating_ahri_340_360, x.rating_ahri_340_360_is_set, false);
 		}
 		const std::string_view Description::product_information_units = "";
 
@@ -289,14 +337,14 @@ namespace tk205  {
 		const std::string_view Description::rating_ahri_340_360_name = "rating_ahri_340_360";
 
 		void from_json(const nlohmann::json& j, Performance& x) {
-			a205_json_get<double>(j, "standby_power", x.standby_power, x.standby_power_is_set, true);
-			a205_json_get<rs0003_ns::RS0003>(j, "fan_representation", x.fan_representation, x.fan_representation_is_set, false);
-			a205_json_get<rs0002_ns::FanPosition>(j, "fan_position", x.fan_position, x.fan_position_is_set, true);
-			a205_json_get<rs0004_ns::RS0004>(j, "dx_system_representation", x.dx_system_representation, x.dx_system_representation_is_set, false);
+			a205_json_get<double>(j, *RS0002::logger, "standby_power", x.standby_power, x.standby_power_is_set, true);
+			a205_json_get<rs0003_ns::RS0003>(j, *RS0002::logger, "indoor_fan_representation", x.indoor_fan_representation, x.indoor_fan_representation_is_set, false);
+			a205_json_get<rs0002_ns::FanPosition>(j, *RS0002::logger, "fan_position", x.fan_position, x.fan_position_is_set, true);
+			a205_json_get<rs0004_ns::RS0004>(j, *RS0002::logger, "dx_system_representation", x.dx_system_representation, x.dx_system_representation_is_set, false);
 		}
 		const std::string_view Performance::standby_power_units = "W";
 
-		const std::string_view Performance::fan_representation_units = "";
+		const std::string_view Performance::indoor_fan_representation_units = "";
 
 		const std::string_view Performance::fan_position_units = "";
 
@@ -304,30 +352,32 @@ namespace tk205  {
 
 		const std::string_view Performance::standby_power_description = "Continuous unit power draw regardless of fan or DX system operation";
 
-		const std::string_view Performance::fan_representation_description = "The corresponding Standard 205 fan assembly representation";
+		const std::string_view Performance::indoor_fan_representation_description = "The corresponding Standard 205 fan assembly representation";
 
 		const std::string_view Performance::fan_position_description = "Position of the fan relative to the cooling coil";
 
-		const std::string_view Performance::dx_system_representation_description = "The corresponding Standard 205 direct expansion coil system representation";
+		const std::string_view Performance::dx_system_representation_description = "The corresponding Standard 205 direct expansion system representation";
 
 		const std::string_view Performance::standby_power_name = "standby_power";
 
-		const std::string_view Performance::fan_representation_name = "fan_representation";
+		const std::string_view Performance::indoor_fan_representation_name = "indoor_fan_representation";
 
 		const std::string_view Performance::fan_position_name = "fan_position";
 
 		const std::string_view Performance::dx_system_representation_name = "dx_system_representation";
 
 		void from_json(const nlohmann::json& j, RS0002& x) {
-			a205_json_get<ashrae205_ns::Metadata>(j, "metadata", x.metadata, x.metadata_is_set, true);
-			a205_json_get<rs0002_ns::Description>(j, "description", x.description, x.description_is_set, false);
-			a205_json_get<rs0002_ns::Performance>(j, "performance", x.performance, x.performance_is_set, true);
+			a205_json_get<ashrae205_ns::Metadata>(j, *RS0002::logger, "metadata", x.metadata, x.metadata_is_set, true);
+			a205_json_get<rs0002_ns::Description>(j, *RS0002::logger, "description", x.description, x.description_is_set, false);
+			a205_json_get<rs0002_ns::Performance>(j, *RS0002::logger, "performance", x.performance, x.performance_is_set, true);
 		}
 		void RS0002::initialize(const nlohmann::json& j) {
-			a205_json_get<ashrae205_ns::Metadata>(j, "metadata", metadata, metadata_is_set, true);
-			a205_json_get<rs0002_ns::Description>(j, "description", description, description_is_set, false);
-			a205_json_get<rs0002_ns::Performance>(j, "performance", performance, performance_is_set, true);
+			a205_json_get<ashrae205_ns::Metadata>(j, *RS0002::logger, "metadata", metadata, metadata_is_set, true);
+			a205_json_get<rs0002_ns::Description>(j, *RS0002::logger, "description", description, description_is_set, false);
+			a205_json_get<rs0002_ns::Performance>(j, *RS0002::logger, "performance", performance, performance_is_set, true);
 		}
+		 std::shared_ptr<Courierr::Courierr> RS0002::logger {};
+
 		const std::string_view RS0002::metadata_units = "";
 
 		const std::string_view RS0002::description_units = "";

@@ -18,8 +18,6 @@ if(CPACK_GENERATOR MATCHES "NSIS")
   set(CPACK_NSIS_MENU_LINKS
       "Documentation/index.html"
       "EnergyPlus Documentation"
-      "PostProcess/EP-Compare/EP-Compare.exe"
-      "EP-Compare"
       "PreProcess/EPDraw/EPDrawGUI.exe"
       "EPDrawGUI"
       "EP-Launch.exe"

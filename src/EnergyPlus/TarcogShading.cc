@@ -1,7 +1,7 @@
-// EnergyPlus, Copyright (c) 1996-2023, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
-// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other
+// National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
 // contributors. All rights reserved.
 //
 // NOTICE: This Software was developed under funding from the U.S. Department of Energy and the
@@ -47,7 +47,6 @@
 
 // ObjexxFCL Headers
 #include <ObjexxFCL/Array1D.hh>
-#include <ObjexxFCL/Fmath.hh>
 
 // EnergyPlus Headers
 #include <EnergyPlus/Data/EnergyPlusData.hh>
@@ -90,14 +89,6 @@ namespace TarcogShading {
     using namespace TARCOGGasses90;
     using namespace TARCOGParams;
 
-    enum class CalcForcedVentilation
-    {
-        Invalid = -1,
-        Skip,
-        Allow,
-        Num
-    };
-
     // Functions
 
     void shading(EnergyPlusData &state,
@@ -105,7 +96,7 @@ namespace TarcogShading {
                  Array1D<Real64> const &gap,
                  Array1D<Real64> &hgas,
                  Array1D<Real64> &hcgas,
-                 Array1D<Real64> &hrgas,
+                 Array1D<Real64> const &hrgas,
                  Array2<Real64> const &frct,
                  Array2_int const &iprop,
                  Array1D<Real64> const &pressure,
@@ -130,7 +121,7 @@ namespace TarcogShading {
                  Array1D<TARCOGLayerType> LayerType,
                  Array1D<Real64> &Tgaps,
                  Array1D<Real64> &qv,
-                 Array1D<Real64> &hcv, // Heat transfer coeefficient in gaps including airlow
+                 Array1D<Real64> &hcv, // Heat transfer coefficient in gaps including airflow
                  int &nperr,
                  std::string &ErrorMessage,
                  Array1D<Real64> &vfreevent)
@@ -141,7 +132,7 @@ namespace TarcogShading {
         //  gap      Vector of gap widths (maxlay) [m]
         //  hgas    Convective part of gap effective conductivity
         //  frct    Fraction of gasses in a mixture (maxlay1,maxgas)
-        //  iprop    Vector of gas identifers (maxlay1,maxgas)
+        //  iprop    Vector of gas identifiers (maxlay1,maxgas)
         //  pressure  Vector of gas pressures [N/m^2]
         //  nmix    Vector of number of gasses for each mixture (maxgas=10)
         //  nlayer  Number of glazing layers
@@ -160,9 +151,9 @@ namespace TarcogShading {
         //  Input/Output:
         //  Tgaps    Vector of gap temperatures [K]
         //  Output:
-        //  qv      Vector of heat transfer to the gap by vetilation [W/m^2]
+        //  qv      Vector of heat transfer to the gap by ventilation [W/m^2]
         //  hhatv    Vector of all film coefficients for vented cavities (maxlay3)
-        //  hcv      Vector of surface-to-air heat transfer coefficients by condction/convection for vented cavities [W/(m^2*K)]
+        //  hcv      Vector of surface-to-air heat transfer coefficients by conduction/convection for vented cavities [W/(m^2*K)]
         //  Ebgap    Vector of emissive power of the vented cavities (maxlay3)
         //  nperr    Error flag
         // vfreevent   Vector of free ventilation velocities in gaps
@@ -204,9 +195,6 @@ namespace TarcogShading {
         Real64 qv1;
         Real64 qv2;
 
-        int i;
-        int j;
-        int k;
         int nmix1;
         int nmix2;
 
@@ -218,8 +206,8 @@ namespace TarcogShading {
         // hcv = 0.0d0
 
         // main loop:
-        for (i = 1; i <= nlayer; ++i) {
-            k = 2 * i + 1;
+        for (int i = 1; i <= nlayer; ++i) {
+            // int k = 2 * i + 1;
             // if (LayerType(i).eq.VENETBLIND) then
             if (IsShadingLayer(LayerType(i))) {
                 // dr.........set Shading device geometry
@@ -229,12 +217,12 @@ namespace TarcogShading {
                 Ars = Ar(i);
                 Ahs = Ah(i);
 
-                // dr.....setting gas properies for two adjacent gaps (or enviroment)
+                // dr.....setting gas properties for two adjacent gaps (or environment)
                 nmix1 = nmix(i);
                 nmix2 = nmix(i + 1);
                 press1 = pressure(i);
                 press2 = pressure(i + 1);
-                for (j = 1; j <= maxgas; ++j) {
+                for (int j = 1; j <= maxgas; ++j) {
                     state.dataTarcogShading->iprop1(j) = iprop(j, i);
                     state.dataTarcogShading->iprop2(j) = iprop(j, i + 1);
                     state.dataTarcogShading->frct1(j) = frct(j, i);
@@ -284,7 +272,9 @@ namespace TarcogShading {
                                 speed);
 
                     // exit on error
-                    if ((nperr > 0) && (nperr < 1000)) return;
+                    if ((nperr > 0) && (nperr < 1000)) {
+                        return;
+                    }
 
                     Tgaps(2) = Tgap;
                     // Ebgap(3) = sigma * Tgap ** 4
@@ -348,7 +338,9 @@ namespace TarcogShading {
                                 speed);
 
                     // exit on error
-                    if ((nperr > 0) && (nperr < 1000)) return;
+                    if ((nperr > 0) && (nperr < 1000)) {
+                        return;
+                    }
 
                     Tgaps(nlayer) = Tgap;
                     hcgas(nlayer) = hcvs / 2.0;
@@ -370,13 +362,15 @@ namespace TarcogShading {
 
                     hc1 = hcgas(i);
                     hc2 = hcgas(i + 1);
-                    if (i > 1) s1 = gap(i - 1);
+                    if (i > 1) {
+                        s1 = gap(i - 1);
+                    }
                     s2 = gap(i);
 
                     // speed1 = vvent(i)
                     // speed2 = vvent(i+1)
 
-                    if ((static_cast<int>(CalcForcedVentilation::Allow)) && ((vvent(i) != 0) || (vvent(i + 1) != 0))) {
+                    if ((vvent(i) != 0) || (vvent(i + 1) != 0)) {
                         forcedventilation(state,
                                           state.dataTarcogShading->iprop1,
                                           state.dataTarcogShading->frct1,
@@ -458,9 +452,11 @@ namespace TarcogShading {
                     }
 
                     // exit on error
-                    if ((nperr > 0) && (nperr < 1000)) return;
+                    if ((nperr > 0) && (nperr < 1000)) {
+                        return;
+                    }
 
-                    // if (vvent(i).gt.0) then !not implemented for inside shadin yet
+                    // if (vvent(i).gt.0) then !not implemented for inside shading yet
                     //  nperr = 1006
                     //  ErrorMessage = 'Forced ventilation not implemented for internal SD layers.'
                     //  return
@@ -480,7 +476,7 @@ namespace TarcogShading {
                     vfreevent(i) = speed1;
                     vfreevent(i + 1) = speed2;
                 } // if ((i.gt.1).and.(i.lt.nlayer)) then
-            }     // if (LayerType(i).eq.SHADING) then
+            } // if (LayerType(i).eq.SHADING) then
         }
     }
 
@@ -519,7 +515,7 @@ namespace TarcogShading {
         // Tinlet    Temperature of inlet air
         //  Output:
         //  hcv    Convective/conductive coefficient for vented gap
-        //  qv    Heat transfer to the gap by vetilation [W/m^2]
+        //  qv    Heat transfer to the gap by ventilation [W/m^2]
         //  nperr      Error flag
         // ErrorMessage string containing error message
         //**************************************************************************************************************
@@ -705,8 +701,8 @@ namespace TarcogShading {
 
         TGapOld1 = 0.0;
         TGapOld2 = 0.0;
-        tilt = DataGlobalConstants::Pi / 180 * (angle - 90);
-        T0 = 0.0 + DataGlobalConstants::KelvinConv;
+        tilt = Constant::Pi / 180 * (angle - 90);
+        T0 = 0.0 + Constant::Kelvin;
         A1eqin = 0.0;
         A2eqout = 0.0;
         A1eqout = 0.0;
@@ -734,7 +730,9 @@ namespace TarcogShading {
                  ErrorMessage);
 
         // exit on error:
-        if ((nperr > 0) && (nperr < 1000)) return;
+        if ((nperr > 0) && (nperr < 1000)) {
+            return;
+        }
 
         // dr...check for error messages
         if ((Tgap1 * Tgap2) == 0) {
@@ -798,7 +796,7 @@ namespace TarcogShading {
             //  A = dens0 * T0 * GravityConstant * ABS(cos(tilt)) * ABS(Tgap1 - Tgap2) / (Tgap1 * Tgap2)
 
             // bi...Bug fix #00005:
-            A = dens0 * T0 * DataGlobalConstants::GravityConstant * H * std::abs(cos_Tilt) * std::abs(Tgap1 - Tgap2) / (Tgap1 * Tgap2);
+            A = dens0 * T0 * Constant::Gravity * H * std::abs(cos_Tilt) * std::abs(Tgap1 - Tgap2) / (Tgap1 * Tgap2);
 
             if (A == 0.0) {
                 qv1 = 0.0;
@@ -821,7 +819,7 @@ namespace TarcogShading {
                 A2eqout = Abot + 0.5 * Atop * (Al + Ar + Ah) / (Abot + Atop);
                 A1eqout = Atop + 0.5 * Abot * (Al + Ar + Ah) / (Abot + Atop);
                 A2eqin = Atop + 0.5 * Abot * (Al + Ar + Ah) / (Abot + Atop);
-            } else if (Tgap1 < Tgap2) {
+            } else {
                 A1eqout = Abot + 0.5 * Atop * (Al + Ar + Ah) / (Abot + Atop);
                 A2eqin = Abot + 0.5 * Atop * (Al + Ar + Ah) / (Abot + Atop);
                 A1eqin = Atop + 0.5 * Abot * (Al + Ar + Ah) / (Abot + Atop);
@@ -859,7 +857,7 @@ namespace TarcogShading {
             if (Tgap1 > Tgap2) {
                 Tup = (alpha1 * Tav1 + beta1 * alpha2 * Tav2) / (1.0 - beta1 * beta2);
                 Tdown = alpha2 * Tav2 + beta2 * Tup;
-            } else if (Tgap2 >= Tgap1) {
+            } else {
                 Tdown = (alpha1 * Tav1 + beta1 * alpha2 * Tav2) / (1.0 - beta1 * beta2);
                 Tup = alpha2 * Tav2 + beta2 * Tdown;
             }
@@ -870,7 +868,7 @@ namespace TarcogShading {
             if (Tgap1 > Tgap2) {
                 Temp1 = Tav1 - (H01 / H) * (Tup - Tdown);
                 Temp2 = Tav2 - (H02 / H) * (Tdown - Tup);
-            } else if (Tgap2 >= Tgap1) {
+            } else {
                 Temp1 = Tav1 - (H01 / H) * (Tdown - Tup);
                 Temp2 = Tav2 - (H02 / H) * (Tup - Tdown);
             }
@@ -892,7 +890,7 @@ namespace TarcogShading {
         if (Tgap2 >= Tgap1) {
             qv1 = -dens1 * cp1 * speed1 * s1 * L * (Tdown - Tup) / (H * L);
             qv2 = -dens2 * cp2 * speed2 * s2 * L * (Tup - Tdown) / (H * L);
-        } else if (Tgap2 < Tgap1) {
+        } else {
             qv1 = dens1 * cp1 * speed1 * s1 * L * (Tdown - Tup) / (H * L);
             qv2 = dens2 * cp2 * speed2 * s2 * L * (Tup - Tdown) / (H * L);
         }
@@ -972,12 +970,12 @@ namespace TarcogShading {
         //  angle      Window angle [degrees]
         //  forcedspeed    Speed of forced ventilation [m/s]
         //  hc        Convective/conductive coefficient for non-vented gap
-        //  Tenv      Enviromental temperature
+        //  Tenv      Environmental temperature
         //  Tav        Average temperature of gap surfaces
         //  Output:
         //  Tgap      Temperature of vented gap
         //  hcv        Convective/conductive coefficient for vented gap
-        //  qv        Heat transfer to the gap by vetilation [W/m^2]
+        //  qv        Heat transfer to the gap by ventilation [W/m^2]
         //  nperr      Error flag
         //  speed      Air velocity
         //**************************************************************************************************************
@@ -1027,8 +1025,8 @@ namespace TarcogShading {
         Real64 TGapOld;
         bool converged;
 
-        tilt = DataGlobalConstants::Pi / 180.0 * (angle - 90.0);
-        T0 = 0.0 + DataGlobalConstants::KelvinConv;
+        tilt = Constant::Pi / 180.0 * (angle - 90.0);
+        T0 = 0.0 + Constant::Kelvin;
 
         GASSES90(state,
                  T0,
@@ -1052,7 +1050,9 @@ namespace TarcogShading {
         //                nperr, ErrorMessage)
 
         // exit on error:
-        if ((nperr > 0) && (nperr < 1000)) return;
+        if ((nperr > 0) && (nperr < 1000)) {
+            return;
+        }
 
         // dr...check for error messages
         if ((Tgap * Tenv) == 0.0) {
@@ -1097,12 +1097,14 @@ namespace TarcogShading {
                      nperr,
                      ErrorMessage);
 
-            if ((nperr > 0) && (nperr < 1000)) return;
+            if ((nperr > 0) && (nperr < 1000)) {
+                return;
+            }
 
             //  A = dens0 * T0 * gravity * ABS(cos(tilt)) * ABS(Tgap - Tenv) / (Tgap * Tenv)
 
             // bi...Bug fix #00005:
-            A = dens0 * T0 * DataGlobalConstants::GravityConstant * H * abs_cos_tilt * std::abs(Tgap - Tenv) / (Tgap * Tenv);
+            A = dens0 * T0 * Constant::Gravity * H * abs_cos_tilt * std::abs(Tgap - Tenv) / (Tgap * Tenv);
             //  A = dens0 * T0 * GravityConstant * H * ABS(cos(tilt)) * (Tgap - Tenv) / (Tgap * Tenv)
 
             B1 = dens2 / 2;
@@ -1111,7 +1113,7 @@ namespace TarcogShading {
             if (Tgap > Tenv) {
                 A1eqin = Abot + 0.5 * Atop * (Al + Ar + Ah) / (Abot + Atop);
                 A1eqout = Atop + 0.5 * Abot * (Al + Ar + Ah) / (Abot + Atop);
-            } else if (Tgap <= Tenv) {
+            } else {
                 A1eqout = Abot + 0.5 * Atop * (Al + Ar + Ah) / (Abot + Atop);
                 A1eqin = Atop + 0.5 * Abot * (Al + Ar + Ah) / (Abot + Atop);
             }
@@ -1127,7 +1129,7 @@ namespace TarcogShading {
             // dr...recalculate speed if forced speed exist
             // bi...skip forced vent for now
             //  if (forcedspeed.ne.0) then
-            if ((forcedspeed != 0.0) && (static_cast<int>(CalcForcedVentilation::Allow))) {
+            if ((forcedspeed != 0.0)) {
                 speed = forcedspeed;
             } else {
                 speed = (std::sqrt(pow_2(A2) + std::abs(4.0 * A * A1)) - A2) / (2.0 * A1);
@@ -1176,23 +1178,23 @@ namespace TarcogShading {
     void updateEffectiveMultipliers(int const nlayer,                          // Number of layers
                                     Real64 const width,                        // IGU width [m]
                                     Real64 const height,                       // IGU height [m]
-                                    const Array1D<Real64> &Atop,               // Top openning area [m2]
-                                    const Array1D<Real64> &Abot,               // Bottom openning area [m2]
-                                    const Array1D<Real64> &Al,                 // Left side openning area [m2]
-                                    const Array1D<Real64> &Ar,                 // Right side openning area [m2]
-                                    const Array1D<Real64> &Ah,                 // Front side openning area [m2]
-                                    Array1D<Real64> &Atop_eff,                 // Output - Effective top openning area [m2]
-                                    Array1D<Real64> &Abot_eff,                 // Output - Effective bottom openning area [m2]
-                                    Array1D<Real64> &Al_eff,                   // Output - Effective left side openning area [m2]
-                                    Array1D<Real64> &Ar_eff,                   // Output - Effective right side openning area [m2]
-                                    Array1D<Real64> &Ah_eff,                   // Output - Effective front side openning area [m2]
+                                    const Array1D<Real64> &Atop,               // Top opening area [m2]
+                                    const Array1D<Real64> &Abot,               // Bottom opening area [m2]
+                                    const Array1D<Real64> &Al,                 // Left side opening area [m2]
+                                    const Array1D<Real64> &Ar,                 // Right side opening area [m2]
+                                    const Array1D<Real64> &Ah,                 // Front side opening area [m2]
+                                    Array1D<Real64> &Atop_eff,                 // Output - Effective top opening area [m2]
+                                    Array1D<Real64> &Abot_eff,                 // Output - Effective bottom opening area [m2]
+                                    Array1D<Real64> &Al_eff,                   // Output - Effective left side opening area [m2]
+                                    Array1D<Real64> &Ar_eff,                   // Output - Effective right side opening area [m2]
+                                    Array1D<Real64> &Ah_eff,                   // Output - Effective front side opening area [m2]
                                     const Array1D<TARCOGLayerType> &LayerType, // Layer type
                                     const Array1D<Real64> &SlatAngle           // Venetian layer slat angle [deg]
     )
     {
         for (int i = 1; i <= nlayer; ++i) {
             if (LayerType(i) == TARCOGLayerType::VENETBLIND_HORIZ || LayerType(i) == TARCOGLayerType::VENETBLIND_VERT) {
-                const Real64 slatAngRad = SlatAngle(i) * 2 * DataGlobalConstants::Pi / 360;
+                const Real64 slatAngRad = SlatAngle(i) * 2 * Constant::Pi / 360;
                 Real64 C1_VENET(0);
                 Real64 C2_VENET(0);
                 Real64 C3_VENET(0);

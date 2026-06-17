@@ -1,9 +1,0 @@
-\section{Modeling Desiccant DeHumidifiers}\label{modeling-desiccant-dehumidifiers}
-
-\emph{How do I enter performance data for a desiccant dehumidifier?}
-
-It depends on which specific EnergyPlus object you are trying to use.
-
-The Dehumidifier:Desiccant:NoFans object has default performance curves within the model itself that you can use.~ Set field A12, ``Performance Model,'' to DEFAULT.~ Alternatively, you could also obtain manufacturer's data and develop your own curve fits, then set ``Performance Model'' to User Curves.~~ See the Input Output Reference for more details.
-
-If you want to use the Dehumidifier:Desiccant:System object, then some data set inputs for the required HeatExchanger:Desiccant:BalancedFlow:PerformanceDataType1 object are contained in the file ``PerfCurves.idf'' in the DataSets folder.~ You could also obtain manufacturer's data and develop your own inputs for the HeatExchanger:Desiccant:BalancedFlow:PerformanceDataType1 object.

@@ -12,10 +12,10 @@
 ## Justification for Feature Update ##
 Many inpatient and outpatient healthcare facilities in the US and around the world are governed by ASHRAE Standard 170 or similar standards that require minimum supply air flow rates during occupied mode operation by space type. In order to maintain thermal comfort, this minimum air flow rate may be exceeded and in perimeter spaces the design air flow can be twice as high the design minimum air flow. But during unoccupied mode operation, the minimum air flow based on space type can be either zero, the box minimum, or the minimum required to maintain air flow direction between spaces.
 
-Although EnergyPlus supports minimum airflow schedule, this schedule applies to the calculated peak airflow in the zone. Users are currently unable to model the appropriate minimum airflow turndowns. 
+Although EnergyPlus supports minimum airflow schedule, this schedule applies to the calculated peak airflow in the zone. Users are currently unable to model the appropriate minimum airflow turndowns.
 
 Adding a “Minimum Flow Schedule” that applies to the design minimum air flow, will allow users the flexibility to better model actual building operation.
-   
+
 
 ###Conference Call Conclusions:
 N/A
@@ -57,7 +57,7 @@ I agree, applying it gives users the flexibility. If they choose not to do, they
 
 All the six VAV air terminal units in EnergyPlus has input for specifying a constant minimum air flow fraction. This fraction is defined relative to the air terminal maximum air flow and used to determine the *design minimum* supply air flow. However, the "AirTerminal:SingleDuct:VAV:Reheat" and "AirTerminal:SingleDuct:VAV:NoReheat" have two more method of specifying the minimum flow input methods (1) *Fixed Minimum Air Flow Rate*, and (2) *Minimum Air Flow Fraction Schedule Name*.
 
-The *Fixed Minimum Air Flow Rate* input method allows to enter a fixed minimum flow rate, and the *Minimum Air Flow Fraction Schedule Name* input method allows to enter a scheduled minimum air flow fractions. This existing minimum flow fraction applies the peak design flow rate only. The following two VAV air terminal objects have three different input methods for specifying the design minimum air flow: 
+The *Fixed Minimum Air Flow Rate* input method allows to enter a fixed minimum flow rate, and the *Minimum Air Flow Fraction Schedule Name* input method allows to enter a scheduled minimum air flow fractions. This existing minimum flow fraction applies the peak design flow rate only. The following two VAV air terminal objects have three different input methods for specifying the design minimum air flow:
 
  - **AirTerminal:SingleDuct:VAV:Reheat**
  - **AirTerminal:SingleDuct:VAV:NoReheat**
@@ -92,7 +92,7 @@ Currently the design minimum air flow is determined from user specified minimum 
 ***DesignMinimumFlowRate = Sys.AirMassFlowRateMax * Sys.ZoneMinAirFrac***
 
 This enhancement will allow adjusting the design minimum air flow to determine minimum air flow turndown using the fraction values specified in the new input field (Minimum Air Flow Turndown Schedule Name) as follows:
- 
+
 ***MinimumTurnDownFlowRate = DesignMinimumFlowRate * TurnDownMinimumFraction***
 
 or
@@ -126,14 +126,14 @@ If the new input field is blank, then the **TurnDownMinimumFraction** variable w
 
 
 ##Testing/Validation/Data Source(s):
-The new feature will be compared against exiting model. Unit test will be performed to ensure report variables values are correct. Also a new example file will be provided as needed. 
+The new feature will be compared against exiting model. Unit test will be performed to ensure report variables values are correct. Also a new example file will be provided as needed.
 
 
 ##IO Ref (draft):
 
 The new input field will be appended to the end of the existing air terminal VAV objects. Modified *AirTerminal:SingleDuct:VAV:Reheat* object is shown below as a sample.
 
-The input field *Minimum Air Flow Turndown Schedule Name* fraction values (0.0 to 1.0) will be used to adjust the design minimum air flow turndowns (for example during unoccupied hours) by multiplying the design minimum air flow. These fractions also adjust the design minim air flow used for sizing purpose but users may choose not to so by specifying a fraction value of 1.0 for Summer and Winter Design Days. This field can be used with any of the three *zone minimum air flow input methods*. 
+The input field *Minimum Air Flow Turndown Schedule Name* fraction values (0.0 to 1.0) will be used to adjust the design minimum air flow turndowns (for example during unoccupied hours) by multiplying the design minimum air flow. These fractions also adjust the design minim air flow used for sizing purpose but users may choose not to so by specifying a fraction value of 1.0 for Summer and Winter Design Days. This field can be used with any of the three *zone minimum air flow input methods*.
 
   AirTerminal:SingleDuct:VAV:Reheat,
 
@@ -158,7 +158,7 @@ The input field *Minimum Air Flow Turndown Schedule Name* fraction values (0.0 t
     ,                        !- Maximum Reheat Air Temperature
     ,                        !- Design Specification Outdoor Air Object Name
     TurndownMinAirFlowSch;   !- Minimum Air Flow Turndown Schedule Name
-  
+
   Schedule:Compact,
 
     TurndownMinAirFlowSch,   !- Name
@@ -173,7 +173,7 @@ The input field *Minimum Air Flow Turndown Schedule Name* fraction values (0.0 t
     For: Weekends Holidays CustomDay1 CustomDay2, !- Field 8
     Until: 24:00,0.00;       !- Field 9
 
-  
+
 ###AirTerminal:SingleDuct:VAV:Reheat,
 
        \memo Central air system terminal unit, single duct, variable volume, with reheat coil (hot
@@ -192,7 +192,7 @@ The input field *Minimum Air Flow Turndown Schedule Name* fraction values (0.0 t
        \note If this field is blank, the system is always available.
        \type object-list
        \object-list ScheduleNames
- 
+
   A3 , \field Damper Air Outlet Node Name
 
        \note the outlet node of the damper and the inlet node of the reheat coil
@@ -237,9 +237,9 @@ The input field *Minimum Air Flow Turndown Schedule Name* fraction values (0.0 t
        \note "Cooling Minimum Air Flow per Zone Floor Area", "Cooling Minimum Air Flow", and
        \note "Cooling Minimum Air Flow Fraction". If there is no sizing calculation a default of
        \note 0.000762 m3/s-m2 (0.15 cfm/ft2) is used.
-       \note This constant minimum air flow fraction will be multiplied with the fractional values from input 
+       \note This constant minimum air flow fraction will be multiplied with the fractional values from input
        \note field "Minimum Air Flow Turndown Schedule Name".
-   
+
   N3 , \field Fixed Minimum Air Flow Rate
 
        \type real
@@ -254,9 +254,9 @@ The input field *Minimum Air Flow Turndown Schedule Name* fraction values (0.0 t
        \note "Cooling Minimum Air Flow per Zone Floor Area", "Cooling Minimum Air Flow", and
        \note "Cooling Minimum Air Flow Fraction". If there is no sizing calculation a default of
        \note 0.000762 m3/s-m2 (0.15 cfm/ft2) is used.
-       \note This fixed minimum air flow  will be multiplied with the fractional values from input 
+       \note This fixed minimum air flow  will be multiplied with the fractional values from input
        \note field "Minimum Air Flow Turndown Schedule Name".
-   
+
   A6 , \field Minimum Air Flow Fraction Schedule Name
 
        \type object-list
@@ -265,9 +265,9 @@ The input field *Minimum Air Flow Turndown Schedule Name* fraction values (0.0 t
        \note Schedule values are fractions, 0.0 to 1.0.
        \note If the field Constant Minimum Air Flow Fraction is blank, then the average of the
        \note minimum and maximum schedule values is used for sizing normal-action reheat coils.
-       \note This fraction will be multiplied with the fractional values from input field 
+       \note This fraction will be multiplied with the fractional values from input field
        \note "Minimum Air Flow Turndown Schedule Name".
-   
+
   A7 , \field Reheat Coil Object Type
 
        \required-field
@@ -373,7 +373,7 @@ The input field *Minimum Air Flow Turndown Schedule Name* fraction values (0.0 t
        \type object-list
        \object-list ScheduleNames
        \note This field adjusts the design minimum flow rate by multiplying it using this scheduled fraction
-       \note values. This field can be used with any of the three "Zone Minimum Air Flow Input Method"   
+       \note values. This field can be used with any of the three "Zone Minimum Air Flow Input Method"
        \note Schedule values are fractions, 0.0 to 1.0. This field adjusts the minimum airflow turndown
        \note below the design minimum air flow and is intended for use with ASHRAE Standard 170.
        \note If this field is left blank, then the operating minimum air flow fraction value is set to 1.0
@@ -391,7 +391,7 @@ The following functions of SingleDuct module may be moved as member function as 
     void SimCBVAV(int const SysNum, bool const FirstHVACIteration, int const ZoneNum, int const ZoneNodeNum);
     void SimVAVVS(int const SysNum, bool const FirstHVACIteration, int const ZoneNum, int const ZoneNodeNum);
     void SimConstVol(int const SysNum, bool const FirstHVACIteration, int const ZoneNum, int const ZoneNodeNum);
-    void CalcVAVVS(int const SysNum, bool const FirstHVACIteration, int const ZoneNode, int const HCoilType, Real64 const HWFlow, 
+    void CalcVAVVS(int const SysNum, bool const FirstHVACIteration, int const ZoneNode, int const HCoilType, Real64 const HWFlow,
                    Real64 const HCoilReq, int const FanType, Real64 const AirFlow, int const FanOn, Real64 &LoadMet);
     Real64 VAVVSCoolingResidual(Real64 const SupplyAirMassFlow, Array1<Real64> const &Par);
     Real64 VAVVSHWNoFanResidual(Real64 const HWMassFlow, Array1<Real64> const &Par);
@@ -400,7 +400,7 @@ The following functions of SingleDuct module may be moved as member function as 
     void UpdateSys(int const SysNum);
     void ReportSys(int const SysNum);
 
-The following functions of DualDuct module may be moved as member function as an incremental contribution to re-factor.   
+The following functions of DualDuct module may be moved as member function as an incremental contribution to re-factor.
 
     void InitDualDuct(int const DamperNum, bool const FirstHVACIteration);
     void SizeDualDuct(int const DamperNum);
@@ -431,8 +431,8 @@ The following functions of DualDuct module may be moved as member function as an
 
         // add two new member variables
         int ZoneOperatingMinAirFracSchPtr;    // pointer to the schedule for operating minimum airflow fraction
-        Real64 ZoneOperatingMinAirFrac;       // operating minimum airflow fraction value, multiplier of zone design minimum air flow 
-        
+        Real64 ZoneOperatingMinAirFrac;       // operating minimum airflow fraction value, multiplier of zone design minimum air flow
+
         // Default Constructor
         SysDesignParams()
             : SysType_Num(0), SchedPtr(0), ReheatComp_Num(0), ReheatComp_Index(0), ReheatComp_PlantType(0), Fan_Num(0), Fan_Index(0),
@@ -447,10 +447,10 @@ The following functions of DualDuct module may be moved as member function as an
               MaxAirVolFlowRateDuringReheat(0.0), MaxAirVolFractionDuringReheat(0.0), AirMassFlowDuringReheatMax(0.0), ZoneOutdoorAirMethod(0),
               OutdoorAirFlowRate(0.0), NoOAFlowInputFromUser(true), OARequirementsPtr(0), AirLoopNum(0), HWLoopNum(0), HWLoopSide(0),
               HWBranchIndex(0), HWCompIndex(0), SecInNode(0), IterationLimit(0), IterationFailed(0), OAPerPersonMode(0), EMSOverrideAirFlow(false),
-              EMSMassFlowRateValue(0.0), HeatRate(0.0), CoolRate(0.0), HeatEnergy(0.0), CoolEnergy(0.0), 
-              
+              EMSMassFlowRateValue(0.0), HeatRate(0.0), CoolRate(0.0), HeatEnergy(0.0), CoolEnergy(0.0),
+
               ZoneOperatingMinAirFracSchPtr(0), ZoneOperatingMinAirFrac(0.0)
-  
+
         {
         }
 
@@ -462,18 +462,18 @@ Existing function GetSysInput() will be modified to get the new input field valu
 Existing function InitSys() will be modified to calculate and set the operating minimum air flow rate using the new schedule fraction value.
 
 The minimum operating air flow available will be determined as follows:
- 
+
 **Node(InletNode).MassFlowRateMinAvail = Sys.AirMassFlowRateMax * Sys.ZoneMinAirFrac * Sys.ZoneOperatingMinAirFrac**
 
 Existing functions for simulating the various VAV air terminal units (such as SimVAV, SimVAVVS, SimCBVAV, SizeSys....) will be modified to apply the operating minimum air flow fraction as needed.
- 
+
 
 ### DualDuct
 
   DualDuct.hh
-  
+
   Modify struct "DamperDesignParams"  to add new new member variable
-  
+
     struct DamperDesignParams
     {
         // Members
@@ -487,7 +487,7 @@ Existing functions for simulating the various VAV air terminal units (such as Si
 
         // add two new member variables
         int ZoneOperatingMinAirFracSchPtr;    // pointer to the schedule for operating minimum airflow fraction
-        Real64 ZoneOperatingMinAirFrac;       // operating minimum airflow fraction value, multiplier of zone design minimum airflow 
+        Real64 ZoneOperatingMinAirFrac;       // operating minimum airflow fraction value, multiplier of zone design minimum airflow
 
         // Default Constructor
         DamperDesignParams()
@@ -496,10 +496,10 @@ Existing functions for simulating the various VAV air terminal units (such as Si
               RecircAirInletNodeNum(0), RecircIsUsed(true), DesignOAFlowRate(0.0), DesignRecircFlowRate(0.0), OAControlMode(0),
               RecircAirDamperPosition(0.0), OADamperPosition(0.0), OAFraction(0.0), ADUNum(0), CtrlZoneNum(0), CtrlZoneInNodeIndex(0),
               ActualZoneNum(0), OutdoorAirFlowRate(0.0), NoOAFlowInputFromUser(true), OARequirementsPtr(0), OAPerPersonMode(PerPersonModeNotSet),
-              OAPerPersonByDesignLevel(0.0), AirLoopNum(0), 
-              
+              OAPerPersonByDesignLevel(0.0), AirLoopNum(0),
+
               ZoneOperatingMinAirFracSchPtr(0), ZoneOperatingMinAirFrac(0.0)
-   
+
           {
         }
     }
@@ -517,10 +517,10 @@ The hot and cold deck minimum operating air flow available will be determined as
 **Node(ColdInNode).MassFlowRateMinAvail = DamperColdAirInlet.AirMassFlowRateMax * Damper.ZoneMinAirFrac * Damper.ZoneOperatingMinAirFrac**
 
 Existing function SimDualDuctVarVol() will be modified to calculate and set the damper operating minimum air flow rate.
-  
+
 
 ### Sizing Issue
 
 One obvious technical issue that needs to be discussed is that do we want to change the minimum air flow used for sizing the child objects in the air terminal objects. For example, should we size the reheat coil using the design minim air flow, or should we use the adjusted minimum air flow?
 
-Based on github comments from @mjwitte, the fraction values from the new input field "Minimum Air Flow Turndown Schedule Name" will multiply the design minimum air flow used for sizing purposes and users will have the option to not to do so by appropriately scheduling a value of 1.0 for Winter and Summer Design Days. 
+Based on github comments from @mjwitte, the fraction values from the new input field "Minimum Air Flow Turndown Schedule Name" will multiply the design minimum air flow used for sizing purposes and users will have the option to not to do so by appropriately scheduling a value of 1.0 for Winter and Summer Design Days.

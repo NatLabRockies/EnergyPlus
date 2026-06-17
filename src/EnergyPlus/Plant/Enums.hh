@@ -1,7 +1,7 @@
-// EnergyPlus, Copyright (c) 1996-2023, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
-// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other
+// National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
 // contributors. All rights reserved.
 //
 // NOTICE: This Software was developed under funding from the U.S. Department of Energy and the
@@ -83,27 +83,31 @@ enum class OpScheme
 { // Changed to enum: Better semantic fit and allows use in switch statements: Suggest this migration throughout EnergyPlus (and probably C++11
   // enum "class")
     Invalid = -1,
-    NoControl,            // Scheme Type placeholder for items such as pipes
-    HeatingRB,            // Scheme Type for Heating Load Range Based Operation
-    CoolingRB,            // Scheme Type for Cooling  Load Range Based Operation
-    WetBulbRB,            // Scheme Type for Wet bulb range based Operation
-    DryBulbRB,            // Scheme Type for Dry bulb range based Operation
-    DewPointRB,           // Scheme Type for Dew point range based Operation
-    RelHumRB,             // Scheme Type for relative humidity range based Operation
-    DryBulbTDB,           // Scheme Type for dry bulb temp range based Operation
-    WetBulbTDB,           // Scheme Type for wet bulb temp based Operation
-    DewPointTDB,          // Scheme Type for dew point temp based Operation
-    CompSetPtBased,       // Temp Based Control
-    Uncontrolled,         // Scheme Type for Uncontrolled Operation
-    EMS,                  // Scheme Type for EMS based operation user Define scheme
-    Pump,                 // Not really an OpScheme, just a placeholder
-    Demand,               // Placeholder for demand side equipment such as coils
-    FreeRejection,        // Scheme Type for waterside economizers and the like
-    WSEcon,               // Scheme Type for waterside economizers and the like
-    ThermalEnergyStorage, // Scheme Type for Simplified Thermal Energy Storage operation
+    NoControl,                // Scheme Type placeholder for items such as pipes
+    HeatingRB,                // Scheme Type for Heating Load Range Based Operation
+    CoolingRB,                // Scheme Type for Cooling  Load Range Based Operation
+    WetBulbRB,                // Scheme Type for Wet bulb range based Operation
+    DryBulbRB,                // Scheme Type for Dry bulb range based Operation
+    DewPointRB,               // Scheme Type for Dew point range based Operation
+    RelHumRB,                 // Scheme Type for relative humidity range based Operation
+    DryBulbTDB,               // Scheme Type for dry bulb temp range based Operation
+    WetBulbTDB,               // Scheme Type for wet bulb temp based Operation
+    DewPointTDB,              // Scheme Type for dew point temp based Operation
+    CompSetPtBased,           // Temp Based Control
+    Uncontrolled,             // Scheme Type for Uncontrolled Operation
+    EMS,                      // Scheme Type for EMS based operation user Define scheme
+    Pump,                     // Not really an OpScheme, just a placeholder
+    Demand,                   // Placeholder for demand side equipment such as coils
+    FreeRejection,            // Scheme Type for waterside economizers and the like
+    WSEcon,                   // Scheme Type for waterside economizers and the like
+    ThermalEnergyStorage,     // Scheme Type for Simplified Thermal Energy Storage operation
+    ChillerHeaterSupervisory, // Scheme Type for managed control of water plants
     Num
 };
 
+// Adding a new item to the PlantEquipmentType enum requires similar changes to
+// Component.hh PlantEquipmentCtrlType and PlantEquipmentTypeIsPump
+// DataPlant.hh PlantEquipTypeNames, PlantEquipTypeNamesUC, and ValidLoopEquipTypes
 enum class PlantEquipmentType
 {
     Invalid = -1,
@@ -137,6 +141,7 @@ enum class PlantEquipmentType
     PurchHotWater,
     TS_IceDetailed,
     TS_IceSimple,
+    TS_PCM,
     ValveTempering,
     WtrHeaterMixed,
     WtrHeaterStratified,
@@ -166,6 +171,7 @@ enum class PlantEquipmentType
     EvapFluidCooler_TwoSpd,
     ChilledWaterTankMixed,
     ChilledWaterTankStratified,
+    HotWaterTankStratified,
     PVTSolarCollectorFlatPlate,
     Baseboard_Conv_Water,
     Baseboard_Rad_Conv_Steam,
@@ -204,8 +210,17 @@ enum class PlantEquipmentType
     CoolingPanel_Simple,
     HeatPumpEIRCooling,
     HeatPumpEIRHeating,
+    HeatPumpFuelFiredCooling,
+    HeatPumpFuelFiredHeating,
+    HeatPumpAirToWaterCooling,
+    HeatPumpAirToWaterHeating,
+    HeatPumpAirToWater,
+    PurchSteam,
     Num
 };
+// Adding a new item to the PlantEquipmentType enum (above) requires similar changes to
+// Component.hh PlantEquipmentCtrlType and PlantEquipmentTypeIsPump
+// DataPlant.hh PlantEquipTypeNames, PlantEquipTypeNamesUC, and ValidLoopEquipTypes
 
 // Parameters for component character wrt how load gets met (or not)
 //  used in %HowLoadServed to facilitate load dispatch logic
@@ -239,10 +254,25 @@ enum class FlowMode
     Constant,
     NotModulated,
     LeavingSetpointModulated,
+    VariableSpeedPump,
     Num
 };
 
-constexpr std::array<std::string_view, static_cast<int>(FlowMode::Num)> FlowModeNamesUC{"CONSTANTFLOW", "NOTMODULATED", "LEAVINGSETPOINTMODULATED"};
+constexpr std::array<std::string_view, static_cast<int>(FlowMode::Num)> FlowModeNamesUC{
+    "CONSTANTFLOW", "NOTMODULATED", "LEAVINGSETPOINTMODULATED", "VARIABLESPEEDPUMPING"};
+
+enum class CondenserFlowControl
+{
+    Invalid = -1,
+    ConstantFlow,
+    ModulatedChillerPLR,
+    ModulatedLoopPLR,
+    ModulatedDeltaTemperature,
+    Num
+};
+
+constexpr std::array<std::string_view, static_cast<int>(CondenserFlowControl::Num)> CondenserFlowControlNamesUC{
+    "CONSTANTFLOW", "MODULATEDCHILLERPLR", "MODULATEDLOOPPLR", "MODULATEDDELTATEMPERATURE"};
 
 enum class CondenserType
 {

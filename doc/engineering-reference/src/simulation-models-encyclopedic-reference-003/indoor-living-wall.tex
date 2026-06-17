@@ -1,0 +1,186 @@
+\section{Indoor Living Wall }\label{indoor-living-wall}
+
+Indoor living walls refer to vertically built structures where plants grow soil-based or hydroponically, provide natural cooling effects through plant evapotranspiration, and enhance overall indoor environmental quality in the built environment. Pilot studies shows measurable benefits of hydroponic indoor greenery systems on reducing building cooling rates. This object mathematically describes the thermal performance of indoor living wall systems through surface heat balance as well as heat and mass balance of thermal zones where the indoor living walls are located.
+
+\subsection{Energy Balance of Indoor Living Wall}\label{energy-balance-of-indoor-living-wall}
+
+The IndoorLivingWall object directly connects with the inside surface heat balance, zone air heat balance, and zone air moisture balance in EnergyPlus. Indoor living wall surface heat balance, which determines leaf surface temperature, takes into account convective heat transfer between indoor living walls and zone air, incident shortwave solar radiation, longwave radiation with surrounding surfaces, heat required for vaporization from ET, and heat conduction. Latent load from ET of indoor living walls contributes to indoor air moisture balance.
+
+Plant energy balance equation:
+
+\begin{equation}
+Q_{lw-net}+Q_{sw}+h_{ip} \cdot A_ip \cdot (T_z - T_p )+Q_{cond}=0
+\end{equation}
+
+where:
+
+\begin{itemize}
+\tightlist
+\item
+  \(Q_{lw-net}\) is the net longwave radiation from surrounding surfaces to indoor living walls (\si{\watt})
+\item
+  \(Q_{sw}\) is the shortwave radiation on indoor living wall surface (\si{\watt})
+\item
+  \(h_{ip}\) is the convective heat transfer coefficient (\si{\watt\per\area\per\celsius})
+\item
+  \(T_z\) is the zone air temperature (\si{\celsius})
+\item
+  \(T_p\) is the plant surface temperature (\si{\celsius})
+\item
+  \(A_ip\) is the plant surface area (\si{\area}).
+\end{itemize}
+
+Indoor air heat balance connects with indoor living walls through convective heat transfer, which has the opposite sign of the term in surface heat balance. Convective portion of heat gain from LED lights also contributes to zone air heat balance equation.
+
+\begin{equation}
+\begin{array}{l}\frac{{\rho_{air}}{V_z}{c_p}{dT_z}}{dt} = \sum\limits_{i = 1}^{{N_{sl}}} {\dot Q_i^{}}  + \sum\limits_{i = 1}^{{N_{surfaces}}} {{h_i}} {A_i} ({{T_{si}} - {T_z}}) + {{h_ip}}{A_ip}({{T_{p}} - {T_z}})\\ + \sum\limits_{i = 1}^{{N_{zones}}} {{{\dot m}_i}} {C_p}{{T_{zi}} - {T_z}} + {\dot m_{\inf }}{C_p}( {{T_\infty } - {T_z}}) +{\dot Q_{sys}}\end{array}
+\end{equation}
+
+where:
+
+\begin{itemize}
+\tightlist
+\item
+  $\frac{\rho_{air} V_z c_p dT_z}{dt}$ represents energy stored in zone air during each timestep (\si{\watt})
+\item
+  $\rho_{air}$ is zone air density (\si{\density})
+\item
+  $c_p$ is the air specific heat (\si{\J\per\kg\per\celsius})
+\item
+  $V_z$ is zone air volume (\si{\volume})
+\item
+  \(\dot Q_i\) is the convective heat from internal loads including sensible heat gain from living walls (\si{\watt})
+\item
+  \({{h_i}} {A_i}\left( {{T_{si}} - {T_z}} \right)\) is the convective heat transfer from surfaces to zone air (\si{\watt})
+\item
+  \({{h_ip}} {A_ip}\left( {{T_{p}} - {T_z}} \right)\) represents the term for convective heat transfer from indoor plants to zone air (\si{\watt})
+\item
+  \({{{\dot m}_i}} {C_p}\left( {{T_{zi}} - {T_z}} \right)\) represents heat transfer due to air mixing between zones (\si{\watt})
+\item
+  \({\dot m_{\inf }}{C_p}\left( {{T_\infty } - {T_z}} \right)\) represents heat transfer due to infiltration of outdoor air (\si{\watt})
+\item
+  \(\dot Q_{sys}\) is the sensible heat gain from mechanical systems (\si{\watt}).
+\end{itemize}
+
+A modified zone air moisture balance equation shown below considers indoor living walls.
+
+\begin{equation}
+\begin{array}{l}{\rho_{air}}{V_z}{C_W}{\left( {\delta t} \right)^{ - 1}}\left( {W_z^t - W_z^{t - \delta t}} \right) = \sum\limits_{i = 1}^{{N_{sl}}} {k{g_{mas{s_{sched\;load}}}}} + kg_{mass_{et}} \\ + \sum\limits_{i = 1}^{{N_{surfaces}}} {{A_i}{h_{mi}}} {\rho_{ai{r_z}}}\left( {{W_{surf{s_i}}} - W_z^t} \right)+ \sum\limits_{i = 1}^{{N_{zones}}} {{{\dot m}_i}} \left( {{W_{zi}} - W_z^t} \right) + {{\dot m}_{\inf }}\left( {{W_\infty } - W_z^t} \right) + {{\dot m}_{sys}}\left( {{W_{\sup }} - W_z^t} \right)\end{array}
+\end{equation}
+
+where:
+
+\begin{itemize}
+\tightlist
+\item
+  \(kg_{mass_{et}}\) is the moisture added to thermal zone from indoor living walls (\si{\massFlowRate})
+\item
+  \(W\) is the humidity ratio of moisture air (\si{\humidityRatio})
+\item
+  $\frac{\rho_air V_z C_W}{\delta t} \left(W_z^t - W_z^{t-\delta t}\right)$ represents moisture stored in zone air during each timestep (\si{\massFlowRate})
+\item
+  \(kg_{mass_{et}}\) represents moisture rate from plant evapotranspiration added to zone air (\si{\massFlowRate})
+\item
+  \({{{\dot m}_i}} \left( {W_zi - W_z^t} \right)\) represents moisture mass flow due to air mixing (\si{\massFlowRate})
+\item
+  \({{\dot m}_{\inf }}\left( {{W_\infty } - W_z^t} \right)\) represents moisture gain rate due to outside air infiltration (\si{\massFlowRate})
+\item
+  \({{\dot m}_{sys}}\left( {{W_{\sup }} - W_z^t} \right)\) represents the moisture gain rate from mechanical systems (\si{\massFlowRate}).
+\end{itemize}
+
+\subsection{Evapotranspiration from indoor living wall}\label{evaporation-from-indoor-living-wall}
+
+Evapotranspiration (ET) represents the amount of water lost through transpiration from plant surfaces and evaporation from growing media. In plant heat balance, transpiration is a major component in forming the plant energy balance and provides evaporative cooling for the surrounding built environment. Plant transpiration is a vital process to transport water and nutrients from roots to shoots. Transpiration is driven by net radiation and sensible heat gains from the surrounding environment and provides evaporative cooling for the built environment. For the indoorlivingwall object, we have two calculation methods for evapotranspiration (ET) including Penman-Monteith model and Stanghellini model.
+
+The Penman-Monteith model, described in the equation below,  is the most popular ET model used for open field agriculture. The model or modified model has been tested for ET rate predictions for indoor environments such as greenhouse and vertical farming applications.
+
+\begin{equation}
+ET=\frac{1}{\lambda} \cdot \left[
+  \Delta \cdot(I_n-G)
++ \frac{
+    \frac{\rho_a \cdot Cp \cdot VPD}{r_a}
+  }
+  {
+     \Delta+\gamma \cdot (1+\frac{r_s}{r_a} )
+  }
+\right]
+\end{equation}
+
+where:
+
+\begin{itemize}
+\tightlist
+\item
+  \(ET\) is the evapotranspiration rate (\si{\evapotranspirationRate})
+\item
+  \(\lambda\) is the latent heat of vaporization (\si{\mega\specificEnthalpy})
+\item
+  \(\Delta\) is the slope of the saturation vapor pressure-temperature curve (\si{\kPa\per\celsius})
+\item
+  \(\gamma\)is the psychrometric constant (\si{\kPa\per\celsius})
+\item
+  \(I_n\) represents net radiation, which is based on daylighting level and/or LED growth lighting intensity level (\si{\mega\watt\per\area})
+\item
+  \(G\) represents soil heat flux, which is assumed to be zero in the current model(\si{\MW\per\area})
+\item
+  \(\rho_a\) is air density (\si{\density})
+\item
+  \(Cp\) is the specific heat of air (\si{\mega\J\per\kg\per\celsius})
+\item
+  \(VPD\) is vapor pressure deficit (\si{\kPa})
+\item
+  \(r_s\) is surface resistance, which is the resistance to the flow of vapor through the crop to the leaf surface (\si{\s\per\m})
+\item
+  \(r_a\) represents aerodynamic resistance, which is the resistance to the flow of water vapor and sensible heat from the surface of the leaf to the surrounding air (\si{\s\per\m}).
+\end{itemize}
+
+Empirical models of stomatal resistance such as the Jarvis and the Ball models require experimental data to generate submodel structure and fit the model coefficients.  In this module, we used the surface and aerodynamic resistance models from Graamans et al. to calculate $r_s$ and $r_a$.
+
+\begin{equation}
+r_s=60 \cdot (1500+I_n/C)/(200+I_n/C)
+\end{equation}
+
+\begin{equation}
+r_a=350 \cdot \sqrt{L/u_\infty} \cdot (1/LAI)
+\end{equation}
+
+where:
+
+\begin{itemize}
+\tightlist
+\item
+  \(C\) is the conversion factor from \si{\mega\watt\per\area} to \si{\umolperAreaperSecond}
+\item
+  \(u_\infty\) is the air velocity (\si{\m\per\s})
+\item
+  \(L\) is the leaf diameter (\si{\m})
+\item
+  \(LAI\) is defined as the ratio of one-side leaf area per unit plant growing area.
+\end{itemize}
+
+In the current IndoorLivingWall, the room air velocity \(u_\infty\) is assumed to be \SI{0.1}{\m\per\s}, the mean leaf diameter L is assumed to be \SI{0.1}{\m}, and LAI is calculated based on total leaf area and surface area.
+
+Stanghellini model is similar to Penman-Monteith model; both are based on energy heat balance for plants. The Stanghellini model includes leaf area index LAI [-] accounting for energy flux between multiple layers of leaves in a CEA canopy.
+
+The equation for the evaporation rate is:
+\begin{equation}
+ET=1/\lambda \cdot (\Delta \cdot(I_n-G)+(2 \cdot Cp LAI \cdot Cp \rho_a \cdot Cp \cdot VPD)/r_a )/(\Delta+\gamma \cdot (1+r_s/r_a ) )
+\end{equation}
+
+Users can also define a customized ET model using an "Evapotranspiration rate" actuator which can be calculated with Energy Management System (EMS) objects, Python Plugins objects, and Python API with the indoor living wall model. Please refer the Application Guide for EMS.
+
+\subsection{References}\label{references-indoorlivingwall}
+
+  Ball, J.T., I.E. Woodrow, and J.A. Berry (1987). A model predicting stomatal conductance and its contribution to the control of photosynthesis under different environmental conditions, Photosynthesis Research, Springer. p. 221-224.
+
+  Graamans, L., et al. (2017) Plant factories; crop transpiration and energy balance. Agricultural Systems. 153, p. 138-147.
+
+  Jarvis, P. (1976). The interpretation of the variations in leaf water potential and stomatal conductance found in canopies in the field.Philosophical Transactions of the Royal Society of London. Series B, 273(927), p. 593-610.
+
+  Monteith, J.L. (1965). Evaporation and environment. in Symposia of the society for experimental biology. Cambridge University Press (CUP) Cambridge.
+
+  Wang, L., L. Norford, M. J. Witte (2025). Modeling Thermal Impacts of Indoor Living Plants in the Built Environment. Energy and Building. 2025. Volume 346, 116113.
+
+  Wang, L. and M.J. Witte (2022). Integrating building energy simulation with a machine learning algorithm for evaluating indoor living walls’ impacts on cooling energy use in commercial buildings. Energy and Buildings 272, p. 112322.
+
+  Wang, L., E. Iddio, and B. Ewers (2021). Introductory overview: Evapotranspiration (ET) models for controlled environment agriculture (CEA). Computers and Electronics in Agriculture 190, p. 106447.

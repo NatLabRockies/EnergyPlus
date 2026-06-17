@@ -1,7 +1,7 @@
-// EnergyPlus, Copyright (c) 1996-2023, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
-// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other
+// National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
 // contributors. All rights reserved.
 //
 // NOTICE: This Software was developed under funding from the U.S. Department of Energy and the
@@ -107,11 +107,11 @@ namespace BranchInputManager {
         std::string Name;             // Name for this Branch
         std::string AssignedLoopName; // Loop Name for this branch
         DataBranchAirLoopPlant::PressureCurveType PressureCurveType =
-            DataBranchAirLoopPlant::PressureCurveType::Invalid;                     // Integer index of pressure curve type
-        int PressureCurveIndex = 0;                                                 // Integer index of pressure curve
-        DataLoopNode::NodeFluidType FluidType = DataLoopNode::NodeFluidType::Blank; // Fluid type (see DataLoopNode)
-        int NumOfComponents = 0;                                                    // Number of Components on this Branch
-        Array1D<ComponentData> Component;                                           // Component definitions for each component
+            DataBranchAirLoopPlant::PressureCurveType::Invalid; // Integer index of pressure curve type
+        int PressureCurveIndex = 0;                             // Integer index of pressure curve
+        Node::FluidType FluidType = Node::FluidType::Blank;     // Fluid type (see DataLoopNode)
+        int NumOfComponents = 0;                                // Number of Components on this Branch
+        Array1D<ComponentData> Component;                       // Component definitions for each component
     };
 
     struct SplitterData
@@ -134,6 +134,7 @@ namespace BranchInputManager {
 
     // Functions
     void ManageBranchInput(EnergyPlusData &state);
+    void ManageConnectorInput(EnergyPlusData &state);
 
     //==================================================================================
     //   Routines that "get" data from internal branch management structure
@@ -180,7 +181,7 @@ namespace BranchInputManager {
                                DataBranchAirLoopPlant::PressureCurveType &PressCurveType, // Index of pressure curve object
                                int &PressCurveIndex,                                      // Index of pressure curve object
                                int &NumComps,                                             // Number of Components on Branch
-                               Array1D<ComponentData> &BComponents,                       // Component data returned
+                               Array1D<ComponentData> const &BComponents,                 // Component data returned
                                bool &ErrorsFound // True when Loop Name is already assigned and this not same loop
     );
 
@@ -241,11 +242,11 @@ namespace BranchInputManager {
     void GetSingleBranchInput(EnergyPlusData &state,
                               std::string_view RoutineName,
                               int BCount,
-                              Array1D_string &Alphas,
-                              Array1D_string &cAlphaFields,
+                              Array1D_string const &Alphas,
+                              Array1D_string const &cAlphaFields,
                               int NumAlphas,
                               Array1D_int &NodeNums,
-                              Array1D_bool &lAlphaBlanks);
+                              Array1D_bool const &lAlphaBlanks);
 
     void GetBranchListInput(EnergyPlusData &state);
 
@@ -317,9 +318,17 @@ struct BranchInputManagerData : BaseGlobalStruct
     Array1D<BranchInputManager::MixerData> Mixers;             // Mixer Data for each Mixer
     Array1D<BranchInputManager::ComponentData> BComponents;    // Component data to be returned
 
+    void init_constant_state([[maybe_unused]] EnergyPlusData &state) override
+    {
+    }
+
+    void init_state([[maybe_unused]] EnergyPlusData &state) override
+    {
+    }
+
     void clear_state() override
     {
-        *this = BranchInputManagerData();
+        new (this) BranchInputManagerData();
     }
 };
 

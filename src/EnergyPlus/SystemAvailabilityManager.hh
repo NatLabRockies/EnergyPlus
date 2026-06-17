@@ -1,7 +1,7 @@
-// EnergyPlus, Copyright (c) 1996-2023, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
-// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other
+// National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
 // contributors. All rights reserved.
 //
 // NOTICE: This Software was developed under funding from the U.S. Department of Energy and the
@@ -56,14 +56,29 @@
 #include <EnergyPlus/Data/BaseData.hh>
 #include <EnergyPlus/DataGlobals.hh>
 #include <EnergyPlus/EnergyPlus.hh>
-#include <EnergyPlus/Plant/PlantAvailManager.hh>
+#include <EnergyPlus/ScheduleManager.hh>
 
 namespace EnergyPlus {
 
 // Forward declarations
 struct EnergyPlusData;
 
-namespace SystemAvailabilityManager {
+namespace Avail {
+
+    // The following parameters are used for system availability
+    // status.  Putting this in SystemAvailabilityManager (where it
+    // belongs) creates a circular dependency between
+    // SystemAvailabilityManager and PlantAvailablityManager which
+    // needs to be resolved by unifying those two.
+    enum class Status
+    {
+        Invalid = -1,
+        NoAction,
+        ForceOff,
+        CycleOn,
+        CycleOnZoneFansOnly,
+        Num
+    };
 
     enum class ControlAlgorithm
     {
@@ -109,18 +124,31 @@ namespace SystemAvailabilityManager {
         Num
     };
 
+    enum class ManagerType
+    {
+        Invalid = -1,
+        Scheduled,
+        ScheduledOn,
+        ScheduledOff,
+        NightCycle,
+        DiffThermo,
+        HiTempTOff,
+        HiTempTOn,
+        LoTempTOff,
+        LoTempTOn,
+        NightVent,
+        HybridVent,
+        OptimumStart,
+        Num
+    };
+
     struct SysAvailManager
     {
         // Members
-        std::string Name;                                                                       // Name of the manager object
-        DataPlant::SystemAvailabilityType MgrType = DataPlant::SystemAvailabilityType::Invalid; // Integer equivalent of availability manager type
-        int SchedPtr;                                                                           // Schedule pointer
-        int AvailStatus;                                                                        // reports status of availability manager
-
-        // Default Constructor
-        SysAvailManager() : SchedPtr(0), AvailStatus(0)
-        {
-        }
+        std::string Name;                        // Name of the manager object
+        ManagerType type = ManagerType::Invalid; // Integer equivalent of availability manager type
+        Sched::Schedule *availSched = nullptr;   // Schedule pointer
+        Status availStatus = Status::NoAction;   // reports status of availability manager
     };
 
     struct SysAvailManagerScheduled : SysAvailManager // Derived type for Scheduled Sys Avail Managers
@@ -138,12 +166,11 @@ namespace SystemAvailabilityManager {
     struct SysAvailManagerNightCycle : SysAvailManager // Derived type for Night Cycle Sys Avail Managers
     {
         // Members
-        std::string FanSched; // Fan schedule name
-        int FanSchedPtr;      // Fan schedule pointer
+        Sched::Schedule *fanSched = nullptr; // Fan schedule
         //   Cycle On Control Zone, or Cycle On Any - Zone Fans Only
         Real64 TempTolRange;                                                          // range in degrees C of thermostat tolerance
         int CyclingTimeSteps;                                                         // period (in Loads time steps) system will cycle on.
-        int PriorAvailStatus;                                                         // prior status of availability manager
+        Status priorAvailStatus = Status::NoAction;                                   // prior status of availability manager
         std::string CtrlZoneListName;                                                 // controlled zone or zonelist name
         int NumOfCtrlZones;                                                           // number of controlled zones
         Array1D_int CtrlZonePtrs;                                                     // pointers to controlled zone(s)
@@ -161,8 +188,7 @@ namespace SystemAvailabilityManager {
 
         // Default Constructor
         SysAvailManagerNightCycle()
-            : FanSchedPtr(0), TempTolRange(1.0), CyclingTimeSteps(1), PriorAvailStatus(0), NumOfCtrlZones(0), NumOfCoolingZones(0),
-              NumOfHeatingZones(0), NumOfHeatZnFanZones(0)
+            : TempTolRange(1.0), CyclingTimeSteps(1), NumOfCtrlZones(0), NumOfCoolingZones(0), NumOfHeatingZones(0), NumOfHeatZnFanZones(0)
         {
         }
     };
@@ -170,16 +196,16 @@ namespace SystemAvailabilityManager {
     struct SysAvailManagerOptimumStart : SysAvailManager // Derived type for Optimal Start Sys Avail Managers
     {
         // Members
-        bool isSimulated;                  // true after availability manager is simulated
-        std::string FanSched;              // Fan schedule name
-        int FanSchedPtr;                   // Fan schedule pointer
-        std::string CtrlZoneName;          // Name of the control zone
-        int ZoneNum;                       // zone number of control zone
-        std::string ZoneListName;          // Zone List name
-        int NumOfZones;                    // Number of zones in the list
-        Array1D_int ZonePtrs;              // Pointers to zones in the list
-        Real64 MaxOptStartTime;            // Maximum value of start time in hours
-        ControlAlgorithm controlAlgorithm; // Control algorithm: ConstantTemperatureGradient,
+        bool isSimulated; // true after availability manager is simulated
+
+        Sched::Schedule *fanSched = nullptr; // Fan schedule
+        std::string CtrlZoneName;            // Name of the control zone
+        int ZoneNum;                         // zone number of control zone
+        std::string ZoneListName;            // Zone List name
+        int NumOfZones;                      // Number of zones in the list
+        Array1D_int ZonePtrs;                // Pointers to zones in the list
+        Real64 MaxOptStartTime;              // Maximum value of start time in hours
+        ControlAlgorithm controlAlgorithm;   // Control algorithm: ConstantTemperatureGradient,
         // AdaptiveTemperatureGradient, AdaptiveASHRAE, ConstantStartTime
         Real64 ConstTGradCool;    // Constant temperature gradient in cooling mode, unit: degC per hour
         Real64 ConstTGradHeat;    // Constant temperature gradient in heating mode, unit: degC per hour
@@ -213,16 +239,15 @@ namespace SystemAvailabilityManager {
 
         // Default Constructor
         SysAvailManagerOptimumStart()
-            : isSimulated(false), FanSchedPtr(0), ZoneNum(0), NumOfZones(0), MaxOptStartTime(6.0), controlAlgorithm(ControlAlgorithm::Invalid),
-              ConstTGradCool(1.0), ConstTGradHeat(1.0), InitTGradCool(1.0), InitTGradHeat(1.0), AdaptiveTGradCool(1.0), AdaptiveTGradHeat(1.0),
-              ConstStartTime(2.0), NumPreDays(1), NumHoursBeforeOccupancy(0.0), TempDiffHi(0.0), TempDiffLo(0.0), ATGWCZoneNumLo(0),
-              ATGWCZoneNumHi(0), CycleOnFlag(false), ATGUpdateFlag1(false), ATGUpdateFlag2(false), FirstTimeATGFlag(true), OverNightStartFlag(false),
-              OSReportVarFlag(false), AdaTempGradHeat(0.0), AdaTempGradCool(0.0), ATGUpdateTime1(0.0), ATGUpdateTime2(0.0), ATGUpdateTemp1(0.0),
-              ATGUpdateTemp2(0.0)
+            : isSimulated(false), ZoneNum(0), NumOfZones(0), MaxOptStartTime(6.0), controlAlgorithm(ControlAlgorithm::Invalid), ConstTGradCool(1.0),
+              ConstTGradHeat(1.0), InitTGradCool(1.0), InitTGradHeat(1.0), AdaptiveTGradCool(1.0), AdaptiveTGradHeat(1.0), ConstStartTime(2.0),
+              NumPreDays(1), NumHoursBeforeOccupancy(0.0), TempDiffHi(0.0), TempDiffLo(0.0), ATGWCZoneNumLo(0), ATGWCZoneNumHi(0), CycleOnFlag(false),
+              ATGUpdateFlag1(false), ATGUpdateFlag2(false), FirstTimeATGFlag(true), OverNightStartFlag(false), OSReportVarFlag(false),
+              AdaTempGradHeat(0.0), AdaTempGradCool(0.0), ATGUpdateTime1(0.0), ATGUpdateTime2(0.0), ATGUpdateTemp1(0.0), ATGUpdateTemp2(0.0)
         {
         }
 
-        void SetOptStartFlag(EnergyPlusData &state, int const AirLoopNum);
+        void SetOptStartFlag(EnergyPlusData &state, int const AirLoopNum, int const zoneNum);
     };
 
     struct DefineASHRAEAdaptiveOptimumStartCoeffs // Derived type for Differential Thermostat Sys Avail Managers
@@ -269,57 +294,79 @@ namespace SystemAvailabilityManager {
     struct SysAvailManagerNightVent : SysAvailManager
     {
         // Members
-        std::string FanSched;      // Fan schedule name
-        int FanSchedPtr;           // Fan schedule pointer
-        std::string VentTempSched; // Ventilation temperature schedule
-        int VentTempSchedPtr;      // Ventilation temperature schedule pointer
-        Real64 VentDelT;           // Ventilation delta T [deltaC]
-        Real64 VentTempLowLim;     // ventilation temperature low limit
-        std::string CtrlZoneName;  // Name of the control zone
-        int ZoneNum;               // zome number of control zone
-        Real64 VentFlowFrac;       // the night venting flow fraction
+        Sched::Schedule *fanSched = nullptr;      // Fan schedule
+        Sched::Schedule *ventTempSched = nullptr; // Ventilation temperature schedule
+        Real64 VentDelT;                          // Ventilation delta T [deltaC]
+        Real64 VentTempLowLim;                    // ventilation temperature low limit
+        std::string CtrlZoneName;                 // Name of the control zone
+        int ZoneNum;                              // zome number of control zone
+        Real64 VentFlowFrac;                      // the night venting flow fraction
 
         // Default Constructor
-        SysAvailManagerNightVent() : FanSchedPtr(0), VentTempSchedPtr(0), VentDelT(0.0), VentTempLowLim(0.0), ZoneNum(0), VentFlowFrac(0.0)
+        SysAvailManagerNightVent() : VentDelT(0.0), VentTempLowLim(0.0), ZoneNum(0), VentFlowFrac(0.0)
         {
         }
+    };
+
+    // Hybrid Ventilation parameters
+    enum class VentCtrlType
+    {
+        Invalid = -1,
+        No,       // No hybrid ventilation control
+        Temp,     // Temperature control
+        Enth,     // Enthalpy control
+        DewPoint, // Dew point control
+        OA,       // Outdoor air control
+        OperT80,  // Operative temperature control with 80% acceptability limits
+        OperT90,  // Operative temperature control with 90% acceptability limits
+        CO2,      // CO2 control
+        Num
+    };
+
+    enum class VentCtrlStatus
+    {
+        Invalid = -1,
+        NoAction, // No hybrid ventilation control
+        Open,     // Open windows or doors
+        Close,    // Close windows or doors
+        Num
     };
 
     struct SysAvailManagerHybridVent : SysAvailManager
     {
         // Members
-        std::string AirLoopName;     // Name of HVAC Air Loop
-        int AirLoopNum;              // HVAC Air Loop number
-        std::string ControlZoneName; // Controlled zone name
-        int NodeNumOfControlledZone; // Controlled zone node number
-        int ControlledZoneNum;       // Controlled zone number
-        int ControlModeSchedPtr;     // Ventilation control mode schedule pointer
-        int ControlMode;             // hybrid ventilation control mode
-        int VentilationCtrl;         // Ventilation control type: Noaction, Close, Open
-        Real64 MinOutdoorTemp;       // Minimum Outdoor Temperature [C]
-        Real64 MaxOutdoorTemp;       // Maximum Outdoor Temperature [C]
-        Real64 MinOutdoorEnth;       // Minimum Outdoor Enthalpy [J/kg]
-        Real64 MaxOutdoorEnth;       // Maximum Outdoor Enthalpy [J/kg]
-        Real64 MinOutdoorDewPoint;   // Minimum Outdoor Dew point temperature [C]
-        Real64 MaxOutdoorDewPoint;   // Maximum Outdoor Dew Point Temperature [C]
-        Real64 MaxWindSpeed;         // Maximum Wind speed [m/s]
-        bool UseRainIndicator;       // Use WeatherFile Rain Indicators
-        std::string MinOASched;      // Minimum Outdoor Ventilation Air Schedule Name
-        int MinOASchedPtr;           // Minimum Outdoor Ventilation Air Schedule pointer
-        int DewPointNoRHErrCount;    // Dewpoint control mode error count without a humidistat
-        int DewPointNoRHErrIndex;    // Dewpoint control mode error index without a humidistat
-        int DewPointErrCount;        // Dewpoint control mode error count without a valid humidistat
-        int DewPointErrIndex;        // Dewpoint control mode error index without a valid humidistat
-        int SingleHCErrCount;        // Temperature and enthalpy control mode error count
+        std::string AirLoopName;                              // Name of HVAC Air Loop
+        int AirLoopNum;                                       // HVAC Air Loop number
+        std::string ControlZoneName;                          // Controlled zone name
+        int NodeNumOfControlledZone;                          // Controlled zone node number
+        int ControlledZoneNum;                                // Controlled zone number
+        Sched::Schedule *controlModeSched = nullptr;          // Ventilation control mode schedule
+        VentCtrlType ctrlType = VentCtrlType::No;             // hybrid ventilation control mode
+        VentCtrlStatus ctrlStatus = VentCtrlStatus::NoAction; // Ventilation control type: Noaction, Close, Open
+        Real64 MinOutdoorTemp;                                // Minimum Outdoor Temperature [C]
+        Real64 MaxOutdoorTemp;                                // Maximum Outdoor Temperature [C]
+        Real64 MinOutdoorEnth;                                // Minimum Outdoor Enthalpy [J/kg]
+        Real64 MaxOutdoorEnth;                                // Maximum Outdoor Enthalpy [J/kg]
+        Real64 MinOutdoorDewPoint;                            // Minimum Outdoor Dew point temperature [C]
+        Real64 MaxOutdoorDewPoint;                            // Maximum Outdoor Dew Point Temperature [C]
+        Real64 MaxWindSpeed;                                  // Maximum Wind speed [m/s]
+        bool UseRainIndicator;                                // Use WeatherFile Rain Indicators
+        Sched::Schedule *minOASched = nullptr;                // Minimum Outdoor Ventilation Air Schedule
+        int DewPointNoRHErrCount;                             // Dewpoint control mode error count without a humidistat
+        int DewPointNoRHErrIndex;                             // Dewpoint control mode error index without a humidistat
+        int DewPointErrCount;                                 // Dewpoint control mode error count without a valid humidistat
+        int DewPointErrIndex;                                 // Dewpoint control mode error index without a valid humidistat
+        int SingleHCErrCount;                                 // Temperature and enthalpy control mode error count
         // with a singleHeatingCooling setpoint
         int SingleHCErrIndex; // Temperature and enthalpy control mode error index
         // with a singleHeatingCooling setpoint
-        int OpeningFactorFWS;                 // Opening factor modifier as a function of wind speed
-        int ANControlTypeSchedPtr;            // AirflowNetwork control type schedule pointer
-        int SimpleControlTypeSchedPtr;        // Simple airflow object control type schedule pointer
-        int VentilationPtr;                   // Ventilation object name pointer
-        std::string VentilationName;          // Ventilation object name
-        bool HybridVentMgrConnectedToAirLoop; // Flag to check whether hybrid ventilation
+        int OpeningFactorFWS; // Opening factor modifier as a function of wind speed
+
+        Sched::Schedule *afnControlTypeSched = nullptr;    // AirflowNetwork control type schedule pointer
+        Sched::Schedule *simpleControlTypeSched = nullptr; // Simple airflow object control type schedule pointer
+        int VentilationPtr;                                // Ventilation object name pointer
+        std::string VentilationName;                       // Ventilation object name
+        bool HybridVentMgrConnectedToAirLoop;              // Flag to check whether hybrid ventilation
         // manager is connected to air loop
         bool SimHybridVentSysAvailMgr; // Set to false when a zone has two hybrid ventilation
         // managers, one with air loop and one without
@@ -332,31 +379,55 @@ namespace SystemAvailabilityManager {
         Real64 minAdaTem;        // minimum adaptive temperature for adaptive temperature control [C]
         Real64 maxAdaTem;        // maximum adaptive temperature for adaptive temperature control [C]
 
+        int afnControlStatus = 0;
+        int Master = 0;
+        Real64 WindModifier = 0.0;
+
         // Default Constructor
         SysAvailManagerHybridVent()
-            : AirLoopNum(0), NodeNumOfControlledZone(0), ControlledZoneNum(0), ControlModeSchedPtr(0), ControlMode(0), VentilationCtrl(0),
-              MinOutdoorTemp(-100.0), MaxOutdoorTemp(100.0), MinOutdoorEnth(0.1), MaxOutdoorEnth(300000.0), MinOutdoorDewPoint(-100.0),
-              MaxOutdoorDewPoint(100.0), MaxWindSpeed(0.0), UseRainIndicator(true), MinOASchedPtr(0), DewPointNoRHErrCount(0),
-              DewPointNoRHErrIndex(0), DewPointErrCount(0), DewPointErrIndex(0), SingleHCErrCount(0), SingleHCErrIndex(0), OpeningFactorFWS(0),
-              ANControlTypeSchedPtr(0), SimpleControlTypeSchedPtr(0), VentilationPtr(0), HybridVentMgrConnectedToAirLoop(true),
-              SimHybridVentSysAvailMgr(false), OperativeTemp(0.0), CO2(0.0), MinOperTime(0.0), MinVentTime(0.0), TimeOperDuration(0.0),
-              TimeVentDuration(0.0), minAdaTem(0.0), maxAdaTem(0.0)
+            : AirLoopNum(0), NodeNumOfControlledZone(0), ControlledZoneNum(0), MinOutdoorTemp(-100.0), MaxOutdoorTemp(100.0), MinOutdoorEnth(0.1),
+              MaxOutdoorEnth(300000.0), MinOutdoorDewPoint(-100.0), MaxOutdoorDewPoint(100.0), MaxWindSpeed(0.0), UseRainIndicator(true),
+              DewPointNoRHErrCount(0), DewPointNoRHErrIndex(0), DewPointErrCount(0), DewPointErrIndex(0), SingleHCErrCount(0), SingleHCErrIndex(0),
+              OpeningFactorFWS(0), VentilationPtr(0), HybridVentMgrConnectedToAirLoop(true), SimHybridVentSysAvailMgr(false), OperativeTemp(0.0),
+              CO2(0.0), MinOperTime(0.0), MinVentTime(0.0), TimeOperDuration(0.0), TimeVentDuration(0.0), minAdaTem(0.0), maxAdaTem(0.0)
         {
         }
     };
 
-    struct List
+    struct AvailManagerNTN
+    {
+        std::string Name;
+        ManagerType type;
+        int Num;
+    };
+
+    struct List // LOL
     {
         // Members
         std::string Name; // Availability Manager List Name
-        int NumItems;
-        Array1D_string AvailManagerName;
-        Array1D<DataPlant::SystemAvailabilityType> AvailManagerType;
+        int NumItems = 0;
+        Array1D<AvailManagerNTN> availManagers;
+    };
 
-        // Default Constructor
-        List() : NumItems(0)
-        {
-        }
+    struct DefineZoneCompAvailMgrs
+    {
+        // Members
+        int NumAvailManagers = 0;               // number of availability managers for this system
+        Status availStatus = Status::NoAction;  // system availability status
+        int StartTime = 0;                      // cycle on time (in SimTimeSteps)
+        int StopTime = 0;                       // cycle off time (in SimTimeSteps)
+        std::string AvailManagerListName;       // name of each availability manager
+        Array1D<AvailManagerNTN> availManagers; // type of availability manager
+        int ZoneNum = 0;                        // cycle off time (in SimTimeSteps)
+        bool Input = true;                      // starts off as true to initialize zone equipment availability manager data
+        int Count = 0;                          // initialize twice to ensure zone equipment availability manager list name has been read in
+    };
+
+    struct ZoneCompTypeData
+    {
+        // Members
+        Array1D<DefineZoneCompAvailMgrs> ZoneCompAvailMgrs;
+        int TotalNumComp = 0; // total number of components of a zone equip type
     };
 
     void ManageSystemAvailability(EnergyPlusData &state);
@@ -385,40 +456,38 @@ namespace SystemAvailabilityManager {
                                       bool &ErrorsFound        // true if certain errors are detected here
     );
 
+    void FillPredefinedTablesForAvailManager(EnergyPlusData &state);
+
     void InitSysAvailManagers(EnergyPlusData &state);
 
-    void SimSysAvailManager(EnergyPlusData &state,
-                            const DataPlant::SystemAvailabilityType SysAvailType,
-                            std::string const &SysAvailName,
-                            int &SysAvailNum,
-                            int const PriAirSysNum, // Primary Air System index. If being called for a ZoneHVAC:* component
-                            int const PreviousStatus,
-                            int &AvailStatus,
-                            ObjexxFCL::Optional_int_const ZoneEquipType = _, // Type of ZoneHVAC:* equipment component
-                            ObjexxFCL::Optional_int_const CompNum = _        // Index of ZoneHVAC:* equipment component
+    Status SimSysAvailManager(EnergyPlusData &state,
+                              ManagerType const type,
+                              std::string const &SysAvailName,
+                              int &SysAvailNum,
+                              int const PriAirSysNum, // Primary Air System index. If being called for a ZoneHVAC:* component
+                              Status const previousStatus,
+                              int const zoneNum = 0,                           // Index of ZoneHVAC:* equipment component
+                              ObjexxFCL::Optional_int_const ZoneEquipType = _, // Type of ZoneHVAC:* equipment component
+                              ObjexxFCL::Optional_int_const CompNum = _        // Index of ZoneHVAC:* equipment component
     );
 
-    void CalcSchedSysAvailMgr(EnergyPlusData &state,
-                              int const SysAvailNum, // number of the current scheduled system availability manager
-                              int &AvailStatus       // System status indicator
+    Status CalcSchedSysAvailMgr(EnergyPlusData &state,
+                                int const SysAvailNum // number of the current scheduled system availability manager
     );
 
-    void CalcSchedOnSysAvailMgr(EnergyPlusData &state,
-                                int const SysAvailNum, // number of the current scheduled on system availability manager
-                                int &AvailStatus       // System status indicator
+    Status CalcSchedOnSysAvailMgr(EnergyPlusData &state,
+                                  int const SysAvailNum // number of the current scheduled on system availability manager
     );
 
-    void CalcSchedOffSysAvailMgr(EnergyPlusData &state,
-                                 int const SysAvailNum, // number of the current scheduled off system availability manager
-                                 int &AvailStatus       // System status indicator
+    Status CalcSchedOffSysAvailMgr(EnergyPlusData &state,
+                                   int const SysAvailNum // number of the current scheduled off system availability manager
     );
 
-    void CalcNCycSysAvailMgr(EnergyPlusData &state,
-                             int const SysAvailNum,                           // number of the current scheduled system availability manager
-                             int const PriAirSysNum,                          // number of the primary air system affected by this Avail. Manager
-                             int &AvailStatus,                                // System status indicator
-                             ObjexxFCL::Optional_int_const ZoneEquipType = _, // Type of ZoneHVAC equipment component
-                             ObjexxFCL::Optional_int_const CompNum = _        // Index of ZoneHVAC equipment component
+    Status CalcNCycSysAvailMgr(EnergyPlusData &state,
+                               int const SysAvailNum,                           // number of the current scheduled system availability manager
+                               int const PriAirSysNum,                          // number of the primary air system affected by this Avail. Manager
+                               ObjexxFCL::Optional_int_const ZoneEquipType = _, // Type of ZoneHVAC equipment component
+                               ObjexxFCL::Optional_int_const CompNum = _        // Index of ZoneHVAC equipment component
     );
 
     bool CoolingZoneOutOfTolerance(EnergyPlusData &state,
@@ -433,45 +502,39 @@ namespace SystemAvailabilityManager {
                                    Real64 const TempTolerance     // temperature tolerance
     );
 
-    void CalcOptStartSysAvailMgr(EnergyPlusData &state,
-                                 int const SysAvailNum,                           // number of the current scheduled system availability manager
-                                 int const PriAirSysNum,                          // number of the primary air system affected by this Avail. Manager
-                                 int &AvailStatus,                                // System status indicator
-                                 ObjexxFCL::Optional_int_const ZoneEquipType = _, // Type of ZoneHVAC equipment component
-                                 ObjexxFCL::Optional_int_const CompNum = _        // Index of ZoneHVAC equipment component
+    Status CalcOptStartSysAvailMgr(EnergyPlusData &state,
+                                   int const SysAvailNum,  // number of the current scheduled system availability manager
+                                   int const PriAirSysNum, // number of the primary air system affected by this Avail. Manager
+                                   int const zoneNum,      // Index of ZoneHVAC:* equipment component
+                                   ObjexxFCL::Optional_int_const ZoneEquipType = _, // Type of ZoneHVAC equipment component
+                                   ObjexxFCL::Optional_int_const CompNum = _        // Index of ZoneHVAC equipment component
     );
 
-    void CalcNVentSysAvailMgr(EnergyPlusData &state,
-                              int const SysAvailNum,                          // number of the current scheduled system availability manager
-                              int const PriAirSysNum,                         // number of the primary air system affected by this Avail. Manager
-                              int &AvailStatus,                               // System status indicator
-                              ObjexxFCL::Optional_int_const ZoneEquipType = _ // Type of zone equipment component
+    Status CalcNVentSysAvailMgr(EnergyPlusData &state,
+                                int const SysAvailNum,             // number of the current scheduled system availability manager
+                                int const PriAirSysNum,            // number of the primary air system affected by this Avail. Manager
+                                bool const isZoneEquipType = false // Type of zone equipment component
     );
 
-    void CalcDiffTSysAvailMgr(EnergyPlusData &state,
-                              int const SysAvailNum,    // Number of the current scheduled system availability manager
-                              int const PreviousStatus, // System status for the previous timestep
-                              int &AvailStatus          // System status indicator
+    Status CalcDiffTSysAvailMgr(EnergyPlusData &state,
+                                int const SysAvailNum,      // Number of the current scheduled system availability manager
+                                Status const PreviousStatus // System status for the previous timestep
     );
 
-    void CalcHiTurnOffSysAvailMgr(EnergyPlusData &state,
-                                  int const SysAvailNum, // Number of the current scheduled system availability manager
-                                  int &AvailStatus       // System status indicator
+    Status CalcHiTurnOffSysAvailMgr(EnergyPlusData &state,
+                                    int const SysAvailNum // Number of the current scheduled system availability manager
     );
 
-    void CalcHiTurnOnSysAvailMgr(EnergyPlusData &state,
-                                 int const SysAvailNum, // Number of the current scheduled system availability manager
-                                 int &AvailStatus       // System status indicator
+    Status CalcHiTurnOnSysAvailMgr(EnergyPlusData &state,
+                                   int const SysAvailNum // Number of the current scheduled system availability manager
     );
 
-    void CalcLoTurnOffSysAvailMgr(EnergyPlusData &state,
-                                  int const SysAvailNum, // Number of the current scheduled system availability manager
-                                  int &AvailStatus       // System status indicator
+    Status CalcLoTurnOffSysAvailMgr(EnergyPlusData &state,
+                                    int const SysAvailNum // Number of the current scheduled system availability manager
     );
 
-    void CalcLoTurnOnSysAvailMgr(EnergyPlusData &state,
-                                 int const SysAvailNum, // Number of the current scheduled system availability manager
-                                 int &AvailStatus       // System status indicator
+    Status CalcLoTurnOnSysAvailMgr(EnergyPlusData &state,
+                                   int const SysAvailNum // Number of the current scheduled system availability manager
     );
 
     void ManageHybridVentilation(EnergyPlusData &state);
@@ -487,7 +550,24 @@ namespace SystemAvailabilityManager {
 
     bool GetHybridVentilationControlStatus(EnergyPlusData &state, int const ZoneNum); // Index of zone
 
-} // namespace SystemAvailabilityManager
+    struct PlantAvailMgrData
+    {
+        // Members
+        int NumAvailManagers = 0;               // number of availability managers for this plant loop
+        Status availStatus = Status::NoAction;  // system availability status
+        int StartTime = 0;                      // cycle on time (in SimTimeSteps)
+        int StopTime = 0;                       // cycle off time (in SimTimeSteps)
+        Array1D<AvailManagerNTN> availManagers; // type of availability manager
+    };
+
+    struct OptStartData
+    {
+        int ActualZoneNum = 0;
+        Real64 OccStartTime = 0.0;
+        bool OptStartFlag = false;
+    };
+
+} // namespace Avail
 
 struct SystemAvailabilityManagerData : BaseGlobalStruct
 {
@@ -502,31 +582,37 @@ struct SystemAvailabilityManagerData : BaseGlobalStruct
     int NumLoTurnOnSysAvailMgrs = 0;
     int NumNVentSysAvailMgrs = 0;
     int NumAvailManagerLists = 0;
+    int NumOptStartSysAvailMgrs = 0;
+    int NumHybridVentSysAvailMgrs = 0; // Number of hybrid ventilation control
+
     bool GetAvailListsInput = true;
     bool GetAvailMgrInputFlag = true; // First time, input is "gotten"
     bool GetHybridInputFlag = true;   // Flag set to make sure you get input once
-    int NumOptStartSysAvailMgrs = 0;
 
     bool InitSysAvailManagers_MyOneTimeFlag = true;
     bool CalcNCycSysAvailMgr_OneTimeFlag = true;
     Array1D<Real64> OptStart_AdaTempGradTrdHeat; // Heating temp gradient for previous days - used in CalcOptStartSysAvailMgr
     Array1D<Real64> OptStart_AdaTempGradTrdCool; // Cooling temp gradient for previous days - used in CalcOptStartSysAvailMgr
 
-    EPVector<SystemAvailabilityManager::SysAvailManagerScheduled> SchedData;
-    EPVector<SystemAvailabilityManager::SysAvailManagerScheduledOn> SchedOnData;
-    EPVector<SystemAvailabilityManager::SysAvailManagerScheduledOff> SchedOffData;
-    EPVector<SystemAvailabilityManager::SysAvailManagerNightCycle> NightCycleData;
-    EPVector<SystemAvailabilityManager::SysAvailManagerDiffThermo> DiffThermoData;
-    EPVector<SystemAvailabilityManager::SysAvailManagerHiLoTemp> HiTurnOffData;
-    EPVector<SystemAvailabilityManager::SysAvailManagerHiLoTemp> HiTurnOnData;
-    EPVector<SystemAvailabilityManager::SysAvailManagerHiLoTemp> LoTurnOffData;
-    EPVector<SystemAvailabilityManager::SysAvailManagerHiLoTemp> LoTurnOnData;
-    EPVector<SystemAvailabilityManager::SysAvailManagerNightVent> NightVentData;
-    EPVector<SystemAvailabilityManager::SysAvailManagerHybridVent> HybridVentData;
-    EPVector<SystemAvailabilityManager::List> ListData;
-    EPVector<SystemAvailabilityManager::SysAvailManagerOptimumStart> OptimumStartData;
-    EPVector<SystemAvailabilityManager::DefineASHRAEAdaptiveOptimumStartCoeffs> ASHRAEOptSCoeffCooling;
-    EPVector<SystemAvailabilityManager::DefineASHRAEAdaptiveOptimumStartCoeffs> ASHRAEOptSCoeffHeating;
+    EPVector<Avail::SysAvailManagerScheduled> SchedData;
+    EPVector<Avail::SysAvailManagerScheduledOn> SchedOnData;
+    EPVector<Avail::SysAvailManagerScheduledOff> SchedOffData;
+    EPVector<Avail::SysAvailManagerNightCycle> NightCycleData;
+    EPVector<Avail::SysAvailManagerDiffThermo> DiffThermoData;
+    EPVector<Avail::SysAvailManagerHiLoTemp> HiTurnOffData;
+    EPVector<Avail::SysAvailManagerHiLoTemp> HiTurnOnData;
+    EPVector<Avail::SysAvailManagerHiLoTemp> LoTurnOffData;
+    EPVector<Avail::SysAvailManagerHiLoTemp> LoTurnOnData;
+    EPVector<Avail::SysAvailManagerNightVent> NightVentData;
+    EPVector<Avail::SysAvailManagerHybridVent> HybridVentData;
+    EPVector<Avail::List> ListData;
+    EPVector<Avail::SysAvailManagerOptimumStart> OptimumStartData;
+    EPVector<Avail::DefineASHRAEAdaptiveOptimumStartCoeffs> ASHRAEOptSCoeffCooling;
+    EPVector<Avail::DefineASHRAEAdaptiveOptimumStartCoeffs> ASHRAEOptSCoeffHeating;
+
+    Array1D<Avail::ZoneCompTypeData> ZoneComp;
+    Array1D<Avail::PlantAvailMgrData> PlantAvailMgr;
+    Array1D<Avail::OptStartData> OptStart; // For optimum start
 
     bool BeginOfDayResetFlag = true;
 
@@ -537,6 +623,15 @@ struct SystemAvailabilityManagerData : BaseGlobalStruct
     Real64 CurrentEndTime = 0.0;     // Current end time
     Real64 CurrentEndTimeLast = 0.0; // last end time
     Real64 TimeStepSysLast = 0.0;    // last system time step
+
+    // Hybrid ventilation control part
+    void init_constant_state([[maybe_unused]] EnergyPlusData &state) override
+    {
+    }
+
+    void init_state([[maybe_unused]] EnergyPlusData &state) override
+    {
+    }
 
     void clear_state() override
     {
@@ -575,6 +670,7 @@ struct SystemAvailabilityManagerData : BaseGlobalStruct
         BeginOfDayResetFlag = true;
         OptStart_AdaTempGradTrdHeat.deallocate();
         OptStart_AdaTempGradTrdCool.deallocate();
+        PlantAvailMgr.deallocate();
         MyOneTimeFlag = true;
         MyEnvrnFlag = true;
         CurrentEndTime = 0.0;

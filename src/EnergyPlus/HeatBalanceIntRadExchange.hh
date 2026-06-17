@@ -1,7 +1,7 @@
-// EnergyPlus, Copyright (c) 1996-2023, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
-// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other
+// National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
 // contributors. All rights reserved.
 //
 // NOTICE: This Software was developed under funding from the U.S. Department of Energy and the
@@ -116,17 +116,17 @@ namespace HeatBalanceIntRadExchange {
     );
 
     void FixViewFactors(EnergyPlusData &state,
-                        int const N,                     // NUMBER OF SURFACES
-                        const Array1D<Real64> &A,        // AREA VECTOR- ASSUMED,BE N ELEMENTS LONG
-                        Array2A<Real64> F,               // APPROXIMATE DIRECT VIEW FACTOR MATRIX (N X N)
-                        std::string &enclName,           // Name of Enclosure being fixed
-                        std::vector<int> const zoneNums, // Zones which are part of this enclosure
-                        Real64 &OriginalCheckValue,      // check of SUM(F) - N
-                        Real64 &FixedCheckValue,         // check after fixed of SUM(F) - N
-                        Real64 &FinalCheckValue,         // the one to go with
-                        int &NumIterations,              // number of iterations to fixed
-                        Real64 &RowSum,                  // RowSum of Fixed
-                        bool const anyIntMassInZone      // are there any surfaces in the zone that are thermal mass
+                        int const N,                      // NUMBER OF SURFACES
+                        const Array1D<Real64> &A,         // AREA VECTOR- ASSUMED,BE N ELEMENTS LONG
+                        Array2A<Real64> F,                // APPROXIMATE DIRECT VIEW FACTOR MATRIX (N X N)
+                        std::string &enclName,            // Name of Enclosure being fixed
+                        std::vector<int> const &zoneNums, // Zones which are part of this enclosure
+                        Real64 &OriginalCheckValue,       // check of SUM(F) - N
+                        Real64 &FixedCheckValue,          // check after fixed of SUM(F) - N
+                        Real64 &FinalCheckValue,          // the one to go with
+                        int &NumIterations,               // number of iterations to fixed
+                        Real64 &RowSum,                   // RowSum of Fixed
+                        bool const anyIntMassInZone       // are there any surfaces in the zone that are thermal mass
     );
 
     bool DoesZoneHaveInternalMass(EnergyPlusData &state,
@@ -148,10 +148,10 @@ namespace HeatBalanceIntRadExchange {
                   Array1D<Real64> &FMRT     // VECTOR OF MEAN RADIANT TEMPERATURE "VIEW FACTORS"
     );
 
-    void CalcFp(int const N,            // Number of surfaces
-                Array1D<Real64> &EMISS, // VECTOR OF SURFACE EMISSIVITIES
-                Array1D<Real64> &FMRT,  // VECTOR OF MEAN RADIANT TEMPERATURE "VIEW FACTORS"
-                Array1D<Real64> &Fp     // VECTOR OF OPPENHEIM RESISTNACE VALUES
+    void CalcFp(int const N,                  // Number of surfaces
+                Array1D<Real64> const &EMISS, // VECTOR OF SURFACE EMISSIVITIES
+                Array1D<Real64> const &FMRT,  // VECTOR OF MEAN RADIANT TEMPERATURE "VIEW FACTORS"
+                Array1D<Real64> &Fp           // VECTOR OF OPPENHEIM RESISTNACE VALUES
     );
 
     void CalcMatrixInverse(Array2<Real64> &A, // Matrix: Gets reduced to L\U form
@@ -181,6 +181,14 @@ struct HeatBalanceIntRadExchgData : BaseGlobalStruct
     Array1D<Real64> SurfaceEmiss;
     bool ViewFactorReport = false; // Flag to output view factor report in eio file
     int LargestSurf = 0;
+
+    void init_constant_state([[maybe_unused]] EnergyPlusData &state) override
+    {
+    }
+
+    void init_state([[maybe_unused]] EnergyPlusData &state) override
+    {
+    }
 
     void clear_state() override
     {

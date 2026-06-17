@@ -1,7 +1,7 @@
-// EnergyPlus, Copyright (c) 1996-2023, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
-// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other
+// National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
 // contributors. All rights reserved.
 //
 // NOTICE: This Software was developed under funding from the U.S. Department of Energy and the
@@ -51,61 +51,105 @@
 // EnergyPlus Headers
 #include <EnergyPlus/DataGlobals.hh>
 #include <EnergyPlus/EnergyPlus.hh>
+#include <EnergyPlus/Formatters.hh>
 
 namespace EnergyPlus {
 
 // Forward declarations
 struct EnergyPlusData;
 
-enum class GroundTempObjType
+namespace GroundTemp {
+
+    enum class ModelType
+    {
+        Invalid = -1,
+        Kusuda,
+        FiniteDiff,
+        SiteBuildingSurface,
+        SiteShallow,
+        SiteDeep,
+        SiteFCFactorMethod,
+        Xing,
+        Num
+    };
+
+    constexpr std::array<std::string_view, (int)ModelType::Num> modelTypeNamesUC = {"SITE:GROUNDTEMPERATURE:UNDISTURBED:KUSUDAACHENBACH",
+                                                                                    "SITE:GROUNDTEMPERATURE:UNDISTURBED:FINITEDIFFERENCE",
+                                                                                    "SITE:GROUNDTEMPERATURE:BUILDINGSURFACE",
+                                                                                    "SITE:GROUNDTEMPERATURE:SHALLOW",
+                                                                                    "SITE:GROUNDTEMPERATURE:DEEP",
+                                                                                    "SITE:GROUNDTEMPERATURE:FCFACTORMETHOD",
+                                                                                    "SITE:GROUNDTEMPERATURE:UNDISTURBED:XING"};
+
+    constexpr std::array<std::string_view, (int)ModelType::Num> modelTypeNames = {"Site:GroundTemperature:Undisturbed:KusudaAchenbach",
+                                                                                  "Site:GroundTemperature:Undisturbed:FiniteDifference",
+                                                                                  "Site:GroundTemperature:BuildingSurface",
+                                                                                  "Site:GroundTemperature:Shallow",
+                                                                                  "Site:GroundTemperature:Deep",
+                                                                                  "Site:GroundTemperature:FCfactorMethod",
+                                                                                  "Site:GroundTemperature:Undisturbed:Xing"};
+
+    // Base class
+    class BaseGroundTempsModel
+    {
+    public:
+        // Public Members
+        std::string Name;
+        ModelType modelType = ModelType::Invalid;
+
+        BaseGroundTempsModel() = default;
+        virtual ~BaseGroundTempsModel() = default;
+        BaseGroundTempsModel(const BaseGroundTempsModel &) = delete;
+        BaseGroundTempsModel(BaseGroundTempsModel &&) = delete;
+        BaseGroundTempsModel &operator=(const BaseGroundTempsModel &) = delete;
+        BaseGroundTempsModel &operator=(BaseGroundTempsModel &&) = delete;
+
+        // Virtual method for retrieving the ground temp
+        virtual Real64 getGroundTemp(EnergyPlusData &state) = 0;
+
+        virtual Real64 getGroundTempAtTimeInSeconds(EnergyPlusData &state, Real64, Real64) = 0; // parameter names, this isn't K&R C
+
+        virtual Real64 getGroundTempAtTimeInMonths(EnergyPlusData &state, Real64, int) = 0; // parameter names, this isn't K&R C
+
+    protected:
+        static void write_ground_temps(InputOutputFile &os, const std::string &name, const Array1D<Real64> &data)
+        {
+            print(os,
+                  "! "
+                  "<Site:GroundTemperature:{}>,Jan{{C}},Feb{{C}},Mar{{C}},Apr{{C}},May{{C}},Jun{{C}},Jul{{C}},Aug{{C}},Sep{{C}},Oct{{"
+                  "C}},Nov{{C}},Dec{{C}}\n",
+                  name);
+            print(os, " Site:GroundTemperature:{}, {}\n", name, std::format("{:6.2F}", EnergyPlus::join(data, ", ")));
+        }
+    };
+
+    BaseGroundTempsModel *GetGroundTempModelAndInit(EnergyPlusData &state, ModelType modelType, std::string const &name);
+
+} // namespace GroundTemp
+
+struct GroundTemperatureManagerData final : BaseGlobalStruct
 {
-    Invalid = -1,
-    KusudaGroundTemp,
-    FiniteDiffGroundTemp,
-    SiteBuildingSurfaceGroundTemp,
-    SiteShallowGroundTemp,
-    SiteDeepGroundTemp,
-    SiteFCFactorMethodGroundTemp,
-    XingGroundTemp,
-    Num
-};
+    // all ground temperature model instances are owned here
+    // client component models can get pointers to the instances inside this vector, but they don't own them
+    std::vector<GroundTemp::BaseGroundTempsModel *> groundTempModels;
 
-// Base class
-class BaseGroundTempsModel
-{
-public:
-    // Public Members
-    GroundTempObjType objectType;
-    std::string objectName;
-
-    virtual ~BaseGroundTempsModel() = default;
-    BaseGroundTempsModel(const BaseGroundTempsModel &) = delete;
-    BaseGroundTempsModel(BaseGroundTempsModel &&) = delete;
-    BaseGroundTempsModel &operator=(const BaseGroundTempsModel &) = delete;
-    BaseGroundTempsModel &operator=(BaseGroundTempsModel &&) = delete;
-
-    // Default Constructor
-    BaseGroundTempsModel() : objectType(GroundTempObjType::Invalid)
+    void init_constant_state([[maybe_unused]] EnergyPlusData &state) override
     {
     }
 
-    // Virtual method for retrieving the ground temp
-    virtual Real64 getGroundTemp(EnergyPlusData &state) = 0;
-
-    virtual Real64 getGroundTempAtTimeInSeconds(EnergyPlusData &state, Real64 const, Real64 const) = 0;
-
-    virtual Real64 getGroundTempAtTimeInMonths(EnergyPlusData &state, Real64 const, int const) = 0;
-
-protected:
-    static void write_ground_temps(InputOutputFile &os, const std::string &name, const Array1D<Real64> &data)
+    void init_state([[maybe_unused]] EnergyPlusData &state) override
     {
-        print<FormatSyntax::FMT>(os,
-                                 "! "
-                                 "<Site:GroundTemperature:{}>,Jan{{C}},Feb{{C}},Mar{{C}},Apr{{C}},May{{C}},Jun{{C}},Jul{{C}},Aug{{C}},Sep{{C}},Oct{{"
-                                 "C}},Nov{{C}},Dec{{C}}\n",
-                                 name);
-        print<FormatSyntax::FMT>(os, " Site:GroundTemperature:{}, {}\n", name, fmt::format("{:6.2F}", fmt::join(data, ", ")));
     }
+
+    void clear_state() override
+    {
+        for (const auto &groundTempModel : groundTempModels) {
+            delete groundTempModel;
+        }
+        new (this) GroundTemperatureManagerData();
+    }
+
+    virtual ~GroundTemperatureManagerData() = default;
 };
 
 } // namespace EnergyPlus

@@ -1,7 +1,7 @@
-// EnergyPlus, Copyright (c) 1996-2023, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
-// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other
+// National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
 // contributors. All rights reserved.
 //
 // NOTICE: This Software was developed under funding from the U.S. Department of Energy and the
@@ -53,28 +53,60 @@
 
 #include <EnergyPlus/Data/BaseData.hh>
 #include <EnergyPlus/EnergyPlus.hh>
+#include <EnergyPlus/Material.hh>
 
 namespace EnergyPlus {
 
 // Forward declarations
 struct EnergyPlusData;
 
-namespace HysteresisPhaseChange {
+namespace Material {
 
-    struct PhaseChangeStates
+    enum class Phase
     {
-        // keeping these as ints to allow output variable reporting; could refine later into enum class
-        static const int LIQUID = -2;
-        static const int MELTING = -1;
-        static const int TRANSITION = 0;
-        static const int FREEZING = 1;
-        static const int CRYSTALLIZED = 2;
+        Invalid = -1,
+        Liquid,
+        Melting,
+        Transition,
+        Freezing,
+        Crystallized,
+        Num
     };
 
-    class HysteresisPhaseChange
-    {
+    static constexpr std::array<int, (int)Phase::Num> phaseInts = {-2, -1, 0, 1, 2};
 
-        Real64 getEnthalpy(Real64 T, Real64 Tc, Real64 tau1, Real64 tau2);
+    struct MaterialPhaseChange : public MaterialBase
+    {
+        // members are pretty much all accessed outside of the class in one way or another (by the static factory, etc.)
+        Real64 enthalpyM = 0.0;
+        Real64 enthalpyF = 0.0;
+
+        // input parameters
+        Real64 totalLatentHeat = 0.0;
+        Real64 specificHeatLiquid = 0.0;
+        Real64 deltaTempMeltingHigh = 0.0;
+        Real64 peakTempMelting = 0.0;
+        Real64 deltaTempMeltingLow = 0.0;
+        Real64 specificHeatSolid = 0.0;
+        Real64 deltaTempFreezingHigh = 0.0;
+        Real64 peakTempFreezing = 0.0;
+        Real64 deltaTempFreezingLow = 0.0;
+
+        // additional thermal properties
+        Real64 fullySolidThermalConductivity = 0.0;
+        Real64 fullyLiquidThermalConductivity = 0.0;
+        Real64 fullySolidDensity = 0.0;
+        Real64 fullyLiquidDensity = 0.0;
+
+        // history and state terms // Why are these here and not in surface?
+        bool phaseChangeTransition = false;
+        Real64 enthOld = 0.0;
+        Real64 enthNew = 0.0;
+        Real64 enthRev = 0.0;
+        Real64 CpOld = 0.0;
+        Real64 specHeatTransition = 0.0;
+
+        Real64 getEnthalpy(Real64 T, Real64 Tc, Real64 tau1, Real64 tau2) const;
 
         Real64 specHeat(Real64 temperaturePrev,
                         Real64 temperatureCurrent,
@@ -82,74 +114,46 @@ namespace HysteresisPhaseChange {
                         Real64 tau1,
                         Real64 tau2,
                         Real64 EnthalpyOld,
-                        Real64 EnthalpyNew);
+                        Real64 EnthalpyNew) const;
 
-    public:
-        // members are pretty much all accessed outside of the class in one way or another (by the static factory, etc.)
-        std::string name;
-        Real64 enthalpyM;
-        Real64 enthalpyF;
-
-        // input parameters
-        Real64 totalLatentHeat;
-        Real64 specificHeatLiquid;
-        Real64 deltaTempMeltingHigh;
-        Real64 peakTempMelting;
-        Real64 deltaTempMeltingLow;
-        Real64 specificHeatSolid;
-        Real64 deltaTempFreezingHigh;
-        Real64 peakTempFreezing;
-        Real64 deltaTempFreezingLow;
-
-        // additional thermal propreties
-        Real64 fullySolidThermalConductivity;
-        Real64 fullyLiquidThermalConductivity;
-        Real64 fullySolidDensity;
-        Real64 fullyLiquidDensity;
-
-        // history and state terms
-        bool phaseChangeTransition;
-        Real64 enthOld;
-        Real64 enthNew;
-        Real64 enthRev;
-        Real64 CpOld;
-        Real64 specHeatTransition;
-
-        // the factory for this class
-        static HysteresisPhaseChange *factory(EnergyPlusData &state, const std::string &objectName);
-
+        // This function modifies some state variables that look like they should belong to surface rather than material
         // the Cp calculation function for this class
         Real64 getCurrentSpecificHeat(
-            Real64 prevTempTD, Real64 updatedTempTDT, Real64 phaseChangeTempReverse, int prevPhaseChangeState, int &phaseChangeState);
+            Real64 prevTempTD, Real64 updatedTempTDT, Real64 phaseChangeTempReverse, Phase prevPhaseChangeState, Phase &phaseChangeState);
 
         // the conductivity calculation function for this class
-        Real64 getConductivity(Real64 T);
+        Real64 getConductivity(Real64 T) const;
 
         // the density calculation function for this class
-        Real64 getDensity(Real64 T);
+        Real64 getDensity(Real64 T) const;
 
-        // and the destructor
-        virtual ~HysteresisPhaseChange()
+        MaterialPhaseChange() : MaterialBase()
         {
+            group = Material::Group::Regular;
         }
+        ~MaterialPhaseChange() = default;
     };
 
-    void readAllHysteresisModels(EnergyPlusData &state);
+    void GetHysteresisData(EnergyPlusData &state, bool &ErrorsFound);
 
-} // namespace HysteresisPhaseChange
+} // namespace Material
 
 struct HysteresisPhaseChangeData : BaseGlobalStruct
 {
 
     bool getHysteresisModels = true;
-    int numHysteresisModels = 0;
-    std::vector<HysteresisPhaseChange::HysteresisPhaseChange> hysteresisPhaseChangeModels;
+
+    void init_constant_state([[maybe_unused]] EnergyPlusData &state) override
+    {
+    }
+
+    void init_state([[maybe_unused]] EnergyPlusData &state) override
+    {
+    }
 
     void clear_state() override
     {
-        numHysteresisModels = 0;
         getHysteresisModels = true;
-        hysteresisPhaseChangeModels.clear();
     }
 };
 

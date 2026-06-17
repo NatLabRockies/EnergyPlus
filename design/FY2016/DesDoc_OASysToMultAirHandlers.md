@@ -7,7 +7,7 @@ Currently a DOAS (dedicated outdoor air system) in EnergyPlus is a normal AirLoo
 
 ### **Conference Call Conclusions**
 #### **Jan 06, 2016**
-*  Should the DOAS serving multiple air handlers be modeled on the AirLoopHVAC object or the AirLoopHVAC:OutdoorAirSystem? Consensus seemed to be on the AirLoopHVAC:OutdoorAirSystem. 
+*  Should the DOAS serving multiple air handlers be modeled on the AirLoopHVAC object or the AirLoopHVAC:OutdoorAirSystem? Consensus seemed to be on the AirLoopHVAC:OutdoorAirSystem.
 *  The DOAS will be supplying ventilation air. To allow economizer action, each  AirLoopHVAC:OutdoorAirSystem it connects to will need 2 outside air inlets. One for the DOAS connection and one for direct access to outside air for economizer action.
 *  Should the DOAS have branches or just in/out nodes like OutdoorAirSystem? I favor directly replicating OutdoorAirSystem.
 
@@ -40,7 +40,7 @@ Here we will start seeing some impact on run time. Our proposal is to use method
 *Sizing:* we propose to use the existing *Sizing:System* object for  *OutdoorAirSystemHVAC*. *OutdoorAirSystemHVAC* will be sized to the sum of its air loop design minimum ventilation air flow rates.
 
 ### **Testing/Validation Source(s):**
-Creating an example / test file for this new capability will be a major task in itself. Once we have this file, we will use it to compare a "do nothing" OutdoorAirSystemHVAC with the case where there is no OutdoorAirSystemHVAC. We can also compare cases where the ventilation air conditioning is done within the air loop versus where it is done by an OutdoorAirSystemHVAC. 
+Creating an example / test file for this new capability will be a major task in itself. Once we have this file, we will use it to compare a "do nothing" OutdoorAirSystemHVAC with the case where there is no OutdoorAirSystemHVAC. We can also compare cases where the ventilation air conditioning is done within the air loop versus where it is done by an OutdoorAirSystemHVAC.
 
 ### **IO Ref (draft)**
 
@@ -56,5 +56,3 @@ We aren't far enough along yet to do this. The *Air Loop* and *Air Loop Simulati
 ### **Example file and Transition changes:**
 
 ### **Other documents:**
-
-

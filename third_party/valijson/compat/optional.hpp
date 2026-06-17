@@ -7,8 +7,8 @@
 // The idea and interface is based on Boost.Optional library
 // authored by Fernando Luis Cacciola Carballal
 
-# ifndef ___OPTIONAL_HPP___
-# define ___OPTIONAL_HPP___
+# ifndef OPTIONAL_HPP
+# define OPTIONAL_HPP
 
 # include <utility>
 # include <type_traits>
@@ -45,11 +45,11 @@
 #
 # if defined __clang_major__
 #   if (__clang_major__ == 3 && __clang_minor__ >= 5)
-#     define TR2_OPTIONAL_CLANG_3_5_AND_HIGHTER_
+#     define TR2_OPTIONAL_CLANG_3_5_AND_HIGHER_
 #   elif (__clang_major__ > 3)
-#     define TR2_OPTIONAL_CLANG_3_5_AND_HIGHTER_
+#     define TR2_OPTIONAL_CLANG_3_5_AND_HIGHER_
 #   endif
-#   if defined TR2_OPTIONAL_CLANG_3_5_AND_HIGHTER_
+#   if defined TR2_OPTIONAL_CLANG_3_5_AND_HIGHER_
 #     define TR2_OPTIONAL_CLANG_3_4_2_AND_HIGHER_
 #   elif (__clang_major__ == 3 && __clang_minor__ == 4 && __clang_patchlevel__ >= 2)
 #     define TR2_OPTIONAL_CLANG_3_4_2_AND_HIGHER_
@@ -85,7 +85,7 @@
 #   define OPTIONAL_CONSTEXPR_INIT_LIST
 # endif
 
-# if defined TR2_OPTIONAL_CLANG_3_5_AND_HIGHTER_ && (defined __cplusplus) && (__cplusplus != 201103L)
+# if defined TR2_OPTIONAL_CLANG_3_5_AND_HIGHER_ && (defined __cplusplus) && (__cplusplus != 201103L)
 #   define OPTIONAL_HAS_MOVE_ACCESSORS 1
 # else
 #   define OPTIONAL_HAS_MOVE_ACCESSORS 0
@@ -270,7 +270,7 @@ namespace std{
             unsigned char dummy_;
             T value_;
 
-            constexpr storage_t( trivial_init_t ) noexcept : dummy_() {};
+            constexpr storage_t( trivial_init_t ) noexcept : dummy_() {}
 
             template <class... Args>
             constexpr storage_t( Args&&... args ) : value_(constexpr_forward<Args>(args)...) {}
@@ -285,7 +285,7 @@ namespace std{
             unsigned char dummy_;
             T value_;
 
-            constexpr constexpr_storage_t( trivial_init_t ) noexcept : dummy_() {};
+            constexpr constexpr_storage_t( trivial_init_t ) noexcept : dummy_() {}
 
             template <class... Args>
             constexpr constexpr_storage_t( Args&&... args ) : value_(constexpr_forward<Args>(args)...) {}
@@ -300,7 +300,7 @@ namespace std{
             bool init_;
             storage_t<T> storage_;
 
-            constexpr optional_base() noexcept : init_(false), storage_(trivial_init) {};
+            constexpr optional_base() noexcept : init_(false), storage_(trivial_init) {}
 
             explicit constexpr optional_base(const T& v) : init_(true), storage_(v) {}
 
@@ -323,7 +323,7 @@ namespace std{
             bool init_;
             constexpr_storage_t<T> storage_;
 
-            constexpr constexpr_optional_base() noexcept : init_(false), storage_(trivial_init) {};
+            constexpr constexpr_optional_base() noexcept : init_(false), storage_(trivial_init) {}
 
             explicit constexpr constexpr_optional_base(const T& v) : init_(true), storage_(v) {}
 
@@ -398,8 +398,8 @@ namespace std{
             typedef T value_type;
 
             // 20.5.5.1, constructors
-            constexpr optional() noexcept : OptionalBase<T>()  {};
-            constexpr optional(nullopt_t) noexcept : OptionalBase<T>() {};
+            constexpr optional() noexcept : OptionalBase<T>()  {}
+            constexpr optional(nullopt_t) noexcept : OptionalBase<T>() {}
 
             optional(const optional& rhs)
             : OptionalBase<T>()
@@ -1040,4 +1040,4 @@ namespace std
 # undef TR2_OPTIONAL_REQUIRES
 # undef TR2_OPTIONAL_ASSERTED_EXPRESSION
 
-# endif //___OPTIONAL_HPP___
+# endif //OPTIONAL_HPP

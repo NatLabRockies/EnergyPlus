@@ -1,7 +1,7 @@
-// EnergyPlus, Copyright (c) 1996-2023, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
-// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other
+// National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
 // contributors. All rights reserved.
 //
 // NOTICE: This Software was developed under funding from the U.S. Department of Energy and the
@@ -52,6 +52,7 @@
 
 // C++ Headers
 #include <string>
+#include <vector>
 
 namespace EnergyPlus {
 struct EnergyPlusData;
@@ -65,11 +66,11 @@ int initializeEnergyPlus(EnergyPlus::EnergyPlusData &state, std::string const &f
 
 int wrapUpEnergyPlus(EnergyPlus::EnergyPlusData &state);
 
-int ENERGYPLUSLIB_API EnergyPlusPgm(int argc, const char *argv[], std::string const &filepath = std::string());
+int ENERGYPLUSLIB_API EnergyPlusPgm(const std::vector<std::string> &args, std::string const &filepath = std::string());
 
 int ENERGYPLUSLIB_API RunEnergyPlus(EnergyPlus::EnergyPlusData &state, std::string const &filepath = std::string());
 
-int runEnergyPlusAsLibrary(EnergyPlus::EnergyPlusData &state, int argc, const char *argv[]);
+int runEnergyPlusAsLibrary(EnergyPlus::EnergyPlusData &state, const std::vector<std::string> &args);
 
 void ENERGYPLUSLIB_API StoreProgressCallback(EnergyPlus::EnergyPlusData &state, void (*f)(int const));
 

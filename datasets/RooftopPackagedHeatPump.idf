@@ -53,9 +53,6 @@
 ! their specific case. Following the example, only the curve fits of DX cooling and heating coils are provided.
 ! The objects and syntax in this dataset comply with EnergyPlus, Version 8.4.0 and above, unless otherwise noted.
 
-!  Version,
-!    9.0;                    !- Version Identifier
-
   AirLoopHVAC:UnitaryHeatPump:AirToAir,
     RooftopPackagedHeatpumpExample,  !- Name
     HVACAvailSched,          !- Availability Schedule Name
@@ -100,7 +97,10 @@
     JCI J05XP Cooling CapFFF,!- Total Cooling Capacity Function of Flow Fraction Curve Name
     JCI J05XP Cooling EIRFTemp,  !- Energy Input Ratio Function of Temperature Curve Name
     JCI J05XP Cooling EIRFFF,!- Energy Input Ratio Function of Flow Fraction Curve Name
-    JCI J05XP Cooling PLFFPLR;  !- Part Load Fraction Correlation Curve Name
+    JCI J05XP Cooling PLFFPLR,  !- Part Load Fraction Correlation Curve Name
+    ,                        !- Minimum Outdoor Dry-Bulb Temperature for Compressor Operation {C}
+    ,                        !- Nominal Time for Condensate Removal to Begin {s}
+    ;                        !- Ratio of Initial Moisture Evaporation Rate and Steady State Latent Capacity {dimensionless}
 
 ! Cooling Capacity Function of Temperature Curve
 ! x = Entering Wet-bulb Temp and y = Outdoor Dry-bulb Temp
@@ -206,11 +206,17 @@
     ,                        !- Outdoor Dry-Bulb Temperature to Turn On Compressor {C}
     ,                        !- Maximum Outdoor Dry-Bulb Temperature for Defrost Operation {C}
     ,                        !- Crankcase Heater Capacity {W}
+    ,                        !- Crankcase Heater Capacity Function of Temperature Curve Name
     ,                        !- Maximum Outdoor Dry-Bulb Temperature for Crankcase Heater Operation {C}
     ,                        !- Defrost Strategy
     ,                        !- Defrost Control
     ,                        !- Defrost Time Period Fraction
-    ;                        !- Resistive Defrost Heater Capacity {W}
+    ,                        !- Resistive Defrost Heater Capacity {W}
+    ,                        !- Region number for calculating HSPF
+    ,                        !- Evaporator Air Inlet Node Name
+    ,                        !- Zone Name for Evaporator Placement
+    ,                        !- Secondary Coil Air Flow Rate {m3/s}
+    ;                        !- Secondary Coil Fan Flow Scaling Factor {m3/s}
 
 ! Heating Capacity Function of Temperature Curve
 ! x = Entering dry-bulb Temp and y = Outdoor Dry-bulb Temp
@@ -321,7 +327,10 @@
     JCI J10XP Cooling CapFFF,!- Total Cooling Capacity Function of Flow Fraction Curve Name
     JCI J10XP Cooling EIRFTemp,  !- Energy Input Ratio Function of Temperature Curve Name
     JCI J10XP Cooling EIRFFF,!- Energy Input Ratio Function of Flow Fraction Curve Name
-    JCI J10XP Cooling PLFFPLR;  !- Part Load Fraction Correlation Curve Name
+    JCI J10XP Cooling PLFFPLR,  !- Part Load Fraction Correlation Curve Name
+    ,                        !- Minimum Outdoor Dry-Bulb Temperature for Compressor Operation {C}
+    ,                        !- Nominal Time for Condensate Removal to Begin {s}
+    ;                        !- Ratio of Initial Moisture Evaporation Rate and Steady State Latent Capacity {dimensionless}
 
 ! Cooling Capacity Function of Temperature Curve
 ! x = Entering Wet-bulb Temp and y = Outdoor Dry-bulb Temp
@@ -427,11 +436,17 @@
     ,                        !- Outdoor Dry-Bulb Temperature to Turn On Compressor {C}
     ,                        !- Maximum Outdoor Dry-Bulb Temperature for Defrost Operation {C}
     ,                        !- Crankcase Heater Capacity {W}
+    ,                        !- Crankcase Heater Capacity Function of Temperature Curve Name
     ,                        !- Maximum Outdoor Dry-Bulb Temperature for Crankcase Heater Operation {C}
     ,                        !- Defrost Strategy
     ,                        !- Defrost Control
     ,                        !- Defrost Time Period Fraction
-    ;                        !- Resistive Defrost Heater Capacity {W}
+    ,                        !- Resistive Defrost Heater Capacity {W}
+    ,                        !- Region number for calculating HSPF
+    ,                        !- Evaporator Air Inlet Node Name
+    ,                        !- Zone Name for Evaporator Placement
+    ,                        !- Secondary Coil Air Flow Rate {m3/s}
+    ;                        !- Secondary Coil Fan Flow Scaling Factor {m3/s}
 
 ! Heating Capacity Function of Temperature Curve
 ! x = Entering dry-bulb Temp and y = Outdoor Dry-bulb Temp
@@ -541,7 +556,10 @@
     Carrier 50TFQ006 Cooling CapFFF,  !- Total Cooling Capacity Function of Flow Fraction Curve Name
     Carrier 50TFQ006 Cooling EIRFTemp,  !- Energy Input Ratio Function of Temperature Curve Name
     Carrier 50TFQ006 Cooling EIRFFF,  !- Energy Input Ratio Function of Flow Fraction Curve Name
-    Carrier 50TFQ006 Cooling PLFFPLR;  !- Part Load Fraction Correlation Curve Name
+    Carrier 50TFQ006 Cooling PLFFPLR,  !- Part Load Fraction Correlation Curve Name
+    ,                        !- Minimum Outdoor Dry-Bulb Temperature for Compressor Operation {C}
+    ,                        !- Nominal Time for Condensate Removal to Begin {s}
+    ;                        !- Ratio of Initial Moisture Evaporation Rate and Steady State Latent Capacity {dimensionless}
 
 ! Cooling Capacity Function of Temperature Curve
 ! x = Entering Wet-bulb Temp and y = Outdoor Dry-bulb Temp
@@ -647,11 +665,17 @@
     ,                        !- Outdoor Dry-Bulb Temperature to Turn On Compressor {C}
     ,                        !- Maximum Outdoor Dry-Bulb Temperature for Defrost Operation {C}
     ,                        !- Crankcase Heater Capacity {W}
+    ,                        !- Crankcase Heater Capacity Function of Temperature Curve Name
     ,                        !- Maximum Outdoor Dry-Bulb Temperature for Crankcase Heater Operation {C}
     ,                        !- Defrost Strategy
     ,                        !- Defrost Control
     ,                        !- Defrost Time Period Fraction
-    ;                        !- Resistive Defrost Heater Capacity {W}
+    ,                        !- Resistive Defrost Heater Capacity {W}
+    ,                        !- Region number for calculating HSPF
+    ,                        !- Evaporator Air Inlet Node Name
+    ,                        !- Zone Name for Evaporator Placement
+    ,                        !- Secondary Coil Air Flow Rate {m3/s}
+    ;                        !- Secondary Coil Fan Flow Scaling Factor {m3/s}
 
 ! Heating Capacity Function of Temperature Curve
 ! x = Entering dry-bulb Temp and y = Outdoor Dry-bulb Temp
@@ -761,7 +785,10 @@
     Carrier 50HJQ012 Cooling CapFFF,  !- Total Cooling Capacity Function of Flow Fraction Curve Name
     Carrier 50HJQ012 Cooling EIRFTemp,  !- Energy Input Ratio Function of Temperature Curve Name
     Carrier 50HJQ012 Cooling EIRFFF,  !- Energy Input Ratio Function of Flow Fraction Curve Name
-    Carrier 50HJQ012 Cooling PLFFPLR;  !- Part Load Fraction Correlation Curve Name
+    Carrier 50HJQ012 Cooling PLFFPLR,  !- Part Load Fraction Correlation Curve Name
+    ,                        !- Minimum Outdoor Dry-Bulb Temperature for Compressor Operation {C}
+    ,                        !- Nominal Time for Condensate Removal to Begin {s}
+    ;                        !- Ratio of Initial Moisture Evaporation Rate and Steady State Latent Capacity {dimensionless}
 
 ! Cooling Capacity Function of Temperature Curve
 ! x = Entering Wet-bulb Temp and y = Outdoor Dry-bulb Temp
@@ -867,11 +894,17 @@
     ,                        !- Outdoor Dry-Bulb Temperature to Turn On Compressor {C}
     ,                        !- Maximum Outdoor Dry-Bulb Temperature for Defrost Operation {C}
     ,                        !- Crankcase Heater Capacity {W}
+    ,                        !- Crankcase Heater Capacity Function of Temperature Curve Name
     ,                        !- Maximum Outdoor Dry-Bulb Temperature for Crankcase Heater Operation {C}
     ,                        !- Defrost Strategy
     ,                        !- Defrost Control
     ,                        !- Defrost Time Period Fraction
-    ;                        !- Resistive Defrost Heater Capacity {W}
+    ,                        !- Resistive Defrost Heater Capacity {W}
+    ,                        !- Region number for calculating HSPF
+    ,                        !- Evaporator Air Inlet Node Name
+    ,                        !- Zone Name for Evaporator Placement
+    ,                        !- Secondary Coil Air Flow Rate {m3/s}
+    ;                        !- Secondary Coil Fan Flow Scaling Factor {m3/s}
 
 ! Heating Capacity Function of Temperature Curve
 ! x = Entering dry-bulb Temp and y = Outdoor Dry-bulb Temp
@@ -981,7 +1014,10 @@
     Carrier 50EZ060 Cooling CapFFF,  !- Total Cooling Capacity Function of Flow Fraction Curve Name
     Carrier 50EZ060 Cooling EIRFTemp,  !- Energy Input Ratio Function of Temperature Curve Name
     Carrier 50EZ060 Cooling EIRFFF,  !- Energy Input Ratio Function of Flow Fraction Curve Name
-    Carrier 50EZ060 Cooling PLFFPLR;  !- Part Load Fraction Correlation Curve Name
+    Carrier 50EZ060 Cooling PLFFPLR,  !- Part Load Fraction Correlation Curve Name
+    ,                        !- Minimum Outdoor Dry-Bulb Temperature for Compressor Operation {C}
+    ,                        !- Nominal Time for Condensate Removal to Begin {s}
+    ;                        !- Ratio of Initial Moisture Evaporation Rate and Steady State Latent Capacity {dimensionless}
 
 ! Cooling Capacity Function of Temperature Curve
 ! x = Entering Wet-bulb Temp and y = Outdoor Dry-bulb Temp
@@ -1087,11 +1123,17 @@
     ,                        !- Outdoor Dry-Bulb Temperature to Turn On Compressor {C}
     ,                        !- Maximum Outdoor Dry-Bulb Temperature for Defrost Operation {C}
     ,                        !- Crankcase Heater Capacity {W}
+    ,                        !- Crankcase Heater Capacity Function of Temperature Curve Name
     ,                        !- Maximum Outdoor Dry-Bulb Temperature for Crankcase Heater Operation {C}
     ,                        !- Defrost Strategy
     ,                        !- Defrost Control
     ,                        !- Defrost Time Period Fraction
-    ;                        !- Resistive Defrost Heater Capacity {W}
+    ,                        !- Resistive Defrost Heater Capacity {W}
+    ,                        !- Region number for calculating HSPF
+    ,                        !- Evaporator Air Inlet Node Name
+    ,                        !- Zone Name for Evaporator Placement
+    ,                        !- Secondary Coil Air Flow Rate {m3/s}
+    ;                        !- Secondary Coil Fan Flow Scaling Factor {m3/s}
 
 ! Heating Capacity Function of Temperature Curve
 ! x = Entering dry-bulb Temp and y = Outdoor Dry-bulb Temp
@@ -1194,6 +1236,7 @@
     DXCoilAirInletNode,      !- Air Inlet Node Name
     DXCoilAirOutletNode,     !- Air Outlet Node Name
     ,                        !- Crankcase Heater Capacity {W}
+    ,                        !- Crankcase Heater Capacity Function of Temperature Curve Name
     ,                        !- Maximum Outdoor Dry-Bulb Temperature for Crankcase Heater Operation {C}
     2,                       !- Number of Capacity Stages
     0,                       !- Number of Enhanced Dehumidification Modes
@@ -1286,7 +1329,7 @@
     1.2,                     !- Maximum Value of x
     0.9507,                  !- Minimum Curve Output
     1.062,                   !- Maximum Curve Output
-    Dimensionless,            !- Input Unit Type for X
+    Dimensionless,           !- Input Unit Type for X
     Dimensionless;           !- Output Unit Type
 
 ! EIR Function of Flow Fraction Curve
@@ -1301,7 +1344,7 @@
     1.2,                     !- Maximum Value of x
     0.9507,                  !- Minimum Curve Output
     1.0458,                  !- Maximum Curve Output
-    Dimensionless,            !- Input Unit Type for X
+    Dimensionless,           !- Input Unit Type for X
     Dimensionless;           !- Output Unit Type
 
 ! Cooling Capacity Function of Temperature Curve
@@ -1408,11 +1451,17 @@
     ,                        !- Outdoor Dry-Bulb Temperature to Turn On Compressor {C}
     ,                        !- Maximum Outdoor Dry-Bulb Temperature for Defrost Operation {C}
     ,                        !- Crankcase Heater Capacity {W}
+    ,                        !- Crankcase Heater Capacity Function of Temperature Curve Name
     ,                        !- Maximum Outdoor Dry-Bulb Temperature for Crankcase Heater Operation {C}
     ,                        !- Defrost Strategy
     ,                        !- Defrost Control
     ,                        !- Defrost Time Period Fraction
-    ;                        !- Resistive Defrost Heater Capacity {W}
+    ,                        !- Resistive Defrost Heater Capacity {W}
+    ,                        !- Region number for calculating HSPF
+    ,                        !- Evaporator Air Inlet Node Name
+    ,                        !- Zone Name for Evaporator Placement
+    ,                        !- Secondary Coil Air Flow Rate {m3/s}
+    ;                        !- Secondary Coil Fan Flow Scaling Factor {m3/s}
 
 ! Heating Capacity Function of Temperature Curve
 ! x = Outdoor Dry-bulb Temp (Entering dry-bulb Temp = 70 F)
@@ -1505,6 +1554,7 @@
     DXCoilAirInletNode,      !- Air Inlet Node Name
     DXCoilAirOutletNode,     !- Air Outlet Node Name
     ,                        !- Crankcase Heater Capacity {W}
+    ,                        !- Crankcase Heater Capacity Function of Temperature Curve Name
     ,                        !- Maximum Outdoor Dry-Bulb Temperature for Crankcase Heater Operation {C}
     2,                       !- Number of Capacity Stages
     0,                       !- Number of Enhanced Dehumidification Modes
@@ -1719,11 +1769,17 @@
     ,                        !- Outdoor Dry-Bulb Temperature to Turn On Compressor {C}
     ,                        !- Maximum Outdoor Dry-Bulb Temperature for Defrost Operation {C}
     ,                        !- Crankcase Heater Capacity {W}
+    ,                        !- Crankcase Heater Capacity Function of Temperature Curve Name
     ,                        !- Maximum Outdoor Dry-Bulb Temperature for Crankcase Heater Operation {C}
     ,                        !- Defrost Strategy
     ,                        !- Defrost Control
     ,                        !- Defrost Time Period Fraction
-    ;                        !- Resistive Defrost Heater Capacity {W}
+    ,                        !- Resistive Defrost Heater Capacity {W}
+    ,                        !- Region number for calculating HSPF
+    ,                        !- Evaporator Air Inlet Node Name
+    ,                        !- Zone Name for Evaporator Placement
+    ,                        !- Secondary Coil Air Flow Rate {m3/s}
+    ;                        !- Secondary Coil Fan Flow Scaling Factor {m3/s}
 
 ! Heating Capacity Function of Temperature Curve
 ! x = Outdoor Dry-bulb Temp (Entering dry-bulb Temp = 70 F)
@@ -1824,7 +1880,10 @@
     Lennox THA060S2 Cooling CapFFF,  !- Total Cooling Capacity Function of Flow Fraction Curve Name
     Lennox THA060S2 Cooling EIRFTemp,  !- Energy Input Ratio Function of Temperature Curve Name
     Lennox THA060S2 Cooling EIRFFF,  !- Energy Input Ratio Function of Flow Fraction Curve Name
-    Lennox THA060S2 Cooling PLFFPLR;  !- Part Load Fraction Correlation Curve Name
+    Lennox THA060S2 Cooling PLFFPLR,  !- Part Load Fraction Correlation Curve Name
+    ,                        !- Minimum Outdoor Dry-Bulb Temperature for Compressor Operation {C}
+    ,                        !- Nominal Time for Condensate Removal to Begin {s}
+    ;                        !- Ratio of Initial Moisture Evaporation Rate and Steady State Latent Capacity {dimensionless}
 
 ! Cooling Capacity Function of Temperature Curve
 ! x = Entering Wet-bulb Temp and y = Outdoor Dry-bulb Temp
@@ -1930,11 +1989,17 @@
     ,                        !- Outdoor Dry-Bulb Temperature to Turn On Compressor {C}
     ,                        !- Maximum Outdoor Dry-Bulb Temperature for Defrost Operation {C}
     ,                        !- Crankcase Heater Capacity {W}
+    ,                        !- Crankcase Heater Capacity Function of Temperature Curve Name
     ,                        !- Maximum Outdoor Dry-Bulb Temperature for Crankcase Heater Operation {C}
     ,                        !- Defrost Strategy
     ,                        !- Defrost Control
     ,                        !- Defrost Time Period Fraction
-    ;                        !- Resistive Defrost Heater Capacity {W}
+    ,                        !- Resistive Defrost Heater Capacity {W}
+    ,                        !- Region number for calculating HSPF
+    ,                        !- Evaporator Air Inlet Node Name
+    ,                        !- Zone Name for Evaporator Placement
+    ,                        !- Secondary Coil Air Flow Rate {m3/s}
+    ;                        !- Secondary Coil Fan Flow Scaling Factor {m3/s}
 
 ! Heating Capacity Function of Temperature Curve
 ! x = Outdoor Dry-bulb Temp (Entering dry-bulb Temp = 70 F)
@@ -2027,6 +2092,7 @@
     DXCoilAirInletNode,      !- Air Inlet Node Name
     DXCoilAirOutletNode,     !- Air Outlet Node Name
     ,                        !- Crankcase Heater Capacity {W}
+    ,                        !- Crankcase Heater Capacity Function of Temperature Curve Name
     ,                        !- Maximum Outdoor Dry-Bulb Temperature for Crankcase Heater Operation {C}
     2,                       !- Number of Capacity Stages
     0,                       !- Number of Enhanced Dehumidification Modes
@@ -2241,11 +2307,17 @@
     ,                        !- Outdoor Dry-Bulb Temperature to Turn On Compressor {C}
     ,                        !- Maximum Outdoor Dry-Bulb Temperature for Defrost Operation {C}
     ,                        !- Crankcase Heater Capacity {W}
+    ,                        !- Crankcase Heater Capacity Function of Temperature Curve Name
     ,                        !- Maximum Outdoor Dry-Bulb Temperature for Crankcase Heater Operation {C}
     ,                        !- Defrost Strategy
     ,                        !- Defrost Control
     ,                        !- Defrost Time Period Fraction
-    ;                        !- Resistive Defrost Heater Capacity {W}
+    ,                        !- Resistive Defrost Heater Capacity {W}
+    ,                        !- Region number for calculating HSPF
+    ,                        !- Evaporator Air Inlet Node Name
+    ,                        !- Zone Name for Evaporator Placement
+    ,                        !- Secondary Coil Air Flow Rate {m3/s}
+    ;                        !- Secondary Coil Fan Flow Scaling Factor {m3/s}
 
 ! Heating Capacity Function of Temperature Curve
 ! x = Outdoor Dry-bulb Temp (Entering dry-bulb Temp = 70 F)
@@ -2346,7 +2418,10 @@
     Lennox KHA060S4 Cooling CapFFF,  !- Total Cooling Capacity Function of Flow Fraction Curve Name
     Lennox KHA060S4 Cooling EIRFTemp,  !- Energy Input Ratio Function of Temperature Curve Name
     Lennox KHA060S4 Cooling EIRFFF,  !- Energy Input Ratio Function of Flow Fraction Curve Name
-    Lennox KHA060S4 Cooling PLFFPLR;  !- Part Load Fraction Correlation Curve Name
+    Lennox KHA060S4 Cooling PLFFPLR,  !- Part Load Fraction Correlation Curve Name
+    ,                        !- Minimum Outdoor Dry-Bulb Temperature for Compressor Operation {C}
+    ,                        !- Nominal Time for Condensate Removal to Begin {s}
+    ;                        !- Ratio of Initial Moisture Evaporation Rate and Steady State Latent Capacity {dimensionless}
 
 ! Cooling Capacity Function of Temperature Curve
 ! x = Entering Wet-bulb Temp and y = Outdoor Dry-bulb Temp
@@ -2452,11 +2527,17 @@
     ,                        !- Outdoor Dry-Bulb Temperature to Turn On Compressor {C}
     ,                        !- Maximum Outdoor Dry-Bulb Temperature for Defrost Operation {C}
     ,                        !- Crankcase Heater Capacity {W}
+    ,                        !- Crankcase Heater Capacity Function of Temperature Curve Name
     ,                        !- Maximum Outdoor Dry-Bulb Temperature for Crankcase Heater Operation {C}
     ,                        !- Defrost Strategy
     ,                        !- Defrost Control
     ,                        !- Defrost Time Period Fraction
-    ;                        !- Resistive Defrost Heater Capacity {W}
+    ,                        !- Resistive Defrost Heater Capacity {W}
+    ,                        !- Region number for calculating HSPF
+    ,                        !- Evaporator Air Inlet Node Name
+    ,                        !- Zone Name for Evaporator Placement
+    ,                        !- Secondary Coil Air Flow Rate {m3/s}
+    ;                        !- Secondary Coil Fan Flow Scaling Factor {m3/s}
 
 ! Heating Capacity Function of Temperature Curve
 ! x = Outdoor Dry-bulb Temp (Entering dry-bulb Temp = 70 F)
@@ -2549,6 +2630,7 @@
     DXCoilAirInletNode,      !- Air Inlet Node Name
     DXCoilAirOutletNode,     !- Air Outlet Node Name
     ,                        !- Crankcase Heater Capacity {W}
+    ,                        !- Crankcase Heater Capacity Function of Temperature Curve Name
     ,                        !- Maximum Outdoor Dry-Bulb Temperature for Crankcase Heater Operation {C}
     2,                       !- Number of Capacity Stages
     0,                       !- Number of Enhanced Dehumidification Modes
@@ -2763,11 +2845,17 @@
     ,                        !- Outdoor Dry-Bulb Temperature to Turn On Compressor {C}
     ,                        !- Maximum Outdoor Dry-Bulb Temperature for Defrost Operation {C}
     ,                        !- Crankcase Heater Capacity {W}
+    ,                        !- Crankcase Heater Capacity Function of Temperature Curve Name
     ,                        !- Maximum Outdoor Dry-Bulb Temperature for Crankcase Heater Operation {C}
     ,                        !- Defrost Strategy
     ,                        !- Defrost Control
     ,                        !- Defrost Time Period Fraction
-    ;                        !- Resistive Defrost Heater Capacity {W}
+    ,                        !- Resistive Defrost Heater Capacity {W}
+    ,                        !- Region number for calculating HSPF
+    ,                        !- Evaporator Air Inlet Node Name
+    ,                        !- Zone Name for Evaporator Placement
+    ,                        !- Secondary Coil Air Flow Rate {m3/s}
+    ;                        !- Secondary Coil Fan Flow Scaling Factor {m3/s}
 
 ! Heating Capacity Function of Temperature Curve
 ! x = Outdoor Dry-bulb Temp (Entering dry-bulb Temp = 70 F)
@@ -2860,6 +2948,7 @@
     DXCoilAirInletNode,      !- Air Inlet Node Name
     DXCoilAirOutletNode,     !- Air Outlet Node Name
     ,                        !- Crankcase Heater Capacity {W}
+    ,                        !- Crankcase Heater Capacity Function of Temperature Curve Name
     ,                        !- Maximum Outdoor Dry-Bulb Temperature for Crankcase Heater Operation {C}
     2,                       !- Number of Capacity Stages
     0,                       !- Number of Enhanced Dehumidification Modes
@@ -3074,11 +3163,17 @@
     ,                        !- Outdoor Dry-Bulb Temperature to Turn On Compressor {C}
     ,                        !- Maximum Outdoor Dry-Bulb Temperature for Defrost Operation {C}
     ,                        !- Crankcase Heater Capacity {W}
+    ,                        !- Crankcase Heater Capacity Function of Temperature Curve Name
     ,                        !- Maximum Outdoor Dry-Bulb Temperature for Crankcase Heater Operation {C}
     ,                        !- Defrost Strategy
     ,                        !- Defrost Control
     ,                        !- Defrost Time Period Fraction
-    ;                        !- Resistive Defrost Heater Capacity {W}
+    ,                        !- Resistive Defrost Heater Capacity {W}
+    ,                        !- Region number for calculating HSPF
+    ,                        !- Evaporator Air Inlet Node Name
+    ,                        !- Zone Name for Evaporator Placement
+    ,                        !- Secondary Coil Air Flow Rate {m3/s}
+    ;                        !- Secondary Coil Fan Flow Scaling Factor {m3/s}
 
 ! Heating Capacity Function of Temperature Curve
 ! x = Outdoor Dry-bulb Temp (Entering dry-bulb Temp = 70 F)

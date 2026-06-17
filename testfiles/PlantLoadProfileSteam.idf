@@ -1,0 +1,397 @@
+! PlantLoadProfileSteam.idf
+!
+! Basic file description:
+! This input file is a plant-only simulation using the PLANT LOAD PROFILE object for steam loop; no zones are simulated.
+! The PLANT LOAD PROFILE object allows a scheduled load to be connected to the plant demand side loop.
+! This is useful when the building plant load profile is already known.  It's also useful for testing the
+! operation of plant supply side components.
+! Run:      1 design day.
+! Building: None.
+! System:   None.
+! Plant:    PLANT LOAD PROFILE with Boiler:Steam.
+
+  Version,26.2;
+
+  Building,
+    Plant Load Profile Steam Example,  !- Name
+    0.0,                     !- North Axis {deg}
+    Suburbs,                 !- Terrain
+    0.04,                    !- Loads Convergence Tolerance Value {W}
+    0.04,                    !- Temperature Convergence Tolerance Value {deltaC}
+    FullInteriorAndExterior, !- Solar Distribution
+    25,                      !- Maximum Number of Warmup Days
+    6;                       !- Minimum Number of Warmup Days
+
+  Timestep,6;
+
+  GlobalGeometryRules,
+    UpperLeftCorner,         !- Starting Vertex Position
+    CounterClockWise,        !- Vertex Entry Direction
+    Relative;                !- Coordinate System
+
+  Site:Location,
+    CHICAGO_IL_USA_WMO_725300,  !- Name
+    42.00,                   !- Latitude {deg}
+    -87.88,                  !- Longitude {deg}
+    -6.00,                   !- Time Zone {hr}
+    190.00;                  !- Elevation {m}
+
+  SizingPeriod:DesignDay,
+    CHICAGO Ann Clg 1% Condns DB=>MWB,  !- Name
+    7,                       !- Month
+    21,                      !- Day of Month
+    SummerDesignDay,         !- Day Type
+    31.5,                    !- Maximum Dry-Bulb Temperature {C}
+    10.7,                    !- Daily Dry-Bulb Temperature Range {deltaC}
+    ,                        !- Dry-Bulb Temperature Range Modifier Type
+    ,                        !- Dry-Bulb Temperature Range Modifier Day Schedule Name
+    Wetbulb,                 !- Humidity Condition Type
+    23,                      !- Wetbulb or DewPoint at Maximum Dry-Bulb {C}
+    ,                        !- Humidity Condition Day Schedule Name
+    ,                        !- Humidity Ratio at Maximum Dry-Bulb {kgWater/kgDryAir}
+    ,                        !- Enthalpy at Maximum Dry-Bulb {J/kg}
+    ,                        !- Daily Wet-Bulb Temperature Range {deltaC}
+    99063.,                  !- Barometric Pressure {Pa}
+    5.3,                     !- Wind Speed {m/s}
+    230,                     !- Wind Direction {deg}
+    No,                      !- Rain Indicator
+    No,                      !- Snow Indicator
+    No,                      !- Daylight Saving Time Indicator
+    ASHRAEClearSky,          !- Solar Model Indicator
+    ,                        !- Beam Solar Day Schedule Name
+    ,                        !- Diffuse Solar Day Schedule Name
+    ,                        !- ASHRAE Clear Sky Optical Depth for Beam Irradiance (taub) {dimensionless}
+    ,                        !- ASHRAE Clear Sky Optical Depth for Diffuse Irradiance (taud) {dimensionless}
+    1.00;                    !- Sky Clearness
+
+  SizingPeriod:DesignDay,
+    CHICAGO Ann Htg 99% Condns DB,  !- Name
+    1,                       !- Month
+    21,                      !- Day of Month
+    WinterDesignDay,         !- Day Type
+    -17.3,                   !- Maximum Dry-Bulb Temperature {C}
+    0.0,                     !- Daily Dry-Bulb Temperature Range {deltaC}
+    ,                        !- Dry-Bulb Temperature Range Modifier Type
+    ,                        !- Dry-Bulb Temperature Range Modifier Day Schedule Name
+    Wetbulb,                 !- Humidity Condition Type
+    -17.3,                   !- Wetbulb or DewPoint at Maximum Dry-Bulb {C}
+    ,                        !- Humidity Condition Day Schedule Name
+    ,                        !- Humidity Ratio at Maximum Dry-Bulb {kgWater/kgDryAir}
+    ,                        !- Enthalpy at Maximum Dry-Bulb {J/kg}
+    ,                        !- Daily Wet-Bulb Temperature Range {deltaC}
+    99063.,                  !- Barometric Pressure {Pa}
+    4.9,                     !- Wind Speed {m/s}
+    270,                     !- Wind Direction {deg}
+    No,                      !- Rain Indicator
+    No,                      !- Snow Indicator
+    No,                      !- Daylight Saving Time Indicator
+    ASHRAEClearSky,          !- Solar Model Indicator
+    ,                        !- Beam Solar Day Schedule Name
+    ,                        !- Diffuse Solar Day Schedule Name
+    ,                        !- ASHRAE Clear Sky Optical Depth for Beam Irradiance (taub) {dimensionless}
+    ,                        !- ASHRAE Clear Sky Optical Depth for Diffuse Irradiance (taud) {dimensionless}
+    0.00;                    !- Sky Clearness
+
+  RunPeriod,
+    Run Period 1,            !- Name
+    1,                       !- Begin Month
+    1,                       !- Begin Day of Month
+    ,                        !- Begin Year
+    12,                      !- End Month
+    31,                      !- End Day of Month
+    ,                        !- End Year
+    Tuesday,                 !- Day of Week for Start Day
+    Yes,                     !- Use Weather File Holidays and Special Days
+    Yes,                     !- Use Weather File Daylight Saving Period
+    No,                      !- Apply Weekend Holiday Rule
+    Yes,                     !- Use Weather File Rain Indicators
+    Yes;                     !- Use Weather File Snow Indicators
+
+  SimulationControl,
+    NO,                      !- Do Zone Sizing Calculation
+    NO,                      !- Do System Sizing Calculation
+    NO,                      !- Do Plant Sizing Calculation
+    YES,                     !- Run Simulation for Sizing Periods
+    NO,                      !- Run Simulation for Weather File Run Periods
+    NO,                      !- Do HVAC Sizing Simulation for Sizing Periods
+    1;                       !- Maximum Number of HVAC Sizing Simulation Passes
+
+  PlantLoop,
+    Main Loop,               !- Name
+    Steam,                   !- Fluid Type
+    ,                        !- User Defined Fluid Type
+    Main Loop Operation,     !- Plant Equipment Operation Scheme Name
+    Supply Outlet Node,      !- Loop Temperature Setpoint Node Name
+    110,                     !- Maximum Loop Temperature {C}
+    10,                      !- Minimum Loop Temperature {C}
+    autosize,                !- Maximum Loop Flow Rate {m3/s}
+    0,                       !- Minimum Loop Flow Rate {m3/s}
+    autocalculate,           !- Plant Loop Volume {m3}
+    Supply Inlet Node,       !- Plant Side Inlet Node Name
+    Supply Outlet Node,      !- Plant Side Outlet Node Name
+    Supply Branches,         !- Plant Side Branch List Name
+    Supply Connectors,       !- Plant Side Connector List Name
+    Demand Inlet Node,       !- Demand Side Inlet Node Name
+    Demand Outlet Node,      !- Demand Side Outlet Node Name
+    Demand Branches,         !- Demand Side Branch List Name
+    Demand Connectors,       !- Demand Side Connector List Name
+    OPTIMAL;                 !- Load Distribution Scheme
+
+  SetpointManager:Scheduled,
+    Main Loop Setpoint Manager,  !- Name
+    Temperature,             !- Control Variable
+    Main Loop Temp Sch,      !- Schedule Name
+    Main Loop Setpoint Node List;  !- Setpoint Node or NodeList Name
+
+  NodeList,
+    Main Loop Setpoint Node List,  !- Name
+    Supply Outlet Node;      !- Node 1 Name
+
+  PlantEquipmentOperationSchemes,
+    Main Loop Operation,     !- Name
+    PlantEquipmentOperation:HeatingLoad,  !- Control Scheme 1 Object Type
+    Steam Boiler Plant Heat Supply,  !- Control Scheme 1 Name
+    AlwaysOnSchedule;        !- Control Scheme 1 Schedule Name
+
+  PlantEquipmentOperation:HeatingLoad,
+    Steam Boiler Plant Heat Supply,  !- Name
+    0,                       !- Load Range 1 Lower Limit {W}
+    10000000,                !- Load Range 1 Upper Limit {W}
+    Steam Boiler Heating Plant;  !- Range 1 Equipment List Name
+
+  PlantEquipmentList,
+    Steam Boiler Heating Plant,  !- Name
+    Boiler:Steam,            !- Equipment 1 Object Type
+    Steam Boiler Plant Boiler;  !- Equipment 1 Name
+
+  BranchList,
+    Supply Branches,         !- Name
+    Supply Inlet Branch,     !- Branch 1 Name
+    Heating Branch,          !- Branch 2 Name
+    Supply Outlet Branch;    !- Branch 3 Name
+
+  ConnectorList,
+    Supply Connectors,       !- Name
+    Connector:Splitter,      !- Connector 1 Object Type
+    Supply Splitter,         !- Connector 1 Name
+    Connector:Mixer,         !- Connector 2 Object Type
+    Supply Mixer;            !- Connector 2 Name
+
+  Connector:Splitter,
+    Supply Splitter,         !- Name
+    Supply Inlet Branch,     !- Inlet Branch Name
+    Heating Branch;          !- Outlet Branch 1 Name
+
+  Connector:Mixer,
+    Supply Mixer,            !- Name
+    Supply Outlet Branch,    !- Outlet Branch Name
+    Heating Branch;          !- Inlet Branch 1 Name
+
+  Branch,
+    Supply Inlet Branch,     !- Name
+    ,                        !- Pressure Drop Curve Name
+    Pump:VariableSpeed:Condensate,  !- Component 1 Object Type
+    Steam Boiler Plant Steam Circ Pump,  !- Component 1 Name
+    Supply Inlet Node,       !- Component 1 Inlet Node Name
+    Condensate Pump Outlet Node;  !- Component 1 Outlet Node Name
+
+  Pump:VariableSpeed:Condensate,
+    Steam Boiler Plant Steam Circ Pump,  !- Name
+    Supply Inlet Node,       !- Inlet Node Name
+    Condensate Pump Outlet Node,  !- Outlet Node Name
+    autosize,                !- Design Steam Volume Flow Rate {m3/s}
+    179352,                  !- Design Pump Head {Pa}
+    autosize,                !- Design Power Consumption {W}
+    0.9,                     !- Motor Efficiency
+    0.0,                     !- Fraction of Motor Inefficiencies to Fluid Stream
+    0,                       !- Coefficient 1 of the Part Load Performance Curve
+    1,                       !- Coefficient 2 of the Part Load Performance Curve
+    0,                       !- Coefficient 3 of the Part Load Performance Curve
+    0,                       !- Coefficient 4 of the Part Load Performance Curve
+    ;                        !- Pump Flow Rate Schedule Name
+
+  Branch,
+    Heating Branch,          !- Name
+    ,                        !- Pressure Drop Curve Name
+    Boiler:Steam,            !- Component 1 Object Type
+    Steam Boiler Plant Boiler,  !- Component 1 Name
+    Steam Boiler Plant Boiler Inlet Node,  !- Component 1 Inlet Node Name
+    Steam Boiler Plant Boiler Outlet Node;  !- Component 1 Outlet Node Name
+
+  Boiler:Steam,
+    Steam Boiler Plant Boiler,  !- Name
+    NaturalGas,              !- Fuel Type
+    160000,                  !- Maximum Operating Pressure {Pa}
+    0.8,                     !- Theoretical Efficiency
+    115,                     !- Design Outlet Steam Temperature {C}
+    autosize,                !- Nominal Capacity {W}
+    0.00001,                 !- Minimum Part Load Ratio
+    1.0,                     !- Maximum Part Load Ratio
+    0.2,                     !- Optimum Part Load Ratio
+    0.8,                     !- Coefficient 1 of Fuel Use Function of Part Load Ratio Curve
+    0.1,                     !- Coefficient 2 of Fuel Use Function of Part Load Ratio Curve
+    0.1,                     !- Coefficient 3 of Fuel Use Function of Part Load Ratio Curve
+    Steam Boiler Plant Boiler Inlet Node,  !- Water Inlet Node Name
+    Steam Boiler Plant Boiler Outlet Node;  !- Steam Outlet Node Name
+
+  Branch,
+    Supply Outlet Branch,    !- Name
+    ,                        !- Pressure Drop Curve Name
+    Pipe:Adiabatic:Steam,    !- Component 1 Object Type
+    Supply Outlet Pipe,      !- Component 1 Name
+    Supply Outlet Pipe Inlet Node,  !- Component 1 Inlet Node Name
+    Supply Outlet Node;      !- Component 1 Outlet Node Name
+
+  Pipe:Adiabatic:Steam,
+    Supply Outlet Pipe,      !- Name
+    Supply Outlet Pipe Inlet Node,  !- Inlet Node Name
+    Supply Outlet Node;      !- Outlet Node Name
+
+  BranchList,
+    Demand Branches,         !- Name
+    Demand Inlet Branch,     !- Branch 1 Name
+    Load Profile Branch 1,   !- Branch 2 Name
+    Demand Outlet Branch;    !- Branch 3 Name
+
+  ConnectorList,
+    Demand Connectors,       !- Name
+    Connector:Splitter,      !- Connector 1 Object Type
+    Demand Splitter,         !- Connector 1 Name
+    Connector:Mixer,         !- Connector 2 Object Type
+    Demand Mixer;            !- Connector 2 Name
+
+  Connector:Splitter,
+    Demand Splitter,         !- Name
+    Demand Inlet Branch,     !- Inlet Branch Name
+    Load Profile Branch 1;   !- Outlet Branch 1 Name
+
+  Connector:Mixer,
+    Demand Mixer,            !- Name
+    Demand Outlet Branch,    !- Outlet Branch Name
+    Load Profile Branch 1;   !- Inlet Branch 1 Name
+
+  Branch,
+    Demand Inlet Branch,     !- Name
+    ,                        !- Pressure Drop Curve Name
+    Pipe:Adiabatic:Steam,    !- Component 1 Object Type
+    Demand Inlet Pipe,       !- Component 1 Name
+    Demand Inlet Node,       !- Component 1 Inlet Node Name
+    Demand Inlet Pipe Outlet Node;  !- Component 1 Outlet Node Name
+
+  Pipe:Adiabatic:Steam,
+    Demand Inlet Pipe,       !- Name
+    Demand Inlet Node,       !- Inlet Node Name
+    Demand Inlet Pipe Outlet Node;  !- Outlet Node Name
+
+  Branch,
+    Load Profile Branch 1,   !- Name
+    ,                        !- Pressure Drop Curve Name
+    LoadProfile:Plant,       !- Component 1 Object Type
+    Load Profile 1,          !- Component 1 Name
+    Demand Load Profile 1 Inlet Node,  !- Component 1 Inlet Node Name
+    Demand Load Profile 1 Outlet Node;  !- Component 1 Outlet Node Name
+
+  LoadProfile:Plant,
+    Load Profile 1,          !- Name
+    Demand Load Profile 1 Inlet Node,  !- Inlet Node Name
+    Demand Load Profile 1 Outlet Node,  !- Outlet Node Name
+    Load Profile 1 Load Schedule,  !- Load Schedule Name
+    0.008,                   !- Peak Flow Rate {m3/s}
+    Load Profile 1 Flow Frac Schedule,  !- Flow Rate Fraction Schedule Name
+    Steam,                   !- Plant Loop Fluid Type
+    3,                       !- Degree of SubCooling {C}
+    15;                      !- Degree of Loop SubCooling {C}
+
+  Branch,
+    Demand Outlet Branch,    !- Name
+    ,                        !- Pressure Drop Curve Name
+    Pipe:Adiabatic:Steam,    !- Component 1 Object Type
+    Demand Outlet Pipe,      !- Component 1 Name
+    Demand Outlet Pipe Inlet Node,  !- Component 1 Inlet Node Name
+    Demand Outlet Node;      !- Component 1 Outlet Node Name
+
+  Pipe:Adiabatic:Steam,
+    Demand Outlet Pipe,      !- Name
+    Demand Outlet Pipe Inlet Node,  !- Inlet Node Name
+    Demand Outlet Node;      !- Outlet Node Name
+
+  ScheduleTypeLimits,
+    Any Number;              !- Name
+
+  ScheduleTypeLimits,
+    On/Off,                  !- Name
+    0,                       !- Lower Limit Value
+    1,                       !- Upper Limit Value
+    DISCRETE;                !- Numeric Type
+
+  Schedule:Compact,
+    Main Loop Temp Sch,      !- Name
+    Any Number,              !- Schedule Type Limits Name
+    THROUGH: 12/31,          !- Field 1
+    FOR: AllDays,            !- Field 2
+    UNTIL: 24:00,100.0;      !- Field 3
+
+  Schedule:Compact,
+    AlwaysOnSchedule,        !- Name
+    On/Off,                  !- Schedule Type Limits Name
+    THROUGH: 12/31,          !- Field 1
+    FOR: AllDays,            !- Field 2
+    UNTIL: 24:00,1;          !- Field 3
+
+  Schedule:Compact,
+    Load Profile 1 Load Schedule,  !- Name
+    Any Number,              !- Schedule Type Limits Name
+    THROUGH: 12/31,          !- Field 1
+    FOR: AllDays,            !- Field 2
+    UNTIL: 7:00,2000,        !- Field 3
+    UNTIL: 17:00,10000,      !- Field 5
+    UNTIL: 24:00,6000;       !- Field 7
+
+  Schedule:Compact,
+    Load Profile 1 Flow Frac Schedule,  !- Name
+    Any Number,              !- Schedule Type Limits Name
+    THROUGH: 12/31,          !- Field 1
+    FOR: AllDays,            !- Field 2
+    UNTIL: 24:00,1.0;        !- Field 3
+
+  Sizing:Plant,
+    Main Loop,               !- Plant or Condenser Loop Name
+    Steam,                   !- Loop Type
+    110,                     !- Design Loop Exit Temperature {C}
+    25;                      !- Loop Design Temperature Difference {deltaC}
+
+  Output:VariableDictionary,Regular;
+
+  Output:Variable,*,System Node Temperature,Hourly;
+
+  Output:Variable,*,System Node Mass Flow Rate,Hourly;
+
+  Output:Variable,*,Plant Load Profile Mass Flow Rate,Hourly;
+
+  Output:Variable,*,Plant Load Profile Heat Transfer Rate,Hourly;
+
+  Output:Variable,*,Plant Load Profile Heat Transfer Energy,Hourly;
+
+  Output:Variable,*,Load Profile Steam Outlet Temperature,Hourly;
+
+  Output:Variable,*,Boiler Heating Rate,Hourly;
+
+  Output:Variable,*,Boiler Steam Efficiency,Hourly;
+
+  Output:Variable,*,Boiler Steam Mass Flow Rate,Hourly;
+
+  Output:Variable,*,Boiler Steam Inlet Temperature,Hourly;
+
+  Output:Variable,*,Boiler Steam Outlet Temperature,Hourly;
+
+  Output:Variable,Main Loop,Plant Supply Side Heating Demand Rate,Hourly;
+
+  OutputControl:Table:Style,
+    HTML;                    !- Column Separator
+
+  Output:Table:SummaryReports,
+    AllSummary;              !- Report 1 Name
+
+  Output:SQLite,
+    Simple;                  !- Option Type
+

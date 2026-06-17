@@ -1,0 +1,5 @@
+cmake_minimum_required(VERSION 3.10)
+set(CMAKE_CXX_STANDARD 11)
+project({TARGET_NAME})
+add_executable({TARGET_NAME} {SOURCE_FILE})
+target_link_libraries({TARGET_NAME} ${{CMAKE_DL_LIBS}})

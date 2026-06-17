@@ -1,7 +1,7 @@
-// EnergyPlus, Copyright (c) 1996-2023, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
-// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other
+// National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
 // contributors. All rights reserved.
 //
 // NOTICE: This Software was developed under funding from the U.S. Department of Energy and the
@@ -53,6 +53,7 @@
 // EnergyPlus Headers
 #include "Fixtures/EnergyPlusFixture.hh"
 #include <AirflowNetwork/Solver.hpp>
+#include <EnergyPlus/CrossVentMgr.hh>
 #include <EnergyPlus/Data/EnergyPlusData.hh>
 #include <EnergyPlus/DataDefineEquip.hh>
 #include <EnergyPlus/DataEnvironment.hh>
@@ -67,28 +68,48 @@
 #include <EnergyPlus/DataSizing.hh>
 #include <EnergyPlus/DataSurfaces.hh>
 #include <EnergyPlus/DataZoneEquipment.hh>
+#include <EnergyPlus/DisplacementVentMgr.hh>
+#include <EnergyPlus/FanCoilUnits.hh>
+#include <EnergyPlus/Fans.hh>
+#include <EnergyPlus/General.hh>
+#include <EnergyPlus/HVACStandAloneERV.hh>
+#include <EnergyPlus/HVACVariableRefrigerantFlow.hh>
 #include <EnergyPlus/HeatBalanceManager.hh>
+#include <EnergyPlus/HybridUnitaryAirConditioners.hh>
+#include <EnergyPlus/InputProcessing/InputProcessor.hh>
 #include <EnergyPlus/InternalHeatGains.hh>
 #include <EnergyPlus/Material.hh>
+#include <EnergyPlus/MixedAir.hh>
+#include <EnergyPlus/MundtSimMgr.hh>
+#include <EnergyPlus/OutdoorAirUnit.hh>
+#include <EnergyPlus/OutputProcessor.hh>
 #include <EnergyPlus/Psychrometrics.hh>
+#include <EnergyPlus/PurchasedAirManager.hh>
 #include <EnergyPlus/RoomAirModelAirflowNetwork.hh>
 #include <EnergyPlus/RoomAirModelManager.hh>
+#include <EnergyPlus/RoomAirModelUserTempPattern.hh>
 #include <EnergyPlus/ScheduleManager.hh>
 #include <EnergyPlus/SurfaceGeometry.hh>
+#include <EnergyPlus/UFADManager.hh>
+#include <EnergyPlus/UnitHeater.hh>
+#include <EnergyPlus/UnitVentilator.hh>
+#include <EnergyPlus/UtilityRoutines.hh>
+#include <EnergyPlus/VentilatedSlab.hh>
+#include <EnergyPlus/WaterThermalTanks.hh>
+#include <EnergyPlus/WindowAC.hh>
 #include <EnergyPlus/ZoneAirLoopEquipmentManager.hh>
+#include <EnergyPlus/ZoneDehumidifier.hh>
+#include <EnergyPlus/ZoneEquipmentManager.hh>
 #include <EnergyPlus/ZoneTempPredictorCorrector.hh>
 
 using namespace EnergyPlus;
 using namespace DataEnvironment;
 using namespace EnergyPlus::DataSizing;
 using namespace EnergyPlus::DataHeatBalance;
-using namespace EnergyPlus::DataHVACGlobals;
-using namespace DataRoomAirModel;
+using namespace RoomAir;
 using namespace DataMoistureBalanceEMPD;
 using namespace DataSurfaces;
 using namespace DataHeatBalSurface;
-using namespace EnergyPlus::RoomAirModelAirflowNetwork;
-using namespace EnergyPlus::DataLoopNode;
 using namespace EnergyPlus::DataHeatBalFanSys;
 using namespace EnergyPlus::Psychrometrics;
 
@@ -107,7 +128,7 @@ protected:
         state->dataLoopNodes->NumOfNodes = 5;
         state->dataGlobal->BeginEnvrnFlag = true;
         int NumOfSurfaces = 2;
-        state->dataRoomAirMod->RoomAirflowNetworkZoneInfo.allocate(state->dataGlobal->NumOfZones);
+        state->dataRoomAir->AFNZoneInfo.allocate(state->dataGlobal->NumOfZones);
         state->dataHeatBal->Zone.allocate(state->dataGlobal->NumOfZones);
         state->dataHeatBal->space.allocate(state->dataGlobal->numSpaces);
         state->dataZoneEquip->ZoneEquipConfig.allocate(state->dataGlobal->NumOfZones);
@@ -133,7 +154,6 @@ protected:
         state->afn->AirflowNetworkLinkageData.allocate(5);
         state->afn->AirflowNetworkNodeSimu.allocate(6);
         state->afn->AirflowNetworkLinkSimu.allocate(5);
-        state->dataRoomAirflowNetModel->RAFN.allocate(state->dataGlobal->NumOfZones);
     }
 
     virtual void TearDown()
@@ -148,70 +168,71 @@ TEST_F(RoomAirflowNetworkTest, RAFNTest)
     int ZoneNum = 1;
     int RoomAirNode;
     state->dataHVACGlobal->TimeStepSys = 15.0 / 60.0;
+    state->dataHVACGlobal->TimeStepSysSec = state->dataHVACGlobal->TimeStepSys * Constant::rSecsInHour;
     state->dataEnvrn->OutBaroPress = 101325.0;
     state->dataHeatBal->Zone(ZoneNum).ZoneVolCapMultpSens = 1;
 
-    state->dataRoomAirMod->RoomAirflowNetworkZoneInfo(ZoneNum).IsUsed = true;
-    state->dataRoomAirMod->RoomAirflowNetworkZoneInfo(ZoneNum).ActualZoneID = ZoneNum;
-    state->dataRoomAirMod->RoomAirflowNetworkZoneInfo(ZoneNum).NumOfAirNodes = NumOfAirNodes;
-    state->dataRoomAirMod->RoomAirflowNetworkZoneInfo(ZoneNum).Node.allocate(NumOfAirNodes);
-    state->dataRoomAirMod->RoomAirflowNetworkZoneInfo(ZoneNum).ControlAirNodeID = 1;
-    state->dataRoomAirMod->RoomAirflowNetworkZoneInfo(ZoneNum).Node(1).ZoneVolumeFraction = 0.2;
-    state->dataRoomAirMod->RoomAirflowNetworkZoneInfo(ZoneNum).Node(2).ZoneVolumeFraction = 0.8;
-    state->dataRoomAirMod->RoomAirflowNetworkZoneInfo(ZoneNum).Node(1).HVAC.allocate(1);
-    state->dataRoomAirMod->RoomAirflowNetworkZoneInfo(ZoneNum).Node(2).HVAC.allocate(1);
-    state->dataRoomAirMod->RoomAirflowNetworkZoneInfo(ZoneNum).Node(1).NumHVACs = 1;
-    state->dataRoomAirMod->RoomAirflowNetworkZoneInfo(ZoneNum).Node(2).NumHVACs = 1;
-    state->dataRoomAirMod->RoomAirflowNetworkZoneInfo(ZoneNum).Node(1).HVAC(1).SupplyFraction = 0.4;
-    state->dataRoomAirMod->RoomAirflowNetworkZoneInfo(ZoneNum).Node(2).HVAC(1).SupplyFraction = 0.6;
-    state->dataRoomAirMod->RoomAirflowNetworkZoneInfo(ZoneNum).Node(1).HVAC(1).ReturnFraction = 0.4;
-    state->dataRoomAirMod->RoomAirflowNetworkZoneInfo(ZoneNum).Node(2).HVAC(1).ReturnFraction = 0.6;
-    state->dataRoomAirMod->RoomAirflowNetworkZoneInfo(ZoneNum).Node(1).HVAC(1).Name = "ZoneHVAC";
-    state->dataRoomAirMod->RoomAirflowNetworkZoneInfo(ZoneNum).Node(2).HVAC(1).Name = "ZoneHVAC";
-    state->dataRoomAirMod->RoomAirflowNetworkZoneInfo(ZoneNum).Node(1).HVAC(1).SupplyNodeName = "Supply";
-    state->dataRoomAirMod->RoomAirflowNetworkZoneInfo(ZoneNum).Node(2).HVAC(1).SupplyNodeName = "Supply";
-    state->dataRoomAirMod->RoomAirflowNetworkZoneInfo(ZoneNum).Node(1).HVAC(1).ReturnNodeName = "Return";
-    state->dataRoomAirMod->RoomAirflowNetworkZoneInfo(ZoneNum).Node(2).HVAC(1).ReturnNodeName = "Return";
-    state->dataRoomAirMod->RoomAirflowNetworkZoneInfo(ZoneNum).Node(1).HVAC(1).Name = "ZoneHVAC";
-    state->dataRoomAirMod->RoomAirflowNetworkZoneInfo(ZoneNum).Node(2).HVAC(1).Name = "ZoneHVAC";
-    state->dataRoomAirMod->RoomAirflowNetworkZoneInfo(ZoneNum).Node(1).IntGainsDeviceIndices.allocate(1);
-    state->dataRoomAirMod->RoomAirflowNetworkZoneInfo(ZoneNum).Node(2).IntGainsDeviceIndices.allocate(1);
-    state->dataRoomAirMod->RoomAirflowNetworkZoneInfo(ZoneNum).Node(1).intGainsDeviceSpaces.allocate(1);
-    state->dataRoomAirMod->RoomAirflowNetworkZoneInfo(ZoneNum).Node(2).intGainsDeviceSpaces.allocate(1);
-    state->dataRoomAirMod->RoomAirflowNetworkZoneInfo(ZoneNum).Node(1).NumIntGains = 1;
-    state->dataRoomAirMod->RoomAirflowNetworkZoneInfo(ZoneNum).Node(2).NumIntGains = 1;
-    state->dataRoomAirMod->RoomAirflowNetworkZoneInfo(ZoneNum).Node(1).IntGainsDeviceIndices(1) = 1;
-    state->dataRoomAirMod->RoomAirflowNetworkZoneInfo(ZoneNum).Node(2).IntGainsDeviceIndices(1) = 1;
-    state->dataRoomAirMod->RoomAirflowNetworkZoneInfo(ZoneNum).Node(1).intGainsDeviceSpaces(1) = 1;
-    state->dataRoomAirMod->RoomAirflowNetworkZoneInfo(ZoneNum).Node(2).intGainsDeviceSpaces(1) = 1;
-    state->dataRoomAirMod->RoomAirflowNetworkZoneInfo(ZoneNum).Node(1).IntGainsFractions.allocate(1);
-    state->dataRoomAirMod->RoomAirflowNetworkZoneInfo(ZoneNum).Node(2).IntGainsFractions.allocate(1);
-    state->dataRoomAirMod->RoomAirflowNetworkZoneInfo(ZoneNum).Node(1).IntGainsFractions(1) = 0.4;
-    state->dataRoomAirMod->RoomAirflowNetworkZoneInfo(ZoneNum).Node(2).IntGainsFractions(1) = 0.6;
-    state->dataRoomAirMod->RoomAirflowNetworkZoneInfo(ZoneNum).Node(1).HasIntGainsAssigned = true;
-    state->dataRoomAirMod->RoomAirflowNetworkZoneInfo(ZoneNum).Node(2).HasIntGainsAssigned = true;
-    state->dataRoomAirMod->RoomAirflowNetworkZoneInfo(ZoneNum).Node(1).HasSurfacesAssigned = true;
-    state->dataRoomAirMod->RoomAirflowNetworkZoneInfo(ZoneNum).Node(2).HasSurfacesAssigned = true;
-    state->dataRoomAirMod->RoomAirflowNetworkZoneInfo(ZoneNum).Node(1).HasHVACAssigned = true;
-    state->dataRoomAirMod->RoomAirflowNetworkZoneInfo(ZoneNum).Node(2).HasHVACAssigned = true;
-    state->dataRoomAirMod->RoomAirflowNetworkZoneInfo(ZoneNum).Node(1).SurfMask.allocate(2);
-    state->dataRoomAirMod->RoomAirflowNetworkZoneInfo(ZoneNum).Node(2).SurfMask.allocate(2);
-    state->dataRoomAirMod->RoomAirflowNetworkZoneInfo(ZoneNum).Node(1).SurfMask(1) = true;
-    state->dataRoomAirMod->RoomAirflowNetworkZoneInfo(ZoneNum).Node(1).SurfMask(2) = false;
-    state->dataRoomAirMod->RoomAirflowNetworkZoneInfo(ZoneNum).Node(2).SurfMask(1) = false;
-    state->dataRoomAirMod->RoomAirflowNetworkZoneInfo(ZoneNum).Node(2).SurfMask(2) = true;
-    state->dataRoomAirMod->RoomAirflowNetworkZoneInfo(ZoneNum).Node(1).NumOfAirflowLinks = 3;
-    state->dataRoomAirMod->RoomAirflowNetworkZoneInfo(ZoneNum).Node(1).Link.allocate(3);
-    state->dataRoomAirMod->RoomAirflowNetworkZoneInfo(ZoneNum).Node(1).Link(1).AirflowNetworkLinkSimuID = 1;
-    state->dataRoomAirMod->RoomAirflowNetworkZoneInfo(ZoneNum).Node(1).Link(2).AirflowNetworkLinkSimuID = 2;
-    state->dataRoomAirMod->RoomAirflowNetworkZoneInfo(ZoneNum).Node(1).Link(3).AirflowNetworkLinkSimuID = 3;
-    state->dataRoomAirMod->RoomAirflowNetworkZoneInfo(ZoneNum).Node(1).AirflowNetworkNodeID = 1;
-    state->dataRoomAirMod->RoomAirflowNetworkZoneInfo(ZoneNum).Node(2).NumOfAirflowLinks = 3;
-    state->dataRoomAirMod->RoomAirflowNetworkZoneInfo(ZoneNum).Node(2).Link.allocate(3);
-    state->dataRoomAirMod->RoomAirflowNetworkZoneInfo(ZoneNum).Node(2).Link(1).AirflowNetworkLinkSimuID = 3;
-    state->dataRoomAirMod->RoomAirflowNetworkZoneInfo(ZoneNum).Node(2).Link(2).AirflowNetworkLinkSimuID = 4;
-    state->dataRoomAirMod->RoomAirflowNetworkZoneInfo(ZoneNum).Node(2).Link(3).AirflowNetworkLinkSimuID = 5;
-    state->dataRoomAirMod->RoomAirflowNetworkZoneInfo(ZoneNum).Node(2).AirflowNetworkNodeID = 2;
+    state->dataRoomAir->AFNZoneInfo(ZoneNum).IsUsed = true;
+    state->dataRoomAir->AFNZoneInfo(ZoneNum).ActualZoneID = ZoneNum;
+    state->dataRoomAir->AFNZoneInfo(ZoneNum).NumOfAirNodes = NumOfAirNodes;
+    state->dataRoomAir->AFNZoneInfo(ZoneNum).Node.allocate(NumOfAirNodes);
+    state->dataRoomAir->AFNZoneInfo(ZoneNum).ControlAirNodeID = 1;
+    state->dataRoomAir->AFNZoneInfo(ZoneNum).Node(1).ZoneVolumeFraction = 0.2;
+    state->dataRoomAir->AFNZoneInfo(ZoneNum).Node(2).ZoneVolumeFraction = 0.8;
+    state->dataRoomAir->AFNZoneInfo(ZoneNum).Node(1).HVAC.allocate(1);
+    state->dataRoomAir->AFNZoneInfo(ZoneNum).Node(2).HVAC.allocate(1);
+    state->dataRoomAir->AFNZoneInfo(ZoneNum).Node(1).NumHVACs = 1;
+    state->dataRoomAir->AFNZoneInfo(ZoneNum).Node(2).NumHVACs = 1;
+    state->dataRoomAir->AFNZoneInfo(ZoneNum).Node(1).HVAC(1).SupplyFraction = 0.4;
+    state->dataRoomAir->AFNZoneInfo(ZoneNum).Node(2).HVAC(1).SupplyFraction = 0.6;
+    state->dataRoomAir->AFNZoneInfo(ZoneNum).Node(1).HVAC(1).ReturnFraction = 0.4;
+    state->dataRoomAir->AFNZoneInfo(ZoneNum).Node(2).HVAC(1).ReturnFraction = 0.6;
+    state->dataRoomAir->AFNZoneInfo(ZoneNum).Node(1).HVAC(1).Name = "ZoneHVAC";
+    state->dataRoomAir->AFNZoneInfo(ZoneNum).Node(2).HVAC(1).Name = "ZoneHVAC";
+    state->dataRoomAir->AFNZoneInfo(ZoneNum).Node(1).HVAC(1).SupplyNodeName = "Supply";
+    state->dataRoomAir->AFNZoneInfo(ZoneNum).Node(2).HVAC(1).SupplyNodeName = "Supply";
+    state->dataRoomAir->AFNZoneInfo(ZoneNum).Node(1).HVAC(1).ReturnNodeName = "Return";
+    state->dataRoomAir->AFNZoneInfo(ZoneNum).Node(2).HVAC(1).ReturnNodeName = "Return";
+    state->dataRoomAir->AFNZoneInfo(ZoneNum).Node(1).HVAC(1).Name = "ZoneHVAC";
+    state->dataRoomAir->AFNZoneInfo(ZoneNum).Node(2).HVAC(1).Name = "ZoneHVAC";
+    state->dataRoomAir->AFNZoneInfo(ZoneNum).Node(1).IntGainsDeviceIndices.allocate(1);
+    state->dataRoomAir->AFNZoneInfo(ZoneNum).Node(2).IntGainsDeviceIndices.allocate(1);
+    state->dataRoomAir->AFNZoneInfo(ZoneNum).Node(1).intGainsDeviceSpaces.allocate(1);
+    state->dataRoomAir->AFNZoneInfo(ZoneNum).Node(2).intGainsDeviceSpaces.allocate(1);
+    state->dataRoomAir->AFNZoneInfo(ZoneNum).Node(1).NumIntGains = 1;
+    state->dataRoomAir->AFNZoneInfo(ZoneNum).Node(2).NumIntGains = 1;
+    state->dataRoomAir->AFNZoneInfo(ZoneNum).Node(1).IntGainsDeviceIndices(1) = 1;
+    state->dataRoomAir->AFNZoneInfo(ZoneNum).Node(2).IntGainsDeviceIndices(1) = 1;
+    state->dataRoomAir->AFNZoneInfo(ZoneNum).Node(1).intGainsDeviceSpaces(1) = 1;
+    state->dataRoomAir->AFNZoneInfo(ZoneNum).Node(2).intGainsDeviceSpaces(1) = 1;
+    state->dataRoomAir->AFNZoneInfo(ZoneNum).Node(1).IntGainsFractions.allocate(1);
+    state->dataRoomAir->AFNZoneInfo(ZoneNum).Node(2).IntGainsFractions.allocate(1);
+    state->dataRoomAir->AFNZoneInfo(ZoneNum).Node(1).IntGainsFractions(1) = 0.4;
+    state->dataRoomAir->AFNZoneInfo(ZoneNum).Node(2).IntGainsFractions(1) = 0.6;
+    state->dataRoomAir->AFNZoneInfo(ZoneNum).Node(1).HasIntGainsAssigned = true;
+    state->dataRoomAir->AFNZoneInfo(ZoneNum).Node(2).HasIntGainsAssigned = true;
+    state->dataRoomAir->AFNZoneInfo(ZoneNum).Node(1).HasSurfacesAssigned = true;
+    state->dataRoomAir->AFNZoneInfo(ZoneNum).Node(2).HasSurfacesAssigned = true;
+    state->dataRoomAir->AFNZoneInfo(ZoneNum).Node(1).HasHVACAssigned = true;
+    state->dataRoomAir->AFNZoneInfo(ZoneNum).Node(2).HasHVACAssigned = true;
+    state->dataRoomAir->AFNZoneInfo(ZoneNum).Node(1).SurfMask.allocate(2);
+    state->dataRoomAir->AFNZoneInfo(ZoneNum).Node(2).SurfMask.allocate(2);
+    state->dataRoomAir->AFNZoneInfo(ZoneNum).Node(1).SurfMask(1) = true;
+    state->dataRoomAir->AFNZoneInfo(ZoneNum).Node(1).SurfMask(2) = false;
+    state->dataRoomAir->AFNZoneInfo(ZoneNum).Node(2).SurfMask(1) = false;
+    state->dataRoomAir->AFNZoneInfo(ZoneNum).Node(2).SurfMask(2) = true;
+    state->dataRoomAir->AFNZoneInfo(ZoneNum).Node(1).NumOfAirflowLinks = 3;
+    state->dataRoomAir->AFNZoneInfo(ZoneNum).Node(1).Link.allocate(3);
+    state->dataRoomAir->AFNZoneInfo(ZoneNum).Node(1).Link(1).AFNSimuID = 1;
+    state->dataRoomAir->AFNZoneInfo(ZoneNum).Node(1).Link(2).AFNSimuID = 2;
+    state->dataRoomAir->AFNZoneInfo(ZoneNum).Node(1).Link(3).AFNSimuID = 3;
+    state->dataRoomAir->AFNZoneInfo(ZoneNum).Node(1).AFNNodeID = 1;
+    state->dataRoomAir->AFNZoneInfo(ZoneNum).Node(2).NumOfAirflowLinks = 3;
+    state->dataRoomAir->AFNZoneInfo(ZoneNum).Node(2).Link.allocate(3);
+    state->dataRoomAir->AFNZoneInfo(ZoneNum).Node(2).Link(1).AFNSimuID = 3;
+    state->dataRoomAir->AFNZoneInfo(ZoneNum).Node(2).Link(2).AFNSimuID = 4;
+    state->dataRoomAir->AFNZoneInfo(ZoneNum).Node(2).Link(3).AFNSimuID = 5;
+    state->dataRoomAir->AFNZoneInfo(ZoneNum).Node(2).AFNNodeID = 2;
 
     state->afn->AirflowNetworkLinkageData(1).NodeNums[0] = 1;
     state->afn->AirflowNetworkLinkageData(2).NodeNums[0] = 1;
@@ -249,8 +270,8 @@ TEST_F(RoomAirflowNetworkTest, RAFNTest)
     state->dataZoneEquip->ZoneEquipList(ZoneNum).NumOfEquipTypes = 1;
     state->dataZoneEquip->ZoneEquipList(ZoneNum).EquipName.allocate(1);
     state->dataZoneEquip->ZoneEquipList(ZoneNum).EquipName(1) = "ZoneHVAC";
-    state->dataZoneEquip->ZoneEquipList(ZoneNum).EquipTypeEnum.allocate(1);
-    state->dataZoneEquip->ZoneEquipList(ZoneNum).EquipTypeEnum(1) = DataZoneEquipment::ZoneEquip::PkgTermHPAirToAir;
+    state->dataZoneEquip->ZoneEquipList(ZoneNum).EquipType.allocate(1);
+    state->dataZoneEquip->ZoneEquipList(ZoneNum).EquipType(1) = DataZoneEquipment::ZoneEquipType::PackagedTerminalHeatPump;
 
     state->dataZoneEquip->ZoneEquipConfig(ZoneNum).NumInletNodes = 1;
     state->dataZoneEquip->ZoneEquipConfig(ZoneNum).InletNode.allocate(1);
@@ -299,78 +320,75 @@ TEST_F(RoomAirflowNetworkTest, RAFNTest)
 
     auto &thisZoneHB = state->dataZoneTempPredictorCorrector->zoneHeatBalance(ZoneNum);
     thisZoneHB.MAT = 20.0;
-    thisZoneHB.ZoneAirHumRat = 0.001;
+    thisZoneHB.airHumRat = 0.001;
     state->dataHeatBalSurf->SurfHConvInt(1) = 1.0;
     state->dataHeatBalSurf->SurfHConvInt(2) = 1.0;
     state->dataHeatBalSurf->SurfTempInTmp(1) = 25.0;
     state->dataHeatBalSurf->SurfTempInTmp(2) = 30.0;
-    state->dataMstBal->RhoVaporAirIn(1) = PsyRhovFnTdbWPb(thisZoneHB.MAT, thisZoneHB.ZoneAirHumRat, state->dataEnvrn->OutBaroPress);
-    state->dataMstBal->RhoVaporAirIn(2) = PsyRhovFnTdbWPb(thisZoneHB.MAT, thisZoneHB.ZoneAirHumRat, state->dataEnvrn->OutBaroPress);
+    state->dataMstBal->RhoVaporAirIn(1) = PsyRhovFnTdbWPb(thisZoneHB.MAT, thisZoneHB.airHumRat, state->dataEnvrn->OutBaroPress);
+    state->dataMstBal->RhoVaporAirIn(2) = PsyRhovFnTdbWPb(thisZoneHB.MAT, thisZoneHB.airHumRat, state->dataEnvrn->OutBaroPress);
     state->dataMstBal->HMassConvInFD(1) =
         state->dataHeatBalSurf->SurfHConvInt(1) /
-        ((PsyRhoAirFnPbTdbW(*state, state->dataEnvrn->OutBaroPress, thisZoneHB.MAT, thisZoneHB.ZoneAirHumRat) + state->dataMstBal->RhoVaporAirIn(1)) *
-         PsyCpAirFnW(thisZoneHB.ZoneAirHumRat));
+        ((PsyRhoAirFnPbTdbW(*state, state->dataEnvrn->OutBaroPress, thisZoneHB.MAT, thisZoneHB.airHumRat) + state->dataMstBal->RhoVaporAirIn(1)) *
+         PsyCpAirFnW(thisZoneHB.airHumRat));
     state->dataMstBal->HMassConvInFD(2) =
         state->dataHeatBalSurf->SurfHConvInt(2) /
-        ((PsyRhoAirFnPbTdbW(*state, state->dataEnvrn->OutBaroPress, thisZoneHB.MAT, thisZoneHB.ZoneAirHumRat) + state->dataMstBal->RhoVaporAirIn(2)) *
-         PsyCpAirFnW(thisZoneHB.ZoneAirHumRat));
+        ((PsyRhoAirFnPbTdbW(*state, state->dataEnvrn->OutBaroPress, thisZoneHB.MAT, thisZoneHB.airHumRat) + state->dataMstBal->RhoVaporAirIn(2)) *
+         PsyCpAirFnW(thisZoneHB.airHumRat));
 
     RoomAirNode = 1;
-    auto &thisRAFN(state->dataRoomAirflowNetModel->RAFN(ZoneNum));
-    thisRAFN.ZoneNum = ZoneNum;
+    InitRoomAirModelAFN(*state, ZoneNum, RoomAirNode);
 
-    thisRAFN.InitRoomAirModelAirflowNetwork(*state, RoomAirNode);
+    EXPECT_NEAR(120.0, state->dataRoomAir->AFNZoneInfo(ZoneNum).Node(RoomAirNode).SumIntSensibleGain, 0.00001);
+    EXPECT_NEAR(80.0, state->dataRoomAir->AFNZoneInfo(ZoneNum).Node(RoomAirNode).SumIntLatentGain, 0.00001);
+    EXPECT_NEAR(1.0, state->dataRoomAir->AFNZoneInfo(ZoneNum).Node(RoomAirNode).SumHA, 0.00001);
+    EXPECT_NEAR(25.0, state->dataRoomAir->AFNZoneInfo(ZoneNum).Node(RoomAirNode).SumHATsurf, 0.00001);
+    EXPECT_NEAR(0.0, state->dataRoomAir->AFNZoneInfo(ZoneNum).Node(RoomAirNode).SumHATref, 0.00001);
+    EXPECT_NEAR(4.0268, state->dataRoomAir->AFNZoneInfo(ZoneNum).Node(RoomAirNode).SumSysMCp, 0.0001);
+    EXPECT_NEAR(80.536, state->dataRoomAir->AFNZoneInfo(ZoneNum).Node(RoomAirNode).SumSysMCpT, 0.001);
+    EXPECT_NEAR(0.004, state->dataRoomAir->AFNZoneInfo(ZoneNum).Node(RoomAirNode).SumSysM, 0.00001);
+    EXPECT_NEAR(4.0e-6, state->dataRoomAir->AFNZoneInfo(ZoneNum).Node(RoomAirNode).SumSysMW, 0.00001);
+    EXPECT_NEAR(30.200968, state->dataRoomAir->AFNZoneInfo(ZoneNum).Node(RoomAirNode).SumLinkMCp, 0.0001);
+    EXPECT_NEAR(744.95722, state->dataRoomAir->AFNZoneInfo(ZoneNum).Node(RoomAirNode).SumLinkMCpT, 0.001);
+    EXPECT_NEAR(0.03, state->dataRoomAir->AFNZoneInfo(ZoneNum).Node(RoomAirNode).SumLinkM, 0.00001);
+    EXPECT_NEAR(3.0e-5, state->dataRoomAir->AFNZoneInfo(ZoneNum).Node(RoomAirNode).SumLinkMW, 0.00001);
+    EXPECT_NEAR(-8.431365e-8, state->dataRoomAir->AFNZoneInfo(ZoneNum).Node(RoomAirNode).SumHmAW, 0.0000001);
+    EXPECT_NEAR(0.0009756833, state->dataRoomAir->AFNZoneInfo(ZoneNum).Node(RoomAirNode).SumHmARa, 0.0000001);
+    EXPECT_NEAR(9.0784549e-7, state->dataRoomAir->AFNZoneInfo(ZoneNum).Node(RoomAirNode).SumHmARaW, 0.0000001);
 
-    EXPECT_NEAR(120.0, state->dataRoomAirMod->RoomAirflowNetworkZoneInfo(ZoneNum).Node(RoomAirNode).SumIntSensibleGain, 0.00001);
-    EXPECT_NEAR(80.0, state->dataRoomAirMod->RoomAirflowNetworkZoneInfo(ZoneNum).Node(RoomAirNode).SumIntLatentGain, 0.00001);
-    EXPECT_NEAR(1.0, state->dataRoomAirMod->RoomAirflowNetworkZoneInfo(ZoneNum).Node(RoomAirNode).SumHA, 0.00001);
-    EXPECT_NEAR(25.0, state->dataRoomAirMod->RoomAirflowNetworkZoneInfo(ZoneNum).Node(RoomAirNode).SumHATsurf, 0.00001);
-    EXPECT_NEAR(0.0, state->dataRoomAirMod->RoomAirflowNetworkZoneInfo(ZoneNum).Node(RoomAirNode).SumHATref, 0.00001);
-    EXPECT_NEAR(4.0268, state->dataRoomAirMod->RoomAirflowNetworkZoneInfo(ZoneNum).Node(RoomAirNode).SumSysMCp, 0.0001);
-    EXPECT_NEAR(80.536, state->dataRoomAirMod->RoomAirflowNetworkZoneInfo(ZoneNum).Node(RoomAirNode).SumSysMCpT, 0.001);
-    EXPECT_NEAR(0.004, state->dataRoomAirMod->RoomAirflowNetworkZoneInfo(ZoneNum).Node(RoomAirNode).SumSysM, 0.00001);
-    EXPECT_NEAR(4.0e-6, state->dataRoomAirMod->RoomAirflowNetworkZoneInfo(ZoneNum).Node(RoomAirNode).SumSysMW, 0.00001);
-    EXPECT_NEAR(30.200968, state->dataRoomAirMod->RoomAirflowNetworkZoneInfo(ZoneNum).Node(RoomAirNode).SumLinkMCp, 0.0001);
-    EXPECT_NEAR(744.95722, state->dataRoomAirMod->RoomAirflowNetworkZoneInfo(ZoneNum).Node(RoomAirNode).SumLinkMCpT, 0.001);
-    EXPECT_NEAR(0.03, state->dataRoomAirMod->RoomAirflowNetworkZoneInfo(ZoneNum).Node(RoomAirNode).SumLinkM, 0.00001);
-    EXPECT_NEAR(3.0e-5, state->dataRoomAirMod->RoomAirflowNetworkZoneInfo(ZoneNum).Node(RoomAirNode).SumLinkMW, 0.00001);
-    EXPECT_NEAR(-8.431365e-8, state->dataRoomAirMod->RoomAirflowNetworkZoneInfo(ZoneNum).Node(RoomAirNode).SumHmAW, 0.0000001);
-    EXPECT_NEAR(0.0009756833, state->dataRoomAirMod->RoomAirflowNetworkZoneInfo(ZoneNum).Node(RoomAirNode).SumHmARa, 0.0000001);
-    EXPECT_NEAR(9.0784549e-7, state->dataRoomAirMod->RoomAirflowNetworkZoneInfo(ZoneNum).Node(RoomAirNode).SumHmARaW, 0.0000001);
+    CalcRoomAirModelAFN(*state, ZoneNum, RoomAirNode);
 
-    thisRAFN.CalcRoomAirModelAirflowNetwork(*state, RoomAirNode);
-
-    EXPECT_NEAR(24.907085, state->dataRoomAirMod->RoomAirflowNetworkZoneInfo(ZoneNum).Node(RoomAirNode).AirTemp, 0.00001);
-    EXPECT_NEAR(0.00189601, state->dataRoomAirMod->RoomAirflowNetworkZoneInfo(ZoneNum).Node(RoomAirNode).HumRat, 0.00001);
-    EXPECT_NEAR(9.770445, state->dataRoomAirMod->RoomAirflowNetworkZoneInfo(ZoneNum).Node(RoomAirNode).RelHumidity, 0.00001);
+    EXPECT_NEAR(24.907085, state->dataRoomAir->AFNZoneInfo(ZoneNum).Node(RoomAirNode).AirTemp, 0.00001);
+    EXPECT_NEAR(0.00189601, state->dataRoomAir->AFNZoneInfo(ZoneNum).Node(RoomAirNode).HumRat, 0.00001);
+    EXPECT_NEAR(9.770445, state->dataRoomAir->AFNZoneInfo(ZoneNum).Node(RoomAirNode).RelHumidity, 0.00001);
 
     RoomAirNode = 2;
-    thisRAFN.InitRoomAirModelAirflowNetwork(*state, RoomAirNode);
+    InitRoomAirModelAFN(*state, ZoneNum, RoomAirNode);
 
-    EXPECT_NEAR(180.0, state->dataRoomAirMod->RoomAirflowNetworkZoneInfo(ZoneNum).Node(RoomAirNode).SumIntSensibleGain, 0.00001);
-    EXPECT_NEAR(120.0, state->dataRoomAirMod->RoomAirflowNetworkZoneInfo(ZoneNum).Node(RoomAirNode).SumIntLatentGain, 0.00001);
-    EXPECT_NEAR(2.0, state->dataRoomAirMod->RoomAirflowNetworkZoneInfo(ZoneNum).Node(RoomAirNode).SumHA, 0.00001);
-    EXPECT_NEAR(60.0, state->dataRoomAirMod->RoomAirflowNetworkZoneInfo(ZoneNum).Node(RoomAirNode).SumHATsurf, 0.00001);
-    EXPECT_NEAR(0.0, state->dataRoomAirMod->RoomAirflowNetworkZoneInfo(ZoneNum).Node(RoomAirNode).SumHATref, 0.00001);
-    EXPECT_NEAR(6.04019, state->dataRoomAirMod->RoomAirflowNetworkZoneInfo(ZoneNum).Node(RoomAirNode).SumSysMCp, 0.0001);
-    EXPECT_NEAR(120.803874, state->dataRoomAirMod->RoomAirflowNetworkZoneInfo(ZoneNum).Node(RoomAirNode).SumSysMCpT, 0.00001);
-    EXPECT_NEAR(0.006, state->dataRoomAirMod->RoomAirflowNetworkZoneInfo(ZoneNum).Node(RoomAirNode).SumSysM, 0.00001);
-    EXPECT_NEAR(6.0e-6, state->dataRoomAirMod->RoomAirflowNetworkZoneInfo(ZoneNum).Node(RoomAirNode).SumSysMW, 0.00001);
-    EXPECT_NEAR(20.14327, state->dataRoomAirMod->RoomAirflowNetworkZoneInfo(ZoneNum).Node(RoomAirNode).SumLinkMCp, 0.0001);
-    EXPECT_NEAR(523.73441, state->dataRoomAirMod->RoomAirflowNetworkZoneInfo(ZoneNum).Node(RoomAirNode).SumLinkMCpT, 0.001);
-    EXPECT_NEAR(0.02, state->dataRoomAirMod->RoomAirflowNetworkZoneInfo(ZoneNum).Node(RoomAirNode).SumLinkM, 0.00001);
-    EXPECT_NEAR(2.5e-5, state->dataRoomAirMod->RoomAirflowNetworkZoneInfo(ZoneNum).Node(RoomAirNode).SumLinkMW, 0.00001);
-    EXPECT_NEAR(-3.5644894e-9, state->dataRoomAirMod->RoomAirflowNetworkZoneInfo(ZoneNum).Node(RoomAirNode).SumHmAW, 0.0000001);
-    EXPECT_NEAR(0.0019191284, state->dataRoomAirMod->RoomAirflowNetworkZoneInfo(ZoneNum).Node(RoomAirNode).SumHmARa, 0.0000001);
-    EXPECT_NEAR(1.98975381e-6, state->dataRoomAirMod->RoomAirflowNetworkZoneInfo(ZoneNum).Node(RoomAirNode).SumHmARaW, 0.0000001);
+    EXPECT_NEAR(180.0, state->dataRoomAir->AFNZoneInfo(ZoneNum).Node(RoomAirNode).SumIntSensibleGain, 0.00001);
+    EXPECT_NEAR(120.0, state->dataRoomAir->AFNZoneInfo(ZoneNum).Node(RoomAirNode).SumIntLatentGain, 0.00001);
+    EXPECT_NEAR(2.0, state->dataRoomAir->AFNZoneInfo(ZoneNum).Node(RoomAirNode).SumHA, 0.00001);
+    EXPECT_NEAR(60.0, state->dataRoomAir->AFNZoneInfo(ZoneNum).Node(RoomAirNode).SumHATsurf, 0.00001);
+    EXPECT_NEAR(0.0, state->dataRoomAir->AFNZoneInfo(ZoneNum).Node(RoomAirNode).SumHATref, 0.00001);
+    EXPECT_NEAR(6.04019, state->dataRoomAir->AFNZoneInfo(ZoneNum).Node(RoomAirNode).SumSysMCp, 0.0001);
+    EXPECT_NEAR(120.803874, state->dataRoomAir->AFNZoneInfo(ZoneNum).Node(RoomAirNode).SumSysMCpT, 0.00001);
+    EXPECT_NEAR(0.006, state->dataRoomAir->AFNZoneInfo(ZoneNum).Node(RoomAirNode).SumSysM, 0.00001);
+    EXPECT_NEAR(6.0e-6, state->dataRoomAir->AFNZoneInfo(ZoneNum).Node(RoomAirNode).SumSysMW, 0.00001);
+    EXPECT_NEAR(20.14327, state->dataRoomAir->AFNZoneInfo(ZoneNum).Node(RoomAirNode).SumLinkMCp, 0.0001);
+    EXPECT_NEAR(523.73441, state->dataRoomAir->AFNZoneInfo(ZoneNum).Node(RoomAirNode).SumLinkMCpT, 0.001);
+    EXPECT_NEAR(0.02, state->dataRoomAir->AFNZoneInfo(ZoneNum).Node(RoomAirNode).SumLinkM, 0.00001);
+    EXPECT_NEAR(2.5e-5, state->dataRoomAir->AFNZoneInfo(ZoneNum).Node(RoomAirNode).SumLinkMW, 0.00001);
+    EXPECT_NEAR(-3.5644894e-9, state->dataRoomAir->AFNZoneInfo(ZoneNum).Node(RoomAirNode).SumHmAW, 0.0000001);
+    EXPECT_NEAR(0.0019191284, state->dataRoomAir->AFNZoneInfo(ZoneNum).Node(RoomAirNode).SumHmARa, 0.0000001);
+    EXPECT_NEAR(1.98975381e-6, state->dataRoomAir->AFNZoneInfo(ZoneNum).Node(RoomAirNode).SumHmARaW, 0.0000001);
 
-    thisRAFN.CalcRoomAirModelAirflowNetwork(*state, RoomAirNode);
+    CalcRoomAirModelAFN(*state, ZoneNum, RoomAirNode);
 
-    EXPECT_NEAR(24.057841, state->dataRoomAirMod->RoomAirflowNetworkZoneInfo(ZoneNum).Node(RoomAirNode).AirTemp, 0.00001);
-    EXPECT_NEAR(0.0028697086, state->dataRoomAirMod->RoomAirflowNetworkZoneInfo(ZoneNum).Node(RoomAirNode).HumRat, 0.00001);
-    EXPECT_NEAR(15.53486185, state->dataRoomAirMod->RoomAirflowNetworkZoneInfo(ZoneNum).Node(RoomAirNode).RelHumidity, 0.00001);
+    EXPECT_NEAR(24.057841, state->dataRoomAir->AFNZoneInfo(ZoneNum).Node(RoomAirNode).AirTemp, 0.00001);
+    EXPECT_NEAR(0.0028697086, state->dataRoomAir->AFNZoneInfo(ZoneNum).Node(RoomAirNode).HumRat, 0.00001);
+    EXPECT_NEAR(15.53486185, state->dataRoomAir->AFNZoneInfo(ZoneNum).Node(RoomAirNode).RelHumidity, 0.00001);
 
-    thisRAFN.UpdateRoomAirModelAirflowNetwork(*state);
+    UpdateRoomAirModelAFN(*state, ZoneNum);
 
     EXPECT_NEAR(24.397538, state->dataLoopNodes->Node(2).Temp, 0.00001);
     EXPECT_NEAR(0.0024802305, state->dataLoopNodes->Node(2).HumRat, 0.000001);
@@ -393,27 +411,27 @@ TEST_F(RoomAirflowNetworkTest, RAFNTest)
     ASSERT_TRUE(process_idf(idf_objects));
     state->afn->get_input();
 
-    state->dataZoneEquip->ZoneEquipList(ZoneNum).EquipTypeEnum(1) = DataZoneEquipment::ZoneEquip::AirDistUnit;
-    state->dataRoomAirflowNetModel->InitRoomAirModelAirflowNetworkOneTimeFlagConf = true;
+    state->dataZoneEquip->ZoneEquipList(ZoneNum).EquipType(1) = DataZoneEquipment::ZoneEquipType::AirDistributionUnit;
+    state->dataRoomAirflowNetModel->OneTimeFlagConf = true;
     state->dataZoneAirLoopEquipmentManager->GetAirDistUnitsFlag = false;
     state->dataDefineEquipment->AirDistUnit.allocate(1);
     state->dataZoneEquip->ZoneEquipList(ZoneNum).EquipName(1) = "ADU";
     state->dataDefineEquipment->AirDistUnit(1).Name = "ADU";
     state->dataDefineEquipment->AirDistUnit(1).EquipName.allocate(1);
     state->dataDefineEquipment->AirDistUnit(1).EquipName(1) = "AirTerminal";
-    state->dataRoomAirMod->RoomAirflowNetworkZoneInfo(ZoneNum).Node(1).HVAC(1).Name = "AirTerminal";
-    state->dataRoomAirMod->RoomAirflowNetworkZoneInfo(ZoneNum).Node(1).HVAC(1).SupplyFraction = 0.4;
-    state->dataRoomAirMod->RoomAirflowNetworkZoneInfo(ZoneNum).Node(1).HVAC(1).ReturnFraction = 0.4;
-    state->dataRoomAirMod->RoomAirflowNetworkZoneInfo(ZoneNum).Node(2).HVAC(1).Name = "AirTerminal";
-    state->dataRoomAirMod->RoomAirflowNetworkZoneInfo(ZoneNum).Node(2).HVAC(1).SupplyFraction = 0.6;
-    state->dataRoomAirMod->RoomAirflowNetworkZoneInfo(ZoneNum).Node(2).HVAC(1).ReturnFraction = 0.6;
+    state->dataRoomAir->AFNZoneInfo(ZoneNum).Node(1).HVAC(1).Name = "AirTerminal";
+    state->dataRoomAir->AFNZoneInfo(ZoneNum).Node(1).HVAC(1).SupplyFraction = 0.4;
+    state->dataRoomAir->AFNZoneInfo(ZoneNum).Node(1).HVAC(1).ReturnFraction = 0.4;
+    state->dataRoomAir->AFNZoneInfo(ZoneNum).Node(2).HVAC(1).Name = "AirTerminal";
+    state->dataRoomAir->AFNZoneInfo(ZoneNum).Node(2).HVAC(1).SupplyFraction = 0.6;
+    state->dataRoomAir->AFNZoneInfo(ZoneNum).Node(2).HVAC(1).ReturnFraction = 0.6;
 
-    thisRAFN.InitRoomAirModelAirflowNetwork(*state, RoomAirNode);
+    InitRoomAirModelAFN(*state, ZoneNum, RoomAirNode);
     // No errorfound
-    EXPECT_NEAR(1.1824296, state->dataRoomAirMod->RoomAirflowNetworkZoneInfo(ZoneNum).Node(RoomAirNode).RhoAir, 0.00001);
-    EXPECT_NEAR(1010.1746, state->dataRoomAirMod->RoomAirflowNetworkZoneInfo(ZoneNum).Node(RoomAirNode).CpAir, 0.001);
+    EXPECT_NEAR(1.1824296, state->dataRoomAir->AFNZoneInfo(ZoneNum).Node(RoomAirNode).RhoAir, 0.00001);
+    EXPECT_NEAR(1010.1746, state->dataRoomAir->AFNZoneInfo(ZoneNum).Node(RoomAirNode).CpAir, 0.001);
 
-    state->dataRoomAirflowNetModel->InitRoomAirModelAirflowNetworkOneTimeFlagConf = false;
+    state->dataRoomAirflowNetModel->OneTimeFlagConf = false;
 }
 TEST_F(EnergyPlusFixture, RoomAirInternalGains_InternalHeatGains_Check)
 {
@@ -527,7 +545,7 @@ TEST_F(EnergyPlusFixture, RoomAirInternalGains_InternalHeatGains_Check)
         "RoomAirSettings:AirflowNetwork,",
         "  living_unit1,            !- Name",
         "  living_unit1,            !- Zone Name",
-        "  Node1,            !- Control Point RoomAirflowNetwork : Node Name",
+        "  Node1,            !- Control Point AFN : Node Name",
         "  Node1;                   !- RoomAirflowNetwork : Node Name 1",
 
     });
@@ -535,13 +553,15 @@ TEST_F(EnergyPlusFixture, RoomAirInternalGains_InternalHeatGains_Check)
     ASSERT_TRUE(process_idf(idf_objects));
     EXPECT_FALSE(has_err_output());
 
+    state->dataGlobal->TimeStepsInHour = 1;
+    state->dataGlobal->MinutesInTimeStep = 60;
+    state->init_state(*state);
+
     ErrorsFound = false;
-    state->dataGlobal->NumOfTimeStepInHour = 1;
-    state->dataGlobal->MinutesPerTimeStep = 60;
-    ScheduleManager::ProcessScheduleInput(*state);
 
     HeatBalanceManager::GetZoneData(*state, ErrorsFound);
     EXPECT_FALSE(ErrorsFound);
+    ZoneEquipmentManager::GetZoneEquipment(*state);
 
     ErrorsFound = false;
     Material::GetMaterialData(*state, ErrorsFound);
@@ -554,8 +574,8 @@ TEST_F(EnergyPlusFixture, RoomAirInternalGains_InternalHeatGains_Check)
     ErrorsFound = false;
     state->dataSurfaceGeometry->CosZoneRelNorth.allocate(1);
     state->dataSurfaceGeometry->SinZoneRelNorth.allocate(1);
-    state->dataSurfaceGeometry->CosZoneRelNorth(1) = std::cos(-state->dataHeatBal->Zone(1).RelNorth * DataGlobalConstants::DegToRadians);
-    state->dataSurfaceGeometry->SinZoneRelNorth(1) = std::sin(-state->dataHeatBal->Zone(1).RelNorth * DataGlobalConstants::DegToRadians);
+    state->dataSurfaceGeometry->CosZoneRelNorth(1) = std::cos(-state->dataHeatBal->Zone(1).RelNorth * Constant::DegToRad);
+    state->dataSurfaceGeometry->SinZoneRelNorth(1) = std::sin(-state->dataHeatBal->Zone(1).RelNorth * Constant::DegToRad);
     state->dataSurfaceGeometry->CosBldgRelNorth = 1.0;
     state->dataSurfaceGeometry->SinBldgRelNorth = 0.0;
     SurfaceGeometry::GetSurfaceData(*state, ErrorsFound);
@@ -565,13 +585,19 @@ TEST_F(EnergyPlusFixture, RoomAirInternalGains_InternalHeatGains_Check)
     InternalHeatGains::GetInternalHeatGainsInput(*state);
 
     ErrorsFound = false;
-    state->dataRoomAirMod->AirModel.allocate(1);
-    state->dataRoomAirMod->AirModel(1).AirModelType = DataRoomAirModel::RoomAirModel::AirflowNetwork;
-    RoomAirModelManager::GetRoomAirflowNetworkData(*state, ErrorsFound);
+    state->dataRoomAir->AirModel.allocate(1);
+    state->dataRoomAir->AirModel(1).AirModel = RoomAir::RoomAirModel::AirflowNetwork;
+    RoomAir::GetRoomAirflowNetworkData(*state, ErrorsFound);
     EXPECT_TRUE(ErrorsFound);
 
     std::string const error_string =
-        delimited_string({"   ** Severe  ** GetRoomAirflowNetworkData: Invalid Internal Gain Object Name = LIVING_UNIT1 PEOPLE",
+        delimited_string({"   ** Warning ** ProcessScheduleInput: Schedule:Constant = SCH_ACT",
+                          "   **   ~~~   ** Schedule Type Limits Name is empty.",
+                          "   **   ~~~   ** Schedule will not be validated.",
+                          "   ** Warning ** ProcessScheduleInput: Schedule:Constant = SCH",
+                          "   **   ~~~   ** Schedule Type Limits Name is empty.",
+                          "   **   ~~~   ** Schedule will not be validated.",
+                          "   ** Severe  ** GetRoomAirflowNetworkData: Invalid Internal Gain Object Name = LIVING_UNIT1 PEOPLE",
                           "   **   ~~~   ** Entered in RoomAir:Node:AirflowNetwork:InternalGains = NODE1_GAIN",
                           "   **   ~~~   ** Internal gain did not match correctly",
                           "   ** Severe  ** GetRoomAirflowNetworkData: Invalid Internal Gain Object Name = LIVING_UNIT1 LIGHTS",
@@ -582,4 +608,232 @@ TEST_F(EnergyPlusFixture, RoomAirInternalGains_InternalHeatGains_Check)
                           "   **   ~~~   ** Internal gain did not match correctly"});
 
     EXPECT_TRUE(compare_err_stream(error_string, true));
+}
+
+TEST_F(EnergyPlusFixture, RoomAirflowNetwork_CheckEquipName_Test)
+{
+    // Test #6321
+    bool check;
+    std::string const EquipName = "ZoneEquip";
+    std::string SupplyNodeName;
+    std::string ReturnNodeName;
+    int EquipIndex = 1; // Equipment index
+    DataZoneEquipment::ZoneEquipType zoneEquipType;
+
+    state->dataLoopNodes->NodeID.allocate(2);
+    state->dataLoopNodes->Node.allocate(2);
+    state->dataLoopNodes->NodeID(1) = "SupplyNode";
+    state->dataLoopNodes->NodeID(2) = "ReturnNode";
+
+    state->dataHVACVarRefFlow->GetVRFInputFlag = false;
+    state->dataHVACVarRefFlow->VRFTU.allocate(1);
+    state->dataHVACVarRefFlow->VRFTU(1).VRFTUOutletNodeNum = 1;
+
+    zoneEquipType = DataZoneEquipment::ZoneEquipType::VariableRefrigerantFlowTerminal;
+    state->dataHVACVarRefFlow->NumVRFTU = 1;
+    state->dataHVACVarRefFlow->VRFTU(1).Name = EquipName;
+    check = CheckEquipName(*state, EquipName, SupplyNodeName, ReturnNodeName, zoneEquipType);
+    EXPECT_TRUE(check);
+    EXPECT_EQ("SupplyNode", SupplyNodeName);
+
+    state->dataLoopNodes->NodeID(1) = "SupplyNode1";
+    state->dataLoopNodes->NodeID(2) = "ReturnNode1";
+    zoneEquipType = DataZoneEquipment::ZoneEquipType::EnergyRecoveryVentilator;
+    state->dataHVACStandAloneERV->GetERVInputFlag = false;
+    state->dataHVACStandAloneERV->StandAloneERV.allocate(1);
+    state->dataHVACStandAloneERV->NumStandAloneERVs = 1;
+    state->dataHVACStandAloneERV->StandAloneERV(1).SupplyAirInletNode = 1;
+    state->dataHVACStandAloneERV->StandAloneERV(1).Name = EquipName;
+    check = CheckEquipName(*state, EquipName, SupplyNodeName, ReturnNodeName, zoneEquipType);
+    EXPECT_TRUE(check);
+    EXPECT_EQ("SupplyNode1", SupplyNodeName);
+
+    state->dataLoopNodes->NodeID(1) = "SupplyNode2";
+    state->dataLoopNodes->NodeID(2) = "ReturnNode2";
+    zoneEquipType = DataZoneEquipment::ZoneEquipType::FourPipeFanCoil;
+    state->dataFanCoilUnits->FanCoil.allocate(1);
+    state->dataFanCoilUnits->FanCoil(EquipIndex).AirOutNode = 1;
+    state->dataFanCoilUnits->FanCoil(EquipIndex).AirInNode = 2;
+    state->dataFanCoilUnits->NumFanCoils = 1;
+    state->dataFanCoilUnits->GetFanCoilInputFlag = false;
+    state->dataFanCoilUnits->FanCoil(EquipIndex).Name = EquipName;
+    check = CheckEquipName(*state, EquipName, SupplyNodeName, ReturnNodeName, zoneEquipType);
+    EXPECT_TRUE(check);
+    EXPECT_EQ("SupplyNode2", SupplyNodeName);
+    EXPECT_EQ("ReturnNode2", ReturnNodeName);
+
+    state->dataLoopNodes->NodeID(1) = "SupplyNode3";
+    state->dataLoopNodes->NodeID(2) = "ReturnNode3";
+    zoneEquipType = DataZoneEquipment::ZoneEquipType::OutdoorAirUnit;
+    state->dataOutdoorAirUnit->OutAirUnit.allocate(1);
+    state->dataOutdoorAirUnit->OutAirUnit(EquipIndex).AirOutletNode = 1;
+    state->dataOutdoorAirUnit->OutAirUnit(EquipIndex).AirInletNode = 2;
+    state->dataOutdoorAirUnit->NumOfOAUnits = 1;
+    state->dataOutdoorAirUnit->GetOutdoorAirUnitInputFlag = false;
+    state->dataOutdoorAirUnit->OutAirUnit(EquipIndex).Name = EquipName;
+    check = CheckEquipName(*state, EquipName, SupplyNodeName, ReturnNodeName, zoneEquipType);
+    EXPECT_TRUE(check);
+    EXPECT_EQ("SupplyNode3", SupplyNodeName);
+    EXPECT_EQ("ReturnNode3", ReturnNodeName);
+
+    state->dataLoopNodes->NodeID(1) = "SupplyNode4";
+    state->dataLoopNodes->NodeID(2) = "ReturnNode4";
+    zoneEquipType = DataZoneEquipment::ZoneEquipType::PackagedTerminalAirConditioner;
+    UnitarySystems::UnitarySys thisUnit;
+    state->dataUnitarySystems->unitarySys.push_back(thisUnit);
+    state->dataUnitarySystems->getInputOnceFlag = false;
+    state->dataUnitarySystems->unitarySys[EquipIndex - 1].Name = EquipName;
+    state->dataUnitarySystems->numUnitarySystems = 1;
+    state->dataUnitarySystems->unitarySys[EquipIndex - 1].AirOutNode = 1;
+    state->dataUnitarySystems->unitarySys[EquipIndex - 1].AirInNode = 2;
+    check = CheckEquipName(*state, EquipName, SupplyNodeName, ReturnNodeName, zoneEquipType);
+    EXPECT_TRUE(check);
+    EXPECT_EQ("SupplyNode4", SupplyNodeName);
+    EXPECT_EQ("ReturnNode4", ReturnNodeName);
+
+    state->dataLoopNodes->NodeID(1) = "SupplyNode5";
+    state->dataLoopNodes->NodeID(2) = "ReturnNode5";
+    zoneEquipType = DataZoneEquipment::ZoneEquipType::PackagedTerminalHeatPump;
+    // UnitarySystems::UnitarySys thisUnit;
+    // state->dataUnitarySystems->unitarySys.push_back(thisUnit);
+    state->dataUnitarySystems->getInputOnceFlag = false;
+    state->dataUnitarySystems->unitarySys[EquipIndex - 1].Name = EquipName;
+    state->dataUnitarySystems->numUnitarySystems = 1;
+    state->dataUnitarySystems->unitarySys[EquipIndex - 1].AirOutNode = 1;
+    state->dataUnitarySystems->unitarySys[EquipIndex - 1].AirInNode = 2;
+    check = CheckEquipName(*state, EquipName, SupplyNodeName, ReturnNodeName, zoneEquipType);
+    EXPECT_TRUE(check);
+    EXPECT_EQ("SupplyNode5", SupplyNodeName);
+    EXPECT_EQ("ReturnNode5", ReturnNodeName);
+
+    state->dataLoopNodes->NodeID(1) = "SupplyNode6";
+    state->dataLoopNodes->NodeID(2) = "ReturnNode6";
+    zoneEquipType = DataZoneEquipment::ZoneEquipType::PackagedTerminalHeatPumpWaterToAir;
+    // UnitarySystems::UnitarySys thisUnit;
+    // state->dataUnitarySystems->unitarySys.push_back(thisUnit);
+    state->dataUnitarySystems->getInputOnceFlag = false;
+    state->dataUnitarySystems->unitarySys[EquipIndex - 1].Name = EquipName;
+    state->dataUnitarySystems->numUnitarySystems = 1;
+    state->dataUnitarySystems->unitarySys[EquipIndex - 1].AirOutNode = 1;
+    state->dataUnitarySystems->unitarySys[EquipIndex - 1].AirInNode = 2;
+    check = CheckEquipName(*state, EquipName, SupplyNodeName, ReturnNodeName, zoneEquipType);
+    EXPECT_TRUE(check);
+    EXPECT_EQ("SupplyNode6", SupplyNodeName);
+    EXPECT_EQ("ReturnNode6", ReturnNodeName);
+
+    state->dataLoopNodes->NodeID(1) = "SupplyNode7";
+    state->dataLoopNodes->NodeID(2) = "ReturnNode7";
+    zoneEquipType = DataZoneEquipment::ZoneEquipType::UnitHeater;
+    state->dataUnitHeaters->UnitHeat.allocate(1);
+    state->dataUnitHeaters->UnitHeat(EquipIndex).AirOutNode = 1;
+    state->dataUnitHeaters->UnitHeat(EquipIndex).AirInNode = 2;
+    state->dataUnitHeaters->NumOfUnitHeats = 1;
+    state->dataUnitHeaters->GetUnitHeaterInputFlag = false;
+    state->dataUnitHeaters->UnitHeat(EquipIndex).Name = EquipName;
+    check = CheckEquipName(*state, EquipName, SupplyNodeName, ReturnNodeName, zoneEquipType);
+    EXPECT_TRUE(check);
+    EXPECT_EQ("SupplyNode7", SupplyNodeName);
+    EXPECT_EQ("ReturnNode7", ReturnNodeName);
+
+    state->dataLoopNodes->NodeID(1) = "SupplyNode8";
+    state->dataLoopNodes->NodeID(2) = "ReturnNode8";
+    zoneEquipType = DataZoneEquipment::ZoneEquipType::UnitVentilator;
+    state->dataUnitVentilators->UnitVent.allocate(1);
+    state->dataUnitVentilators->UnitVent(EquipIndex).AirOutNode = 1;
+    state->dataUnitVentilators->UnitVent(EquipIndex).AirInNode = 2;
+    state->dataUnitVentilators->NumOfUnitVents = 1;
+    state->dataUnitVentilators->UnitVent(EquipIndex).Name = EquipName;
+    state->dataUnitVentilators->GetUnitVentilatorInputFlag = false;
+    check = CheckEquipName(*state, EquipName, SupplyNodeName, ReturnNodeName, zoneEquipType);
+    EXPECT_TRUE(check);
+    EXPECT_EQ("SupplyNode8", SupplyNodeName);
+    EXPECT_EQ("ReturnNode8", ReturnNodeName);
+
+    state->dataLoopNodes->NodeID(1) = "SupplyNode9";
+    state->dataLoopNodes->NodeID(2) = "ReturnNode9";
+    zoneEquipType = DataZoneEquipment::ZoneEquipType::VentilatedSlab;
+    state->dataVentilatedSlab->VentSlab.allocate(1);
+    state->dataVentilatedSlab->VentSlab(EquipIndex).ZoneAirInNode = 1;
+    state->dataVentilatedSlab->VentSlab(EquipIndex).ReturnAirNode = 2;
+    state->dataVentilatedSlab->NumOfVentSlabs = 1;
+    state->dataVentilatedSlab->GetInputFlag = false;
+    state->dataVentilatedSlab->VentSlab(EquipIndex).Name = EquipName;
+    check = CheckEquipName(*state, EquipName, SupplyNodeName, ReturnNodeName, zoneEquipType);
+    EXPECT_TRUE(check);
+    EXPECT_EQ("SupplyNode9", SupplyNodeName);
+    EXPECT_EQ("ReturnNode9", ReturnNodeName);
+
+    state->dataLoopNodes->NodeID(1) = "SupplyNode10";
+    state->dataLoopNodes->NodeID(2) = "ReturnNode10";
+    zoneEquipType = DataZoneEquipment::ZoneEquipType::WindowAirConditioner;
+    state->dataWindowAC->WindAC.allocate(1);
+    state->dataWindowAC->WindAC(EquipIndex).AirOutNode = 1;
+    state->dataWindowAC->WindAC(EquipIndex).AirInNode = 2;
+    state->dataWindowAC->WindAC(EquipIndex).OAMixIndex = 1;
+    state->dataWindowAC->NumWindAC = 1;
+    state->dataWindowAC->GetWindowACInputFlag = false;
+    state->dataMixedAir->NumOAMixers = 1;
+    state->dataMixedAir->OAMixer.allocate(1);
+    state->dataMixedAir->OAMixer(1).RetNode = 2;
+    state->dataWindowAC->WindAC(EquipIndex).Name = EquipName;
+    state->dataMixedAir->GetOAMixerInputFlag = false;
+    check = CheckEquipName(*state, EquipName, SupplyNodeName, ReturnNodeName, zoneEquipType);
+    EXPECT_TRUE(check);
+    EXPECT_EQ("SupplyNode10", SupplyNodeName);
+    EXPECT_EQ("ReturnNode10", ReturnNodeName);
+
+    state->dataLoopNodes->NodeID(1) = "SupplyNode11";
+    state->dataLoopNodes->NodeID(2) = "ReturnNode11";
+    zoneEquipType = DataZoneEquipment::ZoneEquipType::DehumidifierDX;
+    state->dataZoneDehumidifier->ZoneDehumid.allocate(1);
+    state->dataZoneDehumidifier->ZoneDehumid(EquipIndex).AirOutletNodeNum = 1;
+    state->dataZoneDehumidifier->ZoneDehumid(EquipIndex).AirInletNodeNum = 2;
+    state->dataZoneDehumidifier->ZoneDehumid(EquipIndex).Name = EquipName;
+    state->dataZoneDehumidifier->GetInputFlag = false;
+    check = CheckEquipName(*state, EquipName, SupplyNodeName, ReturnNodeName, zoneEquipType);
+    EXPECT_TRUE(check);
+    EXPECT_EQ("SupplyNode11", SupplyNodeName);
+    EXPECT_EQ("ReturnNode11", ReturnNodeName);
+
+    state->dataLoopNodes->NodeID(1) = "SupplyNode12";
+    state->dataLoopNodes->NodeID(2) = "ReturnNode12";
+    zoneEquipType = DataZoneEquipment::ZoneEquipType::PurchasedAir;
+    state->dataPurchasedAirMgr->PurchAir.allocate(1);
+    state->dataPurchasedAirMgr->PurchAir(EquipIndex).ZoneSupplyAirNodeNum = 1;
+    state->dataPurchasedAirMgr->PurchAir(EquipIndex).ZoneExhaustAirNodeNum = 2;
+    state->dataPurchasedAirMgr->NumPurchAir = 1;
+    state->dataPurchasedAirMgr->PurchAir(EquipIndex).Name = EquipName;
+    state->dataPurchasedAirMgr->GetPurchAirInputFlag = false;
+    check = CheckEquipName(*state, EquipName, SupplyNodeName, ReturnNodeName, zoneEquipType);
+    EXPECT_TRUE(check);
+    EXPECT_EQ("SupplyNode12", SupplyNodeName);
+    EXPECT_EQ("ReturnNode12", ReturnNodeName);
+
+    state->dataLoopNodes->NodeID(1) = "SupplyNode13";
+    state->dataLoopNodes->NodeID(2) = "ReturnNode13";
+    zoneEquipType = DataZoneEquipment::ZoneEquipType::PurchasedAir;
+    state->dataHybridUnitaryAC->ZoneHybridUnitaryAirConditioner.allocate(1);
+    state->dataHybridUnitaryAC->ZoneHybridUnitaryAirConditioner(EquipIndex).OutletNode = 1;
+    state->dataHybridUnitaryAC->ZoneHybridUnitaryAirConditioner(EquipIndex).InletNode = 2;
+    state->dataHybridUnitaryAC->NumZoneHybridEvap = 1;
+    state->dataHybridUnitaryAC->ZoneHybridUnitaryAirConditioner(EquipIndex).Name = EquipName;
+    state->dataHybridUnitaryAC->GetInputZoneHybridEvap = false;
+    check = CheckEquipName(*state, EquipName, SupplyNodeName, ReturnNodeName, zoneEquipType);
+    EXPECT_TRUE(check);
+    EXPECT_EQ("SupplyNode13", SupplyNodeName);
+    EXPECT_EQ("ReturnNode13", ReturnNodeName);
+
+    state->dataLoopNodes->NodeID(1) = "SupplyNode14";
+    state->dataLoopNodes->NodeID(2) = "ReturnNode14";
+    zoneEquipType = DataZoneEquipment::ZoneEquipType::PurchasedAir;
+    state->dataWaterThermalTanks->HPWaterHeater.allocate(1);
+    state->dataWaterThermalTanks->HPWaterHeater(EquipIndex).HeatPumpAirOutletNode = 1;
+    state->dataWaterThermalTanks->HPWaterHeater(EquipIndex).HeatPumpAirInletNode = 2;
+    state->dataWaterThermalTanks->numHeatPumpWaterHeater = 1;
+    state->dataWaterThermalTanks->HPWaterHeater(EquipIndex).Name = EquipName;
+    state->dataWaterThermalTanks->getWaterThermalTankInputFlag = false;
+    check = CheckEquipName(*state, EquipName, SupplyNodeName, ReturnNodeName, zoneEquipType);
+    EXPECT_TRUE(check);
+    EXPECT_EQ("SupplyNode14", SupplyNodeName);
+    EXPECT_EQ("ReturnNode14", ReturnNodeName);
 }

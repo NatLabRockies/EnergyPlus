@@ -1,7 +1,7 @@
-// EnergyPlus, Copyright (c) 1996-2023, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
-// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other
+// National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
 // contributors. All rights reserved.
 //
 // NOTICE: This Software was developed under funding from the U.S. Department of Energy and the
@@ -67,8 +67,6 @@ namespace DXFEarClipping {
     // Module information:
     //       Author         Linda Lawrie
     //       Date written   October 2005
-    //       Modified       na
-    //       Re-engineered  na
 
     // Purpose of this module:
     // This module provides the techniques and back up procedures for producing a triangulated
@@ -94,9 +92,7 @@ namespace DXFEarClipping {
         //'NOTE: A point on the edge is inside the circumcircle
 
         Real64 constexpr epsilon(0.0000001);
-        Real64 anglesum;
         Real64 costheta;
-        int vert;
         Real64 m1;
         Real64 m2;
         Real64 acosval;
@@ -107,9 +103,9 @@ namespace DXFEarClipping {
 
         InPolygon = false;
 
-        anglesum = 0.0;
+        Real64 anglesum = 0.0;
 
-        for (vert = 1; vert <= nsides - 1; ++vert) {
+        for (int vert = 1; vert <= nsides - 1; ++vert) {
 
             p1.x = poly(vert).x - point.x;
             p1.y = poly(vert).y - point.y;
@@ -125,14 +121,13 @@ namespace DXFEarClipping {
             if (m1 * m2 <= epsilon) {
                 InPolygon = true;
                 break;
-            } else {
-                costheta = (p1.x * p2.x + p1.y * p2.y + p1.z * p2.z) / (m1 * m2);
-                acosval = std::acos(costheta);
-                anglesum += acosval;
             }
+            costheta = (p1.x * p2.x + p1.y * p2.y + p1.z * p2.z) / (m1 * m2);
+            acosval = std::acos(costheta);
+            anglesum += acosval;
         }
 
-        if (std::abs(anglesum - DataGlobalConstants::TwoPi) <= epsilon) {
+        if (std::abs(anglesum - Constant::TwoPi) <= epsilon) {
             InPolygon = true;
         }
 
@@ -165,20 +160,11 @@ namespace DXFEarClipping {
         // Subroutine information:
         //       Author         Linda Lawrie
         //       Date written   October 2005
-        //       Modified       na
-        //       Re-engineered  na
 
         // Purpose of this subroutine:
         // This routine is a self-contained triangulation calculation from a polygon
         // of 3D vertices, nsides, to a returned set (as possible) of triangles -- noted
         // by vertex numbers.
-
-        // Using/Aliasing
-        using DataSurfaces::cSurfaceClass;
-        using DataSurfaces::SurfaceClass;
-
-        // Return value
-        int Triangulate;
 
         // Argument array dimensioning
         EP_SIZE_CHECK(polygon, nsides);
@@ -187,7 +173,6 @@ namespace DXFEarClipping {
         Real64 constexpr point_tolerance(0.00001);
 
         // Subroutine local variable declarations:
-        bool errFlag;
         Array1D_int ears(nsides);
         Array1D_int r_angles(nsides);
         Array1D<Real64> rangles(nsides);
@@ -199,82 +184,77 @@ namespace DXFEarClipping {
         Array1D<Real64> yvt(nsides);
         Array1D<Real64> zvt(nsides);
 
-        int ntri;
-        int nvertcur;
-        int ncount;
-        int svert;
-        int mvert;
-        int evert;
         int nears;
         int nrangles;
         int ncverts;
-        std::string line;
 
         // Object Data
         Array1D<Vector_2d> vertex(nsides);
         Array1D<dTriangle> Triangle(nsides);
 
-        errFlag = false;
-        //  vertex=polygon
-        //  if (surfname == 'BOTTOM:OFFICE_E_3') THEN
-        //    trackit=.TRUE.
-        //  else
-        //    trackit=.FALSE.
-        //  endif
-        if (surfclass == SurfaceClass::Floor || surfclass == SurfaceClass::Roof || surfclass == SurfaceClass::Overhang) {
+        if (surfclass == DataSurfaces::SurfaceClass::Floor || surfclass == DataSurfaces::SurfaceClass::Roof ||
+            surfclass == DataSurfaces::SurfaceClass::Overhang) {
             CalcRfFlrCoordinateTransformation(nsides, polygon, surfazimuth, surftilt, xvt, yvt, zvt);
-            for (svert = 1; svert <= nsides; ++svert) {
-                for (mvert = svert + 1; mvert <= nsides; ++mvert) {
-                    if (std::abs(xvt(svert) - xvt(mvert)) <= point_tolerance) xvt(svert) = xvt(mvert);
-                    if (std::abs(zvt(svert) - zvt(mvert)) <= point_tolerance) zvt(svert) = zvt(mvert);
+            for (int svert = 1; svert <= nsides; ++svert) {
+                for (int mvert = svert + 1; mvert <= nsides; ++mvert) {
+                    if (std::abs(xvt(svert) - xvt(mvert)) <= point_tolerance) {
+                        xvt(svert) = xvt(mvert);
+                    }
+                    if (std::abs(zvt(svert) - zvt(mvert)) <= point_tolerance) {
+                        zvt(svert) = zvt(mvert);
+                    }
                 }
             }
-            for (svert = 1; svert <= nsides; ++svert) {
+            for (int svert = 1; svert <= nsides; ++svert) {
                 vertex(svert).x = xvt(svert);
                 vertex(svert).y = zvt(svert);
                 //      if (trackit) write(outputfiledebug,*) 'x=',xvt(svert),' y=',zvt(svert)
             }
         } else {
             CalcWallCoordinateTransformation(nsides, polygon, surfazimuth, surftilt, xvt, yvt, zvt);
-            for (svert = 1; svert <= nsides; ++svert) {
-                for (mvert = svert + 1; mvert <= nsides; ++mvert) {
-                    if (std::abs(xvt(svert) - xvt(mvert)) <= point_tolerance) xvt(svert) = xvt(mvert);
-                    if (std::abs(zvt(svert) - zvt(mvert)) <= point_tolerance) zvt(svert) = zvt(mvert);
+            for (int svert = 1; svert <= nsides; ++svert) {
+                for (int mvert = svert + 1; mvert <= nsides; ++mvert) {
+                    if (std::abs(xvt(svert) - xvt(mvert)) <= point_tolerance) {
+                        xvt(svert) = xvt(mvert);
+                    }
+                    if (std::abs(zvt(svert) - zvt(mvert)) <= point_tolerance) {
+                        zvt(svert) = zvt(mvert);
+                    }
                 }
             }
-            for (svert = 1; svert <= nsides; ++svert) {
+            for (int svert = 1; svert <= nsides; ++svert) {
                 vertex(svert).x = xvt(svert);
                 vertex(svert).y = zvt(svert);
             }
         }
 
         // find ears
-        nvertcur = nsides;
-        ncount = 0;
-        svert = 1;
-        mvert = 2;
-        evert = 3;
+        int nvertcur = nsides;
+        int ncount = 0;
+        int svert = 1;
+        int mvert = 2;
+        int evert = 3;
         removed = false;
         while (nvertcur > 3) {
             generate_ears(state, nsides, vertex, ears, nears, r_angles, nrangles, c_vertices, ncverts, removed, earverts, rangles);
             if (!any_gt(ears, 0)) {
                 ShowWarningError(state,
-                                 format("DXFOut: Could not triangulate surface=\"{}\", type=\"{}\", check surface vertex order(entry)",
-                                        surfname,
-                                        cSurfaceClass(surfclass)));
+                                 std::format("DXFOut: Could not triangulate surface=\"{}\", type=\"{}\", check surface vertex order(entry)",
+                                             surfname,
+                                             DataSurfaces::cSurfaceClass(surfclass)));
                 ++state.dataDXFEarClipping->errcount;
                 if (state.dataDXFEarClipping->errcount == 1 && !state.dataGlobal->DisplayExtraWarnings) {
                     ShowContinueError(state, "...use Output:Diagnostics,DisplayExtraWarnings; to show more details on individual surfaces.");
                 }
                 if (state.dataGlobal->DisplayExtraWarnings) {
-                    ShowMessage(state, format(" surface={} class={}", surfname, cSurfaceClass(surfclass)));
+                    ShowMessage(state, std::format(" surface={} class={}", surfname, DataSurfaces::cSurfaceClass(surfclass)));
 
                     for (int j = 1; j <= nsides; ++j) {
-                        ShowMessage(state, format(" side={} ({:.1R},{:.1R},{:.1R})", j, polygon(j).x, polygon(j).y, polygon(j).z));
+                        ShowMessage(state, std::format(" side={} ({:.1f},{:.1f},{:.1f})", j, polygon(j).x, polygon(j).y, polygon(j).z));
                     }
-                    ShowMessage(state, format(" number of triangles found={:12}", ncount));
+                    ShowMessage(state, std::format(" number of triangles found={:12}", ncount));
                     for (int j = 1; j <= nrangles; ++j) {
-                        ShowMessage(state, format(" r angle={} vert={} deg={:.1R}", j, r_angles(j), rangles(j) * DataGlobalConstants::RadToDeg));
+                        ShowMessage(state, std::format(" r angle={} vert={} deg={:.1f}", j, r_angles(j), rangles(j) * Constant::RadToDeg));
                     }
                 }
                 break; // while loop
@@ -295,14 +275,16 @@ namespace DXFEarClipping {
                 int j = 1;
                 ++ncount;
                 for (int i = 1; i <= nsides; ++i) {
-                    if (removed(i)) continue;
+                    if (removed(i)) {
+                        continue;
+                    }
                     earvert(ncount, j) = i;
                     ++j;
                 }
             }
         }
 
-        ntri = ncount;
+        int ntri = ncount;
 
         for (int i = 1; i <= ntri; ++i) {
             Triangle(i).vv0 = earvert(i, 1);
@@ -315,9 +297,7 @@ namespace DXFEarClipping {
             outtriangles(i) = Triangle(i);
         }
 
-        Triangulate = ntri;
-
-        return Triangulate;
+        return ntri;
     }
 
     Real64 angle_2dvector(Real64 const xa, // vertex coordinate
@@ -332,8 +312,6 @@ namespace DXFEarClipping {
         // Function information:
         //       Author         Linda Lawrie
         //       Date written   October 2005
-        //       Modified       na
-        //       Re-engineered  na
 
         // Purpose of this function:
         // This function calculates the angle between two sides of a 2d polygon.
@@ -348,27 +326,20 @@ namespace DXFEarClipping {
         // Return value
         Real64 angle; // the angle, between 0 and 2*PI.
 
-        // Locals
-        // Function argument definitions:
         // angle is set to PI/2 in the degenerate case.
 
         // Function parameter definitions:
         Real64 constexpr epsilon(0.0000001);
 
-        // Function local variable declarations:
-        Real64 t;
-        Real64 x1;
-        Real64 x2;
-        Real64 y1;
-        Real64 y2;
+        Real64 x1 = xa - xb;
+        Real64 y1 = ya - yb;
+        Real64 x2 = xc - xb;
+        Real64 y2 = yc - yb;
 
-        x1 = xa - xb;
-        y1 = ya - yb;
-        x2 = xc - xb;
-        y2 = yc - yb;
-
-        t = std::sqrt((x1 * x1 + y1 * y1) * (x2 * x2 + y2 * y2));
-        if (t == 0.0E+00) t = 1.0E+00;
+        Real64 t = std::sqrt((x1 * x1 + y1 * y1) * (x2 * x2 + y2 * y2));
+        if (t == 0.0E+00) {
+            t = 1.0E+00;
+        }
 
         t = (x1 * x2 + y1 * y2) / t;
 
@@ -379,7 +350,7 @@ namespace DXFEarClipping {
         angle = std::acos(t);
 
         if (x2 * y1 - y2 * x1 < 0.0E+00) {
-            angle = 2.0E+00 * DataGlobalConstants::Pi - angle;
+            angle = 2.0E+00 * Constant::Pi - angle;
         }
 
         return angle;
@@ -394,15 +365,10 @@ namespace DXFEarClipping {
         // Function information:
         //       Author         Linda Lawrie
         //       Date written   October 2005
-        //       Modified       na
-        //       Re-engineered  na
 
         // Purpose of this function:
         // Determine if a point is inside a simple 2d polygon.  For a simple polygon (one whose
         // boundary never crosses itself).  The polygon does not need to be convex.
-
-        // Methodology employed:
-        // <Description>
 
         // References:
         // M Shimrat, Position of Point Relative to Polygon, ACM Algorithm 112,
@@ -415,12 +381,11 @@ namespace DXFEarClipping {
         EP_SIZE_CHECK(polygon, nsides);
 
         // Function local variable declarations:
-        int i;
         int ip1;
 
         inside = false;
 
-        for (i = 1; i <= nsides; ++i) {
+        for (int i = 1; i <= nsides; ++i) {
 
             if (i < nsides) {
                 ip1 = i + 1;
@@ -455,8 +420,6 @@ namespace DXFEarClipping {
         // Subroutine information:
         //       Author         Linda Lawrie
         //       Date written   October 2005
-        //       Modified       na
-        //       Re-engineered  na
 
         // Purpose of this subroutine:
         // This routine generates "ears", "reflex angles" and "convex angles" of the polygon
@@ -480,13 +443,7 @@ namespace DXFEarClipping {
         EP_SIZE_CHECK(rangles, nvert);
 
         // Subroutine local variable declarations:
-        int svert;   // starting vertex
-        int mvert;   // "middle" vertex (this will be an ear, if calculated)
-        int evert;   // ending vertex
-        Real64 ang;  // ang between
-        int tvert;   // test vertex, intermediate use
         bool inpoly; // in polygon or not
-        int j;       // loop counter
 
         // Object Data
         Vector_2d point;               // structure for point
@@ -501,25 +458,35 @@ namespace DXFEarClipping {
         c_vertices = 0;
         ncverts = 0;
 
-        for (svert = 1; svert <= nvert; ++svert) {
-            if (removed(svert)) continue;
+        for (int svert = 1; svert <= nvert; ++svert) {
+            if (removed(svert)) {
+                continue;
+            }
             //  have starting vertex.  now need middle and end
-            mvert = svert + 1;
-            for (j = 1; j <= nvert; ++j) {
-                if (mvert > nvert) mvert = 1;
+            int mvert = svert + 1;
+            for (int j = 1; j <= nvert; ++j) {
+                if (mvert > nvert) {
+                    mvert = 1;
+                }
                 if (removed(mvert)) {
                     ++mvert;
-                    if (mvert > nvert) mvert = 1;
+                    if (mvert > nvert) {
+                        mvert = 1;
+                    }
                 } else {
                     break;
                 }
             }
-            evert = mvert + 1;
-            for (j = 1; j <= nvert; ++j) {
-                if (evert > nvert) evert = 1;
+            int evert = mvert + 1;
+            for (int j = 1; j <= nvert; ++j) {
+                if (evert > nvert) {
+                    evert = 1;
+                }
                 if (removed(evert)) {
                     ++evert;
-                    if (evert > nvert) evert = 1;
+                    if (evert > nvert) {
+                        evert = 1;
+                    }
                 } else {
                     break;
                 }
@@ -527,30 +494,35 @@ namespace DXFEarClipping {
 
             // have gotten start, middle and ending vertices.  test for reflex angle
 
-            ang = angle_2dvector(vertex(svert).x, vertex(svert).y, vertex(mvert).x, vertex(mvert).y, vertex(evert).x, vertex(evert).y);
+            Real64 ang = angle_2dvector(vertex(svert).x, vertex(svert).y, vertex(mvert).x, vertex(mvert).y, vertex(evert).x, vertex(evert).y);
 
-            if (ang > DataGlobalConstants::Pi) { // sufficiently close to 180 degrees.
+            if (ang > Constant::Pi) { // sufficiently close to 180 degrees.
                 ++nrverts;
                 r_vertices(nrverts) = mvert;
                 rangles(nrverts) = ang;
                 continue;
-            } else {
-                ++ncverts;
-                c_vertices(ncverts) = mvert;
             }
+            ++ncverts;
+            c_vertices(ncverts) = mvert;
 
             // convex angle, see if it's an ear
             testtri(1) = vertex(svert);
             testtri(2) = vertex(mvert);
             testtri(3) = vertex(evert);
-            tvert = evert;
-            for (j = 4; j <= nvert; ++j) {
+            int tvert = evert;
+            for (int j = 4; j <= nvert; ++j) {
                 ++tvert;
-                if (tvert > nvert) tvert = 1;
-                if (removed(tvert)) continue;
+                if (tvert > nvert) {
+                    tvert = 1;
+                }
+                if (removed(tvert)) {
+                    continue;
+                }
                 point = vertex(tvert);
                 inpoly = polygon_contains_point_2d(3, testtri, point);
-                if (!inpoly) continue;
+                if (!inpoly) {
+                    continue;
+                }
                 break;
             }
             //    if (trackit) then
@@ -588,8 +560,6 @@ namespace DXFEarClipping {
         // Subroutine information:
         //       Author         Linda Lawrie
         //       Date written   October 2005
-        //       Modified       na
-        //       Re-engineered  na
 
         // Purpose of this subroutine:
         // This routine transforms a "wall" (normally vertical polygon) to a south facing (180 deg outward
@@ -604,14 +574,12 @@ namespace DXFEarClipping {
         EP_SIZE_CHECK(yvt, nsides);
         EP_SIZE_CHECK(zvt, nsides);
 
-        // Subroutine local variable declarations:
-
         // convert surface (wall) to facing 180 (outward normal)
 
         Real64 const alpha = surfazimuth;
 
         Real64 const alpha180 = 180.0 - alpha; // amount to rotate
-        Real64 const alphrad = alpha180 / DataGlobalConstants::RadToDeg;
+        Real64 const alphrad = alpha180 / Constant::RadToDeg;
         Real64 const cos_alphrad = std::cos(alphrad);
         Real64 const sin_alphrad = std::sin(alphrad);
 
@@ -634,14 +602,11 @@ namespace DXFEarClipping {
         // Subroutine information:
         //       Author         Linda Lawrie
         //       Date written   October 2005
-        //       Modified       na
-        //       Re-engineered  na
 
         // Purpose of this subroutine:
         // This routine transforms a roof/floor (normally flat polygon) to a flat
         // polygon in 2 d (z vertices are then ignored).
 
-        // Methodology employed:
         // Standard angle rotation
 
         // Argument array dimensioning
@@ -653,7 +618,7 @@ namespace DXFEarClipping {
         // Subroutine local variable declarations:
 
         Real64 const alpha = -surftilt;
-        Real64 const alphrad = alpha / DataGlobalConstants::RadToDeg;
+        Real64 const alphrad = alpha / Constant::RadToDeg;
         Real64 const cos_alphrad = std::cos(alphrad);
         Real64 const sin_alphrad = std::sin(alphrad);
 
@@ -664,27 +629,27 @@ namespace DXFEarClipping {
         }
     }
 
-    void reorder([[maybe_unused]] int &nvert) // unused1208
-    {
+    // void reorder([[maybe_unused]] int &nvert) // unused1208
+    //{
 
-        // Locals
-        // type (Vector_2d) nvertex(nvert)
-        // integer i
-        // type (Vector_2d) point
-        // integer nrep
+    //    // Locals
+    //    // type (Vector_2d) nvertex(nvert)
+    //    // integer i
+    //    // type (Vector_2d) point
+    //    // integer nrep
 
-        //  Vertex, nverts is in cw order, reorder for calc
+    //    //  Vertex, nverts is in cw order, reorder for calc
 
-        // nrep=1
-        // nvertex(1)=vertex(1)
-        // do i=nvert,1,-1
-        //  nvertex(nrep)=vertex(i)
-        //  nrep=nrep+1
-        // enddo
-        // do i=1,nvert
-        //  vertex(i)=nvertex(i)
-        // enddo
-    }
+    //    // nrep=1
+    //    // nvertex(1)=vertex(1)
+    //    // do i=nvert,1,-1
+    //    //  nvertex(nrep)=vertex(i)
+    //    //  nrep=nrep+1
+    //    // enddo
+    //    // do i=1,nvert
+    //    //  vertex(i)=nvertex(i)
+    //    // enddo
+    //}
 
 } // namespace DXFEarClipping
 

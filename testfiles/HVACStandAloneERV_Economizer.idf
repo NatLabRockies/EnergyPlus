@@ -107,12 +107,12 @@
 ! Environmental Emissions:        None
 ! Utility Tariffs:                None
 
-  Version,23.1;
+  Version,26.2;
 
 !-   ===========  ALL OBJECTS IN CLASS: SIMULATIONCONTROL ===========
 
   SimulationControl,
-    No,                      !- Do Zone Sizing Calculation
+    Yes,                     !- Do Zone Sizing Calculation
     No,                      !- Do System Sizing Calculation
     No,                      !- Do Plant Sizing Calculation
     Yes,                     !- Run Simulation for Sizing Periods
@@ -1050,7 +1050,7 @@
     Activity Sch,            !- Activity Level Schedule Name
     3.82E-8,                 !- Carbon Dioxide Generation Rate {m3/s-W}
     ,                        !- Enable ASHRAE 55 Comfort Warnings
-    zoneaveraged,            !- Mean Radiant Temperature Calculation Type
+    EnclosureAveraged,       !- Mean Radiant Temperature Calculation Type
     ,                        !- Surface Name/Angle Factor List Name
     Work Eff Sch,            !- Work Efficiency Schedule Name
     ClothingInsulationSchedule,  !- Clothing Insulation Calculation Method
@@ -1072,7 +1072,7 @@
     Activity Sch,            !- Activity Level Schedule Name
     3.82E-8,                 !- Carbon Dioxide Generation Rate {m3/s-W}
     ,                        !- Enable ASHRAE 55 Comfort Warnings
-    zoneaveraged,            !- Mean Radiant Temperature Calculation Type
+    EnclosureAveraged,       !- Mean Radiant Temperature Calculation Type
     ,                        !- Surface Name/Angle Factor List Name
     Work Eff Sch,            !- Work Efficiency Schedule Name
     ClothingInsulationSchedule,  !- Clothing Insulation Calculation Method
@@ -1094,7 +1094,7 @@
     Activity Sch,            !- Activity Level Schedule Name
     3.82E-8,                 !- Carbon Dioxide Generation Rate {m3/s-W}
     ,                        !- Enable ASHRAE 55 Comfort Warnings
-    zoneaveraged,            !- Mean Radiant Temperature Calculation Type
+    EnclosureAveraged,       !- Mean Radiant Temperature Calculation Type
     ,                        !- Surface Name/Angle Factor List Name
     Work Eff Sch,            !- Work Efficiency Schedule Name
     ClothingInsulationSchedule,  !- Clothing Insulation Calculation Method
@@ -1111,7 +1111,7 @@
     OFFICE LIGHTING,         !- Schedule Name
     LightingLevel,           !- Design Level Calculation Method
     1464.375,                !- Lighting Level {W}
-    ,                        !- Watts per Zone Floor Area {W/m2}
+    ,                        !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0,                       !- Return Air Fraction
     0.2000000,               !- Fraction Radiant
@@ -1125,7 +1125,7 @@
     OFFICE LIGHTING,         !- Schedule Name
     LightingLevel,           !- Design Level Calculation Method
     878.6252,                !- Lighting Level {W}
-    ,                        !- Watts per Zone Floor Area {W/m2}
+    ,                        !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0,                       !- Return Air Fraction
     0.2000000,               !- Fraction Radiant
@@ -1141,7 +1141,7 @@
     INTERMITTENT,            !- Schedule Name
     EquipmentLevel,          !- Design Level Calculation Method
     2928.751,                !- Design Level {W}
-    ,                        !- Watts per Zone Floor Area {W/m2}
+    ,                        !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0,                       !- Fraction Latent
     0.3000000,               !- Fraction Radiant
@@ -1153,7 +1153,7 @@
     INTERMITTENT,            !- Schedule Name
     EquipmentLevel,          !- Design Level Calculation Method
     1464.375,                !- Design Level {W}
-    ,                        !- Watts per Zone Floor Area {W/m2}
+    ,                        !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0,                       !- Fraction Latent
     0.3000000,               !- Fraction Radiant
@@ -1165,7 +1165,7 @@
     INTERMITTENT,            !- Schedule Name
     EquipmentLevel,          !- Design Level Calculation Method
     2928.751,                !- Design Level {W}
-    ,                        !- Watts per Zone Floor Area {W/m2}
+    ,                        !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0,                       !- Fraction Latent
     0.3000000,               !- Fraction Radiant
@@ -1176,7 +1176,7 @@
   ZoneControl:Humidistat,
     Zone 1 Humidistat,       !- Name
     WEST ZONE,               !- Zone Name
-    Seasonal Relative Humidity Sch;  !- Humidifying Relative Humidity Setpoint Schedule Name
+    Seasonal Relative Humidity Sch;  !- Humidifying Setpoint Schedule Name
 
 !-   ===========  ALL OBJECTS IN CLASS: ZONECONTROL:THERMOSTAT ===========
 
@@ -1372,6 +1372,137 @@
     500.,                    !- U-Factor Times Area Value {W/K}
     0.0013,                  !- Maximum Water Flow Rate {m3/s}
     0.001;                   !- Convergence Tolerance
+
+!-   ===========  ALL OBJECTS IN CLASS: SIZING:ZONE AND DESIGNSPECIFICATION:OUTDOORAIR ===========
+
+  Sizing:Zone,
+    WEST ZONE,               !- Zone or ZoneList Name
+    SupplyAirTemperature,    !- Zone Cooling Design Supply Air Temperature Input Method
+    14.,                     !- Zone Cooling Design Supply Air Temperature {C}
+    ,                        !- Zone Cooling Design Supply Air Temperature Difference {deltaC}
+    SupplyAirTemperature,    !- Zone Heating Design Supply Air Temperature Input Method
+    50.,                     !- Zone Heating Design Supply Air Temperature {C}
+    ,                        !- Zone Heating Design Supply Air Temperature Difference {deltaC}
+    0.009,                   !- Zone Cooling Design Supply Air Humidity Ratio {kgWater/kgDryAir}
+    0.004,                   !- Zone Heating Design Supply Air Humidity Ratio {kgWater/kgDryAir}
+    SZ DSOA Zone 1,          !- Design Specification Outdoor Air Object Name
+    0.0,                     !- Zone Heating Sizing Factor
+    0.0,                     !- Zone Cooling Sizing Factor
+    DesignDayWithLimit,      !- Cooling Design Air Flow Method
+    ,                        !- Cooling Design Air Flow Rate {m3/s}
+    ,                        !- Cooling Minimum Air Flow per Zone Floor Area {m3/s-m2}
+    ,                        !- Cooling Minimum Air Flow {m3/s}
+    ,                        !- Cooling Minimum Air Flow Fraction
+    DesignDay,               !- Heating Design Air Flow Method
+    ,                        !- Heating Design Air Flow Rate {m3/s}
+    ,                        !- Heating Maximum Air Flow per Zone Floor Area {m3/s-m2}
+    ,                        !- Heating Maximum Air Flow {m3/s}
+    ,                        !- Heating Maximum Air Flow Fraction
+    ,                        !- Design Specification Zone Air Distribution Object Name
+    No,                      !- Account for Dedicated Outdoor Air System
+    NeutralSupplyAir,        !- Dedicated Outdoor Air System Control Strategy
+    autosize,                !- Dedicated Outdoor Air Low Setpoint Temperature for Design {C}
+    autosize,                !- Dedicated Outdoor Air High Setpoint Temperature for Design {C}
+    ,                        !- Zone Load Sizing Method
+    ,                        !- Zone Latent Cooling Design Supply Air Humidity Ratio Input Method
+    ,                        !- Zone Dehumidification Design Supply Air Humidity Ratio {kgWater/kgDryAir}
+    ,                        !- Zone Cooling Design Supply Air Humidity Ratio Difference {kgWater/kgDryAir}
+    ,                        !- Zone Latent Heating Design Supply Air Humidity Ratio Input Method
+    ,                        !- Zone Humidification Design Supply Air Humidity Ratio {kgWater/kgDryAir}
+    ;                        !- Zone Humidification Design Supply Air Humidity Ratio Difference {kgWater/kgDryAir}
+
+  DesignSpecification:OutdoorAir,
+    SZ DSOA Zone 1,          !- Name
+    sum,                     !- Outdoor Air Method
+    0.00236,                 !- Outdoor Air Flow per Person {m3/s-person}
+    0.000305,                !- Outdoor Air Flow per Zone Floor Area {m3/s-m2}
+    0.0;                     !- Outdoor Air Flow per Zone {m3/s}
+
+  Sizing:Zone,
+    EAST ZONE,               !- Zone or ZoneList Name
+    SupplyAirTemperature,    !- Zone Cooling Design Supply Air Temperature Input Method
+    14.,                     !- Zone Cooling Design Supply Air Temperature {C}
+    ,                        !- Zone Cooling Design Supply Air Temperature Difference {deltaC}
+    SupplyAirTemperature,    !- Zone Heating Design Supply Air Temperature Input Method
+    50.,                     !- Zone Heating Design Supply Air Temperature {C}
+    ,                        !- Zone Heating Design Supply Air Temperature Difference {deltaC}
+    0.009,                   !- Zone Cooling Design Supply Air Humidity Ratio {kgWater/kgDryAir}
+    0.004,                   !- Zone Heating Design Supply Air Humidity Ratio {kgWater/kgDryAir}
+    SZ DSOA Zone 2,          !- Design Specification Outdoor Air Object Name
+    0.0,                     !- Zone Heating Sizing Factor
+    0.0,                     !- Zone Cooling Sizing Factor
+    DesignDayWithLimit,      !- Cooling Design Air Flow Method
+    ,                        !- Cooling Design Air Flow Rate {m3/s}
+    ,                        !- Cooling Minimum Air Flow per Zone Floor Area {m3/s-m2}
+    ,                        !- Cooling Minimum Air Flow {m3/s}
+    ,                        !- Cooling Minimum Air Flow Fraction
+    DesignDay,               !- Heating Design Air Flow Method
+    ,                        !- Heating Design Air Flow Rate {m3/s}
+    ,                        !- Heating Maximum Air Flow per Zone Floor Area {m3/s-m2}
+    ,                        !- Heating Maximum Air Flow {m3/s}
+    ,                        !- Heating Maximum Air Flow Fraction
+    ,                        !- Design Specification Zone Air Distribution Object Name
+    No,                      !- Account for Dedicated Outdoor Air System
+    NeutralSupplyAir,        !- Dedicated Outdoor Air System Control Strategy
+    autosize,                !- Dedicated Outdoor Air Low Setpoint Temperature for Design {C}
+    autosize,                !- Dedicated Outdoor Air High Setpoint Temperature for Design {C}
+    ,                        !- Zone Load Sizing Method
+    ,                        !- Zone Latent Cooling Design Supply Air Humidity Ratio Input Method
+    ,                        !- Zone Dehumidification Design Supply Air Humidity Ratio {kgWater/kgDryAir}
+    ,                        !- Zone Cooling Design Supply Air Humidity Ratio Difference {kgWater/kgDryAir}
+    ,                        !- Zone Latent Heating Design Supply Air Humidity Ratio Input Method
+    ,                        !- Zone Humidification Design Supply Air Humidity Ratio {kgWater/kgDryAir}
+    ;                        !- Zone Humidification Design Supply Air Humidity Ratio Difference {kgWater/kgDryAir}
+
+  DesignSpecification:OutdoorAir,
+    SZ DSOA Zone 2,          !- Name
+    sum,                     !- Outdoor Air Method
+    0.00236,                 !- Outdoor Air Flow per Person {m3/s-person}
+    0.000305,                !- Outdoor Air Flow per Zone Floor Area {m3/s-m2}
+    0.0;                     !- Outdoor Air Flow per Zone {m3/s}
+
+  Sizing:Zone,
+    NORTH ZONE,              !- Zone or ZoneList Name
+    SupplyAirTemperature,    !- Zone Cooling Design Supply Air Temperature Input Method
+    14.,                     !- Zone Cooling Design Supply Air Temperature {C}
+    ,                        !- Zone Cooling Design Supply Air Temperature Difference {deltaC}
+    SupplyAirTemperature,    !- Zone Heating Design Supply Air Temperature Input Method
+    50.,                     !- Zone Heating Design Supply Air Temperature {C}
+    ,                        !- Zone Heating Design Supply Air Temperature Difference {deltaC}
+    0.009,                   !- Zone Cooling Design Supply Air Humidity Ratio {kgWater/kgDryAir}
+    0.004,                   !- Zone Heating Design Supply Air Humidity Ratio {kgWater/kgDryAir}
+    SZ DSOA Zone 3,          !- Design Specification Outdoor Air Object Name
+    0.0,                     !- Zone Heating Sizing Factor
+    0.0,                     !- Zone Cooling Sizing Factor
+    DesignDayWithLimit,      !- Cooling Design Air Flow Method
+    ,                        !- Cooling Design Air Flow Rate {m3/s}
+    ,                        !- Cooling Minimum Air Flow per Zone Floor Area {m3/s-m2}
+    ,                        !- Cooling Minimum Air Flow {m3/s}
+    ,                        !- Cooling Minimum Air Flow Fraction
+    DesignDay,               !- Heating Design Air Flow Method
+    ,                        !- Heating Design Air Flow Rate {m3/s}
+    ,                        !- Heating Maximum Air Flow per Zone Floor Area {m3/s-m2}
+    ,                        !- Heating Maximum Air Flow {m3/s}
+    ,                        !- Heating Maximum Air Flow Fraction
+    ,                        !- Design Specification Zone Air Distribution Object Name
+    No,                      !- Account for Dedicated Outdoor Air System
+    NeutralSupplyAir,        !- Dedicated Outdoor Air System Control Strategy
+    autosize,                !- Dedicated Outdoor Air Low Setpoint Temperature for Design {C}
+    autosize,                !- Dedicated Outdoor Air High Setpoint Temperature for Design {C}
+    ,                        !- Zone Load Sizing Method
+    ,                        !- Zone Latent Cooling Design Supply Air Humidity Ratio Input Method
+    ,                        !- Zone Dehumidification Design Supply Air Humidity Ratio {kgWater/kgDryAir}
+    ,                        !- Zone Cooling Design Supply Air Humidity Ratio Difference {kgWater/kgDryAir}
+    ,                        !- Zone Latent Heating Design Supply Air Humidity Ratio Input Method
+    ,                        !- Zone Humidification Design Supply Air Humidity Ratio {kgWater/kgDryAir}
+    ;                        !- Zone Humidification Design Supply Air Humidity Ratio Difference {kgWater/kgDryAir}
+
+  DesignSpecification:OutdoorAir,
+    SZ DSOA Zone 3,          !- Name
+    sum,                     !- Outdoor Air Method
+    0.00236,                 !- Outdoor Air Flow per Person {m3/s-person}
+    0.000305,                !- Outdoor Air Flow per Zone Floor Area {m3/s-m2}
+    0.0;                     !- Outdoor Air Flow per Zone {m3/s}
 
 !-   ===========  ALL OBJECTS IN CLASS: ZONEHVAC:EQUIPMENTLIST ===========
 
@@ -1615,15 +1746,18 @@
     0.75,                    !- Gross Rated Sensible Heat Ratio
     3.0,                     !- Gross Rated Cooling COP {W/W}
     0.6,                     !- Rated Air Flow Rate {m3/s}
-    ,                        !- Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
-    934.4,                   !- 2023 Rated Evaporator Fan Power Per Volume Flow {W/(m3/s)}
+    ,                        !- 2017 Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
+    934.4,                   !- 2023 Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
     Zone1WindACFanOutletNode,!- Air Inlet Node Name
     Zone1WindACAirOutletNode,!- Air Outlet Node Name
     WindACCoolCapFT,         !- Total Cooling Capacity Function of Temperature Curve Name
     WindACCoolCapFFF,        !- Total Cooling Capacity Function of Flow Fraction Curve Name
     WindACEIRFT,             !- Energy Input Ratio Function of Temperature Curve Name
     WindACEIRFFF,            !- Energy Input Ratio Function of Flow Fraction Curve Name
-    WindACPLFFPLR;           !- Part Load Fraction Correlation Curve Name
+    WindACPLFFPLR,           !- Part Load Fraction Correlation Curve Name
+    ,                        !- Minimum Outdoor Dry-Bulb Temperature for Compressor Operation {C}
+    ,                        !- Nominal Time for Condensate Removal to Begin {s}
+    ;                        !- Ratio of Initial Moisture Evaporation Rate and Steady State Latent Capacity {dimensionless}
 
   Coil:Cooling:DX:SingleSpeed,
     Zone2WindACDXCoil,       !- Name
@@ -1632,8 +1766,8 @@
     0.75,                    !- Gross Rated Sensible Heat Ratio
     3.0,                     !- Gross Rated Cooling COP {W/W}
     0.6,                     !- Rated Air Flow Rate {m3/s}
-    ,                        !- Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
-    934.4,                   !- 2023 Rated Evaporator Fan Power Per Volume Flow {W/(m3/s)}
+    ,                        !- 2017 Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
+    934.4,                   !- 2023 Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
     Zone2WindACFanOutletNode,!- Air Inlet Node Name
     Zone2WindACAirOutletNode,!- Air Outlet Node Name
     WindACCoolCapFT,         !- Total Cooling Capacity Function of Temperature Curve Name
@@ -1654,8 +1788,8 @@
     0.75,                    !- Gross Rated Sensible Heat Ratio
     3.0,                     !- Gross Rated Cooling COP {W/W}
     0.6,                     !- Rated Air Flow Rate {m3/s}
-    ,                        !- Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
-    934.4,                   !- 2023 Rated Evaporator Fan Power Per Volume Flow {W/(m3/s)}
+    ,                        !- 2017 Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
+    934.4,                   !- 2023 Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
     Zone3WindACOAMixerOutletNode,  !- Air Inlet Node Name
     Zone3WindACDXOutletNode, !- Air Outlet Node Name
     WindACCoolCapFT,         !- Total Cooling Capacity Function of Temperature Curve Name
@@ -1677,12 +1811,8 @@
     0.05,                    !- Nominal Supply Air Flow Rate {m3/s}
     0.76,                    !- Sensible Effectiveness at 100% Heating Air Flow {dimensionless}
     0.68,                    !- Latent Effectiveness at 100% Heating Air Flow {dimensionless}
-    0.81,                    !- Sensible Effectiveness at 75% Heating Air Flow {dimensionless}
-    0.73,                    !- Latent Effectiveness at 75% Heating Air Flow {dimensionless}
     0.76,                    !- Sensible Effectiveness at 100% Cooling Air Flow {dimensionless}
     0.68,                    !- Latent Effectiveness at 100% Cooling Air Flow {dimensionless}
-    0.81,                    !- Sensible Effectiveness at 75% Cooling Air Flow {dimensionless}
-    0.73,                    !- Latent Effectiveness at 75% Cooling Air Flow {dimensionless}
     ERV Outside Air Inlet Node,  !- Supply Air Inlet Node Name
     Heat Recovery Outlet Node,  !- Supply Air Outlet Node Name
     Zone 1 Exhaust Node,     !- Exhaust Air Inlet Node Name
@@ -1691,7 +1821,60 @@
     Yes,                     !- Supply Air Outlet Temperature Control
     Rotary,                  !- Heat Exchanger Type
     MinimumExhaustTemperature,  !- Frost Control Type
-    1.7;                     !- Threshold Temperature {C}
+    1.7,                     !- Threshold Temperature {C}
+    ,                        !- Initial Defrost Time Fraction {dimensionless}
+    ,                        !- Rate of Defrost Time Fraction Increase {1/K}
+    ,                        !- Economizer Lockout
+    SenEffectivenessTable,   !- Sensible Effectiveness of Heating Air Flow Curve Name
+    LatEffectivenessTable,   !- Latent Effectiveness of Heating Air Flow Curve Name
+    SenEffectivenessTable,   !- Sensible Effectiveness of Cooling Air Flow Curve Name
+    LatEffectivenessTable;   !- Latent Effectiveness of Cooling Air Flow Curve Name
+
+  Table:IndependentVariable,
+    airFlowRatio,            !- Name
+    Linear,                  !- Interpolation Method
+    Linear,                  !- Extrapolation Method
+    0.0,                     !- Minimum Value
+    10.0,                    !- Maximum Value
+    ,                        !- Normalization Reference Value
+    Dimensionless,           !- Unit Type
+    ,                        !- External File Name
+    ,                        !- External File Column Number
+    ,                        !- External File Starting Row Number
+    0.75,                    !- Value 1
+    1.0;                     !- Value 2
+
+  Table:IndependentVariableList,
+    effectiveness_IndependentVariableList,  !- Name
+    airFlowRatio;            !- Independent Variable 1 Name
+
+  Table:Lookup,
+    SenEffectivenessTable,   !- Name
+    effectiveness_IndependentVariableList,  !- Independent Variable List Name
+    DivisorOnly,             !- Normalization Method
+    0.76,                    !- Normalization Divisor
+    0.0,                     !- Minimum Output
+    10.0,                    !- Maximum Output
+    Dimensionless,           !- Output Unit Type
+    ,                        !- External File Name
+    ,                        !- External File Column Number
+    ,                        !- External File Starting Row Number
+    0.81,                    !- Output Value 1
+    0.76;                    !- Output Value 2
+
+  Table:Lookup,
+    LatEffectivenessTable,   !- Name
+    effectiveness_IndependentVariableList,  !- Independent Variable List Name
+    DivisorOnly,             !- Normalization Method
+    0.68,                    !- Normalization Divisor
+    0.0,                     !- Minimum Output
+    10.0,                    !- Maximum Output
+    Dimensionless,           !- Output Unit Type
+    ,                        !- External File Name
+    ,                        !- External File Column Number
+    ,                        !- External File Starting Row Number
+    0.73,                    !- Output Value 1
+    0.68;                    !- Output Value 2
 
   HeatExchanger:AirToAir:SensibleAndLatent,
     OA Heat Recovery 2,      !- Name
@@ -1699,12 +1882,8 @@
     0.05,                    !- Nominal Supply Air Flow Rate {m3/s}
     0.76,                    !- Sensible Effectiveness at 100% Heating Air Flow {dimensionless}
     0.68,                    !- Latent Effectiveness at 100% Heating Air Flow {dimensionless}
-    0.81,                    !- Sensible Effectiveness at 75% Heating Air Flow {dimensionless}
-    0.73,                    !- Latent Effectiveness at 75% Heating Air Flow {dimensionless}
     0.76,                    !- Sensible Effectiveness at 100% Cooling Air Flow {dimensionless}
     0.68,                    !- Latent Effectiveness at 100% Cooling Air Flow {dimensionless}
-    0.81,                    !- Sensible Effectiveness at 75% Cooling Air Flow {dimensionless}
-    0.73,                    !- Latent Effectiveness at 75% Cooling Air Flow {dimensionless}
     ERV Outside Air Inlet Node 2,  !- Supply Air Inlet Node Name
     Heat Recovery Outlet Node 2,  !- Supply Air Outlet Node Name
     Zone 2 Exhaust Node,     !- Exhaust Air Inlet Node Name
@@ -1713,7 +1892,14 @@
     Yes,                     !- Supply Air Outlet Temperature Control
     Rotary,                  !- Heat Exchanger Type
     MinimumExhaustTemperature,  !- Frost Control Type
-    1.7;                     !- Threshold Temperature {C}
+    1.7,                     !- Threshold Temperature {C}
+    ,                        !- Initial Defrost Time Fraction {dimensionless}
+    ,                        !- Rate of Defrost Time Fraction Increase {1/K}
+    ,                        !- Economizer Lockout
+    SenEffectivenessTable,   !- Sensible Effectiveness of Heating Air Flow Curve Name
+    LatEffectivenessTable,   !- Latent Effectiveness of Heating Air Flow Curve Name
+    SenEffectivenessTable,   !- Sensible Effectiveness of Cooling Air Flow Curve Name
+    LatEffectivenessTable;   !- Latent Effectiveness of Cooling Air Flow Curve Name
 
   HeatExchanger:AirToAir:SensibleAndLatent,
     OA Heat Recovery 3,      !- Name
@@ -1721,12 +1907,8 @@
     0.015,                   !- Nominal Supply Air Flow Rate {m3/s}
     0.76,                    !- Sensible Effectiveness at 100% Heating Air Flow {dimensionless}
     0.68,                    !- Latent Effectiveness at 100% Heating Air Flow {dimensionless}
-    0.81,                    !- Sensible Effectiveness at 75% Heating Air Flow {dimensionless}
-    0.73,                    !- Latent Effectiveness at 75% Heating Air Flow {dimensionless}
     0.76,                    !- Sensible Effectiveness at 100% Cooling Air Flow {dimensionless}
     0.68,                    !- Latent Effectiveness at 100% Cooling Air Flow {dimensionless}
-    0.81,                    !- Sensible Effectiveness at 75% Cooling Air Flow {dimensionless}
-    0.73,                    !- Latent Effectiveness at 75% Cooling Air Flow {dimensionless}
     ERV Outside Air Inlet Node 3,  !- Supply Air Inlet Node Name
     Heat Recovery Outlet Node 3,  !- Supply Air Outlet Node Name
     Zone 3 Exhaust Node,     !- Exhaust Air Inlet Node Name
@@ -1735,7 +1917,14 @@
     Yes,                     !- Supply Air Outlet Temperature Control
     Rotary,                  !- Heat Exchanger Type
     MinimumExhaustTemperature,  !- Frost Control Type
-    1.7;                     !- Threshold Temperature {C}
+    1.7,                     !- Threshold Temperature {C}
+    ,                        !- Initial Defrost Time Fraction {dimensionless}
+    ,                        !- Rate of Defrost Time Fraction Increase {1/K}
+    ,                        !- Economizer Lockout
+    SenEffectivenessTable,   !- Sensible Effectiveness of Heating Air Flow Curve Name
+    LatEffectivenessTable,   !- Latent Effectiveness of Heating Air Flow Curve Name
+    SenEffectivenessTable,   !- Sensible Effectiveness of Cooling Air Flow Curve Name
+    LatEffectivenessTable;   !- Latent Effectiveness of Cooling Air Flow Curve Name
 
 !-   ===========  ALL OBJECTS IN CLASS: OUTDOORAIR:MIXER ===========
 
@@ -1773,7 +1962,7 @@
   Branch,
     Heating Purchased Hot Water Branch,  !- Name
     ,                        !- Pressure Drop Curve Name
-    DistrictHeating,         !- Component 1 Object Type
+    DistrictHeating:Water,   !- Component 1 Object Type
     Purchased Heating,       !- Component 1 Name
     Purchased Heat Inlet Node,  !- Component 1 Inlet Node Name
     Purchased Heat Outlet Node;  !- Component 1 Outlet Node Name
@@ -1984,7 +2173,7 @@
 
 !-   ===========  ALL OBJECTS IN CLASS: DISTRICTHEATING ===========
 
-  DistrictHeating,
+  DistrictHeating:Water,
     Purchased Heating,       !- Name
     Purchased Heat Inlet Node,  !- Hot Water Inlet Node Name
     Purchased Heat Outlet Node,  !- Hot Water Outlet Node Name
@@ -2044,7 +2233,7 @@
 
   PlantEquipmentList,
     heating plant,           !- Name
-    DistrictHeating,         !- Equipment 1 Object Type
+    DistrictHeating:Water,   !- Equipment 1 Object Type
     Purchased Heating;       !- Equipment 1 Name
 
 !-   ===========  ALL OBJECTS IN CLASS: PLANTEQUIPMENTOPERATION:HEATINGLOAD ===========

@@ -1,7 +1,7 @@
-// EnergyPlus, Copyright (c) 1996-2023, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
-// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other
+// National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
 // contributors. All rights reserved.
 //
 // NOTICE: This Software was developed under funding from the U.S. Department of Energy and the
@@ -60,22 +60,20 @@
 
 using namespace EnergyPlus;
 using namespace EnergyPlus::ExteriorEnergyUse;
-using namespace EnergyPlus::ScheduleManager;
 
 TEST_F(EnergyPlusFixture, ExteriorEquipmentTest_Test1)
 {
+    state->dataGlobal->TimeStepZone = 0.25;
+    state->dataGlobal->TimeStepZoneSec = state->dataGlobal->TimeStepZone * Constant::rSecsInHour;
+    state->init_state(*state);
 
     state->dataExteriorEnergyUse->NumExteriorLights = 0;
     state->dataExteriorEnergyUse->NumExteriorEqs = 2;
-    state->dataGlobal->TimeStepZone = 0.25;
-    state->dataGlobal->TimeStepZoneSec = state->dataGlobal->TimeStepZone * DataGlobalConstants::SecInHour;
     state->dataExteriorEnergyUse->ExteriorEquipment.allocate(state->dataExteriorEnergyUse->NumExteriorEqs);
     state->dataExteriorEnergyUse->ExteriorEquipment(1).DesignLevel = 1000.0;
     state->dataExteriorEnergyUse->ExteriorEquipment(2).DesignLevel = 0.0;
-    state->dataExteriorEnergyUse->ExteriorEquipment(1).SchedPtr =
-        DataGlobalConstants::ScheduleAlwaysOn; // From dataglobals, always returns a 1 for schedule value
-    state->dataExteriorEnergyUse->ExteriorEquipment(2).SchedPtr =
-        DataGlobalConstants::ScheduleAlwaysOn; // From dataglobals, always returns a 1 for schedule value
+    state->dataExteriorEnergyUse->ExteriorEquipment(1).sched = Sched::GetScheduleAlwaysOn(*state);
+    state->dataExteriorEnergyUse->ExteriorEquipment(2).sched = Sched::GetScheduleAlwaysOn(*state);
     ReportExteriorEnergyUse(*state);
 
     EXPECT_EQ(1000.0, state->dataExteriorEnergyUse->ExteriorEquipment(1).Power);

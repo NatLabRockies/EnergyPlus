@@ -94,7 +94,7 @@ A performance curve having an order or degree of 3 in two independent variables.
 z = a + bx + c{x^2} + dy + e{y^2} + fxy + g{x^3} + h{y^3} + i{x^2}y
 \end{equation}
 
-Calulating performance curve coefficients in a spreadsheet is a simple matter of finding the data required to perform the regression analysis. For example, the biquadratic equation shown above is representative of the cooling capacity as a function of temperature performance curve for DX cooling coils. The fundamental equation for DX cooling coil capacity is:
+Calculating performance curve coefficients in a spreadsheet is a simple matter of finding the data required to perform the regression analysis. For example, the biquadratic equation shown above is representative of the cooling capacity as a function of temperature performance curve for DX cooling coils. The fundamental equation for DX cooling coil capacity is:
 
 \begin{equation}
 TotCapTempModFac = a + b\left( {{T_{wb,i}}} \right) + c{\left( {{T_{wb,i}}} \right)^2} + d\left( {{T_{c,i}}} \right) + e{\left( {{T_{c,i}}} \right)^2} + f\left( {{T_{wb,i}}} \right)\left( {{T_{c,i}}} \right)
@@ -106,7 +106,7 @@ where:
 
 \(T_{c,i}\) (or \(T_{db,i}\)) is the dry-bulb temperature of the air entering an air-cooled condenser (\(^{\circ}\)C).
 
-Given the data set shown in Figure~\ref{fig:dx-cooling-data-table}, each of the independent variables would be calculated according to the fundamental equation above (i.e., the T, T\(^{2}\), and cross-product terms would be multiplied out). The data would be converted to degrees celcius and the cooling capacity would be converted to Watts. The data would also be normalized using the ARI rating point shown as highlighted in Figure~\ref{fig:dx-cooling-data-normalized}.
+Given the data set shown in Figure~\ref{fig:dx-cooling-data-table}, each of the independent variables would be calculated according to the fundamental equation above (i.e., the T, T\(^{2}\), and cross-product terms would be multiplied out). The data would be converted to degrees Celsius and the cooling capacity would be converted to Watts. The data would also be normalized using the ARI rating point shown as highlighted in Figure~\ref{fig:dx-cooling-data-normalized}.
 
 \begin{figure}[htbp]
 \centering
@@ -122,7 +122,7 @@ The fundamental equation would be used to determine the number of independent va
 \caption{Regression Analysis for Example \protect \label{fig:dx-cooling-data-normalized}}
 \end{figure}
 
-The regression analysis and summary statistical output is shown below. The equation coefficients are shown highlighted. In this example, the equation coefficents are: a = 0.757382, b = 0.014666, c = 0.000459, d = -0.00095, e = -6.7E-05, and f = -0.00015. These coefficients would be entered in a Curve:BiQuadratic object and used to describe the cooling capacity as a function of temperature for the DX cooling coil model. Minimum and Maximum values from the tabular data are entered as Min/Max values for the curve object. The values may be relaxed slightly with care to allow extrapolation as needed. A performance table may be used to automatically perform the regression analysis as described in the following section.
+The regression analysis and summary statistical output is shown below. The equation coefficients are shown highlighted. In this example, the equation coefficients are: a = 0.757382, b = 0.014666, c = 0.000459, d = -0.00095, e = -6.7E-05, and f = -0.00015. These coefficients would be entered in a Curve:BiQuadratic object and used to describe the cooling capacity as a function of temperature for the DX cooling coil model. Minimum and Maximum values from the tabular data are entered as Min/Max values for the curve object. The values may be relaxed slightly with care to allow extrapolation as needed. A performance table may be used to automatically perform the regression analysis as described in the following section.
 
 \begin{figure}[htbp]
 \centering

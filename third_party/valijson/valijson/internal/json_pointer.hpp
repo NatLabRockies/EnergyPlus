@@ -7,7 +7,7 @@
 #include <stdexcept>
 #include <string>
 
-#include <valijson/adapters/adapter.hpp>
+#include <valijson/internal/adapter.hpp>
 #include <valijson/internal/optional.hpp>
 #include <valijson/exceptions.hpp>
 
@@ -111,7 +111,7 @@ inline std::string extractReferenceToken(std::string::const_iterator begin,
         try {
 #endif
             const char c = decodePercentEncodedChar(token.substr(n + 1, 2));
-            token.replace(n, 3, &c, 1);
+            token.replace(n, 3, 1, c);
 #if VALIJSON_USE_EXCEPTIONS
         } catch (const std::runtime_error &e) {
             throwRuntimeError(
@@ -133,7 +133,7 @@ inline std::string extractReferenceToken(std::string::const_iterator begin,
  * at least one character in length to be considered valid.
  *
  * Once the next reference token has been identified, it will be used either as
- * an array index or as an the name an object member. The validity of a
+ * an array index or as the name of an object member. The validity of a
  * reference token depends on the type of the node currently being traversed,
  * and the applicability of the token to that node. For example, an array can
  * only be dereferenced by a non-negative integral index.

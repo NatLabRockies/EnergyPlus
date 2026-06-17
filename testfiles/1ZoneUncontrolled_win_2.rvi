@@ -2,7 +2,7 @@ eplusout.eso
 eplusout.csv
 Site Outdoor Air Drybulb Temperature
 ZONE ONE,Zone Mean Air Temperature
-ZONE ONE,Zone Windows Total Transmitted Solar Radiation Rate
+ZONE ONE,Enclosure Windows Total Transmitted Solar Radiation Rate
 ZN001:WALL001,Surface Outside Face Incident Solar Radiation Rate per Area
 ZN001:WALL001,Surface Outside Face Sunlit Fraction
 ZN001:WALL001,Surface Inside Face Temperature

@@ -1,8 +1,8 @@
 #pragma once
 
-#include <vector>
-
+#include <functional>
 #include <memory>
+#include <vector>
 
 #include <valijson/constraints/constraint.hpp>
 #include <valijson/internal/optional.hpp>
@@ -44,10 +44,44 @@ public:
     Subschema & operator=(const Subschema &) = delete;
 
     /**
+     * @brief Move construct a new Subschema
+     *
+     * @param other Subschema that is moved into the new Subschema
+     */
+    Subschema(Subschema &&other)
+      : m_allocFn(other.m_allocFn),
+        m_freeFn(other.m_freeFn),
+        m_alwaysInvalid(std::move(other.m_alwaysInvalid)),
+        m_constraints(std::move(other.m_constraints)),
+        m_description(std::move(other.m_description)),
+        m_id(std::move(other.m_id)),
+        m_title(std::move(other.m_title)) { }
+
+    /**
+     * @brief Move assign a Subschema
+     *
+     * @param other Subschema that is move assigned to this Subschema
+     * @return Subschema&
+     */
+    Subschema & operator=(Subschema &&other)
+    {
+        // Swaps all members
+        std::swap(m_allocFn, other.m_allocFn);
+        std::swap(m_freeFn, other.m_freeFn);
+        std::swap(m_alwaysInvalid, other.m_alwaysInvalid);
+        std::swap(m_constraints, other.m_constraints);
+        std::swap(m_description, other.m_description);
+        std::swap(m_id, other.m_id);
+        std::swap(m_title, other.m_title);
+
+        return *this;
+    }
+
+    /**
      * @brief  Construct a new Subschema object
      */
     Subschema()
-      : m_allocFn(::operator new)
+      : m_allocFn([](size_t size) { return ::operator new(size, std::nothrow); })
       , m_freeFn(::operator delete)
       , m_alwaysInvalid(false) { }
 
@@ -79,11 +113,6 @@ public:
 #if VALIJSON_USE_EXCEPTIONS
         try {
 #endif
-            for (auto constConstraint : m_constraints) {
-                auto *constraint = const_cast<Constraint *>(constConstraint);
-                constraint->~Constraint();
-                m_freeFn(constraint);
-            }
             m_constraints.clear();
 #if VALIJSON_USE_EXCEPTIONS
         } catch (const std::exception &e) {
@@ -106,36 +135,31 @@ public:
      */
     void addConstraint(const Constraint &constraint)
     {
-        Constraint *newConstraint = constraint.clone(m_allocFn, m_freeFn);
-#if VALIJSON_USE_EXCEPTIONS
-        try {
-#endif
-            m_constraints.push_back(newConstraint);
-#if VALIJSON_USE_EXCEPTIONS
-        } catch (...) {
-            newConstraint->~Constraint();
-            m_freeFn(newConstraint);
-            throw;
-        }
-#endif
+        // the vector allocation might throw but the constraint memory will be taken care of anyways
+        m_constraints.push_back(constraint.clone(m_allocFn, m_freeFn));
     }
 
     /**
      * @brief  Invoke a function on each child Constraint
      *
      * This function will apply the callback function to each constraint in
-     * the Subschema, even if one of the invokations returns \c false. However,
-     * if one or more invokations of the callback function return \c false,
+     * the Subschema, even if one of the invocations returns \c false. However,
+     * if one or more invocations of the callback function return \c false,
      * this function will also return \c false.
      *
-     * @returns  \c true if all invokations of the callback function are
+     * @returns  \c true if all invocations of the callback function are
      *           successful, \c false otherwise
      */
     bool apply(ApplyFunction &applyFunction) const
     {
         bool allTrue = true;
-        for (const Constraint *constraint : m_constraints) {
-            allTrue = allTrue && applyFunction(*constraint);
+        for (auto &&constraint : m_constraints) {
+            // Even if an application fails, we want to continue checking the
+            // schema. In that case we set allTrue to false, and then fall
+            // through to the next constraint
+            if (!applyFunction(*constraint)) {
+                allTrue = false;
+            }
         }
 
         return allTrue;
@@ -145,15 +169,15 @@ public:
      * @brief  Invoke a function on each child Constraint
      *
      * This is a stricter version of the apply() function that will return
-     * immediately if any of the invokations of the callback function return
+     * immediately if any of the invocations of the callback function return
      * \c false.
      *
-     * @returns  \c true if all invokations of the callback function are
+     * @returns  \c true if all invocations of the callback function are
      *           successful, \c false otherwise
      */
     bool applyStrict(ApplyFunction &applyFunction) const
     {
-        for (const Constraint *constraint : m_constraints) {
+        for (auto &&constraint : m_constraints) {
             if (!applyFunction(*constraint)) {
                 return false;
             }
@@ -296,12 +320,12 @@ private:
     bool m_alwaysInvalid;
 
     /// List of pointers to constraints that apply to this schema.
-    std::vector<const Constraint *> m_constraints;
+    std::vector<Constraint::OwningPointer> m_constraints;
 
     /// Schema description (optional)
     opt::optional<std::string> m_description;
 
-    /// Id to apply when resolving the schema URI
+    /// ID to apply when resolving the schema URI
     opt::optional<std::string> m_id;
 
     /// Title string associated with the schema (optional)

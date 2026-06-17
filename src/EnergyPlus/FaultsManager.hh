@@ -1,7 +1,7 @@
-// EnergyPlus, Copyright (c) 1996-2023, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
-// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other
+// National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
 // contributors. All rights reserved.
 //
 // NOTICE: This Software was developed under funding from the U.S. Department of Energy and the
@@ -86,7 +86,7 @@ namespace FaultsManager {
     };
 
     // FaultTypeEnum
-    enum class Fault
+    enum class FaultType
     {
         Invalid = -1,
         TemperatureSensorOffset_OutdoorAir,
@@ -148,21 +148,11 @@ namespace FaultsManager {
     {
         // Members
         std::string Name;
-        std::string FaultType;        // Fault type
-        std::string AvaiSchedule;     // Availability schedule
-        std::string SeveritySchedule; // Severity schedule, multipliers to the Offset
-        Fault FaultTypeEnum;
-        int AvaiSchedPtr;
-        int SeveritySchedPtr;
-        Real64 Offset; // offset, + means sensor reading is higher than actual value
-        bool Status;   // for future use
-
-        // Default Constructor
-        FaultProperties()
-            : Name(""), FaultType(""), AvaiSchedule(""), SeveritySchedule(""), FaultTypeEnum(Fault::Invalid), AvaiSchedPtr(0), SeveritySchedPtr(0),
-              Offset(0.0), Status(false)
-        {
-        }
+        FaultType type = FaultType::Invalid;
+        Sched::Schedule *availSched = nullptr;
+        Sched::Schedule *severitySched = nullptr;
+        Real64 Offset = 0.0; // offset, + means sensor reading is higher than actual value
+        bool Status = false; // for future use
 
         // Virtual Destructor
         virtual ~FaultProperties() = default;
@@ -180,7 +170,7 @@ namespace FaultsManager {
         std::string ControllerName; // Controller name
 
         // Default Constructor
-        FaultPropertiesEconomizer() : ControllerTypeEnum(0), ControllerID(0), ControllerType(""), ControllerName("")
+        FaultPropertiesEconomizer() : ControllerTypeEnum(0), ControllerID(0)
         {
         }
 
@@ -194,7 +184,7 @@ namespace FaultsManager {
         std::string FaultyThermostatName; // The faulty thermostat name
 
         // Default Constructor
-        FaultPropertiesThermostat() : FaultyThermostatName("")
+        FaultPropertiesThermostat()
         {
         }
 
@@ -210,7 +200,7 @@ namespace FaultsManager {
         std::string FaultyHumidistatType; // The faulty humidistat type
 
         // Default Constructor
-        FaultPropertiesHumidistat() : FaultyThermostatName(""), FaultyHumidistatName(""), FaultyHumidistatType("")
+        FaultPropertiesHumidistat()
         {
         }
 
@@ -233,8 +223,8 @@ namespace FaultsManager {
 
         // Default Constructor
         FaultPropertiesFoulingCoil()
-            : FouledCoilName(""), FouledCoilType(DataPlant::PlantEquipmentType::Invalid), FouledCoilNum(0), FoulingInputMethod(FouledCoil::Invalid),
-              UAFouled(0.0), Rfw(0.0), Rfa(0.0), Aout(0.0), Aratio(0.0)
+            : FouledCoilType(DataPlant::PlantEquipmentType::Invalid), FouledCoilNum(0), FoulingInputMethod(FouledCoil::Invalid), UAFouled(0.0),
+              Rfw(0.0), Rfa(0.0), Aout(0.0), Aratio(0.0)
         {
         }
 
@@ -252,21 +242,13 @@ namespace FaultsManager {
     struct FaultPropertiesAirFilter : public FaultProperties // Class for FaultModel:Fouling:AirFilter, derived from FaultProperties
     {
         // Members
-        std::string FaultyAirFilterFanName;       // The name of the fan corresponding to the fouled air filter
-        std::string FaultyAirFilterFanType;       // The type of the fan corresponding to the fouled air filter
-        std::string FaultyAirFilterFanCurve;      // The name of the fan curve
-        std::string FaultyAirFilterPressFracSche; // Schedule describing variations of the fan pressure rise
-        int FaultyAirFilterFanCurvePtr;           // The index to the curve
-        int FaultyAirFilterPressFracSchePtr;      // The pointer to the schedule
-        Real64 FaultyAirFilterFanPressInc;        // The increase of the fan pressure due to fouled air filter
-        Real64 FaultyAirFilterFanFlowDec;         // The decrease of the fan airflow rate due to fouled air filter
-
-        // Default Constructor
-        FaultPropertiesAirFilter()
-            : FaultyAirFilterFanName(""), FaultyAirFilterFanType(""), FaultyAirFilterFanCurve(""), FaultyAirFilterPressFracSche(""),
-              FaultyAirFilterFanCurvePtr(0), FaultyAirFilterPressFracSchePtr(0), FaultyAirFilterFanPressInc(0.0), FaultyAirFilterFanFlowDec(0.0)
-        {
-        }
+        std::string fanName; // The name of the fan corresponding to the fouled air filter
+        int fanNum = 0;
+        HVAC::FanType fanType = HVAC::FanType::Invalid; // The type of the fan corresponding to the fouled air filter
+        int fanCurveNum = 0;                            // The index to the curve
+        Sched::Schedule *pressFracSched = nullptr;      // The pointer to the schedule
+        Real64 fanPressInc = 0.0;                       // The increase of the fan pressure due to fouled air filter
+        Real64 fanFlowDec = 0.0;                        // The decrease of the fan airflow rate due to fouled air filter
 
         // Destructor
         virtual ~FaultPropertiesAirFilter() = default;
@@ -283,7 +265,7 @@ namespace FaultsManager {
         std::string WaterCoilControllerName; // Water coil controller name
 
         // Default Constructor
-        FaultPropertiesCoilSAT() : CoilType(""), CoilName(""), WaterCoilControllerName("")
+        FaultPropertiesCoilSAT()
         {
         }
     };
@@ -295,7 +277,7 @@ namespace FaultsManager {
         std::string ChillerName; // Chiller name
 
         // Default Constructor
-        FaultPropertiesChillerSWT() : ChillerType(""), ChillerName("")
+        FaultPropertiesChillerSWT()
         {
         }
 
@@ -320,7 +302,7 @@ namespace FaultsManager {
         std::string TowerName; // Tower name
 
         // Default Constructor
-        FaultPropertiesCondenserSWT() : TowerType(""), TowerName("")
+        FaultPropertiesCondenserSWT()
         {
         }
     };
@@ -333,7 +315,7 @@ namespace FaultsManager {
         Real64 UAReductionFactor; // UA Reduction Factor
 
         // Default Constructor
-        FaultPropertiesTowerFouling() : TowerType(""), TowerName(""), UAReductionFactor(1.0)
+        FaultPropertiesTowerFouling() : UAReductionFactor(1.0)
         {
         }
 
@@ -362,7 +344,7 @@ namespace FaultsManager {
         std::string BoilerName; // Boiler name
 
         // Default Constructor
-        FaultPropertiesBoilerFouling() : BoilerType(""), BoilerName("")
+        FaultPropertiesBoilerFouling()
         {
         }
     };
@@ -374,7 +356,7 @@ namespace FaultsManager {
         std::string ChillerName; // Chiller name
 
         // Default Constructor
-        FaultPropertiesChillerFouling() : ChillerType(""), ChillerName("")
+        FaultPropertiesChillerFouling()
         {
         }
     };
@@ -386,7 +368,7 @@ namespace FaultsManager {
         std::string EvapCoolerName; // Evaporative Cooler name
 
         // Default Constructor
-        FaultPropertiesEvapCoolerFouling() : EvapCoolerType(""), EvapCoolerName("")
+        FaultPropertiesEvapCoolerFouling()
         {
         }
     };
@@ -434,6 +416,14 @@ struct FaultsManagerData : BaseGlobalStruct
     Array1D<FaultsManager::FaultPropertiesBoilerFouling> FaultsBoilerFouling;
     Array1D<FaultsManager::FaultPropertiesChillerFouling> FaultsChillerFouling;
     Array1D<FaultsManager::FaultPropertiesEvapCoolerFouling> FaultsEvapCoolerFouling;
+
+    void init_constant_state([[maybe_unused]] EnergyPlusData &state) override
+    {
+    }
+
+    void init_state([[maybe_unused]] EnergyPlusData &state) override
+    {
+    }
 
     void clear_state() override
     {

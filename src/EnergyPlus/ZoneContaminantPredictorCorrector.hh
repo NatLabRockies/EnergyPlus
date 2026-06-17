@@ -1,7 +1,7 @@
-// EnergyPlus, Copyright (c) 1996-2023, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
-// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other
+// National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
 // contributors. All rights reserved.
 //
 // NOTICE: This Software was developed under funding from the U.S. Department of Energy and the
@@ -87,12 +87,12 @@ namespace ZoneContaminantPredictorCorrector {
     void RevertZoneTimestepHistories(EnergyPlusData &state);
 
     void InverseModelCO2(EnergyPlusData &state,
-                         int ZoneNum,                 // Zone number
-                         Real64 &CO2Gain,             // Zone total CO2 gain
-                         Real64 &CO2GainExceptPeople, // ZOne total CO2 gain from sources except for people
-                         Real64 &ZoneMassFlowRate,    // Zone air mass flow rate
-                         Real64 &CO2MassFlowRate,     // Zone air CO2 mass flow rate
-                         Real64 &RhoAir               // Air density
+                         int ZoneNum,                // Zone number
+                         Real64 CO2Gain,             // Zone total CO2 gain
+                         Real64 CO2GainExceptPeople, // ZOne total CO2 gain from sources except for people
+                         Real64 ZoneMassFlowRate,    // Zone air mass flow rate
+                         Real64 CO2MassFlowRate,     // Zone air CO2 mass flow rate
+                         Real64 RhoAir               // Air density
     );
 
     void CorrectZoneContaminants(EnergyPlusData &state,
@@ -108,9 +108,17 @@ struct ZoneContaminantPredictorCorrectorData : BaseGlobalStruct
     bool MyEnvrnFlag = true;
     bool MyConfigOneTimeFlag = true;
 
+    void init_constant_state([[maybe_unused]] EnergyPlusData &state) override
+    {
+    }
+
+    void init_state([[maybe_unused]] EnergyPlusData &state) override
+    {
+    }
+
     void clear_state() override
     {
-        *this = ZoneContaminantPredictorCorrectorData();
+        new (this) ZoneContaminantPredictorCorrectorData();
     }
 };
 

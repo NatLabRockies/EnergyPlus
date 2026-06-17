@@ -1,7 +1,7 @@
-// EnergyPlus, Copyright (c) 1996-2023, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
-// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other
+// National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
 // contributors. All rights reserved.
 //
 // NOTICE: This Software was developed under funding from the U.S. Department of Energy and the
@@ -46,13 +46,14 @@
 // POSSIBILITY OF SUCH DAMAGE.
 
 // C++ Headers
+#include <format>
 
 // Kiva Headers
-#include <libkiva/Errors.hpp>
 #ifdef GROUND_PLOT
-#include <EnergyPlus/DataStringGlobals.hh>
-#include <libgroundplot/GroundPlot.hpp>
+#    include <EnergyPlus/DataStringGlobals.hh>
+#    include <libgroundplot/GroundPlot.hpp>
 #endif
+#include <libkiva/Errors.hpp>
 
 // EnergyPlus Headers
 #include <EnergyPlus/Construction.hh>
@@ -77,17 +78,18 @@
 
 namespace EnergyPlus::HeatBalanceKivaManager {
 
+// cppcheck-suppress passedByValueCallback
 void kivaErrorCallback(const int messageType, const std::string message, void *contextPtr)
 {
-    if (!contextPtr) {
-        throw FatalError(format("Unhandled Kiva Error: {}", message));
+    if (contextPtr == nullptr) {
+        throw FatalError(std::format("Unhandled Kiva Error: {}", message));
     }
     std::string fullMessage;
     std::pair<EnergyPlusData *, std::string> contextPair = *(std::pair<EnergyPlusData *, std::string> *)contextPtr;
-    if (contextPair.second.size() > 0) {
-        fullMessage = format("{}: {}", contextPair.second, message);
+    if (!contextPair.second.empty()) {
+        fullMessage = std::format("{}: {}", contextPair.second, message);
     } else {
-        fullMessage = format("Kiva: {}", message);
+        fullMessage = std::format("Kiva: {}", message);
     }
     if (messageType == Kiva::MSG_INFO) {
         ShowMessage(*contextPair.first, fullMessage);
@@ -146,11 +148,11 @@ void KivaInstanceMap::initGround(EnergyPlusData &state, const KivaWeatherData &k
         constructionName = state.dataConstruction->Construct(constructionNum).Name;
     }
 
-    ss.dir = format("{}/{} {:.2R} {}",
-                    FileSystem::getAbsolutePath(state.dataStrGlobals->outDirPath),
-                    state.dataSurface->Surface(floorSurface).Name,
-                    instance.ground->foundation.foundationDepth,
-                    constructionName);
+    ss.dir = std::format("{}/{} {:.2f} {}",
+                         FileSystem::getAbsolutePath(state.dataStrGlobals->outDirPath),
+                         state.dataSurface->Surface(floorSurface).Name,
+                         instance.ground->foundation.foundationDepth,
+                         constructionName);
 
     debugDir = ss.dir;
     plotNum = 0;
@@ -179,21 +181,21 @@ void KivaInstanceMap::initGround(EnergyPlusData &state, const KivaWeatherData &k
     int accDate = getAccDate(state, numAccelaratedTimesteps, acceleratedTimestep);
     // Initialize with steady state before accelerated timestepping
     instance.ground->foundation.numericalScheme = Kiva::Foundation::NS_STEADY_STATE;
-    setInitialBoundaryConditions(state, kivaWeather, accDate, 24, state.dataGlobal->NumOfTimeStepInHour);
+    setInitialBoundaryConditions(state, kivaWeather, accDate, 24, state.dataGlobal->TimeStepsInHour);
     instance.calculate();
     accDate += acceleratedTimestep;
-    while (accDate > 365 + state.dataWeatherManager->LeapYearAdd) {
-        accDate = accDate - (365 + state.dataWeatherManager->LeapYearAdd);
+    while (accDate > 365 + state.dataWeather->LeapYearAdd) {
+        accDate = accDate - (365 + state.dataWeather->LeapYearAdd);
     }
 
     // Accelerated timestepping
     instance.ground->foundation.numericalScheme = Kiva::Foundation::NS_IMPLICIT;
     for (int i = 0; i < numAccelaratedTimesteps; ++i) {
-        setInitialBoundaryConditions(state, kivaWeather, accDate, 24, state.dataGlobal->NumOfTimeStepInHour);
+        setInitialBoundaryConditions(state, kivaWeather, accDate, 24, state.dataGlobal->TimeStepsInHour);
         instance.calculate(acceleratedTimestep * 24 * 60 * 60);
         accDate += acceleratedTimestep;
-        while (accDate > 365 + state.dataWeatherManager->LeapYearAdd) {
-            accDate = accDate - (365 + state.dataWeatherManager->LeapYearAdd);
+        while (accDate > 365 + state.dataWeather->LeapYearAdd) {
+            accDate = accDate - (365 + state.dataWeather->LeapYearAdd);
         }
     }
 
@@ -207,7 +209,7 @@ int KivaInstanceMap::getAccDate(EnergyPlusData &state, const int numAccelaratedT
     int accDate =
         state.dataEnvrn->DayOfYear - 1 - acceleratedTimestep * (numAccelaratedTimesteps + 1); // date time = last timestep from the day before
     while (accDate <= 0) {
-        accDate = accDate + 365 + state.dataWeatherManager->LeapYearAdd;
+        accDate = accDate + 365 + state.dataWeather->LeapYearAdd;
     }
     return accDate;
 }
@@ -222,9 +224,9 @@ void KivaInstanceMap::setInitialBoundaryConditions(
 
     if (kivaWeather.intervalsPerHour == 1) {
         index = (date - 1) * 24 + (hour - 1);
-        weightNow = min(1.0, (double(timestep) / double(state.dataGlobal->NumOfTimeStepInHour)));
+        weightNow = min(1.0, (double(timestep) / double(state.dataGlobal->TimeStepsInHour)));
     } else {
-        index = (date - 1) * 24 * state.dataGlobal->NumOfTimeStepInHour + (hour - 1) * state.dataGlobal->NumOfTimeStepInHour + (timestep - 1);
+        index = (date - 1) * 24 * state.dataGlobal->TimeStepsInHour + (hour - 1) * state.dataGlobal->TimeStepsInHour + (timestep - 1);
         weightNow = 1.0; // weather data interval must be the same as the timestep interval (i.e., no interpolation)
     }
     if (index == 0) {
@@ -237,7 +239,7 @@ void KivaInstanceMap::setInitialBoundaryConditions(
 
     std::shared_ptr<Kiva::BoundaryConditions> bcs = instance.bcs;
 
-    bcs->outdoorTemp = kivaWeather.dryBulb[index] * weightNow + kivaWeather.dryBulb[indexPrev] * (1.0 - weightNow) + DataGlobalConstants::KelvinConv;
+    bcs->outdoorTemp = kivaWeather.dryBulb[index] * weightNow + kivaWeather.dryBulb[indexPrev] * (1.0 - weightNow) + Constant::Kelvin;
 
     bcs->localWindSpeed = (kivaWeather.windSpeed[index] * weightNow + kivaWeather.windSpeed[indexPrev] * (1.0 - weightNow)) *
                           state.dataEnvrn->WeatherFileWindModCoeff *
@@ -249,7 +251,7 @@ void KivaInstanceMap::setInitialBoundaryConditions(
     bcs->diffuseHorizontalFlux = 0.0;
     bcs->slabAbsRadiation = 0.0;
     bcs->wallAbsRadiation = 0.0;
-    bcs->deepGroundTemperature = kivaWeather.annualAverageDrybulbTemp + DataGlobalConstants::KelvinConv;
+    bcs->deepGroundTemperature = kivaWeather.annualAverageDrybulbTemp + Constant::Kelvin;
 
     // Estimate indoor temperature
     constexpr Real64 defaultFlagTemp = -999;   // default sets this below -999 at -9999 so uses value if entered
@@ -259,95 +261,97 @@ void KivaInstanceMap::setInitialBoundaryConditions(
 
     Real64 Tin;
     if (zoneAssumedTemperature > defaultFlagTemp) {
-        Tin = zoneAssumedTemperature + DataGlobalConstants::KelvinConv;
+        Tin = zoneAssumedTemperature + Constant::Kelvin;
     } else {
         switch (zoneControlType) {
         case KIVAZONE_UNCONTROLLED: {
-            Tin = assumedFloatingTemp + DataGlobalConstants::KelvinConv;
+            Tin = assumedFloatingTemp + Constant::Kelvin;
             break;
         }
         case KIVAZONE_TEMPCONTROL: {
 
-            int controlTypeSchId = state.dataZoneCtrls->TempControlledZone(zoneControlNum).CTSchedIndex;
-            auto controlType =
-                static_cast<DataHVACGlobals::ThermostatType>(ScheduleManager::LookUpScheduleValue(state, controlTypeSchId, hour, timestep));
+            auto const *ctrlTypeSched = state.dataZoneCtrls->TempControlledZone(zoneControlNum).setptTypeSched;
+            HVAC::SetptType controlType = static_cast<HVAC::SetptType>(ctrlTypeSched->getHrTsVal(state, hour, timestep));
 
             switch (controlType) {
-            case DataHVACGlobals::ThermostatType::Uncontrolled:
-                Tin = assumedFloatingTemp + DataGlobalConstants::KelvinConv;
+            case HVAC::SetptType::Uncontrolled:
+                Tin = assumedFloatingTemp + Constant::Kelvin;
                 break;
-            case DataHVACGlobals::ThermostatType::SingleHeating: {
-                int schNameId = state.dataZoneCtrls->TempControlledZone(zoneControlNum).SchIndx_SingleHeatSetPoint;
-                Real64 setpoint = ScheduleManager::LookUpScheduleValue(state, schNameId, hour, timestep);
-                Tin = setpoint + DataGlobalConstants::KelvinConv;
-                break;
-            }
-            case DataHVACGlobals::ThermostatType::SingleCooling: {
-                int schNameId = state.dataZoneCtrls->TempControlledZone(zoneControlNum).SchIndx_SingleCoolSetPoint;
-                Real64 setpoint = ScheduleManager::LookUpScheduleValue(state, schNameId, hour, timestep);
-                Tin = setpoint + DataGlobalConstants::KelvinConv;
-                break;
-            }
-            case DataHVACGlobals::ThermostatType::SingleHeatCool: {
-                int schNameId = state.dataZoneCtrls->TempControlledZone(zoneControlNum).SchIndx_SingleHeatCoolSetPoint;
-                Real64 setpoint = ScheduleManager::LookUpScheduleValue(state, schNameId, hour, timestep);
-                Tin = setpoint + DataGlobalConstants::KelvinConv;
-                break;
-            }
-            case DataHVACGlobals::ThermostatType::DualSetPointWithDeadBand: {
-                int schNameIdHeat = state.dataZoneCtrls->TempControlledZone(zoneControlNum).SchIndx_DualSetPointWDeadBandHeat;
-                int schNameIdCool = state.dataZoneCtrls->TempControlledZone(zoneControlNum).SchIndx_DualSetPointWDeadBandCool;
-                Real64 heatSetpoint = ScheduleManager::LookUpScheduleValue(state, schNameIdHeat, hour, timestep);
-                Real64 coolSetpoint = ScheduleManager::LookUpScheduleValue(state, schNameIdCool, hour, timestep);
-                constexpr Real64 heatBalanceTemp = 10.0; // (assumed) degC
-                constexpr Real64 coolBalanceTemp = 15.0; // (assumed) degC
+            case HVAC::SetptType::SingleHeat: {
+                auto const *sched = state.dataZoneCtrls->TempControlledZone(zoneControlNum).setpts[(int)controlType].heatSetptSched;
+                Real64 setpoint = sched->getHrTsVal(state, hour, timestep);
+                Tin = setpoint + Constant::Kelvin;
+            } break;
+
+            case HVAC::SetptType::SingleCool: {
+                auto const *sched = state.dataZoneCtrls->TempControlledZone(zoneControlNum).setpts[(int)controlType].coolSetptSched;
+                Real64 setpoint = sched->getHrTsVal(state, hour, timestep);
+                Tin = setpoint + Constant::Kelvin;
+            } break;
+
+            case HVAC::SetptType::SingleHeatCool: {
+                // Heat and cool setpt scheds will be the same for this option
+                auto const *sched = state.dataZoneCtrls->TempControlledZone(zoneControlNum).setpts[(int)controlType].heatSetptSched;
+                Real64 setpoint = sched->getHrTsVal(state, hour, timestep);
+                Tin = setpoint + Constant::Kelvin;
+            } break;
+
+            case HVAC::SetptType::DualHeatCool: {
+                auto const *heatSched = state.dataZoneCtrls->TempControlledZone(zoneControlNum).setpts[(int)controlType].heatSetptSched;
+                auto const *coolSched = state.dataZoneCtrls->TempControlledZone(zoneControlNum).setpts[(int)controlType].coolSetptSched;
+                Real64 heatSetpoint = heatSched->getHrTsVal(state, hour, timestep);
+                Real64 coolSetpoint = coolSched->getHrTsVal(state, hour, timestep);
+                constexpr Real64 heatBalanceTemp = 10.0 + Constant::Kelvin; // (assumed)
+                constexpr Real64 coolBalanceTemp = 15.0 + Constant::Kelvin; // (assumed)
 
                 if (bcs->outdoorTemp < heatBalanceTemp) {
-                    Tin = heatSetpoint + DataGlobalConstants::KelvinConv;
+                    Tin = heatSetpoint + Constant::Kelvin;
                 } else if (bcs->outdoorTemp > coolBalanceTemp) {
-                    Tin = coolSetpoint + DataGlobalConstants::KelvinConv;
+                    Tin = coolSetpoint + Constant::Kelvin;
                 } else {
                     Real64 weight = (coolBalanceTemp - bcs->outdoorTemp) / (coolBalanceTemp - heatBalanceTemp);
-                    Tin = heatSetpoint * weight + coolSetpoint * (1.0 - weight) + DataGlobalConstants::KelvinConv;
+                    Tin = heatSetpoint * weight + coolSetpoint * (1.0 - weight) + Constant::Kelvin;
                 }
-                break;
-            }
-            default:
+            } break;
+
+            default: {
                 Tin = 0.0;
                 ShowSevereError(state,
-                                format("Illegal control type for Zone={}, Found value={}, in Schedule={}",
-                                       state.dataHeatBal->Zone(zoneNum).Name,
-                                       controlType,
-                                       state.dataZoneCtrls->TempControlledZone(zoneControlNum).ControlTypeSchedName));
-            }
+                                std::format("Illegal control type for Zone={}, Found value={}, in Schedule={}",
+                                            state.dataHeatBal->Zone(zoneNum).Name,
+                                            static_cast<int>(controlType),
+                                            state.dataZoneCtrls->TempControlledZone(zoneControlNum).setptTypeSched->Name));
+            } break;
+
+            } // switch (tstatType)
             break;
         }
         case KIVAZONE_COMFORTCONTROL: {
 
-            Tin = standardTemp + DataGlobalConstants::KelvinConv;
+            Tin = standardTemp + Constant::Kelvin;
             break;
         }
         case KIVAZONE_STAGEDCONTROL: {
 
-            int heatSpSchId = state.dataZoneCtrls->StageControlledZone(zoneControlNum).HSBchedIndex;
-            int coolSpSchId = state.dataZoneCtrls->StageControlledZone(zoneControlNum).CSBchedIndex;
-            Real64 heatSetpoint = ScheduleManager::LookUpScheduleValue(state, heatSpSchId, hour, timestep);
-            Real64 coolSetpoint = ScheduleManager::LookUpScheduleValue(state, coolSpSchId, hour, timestep);
-            constexpr Real64 heatBalanceTemp = 10.0; // (assumed) degC
-            constexpr Real64 coolBalanceTemp = 15.0; // (assumed) degC
+            auto const *heatSched = state.dataZoneCtrls->StageControlledZone(zoneControlNum).heatSetptBaseSched;
+            auto const *coolSched = state.dataZoneCtrls->StageControlledZone(zoneControlNum).coolSetptBaseSched;
+            Real64 heatSetpoint = heatSched->getHrTsVal(state, hour, timestep);
+            Real64 coolSetpoint = coolSched->getHrTsVal(state, hour, timestep);
+            constexpr Real64 heatBalanceTemp = 10.0 + Constant::Kelvin; // (assumed)
+            constexpr Real64 coolBalanceTemp = 15.0 + Constant::Kelvin; // (assumed)
             if (bcs->outdoorTemp < heatBalanceTemp) {
-                Tin = heatSetpoint + DataGlobalConstants::KelvinConv;
+                Tin = heatSetpoint + Constant::Kelvin;
             } else if (bcs->outdoorTemp > coolBalanceTemp) {
-                Tin = coolSetpoint + DataGlobalConstants::KelvinConv;
+                Tin = coolSetpoint + Constant::Kelvin;
             } else {
                 Real64 weight = (coolBalanceTemp - bcs->outdoorTemp) / (coolBalanceTemp - heatBalanceTemp);
-                Tin = heatSetpoint * weight + coolSetpoint * (1.0 - weight) + DataGlobalConstants::KelvinConv;
+                Tin = heatSetpoint * weight + coolSetpoint * (1.0 - weight) + Constant::Kelvin;
             }
             break;
         }
         default: {
             // error?
-            Tin = assumedFloatingTemp + DataGlobalConstants::KelvinConv;
+            Tin = assumedFloatingTemp + Constant::Kelvin;
             break;
         }
         }
@@ -375,11 +379,11 @@ void KivaInstanceMap::setBoundaryConditions(EnergyPlusData &state)
 {
     std::shared_ptr<Kiva::BoundaryConditions> bcs = instance.bcs;
 
-    bcs->outdoorTemp = state.dataEnvrn->OutDryBulbTemp + DataGlobalConstants::KelvinConv;
+    bcs->outdoorTemp = state.dataEnvrn->OutDryBulbTemp + Constant::Kelvin;
     bcs->localWindSpeed = DataEnvironment::WindSpeedAt(state, instance.ground->foundation.grade.roughness);
-    bcs->windDirection = state.dataEnvrn->WindDir * DataGlobalConstants::DegToRadians;
+    bcs->windDirection = state.dataEnvrn->WindDir * Constant::DegToRad;
     bcs->solarAzimuth = std::atan2(state.dataEnvrn->SOLCOS(1), state.dataEnvrn->SOLCOS(2));
-    bcs->solarAltitude = DataGlobalConstants::PiOvr2 - std::acos(state.dataEnvrn->SOLCOS(3));
+    bcs->solarAltitude = Constant::PiOvr2 - std::acos(state.dataEnvrn->SOLCOS(3));
     bcs->directNormalFlux = state.dataEnvrn->BeamSolarRad;
     bcs->diffuseHorizontalFlux = state.dataEnvrn->DifSolarRad;
     bcs->skyEmissivity = pow4(state.dataEnvrn->SkyTempKelvin) / pow4(bcs->outdoorTemp);
@@ -388,8 +392,8 @@ void KivaInstanceMap::setBoundaryConditions(EnergyPlusData &state)
                             state.dataHeatBal->SurfQdotRadIntGainsInPerArea(floorSurface) + // internal gains
                             state.dataHeatBalSurf->SurfQdotRadHVACInPerArea(floorSurface);  // HVAC
 
-    bcs->slabConvectiveTemp = state.dataHeatBal->SurfTempEffBulkAir(floorSurface) + DataGlobalConstants::KelvinConv;
-    bcs->slabRadiantTemp = ThermalComfort::CalcSurfaceWeightedMRT(state, floorSurface, false) + DataGlobalConstants::KelvinConv;
+    bcs->slabConvectiveTemp = state.dataHeatBal->SurfTempEffBulkAir(floorSurface) + Constant::Kelvin;
+    bcs->slabRadiantTemp = ThermalComfort::CalcSurfaceWeightedMRT(state, floorSurface, false) + Constant::Kelvin;
     bcs->gradeForcedTerm = kmPtr->surfaceConvMap[floorSurface].f;
     bcs->gradeConvectionAlgorithm = kmPtr->surfaceConvMap[floorSurface].out;
     bcs->slabConvectionAlgorithm = kmPtr->surfaceConvMap[floorSurface].in;
@@ -399,12 +403,12 @@ void KivaInstanceMap::setBoundaryConditions(EnergyPlusData &state)
     Real64 Atotal = 0.0;
     Real64 TARadTotal = 0.0;
     Real64 TAConvTotal = 0.0;
-    for (auto &wl : wallSurfaces) {
+    for (int wl : wallSurfaces) {
         Real64 Q = state.dataHeatBalSurf->SurfOpaqQRadSWInAbs(wl) +      // solar
                    state.dataHeatBal->SurfQdotRadIntGainsInPerArea(wl) + // internal gains
                    state.dataHeatBalSurf->SurfQdotRadHVACInPerArea(wl);  // HVAC
 
-        Real64 &A = state.dataSurface->Surface(wl).Area;
+        Real64 const &A = state.dataSurface->Surface(wl).Area;
 
         Real64 Trad = ThermalComfort::CalcSurfaceWeightedMRT(state, wl, false);
         Real64 Tconv = state.dataHeatBal->SurfTempEffBulkAir(wl);
@@ -417,8 +421,8 @@ void KivaInstanceMap::setBoundaryConditions(EnergyPlusData &state)
 
     if (Atotal > 0.0) {
         bcs->wallAbsRadiation = QAtotal / Atotal;
-        bcs->wallRadiantTemp = TARadTotal / Atotal + DataGlobalConstants::KelvinConv;
-        bcs->wallConvectiveTemp = TAConvTotal / Atotal + DataGlobalConstants::KelvinConv;
+        bcs->wallRadiantTemp = TARadTotal / Atotal + Constant::Kelvin;
+        bcs->wallConvectiveTemp = TAConvTotal / Atotal + Constant::Kelvin;
         bcs->extWallForcedTerm = kmPtr->surfaceConvMap[wallSurfaces[0]].f;
         bcs->extWallConvectionAlgorithm = kmPtr->surfaceConvMap[wallSurfaces[0]].out;
         bcs->intWallConvectionAlgorithm = kmPtr->surfaceConvMap[wallSurfaces[0]].in;
@@ -475,8 +479,9 @@ void KivaManager::readWeatherData(EnergyPlusData &state)
         if (LineResult.eof) {
             ShowFatalError(
                 state,
-                format("Kiva::ReadWeatherFile: Unexpected End-of-File on EPW Weather file, while reading header information, looking for header={}",
-                       Header(HdLine)));
+                std::format(
+                    "Kiva::ReadWeatherFile: Unexpected End-of-File on EPW Weather file, while reading header information, looking for header={}",
+                    Header(HdLine)));
         }
 
         // Use headers to know how to read data to memory (e.g., number of periods, number of intervals)
@@ -490,19 +495,23 @@ void KivaManager::readWeatherData(EnergyPlusData &state)
         }
         std::string::size_type Pos = FindNonSpace(LineResult.data);
         std::string::size_type const HdPos = index(LineResult.data, Header(HdLine));
-        if (Pos != HdPos) continue;
+        if (Pos != HdPos) {
+            continue;
+        }
         Pos = index(LineResult.data, ',');
 
         // Below borrowed from ProcessEPWHeader
 
         if ((Pos == std::string::npos) && (!has_prefixi(Header(HdLine), "COMMENTS"))) {
             ShowSevereError(state, "Invalid Header line in in.epw -- no commas");
-            ShowContinueError(state, format("Line={}", LineResult.data));
+            ShowContinueError(state, std::format("Line={}", LineResult.data));
             ShowFatalError(state, "Previous conditions cause termination.");
         }
-        if (Pos != std::string::npos) LineResult.data.erase(0, Pos + 1);
+        if (Pos != std::string::npos) {
+            LineResult.data.erase(0, Pos + 1);
+        }
 
-        if (UtilityRoutines::MakeUPPERCase(Header(HdLine)) == "DATA PERIODS") {
+        if (Util::makeUPPER(Header(HdLine)) == "DATA PERIODS") {
             bool IOStatus;
             uppercase(LineResult.data);
             int NumHdArgs = 2;
@@ -525,11 +534,11 @@ void KivaManager::readWeatherData(EnergyPlusData &state)
 
                 switch (Count) {
                 case 1:
-                    NumHdArgs += 4 * UtilityRoutines::ProcessNumber(LineResult.data.substr(0, Pos), IOStatus);
+                    NumHdArgs += 4 * Util::ProcessNumber(LineResult.data.substr(0, Pos), IOStatus);
                     // TODO: Error if more than one period? Less than full year?
                     break;
                 case 2:
-                    kivaWeather.intervalsPerHour = UtilityRoutines::ProcessNumber(LineResult.data.substr(0, Pos), IOStatus);
+                    kivaWeather.intervalsPerHour = Util::ProcessNumber(LineResult.data.substr(0, Pos), IOStatus);
                     break;
                 default:
                     break;
@@ -540,7 +549,9 @@ void KivaManager::readWeatherData(EnergyPlusData &state)
         }
 
         ++HdLine;
-        if (HdLine == 9) StillLooking = false;
+        if (HdLine == 9) {
+            StillLooking = false;
+        }
     }
 
     bool ErrorFound = false;
@@ -586,64 +597,63 @@ void KivaManager::readWeatherData(EnergyPlusData &state)
         if (WeatherDataLine.eof) {
             break;
         }
-        WeatherManager::InterpretWeatherDataLine(state,
-                                                 WeatherDataLine.data,
-                                                 ErrorFound,
-                                                 WYear,
-                                                 WMonth,
-                                                 WDay,
-                                                 WHour,
-                                                 WMinute,
-                                                 DryBulb,
-                                                 DewPoint,
-                                                 RelHum,
-                                                 AtmPress,
-                                                 ETHoriz,
-                                                 ETDirect,
-                                                 IRHoriz,
-                                                 GLBHoriz,
-                                                 DirectRad,
-                                                 DiffuseRad,
-                                                 GLBHorizIllum,
-                                                 DirectNrmIllum,
-                                                 DiffuseHorizIllum,
-                                                 ZenLum,
-                                                 WindDir,
-                                                 WindSpeed,
-                                                 TotalSkyCover,
-                                                 OpaqueSkyCover,
-                                                 Visibility,
-                                                 CeilHeight,
-                                                 PresWeathObs,
-                                                 PresWeathConds,
-                                                 PrecipWater,
-                                                 AerosolOptDepth,
-                                                 SnowDepth,
-                                                 DaysSinceLastSnow,
-                                                 Albedo,
-                                                 LiquidPrecip);
+        Weather::InterpretWeatherDataLine(state,
+                                          WeatherDataLine.data,
+                                          ErrorFound,
+                                          WYear,
+                                          WMonth,
+                                          WDay,
+                                          WHour,
+                                          WMinute,
+                                          DryBulb,
+                                          DewPoint,
+                                          RelHum,
+                                          AtmPress,
+                                          ETHoriz,
+                                          ETDirect,
+                                          IRHoriz,
+                                          GLBHoriz,
+                                          DirectRad,
+                                          DiffuseRad,
+                                          GLBHorizIllum,
+                                          DirectNrmIllum,
+                                          DiffuseHorizIllum,
+                                          ZenLum,
+                                          WindDir,
+                                          WindSpeed,
+                                          TotalSkyCover,
+                                          OpaqueSkyCover,
+                                          Visibility,
+                                          CeilHeight,
+                                          PresWeathObs,
+                                          PresWeathConds,
+                                          PrecipWater,
+                                          AerosolOptDepth,
+                                          SnowDepth,
+                                          DaysSinceLastSnow,
+                                          Albedo,
+                                          LiquidPrecip);
 
         // Checks for missing value
         if (DryBulb >= 99.9) {
-            DryBulb = state.dataWeatherManager->Missing.DryBulb;
+            DryBulb = state.dataWeather->wvarsMissing.OutDryBulbTemp;
         }
         if (DewPoint >= 99.9) {
-            DewPoint = state.dataWeatherManager->Missing.DewPoint;
+            DewPoint = state.dataWeather->wvarsMissing.OutDewPointTemp;
         }
         if (WindSpeed >= 999.0) {
-            WindSpeed = state.dataWeatherManager->Missing.WindSpd;
+            WindSpeed = state.dataWeather->wvarsMissing.WindSpeed;
         }
         if (OpaqueSkyCover >= 99.0) {
-            OpaqueSkyCover = state.dataWeatherManager->Missing.OpaqSkyCvr;
+            OpaqueSkyCover = state.dataWeather->wvarsMissing.OpaqueSkyCover;
         }
 
         kivaWeather.dryBulb.push_back(DryBulb);
         kivaWeather.windSpeed.push_back(WindSpeed);
 
         Real64 OSky = OpaqueSkyCover;
-        Real64 TDewK = min(DryBulb, DewPoint) + DataGlobalConstants::KelvinConv;
-        Real64 ESky = (0.787 + 0.764 * std::log(TDewK / DataGlobalConstants::KelvinConv)) *
-                      (1.0 + 0.0224 * OSky - 0.0035 * pow_2(OSky) + 0.00028 * pow_3(OSky));
+        Real64 TDewK = min(DryBulb, DewPoint) + Constant::Kelvin;
+        Real64 ESky = (0.787 + 0.764 * std::log(TDewK / Constant::Kelvin)) * (1.0 + 0.0224 * OSky - 0.0035 * pow_2(OSky) + 0.00028 * pow_3(OSky));
 
         kivaWeather.skyEmissivity.push_back(ESky);
 
@@ -670,7 +680,7 @@ bool KivaManager::setupKivaInstances(EnergyPlusData &state)
 
     auto &Surfaces = state.dataSurface->Surface;
     auto &Constructs = state.dataConstruction->Construct;
-    auto &Materials = state.dataMaterial->Material;
+    auto &materials = state.dataMaterial->materials;
 
     int inst = 0;
     int surfNum = 1;
@@ -687,15 +697,16 @@ bool KivaManager::setupKivaInstances(EnergyPlusData &state)
                         if (Surfaces(wl).Class == DataSurfaces::SurfaceClass::Floor) {
                             ErrorsFound = true;
                             ShowSevereError(state,
-                                            format("Foundation:Kiva=\"{}\", only one floor per Foundation:Kiva Object allowed.",
-                                                   foundationInputs[surface.OSCPtr].name));
+                                            std::format("Foundation:Kiva=\"{}\", only one floor per Foundation:Kiva Object allowed.",
+                                                        foundationInputs[surface.OSCPtr].name));
                         } else {
                             ErrorsFound = true;
-                            ShowSevereError(state,
-                                            format("Foundation:Kiva=\"{}\", only floor and wall surfaces are allowed to reference Foundation Outside "
-                                                   "Boundary Conditions.",
-                                                   foundationInputs[surface.OSCPtr].name));
-                            ShowContinueError(state, format("Surface=\"{}\", is not a floor or wall.", Surfaces(wl).Name));
+                            ShowSevereError(
+                                state,
+                                std::format("Foundation:Kiva=\"{}\", only floor and wall surfaces are allowed to reference Foundation Outside "
+                                            "Boundary Conditions.",
+                                            foundationInputs[surface.OSCPtr].name));
+                            ShowContinueError(state, std::format("Surface=\"{}\", is not a floor or wall.", Surfaces(wl).Name));
                         }
                     } else {
                         wallSurfaces.push_back(wl);
@@ -715,7 +726,7 @@ bool KivaManager::setupKivaInstances(EnergyPlusData &state)
                 userSetExposedPerimeter = true;
                 useDetailedExposedPerimeter = expPerimMap[surfNum].useDetailedExposedPerimeter;
                 if (useDetailedExposedPerimeter) {
-                    for (auto s : expPerimMap[surfNum].isExposedPerimeter) {
+                    for (bool s : expPerimMap[surfNum].isExposedPerimeter) {
                         isExposedPerimeter.push_back(s);
                     }
                 } else {
@@ -724,14 +735,13 @@ bool KivaManager::setupKivaInstances(EnergyPlusData &state)
             } else {
                 ErrorsFound = true;
                 ShowSevereError(state,
-                                format("Surface=\"{}\", references a Foundation Outside Boundary Condition but there is no corresponding "
-                                       "SURFACEPROPERTY:EXPOSEDFOUNDATIONPERIMETER object defined.",
-                                       Surfaces(surfNum).Name));
+                                std::format("Surface=\"{}\", references a Foundation Outside Boundary Condition but there is no corresponding "
+                                            "SURFACEPROPERTY:EXPOSEDFOUNDATIONPERIMETER object defined.",
+                                            Surfaces(surfNum).Name));
             }
 
             Kiva::Polygon floorPolygon;
-            for (std::size_t i = 0; i < surface.Vertex.size(); ++i) {
-                auto &v = surface.Vertex[i];
+            for (const auto &v : surface.Vertex) {
                 floorPolygon.outer().push_back(Kiva::Point(v.x, v.y));
                 if (!userSetExposedPerimeter) {
                     isExposedPerimeter.push_back(true);
@@ -746,8 +756,8 @@ bool KivaManager::setupKivaInstances(EnergyPlusData &state)
                 } else {
                     iNext = i + 1;
                 }
-                auto &v = surface.Vertex[i];
-                auto &vNext = surface.Vertex[iNext];
+                auto const &v = surface.Vertex[i];
+                auto const &vNext = surface.Vertex[iNext];
                 totalPerimeter += distance(v, vNext);
             }
 
@@ -761,8 +771,8 @@ bool KivaManager::setupKivaInstances(EnergyPlusData &state)
                     } else {
                         iNext = i + 1;
                     }
-                    auto &p = floorPolygon.outer()[i];
-                    auto &pNext = floorPolygon.outer()[iNext];
+                    auto const &p = floorPolygon.outer()[i];
+                    auto const &pNext = floorPolygon.outer()[iNext];
                     Real64 perim = Kiva::getDistance(p, pNext);
                     total2DPerimeter += perim;
                     if (isExposedPerimeter[i]) {
@@ -776,7 +786,7 @@ bool KivaManager::setupKivaInstances(EnergyPlusData &state)
 
             Real64 totalExposedPerimeter = exposedFraction * totalPerimeter;
 
-            // Remaining exposed perimeter will be alloted to each instance as appropriate
+            // Remaining exposed perimeter will be allotted to each instance as appropriate
             Real64 remainingExposedPerimeter = totalExposedPerimeter;
 
             // Get combinations of wall constructions and wall heights -- each different
@@ -786,18 +796,18 @@ bool KivaManager::setupKivaInstances(EnergyPlusData &state)
             std::map<std::pair<int, Real64>, WallGroup> combinationMap;
 
             if (!wallSurfaces.empty()) {
-                for (auto &wl : wallSurfaces) {
+                for (int wl : wallSurfaces) {
 
-                    auto &v = Surfaces(wl).Vertex;
+                    auto const &v = Surfaces(wl).Vertex;
                     size_t numVs = v.size();
                     // Enforce quadrilateralism
                     if (numVs > 4) {
                         ShowWarningError(state,
-                                         format("Foundation:Kiva=\"{}\", wall surfaces with more than four vertices referencing",
-                                                foundationInputs[surface.OSCPtr].name));
+                                         std::format("Foundation:Kiva=\"{}\", wall surfaces with more than four vertices referencing",
+                                                     foundationInputs[surface.OSCPtr].name));
                         ShowContinueError(
                             state, "...Foundation Outside Boundary Conditions may not be interpreted correctly in the 2D finite difference model.");
-                        ShowContinueError(state, format("Surface=\"{}\", has {} vertices.", Surfaces(wl).Name, numVs));
+                        ShowContinueError(state, std::format("Surface=\"{}\", has {} vertices.", Surfaces(wl).Name, numVs));
                         ShowContinueError(state,
                                           "Consider separating the wall into separate surfaces, each spanning from the floor slab to the top of "
                                           "the foundation wall.");
@@ -822,9 +832,9 @@ bool KivaManager::setupKivaInstances(EnergyPlusData &state)
                     }
 
                     if (perimeter == 0.0) {
-                        ShowWarningError(state, format("Foundation:Kiva=\"{}\".", foundationInputs[surface.OSCPtr].name));
-                        ShowContinueError(state, format("   Wall Surface=\"{}\", does not have any vertices that are", Surfaces(wl).Name));
-                        ShowContinueError(state, format("   coplanar with the corresponding Floor Surface=\"{}\".", Surfaces(surfNum).Name));
+                        ShowWarningError(state, std::format("Foundation:Kiva=\"{}\".", foundationInputs[surface.OSCPtr].name));
+                        ShowContinueError(state, std::format("   Wall Surface=\"{}\", does not have any vertices that are", Surfaces(wl).Name));
+                        ShowContinueError(state, std::format("   coplanar with the corresponding Floor Surface=\"{}\".", Surfaces(surfNum).Name));
                         ShowContinueError(state,
                                           "   Simulation will continue using the distance between the two lowest points in the wall for the "
                                           "interface distance.");
@@ -840,7 +850,7 @@ bool KivaManager::setupKivaInstances(EnergyPlusData &state)
 
                     Real64 surfHeight = Surfaces(wl).get_average_height(state);
                     // round to avoid numerical precision differences
-                    surfHeight = std::round((surfHeight)*1000.0) / 1000.0;
+                    surfHeight = std::round((surfHeight) * 1000.0) / 1000.0;
 
                     if (combinationMap.count({Surfaces(wl).Construction, surfHeight}) == 0) {
                         // create new combination
@@ -902,12 +912,12 @@ bool KivaManager::setupKivaInstances(EnergyPlusData &state)
 
                     // Push back construction's layers
                     for (int layer = 1; layer <= c.TotLayers; layer++) {
-                        auto const *mat = Materials(c.LayerPoint(layer));
+                        auto const *mat = materials(c.LayerPoint(layer));
                         if (mat->ROnly) {
                             ErrorsFound = true;
-                            ShowSevereError(state, format("Construction=\"{}\", constructions referenced by surfaces with a", c.Name));
+                            ShowSevereError(state, std::format("Construction=\"{}\", constructions referenced by surfaces with a", c.Name));
                             ShowContinueError(state, "\"Foundation\" Outside Boundary Condition must use only regular material objects");
-                            ShowContinueError(state, format("Material=\"{}\", is not a regular material object", mat->Name));
+                            ShowContinueError(state, std::format("Material=\"{}\", is not a regular material object", mat->Name));
                             return ErrorsFound;
                         }
 
@@ -926,13 +936,14 @@ bool KivaManager::setupKivaInstances(EnergyPlusData &state)
 
                 // Set slab construction
                 for (int i = 0; i < Constructs(surface.Construction).TotLayers; ++i) {
-                    auto const *mat = Materials(Constructs(surface.Construction).LayerPoint[i]);
+                    auto const *mat = materials(Constructs(surface.Construction).LayerPoint[i]);
                     if (mat->ROnly) {
                         ErrorsFound = true;
                         ShowSevereError(
-                            state, format("Construction=\"{}\", constructions referenced by surfaces with a", Constructs(surface.Construction).Name));
+                            state,
+                            std::format("Construction=\"{}\", constructions referenced by surfaces with a", Constructs(surface.Construction).Name));
                         ShowContinueError(state, "\"Foundation\" Outside Boundary Condition must use only regular material objects");
-                        ShowContinueError(state, format("Material=\"{}\", is not a regular material object", mat->Name));
+                        ShowContinueError(state, std::format("Material=\"{}\", is not a regular material object", mat->Name));
                         return ErrorsFound;
                     }
 
@@ -953,11 +964,11 @@ bool KivaManager::setupKivaInstances(EnergyPlusData &state)
                 fnd.perimeterSurfaceWidth = 0.0;
 
                 // Add blocks
-                auto intHIns = foundationInputs[surface.OSCPtr].intHIns;
-                auto intVIns = foundationInputs[surface.OSCPtr].intVIns;
-                auto extHIns = foundationInputs[surface.OSCPtr].extHIns;
-                auto extVIns = foundationInputs[surface.OSCPtr].extVIns;
-                auto footing = foundationInputs[surface.OSCPtr].footing;
+                auto intHIns = foundationInputs[surface.OSCPtr].intHIns; // (AUTO_OK_OBJ) intend to make a copy?
+                auto intVIns = foundationInputs[surface.OSCPtr].intVIns; // (AUTO_OK_OBJ) intend to make a copy?
+                auto extHIns = foundationInputs[surface.OSCPtr].extHIns; // (AUTO_OK_OBJ) intend to make a copy?
+                auto extVIns = foundationInputs[surface.OSCPtr].extVIns; // (AUTO_OK_OBJ) intend to make a copy?
+                auto footing = foundationInputs[surface.OSCPtr].footing; // (AUTO_OK_OBJ) intend to make a copy?
 
                 if (std::abs(intHIns.width) > 0.0) {
                     intHIns.z += fnd.foundationDepth + fnd.slab.totalWidth();
@@ -986,21 +997,22 @@ bool KivaManager::setupKivaInstances(EnergyPlusData &state)
 
                 if (fnd.deepGroundDepth > initDeepGroundDepth) {
                     ShowWarningError(state,
-                                     format("Foundation:Kiva=\"{}\", the autocalculated deep ground depth ({:.3T} m) is shallower than "
-                                            "foundation construction elements ({:.3T} m)",
-                                            foundationInputs[surface.OSCPtr].name,
-                                            initDeepGroundDepth,
-                                            fnd.deepGroundDepth - 1.0));
-                    ShowContinueError(state,
-                                      format("The deep ground depth will be set one meter below the lowest element ({:.3T} m)", fnd.deepGroundDepth));
+                                     std::format("Foundation:Kiva=\"{}\", the autocalculated deep ground depth ({:.3f} m) is shallower than "
+                                                 "foundation construction elements ({:.3f} m)",
+                                                 foundationInputs[surface.OSCPtr].name,
+                                                 initDeepGroundDepth,
+                                                 fnd.deepGroundDepth - 1.0));
+                    ShowContinueError(
+                        state, std::format("The deep ground depth will be set one meter below the lowest element ({:.3f} m)", fnd.deepGroundDepth));
                 }
 
                 // polygon
 
                 fnd.polygon = floorPolygon;
 
-                std::pair<EnergyPlusData *, std::string> contextPair{&state, format("Foundation:Kiva=\"{}\"", foundationInputs[surface.OSCPtr].name)};
-                Kiva::setMessageCallback(kivaErrorCallback, &contextPair);
+                std::pair<EnergyPlusData *, std::string> contexPair2{&state,
+                                                                     std::format("Foundation:Kiva=\"{}\"", foundationInputs[surface.OSCPtr].name)};
+                Kiva::setMessageCallback(kivaErrorCallback, &contexPair2);
 
                 // point surface to associated ground instance(s)
                 kivaInstances.emplace_back(state,
@@ -1017,7 +1029,7 @@ bool KivaManager::setupKivaInstances(EnergyPlusData &state)
                 floorAggregator.add_instance(kivaInstances[inst].instance.ground.get(), floorWeight);
 
                 // Walls can only have one associated ground instance
-                for (auto &wl : wallIDs) {
+                for (int wl : wallIDs) {
                     surfaceMap[wl] = Kiva::Aggregator(Kiva::Surface::ST_WALL_INT);
                     surfaceMap[wl].add_instance(kivaInstances[inst].instance.ground.get(), 1.0);
                 }
@@ -1036,8 +1048,9 @@ bool KivaManager::setupKivaInstances(EnergyPlusData &state)
                     assignKivaInstances = false;
                     if (remainingExposedPerimeter < -0.1) {
                         ErrorsFound = true;
-                        ShowSevereError(state, format("For Floor Surface=\"{}\", the Wall surfaces referencing", Surfaces(surfNum).Name));
-                        ShowContinueError(state, format("  the same Foundation:Kiva=\"{}\" have", foundationInputs[Surfaces(surfNum).OSCPtr].name));
+                        ShowSevereError(state, std::format("For Floor Surface=\"{}\", the Wall surfaces referencing", Surfaces(surfNum).Name));
+                        ShowContinueError(state,
+                                          std::format("  the same Foundation:Kiva=\"{}\" have", foundationInputs[Surfaces(surfNum).OSCPtr].name));
                         ShowContinueError(state, "  a combined length greater than the exposed perimeter of the foundation.");
                         ShowContinueError(state, "  Ensure that each Wall surface shares at least one edge with the corresponding");
                         ShowContinueError(state, "  Floor surface.");
@@ -1052,21 +1065,22 @@ bool KivaManager::setupKivaInstances(EnergyPlusData &state)
     }
 
     // Loop through Foundation surfaces and make sure they are all assigned to an instance
-    for (auto surfNum : state.dataSurface->AllHTKivaSurfaceList) {
-        if (surfaceMap[surfNum].size() == 0) {
+    for (int surfNum2 : state.dataSurface->AllHTKivaSurfaceList) {
+        if (surfaceMap[surfNum2].size() == 0) {
             ErrorsFound = true;
-            ShowSevereError(state, format("Surface=\"{}\" has a 'Foundation' Outside Boundary Condition", Surfaces(surfNum).Name));
-            ShowContinueError(state, format("  referencing Foundation:Kiva=\"{}\".", foundationInputs[Surfaces(surfNum).OSCPtr].name));
-            if (Surfaces(surfNum).Class == DataSurfaces::SurfaceClass::Wall) {
-                ShowContinueError(state, format("  You must also reference Foundation:Kiva=\"{}\"", foundationInputs[Surfaces(surfNum).OSCPtr].name));
+            ShowSevereError(state, std::format("Surface=\"{}\" has a 'Foundation' Outside Boundary Condition", Surfaces(surfNum).Name));
+            ShowContinueError(state, std::format("  referencing Foundation:Kiva=\"{}\".", foundationInputs[Surfaces(surfNum).OSCPtr].name));
+            if (Surfaces(surfNum2).Class == DataSurfaces::SurfaceClass::Wall) {
                 ShowContinueError(state,
-                                  format("  in a floor surface within the same Zone=\"{}\".", state.dataHeatBal->Zone(Surfaces(surfNum).Zone).Name));
-            } else if (Surfaces(surfNum).Class == DataSurfaces::SurfaceClass::Floor) {
+                                  std::format("  You must also reference Foundation:Kiva=\"{}\"", foundationInputs[Surfaces(surfNum).OSCPtr].name));
+                ShowContinueError(
+                    state, std::format("  in a floor surface within the same Zone=\"{}\".", state.dataHeatBal->Zone(Surfaces(surfNum).Zone).Name));
+            } else if (Surfaces(surfNum2).Class == DataSurfaces::SurfaceClass::Floor) {
                 ShowContinueError(state, "  However, this floor was never assigned to a Kiva instance.");
                 ShowContinueError(state, "  This should not occur for floor surfaces. Please report to EnergyPlus Development Team.");
             } else {
                 ShowContinueError(state, "  Only floor and wall surfaces are allowed to reference 'Foundation' Outside Boundary Conditions.");
-                ShowContinueError(state, format("  Surface=\"{}\", is not a floor or wall.", Surfaces(surfNum).Name));
+                ShowContinueError(state, std::format("  Surface=\"{}\", is not a floor or wall.", Surfaces(surfNum).Name));
             }
         }
     }
@@ -1078,7 +1092,7 @@ bool KivaManager::setupKivaInstances(EnergyPlusData &state)
           "Surface(s)\n");
 
     for (auto &kv : kivaInstances) {
-        auto grnd = kv.instance.ground.get();
+        auto grnd = kv.instance.ground.get(); // (AUTO_OK_OBJ)
 
         std::string constructionName;
         if (kv.constructionNum <= 0) {
@@ -1088,11 +1102,11 @@ bool KivaManager::setupKivaInstances(EnergyPlusData &state)
         }
 
         std::string wallSurfaceString;
-        for (auto &wl : kv.wallSurfaces) {
+        for (int wl : kv.wallSurfaces) {
             wallSurfaceString += "," + state.dataSurface->Surface(wl).Name;
         }
 
-        static constexpr std::string_view fmt = "{},{},{},{},{:.2R},{:.2R},{:.2R},{},{}{}\n";
+        static constexpr std::string_view fmt = "{},{},{},{},{:.2f},{:.2f},{:.2f},{},{}{}\n";
         print(state.files.eio,
               fmt,
               foundationInputs[state.dataSurface->Surface(kv.floorSurface).OSCPtr].name,
@@ -1161,9 +1175,9 @@ void KivaManager::calcKivaInstances(EnergyPlusData &state)
 #ifdef GROUND_PLOT
 void KivaInstanceMap::plotDomain(EnergyPlusData &state)
 {
-    gp.createFrame(*instance.ground, format("{}/{} {}:00", state.dataEnvrn->Month, state.dataEnvrn->DayOfMonth, state.dataGlobal->HourOfDay));
+    gp.createFrame(*instance.ground, std::format("{}/{} {}:00", state.dataEnvrn->Month, state.dataEnvrn->DayOfMonth, state.dataGlobal->HourOfDay));
 
-    instance.ground->writeCSV(format("{}/{}.csv", debugDir, plotNum));
+    instance.ground->writeCSV(std::format("{}/{}.csv", debugDir, plotNum));
 
     plotNum++;
 }
@@ -1171,8 +1185,8 @@ void KivaInstanceMap::plotDomain(EnergyPlusData &state)
 
 void KivaManager::calcKivaSurfaceResults(EnergyPlusData &state)
 {
-    for (auto surfNum : state.dataSurface->AllHTKivaSurfaceList) {
-        std::pair<EnergyPlusData *, std::string> contextPair{&state, format("Surface=\"{}\"", state.dataSurface->Surface(surfNum).Name)};
+    for (int surfNum : state.dataSurface->AllHTKivaSurfaceList) {
+        std::pair<EnergyPlusData *, std::string> contextPair{&state, std::format("Surface=\"{}\"", state.dataSurface->Surface(surfNum).Name)};
         Kiva::setMessageCallback(kivaErrorCallback, &contextPair);
         surfaceMap[surfNum].calc_weighted_results();
         state.dataHeatBalSurf->SurfHConvInt(surfNum) = state.dataSurfaceGeometry->kivaManager.surfaceMap[surfNum].results.hconv;
@@ -1205,8 +1219,8 @@ void KivaManager::defineDefaultFoundation(EnergyPlusData &state)
         if (!settings.autocalculateDeepGroundDepth) {
             if (defFnd.deepGroundDepth != settings.deepGroundDepth) {
                 ShowWarningError(state, "Foundation:Kiva:Settings, when Deep-Ground Boundary Condition is Autoselect,");
-                ShowContinueError(state, format("the user-specified Deep-Ground Depth ({:.1R} m)", settings.deepGroundDepth));
-                ShowContinueError(state, format("will be overridden with the Autoselected depth ({:.1R} m)", defFnd.deepGroundDepth));
+                ShowContinueError(state, std::format("the user-specified Deep-Ground Depth ({:.1f} m)", settings.deepGroundDepth));
+                ShowContinueError(state, std::format("will be overridden with the Autoselected depth ({:.1f} m)", defFnd.deepGroundDepth));
             }
         }
     } else if (settings.deepGroundBoundary == Settings::ZERO_FLUX) {
@@ -1258,7 +1272,7 @@ void KivaManager::addDefaultFoundation()
 int KivaManager::findFoundation(std::string const &name)
 {
     int fndNum = 0;
-    for (auto &fnd : foundationInputs) {
+    for (auto const &fnd : foundationInputs) {
         // Check if foundation exists
         if (fnd.name == name) {
             return fndNum;

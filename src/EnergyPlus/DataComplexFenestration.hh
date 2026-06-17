@@ -1,7 +1,7 @@
-// EnergyPlus, Copyright (c) 1996-2023, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
-// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other
+// National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
 // contributors. All rights reserved.
 //
 // NOTICE: This Software was developed under funding from the U.S. Department of Energy and the
@@ -59,58 +59,6 @@
 namespace EnergyPlus {
 
 namespace DataComplexFenestration {
-
-    struct GapSupportPillar
-    {
-        // Members
-        std::string Name;     // Name of support pillar
-        Real64 Spacing = 0.0; // Spacing between centers of support pillars (m)
-        Real64 Radius = 0.0;  // Support pillar radius (m)
-    };
-
-    struct GapDeflectionState
-    {
-        // Members
-        std::string Name; // Name of deflection state
-        Real64 DeflectedThickness = 0.0;
-    };
-
-    struct WindowComplexShade
-    {
-        // Members
-        std::string Name; // Name for complex shade
-        TARCOGParams::TARCOGLayerType LayerType =
-            TARCOGParams::TARCOGLayerType::Invalid; // Layer type (OtherShadingType, Venetian, Woven, Perforated)
-        Real64 Thickness = 0.0;                     // Layer thickness (m)
-        Real64 Conductivity = 0.0;                  // Layer conductivity (W/m2K)
-        Real64 IRTransmittance = 0.0;               // IR Transmittance
-        Real64 FrontEmissivity = 0.0;               // Emissivity of front surface
-        Real64 BackEmissivity = 0.0;                // Emissivity of back surface
-        Real64 TopOpeningMultiplier = 0.0;          // Coverage percent for top opening (%)
-        Real64 BottomOpeningMultiplier = 0.0;       // Coverage percent for bottom opening (%)
-        Real64 LeftOpeningMultiplier = 0.0;         // Coverage percent for left opening (%)
-        Real64 RightOpeningMultiplier = 0.0;        // Coverage percent for right opening (%)
-        Real64 FrontOpeningMultiplier = 0.0;        // Coverage percent for front opening (%)
-        Real64 SlatWidth = 0.0;                     // Slat width (m)
-        Real64 SlatSpacing = 0.0;                   // Slat spacing (m)
-        Real64 SlatThickness = 0.0;                 // Slat thickness (m)
-        Real64 SlatAngle = 0.0;                     // Slat angle (deg)
-        Real64 SlatConductivity = 0.0;              // Slat conductivity (W/m2K)
-        Real64 SlatCurve = 0.0;                     // Curvature radius of slat (if =0 then flat) (m)
-    };
-
-    struct WindowThermalModelParams
-    {
-        // Members
-        std::string Name;                                                                                   // Window thermal model name
-        TARCOGGassesParams::Stdrd CalculationStandard = TARCOGGassesParams::Stdrd::Invalid;                 // Tarcog calculation standard
-        TARCOGParams::TARCOGThermalModel ThermalModel = TARCOGParams::TARCOGThermalModel::Invalid;          // Tarcog thermal model
-        Real64 SDScalar = 0.0;                                                                              // SDScalar coefficient
-        TARCOGParams::DeflectionCalculation DeflectionModel = TARCOGParams::DeflectionCalculation::Invalid; // Deflection model
-        Real64 VacuumPressureLimit = 0.0; // Pressure limit at which it will be considered vacuum gas state
-        Real64 InitialTemperature = 0.0;  // Window(s) temperature in time of fabrication
-        Real64 InitialPressure = 0.0;     // Window(s) pressure in time of fabrication
-    };
 
 } // namespace DataComplexFenestration
 

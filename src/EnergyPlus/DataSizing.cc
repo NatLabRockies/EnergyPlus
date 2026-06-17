@@ -1,7 +1,7 @@
-// EnergyPlus, Copyright (c) 1996-2023, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
-// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other
+// National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
 // contributors. All rights reserved.
 //
 // NOTICE: This Software was developed under funding from the U.S. Department of Energy and the
@@ -55,6 +55,7 @@
 #include <EnergyPlus/DataZoneEquipment.hh>
 #include <EnergyPlus/Psychrometrics.hh>
 #include <EnergyPlus/ScheduleManager.hh>
+#include <EnergyPlus/SizingManager.hh>
 
 namespace EnergyPlus::DataSizing {
 
@@ -105,31 +106,33 @@ Real64 TermUnitSizingData::applyTermUnitSizingHeatFlow(Real64 const heatFlowWith
     return adjustedFlow;
 }
 
-void ZoneSizingData::scaleZoneCooling(Real64 const ratio // Scaling ratio
-)
+void TermUnitZoneSizingData::scaleZoneCooling(Real64 const ratio)
 {
     // Apply scaling ratio to TermUnitFinalZoneSizing cooling flow and load
-    this->DesCoolVolFlow = this->DesCoolVolFlow * ratio;
-    this->DesCoolMassFlow = this->DesCoolMassFlow * ratio;
-    this->DesCoolLoad = this->DesCoolLoad * ratio;
-    this->CoolFlowSeq = this->CoolFlowSeq * ratio;
-    this->CoolLoadSeq = this->CoolLoadSeq * ratio;
+    this->DesCoolVolFlow *= ratio;
+    this->DesCoolMassFlow *= ratio;
+    this->DesCoolLoad *= ratio;
+    for (auto &cfs : this->CoolFlowSeq) {
+        cfs *= ratio;
+    }
 }
 
-void ZoneSizingData::scaleZoneHeating(Real64 const ratio // Scaling ratio
-)
+void TermUnitZoneSizingData::scaleZoneHeating(Real64 const ratio)
 {
     // Apply scaling ratio to TermUnitFinalZoneSizing heating flow and load
-    this->DesHeatVolFlow = this->DesHeatVolFlow * ratio;
-    this->DesHeatMassFlow = this->DesHeatMassFlow * ratio;
-    this->DesHeatLoad = this->DesHeatLoad * ratio;
-    this->HeatFlowSeq = this->HeatFlowSeq * ratio;
-    this->HeatLoadSeq = this->HeatLoadSeq * ratio;
+    this->DesHeatVolFlow *= ratio;
+    this->DesHeatMassFlow *= ratio;
+    this->DesHeatLoad *= ratio;
+    for (auto &cfs : this->HeatFlowSeq) {
+        cfs *= ratio;
+    }
 }
 
 void ZoneSizingData::zeroMemberData()
 {
-    if (!allocated(this->DOASSupMassFlowSeq)) return;
+    if (!allocated(this->DOASSupMassFlowSeq)) {
+        return;
+    }
     std::fill(this->DOASSupMassFlowSeq.begin(), this->DOASSupMassFlowSeq.end(), 0.0);
     std::fill(this->DOASHeatLoadSeq.begin(), this->DOASHeatLoadSeq.end(), 0.0);
     std::fill(this->DOASCoolLoadSeq.begin(), this->DOASCoolLoadSeq.end(), 0.0);
@@ -144,6 +147,8 @@ void ZoneSizingData::zeroMemberData()
     std::fill(this->HeatZoneTempSeq.begin(), this->HeatZoneTempSeq.end(), 0.0);
     std::fill(this->DesHeatSetPtSeq.begin(), this->DesHeatSetPtSeq.end(), 0.0);
     std::fill(this->HeatOutTempSeq.begin(), this->HeatOutTempSeq.end(), 0.0);
+    std::fill(this->HeatMCPISeq.begin(), this->HeatMCPISeq.end(), 0.0);
+    std::fill(this->HeatMCPVSeq.begin(), this->HeatMCPVSeq.end(), 0.0);
     std::fill(this->HeatZoneRetTempSeq.begin(), this->HeatZoneRetTempSeq.end(), 0.0);
     std::fill(this->HeatTstatTempSeq.begin(), this->HeatTstatTempSeq.end(), 0.0);
     std::fill(this->HeatZoneHumRatSeq.begin(), this->HeatZoneHumRatSeq.end(), 0.0);
@@ -287,6 +292,8 @@ void ZoneSizingData::allocateMemberArrays(int const numOfTimeStepInDay)
     this->CoolZoneTempSeq.dimension(numOfTimeStepInDay, 0.0);
     this->DesCoolSetPtSeq.dimension(numOfTimeStepInDay, 0.0);
     this->HeatOutTempSeq.dimension(numOfTimeStepInDay, 0.0);
+    this->HeatMCPISeq.dimension(numOfTimeStepInDay, 0.0);
+    this->HeatMCPVSeq.dimension(numOfTimeStepInDay, 0.0);
     this->CoolOutTempSeq.dimension(numOfTimeStepInDay, 0.0);
     this->HeatZoneRetTempSeq.dimension(numOfTimeStepInDay, 0.0);
     this->HeatTstatTempSeq.dimension(numOfTimeStepInDay, 0.0);
@@ -314,6 +321,100 @@ void ZoneSizingData::allocateMemberArrays(int const numOfTimeStepInDay)
     this->LatentHeatFlowSeq.dimension(numOfTimeStepInDay, 0.0);
 }
 
+void TermUnitZoneSizingData::allocateMemberArrays(int const numOfTimeStepInDay)
+{
+    this->HeatFlowSeq.dimension(numOfTimeStepInDay, 0.0);
+    this->CoolFlowSeq.dimension(numOfTimeStepInDay, 0.0);
+    this->HeatFlowSeqNoOA.dimension(numOfTimeStepInDay, 0.0);
+    this->CoolFlowSeqNoOA.dimension(numOfTimeStepInDay, 0.0);
+    this->HeatZoneTempSeq.dimension(numOfTimeStepInDay, 0.0);
+    this->HeatZoneRetTempSeq.dimension(numOfTimeStepInDay, 0.0);
+    this->CoolZoneTempSeq.dimension(numOfTimeStepInDay, 0.0);
+    this->CoolZoneRetTempSeq.dimension(numOfTimeStepInDay, 0.0);
+}
+
+void TermUnitZoneSizingData::copyFromZoneSizing(ZoneSizingData const &sourceData)
+{
+    this->ZoneName = sourceData.ZoneName;
+    this->ADUName = sourceData.ADUName;
+    this->CoolDesTemp = sourceData.CoolDesTemp;
+    this->HeatDesTemp = sourceData.HeatDesTemp;
+    this->CoolDesHumRat = sourceData.CoolDesHumRat;
+    this->HeatDesHumRat = sourceData.HeatDesHumRat;
+    this->DesOAFlowPPer = sourceData.DesOAFlowPPer;
+    this->DesOAFlowPerArea = sourceData.DesOAFlowPerArea;
+    this->DesCoolMinAirFlow = sourceData.DesCoolMinAirFlow;
+    this->DesCoolMinAirFlowFrac = sourceData.DesCoolMinAirFlowFrac;
+    this->DesHeatMaxAirFlow = sourceData.DesHeatMaxAirFlow;
+    this->DesHeatMaxAirFlowFrac = sourceData.DesHeatMaxAirFlowFrac;
+    this->ZoneNum = sourceData.ZoneNum;
+    this->DesHeatMassFlow = sourceData.DesHeatMassFlow;
+    this->DesHeatMassFlowNoOA = sourceData.DesHeatMassFlowNoOA;
+    this->DesHeatOAFlowFrac = sourceData.DesHeatOAFlowFrac;
+    this->DesCoolMassFlow = sourceData.DesCoolMassFlow;
+    this->DesCoolMassFlowNoOA = sourceData.DesCoolMassFlowNoOA;
+    this->DesCoolOAFlowFrac = sourceData.DesCoolOAFlowFrac;
+    this->DesHeatLoad = sourceData.DesHeatLoad;
+    this->NonAirSysDesHeatLoad = sourceData.NonAirSysDesHeatLoad;
+    this->DesCoolLoad = sourceData.DesCoolLoad;
+    this->NonAirSysDesCoolLoad = sourceData.NonAirSysDesCoolLoad;
+    this->DesHeatVolFlow = sourceData.DesHeatVolFlow;
+    this->DesHeatVolFlowNoOA = sourceData.DesHeatVolFlowNoOA;
+    this->NonAirSysDesHeatVolFlow = sourceData.NonAirSysDesHeatVolFlow;
+    this->DesCoolVolFlow = sourceData.DesCoolVolFlow;
+    this->DesCoolVolFlowNoOA = sourceData.DesCoolVolFlowNoOA;
+    this->NonAirSysDesCoolVolFlow = sourceData.NonAirSysDesCoolVolFlow;
+    this->DesHeatVolFlowMax = sourceData.DesHeatVolFlowMax;
+    this->DesCoolVolFlowMin = sourceData.DesCoolVolFlowMin;
+    this->DesHeatCoilInTempTU = sourceData.DesHeatCoilInTempTU;
+    this->DesCoolCoilInTempTU = sourceData.DesCoolCoilInTempTU;
+    this->DesHeatCoilInHumRatTU = sourceData.DesHeatCoilInHumRatTU;
+    this->DesCoolCoilInHumRatTU = sourceData.DesCoolCoilInHumRatTU;
+    this->ZoneTempAtHeatPeak = sourceData.ZoneTempAtHeatPeak;
+    this->ZoneRetTempAtHeatPeak = sourceData.ZoneRetTempAtHeatPeak;
+    this->ZoneTempAtCoolPeak = sourceData.ZoneTempAtCoolPeak;
+    this->ZoneRetTempAtCoolPeak = sourceData.ZoneRetTempAtCoolPeak;
+    this->ZoneHumRatAtHeatPeak = sourceData.ZoneHumRatAtHeatPeak;
+    this->ZoneHumRatAtCoolPeak = sourceData.ZoneHumRatAtCoolPeak;
+    this->TimeStepNumAtHeatMax = sourceData.TimeStepNumAtHeatMax;
+    this->TimeStepNumAtCoolMax = sourceData.TimeStepNumAtCoolMax;
+    this->HeatDDNum = sourceData.HeatDDNum;
+    this->CoolDDNum = sourceData.CoolDDNum;
+    this->MinOA = sourceData.MinOA;
+    this->DesCoolMinAirFlow2 = sourceData.DesCoolMinAirFlow2;
+    this->DesHeatMaxAirFlow2 = sourceData.DesHeatMaxAirFlow2;
+    for (size_t t = 1; t <= this->HeatFlowSeq.size(); ++t) {
+        this->HeatFlowSeq(t) = sourceData.HeatFlowSeq(t);
+        this->HeatFlowSeqNoOA(t) = sourceData.HeatFlowSeqNoOA(t);
+        this->CoolFlowSeq(t) = sourceData.CoolFlowSeq(t);
+        this->CoolFlowSeqNoOA(t) = sourceData.CoolFlowSeqNoOA(t);
+        this->HeatZoneTempSeq(t) = sourceData.HeatZoneTempSeq(t);
+        this->HeatZoneRetTempSeq(t) = sourceData.HeatZoneRetTempSeq(t);
+        this->CoolZoneTempSeq(t) = sourceData.CoolZoneTempSeq(t);
+        this->CoolZoneRetTempSeq(t) = sourceData.CoolZoneRetTempSeq(t);
+    }
+    this->ZoneADEffCooling = sourceData.ZoneADEffCooling;
+    this->ZoneADEffHeating = sourceData.ZoneADEffHeating;
+    this->ZoneSecondaryRecirculation = sourceData.ZoneSecondaryRecirculation;
+    this->ZoneVentilationEff = sourceData.ZoneVentilationEff;
+    this->ZonePrimaryAirFraction = sourceData.ZonePrimaryAirFraction;
+    this->ZonePrimaryAirFractionHtg = sourceData.ZonePrimaryAirFractionHtg;
+    this->ZoneOAFracCooling = sourceData.ZoneOAFracCooling;
+    this->ZoneOAFracHeating = sourceData.ZoneOAFracHeating;
+    this->TotalOAFromPeople = sourceData.TotalOAFromPeople;
+    this->TotalOAFromArea = sourceData.TotalOAFromArea;
+    this->TotPeopleInZone = sourceData.TotPeopleInZone;
+    this->TotalZoneFloorArea = sourceData.TotalZoneFloorArea;
+    this->SupplyAirAdjustFactor = sourceData.SupplyAirAdjustFactor;
+    this->ZpzClgByZone = sourceData.ZpzClgByZone;
+    this->ZpzHtgByZone = sourceData.ZpzHtgByZone;
+    this->VozClgByZone = sourceData.VozClgByZone;
+    this->VozHtgByZone = sourceData.VozHtgByZone;
+    this->VpzMinByZoneSPSized = sourceData.VpzMinByZoneSPSized;
+    this->ZoneSizThermSetPtHi = sourceData.ZoneSizThermSetPtHi;
+    this->ZoneSizThermSetPtLo = sourceData.ZoneSizThermSetPtLo;
+}
+
 void resetHVACSizingGlobals(EnergyPlusData &state,
                             int const curZoneEqNum,
                             int const curSysNum,
@@ -325,7 +426,7 @@ void resetHVACSizingGlobals(EnergyPlusData &state,
     state.dataSize->DataPltSizHeatNum = 0;
     state.dataSize->DataWaterLoopNum = 0;
     state.dataSize->DataCoilNum = 0;
-    state.dataSize->DataFanOpMode = 0;
+    state.dataSize->DataFanOp = HVAC::FanOp::Invalid;
     state.dataSize->DataCoilIsSuppHeater = false;
     state.dataSize->DataIsDXCoil = false;
     state.dataSize->DataAutosizable = true;
@@ -363,25 +464,25 @@ void resetHVACSizingGlobals(EnergyPlusData &state,
     state.dataSize->DataFractionUsedForSizing = 0.0;
     state.dataSize->DataNonZoneNonAirloopValue = 0.0;
     state.dataSize->DataZoneNumber = 0;
-    state.dataSize->DataFanEnumType = -1;
-    state.dataSize->DataFanIndex = -1;
+    state.dataSize->DataFanType = HVAC::FanType::Invalid;
+    state.dataSize->DataFanIndex = 0;
     state.dataSize->DataWaterCoilSizCoolDeltaT = 0.0;
     state.dataSize->DataWaterCoilSizHeatDeltaT = 0.0;
     state.dataSize->DataNomCapInpMeth = false;
-    state.dataSize->DataFanPlacement = ZoneFanPlacement::NotSet;
+    state.dataSize->DataFanPlacement = HVAC::FanPlace::Invalid;
     state.dataSize->DataDXSpeedNum = 0;
     state.dataSize->DataCoilSizingAirInTemp = 0.0;
     state.dataSize->DataCoilSizingAirInHumRat = 0.0;
     state.dataSize->DataCoilSizingAirOutTemp = 0.0;
     state.dataSize->DataCoilSizingAirOutHumRat = 0.0;
-    state.dataSize->DataCoolCoilType = -1;
+    state.dataSize->DataCoolCoilType = HVAC::CoilType::Invalid;
     state.dataSize->DataCoolCoilIndex = -1;
 
     // These zone specific sizing variables are set in zone equipment to use for sizing.
     // Reset to avoid chance that second zone equipment will size using these variables set by first zone equipment to be sized
     if (curZoneEqNum > 0) {
 
-        if (state.dataSize->ZoneEqSizing.size() == 0) {
+        if (state.dataSize->ZoneEqSizing.empty()) {
             firstPassFlag = false;
             return;
         }
@@ -408,7 +509,7 @@ void resetHVACSizingGlobals(EnergyPlusData &state,
 
     if (curSysNum > 0) {
 
-        if (state.dataSize->UnitarySysEqSizing.size() == 0) {
+        if (state.dataSize->UnitarySysEqSizing.empty()) {
             firstPassFlag = false;
             return;
         }
@@ -453,9 +554,10 @@ void GetCoilDesFlowT(EnergyPlusData &state,
     auto &sysSizPeakDDNum = state.dataSize->SysSizPeakDDNum(SysNum);
     auto &calcSysSizing = state.dataSize->CalcSysSizing(SysNum);
 
-    int sysSizIndex =
-        UtilityRoutines::FindItemInList(finalSysSizing.AirPriLoopName, state.dataSize->SysSizInput, &SystemSizingInputData::AirPriLoopName);
-    if (sysSizIndex == 0) sysSizIndex = 1;
+    int sysSizIndex = Util::FindItemInList(finalSysSizing.AirPriLoopName, state.dataSize->SysSizInput, &SystemSizingInputData::AirPriLoopName);
+    if (sysSizIndex == 0) {
+        sysSizIndex = 1;
+    }
     auto &sysSizInput = state.dataSize->SysSizInput(sysSizIndex);
 
     if (sysSizPeakDDNum.SensCoolPeakDD > 0) {
@@ -466,8 +568,8 @@ void GetCoilDesFlowT(EnergyPlusData &state,
         }
     } else {
         if ((sysSizInput.CoolCapControl == CapacityControl::VT) || (sysSizInput.CoolCapControl == CapacityControl::Bypass)) {
-            ShowWarningError(state,
-                             format("GetCoilDesFlow: AirLoopHVAC = {} has no time of peak cooling load for sizing.", sysSizInput.AirPriLoopName));
+            ShowWarningError(
+                state, std::format("GetCoilDesFlow: AirLoopHVAC = {} has no time of peak cooling load for sizing.", sysSizInput.AirPriLoopName));
             ShowContinueError(state, "Using Central Cooling Capacity Control Method=VAV instead of Bypass or VT.");
             sysSizInput.CoolCapControl = CapacityControl::VAV;
         }
@@ -509,17 +611,21 @@ Real64 ZoneAirDistributionData::calculateEz(EnergyPlusData &state, int const Zon
     // Calc the zone supplied OA flow rate counting the zone air distribution effectiveness
     //  First check whether the zone air distribution effectiveness schedule exists, if yes uses it;
     //   otherwise uses the inputs of zone distribution effectiveness in cooling mode or heating mode
-    if (this->ZoneADEffSchPtr > 0) {
+    if (this->zoneADEffSched != nullptr) {
         // Get schedule value for the zone air distribution effectiveness
-        zoneEz = ScheduleManager::GetCurrentScheduleValue(state, this->ZoneADEffSchPtr);
+        zoneEz = this->zoneADEffSched->getCurrentVal();
     } else {
         Real64 zoneLoad = state.dataZoneEnergyDemand->ZoneSysEnergyDemand(ZoneNum).TotalOutputRequired;
 
         // Zone in cooling mode
-        if (zoneLoad < 0.0) zoneEz = this->ZoneADEffCooling;
+        if (zoneLoad < 0.0) {
+            zoneEz = this->ZoneADEffCooling;
+        }
 
         // Zone in heating mode
-        if (zoneLoad > 0.0) zoneEz = this->ZoneADEffHeating;
+        if (zoneLoad > 0.0) {
+            zoneEz = this->ZoneADEffHeating;
+        }
     }
     if (zoneEz <= 0.0) {
         // Enforce defaults
@@ -528,26 +634,31 @@ Real64 ZoneAirDistributionData::calculateEz(EnergyPlusData &state, int const Zon
     return zoneEz;
 }
 
-Real64 calcDesignSpecificationOutdoorAir(EnergyPlusData &state,
-                                         int const DSOAPtr,          // Pointer to DesignSpecification:OutdoorAir object
-                                         int const ActualZoneNum,    // Zone index
-                                         bool const UseOccSchFlag,   // Zone occupancy schedule will be used instead of using total zone occupancy
-                                         bool const UseMinOASchFlag, // Use min OA schedule in DesignSpecification:OutdoorAir object
-                                         bool const PerPersonNotSet, // when calculation should not include occupants (e.g., dual duct)
-                                         bool const MaxOAVolFlowFlag // TRUE when calculation uses occupancy schedule  (e.g., dual duct)
-)
+Real64
+calcDesignSpecificationOutdoorAir(EnergyPlusData &state,
+                                  int const DSOAPtr,           // Pointer to DesignSpecification:OutdoorAir object
+                                  int const ActualZoneNum,     // Zone index
+                                  bool const UseOccSchFlag,    // Zone occupancy schedule will be used instead of using total zone occupancy
+                                  bool const UseMinOASchFlag,  // Use min OA schedule in DesignSpecification:OutdoorAir object
+                                  bool const PerPersonNotSet,  // when calculation should not include occupants (e.g., dual duct)
+                                  bool const MaxOAVolFlowFlag, // TRUE when calculation uses occupancy schedule  (e.g., dual duct)
+                                  int const spaceNum,          // Space index (if applicable)
+                                  bool const calcIAQMethods)   // For IAQProcedure, PCOccSch, and PCDesOcc, calculate if true, return zero if false
 {
     Real64 totOAFlowRate = 0.0;
-    if (DSOAPtr == 0) return totOAFlowRate;
+    if (DSOAPtr == 0) {
+        return totOAFlowRate;
+    }
 
     auto &thisDSOA = state.dataSize->OARequirements(DSOAPtr);
 
     if (thisDSOA.numDSOA == 0) {
         // This is a simple DesignSpecification:OutdoorAir
-        return thisDSOA.calcOAFlowRate(state, ActualZoneNum, UseOccSchFlag, UseMinOASchFlag, PerPersonNotSet, MaxOAVolFlowFlag);
-    } else {
-        // This is a DesignSpecification:OutdoorAir:SpaceList
-        for (int dsoaCount = 1; dsoaCount <= thisDSOA.numDSOA; ++dsoaCount) {
+        return thisDSOA.calcOAFlowRate(
+            state, ActualZoneNum, UseOccSchFlag, UseMinOASchFlag, PerPersonNotSet, MaxOAVolFlowFlag, spaceNum, calcIAQMethods);
+    } // This is a DesignSpecification:OutdoorAir:SpaceList
+    for (int dsoaCount = 1; dsoaCount <= thisDSOA.numDSOA; ++dsoaCount) {
+        if ((spaceNum == 0) || ((spaceNum > 0) && (spaceNum == thisDSOA.dsoaSpaceIndexes(dsoaCount)))) {
             totOAFlowRate += state.dataSize->OARequirements(thisDSOA.dsoaIndexes(dsoaCount))
                                  .calcOAFlowRate(state,
                                                  ActualZoneNum,
@@ -555,15 +666,144 @@ Real64 calcDesignSpecificationOutdoorAir(EnergyPlusData &state,
                                                  UseMinOASchFlag,
                                                  PerPersonNotSet,
                                                  MaxOAVolFlowFlag,
-                                                 thisDSOA.dsoaSpaceIndexes(dsoaCount));
+                                                 thisDSOA.dsoaSpaceIndexes(dsoaCount),
+                                                 calcIAQMethods);
         }
-        return totOAFlowRate;
+    }
+    return totOAFlowRate;
+}
+
+void setHeatPumpSize(EnergyPlusData &state, Real64 &coolingCap, Real64 &heatingCap, Real64 const sizingRatio)
+{
+    state.dataSize->DataHeatSizeRatio = sizingRatio;
+    if (state.dataSize->CurSysNum > 0) {
+        auto const &finalSysSizing = state.dataSize->FinalSysSizing(state.dataSize->CurSysNum);
+        if (finalSysSizing.heatCoilSizingMethod == DataSizing::HeatCoilSizMethod::HeatingCapacity) {
+            if (heatingCap > coolingCap * finalSysSizing.maxHeatCoilToCoolingLoadSizingRatio) {
+                heatingCap = (coolingCap * finalSysSizing.maxHeatCoilToCoolingLoadSizingRatio) / sizingRatio;
+                coolingCap = heatingCap;
+            } else {
+                coolingCap = heatingCap; // sizing ratio gets applied when coil sizes
+            }
+        } else if (finalSysSizing.heatCoilSizingMethod == DataSizing::HeatCoilSizMethod::GreaterOfHeatingOrCooling) {
+            if (heatingCap > coolingCap * finalSysSizing.maxHeatCoilToCoolingLoadSizingRatio) {
+                coolingCap = heatingCap / finalSysSizing.maxHeatCoilToCoolingLoadSizingRatio;
+            } else if (heatingCap > coolingCap * sizingRatio) {
+                coolingCap = heatingCap; // sizing ratio gets applied when coil sizes
+            } else {
+                heatingCap = coolingCap; // sizing ratio gets applied when coil sizes
+            }
+        } else if (finalSysSizing.heatCoilSizingMethod == DataSizing::HeatCoilSizMethod::CoolingCapacity) {
+            if (heatingCap > coolingCap * finalSysSizing.maxHeatCoilToCoolingLoadSizingRatio) {
+                heatingCap = (coolingCap * finalSysSizing.maxHeatCoilToCoolingLoadSizingRatio) / sizingRatio;
+            } else {
+                heatingCap = coolingCap; // sizing ratio gets applied when coil sizes
+            }
+        }
+    } else if (state.dataSize->CurZoneEqNum > 0) {
+        auto const &finalZoneSizing = state.dataSize->FinalZoneSizing(state.dataSize->CurZoneEqNum);
+        if (finalZoneSizing.heatCoilSizingMethod == DataSizing::HeatCoilSizMethod::HeatingCapacity) {
+            if (heatingCap > coolingCap * finalZoneSizing.maxHeatCoilToCoolingLoadSizingRatio) {
+                heatingCap = (coolingCap * finalZoneSizing.maxHeatCoilToCoolingLoadSizingRatio) / sizingRatio;
+                coolingCap = heatingCap;
+            } else {
+                coolingCap = heatingCap; // sizing ratio gets applied when coil sizes
+            }
+        } else if (finalZoneSizing.heatCoilSizingMethod == DataSizing::HeatCoilSizMethod::GreaterOfHeatingOrCooling) {
+            if (heatingCap > coolingCap * finalZoneSizing.maxHeatCoilToCoolingLoadSizingRatio) {
+                coolingCap = heatingCap / finalZoneSizing.maxHeatCoilToCoolingLoadSizingRatio;
+            } else if (heatingCap > coolingCap * sizingRatio) {
+                coolingCap = heatingCap / sizingRatio;
+            } else {
+                heatingCap = coolingCap; // sizing ratio gets applied when coil sizes
+            }
+        } else if (finalZoneSizing.heatCoilSizingMethod == DataSizing::HeatCoilSizMethod::CoolingCapacity) {
+            if (heatingCap > coolingCap * finalZoneSizing.maxHeatCoilToCoolingLoadSizingRatio) {
+                heatingCap = (coolingCap * finalZoneSizing.maxHeatCoilToCoolingLoadSizingRatio) / sizingRatio;
+            } else if (heatingCap < coolingCap) {
+                heatingCap = coolingCap; // sizing ratio gets applied when coil sizes
+            }
+        }
     }
 }
 
-Real64 OARequirementsData::desFlowPerZoneArea(EnergyPlusData &state,
-                                              int const actualZoneNum // Zone index
-)
+int getDefaultOAReq(EnergyPlusData &state)
+{
+    if (state.dataSize->OARequirements_Default == 0) {
+        SizingManager::GetOARequirements(state); // get the OA requirements object and set up the default
+    }
+    return state.dataSize->OARequirements_Default;
+}
+
+Real64 OARequirementsData::oaFlowArea(EnergyPlusData &state,
+                                      int const zoneNum,
+                                      bool const useMinOASchFlag, // Use min OA schedule in DesignSpecification:OutdoorAir object
+                                      int const spaceNum)         // Space index (if applicable)
+{
+    Real64 sumAreaOA = 0.0; // OA Flow Rate based on area [m3/s]
+    if (this->numDSOA == 0) {
+        // This is a simple DesignSpecification:OutdoorAir
+        if (this->OAFlowMethod != OAFlowCalcMethod::PerPerson && this->OAFlowMethod != OAFlowCalcMethod::PerZone &&
+            this->OAFlowMethod != OAFlowCalcMethod::ACH) {
+            if (spaceNum == 0) {
+                sumAreaOA = state.dataHeatBal->Zone(zoneNum).FloorArea * this->OAFlowPerArea;
+            } else {
+                sumAreaOA = state.dataHeatBal->space(spaceNum).FloorArea * this->OAFlowPerArea;
+            }
+            if (useMinOASchFlag && (this->oaFlowFracSched != nullptr)) {
+                sumAreaOA *= this->oaFlowFracSched->getCurrentVal();
+            }
+        }
+    } else {
+        // This is a DesignSpecification:OutdoorAir:SpaceList
+        for (int dsoaCount = 1; dsoaCount <= this->numDSOA; ++dsoaCount) {
+            auto const &thisDSOA = state.dataSize->OARequirements(this->dsoaIndexes(dsoaCount));
+            int const dsoaSpaceNum = this->dsoaSpaceIndexes(dsoaCount);
+            if (thisDSOA.OAFlowMethod != OAFlowCalcMethod::PerPerson && thisDSOA.OAFlowMethod != OAFlowCalcMethod::PerZone &&
+                thisDSOA.OAFlowMethod != OAFlowCalcMethod::ACH) {
+                if ((spaceNum == 0) || (spaceNum == dsoaSpaceNum)) {
+                    Real64 spaceArea = state.dataHeatBal->space(this->dsoaSpaceIndexes(dsoaCount)).FloorArea;
+                    Real64 spaceOAArea = thisDSOA.OAFlowPerArea * spaceArea;
+                    if (useMinOASchFlag && (thisDSOA.oaFlowFracSched != nullptr)) {
+                        spaceOAArea *= thisDSOA.oaFlowFracSched->getCurrentVal();
+                    }
+                    sumAreaOA += spaceOAArea;
+                }
+            }
+        }
+    }
+    auto &thisZone = state.dataHeatBal->Zone(zoneNum);
+    sumAreaOA = sumAreaOA * thisZone.Multiplier * thisZone.ListMultiplier;
+    return sumAreaOA;
+}
+
+Real64 OARequirementsData::floorArea(EnergyPlusData &state, int const zoneNum,
+                                     int const spaceNum) // Space index (if applicable)
+{
+    Real64 sumArea = 0.0; // Zone or space floor area [m2]
+    if (this->numDSOA == 0) {
+        // This is a simple DesignSpecification:OutdoorAir
+        if (spaceNum == 0) {
+            sumArea = state.dataHeatBal->Zone(zoneNum).FloorArea;
+        } else {
+            sumArea = state.dataHeatBal->space(spaceNum).FloorArea;
+        }
+    } else {
+        // This is a DesignSpecification:OutdoorAir:SpaceList
+        for (int dsoaCount = 1; dsoaCount <= this->numDSOA; ++dsoaCount) {
+            int const dsoaSpaceNum = this->dsoaSpaceIndexes(dsoaCount);
+            if ((spaceNum == 0) || (spaceNum == dsoaSpaceNum)) {
+                Real64 spaceArea = state.dataHeatBal->space(this->dsoaSpaceIndexes(dsoaCount)).FloorArea;
+                sumArea += spaceArea;
+            }
+        }
+    }
+    auto &thisZone = state.dataHeatBal->Zone(zoneNum);
+    sumArea = sumArea * thisZone.Multiplier * thisZone.ListMultiplier;
+    return sumArea;
+}
+
+Real64 OARequirementsData::desFlowPerZoneArea(EnergyPlusData &state, int const zoneNum, int const spaceNum)
 {
     Real64 desFlowPA = 0.0;
     if (this->numDSOA == 0) {
@@ -574,25 +814,116 @@ Real64 OARequirementsData::desFlowPerZoneArea(EnergyPlusData &state,
         }
     } else {
         // This is a DesignSpecification:OutdoorAir:SpaceList
-        Real64 sumAreaOA = 0.0;
-        for (int dsoaCount = 1; dsoaCount <= this->numDSOA; ++dsoaCount) {
-            auto const &thisDSOA = state.dataSize->OARequirements(this->dsoaIndexes(dsoaCount));
-            if (thisDSOA.OAFlowMethod != OAFlowCalcMethod::PerPerson && thisDSOA.OAFlowMethod != OAFlowCalcMethod::PerZone &&
-                thisDSOA.OAFlowMethod != OAFlowCalcMethod::ACH) {
-                Real64 spaceArea = state.dataHeatBal->space(this->dsoaSpaceIndexes(dsoaCount)).floorArea;
-                sumAreaOA += thisDSOA.OAFlowPerArea * spaceArea;
-            }
-        }
-        if (state.dataHeatBal->Zone(actualZoneNum).FloorArea) {
-            desFlowPA = sumAreaOA / state.dataHeatBal->Zone(actualZoneNum).FloorArea;
+        bool useMinOASch = false;
+        Real64 sumAreaOA = this->oaFlowArea(state, zoneNum, useMinOASch, spaceNum);
+        Real64 sumArea = this->floorArea(state, zoneNum, spaceNum);
+        if (sumArea > 0.0) {
+            desFlowPA = sumAreaOA / sumArea;
         }
     }
     return desFlowPA;
 }
 
-Real64 OARequirementsData::desFlowPerZonePerson(EnergyPlusData &state,
-                                                int const actualZoneNum // Zone index
-)
+Real64 OARequirementsData::oaFlowPeople(EnergyPlusData &state,
+                                        int const zoneNum,          // Zone index
+                                        bool const useOccSchFlag,   // Use occupancy schedule
+                                        bool const useMinOASchFlag, // Use min OA schedule in DesignSpecification:OutdoorAir object
+                                        int const spaceNum)         // Space index (if applicable)
+{
+    Real64 sumPeopleOA = 0.0; // OA Flow Rate based on people [m3/s]
+    if (this->numDSOA == 0) {
+        // This is a simple DesignSpecification:OutdoorAir
+        if (this->OAFlowMethod != OAFlowCalcMethod::PerArea && this->OAFlowMethod != OAFlowCalcMethod::PerZone &&
+            this->OAFlowMethod != OAFlowCalcMethod::ACH) {
+            Real64 sumPeople = 0.0; // Zone or space number of people
+            if (spaceNum == 0) {
+                if (useOccSchFlag) {
+                    sumPeople = state.dataHeatBal->ZoneIntGain(zoneNum).NOFOCC;
+                } else {
+                    sumPeople = state.dataHeatBal->Zone(zoneNum).TotOccupants;
+                }
+            } else {
+                if (useOccSchFlag) {
+                    sumPeople = state.dataHeatBal->space(spaceNum).TotOccupants;
+                } else {
+                    sumPeople = state.dataHeatBal->spaceIntGain(spaceNum).NOFOCC;
+                }
+            }
+            sumPeopleOA = sumPeople * this->OAFlowPerPerson;
+            // Apply schedule as needed. Sizing does not use schedule.
+            if (useMinOASchFlag && (this->oaFlowFracSched != nullptr)) {
+                sumPeopleOA *= this->oaFlowFracSched->getCurrentVal();
+            }
+        }
+    } else {
+        // This is a DesignSpecification:OutdoorAir:SpaceList
+        for (int dsoaCount = 1; dsoaCount <= this->numDSOA; ++dsoaCount) {
+            auto const &thisDSOA = state.dataSize->OARequirements(this->dsoaIndexes(dsoaCount));
+            int const dsoaSpaceNum = this->dsoaSpaceIndexes(dsoaCount);
+            if (thisDSOA.OAFlowMethod != OAFlowCalcMethod::PerArea && thisDSOA.OAFlowMethod != OAFlowCalcMethod::PerZone &&
+                thisDSOA.OAFlowMethod != OAFlowCalcMethod::ACH) {
+                if ((spaceNum == 0) || (spaceNum == dsoaSpaceNum)) {
+                    Real64 spacePeople = 0.0;
+                    if (useOccSchFlag) {
+                        spacePeople = state.dataHeatBal->spaceIntGain(spaceNum).NOFOCC;
+                    } else {
+                        spacePeople = state.dataHeatBal->space(dsoaSpaceNum).TotOccupants;
+                    }
+                    sumPeopleOA += thisDSOA.OAFlowPerPerson * spacePeople;
+                    if (useMinOASchFlag && (thisDSOA.oaFlowFracSched != nullptr)) {
+                        sumPeopleOA *= thisDSOA.oaFlowFracSched->getCurrentVal();
+                    }
+                }
+            }
+        }
+    }
+    auto &thisZone = state.dataHeatBal->Zone(zoneNum);
+    sumPeopleOA = sumPeopleOA * thisZone.Multiplier * thisZone.ListMultiplier;
+    return sumPeopleOA;
+}
+
+Real64 OARequirementsData::people(EnergyPlusData &state,
+                                  int const zoneNum,        // Zone index
+                                  bool const useOccSchFlag, // Use zone occupancy schedule
+                                  int const spaceNum)       // Space index (if applicable)
+{
+    Real64 sumPeople = 0.0; // Zone or space number of people
+    if (this->numDSOA == 0) {
+        // This is a simple DesignSpecification:OutdoorAir
+        if (spaceNum == 0) {
+            if (useOccSchFlag) {
+                sumPeople = state.dataHeatBal->ZoneIntGain(zoneNum).NOFOCC;
+            } else {
+                sumPeople = state.dataHeatBal->Zone(zoneNum).TotOccupants;
+            }
+        } else {
+            if (useOccSchFlag) {
+                sumPeople = state.dataHeatBal->space(spaceNum).TotOccupants;
+            } else {
+                sumPeople = state.dataHeatBal->spaceIntGain(spaceNum).NOFOCC;
+            }
+        }
+    } else {
+        // This is a DesignSpecification:OutdoorAir:SpaceList
+        for (int dsoaCount = 1; dsoaCount <= this->numDSOA; ++dsoaCount) {
+            int const dsoaSpaceNum = this->dsoaSpaceIndexes(dsoaCount);
+            if ((spaceNum == 0) || (spaceNum == dsoaSpaceNum)) {
+                Real64 spacePeople = 0.0;
+                if (useOccSchFlag) {
+                    spacePeople = state.dataHeatBal->spaceIntGain(spaceNum).NOFOCC;
+                } else {
+                    spacePeople = state.dataHeatBal->space(dsoaSpaceNum).TotOccupants;
+                }
+                sumPeople += spacePeople;
+            }
+        }
+    }
+    auto &thisZone = state.dataHeatBal->Zone(zoneNum);
+    sumPeople = sumPeople * thisZone.Multiplier * thisZone.ListMultiplier;
+    return sumPeople;
+}
+
+Real64 OARequirementsData::desFlowPerZonePerson(EnergyPlusData &state, int const zoneNum, int const spaceNum)
 {
     Real64 desFlowPP = 0.0;
     if (this->numDSOA == 0) {
@@ -603,29 +934,84 @@ Real64 OARequirementsData::desFlowPerZonePerson(EnergyPlusData &state,
         }
     } else {
         // This is a DesignSpecification:OutdoorAir:SpaceList
-        Real64 sumPeopleOA = 0.0;
-        for (int dsoaCount = 1; dsoaCount <= this->numDSOA; ++dsoaCount) {
-            auto const &thisDSOA = state.dataSize->OARequirements(this->dsoaIndexes(dsoaCount));
-            if (thisDSOA.OAFlowMethod != OAFlowCalcMethod::PerArea && thisDSOA.OAFlowMethod != OAFlowCalcMethod::PerZone &&
-                thisDSOA.OAFlowMethod != OAFlowCalcMethod::ACH) {
-                Real64 spacePeople = state.dataHeatBal->space(this->dsoaSpaceIndexes(dsoaCount)).totOccupants;
-                sumPeopleOA += thisDSOA.OAFlowPerPerson * spacePeople;
-            }
-        }
-        if (state.dataHeatBal->Zone(actualZoneNum).TotOccupants > 0.0) {
-            desFlowPP = sumPeopleOA / state.dataHeatBal->Zone(actualZoneNum).TotOccupants;
+        bool useOccSch = false; // Use the design people value
+        bool useMinOASch = false;
+        Real64 sumPeopleOA = this->oaFlowPeople(state, zoneNum, useOccSch, useMinOASch, spaceNum);
+        Real64 sumPeople = this->people(state, zoneNum, useOccSch, spaceNum);
+        if (sumPeople > 0.0) {
+            desFlowPP = sumPeopleOA / sumPeople;
         }
     }
     return desFlowPP;
 }
 
-Real64 OARequirementsData::calcOAFlowRate(EnergyPlusData &state,
-                                          int const ActualZoneNum,     // Zone index
-                                          bool const UseOccSchFlag,    // Zone occupancy schedule will be used instead of using total zone occupancy
-                                          bool const UseMinOASchFlag,  // Use min OA schedule in DesignSpecification:OutdoorAir object
-                                          bool const PerPersonNotSet,  // when calculation should not include occupants (e.g., dual duct)
-                                          bool const MaxOAVolFlowFlag, // TRUE when calculation uses occupancy schedule  (e.g., dual duct)
-                                          int const spaceNum           // Space index (if applicable)
+Real64 OARequirementsData::desFlowPerZone(EnergyPlusData &state, int const spaceNum)
+{
+    Real64 desFlowPZ = 0.0; // [m3/s]
+    if (this->numDSOA == 0) {
+        // This is a simple DesignSpecification:OutdoorAir
+        if (this->OAFlowMethod != OAFlowCalcMethod::PerPerson && this->OAFlowMethod != OAFlowCalcMethod::PerArea &&
+            this->OAFlowMethod != OAFlowCalcMethod::ACH) {
+            desFlowPZ = this->OAFlowPerZone;
+        }
+    } else {
+        // This is a DesignSpecification:OutdoorAir:SpaceList
+        for (int dsoaCount = 1; dsoaCount <= this->numDSOA; ++dsoaCount) {
+            auto const &thisDSOA = state.dataSize->OARequirements(this->dsoaIndexes(dsoaCount));
+            int const dsoaSpaceNum = this->dsoaSpaceIndexes(dsoaCount);
+            if (thisDSOA.OAFlowMethod != OAFlowCalcMethod::PerPerson && thisDSOA.OAFlowMethod != OAFlowCalcMethod::PerArea &&
+                thisDSOA.OAFlowMethod != OAFlowCalcMethod::ACH) {
+                if ((spaceNum == 0) || (spaceNum == dsoaSpaceNum)) {
+                    desFlowPZ += thisDSOA.OAFlowPerZone;
+                }
+            }
+        }
+    }
+    return desFlowPZ;
+}
+
+Real64 OARequirementsData::desFlowPerACH(EnergyPlusData &state, int const spaceNum)
+{
+    Real64 desFlowPACH = 0.0; // [1/hr]
+    if (this->numDSOA == 0) {
+        // This is a simple DesignSpecification:OutdoorAir
+        if (this->OAFlowMethod != OAFlowCalcMethod::PerPerson && this->OAFlowMethod != OAFlowCalcMethod::PerArea &&
+            this->OAFlowMethod != OAFlowCalcMethod::PerZone) {
+            desFlowPACH = this->OAFlowACH;
+        }
+    } else {
+        // This is a DesignSpecification:OutdoorAir:SpaceList
+        Real64 sumVolume = 0.0;
+        Real64 sumACHFlow = 0.0;
+        for (int dsoaCount = 1; dsoaCount <= this->numDSOA; ++dsoaCount) {
+            auto const &thisDSOA = state.dataSize->OARequirements(this->dsoaIndexes(dsoaCount));
+            int const dsoaSpaceNum = this->dsoaSpaceIndexes(dsoaCount);
+            if (thisDSOA.OAFlowMethod != OAFlowCalcMethod::PerPerson && thisDSOA.OAFlowMethod != OAFlowCalcMethod::PerArea &&
+                thisDSOA.OAFlowMethod != OAFlowCalcMethod::PerZone) {
+                if ((spaceNum == 0) || (spaceNum == dsoaSpaceNum)) {
+                    Real64 spaceVol = state.dataHeatBal->space(this->dsoaSpaceIndexes(dsoaCount)).Volume;
+                    sumVolume += spaceVol;
+                    Real64 spaceOAACH = thisDSOA.OAFlowACH * spaceVol;
+                    sumACHFlow += spaceOAACH;
+                }
+            }
+        }
+        if (sumVolume > 0.0) {
+            desFlowPACH = Constant::rSecsInHour * sumACHFlow / sumVolume;
+        }
+    }
+    return desFlowPACH;
+}
+
+Real64
+OARequirementsData::calcOAFlowRate(EnergyPlusData &state,
+                                   int const ActualZoneNum,     // Zone index
+                                   bool const UseOccSchFlag,    // Zone occupancy schedule will be used instead of using total zone occupancy
+                                   bool const UseMinOASchFlag,  // Use min OA schedule in DesignSpecification:OutdoorAir object
+                                   bool const PerPersonNotSet,  // when calculation should not include occupants (e.g., dual duct)
+                                   bool const MaxOAVolFlowFlag, // TRUE when calculation uses occupancy schedule  (e.g., dual duct)
+                                   int const spaceNum,          // Space index (if applicable)
+                                   bool const calcIAQMethods    // For IAQProcedure, PCOccSch, and PCDesOcc, calculate if true, return zero if false
 )
 {
 
@@ -669,16 +1055,12 @@ Real64 OARequirementsData::calcOAFlowRate(EnergyPlusData &state,
     Real64 curNumOccupants = 0.0;
     Real64 maxOccupants = 0.0;
     if (spaceNum > 0) {
-        floorArea = state.dataHeatBal->space(spaceNum).floorArea;
-        // TODO MJW: For now just proportion space volume by floor area
-        if (thisZone.FloorArea > 0.0) {
-            volume = thisZone.Volume * state.dataHeatBal->space(spaceNum).floorArea / thisZone.FloorArea;
-        } else {
-            volume = 0.0;
-        }
-        nomTotOccupants = state.dataHeatBal->space(spaceNum).totOccupants;
+        auto const &thisSpace = state.dataHeatBal->space(spaceNum);
+        floorArea = thisSpace.FloorArea;
+        volume = thisSpace.Volume;
+        nomTotOccupants = thisSpace.TotOccupants;
         curNumOccupants = state.dataHeatBal->spaceIntGain(spaceNum).NOFOCC;
-        maxOccupants = state.dataHeatBal->space(spaceNum).maxOccupants;
+        maxOccupants = thisSpace.maxOccupants;
     } else {
         floorArea = thisZone.FloorArea;
         volume = thisZone.Volume;
@@ -690,9 +1072,9 @@ Real64 OARequirementsData::calcOAFlowRate(EnergyPlusData &state,
     if (this->OAFlowMethod == DataSizing::OAFlowCalcMethod::IAQProcedure && this->myEnvrnFlag) {
         if (!state.dataContaminantBalance->Contaminant.CO2Simulation) {
             ShowSevereError(state,
-                            format("DesignSpecification:OutdoorAir=\"{}{}",
-                                   this->Name,
-                                   R"(" valid Outdoor Air Method =" IndoorAirQualityProcedure" requires CO2 simulation.)"));
+                            std::format("DesignSpecification:OutdoorAir=\"{}{}",
+                                        this->Name,
+                                        R"(" valid Outdoor Air Method =" IndoorAirQualityProcedure" requires CO2 simulation.)"));
             ShowContinueError(state, "The choice must be Yes for the field Carbon Dioxide Concentration in ZoneAirContaminantBalance");
             ShowFatalError(state, "CalcDesignSpecificationOutdoorAir: Errors found in input. Preceding condition(s) cause termination.");
         }
@@ -701,9 +1083,9 @@ Real64 OARequirementsData::calcOAFlowRate(EnergyPlusData &state,
     if (this->OAFlowMethod == DataSizing::OAFlowCalcMethod::PCOccSch && this->myEnvrnFlag) {
         if (!state.dataContaminantBalance->Contaminant.CO2Simulation) {
             ShowSevereError(state,
-                            format("DesignSpecification:OutdoorAir=\"{}{}",
-                                   this->Name,
-                                   R"(" valid Outdoor Air Method =" ProportionalControlBasedOnDesignOccupancy" requires CO2 simulation.)"));
+                            std::format("DesignSpecification:OutdoorAir=\"{}{}",
+                                        this->Name,
+                                        R"(" valid Outdoor Air Method =" ProportionalControlBasedOnDesignOccupancy" requires CO2 simulation.)"));
             ShowContinueError(state, "The choice must be Yes for the field Carbon Dioxide Concentration in ZoneAirContaminantBalance");
             ShowFatalError(state, "CalcDesignSpecificationOutdoorAir: Errors found in input. Preceding condition(s) cause termination.");
         }
@@ -712,13 +1094,19 @@ Real64 OARequirementsData::calcOAFlowRate(EnergyPlusData &state,
     if (this->OAFlowMethod == DataSizing::OAFlowCalcMethod::PCDesOcc && this->myEnvrnFlag) {
         if (!state.dataContaminantBalance->Contaminant.CO2Simulation) {
             ShowSevereError(state,
-                            format("DesignSpecification:OutdoorAir=\"{}{}",
-                                   this->Name,
-                                   R"(" valid Outdoor Air Method =" ProportionalControlBasedOnOccupancySchedule" requires CO2 simulation.)"));
+                            std::format("DesignSpecification:OutdoorAir=\"{}{}",
+                                        this->Name,
+                                        R"(" valid Outdoor Air Method =" ProportionalControlBasedOnOccupancySchedule" requires CO2 simulation.)"));
             ShowContinueError(state, "The choice must be Yes for the field Carbon Dioxide Concentration in ZoneAirContaminantBalance");
             ShowFatalError(state, "CalcDesignSpecificationOutdoorAir: Errors found in input. Preceding condition(s) cause termination.");
         }
         this->myEnvrnFlag = false;
+    }
+
+    if (!calcIAQMethods &&
+        (this->OAFlowMethod == DataSizing::OAFlowCalcMethod::IAQProcedure || this->OAFlowMethod == DataSizing::OAFlowCalcMethod::PCOccSch ||
+         this->OAFlowMethod == DataSizing::OAFlowCalcMethod::PCDesOcc)) {
+        return OAVolumeFlowRate;
     }
 
     // Calculate people outdoor air flow rate as needed
@@ -743,7 +1131,9 @@ Real64 OARequirementsData::calcOAFlowRate(EnergyPlusData &state,
                 DSOAFlowPeople = nomTotOccupants * this->OAFlowPerPerson;
             }
         }
-        if (PerPersonNotSet) DSOAFlowPeople = 0.0; // for Dual Duct if Per Person Ventilation Rate Mode is not entered
+        if (PerPersonNotSet) {
+            DSOAFlowPeople = 0.0; // for Dual Duct if Per Person Ventilation Rate Mode is not entered
+        }
     } break;
     default: {
         DSOAFlowPeople = 0.0;
@@ -795,63 +1185,64 @@ Real64 OARequirementsData::calcOAFlowRate(EnergyPlusData &state,
     case DataSizing::OAFlowCalcMethod::PCDesOcc: {
         ZoneOAPeople = 0.0;
         if (this->OAFlowMethod != DataSizing::OAFlowCalcMethod::PCDesOcc) {
-            ZoneOAPeople = curNumOccupants * thisZone.Multiplier * thisZone.ListMultiplier * this->OAFlowPerPerson;
+            ZoneOAPeople = curNumOccupants * this->OAFlowPerPerson;
         } else {
-            ZoneOAPeople = nomTotOccupants * thisZone.Multiplier * thisZone.ListMultiplier * this->OAFlowPerPerson;
+            ZoneOAPeople = nomTotOccupants * this->OAFlowPerPerson;
             CO2PeopleGeneration = 0.0;
             if (this->OAFlowMethod == DataSizing::OAFlowCalcMethod::PCDesOcc) {
                 // Accumulate CO2 generation from people at design occupancy and current activity level
                 for (int PeopleNum = 1; PeopleNum <= state.dataHeatBal->TotPeople; ++PeopleNum) {
                     if (spaceNum > 0) {
-                        if (state.dataHeatBal->People(PeopleNum).spaceIndex != spaceNum) continue;
+                        if (state.dataHeatBal->People(PeopleNum).spaceIndex != spaceNum) {
+                            continue;
+                        }
                     } else {
-                        if (state.dataHeatBal->People(PeopleNum).ZonePtr != ActualZoneNum) continue;
+                        if (state.dataHeatBal->People(PeopleNum).ZonePtr != ActualZoneNum) {
+                            continue;
+                        }
                     }
                     CO2PeopleGeneration += state.dataHeatBal->People(PeopleNum).NumberOfPeople * state.dataHeatBal->People(PeopleNum).CO2RateFactor *
-                                           ScheduleManager::GetCurrentScheduleValue(state, state.dataHeatBal->People(PeopleNum).ActivityLevelPtr);
+                                           state.dataHeatBal->People(PeopleNum).activityLevelSched->getCurrentVal();
                 }
             }
         }
-        ZoneOAArea = floorArea * thisZone.Multiplier * thisZone.ListMultiplier * this->OAFlowPerArea;
+        ZoneOAArea = floorArea * this->OAFlowPerArea;
         ZoneOAMin = ZoneOAArea;
         ZoneOAMax = (ZoneOAArea + ZoneOAPeople);
-        if (thisZone.ZoneContamControllerSchedIndex > 0.0) {
+        if (thisZone.zoneContamControllerSched != nullptr) {
             // Check the availability schedule value for ZoneControl:ContaminantController
-            ZoneContamControllerSched = ScheduleManager::GetCurrentScheduleValue(state, thisZone.ZoneContamControllerSchedIndex);
+            ZoneContamControllerSched = thisZone.zoneContamControllerSched->getCurrentVal();
             if (ZoneContamControllerSched > 0.0) {
                 if (ZoneOAPeople > 0.0) {
                     if (state.dataContaminantBalance->ZoneCO2GainFromPeople(ActualZoneNum) > 0.0) {
-                        if (thisZone.ZoneMinCO2SchedIndex > 0.0) {
+                        if (thisZone.zoneMinCO2Sched != nullptr) {
                             // Take the schedule value of "Minimum Carbon Dioxide Concentration Schedule Name"
                             // in the ZoneControl:ContaminantController
-                            ZoneMinCO2 = ScheduleManager::GetCurrentScheduleValue(state, thisZone.ZoneMinCO2SchedIndex);
+                            ZoneMinCO2 = thisZone.zoneMinCO2Sched->getCurrentVal();
                         } else {
                             ZoneMinCO2 = state.dataContaminantBalance->OutdoorCO2;
                         }
 
                         // Calculate zone maximum target CO2 concentration in PPM
                         if (this->OAFlowMethod == DataSizing::OAFlowCalcMethod::PCDesOcc) {
-                            ZoneMaxCO2 = state.dataContaminantBalance->OutdoorCO2 +
-                                         (CO2PeopleGeneration * thisZone.Multiplier * thisZone.ListMultiplier * 1.0e6) / ZoneOAMax;
+                            ZoneMaxCO2 = state.dataContaminantBalance->OutdoorCO2 + (CO2PeopleGeneration * 1.0e6) / ZoneOAMax;
                         } else {
-                            ZoneMaxCO2 =
-                                state.dataContaminantBalance->OutdoorCO2 + (state.dataContaminantBalance->ZoneCO2GainFromPeople(ActualZoneNum) *
-                                                                            thisZone.Multiplier * thisZone.ListMultiplier * 1.0e6) /
-                                                                               ZoneOAMax;
+                            ZoneMaxCO2 = state.dataContaminantBalance->OutdoorCO2 +
+                                         (state.dataContaminantBalance->ZoneCO2GainFromPeople(ActualZoneNum) * 1.0e6) / ZoneOAMax;
                         }
 
                         if (ZoneMaxCO2 <= ZoneMinCO2) {
                             ++this->CO2MaxMinLimitErrorCount;
                             if (this->OAFlowMethod == DataSizing::OAFlowCalcMethod::PCOccSch) {
                                 if (this->CO2MaxMinLimitErrorCount < 2) {
-                                    ShowSevereError(state,
-                                                    format("CalcDesignSpecificationOutdoorAir DesignSpecification:OutdoorAir = \"{}\".", this->Name));
+                                    ShowSevereError(
+                                        state, std::format("CalcDesignSpecificationOutdoorAir DesignSpecification:OutdoorAir = \"{}\".", this->Name));
                                     ShowContinueError(
                                         state,
-                                        format("For System Outdoor Air Method = ProportionalControlBasedOnOccupancySchedule, maximum target "
-                                               "CO2 concentration ({:.2R}), is not greater than minimum target CO2 concentration ({:.2R}).",
-                                               ZoneMaxCO2,
-                                               ZoneMinCO2));
+                                        std::format("For System Outdoor Air Method = ProportionalControlBasedOnOccupancySchedule, maximum target "
+                                                    "CO2 concentration ({:.2f}), is not greater than minimum target CO2 concentration ({:.2f}).",
+                                                    ZoneMaxCO2,
+                                                    ZoneMinCO2));
                                     ShowContinueError(state,
                                                       "\"ProportionalControlBasedOnOccupancySchedule\" will not be modeled. "
                                                       "Default \"Flow/Person+Flow/Area\" will be modeled. Simulation continues...");
@@ -859,23 +1250,24 @@ Real64 OARequirementsData::calcOAFlowRate(EnergyPlusData &state,
                                 } else {
                                     ShowRecurringWarningErrorAtEnd(
                                         state,
-                                        format("DesignSpecification:OutdoorAir = \"{}\", For System Outdoor Air Method = "
-                                               "ProportionalControlBasedOnOccupancySchedule, maximum target CO2 concentration is not greater than "
-                                               "minimum target CO2 concentration. Error continues...",
-                                               this->Name),
+                                        std::format(
+                                            "DesignSpecification:OutdoorAir = \"{}\", For System Outdoor Air Method = "
+                                            "ProportionalControlBasedOnOccupancySchedule, maximum target CO2 concentration is not greater than "
+                                            "minimum target CO2 concentration. Error continues...",
+                                            this->Name),
                                         this->CO2MaxMinLimitErrorIndex);
                                 }
                             }
                             if (this->OAFlowMethod == DataSizing::OAFlowCalcMethod::PCDesOcc) {
                                 if (this->CO2MaxMinLimitErrorCount < 2) {
-                                    ShowSevereError(state,
-                                                    format("CalcDesignSpecificationOutdoorAir DesignSpecification:OutdoorAir = \"{}\".", this->Name));
+                                    ShowSevereError(
+                                        state, std::format("CalcDesignSpecificationOutdoorAir DesignSpecification:OutdoorAir = \"{}\".", this->Name));
                                     ShowContinueError(
                                         state,
-                                        format("For System Outdoor Air Method = ProportionalControlBasedOnDesignOccupancy, maximum target "
-                                               "CO2 concentration ({:.2R}), is not greater than minimum target CO2 concentration ({:.2R}).",
-                                               ZoneMaxCO2,
-                                               ZoneMinCO2));
+                                        std::format("For System Outdoor Air Method = ProportionalControlBasedOnDesignOccupancy, maximum target "
+                                                    "CO2 concentration ({:.2f}), is not greater than minimum target CO2 concentration ({:.2f}).",
+                                                    ZoneMaxCO2,
+                                                    ZoneMinCO2));
                                     ShowContinueError(state,
                                                       "\"ProportionalControlBasedOnDesignOccupancy\" will not be modeled. "
                                                       "Default \"Flow/Person+Flow/Area\" will be modeled. Simulation continues...");
@@ -883,10 +1275,10 @@ Real64 OARequirementsData::calcOAFlowRate(EnergyPlusData &state,
                                 } else {
                                     ShowRecurringWarningErrorAtEnd(
                                         state,
-                                        format("DesignSpecification:OutdoorAir = \"{}\", For System Outdoor Air Method = "
-                                               "ProportionalControlBasedOnDesignOccupancy, maximum target CO2 concentration is not greater than "
-                                               "minimum target CO2 concentration. Error continues...",
-                                               this->Name),
+                                        std::format("DesignSpecification:OutdoorAir = \"{}\", For System Outdoor Air Method = "
+                                                    "ProportionalControlBasedOnDesignOccupancy, maximum target CO2 concentration is not greater than "
+                                                    "minimum target CO2 concentration. Error continues...",
+                                                    this->Name),
                                         this->CO2MaxMinLimitErrorIndex);
                                 }
                             }
@@ -915,44 +1307,46 @@ Real64 OARequirementsData::calcOAFlowRate(EnergyPlusData &state,
                             ++this->CO2GainErrorCount;
                             if (this->OAFlowMethod == DataSizing::OAFlowCalcMethod::PCOccSch) {
                                 if (this->CO2GainErrorCount < 2) {
-                                    ShowSevereError(state,
-                                                    format("CalcDesignSpecificationOutdoorAir DesignSpecification:OutdoorAir = \"{}\".", this->Name));
+                                    ShowSevereError(
+                                        state, std::format("CalcDesignSpecificationOutdoorAir DesignSpecification:OutdoorAir = \"{}\".", this->Name));
                                     ShowContinueError(state,
-                                                      format("For System Outdoor Air Method = ProportionalControlBasedOnOccupancySchedule, CO2 "
-                                                             "generation from people is not greater than zero. Occurs in Zone =\"{}\". ",
-                                                             thisZone.Name));
+                                                      std::format("For System Outdoor Air Method = ProportionalControlBasedOnOccupancySchedule, CO2 "
+                                                                  "generation from people is not greater than zero. Occurs in Zone =\"{}\". ",
+                                                                  thisZone.Name));
                                     ShowContinueError(state,
                                                       "\"ProportionalControlBasedOnOccupancySchedule\" will not be modeled. "
                                                       "Default \"Flow/Person+Flow/Area\" will be modeled. Simulation continues...");
                                     ShowContinueErrorTimeStamp(state, "");
                                 } else {
-                                    ShowRecurringWarningErrorAtEnd(state,
-                                                                   format("DesignSpecification:OutdoorAir = \"{}\", For System Outdoor Air Method = "
-                                                                          "ProportionalControlBasedOnOccupancySchedule, CO2 generation from people "
-                                                                          "is not greater than zero. Error continues...",
-                                                                          this->Name),
-                                                                   this->CO2GainErrorIndex);
+                                    ShowRecurringWarningErrorAtEnd(
+                                        state,
+                                        std::format("DesignSpecification:OutdoorAir = \"{}\", For System Outdoor Air Method = "
+                                                    "ProportionalControlBasedOnOccupancySchedule, CO2 generation from people "
+                                                    "is not greater than zero. Error continues...",
+                                                    this->Name),
+                                        this->CO2GainErrorIndex);
                                 }
                             }
                             if (this->OAFlowMethod == DataSizing::OAFlowCalcMethod::PCDesOcc) {
                                 if (this->CO2GainErrorCount < 2) {
-                                    ShowSevereError(state,
-                                                    format("CalcDesignSpecificationOutdoorAir DesignSpecification:OutdoorAir = \"{}\".", this->Name));
+                                    ShowSevereError(
+                                        state, std::format("CalcDesignSpecificationOutdoorAir DesignSpecification:OutdoorAir = \"{}\".", this->Name));
                                     ShowContinueError(state,
-                                                      format("For System Outdoor Air Method = ProportionalControlBasedOnDesignOccupancy, CO2 "
-                                                             "generation from people is not greater than zero. Occurs in Zone =\"{}\". ",
-                                                             thisZone.Name));
+                                                      std::format("For System Outdoor Air Method = ProportionalControlBasedOnDesignOccupancy, CO2 "
+                                                                  "generation from people is not greater than zero. Occurs in Zone =\"{}\". ",
+                                                                  thisZone.Name));
                                     ShowContinueError(state,
                                                       "\"ProportionalControlBasedOnDesignOccupancy\" will not be modeled. "
                                                       "Default \"Flow/Person+Flow/Area\" will be modeled. Simulation continues...");
                                     ShowContinueErrorTimeStamp(state, "");
                                 } else {
-                                    ShowRecurringWarningErrorAtEnd(state,
-                                                                   format("DesignSpecification:OutdoorAir = \"{}\", For System Outdoor Air Method = "
-                                                                          "ProportionalControlBasedOnDesignOccupancy, CO2 generation from people is "
-                                                                          "not greater than zero. Error continues...",
-                                                                          this->Name),
-                                                                   this->CO2GainErrorIndex);
+                                    ShowRecurringWarningErrorAtEnd(
+                                        state,
+                                        std::format("DesignSpecification:OutdoorAir = \"{}\", For System Outdoor Air Method = "
+                                                    "ProportionalControlBasedOnDesignOccupancy, CO2 generation from people is "
+                                                    "not greater than zero. Error continues...",
+                                                    this->Name),
+                                        this->CO2GainErrorIndex);
                                 }
                             }
                         }
@@ -978,19 +1372,78 @@ Real64 OARequirementsData::calcOAFlowRate(EnergyPlusData &state,
     }
 
     // Apply zone multipliers and zone list multipliers
-    // TODO MJW: this looks like it's double-counting the multipliers
     OAVolumeFlowRate *= thisZone.Multiplier * thisZone.ListMultiplier;
 
     // Apply schedule as needed. Sizing does not use schedule.
-    if (this->OAFlowFracSchPtr > 0 && UseMinOASchFlag) {
+    if (this->oaFlowFracSched != nullptr && UseMinOASchFlag) {
         if (MaxOAVolFlowFlag) {
-            OAVolumeFlowRate *= ScheduleManager::GetScheduleMaxValue(state, this->OAFlowFracSchPtr);
+            OAVolumeFlowRate *= this->oaFlowFracSched->getMaxVal(state);
         } else {
-            OAVolumeFlowRate *= ScheduleManager::GetCurrentScheduleValue(state, this->OAFlowFracSchPtr);
+            OAVolumeFlowRate *= this->oaFlowFracSched->getCurrentVal();
         }
     }
 
     return OAVolumeFlowRate;
+}
+
+Sched::Schedule *OARequirementsData::getZoneFlowFracSched(EnergyPlusData &state, bool notAllSame)
+{
+    notAllSame = false;
+    Sched::Schedule *schedPtr = nullptr;
+    if (this->numDSOA == 0) {
+        // This is a simple DesignSpecification:OutdoorAir
+        schedPtr = this->oaFlowFracSched;
+    } else {
+        // This is a DesignSpecification:OutdoorAir:SpaceList
+        for (int dsoaCount = 1; dsoaCount <= this->numDSOA; ++dsoaCount) {
+            auto const &thisDSOA = state.dataSize->OARequirements(this->dsoaIndexes(dsoaCount));
+            if (dsoaCount == 1) {
+                schedPtr = thisDSOA.oaFlowFracSched;
+            } else {
+                if (schedPtr != thisDSOA.oaFlowFracSched) {
+                    notAllSame = true;
+                    ShowWarningError(state,
+                                     std::format("getZoneFlowFracSched: Outdoor Air Schedules are not the same for all spaces in "
+                                                 "DesignSpecification:OutdoorAir:SpaceList={}.",
+                                                 this->Name));
+                    ShowContinueError(state, std::format("Using the first space schedule={}", schedPtr->Name));
+                    break;
+                }
+            }
+        }
+    }
+    return schedPtr;
+}
+
+Sched::Schedule *OARequirementsData::getZonePropCtlMinRateSched(EnergyPlusData &state, bool notAllSame)
+{
+    notAllSame = false;
+    Sched::Schedule *schedPtr = nullptr;
+    if (this->numDSOA == 0) {
+        // This is a simple DesignSpecification:OutdoorAir
+        schedPtr = this->oaPropCtlMinRateSched;
+    } else {
+        // This is a DesignSpecification:OutdoorAir:SpaceList
+        for (int dsoaCount = 1; dsoaCount <= this->numDSOA; ++dsoaCount) {
+            auto const &thisDSOA = state.dataSize->OARequirements(this->dsoaIndexes(dsoaCount));
+            if (dsoaCount == 1) {
+                schedPtr = thisDSOA.oaPropCtlMinRateSched;
+            } else {
+                if (schedPtr != thisDSOA.oaPropCtlMinRateSched) {
+                    notAllSame = true;
+                    ShowWarningError(
+                        state,
+                        std::format(
+                            "getZoneFlowFracSched: Proportional Control Minimum Outdoor Air Flow Rate Schedules are not the same for all spaces in "
+                            "DesignSpecification:OutdoorAir:SpaceList={}.",
+                            this->Name));
+                    ShowContinueError(state, std::format("Using the first space schedule={}", schedPtr->Name));
+                    break;
+                }
+            }
+        }
+    }
+    return schedPtr;
 }
 
 } // namespace EnergyPlus::DataSizing

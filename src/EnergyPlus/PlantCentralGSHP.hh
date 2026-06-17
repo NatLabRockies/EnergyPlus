@@ -1,7 +1,7 @@
-// EnergyPlus, Copyright (c) 1996-2023, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
-// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other
+// National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
 // contributors. All rights reserved.
 //
 // NOTICE: This Software was developed under funding from the U.S. Department of Energy and the
@@ -72,6 +72,14 @@ namespace PlantCentralGSHP {
         Num
     };
 
+    enum class CondenserModeTemperature
+    {
+        Invalid = -1,
+        EnteringCondenser,
+        LeavingCondenser,
+        Num
+    };
+
     struct CGSHPNodeData
     {
         // Members
@@ -99,9 +107,9 @@ namespace PlantCentralGSHP {
         std::string WrapperComponentName;         // Component name
         int WrapperPerformanceObjectIndex;        // Component index in the input array
         int WrapperIdenticalObjectNum;            // Number of identical objects
-        int CHSchedPtr;                           // Index to schedule
+        Sched::Schedule *chSched = nullptr;       // schedule
 
-        WrapperComponentSpecs() : WrapperPerformanceObjectIndex(0), WrapperIdenticalObjectNum(0), CHSchedPtr(0)
+        WrapperComponentSpecs() : WrapperPerformanceObjectIndex(0), WrapperIdenticalObjectNum(0)
         {
         }
     };
@@ -168,88 +176,88 @@ namespace PlantCentralGSHP {
 
     struct ChillerHeaterSpecs
     {
-        std::string Name;                 // Name of the Chiller Heater object
-        std::string CondModeCooling;      // Cooling mode temperature curve input variable
-        std::string CondModeHeating;      // Clg/Htg mode temperature curve input variable
-        std::string CondMode;             // Current mode temperature curve input variable
-        bool ConstantFlow;                // True if this is a Constant Flow Chiller
-        bool VariableFlow;                // True if this is a Variable Flow Chiller
-        bool CoolSetPointSetToLoop;       // True if the setpoint is missing at the outlet node
-        bool HeatSetPointSetToLoop;       // True if the setpoint is missing at the outlet node
-        bool CoolSetPointErrDone;         // true if setpoint warning issued
-        bool HeatSetPointErrDone;         // true if setpoint warning issued
-        bool PossibleSubcooling;          // flag to indicate chiller is doing less cooling that requested
-        int ChillerHeaterNum;             // Chiller heater number
-        CondenserType condenserType;      // Type of Condenser - only water cooled is allowed
-        int ChillerCapFTCoolingIDX;       // Cooling capacity function of temperature curve index
-        int ChillerEIRFTCoolingIDX;       // Elec Input to Cooling Output ratio function of temperature curve index
-        int ChillerEIRFPLRCoolingIDX;     // Elec Input to cooling output ratio function of PLR curve index
-        int ChillerCapFTHeatingIDX;       // Clg/Htg capacity function of temperature curve index
-        int ChillerEIRFTHeatingIDX;       // Elec Input to Clg/Htg Output ratio function of temperature curve index
-        int ChillerEIRFPLRHeatingIDX;     // Elec Input to Clg/Htg output ratio function of PLR curve index
-        int ChillerCapFTIDX;              // Capacity function of temperature curve index
-        int ChillerEIRFTIDX;              // Elec Input to demand output ratio function of temperature curve index
-        int ChillerEIRFPLRIDX;            // Elec Input to demand output ratio function of PLR curve index
-        int EvapInletNodeNum;             // Node number on the inlet side of the plant (evaporator side)
-        int EvapOutletNodeNum;            // Node number on the outlet side of the plant (evaporator side)
-        int CondInletNodeNum;             // Node number on the inlet side of the condenser
-        int CondOutletNodeNum;            // Node number on the outlet side of the condenser
-        int ChillerCapFTError;            // Used for negative capacity as a function of temp warnings
-        int ChillerCapFTErrorIndex;       // Used for negative capacity as a function of temp warnings
-        int ChillerEIRFTError;            // Used for negative EIR as a function of temp warnings
-        int ChillerEIRFTErrorIndex;       // Used for negative EIR as a function of temp warnings
-        int ChillerEIRFPLRError;          // Used for negative EIR as a function of PLR warnings
-        int ChillerEIRFPLRErrorIndex;     // Used for negative EIR as a function of PLR warnings
-        int ChillerEIRRefTempErrorIndex;  // Used for reference temperature problems
-        int DeltaTErrCount;               // Evaporator delta T equals 0 for variable flow chiller warning messages
-        int DeltaTErrCountIndex;          // Index to evaporator delta T = 0 for variable flow chiller warning messages
-        int CondMassFlowIndex;            // Index to condenser mass flow rate
-        Real64 RefCapCooling;             // Reference cooling-mode evaporator capacity [W]
-        bool RefCapCoolingWasAutoSized;   // true if reference cooling capacity was autosize on input
-        Real64 RefCOPCooling;             // Reference cooling-mode COP
-        Real64 TempRefEvapOutCooling;     // Reference cooling-mode evaporator leaving temperature [C]
-        Real64 TempRefCondInCooling;      // Reference cooling-mode condenser entering temperature [C]
-        Real64 TempRefCondOutCooling;     // Reference cooling-mode condenser leaving temperature [C]
-        Real64 MaxPartLoadRatCooling;     // Maximum Part load ratio in cooling mode
-        Real64 OptPartLoadRatCooling;     // Optimum Part load ratio in cooling mode
-        Real64 MinPartLoadRatCooling;     // minimum Part load ratio in cooling mode
-        Real64 ClgHtgToCoolingCapRatio;   // ratio of clg/htg-mode evaporator capacity to cooling-mode evap. cap
-        Real64 ClgHtgtoCogPowerRatio;     // ratio of clg/htg-mode evaporator power to cooling-mode evap. power
-        Real64 RefCapClgHtg;              // Reference clg/htg-mode evaporator capacity [W]
-        Real64 RefCOPClgHtg;              // Reference clg/htg-mode COP
-        Real64 RefPowerClgHtg;            // Reference clg/htg-mode evaporator power [W]
-        Real64 TempRefEvapOutClgHtg;      // Reference clg/htg-mode evaporator leaving temperature [C]
-        Real64 TempRefCondInClgHtg;       // Reference clg/htg-mode condenser entering temperature [C]
-        Real64 TempRefCondOutClgHtg;      // Reference clg/htg-mode condenser leaving temperature [C]
-        Real64 TempLowLimitEvapOut;       // Low temperature shut off [C]
-        Real64 MaxPartLoadRatClgHtg;      // Maximum Part load ratio in simultaneous heating/cooling mode
-        Real64 OptPartLoadRatClgHtg;      // Optimum Part load ratio in simultaneous heating/cooling mode
-        Real64 MinPartLoadRatClgHtg;      // minimum Part load ratio in simultaneous heating/cooling mode
-        CGSHPNodeData EvapInletNode;      // Chiller heater evaperator inlet node
-        CGSHPNodeData EvapOutletNode;     // Chiller heater evaperator outlet node
-        CGSHPNodeData CondInletNode;      // Chiller heater condenser inlet node
-        CGSHPNodeData CondOutletNode;     // Chiller heater condenser outlet node
-        Real64 EvapVolFlowRate;           // Reference water volumetric flow rate through the evaporator [m3/s]
-        bool EvapVolFlowRateWasAutoSized; // true if evaporator flow rate was autosize on input
-        Real64 tmpEvapVolFlowRate;        // temporary ref water vol flow rate for intermediate sizing [m3/s]
-        Real64 CondVolFlowRate;           // Reference water volumetric flow rate through the condenser [m3/s]
-        bool CondVolFlowRateWasAutoSized; // true if condenser flow rate was autosize on input
-        Real64 tmpCondVolFlowRate;        // temporary ref water vol flow rate for intermediate sizing [m3/s]
-        Real64 CondMassFlowRateMax;       // Reference water mass flow rate through condenser [kg/s]
-        Real64 EvapMassFlowRateMax;       // Reference water mass flow rate through evaporator [kg/s]
-        Real64 Evapmdot;                  // Evaporator mass flow rate [kg/s]
-        Real64 Condmdot;                  // Condenser mass flow rate [kg/s]
-        Real64 DesignHotWaterVolFlowRate; // Design hot water volumetric flow rate through the condenser [m3/s]
-        Real64 OpenMotorEff;              // Open chiller motor efficiency [fraction, 0 to 1]
-        Real64 SizFac;                    // sizing factor
-        Real64 RefCap;                    // Reference evaporator capacity [W]
-        Real64 RefCOP;                    // Reference COP
-        Real64 TempRefEvapOut;            // Reference evaporator leaving temperature [C]
-        Real64 TempRefCondIn;             // Reference condenser entering temperature [C]
-        Real64 TempRefCondOut;            // Reference condenser leaving temperature [C]
-        Real64 OptPartLoadRat;            // Optimal operating fraction of full load
-        Real64 ChillerEIRFPLRMin;         // Minimum value of PLR from EIRFPLR curve
-        Real64 ChillerEIRFPLRMax;         // Maximum value of PLR from EIRFPLR curve
+        std::string Name;                         // Name of the Chiller Heater object
+        CondenserModeTemperature CondModeCooling; // Cooling mode temperature curve input variable
+        CondenserModeTemperature CondModeHeating; // Clg/Htg mode temperature curve input variable
+        CondenserModeTemperature CondMode;        // Current mode temperature curve input variable
+        bool ConstantFlow;                        // True if this is a Constant Flow Chiller
+        bool VariableFlow;                        // True if this is a Variable Flow Chiller
+        bool CoolSetPointSetToLoop;               // True if the setpoint is missing at the outlet node
+        bool HeatSetPointSetToLoop;               // True if the setpoint is missing at the outlet node
+        bool CoolSetPointErrDone;                 // true if setpoint warning issued
+        bool HeatSetPointErrDone;                 // true if setpoint warning issued
+        bool PossibleSubcooling;                  // flag to indicate chiller is doing less cooling that requested
+        int ChillerHeaterNum;                     // Chiller heater number
+        CondenserType condenserType;              // Type of Condenser - only water cooled is allowed
+        int ChillerCapFTCoolingIDX;               // Cooling capacity function of temperature curve index
+        int ChillerEIRFTCoolingIDX;               // Elec Input to Cooling Output ratio function of temperature curve index
+        int ChillerEIRFPLRCoolingIDX;             // Elec Input to cooling output ratio function of PLR curve index
+        int ChillerCapFTHeatingIDX;               // Clg/Htg capacity function of temperature curve index
+        int ChillerEIRFTHeatingIDX;               // Elec Input to Clg/Htg Output ratio function of temperature curve index
+        int ChillerEIRFPLRHeatingIDX;             // Elec Input to Clg/Htg output ratio function of PLR curve index
+        int ChillerCapFTIDX;                      // Capacity function of temperature curve index
+        int ChillerEIRFTIDX;                      // Elec Input to demand output ratio function of temperature curve index
+        int ChillerEIRFPLRIDX;                    // Elec Input to demand output ratio function of PLR curve index
+        int EvapInletNodeNum;                     // Node number on the inlet side of the plant (evaporator side)
+        int EvapOutletNodeNum;                    // Node number on the outlet side of the plant (evaporator side)
+        int CondInletNodeNum;                     // Node number on the inlet side of the condenser
+        int CondOutletNodeNum;                    // Node number on the outlet side of the condenser
+        int ChillerCapFTError;                    // Used for negative capacity as a function of temp warnings
+        int ChillerCapFTErrorIndex;               // Used for negative capacity as a function of temp warnings
+        int ChillerEIRFTError;                    // Used for negative EIR as a function of temp warnings
+        int ChillerEIRFTErrorIndex;               // Used for negative EIR as a function of temp warnings
+        int ChillerEIRFPLRError;                  // Used for negative EIR as a function of PLR warnings
+        int ChillerEIRFPLRErrorIndex;             // Used for negative EIR as a function of PLR warnings
+        int ChillerEIRRefTempErrorIndex;          // Used for reference temperature problems
+        int DeltaTErrCount;                       // Evaporator delta T equals 0 for variable flow chiller warning messages
+        int DeltaTErrCountIndex;                  // Index to evaporator delta T = 0 for variable flow chiller warning messages
+        int CondMassFlowIndex;                    // Index to condenser mass flow rate
+        Real64 RefCapCooling;                     // Reference cooling-mode evaporator capacity [W]
+        bool RefCapCoolingWasAutoSized;           // true if reference cooling capacity was autosize on input
+        Real64 RefCOPCooling;                     // Reference cooling-mode COP
+        Real64 TempRefEvapOutCooling;             // Reference cooling-mode evaporator leaving temperature [C]
+        Real64 TempRefCondInCooling;              // Reference cooling-mode condenser entering temperature [C]
+        Real64 TempRefCondOutCooling;             // Reference cooling-mode condenser leaving temperature [C]
+        Real64 MaxPartLoadRatCooling;             // Maximum Part load ratio in cooling mode
+        Real64 OptPartLoadRatCooling;             // Optimum Part load ratio in cooling mode
+        Real64 MinPartLoadRatCooling;             // minimum Part load ratio in cooling mode
+        Real64 ClgHtgToCoolingCapRatio;           // ratio of clg/htg-mode evaporator capacity to cooling-mode evap. cap
+        Real64 ClgHtgtoCogPowerRatio;             // ratio of clg/htg-mode evaporator power to cooling-mode evap. power
+        Real64 RefCapClgHtg;                      // Reference clg/htg-mode evaporator capacity [W]
+        Real64 RefCOPClgHtg;                      // Reference clg/htg-mode COP
+        Real64 RefPowerClgHtg;                    // Reference clg/htg-mode evaporator power [W]
+        Real64 TempRefEvapOutClgHtg;              // Reference clg/htg-mode evaporator leaving temperature [C]
+        Real64 TempRefCondInClgHtg;               // Reference clg/htg-mode condenser entering temperature [C]
+        Real64 TempRefCondOutClgHtg;              // Reference clg/htg-mode condenser leaving temperature [C]
+        Real64 TempLowLimitEvapOut;               // Low temperature shut off [C]
+        Real64 MaxPartLoadRatClgHtg;              // Maximum Part load ratio in simultaneous heating/cooling mode
+        Real64 OptPartLoadRatClgHtg;              // Optimum Part load ratio in simultaneous heating/cooling mode
+        Real64 MinPartLoadRatClgHtg;              // minimum Part load ratio in simultaneous heating/cooling mode
+        CGSHPNodeData EvapInletNode;              // Chiller heater evaperator inlet node
+        CGSHPNodeData EvapOutletNode;             // Chiller heater evaperator outlet node
+        CGSHPNodeData CondInletNode;              // Chiller heater condenser inlet node
+        CGSHPNodeData CondOutletNode;             // Chiller heater condenser outlet node
+        Real64 EvapVolFlowRate;                   // Reference water volumetric flow rate through the evaporator [m3/s]
+        bool EvapVolFlowRateWasAutoSized;         // true if evaporator flow rate was autosize on input
+        Real64 tmpEvapVolFlowRate;                // temporary ref water vol flow rate for intermediate sizing [m3/s]
+        Real64 CondVolFlowRate;                   // Reference water volumetric flow rate through the condenser [m3/s]
+        bool CondVolFlowRateWasAutoSized;         // true if condenser flow rate was autosize on input
+        Real64 tmpCondVolFlowRate;                // temporary ref water vol flow rate for intermediate sizing [m3/s]
+        Real64 CondMassFlowRateMax;               // Reference water mass flow rate through condenser [kg/s]
+        Real64 EvapMassFlowRateMax;               // Reference water mass flow rate through evaporator [kg/s]
+        Real64 Evapmdot;                          // Evaporator mass flow rate [kg/s]
+        Real64 Condmdot;                          // Condenser mass flow rate [kg/s]
+        Real64 DesignHotWaterVolFlowRate;         // Design hot water volumetric flow rate through the condenser [m3/s]
+        Real64 OpenMotorEff;                      // Open chiller motor efficiency [fraction, 0 to 1]
+        Real64 SizFac;                            // sizing factor
+        Real64 RefCap;                            // Reference evaporator capacity [W]
+        Real64 RefCOP;                            // Reference COP
+        Real64 TempRefEvapOut;                    // Reference evaporator leaving temperature [C]
+        Real64 TempRefCondIn;                     // Reference condenser entering temperature [C]
+        Real64 TempRefCondOut;                    // Reference condenser leaving temperature [C]
+        Real64 OptPartLoadRat;                    // Optimal operating fraction of full load
+        Real64 ChillerEIRFPLRMin;                 // Minimum value of PLR from EIRFPLR curve
+        Real64 ChillerEIRFPLRMax;                 // Maximum value of PLR from EIRFPLR curve
         CHReportVars Report;
 
         ChillerHeaterSpecs()
@@ -321,27 +329,27 @@ namespace PlantCentralGSHP {
 
     struct WrapperSpecs : PlantComponent
     {
-        std::string Name;           // User identifier
-        bool VariableFlowCH;        // True if all chiller heaters are variable flow control
-        int SchedPtr;               // Schedule value for ancillary power control
-        int CHSchedPtr;             // Schedule value for individual chiller heater control
-        CondenserType ControlMode;  // SmartMixing or FullyMixing
-        int CHWInletNodeNum;        // Node number on the inlet side of the plant (Chilled Water side)
-        int CHWOutletNodeNum;       // Node number on the outlet side of the plant (Chilled Water side)
-        int HWInletNodeNum;         // Node number on the inlet side of the plant (Hot Water side)
-        int HWOutletNodeNum;        // Node number on the outlet side of the plant (Hot Water side)
-        int GLHEInletNodeNum;       // Node number on the inlet side of the plant (GLHE Water side)
-        int GLHEOutletNodeNum;      // Node number on the outlet side of the plant (GLHE Water side)
-        int NumOfComp;              // Number of Components under the wrapper
-        Real64 CHWMassFlowRate;     // Chilled water mass flow rate
-        Real64 HWMassFlowRate;      // Hot water mass flow rate
-        Real64 GLHEMassFlowRate;    // Condenser water mass flow rate
-        Real64 CHWMassFlowRateMax;  // Maximum chilled water mass flow rate
-        Real64 HWMassFlowRateMax;   // Maximum hot water mass flow rate
-        Real64 GLHEMassFlowRateMax; // Maximum condenser water mass flow rate
-        Real64 WrapperCoolingLoad;  // Cooling demand for the central heat pump system
-        Real64 WrapperHeatingLoad;  // Heating demand for the central heat pump system
-        Real64 AncillaryPower;      // Wrapper Ancillary Power
+        std::string Name;                               // User identifier
+        bool VariableFlowCH;                            // True if all chiller heaters are variable flow control
+        Sched::Schedule *ancillaryPowerSched = nullptr; // Schedule value for ancillary power control
+        Sched::Schedule *chSched = nullptr;             // Schedule value for individual chiller heater control
+        CondenserType ControlMode;                      // SmartMixing or FullyMixing
+        int CHWInletNodeNum;                            // Node number on the inlet side of the plant (Chilled Water side)
+        int CHWOutletNodeNum;                           // Node number on the outlet side of the plant (Chilled Water side)
+        int HWInletNodeNum;                             // Node number on the inlet side of the plant (Hot Water side)
+        int HWOutletNodeNum;                            // Node number on the outlet side of the plant (Hot Water side)
+        int GLHEInletNodeNum;                           // Node number on the inlet side of the plant (GLHE Water side)
+        int GLHEOutletNodeNum;                          // Node number on the outlet side of the plant (GLHE Water side)
+        int NumOfComp;                                  // Number of Components under the wrapper
+        Real64 CHWMassFlowRate;                         // Chilled water mass flow rate
+        Real64 HWMassFlowRate;                          // Hot water mass flow rate
+        Real64 GLHEMassFlowRate;                        // Condenser water mass flow rate
+        Real64 CHWMassFlowRateMax;                      // Maximum chilled water mass flow rate
+        Real64 HWMassFlowRateMax;                       // Maximum hot water mass flow rate
+        Real64 GLHEMassFlowRateMax;                     // Maximum condenser water mass flow rate
+        Real64 WrapperCoolingLoad;                      // Cooling demand for the central heat pump system
+        Real64 WrapperHeatingLoad;                      // Heating demand for the central heat pump system
+        Real64 AncillaryPower;                          // Wrapper Ancillary Power
         Array1D<WrapperComponentSpecs> WrapperComp;
         Array1D<ChillerHeaterSpecs> ChillerHeater; // Dimension to number of machines
         bool CoolSetPointErrDone;                  // true if setpoint warning issued
@@ -368,14 +376,13 @@ namespace PlantCentralGSHP {
         bool mySizesReported;
 
         WrapperSpecs()
-            : VariableFlowCH(false), SchedPtr(0), CHSchedPtr(0), ControlMode(CondenserType::Invalid), CHWInletNodeNum(0), CHWOutletNodeNum(0),
-              HWInletNodeNum(0), HWOutletNodeNum(0), GLHEInletNodeNum(0), GLHEOutletNodeNum(0), NumOfComp(0), CHWMassFlowRate(0.0),
-              HWMassFlowRate(0.0), GLHEMassFlowRate(0.0), CHWMassFlowRateMax(0.0), HWMassFlowRateMax(0.0), GLHEMassFlowRateMax(0.0),
-              WrapperCoolingLoad(0.0), WrapperHeatingLoad(0.0), AncillaryPower(0.0), CoolSetPointErrDone(false), HeatSetPointErrDone(false),
-              CoolSetPointSetToLoop(false), HeatSetPointSetToLoop(false), ChillerHeaterNums(0), CWPlantLoc{}, HWPlantLoc{}, GLHEPlantLoc{},
-              CHWMassFlowIndex(0), HWMassFlowIndex(0), GLHEMassFlowIndex(0), SizingFactor(1.0), CHWVolFlowRate(0.0), HWVolFlowRate(0.0),
-              GLHEVolFlowRate(0.0), MyWrapperFlag(true), MyWrapperEnvrnFlag(true), SimulClgDominant(false), SimulHtgDominant(false),
-              setupOutputVarsFlag(true), mySizesReported(false)
+            : VariableFlowCH(false), ControlMode(CondenserType::Invalid), CHWInletNodeNum(0), CHWOutletNodeNum(0), HWInletNodeNum(0),
+              HWOutletNodeNum(0), GLHEInletNodeNum(0), GLHEOutletNodeNum(0), NumOfComp(0), CHWMassFlowRate(0.0), HWMassFlowRate(0.0),
+              GLHEMassFlowRate(0.0), CHWMassFlowRateMax(0.0), HWMassFlowRateMax(0.0), GLHEMassFlowRateMax(0.0), WrapperCoolingLoad(0.0),
+              WrapperHeatingLoad(0.0), AncillaryPower(0.0), CoolSetPointErrDone(false), HeatSetPointErrDone(false), CoolSetPointSetToLoop(false),
+              HeatSetPointSetToLoop(false), ChillerHeaterNums(0), CWPlantLoc{}, HWPlantLoc{}, GLHEPlantLoc{}, CHWMassFlowIndex(0), HWMassFlowIndex(0),
+              GLHEMassFlowIndex(0), SizingFactor(1.0), CHWVolFlowRate(0.0), HWVolFlowRate(0.0), GLHEVolFlowRate(0.0), MyWrapperFlag(true),
+              MyWrapperEnvrnFlag(true), SimulClgDominant(false), SimulHtgDominant(false), setupOutputVarsFlag(true), mySizesReported(false)
         {
         }
 
@@ -406,6 +413,38 @@ namespace PlantCentralGSHP {
         void CalcChillerModel(EnergyPlusData &state);
 
         void CalcChillerHeaterModel(EnergyPlusData &state);
+
+        void adjustChillerHeaterCondFlowTemp(EnergyPlusData &state,
+                                             Real64 &QCondenser,
+                                             Real64 &CondMassFlowRate,
+                                             Real64 &CondOutletTemp,
+                                             Real64 const CondInletTemp,
+                                             Real64 const CondDeltaTemp);
+
+        void adjustChillerHeaterEvapFlowTemp(
+            EnergyPlusData &state, Real64 const qEvaporator, Real64 &evapMassFlowRate, Real64 &evapOutletTemp, Real64 const evapInletTemp);
+
+        Real64
+        setChillerHeaterCondTemp(EnergyPlusData &state, int const numChillerHeater, Real64 const condEnteringTemp, Real64 const condLeavingTemp);
+
+        Real64 calcChillerCapFT(EnergyPlusData &state, int const numChillerHeater, Real64 const evapOutletTemp, Real64 const condTemp);
+
+        void checkEvapOutletTemp(EnergyPlusData &state,
+                                 int const numChillerHeater,
+                                 Real64 &evapOutletTemp,
+                                 Real64 const lowTempLimitEout,
+                                 Real64 evapInletTemp,
+                                 Real64 &qEvaporator,
+                                 Real64 const evapMassFlowRate,
+                                 Real64 const Cp);
+
+        void calcPLRAndCyclingRatio(EnergyPlusData &state,
+                                    Real64 const availChillerCap,
+                                    Real64 &actualPartLoadRatio,
+                                    Real64 const minPartLoadRatio,
+                                    Real64 const maxPartLoadRatio,
+                                    Real64 const qEvaporator,
+                                    Real64 &frac);
 
         void UpdateChillerHeaterRecords(EnergyPlusData &state);
 
@@ -438,6 +477,14 @@ struct PlantCentralGSHPData : BaseGlobalStruct
     Real64 ChillerFalseLoadRate = 0.0; // Chiller/heater false load over and above the water-side load [W]
     EPVector<PlantCentralGSHP::WrapperSpecs> Wrapper;
     EPVector<PlantCentralGSHP::ChillerHeaterSpecs> ChillerHeater;
+
+    void init_constant_state([[maybe_unused]] EnergyPlusData &state) override
+    {
+    }
+
+    void init_state([[maybe_unused]] EnergyPlusData &state) override
+    {
+    }
 
     void clear_state() override
     {

@@ -2,7 +2,7 @@
 
 \subsection{Overview}\label{overview-030}
 
-There is no single best way to establish design HVAC flow rates and size HVAC equipment. Different building designs, climates, and HVAC systems will impose varying constraints on the designer. The method used to size an HVAC system in a hot, moist climate such as Miami will be different than the method used for a building in Albuquerque. The type of building is also relevant - a simple watts per square foot loads estimate could be adequate for a building containing a network server farm while a detailed, dynamic loads simulation would be necessary for a passive solar building. In the end the designer's experience and engineering judgement will play an important role in any sizing calculation.
+There is no single best way to establish design HVAC flow rates and size HVAC equipment. Different building designs, climates, and HVAC systems will impose varying constraints on the designer. The method used to size an HVAC system in a hot, moist climate such as Miami will be different than the method used for a building in Albuquerque. The type of building is also relevant - a simple watts per square foot loads estimate could be adequate for a building containing a network server farm while a detailed, dynamic loads simulation would be necessary for a passive solar building. In the end the designer's experience and engineering judgment will play an important role in any sizing calculation.
 
 HVAC equipment sizing begins with the calculation of space heating and cooling sensible and/or latent loads. A space cooling (heating) sensible load is defined as the rate at which heat must be removed (added) to a space to maintain a constant zone temperature. A space cooling (heating) latent load is defined as the rate at which moisture must be removed (added) to a space to maintain a constant zone moisture/humidity ratio/relative humidity level. The current industry standard method for calculating space loads is the \emph{heat balance method} {[}ASHRAE Fundamentals (2001), page 29.1; Pedersen et al., (1997); Pedersen (2001). Since EnergyPlus is a heat balance based simulation program it is straightforward for the program to use this method for calculating zone loads.
 
@@ -27,13 +27,13 @@ The data stored in \emph{CalcZoneSizing}, \emph{CalcFinalZoneSizing}, \emph{Zone
 % table 40
 \begin{longtable}[c]{p{1.85in}p{4.13in}}
 \caption{Zone Sizing Data \label{table:zone-sizing-data}} \tabularnewline
-\toprule 
+\toprule
 Name & Description \tabularnewline
 \midrule
 \endfirsthead
 
 \caption[]{Zone Sizing Data} \tabularnewline
-\toprule 
+\toprule
 Name & Description \tabularnewline
 \midrule
 \endhead
@@ -111,7 +111,7 @@ As described in the preceding section, the Sizing Manager initiates the zone des
 
 In module \emph{HVACManager}, subroutine \emph{ManageHVAC} calls \emph{SimHVAC}. \emph{SimHVAC} checks \emph{ZoneSizingCalc}. If it is \emph{true}, \emph{SimHVAC} calls \emph{ManageZoneEquipment} and returns, rather than simulating the actual system. In turn \emph{ManageZoneEquipment} checks if \emph{ZoneSizingCalc} is \emph{true}; if it is it calls \emph{SizeZoneEquipment} rather than \emph{SimZoneEquipment}.
 
-\emph{SizeZoneEquipment} assumes that each controlled zone is served by an ideal air conditioning unit. This unit supplies sensible and latent (if latent sizing is requeted) heating or cooling air at a fixed, user input temperature and humidity (specified in the Sizing:Zone objects). The units have infinite capacity: the flow rate can be any amount. Zone humidity is controlled at a constant level when latent sizing is requested, otherwise zone humidity is allowed to float. The sensible and latent loads and air mass flow rates are saved and reported to \emph{eplusout.zsz}. 
+\emph{SizeZoneEquipment} assumes that each controlled zone is served by an ideal air conditioning unit. This unit supplies sensible and latent (if latent sizing is requested) heating or cooling air at a fixed, user input temperature and humidity (specified in the Sizing:Zone objects). The units have infinite capacity: the flow rate can be any amount. Zone humidity is controlled at a constant level when latent sizing is requested, otherwise zone humidity is allowed to float. The sensible and latent loads and air mass flow rates are saved and reported to \emph{eplusout.zsz}.
 
 Before the ideal zone load is calculated, the function checks whether the user wants to account for the heat gain or loss caused by the ventilation air from a Dedicated Outdoor Air System (DOAS). If the user has selected \emph{Account For Dedicated Outdoor Air = Yes} the function performs an ideal DOAS calculation. The DOAS supply temperature is set according to the user's choice of 1 of 3 possible control strategies: \emph{NeutralSupplyAir}, \emph{NeutralDehumidifiedSupplyAir}, or \emph{ColdSupplyAir}. This value is saved and reported to \emph{eplusout.zsz}. The different strategies are:
 
@@ -119,7 +119,7 @@ Before the ideal zone load is calculated, the function checks whether the user w
 \item
   \emph{DOAS Control Strategy = NeutralSupplyAir}. The purpose of this strategy is to cool or heat the outdoor air (OA) to keep it between the \emph{T\(_{l}\)} and \emph{T\(_{h}\)} setpoints.
 \item
-  \emph{DOAS Control Strategy = Neutral Dehumidified Supply Air}. The purpose of this strategy is to cool and dehumidify the outdoor air, then reheat it to a ``neutral'' temperature so that no sensible load is imposed on the space or AHU unit. The DOAS will with this strategy handle some or all of the latent load. If the outdoor air temperature is greater than \emph{T\(_{l}\)} the outdoor air is cooled to \emph{T\(_{l}\)} and reheated to \emph{T\(_{h}\)}. If the outdoor air temperaure is below \emph{T\(_{l}\)} it is heated to \emph{T\(_{h}\)}.
+  \emph{DOAS Control Strategy = Neutral Dehumidified Supply Air}. The purpose of this strategy is to cool and dehumidify the outdoor air, then reheat it to a ``neutral'' temperature so that no sensible load is imposed on the space or AHU unit. The DOAS will with this strategy handle some or all of the latent load. If the outdoor air temperature is greater than \emph{T\(_{l}\)} the outdoor air is cooled to \emph{T\(_{l}\)} and reheated to \emph{T\(_{h}\)}. If the outdoor air temperature is below \emph{T\(_{l}\)} it is heated to \emph{T\(_{h}\)}.
 \item
   \emph{DOAS Control Strategy = ColdSupplyAir}. The purpose of this strategy is to provide cool, dehumidified ventilation air to the zone. In this case the DOAS can handle part of the sensible zone cooling load as well as meet part or all of the latent load. If the outdoor air temperature is below \emph{T\(_{l}\)} it is heated to \emph{T\(_{h}\)}. If it is above \emph{T\(_{l}\)}, it is cooled to \emph{T\(_{l}\)}.
 \end{itemize}
@@ -130,7 +130,7 @@ With the DOAS supply temperature set and the air mass flow rate set to the minim
 {\dot Q_{doa}} = {c_{p,air}}{\dot m_{vent,min}}({T_{sup}} - {T_z})
 \end{equation}
 
-\emph{UpdateSystemOutputRequired} is then invoked to adjust the load to be met by the ideal zone system. 
+\emph{UpdateSystemOutputRequired} is then invoked to adjust the load to be met by the ideal zone system.
 
 When latent sizing is requested sensible and latent loads provided by the DOAS are updated. Latent load units are kgw per second.
 
@@ -186,7 +186,7 @@ The calculated and stored sequences are summed or averaged over the zone time-st
 \def\labelenumi{(\arabic{enumi})}
 \tightlist
 \item
-  Smooth the design sequences by applying a moving, fixed-width averaging window to the sequences. The width of the window is user specified in the \emph{Sizing:Parameters} input object. The sequences that are smoothed are: 
+  Smooth the design sequences by applying a moving, fixed-width averaging window to the sequences. The width of the window is user specified in the \emph{Sizing:Parameters} input object. The sequences that are smoothed are:
 \end{enumerate}
 
 \begin{enumerate}
@@ -243,6 +243,12 @@ If \emph{cooling design air flow method} is \emph{flow/zone}, then \emph{cooling
 
 If \emph{heating design air flow method} is \emph{flow/zone}, then \emph{heating design air flow rate} will be used for the design max heating air flow rate. If \emph{heating design air flow method} is \emph{design day}, then the design day calculation will set the design max heating air flow rate. If \emph{heating design air flow method} is \emph{design day with limit}, then the maximum from \emph{heating max flow per area}, \emph{heating max flow} and \emph{heating max flow fraction} will set an upper limit on the design max heating air flow rate. The design max heating air flow rate must always be \textgreater{} = the ventilation requirement. In each case, the outside airflow will be modified based on zone ventilation effectiveness specified in the zone sizing object.
 
+\subsection{Space Sizing}\label{space-sizing}
+When ZoneAirHeatBalanceAlgorithm ``Do Space Heat Balance for Sizing'' is ``Yes'', the same sizing calculations described above will be performed for each space that is part of a controlled zone, using the same thermostat setpoints as the parent zone. The space sizing results will be reported the same as zone sizing results (eio, table, and spsz outputs).
+
+\subsection{NonCoincident Zone Sizing}\label{noncoincident-zone-sizing}
+Sizing:Zone has an option for  ``Type of Space Sum to Use'', ``Coincident'' or ``NonCoincident''. Coincident zone sizing (the default) is always calculated first, with all spaces in the zone lumped together. For ``NonCoincident'' zone sizing, if the zone contains more than one space, the zone sizing results will be overwritten using the sums and averages of the space sizing results. If all spaces for a given load type (heating or cooling) peak on the same design day, then that day will be reported as the zone peak day, otherwise the zone design day will be "N/A". The zone peak time will be determined by scanning the peak zone sequential loads which are calculated by summing the space peak day sequential loads.
+
 \textbf{This concludes the calculation of the zone design flow rates and loads.}
 
 \subsection{Air Terminal Unit Sizing}\label{air-terminal-unit-sizing}
@@ -275,11 +281,11 @@ All of these factors default to 1.0. Function \emph{UpdateTermUnitFinalZoneSizin
 
 {\scriptsize
 \begin{equation}
-    {CoolFlow_{TU}} = {CoolFlowNoOA_{FZ}} \cdot CoolFlowRatio + {MinOAFrac} \cdot ( {CoolFlowWithOA_{FZ}} - {CoolFlowNoOA_{FZ}} ) 
+    {CoolFlow_{TU}} = {CoolFlowNoOA_{FZ}} \cdot CoolFlowRatio + {MinOAFrac} \cdot ( {CoolFlowWithOA_{FZ}} - {CoolFlowNoOA_{FZ}} )
 \end{equation}}
 
 \begin{equation}
-    {CoolFlow_{TU}} = max({CoolFlow_{TU}},{minOAFlow_{TU}}) 
+    {CoolFlow_{TU}} = max({CoolFlow_{TU}},{minOAFlow_{TU}})
 \end{equation}
 
 Where:

@@ -46,7 +46,7 @@
 ! Environmental Emissions: No
 ! Utility Tariffs: No
 
-  Version,23.1;
+  Version,26.2;
 
   Building,
     Branch Pumps With Common Pipe,  !- Name
@@ -214,9 +214,9 @@
 
   PlantEquipmentList,
     Heating Plant,           !- Name
-    DistrictHeating,         !- Equipment 1 Object Type
+    DistrictHeating:Water,   !- Equipment 1 Object Type
     Purchased Heating 1,     !- Equipment 1 Name
-    DistrictHeating,         !- Equipment 2 Object Type
+    DistrictHeating:Water,   !- Equipment 2 Object Type
     Purchased Heating 2;     !- Equipment 2 Name
 
   BranchList,
@@ -265,7 +265,7 @@
     Branch Pump 1,           !- Component 1 Name
     Branch Pump 1 Inlet Node,!- Component 1 Inlet Node Name
     Supply Heating 1 Inlet Node,  !- Component 1 Outlet Node Name
-    DistrictHeating,         !- Component 2 Object Type
+    DistrictHeating:Water,   !- Component 2 Object Type
     Purchased Heating 1,     !- Component 2 Name
     Supply Heating 1 Inlet Node,  !- Component 2 Inlet Node Name
     Supply Heating 1 Outlet Node;  !- Component 2 Outlet Node Name
@@ -281,7 +281,7 @@
     0.0,                     !- Fraction of Motor Inefficiencies to Fluid Stream
     INTERMITTENT;            !- Pump Control Type
 
-  DistrictHeating,
+  DistrictHeating:Water,
     Purchased Heating 1,     !- Name
     Supply Heating 1 Inlet Node,  !- Hot Water Inlet Node Name
     Supply Heating 1 Outlet Node,  !- Hot Water Outlet Node Name
@@ -294,7 +294,7 @@
     Branch Pump 2,           !- Component 1 Name
     Branch Pump 2 Inlet Node,!- Component 1 Inlet Node Name
     Supply Heating 2 Inlet Node,  !- Component 1 Outlet Node Name
-    DistrictHeating,         !- Component 2 Object Type
+    DistrictHeating:Water,   !- Component 2 Object Type
     Purchased Heating 2,     !- Component 2 Name
     Supply Heating 2 Inlet Node,  !- Component 2 Inlet Node Name
     Supply Heating 2 Outlet Node;  !- Component 2 Outlet Node Name
@@ -310,7 +310,7 @@
     0.0,                     !- Fraction of Motor Inefficiencies to Fluid Stream
     INTERMITTENT;            !- Pump Control Type
 
-  DistrictHeating,
+  DistrictHeating:Water,
     Purchased Heating 2,     !- Name
     Supply Heating 2 Inlet Node,  !- Hot Water Inlet Node Name
     Supply Heating 2 Outlet Node,  !- Hot Water Outlet Node Name
@@ -390,7 +390,8 @@
     Demand Load Profile 1 Outlet Node,  !- Outlet Node Name
     Load Profile 1 Load Schedule,  !- Load Schedule Name
     0.003,                   !- Peak Flow Rate {m3/s}
-    Load Profile 1 Flow Frac Schedule;  !- Flow Rate Fraction Schedule Name
+    Load Profile 1 Flow Frac Schedule,  !- Flow Rate Fraction Schedule Name
+    Water;                   !- Plant Loop Fluid Type
 
   Branch,
     Demand Outlet Branch,    !- Name
@@ -473,15 +474,15 @@
 
   Output:Variable,*,Plant Load Profile Heat Transfer Energy,Hourly;
 
-  Output:Variable,*,District Heating Hot Water Rate,Hourly;
+  Output:Variable,*,District Heating Water Rate,Hourly;
 
-  Output:Variable,*,District Heating Hot Water Energy,Hourly;
+  Output:Variable,*,District Heating Water Energy,Hourly;
 
-  Output:Meter,Heating:DistrictHeating,Daily;
+  Output:Meter,Heating:DistrictHeatingWater,Daily;
 
-  Output:Meter:MeterFileOnly,Heating:DistrictHeating,monthly;
+  Output:Meter:MeterFileOnly,Heating:DistrictHeatingWater,monthly;
 
-  Output:Meter:MeterFileOnly,Heating:DistrictHeating,runperiod;
+  Output:Meter:MeterFileOnly,Heating:DistrictHeatingWater,runperiod;
 
   Output:Meter:MeterFileOnly,Electricity:Facility,monthly;
 

@@ -1,29 +1,34 @@
 # Main library
 
 set(library_sources
-  btwxt.h
-  btwxt.cpp
-  griddeddata.h
-  griddeddata.cpp
-  gridpoint.h
-  gridpoint.cpp
-  error.h
-  error.cpp
-)
+        regular-grid-interpolator-implementation.h
+        regular-grid-interpolator-implementation.cpp
+        regular-grid-interpolator.cpp
+        grid-axis.cpp
+        )
 
-option( BTWXT_STATIC_LIB "Make btwxt a static library" ON )
+option(${PROJECT_NAME}_STATIC_LIB "Make ${PROJECT_NAME} a static library" ON)
 
-if (BTWXT_STATIC_LIB)
-  add_library(btwxt STATIC ${library_sources})
-  set_target_properties(btwxt PROPERTIES COMPILE_FLAGS "-DBTWXT_STATIC_DEFINE")
-else()
-  set(CMAKE_MACOSX_RPATH 1)
-  add_library(btwxt SHARED ${library_sources})
-endif()
+if (${PROJECT_NAME}_STATIC_LIB)
+    add_library(${PROJECT_NAME} STATIC ${library_sources})
+    set_target_properties(${PROJECT_NAME} PROPERTIES COMPILE_FLAGS "-D${PROJECT_NAME}_STATIC_DEFINE")
+else ()
+    set(CMAKE_MACOSX_RPATH 1)
+    add_library(${PROJECT_NAME} SHARED ${library_sources})
+endif ()
 
+target_link_libraries(${PROJECT_NAME} PUBLIC ${PROJECT_NAME}_interface courierr)
+
+target_compile_options(btwxt PRIVATE
+        $<$<CXX_COMPILER_ID:MSVC>:/W4>
+        $<$<OR:$<CXX_COMPILER_ID:Clang>,$<CXX_COMPILER_ID:AppleClang>,$<CXX_COMPILER_ID:GNU>>:
+        -Wall -Wextra -Wpedantic>
+        )
+
+target_compile_features(${PROJECT_NAME} PRIVATE cxx_std_17)
 include(GenerateExportHeader)
-generate_export_header(btwxt)
+generate_export_header(${PROJECT_NAME})
 
-if (BTWXT_COVERAGE)
-  add_coverage(btwxt)
-endif()
+if (${PROJECT_NAME}_COVERAGE)
+    add_coverage(${PROJECT_NAME})
+endif ()

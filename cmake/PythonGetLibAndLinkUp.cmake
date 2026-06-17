@@ -25,4 +25,5 @@ if(WIN32)
 endif()
 
 # then copy the DLL in
+message("COPYING ${RESOLVED_PYTHON_LIB} to ${BASE_PATH}")
 execute_process(COMMAND "${CMAKE_COMMAND}" -E copy "${RESOLVED_PYTHON_LIB}" "${BASE_PATH}")

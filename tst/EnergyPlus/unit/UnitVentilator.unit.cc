@@ -1,7 +1,7 @@
-// EnergyPlus, Copyright (c) 1996-2023, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
-// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other
+// National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
 // contributors. All rights reserved.
 //
 // NOTICE: This Software was developed under funding from the U.S. Department of Energy and the
@@ -78,7 +78,7 @@ TEST_F(EnergyPlusFixture, UnitVentilatorSetOAMassFlowRateForCoolingVariablePerce
     state->dataUnitVentilators->UnitVent.allocate(1);
 
     state->dataUnitVentilators->UnitVent(1).ATMixerExists = false;
-    state->dataUnitVentilators->UnitVent(1).ATMixerType = DataHVACGlobals::ATMixer_InletSide;
+    state->dataUnitVentilators->UnitVent(1).ATMixerType = HVAC::MixerType::InletSide;
     state->dataUnitVentilators->UnitVent(1).FanOutletNode = 1;
     state->dataUnitVentilators->UnitVent(1).OAMixerOutNode = 2;
     state->dataUnitVentilators->UnitVent(1).ATMixerOutNode = 3;
@@ -176,7 +176,7 @@ TEST_F(EnergyPlusFixture, UnitVentilatorSetOAMassFlowRateForCoolingVariablePerce
     state->dataLoopNodes->Node(3).Enthalpy = 1.0;
     state->dataLoopNodes->Node(4).Enthalpy = 0.0;
     state->dataUnitVentilators->UnitVent(1).ATMixerExists = true;
-    state->dataUnitVentilators->UnitVent(1).ATMixerType = DataHVACGlobals::ATMixer_InletSide;
+    state->dataUnitVentilators->UnitVent(1).ATMixerType = HVAC::MixerType::InletSide;
 
     OAMassFlowRate = UnitVentilator::SetOAMassFlowRateForCoolingVariablePercent(*state, UnitVentNum, MinOA, MassFlowRate, MaxOA, Tinlet, Toutdoor);
     ExpectedOAMassFlowRate = 1.02133;
@@ -196,7 +196,7 @@ TEST_F(EnergyPlusFixture, UnitVentilatorSetOAMassFlowRateForCoolingVariablePerce
     state->dataLoopNodes->Node(3).Enthalpy = 0.0;
     state->dataLoopNodes->Node(4).Enthalpy = 1.0;
     state->dataUnitVentilators->UnitVent(1).ATMixerExists = true;
-    state->dataUnitVentilators->UnitVent(1).ATMixerType = DataHVACGlobals::ATMixer_SupplySide;
+    state->dataUnitVentilators->UnitVent(1).ATMixerType = HVAC::MixerType::SupplySide;
 
     OAMassFlowRate = UnitVentilator::SetOAMassFlowRateForCoolingVariablePercent(*state, UnitVentNum, MinOA, MassFlowRate, MaxOA, Tinlet, Toutdoor);
     ExpectedOAMassFlowRate = 1.02133;

@@ -1,7 +1,7 @@
-// EnergyPlus, Copyright (c) 1996-2023, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
-// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other
+// National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
 // contributors. All rights reserved.
 //
 // NOTICE: This Software was developed under funding from the U.S. Department of Energy and the
@@ -73,7 +73,7 @@ namespace HeatRecovery {
         Num
     };
 
-    enum class HXConfigurationType
+    enum class HXExchConfigType
     {
         Invalid = -1,
         Plate,
@@ -108,10 +108,10 @@ namespace HeatRecovery {
 
     struct HeatExchCond
     {
-        std::string Name;                                   // name of component
-        int ExchType = 0;                                   // Integer equivalent to ExchType
+        std::string Name; // name of component
+        HVAC::HXType type = HVAC::HXType::Invalid;
         std::string HeatExchPerfName;                       // Desiccant balanced heat exchanger performance data name
-        int SchedPtr = 0;                                   // index of schedule
+        Sched::Schedule *availSched = nullptr;              // schedule // availability ?
         HXConfiguration FlowArr = HXConfiguration::Invalid; // flow Arrangement:
         bool EconoLockOut = false;
         Real64 hARatio = 0.0;          // ratio of supply side h*A to secondary side h*A
@@ -145,16 +145,16 @@ namespace HeatRecovery {
         int PerfDataIndex = 0; // Performance data index allocating performance data number to heat exchanger
         Real64 FaceArea = 0.0; // face area of balanced desiccant heat exchangers to determine face velocity [m2]
         // generic hx performance inputs
-        Real64 HeatEffectSensible100 = 0.0; // heating sensible effectiveness at 100% rated air flow
-        Real64 HeatEffectSensible75 = 0.0;  // heating sensible effectiveness at 75% rated air flow
-        Real64 HeatEffectLatent100 = 0.0;   // heating latent effectiveness at 100% rated air flow
-        Real64 HeatEffectLatent75 = 0.0;    // heating latent effectiveness at 75% rated air flow
-        Real64 CoolEffectSensible100 = 0.0; // cooling sensible effectiveness at 100% rated air flow
-        Real64 CoolEffectSensible75 = 0.0;  // cooling sensible effectiveness at 75% rated air flow
-        Real64 CoolEffectLatent100 = 0.0;   // cooling latent effectiveness at 100% rated air flow
-        Real64 CoolEffectLatent75 = 0.0;    // cooling latent effectiveness at 75% rated air flow
+        Real64 HeatEffectSensible100 = 0.0;   // heating sensible effectiveness at 100% rated air flow
+        Real64 HeatEffectLatent100 = 0.0;     // heating latent effectiveness at 100% rated air flow
+        Real64 CoolEffectSensible100 = 0.0;   // cooling sensible effectiveness at 100% rated air flow
+        Real64 CoolEffectLatent100 = 0.0;     // cooling latent effectiveness at 100% rated air flow
+        int HeatEffectSensibleCurveIndex = 0; // heating sensible effectiveness multiplier curve to HeatEffectSensible100
+        int HeatEffectLatentCurveIndex = 0;   // heating latent effectiveness multiplier curve to HeatEffectLatent100
+        int CoolEffectSensibleCurveIndex = 0; // cooling sensible effectiveness multiplier curve to CoolEffectSensible100
+        int CoolEffectLatentCurveIndex = 0;   // cooling latent effectiveness multiplier curve to CoolEffectLatent100
         // 1 = None, 2 = Bypass, 3 = Stop Rotary HX Rotation
-        HXConfigurationType ExchConfig = HXConfigurationType::Invalid; // parameter equivalent of HX configuration, plate or rotary
+        HXExchConfigType ExchConfig = HXExchConfigType::Invalid; // parameter equivalent of HX configuration, plate or rotary
         // frost control parameters
         FrostControlOption FrostControlType = FrostControlOption::Invalid; // type of frost control used if any
         Real64 ThresholdTemperature = 0.0;                                 // threshold temperature for frost control
@@ -200,8 +200,9 @@ namespace HeatRecovery {
         Array1D_string NumericFieldNames;
         bool MySetPointTest = true;
         bool MySizeFlag = true;
+        bool hasZoneERVController = false; // If this HX is controlled by a ZoneHVAC:EnergyRecoveryVentilator:Controller
 
-        void initialize(EnergyPlusData &state, int CompanionCoilIndex, int CompanionCoilType_Num);
+        void initialize(EnergyPlusData &state, int CompanionCoilIndex, HVAC::CoilType const companionCoilType);
 
         void size(EnergyPlusData &state);
 
@@ -214,7 +215,7 @@ namespace HeatRecovery {
         void CalcAirToAirGenericHeatExch(EnergyPlusData &state,
                                          bool HXUnitOn,                                      // flag to simulate heat exchanger heat recovery
                                          bool FirstHVACIteration,                            // first HVAC iteration flag
-                                         int FanOpMode,                                      // Supply air fan operating mode (1=cycling, 2=constant)
+                                         HVAC::FanOp const fanOp,                            // Supply air fan operating mode (1=cycling, 2=constant)
                                          ObjexxFCL::Optional_bool_const EconomizerFlag = _,  // economizer flag pass by air loop or OA sys
                                          ObjexxFCL::Optional_bool_const HighHumCtrlFlag = _, // high humidity control flag passed by airloop or OA sys
                                          ObjexxFCL::Optional<Real64 const> HXPartLoadRatio = _ //
@@ -222,11 +223,12 @@ namespace HeatRecovery {
 
         void
         CalcDesiccantBalancedHeatExch(EnergyPlusData &state,
-                                      bool HXUnitOn,           // flag to simulate heat exchager heat recovery
-                                      bool FirstHVACIteration, // First HVAC iteration flag
-                                      int FanOpMode,           // Supply air fan operating mode (1=cycling, 2=constant)
-                                      Real64 PartLoadRatio,    // Part load ratio requested of DX compressor
-                                      int CompanionCoilIndex,  // index of companion cooling coil
+                                      bool HXUnitOn,                    // flag to simulate heat exchager heat recovery
+                                      bool FirstHVACIteration,          // First HVAC iteration flag
+                                      HVAC::FanOp const fanOp,          // Supply air fan operating mode (1=cycling, 2=constant)
+                                      Real64 PartLoadRatio,             // Part load ratio requested of DX compressor
+                                      int CompanionCoilIndex,           // index of companion cooling coil
+                                      HVAC::CoilType companionCoilType, // type of cooling coil
                                       bool RegenInletIsOANode, // Flag to determine if regen side inlet is OANode, if so this air stream cycles
                                       ObjexxFCL::Optional_bool_const EconomizerFlag = _, // economizer flag pass by air loop or OA sys
                                       ObjexxFCL::Optional_bool_const HighHumCtrlFlag = _ // high humidity control flag passed by airloop or OA sys
@@ -393,14 +395,14 @@ namespace HeatRecovery {
                          std::string_view CompName,                             // name of the heat exchanger unit
                          bool FirstHVACIteration,                               // TRUE if 1st HVAC simulation of system timestep
                          int &CompIndex,                                        // Pointer to Component
-                         int FanOpMode,                                         // Supply air fan operating mode
+                         HVAC::FanOp const fanOp,                               // Supply air fan operating mode
                          ObjexxFCL::Optional<Real64 const> HXPartLoadRatio = _, // Part load ratio requested of DX compressor
                          ObjexxFCL::Optional_bool_const HXUnitEnable = _,       // Flag to operate heat exchanger
                          ObjexxFCL::Optional_int_const CompanionCoilIndex = _,  // index of companion cooling coil
                          ObjexxFCL::Optional_bool_const RegenInletIsOANode = _, // flag to determine if supply inlet is OA node, if so air flow cycles
                          ObjexxFCL::Optional_bool_const EconomizerFlag = _,     // economizer operation flag passed by airloop or OA sys
                          ObjexxFCL::Optional_bool_const HighHumCtrlFlag = _,    // high humidity control flag passed by airloop or OA sys
-                         ObjexxFCL::Optional_int_const CompanionCoilType_Num = _ // cooling coil type of coil
+                         ObjexxFCL::Optional<HVAC::CoilType const> coilTypeOpt = _ // cooling coil type of coil
     );
 
     void GetHeatRecoveryInput(EnergyPlusData &state);
@@ -451,17 +453,10 @@ namespace HeatRecovery {
                                 bool &ErrorsFound          // set to true if problem
     );
 
-    int GetHeatExchangerObjectTypeNum(EnergyPlusData &state,
-                                      std::string const &HXName, // must match HX names for the ExchCond type
-                                      bool &ErrorsFound          // set to true if problem
-    );
-
-    void SetHeatExchangerData(EnergyPlusData &state,
-                              int HXNum,                                          // Index of HX
-                              bool &ErrorsFound,                                  // Set to true if certain errors found
-                              std::string const &HXName,                          // Name of HX
-                              ObjexxFCL::Optional<Real64> SupplyAirVolFlow = _,   // HX supply air flow rate    [m3/s]
-                              ObjexxFCL::Optional<Real64> SecondaryAirVolFlow = _ // HX secondary air flow rate [m3/s]
+    HVAC::HXType GetHeatExchangerObjectTypeNum(EnergyPlusData &state,
+                                               std::string const &HXName, // must match HX names for the ExchCond type
+                                               int &WhichHX,
+                                               bool &ErrorsFound // set to true if problem
     );
 
 } // namespace HeatRecovery
@@ -494,6 +489,7 @@ struct HeatRecoveryData : BaseGlobalStruct
     ErrorTracker2 error4;
     ErrorTracker2 error5;
     ErrorTracker2 error6;
+    ErrorTracker2 error7;
     std::string OutputCharProc;       // character string for warning messages
     std::string OutputCharRegen;      // character string for warning messages
     Real64 TimeStepSysLast7 = 0.0;    // last system time step (used to check for downshifting)
@@ -508,9 +504,17 @@ struct HeatRecoveryData : BaseGlobalStruct
     Array1D<HeatRecovery::HeatExchCond> ExchCond;
     Array1D<HeatRecovery::BalancedDesDehumPerfData> BalDesDehumPerfData;
 
+    void init_constant_state([[maybe_unused]] EnergyPlusData &state) override
+    {
+    }
+
+    void init_state([[maybe_unused]] EnergyPlusData &state) override
+    {
+    }
+
     void clear_state() override
     {
-        *this = HeatRecoveryData();
+        new (this) HeatRecoveryData();
     }
 };
 

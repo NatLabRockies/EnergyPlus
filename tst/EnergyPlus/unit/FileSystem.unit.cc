@@ -1,7 +1,7 @@
-// EnergyPlus, Copyright (c) 1996-2023, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
-// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other
+// National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
 // contributors. All rights reserved.
 //
 // NOTICE: This Software was developed under funding from the U.S. Department of Energy and the
@@ -69,20 +69,20 @@ TEST(FileSystem, movefile_test)
     std::string line;
     std::stringstream buffer;
     std::ofstream ofs(filename);
-    ofs << "Version, 9.3;" << std::endl;
+    ofs << "Version," + DataStringGlobals::MatchVersion + ";" << std::endl;
     ofs.close();
 
     // read text file
     std::ifstream ifs(filename);
     buffer << ifs.rdbuf();
     // check that text file was created correctly
-    EXPECT_EQ(buffer.str(), "Version, 9.3;\n");
+    EXPECT_EQ(buffer.str(), "Version," + DataStringGlobals::MatchVersion + ";\n");
     ifs.close();
 
     // create temporary text file to move to existing file created above
     std::string filename_temp = "FileSystemTest_temp.idf";
     std::ofstream ofs_temp(filename_temp);
-    ofs_temp << "Version, 9.4;" << std::endl;
+    ofs_temp << "Version," + DataStringGlobals::MatchVersion + ";" << std::endl;
     ofs_temp.close();
 
     // move temporary text file to overwrite existing file
@@ -92,7 +92,7 @@ TEST(FileSystem, movefile_test)
     std::ifstream ifs_new(filename);
     buffer_new << ifs_new.rdbuf();
     // check that original text file was overwritten by temporary text file
-    EXPECT_EQ(buffer_new.str(), "Version, 9.4;\n");
+    EXPECT_EQ(buffer_new.str(), "Version," + DataStringGlobals::MatchVersion + ";\n");
     ifs_new.close();
 
     // remove files
@@ -116,7 +116,7 @@ TEST_F(EnergyPlusFixture, FileSystemGetFileType)
 {
     fs::path filePath0("/eplus/myfile.idf");
     auto ext = EnergyPlus::FileSystem::getFileType(filePath0);
-    EXPECT_TRUE(compare_enums(EnergyPlus::FileSystem::FileTypes::IDF, ext));
+    EXPECT_ENUM_EQ(EnergyPlus::FileSystem::FileTypes::IDF, ext);
 
     fs::path filePath1("./schedulefileA.CSV");
     ext = EnergyPlus::FileSystem::getFileType(filePath1);
@@ -244,7 +244,7 @@ TEST(FileSystem, make_and_remove_Directory)
     EXPECT_TRUE(EnergyPlus::FileSystem::fileExists(filePath));
     EXPECT_FALSE(EnergyPlus::FileSystem::directoryExists((filePath)));
 
-    fs::remove_all("sandbox");
+    fs::remove_all("sandboxA");
 }
 
 TEST(FileSystem, Elaborate)
@@ -272,7 +272,7 @@ TEST(FileSystem, Elaborate)
     fs::remove_all("sandboxB");
 }
 
-// Windows support for symlink isn't great, you'd need admin priviledges
+// Windows support for symlink isn't great, you'd need admin privileges
 #ifndef _WIN32
 TEST(FileSystem, getAbsolutePath_WithSymlink)
 {

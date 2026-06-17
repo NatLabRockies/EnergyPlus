@@ -4,7 +4,7 @@
 !-      Use '!' comments if they need to be retained when using the IDFEditor.
 !-   ===========  ALL OBJECTS IN CLASS: VERSION ===========
 
-  Version,23.1;
+  Version,26.2;
 
 !-   ===========  ALL OBJECTS IN CLASS: SIMULATIONCONTROL ===========
 
@@ -55,8 +55,8 @@
 !-   ===========  ALL OBJECTS IN CLASS: CONVERGENCELIMITS ===========
 
   ConvergenceLimits,
-    15,                       !- Minimum System Timestep {minutes}
-    5;                        !- Maximum HVAC Iterations
+    15,                      !- Minimum System Timestep {minutes}
+    5;                       !- Maximum HVAC Iterations
 
 !-   ===========  ALL OBJECTS IN CLASS: SITE:LOCATION ===========
 
@@ -131,7 +131,7 @@
     1,                       !- Begin Month
     1,                       !- Begin Day of Month
     ,                        !- Begin Year
-    1,                      !- End Month
+    1,                       !- End Month
     31,                      !- End Day of Month
     ,                        !- End Year
     Sunday,                  !- Day of Week for Start Day
@@ -142,34 +142,34 @@
     Yes;                     !- Use Weather File Snow Indicators
 
   RunPeriod,
-    RUNPERIOD 2,              !- Name
-    4,                        !- Begin Month
-    1,                        !- Begin Day of Month
-    ,                         !- Begin Year
-    4,                        !- End Month
-    30,                       !- End Day of Month
-    ,                         !- End Year
-    Sunday,                   !- Day of Week for Start Day
-    No,                       !- Use Weather File Holidays and Special Days
-    No,                       !- Use Weather File Daylight Saving Period
-    No,                       !- Apply Weekend Holiday Rule
-    Yes,                      !- Use Weather File Rain Indicators
-    Yes;                      !- Use Weather File Snow Indicators
+    RUNPERIOD 2,             !- Name
+    4,                       !- Begin Month
+    1,                       !- Begin Day of Month
+    ,                        !- Begin Year
+    4,                       !- End Month
+    30,                      !- End Day of Month
+    ,                        !- End Year
+    Sunday,                  !- Day of Week for Start Day
+    No,                      !- Use Weather File Holidays and Special Days
+    No,                      !- Use Weather File Daylight Saving Period
+    No,                      !- Apply Weekend Holiday Rule
+    Yes,                     !- Use Weather File Rain Indicators
+    Yes;                     !- Use Weather File Snow Indicators
 
   RunPeriod,
-    RUNPERIOD 3,              !- Name
-    7,                        !- Begin Month
-    1,                        !- Begin Day of Month
-    ,                         !- Begin Year
-    7,                        !- End Month
-    31,                       !- End Day of Month
-    ,                         !- End Year
-    Sunday,                   !- Day of Week for Start Day
-    No,                       !- Use Weather File Holidays and Special Days
-    No,                       !- Use Weather File Daylight Saving Period
-    No,                       !- Apply Weekend Holiday Rule
-    Yes,                      !- Use Weather File Rain Indicators
-    Yes;                      !- Use Weather File Snow Indicators
+    RUNPERIOD 3,             !- Name
+    7,                       !- Begin Month
+    1,                       !- Begin Day of Month
+    ,                        !- Begin Year
+    7,                       !- End Month
+    31,                      !- End Day of Month
+    ,                        !- End Year
+    Sunday,                  !- Day of Week for Start Day
+    No,                      !- Use Weather File Holidays and Special Days
+    No,                      !- Use Weather File Daylight Saving Period
+    No,                      !- Apply Weekend Holiday Rule
+    Yes,                     !- Use Weather File Rain Indicators
+    Yes;                     !- Use Weather File Snow Indicators
 
 !-   ===========  ALL OBJECTS IN CLASS: RUNPERIODCONTROL:SPECIALDAYS ===========
 
@@ -420,16 +420,6 @@
     For: Sunday Holidays AllOtherDays, !- Field 16
     Until: 24:00,0.0;        !- Field 17
 
-                             !- Field 12
-                             !- Field 16
-                             !- Field 18
-                             !- Field 20
-                             !- Field 22
-                             !- Field 32
-                             !- Field 34
-                             !- Field 36
-                             !- Field 46
-
   Schedule:Compact,
     BLDG_LIGHT_SCH,          !- Name
     Fraction,                !- Schedule Type Limits Name
@@ -470,22 +460,6 @@
     Until: 19:00,0.0,        !- Field 5
     Until: 24:00,1.0;        !- Field 7
 
-                             !- Field 4
-                             !- Field 6
-                             !- Field 8
-                             !- Field 10
-                             !- Field 12
-                             !- Field 14
-                             !- Field 16
-                             !- Field 22
-                             !- Field 24
-                             !- Field 26
-                             !- Field 28
-                             !- Field 30
-                             !- Field 32
-                             !- Field 38
-                             !- Field 40
-
   Schedule:Compact,
     BLDG_EQUIP_SCH,          !- Name
     Fraction,                !- Schedule Type Limits Name
@@ -513,8 +487,6 @@
     Until: 06:00,0.2210823264, !- Field 37
     Until: 18:00,0.2847429789, !- Field 39
     Until: 24:00,0.2210823264; !- Field 41
-
-                             !- Field 42
 
   Schedule:Compact,
     DataCenter_EQUIP_SCH,    !- Name
@@ -604,8 +576,6 @@
     For: AllOtherDays,       !- Field 118
     Until: 24:00,1;          !- Field 119
 
-                             !- Field 23
-
   Schedule:Compact,
     BLDG_OCC_SCH,            !- Name
     Fraction,                !- Schedule Type Limits Name
@@ -637,8 +607,6 @@
     Until: 06:00,0.0,        !- Field 45
     Until: 18:00,0.05,       !- Field 47
     Until: 24:00,0.0;        !- Field 49
-
-                             !- Field 102
 
   Schedule:Compact,
     BLDG_OCC_SCH_w_SB,       !- Name
@@ -704,14 +672,6 @@
     Until: 06:00,0.0,        !- Field 111
     Until: 18:00,0.05,       !- Field 113
     Until: 24:00,0.0;        !- Field 115
-
-                             !- Field 24
-                             !- Field 28
-                             !- Field 32
-                             !- Field 73
-                             !- Field 77
-                             !- Field 81
-                             !- Field 102
 
   Schedule:Compact,
     BLDG_OCC_SCH_wo_SB,      !- Name
@@ -1024,13 +984,6 @@
     For: Sunday Holidays AllOtherDays, !- Field 38
     Until: 24:00,15.6;       !- Field 39
 
-                             !- Field 24
-                             !- Field 28
-                             !- Field 32
-                             !- Field 73
-                             !- Field 77
-                             !- Field 81
-
   Schedule:Compact,
     HTGSETP_SCH_YES_OPTIMUM_w_SB,  !- Name
     Temperature,             !- Schedule Type Limits Name
@@ -1203,13 +1156,6 @@
     Until: 24:00,26.7,       !- Field 36
     For: Sunday Holidays AllOtherDays, !- Field 38
     Until: 24:00,26.7;       !- Field 39
-
-                             !- Field 24
-                             !- Field 28
-                             !- Field 32
-                             !- Field 73
-                             !- Field 77
-                             !- Field 81
 
   Schedule:Compact,
     CLGSETP_SCH_YES_OPTIMUM_w_SB,  !- Name
@@ -2433,9 +2379,6 @@
     1;                       !- Multiplier
 
 !-   ===========  ALL OBJECTS IN CLASS: BUILDINGSURFACE:DETAILED ===========
-                                        !- X,Y,Z  1 {m}
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
 
   BuildingSurface:Detailed,
     Basement_Wall_East,      !- Name
@@ -2454,11 +2397,6 @@
     73.107200000000,48.738100000000,-2.439000000000,  !- X,Y,Z ==> Vertex 3 {m}
     73.107200000000,48.738100000000,0.000000000000;  !- X,Y,Z ==> Vertex 4 {m}
 
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
-
   BuildingSurface:Detailed,
     Perimeter_bot_ZN_2_Floor-PPAutoCreateOther,  !- Name
     Ceiling,                 !- Surface Type
@@ -2475,11 +2413,6 @@
     68.534000000000,4.573200000000,0.000000000000,  !- X,Y,Z ==> Vertex 2 {m}
     73.107200000000,0.000000000000,0.000000000000,  !- X,Y,Z ==> Vertex 3 {m}
     73.107200000000,48.738100000000,0.000000000000;  !- X,Y,Z ==> Vertex 4 {m}
-
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
 
   BuildingSurface:Detailed,
     Perimeter_bot_ZN_1_Floor-PPAutoCreateOther,  !- Name
@@ -2498,11 +2431,6 @@
     73.107200000000,0.000000000000,0.000000000000,  !- X,Y,Z ==> Vertex 3 {m}
     68.534000000000,4.573200000000,0.000000000000;  !- X,Y,Z ==> Vertex 4 {m}
 
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
-
   BuildingSurface:Detailed,
     Core_bot_ZN_5_Ceiling,   !- Name
     Ceiling,                 !- Surface Type
@@ -2519,11 +2447,6 @@
     5.487600000000,4.573200000000,2.744000000000,  !- X,Y,Z ==> Vertex 2 {m}
     68.534000000000,4.573200000000,2.744000000000,  !- X,Y,Z ==> Vertex 3 {m}
     68.534000000000,44.165000000000,2.744000000000;  !- X,Y,Z ==> Vertex 4 {m}
-
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
 
   BuildingSurface:Detailed,
     DataCenter_basement_ZN_6_Ceiling-Core_bot_ZN_5-PPAutoCreateOther,  !- Name
@@ -2542,11 +2465,6 @@
     5.487600000000,4.573200000000,0.000000000000,  !- X,Y,Z ==> Vertex 3 {m}
     5.487600000000,44.165000000000,0.000000000000;  !- X,Y,Z ==> Vertex 4 {m}
 
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
-
   BuildingSurface:Detailed,
     Core_bot_ZN_5_Wall_South,!- Name
     Wall,                    !- Surface Type
@@ -2563,11 +2481,6 @@
     5.487600000000,4.573200000000,0.000000000000,  !- X,Y,Z ==> Vertex 2 {m}
     68.534000000000,4.573200000000,0.000000000000,  !- X,Y,Z ==> Vertex 3 {m}
     68.534000000000,4.573200000000,2.744000000000;  !- X,Y,Z ==> Vertex 4 {m}
-
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
 
   BuildingSurface:Detailed,
     Core_bot_ZN_5_Wall_West, !- Name
@@ -2586,11 +2499,6 @@
     5.487600000000,4.573200000000,0.000000000000,  !- X,Y,Z ==> Vertex 3 {m}
     5.487600000000,4.573200000000,2.744000000000;  !- X,Y,Z ==> Vertex 4 {m}
 
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
-
   BuildingSurface:Detailed,
     Core_bot_ZN_5_Wall_North,!- Name
     Wall,                    !- Surface Type
@@ -2607,11 +2515,6 @@
     68.534000000000,44.165000000000,0.000000000000,  !- X,Y,Z ==> Vertex 2 {m}
     5.487600000000,44.165000000000,0.000000000000,  !- X,Y,Z ==> Vertex 3 {m}
     5.487600000000,44.165000000000,2.744000000000;  !- X,Y,Z ==> Vertex 4 {m}
-
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
 
   BuildingSurface:Detailed,
     Core_bot_ZN_5_Wall_East, !- Name
@@ -2630,11 +2533,6 @@
     68.534000000000,44.165000000000,0.000000000000,  !- X,Y,Z ==> Vertex 3 {m}
     68.534000000000,44.165000000000,2.744000000000;  !- X,Y,Z ==> Vertex 4 {m}
 
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
-
   BuildingSurface:Detailed,
     Core_mid_ZN_5_Ceiling,   !- Name
     Ceiling,                 !- Surface Type
@@ -2651,11 +2549,6 @@
     5.487600000000,4.573200000000,19.512300000000,  !- X,Y,Z ==> Vertex 2 {m}
     68.534000000000,4.573200000000,19.512300000000,  !- X,Y,Z ==> Vertex 3 {m}
     68.534000000000,44.165000000000,19.512300000000;  !- X,Y,Z ==> Vertex 4 {m}
-
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
 
   BuildingSurface:Detailed,
     Core_mid_ZN_5_Floor,     !- Name
@@ -2674,11 +2567,6 @@
     5.487600000000,4.573200000000,16.768300000000,  !- X,Y,Z ==> Vertex 3 {m}
     5.487600000000,44.165000000000,16.768300000000;  !- X,Y,Z ==> Vertex 4 {m}
 
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
-
   BuildingSurface:Detailed,
     Core_mid_ZN_5_Wall_South,!- Name
     Wall,                    !- Surface Type
@@ -2695,11 +2583,6 @@
     5.487600000000,4.573200000000,16.768300000000,  !- X,Y,Z ==> Vertex 2 {m}
     68.534000000000,4.573200000000,16.768300000000,  !- X,Y,Z ==> Vertex 3 {m}
     68.534000000000,4.573200000000,19.512300000000;  !- X,Y,Z ==> Vertex 4 {m}
-
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
 
   BuildingSurface:Detailed,
     Core_mid_ZN_5_Wall_West, !- Name
@@ -2718,11 +2601,6 @@
     5.487600000000,4.573200000000,16.768300000000,  !- X,Y,Z ==> Vertex 3 {m}
     5.487600000000,4.573200000000,19.512300000000;  !- X,Y,Z ==> Vertex 4 {m}
 
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
-
   BuildingSurface:Detailed,
     Core_mid_ZN_5_Wall_North,!- Name
     Wall,                    !- Surface Type
@@ -2739,11 +2617,6 @@
     68.534000000000,44.165000000000,16.768300000000,  !- X,Y,Z ==> Vertex 2 {m}
     5.487600000000,44.165000000000,16.768300000000,  !- X,Y,Z ==> Vertex 3 {m}
     5.487600000000,44.165000000000,19.512300000000;  !- X,Y,Z ==> Vertex 4 {m}
-
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
 
   BuildingSurface:Detailed,
     Core_mid_ZN_5_Wall_East, !- Name
@@ -2762,11 +2635,6 @@
     68.534000000000,44.165000000000,16.768300000000,  !- X,Y,Z ==> Vertex 3 {m}
     68.534000000000,44.165000000000,19.512300000000;  !- X,Y,Z ==> Vertex 4 {m}
 
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
-
   BuildingSurface:Detailed,
     Core_top_ZN_5_Ceiling,   !- Name
     Ceiling,                 !- Surface Type
@@ -2783,11 +2651,6 @@
     5.487600000000,4.573200000000,36.280600000000,  !- X,Y,Z ==> Vertex 2 {m}
     68.534000000000,4.573200000000,36.280600000000,  !- X,Y,Z ==> Vertex 3 {m}
     68.534000000000,44.165000000000,36.280600000000;  !- X,Y,Z ==> Vertex 4 {m}
-
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
 
   BuildingSurface:Detailed,
     Core_top_ZN_5_Floor,     !- Name
@@ -2806,11 +2669,6 @@
     5.487600000000,4.573200000000,33.536600000000,  !- X,Y,Z ==> Vertex 3 {m}
     5.487600000000,44.165000000000,33.536600000000;  !- X,Y,Z ==> Vertex 4 {m}
 
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
-
   BuildingSurface:Detailed,
     Core_top_ZN_5_Wall_South,!- Name
     Wall,                    !- Surface Type
@@ -2827,11 +2685,6 @@
     5.487600000000,4.573200000000,33.536600000000,  !- X,Y,Z ==> Vertex 2 {m}
     68.534000000000,4.573200000000,33.536600000000,  !- X,Y,Z ==> Vertex 3 {m}
     68.534000000000,4.573200000000,36.280600000000;  !- X,Y,Z ==> Vertex 4 {m}
-
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
 
   BuildingSurface:Detailed,
     Core_top_ZN_5_Wall_West, !- Name
@@ -2850,11 +2703,6 @@
     5.487600000000,4.573200000000,33.536600000000,  !- X,Y,Z ==> Vertex 3 {m}
     5.487600000000,4.573200000000,36.280600000000;  !- X,Y,Z ==> Vertex 4 {m}
 
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
-
   BuildingSurface:Detailed,
     Core_top_ZN_5_Wall_North,!- Name
     Wall,                    !- Surface Type
@@ -2871,11 +2719,6 @@
     68.534000000000,44.165000000000,33.536600000000,  !- X,Y,Z ==> Vertex 2 {m}
     5.487600000000,44.165000000000,33.536600000000,  !- X,Y,Z ==> Vertex 3 {m}
     5.487600000000,44.165000000000,36.280600000000;  !- X,Y,Z ==> Vertex 4 {m}
-
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
 
   BuildingSurface:Detailed,
     Core_top_ZN_5_Wall_East, !- Name
@@ -2894,11 +2737,6 @@
     68.534000000000,44.165000000000,33.536600000000,  !- X,Y,Z ==> Vertex 3 {m}
     68.534000000000,44.165000000000,36.280600000000;  !- X,Y,Z ==> Vertex 4 {m}
 
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
-
   BuildingSurface:Detailed,
     Perimeter_bot_ZN_3_Wall_North,  !- Name
     Wall,                    !- Surface Type
@@ -2915,11 +2753,6 @@
     73.107200000000,48.738100000000,0.000000000000,  !- X,Y,Z ==> Vertex 2 {m}
     0.000000000000,48.738100000000,0.000000000000,  !- X,Y,Z ==> Vertex 3 {m}
     0.000000000000,48.738100000000,2.744000000000;  !- X,Y,Z ==> Vertex 4 {m}
-
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
 
   BuildingSurface:Detailed,
     Perimeter_bot_ZN_3_Ceiling,  !- Name
@@ -2938,11 +2771,6 @@
     68.534000000000,44.165000000000,2.744000000000,  !- X,Y,Z ==> Vertex 3 {m}
     73.107200000000,48.738100000000,2.744000000000;  !- X,Y,Z ==> Vertex 4 {m}
 
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
-
   BuildingSurface:Detailed,
     Perimeter_bot_ZN_3_Floor,!- Name
     Floor,                   !- Surface Type
@@ -2959,11 +2787,6 @@
     68.534000000000,44.165000000000,0.000000000000,  !- X,Y,Z ==> Vertex 2 {m}
     16.078200000000,44.165000000000,0.000000000000,  !- X,Y,Z ==> Vertex 3 {m}
     16.078200000000,48.738100000000,0.000000000000;  !- X,Y,Z ==> Vertex 4 {m}
-
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
 
   BuildingSurface:Detailed,
     Perimeter_bot_ZN_3_Wall_West,  !- Name
@@ -2982,11 +2805,6 @@
     4.573200000000,44.165000000000,0.000000000000,  !- X,Y,Z ==> Vertex 3 {m}
     4.573200000000,44.165000000000,2.744000000000;  !- X,Y,Z ==> Vertex 4 {m}
 
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
-
   BuildingSurface:Detailed,
     Core_bot_ZN_5_Wall_North-PPAutoCreateOther,  !- Name
     Wall,                    !- Surface Type
@@ -3003,11 +2821,6 @@
     5.487600000000,44.165000000000,0.000000000000,  !- X,Y,Z ==> Vertex 2 {m}
     68.534000000000,44.165000000000,0.000000000000,  !- X,Y,Z ==> Vertex 3 {m}
     68.534000000000,44.165000000000,2.744000000000;  !- X,Y,Z ==> Vertex 4 {m}
-
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
 
   BuildingSurface:Detailed,
     Perimeter_bot_ZN_2_Wall_North-PPAutoCreateOther,  !- Name
@@ -3026,11 +2839,6 @@
     73.107200000000,48.738100000000,0.000000000000,  !- X,Y,Z ==> Vertex 3 {m}
     73.107200000000,48.738100000000,2.744000000000;  !- X,Y,Z ==> Vertex 4 {m}
 
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
-
   BuildingSurface:Detailed,
     Perimeter_bot_ZN_2_Wall_East,  !- Name
     Wall,                    !- Surface Type
@@ -3047,11 +2855,6 @@
     73.107200000000,0.000000000000,0.000000000000,  !- X,Y,Z ==> Vertex 2 {m}
     73.107200000000,48.738100000000,0.000000000000,  !- X,Y,Z ==> Vertex 3 {m}
     73.107200000000,48.738100000000,2.744000000000;  !- X,Y,Z ==> Vertex 4 {m}
-
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
 
   BuildingSurface:Detailed,
     Perimeter_bot_ZN_2_Ceiling,  !- Name
@@ -3070,11 +2873,6 @@
     73.107200000000,0.000000000000,2.744000000000,  !- X,Y,Z ==> Vertex 3 {m}
     73.107200000000,48.738100000000,2.744000000000;  !- X,Y,Z ==> Vertex 4 {m}
 
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
-
   BuildingSurface:Detailed,
     Perimeter_bot_ZN_2_Floor,!- Name
     Floor,                   !- Surface Type
@@ -3091,11 +2889,6 @@
     73.107200000000,0.000000000000,0.000000000000,  !- X,Y,Z ==> Vertex 2 {m}
     68.534000000000,4.573200000000,0.000000000000,  !- X,Y,Z ==> Vertex 3 {m}
     68.534000000000,44.165000000000,0.000000000000;  !- X,Y,Z ==> Vertex 4 {m}
-
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
 
   BuildingSurface:Detailed,
     Perimeter_bot_ZN_2_Wall_North,  !- Name
@@ -3114,11 +2907,6 @@
     68.534000000000,44.165000000000,0.000000000000,  !- X,Y,Z ==> Vertex 3 {m}
     68.534000000000,44.165000000000,2.744000000000;  !- X,Y,Z ==> Vertex 4 {m}
 
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
-
   BuildingSurface:Detailed,
     Core_bot_ZN_5_Wall_East-PPAutoCreateOther,  !- Name
     Wall,                    !- Surface Type
@@ -3135,11 +2923,6 @@
     68.534000000000,44.165000000000,0.000000000000,  !- X,Y,Z ==> Vertex 2 {m}
     68.534000000000,4.573200000000,0.000000000000,  !- X,Y,Z ==> Vertex 3 {m}
     68.534000000000,4.573200000000,2.744000000000;  !- X,Y,Z ==> Vertex 4 {m}
-
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
 
   BuildingSurface:Detailed,
     Perimeter_bot_ZN_1_Wall_East-PPAutoCreateOther,  !- Name
@@ -3158,11 +2941,6 @@
     73.107200000000,0.000000000000,0.000000000000,  !- X,Y,Z ==> Vertex 3 {m}
     73.107200000000,0.000000000000,2.744000000000;  !- X,Y,Z ==> Vertex 4 {m}
 
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
-
   BuildingSurface:Detailed,
     Perimeter_bot_ZN_1_Wall_South,  !- Name
     Wall,                    !- Surface Type
@@ -3179,11 +2957,6 @@
     0.000000000000,0.000000000000,0.000000000000,  !- X,Y,Z ==> Vertex 2 {m}
     73.107200000000,0.000000000000,0.000000000000,  !- X,Y,Z ==> Vertex 3 {m}
     73.107200000000,0.000000000000,2.744000000000;  !- X,Y,Z ==> Vertex 4 {m}
-
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
 
   BuildingSurface:Detailed,
     Perimeter_bot_ZN_1_Ceiling,  !- Name
@@ -3202,11 +2975,6 @@
     73.107200000000,0.000000000000,2.744000000000,  !- X,Y,Z ==> Vertex 3 {m}
     68.534000000000,4.573200000000,2.744000000000;  !- X,Y,Z ==> Vertex 4 {m}
 
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
-
   BuildingSurface:Detailed,
     DataCenter_basement_ZN_6-Perimeter_bot_ZN_1-PPAutoCreateOther,  !- Name
     Floor,                   !- Surface Type
@@ -3223,11 +2991,6 @@
     16.078200000000,0.000000000000,0.000000000000,  !- X,Y,Z ==> Vertex 2 {m}
     0.000000000000,0.000000000000,0.000000000000,  !- X,Y,Z ==> Vertex 3 {m}
     4.573200000000,4.573200000000,0.000000000000;  !- X,Y,Z ==> Vertex 4 {m}
-
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
 
   BuildingSurface:Detailed,
     Perimeter_bot_ZN_1_Wall_East,  !- Name
@@ -3246,11 +3009,6 @@
     68.534000000000,4.573200000000,0.000000000000,  !- X,Y,Z ==> Vertex 3 {m}
     68.534000000000,4.573200000000,2.744000000000;  !- X,Y,Z ==> Vertex 4 {m}
 
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
-
   BuildingSurface:Detailed,
     DataCenter_bot_ZN_6_Wall_South-PPAutoCreateOther,  !- Name
     Wall,                    !- Surface Type
@@ -3267,11 +3025,6 @@
     5.487600000000,4.573200000000,0.000000000000,  !- X,Y,Z ==> Vertex 2 {m}
     4.573200000000,4.573200000000,0.000000000000,  !- X,Y,Z ==> Vertex 3 {m}
     4.573200000000,4.573200000000,2.744000000000;  !- X,Y,Z ==> Vertex 4 {m}
-
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
 
   BuildingSurface:Detailed,
     Perimeter_bot_ZN_4_Wall_South-PPAutoCreateOther,  !- Name
@@ -3290,11 +3043,6 @@
     0.000000000000,0.000000000000,0.000000000000,  !- X,Y,Z ==> Vertex 3 {m}
     0.000000000000,0.000000000000,2.744000000000;  !- X,Y,Z ==> Vertex 4 {m}
 
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
-
   BuildingSurface:Detailed,
     Perimeter_bot_ZN_4_Wall_West,  !- Name
     Wall,                    !- Surface Type
@@ -3311,11 +3059,6 @@
     0.000000000000,48.738100000000,0.000000000000,  !- X,Y,Z ==> Vertex 2 {m}
     0.000000000000,0.000000000000,0.000000000000,  !- X,Y,Z ==> Vertex 3 {m}
     0.000000000000,0.000000000000,2.744000000000;  !- X,Y,Z ==> Vertex 4 {m}
-
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
 
   BuildingSurface:Detailed,
     Perimeter_bot_ZN_4_Ceiling,  !- Name
@@ -3334,11 +3077,6 @@
     4.573200000000,4.573200000000,2.744000000000,  !- X,Y,Z ==> Vertex 3 {m}
     4.573200000000,44.165000000000,2.744000000000;  !- X,Y,Z ==> Vertex 4 {m}
 
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
-
   BuildingSurface:Detailed,
     Perimeter_bot_ZN_4_Floor,!- Name
     Floor,                   !- Surface Type
@@ -3355,11 +3093,6 @@
     4.573200000000,4.573200000000,0.000000000000,  !- X,Y,Z ==> Vertex 2 {m}
     0.000000000000,0.000000000000,0.000000000000,  !- X,Y,Z ==> Vertex 3 {m}
     0.000000000000,48.738100000000,0.000000000000;  !- X,Y,Z ==> Vertex 4 {m}
-
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
 
   BuildingSurface:Detailed,
     Perimeter_bot_ZN_4_Wall_South,  !- Name
@@ -3378,11 +3111,6 @@
     4.573200000000,4.573200000000,0.000000000000,  !- X,Y,Z ==> Vertex 3 {m}
     4.573200000000,4.573200000000,2.744000000000;  !- X,Y,Z ==> Vertex 4 {m}
 
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
-
   BuildingSurface:Detailed,
     DataCenter_bot_ZN_6_Wall_West-PPAutoCreateOther,  !- Name
     Wall,                    !- Surface Type
@@ -3399,11 +3127,6 @@
     4.573200000000,4.573200000000,0.000000000000,  !- X,Y,Z ==> Vertex 2 {m}
     4.573200000000,44.165000000000,0.000000000000,  !- X,Y,Z ==> Vertex 3 {m}
     4.573200000000,44.165000000000,2.744000000000;  !- X,Y,Z ==> Vertex 4 {m}
-
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
 
   BuildingSurface:Detailed,
     Perimeter_bot_ZN_3_Wall_West-PPAutoCreateOther,  !- Name
@@ -3422,11 +3145,6 @@
     0.000000000000,48.738100000000,0.000000000000,  !- X,Y,Z ==> Vertex 3 {m}
     0.000000000000,48.738100000000,2.744000000000;  !- X,Y,Z ==> Vertex 4 {m}
 
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
-
   BuildingSurface:Detailed,
     Perimeter_mid_ZN_3_Wall_North,  !- Name
     Wall,                    !- Surface Type
@@ -3443,11 +3161,6 @@
     73.107200000000,48.738100000000,16.768300000000,  !- X,Y,Z ==> Vertex 2 {m}
     0.000000000000,48.738100000000,16.768300000000,  !- X,Y,Z ==> Vertex 3 {m}
     0.000000000000,48.738100000000,19.512300000000;  !- X,Y,Z ==> Vertex 4 {m}
-
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
 
   BuildingSurface:Detailed,
     Perimeter_mid_ZN_3_Ceiling,  !- Name
@@ -3466,11 +3179,6 @@
     68.534000000000,44.165000000000,19.512300000000,  !- X,Y,Z ==> Vertex 3 {m}
     73.107200000000,48.738100000000,19.512300000000;  !- X,Y,Z ==> Vertex 4 {m}
 
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
-
   BuildingSurface:Detailed,
     Perimeter_mid_ZN_3_Floor,!- Name
     Floor,                   !- Surface Type
@@ -3487,11 +3195,6 @@
     68.534000000000,44.165000000000,16.768300000000,  !- X,Y,Z ==> Vertex 2 {m}
     4.573200000000,44.165000000000,16.768300000000,  !- X,Y,Z ==> Vertex 3 {m}
     0.000000000000,48.738100000000,16.768300000000;  !- X,Y,Z ==> Vertex 4 {m}
-
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
 
   BuildingSurface:Detailed,
     Perimeter_mid_ZN_3_Wall_West,  !- Name
@@ -3510,11 +3213,6 @@
     4.573200000000,44.165000000000,16.768300000000,  !- X,Y,Z ==> Vertex 3 {m}
     4.573200000000,44.165000000000,19.512300000000;  !- X,Y,Z ==> Vertex 4 {m}
 
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
-
   BuildingSurface:Detailed,
     Core_mid_ZN_5_Wall_North-PPAutoCreateOther,  !- Name
     Wall,                    !- Surface Type
@@ -3531,11 +3229,6 @@
     5.487600000000,44.165000000000,16.768300000000,  !- X,Y,Z ==> Vertex 2 {m}
     68.534000000000,44.165000000000,16.768300000000,  !- X,Y,Z ==> Vertex 3 {m}
     68.534000000000,44.165000000000,19.512300000000;  !- X,Y,Z ==> Vertex 4 {m}
-
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
 
   BuildingSurface:Detailed,
     Perimeter_mid_ZN_2_Wall_North-PPAutoCreateOther,  !- Name
@@ -3554,11 +3247,6 @@
     73.107200000000,48.738100000000,16.768300000000,  !- X,Y,Z ==> Vertex 3 {m}
     73.107200000000,48.738100000000,19.512300000000;  !- X,Y,Z ==> Vertex 4 {m}
 
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
-
   BuildingSurface:Detailed,
     Perimeter_mid_ZN_2_Wall_East,  !- Name
     Wall,                    !- Surface Type
@@ -3575,11 +3263,6 @@
     73.107200000000,0.000000000000,16.768300000000,  !- X,Y,Z ==> Vertex 2 {m}
     73.107200000000,48.738100000000,16.768300000000,  !- X,Y,Z ==> Vertex 3 {m}
     73.107200000000,48.738100000000,19.512300000000;  !- X,Y,Z ==> Vertex 4 {m}
-
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
 
   BuildingSurface:Detailed,
     Perimeter_mid_ZN_2_Ceiling,  !- Name
@@ -3598,11 +3281,6 @@
     73.107200000000,0.000000000000,19.512300000000,  !- X,Y,Z ==> Vertex 3 {m}
     73.107200000000,48.738100000000,19.512300000000;  !- X,Y,Z ==> Vertex 4 {m}
 
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
-
   BuildingSurface:Detailed,
     Perimeter_mid_ZN_2_Floor,!- Name
     Floor,                   !- Surface Type
@@ -3619,11 +3297,6 @@
     73.107200000000,0.000000000000,16.768300000000,  !- X,Y,Z ==> Vertex 2 {m}
     68.534000000000,4.573200000000,16.768300000000,  !- X,Y,Z ==> Vertex 3 {m}
     68.534000000000,44.165000000000,16.768300000000;  !- X,Y,Z ==> Vertex 4 {m}
-
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
 
   BuildingSurface:Detailed,
     Perimeter_mid_ZN_2_Wall_North,  !- Name
@@ -3642,11 +3315,6 @@
     68.534000000000,44.165000000000,16.768300000000,  !- X,Y,Z ==> Vertex 3 {m}
     68.534000000000,44.165000000000,19.512300000000;  !- X,Y,Z ==> Vertex 4 {m}
 
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
-
   BuildingSurface:Detailed,
     Core_mid_ZN_5_Wall_East-PPAutoCreateOther,  !- Name
     Wall,                    !- Surface Type
@@ -3663,11 +3331,6 @@
     68.534000000000,44.165000000000,16.768300000000,  !- X,Y,Z ==> Vertex 2 {m}
     68.534000000000,4.573200000000,16.768300000000,  !- X,Y,Z ==> Vertex 3 {m}
     68.534000000000,4.573200000000,19.512300000000;  !- X,Y,Z ==> Vertex 4 {m}
-
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
 
   BuildingSurface:Detailed,
     Perimeter_mid_ZN_1_Wall_East-PPAutoCreateOther,  !- Name
@@ -3686,11 +3349,6 @@
     73.107200000000,0.000000000000,16.768300000000,  !- X,Y,Z ==> Vertex 3 {m}
     73.107200000000,0.000000000000,19.512300000000;  !- X,Y,Z ==> Vertex 4 {m}
 
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
-
   BuildingSurface:Detailed,
     Perimeter_mid_ZN_1_Wall_East,  !- Name
     Wall,                    !- Surface Type
@@ -3707,11 +3365,6 @@
     73.107200000000,0.000000000000,16.768300000000,  !- X,Y,Z ==> Vertex 2 {m}
     68.534000000000,4.573200000000,16.768300000000,  !- X,Y,Z ==> Vertex 3 {m}
     68.534000000000,4.573200000000,19.512300000000;  !- X,Y,Z ==> Vertex 4 {m}
-
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
 
   BuildingSurface:Detailed,
     Perimeter_mid_ZN_1_Wall_South,  !- Name
@@ -3730,11 +3383,6 @@
     73.107200000000,0.000000000000,16.768300000000,  !- X,Y,Z ==> Vertex 3 {m}
     73.107200000000,0.000000000000,19.512300000000;  !- X,Y,Z ==> Vertex 4 {m}
 
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
-
   BuildingSurface:Detailed,
     Perimeter_mid_ZN_1_Ceiling,  !- Name
     Ceiling,                 !- Surface Type
@@ -3751,11 +3399,6 @@
     0.000000000000,0.000000000000,19.512300000000,  !- X,Y,Z ==> Vertex 2 {m}
     73.107200000000,0.000000000000,19.512300000000,  !- X,Y,Z ==> Vertex 3 {m}
     68.534000000000,4.573200000000,19.512300000000;  !- X,Y,Z ==> Vertex 4 {m}
-
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
 
   BuildingSurface:Detailed,
     Perimeter_mid_ZN_1_Floor,!- Name
@@ -3774,11 +3417,6 @@
     0.000000000000,0.000000000000,16.768300000000,  !- X,Y,Z ==> Vertex 3 {m}
     4.573200000000,4.573200000000,16.768300000000;  !- X,Y,Z ==> Vertex 4 {m}
 
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
-
   BuildingSurface:Detailed,
     DataCenter_mid_ZN_6_Wall_South-PPAutoCreateOther,  !- Name
     Wall,                    !- Surface Type
@@ -3795,11 +3433,6 @@
     5.487600000000,4.573200000000,16.768300000000,  !- X,Y,Z ==> Vertex 2 {m}
     4.573200000000,4.573200000000,16.768300000000,  !- X,Y,Z ==> Vertex 3 {m}
     4.573200000000,4.573200000000,19.512300000000;  !- X,Y,Z ==> Vertex 4 {m}
-
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
 
   BuildingSurface:Detailed,
     Perimeter_mid_ZN_4_Wall_South-PPAutoCreateOther,  !- Name
@@ -3818,11 +3451,6 @@
     0.000000000000,0.000000000000,16.768300000000,  !- X,Y,Z ==> Vertex 3 {m}
     0.000000000000,0.000000000000,19.512300000000;  !- X,Y,Z ==> Vertex 4 {m}
 
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
-
   BuildingSurface:Detailed,
     Perimeter_mid_ZN_4_Wall_West,  !- Name
     Wall,                    !- Surface Type
@@ -3839,11 +3467,6 @@
     0.000000000000,48.738100000000,16.768300000000,  !- X,Y,Z ==> Vertex 2 {m}
     0.000000000000,0.000000000000,16.768300000000,  !- X,Y,Z ==> Vertex 3 {m}
     0.000000000000,0.000000000000,19.512300000000;  !- X,Y,Z ==> Vertex 4 {m}
-
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
 
   BuildingSurface:Detailed,
     Perimeter_mid_ZN_4_Ceiling,  !- Name
@@ -3862,11 +3485,6 @@
     4.573200000000,4.573200000000,19.512300000000,  !- X,Y,Z ==> Vertex 3 {m}
     4.573200000000,44.165000000000,19.512300000000;  !- X,Y,Z ==> Vertex 4 {m}
 
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
-
   BuildingSurface:Detailed,
     Perimeter_mid_ZN_4_Floor,!- Name
     Floor,                   !- Surface Type
@@ -3883,11 +3501,6 @@
     4.573200000000,4.573200000000,16.768300000000,  !- X,Y,Z ==> Vertex 2 {m}
     0.000000000000,0.000000000000,16.768300000000,  !- X,Y,Z ==> Vertex 3 {m}
     0.000000000000,48.738100000000,16.768300000000;  !- X,Y,Z ==> Vertex 4 {m}
-
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
 
   BuildingSurface:Detailed,
     Perimeter_mid_ZN_4_Wall_South,  !- Name
@@ -3906,11 +3519,6 @@
     4.573200000000,4.573200000000,16.768300000000,  !- X,Y,Z ==> Vertex 3 {m}
     4.573200000000,4.573200000000,19.512300000000;  !- X,Y,Z ==> Vertex 4 {m}
 
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
-
   BuildingSurface:Detailed,
     DataCenter_mid_ZN_6_Wall_West-PPAutoCreateOther,  !- Name
     Wall,                    !- Surface Type
@@ -3927,11 +3535,6 @@
     4.573200000000,4.573200000000,16.768300000000,  !- X,Y,Z ==> Vertex 2 {m}
     4.573200000000,44.165000000000,16.768300000000,  !- X,Y,Z ==> Vertex 3 {m}
     4.573200000000,44.165000000000,19.512300000000;  !- X,Y,Z ==> Vertex 4 {m}
-
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
 
   BuildingSurface:Detailed,
     Perimeter_mid_ZN_3_Wall_West-PPAutoCreateOther,  !- Name
@@ -3950,11 +3553,6 @@
     0.000000000000,48.738100000000,16.768300000000,  !- X,Y,Z ==> Vertex 3 {m}
     0.000000000000,48.738100000000,19.512300000000;  !- X,Y,Z ==> Vertex 4 {m}
 
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
-
   BuildingSurface:Detailed,
     Perimeter_top_ZN_3_Wall_North,  !- Name
     Wall,                    !- Surface Type
@@ -3971,11 +3569,6 @@
     73.107200000000,48.738100000000,33.536600000000,  !- X,Y,Z ==> Vertex 2 {m}
     0.000000000000,48.738100000000,33.536600000000,  !- X,Y,Z ==> Vertex 3 {m}
     0.000000000000,48.738100000000,36.280600000000;  !- X,Y,Z ==> Vertex 4 {m}
-
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
 
   BuildingSurface:Detailed,
     Perimeter_top_ZN_3_Ceiling,  !- Name
@@ -3994,11 +3587,6 @@
     68.534000000000,44.165000000000,36.280600000000,  !- X,Y,Z ==> Vertex 3 {m}
     73.107200000000,48.738100000000,36.280600000000;  !- X,Y,Z ==> Vertex 4 {m}
 
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
-
   BuildingSurface:Detailed,
     Perimeter_top_ZN_3_Floor,!- Name
     Floor,                   !- Surface Type
@@ -4015,11 +3603,6 @@
     68.534000000000,44.165000000000,33.536600000000,  !- X,Y,Z ==> Vertex 2 {m}
     4.573200000000,44.165000000000,33.536600000000,  !- X,Y,Z ==> Vertex 3 {m}
     0.000000000000,48.738100000000,33.536600000000;  !- X,Y,Z ==> Vertex 4 {m}
-
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
 
   BuildingSurface:Detailed,
     Perimeter_top_ZN_3_Wall_West,  !- Name
@@ -4038,11 +3621,6 @@
     4.573200000000,44.165000000000,33.536600000000,  !- X,Y,Z ==> Vertex 3 {m}
     4.573200000000,44.165000000000,36.280600000000;  !- X,Y,Z ==> Vertex 4 {m}
 
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
-
   BuildingSurface:Detailed,
     Core_top_ZN_5_Wall_North-PPAutoCreateOther,  !- Name
     Wall,                    !- Surface Type
@@ -4059,11 +3637,6 @@
     5.487600000000,44.165000000000,33.536600000000,  !- X,Y,Z ==> Vertex 2 {m}
     68.534000000000,44.165000000000,33.536600000000,  !- X,Y,Z ==> Vertex 3 {m}
     68.534000000000,44.165000000000,36.280600000000;  !- X,Y,Z ==> Vertex 4 {m}
-
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
 
   BuildingSurface:Detailed,
     Perimeter_top_ZN_2_Wall_North-PPAutoCreateOther,  !- Name
@@ -4082,11 +3655,6 @@
     73.107200000000,48.738100000000,33.536600000000,  !- X,Y,Z ==> Vertex 3 {m}
     73.107200000000,48.738100000000,36.280600000000;  !- X,Y,Z ==> Vertex 4 {m}
 
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
-
   BuildingSurface:Detailed,
     Perimeter_top_ZN_2_Wall_East,  !- Name
     Wall,                    !- Surface Type
@@ -4103,11 +3671,6 @@
     73.107200000000,0.000000000000,33.536600000000,  !- X,Y,Z ==> Vertex 2 {m}
     73.107200000000,48.738100000000,33.536600000000,  !- X,Y,Z ==> Vertex 3 {m}
     73.107200000000,48.738100000000,36.280600000000;  !- X,Y,Z ==> Vertex 4 {m}
-
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
 
   BuildingSurface:Detailed,
     Perimeter_top_ZN_2_Ceiling,  !- Name
@@ -4126,11 +3689,6 @@
     73.107200000000,0.000000000000,36.280600000000,  !- X,Y,Z ==> Vertex 3 {m}
     73.107200000000,48.738100000000,36.280600000000;  !- X,Y,Z ==> Vertex 4 {m}
 
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
-
   BuildingSurface:Detailed,
     Perimeter_top_ZN_2_Floor,!- Name
     Floor,                   !- Surface Type
@@ -4147,11 +3705,6 @@
     73.107200000000,0.000000000000,33.536600000000,  !- X,Y,Z ==> Vertex 2 {m}
     68.534000000000,4.573200000000,33.536600000000,  !- X,Y,Z ==> Vertex 3 {m}
     68.534000000000,44.165000000000,33.536600000000;  !- X,Y,Z ==> Vertex 4 {m}
-
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
 
   BuildingSurface:Detailed,
     Perimeter_top_ZN_2_Wall_North,  !- Name
@@ -4170,11 +3723,6 @@
     68.534000000000,44.165000000000,33.536600000000,  !- X,Y,Z ==> Vertex 3 {m}
     68.534000000000,44.165000000000,36.280600000000;  !- X,Y,Z ==> Vertex 4 {m}
 
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
-
   BuildingSurface:Detailed,
     Core_top_ZN_5_Wall_East-PPAutoCreateOther,  !- Name
     Wall,                    !- Surface Type
@@ -4191,11 +3739,6 @@
     68.534000000000,44.165000000000,33.536600000000,  !- X,Y,Z ==> Vertex 2 {m}
     68.534000000000,4.573200000000,33.536600000000,  !- X,Y,Z ==> Vertex 3 {m}
     68.534000000000,4.573200000000,36.280600000000;  !- X,Y,Z ==> Vertex 4 {m}
-
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
 
   BuildingSurface:Detailed,
     Int-Per3S-NE-PPAutoCreateOther,  !- Name
@@ -4214,11 +3757,6 @@
     73.107200000000,0.000000000000,33.536600000000,  !- X,Y,Z ==> Vertex 3 {m}
     73.107200000000,0.000000000000,36.280600000000;  !- X,Y,Z ==> Vertex 4 {m}
 
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
-
   BuildingSurface:Detailed,
     Perimeter_top_ZN_1_Wall_South,  !- Name
     Wall,                    !- Surface Type
@@ -4235,11 +3773,6 @@
     0.000000000000,0.000000000000,33.536600000000,  !- X,Y,Z ==> Vertex 2 {m}
     73.107200000000,0.000000000000,33.536600000000,  !- X,Y,Z ==> Vertex 3 {m}
     73.107200000000,0.000000000000,36.280600000000;  !- X,Y,Z ==> Vertex 4 {m}
-
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
 
   BuildingSurface:Detailed,
     Perimeter_top_ZN_1_Ceiling,  !- Name
@@ -4258,11 +3791,6 @@
     73.107200000000,0.000000000000,36.280600000000,  !- X,Y,Z ==> Vertex 3 {m}
     68.534000000000,4.573200000000,36.280600000000;  !- X,Y,Z ==> Vertex 4 {m}
 
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
-
   BuildingSurface:Detailed,
     Perimeter_top_ZN_1_Floor,!- Name
     Floor,                   !- Surface Type
@@ -4279,11 +3807,6 @@
     73.107200000000,0.000000000000,33.536600000000,  !- X,Y,Z ==> Vertex 2 {m}
     0.000000000000,0.000000000000,33.536600000000,  !- X,Y,Z ==> Vertex 3 {m}
     4.573200000000,4.573200000000,33.536600000000;  !- X,Y,Z ==> Vertex 4 {m}
-
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
 
   BuildingSurface:Detailed,
     Int-Per3S-NE,            !- Name
@@ -4302,11 +3825,6 @@
     68.534000000000,4.573200000000,33.536600000000,  !- X,Y,Z ==> Vertex 3 {m}
     68.534000000000,4.573200000000,36.280600000000;  !- X,Y,Z ==> Vertex 4 {m}
 
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
-
   BuildingSurface:Detailed,
     DataCenter_top_ZN_6_Wall_South-PPAutoCreateOther,  !- Name
     Wall,                    !- Surface Type
@@ -4323,11 +3841,6 @@
     5.487600000000,4.573200000000,33.536600000000,  !- X,Y,Z ==> Vertex 2 {m}
     4.573200000000,4.573200000000,33.536600000000,  !- X,Y,Z ==> Vertex 3 {m}
     4.573200000000,4.573200000000,36.280600000000;  !- X,Y,Z ==> Vertex 4 {m}
-
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
 
   BuildingSurface:Detailed,
     Perimeter_top_ZN_4_Wall_South-PPAutoCreateOther,  !- Name
@@ -4346,11 +3859,6 @@
     0.000000000000,0.000000000000,33.536600000000,  !- X,Y,Z ==> Vertex 3 {m}
     0.000000000000,0.000000000000,36.280600000000;  !- X,Y,Z ==> Vertex 4 {m}
 
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
-
   BuildingSurface:Detailed,
     Perimeter_top_ZN_4_Wall_West,  !- Name
     Wall,                    !- Surface Type
@@ -4367,11 +3875,6 @@
     0.000000000000,48.738100000000,33.536600000000,  !- X,Y,Z ==> Vertex 2 {m}
     0.000000000000,0.000000000000,33.536600000000,  !- X,Y,Z ==> Vertex 3 {m}
     0.000000000000,0.000000000000,36.280600000000;  !- X,Y,Z ==> Vertex 4 {m}
-
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
 
   BuildingSurface:Detailed,
     Perimeter_top_ZN_4_Ceiling,  !- Name
@@ -4390,11 +3893,6 @@
     4.573200000000,4.573200000000,36.280600000000,  !- X,Y,Z ==> Vertex 3 {m}
     4.573200000000,44.165000000000,36.280600000000;  !- X,Y,Z ==> Vertex 4 {m}
 
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
-
   BuildingSurface:Detailed,
     Perimeter_top_ZN_4_Floor,!- Name
     Floor,                   !- Surface Type
@@ -4411,11 +3909,6 @@
     4.573200000000,4.573200000000,33.536600000000,  !- X,Y,Z ==> Vertex 2 {m}
     0.000000000000,0.000000000000,33.536600000000,  !- X,Y,Z ==> Vertex 3 {m}
     0.000000000000,48.738100000000,33.536600000000;  !- X,Y,Z ==> Vertex 4 {m}
-
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
 
   BuildingSurface:Detailed,
     Perimeter_top_ZN_4_Wall_South,  !- Name
@@ -4434,11 +3927,6 @@
     4.573200000000,4.573200000000,33.536600000000,  !- X,Y,Z ==> Vertex 3 {m}
     4.573200000000,4.573200000000,36.280600000000;  !- X,Y,Z ==> Vertex 4 {m}
 
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
-
   BuildingSurface:Detailed,
     DataCenter_top_ZN_6_Wall_West-PPAutoCreateOther,  !- Name
     Wall,                    !- Surface Type
@@ -4455,11 +3943,6 @@
     4.573200000000,4.573200000000,33.536600000000,  !- X,Y,Z ==> Vertex 2 {m}
     4.573200000000,44.165000000000,33.536600000000,  !- X,Y,Z ==> Vertex 3 {m}
     4.573200000000,44.165000000000,36.280600000000;  !- X,Y,Z ==> Vertex 4 {m}
-
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
 
   BuildingSurface:Detailed,
     Perimeter_top_ZN_3_Wall_West-PPAutoCreateOther,  !- Name
@@ -4478,11 +3961,6 @@
     0.000000000000,48.738100000000,33.536600000000,  !- X,Y,Z ==> Vertex 3 {m}
     0.000000000000,48.738100000000,36.280600000000;  !- X,Y,Z ==> Vertex 4 {m}
 
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
-
   BuildingSurface:Detailed,
     GroundFloor_Plenum_Wall_North,  !- Name
     Wall,                    !- Surface Type
@@ -4499,11 +3977,6 @@
     73.107200000000,48.738100000000,2.744000000000,  !- X,Y,Z ==> Vertex 2 {m}
     0.000000000000,48.738100000000,2.744000000000,  !- X,Y,Z ==> Vertex 3 {m}
     0.000000000000,48.738100000000,3.963200000000;  !- X,Y,Z ==> Vertex 4 {m}
-
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
 
   BuildingSurface:Detailed,
     GroundFloor_Plenum_West, !- Name
@@ -4522,11 +3995,6 @@
     0.000000000000,0.000000000000,2.744000000000,  !- X,Y,Z ==> Vertex 3 {m}
     0.000000000000,0.000000000000,3.963200000000;  !- X,Y,Z ==> Vertex 4 {m}
 
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
-
   BuildingSurface:Detailed,
     GroundFloor_Plenum_Wall_South,  !- Name
     Wall,                    !- Surface Type
@@ -4543,11 +4011,6 @@
     0.000000000000,0.000000000000,2.744000000000,  !- X,Y,Z ==> Vertex 2 {m}
     73.107200000000,0.000000000000,2.744000000000,  !- X,Y,Z ==> Vertex 3 {m}
     73.107200000000,0.000000000000,3.963200000000;  !- X,Y,Z ==> Vertex 4 {m}
-
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
 
   BuildingSurface:Detailed,
     GroundFloor_Plenum_Wall_East,  !- Name
@@ -4566,11 +4029,6 @@
     73.107200000000,48.738100000000,2.744000000000,  !- X,Y,Z ==> Vertex 3 {m}
     73.107200000000,48.738100000000,3.963200000000;  !- X,Y,Z ==> Vertex 4 {m}
 
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
-
   BuildingSurface:Detailed,
     MidFloor_Plenum_Wall_North,  !- Name
     Wall,                    !- Surface Type
@@ -4587,11 +4045,6 @@
     73.107200000000,48.738100000000,19.512300000000,  !- X,Y,Z ==> Vertex 2 {m}
     0.000000000000,48.738100000000,19.512300000000,  !- X,Y,Z ==> Vertex 3 {m}
     0.000000000000,48.738100000000,20.731500000000;  !- X,Y,Z ==> Vertex 4 {m}
-
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
 
   BuildingSurface:Detailed,
     MidFloor_Plenum_Wall_West,  !- Name
@@ -4610,11 +4063,6 @@
     0.000000000000,0.000000000000,19.512300000000,  !- X,Y,Z ==> Vertex 3 {m}
     0.000000000000,0.000000000000,20.731500000000;  !- X,Y,Z ==> Vertex 4 {m}
 
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
-
   BuildingSurface:Detailed,
     MidFloor_Plenum_Wall_South,  !- Name
     Wall,                    !- Surface Type
@@ -4631,11 +4079,6 @@
     0.000000000000,0.000000000000,19.512300000000,  !- X,Y,Z ==> Vertex 2 {m}
     73.107200000000,0.000000000000,19.512300000000,  !- X,Y,Z ==> Vertex 3 {m}
     73.107200000000,0.000000000000,20.731500000000;  !- X,Y,Z ==> Vertex 4 {m}
-
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
 
   BuildingSurface:Detailed,
     MidFloor_Plenum_Wall_East,  !- Name
@@ -4654,11 +4097,6 @@
     73.107200000000,48.738100000000,19.512300000000,  !- X,Y,Z ==> Vertex 3 {m}
     73.107200000000,48.738100000000,20.731500000000;  !- X,Y,Z ==> Vertex 4 {m}
 
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
-
   BuildingSurface:Detailed,
     TopFloor_Plenum_Wall_North,  !- Name
     Wall,                    !- Surface Type
@@ -4675,11 +4113,6 @@
     0.000000000000,0.000000000000,36.280600000000,  !- X,Y,Z ==> Vertex 2 {m}
     73.107200000000,0.000000000000,36.280600000000,  !- X,Y,Z ==> Vertex 3 {m}
     73.107200000000,0.000000000000,37.499800000000;  !- X,Y,Z ==> Vertex 4 {m}
-
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
 
   BuildingSurface:Detailed,
     TopFloor_Plenum_Wall_East,  !- Name
@@ -4698,11 +4131,6 @@
     73.107200000000,48.738100000000,36.280600000000,  !- X,Y,Z ==> Vertex 3 {m}
     73.107200000000,48.738100000000,37.499800000000;  !- X,Y,Z ==> Vertex 4 {m}
 
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
-
   BuildingSurface:Detailed,
     Building_Roof,           !- Name
     Roof,                    !- Surface Type
@@ -4719,11 +4147,6 @@
     0.000000000000,0.000000000000,37.499800000000,  !- X,Y,Z ==> Vertex 2 {m}
     73.107200000000,0.000000000000,37.499800000000,  !- X,Y,Z ==> Vertex 3 {m}
     73.107200000000,48.738100000000,37.499800000000;  !- X,Y,Z ==> Vertex 4 {m}
-
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
 
   BuildingSurface:Detailed,
     TopFloor_Plenum_Wall_West,  !- Name
@@ -4742,11 +4165,6 @@
     0.000000000000,0.000000000000,36.280600000000,  !- X,Y,Z ==> Vertex 3 {m}
     0.000000000000,0.000000000000,37.499800000000;  !- X,Y,Z ==> Vertex 4 {m}
 
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
-
   BuildingSurface:Detailed,
     TopFloor_Plenum_Wall_South,  !- Name
     Wall,                    !- Surface Type
@@ -4763,11 +4181,6 @@
     73.107200000000,48.738100000000,36.280600000000,  !- X,Y,Z ==> Vertex 2 {m}
     0.000000000000,48.738100000000,36.280600000000,  !- X,Y,Z ==> Vertex 3 {m}
     0.000000000000,48.738100000000,37.499800000000;  !- X,Y,Z ==> Vertex 4 {m}
-
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
 
   BuildingSurface:Detailed,
     GroundFloor_Plenum_Ceiling,  !- Name
@@ -4786,11 +4199,6 @@
     73.107200000000,0.000000000000,3.963200000000,  !- X,Y,Z ==> Vertex 3 {m}
     73.107200000000,48.738100000000,3.963200000000;  !- X,Y,Z ==> Vertex 4 {m}
 
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
-
   BuildingSurface:Detailed,
     MidFloor_Plenum_Ceiling, !- Name
     Ceiling,                 !- Surface Type
@@ -4807,11 +4215,6 @@
     0.000000000000,0.000000000000,20.731500000000,  !- X,Y,Z ==> Vertex 2 {m}
     73.107200000000,0.000000000000,20.731500000000,  !- X,Y,Z ==> Vertex 3 {m}
     73.107200000000,48.738100000000,20.731500000000;  !- X,Y,Z ==> Vertex 4 {m}
-
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
 
   BuildingSurface:Detailed,
     DataCenter_bot_ZN_6_Floor,  !- Name
@@ -4830,11 +4233,6 @@
     -0.914400000000,-39.591800000000,0.000000000000,  !- X,Y,Z ==> Vertex 3 {m}
     -0.914400000000,0.000000000000,0.000000000000;  !- X,Y,Z ==> Vertex 4 {m}
 
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
-
   BuildingSurface:Detailed,
     DataCenter_bot_ZN_6_Wall_North,  !- Name
     Wall,                    !- Surface Type
@@ -4851,11 +4249,6 @@
     0.000000000000,0.000000000000,0.000000000000,  !- X,Y,Z ==> Vertex 2 {m}
     -0.914400000000,0.000000000000,0.000000000000,  !- X,Y,Z ==> Vertex 3 {m}
     -0.914400000000,0.000000000000,2.744000000000;  !- X,Y,Z ==> Vertex 4 {m}
-
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
 
   BuildingSurface:Detailed,
     DataCenter_bot_ZN_6_Wall_South,  !- Name
@@ -4874,11 +4267,6 @@
     0.000000000000,-39.591800000000,0.000000000000,  !- X,Y,Z ==> Vertex 3 {m}
     0.000000000000,-39.591800000000,2.744000000000;  !- X,Y,Z ==> Vertex 4 {m}
 
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
-
   BuildingSurface:Detailed,
     DataCenter_bot_ZN_6_Wall_East-PPAutoCreateOther,  !- Name
     Wall,                    !- Surface Type
@@ -4895,11 +4283,6 @@
     0.000000000000,-39.591800000000,0.000000000000,  !- X,Y,Z ==> Vertex 2 {m}
     0.000000000000,0.000000000000,0.000000000000,  !- X,Y,Z ==> Vertex 3 {m}
     0.000000000000,0.000000000000,2.744000000000;  !- X,Y,Z ==> Vertex 4 {m}
-
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
 
   BuildingSurface:Detailed,
     DataCenter_bot_ZN_6_Ceiling,  !- Name
@@ -4918,11 +4301,6 @@
     0.000000000000,-39.591800000000,2.744000000000,  !- X,Y,Z ==> Vertex 3 {m}
     0.000000000000,0.000000000000,2.744000000000;  !- X,Y,Z ==> Vertex 4 {m}
 
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
-
   BuildingSurface:Detailed,
     DataCenter_bot_ZN_6_Wall_West,  !- Name
     Wall,                    !- Surface Type
@@ -4939,11 +4317,6 @@
     -0.914400000000,0.000000000000,0.000000000000,  !- X,Y,Z ==> Vertex 2 {m}
     -0.914400000000,-39.591800000000,0.000000000000,  !- X,Y,Z ==> Vertex 3 {m}
     -0.914400000000,-39.591800000000,2.744000000000;  !- X,Y,Z ==> Vertex 4 {m}
-
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
 
   BuildingSurface:Detailed,
     DataCenter_bot_ZN_6_Wall_North-PPAutoCreateOther,  !- Name
@@ -4962,11 +4335,6 @@
     5.487600000000,44.165000000000,0.000000000000,  !- X,Y,Z ==> Vertex 3 {m}
     5.487600000000,44.165000000000,2.744000000000;  !- X,Y,Z ==> Vertex 4 {m}
 
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
-
   BuildingSurface:Detailed,
     Core_bot_ZN_5_Wall_South-PPAutoCreateOther,  !- Name
     Wall,                    !- Surface Type
@@ -4983,11 +4351,6 @@
     68.534000000000,4.573200000000,0.000000000000,  !- X,Y,Z ==> Vertex 2 {m}
     5.487600000000,4.573200000000,0.000000000000,  !- X,Y,Z ==> Vertex 3 {m}
     5.487600000000,4.573200000000,2.744000000000;  !- X,Y,Z ==> Vertex 4 {m}
-
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
 
   BuildingSurface:Detailed,
     DataCenter_mid_ZN_6_Floor,  !- Name
@@ -5006,11 +4369,6 @@
     0.000000000000,0.000000000000,0.000000000000,  !- X,Y,Z ==> Vertex 3 {m}
     0.000000000000,39.591800000000,0.000000000000;  !- X,Y,Z ==> Vertex 4 {m}
 
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
-
   BuildingSurface:Detailed,
     DataCenter_mid_ZN_6_Wall_West,  !- Name
     Wall,                    !- Surface Type
@@ -5027,11 +4385,6 @@
     0.000000000000,39.591800000000,0.000000000000,  !- X,Y,Z ==> Vertex 2 {m}
     0.000000000000,0.000000000000,0.000000000000,  !- X,Y,Z ==> Vertex 3 {m}
     0.000000000000,0.000000000000,2.744000000000;  !- X,Y,Z ==> Vertex 4 {m}
-
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
 
   BuildingSurface:Detailed,
     DataCenter_mid_ZN_6_Wall_South,  !- Name
@@ -5050,11 +4403,6 @@
     0.914400000000,0.000000000000,0.000000000000,  !- X,Y,Z ==> Vertex 3 {m}
     0.914400000000,0.000000000000,2.744000000000;  !- X,Y,Z ==> Vertex 4 {m}
 
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
-
   BuildingSurface:Detailed,
     DataCenter_mid_ZN_6_Wall_East,  !- Name
     Wall,                    !- Surface Type
@@ -5071,11 +4419,6 @@
     0.914400000000,0.000000000000,0.000000000000,  !- X,Y,Z ==> Vertex 2 {m}
     0.914400000000,39.591800000000,0.000000000000,  !- X,Y,Z ==> Vertex 3 {m}
     0.914400000000,39.591800000000,2.744000000000;  !- X,Y,Z ==> Vertex 4 {m}
-
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
 
   BuildingSurface:Detailed,
     DataCenter_mid_ZN_6_Wall_North,  !- Name
@@ -5094,11 +4437,6 @@
     0.000000000000,39.591800000000,0.000000000000,  !- X,Y,Z ==> Vertex 3 {m}
     0.000000000000,39.591800000000,2.744000000000;  !- X,Y,Z ==> Vertex 4 {m}
 
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
-
   BuildingSurface:Detailed,
     DataCenter_mid_ZN_6_ceiling,  !- Name
     Ceiling,                 !- Surface Type
@@ -5115,11 +4453,6 @@
     0.000000000000,0.000000000000,2.744000000000,  !- X,Y,Z ==> Vertex 2 {m}
     0.914400000000,0.000000000000,2.744000000000,  !- X,Y,Z ==> Vertex 3 {m}
     0.914400000000,39.591800000000,2.744000000000;  !- X,Y,Z ==> Vertex 4 {m}
-
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
 
   BuildingSurface:Detailed,
     Core_mid_ZN_5_Wall_South-PPAutoCreateOther,  !- Name
@@ -5138,11 +4471,6 @@
     5.487600000000,4.573200000000,16.768300000000,  !- X,Y,Z ==> Vertex 3 {m}
     5.487600000000,4.573200000000,19.512300000000;  !- X,Y,Z ==> Vertex 4 {m}
 
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
-
   BuildingSurface:Detailed,
     DataCenter_mid_ZN_6_Wall_North-PPAutoCreateOther,  !- Name
     Wall,                    !- Surface Type
@@ -5159,11 +4487,6 @@
     4.573200000000,44.165000000000,16.768300000000,  !- X,Y,Z ==> Vertex 2 {m}
     5.487600000000,44.165000000000,16.768300000000,  !- X,Y,Z ==> Vertex 3 {m}
     5.487600000000,44.165000000000,19.512300000000;  !- X,Y,Z ==> Vertex 4 {m}
-
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
 
   BuildingSurface:Detailed,
     DataCenter_top_ZN_6_Wall_North-PPAutoCreateOther,  !- Name
@@ -5182,11 +4505,6 @@
     5.487600000000,44.165000000000,33.536600000000,  !- X,Y,Z ==> Vertex 3 {m}
     5.487600000000,44.165000000000,36.280600000000;  !- X,Y,Z ==> Vertex 4 {m}
 
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
-
   BuildingSurface:Detailed,
     Core_top_ZN_5_Wall_South-PPAutoCreateOther,  !- Name
     Wall,                    !- Surface Type
@@ -5203,11 +4521,6 @@
     68.534000000000,4.573200000000,33.536600000000,  !- X,Y,Z ==> Vertex 2 {m}
     5.487600000000,4.573200000000,33.536600000000,  !- X,Y,Z ==> Vertex 3 {m}
     5.487600000000,4.573200000000,36.280600000000;  !- X,Y,Z ==> Vertex 4 {m}
-
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
 
   BuildingSurface:Detailed,
     DataCenter_top_ZN_6_Floor,  !- Name
@@ -5226,11 +4539,6 @@
     0.000000000000,0.000000000000,0.000000000000,  !- X,Y,Z ==> Vertex 3 {m}
     0.000000000000,39.591800000000,0.000000000000;  !- X,Y,Z ==> Vertex 4 {m}
 
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
-
   BuildingSurface:Detailed,
     DataCenter_top_ZN_6_Wall_East,  !- Name
     Wall,                    !- Surface Type
@@ -5247,11 +4555,6 @@
     0.914400000000,0.000000000000,0.000000000000,  !- X,Y,Z ==> Vertex 2 {m}
     0.914400000000,39.591800000000,0.000000000000,  !- X,Y,Z ==> Vertex 3 {m}
     0.914400000000,39.591800000000,2.744000000000;  !- X,Y,Z ==> Vertex 4 {m}
-
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
 
   BuildingSurface:Detailed,
     DataCenter_top_ZN_6_Wall_West,  !- Name
@@ -5270,11 +4573,6 @@
     0.000000000000,0.000000000000,0.000000000000,  !- X,Y,Z ==> Vertex 3 {m}
     0.000000000000,0.000000000000,2.744000000000;  !- X,Y,Z ==> Vertex 4 {m}
 
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
-
   BuildingSurface:Detailed,
     DataCenter_top_ZN_6_Wall_South,  !- Name
     Wall,                    !- Surface Type
@@ -5291,11 +4589,6 @@
     0.000000000000,0.000000000000,0.000000000000,  !- X,Y,Z ==> Vertex 2 {m}
     0.914400000000,0.000000000000,0.000000000000,  !- X,Y,Z ==> Vertex 3 {m}
     0.914400000000,0.000000000000,2.744000000000;  !- X,Y,Z ==> Vertex 4 {m}
-
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
 
   BuildingSurface:Detailed,
     DataCenter_top_ZN_6_ceiling,  !- Name
@@ -5314,11 +4607,6 @@
     0.914400000000,0.000000000000,2.744000000000,  !- X,Y,Z ==> Vertex 3 {m}
     0.914400000000,39.591800000000,2.744000000000;  !- X,Y,Z ==> Vertex 4 {m}
 
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
-
   BuildingSurface:Detailed,
     DataCenter_top_ZN_6_Wall_North,  !- Name
     Wall,                    !- Surface Type
@@ -5335,11 +4623,6 @@
     0.914400000000,39.591800000000,0.000000000000,  !- X,Y,Z ==> Vertex 2 {m}
     0.000000000000,39.591800000000,0.000000000000,  !- X,Y,Z ==> Vertex 3 {m}
     0.000000000000,39.591800000000,2.744000000000;  !- X,Y,Z ==> Vertex 4 {m}
-
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
 
   BuildingSurface:Detailed,
     Core_bot_ZN_5_Floor-PPAutoCreateOther,  !- Name
@@ -5358,11 +4641,6 @@
     68.534000000000,4.573200000000,0.000000000000,  !- X,Y,Z ==> Vertex 3 {m}
     68.534000000000,44.165000000000,0.000000000000;  !- X,Y,Z ==> Vertex 4 {m}
 
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
-
   BuildingSurface:Detailed,
     Core_bot_ZN_5_Floor,     !- Name
     Floor,                   !- Surface Type
@@ -5379,11 +4657,6 @@
     68.534000000000,4.573200000000,0.000000000000,  !- X,Y,Z ==> Vertex 2 {m}
     16.078200000000,4.573200000000,0.000000000000,  !- X,Y,Z ==> Vertex 3 {m}
     16.078200000000,44.165000000000,0.000000000000;  !- X,Y,Z ==> Vertex 4 {m}
-
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
 
   BuildingSurface:Detailed,
     Perimeter_bot_ZN_3_Floor-PPAutoCreateOther,  !- Name
@@ -5402,11 +4675,6 @@
     68.534000000000,44.165000000000,0.000000000000,  !- X,Y,Z ==> Vertex 3 {m}
     73.107200000000,48.738100000000,0.000000000000;  !- X,Y,Z ==> Vertex 4 {m}
 
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
-
   BuildingSurface:Detailed,
     Basement_Wall_South,     !- Name
     Wall,                    !- Surface Type
@@ -5423,11 +4691,6 @@
     16.079400000000,0.000000000000,-2.439000000000,  !- X,Y,Z ==> Vertex 2 {m}
     73.107200000000,0.000000000000,-2.439000000000,  !- X,Y,Z ==> Vertex 3 {m}
     73.107200000000,0.000000000000,0.000000000000;  !- X,Y,Z ==> Vertex 4 {m}
-
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
 
   BuildingSurface:Detailed,
     Basement_Floor,          !- Name
@@ -5446,11 +4709,6 @@
     16.079400000000,0.000000000000,-2.439000000000,  !- X,Y,Z ==> Vertex 3 {m}
     16.079400000000,48.738100000000,-2.439000000000;  !- X,Y,Z ==> Vertex 4 {m}
 
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
-
   BuildingSurface:Detailed,
     Basement_Wall_North,     !- Name
     Wall,                    !- Surface Type
@@ -5467,11 +4725,6 @@
     73.107200000000,48.738100000000,-2.439000000000,  !- X,Y,Z ==> Vertex 2 {m}
     16.079400000000,48.738100000000,-2.439000000000,  !- X,Y,Z ==> Vertex 3 {m}
     16.079400000000,48.738100000000,0.000000000000;  !- X,Y,Z ==> Vertex 4 {m}
-
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
 
   BuildingSurface:Detailed,
     Basement_Wall_West,      !- Name
@@ -5490,11 +4743,6 @@
     16.079400000000,0.000000000000,-2.439000000000,  !- X,Y,Z ==> Vertex 3 {m}
     16.079400000000,0.000000000000,0.000000000000;  !- X,Y,Z ==> Vertex 4 {m}
 
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
-
   BuildingSurface:Detailed,
     DataCenter_basement_ZN_6_Floor,  !- Name
     Floor,                   !- Surface Type
@@ -5511,11 +4759,6 @@
     0.000000000000,0.000000000000,0.000000000000,  !- X,Y,Z ==> Vertex 2 {m}
     -16.079400000000,0.000000000000,0.000000000000,  !- X,Y,Z ==> Vertex 3 {m}
     -16.079400000000,48.738100000000,0.000000000000;  !- X,Y,Z ==> Vertex 4 {m}
-
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
 
   BuildingSurface:Detailed,
     DataCenter_basement_ZN_6_Wall_North,  !- Name
@@ -5534,11 +4777,6 @@
     -16.079400000000,48.738100000000,0.000000000000,  !- X,Y,Z ==> Vertex 3 {m}
     -16.079400000000,48.738100000000,2.439000000000;  !- X,Y,Z ==> Vertex 4 {m}
 
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
-
   BuildingSurface:Detailed,
     DataCenter_basement_ZN_6_Wall_South,  !- Name
     Wall,                    !- Surface Type
@@ -5555,11 +4793,6 @@
     -16.079400000000,0.000000000000,0.000000000000,  !- X,Y,Z ==> Vertex 2 {m}
     0.000000000000,0.000000000000,0.000000000000,  !- X,Y,Z ==> Vertex 3 {m}
     0.000000000000,0.000000000000,2.439000000000;  !- X,Y,Z ==> Vertex 4 {m}
-
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
 
   BuildingSurface:Detailed,
     DataCenter_basement_ZN_6_Wall_West,  !- Name
@@ -5578,11 +4811,6 @@
     -16.079400000000,0.000000000000,0.000000000000,  !- X,Y,Z ==> Vertex 3 {m}
     -16.079400000000,0.000000000000,2.439000000000;  !- X,Y,Z ==> Vertex 4 {m}
 
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
-
   BuildingSurface:Detailed,
     DataCenter_bot_ZN_6_Floor-PPAutoCreateOther,  !- Name
     Ceiling,                 !- Surface Type
@@ -5599,11 +4827,6 @@
     -11.506200000000,4.573200000000,2.439000000000,  !- X,Y,Z ==> Vertex 2 {m}
     -10.591800000000,4.573200000000,2.439000000000,  !- X,Y,Z ==> Vertex 3 {m}
     -10.591800000000,44.165000000000,2.439000000000;  !- X,Y,Z ==> Vertex 4 {m}
-
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
 
   BuildingSurface:Detailed,
     DataCenter_basement_ZN_6_Ceiling-Core_bot_ZN_5,  !- Name
@@ -5622,11 +4845,6 @@
     0.000000000000,4.573200000000,2.439000000000,  !- X,Y,Z ==> Vertex 3 {m}
     0.000000000000,44.165000000000,2.439000000000;  !- X,Y,Z ==> Vertex 4 {m}
 
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
-
   BuildingSurface:Detailed,
     Perimeter_bot_ZN_4_Floor-PPAutoCreateOther,  !- Name
     Ceiling,                 !- Surface Type
@@ -5643,11 +4861,6 @@
     -16.079400000000,0.000000000000,2.439000000000,  !- X,Y,Z ==> Vertex 2 {m}
     -11.506200000000,4.573200000000,2.439000000000,  !- X,Y,Z ==> Vertex 3 {m}
     -11.506200000000,44.165000000000,2.439000000000;  !- X,Y,Z ==> Vertex 4 {m}
-
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
 
   BuildingSurface:Detailed,
     DataCenter_basement_ZN_6_Ceiling-Perimeter_bot_ZN_1,  !- Name
@@ -5666,11 +4879,6 @@
     0.000000000000,0.000000000000,2.439000000000,  !- X,Y,Z ==> Vertex 3 {m}
     0.000000000000,4.573200000000,2.439000000000;  !- X,Y,Z ==> Vertex 4 {m}
 
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
-
   BuildingSurface:Detailed,
     DataCenter_basement_ZN_6_Ceiling-Perimeter_bot_ZN_3,  !- Name
     Ceiling,                 !- Surface Type
@@ -5687,11 +4895,6 @@
     -11.506200000000,44.165000000000,2.439000000000,  !- X,Y,Z ==> Vertex 2 {m}
     -0.001200000000,44.165000000000,2.439000000000,  !- X,Y,Z ==> Vertex 3 {m}
     -0.001200000000,48.738100000000,2.439000000000;  !- X,Y,Z ==> Vertex 4 {m}
-
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
 
   BuildingSurface:Detailed,
     Perimeter_bot_ZN_1_Floor,!- Name
@@ -5710,11 +4913,6 @@
     16.078200000000,0.000000000000,0.000000000000,  !- X,Y,Z ==> Vertex 3 {m}
     16.078200000000,4.573200000000,0.000000000000;  !- X,Y,Z ==> Vertex 4 {m}
 
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
-
   BuildingSurface:Detailed,
     DataCenter_basement_ZN_6_Ceiling-Perimeter_bot_ZN_3-PPAutoCreateOther,  !- Name
     Floor,                   !- Surface Type
@@ -5731,11 +4929,6 @@
     16.078200000000,44.165000000000,0.000000000000,  !- X,Y,Z ==> Vertex 2 {m}
     4.573200000000,44.165000000000,0.000000000000,  !- X,Y,Z ==> Vertex 3 {m}
     0.000000000000,48.738100000000,0.000000000000;  !- X,Y,Z ==> Vertex 4 {m}
-
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
 
   BuildingSurface:Detailed,
     DataCenter_basement_ZN_6_Wall_East,  !- Name
@@ -5754,9 +4947,7 @@
     0.000000000000,48.738100000000,0.000000000000,  !- X,Y,Z ==> Vertex 3 {m}
     0.000000000000,48.738100000000,2.439000000000;  !- X,Y,Z ==> Vertex 4 {m}
 
-                                        !- X,Y,Z  4 {m}
 !-   ===========  ALL OBJECTS IN CLASS: FENESTRATIONSURFACE:DETAILED ===========
-                                        !- X,Y,Z  1 {m}
 
   FenestrationSurface:Detailed,
     Perimeter_bot_ZN_3_Wall_North_Window1,  !- Name
@@ -5773,9 +4964,6 @@
     59.46085,48.73810,0.8014041856,  !- X,Y,Z ==> Vertex 3 {m}
     59.460850000000,48.738100000000,2.500000000000;  !- X,Y,Z ==> Vertex 4 {m}
 
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-
   FenestrationSurface:Detailed,
     Perimeter_bot_ZN_3_Wall_North_Window2,  !- Name
     Window,                  !- Surface Type
@@ -5790,9 +4978,6 @@
     58.24165,48.73810,0.8014041856,  !- X,Y,Z ==> Vertex 2 {m}
     44.59550,48.73810,0.8014041856,  !- X,Y,Z ==> Vertex 3 {m}
     44.595500000000,48.738100000000,2.500000000000;  !- X,Y,Z ==> Vertex 4 {m}
-
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
 
   FenestrationSurface:Detailed,
     Perimeter_bot_ZN_3_Wall_North_Window3,  !- Name
@@ -5809,9 +4994,6 @@
     29.73015,48.73810,0.8014041856,  !- X,Y,Z ==> Vertex 3 {m}
     29.730150000000,48.738100000000,2.500000000000;  !- X,Y,Z ==> Vertex 4 {m}
 
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-
   FenestrationSurface:Detailed,
     Perimeter_bot_ZN_3_Wall_North_Window4,  !- Name
     Window,                  !- Surface Type
@@ -5826,9 +5008,6 @@
     28.51095,48.73810,0.8014041856,  !- X,Y,Z ==> Vertex 2 {m}
     14.86480,48.73810,0.8014041856,  !- X,Y,Z ==> Vertex 3 {m}
     14.864800000000,48.738100000000,2.500000000000;  !- X,Y,Z ==> Vertex 4 {m}
-
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
 
   FenestrationSurface:Detailed,
     Perimeter_bot_ZN_3_Wall_North_Window5,  !- Name
@@ -5845,9 +5024,6 @@
     0.00000,48.73810,0.8014041856,  !- X,Y,Z ==> Vertex 3 {m}
     0.000000000000,48.738100000000,2.500000000000;  !- X,Y,Z ==> Vertex 4 {m}
 
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-
   FenestrationSurface:Detailed,
     Perimeter_bot_ZN_2_Wall_East_Window1,  !- Name
     Window,                  !- Surface Type
@@ -5862,9 +5038,6 @@
     73.10720,0.00000,0.8312233024,  !- X,Y,Z ==> Vertex 2 {m}
     73.10720,15.433294,0.8312233024,  !- X,Y,Z ==> Vertex 3 {m}
     73.107200000000,15.433294000000,2.500000000000;  !- X,Y,Z ==> Vertex 4 {m}
-
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
 
   FenestrationSurface:Detailed,
     Perimeter_bot_ZN_2_Wall_East_Window2,  !- Name
@@ -5881,9 +5054,6 @@
     73.10720,32.085788,0.8312233024,  !- X,Y,Z ==> Vertex 3 {m}
     73.107200000000,32.085788000000,2.500000000000;  !- X,Y,Z ==> Vertex 4 {m}
 
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-
   FenestrationSurface:Detailed,
     Perimeter_bot_ZN_2_Wall_East_Window3,  !- Name
     Window,                  !- Surface Type
@@ -5898,9 +5068,6 @@
     73.10720,33.304988,0.8312233024,  !- X,Y,Z ==> Vertex 2 {m}
     73.10720,48.73800,0.8312233024,  !- X,Y,Z ==> Vertex 3 {m}
     73.107200000000,48.738000000000,2.500000000000;  !- X,Y,Z ==> Vertex 4 {m}
-
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
 
   FenestrationSurface:Detailed,
     Perimeter_bot_ZN_1_Wall_South_Window1,  !- Name
@@ -5917,9 +5084,6 @@
     13.64615,0.00000,0.8014041856,  !- X,Y,Z ==> Vertex 3 {m}
     13.646150000000,0.000000000000,2.500000000000;  !- X,Y,Z ==> Vertex 4 {m}
 
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-
   FenestrationSurface:Detailed,
     Perimeter_bot_ZN_1_Wall_South_Window2,  !- Name
     Window,                  !- Surface Type
@@ -5934,9 +5098,6 @@
     14.86535,0.00000,0.8014041856,  !- X,Y,Z ==> Vertex 2 {m}
     28.51150,0.00000,0.8014041856,  !- X,Y,Z ==> Vertex 3 {m}
     28.511500000000,0.000000000000,2.500000000000;  !- X,Y,Z ==> Vertex 4 {m}
-
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
 
   FenestrationSurface:Detailed,
     Perimeter_bot_ZN_1_Wall_South_Window3,  !- Name
@@ -5953,9 +5114,6 @@
     43.37685,0.00000,0.8014041856,  !- X,Y,Z ==> Vertex 3 {m}
     43.376850000000,0.000000000000,2.500000000000;  !- X,Y,Z ==> Vertex 4 {m}
 
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-
   FenestrationSurface:Detailed,
     Perimeter_bot_ZN_1_Wall_South_Window4,  !- Name
     Window,                  !- Surface Type
@@ -5970,9 +5128,6 @@
     44.59605,0.00000,0.8014041856,  !- X,Y,Z ==> Vertex 2 {m}
     58.24220,0.00000,0.8014041856,  !- X,Y,Z ==> Vertex 3 {m}
     58.242200000000,0.000000000000,2.500000000000;  !- X,Y,Z ==> Vertex 4 {m}
-
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
 
   FenestrationSurface:Detailed,
     Perimeter_bot_ZN_1_Wall_South_Window5,  !- Name
@@ -5989,9 +5144,6 @@
     73.10700,0.00000,0.8014041856,  !- X,Y,Z ==> Vertex 3 {m}
     73.107000000000,0.000000000000,2.500000000000;  !- X,Y,Z ==> Vertex 4 {m}
 
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-
   FenestrationSurface:Detailed,
     Perimeter_bot_ZN_4_Wall_West_Window1,  !- Name
     Window,                  !- Surface Type
@@ -6006,9 +5158,6 @@
     0.00000,48.73800,0.8312233024,  !- X,Y,Z ==> Vertex 2 {m}
     0.00000,33.304706,0.8312233024,  !- X,Y,Z ==> Vertex 3 {m}
     0.000000000000,33.304706000000,2.500000000000;  !- X,Y,Z ==> Vertex 4 {m}
-
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
 
   FenestrationSurface:Detailed,
     Perimeter_bot_ZN_4_Wall_West_Window2,  !- Name
@@ -6025,9 +5174,6 @@
     0.00000,16.652212,0.8312233024,  !- X,Y,Z ==> Vertex 3 {m}
     0.000000000000,16.652212000000,2.500000000000;  !- X,Y,Z ==> Vertex 4 {m}
 
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-
   FenestrationSurface:Detailed,
     Perimeter_bot_ZN_4_Wall_West_Window3,  !- Name
     Window,                  !- Surface Type
@@ -6042,8 +5188,6 @@
     0.00000,15.433012,0.8312233024,  !- X,Y,Z ==> Vertex 2 {m}
     0.00000,0.00000,0.8312233024,  !- X,Y,Z ==> Vertex 3 {m}
     0.000000000000,0.000000000000,2.500000000000;  !- X,Y,Z ==> Vertex 4 {m}
-
-                                        !- X,Y,Z  4 {m}
 
   FenestrationSurface:Detailed,
     Perimeter_mid_ZN_3_Wall_North_Window,  !- Name
@@ -6165,10 +5309,6 @@
     0.0000,0.0000,34.45132,  !- X,Y,Z ==> Vertex 3 {m}
     0.000000,0.000000,36.036600;  !- X,Y,Z ==> Vertex 4 {m}
 
-                                        !- X,Y,Z  1 {m}
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
-
   FenestrationSurface:Detailed,
     Perimeter_bot_ZN_4_Wall_West_Door1,  !- Name
     Door,                    !- Surface Type
@@ -6183,11 +5323,6 @@
     0.000000000000,33.185179805763,0.000000000000,  !- X,Y,Z ==> Vertex 2 {m}
     0.000000000000,32.270779805763,0.000000000000,  !- X,Y,Z ==> Vertex 3 {m}
     0.000000000000,32.270779805763,2.133600000000;  !- X,Y,Z ==> Vertex 4 {m}
-
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
 
   FenestrationSurface:Detailed,
     Perimeter_bot_ZN_4_Wall_West_Door2,  !- Name
@@ -6204,11 +5339,6 @@
     0.000000000000,15.638417982567,0.000000000000,  !- X,Y,Z ==> Vertex 3 {m}
     0.000000000000,15.638417982567,2.133600000000;  !- X,Y,Z ==> Vertex 4 {m}
 
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
-
   FenestrationSurface:Detailed,
     Perimeter_bot_ZN_1_Wall_South_Door1,  !- Name
     Door,                    !- Surface Type
@@ -6223,11 +5353,6 @@
     13.810736114328,0.000000000000,0.000000000000,  !- X,Y,Z ==> Vertex 2 {m}
     14.725136114328,0.000000000000,0.000000000000,  !- X,Y,Z ==> Vertex 3 {m}
     14.725136114328,0.000000000000,2.133600000000;  !- X,Y,Z ==> Vertex 4 {m}
-
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
 
   FenestrationSurface:Detailed,
     Perimeter_bot_ZN_1_Wall_South_Door2,  !- Name
@@ -6244,11 +5369,6 @@
     29.558095630079,0.000000000000,0.000000000000,  !- X,Y,Z ==> Vertex 3 {m}
     29.558095630079,0.000000000000,2.133600000000;  !- X,Y,Z ==> Vertex 4 {m}
 
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
-
   FenestrationSurface:Detailed,
     Perimeter_bot_ZN_1_Wall_South_Door3,  !- Name
     Door,                    !- Surface Type
@@ -6263,11 +5383,6 @@
     43.526278450605,0.000000000000,0.000000000000,  !- X,Y,Z ==> Vertex 2 {m}
     44.440678450605,0.000000000000,0.000000000000,  !- X,Y,Z ==> Vertex 3 {m}
     44.440678450605,0.000000000000,2.133600000000;  !- X,Y,Z ==> Vertex 4 {m}
-
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
 
   FenestrationSurface:Detailed,
     Perimeter_bot_ZN_1_Wall_South_Door4,  !- Name
@@ -6284,11 +5399,6 @@
     59.344780500539,0.000000000000,0.000000000000,  !- X,Y,Z ==> Vertex 3 {m}
     59.344780500539,0.000000000000,2.133600000000;  !- X,Y,Z ==> Vertex 4 {m}
 
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
-
   FenestrationSurface:Detailed,
     Perimeter_bot_ZN_2_Wall_East_Door1,  !- Name
     Door,                    !- Surface Type
@@ -6303,11 +5413,6 @@
     73.107200000000,15.598040704848,0.000000000000,  !- X,Y,Z ==> Vertex 2 {m}
     73.107200000000,16.512440704848,0.000000000000,  !- X,Y,Z ==> Vertex 3 {m}
     73.107200000000,16.512440704848,2.133600000000;  !- X,Y,Z ==> Vertex 4 {m}
-
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
 
   FenestrationSurface:Detailed,
     Perimeter_bot_ZN_2_Wall_East_Door2,  !- Name
@@ -6324,11 +5429,6 @@
     73.107200000000,33.123187109866,0.000000000000,  !- X,Y,Z ==> Vertex 3 {m}
     73.107200000000,33.123187109866,2.133600000000;  !- X,Y,Z ==> Vertex 4 {m}
 
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
-
   FenestrationSurface:Detailed,
     Perimeter_bot_ZN_3_Wall_North_Door1,  !- Name
     Door,                    !- Surface Type
@@ -6343,11 +5443,6 @@
     59.294409384709,48.738100000000,0.000000000000,  !- X,Y,Z ==> Vertex 2 {m}
     58.380009384709,48.738100000000,0.000000000000,  !- X,Y,Z ==> Vertex 3 {m}
     58.380009384709,48.738100000000,2.133600000000;  !- X,Y,Z ==> Vertex 4 {m}
-
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
 
   FenestrationSurface:Detailed,
     Perimeter_bot_ZN_3_Wall_North_Door2,  !- Name
@@ -6364,11 +5459,6 @@
     43.523976131067,48.738100000000,0.000000000000,  !- X,Y,Z ==> Vertex 3 {m}
     43.523976131067,48.738100000000,2.133600000000;  !- X,Y,Z ==> Vertex 4 {m}
 
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
-
   FenestrationSurface:Detailed,
     Perimeter_bot_ZN_3_Wall_North_Door3,  !- Name
     Door,                    !- Surface Type
@@ -6383,11 +5473,6 @@
     29.612533284962,48.738100000000,0.000000000000,  !- X,Y,Z ==> Vertex 2 {m}
     28.698133284962,48.738100000000,0.000000000000,  !- X,Y,Z ==> Vertex 3 {m}
     28.698133284962,48.738100000000,2.133600000000;  !- X,Y,Z ==> Vertex 4 {m}
-
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
 
   FenestrationSurface:Detailed,
     Perimeter_bot_ZN_3_Wall_North_Door4,  !- Name
@@ -6404,7 +5489,6 @@
     13.822852885612,48.738100000000,0.000000000000,  !- X,Y,Z ==> Vertex 3 {m}
     13.822852885612,48.738100000000,2.133600000000;  !- X,Y,Z ==> Vertex 4 {m}
 
-                                        !- X,Y,Z  4 {m}
 !-   ===========  ALL OBJECTS IN CLASS: INTERNALMASS ===========
 
   InternalMass,
@@ -6534,7 +5618,7 @@
     ACTIVITY_SCH,            !- Activity Level Schedule Name
     ,                        !- Carbon Dioxide Generation Rate {m3/s-W}
     No,                      !- Enable ASHRAE 55 Comfort Warnings
-    ZoneAveraged,            !- Mean Radiant Temperature Calculation Type
+    EnclosureAveraged,       !- Mean Radiant Temperature Calculation Type
     ,                        !- Surface Name/Angle Factor List Name
     WORK_EFF_SCH,            !- Work Efficiency Schedule Name
     ClothingInsulationSchedule,  !- Clothing Insulation Calculation Method
@@ -6556,7 +5640,7 @@
     ACTIVITY_SCH,            !- Activity Level Schedule Name
     ,                        !- Carbon Dioxide Generation Rate {m3/s-W}
     No,                      !- Enable ASHRAE 55 Comfort Warnings
-    ZoneAveraged,            !- Mean Radiant Temperature Calculation Type
+    EnclosureAveraged,       !- Mean Radiant Temperature Calculation Type
     ,                        !- Surface Name/Angle Factor List Name
     WORK_EFF_SCH,            !- Work Efficiency Schedule Name
     ClothingInsulationSchedule,  !- Clothing Insulation Calculation Method
@@ -6578,7 +5662,7 @@
     ACTIVITY_SCH,            !- Activity Level Schedule Name
     ,                        !- Carbon Dioxide Generation Rate {m3/s-W}
     No,                      !- Enable ASHRAE 55 Comfort Warnings
-    ZoneAveraged,            !- Mean Radiant Temperature Calculation Type
+    EnclosureAveraged,       !- Mean Radiant Temperature Calculation Type
     ,                        !- Surface Name/Angle Factor List Name
     WORK_EFF_SCH,            !- Work Efficiency Schedule Name
     ClothingInsulationSchedule,  !- Clothing Insulation Calculation Method
@@ -6600,7 +5684,7 @@
     ACTIVITY_SCH,            !- Activity Level Schedule Name
     ,                        !- Carbon Dioxide Generation Rate {m3/s-W}
     No,                      !- Enable ASHRAE 55 Comfort Warnings
-    ZoneAveraged,            !- Mean Radiant Temperature Calculation Type
+    EnclosureAveraged,       !- Mean Radiant Temperature Calculation Type
     ,                        !- Surface Name/Angle Factor List Name
     WORK_EFF_SCH,            !- Work Efficiency Schedule Name
     ClothingInsulationSchedule,  !- Clothing Insulation Calculation Method
@@ -6622,7 +5706,7 @@
     ACTIVITY_SCH,            !- Activity Level Schedule Name
     ,                        !- Carbon Dioxide Generation Rate {m3/s-W}
     No,                      !- Enable ASHRAE 55 Comfort Warnings
-    ZoneAveraged,            !- Mean Radiant Temperature Calculation Type
+    EnclosureAveraged,       !- Mean Radiant Temperature Calculation Type
     ,                        !- Surface Name/Angle Factor List Name
     WORK_EFF_SCH,            !- Work Efficiency Schedule Name
     ClothingInsulationSchedule,  !- Clothing Insulation Calculation Method
@@ -6644,7 +5728,7 @@
     ACTIVITY_SCH,            !- Activity Level Schedule Name
     ,                        !- Carbon Dioxide Generation Rate {m3/s-W}
     No,                      !- Enable ASHRAE 55 Comfort Warnings
-    ZoneAveraged,            !- Mean Radiant Temperature Calculation Type
+    EnclosureAveraged,       !- Mean Radiant Temperature Calculation Type
     ,                        !- Surface Name/Angle Factor List Name
     WORK_EFF_SCH,            !- Work Efficiency Schedule Name
     ClothingInsulationSchedule,  !- Clothing Insulation Calculation Method
@@ -6666,7 +5750,7 @@
     ACTIVITY_SCH,            !- Activity Level Schedule Name
     ,                        !- Carbon Dioxide Generation Rate {m3/s-W}
     No,                      !- Enable ASHRAE 55 Comfort Warnings
-    ZoneAveraged,            !- Mean Radiant Temperature Calculation Type
+    EnclosureAveraged,       !- Mean Radiant Temperature Calculation Type
     ,                        !- Surface Name/Angle Factor List Name
     WORK_EFF_SCH,            !- Work Efficiency Schedule Name
     ClothingInsulationSchedule,  !- Clothing Insulation Calculation Method
@@ -6688,7 +5772,7 @@
     ACTIVITY_SCH,            !- Activity Level Schedule Name
     ,                        !- Carbon Dioxide Generation Rate {m3/s-W}
     No,                      !- Enable ASHRAE 55 Comfort Warnings
-    ZoneAveraged,            !- Mean Radiant Temperature Calculation Type
+    EnclosureAveraged,       !- Mean Radiant Temperature Calculation Type
     ,                        !- Surface Name/Angle Factor List Name
     WORK_EFF_SCH,            !- Work Efficiency Schedule Name
     ClothingInsulationSchedule,  !- Clothing Insulation Calculation Method
@@ -6710,7 +5794,7 @@
     ACTIVITY_SCH,            !- Activity Level Schedule Name
     ,                        !- Carbon Dioxide Generation Rate {m3/s-W}
     No,                      !- Enable ASHRAE 55 Comfort Warnings
-    ZoneAveraged,            !- Mean Radiant Temperature Calculation Type
+    EnclosureAveraged,       !- Mean Radiant Temperature Calculation Type
     ,                        !- Surface Name/Angle Factor List Name
     WORK_EFF_SCH,            !- Work Efficiency Schedule Name
     ClothingInsulationSchedule,  !- Clothing Insulation Calculation Method
@@ -6732,7 +5816,7 @@
     ACTIVITY_SCH,            !- Activity Level Schedule Name
     ,                        !- Carbon Dioxide Generation Rate {m3/s-W}
     No,                      !- Enable ASHRAE 55 Comfort Warnings
-    ZoneAveraged,            !- Mean Radiant Temperature Calculation Type
+    EnclosureAveraged,       !- Mean Radiant Temperature Calculation Type
     ,                        !- Surface Name/Angle Factor List Name
     WORK_EFF_SCH,            !- Work Efficiency Schedule Name
     ClothingInsulationSchedule,  !- Clothing Insulation Calculation Method
@@ -6754,7 +5838,7 @@
     ACTIVITY_SCH,            !- Activity Level Schedule Name
     ,                        !- Carbon Dioxide Generation Rate {m3/s-W}
     No,                      !- Enable ASHRAE 55 Comfort Warnings
-    ZoneAveraged,            !- Mean Radiant Temperature Calculation Type
+    EnclosureAveraged,       !- Mean Radiant Temperature Calculation Type
     ,                        !- Surface Name/Angle Factor List Name
     WORK_EFF_SCH,            !- Work Efficiency Schedule Name
     ClothingInsulationSchedule,  !- Clothing Insulation Calculation Method
@@ -6776,7 +5860,7 @@
     ACTIVITY_SCH,            !- Activity Level Schedule Name
     ,                        !- Carbon Dioxide Generation Rate {m3/s-W}
     No,                      !- Enable ASHRAE 55 Comfort Warnings
-    ZoneAveraged,            !- Mean Radiant Temperature Calculation Type
+    EnclosureAveraged,       !- Mean Radiant Temperature Calculation Type
     ,                        !- Surface Name/Angle Factor List Name
     WORK_EFF_SCH,            !- Work Efficiency Schedule Name
     ClothingInsulationSchedule,  !- Clothing Insulation Calculation Method
@@ -6798,7 +5882,7 @@
     ACTIVITY_SCH,            !- Activity Level Schedule Name
     ,                        !- Carbon Dioxide Generation Rate {m3/s-W}
     No,                      !- Enable ASHRAE 55 Comfort Warnings
-    ZoneAveraged,            !- Mean Radiant Temperature Calculation Type
+    EnclosureAveraged,       !- Mean Radiant Temperature Calculation Type
     ,                        !- Surface Name/Angle Factor List Name
     WORK_EFF_SCH,            !- Work Efficiency Schedule Name
     ClothingInsulationSchedule,  !- Clothing Insulation Calculation Method
@@ -6820,7 +5904,7 @@
     ACTIVITY_SCH,            !- Activity Level Schedule Name
     ,                        !- Carbon Dioxide Generation Rate {m3/s-W}
     No,                      !- Enable ASHRAE 55 Comfort Warnings
-    ZoneAveraged,            !- Mean Radiant Temperature Calculation Type
+    EnclosureAveraged,       !- Mean Radiant Temperature Calculation Type
     ,                        !- Surface Name/Angle Factor List Name
     WORK_EFF_SCH,            !- Work Efficiency Schedule Name
     ClothingInsulationSchedule,  !- Clothing Insulation Calculation Method
@@ -6842,7 +5926,7 @@
     ACTIVITY_SCH,            !- Activity Level Schedule Name
     ,                        !- Carbon Dioxide Generation Rate {m3/s-W}
     No,                      !- Enable ASHRAE 55 Comfort Warnings
-    ZoneAveraged,            !- Mean Radiant Temperature Calculation Type
+    EnclosureAveraged,       !- Mean Radiant Temperature Calculation Type
     ,                        !- Surface Name/Angle Factor List Name
     WORK_EFF_SCH,            !- Work Efficiency Schedule Name
     ClothingInsulationSchedule,  !- Clothing Insulation Calculation Method
@@ -6864,7 +5948,7 @@
     ACTIVITY_SCH,            !- Activity Level Schedule Name
     ,                        !- Carbon Dioxide Generation Rate {m3/s-W}
     No,                      !- Enable ASHRAE 55 Comfort Warnings
-    ZoneAveraged,            !- Mean Radiant Temperature Calculation Type
+    EnclosureAveraged,       !- Mean Radiant Temperature Calculation Type
     ,                        !- Surface Name/Angle Factor List Name
     WORK_EFF_SCH,            !- Work Efficiency Schedule Name
     ClothingInsulationSchedule,  !- Clothing Insulation Calculation Method
@@ -6881,7 +5965,7 @@
     BLDG_LIGHT_SCH,          !- Schedule Name
     Watts/Area,              !- Design Level Calculation Method
     ,                        !- Lighting Level {W}
-    6.888902667,             !- Watts per Zone Floor Area {W/m2}
+    6.888902667,             !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0.0000,                  !- Return Air Fraction
     0.7000,                  !- Fraction Radiant
@@ -6896,7 +5980,7 @@
     BLDG_LIGHT_SCH,          !- Schedule Name
     Watts/Area,              !- Design Level Calculation Method
     ,                        !- Lighting Level {W}
-    6.888902667,             !- Watts per Zone Floor Area {W/m2}
+    6.888902667,             !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0.0000,                  !- Return Air Fraction
     0.7000,                  !- Fraction Radiant
@@ -6911,7 +5995,7 @@
     BLDG_LIGHT_SCH,          !- Schedule Name
     Watts/Area,              !- Design Level Calculation Method
     ,                        !- Lighting Level {W}
-    6.888902667,             !- Watts per Zone Floor Area {W/m2}
+    6.888902667,             !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0.0000,                  !- Return Air Fraction
     0.7000,                  !- Fraction Radiant
@@ -6926,7 +6010,7 @@
     BLDG_LIGHT_SCH,          !- Schedule Name
     Watts/Area,              !- Design Level Calculation Method
     ,                        !- Lighting Level {W}
-    6.888902667,             !- Watts per Zone Floor Area {W/m2}
+    6.888902667,             !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0.0000,                  !- Return Air Fraction
     0.7000,                  !- Fraction Radiant
@@ -6941,7 +6025,7 @@
     BLDG_LIGHT_SCH,          !- Schedule Name
     Watts/Area,              !- Design Level Calculation Method
     ,                        !- Lighting Level {W}
-    6.888902667,             !- Watts per Zone Floor Area {W/m2}
+    6.888902667,             !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0.0000,                  !- Return Air Fraction
     0.7000,                  !- Fraction Radiant
@@ -6956,7 +6040,7 @@
     BLDG_LIGHT_SCH,          !- Schedule Name
     Watts/Area,              !- Design Level Calculation Method
     ,                        !- Lighting Level {W}
-    6.888902667,             !- Watts per Zone Floor Area {W/m2}
+    6.888902667,             !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0.0000,                  !- Return Air Fraction
     0.7000,                  !- Fraction Radiant
@@ -6971,7 +6055,7 @@
     BLDG_LIGHT_SCH,          !- Schedule Name
     Watts/Area,              !- Design Level Calculation Method
     ,                        !- Lighting Level {W}
-    6.888902667,             !- Watts per Zone Floor Area {W/m2}
+    6.888902667,             !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0.0000,                  !- Return Air Fraction
     0.7000,                  !- Fraction Radiant
@@ -6986,7 +6070,7 @@
     BLDG_LIGHT_SCH,          !- Schedule Name
     Watts/Area,              !- Design Level Calculation Method
     ,                        !- Lighting Level {W}
-    6.888902667,             !- Watts per Zone Floor Area {W/m2}
+    6.888902667,             !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0.0000,                  !- Return Air Fraction
     0.7000,                  !- Fraction Radiant
@@ -7001,7 +6085,7 @@
     BLDG_LIGHT_SCH,          !- Schedule Name
     Watts/Area,              !- Design Level Calculation Method
     ,                        !- Lighting Level {W}
-    6.888902667,             !- Watts per Zone Floor Area {W/m2}
+    6.888902667,             !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0.0000,                  !- Return Air Fraction
     0.7000,                  !- Fraction Radiant
@@ -7016,7 +6100,7 @@
     BLDG_LIGHT_SCH,          !- Schedule Name
     Watts/Area,              !- Design Level Calculation Method
     ,                        !- Lighting Level {W}
-    6.888902667,             !- Watts per Zone Floor Area {W/m2}
+    6.888902667,             !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0.0000,                  !- Return Air Fraction
     0.7000,                  !- Fraction Radiant
@@ -7031,7 +6115,7 @@
     BLDG_LIGHT_SCH,          !- Schedule Name
     Watts/Area,              !- Design Level Calculation Method
     ,                        !- Lighting Level {W}
-    6.888902667,             !- Watts per Zone Floor Area {W/m2}
+    6.888902667,             !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0.0000,                  !- Return Air Fraction
     0.7000,                  !- Fraction Radiant
@@ -7046,7 +6130,7 @@
     BLDG_LIGHT_SCH,          !- Schedule Name
     Watts/Area,              !- Design Level Calculation Method
     ,                        !- Lighting Level {W}
-    6.888902667,             !- Watts per Zone Floor Area {W/m2}
+    6.888902667,             !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0.0000,                  !- Return Air Fraction
     0.7000,                  !- Fraction Radiant
@@ -7061,7 +6145,7 @@
     BLDG_LIGHT_SCH,          !- Schedule Name
     Watts/Area,              !- Design Level Calculation Method
     ,                        !- Lighting Level {W}
-    6.888902667,             !- Watts per Zone Floor Area {W/m2}
+    6.888902667,             !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0.0000,                  !- Return Air Fraction
     0.7000,                  !- Fraction Radiant
@@ -7076,7 +6160,7 @@
     BLDG_LIGHT_SCH,          !- Schedule Name
     Watts/Area,              !- Design Level Calculation Method
     ,                        !- Lighting Level {W}
-    6.888902667,             !- Watts per Zone Floor Area {W/m2}
+    6.888902667,             !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0.0000,                  !- Return Air Fraction
     0.7000,                  !- Fraction Radiant
@@ -7091,7 +6175,7 @@
     BLDG_LIGHT_SCH,          !- Schedule Name
     Watts/Area,              !- Design Level Calculation Method
     ,                        !- Lighting Level {W}
-    6.888902667,             !- Watts per Zone Floor Area {W/m2}
+    6.888902667,             !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0.0000,                  !- Return Air Fraction
     0.7000,                  !- Fraction Radiant
@@ -7106,7 +6190,7 @@
     BLDG_LIGHT_SCH,          !- Schedule Name
     Watts/Area,              !- Design Level Calculation Method
     ,                        !- Lighting Level {W}
-    6.888902667,             !- Watts per Zone Floor Area {W/m2}
+    6.888902667,             !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0.0000,                  !- Return Air Fraction
     0.7000,                  !- Fraction Radiant
@@ -7121,7 +6205,7 @@
     BLDG_LIGHT_SCH,          !- Schedule Name
     Watts/Area,              !- Design Level Calculation Method
     ,                        !- Lighting Level {W}
-    6.888902667,             !- Watts per Zone Floor Area {W/m2}
+    6.888902667,             !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0.0000,                  !- Return Air Fraction
     0.7000,                  !- Fraction Radiant
@@ -7136,7 +6220,7 @@
     BLDG_LIGHT_SCH,          !- Schedule Name
     Watts/Area,              !- Design Level Calculation Method
     ,                        !- Lighting Level {W}
-    6.888902667,             !- Watts per Zone Floor Area {W/m2}
+    6.888902667,             !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0.0000,                  !- Return Air Fraction
     0.7000,                  !- Fraction Radiant
@@ -7151,7 +6235,7 @@
     BLDG_LIGHT_SCH,          !- Schedule Name
     Watts/Area,              !- Design Level Calculation Method
     ,                        !- Lighting Level {W}
-    6.888902667,             !- Watts per Zone Floor Area {W/m2}
+    6.888902667,             !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0.0000,                  !- Return Air Fraction
     0.7000,                  !- Fraction Radiant
@@ -7166,7 +6250,7 @@
     BLDG_LIGHT_SCH,          !- Schedule Name
     Watts/Area,              !- Design Level Calculation Method
     ,                        !- Lighting Level {W}
-    6.888902667,             !- Watts per Zone Floor Area {W/m2}
+    6.888902667,             !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0.0000,                  !- Return Air Fraction
     0.7000,                  !- Fraction Radiant
@@ -7183,7 +6267,7 @@
     Always_on,               !- Schedule Name
     EquipmentLevel,          !- Design Level Calculation Method
     13457.544,               !- Design Level {W}
-    ,                        !- Watts per Zone Floor Area {W/m2}
+    ,                        !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0.0000,                  !- Fraction Latent
     0.5000,                  !- Fraction Radiant
@@ -7196,7 +6280,7 @@
     BLDG_EQUIP_SCH,          !- Schedule Name
     EquipmentLevel,          !- Design Level Calculation Method
     20142.877,               !- Design Level {W}
-    ,                        !- Watts per Zone Floor Area {W/m2}
+    ,                        !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0.0000,                  !- Fraction Latent
     0.5000,                  !- Fraction Radiant
@@ -7209,7 +6293,7 @@
     BLDG_EQUIP_SCH,          !- Schedule Name
     EquipmentLevel,          !- Design Level Calculation Method
     20142.8,                 !- Design Level {W}
-    ,                        !- Watts per Zone Floor Area {W/m2}
+    ,                        !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0.0000,                  !- Fraction Latent
     0.5000,                  !- Fraction Radiant
@@ -7222,7 +6306,7 @@
     BLDG_EQUIP_SCH,          !- Schedule Name
     EquipmentLevel,          !- Design Level Calculation Method
     20142.8,                 !- Design Level {W}
-    ,                        !- Watts per Zone Floor Area {W/m2}
+    ,                        !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0.0000,                  !- Fraction Latent
     0.5000,                  !- Fraction Radiant
@@ -7235,7 +6319,7 @@
     BLDG_EQUIP_SCH,          !- Schedule Name
     EquipmentLevel,          !- Design Level Calculation Method
     2529.2421,               !- Design Level {W}
-    ,                        !- Watts per Zone Floor Area {W/m2}
+    ,                        !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0.0000,                  !- Fraction Latent
     0.5000,                  !- Fraction Radiant
@@ -7248,7 +6332,7 @@
     BLDG_EQUIP_SCH,          !- Schedule Name
     EquipmentLevel,          !- Design Level Calculation Method
     1629.9400,               !- Design Level {W}
-    ,                        !- Watts per Zone Floor Area {W/m2}
+    ,                        !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0.0000,                  !- Fraction Latent
     0.5000,                  !- Fraction Radiant
@@ -7261,7 +6345,7 @@
     BLDG_EQUIP_SCH,          !- Schedule Name
     EquipmentLevel,          !- Design Level Calculation Method
     2529.2809,               !- Design Level {W}
-    ,                        !- Watts per Zone Floor Area {W/m2}
+    ,                        !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0.0000,                  !- Fraction Latent
     0.5000,                  !- Fraction Radiant
@@ -7274,7 +6358,7 @@
     BLDG_EQUIP_SCH,          !- Schedule Name
     EquipmentLevel,          !- Design Level Calculation Method
     1629.9293,               !- Design Level {W}
-    ,                        !- Watts per Zone Floor Area {W/m2}
+    ,                        !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0.0000,                  !- Fraction Latent
     0.5000,                  !- Fraction Radiant
@@ -7287,7 +6371,7 @@
     BLDG_EQUIP_SCH,          !- Schedule Name
     EquipmentLevel,          !- Design Level Calculation Method
     2529.2421,               !- Design Level {W}
-    ,                        !- Watts per Zone Floor Area {W/m2}
+    ,                        !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0.0000,                  !- Fraction Latent
     0.5000,                  !- Fraction Radiant
@@ -7300,7 +6384,7 @@
     BLDG_EQUIP_SCH,          !- Schedule Name
     EquipmentLevel,          !- Design Level Calculation Method
     1629.9400,               !- Design Level {W}
-    ,                        !- Watts per Zone Floor Area {W/m2}
+    ,                        !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0.0000,                  !- Fraction Latent
     0.5000,                  !- Fraction Radiant
@@ -7313,7 +6397,7 @@
     BLDG_EQUIP_SCH,          !- Schedule Name
     EquipmentLevel,          !- Design Level Calculation Method
     2529.2809,               !- Design Level {W}
-    ,                        !- Watts per Zone Floor Area {W/m2}
+    ,                        !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0.0000,                  !- Fraction Latent
     0.5000,                  !- Fraction Radiant
@@ -7326,7 +6410,7 @@
     BLDG_EQUIP_SCH,          !- Schedule Name
     EquipmentLevel,          !- Design Level Calculation Method
     1629.9293,               !- Design Level {W}
-    ,                        !- Watts per Zone Floor Area {W/m2}
+    ,                        !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0.0000,                  !- Fraction Latent
     0.5000,                  !- Fraction Radiant
@@ -7339,7 +6423,7 @@
     BLDG_EQUIP_SCH,          !- Schedule Name
     EquipmentLevel,          !- Design Level Calculation Method
     2529.2421,               !- Design Level {W}
-    ,                        !- Watts per Zone Floor Area {W/m2}
+    ,                        !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0.0000,                  !- Fraction Latent
     0.5000,                  !- Fraction Radiant
@@ -7352,7 +6436,7 @@
     BLDG_EQUIP_SCH,          !- Schedule Name
     EquipmentLevel,          !- Design Level Calculation Method
     1629.9400,               !- Design Level {W}
-    ,                        !- Watts per Zone Floor Area {W/m2}
+    ,                        !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0.0000,                  !- Fraction Latent
     0.5000,                  !- Fraction Radiant
@@ -7365,7 +6449,7 @@
     BLDG_EQUIP_SCH,          !- Schedule Name
     EquipmentLevel,          !- Design Level Calculation Method
     2529.2809,               !- Design Level {W}
-    ,                        !- Watts per Zone Floor Area {W/m2}
+    ,                        !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0.0000,                  !- Fraction Latent
     0.5000,                  !- Fraction Radiant
@@ -7378,7 +6462,7 @@
     BLDG_EQUIP_SCH,          !- Schedule Name
     EquipmentLevel,          !- Design Level Calculation Method
     1629.9293,               !- Design Level {W}
-    ,                        !- Watts per Zone Floor Area {W/m2}
+    ,                        !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0.0000,                  !- Fraction Latent
     0.5000,                  !- Fraction Radiant
@@ -7391,7 +6475,7 @@
     DataCenter_EQUIP_SCH,    !- Schedule Name
     Watts/Area,              !- Design Level Calculation Method
     0,                       !- Design Level {W}
-    484.423246742185,        !- Watts per Zone Floor Area {W/m2}
+    484.423246742185,        !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0.0000,                  !- Fraction Latent
     0.1000,                  !- Fraction Radiant
@@ -7404,7 +6488,7 @@
     DataCenter_EQUIP_SCH,    !- Schedule Name
     Watts/Area,              !- Design Level Calculation Method
     0,                       !- Design Level {W}
-    215.299220774304,        !- Watts per Zone Floor Area {W/m2}
+    215.299220774304,        !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0.0000,                  !- Fraction Latent
     0.1000,                  !- Fraction Radiant
@@ -7417,7 +6501,7 @@
     DataCenter_EQUIP_SCH,    !- Schedule Name
     Watts/Area,              !- Design Level Calculation Method
     0,                       !- Design Level {W}
-    215.299220774304,        !- Watts per Zone Floor Area {W/m2}
+    215.299220774304,        !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0.0000,                  !- Fraction Latent
     0.1000,                  !- Fraction Radiant
@@ -7430,7 +6514,7 @@
     DataCenter_EQUIP_SCH,    !- Schedule Name
     Watts/Area,              !- Design Level Calculation Method
     0,                       !- Design Level {W}
-    215.299220774304,        !- Watts per Zone Floor Area {W/m2}
+    215.299220774304,        !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0.0000,                  !- Fraction Latent
     0.1000,                  !- Fraction Radiant
@@ -7869,8 +6953,8 @@
     INFIL_SCH_PNNL,          !- Schedule Name
     Flow/ExteriorArea,       !- Design Flow Rate Calculation Method
     ,                        !- Design Flow Rate {m3/s}
-    ,                        !- Flow per Zone Floor Area {m3/s-m2}
-    0.00056896,              !- Flow per Exterior Surface Area {m3/s-m2}
+    ,                        !- Flow Rate per Floor Area {m3/s-m2}
+    0.00056896,              !- Flow Rate per Exterior Surface Area {m3/s-m2}
     ,                        !- Air Changes per Hour {1/hr}
     0.0000,                  !- Constant Term Coefficient
     0.0000,                  !- Temperature Term Coefficient
@@ -7883,8 +6967,8 @@
     INFIL_SCH_PNNL,          !- Schedule Name
     Flow/ExteriorArea,       !- Design Flow Rate Calculation Method
     ,                        !- Design Flow Rate {m3/s}
-    ,                        !- Flow per Zone Floor Area {m3/s-m2}
-    0.00056896,              !- Flow per Exterior Surface Area {m3/s-m2}
+    ,                        !- Flow Rate per Floor Area {m3/s-m2}
+    0.00056896,              !- Flow Rate per Exterior Surface Area {m3/s-m2}
     ,                        !- Air Changes per Hour {1/hr}
     0.0000,                  !- Constant Term Coefficient
     0.0000,                  !- Temperature Term Coefficient
@@ -7897,8 +6981,8 @@
     INFIL_SCH_PNNL,          !- Schedule Name
     Flow/ExteriorArea,       !- Design Flow Rate Calculation Method
     ,                        !- Design Flow Rate {m3/s}
-    ,                        !- Flow per Zone Floor Area {m3/s-m2}
-    0.00056896,              !- Flow per Exterior Surface Area {m3/s-m2}
+    ,                        !- Flow Rate per Floor Area {m3/s-m2}
+    0.00056896,              !- Flow Rate per Exterior Surface Area {m3/s-m2}
     ,                        !- Air Changes per Hour {1/hr}
     0.0000,                  !- Constant Term Coefficient
     0.0000,                  !- Temperature Term Coefficient
@@ -7911,8 +6995,8 @@
     INFIL_SCH_PNNL,          !- Schedule Name
     Flow/ExteriorArea,       !- Design Flow Rate Calculation Method
     ,                        !- Design Flow Rate {m3/s}
-    ,                        !- Flow per Zone Floor Area {m3/s-m2}
-    0.00056896,              !- Flow per Exterior Surface Area {m3/s-m2}
+    ,                        !- Flow Rate per Floor Area {m3/s-m2}
+    0.00056896,              !- Flow Rate per Exterior Surface Area {m3/s-m2}
     ,                        !- Air Changes per Hour {1/hr}
     0.0000,                  !- Constant Term Coefficient
     0.0000,                  !- Temperature Term Coefficient
@@ -7925,8 +7009,8 @@
     INFIL_SCH_PNNL,          !- Schedule Name
     Flow/ExteriorArea,       !- Design Flow Rate Calculation Method
     ,                        !- Design Flow Rate {m3/s}
-    ,                        !- Flow per Zone Floor Area {m3/s-m2}
-    0.00056896,              !- Flow per Exterior Surface Area {m3/s-m2}
+    ,                        !- Flow Rate per Floor Area {m3/s-m2}
+    0.00056896,              !- Flow Rate per Exterior Surface Area {m3/s-m2}
     ,                        !- Air Changes per Hour {1/hr}
     0.0000,                  !- Constant Term Coefficient
     0.0000,                  !- Temperature Term Coefficient
@@ -7939,8 +7023,8 @@
     INFIL_SCH_PNNL,          !- Schedule Name
     Flow/ExteriorArea,       !- Design Flow Rate Calculation Method
     ,                        !- Design Flow Rate {m3/s}
-    ,                        !- Flow per Zone Floor Area {m3/s-m2}
-    0.00056896,              !- Flow per Exterior Surface Area {m3/s-m2}
+    ,                        !- Flow Rate per Floor Area {m3/s-m2}
+    0.00056896,              !- Flow Rate per Exterior Surface Area {m3/s-m2}
     ,                        !- Air Changes per Hour {1/hr}
     0.0000,                  !- Constant Term Coefficient
     0.0000,                  !- Temperature Term Coefficient
@@ -7953,8 +7037,8 @@
     INFIL_SCH_PNNL,          !- Schedule Name
     Flow/ExteriorArea,       !- Design Flow Rate Calculation Method
     ,                        !- Design Flow Rate {m3/s}
-    ,                        !- Flow per Zone Floor Area {m3/s-m2}
-    0.00056896,              !- Flow per Exterior Surface Area {m3/s-m2}
+    ,                        !- Flow Rate per Floor Area {m3/s-m2}
+    0.00056896,              !- Flow Rate per Exterior Surface Area {m3/s-m2}
     ,                        !- Air Changes per Hour {1/hr}
     0.0000,                  !- Constant Term Coefficient
     0.0000,                  !- Temperature Term Coefficient
@@ -7967,8 +7051,8 @@
     INFIL_SCH_PNNL,          !- Schedule Name
     Flow/ExteriorArea,       !- Design Flow Rate Calculation Method
     ,                        !- Design Flow Rate {m3/s}
-    ,                        !- Flow per Zone Floor Area {m3/s-m2}
-    0.00056896,              !- Flow per Exterior Surface Area {m3/s-m2}
+    ,                        !- Flow Rate per Floor Area {m3/s-m2}
+    0.00056896,              !- Flow Rate per Exterior Surface Area {m3/s-m2}
     ,                        !- Air Changes per Hour {1/hr}
     0.0000,                  !- Constant Term Coefficient
     0.0000,                  !- Temperature Term Coefficient
@@ -7981,8 +7065,8 @@
     INFIL_SCH_PNNL,          !- Schedule Name
     Flow/ExteriorArea,       !- Design Flow Rate Calculation Method
     ,                        !- Design Flow Rate {m3/s}
-    ,                        !- Flow per Zone Floor Area {m3/s-m2}
-    0.00056896,              !- Flow per Exterior Surface Area {m3/s-m2}
+    ,                        !- Flow Rate per Floor Area {m3/s-m2}
+    0.00056896,              !- Flow Rate per Exterior Surface Area {m3/s-m2}
     ,                        !- Air Changes per Hour {1/hr}
     0.0000,                  !- Constant Term Coefficient
     0.0000,                  !- Temperature Term Coefficient
@@ -7995,8 +7079,8 @@
     INFIL_SCH_PNNL,          !- Schedule Name
     Flow/ExteriorArea,       !- Design Flow Rate Calculation Method
     ,                        !- Design Flow Rate {m3/s}
-    ,                        !- Flow per Zone Floor Area {m3/s-m2}
-    0.00056896,              !- Flow per Exterior Surface Area {m3/s-m2}
+    ,                        !- Flow Rate per Floor Area {m3/s-m2}
+    0.00056896,              !- Flow Rate per Exterior Surface Area {m3/s-m2}
     ,                        !- Air Changes per Hour {1/hr}
     0.0000,                  !- Constant Term Coefficient
     0.0000,                  !- Temperature Term Coefficient
@@ -8009,8 +7093,8 @@
     INFIL_SCH_PNNL,          !- Schedule Name
     Flow/ExteriorArea,       !- Design Flow Rate Calculation Method
     ,                        !- Design Flow Rate {m3/s}
-    ,                        !- Flow per Zone Floor Area {m3/s-m2}
-    0.00056896,              !- Flow per Exterior Surface Area {m3/s-m2}
+    ,                        !- Flow Rate per Floor Area {m3/s-m2}
+    0.00056896,              !- Flow Rate per Exterior Surface Area {m3/s-m2}
     ,                        !- Air Changes per Hour {1/hr}
     0.0000,                  !- Constant Term Coefficient
     0.0000,                  !- Temperature Term Coefficient
@@ -8023,8 +7107,8 @@
     INFIL_SCH_PNNL,          !- Schedule Name
     Flow/ExteriorArea,       !- Design Flow Rate Calculation Method
     ,                        !- Design Flow Rate {m3/s}
-    ,                        !- Flow per Zone Floor Area {m3/s-m2}
-    0.00056896,              !- Flow per Exterior Surface Area {m3/s-m2}
+    ,                        !- Flow Rate per Floor Area {m3/s-m2}
+    0.00056896,              !- Flow Rate per Exterior Surface Area {m3/s-m2}
     ,                        !- Air Changes per Hour {1/hr}
     0.0000,                  !- Constant Term Coefficient
     0.0000,                  !- Temperature Term Coefficient
@@ -8037,8 +7121,8 @@
     INFIL_SCH_PNNL,          !- Schedule Name
     Flow/ExteriorArea,       !- Design Flow Rate Calculation Method
     ,                        !- Design Flow Rate {m3/s}
-    ,                        !- Flow per Zone Floor Area {m3/s-m2}
-    0.00056896,              !- Flow per Exterior Surface Area {m3/s-m2}
+    ,                        !- Flow Rate per Floor Area {m3/s-m2}
+    0.00056896,              !- Flow Rate per Exterior Surface Area {m3/s-m2}
     ,                        !- Air Changes per Hour {1/hr}
     0.0000,                  !- Constant Term Coefficient
     0.0000,                  !- Temperature Term Coefficient
@@ -8051,8 +7135,8 @@
     INFIL_SCH_PNNL,          !- Schedule Name
     Flow/ExteriorArea,       !- Design Flow Rate Calculation Method
     ,                        !- Design Flow Rate {m3/s}
-    ,                        !- Flow per Zone Floor Area {m3/s-m2}
-    0.00056896,              !- Flow per Exterior Surface Area {m3/s-m2}
+    ,                        !- Flow Rate per Floor Area {m3/s-m2}
+    0.00056896,              !- Flow Rate per Exterior Surface Area {m3/s-m2}
     ,                        !- Air Changes per Hour {1/hr}
     0.0000,                  !- Constant Term Coefficient
     0.0000,                  !- Temperature Term Coefficient
@@ -8065,8 +7149,8 @@
     INFIL_SCH_PNNL,          !- Schedule Name
     Flow/ExteriorArea,       !- Design Flow Rate Calculation Method
     ,                        !- Design Flow Rate {m3/s}
-    ,                        !- Flow per Zone Floor Area {m3/s-m2}
-    4.37644032e-05,          !- Flow per Exterior Surface Area {m3/s-m2}
+    ,                        !- Flow Rate per Floor Area {m3/s-m2}
+    4.37644032e-05,          !- Flow Rate per Exterior Surface Area {m3/s-m2}
     ,                        !- Air Changes per Hour {1/hr}
     0.0000,                  !- Constant Term Coefficient
     0.0000,                  !- Temperature Term Coefficient
@@ -8465,7 +7549,14 @@
     No,                      !- Account for Dedicated Outdoor Air System
     NeutralSupplyAir,        !- Dedicated Outdoor Air System Control Strategy
     autosize,                !- Dedicated Outdoor Air Low Setpoint Temperature for Design {C}
-    autosize;                !- Dedicated Outdoor Air High Setpoint Temperature for Design {C}
+    autosize,                !- Dedicated Outdoor Air High Setpoint Temperature for Design {C}
+    ,                        !- Zone Load Sizing Method
+    ,                        !- Zone Latent Cooling Design Supply Air Humidity Ratio Input Method
+    ,                        !- Zone Dehumidification Design Supply Air Humidity Ratio {kgWater/kgDryAir}
+    ,                        !- Zone Cooling Design Supply Air Humidity Ratio Difference {kgWater/kgDryAir}
+    ,                        !- Zone Latent Heating Design Supply Air Humidity Ratio Input Method
+    ,                        !- Zone Humidification Design Supply Air Humidity Ratio {kgWater/kgDryAir}
+    ;                        !- Zone Humidification Design Supply Air Humidity Ratio Difference {kgWater/kgDryAir}
 
   Sizing:Zone,
     Core_bottom,             !- Zone or ZoneList Name
@@ -8494,7 +7585,14 @@
     No,                      !- Account for Dedicated Outdoor Air System
     NeutralSupplyAir,        !- Dedicated Outdoor Air System Control Strategy
     autosize,                !- Dedicated Outdoor Air Low Setpoint Temperature for Design {C}
-    autosize;                !- Dedicated Outdoor Air High Setpoint Temperature for Design {C}
+    autosize,                !- Dedicated Outdoor Air High Setpoint Temperature for Design {C}
+    ,                        !- Zone Load Sizing Method
+    ,                        !- Zone Latent Cooling Design Supply Air Humidity Ratio Input Method
+    ,                        !- Zone Dehumidification Design Supply Air Humidity Ratio {kgWater/kgDryAir}
+    ,                        !- Zone Cooling Design Supply Air Humidity Ratio Difference {kgWater/kgDryAir}
+    ,                        !- Zone Latent Heating Design Supply Air Humidity Ratio Input Method
+    ,                        !- Zone Humidification Design Supply Air Humidity Ratio {kgWater/kgDryAir}
+    ;                        !- Zone Humidification Design Supply Air Humidity Ratio Difference {kgWater/kgDryAir}
 
   Sizing:Zone,
     Core_mid,                !- Zone or ZoneList Name
@@ -8523,7 +7621,14 @@
     No,                      !- Account for Dedicated Outdoor Air System
     NeutralSupplyAir,        !- Dedicated Outdoor Air System Control Strategy
     autosize,                !- Dedicated Outdoor Air Low Setpoint Temperature for Design {C}
-    autosize;                !- Dedicated Outdoor Air High Setpoint Temperature for Design {C}
+    autosize,                !- Dedicated Outdoor Air High Setpoint Temperature for Design {C}
+    ,                        !- Zone Load Sizing Method
+    ,                        !- Zone Latent Cooling Design Supply Air Humidity Ratio Input Method
+    ,                        !- Zone Dehumidification Design Supply Air Humidity Ratio {kgWater/kgDryAir}
+    ,                        !- Zone Cooling Design Supply Air Humidity Ratio Difference {kgWater/kgDryAir}
+    ,                        !- Zone Latent Heating Design Supply Air Humidity Ratio Input Method
+    ,                        !- Zone Humidification Design Supply Air Humidity Ratio {kgWater/kgDryAir}
+    ;                        !- Zone Humidification Design Supply Air Humidity Ratio Difference {kgWater/kgDryAir}
 
   Sizing:Zone,
     Core_top,                !- Zone or ZoneList Name
@@ -8552,7 +7657,14 @@
     No,                      !- Account for Dedicated Outdoor Air System
     NeutralSupplyAir,        !- Dedicated Outdoor Air System Control Strategy
     autosize,                !- Dedicated Outdoor Air Low Setpoint Temperature for Design {C}
-    autosize;                !- Dedicated Outdoor Air High Setpoint Temperature for Design {C}
+    autosize,                !- Dedicated Outdoor Air High Setpoint Temperature for Design {C}
+    ,                        !- Zone Load Sizing Method
+    ,                        !- Zone Latent Cooling Design Supply Air Humidity Ratio Input Method
+    ,                        !- Zone Dehumidification Design Supply Air Humidity Ratio {kgWater/kgDryAir}
+    ,                        !- Zone Cooling Design Supply Air Humidity Ratio Difference {kgWater/kgDryAir}
+    ,                        !- Zone Latent Heating Design Supply Air Humidity Ratio Input Method
+    ,                        !- Zone Humidification Design Supply Air Humidity Ratio {kgWater/kgDryAir}
+    ;                        !- Zone Humidification Design Supply Air Humidity Ratio Difference {kgWater/kgDryAir}
 
   Sizing:Zone,
     Perimeter_bot_ZN_3,      !- Zone or ZoneList Name
@@ -8581,7 +7693,14 @@
     No,                      !- Account for Dedicated Outdoor Air System
     NeutralSupplyAir,        !- Dedicated Outdoor Air System Control Strategy
     autosize,                !- Dedicated Outdoor Air Low Setpoint Temperature for Design {C}
-    autosize;                !- Dedicated Outdoor Air High Setpoint Temperature for Design {C}
+    autosize,                !- Dedicated Outdoor Air High Setpoint Temperature for Design {C}
+    ,                        !- Zone Load Sizing Method
+    ,                        !- Zone Latent Cooling Design Supply Air Humidity Ratio Input Method
+    ,                        !- Zone Dehumidification Design Supply Air Humidity Ratio {kgWater/kgDryAir}
+    ,                        !- Zone Cooling Design Supply Air Humidity Ratio Difference {kgWater/kgDryAir}
+    ,                        !- Zone Latent Heating Design Supply Air Humidity Ratio Input Method
+    ,                        !- Zone Humidification Design Supply Air Humidity Ratio {kgWater/kgDryAir}
+    ;                        !- Zone Humidification Design Supply Air Humidity Ratio Difference {kgWater/kgDryAir}
 
   Sizing:Zone,
     Perimeter_bot_ZN_2,      !- Zone or ZoneList Name
@@ -8610,7 +7729,14 @@
     No,                      !- Account for Dedicated Outdoor Air System
     NeutralSupplyAir,        !- Dedicated Outdoor Air System Control Strategy
     autosize,                !- Dedicated Outdoor Air Low Setpoint Temperature for Design {C}
-    autosize;                !- Dedicated Outdoor Air High Setpoint Temperature for Design {C}
+    autosize,                !- Dedicated Outdoor Air High Setpoint Temperature for Design {C}
+    ,                        !- Zone Load Sizing Method
+    ,                        !- Zone Latent Cooling Design Supply Air Humidity Ratio Input Method
+    ,                        !- Zone Dehumidification Design Supply Air Humidity Ratio {kgWater/kgDryAir}
+    ,                        !- Zone Cooling Design Supply Air Humidity Ratio Difference {kgWater/kgDryAir}
+    ,                        !- Zone Latent Heating Design Supply Air Humidity Ratio Input Method
+    ,                        !- Zone Humidification Design Supply Air Humidity Ratio {kgWater/kgDryAir}
+    ;                        !- Zone Humidification Design Supply Air Humidity Ratio Difference {kgWater/kgDryAir}
 
   Sizing:Zone,
     Perimeter_bot_ZN_1,      !- Zone or ZoneList Name
@@ -8639,7 +7765,14 @@
     No,                      !- Account for Dedicated Outdoor Air System
     NeutralSupplyAir,        !- Dedicated Outdoor Air System Control Strategy
     autosize,                !- Dedicated Outdoor Air Low Setpoint Temperature for Design {C}
-    autosize;                !- Dedicated Outdoor Air High Setpoint Temperature for Design {C}
+    autosize,                !- Dedicated Outdoor Air High Setpoint Temperature for Design {C}
+    ,                        !- Zone Load Sizing Method
+    ,                        !- Zone Latent Cooling Design Supply Air Humidity Ratio Input Method
+    ,                        !- Zone Dehumidification Design Supply Air Humidity Ratio {kgWater/kgDryAir}
+    ,                        !- Zone Cooling Design Supply Air Humidity Ratio Difference {kgWater/kgDryAir}
+    ,                        !- Zone Latent Heating Design Supply Air Humidity Ratio Input Method
+    ,                        !- Zone Humidification Design Supply Air Humidity Ratio {kgWater/kgDryAir}
+    ;                        !- Zone Humidification Design Supply Air Humidity Ratio Difference {kgWater/kgDryAir}
 
   Sizing:Zone,
     Perimeter_bot_ZN_4,      !- Zone or ZoneList Name
@@ -8668,7 +7801,14 @@
     No,                      !- Account for Dedicated Outdoor Air System
     NeutralSupplyAir,        !- Dedicated Outdoor Air System Control Strategy
     autosize,                !- Dedicated Outdoor Air Low Setpoint Temperature for Design {C}
-    autosize;                !- Dedicated Outdoor Air High Setpoint Temperature for Design {C}
+    autosize,                !- Dedicated Outdoor Air High Setpoint Temperature for Design {C}
+    ,                        !- Zone Load Sizing Method
+    ,                        !- Zone Latent Cooling Design Supply Air Humidity Ratio Input Method
+    ,                        !- Zone Dehumidification Design Supply Air Humidity Ratio {kgWater/kgDryAir}
+    ,                        !- Zone Cooling Design Supply Air Humidity Ratio Difference {kgWater/kgDryAir}
+    ,                        !- Zone Latent Heating Design Supply Air Humidity Ratio Input Method
+    ,                        !- Zone Humidification Design Supply Air Humidity Ratio {kgWater/kgDryAir}
+    ;                        !- Zone Humidification Design Supply Air Humidity Ratio Difference {kgWater/kgDryAir}
 
   Sizing:Zone,
     Perimeter_mid_ZN_3,      !- Zone or ZoneList Name
@@ -8697,7 +7837,14 @@
     No,                      !- Account for Dedicated Outdoor Air System
     NeutralSupplyAir,        !- Dedicated Outdoor Air System Control Strategy
     autosize,                !- Dedicated Outdoor Air Low Setpoint Temperature for Design {C}
-    autosize;                !- Dedicated Outdoor Air High Setpoint Temperature for Design {C}
+    autosize,                !- Dedicated Outdoor Air High Setpoint Temperature for Design {C}
+    ,                        !- Zone Load Sizing Method
+    ,                        !- Zone Latent Cooling Design Supply Air Humidity Ratio Input Method
+    ,                        !- Zone Dehumidification Design Supply Air Humidity Ratio {kgWater/kgDryAir}
+    ,                        !- Zone Cooling Design Supply Air Humidity Ratio Difference {kgWater/kgDryAir}
+    ,                        !- Zone Latent Heating Design Supply Air Humidity Ratio Input Method
+    ,                        !- Zone Humidification Design Supply Air Humidity Ratio {kgWater/kgDryAir}
+    ;                        !- Zone Humidification Design Supply Air Humidity Ratio Difference {kgWater/kgDryAir}
 
   Sizing:Zone,
     Perimeter_mid_ZN_2,      !- Zone or ZoneList Name
@@ -8726,7 +7873,14 @@
     No,                      !- Account for Dedicated Outdoor Air System
     NeutralSupplyAir,        !- Dedicated Outdoor Air System Control Strategy
     autosize,                !- Dedicated Outdoor Air Low Setpoint Temperature for Design {C}
-    autosize;                !- Dedicated Outdoor Air High Setpoint Temperature for Design {C}
+    autosize,                !- Dedicated Outdoor Air High Setpoint Temperature for Design {C}
+    ,                        !- Zone Load Sizing Method
+    ,                        !- Zone Latent Cooling Design Supply Air Humidity Ratio Input Method
+    ,                        !- Zone Dehumidification Design Supply Air Humidity Ratio {kgWater/kgDryAir}
+    ,                        !- Zone Cooling Design Supply Air Humidity Ratio Difference {kgWater/kgDryAir}
+    ,                        !- Zone Latent Heating Design Supply Air Humidity Ratio Input Method
+    ,                        !- Zone Humidification Design Supply Air Humidity Ratio {kgWater/kgDryAir}
+    ;                        !- Zone Humidification Design Supply Air Humidity Ratio Difference {kgWater/kgDryAir}
 
   Sizing:Zone,
     Perimeter_mid_ZN_1,      !- Zone or ZoneList Name
@@ -8755,7 +7909,14 @@
     No,                      !- Account for Dedicated Outdoor Air System
     NeutralSupplyAir,        !- Dedicated Outdoor Air System Control Strategy
     autosize,                !- Dedicated Outdoor Air Low Setpoint Temperature for Design {C}
-    autosize;                !- Dedicated Outdoor Air High Setpoint Temperature for Design {C}
+    autosize,                !- Dedicated Outdoor Air High Setpoint Temperature for Design {C}
+    ,                        !- Zone Load Sizing Method
+    ,                        !- Zone Latent Cooling Design Supply Air Humidity Ratio Input Method
+    ,                        !- Zone Dehumidification Design Supply Air Humidity Ratio {kgWater/kgDryAir}
+    ,                        !- Zone Cooling Design Supply Air Humidity Ratio Difference {kgWater/kgDryAir}
+    ,                        !- Zone Latent Heating Design Supply Air Humidity Ratio Input Method
+    ,                        !- Zone Humidification Design Supply Air Humidity Ratio {kgWater/kgDryAir}
+    ;                        !- Zone Humidification Design Supply Air Humidity Ratio Difference {kgWater/kgDryAir}
 
   Sizing:Zone,
     Perimeter_mid_ZN_4,      !- Zone or ZoneList Name
@@ -8784,7 +7945,14 @@
     No,                      !- Account for Dedicated Outdoor Air System
     NeutralSupplyAir,        !- Dedicated Outdoor Air System Control Strategy
     autosize,                !- Dedicated Outdoor Air Low Setpoint Temperature for Design {C}
-    autosize;                !- Dedicated Outdoor Air High Setpoint Temperature for Design {C}
+    autosize,                !- Dedicated Outdoor Air High Setpoint Temperature for Design {C}
+    ,                        !- Zone Load Sizing Method
+    ,                        !- Zone Latent Cooling Design Supply Air Humidity Ratio Input Method
+    ,                        !- Zone Dehumidification Design Supply Air Humidity Ratio {kgWater/kgDryAir}
+    ,                        !- Zone Cooling Design Supply Air Humidity Ratio Difference {kgWater/kgDryAir}
+    ,                        !- Zone Latent Heating Design Supply Air Humidity Ratio Input Method
+    ,                        !- Zone Humidification Design Supply Air Humidity Ratio {kgWater/kgDryAir}
+    ;                        !- Zone Humidification Design Supply Air Humidity Ratio Difference {kgWater/kgDryAir}
 
   Sizing:Zone,
     Perimeter_top_ZN_3,      !- Zone or ZoneList Name
@@ -8813,7 +7981,14 @@
     No,                      !- Account for Dedicated Outdoor Air System
     NeutralSupplyAir,        !- Dedicated Outdoor Air System Control Strategy
     autosize,                !- Dedicated Outdoor Air Low Setpoint Temperature for Design {C}
-    autosize;                !- Dedicated Outdoor Air High Setpoint Temperature for Design {C}
+    autosize,                !- Dedicated Outdoor Air High Setpoint Temperature for Design {C}
+    ,                        !- Zone Load Sizing Method
+    ,                        !- Zone Latent Cooling Design Supply Air Humidity Ratio Input Method
+    ,                        !- Zone Dehumidification Design Supply Air Humidity Ratio {kgWater/kgDryAir}
+    ,                        !- Zone Cooling Design Supply Air Humidity Ratio Difference {kgWater/kgDryAir}
+    ,                        !- Zone Latent Heating Design Supply Air Humidity Ratio Input Method
+    ,                        !- Zone Humidification Design Supply Air Humidity Ratio {kgWater/kgDryAir}
+    ;                        !- Zone Humidification Design Supply Air Humidity Ratio Difference {kgWater/kgDryAir}
 
   Sizing:Zone,
     Perimeter_top_ZN_2,      !- Zone or ZoneList Name
@@ -8842,7 +8017,14 @@
     No,                      !- Account for Dedicated Outdoor Air System
     NeutralSupplyAir,        !- Dedicated Outdoor Air System Control Strategy
     autosize,                !- Dedicated Outdoor Air Low Setpoint Temperature for Design {C}
-    autosize;                !- Dedicated Outdoor Air High Setpoint Temperature for Design {C}
+    autosize,                !- Dedicated Outdoor Air High Setpoint Temperature for Design {C}
+    ,                        !- Zone Load Sizing Method
+    ,                        !- Zone Latent Cooling Design Supply Air Humidity Ratio Input Method
+    ,                        !- Zone Dehumidification Design Supply Air Humidity Ratio {kgWater/kgDryAir}
+    ,                        !- Zone Cooling Design Supply Air Humidity Ratio Difference {kgWater/kgDryAir}
+    ,                        !- Zone Latent Heating Design Supply Air Humidity Ratio Input Method
+    ,                        !- Zone Humidification Design Supply Air Humidity Ratio {kgWater/kgDryAir}
+    ;                        !- Zone Humidification Design Supply Air Humidity Ratio Difference {kgWater/kgDryAir}
 
   Sizing:Zone,
     Perimeter_top_ZN_1,      !- Zone or ZoneList Name
@@ -8871,7 +8053,14 @@
     No,                      !- Account for Dedicated Outdoor Air System
     NeutralSupplyAir,        !- Dedicated Outdoor Air System Control Strategy
     autosize,                !- Dedicated Outdoor Air Low Setpoint Temperature for Design {C}
-    autosize;                !- Dedicated Outdoor Air High Setpoint Temperature for Design {C}
+    autosize,                !- Dedicated Outdoor Air High Setpoint Temperature for Design {C}
+    ,                        !- Zone Load Sizing Method
+    ,                        !- Zone Latent Cooling Design Supply Air Humidity Ratio Input Method
+    ,                        !- Zone Dehumidification Design Supply Air Humidity Ratio {kgWater/kgDryAir}
+    ,                        !- Zone Cooling Design Supply Air Humidity Ratio Difference {kgWater/kgDryAir}
+    ,                        !- Zone Latent Heating Design Supply Air Humidity Ratio Input Method
+    ,                        !- Zone Humidification Design Supply Air Humidity Ratio {kgWater/kgDryAir}
+    ;                        !- Zone Humidification Design Supply Air Humidity Ratio Difference {kgWater/kgDryAir}
 
   Sizing:Zone,
     Perimeter_top_ZN_4,      !- Zone or ZoneList Name
@@ -8900,7 +8089,14 @@
     No,                      !- Account for Dedicated Outdoor Air System
     NeutralSupplyAir,        !- Dedicated Outdoor Air System Control Strategy
     autosize,                !- Dedicated Outdoor Air Low Setpoint Temperature for Design {C}
-    autosize;                !- Dedicated Outdoor Air High Setpoint Temperature for Design {C}
+    autosize,                !- Dedicated Outdoor Air High Setpoint Temperature for Design {C}
+    ,                        !- Zone Load Sizing Method
+    ,                        !- Zone Latent Cooling Design Supply Air Humidity Ratio Input Method
+    ,                        !- Zone Dehumidification Design Supply Air Humidity Ratio {kgWater/kgDryAir}
+    ,                        !- Zone Cooling Design Supply Air Humidity Ratio Difference {kgWater/kgDryAir}
+    ,                        !- Zone Latent Heating Design Supply Air Humidity Ratio Input Method
+    ,                        !- Zone Humidification Design Supply Air Humidity Ratio {kgWater/kgDryAir}
+    ;                        !- Zone Humidification Design Supply Air Humidity Ratio Difference {kgWater/kgDryAir}
 
   Sizing:Zone,
     DataCenter_basement_ZN_6,!- Zone or ZoneList Name
@@ -8929,7 +8125,14 @@
     No,                      !- Account for Dedicated Outdoor Air System
     NeutralSupplyAir,        !- Dedicated Outdoor Air System Control Strategy
     autosize,                !- Dedicated Outdoor Air Low Setpoint Temperature for Design {C}
-    autosize;                !- Dedicated Outdoor Air High Setpoint Temperature for Design {C}
+    autosize,                !- Dedicated Outdoor Air High Setpoint Temperature for Design {C}
+    ,                        !- Zone Load Sizing Method
+    ,                        !- Zone Latent Cooling Design Supply Air Humidity Ratio Input Method
+    ,                        !- Zone Dehumidification Design Supply Air Humidity Ratio {kgWater/kgDryAir}
+    ,                        !- Zone Cooling Design Supply Air Humidity Ratio Difference {kgWater/kgDryAir}
+    ,                        !- Zone Latent Heating Design Supply Air Humidity Ratio Input Method
+    ,                        !- Zone Humidification Design Supply Air Humidity Ratio {kgWater/kgDryAir}
+    ;                        !- Zone Humidification Design Supply Air Humidity Ratio Difference {kgWater/kgDryAir}
 
   Sizing:Zone,
     DataCenter_bot_ZN_6,     !- Zone or ZoneList Name
@@ -8958,7 +8161,14 @@
     No,                      !- Account for Dedicated Outdoor Air System
     NeutralSupplyAir,        !- Dedicated Outdoor Air System Control Strategy
     autosize,                !- Dedicated Outdoor Air Low Setpoint Temperature for Design {C}
-    autosize;                !- Dedicated Outdoor Air High Setpoint Temperature for Design {C}
+    autosize,                !- Dedicated Outdoor Air High Setpoint Temperature for Design {C}
+    ,                        !- Zone Load Sizing Method
+    ,                        !- Zone Latent Cooling Design Supply Air Humidity Ratio Input Method
+    ,                        !- Zone Dehumidification Design Supply Air Humidity Ratio {kgWater/kgDryAir}
+    ,                        !- Zone Cooling Design Supply Air Humidity Ratio Difference {kgWater/kgDryAir}
+    ,                        !- Zone Latent Heating Design Supply Air Humidity Ratio Input Method
+    ,                        !- Zone Humidification Design Supply Air Humidity Ratio {kgWater/kgDryAir}
+    ;                        !- Zone Humidification Design Supply Air Humidity Ratio Difference {kgWater/kgDryAir}
 
   Sizing:Zone,
     DataCenter_mid_ZN_6,     !- Zone or ZoneList Name
@@ -8987,7 +8197,14 @@
     No,                      !- Account for Dedicated Outdoor Air System
     NeutralSupplyAir,        !- Dedicated Outdoor Air System Control Strategy
     autosize,                !- Dedicated Outdoor Air Low Setpoint Temperature for Design {C}
-    autosize;                !- Dedicated Outdoor Air High Setpoint Temperature for Design {C}
+    autosize,                !- Dedicated Outdoor Air High Setpoint Temperature for Design {C}
+    ,                        !- Zone Load Sizing Method
+    ,                        !- Zone Latent Cooling Design Supply Air Humidity Ratio Input Method
+    ,                        !- Zone Dehumidification Design Supply Air Humidity Ratio {kgWater/kgDryAir}
+    ,                        !- Zone Cooling Design Supply Air Humidity Ratio Difference {kgWater/kgDryAir}
+    ,                        !- Zone Latent Heating Design Supply Air Humidity Ratio Input Method
+    ,                        !- Zone Humidification Design Supply Air Humidity Ratio {kgWater/kgDryAir}
+    ;                        !- Zone Humidification Design Supply Air Humidity Ratio Difference {kgWater/kgDryAir}
 
   Sizing:Zone,
     DataCenter_top_ZN_6,     !- Zone or ZoneList Name
@@ -9016,7 +8233,14 @@
     No,                      !- Account for Dedicated Outdoor Air System
     NeutralSupplyAir,        !- Dedicated Outdoor Air System Control Strategy
     autosize,                !- Dedicated Outdoor Air Low Setpoint Temperature for Design {C}
-    autosize;                !- Dedicated Outdoor Air High Setpoint Temperature for Design {C}
+    autosize,                !- Dedicated Outdoor Air High Setpoint Temperature for Design {C}
+    ,                        !- Zone Load Sizing Method
+    ,                        !- Zone Latent Cooling Design Supply Air Humidity Ratio Input Method
+    ,                        !- Zone Dehumidification Design Supply Air Humidity Ratio {kgWater/kgDryAir}
+    ,                        !- Zone Cooling Design Supply Air Humidity Ratio Difference {kgWater/kgDryAir}
+    ,                        !- Zone Latent Heating Design Supply Air Humidity Ratio Input Method
+    ,                        !- Zone Humidification Design Supply Air Humidity Ratio {kgWater/kgDryAir}
+    ;                        !- Zone Humidification Design Supply Air Humidity Ratio Difference {kgWater/kgDryAir}
 
 !-   ===========  ALL OBJECTS IN CLASS: SIZING:SYSTEM ===========
 
@@ -9378,7 +8602,7 @@
   ZoneControl:Humidistat,
     DataCenter Basement Humidistat,  !- Name
     DataCenter_basement_ZN_6,!- Zone Name
-    DC_MinRelHumSetSch;      !- Humidifying Relative Humidity Setpoint Schedule Name
+    DC_MinRelHumSetSch;      !- Humidifying Setpoint Schedule Name
 
 !-   ===========  ALL OBJECTS IN CLASS: ZONECONTROL:THERMOSTAT ===========
 
@@ -11026,6 +10250,7 @@
 
   Coil:Cooling:WaterToAirHeatPump:EquationFit,
     Heat Pump Cooling Mode AirLoop DataCenter Basement,  !- Name
+    ,                        !- Availability Schedule Name
     AirLoop DataCenter Basement Water to Air Heat Pump Source Side1 Inlet Node,  !- Water Inlet Node Name
     AirLoop DataCenter Basement Water to Air Heat Pump Source Side1 Outlet Node,  !- Water Outlet Node Name
     AirLoop DataCenter Basement Supply Fan Outlet,  !- Air Inlet Node Name
@@ -11035,17 +10260,22 @@
     autosize,                !- Gross Rated Total Cooling Capacity {W}
     autosize,                !- Gross Rated Sensible Cooling Capacity {W}
     3.878739046,             !- Gross Rated Cooling COP {W/W}
-    30.0,                   !- Rated Entering Water Temperature {C}
-    27.0,                   !- Rated Entering Air Dry-Bulb Temperature {C}
-    19.0,                   !- Rated Entering Air Wet-Bulb Temperature {C}
+    30.0,                    !- Rated Entering Water Temperature {C}
+    27.0,                    !- Rated Entering Air Dry-Bulb Temperature {C}
+    19.0,                    !- Rated Entering Air Wet-Bulb Temperature {C}
     WAHPCoolCapCurveTot 1,   !- Total Cooling Capacity Curve Name
     WAHPCoolCapCurveSens 1,  !- Sensible Cooling Capacity Curve Name
     WAHPCoolPowCurve 1,      !- Cooling Power Consumption Curve Name
+    HPACCOOLPLFFPLR,         !- Part Load Fraction Correlation Curve Name
     0,                       !- Nominal Time for Condensate Removal to Begin {s}
-    0;                       !- Ratio of Initial Moisture Evaporation Rate and Steady State Latent Capacity {dimensionless}
+    0,                       !- Ratio of Initial Moisture Evaporation Rate and Steady State Latent Capacity {dimensionless}
+    2.5,                     !- Maximum Cycling Rate {cycles/hr}
+    60,                      !- Latent Capacity Time Constant {s}
+    60;                      !- Fan Delay Time {s}
 
   Coil:Cooling:WaterToAirHeatPump:EquationFit,
     Heat Pump Cooling Mode AirLoop DataCenter bot,  !- Name
+    ,                        !- Availability Schedule Name
     AirLoop DataCenter bot Water to Air Heat Pump Source Side1 Inlet Node,  !- Water Inlet Node Name
     AirLoop DataCenter bot Water to Air Heat Pump Source Side1 Outlet Node,  !- Water Outlet Node Name
     AirLoop DataCenter bot Supply Fan Outlet,  !- Air Inlet Node Name
@@ -11055,17 +10285,22 @@
     autosize,                !- Gross Rated Total Cooling Capacity {W}
     autosize,                !- Gross Rated Sensible Cooling Capacity {W}
     4.005260634,             !- Gross Rated Cooling COP {W/W}
-    30.0,                   !- Rated Entering Water Temperature {C}
-    27.0,                   !- Rated Entering Air Dry-Bulb Temperature {C}
-    19.0,                   !- Rated Entering Air Wet-Bulb Temperature {C}
+    30.0,                    !- Rated Entering Water Temperature {C}
+    27.0,                    !- Rated Entering Air Dry-Bulb Temperature {C}
+    19.0,                    !- Rated Entering Air Wet-Bulb Temperature {C}
     WAHPCoolCapCurveTot 2,   !- Total Cooling Capacity Curve Name
     WAHPCoolCapCurveSens 2,  !- Sensible Cooling Capacity Curve Name
     WAHPCoolPowCurve 2,      !- Cooling Power Consumption Curve Name
+    HPACCOOLPLFFPLR,         !- Part Load Fraction Correlation Curve Name
     0,                       !- Nominal Time for Condensate Removal to Begin {s}
-    0;                       !- Ratio of Initial Moisture Evaporation Rate and Steady State Latent Capacity {dimensionless}
+    0,                       !- Ratio of Initial Moisture Evaporation Rate and Steady State Latent Capacity {dimensionless}
+    2.5,                     !- Maximum Cycling Rate {cycles/hr}
+    60,                      !- Latent Capacity Time Constant {s}
+    60;                      !- Fan Delay Time {s}
 
   Coil:Cooling:WaterToAirHeatPump:EquationFit,
     Heat Pump Cooling Mode AirLoop DataCenter mid,  !- Name
+    ,                        !- Availability Schedule Name
     AirLoop DataCenter mid Water to Air Heat Pump Source Side1 Inlet Node,  !- Water Inlet Node Name
     AirLoop DataCenter mid Water to Air Heat Pump Source Side1 Outlet Node,  !- Water Outlet Node Name
     AirLoop DataCenter mid Supply Fan Outlet,  !- Air Inlet Node Name
@@ -11075,17 +10310,22 @@
     autosize,                !- Gross Rated Total Cooling Capacity {W}
     autosize,                !- Gross Rated Sensible Cooling Capacity {W}
     4.005260634,             !- Gross Rated Cooling COP {W/W}
-    30.0,                   !- Rated Entering Water Temperature {C}
-    27.0,                   !- Rated Entering Air Dry-Bulb Temperature {C}
-    19.0,                   !- Rated Entering Air Wet-Bulb Temperature {C}
+    30.0,                    !- Rated Entering Water Temperature {C}
+    27.0,                    !- Rated Entering Air Dry-Bulb Temperature {C}
+    19.0,                    !- Rated Entering Air Wet-Bulb Temperature {C}
     WAHPCoolCapCurveTot 3,   !- Total Cooling Capacity Curve Name
     WAHPCoolCapCurveSens 3,  !- Sensible Cooling Capacity Curve Name
     WAHPCoolPowCurve 3,      !- Cooling Power Consumption Curve Name
+    HPACCOOLPLFFPLR,         !- Part Load Fraction Correlation Curve Name
     0,                       !- Nominal Time for Condensate Removal to Begin {s}
-    0;                       !- Ratio of Initial Moisture Evaporation Rate and Steady State Latent Capacity {dimensionless}
+    0,                       !- Ratio of Initial Moisture Evaporation Rate and Steady State Latent Capacity {dimensionless}
+    2.5,                     !- Maximum Cycling Rate {cycles/hr}
+    60,                      !- Latent Capacity Time Constant {s}
+    60;                      !- Fan Delay Time {s}
 
   Coil:Cooling:WaterToAirHeatPump:EquationFit,
     Heat Pump Cooling Mode AirLoop DataCenter top,  !- Name
+    ,                        !- Availability Schedule Name
     AirLoop DataCenter top Water to Air Heat Pump Source Side1 Inlet Node,  !- Water Inlet Node Name
     AirLoop DataCenter top Water to Air Heat Pump Source Side1 Outlet Node,  !- Water Outlet Node Name
     AirLoop DataCenter top Supply Fan Outlet,  !- Air Inlet Node Name
@@ -11095,19 +10335,24 @@
     autosize,                !- Gross Rated Total Cooling Capacity {W}
     autosize,                !- Gross Rated Sensible Cooling Capacity {W}
     4.005260634,             !- Gross Rated Cooling COP {W/W}
-    30.0,                   !- Rated Entering Water Temperature {C}
-    27.0,                   !- Rated Entering Air Dry-Bulb Temperature {C}
-    19.0,                   !- Rated Entering Air Wet-Bulb Temperature {C}
+    30.0,                    !- Rated Entering Water Temperature {C}
+    27.0,                    !- Rated Entering Air Dry-Bulb Temperature {C}
+    19.0,                    !- Rated Entering Air Wet-Bulb Temperature {C}
     WAHPCoolCapCurveTot 4,   !- Total Cooling Capacity Curve Name
     WAHPCoolCapCurveSens 4,  !- Sensible Cooling Capacity Curve Name
     WAHPCoolPowCurve 4,      !- Cooling Power Consumption Curve Name
+    HPACCOOLPLFFPLR,         !- Part Load Fraction Correlation Curve Name
     0,                       !- Nominal Time for Condensate Removal to Begin {s}
-    0;                       !- Ratio of Initial Moisture Evaporation Rate and Steady State Latent Capacity {dimensionless}
+    0,                       !- Ratio of Initial Moisture Evaporation Rate and Steady State Latent Capacity {dimensionless}
+    2.5,                     !- Maximum Cycling Rate {cycles/hr}
+    60,                      !- Latent Capacity Time Constant {s}
+    60;                      !- Fan Delay Time {s}
 
 !-   ===========  ALL OBJECTS IN CLASS: COIL:HEATING:WATERTOAIRHEATPUMP:EQUATIONFIT ===========
 
   Coil:Heating:WaterToAirHeatPump:EquationFit,
     Heat Pump HEATING Mode AirLoop DataCenter Basement,  !- Name
+    ,                        !- Availability Schedule Name
     AirLoop DataCenter Basement Water to Air Heat Pump Source Side2 Inlet Node,  !- Water Inlet Node Name
     AirLoop DataCenter Basement Water to Air Heat Pump Source Side2 Outlet Node,  !- Water Outlet Node Name
     Cooling Coil Air Outlet Node AirLoop DataCenter Basement,  !- Air Inlet Node Name
@@ -11120,10 +10365,12 @@
     20.0,                    !- Rated Entering Air Dry-Bulb Temperature {C}
     1.0,                     !- Ratio of Rated Heating Capacity to Rated Cooling Capacity
     WAHPHeatCapCurve 1,      !- Heating Capacity Curve Name
-    WAHPHeatPowCurve 1;      !- Heating Power Consumption Curve Name
+    WAHPHeatPowCurve 1,      !- Heating Power Consumption Curve Name
+    HPACHEATPLFFPLR;         !- Part Load Fraction Correlation Curve Name
 
   Coil:Heating:WaterToAirHeatPump:EquationFit,
     Heat Pump HEATING Mode AirLoop DataCenter bot,  !- Name
+    ,                        !- Availability Schedule Name
     AirLoop DataCenter bot Water to Air Heat Pump Source Side2 Inlet Node,  !- Water Inlet Node Name
     AirLoop DataCenter bot Water to Air Heat Pump Source Side2 Outlet Node,  !- Water Outlet Node Name
     Cooling Coil Air Outlet Node AirLoop DataCenter bot,  !- Air Inlet Node Name
@@ -11136,10 +10383,12 @@
     20.0,                    !- Rated Entering Air Dry-Bulb Temperature {C}
     1.0,                     !- Ratio of Rated Heating Capacity to Rated Cooling Capacity
     WAHPHeatCapCurve 2,      !- Heating Capacity Curve Name
-    WAHPHeatPowCurve 2;      !- Heating Power Consumption Curve Name
+    WAHPHeatPowCurve 2,      !- Heating Power Consumption Curve Name
+    HPACHEATPLFFPLR;         !- Part Load Fraction Correlation Curve Name
 
   Coil:Heating:WaterToAirHeatPump:EquationFit,
     Heat Pump HEATING Mode AirLoop DataCenter mid,  !- Name
+    ,                        !- Availability Schedule Name
     AirLoop DataCenter mid Water to Air Heat Pump Source Side2 Inlet Node,  !- Water Inlet Node Name
     AirLoop DataCenter mid Water to Air Heat Pump Source Side2 Outlet Node,  !- Water Outlet Node Name
     Cooling Coil Air Outlet Node AirLoop DataCenter mid,  !- Air Inlet Node Name
@@ -11152,10 +10401,12 @@
     20.0,                    !- Rated Entering Air Dry-Bulb Temperature {C}
     1.0,                     !- Ratio of Rated Heating Capacity to Rated Cooling Capacity
     WAHPHeatCapCurve 3,      !- Heating Capacity Curve Name
-    WAHPHeatPowCurve 3;      !- Heating Power Consumption Curve Name
+    WAHPHeatPowCurve 3,      !- Heating Power Consumption Curve Name
+    HPACHEATPLFFPLR;         !- Part Load Fraction Correlation Curve Name
 
   Coil:Heating:WaterToAirHeatPump:EquationFit,
     Heat Pump HEATING Mode AirLoop DataCenter top,  !- Name
+    ,                        !- Availability Schedule Name
     AirLoop DataCenter top Water to Air Heat Pump Source Side2 Inlet Node,  !- Water Inlet Node Name
     AirLoop DataCenter top Water to Air Heat Pump Source Side2 Outlet Node,  !- Water Outlet Node Name
     Cooling Coil Air Outlet Node AirLoop DataCenter top,  !- Air Inlet Node Name
@@ -11168,7 +10419,8 @@
     20.0,                    !- Rated Entering Air Dry-Bulb Temperature {C}
     1.0,                     !- Ratio of Rated Heating Capacity to Rated Cooling Capacity
     WAHPHeatCapCurve 4,      !- Heating Capacity Curve Name
-    WAHPHeatPowCurve 4;      !- Heating Power Consumption Curve Name
+    WAHPHeatPowCurve 4,      !- Heating Power Consumption Curve Name
+    HPACHEATPLFFPLR;         !- Part Load Fraction Correlation Curve Name
 
 !-   ===========  ALL OBJECTS IN CLASS: HUMIDIFIER:STEAM:ELECTRIC ===========
 
@@ -11199,10 +10451,6 @@
     Coil:Cooling:WaterToAirHeatPump:EquationFit,  !- Cooling Coil Object Type
     Heat Pump Cooling Mode AirLoop DataCenter Basement,  !- Cooling Coil Name
     0.001,                   !- Cooling Convergence
-    2.5,                     !- Maximum Cycling Rate {cycles/hr}
-    60,                      !- Heat Pump Time Constant {s}
-    0.01,                    !- Fraction of On-Cycle Power Use
-    60,                      !- Heat Pump Fan Delay Time {s}
     Coil:Heating:Electric,   !- Supplemental Heating Coil Object Type
     Heat Pump DX Supp Heating Coil AirLoop DataCenter Basement,  !- Supplemental Heating Coil Name
     50,                      !- Maximum Supply Air Temperature from Supplemental Heater {C}
@@ -11226,10 +10474,6 @@
     Coil:Cooling:WaterToAirHeatPump:EquationFit,  !- Cooling Coil Object Type
     Heat Pump Cooling Mode AirLoop DataCenter bot,  !- Cooling Coil Name
     0.001,                   !- Cooling Convergence
-    2.5,                     !- Maximum Cycling Rate {cycles/hr}
-    60,                      !- Heat Pump Time Constant {s}
-    0.01,                    !- Fraction of On-Cycle Power Use
-    60,                      !- Heat Pump Fan Delay Time {s}
     Coil:Heating:Electric,   !- Supplemental Heating Coil Object Type
     Heat Pump DX Supp Heating Coil AirLoop DataCenter bot,  !- Supplemental Heating Coil Name
     50,                      !- Maximum Supply Air Temperature from Supplemental Heater {C}
@@ -11253,10 +10497,6 @@
     Coil:Cooling:WaterToAirHeatPump:EquationFit,  !- Cooling Coil Object Type
     Heat Pump Cooling Mode AirLoop DataCenter mid,  !- Cooling Coil Name
     0.001,                   !- Cooling Convergence
-    2.5,                     !- Maximum Cycling Rate {cycles/hr}
-    60,                      !- Heat Pump Time Constant {s}
-    0.01,                    !- Fraction of On-Cycle Power Use
-    60,                      !- Heat Pump Fan Delay Time {s}
     Coil:Heating:Electric,   !- Supplemental Heating Coil Object Type
     Heat Pump DX Supp Heating Coil AirLoop DataCenter mid,  !- Supplemental Heating Coil Name
     50,                      !- Maximum Supply Air Temperature from Supplemental Heater {C}
@@ -11280,10 +10520,6 @@
     Coil:Cooling:WaterToAirHeatPump:EquationFit,  !- Cooling Coil Object Type
     Heat Pump Cooling Mode AirLoop DataCenter top,  !- Cooling Coil Name
     0.001,                   !- Cooling Convergence
-    2.5,                     !- Maximum Cycling Rate {cycles/hr}
-    60,                      !- Heat Pump Time Constant {s}
-    0.01,                    !- Fraction of On-Cycle Power Use
-    60,                      !- Heat Pump Fan Delay Time {s}
     Coil:Heating:Electric,   !- Supplemental Heating Coil Object Type
     Heat Pump DX Supp Heating Coil AirLoop DataCenter top,  !- Supplemental Heating Coil Name
     50,                      !- Maximum Supply Air Temperature from Supplemental Heater {C}
@@ -11562,7 +10798,7 @@
     VAV_top WITH REHEAT_DCV, !- Name
     MinOA_MotorizedDamper_Sched,  !- Availability Schedule Name
     Yes,                     !- Demand Controlled Ventilation
-    Standard62.1VentilationRateProcedureWithLimit,!- System Outdoor Air Method
+    Standard62.1VentilationRateProcedureWithLimit,  !- System Outdoor Air Method
     ,                        !- Zone Maximum Outdoor Air Fraction {dimensionless}
     Core_top,                !- Zone or ZoneList 1 Name
     CM DSOA Core_top,        !- Design Specification Outdoor Air Object Name 1
@@ -11584,7 +10820,7 @@
     VAV_bot WITH REHEAT_DCV, !- Name
     MinOA_MotorizedDamper_Sched,  !- Availability Schedule Name
     Yes,                     !- Demand Controlled Ventilation
-    Standard62.1VentilationRateProcedureWithLimit,!- System Outdoor Air Method
+    Standard62.1VentilationRateProcedureWithLimit,  !- System Outdoor Air Method
     ,                        !- Zone Maximum Outdoor Air Fraction {dimensionless}
     Core_bottom,             !- Zone or ZoneList 1 Name
     CM DSOA Core_bottom,     !- Design Specification Outdoor Air Object Name 1
@@ -11606,7 +10842,7 @@
     VAV_mid WITH REHEAT_DCV, !- Name
     MinOA_MotorizedDamper_Sched,  !- Availability Schedule Name
     Yes,                     !- Demand Controlled Ventilation
-    Standard62.1VentilationRateProcedureWithLimit,!- System Outdoor Air Method
+    Standard62.1VentilationRateProcedureWithLimit,  !- System Outdoor Air Method
     ,                        !- Zone Maximum Outdoor Air Fraction {dimensionless}
     Core_mid,                !- Zone or ZoneList 1 Name
     CM DSOA Core_mid,        !- Design Specification Outdoor Air Object Name 1
@@ -12648,20 +11884,20 @@
   Branch,
     CoolSys1 Auxiliary Cooling Branch,  !- Name
     ,                        !- Pressure Drop Curve Name
-    Chiller:Electric:ASHRAE205,      !- Component 1 Object Type
-    CoolSys1 Chiller1,           !- Component 1 Name
+    Chiller:Electric:ASHRAE205,  !- Component 1 Object Type
+    CoolSys1 Chiller1,       !- Component 1 Name
     CoolSys1 Chiller1 Oil Cooler Inlet Node,  !- Component 1 Inlet Node Name
     CoolSys1 Chiller1 Oil Cooler Aux Node,  !- Component 1 Outlet Node Name
-    Chiller:Electric:ASHRAE205,      !- Component 2 Object Type
-    CoolSys1 Chiller1,           !- Component 2 Name
+    Chiller:Electric:ASHRAE205,  !- Component 2 Object Type
+    CoolSys1 Chiller1,       !- Component 2 Name
     CoolSys1 Chiller1 Oil Cooler Aux Node,  !- Component 2 Inlet Node Name
     CoolSys1 Chiller2 Oil Cooler Inlet Node,  !- Component 2 Outlet Node Name
-    Chiller:Electric:ASHRAE205,      !- Component 3 Object Type
-    CoolSys1 Chiller2,           !- Component 3 Name
+    Chiller:Electric:ASHRAE205,  !- Component 3 Object Type
+    CoolSys1 Chiller2,       !- Component 3 Name
     CoolSys1 Chiller2 Oil Cooler Inlet Node,  !- Component 3 Inlet Node Name
     CoolSys1 Chiller2 Oil Cooler Aux Node,  !- Component 3 Outlet Node Name
-    Chiller:Electric:ASHRAE205,      !- Component 4 Object Type
-    CoolSys1 Chiller2,           !- Component 4 Name
+    Chiller:Electric:ASHRAE205,  !- Component 4 Object Type
+    CoolSys1 Chiller2,       !- Component 4 Name
     CoolSys1 Chiller2 Oil Cooler Aux Node,  !- Component 4 Inlet Node Name
     CoolSys1 Chiller2 Auxiliary Outlet Node;  !- Component 4 Outlet Node Name
 
@@ -13884,7 +13120,7 @@
     CoolSys1 Chiller1,       !- Name
     CoolSys1-Chiller-Detailed.RS0001.a205.cbor,  !- Representation File Name
     Cubic,                   !- Performance Interpolation Method
-    ,                        !- Reference Capacity
+    ,                        !- Rated Capacity {W}
     1.0,                     !- Sizing Factor
     Zone,                    !- Ambient Temperature Indicator
     ,                        !- Ambient Temperature Schedule Name
@@ -13896,7 +13132,7 @@
     CoolSys1 Chiller1 Water Inlet Node,  !- Condenser Inlet Node Name
     CoolSys1 Chiller1 Water Outlet Node,  !- Condenser Outlet Node Name
     0.05517136253079016,     !- Condenser Maximum Requested Flow Rate
-    ConstantFlow,            !- Chiller Flow Mode Type
+    ConstantFlow,            !- Chiller Flow Mode
     CoolSys1 Chiller1 Oil Cooler Inlet Node,  !- Oil Cooler Inlet Node Name
     CoolSys1 Chiller1 Oil Cooler Aux Node,  !- Oil Cooler Outlet Node Name
     0.001,                   !- Oil Cooler Design Flow Rate
@@ -13908,7 +13144,7 @@
     CoolSys1 Chiller2,       !- Name
     CoolSys1-Chiller-Detailed.RS0001.a205.cbor,  !- Representation File Name
     Cubic,                   !- Performance Interpolation Method
-    ,                        !- Reference Capacity
+    ,                        !- Rated Capacity {W}
     1.0,                     !- Sizing Factor
     Zone,                    !- Ambient Temperature Indicator
     ,                        !- Ambient Temperature Schedule Name
@@ -13920,7 +13156,7 @@
     CoolSys1 Chiller2 Water Inlet Node,  !- Condenser Inlet Node Name
     CoolSys1 Chiller2 Water Outlet Node,  !- Condenser Outlet Node Name
     0.05517136253079016,     !- Condenser Maximum Requested Flow Rate
-    ConstantFlow,            !- Chiller Flow Mode Type
+    ConstantFlow,            !- Chiller Flow Mode
     CoolSys1 Chiller2 Oil Cooler Inlet Node,  !- Oil Cooler Inlet Node Name
     CoolSys1 Chiller2 Oil Cooler Aux Node,  !- Oil Cooler Outlet Node Name
     0.001,                   !- Oil Cooler Design Flow Rate
@@ -14709,12 +13945,6 @@
     COOLSYS1 CHILLER2 PUMP,  !- Actuated Component Unique Name
     Plant Component Pump:ConstantSpeed,  !- Actuated Component Type
     On/Off Supervisory;      !- Actuated Component Control Type
-
-  EnergyManagementSystem:Actuator,
-    Chiller1PumpFlow,        !- Name
-    COOLSYS1 CHILLER1 PUMP,  !- Actuated Component Unique Name
-    Pump,                    !- Actuated Component Type
-    Pump Mass Flow Rate;     !- Actuated Component Control Type
 
   EnergyManagementSystem:Actuator,
     Chiller2PumpFlow,        !- Name
@@ -15894,7 +15124,7 @@
     -4.50025090963202,       !- Coefficient1 Constant
     7.51532615879379,        !- Coefficient2 w
     -2.34230474384112,       !- Coefficient3 x
-    0.14642462072188,       !- Coefficient4 y
+    0.14642462072188,        !- Coefficient4 y
     0.107374393461896,       !- Coefficient5 z
     -100,                    !- Minimum Value of w
     100,                     !- Maximum Value of w
@@ -15908,10 +15138,10 @@
   Curve:QuadLinear,
     WAHPCoolPowCurve 1,      !- Name
     -5.64270843812028,       !- Coefficient1 Constant
-    0.436278088630104,        !- Coefficient2 w
-    5.80919185594373,       !- Coefficient3 x
+    0.436278088630104,       !- Coefficient2 w
+    5.80919185594373,        !- Coefficient3 x
     0.140731472492284,       !- Coefficient4 y
-    -0.167686303743809,       !- Coefficient5 z
+    -0.167686303743809,      !- Coefficient5 z
     -100,                    !- Minimum Value of w
     100,                     !- Maximum Value of w
     -100,                    !- Minimum Value of x
@@ -15926,7 +15156,7 @@
     -4.50025090963202,       !- Coefficient1 Constant
     7.51532615879379,        !- Coefficient2 w
     -2.34230474384112,       !- Coefficient3 x
-    0.14642462072188,       !- Coefficient4 y
+    0.14642462072188,        !- Coefficient4 y
     0.107374393461896,       !- Coefficient5 z
     -100,                    !- Minimum Value of w
     100,                     !- Maximum Value of w
@@ -15940,10 +15170,10 @@
   Curve:QuadLinear,
     WAHPCoolPowCurve 2,      !- Name
     -5.64270843812028,       !- Coefficient1 Constant
-    0.436278088630104,        !- Coefficient2 w
-    5.80919185594373,       !- Coefficient3 x
+    0.436278088630104,       !- Coefficient2 w
+    5.80919185594373,        !- Coefficient3 x
     0.140731472492284,       !- Coefficient4 y
-    -0.167686303743809,       !- Coefficient5 z
+    -0.167686303743809,      !- Coefficient5 z
     -100,                    !- Minimum Value of w
     100,                     !- Maximum Value of w
     -100,                    !- Minimum Value of x
@@ -15958,7 +15188,7 @@
     -4.50025090963202,       !- Coefficient1 Constant
     7.51532615879379,        !- Coefficient2 w
     -2.34230474384112,       !- Coefficient3 x
-    0.14642462072188,       !- Coefficient4 y
+    0.14642462072188,        !- Coefficient4 y
     0.107374393461896,       !- Coefficient5 z
     -100,                    !- Minimum Value of w
     100,                     !- Maximum Value of w
@@ -15972,10 +15202,10 @@
   Curve:QuadLinear,
     WAHPCoolPowCurve 3,      !- Name
     -5.64270843812028,       !- Coefficient1 Constant
-    0.436278088630104,        !- Coefficient2 w
-    5.80919185594373,       !- Coefficient3 x
+    0.436278088630104,       !- Coefficient2 w
+    5.80919185594373,        !- Coefficient3 x
     0.140731472492284,       !- Coefficient4 y
-    -0.167686303743809,       !- Coefficient5 z
+    -0.167686303743809,      !- Coefficient5 z
     -100,                    !- Minimum Value of w
     100,                     !- Maximum Value of w
     -100,                    !- Minimum Value of x
@@ -15990,7 +15220,7 @@
     -4.50025090963202,       !- Coefficient1 Constant
     7.51532615879379,        !- Coefficient2 w
     -2.34230474384112,       !- Coefficient3 x
-    0.14642462072188,       !- Coefficient4 y
+    0.14642462072188,        !- Coefficient4 y
     0.107374393461896,       !- Coefficient5 z
     -100,                    !- Minimum Value of w
     100,                     !- Maximum Value of w
@@ -16004,10 +15234,10 @@
   Curve:QuadLinear,
     WAHPCoolPowCurve 4,      !- Name
     -5.64270843812028,       !- Coefficient1 Constant
-    0.436278088630104,        !- Coefficient2 w
-    5.80919185594373,       !- Coefficient3 x
+    0.436278088630104,       !- Coefficient2 w
+    5.80919185594373,        !- Coefficient3 x
     0.140731472492284,       !- Coefficient4 y
-    -0.167686303743809,       !- Coefficient5 z
+    -0.167686303743809,      !- Coefficient5 z
     -100,                    !- Minimum Value of w
     100,                     !- Maximum Value of w
     -100,                    !- Minimum Value of x
@@ -16023,7 +15253,7 @@
     -3.32614175008211,       !- Coefficient2 w
     3.77002512979569,        !- Coefficient3 x
     0.177487717251347,       !- Coefficient4 y
-    0.127378040851416,        !- Coefficient5 z
+    0.127378040851416,       !- Coefficient5 z
     -100,                    !- Minimum Value of w
     100,                     !- Maximum Value of w
     -100,                    !- Minimum Value of x
@@ -16037,7 +15267,7 @@
     WAHPHeatPowCurve 1,      !- Name
     -3.82822342994465,       !- Coefficient1 Constant
     3.42057724376637,        !- Coefficient2 w
-    1.51670957364394,         !- Coefficient3 x
+    1.51670957364394,        !- Coefficient3 x
     -0.179362136835128,      !- Coefficient4 y
     -0.104071260074646,      !- Coefficient5 z
     -100,                    !- Minimum Value of w
@@ -16055,7 +15285,7 @@
     -3.32614175008211,       !- Coefficient2 w
     3.77002512979569,        !- Coefficient3 x
     0.177487717251347,       !- Coefficient4 y
-    0.127378040851416,        !- Coefficient5 z
+    0.127378040851416,       !- Coefficient5 z
     -100,                    !- Minimum Value of w
     100,                     !- Maximum Value of w
     -100,                    !- Minimum Value of x
@@ -16069,7 +15299,7 @@
     WAHPHeatPowCurve 2,      !- Name
     -3.82822342994465,       !- Coefficient1 Constant
     3.42057724376637,        !- Coefficient2 w
-    1.51670957364394,         !- Coefficient3 x
+    1.51670957364394,        !- Coefficient3 x
     -0.179362136835128,      !- Coefficient4 y
     -0.104071260074646,      !- Coefficient5 z
     -100,                    !- Minimum Value of w
@@ -16087,7 +15317,7 @@
     -3.32614175008211,       !- Coefficient2 w
     3.77002512979569,        !- Coefficient3 x
     0.177487717251347,       !- Coefficient4 y
-    0.127378040851416,        !- Coefficient5 z
+    0.127378040851416,       !- Coefficient5 z
     -100,                    !- Minimum Value of w
     100,                     !- Maximum Value of w
     -100,                    !- Minimum Value of x
@@ -16101,7 +15331,7 @@
     WAHPHeatPowCurve 3,      !- Name
     -3.82822342994465,       !- Coefficient1 Constant
     3.42057724376637,        !- Coefficient2 w
-    1.51670957364394,         !- Coefficient3 x
+    1.51670957364394,        !- Coefficient3 x
     -0.179362136835128,      !- Coefficient4 y
     -0.104071260074646,      !- Coefficient5 z
     -100,                    !- Minimum Value of w
@@ -16119,7 +15349,7 @@
     -3.32614175008211,       !- Coefficient2 w
     3.77002512979569,        !- Coefficient3 x
     0.177487717251347,       !- Coefficient4 y
-    0.127378040851416,        !- Coefficient5 z
+    0.127378040851416,       !- Coefficient5 z
     -100,                    !- Minimum Value of w
     100,                     !- Maximum Value of w
     -100,                    !- Minimum Value of x
@@ -16133,7 +15363,7 @@
     WAHPHeatPowCurve 4,      !- Name
     -3.82822342994465,       !- Coefficient1 Constant
     3.42057724376637,        !- Coefficient2 w
-    1.51670957364394,         !- Coefficient3 x
+    1.51670957364394,        !- Coefficient3 x
     -0.179362136835128,      !- Coefficient4 y
     -0.104071260074646,      !- Coefficient5 z
     -100,                    !- Minimum Value of w
@@ -16149,7 +15379,7 @@
 
   Curve:QuintLinear,
     WAHPCoolCapCurveSens 1,  !- Name
-    5.67639816011815,         !- Coefficient1 Constant
+    5.67639816011815,        !- Coefficient1 Constant
     21.4026096359879,        !- Coefficient2 v
     -25.3426552752253,       !- Coefficient3 w
     -1.63025091025978,       !- Coefficient4 x
@@ -16168,7 +15398,7 @@
 
   Curve:QuintLinear,
     WAHPCoolCapCurveSens 2,  !- Name
-    5.67639816011815,         !- Coefficient1 Constant
+    5.67639816011815,        !- Coefficient1 Constant
     21.4026096359879,        !- Coefficient2 v
     -25.3426552752253,       !- Coefficient3 w
     -1.63025091025978,       !- Coefficient4 x
@@ -16187,7 +15417,7 @@
 
   Curve:QuintLinear,
     WAHPCoolCapCurveSens 3,  !- Name
-    5.67639816011815,         !- Coefficient1 Constant
+    5.67639816011815,        !- Coefficient1 Constant
     21.4026096359879,        !- Coefficient2 v
     -25.3426552752253,       !- Coefficient3 w
     -1.63025091025978,       !- Coefficient4 x
@@ -16206,7 +15436,7 @@
 
   Curve:QuintLinear,
     WAHPCoolCapCurveSens 4,  !- Name
-    5.67639816011815,         !- Coefficient1 Constant
+    5.67639816011815,        !- Coefficient1 Constant
     21.4026096359879,        !- Coefficient2 v
     -25.3426552752253,       !- Coefficient3 w
     -1.63025091025978,       !- Coefficient4 x
@@ -16272,6 +15502,22 @@
     0.0,                     !- Coefficient3 x**2
     0,                       !- Minimum Value of x
     1;                       !- Maximum Value of x
+
+  Curve:Quadratic,
+    HPACCOOLPLFFPLR,         !- Name
+    0.75,                    !- Coefficient1 Constant
+    0.25,                    !- Coefficient2 x
+    0.0,                     !- Coefficient3 x**2
+    0.0,                     !- Minimum Value of x
+    1.0;                     !- Maximum Value of x
+
+  Curve:Quadratic,
+    HPACHEATPLFFPLR,         !- Name
+    0.75,                    !- Coefficient1 Constant
+    0.25,                    !- Coefficient2 x
+    0.0,                     !- Coefficient3 x**2
+    0.0,                     !- Minimum Value of x
+    1.0;                     !- Maximum Value of x
 
 !-   ===========  ALL OBJECTS IN CLASS: CURVE:CUBIC ===========
 
@@ -17145,3 +16391,4 @@
   Output:Variable,*,Oil Cooler Heat Transfer Rate,Detailed;
 
   Output:Variable,*,Auxiliary Heat Transfer Rate,Detailed;
+

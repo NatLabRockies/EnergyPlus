@@ -88,7 +88,7 @@
 ! Environmental Emissions:        None
 ! Utility Tariffs:                None
 
-  Version,23.1;
+  Version,26.2;
 
   Timestep,4;
 
@@ -368,6 +368,9 @@
     15.24000,0.000000,4.572,  !- X,Y,Z ==> Vertex 3 {m}
     15.24000,15.24000,4.572;  !- X,Y,Z ==> Vertex 4 {m}
 
+  Output:Diagnostics,
+    DisplayAdvancedReportVariables;  !- Key 1
+
   Output:Variable,*,Site Outdoor Air Drybulb Temperature,hourly;
 
   Output:Variable,*,Site Total Sky Cover,hourly;
@@ -379,6 +382,10 @@
   Output:Variable,*,Site Day Type Index,daily;
 
   Output:Variable,*,Zone Mean Air Temperature,hourly;
+
+  Output:Variable,*,Zone Operative Temperature,hourly;
+
+  Output:Variable,ZONE ONE,Zone Wetbulb Globe Temperature,hourly;
 
   Output:Variable,*,Zone Total Internal Latent Gain Energy,hourly;
 
@@ -395,6 +402,66 @@
   Output:Variable,*,Surface Inside Face Convection Heat Transfer Coefficient,daily;
 
   Output:Variable,*,Surface Outside Face Convection Heat Transfer Coefficient,daily;
+
+  Output:Variable,*,Surface Inside Face Conduction Heat Transfer Rate,hourly;
+
+  Output:Variable,*,Surface Inside Face Conduction Heat Gain Rate,hourly;
+
+  Output:Variable,*,Surface Inside Face Conduction Heat Loss Rate,hourly;
+
+  Output:Variable,*,Surface Inside Face Conduction Heat Transfer Rate per Area,hourly;
+
+  Output:Variable,*,Surface Inside Face Conduction Heat Transfer Energy,hourly;
+
+  Output:Variable,*,Surface Outside Face Conduction Heat Transfer Rate,hourly;
+
+  Output:Variable,*,Surface Outside Face Conduction Heat Gain Rate,hourly;
+
+  Output:Variable,*,Surface Outside Face Conduction Heat Loss Rate,hourly;
+
+  Output:Variable,*,Surface Outside Face Conduction Heat Transfer Rate per Area,hourly;
+
+  Output:Variable,*,Surface Outside Face Conduction Heat Transfer Energy,hourly;
+
+  Output:Variable,*,Surface Average Face Conduction Heat Transfer Rate,hourly;
+
+  Output:Variable,*,Surface Average Face Conduction Heat Gain Rate,hourly;
+
+  Output:Variable,*,Surface Average Face Conduction Heat Loss Rate,hourly;
+
+  Output:Variable,*,Surface Average Face Conduction Heat Transfer Rate per Area,hourly;
+
+  Output:Variable,*,Surface Average Face Conduction Heat Transfer Energy,hourly;
+
+  Output:Variable,*,Surface Heat Storage Rate,hourly;
+
+  Output:Variable,*,Surface Heat Storage Gain Rate,hourly;
+
+  Output:Variable,*,Surface Heat Storage Loss Rate,hourly;
+
+  Output:Variable,*,Surface Heat Storage Rate per Area,hourly;
+
+  Output:Variable,*,Surface Heat Storage Energy,hourly;
+
+  Output:Variable,*,Zone Opaque Surface Inside Faces Conduction Rate,hourly;
+
+  Output:Variable,*,Zone Opaque Surface Inside Faces Conduction Heat Gain Rate,hourly;
+
+  Output:Variable,*,Zone Opaque Surface Inside Faces Conduction Heat Loss Rate,hourly;
+
+  Output:Variable,*,Zone Opaque Surface Inside Faces Conduction Heat Gain Energy,hourly;
+
+  Output:Variable,*,Zone Opaque Surface Inside Faces Conduction Heat Loss Energy,hourly;
+
+  Output:Variable,*,Zone Opaque Surface Outside Faces Conduction Rate,hourly;
+
+  Output:Variable,*,Zone Opaque Surface Outside Faces Conduction Heat Gain Rate,hourly;
+
+  Output:Variable,*,Zone Opaque Surface Outside Faces Conduction Heat Loss Rate,hourly;
+
+  Output:Variable,*,Zone Opaque Surface Outside Faces Conduction Heat Gain Energy,hourly;
+
+  Output:Variable,*,Zone Opaque Surface Outside Faces Conduction Heat Loss Energy,hourly;
 
   Output:Variable,*,Other Equipment Total Heating Energy,monthly;
 
@@ -438,7 +505,7 @@
     AlwaysOn,                !- Schedule Name
     EquipmentLevel,          !- Design Level Calculation Method
     352,                     !- Design Level {W}
-    ,                        !- Power per Zone Floor Area {W/m2}
+    ,                        !- Power per Floor Area {W/m2}
     ,                        !- Power per Person {W/person}
     0,                       !- Fraction Latent
     0,                       !- Fraction Radiant
@@ -451,7 +518,7 @@
     AlwaysOn,                !- Schedule Name
     EquipmentLevel,          !- Design Level Calculation Method
     -352,                    !- Design Level {W}
-    ,                        !- Power per Zone Floor Area {W/m2}
+    ,                        !- Power per Floor Area {W/m2}
     ,                        !- Power per Person {W/person}
     0,                       !- Fraction Latent
     0,                       !- Fraction Radiant

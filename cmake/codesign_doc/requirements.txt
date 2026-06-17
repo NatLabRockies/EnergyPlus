@@ -1,0 +1,5 @@
+GitPython==3.1.50
+rst2pdf==0.102
+sphinx-rtd-theme==2.0.0
+sphinx-sitemap==2.6.0
+sphinxcontrib-moderncmakedomain==3.29.0

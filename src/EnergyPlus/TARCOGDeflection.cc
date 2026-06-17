@@ -1,7 +1,7 @@
-// EnergyPlus, Copyright (c) 1996-2023, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
-// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other
+// National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
 // contributors. All rights reserved.
 //
 // NOTICE: This Software was developed under funding from the U.S. Department of Energy and the
@@ -47,7 +47,6 @@
 
 // ObjexxFCL Headers
 #include <ObjexxFCL/Array1D.hh>
-#include <ObjexxFCL/Fmath.hh>
 
 // EnergyPlus Headers
 #include <EnergyPlus/DataGlobals.hh>
@@ -105,7 +104,7 @@ void PanesDeflection(DeflectionCalculation const DeflectionStandard,
     EP_SIZE_CHECK(PoissonsRat, maxlay);
     EP_SIZE_CHECK(LayerDeflection, maxlay);
 
-    // Localy used
+    // Locally used
     Array1D<Real64> DCoeff(maxlay);
 
     // first calculate D coefficients since that will be necessary for any of selected standards
@@ -163,9 +162,9 @@ void DeflectionTemperatures(int const nlayer,
     EP_SIZE_CHECK(LayerDeflection, maxlay);
 
     // Static constants
-    static Real64 const Pi_6(pow_6(DataGlobalConstants::Pi));
+    static Real64 const Pi_6(pow_6(Constant::Pi));
 
-    // localy used
+    // locally used
     Array1D<Real64> DPressure(maxlay); // delta pressure at each glazing layer
     Array1D<Real64> Vini(MaxGap);
     Array1D<Real64> Vgap(MaxGap);

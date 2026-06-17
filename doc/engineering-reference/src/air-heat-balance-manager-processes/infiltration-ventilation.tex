@@ -14,6 +14,8 @@ Infiltration (Ref Object: ZoneInfiltration:DesignFlowRate) is the unintended flo
 Infiltration = \left( {{I_{design}}} \right)\left( {{F_{schedule}}} \right)\left[ {A + B\left| {\left( {{T_{zone}} - {T_{odb}}} \right)} \right| + C\left( {WindSpeed} \right) + D\left( {Windspee{d^2}} \right)} \right]
 \end{equation}
 
+The $Infiltration$ volume flow rate is converted to mass flow rate using the density basis specified in the input: outdoor (the default), standard, or indoor.
+
 More advanced infiltration calculations are possible using the EnergyPlus AirflowNetwork model for natural infiltration driven by wind when the HVAC system does not operate and/or driven by wind and forced air for times when the HVAC system operates. Exfiltration (the leakage of zone air to the outside) is generally handled better as zone exhaust air in the zone equipment description.
 
 The question of typical values for these coefficients is subject to debate. Ideally, one should do a detailed analysis of the infiltration situation and then determine a custom set of coefficients using methods such as those laid out in Chapter 26 of the ASHRAE Handbook of Fundamentals. The EnergyPlus defaults are 1,0,0,0 which gives a constant volume flow of infiltration under all conditions.
@@ -101,6 +103,8 @@ Ventilation (Ref Object: ZoneVentilation:DesignFlowRate) is the purposeful flow 
 \begin{equation}
 Ventilation = \left( {{V_{design}}} \right)\left( {{F_{schedule}}} \right)\left\lfloor {A + B\left| {{T_{zone}} - {T_{odb}}} \right| + C\left( {WindSpeed} \right) + D\left( {WindSpee{d^2}} \right)} \right\rfloor
 \end{equation}
+
+The $Ventilation$ volume flow rate is converted to mass flow rate using the density basis specified in the input: outdoor (the default), standard, or indoor.
 
 More advanced ventilation calculations are possible using the EnergyPlus AirflowNetwork model.
 

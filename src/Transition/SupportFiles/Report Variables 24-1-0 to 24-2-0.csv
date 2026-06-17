@@ -1,0 +1,14 @@
+24.1.0,24.2.0,Transition notes - some of these are EMS variable names
+11,11,These numbers should be the number of report variables in the following list (including deletes). Two columns/numbers.
+Zone Windows Total Transmitted Solar Radiation Rate,Enclosure Windows Total Transmitted Solar Radiation Rate,
+Zone Exterior Windows Total Transmitted Beam Solar Radiation Rate,Enclosure Exterior Windows Total Transmitted Beam Solar Radiation Rate,
+Zone Interior Windows Total Transmitted Beam Solar Radiation Rate,Enclosure Interior Windows Total Transmitted Beam Solar Radiation Rate,
+Zone Exterior Windows Total Transmitted Diffuse Solar Radiation Rate,Enclosure Exterior Windows Total Transmitted Diffuse Solar Radiation Rate,
+Zone Interior Windows Total Transmitted Diffuse Solar Radiation Rate,Enclosure Interior Windows Total Transmitted Diffuse Solar Radiation Rate,
+Zone Windows Total Transmitted Solar Radiation Energy,Enclosure Windows Total Transmitted Solar Radiation Energy,
+Zone Exterior Windows Total Transmitted Beam Solar Radiation Energy,Enclosure Exterior Windows Total Transmitted Beam Solar Radiation Energy,
+Zone Interior Windows Total Transmitted Beam Solar Radiation Energy,Enclosure Interior Windows Total Transmitted Beam Solar Radiation Energy,
+Zone Exterior Windows Total Transmitted Diffuse Solar Radiation Energy,Enclosure Exterior Windows Total Transmitted Diffuse Solar Radiation Energy,
+Zone Interior Windows Total Transmitted Diffuse Solar Radiation Energy,Enclosure Interior Windows Total Transmitted Diffuse Solar Radiation Energy,
+Indoor Living Wall Energy Required For Evapotranspiration Per Unit Area,Indoor Living Wall Energy Rate Required For Evapotranspiration Per Unit Area,
+old variable name,new variable name,-- add variable names (before this line) and leave off units -- <DELETE> to delete

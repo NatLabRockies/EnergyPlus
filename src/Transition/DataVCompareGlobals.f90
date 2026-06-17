@@ -136,4 +136,3 @@ INTEGER :: numChillerHeaters=0
 LOGICAL :: CondFDVariables=.false.
 
 end module DataVCompareGlobals
-

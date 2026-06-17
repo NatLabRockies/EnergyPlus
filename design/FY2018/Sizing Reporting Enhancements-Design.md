@@ -26,7 +26,7 @@ New functions are:
 `finishCoilSummaryReportTable` - called from `OutputReportTabular::WriteTabularReports`
 
     doFinalProcessingOfCoilData - fill in some of the data fields
-	writeCoilSelectionOutput - write the full Coil Sizing Details table 
+	writeCoilSelectionOutput - write the full Coil Sizing Details table
 	writeCoilSelectionOutput2 - write the abbreviated Coil Sizing subtable
 
 A variety of public functions called from the various coil sizing routines to populate the data:
@@ -34,7 +34,7 @@ A variety of public functions called from the various coil sizing routines to po
 	setCoilFinalSizes
 	setRatedCoilConditions
 	setCoilAirFlow
-	setCoilWaterFlowNodeNums( 
+	setCoilWaterFlowNodeNums(
 	setCoilWaterFlowPltSizNum
 	setCoilEntAirTemp
 	setCoilEntAirHumRat

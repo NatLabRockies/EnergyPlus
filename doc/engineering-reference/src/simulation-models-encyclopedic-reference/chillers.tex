@@ -4,7 +4,7 @@
 
 The input object Chiller:Absorption provides a model for absorption chillers that is an empirical model of a standard absorption refrigeration cycle.~ The condenser and evaporator are similar to that of a standard chiller, which are both water-to-water heat exchangers.~ The assembly of a generator and absorber provides the compression operation.~ Low-pressure vapor from the evaporator is absorbed by the liquid solution in the absorber.~ A pump receives low-pressure liquid from the absorber, elevates the pressure of the liquid, and delivers the liquid to the generator.~ In the generator, heat from a high temperature source (hot water or steam) drives off the vapor that has been absorbed by the solution.~ The liquid solution returns to the absorber through a throttling valve whose purpose is to provide a pressure drop to maintain the pressure difference between the generator and absorber.~ The heat supplied to the absorber can be waste heat from a diesel jacket, or the exhaust heat from diesel, gas, and steam turbines.~ For more information on absorption chillers, see the Input/Output Reference Document (Object: Chiller:Absorption).
 
-The part-load ratio of the absoprtion chiller's evaporator is simply the actual cooling effect produced by the chiller divided by the maximum cooling effect available.
+The part-load ratio of the absorption chiller's evaporator is simply the actual cooling effect produced by the chiller divided by the maximum cooling effect available.
 
 \begin{equation}
 PLR = \frac{\dot{Q}_{evap}}{\dot{Q}_{evap,rated}}
@@ -54,7 +54,7 @@ where:
 
 \({\dot Q_{generator}}\) is the generator input power (W)
 
-\({\dot Q_{pump}}\) is the absorbtion chiller pumping power (W).
+\({\dot Q_{pump}}\) is the absorption chiller pumping power (W).
 
 The evaporator water mass flow rate is calculated based on the Chiller Flow Mode as follows.
 
@@ -218,7 +218,7 @@ where:
 
 \(CAPF{T_{generator}}\) is the capacity correction (function of generator temperature) factor
 
-\({T_{evaporator}}\) is the evaporator outet water temperature (\(^{\circ}\)C)
+\({T_{evaporator}}\) is the evaporator outlet water temperature (\(^{\circ}\)C)
 
 \({T_{condenser}}\) is the condenser inlet water temperature (\(^{\circ}\)C)
 
@@ -228,7 +228,7 @@ where:
 
 \({\dot Q_{evap,rated}}\) is the rated chiller capacity (W).
 
-The part-load ratio of the indirect absoprtion chiller's evaporator is simply the actual cooling effect required (load) divided by the maximum cooling effect available.
+The part-load ratio of the indirect absorption chiller's evaporator is simply the actual cooling effect required (load) divided by the maximum cooling effect available.
 
 \begin{equation}
   PLR = \frac{\dot{Q}_{evap}}{\dot{Q}_{evap,max}}
@@ -240,7 +240,7 @@ where:
 
 \({\dot Q_{evap}}\) is the chiller evaporator operating capacity (W).
 
-The generator's heat input is also a function of several parameters. The primary input for determining the heat input requirements is the Generator Heat Input function of Part-Load Ratio Curve. The curve is a quadratic or cubic equation that determines the ratio of the generator heat input to the chiller's maximum capacity (Q\(_{evap,\, max}\)) and is solely a function of part-load ratio. Typical generator heat input ratios at full load (i.e., PLR = 1) are between 1 and 2. Two additional curves are available to modifiy the heat input requirement based on the generator inlet water temperature and the evaporator outlet water temperature.
+The generator's heat input is also a function of several parameters. The primary input for determining the heat input requirements is the Generator Heat Input function of Part-Load Ratio Curve. The curve is a quadratic or cubic equation that determines the ratio of the generator heat input to the chiller's maximum capacity (Q\(_{evap,\, max}\)) and is solely a function of part-load ratio. Typical generator heat input ratios at full load (i.e., PLR = 1) are between 1 and 2. Two additional curves are available to modify the heat input requirement based on the generator inlet water temperature and the evaporator outlet water temperature.
 
 \begin{equation}
 GeneratorHIR = a + b\left( {PLR} \right) + c{\left( {PLR} \right)^2} + d{\left( {PLR} \right)^3}
@@ -366,7 +366,7 @@ The absorption chiller can model the impact of steam or hot water entering the g
 
 \subsubsection{Steam Loop Calculations}\label{steam-loop-calculations-1}
 
-When a steam loop is used and the inlet and outlet node names are specified (i.e.~the nodes are connected to a steam loop), the generator outlet node steam mass flow rate and temperature are calculated based on the generator heat input, latent heat of steam, the specific heat of water, and the amount of subcooling in the steam generator. The model assumes dry saturated steam enters the generator and exits the generator as a subcooled liquid. The temperature leaving the generator is calculated based on the user entered amount of liquid subcooling in the generator. The effect of subcooling of the liquid (condensate) in the pipe returning to the boiler is also modeled using the user entered abount of steam condensate loop subcooling.
+When a steam loop is used and the inlet and outlet node names are specified (i.e.~the nodes are connected to a steam loop), the generator outlet node steam mass flow rate and temperature are calculated based on the generator heat input, latent heat of steam, the specific heat of water, and the amount of subcooling in the steam generator. The model assumes dry saturated steam enters the generator and exits the generator as a subcooled liquid. The temperature leaving the generator is calculated based on the user entered amount of liquid subcooling in the generator. The effect of subcooling of the liquid (condensate) in the pipe returning to the boiler is also modeled using the user entered amount of steam condensate loop subcooling.
 
 \begin{equation}
 {\dot m_{steam}}\,\,\,\, = \,\,\,\,\,\frac{{{{\dot Q}_{generator}}}}{{{h_{fg}} + {c_{p,water}} \times \Delta {T_{sc}}}}
@@ -1185,7 +1185,7 @@ The second is used for the chiller model for the object Chiller:Electric:Reformu
 {T_{Cond,out,Avg}} = \frac{{\left( {{{\dot Q}_{HR}}{T_{HR,out}} + {{\dot Q}_{Cond}}{T_{Cond,out}}} \right)}}{{\left( {{{\dot Q}_{HR}} + {{\dot Q}_{Cond}}} \right)}}
 \end{equation}
 
-Both of these are available as an output variable called Chiller Effective Heat Rejection Tempeature in \(^{\circ}\)C.
+Both of these are available as an output variable called Chiller Effective Heat Rejection Temperature in \(^{\circ}\)C.
 
 \subsubsection{Chiller Basin Heater}\label{chiller-basin-heater-2}
 
@@ -1416,7 +1416,7 @@ where:
 
 For water-cooled chillers, the water temperature leaving the condenser is then calculated as shown below.
 
-\begin{equation} 
+\begin{equation}
   T_{cond,l} = T_{cond,e} + \frac{\dot{Q}_{cond}}{\dot{m}_{cond}C_{p,cond}}
 \end{equation}
 
@@ -1905,7 +1905,7 @@ Heat from the electric reformulated EIR chiller condenser may be recovered. The 
 
 \subsubsection{Standard Rating (Integrated Part Load Value)}\label{standard-rating-integrated-part-load-value-1}
 
-Integrated Part Laod Value (IPLV) calculations for Reformulated EIR chiller are similar to what are described above for EIR chillers. The only difference with Reformulated EIR chiller is that it calls an iterative subroutine (SolveRegulaFalsi) to obtain a condenser water outlet temperature which corresponds to condenser inlet temperature at reduced capacity conditions as outlined in Table~\ref{table:standard-rating-integrated-part-load-value} above. SolveRegulaFalsi is a general utility routine for finding the zero of a function. In this case it finds the condenser inlet temperature that will zero the residual function -- the difference between calculated condenser inlet temperature and desired condenser inlet temperature per ANSI/AHRI 550/590, 2011 (Table~\ref{table:standard-rating-integrated-part-load-value} above) divided by desired condenser inlet temperature.
+Integrated Part Load Value (IPLV) calculations for Reformulated EIR chiller are similar to what are described above for EIR chillers. The only difference with Reformulated EIR chiller is that it calls an iterative subroutine (SolveRegulaFalsi) to obtain a condenser water outlet temperature which corresponds to condenser inlet temperature at reduced capacity conditions as outlined in Table~\ref{table:standard-rating-integrated-part-load-value} above. SolveRegulaFalsi is a general utility routine for finding the zero of a function. In this case it finds the condenser inlet temperature that will zero the residual function -- the difference between calculated condenser inlet temperature and desired condenser inlet temperature per ANSI/AHRI 550/590, 2011 (Table~\ref{table:standard-rating-integrated-part-load-value} above) divided by desired condenser inlet temperature.
 
 \subsubsection{References}\label{references-1-003}
 
@@ -2005,4 +2005,61 @@ where:
 
 \emph{Schedule\(_{heater,basin}\)} is the basin heater schedule, user input (schedule value \textgreater{} 0 means ON)
 
-\emph{ChillerIsOFF} is the logical variable denoting that the chiller is not operating for the current simulation time step (e.g.,~ there is no cooling load to be met by the chiller, or if there is no water flow through the chiller due to a chiller or pump availability schedule, etc.). 
+\emph{ChillerIsOFF} is the logical variable denoting that the chiller is not operating for the current simulation time step (e.g.,~ there is no cooling load to be met by the chiller, or if there is no water flow through the chiller due to a chiller or pump availability schedule, etc.).
+
+\subsection{Variable Flow Condenser}\label{variable-flow-condenser}
+
+The \hyperref[electric-chiller-model-based-on-condenser-entering-temperature](Chiller:Electric:EIR) and \hyperref[electric-chiller-model-based-on-condenser-leaving-temperature](Chiller:Electric:ReformulatedEIR) have the capability to simulate variable condenser flow requests. The flow request can be capped to a minimum via a user-defined fraction. The minimum condenser plant loop flow rate will be limited by the minimum flow rates of the operating pumps. The flow request can be calculated using one of the following approaches:
+
+\begin{itemize}
+  \item Chiller part load ratio
+  \item Chilled water part load ratio
+  \item Condenser temperature difference
+\end{itemize}
+
+Note that simulating a variable flow condenser will, at identical load and entering conditions, modify the condenser leaving water temperature when compared with a constant flow condenser. The performance of a Chiller:Electric:EIR object won't be impacted by a change in leaving water condenser temperature but the performance of a Chiller:Electric:ReformulatedEIR object will be impacted.
+
+\subsubsection{Chiller Part Load Ratio}
+
+The flow request is determined by multiplying the maximum chiller condenser mass flow rate by the chiller operating part load ratio.
+
+\subsubsection{Chiller water part load ratio}
+
+The flow request is determined by first calculating the chilled water loop (CHWL) part load ratio:
+
+\begin{equation}
+{PLR_{CHWL}} = \frac{{L_{CHWL}}}{CAP_{CHWL}}
+\end{equation}
+
+where:
+
+\({PLR_{CHWL}}\) is the chilled water loop part load ratio
+
+\({L_{CHWL}}\) is the actual load on the chilled water loop
+
+\({CAP_{CHWL}}\) is the design chilled water loop capacity determined using inputs from the Sizing:Plant object for the loop
+
+
+The condenser plant loop water flow fraction (\({CWFR}\)) corresponding to the \({PLR_{CWHL}}\) is obtained by feeding it through a user-specified curve. A linear curve is expected: \(CWFR = C * {PLR_{CHWL}} + D\)  where C and D are coefficients. A reference for these coefficients is provided in ``Optimizing Design \& Control Of Chilled Water Plants, Part 5'', S. Taylor, ASHRAE Journal June 2012.
+
+The actual condenser mass flow request for the chiller is then calculated as follows:
+
+\begin{equation}
+{\dot m_{chiller_{condenser}}} = \frac{{\dot m_{condenser_{loop_{design}}}} . {CWFR} . {\dot Q_{chiller_{evaporator}}}}{L_{CHWL}}
+\end{equation}
+
+If a single chiller is meeting the \({L_{CHWL}}\), then \({\dot m_{chiller_{condenser}}} = {\dot m_{condenser_{loop_{design}}}} * {CWFR}\).
+
+\subsubsection{Chiller water part load ratio}
+
+The flow request is determined as follows:
+
+\begin{equation}
+{\dot m_{chiller_{condenser}}} = \frac{{\dot Q_{chiller_{condenser}}}}{({C_p} . {\Delta {T_{condenser}}})}
+\end{equation}
+
+where:
+
+\({\dot Q_{chiller_{condenser}}}\) is the chiller's condenser heat transfer rate
+
+\({\Delta {T_{condenser}}}\) is the user-defined temperature difference across the chiller condenser bundle

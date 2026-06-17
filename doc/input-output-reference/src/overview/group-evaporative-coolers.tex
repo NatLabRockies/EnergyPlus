@@ -12,12 +12,12 @@ The direct stage, shown in the figure below, consists of a rigid media evaporati
 \caption{Direct Stage Evaporative Cooler \protect \label{fig:direct-stage-evaporative-cooler}}
 \end{figure}
 
-The thermodynamic process is a simultaneous heat and mass transfer, or adiabatic cooling, and follows a constant enthalpy line on the psychrometric chart, it is shown in the figure below as a process from A to B. Since the deviation of the constant wet-bulb line and the constant enthalpy line is small, it is assumed that the wet-bulb temperature is constant across the direct evaporative stage.
+The thermodynamic process is a simultaneous, adiabatic heat and mass transfer, and follows a line of constant wet-bulb temperature on the psychrometric chart (this is the process that defines the thermodynamic wet-bulb temperature). It is shown in the figure below as a process from A to B.
 
 \begin{figure}[hbtp] % fig 145
 \centering
 \includegraphics[width=0.9\textwidth, height=0.9\textheight, keepaspectratio=true]{media/image416.png}
-\caption{Psychrometric Chart -- Constant Enthalpy \protect \label{fig:psychrometric-chart-constant-enthalpy}}
+\caption{Psychrometric Chart -- Constant Wet-Bulb Temperature \protect \label{fig:psychrometric-chart-constant-wetbulb}}
 \end{figure}
 
 If the direct evaporative process were 100\% efficient, the leaving dry-bulb temperature would equal the entering wet-bulb temperature. The efficiency of the direct evaporative process is less than 100\% and by defining saturation efficiency (\(\varepsilon\) se) for the direct stage or evaporative pad, the leaving dry-bulb temperature can be expressed by the following equation.
@@ -67,15 +67,14 @@ This field is optional. It is used to describe where the cooler obtains water us
 An IDF example showing how this object is:
 
 \begin{lstlisting}
-
 EvaporativeCooler:Direct:CelDekPad,
-  Evaporative Cooler,           !- Name
-  System Availability Schedule,   !- Availability Schedule Name
-  0.6,                                         !- Direct Pad Area {m2}
-  0.2,                                         !- Direct Pad Depth {m}
-  225,                                         !- Recirculating Water Pump Power Consumption {W}
-  Evap Cooler Inlet Node,   !- Air Inlet Node Name
-  Supply Outlet Node;           !- Air Outlet Node Name
+  Evaporative Cooler,         !- Name
+  System Availability Schedule,  !- Availability Schedule Name
+  0.6,                        !- Direct Pad Area {m2}
+  0.2,                        !- Direct Pad Depth {m}
+  225,                        !- Recirculating Water Pump Power Consumption {W}
+  Evap Cooler Inlet Node,     !- Air Inlet Node Name
+  Supply Outlet Node;         !- Air Outlet Node Name
 \end{lstlisting}
 
 \subsubsection{Outputs}
@@ -103,7 +102,7 @@ The output variables that are available for this direct evaporative cooler are s
 
 \paragraph{Evaporative Cooler Wet Bulb Effectiveness}\label{evaporative-cooler-wet-bulb-effectiveness}
 
-The effectivenss, or saturation efficiency, is the temperature change of the supply air divided by the difference between the inlet air dry-bulb and wet-bulb temperatures. In other words, it is a measure of the approach to the inlet air wet-bulb temperature.
+The effectiveness, or saturation efficiency, is the temperature change of the supply air divided by the difference between the inlet air dry-bulb and wet-bulb temperatures. In other words, it is a measure of the approach to the inlet air wet-bulb temperature.
 
 \paragraph{Evaporative Cooler Electricity Rate {[}W{]}}\label{evaporative-cooler-electric-powerw}
 
@@ -125,11 +124,11 @@ The water consumption is the water evaporated from the pad. This water consumpti
 
 \paragraph{Evaporative Cooler Starved Water Volume {[}m3{]}}\label{evaporative-cooler-starved-water-volume-m3}
 
-This is the water consumed by the evaporative cooler that could not accually be met by the storage tank. This output variable appears when storage tank water is supplied to the cooler.
+This is the water consumed by the evaporative cooler that could not actually be met by the storage tank. This output variable appears when storage tank water is supplied to the cooler.
 
 \paragraph{Evaporative Cooler Starved Mains Water Volume {[}m3{]}}\label{evaporative-cooler-starved-mains-water-volume-m3}
 
-This is the source (mains) of water consumed by the evaporative cooler that could not accually be met by the storage tank. This output variable appears when storage tank water is supplied to the cooler.
+This is the source (mains) of water consumed by the evaporative cooler that could not actually be met by the storage tank. This output variable appears when storage tank water is supplied to the cooler.
 
 \subsection{EvaporativeCooler:Direct:ResearchSpecial}\label{evaporativecoolerdirectresearchspecial}
 
@@ -217,22 +216,21 @@ This numeric field defines the evaporative cooler air inlet node drybulb tempera
 An example IDF entry is
 
 \begin{lstlisting}
-
 EvaporativeCooler:Direct:ResearchSpecial,
-  Direct Evap Cooler, !- Name
-  ALWAYS_ON,          !- Availability Schedule Name
-  0.7 ,               !- Cooler Design Effectiveness
-  ,                   !- Effectiveness Flow Ratio Modifier Curve Name
-  autosize,           !- Primary Air Design Flow Rate {m3/s}
-  30.0 ,              !- Recirculating Water Pump Design Power
-  ,                   !- Water Pump Power Sizing Factor
-  ,                   !- Water Pump Power Modifier Curve Name
-  OAIndRDD Evap Cooler-OADirect Evap CoolerNode , !- Air Inlet Node Name
-  OADirect Evap Cooler-OAMixing BoxNode, !- Air Outlet Node Name
-  OADirect Evap Cooler-OAMixing BoxNode, !- Sensor Node Name
-  ,                   !- Water Supply Storage Tank Name
-  0.0,                !- Drift Loss Fraction
-  3;                  !- Blowdown Concentration Ratio
+  Direct Evap Cooler,         !- Name
+  ALWAYS_ON,                  !- Availability Schedule Name
+  0.7,                        !- Cooler Design Effectiveness
+  ,                           !- Effectiveness Flow Ratio Modifier Curve Name
+  autosize,                   !- Primary Air Design Flow Rate {m3/s}
+  30.0,                       !- Recirculating Water Pump Design Power
+  ,                           !- Water Pump Power Sizing Factor
+  ,                           !- Water Pump Power Modifier Curve Name
+  OAIndRDD Evap Cooler-OADirect Evap CoolerNode,  !- Air Inlet Node Name
+  OADirect Evap Cooler-OAMixing BoxNode,  !- Air Outlet Node Name
+  OADirect Evap Cooler-OAMixing BoxNode,  !- Sensor Node Name
+  ,                           !- Water Supply Storage Tank Name
+  0.0,                        !- Drift Loss Fraction
+  3;                          !- Blowdown Concentration Ratio
 \end{lstlisting}
 
 \subsubsection{Outputs}\label{outputs-1-009}
@@ -282,11 +280,11 @@ The water consumption is the water evaporated from the pad. This water consumpti
 
 \paragraph{Evaporative Cooler Starved Water Volume {[}m3{]}}\label{evaporative-cooler-starved-water-volume-m3-1}
 
-This is the water consumed by the evaporative cooler that could not accually be met by the storage tank. This output variable appears when storage tank water is supplied to the cooler.
+This is the water consumed by the evaporative cooler that could not actually be met by the storage tank. This output variable appears when storage tank water is supplied to the cooler.
 
 \paragraph{Evaporative Cooler Starved Mains Water Volume {[}m3{]}}\label{evaporative-cooler-starved-mains-water-volume-m3-1}
 
-This is the source (mains) of water consumed by the evaporative cooler that could not accually be met by the storage tank. This output variable appears when storage tank water is supplied to the cooler.
+This is the source (mains) of water consumed by the evaporative cooler that could not actually be met by the storage tank. This output variable appears when storage tank water is supplied to the cooler.
 
 \subsection{EvaporativeCooler:Indirect:CelDekPad}\label{evaporativecoolerindirectceldekpad}
 
@@ -369,22 +367,21 @@ This field is optional. It is used to explicitly define an outdoor air node for 
 And an IDF example showing how this object is specified:
 
 \begin{lstlisting}
-
 EvaporativeCooler:Indirect:CelDekPad,
-  IndirectEvapCooler1,         !- Name
+  IndirectEvapCooler1,        !- Name
   FanAndCoilAvailSched,       !- Availability Schedule Name
-  0.6,                                         !- Direct Pad Area {m2}
-  0.2,                                         !- Direct Pad Depth {m}
-  225.,                                       !- Recirculating Water Pump Power Consumption {W}
-  1.0,                                         !- Secondary Air Fan Flow Rate {m3/s}
-  0.7,                                         !- Secondary Fan Total Efficiency
-  200.0,                                     !- Secondary Fan Delta Pressure {Pa}
-  0.67,                                       !- Indirect Heat Exchanger Effectiveness
-  EvapCoolerIndirectInletAirNode,   !- Primary Air Inlet Node Name
-  EvapCoolerDirectInletAirNode,   !- Primary Air Outlet Node Name
-  ,                                           !- Control Type
-  ,                                               !- Water Supply Storage Tank Name
-  Secondary side OA inlet node;   !- Secondary Air Inlet Node Name
+  0.6,                        !- Direct Pad Area {m2}
+  0.2,                        !- Direct Pad Depth {m}
+  225.,                       !- Recirculating Water Pump Power Consumption {W}
+  1.0,                        !- Secondary Air Fan Flow Rate {m3/s}
+  0.7,                        !- Secondary Fan Total Efficiency
+  200.0,                      !- Secondary Fan Delta Pressure {Pa}
+  0.67,                       !- Indirect Heat Exchanger Effectiveness
+  EvapCoolerIndirectInletAirNode,  !- Primary Air Inlet Node Name
+  EvapCoolerDirectInletAirNode,  !- Primary Air Outlet Node Name
+  ,                           !- Control Type
+  ,                           !- Water Supply Storage Tank Name
+  Secondary side OA inlet node;  !- Secondary Air Inlet Node Name
 \end{lstlisting}
 
 \subsubsection{Outputs}\label{outputs-2-008}
@@ -440,11 +437,11 @@ The water consumption is the water evaporated from the pad. This water consumpti
 
 \paragraph{Evaporative Cooler Starved Water Volume {[}m3{]}}\label{evaporative-cooler-starved-water-volume-m3-2}
 
-This is the water consumed by the evaporative cooler that could not accually be met by the storage tank. This output variable appears when storage tank water is supplied to the cooler.
+This is the water consumed by the evaporative cooler that could not actually be met by the storage tank. This output variable appears when storage tank water is supplied to the cooler.
 
 \paragraph{Evaporative Cooler Starved Mains Water Volume {[}m3{]}}\label{evaporative-cooler-starved-mains-water-volume-m3-2}
 
-This is the source (mains) of water consumed by the evaporative cooler that could not accually be met by the storage tank. This output variable appears when storage tank water is supplied to the cooler.
+This is the source (mains) of water consumed by the evaporative cooler that could not actually be met by the storage tank. This output variable appears when storage tank water is supplied to the cooler.
 
 \subsection{EvaporativeCooler:Indirect:WetCoil}\label{evaporativecoolerindirectwetcoil}
 
@@ -456,7 +453,7 @@ The wetted coil evaporative cooler shown in the figure below, has water sprayed 
 \caption{Evaporative Cooler Indirect Wet Coil \protect \label{fig:evaporative-cooler-indirect-wet-coil}}
 \end{figure}
 
-The process that the secondary air goes through, A to C on the following figure, is a path of simultaneous heat and mass transfer, but it does not follow a line of constant enthalpy as in the direct stage. The process is not adiabatic due to the heat gain from the supply air flowing through the tubes of the heat exchanger.
+The process that the secondary air goes through, A to C on the following figure, is a path of simultaneous heat and mass transfer, but it does not follow the constant wet-bulb-temperature path of the direct stage. The process is not adiabatic due to the heat gain from the supply air flowing through the tubes of the heat exchanger.
 
 \begin{figure}[hbtp] % fig 149
 \centering
@@ -523,21 +520,20 @@ This field is optional. It is used to explicitly define an outdoor air node for 
 And an IDF example showing how this object is specified:
 
 \begin{lstlisting}
-
 EvaporativeCooler:Indirect:WetCoil,
-  IndirectEvapCooler1,         !- Name
+  IndirectEvapCooler1,        !- Name
   FanAndCoilAvailSched,       !- Availability Schedule Name
-  0.8,                                         !- Coil Maximum Efficiency
-  0.16,                                       !- Coil Flow Ratio
-  225.,                                       !- Recirculating Water Pump Power Consumption {W}
-  1.0,                                         !- Secondary Air Fan Flow Rate {m3/s}
-  0.7,                                         !- Secondary Air Fan Total Efficiency
-  200.0,                                     !- Secondary Air Fan Delta Pressure {Pa}
-  EvapCoolerIndirectInletAirNode,   !- Primary Air Inlet Node Name
-  EvapCoolerDirectInletAirNode,   !- Primary Air Outlet Node Name
-  ,                                               !- Control Type
-  ,                                               !- Water Supply Storage Tank Name
-  Secondary side OA inlet node;   !- Secondary Air Inlet Node Name
+  0.8,                        !- Coil Maximum Efficiency
+  0.16,                       !- Coil Flow Ratio
+  225.,                       !- Recirculating Water Pump Power Consumption {W}
+  1.0,                        !- Secondary Air Fan Flow Rate {m3/s}
+  0.7,                        !- Secondary Air Fan Total Efficiency
+  200.0,                      !- Secondary Air Fan Delta Pressure {Pa}
+  EvapCoolerIndirectInletAirNode,  !- Primary Air Inlet Node Name
+  EvapCoolerDirectInletAirNode,  !- Primary Air Outlet Node Name
+  ,                           !- Control Type
+  ,                           !- Water Supply Storage Tank Name
+  Secondary side OA inlet node;  !- Secondary Air Inlet Node Name
 \end{lstlisting}
 
 \subsubsection{Outputs}\label{outputs-3-006}
@@ -587,11 +583,11 @@ The water consumption is the water evaporated from the pad. This water consumpti
 
 \paragraph{Evaporative Cooler Starved Water Volume {[}m3{]}}\label{evaporative-cooler-starved-water-volume-m3-3}
 
-This is the water consumed by the evaporative cooler that could not accually be met by the storage tank. This output variable appears when storage tank water is supplied to the cooler.
+This is the water consumed by the evaporative cooler that could not actually be met by the storage tank. This output variable appears when storage tank water is supplied to the cooler.
 
 \paragraph{Evaporative Cooler Starved Mains Water Volume {[}m3{]}}\label{evaporative-cooler-starved-mains-water-volume-m3-3}
 
-This is the source (mains) of water consumed by the evaporative cooler that could not accually be met by the storage tank. This output variable appears when storage tank water is supplied to the cooler.
+This is the source (mains) of water consumed by the evaporative cooler that could not actually be met by the storage tank. This output variable appears when storage tank water is supplied to the cooler.
 
 \subsection{EvaporativeCooler:Indirect:ResearchSpecial}\label{evaporativecoolerindirectresearchspecial}
 
@@ -619,7 +615,7 @@ This alpha field is the name of a curve that modifies the wet bulb effectiveness
 
 \paragraph{Field: Cooler Drybulb Design Effectiveness}\label{field-cooler-drybulb-design-effectiveness}
 
-This numeric field is the dry bulb design effectiveness of the evaporative cooler. This is the nominal design dry blub effectiveness with respect to the dry bulb temperature difference, i.e., dry operation at design air flow rates, and no water evaporation or spraying on the secondary side.
+This numeric field is the dry bulb design effectiveness of the evaporative cooler. This is the nominal design dry bulb effectiveness with respect to the dry bulb temperature difference, i.e., dry operation at design air flow rates, and no water evaporation or spraying on the secondary side.
 
 \paragraph{Field Drybulb Effectiveness Flow Ratio Modifier Curve Name}\label{field-drybulb-effectiveness-flow-ratio-modifier-curve-name}
 
@@ -716,32 +712,30 @@ This numeric field defines the secondary air inlet node drybulb temperature limi
 An IDF example is shown below:
 
 \begin{lstlisting}
-
 EvaporativeCooler:Indirect:ResearchSpecial,
-  DataC_IndirectEvapCooler,     !- Name
-  ALWAYS_ON,                    !- Availability Schedule Name
-  0.75,                         !- Cooler Wetbulb Design Effectiveness
-  ,              !- Wetbulb Effectiveness Flow Ratio Modifier Curve Name
-  ,                          !- Cooler Drybulb Design Effectiveness
-  ,              !- Drybulb Effectiveness Flow Ratio Modifier Curve Name
-  autosize,                     !- Recirculating Water Pump Power
-  autosize,                     !- Secondary Air Design Flow Rate
-  1.0,                          !- Secondary Air Flow Scaling Factor
-
-  autosize,                     !- Secondary Air Fan Design Power
-  800.0,                        !- Secondary Air Fan Sizing Specific Power W
-  ,               !- Secondary Air Fan Power Modifier Curve Name
-  Return Air Node,              !- Primary Air Inlet Node Name
-  IndEC Outlet Node,            !- Primary Air Outlet Node Name
-  autosize,                     !- Primary Design Air Flow Rate
-  0.9 ,                         !- Dewpoint Effectiveness Factor
-  IndEC OA Air Inlet Node,      !- Secondary Air Inlet Node Name
-  IndEC OA Air Outlet Node,     !- Secondary Air Outlet Node Name
-  IndEC Outlet Node,            !- Sensor Node Name
-  ,                             !- Relief Air Inlet Node Name
-  ,                             !- Water Supply Storage Tank Name
-  0.0,                          !- Drift Loss Fraction
-  ;                             !- Blowdown Concentration Ratio
+  DataC_IndirectEvapCooler,   !- Name
+  ALWAYS_ON,                  !- Availability Schedule Name
+  0.75,                       !- Cooler Wetbulb Design Effectiveness
+  ,                           !- Wetbulb Effectiveness Flow Ratio Modifier Curve Name
+  ,                           !- Cooler Drybulb Design Effectiveness
+  ,                           !- Drybulb Effectiveness Flow Ratio Modifier Curve Name
+  autosize,                   !- Recirculating Water Pump Power
+  autosize,                   !- Secondary Air Design Flow Rate
+  1.0,                        !- Secondary Air Flow Scaling Factor
+  autosize,                   !- Secondary Air Fan Design Power
+  800.0,                      !- Secondary Air Fan Sizing Specific Power W
+  ,                           !- Secondary Air Fan Power Modifier Curve Name
+  Return Air Node,            !- Primary Air Inlet Node Name
+  IndEC Outlet Node,          !- Primary Air Outlet Node Name
+  autosize,                   !- Primary Design Air Flow Rate
+  0.9,                        !- Dewpoint Effectiveness Factor
+  IndEC OA Air Inlet Node,    !- Secondary Air Inlet Node Name
+  IndEC OA Air Outlet Node,   !- Secondary Air Outlet Node Name
+  IndEC Outlet Node,          !- Sensor Node Name
+  ,                           !- Relief Air Inlet Node Name
+  ,                           !- Water Supply Storage Tank Name
+  0.0,                        !- Drift Loss Fraction
+  ;                           !- Blowdown Concentration Ratio
 \end{lstlisting}
 
 \subsubsection{Outputs}\label{outputs-4-004}
@@ -756,7 +750,7 @@ The output variables that are available for the EvaporativeCooler:Indirect:Resea
 \item
   HVAC,Average,Evaporative Cooler Dewpoint Bound Status
 \item
-  HVAC,Average,Evaporative Cooler Operating Mode Satus {[]}
+  HVAC,Average,Evaporative Cooler Operating Mode Status {[]}
 \item
   HVAC,Sum,Evaporative Cooler Electricity Energy {[}J{]}
 \item
@@ -771,7 +765,7 @@ The output variables that are available for the EvaporativeCooler:Indirect:Resea
 
 \paragraph{Evaporative Cooler Total Stage Effectiveness {[]}}\label{evaporative-cooler-total-stage-effectiveness-2}
 
-The Total Stage Efficiency is defined as the temperature change of the supply air divided by the difference between the primary air entering dry-bulb temperature and the secondary air enterig wet-bulb temperature for wet operating mode or the the difference between the primary air entering dry-bulb temperature and the secondary air enterig dry-bulb temperature for dry operating mode, including the effect of the reduction in flow because of the secondary air stream. In other words, it is a measure of the approach to the secondary air wet-bulb temperature for wet operating mode, or it is a measure of the approach to the secondary air entering dry-bulb temperature for dry operating mode.
+The Total Stage Efficiency is defined as the temperature change of the supply air divided by the difference between the primary air entering dry-bulb temperature and the secondary air entering wet-bulb temperature for wet operating mode or the the difference between the primary air entering dry-bulb temperature and the secondary air entering dry-bulb temperature for dry operating mode, including the effect of the reduction in flow because of the secondary air stream. In other words, it is a measure of the approach to the secondary air wet-bulb temperature for wet operating mode, or it is a measure of the approach to the secondary air entering dry-bulb temperature for dry operating mode.
 
 \paragraph{Evaporative Cooler Operating Mode Status {[]}}\label{evaporative-cooler-operating-mode-status}
 
@@ -783,7 +777,7 @@ This output variable provides the part load fraction of the indirect cooler. The
 
 \paragraph{Evaporative Cooler Dewpoint Bound Status {[]}}\label{evaporative-cooler-dewpoint-bound-status}
 
-This output variable is a flag that indicates if the modeling was based on dewpoint effectivenss rather than wetbulb effectiveness The ResearchSpecial model is usually based on wet-bulb approach, but since values in excess of 1.0 are allowed, there is a secondary constraint imposed by dewpoint. If the dewpoint effectiveness was applied, then this flag variable will have the value 1.0, otherwise it is 0.0.
+This output variable is a flag that indicates if the modeling was based on dewpoint effectiveness rather than wetbulb effectiveness The ResearchSpecial model is usually based on wet-bulb approach, but since values in excess of 1.0 are allowed, there is a secondary constraint imposed by dewpoint. If the dewpoint effectiveness was applied, then this flag variable will have the value 1.0, otherwise it is 0.0.
 
 \paragraph{Evaporative Cooler Electricity Rate {[}W{]}}\label{evaporative-cooler-electric-power-w-1}
 
@@ -805,8 +799,8 @@ The water consumption is the water evaporated from the pad. This water consumpti
 
 \paragraph{Evaporative Cooler Starved Water Volume {[}m3{]}}\label{evaporative-cooler-starved-water-volume-m3-4}
 
-This is the water consumed by the evaporative cooler that could not accually be met by the storage tank. This output variable appears when storage tank water is supplied to the cooler.
+This is the water consumed by the evaporative cooler that could not actually be met by the storage tank. This output variable appears when storage tank water is supplied to the cooler.
 
 \paragraph{Evaporative Cooler Starved Mains Water Volume {[}m3{]}}\label{evaporative-cooler-starved-mains-water-volume-m3-4}
 
-This is the source (mains) of water consumed by the evaporative cooler that could not accually be met by the storage tank. This output variable appears when storage tank water is supplied to the cooler.
+This is the source (mains) of water consumed by the evaporative cooler that could not actually be met by the storage tank. This output variable appears when storage tank water is supplied to the cooler.

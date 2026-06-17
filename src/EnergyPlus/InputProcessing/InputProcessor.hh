@@ -1,7 +1,7 @@
-// EnergyPlus, Copyright (c) 1996-2023, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
-// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other
+// National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
 // contributors. All rights reserved.
 //
 // NOTICE: This Software was developed under funding from the U.S. Department of Energy and the
@@ -92,7 +92,9 @@ public:
     template <typename T> T *objectFactory(EnergyPlusData &state, std::string const &objectName)
     {
         T *p = data->objectFactory<T>(objectName);
-        if (p != nullptr) return p;
+        if (p != nullptr) {
+            return p;
+        }
         auto const &fields = getFields(state, T::canonicalObjectType(), objectName);
         p = data->addObject<T>(objectName, fields);
         return p;
@@ -101,7 +103,9 @@ public:
     template <typename T> T *objectFactory(EnergyPlusData &state)
     {
         T *p = data->objectFactory<T>();
-        if (p != nullptr) return p;
+        if (p != nullptr) {
+            return p;
+        }
         auto const &fields = getFields(state, T::canonicalObjectType());
         p = data->addObject<T>(fields);
         return p;
@@ -127,7 +131,7 @@ public:
 
     bool getDefaultValue(EnergyPlusData &state, std::string const &objectWord, std::string const &fieldName, std::string &value);
 
-    std::string getAlphaFieldValue(json const &ep_object, json const &schema_obj_props, std::string const &fieldName);
+    std::string getAlphaFieldValue(json const &ep_object, json const &schema_obj_props, std::string const &fieldName, bool uc = true);
 
     Real64 getRealFieldValue(json const &ep_object, json const &schema_obj_props, std::string const &fieldName);
 
@@ -136,6 +140,8 @@ public:
     const json &getObjectSchemaProps(EnergyPlusData &state, std::string const &objectWord);
 
     std::pair<std::string, bool> getObjectItemValue(std::string const &field_value, json const &schema_field_obj);
+
+    const json &getJSONObjectItem(EnergyPlusData &state, std::string_view ObjType, std::string_view ObjName);
 
     void getObjectItem(EnergyPlusData &state,
                        std::string_view Object,
@@ -150,7 +156,9 @@ public:
                        ObjexxFCL::Optional<Array1D_string> AlphaFieldNames = _,
                        ObjexxFCL::Optional<Array1D_string> NumericFieldNames = _);
 
-    int getIDFObjNum(EnergyPlusData &state, std::string const &Object, int const Number);
+    int getIDFObjNum(EnergyPlusData &state, std::string_view Object, int const Number);
+
+    std::vector<std::string> getIDFOrderedKeys(EnergyPlusData &state, std::string_view Object);
 
     int getJSONObjNum(EnergyPlusData &state, std::string const &Object, int const Number);
 
@@ -160,33 +168,9 @@ public:
     );
 
     int getObjectItemNum(EnergyPlusData &state,
-                         std::string const &ObjType,     // Object Type (ref: IDD Objects)
+                         std::string_view ObjType,       // Object Type (ref: IDD Objects)
                          std::string const &NameTypeVal, // Object "name" field type ( used as search key )
                          std::string const &ObjName      // Name of the object type
-    );
-
-    void lowerRangeCheck(EnergyPlusData &state,
-                         bool &ErrorsFound,                         // Set to true if error detected
-                         std::string const &WhatFieldString,        // Descriptive field for string
-                         std::string const &WhatObjectString,       // Descriptive field for object, Zone Name, etc.
-                         std::string const &ErrorLevel,             // 'Warning','Severe','Fatal')
-                         std::string const &LowerBoundString,       // String for error message, if applicable
-                         bool const LowerBoundCondition,            // Condition for error condition, if applicable
-                         std::string_view const ValueString = {},   // Value with digits if to be displayed with error
-                         std::string_view const WhatObjectName = {} // ObjectName -- used for error messages
-    );
-
-    void rangeCheck(EnergyPlusData &state,
-                    bool &ErrorsFound,                         // Set to true if error detected
-                    std::string const &WhatFieldString,        // Descriptive field for string
-                    std::string const &WhatObjectString,       // Descriptive field for object, Zone Name, etc.
-                    std::string const &ErrorLevel,             // 'Warning','Severe','Fatal')
-                    std::string const &LowerBoundString,       // String for error message, if applicable
-                    bool const LowerBoundCondition,            // Condition for error condition, if applicable
-                    std::string const &UpperBoundString,       // String for error message, if applicable
-                    bool const UpperBoundCondition,            // Condition for error condition, if applicable
-                    std::string_view const ValueString = {},   // Value with digits if to be displayed with error
-                    std::string_view const WhatObjectName = {} // ObjectName -- used for error messages
     );
 
     void getMaxSchemaArgs(int &NumArgs, int &NumAlpha, int &NumNumeric);
@@ -236,8 +220,8 @@ private:
             return cmp < 0;
         }
 
-        std::string objectType = "";
-        std::string objectName = "";
+        std::string objectType;
+        std::string objectName;
     };
 
     struct ObjectCache
@@ -303,14 +287,17 @@ private:
 
     json const &getPatternProperties(EnergyPlusData &state, json const &schema_obj);
 
-    inline std::string convertToUpper(std::string s)
+    inline std::string convertToUpper(std::string_view s)
     {
+        std::string s2;
         size_t len = s.size();
+        s2.resize(len);
         for (size_t i = 0; i < len; ++i) {
             char c = s[i];
-            s[i] = ('a' <= c && c <= 'z') ? c ^ 0x20 : c; // ASCII only
+            s2[i] = ('a' <= c && c <= 'z') ? c ^ 0x20 : c; // ASCII only
         }
-        return s;
+        s2[len] = '\0';
+        return s2;
     }
 
     using UnorderedObjectTypeMap = std::unordered_map<std::string, std::string>;
@@ -326,8 +313,12 @@ public:
     json epJSON;
 
 private:
+    // Maps OBJECTTYPE to ObjectType (example entry: {"ZONEHVAC:EQUIPMENTLIST", "ZoneHVAC:EquipmentList"})
     UnorderedObjectTypeMap caseInsensitiveObjectMap;
+    // Maps ObjectType to ObjectCache (json::const_iterator const &schemaIterator, std::vector<json::const_iterator> const &inputObjectIterators)
     UnorderedObjectCacheMap objectCacheMap;
+
+    // ObjectType to vector of ObjectName
     UnusedObjectSet unusedInputs;
     char s[129] = {0};
 
@@ -336,6 +327,14 @@ private:
 struct DataInputProcessing : BaseGlobalStruct
 {
     std::unique_ptr<InputProcessor> inputProcessor = InputProcessor::factory();
+
+    void init_constant_state([[maybe_unused]] EnergyPlusData &state) override
+    {
+    }
+
+    void init_state([[maybe_unused]] EnergyPlusData &state) override
+    {
+    }
 
     void clear_state() override
     {

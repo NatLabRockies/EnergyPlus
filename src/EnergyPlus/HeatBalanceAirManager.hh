@@ -1,7 +1,7 @@
-// EnergyPlus, Copyright (c) 1996-2023, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
-// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other
+// National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
 // contributors. All rights reserved.
 //
 // NOTICE: This Software was developed under funding from the U.S. Department of Energy and the
@@ -84,6 +84,13 @@ namespace HeatBalanceAirManager {
 
     void ReportZoneMeanAirTemp(EnergyPlusData &state);
 
+    void calcMeanAirTemps(EnergyPlusData &state,
+                          Real64 const ZTAV,
+                          Real64 const airHumRatAvg,
+                          Real64 const MRT,
+                          DataHeatBalance::AirReportVars &thisAirRpt,
+                          int const zoneNum);
+
 } // namespace HeatBalanceAirManager
 
 struct HeatBalanceAirMgrData : BaseGlobalStruct
@@ -92,10 +99,20 @@ struct HeatBalanceAirMgrData : BaseGlobalStruct
     std::unordered_set<std::string> UniqueZoneNames;
     std::unordered_map<std::string, std::string> UniqueInfiltrationNames;
     bool ManageAirHeatBalanceGetInputFlag = true;
+    bool CalcExtraReportVarMyOneTimeFlag = true;
+
+    void init_constant_state([[maybe_unused]] EnergyPlusData &state) override
+    {
+    }
+
+    void init_state([[maybe_unused]] EnergyPlusData &state) override
+    {
+    }
 
     void clear_state() override
     {
         this->ManageAirHeatBalanceGetInputFlag = true;
+        this->CalcExtraReportVarMyOneTimeFlag = true;
         this->UniqueZoneNames.clear();
         this->UniqueInfiltrationNames.clear();
     }

@@ -215,7 +215,7 @@ int ProcessW4GlassType(
 			struct_init("GLASS",(char *)lib_ptr->glass[lib_ptr->nglass]);
 
 			// Populate the new DElight LIB GLASS entry with the Window4 data
-			sprintf(lib_ptr->glass[lib_ptr->nglass]->name, "%d", iGlass_Type);	/* glass type ID: 1 to 11 => DOE2 original, >11 => W4lib.dat, <0 => E10 library */
+			snprintf(lib_ptr->glass[lib_ptr->nglass]->name, 60, "%d", iGlass_Type);	/* glass type ID: 1 to 11 => DOE2 original, >11 => W4lib.dat, <0 => E10 library */
 			lib_ptr->glass[lib_ptr->nglass]->vis_trans = dTvis[0];		/* visible transmittance at normal incidence */
 			lib_ptr->glass[lib_ptr->nglass]->W4hemi_trans = dTvisHemi;	/* Window 4 hemispherical transmittance */
 			lib_ptr->glass[lib_ptr->nglass]->W4vis_fit1 = dTvFit1;		/* Window 4 angular transmission curve fit coef #1 */

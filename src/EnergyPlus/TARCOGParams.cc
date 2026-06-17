@@ -1,7 +1,7 @@
-// EnergyPlus, Copyright (c) 1996-2023, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
-// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other
+// National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
 // contributors. All rights reserved.
 //
 // NOTICE: This Software was developed under funding from the U.S. Department of Energy and the
@@ -62,5 +62,14 @@ namespace EnergyPlus::TARCOGParams {
 
 // PURPOSE OF THIS MODULE:
 // Module which contains common TARCOG parameters and constants
+
+constexpr std::array<std::string_view, (int)TARCOGLayerType::Num> layerTypeNamesUC = {
+    "SPECULAR", "VENETIANHORIZONTAL", "WOVEN", "PERFORATED", "OTHERSHADINGTYPE", "BSDF", "VENETIANVERTICAL"};
+
+constexpr std::array<std::string_view, (int)TARCOGThermalModel::Num> thermalModelNamesUC = {
+    "ISO15099", "SCALEDCAVITYWIDTH", "CONVECTIVESCALARMODEL_NOSDTHICKNESS", "CONVECTIVESCALARMODEL_WITHSDTHICKNESS"};
+
+constexpr std::array<std::string_view, (int)DeflectionCalculation::Num> deflectionCalculationNamesUC = {
+    "NODEFLECTION", "TEMPERATUREANDPRESSUREINPUT", "MEASUREDDEFLECTION"};
 
 } // namespace EnergyPlus::TARCOGParams

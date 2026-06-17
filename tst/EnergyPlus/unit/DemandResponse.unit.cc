@@ -1,7 +1,7 @@
-// EnergyPlus, Copyright (c) 1996-2023, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
-// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other
+// National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
 // contributors. All rights reserved.
 //
 // NOTICE: This Software was developed under funding from the U.S. Department of Energy and the
@@ -67,7 +67,6 @@ namespace EnergyPlus {
 TEST_F(EnergyPlusFixture, DemandManagerGetInput)
 {
     // Test input processing for DemandManager:Ventilation
-
     std::string const idf_objects = delimited_string({"DemandManager:Ventilation,",
                                                       " Ventilation Manager,",
                                                       " ,",
@@ -81,6 +80,7 @@ TEST_F(EnergyPlusFixture, DemandManagerGetInput)
                                                       " OA CONTROLLER 1;"});
 
     ASSERT_TRUE(process_idf(idf_objects));
+    state->init_state(*state);
 
     state->dataMixedAir->NumOAControllers = 1;
     state->dataMixedAir->OAController.allocate(state->dataMixedAir->NumOAControllers);
@@ -88,17 +88,16 @@ TEST_F(EnergyPlusFixture, DemandManagerGetInput)
 
     GetDemandManagerInput(*state);
     auto &DemandMgr(state->dataDemandManager->DemandMgr);
-    EXPECT_EQ(DataGlobalConstants::ScheduleAlwaysOn, DemandMgr(1).AvailSchedule);
-    EXPECT_TRUE(compare_enums(ManagerLimit::Fixed, DemandMgr(1).LimitControl));
+    EXPECT_EQ(Sched::SchedNum_AlwaysOn, DemandMgr(1).availSched->Num);
+    EXPECT_ENUM_EQ(ManagerLimit::Fixed, DemandMgr(1).LimitControl);
     EXPECT_DOUBLE_EQ(60.0, DemandMgr(1).LimitDuration);
     EXPECT_DOUBLE_EQ(0.2, DemandMgr(1).FixedRate);
-    EXPECT_TRUE(compare_enums(ManagerSelection::All, DemandMgr(1).SelectionControl));
+    EXPECT_ENUM_EQ(ManagerSelection::All, DemandMgr(1).SelectionControl);
     EXPECT_EQ(1, DemandMgr(1).NumOfLoads);
 }
 
 TEST_F(EnergyPlusFixture, DemandManagerAssignmentListGetInputTest)
 {
-
     std::string const idf_objects = delimited_string({
         "  DemandManagerAssignmentList,",
         "    Demand Manager,          !- Name",
@@ -156,20 +155,20 @@ TEST_F(EnergyPlusFixture, DemandManagerAssignmentListGetInputTest)
 
     ASSERT_TRUE(process_idf(idf_objects));
 
-    state->dataGlobal->NumOfTimeStepInHour = 1;
-    state->dataGlobal->MinutesPerTimeStep = 60;
-    ScheduleManager::ProcessScheduleInput(*state);
-    state->dataScheduleMgr->ScheduleInputProcessed = true;
+    state->dataGlobal->TimeStepsInHour = 1;
+    state->dataGlobal->MinutesInTimeStep = 60;
+    state->init_state(*state);
+
     ExteriorEnergyUse::GetExteriorEnergyUseInput(*state);
     GetDemandManagerInput(*state);
 
     int dMgrIndex = 0;
     auto &DemandMgr(state->dataDemandManager->DemandMgr);
     // check lights demand manager name
-    dMgrIndex = UtilityRoutines::FindItemInList("EXT LIGHTS MANAGER", DemandMgr);
+    dMgrIndex = Util::FindItemInList("EXT LIGHTS MANAGER", DemandMgr);
     auto &lightsDmndMgr = state->dataDemandManager->DemandMgr(dMgrIndex);
     EXPECT_EQ("EXT LIGHTS MANAGER", lightsDmndMgr.Name);
-    // test expected fatal error due to wrong demand manager objet name
+    // test expected fatal error due to wrong demand manager object name
     // object name in the list and in the object are different
     std::string expected_error = delimited_string({
         "   ** Severe  ** DemandManagerAssignmentList = \"DEMAND MANAGER\" invalid DemandManager Name = \"EXT LIGHTS MANAGER 1\" not found.",

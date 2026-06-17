@@ -143,9 +143,6 @@
 ! Refrigerant = R407-C
 ! The objects and syntax in this dataset comply with EnergyPlus, Version 8.4.0 and above, unless otherwise noted.
 
-!  Version,
-!    9.0;                    !- Version Identifier
-
   Chiller:Electric:EIR,
     ElectricEIRChiller McQuay AGZ010BS 34.5kW/2.67COP,  !- Name
     34465,                   !- Reference Capacity {W}

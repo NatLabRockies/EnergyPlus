@@ -1,7 +1,7 @@
-// EnergyPlus, Copyright (c) 1996-2023, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
-// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other
+// National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
 // contributors. All rights reserved.
 //
 // NOTICE: This Software was developed under funding from the U.S. Department of Energy and the
@@ -51,7 +51,6 @@
 // ObjexxFCL Headers
 #include <ObjexxFCL/Array1D.hh>
 #include <ObjexxFCL/Array2D.hh>
-#include <ObjexxFCL/Fmath.hh>
 
 // EnergyPlus Headers
 #include <EnergyPlus/Data/EnergyPlusData.hh>
@@ -64,7 +63,7 @@ namespace EnergyPlus::TARCOGGasses90 {
 // MODULE INFORMATION:
 //       AUTHOR         D. Charlie Curcija
 //       DATE WRITTEN   June/2000
-//       MODIFIED       (see revision history bellow)
+//       MODIFIED       (see revision history below)
 //       RE-ENGINEERED  na
 //  Revision: 7.0.02  (November/8/2011), Simon Vidanovic
 //   - feature: Error message (string) return from gasses
@@ -123,7 +122,7 @@ void GASSES90(EnergyPlusData &state,
     state.dataTARCOGGasses90->fvis(1) = xgvis(1, iprop(1)) + xgvis(2, iprop(1)) * tmean + xgvis(3, iprop(1)) * tmean_2;
     state.dataTARCOGGasses90->fcp(1) = xgcp(1, iprop(1)) + xgcp(2, iprop(1)) * tmean + xgcp(3, iprop(1)) * tmean_2;
     // Density using ideal gas law: rho=(presure*mol. weight)/(gas const*Tmean)
-    state.dataTARCOGGasses90->fdens(1) = pres * xwght(iprop(1)) / (DataGlobalConstants::UniversalGasConst * tmean);
+    state.dataTARCOGGasses90->fdens(1) = pres * xwght(iprop(1)) / (Constant::UniversalGasConst * tmean);
     // Mollecular weights in kg/kmol
     if ((standard == TARCOGGassesParams::Stdrd::EN673) || (standard == TARCOGGassesParams::Stdrd::EN673Design)) {
         // fdens( 1 ) = xgrho( iprop( 1 ), 1 ) + xgrho( iprop( 1 ), 2 ) * tmean + xgrho( iprop( 1 ), 3 ) * pow_2( tmean ); //Autodesk:Uninit xgrho
@@ -143,7 +142,7 @@ void GASSES90(EnergyPlusData &state,
             molmix = frct(1) * xwght(iprop(1));                 // initialize equation 56
             cpmixm = molmix * state.dataTARCOGGasses90->fcp(1); // initialize equation 58
             state.dataTARCOGGasses90->kprime(1) =
-                3.75 * DataGlobalConstants::UniversalGasConst / xwght(iprop(1)) * state.dataTARCOGGasses90->fvis(1);        // equation 67
+                3.75 * Constant::UniversalGasConst / xwght(iprop(1)) * state.dataTARCOGGasses90->fvis(1);                   // equation 67
             state.dataTARCOGGasses90->kdblprm(1) = state.dataTARCOGGasses90->fcon(1) - state.dataTARCOGGasses90->kprime(1); // equation 67
             // initialize sumations for eqns 60-66:
             state.dataTARCOGGasses90->mukpdwn(1) = 1.0;
@@ -169,7 +168,7 @@ void GASSES90(EnergyPlusData &state,
                 molmix += frct(i) * xwght(iprop(i));                                    // equation 56
                 cpmixm += frct(i) * state.dataTARCOGGasses90->fcp(i) * xwght(iprop(i)); // equation 58-59
                 state.dataTARCOGGasses90->kprime(i) =
-                    3.75 * DataGlobalConstants::UniversalGasConst / xwght(iprop(i)) * state.dataTARCOGGasses90->fvis(i);        // equation 67
+                    3.75 * Constant::UniversalGasConst / xwght(iprop(i)) * state.dataTARCOGGasses90->fvis(i);                   // equation 67
                 state.dataTARCOGGasses90->kdblprm(i) = state.dataTARCOGGasses90->fcon(i) - state.dataTARCOGGasses90->kprime(i); // equation 68
                 state.dataTARCOGGasses90->mukpdwn(i) = 1.0; // initialize denominator of equation 60
                 state.dataTARCOGGasses90->kpdown(i) = 1.0;  // initialize denominator of equation 63
@@ -195,7 +194,9 @@ void GASSES90(EnergyPlusData &state,
                     downer = two_sqrt_2 * std::sqrt(1.0 + (xwght_i / xwght_j));
 
                     // calculate the denominator of equation 60
-                    if (i != j) state.dataTARCOGGasses90->mukpdwn(i) += phimup / downer * frct(j) / frct(i);
+                    if (i != j) {
+                        state.dataTARCOGGasses90->mukpdwn(i) += phimup / downer * frct(j) / frct(i);
+                    }
 
                     // numerator of equation 64, psiterm is the multiplied term in brackets
                     psiup = pow_2(1.0 + std::sqrt(kprime_i / state.dataTARCOGGasses90->kprime(j)) / x_pow);
@@ -203,13 +204,17 @@ void GASSES90(EnergyPlusData &state,
                     psiterm = 1.0 + 2.41 * (xwght_i - xwght_j) * (xwght_i - 0.142 * xwght_j) / pow_2(xwght_i + xwght_j);
 
                     // using the common denominator downer calculate the denominator for equation 63
-                    if (i != j) state.dataTARCOGGasses90->kpdown(i) += psiup * psiterm / downer * frct(j) / frct(i);
+                    if (i != j) {
+                        state.dataTARCOGGasses90->kpdown(i) += psiup * psiterm / downer * frct(j) / frct(i);
+                    }
 
                     // calculate the numerator of equation 66
                     phikup = psiup; // Tuned Was pow_2( 1.0 + std::sqrt( kprime_i / kprime( j ) ) * std::pow( xwght_i / xwght_j, 0.25 ) );
 
                     // using the common denominator downer calculate the denominator for equation 65
-                    if (i != j) state.dataTARCOGGasses90->kdpdown(i) += phikup / downer * frct(j) / frct(i);
+                    if (i != j) {
+                        state.dataTARCOGGasses90->kdpdown(i) += phikup / downer * frct(j) / frct(i);
+                    }
                 }
                 mumix += state.dataTARCOGGasses90->fvis(i) / state.dataTARCOGGasses90->mukpdwn(i);     // equation 60
                 kpmix += state.dataTARCOGGasses90->kprime(i) / state.dataTARCOGGasses90->kpdown(i);    // equation 63
@@ -217,8 +222,8 @@ void GASSES90(EnergyPlusData &state,
             }
 
             // calculate the density of the mixture assuming an ideal gas:
-            Real64 const rhomix = pres * molmix / (DataGlobalConstants::UniversalGasConst * tmean); // equation 57
-            Real64 const kmix = kpmix + kdpmix;                                                     // equation 68-a
+            Real64 const rhomix = pres * molmix / (Constant::UniversalGasConst * tmean); // equation 57
+            Real64 const kmix = kpmix + kdpmix;                                          // equation 68-a
 
             // final mixture properties:
             visc = mumix;
@@ -260,8 +265,7 @@ void GassesLow(Real64 const tmean, Real64 const mwght, Real64 const pressure, Re
         return;
     }
 
-    Real64 const B =
-        alpha * (gama + 1) / (gama - 1) * std::sqrt(DataGlobalConstants::UniversalGasConst / (8 * DataGlobalConstants::Pi * mwght * tmean));
+    Real64 const B = alpha * (gama + 1) / (gama - 1) * std::sqrt(Constant::UniversalGasConst / (8 * Constant::Pi * mwght * tmean));
 
     cond = B * pressure;
 }

@@ -1,7 +1,7 @@
-// EnergyPlus, Copyright (c) 1996-2023, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
-// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other
+// National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
 // contributors. All rights reserved.
 //
 // NOTICE: This Software was developed under funding from the U.S. Department of Energy and the
@@ -356,41 +356,33 @@ namespace EconomicLifeCycleCost {
     struct UsePriceEscalationType
     {
         // Members
-        std::string name;                           // Name
-        DataGlobalConstants::ResourceType resource; // resource like electricity or natural gas (uses definitions from DataGlobalConstants)
-        int escalationStartYear;                    // Escalation Start Year 1900-2100
-        int escalationStartMonth;                   // Escalation Start Month 1 to 12
-        Array1D<Real64> Escalation;                 // Escalation by year, first year is baseDateYear
+        std::string name; // Name
+        Constant::eResource resource =
+            Constant::eResource::Invalid; // resource like electricity or natural gas (uses definitions from DataGlobalConstants)
+        int escalationStartYear = 0;      // Escalation Start Year 1900-2100
+        int escalationStartMonth = 0;     // Escalation Start Month 1 to 12
+        Array1D<Real64> Escalation;       // Escalation by year, first year is baseDateYear
         // last year is baseDateYear + lengthStudyYears - 1
-
-        // Default Constructor
-        UsePriceEscalationType() : resource(DataGlobalConstants::ResourceType::None), escalationStartYear(0), escalationStartMonth(0)
-        {
-        }
     };
 
     struct UseAdjustmentType
     {
         // Members
-        std::string name;                           // Name
-        DataGlobalConstants::ResourceType resource; // resource like electricity or natural gas (uses definitions from DataGlobalConstants)
-        Array1D<Real64> Adjustment;                 // Adjustment by year, first year is baseDateYear
+        std::string name; // Name
+        Constant::eResource resource =
+            Constant::eResource::Invalid; // resource like electricity or natural gas (uses definitions from DataGlobalConstants)
+        Array1D<Real64> Adjustment;       // Adjustment by year, first year is baseDateYear
         // last year is baseDateYear + lengthStudyYears - 1
-
-        // Default Constructor
-        UseAdjustmentType() : resource(DataGlobalConstants::ResourceType::None)
-        {
-        }
     };
 
     struct CashFlowType
     {
         // Members
-        std::string name;                           // Name - just for labeling output - use Category for aggregation
-        SourceKindType SourceKind;                  // 1=recurring, 2=nonrecurring, 3=resource
-        DataGlobalConstants::ResourceType Resource; // resource like electricity or natural gas (uses definitions from DataGlobalConstants)
-        CostCategory Category;                      // uses "costCat" constants above
-        Array1D<Real64> mnAmount;                   // cashflow dollar amount by month, first year is baseDateYear
+        std::string name;             // Name - just for labeling output - use Category for aggregation
+        SourceKindType SourceKind;    // 1=recurring, 2=nonrecurring, 3=resource
+        Constant::eResource Resource; // resource like electricity or natural gas (uses definitions from DataGlobalConstants)
+        CostCategory Category;        // uses "costCat" constants above
+        Array1D<Real64> mnAmount;     // cashflow dollar amount by month, first year is baseDateYear
         // last year is baseDateYear + lengthStudyYears - 1
         Array1D<Real64> yrAmount;  // cashflow dollar amount by year, first year is baseDateYear
         PrValKind pvKind;          // kind of present value 1=energy, 2=non-energy,3=not computed but summed
@@ -400,7 +392,7 @@ namespace EconomicLifeCycleCost {
 
         // Default Constructor
         CashFlowType()
-            : SourceKind(SourceKindType::Invalid), Resource(DataGlobalConstants::ResourceType::None), Category(CostCategory::Invalid),
+            : SourceKind(SourceKindType::Invalid), Resource(Constant::eResource::Invalid), Category(CostCategory::Invalid),
               pvKind(PrValKind::Invalid), presentValue(0.), orginalCost(0.)
         {
         }
@@ -486,7 +478,7 @@ struct EconomicLifeCycleCostData : BaseGlobalStruct
     int numResourcesUsed = 0;
     bool GetInput_GetLifeCycleCostInput = true;
 
-    // from former statics in GetInputLifeCycleCostUsePriceEscalation()
+    // from former statistics in GetInputLifeCycleCostUsePriceEscalation()
     int UsePriceEscalation_escStartYear = 0;
     int UsePriceEscalation_escNumYears = 0;
     int UsePriceEscalation_escEndYear = 0;
@@ -495,13 +487,13 @@ struct EconomicLifeCycleCostData : BaseGlobalStruct
     int UsePriceEscalation_curEsc = 0;
     int UsePriceEscalation_curFld = 0;
 
-    // from former statics in ExpressAsCashFlows
+    // from former statistics in ExpressAsCashFlows
     int ExpressAsCashFlows_baseMonths1900 = 0;    // number of months since 1900 for base period
     int ExpressAsCashFlows_serviceMonths1900 = 0; // number of months since 1900 for service period
 
     // present value factors
     Array1D<Real64> SPV;
-    std::map<int, std::map<DataGlobalConstants::ResourceType, Real64>> energySPV; // yearly equivalent to FEMP UPV* values
+    std::map<int, std::array<Real64, static_cast<int>(Constant::eResource::Num)>> energySPV; // yearly equivalent to FEMP UPV* values
 
     // arrays related to computing after tax cashflow and present value
     Array1D<Real64> DepreciatedCapital;
@@ -512,13 +504,21 @@ struct EconomicLifeCycleCostData : BaseGlobalStruct
 
     // arrays related to escalated energy costs
     Array1D<Real64> EscalatedTotEnergy;
-    std::map<int, std::map<DataGlobalConstants::ResourceType, Real64>> EscalatedEnergy;
+    std::map<int, std::array<Real64, static_cast<int>(Constant::eResource::Num)>> EscalatedEnergy;
 
     std::vector<EconomicLifeCycleCost::RecurringCostsType> RecurringCosts;
     std::vector<EconomicLifeCycleCost::NonrecurringCostType> NonrecurringCost;
     EPVector<EconomicLifeCycleCost::UsePriceEscalationType> UsePriceEscalation;
     EPVector<EconomicLifeCycleCost::UseAdjustmentType> UseAdjustment;
     std::vector<EconomicLifeCycleCost::CashFlowType> CashFlow;
+
+    void init_constant_state([[maybe_unused]] EnergyPlusData &state) override
+    {
+    }
+
+    void init_state([[maybe_unused]] EnergyPlusData &state) override
+    {
+    }
 
     void clear_state() override
     {

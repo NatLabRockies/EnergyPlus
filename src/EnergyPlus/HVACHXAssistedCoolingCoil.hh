@@ -1,7 +1,7 @@
-// EnergyPlus, Copyright (c) 1996-2023, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
-// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other
+// National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
 // contributors. All rights reserved.
 //
 // NOTICE: This Software was developed under funding from the U.S. Department of Energy and the
@@ -67,53 +67,50 @@ namespace HVACHXAssistedCoolingCoil {
     struct HXAssistedCoilParameters
     {
         // Members
-        std::string HXAssistedCoilType; // Type of HXAssistedCoolingCoil
-        int HXAssistedCoilType_Num;     // Numeric equivalent for hx assisted coil
-        std::string Name;               // Name of the HXAssistedCoolingCoil
-        std::string CoolingCoilType;    // Cooling coil type must be DetailedFlatCooling
+        HVAC::CoilType hxAssistedCoilType = HVAC::CoilType::Invalid; // Numeric equivalent for hx assisted coil
+        std::string Name;                                            // Name of the HXAssistedCoolingCoil
         //  or Coil:DX:CoolingBypassFactorEmpirical
-        int CoolingCoilType_Num;     // Numeric Equivalent for cooling coil
-        std::string CoolingCoilName; // Cooling coil name
+        HVAC::CoilType coolCoilType = HVAC::CoilType::Invalid; // Numeric Equivalent for cooling coil
+        std::string CoolingCoilName;                           // Cooling coil name
         int CoolingCoilIndex;
-        int DXCoilNumOfSpeeds;         // number of speed levels for variable speed DX coil
-        std::string HeatExchangerType; // Heat Exchanger type must be HeatExchanger:AirToAir:FlatPlate,
+        int DXCoilNumOfSpeeds; // number of speed levels for variable speed DX coil
+        // Heat Exchanger type must be HeatExchanger:AirToAir:FlatPlate,
         // HeatExchanger:AirToAir:SensibleAndLatent or
         // HeatExchanger:Desiccant:BalancedFlow
-        int HeatExchangerType_Num;       // Numeric Equivalent for heat exchanger
-        std::string HeatExchangerName;   // Heat Exchanger name
-        int HeatExchangerIndex;          // Heat Exchanger index
-        int HXAssistedCoilInletNodeNum;  // Inlet node to HXAssistedCoolingCoil compound object
-        int HXAssistedCoilOutletNodeNum; // Outlet node to HXAssistedCoolingCoil compound object
-        int HXExhaustAirInletNodeNum;    // Inlet node number for air-to-air heat exchanger
-        Real64 MassFlowRate;             // Mass flow rate through HXAssistedCoolingCoil compound object
-        int MaxIterCounter;              // used in warning messages
-        int MaxIterIndex;                // used in warning messages
-        int ControllerIndex;             // index to water coil controller
-        std::string ControllerName;      // name of water coil controller
+        HVAC::HXType hxType = HVAC::HXType::Invalid; // Numeric Equivalent for heat exchanger
+        std::string HeatExchangerName;               // Heat Exchanger name
+        int HeatExchangerIndex;                      // Heat Exchanger index
+        int HXAssistedCoilInletNodeNum;              // Inlet node to HXAssistedCoolingCoil compound object
+        int HXAssistedCoilOutletNodeNum;             // Outlet node to HXAssistedCoolingCoil compound object
+        int HXExhaustAirInletNodeNum;                // Inlet node number for air-to-air heat exchanger
+        Real64 MassFlowRate;                         // Mass flow rate through HXAssistedCoolingCoil compound object
+        int MaxIterCounter;                          // used in warning messages
+        int MaxIterIndex;                            // used in warning messages
+        int ControllerIndex;                         // index to water coil controller
+        std::string ControllerName;                  // name of water coil controller
 
         // Default Constructor
         HXAssistedCoilParameters()
-            : HXAssistedCoilType_Num(0), CoolingCoilType_Num(0), CoolingCoilIndex(0), DXCoilNumOfSpeeds(0), HeatExchangerType_Num(0),
-              HeatExchangerIndex(0), HXAssistedCoilInletNodeNum(0), HXAssistedCoilOutletNodeNum(0), HXExhaustAirInletNodeNum(0), MassFlowRate(0.0),
-              MaxIterCounter(0), MaxIterIndex(0), ControllerIndex(0)
+            : CoolingCoilIndex(0), DXCoilNumOfSpeeds(0), HeatExchangerIndex(0), HXAssistedCoilInletNodeNum(0), HXAssistedCoilOutletNodeNum(0),
+              HXExhaustAirInletNodeNum(0), MassFlowRate(0.0), MaxIterCounter(0), MaxIterIndex(0), ControllerIndex(0)
         {
         }
     };
 
     void
     SimHXAssistedCoolingCoil(EnergyPlusData &state,
-                             std::string_view HXAssistedCoilName,               // Name of HXAssistedCoolingCoil
-                             bool const FirstHVACIteration,                     // FirstHVACIteration flag
-                             DataHVACGlobals::CompressorOperation CompressorOp, // compressor operation; 1=on, 0=off
-                             Real64 const PartLoadRatio,                        // Part load ratio of Coil:DX:CoolingBypassFactorEmpirical
+                             std::string_view HXAssistedCoilName, // Name of HXAssistedCoolingCoil
+                             bool const FirstHVACIteration,       // FirstHVACIteration flag
+                             HVAC::CompressorOp compressorOp,     // compressor operation; 1=on, 0=off
+                             Real64 const PartLoadRatio,          // Part load ratio of Coil:DX:CoolingBypassFactorEmpirical
                              int &CompIndex,
-                             int const FanOpMode,                               // Allows the parent object to control fan operation
+                             HVAC::FanOp const fanOp,                           // Allows the parent object to control fan operation
                              ObjexxFCL::Optional_bool_const HXUnitEnable = _,   // flag to enable heat exchanger heat recovery
                              ObjexxFCL::Optional<Real64 const> OnOffAFR = _,    // Ratio of compressor ON air mass flow rate to AVERAGE over time step
                              ObjexxFCL::Optional_bool_const EconomizerFlag = _, // OA sys or air loop economizer status
                              ObjexxFCL::Optional<Real64> QTotOut = _,           // the total cooling output of unit
-                             ObjexxFCL::Optional_int_const DehumidificationMode = _, // Optional dehumbidication mode
-                             ObjexxFCL::Optional<Real64 const> LoadSHR = _           // Optional coil SHR pass over
+                             ObjexxFCL::Optional<HVAC::CoilMode const> DehumidificationMode = _, // Optional dehumbidication mode
+                             ObjexxFCL::Optional<Real64 const> LoadSHR = _                       // Optional coil SHR pass over
     );
 
     void GetHXAssistedCoolingCoilInput(EnergyPlusData &state);
@@ -124,14 +121,14 @@ namespace HVACHXAssistedCoolingCoil {
     CalcHXAssistedCoolingCoil(EnergyPlusData &state,
                               int const HXAssistedCoilNum,                        // Index number for HXAssistedCoolingCoil
                               bool const FirstHVACIteration,                      // FirstHVACIteration flag
-                              DataHVACGlobals::CompressorOperation CompressorOp,  // compressor operation; 1=on, 0=off
+                              HVAC::CompressorOp compressorOp,                    // compressor operation; 1=on, 0=off
                               Real64 const PartLoadRatio,                         // Cooling coil part load ratio
                               bool const HXUnitOn,                                // Flag to enable heat exchanger
-                              int const FanOpMode,                                // Allows parent object to control fan operation
+                              HVAC::FanOp const fanOp,                            // Allows parent object to control fan operation
                               ObjexxFCL::Optional<Real64 const> OnOffAirFlow = _, // Ratio of compressor ON air mass flow to AVERAGE over time step
                               ObjexxFCL::Optional_bool_const EconomizerFlag = _,  // OA (or airloop) econommizer status
-                              ObjexxFCL::Optional_int_const DehumidificationMode = _,        // Optional dehumbidication mode
-                              [[maybe_unused]] ObjexxFCL::Optional<Real64 const> LoadSHR = _ // Optional coil SHR pass over
+                              ObjexxFCL::Optional<HVAC::CoilMode const> DehumidificationMode = _, // Optional dehumbidication mode
+                              [[maybe_unused]] ObjexxFCL::Optional<Real64 const> LoadSHR = _      // Optional coil SHR pass over
     );
 
     void GetHXDXCoilIndex(EnergyPlusData &state,
@@ -152,24 +149,24 @@ namespace HVACHXAssistedCoolingCoil {
                            bool &ErrorsFound            // set to true if problem
     );
 
-    int GetCoilGroupTypeNum(EnergyPlusData &state,
-                            std::string const &CoilType,                    // must match coil types in this module
-                            std::string const &CoilName,                    // must match coil names for the coil type
-                            bool &ErrorsFound,                              // set to true if problem
-                            ObjexxFCL::Optional_bool_const PrintWarning = _ // prints warning message if true
+    HVAC::CoilType GetCoilGroupTypeNum(EnergyPlusData &state,
+                                       std::string const &CoilType,   // must match coil types in this module
+                                       std::string const &CoilName,   // must match coil names for the coil type
+                                       bool &ErrorsFound,             // set to true if problem
+                                       bool const PrintWarning = true // prints warning message if true
     );
 
-    int GetCoilObjectTypeNum(EnergyPlusData &state,
-                             std::string const &CoilType,                    // must match coil types in this module
-                             std::string const &CoilName,                    // must match coil names for the coil type
-                             bool &ErrorsFound,                              // set to true if problem
-                             ObjexxFCL::Optional_bool_const PrintWarning = _ // prints warning message if true
+    HVAC::CoilType GetCoilObjectTypeNum(EnergyPlusData &state,
+                                        std::string_view const coilType, // must match coil types in this module
+                                        std::string const &CoilName,     // must match coil names for the coil type
+                                        bool &ErrorsFound,               // set to true if problem
+                                        bool const PrintWarning = true   // prints warning message if true
     );
 
     int GetCoilInletNode(EnergyPlusData &state,
-                         std::string_view CoilType,   // must match coil types in this module
-                         std::string const &CoilName, // must match coil names for the coil type
-                         bool &ErrorsFound            // set to true if problem
+                         std::string_view const coilType, // must match coil types in this module
+                         std::string const &CoilName,     // must match coil names for the coil type
+                         bool &ErrorsFound                // set to true if problem
     );
 
     int GetCoilWaterInletNode(EnergyPlusData &state,
@@ -247,6 +244,14 @@ struct HVACHXAssistedCoolingCoilData : BaseGlobalStruct
     Real64 CoilOutputTempLast; // Exiting cooling coil temperature from last iteration
     int ErrCount = 0;
     int ErrCount2 = 0;
+
+    void init_constant_state([[maybe_unused]] EnergyPlusData &state) override
+    {
+    }
+
+    void init_state([[maybe_unused]] EnergyPlusData &state) override
+    {
+    }
 
     void clear_state() override
     {

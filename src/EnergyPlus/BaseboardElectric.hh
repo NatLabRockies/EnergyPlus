@@ -1,7 +1,7 @@
-// EnergyPlus, Copyright (c) 1996-2023, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
-// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other
+// National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
 // contributors. All rights reserved.
 //
 // NOTICE: This Software was developed under funding from the U.S. Department of Energy and the
@@ -48,14 +48,12 @@
 #ifndef BaseboardElectric_hh_INCLUDED
 #define BaseboardElectric_hh_INCLUDED
 
-// ObjexxFCL Headers
-#include <ObjexxFCL/Array1D.hh>
-
 // EnergyPlus Headers
 #include <EnergyPlus/Data/BaseData.hh>
 #include <EnergyPlus/DataGlobals.hh>
 #include <EnergyPlus/EPVector.hh>
 #include <EnergyPlus/EnergyPlus.hh>
+#include <EnergyPlus/ScheduleManager.hh>
 
 namespace EnergyPlus {
 
@@ -69,7 +67,7 @@ namespace BaseboardElectric {
         std::string EquipName;
         std::string EquipType;
         std::string Schedule;
-        int SchedPtr = 0;
+        Sched::Schedule *availSched = nullptr;
         Real64 NominalCapacity = 0.0;
         Real64 BaseboardEfficiency = 0.0;
         Real64 AirInletTemp = 0.0;
@@ -85,7 +83,7 @@ namespace BaseboardElectric {
         Real64 ScaledHeatingCapacity = 0.0; // - scaled maximum heating capacity {W} or scalable variable of zone HVAC equipment, {-}, or {W/m2}
         bool MySizeFlag = true;
         bool CheckEquipName = true;
-        Array1D_string FieldNames;
+        std::vector<std::string> FieldNames;
     };
 
     void SimElectricBaseboard(EnergyPlusData &state, std::string const &EquipName, int const ControlledZoneNum, Real64 &PowerMet, int &CompIndex);
@@ -105,9 +103,17 @@ struct BaseboardElectricData : BaseGlobalStruct
     bool getInputFlag = true;
     EPVector<BaseboardElectric::BaseboardParams> baseboards;
 
+    void init_constant_state([[maybe_unused]] EnergyPlusData &state) override
+    {
+    }
+
+    void init_state([[maybe_unused]] EnergyPlusData &state) override
+    {
+    }
+
     void clear_state() override
     {
-        *this = BaseboardElectricData();
+        new (this) BaseboardElectricData();
     }
 };
 

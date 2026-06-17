@@ -1,7 +1,7 @@
-// EnergyPlus, Copyright (c) 1996-2023, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
-// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other
+// National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
 // contributors. All rights reserved.
 //
 // NOTICE: This Software was developed under funding from the U.S. Department of Energy and the
@@ -45,11 +45,14 @@
 // OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 // POSSIBILITY OF SUCH DAMAGE.
 
+// C++ Headers
+#include <format>
+
+// EnergyPlus Headers
 #include <EnergyPlus/Autosizing/CoolingSHRSizing.hh>
 #include <EnergyPlus/DXCoils.hh>
 #include <EnergyPlus/Data/EnergyPlusData.hh>
 #include <EnergyPlus/DataHVACGlobals.hh>
-#include <EnergyPlus/General.hh>
 
 namespace EnergyPlus {
 
@@ -73,7 +76,7 @@ Real64 CoolingSHRSizer::size(EnergyPlusData &state, Real64 _originalValue, bool 
                 ((this->curZoneEqNum > 0 && !this->sizingDesRunThisZone) || (this->curSysNum > 0 && !this->sizingDesRunThisAirSys))) {
                 this->autoSizedValue = _originalValue;
             } else {
-                if (this->dataFlowUsedForSizing >= DataHVACGlobals::SmallAirVolFlow && this->dataCapacityUsedForSizing > 0.0) {
+                if (this->dataFlowUsedForSizing >= HVAC::SmallAirVolFlow && this->dataCapacityUsedForSizing > 0.0) {
                     // For autosizing the rated SHR, we set a minimum SHR of 0.676 and a maximum of 0.798. The min SHR occurs occurs at the
                     // minimum flow / capacity ratio = MinRatedVolFlowPerRatedTotCap = 0.00004027 [m3/s / W] = 300 [cfm/ton].
                     // The max SHR occurs at maximum flow / capacity ratio = MaxRatedVolFlowPerRatedTotCap = 0.00006041 [m3/s / W] = 450
@@ -81,19 +84,19 @@ Real64 CoolingSHRSizer::size(EnergyPlusData &state, Real64 _originalValue, bool 
                     // rated SHR is a linear function of the rated flow / capacity ratio. This linear function (see below) is the result of a
                     // regression of flow/capacity ratio vs SHR for several actual coils.
                     Real64 RatedVolFlowPerRatedTotCap = this->dataFlowUsedForSizing / this->dataCapacityUsedForSizing;
-                    if (state.dataHVACGlobal->DXCT == DataHVACGlobals::RegularDXCoil) {
-                        if (RatedVolFlowPerRatedTotCap > state.dataHVACGlobal->MaxRatedVolFlowPerRatedTotCap(state.dataHVACGlobal->DXCT)) {
-                            this->autoSizedValue = 0.431 + 6086.0 * state.dataHVACGlobal->MaxRatedVolFlowPerRatedTotCap(state.dataHVACGlobal->DXCT);
-                        } else if (RatedVolFlowPerRatedTotCap < state.dataHVACGlobal->MinRatedVolFlowPerRatedTotCap(state.dataHVACGlobal->DXCT)) {
-                            this->autoSizedValue = 0.431 + 6086.0 * state.dataHVACGlobal->MinRatedVolFlowPerRatedTotCap(state.dataHVACGlobal->DXCT);
+                    if (state.dataHVACGlobal->DXCT == HVAC::DXCoilType::Regular) {
+                        if (RatedVolFlowPerRatedTotCap > HVAC::MaxRatedVolFlowPerRatedTotCap[(int)state.dataHVACGlobal->DXCT]) {
+                            this->autoSizedValue = 0.431 + 6086.0 * HVAC::MaxRatedVolFlowPerRatedTotCap[(int)state.dataHVACGlobal->DXCT];
+                        } else if (RatedVolFlowPerRatedTotCap < HVAC::MinRatedVolFlowPerRatedTotCap[(int)state.dataHVACGlobal->DXCT]) {
+                            this->autoSizedValue = 0.431 + 6086.0 * HVAC::MinRatedVolFlowPerRatedTotCap[(int)state.dataHVACGlobal->DXCT];
                         } else {
                             this->autoSizedValue = 0.431 + 6086.0 * RatedVolFlowPerRatedTotCap;
                         }
                     } else { // DOASDXCoil, or DXCT = 2
-                        if (RatedVolFlowPerRatedTotCap > state.dataHVACGlobal->MaxRatedVolFlowPerRatedTotCap(state.dataHVACGlobal->DXCT)) {
-                            this->autoSizedValue = 0.389 + 7684.0 * state.dataHVACGlobal->MaxRatedVolFlowPerRatedTotCap(state.dataHVACGlobal->DXCT);
-                        } else if (RatedVolFlowPerRatedTotCap < state.dataHVACGlobal->MinRatedVolFlowPerRatedTotCap(state.dataHVACGlobal->DXCT)) {
-                            this->autoSizedValue = 0.389 + 7684.0 * state.dataHVACGlobal->MinRatedVolFlowPerRatedTotCap(state.dataHVACGlobal->DXCT);
+                        if (RatedVolFlowPerRatedTotCap > HVAC::MaxRatedVolFlowPerRatedTotCap[(int)state.dataHVACGlobal->DXCT]) {
+                            this->autoSizedValue = 0.389 + 7684.0 * HVAC::MaxRatedVolFlowPerRatedTotCap[(int)state.dataHVACGlobal->DXCT];
+                        } else if (RatedVolFlowPerRatedTotCap < HVAC::MinRatedVolFlowPerRatedTotCap[(int)state.dataHVACGlobal->DXCT]) {
+                            this->autoSizedValue = 0.389 + 7684.0 * HVAC::MinRatedVolFlowPerRatedTotCap[(int)state.dataHVACGlobal->DXCT];
                         } else {
                             this->autoSizedValue = 0.389 + 7684.0 * RatedVolFlowPerRatedTotCap;
                         }
@@ -132,42 +135,24 @@ Real64 CoolingSHRSizer::size(EnergyPlusData &state, Real64 _originalValue, bool 
 
 void CoolingSHRSizer::updateSizingString(EnergyPlusData &state)
 {
-    if (!overrideSizeString) return;
+    if (!overrideSizeString) {
+        return;
+    }
     // override sizingString to match existing text
-    if (this->coilType_Num == DataHVACGlobals::CoilDX_CoolingTwoSpeed) {
+    if (this->coilType == HVAC::CoilType::CoolingDXTwoSpeed) {
         if (this->dataDXSpeedNum == 1) { // mode 1 is high speed in DXCoils loop
-            if (this->isEpJSON) {
-                this->sizingString = "high_speed_rated_sensible_heat_ratio";
-            } else {
-                this->sizingString = "High Speed Rated Sensible Heat Ratio";
-            }
+            this->sizingString = "High Speed Rated Sensible Heat Ratio";
         } else if (this->dataDXSpeedNum == 2) {
-            if (this->isEpJSON) {
-                this->sizingString = "low_speed_gross_rated_sensible_heat_ratio";
-            } else {
-                this->sizingString = "Low Speed Gross Rated Sensible Heat Ratio";
-            }
+            this->sizingString = "Low Speed Gross Rated Sensible Heat Ratio";
         }
-    } else if (this->coilType_Num == DataHVACGlobals::CoilDX_MultiSpeedCooling) {
-        if (this->isEpJSON) {
-            this->sizingString = fmt::format("speed_{}_rated_sensible_heat_ratio", state.dataSize->DataDXSpeedNum);
-        } else {
-            this->sizingString = fmt::format("Speed {} Rated Sensible Heat Ratio", state.dataSize->DataDXSpeedNum);
-        }
-    } else if (this->coilType_Num == DataHVACGlobals::CoilVRF_FluidTCtrl_Cooling) {
-        if (this->isEpJSON) {
-            this->sizingString = "rated_sensible_heat_ratio";
-        } else {
-            this->sizingString = "Rated Sensible Heat Ratio";
-        }
-    } else if (this->coilType_Num == DataHVACGlobals::CoilDX_CurveFit_Speed) {
-        if (this->isEpJSON) {
-            this->sizingString = "gross_sensible_heat_ratio";
-        } else {
-            this->sizingString = "Gross Sensible Heat Ratio";
-        }
+    } else if (this->coilType == HVAC::CoilType::CoolingDXMultiSpeed) {
+        this->sizingString = std::format("Speed {} Rated Sensible Heat Ratio", state.dataSize->DataDXSpeedNum);
+    } else if (this->coilType == HVAC::CoilType::CoolingVRFFluidTCtrl) {
+        this->sizingString = "Rated Sensible Heat Ratio";
+    } else if (this->coilType == HVAC::CoilType::CoolingDXCurveFit) {
+        this->sizingString = "Gross Sensible Heat Ratio";
     } else {
-        if (this->isEpJSON) this->sizingString = "gross_rated_sensible_heat_ratio";
+        this->sizingString = "Gross Rated Sensible Heat Ratio";
     }
 }
 

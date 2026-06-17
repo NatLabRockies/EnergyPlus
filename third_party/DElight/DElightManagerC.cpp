@@ -212,7 +212,7 @@ catch(string sThrownMsg) {
         // No Error message file open, open one and write the thrown message to it
         ofdmpfile.open("eplusout.delightdfdmp");
         char msg[210];
-        sprintf(msg, "%s\n", sThrownMsg.c_str());
+        snprintf(msg, 210, "%s\n", sThrownMsg.c_str());
 		ofdmpfile << msg;
         // Close Error message dump file
         ofdmpfile.close();
@@ -236,7 +236,7 @@ catch(char* cThrownMsg) {
         // No Error message file open, open one and write the thrown message to it
         ofdmpfile.open("eplusout.delightdfdmp");
         char msg[210];
-        sprintf(msg, "%s\n", cThrownMsg);
+        snprintf(msg, 210, "%s\n", cThrownMsg);
 		ofdmpfile << msg;
         // Close Error message dump file
         ofdmpfile.close();
@@ -371,7 +371,7 @@ catch(string sThrownMsg) {
         // No Error message file open, open one and write the thrown message to it
         ofdmpfile.open("eplusout.delighteldmp");
         char msg[210];
-        sprintf(msg, "%s\n", sThrownMsg.c_str());
+        snprintf(msg, 210, "%s\n", sThrownMsg.c_str());
 		ofdmpfile << msg;
         // Close Error message dump file
         ofdmpfile.close();
@@ -395,7 +395,7 @@ catch(char* cThrownMsg) {
         // No Error message file open, open one and write the thrown message to it
         ofdmpfile.open("eplusout.delighteldmp");
         char msg[210];
-        sprintf(msg, "%s\n", cThrownMsg);
+        snprintf(msg, 210, "%s\n", cThrownMsg);
 		ofdmpfile << msg;
         // Close Error message dump file
         ofdmpfile.close();

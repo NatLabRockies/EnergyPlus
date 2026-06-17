@@ -1,7 +1,7 @@
-// EnergyPlus, Copyright (c) 1996-2023, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
-// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other
+// National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
 // contributors. All rights reserved.
 //
 // NOTICE: This Software was developed under funding from the U.S. Department of Energy and the
@@ -147,12 +147,12 @@ TEST_F(EnergyPlusFixture, UtilityRoutines_appendPerfLog1)
     fs::remove(state->dataStrGlobals->outputPerfLogFilePath);
 
     // make sure the static variables are cleared
-    UtilityRoutines::appendPerfLog(*state, "RESET", "RESET");
+    Util::appendPerfLog(*state, "RESET", "RESET");
 
     // add headers and values
-    UtilityRoutines::appendPerfLog(*state, "header1", "value1-1");
-    UtilityRoutines::appendPerfLog(*state, "header2", "value1-2");
-    UtilityRoutines::appendPerfLog(*state, "header3", "value1-3", true);
+    Util::appendPerfLog(*state, "header1", "value1-1");
+    Util::appendPerfLog(*state, "header2", "value1-2");
+    Util::appendPerfLog(*state, "header3", "value1-3", true);
 
     std::ifstream perfLogFile;
     std::stringstream perfLogStrSteam;
@@ -174,7 +174,7 @@ TEST_F(EnergyPlusFixture, UtilityRoutines_appendPerfLog1)
 TEST_F(EnergyPlusFixture, UtilityRoutines_appendPerfLog2)
 {
     // make sure the static variables are cleared
-    UtilityRoutines::appendPerfLog(*state, "RESET", "RESET");
+    Util::appendPerfLog(*state, "RESET", "RESET");
 
     state->dataStrGlobals->outputPerfLogFilePath = "eplusout_2_perflog.csv";
 
@@ -186,9 +186,9 @@ TEST_F(EnergyPlusFixture, UtilityRoutines_appendPerfLog2)
     initPerfLogFile.close();
 
     // without deleting file add headers and values again
-    UtilityRoutines::appendPerfLog(*state, "ignored1", "value2-1");
-    UtilityRoutines::appendPerfLog(*state, "ignored2", "value2-2");
-    UtilityRoutines::appendPerfLog(*state, "ignored3", "value2-3", true);
+    Util::appendPerfLog(*state, "ignored1", "value2-1");
+    Util::appendPerfLog(*state, "ignored2", "value2-2");
+    Util::appendPerfLog(*state, "ignored3", "value2-3", true);
 
     std::ifstream perfLogFile;
     std::stringstream perfLogStrSteam;
@@ -214,50 +214,131 @@ TEST_F(EnergyPlusFixture, UtilityRoutines_ProcessNumber)
     std::string goodString{"3.14159"};
     double expectedVal{3.14159};
     bool expectedError{false};
-    EXPECT_NEAR(UtilityRoutines::ProcessNumber(goodString, expectedError), expectedVal, 1E-5);
+    EXPECT_NEAR(Util::ProcessNumber(goodString, expectedError), expectedVal, 1E-5);
     EXPECT_FALSE(expectedError);
 
     goodString = "3.14159+E0";
-    EXPECT_NEAR(UtilityRoutines::ProcessNumber(goodString, expectedError), expectedVal, 1E-5);
+    EXPECT_NEAR(Util::ProcessNumber(goodString, expectedError), expectedVal, 1E-5);
     EXPECT_FALSE(expectedError);
 
     goodString = "3.14159+e0";
-    EXPECT_NEAR(UtilityRoutines::ProcessNumber(goodString, expectedError), expectedVal, 1E-5);
+    EXPECT_NEAR(Util::ProcessNumber(goodString, expectedError), expectedVal, 1E-5);
     EXPECT_FALSE(expectedError);
 
     goodString = "3.14159+D0";
-    EXPECT_NEAR(UtilityRoutines::ProcessNumber(goodString, expectedError), expectedVal, 1E-5);
+    EXPECT_NEAR(Util::ProcessNumber(goodString, expectedError), expectedVal, 1E-5);
     EXPECT_FALSE(expectedError);
 
     goodString = "3.14159+d0";
-    EXPECT_NEAR(UtilityRoutines::ProcessNumber(goodString, expectedError), expectedVal, 1E-5);
+    EXPECT_NEAR(Util::ProcessNumber(goodString, expectedError), expectedVal, 1E-5);
     EXPECT_FALSE(expectedError);
 
     // invalid strings
     std::string badString{"É.14159"};
     expectedVal = 0.0;
-    EXPECT_NEAR(UtilityRoutines::ProcessNumber(badString, expectedError), expectedVal, 1E-5);
+    EXPECT_NEAR(Util::ProcessNumber(badString, expectedError), expectedVal, 1E-5);
     EXPECT_TRUE(expectedError);
 
     badString = "3.14159É0";
     expectedVal = 0.0;
-    EXPECT_NEAR(UtilityRoutines::ProcessNumber(badString, expectedError), expectedVal, 1E-5);
+    EXPECT_NEAR(Util::ProcessNumber(badString, expectedError), expectedVal, 1E-5);
     EXPECT_TRUE(expectedError);
 
     badString = "3.14159 0";
     expectedVal = 0.0;
-    EXPECT_NEAR(UtilityRoutines::ProcessNumber(badString, expectedError), expectedVal, 1E-5);
+    EXPECT_NEAR(Util::ProcessNumber(badString, expectedError), expectedVal, 1E-5);
     EXPECT_TRUE(expectedError);
 
     // invalid argument
     badString = "E3.14159";
     expectedVal = 0.0;
-    EXPECT_NEAR(UtilityRoutines::ProcessNumber(badString, expectedError), expectedVal, 1E-5);
+    EXPECT_NEAR(Util::ProcessNumber(badString, expectedError), expectedVal, 1E-5);
     EXPECT_TRUE(expectedError);
 
     // out of range
     badString = "1E5000";
     expectedVal = 0.0;
-    EXPECT_NEAR(UtilityRoutines::ProcessNumber(badString, expectedError), expectedVal, 1E-5);
+    EXPECT_NEAR(Util::ProcessNumber(badString, expectedError), expectedVal, 1E-5);
     EXPECT_TRUE(expectedError);
+}
+
+TEST_F(EnergyPlusFixture, UtilityRoutines_setDesignObjectNameAndPointerTest)
+{
+    // Test for Defect #11111: Autosized ZoneHVAC:LowTemperatureRadiant:VariableFlow with no Design Object throws allocation error
+    std::string nameResult;
+    std::string expectedName;
+    int ptrResult = -99;
+    int expectedPtr = -99;
+    std::string userName;
+    Array1D_string userNames;
+    userNames.allocate(4);
+    userNames = {"First Name", "Second Name", "Third Name", "Fourth Name"};
+    std::string objectType;
+    std::string objectName;
+    bool gotErrors = false;
+
+    // Test 1: Valid input (userName matches one of the userNames)
+    userName = "Second Name";
+    expectedName = "Second Name";
+    expectedPtr = 2;
+    objectType = "ZoneHVAC:LowTemperatureRadiant:VariableFlow";
+    objectName = "MyVarFlowRadSys";
+    gotErrors = false;
+
+    EnergyPlus::Util::setDesignObjectNameAndPointer(*state, nameResult, ptrResult, userName, userNames, objectType, objectName, gotErrors);
+    EXPECT_FALSE(gotErrors);
+    EXPECT_EQ(nameResult, expectedName);
+    EXPECT_EQ(ptrResult, expectedPtr);
+
+    // Test 2: Invalid input (userName does not match one of the userNames)
+    userName = "No Name";
+    expectedName = "";
+    expectedPtr = 0;
+    objectType = "ZoneHVAC:Baseboard:RadiantConvective:Water";
+    objectName = "MyWaterBB";
+    gotErrors = false;
+
+    EnergyPlus::Util::setDesignObjectNameAndPointer(*state, nameResult, ptrResult, userName, userNames, objectType, objectName, gotErrors);
+    std::string const error_stringTest2 = delimited_string({
+        "   ** Severe  ** Object = ZoneHVAC:Baseboard:RadiantConvective:Water with the Name = MyWaterBB has an invalid Design Object Name = No Name.",
+        "   **   ~~~   **   The Design Object Name was not found or was left blank.  This is not allowed.",
+        "   **   ~~~   **   A valid Design Object Name must be provided for any ZoneHVAC:Baseboard:RadiantConvective:Water object.",
+    });
+    EXPECT_TRUE(compare_err_stream(error_stringTest2, true));
+    EXPECT_TRUE(gotErrors);
+
+    // Test 3: Invalid input (userName is blank)
+    userName = "";
+    expectedName = "";
+    expectedPtr = 0;
+    objectType = "ZoneHVAC:Baseboard:RadiantConvective:Steam";
+    objectName = "MySteamBB";
+    gotErrors = false;
+
+    EnergyPlus::Util::setDesignObjectNameAndPointer(*state, nameResult, ptrResult, userName, userNames, objectType, objectName, gotErrors);
+    std::string const error_stringTest3 = delimited_string({
+        "   ** Severe  ** Object = ZoneHVAC:Baseboard:RadiantConvective:Steam with the Name = MySteamBB has an invalid Design Object Name = .",
+        "   **   ~~~   **   The Design Object Name was not found or was left blank.  This is not allowed.",
+        "   **   ~~~   **   A valid Design Object Name must be provided for any ZoneHVAC:Baseboard:RadiantConvective:Steam object.",
+    });
+    EXPECT_TRUE(compare_err_stream(error_stringTest3, true));
+    EXPECT_TRUE(gotErrors);
+}
+
+TEST_F(EnergyPlusFixture, UtilityRoutines_ShowDetailedSevereItemNotFound)
+{
+    // New error message
+    std::string detailed_error_message = "TestRoutine: MissingField = CanNotBeFound, item not found.";
+
+    // Original error message
+    std::string error_message = "TestRoutine:  =";
+
+    ErrorObjectHeader eoh{"TestRoutine", "", ""};
+    // This should output the item that's missing
+    ShowDetailedSevereItemNotFound(*state, eoh, "MissingField", "CanNotBeFound");
+    EXPECT_TRUE(state->dataErrTracking->LastSevereError.find(detailed_error_message) != std::string::npos);
+
+    // This  should not display the item information
+    ShowSevereItemNotFound(*state, eoh, "MissingField", "CanNotBeFound");
+    EXPECT_TRUE(state->dataErrTracking->LastSevereError.find(error_message) != std::string::npos);
 }

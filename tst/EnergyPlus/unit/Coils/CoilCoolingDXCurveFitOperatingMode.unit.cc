@@ -1,7 +1,7 @@
-// EnergyPlus, Copyright (c) 1996-2023, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
-// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other
+// National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
 // contributors. All rights reserved.
 //
 // NOTICE: This Software was developed under funding from the U.S. Department of Energy and the
@@ -49,19 +49,24 @@
 #include <gtest/gtest.h>
 
 // EnergyPlus Headers
-#include "../Coils/CoilCoolingDXFixture.hh"
 #include <EnergyPlus/Coils/CoilCoolingDX.hh>
+#include <EnergyPlus/Coils/CoilCoolingDXCurveFitOperatingMode.hh>
+#include <EnergyPlus/Coils/CoilCoolingDXCurveFitPerformance.hh>
+#include <EnergyPlus/CurveManager.hh>
 #include <EnergyPlus/DataEnvironment.hh>
 #include <EnergyPlus/DataSizing.hh>
 #include <EnergyPlus/OutputReportPredefined.hh>
 #include <EnergyPlus/OutputReportTabular.hh>
 
+#include "../Coils/CoilCoolingDXFixture.hh"
+
 using namespace EnergyPlus;
 
 TEST_F(CoilCoolingDXTest, CoilCoolingDXCurveFitModeInput)
 {
-    std::string idf_objects = this->getModeObjectString("mode1", 2);
+    std::string idf_objects = this->getModeObjectString("mode1", 2); // What is going on here?
     EXPECT_TRUE(process_idf(idf_objects, false));
+    state->init_state(*state);
     CoilCoolingDXCurveFitOperatingMode thisMode(*state, "mode1");
     EXPECT_EQ("MODE1", thisMode.name);
     EXPECT_EQ("MODE1SPEED1", thisMode.speeds[0].name);
@@ -70,7 +75,6 @@ TEST_F(CoilCoolingDXTest, CoilCoolingDXCurveFitModeInput)
 TEST_F(CoilCoolingDXTest, CoilCoolingDXCurveFitOperatingMode_Sizing)
 {
 
-    state->dataSQLiteProcedures->sqlite->sqliteBegin();
     state->dataSQLiteProcedures->sqlite->createSQLiteSimulationsRecord(1, "EnergyPlus Version", "Current Time");
 
     std::string idf_objects = delimited_string({
@@ -88,6 +92,7 @@ TEST_F(CoilCoolingDXTest, CoilCoolingDXCurveFitOperatingMode_Sizing)
         "Coil:Cooling:DX:CurveFit:Performance,",
         "  Coil Cooling DX Curve Fit Performance 1, !- Name",
         "  0,                                      !- Crankcase Heater Capacity {W}",
+        "  ,                                       !- Crankcase Heater Capacity Function of Temperature Curve Name",
         "  -25,                                    !- Minimum Outdoor Dry-Bulb Temperature for Compressor Operation {C}",
         "  10,                                     !- Maximum Outdoor Dry-Bulb Temperature for Crankcase Heater Operation {C}",
         "  773.3,                                  !- Unit Internal Static Air Pressure {Pa}",
@@ -107,6 +112,7 @@ TEST_F(CoilCoolingDXTest, CoilCoolingDXCurveFitOperatingMode_Sizing)
         "  0,                                      !- Ratio of Initial Moisture Evaporation Rate and Steady State Latent Capacity {dimensionless}",
         "  0,                                      !- Latent Capacity Time Constant {s}",
         "  0,                                      !- Nominal Time for Condensate Removal to Begin {s}",
+        "  Yes,                                    !- Apply Part Load Fraction to Speeds Greater than 1",
         "  No,                                     !- Apply Latent Degradation to Speeds Greater than 1",
         "  EvaporativelyCooled,                    !- Condenser Type",
         "  Autosize,                               !- Nominal Evaporative Condenser Pump Power {W}",
@@ -115,8 +121,10 @@ TEST_F(CoilCoolingDXTest, CoilCoolingDXCurveFitOperatingMode_Sizing)
     });
     idf_objects += this->getSpeedObjectString("Coil Cooling DX Curve Fit Speed 1");
     EXPECT_TRUE(process_idf(idf_objects, false));
+    state->init_state(*state);
+
     CoilCoolingDXCurveFitOperatingMode thisMode(*state, "Coil Cooling DX Curve Fit Operating Mode 1");
-    EXPECT_TRUE(compare_enums(CoilCoolingDXCurveFitOperatingMode::CondenserType::EVAPCOOLED, thisMode.condenserType));
+    EXPECT_ENUM_EQ(CoilCoolingDXCurveFitOperatingMode::CondenserType::EVAPCOOLED, thisMode.condenserType);
     EXPECT_EQ(DataSizing::AutoSize, thisMode.ratedEvapAirFlowRate);
     EXPECT_EQ(DataSizing::AutoSize, thisMode.ratedGrossTotalCap);
     EXPECT_EQ(DataSizing::AutoSize, thisMode.ratedCondAirFlowRate);
@@ -135,7 +143,7 @@ TEST_F(CoilCoolingDXTest, CoilCoolingDXCurveFitOperatingMode_Sizing)
     state->dataSize->ZoneSizingRunDone = true;
     state->dataSize->ZoneEqSizing(state->dataSize->CurZoneEqNum).DesignSizeFromParent = false;
     state->dataSize->ZoneEqSizing(state->dataSize->CurZoneEqNum).SizingMethod.allocate(25);
-    state->dataSize->ZoneEqSizing(state->dataSize->CurZoneEqNum).SizingMethod(DataHVACGlobals::SystemAirflowSizing) = DataSizing::SupplyAirFlowRate;
+    state->dataSize->ZoneEqSizing(state->dataSize->CurZoneEqNum).SizingMethod(HVAC::SystemAirflowSizing) = DataSizing::SupplyAirFlowRate;
 
     Real64 ratedEvapAirFlowRate = 1.005;
 
@@ -147,9 +155,6 @@ TEST_F(CoilCoolingDXTest, CoilCoolingDXCurveFitOperatingMode_Sizing)
     state->dataSize->FinalZoneSizing(state->dataSize->CurZoneEqNum).CoolDesHumRat = 0.0006;
 
     thisMode.size(*state);
-
-    // We need to commit, so that the ComponentSizes is actually written
-    state->dataSQLiteProcedures->sqlite->sqliteCommit();
 
     EXPECT_EQ(ratedEvapAirFlowRate, thisMode.ratedEvapAirFlowRate);
     Real64 ratedGrossTotalCap = thisMode.ratedGrossTotalCap;
@@ -168,9 +173,11 @@ TEST_F(CoilCoolingDXTest, CoilCoolingDXCurveFitOperatingMode_Sizing)
 
     struct TestQuery
     {
+        // clang-format off
         TestQuery(std::string t_description, std::string t_units, Real64 t_value)
             : description(t_description), units(t_units), expectedValue(t_value),
-              displayString("Description='" + description + "'; Units='" + units + "'"){};
+              displayString("Description='" + description + "'; Units='" + units + "'") {};
+        // clang-format on
 
         const std::string description;
         const std::string units;
@@ -206,6 +213,98 @@ TEST_F(CoilCoolingDXTest, CoilCoolingDXCurveFitOperatingMode_Sizing)
             EXPECT_NEAR(testQuery.expectedValue, return_val, 0.01) << "Failed for " << testQuery.displayString;
         }
     }
+}
 
-    state->dataSQLiteProcedures->sqlite->sqliteCommit();
+TEST_F(CoilCoolingDXTest, CoilCoolingDXCurveFitCrankcaseHeaterCurve)
+{
+    std::string idf_objects = delimited_string(
+        {"Coil:Cooling:DX,",
+         "  Coil Cooling DX 1,                      !- Name",
+         "  Air Loop HVAC Unitary System 5 Fan - Cooling Coil Node, !- Evaporator Inlet Node Name",
+         "  Air Loop HVAC Unitary System 5 Cooling Coil - Heating Coil Node, !- Evaporator Outlet Node Name",
+         "  ,                                       !- Availability Schedule Name",
+         "  ,                                       !- Condenser Zone Name",
+         "  Coil Cooling DX 1 Condenser Inlet Node, !- Condenser Inlet Node Name",
+         "  Coil Cooling DX 1 Condenser Outlet Node, !- Condenser Outlet Node Name",
+         "  Coil Cooling DX Curve Fit Performance 1; !- Performance Object Name",
+
+         "Coil:Cooling:DX:CurveFit:Performance,",
+         "  Coil Cooling DX Curve Fit Performance 1, !- Name",
+         "  10,                                      !- Crankcase Heater Capacity {W}",
+         "heaterCapCurve,                           !- Crankcase Heater Capacity Function of Outdoor Temperature Curve Name",
+         "  -25,                                    !- Minimum Outdoor Dry-Bulb Temperature for Compressor Operation {C}",
+         "  10,                                     !- Maximum Outdoor Dry-Bulb Temperature for Crankcase Heater Operation {C}",
+         "  773.3,                                  !- Unit Internal Static Air Pressure {Pa}",
+         "  Discrete,                               !- Capacity Control Method",
+         "  0,                                      !- Evaporative Condenser Basin Heater Capacity {W/K}",
+         "  2,                                      !- Evaporative Condenser Basin Heater Setpoint Temperature {C}",
+         "  ,                                       !- Evaporative Condenser Basin Heater Operating Schedule Name",
+         "  Electricity,                            !- Compressor Fuel Type",
+         "  Coil Cooling DX Curve Fit Operating Mode 1, !- Base Operating Mode",
+         ",",
+         ";",
+
+         "Curve:Linear,",
+         "heaterCapCurve,          !- Name",
+         "10.0,                    !- Coefficient1 Constant",
+         "2.,                      !- Coefficient2 x",
+         "-10.0,                    !- Minimum Value of x",
+         "70;                      !- Maximum Value of x",
+
+         "Coil:Cooling:DX:CurveFit:OperatingMode,",
+         "  Coil Cooling DX Curve Fit Operating Mode 1, !- Name",
+         "  Autosize,                               !- Rated Gross Total Cooling Capacity {W}",
+         "  Autosize,                                    !- Rated Evaporator Air Flow Rate {m3/s}",
+         "  Autosize,                               !- Rated Condenser Air Flow Rate {m3/s}",
+         "  0,                                      !- Maximum Cycling Rate {cycles/hr}",
+         "  0,                                      !- Ratio of Initial Moisture Evaporation Rate and Steady State Latent Capacity {dimensionless}",
+         "  0,                                      !- Latent Capacity Time Constant {s}",
+         "  0,                                      !- Nominal Time for Condensate Removal to Begin {s}",
+         "  Yes,                                    !- Apply Part Load Fraction to Speeds Greater than 1",
+         "  No,                                     !- Apply Latent Degradation to Speeds Greater than 1",
+         "  EvaporativelyCooled,                    !- Condenser Type",
+         "  Autosize,                               !- Nominal Evaporative Condenser Pump Power {W}",
+         "  1,                                      !- Nominal Speed Number",
+         "  Coil Cooling DX Curve Fit Speed 1;      !- Speed Name 1"});
+
+    idf_objects += this->getSpeedObjectString("Coil Cooling DX Curve Fit Speed 1");
+    EXPECT_TRUE(process_idf(idf_objects, false));
+    state->init_state(*state);
+
+    int coilIndex = CoilCoolingDX::factory(*state, "Coil Cooling DX 1");
+    auto &thisCoil(state->dataCoilCoolingDX->coilCoolingDXs[coilIndex]);
+    EXPECT_EQ("COIL COOLING DX 1", thisCoil.name);
+    EXPECT_EQ("COIL COOLING DX CURVE FIT PERFORMANCE 1", thisCoil.performance->name);
+
+    HVAC::CoilMode coilMode = HVAC::CoilMode::Normal;
+    int speedNum = 1;
+    Real64 speedRatio = 1.0;
+    HVAC::FanOp fanOp = HVAC::FanOp::Cycling;
+    bool singleMode = false;
+    state->dataEnvrn->OutDryBulbTemp = 1.0;
+    // thisCoil.simulate(*state, useAlternateMode, PLR, speedNum, speedRatio, fanOpMode, singleMode);
+    auto &evapInletNode = state->dataLoopNodes->Node(thisCoil.evapInletNodeIndex);
+    auto &evapOutletNode = state->dataLoopNodes->Node(thisCoil.evapOutletNodeIndex);
+    auto &condInletNode = state->dataLoopNodes->Node(thisCoil.condInletNodeIndex);
+    auto &condOutletNode = state->dataLoopNodes->Node(thisCoil.condOutletNodeIndex);
+    Real64 LoadSHR = 0.0;
+    thisCoil.performance->simulate(
+        *state, evapInletNode, evapOutletNode, coilMode, speedNum, speedRatio, fanOp, condInletNode, condOutletNode, singleMode, LoadSHR);
+    EXPECT_EQ(thisCoil.performance->crankcaseHeaterPower, 120.0);
+    EXPECT_EQ(thisCoil.performance->minOutdoorDrybulb, -25.0);
+    auto performance{dynamic_cast<CoilCoolingDXCurveFitPerformance *>(thisCoil.performance.get())};
+    EXPECT_EQ(performance->normalMode.minOutdoorDrybulb, -25.0);
+    EXPECT_EQ(performance->alternateMode.minOutdoorDrybulb, -25.0);
+    EXPECT_EQ(performance->alternateMode2.minOutdoorDrybulb, -25.0);
+    EXPECT_EQ(thisCoil.totalCoolingEnergyRate, 0.0);
+    // change the minimum OA temp for compressor operation to 5.0C
+    thisCoil.performance->minOutdoorDrybulb = 5.0;
+    performance->myOneTimeMinOATFlag = true;
+    thisCoil.size(*state); // run size() to reset the min OA temp
+    thisCoil.performance->simulate(
+        *state, evapInletNode, evapOutletNode, coilMode, speedNum, speedRatio, fanOp, condInletNode, condOutletNode, singleMode, LoadSHR);
+    EXPECT_EQ(performance->normalMode.minOutdoorDrybulb, 5.0);
+    EXPECT_EQ(performance->alternateMode.minOutdoorDrybulb, 5.0);
+    EXPECT_EQ(performance->alternateMode2.minOutdoorDrybulb, 5.0);
+    EXPECT_EQ(thisCoil.totalCoolingEnergyRate, 0.0);
 }

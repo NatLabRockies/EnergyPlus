@@ -60,13 +60,13 @@ A more detailed model will allow you to determine more accurately the actual dis
 % table 2
 \begin{longtable}[c]{@{}lllll@{}}
 \caption{Zoning the Building by System Type. \label{table:zoning-the-building-by-system-type.}} \tabularnewline
-\toprule 
+\toprule
 System Number & System Name & CFM & m/s & Zone Served \tabularnewline
 \midrule
 \endfirsthead
 
 \caption[]{Zoning the Building by System Type.} \tabularnewline
-\toprule 
+\toprule
 System Number & System Name & CFM & m/s & Zone Served \tabularnewline
 \midrule
 \endhead
@@ -116,13 +116,13 @@ The details of inputting surfaces are described in the Input/Output Reference do
 % table 3
 \begin{longtable}[c]{p{1.91in}p{4.08in}}
 \caption{Surface types and categorization \label{table:surface-types-and-categorization}} \tabularnewline
-\toprule 
+\toprule
 Surface Type & Applicability \tabularnewline
 \midrule
 \endfirsthead
 
 \caption[]{Surface types and categorization} \tabularnewline
-\toprule 
+\toprule
 Surface Type & Applicability \tabularnewline
 \midrule
 \endhead
@@ -144,6 +144,7 @@ The pieces of the definition that designate BuildingSurface:Detailed surfaces as
          \type choice
          \key Surface
          \key Zone
+         \key Space
          \key Outdoors
          \key Ground
          \key OtherSideCoefficients
@@ -151,7 +152,7 @@ The pieces of the definition that designate BuildingSurface:Detailed surfaces as
     A6,  \field Outside Boundary Condition Object
          \type object-list
          \object-list OutFaceEnvNames
-         \note Non-blank only if the field Outside Boundary Condition is Surface, Zone, OtherSideCoefficients,
+         \note Non-blank only if the field Outside Boundary Condition is Surface, Zone, Space, OtherSideCoefficients,
          \note or OtherSideConditionsModel
          \note If Surface, specify name of corresponding surface in adjacent zone or
          \note specify current surface name for internal partition separating like zones
@@ -253,7 +254,7 @@ BuildingSurface:Detailed,Zn005:Wall005,  !- Base Surface Name
      57.90000    ,   47.79000    ,  0.0000000E+00,
      67.90000    ,   47.79000    ,  0.0000000E+00,
      67.90000    ,   47.79000    ,   10.00000    ;
-   
+
 \end{lstlisting}
 
 \subsubsection{Step 3.2.~~~~ Define equivalent surfaces as desired.}\label{step-3.2.-define-equivalent-surfaces-as-desired.}
@@ -283,13 +284,13 @@ BLAST, DOE-2 and other programs often have ``libraries'' of constructions, sched
 % table 4
 \begin{longtable}[c]{@{}lll@{}}
 \caption{Building Elements \label{table:building-elements}} \tabularnewline
-\toprule 
+\toprule
 Type (1) & Name (2) & Material (3) \tabularnewline
 \midrule
 \endfirsthead
 
 \caption[]{Building Elements} \tabularnewline
-\toprule 
+\toprule
 Type (1) & Name (2) & Material (3) \tabularnewline
 \midrule
 \endhead
@@ -390,13 +391,13 @@ For the single zone model, the following figure is a schematic representation of
 % table 5
 \begin{longtable}[c]{p{1.2in}p{1.2in}p{1.2in}p{1.2in}p{1.2in}}
 \caption{Compilation of Surface Information for the One Zone Model \label{table:compilation-of-surface-information-for}} \tabularnewline
-\toprule 
+\toprule
 Surface & type & construction & Length \{m\} & Area \{m  \} \tabularnewline
 \midrule
 \endfirsthead
 
 \caption[]{Compilation of Surface Information for the One Zone Model} \tabularnewline
-\toprule 
+\toprule
 Surface & type & construction & Length \{m\} & Area \{m  \} \tabularnewline
 \midrule
 \endhead
@@ -452,13 +453,13 @@ People, lights, equipment, outside air infiltration and ventilation all constitu
 % table 6
 \begin{longtable}[c]{@{}llll@{}}
 \caption{Internal Gain Data \label{table:internal-gain-data}} \tabularnewline
-\toprule 
+\toprule
 Zone & Gain Type & Size & Schedule \tabularnewline
 \midrule
 \endfirsthead
 
 \caption[]{Internal Gain Data} \tabularnewline
-\toprule 
+\toprule
 Zone & Gain Type & Size & Schedule \tabularnewline
 \midrule
 \endhead

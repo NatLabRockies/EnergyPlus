@@ -9,7 +9,7 @@ Copyright (c) 2016, Northland Numerics LLC
 All rights reserved.
 
 Use of this software in source and binary forms, with or without modification, is permitted for
-Alliance for Sustainable Energy, LLC (the ìLicenseeî) and for third parties that receive this
+Alliance for Sustainable Energy, LLC (the ‚ÄúLicensee‚Äù) and for third parties that receive this
 software, with or without modification, directly from Licensee.  Licensee is permitted to
 redistribute this software in source and binary forms, with or without modification, provided
 that redistributions of source code must retain the above copyright notice and reservation of

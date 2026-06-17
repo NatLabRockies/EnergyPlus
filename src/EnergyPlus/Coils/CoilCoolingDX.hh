@@ -1,7 +1,7 @@
-// EnergyPlus, Copyright (c) 1996-2023, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
-// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other
+// National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
 // contributors. All rights reserved.
 //
 // NOTICE: This Software was developed under funding from the U.S. Department of Energy and the
@@ -51,10 +51,11 @@
 #include <string>
 #include <vector>
 
-#include <EnergyPlus/Coils/CoilCoolingDXCurveFitPerformance.hh>
+#include <EnergyPlus/Coils/CoilCoolingDXPerformanceBase.hh>
 #include <EnergyPlus/Data/BaseData.hh>
 #include <EnergyPlus/DataHeatBalance.hh>
 #include <EnergyPlus/EnergyPlus.hh>
+#include <EnergyPlus/ScheduleManager.hh>
 
 namespace EnergyPlus {
 
@@ -78,6 +79,8 @@ struct CoilCoolingDXInputSpecification
 struct CoilCoolingDX
 {
     CoilCoolingDX() = default;
+    static std::shared_ptr<CoilCoolingDXPerformanceBase> makePerformanceSubclass(EnergyPlus::EnergyPlusData &state,
+                                                                                 const std::string &performance_object_name);
     static int factory(EnergyPlusData &state, std::string const &coilName);
     static void getInput(EnergyPlusData &state);
     static void clear_state();
@@ -85,40 +88,42 @@ struct CoilCoolingDX
     void instantiateFromInputSpec(EnergyPlusData &state, const CoilCoolingDXInputSpecification &input_data);
     void oneTimeInit(EnergyPlusData &state);
     void simulate(EnergyPlusData &state,
-                  int useAlternateMode,
-                  Real64 PLR,
+                  HVAC::CoilMode coilMode,
                   int speedNum,
                   Real64 speedRatio,
-                  int const fanOpMode,
-                  bool const singleMode,
+                  HVAC::FanOp const fanOp,
+                  bool singleMode,
                   Real64 LoadSHR = -1.0);
-    void setData(int fanIndex, int fanType, std::string const &fanName, int airLoopNum);
+    void setData(int fanIndex, HVAC::FanType fanType, std::string const &fanName, int airLoopNum);
     void getFixedData(int &evapInletNodeIndex,
                       int &evapOutletNodeIndex,
                       int &condInletNodeIndex,
                       int &normalModeNumSpeeds,
-                      CoilCoolingDXCurveFitPerformance::CapControlMethod &capacityControlMethod,
+                      CoilCoolingDXPerformanceBase::CapControlMethod &capacityControlMethod,
                       Real64 &minOutdoorDryBulb);
-    void getDataAfterSizing(Real64 &normalModeRatedEvapAirFlowRate,
+    void getDataAfterSizing(EnergyPlusData &state,
+                            Real64 &normalModeRatedEvapAirFlowRate,
                             Real64 &normalModeRatedCapacity,
                             std::vector<Real64> &normalModeFlowRates,
                             std::vector<Real64> &normalModeRatedCapacities);
-    static void inline passThroughNodeData(DataLoopNode::NodeData &in, DataLoopNode::NodeData &out);
+    static void inline passThroughNodeData(Node::NodeData &in, Node::NodeData &out);
     void size(EnergyPlusData &state);
 
     int getNumModes();
-    int getOpModeCapFTIndex(bool useAlternateMode = false);
-    Real64 condMassFlowRate(bool useAlternateMode);
+    int getOpModeCapFTIndex(HVAC::CoilMode mode = HVAC::CoilMode::Normal);
+    Real64 condMassFlowRate(EnergyPlusData &state, HVAC::CoilMode mode);
 
     CoilCoolingDXInputSpecification original_input_specs;
     std::string name;
+    HVAC::CoilType coilType = HVAC::CoilType::Invalid;
+    int coilReportNum = -1;
     bool myOneTimeInitFlag = true;
     int evapInletNodeIndex = 0;
     int evapOutletNodeIndex = 0;
-    int availScheduleIndex = 0;
+    Sched::Schedule *availSched = nullptr;
     int condInletNodeIndex = 0;
     int condOutletNodeIndex = 0;
-    CoilCoolingDXCurveFitPerformance performance;
+    std::shared_ptr<CoilCoolingDXPerformanceBase> performance; // TODO: unique_ptr and explicit copy ctor
     int condensateTankIndex = 0;
     int condensateTankSupplyARRID = 0;
     Real64 condensateVolumeFlow = 0.0;
@@ -131,12 +136,12 @@ struct CoilCoolingDX
     Real64 evapCondPumpElecConsumption = 0.0;
     int airLoopNum = 0; // Add for AFN compatibility, revisit at a later date
     int supplyFanIndex = 0;
-    int supplyFanType = 0;
-    std::string supplyFanName = "";
-    bool SubcoolReheatFlag = false; // Subcool reheat coil control
+    HVAC::FanType supplyFanType = HVAC::FanType::Invalid;
+    std::string supplyFanName;
+    bool subcoolReheatFlag = false; // Subcool reheat coil control
 
-    CoilCoolingDXCurveFitSpeed &normModeNomSpeed();
-    CoilCoolingDXCurveFitSpeed &altModeNomSpeed();
+    // CoilCoolingDXCurveFitSpeed &normModeNomSpeed();
+    // CoilCoolingDXCurveFitSpeed &altModeNomSpeed();
 
     // report variables
     Real64 totalCoolingEnergyRate = 0.0;
@@ -164,7 +169,7 @@ struct CoilCoolingDX
     Real64 recoveredHeatEnergy = 0.0;
     Real64 recoveredHeatEnergyRate = 0.0;
     Real64 condenserInletTemperature = 0.0;
-    int dehumidificationMode = 0;
+    HVAC::CoilMode dehumidificationMode = HVAC::CoilMode::Normal;
     bool reportCoilFinalSizes = true;
     bool isSecondaryDXCoilInZone = false;
     Real64 secCoilSensHeatRejEnergyRate = 0.0;
@@ -173,6 +178,10 @@ struct CoilCoolingDX
 
     void setToHundredPercentDOAS();
     bool isHundredPercentDOAS = false;
+
+private:
+    static bool
+    findPerformanceSubclass(EnergyPlus::EnergyPlusData &state, const std::string_view object_to_find, const std::string &idd_performance_name);
 };
 
 struct CoilCoolingDXData : BaseGlobalStruct
@@ -180,7 +189,17 @@ struct CoilCoolingDXData : BaseGlobalStruct
     std::vector<CoilCoolingDX> coilCoolingDXs;
     bool coilCoolingDXGetInputFlag = true;
     std::string const coilCoolingDXObjectName = "Coil:Cooling:DX";
+    HVAC::CoilType coilType = HVAC::CoilType::CoolingDX;
     bool stillNeedToReportStandardRatings = true; // standard ratings flag for all coils to report at the same time
+
+    void init_constant_state([[maybe_unused]] EnergyPlusData &state) override
+    {
+    }
+
+    void init_state([[maybe_unused]] EnergyPlusData &state) override
+    {
+    }
+
     void clear_state() override
     {
         coilCoolingDXs.clear();

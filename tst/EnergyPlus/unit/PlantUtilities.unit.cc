@@ -1,7 +1,7 @@
-// EnergyPlus, Copyright (c) 1996-2023, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
-// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other
+// National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
 // contributors. All rights reserved.
 //
 // NOTICE: This Software was developed under funding from the U.S. Department of Energy and the
@@ -57,6 +57,7 @@
 #include "Fixtures/EnergyPlusFixture.hh"
 #include <EnergyPlus/Data/EnergyPlusData.hh>
 #include <EnergyPlus/DataSizing.hh>
+#include <EnergyPlus/FluidProperties.hh>
 #include <EnergyPlus/Plant/DataPlant.hh>
 #include <EnergyPlus/PlantUtilities.hh>
 
@@ -89,6 +90,19 @@ TEST_F(EnergyPlusFixture, PlantUtilities_RegisterPlantCompDesignFlowTest1)
 
 TEST_F(EnergyPlusFixture, TestRegulateCondenserCompFlowReqOp)
 {
+    // test consecutive call to fluid properties getInput
+    Fluid::GetFluidPropertiesData(*state);
+    EXPECT_EQ(1, state->dataFluid->refrigs.isize());
+    EXPECT_EQ(1, state->dataFluid->glycols.isize());
+
+    // should never happen but if it does it's safe
+
+    // This is the second unit test that does this, when really we
+    // should just ensure that it never happens.
+    Fluid::GetFluidPropertiesData(*state);
+    EXPECT_EQ(1, state->dataFluid->refrigs.isize());
+    EXPECT_EQ(1, state->dataFluid->glycols.isize());
+
     // This test captures all code paths through the RegulateCondenserCompFlowReqOp function
     // We only need a single component to check here
     state->dataPlnt->PlantLoop.allocate(1);
@@ -251,18 +265,21 @@ TEST_F(EnergyPlusFixture, TestPullCompInterconnectTrigger)
 {
     // This test captures all code paths through the PullCompInterconnectTrigger function
 
+    state->dataPlnt->PlantLoop.allocate(2);
+
     // We'll set up two plant loops, the one to test and the connected one
     // each one will need a single loop side, but no branches are checked or anything like that
-    int thisLoopNum = 1, thisBranchNum = 1, thisCompNum = 1;
-    DataPlant::LoopSideLocation thisLoopSideNum = DataPlant::LoopSideLocation::Demand;
-    PlantLocation plantLoc{thisLoopNum, thisLoopSideNum, thisBranchNum, thisCompNum};
-    int connectedLoopNum = 2;
-    DataPlant::LoopSideLocation connectedLoopSideNum = DataPlant::LoopSideLocation::Demand;
-    PlantLocation connectedPlantLoc{connectedLoopNum, connectedLoopSideNum, 0, 0};
+    PlantLocation plantLoc{1, DataPlant::LoopSideLocation::Demand, 0, 0};
+    PlantUtilities::SetPlantLocationLinks(*state, plantLoc);
+    // plantLoc.branch = &plantLoc.side->Branch(plantLoc.branchNum);
+    // plantLoc.comp = &plantLoc.branch->Comp(plantLoc.compNum);
+
+    PlantLocation connectedPlantLoc{2, DataPlant::LoopSideLocation::Demand, 0, 0};
+    PlantUtilities::SetPlantLocationLinks(*state, connectedPlantLoc);
+
     int criteriaCheckIndex1 = 0, criteriaCheckIndex2 = 0, criteriaCheckIndex3 = 0;
     Real64 criteriaValue1 = 0.0, criteriaValue2 = 0.0, criteriaValue3 = 0.0;
 
-    state->dataPlnt->PlantLoop.allocate(2);
     auto &connectedLoopSide = state->dataPlnt->PlantLoop(2).LoopSide(DataPlant::LoopSideLocation::Demand);
 
     // the first time we call each criteria check, we should just get an index back and it should trigger the connected loop
@@ -461,9 +478,13 @@ TEST_F(EnergyPlusFixture, TestScanPlantLoopsErrorFlagReturnType)
     // test simple searching first
     PlantUtilities::ScanPlantLoopsForObject(*state, "comp_name", DataPlant::PlantEquipmentType::Boiler_Simple, plantLoc, errorFlag);
     EXPECT_EQ(1, plantLoc.loopNum);
-    EXPECT_TRUE(compare_enums(DataPlant::LoopSideLocation::Demand, plantLoc.loopSideNum));
+    EXPECT_ENUM_EQ(DataPlant::LoopSideLocation::Demand, plantLoc.loopSideNum);
     EXPECT_EQ(1, plantLoc.branchNum);
     EXPECT_EQ(1, plantLoc.compNum);
+    EXPECT_EQ(&state->dataPlnt->PlantLoop(plantLoc.loopNum), plantLoc.loop);
+    EXPECT_EQ(&plantLoc.loop->LoopSide(plantLoc.loopSideNum), plantLoc.side);
+    EXPECT_EQ(&plantLoc.side->Branch(plantLoc.branchNum), plantLoc.branch);
+    EXPECT_EQ(&plantLoc.branch->Comp(plantLoc.compNum), plantLoc.comp);
     EXPECT_FALSE(errorFlag);
 
     // then test to make sure errorFlag is passed by reference

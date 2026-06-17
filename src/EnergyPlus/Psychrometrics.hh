@@ -1,7 +1,7 @@
-// EnergyPlus, Copyright (c) 1996-2023, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
-// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other
+// National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
 // contributors. All rights reserved.
 //
 // NOTICE: This Software was developed under funding from the U.S. Department of Energy and the
@@ -54,7 +54,6 @@
 
 // ObjexxFCL Headers
 #include <ObjexxFCL/Array1D.hh>
-#include <ObjexxFCL/Fmath.hh>
 
 // EnergyPlus Headers
 #include <EnergyPlus/Data/BaseData.hh>
@@ -62,7 +61,6 @@
 #include <EnergyPlus/DataGlobals.hh>
 #include <EnergyPlus/EnergyPlus.hh>
 #include <EnergyPlus/PsychCacheData.hh>
-#include <EnergyPlus/UtilityRoutines.hh>
 
 namespace EnergyPlus {
 
@@ -70,15 +68,15 @@ namespace EnergyPlus {
 struct EnergyPlusData;
 
 #ifdef EP_nocache_Psychrometrics
-#undef EP_cache_PsyTwbFnTdbWPb
-#undef EP_cache_PsyPsatFnTemp
-#undef EP_cache_PsyTsatFnPb
-#undef EP_cache_PsyTsatFnHPb
+#    undef EP_cache_PsyTwbFnTdbWPb
+#    undef EP_cache_PsyPsatFnTemp
+#    undef EP_cache_PsyTsatFnPb
+#    undef EP_cache_PsyTsatFnHPb
 #else
-#define EP_cache_PsyTwbFnTdbWPb
-#define EP_cache_PsyPsatFnTemp
-#define EP_cache_PsyTsatFnPb
-#define EP_cache_PsyTsatFnHPb
+#    define EP_cache_PsyTwbFnTdbWPb
+#    define EP_cache_PsyPsatFnTemp
+#    define EP_cache_PsyTsatFnPb
+#    define EP_cache_PsyTsatFnHPb
 #endif
 
 // Adapted from: https://www.fluentcpp.com/2019/08/30/how-to-disable-a-warning-in-cpp/
@@ -132,7 +130,7 @@ namespace Psychrometrics {
                                 // 14 - HR | 15 - max iter | 16 - HR | 17 - max iter | 18 -
                                 // PsyTwbFnTdbWPb_raw (raw calc) | 19 - PsyPsatFnTemp_raw
                                 // (raw calc)
-                                // sample bin size =64 Pa; sample size =1651 (continous)
+                                // sample bin size =64 Pa; sample size =1651 (continuous)
     static constexpr std::array<Real64, 1651> tsat_fn_pb_y = {
         -100,        -24.88812836, -17.74197121, -13.36696483, -10.17031904, -7.635747635, -5.528025298, -3.719474549, -2.132789207, -0.717496548,
         0.635182846, 1.961212857,  3.184455749,  4.320585222,  5.381890646,  6.378191532,  7.317464071,  8.206277019,  9.050107781,  9.853572827,
@@ -537,9 +535,11 @@ namespace Psychrometrics {
         // Wylan & Sontag, Fundamentals of Classical Thermodynamics.
         // ASHRAE handbook 1985 Fundamentals, Ch. 6, eqn. (6),(26)
 
-        Real64 const rhoair(pb / (287.0 * (tdb + DataGlobalConstants::KelvinConv) * (1.0 + 1.6077687 * max(dw, 1.0e-5))));
+        Real64 const rhoair(pb / (287.0 * (tdb + Constant::Kelvin) * (1.0 + 1.6077687 * max(dw, 1.0e-5))));
 #ifdef EP_psych_errors
-        if (rhoair < 0.0) PsyRhoAirFnPbTdbW_error(state, pb, tdb, dw, rhoair, CalledFrom);
+        if (rhoair < 0.0) {
+            PsyRhoAirFnPbTdbW_error(state, pb, tdb, dw, rhoair, CalledFrom);
+        }
 #endif
         return rhoair;
     }
@@ -568,7 +568,7 @@ namespace Psychrometrics {
         // Wylan & Sontag, Fundamentals of Classical Thermodynamics.
         // ASHRAE handbook 1985 Fundamentals, Ch. 6, eqn. (6),(26)
 
-        return (pb / (287.0 * (tdb + DataGlobalConstants::KelvinConv) * (1.0 + 1.6077687 * std::max(dw, 1.0e-5))));
+        return (pb / (287.0 * (tdb + Constant::Kelvin) * (1.0 + 1.6077687 * std::max(dw, 1.0e-5))));
     }
 
     inline Real64 PsyRhoAirFnPbTdbW_fast([[maybe_unused]] EnergyPlusData &state,
@@ -579,9 +579,11 @@ namespace Psychrometrics {
     {
         // Faster version with humidity ratio already adjusted
         assert(dw >= 1.0e-5);
-        Real64 const rhoair(pb / (287.0 * (tdb + DataGlobalConstants::KelvinConv) * (1.0 + 1.6077687 * dw)));
+        Real64 const rhoair(pb / (287.0 * (tdb + Constant::Kelvin) * (1.0 + 1.6077687 * dw)));
 #ifdef EP_psych_errors
-        if (rhoair < 0.0) PsyRhoAirFnPbTdbW_error(state, pb, tdb, dw, rhoair);
+        if (rhoair < 0.0) {
+            PsyRhoAirFnPbTdbW_error(state, pb, tdb, dw, rhoair);
+        }
 #endif
         return rhoair;
     }
@@ -696,7 +698,9 @@ namespace Psychrometrics {
         static Real64 cpaSave(-100.0);
 
         // check if last call had the same input and if it did just use the saved output
-        if (dwSave == dw) return cpaSave;
+        if (dwSave == dw) {
+            return cpaSave;
+        }
 
         // compute heat capacity of air
         Real64 const w(max(dw, 1.0e-5));
@@ -720,7 +724,9 @@ namespace Psychrometrics {
         static Real64 cpaSave(-100.0);
 
         // check if last call had the same input and if it did just use the saved output
-        if (dwSave == dw) return cpaSave;
+        if (dwSave == dw) {
+            return cpaSave;
+        }
 
         // compute heat capacity of air
         Real64 const cpa((1.00484e3 + dw * 1.85895e3)); // result => heat capacity of moist air {J/kg-C}
@@ -775,8 +781,7 @@ namespace Psychrometrics {
         // REFERENCES:
         // ASHRAE handbook 1993 Fundamentals,
 
-        return RH / (461.52 * (Tdb + DataGlobalConstants::KelvinConv)) *
-               std::exp(23.7093 - 4111.0 / ((Tdb + DataGlobalConstants::KelvinConv) - 35.45)); // Vapor density in air
+        return RH / (461.52 * (Tdb + Constant::Kelvin)) * std::exp(23.7093 - 4111.0 / ((Tdb + Constant::Kelvin) - 35.45)); // Vapor density in air
     }
 
     inline Real64 PsyRhovFnTdbWPb(Real64 const Tdb, // dry-bulb temperature {C}
@@ -802,7 +807,7 @@ namespace Psychrometrics {
         // ASHRAE handbook 1993 Fundamentals,
 
         Real64 const W(max(dW, 1.0e-5)); // humidity ratio
-        return W * PB / (461.52 * (Tdb + DataGlobalConstants::KelvinConv) * (W + 0.62198));
+        return W * PB / (461.52 * (Tdb + Constant::Kelvin) * (W + 0.62198));
     }
 
     inline Real64 PsyRhovFnTdbWPb_fast(Real64 const Tdb, // dry-bulb temperature {C}
@@ -812,7 +817,7 @@ namespace Psychrometrics {
     {
         // Faster version with humidity ratio already adjusted
         assert(dW >= 1.0e-5);
-        return dW * PB / (461.52 * (Tdb + DataGlobalConstants::KelvinConv) * (dW + 0.62198));
+        return dW * PB / (461.52 * (Tdb + Constant::Kelvin) * (dW + 0.62198));
     }
 
 #ifdef EP_psych_errors
@@ -853,9 +858,8 @@ namespace Psychrometrics {
         ++state.dataPsychCache->NumTimesCalled[static_cast<int>(PsychrometricFunction::RhFnTdbRhovLBnd0C)];
 #endif
 
-        Real64 const RHValue(Rhovapor > 0.0 ? Rhovapor * 461.52 * (Tdb + DataGlobalConstants::KelvinConv) *
-                                                  std::exp(-23.7093 + 4111.0 / ((Tdb + DataGlobalConstants::KelvinConv) - 35.45))
-                                            : 0.0);
+        Real64 const RHValue(
+            Rhovapor > 0.0 ? Rhovapor * 461.52 * (Tdb + Constant::Kelvin) * std::exp(-23.7093 + 4111.0 / ((Tdb + Constant::Kelvin) - 35.45)) : 0.0);
 
         if ((RHValue < 0.0) || (RHValue > 1.0)) {
 #ifdef EP_psych_errors
@@ -864,9 +868,8 @@ namespace Psychrometrics {
             }
 #endif
             return min(max(RHValue, 0.01), 1.0);
-        } else {
-            return RHValue;
         }
+        return RHValue;
     }
 
 #ifdef EP_cache_PsyTwbFnTdbWPb
@@ -936,12 +939,13 @@ namespace Psychrometrics {
         // Validity test
         if (V < 0.0) {
 #ifdef EP_psych_errors
-            if (V <= -0.01) PsyVFnTdbWPb_error(state, TDB, w, PB, V, CalledFrom);
+            if (V <= -0.01) {
+                PsyVFnTdbWPb_error(state, TDB, w, PB, V, CalledFrom);
+            }
 #endif
             return 0.83; // Fix Was inside the ifdef
-        } else {
-            return V;
         }
+        return V;
     }
 
 #ifdef EP_psych_errors
@@ -982,12 +986,13 @@ namespace Psychrometrics {
         // Validity test
         if (W < 0.0) {
 #ifdef EP_psych_errors
-            if ((W <= -0.0001) && (!SuppressWarnings)) PsyWFnTdbH_error(state, TDB, H, W, CalledFrom);
+            if ((W <= -0.0001) && (!SuppressWarnings)) {
+                PsyWFnTdbH_error(state, TDB, H, W, CalledFrom);
+            }
 #endif
             return 1.0e-5;
-        } else {
-            return W;
         }
+        return W;
     }
 
 #ifdef EP_cache_PsyPsatFnTemp
@@ -1001,10 +1006,10 @@ namespace Psychrometrics {
 // but the () and [] operator overloads for Array1D (which stores the cache) only uses 32bit lookups
 // this seems ... very bad. This problem will be fixed when we get rid of Array1D
 // at which time this warning disable should be removed.
-#ifdef _MSC_VER
-#pragma warning(push)
-#pragma warning(disable : 4244)
-#endif
+#    ifdef _MSC_VER
+#        pragma warning(push)
+#        pragma warning(disable : 4244)
+#    endif
 
     inline Real64 PsyPsatFnTemp(EnergyPlusData &state,
                                 Real64 const T,                        // dry-bulb temperature {C}
@@ -1028,12 +1033,13 @@ namespace Psychrometrics {
         //  integer(i64), parameter :: Grid_Mask=NOT(ISHFT(1_i64, Grid_Shift)-1)
         std::uint64_t constexpr Grid_Shift = 64 - 12 - psatprecision_bits;
 
-#ifdef EP_psych_stats
+#    ifdef EP_psych_stats
         ++state.dataPsychCache->NumTimesCalled[static_cast<int>(PsychrometricFunction::PsatFnTemp_cache)];
-#endif
+#    endif
 
         DISABLE_WARNING_PUSH
         DISABLE_WARNING_STRICT_ALIASING
+        // cppcheck-suppress invalidPointerCast
         Int64 Tdb_tag(*reinterpret_cast<Int64 const *>(&T) >> Grid_Shift);
         DISABLE_WARNING_POP
         Int64 const hash(Tdb_tag & psatcache_mask);
@@ -1044,6 +1050,7 @@ namespace Psychrometrics {
             Tdb_tag <<= Grid_Shift;
             DISABLE_WARNING_PUSH
             DISABLE_WARNING_STRICT_ALIASING
+            // cppcheck-suppress invalidPointerCast
             Real64 Tdb_tag_r = *reinterpret_cast<Real64 const *>(&Tdb_tag);
             DISABLE_WARNING_POP
             cPsat.Psat = PsyPsatFnTemp_raw(state, Tdb_tag_r, CalledFrom);
@@ -1086,12 +1093,14 @@ namespace Psychrometrics {
 
         // FUNCTION LOCAL VARIABLE DECLARATIONS:
 
-#ifdef EP_psych_stats
+#    ifdef EP_psych_stats
         ++state.dataPsychCache->NumTimesCalled[static_cast<int>(PsychrometricFunction::TwbFnTdbWPb_cache)];
-#endif
+#    endif
         DISABLE_WARNING_PUSH
         DISABLE_WARNING_STRICT_ALIASING
+        // cppcheck-suppress invalidPointerCast
         Int64 H_tag = *reinterpret_cast<Int64 const *>(&H) >> Grid_Shift;
+        // cppcheck-suppress invalidPointerCast
         Int64 Pb_tag = *reinterpret_cast<Int64 const *>(&Pb) >> Grid_Shift;
         DISABLE_WARNING_POP
         Int64 hash = (H_tag ^ Pb_tag) & Int64(tsat_hbp_cache_size - 1);
@@ -1143,7 +1152,7 @@ namespace Psychrometrics {
         // Used values from Table 2, HOF 2005, Chapter 6, to verify that these values match (at saturation)
         // values from PsyRhFnTdbWPb
 
-        return (PsyPsatFnTemp(state, Tdb, CalledFrom) * RH) / (461.52 * (Tdb + DataGlobalConstants::KelvinConv)); // Vapor density in air
+        return (PsyPsatFnTemp(state, Tdb, CalledFrom) * RH) / (461.52 * (Tdb + Constant::Kelvin)); // Vapor density in air
     }
 
 #ifdef EP_psych_errors
@@ -1185,7 +1194,7 @@ namespace Psychrometrics {
         ++state.dataPsychCache->NumTimesCalled[static_cast<int>(PsychrometricFunction::RhFnTdbRhov)];
 #endif
 
-        Real64 const RHValue(Rhovapor > 0.0 ? Rhovapor * 461.52 * (Tdb + DataGlobalConstants::KelvinConv) /
+        Real64 const RHValue(Rhovapor > 0.0 ? Rhovapor * 461.52 * (Tdb + Constant::Kelvin) /
                                                   PsyPsatFnTemp(state, Tdb, PsyRoutineNames[static_cast<int>(PsychrometricFunction::RhFnTdbRhov)])
                                             : 0.0);
 
@@ -1196,9 +1205,8 @@ namespace Psychrometrics {
             }
 #endif
             return min(max(RHValue, 0.01), 1.0);
-        } else {
-            return RHValue;
         }
+        return RHValue;
     }
 
 #ifdef EP_psych_errors
@@ -1254,9 +1262,8 @@ namespace Psychrometrics {
             }
 #endif
             return min(max(RHValue, 0.01), 1.0);
-        } else {
-            return RHValue;
         }
+        return RHValue;
     }
 
 #ifdef EP_psych_errors
@@ -1316,9 +1323,8 @@ namespace Psychrometrics {
             }
 #endif
             return W1;
-        } else {
-            return W;
         }
+        return W;
     }
 
 #ifdef EP_psych_errors
@@ -1369,12 +1375,13 @@ namespace Psychrometrics {
         // Validity test
         if (W < 1.0e-5) {
 #ifdef EP_psych_errors
-            if (W <= -0.0001) PsyWFnTdbRhPb_error(state, TDB, RH, PB, W, CalledFrom);
+            if (W <= -0.0001) {
+                PsyWFnTdbRhPb_error(state, TDB, RH, PB, W, CalledFrom);
+            }
 #endif
             return 1.0e-5;
-        } else {
-            return W;
         }
+        return W;
     }
 
 #ifdef EP_psych_errors
@@ -1425,7 +1432,9 @@ namespace Psychrometrics {
         // Validity check
         if (TWB > TDB) {
 #ifdef EP_psych_errors
-            if (TWB > TDB + 0.01) PsyWFnTdbTwbPb_temperature_error(state, TDB, TWB, PB, CalledFrom);
+            if (TWB > TDB + 0.01) {
+                PsyWFnTdbTwbPb_temperature_error(state, TDB, TWB, PB, CalledFrom);
+            }
 #endif
             TWB = TDB;
         }
@@ -1444,9 +1453,8 @@ namespace Psychrometrics {
             PsyWFnTdbTwbPb_humidity_error(state, TDB, TWB, PB, W, CalledFrom);
 #endif
             return PsyWFnTdbRhPb(state, TDB, 0.0001, PB, CalledFrom);
-        } else {
-            return W;
         }
+        return W;
     }
 
     inline Real64 PsyHFnTdbRhPb(EnergyPlusData &state,
@@ -1491,6 +1499,7 @@ namespace Psychrometrics {
         std::uint64_t Grid_Shift = 64 - 12 - state.dataPsychCache->tsatprecision_bits;
         DISABLE_WARNING_PUSH
         DISABLE_WARNING_STRICT_ALIASING
+        // cppcheck-suppress invalidPointerCast
         Int64 const Pb_tag(*reinterpret_cast<Int64 const *>(&Press) >> Grid_Shift);
         DISABLE_WARNING_POP
 
@@ -1504,9 +1513,9 @@ namespace Psychrometrics {
         return cTsat.Tsat; // saturation temperature
     }
 
-#ifdef _MSC_VER
-#pragma warning(pop)
-#endif
+#    ifdef _MSC_VER
+#        pragma warning(pop)
+#    endif
 
 #else
     Real64 PsyTsatFnPb(EnergyPlusData &state,
@@ -1577,12 +1586,13 @@ namespace Psychrometrics {
 
         if (TDP > TWB) {
 #ifdef EP_psych_errors
-            if (TDP > TWB + 0.1) PsyTdpFnTdbTwbPb_error(state, TDB, TWB, PB, W, TDP, CalledFrom);
+            if (TDP > TWB + 0.1) {
+                PsyTdpFnTdbTwbPb_error(state, TDB, TWB, PB, W, TDP, CalledFrom);
+            }
 #endif
             return TWB;
-        } else {
-            return TDP;
         }
+        return TDP;
     }
 
     inline Real64 F6(Real64 const X, Real64 const A0, Real64 const A1, Real64 const A2, Real64 const A3, Real64 const A4, Real64 const A5)
@@ -1698,6 +1708,15 @@ struct PsychrometricsData : BaseGlobalStruct
     std::string String;
     bool ReportErrors = true;
     bool useInterpolationPsychTsatFnPb = false;
+
+    void init_constant_state(EnergyPlusData &state) override
+    {
+        Psychrometrics::InitializePsychRoutines(state);
+    }
+
+    void init_state([[maybe_unused]] EnergyPlusData &state) override
+    {
+    }
 
     void clear_state() override
     {

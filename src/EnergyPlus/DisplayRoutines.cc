@@ -1,7 +1,7 @@
-// EnergyPlus, Copyright (c) 1996-2023, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
-// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other
+// National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
 // contributors. All rights reserved.
 //
 // NOTICE: This Software was developed under funding from the U.S. Department of Energy and the
@@ -74,11 +74,19 @@ void DisplayString(EnergyPlusData &state, std::string const &String) // String t
 
     // SUBROUTINE LOCAL VARIABLE DECLARATIONS:
     // na
-    if (state.dataGlobal->fMessagePtr) state.dataGlobal->fMessagePtr(String);
-    if (state.dataGlobal->messageCallback) state.dataGlobal->messageCallback(String.c_str());
+    if (state.dataGlobal->fMessagePtr != nullptr) {
+        state.dataGlobal->fMessagePtr(String);
+    }
+    if (state.dataGlobal->messageCallback) {
+        state.dataGlobal->messageCallback(String.c_str());
+    }
 
-    if (state.dataGlobal->KickOffSimulation && !state.dataSysVars->DeveloperFlag) return;
-    if (!state.dataGlobal->printConsoleOutput) return;
+    if (state.dataGlobal->KickOffSimulation && !state.dataSysVars->DeveloperFlag) {
+        return;
+    }
+    if (!state.dataGlobal->printConsoleOutput) {
+        return;
+    }
     std::cout << String << std::endl;
 }
 
@@ -94,11 +102,19 @@ void DisplayString(EnergyPlusData &state, char const *String) // String to be di
     // PURPOSE OF THIS SUBROUTINE:
     // This subroutine provides a call to display strings during program execution.
 
-    if (state.dataGlobal->fMessagePtr) state.dataGlobal->fMessagePtr(String);
-    if (state.dataGlobal->messageCallback) state.dataGlobal->messageCallback(String);
+    if (state.dataGlobal->fMessagePtr != nullptr) {
+        state.dataGlobal->fMessagePtr(String);
+    }
+    if (state.dataGlobal->messageCallback) {
+        state.dataGlobal->messageCallback(String);
+    }
 
-    if (state.dataGlobal->KickOffSimulation && !state.dataSysVars->DeveloperFlag) return;
-    if (!state.dataGlobal->printConsoleOutput) return;
+    if (state.dataGlobal->KickOffSimulation && !state.dataSysVars->DeveloperFlag) {
+        return;
+    }
+    if (!state.dataGlobal->printConsoleOutput) {
+        return;
+    }
     std::cout << String << std::endl;
 }
 
@@ -119,16 +135,24 @@ void DisplayNumberAndString(EnergyPlusData &state,
     // during program parsing.
 
     // METHODOLOGY EMPLOYED:
-    // usage:= call DisplayNumberAndString(numbr,string)
+    // usage:= call DisplayNumberAndString(number,string)
 
     // SUBROUTINE LOCAL VARIABLE DECLARATIONS:
     std::stringstream sstm;
     sstm << String << ' ' << Number;
-    if (state.dataGlobal->fMessagePtr) state.dataGlobal->fMessagePtr(sstm.str());
-    if (state.dataGlobal->messageCallback) state.dataGlobal->messageCallback(sstm.str().c_str());
+    if (state.dataGlobal->fMessagePtr != nullptr) {
+        state.dataGlobal->fMessagePtr(sstm.str());
+    }
+    if (state.dataGlobal->messageCallback) {
+        state.dataGlobal->messageCallback(sstm.str().c_str());
+    }
 
-    if (state.dataGlobal->KickOffSimulation && !state.dataSysVars->DeveloperFlag) return;
-    if (!state.dataGlobal->printConsoleOutput) return;
+    if (state.dataGlobal->KickOffSimulation && !state.dataSysVars->DeveloperFlag) {
+        return;
+    }
+    if (!state.dataGlobal->printConsoleOutput) {
+        return;
+    }
     std::cout << String << ' ' << Number << std::endl;
 }
 
@@ -151,7 +175,9 @@ void DisplaySimDaysProgress(EnergyPlusData &state,
     // SUBROUTINE LOCAL VARIABLE DECLARATIONS:
     int percent(0); // Current percent progress
 
-    if (state.dataGlobal->KickOffSimulation && !state.dataSysVars->DeveloperFlag) return;
+    if (state.dataGlobal->KickOffSimulation && !state.dataSysVars->DeveloperFlag) {
+        return;
+    }
     if (TotalSimDays > 0) {
         percent = nint(((float)CurrentSimDay / (float)TotalSimDays) * 100.0);
         percent = min(percent, 100);
@@ -159,8 +185,12 @@ void DisplaySimDaysProgress(EnergyPlusData &state,
         percent = 0;
     }
 
-    if (state.dataGlobal->fProgressPtr) state.dataGlobal->fProgressPtr(percent);
-    if (state.dataGlobal->progressCallback) state.dataGlobal->progressCallback(percent);
+    if (state.dataGlobal->fProgressPtr != nullptr) {
+        state.dataGlobal->fProgressPtr(percent);
+    }
+    if (state.dataGlobal->progressCallback) {
+        state.dataGlobal->progressCallback(percent);
+    }
 }
 
 } // namespace EnergyPlus

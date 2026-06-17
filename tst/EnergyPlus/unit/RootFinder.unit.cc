@@ -1,7 +1,7 @@
-// EnergyPlus, Copyright (c) 1996-2023, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
-// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other
+// National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
 // contributors. All rights reserved.
 //
 // NOTICE: This Software was developed under funding from the U.S. Department of Energy and the
@@ -68,12 +68,12 @@ TEST_F(EnergyPlusFixture, RootFinder_CheckConvergence)
     Real64 absoluteYTolerance = 1.0e-5;
 
     RootFinder::SetupRootFinder(*state, rootFinderData, slopeType, methodType, relativeXTolerance, absoluteXTolerance, absoluteYTolerance);
-    EXPECT_TRUE(compare_enums(rootFinderData.StatusFlag, DataRootFinder::RootFinderStatus::None));
+    EXPECT_ENUM_EQ(rootFinderData.StatusFlag, DataRootFinder::RootFinderStatus::None);
 
     Real64 xMin = 0.0;
     Real64 xMax = 100.0;
     RootFinder::InitializeRootFinder(*state, rootFinderData, xMin, xMax);
-    EXPECT_TRUE(compare_enums(rootFinderData.StatusFlag, DataRootFinder::RootFinderStatus::None));
+    EXPECT_ENUM_EQ(rootFinderData.StatusFlag, DataRootFinder::RootFinderStatus::None);
 
     bool isDone = false;
 
@@ -81,28 +81,28 @@ TEST_F(EnergyPlusFixture, RootFinder_CheckConvergence)
     Real64 xValue = xMin;
     Real64 yValue = 100.0;
     RootFinder::IterateRootFinder(*state, rootFinderData, xValue, yValue, isDone);
-    EXPECT_TRUE(compare_enums(rootFinderData.StatusFlag, DataRootFinder::RootFinderStatus::None));
+    EXPECT_ENUM_EQ(rootFinderData.StatusFlag, DataRootFinder::RootFinderStatus::None);
     EXPECT_FALSE(isDone);
 
     // Set max point
     xValue = xMax;
     yValue = -100.0;
     RootFinder::IterateRootFinder(*state, rootFinderData, xValue, yValue, isDone);
-    EXPECT_TRUE(compare_enums(rootFinderData.StatusFlag, DataRootFinder::RootFinderStatus::None));
+    EXPECT_ENUM_EQ(rootFinderData.StatusFlag, DataRootFinder::RootFinderStatus::None);
     EXPECT_FALSE(isDone);
 
     // Set 3rd point
     xValue = 20.0;
     yValue = -1.0;
     RootFinder::IterateRootFinder(*state, rootFinderData, xValue, yValue, isDone);
-    EXPECT_TRUE(compare_enums(rootFinderData.StatusFlag, DataRootFinder::RootFinderStatus::None));
+    EXPECT_ENUM_EQ(rootFinderData.StatusFlag, DataRootFinder::RootFinderStatus::None);
     EXPECT_FALSE(isDone);
 
     // 4th point should converge
     xValue = rootFinderData.XCandidate;
     yValue = absoluteYTolerance / 2.0;
     RootFinder::IterateRootFinder(*state, rootFinderData, xValue, yValue, isDone);
-    EXPECT_TRUE(compare_enums(rootFinderData.StatusFlag, DataRootFinder::RootFinderStatus::OK));
+    EXPECT_ENUM_EQ(rootFinderData.StatusFlag, DataRootFinder::RootFinderStatus::OK);
     EXPECT_TRUE(isDone);
 }
 
@@ -116,12 +116,12 @@ TEST_F(EnergyPlusFixture, RootFinder_CheckBracketRoundOff)
     Real64 absoluteYTolerance = 1.0e-5;
 
     RootFinder::SetupRootFinder(*state, rootFinderData, slopeType, methodType, relativeXTolerance, absoluteXTolerance, absoluteYTolerance);
-    EXPECT_TRUE(compare_enums(rootFinderData.StatusFlag, DataRootFinder::RootFinderStatus::None));
+    EXPECT_ENUM_EQ(rootFinderData.StatusFlag, DataRootFinder::RootFinderStatus::None);
 
     Real64 xMin = 0.0;
     Real64 xMax = 100.0;
     RootFinder::InitializeRootFinder(*state, rootFinderData, xMin, xMax);
-    EXPECT_TRUE(compare_enums(rootFinderData.StatusFlag, DataRootFinder::RootFinderStatus::None));
+    EXPECT_ENUM_EQ(rootFinderData.StatusFlag, DataRootFinder::RootFinderStatus::None);
 
     bool isDone = false;
 
@@ -129,34 +129,34 @@ TEST_F(EnergyPlusFixture, RootFinder_CheckBracketRoundOff)
     Real64 xValue = xMin;
     Real64 yValue = 100.0;
     RootFinder::IterateRootFinder(*state, rootFinderData, xValue, yValue, isDone);
-    EXPECT_TRUE(compare_enums(rootFinderData.StatusFlag, DataRootFinder::RootFinderStatus::None));
+    EXPECT_ENUM_EQ(rootFinderData.StatusFlag, DataRootFinder::RootFinderStatus::None);
     EXPECT_FALSE(isDone);
 
     // Set max point
     xValue = xMax;
     yValue = -100.0;
     RootFinder::IterateRootFinder(*state, rootFinderData, xValue, yValue, isDone);
-    EXPECT_TRUE(compare_enums(rootFinderData.StatusFlag, DataRootFinder::RootFinderStatus::None));
+    EXPECT_ENUM_EQ(rootFinderData.StatusFlag, DataRootFinder::RootFinderStatus::None);
     EXPECT_FALSE(isDone);
 
     // Set 3rd point (this will be the upper point)
     xValue = 20.0;
     yValue = -10.0;
     RootFinder::IterateRootFinder(*state, rootFinderData, xValue, yValue, isDone);
-    EXPECT_TRUE(compare_enums(rootFinderData.StatusFlag, DataRootFinder::RootFinderStatus::None));
+    EXPECT_ENUM_EQ(rootFinderData.StatusFlag, DataRootFinder::RootFinderStatus::None);
     EXPECT_FALSE(isDone);
 
     // Set 4th point slightly below 3rd point but with opposite sign for y (this will be the lower point)
     xValue = xValue - absoluteXTolerance / 3.0;
     yValue = 10.0;
     RootFinder::IterateRootFinder(*state, rootFinderData, xValue, yValue, isDone);
-    EXPECT_TRUE(compare_enums(rootFinderData.StatusFlag, DataRootFinder::RootFinderStatus::None));
+    EXPECT_ENUM_EQ(rootFinderData.StatusFlag, DataRootFinder::RootFinderStatus::None);
     EXPECT_FALSE(isDone);
 
     // Set 5th point in between upper and lower, but non-convergent so it gets to the Increment check)
     xValue = rootFinderData.XCandidate;
     yValue = 5.0;
     RootFinder::IterateRootFinder(*state, rootFinderData, xValue, yValue, isDone);
-    EXPECT_TRUE(compare_enums(rootFinderData.StatusFlag, DataRootFinder::RootFinderStatus::OKRoundOff));
+    EXPECT_ENUM_EQ(rootFinderData.StatusFlag, DataRootFinder::RootFinderStatus::OKRoundOff);
     EXPECT_TRUE(isDone);
 }

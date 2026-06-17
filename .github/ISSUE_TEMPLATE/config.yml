@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Unmet Hours
+    url: https://unmethours.com
+    about: "Ask modeling **questions** on unmethours.com"
+  - name: Helpdesk
+    url: https://energyplushelp.freshdesk.com/support/home
+    about: The EnergyPlus Helpdesk has a knowledge base and entry forms for submitting help requests and bug reports

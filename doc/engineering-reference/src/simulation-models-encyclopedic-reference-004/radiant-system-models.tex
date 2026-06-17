@@ -16,7 +16,7 @@ One of the most important forms of heat transfer in energy analysis is heat cond
 \label{eq:1DPartialDiffEqinTt}
 \end{equation}
 
-where: 
+where:
 
 T is the temperature as a function of position and time
 
@@ -93,16 +93,16 @@ q''\left( {x,s} \right) =  - k\frac{{dT\left( {x,s} \right)}}{{dx}}
 The transformed equations are solved and then put in matrix form as shown below:
 
 \begin{equation}
-\left[ 
+\left[
     {\begin{array}{*{20}{c}}
       {{T_1}\left( s \right)} \\ {{q_1}\left( s \right)}
     \end{array}}
-  \right] = \left[ 
+  \right] = \left[
     {\begin{array}{*{20}{c}}
       {{A_1}\left( s \right)}&{{B_1}\left( s \right)} \\
       {{C_1}\left( s \right)}&{{D_1}\left( s \right)}
     \end{array}}
-  \right] \left[ 
+  \right] \left[
     {\begin{array}{*{20}{c}}
       {{T_2}\left( s \right)} \\
       {{q_2}\left( s \right)}
@@ -443,7 +443,7 @@ is given by the tubing spacing user input in the
 ConstructionProperty:InternalHeatSource object.  This tubing spacing is halved
 to determine the perpendicular distance for the solution domain.
 \item
-While the number of nodes used for each layer of a construction is determined by the thermo-physical properties of the material for the layer to maintain solution stability, the number of nodes in the perpendicular direction is fixed for all layers of the construction.  Currently in EnergyPlus, the number of nodes in the perpendicular direction is fixed at 7.  This number was chosen as a result of testing with an evaluation version of one of the precedessor programs of EnergyPlus.  This number of nodes was a balance between accuracy requirements and solution speed.  Because the speed of the process required to calculate conduction transfer functions increases greatly as the number of nodes used in the model increases, increasing the number of nodes in the perpendicular direction too much will result in an unacceptible increase in the time required to calculate the conduction transfer functions.
+While the number of nodes used for each layer of a construction is determined by the thermo-physical properties of the material for the layer to maintain solution stability, the number of nodes in the perpendicular direction is fixed for all layers of the construction.  Currently in EnergyPlus, the number of nodes in the perpendicular direction is fixed at 7.  This number was chosen as a result of testing with an evaluation version of one of the predecessor programs of EnergyPlus.  This number of nodes was a balance between accuracy requirements and solution speed.  Because the speed of the process required to calculate conduction transfer functions increases greatly as the number of nodes used in the model increases, increasing the number of nodes in the perpendicular direction too much will result in an unacceptable increase in the time required to calculate the conduction transfer functions.
 \item
 The heat source or sink is applied evenly over the entire node where the user
 defines the location of the source through the
@@ -605,7 +605,7 @@ can be used for controlling a radiant system.
 
 Since flow rate is varied in a variable flow radiant system, there is no explicit control on the inlet water temperature or mixing to achieve some inlet water temperature in a hydronic system.~ However, the user does have the ability to specify on an hourly basis through a schedule the temperature of the water that would be supplied to the radiant system.  Graphical descriptions of the controls for the low temperature radiant system model in EnergyPlus are shown in Figure~\ref{fig:variable-flow-low-temperature-radiant-system} for a hydronic system.~ In a system that uses electric resistance heating, the power or heat addition to the system varies in a manner similar to mass flow rate variation shown in Figure~\ref{fig:variable-flow-low-temperature-radiant-system}.
 
-In the constant flow/variable temperature systems, the controls are also considered piecewise linear functions, but in this case the user selects both the control temperatures and the water temperatures via schedules.  This offers greater flexibility for defining how the radiant system operates though it may not model every situation.~ Figure~\ref{fig:variable-temperature-low-temperature-radiant} shows how the ``desired'' inlet water temperature is controlled based on user schedules.~ The user has the ability to specify the high and low water and control temperature schedules for heating and cooling (separately; a total of eight temperature schedules).~ Note that this inlet temperature is a ``desired'' inlet temperature in that there is no guarantee that the system will provide water to the system at that temperature.~ The model includes a local loop that attempts to meet this demand temperature through mixing and recirculation.  Finally, the control temperature options are the same for a constant flow/variable temperature system as they are for the variable flow and electric radiant systems: mean air temperautre, mean radiant temperature, operative temperature, outdoor dry-bulb temperature, outdoor wet-bulb temperature, surface inside face temperature, and surface interior temperature.
+In the constant flow/variable temperature systems, the controls are also considered piecewise linear functions, but in this case the user selects both the control temperatures and the water temperatures via schedules.  This offers greater flexibility for defining how the radiant system operates though it may not model every situation.~ Figure~\ref{fig:variable-temperature-low-temperature-radiant} shows how the ``desired'' inlet water temperature is controlled based on user schedules.~ The user has the ability to specify the high and low water and control temperature schedules for heating and cooling (separately; a total of eight temperature schedules).~ Note that this inlet temperature is a ``desired'' inlet temperature in that there is no guarantee that the system will provide water to the system at that temperature.~ The model includes a local loop that attempts to meet this demand temperature through mixing and recirculation.  Finally, the control temperature options are the same for a constant flow/variable temperature system as they are for the variable flow and electric radiant systems: mean air temperature, mean radiant temperature, operative temperature, outdoor dry-bulb temperature, outdoor wet-bulb temperature, surface inside face temperature, and surface interior temperature.
 
 \begin{figure}[hbtp] % fig 271
 \centering

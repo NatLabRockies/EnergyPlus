@@ -94,7 +94,7 @@
 ! Environmental Emissions:        None
 ! Utility Tariffs:                None
 
-  Version,23.1;
+  Version,26.2;
 
   Output:Diagnostics,
     DisplayAllWarnings;      !- Key 1
@@ -320,7 +320,7 @@
     autosize,                !- No Load Outdoor Air Flow Rate {m3/s}
     VRFFanSchedule,          !- Supply Air Fan Operating Mode Schedule Name
     drawthrough,             !- Supply Air Fan Placement
-    Fan:VariableVolume,      !- Supply Air Fan Object Type
+    Fan:SystemModel,         !- Supply Air Fan Object Type
     TU1 VRF Supply Fan,      !- Supply Air Fan Object Name
     OutdoorAir:Mixer,        !- Outside Air Mixer Object Type
     TU1 OA Mixer,            !- Outside Air Mixer Object Name
@@ -335,7 +335,45 @@
     ,                        !- Design Specification ZoneHVAC Sizing Object Name
     ,                        !- Supplemental Heating Coil Object Type
     ,                        !- Supplemental Heating Coil Name
-    ;                        !- Maximum Supply Air Temperature from Supplemental Heater {C}
+    ,                        !- Maximum Supply Air Temperature from Supplemental Heater {C}
+    ;                        !- Maximum Outdoor Dry-Bulb Temperature for Supplemental Heater Operation {C}
+
+  Fan:SystemModel,
+    TU1 VRF Supply Fan,      !- Name
+    VRFAvailSched,           !- Availability Schedule Name
+    TU1 VRF DX HCoil Outlet Node,  !- Air Inlet Node Name
+    TU1 Outlet Node,         !- Air Outlet Node Name
+    autosize,                !- Design Maximum Air Flow Rate {m3/s}
+    Continuous,              !- Speed Control Method
+    0,                       !- Electric Power Minimum Flow Rate Fraction
+    600,                     !- Design Pressure Rise {Pa}
+    0.9,                     !- Motor Efficiency
+    1,                       !- Motor In Air Stream Fraction
+    autosize,                !- Design Electric Power Consumption {W}
+    TotalEfficiencyAndPressure,  !- Design Power Sizing Method
+    ,                        !- Electric Power Per Unit Flow Rate {W/(m3/s)}
+    ,                        !- Electric Power Per Unit Flow Rate Per Unit Pressure {W/((m3/s)-Pa)}
+    0.7,                     !- Fan Total Efficiency
+    TU1 VRF Supply Fan_curve,!- Electric Power Function of Flow Fraction Curve Name
+    ,                        !- Night Ventilation Mode Pressure Rise {Pa}
+    ,                        !- Night Ventilation Mode Flow Fraction
+    ,                        !- Motor Loss Zone Name
+    ,                        !- Motor Loss Radiative Fraction
+    General;                 !- End-Use Subcategory
+
+  Curve:Quartic,
+    TU1 VRF Supply Fan_curve,!- Name
+    0.059,                   !- Coefficient1 Constant
+    0,                       !- Coefficient2 x
+    0,                       !- Coefficient3 x**2
+    0.928,                   !- Coefficient4 x**3
+    0,                       !- Coefficient5 x**4
+    0.0000000,               !- Minimum Value of x
+    1.0,                     !- Maximum Value of x
+    0.0,                     !- Minimum Curve Output
+    5.0,                     !- Maximum Curve Output
+    Dimensionless,           !- Input Unit Type for X
+    Dimensionless;           !- Output Unit Type
 
   ZoneHVAC:TerminalUnit:VariableRefrigerantFlow,
     TU2,                     !- Zone Terminal Unit Name
@@ -351,7 +389,7 @@
     autosize,                !- No Load Outdoor Air Flow Rate {m3/s}
     VRFFanSchedule,          !- Supply Air Fan Operating Mode Schedule Name
     drawthrough,             !- Supply Air Fan Placement
-    Fan:VariableVolume,      !- Supply Air Fan Object Type
+    Fan:SystemModel,         !- Supply Air Fan Object Type
     TU2 VRF Supply Fan,      !- Supply Air Fan Object Name
     OutdoorAir:Mixer,        !- Outside Air Mixer Object Type
     TU2 OA Mixer,            !- Outside Air Mixer Object Name
@@ -366,7 +404,45 @@
     ,                        !- Design Specification ZoneHVAC Sizing Object Name
     ,                        !- Supplemental Heating Coil Object Type
     ,                        !- Supplemental Heating Coil Name
-    ;                        !- Maximum Supply Air Temperature from Supplemental Heater {C}
+    ,                        !- Maximum Supply Air Temperature from Supplemental Heater {C}
+    ;                        !- Maximum Outdoor Dry-Bulb Temperature for Supplemental Heater Operation {C}
+
+  Fan:SystemModel,
+    TU2 VRF Supply Fan,      !- Name
+    VRFAvailSched,           !- Availability Schedule Name
+    TU2 VRF DX HCoil Outlet Node,  !- Air Inlet Node Name
+    TU2 Outlet Node,         !- Air Outlet Node Name
+    autosize,                !- Design Maximum Air Flow Rate {m3/s}
+    Continuous,              !- Speed Control Method
+    0,                       !- Electric Power Minimum Flow Rate Fraction
+    600,                     !- Design Pressure Rise {Pa}
+    0.9,                     !- Motor Efficiency
+    1,                       !- Motor In Air Stream Fraction
+    autosize,                !- Design Electric Power Consumption {W}
+    TotalEfficiencyAndPressure,  !- Design Power Sizing Method
+    ,                        !- Electric Power Per Unit Flow Rate {W/(m3/s)}
+    ,                        !- Electric Power Per Unit Flow Rate Per Unit Pressure {W/((m3/s)-Pa)}
+    0.7,                     !- Fan Total Efficiency
+    TU2 VRF Supply Fan_curve,!- Electric Power Function of Flow Fraction Curve Name
+    ,                        !- Night Ventilation Mode Pressure Rise {Pa}
+    ,                        !- Night Ventilation Mode Flow Fraction
+    ,                        !- Motor Loss Zone Name
+    ,                        !- Motor Loss Radiative Fraction
+    General;                 !- End-Use Subcategory
+
+  Curve:Quartic,
+    TU2 VRF Supply Fan_curve,!- Name
+    0.059,                   !- Coefficient1 Constant
+    0,                       !- Coefficient2 x
+    0,                       !- Coefficient3 x**2
+    0.928,                   !- Coefficient4 x**3
+    0,                       !- Coefficient5 x**4
+    0.0000000,               !- Minimum Value of x
+    1.0,                     !- Maximum Value of x
+    0.0,                     !- Minimum Curve Output
+    5.0,                     !- Maximum Curve Output
+    Dimensionless,           !- Input Unit Type for X
+    Dimensionless;           !- Output Unit Type
 
   ZoneHVAC:TerminalUnit:VariableRefrigerantFlow,
     TU3,                     !- Zone Terminal Unit Name
@@ -382,7 +458,7 @@
     autosize,                !- No Load Outdoor Air Flow Rate {m3/s}
     VRFFanSchedule,          !- Supply Air Fan Operating Mode Schedule Name
     drawthrough,             !- Supply Air Fan Placement
-    Fan:VariableVolume,      !- Supply Air Fan Object Type
+    Fan:SystemModel,         !- Supply Air Fan Object Type
     TU3 VRF Supply Fan,      !- Supply Air Fan Object Name
     OutdoorAir:Mixer,        !- Outside Air Mixer Object Type
     TU3 OA Mixer,            !- Outside Air Mixer Object Name
@@ -397,7 +473,45 @@
     ,                        !- Design Specification ZoneHVAC Sizing Object Name
     ,                        !- Supplemental Heating Coil Object Type
     ,                        !- Supplemental Heating Coil Name
-    ;                        !- Maximum Supply Air Temperature from Supplemental Heater {C}
+    ,                        !- Maximum Supply Air Temperature from Supplemental Heater {C}
+    ;                        !- Maximum Outdoor Dry-Bulb Temperature for Supplemental Heater Operation {C}
+
+  Fan:SystemModel,
+    TU3 VRF Supply Fan,      !- Name
+    VRFAvailSched,           !- Availability Schedule Name
+    TU3 VRF DX HCoil Outlet Node,  !- Air Inlet Node Name
+    TU3 Outlet Node,         !- Air Outlet Node Name
+    autosize,                !- Design Maximum Air Flow Rate {m3/s}
+    Continuous,              !- Speed Control Method
+    0,                       !- Electric Power Minimum Flow Rate Fraction
+    600,                     !- Design Pressure Rise {Pa}
+    0.9,                     !- Motor Efficiency
+    1,                       !- Motor In Air Stream Fraction
+    autosize,                !- Design Electric Power Consumption {W}
+    TotalEfficiencyAndPressure,  !- Design Power Sizing Method
+    ,                        !- Electric Power Per Unit Flow Rate {W/(m3/s)}
+    ,                        !- Electric Power Per Unit Flow Rate Per Unit Pressure {W/((m3/s)-Pa)}
+    0.7,                     !- Fan Total Efficiency
+    TU3 VRF Supply Fan_curve,!- Electric Power Function of Flow Fraction Curve Name
+    ,                        !- Night Ventilation Mode Pressure Rise {Pa}
+    ,                        !- Night Ventilation Mode Flow Fraction
+    ,                        !- Motor Loss Zone Name
+    ,                        !- Motor Loss Radiative Fraction
+    General;                 !- End-Use Subcategory
+
+  Curve:Quartic,
+    TU3 VRF Supply Fan_curve,!- Name
+    0.059,                   !- Coefficient1 Constant
+    0,                       !- Coefficient2 x
+    0,                       !- Coefficient3 x**2
+    0.928,                   !- Coefficient4 x**3
+    0,                       !- Coefficient5 x**4
+    0.0000000,               !- Minimum Value of x
+    1.0,                     !- Maximum Value of x
+    0.0,                     !- Minimum Curve Output
+    5.0,                     !- Maximum Curve Output
+    Dimensionless,           !- Input Unit Type for X
+    Dimensionless;           !- Output Unit Type
 
   ZoneHVAC:TerminalUnit:VariableRefrigerantFlow,
     TU4,                     !- Zone Terminal Unit Name
@@ -413,7 +527,7 @@
     autosize,                !- No Load Outdoor Air Flow Rate {m3/s}
     VRFFanSchedule,          !- Supply Air Fan Operating Mode Schedule Name
     drawthrough,             !- Supply Air Fan Placement
-    Fan:VariableVolume,      !- Supply Air Fan Object Type
+    Fan:SystemModel,         !- Supply Air Fan Object Type
     TU4 VRF Supply Fan,      !- Supply Air Fan Object Name
     OutdoorAir:Mixer,        !- Outside Air Mixer Object Type
     TU4 OA Mixer,            !- Outside Air Mixer Object Name
@@ -428,7 +542,45 @@
     ,                        !- Design Specification ZoneHVAC Sizing Object Name
     ,                        !- Supplemental Heating Coil Object Type
     ,                        !- Supplemental Heating Coil Name
-    ;                        !- Maximum Supply Air Temperature from Supplemental Heater {C}
+    ,                        !- Maximum Supply Air Temperature from Supplemental Heater {C}
+    ;                        !- Maximum Outdoor Dry-Bulb Temperature for Supplemental Heater Operation {C}
+
+  Fan:SystemModel,
+    TU4 VRF Supply Fan,      !- Name
+    VRFAvailSched,           !- Availability Schedule Name
+    TU4 VRF DX HCoil Outlet Node,  !- Air Inlet Node Name
+    TU4 Outlet Node,         !- Air Outlet Node Name
+    autosize,                !- Design Maximum Air Flow Rate {m3/s}
+    Continuous,              !- Speed Control Method
+    0,                       !- Electric Power Minimum Flow Rate Fraction
+    600,                     !- Design Pressure Rise {Pa}
+    0.9,                     !- Motor Efficiency
+    1,                       !- Motor In Air Stream Fraction
+    autosize,                !- Design Electric Power Consumption {W}
+    TotalEfficiencyAndPressure,  !- Design Power Sizing Method
+    ,                        !- Electric Power Per Unit Flow Rate {W/(m3/s)}
+    ,                        !- Electric Power Per Unit Flow Rate Per Unit Pressure {W/((m3/s)-Pa)}
+    0.7,                     !- Fan Total Efficiency
+    TU4 VRF Supply Fan_curve,!- Electric Power Function of Flow Fraction Curve Name
+    ,                        !- Night Ventilation Mode Pressure Rise {Pa}
+    ,                        !- Night Ventilation Mode Flow Fraction
+    ,                        !- Motor Loss Zone Name
+    ,                        !- Motor Loss Radiative Fraction
+    General;                 !- End-Use Subcategory
+
+  Curve:Quartic,
+    TU4 VRF Supply Fan_curve,!- Name
+    0.059,                   !- Coefficient1 Constant
+    0,                       !- Coefficient2 x
+    0,                       !- Coefficient3 x**2
+    0.928,                   !- Coefficient4 x**3
+    0,                       !- Coefficient5 x**4
+    0.0000000,               !- Minimum Value of x
+    1.0,                     !- Maximum Value of x
+    0.0,                     !- Minimum Curve Output
+    5.0,                     !- Maximum Curve Output
+    Dimensionless,           !- Input Unit Type for X
+    Dimensionless;           !- Output Unit Type
 
   ZoneHVAC:TerminalUnit:VariableRefrigerantFlow,
     TU5,                     !- Zone Terminal Unit Name
@@ -444,7 +596,7 @@
     autosize,                !- No Load Outdoor Air Flow Rate {m3/s}
     VRFFanSchedule,          !- Supply Air Fan Operating Mode Schedule Name
     drawthrough,             !- Supply Air Fan Placement
-    Fan:VariableVolume,      !- Supply Air Fan Object Type
+    Fan:SystemModel,         !- Supply Air Fan Object Type
     TU5 VRF Supply Fan,      !- Supply Air Fan Object Name
     OutdoorAir:Mixer,        !- Outside Air Mixer Object Type
     TU5 OA Mixer,            !- Outside Air Mixer Object Name
@@ -459,7 +611,45 @@
     ,                        !- Design Specification ZoneHVAC Sizing Object Name
     ,                        !- Supplemental Heating Coil Object Type
     ,                        !- Supplemental Heating Coil Name
-    ;                        !- Maximum Supply Air Temperature from Supplemental Heater {C}
+    ,                        !- Maximum Supply Air Temperature from Supplemental Heater {C}
+    ;                        !- Maximum Outdoor Dry-Bulb Temperature for Supplemental Heater Operation {C}
+
+  Fan:SystemModel,
+    TU5 VRF Supply Fan,      !- Name
+    VRFAvailSched,           !- Availability Schedule Name
+    TU5 VRF DX HCoil Outlet Node,  !- Air Inlet Node Name
+    TU5 Outlet Node,         !- Air Outlet Node Name
+    autosize,                !- Design Maximum Air Flow Rate {m3/s}
+    Continuous,              !- Speed Control Method
+    0,                       !- Electric Power Minimum Flow Rate Fraction
+    600,                     !- Design Pressure Rise {Pa}
+    0.9,                     !- Motor Efficiency
+    1,                       !- Motor In Air Stream Fraction
+    autosize,                !- Design Electric Power Consumption {W}
+    TotalEfficiencyAndPressure,  !- Design Power Sizing Method
+    ,                        !- Electric Power Per Unit Flow Rate {W/(m3/s)}
+    ,                        !- Electric Power Per Unit Flow Rate Per Unit Pressure {W/((m3/s)-Pa)}
+    0.7,                     !- Fan Total Efficiency
+    TU5 VRF Supply Fan_curve,!- Electric Power Function of Flow Fraction Curve Name
+    ,                        !- Night Ventilation Mode Pressure Rise {Pa}
+    ,                        !- Night Ventilation Mode Flow Fraction
+    ,                        !- Motor Loss Zone Name
+    ,                        !- Motor Loss Radiative Fraction
+    General;                 !- End-Use Subcategory
+
+  Curve:Quartic,
+    TU5 VRF Supply Fan_curve,!- Name
+    0.059,                   !- Coefficient1 Constant
+    0,                       !- Coefficient2 x
+    0,                       !- Coefficient3 x**2
+    0.928,                   !- Coefficient4 x**3
+    0,                       !- Coefficient5 x**4
+    0.0000000,               !- Minimum Value of x
+    1.0,                     !- Maximum Value of x
+    0.0,                     !- Minimum Curve Output
+    5.0,                     !- Maximum Curve Output
+    Dimensionless,           !- Input Unit Type for X
+    Dimensionless;           !- Output Unit Type
 
   Schedule:Compact,
     VRFFanSchedule,          !- Name
@@ -504,106 +694,6 @@
     Outside Air Inlet Node 5,!- Outdoor Air Stream Node Name
     Relief Air Outlet Node 5,!- Relief Air Stream Node Name
     TU5 Inlet Node;          !- Return Air Stream Node Name
-
-  Fan:VariableVolume,
-    TU1 VRF Supply Fan,      !- Name
-    VRFAvailSched,           !- Availability Schedule Name
-    0.7,                     !- Fan Total Efficiency
-    600,                     !- Pressure Rise {Pa}
-    autosize,                !- Maximum Flow Rate {m3/s}
-    Fraction,                !- Fan Power Minimum Flow Rate Input Method
-    0,                       !- Fan Power Minimum Flow Fraction
-    0,                       !- Fan Power Minimum Air Flow Rate {m3/s}
-    0.9,                     !- Motor Efficiency
-    1,                       !- Motor In Airstream Fraction
-    0.059,                   !- Fan Power Coefficient 1
-    0,                       !- Fan Power Coefficient 2
-    0,                       !- Fan Power Coefficient 3
-    0.928,                   !- Fan Power Coefficient 4
-    0,                       !- Fan Power Coefficient 5
-    TU1 VRF DX HCoil Outlet Node,  !- Air Inlet Node Name
-    TU1 Outlet Node,         !- Air Outlet Node Name
-    General;                 !- End-Use Subcategory
-
-  Fan:VariableVolume,
-    TU2 VRF Supply Fan,      !- Name
-    VRFAvailSched,           !- Availability Schedule Name
-    0.7,                     !- Fan Total Efficiency
-    600,                     !- Pressure Rise {Pa}
-    autosize,                !- Maximum Flow Rate {m3/s}
-    Fraction,                !- Fan Power Minimum Flow Rate Input Method
-    0,                       !- Fan Power Minimum Flow Fraction
-    0,                       !- Fan Power Minimum Air Flow Rate {m3/s}
-    0.9,                     !- Motor Efficiency
-    1,                       !- Motor In Airstream Fraction
-    0.059,                   !- Fan Power Coefficient 1
-    0,                       !- Fan Power Coefficient 2
-    0,                       !- Fan Power Coefficient 3
-    0.928,                   !- Fan Power Coefficient 4
-    0,                       !- Fan Power Coefficient 5
-    TU2 VRF DX HCoil Outlet Node,  !- Air Inlet Node Name
-    TU2 Outlet Node,         !- Air Outlet Node Name
-    General;                 !- End-Use Subcategory
-
-  Fan:VariableVolume,
-    TU3 VRF Supply Fan,      !- Name
-    VRFAvailSched,           !- Availability Schedule Name
-    0.7,                     !- Fan Total Efficiency
-    600,                     !- Pressure Rise {Pa}
-    autosize,                !- Maximum Flow Rate {m3/s}
-    Fraction,                !- Fan Power Minimum Flow Rate Input Method
-    0,                       !- Fan Power Minimum Flow Fraction
-    0,                       !- Fan Power Minimum Air Flow Rate {m3/s}
-    0.9,                     !- Motor Efficiency
-    1,                       !- Motor In Airstream Fraction
-    0.059,                   !- Fan Power Coefficient 1
-    0,                       !- Fan Power Coefficient 2
-    0,                       !- Fan Power Coefficient 3
-    0.928,                   !- Fan Power Coefficient 4
-    0,                       !- Fan Power Coefficient 5
-    TU3 VRF DX HCoil Outlet Node,  !- Air Inlet Node Name
-    TU3 Outlet Node,         !- Air Outlet Node Name
-    General;                 !- End-Use Subcategory
-
-  Fan:VariableVolume,
-    TU4 VRF Supply Fan,      !- Name
-    VRFAvailSched,           !- Availability Schedule Name
-    0.7,                     !- Fan Total Efficiency
-    600,                     !- Pressure Rise {Pa}
-    autosize,                !- Maximum Flow Rate {m3/s}
-    Fraction,                !- Fan Power Minimum Flow Rate Input Method
-    0,                       !- Fan Power Minimum Flow Fraction
-    0,                       !- Fan Power Minimum Air Flow Rate {m3/s}
-    0.9,                     !- Motor Efficiency
-    1,                       !- Motor In Airstream Fraction
-    0.059,                   !- Fan Power Coefficient 1
-    0,                       !- Fan Power Coefficient 2
-    0,                       !- Fan Power Coefficient 3
-    0.928,                   !- Fan Power Coefficient 4
-    0,                       !- Fan Power Coefficient 5
-    TU4 VRF DX HCoil Outlet Node,  !- Air Inlet Node Name
-    TU4 Outlet Node,         !- Air Outlet Node Name
-    General;                 !- End-Use Subcategory
-
-  Fan:VariableVolume,
-    TU5 VRF Supply Fan,      !- Name
-    VRFAvailSched,           !- Availability Schedule Name
-    0.7,                     !- Fan Total Efficiency
-    600,                     !- Pressure Rise {Pa}
-    autosize,                !- Maximum Flow Rate {m3/s}
-    Fraction,                !- Fan Power Minimum Flow Rate Input Method
-    0,                       !- Fan Power Minimum Flow Fraction
-    0,                       !- Fan Power Minimum Air Flow Rate {m3/s}
-    0.9,                     !- Motor Efficiency
-    1,                       !- Motor In Airstream Fraction
-    0.059,                   !- Fan Power Coefficient 1
-    0,                       !- Fan Power Coefficient 2
-    0,                       !- Fan Power Coefficient 3
-    0.928,                   !- Fan Power Coefficient 4
-    0,                       !- Fan Power Coefficient 5
-    TU5 VRF DX HCoil Outlet Node,  !- Air Inlet Node Name
-    TU5 Outlet Node,         !- Air Outlet Node Name
-    General;                 !- End-Use Subcategory
 
 !-   ===========  ALL OBJECTS IN CLASS: COIL:COOLING:DX:VARIABLEREFRIGERANTFLOW:FLUIDTEMPERATURECONTROL ===========
 
@@ -2040,7 +2130,8 @@
   HeatBalanceAlgorithm,ConductionTransferFunction;
 
   ZoneAirHeatBalanceAlgorithm,
-    AnalyticalSolution;      !- Algorithm
+    AnalyticalSolution,      !- Algorithm
+    ;                        !- Do Space Heat Balance for Sizing
 
   GlobalGeometryRules,
     UpperLeftCorner,         !- Starting Vertex Position
@@ -2535,8 +2626,6 @@
     For: AllDays,            !- Field 2
     Until: 24:00,117.239997864; !- Field 3
 
-                             !- Field 4
-
   Schedule:Compact,
     ShadeTransSch,           !- Name
     Fraction,                !- Schedule Type Limits Name
@@ -2742,8 +2831,8 @@
     INFIL-SCH,               !- Schedule Name
     flow/zone,               !- Design Flow Rate Calculation Method
     0.0167,                  !- Design Flow Rate {m3/s}
-    ,                        !- Flow per Zone Floor Area {m3/s-m2}
-    ,                        !- Flow per Exterior Surface Area {m3/s-m2}
+    ,                        !- Flow Rate per Floor Area {m3/s-m2}
+    ,                        !- Flow Rate per Exterior Surface Area {m3/s-m2}
     ,                        !- Air Changes per Hour {1/hr}
     0,                       !- Constant Term Coefficient
     0,                       !- Temperature Term Coefficient
@@ -2768,7 +2857,7 @@
     LIGHTS-1,                !- Schedule Name
     Watts/Area,              !- Design Level Calculation Method
     ,                        !- Lighting Level {W}
-    16.15,                   !- Watts per Zone Floor Area {W/m2}
+    16.15,                   !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0.0,                     !- Return Air Fraction
     0.59,                    !- Fraction Radiant
@@ -2782,7 +2871,7 @@
     EQUIP-1,                 !- Schedule Name
     Watts/Area,              !- Design Level Calculation Method
     ,                        !- Design Level {W}
-    10.76,                   !- Watts per Zone Floor Area {W/m2}
+    10.76,                   !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0,                       !- Fraction Latent
     0.3,                     !- Fraction Radiant
@@ -2957,8 +3046,8 @@
     INFIL-SCH,               !- Schedule Name
     flow/zone,               !- Design Flow Rate Calculation Method
     0.00717,                 !- Design Flow Rate {m3/s}
-    ,                        !- Flow per Zone Floor Area {m3/s-m2}
-    ,                        !- Flow per Exterior Surface Area {m3/s-m2}
+    ,                        !- Flow Rate per Floor Area {m3/s-m2}
+    ,                        !- Flow Rate per Exterior Surface Area {m3/s-m2}
     ,                        !- Air Changes per Hour {1/hr}
     0,                       !- Constant Term Coefficient
     0,                       !- Temperature Term Coefficient
@@ -2983,7 +3072,7 @@
     LIGHTS-1,                !- Schedule Name
     Watts/Area,              !- Design Level Calculation Method
     ,                        !- Lighting Level {W}
-    16.15,                   !- Watts per Zone Floor Area {W/m2}
+    16.15,                   !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0.0,                     !- Return Air Fraction
     0.59,                    !- Fraction Radiant
@@ -2997,7 +3086,7 @@
     EQUIP-1,                 !- Schedule Name
     Watts/Area,              !- Design Level Calculation Method
     ,                        !- Design Level {W}
-    10.76,                   !- Watts per Zone Floor Area {W/m2}
+    10.76,                   !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0,                       !- Fraction Latent
     0.3,                     !- Fraction Radiant
@@ -3137,8 +3226,8 @@
     INFIL-SCH,               !- Schedule Name
     flow/zone,               !- Design Flow Rate Calculation Method
     0.0167,                  !- Design Flow Rate {m3/s}
-    ,                        !- Flow per Zone Floor Area {m3/s-m2}
-    ,                        !- Flow per Exterior Surface Area {m3/s-m2}
+    ,                        !- Flow Rate per Floor Area {m3/s-m2}
+    ,                        !- Flow Rate per Exterior Surface Area {m3/s-m2}
     ,                        !- Air Changes per Hour {1/hr}
     0,                       !- Constant Term Coefficient
     0,                       !- Temperature Term Coefficient
@@ -3163,7 +3252,7 @@
     LIGHTS-1,                !- Schedule Name
     Watts/Area,              !- Design Level Calculation Method
     ,                        !- Lighting Level {W}
-    16.15,                   !- Watts per Zone Floor Area {W/m2}
+    16.15,                   !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0.0,                     !- Return Air Fraction
     0.59,                    !- Fraction Radiant
@@ -3177,7 +3266,7 @@
     EQUIP-1,                 !- Schedule Name
     Watts/Area,              !- Design Level Calculation Method
     ,                        !- Design Level {W}
-    10.76,                   !- Watts per Zone Floor Area {W/m2}
+    10.76,                   !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0,                       !- Fraction Latent
     0.3,                     !- Fraction Radiant
@@ -3332,8 +3421,8 @@
     INFIL-SCH,               !- Schedule Name
     flow/zone,               !- Design Flow Rate Calculation Method
     0.00717,                 !- Design Flow Rate {m3/s}
-    ,                        !- Flow per Zone Floor Area {m3/s-m2}
-    ,                        !- Flow per Exterior Surface Area {m3/s-m2}
+    ,                        !- Flow Rate per Floor Area {m3/s-m2}
+    ,                        !- Flow Rate per Exterior Surface Area {m3/s-m2}
     ,                        !- Air Changes per Hour {1/hr}
     0,                       !- Constant Term Coefficient
     0,                       !- Temperature Term Coefficient
@@ -3358,7 +3447,7 @@
     LIGHTS-1,                !- Schedule Name
     Watts/Area,              !- Design Level Calculation Method
     ,                        !- Lighting Level {W}
-    16.15,                   !- Watts per Zone Floor Area {W/m2}
+    16.15,                   !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0.0,                     !- Return Air Fraction
     0.59,                    !- Fraction Radiant
@@ -3372,7 +3461,7 @@
     EQUIP-1,                 !- Schedule Name
     Watts/Area,              !- Design Level Calculation Method
     ,                        !- Design Level {W}
-    10.76,                   !- Watts per Zone Floor Area {W/m2}
+    10.76,                   !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0,                       !- Fraction Latent
     0.3,                     !- Fraction Radiant
@@ -3512,8 +3601,8 @@
     INFIL-SCH,               !- Schedule Name
     flow/zone,               !- Design Flow Rate Calculation Method
     0.031089,                !- Design Flow Rate {m3/s}
-    ,                        !- Flow per Zone Floor Area {m3/s-m2}
-    ,                        !- Flow per Exterior Surface Area {m3/s-m2}
+    ,                        !- Flow Rate per Floor Area {m3/s-m2}
+    ,                        !- Flow Rate per Exterior Surface Area {m3/s-m2}
     ,                        !- Air Changes per Hour {1/hr}
     0,                       !- Constant Term Coefficient
     0,                       !- Temperature Term Coefficient
@@ -3538,7 +3627,7 @@
     LIGHTS-1,                !- Schedule Name
     Watts/Area,              !- Design Level Calculation Method
     ,                        !- Lighting Level {W}
-    16.15,                   !- Watts per Zone Floor Area {W/m2}
+    16.15,                   !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0.0,                     !- Return Air Fraction
     0.59,                    !- Fraction Radiant
@@ -3552,7 +3641,7 @@
     EQUIP-1,                 !- Schedule Name
     Watts/Area,              !- Design Level Calculation Method
     ,                        !- Design Level {W}
-    10.76,                   !- Watts per Zone Floor Area {W/m2}
+    10.76,                   !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0,                       !- Fraction Latent
     0.3,                     !- Fraction Radiant
@@ -3691,7 +3780,14 @@
     No,                      !- Account for Dedicated Outdoor Air System
     NeutralSupplyAir,        !- Dedicated Outdoor Air System Control Strategy
     autosize,                !- Dedicated Outdoor Air Low Setpoint Temperature for Design {C}
-    autosize;                !- Dedicated Outdoor Air High Setpoint Temperature for Design {C}
+    autosize,                !- Dedicated Outdoor Air High Setpoint Temperature for Design {C}
+    ,                        !- Zone Load Sizing Method
+    ,                        !- Zone Latent Cooling Design Supply Air Humidity Ratio Input Method
+    ,                        !- Zone Dehumidification Design Supply Air Humidity Ratio {kgWater/kgDryAir}
+    ,                        !- Zone Cooling Design Supply Air Humidity Ratio Difference {kgWater/kgDryAir}
+    ,                        !- Zone Latent Heating Design Supply Air Humidity Ratio Input Method
+    ,                        !- Zone Humidification Design Supply Air Humidity Ratio {kgWater/kgDryAir}
+    ;                        !- Zone Humidification Design Supply Air Humidity Ratio Difference {kgWater/kgDryAir}
 
   DesignSpecification:OutdoorAir,
     SZ DSOA SPACE1-1,        !- Name
@@ -3727,7 +3823,14 @@
     No,                      !- Account for Dedicated Outdoor Air System
     NeutralSupplyAir,        !- Dedicated Outdoor Air System Control Strategy
     autosize,                !- Dedicated Outdoor Air Low Setpoint Temperature for Design {C}
-    autosize;                !- Dedicated Outdoor Air High Setpoint Temperature for Design {C}
+    autosize,                !- Dedicated Outdoor Air High Setpoint Temperature for Design {C}
+    ,                        !- Zone Load Sizing Method
+    ,                        !- Zone Latent Cooling Design Supply Air Humidity Ratio Input Method
+    ,                        !- Zone Dehumidification Design Supply Air Humidity Ratio {kgWater/kgDryAir}
+    ,                        !- Zone Cooling Design Supply Air Humidity Ratio Difference {kgWater/kgDryAir}
+    ,                        !- Zone Latent Heating Design Supply Air Humidity Ratio Input Method
+    ,                        !- Zone Humidification Design Supply Air Humidity Ratio {kgWater/kgDryAir}
+    ;                        !- Zone Humidification Design Supply Air Humidity Ratio Difference {kgWater/kgDryAir}
 
   DesignSpecification:OutdoorAir,
     SZ DSOA SPACE2-1,        !- Name
@@ -3763,7 +3866,14 @@
     No,                      !- Account for Dedicated Outdoor Air System
     NeutralSupplyAir,        !- Dedicated Outdoor Air System Control Strategy
     autosize,                !- Dedicated Outdoor Air Low Setpoint Temperature for Design {C}
-    autosize;                !- Dedicated Outdoor Air High Setpoint Temperature for Design {C}
+    autosize,                !- Dedicated Outdoor Air High Setpoint Temperature for Design {C}
+    ,                        !- Zone Load Sizing Method
+    ,                        !- Zone Latent Cooling Design Supply Air Humidity Ratio Input Method
+    ,                        !- Zone Dehumidification Design Supply Air Humidity Ratio {kgWater/kgDryAir}
+    ,                        !- Zone Cooling Design Supply Air Humidity Ratio Difference {kgWater/kgDryAir}
+    ,                        !- Zone Latent Heating Design Supply Air Humidity Ratio Input Method
+    ,                        !- Zone Humidification Design Supply Air Humidity Ratio {kgWater/kgDryAir}
+    ;                        !- Zone Humidification Design Supply Air Humidity Ratio Difference {kgWater/kgDryAir}
 
   DesignSpecification:OutdoorAir,
     SZ DSOA SPACE3-1,        !- Name
@@ -3799,7 +3909,14 @@
     No,                      !- Account for Dedicated Outdoor Air System
     NeutralSupplyAir,        !- Dedicated Outdoor Air System Control Strategy
     autosize,                !- Dedicated Outdoor Air Low Setpoint Temperature for Design {C}
-    autosize;                !- Dedicated Outdoor Air High Setpoint Temperature for Design {C}
+    autosize,                !- Dedicated Outdoor Air High Setpoint Temperature for Design {C}
+    ,                        !- Zone Load Sizing Method
+    ,                        !- Zone Latent Cooling Design Supply Air Humidity Ratio Input Method
+    ,                        !- Zone Dehumidification Design Supply Air Humidity Ratio {kgWater/kgDryAir}
+    ,                        !- Zone Cooling Design Supply Air Humidity Ratio Difference {kgWater/kgDryAir}
+    ,                        !- Zone Latent Heating Design Supply Air Humidity Ratio Input Method
+    ,                        !- Zone Humidification Design Supply Air Humidity Ratio {kgWater/kgDryAir}
+    ;                        !- Zone Humidification Design Supply Air Humidity Ratio Difference {kgWater/kgDryAir}
 
   DesignSpecification:OutdoorAir,
     SZ DSOA SPACE4-1,        !- Name
@@ -3835,7 +3952,14 @@
     No,                      !- Account for Dedicated Outdoor Air System
     NeutralSupplyAir,        !- Dedicated Outdoor Air System Control Strategy
     autosize,                !- Dedicated Outdoor Air Low Setpoint Temperature for Design {C}
-    autosize;                !- Dedicated Outdoor Air High Setpoint Temperature for Design {C}
+    autosize,                !- Dedicated Outdoor Air High Setpoint Temperature for Design {C}
+    ,                        !- Zone Load Sizing Method
+    ,                        !- Zone Latent Cooling Design Supply Air Humidity Ratio Input Method
+    ,                        !- Zone Dehumidification Design Supply Air Humidity Ratio {kgWater/kgDryAir}
+    ,                        !- Zone Cooling Design Supply Air Humidity Ratio Difference {kgWater/kgDryAir}
+    ,                        !- Zone Latent Heating Design Supply Air Humidity Ratio Input Method
+    ,                        !- Zone Humidification Design Supply Air Humidity Ratio {kgWater/kgDryAir}
+    ;                        !- Zone Humidification Design Supply Air Humidity Ratio Difference {kgWater/kgDryAir}
 
   DesignSpecification:OutdoorAir,
     SZ DSOA SPACE5-1,        !- Name

@@ -8,7 +8,7 @@ Use C++17 std::filesystem library
 
 ## Justification for New Feature ##
 
-[#8376](https://github.com/NREL/EnergyPlus/issues/8376) identified a bug with the `EnergyPlus::FileSystem::moveFile(std::string const &filePath, std::string const &destination)` function on Unix that calls the stdio [`rename`](https://www.cplusplus.com/reference/cstdio/rename/). The rename method would fail when `filePath` and `destination` aren't on the same device (eg: two different hard drives).
+[#8376](https://github.com/NatLabRockies/EnergyPlus/issues/8376) identified a bug with the `EnergyPlus::FileSystem::moveFile(std::string const &filePath, std::string const &destination)` function on Unix that calls the stdio [`rename`](https://www.cplusplus.com/reference/cstdio/rename/). The rename method would fail when `filePath` and `destination` aren't on the same device (eg: two different hard drives).
 
 Looking into the `FileSystem.cc`, it is ridden with macros to conditionally call into win32 API or unix APIs.
 
@@ -18,7 +18,7 @@ Note that there are only a handful of files that use the `FileSystem.hh` header,
 
 => **Bottom line**: the proposed changes mainly affects the CLI.
 
-**Note:** [#8376](https://github.com/NREL/EnergyPlus/issues/8376) was fixed by a minimal approach that doesn't include upgrading to `std::filesystem` (see [PR#8410](https://github.com/NREL/EnergyPlus/pull/8410)).
+**Note:** [#8376](https://github.com/NatLabRockies/EnergyPlus/issues/8376) was fixed by a minimal approach that doesn't include upgrading to `std::filesystem` (see [PR#8410](https://github.com/NatLabRockies/EnergyPlus/pull/8410)).
 The `std::filesystem` was kept out of it and moved into this NFP so that it can be reviewed and approved (or not) by the development team.
 If the minimal approach is taken, it will be a small defect; if the filesystem conversion approach is taken, it will be a larger defect.
 
@@ -35,7 +35,7 @@ There are two things we can do:
 2. Move everything to use `fs::path`, including in consumers.
     * `CommandLineInterface` would no longer use concatenation of std::string, like `std::string outputFilePrefix = std::string{outDirPathName} + std::string{prefixOutName};`, instead it would use `fs::path` and not have to deal with trailing slashes etc, it can just use the operator/ overload, eg: `fs::path outputFilePrefix = fs::path{outDirPathName} / prefixOutName;`
 
-I have - for the most part - implemented Part 1., you can find a difference here: https://github.com/NREL/EnergyPlus/compare/8376_FileSystem_Move_minimal...jmarrec:8376_FileSystem_Move
+I have - for the most part - implemented Part 1., you can find a difference here: https://github.com/NatLabRockies/EnergyPlus/compare/8376_FileSystem_Move_minimal...jmarrec:8376_FileSystem_Move
 
 ## Testing/Validation/Data Sources ##
 

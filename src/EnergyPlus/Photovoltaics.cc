@@ -1,7 +1,7 @@
-// EnergyPlus, Copyright (c) 1996-2023, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
-// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other
+// National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
 // contributors. All rights reserved.
 //
 // NOTICE: This Software was developed under funding from the U.S. Department of Energy and the
@@ -48,6 +48,7 @@
 // C++ Headers
 #include <cassert>
 #include <cmath>
+#include <format>
 
 // ObjexxFCL Headers
 #include <ObjexxFCL/Array.functions.hh>
@@ -111,6 +112,32 @@ namespace Photovoltaics {
     // Using/Aliasing
     using namespace DataPhotovoltaics;
 
+    constexpr std::string_view cPVGeneratorObjectName = "Generator:Photovoltaic";
+
+    constexpr std::array<std::string_view, (int)PVModel::Num> pvModelNames = {
+        "PhotovoltaicPerformance:Simple", "PhotovoltaicPerformance:EquivalentOne-Diode", "PhotovoltaicPerformance:Sandia"};
+    constexpr std::array<std::string_view, (int)PVModel::Num> pvModelNamesUC = {
+        "PHOTOVOLTAICPERFORMANCE:SIMPLE", "PHOTOVOLTAICPERFORMANCE:EQUIVALENTONE-DIODE", "PHOTOVOLTAICPERFORMANCE:SANDIA"};
+
+    [[maybe_unused]] constexpr std::array<std::string_view, (int)CellIntegration::Num> cellIntegrationNames = {"Decoupled",
+                                                                                                               "DecoupledUllebergDynamic",
+                                                                                                               "IntegratedSurfaceOutsideFace",
+                                                                                                               "IntegratedTranspiredCollector",
+                                                                                                               "IntegratedExteriorVentedCavity",
+                                                                                                               "PhotovoltaicThermalSolarCollector"};
+    constexpr std::array<std::string_view, (int)CellIntegration::Num> cellIntegrationNamesUC = {"DECOUPLED",
+                                                                                                "DECOUPLEDULLEBERGDYNAMIC",
+                                                                                                "INTEGRATEDSURFACEOUTSIDEFACE",
+                                                                                                "INTEGRATEDTRANSPIREDCOLLECTOR",
+                                                                                                "INTEGRATEDEXTERIORVENTEDCAVITY",
+                                                                                                "PHOTOVOLTAICTHERMALSOLARCOLLECTOR"};
+
+    [[maybe_unused]] constexpr std::array<std::string_view, (int)Efficiency::Num> efficiencyNames = {"Fixed", "Scheduled"};
+    constexpr std::array<std::string_view, (int)Efficiency::Num> efficiencyNamesUC = {"FIXED", "SCHEDULED"};
+
+    [[maybe_unused]] constexpr std::array<std::string_view, (int)SiPVCells::Num> siPVCellsNames = {"CrystallineSilicon", "AmorphousSilicon"};
+    constexpr std::array<std::string_view, (int)SiPVCells::Num> siPVCellsNamesUC = {"CRYSTALLINESILICON", "AMORPHOUSSILICON"};
+
     void SimPVGenerator(EnergyPlusData &state,
                         [[maybe_unused]] GeneratorType const GeneratorType, // type of Generator !unused1208
                         std::string const &GeneratorName,                   // user specified name of Generator
@@ -141,28 +168,29 @@ namespace Photovoltaics {
         }
 
         if (GeneratorIndex == 0) {
-            PVnum = UtilityRoutines::FindItemInList(GeneratorName, state.dataPhotovoltaic->PVarray);
+            PVnum = Util::FindItemInList(GeneratorName, state.dataPhotovoltaic->PVarray);
             if (PVnum == 0) {
-                ShowFatalError(state, format("SimPhotovoltaicGenerator: Specified PV not one of valid Photovoltaic Generators {}", GeneratorName));
+                ShowFatalError(state,
+                               std::format("SimPhotovoltaicGenerator: Specified PV not one of valid Photovoltaic Generators {}", GeneratorName));
             }
             GeneratorIndex = PVnum;
         } else {
             PVnum = GeneratorIndex;
             if (PVnum > state.dataPhotovoltaic->NumPVs || PVnum < 1) {
                 ShowFatalError(state,
-                               format("SimPhotovoltaicGenerator: Invalid GeneratorIndex passed={}, Number of PVs={}, Generator name={}",
-                                      PVnum,
-                                      state.dataPhotovoltaic->NumPVs,
-                                      GeneratorName));
+                               std::format("SimPhotovoltaicGenerator: Invalid GeneratorIndex passed={}, Number of PVs={}, Generator name={}",
+                                           PVnum,
+                                           state.dataPhotovoltaic->NumPVs,
+                                           GeneratorName));
             }
             if (state.dataPhotovoltaicState->CheckEquipName(PVnum)) {
                 if (GeneratorName != state.dataPhotovoltaic->PVarray(PVnum).Name) {
                     ShowFatalError(
                         state,
-                        format("SimPhotovoltaicGenerator: Invalid GeneratorIndex passed={}, Generator name={}, stored PV Name for that index={}",
-                               PVnum,
-                               GeneratorName,
-                               state.dataPhotovoltaic->PVarray(PVnum).Name));
+                        std::format("SimPhotovoltaicGenerator: Invalid GeneratorIndex passed={}, Generator name={}, stored PV Name for that index={}",
+                                    PVnum,
+                                    GeneratorName,
+                                    state.dataPhotovoltaic->PVarray(PVnum).Name));
                 }
                 state.dataPhotovoltaicState->CheckEquipName(PVnum) = false;
             }
@@ -173,7 +201,7 @@ namespace Photovoltaics {
             CalcSimplePV(state, PVnum);
         } break;
         case PVModel::TRNSYS: {
-            // 'PhotovoltaicPeformance:EquivalentOne-Diode' (aka. 5-parameter TRNSYS type 180 model)
+            // 'PhotovoltaicPerformance:EquivalentOne-Diode' (aka. 5-parameter TRNSYS type 180 model)
             InitTRNSYSPV(state, PVnum);
 
             CalcTRNSYSPV(state, PVnum, RunFlag);
@@ -183,7 +211,7 @@ namespace Photovoltaics {
             CalcSandiaPV(state, PVnum, RunFlag);
         } break;
         default: {
-            ShowFatalError(state, format("Specified generator model type not found for PV generator = {}", GeneratorName));
+            ShowFatalError(state, std::format("Specified generator model type not found for PV generator = {}", GeneratorName));
         } break;
         }
 
@@ -206,15 +234,16 @@ namespace Photovoltaics {
         //       RE-ENGINEERED  na
 
         // PURPOSE OF THIS SUBROUTINE:
-        // provide a "get" method to collect results for individual electic load centers.
+        // provide a "get" method to collect results for individual electric load centers.
 
         // Using/Aliasing
         using PhotovoltaicThermalCollectors::GetPVTThermalPowerProduction;
 
         GeneratorPower = state.dataPhotovoltaic->PVarray(GeneratorIndex).Report.DCPower;
         GeneratorEnergy = state.dataPhotovoltaic->PVarray(GeneratorIndex).Report.DCEnergy;
+        auto const &thisPVarray = state.dataPhotovoltaic->PVarray(GeneratorIndex);
         // PVT may add thermal
-        if (state.dataPhotovoltaic->PVarray(GeneratorIndex).CellIntegrationMode == CellIntegration::PVTSolarCollector) {
+        if (thisPVarray.CellIntegrationMode == CellIntegration::PVTSolarCollector) {
             // get result for thermal power generation
             GetPVTThermalPowerProduction(state, GeneratorIndex, ThermalPower, ThermalEnergy);
         } else {
@@ -246,9 +275,10 @@ namespace Photovoltaics {
         // Using/Aliasing
         using namespace DataHeatBalance;
 
-        using ScheduleManager::GetScheduleIndex;
+        using PhotovoltaicThermalCollectors::GetPVTmodelIndex;
         using TranspiredCollector::GetTranspiredCollectorIndex;
 
+        static constexpr std::string_view routineName = "GetPVInput";
         // SUBROUTINE LOCAL VARIABLE DECLARATIONS:
         int PVnum;     // working variable for do loop through pv arrays
         int SurfNum;   // working variable for surface id in Heat Balance domain
@@ -262,57 +292,61 @@ namespace Photovoltaics {
 
         // Object Data
         Array1D<SimplePVParamsStruct> tmpSimpleModuleParams;       // temporary, for processing input data
-        Array1D<TRNSYSPVModuleParamsStruct> tmpTNRSYSModuleParams; // temporary, for processing input data
+        Array1D<TRNSYSPVModuleParamsStruct> tmpTRNSYSModuleParams; // temporary, for processing input data
         Array1D<SNLModuleParamsStuct> tmpSNLModuleParams;          // temporary, for processing input data
 
+        auto &s_ipsc = state.dataIPShortCut;
+
         // count how many photovoltaic arrays of different types are in the .idf
-        state.dataPhotovoltaic->NumPVs =
-            state.dataInputProcessing->inputProcessor->getNumObjectsFound(state, state.dataPhotovoltaic->cPVGeneratorObjectName);
+        state.dataPhotovoltaic->NumPVs = state.dataInputProcessing->inputProcessor->getNumObjectsFound(state, cPVGeneratorObjectName);
         state.dataPhotovoltaic->NumSimplePVModuleTypes =
-            state.dataInputProcessing->inputProcessor->getNumObjectsFound(state, state.dataPhotovoltaic->cPVSimplePerfObjectName);
+            state.dataInputProcessing->inputProcessor->getNumObjectsFound(state, pvModelNames[(int)PVModel::Simple]);
         state.dataPhotovoltaic->Num1DiodePVModuleTypes =
-            state.dataInputProcessing->inputProcessor->getNumObjectsFound(state, state.dataPhotovoltaic->cPVEquiv1DiodePerfObjectName);
+            state.dataInputProcessing->inputProcessor->getNumObjectsFound(state, pvModelNames[(int)PVModel::TRNSYS]);
         state.dataPhotovoltaic->NumSNLPVModuleTypes =
-            state.dataInputProcessing->inputProcessor->getNumObjectsFound(state, state.dataPhotovoltaic->cPVSandiaPerfObjectName);
+            state.dataInputProcessing->inputProcessor->getNumObjectsFound(state, pvModelNames[(int)PVModel::Sandia]);
 
         if (state.dataPhotovoltaic->NumPVs <= 0) {
-            ShowSevereError(state, format("Did not find any {}", state.dataPhotovoltaic->cPVGeneratorObjectName));
+            ShowSevereError(state, std::format("Did not find any {}", cPVGeneratorObjectName));
             return;
         }
 
-        if (!allocated(state.dataPhotovoltaic->PVarray)) state.dataPhotovoltaic->PVarray.allocate(state.dataPhotovoltaic->NumPVs);
+        if (!allocated(state.dataPhotovoltaic->PVarray)) {
+            state.dataPhotovoltaic->PVarray.allocate(state.dataPhotovoltaic->NumPVs);
+        }
         state.dataPhotovoltaicState->CheckEquipName.dimension(state.dataPhotovoltaic->NumPVs, true);
-        auto &cCurrentModuleObject = state.dataIPShortCut->cCurrentModuleObject;
-        cCurrentModuleObject = state.dataPhotovoltaic->cPVGeneratorObjectName;
+
+        s_ipsc->cCurrentModuleObject = cPVGeneratorObjectName;
         for (PVnum = 1; PVnum <= state.dataPhotovoltaic->NumPVs; ++PVnum) {
             state.dataInputProcessing->inputProcessor->getObjectItem(state,
-                                                                     cCurrentModuleObject,
+                                                                     s_ipsc->cCurrentModuleObject,
                                                                      PVnum,
-                                                                     state.dataIPShortCut->cAlphaArgs,
+                                                                     s_ipsc->cAlphaArgs,
                                                                      NumAlphas,
-                                                                     state.dataIPShortCut->rNumericArgs,
+                                                                     s_ipsc->rNumericArgs,
                                                                      NumNums,
                                                                      IOStat,
                                                                      _,
-                                                                     state.dataIPShortCut->lAlphaFieldBlanks,
-                                                                     state.dataIPShortCut->cAlphaFieldNames,
-                                                                     state.dataIPShortCut->cNumericFieldNames);
-            UtilityRoutines::IsNameEmpty(state, state.dataIPShortCut->cAlphaArgs(1), cCurrentModuleObject, ErrorsFound);
-            state.dataPhotovoltaic->PVarray(PVnum).Name = state.dataIPShortCut->cAlphaArgs(1);
+                                                                     s_ipsc->lAlphaFieldBlanks,
+                                                                     s_ipsc->cAlphaFieldNames,
+                                                                     s_ipsc->cNumericFieldNames);
 
-            state.dataPhotovoltaic->PVarray(PVnum).SurfaceName = state.dataIPShortCut->cAlphaArgs(2);
-            state.dataPhotovoltaic->PVarray(PVnum).SurfacePtr =
-                UtilityRoutines::FindItemInList(state.dataIPShortCut->cAlphaArgs(2), state.dataSurface->Surface);
+            ErrorObjectHeader eoh{routineName, s_ipsc->cCurrentModuleObject, s_ipsc->cAlphaArgs(1)};
+
+            state.dataPhotovoltaic->PVarray(PVnum).Name = s_ipsc->cAlphaArgs(1);
+
+            state.dataPhotovoltaic->PVarray(PVnum).SurfaceName = s_ipsc->cAlphaArgs(2);
+            state.dataPhotovoltaic->PVarray(PVnum).SurfacePtr = Util::FindItemInList(s_ipsc->cAlphaArgs(2), state.dataSurface->Surface);
             // required-surface
-            if (state.dataIPShortCut->lAlphaFieldBlanks(2)) {
-                ShowSevereError(state, format("Invalid {} = {}", state.dataIPShortCut->cAlphaFieldNames(2), state.dataIPShortCut->cAlphaArgs(2)));
-                ShowContinueError(state, format("Entered in {} = {}", cCurrentModuleObject, state.dataIPShortCut->cAlphaArgs(1)));
+            if (s_ipsc->lAlphaFieldBlanks(2)) {
+                ShowSevereError(state, std::format("Invalid {} = {}", s_ipsc->cAlphaFieldNames(2), s_ipsc->cAlphaArgs(2)));
+                ShowContinueError(state, std::format("Entered in {} = {}", s_ipsc->cCurrentModuleObject, s_ipsc->cAlphaArgs(1)));
                 ShowContinueError(state, "Surface name cannot be blank");
                 ErrorsFound = true;
             }
             if (state.dataPhotovoltaic->PVarray(PVnum).SurfacePtr == 0) {
-                ShowSevereError(state, format("Invalid {} = {}", state.dataIPShortCut->cAlphaFieldNames(2), state.dataIPShortCut->cAlphaArgs(2)));
-                ShowContinueError(state, format("Entered in {} = {}", cCurrentModuleObject, state.dataIPShortCut->cAlphaArgs(1)));
+                ShowSevereError(state, std::format("Invalid {} = {}", s_ipsc->cAlphaFieldNames(2), s_ipsc->cAlphaArgs(2)));
+                ShowContinueError(state, std::format("Entered in {} = {}", s_ipsc->cCurrentModuleObject, s_ipsc->cAlphaArgs(1)));
                 ErrorsFound = true;
             } else {
                 // Found one -- make sure has right parameters for PV
@@ -320,77 +354,45 @@ namespace Photovoltaics {
                 state.dataSurface->SurfIsPV(SurfNum) = true;
 
                 if (!state.dataSurface->Surface(SurfNum).ExtSolar) {
-                    ShowWarningError(state,
-                                     format("Invalid {} = {}", state.dataIPShortCut->cAlphaFieldNames(2), state.dataIPShortCut->cAlphaArgs(2)));
-                    ShowContinueError(state, format("Entered in {} = {}", cCurrentModuleObject, state.dataIPShortCut->cAlphaArgs(1)));
-                    ShowContinueError(state, "Surface is not exposed to solar, check surface bounday condition");
+                    ShowWarningError(state, std::format("Invalid {} = {}", s_ipsc->cAlphaFieldNames(2), s_ipsc->cAlphaArgs(2)));
+                    ShowContinueError(state, std::format("Entered in {} = {}", s_ipsc->cCurrentModuleObject, s_ipsc->cAlphaArgs(1)));
+                    ShowContinueError(state, "Surface is not exposed to solar, check surface boundary condition");
                 }
                 state.dataPhotovoltaic->PVarray(PVnum).Zone = GetPVZone(state, state.dataPhotovoltaic->PVarray(PVnum).SurfacePtr);
 
                 // check surface orientation, warn if upside down
                 if ((state.dataSurface->Surface(SurfNum).Tilt < -95.0) || (state.dataSurface->Surface(SurfNum).Tilt > 95.0)) {
-                    ShowWarningError(state,
-                                     format("Suspected input problem with {} = {}",
-                                            state.dataIPShortCut->cAlphaFieldNames(2),
-                                            state.dataIPShortCut->cAlphaArgs(2)));
-                    ShowContinueError(state, format("Entered in {} = {}", cCurrentModuleObject, state.dataIPShortCut->cAlphaArgs(1)));
+                    ShowWarningError(state, std::format("Suspected input problem with {} = {}", s_ipsc->cAlphaFieldNames(2), s_ipsc->cAlphaArgs(2)));
+                    ShowContinueError(state, std::format("Entered in {} = {}", s_ipsc->cCurrentModuleObject, s_ipsc->cAlphaArgs(1)));
                     ShowContinueError(state, "Surface used for solar collector faces down");
                     ShowContinueError(
-                        state, format("Surface tilt angle (degrees from ground outward normal) = {:.2R}", state.dataSurface->Surface(SurfNum).Tilt));
+                        state,
+                        std::format("Surface tilt angle (degrees from ground outward normal) = {:.2f}", state.dataSurface->Surface(SurfNum).Tilt));
                 }
             }
 
-            state.dataPhotovoltaic->PVarray(PVnum).PVModelType = PVModel::Invalid;
-            if (UtilityRoutines::SameString(state.dataIPShortCut->cAlphaArgs(3), state.dataPhotovoltaic->cPVSimplePerfObjectName)) {
-                state.dataPhotovoltaic->PVarray(PVnum).PVModelType = PVModel::Simple;
-            } else if (UtilityRoutines::SameString(state.dataIPShortCut->cAlphaArgs(3), state.dataPhotovoltaic->cPVEquiv1DiodePerfObjectName)) {
-                state.dataPhotovoltaic->PVarray(PVnum).PVModelType = PVModel::TRNSYS;
-            } else if (UtilityRoutines::SameString(state.dataIPShortCut->cAlphaArgs(3), state.dataPhotovoltaic->cPVSandiaPerfObjectName)) {
-                state.dataPhotovoltaic->PVarray(PVnum).PVModelType = PVModel::Sandia;
-            } else { // throw error, did not find module performance type
-                if (state.dataIPShortCut->lAlphaFieldBlanks(3)) {
-                    ShowSevereError(state, format("Invalid {} = {}", state.dataIPShortCut->cAlphaFieldNames(3), state.dataIPShortCut->cAlphaArgs(3)));
-                    ShowContinueError(state, format("Entered in {} = {}", cCurrentModuleObject, state.dataIPShortCut->cAlphaArgs(1)));
-                    ShowContinueError(state, "Field cannot be blank");
-                    ErrorsFound = true;
-                } else {
-                    ShowSevereError(state, format("Invalid {} = {}", state.dataIPShortCut->cAlphaFieldNames(3), state.dataIPShortCut->cAlphaArgs(3)));
-                    ShowContinueError(state, format("Entered in {} = {}", cCurrentModuleObject, state.dataIPShortCut->cAlphaArgs(1)));
-                    ShowContinueError(state, "Did not recognize entry");
-                    ErrorsFound = true;
-                }
-            }
-            state.dataPhotovoltaic->PVarray(PVnum).PerfObjName = state.dataIPShortCut->cAlphaArgs(4); // check later once perf objects are loaded
-
-            state.dataPhotovoltaic->PVarray(PVnum).CellIntegrationMode = CellIntegration::Invalid;
-            if (UtilityRoutines::SameString(state.dataIPShortCut->cAlphaArgs(5), "Decoupled")) {
-                state.dataPhotovoltaic->PVarray(PVnum).CellIntegrationMode = CellIntegration::Decoupled;
-            } else if (UtilityRoutines::SameString(state.dataIPShortCut->cAlphaArgs(5), "DecoupledUllebergDynamic")) {
-                state.dataPhotovoltaic->PVarray(PVnum).CellIntegrationMode = CellIntegration::DecoupledUllebergDynamic;
-            } else if (UtilityRoutines::SameString(state.dataIPShortCut->cAlphaArgs(5), "IntegratedSurfaceOutsideFace")) {
-                state.dataPhotovoltaic->PVarray(PVnum).CellIntegrationMode = CellIntegration::SurfaceOutsideFace;
-            } else if (UtilityRoutines::SameString(state.dataIPShortCut->cAlphaArgs(5), "IntegratedTranspiredCollector")) {
-                state.dataPhotovoltaic->PVarray(PVnum).CellIntegrationMode = CellIntegration::TranspiredCollector;
-            } else if (UtilityRoutines::SameString(state.dataIPShortCut->cAlphaArgs(5), "IntegratedExteriorVentedCavity")) {
-                state.dataPhotovoltaic->PVarray(PVnum).CellIntegrationMode = CellIntegration::ExteriorVentedCavity;
-            } else if (UtilityRoutines::SameString(state.dataIPShortCut->cAlphaArgs(5), "PhotovoltaicThermalSolarCollector")) {
-                state.dataPhotovoltaic->PVarray(PVnum).CellIntegrationMode = CellIntegration::PVTSolarCollector;
-            } else {
-                if (state.dataIPShortCut->lAlphaFieldBlanks(5)) {
-                    ShowSevereError(state, format("Invalid {} = {}", state.dataIPShortCut->cAlphaFieldNames(5), state.dataIPShortCut->cAlphaArgs(5)));
-                    ShowContinueError(state, format("Entered in {} = {}", cCurrentModuleObject, state.dataIPShortCut->cAlphaArgs(1)));
-                    ShowContinueError(state, "Field cannot be blank");
-                    ErrorsFound = true;
-                } else {
-                    ShowSevereError(state, format("Invalid {} = {}", state.dataIPShortCut->cAlphaFieldNames(5), state.dataIPShortCut->cAlphaArgs(5)));
-                    ShowContinueError(state, format("Entered in {} = {}", cCurrentModuleObject, state.dataIPShortCut->cAlphaArgs(1)));
-                    ShowContinueError(state, "Did not recognize entry");
-                    ErrorsFound = true;
-                }
+            if (s_ipsc->lAlphaFieldBlanks(3)) {
+                ShowSevereEmptyField(state, eoh, s_ipsc->cAlphaFieldNames(3), s_ipsc->cAlphaArgs(3));
+                ErrorsFound = true;
+            } else if ((state.dataPhotovoltaic->PVarray(PVnum).PVModelType =
+                            static_cast<PVModel>(getEnumValue(pvModelNamesUC, s_ipsc->cAlphaArgs(3)))) == PVModel::Invalid) {
+                ShowSevereInvalidKey(state, eoh, s_ipsc->cAlphaFieldNames(3), s_ipsc->cAlphaArgs(3));
+                ErrorsFound = true;
             }
 
-            state.dataPhotovoltaic->PVarray(PVnum).NumSeriesNParall = state.dataIPShortCut->rNumericArgs(1);
-            state.dataPhotovoltaic->PVarray(PVnum).NumModNSeries = state.dataIPShortCut->rNumericArgs(2);
+            state.dataPhotovoltaic->PVarray(PVnum).PerfObjName = s_ipsc->cAlphaArgs(4); // check later once perf objects are loaded
+
+            if (s_ipsc->lAlphaFieldBlanks(5)) {
+                ShowSevereEmptyField(state, eoh, s_ipsc->cAlphaFieldNames(5), s_ipsc->cAlphaArgs(5));
+                ErrorsFound = true;
+            } else if ((state.dataPhotovoltaic->PVarray(PVnum).CellIntegrationMode =
+                            static_cast<CellIntegration>(getEnumValue(cellIntegrationNamesUC, s_ipsc->cAlphaArgs(5)))) == CellIntegration::Invalid) {
+                ShowSevereInvalidKey(state, eoh, s_ipsc->cAlphaFieldNames(5), s_ipsc->cAlphaArgs(5));
+                ErrorsFound = true;
+            }
+
+            state.dataPhotovoltaic->PVarray(PVnum).NumSeriesNParall = s_ipsc->rNumericArgs(1);
+            state.dataPhotovoltaic->PVarray(PVnum).NumModNSeries = s_ipsc->rNumericArgs(2);
 
         } // main PV array objects
 
@@ -400,37 +402,50 @@ namespace Photovoltaics {
             case CellIntegration::SurfaceOutsideFace:
             case CellIntegration::TranspiredCollector:
             case CellIntegration::ExteriorVentedCavity: {
-                dupPtr = UtilityRoutines::FindItemInList(state.dataPhotovoltaic->PVarray(PVnum).SurfaceName,
-                                                         state.dataPhotovoltaic->PVarray({PVnum + 1, state.dataPhotovoltaic->NumPVs}),
-                                                         &PVArrayStruct::SurfaceName);
-                if (dupPtr != 0) dupPtr += PVnum; // to correct for shortened array in find item
+                dupPtr = Util::FindItemInList(state.dataPhotovoltaic->PVarray(PVnum).SurfaceName,
+                                              state.dataPhotovoltaic->PVarray({PVnum + 1, state.dataPhotovoltaic->NumPVs}),
+                                              &PVArrayStruct::SurfaceName);
                 if (dupPtr != 0) {
-                    if (state.dataPhotovoltaic->PVarray(dupPtr).CellIntegrationMode == CellIntegration::SurfaceOutsideFace) {
-                        ShowSevereError(state, format("{}: problem detected with multiple PV arrays.", cCurrentModuleObject));
+                    dupPtr += PVnum; // to correct for shortened array in find item
+                }
+                if (dupPtr != 0) {
+                    auto &thisPVarray = state.dataPhotovoltaic->PVarray(dupPtr);
+                    if (thisPVarray.CellIntegrationMode == CellIntegration::SurfaceOutsideFace) {
+                        ShowSevereError(state, std::format("{}: problem detected with multiple PV arrays.", s_ipsc->cCurrentModuleObject));
                         ShowContinueError(state, "When using IntegratedSurfaceOutsideFace heat transfer mode, only one PV array can be coupled");
                         ShowContinueError(state,
-                                          format("Both {} and {} are using surface {}",
-                                                 state.dataPhotovoltaic->PVarray(PVnum).Name,
-                                                 state.dataPhotovoltaic->PVarray(dupPtr).Name,
-                                                 state.dataPhotovoltaic->PVarray(PVnum).SurfaceName));
+                                          std::format("Both {} and {} are using surface {}",
+                                                      state.dataPhotovoltaic->PVarray(PVnum).Name,
+                                                      thisPVarray.Name,
+                                                      state.dataPhotovoltaic->PVarray(PVnum).SurfaceName));
                         ErrorsFound = true;
-                    } else if (state.dataPhotovoltaic->PVarray(dupPtr).CellIntegrationMode == CellIntegration::TranspiredCollector) {
-                        ShowSevereError(state, format("{}: problem detected with multiple PV arrays.", cCurrentModuleObject));
+                    } else if (thisPVarray.CellIntegrationMode == CellIntegration::TranspiredCollector) {
+                        ShowSevereError(state, std::format("{}: problem detected with multiple PV arrays.", s_ipsc->cCurrentModuleObject));
                         ShowContinueError(state, "When using IntegratedTranspiredCollector heat transfer mode, only one PV array can be coupled");
                         ShowContinueError(state,
-                                          format("Both {} and {} are using UTSC surface = {}",
-                                                 state.dataPhotovoltaic->PVarray(PVnum).Name,
-                                                 state.dataPhotovoltaic->PVarray(dupPtr).Name,
-                                                 state.dataPhotovoltaic->PVarray(PVnum).SurfaceName));
+                                          std::format("Both {} and {} are using UTSC surface = {}",
+                                                      state.dataPhotovoltaic->PVarray(PVnum).Name,
+                                                      thisPVarray.Name,
+                                                      state.dataPhotovoltaic->PVarray(PVnum).SurfaceName));
                         ErrorsFound = true;
-                    } else if (state.dataPhotovoltaic->PVarray(dupPtr).CellIntegrationMode == CellIntegration::ExteriorVentedCavity) {
-                        ShowSevereError(state, format("{}: problem detected with multiple PV arrays.", cCurrentModuleObject));
+                    } else if (thisPVarray.CellIntegrationMode == CellIntegration::ExteriorVentedCavity) {
+                        ShowSevereError(state, std::format("{}: problem detected with multiple PV arrays.", s_ipsc->cCurrentModuleObject));
                         ShowContinueError(state, "When using IntegratedExteriorVentedCavity heat transfer mode, only one PV array can be coupled");
                         ShowContinueError(state,
-                                          format("Both {} and {} are using exterior vented surface = {}",
-                                                 state.dataPhotovoltaic->PVarray(PVnum).Name,
-                                                 state.dataPhotovoltaic->PVarray(dupPtr).Name,
-                                                 state.dataPhotovoltaic->PVarray(PVnum).SurfaceName));
+                                          std::format("Both {} and {} are using exterior vented surface = {}",
+                                                      state.dataPhotovoltaic->PVarray(PVnum).Name,
+                                                      thisPVarray.Name,
+                                                      state.dataPhotovoltaic->PVarray(PVnum).SurfaceName));
+                        ErrorsFound = true;
+                    } else if (thisPVarray.CellIntegrationMode == CellIntegration::PVTSolarCollector) {
+                        ShowSevereError(
+                            state,
+                            std::format("Problem detected with multiple PV arrays for={}. When using PhotovoltaicThermalSolarCollector heat transfer "
+                                        "mode, only one PV array can be coupled. Both this PV array={} and this PV array={} are using PVT surface={}",
+                                        s_ipsc->cCurrentModuleObject,
+                                        state.dataPhotovoltaic->PVarray(PVnum).Name,
+                                        thisPVarray.Name,
+                                        state.dataPhotovoltaic->PVarray(PVnum).SurfaceName));
                         ErrorsFound = true;
                     }
                 }
@@ -442,179 +457,157 @@ namespace Photovoltaics {
 
         if (state.dataPhotovoltaic->NumSimplePVModuleTypes > 0) {
             tmpSimpleModuleParams.allocate(state.dataPhotovoltaic->NumSimplePVModuleTypes);
-            cCurrentModuleObject = state.dataPhotovoltaic->cPVSimplePerfObjectName;
+            s_ipsc->cCurrentModuleObject = pvModelNames[(int)PVModel::Simple];
             for (ModNum = 1; ModNum <= state.dataPhotovoltaic->NumSimplePVModuleTypes; ++ModNum) {
                 state.dataInputProcessing->inputProcessor->getObjectItem(state,
-                                                                         cCurrentModuleObject,
+                                                                         s_ipsc->cCurrentModuleObject,
                                                                          ModNum,
-                                                                         state.dataIPShortCut->cAlphaArgs,
+                                                                         s_ipsc->cAlphaArgs,
                                                                          NumAlphas,
-                                                                         state.dataIPShortCut->rNumericArgs,
+                                                                         s_ipsc->rNumericArgs,
                                                                          NumNums,
                                                                          IOStat,
                                                                          _,
-                                                                         state.dataIPShortCut->lAlphaFieldBlanks,
-                                                                         state.dataIPShortCut->cAlphaFieldNames,
-                                                                         state.dataIPShortCut->cNumericFieldNames);
-                if (UtilityRoutines::IsNameEmpty(state, state.dataIPShortCut->cAlphaArgs(1), cCurrentModuleObject, ErrorsFound)) {
-                    continue;
-                }
-                tmpSimpleModuleParams(ModNum).Name = state.dataIPShortCut->cAlphaArgs(1);
-                tmpSimpleModuleParams(ModNum).ActiveFraction = state.dataIPShortCut->rNumericArgs(1);
+                                                                         s_ipsc->lAlphaFieldBlanks,
+                                                                         s_ipsc->cAlphaFieldNames,
+                                                                         s_ipsc->cNumericFieldNames);
 
-                if (UtilityRoutines::SameString(state.dataIPShortCut->cAlphaArgs(2), "Fixed")) {
-                    tmpSimpleModuleParams(ModNum).EfficencyInputMode = Efficiency::Fixed;
-                } else if (UtilityRoutines::SameString(state.dataIPShortCut->cAlphaArgs(2), "Scheduled")) {
-                    tmpSimpleModuleParams(ModNum).EfficencyInputMode = Efficiency::Scheduled;
-                } else {
-                    if (state.dataIPShortCut->lAlphaFieldBlanks(2)) {
-                        ShowSevereError(state,
-                                        format("Invalid {} = {}", state.dataIPShortCut->cAlphaFieldNames(2), state.dataIPShortCut->cAlphaArgs(2)));
-                        ShowContinueError(state, format("Entered in {} = {}", cCurrentModuleObject, state.dataIPShortCut->cAlphaArgs(1)));
-                        ShowContinueError(state, "Field cannot be blank");
+                ErrorObjectHeader eoh{routineName, s_ipsc->cCurrentModuleObject, s_ipsc->cAlphaArgs(1)};
+
+                tmpSimpleModuleParams(ModNum).Name = s_ipsc->cAlphaArgs(1);
+                tmpSimpleModuleParams(ModNum).ActiveFraction = s_ipsc->rNumericArgs(1);
+
+                if (s_ipsc->lAlphaFieldBlanks(2)) {
+                    ShowSevereEmptyField(state, eoh, s_ipsc->cAlphaFieldNames(2));
+                    ErrorsFound = true;
+                } else if ((tmpSimpleModuleParams(ModNum).EfficencyInputMode =
+                                static_cast<Efficiency>(getEnumValue(efficiencyNamesUC, s_ipsc->cAlphaArgs(2)))) == Efficiency::Invalid) {
+                    ShowSevereInvalidKey(state, eoh, s_ipsc->cAlphaFieldNames(2), s_ipsc->cAlphaArgs(2));
+                    ErrorsFound = true;
+                }
+                tmpSimpleModuleParams(ModNum).PVEfficiency = s_ipsc->rNumericArgs(2);
+
+                if (tmpSimpleModuleParams(ModNum).EfficencyInputMode == Efficiency::Scheduled) {
+                    if (s_ipsc->lAlphaFieldBlanks(3)) {
+                        ShowSevereEmptyField(state, eoh, s_ipsc->cAlphaFieldNames(3));
                         ErrorsFound = true;
-                    } else {
-                        ShowSevereError(state,
-                                        format("Invalid {} = {}", state.dataIPShortCut->cAlphaFieldNames(2), state.dataIPShortCut->cAlphaArgs(2)));
-                        ShowContinueError(state, format("Entered in {} = {}", cCurrentModuleObject, state.dataIPShortCut->cAlphaArgs(1)));
-                        ShowContinueError(state, "Did not recognize entry");
+                    } else if ((tmpSimpleModuleParams(ModNum).effSched = Sched::GetSchedule(state, s_ipsc->cAlphaArgs(3))) == nullptr) {
+                        ShowSevereItemNotFound(state, eoh, s_ipsc->cAlphaFieldNames(3), s_ipsc->cAlphaArgs(3));
                         ErrorsFound = true;
                     }
-                }
-                tmpSimpleModuleParams(ModNum).PVEfficiency = state.dataIPShortCut->rNumericArgs(2);
-
-                tmpSimpleModuleParams(ModNum).EffSchedPtr = GetScheduleIndex(state, state.dataIPShortCut->cAlphaArgs(3));
-                if ((tmpSimpleModuleParams(ModNum).EffSchedPtr == 0) && (tmpSimpleModuleParams(ModNum).EfficencyInputMode == Efficiency::Scheduled)) {
-                    ShowSevereError(state, format("Invalid {} = {}", state.dataIPShortCut->cAlphaFieldNames(3), state.dataIPShortCut->cAlphaArgs(3)));
-                    ShowContinueError(state, format("Entered in {} = {}", cCurrentModuleObject, state.dataIPShortCut->cAlphaArgs(1)));
-                    ShowContinueError(state, "Did not find schedule");
-                    ErrorsFound = true;
                 }
             }
         }
 
         if (state.dataPhotovoltaic->Num1DiodePVModuleTypes > 0) {
-            tmpTNRSYSModuleParams.allocate(state.dataPhotovoltaic->Num1DiodePVModuleTypes);
-            cCurrentModuleObject = state.dataPhotovoltaic->cPVEquiv1DiodePerfObjectName;
+            tmpTRNSYSModuleParams.allocate(state.dataPhotovoltaic->Num1DiodePVModuleTypes);
+            s_ipsc->cCurrentModuleObject = pvModelNames[(int)PVModel::TRNSYS];
             for (ModNum = 1; ModNum <= state.dataPhotovoltaic->Num1DiodePVModuleTypes; ++ModNum) {
                 state.dataInputProcessing->inputProcessor->getObjectItem(state,
-                                                                         cCurrentModuleObject,
+                                                                         s_ipsc->cCurrentModuleObject,
                                                                          ModNum,
-                                                                         state.dataIPShortCut->cAlphaArgs,
+                                                                         s_ipsc->cAlphaArgs,
                                                                          NumAlphas,
-                                                                         state.dataIPShortCut->rNumericArgs,
+                                                                         s_ipsc->rNumericArgs,
                                                                          NumNums,
                                                                          IOStat,
                                                                          _,
-                                                                         state.dataIPShortCut->lAlphaFieldBlanks,
-                                                                         state.dataIPShortCut->cAlphaFieldNames,
-                                                                         state.dataIPShortCut->cNumericFieldNames);
-                if (UtilityRoutines::IsNameEmpty(state, state.dataIPShortCut->cAlphaArgs(1), cCurrentModuleObject, ErrorsFound)) {
-                    continue;
-                }
-                tmpTNRSYSModuleParams(ModNum).Name = state.dataIPShortCut->cAlphaArgs(1);
-                if (UtilityRoutines::SameString(state.dataIPShortCut->cAlphaArgs(2), "CrystallineSilicon")) {
-                    tmpTNRSYSModuleParams(ModNum).CellType = SiPVCells::Crystalline;
-                } else if (UtilityRoutines::SameString(state.dataIPShortCut->cAlphaArgs(2), "AmorphousSilicon")) {
-                    tmpTNRSYSModuleParams(ModNum).CellType = SiPVCells::Amorphous;
-                } else {
-                    if (state.dataIPShortCut->lAlphaFieldBlanks(2)) {
-                        ShowSevereError(state,
-                                        format("Invalid {} = {}", state.dataIPShortCut->cAlphaFieldNames(2), state.dataIPShortCut->cAlphaArgs(2)));
-                        ShowContinueError(state, format("Entered in {} = {}", cCurrentModuleObject, state.dataIPShortCut->cAlphaArgs(1)));
-                        ShowContinueError(state, "Field cannot be blank");
-                        ErrorsFound = true;
-                    } else {
-                        ShowSevereError(state,
-                                        format("Invalid {} = {}", state.dataIPShortCut->cAlphaFieldNames(2), state.dataIPShortCut->cAlphaArgs(2)));
-                        ShowContinueError(state, format("Entered in {} = {}", cCurrentModuleObject, state.dataIPShortCut->cAlphaArgs(1)));
-                        ShowContinueError(state, "Did not recognize entry");
-                        ErrorsFound = true;
-                    }
+                                                                         s_ipsc->lAlphaFieldBlanks,
+                                                                         s_ipsc->cAlphaFieldNames,
+                                                                         s_ipsc->cNumericFieldNames);
+
+                ErrorObjectHeader eoh{routineName, s_ipsc->cCurrentModuleObject, s_ipsc->cAlphaArgs(1)};
+
+                tmpTRNSYSModuleParams(ModNum).Name = s_ipsc->cAlphaArgs(1);
+
+                if (s_ipsc->lAlphaFieldBlanks(2)) {
+                    ShowSevereEmptyField(state, eoh, s_ipsc->cAlphaFieldNames(2), s_ipsc->cAlphaArgs(2));
+                    ErrorsFound = true;
+                } else if ((tmpTRNSYSModuleParams(ModNum).CellType = static_cast<SiPVCells>(getEnumValue(siPVCellsNamesUC, s_ipsc->cAlphaArgs(2)))) ==
+                           SiPVCells::Invalid) {
+                    ShowSevereInvalidKey(state, eoh, s_ipsc->cAlphaFieldNames(2), s_ipsc->cAlphaArgs(2));
+                    ErrorsFound = true;
                 }
 
-                tmpTNRSYSModuleParams(ModNum).CellsInSeries = int(state.dataIPShortCut->rNumericArgs(1));
-                tmpTNRSYSModuleParams(ModNum).Area = state.dataIPShortCut->rNumericArgs(2);
-                tmpTNRSYSModuleParams(ModNum).TauAlpha = state.dataIPShortCut->rNumericArgs(3);
-                tmpTNRSYSModuleParams(ModNum).SemiConductorBandgap = state.dataIPShortCut->rNumericArgs(4);
-                tmpTNRSYSModuleParams(ModNum).ShuntResistance = state.dataIPShortCut->rNumericArgs(5);
-                tmpTNRSYSModuleParams(ModNum).RefIsc = state.dataIPShortCut->rNumericArgs(6);
-                tmpTNRSYSModuleParams(ModNum).RefVoc = state.dataIPShortCut->rNumericArgs(7);
-                tmpTNRSYSModuleParams(ModNum).RefTemperature = state.dataIPShortCut->rNumericArgs(8) + DataGlobalConstants::KelvinConv;
-                tmpTNRSYSModuleParams(ModNum).RefInsolation = state.dataIPShortCut->rNumericArgs(9);
-                tmpTNRSYSModuleParams(ModNum).Imp = state.dataIPShortCut->rNumericArgs(10);
-                tmpTNRSYSModuleParams(ModNum).Vmp = state.dataIPShortCut->rNumericArgs(11);
-                tmpTNRSYSModuleParams(ModNum).TempCoefIsc = state.dataIPShortCut->rNumericArgs(12);
-                tmpTNRSYSModuleParams(ModNum).TempCoefVoc = state.dataIPShortCut->rNumericArgs(13);
-                tmpTNRSYSModuleParams(ModNum).NOCTAmbTemp = state.dataIPShortCut->rNumericArgs(14) + DataGlobalConstants::KelvinConv;
-                tmpTNRSYSModuleParams(ModNum).NOCTCellTemp = state.dataIPShortCut->rNumericArgs(15) + DataGlobalConstants::KelvinConv;
-                tmpTNRSYSModuleParams(ModNum).NOCTInsolation = state.dataIPShortCut->rNumericArgs(16);
-                tmpTNRSYSModuleParams(ModNum).HeatLossCoef = state.dataIPShortCut->rNumericArgs(17);
-                tmpTNRSYSModuleParams(ModNum).HeatCapacity = state.dataIPShortCut->rNumericArgs(18);
+                tmpTRNSYSModuleParams(ModNum).CellsInSeries = int(s_ipsc->rNumericArgs(1));
+                tmpTRNSYSModuleParams(ModNum).Area = s_ipsc->rNumericArgs(2);
+                tmpTRNSYSModuleParams(ModNum).TauAlpha = s_ipsc->rNumericArgs(3);
+                tmpTRNSYSModuleParams(ModNum).SemiConductorBandgap = s_ipsc->rNumericArgs(4);
+                tmpTRNSYSModuleParams(ModNum).ShuntResistance = s_ipsc->rNumericArgs(5);
+                tmpTRNSYSModuleParams(ModNum).RefIsc = s_ipsc->rNumericArgs(6);
+                tmpTRNSYSModuleParams(ModNum).RefVoc = s_ipsc->rNumericArgs(7);
+                tmpTRNSYSModuleParams(ModNum).RefTemperature = s_ipsc->rNumericArgs(8) + Constant::Kelvin;
+                tmpTRNSYSModuleParams(ModNum).RefInsolation = s_ipsc->rNumericArgs(9);
+                tmpTRNSYSModuleParams(ModNum).Imp = s_ipsc->rNumericArgs(10);
+                tmpTRNSYSModuleParams(ModNum).Vmp = s_ipsc->rNumericArgs(11);
+                tmpTRNSYSModuleParams(ModNum).TempCoefIsc = s_ipsc->rNumericArgs(12);
+                tmpTRNSYSModuleParams(ModNum).TempCoefVoc = s_ipsc->rNumericArgs(13);
+                tmpTRNSYSModuleParams(ModNum).NOCTAmbTemp = s_ipsc->rNumericArgs(14) + Constant::Kelvin;
+                tmpTRNSYSModuleParams(ModNum).NOCTCellTemp = s_ipsc->rNumericArgs(15) + Constant::Kelvin;
+                tmpTRNSYSModuleParams(ModNum).NOCTInsolation = s_ipsc->rNumericArgs(16);
+                tmpTRNSYSModuleParams(ModNum).HeatLossCoef = s_ipsc->rNumericArgs(17);
+                tmpTRNSYSModuleParams(ModNum).HeatCapacity = s_ipsc->rNumericArgs(18);
             }
         }
 
         if (state.dataPhotovoltaic->NumSNLPVModuleTypes > 0) {
             tmpSNLModuleParams.allocate(state.dataPhotovoltaic->NumSNLPVModuleTypes);
-            cCurrentModuleObject = state.dataPhotovoltaic->cPVSandiaPerfObjectName;
+            s_ipsc->cCurrentModuleObject = pvModelNames[(int)PVModel::Sandia];
             for (ModNum = 1; ModNum <= state.dataPhotovoltaic->NumSNLPVModuleTypes; ++ModNum) {
 
                 state.dataInputProcessing->inputProcessor->getObjectItem(state,
-                                                                         cCurrentModuleObject,
+                                                                         s_ipsc->cCurrentModuleObject,
                                                                          ModNum,
-                                                                         state.dataIPShortCut->cAlphaArgs,
+                                                                         s_ipsc->cAlphaArgs,
                                                                          NumAlphas,
-                                                                         state.dataIPShortCut->rNumericArgs,
+                                                                         s_ipsc->rNumericArgs,
                                                                          NumNums,
                                                                          IOStat,
                                                                          _,
-                                                                         state.dataIPShortCut->lAlphaFieldBlanks,
-                                                                         state.dataIPShortCut->cAlphaFieldNames,
-                                                                         state.dataIPShortCut->cNumericFieldNames);
-                if (UtilityRoutines::IsNameEmpty(state, state.dataIPShortCut->cAlphaArgs(1), cCurrentModuleObject, ErrorsFound)) {
-                    continue;
-                }
+                                                                         s_ipsc->lAlphaFieldBlanks,
+                                                                         s_ipsc->cAlphaFieldNames,
+                                                                         s_ipsc->cNumericFieldNames);
 
-                tmpSNLModuleParams(ModNum).name = state.dataIPShortCut->cAlphaArgs(1);
-                tmpSNLModuleParams(ModNum).Acoll = state.dataIPShortCut->rNumericArgs(1);
-                tmpSNLModuleParams(ModNum).NcellSer = state.dataIPShortCut->rNumericArgs(2);
-                tmpSNLModuleParams(ModNum).NparSerCells = state.dataIPShortCut->rNumericArgs(3);
-                tmpSNLModuleParams(ModNum).Isc0 = state.dataIPShortCut->rNumericArgs(4);
-                tmpSNLModuleParams(ModNum).Voc0 = state.dataIPShortCut->rNumericArgs(5);
-                tmpSNLModuleParams(ModNum).Imp0 = state.dataIPShortCut->rNumericArgs(6);
-                tmpSNLModuleParams(ModNum).Vmp0 = state.dataIPShortCut->rNumericArgs(7);
-                tmpSNLModuleParams(ModNum).aIsc = state.dataIPShortCut->rNumericArgs(8);
-                tmpSNLModuleParams(ModNum).aImp = state.dataIPShortCut->rNumericArgs(9);
-                tmpSNLModuleParams(ModNum).c_0 = state.dataIPShortCut->rNumericArgs(10);
-                tmpSNLModuleParams(ModNum).c_1 = state.dataIPShortCut->rNumericArgs(11);
-                tmpSNLModuleParams(ModNum).BVoc0 = state.dataIPShortCut->rNumericArgs(12);
-                tmpSNLModuleParams(ModNum).mBVoc = state.dataIPShortCut->rNumericArgs(13);
-                tmpSNLModuleParams(ModNum).BVmp0 = state.dataIPShortCut->rNumericArgs(14);
-                tmpSNLModuleParams(ModNum).mBVmp = state.dataIPShortCut->rNumericArgs(15);
-                tmpSNLModuleParams(ModNum).DiodeFactor = state.dataIPShortCut->rNumericArgs(16);
-                tmpSNLModuleParams(ModNum).c_2 = state.dataIPShortCut->rNumericArgs(17);
-                tmpSNLModuleParams(ModNum).c_3 = state.dataIPShortCut->rNumericArgs(18);
-                tmpSNLModuleParams(ModNum).a_0 = state.dataIPShortCut->rNumericArgs(19);
-                tmpSNLModuleParams(ModNum).a_1 = state.dataIPShortCut->rNumericArgs(20);
-                tmpSNLModuleParams(ModNum).a_2 = state.dataIPShortCut->rNumericArgs(21);
-                tmpSNLModuleParams(ModNum).a_3 = state.dataIPShortCut->rNumericArgs(22);
-                tmpSNLModuleParams(ModNum).a_4 = state.dataIPShortCut->rNumericArgs(23);
-                tmpSNLModuleParams(ModNum).b_0 = state.dataIPShortCut->rNumericArgs(24);
-                tmpSNLModuleParams(ModNum).b_1 = state.dataIPShortCut->rNumericArgs(25);
-                tmpSNLModuleParams(ModNum).b_2 = state.dataIPShortCut->rNumericArgs(26);
-                tmpSNLModuleParams(ModNum).b_3 = state.dataIPShortCut->rNumericArgs(27);
-                tmpSNLModuleParams(ModNum).b_4 = state.dataIPShortCut->rNumericArgs(28);
-                tmpSNLModuleParams(ModNum).b_5 = state.dataIPShortCut->rNumericArgs(29);
-                tmpSNLModuleParams(ModNum).DT0 = state.dataIPShortCut->rNumericArgs(30);
-                tmpSNLModuleParams(ModNum).fd = state.dataIPShortCut->rNumericArgs(31);
-                tmpSNLModuleParams(ModNum).a = state.dataIPShortCut->rNumericArgs(32);
-                tmpSNLModuleParams(ModNum).b = state.dataIPShortCut->rNumericArgs(33);
-                tmpSNLModuleParams(ModNum).c_4 = state.dataIPShortCut->rNumericArgs(34);
-                tmpSNLModuleParams(ModNum).c_5 = state.dataIPShortCut->rNumericArgs(35);
-                tmpSNLModuleParams(ModNum).Ix0 = state.dataIPShortCut->rNumericArgs(36);
-                tmpSNLModuleParams(ModNum).Ixx0 = state.dataIPShortCut->rNumericArgs(37);
-                tmpSNLModuleParams(ModNum).c_6 = state.dataIPShortCut->rNumericArgs(38);
-                tmpSNLModuleParams(ModNum).c_7 = state.dataIPShortCut->rNumericArgs(39);
+                tmpSNLModuleParams(ModNum).name = s_ipsc->cAlphaArgs(1);
+                tmpSNLModuleParams(ModNum).Acoll = s_ipsc->rNumericArgs(1);
+                tmpSNLModuleParams(ModNum).NcellSer = s_ipsc->rNumericArgs(2);
+                tmpSNLModuleParams(ModNum).NparSerCells = s_ipsc->rNumericArgs(3);
+                tmpSNLModuleParams(ModNum).Isc0 = s_ipsc->rNumericArgs(4);
+                tmpSNLModuleParams(ModNum).Voc0 = s_ipsc->rNumericArgs(5);
+                tmpSNLModuleParams(ModNum).Imp0 = s_ipsc->rNumericArgs(6);
+                tmpSNLModuleParams(ModNum).Vmp0 = s_ipsc->rNumericArgs(7);
+                tmpSNLModuleParams(ModNum).aIsc = s_ipsc->rNumericArgs(8);
+                tmpSNLModuleParams(ModNum).aImp = s_ipsc->rNumericArgs(9);
+                tmpSNLModuleParams(ModNum).c_0 = s_ipsc->rNumericArgs(10);
+                tmpSNLModuleParams(ModNum).c_1 = s_ipsc->rNumericArgs(11);
+                tmpSNLModuleParams(ModNum).BVoc0 = s_ipsc->rNumericArgs(12);
+                tmpSNLModuleParams(ModNum).mBVoc = s_ipsc->rNumericArgs(13);
+                tmpSNLModuleParams(ModNum).BVmp0 = s_ipsc->rNumericArgs(14);
+                tmpSNLModuleParams(ModNum).mBVmp = s_ipsc->rNumericArgs(15);
+                tmpSNLModuleParams(ModNum).DiodeFactor = s_ipsc->rNumericArgs(16);
+                tmpSNLModuleParams(ModNum).c_2 = s_ipsc->rNumericArgs(17);
+                tmpSNLModuleParams(ModNum).c_3 = s_ipsc->rNumericArgs(18);
+                tmpSNLModuleParams(ModNum).a_0 = s_ipsc->rNumericArgs(19);
+                tmpSNLModuleParams(ModNum).a_1 = s_ipsc->rNumericArgs(20);
+                tmpSNLModuleParams(ModNum).a_2 = s_ipsc->rNumericArgs(21);
+                tmpSNLModuleParams(ModNum).a_3 = s_ipsc->rNumericArgs(22);
+                tmpSNLModuleParams(ModNum).a_4 = s_ipsc->rNumericArgs(23);
+                tmpSNLModuleParams(ModNum).b_0 = s_ipsc->rNumericArgs(24);
+                tmpSNLModuleParams(ModNum).b_1 = s_ipsc->rNumericArgs(25);
+                tmpSNLModuleParams(ModNum).b_2 = s_ipsc->rNumericArgs(26);
+                tmpSNLModuleParams(ModNum).b_3 = s_ipsc->rNumericArgs(27);
+                tmpSNLModuleParams(ModNum).b_4 = s_ipsc->rNumericArgs(28);
+                tmpSNLModuleParams(ModNum).b_5 = s_ipsc->rNumericArgs(29);
+                tmpSNLModuleParams(ModNum).DT0 = s_ipsc->rNumericArgs(30);
+                tmpSNLModuleParams(ModNum).fd = s_ipsc->rNumericArgs(31);
+                tmpSNLModuleParams(ModNum).a = s_ipsc->rNumericArgs(32);
+                tmpSNLModuleParams(ModNum).b = s_ipsc->rNumericArgs(33);
+                tmpSNLModuleParams(ModNum).c_4 = s_ipsc->rNumericArgs(34);
+                tmpSNLModuleParams(ModNum).c_5 = s_ipsc->rNumericArgs(35);
+                tmpSNLModuleParams(ModNum).Ix0 = s_ipsc->rNumericArgs(36);
+                tmpSNLModuleParams(ModNum).Ixx0 = s_ipsc->rNumericArgs(37);
+                tmpSNLModuleParams(ModNum).c_6 = s_ipsc->rNumericArgs(38);
+                tmpSNLModuleParams(ModNum).c_7 = s_ipsc->rNumericArgs(39);
             }
         }
 
@@ -623,7 +616,7 @@ namespace Photovoltaics {
 
             switch (state.dataPhotovoltaic->PVarray(PVnum).PVModelType) {
             case PVModel::Simple: {
-                ThisParamObj = UtilityRoutines::FindItemInList(state.dataPhotovoltaic->PVarray(PVnum).PerfObjName, tmpSimpleModuleParams);
+                ThisParamObj = Util::FindItemInList(state.dataPhotovoltaic->PVarray(PVnum).PerfObjName, tmpSimpleModuleParams);
                 if (ThisParamObj > 0) {
                     state.dataPhotovoltaic->PVarray(PVnum).SimplePVModule = tmpSimpleModuleParams(ThisParamObj); // entire structure assignment
 
@@ -632,35 +625,32 @@ namespace Photovoltaics {
                         state.dataSurface->Surface(state.dataPhotovoltaic->PVarray(PVnum).SurfacePtr).Area *
                         state.dataPhotovoltaic->PVarray(PVnum).SimplePVModule.ActiveFraction;
                 } else {
-                    ShowSevereError(state, format("Invalid PV performance object name of {}", state.dataPhotovoltaic->PVarray(PVnum).PerfObjName));
-                    ShowContinueError(
-                        state,
-                        format("Entered in {} = {}", state.dataPhotovoltaic->cPVGeneratorObjectName, state.dataPhotovoltaic->PVarray(PVnum).Name));
+                    ShowSevereError(state,
+                                    std::format("Invalid PV performance object name of {}", state.dataPhotovoltaic->PVarray(PVnum).PerfObjName));
+                    ShowContinueError(state, std::format("Entered in {} = {}", cPVGeneratorObjectName, state.dataPhotovoltaic->PVarray(PVnum).Name));
                     ErrorsFound = true;
                 }
             } break;
             case PVModel::TRNSYS: {
-                ThisParamObj = UtilityRoutines::FindItemInList(state.dataPhotovoltaic->PVarray(PVnum).PerfObjName, tmpTNRSYSModuleParams);
+                ThisParamObj = Util::FindItemInList(state.dataPhotovoltaic->PVarray(PVnum).PerfObjName, tmpTRNSYSModuleParams);
                 if (ThisParamObj > 0) {
-                    state.dataPhotovoltaic->PVarray(PVnum).TRNSYSPVModule = tmpTNRSYSModuleParams(ThisParamObj); // entire structure assignment
+                    state.dataPhotovoltaic->PVarray(PVnum).TRNSYSPVModule = tmpTRNSYSModuleParams(ThisParamObj); // entire structure assignment
                 } else {
-                    ShowSevereError(state, format("Invalid PV performance object name of {}", state.dataPhotovoltaic->PVarray(PVnum).PerfObjName));
-                    ShowContinueError(
-                        state,
-                        format("Entered in {} = {}", state.dataPhotovoltaic->cPVGeneratorObjectName, state.dataPhotovoltaic->PVarray(PVnum).Name));
+                    ShowSevereError(state,
+                                    std::format("Invalid PV performance object name of {}", state.dataPhotovoltaic->PVarray(PVnum).PerfObjName));
+                    ShowContinueError(state, std::format("Entered in {} = {}", cPVGeneratorObjectName, state.dataPhotovoltaic->PVarray(PVnum).Name));
                     ErrorsFound = true;
                 }
             } break;
             case PVModel::Sandia: {
-                ThisParamObj = UtilityRoutines::FindItemInList(
-                    state.dataPhotovoltaic->PVarray(PVnum).PerfObjName, tmpSNLModuleParams, &SNLModuleParamsStuct::name);
+                ThisParamObj =
+                    Util::FindItemInList(state.dataPhotovoltaic->PVarray(PVnum).PerfObjName, tmpSNLModuleParams, &SNLModuleParamsStuct::name);
                 if (ThisParamObj > 0) {
                     state.dataPhotovoltaic->PVarray(PVnum).SNLPVModule = tmpSNLModuleParams(ThisParamObj); // entire structure assignment
                 } else {
-                    ShowSevereError(state, format("Invalid PV performance object name of {}", state.dataPhotovoltaic->PVarray(PVnum).PerfObjName));
-                    ShowContinueError(
-                        state,
-                        format("Entered in {} = {}", state.dataPhotovoltaic->cPVGeneratorObjectName, state.dataPhotovoltaic->PVarray(PVnum).Name));
+                    ShowSevereError(state,
+                                    std::format("Invalid PV performance object name of {}", state.dataPhotovoltaic->PVarray(PVnum).PerfObjName));
+                    ShowContinueError(state, std::format("Entered in {} = {}", cPVGeneratorObjectName, state.dataPhotovoltaic->PVarray(PVnum).Name));
                     ErrorsFound = true;
                 }
             } break;
@@ -671,29 +661,27 @@ namespace Photovoltaics {
             // set up report variables CurrentModuleObject='Photovoltaics'
             SetupOutputVariable(state,
                                 "Generator Produced DC Electricity Rate",
-                                OutputProcessor::Unit::W,
+                                Constant::Units::W,
                                 state.dataPhotovoltaic->PVarray(PVnum).Report.DCPower,
-                                OutputProcessor::SOVTimeStepType::System,
-                                OutputProcessor::SOVStoreType::Average,
+                                OutputProcessor::TimeStepType::System,
+                                OutputProcessor::StoreType::Average,
                                 state.dataPhotovoltaic->PVarray(PVnum).Name);
             SetupOutputVariable(state,
                                 "Generator Produced DC Electricity Energy",
-                                OutputProcessor::Unit::J,
+                                Constant::Units::J,
                                 state.dataPhotovoltaic->PVarray(PVnum).Report.DCEnergy,
-                                OutputProcessor::SOVTimeStepType::System,
-                                OutputProcessor::SOVStoreType::Summed,
+                                OutputProcessor::TimeStepType::System,
+                                OutputProcessor::StoreType::Sum,
                                 state.dataPhotovoltaic->PVarray(PVnum).Name,
-                                _,
-                                "ElectricityProduced",
-                                "Photovoltaics",
-                                _,
-                                "Plant");
+                                Constant::eResource::ElectricityProduced,
+                                OutputProcessor::Group::Plant,
+                                OutputProcessor::EndUseCat::Photovoltaic);
             SetupOutputVariable(state,
                                 "Generator PV Array Efficiency",
-                                OutputProcessor::Unit::None,
+                                Constant::Units::None,
                                 state.dataPhotovoltaic->PVarray(PVnum).Report.ArrayEfficiency,
-                                OutputProcessor::SOVTimeStepType::System,
-                                OutputProcessor::SOVStoreType::Average,
+                                OutputProcessor::TimeStepType::System,
+                                OutputProcessor::StoreType::Average,
                                 state.dataPhotovoltaic->PVarray(PVnum).Name);
 
             // CurrentModuleObject='Equiv1Diode or Sandia Photovoltaics'
@@ -701,24 +689,24 @@ namespace Photovoltaics {
                 (state.dataPhotovoltaic->PVarray(PVnum).PVModelType == PVModel::Sandia)) {
                 SetupOutputVariable(state,
                                     "Generator PV Cell Temperature",
-                                    OutputProcessor::Unit::C,
+                                    Constant::Units::C,
                                     state.dataPhotovoltaic->PVarray(PVnum).Report.CellTemp,
-                                    OutputProcessor::SOVTimeStepType::System,
-                                    OutputProcessor::SOVStoreType::Average,
+                                    OutputProcessor::TimeStepType::System,
+                                    OutputProcessor::StoreType::Average,
                                     state.dataPhotovoltaic->PVarray(PVnum).Name);
                 SetupOutputVariable(state,
                                     "Generator PV Short Circuit Current",
-                                    OutputProcessor::Unit::A,
+                                    Constant::Units::A,
                                     state.dataPhotovoltaic->PVarray(PVnum).Report.ArrayIsc,
-                                    OutputProcessor::SOVTimeStepType::System,
-                                    OutputProcessor::SOVStoreType::Average,
+                                    OutputProcessor::TimeStepType::System,
+                                    OutputProcessor::StoreType::Average,
                                     state.dataPhotovoltaic->PVarray(PVnum).Name);
                 SetupOutputVariable(state,
                                     "Generator PV Open Circuit Voltage",
-                                    OutputProcessor::Unit::V,
+                                    Constant::Units::V,
                                     state.dataPhotovoltaic->PVarray(PVnum).Report.ArrayVoc,
-                                    OutputProcessor::SOVTimeStepType::System,
-                                    OutputProcessor::SOVStoreType::Average,
+                                    OutputProcessor::TimeStepType::System,
+                                    OutputProcessor::StoreType::Average,
                                     state.dataPhotovoltaic->PVarray(PVnum).Name);
             }
 
@@ -727,15 +715,15 @@ namespace Photovoltaics {
                 // check that surface is HeatTransfer and a Construction with Internal Source was used
                 if (!state.dataSurface->Surface(state.dataPhotovoltaic->PVarray(PVnum).SurfacePtr).HeatTransSurf) {
                     ShowSevereError(state,
-                                    format("Must use a surface with heat transfer for IntegratedSurfaceOutsideFace mode in {}",
-                                           state.dataPhotovoltaic->PVarray(PVnum).Name));
+                                    std::format("Must use a surface with heat transfer for IntegratedSurfaceOutsideFace mode in {}",
+                                                state.dataPhotovoltaic->PVarray(PVnum).Name));
                     ErrorsFound = true;
                 } else if (!state.dataConstruction
                                 ->Construct(state.dataSurface->Surface(state.dataPhotovoltaic->PVarray(PVnum).SurfacePtr).Construction)
                                 .SourceSinkPresent) {
                     ShowSevereError(state,
-                                    format("Must use a surface with internal source construction for IntegratedSurfaceOutsideFace mode in {}",
-                                           state.dataPhotovoltaic->PVarray(PVnum).Name));
+                                    std::format("Must use a surface with internal source construction for IntegratedSurfaceOutsideFace mode in {}",
+                                                state.dataPhotovoltaic->PVarray(PVnum).Name));
                     ErrorsFound = true;
                 }
             }
@@ -750,7 +738,7 @@ namespace Photovoltaics {
             }
 
             if (state.dataPhotovoltaic->PVarray(PVnum).CellIntegrationMode == CellIntegration::PVTSolarCollector) {
-                // Call GetPVTmodelIndex( state.dataPhotovoltaic->PVarray(PVNum)%SurfacePtr , state.dataPhotovoltaic->PVarray(PVNum)%PVTPtr )
+                state.dataPhotovoltaic->PVarray(PVnum).PVTPtr = GetPVTmodelIndex(state, state.dataPhotovoltaic->PVarray(PVnum).SurfacePtr);
             }
         }
 
@@ -773,8 +761,7 @@ namespace Photovoltaics {
         if (SurfNum > 0) {
             GetPVZone = state.dataSurface->Surface(SurfNum).Zone;
             if (GetPVZone == 0) { // might need to get the zone number from the name
-                GetPVZone = UtilityRoutines::FindItemInList(
-                    state.dataSurface->Surface(SurfNum).ZoneName, state.dataHeatBal->Zone, state.dataGlobal->NumOfZones);
+                GetPVZone = Util::FindItemInList(state.dataSurface->Surface(SurfNum).ZoneName, state.dataHeatBal->Zone, state.dataGlobal->NumOfZones);
             }
         }
 
@@ -796,8 +783,7 @@ namespace Photovoltaics {
         // calculate the electricity production using a simple PV model
 
         // Using/Aliasing
-        auto &TimeStepSys = state.dataHVACGlobal->TimeStepSys;
-        using ScheduleManager::GetCurrentScheduleValue;
+        Real64 TimeStepSysSec = state.dataHVACGlobal->TimeStepSysSec;
 
         // SUBROUTINE LOCAL VARIABLE DECLARATIONS:
         int ThisSurf; // working index ptr to Surface arrays
@@ -813,7 +799,7 @@ namespace Photovoltaics {
                 Eff = state.dataPhotovoltaic->PVarray(thisPV).SimplePVModule.PVEfficiency;
             } break;
             case Efficiency::Scheduled: { // get from schedule
-                Eff = GetCurrentScheduleValue(state, state.dataPhotovoltaic->PVarray(thisPV).SimplePVModule.EffSchedPtr);
+                Eff = state.dataPhotovoltaic->PVarray(thisPV).SimplePVModule.effSched->getCurrentVal();
                 state.dataPhotovoltaic->PVarray(thisPV).SimplePVModule.PVEfficiency = Eff;
             } break;
             default: {
@@ -827,12 +813,11 @@ namespace Photovoltaics {
                 state.dataHeatBal->SurfQRadSWOutIncident(
                     ThisSurf); // active solar cellsurface net area | solar conversion efficiency | solar incident
 
-            // store sink term in appropriate place for surface heat transfer itegration
+            // store sink term in appropriate place for surface heat transfer integration
             state.dataPhotovoltaic->PVarray(thisPV).SurfaceSink = state.dataPhotovoltaic->PVarray(thisPV).Report.DCPower;
 
             // array energy, power * timestep
-            state.dataPhotovoltaic->PVarray(thisPV).Report.DCEnergy =
-                state.dataPhotovoltaic->PVarray(thisPV).Report.DCPower * (TimeStepSys * DataGlobalConstants::SecInHour);
+            state.dataPhotovoltaic->PVarray(thisPV).Report.DCEnergy = state.dataPhotovoltaic->PVarray(thisPV).Report.DCPower * TimeStepSysSec;
             state.dataPhotovoltaic->PVarray(thisPV).Report.ArrayEfficiency = Eff;
         } else { // not enough incident solar, zero things out
 
@@ -855,13 +840,13 @@ namespace Photovoltaics {
         // collect statements that assign to variables tied to output variables
 
         // Using/Aliasing
+        Real64 TimeStepSysSec = state.dataHVACGlobal->TimeStepSysSec;
         using TranspiredCollector::SetUTSCQdotSource;
 
         // SUBROUTINE LOCAL VARIABLE DECLARATIONS:
         int thisZone; // working index for zones
 
-        state.dataPhotovoltaic->PVarray(PVnum).Report.DCEnergy =
-            state.dataPhotovoltaic->PVarray(PVnum).Report.DCPower * (state.dataHVACGlobal->TimeStepSys * DataGlobalConstants::SecInHour);
+        state.dataPhotovoltaic->PVarray(PVnum).Report.DCEnergy = state.dataPhotovoltaic->PVarray(PVnum).Report.DCPower * TimeStepSysSec;
 
         // add check for multiplier.  if surface is attached to a zone that is on a multiplier
         // then PV production should be multiplied out as well
@@ -888,6 +873,8 @@ namespace Photovoltaics {
                 state, state.dataPhotovoltaic->PVarray(PVnum).ExtVentCavPtr, -1.0 * state.dataPhotovoltaic->PVarray(PVnum).SurfaceSink);
         } break;
         case CellIntegration::PVTSolarCollector: {
+            PhotovoltaicThermalCollectors::SetPVTQdotSource(
+                state, state.dataPhotovoltaic->PVarray(PVnum).PVTPtr, -1.0 * state.dataPhotovoltaic->PVarray(PVnum).SurfaceSink);
         } break;
         default:
             break;
@@ -909,7 +896,7 @@ namespace Photovoltaics {
         //       RE-ENGINEERED  na
 
         // PURPOSE OF THIS SUBROUTINE:
-        // Calculate various PV system peformance indicies at the current timestep
+        // Calculate various PV system performance indices at the current timestep
 
         // METHODOLOGY EMPLOYED:
         //  adapted code from a set of F77 routines by G. Barker that implement the model
@@ -925,232 +912,220 @@ namespace Photovoltaics {
         //    integrated photovoltaics. Solar 2002, Sunrise on the Reliable Energy Economy, June 15-19, 2002 Reno, NV
 
         // Using/Aliasing
+        using PhotovoltaicThermalCollectors::GetPVTTsColl;
         using TranspiredCollector::GetUTSCTsColl;
 
         int ThisSurf; // working variable for indexing surfaces
         Real64 Ee;
 
         ThisSurf = state.dataPhotovoltaic->PVarray(PVnum).SurfacePtr;
+        auto &thisPVarray = state.dataPhotovoltaic->PVarray(PVnum);
 
         //   get input from elsewhere in Energyplus for the current point in the simulation
-        state.dataPhotovoltaic->PVarray(PVnum).SNLPVinto.IcBeam = state.dataHeatBal->SurfQRadSWOutIncidentBeam(ThisSurf); //(W/m2)from DataHeatBalance
-        state.dataPhotovoltaic->PVarray(PVnum).SNLPVinto.IcDiffuse =
+        thisPVarray.SNLPVinto.IcBeam = state.dataHeatBal->SurfQRadSWOutIncidentBeam(ThisSurf); //(W/m2)from DataHeatBalance
+        thisPVarray.SNLPVinto.IcDiffuse =
             state.dataHeatBal->SurfQRadSWOutIncident(ThisSurf) - state.dataHeatBal->SurfQRadSWOutIncidentBeam(ThisSurf); //(W/ m2)(was kJ/hr m2)
-        state.dataPhotovoltaic->PVarray(PVnum).SNLPVinto.IncidenceAngle =
-            std::acos(state.dataHeatBal->SurfCosIncidenceAngle(ThisSurf)) / DataGlobalConstants::DegToRadians; // (deg) from dataHeatBalance
-        state.dataPhotovoltaic->PVarray(PVnum).SNLPVinto.ZenithAngle =
-            std::acos(state.dataEnvrn->SOLCOS(3)) / DataGlobalConstants::DegToRadians;                              //(degrees),
-        state.dataPhotovoltaic->PVarray(PVnum).SNLPVinto.Tamb = state.dataSurface->SurfOutDryBulbTemp(ThisSurf);    //(deg. C)
-        state.dataPhotovoltaic->PVarray(PVnum).SNLPVinto.WindSpeed = state.dataSurface->SurfOutWindSpeed(ThisSurf); // (m/s)
-        state.dataPhotovoltaic->PVarray(PVnum).SNLPVinto.Altitude = state.dataEnvrn->Elevation;                     // from DataEnvironment via USE
+        thisPVarray.SNLPVinto.IncidenceAngle =
+            std::acos(state.dataHeatBal->SurfCosIncidenceAngle(ThisSurf)) / Constant::DegToRad;         // (deg) from dataHeatBalance
+        thisPVarray.SNLPVinto.ZenithAngle = std::acos(state.dataEnvrn->SOLCOS(3)) / Constant::DegToRad; //(degrees),
+        thisPVarray.SNLPVinto.Tamb = state.dataSurface->SurfOutDryBulbTemp(ThisSurf);                   //(deg. C)
+        thisPVarray.SNLPVinto.WindSpeed = state.dataSurface->SurfOutWindSpeed(ThisSurf);                // (m/s)
+        thisPVarray.SNLPVinto.Altitude = state.dataEnvrn->Elevation;                                    // from DataEnvironment via USE
 
-        if (((state.dataPhotovoltaic->PVarray(PVnum).SNLPVinto.IcBeam + state.dataPhotovoltaic->PVarray(PVnum).SNLPVinto.IcDiffuse) >
-             DataPhotovoltaics::MinIrradiance) &&
-            (RunFlag)) {
+        if (((thisPVarray.SNLPVinto.IcBeam + thisPVarray.SNLPVinto.IcDiffuse) > DataPhotovoltaics::MinIrradiance) && (RunFlag)) {
 
             // first determine PV cell temperatures depending on model
-            switch (state.dataPhotovoltaic->PVarray(PVnum).CellIntegrationMode) {
+            switch (thisPVarray.CellIntegrationMode) {
             case CellIntegration::Decoupled: { // Sandia module temperature model for rack mounted PVs
                 // Calculate back-of-module temperature:
-                state.dataPhotovoltaic->PVarray(PVnum).SNLPVCalc.Tback =
-                    SandiaModuleTemperature(state.dataPhotovoltaic->PVarray(PVnum).SNLPVinto.IcBeam,
-                                            state.dataPhotovoltaic->PVarray(PVnum).SNLPVinto.IcDiffuse,
-                                            state.dataPhotovoltaic->PVarray(PVnum).SNLPVinto.WindSpeed,
-                                            state.dataPhotovoltaic->PVarray(PVnum).SNLPVinto.Tamb,
-                                            state.dataPhotovoltaic->PVarray(PVnum).SNLPVModule.fd,
-                                            state.dataPhotovoltaic->PVarray(PVnum).SNLPVModule.a,
-                                            state.dataPhotovoltaic->PVarray(PVnum).SNLPVModule.b);
+                thisPVarray.SNLPVCalc.Tback = SandiaModuleTemperature(thisPVarray.SNLPVinto.IcBeam,
+                                                                      thisPVarray.SNLPVinto.IcDiffuse,
+                                                                      thisPVarray.SNLPVinto.WindSpeed,
+                                                                      thisPVarray.SNLPVinto.Tamb,
+                                                                      thisPVarray.SNLPVModule.fd,
+                                                                      thisPVarray.SNLPVModule.a,
+                                                                      thisPVarray.SNLPVModule.b);
 
                 // Calculate cell temperature:
-                state.dataPhotovoltaic->PVarray(PVnum).SNLPVCalc.Tcell =
-                    SandiaTcellFromTmodule(state.dataPhotovoltaic->PVarray(PVnum).SNLPVCalc.Tback,
-                                           state.dataPhotovoltaic->PVarray(PVnum).SNLPVinto.IcBeam,
-                                           state.dataPhotovoltaic->PVarray(PVnum).SNLPVinto.IcDiffuse,
-                                           state.dataPhotovoltaic->PVarray(PVnum).SNLPVModule.fd,
-                                           state.dataPhotovoltaic->PVarray(PVnum).SNLPVModule.DT0);
+                thisPVarray.SNLPVCalc.Tcell = SandiaTcellFromTmodule(thisPVarray.SNLPVCalc.Tback,
+                                                                     thisPVarray.SNLPVinto.IcBeam,
+                                                                     thisPVarray.SNLPVinto.IcDiffuse,
+                                                                     thisPVarray.SNLPVModule.fd,
+                                                                     thisPVarray.SNLPVModule.DT0);
 
             } break;
             case CellIntegration::SurfaceOutsideFace: {
                 // get back-of-module temperature from elsewhere in EnergyPlus
-                state.dataPhotovoltaic->PVarray(PVnum).SNLPVCalc.Tback =
-                    state.dataHeatBalSurf->SurfTempOut(state.dataPhotovoltaic->PVarray(PVnum).SurfacePtr);
+                thisPVarray.SNLPVCalc.Tback = state.dataHeatBalSurf->SurfTempOut(thisPVarray.SurfacePtr);
 
-                state.dataPhotovoltaic->PVarray(PVnum).SNLPVCalc.Tcell =
-                    SandiaTcellFromTmodule(state.dataPhotovoltaic->PVarray(PVnum).SNLPVCalc.Tback,
-                                           state.dataPhotovoltaic->PVarray(PVnum).SNLPVinto.IcBeam,
-                                           state.dataPhotovoltaic->PVarray(PVnum).SNLPVinto.IcDiffuse,
-                                           state.dataPhotovoltaic->PVarray(PVnum).SNLPVModule.fd,
-                                           state.dataPhotovoltaic->PVarray(PVnum).SNLPVModule.DT0);
+                thisPVarray.SNLPVCalc.Tcell = SandiaTcellFromTmodule(thisPVarray.SNLPVCalc.Tback,
+                                                                     thisPVarray.SNLPVinto.IcBeam,
+                                                                     thisPVarray.SNLPVinto.IcDiffuse,
+                                                                     thisPVarray.SNLPVModule.fd,
+                                                                     thisPVarray.SNLPVModule.DT0);
 
             } break;
             case CellIntegration::TranspiredCollector: {
-                GetUTSCTsColl(state, state.dataPhotovoltaic->PVarray(PVnum).UTSCPtr, state.dataPhotovoltaic->PVarray(PVnum).SNLPVCalc.Tback);
+                GetUTSCTsColl(state, thisPVarray.UTSCPtr, thisPVarray.SNLPVCalc.Tback);
 
-                state.dataPhotovoltaic->PVarray(PVnum).SNLPVCalc.Tcell =
-                    SandiaTcellFromTmodule(state.dataPhotovoltaic->PVarray(PVnum).SNLPVCalc.Tback,
-                                           state.dataPhotovoltaic->PVarray(PVnum).SNLPVinto.IcBeam,
-                                           state.dataPhotovoltaic->PVarray(PVnum).SNLPVinto.IcDiffuse,
-                                           state.dataPhotovoltaic->PVarray(PVnum).SNLPVModule.fd,
-                                           state.dataPhotovoltaic->PVarray(PVnum).SNLPVModule.DT0);
+                thisPVarray.SNLPVCalc.Tcell = SandiaTcellFromTmodule(thisPVarray.SNLPVCalc.Tback,
+                                                                     thisPVarray.SNLPVinto.IcBeam,
+                                                                     thisPVarray.SNLPVinto.IcDiffuse,
+                                                                     thisPVarray.SNLPVModule.fd,
+                                                                     thisPVarray.SNLPVModule.DT0);
 
             } break;
             case CellIntegration::ExteriorVentedCavity: {
-                GetExtVentedCavityTsColl(
-                    state, state.dataPhotovoltaic->PVarray(PVnum).ExtVentCavPtr, state.dataPhotovoltaic->PVarray(PVnum).SNLPVCalc.Tback);
+                GetExtVentedCavityTsColl(state, thisPVarray.ExtVentCavPtr, thisPVarray.SNLPVCalc.Tback);
 
-                state.dataPhotovoltaic->PVarray(PVnum).SNLPVCalc.Tcell =
-                    SandiaTcellFromTmodule(state.dataPhotovoltaic->PVarray(PVnum).SNLPVCalc.Tback,
-                                           state.dataPhotovoltaic->PVarray(PVnum).SNLPVinto.IcBeam,
-                                           state.dataPhotovoltaic->PVarray(PVnum).SNLPVinto.IcDiffuse,
-                                           state.dataPhotovoltaic->PVarray(PVnum).SNLPVModule.fd,
-                                           state.dataPhotovoltaic->PVarray(PVnum).SNLPVModule.DT0);
+                thisPVarray.SNLPVCalc.Tcell = SandiaTcellFromTmodule(thisPVarray.SNLPVCalc.Tback,
+                                                                     thisPVarray.SNLPVinto.IcBeam,
+                                                                     thisPVarray.SNLPVinto.IcDiffuse,
+                                                                     thisPVarray.SNLPVModule.fd,
+                                                                     thisPVarray.SNLPVModule.DT0);
 
             } break;
             case CellIntegration::PVTSolarCollector: {
-                // add calls to PVT models here
+                GetPVTTsColl(state, thisPVarray.PVTPtr, thisPVarray.SNLPVCalc.Tback);
+                thisPVarray.SNLPVCalc.Tcell = SandiaTcellFromTmodule(thisPVarray.SNLPVCalc.Tback,
+                                                                     thisPVarray.SNLPVinto.IcBeam,
+                                                                     thisPVarray.SNLPVinto.IcDiffuse,
+                                                                     thisPVarray.SNLPVModule.fd,
+                                                                     thisPVarray.SNLPVModule.DT0);
             } break;
             default: {
-                ShowSevereError(state,
-                                format("Sandia PV Simulation Temperature Modeling Mode Error in {}", state.dataPhotovoltaic->PVarray(PVnum).Name));
+                ShowSevereError(state, std::format("Sandia PV Simulation Temperature Modeling Mode Error in {}", thisPVarray.Name));
             } break;
             }
 
             // Calculate Air Mass function
-            state.dataPhotovoltaic->PVarray(PVnum).SNLPVCalc.AMa = AbsoluteAirMass(state.dataPhotovoltaic->PVarray(PVnum).SNLPVinto.ZenithAngle,
-                                                                                   state.dataPhotovoltaic->PVarray(PVnum).SNLPVinto.Altitude);
+            thisPVarray.SNLPVCalc.AMa = AbsoluteAirMass(thisPVarray.SNLPVinto.ZenithAngle, thisPVarray.SNLPVinto.Altitude);
 
             // Calculate F1 polynomial function:
-            state.dataPhotovoltaic->PVarray(PVnum).SNLPVCalc.F1 = SandiaF1(state.dataPhotovoltaic->PVarray(PVnum).SNLPVCalc.AMa,
-                                                                           state.dataPhotovoltaic->PVarray(PVnum).SNLPVModule.a_0,
-                                                                           state.dataPhotovoltaic->PVarray(PVnum).SNLPVModule.a_1,
-                                                                           state.dataPhotovoltaic->PVarray(PVnum).SNLPVModule.a_2,
-                                                                           state.dataPhotovoltaic->PVarray(PVnum).SNLPVModule.a_3,
-                                                                           state.dataPhotovoltaic->PVarray(PVnum).SNLPVModule.a_4);
+            thisPVarray.SNLPVCalc.F1 = SandiaF1(thisPVarray.SNLPVCalc.AMa,
+                                                thisPVarray.SNLPVModule.a_0,
+                                                thisPVarray.SNLPVModule.a_1,
+                                                thisPVarray.SNLPVModule.a_2,
+                                                thisPVarray.SNLPVModule.a_3,
+                                                thisPVarray.SNLPVModule.a_4);
 
             // Calculate F2 polynomial function:
-            state.dataPhotovoltaic->PVarray(PVnum).SNLPVCalc.F2 = SandiaF2(state.dataPhotovoltaic->PVarray(PVnum).SNLPVinto.IncidenceAngle,
-                                                                           state.dataPhotovoltaic->PVarray(PVnum).SNLPVModule.b_0,
-                                                                           state.dataPhotovoltaic->PVarray(PVnum).SNLPVModule.b_1,
-                                                                           state.dataPhotovoltaic->PVarray(PVnum).SNLPVModule.b_2,
-                                                                           state.dataPhotovoltaic->PVarray(PVnum).SNLPVModule.b_3,
-                                                                           state.dataPhotovoltaic->PVarray(PVnum).SNLPVModule.b_4,
-                                                                           state.dataPhotovoltaic->PVarray(PVnum).SNLPVModule.b_5);
+            thisPVarray.SNLPVCalc.F2 = SandiaF2(thisPVarray.SNLPVinto.IncidenceAngle,
+                                                thisPVarray.SNLPVModule.b_0,
+                                                thisPVarray.SNLPVModule.b_1,
+                                                thisPVarray.SNLPVModule.b_2,
+                                                thisPVarray.SNLPVModule.b_3,
+                                                thisPVarray.SNLPVModule.b_4,
+                                                thisPVarray.SNLPVModule.b_5);
 
             // Calculate short-circuit current function:
-            state.dataPhotovoltaic->PVarray(PVnum).SNLPVCalc.Isc = SandiaIsc(state.dataPhotovoltaic->PVarray(PVnum).SNLPVCalc.Tcell,
-                                                                             state.dataPhotovoltaic->PVarray(PVnum).SNLPVModule.Isc0,
-                                                                             state.dataPhotovoltaic->PVarray(PVnum).SNLPVinto.IcBeam,
-                                                                             state.dataPhotovoltaic->PVarray(PVnum).SNLPVinto.IcDiffuse,
-                                                                             state.dataPhotovoltaic->PVarray(PVnum).SNLPVCalc.F1,
-                                                                             state.dataPhotovoltaic->PVarray(PVnum).SNLPVCalc.F2,
-                                                                             state.dataPhotovoltaic->PVarray(PVnum).SNLPVModule.fd,
-                                                                             state.dataPhotovoltaic->PVarray(PVnum).SNLPVModule.aIsc);
+            thisPVarray.SNLPVCalc.Isc = SandiaIsc(thisPVarray.SNLPVCalc.Tcell,
+                                                  thisPVarray.SNLPVModule.Isc0,
+                                                  thisPVarray.SNLPVinto.IcBeam,
+                                                  thisPVarray.SNLPVinto.IcDiffuse,
+                                                  thisPVarray.SNLPVCalc.F1,
+                                                  thisPVarray.SNLPVCalc.F2,
+                                                  thisPVarray.SNLPVModule.fd,
+                                                  thisPVarray.SNLPVModule.aIsc);
 
             // Calculate effective irradiance function:
-            Ee = SandiaEffectiveIrradiance(state.dataPhotovoltaic->PVarray(PVnum).SNLPVCalc.Tcell,
-                                           state.dataPhotovoltaic->PVarray(PVnum).SNLPVCalc.Isc,
-                                           state.dataPhotovoltaic->PVarray(PVnum).SNLPVModule.Isc0,
-                                           state.dataPhotovoltaic->PVarray(PVnum).SNLPVModule.aIsc);
+            Ee = SandiaEffectiveIrradiance(
+                thisPVarray.SNLPVCalc.Tcell, thisPVarray.SNLPVCalc.Isc, thisPVarray.SNLPVModule.Isc0, thisPVarray.SNLPVModule.aIsc);
             // Calculate Imp function:
-            state.dataPhotovoltaic->PVarray(PVnum).SNLPVCalc.Imp = SandiaImp(state.dataPhotovoltaic->PVarray(PVnum).SNLPVCalc.Tcell,
-                                                                             Ee,
-                                                                             state.dataPhotovoltaic->PVarray(PVnum).SNLPVModule.Imp0,
-                                                                             state.dataPhotovoltaic->PVarray(PVnum).SNLPVModule.aImp,
-                                                                             state.dataPhotovoltaic->PVarray(PVnum).SNLPVModule.c_0,
-                                                                             state.dataPhotovoltaic->PVarray(PVnum).SNLPVModule.c_1);
+            thisPVarray.SNLPVCalc.Imp = SandiaImp(thisPVarray.SNLPVCalc.Tcell,
+                                                  Ee,
+                                                  thisPVarray.SNLPVModule.Imp0,
+                                                  thisPVarray.SNLPVModule.aImp,
+                                                  thisPVarray.SNLPVModule.c_0,
+                                                  thisPVarray.SNLPVModule.c_1);
 
             // Calculate Voc function:
-            state.dataPhotovoltaic->PVarray(PVnum).SNLPVCalc.Voc = SandiaVoc(state.dataPhotovoltaic->PVarray(PVnum).SNLPVCalc.Tcell,
-                                                                             Ee,
-                                                                             state.dataPhotovoltaic->PVarray(PVnum).SNLPVModule.Voc0,
-                                                                             state.dataPhotovoltaic->PVarray(PVnum).SNLPVModule.NcellSer,
-                                                                             state.dataPhotovoltaic->PVarray(PVnum).SNLPVModule.DiodeFactor,
-                                                                             state.dataPhotovoltaic->PVarray(PVnum).SNLPVModule.BVoc0,
-                                                                             state.dataPhotovoltaic->PVarray(PVnum).SNLPVModule.mBVoc);
+            thisPVarray.SNLPVCalc.Voc = SandiaVoc(thisPVarray.SNLPVCalc.Tcell,
+                                                  Ee,
+                                                  thisPVarray.SNLPVModule.Voc0,
+                                                  thisPVarray.SNLPVModule.NcellSer,
+                                                  thisPVarray.SNLPVModule.DiodeFactor,
+                                                  thisPVarray.SNLPVModule.BVoc0,
+                                                  thisPVarray.SNLPVModule.mBVoc);
 
-            // Calculate Vmp: voltagea at maximum powerpoint
-            state.dataPhotovoltaic->PVarray(PVnum).SNLPVCalc.Vmp = SandiaVmp(state.dataPhotovoltaic->PVarray(PVnum).SNLPVCalc.Tcell,
-                                                                             Ee,
-                                                                             state.dataPhotovoltaic->PVarray(PVnum).SNLPVModule.Vmp0,
-                                                                             state.dataPhotovoltaic->PVarray(PVnum).SNLPVModule.NcellSer,
-                                                                             state.dataPhotovoltaic->PVarray(PVnum).SNLPVModule.DiodeFactor,
-                                                                             state.dataPhotovoltaic->PVarray(PVnum).SNLPVModule.BVmp0,
-                                                                             state.dataPhotovoltaic->PVarray(PVnum).SNLPVModule.mBVmp,
-                                                                             state.dataPhotovoltaic->PVarray(PVnum).SNLPVModule.c_2,
-                                                                             state.dataPhotovoltaic->PVarray(PVnum).SNLPVModule.c_3);
+            // Calculate Vmp: voltage at maximum powerpoint
+            thisPVarray.SNLPVCalc.Vmp = SandiaVmp(thisPVarray.SNLPVCalc.Tcell,
+                                                  Ee,
+                                                  thisPVarray.SNLPVModule.Vmp0,
+                                                  thisPVarray.SNLPVModule.NcellSer,
+                                                  thisPVarray.SNLPVModule.DiodeFactor,
+                                                  thisPVarray.SNLPVModule.BVmp0,
+                                                  thisPVarray.SNLPVModule.mBVmp,
+                                                  thisPVarray.SNLPVModule.c_2,
+                                                  thisPVarray.SNLPVModule.c_3);
 
             // Calculate Ix function:
-            state.dataPhotovoltaic->PVarray(PVnum).SNLPVCalc.Ix = SandiaIx(state.dataPhotovoltaic->PVarray(PVnum).SNLPVCalc.Tcell,
-                                                                           Ee,
-                                                                           state.dataPhotovoltaic->PVarray(PVnum).SNLPVModule.Ix0,
-                                                                           state.dataPhotovoltaic->PVarray(PVnum).SNLPVModule.aIsc,
-                                                                           state.dataPhotovoltaic->PVarray(PVnum).SNLPVModule.aImp,
-                                                                           state.dataPhotovoltaic->PVarray(PVnum).SNLPVModule.c_4,
-                                                                           state.dataPhotovoltaic->PVarray(PVnum).SNLPVModule.c_5);
+            thisPVarray.SNLPVCalc.Ix = SandiaIx(thisPVarray.SNLPVCalc.Tcell,
+                                                Ee,
+                                                thisPVarray.SNLPVModule.Ix0,
+                                                thisPVarray.SNLPVModule.aIsc,
+                                                thisPVarray.SNLPVModule.aImp,
+                                                thisPVarray.SNLPVModule.c_4,
+                                                thisPVarray.SNLPVModule.c_5);
 
             // Calculate Vx function:
-            state.dataPhotovoltaic->PVarray(PVnum).SNLPVCalc.Vx = state.dataPhotovoltaic->PVarray(PVnum).SNLPVCalc.Voc / 2.0;
+            thisPVarray.SNLPVCalc.Vx = thisPVarray.SNLPVCalc.Voc / 2.0;
 
             // Calculate Ixx function:
-            state.dataPhotovoltaic->PVarray(PVnum).SNLPVCalc.Ixx = SandiaIxx(state.dataPhotovoltaic->PVarray(PVnum).SNLPVCalc.Tcell,
-                                                                             Ee,
-                                                                             state.dataPhotovoltaic->PVarray(PVnum).SNLPVModule.Ixx0,
-                                                                             state.dataPhotovoltaic->PVarray(PVnum).SNLPVModule.aImp,
-                                                                             state.dataPhotovoltaic->PVarray(PVnum).SNLPVModule.c_6,
-                                                                             state.dataPhotovoltaic->PVarray(PVnum).SNLPVModule.c_7);
+            thisPVarray.SNLPVCalc.Ixx = SandiaIxx(thisPVarray.SNLPVCalc.Tcell,
+                                                  Ee,
+                                                  thisPVarray.SNLPVModule.Ixx0,
+                                                  thisPVarray.SNLPVModule.aImp,
+                                                  thisPVarray.SNLPVModule.c_6,
+                                                  thisPVarray.SNLPVModule.c_7);
             // Calculate Vxx :
-            state.dataPhotovoltaic->PVarray(PVnum).SNLPVCalc.Vxx =
-                0.5 * (state.dataPhotovoltaic->PVarray(PVnum).SNLPVCalc.Voc + state.dataPhotovoltaic->PVarray(PVnum).SNLPVCalc.Vmp);
+            thisPVarray.SNLPVCalc.Vxx = 0.5 * (thisPVarray.SNLPVCalc.Voc + thisPVarray.SNLPVCalc.Vmp);
 
             // Calculate Pmp, single module: power at maximum powerpoint
-            state.dataPhotovoltaic->PVarray(PVnum).SNLPVCalc.Pmp =
-                state.dataPhotovoltaic->PVarray(PVnum).SNLPVCalc.Imp * state.dataPhotovoltaic->PVarray(PVnum).SNLPVCalc.Vmp; // W
+            thisPVarray.SNLPVCalc.Pmp = thisPVarray.SNLPVCalc.Imp * thisPVarray.SNLPVCalc.Vmp; // W
 
             // Calculate PV efficiency at maximum power point
-            state.dataPhotovoltaic->PVarray(PVnum).SNLPVCalc.EffMax =
-                state.dataPhotovoltaic->PVarray(PVnum).SNLPVCalc.Pmp /
-                (state.dataPhotovoltaic->PVarray(PVnum).SNLPVinto.IcBeam + state.dataPhotovoltaic->PVarray(PVnum).SNLPVinto.IcDiffuse) /
-                state.dataPhotovoltaic->PVarray(PVnum).SNLPVModule.Acoll;
+            thisPVarray.SNLPVCalc.EffMax =
+                thisPVarray.SNLPVCalc.Pmp / (thisPVarray.SNLPVinto.IcBeam + thisPVarray.SNLPVinto.IcDiffuse) / thisPVarray.SNLPVModule.Acoll;
 
             // Scale to NumStrings and NumSeries:
-            state.dataPhotovoltaic->PVarray(PVnum).SNLPVCalc.Pmp *=
-                state.dataPhotovoltaic->PVarray(PVnum).NumSeriesNParall * state.dataPhotovoltaic->PVarray(PVnum).NumModNSeries;
-            state.dataPhotovoltaic->PVarray(PVnum).SNLPVCalc.Imp *= state.dataPhotovoltaic->PVarray(PVnum).NumModNSeries;
-            state.dataPhotovoltaic->PVarray(PVnum).SNLPVCalc.Vmp *= state.dataPhotovoltaic->PVarray(PVnum).NumModNSeries;
-            state.dataPhotovoltaic->PVarray(PVnum).SNLPVCalc.Isc *= state.dataPhotovoltaic->PVarray(PVnum).NumSeriesNParall;
-            state.dataPhotovoltaic->PVarray(PVnum).SNLPVCalc.Voc *= state.dataPhotovoltaic->PVarray(PVnum).NumModNSeries;
-            state.dataPhotovoltaic->PVarray(PVnum).SNLPVCalc.Ix *= state.dataPhotovoltaic->PVarray(PVnum).NumSeriesNParall;
-            state.dataPhotovoltaic->PVarray(PVnum).SNLPVCalc.Ixx *= state.dataPhotovoltaic->PVarray(PVnum).NumSeriesNParall;
-            state.dataPhotovoltaic->PVarray(PVnum).SNLPVCalc.Vx *= state.dataPhotovoltaic->PVarray(PVnum).NumModNSeries;
-            state.dataPhotovoltaic->PVarray(PVnum).SNLPVCalc.Vxx *= state.dataPhotovoltaic->PVarray(PVnum).NumModNSeries;
-            state.dataPhotovoltaic->PVarray(PVnum).SNLPVCalc.SurfaceSink = state.dataPhotovoltaic->PVarray(PVnum).SNLPVCalc.Pmp;
+            thisPVarray.SNLPVCalc.Pmp *= thisPVarray.NumSeriesNParall * thisPVarray.NumModNSeries;
+            thisPVarray.SNLPVCalc.Imp *= thisPVarray.NumModNSeries;
+            thisPVarray.SNLPVCalc.Vmp *= thisPVarray.NumModNSeries;
+            thisPVarray.SNLPVCalc.Isc *= thisPVarray.NumSeriesNParall;
+            thisPVarray.SNLPVCalc.Voc *= thisPVarray.NumModNSeries;
+            thisPVarray.SNLPVCalc.Ix *= thisPVarray.NumSeriesNParall;
+            thisPVarray.SNLPVCalc.Ixx *= thisPVarray.NumSeriesNParall;
+            thisPVarray.SNLPVCalc.Vx *= thisPVarray.NumModNSeries;
+            thisPVarray.SNLPVCalc.Vxx *= thisPVarray.NumModNSeries;
+            thisPVarray.SNLPVCalc.SurfaceSink = thisPVarray.SNLPVCalc.Pmp;
         } else { // Ibeam+Idiff < MaxIrradiance or not RunFlag
             // so zero things.
-            state.dataPhotovoltaic->PVarray(PVnum).SNLPVCalc.Vmp = 0.0;
-            state.dataPhotovoltaic->PVarray(PVnum).SNLPVCalc.Imp = 0.0;
-            state.dataPhotovoltaic->PVarray(PVnum).SNLPVCalc.Pmp = 0.0;
-            state.dataPhotovoltaic->PVarray(PVnum).SNLPVCalc.EffMax = 0.0;
-            state.dataPhotovoltaic->PVarray(PVnum).SNLPVCalc.Isc = 0.0;
-            state.dataPhotovoltaic->PVarray(PVnum).SNLPVCalc.Voc = 0.0;
-            state.dataPhotovoltaic->PVarray(PVnum).SNLPVCalc.Tcell = state.dataPhotovoltaic->PVarray(PVnum).SNLPVinto.Tamb;
-            state.dataPhotovoltaic->PVarray(PVnum).SNLPVCalc.Tback = state.dataPhotovoltaic->PVarray(PVnum).SNLPVinto.Tamb;
-            state.dataPhotovoltaic->PVarray(PVnum).SNLPVCalc.AMa = 999.0;
-            state.dataPhotovoltaic->PVarray(PVnum).SNLPVCalc.F1 = 0.0;
-            state.dataPhotovoltaic->PVarray(PVnum).SNLPVCalc.F2 = 0.0;
-            state.dataPhotovoltaic->PVarray(PVnum).SNLPVCalc.Ix = 0.0;
-            state.dataPhotovoltaic->PVarray(PVnum).SNLPVCalc.Vx = 0.0;
-            state.dataPhotovoltaic->PVarray(PVnum).SNLPVCalc.Ixx = 0.0;
-            state.dataPhotovoltaic->PVarray(PVnum).SNLPVCalc.Vxx = 0.0;
-            state.dataPhotovoltaic->PVarray(PVnum).SNLPVCalc.SurfaceSink = 0.0;
+            thisPVarray.SNLPVCalc.Vmp = 0.0;
+            thisPVarray.SNLPVCalc.Imp = 0.0;
+            thisPVarray.SNLPVCalc.Pmp = 0.0;
+            thisPVarray.SNLPVCalc.EffMax = 0.0;
+            thisPVarray.SNLPVCalc.Isc = 0.0;
+            thisPVarray.SNLPVCalc.Voc = 0.0;
+            thisPVarray.SNLPVCalc.Tcell = thisPVarray.SNLPVinto.Tamb;
+            thisPVarray.SNLPVCalc.Tback = thisPVarray.SNLPVinto.Tamb;
+            thisPVarray.SNLPVCalc.AMa = 999.0;
+            thisPVarray.SNLPVCalc.F1 = 0.0;
+            thisPVarray.SNLPVCalc.F2 = 0.0;
+            thisPVarray.SNLPVCalc.Ix = 0.0;
+            thisPVarray.SNLPVCalc.Vx = 0.0;
+            thisPVarray.SNLPVCalc.Ixx = 0.0;
+            thisPVarray.SNLPVCalc.Vxx = 0.0;
+            thisPVarray.SNLPVCalc.SurfaceSink = 0.0;
         } // Ibeam+Idiff > MinIrradiance and runflag
 
         // update calculations to report variables
-        state.dataPhotovoltaic->PVarray(PVnum).Report.DCPower = state.dataPhotovoltaic->PVarray(PVnum).SNLPVCalc.Pmp;
-        state.dataPhotovoltaic->PVarray(PVnum).Report.ArrayIsc = state.dataPhotovoltaic->PVarray(PVnum).SNLPVCalc.Isc;
-        state.dataPhotovoltaic->PVarray(PVnum).Report.ArrayVoc = state.dataPhotovoltaic->PVarray(PVnum).SNLPVCalc.Voc;
-        state.dataPhotovoltaic->PVarray(PVnum).Report.CellTemp = state.dataPhotovoltaic->PVarray(PVnum).SNLPVCalc.Tcell;
-        state.dataPhotovoltaic->PVarray(PVnum).Report.ArrayEfficiency = state.dataPhotovoltaic->PVarray(PVnum).SNLPVCalc.EffMax;
-        state.dataPhotovoltaic->PVarray(PVnum).SurfaceSink = state.dataPhotovoltaic->PVarray(PVnum).SNLPVCalc.SurfaceSink;
+        thisPVarray.Report.DCPower = thisPVarray.SNLPVCalc.Pmp;
+        thisPVarray.Report.ArrayIsc = thisPVarray.SNLPVCalc.Isc;
+        thisPVarray.Report.ArrayVoc = thisPVarray.SNLPVCalc.Voc;
+        thisPVarray.Report.CellTemp = thisPVarray.SNLPVCalc.Tcell;
+        thisPVarray.Report.ArrayEfficiency = thisPVarray.SNLPVCalc.EffMax;
+        thisPVarray.SurfaceSink = thisPVarray.SNLPVCalc.SurfaceSink;
     }
 
     // ********************
@@ -1172,8 +1147,6 @@ namespace Photovoltaics {
         // subroutine was taken from InitBaseboard.
 
         // Using/Aliasing
-        auto &SysTimeElapsed = state.dataHVACGlobal->SysTimeElapsed;
-
         // SUBROUTINE LOCAL VARIABLE DECLARATIONS:
         Real64 TimeElapsed; // Fraction of the current hour that has elapsed (h)
 
@@ -1187,9 +1160,9 @@ namespace Photovoltaics {
         // Do the Begin Environment initializations
         if (state.dataGlobal->BeginEnvrnFlag && state.dataPhotovoltaicState->MyEnvrnFlag(PVnum)) {
             state.dataPhotovoltaic->PVarray(PVnum).TRNSYSPVcalc.CellTempK =
-                state.dataSurface->SurfOutDryBulbTemp(state.dataPhotovoltaic->PVarray(PVnum).SurfacePtr) + DataGlobalConstants::KelvinConv;
+                state.dataSurface->SurfOutDryBulbTemp(state.dataPhotovoltaic->PVarray(PVnum).SurfacePtr) + Constant::Kelvin;
             state.dataPhotovoltaic->PVarray(PVnum).TRNSYSPVcalc.LastCellTempK =
-                state.dataSurface->SurfOutDryBulbTemp(state.dataPhotovoltaic->PVarray(PVnum).SurfacePtr) + DataGlobalConstants::KelvinConv;
+                state.dataSurface->SurfOutDryBulbTemp(state.dataPhotovoltaic->PVarray(PVnum).SurfacePtr) + Constant::Kelvin;
             state.dataPhotovoltaicState->MyEnvrnFlag(PVnum) = false;
         }
 
@@ -1198,7 +1171,8 @@ namespace Photovoltaics {
         }
 
         // Do the beginning of every time step initializations
-        TimeElapsed = state.dataGlobal->HourOfDay + state.dataGlobal->TimeStep * state.dataGlobal->TimeStepZone + SysTimeElapsed;
+        TimeElapsed =
+            state.dataGlobal->HourOfDay + state.dataGlobal->TimeStep * state.dataGlobal->TimeStepZone + state.dataHVACGlobal->SysTimeElapsed;
         if (state.dataPhotovoltaic->PVarray(PVnum).TRNSYSPVcalc.TimeElapsed != TimeElapsed) {
             // The simulation has advanced to the next system timestep.  Save conditions from the end of the previous system
             state.dataPhotovoltaic->PVarray(PVnum).TRNSYSPVcalc.LastCellTempK = state.dataPhotovoltaic->PVarray(PVnum).TRNSYSPVcalc.CellTempK;
@@ -1233,6 +1207,7 @@ namespace Photovoltaics {
         // PURPOSE OF THIS SUBROUTINE:
         // This subroutine simulates the PV performance.
 
+        using PhotovoltaicThermalCollectors::GetPVTTsColl;
         using TranspiredCollector::GetUTSCTsColl;
 
         Real64 constexpr EPS(0.001);
@@ -1265,15 +1240,13 @@ namespace Photovoltaics {
         Real64 VA;
         Real64 VOCA;
         Real64 PA;
-        int CC;
-        int K;
         Real64 CellTemp(0.0); // cell temperature in Kelvin
         Real64 CellTempC;     // cell temperature in degrees C
 
         // if the cell temperature mode is 2, convert the timestep to seconds
         if (state.dataPhotovoltaicState->firstTime &&
             state.dataPhotovoltaic->PVarray(PVnum).CellIntegrationMode == CellIntegration::DecoupledUllebergDynamic) {
-            state.dataPhotovoltaicState->PVTimeStep = double(state.dataGlobal->MinutesPerTimeStep) * 60.0; // Seconds per time step
+            state.dataPhotovoltaicState->PVTimeStep = double(state.dataGlobal->MinutesInTimeStep) * 60.0; // Seconds per time step
         }
         state.dataPhotovoltaicState->firstTime = false;
 
@@ -1281,19 +1254,20 @@ namespace Photovoltaics {
         state.dataPhotovoltaic->ShuntResistance = state.dataPhotovoltaic->PVarray(PVnum).TRNSYSPVModule.ShuntResistance;
 
         // convert ambient temperature from C to K
-        Tambient = state.dataSurface->SurfOutDryBulbTemp(state.dataPhotovoltaic->PVarray(PVnum).SurfacePtr) + DataGlobalConstants::KelvinConv;
+        Tambient = state.dataSurface->SurfOutDryBulbTemp(state.dataPhotovoltaic->PVarray(PVnum).SurfacePtr) + Constant::Kelvin;
+
+        auto const &thisPVarray = state.dataPhotovoltaic->PVarray(PVnum);
 
         if ((state.dataPhotovoltaic->PVarray(PVnum).TRNSYSPVcalc.Insolation > MinInsolation) && (RunFlag)) {
 
             // set initial values for eta iteration loop
             DummyErr = 2.0 * ERR;
-            CC = 1;
             EtaOld = EtaIni;
+            int K;
 
             // Begin DO WHILE loop - until the error tolerance is reached.
             ETA = 0.0;
             while (DummyErr > ERR) {
-
                 switch (state.dataPhotovoltaic->PVarray(PVnum).CellIntegrationMode) {
                 case CellIntegration::Decoupled: {
                     //  cell temperature based on energy balance
@@ -1322,19 +1296,19 @@ namespace Photovoltaics {
                                       state.dataPhotovoltaic->PVarray(PVnum).TRNSYSPVModule.HeatCapacity * state.dataPhotovoltaicState->PVTimeStep));
                 } break;
                 case CellIntegration::SurfaceOutsideFace: {
-                    CellTemp =
-                        state.dataHeatBalSurf->SurfTempOut(state.dataPhotovoltaic->PVarray(PVnum).SurfacePtr) + DataGlobalConstants::KelvinConv;
+                    CellTemp = state.dataHeatBalSurf->SurfTempOut(state.dataPhotovoltaic->PVarray(PVnum).SurfacePtr) + Constant::Kelvin;
                 } break;
                 case CellIntegration::TranspiredCollector: {
                     GetUTSCTsColl(state, state.dataPhotovoltaic->PVarray(PVnum).UTSCPtr, CellTemp);
-                    CellTemp += DataGlobalConstants::KelvinConv;
+                    CellTemp += Constant::Kelvin;
                 } break;
                 case CellIntegration::ExteriorVentedCavity: {
                     GetExtVentedCavityTsColl(state, state.dataPhotovoltaic->PVarray(PVnum).ExtVentCavPtr, CellTemp);
-                    CellTemp += DataGlobalConstants::KelvinConv;
+                    CellTemp += Constant::Kelvin;
                 } break;
                 case CellIntegration::PVTSolarCollector: {
-                    // get PVT model result for cell temp..
+                    GetPVTTsColl(state, thisPVarray.PVTPtr, CellTemp);
+                    CellTemp += Constant::Kelvin;
                 } break;
                 default:
                     break;
@@ -1358,7 +1332,7 @@ namespace Photovoltaics {
                      state.dataPhotovoltaic->PVarray(PVnum).TRNSYSPVModule.Vmp + state.dataPhotovoltaic->PVarray(PVnum).TRNSYSPVModule.RefVoc) /
                     state.dataPhotovoltaic->PVarray(PVnum).TRNSYSPVModule.Imp;
 
-                //  temperature depencence
+                //  temperature dependence
                 IL = state.dataPhotovoltaic->PVarray(PVnum).TRNSYSPVcalc.Insolation /
                      state.dataPhotovoltaic->PVarray(PVnum).TRNSYSPVModule.RefInsolation *
                      (ILRef + state.dataPhotovoltaic->PVarray(PVnum).TRNSYSPVModule.TempCoefIsc *
@@ -1370,7 +1344,7 @@ namespace Photovoltaics {
                               state.dataPhotovoltaic->PVarray(PVnum).TRNSYSPVModule.CellsInSeries / AARef *
                               (1.0 - state.dataPhotovoltaic->PVarray(PVnum).TRNSYSPVModule.RefTemperature / CellTemp));
 
-                //  compute short curcuit current and open circuit voltage
+                //  compute short circuit current and open circuit voltage
 
                 //   NEWTON --> ISC  (STARTVALUE: ISCG1 - BASED ON IL=ISC)
                 ISCG1 = IL;
@@ -1395,7 +1369,6 @@ namespace Photovoltaics {
                     PM / state.dataPhotovoltaic->PVarray(PVnum).TRNSYSPVcalc.Insolation / state.dataPhotovoltaic->PVarray(PVnum).TRNSYSPVModule.Area;
                 DummyErr = std::abs((ETA - EtaOld) / EtaOld);
                 EtaOld = ETA;
-                ++CC;
 
             } // while
 
@@ -1412,18 +1385,19 @@ namespace Photovoltaics {
                                         state.dataPhotovoltaic->PVarray(PVnum).TRNSYSPVModule.HeatCapacity * state.dataPhotovoltaicState->PVTimeStep);
             } break;
             case CellIntegration::SurfaceOutsideFace: {
-                CellTemp = state.dataHeatBalSurf->SurfTempOut(state.dataPhotovoltaic->PVarray(PVnum).SurfacePtr) + DataGlobalConstants::KelvinConv;
+                CellTemp = state.dataHeatBalSurf->SurfTempOut(state.dataPhotovoltaic->PVarray(PVnum).SurfacePtr) + Constant::Kelvin;
             } break;
             case CellIntegration::TranspiredCollector: {
                 GetUTSCTsColl(state, state.dataPhotovoltaic->PVarray(PVnum).UTSCPtr, CellTemp);
-                CellTemp += DataGlobalConstants::KelvinConv;
+                CellTemp += Constant::Kelvin;
             } break;
             case CellIntegration::ExteriorVentedCavity: {
                 GetExtVentedCavityTsColl(state, state.dataPhotovoltaic->PVarray(PVnum).ExtVentCavPtr, CellTemp);
-                CellTemp += DataGlobalConstants::KelvinConv;
+                CellTemp += Constant::Kelvin;
             } break;
             case CellIntegration::PVTSolarCollector: {
-                // get PVT model result for cell temp.. //Bug CellTemp not set but used below
+                GetPVTTsColl(state, thisPVarray.PVTPtr, CellTemp);
+                CellTemp += Constant::Kelvin;
             } break;
             default: {
                 assert(false);
@@ -1440,7 +1414,7 @@ namespace Photovoltaics {
         }
 
         // convert cell temperature back to C
-        CellTempC = CellTemp - DataGlobalConstants::KelvinConv;
+        CellTempC = CellTemp - Constant::Kelvin;
 
         // calculate array based outputs (so far, the outputs are module based
         IA = state.dataPhotovoltaic->PVarray(PVnum).NumSeriesNParall * IM;
@@ -1473,7 +1447,7 @@ namespace Photovoltaics {
                Real64 const AA,   // passed in from CalcPV
                Real64 const EPS,  // passed in from CalcPV
                Real64 &II,        // current [A]
-               Real64 &VV,        // voltage [V]
+               Real64 const VV,   // voltage [V]
                Real64 &PP         // power [W]
     )
     {
@@ -1540,10 +1514,10 @@ namespace Photovoltaics {
                 Real64 &B,
                 Real64 &P,
                 int &K,
-                Real64 &IO,
-                Real64 &IL,
-                Real64 &RSER,
-                Real64 &AA,
+                Real64 const IO,
+                Real64 const IL,
+                Real64 const RSER,
+                Real64 const AA,
                 Real64 const EPS,
                 int const KMAX)
     {
@@ -1626,9 +1600,8 @@ namespace Photovoltaics {
                 YP = YB;
             }
             return;
-        } else {
-            return;
         }
+        return;
     }
 
     Real64 FUN(EnergyPlusData &state, Real64 const II, Real64 const VV, Real64 const IL, Real64 const IO, Real64 const RSER, Real64 const AA)
@@ -1652,9 +1625,9 @@ namespace Photovoltaics {
         } else {
             ShowSevereError(state, "EquivalentOneDiode Photovoltaic model failed to find maximum power point");
             ShowContinueError(state, "Numerical solver failed trying to take exponential of too large a number");
-            ShowContinueError(state, format("Check input data in {}", state.dataPhotovoltaic->cPVEquiv1DiodePerfObjectName));
-            ShowContinueError(state, format("VV (voltage) = {:.5R}", VV));
-            ShowContinueError(state, format("II (current) = {:.5R}", II));
+            ShowContinueError(state, std::format("Check input data in {}", pvModelNames[(int)PVModel::TRNSYS]));
+            ShowContinueError(state, std::format("VV (voltage) = {:.5f}", VV));
+            ShowContinueError(state, std::format("II (current) = {:.5f}", II));
             ShowFatalError(state, "FUN: EnergyPlus terminates because of numerical problem in EquivalentOne-Diode PV model");
         }
 
@@ -1685,9 +1658,9 @@ namespace Photovoltaics {
         } else {
             ShowSevereError(state, "EquivalentOneDiode Photovoltaic model failed to find maximum power point");
             ShowContinueError(state, "Numerical solver failed trying to take exponential of too large a number");
-            ShowContinueError(state, format("Check input data in {}", state.dataPhotovoltaic->cPVEquiv1DiodePerfObjectName));
-            ShowContinueError(state, format("VV (voltage) = {:.5R}", VV));
-            ShowContinueError(state, format("II (current) = {:.5R}", II));
+            ShowContinueError(state, std::format("Check input data in {}", pvModelNames[(int)PVModel::TRNSYS]));
+            ShowContinueError(state, std::format("VV (voltage) = {:.5f}", VV));
+            ShowContinueError(state, std::format("II (current) = {:.5f}", II));
             ShowFatalError(state, "FI: EnergyPlus terminates because of numerical problem in EquivalentOne-Diode PV model");
         }
 
@@ -1718,9 +1691,9 @@ namespace Photovoltaics {
         } else {
             ShowSevereError(state, "EquivalentOneDiode Photovoltaic model failed to find maximum power point");
             ShowContinueError(state, "Numerical solver failed trying to take exponential of too large a number");
-            ShowContinueError(state, format("Check input data in {}", state.dataPhotovoltaic->cPVEquiv1DiodePerfObjectName));
-            ShowContinueError(state, format("VV (voltage) = {:.5R}", VV));
-            ShowContinueError(state, format("II (current) = {:.5R}", II));
+            ShowContinueError(state, std::format("Check input data in {}", pvModelNames[(int)PVModel::TRNSYS]));
+            ShowContinueError(state, std::format("VV (voltage) = {:.5f}", VV));
+            ShowContinueError(state, std::format("II (current) = {:.5f}", II));
             ShowFatalError(state, "FI: EnergyPlus terminates because of numerical problem in EquivalentOne-Diode PV model");
         }
 
@@ -1753,7 +1726,7 @@ namespace Photovoltaics {
 
         // METHODOLOGY EMPLOYED:
         // apply sandia temperature model, This is module temp or back of
-        // of the panel.  A seperate correction handles delta T for actual cell
+        // of the panel.  A separate correction handles delta T for actual cell
 
         // REFERENCES:
         // from G. Barker's TRNSYS implementation
@@ -1906,7 +1879,7 @@ namespace Photovoltaics {
         Real64 AbsoluteAirMass;
 
         if (SolZen < 89.9) {
-            Real64 const AM(1.0 / (std::cos(SolZen * DataGlobalConstants::DegToRadians) + 0.5057 * std::pow(96.08 - SolZen, -1.634)));
+            Real64 const AM(1.0 / (std::cos(SolZen * Constant::DegToRad) + 0.5057 * std::pow(96.08 - SolZen, -1.634)));
             AbsoluteAirMass = std::exp(-0.0001184 * Altitude) * AM;
         } else {
             Real64 constexpr AM(36.32); // evaluated above at SolZen = 89.9 issue #5528
@@ -1930,7 +1903,7 @@ namespace Photovoltaics {
         //       AUTHOR         G. Barker
         //       DATE WRITTEN   <unknown>
         //       MODIFIED       na
-        //       RE-ENGINEERED  B. Griffit F77-> f90
+        //       RE-ENGINEERED  B. Griffith F77-> f90
 
         // PURPOSE OF THIS FUNCTION:
         // Returns the result of Sandia Air Mass function
@@ -2171,7 +2144,7 @@ namespace Photovoltaics {
 
         if (Ee > 0.0) {
             // following is equation 8 in King et al. nov. 2003
-            dTc = DiodeFactor * ((1.38066e-23 * (Tc + DataGlobalConstants::KelvinConv)) / 1.60218e-19);
+            dTc = DiodeFactor * ((1.38066e-23 * (Tc + Constant::Kelvin)) / 1.60218e-19);
 
             BVmpEe = BVmp0 + mBVmp * (1.0 - Ee);
 
@@ -2210,7 +2183,7 @@ namespace Photovoltaics {
         Real64 BVocEe; // working variable
 
         if (Ee > 0.0) {
-            dTc = DiodeFactor * ((1.38066e-23 * (Tc + DataGlobalConstants::KelvinConv)) / 1.60218e-19);
+            dTc = DiodeFactor * ((1.38066e-23 * (Tc + Constant::Kelvin)) / 1.60218e-19);
             BVocEe = BVoc0 + mBVoc * (1.0 - Ee);
 
             SandiaVoc = Voc0 + NcellSer * dTc * std::log(Ee) + BVocEe * (Tc - 25.0);
@@ -2229,7 +2202,7 @@ namespace Photovoltaics {
 
         // SUBROUTINE INFORMATION:
         //       AUTHOR         B. Griffith
-        //       DATE WRITTEN   Janauray 2004
+        //       DATE WRITTEN   January 2004
         //       MODIFIED       na
         //       RE-ENGINEERED  na
 
@@ -2242,7 +2215,7 @@ namespace Photovoltaics {
         // Using/Aliasing
         using namespace DataSurfaces;
 
-        state.dataSurface->ExtVentedCavity(VentModNum).QdotSource = QSource / state.dataSurface->ExtVentedCavity(VentModNum).ProjArea;
+        state.dataHeatBal->ExtVentedCavity(VentModNum).QdotSource = QSource / state.dataHeatBal->ExtVentedCavity(VentModNum).ProjArea;
     }
 
     void GetExtVentedCavityIndex(EnergyPlusData &state, int const SurfacePtr, int &VentCavIndex)
@@ -2275,8 +2248,8 @@ namespace Photovoltaics {
         CavNum = 0;
         Found = false;
         for (thisCav = 1; thisCav <= state.dataSurface->TotExtVentCav; ++thisCav) {
-            for (ThisSurf = 1; ThisSurf <= state.dataSurface->ExtVentedCavity(thisCav).NumSurfs; ++ThisSurf) {
-                if (SurfacePtr == state.dataSurface->ExtVentedCavity(thisCav).SurfPtrs(ThisSurf)) {
+            for (ThisSurf = 1; ThisSurf <= state.dataHeatBal->ExtVentedCavity(thisCav).NumSurfs; ++ThisSurf) {
+                if (SurfacePtr == state.dataHeatBal->ExtVentedCavity(thisCav).SurfPtrs(ThisSurf)) {
                     Found = true;
                     CavNum = thisCav;
                 }
@@ -2285,8 +2258,8 @@ namespace Photovoltaics {
 
         if (!Found) {
             ShowFatalError(state,
-                           format("Did not find surface in Exterior Vented Cavity description in GetExtVentedCavityIndex, Surface name = {}",
-                                  state.dataSurface->Surface(SurfacePtr).Name));
+                           std::format("Did not find surface in Exterior Vented Cavity description in GetExtVentedCavityIndex, Surface name = {}",
+                                       state.dataSurface->Surface(SurfacePtr).Name));
         } else {
 
             VentCavIndex = CavNum;
@@ -2309,14 +2282,14 @@ namespace Photovoltaics {
         // access derived type
 
         // SUBROUTINE LOCAL VARIABLE DECLARATIONS:
-        TsColl = state.dataSurface->ExtVentedCavity(VentModNum).Tbaffle;
+        TsColl = state.dataHeatBal->ExtVentedCavity(VentModNum).Tbaffle;
     }
 
     // -------------------------------------------------------------------------------
 
     //     EnergyPlus V1.2 and beyond include models for photovoltaic calculations called
     //     Generator:Photovoltaic:Simple and Generator:PV:Sandia implemented by the Center for
-    //     Buildings and Thermal Systems, National Renewable Energy Laboratory, 1617 Cole Blvd
+    //     Buildings and Thermal Systems, National Laboratory of the Rockies, 1617 Cole Blvd
     //     MS 2722, Golden, CO, 80401
 
     //     EnergyPlus v1.1.1 and beyond includes model for Photovoltaic calculations, now

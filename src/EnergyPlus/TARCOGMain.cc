@@ -1,7 +1,7 @@
-// EnergyPlus, Copyright (c) 1996-2023, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
-// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other
+// National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
 // contributors. All rights reserved.
 //
 // NOTICE: This Software was developed under funding from the U.S. Department of Energy and the
@@ -66,24 +66,24 @@ namespace EnergyPlus::TARCOGMain {
 //       AUTHOR         D. Charlie Curcija
 //       DATE WRITTEN   July 2000
 //       MODIFIED       na
-//       RE-ENGINEERED  (see information bellow)
+//       RE-ENGINEERED  (see information below)
 //  Revision: 7.0.13  (March/27/2012), Simon Vidanovic
-//   - feature: New set of equaitons is set instead of hhat coefficents and new approach to solution which improves
+//   - feature: New set of equations is set instead of hhat coefficients and new approach to solution which improves
 //               speed and stability.  Note that this solution does not include laminates
 //  Revision: 7.0.12  (March/06/2012), Simon Vidanovic
 //   - feature: Additional state for isky introduced.  Tarcog now can accept IR radiance from external source.
 //  Revision: 7.0.11  (January/04/2012), Simon Vidanovic
-//   - imrovements/bug fixes: Several items merged from Windows tarcog version into this one:
-//      - bug fix: Correct foramtting for VacuumMaxGapThickness when program writes input file
+//   - improvements/bug fixes: Several items merged from Windows tarcog version into this one:
+//      - bug fix: Correct formatting for VacuumMaxGapThickness when program writes input file
 //      - improvement: Gamma coefficient is now written in scientific notation (needed for correct output file generation)
-//      - imporvement: Gap data are now saved with higer precision to wincog input file (test purposes, debug mode only)
+//      - improvement: Gap data are now saved with higher precision to wincog input file (test purposes, debug mode only)
 //      - bug fix: Gap temperatures are recalculated within iterations (for thermally driven and forced ventilation)
 //  Revision: 7.0.10  (December/15/2011), Simon Vidanovic
-//   - imrovement: Flag for performing SHGC calculations
+//   - improvement: Flag for performing SHGC calculations
 //  Revision: 7.0.09  (November/15/2011), Simon Vidanovic
-//   - imrovement: Added error message tolerance (This is necessary to handle error messages in correct way)
+//   - improvement: Added error message tolerance (This is necessary to handle error messages in correct way)
 //  Revision: 7.0.08  (November/15/2011), Simon Vidanovic
-//   - bug fix: Fixed program crashing when warrning message 1007 occurred (output could not fit in string)
+//   - bug fix: Fixed program crashing when warning message 1007 occurred (output could not fit in string)
 //   - feature: relaxation parameter changed
 //  Revision: 7.0.07  (November/08/2011), Simon Vidanovic
 //   - feature: Error message (as string) is now return from tarcog
@@ -92,7 +92,7 @@ namespace EnergyPlus::TARCOGMain {
 //  Revision: 7.0.05  (November/07/2011), Simon Vidanovic
 //   - bug fix: Troom and Tamb are not passed out of hhat routine after recalculation is performed.
 //              This will cause differences in calculation of U-factor
-//   - feature: VacuumMaxGapThickness is added to list of input paramters
+//   - feature: VacuumMaxGapThickness is added to list of input parameters
 //  Revision: 7.0.04  (November/03/2011), Simon Vidanovic
 //   - bug fix: one of debug files did not update properly
 //  Revision: 7.0.03  (November/01/2011), Simon Vidanovic
@@ -133,7 +133,7 @@ namespace EnergyPlus::TARCOGMain {
 //   - Added new input argument - SDScalar:
 //      0.0  - No SD (in terms of convection)
 //      1.0  - Closed SD (SD treated as a 'regular' specular layer)
-//      between 0 and 1 - cobination of No SD and Closed SD cases
+//      between 0 and 1 - combination of No SD and Closed SD cases
 //   - A bug in unshaded run (remapping gas properties in removal of indoor SD layer) was fixed
 //   - TARCOG error codes have been updated (error codes 30 and 37 added)
 //  Revision: 6.0.26  (May/31/2006)
@@ -169,7 +169,7 @@ namespace EnergyPlus::TARCOGMain {
 //   - Added two new output arguments needed for connection with T6:
 //      HcUnshadedOut,
 //      HcUnshadeIn.
-//   - Changed the way ShadeHcRatioOut and ShadeHcRatioIn are caculated.
+//   - Changed the way ShadeHcRatioOut and ShadeHcRatioIn are calculated.
 //  Revision: 6.0.21  (October/28/2005)
 //   - Fixed another serious bug in new routine for calculation of U factor.
 //  Revision: 6.0.20  (October/20/2005)
@@ -185,7 +185,7 @@ namespace EnergyPlus::TARCOGMain {
 //   - Description of arguments has been updated.
 //   - Forced ventilation calc has been disabled.
 //  Revision: 6.0.18  (September/16/2005)
-//   - Changed Tvent for outdoor and indoor SD layers to Tout and Tin, respectivelly.
+//   - Changed Tvent for outdoor and indoor SD layers to Tout and Tin, respectively.
 //   - Keff is now calculated for each gap.
 //  Revision: 6.0.17  (September/08/2005)
 //   - Fixed a bug involving Al, Ar & Ah values (patch for a case of Al+Ar+Ah = 0).
@@ -210,7 +210,7 @@ namespace EnergyPlus::TARCOGMain {
 //   - Minor change in Picard coefficients for vented gaps - MaxIter cannot
 //     be less than 800. This solves issue with theta buffer in Therm1d.
 //   - Implemented creation of TARCOG debug file w/ i/o arguments/results (Tarcog.dbg)
-//     (fetaure #8); debug file will be created depending on Debug_mode switch:
+//     (feature #8); debug file will be created depending on Debug_mode switch:
 //      Debug_mode = 0 : debug file will not be created
 //      Debug_mode = 1 : debug file will be appended
 //      Debug_mode = 2 : new debug file will be created
@@ -256,14 +256,14 @@ namespace EnergyPlus::TARCOGMain {
 //   - implemented arrays for ventilation temperature and speed
 //   - repaired equation 121 in ISO (instead of cos(tilt) now is ABS(cos(tilt)))
 //   - implemented input field for forced ventilation velocity (for all cases)
-//   - fixed bug in shading edge: coefficients B1, C1 and D1 repaired to calcluate value for gap temperature (not enviroment)
-//   - fixed bug in routine shading edge: characteristic Height is calculated for gap (not for enviroment)
-//   - fixed bug in proccesing error messages (this was produced slightly wrong in some cases results)
+//   - fixed bug in shading edge: coefficients B1, C1 and D1 repaired to calculate value for gap temperature (not environment)
+//   - fixed bug in routine shading edge: characteristic Height is calculated for gap (not for environment)
+//   - fixed bug in processing error messages (this was produced slightly wrong in some cases results)
 //  Revision: 6.0.06 rv  (04/22/03)
 //   - write out heat flux calculation for shading device panes
 //   - qv smoothing: make vented heat flux same in adjacent gaps (gaps are divided by shading pane)
 //   - fixed bug in routine "shadingin": make that vented heat flow direction is calculated correct, according
-//     to temeratures in adjecent gaps
+//     to temperatures in adjacent gaps
 //  Revision: 6.0.05  (04/14/03)
 //   - implemented "Picard" method in iteration loop
 //   - number of iterations is increased to 1000
@@ -360,8 +360,8 @@ void TARCOG90(EnergyPlusData &state,
               Real64 const VacuumPressure,                // maximal pressure for gas to be considered as vacuum
               Real64 &VacuumMaxGapThickness,              // maximum allowed thickness without producing warning message
               DeflectionCalculation const CalcDeflection, // Deflection calculation flag:
-              Real64 const Pa,                            // Atmospheric (outside/inside) pressure (used onlu if CalcDeflection = 1)
-              Real64 const Pini,                          // Initial presssure at time of fabrication (used only if CalcDeflection = 1)
+              Real64 const Pa,                            // Atmospheric (outside/inside) pressure (used only if CalcDeflection = 1)
+              Real64 const Pini,                          // Initial pressure at time of fabrication (used only if CalcDeflection = 1)
               Real64 const Tini,                          // Initial temperature at time of fabrication (used only if CalcDeflection = 1)
               Array1D<Real64> &gap,                       // Vector of gap widths [m]
               Array1D<Real64> &GapDefMax,                 // Vector of gap widths in deflected state. It will be used as input
@@ -384,7 +384,7 @@ void TARCOG90(EnergyPlusData &state,
               Array2A<Real64> const xgvis,                // Matrix of constants for gas dynamic viscosity calc
               Array2A<Real64> const xgcp,                 // Matrix of constants for gas specific heat calc at constant pressure
               const Array1D<Real64> &xwght,               // Vector of Molecular weights for gasses
-              const Array1D<Real64> &gama,                // Vector of spefic heat ration for low pressure calc
+              const Array1D<Real64> &gama,                // Vector of specific heat ration for low pressure calc
               const Array1D_int &nmix,                    // Vector of number of gasses in gas mixture of each gap
               const Array1D_int &SupportPillar,           // Shows whether or not gap have support pillar
               const Array1D<Real64> &PillarSpacing,       // Pillar spacing for each gap (used in case there is support pillar)
@@ -392,7 +392,7 @@ void TARCOG90(EnergyPlusData &state,
               Array1D<Real64> &theta,                     // Vector of average temperatures of glazing surfaces [K]
               Array1D<Real64> &LayerDef,                  // Vector of layers deflection. [m]
               Array1D<Real64> &q,                         // Vector of various heat fluxes [W/m2]
-              Array1D<Real64> &qv,                        // Vector of heat fluxes to each gap by ventillation [W/m2]
+              Array1D<Real64> &qv,                        // Vector of heat fluxes to each gap by ventilation [W/m2]
               Real64 &ufactor,                            // Center of glass U-value [W/m2 K]
               Real64 &sc,                                 // Shading Coefficient
               Real64 &hflux,                              // Net heat flux between room and window [W/m2]
@@ -453,7 +453,7 @@ void TARCOG90(EnergyPlusData &state,
               Array1D<Real64> &ShadeGapKeffConv,          // Vector of convective keff values for areas above/below
               Real64 const SDScalar,                      // Factor of Venetian SD layer contribution to convection
               int const SHGCCalc,                         // SHGC calculation switch:
-              int &NumOfIterations,                       // Number of iterations for reacing solution
+              int &NumOfIterations,                       // Number of iterations for reaching solution
               Real64 const edgeGlCorrFac                  // Edge of glass correction factor
 )
 {
@@ -550,7 +550,7 @@ void TARCOG90(EnergyPlusData &state,
     //          4 - Xenon
     //    0 - h to be calculated
     //    1 - combined film coefficient h prescribed
-    //    2 - convective film coefficient (hc) prescibed
+    //    2 - convective film coefficient (hc) prescribed
     // Also used in old algorithms for calculating h, accessible through negative
     // values for flags:
     //    -1 - old SPC142 correlation
@@ -731,7 +731,7 @@ void TARCOG90(EnergyPlusData &state,
                      SDScalar,
                      ErrorMessage);
 
-    // in case of provided deflected gap widths just store deflected widhts before temperatures calculation
+    // in case of provided deflected gap widths just store deflected widths before temperatures calculation
     // deflections in this case do not depend of temperatures and it should be calculated before to avoid
     // one extra call of temperatures calculations
     if (CalcDeflection == DeflectionCalculation::GAP_WIDTHS) {
@@ -1110,8 +1110,8 @@ void TARCOG90(EnergyPlusData &state,
                     ErrorMessage = "Deflection calculations failed to converge";
                 }
             } // do while (.not.(converged))
-        }     // if ((CalcDeflection.eq.DeflectionCalculation::TEMPERATURE).or.(CalcDeflection.eq.DeflectionCalculation::GAP_WIDTHS)) then
-    }         // if (GoAhead(nperr)) then
+        } // if ((CalcDeflection.eq.DeflectionCalculation::TEMPERATURE).or.(CalcDeflection.eq.DeflectionCalculation::GAP_WIDTHS)) then
+    } // if (GoAhead(nperr)) then
 
     FinishDebugOutputFiles(files, nperr);
 }

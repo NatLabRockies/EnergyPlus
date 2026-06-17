@@ -54,6 +54,8 @@ When a boiler efficiency curve is used, a constant efficiency boiler may be spec
 
 The parasitic electric power is calculated based on the user-defined parasitic electric load and the operating part load ratio calculated above. The model assumes that this parasitic power does not contribute to heating the water.
 
+The parasitic fuel power is calculated based on the user-defined parasitic fuel load and assumes that it is consumed only for the portion of the simulation time step where the boiler is not operating. The model assumes that this parasitic power does not contribute to heating the water.
+
 \begin{equation}
 {P_{parasitic}} = {P_{load}}\left( {PLR} \right)
 \end{equation}
@@ -216,11 +218,11 @@ It is assumed that the steam boiler operates to maintain a desired temperature, 
 % table 50
 \begin{longtable}[c]{p{1.0in}p{4.0in}}
 \caption{Steam Loop Nomenclature \label{table:steam-loop-nomenclature}} \tabularnewline
-\toprule 
+\toprule
 \endfirsthead
 
 \caption[]{Steam Loop Nomenclature} \tabularnewline
-\toprule 
+\toprule
 \endhead
 
 \({Q_{B}}\) & Boiler Heat Transfer, W \tabularnewline

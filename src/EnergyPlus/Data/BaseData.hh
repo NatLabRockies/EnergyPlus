@@ -1,7 +1,7 @@
-// EnergyPlus, Copyright (c) 1996-2023, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
-// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other
+// National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
 // contributors. All rights reserved.
 //
 // NOTICE: This Software was developed under funding from the U.S. Department of Energy and the
@@ -50,8 +50,14 @@
 
 namespace EnergyPlus {
 
+struct EnergyPlusData; // Forward declaration
+
 struct BaseGlobalStruct
 {
+
+    virtual ~BaseGlobalStruct() = default;
+    virtual void init_constant_state([[maybe_unused]] EnergyPlusData &state) = 0;
+    virtual void init_state([[maybe_unused]] EnergyPlusData &state) = 0;
     virtual void clear_state() = 0;
 };
 

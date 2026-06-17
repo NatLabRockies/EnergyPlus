@@ -1,7 +1,7 @@
-// EnergyPlus, Copyright (c) 1996-2023, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
-// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other
+// National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
 // contributors. All rights reserved.
 //
 // NOTICE: This Software was developed under funding from the U.S. Department of Energy and the
@@ -78,6 +78,8 @@ enum class TARCOGLayerType : int
     Num
 };
 
+extern const std::array<std::string_view, (int)TARCOGLayerType::Num> layerTypeNamesUC;
+
 //  Thermal models:
 enum class TARCOGThermalModel : int
 {
@@ -89,7 +91,9 @@ enum class TARCOGThermalModel : int
     Num
 };
 
-int constexpr YES_SupportPillar = 1;
+extern const std::array<std::string_view, (int)TARCOGThermalModel::Num> thermalModelNamesUC;
+
+int constexpr YES_SupportPillar = 1; // Exsqueeze me?
 
 // Deflection parameters
 enum class DeflectionCalculation : int
@@ -100,6 +104,8 @@ enum class DeflectionCalculation : int
     GAP_WIDTHS,
     Num
 };
+
+extern const std::array<std::string_view, (int)DeflectionCalculation::Num> deflectionCalculationNamesUC;
 
 // definition of parameters for deflection sum.  These parameters define maximum number of loop to which sum
 // will perform. By equation, these numbers will go to infinite and some test showed that going to NMax and MMax
@@ -114,7 +120,7 @@ int constexpr NumOfIterations(100);
 // In case that is not happening program will tolerate certain number of tries before declare convergence
 // (or decrease relaxation parameter)
 int constexpr NumOfTries(5);
-// integer, parameter :: NewtonIterations = 75 ! shows when to swith to Newton
+// integer, parameter :: NewtonIterations = 75 ! shows when to switch to Newton
 Real64 constexpr RelaxationStart(0.6);    // Has to be between 0 and 1
 Real64 constexpr RelaxationDecrease(0.1); // Step for which relaxation parameter will decrease
 

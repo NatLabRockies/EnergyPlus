@@ -8,7 +8,7 @@
 
 GEBs (Grid-interactive efficient buildings) can respond to grid or pricing signals by adjusting the operation of HVAC, water heaters, and some other systems. Adjusting HVAC operation strategies include changing thermostat setpoints, turning equipment on/off, and adjusting the speed or capacity of variable-speed or multi-speed compressors and fans. The typical EnergyPlus HVAC approach is to have a setpoint without a deadband and find the appropriate speed ratio to perfectly meet the load. If a heating load for an ASHP is unable to be met by DX coils, then the remaining loads will be passed to the supplemental electric coil. With growing demands to model a more realistic on-off cycles and hvac operations, the current supplemental coil capability is limited in two reasons:
 1. It currently only allows a single stage electric coil to be attached to *AirLoopHVAC:UnitarySystem* as the supplemental coil. In reality, it's very likely that a multistage backup heating is installed with multispeed heat pumps. *Coil:Heating:Electric:MultiStage* already exists and is able to serve as a supplemental coil for some parent objects, but not *AirLoopHVAC:UnitarySystem*. Enabling this coil in UnitarySystem is a bugfix.
-2. The commonly used logic of simply passing remaining loads to backup coils doesn't work well when using an on/off thermostat, where most of time HVAC systems are operating when zone temperature is within deadband instead of being maintained exactly at setpoint. In current E+, supplemental coils will always run fully/at high stage along with DX coil to try to meet the upper end of the deadband as quickly as possible. This will cause higher energy use and shorter cycle than reality, which is not desired. 
+2. The commonly used logic of simply passing remaining loads to backup coils doesn't work well when using an on/off thermostat, where most of time HVAC systems are operating when zone temperature is within deadband instead of being maintained exactly at setpoint. In current E+, supplemental coils will always run fully/at high stage along with DX coil to try to meet the upper end of the deadband as quickly as possible. This will cause higher energy use and shorter cycle than reality, which is not desired.
 
 Therefore, enhancements to the current *Coil:Heating:Electric:MultiStage* object are needed to take advantage of existing GEB capabilities to model realistic HVAC systems in E+.
 
@@ -36,4 +36,4 @@ A new example file built upon the existing file, `UnitarySystem_MultiStageSupple
 
 ## Email Discussion
 
-The feature and implementation details were based on [issue 9357](https://github.com/NREL/EnergyPlus/issues/9357)
+The feature and implementation details were based on [issue 9357](https://github.com/NatLabRockies/EnergyPlus/issues/9357)

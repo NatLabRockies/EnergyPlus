@@ -2,16 +2,25 @@
 # add_library( ModernJSON INTERFACE )
 # target_include_directories( ModernJSON INTERFACE "${PROJECT_SOURCE_DIR}/nlohmann" "${PROJECT_SOURCE_DIR}/doj" )
 
-add_library( ModernJSON INTERFACE )
+add_library( nlohmann_json INTERFACE )
 target_compile_definitions(
-        ModernJSON
+        nlohmann_json
         INTERFACE
-        JSON_USE_IMPLICIT_CONVERSIONS=OFF
+        JSON_USE_IMPLICIT_CONVERSIONS=1
 )
+if(NOT MSVC)  # This is really only needed with newer Clang, but gcc is fine with it
+  target_compile_options(nlohmann_json INTERFACE -Wno-deprecated-declarations)
+endif()
+target_compile_options(nlohmann_json INTERFACE $<$<COMPILE_LANG_AND_ID:CXX,AppleClang>:-Wno-shorten-64-to-32>)
 target_include_directories(
-        ModernJSON
-        INTERFACE
-        $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/nlohmann>
+        nlohmann_json
+        SYSTEM INTERFACE
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
+)
+set_source_files_properties(
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>/nlohmann/json.hpp
+  TARGET_DIRECTORY nlohmann_json
+  PROPERTIES COMPILE_FLAGS -Wno-deprecated-declarations
 )
 
 # To avoid modifying every third_party library
@@ -67,14 +76,20 @@ elseif(MSVC) # VisualStudio
 endif()
 target_compile_features(ssc PRIVATE cxx_std_11)
 
-# C++17 flag is intentionally after ssd
-set(CMAKE_CXX_STANDARD 17)
+# C++20 flag is intentionally after ssc
+set(CMAKE_CXX_STANDARD 20)
 
 #Note: the Tarcog files are improperly initializing their virtual base classes, and this 4589 warning
 # on MSVC is legitimate, but silencing the warning because it's a third-party library
 
+# Shush every warning for any lib added after it?
+# link_libraries(turn_off_warnings)
+
 if(NOT MSVC)
   add_compile_options(-Wno-pedantic -Wno-unused-parameter -Wno-unknown-pragmas)
+  if(CMAKE_COMPILER_IS_GNUCXX AND CMAKE_CXX_COMPILER_VERSION VERSION_GREATER_EQUAL 15.0)
+    add_compile_options($<$<COMPILE_LANGUAGE:CXX>:-Wno-dangling-reference> $<$<COMPILE_LANGUAGE:CXX>:-Wno-restrict>)
+  endif()
 else()
   add_compile_options(/wd4267 /wd4996 /wd4068 /wd4244 /wd4589)
 endif()
@@ -93,7 +108,7 @@ set(RE2_BUILD_TESTING
 #      CACHE BOOL "" FORCE)
 #endif()
 
-# We don't want to enable the global warnings for any of the third party projects
+# We don't want to enable the global project_warnings for any of the third party projects
 link_libraries(project_options)
 add_subdirectory(SQLite)
 set_target_properties(sqlite PROPERTIES FOLDER ThirdParty/SQLite)
@@ -119,31 +134,49 @@ if(BUILD_TESTING)
   set_target_properties(gtest_main PROPERTIES FOLDER ThirdParty/gtest)
   set_target_properties(gmock PROPERTIES FOLDER ThirdParty/gtest)
   set_target_properties(gmock_main PROPERTIES FOLDER ThirdParty/gtest)
+
+  set(is_clang "$<CXX_COMPILER_ID:Clang>")
+  set(v21_or_later "$<VERSION_GREATER_EQUAL:$<CXX_COMPILER_VERSION>,21>")
+  set(is_clang_v21_or_later "$<AND:${is_clang},${v21_or_later}>")
+  foreach(_gtest_target gtest gtest_main gmock gmock_main)
+    if(TARGET ${_gtest_target})
+      target_compile_options(${_gtest_target}
+        PRIVATE
+          "$<${is_clang_v21_or_later}:-Wno-character-conversion>"
+          $<$<COMPILE_LANG_AND_ID:CXX,Clang,AppleClang>:-Wno-deprecated-declarations>
+      )
+    endif()
+  endforeach()
 endif()
 
 add_subdirectory(ObjexxFCL)
 set_target_properties(objexx PROPERTIES FOLDER ThirdParty/ObjexxFCL)
+
 add_subdirectory(BCVTB)
 set_target_properties(bcvtb PROPERTIES FOLDER ThirdParty/BCVTB)
+
 add_subdirectory(Expat)
 set_target_properties(epexpat PROPERTIES FOLDER ThirdParty/Expat)
+
 add_subdirectory(FMI)
 set_target_properties(epfmiimport PROPERTIES FOLDER ThirdParty/FMI)
+target_link_libraries(epfmiimport PRIVATE turn_off_warnings)
+
 add_subdirectory(zlib)
 set_target_properties(miniziplib PROPERTIES FOLDER ThirdParty/zlib)
+target_link_libraries(miniziplib PRIVATE turn_off_warnings)
+
 add_subdirectory(DElight)
 set_target_properties(DElight PROPERTIES FOLDER ThirdParty/DElight)
+target_link_libraries(DElight PRIVATE turn_off_warnings)
+
 add_subdirectory(re2)
 set_target_properties(re2 PROPERTIES FOLDER ThirdParty/re2)
-add_subdirectory(fmt-8.0.1)
-target_compile_definitions(fmt PRIVATE FMT_USE_FULL_CACHE_DRAGONBOX=1)
-set_target_properties(fmt PROPERTIES FOLDER ThirdParty/fmt)
-add_subdirectory(cpgfunctionEP)
-set_target_properties(cpgfunctionEP PROPERTIES FOLDER ThirdParty/cpgfunctionEP)
 
 # Kiva
 option(BUILD_GROUND_PLOT "Build ground plotting library (for Kiva debugging only)" OFF)
 mark_as_advanced(FORCE BUILD_GROUND_PLOT)
+mark_as_advanced(FORCE KIVA_WERROR)
 
 set(KIVA_TESTING OFF CACHE BOOL "" FORCE)
 set(KIVA_EXE_BUILD OFF CACHE BOOL "" FORCE)
@@ -151,7 +184,7 @@ set(KIVA_3D OFF CACHE BOOL "" FORCE)
 set(KIVA_GROUND_PLOT ${BUILD_GROUND_PLOT} CACHE BOOL "" FORCE)
 set(KIVA_COVERAGE OFF CACHE BOOL "" FORCE)
 
-add_subdirectory("kiva-ep")
+add_subdirectory(kiva)
 set_target_properties(libkiva PROPERTIES FOLDER ThirdParty/Kiva)
 
 if(NOT APPLE)
@@ -172,17 +205,21 @@ set(BUILD_BTWXT_TESTING
     CACHE BOOL "" FORCE)
 add_subdirectory(btwxt)
 set_target_properties(btwxt PROPERTIES FOLDER ThirdParty/Btwxt)
+mark_as_advanced(FORCE btwxt_STATIC_LIB)
+mark_as_advanced(FORCE btwxt_COVERAGE)
+mark_as_advanced(FORCE btwxt_BUILD_TESTING)
 
 if(OPENGL_FOUND)
   set(BUILD_PENUMBRA_TESTING
       OFF
       CACHE BOOL "" FORCE)
   add_subdirectory(penumbra)
-  set_target_properties(awning PROPERTIES FOLDER ThirdParty/Penumbra)
   set_target_properties(glfw PROPERTIES FOLDER ThirdParty/Penumbra/GLFW)
   set_target_properties(glad PROPERTIES FOLDER ThirdParty/Penumbra)
   set_target_properties(penumbra PROPERTIES FOLDER ThirdParty/Penumbra)
   set_target_properties(tess2 PROPERTIES FOLDER ThirdParty/Penumbra)
+  mark_as_advanced(FORCE penumbra_STATIC_LIB)
+  mark_as_advanced(FORCE penumbra_COVERAGE)
 endif()
 
 # libtk205
@@ -193,3 +230,6 @@ set(libtk205_USE_SUBMODULES
         OFF
         CACHE BOOL "" FORCE)
 add_subdirectory(libtk205)
+mark_as_advanced(FORCE libtk205_STATIC_LIB)
+mark_as_advanced(FORCE libtk205_COVERAGE)
+mark_as_advanced(FORCE libtk205_BUILD_TESTING)

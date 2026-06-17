@@ -37,7 +37,7 @@ There are a couple potential solutions to this problem:
 
 ## Input Output Reference Documentation ##
 
-See proposed changes in [Energy+.idd.in](https://github.com/NREL/EnergyPlus/pull/7302/files#diff-23ccf090b80d26e885712256b9a6d888). Will draft document once IDD is reviewed.
+See proposed changes in [Energy+.idd.in](https://github.com/NatLabRockies/EnergyPlus/pull/7302/files#diff-23ccf090b80d26e885712256b9a6d888). Will draft document once IDD is reviewed.
 
 ## Engineering Reference ##
 

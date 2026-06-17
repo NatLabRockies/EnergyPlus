@@ -1,0 +1,22 @@
+Big news!  As of EnergyPLus 25.1.0, the classic IDF Version Updater tool is being deprecated.
+
+A brand-new version updater tool has been developed, and is now packaged up on all platforms.
+This new tool was written in Python, and leverages the Python interpreter embedded inside
+EnergyPlus.  If you'd like to give it a try, here's how:
+
+# Windows
+Just click the IDFVersionUpdater_Python shortcut in the EnergyPlus installation root folder (one folder up from here),
+or launch from the Windows start menu (if you installed start menu shortcuts).
+
+# Mac
+There is an .app bundle right in the EnergyPlus Applications root folder, just launch from there.  One open you can pin
+it to the dock for easy access.
+
+# Linux
+Like Windows, there are shortcuts right in the install folder, but it is also available from the new desktop
+integration.  After install, press that "Start" button on the keyboard, and pin the EnergyPlus icon to the dock.  From
+there, you can right click to access the Python EPLaunch or the Python IDFVersionUpdater.
+
+# Classic Version
+The classic updater tool was not working on Ubuntu 24.04, and so it was removed entirely in favor of the Python tool.
+The classic updater tool is still included on Windows and Mac, but will be removed in a future version.

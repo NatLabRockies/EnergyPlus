@@ -1,7 +1,7 @@
-// EnergyPlus, Copyright (c) 1996-2023, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
-// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other
+// National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
 // contributors. All rights reserved.
 //
 // NOTICE: This Software was developed under funding from the U.S. Department of Energy and the
@@ -47,7 +47,6 @@
 
 // ObjexxFCL Headers
 #include <ObjexxFCL/Array1D.hh>
-#include <ObjexxFCL/Fmath.hh>
 
 // EnergyPlus Headers
 #include <EnergyPlus/Data/EnergyPlusData.hh>
@@ -88,12 +87,12 @@ namespace TARCOGCommon {
 
         LDSumMax = 0.0;
         for (i = 1; i <= TARCOGParams::MMax; i += 2) {
-            Real64 const sin_i(std::sin(i * DataGlobalConstants::PiOvr2));
+            Real64 const sin_i(std::sin(i * Constant::PiOvr2));
             Real64 const pow_i_W(pow_2(i / Width));
             for (j = 1; j <= TARCOGParams::NMax; j += 2) {
-                LDSumMax += (sin_i * std::sin(j * DataGlobalConstants::PiOvr2)) / (i * j * pow_2(pow_i_W + pow_2(j / Height)));
+                LDSumMax += (sin_i * std::sin(j * Constant::PiOvr2)) / (i * j * pow_2(pow_i_W + pow_2(j / Height)));
             } // do j = 1, DeflectionParameters::NMax, 2
-        }     // do i = 1, DeflectionParameters::MMax, 2
+        } // do i = 1, DeflectionParameters::MMax, 2
 
         return LDSumMax;
     }
@@ -111,7 +110,7 @@ namespace TARCOGCommon {
         Real64 LDSumMean;
 
         // Locals
-        Real64 constexpr Pi_squared(DataGlobalConstants::Pi * DataGlobalConstants::Pi);
+        Real64 constexpr Pi_squared(Constant::Pi * Constant::Pi);
         int i;
         int j;
 
@@ -122,7 +121,7 @@ namespace TARCOGCommon {
             for (j = 1; j <= TARCOGParams::NMax; j += 2) {
                 LDSumMean += 4.0 / (pow_i_Pi_2 * pow_2(j) * pow_2(pow_i_W + pow_2(j / Height)));
             } // do j = 1, DeflectionParameters::NMax, 2
-        }     // do i = 1, MMax, 2
+        } // do i = 1, MMax, 2
 
         return LDSumMean;
     }
@@ -175,7 +174,6 @@ namespace TARCOGCommon {
         int k;
         int front;
         int back;
-        int vent;
 
         for (i = 1; i <= 4 * nlayer; ++i) {
             b(i) = 0.0;
@@ -208,7 +206,7 @@ namespace TARCOGCommon {
             }
 
             // second row
-            a(k, k + 1) = emis(front) * DataGlobalConstants::StefanBoltzmann * pow_3(theta(front));
+            a(k, k + 1) = emis(front) * Constant::StefanBoltzmann * pow_3(theta(front));
             a(k + 1, k + 1) = -1.0;
             if (i != 1) {
                 a(k - 2, k + 1) = rir(front);
@@ -219,7 +217,7 @@ namespace TARCOGCommon {
 
             // third row
             a(k + 2, k + 2) = -1.0;
-            a(k + 3, k + 2) = emis(back) * DataGlobalConstants::StefanBoltzmann * pow_3(theta(back));
+            a(k + 3, k + 2) = emis(back) * Constant::StefanBoltzmann * pow_3(theta(back));
             if (i != 1) {
                 a(k - 2, k + 2) = tir(front);
             }
@@ -246,7 +244,7 @@ namespace TARCOGCommon {
             k = 4 * i - 3;
             front = 2 * i - 1;
             back = 2 * i;
-            vent = i + 1;
+            int vent = i + 1;
 
             b(k) = 0.5 * asol(i) + 0.5 * qv(vent - 1);
             b(k + 3) = -0.5 * asol(i) - 0.5 * qv(vent);
@@ -290,7 +288,9 @@ namespace TARCOGCommon {
         ludcmp(state, a, n, indx, d, nperr, ErrorMessage);
 
         // Exit on error
-        if ((nperr > 0) && (nperr <= 1000)) return;
+        if ((nperr > 0) && (nperr <= 1000)) {
+            return;
+        }
 
         lubksb(a, n, indx, b);
     }
@@ -313,7 +313,9 @@ namespace TARCOGCommon {
         for (i = 1; i <= n; ++i) {
             aamax = 0.0;
             for (j = 1; j <= n; ++j) {
-                if (std::abs(a(j, i)) > aamax) aamax = std::abs(a(j, i));
+                if (std::abs(a(j, i)) > aamax) {
+                    aamax = std::abs(a(j, i));
+                }
             } // j
             if (aamax == 0.0) {
                 nperr = 13;
@@ -354,7 +356,9 @@ namespace TARCOGCommon {
                 state.dataTARCOGCommon->vv(imax) = state.dataTARCOGCommon->vv(j);
             }
             indx(j) = imax;
-            if (a(j, j) == 0.0) a(j, j) = TINY;
+            if (a(j, j) == 0.0) {
+                a(j, j) = TINY;
+            }
             if (j != n) {
                 dum = 1.0 / a(j, j);
                 for (i = j + 1; i <= n; ++i) {
@@ -375,12 +379,11 @@ namespace TARCOGCommon {
         int i;
         int ii;
         int j;
-        int ll;
         Real64 sum;
 
         ii = 0;
         for (i = 1; i <= n; ++i) {
-            ll = indx(i);
+            int ll = indx(i);
             sum = b(ll);
             b(ll) = b(i);
             if (ii != 0) {

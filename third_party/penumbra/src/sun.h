@@ -4,39 +4,39 @@
 #ifndef SUN_H_
 #define SUN_H_
 
+// Standard
 #include <cmath>
-#include <linmath.h>
 
-namespace Pumbra {
+// Vendor
+#include <linmath.h> // Part of GLFW
+#include <courierr/courierr.h>
 
-// typedef std::array<std::array<float, 4>, 4> mat4x4_std;
+namespace Penumbra {
+
 typedef float (*mat4x4_ptr)[4];
 
 class Sun {
 public:
-  Sun(float azm, float alt);
   Sun();
 
   // Member functions
 public:
-  mat4x4_ptr getView();
-  void setView(float azm, float alt);
-  // void setView(mat4x4 view);
-  float getAzimuth();
-  float getAltitude();
+  mat4x4_ptr get_view();
+  void set_view(float azimuth, float altitude);
+  [[nodiscard]] float get_azimuth() const;
+  [[nodiscard]] float get_altitude() const;
 
 private:
-  void setView();
-  void setAzimuth(float azm);
-  void setAltitude(float alt);
+  void set_view();
+  void set_azimuth(float azimuth);
+  void set_altitude(float altitude);
 
   // Data Members
 private:
-  mat4x4 view;
+  mat4x4 view = {};
   float azimuth, altitude;
-  bool posSet;
 };
 
-} // namespace Pumbra
+} // namespace Penumbra
 
 #endif // SUN_H_

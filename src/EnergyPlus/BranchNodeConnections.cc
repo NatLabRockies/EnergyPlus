@@ -1,7 +1,7 @@
-// EnergyPlus, Copyright (c) 1996-2023, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
-// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other
+// National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
 // contributors. All rights reserved.
 //
 // NOTICE: This Software was developed under funding from the U.S. Department of Energy and the
@@ -45,13 +45,15 @@
 // OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 // POSSIBILITY OF SUCH DAMAGE.
 
+// C++ Headers
+#include <format>
+
 // ObjexxFCL Headers
 #include <ObjexxFCL/Array.functions.hh>
 #include <ObjexxFCL/member.functions.hh>
 #include <ObjexxFCL/string.functions.hh>
 
 // EnergyPlus Headers
-#include <EnergyPlus/BITF.hh>
 #include <EnergyPlus/BranchNodeConnections.hh>
 #include <EnergyPlus/Data/EnergyPlusData.hh>
 #include <EnergyPlus/DataBranchNodeConnections.hh>
@@ -59,7 +61,7 @@
 #include <EnergyPlus/NodeInputManager.hh>
 #include <EnergyPlus/UtilityRoutines.hh>
 
-namespace EnergyPlus::BranchNodeConnections {
+namespace EnergyPlus::Node {
 
 // Module containing the routines dealing with the Branch/Node Connections (CompSets, etc)
 
@@ -72,12 +74,10 @@ namespace EnergyPlus::BranchNodeConnections {
 // needed in the branch-node data
 
 // Using/Aliasing
-using namespace DataLoopNode;
-using namespace DataBranchNodeConnections;
 
 static constexpr std::string_view undefined("UNDEFINED");
 
-constexpr std::array<std::string_view, static_cast<int>(DataLoopNode::ConnectionObjectType::Num)> ConnectionObjectTypeNames = {
+constexpr std::array<std::string_view, static_cast<int>(Node::ConnectionObjectType::Num)> ConnectionObjectTypeNames = {
     "Undefined",
     "AirConditioner:VariableRefrigerantFlow",
     "AirLoopHVAC",
@@ -87,6 +87,7 @@ constexpr std::array<std::string_view, static_cast<int>(DataLoopNode::Connection
     "AirLoopHVAC:OutdoorAirSystem",
     "AirLoopHVAC:ReturnPath",
     "AirLoopHVAC:ReturnPlenum",
+    "AirLoopHVAC:Splitter",
     "AirLoopHVAC:SupplyPath",
     "AirLoopHVAC:SupplyPlenum",
     "AirLoopHVAC:Unitary:Furnace:HeatCool",
@@ -198,7 +199,8 @@ constexpr std::array<std::string_view, static_cast<int>(DataLoopNode::Connection
     "Dehumidifier:Desiccant:NoFans",
     "Dehumidifier:Desiccant:System",
     "DistrictCooling",
-    "DistrictHeating",
+    "DistrictHeating:Water",
+    "DistrictHeating:Steam",
     "Duct",
     "ElectricEquipment:ITE:AirCooled",
     "EvaporativeCooler:Direct:CelDekPad",
@@ -237,8 +239,13 @@ constexpr std::array<std::string_view, static_cast<int>(DataLoopNode::Connection
     "HeatExchanger:AirToAir:SensibleAndLatent",
     "HeatExchanger:Desiccant:BalancedFlow",
     "HeatExchanger:FluidToFluid",
+    "HeatPump:AirToWater:FuelFired:Cooling",
+    "HeatPump:AirToWater:FuelFired:Heating",
     "HeatPump:PlantLoop:EIR:Cooling",
     "HeatPump:PlantLoop:EIR:Heating",
+    "HeatPump:AirToWater:Cooling",
+    "HeatPump:AirToWater:Heating",
+    "HeatPump:AirToWater",
     "HeatPump:WaterToWater:EquationFit:Cooling",
     "HeatPump:WaterToWater:EquationFit:Heating",
     "HeatPump:WaterToWater:ParameterEstimation:Cooling",
@@ -258,6 +265,7 @@ constexpr std::array<std::string_view, static_cast<int>(DataLoopNode::Connection
     "PipingSystem:Underground:PipeCircuit",
     "PlantComponent:TemperatureSource",
     "PlantComponent:UserDefined",
+    "PlantEquipmentOperation:ChillerHeaterChangeover",
     "PlantEquipmentOperation:ComponentSetpoint",
     "PlantEquipmentOperation:OutdoorDewpointDifference",
     "PlantEquipmentOperation:OutdoorDrybulbDifference",
@@ -312,8 +320,10 @@ constexpr std::array<std::string_view, static_cast<int>(DataLoopNode::Connection
     "TemperingValve",
     "ThermalStorage:ChilledWater:Mixed",
     "ThermalStorage:ChilledWater:Stratified",
+    "ThermalStorage:HotWater:Stratified",
     "ThermalStorage:Ice:Detailed",
     "ThermalStorage:Ice:Simple",
+    "ThermalStorage:PCM",
     "WaterHeater:HeatPump",
     "WaterHeater:HeatPump:PumpedCondenser",
     "WaterHeater:HeatPump:WrappedCondenser",
@@ -350,9 +360,11 @@ constexpr std::array<std::string_view, static_cast<int>(DataLoopNode::Connection
     "ZoneHVAC:WaterToAirHeatPump",
     "ZoneHVAC:WindowAirConditioner",
     "ZoneProperty:LocalEnvironment",
-};
+    "SpaceHVAC:EquipmentConnections",
+    "SpaceHVAC:ZoneEquipmentSplitter",
+    "SpaceHVAC:ZoneEquipmentMixer"};
 
-constexpr std::array<std::string_view, static_cast<int>(DataLoopNode::ConnectionObjectType::Num)> ConnectionObjectTypeNamesUC = {
+constexpr std::array<std::string_view, static_cast<int>(Node::ConnectionObjectType::Num)> ConnectionObjectTypeNamesUC = {
     undefined,
     "AIRCONDITIONER:VARIABLEREFRIGERANTFLOW",
     "AIRLOOPHVAC",
@@ -362,6 +374,7 @@ constexpr std::array<std::string_view, static_cast<int>(DataLoopNode::Connection
     "AIRLOOPHVAC:OUTDOORAIRSYSTEM",
     "AIRLOOPHVAC:RETURNPATH",
     "AIRLOOPHVAC:RETURNPLENUM",
+    "AIALOOPHVAC:SPLITTER",
     "AIRLOOPHVAC:SUPPLYPATH",
     "AIRLOOPHVAC:SUPPLYPLENUM",
     "AIRLOOPHVAC:UNITARY:FURNACE:HEATCOOL",
@@ -473,7 +486,8 @@ constexpr std::array<std::string_view, static_cast<int>(DataLoopNode::Connection
     "DEHUMIDIFIER:DESICCANT:NOFANS",
     "DEHUMIDIFIER:DESICCANT:SYSTEM",
     "DISTRICTCOOLING",
-    "DISTRICTHEATING",
+    "DISTRICTHEATING:WATER",
+    "DISTRICTHEATING:STEAM",
     "DUCT",
     "ELECTRICEQUIPMENT:ITE:AIRCOOLED",
     "EVAPORATIVECOOLER:DIRECT:CELDEKPAD",
@@ -512,8 +526,13 @@ constexpr std::array<std::string_view, static_cast<int>(DataLoopNode::Connection
     "HEATEXCHANGER:AIRTOAIR:SENSIBLEANDLATENT",
     "HEATEXCHANGER:DESICCANT:BALANCEDFLOW",
     "HEATEXCHANGER:FLUIDTOFLUID",
+    "HEATPUMP:AIRTOWATER:FUELFIRED:COOLING",
+    "HEATPUMP:AIRTOWATER:FUELFIRED:HEATING",
     "HEATPUMP:PLANTLOOP:EIR:COOLING",
     "HEATPUMP:PLANTLOOP:EIR:HEATING",
+    "HEATPUMP:AIRTOWATER:COOLING",
+    "HEATPUMP:AIRTOWATER:HEATING",
+    "HEATPUMP:AIRTOWATER",
     "HEATPUMP:WATERTOWATER:EQUATIONFIT:COOLING",
     "HEATPUMP:WATERTOWATER:EQUATIONFIT:HEATING",
     "HEATPUMP:WATERTOWATER:PARAMETERESTIMATION:COOLING",
@@ -533,6 +552,7 @@ constexpr std::array<std::string_view, static_cast<int>(DataLoopNode::Connection
     "PIPINGSYSTEM:UNDERGROUND:PIPECIRCUIT",
     "PLANTCOMPONENT:TEMPERATURESOURCE",
     "PLANTCOMPONENT:USERDEFINED",
+    "PLANTEQUIPMENTOPERATION:CHILLERHEATERCHANGEOVER",
     "PLANTEQUIPMENTOPERATION:COMPONENTSETPOINT",
     "PLANTEQUIPMENTOPERATION:OUTDOORDEWPOINTDIFFERENCE",
     "PLANTEQUIPMENTOPERATION:OUTDOORDRYBULBDIFFERENCE",
@@ -587,8 +607,10 @@ constexpr std::array<std::string_view, static_cast<int>(DataLoopNode::Connection
     "TEMPERINGVALVE",
     "THERMALSTORAGE:CHILLEDWATER:MIXED",
     "THERMALSTORAGE:CHILLEDWATER:STRATIFIED",
+    "THERMALSTORAGE:HOTWATER:STRATIFIED",
     "THERMALSTORAGE:ICE:DETAILED",
     "THERMALSTORAGE:ICE:SIMPLE",
+    "THERMALSTORAGE:PCM",
     "WATERHEATER:HEATPUMP",
     "WATERHEATER:HEATPUMP:PUMPEDCONDENSER",
     "WATERHEATER:HEATPUMP:WRAPPEDCONDENSER",
@@ -625,18 +647,20 @@ constexpr std::array<std::string_view, static_cast<int>(DataLoopNode::Connection
     "ZONEHVAC:WATERTOAIRHEATPUMP",
     "ZONEHVAC:WINDOWAIRCONDITIONER",
     "ZONEPROPERTY:LOCALENVIRONMENT",
-};
+    "SPACEHVAC:EQUIPMENTCONNECTIONS",
+    "SPACEHVAC:ZONEEQUIPMENTSPLITTER",
+    "SPACEHVAC:ZONEEQUIPMENTMIXER"};
 
 void RegisterNodeConnection(EnergyPlusData &state,
-                            int const NodeNumber,                                // Number for this Node
-                            std::string_view const NodeName,                     // Name of this Node
-                            DataLoopNode::ConnectionObjectType const ObjectType, // Type of object this Node is connected to (e.g. Chiller:Electric)
-                            std::string_view const ObjectName,                   // Name of object this Node is connected to (e.g. MyChiller)
-                            DataLoopNode::ConnectionType const ConnectionType,   // Connection Type for this Node (must be valid)
-                            NodeInputManager::CompFluidStream const FluidStream, // Count on Fluid Streams
-                            bool const IsParent,                                 // True when node is a parent node
-                            bool &errFlag,                                       // Will be True if errors already detected or if errors found here
-                            std::string_view const InputFieldName                // Input Field Name
+                            int const NodeNumber,                        // Number for this Node
+                            std::string_view const NodeName,             // Name of this Node
+                            Node::ConnectionObjectType const ObjectType, // Type of object this Node is connected to (e.g. Chiller:Electric)
+                            std::string_view const ObjectName,           // Name of object this Node is connected to (e.g. MyChiller)
+                            Node::ConnectionType const ConnectionType,   // Connection Type for this Node (must be valid)
+                            Node::CompFluidStream const FluidStream,     // Count on Fluid Streams
+                            bool const IsParent,                         // True when node is a parent node
+                            bool &errFlag,                               // Will be True if errors already detected or if errors found here
+                            std::string_view const InputFieldName        // Input Field Name
 )
 {
 
@@ -655,32 +679,43 @@ void RegisterNodeConnection(EnergyPlusData &state,
 
     bool ErrorsFoundHere = false;
 
-    if ((ObjectType == DataLoopNode::ConnectionObjectType::Invalid) || (ObjectType == DataLoopNode::ConnectionObjectType::Num)) {
+    if ((ObjectType == Node::ConnectionObjectType::Invalid) || (ObjectType == Node::ConnectionObjectType::Num)) {
         ShowSevereError(state, "Developer Error: Invalid ObjectType");
-        ShowContinueError(state, format("Occurs for Node={}, ObjectName={}", std::string{NodeName}, std::string{ObjectName}));
+        ShowContinueError(state, std::format("Occurs for Node={}, ObjectName={}", std::string{NodeName}, std::string{ObjectName}));
         ErrorsFoundHere = true;
     }
 
     std::string_view const objTypeStr = ConnectionObjectTypeNames[static_cast<int>(ObjectType)];
-    std::string_view const conTypeStr = ConnectionTypeNames[static_cast<int>(ConnectionType)];
+    std::string_view const conTypeStr = Node::ConnectionTypeNames[static_cast<int>(ConnectionType)];
 
-    if ((ConnectionType == DataLoopNode::ConnectionType::Invalid) || (ConnectionType == DataLoopNode::ConnectionType::Num)) {
-        ShowSevereError(state, format("{}{}{}", RoutineName, "Invalid ConnectionType=", ConnectionType));
-        ShowContinueError(state, format("Occurs for Node={}, ObjectType={}, ObjectName={}", NodeName, objTypeStr, ObjectName));
+    if ((ConnectionType == Node::ConnectionType::Invalid) || (ConnectionType == Node::ConnectionType::Num)) {
+        ShowSevereError(state, std::format("{}Invalid ConnectionType={}", RoutineName, static_cast<int>(ConnectionType)));
+        ShowContinueError(state, std::format("Occurs for Node={}, ObjectType={}, ObjectName={}", NodeName, objTypeStr, ObjectName));
         ErrorsFoundHere = true;
     }
 
     bool MakeNew = true;
     for (int Count = 1; Count <= state.dataBranchNodeConnections->NumOfNodeConnections; ++Count) {
-        if (state.dataBranchNodeConnections->NodeConnections(Count).NodeNumber != NodeNumber) continue;
-        if (state.dataBranchNodeConnections->NodeConnections(Count).ObjectType != ObjectType) continue;
-        if (!UtilityRoutines::SameString(state.dataBranchNodeConnections->NodeConnections(Count).ObjectName, ObjectName)) continue;
-        if (state.dataBranchNodeConnections->NodeConnections(Count).ConnectionType != ConnectionType) continue;
-        if (state.dataBranchNodeConnections->NodeConnections(Count).FluidStream != FluidStream) continue;
+        if (state.dataBranchNodeConnections->NodeConnections(Count).NodeNumber != NodeNumber) {
+            continue;
+        }
+        if (state.dataBranchNodeConnections->NodeConnections(Count).ObjectType != ObjectType) {
+            continue;
+        }
+        if (!Util::SameString(state.dataBranchNodeConnections->NodeConnections(Count).ObjectName, ObjectName)) {
+            continue;
+        }
+        if (state.dataBranchNodeConnections->NodeConnections(Count).ConnectionType != ConnectionType) {
+            continue;
+        }
+        if (state.dataBranchNodeConnections->NodeConnections(Count).FluidStream != FluidStream) {
+            continue;
+        }
         if ((state.dataBranchNodeConnections->NodeConnections(Count).ObjectIsParent && !IsParent) ||
             (!state.dataBranchNodeConnections->NodeConnections(Count).ObjectIsParent && IsParent)) {
-            ShowSevereError(state, format("{}{}", RoutineName, "Node registered for both Parent and \"not\" Parent"));
-            ShowContinueError(state, format("{}{}{}{}{}{}", "Occurs for Node=", NodeName, ", ObjectType=", ObjectType, ", ObjectName=", ObjectName));
+            ShowSevereError(state, std::format("{}{}", RoutineName, "Node registered for both Parent and \"not\" Parent"));
+            ShowContinueError(state,
+                              std::format("{}{}{}{}{}{}", "Occurs for Node=", NodeName, ", ObjectType=", objTypeStr, ", ObjectName=", ObjectName));
             ErrorsFoundHere = true;
         }
         MakeNew = false;
@@ -719,25 +754,27 @@ void RegisterNodeConnection(EnergyPlusData &state,
             }
 
             // Check out AirTerminal inlet/outlet nodes
-            bool Found = UtilityRoutines::FindItemInList(NodeName,
-                                                         state.dataBranchNodeConnections->AirTerminalNodeConnections,
-                                                         &EqNodeConnectionDef::NodeName,
-                                                         state.dataBranchNodeConnections->NumOfAirTerminalNodes - 1);
+            int Found = Util::FindItemInList(NodeName,
+                                             state.dataBranchNodeConnections->AirTerminalNodeConnections,
+                                             &Node::EqNodeConnectionDef::NodeName,
+                                             state.dataBranchNodeConnections->NumOfAirTerminalNodes - 1);
             if (Found != 0) { // Nodename already used
-                ShowSevereError(state, fmt::format("{}{}=\"{}\" node name duplicated", RoutineName, ObjectType, ObjectName));
-                ShowContinueError(state, format("NodeName=\"{}\", entered as type={}", NodeName, conTypeStr));
-                ShowContinueError(state, fmt::format("In Field={}", InputFieldName));
+                ShowSevereError(state, std::format("{}{}=\"{}\" node name duplicated", RoutineName, objTypeStr, ObjectName));
+                ShowContinueError(state, std::format("NodeName=\"{}\", entered as type={}", NodeName, conTypeStr));
+                ShowContinueError(state, std::format("In Field={}", InputFieldName));
+                ShowContinueError(
+                    state,
+                    std::format("NodeName=\"{}\", entered as type={}", NodeName, Node::ConnectionTypeNamesUC[static_cast<int>(ConnectionType)]));
+                ShowContinueError(state, std::format("In Field={}", InputFieldName));
                 ShowContinueError(state,
-                                  format("NodeName=\"{}\", entered as type={}", NodeName, ConnectionTypeNamesUC[static_cast<int>(ConnectionType)]));
-                ShowContinueError(state, format("In Field={}", InputFieldName));
-                ShowContinueError(
-                    state,
-                    format("Already used in {}=\"{}\".", objTypeStr, state.dataBranchNodeConnections->AirTerminalNodeConnections(Found).ObjectName));
-                ShowContinueError(
-                    state,
-                    format(" as type={}, In Field={}",
-                           ConnectionTypeNamesUC[static_cast<int>(state.dataBranchNodeConnections->AirTerminalNodeConnections(Found).ConnectionType)],
-                           state.dataBranchNodeConnections->AirTerminalNodeConnections(Found).InputFieldName));
+                                  std::format("Already used in {}=\"{}\".",
+                                              objTypeStr,
+                                              state.dataBranchNodeConnections->AirTerminalNodeConnections(Found).ObjectName));
+                ShowContinueError(state,
+                                  std::format(" as type={}, In Field={}",
+                                              Node::ConnectionTypeNamesUC[static_cast<int>(
+                                                  state.dataBranchNodeConnections->AirTerminalNodeConnections(Found).ConnectionType)],
+                                              state.dataBranchNodeConnections->AirTerminalNodeConnections(Found).InputFieldName));
                 ErrorsFoundHere = true;
             } else {
                 state.dataBranchNodeConnections->AirTerminalNodeConnections(state.dataBranchNodeConnections->NumOfAirTerminalNodes).NodeName =
@@ -752,7 +789,7 @@ void RegisterNodeConnection(EnergyPlusData &state,
                     InputFieldName;
             }
         } else {
-            ShowSevereError(state, fmt::format("{}{} , Developer Error: Input Field Name not included.", RoutineName, objTypeStr));
+            ShowSevereError(state, std::format("{}{} , Developer Error: Input Field Name not included.", RoutineName, objTypeStr));
             ShowContinueError(state, "Node names not checked for duplication.");
         }
     }
@@ -762,16 +799,15 @@ void RegisterNodeConnection(EnergyPlusData &state,
     }
 }
 
-void OverrideNodeConnectionType(
-    EnergyPlusData &state,
-    int const NodeNumber,                                // Number for this Node
-    std::string const &NodeName,                         // Name of this Node
-    DataLoopNode::ConnectionObjectType const ObjectType, // Type of object this Node is connected to (e.g. Chiller:Electric)
-    std::string const &ObjectName,                       // Name of object this Node is connected to (e.g. MyChiller)
-    DataLoopNode::ConnectionType const ConnectionType,   // Connection Type for this Node (must be valid)
-    NodeInputManager::CompFluidStream const FluidStream, // Count on Fluid Streams
-    bool const IsParent,                                 // True when node is a parent node
-    bool &errFlag                                        // Will be True if errors already detected or if errors found here
+void OverrideNodeConnectionType(EnergyPlusData &state,
+                                int const NodeNumber,                        // Number for this Node
+                                std::string const &NodeName,                 // Name of this Node
+                                Node::ConnectionObjectType const ObjectType, // Type of object this Node is connected to (e.g. Chiller:Electric)
+                                std::string const &ObjectName,               // Name of object this Node is connected to (e.g. MyChiller)
+                                Node::ConnectionType const ConnectionType,   // Connection Type for this Node (must be valid)
+                                Node::CompFluidStream const FluidStream,     // Count on Fluid Streams
+                                bool const IsParent,                         // True when node is a parent node
+                                bool &errFlag                                // Will be True if errors already detected or if errors found here
 )
 {
 
@@ -786,21 +822,31 @@ void OverrideNodeConnectionType(
 
     static constexpr std::string_view RoutineName("ModifyNodeConnectionType: ");
 
-    if ((ConnectionType == DataLoopNode::ConnectionType::Invalid) || (ConnectionType == DataLoopNode::ConnectionType::Num)) {
-        ShowSevereError(state, format("{}{}{}", RoutineName, "Invalid ConnectionType=", ConnectionType));
-        ShowContinueError(
-            state,
-            format("Occurs for Node={}, ObjectType={}, ObjectName={}", NodeName, ConnectionTypeNames[static_cast<int>(ObjectType)], ObjectName));
+    std::string_view const objTypeStr = ConnectionObjectTypeNames[static_cast<int>(ObjectType)];
+
+    if ((ConnectionType == Node::ConnectionType::Invalid) || (ConnectionType == Node::ConnectionType::Num)) {
+        ShowSevereError(state, std::format("{}Invalid ConnectionType={}", RoutineName, static_cast<int>(ConnectionType)));
+        ShowContinueError(state, std::format("Occurs for Node={}, ObjectType={}, ObjectName={}", NodeName, objTypeStr, ObjectName));
         errFlag = true;
     }
 
     int Found = 0;
     for (int Count = 1; Count <= state.dataBranchNodeConnections->NumOfNodeConnections; ++Count) {
-        if (state.dataBranchNodeConnections->NodeConnections(Count).NodeNumber != NodeNumber) continue;
-        if (state.dataBranchNodeConnections->NodeConnections(Count).ObjectType != ObjectType) continue;
-        if (!UtilityRoutines::SameString(state.dataBranchNodeConnections->NodeConnections(Count).ObjectName, ObjectName)) continue;
-        if (state.dataBranchNodeConnections->NodeConnections(Count).FluidStream != FluidStream) continue;
-        if ((state.dataBranchNodeConnections->NodeConnections(Count).ObjectIsParent != IsParent)) continue;
+        if (state.dataBranchNodeConnections->NodeConnections(Count).NodeNumber != NodeNumber) {
+            continue;
+        }
+        if (state.dataBranchNodeConnections->NodeConnections(Count).ObjectType != ObjectType) {
+            continue;
+        }
+        if (!Util::SameString(state.dataBranchNodeConnections->NodeConnections(Count).ObjectName, ObjectName)) {
+            continue;
+        }
+        if (state.dataBranchNodeConnections->NodeConnections(Count).FluidStream != FluidStream) {
+            continue;
+        }
+        if ((state.dataBranchNodeConnections->NodeConnections(Count).ObjectIsParent != IsParent)) {
+            continue;
+        }
         Found = Count;
         break;
     }
@@ -808,10 +854,8 @@ void OverrideNodeConnectionType(
     if (Found > 0) {
         state.dataBranchNodeConnections->NodeConnections(Found).ConnectionType = ConnectionType;
     } else {
-        ShowSevereError(state, format("{}{}", RoutineName, "Existing node connection not found."));
-        ShowContinueError(
-            state,
-            format("Occurs for Node={}, ObjectType={}, ObjectName={}", NodeName, ConnectionTypeNames[static_cast<int>(ObjectType)], ObjectName));
+        ShowSevereError(state, std::format("{}{}", RoutineName, "Existing node connection not found."));
+        ShowContinueError(state, std::format("Occurs for Node={}, ObjectType={}, ObjectName={}", NodeName, objTypeStr, ObjectName));
         errFlag = true;
     }
 }
@@ -846,7 +890,7 @@ void CheckNodeConnections(EnergyPlusData &state, bool &ErrorsFound)
     // 6.  Any given node can only be an inlet once in the list of Non-Parent Node Connections
     // 7.  Any given node can only be an outlet once in the list of Non-Parent Node Connections
     // 8.  non-parent outlet nodes -- must never be an outlet more than once
-    // 9.  nodes of type OutsideAirReference must be registered as DataLoopNode::NodeConnectionType::OutsideAir
+    // 9.  nodes of type OutsideAirReference must be registered as Node::NodeConnectionType::OutsideAir
     // 10. fluid streams cannot have multiple inlet/outlet nodes on same component
     // 11. zone nodes may not be used as anything else except as a setpoint, sensor or actuator node
 
@@ -861,75 +905,85 @@ void CheckNodeConnections(EnergyPlusData &state, bool &ErrorsFound)
     bool IsOutlet;
     bool MatchedAtLeastOne;
     int ErrorCounter;
-    int Object;
-    int EndConnect;
     Array1D_int FluidStreamInletCount;
     Array1D_int FluidStreamOutletCount;
     Array1D_int NodeObjects;
     Array1D_bool FluidStreamCounts;
-    int NumObjects;
-    int MaxFluidStream;
 
     ErrorCounter = 0;
 
     //  Check 1 -- check sensor and actuator nodes
     for (int Loop1 = 1; Loop1 <= state.dataBranchNodeConnections->NumOfNodeConnections; ++Loop1) {
-        if (state.dataBranchNodeConnections->NodeConnections(Loop1).ConnectionType != DataLoopNode::ConnectionType::Sensor) continue;
+        if (state.dataBranchNodeConnections->NodeConnections(Loop1).ConnectionType != Node::ConnectionType::Sensor) {
+            continue;
+        }
         IsValid = false;
         for (int Loop2 = 1; Loop2 <= state.dataBranchNodeConnections->NumOfNodeConnections; ++Loop2) {
-            if (Loop1 == Loop2) continue;
-            if (state.dataBranchNodeConnections->NodeConnections(Loop1).NodeNumber !=
-                state.dataBranchNodeConnections->NodeConnections(Loop2).NodeNumber)
+            if (Loop1 == Loop2) {
                 continue;
-            if ((state.dataBranchNodeConnections->NodeConnections(Loop2).ConnectionType == DataLoopNode::ConnectionType::Actuator) ||
-                (state.dataBranchNodeConnections->NodeConnections(Loop2).ConnectionType == DataLoopNode::ConnectionType::Sensor)) {
+            }
+            if (state.dataBranchNodeConnections->NodeConnections(Loop1).NodeNumber !=
+                state.dataBranchNodeConnections->NodeConnections(Loop2).NodeNumber) {
+                continue;
+            }
+            if ((state.dataBranchNodeConnections->NodeConnections(Loop2).ConnectionType == Node::ConnectionType::Actuator) ||
+                (state.dataBranchNodeConnections->NodeConnections(Loop2).ConnectionType == Node::ConnectionType::Sensor)) {
                 continue;
             }
 
             IsValid = true;
         }
         if (!IsValid) {
-            ShowSevereError(state,
-                            format("Node Connection Error, Node=\"{}\", Sensor node did not find a matching node of appropriate type (other than "
-                                   "Actuator or Sensor).",
-                                   state.dataBranchNodeConnections->NodeConnections(Loop1).NodeName));
+            ShowSevereError(
+                state,
+                std::format("Node Connection Error, Node=\"{}\", Sensor node did not find a matching node of appropriate type (other than "
+                            "Actuator or Sensor).",
+                            state.dataBranchNodeConnections->NodeConnections(Loop1).NodeName));
 
-            ShowContinueError(state,
-                              format("Reference Object={}, Name={}",
-                                     ConnectionObjectTypeNames[static_cast<int>(state.dataBranchNodeConnections->NodeConnections(Loop1).ObjectType)],
-                                     state.dataBranchNodeConnections->NodeConnections(Loop1).ObjectName));
+            ShowContinueError(
+                state,
+                std::format("Reference Object={}, Name={}",
+                            ConnectionObjectTypeNames[static_cast<int>(state.dataBranchNodeConnections->NodeConnections(Loop1).ObjectType)],
+                            state.dataBranchNodeConnections->NodeConnections(Loop1).ObjectName));
             ++ErrorCounter;
             ErrorsFound = true;
         }
     }
 
     for (int Loop1 = 1; Loop1 <= state.dataBranchNodeConnections->NumOfNodeConnections; ++Loop1) {
-        if (state.dataBranchNodeConnections->NodeConnections(Loop1).ConnectionType != DataLoopNode::ConnectionType::Actuator) continue;
+        if (state.dataBranchNodeConnections->NodeConnections(Loop1).ConnectionType != Node::ConnectionType::Actuator) {
+            continue;
+        }
         IsValid = false;
         for (int Loop2 = 1; Loop2 <= state.dataBranchNodeConnections->NumOfNodeConnections; ++Loop2) {
-            if (Loop1 == Loop2) continue;
-            if (state.dataBranchNodeConnections->NodeConnections(Loop1).NodeNumber !=
-                state.dataBranchNodeConnections->NodeConnections(Loop2).NodeNumber)
+            if (Loop1 == Loop2) {
                 continue;
+            }
+            if (state.dataBranchNodeConnections->NodeConnections(Loop1).NodeNumber !=
+                state.dataBranchNodeConnections->NodeConnections(Loop2).NodeNumber) {
+                continue;
+            }
 
-            if ((state.dataBranchNodeConnections->NodeConnections(Loop2).ConnectionType == DataLoopNode::ConnectionType::Actuator) ||
-                (state.dataBranchNodeConnections->NodeConnections(Loop2).ConnectionType == DataLoopNode::ConnectionType::Sensor) ||
-                (state.dataBranchNodeConnections->NodeConnections(Loop2).ConnectionType == DataLoopNode::ConnectionType::OutsideAir)) {
+            if ((state.dataBranchNodeConnections->NodeConnections(Loop2).ConnectionType == Node::ConnectionType::Actuator) ||
+                (state.dataBranchNodeConnections->NodeConnections(Loop2).ConnectionType == Node::ConnectionType::Sensor) ||
+                (state.dataBranchNodeConnections->NodeConnections(Loop2).ConnectionType == Node::ConnectionType::OutsideAir)) {
                 continue;
             }
 
             IsValid = true;
         }
         if (!IsValid) {
-            ShowSevereError(state,
-                            format("Node Connection Error, Node=\"{}\", Actuator node did not find a matching node of appropriate type (other than "
-                                   "Actuator, Sensor, OutsideAir).",
-                                   state.dataBranchNodeConnections->NodeConnections(Loop1).NodeName));
+            ShowSevereError(
+                state,
+                std::format("Node Connection Error, Node=\"{}\", Actuator node did not find a matching node of appropriate type (other than "
+                            "Actuator, Sensor, OutsideAir).",
+                            state.dataBranchNodeConnections->NodeConnections(Loop1).NodeName));
 
-            ShowContinueError(state,
-                              format("Reference Object={}, Name={}",
-                                     ConnectionObjectTypeNames[static_cast<int>(state.dataBranchNodeConnections->NodeConnections(Loop1).ObjectType)],
-                                     state.dataBranchNodeConnections->NodeConnections(Loop1).ObjectName));
+            ShowContinueError(
+                state,
+                std::format("Reference Object={}, Name={}",
+                            ConnectionObjectTypeNames[static_cast<int>(state.dataBranchNodeConnections->NodeConnections(Loop1).ObjectType)],
+                            state.dataBranchNodeConnections->NodeConnections(Loop1).ObjectName));
             ++ErrorCounter;
             ErrorsFound = true;
         }
@@ -938,50 +992,58 @@ void CheckNodeConnections(EnergyPlusData &state, bool &ErrorsFound)
     // Check 2 -- setpoint nodes
     // Check 2a -- setpoint node must also be an inlet or an outlet (CR8212)
     for (int Loop1 = 1; Loop1 <= state.dataBranchNodeConnections->NumOfNodeConnections; ++Loop1) {
-        if (state.dataBranchNodeConnections->NodeConnections(Loop1).ConnectionType != DataLoopNode::ConnectionType::SetPoint) continue;
+        if (state.dataBranchNodeConnections->NodeConnections(Loop1).ConnectionType != Node::ConnectionType::SetPoint) {
+            continue;
+        }
         IsValid = false;
         IsInlet = false;
         IsOutlet = false;
         for (int Loop2 = 1; Loop2 <= state.dataBranchNodeConnections->NumOfNodeConnections; ++Loop2) {
-            if (Loop1 == Loop2) continue;
-            if (state.dataBranchNodeConnections->NodeConnections(Loop1).NodeNumber !=
-                state.dataBranchNodeConnections->NodeConnections(Loop2).NodeNumber)
+            if (Loop1 == Loop2) {
                 continue;
-            if ((state.dataBranchNodeConnections->NodeConnections(Loop2).ConnectionType == DataLoopNode::ConnectionType::SetPoint) ||
-                (state.dataBranchNodeConnections->NodeConnections(Loop2).ConnectionType == DataLoopNode::ConnectionType::OutsideAir)) {
+            }
+            if (state.dataBranchNodeConnections->NodeConnections(Loop1).NodeNumber !=
+                state.dataBranchNodeConnections->NodeConnections(Loop2).NodeNumber) {
+                continue;
+            }
+            if ((state.dataBranchNodeConnections->NodeConnections(Loop2).ConnectionType == Node::ConnectionType::SetPoint) ||
+                (state.dataBranchNodeConnections->NodeConnections(Loop2).ConnectionType == Node::ConnectionType::OutsideAir)) {
                 continue;
             }
 
-            if (state.dataBranchNodeConnections->NodeConnections(Loop2).ConnectionType == DataLoopNode::ConnectionType::Inlet) {
+            if (state.dataBranchNodeConnections->NodeConnections(Loop2).ConnectionType == Node::ConnectionType::Inlet) {
                 IsInlet = true;
-            } else if (state.dataBranchNodeConnections->NodeConnections(Loop2).ConnectionType == DataLoopNode::ConnectionType::Outlet) {
+            } else if (state.dataBranchNodeConnections->NodeConnections(Loop2).ConnectionType == Node::ConnectionType::Outlet) {
                 IsOutlet = true;
             }
             IsValid = true;
         }
         if (!IsValid) {
-            ShowSevereError(state,
-                            format("Node Connection Error, Node=\"{}\", Setpoint node did not find a matching node of appropriate type (other than "
-                                   "Setpoint, OutsideAir).",
-                                   state.dataBranchNodeConnections->NodeConnections(Loop1).NodeName));
+            ShowSevereError(
+                state,
+                std::format("Node Connection Error, Node=\"{}\", Setpoint node did not find a matching node of appropriate type (other than "
+                            "Setpoint, OutsideAir).",
+                            state.dataBranchNodeConnections->NodeConnections(Loop1).NodeName));
 
-            ShowContinueError(state,
-                              format("Reference Object={}, Name={}",
-                                     ConnectionObjectTypeNames[static_cast<int>(state.dataBranchNodeConnections->NodeConnections(Loop1).ObjectType)],
-                                     state.dataBranchNodeConnections->NodeConnections(Loop1).ObjectName));
+            ShowContinueError(
+                state,
+                std::format("Reference Object={}, Name={}",
+                            ConnectionObjectTypeNames[static_cast<int>(state.dataBranchNodeConnections->NodeConnections(Loop1).ObjectType)],
+                            state.dataBranchNodeConnections->NodeConnections(Loop1).ObjectName));
             ++ErrorCounter;
             ErrorsFound = true;
         }
         if (!IsInlet && !IsOutlet) {
             ShowSevereError(state,
-                            format("Node Connection Error, Node=\"{}\", Setpoint node did not find a matching node of type Inlet or Outlet.",
-                                   state.dataBranchNodeConnections->NodeConnections(Loop1).NodeName));
+                            std::format("Node Connection Error, Node=\"{}\", Setpoint node did not find a matching node of type Inlet or Outlet.",
+                                        state.dataBranchNodeConnections->NodeConnections(Loop1).NodeName));
             ShowContinueError(state, "It appears this node is not part of the HVAC system.");
 
-            ShowContinueError(state,
-                              format("Reference Object={}, Name={}",
-                                     ConnectionObjectTypeNames[static_cast<int>(state.dataBranchNodeConnections->NodeConnections(Loop1).ObjectType)],
-                                     state.dataBranchNodeConnections->NodeConnections(Loop1).ObjectName));
+            ShowContinueError(
+                state,
+                std::format("Reference Object={}, Name={}",
+                            ConnectionObjectTypeNames[static_cast<int>(state.dataBranchNodeConnections->NodeConnections(Loop1).ObjectType)],
+                            state.dataBranchNodeConnections->NodeConnections(Loop1).ObjectName));
             ++ErrorCounter;
         }
     }
@@ -990,75 +1052,100 @@ void CheckNodeConnections(EnergyPlusData &state, bool &ErrorsFound)
 
     // Check 3 -- zone inlet nodes -- must be an outlet somewhere
     for (int Loop1 = 1; Loop1 <= state.dataBranchNodeConnections->NumOfNodeConnections; ++Loop1) {
-        if (state.dataBranchNodeConnections->NodeConnections(Loop1).ConnectionType != DataLoopNode::ConnectionType::ZoneInlet) continue;
+        if (state.dataBranchNodeConnections->NodeConnections(Loop1).ConnectionType != Node::ConnectionType::ZoneInlet) {
+            continue;
+        }
         IsValid = false;
         for (int Loop2 = 1; Loop2 <= state.dataBranchNodeConnections->NumOfNodeConnections; ++Loop2) {
-            if (Loop1 == Loop2) continue;
-            if (state.dataBranchNodeConnections->NodeConnections(Loop1).NodeNumber !=
-                state.dataBranchNodeConnections->NodeConnections(Loop2).NodeNumber)
+            if (Loop1 == Loop2) {
                 continue;
-            if (state.dataBranchNodeConnections->NodeConnections(Loop2).ConnectionType != DataLoopNode::ConnectionType::Outlet) continue;
+            }
+            if (state.dataBranchNodeConnections->NodeConnections(Loop1).NodeNumber !=
+                state.dataBranchNodeConnections->NodeConnections(Loop2).NodeNumber) {
+                continue;
+            }
+            if (state.dataBranchNodeConnections->NodeConnections(Loop2).ConnectionType != Node::ConnectionType::Outlet) {
+                continue;
+            }
             IsValid = true;
         }
         if (!IsValid) {
             ShowSevereError(state,
-                            format("Node Connection Error, Node=\"{}\", ZoneInlet node did not find an outlet node.",
-                                   state.dataBranchNodeConnections->NodeConnections(Loop1).NodeName));
+                            std::format("Node Connection Error, Node=\"{}\", ZoneInlet node did not find an outlet node.",
+                                        state.dataBranchNodeConnections->NodeConnections(Loop1).NodeName));
 
-            ShowContinueError(state,
-                              format("Reference Object={}, Name={}",
-                                     ConnectionObjectTypeNames[static_cast<int>(state.dataBranchNodeConnections->NodeConnections(Loop1).ObjectType)],
-                                     state.dataBranchNodeConnections->NodeConnections(Loop1).ObjectName));
+            ShowContinueError(
+                state,
+                std::format("Reference Object={}, Name={}",
+                            ConnectionObjectTypeNames[static_cast<int>(state.dataBranchNodeConnections->NodeConnections(Loop1).ObjectType)],
+                            state.dataBranchNodeConnections->NodeConnections(Loop1).ObjectName));
             ++ErrorCounter;
         }
     }
 
     // Check 4 -- zone exhaust nodes -- must be an inlet somewhere
     for (int Loop1 = 1; Loop1 <= state.dataBranchNodeConnections->NumOfNodeConnections; ++Loop1) {
-        if (state.dataBranchNodeConnections->NodeConnections(Loop1).ConnectionType != DataLoopNode::ConnectionType::ZoneExhaust) continue;
+        if (state.dataBranchNodeConnections->NodeConnections(Loop1).ConnectionType != Node::ConnectionType::ZoneExhaust) {
+            continue;
+        }
         IsValid = false;
         for (int Loop2 = 1; Loop2 <= state.dataBranchNodeConnections->NumOfNodeConnections; ++Loop2) {
-            if (Loop1 == Loop2) continue;
-            if (state.dataBranchNodeConnections->NodeConnections(Loop1).NodeNumber !=
-                state.dataBranchNodeConnections->NodeConnections(Loop2).NodeNumber)
+            if (Loop1 == Loop2) {
                 continue;
-            if (state.dataBranchNodeConnections->NodeConnections(Loop2).ConnectionType != DataLoopNode::ConnectionType::Inlet) continue;
+            }
+            if (state.dataBranchNodeConnections->NodeConnections(Loop1).NodeNumber !=
+                state.dataBranchNodeConnections->NodeConnections(Loop2).NodeNumber) {
+                continue;
+            }
+            if (state.dataBranchNodeConnections->NodeConnections(Loop2).ConnectionType != Node::ConnectionType::Inlet) {
+                continue;
+            }
             IsValid = true;
         }
         if (!IsValid) {
             ShowSevereError(state,
-                            format("Node Connection Error, Node=\"{}\", ZoneExhaust node did not find a matching inlet node.",
-                                   state.dataBranchNodeConnections->NodeConnections(Loop1).NodeName));
+                            std::format("Node Connection Error, Node=\"{}\", ZoneExhaust node did not find a matching inlet node.",
+                                        state.dataBranchNodeConnections->NodeConnections(Loop1).NodeName));
 
-            ShowContinueError(state,
-                              format("Reference Object={}, Name={}",
-                                     ConnectionObjectTypeNames[static_cast<int>(state.dataBranchNodeConnections->NodeConnections(Loop1).ObjectType)],
-                                     state.dataBranchNodeConnections->NodeConnections(Loop1).ObjectName));
+            ShowContinueError(
+                state,
+                std::format("Reference Object={}, Name={}",
+                            ConnectionObjectTypeNames[static_cast<int>(state.dataBranchNodeConnections->NodeConnections(Loop1).ObjectType)],
+                            state.dataBranchNodeConnections->NodeConnections(Loop1).ObjectName));
             ++ErrorCounter;
         }
     }
 
     // Check 5 -- return plenum induced air outlet nodes -- must be an inlet somewhere
     for (int Loop1 = 1; Loop1 <= state.dataBranchNodeConnections->NumOfNodeConnections; ++Loop1) {
-        if (state.dataBranchNodeConnections->NodeConnections(Loop1).ConnectionType != DataLoopNode::ConnectionType::InducedAir) continue;
+        if (state.dataBranchNodeConnections->NodeConnections(Loop1).ConnectionType != Node::ConnectionType::InducedAir) {
+            continue;
+        }
         IsValid = false;
         for (int Loop2 = 1; Loop2 <= state.dataBranchNodeConnections->NumOfNodeConnections; ++Loop2) {
-            if (Loop1 == Loop2) continue;
-            if (state.dataBranchNodeConnections->NodeConnections(Loop1).NodeNumber !=
-                state.dataBranchNodeConnections->NodeConnections(Loop2).NodeNumber)
+            if (Loop1 == Loop2) {
                 continue;
-            if (state.dataBranchNodeConnections->NodeConnections(Loop2).ConnectionType != DataLoopNode::ConnectionType::Inlet) continue;
+            }
+            if (state.dataBranchNodeConnections->NodeConnections(Loop1).NodeNumber !=
+                state.dataBranchNodeConnections->NodeConnections(Loop2).NodeNumber) {
+                continue;
+            }
+            if (state.dataBranchNodeConnections->NodeConnections(Loop2).ConnectionType != Node::ConnectionType::Inlet) {
+                continue;
+            }
             IsValid = true;
         }
         if (!IsValid) {
-            ShowSevereError(state,
-                            format("Node Connection Error, Node=\"{}\", Return plenum induced air outlet node did not find a matching inlet node.",
-                                   state.dataBranchNodeConnections->NodeConnections(Loop1).NodeName));
+            ShowSevereError(
+                state,
+                std::format("Node Connection Error, Node=\"{}\", Return plenum induced air outlet node did not find a matching inlet node.",
+                            state.dataBranchNodeConnections->NodeConnections(Loop1).NodeName));
 
-            ShowContinueError(state,
-                              format("Reference Object={}, Name={}",
-                                     ConnectionObjectTypeNames[static_cast<int>(state.dataBranchNodeConnections->NodeConnections(Loop1).ObjectType)],
-                                     state.dataBranchNodeConnections->NodeConnections(Loop1).ObjectName));
+            ShowContinueError(
+                state,
+                std::format("Reference Object={}, Name={}",
+                            ConnectionObjectTypeNames[static_cast<int>(state.dataBranchNodeConnections->NodeConnections(Loop1).ObjectType)],
+                            state.dataBranchNodeConnections->NodeConnections(Loop1).ObjectName));
             ++ErrorCounter;
             ErrorsFound = true;
         }
@@ -1069,33 +1156,39 @@ void CheckNodeConnections(EnergyPlusData &state, bool &ErrorsFound)
     //    b)  If an InletNode's object is not one of the above types, it is valid if the
     //        same node name appears as an INLET to an AirLoopHVAC, CondenserLoop, or PlantLoop.
     for (int Loop1 = 1; Loop1 <= state.dataBranchNodeConnections->NumOfNodeConnections; ++Loop1) {
-        if (state.dataBranchNodeConnections->NodeConnections(Loop1).ConnectionType != DataLoopNode::ConnectionType::Inlet) continue;
-        if (state.dataBranchNodeConnections->NodeConnections(Loop1).ObjectType == DataLoopNode::ConnectionObjectType::AirLoopHVAC ||
-            state.dataBranchNodeConnections->NodeConnections(Loop1).ObjectType == DataLoopNode::ConnectionObjectType::CondenserLoop ||
-            state.dataBranchNodeConnections->NodeConnections(Loop1).ObjectType == DataLoopNode::ConnectionObjectType::PlantLoop)
+        if (state.dataBranchNodeConnections->NodeConnections(Loop1).ConnectionType != Node::ConnectionType::Inlet) {
             continue;
+        }
+        if (state.dataBranchNodeConnections->NodeConnections(Loop1).ObjectType == Node::ConnectionObjectType::AirLoopHVAC ||
+            state.dataBranchNodeConnections->NodeConnections(Loop1).ObjectType == Node::ConnectionObjectType::CondenserLoop ||
+            state.dataBranchNodeConnections->NodeConnections(Loop1).ObjectType == Node::ConnectionObjectType::PlantLoop) {
+            continue;
+        }
         IsValid = false;
         MatchedAtLeastOne = false;
         for (int Loop2 = 1; Loop2 <= state.dataBranchNodeConnections->NumOfNodeConnections; ++Loop2) {
-            if (Loop1 == Loop2) continue;
-            if (state.dataBranchNodeConnections->NodeConnections(Loop1).NodeNumber !=
-                state.dataBranchNodeConnections->NodeConnections(Loop2).NodeNumber)
+            if (Loop1 == Loop2) {
                 continue;
+            }
+            if (state.dataBranchNodeConnections->NodeConnections(Loop1).NodeNumber !=
+                state.dataBranchNodeConnections->NodeConnections(Loop2).NodeNumber) {
+                continue;
+            }
 
-            if ((state.dataBranchNodeConnections->NodeConnections(Loop2).ConnectionType == DataLoopNode::ConnectionType::Outlet) ||
-                (state.dataBranchNodeConnections->NodeConnections(Loop2).ConnectionType == DataLoopNode::ConnectionType::ZoneReturn) ||
-                (state.dataBranchNodeConnections->NodeConnections(Loop2).ConnectionType == DataLoopNode::ConnectionType::ZoneExhaust) ||
-                (state.dataBranchNodeConnections->NodeConnections(Loop2).ConnectionType == DataLoopNode::ConnectionType::InducedAir) ||
-                (state.dataBranchNodeConnections->NodeConnections(Loop2).ConnectionType == DataLoopNode::ConnectionType::ReliefAir) ||
-                (state.dataBranchNodeConnections->NodeConnections(Loop2).ConnectionType == DataLoopNode::ConnectionType::OutsideAir)) {
+            if ((state.dataBranchNodeConnections->NodeConnections(Loop2).ConnectionType == Node::ConnectionType::Outlet) ||
+                (state.dataBranchNodeConnections->NodeConnections(Loop2).ConnectionType == Node::ConnectionType::ZoneReturn) ||
+                (state.dataBranchNodeConnections->NodeConnections(Loop2).ConnectionType == Node::ConnectionType::ZoneExhaust) ||
+                (state.dataBranchNodeConnections->NodeConnections(Loop2).ConnectionType == Node::ConnectionType::InducedAir) ||
+                (state.dataBranchNodeConnections->NodeConnections(Loop2).ConnectionType == Node::ConnectionType::ReliefAir) ||
+                (state.dataBranchNodeConnections->NodeConnections(Loop2).ConnectionType == Node::ConnectionType::OutsideAir)) {
                 MatchedAtLeastOne = true;
                 continue;
             }
 
-            if (state.dataBranchNodeConnections->NodeConnections(Loop2).ConnectionType == DataLoopNode::ConnectionType::Inlet &&
-                (state.dataBranchNodeConnections->NodeConnections(Loop2).ObjectType == DataLoopNode::ConnectionObjectType::AirLoopHVAC ||
-                 state.dataBranchNodeConnections->NodeConnections(Loop2).ObjectType == DataLoopNode::ConnectionObjectType::CondenserLoop ||
-                 state.dataBranchNodeConnections->NodeConnections(Loop2).ObjectType == DataLoopNode::ConnectionObjectType::PlantLoop)) {
+            if (state.dataBranchNodeConnections->NodeConnections(Loop2).ConnectionType == Node::ConnectionType::Inlet &&
+                (state.dataBranchNodeConnections->NodeConnections(Loop2).ObjectType == Node::ConnectionObjectType::AirLoopHVAC ||
+                 state.dataBranchNodeConnections->NodeConnections(Loop2).ObjectType == Node::ConnectionObjectType::CondenserLoop ||
+                 state.dataBranchNodeConnections->NodeConnections(Loop2).ObjectType == Node::ConnectionObjectType::PlantLoop)) {
                 MatchedAtLeastOne = true;
                 continue;
             }
@@ -1103,16 +1196,17 @@ void CheckNodeConnections(EnergyPlusData &state, bool &ErrorsFound)
         }
         if (!IsValid && !MatchedAtLeastOne) {
             ShowSevereError(state,
-                            format("{}{}{}",
-                                   "Node Connection Error, Node=\"",
-                                   state.dataBranchNodeConnections->NodeConnections(Loop1).NodeName,
-                                   R"(", Inlet node did not find an appropriate matching "outlet" node.)"));
+                            std::format("{}{}{}",
+                                        "Node Connection Error, Node=\"",
+                                        state.dataBranchNodeConnections->NodeConnections(Loop1).NodeName,
+                                        R"(", Inlet node did not find an appropriate matching "outlet" node.)"));
             ShowContinueError(state, "If this is an outdoor air inlet node, it must be listed in an OutdoorAir:Node or OutdoorAir:NodeList object.");
 
-            ShowContinueError(state,
-                              format("Reference Object={}, Name={}",
-                                     ConnectionObjectTypeNames[static_cast<int>(state.dataBranchNodeConnections->NodeConnections(Loop1).ObjectType)],
-                                     state.dataBranchNodeConnections->NodeConnections(Loop1).ObjectName));
+            ShowContinueError(
+                state,
+                std::format("Reference Object={}, Name={}",
+                            ConnectionObjectTypeNames[static_cast<int>(state.dataBranchNodeConnections->NodeConnections(Loop1).ObjectType)],
+                            state.dataBranchNodeConnections->NodeConnections(Loop1).ObjectName));
             ++ErrorCounter;
         }
     }
@@ -1120,29 +1214,39 @@ void CheckNodeConnections(EnergyPlusData &state, bool &ErrorsFound)
     // Check 7 -- non-parent inlet nodes -- must never be an inlet more than once
     for (int Loop1 = 1; Loop1 <= state.dataBranchNodeConnections->NumOfNodeConnections; ++Loop1) {
         // Only non-parent node connections
-        if (state.dataBranchNodeConnections->NodeConnections(Loop1).ObjectIsParent) continue;
-        if (state.dataBranchNodeConnections->NodeConnections(Loop1).ConnectionType != DataLoopNode::ConnectionType::Inlet) continue;
+        if (state.dataBranchNodeConnections->NodeConnections(Loop1).ObjectIsParent) {
+            continue;
+        }
+        if (state.dataBranchNodeConnections->NodeConnections(Loop1).ConnectionType != Node::ConnectionType::Inlet) {
+            continue;
+        }
         for (int Loop2 = Loop1; Loop2 <= state.dataBranchNodeConnections->NumOfNodeConnections; ++Loop2) {
-            if (Loop1 == Loop2) continue;
-            if (state.dataBranchNodeConnections->NodeConnections(Loop2).ObjectIsParent) continue;
-            if (state.dataBranchNodeConnections->NodeConnections(Loop2).ConnectionType != DataLoopNode::ConnectionType::Inlet) continue;
+            if (Loop1 == Loop2) {
+                continue;
+            }
+            if (state.dataBranchNodeConnections->NodeConnections(Loop2).ObjectIsParent) {
+                continue;
+            }
+            if (state.dataBranchNodeConnections->NodeConnections(Loop2).ConnectionType != Node::ConnectionType::Inlet) {
+                continue;
+            }
             if (state.dataBranchNodeConnections->NodeConnections(Loop2).NodeNumber ==
                 state.dataBranchNodeConnections->NodeConnections(Loop1).NodeNumber) {
                 ShowSevereError(state,
-                                format("Node Connection Error, Node=\"{}\", The same node appears as a non-parent Inlet node more than once.",
-                                       state.dataBranchNodeConnections->NodeConnections(Loop1).NodeName));
+                                std::format("Node Connection Error, Node=\"{}\", The same node appears as a non-parent Inlet node more than once.",
+                                            state.dataBranchNodeConnections->NodeConnections(Loop1).NodeName));
 
                 ShowContinueError(
                     state,
-                    format("Reference Object={}, Name={}",
-                           ConnectionObjectTypeNames[static_cast<int>(state.dataBranchNodeConnections->NodeConnections(Loop1).ObjectType)],
-                           state.dataBranchNodeConnections->NodeConnections(Loop1).ObjectName));
+                    std::format("Reference Object={}, Name={}",
+                                ConnectionObjectTypeNames[static_cast<int>(state.dataBranchNodeConnections->NodeConnections(Loop1).ObjectType)],
+                                state.dataBranchNodeConnections->NodeConnections(Loop1).ObjectName));
 
                 ShowContinueError(
                     state,
-                    format("Reference Object={}, Name={}",
-                           ConnectionObjectTypeNames[static_cast<int>(state.dataBranchNodeConnections->NodeConnections(Loop2).ObjectType)],
-                           state.dataBranchNodeConnections->NodeConnections(Loop2).ObjectName));
+                    std::format("Reference Object={}, Name={}",
+                                ConnectionObjectTypeNames[static_cast<int>(state.dataBranchNodeConnections->NodeConnections(Loop2).ObjectType)],
+                                state.dataBranchNodeConnections->NodeConnections(Loop2).ObjectName));
                 ++ErrorCounter;
                 break;
             }
@@ -1152,31 +1256,41 @@ void CheckNodeConnections(EnergyPlusData &state, bool &ErrorsFound)
     // Check 8 -- non-parent outlet nodes -- must never be an outlet more than once
     for (int Loop1 = 1; Loop1 <= state.dataBranchNodeConnections->NumOfNodeConnections; ++Loop1) {
         // Only non-parent node connections
-        if (state.dataBranchNodeConnections->NodeConnections(Loop1).ObjectIsParent) continue;
-        if (state.dataBranchNodeConnections->NodeConnections(Loop1).ConnectionType != DataLoopNode::ConnectionType::Outlet) continue;
+        if (state.dataBranchNodeConnections->NodeConnections(Loop1).ObjectIsParent) {
+            continue;
+        }
+        if (state.dataBranchNodeConnections->NodeConnections(Loop1).ConnectionType != Node::ConnectionType::Outlet) {
+            continue;
+        }
         IsValid = true;
         for (int Loop2 = Loop1; Loop2 <= state.dataBranchNodeConnections->NumOfNodeConnections; ++Loop2) {
-            if (Loop1 == Loop2) continue;
-            if (state.dataBranchNodeConnections->NodeConnections(Loop2).ObjectIsParent) continue;
-            if (state.dataBranchNodeConnections->NodeConnections(Loop2).ConnectionType != DataLoopNode::ConnectionType::Outlet) continue;
+            if (Loop1 == Loop2) {
+                continue;
+            }
+            if (state.dataBranchNodeConnections->NodeConnections(Loop2).ObjectIsParent) {
+                continue;
+            }
+            if (state.dataBranchNodeConnections->NodeConnections(Loop2).ConnectionType != Node::ConnectionType::Outlet) {
+                continue;
+            }
             if (state.dataBranchNodeConnections->NodeConnections(Loop2).NodeNumber ==
                 state.dataBranchNodeConnections->NodeConnections(Loop1).NodeNumber) {
                 // Skip if one of the
                 ShowSevereError(state,
-                                format("Node Connection Error, Node=\"{}\", The same node appears as a non-parent Outlet node more than once.",
-                                       state.dataBranchNodeConnections->NodeConnections(Loop1).NodeName));
+                                std::format("Node Connection Error, Node=\"{}\", The same node appears as a non-parent Outlet node more than once.",
+                                            state.dataBranchNodeConnections->NodeConnections(Loop1).NodeName));
 
                 ShowContinueError(
                     state,
-                    format("Reference Object={}, Name={}",
-                           ConnectionObjectTypeNames[static_cast<int>(state.dataBranchNodeConnections->NodeConnections(Loop1).ObjectType)],
-                           state.dataBranchNodeConnections->NodeConnections(Loop1).ObjectName));
+                    std::format("Reference Object={}, Name={}",
+                                ConnectionObjectTypeNames[static_cast<int>(state.dataBranchNodeConnections->NodeConnections(Loop1).ObjectType)],
+                                state.dataBranchNodeConnections->NodeConnections(Loop1).ObjectName));
 
                 ShowContinueError(
                     state,
-                    format("Reference Object={}, Name={}",
-                           ConnectionObjectTypeNames[static_cast<int>(state.dataBranchNodeConnections->NodeConnections(Loop2).ObjectType)],
-                           state.dataBranchNodeConnections->NodeConnections(Loop2).ObjectName));
+                    std::format("Reference Object={}, Name={}",
+                                ConnectionObjectTypeNames[static_cast<int>(state.dataBranchNodeConnections->NodeConnections(Loop2).ObjectType)],
+                                state.dataBranchNodeConnections->NodeConnections(Loop2).ObjectName));
 
                 ++ErrorCounter;
                 break;
@@ -1184,31 +1298,39 @@ void CheckNodeConnections(EnergyPlusData &state, bool &ErrorsFound)
         }
     }
 
-    // Check 9 -- nodes of type OutsideAirReference must be registered as DataLoopNode::NodeConnectionType::OutsideAir
+    // Check 9 -- nodes of type OutsideAirReference must be registered as Node::NodeConnectionType::OutsideAir
     for (int Loop1 = 1; Loop1 <= state.dataBranchNodeConnections->NumOfNodeConnections; ++Loop1) {
-        if (state.dataBranchNodeConnections->NodeConnections(Loop1).ConnectionType != DataLoopNode::ConnectionType::OutsideAirReference) continue;
+        if (state.dataBranchNodeConnections->NodeConnections(Loop1).ConnectionType != Node::ConnectionType::OutsideAirReference) {
+            continue;
+        }
         IsValid = false;
         for (int Loop2 = 1; Loop2 <= state.dataBranchNodeConnections->NumOfNodeConnections; ++Loop2) {
-            if (Loop1 == Loop2) continue;
-            if (state.dataBranchNodeConnections->NodeConnections(Loop1).NodeNumber !=
-                state.dataBranchNodeConnections->NodeConnections(Loop2).NodeNumber)
+            if (Loop1 == Loop2) {
                 continue;
-            if (state.dataBranchNodeConnections->NodeConnections(Loop2).ConnectionType != DataLoopNode::ConnectionType::OutsideAir) continue;
+            }
+            if (state.dataBranchNodeConnections->NodeConnections(Loop1).NodeNumber !=
+                state.dataBranchNodeConnections->NodeConnections(Loop2).NodeNumber) {
+                continue;
+            }
+            if (state.dataBranchNodeConnections->NodeConnections(Loop2).ConnectionType != Node::ConnectionType::OutsideAir) {
+                continue;
+            }
             IsValid = true;
             break;
         }
         if (!IsValid) {
             ShowSevereError(state,
-                            format("{}{}{}",
-                                   "Node Connection Error, Node=\"",
-                                   state.dataBranchNodeConnections->NodeConnections(Loop1).NodeName,
-                                   R"(", Outdoor Air Reference did not find an appropriate "outdoor air" node.)"));
+                            std::format("{}{}{}",
+                                        "Node Connection Error, Node=\"",
+                                        state.dataBranchNodeConnections->NodeConnections(Loop1).NodeName,
+                                        R"(", Outdoor Air Reference did not find an appropriate "outdoor air" node.)"));
             ShowContinueError(state, "This node must be listed in an OutdoorAir:Node or OutdoorAir:NodeList object in order to set its conditions.");
 
-            ShowContinueError(state,
-                              format("Reference Object={}, Name={}",
-                                     ConnectionObjectTypeNames[static_cast<int>(state.dataBranchNodeConnections->NodeConnections(Loop1).ObjectType)],
-                                     state.dataBranchNodeConnections->NodeConnections(Loop1).ObjectName));
+            ShowContinueError(
+                state,
+                std::format("Reference Object={}, Name={}",
+                            ConnectionObjectTypeNames[static_cast<int>(state.dataBranchNodeConnections->NodeConnections(Loop1).ObjectType)],
+                            state.dataBranchNodeConnections->NodeConnections(Loop1).ObjectName));
 
             ++ErrorCounter;
         }
@@ -1217,7 +1339,7 @@ void CheckNodeConnections(EnergyPlusData &state, bool &ErrorsFound)
     // Check 10 -- fluid streams cannot have multiple inlet/outlet nodes on same component
     //  can have multiple inlets with one outlet or vice versa but cannot have multiple both inlet and outlet
     if (state.dataBranchNodeConnections->NumOfNodeConnections > 0) {
-        MaxFluidStream = static_cast<int>(maxval(state.dataBranchNodeConnections->NodeConnections, &NodeConnectionDef::FluidStream));
+        int MaxFluidStream = static_cast<int>(maxval(state.dataBranchNodeConnections->NodeConnections, &Node::NodeConnectionDef::FluidStream));
         FluidStreamInletCount.allocate(MaxFluidStream);
         FluidStreamOutletCount.allocate(MaxFluidStream);
         FluidStreamCounts.allocate(MaxFluidStream);
@@ -1227,9 +1349,9 @@ void CheckNodeConnections(EnergyPlusData &state, bool &ErrorsFound)
         NodeObjects = 0;
         FluidStreamCounts = false;
         // Following code relies on node connections for single object type/name being grouped together
-        Object = 1;
-        EndConnect = 0;
-        NumObjects = 2;
+        int Object = 1;
+        int EndConnect = 0;
+        int NumObjects = 2;
         NodeObjects(1) = 1;
         while (Object < state.dataBranchNodeConnections->NumOfNodeConnections) {
             if (state.dataBranchNodeConnections->NodeConnections(Object).ObjectType !=
@@ -1251,18 +1373,24 @@ void CheckNodeConnections(EnergyPlusData &state, bool &ErrorsFound)
             FluidStreamOutletCount = 0;
             FluidStreamCounts = false;
             int Loop1 = NodeObjects(Object);
-            if (state.dataBranchNodeConnections->NumOfNodeConnections < 2) continue;
-            if (state.dataBranchNodeConnections->NodeConnections(Loop1).ObjectIsParent) continue;
-            if (state.dataBranchNodeConnections->NodeConnections(Loop1).ConnectionType == DataLoopNode::ConnectionType::Inlet) {
+            if (state.dataBranchNodeConnections->NumOfNodeConnections < 2) {
+                continue;
+            }
+            if (state.dataBranchNodeConnections->NodeConnections(Loop1).ObjectIsParent) {
+                continue;
+            }
+            if (state.dataBranchNodeConnections->NodeConnections(Loop1).ConnectionType == Node::ConnectionType::Inlet) {
                 ++FluidStreamInletCount(static_cast<int>(state.dataBranchNodeConnections->NodeConnections(Loop1).FluidStream));
-            } else if (state.dataBranchNodeConnections->NodeConnections(Loop1).ConnectionType == DataLoopNode::ConnectionType::Outlet) {
+            } else if (state.dataBranchNodeConnections->NodeConnections(Loop1).ConnectionType == Node::ConnectionType::Outlet) {
                 ++FluidStreamOutletCount(static_cast<int>(state.dataBranchNodeConnections->NodeConnections(Loop1).FluidStream));
             }
             for (int Loop2 = Loop1 + 1; Loop2 <= NodeObjects(Object + 1) - 1; ++Loop2) {
-                if (state.dataBranchNodeConnections->NodeConnections(Loop2).ObjectIsParent) continue;
-                if (state.dataBranchNodeConnections->NodeConnections(Loop2).ConnectionType == DataLoopNode::ConnectionType::Inlet) {
+                if (state.dataBranchNodeConnections->NodeConnections(Loop2).ObjectIsParent) {
+                    continue;
+                }
+                if (state.dataBranchNodeConnections->NodeConnections(Loop2).ConnectionType == Node::ConnectionType::Inlet) {
                     ++FluidStreamInletCount(static_cast<int>(state.dataBranchNodeConnections->NodeConnections(Loop2).FluidStream));
-                } else if (state.dataBranchNodeConnections->NodeConnections(Loop2).ConnectionType == DataLoopNode::ConnectionType::Outlet) {
+                } else if (state.dataBranchNodeConnections->NodeConnections(Loop2).ConnectionType == Node::ConnectionType::Outlet) {
                     ++FluidStreamOutletCount(static_cast<int>(state.dataBranchNodeConnections->NodeConnections(Loop2).FluidStream));
                 }
             }
@@ -1276,13 +1404,15 @@ void CheckNodeConnections(EnergyPlusData &state, bool &ErrorsFound)
 
                 ShowSevereError(
                     state,
-                    format("(Developer) Node Connection Error, Object={}:{}",
-                           ConnectionObjectTypeNames[static_cast<int>(state.dataBranchNodeConnections->NodeConnections(Loop1).ObjectType)],
-                           state.dataBranchNodeConnections->NodeConnections(Loop1).ObjectName));
+                    std::format("(Developer) Node Connection Error, Object={}:{}",
+                                ConnectionObjectTypeNames[static_cast<int>(state.dataBranchNodeConnections->NodeConnections(Loop1).ObjectType)],
+                                state.dataBranchNodeConnections->NodeConnections(Loop1).ObjectName));
 
                 ShowContinueError(state, "Object has multiple connections on both inlet and outlet fluid streams.");
                 for (int Loop2 = 1; Loop2 <= MaxFluidStream; ++Loop2) {
-                    if (FluidStreamCounts(Loop2)) ShowContinueError(state, format("...occurs in Fluid Stream [{}].", Loop2));
+                    if (FluidStreamCounts(Loop2)) {
+                        ShowContinueError(state, std::format("...occurs in Fluid Stream [{}].", Loop2));
+                    }
                 }
                 ++ErrorCounter;
                 ErrorsFound = true;
@@ -1296,34 +1426,38 @@ void CheckNodeConnections(EnergyPlusData &state, bool &ErrorsFound)
 
     // Check 11 - zone nodes may not be used as anything else except as a setpoint, sensor or actuator node
     for (int Loop1 = 1; Loop1 <= state.dataBranchNodeConnections->NumOfNodeConnections; ++Loop1) {
-        if (state.dataBranchNodeConnections->NodeConnections(Loop1).ConnectionType != DataLoopNode::ConnectionType::ZoneNode) continue;
+        if (state.dataBranchNodeConnections->NodeConnections(Loop1).ConnectionType != Node::ConnectionType::ZoneNode) {
+            continue;
+        }
         IsValid = true;
         for (int Loop2 = Loop1; Loop2 <= state.dataBranchNodeConnections->NumOfNodeConnections; ++Loop2) {
-            if (Loop1 == Loop2) continue;
+            if (Loop1 == Loop2) {
+                continue;
+            }
             if (state.dataBranchNodeConnections->NodeConnections(Loop1).NodeName ==
                 state.dataBranchNodeConnections->NodeConnections(Loop2).NodeName) {
 
-                if ((state.dataBranchNodeConnections->NodeConnections(Loop2).ConnectionType == DataLoopNode::ConnectionType::Actuator) ||
-                    (state.dataBranchNodeConnections->NodeConnections(Loop2).ConnectionType == DataLoopNode::ConnectionType::Sensor) ||
-                    (state.dataBranchNodeConnections->NodeConnections(Loop2).ConnectionType == DataLoopNode::ConnectionType::SetPoint)) {
+                if ((state.dataBranchNodeConnections->NodeConnections(Loop2).ConnectionType == Node::ConnectionType::Actuator) ||
+                    (state.dataBranchNodeConnections->NodeConnections(Loop2).ConnectionType == Node::ConnectionType::Sensor) ||
+                    (state.dataBranchNodeConnections->NodeConnections(Loop2).ConnectionType == Node::ConnectionType::SetPoint)) {
                     continue;
                 }
 
                 ShowSevereError(state,
-                                format("Node Connection Error, Node Name=\"{}\", The same zone node appears more than once.",
-                                       state.dataBranchNodeConnections->NodeConnections(Loop1).NodeName));
+                                std::format("Node Connection Error, Node Name=\"{}\", The same zone node appears more than once.",
+                                            state.dataBranchNodeConnections->NodeConnections(Loop1).NodeName));
 
                 ShowContinueError(
                     state,
-                    format("Reference Object={}, Object Name={}",
-                           ConnectionObjectTypeNames[static_cast<int>(state.dataBranchNodeConnections->NodeConnections(Loop1).ObjectType)],
-                           state.dataBranchNodeConnections->NodeConnections(Loop1).ObjectName));
+                    std::format("Reference Object={}, Object Name={}",
+                                ConnectionObjectTypeNames[static_cast<int>(state.dataBranchNodeConnections->NodeConnections(Loop1).ObjectType)],
+                                state.dataBranchNodeConnections->NodeConnections(Loop1).ObjectName));
 
                 ShowContinueError(
                     state,
-                    format("Reference Object={}, Object Name={}",
-                           ConnectionObjectTypeNames[static_cast<int>(state.dataBranchNodeConnections->NodeConnections(Loop2).ObjectType)],
-                           state.dataBranchNodeConnections->NodeConnections(Loop2).ObjectName));
+                    std::format("Reference Object={}, Object Name={}",
+                                ConnectionObjectTypeNames[static_cast<int>(state.dataBranchNodeConnections->NodeConnections(Loop2).ObjectType)],
+                                state.dataBranchNodeConnections->NodeConnections(Loop2).ObjectName));
 
                 ++ErrorCounter;
                 ErrorsFound = true;
@@ -1334,7 +1468,7 @@ void CheckNodeConnections(EnergyPlusData &state, bool &ErrorsFound)
     state.dataBranchNodeConnections->NumNodeConnectionErrors += ErrorCounter;
 }
 
-bool IsParentObject(EnergyPlusData &state, DataLoopNode::ConnectionObjectType const ComponentType, std::string const &ComponentName)
+bool IsParentObject(EnergyPlusData &state, Node::ConnectionObjectType const ComponentType, std::string const &ComponentName)
 {
 
     // FUNCTION INFORMATION:
@@ -1366,7 +1500,7 @@ bool IsParentObject(EnergyPlusData &state, DataLoopNode::ConnectionObjectType co
     return IsParent;
 }
 
-int WhichParentSet(EnergyPlusData &state, DataLoopNode::ConnectionObjectType const ComponentType, std::string const &ComponentName)
+int WhichParentSet(EnergyPlusData &state, Node::ConnectionObjectType const ComponentType, std::string const &ComponentName)
 {
 
     // FUNCTION INFORMATION:
@@ -1392,7 +1526,7 @@ int WhichParentSet(EnergyPlusData &state, DataLoopNode::ConnectionObjectType con
 }
 
 void GetParentData(EnergyPlusData &state,
-                   DataLoopNode::ConnectionObjectType const ComponentType,
+                   Node::ConnectionObjectType const ComponentType,
                    std::string const &ComponentName,
                    std::string &InletNodeName,
                    int &InletNodeNum,
@@ -1420,43 +1554,45 @@ void GetParentData(EnergyPlusData &state,
     OutletNodeNum = 0;
     ErrInObject = false;
 
-    int Which = WhichParentSet(state, ComponentType, ComponentName);
+    int Which = Node::WhichParentSet(state, ComponentType, ComponentName);
     if (Which != 0) {
         InletNodeName = state.dataBranchNodeConnections->ParentNodeList(Which).InletNodeName;
         OutletNodeName = state.dataBranchNodeConnections->ParentNodeList(Which).OutletNodeName;
         // Get Node Numbers
-        InletNodeNum = UtilityRoutines::FindItemInList(
-            InletNodeName, state.dataLoopNodes->NodeID({1, state.dataLoopNodes->NumOfNodes}), state.dataLoopNodes->NumOfNodes);
-        OutletNodeNum = UtilityRoutines::FindItemInList(
-            OutletNodeName, state.dataLoopNodes->NodeID({1, state.dataLoopNodes->NumOfNodes}), state.dataLoopNodes->NumOfNodes);
+        InletNodeNum =
+            Util::FindItemInList(InletNodeName, state.dataLoopNodes->NodeID({1, state.dataLoopNodes->NumOfNodes}), state.dataLoopNodes->NumOfNodes);
+        OutletNodeNum =
+            Util::FindItemInList(OutletNodeName, state.dataLoopNodes->NodeID({1, state.dataLoopNodes->NumOfNodes}), state.dataLoopNodes->NumOfNodes);
     } else if (IsParentObjectCompSet(state, ComponentType, ComponentName)) {
         Which = WhichCompSet(state, ComponentType, ComponentName);
         if (Which != 0) {
             InletNodeName = state.dataBranchNodeConnections->CompSets(Which).InletNodeName;
             OutletNodeName = state.dataBranchNodeConnections->CompSets(Which).OutletNodeName;
-            InletNodeNum = UtilityRoutines::FindItemInList(
+            InletNodeNum = Util::FindItemInList(
                 InletNodeName, state.dataLoopNodes->NodeID({1, state.dataLoopNodes->NumOfNodes}), state.dataLoopNodes->NumOfNodes);
-            OutletNodeNum = UtilityRoutines::FindItemInList(
+            OutletNodeNum = Util::FindItemInList(
                 OutletNodeName, state.dataLoopNodes->NodeID({1, state.dataLoopNodes->NumOfNodes}), state.dataLoopNodes->NumOfNodes);
         } else {
             ErrInObject = true;
             ShowWarningError(state,
-                             format("GetParentData: Component Type={}, Component Name={} not found.",
-                                    ConnectionObjectTypeNames[static_cast<int>(ComponentType)],
-                                    ComponentName));
+                             std::format("GetParentData: Component Type={}, Component Name={} not found.",
+                                         ConnectionObjectTypeNames[static_cast<int>(ComponentType)],
+                                         ComponentName));
         }
     } else {
         ErrInObject = true;
         ShowWarningError(state,
-                         format("GetParentData: Component Type={}, Component Name={} not found.",
-                                ConnectionObjectTypeNames[static_cast<int>(ComponentType)],
-                                ComponentName));
+                         std::format("GetParentData: Component Type={}, Component Name={} not found.",
+                                     ConnectionObjectTypeNames[static_cast<int>(ComponentType)],
+                                     ComponentName));
     }
 
-    if (ErrInObject) ErrorsFound = true;
+    if (ErrInObject) {
+        ErrorsFound = true;
+    }
 }
 
-bool IsParentObjectCompSet(EnergyPlusData &state, DataLoopNode::ConnectionObjectType const ComponentType, std::string const &ComponentName)
+bool IsParentObjectCompSet(EnergyPlusData &state, Node::ConnectionObjectType const ComponentType, std::string const &ComponentName)
 {
 
     // FUNCTION INFORMATION:
@@ -1483,7 +1619,7 @@ bool IsParentObjectCompSet(EnergyPlusData &state, DataLoopNode::ConnectionObject
     return IsParent;
 }
 
-int WhichCompSet(EnergyPlusData &state, DataLoopNode::ConnectionObjectType const ComponentType, std::string const &ComponentName)
+int WhichCompSet(EnergyPlusData &state, Node::ConnectionObjectType const ComponentType, std::string const &ComponentName)
 {
 
     // FUNCTION INFORMATION:
@@ -1511,7 +1647,7 @@ int WhichCompSet(EnergyPlusData &state, DataLoopNode::ConnectionObjectType const
     return WhichOne;
 }
 
-int GetNumChildren(EnergyPlusData &state, DataLoopNode::ConnectionObjectType const ComponentType, std::string const &ComponentName)
+int GetNumChildren(EnergyPlusData &state, Node::ConnectionObjectType const ComponentType, std::string const &ComponentName)
 {
 
     // FUNCTION INFORMATION:
@@ -1530,7 +1666,7 @@ int GetNumChildren(EnergyPlusData &state, DataLoopNode::ConnectionObjectType con
     int NumChildren;
 
     NumChildren = 0;
-    if (IsParentObject(state, ComponentType, ComponentName)) {
+    if (Node::IsParentObject(state, ComponentType, ComponentName)) {
         for (int Loop = 1; Loop <= state.dataBranchNodeConnections->NumCompSets; ++Loop) {
             if (state.dataBranchNodeConnections->CompSets(Loop).ParentObjectType == ComponentType &&
                 state.dataBranchNodeConnections->CompSets(Loop).ParentCName == ComponentName) {
@@ -1543,26 +1679,22 @@ int GetNumChildren(EnergyPlusData &state, DataLoopNode::ConnectionObjectType con
 }
 
 void GetComponentData(EnergyPlusData &state,
-                      DataLoopNode::ConnectionObjectType const ComponentType,
+                      Node::ConnectionObjectType const ComponentType,
                       std::string const &ComponentName,
                       bool &IsParent, // true or false
                       int &NumInlets,
                       Array1D_string &InletNodeNames,
                       Array1D_int &InletNodeNums,
-                      Array1D<NodeInputManager::CompFluidStream> &InletFluidStreams,
+                      Array1D<Node::CompFluidStream> &InletFluidStreams,
                       int &NumOutlets,
                       Array1D_string &OutletNodeNames,
                       Array1D_int &OutletNodeNums,
-                      Array1D<NodeInputManager::CompFluidStream> &OutletFluidStreams,
-                      bool &ErrorsFound // set to true if errors found, unchanged otherwise
-)
+                      Array1D<Node::CompFluidStream> &OutletFluidStreams)
 {
 
     // SUBROUTINE INFORMATION:
     //       AUTHOR         Linda Lawrie
     //       DATE WRITTEN   May 2005
-    //       MODIFIED       na
-    //       RE-ENGINEERED  na
 
     // PURPOSE OF THIS SUBROUTINE:
     // This routine gets data for a given Component Type and Name Name.
@@ -1570,15 +1702,24 @@ void GetComponentData(EnergyPlusData &state,
     // METHODOLOGY EMPLOYED:
     // Traverses CompSet structure.
 
-    // SUBROUTINE LOCAL VARIABLE DECLARATIONS:
-    bool ErrInObject;
-
-    if (allocated(InletNodeNames)) InletNodeNames.deallocate();
-    if (allocated(InletNodeNums)) InletNodeNums.deallocate();
-    if (allocated(InletFluidStreams)) InletFluidStreams.deallocate();
-    if (allocated(OutletNodeNames)) OutletNodeNames.deallocate();
-    if (allocated(OutletNodeNums)) OutletNodeNums.deallocate();
-    if (allocated(OutletFluidStreams)) OutletFluidStreams.deallocate();
+    if (allocated(InletNodeNames)) {
+        InletNodeNames.deallocate();
+    }
+    if (allocated(InletNodeNums)) {
+        InletNodeNums.deallocate();
+    }
+    if (allocated(InletFluidStreams)) {
+        InletFluidStreams.deallocate();
+    }
+    if (allocated(OutletNodeNames)) {
+        OutletNodeNames.deallocate();
+    }
+    if (allocated(OutletNodeNums)) {
+        OutletNodeNums.deallocate();
+    }
+    if (allocated(OutletFluidStreams)) {
+        OutletFluidStreams.deallocate();
+    }
 
     NumInlets = 0;
     NumOutlets = 0;
@@ -1586,12 +1727,15 @@ void GetComponentData(EnergyPlusData &state,
     IsParent = false;
     for (int Which = 1; Which <= state.dataBranchNodeConnections->NumOfNodeConnections; ++Which) {
         if (state.dataBranchNodeConnections->NodeConnections(Which).ObjectType != ComponentType ||
-            state.dataBranchNodeConnections->NodeConnections(Which).ObjectName != ComponentName)
+            state.dataBranchNodeConnections->NodeConnections(Which).ObjectName != ComponentName) {
             continue;
-        if (state.dataBranchNodeConnections->NodeConnections(Which).ObjectIsParent) IsParent = true;
-        if (state.dataBranchNodeConnections->NodeConnections(Which).ConnectionType == DataLoopNode::ConnectionType::Inlet) {
+        }
+        if (state.dataBranchNodeConnections->NodeConnections(Which).ObjectIsParent) {
+            IsParent = true;
+        }
+        if (state.dataBranchNodeConnections->NodeConnections(Which).ConnectionType == Node::ConnectionType::Inlet) {
             ++NumInlets;
-        } else if (state.dataBranchNodeConnections->NodeConnections(Which).ConnectionType == DataLoopNode::ConnectionType::Outlet) {
+        } else if (state.dataBranchNodeConnections->NodeConnections(Which).ConnectionType == Node::ConnectionType::Outlet) {
             ++NumOutlets;
         }
     }
@@ -1605,45 +1749,37 @@ void GetComponentData(EnergyPlusData &state,
 
     InletNodeNames = std::string();
     InletNodeNums = 0;
-    InletFluidStreams = NodeInputManager::CompFluidStream::Invalid;
+    InletFluidStreams = Node::CompFluidStream::Invalid;
     OutletNodeNames = std::string();
     OutletNodeNums = 0;
-    OutletFluidStreams = NodeInputManager::CompFluidStream::Invalid;
+    OutletFluidStreams = Node::CompFluidStream::Invalid;
     NumInlets = 0;
     NumOutlets = 0;
-    ErrInObject = false;
 
     for (int Which = 1; Which <= state.dataBranchNodeConnections->NumOfNodeConnections; ++Which) {
         if (state.dataBranchNodeConnections->NodeConnections(Which).ObjectType != ComponentType ||
-            state.dataBranchNodeConnections->NodeConnections(Which).ObjectName != ComponentName)
+            state.dataBranchNodeConnections->NodeConnections(Which).ObjectName != ComponentName) {
             continue;
-        if (state.dataBranchNodeConnections->NodeConnections(Which).ConnectionType == DataLoopNode::ConnectionType::Inlet) {
+        }
+        if (state.dataBranchNodeConnections->NodeConnections(Which).ConnectionType == Node::ConnectionType::Inlet) {
             ++NumInlets;
             InletNodeNames(NumInlets) = state.dataBranchNodeConnections->NodeConnections(Which).NodeName;
             InletNodeNums(NumInlets) = state.dataBranchNodeConnections->NodeConnections(Which).NodeNumber;
             InletFluidStreams(NumInlets) = state.dataBranchNodeConnections->NodeConnections(Which).FluidStream;
-        } else if (state.dataBranchNodeConnections->NodeConnections(Which).ConnectionType == DataLoopNode::ConnectionType::Outlet) {
+        } else if (state.dataBranchNodeConnections->NodeConnections(Which).ConnectionType == Node::ConnectionType::Outlet) {
             ++NumOutlets;
             OutletNodeNames(NumOutlets) = state.dataBranchNodeConnections->NodeConnections(Which).NodeName;
             OutletNodeNums(NumOutlets) = state.dataBranchNodeConnections->NodeConnections(Which).NodeNumber;
             OutletFluidStreams(NumOutlets) = state.dataBranchNodeConnections->NodeConnections(Which).FluidStream;
         }
     }
-    if (ErrInObject) {
-        ShowWarningError(state,
-                         format("GetParentData: Component Type={}, Component Name={} not found.",
-                                ConnectionObjectTypeNames[static_cast<int>(ComponentType)],
-                                ComponentName));
-    }
-
-    if (ErrInObject) ErrorsFound = true;
 }
 
 void GetChildrenData(EnergyPlusData &state,
-                     DataLoopNode::ConnectionObjectType const ComponentType,
+                     Node::ConnectionObjectType const ComponentType,
                      std::string const &ComponentName,
                      int &NumChildren,
-                     EPVector<DataLoopNode::ConnectionObjectType> &ChildrenCType,
+                     EPVector<Node::ConnectionObjectType> &ChildrenCType,
                      Array1D_string &ChildrenCName,
                      Array1D_string &InletNodeName,
                      Array1D_int &InletNodeNum,
@@ -1663,23 +1799,17 @@ void GetChildrenData(EnergyPlusData &state,
     // Traverses CompSet structure.
 
     // SUBROUTINE LOCAL VARIABLE DECLARATIONS:
-    EPVector<DataLoopNode::ConnectionObjectType> ChildCType;
+    EPVector<Node::ConnectionObjectType> ChildCType;
     Array1D_string ChildCName;
     Array1D_string ChildInNodeName;
     Array1D_string ChildOutNodeName;
     Array1D_int ChildInNodeNum;
     Array1D_int ChildOutNodeNum;
-    int CountNum;
-    bool ErrInObject;
-    std::string MatchNodeName;
-    std::string ParentInletNodeName;
-    std::string ParentOutletNodeName;
-    int ParentInletNodeNum;
-    int ParentOutletNodeNum;
-    int CountMatchLoop;
+    Array1D_bool ChildMatched;
 
-    for (auto &thisChildrenCType : ChildrenCType)
-        thisChildrenCType = DataLoopNode::ConnectionObjectType::Invalid;
+    bool ErrInObject;
+
+    std::fill(ChildrenCType.begin(), ChildrenCType.end(), Node::ConnectionObjectType::Invalid);
     ChildrenCName = std::string();
     InletNodeName = std::string();
     InletNodeNum = 0;
@@ -1687,82 +1817,113 @@ void GetChildrenData(EnergyPlusData &state,
     OutletNodeNum = 0;
     ErrInObject = false;
 
-    if (IsParentObject(state, ComponentType, ComponentName)) {
-        NumChildren = GetNumChildren(state, ComponentType, ComponentName);
-        if (NumChildren == 0) {
-            ShowWarningError(state,
-                             format("GetChildrenData: Parent Node has no children, node={}:{}.",
-                                    ConnectionObjectTypeNames[static_cast<int>(ComponentType)],
-                                    ComponentName));
+    if (!Node::IsParentObject(state, ComponentType, ComponentName)) {
+        ShowWarningError(state,
+                         std::format("GetChildrenData: Requested Children Data for non Parent Node={}:{}.",
+                                     ConnectionObjectTypeNames[static_cast<int>(ComponentType)],
+                                     ComponentName));
+        ErrorsFound = true;
+
+    } else if ((NumChildren = Node::GetNumChildren(state, ComponentType, ComponentName)) == 0) {
+        ShowWarningError(state,
+                         std::format("GetChildrenData: Parent Node has no children, node={}:{}.",
+                                     ConnectionObjectTypeNames[static_cast<int>(ComponentType)],
+                                     ComponentName));
+
+    } else {
+        int ParentInletNodeNum;
+        int ParentOutletNodeNum;
+        std::string ParentInletNodeName;
+        std::string ParentOutletNodeName;
+        Node::GetParentData(
+            state, ComponentType, ComponentName, ParentInletNodeName, ParentInletNodeNum, ParentOutletNodeName, ParentOutletNodeNum, ErrInObject);
+        ChildCType.allocate(NumChildren);
+        ChildCName.allocate(NumChildren);
+        ChildInNodeName.allocate(NumChildren);
+        ChildOutNodeName.allocate(NumChildren);
+        ChildInNodeNum.allocate(NumChildren);
+        ChildOutNodeNum.allocate(NumChildren);
+        ChildMatched.allocate(NumChildren);
+
+        std::fill(ChildCType.begin(), ChildCType.end(), Node::ConnectionObjectType::Invalid);
+        ChildCName = std::string();
+        ChildInNodeName = std::string();
+        ChildOutNodeName = std::string();
+        ChildInNodeNum = 0;
+        ChildOutNodeNum = 0;
+        ChildMatched = false;
+
+        int CountNum = 0;
+        for (int Loop = 1; Loop <= state.dataBranchNodeConnections->NumCompSets; ++Loop) {
+            auto const &compSet = state.dataBranchNodeConnections->CompSets(Loop);
+            if (compSet.ParentObjectType == ComponentType && compSet.ParentCName == ComponentName) {
+                ++CountNum;
+                ChildCType(CountNum) = compSet.ComponentObjectType;
+                ChildCName(CountNum) = compSet.CName;
+                ChildInNodeName(CountNum) = compSet.InletNodeName;
+                ChildOutNodeName(CountNum) = compSet.OutletNodeName;
+                // Get Node Numbers
+                ChildInNodeNum(CountNum) = Util::FindItemInList(ChildInNodeName(CountNum), state.dataLoopNodes->NodeID);
+                ChildOutNodeNum(CountNum) = Util::FindItemInList(ChildOutNodeName(CountNum), state.dataLoopNodes->NodeID);
+            }
+        }
+
+        if (CountNum != NumChildren) {
+            ShowSevereError(state, "GetChildrenData: Counted nodes not equal to GetNumChildren count");
+            ErrorsFound = true;
+
         } else {
-            GetParentData(
-                state, ComponentType, ComponentName, ParentInletNodeName, ParentInletNodeNum, ParentOutletNodeName, ParentOutletNodeNum, ErrInObject);
-            ChildCType.clear();
-            ChildCType.allocate(NumChildren);
-            ChildCName.allocate(NumChildren);
-            ChildInNodeName.allocate(NumChildren);
-            ChildOutNodeName.allocate(NumChildren);
-            ChildInNodeNum.allocate(NumChildren);
-            ChildOutNodeNum.allocate(NumChildren);
-            ChildCName = std::string();
-            ChildInNodeName = std::string();
-            ChildOutNodeName = std::string();
-            ChildInNodeNum = 0;
-            ChildOutNodeNum = 0;
-            CountNum = 0;
-            for (int Loop = 1; Loop <= state.dataBranchNodeConnections->NumCompSets; ++Loop) {
-                if (state.dataBranchNodeConnections->CompSets(Loop).ParentObjectType == ComponentType &&
-                    state.dataBranchNodeConnections->CompSets(Loop).ParentCName == ComponentName) {
-                    ++CountNum;
-                    ChildCType(CountNum) = state.dataBranchNodeConnections->CompSets(Loop).ComponentObjectType;
-                    ChildCName(CountNum) = state.dataBranchNodeConnections->CompSets(Loop).CName;
-                    ChildInNodeName(CountNum) = state.dataBranchNodeConnections->CompSets(Loop).InletNodeName;
-                    ChildOutNodeName(CountNum) = state.dataBranchNodeConnections->CompSets(Loop).OutletNodeName;
-                    // Get Node Numbers
-                    ChildInNodeNum(CountNum) = UtilityRoutines::FindItemInList(ChildInNodeName(CountNum),
-                                                                               state.dataLoopNodes->NodeID({1, state.dataLoopNodes->NumOfNodes}),
-                                                                               state.dataLoopNodes->NumOfNodes);
-                    ChildOutNodeNum(CountNum) = UtilityRoutines::FindItemInList(ChildOutNodeName(CountNum),
-                                                                                state.dataLoopNodes->NodeID({1, state.dataLoopNodes->NumOfNodes}),
-                                                                                state.dataLoopNodes->NumOfNodes);
+            // Children arrays built.  Now "sort" for flow connection order(?)
+            // FindIntInList is 0-based and FindItemInList is 1-based .. great!
+            int ParentInletNodeIndex = 0;
+            for (int Loop = 1; Loop <= NumChildren; ++Loop) {
+                if (ChildInNodeNum(Loop) == ParentInletNodeNum) {
+                    ParentInletNodeIndex = Loop;
+                    break;
                 }
             }
-            if (CountNum != NumChildren) {
-                ShowSevereError(state, "GetChildrenData: Counted nodes not equal to GetNumChildren count");
-                ErrInObject = true;
-            } else {
-                // Children arrays built.  Now "sort" for flow connection order(?)
-                MatchNodeName = ParentInletNodeName;
+
+            int ParentOutletNodeIndex = 0;
+            for (int Loop = 1; Loop <= NumChildren; ++Loop) {
+                if (ChildOutNodeNum(Loop) == ParentOutletNodeNum) {
+                    ParentOutletNodeIndex = Loop;
+                    break;
+                }
+            }
+
+            // Parent inlet node matches one of the inlet-nodes of the sub-components
+            if (ParentInletNodeIndex > 0) {
+                int MatchInNodeNum = ParentInletNodeNum;
                 CountNum = 0;
-                CountMatchLoop = 0;
-                while (CountMatchLoop < NumChildren) {
-                    ++CountMatchLoop;
-                    //          Matched=.FALSE.
+
+                while (CountNum < NumChildren) {
+                    int MatchInNodeIndex = 0;
                     for (int Loop = 1; Loop <= NumChildren; ++Loop) {
-                        if (ChildInNodeName(Loop) == MatchNodeName) {
-                            ++CountNum;
-                            ChildrenCType(CountNum) = ChildCType(Loop);
-                            ChildrenCName(CountNum) = ChildCName(Loop);
-                            InletNodeName(CountNum) = ChildInNodeName(Loop);
-                            InletNodeNum(CountNum) = ChildInNodeNum(Loop);
-                            OutletNodeName(CountNum) = ChildOutNodeName(Loop);
-                            OutletNodeNum(CountNum) = ChildOutNodeNum(Loop);
-                            ChildInNodeName(Loop).clear(); // So it won't match anymore
-                            //              Matched=.TRUE.
-                            MatchNodeName = ChildOutNodeName(Loop);
+                        if (ChildInNodeNum(Loop) == MatchInNodeNum && !ChildMatched(Loop)) {
+                            MatchInNodeIndex = Loop;
                             break;
                         }
                     }
-                }
-                if (MatchNodeName != ParentOutletNodeName) {
-                    for (int Loop = 1; Loop <= NumChildren; ++Loop) {
-                        if (ChildInNodeName(Loop).empty()) continue;
-                        if (ChildOutNodeName(Loop) == ParentOutletNodeName) break;
+
+                    if (MatchInNodeIndex == 0) { // The chain is broken
                         break;
                     }
+
+                    ++CountNum;
+                    ChildrenCType(CountNum) = ChildCType(MatchInNodeIndex);
+                    ChildrenCName(CountNum) = ChildCName(MatchInNodeIndex);
+                    InletNodeName(CountNum) = ChildInNodeName(MatchInNodeIndex);
+                    InletNodeNum(CountNum) = ChildInNodeNum(MatchInNodeIndex);
+                    OutletNodeName(CountNum) = ChildOutNodeName(MatchInNodeIndex);
+                    OutletNodeNum(CountNum) = ChildOutNodeNum(MatchInNodeIndex);
+                    ChildMatched(MatchInNodeIndex) = true;
+                    MatchInNodeNum = ChildOutNodeNum(MatchInNodeIndex);
                 }
+
                 for (int Loop = 1; Loop <= NumChildren; ++Loop) {
-                    if (ChildInNodeName(Loop).empty()) continue;
+                    if (ChildMatched(Loop)) {
+                        continue;
+                    }
                     ++CountNum;
                     ChildrenCType(CountNum) = ChildCType(Loop);
                     ChildrenCName(CountNum) = ChildCName(Loop);
@@ -1771,23 +1932,81 @@ void GetChildrenData(EnergyPlusData &state,
                     OutletNodeName(CountNum) = ChildOutNodeName(Loop);
                     OutletNodeNum(CountNum) = ChildOutNodeNum(Loop);
                 }
-                ChildCType.deallocate();
-                ChildCName.deallocate();
-                ChildInNodeName.deallocate();
-                ChildOutNodeName.deallocate();
-                ChildInNodeNum.deallocate();
-                ChildOutNodeNum.deallocate();
+
+                // Parent outlet node matches one of the outlet-nodes of the sub-components
+            } else if (ParentOutletNodeIndex > 0) {
+                int MatchOutNodeNum = ParentOutletNodeNum;
+                CountNum = NumChildren + 1;
+
+                while (CountNum > 1) {
+                    int MatchOutNodeIndex = 0;
+                    for (int Loop = 1; Loop <= NumChildren; ++Loop) {
+                        if (ChildOutNodeNum(Loop) == MatchOutNodeNum && !ChildMatched(Loop)) {
+                            MatchOutNodeIndex = Loop;
+                            break;
+                        }
+                    }
+
+                    if (MatchOutNodeIndex == 0) { // The chain is broken
+                        break;
+                    }
+
+                    --CountNum;
+                    ChildrenCType(CountNum) = ChildCType(MatchOutNodeIndex);
+                    ChildrenCName(CountNum) = ChildCName(MatchOutNodeIndex);
+                    InletNodeName(CountNum) = ChildInNodeName(MatchOutNodeIndex);
+                    InletNodeNum(CountNum) = ChildInNodeNum(MatchOutNodeIndex);
+                    OutletNodeName(CountNum) = ChildOutNodeName(MatchOutNodeIndex);
+                    OutletNodeNum(CountNum) = ChildOutNodeNum(MatchOutNodeIndex);
+                    ChildMatched(MatchOutNodeIndex) = true;
+                    MatchOutNodeNum = ChildInNodeNum(MatchOutNodeIndex);
+                }
+
+                CountNum = 0;
+                for (int Loop = 1; Loop <= NumChildren; ++Loop) {
+                    if (ChildMatched(Loop)) {
+                        continue;
+                    }
+                    ++CountNum;
+                    ChildrenCType(CountNum) = ChildCType(Loop);
+                    ChildrenCName(CountNum) = ChildCName(Loop);
+                    InletNodeName(CountNum) = ChildInNodeName(Loop);
+                    InletNodeNum(CountNum) = ChildInNodeNum(Loop);
+                    OutletNodeName(CountNum) = ChildOutNodeName(Loop);
+                    OutletNodeNum(CountNum) = ChildOutNodeNum(Loop);
+                }
+            } else {
+                // No sub-component is connected to either the parent
+                // component's inlet- or outlet- nodes? Just copy the
+                // sub-components in the order in which they appear in
+                // the CompSets
+
+                for (int Loop = 1; Loop <= NumChildren; ++Loop) {
+                    if (ChildMatched(Loop)) {
+                        continue;
+                    }
+                    ChildrenCType(Loop) = ChildCType(Loop);
+                    ChildrenCName(Loop) = ChildCName(Loop);
+                    InletNodeName(Loop) = ChildInNodeName(Loop);
+                    InletNodeNum(Loop) = ChildInNodeNum(Loop);
+                    OutletNodeName(Loop) = ChildOutNodeName(Loop);
+                    OutletNodeNum(Loop) = ChildOutNodeNum(Loop);
+                }
             }
         }
-    } else {
-        ShowWarningError(state,
-                         format("GetChildrenData: Requested Children Data for non Parent Node={}:{}.",
-                                ConnectionObjectTypeNames[static_cast<int>(ComponentType)],
-                                ComponentName));
-        ErrInObject = true;
+
+        ChildCType.deallocate();
+        ChildCName.deallocate();
+        ChildInNodeName.deallocate();
+        ChildOutNodeName.deallocate();
+        ChildInNodeNum.deallocate();
+        ChildOutNodeNum.deallocate();
+        ChildMatched.deallocate();
     }
 
-    if (ErrInObject) ErrorsFound = true;
+    if (ErrInObject) {
+        ErrorsFound = true;
+    }
 }
 
 void SetUpCompSets(EnergyPlusData &state,
@@ -1811,43 +2030,49 @@ void SetUpCompSets(EnergyPlusData &state,
     // inlet/outlet nodes have been input.  This routine assumes that identical
     // "CompSets" cannot be used in multiple places and issues a warning if they are.
 
-    std::string ParentTypeUC = UtilityRoutines::MakeUPPERCase(ParentType);
-    std::string CompTypeUC = UtilityRoutines::MakeUPPERCase(CompType);
+    std::string ParentTypeUC = Util::makeUPPER(ParentType);
+    std::string CompTypeUC = Util::makeUPPER(CompType);
     // TODO: Refactor this away by passing in enums
-    DataLoopNode::ConnectionObjectType ParentTypeEnum =
-        static_cast<DataLoopNode::ConnectionObjectType>(getEnumerationValue(ConnectionObjectTypeNamesUC, ParentTypeUC));
-    assert(ParentTypeEnum != DataLoopNode::ConnectionObjectType::Invalid);
+    Node::ConnectionObjectType ParentTypeEnum = static_cast<Node::ConnectionObjectType>(getEnumValue(ConnectionObjectTypeNamesUC, ParentTypeUC));
+    assert(ParentTypeEnum != Node::ConnectionObjectType::Invalid);
 
-    DataLoopNode::ConnectionObjectType ComponentTypeEnum =
-        static_cast<DataLoopNode::ConnectionObjectType>(getEnumerationValue(ConnectionObjectTypeNamesUC, CompTypeUC));
-    assert(ComponentTypeEnum != DataLoopNode::ConnectionObjectType::Invalid);
+    Node::ConnectionObjectType ComponentTypeEnum = static_cast<Node::ConnectionObjectType>(getEnumValue(ConnectionObjectTypeNamesUC, CompTypeUC));
+    assert(ComponentTypeEnum != Node::ConnectionObjectType::Invalid);
 
     int Found = 0;
 
     // See if Component-Nodes set is already there - should be unique
     // Try to fill in blanks (passed in as undefined
     for (int Count = 1; Count <= state.dataBranchNodeConnections->NumCompSets; ++Count) {
-        if (CompName != state.dataBranchNodeConnections->CompSets(Count).CName) continue;
-        if (ComponentTypeEnum != DataLoopNode::ConnectionObjectType::Undefined) {
-            if (ComponentTypeEnum != state.dataBranchNodeConnections->CompSets(Count).ComponentObjectType) continue;
+        if (CompName != state.dataBranchNodeConnections->CompSets(Count).CName) {
+            continue;
+        }
+        if (ComponentTypeEnum != Node::ConnectionObjectType::Undefined) {
+            if (ComponentTypeEnum != state.dataBranchNodeConnections->CompSets(Count).ComponentObjectType) {
+                continue;
+            }
         }
         // Component name matches, component type matches or is undefined
         if (InletNode != undefined) {
             if (state.dataBranchNodeConnections->CompSets(Count).InletNodeName != undefined) {
-                if (InletNode != state.dataBranchNodeConnections->CompSets(Count).InletNodeName) continue;
+                if (InletNode != state.dataBranchNodeConnections->CompSets(Count).InletNodeName) {
+                    continue;
+                }
             } else {
                 state.dataBranchNodeConnections->CompSets(Count).InletNodeName = InletNode;
             }
         }
         if (OutletNode != undefined) {
             if (state.dataBranchNodeConnections->CompSets(Count).OutletNodeName != undefined) {
-                if (OutletNode != state.dataBranchNodeConnections->CompSets(Count).OutletNodeName) continue;
+                if (OutletNode != state.dataBranchNodeConnections->CompSets(Count).OutletNodeName) {
+                    continue;
+                }
             } else {
                 state.dataBranchNodeConnections->CompSets(Count).OutletNodeName = OutletNode;
             }
         }
         //  See if something undefined and set here
-        if (state.dataBranchNodeConnections->CompSets(Count).ParentObjectType == DataLoopNode::ConnectionObjectType::Undefined &&
+        if (state.dataBranchNodeConnections->CompSets(Count).ParentObjectType == Node::ConnectionObjectType::Undefined &&
             state.dataBranchNodeConnections->CompSets(Count).ParentCName == undefined) {
             // Assume this is a further definition for this compset
             state.dataBranchNodeConnections->CompSets(Count).ParentObjectType = ParentTypeEnum;
@@ -1868,8 +2093,9 @@ void SetUpCompSets(EnergyPlusData &state,
             if (InletNode != state.dataBranchNodeConnections->CompSets(Count).InletNodeName) {
                 continue;
                 // If parent type is undefined then no error
-            } else if ((ParentTypeEnum == DataLoopNode::ConnectionObjectType::Undefined) ||
-                       (state.dataBranchNodeConnections->CompSets(Count).ParentObjectType == DataLoopNode::ConnectionObjectType::Undefined)) {
+            }
+            if ((ParentTypeEnum == Node::ConnectionObjectType::Undefined) ||
+                (state.dataBranchNodeConnections->CompSets(Count).ParentObjectType == Node::ConnectionObjectType::Undefined)) {
                 // If node name is undefined then no error
             } else if (InletNode != undefined) {
                 // If the matching node name does not belong to the parent or child object, then error
@@ -1887,26 +2113,31 @@ void SetUpCompSets(EnergyPlusData &state,
                     for (int Count2 = 1; Count2 <= state.dataBranchNodeConnections->NumCompSets; ++Count2) {
                         if ((state.dataBranchNodeConnections->CompSets(Count).ComponentObjectType ==
                              state.dataBranchNodeConnections->CompSets(Count2).ParentObjectType) &&
-                            (state.dataBranchNodeConnections->CompSets(Count).CName == state.dataBranchNodeConnections->CompSets(Count2).ParentCName))
+                            (state.dataBranchNodeConnections->CompSets(Count).CName ==
+                             state.dataBranchNodeConnections->CompSets(Count2).ParentCName)) {
                             Found2 = 1;
+                        }
                         if ((ComponentTypeEnum == state.dataBranchNodeConnections->CompSets(Count2).ParentObjectType) &&
-                            (CompName == state.dataBranchNodeConnections->CompSets(Count2).ParentCName))
+                            (CompName == state.dataBranchNodeConnections->CompSets(Count2).ParentCName)) {
                             Found2 = 1;
+                        }
                     }
                     if (Found2 == 0) {
-                        ShowWarningError(state, format("Node used as an inlet more than once: {}", InletNode));
+                        ShowWarningError(state, std::format("Node used as an inlet more than once: {}", InletNode));
                         ShowContinueError(
                             state,
-                            format("  Used by: {}, name={}",
-                                   ConnectionObjectTypeNames[static_cast<int>(state.dataBranchNodeConnections->CompSets(Count).ParentObjectType)],
-                                   state.dataBranchNodeConnections->CompSets(Count).ParentCName));
+                            std::format(
+                                "  Used by: {}, name={}",
+                                ConnectionObjectTypeNames[static_cast<int>(state.dataBranchNodeConnections->CompSets(Count).ParentObjectType)],
+                                state.dataBranchNodeConnections->CompSets(Count).ParentCName));
                         ShowContinueError(
                             state,
-                            format("  as inlet for: {}, name={}",
-                                   ConnectionObjectTypeNames[static_cast<int>(state.dataBranchNodeConnections->CompSets(Count).ComponentObjectType)],
-                                   state.dataBranchNodeConnections->CompSets(Count).CName));
-                        ShowContinueError(state, format("{}{}{}", "  and  by     : ", ParentTypeUC + ", name=", ParentName));
-                        ShowContinueError(state, format("{}{}{}", "  as inlet for: ", CompTypeUC + ", name=", CompName));
+                            std::format(
+                                "  as inlet for: {}, name={}",
+                                ConnectionObjectTypeNames[static_cast<int>(state.dataBranchNodeConnections->CompSets(Count).ComponentObjectType)],
+                                state.dataBranchNodeConnections->CompSets(Count).CName));
+                        ShowContinueError(state, std::format("{}{}{}", "  and  by     : ", ParentTypeUC + ", name=", ParentName));
+                        ShowContinueError(state, std::format("{}{}{}", "  as inlet for: ", CompTypeUC + ", name=", CompName));
                     }
                 }
             }
@@ -1916,8 +2147,9 @@ void SetUpCompSets(EnergyPlusData &state,
             if (OutletNode != state.dataBranchNodeConnections->CompSets(Count).OutletNodeName) {
                 continue;
                 // If parent type is undefined then no error
-            } else if ((ParentTypeEnum == DataLoopNode::ConnectionObjectType::Undefined) ||
-                       (state.dataBranchNodeConnections->CompSets(Count).ParentObjectType == DataLoopNode::ConnectionObjectType::Undefined)) {
+            }
+            if ((ParentTypeEnum == Node::ConnectionObjectType::Undefined) ||
+                (state.dataBranchNodeConnections->CompSets(Count).ParentObjectType == Node::ConnectionObjectType::Undefined)) {
                 // If node name is undefined then no error
             } else if (OutletNode != undefined) {
                 if ((ParentTypeEnum == state.dataBranchNodeConnections->CompSets(Count).ComponentObjectType) &&
@@ -1933,39 +2165,46 @@ void SetUpCompSets(EnergyPlusData &state,
                     for (int Count2 = 1; Count2 <= state.dataBranchNodeConnections->NumCompSets; ++Count2) {
                         if ((state.dataBranchNodeConnections->CompSets(Count).ComponentObjectType ==
                              state.dataBranchNodeConnections->CompSets(Count2).ParentObjectType) &&
-                            (state.dataBranchNodeConnections->CompSets(Count).CName == state.dataBranchNodeConnections->CompSets(Count2).ParentCName))
+                            (state.dataBranchNodeConnections->CompSets(Count).CName ==
+                             state.dataBranchNodeConnections->CompSets(Count2).ParentCName)) {
                             Found2 = 1;
+                        }
                         if ((ComponentTypeEnum == state.dataBranchNodeConnections->CompSets(Count2).ParentObjectType) &&
-                            (CompName == state.dataBranchNodeConnections->CompSets(Count2).ParentCName))
+                            (CompName == state.dataBranchNodeConnections->CompSets(Count2).ParentCName)) {
                             Found2 = 1;
+                        }
                     }
                     // This rule is violated by dual duct units, so let it pass
                     if (Found2 == 0) {
                         std::string_view const CType =
                             ConnectionObjectTypeNames[static_cast<int>(state.dataBranchNodeConnections->CompSets(Count).ComponentObjectType)];
                         if ((!has_prefixi(CType, "AirTerminal:DualDuct:")) && (!has_prefixi(CompTypeUC, "AirTerminal:DualDuct:"))) {
-                            ShowWarningError(state, format("Node used as an outlet more than once: {}", OutletNode));
+                            ShowWarningError(state, std::format("Node used as an outlet more than once: {}", OutletNode));
                             ShowContinueError(
                                 state,
-                                format("  Used by: {}, name={}",
-                                       ConnectionObjectTypeNames[static_cast<int>(state.dataBranchNodeConnections->CompSets(Count).ParentObjectType)],
-                                       state.dataBranchNodeConnections->CompSets(Count).ParentCName));
+                                std::format(
+                                    "  Used by: {}, name={}",
+                                    ConnectionObjectTypeNames[static_cast<int>(state.dataBranchNodeConnections->CompSets(Count).ParentObjectType)],
+                                    state.dataBranchNodeConnections->CompSets(Count).ParentCName));
                             ShowContinueError(
                                 state,
-                                format(
+                                std::format(
                                     "  as outlet for: {}, name={}",
                                     ConnectionObjectTypeNames[static_cast<int>(state.dataBranchNodeConnections->CompSets(Count).ComponentObjectType)],
                                     state.dataBranchNodeConnections->CompSets(Count).CName));
-                            ShowContinueError(state, format("{}{}{}", "  and  by     : ", ParentTypeUC + ", name=", ParentName));
-                            ShowContinueError(state, format("{}{}{}", "  as outlet for: ", CompTypeUC + ", name=", CompName));
+                            ShowContinueError(state, std::format("{}{}{}", "  and  by     : ", ParentTypeUC + ", name=", ParentName));
+                            ShowContinueError(state, std::format("{}{}{}", "  as outlet for: ", CompTypeUC + ", name=", CompName));
                         }
                     }
                 }
             }
             if (ComponentTypeEnum != state.dataBranchNodeConnections->CompSets(Count).ComponentObjectType &&
-                ComponentTypeEnum != DataLoopNode::ConnectionObjectType::Undefined)
+                ComponentTypeEnum != Node::ConnectionObjectType::Undefined) {
                 continue;
-            if (CompName != state.dataBranchNodeConnections->CompSets(Count).CName) continue;
+            }
+            if (CompName != state.dataBranchNodeConnections->CompSets(Count).CName) {
+                continue;
+            }
             Found = Count;
             break;
         }
@@ -1978,9 +2217,11 @@ void SetUpCompSets(EnergyPlusData &state,
         state.dataBranchNodeConnections->CompSets(state.dataBranchNodeConnections->NumCompSets).ComponentObjectType = ComponentTypeEnum;
         state.dataBranchNodeConnections->CompSets(state.dataBranchNodeConnections->NumCompSets).CName = CompName;
         state.dataBranchNodeConnections->CompSets(state.dataBranchNodeConnections->NumCompSets).InletNodeName =
-            UtilityRoutines::MakeUPPERCase(InletNode); // TODO: Fix this....
+
+            Util::makeUPPER(InletNode); // TODO: Fix this....
         state.dataBranchNodeConnections->CompSets(state.dataBranchNodeConnections->NumCompSets).OutletNodeName =
-            UtilityRoutines::MakeUPPERCase(OutletNode); // TODO: Fix this....
+            Util::makeUPPER(OutletNode); // TODO: Fix this....
+
         if (!Description.empty()) {
             state.dataBranchNodeConnections->CompSets(state.dataBranchNodeConnections->NumCompSets).Description = Description;
         } else {
@@ -2006,38 +2247,43 @@ void TestInletOutletNodes(EnergyPlusData &state)
     AlreadyNoted.dimension(state.dataBranchNodeConnections->NumCompSets, false);
     for (int Count = 1; Count <= state.dataBranchNodeConnections->NumCompSets; ++Count) {
         for (int Other = 1; Other <= state.dataBranchNodeConnections->NumCompSets; ++Other) {
-            if (Count == Other) continue;
-            if (state.dataBranchNodeConnections->CompSets(Count).InletNodeName != state.dataBranchNodeConnections->CompSets(Other).InletNodeName)
+            if (Count == Other) {
                 continue;
-            if (AlreadyNoted(Count)) continue;
+            }
+            if (state.dataBranchNodeConnections->CompSets(Count).InletNodeName != state.dataBranchNodeConnections->CompSets(Other).InletNodeName) {
+                continue;
+            }
+            if (AlreadyNoted(Count)) {
+                continue;
+            }
             //  All other values must match
             if (state.dataBranchNodeConnections->CompSets(Count).ComponentObjectType !=
                     state.dataBranchNodeConnections->CompSets(Other).ComponentObjectType ||
                 state.dataBranchNodeConnections->CompSets(Count).CName != state.dataBranchNodeConnections->CompSets(Other).CName ||
                 state.dataBranchNodeConnections->CompSets(Count).OutletNodeName != state.dataBranchNodeConnections->CompSets(Other).OutletNodeName) {
                 AlreadyNoted(Other) = true;
-                ShowWarningError(state,
-                                 format("Node used as an inlet more than once: {}", state.dataBranchNodeConnections->CompSets(Count).InletNodeName));
+                ShowWarningError(
+                    state, std::format("Node used as an inlet more than once: {}", state.dataBranchNodeConnections->CompSets(Count).InletNodeName));
                 ShowContinueError(
                     state,
-                    format("  Used by: {}, name={}",
-                           ConnectionObjectTypeNames[static_cast<int>(state.dataBranchNodeConnections->CompSets(Count).ParentObjectType)],
-                           state.dataBranchNodeConnections->CompSets(Count).ParentCName));
+                    std::format("  Used by: {}, name={}",
+                                ConnectionObjectTypeNames[static_cast<int>(state.dataBranchNodeConnections->CompSets(Count).ParentObjectType)],
+                                state.dataBranchNodeConnections->CompSets(Count).ParentCName));
                 ShowContinueError(
                     state,
-                    format("  as inlet for: {}, name={}",
-                           ConnectionObjectTypeNames[static_cast<int>(state.dataBranchNodeConnections->CompSets(Other).ComponentObjectType)],
-                           state.dataBranchNodeConnections->CompSets(Other).CName));
+                    std::format("  as inlet for: {}, name={}",
+                                ConnectionObjectTypeNames[static_cast<int>(state.dataBranchNodeConnections->CompSets(Other).ComponentObjectType)],
+                                state.dataBranchNodeConnections->CompSets(Other).CName));
                 ShowContinueError(
                     state,
-                    format("  and by: {}, name={}",
-                           ConnectionObjectTypeNames[static_cast<int>(state.dataBranchNodeConnections->CompSets(Other).ParentObjectType)],
-                           state.dataBranchNodeConnections->CompSets(Other).ParentCName));
+                    std::format("  and by: {}, name={}",
+                                ConnectionObjectTypeNames[static_cast<int>(state.dataBranchNodeConnections->CompSets(Other).ParentObjectType)],
+                                state.dataBranchNodeConnections->CompSets(Other).ParentCName));
                 ShowContinueError(
                     state,
-                    format("  as inlet for: {}, name={}",
-                           ConnectionObjectTypeNames[static_cast<int>(state.dataBranchNodeConnections->CompSets(Count).ComponentObjectType)],
-                           state.dataBranchNodeConnections->CompSets(Count).CName));
+                    std::format("  as inlet for: {}, name={}",
+                                ConnectionObjectTypeNames[static_cast<int>(state.dataBranchNodeConnections->CompSets(Count).ComponentObjectType)],
+                                state.dataBranchNodeConnections->CompSets(Count).CName));
             }
         }
     }
@@ -2045,10 +2291,15 @@ void TestInletOutletNodes(EnergyPlusData &state)
     AlreadyNoted = false;
     for (int Count = 1; Count <= state.dataBranchNodeConnections->NumCompSets; ++Count) {
         for (int Other = 1; Other <= state.dataBranchNodeConnections->NumCompSets; ++Other) {
-            if (Count == Other) continue;
-            if (state.dataBranchNodeConnections->CompSets(Count).OutletNodeName != state.dataBranchNodeConnections->CompSets(Other).OutletNodeName)
+            if (Count == Other) {
                 continue;
-            if (AlreadyNoted(Count)) continue;
+            }
+            if (state.dataBranchNodeConnections->CompSets(Count).OutletNodeName != state.dataBranchNodeConnections->CompSets(Other).OutletNodeName) {
+                continue;
+            }
+            if (AlreadyNoted(Count)) {
+                continue;
+            }
             //  All other values must match
             if (state.dataBranchNodeConnections->CompSets(Count).ComponentObjectType !=
                     state.dataBranchNodeConnections->CompSets(Other).ComponentObjectType ||
@@ -2056,27 +2307,27 @@ void TestInletOutletNodes(EnergyPlusData &state)
                 state.dataBranchNodeConnections->CompSets(Count).InletNodeName != state.dataBranchNodeConnections->CompSets(Other).InletNodeName) {
                 AlreadyNoted(Other) = true;
                 ShowWarningError(
-                    state, format("Node used as an outlet more than once: {}", state.dataBranchNodeConnections->CompSets(Count).OutletNodeName));
+                    state, std::format("Node used as an outlet more than once: {}", state.dataBranchNodeConnections->CompSets(Count).OutletNodeName));
                 ShowContinueError(
                     state,
-                    format("  Used by: {}, name={}",
-                           ConnectionObjectTypeNames[static_cast<int>(state.dataBranchNodeConnections->CompSets(Count).ParentObjectType)],
-                           state.dataBranchNodeConnections->CompSets(Count).ParentCName));
+                    std::format("  Used by: {}, name={}",
+                                ConnectionObjectTypeNames[static_cast<int>(state.dataBranchNodeConnections->CompSets(Count).ParentObjectType)],
+                                state.dataBranchNodeConnections->CompSets(Count).ParentCName));
                 ShowContinueError(
                     state,
-                    format("  as outlet for: {}, name={}",
-                           ConnectionObjectTypeNames[static_cast<int>(state.dataBranchNodeConnections->CompSets(Other).ComponentObjectType)],
-                           state.dataBranchNodeConnections->CompSets(Other).CName));
+                    std::format("  as outlet for: {}, name={}",
+                                ConnectionObjectTypeNames[static_cast<int>(state.dataBranchNodeConnections->CompSets(Other).ComponentObjectType)],
+                                state.dataBranchNodeConnections->CompSets(Other).CName));
                 ShowContinueError(
                     state,
-                    format("  and by: {}, name={}",
-                           ConnectionObjectTypeNames[static_cast<int>(state.dataBranchNodeConnections->CompSets(Other).ParentObjectType)],
-                           state.dataBranchNodeConnections->CompSets(Other).ParentCName));
+                    std::format("  and by: {}, name={}",
+                                ConnectionObjectTypeNames[static_cast<int>(state.dataBranchNodeConnections->CompSets(Other).ParentObjectType)],
+                                state.dataBranchNodeConnections->CompSets(Other).ParentCName));
                 ShowContinueError(
                     state,
-                    format("  as outlet for: {}, name={}",
-                           ConnectionObjectTypeNames[static_cast<int>(state.dataBranchNodeConnections->CompSets(Count).ComponentObjectType)],
-                           state.dataBranchNodeConnections->CompSets(Count).CName));
+                    std::format("  as outlet for: {}, name={}",
+                                ConnectionObjectTypeNames[static_cast<int>(state.dataBranchNodeConnections->CompSets(Count).ComponentObjectType)],
+                                state.dataBranchNodeConnections->CompSets(Count).CName));
             }
         }
     }
@@ -2113,25 +2364,30 @@ void TestCompSet(EnergyPlusData &state,
     //   c)  If not found, call SetUpCompSets (with parent type and name UNDEFINED)
     //       to add a new item in the CompSets array
 
-    std::string CompTypeUC = UtilityRoutines::MakeUPPERCase(CompType);
+    std::string CompTypeUC = Util::makeUPPER(CompType);
+
     // TODO: Refactor this away by passing in enums
-    DataLoopNode::ConnectionObjectType ComponentTypeEnum =
-        static_cast<DataLoopNode::ConnectionObjectType>(getEnumerationValue(ConnectionObjectTypeNamesUC, CompTypeUC));
-    assert(ComponentTypeEnum != DataLoopNode::ConnectionObjectType::Invalid);
+    Node::ConnectionObjectType ComponentTypeEnum = static_cast<Node::ConnectionObjectType>(getEnumValue(ConnectionObjectTypeNamesUC, CompTypeUC));
+    assert(ComponentTypeEnum != Node::ConnectionObjectType::Invalid);
 
     // See if Already there
     int Found = 0;
     for (int Count = 1; Count <= state.dataBranchNodeConnections->NumCompSets; ++Count) {
         if ((ComponentTypeEnum != state.dataBranchNodeConnections->CompSets(Count).ComponentObjectType) &&
-            (state.dataBranchNodeConnections->CompSets(Count).ComponentObjectType != DataLoopNode::ConnectionObjectType::Undefined))
+            (state.dataBranchNodeConnections->CompSets(Count).ComponentObjectType != Node::ConnectionObjectType::Undefined)) {
             continue;
-        if (CompName != state.dataBranchNodeConnections->CompSets(Count).CName) continue;
+        }
+        if (CompName != state.dataBranchNodeConnections->CompSets(Count).CName) {
+            continue;
+        }
         if ((InletNode != state.dataBranchNodeConnections->CompSets(Count).InletNodeName) &&
-            (state.dataBranchNodeConnections->CompSets(Count).InletNodeName != undefined) && (InletNode != undefined))
+            (state.dataBranchNodeConnections->CompSets(Count).InletNodeName != undefined) && (InletNode != undefined)) {
             continue;
+        }
         if ((OutletNode != state.dataBranchNodeConnections->CompSets(Count).OutletNodeName) &&
-            (state.dataBranchNodeConnections->CompSets(Count).OutletNodeName != undefined) && (OutletNode != undefined))
+            (state.dataBranchNodeConnections->CompSets(Count).OutletNodeName != undefined) && (OutletNode != undefined)) {
             continue;
+        }
 
         Found = Count;
         break;
@@ -2144,15 +2400,18 @@ void TestCompSet(EnergyPlusData &state,
         //   If the parent object did not specify a component type or inlet or outlet node, then that value
         //   is UNDEFINED in CompSets.  When a component calls TestCompSet, the comp type and inlet and
         //   outlet nodes are known, so they can be filled in for future reference.
-        if (state.dataBranchNodeConnections->CompSets(Found).ComponentObjectType == DataLoopNode::ConnectionObjectType::Undefined) {
+        if (state.dataBranchNodeConnections->CompSets(Found).ComponentObjectType == Node::ConnectionObjectType::Undefined) {
             state.dataBranchNodeConnections->CompSets(Found).ComponentObjectType = ComponentTypeEnum;
         }
-        if (state.dataBranchNodeConnections->CompSets(Found).InletNodeName == undefined)
+        if (state.dataBranchNodeConnections->CompSets(Found).InletNodeName == undefined) {
             state.dataBranchNodeConnections->CompSets(Found).InletNodeName = InletNode;
-        if (state.dataBranchNodeConnections->CompSets(Found).OutletNodeName == undefined)
+        }
+        if (state.dataBranchNodeConnections->CompSets(Found).OutletNodeName == undefined) {
             state.dataBranchNodeConnections->CompSets(Found).OutletNodeName = OutletNode;
-        if (state.dataBranchNodeConnections->CompSets(Found).Description == undefined)
+        }
+        if (state.dataBranchNodeConnections->CompSets(Found).Description == undefined) {
             state.dataBranchNodeConnections->CompSets(Found).Description = Description;
+        }
     }
 }
 
@@ -2176,44 +2435,53 @@ void TestCompSetInletOutletNodes(EnergyPlusData &state, bool &ErrorsFound)
     AlreadyNoted.dimension(state.dataBranchNodeConnections->NumCompSets, false);
     for (int Count = 1; Count <= state.dataBranchNodeConnections->NumCompSets; ++Count) {
         for (int Other = 1; Other <= state.dataBranchNodeConnections->NumCompSets; ++Other) {
-            if (Count == Other) continue;
-            if (state.dataBranchNodeConnections->CompSets(Count).ComponentObjectType ==
-                DataLoopNode::ConnectionObjectType ::SolarCollectorUnglazedTranspired)
+            if (Count == Other) {
                 continue;
+            }
+            if (state.dataBranchNodeConnections->CompSets(Count).ComponentObjectType ==
+                Node::ConnectionObjectType ::SolarCollectorUnglazedTranspired) {
+                continue;
+            }
             if (state.dataBranchNodeConnections->CompSets(Count).ComponentObjectType !=
                     state.dataBranchNodeConnections->CompSets(Other).ComponentObjectType ||
-                state.dataBranchNodeConnections->CompSets(Count).CName != state.dataBranchNodeConnections->CompSets(Other).CName)
+                state.dataBranchNodeConnections->CompSets(Count).CName != state.dataBranchNodeConnections->CompSets(Other).CName) {
                 continue;
+            }
             if (state.dataBranchNodeConnections->CompSets(Count).Description != state.dataBranchNodeConnections->CompSets(Other).Description) {
                 if (state.dataBranchNodeConnections->CompSets(Count).Description != undefined &&
-                    state.dataBranchNodeConnections->CompSets(Other).Description != undefined)
+                    state.dataBranchNodeConnections->CompSets(Other).Description != undefined) {
                     continue;
+                }
             }
-            if (state.dataBranchNodeConnections->CompSets(Count).InletNodeName == state.dataBranchNodeConnections->CompSets(Other).InletNodeName)
+            if (state.dataBranchNodeConnections->CompSets(Count).InletNodeName == state.dataBranchNodeConnections->CompSets(Other).InletNodeName) {
                 continue;
-            if (state.dataBranchNodeConnections->CompSets(Count).OutletNodeName == state.dataBranchNodeConnections->CompSets(Other).OutletNodeName)
+            }
+            if (state.dataBranchNodeConnections->CompSets(Count).OutletNodeName == state.dataBranchNodeConnections->CompSets(Other).OutletNodeName) {
                 continue;
-            if (AlreadyNoted(Count)) continue;
+            }
+            if (AlreadyNoted(Count)) {
+                continue;
+            }
             //  All other values must match
             AlreadyNoted(Other) = true;
             ShowSevereError(state, "Same component name and type has differing Node Names.");
             ShowContinueError(
                 state,
-                format("  Component: {}, name={}",
-                       ConnectionObjectTypeNames[static_cast<int>(state.dataBranchNodeConnections->CompSets(Count).ComponentObjectType)],
-                       state.dataBranchNodeConnections->CompSets(Count).CName));
+                std::format("  Component: {}, name={}",
+                            ConnectionObjectTypeNames[static_cast<int>(state.dataBranchNodeConnections->CompSets(Count).ComponentObjectType)],
+                            state.dataBranchNodeConnections->CompSets(Count).CName));
             ShowContinueError(state,
-                              format("   Nodes, inlet: {}, outlet: {}",
-                                     state.dataBranchNodeConnections->CompSets(Count).InletNodeName,
-                                     state.dataBranchNodeConnections->CompSets(Count).OutletNodeName));
+                              std::format("   Nodes, inlet: {}, outlet: {}",
+                                          state.dataBranchNodeConnections->CompSets(Count).InletNodeName,
+                                          state.dataBranchNodeConnections->CompSets(Count).OutletNodeName));
             ShowContinueError(state,
-                              format(" & Nodes, inlet: {}, outlet: {}",
-                                     state.dataBranchNodeConnections->CompSets(Other).InletNodeName,
-                                     state.dataBranchNodeConnections->CompSets(Other).OutletNodeName));
+                              std::format(" & Nodes, inlet: {}, outlet: {}",
+                                          state.dataBranchNodeConnections->CompSets(Other).InletNodeName,
+                                          state.dataBranchNodeConnections->CompSets(Other).OutletNodeName));
             ShowContinueError(state,
-                              format("   Node Types:   {} & {}",
-                                     state.dataBranchNodeConnections->CompSets(Count).Description,
-                                     state.dataBranchNodeConnections->CompSets(Other).Description));
+                              std::format("   Node Types:   {} & {}",
+                                          state.dataBranchNodeConnections->CompSets(Count).Description,
+                                          state.dataBranchNodeConnections->CompSets(Other).Description));
             ErrorsFound = true;
         }
     }
@@ -2221,7 +2489,7 @@ void TestCompSetInletOutletNodes(EnergyPlusData &state, bool &ErrorsFound)
     AlreadyNoted.deallocate();
 }
 
-void GetNodeConnectionType(EnergyPlusData &state, int const NodeNumber, EPVector<DataLoopNode::ConnectionType> &NodeConnectType, bool &errFlag)
+void GetNodeConnectionType(EnergyPlusData &state, int const NodeNumber, EPVector<Node::ConnectionType> &NodeConnectType, bool &errFlag)
 {
 
     // FUNCTION INFORMATION:
@@ -2234,11 +2502,13 @@ void GetNodeConnectionType(EnergyPlusData &state, int const NodeNumber, EPVector
     Array1D_int ListArray;
     Array1D_string ConnectionTypes(15);
 
-    for (int nodetype = 1; nodetype < static_cast<int>(ConnectionType::Num); ++nodetype) {
-        ConnectionTypes(nodetype) = ConnectionTypeNames[nodetype];
+    for (int nodetype = 1; nodetype < static_cast<int>(Node::ConnectionType::Num); ++nodetype) {
+        ConnectionTypes(nodetype) = Node::ConnectionTypeNames[nodetype];
     }
 
-    if (allocated(NodeConnectType)) NodeConnectType.deallocate();
+    if (allocated(NodeConnectType)) {
+        NodeConnectType.deallocate();
+    }
 
     int NumInList;
     FindAllNodeNumbersInList(
@@ -2252,7 +2522,7 @@ void GetNodeConnectionType(EnergyPlusData &state, int const NodeNumber, EPVector
         }
     } else {
         if (NodeNumber > 0) {
-            ShowWarningError(state, format("Node not found = {}.", state.dataLoopNodes->NodeID(NodeNumber)));
+            ShowWarningError(state, std::format("Node not found = {}.", state.dataLoopNodes->NodeID(NodeNumber)));
         } else {
             ShowWarningError(state, "Invalid node number passed = 0.");
         }
@@ -2261,7 +2531,7 @@ void GetNodeConnectionType(EnergyPlusData &state, int const NodeNumber, EPVector
 }
 
 void FindAllNodeNumbersInList(int const WhichNumber,
-                              EPVector<DataBranchNodeConnections::NodeConnectionDef> const &NodeConnections,
+                              EPVector<Node::NodeConnectionDef> const &NodeConnections,
                               int const NumItems,
                               int &CountOfItems,            // Number of items found
                               Array1D_int &AllNumbersInList // Index array to all numbers found
@@ -2279,7 +2549,9 @@ void FindAllNodeNumbersInList(int const WhichNumber,
 
     CountOfItems = 0;
 
-    if (allocated(AllNumbersInList)) AllNumbersInList.deallocate();
+    if (allocated(AllNumbersInList)) {
+        AllNumbersInList.deallocate();
+    }
 
     for (int Count = 1; Count <= NumItems; ++Count) {
         if (WhichNumber == NodeConnections(Count).NodeNumber) {
@@ -2301,4 +2573,4 @@ void FindAllNodeNumbersInList(int const WhichNumber,
     }
 }
 
-} // namespace EnergyPlus::BranchNodeConnections
+} // namespace EnergyPlus::Node

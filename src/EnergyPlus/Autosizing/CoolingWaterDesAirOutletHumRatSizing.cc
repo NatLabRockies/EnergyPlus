@@ -1,7 +1,7 @@
-// EnergyPlus, Copyright (c) 1996-2023, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
-// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other
+// National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
 // contributors. All rights reserved.
 //
 // NOTICE: This Software was developed under funding from the U.S. Department of Energy and the
@@ -45,6 +45,7 @@
 // OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 // POSSIBILITY OF SUCH DAMAGE.
 
+// EnergyPlus Headers
 #include <EnergyPlus/Autosizing/CoolingWaterDesAirOutletHumRatSizing.hh>
 #include <EnergyPlus/Data/EnergyPlusData.hh>
 #include <EnergyPlus/DataEnvironment.hh>
@@ -96,16 +97,15 @@ Real64 CoolingWaterDesAirOutletHumRatSizer::size(EnergyPlusData &state, Real64 _
 
     if (this->wasAutoSized) {
         if (this->autoSizedValue > this->dataDesInletAirHumRat &&
-            (UtilityRoutines::SameString(this->compType, "COIL:COOLING:WATER") ||
-             UtilityRoutines::SameString(this->compType, "COIL:COOLING:WATER:DETAILEDGEOMETRY"))) {
+            (Util::SameString(this->compType, "COIL:COOLING:WATER") || Util::SameString(this->compType, "COIL:COOLING:WATER:DETAILEDGEOMETRY"))) {
             std::string msg =
                 this->callingRoutine + ":" + " Coil=\"" + this->compName + "\", Cooling Coil has leaving humidity ratio > entering humidity ratio.";
             this->addErrorMessage(msg);
             ShowWarningError(state, msg);
-            msg = format("    Wair,in =  {:.6R} [kgWater/kgDryAir]", this->dataDesInletAirHumRat);
+            msg = std::format("    Wair,in =  {:.3E} [kgWater/kgDryAir]", this->dataDesInletAirHumRat);
             this->addErrorMessage(msg);
             ShowContinueError(state, msg);
-            msg = format("    Wair,out = {:.6R} [kgWater/kgDryAir]", this->autoSizedValue);
+            msg = std::format("    Wair,out = {:.3E} [kgWater/kgDryAir]", this->autoSizedValue);
             this->addErrorMessage(msg);
             ShowContinueError(state, msg);
             if (this->dataDesInletAirHumRat > 0.016) {
@@ -116,7 +116,7 @@ Real64 CoolingWaterDesAirOutletHumRatSizer::size(EnergyPlusData &state, Real64 _
             msg = "....coil leaving humidity ratio will be reset to:";
             this->addErrorMessage(msg);
             ShowContinueError(state, msg);
-            msg = format("    Wair,out = {:.6R} [kgWater/kgDryAir]", this->autoSizedValue);
+            msg = std::format("    Wair,out = {:.3E} [kgWater/kgDryAir]", this->autoSizedValue);
             this->addErrorMessage(msg);
             ShowContinueError(state, msg);
         }
@@ -126,42 +126,42 @@ Real64 CoolingWaterDesAirOutletHumRatSizer::size(EnergyPlusData &state, Real64 _
         Real64 desHumRatAtWaterInTemp = Psychrometrics::PsyWFnTdbH(state, this->dataDesInletWaterTemp, desSatEnthAtWaterInTemp, this->callingRoutine);
         if (this->autoSizedValue < this->dataDesInletAirHumRat && desHumRatAtWaterInTemp > this->dataDesInletAirHumRat) {
             if (this->autoSizedValue < this->dataDesInletAirHumRat &&
-                (UtilityRoutines::SameString(this->compType, "COIL:COOLING:WATER") ||
-                 UtilityRoutines::SameString(this->compType, "COIL:COOLING:WATER:DETAILEDGEOMETRY"))) {
+                (Util::SameString(this->compType, "COIL:COOLING:WATER") || Util::SameString(this->compType, "COIL:COOLING:WATER:DETAILEDGEOMETRY"))) {
                 std::string msg = this->callingRoutine + ":" + " Coil=\"" + this->compName +
                                   "\", Cooling Coil is running dry for sizing and has minimum humidity ratio at saturation for inlet chilled water "
                                   "temperature > design air entering humidity ratio.";
                 this->addErrorMessage(msg);
                 ShowWarningError(state, msg);
-                msg = format("    Wair,in =  {:.6R} [kgWater/kgDryAir]", this->dataDesInletAirHumRat);
+                msg = std::format("    Wair,in =  {:.3E} [kgWater/kgDryAir]", this->dataDesInletAirHumRat);
                 this->addErrorMessage(msg);
                 ShowContinueError(state, msg);
-                msg = format("    Wair,out = {:.6R} [kgWater/kgDryAir]", this->autoSizedValue);
+                msg = std::format("    Wair,out = {:.3E} [kgWater/kgDryAir]", this->autoSizedValue);
                 this->addErrorMessage(msg);
                 ShowContinueError(state, msg);
-                msg = format("    Inlet chilled water temperature = {:.3R} [C]", this->dataDesInletWaterTemp);
+                msg = std::format("    Inlet chilled water temperature = {:.3f} [C]", this->dataDesInletWaterTemp);
                 this->addErrorMessage(msg);
                 ShowContinueError(state, msg);
-                msg = format("    Minimum humidity ratio at saturation for inlet chilled water temperature = {:.6R} [kgWater/kgDryAir]",
-                             desHumRatAtWaterInTemp);
+                msg = std::format("    Minimum humidity ratio at saturation for inlet chilled water temperature = {:.3E} [kgWater/kgDryAir]",
+                                  desHumRatAtWaterInTemp);
                 this->addErrorMessage(msg);
                 ShowContinueError(state, msg);
                 this->autoSizedValue = this->dataDesInletAirHumRat;
                 msg = "....coil leaving humidity ratio will be reset to:";
                 this->addErrorMessage(msg);
                 ShowContinueError(state, msg);
-                msg = format("    Wair,out = {:.6R} [kgWater/kgDryAir]", this->autoSizedValue);
+                msg = std::format("    Wair,out = {:.3E} [kgWater/kgDryAir]", this->autoSizedValue);
                 this->addErrorMessage(msg);
                 ShowContinueError(state, msg);
             }
         }
     }
     if (this->overrideSizeString) {
-        if (this->isEpJSON) this->sizingString = "design_outlet_air_humidity_ratio [kgWater/kgDryAir]";
+        this->sizingString = "Design Outlet Air Humidity Ratio [kgWater/kgDryAir]";
     }
     this->selectSizerOutput(state, errorsFound);
-    if (this->isCoilReportObject)
-        state.dataRptCoilSelection->coilSelectionReportObj->setCoilLvgAirHumRat(state, this->compName, this->compType, this->autoSizedValue);
+    if (this->isCoilReportObject) {
+        ReportCoilSelection::setCoilLvgAirHumRat(state, this->coilReportNum, this->autoSizedValue);
+    }
     return this->autoSizedValue;
 }
 

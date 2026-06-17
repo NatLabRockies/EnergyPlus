@@ -1,7 +1,7 @@
-// EnergyPlus, Copyright (c) 1996-2023, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
-// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other
+// National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
 // contributors. All rights reserved.
 //
 // NOTICE: This Software was developed under funding from the U.S. Department of Energy and the
@@ -51,39 +51,46 @@
 // ObjexxFCL Headers
 #include <ObjexxFCL/Array1D.hh>
 #include <ObjexxFCL/Array2D.hh>
-#include <ObjexxFCL/Array3D.hh>
-#include <ObjexxFCL/Array4D.hh>
-#include <ObjexxFCL/Array5D.hh>
 
 // EnergyPlus Headers
 #include <EnergyPlus/Data/BaseData.hh>
 #include <EnergyPlus/DataGlobals.hh>
+#include <EnergyPlus/DataSurfaces.hh>
 #include <EnergyPlus/EPVector.hh>
 #include <EnergyPlus/EnergyPlus.hh>
 
 namespace EnergyPlus {
 
-namespace DataDaylighting {
+namespace Dayltg {
+
+    using DataSurfaces::Lum;
 
     // Two kinds of reference points: used directly in daylighting, used to show illuminance map of zone
     constexpr int MaxMapRefPoints(2500); // Maximum number of Illuminance Map Ref Points
 
-    enum class SkyType : int
+    enum class SkyType
     {
         Invalid = -1,
-        Clear = 1,
+        Clear,
         ClearTurbid,
         Intermediate,
         Overcast,
         Num
     };
 
+    struct Illums
+    {
+        std::array<Real64, (int)SkyType::Num> sky = {0.0, 0.0, 0.0, 0.0};
+        Real64 sun = 0.0;
+        Real64 sunDisk = 0.0;
+    };
+
     enum class ExtWinType
     {
         Invalid = -1,
-        NotInOrAdjZoneExtWin, // Exterior window is not in a Daylighting:Detailed zone or in an adjacent zone with a shared interior window
-        InZoneExtWin,         // Exterior window is in a Daylighting:Detailed zone
-        AdjZoneExtWin,        // Exterior window is in a zone adjacent to a Daylighting:Detailed zone with which it shares an interior window
+        NotInOrAdjZone, // Exterior window is not in a Daylighting:Detailed zone or in an adjacent zone with a shared interior window
+        InZone,         // Exterior window is in a Daylighting:Detailed zone
+        AdjZone,        // Exterior window is in a zone adjacent to a Daylighting:Detailed zone with which it shares an interior window
         Num
     };
 
@@ -103,6 +110,8 @@ namespace DataDaylighting {
         DElight,
         Num
     };
+
+    static constexpr std::array<std::string_view, (int)DaylightingMethod::Num> DaylightingMethodNamesUC = {"NONE", "SPLITFLUX", "DELIGHT"};
 
     // Parameters for "Lighting Control Type" - these are the values expected by DElight
     enum class LtgCtrlType
@@ -148,6 +157,29 @@ namespace DataDaylighting {
         EPVector<int> daylightControlIndexes; // Indexes to daylighting:controls object operating in this enclosure
     };
 
+    struct DaylRefPtExtWin
+    {
+        Real64 solidAng = 0.0;
+        Real64 solidAngWtd = 0.0;
+        std::array<std::array<Real64, (int)DataSurfaces::WinCover::Num>, (int)Lum::Num> lums;
+    };
+
+    struct DaylRefPt
+    {
+        int num = 0;
+        Vector3<Real64> absCoords = {0.0, 0.0, 0.0};
+        bool inBounds = true;
+        Real64 fracZoneDaylit = 0.0;
+        Real64 illumSetPoint = 0.0;
+        Real64 powerReductionFactor = 0.0;
+        Real64 timeExceedingGlareIndexSetPoint = 0.0;
+        Real64 timeExceedingDaylightIlluminanceSetPoint = 0.0;
+        std::array<Real64, (int)Lum::Num> lums = {0.0, 0.0, 0.0};
+        Real64 glareIndex = 0.0;
+
+        Array1D<DaylRefPtExtWin> extWins;
+    };
+
     struct DaylightingControl
     {
         std::string Name;     // Name of the daylighting:controls object
@@ -155,39 +187,24 @@ namespace DataDaylighting {
         int zoneIndex = 0;    // Index to zone where the daylighting:controls object is located
         int spaceIndex = 0;   // Index to space where the daylighting:controls object is located (0 if specified for a zone)
         int enclIndex = 0;    // Index to enclosure where the daylighting:controls object is located
-        DataDaylighting::DaylightingMethod DaylightMethod = DaylightingMethod::None; // Type of Daylighting (1=SplitFlux, 2=DElight)
-        int AvailSchedNum = 0;                                                       // pointer to availability schedule if present
-        int TotalDaylRefPoints = 0;                                                  // Number of daylighting reference points for this control
-        Array1D_int DaylRefPtNum;          // Reference number to DaylRefPt array that stores Daylighting:ReferencePoint
-        Array2D<Real64> DaylRefPtAbsCoord; // =0.0 ! X,Y,Z coordinates of all daylighting reference points
-        // in absolute coordinate system (m)
-        // Points 1 and 2 are the control reference points
-        Array1D_bool DaylRefPtInBounds;                         // True when coordinates are in bounds of zone coordinates
-        Array1D<Real64> FracZoneDaylit;                         // =0.0  ! Fraction of zone controlled by each reference point
+        Dayltg::DaylightingMethod DaylightMethod = DaylightingMethod::None; // Type of Daylighting (1=SplitFlux, 2=DElight)
+        Sched::Schedule *availSched = nullptr;                              // availability schedule if present
+        int TotalExtWindows = 0;
+        int TotalDaylRefPoints = 0; // Number of daylighting reference points for this control
+
+        Array1D<DaylRefPt> refPts;                              // Points 1 and 2 are the control reference points
         Real64 sumFracLights = 0.0;                             // Sum of lighting control fractions for this daylighting control
-        Array1D<Real64> IllumSetPoint;                          // =0.0  ! Illuminance setpoint at each reference point (lux)
         LtgCtrlType LightControlType = LtgCtrlType::Continuous; // Lighting control type (same for all reference points)
-        // (1=continuous, 2=stepped, 3=continuous/off)
-        int glareRefPtNumber = 0;                  // from field: Glare Calculation Daylighting Reference Point Name
-        Real64 ViewAzimuthForGlare = 0.0;          // View direction relative to window for glare calculation (deg)
-        int MaxGlareallowed = 0;                   // Maximum allowable discomfort glare index
-        Real64 MinPowerFraction = 0.0;             // Minimum fraction of power input that continuous dimming system can dim down to
-        Real64 MinLightFraction = 0.0;             // Minimum fraction of light output that continuous dimming system can dim down to
-        int LightControlSteps = 0;                 // Number of levels (excluding zero) of stepped control system
-        Real64 LightControlProbability = 0.0;      // For manual control of stepped systems, probability that lighting will
-        Real64 PowerReductionFactor = 1.0;         // Electric power reduction factor for this control due to daylighting
-        Real64 DElightGriddingResolution = 0.0;    // Field: Delight Gridding Resolution
-        Array1D<Real64> RefPtPowerReductionFactor; // =1.0  ! Electric power reduction factor at reference points
-        // due to daylighting
-        Array1D<Real64> DaylIllumAtRefPt;        // =0.0 ! Daylight illuminance at reference points (lux)
-        Array1D<Real64> GlareIndexAtRefPt;       // =0.0 ! Glare index at reference points
-        Array1D<Real64> BacLum;                  // =0.0 ! Background luminance at each reference point (cd/m2)
-        Array2D<Real64> SolidAngAtRefPt;         // (Number of Zones, Total Daylighting Reference Points)
-        Array2D<Real64> SolidAngAtRefPtWtd;      // (Number of Zones, Total Daylighting Reference Points)
-        Array3D<Real64> IllumFromWinAtRefPt;     // (Number of Zones, 2, Total Daylighting Reference Points)
-        Array3D<Real64> BackLumFromWinAtRefPt;   // (Number of Zones, 2, Total Daylighting Reference Points)
-        Array3D<Real64> SourceLumFromWinAtRefPt; // (Number of Zones, 2, Total Daylighting Reference Points)
-        Array1D<Real64> TimeExceedingGlareIndexSPAtRefPt;
+        int glareRefPtNumber = 0;                               // from field: Glare Calculation Daylighting Reference Point Name
+        Real64 ViewAzimuthForGlare = 0.0;                       // View direction relative to window for glare calculation (deg)
+        int MaxGlareallowed = 0;                                // Maximum allowable discomfort glare index
+        Real64 MinPowerFraction = 0.0;                          // Minimum fraction of power input that continuous dimming system can dim down to
+        Real64 MinLightFraction = 0.0;                          // Minimum fraction of light output that continuous dimming system can dim down to
+        int LightControlSteps = 0;                              // Number of levels (excluding zero) of stepped control system
+        Real64 LightControlProbability = 0.0;                   // For manual control of stepped systems, probability that lighting will
+        Real64 PowerReductionFactor = 1.0;                      // Electric power reduction factor for this control due to daylighting
+        Real64 DElightGriddingResolution = 0.0;                 // Field: Delight Gridding Resolution
+
         // Allocatable daylight factor arrays
         // Arguments (dimensions) for Dayl---Sky are:
         //  1: Sun position index / HourOfDay (1 to 24)
@@ -196,23 +213,11 @@ namespace DataDaylighting {
         //  3: Reference point number (1 to Total Daylighting Reference Points)
         //  4: Sky type (1 to 4; 1 = clear, 2 = clear turbid, 3 = intermediate, 4 = overcast
         //  5: Daylit window number (1 to NumOfDayltgExtWins)
-        Array5D<Real64> DaylIllFacSky;
-        Array5D<Real64> DaylSourceFacSky;
-        Array5D<Real64> DaylBackFacSky;
-        // Arguments (dimensions) for Dayl---Sun are:
-        //  1: Sun position index / HourOfDay (1 to 24)
-        //  2: Shading index (1 to MaxSlatAngs+1; 1 = bare window; 2 = with shade, or, if blinds
-        //      2 = first slat position, 3 = second position, ..., MaxSlatAngs+1 = last position)
-        //  3: Reference point number (1 to Total Daylighting Reference Points)
-        //  4: Daylit window number (1 to NumOfDayltgExtWins)
-        Array4D<Real64> DaylIllFacSun;
-        Array4D<Real64> DaylIllFacSunDisk;
-        Array4D<Real64> DaylSourceFacSun;
-        Array4D<Real64> DaylSourceFacSunDisk;
-        Array4D<Real64> DaylBackFacSun;
-        Array4D<Real64> DaylBackFacSunDisk;
+        std::array<Array2D<std::array<std::array<Dayltg::Illums, (int)Lum::Num>, (int)DataSurfaces::WinCover::Num>>, (int)Constant::iHoursInDay + 1>
+            daylFac;
+
         // Time exceeding daylight illuminance setpoint at reference points (hours)
-        Array1D<Real64> TimeExceedingDaylightIlluminanceSPAtRefPt;
+        // Array1D<Real64> TimeExceedingDaylightIlluminanceSPAtRefPt;
         std::vector<std::vector<int>> ShadeDeployOrderExtWins; // describes how the fenestration surfaces should deploy the shades.
         // It is a list of lists. Each sublist is a group of fenestration surfaces that should be deployed together. Many times the
         // sublists a just a single index to a fenestration surface if they are deployed one at a time.
@@ -226,11 +231,22 @@ namespace DataDaylighting {
         int totRefPts = 0.0;          // For VisualResilienceSummary total number of rereference points
     };
 
-    struct IllumMapData
+    struct DaylMapPt
+    {
+        Vector3<Real64> absCoords = {0.0, 0.0, 0.0};
+        bool inBounds = true;
+        std::array<Real64, (int)Lum::Num> lums = {0.0, 0.0, 0.0};
+        std::array<Real64, (int)Lum::Num> lumsHr = {0.0, 0.0, 0.0};
+
+        Array1D<std::array<Real64, (int)DataSurfaces::WinCover::Num>> winLums;
+    };
+
+    struct IllumMap
     {
         // Members
         std::string Name;                    // Map name
-        int zoneIndex;                       // Index to zone being mapped
+        int spaceIndex = 0;                  // Index to space being mapped
+        int zoneIndex = 0;                   // Index to zone being mapped
         int enclIndex = 0;                   // Index to enclosure for this map
         Real64 Z = 0.0;                      // Elevation or height
         Real64 Xmin = 0.0;                   // Minimum X value
@@ -245,47 +261,23 @@ namespace DataDaylighting {
         bool HeaderXLineLengthNeeded = true; // X header will likely be the longest line in the file
         int HeaderXLineLength = 0;           // actual length of this X header line
         std::string pointsHeader;            // part of the header that lists the reference points in the same zone
-    };
 
-    struct MapCalcData
-    {
-        // Members
-        int TotalMapRefPoints = 0;        // Number of illuminance map reference points in this zone (up to 100)
-        int zoneIndex = 0;                // Pointer to zone being mapped
-        int enclIndex = 0;                // Index to enclosure for this map
-        Array2D<Real64> MapRefPtAbsCoord; // X,Y,Z coordinates of all illuminance map reference points
-        // in absolute coordinate system (m)
-        // Points 1 and 2 are the control reference points
-        Array1D_bool MapRefPtInBounds;    // True when coordinates are in bounds of zone coordinates
-        Array1D<Real64> DaylIllumAtMapPt; // Daylight illuminance at illuminance map points (lux)
-        // following Hr - report avg hr
-        Array1D<Real64> DaylIllumAtMapPtHr;  // Daylight illuminance at illuminance map points (lux)
-        Array3D<Real64> IllumFromWinAtMapPt; // (Number of Zones, 2, Total Map Reference Points)
+        int TotalMapRefPoints = 0; // Number of illuminance map reference points in this zone (up to 100)
+        Array1D<DaylMapPt> refPts;
         // Arguments (dimensions) for Dayl---Sky are:
         //  1: Sun position index / HourOfDay (1 to 24)
-        //  2: Shading index (1 to MaxSlatAngs+1; 1 = bare window; 2 = with shade, or, if blinds
-        //      2 = first slat position, 3 = second position, ..., MaxSlatAngs+1 = last position)
+        //  2: Daylit window number (1 to NumOfDayltgExtWins)
         //  3: Reference point number (1 to Total Map Reference Points)
-        //  4: Sky type (1 to 4; 1 = clear, 2 = clear turbid, 3 = intermediate, 4 = overcast
-        //  5: Daylit window number (1 to NumOfDayltgExtWins)
-        Array5D<Real64> DaylIllFacSky;
-        // Arguments (dimensions) for Dayl---Sun are:
-        //  1: Sun position index / HourOfDay (1 to 24)
-        //  2: Shading index (1 to MaxSlatAngs+1; 1 = bare window; 2 = with shade, or, if blinds
+        //  4: Shading index (1 to MaxSlatAngs+1; 1 = bare window; 2 = with shade, or, if blinds
         //      2 = first slat position, 3 = second position, ..., MaxSlatAngs+1 = last position)
-        //  3: Reference point number (1 to Total Map Reference Points)
-        //  4: Daylit window number (1 to NumOfDayltgExtWins)
-        Array4D<Real64> DaylIllFacSun;
-        Array4D<Real64> DaylIllFacSunDisk;
+        std::array<Array2D<std::array<Dayltg::Illums, (int)DataSurfaces::WinCover::Num>>, (int)Constant::iHoursInDay + 1> daylFac;
     };
 
     struct RefPointData
     {
-        std::string Name; // Map name
-        int ZoneNum = 0;  // Pointer to zone being referenced
-        Real64 x = 0.0;   // x coordinate
-        Real64 y = 0.0;   // y coordinate
-        Real64 z = 0.0;   // z coordinate
+        std::string Name;                         // Map name
+        int ZoneNum = 0;                          // Pointer to zone being referenced
+        Vector3<Real64> coords = {0.0, 0.0, 0.0}; // x coordinate
         int indexToFracAndIllum = 0;
     };
 
@@ -298,31 +290,7 @@ namespace DataDaylighting {
         Real64 feneRota;             // Fenestration Rotation
     };
 
-} // namespace DataDaylighting
-
-struct DaylightingData : BaseGlobalStruct
-{
-    int maxRefPointsPerControl = 0;
-    bool mapResultsToReport = false; // used when only partial hour has "sun up"
-    bool mapResultsReported = false; // when no map results are ever reported this will still be false
-    char MapColSep;                  // Character for separating map columns (tab, space, comma)
-    bool DFSReportSizingDays = false;
-    bool DFSReportAllShadowCalculationDays = false;
-
-    Array1D<DataDaylighting::EnclDaylightCalc> enclDaylight;
-    Array1D<DataDaylighting::ZoneDaylightCalc> ZoneDaylight;
-    Array1D<DataDaylighting::DaylightingControl> daylightControl;
-    Array1D<DataDaylighting::IllumMapData> IllumMap;
-    Array1D<DataDaylighting::MapCalcData> IllumMapCalc;
-    Array1D<DataDaylighting::RefPointData> DaylRefPt;
-    Array1D<DataDaylighting::DElightComplexFeneData> DElightComplexFene;
-    Array1D<Real64> spacePowerReductionFactor; // Average electric power reduction factor for space due to daylighting
-
-    void clear_state() override
-    {
-        *this = DaylightingData();
-    }
-};
+} // namespace Dayltg
 
 } // namespace EnergyPlus
 

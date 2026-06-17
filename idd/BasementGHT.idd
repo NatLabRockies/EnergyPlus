@@ -371,6 +371,7 @@ ManualGrid,
           \required-field
      N4,  \field NZBG: Number of cells in Z direction. below grade: 10-35]
           \minimum 1
+          \maximum 100
           \required-field
      N5,  \field IBASE: X direction cell indicator of slab edge: 5-20]
           \required-field

@@ -10,13 +10,13 @@ Dependencies on moisture content are indicated by a superscript \(^{w}\), on hea
 
 \begin{longtable}[c]{p{1.5in}p{1.0in}p{3.5in}}
 \caption{Combined Heat and Moisture Transfer Model Nomenclature \label{table:combined-heat-and-moisture-transfer-model}} \tabularnewline
-\toprule 
+\toprule
 Symbol & Units & Meaning \tabularnewline
 \midrule
 \endfirsthead
 
 \caption[]{Combined Heat and Moisture Transfer Model Nomenclature} \tabularnewline
-\toprule 
+\toprule
 Symbol & Units & Meaning \tabularnewline
 \midrule
 \endhead
@@ -125,11 +125,11 @@ The moisture content (w) of a cell is needed for the calculation of the heat tra
 
 The porosity of a material (P) is an input variable and defined as the maximum fraction, by volume, of a material that can be taken up with moisture. It is used to calculate the maximum point on the sorption isotherm curve. ~The porosity is entered for each material via the MaterialProperty:HeatAndMoistureTransfer:Settings object, as described in the Input Output Reference document.
 
-\subsubsection{Moisture Dependant Thermal Conductivity k\(^{w}\)}\label{moisture-dependant-thermal-conductivity-kw}
+\subsubsection{Moisture Dependent Thermal Conductivity k\(^{w}\)}\label{moisture-dependent-thermal-conductivity-kw}
 
 The thermal conductivity (k\(^{w}\)) of the cell is determined by interpolating between data points of thermal conductivity versus the moisture content of the material, entered into EnergyPlus via the MaterialProperty:HeatAndMoistureTransfer:ThermalConductivity object. The moisture content is determined via the sorption isotherm which gives the moisture content as a function of Relative Humidity.
 
-\subsubsection{Moisture Dependant Moisture Diffusion Coefficient μ}\label{moisture-dependant-moisture-diffusion-coefficient-ux3bc}
+\subsubsection{Moisture Dependent Moisture Diffusion Coefficient μ}\label{moisture-dependent-moisture-diffusion-coefficient-ux3bc}
 
 This is used in the third term of Equation~\ref{eq:HAMTHeatBalanceEquation} to describe the heat transfer due to vapor movement. It is determined by interpolating between data points of moisture diffusion coefficient versus the moisture content of the material, entered into EnergyPlus via the MaterialProperty:HeatAndMoistureTransfer:Diffusion object. A simple linear interpolation is used to obtain the conductivity between measured points.
 
@@ -159,11 +159,11 @@ is the moisture resistance between cells i and j and \(R_{ij}^v = \frac{\mu_{ij}
 
 Equation~\ref{eq:RelativeHumidityIthCell} can be used together with the heat equation~\ref{eq:TemperatureIthCell} in an alternate step by step fashion to calculate the new temperature and relative humidity profiles for each cell for the next time step.
 
-Surfaces with Ground exterior boundary condition assumes saturated air ({100\%} relative humidity) condition to calculate the exterior mass transfer coefficient, which is used to model mass transport through a ground contact surfaces. 
+Surfaces with Ground exterior boundary condition assumes saturated air ({100\%} relative humidity) condition to calculate the exterior mass transfer coefficient, which is used to model mass transport through a ground contact surfaces.
 
 \subsubsection{Liquid Transport Coefficient D\(^{w}\)}\label{liquid-transport-coefficient-dw}
 
-The Moisture Dependant Liquid Transport Coefficient is entered as a series of moisture density and liquid transport coefficient data points. There are two different coefficients, one for suction, where the surface is wet due to rain, and one for redistribution where the surface is no longer wet. If the weather file has a rain flag it is used to switch between these two types of coefficient. HAMT-SUCTION and HAMT-REDISTRIBUTION.
+The Moisture Dependent Liquid Transport Coefficient is entered as a series of moisture density and liquid transport coefficient data points. There are two different coefficients, one for suction, where the surface is wet due to rain, and one for redistribution where the surface is no longer wet. If the weather file has a rain flag it is used to switch between these two types of coefficient. HAMT-SUCTION and HAMT-REDISTRIBUTION.
 
 \subsubsection{Moisture Dependent Moisture Capacity \(\frac{\partial w}{\partial \phi}\)}\label{moisture-dependent-moisture-capacity-fracpartial-wpartial-phi}
 

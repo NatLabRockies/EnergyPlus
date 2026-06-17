@@ -9,11 +9,11 @@ The simplest piece of zone equipment is the ZoneHVAC:IdealLoadsAirSystem compone
 
 This component can be operated with infinite or finite heating and cooling capacity. For either mode---infinite or limited capacity---the user can also specify on/off schedules for heating and cooling and outdoor air controls. There are also optional controls for dehumidification, humidification, economizer, and heat recovery. This component may be used in combination with other HVAC equipment serving the same zone.
 
-This component can be thought of as an ideal unit that mixes air at the zone exhaust condition (or plenum outlet condition when a plenum is attached) with the specified amount of outdoor air and then adds or removes heat and moisture at 100\% efficiency in order to produce a supply air stream at the specified conditions. The energy required to condition the supply air is metered and reported as \hyperref[districtheating]{DistrictHeating} and \hyperref[districtcooling]{DistrictCooling}.
+This component can be thought of as an ideal unit that mixes air at the zone exhaust condition (or plenum outlet condition when a plenum is attached) with the specified amount of outdoor air and then adds or removes heat and moisture at 100\% efficiency in order to produce a supply air stream at the specified conditions. The energy required to condition the supply air is metered and reported as \hyperref[districtheating]{DistrictHeatingWater} and \hyperref[districtcooling]{DistrictCooling}.
 
 \textbf{Notes:} The ideal loads system uses the zone return node or an optional zone exhaust node to extract air from the zone. When the AirloopHVAC:ReturnPlenum is used the inlet of the ideal loads system is connected to the plenum outlet air node while the outlet of the ideal loads system is connected to a zone inlet node. The node name connected between the zone exhaust air node and plenum inlet air node must match in the \hyperref[zonehvacequipmentconnections]{ZoneHVAC:EquipmentConnections} and AirloopHVAC:ReturnPlenum objects. Every zone served by an HVAC component must have a return air node, even though this node may not be connected to anything. If more than one ideals loads air systems are connected to the same AirloopHVAC:ReturnPlenum then one of the ideal loads air systems will connect to the ZoneHVAC:ReturnPlenum outlet air node and the remaining ideal loads air systems connected to the same return plenum will connect to the ZoneHVAC:ReturnPlenum induced air outlet nodes.
 
-The ideal loads system was significantly expanded in version 7.0 (October 2011). As part of this upgrade, any change in the moisture content of the supply air stream results in a latent cooling (dehumidification) or latent heating (humidification) load which is metered as \hyperref[districtcooling]{DistrictCooling} and \hyperref[districtheating]{DistrictHeating} energy consumption. Prior to version 7.0, when the ideal loads system was in heating mode, only the energy for sensible heating was metered. This results in significant changes in reported energy use compared to earlier versions, especially when using the \textbf{\emph{ConstantSupplyHumidityRatio}} option for Humidification Control Type.
+The ideal loads system was significantly expanded in version 7.0 (October 2011). As part of this upgrade, any change in the moisture content of the supply air stream results in a latent cooling (dehumidification) or latent heating (humidification) load which is metered as \hyperref[districtcooling]{DistrictCooling} and \hyperref[districtheating]{DistrictHeatingWater} energy consumption. Prior to version 7.0, when the ideal loads system was in heating mode, only the energy for sensible heating was metered. This results in significant changes in reported energy use compared to earlier versions, especially when using the \textbf{\emph{ConstantSupplyHumidityRatio}} option for Humidification Control Type.
 
 Older idf files which are transitioned to version 7.0 will automatically be set to use the \textbf{\emph{ConstantSupplyHumidityRatio}} option for both dehumidification and humidification controls, because this is equivalent to the controls used in the older version of this system. However, the user should review all of the humidity control options and select the one which best reflects the goal of the simulation.
 
@@ -146,39 +146,54 @@ The latent heat recovery effectiveness, where effectiveness is defined as the ch
 
 \paragraph{Field: Design Specification ZoneHVAC Sizing Object Name}\label{field-design-specification-zonehvac-sizing-object-name-000}
 
-This optional input field is the name of a \hyperref[designspecificationzonehvacsizing]{DesignSpecification:ZoneHVAC:Sizing} object. The name must correspond to unique name of a \hyperref[designspecificationzonehvacsizing]{DesignSpecification:ZoneHVAC:Sizing} object. A Design Sepcification Zone HVAC Sizing object defines scalable sizing methods for sizing input fields such as Maximum Heating Air Flow Rate and Maximum Cooling Air Flow Rate in a Ideal Load Air System zone HVAC object. The scaled maximum heating and cooling air flow rates are used to size the heating and cooling capacities.
+This optional input field is the name of a \hyperref[designspecificationzonehvacsizing]{DesignSpecification:ZoneHVAC:Sizing} object. The name must correspond to unique name of a \hyperref[designspecificationzonehvacsizing]{DesignSpecification:ZoneHVAC:Sizing} object. A Design Specification Zone HVAC Sizing object defines scalable sizing methods for sizing input fields such as Maximum Heating Air Flow Rate and Maximum Cooling Air Flow Rate in a Ideal Load Air System zone HVAC object. The scaled maximum heating and cooling air flow rates are used to size the heating and cooling capacities.
+
+\paragraph{Field: Heating Fuel Efficiency Schedule Name}\label{field-heating-fuel-efficiency-schedule-name}
+
+This optional input field is the name of a \textbf{Schedule} object. The name must correspond to unique name of a \textit{schedule} object. References heating fuel efficiency value for converting heating ideal air loads into heating fuel energy consumption. The minimum schedule value must be greater than 0.0. The maximum value depends on the technology, and can exceed 1 (e.g. a DX Heating Coil). If blank, heating fuel efficiency value is always 1.0.
+
+\paragraph{Field: Heating Fuel Type}\label{field-heating-fuel-type}
+
+This is an optional input alpha field that determines the heating fuel type used by the ideal loads air system. This field offers thirteen choices: Electricity, NaturalGas, Propane, Diesel, Gasoline, FuelOilNo1, FuelOilNo2, OtherFuel1, OtherFuel2, DistrictCooling, DistrictHeatingWater, or DistrictHeatingSteam. The default key choice is DistrictHeatingWater.
+
+\paragraph{Field: Cooling Fuel Efficiency Schedule Name}\label{field-cooling-fuel-efficiency-schedule-name}
+
+This optional input field is the name of a \textbf{Schedule} object. The name must correspond to unique name of a \textit{schedule} object. References cooling fuel efficiency value for converting cooling ideal air loads into cooling fuel energy consumption. The minimum schedule value must be greater than 0.0. The maximum value depends on the technology, and can exceed 1 (e.g. a DX Cooling Coil). If blank, cooling fuel efficiency value is always 1.0.
+
+\paragraph{Field: Cooling Fuel Type}\label{field-cooling-fuel-type}
+
+This is an optional input alpha field that determines the cooling fuel type used by the ideal loads air system. This field offers thirteen choices: Electricity, NaturalGas, Propane, Diesel, Gasoline, FuelOilNo1, FuelOilNo2, OtherFuel1, OtherFuel2, DistrictCooling, DistrictHeatingWater, or DistrictHeatingSteam. The default key choice is DistrictCooling.
 
 An example of this object in an IDF is:
 
 \begin{lstlisting}
-
-  ZoneHVAC:IdealLoadsAirSystem,
-      Zone1 Ideal Loads System, !- Name
-      AlwaysOn,                !- Availability Schedule Name
-      Zone1 Ideal Loads Supply Node, !- Zone Supply Air Node Name
-      Zone1 Ideal Loads Return Node, ! Zone Exhaust Air Node Name
-      50,                      !- Maximum Heating Supply Air Temperature {C}
-      13,                      !- Minimum Cooling Supply Air Temperature {C}
-      0.0156,                  !- Maximum Heating Supply Air Humidity Ratio {kgWater/kgDryAir}
-      0.0077,                  !- Minimum Cooling Supply Air Humidity Ratio {kgWater/kgDryAir}
-      NoLimit,                 !- Heating Limit
-      ,                        !- Maximum Heating Air Flow Rate {m3/s}
-      ,                        !- Maximum Sensible Heating Capacity {W}
-      NoLimit,                 !- Cooling Limit
-      ,                        !- Maximum Cooling Air Flow Rate {m3/s}
-      ,                        !- Maximum Total Cooling Capacity {W}
-      ,                        !- Heating Availability Schedule Name
-      ,                        !- Cooling Availability Schedule Name
-      ConstantSensibleHeatRatio,  !- Dehumidification Control Type
-      0.7,                     !- Cooling Sensible Heat Ratio
-      None,                    !- Humidification Control Type
-      Office OA Specification, !- Design Specification Outdoor Air Object Name
-      Zone1 Ideal Loads OA Inlet Node, !- Outdoor Air Inlet Node Name
-      None,                    !- Demand Controlled Ventilation Type
-      NoEconomizer,            !- Outdoor Air Economizer Type
-      Enthalpy,                !- Heat Recovery Type
-      0.70,                    !- Sensible Heat Recovery Effectiveness
-      0.65;                    !- Latent Heat Recovery Effectiveness
+ZoneHVAC:IdealLoadsAirSystem,
+  Zone1 Ideal Loads System,   !- Name
+  AlwaysOn,                   !- Availability Schedule Name
+  Zone1 Ideal Loads Supply Node,  !- Zone Supply Air Node Name
+  Zone1 Ideal Loads Return Node,  !- Zone Exhaust Air Node Name
+  50,                         !- Maximum Heating Supply Air Temperature {C}
+  13,                         !- Minimum Cooling Supply Air Temperature {C}
+  0.0156,                     !- Maximum Heating Supply Air Humidity Ratio {kgWater/kgDryAir}
+  0.0077,                     !- Minimum Cooling Supply Air Humidity Ratio {kgWater/kgDryAir}
+  NoLimit,                    !- Heating Limit
+  ,                           !- Maximum Heating Air Flow Rate {m3/s}
+  ,                           !- Maximum Sensible Heating Capacity {W}
+  NoLimit,                    !- Cooling Limit
+  ,                           !- Maximum Cooling Air Flow Rate {m3/s}
+  ,                           !- Maximum Total Cooling Capacity {W}
+  ,                           !- Heating Availability Schedule Name
+  ,                           !- Cooling Availability Schedule Name
+  ConstantSensibleHeatRatio,  !- Dehumidification Control Type
+  0.7,                        !- Cooling Sensible Heat Ratio
+  None,                       !- Humidification Control Type
+  Office OA Specification,    !- Design Specification Outdoor Air Object Name
+  Zone1 Ideal Loads OA Inlet Node,  !- Outdoor Air Inlet Node Name
+  None,                       !- Demand Controlled Ventilation Type
+  NoEconomizer,               !- Outdoor Air Economizer Type
+  Enthalpy,                   !- Heat Recovery Type
+  0.70,                       !- Sensible Heat Recovery Effectiveness
+  0.65;                       !- Latent Heat Recovery Effectiveness
 \end{lstlisting}
 
 \subsubsection{Outputs}\label{outputs-043}
@@ -235,6 +250,14 @@ The Ideal Loads air system outdoor air load variables are only calculated when t
 \item
   HVAC,Sum,Zone Ideal Loads Heat Recovery Total Cooling Energy {[}J{]}
 \item
+  HVAC,Sum,Zone Ideal Loads Supply Air Total Heating Fuel Energy {[}J{]}
+\item
+  HVAC,Sum,Zone Ideal Loads Supply Air Total Cooling Fuel Energy {[}J{]}
+\item
+  HVAC,Sum,Zone Ideal Loads Zone Heating Fuel Energy {[}J{]}
+\item
+  HVAC,Sum,Zone Ideal Loads Zone Cooling Fuel Energy {[}J{]}
+\item
   HVAC,Average,Zone Ideal Loads Supply Air Sensible Heating Rate {[}W{]}
 \item
   HVAC,Average,Zone Ideal Loads Supply Air Latent Heating Rate {[}W{]}
@@ -282,6 +305,14 @@ The Ideal Loads air system outdoor air load variables are only calculated when t
   HVAC,Average,Zone Ideal Loads Heat Recovery Latent Cooling Rate {[}W{]}
 \item
   HVAC,Average,Zone Ideal Loads Heat Recovery Total Cooling Rate {[}W{]}
+\item
+  HVAC,Sum,Zone Ideal Loads Supply Air Total Heating Fuel Energy Rate {[}W{]}
+\item
+  HVAC,Sum,Zone Ideal Loads Supply Air Total Cooling Fuel Energy Rate {[}W{]}
+\item
+  HVAC,Sum,Zone Ideal Loads Zone Heating Fuel Energy Rat {[}W{]}
+\item
+  HVAC,Sum,Zone Ideal Loads Zone Cooling Fuel Energy Rat {[}W{]}
 \item
   HVAC,Sum,Zone Ideal Loads Economizer Active Time {[}hr{]}
 \item
@@ -338,7 +369,7 @@ The latent heating energy (or rate) added to raise the humidity ratio of the mix
 
 \paragraph{Zone Ideal Loads Supply Air Total Heating Rate {[}W{]}}\label{zone-ideal-loads-supply-air-total-heating-rate-w}
 
-The total (sensible and latent) heating energy (or rate) added to raise the mixed air stream to the temperature and humidity ratio of the supply air stream. \emph{Zone Ideal Loads Supply Air Total Heating Energy} is metered as DistrictHeating energy.
+The total (sensible and latent) heating energy (or rate) added to raise the mixed air stream to the temperature and humidity ratio of the supply air stream. \emph{Zone Ideal Loads Supply Air Total Heating Energy} is metered as DistrictHeatingWater energy.
 
 \paragraph{Zone Ideal Loads Supply Air Sensible Cooling Energy {[}J{]}}\label{zone-ideal-loads-supply-air-sensible-cooling-energy-j}
 
@@ -357,6 +388,18 @@ The latent cooling energy (or rate) removed to lower the humidity ratio of the m
 \paragraph{Zone Ideal Loads Supply Air Total Cooling Rate {[}W{]}}\label{zone-ideal-loads-supply-air-total-cooling-rate-w}
 
 The total (sensible and latent) cooling energy (or rate) removed to lower the mixed air stream to the temperature and humidity ratio of the supply air stream. \emph{Zone Ideal Loads Supply Air Total Cooling Energy} is metered as DistrictCooling energy. This is the ideal ``cooling coil'' total load.
+
+\paragraph{Zone Ideal Loads Supply Air Total Heating Fuel Energy {[}J{]}}\label{zone-ideal-loads-supply-air-total-heating-fuel-energy-j}
+
+\paragraph{Zone Ideal Loads Supply Air Total Heating Fuel Energy Rate {[}W{]}}\label{zone-ideal-loads-supply-air-total-heating-fuel-energy-rate-w}
+
+The total heating fuel energy (or rate) consumed to raise the mixed air stream to the temperature and humidity ratio of the supply air stream, to maintain the desired air conditions in a heated zone. It is calculated by dividing the Zone Ideal Loads Supply Air Total Heating Energy (or Rate) by the heating fuel efficiency.
+
+\paragraph{Zone Ideal Loads Supply Air Total Cooling Fuel Energy {[}J{]}}\label{zone-ideal-loads-supply-air-total-cooling-fuel-energy-j}
+
+\paragraph{Zone Ideal Loads Supply Air Total Cooling Fuel Energy Rate {[}W{]}}\label{zone-ideal-loads-supply-air-total-cooling-fuel-energy-rate-w}
+
+The total cooling fuel energy (or rate) consumed to lower the mixed air stream to the temperature and humidity ratio of the supply air stream, to maintain the desired air conditions in a cooled zone. It is calculated by dividing the Zone Ideal Loads Supply Air Total Cooling Energy (or Rate) by the cooling fuel efficiency.
 
 \paragraph{Zone Ideal Loads Zone Sensible Heating Energy {[}J{]}}\label{zone-ideal-loads-zone-sensible-heating-energy-j}
 
@@ -465,6 +508,18 @@ The latent cooling energy (or rate) removed from the outdoor air stream from hea
 \paragraph{Zone Ideal Loads Heat Recovery Total Cooling Rate {[}W{]}}\label{zone-ideal-loads-heat-recovery-total-cooling-rate-w}
 
 The total (sensible and latent) cooling energy (or rate) removed from the outdoor air stream from heat recovery.
+
+\paragraph{Zone Ideal Loads Zone Heating Fuel Energy {[}J{]}}\label{zone-ideal-loads-zone-heating-fuel-energy-j}
+
+\paragraph{Zone Ideal Loads Zone Heating Fuel Energy Rate {[}W{]}}{zone-ideal-loads-zone-heating-fuel-energy-rate-w}
+
+The total heating fuel energy (or rate) consumed to maintain the desired air conditions in the heated zone is calculated by dividing the Zone Ideal Loads Zone Total Heating Energy (or Rate) by the heating fuel efficiency.
+
+\paragraph{Zone Ideal Loads Zone Cooling Fuel Energy {[}J{]}}\label{zone-ideal-loads-zone-cooling-fuel-energy-j}
+
+\paragraph{Zone Ideal Loads Zone Cooling Fuel Energy Rate {[}W{]}}\label{zone-ideal-loads-zone-cooling-fuel-energy-rate-w}
+
+The total cooling fuel energy (or rate) consumed to maintain the desired air conditions in the cooled zone is calculated by dividing the Zone Ideal Loads Zone Total Cooling Energy (or Rate) by the cooling fuel efficiency.
 
 \paragraph{Zone Ideal Loads Economizer Active Time {[}hr{]}}\label{zone-ideal-loads-economizer-active-time-hr}
 
@@ -726,7 +781,7 @@ This optional input field is the name of an \hyperref[availabilitymanagerassignm
 
 \paragraph{Field: Design Specification ZoneHVAC Sizing Object Name}\label{field-design-specification-zonehvac-sizing-object-name-1}
 
-This optional input field is the name of a \hyperref[designspecificationzonehvacsizing]{DesignSpecification:ZoneHVAC:Sizing} object. The name must correspond to unique name of a \hyperref[designspecificationzonehvacsizing]{DesignSpecification:ZoneHVAC:Sizing} object. A Design Sepcification Zone HVAC Sizing object defines scalable sizing methods for sizing input fields such as Maximum Air Flow Rate in this Four Pipe FanCoil zone HVAC object. The scaled Maximum Air Flow Rate in turn is used to size cooling and heating capacity of the unit.
+This optional input field is the name of a \hyperref[designspecificationzonehvacsizing]{DesignSpecification:ZoneHVAC:Sizing} object. The name must correspond to unique name of a \hyperref[designspecificationzonehvacsizing]{DesignSpecification:ZoneHVAC:Sizing} object. A Design Specification Zone HVAC Sizing object defines scalable sizing methods for sizing input fields such as Maximum Air Flow Rate in this Four Pipe FanCoil zone HVAC object. The scaled Maximum Air Flow Rate in turn is used to size cooling and heating capacity of the unit.
 
 \paragraph{Field: Supply Air Fan Operating Mode Schedule Name}\label{field-supply-air-fan-operating-mode-schedule-name-000}
 
@@ -743,106 +798,105 @@ This optional input is used only when \emph{Capacity Control~Method = ASHRAE90Va
 An example input for a fan coil unit, including its constituent components, is shown below.
 
 \begin{lstlisting}
+ZoneHVAC:FourPipeFanCoil,
+  Zone1FanCoil,               !- Name
+  FanAndCoilAvailSched,       !- Availability Schedule Name
+  ConstantFanVariableFlow,    !- Capacity Control Method
+  autosize,                   !- Maximum Supply Air Flow Rate {m3/s}
+  ,                           !- Low Speed Supply Air Flow Ratio
+  ,                           !- Medium Speed Supply Air Flow Ratio
+  autosize,                   !- Maximum Outdoor Air Flow Rate {m3/s}
+  OUTAIRFANCOILSCHEDULE,      !- Outdoor Air Schedule Name
+  Zone1FanCoilAirInletNode,   !- Air Inlet Node Name
+  Zone1FanCoilAirOutletNode,  !- Air Outlet Node Name
+  OutdoorAir:Mixer,           !- Outdoor Air Mixer Object Type
+  Zone1FanCoilOAMixer,        !- Outdoor Air Mixer Name
+  Fan:ConstantVolume,         !- Supply Air Fan Object Type
+  Zone1FanCoilFan,            !- Supply Air Fan Name
+  Coil:Cooling:Water,         !- Cooling Coil Object Type
+  Zone1FanCoilCoolingCoil,    !- Cooling Coil Name
+  autosize,                   !- Maximum Cold Water Flow Rate {m3/s}
+  0.0,                        !- Minimum Cold Water Flow Rate {m3/s}
+  0.001,                      !- Cooling Convergence Tolerance
+  Coil:Heating:Water,         !- Heating Coil Object Type
+  Zone1FanCoilHeatingCoil,    !- Heating Coil Name
+  autosize,                   !- Maximum Hot Water Flow Rate {m3/s}
+  0.0,                        !- Minimum Hot Water Flow Rate {m3/s}
+  0.001;                      !- Heating Convergence Tolerance
 
-  ZoneHVAC:FourPipeFanCoil,
-      Zone1FanCoil,            !- Name
-      FanAndCoilAvailSched,    !- Availability Schedule Name
-      ConstantFanVariableFlow, !- Capacity Control Method
-      autosize,                !- Maximum Supply Air Flow Rate {m3/s}
-      ,                        !- Low Speed Supply Air Flow Ratio
-      ,                        !- Medium Speed Supply Air Flow Ratio
-      autosize,                !- Maximum Outdoor Air Flow Rate {m3/s}
-      OUTAIRFANCOILSCHEDULE,   !- Outdoor Air Schedule Name
-      Zone1FanCoilAirInletNode,!- Air Inlet Node Name
-      Zone1FanCoilAirOutletNode,  !- Air Outlet Node Name
-      OutdoorAir:Mixer,        !- Outdoor Air Mixer Object Type
-      Zone1FanCoilOAMixer,     !- Outdoor Air Mixer Name
-      Fan:ConstantVolume,      !- Supply Air Fan Object Type
-      Zone1FanCoilFan,         !- Supply Air Fan Name
-      Coil:Cooling:Water,      !- Cooling Coil Object Type
-      Zone1FanCoilCoolingCoil, !- Cooling Coil Name
-      autosize,                !- Maximum Cold Water Flow Rate {m3/s}
-      0.0,                     !- Minimum Cold Water Flow Rate {m3/s}
-      0.001,                   !- Cooling Convergence Tolerance
-      Coil:Heating:Water,      !- Heating Coil Object Type
-      Zone1FanCoilHeatingCoil, !- Heating Coil Name
-      autosize,                !- Maximum Hot Water Flow Rate {m3/s}
-      0.0,                     !- Minimum Hot Water Flow Rate {m3/s}
-      0.001;                   !- Heating Convergence Tolerance
+OutdoorAir:Mixer,
+  Zone1FanCoilOAMixer,        !- name
+  Zone1FanCoilOAMixerOutletNode,  !- Mixed Air Node Name
+  Zone1FanCoilOAInNode,       !- Outdoor Air Stream Node Name
+  Zone1FanCoilExhNode,        !- Relief Air Stream Node Name
+  Zone1FanCoilAirInletNode;   !- Return Air Stream Node Name
 
-  OutdoorAir:Mixer,
-      Zone1FanCoilOAMixer, ! name
-      Zone1FanCoilOAMixerOutletNode, !Mixed Air Node Name
-      Zone1FanCoilOAInNode, !Outdoor Air Stream Node Name
-      Zone1FanCoilExhNode, !Relief Air Stream Node Name
-      Zone1FanCoilAirInletNode; !Return Air Stream Node Name
+Fan:OnOff,
+  Zone1FanCoilFan,            !- Name
+  FanAndCoilAvailSched,       !- Availability Schedule Name
+  0.5,                        !- Fan Total Efficiency
+  75.0,                       !- Pressure Rise {Pa}
+  autosize,                   !- Maximum Flow Rate {m3/s}
+  0.9,                        !- Motor Efficiency
+  1.0,                        !- Motor In Airstream Fraction
+  Zone1FanCoilOAMixerOutletNode,  !- Air Inlet Node Name
+  Zone1FanCoilFanOutletNode,  !- Air Outlet Node Name
+  FanPowerRatioCurve,         !- Fan Power Ratio Function of Speed Ratio Curve Name
+  FanEffRatioCurve;           !- Fan Efficiency Ratio Function of Speed Ratio Curve Name
 
-  Fan:OnOff,
-      Zone1FanCoilFan,         !- Name
-      FanAndCoilAvailSched,    !- Availability Schedule Name
-      0.5,                     !- Fan Total Efficiency
-      75.0,                    !- Pressure Rise {Pa}
-      autosize,                !- Maximum Flow Rate {m3/s}
-      0.9,                     !- Motor Efficiency
-      1.0,                     !- Motor In Airstream Fraction
-      Zone1FanCoilOAMixerOutletNode,  !- Air Inlet Node Name
-      Zone1FanCoilFanOutletNode,  !-Air Outlet Node Name
-      FanPowerRatioCurve,      !- Fan Power Ratio Function of Speed Ratio Curve Name
-      FanEffRatioCurve;        !- Fan Efficiency Ratio Function of Speed Ratio Curve Name
+Coil:Cooling:Water,
+  Zone1FanCoilCoolingCoil,    !- Name
+  FanAndCoilAvailSched,       !- Availability Schedule Name
+  autosize,                   !- Design Water Flow Rate {m3/s}
+  autosize,                   !- Design Air Flow Rate {m3/s}
+  autosize,                   !- Design Inlet Water Temperature {C}
+  autosize,                   !- Design Inlet Air Temperature {C}
+  autosize,                   !- Design Outlet Air Temperature {C}
+  autosize,                   !- Design Inlet Air Humidity Ratio {kgWater/kgDryAir}
+  autosize,                   !- Design Outlet Air Humidity Ratio {kgWater/kgDryAir}
+  Zone1FanCoilChWInletNode,   !- Water Inlet Node Name
+  Zone1FanCoilChWOutletNode,  !- Water Outlet Node Name
+  Zone1FanCoilFanOutletNode,  !- Air Inlet Node Name
+  Zone1FanCoilCCOutletNode,   !- Air Outlet Node Name
+  SimpleAnalysis,             !- Type of Analysis
+  CrossFlow;                  !- Heat Exchanger Configuration
 
-  Coil:Cooling:Water,
-      Zone1FanCoilCoolingCoil, !- Name
-      FanAndCoilAvailSched,    !- Availability Schedule Name
-      autosize,                !- Design Water Flow Rate {m3/s}
-      autosize,                !- Design Air Flow Rate {m3/s}
-      autosize,                !- Design Inlet Water Temperature {C}
-      autosize,                !- Design Inlet Air Temperature {C}
-      autosize,                !- Design Outlet Air Temperature {C}
-      autosize,                !- Design Inlet Air Humidity Ratio {kgWater/kgDryAir}
-      autosize,                !- Design Outlet Air Humidity Ratio {kgWater/kgDryAir}
-      Zone1FanCoilChWInletNode,!- Water Inlet Node Name
-      Zone1FanCoilChWOutletNode,  !- Water Outlet Node Name
-      Zone1FanCoilFanOutletNode,  !- Air Inlet Node Name
-      Zone1FanCoilCCOutletNode,!-Air Outlet Node Name
-      SimpleAnalysis,          !- Type of Analysis
-      CrossFlow;               !- Heat Exchanger Configuration
+Coil:Heating:Water,
+  Zone1FanCoilHeatingCoil,    !- Name
+  FanAndCoilAvailSched,       !- Availability Schedule Name
+  autosize,                   !- U-Factor Times Area Value {W/K}
+  autosize,                   !- Maximum Water Flow Rate {m3/s}
+  Zone1FanCoilHWInletNode,    !- Water Inlet Node Name
+  Zone1FanCoilHWOutletNode,   !- Water Outlet Node Name
+  Zone1FanCoilCCOutletNode,   !- Air Inlet Node Name
+  Zone1FanCoilAirOutletNode,  !- Air Outlet Node Name
+  UFactorTimesAreaAndDesignWaterFlowRate,  !- Performance Input Method
+  autosize,                   !- Nominal Capacity {W}
+  82.2,                       !- Design Inlet Water Temperature {C}
+  16.6,                       !- Design Inlet Air Temperature {C}
+  71.1,                       !- Design Outlet Water Temperature {C}
+  32.2;                       !- Design Outlet Air Temperature {C}
 
-  Coil:Heating:Water,
-      Zone1FanCoilHeatingCoil, !- Name
-      FanAndCoilAvailSched,    !- Availability Schedule Name
-      autosize,                !- U-Factor Times Area Value {W/K}
-      autosize,                !- Maximum Water Flow Rate {m3/s}
-      Zone1FanCoilHWInletNode, !- Water Inlet Node Name
-      Zone1FanCoilHWOutletNode,!- Water Outlet Node Name
-      Zone1FanCoilCCOutletNode,!- Air Inlet Node Name
-      Zone1FanCoilAirOutletNode,  !-Air Outlet Node Name
-      UFactorTimesAreaAndDesignWaterFlowRate,  !- Performance Input Method
-      autosize,                !- Nominal Capacity {W}
-      82.2,                    !- Design Inlet Water Temperature {C}
-      16.6,                    !- Design Inlet Air Temperature {C}
-      71.1,                    !- Design Outlet Water Temperature {C}
-      32.2;                    !- Design Outlet Air Temperature {C}
+Curve:Exponent,
+  FanPowerRatioCurve,         !- Name
+  0.0,                        !- Coefficient1 Constant
+  1.0,                        !- Coefficient2 Constant
+  3.0,                        !- Coefficient3 Constant
+  0.0,                        !- Minimum Value of x
+  1.5,                        !- Maximum Value of x
+  0.01,                       !- Minimum Curve Output
+  1.5;                        !- Maximum Curve Output
 
-  Curve:Exponent,
-      FanPowerRatioCurve,      !- Name
-      0.0,                     !- Coefficient1 Constant
-      1.0,                     !- Coefficient2 Constant
-      3.0,                     !- Coefficient3 Constant
-      0.0,                     !- Minimum Value of x
-      1.5,                     !- Maximum Value of x
-      0.01,                    !- Minimum Curve Output
-      1.5;                     !- Maximum Curve Output
-
-  Curve:Cubic,
-     FanEffRatioCurve,        !- Name
-     0.33856828,              !- Coefficient1 Constant
-     1.72644131,              !- Coefficient2 x
-     -1.49280132,             !- Coefficient3 x**2
-     0.42776208,              !- Coefficient4 x**3
-     0.5,                     !- Minimum Value of x
-     1.5,                     !- Maximum Value of x
-     0.3,                     !- Minimum Curve Output
-     1.0;                     !- Maximum Curve Output
+Curve:Cubic,
+  FanEffRatioCurve,           !- Name
+  0.33856828,                 !- Coefficient1 Constant
+  1.72644131,                 !- Coefficient2 x
+  -1.49280132,                !- Coefficient3 x**2
+  0.42776208,                 !- Coefficient4 x**3
+  0.5,                        !- Minimum Value of x
+  1.5,                        !- Maximum Value of x
+  0.3,                        !- Minimum Curve Output
+  1.0;                        !- Maximum Curve Output
 \end{lstlisting}
 
 \subsubsection{Outputs}\label{outputs-1-033}
@@ -994,7 +1048,7 @@ This field contains a schedule name (ref: Schedule) that should contain values f
 
 \paragraph{Field: Maximum Outdoor Air Flow Rate}\label{field-maximum-outdoor-air-flow-rate-1-000}
 
-This field allows the user to enter the maximum volumetric flow rate of outdoor air that can be brought into the unit ventilator system in m\(^{3}\)/sec.~This parameter should be some real number greater than zero. Note that the value for this parameter may be less than the maximum air flow rate of the unit ventilator and this may affect the maximum fraction of outdoor air within the control strategy defined above. This parameter is an absolute maximum and will supercede any scheduled fraction of the unit ventilator maximum airflow rate. If ``FixedAmount'' type is selected as the outdoor air control strategy, this field will be ignored and be automatically set to be equal to the minimum outdoor air flow rate specified in the field above.
+This field allows the user to enter the maximum volumetric flow rate of outdoor air that can be brought into the unit ventilator system in m\(^{3}\)/sec.~This parameter should be some real number greater than zero. Note that the value for this parameter may be less than the maximum air flow rate of the unit ventilator and this may affect the maximum fraction of outdoor air within the control strategy defined above. This parameter is an absolute maximum and will supersede any scheduled fraction of the unit ventilator maximum airflow rate. If ``FixedAmount'' type is selected as the outdoor air control strategy, this field will be ignored and be automatically set to be equal to the minimum outdoor air flow rate specified in the field above.
 
 \paragraph{Field: Maximum Outdoor Air Fraction or Temperature Schedule Name}\label{field-maximum-outdoor-air-fraction-or-temperature-schedule-name-000}
 
@@ -1113,83 +1167,82 @@ This optional input field is the name of an \hyperref[availabilitymanagerassignm
 
 \paragraph{Field: Design Specification ZoneHVAC Sizing Object Name}\label{field-design-specification-zonehvac-sizing-object-name-2}
 
-This optional input field is the name of a \hyperref[designspecificationzonehvacsizing]{DesignSpecification:ZoneHVAC:Sizing} object. The name must correspond to unique name of a \hyperref[designspecificationzonehvacsizing]{DesignSpecification:ZoneHVAC:Sizing} object. A Design Sepcification Zone HVAC Sizing object defines scalable sizing methods for sizing input fields such as Maximum Air Flow Rate in this Unit Ventilator zone HVAC object. The scaled Maximum Air Flow Rate in turn is used to size cooling and heating capacity of the unit.
+This optional input field is the name of a \hyperref[designspecificationzonehvacsizing]{DesignSpecification:ZoneHVAC:Sizing} object. The name must correspond to unique name of a \hyperref[designspecificationzonehvacsizing]{DesignSpecification:ZoneHVAC:Sizing} object. A Design Specification Zone HVAC Sizing object defines scalable sizing methods for sizing input fields such as Maximum Air Flow Rate in this Unit Ventilator zone HVAC object. The scaled Maximum Air Flow Rate in turn is used to size cooling and heating capacity of the unit.
 
 An example input for a unit ventilator, including its constituent components, is shown below.
 
 \begin{lstlisting}
-
 ZoneHVAC:UnitVentilator,
-      Zone1UnitVent,           !- Name
-      UnitVentAvailability,    !- Availability Schedule Name
-      0.84,                    !- Maximum Supply Air Flow Rate {m3/s}
-      VariablePercent,         !- Outdoor Air Control Type
-      0.168,                   !- Minimum Outdoor Air Flow Rate {m3/s}
-      UnitVentMinOA,           !- Minimum Outdoor Air Schedule Name
-      0.84,                    !- Maximum Outdoor Air Flow Rate {m3/s}
-      UnitVentMaxOA,           !- Maximum Outdoor Air Fraction or Temperature Schedule Name
-      Zone1UnitVentAirInletNode,  !- Air Inlet Node Name
-      Zone1UnitVentAirOutletNode,  !- Air Outlet Node Name
-      Zone1UnitVentOAInNode,   !- Outdoor Air Node Name
-      Zone1UnitVentExhNode,    !- Exhaust Air Node Name
-      Zone1UnitVentOAMixerOutletNode,  !- Mixed Air Node Name
-      Fan:ConstantVolume,     !- Supply Air Fan Object Type
-      Zone1UnitVentFan,        !- Fan Name
-      HeatingAndCooling,       !- Coil Option
-      Coil:Heating:Water,      !- Heating Coil Object Type
-      Zone1UnitVentHeatingCoil,!- Heating Coil Name
-      0.001,                   !- Heating Convergence Tolerance
-      Coil:Cooling:Water,      !- Cooling Coil Object Type
-      Zone1UnitVentCoolingCoil,!- Cooling Coil Name
-      0.001;                   !- Cooling Convergence Tolerance
+  Zone1UnitVent,              !- Name
+  UnitVentAvailability,       !- Availability Schedule Name
+  0.84,                       !- Maximum Supply Air Flow Rate {m3/s}
+  VariablePercent,            !- Outdoor Air Control Type
+  0.168,                      !- Minimum Outdoor Air Flow Rate {m3/s}
+  UnitVentMinOA,              !- Minimum Outdoor Air Schedule Name
+  0.84,                       !- Maximum Outdoor Air Flow Rate {m3/s}
+  UnitVentMaxOA,              !- Maximum Outdoor Air Fraction or Temperature Schedule Name
+  Zone1UnitVentAirInletNode,  !- Air Inlet Node Name
+  Zone1UnitVentAirOutletNode, !- Air Outlet Node Name
+  Zone1UnitVentOAInNode,      !- Outdoor Air Node Name
+  Zone1UnitVentExhNode,       !- Exhaust Air Node Name
+  Zone1UnitVentOAMixerOutletNode,  !- Mixed Air Node Name
+  Fan:ConstantVolume,         !- Supply Air Fan Object Type
+  Zone1UnitVentFan,           !- Fan Name
+  HeatingAndCooling,          !- Coil Option
+  Coil:Heating:Water,         !- Heating Coil Object Type
+  Zone1UnitVentHeatingCoil,   !- Heating Coil Name
+  0.001,                      !- Heating Convergence Tolerance
+  Coil:Cooling:Water,         !- Cooling Coil Object Type
+  Zone1UnitVentCoolingCoil,   !- Cooling Coil Name
+  0.001;                      !- Cooling Convergence Tolerance
 
-  OutdoorAir:Node,
-      Zone1UnitVentOAInNode,   !- Name
-      -1.0;                    !- Height Above Ground {m}
+OutdoorAir:Node,
+  Zone1UnitVentOAInNode,      !- Name
+  -1.0;                       !- Height Above Ground {m}
 
-  Fan:ConstantVolume,
-      Zone1UnitVentFan,        !- Name
-      UnitVentAvailability,    !- Availability Schedule Name
-      0.5,                     !- Fan Total Efficiency
-      75.0,                    !- Pressure Rise {Pa}
-      0.84,                    !- Maximum Flow Rate {m3/s}
-      0.9,                     !- Motor Efficiency
-      1.0,                     !- Motor In Airstream Fraction
-      Zone1UnitVentOAMixerOutletNode,  !- Fan Inlet Node Name
-      Zone1UnitVentFanOutletNode;  !- Fan Outlet Node Name
+Fan:ConstantVolume,
+  Zone1UnitVentFan,           !- Name
+  UnitVentAvailability,       !- Availability Schedule Name
+  0.5,                        !- Fan Total Efficiency
+  75.0,                       !- Pressure Rise {Pa}
+  0.84,                       !- Maximum Flow Rate {m3/s}
+  0.9,                        !- Motor Efficiency
+  1.0,                        !- Motor In Airstream Fraction
+  Zone1UnitVentOAMixerOutletNode,  !- Fan Inlet Node Name
+  Zone1UnitVentFanOutletNode; !- Fan Outlet Node Name
 
-  Coil:Cooling:Water,
-      Zone1UnitVentCoolingCoil,!- Name
-      FanAndCoilAvailSched,    !- Availability Schedule Name
-      0.0010,                  !- Design Water Flow Rate {m3/s}
-      0.84,                    !- Design Air Flow Rate {m3/s}
-      6.67,                    !- Design Inlet Water Temperature {C}
-      30,                      !- Design Inlet Air Temperature {C}
-      12,                      !- Design Outlet Air Temperature {C}
-      0.013,                   !- Design Inlet Air Humidity Ratio {kgWater/kgDryAir}
-      0.008,                   !- Design Outlet Air Humidity Ratio {kgWater/kgDryAir}
-      Zone1UnitVentChWInletNode,  !- Water Inlet Node Name
-      Zone1UnitVentChWOutletNode,  !- Water Outlet Node Name
-      Zone1UnitVentFanOutletNode,  !- Air Inlet Node Name
-      Zone1UnitVentCCOutletNode,  !- Air Outlet Node Name
-      SimpleAnalysis,          !- Type of Analysis
-      CrossFlow;               !- Heat Exchanger Configuration
+Coil:Cooling:Water,
+  Zone1UnitVentCoolingCoil,   !- Name
+  FanAndCoilAvailSched,       !- Availability Schedule Name
+  0.0010,                     !- Design Water Flow Rate {m3/s}
+  0.84,                       !- Design Air Flow Rate {m3/s}
+  6.67,                       !- Design Inlet Water Temperature {C}
+  30,                         !- Design Inlet Air Temperature {C}
+  12,                         !- Design Outlet Air Temperature {C}
+  0.013,                      !- Design Inlet Air Humidity Ratio {kgWater/kgDryAir}
+  0.008,                      !- Design Outlet Air Humidity Ratio {kgWater/kgDryAir}
+  Zone1UnitVentChWInletNode,  !- Water Inlet Node Name
+  Zone1UnitVentChWOutletNode, !- Water Outlet Node Name
+  Zone1UnitVentFanOutletNode, !- Air Inlet Node Name
+  Zone1UnitVentCCOutletNode,  !- Air Outlet Node Name
+  SimpleAnalysis,             !- Type of Analysis
+  CrossFlow;                  !- Heat Exchanger Configuration
 
-  Coil:Heating:Water,
-      Zone1UnitVentHeatingCoil,!- Name
-      FanAndCoilAvailSched,    !- Availability Schedule Name
-      400.,                    !- U-Factor Times Area Value {W/K}
-      0.0005,                  !- Maximum Water Flow Rate {m3/s}
-      Zone1UnitVentHWInletNode,!- Water Inlet Node Name
-      Zone1UnitVentHWOutletNode,  !- Water Outlet Node Name
-      Zone1UnitVentCCOutletNode,  !- Air Inlet Node Name
-      Zone1UnitVentAirOutletNode,  !- Air Outlet Node Name
-      UFactorTimesAreaAndDesignWaterFlowRate,  !- Performance Input Method
-      autosize,                !- Nominal Capacity {W}
-      82.2,                    !- Design Inlet Water Temperature {C}
-      16.6,                    !- Design Inlet Air Temperature {C}
-      71.1,                    !- Design Outlet Water Temperature {C}
-      32.2;                    !- Design Outlet Air Temperature {C}
+Coil:Heating:Water,
+  Zone1UnitVentHeatingCoil,   !- Name
+  FanAndCoilAvailSched,       !- Availability Schedule Name
+  400.,                       !- U-Factor Times Area Value {W/K}
+  0.0005,                     !- Maximum Water Flow Rate {m3/s}
+  Zone1UnitVentHWInletNode,   !- Water Inlet Node Name
+  Zone1UnitVentHWOutletNode,  !- Water Outlet Node Name
+  Zone1UnitVentCCOutletNode,  !- Air Inlet Node Name
+  Zone1UnitVentAirOutletNode, !- Air Outlet Node Name
+  UFactorTimesAreaAndDesignWaterFlowRate,  !- Performance Input Method
+  autosize,                   !- Nominal Capacity {W}
+  82.2,                       !- Design Inlet Water Temperature {C}
+  16.6,                       !- Design Inlet Air Temperature {C}
+  71.1,                       !- Design Outlet Water Temperature {C}
+  32.2;                       !- Design Outlet Air Temperature {C}
 \end{lstlisting}
 
 \subsubsection{Outputs}\label{outputs-2-028}
@@ -1365,55 +1418,52 @@ This optional input field is the name of an \hyperref[availabilitymanagerassignm
 
 \paragraph{Field: Design Specification ZoneHVAC Sizing Object Name}\label{field-design-specification-zonehvac-sizing-object-name-3}
 
-This optional input field is the name of a \hyperref[designspecificationzonehvacsizing]{DesignSpecification:ZoneHVAC:Sizing} object. The name must correspond to unique name of a \hyperref[designspecificationzonehvacsizing]{DesignSpecification:ZoneHVAC:Sizing} object. A Design Sepcification Zone HVAC Sizing object defines scalable sizing methods for sizing input fields \emph{Maximum Supply Air Flow Rate} in this Unit Heater zone HVAC object. The scaled maximum supply air flow rates is used to size Maximum Hot Water or Steam Flow Rate if specified as autosize. The scaled Maximum Air Flow Rate in turn is used to size heating capacity of the unit.
+This optional input field is the name of a \hyperref[designspecificationzonehvacsizing]{DesignSpecification:ZoneHVAC:Sizing} object. The name must correspond to unique name of a \hyperref[designspecificationzonehvacsizing]{DesignSpecification:ZoneHVAC:Sizing} object. A Design Specification Zone HVAC Sizing object defines scalable sizing methods for sizing input fields \emph{Maximum Supply Air Flow Rate} in this Unit Heater zone HVAC object. The scaled maximum supply air flow rates is used to size Maximum Hot Water or Steam Flow Rate if specified as autosize. The scaled Maximum Air Flow Rate in turn is used to size heating capacity of the unit.
 
 An example input for a unit heater, including its constituent components, is shown below.
 
 \begin{lstlisting}
-
 ZoneHVAC:UnitHeater,
-      Zone1UnitHeat,           !- Name
-      UnitHeatAvailability,    !- Availability Schedule Name
-      Zone1UnitHeatAirInletNode,  !- Air Inlet Node Name
-      Zone1UnitHeatAirOutletNode,  !- Air Outlet Node Name
-      Fan:ConstantVolume,     !- Supply Air Fan Object Type
-      Zone1UnitHeatFan,        !- Fan Name
-      0.84,                    !- Maximum Supply Air Flow Rate {m3/s}
-      Continuous,              !- Fan Control Type
-      Coil:Heating:Water,      !- Heating Coil Object Type
-      Zone1UnitHeatHeatingCoil,!- Heating Coil Name
-      0.0005,                  !- Maximum Hot Water or Steam Flow Rate {m3/s}
-      0.0,                     !- Minimum Hot Water or Steam Flow Rate {m3/s}
-      0.001;                   !- Heating Convergence Tolerance
+  Zone1UnitHeat,              !- Name
+  UnitHeatAvailability,       !- Availability Schedule Name
+  Zone1UnitHeatAirInletNode,  !- Air Inlet Node Name
+  Zone1UnitHeatAirOutletNode, !- Air Outlet Node Name
+  Fan:ConstantVolume,         !- Supply Air Fan Object Type
+  Zone1UnitHeatFan,           !- Fan Name
+  0.84,                       !- Maximum Supply Air Flow Rate {m3/s}
+  Continuous,                 !- Fan Control Type
+  Coil:Heating:Water,         !- Heating Coil Object Type
+  Zone1UnitHeatHeatingCoil,   !- Heating Coil Name
+  0.0005,                     !- Maximum Hot Water or Steam Flow Rate {m3/s}
+  0.0,                        !- Minimum Hot Water or Steam Flow Rate {m3/s}
+  0.001;                      !- Heating Convergence Tolerance
 
+Fan:ConstantVolume,
+  Zone1UnitHeatFan,           !- Name
+  UnitHeatAvailability,       !- Availability Schedule Name
+  0.5,                        !- Fan Total Efficiency
+  75.0,                       !- Pressure Rise {Pa}
+  0.84,                       !- Maximum Flow Rate {m3/s}
+  0.9,                        !- Motor Efficiency
+  1.0,                        !- Motor In Airstream Fraction
+  Zone1UnitHeatAirInletNode,  !- Fan Inlet Node Name
+  Zone1UnitHeatFanOutletNode; !- Fan Outlet Node Name
 
-  Fan:ConstantVolume,
-      Zone1UnitHeatFan,        !- Name
-      UnitHeatAvailability,    !- Availability Schedule Name
-      0.5,                     !- Fan Total Efficiency
-      75.0,                    !- Pressure Rise {Pa}
-      0.84,                    !- Maximum Flow Rate {m3/s}
-      0.9,                     !- Motor Efficiency
-      1.0,                     !- Motor In Airstream Fraction
-      Zone1UnitHeatAirInletNode,  !- Fan Inlet Node Name
-      Zone1UnitHeatFanOutletNode;  !- Fan Outlet Node Name
-
-
-  Coil:Heating:Water,
-      Zone1UnitHeatHeatingCoil,!- Name
-      FanAndCoilAvailSched,    !- Availability Schedule Name
-      400.,                    !- U-Factor Times Area Value {W/K}
-      0.0005,                  !- Maximum Water Flow Rate {m3/s}
-      Zone1UnitHeatHWInletNode,!- Water Inlet Node Name
-      Zone1UnitHeatHWOutletNode,  !- Water Outlet Node Name
-      Zone1UnitHeatFanOutletNode,  !- Air Inlet Node Name
-      Zone1UnitHeatAirOutletNode,  !- Air Outlet Node Name
-      UFactorTimesAreaAndDesignWaterFlowRate,  !- Performance Input Method
-      autosize,                !- Nominal Capacity {W}
-      82.2,                    !- Design Inlet Water Temperature {C}
-      16.6,                    !- Design Inlet Air Temperature {C}
-      71.1,                    !- Design Outlet Water Temperature {C}
-      32.2;                    !- Design Outlet Air Temperature {C}
+Coil:Heating:Water,
+  Zone1UnitHeatHeatingCoil,   !- Name
+  FanAndCoilAvailSched,       !- Availability Schedule Name
+  400.,                       !- U-Factor Times Area Value {W/K}
+  0.0005,                     !- Maximum Water Flow Rate {m3/s}
+  Zone1UnitHeatHWInletNode,   !- Water Inlet Node Name
+  Zone1UnitHeatHWOutletNode,  !- Water Outlet Node Name
+  Zone1UnitHeatFanOutletNode, !- Air Inlet Node Name
+  Zone1UnitHeatAirOutletNode, !- Air Outlet Node Name
+  UFactorTimesAreaAndDesignWaterFlowRate,  !- Performance Input Method
+  autosize,                   !- Nominal Capacity {W}
+  82.2,                       !- Design Inlet Water Temperature {C}
+  16.6,                       !- Design Inlet Air Temperature {C}
+  71.1,                       !- Design Outlet Water Temperature {C}
+  32.2;                       !- Design Outlet Air Temperature {C}
 \end{lstlisting}
 
 \subsubsection{Outputs}\label{outputs-3-025}
@@ -1545,30 +1595,35 @@ This optional alpha input field defines the user-defined name of the second evap
 
 \paragraph{Field: Design Specification ZoneHVAC Sizing Object Name}\label{field-design-specification-zonehvac-sizing-object-name-4}
 
-This optional input field is the name of a \hyperref[designspecificationzonehvacsizing]{DesignSpecification:ZoneHVAC:Sizing} object. The name must correspond to unique name of a \hyperref[designspecificationzonehvacsizing]{DesignSpecification:ZoneHVAC:Sizing} object defined elsewhere. A Design Sepcification Zone HVAC Sizing object defines scalable sizing methods for sizing input field \emph{Design Supply Air Flow Rate} in Evaportaive Cooler zone HVAC object. The scaled design supply air flow rates in turn is used to size capacity of the unit.
+This optional input field is the name of a \hyperref[designspecificationzonehvacsizing]{DesignSpecification:ZoneHVAC:Sizing} object. The name must correspond to unique name of a \hyperref[designspecificationzonehvacsizing]{DesignSpecification:ZoneHVAC:Sizing} object defined elsewhere. A Design Specification Zone HVAC Sizing object defines scalable sizing methods for sizing input field \emph{Design Supply Air Flow Rate} in Evaporative Cooler zone HVAC object. The scaled design supply air flow rates in turn is used to size capacity of the unit.
+
+\paragraph{Field: Shut Off Relative Humidity}\label{shut-off-relative-humidity}
+
+This is an optional field. When the relative humidity of the zone is above this
+threshold, the evaporative cooler is shut off. This intends to prevent direct
+evaporative coolers from adding too much moisture into the zone.
 
 An example input object follows.
 
 \begin{lstlisting}
-
 ZoneHVAC:EvaporativeCoolerUnit,
-     Zone Evap Unit,                !- Name
-     System Availability Schedule , !- Availability Schedule Name
-     ,                              !- Availability Manager List Name
-     Cooler Unit OA inlet ,         !- Outdoor Air Inlet Node Name
-     Main Zone Inlet Node,          !- Cooler Outlet Node Name
-     Main Zone Relief Node ,        !- Zone Relief Air Node Name
-     Fan:SystemModel ,              !- Supply Air Fan Object Type
-     Supply Fan ,                   !- Supply Air Fan Name
-     2.0,                           !- Design Supply Air Flow Rate
-     DrawThrough ,                  !- Fan Placement
-     ZoneCoolingLoadOnOffCycling,   !- Cooler Unit Control Method
-     1.1,                           !- Throttling Range Temperature Difference
-     100.0,                         !- Cooling Load Control Threshold Heat Transfer Rate
-     EvaporativeCooler:Direct:CelDekPad, !- First Evaporative Cooler Object Type
-     Evaporative Cooler,            !- First Evaporative Cooler Object Name
-     ,                              !- Second Evaporative Cooler Object Type
-     ;                              !- Second Evaporative Cooler Name
+  Zone Evap Unit,             !- Name
+  System Availability Schedule,  !- Availability Schedule Name
+  ,                           !- Availability Manager List Name
+  Cooler Unit OA inlet,       !- Outdoor Air Inlet Node Name
+  Main Zone Inlet Node,       !- Cooler Outlet Node Name
+  Main Zone Relief Node,      !- Zone Relief Air Node Name
+  Fan:SystemModel,            !- Supply Air Fan Object Type
+  Supply Fan,                 !- Supply Air Fan Name
+  2.0,                        !- Design Supply Air Flow Rate
+  DrawThrough,                !- Fan Placement
+  ZoneCoolingLoadOnOffCycling,!- Cooler Unit Control Method
+  1.1,                        !- Throttling Range Temperature Difference
+  100.0,                      !- Cooling Load Control Threshold Heat Transfer Rate
+  EvaporativeCooler:Direct:CelDekPad,  !- First Evaporative Cooler Object Type
+  Evaporative Cooler,         !- First Evaporative Cooler Object Name
+  ,                           !- Second Evaporative Cooler Object Type
+  ;                           !- Second Evaporative Cooler Name
 \end{lstlisting}
 
 \subsubsection{Outputs}\label{outputs-4-021}
@@ -1749,26 +1804,25 @@ This optional input field is the name of an \hyperref[availabilitymanagerassignm
 An example of this object defined in an input data file is shown below\textbf{:}
 
 \begin{lstlisting}
-
 ZoneHVAC:OutdoorAirUnit,
-      Zone5DXOutAir,           !- Name
-      OAUnitOASched,           !- Availability Schedule Name
-      SPACE5-1,                !- Zone Name
-      0.42,                    !- Outdoor Air Flow Rate {m3/s}
-      OAUnitOASched,           !- Outdoor Air Schedule Name
-      Zone5OAUFan1,            !- Supply Fan Name
-      BlowThrough,             !- Supply Fan Placement
-      ,                        !- Exhaust Fan Name
-      ,                        !- Exhaust Air Flow Rate {m3/s}
-      ,                        !- Exhaust Air Schedule Name
-      TemperatureControl,      !- Unit Control Type
-      OAUHitemp2,              !- High Air Control Temperature Schedule Name
-      OAULotemp2,              !- Low Air Control Temperature Schedule Name
-      Zone5OAUOANode,          !- Outdoor Air Node Name
-      Zone5OAUZoneInletNode,   !- AirOutlet Node Name
-      Zone5OAUZoneOutletNode,  !- AirInlet Node Name
-      Zone5OAUFanOutletNode,   !- Supply FanOutlet Node Name
-      Zone5OAUEquip1;          !- Outdoor Air Unit List Name
+  Zone5DXOutAir,              !- Name
+  OAUnitOASched,              !- Availability Schedule Name
+  SPACE5-1,                   !- Zone Name
+  0.42,                       !- Outdoor Air Flow Rate {m3/s}
+  OAUnitOASched,              !- Outdoor Air Schedule Name
+  Zone5OAUFan1,               !- Supply Fan Name
+  BlowThrough,                !- Supply Fan Placement
+  ,                           !- Exhaust Fan Name
+  ,                           !- Exhaust Air Flow Rate {m3/s}
+  ,                           !- Exhaust Air Schedule Name
+  TemperatureControl,         !- Unit Control Type
+  OAUHitemp2,                 !- High Air Control Temperature Schedule Name
+  OAULotemp2,                 !- Low Air Control Temperature Schedule Name
+  Zone5OAUOANode,             !- Outdoor Air Node Name
+  Zone5OAUZoneInletNode,      !- AirOutlet Node Name
+  Zone5OAUZoneOutletNode,     !- AirInlet Node Name
+  Zone5OAUFanOutletNode,      !- Supply FanOutlet Node Name
+  Zone5OAUEquip1;             !- Outdoor Air Unit List Name
 \end{lstlisting}
 
 \subsubsection{Outputs}\label{outputs-5-012}
@@ -1881,17 +1935,16 @@ Note: If any of the components use the autosized option at the component level, 
 An example from an IDF:
 
 \begin{lstlisting}
-
 ZoneHVAC:OutdoorAirUnit:EquipmentList,
-      Zone5OAUEquip1,          !- Name
-      Dehumidifier:Desiccant:NoFans,  !- Component 1 Object Type
-      Z5Dessicant,             !- Component 1 Name
-      HeatExchanger:AirToAir:FlatPlate,  !- Component 2 Object Type
-      Zone5A2AHeat Recovery,   !- Component 2 Name
-      CoilSystem:Cooling:DX,  !- Component 3 Object Type
-      DX Cooling Coil System 5,!- Component 3 Name
-      Coil:Heating:Electric,   !- Component 4 Object Type
-      Zone5DESHCoil;           !- Component 4 Name
+  Zone5OAUEquip1,             !- Name
+  Dehumidifier:Desiccant:NoFans,  !- Component 1 Object Type
+  Z5Desiccant,                !- Component 1 Name
+  HeatExchanger:AirToAir:FlatPlate,  !- Component 2 Object Type
+  Zone5A2AHeat Recovery,      !- Component 2 Name
+  CoilSystem:Cooling:DX,      !- Component 3 Object Type
+  DX Cooling Coil System 5,   !- Component 3 Name
+  Coil:Heating:Electric,      !- Component 4 Object Type
+  Zone5DESHCoil;              !- Component 4 Name
 \end{lstlisting}
 
 \subsection{ZoneHVAC:WindowAirConditioner}\label{zonehvacwindowairconditioner}
@@ -1998,75 +2051,74 @@ This optional input field is the name of an \hyperref[availabilitymanagerassignm
 
 \paragraph{Field: Design Specification ZoneHVAC Sizing Object Name}\label{field-design-specification-zonehvac-sizing-object-name-5}
 
-This optional input field is the name of a \hyperref[designspecificationzonehvacsizing]{DesignSpecification:ZoneHVAC:Sizing} object. The name must correspond to unique name of a \hyperref[designspecificationzonehvacsizing]{DesignSpecification:ZoneHVAC:Sizing} object. A Design Sepcification Zone HVAC Sizing object defines scalable sizing methods for sizing input fields such as Maximum Air Flow Rate in this Window Air Conditioner zone HVAC object. The scaled Maximum Air Flow Rate in turn is used to size cooling capacity of the unit.
+This optional input field is the name of a \hyperref[designspecificationzonehvacsizing]{DesignSpecification:ZoneHVAC:Sizing} object. The name must correspond to unique name of a \hyperref[designspecificationzonehvacsizing]{DesignSpecification:ZoneHVAC:Sizing} object. A Design Specification Zone HVAC Sizing object defines scalable sizing methods for sizing input fields such as Maximum Air Flow Rate in this Window Air Conditioner zone HVAC object. The scaled Maximum Air Flow Rate in turn is used to size cooling capacity of the unit.
 
 Following is an example input for the cycling window air conditioner, along with its constituent components.
 
 \begin{lstlisting}
+ZoneHVAC:WindowAirConditioner,
+  Zone3WindAC,                !- name of window AC unit
+  FanAndCoilAvailSched,       !- Availability Schedule Name
+  0.6,                        !- Maximum Supply Air Flow Rate {m3/s}
+  0.05,                       !- Maximum Outdoor Air Flow Rate {m3/s}
+  Zone3WindACAirInletNode,    !- Air Inlet Node Name
+  Zone3WindACAirOutletNode,   !- Air Outlet Node Name
+  OutdoorAir:Mixer,           !- Outdoor Air Mixer Object Type
+  Zone3WindACOAMixer,         !- Outdoor Air Mixer Name
+  Fan:SystemModel,            !- Supply Air Fan Object Type
+  Zone3WindACFan,             !- Fan Name
+  Zone3WindACDXCoil,          !- DX Cooling Coil Name
+  CyclingFanSch,              !- Supply Air Fan Operation Mode Schedule Name
+  DrawThrough,                !- Fan Placement
+  0.001,                      !- Cooling Convergence Tolerance
+  Coil:Cooling:DX:SingleSpeed;!- Cooling Coil Object Type
 
-  ZoneHVAC:WindowAirConditioner,
-         Zone3WindAC,                  ! name of window AC unit
-         FanAndCoilAvailSched,         ! Availability Schedule Name
-         0.6,                          ! Maximum Supply Air Flow Rate {m3/s}
-         0.05,                         ! Maximum Outdoor Air Flow Rate {m3/s}
-         Zone3WindACAirInletNode,      ! Air Inlet Node Name
-         Zone3WindACAirOutletNode,     ! Air Outlet Node Name
-         OutdoorAir:Mixer,             ! Outdoor Air Mixer Object Type
-         Zone3WindACOAMixer,           ! Outdoor Air Mixer Name
-         Fan:SystemModel,              ! Supply Air Fan Object Type
-         Zone3WindACFan,               ! Fan Name
-         Zone3WindACDXCoil,            ! DX Cooling Coil Name
-         CyclingFanSch,                ! Supply Air Fan Operation Mode Schedule Name
-         DrawThrough,                  ! Fan Placement
-         0.001,                        ! Cooling Convergence Tolerance
-         Coil:Cooling:DX:SingleSpeed;  ! Cooling Coil Object Type
+Schedule:Compact,
+  CyclingFanSch,              !- Name
+  Fraction,                   !- ScheduleType
+  Through: 12/31,             !- Complex Field \#1
+  For: AllDays,               !- Complex Field \#2
+  Until: 24:00,               !- Complex Field \#7
+  0.0;                        !- Complex Field \#8
 
-  Schedule:Compact,
-         CyclingFanSch,                !- Name
-         Fraction,                     !- ScheduleType
-         Through: 12/31,               !- Complex Field \#1
-         For: AllDays,                 !- Complex Field \#2
-         Until: 24:00,                 !- Complex Field \#7
-         0.0;                          !- Complex Field \#8
+OutdoorAir:Mixer,
+  Zone3WindACOAMixer,         !- Name
+  Zone3WindACOAMixerOutletNode,  !- Mixed Air Node Name
+  Zone3WindACOAInNode,        !- Outdoor Air Stream Node Name
+  Zone3WindACExhNode,         !- Relief Air Stream Node Name
+  Zone3WindACAirInletNode;    !- Return Air Stream Node Name
 
-  OutdoorAir:Mixer,
-         Zone3WindACOAMixer,           ! Name
-         Zone3WindACOAMixerOutletNode, ! Mixed Air Node Name
-         Zone3WindACOAInNode,          ! Outdoor Air Stream Node Name
-         Zone3WindACExhNode,           ! Relief Air Stream Node Name
-         Zone3WindACAirInletNode;      ! Return Air Stream Node Name
+Fan:SystemModel,
+  Zone3WindACFan,             !- Name
+  FanAndCoilAvailSched,       !- Availability Schedule Name
+  Zone3WindACDXOutletNode,    !- Air Inlet Node Name
+  Zone3WindACAirOutletNode,   !- Air Outlet Node Name
+  0.6,                        !- Design Maximum Air Flow Rate
+  Discrete,                   !- Speed Control Method
+  0.0,                        !- Electric Power Minimum Flow Rate Fraction
+  75.0,                       !- Design Pressure Rise
+  0.9,                        !- Motor Efficiency
+  1.0,                        !- Motor In Air Stream Fraction
+  AUTOSIZE,                   !- Design Electric Power Consumption
+  TotalEfficiencyAndPressure, !- Design Power Sizing Method
+  ,                           !- Electric Power Per Unit Flow Rate
+  ,                           !- Electric Power Per Unit Flow Rate Per Unit Pressure
+  0.5;                        !- Fan Total Efficiency
 
-  Fan:SystemModel,
-       Zone3WindACFan ,                !- Name
-       FanAndCoilAvailSched ,          !- Availability Schedule Name
-       Zone3WindACDXOutletNode,        !- Air Inlet Node Name
-       Zone3WindACAirOutletNode,       !- Air Outlet Node Name
-       0.6 ,                           !- Design Maximum Air Flow Rate
-       Discrete ,                      !- Speed Control Method
-       0.0,                            !- Electric Power Minimum Flow Rate Fraction
-       75.0,                           !- Design Pressure Rise
-       0.9 ,                           !- Motor Efficiency
-       1.0 ,                           !- Motor In Air Stream Fraction
-       AUTOSIZE,                       !- Design Electric Power Consumption
-       TotalEfficiencyAndPressure,     !- Design Power Sizing Method
-       ,                               !- Electric Power Per Unit Flow Rate
-       ,                               !- Electric Power Per Unit Flow Rate Per Unit Pressure
-       0.5;                            !- Fan Total Efficiency
-
-  Coil:Cooling:DX:SingleSpeed,
-      Zone3WindACDXCoil,       !- Name
-      CoolingCoilAvailSched,   !- Availability Schedule Name
-      autosize,                !- Rated Total Cooling Capacity {W}
-      autosize,                !- Rated Sensible Heat Ratio
-      3.0,                     !- Rated COP
-      autosize,                !- Rated Air Flow Rate {m3/s}
-      Zone3WindACOAMixerOutletNode,  !- Air Inlet Node Name
-      Zone3WindACDXOutletNode, !- Air Outlet Node Name
-      WindACCoolCapFT,         !- Total Cooling Capacity Function of Temperature Curve Name
-      WindACCoolCapFFF,        !- Total Cooling Capacity Function of Flow Fraction Curve Name
-      WindACEIRFT,             !- Energy Input Ratio Function of Temperature Curve Name
-      WindACEIRFFF,            !- Energy Input Ratio Function of Flow Fraction Curve Name
-      WindACPLFFPLR;           !- Part Load Fraction Correlation Curve Name
+Coil:Cooling:DX:SingleSpeed,
+  Zone3WindACDXCoil,          !- Name
+  CoolingCoilAvailSched,      !- Availability Schedule Name
+  autosize,                   !- Rated Total Cooling Capacity {W}
+  autosize,                   !- Rated Sensible Heat Ratio
+  3.0,                        !- Rated COP
+  autosize,                   !- Rated Air Flow Rate {m3/s}
+  Zone3WindACOAMixerOutletNode,  !- Air Inlet Node Name
+  Zone3WindACDXOutletNode,    !- Air Outlet Node Name
+  WindACCoolCapFT,            !- Total Cooling Capacity Function of Temperature Curve Name
+  WindACCoolCapFFF,           !- Total Cooling Capacity Function of Flow Fraction Curve Name
+  WindACEIRFT,                !- Energy Input Ratio Function of Temperature Curve Name
+  WindACEIRFFF,               !- Energy Input Ratio Function of Flow Fraction Curve Name
+  WindACPLFFPLR;              !- Part Load Fraction Correlation Curve Name
 \end{lstlisting}
 
 \subsubsection{Outputs}\label{outputs-6-012}
@@ -2198,6 +2250,10 @@ This numeric field defines the supply air flow rate leaving the air conditioner 
 
 This numeric field defines the supply air flow rate leaving the air conditioner in cubic meters per second when neither cooling nor heating is required (i.e., DX coil and heater are off but the supply air fan operates). This field is only used when the air conditioner's supply air fan operating mode schedule specifies continuous fan operation. Values must be greater than or equal to zero, or this field is autosizable. If the air conditioner's supply air fan operating mode schedule specifies continuous fan operation and this value is set to zero or this field is left blank, then the model assumes that the supply air flow rate when no cooling/heating is needed is equal to the supply air flow rate when the cooling or heating coil was last operating (for cooling operation or heating operation).
 
+\paragraph{Field: No Load Supply Air Flow Rate Control Set To Low Speed}\label{field-no-load-supply-air-flow-rate-control-set-to-low-speed-001}
+
+This alpha field defines whether the supply air flow rate leaving the air conditioner in cubic meters per second when neither cooling nor heating is required is set to the coil high speed or low speed air flow rate. The valid choices are Yes or No. The default value is Yes. If the coil type does not have multiple air flow rates then this field is not used. If Yes is selected and the coil air flow rate is autosized the No Load Supply Air Flow Rate is proportional to the number of speeds.
+
 \paragraph{Field: Cooling Outdoor Air Flow Rate}\label{field-cooling-outdoor-air-flow-rate-001}
 
 This numeric field defines the outdoor air flow rate through the air conditioner in cubic meters per second when the DX cooling coil is operating. Values must be greater than or equal to 0, or this field is autosizable. Note that the Cooling Outdoor Air Flow Rate is fixed; it cannot change during the simulation. In addition, the Cooling Outdoor Air Flow Rate cannot be greater than the air conditioner's supply air volumetric flow rate during cooling operation. This field is set to zero flow when the PTAC is connected to an \textit{\hyperref[airterminalsingleductmixer]{AirTerminal:SingleDuct:Mixer}} object.
@@ -2272,7 +2328,7 @@ This optional input field is the name of an \hyperref[availabilitymanagerassignm
 
 \paragraph{Field: Design Specification ZoneHVAC Sizing Object Name}\label{field-design-specification-zonehvac-sizing-object-name-6}
 
-This optional input field is the name of a \hyperref[designspecificationzonehvacsizing]{DesignSpecification:ZoneHVAC:Sizing} object. The name must correspond to unique name of a \hyperref[designspecificationzonehvacsizing]{DesignSpecification:ZoneHVAC:Sizing} object. A Design Sepcification Zone HVAC Sizing object defines scalable sizing methods for sizing input fields such as Cooling Supply Air Flow Rate in this Packaged Terminal Air Conditioner~ zone HVAC object. The scaled Supply Air Flow Rate in turn is used to size cooling and heating capacity of the unit.
+This optional input field is the name of a \hyperref[designspecificationzonehvacsizing]{DesignSpecification:ZoneHVAC:Sizing} object. The name must correspond to unique name of a \hyperref[designspecificationzonehvacsizing]{DesignSpecification:ZoneHVAC:Sizing} object. A Design Specification Zone HVAC Sizing object defines scalable sizing methods for sizing input fields such as Cooling Supply Air Flow Rate in this Packaged Terminal Air Conditioner~ zone HVAC object. The scaled Supply Air Flow Rate in turn is used to size cooling and heating capacity of the unit.
 
 \paragraph{Field: Capacity Control Method}\label{field-capacity-control-method-2}
 
@@ -2302,82 +2358,81 @@ As shown in the example below, correct specification of the packaged terminal ai
 \end{enumerate}
 
 \begin{lstlisting}
-
 ZoneHVAC:PackagedTerminalAirConditioner,
-  Zone2PTAC,               !- Name
-  FanAndCoilAvailSched,    !- Availability Schedule Name
-  Zone2PTACAirInletNode,   !- Air Inlet Node Name
-  Zone2PTACAirOutletNode,  !- Air Outlet Node Name
-  OutdoorAir:Mixer,        !- Outdoor Air Mixer Object Type
-  Zone2PTACOAMixer,        !- Outdoor Air Mixer Name
-  autosize,              !- Cooling Supply Air Flow Rate {m3/s}
-  autosize,              !- Heating Supply Air Flow Rate operation {m3/s}
-  autosize,              !- No Load Supply Air Flow Rate {m3/s}
-  autosize,              !- Cooling Outdoor Air Flow Rate {m3/s}
-  autosize,              !- Heating Outdoor Air Flow Rate {m3/s}
-  autosize,              !- No Load Outdoor Air Flow Rate  {m3/s}
-  Fan:OnOff,                      !- Supply Air Fan Object Type
-  Zone2PTACFan,                          !- Supply Air Fan Name
-  Coil:Heating:Electric,                 !- Heating Coil Object Type
-  Zone2PTACHeatCoil,                     !- Heating Coil Name
-  Coil:Cooling:DX:SingleSpeed,  !- Cooling Coil Object Type
-  Zone2PTACDXCoolCoil,                   !- Cooling Coil Name
-  BlowThrough,                           !- Fan Placement
-  SupplyFanSch;                          !- Supply Air Fan Operating Mode Schedule Name
+  Zone2PTAC,                  !- Name
+  FanAndCoilAvailSched,       !- Availability Schedule Name
+  Zone2PTACAirInletNode,      !- Air Inlet Node Name
+  Zone2PTACAirOutletNode,     !- Air Outlet Node Name
+  OutdoorAir:Mixer,           !- Outdoor Air Mixer Object Type
+  Zone2PTACOAMixer,           !- Outdoor Air Mixer Name
+  autosize,                   !- Cooling Supply Air Flow Rate {m3/s}
+  autosize,                   !- Heating Supply Air Flow Rate operation {m3/s}
+  autosize,                   !- No Load Supply Air Flow Rate {m3/s}
+  ,                           !- No Load Supply Air Flow Rate Control Set To Low Speed
+  autosize,                   !- Cooling Outdoor Air Flow Rate {m3/s}
+  autosize,                   !- Heating Outdoor Air Flow Rate {m3/s}
+  autosize,                   !- No Load Outdoor Air Flow Rate  {m3/s}
+  Fan:OnOff,                  !- Supply Air Fan Object Type
+  Zone2PTACFan,               !- Supply Air Fan Name
+  Coil:Heating:Electric,      !- Heating Coil Object Type
+  Zone2PTACHeatCoil,          !- Heating Coil Name
+  Coil:Cooling:DX:SingleSpeed,!- Cooling Coil Object Type
+  Zone2PTACDXCoolCoil,        !- Cooling Coil Name
+  BlowThrough,                !- Fan Placement
+  SupplyFanSch;               !- Supply Air Fan Operating Mode Schedule Name
 
+Schedule:Compact,
+  SupplyFanSch,               !- Name
+  Fraction,                   !- ScheduleType
+  Through: 12/31,             !- Complex Field \#1
+  For: AllDays,               !- Complex Field \#2
+  Until:  7:00,               !- Complex Field \#3
+  0.0,                        !- Complex Field \#4
+  Until: 18:00,               !- Complex Field \#5
+  1.0,                        !- Complex Field \#6
+  Until: 24:00,               !- Complex Field \#7
+  0.0;                        !- Complex Field \#8
 
-  Schedule:Compact,
-      SupplyFanSch,            !- Name
-      Fraction,                !- ScheduleType
-      Through: 12/31,          !- Complex Field \#1
-      For: AllDays,            !- Complex Field \#2
-      Until:  7:00,            !- Complex Field \#3
-      0.0,                     !- Complex Field \#4
-      Until: 18:00,            !- Complex Field \#5
-      1.0,                     !- Complex Field \#6
-      Until: 24:00,            !- Complex Field \#7
-      0.0;                     !- Complex Field \#8
+OutdoorAir:Mixer,
+  Zone2PTACOAMixer,           !- Name
+  Zone2PTACOAMixerOutletNode, !- Mixed Air Node Name
+  Zone2PTACOAInNode,          !- Outdoor Air Stream Node Name
+  Zone2PTACExhNode,           !- Relief Air Stream Node Name
+  Zone2PTACAirInletNode;      !- Return Air Stream Node Name
 
-  OutdoorAir:Mixer,
-      Zone2PTACOAMixer,            !- Name
-      Zone2PTACOAMixerOutletNode,  !-Mixed Air Node Name
-      Zone2PTACOAInNode,           !-Outdoor Air Stream Node Name
-      Zone2PTACExhNode,            !- Relief Air Stream Node Name
-      Zone2PTACAirInletNode;       !- Return Air Stream Node Name
+Fan:OnOff,
+  Zone2PTACFan,               !- Name
+  FanAndCoilAvailSched,       !- Availability Schedule Name
+  0.5,                        !- Fan Total Efficiency
+  75.0,                       !- Pressure Rise {Pa}
+  autosize,                   !- Maximum Flow Rate{m3/s}
+  0.9,                        !- Motor Efficiency
+  1.0,                        !- Motor In Airstream Fraction
+  Zone2PTACOAMixerOutletNode, !- Air Inlet Node Name
+  Zone2PTACFanOutletNode;     !- Air Outlet Node Name
 
-    Fan:OnOff,
-      Zone2PTACFan,                !- Name
-      FanAndCoilAvailSched,        !- Availability Schedule Name
-      0.5,                         !- Fan Total Efficiency
-      75.0,                        !- Pressure Rise {Pa}
-      autosize,                    !- Maximum Flow Rate{m3/s}
-      0.9,                         !- Motor Efficiency
-      1.0,                         !- Motor In Airstream Fraction
-      Zone2PTACOAMixerOutletNode,  !- Air Inlet Node Name
-      Zone2PTACFanOutletNode;      !- Air Outlet Node Name
+Coil:Cooling:DX:SingleSpeed,
+  Zone2PTACDXCoolCoil,        !- Coil Name
+  CoolingCoilAvailSched,      !- Availability Schedule Name
+  autosize,                   !- Rated Total Cooling Capacity (gross) {W}
+  autosize,                   !- Rated SHR
+  3.0,                        !- Rated COP
+  autosize,                   !- Rated Air Volume Flow Rate {m3/s}
+  Zone2PTACFanOutletNode,     !- Coil Air Inlet Node
+  Zone2PTACCoolCoilOutletNode,!- Coil Air Outlet Node
+  HPACCoolCapFT,              !- Total Cooling Capacity Modifier Curve (function of temperature)
+  HPACCoolCapFFF,             !- Total Cooling Capacity Modifier Curve (function of flow fraction)
+  HPACEIRFT,                  !- Energy Input Ratio Modifier Curve (function of temperature)
+  HPACEIRFFF,                 !- Energy Input Ratio Modifier Curve (function of flow fraction)
+  HPACPLFFPLR;                !- Part Load Fraction Correlation (function of part load ratio)
 
-  Coil:Cooling:DX:SingleSpeed,
-      Zone2PTACDXCoolCoil,         !- Coil Name
-      CoolingCoilAvailSched,       !- Availability Schedule Name
-      autosize,                    !- Rated Total Cooling Capacity (gross) {W}
-      autosize,                    !- Rated SHR
-      3.0,                         !- Rated COP
-      autosize,                    !- Rated Air Volume Flow Rate {m3/s}
-      Zone2PTACFanOutletNode,      !- Coil Air Inlet Node
-      Zone2PTACCoolCoilOutletNode, !-Coil Air Outlet Node
-      HPACCoolCapFT,               !- Total Cooling Capacity Modifier Curve (function of temperature)
-      HPACCoolCapFFF,              !- Total Cooling Capacity Modifier Curve (function of flow fraction)
-      HPACEIRFT,                   !- Energy Input Ratio Modifier Curve (function of temperature)
-      HPACEIRFFF,                  !- Energy Input Ratio Modifier Curve (function of flow fraction)
-      HPACPLFFPLR;                 !- Part Load Fraction Correlation (function of part load ratio)
-
-  Coil:Heating:Electric,
-      Zone2PTACHeatCoil,           !- Coil Name
-      HeatingCoilAvailSched,       !- Availability Schedule Name
-      1.0,                         !- Efficiency
-      autosize,                    !- Nominal Capacity {W}
-      Zone2PTACCoolCoilOutletNode, !- Air Inlet Node Name
-      Zone2PTACAirOutletNode;      !- Air Outlet Node Name
+Coil:Heating:Electric,
+  Zone2PTACHeatCoil,          !- Coil Name
+  HeatingCoilAvailSched,      !- Availability Schedule Name
+  1.0,                        !- Efficiency
+  autosize,                   !- Nominal Capacity {W}
+  Zone2PTACCoolCoilOutletNode,!- Air Inlet Node Name
+  Zone2PTACAirOutletNode;     !- Air Outlet Node Name
 \end{lstlisting}
 
 \subsubsection{Outputs}\label{outputs-7-012}
@@ -2545,6 +2600,10 @@ This numeric field defines the supply air flow rate leaving the heat pump in cub
 
 This numeric field defines the supply air flow rate leaving the heat pump in cubic meters per second when neither cooling or heating is required (i.e., DX coils and supplemental heater are off but the supply air fan operates). This field is only used when the heat pump's supply air fan operating mode schedule specifies continuous fan operation. Values must be greater than or equal to zero, or this field is autosizable. If the heat pump's supply air fan operating mode schedule specifies continuous fan operation and this value is set to zero or this field is left blank, then the model assumes that the supply air flow rate when no cooling/heating is needed is equal to the supply air flow rate when the cooling or heating coil was last operating (for cooling operation or heating operation).
 
+\paragraph{Field: No Load Supply Air Flow Rate Control Set To Low Speed}\label{field-no-load-supply-air-flow-rate-control-set-to-low-speed-002}
+
+This alpha field defines whether the supply air flow rate leaving the air conditioner in cubic meters per second when neither cooling nor heating is required is set to the coil high speed or low speed air flow rate. The valid choices are Yes or No. The default value is Yes. If the coil type does not have multiple air flow rates then this field is not used. If Yes is selected and the coil air flow rate is autosized the No Load Supply Air Flow Rate is proportional to the number of speeds.
+
 \paragraph{Field: Cooling Outdoor Air Flow Rate}\label{field-cooling-outdoor-air-flow-rate-1}
 
 This numeric field defines the outdoor air flow rate through the heat pump in cubic meters per second when the DX cooling coil is operating. Values must be greater than or equal to 0, or this field is autosizable. Note that the Cooling Outdoor Air Flow Rate is fixed; it cannot change during the simulation. In addition, the Cooling Outdoor Air Flow Rate cannot be greater than the heat pump's supply air volumetric flow rate during cooling operation.
@@ -2660,7 +2719,7 @@ This optional input field is the name of an \hyperref[availabilitymanagerassignm
 
 \paragraph{Field: Design Specification ZoneHVAC Sizing Object Name}\label{field-design-specification-zonehvac-sizing-object-name-7}
 
-This optional input field is the name of a \hyperref[designspecificationzonehvacsizing]{DesignSpecification:ZoneHVAC:Sizing} object. The name must correspond to unique name of a \hyperref[designspecificationzonehvacsizing]{DesignSpecification:ZoneHVAC:Sizing} object. A Design Sepcification Zone HVAC Sizing object defines scalable sizing methods for sizing input fields such as Cooling Supply Air Flow Rate in this PTHP zone HVAC object. The scaled Supply Air Flow Rate in turn is used to size cooling and heating capacity of the unit.
+This optional input field is the name of a \hyperref[designspecificationzonehvacsizing]{DesignSpecification:ZoneHVAC:Sizing} object. The name must correspond to unique name of a \hyperref[designspecificationzonehvacsizing]{DesignSpecification:ZoneHVAC:Sizing} object. A Design Specification Zone HVAC Sizing object defines scalable sizing methods for sizing input fields such as Cooling Supply Air Flow Rate in this PTHP zone HVAC object. The scaled Supply Air Flow Rate in turn is used to size cooling and heating capacity of the unit.
 
 \paragraph{Field: Capacity Control Method}\label{field-capacity-control-method-3}
 
@@ -2674,6 +2733,9 @@ When Capacity Control Method = SingleZoneVAV, enter the minimum air temperature 
 
 When Capacity Control Method = SingleZoneVAV, enter the maximum air temperature limit for reduced fan speed in heating mode. For SingleZoneVAV, this field's minimum supply air temperature is 0.0\si{\degreeCelsius}. This field is autosizable and the default is autosize.
 
+\paragraph{Field: DX Heating Coil Sizing Ratio}\label{field-dx-heating-coil-sizing-ratio-0101}
+
+This input specifies the ratio of heat pump heating to cooling capacity. The default value is 1.0.
 
 As shown in the example below, correct specification of the packaged terminal heat pump requires the following objects in addition to the compound object itself:
 
@@ -2692,107 +2754,106 @@ As shown in the example below, correct specification of the packaged terminal he
 \end{enumerate}
 
 \begin{lstlisting}
-
 ZoneHVAC:PackagedTerminalHeatPump,
-  Zone2PTHP,               !- Name
-  FanAndCoilAvailSched,    !- Availability Schedule Name
-  Zone2PTHPAirInletNode,   !- Air Inlet Node Name
-  Zone2PTHPAirOutletNode,  !- Air Outlet Node Name
-  OutdoorAir:Mixer,        !- Outdoor Air Mixer Object Type
-  Zone2PTHPOAMixer,        !- Outdoor Air Mixer Name
-  autosize,                !- Cooling Supply Air Flow Rate {m3/s}
-  autosize,                !- Heating Supply Air Flow Rate {m3/s}
-  autosize,                !- No Load Supply Air Flow Rate {m3/s}
-  autosize,                !- Cooling Outdoor Air Flow Rate {m3/s}
-  autosize,                !- Heating Outdoor Air Flow Rate {m3/s}
-  autosize,                !- No Load Outdoor Air Flow Rate {m3/s}
-  Fan:OnOff,               !- Supply Air Fan Object Type
-  Zone2PTHPFan,            !- Supply Air Fan Name
-  Coil:Heating:DX:SingleSpeed,  !- Heating Coil Object Type
-  Zone2PTHPDXHeatCoil,     !- Heating Coil Name
-  0.001,                   !- Heating Convergence Tolerance {dimensionless}
-  Coil:Cooling:DX:SingleSpeed,  !- Cooling Coil Object Type
-  Zone2PTHPDXCoolCoil,     !- Cooling Coil Name
-  0.001,                   !- Cooling Convergence Tolerance {dimensionless}
-  Coil:Heating:Electric,   !- Supplemental Heating Coil Object Type
-  Zone2PTHPSupHeater,      !- Supplemental Heating Coil Name
-  autosize,                !- Maximum Supply Air Temperature from Supplemental Heater {C}
-  10.0,                    !- Maximum Outdoor Dry-Bulb Temperature for Supplemental Heater Operation {C}
-  BlowThrough,             !- Fan Placement
-  CyclingFanSch;           !- Supply Air Fan Operating Mode Schedule Name
+  Zone2PTHP,                  !- Name
+  FanAndCoilAvailSched,       !- Availability Schedule Name
+  Zone2PTHPAirInletNode,      !- Air Inlet Node Name
+  Zone2PTHPAirOutletNode,     !- Air Outlet Node Name
+  OutdoorAir:Mixer,           !- Outdoor Air Mixer Object Type
+  Zone2PTHPOAMixer,           !- Outdoor Air Mixer Name
+  autosize,                   !- Cooling Supply Air Flow Rate {m3/s}
+  autosize,                   !- Heating Supply Air Flow Rate {m3/s}
+  autosize,                   !- No Load Supply Air Flow Rate {m3/s}
+  ,                           !- No Load Supply Air Flow Rate Control Set To Low Speed
+  autosize,                   !- Cooling Outdoor Air Flow Rate {m3/s}
+  autosize,                   !- Heating Outdoor Air Flow Rate {m3/s}
+  autosize,                   !- No Load Outdoor Air Flow Rate {m3/s}
+  Fan:OnOff,                  !- Supply Air Fan Object Type
+  Zone2PTHPFan,               !- Supply Air Fan Name
+  Coil:Heating:DX:SingleSpeed,!- Heating Coil Object Type
+  Zone2PTHPDXHeatCoil,        !- Heating Coil Name
+  0.001,                      !- Heating Convergence Tolerance {dimensionless}
+  Coil:Cooling:DX:SingleSpeed,!- Cooling Coil Object Type
+  Zone2PTHPDXCoolCoil,        !- Cooling Coil Name
+  0.001,                      !- Cooling Convergence Tolerance {dimensionless}
+  Coil:Heating:Electric,      !- Supplemental Heating Coil Object Type
+  Zone2PTHPSupHeater,         !- Supplemental Heating Coil Name
+  autosize,                   !- Maximum Supply Air Temperature from Supplemental Heater {C}
+  10.0,                       !- Maximum Outdoor Dry-Bulb Temperature for Supplemental Heater Operation {C}
+  BlowThrough,                !- Fan Placement
+  CyclingFanSch;              !- Supply Air Fan Operating Mode Schedule Name
 
+Schedule:Compact,
+  CyclingFanSch,              !- Name
+  Fraction,                   !- ScheduleType
+  Through: 12/31,             !- Complex Field \#1
+  For: AllDays,               !- Complex Field \#2
+  Until: 24:00,               !- Complex Field \#7
+  0.0;                        !- Complex Field \#8
 
-  Schedule:Compact,
-      CyclingFanSch,               !- Name
-      Fraction,                    !- ScheduleType
-      Through: 12/31,              !- Complex Field \#1
-      For: AllDays,                !- Complex Field \#2
-      Until: 24:00,                !- Complex Field \#7
-      0.0;                         !- Complex Field \#8
+OutdoorAir:Mixer,
+  Zone2PTHPOAMixer,           !- Name
+  Zone2PTHPOAMixerOutletNode, !- Mixed Air Node Name
+  Zone2PTHPOAInNode,          !- Outdoor Air Stream Node Name
+  Zone2PTHPExhNode,           !- Relief Air Stream Node Name
+  Zone2PTHPAirInletNode;      !- Return Air Stream Node Name
 
-  OutdoorAir:Mixer,
-      Zone2PTHPOAMixer,            !- Name
-      Zone2PTHPOAMixerOutletNode,  !-Mixed Air Node Name
-      Zone2PTHPOAInNode,           !-Outdoor Air Stream Node Name
-      Zone2PTHPExhNode,            !- Relief Air Stream Node Name
-      Zone2PTHPAirInletNode;       !- Return Air Stream Node Name
+Fan:OnOff,
+  Zone2PTHPFan,               !- Name
+  FanAndCoilAvailSched,       !- Availability Schedule Name
+  0.5,                        !- Fan Total Efficiency
+  75.0,                       !- Pressure Rise {Pa}
+  autosize,                   !- Maximum Flow Rate {m3/s}
+  0.9,                        !- Motor Efficiency
+  1.0,                        !- Motor In Airstream Fraction
+  Zone2PTHPOAMixerOutletNode, !- Air Inlet Node Name
+  Zone2PTHPFanOutletNode;     !- Air Outlet Node Name
 
-  Fan:OnOff,
-      Zone2PTHPFan,                !- Name
-      FanAndCoilAvailSched,        !- Availability Schedule Name
-      0.5,                         !- Fan Total Efficiency
-      75.0,                        !- Pressure Rise {Pa}
-      autosize,                    !- Maximum Flow Rate {m3/s}
-      0.9,                         !- Motor Efficiency
-      1.0,                         !- Motor In Airstream Fraction
-      Zone2PTHPOAMixerOutletNode,  !- Air Inlet Node Name
-      Zone2PTHPFanOutletNode;      !- Air Outlet Node Name
+Coil:Cooling:DX:SingleSpeed,
+  Zone2PTHPDXCoolCoil,        !- Coil Name
+  CoolingCoilAvailSched,      !- Availability Schedule
+  autosize,                   !- Rated Total Cooling Capacity (gross) {W}
+  autosize,                   !- Rated SHR
+  3.0,                        !- Rated COP
+  autosize,                   !- Rated Air Volume Flow Rate {m3/s}
+  Zone2PTHPFanOutletNode,     !- Coil Air Inlet Node
+  Zone2PTHPCoolCoilOutletNode,!- Coil Air Outlet Node
+  HPACCoolCapFT,              !- Total Cooling Capacity Modifier Curve (function of temperature)
+  HPACCoolCapFFF,             !- Total Cooling Capacity Modifier Curve (function of flow fraction)
+  HPACEIRFT,                  !- Energy Input Ratio Modifier Curve (function of temperature)
+  HPACEIRFFF,                 !- Energy Input Ratio Modifier Curve (function of flow fraction)
+  HPACPLFFPLR;                !- Part Load Fraction Correlation (function of part load ratio)
 
-  Coil:Cooling:DX:SingleSpeed,
-      Zone2PTHPDXCoolCoil,         !- Coil Name
-      CoolingCoilAvailSched,       !- Availability Schedule
-      autosize,                    !- Rated Total Cooling Capacity (gross) {W}
-      autosize,                    !- Rated SHR
-      3.0,                         !- Rated COP
-      autosize,                    !- Rated Air Volume Flow Rate {m3/s}
-      Zone2PTHPFanOutletNode,      !- Coil Air Inlet Node
-      Zone2PTHPCoolCoilOutletNode, !- Coil Air Outlet Node
-      HPACCoolCapFT,               !- Total Cooling Capacity Modifier Curve (function of temperature)
-      HPACCoolCapFFF,              !- Total Cooling Capacity Modifier Curve (function of flow fraction)
-      HPACEIRFT,                   !- Energy Input Ratio Modifier Curve (function of temperature)
-      HPACEIRFFF,                  !- Energy Input Ratio Modifier Curve (function of flow fraction)
-      HPACPLFFPLR;                 !- Part Load Fraction Correlation (function of part load ratio)
+COIL:Heating:DX:SingleSpeed,
+  Zone2PTHPDXHeatCoil,        !- Coil Name
+  HeatingCoilAvailSched,      !- Availability Schedule
+  autosize,                   !- Rated Total Heating Capacity {W}
+  2.75,                       !- Rated COP
+  autosize,                   !- Rated Air Volume Flow Rate {m3/s}
+  Zone2PTHPCoolCoilOutletNode,!- Coil Air Inlet Node
+  Zone2PTHPDXHeatCoilOutletNode,  !- Coil Air Outlet Node
+  HPACHeatCapFT,              !- Total heating capacity modifier curve (function of temperature)
+  HPACHeatCapFFF,             !- Total heating capacity modifier curve (function of flow fraction)
+  HPACHeatEIRFT,              !- Energy input ratio modifier curve (function of temperature)
+  HPACHeatEIRFFF,             !- Energy input ratio modifier curve (function of flow fraction)
+  HPACCOOLPLFFPLR,            !- Part load fraction correlation (function of part load ratio)
+  ,                           !- Defrost energy input ratio modifier curve (function of temperature)
+  2.0,                        !- Minimum Outdoor Dry-bulb Temperature for Compressor Operation {C}
+  5.0,                        !- Maximum Outdoor Dry-bulb Temperature for Defrost Operation {C}
+  200.0,                      !- Crankcase Heater Capacity {W}
+  10.0,                       !- Maximum Outdoor Dry-bulb Temperature for Crankcase Heater Operation {C}
+  Resistive,                  !- Defrost Strategy
+  TIMED,                      !- Defrost Control
+  0.166667,                   !- Defrost Time Period Fraction
+  20000;                      !- Resistive Defrost Heater Capacity {W}
 
-  COIL:Heating:DX:SingleSpeed,
-      Zone2PTHPDXHeatCoil,         !- Coil Name
-      HeatingCoilAvailSched,       !- Availability Schedule
-      autosize,                    !- Rated Total Heating Capacity {W}
-      2.75,                        !- Rated COP
-      autosize,                    !- Rated Air Volume Flow Rate {m3/s}
-      Zone2PTHPCoolCoilOutletNode, !- Coil Air Inlet Node
-      Zone2PTHPDXHeatCoilOutletNode, !- Coil Air Outlet Node
-      HPACHeatCapFT,              !- Total heating capacity modifier curve (function of temperature)
-      HPACHeatCapFFF,             !- Total heating capacity modifier curve (function of flow fraction)
-      HPACHeatEIRFT,              !- Energy input ratio modifier curve (function of temperature)
-      HPACHeatEIRFFF,             !- Energy input ratio modifier curve (function of flow fraction)
-      HPACCOOLPLFFPLR,            !- Part load fraction correlation (function of part load ratio)
-      ,                           !- Defrost energy input ratio modifier curve (function of temperature)
-      2.0,                        !- Minimum Outdoor Dry-bulb Temperature for Compressor Operation {C}
-      5.0,                        !- Maximum Outdoor Dry-bulb Temperature for Defrost Operation {C}
-      200.0,                      !- Crankcase Heater Capacity {W}
-      10.0,                       !- Maximum Outdoor Dry-bulb Temperature for Crankcase Heater Operation {C}
-      Resistive,                  !- Defrost Strategy
-      TIMED,                      !- Defrost Control
-      0.166667,                   !- Defrost Time Period Fraction
-      20000;                      !- Resistive Defrost Heater Capacity {W}
-
-  Coil:Heating:Electric,
-      Zone2PTHPSupHeater,          !- Name
-      HeatingCoilAvailSched,       !- Availability Schedule Name
-      1.0,                         !- Efficiency
-      autosize,                    !- Nominal Capacity {W}
-      Zone2PTHPDXHeatCoilOutletNode, !- Air Inlet Node Name
-      Zone2PTHPAirOutletNode;      !- Air Outlet Node Name
+Coil:Heating:Electric,
+  Zone2PTHPSupHeater,         !- Name
+  HeatingCoilAvailSched,      !- Availability Schedule Name
+  1.0,                        !- Efficiency
+  autosize,                   !- Nominal Capacity {W}
+  Zone2PTHPDXHeatCoilOutletNode,  !- Air Inlet Node Name
+  Zone2PTHPAirOutletNode;     !- Air Outlet Node Name
 \end{lstlisting}
 
 \subsubsection{Outputs}\label{outputs-8-009}
@@ -2884,11 +2945,11 @@ This output field is the latent heat extraction (dehumidification) of the packag
 
 \paragraph{Zone Packaged Terminal Heat Pump Electricity Rate {[}W{]}}\label{zone-packaged-terminal-heat-pump-electric-power-w}
 
-This output field is the electricity consumption rate of the packaged terminal heat pump in Watts. The consumption includes electricity used by the compressor (including crankcase heater), fans (indoor supply air fan and the condenser fan), and the supplemental heating coil (if electric). This value is calculated for each HVAC system timestep being simulated, and the results are averaged for the timestep being reported.
+This output field is the electricity consumption rate of the packaged terminal heat pump in Watts. The consumption includes electricity used by the compressor (including crankcase heater), fans (indoor supply air fan and the condenser fan), defrost mode operation (resistive or reverse-cycle), and the supplemental heating coil (if electric). This value is calculated for each HVAC system timestep being simulated, and the results are averaged for the timestep being reported.
 
 \paragraph{Zone Packaged Terminal Heat Pump Electricity Energy {[}J{]}}\label{zone-packaged-terminal-heat-pump-electric-energy-j}
 
-This output field is the electricity consumption of the packaged terminal heat pump in Joules for the time period being reported. The consumption includes electricity used by the compressor (including crankcase heater), fans (indoor supply air fan and the condenser fan), and the supplemental heating coil (if electric). This value is calculated for each HVAC system timestep being simulated, and the results are summed for the timestep being reported.
+This output field is the electricity consumption of the packaged terminal heat pump in Joules for the time period being reported. The consumption includes electricity used by the compressor (including crankcase heater), fans (indoor supply air fan and the condenser fan), defrost mode operation (resistive or reverse-cycle), and the supplemental heating coil (if electric). This value is calculated for each HVAC system timestep being simulated, and the results are summed for the timestep being reported.
 
 \paragraph{Zone Packaged Terminal Heat Pump Fan Part Load Ratio {[]}}\label{zone-packaged-terminal-heat-pump-fan-part-load-ratio}
 
@@ -2949,16 +3010,15 @@ The name of the nth air chiller that will be used to meet the zone cooling load.
 The following is an example input for a refrigeration chiller set.
 
 \begin{lstlisting}
-
-   ZoneHVAC:RefrigerationChillerSet,
-      SubFreezerChillerSet ,     !- Name
-      ,                         !- Availability Schedule Name
-      SubFreezer,                !- Zone Name
-      NODE_142,                   !- Air Inlet Node Name
-      NODE_141,                   !- Air Outlet Node Name
-      SubFreezerAirChiller_1,    !- Air Chiller \#1 Name
-      SubFreezerAirChiller_2,    !- Air Chiller \#2 Name
-      SubFreezerAirChiller_3;    !- Air Chiller \#3 Name
+ZoneHVAC:RefrigerationChillerSet,
+  SubFreezerChillerSet,       !- Name
+  ,                           !- Availability Schedule Name
+  SubFreezer,                 !- Zone Name
+  NODE_142,                   !- Air Inlet Node Name
+  NODE_141,                   !- Air Outlet Node Name
+  SubFreezerAirChiller_1,     !- Air Chiller \#1 Name
+  SubFreezerAirChiller_2,     !- Air Chiller \#2 Name
+  SubFreezerAirChiller_3;     !- Air Chiller \#3 Name
 \end{lstlisting}
 
 There are no outputs variables for a ZoneHVAC:RefrigerationChillerSet. Outputs for the refrigeration impact on any zone are listed in the Group:Refrigeration.
@@ -2979,6 +3039,10 @@ For this zone heat pump,there are two types of WaterToAirHeatPump coil model all
 \item
   \hyperref[coilheatingwatertoairheatpumpvariablespeedequationfit]{Coil:Heating:WaterToAirHeat\hyperref[pumpvariablespeed]{Pump:VariableSpeed}EquationFit}
 \end{itemize}
+
+When the inputs of the last two fields (Design Specification Multispeed Object Type and Design Specification Multispeed Fan Object Name) are entered, a multiuspeed fan with different air flow rates is applied.  The fan speed number is determined by zone load. The fan air flow cycles between adjacent speeds based on the cooling / heating capacity (or coordinate with the cooling / heating coil stage for variable speed water to air coils). When Coil:Cooling:WaterToAirHeatPump:EquationFit and Coil:Heating:WaterToAirHeatPump:EquationFit are used, the water flow rate in the coils remain the same.
+
+When there are no inputs of the last two fields, a multispeed fan may be also applied if the Fan:SysmModel is selected as fan type, and Discrete is selected as Speed Control Method and the Number of Speeds is greater than 1 in the Fan:SystemMode object.
 
 \begin{figure}[hbtp] % fig 113
 \centering
@@ -3032,6 +3096,10 @@ This numeric field defines the supply air flow rate leaving the heat pump in cub
 
 This numeric field defines the supply air flow rate leaving the heat pump in cubic meters per second when neither cooling or heating is required (i.e., DX coils and supplemental heater are off but the supply air fan operates). This field is only used when the heat pump's supply air fan operating mode schedule specifies continuous fan operation. Values must be greater than or equal to zero, or this field is autosizable. If the heat pump's supply air fan operating mode schedule specifies continuous fan operation and this value is set to zero or this field is left blank, then the model assumes that the supply air flow rate when no cooling/heating is needed is equal to the supply air flow rate when the cooling or heating coil was last operating (for cooling operation or heating operation).
 
+\paragraph{Field: No Load Supply Air Flow Rate Control Set To Low Speed}\label{field-no-load-supply-air-flow-rate-control-set-to-low-speed-003}
+
+This alpha field defines whether the supply air flow rate leaving the air conditioner in cubic meters per second when neither cooling nor heating is required is set to the coil high speed or low speed air flow rate. The valid choices are Yes or No. The default value is Yes. If the coil type does not have multiple air flow rates then this field is not used. If Yes is selected and the coil air flow rate is autosized the No Load Supply Air Flow Rate is proportional to the number of speeds.
+
 \paragraph{Field: Cooling Outdoor Air Flow Rate}\label{field-cooling-outdoor-air-flow-rate-2}
 
 This numeric field defines the outdoor air flow rate through the heat pump in cubic meters per second when the DX cooling coil is operating. Values must be greater than or equal to 0, or this field is autosizable. Note that the outside air flow rate during cooling operation is fixed; it cannot change during the simulation. In addition, the outside air flow rate during cooling operation cannot be greater than the heat pump's supply air flow rate during cooling operation. This input field is set to zero flow when the WaterToAirHeatPump is connected to an \textit{\hyperref[airterminalsingleductmixer]{AirTerminal:SingleDuct:Mixer}} object.
@@ -3047,6 +3115,8 @@ This numeric field defines the outdoor air flow rate through the heat pump in cu
 \paragraph{Field: Supply Air Fan Object Type}\label{field-supply-air-fan-object-type-7}
 
 This alpha field contains the identifying type of supply air fan specified in the heat pump. Fan type must be \hyperref[fansystemmodel]{Fan:SystemModel} or \hyperref[fanonoff]{Fan:OnOff}.
+
+If Fan:SystemModel is entered and there are no inputs of last two fields: Design Specification Multispeed Object Type and Design Specification Multispeed Object Name, a multispeed fan may be also applied if the input of Number Of Speed in the Fan:SystemModel is greater than 1.
 
 \paragraph{Field: Supply Air Fan Name}\label{field-supply-air-fan-name-6}
 
@@ -3100,7 +3170,7 @@ This numeric field contains the fraction of on-cycle power use to adjust the par
 
 \paragraph{Field: Heat Pump Fan Delay Time}\label{field-heat-pump-fan-delay-time-001}
 
-This numeric field contains the time delay in seconds for the heat pump supply air fan to shut off after compressor cycle off. This value can be obtained from the manufacturer or the heat pump catalog. Suggested value is 60 seconds. This value is disregared at times when the WaterToAirHeatPump's fan operating mode schedule value is greater than 0 (i.e., continuous fan mode).
+This numeric field contains the time delay in seconds for the heat pump supply air fan to shut off after compressor cycle off. This value can be obtained from the manufacturer or the heat pump catalog. Suggested value is 60 seconds. This value is disregarded at times when the WaterToAirHeatPump's fan operating mode schedule value is greater than 0 (i.e., continuous fan mode).
 
 \paragraph{Field: Supplemental Heating Coil Object Type}\label{field-supplemental-heating-coil-object-type-1-000}
 
@@ -3175,7 +3245,7 @@ This field specifies the way in which water flow through the heat pump coils wil
   CyclingOnDemand
 \end{itemize}
 
-\textbf{Cycling} varies water flow through the coil based on the heat pump Part Load Ratio. This control method is appropriate for modeling heat pumps that are outfitted with a soleniod valve which allows water to flow through the coil only when the compressor is active. This is the default for EnergyPlus V8 and later.
+\textbf{Cycling} varies water flow through the coil based on the heat pump Part Load Ratio. This control method is appropriate for modeling heat pumps that are outfitted with a solenoid valve which allows water to flow through the coil only when the compressor is active. This is the default for EnergyPlus V8 and later.
 
 \textbf{Constant} provides a constant water flow regardless of heat pump operation. Remember that EnergyPlus has two coils (a heating coil and a cooling coil) to approximate the operation of one coil that can operate in either heating mode or cooling mode. Therefore, when the water flow mode is constant, there will be full flow through either the heating coil or the cooling coil, but not both at the same time.
 
@@ -3183,114 +3253,128 @@ This field specifies the way in which water flow through the heat pump coils wil
 
 \paragraph{Field: Design Specification ZoneHVAC Sizing Object Name}\label{field-design-specification-zonehvac-sizing-object-name-8}
 
-This optional input field is the name of a \hyperref[designspecificationzonehvacsizing]{DesignSpecification:ZoneHVAC:Sizing} object. The name must correspond to unique name of a \hyperref[designspecificationzonehvacsizing]{DesignSpecification:ZoneHVAC:Sizing} object. A Design Sepcification Zone HVAC Sizing object defines scalable sizing methods for sizing input fields such as Cooling Supply Air Flow Rate in this Water To Air Heat Pump zone HVAC object. The scaled Supply Air Flow Rate in turn is used to size cooling and heating capacity of the unit.
+This optional input field is the name of a \hyperref[designspecificationzonehvacsizing]{DesignSpecification:ZoneHVAC:Sizing} object. The name must correspond to unique name of a \hyperref[designspecificationzonehvacsizing]{DesignSpecification:ZoneHVAC:Sizing} object. A Design Specification Zone HVAC Sizing object defines scalable sizing methods for sizing input fields such as Cooling Supply Air Flow Rate in this Water To Air Heat Pump zone HVAC object. The scaled Supply Air Flow Rate in turn is used to size cooling and heating capacity of the unit.
+
+\paragraph{Field: Design Specification Multispeed Object Type}\label{field-design-specification-multispeed-object-type-2}
+
+This optional alpha field contains the identifying type for the design specification multispeed object. This field is only needed when multispeed fan is applied. The only available type is:
+
+\paragraph{Field: DX Heating Coil Sizing Ratio}\label{field-dx-heating-coil-sizing-ratio-0102}
+
+This input specifies the ratio of heat pump heating to cooling capacity. The default value is 1.0.
+
+\begin{itemize}
+\tightlist
+\item
+  \hyperref[unitarysystemperformancemultispeed]{UnitarySystemPerformance:Multispeed}
+\end{itemize}
+
+\paragraph{Field: Design Specification Multispeed Object Name}\label{field-design-specification-multispeed-object-name-2}
+
+This optional alpha field contains the identifying name for the design specification multispeed object. This field is only needed when multispeed fan is applied.
 
 Examples of IDF use:
 
 \begin{lstlisting}
-
 ZoneHVAC:WaterToAirHeatPump,
-  Zone1WTAHP,               !- Name
-  FanAndCoilAvailSched,     !- Availability Schedule Name
-  Zone 1 Outlet Node,       !- Air Inlet Node Name
-  Zone 1 Inlet Node,        !- Air Outlet Node Name
-  OutdoorAir:Mixer,         !- Outdoor air mixer object type
-  Zone 1 Mixer,             !- Outdoor Air Mixer Name
-  Autosize,                 !- Cooling Supply Air Flow Rate {m3/s}
-  Autosize,                 !- Heating Supply Air Flow Rate {m3/s}
-  ,                         !- No Load Supply Air Flow Rate {m3/s}
-  0.0,                      !- Cooling Outdoor Air Flow Rate {m3/s}
-  0.0,                      !- Heating Outdoor Air Flow Rate {m3/s}
-  ,                         !- No Load Outdoor Air Flow Rate {m3/s}
-  Fan:OnOff,                !- Supply Air Fan Object Type
-  Zone 1 Fan,               !- Supply Air Fan Name
+  Zone1WTAHP,                 !- Name
+  FanAndCoilAvailSched,       !- Availability Schedule Name
+  Zone 1 Outlet Node,         !- Air Inlet Node Name
+  Zone 1 Inlet Node,          !- Air Outlet Node Name
+  OutdoorAir:Mixer,           !- Outdoor air mixer object type
+  Zone 1 Mixer,               !- Outdoor Air Mixer Name
+  Autosize,                   !- Cooling Supply Air Flow Rate {m3/s}
+  Autosize,                   !- Heating Supply Air Flow Rate {m3/s}
+  ,                           !- No Load Supply Air Flow Rate {m3/s}
+  ,                           !- No Load Supply Air Flow Rate Control Set To Low Speed
+  0.0,                        !- Cooling Outdoor Air Flow Rate {m3/s}
+  0.0,                        !- Heating Outdoor Air Flow Rate {m3/s}
+  ,                           !- No Load Outdoor Air Flow Rate {m3/s}
+  Fan:OnOff,                  !- Supply Air Fan Object Type
+  Zone 1 Fan,                 !- Supply Air Fan Name
   Coil:Heating:WaterToAirHeatPump:EquationFit,  !- Heating Coil Object Type
   Sys 1 Heat Pump Heating Mode,  !- Heating Coil Name
-  Coil:Cooling:WaterToAirHeatPump:EquationFit, !- Cooling Coil Object Type
-  Sys 1 Heat Pump Cooling Mode, !- Cooling Coil Name
-  2.5,                      !- Maximum Cycling Rate
-  60.0,                     !- Heat Pump Time Constant
-  0.01,                     !- Fraction of On-Cycle Power Use
-  60,                       !- Heat Pump Fan Delay Time
-  Coil:Heating:Fuel,         !- Supplemental Heating Coil Object Type
-  Heat Pump DX Supp Heating Coil 1, !- Supplemental Heating Coil Name
-  60.0,                  !- Maximum Supply Air Temperature from Supplemental Heater {C}
-  20.0,                  !- Maximum Outdoor Dry-Bulb Temperature for Supplemental Heater Operation {C}
-  Sys 1 Outside Air Inlet Node, !- Outdoor Dry-Bulb Temperature Sensor Node Name
-  BlowThrough,              !- Fan Placement
-  CyclingFanSch;            !- Supply Air Fan Operating Mode Schedule Name
+  Coil:Cooling:WaterToAirHeatPump:EquationFit,  !- Cooling Coil Object Type
+  Sys 1 Heat Pump Cooling Mode,  !- Cooling Coil Name
+  Coil:Heating:Fuel,          !- Supplemental Heating Coil Object Type
+  Heat Pump DX Supp Heating Coil 1,  !- Supplemental Heating Coil Name
+  60.0,                       !- Maximum Supply Air Temperature from Supplemental Heater {C}
+  20.0,                       !- Maximum Outdoor Dry-Bulb Temperature for Supplemental Heater Operation {C}
+  Sys 1 Outside Air Inlet Node,  !- Outdoor Dry-Bulb Temperature Sensor Node Name
+  BlowThrough,                !- Fan Placement
+  CyclingFanSch;              !- Supply Air Fan Operating Mode Schedule Name
 
-  Schedule:Compact,
-      CyclingFanSch,           !- Name
-      Fraction,                !- Schedule Type Limits Name
-      Through: 12/31,          !- Field 1
-      For: AllDays,            !- Field 2
-      Until: 24:00,            !- Field 3
-      0.0;                     !- Field 4
+Schedule:Compact,
+  CyclingFanSch,              !- Name
+  Fraction,                   !- Schedule Type Limits Name
+  Through: 12/31,             !- Field 1
+  For: AllDays,               !- Field 2
+  Until: 24:00,               !- Field 3
+  0.0;                        !- Field 4
 
-    Coil:Heating:WaterToAirHeatPump:EquationFit,
-      Sys 1 Heat Pump Heating Mode,  !- Name
-      Sys 1 Water to Air Heat Pump Source Side2 Inlet Node,   !- Water Inlet Node Name
-      Sys 1 Water to Air Heat Pump Source Side2 Outlet Node,  !- Water Outlet Node Name
-      Sys 1 Heating Coil Air Inlet Node,      !- Air Inlet Node Name
-      Sys 1 SuppHeating Coil Air Inlet Node,  !- Air Outlet Node Name
-      Autosize,                !- Rated Air Flow Rate {m3/s}
-      Autosize,                !- Rated Water Flow Rate {m3/s}
-      Autosize,                !- Rated Heating Capacity {W}
-      4.75,                    !- Rated Heating Coefficient of Performance
-      -1.361311959,            !- Heating Capacity Coefficient 1
-      -2.471798046,            !- Heating Capacity Coefficient 2
-      4.173164514,             !- Heating Capacity Coefficient 3
-      0.640757401,             !- Heating Capacity Coefficient 4
-      0.0,                     !- Heating Capacity Coefficient 5
-      -2.176941116,            !- Heating Power Consumption Coefficient 1
-      0.832114286,             !- Heating Power Consumption Coefficient 2
-      1.570743399,             !- Heating Power Consumption Coefficient 3
-      0.690793651,             !- Heating Power Consumption Coefficient 4
-      0.0;                     !- Heating Power Consumption Coefficient 5
+Coil:Heating:WaterToAirHeatPump:EquationFit,
+  Sys 1 Heat Pump Heating Mode,  !- Name
+  Sys 1 Water to Air Heat Pump Source Side2 Inlet Node,  !- Water Inlet Node Name
+  Sys 1 Water to Air Heat Pump Source Side2 Outlet Node,  !- Water Outlet Node Name
+  Sys 1 Heating Coil Air Inlet Node,  !- Air Inlet Node Name
+  Sys 1 SuppHeating Coil Air Inlet Node,  !- Air Outlet Node Name
+  Autosize,                   !- Rated Air Flow Rate {m3/s}
+  Autosize,                   !- Rated Water Flow Rate {m3/s}
+  Autosize,                   !- Rated Heating Capacity {W}
+  4.75,                       !- Rated Heating Coefficient of Performance
+  -1.361311959,               !- Heating Capacity Coefficient 1
+  -2.471798046,               !- Heating Capacity Coefficient 2
+  4.173164514,                !- Heating Capacity Coefficient 3
+  0.640757401,                !- Heating Capacity Coefficient 4
+  0.0,                        !- Heating Capacity Coefficient 5
+  -2.176941116,               !- Heating Power Consumption Coefficient 1
+  0.832114286,                !- Heating Power Consumption Coefficient 2
+  1.570743399,                !- Heating Power Consumption Coefficient 3
+  0.690793651,                !- Heating Power Consumption Coefficient 4
+  0.0;                        !- Heating Power Consumption Coefficient 5
 
-    OutdoorAir:Mixer,
-      Zone 1 Mixer,          !- Name
-      Sys 1 Mixed Air Node,  !- Mixed Air Node Name
-      Sys 1 Outside Air Inlet Node,  !- Outdoor Air Stream Node Name
-      Sys 1 Relief Air Outlet Node,  !- Relief Air Stream Node Name
-      Zone 1 Outlet Node;  !- Return Air Stream Node Name
+OutdoorAir:Mixer,
+  Zone 1 Mixer,               !- Name
+  Sys 1 Mixed Air Node,       !- Mixed Air Node Name
+  Sys 1 Outside Air Inlet Node,  !- Outdoor Air Stream Node Name
+  Sys 1 Relief Air Outlet Node,  !- Relief Air Stream Node Name
+  Zone 1 Outlet Node;         !- Return Air Stream Node Name
 
-    Fan:OnOff,
-      Zone 1 Fan,              !- Name
-      FanAndCoilAvailSched,    !- Availability Schedule Name
-      0.7,                     !- Fan Total Efficiency
-      300.0,                   !- Pressure Rise {Pa}
-      Autosize,                !- Maximum Flow Rate {m3/s}
-      0.9,                     !- Motor Efficiency
-      1.0,                     !- Motor In Airstream Fraction
-      Sys 1 Mixed Air Node,    !- Air Inlet Node Name
-      Sys 1 Cooling Coil Air Inlet Node;  !- Air Outlet Node Name
+Fan:OnOff,
+  Zone 1 Fan,                 !- Name
+  FanAndCoilAvailSched,       !- Availability Schedule Name
+  0.7,                        !- Fan Total Efficiency
+  300.0,                      !- Pressure Rise {Pa}
+  Autosize,                   !- Maximum Flow Rate {m3/s}
+  0.9,                        !- Motor Efficiency
+  1.0,                        !- Motor In Airstream Fraction
+  Sys 1 Mixed Air Node,       !- Air Inlet Node Name
+  Sys 1 Cooling Coil Air Inlet Node;  !- Air Outlet Node Name
 
-    Coil:Heating:Fuel,
-      Heat Pump DX Supp Heating Coil 1,  !- Name
-      FanAndCoilAvailSched,    !- Availability Schedule Name
-      NaturalGas,              !- Fuel Type
-      0.8,                     !- Gas Burner Efficiency
-      32000,                   !- Nominal Capacity {W}
-      Sys 1 SuppHeating Coil Air Inlet Node,  !- Air Inlet Node Name
-      Zone 1 Inlet Node;  !-Air Outlet Node Name
+Coil:Heating:Fuel,
+  Heat Pump DX Supp Heating Coil 1,  !- Name
+  FanAndCoilAvailSched,       !- Availability Schedule Name
+  NaturalGas,                 !- Fuel Type
+  0.8,                        !- Gas Burner Efficiency
+  32000,                      !- Nominal Capacity {W}
+  Sys 1 SuppHeating Coil Air Inlet Node,  !- Air Inlet Node Name
+  Zone 1 Inlet Node;          !- Air Outlet Node Name
 
-    BRANCH,
-      Gshp Cooling Condenser Branch,  !- Name
-      ,  !- Pressure Drop Curve Name
-      Coil:Cooling:WaterToAirHeatPump:ParameterEstimation,  !- Component 1 Object Type
-      Heat Pump Cooling Mode,  !- Component 1 Name
-      Water to Air Heat Pump Source Side1 Inlet Node,  !- Component 1 Inlet Node Name
-      Water to Air Heat Pump Source Side1 Outlet Node; !- Component 1 Outlet Node Name
+BRANCH,
+  Gshp Cooling Condenser Branch,  !- Name
+  ,                           !- Pressure Drop Curve Name
+  Coil:Cooling:WaterToAirHeatPump:ParameterEstimation,  !- Component 1 Object Type
+  Heat Pump Cooling Mode,     !- Component 1 Name
+  Water to Air Heat Pump Source Side1 Inlet Node,  !- Component 1 Inlet Node Name
+  Water to Air Heat Pump Source Side1 Outlet Node;  !- Component 1 Outlet Node Name
 
-    BRANCH,
-      Gshp Heating Condenser Branch,  !- Name
-      ,  !- Pressure Drop Curve Name
-      Coil:Heating:WaterToAirHeatPump:ParameterEstimation,  !- Component 1 Object Type
-      Heat Pump Heating Mode,  !- Component 1 Name
-      Water to Air Heat Pump Source Side2 Inlet Node,   !- Component 1 Inlet Node Name
-      Water to Air Heat Pump Source Side2 Outlet Node;  !- Component 1 Outlet Node Name
+BRANCH,
+  Gshp Heating Condenser Branch,  !- Name
+  ,                           !- Pressure Drop Curve Name
+  Coil:Heating:WaterToAirHeatPump:ParameterEstimation,  !- Component 1 Object Type
+  Heat Pump Heating Mode,     !- Component 1 Name
+  Water to Air Heat Pump Source Side2 Inlet Node,  !- Component 1 Inlet Node Name
+  Water to Air Heat Pump Source Side2 Outlet Node;  !- Component 1 Outlet Node Name
 \end{lstlisting}
 
 \subsubsection{Outputs}\label{outputs-9-009}
@@ -3330,6 +3414,12 @@ ZoneHVAC:WaterToAirHeatPump,
   HVAC,Average,Zone Water to Air Heat Pump Compressor Part Load Ratio {[]}
 \item
   HVAC,Average,Zone Water to Air Heat Pump Fan Availability Status {[]}
+\item
+  HVAC,Average,Unitary System Water Coil Multispeed Fan Cycling Ratio {[]}
+\item
+  HVAC,Average,Unitary System Water Coil Multispeed Fan Speed Ratio {[]}
+\item
+  HVAC,Average,Unitary System Water Coil Multispeed Fan Speed Level {[]}
 \end{itemize}
 
 \paragraph{Zone Water to Air Heat Pump Total Heating Rate {[}W{]}}\label{zone-water-to-air-heat-pump-total-heating-rate-w}
@@ -3399,6 +3489,18 @@ This output field is the part-load ratio of the compressor used by the DX coils 
 \paragraph{Zone Water to Air Heat Pump Fan Availability Status {[]}}\label{zone-water-to-air-heat-pump-fan-availability-status}
 
 This is the availability status of the zone water source heat pump~ fan. This status flag is a result of the calculations made by the Availability Manager(s) listed in an AvailabilityManagerAssignmentList object and/or calculations made by Hybrid Ventilation Manager object. The AvailabilityManagerAssignmentList is an optional input in the zone water source heat pump~ object. When a single availability manager is used in an Availability Manager Assignment List, this is also the availability status reported by the specific availability manager (Ref. AvailabilityManager:* Outputs). For multiple availability managers in an Availability Manager Assignment List (with or without Hybrid Ventilation Manager), rules to determine fan availability status are described in the section `Group -- System Availability Managers'. The control status outputs are represented using integers 0 through 3. These integers represent NoAction (0), ForceOff (1), CycleOn (2), and CycleOnZoneFansOnly (3). Since the status output is averaged, the output result may not correspond to the values described here when output variable frequencies other than detailed are used. Use the ``detailed'' reporting frequency (Ref. Output:Variable object) to view the availability status at each simulation timestep.
+
+\paragraph{Unitary System Water Coil Multispeed Fan Cycling Ratio {[]}}\label{unitary-system-water-coil-multispeed-fan-cycling-ratio}
+
+This output variable is only available with a multispeed fan of zone water source heat pump. It is the ratio of the sensible load (heating or cooling) to the steady-state capacity of the zone water source heat pump heating or cooling coil (Speed 1) for the entire system timestep. The value is between 0.0 and 1.0 when the zone water source heat pump is cycling on and off its lowest speed (Speed 1) and 1.0 when the zone water source heat pump operates at speeds above 1.
+
+\paragraph{Unitary System Water Coil Multispeed Fan Speed Ratio {[]}}\label{unitary-system-water-coil-multispeed-fan-speed-ratio}
+
+This output variable is only available with a multispeed fan of zone water source heat pump. It is the ratio of time in a system timestep that the fan is at rated speed between two consecutive speed numbers ( [Fanr Speed - Fan speed at Speed i-1] / Fan speed at Speed i - Fan speed at Speed i-1]). The fan speed ratio reports (1.0 is max, 0.0 is min) and any value in between as it is averaged over the timestep. The value is 0.0 during Speed 1 operation.
+
+\paragraph{Unitary System Water Coil Multispeed Fan Speed Level {[]}}\label{unitary-system-water-coil-multispeed-fan-speed-level}
+
+This output variable is only available with a multispeed fan of zone water source heat pump. It ts the maximum speed needed when the zone water source heat pump operates to meet the sensible load (heating or cooling) in a system timestep. When the value is 1, the zone water source heat pump operates at Speed 1 (lowest speed). For this case the cycling ratio is between 0.0 and 1.0, while the speed ratio is 0.0. When the speed number output variable is above one, such as i, the zone water source heat pump operation is determined by the speed ratio through linear interpolation. For example, when the speed ratio is 0.4 and the speed number is 3, the zone water source heat pump operates at Speed 3 for 40\% of a system timestep and at Speed 2 for 60\% of a system timestep for a multiple speed fan.
 
 \subsection{ZoneHVAC:Dehumidifier:DX}\label{zonehvacdehumidifierdx}
 
@@ -3489,27 +3591,25 @@ This field is optional. It is used to specify where condensate from the dehumidi
 Following is an example input for a zone DX dehumidifier object. A \hyperref[zonecontrolhumidistat]{ZoneControl:Humidistat} object must also be specified for the zone to which the dehumidifier is connected (connect via a zone air exhaust node and a zone air inlet node, ref. \hyperref[zonehvacequipmentconnections]{ZoneHVAC:EquipmentConnections}).
 
 \begin{lstlisting}
+ZoneHVAC:Dehumidifier:DX,
+  North Zone Dehumidifier,    !- Name
+  ON,                         !- Availability Schedule Name
+  Zone3DehumidifierInlet,     !- Air Inlet Node Name
+  Dehumidifier Outlet Node,   !- Air Outlet Node Name
+  50.16,                      !- Rated Water Removal {L/day} (106 pints/day)
+  3.412,                      !- Rated Energy Factor {L/kWh} (7.21 pints/kWh)
+  0.12036,                    !- Rated Air Flow Rate {m3/s} (255 cfm)
+  ZoneDehumidWaterRemoval,    !- Water Removal Curve Name
+  ZoneDehumidEnergyFactor,    !- Energy Factor Curve Name
+  ZoneDehumidPLFFPLR,         !- Part Load Fraction Correlation Curve Name
+  10.0,                       !- Minimum Dry-Bulb Temperature for Compressor Operation {C}
+  32.0,                       !- Maximum Dry-Bulb Temperature for Compressor Operation {C}
+  0.0;                        !- Off Cycle Parasitic Electric Load {W}
 
-  ZoneHVAC:Dehumidifier:DX,
-      North Zone Dehumidifier,  !- Name
-      ON,                       !- Availability Schedule Name
-      Zone3DehumidifierInlet,   !- Air Inlet Node Name
-      Dehumidifier Outlet Node, !- Air Outlet Node Name
-      50.16,                    !- Rated Water Removal {L/day} (106 pints/day)
-      3.412,                    !- Rated Energy Factor {L/kWh} (7.21 pints/kWh)
-      0.12036,                  !- Rated Air Flow Rate {m3/s} (255 cfm)
-      ZoneDehumidWaterRemoval,  !- Water Removal Curve Name
-      ZoneDehumidEnergyFactor,  !- Energy Factor Curve Name
-      ZoneDehumidPLFFPLR,        !- Part Load Fraction Correlation Curve Name
-      10.0,  !- Minimum Dry-Bulb Temperature for Compressor Operation {C}
-      32.0,  !- Maximum Dry-Bulb Temperature for Compressor Operation {C}
-      0.0;   !- Off Cycle Parasitic Electric Load {W}
-
-
-    ZoneControl:Humidistat,
-      Zone 3 Humidistat,       !- Name
-      NORTH ZONE,              !- Zone Name
-      Seasonal Relative Humidity Sch;  !- Relative Humidity Setpoint Schedule Name
+ZoneControl:Humidistat,
+  Zone 3 Humidistat,          !- Name
+  NORTH ZONE,                 !- Zone Name
+  Seasonal Relative Humidity Sch;  !- Relative Humidity Setpoint Schedule Name
 \end{lstlisting}
 
 \subsubsection{Outputs}\label{outputs-10-008}
@@ -3702,127 +3802,108 @@ This optional input field is the name of an \hyperref[availabilitymanagerassignm
 Following is an example input for this compound object and associated objects that may be defined:
 
 \begin{lstlisting}
-
 ZoneHVAC:EnergyRecoveryVentilator,
-      Stand Alone ERV 1,                        !- Stand alone ERV name
-      FanAndCoilAvailSched,                     !- Availability schedule name
-      OA Heat Recovery 1,                       !- Heat exchanger name
-      0.05,                                     !- Supply air flow rate {m3/s}
-      0.05,                                     !- Exhaust air flow rate {m3/s}
-      Stand Alone ERV Supply Fan,               !- Supply air fan name
-      Stand Alone ERV Exhaust Fan,              !- Exhaust air fan name
-      ERV OA Controller 1;                      !- ERV controller name
+  Stand Alone ERV 1,          !- Stand alone ERV name
+  FanAndCoilAvailSched,       !- Availability schedule name
+  OA Heat Recovery 1,         !- Heat exchanger name
+  0.05,                       !- Supply air flow rate {m3/s}
+  0.05,                       !- Exhaust air flow rate {m3/s}
+  Stand Alone ERV Supply Fan, !- Supply air fan name
+  Stand Alone ERV Exhaust Fan,!- Exhaust air fan name
+  ERV OA Controller 1;        !- ERV controller name
 
+OutdoorAir:NodeLine,
+  OutsideAirInletNodes;       !- 1st Node name or node list name
 
-  OutdoorAir:NodeLine,
-      OutsideAirInletNodes;       !- 1st Node name or node list name
+NodeList,
+  OutsideAirInletNodes,       !- Node List Name
+  ERV Outdoor air Inlet Node; !- Node_ID_1
 
+ZoneHVAC:EquipmentConnections,
+  RESISTIVE ZONE,             !- Zone Name
+  Zone1Equipment,             !- List Name: Zone Equipment
+  Zone1Inlets,                !- List Name: Zone Inlet Nodes
+  Zone1Exhausts,              !- List Name: Zone Exhaust Nodes
+  Zone 1 Node,                !- Zone Air Node Name
+  Zone 1 Outlet Node;         !- Zone Return Air Node Name
 
-  NodeList,
-      OutsideAirInletNodes,       !- Node List Name
-      ERV Outdoor air Inlet Node; !- Node_ID_1
+ZoneHVAC:EquipmentList,
+  Zone1Equipment,             !- Name
+  ZoneHVAC:EnergyRecoveryVentilator,  !- KEY--Zone Equipment Type 1
+  Stand Alone ERV 1,          !- Type Name 1
+  1,                          !- Cooling Priority
+  1;                          !- Heating Priority
 
+NodeList,
+  Zone1Inlets,                !- Node List Name
+  Stand Alone ERV Supply Fan Outlet Node;  !- Node_ID_1
 
+NodeList,
+  Zone1Exhausts,              !- Node List Name
+  Zone 1 Exhaust Node;        !- Node_ID_1
 
+ZoneHVAC:EnergyRecoveryVentilator:Controller,
+  ERV OA Controller 1,        !- ERV controller name
+  0.05,                       !- Outdoor air flow rate {m3/s}
+  19.,                        !- Temperature high limit {C}
+  14.,                        !- Temperature low limit {C}
+  0.0,                        !- Enthalpy high limit {J/kg}
+  NoExhaustAirTemperatureLimit,  !- Exhaust air temperature limit
+  NoExhaustAirEnthalpyLimit;  !- Exhaust air enthalpy limit
 
-  ZoneHVAC:EquipmentConnections,
-      RESISTIVE ZONE,      !- Zone Name
-      Zone1Equipment,      !- List Name: Zone Equipment
-      Zone1Inlets,         !- List Name: Zone Inlet Nodes
-      Zone1Exhausts,       !- List Name: Zone Exhaust Nodes
-      Zone 1 Node,         !- Zone Air Node Name
-      Zone 1 Outlet Node;  !- Zone Return Air Node Name
+HeatExchanger:AirToAir:SensibleAndLatent,
+  OA Heat Recovery 1,         !- Heat exchanger name
+  FanAndCoilAvailSched,       !- Availability schedule name
+  0.05,                       !- Nominal supply air flow rate {m3/s}
+  .76,                        !- Sensible effectiveness at 100% airflow heating condition
+  .68,                        !- Latent effectiveness at 100% airflow heating condition
+  .81,                        !- Sensible effectiveness at 75% airflow heating condition
+  .73,                        !- Latent effectiveness at 75% airflow heating condition
+  .76,                        !- Sensible effectiveness at 100% airflow cooling condition
+  .68,                        !- Latent effectiveness at 100% airflow cooling condition
+  .81,                        !- Sensible effectiveness at 75% airflow cooling condition
+  .73,                        !- Latent effectiveness at 75% airflow cooling condition
+  ERV Outdoor air Inlet Node, !- Supply air inlet node name
+  Heat Recovery Outlet Node,  !- Supply air outlet node name
+  Zone 1 Exhaust Node,        !- Exhaust air inlet node name
+  Heat Recovery Secondary Outlet Node,  !- Exhaust air outlet node name
+  50.0,                       !- Nominal electric power {W}
+  Yes,                        !- Supply air outlet temperature control
+  Rotary,                     !- Heat exchanger type
+  MinimumExhaustTemperature,  !- Frost control type
+  1.7;                        !- Threshold temperature
 
+Fan:OnOff,
+  Stand Alone ERV Supply Fan, !- Fan Name
+  FanAndCoilAvailSched,       !- Availability Schedule Name
+  0.5,                        !- Fan Total Efficiency
+  75.0,                       !- Delta Pressure {Pa}
+  0.05,                       !- Max Flow Rate {m3/s}
+  0.9,                        !- Motor Efficiency
+  1.0,                        !- Motor In Airstream Fraction
+  Heat Recovery Outlet Node,  !- Fan_Inlet_Node
+  Stand Alone ERV Supply Fan Outlet Node;  !- Fan_Outlet_Node
 
-  ZoneHVAC:EquipmentList,
-      Zone1Equipment,                          !-Name
-      ZoneHVAC:EnergyRecoveryVentilator,  !- KEY--Zone Equipment Type 1
-      Stand Alone ERV 1,                       !- Type Name 1
-      1,                                       !- Cooling Priority
-      1;                                       !- Heating Priority
+Fan:OnOff,
+  Stand Alone ERV Exhaust Fan,!- Fan Name
+  FanAndCoilAvailSched,       !- Availability Schedule Name
+  0.5,                        !- Fan Total Efficiency
+  75.0,                       !- Delta Pressure {Pa}
+  0.05,                       !- Max Flow Rate {m3/s}
+  0.9,                        !- Motor Efficiency
+  1.0,                        !- Motor In Airstream Fraction
+  Heat Recovery Secondary Outlet Node,  !- Fan_Inlet_Node
+  Stand Alone ERV Exhaust Fan Outlet Node;  !- Fan_Outlet_Node
 
+SetpointManager:Scheduled,
+  Heat Exchanger Supply Air Temp Manager,  !- Name
+  Temperature,                !- Control variable
+  Heat Exchanger Supply Air Temp Sch,  !- Schedule Name
+  Heat Exchanger Supply Air Nodes;  !- Name of the set point Node List
 
-  NodeList,
-      Zone1Inlets,                             !- Node List Name
-      Stand Alone ERV Supply Fan Outlet Node;  !- Node_ID_1
-
-
-  NodeList,
-      Zone1Exhausts,         !- Node List Name
-      Zone 1 Exhaust Node;   !- Node_ID_1
-
-
-  ZoneHVAC:EnergyRecoveryVentilator:Controller,
-      ERV OA Controller 1,           !- ERV controller name
-      0.05,                          !- Outdoor air flow rate {m3/s}
-      19.,                           !- Temperature high limit {C}
-      14.,                           !- Temperature low limit {C}
-      0.0,                           !- Enthalpy high limit {J/kg}
-      NoExhaustAirTemperatureLimit,     !- Exhaust air temperature limit
-      NoExhaustAirEnthalpyLimit; !- Exhaust air enthalpy limit
-
-
-
-
-  HeatExchanger:AirToAir:SensibleAndLatent,
-      OA Heat Recovery 1,            !- Heat exchanger name
-      FanAndCoilAvailSched,          !- Availability schedule name
-      0.05,                          !- Nominal supply air flow rate {m3/s}
-      .76,                           !- Sensible effectiveness at 100% airflow heating condition
-      .68,                           !- Latent effectiveness at 100% airflow heating condition
-      .81,                           !- Sensible effectiveness at 75% airflow heating condition
-      .73,                           !- Latent effectiveness at 75% airflow heating condition
-      .76,                           !- Sensible effectiveness at 100% airflow cooling condition
-      .68,                           !- Latent effectiveness at 100% airflow cooling condition
-      .81,                           !- Sensible effectiveness at 75% airflow cooling condition
-      .73,                           !- Latent effectiveness at 75% airflow cooling condition
-      ERV Outdoor air Inlet Node,    !- Supply air inlet node name
-      Heat Recovery Outlet Node,     !- Supply air outlet node name
-      Zone 1 Exhaust Node,           !- Exhaust air inlet node name
-      Heat Recovery Secondary Outlet Node,  !- Exhaust air outlet node name
-      50.0,                          !- Nominal electric power {W}
-      Yes,                           !- Supply air outlet temperature control
-      Rotary,                        !- Heat exchanger type
-      MinimumExhaustTemperature,   !- Frost control type
-      1.7;                           !- Threshold temperature
-
-
-
-
-  Fan:OnOff,
-      Stand Alone ERV Supply Fan,               !- Fan Name
-      FanAndCoilAvailSched,                     !- Availability Schedule Name
-      0.5,                                      !- Fan Total Efficiency
-      75.0,                                     !- Delta Pressure {Pa}
-      0.05,                                     !- Max Flow Rate {m3/s}
-      0.9,                                      !- Motor Efficiency
-      1.0,                                      !- Motor In Airstream Fraction
-      Heat Recovery Outlet Node,                !- Fan_Inlet_Node
-      Stand Alone ERV Supply Fan Outlet Node;   !- Fan_Outlet_Node
-
-
-  Fan:OnOff,
-      Stand Alone ERV Exhaust Fan,              !- Fan Name
-      FanAndCoilAvailSched,                     !- Availability Schedule Name
-      0.5,                                      !- Fan Total Efficiency
-      75.0,                                     !- Delta Pressure {Pa}
-      0.05,                                     !- Max Flow Rate {m3/s}
-      0.9,                                      !- Motor Efficiency
-      1.0,                                      !- Motor In Airstream Fraction
-      Heat Recovery Secondary Outlet Node,      !- Fan_Inlet_Node
-      Stand Alone ERV Exhaust Fan Outlet Node;  !- Fan_Outlet_Node
-
-
-  SetpointManager:Scheduled,
-      Heat Exhchanger Supply Air Temp Manager,  !- Name
-      Temperature,  !- Control variable
-      Heat Exchanger Supply Air Temp Sch,  !- Schedule Name
-      Heat Exchanger Supply Air Nodes;     !- Name of the set point Node List
-
-
-  NodeList,
-      Heat Exchanger Supply Air Nodes,  !- Node List Name
-      Heat Recovery Outlet Node;        !- Node_ID_1
+NodeList,
+  Heat Exchanger Supply Air Nodes,  !- Node List Name
+  Heat Recovery Outlet Node;  !- Node_ID_1
 \end{lstlisting}
 
 \subsubsection{Outputs}\label{outputs-11-006}
@@ -3924,6 +4005,11 @@ This is the availability status of the Stand Alone ERV~ fan. This status flag is
 
 Terminal units with variable refrigerant flow compound HVAC object are used exclusively with variable refrigerant flow (VRF) air conditioning systems (Ref. \hyperref[airconditionervariablerefrigerantflow]{AirConditioner:VariableRefrigerantFlow} objects). The VRF terminal unit may be used as zone, air loop or outside air system equipment. The VRF terminal unit compound object contains an optional outdoor air mixer, a DX cooling coil, a DX heating coil, a supply fan (optional for air loop and outdoor air system equipment), and an optional supplemental heating coil object.
 
+When the inputs of the last two fields (Design Specification Multispeed Object Type and Design Specification Multispeed Fan Object Name) are entered, a multiuspeed fan with different air flow rates is applied to Coil:Cooling:DX:VariableRefrigerantFlow and Coil:Heating:DX:VariableRefrigerantFlow.  The fan speed number is determined by zone load. The fan air flow cycles between adjacent speeds based on the cooling / heating capacity (or coordinate with the cooling / heating coil stage for variable speed water to air coils). However, the water flow rate in the coils remain the same while air flow rate varies with speed.
+
+When there are no inputs of the last two fields, a multispeed fan may be also applied if the Fan:SysmModel is selected as fan type, and Discrete is selected as Speed Control Method and the Number of Speeds is greater than 1 in the Fan:SystemMode object.
+
+
 \begin{callout}
 Note: The terminal unit may be used in the air loop and/or outdoor air system, however, at this time only constant flow (or limited variation within the limits allowed for DX coils) through the unit is allowed. Using a wide range of outdoor air flow rates will cause the DX coil model to fail. For example, if the minimum outdoor air flow rate is allowed to fall near 0, the DX coil model will calculate very low, even very negative, coil outlet temperatures. This can cause psychrometric warnings to occur and cause the simulation to end prematurely.
 \end{callout}
@@ -3932,11 +4018,13 @@ For zone equipment the terminal units are connected to a zone using the inlet an
 
 For air loop equipment and outdoor air system equipment the VRF terminal unit inlet and outlet nodes define the location of the system in the air loop and outdoor air system. The node names must define the path of the air stream in order from the beginning of the air loop or outdoor air system to the outlet of that system.
 
-This VRF terminal unit can be controlled based on a load or set point. When the system is used as zone equipment, load control is always used. When the VRF terminal unit is used in an air loop and the control zone name or thermostat location is specified, the system is controlled based on zone load. If the control zone name or thermostat location is not specified the VRF terminal unit will be controlled based on termninal unit or coil outlet node set point temperature. When set point based control is used the node temperature set points may be placed at the outlet of the terminal unit or at individual coil outlet nodes. If the VRF terminal unit is used in an air loop's outdoor air system, control is always based on a termninal unit or coil outlet node temperature set point.
+This VRF terminal unit can be controlled based on a load or set point. When the system is used as zone equipment, load control is always used. When the VRF terminal unit is used in an air loop and the control zone name or thermostat location is specified, the system is controlled based on zone load. If the control zone name or thermostat location is not specified the VRF terminal unit will be controlled based on terminal unit or coil outlet node set point temperature. When set point based control is used the node temperature set points may be placed at the outlet of the terminal unit or at individual coil outlet nodes. If the VRF terminal unit is used in an air loop's outdoor air system, control is always based on a terminal unit or coil outlet node temperature set point.
 
 The terminal units operate to satisfy a heating or cooling load in a zone based on a zone thermostat temperature set point. A direct-expansion (DX) cooling and/or DX heating coil is specified depending on the operating mode required. Both a DX cooling and DX heating coil will typically be installed in the terminal unit, however only one may be used if desired. An optional supplemental heating coil can also be added to the terminal unit to provide additional heating when the main DX heating coil could not meet the entire heating load of a zone during cold outdoor conditions. The Supplemental Heating Coil Object Type must be \hyperref[coilheatingelectric]{Coil:Heating:Electric}, \hyperref[coilheatinggas-000]{Coil:Heating:Fuel}, \hyperref[coilheatingwater]{Coil:Heating:Water}, or \hyperref[coilheatingsteam]{Coil:Heating:Steam}. Outdoor ventilation air is modeled with the use of an optional outside air mixer object. Outside air may be provided to the zone only when the coil is operating or can be supplied continuously even when the coil is not operating.
 
 A supply air fan can be modeled as either draw through or blow through. The supply air fan is required for zone equipment and optional for air loop and outdoor air system equipment. The Supply Air Fan Object Type must be \hyperref[fansystemmodel]{Fan:SystemModel}, \hyperref[fanonoff]{Fan:OnOff}, or \hyperref[fanconstantvolume]{Fan:ConstantVolume} if \hyperref[airconditionervariablerefrigerantflow]{AirConditioner:VariableRefrigerantFlow} is used to model the VRF outdoor unit. The Supply Air Fan Object Type must be \hyperref[fansystemmodel]{Fan:SystemModel} or \hyperref[fanvariablevolume]{Fan:VariableVolume} if AirConditioner:VariableRefrigerantFlow:\-FluidTemperatureControl or AirConditioner:VariableRefrigerantFlow:\-FluidTemperatureControl:HR is used to model the VRF outdoor unit.
+
+Multispeed fan operation is available to both coils as\textit{\hyperref[coilcoolingdxvariablerefrigerantflow]{Coil:Cooling:DX:VariableRefrigerantFlow}} and \textit{\hyperref[coilheatingdxvariablerefrigerantflow]{Coil:Heating:DX:VariableRefrigerantFlow}}. There are two ways to accomplish multispeed fan operation. The first way is to input last two fields: Design Specification Multispeed Object Type and Design Specification Multispeed Object Name.The object allows users to input multiple speed fan flow fractions for both heating and cooling. It also allows users to input the supply air flow ratio with no load.
 
 \subsubsection{Inputs}\label{inputs-14-018}
 
@@ -3998,7 +4086,7 @@ The second choice stands for ``draw through fan''. This means that the unit cons
 
 \paragraph{Field: Supply Air Fan Object Type}\label{field-supply-air-fan-object-type-8}
 
-This choice field contains the identifying type of supply air fan specified for the furnace. Fan type must be \textit{\hyperref[fanonoff]{Fan:OnOff}}, \textit{\hyperref[fanconstantvolume]{Fan:ConstantVolume}}, \textit{\hyperref[fansystemmodel]{Fan:SystemModel}} or \textit{\hyperref[fanvariablevolume]{Fan:VariableVolume}}. The Supply Air Fan Object Type must be \hyperref[fansystemmodel]{Fan:SystemModel}, \hyperref[fanonoff]{Fan:OnOff}, or \hyperref[fanconstantvolume]{Fan:ConstantVolume} if \hyperref[airconditionervariablerefrigerantflow]{AirConditioner:VariableRefrigerantFlow} is used to model the VRF outdoor unit. The Supply Air Fan Object Type must be \hyperref[fansystemmodel]{Fan:SystemModel} or \hyperref[fanvariablevolume]{Fan:VariableVolume} if AirConditioner:VariableRefrigerantFlow:\-FluidTemperatureControl or AirConditioner:VariableRefrigerantFlow:\-FluidTemperatureControl:HR is used to model the VRF outdoor unit.
+This choice field contains the identifying type of supply air fan specified for the furnace. Fan type must be \textit{\hyperref[fanonoff]{Fan:OnOff}}, \textit{\hyperref[fanconstantvolume]{Fan:ConstantVolume}}, \textit{\hyperref[fansystemmodel]{Fan:SystemModel}}. The Supply Air Fan Object Type must be \hyperref[fansystemmodel]{Fan:SystemModel}, \hyperref[fanonoff]{Fan:OnOff}, or \hyperref[fanconstantvolume]{Fan:ConstantVolume} if \hyperref[airconditionervariablerefrigerantflow]{AirConditioner:VariableRefrigerantFlow} is used to model the VRF outdoor unit. The Supply Air Fan Object Type must be \hyperref[fansystemmodel]{Fan:SystemModel} if AirConditioner:VariableRefrigerantFlow:\-FluidTemperatureControl or AirConditioner:VariableRefrigerantFlow:\-FluidTemperatureControl:HR is used to model the VRF outdoor unit.
 
 \hyperref[fanconstantvolume]{Fan:ConstantVolume} is used when the Supply Air Fan Operating Mode Schedule values are never 0 and the fan operates continuously. \hyperref[fanonoff]{Fan:OnOff} is used when the fan cycles on and off with the cooling or heating coil (i.e.~Supply Air Fan Operating Mode Schedule values are at times 0). The \hyperref[fansystemmodel]{Fan:SystemModel} may be used to model either of these fan operating characteristics.
 
@@ -4050,7 +4138,7 @@ This optional input field is the name of an \hyperref[availabilitymanagerassignm
 
 \paragraph{Field: Design Specification ZoneHVAC Sizing Object Name}\label{field-design-specification-zonehvac-sizing-object-name-9}
 
-This optional input field is the name of a \hyperref[designspecificationzonehvacsizing]{DesignSpecification:ZoneHVAC:Sizing} object. The name must correspond to unique name of a \hyperref[designspecificationzonehvacsizing]{DesignSpecification:ZoneHVAC:Sizing} object. A Design Sepcification Zone HVAC Sizing object defines scalable sizing methods for sizing input fields such as Cooling Supply Air Flow Rate in this VRF terminal unit zone HVAC object. The scaled Supply Air Flow Rate in turn is used to size cooling and heating capacity of the unit.
+This optional input field is the name of a \hyperref[designspecificationzonehvacsizing]{DesignSpecification:ZoneHVAC:Sizing} object. The name must correspond to unique name of a \hyperref[designspecificationzonehvacsizing]{DesignSpecification:ZoneHVAC:Sizing} object. A Design Specification Zone HVAC Sizing object defines scalable sizing methods for sizing input fields such as Cooling Supply Air Flow Rate in this VRF terminal unit zone HVAC object. The scaled Supply Air Flow Rate in turn is used to size cooling and heating capacity of the unit.
 
 \paragraph{Field: Supplemental Heating Coil Object Type}\label{field-supplemental-heating-coil-object-type-2-000}
 
@@ -4072,42 +4160,56 @@ This numeric field defines the maximum outdoor dry-bulb temperature in degrees C
 
 This alpha field is only used when this VRF terminal unit is used as air loop equipment with load based operational control. When the terminal unit is used in an air loop and this terminal unit is load controlled, this zone's thermostat will control operation. When this terminal unit is used in an air loop and is set point controlled, this field must be blank (i.e., when the controlling zone name is present the system will be load controlled).
 
+\paragraph{Field: Design Specification Multispeed Object Type}\label{field-design-specification-multispeed-object-type-3}
+
+This optional alpha field contains the identifying type for the design specification multispeed object. This field is only needed when multispeed fan is applied. The only available type is:
+
+\begin{itemize}
+\tightlist
+\item
+  \hyperref[unitarysystemperformancemultispeed]{UnitarySystemPerformance:Multispeed}
+\end{itemize}
+
+\paragraph{Field: Design Specification Multispeed Object Name}\label{field-design-specification-multispeed-object-name-3}
+
+This optional alpha field contains the identifying name for the design specification multispeed object. This field is only needed when multispeed fan is applied.
+
+
 Following is an example input for a ZoneHVAC:TerminalUnit:VariableRefrigerantFlow object.
 
 \begin{lstlisting}
-
 ZoneHVAC:TerminalUnit:VariableRefrigerantFlow,
-  Zone 1 TU,               !- Zone Terminal Unit Name
-  TU Availability Schedule,!- Terminal Unit Availability schedule
-  TU1 Inlet Node,          !- Terminal Unit Air Inlet Node Name
-  TU1 Outlet Node,         !- Terminal Unit Air Outlet Node Name
-  0.005,                   !- Cooling Supply Air Flow Rate {m3/s}
-  0,                       !- No Cooling Supply Air Flow Rate {m3/s}
-  0.005,                   !- Heating Supply Air Flow Rate {m3/s}
-  0,                       !- No Heating Supply Air Flow Rate {m3/s}
-  0.001,                   !- Cooling Outdoor Air Flow Rate
-  0.001,                   !- Heating Outdoor Air Flow Rate
-  0,                       !- No Load Outdoor Air Flow Rate
-  TU1 Fan Op Schedule,     !- Supply Air Fan Operating Mode Schedule Name
-  drawthrough,             !- Supply Air Fan placement
-  Fan:ConstantVolume,      !- Supply Air Fan Object Type
-  TU1 SA Fan,              !- Supply Air Fan Object Name
-  OutdoorAir:Mixer,        !- Outside Air Mixer Object Type
-  TU1 OA Mixer,            !- Outside Air Mixer Object Name
+  Zone 1 TU,                  !- Zone Terminal Unit Name
+  TU Availability Schedule,   !- Terminal Unit Availability schedule
+  TU1 Inlet Node,             !- Terminal Unit Air Inlet Node Name
+  TU1 Outlet Node,            !- Terminal Unit Air Outlet Node Name
+  0.005,                      !- Cooling Supply Air Flow Rate {m3/s}
+  0,                          !- No Cooling Supply Air Flow Rate {m3/s}
+  0.005,                      !- Heating Supply Air Flow Rate {m3/s}
+  0,                          !- No Heating Supply Air Flow Rate {m3/s}
+  0.001,                      !- Cooling Outdoor Air Flow Rate
+  0.001,                      !- Heating Outdoor Air Flow Rate
+  0,                          !- No Load Outdoor Air Flow Rate
+  TU1 Fan Op Schedule,        !- Supply Air Fan Operating Mode Schedule Name
+  drawthrough,                !- Supply Air Fan placement
+  Fan:ConstantVolume,         !- Supply Air Fan Object Type
+  TU1 SA Fan,                 !- Supply Air Fan Object Name
+  OutdoorAir:Mixer,           !- Outside Air Mixer Object Type
+  TU1 OA Mixer,               !- Outside Air Mixer Object Name
   COIL:Cooling:DX:VariableRefrigerantFlow,  !- Cooling Coil Object Type
-  TU1 VRF DX Cooling Coil, !- Cooling Coil Object Name
+  TU1 VRF DX Cooling Coil,    !- Cooling Coil Object Name
   COIL:Heating:DX:VariableRefrigerantFlow,  !- Heating Coil Object Type
-  TU1 VRF DX Heating Coil, !- Heating Coil Object Name
-  30,                      !- Zone Terminal Unit On Parasitic Electric Energy Use {W}
-  20,                      !- Zone Terminal Unit Off Parasitic Electric Energy Use {W}
-  ,                        !- Rated Total Heating Capacity Sizing Ratio {W/W}
-  ,                        !- Availability Manager List Name
-  ,                        !- Design Specification ZoneHVAC Sizing Object Name
-  Coil:Heating:Electric,   !- Supplemental Heating Coil Object Type
-  TU1 Supp Heating Coil,   !- Supplemental Heating Coil Name
-  autosize,                !- Maximum Supply Air Temperature from Supplemental Heater
-  ,                        !- Maximum Outdoor Dry-Bulb Temperature for Supplemental Heater Operation
-  ;                        !- Controlling Zone or Thermostat Location
+  TU1 VRF DX Heating Coil,    !- Heating Coil Object Name
+  30,                         !- Zone Terminal Unit On Parasitic Electric Energy Use {W}
+  20,                         !- Zone Terminal Unit Off Parasitic Electric Energy Use {W}
+  ,                           !- Rated Total Heating Capacity Sizing Ratio {W/W}
+  ,                           !- Availability Manager List Name
+  ,                           !- Design Specification ZoneHVAC Sizing Object Name
+  Coil:Heating:Electric,      !- Supplemental Heating Coil Object Type
+  TU1 Supp Heating Coil,      !- Supplemental Heating Coil Name
+  autosize,                   !- Maximum Supply Air Temperature from Supplemental Heater
+  ,                           !- Maximum Outdoor Dry-Bulb Temperature for Supplemental Heater Operation
+  ;                           !- Controlling Zone or Thermostat Location
 \end{lstlisting}
 
 \subsubsection{Outputs}\label{outputs-12-006}
@@ -4147,6 +4249,12 @@ ZoneHVAC:TerminalUnit:VariableRefrigerantFlow,
   HVAC,Sum,Zone VRF Air Terminal Heating Electricity Energy {[}J{]}
 \item
   HVAC,Average, Zone VRF Air Terminal Fan Availability Status {[]}
+\item
+  HVAC,Average, Zone VRF Air Terminal Multispeed Fan Cycling Ratio {[]}
+\item
+  HVAC,Average, Zone VRF Air Terminal Multispeed Fan Speed Ratio {[]}
+\item
+  HVAC,Average, Zone VRF Air Terminal Multispeed Fan Speed Level {[]}
 \end{itemize}
 
 \paragraph{Zone VRF Air Terminal Total Cooling Rate {[}W{]}}\label{zone-vrf-air-terminal-total-cooling-rate-w}
@@ -4217,6 +4325,18 @@ This output field is the electricity consumption of the zone terminal unit in Jo
 
 This is the availability status of the Zone Terminal Unit fan. This status flag is a result of the calculations made by the Availability Manager(s) listed in an AvailabilityManagerAssignmentList object and/or calculations made by Hybrid Ventilation Manager object. The AvailabilityManagerAssignmentList is an optional input in the Zone Terminal Unit object. When a single availability manager is used in an Availability Manager Assignment List, this is also the availability status reported by the specific availability manager (Ref. AvailabilityManager:* Outputs). For multiple availability managers in an Availability Manager Assignment List along with Hybrid Ventilation Manager, rules to determine fan availability status are described in the section `Group -- System Availability Managers'. The control status outputs are represented using integers 0 through 3. These integers represent NoAction (0), ForceOff (1), CycleOn (2), and CycleOnZoneFansOnly (3). Since the status output is averaged, the output result may not correspond to the values described here when output variable frequencies other than detailed are used. Use the ``detailed'' reporting frequency (Ref. Output:Variable object) to view the availability status at each simulation timestep.
 
+\paragraph{Zone VRF Air Terminal Multispeed Fan Cycling Ratio {[]}}\label{zone-vrf-air-terminal-multispeed-fan-cycling-ratio}
+
+This output variable is only available with a multispeed fan for COIL:Cooling:DX:VariableRefrigerantFlow and COIL:Heatling:DX:VariableRefrigerantFlow. It is the ratio of the sensible load (heating or cooling) to the steady-state capacity of the zone VRF terminal heating or cooling coil (Speed 1) for the entire system timestep. The value is between 0.0 and 1.0 when the zone water source heat pump is cycling on and off its lowest speed (Speed 1) and 1.0 when the zone VRF terminal operates at speeds above 1.
+
+\paragraph{Zone VRF Air Terminal Multispeed Fan Speed Ratio {[]}}\label{zone-vrf-air-terminal-multispeed-fan-speed-ratio}
+
+This output variable is only available with a multispeed fan  for COIL:Cooling:DX:VariableRefrigerantFlow and COIL:Heatling:DX:VariableRefrigerantFlow. It is the ratio of time in a system timestep that the fan is at rated speed between two consecutive speed numbers ( [Fanr Speed - Fan speed at Speed i-1] / Fan speed at Speed i - Fan speed at Speed i-1]). The fan speed ratio reports (1.0 is max, 0.0 is min) and any value in between as it is averaged over the timestep. The value is 0.0 during Speed 1 operation.
+
+\paragraph{Zone VRF Air Terminal Multispeed Fan Speed Level {[]}}\label{zone-vrf-air-terminal-multispeed-fan-speed-level}
+
+This output variable is only available with a multispeed fan  for COIL:Cooling:DX:VariableRefrigerantFlow and COIL:Heatling:DX:VariableRefrigerantFlow. It ts the maximum speed needed when the zone VRF terminal operates to meet the sensible load (heating or cooling) in a system timestep. When the value is 1, the zone VRF terminal operates at Speed 1 (lowest speed). For this case the cycling ratio is between 0.0 and 1.0, while the speed ratio is 0.0. When the speed number output variable is above one, such as i, the zone VRF terminal operation is determined by the speed ratio through linear interpolation. For example, when the speed ratio is 0.4 and the speed number is 3, the zone VRF terminal operates at Speed 3 for 40\% of a system timestep and at Speed 2 for 60\% of a system timestep for a multiple speed fan.
+
 \subsection{ZoneHVAC:HybridUnitaryHVAC}\label{zonehvac-hybridunitaryhvac}
 
 ZoneHVAC:Hybrid UnitaryHVAC is a black-box model for packaged forced air equipment with multiple discrete operating modes. Generally, a ''hybrid`` is any system that exhibits both continuous and discrete dynamic behavior – a system that can both flow (as could be described by a differential equation) and jump (as must be described by distinct modes). Equipment in this category may utilize a wide variety technologies including, but not limited to: indirect evaporative cooling, desiccant dehumidification, heat recovery, vapor compression, adsorption, or ventilation cooling. Each hybrid system packages multiple technologies into a single integrated system. There are a multitude of unique hybrid system architectures, and each unique system may have numerous unique operating modes.
@@ -4264,7 +4384,7 @@ This optional alpha input field specifies the name of the schedule (ref: Group �
 This optional alpha input field specifies the name of the schedule (ref: Group – Schedules) that specifies the minimum supply air humidity ratio allowed in each time step. Values in this schedule are used as a constraint in choosing the feasible settings for supply air flow rate and outdoor air fraction in each operating mode. If this field is blank, no minimum is imposed.
 
 \paragraph{Field: Maximum Supply Air Humidity Ratio Schedule Name}
-This optional alpha input field specifies the name of the schedule (ref: Group – Schedules) that specifies the maximum supply air humidity raio allowed in each time step. Values in this schedule are used as a constraint in choosing the feasible settings for supply air flow rate and outdoor air fraction in each operating mode. If this field is blank, no maximum is imposed.
+This optional alpha input field specifies the name of the schedule (ref: Group – Schedules) that specifies the maximum supply air humidity ratio allowed in each time step. Values in this schedule are used as a constraint in choosing the feasible settings for supply air flow rate and outdoor air fraction in each operating mode. If this field is blank, no maximum is imposed.
 
 \paragraph{Field: Method to Choose Controlled Inputs and Part Runtime Fraction}
 This alpha input field specifies the method that will be used to choose operating mode(s), supply air flow rate(s), outdoor air fraction(s) and part runtime fraction(s) in each time step. The only valid choices are ''Automatic`` and ''User Defined``, ''Automatic`` chooses the controlled independent variables to minimize resource use within each time step, subject to constraints, while best satisfying zone sensible loads, latent loads, and the scheduled ventilation rate. ''User Defined`` indicates that the user will provide a custom control sequence, using Energy Management System objects or other means, to choose the controlled independent variables and determine system outputs in each time step.
@@ -4303,13 +4423,13 @@ This optional numeric field scales all extensive dependent variables including: 
 This numeric field specifies the minimum time that must pass before the hybrid unit can change mode. If the value in this field is larger than each timestep, the mode selected in one time step will persist in later time steps until the minimum time between mode change is satisfied. If the value in this field is smaller than each timestep, it will determine the minimum part runtime fraction allowed for any mode. Supply air mass flow rate and outdoor air fraction within a mode are not subject to minimum runtime and may change in every time step, or with any part runtime fraction. Mode 0 does not have a minimum time. If this field is blank, the default minimum time between mode change is 10 minutes.
 
 \paragraph{Field: First Fuel Type}
-This alpha field specifies the fuel type associated with the \hyperref[tablelookup]{Table:Lookup} object specified in field ''System Electric Power Power Lookup Table``. Valid choices include: None, Electricity, NaturalGas, Propane, FuelOilNo1, FuelOilNo2, Diesel, Gasoline, Coal, OtherFuel1, OtherFuel2, Steam, \hyperref[districtheating]{DistrictHeating} and \hyperref[districtcooling]{DistrictCooling}. If this field is blank, the default first fuel type is Electricity.
+This alpha field specifies the fuel type associated with the \hyperref[tablelookup]{Table:Lookup} object specified in field ''System Electric Power Power Lookup Table``. Valid choices include: None, Electricity, NaturalGas, Propane, FuelOilNo1, FuelOilNo2, Diesel, Gasoline, Coal, OtherFuel1, OtherFuel2, Steam, \hyperref[districtheating]{DistrictHeatingWater} and \hyperref[districtcooling]{DistrictCooling}. If this field is blank, the default first fuel type is Electricity.
 
 \paragraph{Field: Second Fuel Type}
-This alpha field specifies the fuel type associated with the \hyperref[tablelookup]{Table:Lookup} object specified in field ''System Second Fuel Consumption Lookup Table``. Valid choices include: None, Electricity, NaturalGas, Propane, FuelOilNo1, FuelOilNo2, Diesel, Gasoline, Coal, OtherFuel1, OtherFuel2, Steam, \hyperref[districtheating]{DistrictHeating} and \hyperref[districtcooling]{DistrictCooling}. If this field is blank, the default second fuel type is None.
+This alpha field specifies the fuel type associated with the \hyperref[tablelookup]{Table:Lookup} object specified in field ''System Second Fuel Consumption Lookup Table``. Valid choices include: None, Electricity, NaturalGas, Propane, FuelOilNo1, FuelOilNo2, Diesel, Gasoline, Coal, OtherFuel1, OtherFuel2, Steam, \hyperref[districtheating]{DistrictHeatingWater} and \hyperref[districtcooling]{DistrictCooling}. If this field is blank, the default second fuel type is None.
 
 \paragraph{Field: Third Fuel Type}
-This alpha field specifies the fuel type associated with the \hyperref[tablelookup]{Table:Lookup} object specified in field ''System Third Fuel Consumption Lookup Table``. Valid choices include: None, Electricity, NaturalGas, Propane, FuelOilNo1, FuelOilNo2, Diesel, Gasoline, Coal, OtherFuel1, OtherFuel2, Steam, \hyperref[districtheating]{DistrictHeating} and \hyperref[districtcooling]{DistrictCooling}. If this field is blank, the default second fuel type is None.
+This alpha field specifies the fuel type associated with the \hyperref[tablelookup]{Table:Lookup} object specified in field ''System Third Fuel Consumption Lookup Table``. Valid choices include: None, Electricity, NaturalGas, Propane, FuelOilNo1, FuelOilNo2, Diesel, Gasoline, Coal, OtherFuel1, OtherFuel2, Steam, \hyperref[districtheating]{DistrictHeatingWater} and \hyperref[districtcooling]{DistrictCooling}. If this field is blank, the default second fuel type is None.
 
 \paragraph{Field: Objective Function to Minimize}
 In each time step ZoneHVAC:HybridUnitaryHVAC will choose one or more combinations of the controlled independent variables, subject to constraints, so as to best satisfy sensible load, latent load, and scheduled ventilation with the least amount of resource consumption. This alpha field specifies which resource will be minimized by the optimization.  Valid choices include: Electricity Use, Second Fuel Use, Third Fuel Use, and Water Use.  If this field is blank, the objective function will minimize electricity use.

@@ -1,7 +1,7 @@
-// EnergyPlus, Copyright (c) 1996-2023, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
-// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other
+// National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
 // contributors. All rights reserved.
 //
 // NOTICE: This Software was developed under funding from the U.S. Department of Energy and the
@@ -53,18 +53,15 @@
 
 // ObjexxFCL Headers
 #include <ObjexxFCL/Array1D.hh>
-#include <ObjexxFCL/Fmath.hh>
 
 // EnergyPlus Headers
 #include <EnergyPlus/Data/BaseData.hh>
 #include <EnergyPlus/DataGlobals.hh>
 #include <EnergyPlus/DataLoopNode.hh>
 #include <EnergyPlus/EnergyPlus.hh>
-#include <EnergyPlus/OutputProcessor.hh>
 #include <EnergyPlus/Plant/CallingOrder.hh>
 #include <EnergyPlus/Plant/Enums.hh>
 #include <EnergyPlus/Plant/Loop.hh>
-#include <EnergyPlus/Plant/PlantAvailManager.hh>
 #include <EnergyPlus/Plant/ReportLoopData.hh>
 
 namespace EnergyPlus {
@@ -72,7 +69,7 @@ namespace EnergyPlus {
 namespace DataPlant {
 
     // Using/Aliasing
-    using DataLoopNode::SensedNodeFlagValue;
+    using Node::SensedNodeFlagValue;
 
     // Criteria percentage limits for determining re-simulation of connected loop sides
     constexpr Real64 CriteriaDelta_MassFlowRate(0.001);
@@ -113,9 +110,10 @@ namespace DataPlant {
         "Pipe:Indoor",
         "Pipe:Underground",
         "DistrictCooling",
-        "DistrictHeating",
+        "DistrictHeating:Water",
         "ThermalStorage:Ice:Detailed",
         "ThermalStorage:Ice:Simple",
+        "ThermalStorage:PCM",
         "TemperingValve",
         "WaterHeater:Mixed",
         "WaterHeater:Stratified",
@@ -145,6 +143,7 @@ namespace DataPlant {
         "EvaporativeFluidCooler:TwoSpeed",
         "ThermalStorage:ChilledWater:Mixed",
         "ThermalStorage:ChilledWater:Stratified",
+        "ThermalStorage:HotWater:Stratified",
         "SolarCollector:FlatPlate:PhotovoltaicThermal",
         "ZoneHVAC:Baseboard:Convective:Water",
         "ZoneHVAC:Baseboard:RadiantConvective:Steam",
@@ -182,7 +181,13 @@ namespace DataPlant {
         "AirTerminal:SingleDuct:ConstantVolume:FourPipeBeam",
         "ZoneHVAC:CoolingPanel:RadiantConvective:Water",
         "HeatPump:PlantLoop:EIR:Cooling",
-        "HeatPump:PlantLoop:EIR:Heating"};
+        "HeatPump:PlantLoop:EIR:Heating",
+        "HeatPump:AirToWater:FuelFired:Cooling",
+        "HeatPump:AirToWater:FuelFired:Heating",
+        "HeatPump:AirToWater:Cooling",
+        "HeatPump:AirToWater:Heating",
+        "HeatPump:AirToWater",
+        "DistrictHeating:Steam"};
 
     static constexpr std::array<std::string_view, static_cast<size_t>(PlantEquipmentType::Num)> PlantEquipTypeNamesUC{
         "BOILER:HOTWATER",
@@ -212,9 +217,10 @@ namespace DataPlant {
         "PIPE:INDOOR",
         "PIPE:UNDERGROUND",
         "DISTRICTCOOLING",
-        "DISTRICTHEATING",
+        "DISTRICTHEATING:WATER",
         "THERMALSTORAGE:ICE:DETAILED",
         "THERMALSTORAGE:ICE:SIMPLE",
+        "THERMALSTORAGE:PCM",
         "TEMPERINGVALVE",
         "WATERHEATER:MIXED",
         "WATERHEATER:STRATIFIED",
@@ -244,6 +250,7 @@ namespace DataPlant {
         "EVAPORATIVEFLUIDCOOLER:TWOSPEED",
         "THERMALSTORAGE:CHILLEDWATER:MIXED",
         "THERMALSTORAGE:CHILLEDWATER:STRATIFIED",
+        "THERMALSTORAGE:HOTWATER:STRATIFIED",
         "SOLARCOLLECTOR:FLATPLATE:PHOTOVOLTAICTHERMAL",
         "ZONEHVAC:BASEBOARD:CONVECTIVE:WATER",
         "ZONEHVAC:BASEBOARD:RADIANTCONVECTIVE:STEAM",
@@ -281,7 +288,13 @@ namespace DataPlant {
         "AIRTERMINAL:SINGLEDUCT:CONSTANTVOLUME:FOURPIPEBEAM",
         "ZONEHVAC:COOLINGPANEL:RADIANTCONVECTIVE:WATER",
         "HEATPUMP:PLANTLOOP:EIR:COOLING",
-        "HEATPUMP:PLANTLOOP:EIR:HEATING"};
+        "HEATPUMP:PLANTLOOP:EIR:HEATING",
+        "HEATPUMP:AIRTOWATER:FUELFIRED:COOLING",
+        "HEATPUMP:AIRTOWATER:FUELFIRED:HEATING",
+        "HEATPUMP:AIRTOWATER:COOLING",
+        "HEATPUMP:AIRTOWATER:HEATING",
+        "HEATPUMP:AIRTOWATER",
+        "DISTRICTHEATING:STEAM"};
 
     static constexpr std::array<LoopType, static_cast<size_t>(PlantEquipmentType::Num)> ValidLoopEquipTypes{
         LoopType::Plant, //	"Boiler:HotWater"
@@ -311,9 +324,10 @@ namespace DataPlant {
         LoopType::Both,  //	"Pipe:Indoor"
         LoopType::Both,  //	"Pipe:Underground"
         LoopType::Both,  //	"DistrictCooling"
-        LoopType::Both,  //	"DistrictHeating"
+        LoopType::Both,  //	"DistrictHeating:Water"
         LoopType::Plant, //	"ThermalStorage:Ice:Detailed"
         LoopType::Plant, //	"ThermalStorage:Ice:Simple"
+        LoopType::Plant, // "ThermalStorage:PCM"
         LoopType::Both,  //	"TemperingValve"
         LoopType::Both,  //	"WaterHeater:Mixed"
         LoopType::Both,  //	"WaterHeater:Stratified"
@@ -343,6 +357,7 @@ namespace DataPlant {
         LoopType::Both,  //	"EvaporativeFluidCooler:TwoSpeed"
         LoopType::Both,  //	"ThermalStorage:ChilledWater:Mixed"
         LoopType::Both,  //	"ThermalStorage:ChilledWater:Stratified"
+        LoopType::Both,  //	"ThermalStorage:HotWater:Stratified"
         LoopType::Both,  //	"SolarCollector:FlatPlate:PhotovoltaicThermal"
         LoopType::Plant, //	"ZoneHVAC:Baseboard:Convective:Water"
         LoopType::Plant, //	"ZoneHVAC:Baseboard:RadiantConvective:Steam"
@@ -380,7 +395,13 @@ namespace DataPlant {
         LoopType::Plant, //	"AirTerminal:SingleDuct:ConstantVolume:FourPipeBeam"
         LoopType::Plant, //	"ZoneHVAC:CoolingPanel:RadiantConvective:Water"
         LoopType::Both,  //	"HeatPump:PlantLoop:EIR:Cooling"
-        LoopType::Both   //	"HeatPump:PlantLoop:EIR:Heating"
+        LoopType::Both,  //	"HeatPump:PlantLoop:EIR:Heating"
+        LoopType::Plant, // "HEATPUMP:AIRTOWATER:FUELFIRED:COOLING",
+        LoopType::Plant, // "HEATPUMP:AIRTOWATER:FUELFIRED:HEATING",
+        LoopType::Plant, // "HEATPUMP:AIRTOWATER:COOLING",
+        LoopType::Plant, // "HEATPUMP:AIRTOWATER:HEATING",
+        LoopType::Plant, // "HEATPUMP:AIRTOWATER",
+        LoopType::Both   //	"DistrictHeating:Steam"
     };
 } // namespace DataPlant
 
@@ -398,10 +419,17 @@ struct DataPlantData : BaseGlobalStruct
     int PlantManageSubIterations = 0; // tracks plant iterations to characterize solver
     int PlantManageHalfLoopCalls = 0; // tracks number of half loop calls
     Array1D<DataPlant::PlantLoopData> PlantLoop;
-    Array1D<DataPlant::PlantAvailMgrData> PlantAvailMgr;
     std::array<Array1D<DataPlant::ReportLoopData>, static_cast<int>(DataPlant::LoopSideLocation::Num)> VentRepPlant;
     std::array<Array1D<DataPlant::ReportLoopData>, static_cast<int>(DataPlant::LoopSideLocation::Num)> VentRepCond;
     Array1D<DataPlant::PlantCallingOrderInfoStruct> PlantCallingOrderInfo;
+
+    void init_constant_state([[maybe_unused]] EnergyPlusData &state) override
+    {
+    }
+
+    void init_state([[maybe_unused]] EnergyPlusData &state) override
+    {
+    }
 
     void clear_state() override
     {
@@ -416,7 +444,6 @@ struct DataPlantData : BaseGlobalStruct
         this->PlantManageSubIterations = 0;
         this->PlantManageHalfLoopCalls = 0;
         this->PlantLoop.deallocate();
-        this->PlantAvailMgr.deallocate();
         this->VentRepPlant[static_cast<int>(DataPlant::LoopSideLocation::Demand)].deallocate();
         this->VentRepPlant[static_cast<int>(DataPlant::LoopSideLocation::Supply)].deallocate();
         this->VentRepCond[static_cast<int>(DataPlant::LoopSideLocation::Demand)].deallocate();

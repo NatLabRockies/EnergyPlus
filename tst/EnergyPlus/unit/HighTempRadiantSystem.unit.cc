@@ -1,7 +1,7 @@
-// EnergyPlus, Copyright (c) 1996-2023, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
-// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other
+// National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
 // contributors. All rights reserved.
 //
 // NOTICE: This Software was developed under funding from the U.S. Department of Energy and the
@@ -50,8 +50,10 @@
 // Google Test Headers
 #include <gtest/gtest.h>
 
-// EnergyPlus Headers
+// Fixture Headers
 #include "Fixtures/EnergyPlusFixture.hh"
+
+// EnergyPlus Headers
 #include <EnergyPlus/Data/EnergyPlusData.hh>
 #include <EnergyPlus/DataHVACGlobals.hh>
 #include <EnergyPlus/DataHeatBalance.hh>
@@ -62,7 +64,6 @@
 using namespace EnergyPlus;
 using namespace EnergyPlus::HighTempRadiantSystem;
 using namespace EnergyPlus::DataHeatBalance;
-using namespace DataHVACGlobals;
 using namespace EnergyPlus::DataSurfaces;
 using namespace EnergyPlus::DataSizing;
 
@@ -96,26 +97,27 @@ TEST_F(EnergyPlusFixture, HighTempRadiantSystemTest_GetHighTempRadiantSystem)
     });
 
     ASSERT_TRUE(process_idf(idf_objects));
+    state->init_state(*state);
 
     state->dataHeatBal->Zone.allocate(1);
     state->dataHeatBal->Zone(1).Name = "ZONE1";
     state->dataSurface->Surface.allocate(1);
     state->dataSurface->Surface(1).Name = "WALL1";
     state->dataSurface->Surface(1).Zone = 1;
-    state->dataSurface->SurfIntConvSurfGetsRadiantHeat.allocate(1);
-    state->dataSurface->SurfIntConvSurfGetsRadiantHeat = 0.0;
+    state->dataSurface->surfIntConv.allocate(1);
+    state->dataSurface->surfIntConv(1).getsRadiantHeat = false;
 
     ErrorsFound = false;
 
     GetHighTempRadiantSystem(*state, ErrorsFound);
 
     std::string const error_string01 =
-        delimited_string({"   ** Severe  ** Heating Setpoint Temperature Schedule Name not found: RADIANT HEATING SETPOINTS",
-                          "   **   ~~~   ** Occurs for ZoneHVAC:HighTemperatureRadiant = ZONERADHEATER",
+        delimited_string({"   ** Severe  ** GetHighTempRadiantSystem: ZoneHVAC:HighTemperatureRadiant = ZONERADHEATER",
+                          "   **   ~~~   ** Heating Setpoint Temperature Schedule Name = RADIANT HEATING SETPOINTS, item not found.",
                           "   ** Severe  ** Fraction of radiation distributed to surfaces and people sums up to less than 1 for ZONERADHEATER",
                           "   **   ~~~   ** This would result in some of the radiant energy delivered by the high temp radiant heater being lost.",
                           "   **   ~~~   ** The sum of all radiation fractions to surfaces = 0.80000",
-                          "   **   ~~~   ** The radiant fraction to people = 4.00000E-002",
+                          "   **   ~~~   ** The radiant fraction to people = 0.04000",
                           "   **   ~~~   ** So, all radiant fractions including surfaces and people = 0.84000",
                           "   **   ~~~   ** This means that the fraction of radiant energy that would be lost from the high temperature radiant "
                           "heater would be = 0.16000",
@@ -124,10 +126,13 @@ TEST_F(EnergyPlusFixture, HighTempRadiantSystemTest_GetHighTempRadiantSystem)
 
     EXPECT_TRUE(compare_err_stream(error_string01, true));
     EXPECT_TRUE(ErrorsFound);
+    EXPECT_EQ(state->dataSurface->allGetsRadiantHeatSurfaceList[0], 1);
+    EXPECT_TRUE(state->dataSurface->surfIntConv(1).getsRadiantHeat);
 }
 
 TEST_F(EnergyPlusFixture, HighTempRadiantSystemTest_SizeHighTempRadiantSystemScalableFlagSetTest)
 {
+    state->init_state(*state);
     int RadSysNum;
     int SizingTypesNum;
 
@@ -140,14 +145,16 @@ TEST_F(EnergyPlusFixture, HighTempRadiantSystemTest_SizeHighTempRadiantSystemSca
     state->dataHighTempRadSys->HighTempRadSysNumericFields(RadSysNum).FieldNames.allocate(1);
     state->dataHighTempRadSys->HighTempRadSys(RadSysNum).Name = "TESTSCALABLEFLAG";
     state->dataHighTempRadSys->HighTempRadSys(RadSysNum).ZonePtr = 1;
-    state->dataHighTempRadSys->HighTempRadSys(RadSysNum).HeatingCapMethod = DataSizing::CapacityPerFloorArea;
+    state->dataHighTempRadSys->HighTempRadSys(RadSysNum).HeatingCapMethod = DataSizing::DesignSizingType::CapacityPerFloorArea;
     state->dataHighTempRadSys->HighTempRadSys(RadSysNum).ScaledHeatingCapacity = 100.0;
     state->dataSize->ZoneEqSizing.allocate(1);
     state->dataHeatBal->Zone.allocate(1);
     state->dataHeatBal->Zone(1).FloorArea = 10.0;
-    SizingTypesNum = DataHVACGlobals::NumOfSizingTypes;
-    if (SizingTypesNum < 1) SizingTypesNum = 1;
-    state->dataSize->ZoneEqSizing(state->dataSize->CurZoneEqNum).SizingMethod.allocate(DataHVACGlobals::NumOfSizingTypes);
+    SizingTypesNum = HVAC::NumOfSizingTypes;
+    if (SizingTypesNum < 1) {
+        SizingTypesNum = 1;
+    }
+    state->dataSize->ZoneEqSizing(state->dataSize->CurZoneEqNum).SizingMethod.allocate(HVAC::NumOfSizingTypes);
 
     SizeHighTempRadiantSystem(*state, RadSysNum);
     EXPECT_FALSE(state->dataSize->DataScalableSizingON);

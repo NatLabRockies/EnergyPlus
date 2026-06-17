@@ -15,7 +15,7 @@
 ! Both the supply and the demand side will be modelled in this section of the template
 ! ******************************VERSION IDENTIFIER********************************************
 
-  Version,23.1;
+  Version,26.2;
 
 ! ********************************DEFINE THE CHILLED WATER(CW) LOOP***************************
 
@@ -391,7 +391,8 @@
     Cooling Demand Load Profile Outlet Node,  !- Outlet Node Name
     Load Profile Load Schedule,  !- Load Schedule Name
     1.0,                     !- Peak Flow Rate {m3/s}
-    Load Profile Flow Frac Schedule;  !- Flow Rate Fraction Schedule Name
+    Load Profile Flow Frac Schedule,  !- Flow Rate Fraction Schedule Name
+    Water;                   !- Plant Loop Fluid Type
 
 !============================================================================================
 !-----------------------Plant Equipment Operation Schemes for the CW Loop--------------------

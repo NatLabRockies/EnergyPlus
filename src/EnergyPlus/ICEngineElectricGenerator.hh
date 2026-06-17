@@ -1,7 +1,7 @@
-// EnergyPlus, Copyright (c) 1996-2023, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
-// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other
+// National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
 // contributors. All rights reserved.
 //
 // NOTICE: This Software was developed under funding from the U.S. Department of Energy and the
@@ -53,15 +53,21 @@
 
 // EnergyPlus Headers
 #include <EnergyPlus/Data/BaseData.hh>
+#include <EnergyPlus/DataGlobalConstants.hh>
 #include <EnergyPlus/DataGlobals.hh>
 #include <EnergyPlus/ElectricPowerServiceManager.hh>
 #include <EnergyPlus/EnergyPlus.hh>
 #include <EnergyPlus/PlantComponent.hh>
+#include <EnergyPlus/UtilityRoutines.hh>
 
 namespace EnergyPlus {
 
 // Forward declarations
 struct EnergyPlusData;
+
+namespace Curve {
+    struct Curve;
+}
 
 namespace ICEngineElectricGenerator {
 
@@ -75,39 +81,39 @@ namespace ICEngineElectricGenerator {
         std::string Name;   // user identifier
         std::string TypeOf; // Type of Generator
         GeneratorType CompType_Num;
-        std::string FuelType;       // Type of Fuel - DIESEL, GASOLINE, GAS
-        Real64 RatedPowerOutput;    // W - design nominal capacity of Generator
-        int ElectricCircuitNode;    // Electric Circuit Node
-        Real64 MinPartLoadRat;      // (IC ENGINE MIN) min allowed operating frac full load
-        Real64 MaxPartLoadRat;      // (IC ENGINE MAX) max allowed operating frac full load
-        Real64 OptPartLoadRat;      // (IC ENGINE BEST) optimal operating frac full load
-        Real64 ElecOutputFuelRat;   // (RELDC) Ratio of Generator output to Fuel Energy Input
-        int ElecOutputFuelCurve;    // Curve Index for generator output to Fuel Energy Input Coeff Poly Fit
-        Real64 RecJacHeattoFuelRat; // (RJACDC) Ratio of Recoverable Jacket Heat to Fuel Energy Input
-        int RecJacHeattoFuelCurve;  // Curve Index for Ratio of Recoverable Jacket Heat to
+        Constant::eFuel FuelType;                      // Type of Fuel - DIESEL, GASOLINE, GAS
+        Real64 RatedPowerOutput;                       // W - design nominal capacity of Generator
+        int ElectricCircuitNode;                       // Electric Circuit Node
+        Real64 MinPartLoadRat;                         // (IC ENGINE MIN) min allowed operating frac full load
+        Real64 MaxPartLoadRat;                         // (IC ENGINE MAX) max allowed operating frac full load
+        Real64 OptPartLoadRat;                         // (IC ENGINE BEST) optimal operating frac full load
+        Real64 ElecOutputFuelRat;                      // (RELDC) Ratio of Generator output to Fuel Energy Input
+        Curve::Curve *ElecOutputFuelCurve = nullptr;   // Curve for generator output to Fuel Energy Input Coeff Poly Fit
+        Real64 RecJacHeattoFuelRat;                    // (RJACDC) Ratio of Recoverable Jacket Heat to Fuel Energy Input
+        Curve::Curve *RecJacHeattoFuelCurve = nullptr; // Curve for Ratio of Recoverable Jacket Heat to
         // Fuel Energy Input Coeff Poly Fit
-        Real64 RecLubeHeattoFuelRat; // (RLUBDC) Ratio of Recoverable Lube Oil Heat to Fuel Energy Input
-        int RecLubeHeattoFuelCurve;  // Curve Index for Ratio of Recoverable Lube Oil Heat to
+        Real64 RecLubeHeattoFuelRat;                    // (RLUBDC) Ratio of Recoverable Lube Oil Heat to Fuel Energy Input
+        Curve::Curve *RecLubeHeattoFuelCurve = nullptr; // Curve for Ratio of Recoverable Lube Oil Heat to
         // Fuel Energy Input Coef Poly Fit
-        Real64 TotExhausttoFuelRat; // (REXDC) Total Exhaust heat Input to Fuel Energy Input
-        int TotExhausttoFuelCurve;  // Curve Index for Total Exhaust heat Input to Fuel Energy Input
+        Real64 TotExhausttoFuelRat;                    // (REXDC) Total Exhaust heat Input to Fuel Energy Input
+        Curve::Curve *TotExhausttoFuelCurve = nullptr; // Curve for Total Exhaust heat Input to Fuel Energy Input
         // Coeffs Poly Fit
-        Real64 ExhaustTemp;               // (TEXDC) Exhaust Gas Temp to Fuel Energy Input
-        int ExhaustTempCurve;             // Curve Index for Exhaust Gas Temp to Fuel Energy Input Coeffs Poly Fit
-        int ErrExhaustTempIndex;          // error index for temp curve
-        Real64 UA;                        // (UACDC) exhaust gas Heat Exchanger UA to Capacity
-        Array1D<Real64> UACoef;           // Heat Exchanger UA Coeffs Poly Fit
-        Real64 MaxExhaustperPowerOutput;  // MAX EXHAUST FLOW PER W DSL POWER OUTPUT COEFF
-        Real64 DesignMinExitGasTemp;      // Steam Saturation Temperature
-        Real64 FuelHeatingValue;          // Heating Value of Fuel in kJ/kg
-        Real64 DesignHeatRecVolFlowRate;  // m3/s, Design Water mass flow rate through heat recovery loop
-        Real64 DesignHeatRecMassFlowRate; // kg/s, Design Water mass flow rate through heat recovery loop
-        bool HeatRecActive;               // True if Heat Rec Design Vol Flow Rate > 0
-        int HeatRecInletNodeNum;          // Node number on the heat recovery inlet side of the condenser
-        int HeatRecOutletNodeNum;         // Node number on the heat recovery outlet side of the condenser
-        Real64 HeatRecInletTemp;          // Inlet Temperature of the heat recovery fluid
-        Real64 HeatRecOutletTemp;         // Outlet Temperature of the heat recovery fluid
-        Real64 HeatRecMdotDesign;         // reporting: Heat Recovery Loop Mass flow rate
+        Real64 ExhaustTemp;                       // (TEXDC) Exhaust Gas Temp to Fuel Energy Input
+        Curve::Curve *ExhaustTempCurve = nullptr; // Curve for Exhaust Gas Temp to Fuel Energy Input Coeffs Poly Fit
+        int ErrExhaustTempIndex;                  // error index for temp curve
+        Real64 UA;                                // (UACDC) exhaust gas Heat Exchanger UA to Capacity
+        Array1D<Real64> UACoef;                   // Heat Exchanger UA Coeffs Poly Fit
+        Real64 MaxExhaustperPowerOutput;          // MAX EXHAUST FLOW PER W DSL POWER OUTPUT COEFF
+        Real64 DesignMinExitGasTemp;              // Steam Saturation Temperature
+        Real64 FuelHeatingValue;                  // Heating Value of Fuel in kJ/kg
+        Real64 DesignHeatRecVolFlowRate;          // m3/s, Design Water mass flow rate through heat recovery loop
+        Real64 DesignHeatRecMassFlowRate;         // kg/s, Design Water mass flow rate through heat recovery loop
+        bool HeatRecActive;                       // True if Heat Rec Design Vol Flow Rate > 0
+        int HeatRecInletNodeNum;                  // Node number on the heat recovery inlet side of the condenser
+        int HeatRecOutletNodeNum;                 // Node number on the heat recovery outlet side of the condenser
+        Real64 HeatRecInletTemp;                  // Inlet Temperature of the heat recovery fluid
+        Real64 HeatRecOutletTemp;                 // Outlet Temperature of the heat recovery fluid
+        Real64 HeatRecMdotDesign;                 // reporting: Heat Recovery Loop Mass flow rate
         Real64 HeatRecMdotActual;
         Real64 QTotalHeatRecovered; // total heat recovered (W)
         Real64 QJacketRecovered;    // heat recovered from jacket (W)
@@ -134,15 +140,15 @@ namespace ICEngineElectricGenerator {
         // Default Constructor
         ICEngineGeneratorSpecs()
             : TypeOf("Generator:InternalCombustionEngine"), CompType_Num(GeneratorType::ICEngine), RatedPowerOutput(0.0), ElectricCircuitNode(0),
-              MinPartLoadRat(0.0), MaxPartLoadRat(0.0), OptPartLoadRat(0.0), ElecOutputFuelRat(0.0), ElecOutputFuelCurve(0), RecJacHeattoFuelRat(0.0),
-              RecJacHeattoFuelCurve(0), RecLubeHeattoFuelRat(0.0), RecLubeHeattoFuelCurve(0), TotExhausttoFuelRat(0.0), TotExhausttoFuelCurve(0),
-              ExhaustTemp(0.0), ExhaustTempCurve(0), ErrExhaustTempIndex(0), UA(0.0), UACoef(2, 0.0), MaxExhaustperPowerOutput(0.0),
-              DesignMinExitGasTemp(0.0), FuelHeatingValue(0.0), DesignHeatRecVolFlowRate(0.0), DesignHeatRecMassFlowRate(0.0), HeatRecActive(false),
-              HeatRecInletNodeNum(0), HeatRecOutletNodeNum(0), HeatRecInletTemp(0.0), HeatRecOutletTemp(0.0), HeatRecMdotDesign(0.0),
-              HeatRecMdotActual(0.0), QTotalHeatRecovered(0.0), QJacketRecovered(0.0), QLubeOilRecovered(0.0), QExhaustRecovered(0.0),
-              FuelEnergyUseRate(0.0), TotalHeatEnergyRec(0.0), JacketEnergyRec(0.0), LubeOilEnergyRec(0.0), ExhaustEnergyRec(0.0), FuelEnergy(0.0),
-              FuelMdot(0.0), ExhaustStackTemp(0.0), ElecPowerGenerated(0.0), ElecEnergyGenerated(0.0), HeatRecMaxTemp(0.0), HRPlantLoc{},
-              MyEnvrnFlag(true), MyPlantScanFlag(true), MySizeAndNodeInitFlag(true), CheckEquipName(true), myFlag(true)
+              MinPartLoadRat(0.0), MaxPartLoadRat(0.0), OptPartLoadRat(0.0), ElecOutputFuelRat(0.0), RecJacHeattoFuelRat(0.0),
+              RecLubeHeattoFuelRat(0.0), TotExhausttoFuelRat(0.0), ExhaustTemp(0.0), ErrExhaustTempIndex(0), UA(0.0), UACoef(2, 0.0),
+              MaxExhaustperPowerOutput(0.0), DesignMinExitGasTemp(0.0), FuelHeatingValue(0.0), DesignHeatRecVolFlowRate(0.0),
+              DesignHeatRecMassFlowRate(0.0), HeatRecActive(false), HeatRecInletNodeNum(0), HeatRecOutletNodeNum(0), HeatRecInletTemp(0.0),
+              HeatRecOutletTemp(0.0), HeatRecMdotDesign(0.0), HeatRecMdotActual(0.0), QTotalHeatRecovered(0.0), QJacketRecovered(0.0),
+              QLubeOilRecovered(0.0), QExhaustRecovered(0.0), FuelEnergyUseRate(0.0), TotalHeatEnergyRec(0.0), JacketEnergyRec(0.0),
+              LubeOilEnergyRec(0.0), ExhaustEnergyRec(0.0), FuelEnergy(0.0), FuelMdot(0.0), ExhaustStackTemp(0.0), ElecPowerGenerated(0.0),
+              ElecEnergyGenerated(0.0), HeatRecMaxTemp(0.0), HRPlantLoc{}, MyEnvrnFlag(true), MyPlantScanFlag(true), MySizeAndNodeInitFlag(true),
+              CheckEquipName(true), myFlag(true)
         {
         }
 
@@ -183,6 +189,14 @@ struct ICEngineElectricGeneratorData : BaseGlobalStruct
     int NumICEngineGenerators = 0;                                                // number of IC ENGINE Generators specified in input
     bool getICEInput = true;                                                      // When TRUE, calls subroutine to read input file.
     Array1D<ICEngineElectricGenerator::ICEngineGeneratorSpecs> ICEngineGenerator; // dimension to number of machines
+
+    void init_constant_state([[maybe_unused]] EnergyPlusData &state) override
+    {
+    }
+
+    void init_state([[maybe_unused]] EnergyPlusData &state) override
+    {
+    }
 
     void clear_state() override
     {

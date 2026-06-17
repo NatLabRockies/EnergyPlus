@@ -1,7 +1,7 @@
-// EnergyPlus, Copyright (c) 1996-2023, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
-// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other
+// National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
 // contributors. All rights reserved.
 //
 // NOTICE: This Software was developed under funding from the U.S. Department of Energy and the
@@ -72,33 +72,33 @@ namespace TranspiredCollector {
         // Members
         // from input data
         std::string Name;
-        std::string OSCMName;                         // OtherSideConditionsModel
-        int OSCMPtr;                                  // OtherSideConditionsModel index
-        int SchedPtr;                                 // Availablity schedule
-        Array1D_int InletNode;                        // Air system node "pointer", should be set to outdoor air
-        Array1D_int OutletNode;                       // Air system node "pointer", outlet from UTSC
-        Array1D_int ControlNode;                      // Air system node "pointer", should have mixed air setpoint
-        Array1D_int ZoneNode;                         // Air system node "pointer", should have zone node
-        int Layout;                                   // 'Square' or 'Triangle'
-        int Correlation;                              // which heat exchanger effectiveness model
-        Real64 HoleDia;                               // Diameter of Perforations in Collector [m]
-        Real64 Pitch;                                 // Distance between Perforations in Collector [m]
-        Real64 LWEmitt;                               // Thermal Emissivity of Collector Surface [dimensionless]
-        Real64 SolAbsorp;                             // Solar Absorbtivity of Collector Surface [dimensionless]
-        DataSurfaces::SurfaceRoughness CollRoughness; // surface roughness for exterior convection calcs.
-        Real64 PlenGapThick;                          // Depth of Plenum Behind Collector [m]
-        Real64 PlenCrossArea;                         // cross section area of plenum behind collector [m2]
-        int NumSurfs;                                 // a single collector can have multiple surfaces underneath it
-        Array1D_int SurfPtrs;                         // = 0  ! array of pointers for participating underlying surfaces
-        Real64 Height;                                // Overall Height of Collector  [m]
-        Real64 AreaRatio;                             // Ratio of actual surface are to projected surface area [dimensionless]
-        Real64 CollectThick;                          // Thickness of collector absorber plate material.  [m]
-        Real64 Cv;                                    // volume-based effectiveness of openings for wind-driven vent when Passive
-        Real64 Cd;                                    // discharge coefficient of openings for buoyancy-driven vent when Passive
-        int NumOASysAttached;                         // =1 if no splitter, other wise set by Splitter object
-        int FreeHeatSetPointSchedPtr;                 // used for controlling seperately from usual setpoint managers.
+        std::string OSCMName;                             // OtherSideConditionsModel
+        int OSCMPtr;                                      // OtherSideConditionsModel index
+        Sched::Schedule *availSched = nullptr;            // Availability schedule
+        Array1D_int InletNode;                            // Air system node "pointer", should be set to outdoor air
+        Array1D_int OutletNode;                           // Air system node "pointer", outlet from UTSC
+        Array1D_int ControlNode;                          // Air system node "pointer", should have mixed air setpoint
+        Array1D_int ZoneNode;                             // Air system node "pointer", should have zone node
+        int Layout;                                       // 'Square' or 'Triangle'
+        int Correlation;                                  // which heat exchanger effectiveness model
+        Real64 HoleDia;                                   // Diameter of Perforations in Collector [m]
+        Real64 Pitch;                                     // Distance between Perforations in Collector [m]
+        Real64 LWEmitt;                                   // Thermal Emissivity of Collector Surface [dimensionless]
+        Real64 SolAbsorp;                                 // Solar Absorbtivity of Collector Surface [dimensionless]
+        Material::SurfaceRoughness CollRoughness;         // surface roughness for exterior convection calcs.
+        Real64 PlenGapThick;                              // Depth of Plenum Behind Collector [m]
+        Real64 PlenCrossArea;                             // cross section area of plenum behind collector [m2]
+        int NumSurfs;                                     // a single collector can have multiple surfaces underneath it
+        Array1D_int SurfPtrs;                             // = 0  ! array of pointers for participating underlying surfaces
+        Real64 Height;                                    // Overall Height of Collector  [m]
+        Real64 AreaRatio;                                 // Ratio of actual surface are to projected surface area [dimensionless]
+        Real64 CollectThick;                              // Thickness of collector absorber plate material.  [m]
+        Real64 Cv;                                        // volume-based effectiveness of openings for wind-driven vent when Passive
+        Real64 Cd;                                        // discharge coefficient of openings for buoyancy-driven vent when Passive
+        int NumOASysAttached;                             // =1 if no splitter, other wise set by Splitter object
+        Sched::Schedule *freeHeatSetPointSched = nullptr; // used for controlling separately from usual setpoint managers.
         int VsucErrIndex;
-        // data from elswhere and calculated
+        // data from elsewhere and calculated
         Real64 ActualArea; // Overall Area of Collect with surface corrugations.
         Real64 ProjArea;   // Overall Area of Collector projected, as if flat [m2]
         Vector Centroid;   // computed centroid
@@ -111,7 +111,7 @@ namespace TranspiredCollector {
         Real64 HrPlen;     // Modeled radiation coef for OSCM [W/m2-C]
         Real64 HcPlen;     // Modeled Convection coef for OSCM [W/m2-C]
         Real64 MdotVent;   // air mass flow exchanging with ambient when passive.
-        Real64 HdeltaNPL;  // lenth scale for buoyancy-driven vent when Passive [m]
+        Real64 HdeltaNPL;  // length scale for buoyancy-driven vent when Passive [m]
         Real64 TairHX;     // air drybulb of air leaving collector when Active [C]
         Real64 InletMDot;  // flow rate from outdoor mixer controller
         Real64 InletTempDB;
@@ -140,14 +140,14 @@ namespace TranspiredCollector {
 
         // Default Constructor
         UTSCDataStruct()
-            : OSCMPtr(0), SchedPtr(0), Layout(0), Correlation(0), HoleDia(0.0), Pitch(0.0), LWEmitt(0.0), SolAbsorp(0.0),
-              CollRoughness(DataSurfaces::SurfaceRoughness::VeryRough), PlenGapThick(0.0), PlenCrossArea(0.0), NumSurfs(0), Height(0.0),
-              AreaRatio(0.0), CollectThick(0.0), Cv(0.0), Cd(0.0), NumOASysAttached(0), FreeHeatSetPointSchedPtr(0), VsucErrIndex(0), ActualArea(0.0),
-              ProjArea(0.0), Centroid(0.0, 0.0, 0.0), Porosity(0.0), IsOn(false), Tplen(0.0), Tcoll(0.0), TplenLast(22.5), TcollLast(22.0),
-              HrPlen(0.0), HcPlen(0.0), MdotVent(0.0), HdeltaNPL(0.0), TairHX(0.0), InletMDot(0.0), InletTempDB(0.0), Tilt(0.0), Azimuth(0.0),
-              QdotSource(0.0), Isc(0.0), HXeff(0.0), Vsuction(0.0), PassiveACH(0.0), PassiveMdotVent(0.0), PassiveMdotWind(0.0),
-              PassiveMdotTherm(0.0), PlenumVelocity(0.0), SupOutTemp(0.0), SupOutHumRat(0.0), SupOutEnth(0.0), SupOutMassFlow(0.0),
-              SensHeatingRate(0.0), SensHeatingEnergy(0.0), SensCoolingRate(0.0), SensCoolingEnergy(0.0), UTSCEfficiency(0.0), UTSCCollEff(0.0)
+            : OSCMPtr(0), Layout(0), Correlation(0), HoleDia(0.0), Pitch(0.0), LWEmitt(0.0), SolAbsorp(0.0),
+              CollRoughness(Material::SurfaceRoughness::VeryRough), PlenGapThick(0.0), PlenCrossArea(0.0), NumSurfs(0), Height(0.0), AreaRatio(0.0),
+              CollectThick(0.0), Cv(0.0), Cd(0.0), NumOASysAttached(0), VsucErrIndex(0), ActualArea(0.0), ProjArea(0.0), Centroid(0.0, 0.0, 0.0),
+              Porosity(0.0), IsOn(false), Tplen(0.0), Tcoll(0.0), TplenLast(22.5), TcollLast(22.0), HrPlen(0.0), HcPlen(0.0), MdotVent(0.0),
+              HdeltaNPL(0.0), TairHX(0.0), InletMDot(0.0), InletTempDB(0.0), Tilt(0.0), Azimuth(0.0), QdotSource(0.0), Isc(0.0), HXeff(0.0),
+              Vsuction(0.0), PassiveACH(0.0), PassiveMdotVent(0.0), PassiveMdotWind(0.0), PassiveMdotTherm(0.0), PlenumVelocity(0.0), SupOutTemp(0.0),
+              SupOutHumRat(0.0), SupOutEnth(0.0), SupOutMassFlow(0.0), SensHeatingRate(0.0), SensHeatingEnergy(0.0), SensCoolingRate(0.0),
+              SensCoolingEnergy(0.0), UTSCEfficiency(0.0), UTSCCollEff(0.0)
         {
         }
     };
@@ -180,6 +180,36 @@ namespace TranspiredCollector {
 
     int GetAirOutletNodeNum(EnergyPlusData &state, std::string const &UTSCName, bool &ErrorsFound);
 
+    void CalcPassiveExteriorBaffleGap(EnergyPlusData &state,
+                                      const Array1D_int &SurfPtrARR, // Array of indexes pointing to Surface structure in DataSurfaces
+                                      Real64 const VentArea,         // Area available for venting the gap [m2]
+                                      Real64 const Cv,               // Oriface coefficient for volume-based discharge, wind-driven [--]
+                                      Real64 const Cd,               // oriface coefficient for discharge,  buoyancy-driven [--]
+                                      Real64 const HdeltaNPL,        // Height difference from neutral pressure level [m]
+                                      Real64 const SolAbs,           // solar absorptivity of baffle [--]
+                                      Real64 const AbsExt,           // thermal absorptance/emittance of baffle material [--]
+                                      Real64 const Tilt,             // Tilt of gap [Degrees]
+                                      Real64 const AspRat,           // aspect ratio of gap  Height/gap [--]
+                                      Real64 const GapThick,         // Thickness of air space between baffle and underlying heat transfer surface
+                                      Material::SurfaceRoughness const Roughness, // Roughness index (1-6), see DataHeatBalance parameters
+                                      Real64 const QdotSource,                    // Source/sink term, e.g. electricity exported from solar cell [W]
+                                      Real64 &TsBaffle,                           // Temperature of baffle (both sides) use lagged value on input [C]
+                                      Real64 &TaGap, // Temperature of air gap (assumed mixed) use lagged value on input [C]
+                                      ObjexxFCL::Optional<Real64> HcGapRpt = _,
+                                      ObjexxFCL::Optional<Real64> HrGapRpt = _,
+                                      ObjexxFCL::Optional<Real64> IscRpt = _,
+                                      ObjexxFCL::Optional<Real64> MdotVentRpt = _,
+                                      ObjexxFCL::Optional<Real64> VdotWindRpt = _,
+                                      ObjexxFCL::Optional<Real64> VdotBuoyRpt = _);
+
+    //****************************************************************************
+
+    Real64 PassiveGapNusseltNumber(Real64 const AspRat, // Aspect Ratio of Gap height to gap width
+                                   Real64 const Tilt,   // Tilt of gap, degrees
+                                   Real64 const Tso,    // Temperature of gap surface closest to outside (K)
+                                   Real64 const Tsi,    // Temperature of gap surface closest to zone (K)
+                                   Real64 const Gr);
+
 } // namespace TranspiredCollector
 
 struct TranspiredCollectorData : BaseGlobalStruct
@@ -194,6 +224,14 @@ struct TranspiredCollectorData : BaseGlobalStruct
     bool MySetPointCheckFlag = true;
 
     Array1D_bool MyEnvrnFlag;
+
+    void init_constant_state([[maybe_unused]] EnergyPlusData &state) override
+    {
+    }
+
+    void init_state([[maybe_unused]] EnergyPlusData &state) override
+    {
+    }
 
     void clear_state() override
     {

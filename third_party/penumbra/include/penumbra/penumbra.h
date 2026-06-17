@@ -9,78 +9,61 @@
 #include <string>
 #include <vector>
 #include <array>
-#include <map>
+#include <unordered_map>
 
 // Penumbra
 #include <penumbra/surface.h>
+#include <penumbra/logging.h>
 
-namespace Pumbra {
+namespace Penumbra {
 
-const int PN_SUCCESS = 0;
-const int PN_FAILURE = 1;
-const int MSG_INFO = 0;
-const int MSG_WARN = 1;
-const int MSG_ERR = 2;
+enum class VendorType { unknown, nvidia, amd, intel, vmware, mesa };
 
-enum class VendorName {
-  None,
-  NVIDIA,
-  AMD,
-  Intel,
-  VMware
-};
-
-typedef void (*PenumbraCallbackFunction)(const int messageType, const std::string &message,
-                                         void *contextPtr);
-
-class PenumbraPrivate;
-
-void penumbraTerminate(); // Call once before exiting calling program to ensure safe cleanup of
-                          // OpenGL memory
+class PenumbraImplementation;
 
 class Penumbra {
 public:
-  Penumbra(unsigned size = 512u);
+  explicit Penumbra(unsigned int size = 512u, const std::shared_ptr<Courierr::Courierr> &logger =
+                                                  std::make_shared<PenumbraLogger>());
 
-  Penumbra(PenumbraCallbackFunction callbackFunction, unsigned size = 512u);
-
-  Penumbra(PenumbraCallbackFunction callbackFunction, void *contextPtr, unsigned size = 512u);
+  explicit Penumbra(const std::shared_ptr<Courierr::Courierr> &logger);
 
   ~Penumbra();
 
 public:
-  static bool isValidContext();
-  unsigned addSurface(const Surface &surface);
-  int setModel();
-  int clearModel();
-  int setSunPosition(const float azm, // in radians, clockwise, north = 0
-                     const float alt  // in radians, horizon = 0, vertical = pi/2
+  static bool is_valid_context();
+  unsigned int add_surface(const Surface &surface);
+  void set_model();
+  void clear_model();
+  void set_sun_position(float azimuth, // in radians, clockwise, north = 0
+                        float altitude // in radians, horizon = 0, vertical = pi/2
   );
-  float getSunAzimuth();
-  float getSunAltitude();
-  void submitPSSA(unsigned surfaceIndex);
-  void submitPSSA(const std::vector<unsigned> &surfaceIndices);
-  void submitPSSA();
-  unsigned getNumSurfaces();
-  float fetchPSSA(unsigned surfaceIndex);
-  std::vector<float> fetchPSSA(const std::vector<unsigned> &surfaceIndices);
-  std::vector<float> fetchPSSA();
-  float calculatePSSA(unsigned surfaceIndex);
-  std::vector<float> calculatePSSA(const std::vector<unsigned> &surfaceIndices);
-  std::vector<float> calculatePSSA();
-  std::map<unsigned, float> calculateInteriorPSSAs(const std::vector<unsigned> &transparentSurfaceIndices,
-                                                   const std::vector<unsigned> &interiorSurfaceIndices);
-  int renderScene(unsigned surfaceIndex); // Primarily for debug purposes
-  int renderInteriorScene(
-      std::vector<unsigned> transparentSurfaceIndices,
-      std::vector<unsigned> interiorSurfaceIndices); // Primarily for debug purposes
-  void setMessageCallback(PenumbraCallbackFunction callbackFunction, void *contextPtr);
-  VendorName getVendorName();
+  float get_sun_azimuth();
+  float get_sun_altitude();
+  void submit_pssa(unsigned int surface_index);
+  void submit_pssa(const std::vector<unsigned int> &surface_indices);
+  void submit_pssa();
+  unsigned int get_number_of_surfaces();
+  float retrieve_pssa(unsigned int surface_index);
+  std::vector<float> retrieve_pssa(const std::vector<unsigned int> &surface_indices);
+  std::vector<float> retrieve_pssa();
+  float calculate_pssa(unsigned int surface_index);
+  std::vector<float> calculate_pssa(const std::vector<unsigned int> &surface_indices);
+  std::vector<float> calculate_pssa();
+  std::unordered_map<unsigned int, float>
+  calculate_interior_pssas(const std::vector<unsigned int> &transparent_surface_indices,
+                           const std::vector<unsigned int> &interior_surface_indices);
+  void render_scene(unsigned int surface_index); // Primarily for debug purposes
+  void render_interior_scene(
+      const std::vector<unsigned int> &transparent_surface_indices,
+      const std::vector<unsigned int> &interior_surface_indices); // Primarily for debug purposes
+  VendorType get_vendor_name();
+  std::shared_ptr<Courierr::Courierr> get_logger();
 
 private:
-  std::unique_ptr<PenumbraPrivate> penumbra;
+  std::unique_ptr<PenumbraImplementation> penumbra;
 };
 
-} // namespace Pumbra
+} // namespace Penumbra
 
 #endif /* PENUMBRA_H_ */

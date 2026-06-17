@@ -1,7 +1,7 @@
-// EnergyPlus, Copyright (c) 1996-2023, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
-// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other
+// National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
 // contributors. All rights reserved.
 //
 // NOTICE: This Software was developed under funding from the U.S. Department of Energy and the
@@ -58,240 +58,199 @@
 #include <EnergyPlus/Data/BaseData.hh>
 #include <EnergyPlus/DataGlobals.hh>
 #include <EnergyPlus/DataSurfaces.hh>
-#include <EnergyPlus/DataVectorTypes.hh>
 #include <EnergyPlus/EnergyPlus.hh>
+#include <EnergyPlus/UtilityRoutines.hh>
 
 namespace EnergyPlus {
 
 // Forward declarations
 struct EnergyPlusData;
 
-namespace ConvectionCoefficients {
+namespace Convect {
 
-    // Using/Aliasing
-    using DataVectorTypes::Vector;
-
-    struct HcInsideFaceUserCurveStruct
+    struct HcIntUserCurve
     {
         // Members
         std::string Name; // user's name for object
-        ConvectionConstants::RefTemp ReferenceTempType = ConvectionConstants::RefTemp::Invalid;
-        int HcFnTempDiffCurveNum = 0;
-        int HcFnTempDiffDivHeightCurveNum = 0;
-        int HcFnACHCurveNum = 0;
-        int HcFnACHDivPerimLengthCurveNum = 0;
+        RefTemp refTempType = RefTemp::Invalid;
+        int hcFnTempDiffCurveNum = 0;
+        int hcFnTempDiffDivHeightCurveNum = 0;
+        int hcFnACHCurveNum = 0;
+        int hcFnACHDivPerimLengthCurveNum = 0;
     };
 
-    struct HcOutsideFaceUserCurveStruct
+    struct HcExtUserCurve
     {
         // Members
         std::string Name;
-        int ReferenceTempType = 0;
-        bool SuppressRainChange = false;
-        ConvectionConstants::RefWind WindSpeedType = ConvectionConstants::RefWind::Invalid;
-        int HfFnWindSpeedCurveNum = 0;
-        int HnFnTempDiffCurveNum = 0;
-        int HnFnTempDiffDivHeightCurveNum = 0;
+        RefTemp refTempType = RefTemp::Invalid;
+        bool suppressRainChange = false;
+        RefWind windSpeedType = RefWind::Invalid;
+        int hfFnWindSpeedCurveNum = 0;
+        int hnFnTempDiffCurveNum = 0;
+        int hnFnTempDiffDivHeightCurveNum = 0;
     };
 
-    struct InsideFaceAdaptiveConvAlgoStruct
+    struct IntAdaptiveConvAlgo
     {
         // Members
         std::string Name;
-        int SimpleBuoyVertWallEqNum = ConvectionConstants::HcInt_FohannoPolidoriVerticalWall; // InConvClass_A3_VertWalls
-        int SimpleBuoyVertWallUserCurveNum = 0;
-        int SimpleBuoyStableHorizEqNum = ConvectionConstants::HcInt_AlamdariHammondStableHorizontal; // InConvClass_A3_StableHoriz
-        int SimpleBuoyStableHorizUserCurveNum = 0;
-        int SimpleBuoyUnstableHorizEqNum = ConvectionConstants::HcInt_AlamdariHammondUnstableHorizontal; // InConvClass_A3_UnstableHoriz
-        int SimpleBuoyUnstableHorizUserCurveNum = 0;
-        int SimpleBuoyStableTiltedEqNum = ConvectionConstants::HcInt_WaltonStableHorizontalOrTilt; // InConvClass_A3_StableTilted
-        int SimpleBuoyStableTiltedUserCurveNum = 0;
-        int SimpleBuoyUnstableTiltedEqNum = ConvectionConstants::HcInt_WaltonUnstableHorizontalOrTilt; // InConvClass_A3_UnstableTilted
-        int SimpleBuoyUnstableTiltedUserCurveNum = 0;
-        int SimpleBuoyWindowsEqNum = ConvectionConstants::HcInt_ISO15099Windows; // InConvClass_A3_Windows
-        int SimpleBuoyWindowsUserCurveNum = 0;
-        int FloorHeatCeilingCoolVertWallEqNum = ConvectionConstants::HcInt_KhalifaEq3WallAwayFromHeat; // InConvClass_A1_VertWalls
-        int FloorHeatCeilingCoolVertWallUserCurveNum = 0;
-        int FloorHeatCeilingCoolStableHorizEqNum = ConvectionConstants::HcInt_AlamdariHammondStableHorizontal; // InConvClass_A1_StableHoriz
-        int FloorHeatCeilingCoolStableHorizUserCurveNum = 0;
-        int FloorHeatCeilingCoolUnstableHorizEqNum = ConvectionConstants::HcInt_KhalifaEq4CeilingAwayFromHeat; // InConvClass_A1_UnstableHoriz
-        int FloorHeatCeilingCoolUnstableHorizUserCurveNum = 0;
-        int FloorHeatCeilingCoolHeatedFloorEqNum = ConvectionConstants::HcInt_AwbiHattonHeatedFloor; // InConvClass_A1_HeatedFloor
-        int FloorHeatCeilingCoolHeatedFloorUserCurveNum = 0;
-        int FloorHeatCeilingCoolChilledCeilingEqNum = ConvectionConstants::HcInt_KaradagChilledCeiling; // InConvClass_A1_ChilledCeil
-        int FloorHeatCeilingCoolChilledCeilingUserCurveNum = 0;
-        int FloorHeatCeilingCoolStableTiltedEqNum = ConvectionConstants::HcInt_WaltonStableHorizontalOrTilt; // InConvClass_A1_StableTilted
-        int FloorHeatCeilingCoolStableTiltedUserCurveNum = 0;
-        int FloorHeatCeilingCoolUnstableTiltedEqNum = ConvectionConstants::HcInt_WaltonUnstableHorizontalOrTilt; // InConvClass_A1_UnstableTilted
-        int FloorHeatCeilingCoolUnstableTiltedUserCurveNum = 0;
-        int FloorHeatCeilingCoolWindowsEqNum = ConvectionConstants::HcInt_ISO15099Windows; // InConvClass_A1_Windows
-        int FloorHeatCeilingCoolWindowsUserCurveNum = 0;
-        int WallPanelHeatVertWallEqNum = ConvectionConstants::HcInt_KhalifaEq6NonHeatedWalls; // InConvClass_A2_VertWallsNonHeated
-        int WallPanelHeatVertWallUserCurveNum = 0;
-        int WallPanelHeatHeatedWallEqNum = ConvectionConstants::HcInt_AwbiHattonHeatedWall; // InConvClass_A2_HeatedVerticalWall
-        int WallPanelHeatHeatedWallUserCurveNum = 0;
-        int WallPanelHeatStableHorizEqNum = ConvectionConstants::HcInt_AlamdariHammondStableHorizontal; // InConvClass_A2_StableHoriz
-        int WallPanelHeatStableHorizUserCurveNum = 0;
-        int WallPanelHeatUnstableHorizEqNum = ConvectionConstants::HcInt_KhalifaEq7Ceiling; // InConvClass_A2_UnstableHoriz
-        int WallPanelHeatUnstableHorizUserCurveNum = 0;
-        int WallPanelHeatStableTiltedEqNum = ConvectionConstants::HcInt_WaltonStableHorizontalOrTilt; // InConvClass_A2_StableTilted
-        int WallPanelHeatStableTiltedUserCurveNum = 0;
-        int WallPanelHeatUnstableTiltedEqNum = ConvectionConstants::HcInt_WaltonUnstableHorizontalOrTilt; // InConvClass_A2_UnstableTilted
-        int WallPanelHeatUnstableTiltedUserCurveNum = 0;
-        int WallPanelHeatWindowsEqNum = ConvectionConstants::HcInt_ISO15099Windows; // InConvClass_A2_Windows
-        int WallPanelHeatWindowsUserCurveNum = 0;
-        int ConvectiveHeatVertWallEqNum = ConvectionConstants::HcInt_FohannoPolidoriVerticalWall;
-        int ConvectiveHeatVertWallUserCurveNum = 0;
-        int ConvectiveHeatVertWallNearHeaterEqNum = ConvectionConstants::HcInt_KhalifaEq5WallNearHeat;
-        int ConvectiveHeatVertWallNearHeaterUserCurveNum = 0;
-        int ConvectiveHeatStableHorizEqNum = ConvectionConstants::HcInt_AlamdariHammondStableHorizontal;
-        int ConvectiveHeatStableHorizUserCurveNum = 0;
-        int ConvectiveHeatUnstableHorizEqNum = ConvectionConstants::HcInt_KhalifaEq7Ceiling;
-        int ConvectiveHeatUnstableHorizUserCurveNum = 0;
-        int ConvectiveHeatStableTiltedEqNum = ConvectionConstants::HcInt_WaltonStableHorizontalOrTilt;
-        int ConvectiveHeatStableTiltedUserCurveNum = 0;
-        int ConvectiveHeatUnstableTiltedEqNum = ConvectionConstants::HcInt_WaltonUnstableHorizontalOrTilt;
-        int ConvectiveHeatUnstableTiltedUserCurveNum = 0;
-        int ConvectiveHeatWindowsEqNum = ConvectionConstants::HcInt_ISO15099Windows;
-        int ConvectiveHeatWindowsUserCurveNum = 0;
-        int CentralAirWallEqNum = ConvectionConstants::HcInt_GoldsteinNovoselacCeilingDiffuserWalls;
-        int CentralAirWallUserCurveNum = 0;
-        int CentralAirCeilingEqNum = ConvectionConstants::HcInt_FisherPedersenCeilDiffuserCeiling;
-        int CentralAirCeilingUserCurveNum = 0;
-        int CentralAirFloorEqNum = ConvectionConstants::HcInt_GoldsteinNovoselacCeilingDiffuserFloor;
-        int CentralAirFloorUserCurveNum = 0;
-        int CentralAirWindowsEqNum = ConvectionConstants::HcInt_GoldsteinNovoselacCeilingDiffuserWindow;
-        int CentralAirWindowsUserCurveNum = 0;
-        int ZoneFanCircVertWallEqNum = ConvectionConstants::HcInt_KhalifaEq3WallAwayFromHeat;
-        int ZoneFanCircVertWallUserCurveNum = 0;
-        int ZoneFanCircStableHorizEqNum = ConvectionConstants::HcInt_AlamdariHammondStableHorizontal;
-        int ZoneFanCircStableHorizUserCurveNum = 0;
-        int ZoneFanCircUnstableHorizEqNum = ConvectionConstants::HcInt_KhalifaEq4CeilingAwayFromHeat;
-        int ZoneFanCircUnstableHorizUserCurveNum = 0;
-        int ZoneFanCircStableTiltedEqNum = ConvectionConstants::HcInt_WaltonStableHorizontalOrTilt;
-        int ZoneFanCircStableTiltedUserCurveNum = 0;
-        int ZoneFanCircUnstableTiltedEqNum = ConvectionConstants::HcInt_WaltonUnstableHorizontalOrTilt;
-        int ZoneFanCircUnstableTiltedUserCurveNum = 0;
-        int ZoneFanCircWindowsEqNum = ConvectionConstants::HcInt_ISO15099Windows;
-        int ZoneFanCircWindowsUserCurveNum = 0;
-        int MixedBuoyAssistingFlowWallEqNum = ConvectionConstants::HcInt_BeausoleilMorrisonMixedAssistingWall;
-        int MixedBuoyAssistingFlowWallUserCurveNum = 0;
-        int MixedBuoyOpposingFlowWallEqNum = ConvectionConstants::HcInt_BeausoleilMorrisonMixedOppossingWall;
-        int MixedBuoyOpposingFlowWallUserCurveNum = 0;
-        int MixedStableFloorEqNum = ConvectionConstants::HcInt_BeausoleilMorrisonMixedStableFloor;
-        int MixedStableFloorUserCurveNum = 0;
-        int MixedUnstableFloorEqNum = ConvectionConstants::HcInt_BeausoleilMorrisonMixedUnstableFloor;
-        int MixedUnstableFloorUserCurveNum = 0;
-        int MixedStableCeilingEqNum = ConvectionConstants::HcInt_BeausoleilMorrisonMixedStableCeiling;
-        int MixedStableCeilingUserCurveNum = 0;
-        int MixedUnstableCeilingEqNum = ConvectionConstants::HcInt_BeausoleilMorrisonMixedUnstableCeiling;
-        int MixedUnstableCeilingUserCurveNum = 0;
-        int MixedWindowsEqNum = ConvectionConstants::HcInt_GoldsteinNovoselacCeilingDiffuserWindow;
-        int MixedWindowsUserCurveNum = 0;
+
+        std::array<HcInt, static_cast<int>(IntConvClass::Num)> intConvClassEqNums = {
+            HcInt::FohannoPolidoriVerticalWall,             // A3_SimpleBuoy_VertWalls
+            HcInt::AlamdariHammondStableHorizontal,         // A3_SimpleBuoy_StableHoriz
+            HcInt::AlamdariHammondUnstableHorizontal,       // A3_SimpleBuoy_UnstableHoriz
+            HcInt::WaltonStableHorizontalOrTilt,            // A3_SimpleBuoy_StableTilted
+            HcInt::WaltonUnstableHorizontalOrTilt,          // A3_SimpleBuoy_UnstableTilted
+            HcInt::ISO15099Windows,                         // A3_SimpleBuoy_Windows
+            HcInt::KhalifaEq3WallAwayFromHeat,              // A1_FloorHeatCeilingCool_VertWalls
+            HcInt::AlamdariHammondStableHorizontal,         // A1_FloorHeatCeilingCool_StableHoriz
+            HcInt::KhalifaEq4CeilingAwayFromHeat,           // A1_FloorHeatCeilingCool_UnstableHoriz
+            HcInt::AwbiHattonHeatedFloor,                   // A1_FloorHeatCeilingCool_HeatedFloor
+            HcInt::KaradagChilledCeiling,                   // A1_FloorHeatCeilingCool_ChilledCeil
+            HcInt::WaltonStableHorizontalOrTilt,            // A1_FloorHeatCeilingCool_StableTilted
+            HcInt::WaltonUnstableHorizontalOrTilt,          // A1_FloorHeatCeilingCool_UnstableTilted
+            HcInt::ISO15099Windows,                         // A1_FloorHeatCeilingCool_Windows
+            HcInt::KhalifaEq6NonHeatedWalls,                // A2_WallPanelHeat_VertWallsNonHeated
+            HcInt::AwbiHattonHeatedWall,                    // A2_WallPanelHeat_HeatedVerticalWall
+            HcInt::AlamdariHammondStableHorizontal,         // A2_WallPanelHeat_StableHoriz
+            HcInt::KhalifaEq7Ceiling,                       // A2_WallPanelHeat_UnstableHoriz
+            HcInt::WaltonStableHorizontalOrTilt,            // A2_WallPanelHeat_StableTilted
+            HcInt::WaltonUnstableHorizontalOrTilt,          // A2_WallPanelHeat_UnstableTilted
+            HcInt::ISO15099Windows,                         // A2_WallPanelHeat_Windows
+            HcInt::FohannoPolidoriVerticalWall,             // B_ConvectiveHeat_VertWall
+            HcInt::KhalifaEq5WallNearHeat,                  // B_ConvectiveHeat_VertWallNearHeater
+            HcInt::AlamdariHammondStableHorizontal,         // B_ConvectiveHeat_StableHoriz
+            HcInt::KhalifaEq7Ceiling,                       // B_ConvectiveHeat_UnstableHoriz
+            HcInt::WaltonStableHorizontalOrTilt,            // B_ConvectiveHeat_StableTilted
+            HcInt::WaltonUnstableHorizontalOrTilt,          // B_ConvectiveHeat_UnstableTilted
+            HcInt::ISO15099Windows,                         // B_ConvectiveHeat_Windows
+            HcInt::GoldsteinNovoselacCeilingDiffuserWalls,  // C_CentralAir_Walls
+            HcInt::FisherPedersenCeilDiffuserCeiling,       // C_CentralAir_Ceiling
+            HcInt::GoldsteinNovoselacCeilingDiffuserFloor,  // C_CentralAir_Floor
+            HcInt::GoldsteinNovoselacCeilingDiffuserWindow, // C_CentralAir_Windows
+            HcInt::KhalifaEq3WallAwayFromHeat,              // D_ZoneFanCirc_VertWall
+            HcInt::AlamdariHammondStableHorizontal,         // D_ZoneFanCirc_StableHoriz
+            HcInt::KhalifaEq4CeilingAwayFromHeat,           // D_ZoneFanCirc_UnstableHoriz
+            HcInt::WaltonStableHorizontalOrTilt,            // D_ZoneFanCirc_StableTilted
+            HcInt::WaltonUnstableHorizontalOrTilt,          // D_ZoneFanCirc_UnstableTilted
+            HcInt::ISO15099Windows,                         // D_ZoneFanCirc_Windows
+            HcInt::BeausoleilMorrisonMixedAssistingWall,    // E_MixedBuoy_AssistFlowWall
+            HcInt::BeausoleilMorrisonMixedOppossingWall,    // E_MixedBuoy_OppositeFlowWall
+            HcInt::BeausoleilMorrisonMixedStableFloor,      // E_MixedBuoy_StableFloor
+            HcInt::BeausoleilMorrisonMixedUnstableFloor,    // E_MixedBuoy_UnstableFloor
+            HcInt::BeausoleilMorrisonMixedStableCeiling,    // E_MixedBuoy_StableCeiling
+            HcInt::BeausoleilMorrisonMixedUnstableCeiling,  // E_MixedBuoy_UnstableCeiling
+            HcInt::GoldsteinNovoselacCeilingDiffuserWindow  // E_MixedBuoy_Windows
+        };
+
+        std::array<int, static_cast<int>(IntConvClass::Num)> intConvClassUserCurveNums = {
+            0, // A3_SimpleBuoy_VertWalls
+            0, // A3_SimpleBuoy_StableHoriz
+            0, // A3_SimpleBuoy_UnstableHoriz
+            0, // A3_SimpleBuoy_StableTilted
+            0, // A3_SimpleBuoy_UnstableTilted
+            0, // A3_SimpleBuoy_Windows
+            0, // A1_FloorHeatCeilingCool_VertWalls
+            0, // A1_FloorHeatCeilingCool_StableHoriz
+            0, // A1_FloorHeatCeilingCool_UnstableHoriz
+            0, // A1_FloorHeatCeilingCool_HeatedFloor
+            0, // A1_FloorHeatCeilingCool_ChilledCeil
+            0, // A1_FloorHeatCeilingCool_StableTilted
+            0, // A1_FloorHeatCeilingCool_UnstableTilted
+            0, // A1_FloorHeatCeilingCool_Windows
+            0, // A2_WallPanelHeat_VertWallsNonHeated
+            0, // A2_WallPanelHeat_HeatedVerticalWall
+            0, // A2_WallPanelHeat_StableHoriz
+            0, // A2_WallPanelHeat_UnstableHoriz
+            0, // A2_WallPanelHeat_StableTilted
+            0, // A2_WallPanelHeat_UnstableTilted
+            0, // A2_WallPanelHeat_Windows
+            0, // B_ConvectiveHeat_VertWall
+            0, // B_ConvectiveHeat_VertWallNearHeater
+            0, // B_ConvectiveHeat_StableHoriz
+            0, // B_ConvectiveHeat_UnstableHoriz
+            0, // B_ConvectiveHeat_StableTilted
+            0, // B_ConvectiveHeat_UnstableTilted
+            0, // B_ConvectiveHeat_Windows
+            0, // C_CentralAir_Walls
+            0, // C_CentralAir_Ceiling
+            0, // C_CentralAir_Floor
+            0, // C_CentralAir_Windows
+            0, // D_ZoneFanCirc_VertWall
+            0, // D_ZoneFanCirc_StableHoriz
+            0, // D_ZoneFanCirc_UnstableHoriz
+            0, // D_ZoneFanCirc_StableTilted
+            0, // D_ZoneFanCirc_UnstableTilted
+            0, // D_ZoneFanCirc_Windows
+            0, // E_MixedBuoy_AssistFlowWall
+            0, // E_MixedBuoy_OppositeFlowWall
+            0, // E_MixedBuoy_StableFloor
+            0, // E_MixedBuoy_UnstableFloor
+            0, // E_MixedBuoy_StableCeiling
+            0, // E_MixedBuoy_UnstableCeiling
+            0  // E_MixedBuoy_Windows
+        };
     };
 
-    struct OutsideFaceAdaptiveConvAlgoStruct
+    struct ExtAdaptiveConvAlgo
     {
         // Members
         std::string Name;
-        bool SuppressRainChange = false;
-        int HWindWallWindwardEqNum = ConvectionConstants::HcExt_SparrowWindward;
-        int HWindWallWindwardUserCurveNum = 0;
-        int HWindWallLeewardEqNum = ConvectionConstants::HcExt_SparrowLeeward;
-        int HWindWallLeewardUserCurveNum = 0;
-        int HWindHorizRoofEqNum = ConvectionConstants::HcExt_ClearRoof;
-        int HWindHorizRoofUserCurveNum = 0;
-        int HNatVertWallEqNum = ConvectionConstants::HcExt_NaturalASHRAEVerticalWall;
-        int HNatVertWallUserCurveNum = 0;
-        int HNatStableHorizEqNum = ConvectionConstants::HcExt_NaturalWaltonStableHorizontalOrTilt;
-        int HNatStableHorizUserCurveNum = 0;
-        int HNatUnstableHorizEqNum = ConvectionConstants::HcExt_NaturalWaltonUnstableHorizontalOrTilt;
-        int HNatUnstableHorizUserCurveNum = 0;
-    };
+        bool suppressRainChange = false;
 
-    struct BoundingBoxVertStruct
-    {
-        // Members
-        int SurfNum = 0;
-        int VertNum = 0;
-        Vector Vertex{0.0, 0.0, 0.0};
-    };
+        std::array<HcExt, static_cast<int>(ExtConvClass2::Num)> extConvClass2EqNums = {
+            HcExt::SparrowWindward,                      // WindConvection_WindwardWall
+            HcExt::SparrowLeeward,                       // WindConvection_LeewardWall
+            HcExt::ClearRoof,                            // WindConvection_HorizRoof
+            HcExt::NaturalASHRAEVerticalWall,            // NaturalConvection_VertWall
+            HcExt::NaturalWaltonStableHorizontalOrTilt,  // NaturalConvection_StableHorizOrTilt
+            HcExt::NaturalWaltonUnstableHorizontalOrTilt // NaturalConvection_StableHorizOrTilt
+        };
 
-    struct RoofGeoCharacteristicsStruct
-    {
-        // Members
-        Real64 Area = 0.0;      // Sum of all roof surface areas
-        Real64 Perimeter = 0.0; // Actual perimeter of all roof surfaces, after removing all edges that are used twice (and inserting vertices
-                                // to split surfaces as needed)
-        Real64 Height = 0.0;    // Weighted average mean vertical height: for each surface, take max - Zmin value,
-                                // then do a weighted average by surface area
-        Real64 Azimuth = 0.0;   // Weighted average azimuth
-        Real64 Tilt = 0.0;      // Weighted average tilt
-    };
-
-    struct FacadeGeoCharacteristicsStruct
-    {
-        // Members
-        Real64 AzimuthRangeLow;
-        Real64 AzimuthRangeHi;
-        Real64 Zmax;
-        Real64 Zmin;
-        Real64 Ymax;
-        Real64 Ymin;
-        Real64 Xmax;
-        Real64 Xmin;
-        Real64 Area;
-        Real64 Perimeter;
-        Real64 Height;
-
-        // Default Constructor
-        FacadeGeoCharacteristicsStruct() = default;
-
-        // Member Constructor
-        FacadeGeoCharacteristicsStruct(Real64 const AzimuthRangeLow,
-                                       Real64 const AzimuthRangeHi,
-                                       Real64 const Zmax,
-                                       Real64 const Zmin,
-                                       Real64 const Ymax,
-                                       Real64 const Ymin,
-                                       Real64 const Xmax,
-                                       Real64 const Xmin,
-                                       Real64 const Area,
-                                       Real64 const Perimeter,
-                                       Real64 const Height)
-            : AzimuthRangeLow(AzimuthRangeLow), AzimuthRangeHi(AzimuthRangeHi), Zmax(Zmax), Zmin(Zmin), Ymax(Ymax), Ymin(Ymin), Xmax(Xmax),
-              Xmin(Xmin), Area(Area), Perimeter(Perimeter), Height(Height)
-        {
-        }
+        std::array<int, static_cast<int>(ExtConvClass2::Num)> extConvClass2UserCurveNums = {
+            0, // WindConvection_WindwardWall
+            0, // WindConvection_LeewardWall
+            0, // WindConvection_HorizRoof
+            0, // NaturalConvection_VertWall
+            0, // NaturalConvection_StableHorizOrTilt
+            0  // NaturalConvection_StableHorizOrTilt
+        };
     };
 
     // Functions
 
-    void
-    InitInteriorConvectionCoeffs(EnergyPlusData &state,
-                                 const Array1D<Real64> &SurfaceTemperatures,        // Temperature of surfaces for evaluation of HcIn
-                                 ObjexxFCL::Optional_int_const ZoneToResimulate = _ // if passed in, then only calculate surfaces that have this zone
+    void InitIntConvCoeff(EnergyPlusData &state,
+                          const Array1D<Real64> &SurfaceTemperatures,        // Temperature of surfaces for evaluation of HcIn
+                          ObjexxFCL::Optional_int_const ZoneToResimulate = _ // if passed in, then only calculate surfaces that have this zone
     );
 
-    void InitExteriorConvectionCoeff(EnergyPlusData &state,
-                                     int SurfNum,                              // Surface number (in Surface derived type)
-                                     Real64 HMovInsul,                         // Equivalent convection coefficient of movable insulation
-                                     DataSurfaces::SurfaceRoughness Roughness, // Roughness index (1-6), see DataHeatBalance parameters
-                                     Real64 AbsExt,                            // Exterior thermal absorptance
-                                     Real64 TempExt,                           // Exterior surface temperature (C)
-                                     Real64 &HExt,                             // Convection coefficient to exterior air
-                                     Real64 &HSky,                             // "Convection" coefficient to sky temperature
-                                     Real64 &HGround,                          // "Convection" coefficient to ground temperature
-                                     Real64 &HAir                              // Radiation to Air Component
+    void InitExtConvCoeff(EnergyPlusData &state,
+                          int SurfNum,                          // Surface number (in Surface derived type)
+                          Real64 HMovInsul,                     // Equivalent convection coefficient of movable insulation
+                          Material::SurfaceRoughness Roughness, // Roughness index (1-6), see DataHeatBalance parameters
+                          Real64 AbsExt,                        // Exterior thermal absorptance
+                          Real64 TempExt,                       // Exterior surface temperature (C)
+                          Real64 &HExt,                         // Convection coefficient to exterior air
+                          Real64 &HSky,                         // "Convection" coefficient to sky temperature
+                          Real64 &HGround,                      // "Convection" coefficient to ground temperature
+                          Real64 &HAir,                         // Radiation to Air Component
+                          Real64 &HSrdSurf                      // Radiation to surrounding surfaces
     );
 
-    Real64 CalcHfExteriorSparrow(Real64 SurfWindSpeed,                     // Local wind speed at height of the heat transfer surface (m/s)
-                                 Real64 GrossArea,                         // Gross surface area {m2}
-                                 Real64 Perimeter,                         // Surface perimeter length {m}
-                                 Real64 CosTilt,                           // Cosine of the Surface Tilt Angle
-                                 Real64 Azimuth,                           // Facing angle (degrees) of the surface outward normal
-                                 DataSurfaces::SurfaceRoughness Roughness, // Surface roughness index
-                                 Real64 WindDirection                      // Wind (compass) direction (degrees)
+    Real64 SurroundingSurfacesRadCoeffAverage(EnergyPlusData &state,
+                                              int const SurfNum,     // Surface number (in Surface derived type)
+                                              Real64 const TempExtK, // Exterior surface temperature (K)
+                                              Real64 const AbsExt    // Exterior thermal absorptance
+    );
+
+    Real64 CalcHfExteriorSparrow(Real64 SurfWindSpeed,                 // Local wind speed at height of the heat transfer surface (m/s)
+                                 Real64 GrossArea,                     // Gross surface area {m2}
+                                 Real64 Perimeter,                     // Surface perimeter length {m}
+                                 Real64 CosTilt,                       // Cosine of the Surface Tilt Angle
+                                 Real64 Azimuth,                       // Facing angle (degrees) of the surface outward normal
+                                 Material::SurfaceRoughness Roughness, // Surface roughness index
+                                 Real64 WindDirection                  // Wind (compass) direction (degrees)
     );
 
     bool Windward(Real64 CosTilt,      // Cosine of the surface tilt angle
@@ -299,12 +258,15 @@ namespace ConvectionCoefficients {
                   Real64 WindDirection // Wind direction measured clockwise from geographhic North
     );
 
-    void GetUserConvectionCoefficients(EnergyPlusData &state);
+    void GetUserConvCoeffs(EnergyPlusData &state);
 
-    void ApplyConvectionValue(EnergyPlusData &state, std::string const &SurfaceTypes, std::string const &ConvectionType, int Value);
+    void ApplyIntConvValue(EnergyPlusData &state, int surfNum, HcInt model, int userNum);
+    void ApplyExtConvValue(EnergyPlusData &state, int surfNum, HcExt model, int userNum);
+    void ApplyIntConvValueMulti(EnergyPlusData &state, DataSurfaces::SurfaceFilter surfaceFilter, HcInt model, int userNum);
+    void ApplyExtConvValueMulti(EnergyPlusData &state, DataSurfaces::SurfaceFilter surfaceFilter, HcExt model, int userNum);
 
-    Real64 CalcASHRAESimpExtConvectCoeff(DataSurfaces::SurfaceRoughness Roughness, // Integer index for roughness, relates to parameter array indices
-                                         Real64 SurfWindSpeed                      // Current wind speed, m/s
+    Real64 CalcASHRAESimpExtConvCoeff(Material::SurfaceRoughness Roughness, // Integer index for roughness, relates to parameter array indices
+                                      Real64 SurfWindSpeed                  // Current wind speed, m/s
     );
 
     Real64 CalcASHRAESimpleIntConvCoeff(Real64 Tsurf, Real64 Tamb, Real64 cosTilt);
@@ -364,19 +326,18 @@ namespace ConvectionCoefficients {
                                     const Array1D<Real64> &SurfaceTemperatures // Temperature of surfaces for evaluation of HcIn
     );
 
-    void CalcNusselt(EnergyPlusData &state,
-                     int SurfNum, // Surface number
-                     Real64 asp,  // Aspect ratio: window height to gap width
-                     Real64 tso,  // Temperature of gap surface closest to outside (K)
-                     Real64 tsi,  // Temperature of gap surface closest to zone (K)
-                     Real64 gr,   // Gap gas Grashof number
-                     Real64 pr,   // Gap gas Prandtl number
-                     Real64 &gnu  // Gap gas Nusselt number
+    Real64 CalcNusselt(EnergyPlusData &state,
+                       int SurfNum, // Surface number
+                       Real64 asp,  // Aspect ratio: window height to gap width
+                       Real64 tso,  // Temperature of gap surface closest to outside (K)
+                       Real64 tsi,  // Temperature of gap surface closest to zone (K)
+                       Real64 gr,   // Gap gas Grashof number
+                       Real64 pr    // Gap gas Prandtl number
     );
 
-    Real64 SetExtConvectionCoeff(EnergyPlusData &state, int SurfNum); // Surface Number
+    Real64 SetExtConvCoeff(EnergyPlusData &state, int SurfNum); // Surface Number
 
-    Real64 SetIntConvectionCoeff(EnergyPlusData &state, int SurfNum); // Surface Number
+    Real64 SetIntConvCoeff(EnergyPlusData &state, int SurfNum); // Surface Number
 
     Real64 CalcISO15099WindowIntConvCoeff(EnergyPlusData &state,
                                           Real64 SurfaceTemperature, // Temperature of surface for evaluation of HcIn
@@ -393,38 +354,40 @@ namespace ConvectionCoefficients {
                                         Real64 AirTemperature      // Mean Air Temperature of Zone (or adjacent air temperature)
     );
 
-    RoofGeoCharacteristicsStruct getRoofGeometryInformation(EnergyPlusData &state);
+    void SetupAdaptiveConvStaticMetaData(EnergyPlusData &state);
 
-    void SetupAdaptiveConvectionStaticMetaData(EnergyPlusData &state);
+    void SetupAdaptiveConvRadiantSurfaceData(EnergyPlusData &state);
 
-    void SetupAdaptiveConvectionRadiantSurfaceData(EnergyPlusData &state);
+    void ManageIntAdaptiveConvAlgo(EnergyPlusData &state, int SurfNum); // surface number for which coefficients are being calculated
 
-    void ManageInsideAdaptiveConvectionAlgo(EnergyPlusData &state, int SurfNum); // surface number for which coefficients are being calculated
+    Real64 ManageExtAdaptiveConvAlgo(EnergyPlusData &state,
+                                     int SurfNum); // surface number for which coefficients are being calculated
 
-    void ManageOutsideAdaptiveConvectionAlgo(EnergyPlusData &state,
-                                             int SurfNum, // surface number for which coefficients are being calculated
-                                             Real64 &Hc   // result for Hc Outside face, becomes HExt.
-    );
+    Real64 EvaluateIntHcModels(EnergyPlusData &state, int SurfNum, HcInt ConvModelEquationNum);
 
-    void EvaluateIntHcModels(EnergyPlusData &state,
-                             int SurfNum,
-                             int ConvModelEquationNum,
-                             Real64 &Hc // calculated Hc value
-    );
-
-    void EvaluateExtHcModels(EnergyPlusData &state, int SurfNum, int NaturalConvModelEqNum, int ForcedConvModelEqNum, Real64 &Hc);
+    Real64 EvaluateExtHcModels(EnergyPlusData &state, int SurfNum, HcExt NaturalConvModelEqNum, HcExt ForcedConvModelEqNum);
 
     void DynamicExtConvSurfaceClassification(EnergyPlusData &state, int SurfNum); // surface number
 
-    void MapExtConvClassificationToHcModels(EnergyPlusData &state, int SurfNum); // surface number
+    void MapExtConvClassToHcModels(EnergyPlusData &state, int SurfNum); // surface number
 
     void DynamicIntConvSurfaceClassification(EnergyPlusData &state, int SurfNum); // surface number
 
-    void MapIntConvClassificationToHcModels(EnergyPlusData &state, int SurfNum); // surface pointer index
+    void MapIntConvClassToHcModels(EnergyPlusData &state, int SurfNum); // surface pointer index
 
-    void CalcUserDefinedInsideHcModel(EnergyPlusData &state, int SurfNum, int UserCurveNum, Real64 &Hc);
+    Real64 CalcUserDefinedIntHcModel(EnergyPlusData &state, int SurfNum, int UserCurveNum);
 
-    void CalcUserDefinedOutsideHcModel(EnergyPlusData &state, int SurfNum, int UserCurveNum, Real64 &H);
+    Real64 CalcUserDefinedExtHcModel(EnergyPlusData &state, int SurfNum, int UserCurveNum);
+
+    void ShowWarningHydraulicDiameterZero(EnergyPlusData &state, int &errorIdx, ErrorObjectHeader const &eoh);
+
+    void ShowWarningDeltaTempZero(EnergyPlusData &state, int &errorIdx, ErrorObjectHeader const &eoh);
+
+    void ShowWarningWindowLocation(EnergyPlusData &state, int &errorIdx, ErrorObjectHeader const &eoh, IntConvWinLoc winLoc);
+
+    void ShowWarningPerimeterLengthZero(EnergyPlusData &state, int &errorIdx, ErrorObjectHeader const &eoh);
+
+    void ShowWarningFaceAreaZero(EnergyPlusData &state, int &errorIdx, ErrorObjectHeader const &eoh);
 
     //** Begin catalog of Hc equation functions. **** !*************************************************
 
@@ -443,7 +406,7 @@ namespace ConvectionCoefficients {
         // REFERENCES:
         // 2.  ASHRAE Handbook of Fundamentals 2001, p. 3.12, Table 5.
 
-        return 1.31 * std::pow(std::abs(DeltaTemp), ConvectionConstants::OneThird);
+        return 1.31 * std::pow(std::abs(DeltaTemp), 1.0 / 3.0);
     }
 
     inline Real64 CalcWaltonUnstableHorizontalOrTilt(Real64 const DeltaTemp, // [C] temperature difference between surface and air
@@ -467,7 +430,7 @@ namespace ConvectionCoefficients {
         // 1.  Walton, G. N. 1983. Thermal Analysis Research Program (TARP) Reference Manual,
         //     NBSSIR 83-2655, National Bureau of Standards, "Surface Inside Heat Balances", pp 79-80.
 
-        return 9.482 * std::pow(std::abs(DeltaTemp), ConvectionConstants::OneThird) / (7.238 - std::abs(CosineTilt));
+        return 9.482 * std::pow(std::abs(DeltaTemp), 1.0 / 3.0) / (7.238 - std::abs(CosineTilt));
     }
 
     inline Real64 CalcWaltonStableHorizontalOrTilt(Real64 const DeltaTemp, // [C] temperature difference between surface and air
@@ -489,7 +452,7 @@ namespace ConvectionCoefficients {
         // 1.  Walton, G. N. 1983. Thermal Analysis Research Program (TARP) Reference Manual,
         //     NBSSIR 83-2655, National Bureau of Standards, "Surface Inside Heat Balances", pp 79-80.
 
-        return 1.810 * std::pow(std::abs(DeltaTemp), ConvectionConstants::OneThird) / (1.382 + std::abs(CosineTilt));
+        return 1.810 * std::pow(std::abs(DeltaTemp), 1.0 / 3.0) / (1.382 + std::abs(CosineTilt));
     }
 
     Real64 CalcFisherPedersenCeilDiffuserFloor(EnergyPlusData &state,
@@ -670,28 +633,28 @@ namespace ConvectionCoefficients {
 
     Real64 CalcKaradagChilledCeiling(Real64 DeltaTemp); // [C] temperature difference between surface and air
 
-    Real64 CalcGoldsteinNovoselacCeilingDiffuserWindow(Real64 AirSystemFlowRate,  // [m3/s] air system flow rate
-                                                       Real64 ZoneExtPerimLength, // [m] length of zone perimeter with exterior walls
-                                                       Real64 WindWallRatio,      // [ ] fraction of window area to wall area for zone
-                                                       ConvectionConstants::InConvWinLoc WindowLocationType // index for location types
+    Real64 CalcGoldsteinNovoselacCeilingDiffuserWindow(Real64 AirSystemFlowRate,        // [m3/s] air system flow rate
+                                                       Real64 ZoneExtPerimLength,       // [m] length of zone perimeter with exterior walls
+                                                       Real64 WindWallRatio,            // [ ] fraction of window area to wall area for zone
+                                                       IntConvWinLoc WindowLocationType // index for location types
     );
 
     Real64 CalcGoldsteinNovoselacCeilingDiffuserWindow(EnergyPlusData &state,
-                                                       Real64 ZoneExtPerimLength, // [m] length of zone perimeter with exterior walls
-                                                       Real64 WindWallRatio,      // [ ] fraction of window area to wall area for zone
-                                                       ConvectionConstants::InConvWinLoc WindowLocationType, // index for location types
-                                                       int ZoneNum                                           // for messages
+                                                       Real64 ZoneExtPerimLength,        // [m] length of zone perimeter with exterior walls
+                                                       Real64 WindWallRatio,             // [ ] fraction of window area to wall area for zone
+                                                       IntConvWinLoc WindowLocationType, // index for location types
+                                                       int ZoneNum                       // for messages
     );
 
-    Real64 CalcGoldsteinNovoselacCeilingDiffuserWall(Real64 AirSystemFlowRate,  // [m3/s] air system flow rate
-                                                     Real64 ZoneExtPerimLength, // [m] length of zone perimeter with exterior walls
-                                                     ConvectionConstants::InConvWinLoc WindowLocationType // index for location types
+    Real64 CalcGoldsteinNovoselacCeilingDiffuserWall(Real64 AirSystemFlowRate,        // [m3/s] air system flow rate
+                                                     Real64 ZoneExtPerimLength,       // [m] length of zone perimeter with exterior walls
+                                                     IntConvWinLoc WindowLocationType // index for location types
     );
 
     Real64 CalcGoldsteinNovoselacCeilingDiffuserWall(EnergyPlusData &state,
-                                                     Real64 ZoneExtPerimLength, // [m] length of zone perimeter with exterior walls
-                                                     ConvectionConstants::InConvWinLoc WindowLocationType, // index for location types
-                                                     int ZoneNum                                           // for messages
+                                                     Real64 ZoneExtPerimLength,        // [m] length of zone perimeter with exterior walls
+                                                     IntConvWinLoc WindowLocationType, // index for location types
+                                                     int ZoneNum                       // for messages
     );
 
     Real64 CalcGoldsteinNovoselacCeilingDiffuserFloor(Real64 AirSystemFlowRate, // [m3/s] air system flow rate
@@ -703,15 +666,15 @@ namespace ConvectionCoefficients {
                                                       int ZoneNum                // for messages
     );
 
-    Real64 CalcSparrowWindward(DataSurfaces::SurfaceRoughness RoughnessIndex, Real64 FacePerimeter, Real64 FaceArea, Real64 WindAtZ);
+    Real64 CalcSparrowWindward(Material::SurfaceRoughness roughness, Real64 FacePerimeter, Real64 FaceArea, Real64 WindAtZ);
 
     Real64 CalcSparrowWindward(
-        EnergyPlusData &state, DataSurfaces::SurfaceRoughness RoughnessIndex, Real64 FacePerimeter, Real64 FaceArea, Real64 WindAtZ, int SurfNum);
+        EnergyPlusData &state, Material::SurfaceRoughness roughness, Real64 FacePerimeter, Real64 FaceArea, Real64 WindAtZ, int SurfNum);
 
-    Real64 CalcSparrowLeeward(DataSurfaces::SurfaceRoughness RoughnessIndex, Real64 FacePerimeter, Real64 FaceArea, Real64 WindAtZ);
+    Real64 CalcSparrowLeeward(Material::SurfaceRoughness roughness, Real64 FacePerimeter, Real64 FaceArea, Real64 WindAtZ);
 
     Real64 CalcSparrowLeeward(
-        EnergyPlusData &state, DataSurfaces::SurfaceRoughness RoughnessIndex, Real64 FacePerimeter, Real64 FaceArea, Real64 WindAtZ, int SurfNum);
+        EnergyPlusData &state, Material::SurfaceRoughness roughness, Real64 FacePerimeter, Real64 FaceArea, Real64 WindAtZ, int SurfNum);
 
     Real64 CalcMoWITTNatural(Real64 DeltaTemp);
 
@@ -723,11 +686,11 @@ namespace ConvectionCoefficients {
 
     Real64 CalcMoWITTLeeward(Real64 DeltaTemp, Real64 WindAtZ);
 
-    Real64 CalcDOE2Forced(Real64 SurfaceTemp, Real64 AirTemp, Real64 CosineTilt, Real64 HfSmooth, DataSurfaces::SurfaceRoughness RoughnessIndex);
+    Real64 CalcDOE2Forced(Real64 SurfaceTemp, Real64 AirTemp, Real64 CosineTilt, Real64 HfSmooth, Material::SurfaceRoughness roughness);
 
-    Real64 CalcDOE2Windward(Real64 SurfaceTemp, Real64 AirTemp, Real64 CosineTilt, Real64 WindAtZ, DataSurfaces::SurfaceRoughness RoughnessIndex);
+    Real64 CalcDOE2Windward(Real64 SurfaceTemp, Real64 AirTemp, Real64 CosineTilt, Real64 WindAtZ, Material::SurfaceRoughness roughness);
 
-    Real64 CalcDOE2Leeward(Real64 SurfaceTemp, Real64 AirTemp, Real64 CosineTilt, Real64 WindAtZ, DataSurfaces::SurfaceRoughness RoughnessIndex);
+    Real64 CalcDOE2Leeward(Real64 SurfaceTemp, Real64 AirTemp, Real64 CosineTilt, Real64 WindAtZ, Material::SurfaceRoughness roughness);
 
     Real64 CalcNusseltJurges(Real64 WindAtZ);
 
@@ -759,7 +722,7 @@ namespace ConvectionCoefficients {
                          Real64 WindDirect, // Wind direction measured clockwise from geographic North
                          Real64 RoofArea,
                          Real64 RoofPerimeter,
-                         DataSurfaces::SurfaceRoughness RoughnessIndex);
+                         Material::SurfaceRoughness roughness);
 
     Real64 CalcClearRoof(EnergyPlusData &state,
                          int SurfNum,
@@ -779,9 +742,8 @@ namespace ConvectionCoefficients {
     Real64
     CalcASTMC1340ConvCoeff(EnergyPlusData &state, int const SurfNum, Real64 const Tsurf, Real64 const Tair, Real64 const Vair, Real64 const Tilt);
 
-    ConvectionConstants::SurfConvOrientation GetSurfConvOrientation(Real64 const Tilt);
-
-} // namespace ConvectionCoefficients
+    SurfOrientation GetSurfConvOrientation(Real64 const Tilt);
+} // namespace Convect
 
 struct ConvectionCoefficientsData : BaseGlobalStruct
 {
@@ -817,37 +779,29 @@ struct ConvectionCoefficientsData : BaseGlobalStruct
     int CalcClearRoofErrorIDX = 0;
     int CalcMitchellErrorIDX = 0;
 
-    // move random statics so they can be reset for unit tests
+    // move random statistics so they can be reset for unit tests
     bool NodeCheck = true;
     bool ActiveSurfaceCheck = true;
     bool MyEnvirnFlag = true;
     bool FirstRoofSurf = true;
-    int ActiveWallCount = 0;
-    Real64 ActiveWallArea = 0.0;
-    int ActiveCeilingCount = 0;
-    Real64 ActiveCeilingArea = 0.0;
-    int ActiveFloorCount = 0;
-    Real64 ActiveFloorArea = 0.0;
 
     // Object Data
-    ConvectionCoefficients::InsideFaceAdaptiveConvAlgoStruct InsideFaceAdaptiveConvectionAlgo; // stores rules for Hc model equations
-    ConvectionCoefficients::OutsideFaceAdaptiveConvAlgoStruct OutsideFaceAdaptiveConvectionAlgo;
-    Array1D<ConvectionCoefficients::HcInsideFaceUserCurveStruct> HcInsideUserCurve;
-    Array1D<ConvectionCoefficients::HcOutsideFaceUserCurveStruct> HcOutsideUserCurve;
-    ConvectionCoefficients::RoofGeoCharacteristicsStruct RoofGeo;
+    Convect::IntAdaptiveConvAlgo intAdaptiveConvAlgo; // stores rules for Hc model equations
+    Convect::ExtAdaptiveConvAlgo extAdaptiveConvAlgo;
+    Array1D<Convect::HcIntUserCurve> hcIntUserCurve;
+    Array1D<Convect::HcExtUserCurve> hcExtUserCurve;
 
-    ConvectionCoefficients::FacadeGeoCharacteristicsStruct NorthFacade = {332.5, 22.5, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
-    ConvectionCoefficients::FacadeGeoCharacteristicsStruct NorthEastFacade = {22.5, 67.5, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
-    ConvectionCoefficients::FacadeGeoCharacteristicsStruct EastFacade = {67.5, 112.5, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
-    ConvectionCoefficients::FacadeGeoCharacteristicsStruct SouthEastFacade = {112.5, 157.5, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
-    ConvectionCoefficients::FacadeGeoCharacteristicsStruct SouthFacade = {157.5, 202.5, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
-    ConvectionCoefficients::FacadeGeoCharacteristicsStruct SouthWestFacade = {202.5, 247.5, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
-    ConvectionCoefficients::FacadeGeoCharacteristicsStruct WestFacade = {247.5, 287.5, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
-    ConvectionCoefficients::FacadeGeoCharacteristicsStruct NorthWestFacade = {287.5, 332.5, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
+    void init_constant_state([[maybe_unused]] EnergyPlusData &state) override
+    {
+    }
+
+    void init_state([[maybe_unused]] EnergyPlusData &state) override
+    {
+    }
 
     void clear_state() override
     {
-        *this = ConvectionCoefficientsData();
+        new (this) ConvectionCoefficientsData();
     }
 };
 

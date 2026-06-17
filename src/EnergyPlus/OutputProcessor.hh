@@ -1,7 +1,7 @@
-// EnergyPlus, Copyright (c) 1996-2023, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
-// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other
+// National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
 // contributors. All rights reserved.
 //
 // NOTICE: This Software was developed under funding from the U.S. Department of Energy and the
@@ -49,15 +49,14 @@
 #define OutputProcessor_hh_INCLUDED
 
 // C++ Headers
+#include <array>
 #include <iosfwd>
 #include <map>
-#include <unordered_map>
+#include <type_traits>
 
 // ObjexxFCL Headers
 #include <ObjexxFCL/Array1D.hh>
 #include <ObjexxFCL/Array2D.hh>
-#include <ObjexxFCL/Optional.hh>
-#include <ObjexxFCL/Reference.hh>
 
 // EnergyPlus Headers
 #include <EnergyPlus/Data/BaseData.hh>
@@ -65,6 +64,7 @@
 #include <EnergyPlus/DisplayRoutines.hh>
 #include <EnergyPlus/EPVector.hh>
 #include <EnergyPlus/EnergyPlus.hh>
+#include <EnergyPlus/ScheduleManager.hh>
 
 // Third party Headers
 #include "re2/re2.h"
@@ -76,28 +76,6 @@ class InputOutputFile;
 struct EnergyPlusData;
 
 namespace OutputProcessor {
-
-    // enumerations for SetupOutputVariable calls -- for now these are direct mappings from the original strings, no change in functionality
-    enum class SOVTimeStepType
-    {
-        Invalid = -1,
-        System,
-        HVAC,
-        Zone,
-        Plant,
-        Num
-    };
-    static constexpr std::array<std::string_view, (int)SOVTimeStepType::Num> sovTimeStepTypeStrings = {"System", "HVAC", "Zone", "Plant"};
-    enum class SOVStoreType
-    {
-        Invalid = -1,
-        State,
-        NonState,
-        Summed,
-        Average,
-        Num
-    };
-    static constexpr std::array<std::string_view, (int)SOVStoreType::Num> sovStoreTypeStrings = {"State", "NonState", "Summed", "Average"};
 
     enum class ReportVDD
     {
@@ -116,7 +94,7 @@ namespace OutputProcessor {
     enum class VariableType
     {
         Invalid = -1,
-        NotFound, // ref: GetVariableKeyCountandType, 0 = not found
+        // NotFound, // ref: GetVariableKeyCountandType, 0 = not found // TODO: This is actually used separately from Invalid, need to get rid of it
         Integer,  // ref: GetVariableKeyCountandType, 1 = integer
         Real,     // ref: GetVariableKeyCountandType, 2 = real
         Meter,    // ref: GetVariableKeyCountandType, 3 = meter
@@ -124,7 +102,7 @@ namespace OutputProcessor {
         Num
     };
 
-    enum class MtrType
+    enum class MeterType
     {
         Invalid = -1,
         Normal,     // Type value for normal meters
@@ -135,25 +113,6 @@ namespace OutputProcessor {
     };
 
     constexpr int N_WriteTimeStampFormatData(100);
-
-    static constexpr std::array<std::string_view, 14> endUseCategoryNames = {"HEATING",
-                                                                             "COOLING",
-                                                                             "INTERIORLIGHTS",
-                                                                             "EXTERIORLIGHTS",
-                                                                             "INTERIOREQUIPMENT",
-                                                                             "EXTERIOREQUIPMENT",
-                                                                             "FANS",
-                                                                             "PUMPS",
-                                                                             "HEATREJECTION",
-                                                                             "HUMIDIFIER",
-                                                                             "HEATRECOVERY",
-                                                                             "WATERSYSTEMS",
-                                                                             "REFRIGERATION",
-                                                                             "COGENERATION"};
-
-    constexpr int RVarAllocInc(1000);
-    constexpr int LVarAllocInc(1000);
-    constexpr int IVarAllocInc(10);
 
     //  For IP Units (tabular reports) certain resources will be put in sub-tables
     enum class RT_IPUnits
@@ -170,372 +129,486 @@ namespace OutputProcessor {
         Num
     };
 
-    enum class Unit
+    enum class ReportFreq
     {
         Invalid = -1,
-        kg_s,
-        C,
-        kgWater_kgDryAir,
-        ppm,
-        Pa,
-        m3_s,
-        None,
-        min,
-        W,
-        J,
-        m3,
-        kg,
-        ach,
-        W_W,
-        lux,
-        lum_W,
-        hr,
-        cd_m2,
-        J_kgWater,
-        m_s,
-        W_m2,
-        m,
-        Ah,
-        A,
-        V,
-        deltaC,
-        kmol_s,
-        rev_min,
-        Btu_h_W,
-        W_m2K,
-        J_kg,
-        kg_kg,
-        Perc,
-        deg,
-        s,
-        kg_m3,
-        kg_m2s,
-        J_kgK,
-        L,
-        K_m,
-        m2,
-        W_m2C,
-        rad,
-        J_m2,
-        clo,
-        W_mK,
-        W_K,
-        K_W,
-        kgWater_s,
-        unknown,
-        customEMS,
+        EachCall,   // Write out each time UpdatedataandReport is called
+        TimeStep,   // Write out at 'EndTimeStepFlag'
+        Hour,       // Write out at 'EndHourFlag'
+        Day,        // Write out at 'EndDayFlag'
+        Month,      // Write out at end of month (must be determined)
+        Simulation, // Write out once per environment 'EndEnvrnFlag'
+        Year,       // Write out at 'EndYearFlag'
         Num
     };
 
-    enum class ReportingFrequency
-    {
-        EachCall = -1, // Write out each time UpdatedataandReport is called
-        TimeStep,      // Write out at 'EndTimeStepFlag'
-        Hourly,        // Write out at 'EndHourFlag'
-        Daily,         // Write out at 'EndDayFlag'
-        Monthly,       // Write out at end of month (must be determined)
-        Simulation,    // Write out once per environment 'EndEnvrnFlag'
-        Yearly,        // Write out at 'EndYearFlag'
-        Num
+    static constexpr std::array<std::string_view, (int)ReportFreq::Num> reportFreqNames = {
+        "Each Call", // EachCall
+        "TimeStep",  // TimeStep
+        "Hourly",    // Hourly
+        "Daily",     // Daily
+        "Monthly",   // Monthly
+        "RunPeriod", // Simulation
+        "Annual"     // Yearly
     };
+
+    static constexpr std::array<std::string_view, (int)ReportFreq::Num> reportFreqNamesUC = {
+        "EACH CALL", // EachCall
+        "TIMESTEP",  // TimeStep
+        "HOURLY",    // Hourly
+        "DAILY",     // Daily
+        "MONTHLY",   // Monthly
+        "RUNPERIOD", // Simulation
+        "ANNUAL"     // Yearly
+    };
+
+    // What is this thing?
+    constexpr std::array<int, (int)ReportFreq::Num> reportFreqArbitraryInts = {1, 1, 1, 7, 9, 11, 11};
 
     enum class StoreType
     {
         Invalid = -1,
-        Averaged = 1, // Type value for "averaged" variables
-        Summed,       // Type value for "summed" variables
+        Average, // Type value for "averaged" variables // TODO: is this just for printing annual tables
+        Sum,     // Type value for "summed" variables
         Num
+    };
+
+    constexpr std::array<std::string_view, (int)StoreType::Num> storeTypeNames = {
+        //        "UNUSED",
+        "Average", // Averaged
+        "Sum"      // Summed
     };
 
     enum class TimeStepType
     {
         Invalid = -1,
-        Zone = 1,   // Type value for "zone" timestep variables
-        System = 2, // Type value for "system" timestep variables
+        Zone,   // Type value for "zone" timestep variables // TODO: is this just for printing Annual tables?
+        System, // Type value for "system" timestep variables
         Num
     };
 
+    constexpr std::array<std::string_view, (int)TimeStepType::Num> timeStepTypeNames = {
+        //        "UNUSED",
+        "Zone",  // Zone
+        "System" // System
+    };
+
+    enum class EndUseCat
+    {
+        Invalid = -1,
+        Heating,
+        Cooling,
+        InteriorLights,
+        ExteriorLights,
+        InteriorEquipment,
+        ExteriorEquipment,
+        Fans,
+        Pumps,
+        HeatRejection,
+        Humidification,
+        HeatRecovery,
+        WaterSystem,
+        Refrigeration,
+        Cogeneration,
+        Baseboard,
+        Boilers,
+        CarbonEquivalentEmissions,
+        Chillers,
+        CoalEmissions,
+        ColdStorageCharge,
+        ColdStorageDischarge,
+        Condensate,
+        CoolingCoils,
+        CoolingPanel,
+        DieselEmissions,
+        DistrictChilledWater,
+        DistrictHotWater,
+        ElectricityEmissions,
+        ElectricStorage,
+        FreeCooling,
+        FuelOilNo1Emissions,
+        FuelOilNo2Emissions,
+        GasolineEmissions,
+        HeatingCoils,
+        HeatProduced,
+        HeatRecoveryForCooling,
+        HeatRecoveryForHeating,
+        LoopToLoop,
+        MainsWater,
+        NaturalGasEmissions,
+        OtherFuel1Emissions,
+        OtherFuel2Emissions,
+        Photovoltaic,
+        PowerConversion,
+        PropaneEmissions,
+        PurchasedElectricityEmissions,
+        RainWater,
+        SoldElectricityEmissions,
+        WellWater,
+        WindTurbine,
+        Num
+    };
+
+    static constexpr std::array<std::string_view, (int)EndUseCat::Num> endUseCatNames = {"Heating",
+                                                                                         "Cooling",
+                                                                                         "InteriorLights",
+                                                                                         "ExteriorLights",
+                                                                                         "InteriorEquipment",
+                                                                                         "ExteriorEquipment",
+                                                                                         "Fans",
+                                                                                         "Pumps",
+                                                                                         "HeatRejection",
+                                                                                         "Humidifier",
+                                                                                         "HeatRecovery",
+                                                                                         "WaterSystems",
+                                                                                         "Refrigeration",
+                                                                                         "Cogeneration",
+                                                                                         "Baseboard",
+                                                                                         "Boilers",
+                                                                                         "CarbonEquivalentEmissions",
+                                                                                         "Chillers",
+                                                                                         "CoalEmissions",
+                                                                                         "ColdStorageCharge",
+                                                                                         "ColdStorageDischarge",
+                                                                                         "Condensate",
+                                                                                         "CoolingCoils",
+                                                                                         "CoolingPanel",
+                                                                                         "DieselEmissions",
+                                                                                         "DistrictChilledWater",
+                                                                                         "DistrictHotWater",
+                                                                                         "ElectricityEmissions",
+                                                                                         "ElectricStorage",
+                                                                                         "FreeCooling",
+                                                                                         "FuelOilNo1Emissions",
+                                                                                         "FuelOilNo2Emissions",
+                                                                                         "GasolineEmissions",
+                                                                                         "HeatingCoils",
+                                                                                         "HeatProduced",
+                                                                                         "HeatRecoveryForCooling",
+                                                                                         "HeatRecoveryForHeating",
+                                                                                         "LoopToLoop",
+                                                                                         "MainsWater",
+                                                                                         "NaturalGasEmissions",
+                                                                                         "OtherFuel1Emissions",
+                                                                                         "OtherFuel2Emissions",
+                                                                                         "Photovoltaic",
+                                                                                         "PowerConversion",
+                                                                                         "PropaneEmissions",
+                                                                                         "PurchasedElectricityEmissions",
+                                                                                         "RainWater",
+                                                                                         "SoldElectricityEmissions",
+                                                                                         "WellWater",
+                                                                                         "WindTurbine"};
+
+    static constexpr std::array<std::string_view, (int)EndUseCat::Num> endUseCatNamesUC = {"HEATING",
+                                                                                           "COOLING",
+                                                                                           "INTERIORLIGHTS",
+                                                                                           "EXTERIORLIGHTS",
+                                                                                           "INTERIOREQUIPMENT",
+                                                                                           "EXTERIOREQUIPMENT",
+                                                                                           "FANS",
+                                                                                           "PUMPS",
+                                                                                           "HEATREJECTION",
+                                                                                           "HUMIDIFIER",
+                                                                                           "HEATRECOVERY",
+                                                                                           "WATERSYSTEMS",
+                                                                                           "REFRIGERATION",
+                                                                                           "COGENERATION",
+                                                                                           "BASEBOARD",
+                                                                                           "BOILERS",
+                                                                                           "CARBONEQUIVALENTEMISSIONS",
+                                                                                           "CHILLERS",
+                                                                                           "COALEMISSIONS",
+                                                                                           "COLDSTORAGECHARGE",
+                                                                                           "COLDSTORAGEDISCHARGE",
+                                                                                           "CONDENSATE",
+                                                                                           "COOLINGCOILS",
+                                                                                           "COOLINGPANEL",
+                                                                                           "DIESELEMISSIONS",
+                                                                                           "DISTRICTCHILLEDWATER",
+                                                                                           "DISTRICTHOTWATER",
+                                                                                           "ELECTRICITYEMISSIONS",
+                                                                                           "ELECTRICSTORAGE",
+                                                                                           "FREECOOLING",
+                                                                                           "FUELOILNO1EMISSIONS",
+                                                                                           "FUELOILNO2EMISSIONS",
+                                                                                           "GASOLINEEMISSIONS",
+                                                                                           "HEATINGCOILS",
+                                                                                           "HEATPRODUCED",
+                                                                                           "HEATRECOVERYFORCOOLING",
+                                                                                           "HEATRECOVERYFORHEATING",
+                                                                                           "LOOPTOLOOP",
+                                                                                           "MAINSWATER",
+                                                                                           "NATURALGASEMISSIONS",
+                                                                                           "OTHERFUEL1EMISSIONS",
+                                                                                           "OTHERFUEL2EMISSIONS",
+                                                                                           "PHOTOVOLTAIC",
+                                                                                           "POWERCONVERSION",
+                                                                                           "PROPANEEMISSIONS",
+                                                                                           "PURCHASEDELECTRICITYEMISSIONS",
+                                                                                           "RAINWATER",
+                                                                                           "SOLDELECTRICITYEMISSIONS",
+                                                                                           "WELLWATER",
+                                                                                           "WINDTURBINE"};
+
+    static constexpr std::array<Constant::EndUse, (int)EndUseCat::Num> endUseCat2endUse = {
+        Constant::EndUse::Heating,           // Heating
+        Constant::EndUse::Cooling,           // Cooling
+        Constant::EndUse::InteriorLights,    // InteriorLights
+        Constant::EndUse::ExteriorLights,    // ExteriorLights
+        Constant::EndUse::InteriorEquipment, // InteriorEquipment
+        Constant::EndUse::ExteriorEquipment, // ExteriorEquipment
+        Constant::EndUse::Fans,              // Fans
+        Constant::EndUse::Pumps,             // Pumps
+        Constant::EndUse::HeatRejection,     // HeatRejection
+        Constant::EndUse::Humidification,    // Humidification
+        Constant::EndUse::HeatRecovery,      // HeatRecovery
+        Constant::EndUse::WaterSystem,       // WaterSystem
+        Constant::EndUse::Refrigeration,     // Refrigeration
+        Constant::EndUse::Cogeneration,      // Cogeneration
+        Constant::EndUse::Invalid,           // Baseboard
+        Constant::EndUse::Invalid,           // Boilers
+        Constant::EndUse::Invalid,           // CarbonEquivalentEmissions
+        Constant::EndUse::Invalid,           // Chillers
+        Constant::EndUse::Invalid,           // CoalEmissions
+        Constant::EndUse::Invalid,           // ColdStorageCharge
+        Constant::EndUse::Invalid,           // ColdStorageDischarge
+        Constant::EndUse::Invalid,           // Condensate
+        Constant::EndUse::Invalid,           // CoolingCoils
+        Constant::EndUse::Invalid,           // CoolingPanel
+        Constant::EndUse::Invalid,           // DieselEmissions
+        Constant::EndUse::Invalid,           // DistrictChilledWater
+        Constant::EndUse::Invalid,           // DistrictHotWater
+        Constant::EndUse::Invalid,           // ElectricityEmissions
+        Constant::EndUse::Invalid,           // ElectricStorage
+        Constant::EndUse::Invalid,           // FreeCooling
+        Constant::EndUse::Invalid,           // FuelOilNo1Emissions
+        Constant::EndUse::Invalid,           // FuelOilNo2Emissions
+        Constant::EndUse::Invalid,           // GasolineEmissions
+        Constant::EndUse::Invalid,           // HeatingCoils
+        Constant::EndUse::Invalid,           // HeatProduced
+        Constant::EndUse::Invalid,           // HeatRecoveryForCooling
+        Constant::EndUse::Invalid,           // HeatRecoveryForHeating
+        Constant::EndUse::Invalid,           // LoopToLoop
+        Constant::EndUse::Invalid,           // MainsWater
+        Constant::EndUse::Invalid,           // NaturalGasEmissions
+        Constant::EndUse::Invalid,           // OtherFuel1Emissions
+        Constant::EndUse::Invalid,           // OtherFuel2Emissions
+        Constant::EndUse::Invalid,           // Photovoltaic
+        Constant::EndUse::Invalid,           // PowerConversion
+        Constant::EndUse::Invalid,           // PropaneEmissions
+        Constant::EndUse::Invalid,           // PurchasedElectricityEmissions
+        Constant::EndUse::Invalid,           // RainWater
+        Constant::EndUse::Invalid,           // SoldElectricityEmissions
+        Constant::EndUse::Invalid,           // WellWater,
+        Constant::EndUse::Invalid,           // WindTurbine,
+    };
+
+    enum class Group
+    {
+        Invalid = -1,
+        Building,
+        HVAC,
+        Plant,
+        Zone,
+        SpaceType,
+        Num
+    };
+
+    static constexpr std::array<std::string_view, (int)Group::Num> groupNames = {"Building", "HVAC", "Plant", "Zone", "SpaceType"};
+    static constexpr std::array<std::string_view, (int)Group::Num> groupNamesUC = {"BUILDING", "HVAC", "PLANT", "ZONE", "SPACETYPE"};
+
     struct TimeSteps
     {
-        Real64 *TimeStep = nullptr; // fortran POINTER Pointer to the Actual Time Step Variable (Zone or HVAC)
+        Real64 *TimeStep = nullptr; // Pointer to the Actual Time Step Variable (Zone or HVAC)
         Real64 CurMinute = 0.0;     // Current minute (decoded from real Time Step Value)
     };
 
-    struct RealVariables
+    struct OutVar
     {
-        Real64 *Which;       // The POINTER to the actual variable holding the value
-        Real64 Value;        // Current Value of the variable (to resolution of Zone Time Step)
-        Real64 TSValue;      // Value of this variable at the Zone Time Step
-        Real64 EITSValue;    // Value of this variable at the Zone Time Step for external interface
-        Real64 StoreValue;   // At end of Zone Time Step, value is placed here for later reporting
-        Real64 NumStored;    // Number of hours stored
-        StoreType storeType; // Variable Type (Summed/Non-Static or Average/Static)
-        bool Stored;         // True when value is stored
-        bool Report;         // User has requested reporting of this variable in the IDF
-        bool tsStored;       // if stored for this zone timestep
-        bool thisTSStored;   // if stored for this zone timestep
-        int thisTSCount;
-        ReportingFrequency frequency; // How often to report this variable
-        Real64 MaxValue;              // Maximum reporting (only for Averaged variables, and those greater than Time Step)
-        int maxValueDate;             // Date stamp of maximum
-        Real64 MinValue;              // Minimum reporting (only for Averaged variables, and those greater than Time Step)
-        int minValueDate;             // Date stamp of minimum
-        int ReportID;                 // Report variable ID number
-        std::string ReportIDChr;      // Report variable ID number (character -- for printing)
-        int SchedPtr;                 // If scheduled, this points to the schedule
-        int MeterArrayPtr;            // If metered, this points to an array of applicable meters
-        int ZoneMult;                 // If metered, Zone Multiplier is applied
-        int ZoneListMult;             // If metered, Zone List Multiplier is applied
+        int ddVarNum = -1;
+        VariableType varType = VariableType::Invalid;
+        TimeStepType timeStepType = TimeStepType::Zone; // Zone or System
+        StoreType storeType = StoreType::Average;       // Variable Type (Summed/Non-Static or Average/Static)
+        Real64 Value = 0.0;                             // Current Value of the variable (to resolution of Zone Time Step)
+        Real64 TSValue = 0.0;                           // Value of this variable at the Zone Time Step
+        Real64 EITSValue = 0.0;                         // Value of this variable at the Zone Time Step for external interface
+        Real64 StoreValue = 0.0;                        // At end of Zone Time Step, value is placed here for later reporting
+        Real64 NumStored = 0.0;                         // Number of hours stored
+        bool Stored = false;                            // True when value is stored
+        bool Report = false;                            // User has requested reporting of this variable in the IDF
+        bool tsStored = false;                          // if stored for this zone timestep
+        bool thisTSStored = false;                      // if stored for this zone timestep
+        int thisTSCount = 0;
+        ReportFreq freq = ReportFreq::Hour; // How often to report this variable
+        Real64 MaxValue = -9999.0;          // Maximum reporting (only for Averaged variables, and those greater than Time Step)
+        Real64 MinValue = 9999.0;           // Minimum reporting (only for Averaged variables, and those greater than Time Step)
+        int maxValueDate = 0;               // Date stamp of maximum
+        int minValueDate = 0;               // Date stamp of minimum
+        int ReportID = 0;                   // Report variable ID number
+        Sched::Schedule *sched = nullptr;   // If scheduled, this is schedule
+        int ZoneMult = 1;                   // If metered, Zone Multiplier is applied
+        int ZoneListMult = 1;               // If metered, Zone List Multiplier is applied
 
-        // Default Constructor
-        RealVariables()
-            : Value(0.0), TSValue(0.0), EITSValue(0.0), StoreValue(0.0), NumStored(0.0), storeType(StoreType::Averaged), Stored(false), Report(false),
-              tsStored(false), thisTSStored(false), thisTSCount(0), frequency(ReportingFrequency::Hourly), MaxValue(-9999.0), maxValueDate(0),
-              MinValue(9999.0), minValueDate(0), ReportID(0), SchedPtr(0), MeterArrayPtr(0), ZoneMult(1), ZoneListMult(1)
+        std::string keyColonName;   // Name of Variable key:variable
+        std::string keyColonNameUC; // Name of Variable (Uppercase)
+        std::string name;           // Name of Variable
+        std::string nameUC;         // Name of Variable with out key in uppercase
+        std::string key;            // Name of key only
+        std::string keyUC;          // Name of key only with out variable in uppercase
+
+        Constant::Units units = Constant::Units::Invalid; // Units for Variable
+        std::string unitNameCustomEMS;                    // name of units when customEMS is used for EMS variables that are unusual
+
+        std::string indexGroup;
+        int indexGroupKey = -1; // Is this thing even used?
+
+        std::vector<int> meterNums; // Meter Numbers
+
+        virtual ~OutVar() = default;
+
+        std::string multiplierString() const;
+
+        void writeReportData(EnergyPlusData &state);
+
+        void writeOutput(EnergyPlusData &state, // Real variable to write out
+                         ReportFreq const freq);
+
+        void writeReportDictionaryItem(EnergyPlusData &state);
+    };
+
+    struct OutVarReal : public OutVar
+    {
+        Real64 *Which = nullptr; // Pointer to the actual variable holding the value
+
+        OutVarReal()
         {
+            varType = VariableType::Real;
         }
     };
 
-    struct IntegerVariables
+    struct OutVarInt : public OutVar
     {
         // Members
-        int *Which;          // The POINTER to the actual variable holding the value
-        Real64 Value;        // Current Value of the variable (to resolution of Zone Time Step)
-        Real64 TSValue;      // Value of this variable at the Zone Time Step
-        Real64 EITSValue;    // Value of this variable at the Zone Time Step for external interface
-        Real64 StoreValue;   // At end of Zone Time Step, value is placed here for later reporting
-        Real64 NumStored;    // Number of hours stored
-        StoreType storeType; // Variable Type (Summed/Non-Static or Average/Static)
-        bool Stored;         // True when value is stored
-        bool Report;         // User has requested reporting of this variable in the IDF
-        bool tsStored;       // if stored for this zone timestep
-        bool thisTSStored;   // if stored for this zone timestep
-        int thisTSCount;
-        ReportingFrequency frequency; // How often to report this variable
-        int MaxValue;                 // Maximum reporting (only for Averaged variables, and those greater than Time Step)
-        int maxValueDate;             // Date stamp of maximum
-        int MinValue;                 // Minimum reporting (only for Averaged variables, and those greater than Time Step)
-        int minValueDate;             // Date stamp of minimum
-        int ReportID;                 // Report variable ID number
-        std::string ReportIDChr;      // Report variable ID number (character -- for printing)
-        int SchedPtr;                 // If scheduled, this points to the schedule
+        int *Which = nullptr; // The POINTER to the actual variable holding the value
 
-        // Default Constructor
-        IntegerVariables()
-            : Value(0.0), TSValue(0.0), EITSValue(0.0), StoreValue(0.0), NumStored(0.0), storeType(StoreType::Averaged), Stored(false), Report(false),
-              tsStored(false), thisTSStored(false), thisTSCount(0), frequency(ReportingFrequency::Hourly), MaxValue(-9999), maxValueDate(0),
-              MinValue(9999), minValueDate(0), ReportID(0), SchedPtr(0)
+        OutVarInt()
         {
+            varType = VariableType::Integer;
         }
     };
 
-    struct VariableTypeForDDOutput
+    struct DDOutVar
     {
         // Members
-        TimeStepType timeStepType;     // Type whether Zone or HVAC
-        StoreType storeType;           // Variable Type (Summed/Non-Static or Average/Static)
-        VariableType variableType;     // Integer, Real.
-        int Next;                      // Next variable of same name (different units)
-        bool ReportedOnDDFile;         // true after written to .rdd/.mdd file
-        std::string VarNameOnly;       // Name of Variable
-        OutputProcessor::Unit units;   // Units for Variable
-        std::string unitNameCustomEMS; // name of units when customEMS is used for EMS variables that are unusual
+        std::string name;                                  // Name of Variable
+        TimeStepType timeStepType = TimeStepType::Invalid; // Type whether Zone or HVAC
+        StoreType storeType = StoreType::Invalid;          // Variable Type (Summed/Non-Static or Average/Static)
+        VariableType variableType = VariableType::Invalid; // Integer, Real.
+        int Next = -1;                                     // Next variable of same name (different units)
+        bool ReportedOnDDFile = false;                     // true after written to .rdd/.mdd file
+        Constant::Units units = Constant::Units::Invalid;  // Units for Variable
+        std::string unitNameCustomEMS;                     // name of units when customEMS is used for EMS variables that are unusual
 
-        // Default Constructor
-        VariableTypeForDDOutput()
-            : timeStepType(TimeStepType::Zone), storeType(StoreType::Averaged), variableType(VariableType::NotFound), Next(0),
-              ReportedOnDDFile(false), units(OutputProcessor::Unit::None)
+        std::vector<int> keyOutVarNums;
+    };
+
+    struct ReqVar // Structure for requested Report Variables
+    {
+        // Members
+        std::string key;                    // Could be blank or "*"
+        std::string name;                   // Name of Variable
+        ReportFreq freq = ReportFreq::Hour; // Reporting Frequency
+        Sched::Schedule *sched = nullptr;   // Schedule
+        bool Used = false;                  // True when this combination (key, varname, frequency) has been set
+
+        bool is_simple_string = true; // Whether the Key potentially includes a Regular Expression pattern
+        std::shared_ptr<RE2> case_insensitive_pattern = nullptr;
+    };
+
+    struct MeterPeriod
+    {
+        Real64 Value = 0.0;          // Daily Value
+        Real64 MaxVal = MaxSetValue; // Maximum Value
+        int MaxValDate = -1;         // Date stamp of maximum
+        Real64 MinVal = MinSetValue; // Minimum Value
+        int MinValDate = -1;         // Date stamp of minimum
+
+        bool Rpt = false;   // Report at End of Day
+        bool RptFO = false; // Report at End of Day -- meter file only
+        int RptNum = 0;     // Report Number
+        bool accRpt = false;
+        bool accRptFO = false;
+        int accRptNum = 0;
+
+        void resetVals()
         {
+            Value = 0.0;
+            MaxVal = MaxSetValue;
+            MaxValDate = 0;
+            MinVal = MinSetValue;
+            MinValDate = 0;
+        }
+
+        void WriteReportData(EnergyPlusData &state, ReportFreq freq);
+    };
+
+    struct Meter
+    {
+        // Members
+        std::string Name;                                            // Name of the meter
+        MeterType type = MeterType::Invalid;                         // type of meter
+        Constant::eResource resource = Constant::eResource::Invalid; // Resource Type of the meter
+        EndUseCat endUseCat = EndUseCat::Invalid;                    // End Use of the meter
+        std::string EndUseSub;                                       // End Use subcategory of the meter
+        Group group = Group::Invalid;                                // Group of the meter
+        Constant::Units units = Constant::Units::Invalid;            // Units for the Meter
+        RT_IPUnits RT_forIPUnits;                                    // Resource type number for IP Units (tabular) reporting
+
+        Real64 CurTSValue = 0.0; // Current TimeStep Value (internal access)
+
+        std::string indexGroup;
+
+        std::array<MeterPeriod, (int)ReportFreq::Num> periods;
+
+        MeterPeriod periodLastSM;
+        MeterPeriod periodFinYrSM;
+
+        std::vector<int> dstMeterNums; // Destination meters for custom meters
+
+        int decMeterNum = -1;          // for custom decrement meters, the number of the meter being subtracted from
+        std::vector<int> srcVarNums;   // Source variables for custom meters
+        std::vector<int> srcMeterNums; // Source meters for custom meters
+
+        Meter(std::string_view name)
+        {
+            Name = std::string(name);
         }
     };
 
-    struct RealVariableType
+    struct MeteredVar
     {
-        // Members
-        TimeStepType timeStepType;     // Type whether Zone or HVAC
-        StoreType storeType;           // Variable Type (Summed/Non-Static or Average/Static)
-        int ReportID;                  // Report variable ID number
-        std::string VarName;           // Name of Variable key:variable
-        std::string VarNameUC;         // Name of Variable (Uppercase)
-        std::string VarNameOnly;       // Name of Variable
-        std::string VarNameOnlyUC;     // Name of Variable with out key in uppercase
-        std::string KeyNameOnlyUC;     // Name of key only witht out variable in uppercase
-        OutputProcessor::Unit units;   // Units for Variable
-        std::string unitNameCustomEMS; // name of units when customEMS is used for EMS variables that are unusual
-        RealVariables VarPtr;          // Pointer used to real Variables structure
-
-        // Default Constructor
-        RealVariableType() : timeStepType(TimeStepType::Zone), storeType(StoreType::Averaged), ReportID(0), units(OutputProcessor::Unit::None)
-        {
-        }
+        int num = -1;
+        std::string name;
+        Constant::eResource resource = Constant::eResource::Invalid;
+        Constant::Units units = Constant::Units::Invalid;
+        VariableType varType = VariableType::Invalid;
+        TimeStepType timeStepType = TimeStepType::Invalid;
+        EndUseCat endUseCat = EndUseCat::Invalid;
+        Group group = Group::Invalid;
+        int rptNum = -1;
     };
 
-    struct IntegerVariableType
+    struct MeterData : MeteredVar
     {
-        // Members
-        TimeStepType timeStepType;   // Type whether Zone or HVAC
-        StoreType storeType;         // Variable Type (Summed/Non-Static or Average/Static)
-        int ReportID;                // Report variable ID number
-        std::string VarName;         // Name of Variable
-        std::string VarNameUC;       // Name of Variable
-        std::string VarNameOnly;     // Name of Variable
-        std::string VarNameOnlyUC;   // Name of Variable with out key in uppercase
-        std::string KeyNameOnlyUC;   // Name of key only witht out variable in uppercase
-        OutputProcessor::Unit units; // Units for Variable
-        IntegerVariables VarPtr;     // Pointer used to integer Variables structure
+        Constant::HeatOrCool heatOrCool = Constant::HeatOrCool::NoHeatNoCool;
+        Real64 curMeterReading = 0.0;
 
-        // Default Constructor
-        IntegerVariableType() : timeStepType(TimeStepType::Zone), storeType(StoreType::Averaged), ReportID(0), units(OutputProcessor::Unit::None)
+        // C++ doesn't figure this out automatically, so we have to do it ourselves
+        MeterData &operator=(MeteredVar const &mv)
         {
-        }
-    };
-
-    struct ReqReportVariables // Structure for requested Report Variables
-    {
-        // Members
-        std::string Key;              // Could be blank or "*"
-        std::string VarName;          // Name of Variable
-        ReportingFrequency frequency; // Reporting Frequency
-        int SchedPtr;                 // Index of the Schedule
-        std::string SchedName;        // Schedule Name
-        bool Used;                    // True when this combination (key, varname, frequency) has been set
-
-        bool is_simple_string; // Whether the Key potentially includes a Regular Expression pattern
-        std::shared_ptr<RE2> case_insensitive_pattern;
-
-        // Default Constructor
-        ReqReportVariables()
-            : frequency(ReportingFrequency::Hourly), SchedPtr(0), Used(false), is_simple_string(true), case_insensitive_pattern(nullptr)
-        {
-        }
-    };
-
-    struct MeterArrayType
-    {
-        // Members
-        int NumOnMeters;            // Number of OnMeter Entries for variable
-        int RepVariable;            // Backwards pointer to real Variable
-        Array1D_int OnMeters;       // Forward pointer to Meter Numbers
-        int NumOnCustomMeters;      // Number of OnCustomMeter Entries for variable
-        Array1D_int OnCustomMeters; // Forward pointer to Custom Meter Numbers
-
-        // Default Constructor
-        MeterArrayType() : NumOnMeters(0), RepVariable(0), OnMeters(10, 0), NumOnCustomMeters(0)
-        {
-        }
-    };
-
-    struct MeterType
-    {
-        // Members
-        std::string Name;                          // Name of the meter
-        std::string ResourceType;                  // Resource Type of the meter
-        std::string EndUse;                        // End Use of the meter
-        std::string EndUseSub;                     // End Use subcategory of the meter
-        std::string Group;                         // Group of the meter
-        OutputProcessor::Unit Units;               // Units for the Meter
-        OutputProcessor::RT_IPUnits RT_forIPUnits; // Resource type number for IP Units (tabular) reporting
-        MtrType TypeOfMeter;                       // type of meter
-        int SourceMeter;                           // for custom decrement meters, this is the meter number for the subtraction
-
-        Real64 TSValue;          // TimeStep Value
-        Real64 CurTSValue;       // Current TimeStep Value (internal access)
-        bool RptTS;              // Report at End of TimeStep (Zone)
-        bool RptTSFO;            // Report at End of TimeStep (Zone) -- meter file only
-        int TSRptNum;            // Report Number for TS Values
-        std::string TSRptNumChr; // Report Number for TS Values (character -- for printing)
-
-        Real64 HRValue;          // Hourly Value
-        bool RptHR;              // Report at End of Hour
-        bool RptHRFO;            // Report at End of Hour -- meter file only
-        int HRRptNum;            // Report Number for HR Values
-        std::string HRRptNumChr; // Report Number for HR Values (character -- for printing)
-
-        Real64 DYValue;          // Daily Value
-        bool RptDY;              // Report at End of Day
-        bool RptDYFO;            // Report at End of Day -- meter file only
-        Real64 DYMaxVal;         // Maximum Value (Day)
-        int DYMaxValDate;        // Date stamp of maximum
-        Real64 DYMinVal;         // Minimum Value (Day)
-        int DYMinValDate;        // Date stamp of minimum
-        int DYRptNum;            // Report Number for DY Values
-        std::string DYRptNumChr; // Report Number for DY Values (character -- for printing)
-
-        Real64 MNValue;          // Monthly Value
-        bool RptMN;              // Report at End of Month
-        bool RptMNFO;            // Report at End of Month -- meter file only
-        Real64 MNMaxVal;         // Maximum Value (Month)
-        int MNMaxValDate;        // Date stamp of maximum
-        Real64 MNMinVal;         // Minimum Value (Month)
-        int MNMinValDate;        // Date stamp of minimum
-        int MNRptNum;            // Report Number for MN Values
-        std::string MNRptNumChr; // Report Number for MN Values (character -- for printing)
-
-        Real64 YRValue;          // Yearly Value
-        bool RptYR;              // Report at End of Year
-        bool RptYRFO;            // Report at End of Year
-        Real64 YRMaxVal;         // Maximum Value (Yearly)
-        int YRMaxValDate;        // Date stamp of maximum
-        Real64 YRMinVal;         // Minimum Value (Yearly)
-        int YRMinValDate;        // Date stamp of minimum
-        int YRRptNum;            // Report Number for YR Values
-        std::string YRRptNumChr; // Report Number for YR Values (character -- for printing)
-
-        Real64 SMValue;          // Simulation Value
-        bool RptSM;              // Report at End of Environment/Simulation
-        bool RptSMFO;            // Report at End of Environment/Simulation -- meter file only
-        Real64 SMMaxVal;         // Maximum Value (Sim)
-        int SMMaxValDate;        // Date stamp of maximum
-        Real64 SMMinVal;         // Minimum Value (Sim)
-        int SMMinValDate;        // Date stamp of minimum
-        int SMRptNum;            // Report Number for SM Values
-        std::string SMRptNumChr; // Report Number for SM Values (character -- for printing)
-
-        Real64 LastSMValue;      // Simulation Value
-        Real64 LastSMMaxVal;     // Maximum Value (Sim)
-        int LastSMMaxValDate;    // Date stamp of maximum
-        Real64 LastSMMinVal;     // Minimum Value (Sim)
-        int LastSMMinValDate;    // Date stamp of minimum
-        Real64 FinYrSMValue;     // Final Year Simulation Value
-        Real64 FinYrSMMaxVal;    // Maximum Value (Sim)
-        int FinYrSMMaxValDate;   // Date stamp of maximum
-        Real64 FinYrSMMinVal;    // Minimum Value (Sim)
-        int FinYrSMMinValDate;   // Date stamp of minimum
-        bool RptAccTS;           // Report Cumulative Meter at Time Step
-        bool RptAccTSFO;         // Report Cumulative Meter at Time Step -- meter file only
-        bool RptAccHR;           // Report Cumulative Meter at Hour
-        bool RptAccHRFO;         // Report Cumulative Meter at Hour -- meter file only
-        bool RptAccDY;           // Report Cumulative Meter at Day
-        bool RptAccDYFO;         // Report Cumulative Meter at Day -- meter file only
-        bool RptAccMN;           // Report Cumulative Meter at Month
-        bool RptAccMNFO;         // Report Cumulative Meter at Month -- meter file only
-        bool RptAccYR;           // Report Cumulative Meter at Year
-        bool RptAccYRFO;         // Report Cumulative Meter at Year -- meter file only
-        bool RptAccSM;           // Report Cumulative Meter at Run Period
-        bool RptAccSMFO;         // Report Cumulative Meter at Run Period -- meter file only
-        int TSAccRptNum;         // Report Number for Acc Values
-        int HRAccRptNum;         // Report Number for Acc Values
-        int DYAccRptNum;         // Report Number for Acc Values
-        int MNAccRptNum;         // Report Number for Acc Values
-        int YRAccRptNum;         // Report Number for Acc Values
-        int SMAccRptNum;         // Report Number for Acc Values
-        int InstMeterCacheStart; // index of the beginning of the instant meter cache
-        int InstMeterCacheEnd;   // index of the end of the instant meter cache
-
-        // Default Constructor
-        MeterType()
-            : Units(OutputProcessor::Unit::None), RT_forIPUnits(OutputProcessor::RT_IPUnits::Invalid), TypeOfMeter(MtrType::Normal), SourceMeter(0),
-              TSValue(0.0), CurTSValue(0.0), RptTS(false), RptTSFO(false), TSRptNum(0), HRValue(0.0), RptHR(false), RptHRFO(false), HRRptNum(0),
-              DYValue(0.0), RptDY(false), RptDYFO(false), DYMaxVal(-99999.0), DYMaxValDate(0), DYMinVal(99999.0), DYMinValDate(0), DYRptNum(0),
-              MNValue(0.0), RptMN(false), RptMNFO(false), MNMaxVal(-99999.0), MNMaxValDate(0), MNMinVal(99999.0), MNMinValDate(0), MNRptNum(0),
-              YRValue(0.0), RptYR(false), RptYRFO(false), YRMaxVal(-99999.0), YRMaxValDate(0), YRMinVal(99999.0), YRMinValDate(0), YRRptNum(0),
-              SMValue(0.0), RptSM(false), RptSMFO(false), SMMaxVal(-99999.0), SMMaxValDate(0), SMMinVal(99999.0), SMMinValDate(0), SMRptNum(0),
-              LastSMValue(0.0), LastSMMaxVal(-99999.0), LastSMMaxValDate(0), LastSMMinVal(99999.0), LastSMMinValDate(0), FinYrSMValue(0.0),
-              FinYrSMMaxVal(-99999.0), FinYrSMMaxValDate(0), FinYrSMMinVal(99999.0), FinYrSMMinValDate(0), RptAccTS(false), RptAccTSFO(false),
-              RptAccHR(false), RptAccHRFO(false), RptAccDY(false), RptAccDYFO(false), RptAccMN(false), RptAccMNFO(false), RptAccYR(false),
-              RptAccYRFO(false), RptAccSM(false), RptAccSMFO(false), TSAccRptNum(0), HRAccRptNum(0), DYAccRptNum(0), MNAccRptNum(0), YRAccRptNum(0),
-              SMAccRptNum(0), InstMeterCacheStart(0), InstMeterCacheEnd(0)
-        {
+            MeteredVar::operator=(mv);
+            return *this;
         }
     };
 
@@ -550,53 +623,27 @@ namespace OutputProcessor {
         Array1D_string spaceTypeName; // Array of space type names
     };
 
-    int DetermineMinuteForReporting(EnergyPlusData &state);
+    int DetermineMinuteForReporting(EnergyPlusData const &state);
 
     void InitializeOutput(EnergyPlusData &state);
 
     void SetupTimePointers(EnergyPlusData &state,
-                           OutputProcessor::SOVTimeStepType IndexKey, // Which timestep is being set up, 'Zone'=1, 'HVAC'=2
-                           Real64 &TimeStep                           // The timestep variable.  Used to get the address
+                           OutputProcessor::TimeStepType timeStepType, // Which timestep is being set up, 'Zone'=1, 'HVAC'=2
+                           Real64 &TimeStep                            // The timestep variable.  Used to get the address
     );
 
     void CheckReportVariable(EnergyPlusData &state,
-                             std::string_view const KeyedValue, // Associated Key for this variable
-                             std::string_view const VarName     // String Name of variable (without units)
-    );
+                             std::string_view const name, // String Name of variable (without units)
+                             std::string const &key,      // Associated Key for this variable
+                             std::vector<int> &reqVarNums);
 
     void GetReportVariableInput(EnergyPlusData &state);
 
-    ReportingFrequency determineFrequency(EnergyPlusData &state, std::string const &FreqString);
+    ReportFreq determineFrequency(EnergyPlusData &state, std::string_view const FreqString);
 
-    std::string reportingFrequency(ReportingFrequency reportingInterval);
-
-    void ProduceMinMaxString(std::string &String,          // Current value
-                             int DateValue,                // Date of min/max
-                             ReportingFrequency ReportFreq // Reporting Frequency
+    std::string produceDateString(int DateValue,  // Date of min/max
+                                  ReportFreq freq // Reporting Frequency
     );
-
-    // TODO: GET RID OF THESE REDIMENSIONS
-    inline void ReallocateIntegerArray(Array1D_int &Array,
-                                       int &ArrayMax,     // Current and resultant dimension for Array
-                                       int const ArrayInc // increment for redimension
-    )
-    {
-        Array.redimension(ArrayMax += ArrayInc, 0);
-    }
-
-    inline void ReallocateRVar(EnergyPlusData &state);
-
-    inline void ReallocateIVar(EnergyPlusData &state);
-
-    TimeStepType ValidateTimeStepType(EnergyPlusData &state,
-                                      OutputProcessor::SOVTimeStepType TimeStepTypeKey // Index type (Zone, HVAC) for variables
-    );
-
-    std::string StandardTimeStepTypeKey(TimeStepType timeStepType);
-
-    StoreType validateVariableType(EnergyPlusData &state, OutputProcessor::SOVStoreType VariableTypeKey);
-
-    std::string standardVariableTypeKey(StoreType VariableType);
 
     // *****************************************************************************
     // The following routines implement Energy Meters in EnergyPlus.
@@ -604,53 +651,30 @@ namespace OutputProcessor {
 
     void GetCustomMeterInput(EnergyPlusData &state, bool &ErrorsFound);
 
-    void
-    GetStandardMeterResourceType(EnergyPlusData &state, std::string &OutResourceType, std::string const &UserInputResourceType, bool &ErrorsFound);
-
-    void AddMeter(EnergyPlusData &state,
-                  std::string const &Name,         // Name for the meter
-                  OutputProcessor::Unit MtrUnits,  // Units for the meter
-                  std::string const &ResourceType, // ResourceType for the meter
-                  std::string const &EndUse,       // EndUse for the meter
-                  std::string const &EndUseSub,    // EndUse subcategory for the meter
-                  std::string const &Group         // Group for the meter
-    );
+    int AddMeter(EnergyPlusData &state,
+                 std::string const &Name,          // Name for the meter
+                 Constant::Units units,            // Units for the meter
+                 Constant::eResource resource,     // ResourceType for the meter
+                 EndUseCat endUseCat,              // EndUse for the meter
+                 std::string_view const EndUseSub, // EndUse subcategory for the meter
+                 Group group,                      // Group for the meter
+                 int outVarNum);
 
     void AttachMeters(EnergyPlusData &state,
-                      EnergyPlus::OutputProcessor::Unit MtrUnits, // Units for this meter
-                      std::string &ResourceType,                  // Electricity, Gas, etc.
-                      std::string &EndUse,                        // End-use category (Lights, Heating, etc.)
-                      std::string &EndUseSub,                     // End-use subcategory (user-defined, e.g., General Lights, Task Lights, etc.)
-                      std::string &Group,                         // Group key (Facility, Zone, Building, etc.)
-                      std::string const &ZoneName,                // Zone key only applicable for Building group
-                      std::string const &SpaceTypeName,           // Space Type key only applicable for Building group
-                      int RepVarNum,                              // Number of this report variable
-                      int &MeterArrayPtr,                         // Output set of Pointers to Meters
-                      bool &ErrorsFound                           // True if errors in this call
+                      Constant::Units units,            // Units for this meter
+                      Constant::eResource resource,     // Electricity, Gas, etc.
+                      EndUseCat endUseCat,              // End-use category (Lights, Heating, etc.)
+                      std::string_view const EndUseSub, // End-use subcategory (user-defined, e.g., General Lights, Task Lights, etc.)
+                      Group group,                      // Group key (Facility, Zone, Building, etc.)
+                      std::string const &ZoneName,      // Zone key only applicable for Building group
+                      std::string const &SpaceTypeName, // Space Type key only applicable for Building group
+                      int RepVarNum                     // Number of this report variable
     );
 
-    void AttachCustomMeters(EnergyPlusData &state,
-                            int RepVarNum,      // Number of this report variable
-                            int &MeterArrayPtr, // Input/Output set of Pointers to Meters
-                            int MeterIndex      // Which meter this is
-    );
-
-    void ValidateNStandardizeMeterTitles(EnergyPlusData &state,
-                                         OutputProcessor::Unit MtrUnits, // Units for the meter
-                                         std::string &ResourceType,      // Electricity, Gas, etc.
-                                         std::string &EndUse,            // End Use Type (Lights, Heating, etc.)
-                                         std::string &EndUseSub,         // End Use Sub Type (General Lights, Task Lights, etc.)
-                                         std::string &Group,             // Group key (Facility, Zone, Building, etc.)
-                                         bool &ErrorsFound,              // True if errors in this call
-                                         const std::string &ZoneName,    // Zone Name when Group=Building
-                                         const std::string &SpaceType    // Space Type when Group=Building
-    );
-
-    void DetermineMeterIPUnits(EnergyPlusData &state,
-                               OutputProcessor::RT_IPUnits &CodeForIPUnits, // Output Code for IP Units
-                               std::string const &ResourceType,             // Resource Type
-                               OutputProcessor::Unit MtrUnits,              // Meter units
-                               bool &ErrorsFound                            // true if errors found during subroutine
+    OutputProcessor::RT_IPUnits GetResourceIPUnits(EnergyPlusData &state,
+                                                   Constant::eResource resource, // Resource Type
+                                                   Constant::Units units,        // Meter units
+                                                   bool &ErrorsFound             // true if errors found during subroutine
     );
 
     void UpdateMeters(EnergyPlusData &state, int TimeStamp); // Current TimeStamp (for max/min)
@@ -664,19 +688,8 @@ namespace OutputProcessor {
                         bool PrintTimeStampToSQL // Print Time Stamp to SQL file
     );
 
-    void ReportHRMeters(EnergyPlusData &state, bool PrintTimeStampToSQL // Print Time Stamp to SQL file
+    void ReportMeters(EnergyPlusData &state, ReportFreq freq, bool PrintTimeStampToSQL // Print Time Stamp to SQL file
     );
-
-    void ReportDYMeters(EnergyPlusData &state, bool PrintTimeStampToSQL // Print Time Stamp to SQL file
-    );
-
-    void ReportMNMeters(EnergyPlusData &state, bool PrintTimeStampToSQL // Print Time Stamp to SQL file
-    );
-
-    void ReportSMMeters(EnergyPlusData &state, bool PrintTimeStampToSQL // Print Time Stamp to SQL file
-    );
-
-    void ReportYRMeters(EnergyPlusData &state, bool PrintTimeStampToSQL);
 
     void ReportForTabularReports(EnergyPlusData &state);
 
@@ -688,128 +701,57 @@ namespace OutputProcessor {
     // End of routines for Energy Meters implementation in EnergyPlus.
     // *****************************************************************************
 
-    void addEndUseSubcategory(EnergyPlusData &state, std::string const &EndUseName, std::string const &EndUseSubName);
-
-    void addEndUseSpaceType(EnergyPlusData &state, std::string const &EndUseName, std::string const &EndUseSpTypeName);
-
     void WriteTimeStampFormatData(EnergyPlusData &state,
                                   InputOutputFile &outputFile,
-                                  ReportingFrequency reportingInterval,              // Reporting frequency.
-                                  int reportID,                                      // The ID of the time stamp
-                                  std::string const &reportIDString,                 // The ID of the time stamp
-                                  std::string const &DayOfSimChr,                    // the number of days simulated so far
-                                  bool writeToSQL,                                   // write to SQLite
-                                  ObjexxFCL::Optional_int_const Month = _,           // the month of the reporting interval
-                                  ObjexxFCL::Optional_int_const DayOfMonth = _,      // The day of the reporting interval
-                                  ObjexxFCL::Optional_int_const Hour = _,            // The hour of the reporting interval
-                                  ObjexxFCL::Optional<Real64 const> EndMinute = _,   // The last minute in the reporting interval
-                                  ObjexxFCL::Optional<Real64 const> StartMinute = _, // The starting minute of the reporting interval
-                                  ObjexxFCL::Optional_int_const DST = _,             // A flag indicating whether daylight savings time is observed
-                                  ObjexxFCL::Optional_string_const DayType = _       // The day tied for the data (e.g., Monday)
+                                  ReportFreq freq,                    // Reporting frequency.
+                                  int reportID,                       // The ID of the time stamp
+                                  std::string const &DayOfSimChr,     // the number of days simulated so far
+                                  bool writeToSQL,                    // write to SQLite
+                                  int const Month = -1,               // the month of the reporting interval
+                                  int const DayOfMonth = -1,          // The day of the reporting interval
+                                  int const Hour = -1,                // The hour of the reporting interval
+                                  Real64 const EndMinute = -1.0,      // The last minute in the reporting interval
+                                  Real64 const StartMinute = -1.0,    // The starting minute of the reporting interval
+                                  int const DST = -1,                 // A flag indicating whether daylight savings time is observed
+                                  std::string_view const DayType = "" // The day tied for the data (e.g., Monday)
     );
 
     void WriteYearlyTimeStamp(EnergyPlusData &state,
                               InputOutputFile &outputFile,
-                              std::string const &reportIDString, // The ID of the time stamp
-                              std::string const &yearOfSimChr,   // the year of the simulation
+                              int reportID,
+                              std::string const &yearOfSimChr, // the year of the simulation
                               bool writeToSQL);
 
-    void WriteReportVariableDictionaryItem(EnergyPlusData &state,
-                                           ReportingFrequency reportingInterval, // The reporting interval (e.g., hourly, daily)
-                                           StoreType storeType,
-                                           int reportID,                        // The reporting ID for the data
-                                           int indexGroupKey,                   // The reporting group (e.g., Zone, Plant Loop, etc.)
-                                           std::string const &indexGroup,       // The reporting group (e.g., Zone, Plant Loop, etc.)
-                                           std::string const &reportIDChr,      // The reporting ID for the data
-                                           std::string_view const keyedValue,   // The key name for the data
-                                           std::string_view const variableName, // The variable's actual name
-                                           TimeStepType timeStepType,
-                                           OutputProcessor::Unit unitsForVar, // The variables units
-                                           ObjexxFCL::Optional_string_const customUnitName = _,
-                                           std::string_view const ScheduleName = {});
-
     void WriteMeterDictionaryItem(EnergyPlusData &state,
-                                  ReportingFrequency reportingInterval, // The reporting interval (e.g., hourly, daily)
+                                  ReportFreq freq, // The reporting interval (e.g., hourly, daily)
                                   StoreType storeType,
-                                  int reportID,                   // The reporting ID in for the variable
-                                  int indexGroupKey,              // The reporting group for the variable
-                                  std::string const &indexGroup,  // The reporting group for the variable
-                                  std::string const &reportIDChr, // The reporting ID in for the variable
-                                  std::string const &meterName,   // The variable's meter name
-                                  OutputProcessor::Unit unit,     // The variables units
-                                  bool cumulativeMeterFlag,       // A flag indicating cumulative data
-                                  bool meterFileOnlyFlag          // A flag indicating whether the data is to be written to standard output
+                                  int reportID,                  // The reporting ID in for the variable
+                                  std::string const &indexGroup, // The reporting group for the variable
+                                  std::string const &meterName,  // The variable's meter name
+                                  Constant::Units unit,          // The variables units
+                                  bool cumulativeMeterFlag,      // A flag indicating cumulative data
+                                  bool meterFileOnlyFlag         // A flag indicating whether the data is to be written to standard output
     );
-
-    void WriteRealVariableOutput(EnergyPlusData &state,
-                                 RealVariables &realVar,       // Real variable to write out
-                                 ReportingFrequency reportType // The report type or interval (e.g., hourly)
-    );
-
-    void WriteReportRealData(EnergyPlusData &state,
-                             int reportID,
-                             std::string const &creportID,
-                             Real64 repValue,
-                             StoreType storeType,
-                             Real64 numOfItemsStored,
-                             ReportingFrequency reportingInterval,
-                             Real64 minValue,
-                             int minValueDate,
-                             Real64 MaxValue,
-                             int maxValueDate);
 
     void WriteCumulativeReportMeterData(EnergyPlusData &state,
-                                        int reportID,                 // The variable's report ID
-                                        std::string const &creportID, // variable ID in characters
-                                        Real64 repValue,              // The variable's value
-                                        bool meterOnlyFlag            // A flag that indicates if the data should be written to standard output
-    );
-
-    void WriteReportMeterData(EnergyPlusData &state,
-                              int reportID,                         // The variable's report ID
-                              std::string const &creportID,         // variable ID in characters
-                              Real64 repValue,                      // The variable's value
-                              ReportingFrequency reportingInterval, // The variable's reporting interval (e.g., hourly)
-                              Real64 minValue,                      // The variable's minimum value during the reporting interval
-                              int minValueDate,                     // The date the minimum value occurred
-                              Real64 MaxValue,                      // The variable's maximum value during the reporting interval
-                              int maxValueDate,                     // The date of the maximum value
-                              bool meterOnlyFlag                    // Indicates whether the data is for the meter file only
+                                        int reportID,      // The variable's report ID
+                                        Real64 repValue,   // The variable's value
+                                        bool meterOnlyFlag // A flag that indicates if the data should be written to standard output
     );
 
     void WriteNumericData(EnergyPlusData &state,
-                          int reportID,                 // The variable's reporting ID
-                          std::string const &creportID, // variable ID in characters
-                          Real64 repValue               // The variable's value
+                          int reportID,   // The variable's reporting ID
+                          Real64 repValue // The variable's value
     );
 
     void WriteNumericData(EnergyPlusData &state,
-                          int reportID,                 // The variable's reporting ID
-                          std::string const &creportID, // variable ID in characters
-                          int32_t repValue              // The variable's value
-    );
-
-    void WriteIntegerVariableOutput(EnergyPlusData &state,
-                                    IntegerVariables &intVar,     // Integer variable to write out
-                                    ReportingFrequency reportType // The report type (i.e., the reporting interval)
-    );
-
-    void WriteReportIntegerData(EnergyPlusData &state,
-                                int reportID,                         // The variable's reporting ID
-                                std::string const &reportIDString,    // The variable's reporting ID (character)
-                                Real64 repValue,                      // The variable's value
-                                StoreType storeType,                  // Type of item (averaged or summed)
-                                Real64 numOfItemsStored,              // The number of items (hours or timesteps) of data stored
-                                ReportingFrequency reportingInterval, // The reporting interval (e.g., monthly)
-                                int minValue,                         // The variable's minimum value during the reporting interval
-                                int minValueDate,                     // The date the minimum value occurred
-                                int MaxValue,                         // The variable's maximum value during the reporting interval
-                                int maxValueDate                      // The date the maximum value occurred
+                          int reportID,    // The variable's reporting ID
+                          int32_t repValue // The variable's value
     );
 
     int DetermineIndexGroupKeyFromMeterName(EnergyPlusData &state, std::string const &meterName); // the meter name
 
-    std::string DetermineIndexGroupFromMeterGroup(MeterType const &meter); // the meter
+    std::string DetermineIndexGroupFromMeterGroup(Meter const *meter); // the meter
 
     void SetInternalVariableValue(EnergyPlusData &state,
                                   OutputProcessor::VariableType varType, // 1=integer, 2=real, 3=meter
@@ -817,12 +759,6 @@ namespace OutputProcessor {
                                   Real64 SetRealVal,                     // real value to set, if type is real or meter
                                   int SetIntVal                          // integer value to set if type is integer
     );
-
-    std::string unitEnumToStringBrackets(EnergyPlus::OutputProcessor::Unit unitIn);
-
-    std::string unitEnumToString(OutputProcessor::Unit unitIn);
-
-    OutputProcessor::Unit unitStringToEnum(std::string const &unitIn);
 
     std::string unitStringFromDDitem(EnergyPlusData &state, int ddItemPtr // index provided for DDVariableTypes
     );
@@ -833,6 +769,9 @@ namespace OutputProcessor {
         std::string varKey;
     };
 
+    std::string standardizeEndUseSub(EndUseCat endUseCat, std::string_view const endUseSubCat);
+    void addEndUseSubcategory(EnergyPlusData &state, EndUseCat endUseCat, std::string_view const endUseSubCat);
+    void addEndUseSpaceType(EnergyPlusData &state, EndUseCat endUseCat, std::string_view const endUseSpTypeName);
 } // namespace OutputProcessor
 
 //==============================================================================================
@@ -843,64 +782,84 @@ namespace OutputProcessor {
 // within the OutputProcessor.
 // *****************************************************************************
 
-void SetupOutputVariable(EnergyPlusData &state,
-                         std::string_view const VariableName,                  // String Name of variable (with units)
-                         OutputProcessor::Unit VariableUnit,                   // Actual units corresponding to the actual variable
-                         Real64 &ActualVariable,                               // Actual Variable, used to set up pointer
-                         OutputProcessor::SOVTimeStepType TimeStepTypeKey,     // Zone, HeatBalance=1, HVAC, System, Plant=2
-                         OutputProcessor::SOVStoreType VariableTypeKey,        // State, Average=1, NonState, Sum=2
-                         std::string_view const KeyedValue,                    // Associated Key for this variable
-                         ObjexxFCL::Optional_string_const ReportFreq = _,      // Internal use -- causes reporting at this freqency
-                         ObjexxFCL::Optional_string_const ResourceTypeKey = _, // Meter Resource Type (Electricity, Gas, etc)
-                         ObjexxFCL::Optional_string_const EndUseKey = _,       // Meter End Use Key (Lights, Heating, Cooling, etc)
-                         ObjexxFCL::Optional_string_const EndUseSubKey = _,    // Meter End Use Sub Key (General Lights, Task Lights, etc)
-                         ObjexxFCL::Optional_string_const GroupKey = _,        // Meter Super Group Key (Building, System, Plant)
-                         ObjexxFCL::Optional_string_const ZoneKey = _,         // Meter Zone Key (zone name)
-                         ObjexxFCL::Optional_int_const ZoneMult = _,           // Zone Multiplier, defaults to 1
-                         ObjexxFCL::Optional_int_const ZoneListMult = _,       // Zone List Multiplier, defaults to 1
-                         ObjexxFCL::Optional_int_const indexGroupKey = _,      // Group identifier for SQL output
-                         ObjexxFCL::Optional_string_const customUnitName = _,  // the custom name for the units from EMS definition of units
-                         ObjexxFCL::Optional_string_const SpaceType = _        // Space type (applicable for Building group only)
+void SetupOutputVariable(
+    EnergyPlusData &state,
+    std::string_view const name,                                                // String Name of variable (with units)
+    Constant::Units units,                                                      // Actual units corresponding to the actual variable
+    Real64 &ActualVariable,                                                     // Actual Variable, used to set up pointer
+    OutputProcessor::TimeStepType timeStepType,                                 // Zone, HeatBalance=1, HVAC, System, Plant=2
+    OutputProcessor::StoreType variableType,                                    // State, Average=1, NonState, Sum=2
+    std::string const &key,                                                     // Associated Key for this variable
+    Constant::eResource resource = Constant::eResource::Invalid,                // Meter Resource Type (Electricity, Gas, etc)
+    OutputProcessor::Group group = OutputProcessor::Group::Invalid,             // Meter Super Group Key (Building, System, Plant)
+    OutputProcessor::EndUseCat endUseCat = OutputProcessor::EndUseCat::Invalid, // Meter End Use Key (Lights, Heating, etc)
+    std::string_view const endUseSub = {},                                      // Meter End Use Sub Key (General Lights, Task Lights, etc)
+    std::string const &zone = {},                                               // Meter Zone Key (zone name)
+    int const zoneMult = 1,                                                     // Zone Multiplier, defaults to 1
+    int const zoneListMult = 1,                                                 // Zone List Multiplier, defaults to 1
+    std::string const &spaceType = {},                                          // Space type (applicable for Building group only)
+    int const indexGroupKey = -999,                                             // Group identifier for SQL output
+    std::string_view const customUnitName = {},                                 // the custom name for the units from EMS definition of units
+    OutputProcessor::ReportFreq reportFreq = OutputProcessor::ReportFreq::Hour  // Internal use -- causes reporting at this frequency
 );
 
 void SetupOutputVariable(EnergyPlusData &state,
-                         std::string_view const VariableName,              // String Name of variable
-                         OutputProcessor::Unit VariableUnit,               // Actual units corresponding to the actual variable
-                         int &ActualVariable,                              // Actual Variable, used to set up pointer
-                         OutputProcessor::SOVTimeStepType TimeStepTypeKey, // Zone, HeatBalance=1, HVAC, System, Plant=2
-                         OutputProcessor::SOVStoreType VariableTypeKey,    // State, Average=1, NonState, Sum=2
-                         std::string_view const KeyedValue,                // Associated Key for this variable
-                         ObjexxFCL::Optional_string_const ReportFreq = _,  // Internal use -- causes reporting at this freqency
-                         ObjexxFCL::Optional_int_const indexGroupKey = _   // Group identifier for SQL output
+                         std::string_view const VariableName,                                 // String Name of variable
+                         Constant::Units VariableUnit,                                        // Actual units corresponding to the actual variable
+                         int &ActualVariable,                                                 // Actual Variable, used to set up pointer
+                         OutputProcessor::TimeStepType TimeStepType,                          // Zone, HeatBalance=1, HVAC, System, Plant=2
+                         OutputProcessor::StoreType VariableType,                             // State, Average=1, NonState, Sum=2
+                         std::string const &KeyedValue,                                       // Associated Key for this variable
+                         int const indexGroupKey = -999,                                      // Group identifier for SQL output
+                         OutputProcessor::ReportFreq freq = OutputProcessor::ReportFreq::Hour // Internal use -- causes reporting at this frequency
 );
+
+// A helper to be able to cast an enum to an int& for use in the above function
+template <typename EnumType, typename = std::enable_if_t<std::is_enum_v<EnumType>>>
+void SetupOutputVariable(EnergyPlusData &state,
+                         std::string_view const VariableName,                                 // String Name of variable
+                         Constant::Units VariableUnit,                                        // Actual units corresponding to the actual variable
+                         EnumType &ActualVariable,                                            // Actual Variable, used to set up pointer
+                         OutputProcessor::TimeStepType TimeStepType,                          // Zone, HeatBalance=1, HVAC, System, Plant=2
+                         OutputProcessor::StoreType VariableType,                             // State, Average=1, NonState, Sum=2
+                         std::string const &KeyedValue,                                       // Associated Key for this variable
+                         int const indexGroupKey = -999,                                      // Group identifier for SQL output
+                         OutputProcessor::ReportFreq freq = OutputProcessor::ReportFreq::Hour // Internal use -- causes reporting at this frequency
+)
+{
+#if defined(__GNUC__) || defined(__clang__)
+#    pragma GCC diagnostic push
+#    pragma GCC diagnostic ignored "-Wstrict-aliasing"
+#endif
+    SetupOutputVariable(state, VariableName, VariableUnit, (int &)ActualVariable, TimeStepType, VariableType, KeyedValue, indexGroupKey, freq);
+#if defined(__GNUC__) || defined(__clang__)
+#    pragma GCC diagnostic pop
+#endif
+}
 
 void UpdateDataandReport(EnergyPlusData &state, OutputProcessor::TimeStepType TimeStepTypeKey); // What kind of data to update (Zone, HVAC)
-
-void AssignReportNumber(EnergyPlusData &state, int &ReportNumber);
 
 void GenOutputVariablesAuditReport(EnergyPlusData &state);
 
 void UpdateMeterReporting(EnergyPlusData &state);
 
 void SetInitialMeterReportingAndOutputNames(EnergyPlusData &state,
-                                            int WhichMeter,                                         // Which meter number
-                                            bool MeterFileOnlyIndicator,                            // true if this is a meter file only reporting
-                                            OutputProcessor::ReportingFrequency FrequencyIndicator, // at what frequency is the meter reported
-                                            bool CumulativeIndicator                                // true if this is a Cumulative meter reporting
+                                            int WhichMeter,                   // Which meter number
+                                            bool MeterFileOnlyIndicator,      // true if this is a meter file only reporting
+                                            OutputProcessor::ReportFreq freq, // at what frequency is the meter reported
+                                            bool CumulativeIndicator          // true if this is a Cumulative meter reporting
 );
 
-int GetMeterIndex(EnergyPlusData &state, std::string const &MeterName);
+int GetMeterIndex(EnergyPlusData const &state, std::string const &MeterName);
 
-std::string GetMeterResourceType(EnergyPlusData &state, int MeterNumber); // Which Meter Number (from GetMeterIndex)
+Constant::eResource GetMeterResourceType(EnergyPlusData const &state, int MeterNumber); // Which Meter Number (from GetMeterIndex)
 
-Real64 GetCurrentMeterValue(EnergyPlusData &state, int MeterNumber); // Which Meter Number (from GetMeterIndex)
+Real64 GetCurrentMeterValue(EnergyPlusData const &state, int MeterNumber); // Which Meter Number (from GetMeterIndex)
 
-Real64 GetInstantMeterValue(EnergyPlusData &state,
+Real64 GetInstantMeterValue(EnergyPlusData const &state,
                             int MeterNumber,                           // Which Meter Number (from GetMeterIndex)
                             OutputProcessor::TimeStepType TimeStepType // Whether this is zone of HVAC
 );
-
-void IncrementInstMeterCache(EnergyPlusData &state);
 
 Real64 GetInternalVariableValue(EnergyPlusData &state,
                                 OutputProcessor::VariableType varType, // 1=integer, 2=real, 3=meter
@@ -912,37 +871,14 @@ Real64 GetInternalVariableValueExternalInterface(EnergyPlusData &state,
                                                  int keyVarIndex                        // Array index
 );
 
-int GetNumMeteredVariables(EnergyPlusData &state,
+int GetNumMeteredVariables(EnergyPlusData const &state,
                            std::string const &ComponentType, // Given Component Type
                            std::string const &ComponentName  // Given Component Name (user defined)
 );
 
-void GetMeteredVariables(EnergyPlusData &state,
-                         std::string const &ComponentType,                                // Given Component Type
-                         std::string const &ComponentName,                                // Given Component Name (user defined)
-                         Array1D_int &VarIndexes,                                         // Variable Numbers
-                         Array1D<OutputProcessor::VariableType> &VarTypes,                // Variable Types (1=integer, 2=real, 3=meter)
-                         Array1D<OutputProcessor::TimeStepType> &TimeStepTypes,           // Variable Index Types (1=Zone,2=HVAC),
-                         Array1D<OutputProcessor::Unit> &unitsForVar,                     // units from enum for each variable
-                         std::map<int, DataGlobalConstants::ResourceType> &ResourceTypes, // ResourceTypes for each variable
-                         Array1D_string &EndUses,                                         // EndUses for each variable
-                         Array1D_string &Groups,                                          // Groups for each variable
-                         Array1D_string &Names,                                           // Variable Names for each variable
-                         int &NumFound                                                    // Number Found
-);
-
-void GetMeteredVariables(EnergyPlusData &state,
-                         std::string const &ComponentType,                                // Given Component Type
-                         std::string const &ComponentName,                                // Given Component Name (user defined)
-                         Array1D_int &VarIndexes,                                         // Variable Numbers
-                         Array1D<OutputProcessor::VariableType> &VarTypes,                // Variable Types (1=integer, 2=real, 3=meter)
-                         Array1D<OutputProcessor::TimeStepType> &TimeStepTypes,           // Variable Index Types (1=Zone,2=HVAC),
-                         Array1D<OutputProcessor::Unit> &unitsForVar,                     // units from enum for each variable
-                         std::map<int, DataGlobalConstants::ResourceType> &ResourceTypes, // ResourceTypes for each variable
-                         Array1D_string &EndUses,                                         // EndUses for each variable
-                         Array1D_string &Groups,                                          // Groups for each variable
-                         Array1D_string &Names,                                           // Variable Names for each variable
-                         Array1D_int &VarIDs                                              // Variable Report Numbers
+int GetMeteredVariables(EnergyPlusData &state,
+                        std::string const &ComponentName,                 // Given Component Name (user defined)
+                        Array1D<OutputProcessor::MeteredVar> &meteredVars // Number Found
 );
 
 void GetVariableKeyCountandType(EnergyPlusData &state,
@@ -951,87 +887,60 @@ void GetVariableKeyCountandType(EnergyPlusData &state,
                                 OutputProcessor::VariableType &varType,
                                 OutputProcessor::StoreType &varAvgSum,      // Variable  is Averaged=1 or Summed=2
                                 OutputProcessor::TimeStepType &varStepType, // Variable time step is Zone=1 or HVAC=2
-                                OutputProcessor::Unit &varUnits             // Units enumeration
+                                Constant::Units &varUnits                   // Units enumeration
 );
 
 void GetVariableKeys(EnergyPlusData &state,
                      std::string const &varName, // Standard variable name
                      OutputProcessor::VariableType varType,
-                     Array1D_string &keyNames,  // Specific key name
-                     Array1D_int &keyVarIndexes // Array index for
+                     Array1D_string &keyNames,
+                     Array1D_int &keyVarNums // Array index for
 );
 
-bool ReportingThisVariable(EnergyPlusData &state, std::string const &RepVarName);
+bool ReportingThisVariable(EnergyPlusData const &state, std::string const &RepVarName);
 
-void InitPollutionMeterReporting(EnergyPlusData &state, std::string const &ReportFreqName);
+void InitPollutionMeterReporting(EnergyPlusData &state, OutputProcessor::ReportFreq freq);
 
 void ProduceRDDMDD(EnergyPlusData &state);
 
-void AddToOutputVariableList(EnergyPlusData &state,
-                             std::string_view const VarName, // Variable Name
-                             OutputProcessor::TimeStepType TimeStepType,
-                             OutputProcessor::StoreType StateType,
-                             OutputProcessor::VariableType VariableType,
-                             OutputProcessor::Unit unitsForVar,
-                             ObjexxFCL::Optional_string_const customUnitName = _ // the custom name for the units from EMS definition of units
+int AddDDOutVar(EnergyPlusData const &state,
+                std::string_view const nameUC, // Variable Name
+                OutputProcessor::TimeStepType TimeStepType,
+                OutputProcessor::StoreType StateType,
+                OutputProcessor::VariableType VariableType,
+                Constant::Units unitsForVar,
+                std::string_view const customUnitName = {} // the custom name for the units from EMS definition of units
 );
 
 int initErrorFile(EnergyPlusData &state);
 
 struct OutputProcessorData : BaseGlobalStruct
 {
-
-    int InstMeterCacheSize = 1000;    // the maximum size of the instant meter cache used in GetInstantMeterValue
-    int InstMeterCacheSizeInc = 1000; // the increment for the instant meter cache used in GetInstantMeterValue
-    Array1D_int InstMeterCache;       // contains a list of RVariableTypes that make up a specific meter
-    int InstMeterCacheLastUsed = 0;   // the last item in the instant meter cache used
-    int CurrentReportNumber = 0;
     int NumVariablesForOutput = 0;
     int MaxVariablesForOutput = 0;
-    int NumOfRVariable_Setup = 0;
     int NumTotalRVariable = 0;
+    int NumOfRVariable = 0;
+    int NumOfRVariable_Setup = 0;
     int NumOfRVariable_Sum = 0;
     int NumOfRVariable_Meter = 0;
-    int NumOfRVariable = 0;
-    int MaxRVariable = 0;
+    int NumOfIVariable = 0;
     int NumOfIVariable_Setup = 0;
     int NumTotalIVariable = 0;
     int NumOfIVariable_Sum = 0;
-    int NumOfIVariable = 0;
-    int MaxIVariable = 0;
     bool OutputInitialized = false;
     OutputProcessor::ReportVDD ProduceReportVDD = OutputProcessor::ReportVDD::No;
     int NumHoursInMonth = 0;
     int NumHoursInSim = 0;
-    Array1D_int ReportList;
-    int NumReportList = 0;
-    int NumExtraVars = 0;
-    int NumOfReqVariables = 0;               // Current number of Requested Report Variables
-    int NumVarMeterArrays = 0;               // Current number of Arrays pointing to meters
-    int NumEnergyMeters = 0;                 // Current number of Energy Meters
-    Array1D<Real64> MeterValue;              // This holds the current timestep value for each meter.
-    int TimeStepStampReportNbr = 0;          // TimeStep and Hourly Report number
-    std::string TimeStepStampReportChr;      // TimeStep and Hourly Report number (character -- for printing)
-    bool TrackingHourlyVariables = false;    // Requested Hourly Report Variables
-    int DailyStampReportNbr = 0;             // Daily Report number
-    std::string DailyStampReportChr;         // Daily Report number (character -- for printing)
-    bool TrackingDailyVariables = false;     // Requested Daily Report Variables
-    int MonthlyStampReportNbr = 0;           // Monthly Report number
-    std::string MonthlyStampReportChr;       // Monthly Report number (character -- for printing)
-    bool TrackingMonthlyVariables = false;   // Requested Monthly Report Variables
-    int YearlyStampReportNbr = 0;            // Yearly Report number
-    std::string YearlyStampReportChr;        // Yearly Report number (character -- for printing)
-    bool TrackingYearlyVariables = false;    // Requested Yearly Report Variables
-    int RunPeriodStampReportNbr;             // RunPeriod Report number
-    std::string RunPeriodStampReportChr;     // RunPeriod Report number (character -- for printing)
-    bool TrackingRunPeriodVariables = false; // Requested RunPeriod Report Variables
-    Real64 TimeStepZoneSec = 0;              // Seconds from NumTimeStepInHour
+    std::vector<Real64> meterValues; // This holds the current timestep value for each meter.
+
+    std::array<int, (int)OutputProcessor::ReportFreq::Num> freqStampReportNums = {-1, -1, -1, -1, -1, -1, -1};
+    std::array<bool, (int)OutputProcessor::ReportFreq::Num> freqTrackingVariables = {false, false, false, false, false, false, false};
+
+    Real64 TimeStepZoneSec = 0; // Seconds from NumTimeStepInHour
     bool ErrorsLogged = false;
-    int MaxNumSubcategories = 1;
-    int maxNumEndUseSpaceTypes = 1;
     bool isFinalYear = false;
     bool GetOutputInputFlag = true;
-    OutputProcessor::ReportingFrequency minimumReportFrequency = OutputProcessor::ReportingFrequency::EachCall;
+    OutputProcessor::ReportFreq minimumReportFreq = OutputProcessor::ReportFreq::EachCall;
     std::vector<OutputProcessor::APIOutputVariableRequest> apiVarRequests;
     int ReportNumberCounter = 0;        // The report number is used in output reports as a key.
     int LHourP = -1;                    // Helps set hours for timestamp output
@@ -1039,96 +948,57 @@ struct OutputProcessorData : BaseGlobalStruct
     Real64 LEndMin = -1.0;              // Helps set minutes for timestamp output
     bool GetMeterIndexFirstCall = true; // trigger setup in GetMeterIndex
     bool InitFlag = true;
-    Array1D_int keyVarIndexes;                                                     // Array index for specific key name
-    int curKeyVarIndexLimit = 0;                                                   // current limit for keyVarIndexes
-    Array1D_string varNames;                                                       // stored variable names
-    Array1D_int ivarNames;                                                         // pointers for sorted information
-    int numVarNames = 0;                                                           // number of variable names
-    std::map<OutputProcessor::TimeStepType, OutputProcessor::TimeSteps> TimeValue; // Pointers to the actual TimeStep variables
-    Array1D<OutputProcessor::RealVariableType> RVariableTypes;                     // Variable Types structure (use NumOfRVariables to traverse)
-    Array1D<OutputProcessor::IntegerVariableType> IVariableTypes;                  // Variable Types structure (use NumOfIVariables to traverse)
-    Array1D<OutputProcessor::VariableTypeForDDOutput> DDVariableTypes;             // Variable Types structure (use NumVariablesForOutput to traverse)
-    Array1D<OutputProcessor::ReqReportVariables> ReqRepVars;
-    Array1D<OutputProcessor::MeterArrayType> VarMeterArrays;
-    Array1D<OutputProcessor::MeterType> EnergyMeters;
-    EPVector<OutputProcessor::EndUseCategoryType> EndUseCategory;
-    std::unordered_map<std::string, std::string> UniqueMeterNames;
+
+    std::array<OutputProcessor::TimeSteps, (int)OutputProcessor::TimeStepType::Num> TimeValue; // Pointers to the actual TimeStep variables
+
+    std::vector<OutputProcessor::OutVar *> outVars;     // Variables array (use NumOfRVariables to traverse)
+    std::vector<OutputProcessor::DDOutVar *> ddOutVars; // Variable Types structure (use NumVariablesForOutput to traverse)
+    std::map<std::string, int> ddOutVarMap;
+    std::vector<OutputProcessor::ReqVar *> reqVars;
+
+    std::vector<OutputProcessor::Meter *> meters;
+    std::map<std::string, int> meterMap;
+
     char stamp[OutputProcessor::N_WriteTimeStampFormatData];
-    char s_WriteReportRealData[129];
-    char s_WriteCumulativeReportMeterData[129];
-    char s_WriteReportMeterData[129];
-    char s_WriteNumericData[129];
     bool Rept = false;
     bool OpaqSurfWarned = false;
-    Array1D_string ValidMeterNames;
-    Array1D_int iValidMeterNames;
-    int NumValidMeters = 0;
 
-    // statics
+    // End-use stuff
+    int MaxNumSubcategories = 1;
+    int maxNumEndUseSpaceTypes = 1;
+    EPVector<OutputProcessor::EndUseCategoryType> EndUseCategory;
 
-    Real64 rDummy1TS = 0.0;
-    Real64 rDummy2TS = 0.0;
-    int iDummy1TS = 0;
-    int iDummy2TS = 0;
-    Real64 rDummy1 = 0.0;
-    Real64 rDummy2 = 0.0;
-    int iDummy1 = 0;
-    int iDummy2 = 0;
-    int indexGroupKey = -1;
+    void init_constant_state([[maybe_unused]] EnergyPlusData &state) override
+    {
+    }
+
+    void init_state([[maybe_unused]] EnergyPlusData &state) override
+    {
+    }
 
     void clear_state() override
     {
-        this->InstMeterCacheSize = 1000;
-        this->InstMeterCacheSizeInc = 1000;
-        this->InstMeterCache.deallocate();
-        this->InstMeterCacheLastUsed = 0;
-        this->CurrentReportNumber = 0;
         this->NumVariablesForOutput = 0;
         this->MaxVariablesForOutput = 0;
         this->NumOfRVariable_Setup = 0;
         this->NumTotalRVariable = 0;
         this->NumOfRVariable_Sum = 0;
         this->NumOfRVariable_Meter = 0;
-        this->NumOfRVariable = 0;
-        this->MaxRVariable = 0;
         this->NumOfIVariable_Setup = 0;
         this->NumTotalIVariable = 0;
         this->NumOfIVariable_Sum = 0;
-        this->NumOfIVariable = 0;
-        this->MaxIVariable = 0;
         this->OutputInitialized = false;
         this->ProduceReportVDD = OutputProcessor::ReportVDD::No;
         this->NumHoursInMonth = 0;
         this->NumHoursInSim = 0;
-        this->ReportList.deallocate();
-        this->NumReportList = 0;
-        this->NumExtraVars = 0;
-        this->NumOfReqVariables = 0;
-        this->NumVarMeterArrays = 0;
-        this->NumEnergyMeters = 0;
-        this->MeterValue.deallocate();
-        this->TimeStepStampReportNbr = 0;
-        this->TimeStepStampReportChr.clear();
-        this->TrackingHourlyVariables = false;
-        this->DailyStampReportNbr = 0;
-        this->DailyStampReportChr.clear();
-        this->TrackingDailyVariables = false;
-        this->MonthlyStampReportNbr = 0;
-        this->MonthlyStampReportChr.clear();
-        this->TrackingMonthlyVariables = false;
-        this->YearlyStampReportNbr = 0;
-        this->YearlyStampReportChr.clear();
-        this->TrackingYearlyVariables = false;
-        this->RunPeriodStampReportNbr = 0;
-        this->RunPeriodStampReportChr.clear();
-        this->TrackingRunPeriodVariables = false;
+        this->meterValues.clear();
+        this->freqStampReportNums = {-1, -1, -1, -1, -1, -1, -1};
+        this->freqTrackingVariables = {false};
         this->TimeStepZoneSec = 0;
         this->ErrorsLogged = false;
-        this->MaxNumSubcategories = 1;
-        this->maxNumEndUseSpaceTypes = 1;
         this->isFinalYear = false;
         this->GetOutputInputFlag = true;
-        this->minimumReportFrequency = OutputProcessor::ReportingFrequency::EachCall;
+        this->minimumReportFreq = OutputProcessor::ReportFreq::EachCall;
         this->apiVarRequests.clear();
         this->ReportNumberCounter = 0;
         this->LHourP = -1;
@@ -1136,35 +1006,39 @@ struct OutputProcessorData : BaseGlobalStruct
         this->LEndMin = -1.0;
         this->GetMeterIndexFirstCall = true;
         this->InitFlag = true;
-        this->keyVarIndexes.deallocate();
-        this->curKeyVarIndexLimit = 0;
-        this->varNames.deallocate();
-        this->ivarNames.deallocate();
-        this->numVarNames = 0;
-        this->TimeValue.clear();
-        this->RVariableTypes.deallocate();
-        this->IVariableTypes.deallocate();
-        this->DDVariableTypes.deallocate();
-        this->ReqRepVars.deallocate();
-        this->VarMeterArrays.deallocate();
-        this->EnergyMeters.deallocate();
-        this->EndUseCategory.deallocate();
-        this->UniqueMeterNames.clear();
 
-        this->rDummy1TS = 0.0;
-        this->rDummy2TS = 0.0;
-        this->iDummy1TS = 0;
-        this->iDummy2TS = 0;
-        this->rDummy1 = 0.0;
-        this->rDummy2 = 0.0;
-        this->iDummy1 = 0;
-        this->iDummy2 = 0;
-        this->indexGroupKey = -1;
+        for (int i = 0; i < (int)OutputProcessor::TimeStepType::Num; ++i) {
+            new (&this->TimeValue[i]) OutputProcessor::TimeSteps();
+        }
+
+        for (auto &outVar : this->outVars) {
+            delete outVar;
+        }
+        this->outVars.clear();
+
+        for (auto &ddOutVar : this->ddOutVars) {
+            delete ddOutVar;
+        }
+        this->ddOutVars.clear();
+        this->ddOutVarMap.clear();
+
+        for (auto &reqVar : this->reqVars) {
+            delete reqVar;
+        }
+        this->reqVars.clear();
+
+        for (auto &meter : this->meters) {
+            delete meter;
+        }
+        this->meters.clear();
+        this->meterMap.clear();
+
         this->Rept = false;
         this->OpaqSurfWarned = false;
-        this->ValidMeterNames.clear();
-        this->iValidMeterNames.clear();
-        this->NumValidMeters = 0;
+
+        this->MaxNumSubcategories = 1;
+        this->maxNumEndUseSpaceTypes = 1;
+        this->EndUseCategory.deallocate();
     }
 };
 

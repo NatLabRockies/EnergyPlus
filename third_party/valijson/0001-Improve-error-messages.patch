@@ -1,0 +1,98 @@
+From 5b3a70cfa9fdfd2c260e4743ecf14d688270a3a6 Mon Sep 17 00:00:00 2001
+From: Julien Marrec <julien.marrec@gmail.com>
+Date: Tue, 22 Apr 2025 16:40:37 +0200
+Subject: [PATCH 1/1] Improve error messages
+
+---
+ valijson/validation_visitor.hpp | 41 +++++++++++++++++++++----
+ 1 file changed, 35 insertions(+), 6 deletions(-)
+
+diff --git a/valijson/validation_visitor.hpp b/valijson/validation_visitor.hpp
+index e3f83e5..20df69f 100644
+--- a/valijson/validation_visitor.hpp
++++ b/valijson/validation_visitor.hpp
+@@ -342,7 +342,7 @@ public:
+ 
+         if (numValidated == 0) {
+             if (m_results) {
+-                m_results->pushError(m_context, "Failed to match against any enum values.");
++                m_results->pushError(m_context, "\"" + m_target.asString() + "\" - Failed to match against any enum values.");
+             }
+ 
+             return false;
+@@ -555,7 +555,7 @@ public:
+         if (constraint.getExclusiveMaximum()) {
+             if (m_target.asDouble() >= maximum) {
+                 if (m_results) {
+-                    m_results->pushError(m_context, "Expected number less than " + std::to_string(maximum));
++                    m_results->pushError(m_context, "\"" + m_target.asString() + "\" - Expected number less than " + std::to_string(maximum));
+                 }
+ 
+                 return false;
+@@ -563,7 +563,7 @@ public:
+ 
+         } else if (m_target.asDouble() > maximum) {
+             if (m_results) {
+-                m_results->pushError(m_context, "Expected number less than or equal to " + std::to_string(maximum));
++                m_results->pushError(m_context, "\"" + m_target.asString() + "\" - Expected number less than or equal to " + std::to_string(maximum));
+             }
+ 
+             return false;
+@@ -672,14 +672,14 @@ public:
+         if (constraint.getExclusiveMinimum()) {
+             if (m_target.asDouble() <= minimum) {
+                 if (m_results) {
+-                    m_results->pushError(m_context, "Expected number greater than " + std::to_string(minimum));
++                    m_results->pushError(m_context, "\"" + m_target.asString() + "\" - Expected number greater than " + std::to_string(minimum));
+                 }
+ 
+                 return false;
+             }
+         } else if (m_target.asDouble() < minimum) {
+             if (m_results) {
+-                m_results->pushError(m_context, "Expected number greater than or equal to " + std::to_string(minimum));
++                m_results->pushError(m_context, "\"" + m_target.asString() + "\" - Expected number greater than or equal to " + std::to_string(minimum));
+             }
+ 
+             return false;
+@@ -1219,7 +1219,36 @@ public:
+             if (numValidated > 0) {
+                 return true;
+             } else if (m_results) {
+-                m_results->pushError(m_context, "Value type not permitted by 'type' constraint.");
++                std::string type;
++                bool output_target = true;
++                if (m_target.isNumber()) {
++                    type = "number";
++                } else if(m_target.isString()) {
++                    type = "string";
++                } else if(m_target.isArray()) {
++                    type = "array";
++                    output_target = false;
++                } else if(m_target.isObject()) {
++                    type = "object";
++                    output_target = false;
++                } else if(m_target.isInteger()) {
++                    type = "integer";
++                } else if(m_target.isBool()) {
++                    type = "boolean";
++                } else if(m_target.isNull()) {
++                    type = "null";
++                } else {
++                    type = "unknown type";
++                    output_target = false;
++                }
++
++                if (output_target) {
++                    m_results->pushError(m_context,
++                                         "Value type \"" + type + "\" for input \"" + m_target.asString() + "\" not permitted by 'type' constraint.");
++                } else {
++                    m_results->pushError(m_context,
++                                         "Value type \"" + type + "\" not permitted by 'type' constraint.");
++                }
+             }
+         }
+ 
+-- 
+2.43.0
+

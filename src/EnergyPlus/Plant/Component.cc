@@ -1,7 +1,7 @@
-// EnergyPlus, Copyright (c) 1996-2023, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
-// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other
+// National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
 // contributors. All rights reserved.
 //
 // NOTICE: This Software was developed under funding from the U.S. Department of Energy and the
@@ -45,6 +45,7 @@
 // OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 // POSSIBILITY OF SUCH DAMAGE.
 
+// EnergyPlus Headers
 #include <EnergyPlus/Data/EnergyPlusData.hh>
 #include <EnergyPlus/Plant/Component.hh>
 #include <EnergyPlus/Plant/DataPlant.hh>
@@ -72,7 +73,7 @@ namespace DataPlant {
         //       MODIFIED       June 2000  -Brandon Anderson
         //                             Changed to Group Similar Components.  Components will
         //                         be defined by ComponentType:SpecificComponent.
-        //                         The colon will act as the type delimeter, So all
+        //                         The colon will act as the type delimiter, So all
         //                         components of one type will be grouped. ex.(Boilers,Chillers)
         //                       May 2003 - Simon Rees
         //                         Added initial loop to force free cooling chiller etc to be
@@ -126,5 +127,13 @@ namespace DataPlant {
         return state.dataPlnt->PlantLoop(plantLoc.loopNum).LoopSide(plantLoc.loopSideNum).Branch(plantLoc.branchNum).Comp(plantLoc.compNum);
     }
 
+    Real64 CompData::getDynamicMaxCapacity(EnergyPlusData &state) const
+    {
+        if (this->compPtr == NULL) {
+            return this->MaxLoad;
+        }
+        Real64 possibleLoad = this->compPtr->getDynamicMaxCapacity(state);
+        return (possibleLoad == 0) ? this->MaxLoad : possibleLoad;
+    }
 } // namespace DataPlant
 } // namespace EnergyPlus

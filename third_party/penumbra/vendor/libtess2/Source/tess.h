@@ -46,6 +46,7 @@ extern "C" {
 //typedef struct TESStesselator TESStesselator;
 
 struct TESStesselator {
+	jmp_buf env;			/* place to jump to when memAllocs fail */
 
 	/*** state needed for collecting the input data ***/
 	TESSmesh	*mesh;		/* stores the input contours, and eventually
@@ -83,7 +84,6 @@ struct TESStesselator {
 
 	TESSalloc alloc;
 
-	jmp_buf env;			/* place to jump to when memAllocs fail */
 };
 
 #ifdef __cplusplus

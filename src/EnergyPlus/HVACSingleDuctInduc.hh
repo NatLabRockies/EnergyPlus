@@ -1,7 +1,7 @@
-// EnergyPlus, Copyright (c) 1996-2023, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
-// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other
+// National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
 // contributors. All rights reserved.
 //
 // NOTICE: This Software was developed under funding from the U.S. Department of Energy and the
@@ -76,22 +76,21 @@ namespace HVACSingleDuctInduc {
     {
         // Members
         // input data
-        std::string Name;           // name of unit
-        std::string UnitType;       // type of unit
-        SingleDuct_CV UnitType_Num; // index to type of unit
-        std::string Sched;          // availability schedule
-        int SchedPtr;               // index to schedule
-        Real64 MaxTotAirVolFlow;    // m3/s (autosizable)
-        Real64 MaxTotAirMassFlow;   // kg/s
-        Real64 InducRatio;          // ratio of induced air flow to primary air flow
-        int PriAirInNode;           // unit primary air inlet node number
-        int SecAirInNode;           // unit induced air inlet node number
-        int OutAirNode;             // unit air outlet node number
-        int HWControlNode;          // hot water control node
-        int CWControlNode;          // cold water control node
-        std::string HCoilType;      // type of heating coil component
-        std::string HCoil;          // name of heating coil component
-        int HCoil_Num;              // index to this coil
+        std::string Name;                      // name of unit
+        std::string UnitType;                  // type of unit
+        SingleDuct_CV UnitType_Num;            // index to type of unit
+        Sched::Schedule *availSched = nullptr; // index to schedule
+        Real64 MaxTotAirVolFlow;               // m3/s (autosizable)
+        Real64 MaxTotAirMassFlow;              // kg/s
+        Real64 InducRatio;                     // ratio of induced air flow to primary air flow
+        int PriAirInNode;                      // unit primary air inlet node number
+        int SecAirInNode;                      // unit induced air inlet node number
+        int OutAirNode;                        // unit air outlet node number
+        int HWControlNode;                     // hot water control node
+        int CWControlNode;                     // cold water control node
+        std::string HCoilType;                 // type of heating coil component
+        std::string HCoil;                     // name of heating coil component
+        int HCoil_Num;                         // index to this coil
         DataPlant::PlantEquipmentType HeatingCoilType;
         Real64 MaxVolHotWaterFlow; // m3/s (autosizable)
         Real64 MaxHotWaterFlow;    // kg/s
@@ -127,18 +126,18 @@ namespace HVACSingleDuctInduc {
 
         // Default Constructor
         IndUnitData()
-            : UnitType_Num(SingleDuct_CV::Invalid), SchedPtr(0), MaxTotAirVolFlow(0.0), MaxTotAirMassFlow(0.0), InducRatio(2.5), PriAirInNode(0),
-              SecAirInNode(0), OutAirNode(0), HWControlNode(0), CWControlNode(0), HCoil_Num(0),
-              HeatingCoilType(DataPlant::PlantEquipmentType::Invalid), MaxVolHotWaterFlow(0.0), MaxHotWaterFlow(0.0), MinVolHotWaterFlow(0.0),
-              MinHotWaterFlow(0.0), HotControlOffset(0.0), HWPlantLoc{}, HWCoilFailNum1(0), HWCoilFailNum2(0), CCoil_Num(0),
-              CoolingCoilType(DataPlant::PlantEquipmentType::Invalid), MaxVolColdWaterFlow(0.0), MaxColdWaterFlow(0.0), MinVolColdWaterFlow(0.0),
-              MinColdWaterFlow(0.0), ColdControlOffset(0.0), CWPlantLoc{}, CWCoilFailNum1(0), CWCoilFailNum2(0), Mixer_Num(0), MaxPriAirMassFlow(0.0),
-              MaxSecAirMassFlow(0.0), ADUNum(0), DesCoolingLoad(0.0), DesHeatingLoad(0.0), CtrlZoneNum(0), CtrlZoneInNodeIndex(0), AirLoopNum(0),
-              OutdoorAirFlowRate(0.0)
+            : UnitType_Num(SingleDuct_CV::Invalid), MaxTotAirVolFlow(0.0), MaxTotAirMassFlow(0.0), InducRatio(2.5), PriAirInNode(0), SecAirInNode(0),
+              OutAirNode(0), HWControlNode(0), CWControlNode(0), HCoil_Num(0), HeatingCoilType(DataPlant::PlantEquipmentType::Invalid),
+              MaxVolHotWaterFlow(0.0), MaxHotWaterFlow(0.0), MinVolHotWaterFlow(0.0), MinHotWaterFlow(0.0), HotControlOffset(0.0), HWPlantLoc{},
+              HWCoilFailNum1(0), HWCoilFailNum2(0), CCoil_Num(0), CoolingCoilType(DataPlant::PlantEquipmentType::Invalid), MaxVolColdWaterFlow(0.0),
+              MaxColdWaterFlow(0.0), MinVolColdWaterFlow(0.0), MinColdWaterFlow(0.0), ColdControlOffset(0.0), CWPlantLoc{}, CWCoilFailNum1(0),
+              CWCoilFailNum2(0), Mixer_Num(0), MaxPriAirMassFlow(0.0), MaxSecAirMassFlow(0.0), ADUNum(0), DesCoolingLoad(0.0), DesHeatingLoad(0.0),
+              CtrlZoneNum(0), CtrlZoneInNodeIndex(0), AirLoopNum(0), OutdoorAirFlowRate(0.0)
         {
         }
         void ReportIndUnit(EnergyPlusData &state);
         void CalcOutdoorAirVolumeFlowRate(EnergyPlusData &state);
+        void reportTerminalUnit(EnergyPlusData &state);
     };
 
     void SimIndUnit(EnergyPlusData &state,
@@ -191,6 +190,14 @@ struct HVACSingleDuctInducData : BaseGlobalStruct
     Array1D_bool MyAirDistInitFlag;
     Array1D<HVACSingleDuctInduc::IndUnitData> IndUnit;
     bool ZoneEquipmentListChecked = false;
+
+    void init_constant_state([[maybe_unused]] EnergyPlusData &state) override
+    {
+    }
+
+    void init_state([[maybe_unused]] EnergyPlusData &state) override
+    {
+    }
 
     void clear_state() override
     {

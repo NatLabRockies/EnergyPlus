@@ -35,9 +35,9 @@
 #include <picojson.h>
 #endif
 
-#include <valijson/adapters/adapter.hpp>
-#include <valijson/adapters/basic_adapter.hpp>
-#include <valijson/adapters/frozen_value.hpp>
+#include <valijson/internal/adapter.hpp>
+#include <valijson/internal/basic_adapter.hpp>
+#include <valijson/internal/frozen_value.hpp>
 #include <valijson/exceptions.hpp>
 
 namespace valijson {
@@ -676,7 +676,7 @@ public:
 
 private:
 
-    /// Iternal copy of the original PicoJson iterator
+    /// Internal copy of the original PicoJson iterator
     picojson::object::const_iterator m_itr;
 };
 

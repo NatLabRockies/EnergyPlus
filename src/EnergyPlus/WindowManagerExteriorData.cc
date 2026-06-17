@@ -1,7 +1,7 @@
-// EnergyPlus, Copyright (c) 1996-2023, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
-// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other
+// National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
 // contributors. All rights reserved.
 //
 // NOTICE: This Software was developed under funding from the U.S. Department of Energy and the
@@ -45,8 +45,13 @@
 // OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 // POSSIBILITY OF SUCH DAMAGE.
 
+// C++ Headers
 #include <cassert>
 
+// Third Party Headers
+#include <WCEMultiLayerOptics.hpp>
+
+// EnergyPlus Headers
 #include <EnergyPlus/Data/EnergyPlusData.hh>
 #include <EnergyPlus/DataBSDFWindow.hh>
 #include <EnergyPlus/DataHeatBalance.hh>
@@ -54,8 +59,6 @@
 #include <EnergyPlus/WindowComplexManager.hh>
 #include <EnergyPlus/WindowManager.hh>
 #include <EnergyPlus/WindowManagerExteriorData.hh>
-
-#include <WCEMultiLayerOptics.hpp>
 
 namespace EnergyPlus {
 
@@ -68,7 +71,7 @@ using namespace FenestrationCommon;
 using namespace SpectralAveraging;
 using namespace MultiLayerOptics;
 
-namespace WindowManager {
+namespace Window {
 
     bool isSurfaceHit(EnergyPlusData &state, const int t_SurfNum, const Vector &t_Ray)
     {
@@ -82,8 +85,8 @@ namespace WindowManager {
         Real64 Phi = 0;
 
         // get window tilt and azimuth
-        Real64 Gamma = DataGlobalConstants::DegToRadians * state.dataSurface->Surface(t_SurfNum).Tilt;
-        Real64 Alpha = DataGlobalConstants::DegToRadians * state.dataSurface->Surface(t_SurfNum).Azimuth;
+        Real64 Gamma = Constant::DegToRad * state.dataSurface->Surface(t_SurfNum).Tilt;
+        Real64 Alpha = Constant::DegToRad * state.dataSurface->Surface(t_SurfNum).Azimuth;
 
         RayIdentificationType RadType = RayIdentificationType::Front_Incident;
 
@@ -94,8 +97,8 @@ namespace WindowManager {
         // get the corresponding local Theta, Phi for ray
         W6CoordsFromWorldVect(state, t_Ray, RadType, Gamma, Alpha, Theta, Phi);
 
-        Theta = 180 / DataGlobalConstants::Pi * Theta;
-        Phi = 180 / DataGlobalConstants::Pi * Phi;
+        Theta = 180 / Constant::Pi * Theta;
+        Phi = 180 / Constant::Pi * Phi;
 
         return std::make_pair(Theta, Phi);
     }
@@ -119,10 +122,10 @@ namespace WindowManager {
         //          April 2021: returning CSeries instead of pointer to CSeries
 
         // PURPOSE OF THIS SUBROUTINE:
-        // Handles solar radiation spetrum from defalut location or IDF
+        // Handles solar radiation spetrum from default location or IDF
         CSeries solarRadiation;
 
-        for (int i = 1; i <= state.dataWindowManager->nume; ++i) {
+        for (int i = 1; i <= nume; ++i) {
             solarRadiation.addProperty(state.dataWindowManager->wle[i - 1], state.dataWindowManager->e[i - 1]);
         }
 
@@ -140,10 +143,10 @@ namespace WindowManager {
         //          April 2021: Function now returns CSeries instead of pointer to CSeries
 
         // PURPOSE OF THIS SUBROUTINE:
-        // Handles solar radiation spetrum from defalut location or IDF
+        // Handles solar radiation spetrum from default location or IDF
         CSeries visibleResponse;
 
-        for (int i = 1; i <= state.dataWindowManager->numt3; ++i) {
+        for (int i = 1; i <= numt3; ++i) {
             visibleResponse.addProperty(state.dataWindowManager->wlt3[i - 1], state.dataWindowManager->y30[i - 1]);
         }
 
@@ -161,9 +164,12 @@ namespace WindowManager {
 
         // PURPOSE OF THIS SUBROUTINE:
         // Reads spectral data value
+
+        auto &s_mat = state.dataMaterial;
+
         assert(t_SampleDataPtr != 0); // It must not be called for zero value
         std::shared_ptr<CSpectralSampleData> aSampleData = std::make_shared<CSpectralSampleData>();
-        auto spectralData = state.dataHeatBal->SpectralData(t_SampleDataPtr);
+        auto spectralData = s_mat->SpectralData(t_SampleDataPtr); // (AUTO_OK_OBJ)
         int numOfWl = spectralData.NumOfWavelengths;
         for (int i = 1; i <= numOfWl; ++i) {
             Real64 wl = spectralData.WaveLength(i);
@@ -177,7 +183,7 @@ namespace WindowManager {
     }
 
     ///////////////////////////////////////////////////////////////////////////////
-    std::shared_ptr<CSpectralSampleData> CWCESpecturmProperties::getSpectralSample(Material::MaterialProperties const &t_MaterialProperties)
+    std::shared_ptr<CSpectralSampleData> CWCESpecturmProperties::getSpectralSample(Material::MaterialGlass const &t_MaterialProperties)
     {
         Real64 Tsol = t_MaterialProperties.Trans;
         Real64 Rfsol = t_MaterialProperties.ReflectSolBeamFront;
@@ -202,17 +208,12 @@ namespace WindowManager {
         return aSampleData;
     }
 
-    ///////////////////////////////////////////////////////////////////////////////
-    //   CWindowConstructionsSimplified
-    ///////////////////////////////////////////////////////////////////////////////
-    std::unique_ptr<CWindowConstructionsSimplified> CWindowConstructionsSimplified::p_inst = nullptr;
-
-    CWindowConstructionsSimplified &CWindowConstructionsSimplified::instance()
+    CWindowConstructionsSimplified &CWindowConstructionsSimplified::instance(EnergyPlusData &state)
     {
-        if (p_inst == nullptr) {
-            p_inst = std::unique_ptr<CWindowConstructionsSimplified>(new CWindowConstructionsSimplified());
+        if (state.dataWindowManagerExterior->p_inst == nullptr) {
+            state.dataWindowManagerExterior->p_inst = std::unique_ptr<CWindowConstructionsSimplified>(new CWindowConstructionsSimplified());
         }
-        return *p_inst;
+        return *state.dataWindowManagerExterior->p_inst;
     }
 
     CWindowConstructionsSimplified::CWindowConstructionsSimplified()
@@ -244,7 +245,7 @@ namespace WindowManager {
                 aEqLayer->addLayer(iguLayers[i]);
             }
 
-            auto aSolarSpectrum = CWCESpecturmProperties::getDefaultSolarRadiationSpectrum(state);
+            auto aSolarSpectrum = CWCESpecturmProperties::getDefaultSolarRadiationSpectrum(state); // (AUTO_OK_OBJ)
             aEqLayer->setSourceData(aSolarSpectrum);
             m_Equivalent[std::make_pair(t_Range, t_ConstrNum)] = aEqLayer;
         }
@@ -254,20 +255,19 @@ namespace WindowManager {
 
     void CWindowConstructionsSimplified::clearState()
     {
-        p_inst = nullptr;
     }
 
     IGU_Layers CWindowConstructionsSimplified::getLayers(EnergyPlusData &state, WavelengthRange const t_Range, int const t_ConstrNum) const
     {
-        Layers_Map aMap = m_Layers.at(t_Range);
+        Layers_Map aMap = m_Layers.at(t_Range); // Do you mean to make a copy of the entire map here?
         auto it = aMap.find(t_ConstrNum);
         if (it == aMap.end()) {
             ShowFatalError(state, "Incorrect construction selection.");
             // throw std::runtime_error("Incorrect construction selection.");
         }
-        return aMap.at(t_ConstrNum);
+        return it->second;
     }
 
-} // namespace WindowManager
+} // namespace Window
 
 } // namespace EnergyPlus

@@ -86,6 +86,12 @@ IF EXIST eplusout.sln   DEL eplusout.sln
 IF EXIST epluszsz.csv   DEL epluszsz.csv
 IF EXIST epluszsz.tab   DEL epluszsz.tab
 IF EXIST epluszsz.txt   DEL epluszsz.txt
+IF EXIST epluspsz.csv   DEL epluspsz.csv
+IF EXIST epluspsz.tab   DEL epluspsz.tab
+IF EXIST epluspsz.txt   DEL epluspsz.txt
+IF EXIST eplusspsz.csv  DEL eplusspsz.csv
+IF EXIST eplusspsz.tab  DEL eplusspsz.tab
+IF EXIST eplusspsz.txt  DEL eplusspsz.txt
 IF EXIST eplusssz.csv   DEL eplusssz.csv
 IF EXIST eplusssz.tab   DEL eplusssz.tab
 IF EXIST eplusssz.txt   DEL eplusssz.txt
@@ -157,6 +163,14 @@ IF EXIST "%output_path%%~1.Zsz" DEL "%output_path%%~1.Zsz"
 IF EXIST "%output_path%%~1Zsz.csv" DEL "%output_path%%~1Zsz.csv"
 IF EXIST "%output_path%%~1Zsz.tab" DEL "%output_path%%~1Zsz.tab"
 IF EXIST "%output_path%%~1Zsz.txt" DEL "%output_path%%~1Zsz.txt"
+IF EXIST "%output_path%%~1.Psz" DEL "%output_path%%~1.Psz"
+IF EXIST "%output_path%%~1Psz.csv" DEL "%output_path%%~1Psz.csv"
+IF EXIST "%output_path%%~1Psz.tab" DEL "%output_path%%~1Psz.tab"
+IF EXIST "%output_path%%~1Psz.txt" DEL "%output_path%%~1Psz.txt"
+IF EXIST "%output_path%%~1.Spsz" DEL "%output_path%%~1.Spsz"
+IF EXIST "%output_path%%~1Spsz.csv" DEL "%output_path%%~1Spsz.csv"
+IF EXIST "%output_path%%~1Spsz.tab" DEL "%output_path%%~1Spsz.tab"
+IF EXIST "%output_path%%~1Spsz.txt" DEL "%output_path%%~1Spsz.txt"
 IF EXIST "%output_path%%~1.ssz" DEL "%output_path%%~1.ssz"
 IF EXIST "%output_path%%~1Ssz.csv" DEL "%output_path%%~1Ssz.csv"
 IF EXIST "%output_path%%~1Ssz.tab" DEL "%output_path%%~1Ssz.tab"
@@ -292,6 +306,13 @@ IF EXIST SLABSurfaceTemps.TXT DEL SLABSurfaceTemps.TXT
  IF NOT EXIST expandedidf.err  "%program_path%%program_name%"
  if %pausing%==Y pause
  
+:  6.0 If native csv output is present, then skip convertESOMTR and ReadVarsESO post-processing
+IF EXIST eplusout.csv GOTO skipReadVars
+IF EXIST eplusout.tab GOTO skipReadVars
+IF EXIST eplusout.txt GOTO skipReadVars
+IF EXIST eplusmtr.csv GOTO skipReadVars
+IF EXIST eplusmtr.tab GOTO skipReadVars
+IF EXIST eplusmtr.txt GOTO skipReadVars
 
 :  6&8. Copy Post Processing Program command file(s) to working directory
  IF EXIST "%input_path%%~1.rvi" copy "%input_path%%~1.rvi" eplusout.inp
@@ -309,6 +330,8 @@ IF EXIST eplusmtr.inp %post_proc%ReadVarsESO.exe eplusmtr.inp %rvset%
 IF NOT EXIST eplusmtr.inp echo eplusout.mtr >test.mvi
 IF NOT EXIST eplusmtr.inp echo eplusmtr.csv >>test.mvi
 IF NOT EXIST eplusmtr.inp %post_proc%ReadVarsESO.exe test.mvi %rvset%
+:skipReadVars
+
 IF EXIST eplusout.bnd %post_proc%HVAC-Diagram.exe
 :if %pausing%==Y pause
 
@@ -330,6 +353,12 @@ IF EXIST eplusout.bnd %post_proc%HVAC-Diagram.exe
  IF EXIST epluszsz.csv MOVE epluszsz.csv "%output_path%%~1Zsz.csv"
  IF EXIST epluszsz.tab MOVE epluszsz.tab "%output_path%%~1Zsz.tab"
  IF EXIST epluszsz.txt MOVE epluszsz.txt "%output_path%%~1Zsz.txt"
+ IF EXIST epluspsz.csv MOVE epluspsz.csv "%output_path%%~1Psz.csv"
+ IF EXIST epluspsz.tab MOVE epluspsz.tab "%output_path%%~1Psz.tab"
+ IF EXIST epluspsz.txt MOVE epluspsz.txt "%output_path%%~1Psz.txt"
+ IF EXIST eplusspsz.csv MOVE eplusspsz.csv "%output_path%%~1Spsz.csv"
+ IF EXIST eplusspsz.tab MOVE eplusspsz.tab "%output_path%%~1Spsz.tab"
+ IF EXIST eplusspsz.txt MOVE eplusspsz.txt "%output_path%%~1Spsz.txt"
  IF EXIST eplusssz.csv MOVE eplusssz.csv "%output_path%%~1Ssz.csv"
  IF EXIST eplusssz.tab MOVE eplusssz.tab "%output_path%%~1Ssz.tab"
  IF EXIST eplusssz.txt MOVE eplusssz.txt "%output_path%%~1Ssz.txt"

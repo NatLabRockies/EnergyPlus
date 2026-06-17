@@ -1,0 +1,37 @@
+From 1458caf2bf6932e9d04d22707aca2b8fca32f9bb Mon Sep 17 00:00:00 2001
+From: Julien Marrec <julien.marrec@gmail.com>
+Date: Tue, 22 Apr 2025 17:22:38 +0200
+Subject: [PATCH 1/1] Eliminate an avoidable std::regex and replace with
+ RegexEngine
+
+---
+ valijson/validation_visitor.hpp | 7 +++++--
+ 1 file changed, 5 insertions(+), 2 deletions(-)
+
+diff --git a/valijson/validation_visitor.hpp b/valijson/validation_visitor.hpp
+index 20df69f..4693828 100644
+--- a/valijson/validation_visitor.hpp
++++ b/valijson/validation_visitor.hpp
+@@ -1634,14 +1634,17 @@ private:
+             // PropertiesConstraint. does std::regex currently support
+             // custom allocators? Anyway, this isn't an issue here, because Valijson's
+             // JSON Scheme validator does not yet support custom allocators.
+-            const std::regex r(patternPropertyStr);
++            auto it = m_regexesCache.find(patternPropertyStr);
++            if (it == m_regexesCache.end()) {
++                it = m_regexesCache.emplace(patternPropertyStr, RegexEngine(patternPropertyStr)).first;
++            }
+ 
+             bool matchFound = false;
+ 
+             // Recursively validate all matching properties
+             typedef const typename AdapterType::ObjectMember ObjectMember;
+             for (const ObjectMember m : m_object) {
+-                if (std::regex_search(m.first, r)) {
++                if (RegexEngine::search(m.first, it->second)) {
+                     matchFound = true;
+                     if (m_propertiesMatched) {
+                         m_propertiesMatched->insert(m.first);
+-- 
+2.43.0
+

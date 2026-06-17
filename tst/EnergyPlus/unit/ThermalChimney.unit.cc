@@ -1,7 +1,7 @@
-// EnergyPlus, Copyright (c) 1996-2023, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
-// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other
+// National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
 // contributors. All rights reserved.
 //
 // NOTICE: This Software was developed under funding from the U.S. Department of Energy and the
@@ -76,11 +76,9 @@
 using namespace EnergyPlus;
 using namespace EnergyPlus::DataEnvironment;
 using namespace EnergyPlus::DataHeatBalance;
-using namespace EnergyPlus::DataHVACGlobals;
 using namespace EnergyPlus::InternalHeatGains;
 using namespace EnergyPlus::HeatBalanceManager;
 using namespace EnergyPlus::OutputProcessor;
-using namespace EnergyPlus::ScheduleManager;
 using namespace EnergyPlus::DataSurfaces;
 using namespace EnergyPlus::DataHeatBalSurface;
 using namespace SimulationManager;
@@ -90,7 +88,7 @@ TEST_F(EnergyPlusFixture, ThermalChimney_EMSAirflow_Test)
 
     std::string const idf_objects = delimited_string({
 
-        "  Version,9.3;",
+        "  Version," + DataStringGlobals::MatchVersion + ";",
 
         "  SimulationControl,",
         "    NO,                      !- Do Zone Sizing Calculation",
@@ -1102,6 +1100,7 @@ TEST_F(EnergyPlusFixture, ThermalChimney_EMSAirflow_Test)
     });
 
     ASSERT_TRUE(process_idf(idf_objects));
+    state->init_state(*state);
 
     state->dataIPShortCut->lNumericFieldBlanks.allocate(1000);
     state->dataIPShortCut->lAlphaFieldBlanks.allocate(1000);
@@ -1122,7 +1121,7 @@ TEST_F(EnergyPlusFixture, ThermalChimney_EMSAirflow_Test)
     EXPECT_FALSE(localErrorsFound);
     HeatBalanceManager::GetZoneData(*state, localErrorsFound);
     EXPECT_FALSE(localErrorsFound);
-    HeatBalanceManager::GetWindowGlassSpectralData(*state, localErrorsFound);
+    Material::GetWindowGlassSpectralData(*state, localErrorsFound);
     EXPECT_FALSE(localErrorsFound);
     Material::GetMaterialData(*state, localErrorsFound);
     EXPECT_FALSE(localErrorsFound);
@@ -1135,8 +1134,6 @@ TEST_F(EnergyPlusFixture, ThermalChimney_EMSAirflow_Test)
     state->dataSurfaceGeometry->SinBldgRotAppGonly = 0.0;
     SurfaceGeometry::GetSurfaceData(*state, localErrorsFound);
     EXPECT_FALSE(localErrorsFound);
-    ScheduleManager::ProcessScheduleInput(*state);
-    state->dataScheduleMgr->ScheduleInputProcessed = true;
 
     state->dataHeatBal->Zone(2).HasWindow = true;
     state->dataHeatBal->Zone(4).HasWindow = true;
@@ -1144,24 +1141,24 @@ TEST_F(EnergyPlusFixture, ThermalChimney_EMSAirflow_Test)
     state->dataHeatBalSurf->SurfHConvInt.allocate(state->dataSurface->TotSurfaces);
     state->dataHeatBalSurf->SurfHConvInt = 0.1;
     state->dataHeatBalSurf->SurfTempIn = 25.00;
-    int surfNum = UtilityRoutines::FindItemInList("ZN002:WALL001", state->dataSurface->Surface);
+    int surfNum = Util::FindItemInList("ZN002:WALL001", state->dataSurface->Surface);
     state->dataHeatBalSurf->SurfTempIn(surfNum) = 25.92;
-    surfNum = UtilityRoutines::FindItemInList("ZN002:WALL001:WIN001", state->dataSurface->Surface);
+    surfNum = Util::FindItemInList("ZN002:WALL001:WIN001", state->dataSurface->Surface);
     state->dataHeatBalSurf->SurfTempIn(surfNum) = 25.92;
-    surfNum = UtilityRoutines::FindItemInList("ZN002:WALL004", state->dataSurface->Surface);
+    surfNum = Util::FindItemInList("ZN002:WALL004", state->dataSurface->Surface);
     state->dataHeatBalSurf->SurfTempIn(surfNum) = 26.99;
-    surfNum = UtilityRoutines::FindItemInList("ZN004:WALL001:WIN001", state->dataSurface->Surface);
+    surfNum = Util::FindItemInList("ZN004:WALL001:WIN001", state->dataSurface->Surface);
     state->dataHeatBalSurf->SurfTempIn(surfNum) = 22.99;
     state->dataZoneTempPredictorCorrector->zoneHeatBalance.allocate(state->dataGlobal->NumOfZones);
     for (auto &thisZoneHB : state->dataZoneTempPredictorCorrector->zoneHeatBalance) {
         thisZoneHB.MAT = 23.0;
-        thisZoneHB.ZoneAirHumRat = 0.01;
+        thisZoneHB.airHumRat = 0.01;
     }
     state->dataEnvrn->OutBaroPress = 101325.0;
     state->dataEnvrn->StdRhoAir = Psychrometrics::PsyRhoAirFnPbTdbW(*state, state->dataEnvrn->OutBaroPress, 20.0, 0.0);
 
     state->dataZoneTempPredictorCorrector->zoneHeatBalance.allocate(state->dataGlobal->NumOfZones);
-    state->dataScheduleMgr->Schedule(1).CurrentValue = 1.0;
+    Sched::GetSchedule(*state, "THERMALCHIMNEYAVAIL")->currentVal = 1.0;
     state->dataHeatBal->ZnAirRpt.allocate(state->dataGlobal->NumOfZones);
     // No EMS
     ThermalChimney::GetThermalChimney(*state, localErrorsFound);

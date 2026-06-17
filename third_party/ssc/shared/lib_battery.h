@@ -402,7 +402,7 @@ public:
 
     battery_params get_params();
 
-    void set_state(const battery_state& state);
+    void set_state(const battery_state& state, double dt_hr=0.0);
 
 private:
     std::unique_ptr<capacity_t> capacity;

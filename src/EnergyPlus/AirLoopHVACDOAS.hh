@@ -1,7 +1,7 @@
-// EnergyPlus, Copyright (c) 1996-2023, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
-// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other
+// National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
 // contributors. All rights reserved.
 //
 // NOTICE: This Software was developed under funding from the U.S. Department of Energy and the
@@ -54,9 +54,7 @@
 
 // EnergyPlus Headers
 #include <EnergyPlus/Data/BaseData.hh>
-#include <EnergyPlus/EPVector.hh>
 #include <EnergyPlus/EnergyPlus.hh>
-#include <EnergyPlus/Plant/Enums.hh>
 #include <EnergyPlus/Plant/PlantLocation.hh>
 #include <EnergyPlus/SimAirServingZones.hh>
 
@@ -72,7 +70,6 @@ namespace AirLoopHVACDOAS {
     struct AirLoopMixer
     {
         std::string name;
-        static AirLoopMixer *factory(EnergyPlusData &state, int object_type_of_num, std::string const &objectName);
         int numOfInletNodes = 0;
         int m_AirLoopMixer_Num = 0;
         int OutletNodeNum = 0;
@@ -81,6 +78,7 @@ namespace AirLoopHVACDOAS {
         std::vector<int> InletNodeNum;
         Real64 OutletTemp = 0.0;
 
+        static AirLoopMixer *factory(EnergyPlusData &state, int objectNum, std::string const &objectName);
         static void getAirLoopMixer(EnergyPlusData &state);
         void CalcAirLoopMixer(EnergyPlusData &state);
     };
@@ -88,16 +86,17 @@ namespace AirLoopHVACDOAS {
     struct AirLoopSplitter
     {
         std::string name;
-        static AirLoopSplitter *factory(EnergyPlusData &state, int object_type_of_num, std::string const &objectName);
         int numOfOutletNodes = 0;
         int m_AirLoopSplitter_Num = 0;
         std::string InletNodeName;
         std::vector<std::string> OutletNodeName;
         std::vector<int> OutletNodeNum;
         Real64 InletTemp = 0.0;
+        int InletNodeNum = 0;
 
+        static AirLoopSplitter *factory(EnergyPlusData &state, int objectNum, std::string const &objectName);
         static void getAirLoopSplitter(EnergyPlusData &state);
-        void CalcAirLoopSplitter(EnergyPlusData &state, Real64 Temp, Real64 Humrat);
+        void CalcAirLoopSplitter(const EnergyPlusData &state, Real64 Temp, Real64 HumRat);
     };
 
     struct AirLoopDOAS
@@ -116,16 +115,21 @@ namespace AirLoopHVACDOAS {
 
         int m_AirLoopDOASNum = 0;
         int m_OASystemNum = 0;
-        int m_AvailManagerSchedPtr = 0;
+        Sched::Schedule *m_AvailManagerSched = nullptr;
         int m_AirLoopMixerIndex = -1;
         int m_AirLoopSplitterIndex = -1;
         int NumOfAirLoops = 0;
         int m_InletNodeNum = 0;
         int m_OutletNodeNum = 0;
-        int m_FanIndex = -1;
+        int m_FanIndex = 0;
         int m_FanInletNodeNum = 0;
         int m_FanOutletNodeNum = 0;
         SimAirServingZones::CompType m_FanTypeNum = SimAirServingZones::CompType::Invalid;
+        bool m_exhaustFanUsed = false;
+        int m_exhaustFanIndex = -1;
+        int m_exhaustFanInletNodeNum = 0;
+        int m_exhaustFanOutletNodeNum = 0;
+        SimAirServingZones::CompType m_exhaustFanTypeNum = SimAirServingZones::CompType::Invalid;
         int m_HeatCoilNum = 0;
         int m_CoolCoilNum = 0;
         int ConveCount = 0;
@@ -174,7 +178,7 @@ namespace AirLoopHVACDOAS {
 
 } // namespace AirLoopHVACDOAS
 
-struct AirLoopHVACDOASData : BaseGlobalStruct
+struct AirLoopHVACDOASData final : BaseGlobalStruct
 {
     bool GetInputOnceFlag = true;
     bool getAirLoopMixerInputOnceFlag = true;
@@ -182,9 +186,18 @@ struct AirLoopHVACDOASData : BaseGlobalStruct
     std::vector<AirLoopHVACDOAS::AirLoopDOAS> airloopDOAS;
     std::vector<AirLoopHVACDOAS::AirLoopMixer> airloopMixer;
     std::vector<AirLoopHVACDOAS::AirLoopSplitter> airloopSplitter;
+
+    void init_constant_state([[maybe_unused]] EnergyPlusData &state) override
+    {
+    }
+
+    void init_state([[maybe_unused]] EnergyPlusData &state) override
+    {
+    }
+
     void clear_state() override
     {
-        *this = AirLoopHVACDOASData();
+        new (this) AirLoopHVACDOASData();
     }
 };
 

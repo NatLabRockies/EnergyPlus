@@ -49,7 +49,7 @@ CHILLED WATER LOOP,Plant Supply Side Cooling Demand Rate
 CHILLED WATER LOOP,Plant Supply Side Heating Demand Rate
 HOT WATER LOOP,Plant Supply Side Cooling Demand Rate
 HOT WATER LOOP,Plant Supply Side Heating Demand Rate
-PURCHASED COOLING,District Cooling Rate
-PURCHASED HEATING,District Heating Rate
+PURCHASED COOLING,District Cooling Water Rate
+PURCHASED HEATING,District Heating Water Rate
 HW Supply Inlet Node,System Node Mass Flow Rate
 0

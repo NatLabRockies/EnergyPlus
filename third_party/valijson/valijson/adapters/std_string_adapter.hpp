@@ -16,9 +16,9 @@
 
 #include <string>
 
-#include <valijson/adapters/adapter.hpp>
-#include <valijson/adapters/frozen_value.hpp>
-#include <valijson/adapters/basic_adapter.hpp>
+#include <valijson/internal/adapter.hpp>
+#include <valijson/internal/frozen_value.hpp>
+#include <valijson/internal/basic_adapter.hpp>
 #include <valijson/exceptions.hpp>
 
 namespace valijson {
@@ -145,7 +145,7 @@ public:
     {
         result = 0;
         return true;
-    };
+    }
 
     StdStringObject asObject() const
     {
@@ -181,67 +181,67 @@ public:
         return new StdStringFrozenValue(m_value);
     }
 
-    static StdStringArray getArray()
+    VALIJSON_NORETURN static StdStringArray getArray()
     {
         throwNotSupported();
     }
 
-    size_t getArraySize() const override
+    VALIJSON_NORETURN size_t getArraySize() const override
     {
         throwNotSupported();
     }
 
-    bool getArraySize(size_t &) const override
+    VALIJSON_NORETURN bool getArraySize(size_t &) const override
     {
         throwNotSupported();
     }
 
-    bool getBool() const override
+    VALIJSON_NORETURN bool getBool() const override
     {
         throwNotSupported();
     }
 
-    bool getBool(bool &) const override
+    VALIJSON_NORETURN bool getBool(bool &) const override
     {
         throwNotSupported();
     }
 
-    double getDouble() const override
+    VALIJSON_NORETURN double getDouble() const override
     {
         throwNotSupported();
     }
 
-    bool getDouble(double &) const override
+    VALIJSON_NORETURN bool getDouble(double &) const override
     {
         throwNotSupported();
     }
 
-    int64_t getInteger() const override
+    VALIJSON_NORETURN int64_t getInteger() const override
     {
         throwNotSupported();
     }
 
-    bool getInteger(int64_t &) const override
+    VALIJSON_NORETURN bool getInteger(int64_t &) const override
     {
         throwNotSupported();
     }
 
-    double getNumber() const override
+    VALIJSON_NORETURN double getNumber() const override
     {
         throwNotSupported();
     }
 
-    bool getNumber(double &) const override
+    VALIJSON_NORETURN bool getNumber(double &) const override
     {
         throwNotSupported();
     }
 
-    size_t getObjectSize() const override
+    VALIJSON_NORETURN size_t getObjectSize() const override
     {
         throwNotSupported();
     }
 
-    bool getObjectSize(size_t &) const override
+    VALIJSON_NORETURN bool getObjectSize(size_t &) const override
     {
         throwNotSupported();
     }
@@ -360,12 +360,12 @@ public:
     using pointer = StdStringAdapter*;
     using reference = StdStringAdapter&;
 
-    StdStringAdapter operator*() const
+    VALIJSON_NORETURN StdStringAdapter operator*() const
     {
         throwNotSupported();
     }
 
-    DerefProxy<StdStringAdapter> operator->() const
+    VALIJSON_NORETURN DerefProxy<StdStringAdapter> operator->() const
     {
         throwNotSupported();
     }
@@ -380,22 +380,22 @@ public:
         return false;
     }
 
-    const StdStringArrayValueIterator& operator++()
+    VALIJSON_NORETURN const StdStringArrayValueIterator& operator++()
     {
         throwNotSupported();
     }
 
-    StdStringArrayValueIterator operator++(int)
+    VALIJSON_NORETURN StdStringArrayValueIterator operator++(int)
     {
         throwNotSupported();
     }
 
-    const StdStringArrayValueIterator& operator--()
+    VALIJSON_NORETURN const StdStringArrayValueIterator& operator--()
     {
         throwNotSupported();
     }
 
-    void advance(std::ptrdiff_t)
+    VALIJSON_NORETURN void advance(std::ptrdiff_t)
     {
         throwNotSupported();
     }
@@ -420,12 +420,12 @@ public:
     using pointer = StdStringObjectMember*;
     using reference = StdStringObjectMember&;
 
-    StdStringObjectMember operator*() const
+    VALIJSON_NORETURN StdStringObjectMember operator*() const
     {
         throwNotSupported();
     }
 
-    DerefProxy<StdStringObjectMember> operator->() const
+    VALIJSON_NORETURN DerefProxy<StdStringObjectMember> operator->() const
     {
         throwNotSupported();
     }
@@ -440,17 +440,17 @@ public:
         return false;
     }
 
-    const StdStringObjectMemberIterator& operator++()
+    VALIJSON_NORETURN const StdStringObjectMemberIterator& operator++()
     {
         throwNotSupported();
     }
 
-    StdStringObjectMemberIterator operator++(int)
+    VALIJSON_NORETURN StdStringObjectMemberIterator operator++(int)
     {
         throwNotSupported();
     }
 
-    const StdStringObjectMemberIterator& operator--()
+    VALIJSON_NORETURN const StdStringObjectMemberIterator& operator--()
     {
         throwNotSupported();
     }

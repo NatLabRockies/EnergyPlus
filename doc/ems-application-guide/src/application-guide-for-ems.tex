@@ -1,9 +1,0 @@
-\input{../title}
-
-\chapter{Introduction}\label{introduction}
-
-This document provides an in-depth look at the Energy Management System (EMS) feature in EnergyPlus and provides a way to develop custom control and modeling routines for EnergyPlus models. EMS is an advanced feature of EnergyPlus and is not for beginners. You will need to write your own custom computer programs and have a thorough understanding of how you want your models to behave. If you are intimidated by the idea of writing computer programs to adjust the fine details of how an EnergyPlus model runs, be aware that EMS is not for all (or even most) users. However, if you relish the idea of being able to write small computer programs that override some annoying behavior, you may find that writing Erl programs can solve many problems faced by energy modelers. EMS is a complicated feature~ and this application guide augments the Input/Output Reference by providing an overall discussion of how to use EMS.
-
-In addition to the built-in EMS language, version 9.3 of EnergyPlus added the ability for users to create custom Python scripts (plugins) that can be used to extend the immense capabilities already added by normal EMS.  For information on the use of Python Plugins, check the Python Plugins section of the InputOutputReference document.
-
-EMS provides high-level, supervisory control to override selected aspects of EnergyPlus modeling. A small programming language called EnergyPlus Runtime Language (Erl) is used to describe the control algorithms. EnergyPlus interprets and executes your Erl program as the model is being run. This guide serves as a programming manual for Erl and attempts to show you how to customize your EnergyPlus simulations.

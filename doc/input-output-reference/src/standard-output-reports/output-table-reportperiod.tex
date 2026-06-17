@@ -3,7 +3,7 @@
 The Output:Table:ReportPeriod object allows the user to create a series of
 tabular reports over a certain subset of a simulation run period. Multiple such
 reporting periods may be defined, each with a unique ``Name''. Currently, it only
-supports resilience reporting tables.
+supports resilience reporting tables (see \hyperref[resilience-summaries]{Resilience Summaries}).
 
 When it is defined, a series of reporting-period-specific resilience summary
 reports will be generated at the end of all tabular reports. The results will be
@@ -82,17 +82,15 @@ desired.
 The following is an example of this object
 
 \begin{lstlisting}
-
 Output:Table:ReportPeriod,
- ThermalResilienceReportTimeWinter,  !- field Name,
- ThermalResilienceSummary,           !- field Report Name,
- ,                                   !- Begin Year
- 1,                                  !- Begin Month
- 1,                                  !- Begin Day of Month
- 8,                                  !- Begin Hour of Day
- ,                                   !- End Year
- 1,                                  !- End Month
- 3,                                  !- End Day of Month
- 18;                                 !- End Hour of Day
-
+  ThermalResilienceReportTimeWinter,  !- field Name,
+  ThermalResilienceSummary,   !- field Report Name,
+  ,                           !- Begin Year
+  1,                          !- Begin Month
+  1,                          !- Begin Day of Month
+  8,                          !- Begin Hour of Day
+  ,                           !- End Year
+  1,                          !- End Month
+  3,                          !- End Day of Month
+  18;                         !- End Hour of Day
 \end{lstlisting}

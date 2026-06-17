@@ -1,9 +1,0 @@
-\section{Output does not match EPW values}\label{output-does-not-match-epw-values}
-
-\emph{Why do values in the EPW differ from the output reports of EnergyPlus?}
-
-This is expected. The difference comes from interpolating hourly weather data for subhourly timesteps in EnergyPlus. In an hourly weather file, the temperatures and other state-point readings are the value at the time the reading was taken. For example, in the USA\_IL\_Chicago-OHare\_TMY2.epw file, the outdoor dry bulb value for July 2, hour 1, is 19.4C. This is the temperature at 1:00 am.
-
-If you set Timestep = 1, then EnergyPlus will report 19.4C for 07/02 01:00 and will use that value for the entire one hour timestep.
-
-If Timestep = 4, then 19.4C is used only for the time step which ends at 01:00. The other timesteps use linearly interpolated values between the hourly weather file values. When you report at the ``hourly'' frequency in EnergyPlus, you see the average temperature over the hour. If you report at the ``timestep'' frequency, you will see the values from the weather data file appear at the last timestep of each hour.

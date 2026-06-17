@@ -1,7 +1,7 @@
-// EnergyPlus, Copyright (c) 1996-2023, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
-// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other
+// National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
 // contributors. All rights reserved.
 //
 // NOTICE: This Software was developed under funding from the U.S. Department of Energy and the
@@ -52,6 +52,7 @@
 // EnergyPlus Headers
 #include <EnergyPlus/Data/EnergyPlusData.hh>
 #include <EnergyPlus/DataGlobals.hh>
+#include <EnergyPlus/FileSystem.hh>
 #include <EnergyPlus/TARCOGCommon.hh>
 #include <EnergyPlus/TARCOGGassesParams.hh>
 #include <EnergyPlus/TARCOGOutput.hh>
@@ -271,7 +272,9 @@ void WriteInputArguments(EnergyPlusData &state,
     // bi...Create debug file w/ Tarcog's input arguments:
 
     // File is not open and nothing cannot be written
-    if (!InArgumentsFile.good()) return;
+    if (!InArgumentsFile.good()) {
+        return;
+    }
 
     date_and_time(real_CLOCK(1), real_CLOCK(2), real_CLOCK(3), DATE_TIME);
 
@@ -291,23 +294,27 @@ void WriteInputArguments(EnergyPlusData &state,
         print(InArgumentsFile, Format_1007, state.dataTARCOGOutputs->iguID);
     }
 
-    print(InArgumentsFile, "     Debug dir:     {}\n", DBGD.string());
+    print(InArgumentsFile, "     Debug dir:     {}\n", DBGD);
 
     print(InArgumentsFile, "\n");
     print(InArgumentsFile, Format_1000);
     print(InArgumentsFile, "\n");
     print(InArgumentsFile, Format_1005);
-    print(InArgumentsFile, Format_1010, tout, tout - DataGlobalConstants::KelvinConv);
-    print(InArgumentsFile, Format_1015, tind, tind - DataGlobalConstants::KelvinConv);
-    print(InArgumentsFile, Format_1020, trmin, trmin - DataGlobalConstants::KelvinConv);
+    print(InArgumentsFile, Format_1010, tout, tout - Constant::Kelvin);
+    print(InArgumentsFile, Format_1015, tind, tind - Constant::Kelvin);
+    print(InArgumentsFile, Format_1020, trmin, trmin - Constant::Kelvin);
     print(InArgumentsFile, Format_1030, wso);
-    if (iwd == 0) print(InArgumentsFile, Format_1032); // windward
-    if (iwd == 1) print(InArgumentsFile, Format_1033); // leeward
+    if (iwd == 0) {
+        print(InArgumentsFile, Format_1032); // windward
+    }
+    if (iwd == 1) {
+        print(InArgumentsFile, Format_1033); // leeward
+    }
     print(InArgumentsFile, Format_1035, wsi);
     print(InArgumentsFile, Format_1040, dir);
     print(InArgumentsFile, Format_1041, outir);
     print(InArgumentsFile, Format_1045, isky);
-    print(InArgumentsFile, Format_1050, tsky, tsky - DataGlobalConstants::KelvinConv);
+    print(InArgumentsFile, Format_1050, tsky, tsky - Constant::Kelvin);
     print(InArgumentsFile, Format_1055, esky);
     print(InArgumentsFile, Format_1060, fclr);
     print(InArgumentsFile, Format_1061, VacuumPressure);
@@ -317,22 +324,28 @@ void WriteInputArguments(EnergyPlusData &state,
     print(InArgumentsFile, Format_1066, ibc(2));
     print(InArgumentsFile, Format_1068, hin);
 
-    if (standard == TARCOGGassesParams::Stdrd::ISO15099) print(InArgumentsFile, Format_1070, standard);
-    if (standard == TARCOGGassesParams::Stdrd::EN673) print(InArgumentsFile, Format_1071, standard);
-    if (standard == TARCOGGassesParams::Stdrd::EN673Design) print(InArgumentsFile, Format_1072, standard);
+    if (standard == TARCOGGassesParams::Stdrd::ISO15099) {
+        print(InArgumentsFile, Format_1070, static_cast<int>(standard));
+    }
+    if (standard == TARCOGGassesParams::Stdrd::EN673) {
+        print(InArgumentsFile, Format_1071, static_cast<int>(standard));
+    }
+    if (standard == TARCOGGassesParams::Stdrd::EN673Design) {
+        print(InArgumentsFile, Format_1072, static_cast<int>(standard));
+    }
 
     if (ThermalMod == TARCOGThermalModel::ISO15099) {
-        print(InArgumentsFile, Format_10731, ThermalMod);
+        print(InArgumentsFile, Format_10731, static_cast<int>(ThermalMod));
         print(InArgumentsFile, Format_10740, SDScalar);
     }
 
     if (ThermalMod == TARCOGThermalModel::SCW) {
-        print(InArgumentsFile, Format_10732, ThermalMod);
+        print(InArgumentsFile, Format_10732, static_cast<int>(ThermalMod));
         print(InArgumentsFile, Format_10740, SDScalar);
     }
 
     if (ThermalMod == TARCOGThermalModel::CSM) {
-        print(InArgumentsFile, Format_10733, ThermalMod);
+        print(InArgumentsFile, Format_10733, static_cast<int>(ThermalMod));
         print(InArgumentsFile, Format_10740, SDScalar);
     }
 
@@ -351,26 +364,26 @@ void WriteInputArguments(EnergyPlusData &state,
     for (i = 1; i <= nlayer; ++i) {
         switch (LayerType(i)) {
         case TARCOGLayerType::DIFFSHADE: { // Diffuse Shade
-            print(InArgumentsFile, Format_10806, i, LayerType(i));
+            print(InArgumentsFile, Format_10806, i, static_cast<int>(LayerType(i)));
         } break;
         case TARCOGLayerType::WOVSHADE: { // Woven Shade
-            print(InArgumentsFile, Format_10805, i, LayerType(i));
+            print(InArgumentsFile, Format_10805, i, static_cast<int>(LayerType(i)));
         } break;
         case TARCOGLayerType::VENETBLIND_HORIZ: { // Horizontal venetian blind
-            print(InArgumentsFile, Format_10804, i, LayerType(i));
+            print(InArgumentsFile, Format_10804, i, static_cast<int>(LayerType(i)));
         } break;
         case TARCOGLayerType::VENETBLIND_VERT: { // Vertical venetian blind
-            print(InArgumentsFile, Format_10810, i, LayerType(i));
+            print(InArgumentsFile, Format_10810, i, static_cast<int>(LayerType(i)));
         } break;
         case TARCOGLayerType::SPECULAR: { // Specular layer
             if (nslice(i) <= 1) {
-                print(InArgumentsFile, Format_10802, i, LayerType(i)); // Monolithic glass
+                print(InArgumentsFile, Format_10802, i, static_cast<int>(LayerType(i))); // Monolithic glass
             } else {
-                print(InArgumentsFile, Format_10803, i, LayerType(i)); // Laminated layer
+                print(InArgumentsFile, Format_10803, i, static_cast<int>(LayerType(i))); // Laminated layer
             }
         } break;
         default: {
-            print(InArgumentsFile, Format_10809, i, LayerType(i));
+            print(InArgumentsFile, Format_10809, i, static_cast<int>(LayerType(i)));
         } break;
         }
 
@@ -409,10 +422,18 @@ void WriteInputArguments(EnergyPlusData &state,
     print(InArgumentsFile, Format_1110);
 
     for (i = 1; i <= nlayer + 1; ++i) { // loop through gaps:
-        if ((i > 1) && (i <= nlayer)) print(InArgumentsFile, Format_1111, i - 1);
-        if (i == 1) print(InArgumentsFile, Format_11110);
-        if (i == nlayer + 1) print(InArgumentsFile, Format_11111);
-        if ((i > 1) && (i <= nlayer)) print(InArgumentsFile, Format_1112, gap(i - 1));
+        if ((i > 1) && (i <= nlayer)) {
+            print(InArgumentsFile, Format_1111, i - 1);
+        }
+        if (i == 1) {
+            print(InArgumentsFile, Format_11110);
+        }
+        if (i == nlayer + 1) {
+            print(InArgumentsFile, Format_11111);
+        }
+        if ((i > 1) && (i <= nlayer)) {
+            print(InArgumentsFile, Format_1112, gap(i - 1));
+        }
         print(InArgumentsFile, Format_1113, presure(i));
         if ((i > 1) && (i <= nlayer)) {
             print(InArgumentsFile, Format_1120, vvent(i));
@@ -434,7 +455,7 @@ void WriteInputArguments(EnergyPlusData &state,
             print(InArgumentsFile, Format_1133, xgcp(1, iprop(j, i)), xgcp(2, iprop(j, i)), xgcp(3, iprop(j, i)));
             print(InArgumentsFile, Format_1134, xwght(iprop(j, i)));
         } // - j - one mix
-    }     // i - gas loop
+    } // i - gas loop
 
     print(InArgumentsFile, "\n");
     print(InArgumentsFile, Format_1198);
@@ -507,8 +528,8 @@ void WriteModifiedArguments(InputOutputFile &InArgumentsFile,
     print(InArgumentsFile, Format_1014);
     print(InArgumentsFile, "\n");
     print(InArgumentsFile, Format_1055, esky);
-    print(InArgumentsFile, Format_1016, trmout, trmout - DataGlobalConstants::KelvinConv);
-    print(InArgumentsFile, Format_1020, trmin, trmin - DataGlobalConstants::KelvinConv);
+    print(InArgumentsFile, Format_1016, trmout, trmout - Constant::Kelvin);
+    print(InArgumentsFile, Format_1020, trmin, trmin - Constant::Kelvin);
     print(InArgumentsFile, Format_1019, ebsky);
     print(InArgumentsFile, Format_10191, ebroom);
     print(InArgumentsFile, Format_1017, Gout);
@@ -518,7 +539,7 @@ void WriteModifiedArguments(InputOutputFile &InArgumentsFile,
     for (i = 1; i <= nlayer; ++i) {
         if ((TARCOGLayerType)LayerType(i) == TARCOGLayerType::VENETBLIND_HORIZ ||
             (TARCOGLayerType)LayerType(i) == TARCOGLayerType::VENETBLIND_VERT) { // SD layer
-            print(InArgumentsFile, Format_1084, i, LayerType(i));
+            print(InArgumentsFile, Format_1084, i, static_cast<int>(LayerType(i)));
             print(InArgumentsFile, Format_1090, thick(i));
             print(InArgumentsFile, Format_1091, scon(i));
         }
@@ -527,10 +548,16 @@ void WriteModifiedArguments(InputOutputFile &InArgumentsFile,
 
     print(InArgumentsFile, Format_1013);
     for (i = 1; i <= nlayer + 1; ++i) { // loop through gaps:
-        if ((i > 1) && (i <= nlayer)) print(InArgumentsFile, Format_1111, i - 1);
-        if ((i > 1) && (i <= nlayer)) print(InArgumentsFile, Format_1112, gap(i - 1));
-        if (i == 1) print(InArgumentsFile, Format_11110);
-        if (i == nlayer + 1) print(InArgumentsFile, Format_11111);
+        if ((i > 1) && (i <= nlayer)) {
+            print(InArgumentsFile, Format_1111, i - 1);
+            print(InArgumentsFile, Format_1112, gap(i - 1));
+        }
+        if (i == 1) {
+            print(InArgumentsFile, Format_11110);
+        }
+        if (i == nlayer + 1) {
+            print(InArgumentsFile, Format_11111);
+        }
         for (j = 1; j <= nmix(i); ++j) {
             print(InArgumentsFile, Format_1130, j, 100 * frct(j, i));
             print(InArgumentsFile, Format_1131, xgcon(1, j), xgcon(2, j), xgcon(3, j));
@@ -538,7 +565,7 @@ void WriteModifiedArguments(InputOutputFile &InArgumentsFile,
             print(InArgumentsFile, Format_1133, xgcp(1, j), xgcp(2, j), xgcp(3, j));
             print(InArgumentsFile, Format_1134, xwght(j));
         } // j - gas mix
-    }     // i - gaps
+    } // i - gaps
     print(InArgumentsFile, "\n");
     print(InArgumentsFile, Format_1198);
 }
@@ -678,37 +705,37 @@ void WriteOutputArguments(InputOutputFile &OutArgumentsFile,
     print(OutArgumentsFile, "\n");
     print(OutArgumentsFile, Format_2350);
     print(OutArgumentsFile, "\n");
-    print(OutArgumentsFile, Format_2105, tamb, tamb - DataGlobalConstants::KelvinConv);
+    print(OutArgumentsFile, Format_2105, tamb, tamb - Constant::Kelvin);
     print(OutArgumentsFile, Format_2180, q(1));
 
     // bi  Write out layer properties:
     for (i = 1; i <= nlayer; ++i) {
         switch (LayerType(i)) {
         case TARCOGLayerType::SPECULAR: { // Specular layer
-            print(OutArgumentsFile, Format_2110, 2 * i - 1, theta(2 * i - 1), theta(2 * i - 1) - DataGlobalConstants::KelvinConv);
+            print(OutArgumentsFile, Format_2110, 2 * i - 1, theta(2 * i - 1), theta(2 * i - 1) - Constant::Kelvin);
             print(OutArgumentsFile, Format_2190, i, q(2 * i));
-            print(OutArgumentsFile, Format_2110, 2 * i, theta(2 * i), theta(2 * i) - DataGlobalConstants::KelvinConv);
+            print(OutArgumentsFile, Format_2110, 2 * i, theta(2 * i), theta(2 * i) - Constant::Kelvin);
         } break;
         case TARCOGLayerType::VENETBLIND_HORIZ:
         case TARCOGLayerType::VENETBLIND_VERT: { // Venetian blind
-            print(OutArgumentsFile, Format_2111, 2 * i - 1, theta(2 * i - 1), theta(2 * i - 1) - DataGlobalConstants::KelvinConv);
+            print(OutArgumentsFile, Format_2111, 2 * i - 1, theta(2 * i - 1), theta(2 * i - 1) - Constant::Kelvin);
             print(OutArgumentsFile, Format_2195, i, q(2 * i), i, ShadeGapKeffConv(i));
-            print(OutArgumentsFile, Format_2111, 2 * i, theta(2 * i), theta(2 * i) - DataGlobalConstants::KelvinConv);
+            print(OutArgumentsFile, Format_2111, 2 * i, theta(2 * i), theta(2 * i) - Constant::Kelvin);
         } break;
         case TARCOGLayerType::WOVSHADE: { // Venetian blind
-            print(OutArgumentsFile, Format_2112, 2 * i - 1, theta(2 * i - 1), theta(2 * i - 1) - DataGlobalConstants::KelvinConv);
+            print(OutArgumentsFile, Format_2112, 2 * i - 1, theta(2 * i - 1), theta(2 * i - 1) - Constant::Kelvin);
             print(OutArgumentsFile, Format_2195, i, q(2 * i), i, ShadeGapKeffConv(i));
-            print(OutArgumentsFile, Format_2112, 2 * i, theta(2 * i), theta(2 * i) - DataGlobalConstants::KelvinConv);
+            print(OutArgumentsFile, Format_2112, 2 * i, theta(2 * i), theta(2 * i) - Constant::Kelvin);
         } break;
         case TARCOGLayerType::DIFFSHADE: { // Venetian blind
-            print(OutArgumentsFile, Format_2110, 2 * i - 1, theta(2 * i - 1), theta(2 * i - 1) - DataGlobalConstants::KelvinConv);
+            print(OutArgumentsFile, Format_2110, 2 * i - 1, theta(2 * i - 1), theta(2 * i - 1) - Constant::Kelvin);
             print(OutArgumentsFile, Format_2190, i, q(2 * i));
-            print(OutArgumentsFile, Format_2110, 2 * i, theta(2 * i), theta(2 * i) - DataGlobalConstants::KelvinConv);
+            print(OutArgumentsFile, Format_2110, 2 * i, theta(2 * i), theta(2 * i) - Constant::Kelvin);
         } break;
         default: {
-            print(OutArgumentsFile, Format_2110, 2 * i - 1, theta(2 * i - 1), theta(2 * i - 1) - DataGlobalConstants::KelvinConv);
+            print(OutArgumentsFile, Format_2110, 2 * i - 1, theta(2 * i - 1), theta(2 * i - 1) - Constant::Kelvin);
             print(OutArgumentsFile, Format_2199, i, q(2 * i));
-            print(OutArgumentsFile, Format_2110, 2 * i, theta(2 * i), theta(2 * i) - DataGlobalConstants::KelvinConv);
+            print(OutArgumentsFile, Format_2110, 2 * i, theta(2 * i), theta(2 * i) - Constant::Kelvin);
         } break;
         }
 
@@ -730,7 +757,7 @@ void WriteOutputArguments(InputOutputFile &OutArgumentsFile,
         }
     } // i - layers
 
-    print(OutArgumentsFile, Format_2115, troom, troom - DataGlobalConstants::KelvinConv);
+    print(OutArgumentsFile, Format_2115, troom, troom - Constant::Kelvin);
 
     print(OutArgumentsFile, "\n");
 
@@ -1083,7 +1110,16 @@ void WriteTARCOGInputFile(EnergyPlusData &state,
     print(files.WINCogFile, Format_200);
     print(files.WINCogFile, Format_113);
     print(files.WINCogFile, Format_210);
-    print(files.WINCogFile, Format_1010, nlayer, 2, standard, ThermalMod, CalcDeflection, SDScalar, VacuumPressure, VacuumMaxGapThickness);
+    print(files.WINCogFile,
+          Format_1010,
+          nlayer,
+          2,
+          static_cast<int>(standard),
+          static_cast<int>(ThermalMod),
+          static_cast<int>(CalcDeflection),
+          SDScalar,
+          VacuumPressure,
+          VacuumMaxGapThickness);
 
     print(files.WINCogFile, Format_113);
     print(files.WINCogFile, Format_300);
@@ -1162,7 +1198,7 @@ void WriteTARCOGInputFile(EnergyPlusData &state,
               tir(2 * i - 1),
               YoungsMod(i),
               PoissonsRat(i),
-              LayerType(i),
+              static_cast<int>(LayerType(i)),
               nslice(i));
 
         if (IsShadingLayer(LayerType(i))) {
@@ -1267,8 +1303,8 @@ void PrepDebugFilesAndVariables(EnergyPlusData &state,
 
     // setup file names if file name is provided, otherwise keep default
     if (!Debug_file.empty()) {
-        files.WINCogFilePath = fs::path(Debug_file.string() + ".w7");
-        files.DebugOutputFilePath = fs::path(Debug_file.string() + ".dbg");
+        files.WINCogFilePath = FileSystem::appendSuffixToPath(Debug_file, ".w7");
+        files.DebugOutputFilePath = FileSystem::appendSuffixToPath(Debug_file, ".dbg");
     }
 
     files.WriteDebugOutput = false;

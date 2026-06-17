@@ -12,7 +12,7 @@
 ! System:   None.
 ! Plant:    A chain of 3 plant loops that connect a LoadProfile:Plant to DistrictCooling by heat exchangers
 
-  Version,23.1;
+  Version,26.2;
 
   Building,
     Plant Load Profile Example,  !- Name
@@ -304,7 +304,8 @@
     Demand Load Profile 1 Outlet Node,  !- Outlet Node Name
     Load Profile 1 Load Schedule,  !- Load Schedule Name
     0.002,                   !- Peak Flow Rate {m3/s}
-    Load Profile 1 Flow Frac Schedule;  !- Flow Rate Fraction Schedule Name
+    Load Profile 1 Flow Frac Schedule,  !- Flow Rate Fraction Schedule Name
+    Water;                   !- Plant Loop Fluid Type
 
   Branch,
     USE Demand Outlet Branch,!- Name
@@ -762,9 +763,9 @@
 
   Output:Variable,*,Plant Load Profile Heat Transfer Energy,Hourly;
 
-  Output:Variable,*,District Cooling Chilled Water Rate,Hourly;
+  Output:Variable,*,District Cooling Water Rate,Hourly;
 
-  Output:Variable,*,District Cooling Chilled Water Energy,Hourly;
+  Output:Variable,*,District Cooling Water Energy,Hourly;
 
   Output:Meter:MeterFileOnly,Cooling:DistrictCooling,monthly;
 

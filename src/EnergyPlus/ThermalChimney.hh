@@ -1,7 +1,7 @@
-// EnergyPlus, Copyright (c) 1996-2023, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
-// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other
+// National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
 // contributors. All rights reserved.
 //
 // NOTICE: This Software was developed under funding from the U.S. Department of Energy and the
@@ -70,8 +70,7 @@ namespace ThermalChimney {
         std::string Name;
         int RealZonePtr;
         std::string RealZoneName;
-        int SchedPtr;
-        std::string SchedName;
+        Sched::Schedule *availSched = nullptr;
         Real64 AbsorberWallWidth;
         Real64 AirOutletCrossArea;
         Real64 DischargeCoeff;
@@ -79,6 +78,7 @@ namespace ThermalChimney {
         bool EMSOverrideOn;         // if true then EMS is requesting to override
         Real64 EMSAirFlowRateValue; // value EMS is setting for air flow rate
         Array1D_int ZonePtr;
+        Array1D_int spacePtr;
         Array1D_string ZoneName;
         Array1D<Real64> DistanceThermChimInlet;
         Array1D<Real64> RatioThermChimAirFlow;
@@ -86,8 +86,8 @@ namespace ThermalChimney {
 
         // Default Constructor
         ThermalChimneyData()
-            : RealZonePtr(0), SchedPtr(0), AbsorberWallWidth(0.0), AirOutletCrossArea(0.0), DischargeCoeff(0.0), TotZoneToDistrib(0),
-              EMSOverrideOn(false), EMSAirFlowRateValue(0)
+            : RealZonePtr(0), AbsorberWallWidth(0.0), AirOutletCrossArea(0.0), DischargeCoeff(0.0), TotZoneToDistrib(0), EMSOverrideOn(false),
+              EMSAirFlowRateValue(0)
         {
         }
     };
@@ -146,6 +146,14 @@ struct ThermalChimneysData : BaseGlobalStruct
     EPVector<ThermalChimney::ThermalChimneyData> ThermalChimneySys;
     EPVector<ThermalChimney::ThermChimZnReportVars> ZnRptThermChim;
     EPVector<ThermalChimney::ThermChimReportVars> ThermalChimneyReport;
+
+    void init_constant_state([[maybe_unused]] EnergyPlusData &state) override
+    {
+    }
+
+    void init_state([[maybe_unused]] EnergyPlusData &state) override
+    {
+    }
 
     void clear_state() override
     {

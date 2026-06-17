@@ -667,7 +667,7 @@ int	CalcDFs(
 				phsun_deg = phsmin;
                 char cSkyStr[MAX_CHAR_LINE];
 	            strcpy(cSkyStr,"");
-	            sprintf(cSkyStr,"SKY^GEN^CIEOVERCASTSKY^%6.2lf^%4.2lf", phsun_deg, bldg_ptr->zone[izone]->surf[isurf]->gnd_refl);
+	            snprintf(cSkyStr, 250, "SKY^GEN^CIEOVERCASTSKY^%6.2lf^%4.2lf", phsun_deg, bldg_ptr->zone[izone]->surf[isurf]->gnd_refl);
 	            string	skyStr = cSkyStr;
                 // Decode the DNA string
 	            LumParam lpsky;
@@ -800,7 +800,7 @@ int	CalcDFs(
                             }
                         }
 	                    strcpy(cSkyStr,"");
-	                    sprintf(cSkyStr,"SKY^GEN^CIECLEARSUN^%6.2lf^%6.2lf^%10.4lf^%10.4lf^%6.2lf^%6.2lf^%8.2lf^%4.2lf", phsun_deg, thsun_deg, solic[IMREF], tfac, bldg_ptr->atmmoi[IMREF], bldg_ptr->atmtur[IMREF], bldg_ptr->alt, bldg_ptr->zone[izone]->surf[isurf]->gnd_refl);
+	                    snprintf(cSkyStr,250, "SKY^GEN^CIECLEARSUN^%6.2lf^%6.2lf^%10.4lf^%10.4lf^%6.2lf^%6.2lf^%8.2lf^%4.2lf", phsun_deg, thsun_deg, solic[IMREF], tfac, bldg_ptr->atmmoi[IMREF], bldg_ptr->atmtur[IMREF], bldg_ptr->alt, bldg_ptr->zone[izone]->surf[isurf]->gnd_refl);
 	                    string	skyStr = cSkyStr;
 //    cout << skyStr << "\n";
                         // Decode the DNA string
@@ -935,7 +935,7 @@ int	CalcDFs(
                         if (thsun_deg < -180.) thsun_deg += 360.;
                         if (thsun_deg > 180.) thsun_deg -= 360.;
 	                    strcpy(cSkyStr,"");
-	                    sprintf(cSkyStr,"SKY^GEN^CIECLEARSKY^%6.2lf^%6.2lf^%10.6lf^%4.2lf", phsun_deg, thsun_deg, zenl, bldg_ptr->zone[izone]->surf[isurf]->gnd_refl);
+	                    snprintf(cSkyStr,250,"SKY^GEN^CIECLEARSKY^%6.2lf^%6.2lf^%10.6lf^%4.2lf", phsun_deg, thsun_deg, zenl, bldg_ptr->zone[izone]->surf[isurf]->gnd_refl);
 	                    string	skyStr = cSkyStr;
                         // Decode the DNA string
 	                    if (!SecretDecoderRing(lpsky,skyStr)) {

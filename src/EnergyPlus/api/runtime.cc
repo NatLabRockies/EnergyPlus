@@ -1,7 +1,7 @@
-// EnergyPlus, Copyright (c) 1996-2023, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
-// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other
+// National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
 // contributors. All rights reserved.
 //
 // NOTICE: This Software was developed under funding from the U.S. Department of Energy and the
@@ -45,6 +45,7 @@
 // OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 // POSSIBILITY OF SUCH DAMAGE.
 
+// EnergyPlus Headers
 #include <EnergyPlus/Data/EnergyPlusData.hh>
 #include <EnergyPlus/DataStringGlobals.hh>
 #include <EnergyPlus/PluginManager.hh>
@@ -52,7 +53,6 @@
 #include <EnergyPlus/api/EnergyPlusPgm.hh>
 #include <EnergyPlus/api/runtime.h>
 
-// disabling "maybe unused" warnings for all the API functions so the IDE isn't lit up with messages
 #pragma clang diagnostic push
 #pragma ide diagnostic ignored "OCUnusedGlobalDeclarationInspection"
 
@@ -66,292 +66,301 @@ int energyplus(EnergyPlusState state, int argc, const char *argv[])
     //    argv[5] = "-i";
     //    argv[6] = epcomp->iddPath.c_str();
     //    argv[7] = epcomp->idfInputPath.c_str();
-    auto *thisState = reinterpret_cast<EnergyPlus::EnergyPlusData *>(state);
+    auto *thisState = reinterpret_cast<EnergyPlus::EnergyPlusData *>(state); // NOLINT(cppcoreguidelines-pro-type-reinterpret-cast)
     if (!thisState->ready) {
         std::cerr << "Attempted to re-run EnergyPlus using a state that was not yet cleared, call stateReset() on this instance and try again\n";
         return 1;
     }
     thisState->ready = false;
-    return runEnergyPlusAsLibrary(*thisState, argc, argv);
+    std::vector<std::string> args(argv, std::next(argv, static_cast<std::ptrdiff_t>(argc)));
+    return runEnergyPlusAsLibrary(*thisState, args);
 }
 
 void stopSimulation(EnergyPlusState state)
 {
-    auto thisState = reinterpret_cast<EnergyPlus::EnergyPlusData *>(state);
+    auto *thisState = reinterpret_cast<EnergyPlus::EnergyPlusData *>(state); // NOLINT(cppcoreguidelines-pro-type-reinterpret-cast)
     thisState->dataGlobal->stopSimulation = true;
 }
 
 void setConsoleOutputState(EnergyPlusState state, int outputStatus)
 {
-    auto thisState = reinterpret_cast<EnergyPlus::EnergyPlusData *>(state);
-    if (outputStatus == 0) {
-        thisState->dataGlobal->printConsoleOutput = false;
-    } else {
-        thisState->dataGlobal->printConsoleOutput = true;
-    }
+    auto *thisState = reinterpret_cast<EnergyPlus::EnergyPlusData *>(state); // NOLINT(cppcoreguidelines-pro-type-reinterpret-cast)
+    thisState->dataGlobal->printConsoleOutput = (outputStatus != 0);
 }
 
 void setEnergyPlusRootDirectory(EnergyPlusState state, const char *path)
 {
-    auto thisState = reinterpret_cast<EnergyPlus::EnergyPlusData *>(state);
+    auto *thisState = reinterpret_cast<EnergyPlus::EnergyPlusData *>(state); // NOLINT(cppcoreguidelines-pro-type-reinterpret-cast)
     thisState->dataGlobal->installRootOverride = true;
     thisState->dataStrGlobals->exeDirectoryPath = fs::path(path);
 }
 
 void issueWarning(EnergyPlusState state, const char *message)
 {
-    auto thisState = reinterpret_cast<EnergyPlus::EnergyPlusData *>(state);
-    EnergyPlus::ShowWarningError(*thisState, message);
+    auto *thisState = reinterpret_cast<EnergyPlus::EnergyPlusData *>(state); // NOLINT(cppcoreguidelines-pro-type-reinterpret-cast)
+    ShowWarningError(*thisState, message);
 }
 void issueSevere(EnergyPlusState state, const char *message)
 {
-    auto thisState = reinterpret_cast<EnergyPlus::EnergyPlusData *>(state);
-    EnergyPlus::ShowSevereError(*thisState, message);
+    auto *thisState = reinterpret_cast<EnergyPlus::EnergyPlusData *>(state); // NOLINT(cppcoreguidelines-pro-type-reinterpret-cast)
+    ShowSevereError(*thisState, message);
 }
 void issueText(EnergyPlusState state, const char *message)
 {
-    auto thisState = reinterpret_cast<EnergyPlus::EnergyPlusData *>(state);
-    EnergyPlus::ShowContinueError(*thisState, message);
+    auto *thisState = reinterpret_cast<EnergyPlus::EnergyPlusData *>(state); // NOLINT(cppcoreguidelines-pro-type-reinterpret-cast)
+    ShowContinueError(*thisState, message);
+}
+
+void registerProgressCallback([[maybe_unused]] EnergyPlusState state, std::function<void(int const)> f)
+{
+    auto *thisState = reinterpret_cast<EnergyPlus::EnergyPlusData *>(state); // NOLINT(cppcoreguidelines-pro-type-reinterpret-cast)
+    thisState->dataGlobal->progressCallback = std::move(f);
 }
 
 void registerProgressCallback(EnergyPlusState state, void (*f)(int const))
 {
-    auto *thisState = reinterpret_cast<EnergyPlus::EnergyPlusData *>(state);
+    auto *thisState = reinterpret_cast<EnergyPlus::EnergyPlusData *>(state); // NOLINT(cppcoreguidelines-pro-type-reinterpret-cast)
     thisState->dataGlobal->progressCallback = f;
 }
 
 void registerStdOutCallback([[maybe_unused]] EnergyPlusState state, std::function<void(const std::string &)> f)
 {
-    auto *thisState = reinterpret_cast<EnergyPlus::EnergyPlusData *>(state);
-    thisState->dataGlobal->messageCallback = f; // NOLINT(performance-unnecessary-value-param)
+    auto *thisState = reinterpret_cast<EnergyPlus::EnergyPlusData *>(state); // NOLINT(cppcoreguidelines-pro-type-reinterpret-cast)
+    thisState->dataGlobal->messageCallback = std::move(f);
 }
 
 void registerStdOutCallback(EnergyPlusState state, void (*f)(const char *))
 {
+    // Extra lamba needed to go from `const std::string&` to `const char *`
     const auto stdf = [f](const std::string &message) { f(message.c_str()); };
     registerStdOutCallback(state, std::function<void(const std::string &)>(stdf));
 }
 
 void registerExternalHVACManager(EnergyPlusState state, std::function<void(EnergyPlusState)> f)
 {
-    auto *thisState = reinterpret_cast<EnergyPlus::EnergyPlusData *>(state);
-    thisState->dataGlobal->externalHVACManager = f; // NOLINT(performance-unnecessary-value-param)
+    auto *thisState = reinterpret_cast<EnergyPlus::EnergyPlusData *>(state); // NOLINT(cppcoreguidelines-pro-type-reinterpret-cast)
+    thisState->dataGlobal->externalHVACManager = std::move(f);
 }
 
 void registerExternalHVACManager(EnergyPlusState state, void (*f)(EnergyPlusState))
 {
-    registerExternalHVACManager(state, std::function<void(EnergyPlusState)>(f));
+    auto *thisState = reinterpret_cast<EnergyPlus::EnergyPlusData *>(state); // NOLINT(cppcoreguidelines-pro-type-reinterpret-cast)
+    thisState->dataGlobal->externalHVACManager = f;
 }
 
 void callbackBeginNewEnvironment(EnergyPlusState state, std::function<void(EnergyPlusState)> const &f)
 {
-    auto *thisState = reinterpret_cast<EnergyPlus::EnergyPlusData *>(state);
+    auto *thisState = reinterpret_cast<EnergyPlus::EnergyPlusData *>(state); // NOLINT(cppcoreguidelines-pro-type-reinterpret-cast)
     EnergyPlus::PluginManagement::registerNewCallback(*thisState, EnergyPlus::EMSManager::EMSCallFrom::BeginNewEnvironment, f);
 }
 
 void callbackBeginNewEnvironment(EnergyPlusState state, void (*f)(EnergyPlusState))
 {
-    auto *thisState = reinterpret_cast<EnergyPlus::EnergyPlusData *>(state);
+    auto *thisState = reinterpret_cast<EnergyPlus::EnergyPlusData *>(state); // NOLINT(cppcoreguidelines-pro-type-reinterpret-cast)
     EnergyPlus::PluginManagement::registerNewCallback(*thisState, EnergyPlus::EMSManager::EMSCallFrom::BeginNewEnvironment, f);
 }
 
 void callbackBeginZoneTimestepBeforeSetCurrentWeather(EnergyPlusState state, std::function<void(EnergyPlusState)> const &f)
 {
-    auto *thisState = reinterpret_cast<EnergyPlus::EnergyPlusData *>(state);
+    auto *thisState = reinterpret_cast<EnergyPlus::EnergyPlusData *>(state); // NOLINT(cppcoreguidelines-pro-type-reinterpret-cast)
     EnergyPlus::PluginManagement::registerNewCallback(*thisState, EnergyPlus::EMSManager::EMSCallFrom::BeginZoneTimestepBeforeSetCurrentWeather, f);
 }
 
 void callbackBeginZoneTimestepBeforeSetCurrentWeather(EnergyPlusState state, void (*f)(EnergyPlusState))
 {
-    auto *thisState = reinterpret_cast<EnergyPlus::EnergyPlusData *>(state);
+    auto *thisState = reinterpret_cast<EnergyPlus::EnergyPlusData *>(state); // NOLINT(cppcoreguidelines-pro-type-reinterpret-cast)
     EnergyPlus::PluginManagement::registerNewCallback(*thisState, EnergyPlus::EMSManager::EMSCallFrom::BeginZoneTimestepBeforeSetCurrentWeather, f);
 }
 
 void callbackAfterNewEnvironmentWarmupComplete(EnergyPlusState state, std::function<void(EnergyPlusState)> const &f)
 {
-    auto *thisState = reinterpret_cast<EnergyPlus::EnergyPlusData *>(state);
+    auto *thisState = reinterpret_cast<EnergyPlus::EnergyPlusData *>(state); // NOLINT(cppcoreguidelines-pro-type-reinterpret-cast)
     EnergyPlus::PluginManagement::registerNewCallback(*thisState, EnergyPlus::EMSManager::EMSCallFrom::BeginNewEnvironmentAfterWarmUp, f);
 }
 
 void callbackAfterNewEnvironmentWarmupComplete(EnergyPlusState state, void (*f)(EnergyPlusState))
 {
-    auto *thisState = reinterpret_cast<EnergyPlus::EnergyPlusData *>(state);
+    auto *thisState = reinterpret_cast<EnergyPlus::EnergyPlusData *>(state); // NOLINT(cppcoreguidelines-pro-type-reinterpret-cast)
     EnergyPlus::PluginManagement::registerNewCallback(*thisState, EnergyPlus::EMSManager::EMSCallFrom::BeginNewEnvironmentAfterWarmUp, f);
 }
 
 void callbackBeginZoneTimeStepBeforeInitHeatBalance(EnergyPlusState state, std::function<void(EnergyPlusState)> const &f)
 {
-    auto *thisState = reinterpret_cast<EnergyPlus::EnergyPlusData *>(state);
+    auto *thisState = reinterpret_cast<EnergyPlus::EnergyPlusData *>(state); // NOLINT(cppcoreguidelines-pro-type-reinterpret-cast)
     EnergyPlus::PluginManagement::registerNewCallback(*thisState, EnergyPlus::EMSManager::EMSCallFrom::BeginZoneTimestepBeforeInitHeatBalance, f);
 }
 
 void callbackBeginZoneTimeStepBeforeInitHeatBalance(EnergyPlusState state, void (*f)(EnergyPlusState))
 {
-    auto *thisState = reinterpret_cast<EnergyPlus::EnergyPlusData *>(state);
+    auto *thisState = reinterpret_cast<EnergyPlus::EnergyPlusData *>(state); // NOLINT(cppcoreguidelines-pro-type-reinterpret-cast)
     EnergyPlus::PluginManagement::registerNewCallback(*thisState, EnergyPlus::EMSManager::EMSCallFrom::BeginZoneTimestepBeforeInitHeatBalance, f);
 }
 
 void callbackBeginZoneTimeStepAfterInitHeatBalance(EnergyPlusState state, std::function<void(EnergyPlusState)> const &f)
 {
-    auto *thisState = reinterpret_cast<EnergyPlus::EnergyPlusData *>(state);
+    auto *thisState = reinterpret_cast<EnergyPlus::EnergyPlusData *>(state); // NOLINT(cppcoreguidelines-pro-type-reinterpret-cast)
     EnergyPlus::PluginManagement::registerNewCallback(*thisState, EnergyPlus::EMSManager::EMSCallFrom::BeginZoneTimestepAfterInitHeatBalance, f);
 }
 
 void callbackBeginZoneTimeStepAfterInitHeatBalance(EnergyPlusState state, void (*f)(EnergyPlusState))
 {
-    auto *thisState = reinterpret_cast<EnergyPlus::EnergyPlusData *>(state);
+    auto *thisState = reinterpret_cast<EnergyPlus::EnergyPlusData *>(state); // NOLINT(cppcoreguidelines-pro-type-reinterpret-cast)
     EnergyPlus::PluginManagement::registerNewCallback(*thisState, EnergyPlus::EMSManager::EMSCallFrom::BeginZoneTimestepAfterInitHeatBalance, f);
 }
 
 void callbackBeginTimeStepBeforePredictor(EnergyPlusState state, std::function<void(EnergyPlusState)> const &f)
 {
-    auto *thisState = reinterpret_cast<EnergyPlus::EnergyPlusData *>(state);
+    auto *thisState = reinterpret_cast<EnergyPlus::EnergyPlusData *>(state); // NOLINT(cppcoreguidelines-pro-type-reinterpret-cast)
     EnergyPlus::PluginManagement::registerNewCallback(*thisState, EnergyPlus::EMSManager::EMSCallFrom::BeginTimestepBeforePredictor, f);
 }
 
 void callbackBeginTimeStepBeforePredictor(EnergyPlusState state, void (*f)(EnergyPlusState))
 {
-    auto *thisState = reinterpret_cast<EnergyPlus::EnergyPlusData *>(state);
+    auto *thisState = reinterpret_cast<EnergyPlus::EnergyPlusData *>(state); // NOLINT(cppcoreguidelines-pro-type-reinterpret-cast)
     EnergyPlus::PluginManagement::registerNewCallback(*thisState, EnergyPlus::EMSManager::EMSCallFrom::BeginTimestepBeforePredictor, f);
 }
 
 void callbackAfterPredictorBeforeHVACManagers(EnergyPlusState state, std::function<void(EnergyPlusState)> const &f)
 {
-    auto *thisState = reinterpret_cast<EnergyPlus::EnergyPlusData *>(state);
+    auto *thisState = reinterpret_cast<EnergyPlus::EnergyPlusData *>(state); // NOLINT(cppcoreguidelines-pro-type-reinterpret-cast)
     EnergyPlus::PluginManagement::registerNewCallback(*thisState, EnergyPlus::EMSManager::EMSCallFrom::BeforeHVACManagers, f);
 }
 
 void callbackAfterPredictorBeforeHVACManagers(EnergyPlusState state, void (*f)(EnergyPlusState))
 {
-    auto *thisState = reinterpret_cast<EnergyPlus::EnergyPlusData *>(state);
+    auto *thisState = reinterpret_cast<EnergyPlus::EnergyPlusData *>(state); // NOLINT(cppcoreguidelines-pro-type-reinterpret-cast)
     EnergyPlus::PluginManagement::registerNewCallback(*thisState, EnergyPlus::EMSManager::EMSCallFrom::BeforeHVACManagers, f);
 }
 
 void callbackAfterPredictorAfterHVACManagers(EnergyPlusState state, std::function<void(EnergyPlusState)> const &f)
 {
-    auto *thisState = reinterpret_cast<EnergyPlus::EnergyPlusData *>(state);
+    auto *thisState = reinterpret_cast<EnergyPlus::EnergyPlusData *>(state); // NOLINT(cppcoreguidelines-pro-type-reinterpret-cast)
     EnergyPlus::PluginManagement::registerNewCallback(*thisState, EnergyPlus::EMSManager::EMSCallFrom::AfterHVACManagers, f);
 }
 
 void callbackAfterPredictorAfterHVACManagers(EnergyPlusState state, void (*f)(EnergyPlusState))
 {
-    auto *thisState = reinterpret_cast<EnergyPlus::EnergyPlusData *>(state);
+    auto *thisState = reinterpret_cast<EnergyPlus::EnergyPlusData *>(state); // NOLINT(cppcoreguidelines-pro-type-reinterpret-cast)
     EnergyPlus::PluginManagement::registerNewCallback(*thisState, EnergyPlus::EMSManager::EMSCallFrom::AfterHVACManagers, f);
 }
 
 void callbackInsideSystemIterationLoop(EnergyPlusState state, std::function<void(EnergyPlusState)> const &f)
 {
-    auto *thisState = reinterpret_cast<EnergyPlus::EnergyPlusData *>(state);
+    auto *thisState = reinterpret_cast<EnergyPlus::EnergyPlusData *>(state); // NOLINT(cppcoreguidelines-pro-type-reinterpret-cast)
     EnergyPlus::PluginManagement::registerNewCallback(*thisState, EnergyPlus::EMSManager::EMSCallFrom::HVACIterationLoop, f);
 }
 
 void callbackInsideSystemIterationLoop(EnergyPlusState state, void (*f)(EnergyPlusState))
 {
-    auto *thisState = reinterpret_cast<EnergyPlus::EnergyPlusData *>(state);
+    auto *thisState = reinterpret_cast<EnergyPlus::EnergyPlusData *>(state); // NOLINT(cppcoreguidelines-pro-type-reinterpret-cast)
     EnergyPlus::PluginManagement::registerNewCallback(*thisState, EnergyPlus::EMSManager::EMSCallFrom::HVACIterationLoop, f);
 }
 
 void callbackEndOfZoneTimeStepBeforeZoneReporting(EnergyPlusState state, std::function<void(EnergyPlusState)> const &f)
 {
-    auto *thisState = reinterpret_cast<EnergyPlus::EnergyPlusData *>(state);
+    auto *thisState = reinterpret_cast<EnergyPlus::EnergyPlusData *>(state); // NOLINT(cppcoreguidelines-pro-type-reinterpret-cast)
     EnergyPlus::PluginManagement::registerNewCallback(*thisState, EnergyPlus::EMSManager::EMSCallFrom::EndZoneTimestepBeforeZoneReporting, f);
 }
 
 void callbackEndOfZoneTimeStepBeforeZoneReporting(EnergyPlusState state, void (*f)(EnergyPlusState))
 {
-    auto *thisState = reinterpret_cast<EnergyPlus::EnergyPlusData *>(state);
+    auto *thisState = reinterpret_cast<EnergyPlus::EnergyPlusData *>(state); // NOLINT(cppcoreguidelines-pro-type-reinterpret-cast)
     EnergyPlus::PluginManagement::registerNewCallback(*thisState, EnergyPlus::EMSManager::EMSCallFrom::EndZoneTimestepBeforeZoneReporting, f);
 }
 
 void callbackEndOfZoneTimeStepAfterZoneReporting(EnergyPlusState state, std::function<void(EnergyPlusState)> const &f)
 {
-    auto *thisState = reinterpret_cast<EnergyPlus::EnergyPlusData *>(state);
+    auto *thisState = reinterpret_cast<EnergyPlus::EnergyPlusData *>(state); // NOLINT(cppcoreguidelines-pro-type-reinterpret-cast)
     EnergyPlus::PluginManagement::registerNewCallback(*thisState, EnergyPlus::EMSManager::EMSCallFrom::EndZoneTimestepAfterZoneReporting, f);
 }
 
 void callbackEndOfZoneTimeStepAfterZoneReporting(EnergyPlusState state, void (*f)(EnergyPlusState))
 {
-    auto *thisState = reinterpret_cast<EnergyPlus::EnergyPlusData *>(state);
+    auto *thisState = reinterpret_cast<EnergyPlus::EnergyPlusData *>(state); // NOLINT(cppcoreguidelines-pro-type-reinterpret-cast)
     EnergyPlus::PluginManagement::registerNewCallback(*thisState, EnergyPlus::EMSManager::EMSCallFrom::EndZoneTimestepAfterZoneReporting, f);
 }
 
 void callbackEndOfSystemTimeStepBeforeHVACReporting(EnergyPlusState state, std::function<void(EnergyPlusState)> const &f)
 {
-    auto *thisState = reinterpret_cast<EnergyPlus::EnergyPlusData *>(state);
+    auto *thisState = reinterpret_cast<EnergyPlus::EnergyPlusData *>(state); // NOLINT(cppcoreguidelines-pro-type-reinterpret-cast)
     EnergyPlus::PluginManagement::registerNewCallback(*thisState, EnergyPlus::EMSManager::EMSCallFrom::EndSystemTimestepBeforeHVACReporting, f);
 }
 
 void callbackEndOfSystemTimeStepBeforeHVACReporting(EnergyPlusState state, void (*f)(EnergyPlusState))
 {
-    auto *thisState = reinterpret_cast<EnergyPlus::EnergyPlusData *>(state);
+    auto *thisState = reinterpret_cast<EnergyPlus::EnergyPlusData *>(state); // NOLINT(cppcoreguidelines-pro-type-reinterpret-cast)
     EnergyPlus::PluginManagement::registerNewCallback(*thisState, EnergyPlus::EMSManager::EMSCallFrom::EndSystemTimestepBeforeHVACReporting, f);
 }
 
 void callbackEndOfSystemTimeStepAfterHVACReporting(EnergyPlusState state, std::function<void(EnergyPlusState)> const &f)
 {
-    auto *thisState = reinterpret_cast<EnergyPlus::EnergyPlusData *>(state);
+    auto *thisState = reinterpret_cast<EnergyPlus::EnergyPlusData *>(state); // NOLINT(cppcoreguidelines-pro-type-reinterpret-cast)
     EnergyPlus::PluginManagement::registerNewCallback(*thisState, EnergyPlus::EMSManager::EMSCallFrom::EndSystemTimestepAfterHVACReporting, f);
 }
 
 void callbackEndOfSystemTimeStepAfterHVACReporting(EnergyPlusState state, void (*f)(EnergyPlusState))
 {
-    auto *thisState = reinterpret_cast<EnergyPlus::EnergyPlusData *>(state);
+    auto *thisState = reinterpret_cast<EnergyPlus::EnergyPlusData *>(state); // NOLINT(cppcoreguidelines-pro-type-reinterpret-cast)
     EnergyPlus::PluginManagement::registerNewCallback(*thisState, EnergyPlus::EMSManager::EMSCallFrom::EndSystemTimestepAfterHVACReporting, f);
 }
 
 void callbackEndOfZoneSizing(EnergyPlusState state, std::function<void(EnergyPlusState)> const &f)
 {
-    auto *thisState = reinterpret_cast<EnergyPlus::EnergyPlusData *>(state);
+    auto *thisState = reinterpret_cast<EnergyPlus::EnergyPlusData *>(state); // NOLINT(cppcoreguidelines-pro-type-reinterpret-cast)
     EnergyPlus::PluginManagement::registerNewCallback(*thisState, EnergyPlus::EMSManager::EMSCallFrom::ZoneSizing, f);
 }
 
 void callbackEndOfZoneSizing(EnergyPlusState state, void (*f)(EnergyPlusState))
 {
-    auto *thisState = reinterpret_cast<EnergyPlus::EnergyPlusData *>(state);
+    auto *thisState = reinterpret_cast<EnergyPlus::EnergyPlusData *>(state); // NOLINT(cppcoreguidelines-pro-type-reinterpret-cast)
     EnergyPlus::PluginManagement::registerNewCallback(*thisState, EnergyPlus::EMSManager::EMSCallFrom::ZoneSizing, f);
 }
 
 void callbackEndOfSystemSizing(EnergyPlusState state, std::function<void(EnergyPlusState)> const &f)
 {
-    auto *thisState = reinterpret_cast<EnergyPlus::EnergyPlusData *>(state);
+    auto *thisState = reinterpret_cast<EnergyPlus::EnergyPlusData *>(state); // NOLINT(cppcoreguidelines-pro-type-reinterpret-cast)
     EnergyPlus::PluginManagement::registerNewCallback(*thisState, EnergyPlus::EMSManager::EMSCallFrom::SystemSizing, f);
 }
 
 void callbackEndOfSystemSizing(EnergyPlusState state, void (*f)(EnergyPlusState))
 {
-    auto *thisState = reinterpret_cast<EnergyPlus::EnergyPlusData *>(state);
+    auto *thisState = reinterpret_cast<EnergyPlus::EnergyPlusData *>(state); // NOLINT(cppcoreguidelines-pro-type-reinterpret-cast)
     EnergyPlus::PluginManagement::registerNewCallback(*thisState, EnergyPlus::EMSManager::EMSCallFrom::SystemSizing, f);
 }
 
 void callbackEndOfAfterComponentGetInput(EnergyPlusState state, std::function<void(EnergyPlusState)> const &f)
 {
-    auto *thisState = reinterpret_cast<EnergyPlus::EnergyPlusData *>(state);
+    auto *thisState = reinterpret_cast<EnergyPlus::EnergyPlusData *>(state); // NOLINT(cppcoreguidelines-pro-type-reinterpret-cast)
     EnergyPlus::PluginManagement::registerNewCallback(*thisState, EnergyPlus::EMSManager::EMSCallFrom::ComponentGetInput, f);
 }
 
 void callbackEndOfAfterComponentGetInput(EnergyPlusState state, void (*f)(EnergyPlusState))
 {
-    auto *thisState = reinterpret_cast<EnergyPlus::EnergyPlusData *>(state);
+    auto *thisState = reinterpret_cast<EnergyPlus::EnergyPlusData *>(state); // NOLINT(cppcoreguidelines-pro-type-reinterpret-cast)
     EnergyPlus::PluginManagement::registerNewCallback(*thisState, EnergyPlus::EMSManager::EMSCallFrom::ComponentGetInput, f);
 }
 
-// void callbackUserDefinedComponentModel(EnergyPlusState state, std::function<void ()> f) {
-//    EnergyPlus::PluginManagement::registerNewCallback(EnergyPlus::DataGlobals::emsCallFromUserDefinedComponentModel, f);
-//}
-//
-// void callbackUserDefinedComponentModel(EnergyPlusState state, void (*f)()) {
-//    callbackUserDefinedComponentModel(std::function<void ()>(f));
-//}
+void callbackUserDefinedComponentModel(EnergyPlusState state, std::function<void(EnergyPlusState)> const &f, const char *programNameInInputFile)
+{
+    auto *thisState = reinterpret_cast<EnergyPlus::EnergyPlusData *>(state); // NOLINT(cppcoreguidelines-pro-type-reinterpret-cast)
+    EnergyPlus::PluginManagement::registerUserDefinedCallback(*thisState, f, programNameInInputFile);
+}
+
+void callbackUserDefinedComponentModel(EnergyPlusState state, void (*f)(EnergyPlusState), const char *programNameInInputFile)
+{
+    auto *thisState = reinterpret_cast<EnergyPlus::EnergyPlusData *>(state); // NOLINT(cppcoreguidelines-pro-type-reinterpret-cast)
+    EnergyPlus::PluginManagement::registerUserDefinedCallback(*thisState, f, programNameInInputFile);
+}
 
 void callbackUnitarySystemSizing(EnergyPlusState state, std::function<void(EnergyPlusState)> const &f)
 {
-    auto *thisState = reinterpret_cast<EnergyPlus::EnergyPlusData *>(state);
+    auto *thisState = reinterpret_cast<EnergyPlus::EnergyPlusData *>(state); // NOLINT(cppcoreguidelines-pro-type-reinterpret-cast)
     EnergyPlus::PluginManagement::registerNewCallback(*thisState, EnergyPlus::EMSManager::EMSCallFrom::UnitarySystemSizing, f);
 }
 
 void callbackUnitarySystemSizing(EnergyPlusState state, void (*f)(EnergyPlusState))
 {
-    auto *thisState = reinterpret_cast<EnergyPlus::EnergyPlusData *>(state);
+    auto *thisState = reinterpret_cast<EnergyPlus::EnergyPlusData *>(state); // NOLINT(cppcoreguidelines-pro-type-reinterpret-cast)
     EnergyPlus::PluginManagement::registerNewCallback(*thisState, EnergyPlus::EMSManager::EMSCallFrom::UnitarySystemSizing, f);
 }
 

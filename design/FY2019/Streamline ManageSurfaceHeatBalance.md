@@ -5,7 +5,7 @@ Streamline ManageSurfaceHeatBalance
 
  - June 28, 2019, Design - Part 1 (after the fact)
  - Revision Date
- 
+
 
 ## Justification for New Feature ##
 
@@ -19,18 +19,18 @@ n/a
 
 This work focuses on streamlining the surface heat balance loops. The general calling tree for this section is:
 ```
-ManageHeatBalance		
-	InitHeatBalance	
-	ManageSurfaceHeatBalance	
+ManageHeatBalance
+	InitHeatBalance
+	ManageSurfaceHeatBalance
 		InitSurfaceHeatBalance
 		CalcHeatBalanceOutsideSurf
-		CalcHeatBalanceInsideSurf			
-			CalcInteriorRadExchange		
-				InitInteriorRadExchange	
+		CalcHeatBalanceInsideSurf
+			CalcInteriorRadExchange
+				InitInteriorRadExchange
 					FixViewFactors
-			CalculateZoneMRT		
-		ManageAirHeatBalance			
-		UpdateFinalSurfaceHeatBalance			
+			CalculateZoneMRT
+		ManageAirHeatBalance
+		UpdateFinalSurfaceHeatBalance
 ```
 
 ## Design - Part 1 ##
@@ -43,13 +43,13 @@ for all zones or to resimulate a single zone. The list is build by looping throu
 for the correct zone. This could be done once and saved.
 
 2. Loop through all zones and their surfaces looking for zones which have mixed heat transfer algorithms. This could be done once and saved.
- 
+
 3. Many occurrences of `any_eq(HeatTransferAlgosUsed, UseCondFD)` or similar. `any-eq` is an Objexx function which loops through a list looking
 for a match. In `CalcHeatBalanceInsideSurf`, these are looking for uses of CondFD, Kiva, HAMT, etc. in order to conditionally call special functions
 or do other calculations specific to a certain algorithm. It is a small list (only CTF by default), but lots of gymnastics to find a result
  that could be done once and stored in a bool. The same function used elsewhere in the code for other things.
 
-4. Loop through all surfaces looking for InsideHeatSourceTermSchedule and set QAdditionalHeatSourceInside to a schedule value - 
+4. Loop through all surfaces looking for InsideHeatSourceTermSchedule and set QAdditionalHeatSourceInside to a schedule value -
 even if there are none in the simulation. Could add a new bool to skip this if there are no inside sources used.
 
 5. Check if windows have an internal source - why are windows even in this list - they're solved elsewhere?

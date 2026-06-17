@@ -1,7 +1,7 @@
-// EnergyPlus, Copyright (c) 1996-2023, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
-// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other
+// National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
 // contributors. All rights reserved.
 //
 // NOTICE: This Software was developed under funding from the U.S. Department of Energy and the
@@ -53,18 +53,113 @@
 
 // EnergyPlus Headers
 #include <EnergyPlus/Data/BaseData.hh>
+#include <EnergyPlus/DataGlobalConstants.hh>
 #include <EnergyPlus/DataGlobals.hh>
 #include <EnergyPlus/EnergyPlus.hh>
 
 namespace EnergyPlus {
 
-namespace PollutionModule {
+namespace Pollution {
 
-    enum class PollFactor
+    enum class Pollutant
     {
         Invalid = -1,
-        Elec,
-        NatGas,
+        CO2,
+        CO,
+        CH4,
+        NOx,
+        N2O,
+        SO2,
+        PM,
+        PM10,
+        PM2_5,
+        NH3,
+        NMVOC,
+        Hg,
+        Pb,
+        Water,
+        NuclearHigh,
+        NuclearLow,
+        Num
+    };
+
+    constexpr std::array<std::string_view, (int)Pollutant::Num> pollNames = {"CO2",
+                                                                             "CO",
+                                                                             "CH4",
+                                                                             "NOx",
+                                                                             "N2O",
+                                                                             "SO2",
+                                                                             "PM",
+                                                                             "PM10",
+                                                                             "PM2.5",
+                                                                             "NH3",
+                                                                             "NMVOC",
+                                                                             "Hg",
+                                                                             "Pb",
+                                                                             "WaterEnvironmentalFactors",
+                                                                             "Nuclear High",
+                                                                             "Nuclear Low"};
+
+    constexpr std::array<Constant::eResource, (int)Pollutant::Num> poll2Resource = {Constant::eResource::CO2,
+                                                                                    Constant::eResource::CO,
+                                                                                    Constant::eResource::CH4,
+                                                                                    Constant::eResource::NOx,
+                                                                                    Constant::eResource::N2O,
+                                                                                    Constant::eResource::SO2,
+                                                                                    Constant::eResource::PM,
+                                                                                    Constant::eResource::PM10,
+                                                                                    Constant::eResource::PM2_5,
+                                                                                    Constant::eResource::NH3,
+                                                                                    Constant::eResource::NMVOC,
+                                                                                    Constant::eResource::Hg,
+                                                                                    Constant::eResource::Pb,
+                                                                                    Constant::eResource::WaterEnvironmentalFactors,
+                                                                                    Constant::eResource::NuclearHigh,
+                                                                                    Constant::eResource::NuclearLow};
+
+    constexpr std::array<Constant::Units, (int)Pollutant::Num> pollUnits = {
+        Constant::Units::kg, // CO2
+        Constant::Units::kg, // CO
+        Constant::Units::kg, // CH4
+        Constant::Units::kg, // NOx
+        Constant::Units::kg, // N2O
+        Constant::Units::kg, // SO2
+        Constant::Units::kg, // PM
+        Constant::Units::kg, // PM10
+        Constant::Units::kg, // PM2_5
+        Constant::Units::kg, // NH3
+        Constant::Units::kg, // NMVOC
+        Constant::Units::kg, // Hg
+        Constant::Units::kg, // Pb
+        Constant::Units::L,  // Water
+        Constant::Units::kg, // NuclearHigh
+        Constant::Units::m3, // NuclearLow
+    };
+
+    constexpr std::array<std::string_view, (int)Pollutant::Num> poll2outVarStrs = {
+        "CO2 Emissions Mass",             // CO2
+        "CO Emissions Mass",              // CO
+        "CH4 Emissions Mass",             // CH4
+        "NOx Emissions Mass",             // NOx
+        "N2O Emissions Mass",             // N2O
+        "SO2 Emissions Mass",             // SO2
+        "PM Emissions Mass",              // PM
+        "PM10 Emissions Mass",            // PM10
+        "PM2.5 Emissions Mass",           // PM2_5
+        "NH3 Emissions Mass",             // NH3
+        "NMVOC Emissions Mass",           // NMVOC
+        "Hg Emissions Mass",              // Hg
+        "Pb Emissions Mass",              // Pb
+        "Water Consumption Volume",       // Water
+        "Nuclear High Level Waste Mass",  // NuclearHigh
+        "Nuclear Low Level Waste Volume", // NuclearLow
+    };
+
+    enum class PollFuel
+    {
+        Invalid = -1,
+        Electricity,
+        NaturalGas,
         FuelOil1,
         FuelOil2,
         Coal,
@@ -76,335 +171,157 @@ namespace PollutionModule {
         Num
     };
 
-    // MODULE VARIABLE DECLARATIONS:
-    // Total for all of the Pollutants
-    // Total Carbon Equivalent Components
-    //  !Fuel Types
-    // Total Carbon Equivalent Coeffs
-    // Purchased Efficiencies
+    constexpr std::array<Real64, (int)PollFuel::Num> pollFuelFactors = {
+        3.167, // Electricity
+        1.084, // NaturalGas
+        1.05,  // FuelOil1
+        1.05,  // FuelOil2
+        1.05,  // Coal
+        1.05,  // Gasoline
+        1.05,  // Propane
+        1.05,  // Diesel
+        1.0,   // OtherFuel1
+        1.0    // OtherFuel2
+    };
 
-    // Fuel Types used with the Pollution Factors
-    // Facility Meter Indexes
-    // Facility Meter Values used in Pollution Calcs
+    constexpr std::array<PollFuel, (int)Constant::eFuel::Num> fuel2pollFuel = {
+        PollFuel::Electricity, // Electricity
+        PollFuel::NaturalGas,  // NaturalGas
+        PollFuel::Gasoline,    // Gasoline
+        PollFuel::Diesel,      // Diesel
+        PollFuel::Coal,        // Coal
+        PollFuel::Propane,     // Propane
+        PollFuel::FuelOil1,    // FuelOilNo1
+        PollFuel::FuelOil2,    // FuelOilNo2
+        PollFuel::OtherFuel1,  // OtherFuel1
+        PollFuel::OtherFuel2,  // OtherFuel2
+        PollFuel::Electricity, // DistrictCooling
+        PollFuel::NaturalGas,  // DistrictHeatingWater
+        PollFuel::NaturalGas,  // DistrictHeatingSteam
+    };
+
+    constexpr std::array<Constant::eFuel, (int)PollFuel::Num> pollFuel2fuel = {
+        Constant::eFuel::Electricity, // Electricity
+        Constant::eFuel::NaturalGas,  // NaturalGas
+        Constant::eFuel::FuelOilNo1,  // FuelOil1
+        Constant::eFuel::FuelOilNo2,  // FuelOil2
+        Constant::eFuel::Coal,        // Coal
+        Constant::eFuel::Gasoline,    // Gasoline
+        Constant::eFuel::Propane,     // Propane
+        Constant::eFuel::Diesel,      // Diesel
+        Constant::eFuel::OtherFuel1,  // OtherFuel1
+        Constant::eFuel::OtherFuel2   // OtherFuel2
+    };
+
+    constexpr std::array<std::string_view, (int)PollFuel::Num> pollFuelNamesUC = {
+        Constant::eFuelNamesUC[(int)pollFuel2fuel[(int)PollFuel::Electricity]], // Electricity
+        Constant::eFuelNamesUC[(int)pollFuel2fuel[(int)PollFuel::NaturalGas]],  // NaturalGas
+        Constant::eFuelNamesUC[(int)pollFuel2fuel[(int)PollFuel::FuelOil1]],    // FuelOil1
+        Constant::eFuelNamesUC[(int)pollFuel2fuel[(int)PollFuel::FuelOil2]],    // FuelOil2
+        Constant::eFuelNamesUC[(int)pollFuel2fuel[(int)PollFuel::Coal]],        // Coal
+        Constant::eFuelNamesUC[(int)pollFuel2fuel[(int)PollFuel::Gasoline]],    // Gasoline
+        Constant::eFuelNamesUC[(int)pollFuel2fuel[(int)PollFuel::Propane]],     // Propane
+        Constant::eFuelNamesUC[(int)pollFuel2fuel[(int)PollFuel::Diesel]],      // Diesel
+        Constant::eFuelNamesUC[(int)pollFuel2fuel[(int)PollFuel::OtherFuel1]],  // OtherFuel1
+        Constant::eFuelNamesUC[(int)pollFuel2fuel[(int)PollFuel::OtherFuel2]]   // OtherFuel2
+    };
+
+    enum class PollFuelComponent
+    {
+        Invalid = -1,
+        Electricity,
+        NaturalGas,
+        FuelOil1,
+        FuelOil2,
+        Coal,
+        Gasoline,
+        Propane,
+        Diesel,
+        OtherFuel1,
+        OtherFuel2,
+        ElectricitySurplusSold,
+        ElectricityPurchased,
+        Num
+    };
+
+    constexpr std::array<PollFuel, (int)PollFuelComponent::Num> pollFuelComp2pollFuel = {PollFuel::Electricity,
+                                                                                         PollFuel::NaturalGas,
+                                                                                         PollFuel::FuelOil1,
+                                                                                         PollFuel::FuelOil2,
+                                                                                         PollFuel::Coal,
+                                                                                         PollFuel::Gasoline,
+                                                                                         PollFuel::Propane,
+                                                                                         PollFuel::Diesel,
+                                                                                         PollFuel::OtherFuel1,
+                                                                                         PollFuel::OtherFuel2,
+                                                                                         PollFuel::Electricity,
+                                                                                         PollFuel::Electricity};
+
+    constexpr std::array<PollFuelComponent, (int)PollFuel::Num> pollFuel2pollFuelComponent = {
+        PollFuelComponent::Electricity,
+        PollFuelComponent::NaturalGas,
+        PollFuelComponent::FuelOil1,
+        PollFuelComponent::FuelOil2,
+        PollFuelComponent::Coal,
+        PollFuelComponent::Gasoline,
+        PollFuelComponent::Propane,
+        PollFuelComponent::Diesel,
+        PollFuelComponent::OtherFuel1,
+        PollFuelComponent::OtherFuel2,
+    };
+
+    enum class PollFacilityMeter
+    {
+        Invalid = -1,
+        Electricity,
+        NaturalGas,
+        FuelOil1,
+        FuelOil2,
+        Coal,
+        Gasoline,
+        Propane,
+        Diesel,
+        OtherFuel1,
+        OtherFuel2,
+        ElectricitySurplusSold,
+        ElectricityPurchased,
+        ElectricityProduced,
+        Steam,
+        HeatPurchased,
+        CoolPurchased,
+        Num
+    };
+
+    constexpr std::array<std::string_view, (int)PollFacilityMeter::Num> pollFacilityMeterNames = {"Electricity:Facility",
+                                                                                                  "NaturalGas:Facility",
+                                                                                                  "FuelOilNo1:Facility",
+                                                                                                  "FuelOilNo2:Facility",
+                                                                                                  "Coal:Facility",
+                                                                                                  "Gasoline:Facility",
+                                                                                                  "Propane:Facility",
+                                                                                                  "Diesel:Facility",
+                                                                                                  "OtherFuel1:Facility",
+                                                                                                  "OtherFuel2:Facility",
+                                                                                                  "ElectricitySurplusSold:Facility",
+                                                                                                  "ElectricityPurchased:Facility",
+                                                                                                  "ElectricityProduced:Facility",
+                                                                                                  "DistrictHeatingSteam:Facility",
+                                                                                                  "DistrictHeatingWater:Facility",
+                                                                                                  "DistrictCooling:Facility"};
 
     struct ComponentProps
     {
-        // Members
-        int FuelFactorType;
-        Real64 Source;
-        Real64 CO2Pollution;
-        Real64 COPollution;
-        Real64 CH4Pollution;
-        Real64 NOxPollution;
-        Real64 N2OPollution;
-        Real64 SO2Pollution;
-        Real64 PMPollution;
-        Real64 PM10Pollution;
-        Real64 PM25Pollution;
-        Real64 NH3Pollution;
-        Real64 NMVOCPollution;
-        Real64 HgPollution;
-        Real64 PbPollution;
-        Real64 WaterPollution;
-        Real64 NucHiPollution;
-        Real64 NucLoPollution;
-
-        // Default Constructor
-        ComponentProps()
-            : FuelFactorType(0), Source(0.0), CO2Pollution(0.0), COPollution(0.0), CH4Pollution(0.0), NOxPollution(0.0), N2OPollution(0.0),
-              SO2Pollution(0.0), PMPollution(0.0), PM10Pollution(0.0), PM25Pollution(0.0), NH3Pollution(0.0), NMVOCPollution(0.0), HgPollution(0.0),
-              PbPollution(0.0), WaterPollution(0.0), NucHiPollution(0.0), NucLoPollution(0.0)
-        {
-        }
-
-        // Member Constructor
-        ComponentProps(int const FuelFactorType,
-                       Real64 const Source,
-                       Real64 const CO2Pollution,
-                       Real64 const COPollution,
-                       Real64 const CH4Pollution,
-                       Real64 const NOxPollution,
-                       Real64 const N2OPollution,
-                       Real64 const SO2Pollution,
-                       Real64 const PMPollution,
-                       Real64 const PM10Pollution,
-                       Real64 const PM25Pollution,
-                       Real64 const NH3Pollution,
-                       Real64 const NMVOCPollution,
-                       Real64 const HgPollution,
-                       Real64 const PbPollution,
-                       Real64 const WaterPollution,
-                       Real64 const NucHiPollution,
-                       Real64 const NucLoPollution)
-            : FuelFactorType(FuelFactorType), Source(Source), CO2Pollution(CO2Pollution), COPollution(COPollution), CH4Pollution(CH4Pollution),
-              NOxPollution(NOxPollution), N2OPollution(N2OPollution), SO2Pollution(SO2Pollution), PMPollution(PMPollution),
-              PM10Pollution(PM10Pollution), PM25Pollution(PM25Pollution), NH3Pollution(NH3Pollution), NMVOCPollution(NMVOCPollution),
-              HgPollution(HgPollution), PbPollution(PbPollution), WaterPollution(WaterPollution), NucHiPollution(NucHiPollution),
-              NucLoPollution(NucLoPollution)
-        {
-        }
+        Real64 sourceVal = 0.0;
+        std::array<Real64, (int)Pollutant::Num> pollutantVals = {0.0};
     };
 
     struct CoefficientProps
     {
-        // Members
-        int FuelFactorType;
-        bool FuelFactorUsed;
-        Real64 Source;
-        Real64 CO2;
-        Real64 CO;
-        Real64 CH4;
-        Real64 NOx;
-        Real64 N2O;
-        Real64 SO2;
-        Real64 PM;
-        Real64 PM10;
-        Real64 PM25;
-        Real64 NH3;
-        Real64 NMVOC;
-        Real64 Hg;
-        Real64 Pb;
-        Real64 Water;
-        Real64 NucHi;
-        Real64 NucLo;
-        int SourceSched;
-        int CO2Sched;
-        int COSched;
-        int CH4Sched;
-        int NOxSched;
-        int N2OSched;
-        int SO2Sched;
-        int PMSched;
-        int PM10Sched;
-        int PM25Sched;
-        int NH3Sched;
-        int NMVOCSched;
-        int HgSched;
-        int PbSched;
-        int WaterSched;
-        int NucHiSched;
-        int NucLoSched;
-
-        // Default Constructor
-        CoefficientProps()
-            : FuelFactorType(0), FuelFactorUsed(false), Source(0.0), CO2(0.0), CO(0.0), CH4(0.0), NOx(0.0), N2O(0.0), SO2(0.0), PM(0.0), PM10(0.0),
-              PM25(0.0), NH3(0.0), NMVOC(0.0), Hg(0.0), Pb(0.0), Water(0.0), NucHi(0.0), NucLo(0.0), SourceSched(0), CO2Sched(0), COSched(0),
-              CH4Sched(0), NOxSched(0), N2OSched(0), SO2Sched(0), PMSched(0), PM10Sched(0), PM25Sched(0), NH3Sched(0), NMVOCSched(0), HgSched(0),
-              PbSched(0), WaterSched(0), NucHiSched(0), NucLoSched(0)
-        {
-        }
-
-        // Member Constructor
-        CoefficientProps(int const FuelFactorType,
-                         bool const FuelFactorUsed,
-                         Real64 const Source,
-                         Real64 const CO2,
-                         Real64 const CO,
-                         Real64 const CH4,
-                         Real64 const NOx,
-                         Real64 const N2O,
-                         Real64 const SO2,
-                         Real64 const PM,
-                         Real64 const PM10,
-                         Real64 const PM25,
-                         Real64 const NH3,
-                         Real64 const NMVOC,
-                         Real64 const Hg,
-                         Real64 const Pb,
-                         Real64 const Water,
-                         Real64 const NucHi,
-                         Real64 const NucLo,
-                         int const SourceSched,
-                         int const CO2Sched,
-                         int const COSched,
-                         int const CH4Sched,
-                         int const NOxSched,
-                         int const N2OSched,
-                         int const SO2Sched,
-                         int const PMSched,
-                         int const PM10Sched,
-                         int const PM25Sched,
-                         int const NH3Sched,
-                         int const NMVOCSched,
-                         int const HgSched,
-                         int const PbSched,
-                         int const WaterSched,
-                         int const NucHiSched,
-                         int const NucLoSched)
-            : FuelFactorType(FuelFactorType), FuelFactorUsed(FuelFactorUsed), Source(Source), CO2(CO2), CO(CO), CH4(CH4), NOx(NOx), N2O(N2O),
-              SO2(SO2), PM(PM), PM10(PM10), PM25(PM25), NH3(NH3), NMVOC(NMVOC), Hg(Hg), Pb(Pb), Water(Water), NucHi(NucHi), NucLo(NucLo),
-              SourceSched(SourceSched), CO2Sched(CO2Sched), COSched(COSched), CH4Sched(CH4Sched), NOxSched(NOxSched), N2OSched(N2OSched),
-              SO2Sched(SO2Sched), PMSched(PMSched), PM10Sched(PM10Sched), PM25Sched(PM25Sched), NH3Sched(NH3Sched), NMVOCSched(NMVOCSched),
-              HgSched(HgSched), PbSched(PbSched), WaterSched(WaterSched), NucHiSched(NucHiSched), NucLoSched(NucLoSched)
-        {
-        }
-    };
-
-    struct PollutionProps
-    {
-        // Members
-        // Components
-        ComponentProps ElecComp;
-        ComponentProps ElecPurchComp;
-        ComponentProps ElecSurplusSoldComp;
-        ComponentProps NatGasComp;
-        ComponentProps FuelOil1Comp;
-        ComponentProps FuelOil2Comp;
-        ComponentProps CoalComp;
-        ComponentProps GasolineComp;
-        ComponentProps PropaneComp;
-        ComponentProps DieselComp;
-        ComponentProps OtherFuel1Comp;
-        ComponentProps OtherFuel2Comp;
-        // Total for all of the Pollutants
-        Real64 N2OPollutTotal;
-        Real64 CH4PollutTotal;
-        Real64 CO2PollutTotal;
-        // Total Carbon Equivalent Components
-        Real64 TotCarbonEquivFromN2O;
-        Real64 TotCarbonEquivFromCH4;
-        Real64 TotCarbonEquivFromCO2;
-        // Fuel Type Coefficients
-        CoefficientProps ElecCoef;
-        CoefficientProps NatGasCoef;
-        CoefficientProps FuelOil1Coef;
-        CoefficientProps FuelOil2Coef;
-        CoefficientProps CoalCoef;
-        CoefficientProps GasolineCoef;
-        CoefficientProps PropaneCoef;
-        CoefficientProps DieselCoef;
-        CoefficientProps OtherFuel1Coef;
-        CoefficientProps OtherFuel2Coef;
-        // Total Carbon Equivalent Coeffs
-        Real64 CarbonEquivN2O;
-        Real64 CarbonEquivCH4;
-        Real64 CarbonEquivCO2;
-        Real64 PurchHeatEffic;
-        Real64 PurchCoolCOP;
-        Real64 SteamConvEffic;
-
-        // Default Constructor
-        PollutionProps()
-            : N2OPollutTotal(0.0), CH4PollutTotal(0.0), CO2PollutTotal(0.0), TotCarbonEquivFromN2O(0.0), TotCarbonEquivFromCH4(0.0),
-              TotCarbonEquivFromCO2(0.0), CarbonEquivN2O(0.0), CarbonEquivCH4(0.0), CarbonEquivCO2(0.0), PurchHeatEffic(0.0), PurchCoolCOP(0.0),
-              SteamConvEffic(0.0)
-        {
-        }
-
-        // Member Constructor
-        PollutionProps(ComponentProps const &ElecComp,
-                       ComponentProps const &ElecPurchComp,
-                       ComponentProps const &ElecSurplusSoldComp,
-                       ComponentProps const &NatGasComp,
-                       ComponentProps const &FuelOil1Comp,
-                       ComponentProps const &FuelOil2Comp,
-                       ComponentProps const &CoalComp,
-                       ComponentProps const &GasolineComp,
-                       ComponentProps const &PropaneComp,
-                       ComponentProps const &DieselComp,
-                       ComponentProps const &OtherFuel1Comp,
-                       ComponentProps const &OtherFuel2Comp,
-                       Real64 const N2OPollutTotal,
-                       Real64 const CH4PollutTotal,
-                       Real64 const CO2PollutTotal,
-                       Real64 const TotCarbonEquivFromN2O,
-                       Real64 const TotCarbonEquivFromCH4,
-                       Real64 const TotCarbonEquivFromCO2,
-                       CoefficientProps const &ElecCoef,
-                       CoefficientProps const &NatGasCoef,
-                       CoefficientProps const &FuelOil1Coef,
-                       CoefficientProps const &FuelOil2Coef,
-                       CoefficientProps const &CoalCoef,
-                       CoefficientProps const &GasolineCoef,
-                       CoefficientProps const &PropaneCoef,
-                       CoefficientProps const &DieselCoef,
-                       CoefficientProps const &OtherFuel1Coef,
-                       CoefficientProps const &OtherFuel2Coef,
-                       Real64 const CarbonEquivN2O,
-                       Real64 const CarbonEquivCH4,
-                       Real64 const CarbonEquivCO2,
-                       Real64 const PurchHeatEffic,
-                       Real64 const PurchCoolCOP,
-                       Real64 const SteamConvEffic)
-            : ElecComp(ElecComp), ElecPurchComp(ElecPurchComp), ElecSurplusSoldComp(ElecSurplusSoldComp), NatGasComp(NatGasComp),
-              FuelOil1Comp(FuelOil1Comp), FuelOil2Comp(FuelOil2Comp), CoalComp(CoalComp), GasolineComp(GasolineComp), PropaneComp(PropaneComp),
-              DieselComp(DieselComp), OtherFuel1Comp(OtherFuel1Comp), OtherFuel2Comp(OtherFuel2Comp), N2OPollutTotal(N2OPollutTotal),
-              CH4PollutTotal(CH4PollutTotal), CO2PollutTotal(CO2PollutTotal), TotCarbonEquivFromN2O(TotCarbonEquivFromN2O),
-              TotCarbonEquivFromCH4(TotCarbonEquivFromCH4), TotCarbonEquivFromCO2(TotCarbonEquivFromCO2), ElecCoef(ElecCoef), NatGasCoef(NatGasCoef),
-              FuelOil1Coef(FuelOil1Coef), FuelOil2Coef(FuelOil2Coef), CoalCoef(CoalCoef), GasolineCoef(GasolineCoef), PropaneCoef(PropaneCoef),
-              DieselCoef(DieselCoef), OtherFuel1Coef(OtherFuel1Coef), OtherFuel2Coef(OtherFuel2Coef), CarbonEquivN2O(CarbonEquivN2O),
-              CarbonEquivCH4(CarbonEquivCH4), CarbonEquivCO2(CarbonEquivCO2), PurchHeatEffic(PurchHeatEffic), PurchCoolCOP(PurchCoolCOP),
-              SteamConvEffic(SteamConvEffic)
-        {
-        }
-    };
-
-    struct FuelTypeProps
-    {
-        // Members
-        // FuelType Names
-        Array1D_string FuelTypeNames;
-        // Fuel Types used with the Pollution Factors
-        Real64 Elec;
-        Real64 NatGas;
-        Real64 FuelOil1;
-        Real64 FuelOil2;
-        Real64 Coal;
-        Real64 Gasoline;
-        Real64 Propane;
-        Real64 Diesel;
-        Real64 OtherFuel1;
-        Real64 OtherFuel2;
-        Real64 ElecPurch;
-        Real64 ElecSold;
-        // Facility Meter Indexes
-        int ElecFacilityIndex;
-        int DieselFacilityIndex;
-        int PurchCoolFacilityIndex;
-        int PurchHeatFacilityIndex;
-        int NatGasFacilityIndex;
-        int GasolineFacilityIndex;
-        int CoalFacilityIndex;
-        int FuelOil1FacilityIndex;
-        int FuelOil2FacilityIndex;
-        int PropaneFacilityIndex;
-        int OtherFuel1FacilityIndex;
-        int OtherFuel2FacilityIndex;
-        int ElecProducedFacilityIndex;
-        int SteamFacilityIndex;
-        int ElecPurchasedFacilityIndex;
-        int ElecSurplusSoldFacilityIndex;
-        // Facility Meter Values used in Pollution Calcs
-        Real64 ElecFacility;
-        Real64 DieselFacility;
-        Real64 PurchCoolFacility;
-        Real64 PurchHeatFacility;
-        Real64 NatGasFacility;
-        Real64 GasolineFacility;
-        Real64 CoalFacility;
-        Real64 FuelOil1Facility;
-        Real64 FuelOil2Facility;
-        Real64 PropaneFacility;
-        Real64 OtherFuel1Facility;
-        Real64 OtherFuel2Facility;
-        Real64 ElecProducedFacility;
-        Real64 SteamFacility;
-        Real64 ElecPurchasedFacility;
-        Real64 ElecSurplusSoldFacility;
-
-        // Default Constructor
-        FuelTypeProps()
-            : FuelTypeNames({1, static_cast<int>(PollFactor::Num)}), Elec(0.0), NatGas(0.0), FuelOil1(0.0), FuelOil2(0.0), Coal(0.0), Gasoline(0.0),
-              Propane(0.0), Diesel(0.0), OtherFuel1(0.0), OtherFuel2(0.0), ElecPurch(0.0), ElecSold(0.0), ElecFacilityIndex(0),
-              DieselFacilityIndex(0), PurchCoolFacilityIndex(0), PurchHeatFacilityIndex(0), NatGasFacilityIndex(0), GasolineFacilityIndex(0),
-              CoalFacilityIndex(0), FuelOil1FacilityIndex(0), FuelOil2FacilityIndex(0), PropaneFacilityIndex(0), OtherFuel1FacilityIndex(0),
-              OtherFuel2FacilityIndex(0), ElecProducedFacilityIndex(0), SteamFacilityIndex(0), ElecPurchasedFacilityIndex(0),
-              ElecSurplusSoldFacilityIndex(0), ElecFacility(0.0), DieselFacility(0.0), PurchCoolFacility(0.0), PurchHeatFacility(0.0),
-              NatGasFacility(0.0), GasolineFacility(0.0), CoalFacility(0.0), FuelOil1Facility(0.0), FuelOil2Facility(0.0), PropaneFacility(0.0),
-              OtherFuel1Facility(0.0), OtherFuel2Facility(0.0), ElecProducedFacility(0.0), SteamFacility(0.0), ElecPurchasedFacility(0.0),
-              ElecSurplusSoldFacility(0.0)
-        {
-        }
+        bool used = false;
+        Real64 sourceCoeff = 0.0;
+        std::array<Real64, (int)Pollutant::Num> pollutantCoeffs = {0.0};
+        Sched::Schedule *sourceSched = nullptr;
+        std::array<Sched::Schedule *, (int)Pollutant::Num> pollutantScheds = {0};
     };
 
     void CalculatePollution(EnergyPlusData &state);
@@ -417,36 +334,28 @@ namespace PollutionModule {
 
     void CheckPollutionMeterReporting(EnergyPlusData &state);
 
-    void CheckFFSchedule(EnergyPlusData &state,
-                         std::string const &currentModuleObject, // the module Object
-                         std::string const &resourceType,        // resource type (Natural Gas, etc)
-                         std::string const &fieldName,           // Actual field name
-                         std::string const &ScheduleName,        // Schedule Name as input
-                         int &SchedulePtr,                       // Schedule Index
-                         bool &ErrorsFound                       // true if errors found
-    );
-
     void CalcPollution(EnergyPlusData &state);
 
     void ReadEnergyMeters(EnergyPlusData &state);
 
-    void GetFuelFactorInfo(EnergyPlusData &state,
-                           std::string const &fuelName,  // input fuel name  (standard from Tabular reports)
-                           bool &fuelFactorUsed,         // return value true if user has entered this fuel
-                           Real64 &fuelSourceFactor,     // if used, the source factor
-                           bool &fuelFactorScheduleUsed, // if true, schedules for this fuel are used
-                           int &ffScheduleIndex          // if schedules for this fuel are used, return schedule index
+    void
+    GetFuelFactorInfo(EnergyPlusData &state,
+                      Constant::eFuel fuel,         // input fuel name  (standard from Tabular reports)
+                      bool &fuelFactorUsed,         // return value true if user has entered this fuel
+                      Real64 &fuelSourceFactor,     // if used, the source factor
+                      bool &fuelFactorScheduleUsed, // if true, schedules for this fuel are used
+                      Sched::Schedule **ffSched // if schedules for this fuel are used, return schedule pointer (need pointer to pointer to do this)
     );
 
     void GetEnvironmentalImpactFactorInfo(EnergyPlusData &state,
-                                          Real64 &efficiencyDistrictHeating, // if entered, the efficiency of District Heating
-                                          Real64 &efficiencyDistrictCooling, // if entered, the efficiency of District Cooling
-                                          Real64 &sourceFactorSteam          // if entered, the source factor for Steam
+                                          Real64 &efficiencyDistrictHeatingWater,  // if entered, the efficiency of District Heating Water
+                                          Real64 &efficiencyDistrictCooling,       // if entered, the efficiency of District Cooling
+                                          Real64 &sourceFactorDistrictHeatingSteam // if entered, the source factor for Dictrict Heating Steam
     );
 
-} // namespace PollutionModule
+} // namespace Pollution
 
-struct PollutionModuleData : BaseGlobalStruct
+struct PollutionData : BaseGlobalStruct
 {
 
     bool PollutionReportSetup = false;
@@ -454,533 +363,38 @@ struct PollutionModuleData : BaseGlobalStruct
     int NumEnvImpactFactors = 0;
     int NumFuelFactors = 0;
 
-    // Object Data
-    PollutionModule::PollutionProps Pollution = {
-        PollutionModule::ComponentProps(
-            static_cast<int>(PollutionModule::PollFactor::Elec), 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0),
-        PollutionModule::ComponentProps(
-            static_cast<int>(PollutionModule::PollFactor::Elec), 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0),
-        PollutionModule::ComponentProps(
-            static_cast<int>(PollutionModule::PollFactor::Elec), 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0),
-        PollutionModule::ComponentProps(static_cast<int>(PollutionModule::PollFactor::NatGas),
-                                        0.0,
-                                        0.0,
-                                        0.0,
-                                        0.0,
-                                        0.0,
-                                        0.0,
-                                        0.0,
-                                        0.0,
-                                        0.0,
-                                        0.0,
-                                        0.0,
-                                        0.0,
-                                        0.0,
-                                        0.0,
-                                        0.0,
-                                        0.0,
-                                        0.0),
-        PollutionModule::ComponentProps(static_cast<int>(PollutionModule::PollFactor::FuelOil1),
-                                        0.0,
-                                        0.0,
-                                        0.0,
-                                        0.0,
-                                        0.0,
-                                        0.0,
-                                        0.0,
-                                        0.0,
-                                        0.0,
-                                        0.0,
-                                        0.0,
-                                        0.0,
-                                        0.0,
-                                        0.0,
-                                        0.0,
-                                        0.0,
-                                        0.0),
-        PollutionModule::ComponentProps(static_cast<int>(PollutionModule::PollFactor::FuelOil2),
-                                        0.0,
-                                        0.0,
-                                        0.0,
-                                        0.0,
-                                        0.0,
-                                        0.0,
-                                        0.0,
-                                        0.0,
-                                        0.0,
-                                        0.0,
-                                        0.0,
-                                        0.0,
-                                        0.0,
-                                        0.0,
-                                        0.0,
-                                        0.0,
-                                        0.0),
-        PollutionModule::ComponentProps(
-            static_cast<int>(PollutionModule::PollFactor::Coal), 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0),
-        PollutionModule::ComponentProps(static_cast<int>(PollutionModule::PollFactor::Gasoline),
-                                        0.0,
-                                        0.0,
-                                        0.0,
-                                        0.0,
-                                        0.0,
-                                        0.0,
-                                        0.0,
-                                        0.0,
-                                        0.0,
-                                        0.0,
-                                        0.0,
-                                        0.0,
-                                        0.0,
-                                        0.0,
-                                        0.0,
-                                        0.0,
-                                        0.0),
-        PollutionModule::ComponentProps(static_cast<int>(PollutionModule::PollFactor::Propane),
-                                        0.0,
-                                        0.0,
-                                        0.0,
-                                        0.0,
-                                        0.0,
-                                        0.0,
-                                        0.0,
-                                        0.0,
-                                        0.0,
-                                        0.0,
-                                        0.0,
-                                        0.0,
-                                        0.0,
-                                        0.0,
-                                        0.0,
-                                        0.0,
-                                        0.0),
-        PollutionModule::ComponentProps(static_cast<int>(PollutionModule::PollFactor::Diesel),
-                                        0.0,
-                                        0.0,
-                                        0.0,
-                                        0.0,
-                                        0.0,
-                                        0.0,
-                                        0.0,
-                                        0.0,
-                                        0.0,
-                                        0.0,
-                                        0.0,
-                                        0.0,
-                                        0.0,
-                                        0.0,
-                                        0.0,
-                                        0.0,
-                                        0.0),
-        PollutionModule::ComponentProps(static_cast<int>(PollutionModule::PollFactor::OtherFuel1),
-                                        0.0,
-                                        0.0,
-                                        0.0,
-                                        0.0,
-                                        0.0,
-                                        0.0,
-                                        0.0,
-                                        0.0,
-                                        0.0,
-                                        0.0,
-                                        0.0,
-                                        0.0,
-                                        0.0,
-                                        0.0,
-                                        0.0,
-                                        0.0,
-                                        0.0),
-        PollutionModule::ComponentProps(static_cast<int>(PollutionModule::PollFactor::OtherFuel2),
-                                        0.0,
-                                        0.0,
-                                        0.0,
-                                        0.0,
-                                        0.0,
-                                        0.0,
-                                        0.0,
-                                        0.0,
-                                        0.0,
-                                        0.0,
-                                        0.0,
-                                        0.0,
-                                        0.0,
-                                        0.0,
-                                        0.0,
-                                        0.0,
-                                        0.0),
-        0.0,
-        0.0,
-        0.0,
-        0.0,
-        0.0,
-        0.0,
-        PollutionModule::CoefficientProps(static_cast<int>(PollutionModule::PollFactor::Elec),
-                                          false,
-                                          3.167,
-                                          0.0,
-                                          0.0,
-                                          0.0,
-                                          0.0,
-                                          0.0,
-                                          0.0,
-                                          0.0,
-                                          0.0,
-                                          0.0,
-                                          0.0,
-                                          0.0,
-                                          0.0,
-                                          0.0,
-                                          0.0,
-                                          0.0,
-                                          0.0,
-                                          0,
-                                          0,
-                                          0,
-                                          0,
-                                          0,
-                                          0,
-                                          0,
-                                          0,
-                                          0,
-                                          0,
-                                          0,
-                                          0,
-                                          0,
-                                          0,
-                                          0,
-                                          0,
-                                          0),
-        PollutionModule::CoefficientProps(static_cast<int>(PollutionModule::PollFactor::NatGas),
-                                          false,
-                                          1.084,
-                                          0.0,
-                                          0.0,
-                                          0.0,
-                                          0.0,
-                                          0.0,
-                                          0.0,
-                                          0.0,
-                                          0.0,
-                                          0.0,
-                                          0.0,
-                                          0.0,
-                                          0.0,
-                                          0.0,
-                                          0.0,
-                                          0.0,
-                                          0.0,
-                                          0,
-                                          0,
-                                          0,
-                                          0,
-                                          0,
-                                          0,
-                                          0,
-                                          0,
-                                          0,
-                                          0,
-                                          0,
-                                          0,
-                                          0,
-                                          0,
-                                          0,
-                                          0,
-                                          0),
-        PollutionModule::CoefficientProps(static_cast<int>(PollutionModule::PollFactor::FuelOil1),
-                                          false,
-                                          1.05,
-                                          0.0,
-                                          0.0,
-                                          0.0,
-                                          0.0,
-                                          0.0,
-                                          0.0,
-                                          0.0,
-                                          0.0,
-                                          0.0,
-                                          0.0,
-                                          0.0,
-                                          0.0,
-                                          0.0,
-                                          0.0,
-                                          0.0,
-                                          0.0,
-                                          0,
-                                          0,
-                                          0,
-                                          0,
-                                          0,
-                                          0,
-                                          0,
-                                          0,
-                                          0,
-                                          0,
-                                          0,
-                                          0,
-                                          0,
-                                          0,
-                                          0,
-                                          0,
-                                          0),
-        PollutionModule::CoefficientProps(static_cast<int>(PollutionModule::PollFactor::FuelOil2),
-                                          false,
-                                          1.05,
-                                          0.0,
-                                          0.0,
-                                          0.0,
-                                          0.0,
-                                          0.0,
-                                          0.0,
-                                          0.0,
-                                          0.0,
-                                          0.0,
-                                          0.0,
-                                          0.0,
-                                          0.0,
-                                          0.0,
-                                          0.0,
-                                          0.0,
-                                          0.0,
-                                          0,
-                                          0,
-                                          0,
-                                          0,
-                                          0,
-                                          0,
-                                          0,
-                                          0,
-                                          0,
-                                          0,
-                                          0,
-                                          0,
-                                          0,
-                                          0,
-                                          0,
-                                          0,
-                                          0),
-        PollutionModule::CoefficientProps(static_cast<int>(PollutionModule::PollFactor::Coal),
-                                          false,
-                                          1.05,
-                                          0.0,
-                                          0.0,
-                                          0.0,
-                                          0.0,
-                                          0.0,
-                                          0.0,
-                                          0.0,
-                                          0.0,
-                                          0.0,
-                                          0.0,
-                                          0.0,
-                                          0.0,
-                                          0.0,
-                                          0.0,
-                                          0.0,
-                                          0.0,
-                                          0,
-                                          0,
-                                          0,
-                                          0,
-                                          0,
-                                          0,
-                                          0,
-                                          0,
-                                          0,
-                                          0,
-                                          0,
-                                          0,
-                                          0,
-                                          0,
-                                          0,
-                                          0,
-                                          0),
-        PollutionModule::CoefficientProps(static_cast<int>(PollutionModule::PollFactor::Gasoline),
-                                          false,
-                                          1.05,
-                                          0.0,
-                                          0.0,
-                                          0.0,
-                                          0.0,
-                                          0.0,
-                                          0.0,
-                                          0.0,
-                                          0.0,
-                                          0.0,
-                                          0.0,
-                                          0.0,
-                                          0.0,
-                                          0.0,
-                                          0.0,
-                                          0.0,
-                                          0.0,
-                                          0,
-                                          0,
-                                          0,
-                                          0,
-                                          0,
-                                          0,
-                                          0,
-                                          0,
-                                          0,
-                                          0,
-                                          0,
-                                          0,
-                                          0,
-                                          0,
-                                          0,
-                                          0,
-                                          0),
-        PollutionModule::CoefficientProps(static_cast<int>(PollutionModule::PollFactor::Propane),
-                                          false,
-                                          1.05,
-                                          0.0,
-                                          0.0,
-                                          0.0,
-                                          0.0,
-                                          0.0,
-                                          0.0,
-                                          0.0,
-                                          0.0,
-                                          0.0,
-                                          0.0,
-                                          0.0,
-                                          0.0,
-                                          0.0,
-                                          0.0,
-                                          0.0,
-                                          0.0,
-                                          0,
-                                          0,
-                                          0,
-                                          0,
-                                          0,
-                                          0,
-                                          0,
-                                          0,
-                                          0,
-                                          0,
-                                          0,
-                                          0,
-                                          0,
-                                          0,
-                                          0,
-                                          0,
-                                          0),
-        PollutionModule::CoefficientProps(static_cast<int>(PollutionModule::PollFactor::Diesel),
-                                          false,
-                                          1.05,
-                                          0.0,
-                                          0.0,
-                                          0.0,
-                                          0.0,
-                                          0.0,
-                                          0.0,
-                                          0.0,
-                                          0.0,
-                                          0.0,
-                                          0.0,
-                                          0.0,
-                                          0.0,
-                                          0.0,
-                                          0.0,
-                                          0.0,
-                                          0.0,
-                                          0,
-                                          0,
-                                          0,
-                                          0,
-                                          0,
-                                          0,
-                                          0,
-                                          0,
-                                          0,
-                                          0,
-                                          0,
-                                          0,
-                                          0,
-                                          0,
-                                          0,
-                                          0,
-                                          0),
-        PollutionModule::CoefficientProps(static_cast<int>(PollutionModule::PollFactor::OtherFuel1),
-                                          false,
-                                          1.0,
-                                          0.0,
-                                          0.0,
-                                          0.0,
-                                          0.0,
-                                          0.0,
-                                          0.0,
-                                          0.0,
-                                          0.0,
-                                          0.0,
-                                          0.0,
-                                          0.0,
-                                          0.0,
-                                          0.0,
-                                          0.0,
-                                          0.0,
-                                          0.0,
-                                          0,
-                                          0,
-                                          0,
-                                          0,
-                                          0,
-                                          0,
-                                          0,
-                                          0,
-                                          0,
-                                          0,
-                                          0,
-                                          0,
-                                          0,
-                                          0,
-                                          0,
-                                          0,
-                                          0),
-        PollutionModule::CoefficientProps(static_cast<int>(PollutionModule::PollFactor::OtherFuel2),
-                                          false,
-                                          1.0,
-                                          0.0,
-                                          0.0,
-                                          0.0,
-                                          0.0,
-                                          0.0,
-                                          0.0,
-                                          0.0,
-                                          0.0,
-                                          0.0,
-                                          0.0,
-                                          0.0,
-                                          0.0,
-                                          0.0,
-                                          0.0,
-                                          0.0,
-                                          0.0,
-                                          0,
-                                          0,
-                                          0,
-                                          0,
-                                          0,
-                                          0,
-                                          0,
-                                          0,
-                                          0,
-                                          0,
-                                          0,
-                                          0,
-                                          0,
-                                          0,
-                                          0,
-                                          0,
-                                          0),
-        0.0,
-        0.0,
-        0.0,
-        0.0,
-        0.0,
-        0.0};
-    PollutionModule::FuelTypeProps FuelType;
+    std::array<Pollution::ComponentProps, (int)Pollution::PollFuelComponent::Num> pollComps;
+
+    // Meters, meter values, and grouped meter values
+    std::array<int, (int)Pollution::PollFacilityMeter::Num> facilityMeterNums = {-1};
+    std::array<Real64, (int)Pollution::PollFacilityMeter::Num> facilityMeterVals = {0.0};
+    std::array<Real64, (int)Pollution::PollFuelComponent::Num> facilityMeterFuelComponentVals = {0.0};
+
+    std::array<Real64, (int)Pollution::Pollutant::Num> pollutantVals = {0.0};
+
+    std::vector<Pollution::PollFuel> pollFuelFactorList;
+
+    // Total Carbon Equivalent Components
+    Real64 TotCarbonEquivFromN2O = 0.0;
+    Real64 TotCarbonEquivFromCH4 = 0.0;
+    Real64 TotCarbonEquivFromCO2 = 0.0;
+    // Fuel Type Coefficients
+    std::array<Pollution::CoefficientProps, (int)Pollution::PollFuel::Num> pollCoeffs;
+    // Total Carbon Equivalent Coeffs
+    Real64 CarbonEquivN2O = 0.0;
+    Real64 CarbonEquivCH4 = 0.0;
+    Real64 CarbonEquivCO2 = 0.0;
+    Real64 PurchHeatEffic = 0.0;
+    Real64 PurchCoolCOP = 0.0;
+    Real64 SteamConvEffic = 0.0;
+
+    void init_constant_state([[maybe_unused]] EnergyPlusData &state) override
+    {
+    }
+
+    void init_state([[maybe_unused]] EnergyPlusData &state) override
+    {
+    }
 
     void clear_state() override
     {
@@ -988,595 +402,8 @@ struct PollutionModuleData : BaseGlobalStruct
         this->GetInputFlagPollution = true;
         this->NumEnvImpactFactors = 0;
         this->NumFuelFactors = 0;
-        this->Pollution = {PollutionModule::ComponentProps(static_cast<int>(PollutionModule::PollFactor::Elec),
-                                                           0.0,
-                                                           0.0,
-                                                           0.0,
-                                                           0.0,
-                                                           0.0,
-                                                           0.0,
-                                                           0.0,
-                                                           0.0,
-                                                           0.0,
-                                                           0.0,
-                                                           0.0,
-                                                           0.0,
-                                                           0.0,
-                                                           0.0,
-                                                           0.0,
-                                                           0.0,
-                                                           0.0),
-                           PollutionModule::ComponentProps(static_cast<int>(PollutionModule::PollFactor::Elec),
-                                                           0.0,
-                                                           0.0,
-                                                           0.0,
-                                                           0.0,
-                                                           0.0,
-                                                           0.0,
-                                                           0.0,
-                                                           0.0,
-                                                           0.0,
-                                                           0.0,
-                                                           0.0,
-                                                           0.0,
-                                                           0.0,
-                                                           0.0,
-                                                           0.0,
-                                                           0.0,
-                                                           0.0),
-                           PollutionModule::ComponentProps(static_cast<int>(PollutionModule::PollFactor::Elec),
-                                                           0.0,
-                                                           0.0,
-                                                           0.0,
-                                                           0.0,
-                                                           0.0,
-                                                           0.0,
-                                                           0.0,
-                                                           0.0,
-                                                           0.0,
-                                                           0.0,
-                                                           0.0,
-                                                           0.0,
-                                                           0.0,
-                                                           0.0,
-                                                           0.0,
-                                                           0.0,
-                                                           0.0),
-                           PollutionModule::ComponentProps(static_cast<int>(PollutionModule::PollFactor::NatGas),
-                                                           0.0,
-                                                           0.0,
-                                                           0.0,
-                                                           0.0,
-                                                           0.0,
-                                                           0.0,
-                                                           0.0,
-                                                           0.0,
-                                                           0.0,
-                                                           0.0,
-                                                           0.0,
-                                                           0.0,
-                                                           0.0,
-                                                           0.0,
-                                                           0.0,
-                                                           0.0,
-                                                           0.0),
-                           PollutionModule::ComponentProps(static_cast<int>(PollutionModule::PollFactor::FuelOil1),
-                                                           0.0,
-                                                           0.0,
-                                                           0.0,
-                                                           0.0,
-                                                           0.0,
-                                                           0.0,
-                                                           0.0,
-                                                           0.0,
-                                                           0.0,
-                                                           0.0,
-                                                           0.0,
-                                                           0.0,
-                                                           0.0,
-                                                           0.0,
-                                                           0.0,
-                                                           0.0,
-                                                           0.0),
-                           PollutionModule::ComponentProps(static_cast<int>(PollutionModule::PollFactor::FuelOil2),
-                                                           0.0,
-                                                           0.0,
-                                                           0.0,
-                                                           0.0,
-                                                           0.0,
-                                                           0.0,
-                                                           0.0,
-                                                           0.0,
-                                                           0.0,
-                                                           0.0,
-                                                           0.0,
-                                                           0.0,
-                                                           0.0,
-                                                           0.0,
-                                                           0.0,
-                                                           0.0,
-                                                           0.0),
-                           PollutionModule::ComponentProps(static_cast<int>(PollutionModule::PollFactor::Coal),
-                                                           0.0,
-                                                           0.0,
-                                                           0.0,
-                                                           0.0,
-                                                           0.0,
-                                                           0.0,
-                                                           0.0,
-                                                           0.0,
-                                                           0.0,
-                                                           0.0,
-                                                           0.0,
-                                                           0.0,
-                                                           0.0,
-                                                           0.0,
-                                                           0.0,
-                                                           0.0,
-                                                           0.0),
-                           PollutionModule::ComponentProps(static_cast<int>(PollutionModule::PollFactor::Gasoline),
-                                                           0.0,
-                                                           0.0,
-                                                           0.0,
-                                                           0.0,
-                                                           0.0,
-                                                           0.0,
-                                                           0.0,
-                                                           0.0,
-                                                           0.0,
-                                                           0.0,
-                                                           0.0,
-                                                           0.0,
-                                                           0.0,
-                                                           0.0,
-                                                           0.0,
-                                                           0.0,
-                                                           0.0),
-                           PollutionModule::ComponentProps(static_cast<int>(PollutionModule::PollFactor::Propane),
-                                                           0.0,
-                                                           0.0,
-                                                           0.0,
-                                                           0.0,
-                                                           0.0,
-                                                           0.0,
-                                                           0.0,
-                                                           0.0,
-                                                           0.0,
-                                                           0.0,
-                                                           0.0,
-                                                           0.0,
-                                                           0.0,
-                                                           0.0,
-                                                           0.0,
-                                                           0.0,
-                                                           0.0),
-                           PollutionModule::ComponentProps(static_cast<int>(PollutionModule::PollFactor::Diesel),
-                                                           0.0,
-                                                           0.0,
-                                                           0.0,
-                                                           0.0,
-                                                           0.0,
-                                                           0.0,
-                                                           0.0,
-                                                           0.0,
-                                                           0.0,
-                                                           0.0,
-                                                           0.0,
-                                                           0.0,
-                                                           0.0,
-                                                           0.0,
-                                                           0.0,
-                                                           0.0,
-                                                           0.0),
-                           PollutionModule::ComponentProps(static_cast<int>(PollutionModule::PollFactor::OtherFuel1),
-                                                           0.0,
-                                                           0.0,
-                                                           0.0,
-                                                           0.0,
-                                                           0.0,
-                                                           0.0,
-                                                           0.0,
-                                                           0.0,
-                                                           0.0,
-                                                           0.0,
-                                                           0.0,
-                                                           0.0,
-                                                           0.0,
-                                                           0.0,
-                                                           0.0,
-                                                           0.0,
-                                                           0.0),
-                           PollutionModule::ComponentProps(static_cast<int>(PollutionModule::PollFactor::OtherFuel2),
-                                                           0.0,
-                                                           0.0,
-                                                           0.0,
-                                                           0.0,
-                                                           0.0,
-                                                           0.0,
-                                                           0.0,
-                                                           0.0,
-                                                           0.0,
-                                                           0.0,
-                                                           0.0,
-                                                           0.0,
-                                                           0.0,
-                                                           0.0,
-                                                           0.0,
-                                                           0.0,
-                                                           0.0),
-                           0.0,
-                           0.0,
-                           0.0,
-                           0.0,
-                           0.0,
-                           0.0,
-                           PollutionModule::CoefficientProps(static_cast<int>(PollutionModule::PollFactor::Elec),
-                                                             false,
-                                                             3.167,
-                                                             0.0,
-                                                             0.0,
-                                                             0.0,
-                                                             0.0,
-                                                             0.0,
-                                                             0.0,
-                                                             0.0,
-                                                             0.0,
-                                                             0.0,
-                                                             0.0,
-                                                             0.0,
-                                                             0.0,
-                                                             0.0,
-                                                             0.0,
-                                                             0.0,
-                                                             0.0,
-                                                             0,
-                                                             0,
-                                                             0,
-                                                             0,
-                                                             0,
-                                                             0,
-                                                             0,
-                                                             0,
-                                                             0,
-                                                             0,
-                                                             0,
-                                                             0,
-                                                             0,
-                                                             0,
-                                                             0,
-                                                             0,
-                                                             0),
-                           PollutionModule::CoefficientProps(static_cast<int>(PollutionModule::PollFactor::NatGas),
-                                                             false,
-                                                             1.084,
-                                                             0.0,
-                                                             0.0,
-                                                             0.0,
-                                                             0.0,
-                                                             0.0,
-                                                             0.0,
-                                                             0.0,
-                                                             0.0,
-                                                             0.0,
-                                                             0.0,
-                                                             0.0,
-                                                             0.0,
-                                                             0.0,
-                                                             0.0,
-                                                             0.0,
-                                                             0.0,
-                                                             0,
-                                                             0,
-                                                             0,
-                                                             0,
-                                                             0,
-                                                             0,
-                                                             0,
-                                                             0,
-                                                             0,
-                                                             0,
-                                                             0,
-                                                             0,
-                                                             0,
-                                                             0,
-                                                             0,
-                                                             0,
-                                                             0),
-                           PollutionModule::CoefficientProps(static_cast<int>(PollutionModule::PollFactor::FuelOil1),
-                                                             false,
-                                                             1.05,
-                                                             0.0,
-                                                             0.0,
-                                                             0.0,
-                                                             0.0,
-                                                             0.0,
-                                                             0.0,
-                                                             0.0,
-                                                             0.0,
-                                                             0.0,
-                                                             0.0,
-                                                             0.0,
-                                                             0.0,
-                                                             0.0,
-                                                             0.0,
-                                                             0.0,
-                                                             0.0,
-                                                             0,
-                                                             0,
-                                                             0,
-                                                             0,
-                                                             0,
-                                                             0,
-                                                             0,
-                                                             0,
-                                                             0,
-                                                             0,
-                                                             0,
-                                                             0,
-                                                             0,
-                                                             0,
-                                                             0,
-                                                             0,
-                                                             0),
-                           PollutionModule::CoefficientProps(static_cast<int>(PollutionModule::PollFactor::FuelOil2),
-                                                             false,
-                                                             1.05,
-                                                             0.0,
-                                                             0.0,
-                                                             0.0,
-                                                             0.0,
-                                                             0.0,
-                                                             0.0,
-                                                             0.0,
-                                                             0.0,
-                                                             0.0,
-                                                             0.0,
-                                                             0.0,
-                                                             0.0,
-                                                             0.0,
-                                                             0.0,
-                                                             0.0,
-                                                             0.0,
-                                                             0,
-                                                             0,
-                                                             0,
-                                                             0,
-                                                             0,
-                                                             0,
-                                                             0,
-                                                             0,
-                                                             0,
-                                                             0,
-                                                             0,
-                                                             0,
-                                                             0,
-                                                             0,
-                                                             0,
-                                                             0,
-                                                             0),
-                           PollutionModule::CoefficientProps(static_cast<int>(PollutionModule::PollFactor::Coal),
-                                                             false,
-                                                             1.05,
-                                                             0.0,
-                                                             0.0,
-                                                             0.0,
-                                                             0.0,
-                                                             0.0,
-                                                             0.0,
-                                                             0.0,
-                                                             0.0,
-                                                             0.0,
-                                                             0.0,
-                                                             0.0,
-                                                             0.0,
-                                                             0.0,
-                                                             0.0,
-                                                             0.0,
-                                                             0.0,
-                                                             0,
-                                                             0,
-                                                             0,
-                                                             0,
-                                                             0,
-                                                             0,
-                                                             0,
-                                                             0,
-                                                             0,
-                                                             0,
-                                                             0,
-                                                             0,
-                                                             0,
-                                                             0,
-                                                             0,
-                                                             0,
-                                                             0),
-                           PollutionModule::CoefficientProps(static_cast<int>(PollutionModule::PollFactor::Gasoline),
-                                                             false,
-                                                             1.05,
-                                                             0.0,
-                                                             0.0,
-                                                             0.0,
-                                                             0.0,
-                                                             0.0,
-                                                             0.0,
-                                                             0.0,
-                                                             0.0,
-                                                             0.0,
-                                                             0.0,
-                                                             0.0,
-                                                             0.0,
-                                                             0.0,
-                                                             0.0,
-                                                             0.0,
-                                                             0.0,
-                                                             0,
-                                                             0,
-                                                             0,
-                                                             0,
-                                                             0,
-                                                             0,
-                                                             0,
-                                                             0,
-                                                             0,
-                                                             0,
-                                                             0,
-                                                             0,
-                                                             0,
-                                                             0,
-                                                             0,
-                                                             0,
-                                                             0),
-                           PollutionModule::CoefficientProps(static_cast<int>(PollutionModule::PollFactor::Propane),
-                                                             false,
-                                                             1.05,
-                                                             0.0,
-                                                             0.0,
-                                                             0.0,
-                                                             0.0,
-                                                             0.0,
-                                                             0.0,
-                                                             0.0,
-                                                             0.0,
-                                                             0.0,
-                                                             0.0,
-                                                             0.0,
-                                                             0.0,
-                                                             0.0,
-                                                             0.0,
-                                                             0.0,
-                                                             0.0,
-                                                             0,
-                                                             0,
-                                                             0,
-                                                             0,
-                                                             0,
-                                                             0,
-                                                             0,
-                                                             0,
-                                                             0,
-                                                             0,
-                                                             0,
-                                                             0,
-                                                             0,
-                                                             0,
-                                                             0,
-                                                             0,
-                                                             0),
-                           PollutionModule::CoefficientProps(static_cast<int>(PollutionModule::PollFactor::Diesel),
-                                                             false,
-                                                             1.05,
-                                                             0.0,
-                                                             0.0,
-                                                             0.0,
-                                                             0.0,
-                                                             0.0,
-                                                             0.0,
-                                                             0.0,
-                                                             0.0,
-                                                             0.0,
-                                                             0.0,
-                                                             0.0,
-                                                             0.0,
-                                                             0.0,
-                                                             0.0,
-                                                             0.0,
-                                                             0.0,
-                                                             0,
-                                                             0,
-                                                             0,
-                                                             0,
-                                                             0,
-                                                             0,
-                                                             0,
-                                                             0,
-                                                             0,
-                                                             0,
-                                                             0,
-                                                             0,
-                                                             0,
-                                                             0,
-                                                             0,
-                                                             0,
-                                                             0),
-                           PollutionModule::CoefficientProps(static_cast<int>(PollutionModule::PollFactor::OtherFuel1),
-                                                             false,
-                                                             1.0,
-                                                             0.0,
-                                                             0.0,
-                                                             0.0,
-                                                             0.0,
-                                                             0.0,
-                                                             0.0,
-                                                             0.0,
-                                                             0.0,
-                                                             0.0,
-                                                             0.0,
-                                                             0.0,
-                                                             0.0,
-                                                             0.0,
-                                                             0.0,
-                                                             0.0,
-                                                             0.0,
-                                                             0,
-                                                             0,
-                                                             0,
-                                                             0,
-                                                             0,
-                                                             0,
-                                                             0,
-                                                             0,
-                                                             0,
-                                                             0,
-                                                             0,
-                                                             0,
-                                                             0,
-                                                             0,
-                                                             0,
-                                                             0,
-                                                             0),
-                           PollutionModule::CoefficientProps(static_cast<int>(PollutionModule::PollFactor::OtherFuel2),
-                                                             false,
-                                                             1.0,
-                                                             0.0,
-                                                             0.0,
-                                                             0.0,
-                                                             0.0,
-                                                             0.0,
-                                                             0.0,
-                                                             0.0,
-                                                             0.0,
-                                                             0.0,
-                                                             0.0,
-                                                             0.0,
-                                                             0.0,
-                                                             0.0,
-                                                             0.0,
-                                                             0.0,
-                                                             0.0,
-                                                             0,
-                                                             0,
-                                                             0,
-                                                             0,
-                                                             0,
-                                                             0,
-                                                             0,
-                                                             0,
-                                                             0,
-                                                             0,
-                                                             0,
-                                                             0,
-                                                             0,
-                                                             0,
-                                                             0,
-                                                             0,
-                                                             0),
-                           0.0,
-                           0.0,
-                           0.0,
-                           0.0,
-                           0.0,
-                           0.0};
-        this->FuelType = {};
+
+        this->pollFuelFactorList.clear();
     }
 };
 

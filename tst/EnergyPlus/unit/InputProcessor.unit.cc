@@ -1,7 +1,7 @@
-// EnergyPlus, Copyright (c) 1996-2023, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
-// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other
+// National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
 // contributors. All rights reserved.
 //
 // NOTICE: This Software was developed under funding from the U.S. Department of Energy and the
@@ -56,8 +56,8 @@
 #include <EnergyPlus/DataIPShortCuts.hh>
 #include <EnergyPlus/DataOutputs.hh>
 #include <EnergyPlus/GeneralRoutines.hh>
+#include <EnergyPlus/InputProcessing/CsvParser.hh>
 #include <EnergyPlus/InputProcessing/InputProcessor.hh>
-#include <EnergyPlus/SortAndStringUtilities.hh>
 
 #include <map>
 #include <sstream>
@@ -224,6 +224,9 @@ TEST_F(InputProcessorFixture, decode_encode_1)
                                        "  Relative,",
                                        "  Relative;",
                                        "",
+                                       "Timestep,",
+                                       "  4;",
+                                       "",
                                        "Version,",
                                        "  " + DataStringGlobals::MatchVersion + ";",
                                        ""});
@@ -268,6 +271,9 @@ TEST_F(InputProcessorFixture, decode_encode_2)
                                           "  Relative,",
                                           "  Relative,",
                                           "  Relative;",
+                                          "",
+                                          "Timestep,",
+                                          "  4;",
                                           "",
                                           "Version,",
                                           "  " + DataStringGlobals::MatchVersion + ";",
@@ -336,6 +342,9 @@ TEST_F(InputProcessorFixture, decode_encode_3)
                                           "  ,",
                                           "  10;",
                                           "",
+                                          "Timestep,",
+                                          "  4;",
+                                          "",
                                           "Version,",
                                           "  " + DataStringGlobals::MatchVersion + ";",
                                           ""}));
@@ -367,6 +376,9 @@ TEST_F(InputProcessorFixture, byte_order_mark)
                                           "  Relative,",
                                           "  Relative,",
                                           "  Relative;",
+                                          "",
+                                          "Timestep,",
+                                          "  4;",
                                           "",
                                           "Version,",
                                           "  " + DataStringGlobals::MatchVersion + ";",
@@ -549,6 +561,7 @@ TEST_F(InputProcessorFixture, parse_bad_utf_8_json_2)
                                "\"vertex_entry_direction\":\"Counterclockwise\""
                                "}"
                                "},"
+                               "\"Timestep\":{\"\":{\"idf_order\":0,\"number_of_timesteps_per_hour\":4}},"
                                "\"Version\":{"
                                "\"\":{"
                                "\"idf_order\":0,"
@@ -597,6 +610,7 @@ TEST_F(InputProcessorFixture, parse_bad_utf_8_json_3)
                                "\"vertex_entry_direction\":\"Counterclockwise\""
                                "}"
                                "},"
+                               "\"Timestep\":{\"\":{\"idf_order\":0,\"number_of_timesteps_per_hour\":4}},"
                                "\"Version\":{"
                                "\"\":{"
                                "\"idf_order\":0,"
@@ -928,6 +942,9 @@ TEST_F(InputProcessorFixture, parse_idf_extensible_blank_extensibles)
                                               "  Relative,",
                                               "  Relative,",
                                               "  Relative;",
+                                              "",
+                                              "Timestep,",
+                                              "  4;",
                                               "",
                                               "Version,",
                                               "  " + DataStringGlobals::MatchVersion + ";",
@@ -1981,31 +1998,31 @@ TEST_F(InputProcessorFixture, look_ahead)
     size_t index = 0;
     IdfParser::Token token = look_ahead(test_input, index);
     EXPECT_EQ(0ul, index);
-    EXPECT_TRUE(compare_enums(IdfParser::Token::STRING, token));
+    EXPECT_ENUM_EQ(IdfParser::Token::STRING, token);
     index = 2;
     token = look_ahead(test_input, index);
     EXPECT_EQ(2ul, index);
-    EXPECT_TRUE(compare_enums(IdfParser::Token::COMMA, token));
+    EXPECT_ENUM_EQ(IdfParser::Token::COMMA, token);
     index = 3;
     token = look_ahead(test_input, index);
     EXPECT_EQ(3ul, index);
-    EXPECT_TRUE(compare_enums(IdfParser::Token::EXCLAMATION, token));
+    EXPECT_ENUM_EQ(IdfParser::Token::EXCLAMATION, token);
     index = 5;
     token = look_ahead(test_input, index);
     EXPECT_EQ(5ul, index);
-    EXPECT_TRUE(compare_enums(IdfParser::Token::STRING, token));
+    EXPECT_ENUM_EQ(IdfParser::Token::STRING, token);
     index = 7;
     token = look_ahead(test_input, index);
     EXPECT_EQ(7ul, index);
-    EXPECT_TRUE(compare_enums(IdfParser::Token::SEMICOLON, token));
+    EXPECT_ENUM_EQ(IdfParser::Token::SEMICOLON, token);
     index = 9;
     token = look_ahead(test_input, index);
     EXPECT_EQ(9ul, index);
-    EXPECT_TRUE(compare_enums(IdfParser::Token::STRING, token));
+    EXPECT_ENUM_EQ(IdfParser::Token::STRING, token);
     index = test_input.size();
     token = look_ahead(test_input, index);
     EXPECT_EQ(test_input.size(), index);
-    EXPECT_TRUE(compare_enums(IdfParser::Token::END, token));
+    EXPECT_ENUM_EQ(IdfParser::Token::END, token);
 }
 
 TEST_F(InputProcessorFixture, next_token)
@@ -2015,32 +2032,32 @@ TEST_F(InputProcessorFixture, next_token)
     std::string const test_input("B , ! t ; `");
     IdfParser::Token token = next_token(test_input, index);
     EXPECT_EQ(1ul, index);
-    EXPECT_TRUE(compare_enums(IdfParser::Token::STRING, token));
+    EXPECT_ENUM_EQ(IdfParser::Token::STRING, token);
     token = next_token(test_input, index);
     EXPECT_EQ(3ul, index);
-    EXPECT_TRUE(compare_enums(IdfParser::Token::COMMA, token));
+    EXPECT_ENUM_EQ(IdfParser::Token::COMMA, token);
     token = next_token(test_input, index);
     EXPECT_EQ(5ul, index);
-    EXPECT_TRUE(compare_enums(IdfParser::Token::EXCLAMATION, token));
+    EXPECT_ENUM_EQ(IdfParser::Token::EXCLAMATION, token);
     token = next_token(test_input, index);
     EXPECT_EQ(7ul, index);
-    EXPECT_TRUE(compare_enums(IdfParser::Token::STRING, token));
+    EXPECT_ENUM_EQ(IdfParser::Token::STRING, token);
     token = next_token(test_input, index);
     EXPECT_EQ(9ul, index);
-    EXPECT_TRUE(compare_enums(IdfParser::Token::SEMICOLON, token));
+    EXPECT_ENUM_EQ(IdfParser::Token::SEMICOLON, token);
     token = next_token(test_input, index);
     EXPECT_EQ(11ul, index);
-    EXPECT_TRUE(compare_enums(IdfParser::Token::STRING, token));
+    EXPECT_ENUM_EQ(IdfParser::Token::STRING, token);
     index = test_input.size();
     token = next_token(test_input, index);
     EXPECT_EQ(test_input.size(), index);
-    EXPECT_TRUE(compare_enums(IdfParser::Token::END, token));
+    EXPECT_ENUM_EQ(IdfParser::Token::END, token);
 }
 
 TEST_F(InputProcessorFixture, getObjectItem_json1)
 {
     std::string const idf_objects = delimited_string({
-        "Version,8.3;",
+        "Version," + DataStringGlobals::MatchVersion + ";",
         "Output:SQLite,SimpleAndTabular;",
     });
 
@@ -2077,11 +2094,12 @@ TEST_F(InputProcessorFixture, getObjectItem_json1)
                                                               cAlphaFields,
                                                               cNumericFields);
 
-    EXPECT_TRUE(compare_containers(std::vector<std::string>({"SIMPLEANDTABULAR", ""}), Alphas));
-    EXPECT_TRUE(compare_containers(std::vector<std::string>({"Option Type", "Unit Conversion for Tabular Data"}), cAlphaFields));
+    EXPECT_TRUE(compare_containers(std::vector<std::string>({"SIMPLEANDTABULAR", "USEOUTPUTCONTROLTABLESTYLE", "YES"}), Alphas));
+    EXPECT_TRUE(compare_containers(
+        std::vector<std::string>({"Option Type", "Unit Conversion for Tabular Data", "Format Numeric Values for Tabular Data"}), cAlphaFields));
     EXPECT_TRUE(compare_containers(std::vector<std::string>({}), cNumericFields));
     EXPECT_TRUE(compare_containers(std::vector<bool>({}), lNumericBlanks));
-    EXPECT_TRUE(compare_containers(std::vector<bool>({false, true}), lAlphaBlanks));
+    EXPECT_TRUE(compare_containers(std::vector<bool>({false, true, true}), lAlphaBlanks));
     EXPECT_TRUE(compare_containers(std::vector<Real64>({}), Numbers));
     EXPECT_EQ(1, NumAlphas);
     EXPECT_EQ(0, NumNumbers);
@@ -2091,7 +2109,7 @@ TEST_F(InputProcessorFixture, getObjectItem_json1)
 TEST_F(InputProcessorFixture, getObjectItem_json2)
 {
     std::string const idf_objects = delimited_string({
-        "Version,8.3;",
+        "Version," + DataStringGlobals::MatchVersion + ";",
         "Humidifier:Steam:Gas,",
         "  Main Gas Humidifier,     !- Name",
         "  ,                        !- Availability Schedule Name",
@@ -2136,9 +2154,14 @@ TEST_F(InputProcessorFixture, getObjectItem_json2)
                                                               cAlphaFields,
                                                               cNumericFields);
 
-    EXPECT_TRUE(compare_containers(
-        std::vector<std::string>({"MAIN GAS HUMIDIFIER", "", "THERMALEFFICIENCYFPLR", "MIXED AIR NODE 1", "MAIN HUMIDIFIER OUTLET NODE", "", ""}),
-        Alphas));
+    EXPECT_TRUE(compare_containers(std::vector<std::string>({"MAIN GAS HUMIDIFIER",
+                                                             "",
+                                                             "THERMALEFFICIENCYFPLR",
+                                                             "MIXED AIR NODE 1",
+                                                             "MAIN HUMIDIFIER OUTLET NODE",
+                                                             "",
+                                                             "FIXEDINLETWATERTEMPERATURE"}),
+                                   Alphas));
     EXPECT_TRUE(compare_containers(std::vector<std::string>({"Name",
                                                              "Availability Schedule Name",
                                                              "Thermal Efficiency Modifier Curve Name",
@@ -2162,7 +2185,7 @@ TEST_F(InputProcessorFixture, getObjectItem_json2)
 TEST_F(InputProcessorFixture, getObjectItem_json3)
 {
     std::string const idf_objects = delimited_string({
-        "Version,8.3;",
+        "Version," + DataStringGlobals::MatchVersion + ";",
         "  BuildingSurface:Detailed,",
         "    Zn001:Wall001,           !- Name",
         "    Wall,                    !- Surface Type",
@@ -2356,7 +2379,7 @@ TEST_F(InputProcessorFixture, getObjectItem_parsing_numbers_as_alpha_fields2)
 TEST_F(InputProcessorFixture, getObjectItem_empty_fields_with_no_defaults)
 {
     std::string const idf_objects = delimited_string({
-        "Version,8.3;",
+        "Version," + DataStringGlobals::MatchVersion + ";",
         " Curve:Biquadratic,",
         "  HPACCOOLEIRFT Speed, !- Name",
         "  0.632475E+00, !- Coefficient1 Constant",
@@ -2468,7 +2491,7 @@ TEST_F(InputProcessorFixture, getObjectItem_empty_fields_with_no_defaults)
 TEST_F(InputProcessorFixture, getObjectItem_truncated_obj_pulled_up_semicolon)
 {
     std::string const idf_objects = delimited_string({
-        "Version,8.3;",
+        "Version," + DataStringGlobals::MatchVersion + ";",
         " Curve:Biquadratic,",
         "  HPACCOOLEIRFT Speed, !- Name",
         "  0.632475E+00, !- Coefficient1 Constant",
@@ -2521,7 +2544,7 @@ TEST_F(InputProcessorFixture, getObjectItem_truncated_obj_pulled_up_semicolon)
                                                               cNumericFields);
 
     EXPECT_EQ(1, NumAlphas);
-    EXPECT_TRUE(compare_containers(std::vector<std::string>({"HPACCOOLEIRFT SPEED", "", "", ""}), Alphas));
+    EXPECT_TRUE(compare_containers(std::vector<std::string>({"HPACCOOLEIRFT SPEED", "DIMENSIONLESS", "DIMENSIONLESS", "DIMENSIONLESS"}), Alphas));
     EXPECT_TRUE(compare_containers(std::vector<std::string>({
                                        "Name",
                                        "Input Unit Type for X",
@@ -2558,7 +2581,7 @@ TEST_F(InputProcessorFixture, getObjectItem_truncated_obj_pulled_up_semicolon)
 TEST_F(InputProcessorFixture, getObjectItem_truncated_sizing_system_min_fields)
 {
     std::string const idf_objects = delimited_string({
-        "Version,8.3;",
+        "Version," + DataStringGlobals::MatchVersion + ";",
         "Sizing:System,",
         "  West Zone Air System,    !- AirLoop Name",
         "  Sensible,                !- Type of Load to Size On",
@@ -2634,20 +2657,21 @@ TEST_F(InputProcessorFixture, getObjectItem_truncated_sizing_system_min_fields)
                                                              "ZONESUM",
                                                              "COOLINGDESIGNCAPACITY",
                                                              "HEATINGDESIGNCAPACITY",
-                                                             "ONOFF"}),
+                                                             "ONOFF",
+                                                             "NONE"}),
                                    Alphas));
     // The commented out compare containers is what the original input processor said that alpha blanks should be, even though the last 3 alpha fields
     // are filled in with defaults. We think the last three fields really should be considered blank, i.e. true
     //        EXPECT_TRUE( compare_containers( std::vector< bool >( { false, false, false, false, false, false, false, true, false, false, false } ),
     //        lAlphaBlanks ) );
-    EXPECT_TRUE(compare_containers(std::vector<bool>({false, false, false, false, false, false, false, true, true, true, true}), lAlphaBlanks));
+    EXPECT_TRUE(compare_containers(std::vector<bool>({false, false, false, false, false, false, false, true, true, true, true, true}), lAlphaBlanks));
 
     EXPECT_EQ(26, NumNumbers);
-    EXPECT_TRUE(compare_containers(std::vector<Real64>({-99999, 0.4, 7, 0.0085, 11.0, 0.0085, 12.8,   16.7, 0.0085, 0.0085, 0, 0, 0, 0,
-                                                        0,      0,   0, 0,      0,    1,      -99999, 0,    0,      -99999, 0, 0, 0}),
+    EXPECT_TRUE(compare_containers(std::vector<Real64>({-99999, 0.4, 7, 0.0085, 11.0, 0.0085, 12.8,   16.7, 0.0085, 0.0085, 0, 0, 0,      0,
+                                                        0,      0,   0, 0,      0,    1,      -99999, 0,    0,      -99999, 0, 0, -99999, 1}),
                                    Numbers));
     EXPECT_TRUE(compare_containers(std::vector<bool>({false, false, false, false, false, false, false, false, false, false, true, true, true, true,
-                                                      true,  true,  true,  true,  true,  true,  true,  true,  true,  true,  true, true, true}),
+                                                      true,  true,  true,  true,  true,  true,  true,  true,  true,  true,  true, true, true, true}),
                                    lNumericBlanks));
     EXPECT_EQ(1, IOStatus);
 }
@@ -2655,7 +2679,7 @@ TEST_F(InputProcessorFixture, getObjectItem_truncated_sizing_system_min_fields)
 TEST_F(InputProcessorFixture, getObjectItem_missing_numerics_with_defaults_and_autosize)
 {
     std::string const idf_objects = delimited_string({
-        "Version,8.3;",
+        "Version," + DataStringGlobals::MatchVersion + ";",
         "Humidifier:Steam:Gas,",
         "  Main Gas Humidifier,     !- Name",
         "  ,                        !- Availability Schedule Name",
@@ -2741,7 +2765,7 @@ TEST_F(InputProcessorFixture, getObjectItem_missing_numerics_with_defaults_and_a
 TEST_F(InputProcessorFixture, getObjectItem_truncated_autosize_fields)
 {
     std::string const idf_objects = delimited_string({
-        "Version,8.3;",
+        "Version," + DataStringGlobals::MatchVersion + ";",
         "Humidifier:Steam:Gas,",
         "  Main Gas Humidifier,     !- Name",
         "  ,                        !- Availability Schedule Name",
@@ -2785,7 +2809,7 @@ TEST_F(InputProcessorFixture, getObjectItem_truncated_autosize_fields)
                                                               cNumericFields);
 
     EXPECT_EQ(2, NumAlphas);
-    EXPECT_TRUE(compare_containers(std::vector<std::string>({"MAIN GAS HUMIDIFIER", "", "", "", "", "", ""}), Alphas));
+    EXPECT_TRUE(compare_containers(std::vector<std::string>({"MAIN GAS HUMIDIFIER", "", "", "", "", "", "FIXEDINLETWATERTEMPERATURE"}), Alphas));
     EXPECT_TRUE(compare_containers(std::vector<std::string>({"Name",
                                                              "Availability Schedule Name",
                                                              "Thermal Efficiency Modifier Curve Name",
@@ -2801,7 +2825,7 @@ TEST_F(InputProcessorFixture, getObjectItem_truncated_autosize_fields)
         std::vector<std::string>({"Rated Capacity", "Rated Gas Use Rate", "Thermal Efficiency", "Rated Fan Power", "Auxiliary Electric Power"}),
         cNumericFields));
     EXPECT_TRUE(compare_containers(std::vector<bool>({false, true, true, true, true}), lNumericBlanks));
-    EXPECT_TRUE(compare_containers(std::vector<Real64>({-99999, 0, 0, 0, 0}), Numbers));
+    EXPECT_TRUE(compare_containers(std::vector<Real64>({-99999, 0, 0.8, 0, 0}), Numbers));
     EXPECT_EQ(1, IOStatus);
 }
 
@@ -2847,6 +2871,7 @@ TEST_F(InputProcessorFixture, getObjectItem_unitary_system_input)
         "  ,                       !- Fraction of Autosized Design Heating Supply Air Flow Rate",
         "  ,                       !- Design Supply Air Flow Rate Per Unit of Capacity During Cooling Operation{ m3/s-W }",
         "  ,                       !- Design Supply Air Flow Rate Per Unit of Capacity During Heating Operation{ m3/s-W }",
+        "  ,                       !- No Load Supply Air Flow Rate Control Set To Low Speed ",
         "  80;                     !- Maximum Supply Air Temperature{ C }",
     });
 
@@ -2884,7 +2909,7 @@ TEST_F(InputProcessorFixture, getObjectItem_unitary_system_input)
                                                               cAlphaFields,
                                                               cNumericFields);
 
-    EXPECT_EQ(22, NumAlphas);
+    EXPECT_EQ(23, NumAlphas);
     EXPECT_TRUE(compare_containers(std::vector<std::string>({"GASHEAT DXAC FURNACE 1",
                                                              "LOAD",
                                                              "EAST ZONE",
@@ -2907,6 +2932,7 @@ TEST_F(InputProcessorFixture, getObjectItem_unitary_system_input)
                                                              "SUPPLYAIRFLOWRATE",
                                                              "SUPPLYAIRFLOWRATE",
                                                              "SUPPLYAIRFLOWRATE",
+                                                             "YES",
                                                              "",
                                                              "",
                                                              "",
@@ -2915,15 +2941,14 @@ TEST_F(InputProcessorFixture, getObjectItem_unitary_system_input)
                                    Alphas));
     EXPECT_TRUE(
         compare_containers(std::vector<bool>({false, false, false, false, false, false, false, false, false, false, false, false, false, false,
-                                              false, true,  true,  false, false, false, false, false, true,  true,  true,  true,  true}),
+                                              false, true,  true,  false, false, false, false, false, true,  true,  true,  true,  true,  true}),
                            lAlphaBlanks));
 
     EXPECT_EQ(17, NumNumbers);
-    EXPECT_TRUE(compare_containers(std::vector<bool>({true, true, false, true,  true, true, false, true, true, true, false, true, true,
-                                                      true, true, true,  false, true, true, true,  true, true, true, true,  true, true}),
+    EXPECT_TRUE(compare_containers(std::vector<bool>({true, true, false, true, true, true,  false, true, true, true, false,
+                                                      true, true, true,  true, true, false, true,  true, true, true, true}),
                                    lNumericBlanks));
-    EXPECT_TRUE(
-        compare_containers(std::vector<Real64>({1, 2, 1.6, 0, 0, 0, 1.6, 0, 0, 0, 1.6, 0, 0, 0, 0, 0, 80, 0, 0, 0, 0, 0, 0, 0, 0, 0}), Numbers));
+    EXPECT_TRUE(compare_containers(std::vector<Real64>({1, 2, 1.6, 0, 0, 0, 1.6, 0, 0, 0, 1.6, 0, 0, 0, 0, 0, 80, 21, 0, 0, 0, 80}), Numbers));
     EXPECT_EQ(1, IOStatus);
 }
 
@@ -3034,12 +3059,12 @@ TEST_F(InputProcessorFixture, getObjectItem_test_zone_input)
                                                               cNumericFields);
 
     EXPECT_EQ(1, NumAlphas);
-    EXPECT_TRUE(compare_containers(std::vector<std::string>({"EAST ZONE", "", "", ""}), Alphas));
+    EXPECT_TRUE(compare_containers(std::vector<std::string>({"EAST ZONE", "", "", "YES"}), Alphas));
     EXPECT_TRUE(compare_containers(std::vector<bool>({false, true, true, true}), lAlphaBlanks));
 
     EXPECT_EQ(8, NumNumbers);
     EXPECT_TRUE(compare_containers(std::vector<bool>({false, false, false, false, false, false, false, false, true}), lNumericBlanks));
-    EXPECT_TRUE(compare_containers(std::vector<Real64>({0, 0, 0, 0, 1, 1, -99999, -99999, 0}), Numbers));
+    EXPECT_TRUE(compare_containers(std::vector<Real64>({0, 0, 0, 0, 1, 1, -99999, -99999, -99999}), Numbers));
     EXPECT_EQ(1, IOStatus);
 }
 
@@ -3165,9 +3190,9 @@ TEST_F(InputProcessorFixture, getObjectItem_coil_heating_fuel)
         "  this_is_an_air_inlet_name, ! A4 , \field Air Inlet Node Name",
         "  this_is_outlet, ! A5 , \field Air Outlet Node Name",
         "  other_name, ! A6 , \field Temperature Setpoint Node Name",
-        "  0.3, ! field Parasitic Electric Load",
+        "  0.3, ! field On Cycle Parasitic Electric Load",
         "  curve_blah_name, ! Part Load Fraction Correlation Curve Name",
-        "  0.344; ! field Parasitic Fuel Load",
+        "  0.344; ! field Off Cycle Parasitic Fuel Load",
         " ",
         "Coil:Heating:Fuel,",
         "  the second name, ! A1 , \field Name",
@@ -3178,9 +3203,9 @@ TEST_F(InputProcessorFixture, getObjectItem_coil_heating_fuel)
         "  this_is_an_air_inlet_name2, ! A4 , \field Air Inlet Node Name",
         "  this_is_outlet2, ! A5 , \field Air Outlet Node Name",
         "  other_name2, ! A6 , \field Temperature Setpoint Node Name",
-        "  0.4, ! field Parasitic Electric Load",
+        "  0.4, ! field On Cycle Parasitic Electric Load",
         "  curve_blah_name2, ! Part Load Fraction Correlation Curve Name",
-        "  0.444; ! field Parasitic Fuel Load",
+        "  0.444; ! field Off Cycle Parasitic Fuel Load",
     });
 
     ASSERT_TRUE(process_idf(idf_objects));
@@ -3314,7 +3339,7 @@ TEST_F(InputProcessorFixture, getObjectItem_schedule_objects)
                                                               cNumericFields);
 
     EXPECT_EQ(1, NumAlphas);
-    EXPECT_TRUE(compare_containers(std::vector<std::string>({"ANY NUMBER", "", ""}), Alphas));
+    EXPECT_TRUE(compare_containers(std::vector<std::string>({"ANY NUMBER", "", "DIMENSIONLESS"}), Alphas));
     EXPECT_TRUE(compare_containers(std::vector<bool>({false, true, true}), lAlphaBlanks));
 
     EXPECT_EQ(0, NumNumbers);
@@ -3417,7 +3442,7 @@ TEST_F(InputProcessorFixture, getObjectItem_fan_on_off)
 
     EXPECT_EQ(4, NumAlphas);
     EXPECT_TRUE(compare_containers(
-        std::vector<std::string>({"SUPPLY FAN 1", "FANANDCOILAVAILSCHED", "ZONE EXHAUST NODE", "DX COOLING COIL AIR INLET NODE", "", "", ""}),
+        std::vector<std::string>({"SUPPLY FAN 1", "FANANDCOILAVAILSCHED", "ZONE EXHAUST NODE", "DX COOLING COIL AIR INLET NODE", "", "", "General"}),
         Alphas));
     EXPECT_TRUE(compare_containers(std::vector<bool>({false, false, false, false, true, true, true}), lAlphaBlanks));
 
@@ -3480,7 +3505,7 @@ TEST_F(InputProcessorFixture, getObjectItem_curve_quadratic)
         *state, CurrentModuleObject, 1, Alphas, NumAlphas, Numbers, NumNumbers, IOStatus, lNumericBlanks, lAlphaBlanks, cAlphaFields, cNumericFields);
 
     EXPECT_EQ(1, NumAlphas);
-    EXPECT_TRUE(compare_containers(std::vector<std::string>({"COOLCAPFFF", "", ""}), Alphas));
+    EXPECT_TRUE(compare_containers(std::vector<std::string>({"COOLCAPFFF", "DIMENSIONLESS", "DIMENSIONLESS"}), Alphas));
     EXPECT_TRUE(compare_containers(std::vector<bool>({false, true, true}), lAlphaBlanks));
 
     EXPECT_EQ(5, NumNumbers);
@@ -3514,7 +3539,7 @@ TEST_F(InputProcessorFixture, getObjectItem_curve_quadratic)
                                                               cNumericFields2);
 
     EXPECT_EQ(1, NumAlphas2);
-    EXPECT_TRUE(compare_containers(std::vector<std::string>({"COOLEIRFFF", "", ""}), Alphas2));
+    EXPECT_TRUE(compare_containers(std::vector<std::string>({"COOLEIRFFF", "DIMENSIONLESS", "DIMENSIONLESS"}), Alphas2));
     EXPECT_TRUE(compare_containers(std::vector<bool>({false, true, true}), lAlphaBlanks2));
 
     EXPECT_EQ(5, NumNumbers2);
@@ -3548,7 +3573,7 @@ TEST_F(InputProcessorFixture, getObjectItem_curve_quadratic)
                                                               cNumericFields3);
 
     EXPECT_EQ(1, NumAlphas3);
-    EXPECT_TRUE(compare_containers(std::vector<std::string>({"PLFFPLR", "", ""}), Alphas3));
+    EXPECT_TRUE(compare_containers(std::vector<std::string>({"PLFFPLR", "DIMENSIONLESS", "DIMENSIONLESS"}), Alphas3));
     EXPECT_TRUE(compare_containers(std::vector<bool>({false, true, true}), lAlphaBlanks3));
 
     EXPECT_EQ(5, NumNumbers3);
@@ -3562,6 +3587,7 @@ TEST_F(InputProcessorFixture, getObjectItem_coil_cooling_dx_variable_speed)
     std::string const idf_objects = delimited_string({
         "Coil:Cooling:DX:VariableSpeed,",
         "  Furnace ACDXCoil 1, !- Name",
+        "  ,                   !- Availability Schedule Name",
         "  DX Cooling Coil Air Inlet Node, !- Air Inlet Node Name",
         "  Heating Coil Air Inlet Node, !- Air Outlet Node Name",
         "  10, !- Number of Speeds{ dimensionless }",
@@ -3570,11 +3596,15 @@ TEST_F(InputProcessorFixture, getObjectItem_coil_cooling_dx_variable_speed)
         "  1.6, !- Rated Air Flow Rate At Selected Nominal Speed Level{ m3 / s }",
         "  0.0, !- Nominal Time for Condensate to Begin Leaving the Coil{ s }",
         "  0.0, !- Initial Moisture Evaporation Rate Divided by Steady - State AC Latent Capacity{ dimensionless }",
+        "  , !- Maximum Cycling Rate",
+        "  , !- Latent Capacity Time Constant",
+        "  , !- Fan Delay Time",
         "  PLFFPLR, !- Energy Part Load Fraction Curve Name",
         "  , !- Condenser Air Inlet Node Name",
         "  AirCooled, !- Condenser Type",
         "  , !- Evaporative Condenser Pump Rated Power Consumption{ W }",
         "  200.0, !- Crankcase Heater Capacity{ W }",
+        "  heaterCapCurve,      !- Crankcase Heater Capacity Function of Temperature Curve Name",
         "  10.0, !- Maximum Outdoor Dry - Bulb Temperature for Crankcase Heater Operation{ C }",
         "  , !- Minimum Outdoor Dry-Bulb Temperature for Compressor Operation",
         "  , !- Supply Water Storage Tank Name",
@@ -3586,6 +3616,8 @@ TEST_F(InputProcessorFixture, getObjectItem_coil_cooling_dx_variable_speed)
         "  0.75, !- Speed 1 Reference Unit Gross Rated Sensible Heat Ratio{ dimensionless }",
         "  4.0, !- Speed 1 Reference Unit Gross Rated Cooling COP{ dimensionless }",
         "  0.1359072, !- Speed 1 Reference Unit Rated Air Flow Rate{ m3 / s }",
+        "    773.3,                   !- Speed 1 2017 Rated Evaporator Fan Power Per Volume Flow Rate",
+        "    934.4,                   !- Speed 1 2023 Rated Evaporator Fan Power Per Volume Flow Rate",
         "  0.26, !- Speed 1 Reference Unit Rated Condenser Air Flow Rate{ m3 / s }",
         "  , !- Speed 1 Reference Unit Rated Pad Effectiveness of Evap Precooling{ dimensionless }",
         "  CoolCapFT, !- Speed 1 Total Cooling Capacity Function of Temperature Curve Name",
@@ -3596,6 +3628,8 @@ TEST_F(InputProcessorFixture, getObjectItem_coil_cooling_dx_variable_speed)
         "  0.75, !- Speed 2 Reference Unit Gross Rated Sensible Heat Ratio{ dimensionless }",
         "  4.0, !- Speed 2 Reference Unit Gross Rated Cooling COP{ dimensionless }",
         "  0.151008, !- Speed 2 Reference Unit Rated Air Flow Rate{ m3 / s }",
+        "    773.3,                   !- Speed 2 2017 Rated Evaporator Fan Power Per Volume Flow Rate",
+        "    934.4,                   !- Speed 2 2023 Rated Evaporator Fan Power Per Volume Flow Rate",
         "  0.30, !- Speed 2 Reference Unit Rated Condenser Air Flow Rate{ m3 / s }",
         "  , !- Speed 2 Reference Unit Rated Pad Effectiveness of Evap Precooling{ dimensionless }",
         "  CoolCapFT, !- Speed 2 Total Cooling Capacity Function of Temperature Curve Name",
@@ -3606,6 +3640,8 @@ TEST_F(InputProcessorFixture, getObjectItem_coil_cooling_dx_variable_speed)
         "  0.75, !- Speed 3 Reference Unit Gross Rated Sensible Heat Ratio{ dimensionless }",
         "  4.0, !- Speed 3 Reference Unit Gross Rated Cooling COP{ dimensionless }",
         "  0.1661088, !- Speed 3 Reference Unit Rated Air Flow Rate{ m3 / s }",
+        "    773.3,                   !- Speed 3 2017 Rated Evaporator Fan Power Per Volume Flow Rate",
+        "    934.4,                   !- Speed 3 2023 Rated Evaporator Fan Power Per Volume Flow Rate",
         "  0.33, !- Speed 3 Reference Unit Rated Condenser Air Flow Rate{ m3 / s }",
         "  , !- Speed 3 Reference Unit Rated Pad Effectiveness of Evap Precooling{ dimensionless }",
         "  CoolCapFT, !- Speed 3 Total Cooling Capacity Function of Temperature Curve Name",
@@ -3616,6 +3652,8 @@ TEST_F(InputProcessorFixture, getObjectItem_coil_cooling_dx_variable_speed)
         "  0.75, !- Speed 4 Reference Unit Gross Rated Sensible Heat Ratio{ dimensionless }",
         "  4.0, !- Speed 4 Reference Unit Gross Rated Cooling COP{ dimensionless }",
         "  0.1963104, !- Speed 4 Reference Unit Rated Air Flow Rate{ m3 / s }",
+        "    773.3,                   !- Speed 4 2017 Rated Evaporator Fan Power Per Volume Flow Rate",
+        "    934.4,                   !- Speed 4 2023 Rated Evaporator Fan Power Per Volume Flow Rate",
         "  0.38, !- Speed 4 Reference Unit Rated Condenser Air Flow Rate{ m3 / s }",
         "  , !- Speed 4 Reference Unit Rated Pad Effectiveness of Evap Precooling{ dimensionless }",
         "  CoolCapFT, !- Speed 4 Total Cooling Capacity Function of Temperature Curve Name",
@@ -3626,6 +3664,8 @@ TEST_F(InputProcessorFixture, getObjectItem_coil_cooling_dx_variable_speed)
         "  0.75, !- Speed 5 Reference Unit Gross Rated Sensible Heat Ratio{ dimensionless }",
         "  4.0, !- Speed 5 Reference Unit Gross Rated Cooling COP{ dimensionless }",
         "  0.226512, !- Speed 5 Reference Unit Rated Air Flow Rate{ m3 / s }",
+        "    773.3,                   !- Speed 5 2017 Rated Evaporator Fan Power Per Volume Flow Rate",
+        "    934.4,                   !- Speed 5 2023 Rated Evaporator Fan Power Per Volume Flow Rate",
         "  0.44, !- Speed 5 Reference Unit Rated Condenser Air Flow Rate{ m3 / s }",
         "  , !- Speed 5 Reference Unit Rated Pad Effectiveness of Evap Precooling{ dimensionless }",
         "  CoolCapFT, !- Speed 5 Total Cooling Capacity Function of Temperature Curve Name",
@@ -3636,6 +3676,8 @@ TEST_F(InputProcessorFixture, getObjectItem_coil_cooling_dx_variable_speed)
         "  0.75, !- Speed 6 Reference Unit Gross Rated Sensible Heat Ratio{ dimensionless }",
         "  4.0, !- Speed 6 Reference Unit Gross Rated Cooling COP{ dimensionless }",
         "  0.2567136, !- Speed 6 Reference Unit Rated Air Flow Rate{ m3 / s }",
+        "    773.3,                   !- Speed 6 2017 Rated Evaporator Fan Power Per Volume Flow Rate",
+        "    934.4,                   !- Speed 6 2023 Rated Evaporator Fan Power Per Volume Flow Rate",
         "  0.50, !- Speed 6 Reference Unit Condenser Air Flow Rate{ m3 / s }",
         "  , !- Speed 6 Reference Unit Rated Pad Effectiveness of Evap Precooling{ dimensionless }",
         "  CoolCapFT, !- Speed 6 Total Cooling Capacity Function of Temperature Curve Name",
@@ -3646,6 +3688,8 @@ TEST_F(InputProcessorFixture, getObjectItem_coil_cooling_dx_variable_speed)
         "  0.75, !- Speed 7 Reference Unit Gross Rated Sensible Heat Ratio{ dimensionless }",
         "  4.0, !- Speed 7 Reference Unit Gross Rated Cooling COP{ dimensionless }",
         "  0.2869152, !- Speed 7 Reference Unit Rated Air Flow Rate{ m3 / s }",
+        "    773.3,                   !- Speed 7 2017 Rated Evaporator Fan Power Per Volume Flow Rate",
+        "    934.4,                   !- Speed 7 2023 Rated Evaporator Fan Power Per Volume Flow Rate",
         "  0.57, !- Speed 7 Reference Unit Condenser Flow Rate{ m3 / s }",
         "  , !- Speed 7 Reference Unit Rated Pad Effectiveness of Evap Precooling{ dimensionless }",
         "  CoolCapFT, !- Speed 7 Total Cooling Capacity Function of Temperature Curve Name",
@@ -3656,6 +3700,8 @@ TEST_F(InputProcessorFixture, getObjectItem_coil_cooling_dx_variable_speed)
         "  0.75, !- Speed 8 Reference Unit Gross Rated Sensible Heat Ratio{ dimensionless }",
         "  4.0, !- Speed 8 Reference Unit Gross Rated Cooling COP{ dimensionless }",
         "  0.3171168, !- Speed 8 Reference Unit Rated Air Flow Rate{ m3 / s }",
+        "    773.3,                   !- Speed 8 2017 Rated Evaporator Fan Power Per Volume Flow Rate",
+        "    934.4,                   !- Speed 8 2023 Rated Evaporator Fan Power Per Volume Flow Rate",
         "  0.63, !- Speed 8 Reference Unit Condenser Air Flow Rate{ m3 / s }",
         "  , !- Speed 8 Reference Unit Rated Pad Effectiveness of Evap Precooling{ dimensionless }",
         "  CoolCapFT, !- Speed 8 Total Cooling Capacity Function of Temperature Curve Name",
@@ -3666,6 +3712,8 @@ TEST_F(InputProcessorFixture, getObjectItem_coil_cooling_dx_variable_speed)
         "  0.75, !- Speed 9 Reference Unit Gross Rated Sensible Heat Ratio{ dimensionless }",
         "  4.0, !- Speed 9 Reference Unit Gross Rated Cooling COP{ dimensionless }",
         "  0.3473184, !- Speed 9 Reference Unit Rated Air Flow Rate{ m3 / s }",
+        "    773.3,                   !- Speed 9 2017 Rated Evaporator Fan Power Per Volume Flow Rate",
+        "    934.4,                   !- Speed 9 2023 Rated Evaporator Fan Power Per Volume Flow Rate",
         "  0.69, !- Speed 9 Reference Unit Condenser Air Flow Rate{ m3 / s }",
         "  , !- Speed 9 Reference Unit Rated Pad Effectiveness of Evap Precooling{ dimensionless }",
         "  CoolCapFT, !- Speed 9 Total Cooling Capacity Function of Temperature Curve Name",
@@ -3676,12 +3724,21 @@ TEST_F(InputProcessorFixture, getObjectItem_coil_cooling_dx_variable_speed)
         "  0.75, !- Speed 10 Reference Unit Gross Rated Sensible Heat Ratio{ dimensionless }",
         "  4.0, !- Speed 10 Reference Unit Gross Rated Cooling COP{ dimensionless }",
         "  0.37752, !- Speed 10 Reference Unit Rated Air Flow Rate{ m3 / s }",
+        "    773.3,                   !- Speed 10 2017 Rated Evaporator Fan Power Per Volume Flow Rate",
+        "    934.4,                   !- Speed 10 2023 Rated Evaporator Fan Power Per Volume Flow Rate",
         "  0.74, !- Speed 10 Reference Unit Condenser Air Flow Rate{ m3 / s }",
         "  , !- Speed 10 Reference Unit Rated Pad Effectiveness of Evap Precooling{ dimensionless }",
         "  CoolCapFT, !- Speed 10 Total Cooling Capacity Function of Temperature Curve Name",
         "  CoolCapFFF, !- Speed 10 Total Cooling Capacity Function of Air Flow Fraction Curve Name",
         "  COOLEIRFT, !- Speed 10 Energy Input Ratio Function of Temperature Curve Name",
         "  COOLEIRFFF;          !- Speed 10 Energy Input Ratio Function of Air Flow Fraction Curve Name",
+
+        "Curve:Linear,",
+        "heaterCapCurve,          !- Name",
+        "10.0,                    !- Coefficient1 Constant",
+        "-2.0,                      !- Coefficient2 x",
+        "-10.0,                    !- Minimum Value of x",
+        "70;                      !- Maximum Value of x",
     });
 
     ASSERT_TRUE(process_idf(idf_objects));
@@ -3718,13 +3775,15 @@ TEST_F(InputProcessorFixture, getObjectItem_coil_cooling_dx_variable_speed)
                                                               cAlphaFields,
                                                               cNumericFields);
 
-    EXPECT_EQ(49, NumAlphas);
+    EXPECT_EQ(51, NumAlphas);
     EXPECT_TRUE(compare_containers(std::vector<std::string>({"FURNACE ACDXCOIL 1",
+                                                             "",
                                                              "DX COOLING COIL AIR INLET NODE",
                                                              "HEATING COIL AIR INLET NODE",
                                                              "PLFFPLR",
                                                              "",
                                                              "AIRCOOLED",
+                                                             "HEATERCAPCURVE",
                                                              "",
                                                              "",
                                                              "",
@@ -3770,26 +3829,28 @@ TEST_F(InputProcessorFixture, getObjectItem_coil_cooling_dx_variable_speed)
                                                              "COOLEIRFFF"}),
                                    Alphas));
     EXPECT_TRUE(compare_containers(
-        std::vector<bool>({false, false, false, false, true,  false, true,  true,  true,  false, false, false, false, false, false, false, false,
+        std::vector<bool>({false, true,  false, false, false, true,  false, false, true,  true,  true,  false, false, false, false, false, false,
                            false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false,
-                           false, false, false, false, false, false, false, false, false, false, false, false, false, false, false}),
+                           false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false}),
         lAlphaBlanks));
 
-    EXPECT_EQ(72, NumNumbers);
+    EXPECT_EQ(95, NumNumbers);
     EXPECT_TRUE(compare_containers(
-        std::vector<Real64>({10.0,      10.0, 32000, 1.6,       0,    0,   0,         200,  10.0, -25.0,    0,    2,   1524.1,     .75,  4,
-                             0.1359072, 0.26, 0,     1877.9,    0.75, 4.0, 0.151008,  0.30, 0,    2226.6,   .75,  4.0, 0.1661088,  0.33, 0,
-                             2911.3,    0.75, 4.0,   0.1963104, 0.38, 0,   3581.7,    0.75, 4.0,  0.226512, 0.44, 0,   4239.5,     0.75, 4.0,
-                             0.2567136, 0.5,  0,     4885.7,    0.75, 4.0, 0.2869152, 0.57, 0,    5520.7,   0.75, 4.0, 0.31711680, 0.63, 0,
-                             6144.8,    .75,  4.0,   0.3473184, 0.69, 0,   6758.0,    0.75, 4.0,  0.37752,  0.74, 0}),
+        std::vector<Real64>({10.0, 10.0, 32000,     1.6,   0,     0,    2.5, 60,     60,   0,   200,        10.0,  -25.0, 0,    2, 1524.1,
+                             .75,  4,    0.1359072, 773.3, 934.4, 0.26, 0,   1877.9, 0.75, 4.0, 0.151008,   773.3, 934.4, 0.30, 0, 2226.6,
+                             .75,  4.0,  0.1661088, 773.3, 934.4, 0.33, 0,   2911.3, 0.75, 4.0, 0.1963104,  773.3, 934.4, 0.38, 0, 3581.7,
+                             0.75, 4.0,  0.226512,  773.3, 934.4, 0.44, 0,   4239.5, 0.75, 4.0, 0.2567136,  773.3, 934.4, 0.5,  0, 4885.7,
+                             0.75, 4.0,  0.2869152, 773.3, 934.4, 0.57, 0,   5520.7, 0.75, 4.0, 0.31711680, 773.3, 934.4, 0.63, 0, 6144.8,
+                             .75,  4.0,  0.3473184, 773.3, 934.4, 0.69, 0,   6758.0, 0.75, 4.0, 0.37752,    773.3, 934.4, 0.74, 0}),
         Numbers));
-    EXPECT_TRUE(
-        compare_containers(std::vector<bool>({false, false, false, false, false, false, true,  false, false, true,  true,  true,  false, false, false,
-                                              false, false, true,  false, false, false, false, false, true,  false, false, false, false, false, true,
-                                              false, false, false, false, false, true,  false, false, false, false, false, true,  false, false, false,
-                                              false, false, true,  false, false, false, false, false, true,  false, false, false, false, false, true,
-                                              false, false, false, false, false, true,  false, false, false, false, false, true}),
-                           lNumericBlanks));
+    EXPECT_TRUE(compare_containers(
+        std::vector<bool>({false, false, false, false, false, false, true, true,  true,  true,  false, false, true,  true,  true, false,
+                           false, false, false, false, false, false, true, false, false, false, false, false, false, false, true, false,
+                           false, false, false, false, false, false, true, false, false, false, false, false, false, false, true, false,
+                           false, false, false, false, false, false, true, false, false, false, false, false, false, false, true, false,
+                           false, false, false, false, false, false, true, false, false, false, false, false, false, false, true, false,
+                           false, false, false, false, false, false, true, false, false, false, false, false, false, false, true}),
+        lNumericBlanks));
     EXPECT_EQ(1, IOStatus);
     // test logical return for ValidateComponent
     bool IsNotOK = false;
@@ -4005,7 +4066,7 @@ TEST_F(InputProcessorFixture, getObjectItem_curve_biquadratic2)
     EXPECT_EQ(1, IOStatus);
 }
 
-// https://github.com/NREL/EnergyPlus/issues/6720
+// https://github.com/NatLabRockies/EnergyPlus/issues/6720
 TEST_F(InputProcessorFixture, FalseDuplicates)
 {
     std::string const idf(delimited_string({
@@ -4164,8 +4225,12 @@ TEST_F(InputProcessorFixture, reportIDFRecordsStats_basic)
 
         // 1 fields with default, 0 Autosizable, 0 Autocalculatable
         // 0 fields defaulted   , 0 Autosized  , 0 Autocalculated
-        "Version,",
-        "  9.4;", // Has a default
+        "Timestep,",
+        "  4;", // Has a default
+
+        // 1 fields with default, 0 Autosizable, 0 Autocalculatable
+        // 0 fields defaulted   , 0 Autosized  , 0 Autocalculated
+        "Version," + DataStringGlobals::MatchVersion + ";", // Has a default
 
         // 8 fields with default, 0 Autosizable, 0 Autocalculatable
         // 1 fields defaulted   , 0 Autosized  , 0 Autocalculated
@@ -4244,11 +4309,11 @@ TEST_F(InputProcessorFixture, reportIDFRecordsStats_basic)
     state->dataInputProcessing->inputProcessor->reportIDFRecordsStats(*state);
 
     // TOTAL:
-    // 36 fields with defaults, 6 Autosizable, 3 Autocalculatable
+    // 37 fields with defaults, 6 Autosizable, 3 Autocalculatable
     // 11 fields defaulted    , 4 Autosized  , 2 Autocalculated
 
-    EXPECT_EQ(4, state->dataOutput->iNumberOfRecords);             // Number of IDF Records (=Objects)
-    EXPECT_EQ(36, state->dataOutput->iTotalFieldsWithDefaults);    // Total number of fields that could be defaulted
+    EXPECT_EQ(5, state->dataOutput->iNumberOfRecords);             // Number of IDF Records (=Objects)
+    EXPECT_EQ(37, state->dataOutput->iTotalFieldsWithDefaults);    // Total number of fields that could be defaulted
     EXPECT_EQ(6, state->dataOutput->iTotalAutoSizableFields);      // Total number of autosizeable fields
     EXPECT_EQ(3, state->dataOutput->iTotalAutoCalculatableFields); // Total number of autocalculatable fields
     EXPECT_EQ(11, state->dataOutput->iNumberOfDefaultedFields);    // Number of defaulted fields in IDF
@@ -4263,8 +4328,12 @@ TEST_F(InputProcessorFixture, reportIDFRecordsStats_extensible_fields)
 
         // 1 fields with default, 0 Autosizable, 0 Autocalculatable
         // 0 fields defaulted   , 0 Autosized  , 0 Autocalculated
-        "Version,",
-        "  9.4;", // Has a default
+        "Timestep,",
+        "  4;", // Has a default
+
+        // 1 fields with default, 0 Autosizable, 0 Autocalculatable
+        // 0 fields defaulted   , 0 Autosized  , 0 Autocalculated
+        "Version," + DataStringGlobals::MatchVersion + ";", // Has a default
 
         // 8 fields with default, 0 Autosizable, 0 Autocalculatable
         // 1 fields defaulted   , 0 Autosized  , 0 Autocalculated
@@ -4296,9 +4365,9 @@ TEST_F(InputProcessorFixture, reportIDFRecordsStats_extensible_fields)
         // 1 fields defaulted    , 0 Autosizable, 0 Autocalculatable
         "SurfaceProperty:SurroundingSurfaces,",
         "  SrdSurfs:Living:East,        !- Name",
-        "  0.3,                         !- Sky View Factor", // Has numeric default
+        "  0.3,                         !- Sky View Factor", // Has autocalculate default
         "  ,                            !- Sky Temperature Schedule Name",
-        "  0.1,                         !- Ground View Factor", // Has numeric default
+        "  0.1,                         !- Ground View Factor", // Has autocalculate default
         "  ,                            !- Ground Temperature Schedule Name",
         "  SurroundingSurface1,         !- Surrounding Surface 1 Name",        // (begin extensible)
         "  0.6,                         !- Surrounding Surface 1 View Factor", // Has numeric default
@@ -4317,13 +4386,13 @@ TEST_F(InputProcessorFixture, reportIDFRecordsStats_extensible_fields)
     state->dataInputProcessing->inputProcessor->reportIDFRecordsStats(*state);
 
     // TOTAL:
-    // 15 fields with defaults, 0 Autosizable, 0 Autocalculatable
+    // 16 fields with defaults, 0 Autosizable, 2 Autocalculatable
     // 2  fields defaulted    , 0 Autosized  , 0 Autocalculated
 
-    EXPECT_EQ(4, state->dataOutput->iNumberOfRecords);             // Number of IDF Records (=Objects)
-    EXPECT_EQ(15, state->dataOutput->iTotalFieldsWithDefaults);    // Total number of fields that could be defaulted
+    EXPECT_EQ(5, state->dataOutput->iNumberOfRecords);             // Number of IDF Records (=Objects)
+    EXPECT_EQ(16, state->dataOutput->iTotalFieldsWithDefaults);    // Total number of fields that could be defaulted
     EXPECT_EQ(0, state->dataOutput->iTotalAutoSizableFields);      // Total number of autosizeable fields
-    EXPECT_EQ(0, state->dataOutput->iTotalAutoCalculatableFields); // Total number of autocalculatable fields
+    EXPECT_EQ(2, state->dataOutput->iTotalAutoCalculatableFields); // Total number of autocalculatable fields
     EXPECT_EQ(2, state->dataOutput->iNumberOfDefaultedFields);     // Number of defaulted fields in IDF
     EXPECT_EQ(0, state->dataOutput->iNumberOfAutoSizedFields);     // Number of autosized fields in IDF
     EXPECT_EQ(0, state->dataOutput->iNumberOfAutoCalcedFields);    // Number of autocalculated fields
@@ -4416,14 +4485,14 @@ TEST_F(InputProcessorFixture, epJSONgetObjectItem_minfields)
 
     // User inputs from above
     // Note even though choice keys are case-sensitive during epJSON processing, getObjectItem pushes Alphas to UPPERcase
-    EXPECT_EQ(state->dataIPShortCut->cAlphaArgs(1), UtilityRoutines::MakeUPPERCase(name2)); // Material Name field is NOT tagged with /retaincase
+    EXPECT_EQ(state->dataIPShortCut->cAlphaArgs(1), Util::makeUPPER(name2)); // Material Name field is NOT tagged with /retaincase
     EXPECT_EQ(state->dataIPShortCut->cAlphaArgs(2), "MEDIUMROUGH");
     EXPECT_NEAR(state->dataIPShortCut->rNumericArgs(1), 2.0, 0.0001);
     EXPECT_NEAR(state->dataIPShortCut->rNumericArgs(3), 0.5, 0.0001);
     // Defaults from schema
     EXPECT_NEAR(state->dataIPShortCut->rNumericArgs(2), 0.9, 0.0001);
-    // Fields beyond min-fields come back as blank or zero, even if they have a default
-    EXPECT_NEAR(state->dataIPShortCut->rNumericArgs(4), 0.0, 0.0001);
+    // Fields beyond min-fields come back as the default value
+    EXPECT_NEAR(state->dataIPShortCut->rNumericArgs(4), 0.7, 0.0001);
 }
 
 TEST_F(InputProcessorFixture, epJSONgetFieldValue_fromJSON)
@@ -4599,10 +4668,10 @@ TEST_F(InputProcessorFixture, epJSONgetFieldValue_fromIDF)
             EXPECT_EQ(numericFieldValue, -99999);
             // Check an alpha field
             alphaFieldValue = ip->getAlphaFieldValue(fields, objectSchemaProps, "on_cycle_parasitic_fuel_type");
-            EXPECT_TRUE(UtilityRoutines::SameString(alphaFieldValue, "Electricity"));
+            EXPECT_TRUE(Util::SameString(alphaFieldValue, "Electricity"));
             // Check a defaulted alpha field
             alphaFieldValue = ip->getAlphaFieldValue(fields, objectSchemaProps, "heater_control_type");
-            EXPECT_TRUE(UtilityRoutines::SameString(alphaFieldValue, "Cycle"));
+            EXPECT_TRUE(Util::SameString(alphaFieldValue, "Cycle"));
         }
     }
 }
@@ -4650,11 +4719,11 @@ TEST_F(InputProcessorFixture, epJSONgetFieldValue_extensiblesFromIDF)
         auto &instancesValue = instances.value();
         for (auto instance = instancesValue.begin(); instance != instancesValue.end(); ++instance) {
             auto const &objectFields = instance.value();
-            std::string const &thisObjectName = UtilityRoutines::MakeUPPERCase(instance.key());
+            std::string const &thisObjectName = Util::makeUPPER(instance.key());
             EXPECT_EQ(thisObjectName, "SPACE EQUIPMENT");
             // Fields before extensibles
             alphaFieldValue = ip->getAlphaFieldValue(objectFields, objectSchemaProps, "load_distribution_scheme");
-            EXPECT_TRUE(UtilityRoutines::SameString(alphaFieldValue, "UniformPLR"));
+            EXPECT_TRUE(Util::SameString(alphaFieldValue, "UniformPLR"));
 
             // Extensibles
 
@@ -4693,25 +4762,25 @@ TEST_F(InputProcessorFixture, epJSONgetFieldValue_extensiblesFromIDF)
                 }
                 EXPECT_EQ(counter, 3);
             }
-            EXPECT_TRUE(UtilityRoutines::SameString(equipmentNames[0], "Baseboard Heat"));
-            EXPECT_TRUE(UtilityRoutines::SameString(equipmentTypes[0], "ZoneHVAC:Baseboard:RadiantConvective:Electric"));
-            EXPECT_TRUE(UtilityRoutines::SameString(coolFracSchedNames[0], ""));
-            EXPECT_TRUE(UtilityRoutines::SameString(heatFracSchedNames[0], ""));
+            EXPECT_TRUE(Util::SameString(equipmentNames[0], "Baseboard Heat"));
+            EXPECT_TRUE(Util::SameString(equipmentTypes[0], "ZoneHVAC:Baseboard:RadiantConvective:Electric"));
+            EXPECT_TRUE(Util::SameString(coolFracSchedNames[0], ""));
+            EXPECT_TRUE(Util::SameString(heatFracSchedNames[0], ""));
             EXPECT_EQ(coolSeqNums[0], 0);
             EXPECT_EQ(heatSeqNums[0], 3);
 
-            EXPECT_TRUE(UtilityRoutines::SameString(equipmentNames[1], "Air Terminal ADU"));
-            EXPECT_TRUE(UtilityRoutines::SameString(equipmentTypes[1], "ZoneHVAC:AirDistributionUnit"));
-            EXPECT_TRUE(UtilityRoutines::SameString(coolFracSchedNames[1], "ADU Cooling Fraction Schedule"));
-            EXPECT_TRUE(UtilityRoutines::SameString(heatFracSchedNames[1], "ADU Heating Fraction Schedule"));
+            EXPECT_TRUE(Util::SameString(equipmentNames[1], "Air Terminal ADU"));
+            EXPECT_TRUE(Util::SameString(equipmentTypes[1], "ZoneHVAC:AirDistributionUnit"));
+            EXPECT_TRUE(Util::SameString(coolFracSchedNames[1], "ADU Cooling Fraction Schedule"));
+            EXPECT_TRUE(Util::SameString(heatFracSchedNames[1], "ADU Heating Fraction Schedule"));
             // Note the input values above are 1.9 and 2.1, the should round to the nearest integer
             EXPECT_EQ(coolSeqNums[1], 2);
             EXPECT_EQ(heatSeqNums[1], 2);
 
-            EXPECT_TRUE(UtilityRoutines::SameString(equipmentNames[2], "Exhaust Fan"));
-            EXPECT_TRUE(UtilityRoutines::SameString(equipmentTypes[2], "Fan:ZoneExhaust"));
-            EXPECT_TRUE(UtilityRoutines::SameString(coolFracSchedNames[2], ""));
-            EXPECT_TRUE(UtilityRoutines::SameString(heatFracSchedNames[2], ""));
+            EXPECT_TRUE(Util::SameString(equipmentNames[2], "Exhaust Fan"));
+            EXPECT_TRUE(Util::SameString(equipmentTypes[2], "Fan:ZoneExhaust"));
+            EXPECT_TRUE(Util::SameString(coolFracSchedNames[2], ""));
+            EXPECT_TRUE(Util::SameString(heatFracSchedNames[2], ""));
             EXPECT_EQ(coolSeqNums[2], 1);
             EXPECT_EQ(heatSeqNums[2], 1);
         }
@@ -4778,5 +4847,45 @@ TEST_F(InputProcessorFixture, epJSONgetFieldValue_extensiblesFromIDF)
 //          EXPECT_TRUE( compare_containers( std::vector< bool >( {} ), IDFRecords( index ).NumBlank ) );
 //
 //   }
+TEST_F(InputProcessorFixture, csv_import_ending_blank_line)
+{
+    std::string csv_no_empty_line_n = "\"H1\",\"H2\",\"H3\"\n"
+                                      "1,2,3\n"
+                                      "4,5,6\n"
+                                      "7,8,9\n";
+    std::string csv_with_empty_line_n = csv_no_empty_line_n + "\\n";
+    // EXPECT_TRUE(false);
+
+    std::string csv_no_empty_line_rn = "\"H1\",\"H2\",\"H3\"\r\n"
+                                       "1,2,3\r\n"
+                                       "4,5,6\r\n"
+                                       "7,8,9\r\n";
+
+    std::string csv_with_empty_line_rn = csv_no_empty_line_rn + "\r\n";
+
+    CsvParser csvParser;
+
+    // None of the following should throw errors
+
+    // No extra lines
+    std::string_view csv = csv_no_empty_line_n;
+    size_t index = 0;
+    csvParser.decode(csv, ',', 0);
+    EXPECT_TRUE(csvParser.errors().empty()) << "\\n with no ending blank line parse test failed";
+    csv = csv_no_empty_line_rn;
+    index = 0;
+    csvParser.decode(csv, ',', 0);
+    EXPECT_TRUE(csvParser.errors().empty()) << "\\r\\n with no ending blank line parse test failed";
+
+    // testing extra blank lines at the end
+    csv = csv_with_empty_line_n;
+    index = 0;
+    csvParser.decode(csv, ',', 0);
+    EXPECT_TRUE(csvParser.errors().empty()) << "\\n with with an ending blank line parse test failed";
+    csv = csv_with_empty_line_rn;
+    index = 0;
+    csvParser.decode(csv, ',', 0);
+    EXPECT_TRUE(csvParser.errors().empty()) << "\\r\\n with an ending blank line parse test failed";
+}
 
 } // namespace EnergyPlus

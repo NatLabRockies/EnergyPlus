@@ -1,7 +1,7 @@
-// EnergyPlus, Copyright (c) 1996-2023, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
-// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other
+// National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
 // contributors. All rights reserved.
 //
 // NOTICE: This Software was developed under funding from the U.S. Department of Energy and the
@@ -55,6 +55,7 @@
 #include <EnergyPlus/Data/BaseData.hh>
 #include <EnergyPlus/DataGlobals.hh>
 #include <EnergyPlus/EnergyPlus.hh>
+#include <EnergyPlus/FluidProperties.hh>
 #include <EnergyPlus/Plant/Enums.hh>
 #include <EnergyPlus/Plant/PlantLocation.hh>
 
@@ -74,43 +75,46 @@ namespace LowTempRadiantSystem {
     enum class SystemType
     {
         Invalid = -1,
-        HydronicSystem,     // Variable flow hydronic radiant system
-        ConstantFlowSystem, // Constant flow, variable (controlled) temperature radiant system
-        ElectricSystem,     // Electric resistance radiant heating system
+        Hydronic,     // Variable flow hydronic radiant system
+        ConstantFlow, // Constant flow, variable (controlled) temperature radiant system
+        Electric,     // Electric resistance radiant heating system
         Num
     };
 
-    // Operating modes:
-    int constexpr NotOperating = 0; // Parameter for use with OperatingMode variable, set for heating
-    int constexpr HeatingMode = 1;  // Parameter for use with OperatingMode variable, set for heating
-    int constexpr CoolingMode = -1; // Parameter for use with OperatingMode variable, set for cooling
+    enum class OpMode
+    {
+        Cool = -1, // Ok for this to be -1 because this isn't coming from the IDF so there is no Invalid
+        None,
+        Heat,
+    };
 
     // Control types:
-    enum class LowTempRadiantControlTypes
+    enum class CtrlType
     {
         Invalid = -1,
-        MATControl,            // Controls system using mean air temperature
-        MRTControl,            // Controls system using mean radiant temperature
-        OperativeControl,      // Controls system using operative temperature
-        ODBControl,            // Controls system using outside air dry-bulb temperature
-        OWBControl,            // Controls system using outside air wet-bulb temperature
-        SurfFaceTempControl,   // Controls system using the surface inside face temperature
-        SurfIntTempControl,    // Controls system using a temperature inside the radiant system construction as defined by the Construction +
-                               // ConstructionProperty:InternalHeatSource inputs
-        RunningMeanODBControl, // Controls system using the running mean outdoor dry-bulb temperature
+        MAT,            // Controls system using mean air temperature
+        MRT,            // Controls system using mean radiant temperature
+        Operative,      // Controls system using operative temperature
+        ODB,            // Controls system using outside air dry-bulb temperature
+        OWB,            // Controls system using outside air wet-bulb temperature
+        SurfFaceTemp,   // Controls system using the surface inside face temperature
+        SurfIntTemp,    // Controls system using a temperature inside the radiant system construction as defined by the Construction +
+                        // ConstructionProperty:InternalHeatSource inputs
+        RunningMeanODB, // Controls system using the running mean outdoor dry-bulb temperature
         Num
     };
 
     // Setpoint Types:
-    enum class LowTempRadiantSetpointTypes
+    enum class SetpointType
     {
         Invalid = -1,
         HalfFlowPower, // Controls system where the setpoint is at the 50% flow/power point
         ZeroFlowPower, // Controls system where the setpoint is at the 0% flow/power point
         Num
     };
+
     // Fluid to Slab Heat Transfer Types:
-    enum class FluidToSlabHeatTransferTypes
+    enum class FluidToSlabHeatTransferType
     {
         Invalid = -1,
         ConvectionOnly, // Convection only model (legacy code, original model)
@@ -118,12 +122,12 @@ namespace LowTempRadiantSystem {
         Num
     };
 
-    enum class CondContrlType
+    enum class CondCtrlType
     {
         Invalid = -1,
-        CondCtrlNone,      // Condensation control--none, so system never shuts down
-        CondCtrlSimpleOff, // Condensation control--simple off, system shuts off when condensation predicted
-        CondCtrlVariedOff, // Condensation control--variable off, system modulates to keep running if possible
+        None,      // Condensation control--none, so system never shuts down
+        SimpleOff, // Condensation control--simple off, system shuts off when condensation predicted
+        VariedOff, // Condensation control--variable off, system modulates to keep running if possible
         Num
     };
 
@@ -139,25 +143,29 @@ namespace LowTempRadiantSystem {
     struct RadiantSystemBaseData
     {
         // Members
-        std::string Name;              // name of hydronic radiant system
-        std::string SchedName;         // availability schedule
-        int SchedPtr = 0;              // index to schedule
-        std::string ZoneName;          // Name of zone the system is serving
-        int ZonePtr = 0;               // Point to this zone in the Zone derived type
-        std::string SurfListName;      // Name of surface/surface list that is the radiant system
-        int NumOfSurfaces = 0;         // Number of surfaces included in this radiant system (coordinated control)
-        Array1D_int SurfacePtr;        // Pointer to the surface(s) in the Surface derived type
-        Array1D_string SurfaceName;    // Name of surfaces that are the radiant system (can be one or more)
-        Array1D<Real64> SurfaceFrac;   // Fraction of flow/pipe length or electric power for a particular surface
-        Real64 TotalSurfaceArea = 0.0; // Total surface area for all surfaces that are part of this radiant system
-        LowTempRadiantControlTypes controlType = LowTempRadiantControlTypes::MATControl; // Control type for the system (MAT, MRT, Op temp, ODB, OWB,
-                                                                                         // Surface Face Temp, Surface Interior Temp, Running Mean
-                                                                                         // Temp for Constant Flow systems only)
-        LowTempRadiantSetpointTypes SetpointType =
-            LowTempRadiantSetpointTypes::HalfFlowPower; // Setpoint type for the syste, (HalfFlowPower or ZeroFlowPower)
-        int OperatingMode = NotOperating;               // Operating mode currently being used (NotOperating, Heating, Cooling)
-        Real64 HeatPower;                               // heating sent to panel in Watts
-        Real64 HeatEnergy;                              // heating sent to panel in Joules
+        std::string Name;                      // name of hydronic radiant system
+        Sched::Schedule *availSched = nullptr; // index to schedule
+        std::string ZoneName;                  // Name of zone the system is serving
+        int ZonePtr = 0;                       // Point to this zone in the Zone derived type
+        std::string SurfListName;              // Name of surface/surface list that is the radiant system
+        int NumOfSurfaces = 0;                 // Number of surfaces included in this radiant system (coordinated control)
+        Array1D_int SurfacePtr;                // Pointer to the surface(s) in the Surface derived type
+        Array1D_string SurfaceName;            // Name of surfaces that are the radiant system (can be one or more)
+        Array1D<Real64> SurfaceFrac;           // Fraction of flow/pipe length or electric power for a particular surface
+        Real64 TotalSurfaceArea = 0.0;         // Total surface area for all surfaces that are part of this radiant system
+        Real64 ZeroLTRSourceSumHATsurf = 0.0;  // Equal to SumHATsurf for all the walls in a zone with no source
+        Array1D<Real64> QRadSysSrcAvg;         // Average source over the time step for a particular radiant surface
+        // Record keeping variables used to calculate QRadSysSrcAvg locally
+        Array1D<Real64> LastQRadSysSrc;                          // Need to keep the last value in case we are still iterating
+        Real64 LastSysTimeElapsed;                               // Need to keep the last value in case we are still iterating
+        Real64 LastTimeStepSys;                                  // Need to keep the last value in case we are still iterating
+        CtrlType controlType = CtrlType::MAT;                    // Control type for the system (MAT, MRT, Op temp, ODB, OWB,
+                                                                 // Surface Face Temp, Surface Interior Temp, Running Mean
+                                                                 // Temp for Constant Flow systems only)
+        SetpointType setpointType = SetpointType::HalfFlowPower; // Setpoint type for the system, (HalfFlowPower or ZeroFlowPower)
+        OpMode opMode = OpMode::None;                            // Operating mode currently being used (NotOperating, Heating, Cooling)
+        Real64 HeatPower;                                        // heating sent to panel in Watts
+        Real64 HeatEnergy;                                       // heating sent to panel in Joules
         Real64 runningMeanOutdoorAirTemperatureWeightingFactor =
             0.0;                                                    // Weighting factor for running mean outdoor air temperature equation (user input)
         Real64 todayRunningMeanOutdoorDryBulbTemperature = 0.0;     // Current running mean outdoor air dry-bulb temperature
@@ -165,26 +173,18 @@ namespace LowTempRadiantSystem {
         Real64 todayAverageOutdoorDryBulbTemperature = 0.0;         // Average outdoor dry-bulb temperature for today
         Real64 yesterdayAverageOutdoorDryBulbTemperature = 0.0;     // Average outdoor dry-bulb temperature for yesterday
 
-        LowTempRadiantControlTypes processRadiantSystemControlInput(EnergyPlusData &state,
-                                                                    std::string const &controlInput,
-                                                                    std::string const &controlInputField,
-                                                                    LowTempRadiantSystem::SystemType typeOfRadiantSystem);
-
-        LowTempRadiantSetpointTypes
-        processRadiantSystemSetpointInput(EnergyPlusData &state, std::string const &controlInput, std::string const &controlInputField);
-
         void errorCheckZonesAndConstructions(EnergyPlusData &state, bool &errorsFound);
 
-        Real64 setRadiantSystemControlTemperature(EnergyPlusData &state, LowTempRadiantControlTypes TempControlType);
+        Real64 setRadiantSystemControlTemperature(EnergyPlusData &state, CtrlType TempControlType);
 
         Real64 calculateOperationalFraction(Real64 const offTemperature, Real64 const controlTemperature, Real64 const throttlingRange);
 
         virtual void calculateLowTemperatureRadiantSystem(EnergyPlusData &state, Real64 &LoadMet) = 0;
 
         Real64 setOffTemperatureLowTemperatureRadiantSystem(EnergyPlusData &state,
-                                                            int const scheduleIndex,
+                                                            Sched::Schedule const *sched,
                                                             Real64 const throttlingRange,
-                                                            LowTempRadiantSetpointTypes SetpointControlType);
+                                                            SetpointType SetpointControlType);
 
         void updateLowTemperatureRadiantSystemSurfaces(EnergyPlusData &state);
 
@@ -210,19 +210,19 @@ namespace LowTempRadiantSystem {
         int ColdWaterInNode = 0;    // cold water inlet node
         int ColdWaterOutNode = 0;   // cold water outlet node
         PlantLocation CWPlantLoc{};
-        int GlycolIndex = 0;             // Index to Glycol (Water) Properties
+        Fluid::GlycolProps *water = nullptr; // Water properties
+
         int CondErrIndex = 0;            // Error index for recurring warning messages
         Real64 CondCausedTimeOff = 0.0;  // Amount of time condensation did or could have turned system off
         bool CondCausedShutDown = false; // .TRUE. when condensation predicted at surface
         CircuitCalc NumCircCalcMethod =
-            CircuitCalc::Invalid;             // Calculation method for number of circuits per surface; 1=1 per surface, 2=use cicuit length
-        Real64 CircLength = 0.0;              // Circuit length {m}
-        std::string schedNameChangeoverDelay; // changeover delay schedule
-        int schedPtrChangeoverDelay = 0;      // Pointer to the schedule for the changeover delay in hours
-        int lastOperatingMode = NotOperating; // Last mode of operation (heating or cooling)
-        int lastDayOfSim = 1;                 // Last day of simulation radiant system operated in lastOperatingMode
-        int lastHourOfDay = 1;                // Last hour of the day radiant system operated in lastOperatingMode
-        int lastTimeStep = 1;                 // Last time step radiant system operated in lastOperatingMode
+            CircuitCalc::Invalid; // Calculation method for number of circuits per surface; 1=1 per surface, 2=use cicuit length
+        Real64 CircLength = 0.0;  // Circuit length {m}
+        Sched::Schedule *changeoverDelaySched = nullptr; // schedule for the changeover delay in hours
+        OpMode lastOpMode = OpMode::None;                // Last mode of operation (heating or cooling)
+        int lastDayOfSim = 1;                            // Last day of simulation radiant system operated in lastOperatingMode
+        int lastHourOfDay = 1;                           // Last hour of the day radiant system operated in lastOperatingMode
+        int lastTimeStep = 1;                            // Last time step radiant system operated in lastOperatingMode
         // Other parameters
         bool EMSOverrideOnWaterMdot = false;
         Real64 EMSWaterMdotOverrideValue = 0.0;
@@ -238,8 +238,6 @@ namespace LowTempRadiantSystem {
 
         void setOperatingModeBasedOnChangeoverDelay(EnergyPlusData &state);
 
-        FluidToSlabHeatTransferTypes getFluidToSlabHeatTransferInput(EnergyPlusData &state, std::string const &userInput);
-
         Real64 calculateHXEffectivenessTerm(EnergyPlusData &state,
                                             int const SurfNum,          // Surface Number
                                             Real64 const Temperature,   // Temperature of water entering the radiant system, in C
@@ -247,7 +245,7 @@ namespace LowTempRadiantSystem {
                                             Real64 const FlowFraction,  // Mass flow rate fraction for this surface in the radiant system
                                             Real64 const NumCircs,      // Number of fluid circuits in this surface
                                             int const DesignObjPtr,     // Design Object Pointer,
-                                            LowTempRadiantSystem::SystemType typeOfRadiantSystem
+                                            SystemType typeOfRadiantSystem
 
         );
 
@@ -289,8 +287,7 @@ namespace LowTempRadiantSystem {
 
         void calculateLowTemperatureRadiantSystem(EnergyPlusData &state, Real64 &LoadMet);
 
-        void
-        calculateLowTemperatureRadiantSystemComponents(EnergyPlusData &state, Real64 &LoadMet, LowTempRadiantSystem::SystemType typeOfRadiantSystem);
+        void calculateLowTemperatureRadiantSystemComponents(EnergyPlusData &state, Real64 &LoadMet, SystemType typeOfRadiantSystem);
 
         void updateLowTemperatureRadiantSystem(EnergyPlusData &state);
 
@@ -308,30 +305,26 @@ namespace LowTempRadiantSystem {
         std::string designName;         // name of the design object+
         Real64 TubeDiameterInner = 0.0; // inside tube diameter for embedded tubing (meters)
         Real64 TubeDiameterOuter = 0.0; // outside tube diameter for embedded tubing (meters)
-        FluidToSlabHeatTransferTypes FluidToSlabHeatTransfer =
-            FluidToSlabHeatTransferTypes::ConvectionOnly; // Model used for calculating heat transfer between fluid and slab
-        Real64 VarFlowTubeConductivity = 0.0;             // tube conductivity in W/m-K
-        LowTempRadiantControlTypes VarFlowControlType =
-            LowTempRadiantControlTypes::MATControl; // Control type for the system (MAT, MRT, Op temp, ODB, OWB,
+        FluidToSlabHeatTransferType FluidToSlabHeatTransfer =
+            FluidToSlabHeatTransferType::ConvectionOnly; // Model used for calculating heat transfer between fluid and slab
+        Real64 VarFlowTubeConductivity = 0.0;            // tube conductivity in W/m-K
+        CtrlType VarFlowControlType = CtrlType::MAT;     // Control type for the system (MAT, MRT, Op temp, ODB, OWB,
         // Surface Face Temp, Surface Interior Temp, Running Mean Temp
         // for Constant Flow systems only)
-        LowTempRadiantSetpointTypes VarFlowSetpointType =
-            LowTempRadiantSetpointTypes::HalfFlowPower; // Setpoint type for the syste, (HalfFlowPower or ZeroFlowPower)
+        SetpointType VarFlowSetpointType = SetpointType::HalfFlowPower; // Setpoint type for the system, (HalfFlowPower or ZeroFlowPower)
         std::string DesignHeatingCapMethodInput;
         int DesignHeatingCapMethod = 0; // - Method for Low Temp Radiant system heating capacity scaledsizing calculation (HeatingDesignCapacity,
         // CapacityPerFloorArea, FracOfAutosizedHeatingCapacity)
         Real64 DesignScaledHeatingCapacity =
             0.0; // -  Low Temp Radiant system scaled maximum heating capacity {W} or scalable variable of zone HVAC equipment,
         // {-}, or {W/m2}
-        Real64 HotThrottlRange = 0.0;  // Throttling range for heating [C]
-        std::string HotSetptSched;     // Schedule name for the zone setpoint temperature
-        int HotSetptSchedPtr = 0;      // Schedule index for the zone setpoint temperature
-        Real64 ColdThrottlRange = 0.0; // Throttling range for cooling [C]
+        Real64 HotThrottlRange = 0.0;              // Throttling range for heating [C]
+        Sched::Schedule *heatSetptSched = nullptr; // Schedule index for the zone setpoint temperature
+        Real64 ColdThrottlRange = 0.0;             // Throttling range for cooling [C]
         Array1D_string FieldNames;
-        CondContrlType CondCtrlType = CondContrlType::CondCtrlSimpleOff; // Condensation control type (initialize to simple off)
-        Real64 CondDewPtDeltaT = 1.0;                                    // Diff between surface temperature and dew point for cond. shut-off
-        std::string ColdSetptSched;                                      // Schedule name for the zone setpoint temperature
-        int ColdSetptSchedPtr = 0;                                       // Schedule index for the zone setpoint temperature
+        CondCtrlType condCtrlType = CondCtrlType::SimpleOff; // Condensation control type (initialize to simple off)
+        Real64 CondDewPtDeltaT = 1.0;                        // Diff between surface temperature and dew point for cond. shut-off
+        Sched::Schedule *coolSetptSched = nullptr;           // Schedule index for the zone setpoint temperature
         std::string DesignCoolingCapMethodInput;
         int DesignCoolingCapMethod = 0; // - Method for Low Temp Radiant system cooling capacity scaledsizing calculation (CoolingDesignCapacity,
                                         // CapacityPerFloorArea, FracOfAutosizedCoolingCapacity)
@@ -353,36 +346,23 @@ namespace LowTempRadiantSystem {
         Real64 WaterMassFlowRate = 0.0;    // current flow rate through system (calculated)
         Real64 HotWaterMassFlowRate = 0.0; // current hot water flow rate through heating side of system (calculated)
         Real64 ChWaterMassFlowRate = 0.0;  // current chilled water flow rate through cooling side of system (calculated)
-        std::string VolFlowSched;          // schedule of maximum flow at the current time
         std::string designObjectName;      // Design Object
         int DesignObjectPtr = 0;
-        int VolFlowSchedPtr = 0;         // index to the volumetric flow schedule
-        Real64 NomPumpHead = 0.0;        // nominal head of the constant flow pump
-        Real64 NomPowerUse = 0.0;        // nominal power use of the constant flow pump
-        Real64 PumpEffic = 0.0;          // overall efficiency of the pump (calculated)
-        std::string HotWaterHiTempSched; // Schedule name for the highest water temperature
-        int HotWaterHiTempSchedPtr = 0;  // Schedule index for the highest water temperature
-        std::string HotWaterLoTempSched; // Schedule name for the lowest water temperature
-        int HotWaterLoTempSchedPtr = 0;  // Schedule index for the lowest water temperature
-        std::string HotCtrlHiTempSched;  // Schedule name for the highest control temperature
+        Sched::Schedule *volFlowSched = nullptr;        // index to the volumetric flow schedule
+        Real64 NomPumpHead = 0.0;                       // nominal head of the constant flow pump
+        Real64 NomPowerUse = 0.0;                       // nominal power use of the constant flow pump
+        Real64 PumpEffic = 0.0;                         // overall efficiency of the pump (calculated)
+        Sched::Schedule *hotWaterHiTempSched = nullptr; // Schedule for the highest water temperature
+        Sched::Schedule *hotWaterLoTempSched = nullptr; // Schedule for the lowest water temperature
+        Sched::Schedule *hotCtrlHiTempSched = nullptr;  // Schedule for the highest control temperature
         // (where the lowest water temperature is requested)
-        int HotCtrlHiTempSchedPtr = 0; // Schedule index for the highest control temperature
-        // (where the lowest water temperature is requested)
-        std::string HotCtrlLoTempSched; // Schedule name for the lowest control temperature
+        Sched::Schedule *hotCtrlLoTempSched = nullptr; // Schedule for the lowest control temperature
         // (where the highest water temperature is requested)
-        int HotCtrlLoTempSchedPtr = 0; // Schedule index for the lowest control temperature
-        // (where the highest water temperature is requested)
-        std::string ColdWaterHiTempSched; // Schedule name for the highest water temperature
-        int ColdWaterHiTempSchedPtr = 0;  // Schedule index for the highest water temperature
-        std::string ColdWaterLoTempSched; // Schedule name for the lowest water temperature
-        int ColdWaterLoTempSchedPtr = 0;  // Schedule index for the lowest water temperature
-        std::string ColdCtrlHiTempSched;  // Schedule name for the highest control temperature
+        Sched::Schedule *coldWaterHiTempSched = nullptr; // Schedule for the highest water temperature
+        Sched::Schedule *coldWaterLoTempSched = nullptr; // Schedule for the lowest water temperature
+        Sched::Schedule *coldCtrlHiTempSched = nullptr;  // Schedule for the highest control temperature
         // (where the lowest water temperature is requested)
-        int ColdCtrlHiTempSchedPtr = 0; // Schedule index for the highest control temperature
-        // (where the lowest water temperature is requested)
-        std::string ColdCtrlLoTempSched; // Schedule name for the lowest control temperature
-        // (where the highest water temperature is requested)
-        int ColdCtrlLoTempSchedPtr = 0; // Schedule index for the lowest control temperature
+        Sched::Schedule *coldCtrlLoTempSched = nullptr; // Schedule for the lowest control temperature
         // (where the highest water temperature is requested)
         Real64 WaterInjectionRate = 0.0;    // water injection mass flow rate from main loop
         Real64 WaterRecircRate = 0.0;       // water recirculation rate (outlet from radiant system recirculated)
@@ -402,7 +382,7 @@ namespace LowTempRadiantSystem {
                                                        int const MainLoopNodeIn, // Node number on main loop of the inlet node to the radiant system
                                                        bool const Iteration,     // FALSE for the regular solution, TRUE when we had to loop back
                                                        Real64 &LoadMet,          // Load met by the low temperature radiant system, in Watts
-                                                       LowTempRadiantSystem::SystemType typeOfRadiantSystem);
+                                                       SystemType typeOfRadiantSystem);
 
         void calculateRunningMeanAverageTemperature(EnergyPlusData &state, int const RadSysNum);
 
@@ -423,22 +403,21 @@ namespace LowTempRadiantSystem {
         // This data could be shared between multiple constant flow LowTempRad Systems
         std::string designName; // name of the design object
         Real64 runningMeanOutdoorAirTemperatureWeightingFactor =
-            0.8; // Weighting factor for running mean outdoor air temperature equation (user input)
-        LowTempRadiantControlTypes ConstFlowControlType =
-            LowTempRadiantControlTypes::MATControl; // Control type for the system (MAT, MRT, Op temp, ODB, OWB,
-                                                    // Surface Face Temp, Surface Interior Temp, Running Mean Temp
-                                                    // for Constant Flow systems only)
-        Real64 TubeDiameterInner = 0.0;             // inside tube diameter for embedded tubing (meters)
-        Real64 TubeDiameterOuter = 0.0;             // outside tube diameter for embedded tubing (meters)
-        FluidToSlabHeatTransferTypes FluidToSlabHeatTransfer =
-            FluidToSlabHeatTransferTypes::ConvectionOnly; // Model used for calculating heat transfer between fluid and slab
-        Real64 ConstFlowTubeConductivity = 0.0;           // tube conductivity in W/m-K
-        Real64 MotorEffic = 0.0;                          // efficiency of the pump motor
-        Real64 FracMotorLossToFluid = 0.0;                // amount of heat generated by pump motor that is added to the fluid
+            0.8;                                       // Weighting factor for running mean outdoor air temperature equation (user input)
+        CtrlType ConstFlowControlType = CtrlType::MAT; // Control type for the system (MAT, MRT, Op temp, ODB, OWB,
+                                                       // Surface Face Temp, Surface Interior Temp, Running Mean Temp
+                                                       // for Constant Flow systems only)
+        Real64 TubeDiameterInner = 0.0;                // inside tube diameter for embedded tubing (meters)
+        Real64 TubeDiameterOuter = 0.0;                // outside tube diameter for embedded tubing (meters)
+        FluidToSlabHeatTransferType FluidToSlabHeatTransfer =
+            FluidToSlabHeatTransferType::ConvectionOnly; // Model used for calculating heat transfer between fluid and slab
+        Real64 ConstFlowTubeConductivity = 0.0;          // tube conductivity in W/m-K
+        Real64 MotorEffic = 0.0;                         // efficiency of the pump motor
+        Real64 FracMotorLossToFluid = 0.0;               // amount of heat generated by pump motor that is added to the fluid
 
         Array1D_string FieldNames;
-        CondContrlType CondCtrlType = CondContrlType::CondCtrlSimpleOff; // Condensation control type (initialize to simple off)
-        Real64 CondDewPtDeltaT = 1.0;                                    // Diff between surface temperature and dew point for cond. shut-off
+        CondCtrlType condCtrlType = CondCtrlType::SimpleOff; // Condensation control type (initialize to simple off)
+        Real64 CondDewPtDeltaT = 1.0;                        // Diff between surface temperature and dew point for cond. shut-off
 
         ConstantFlowRadDesignData() = default;
         ~ConstantFlowRadDesignData() = default;
@@ -448,10 +427,9 @@ namespace LowTempRadiantSystem {
     {
         // Members
         // Input data
-        Real64 MaxElecPower = 0.0; // Maximum electric power that can be supplied to surface, Watts
-        Real64 ThrottlRange = 0.0; // Throttling range for heating [C]
-        std::string SetptSched;    // Schedule name for the zone setpoint temperature
-        int SetptSchedPtr = 0;     // Schedule index for the zone setpoint temperature
+        Real64 MaxElecPower = 0.0;             // Maximum electric power that can be supplied to surface, Watts
+        Real64 ThrottlRange = 0.0;             // Throttling range for heating [C]
+        Sched::Schedule *setptSched = nullptr; // Schedule for the zone setpoint temperature
         // Other parameters
         // Report data
         Real64 ElecPower = 0.0;   // heating sent to panel in Watts
@@ -477,9 +455,9 @@ namespace LowTempRadiantSystem {
     {
         // Members
         // This type used to track different components/types for efficiency
-        std::string Name;                                                                        // name of radiant system
-        LowTempRadiantSystem::SystemType SystemType = LowTempRadiantSystem::SystemType::Invalid; // Type of System (see System Types in Parameters)
-        int CompIndex = 0;                                                                       // Index in specific system types
+        std::string Name;                            // name of radiant system
+        SystemType systemType = SystemType::Invalid; // Type of System (see System Types in Parameters)
+        int CompIndex = 0;                           // Index in specific system types
 
         // Default Constructor
         RadSysTypeData() = default;
@@ -519,13 +497,13 @@ namespace LowTempRadiantSystem {
     void InitLowTempRadiantSystem(EnergyPlusData &state,
                                   bool const FirstHVACIteration, // TRUE if 1st HVAC simulation of system timestep
                                   int const RadSysNum, // Index for the low temperature radiant system under consideration within the derived types
-                                  LowTempRadiantSystem::SystemType const SystemType, // Type of radiant system: hydronic, constant flow, or electric
-                                  bool &InitErrorFound // Set to true when a severe or worse error is discovered during initialization
+                                  SystemType const systemType, // Type of radiant system: hydronic, constant flow, or electric
+                                  bool &InitErrorFound         // Set to true when a severe or worse error is discovered during initialization
     );
 
     void SizeLowTempRadiantSystem(EnergyPlusData &state,
                                   int const RadSysNum, // Index for the low temperature radiant system under consideration within the derived types
-                                  LowTempRadiantSystem::SystemType const SystemType // Type of radiant system: hydronic, constant flow, or electric
+                                  SystemType const systemType // Type of radiant system: hydronic, constant flow, or electric
     );
 
     void UpdateRadSysSourceValAvg(EnergyPlusData &state,
@@ -567,13 +545,6 @@ struct LowTempRadiantSystemData : BaseGlobalStruct
     Real64 LowTempHeating = -200.0; // Used to indicate that a user does not have a heating control temperature
     Real64 HighTempCooling = 200.0; // Used to indicate that a user does not have a cooling control temperature
 
-    Array1D<Real64> QRadSysSrcAvg;        // Average source over the time step for a particular radiant surface
-    Array1D<Real64> ZeroSourceSumHATsurf; // Equal to SumHATsurf for all the walls in a zone with no source
-    // Record keeping variables used to calculate QRadSysSrcAvg locally
-    Array1D<Real64> LastQRadSysSrc;     // Need to keep the last value in case we are still iterating
-    Array1D<Real64> LastSysTimeElapsed; // Need to keep the last value in case we are still iterating
-    Array1D<Real64> LastTimeStepSys;    // Need to keep the last value in case we are still iterating
-
     Array1D<Real64> Ckj; // Coefficients for individual surfaces within a radiant system
     Array1D<Real64> Cmj;
     Array1D<Real64> WaterTempOut; // Array of outlet water temperatures for
@@ -600,6 +571,14 @@ struct LowTempRadiantSystemData : BaseGlobalStruct
     Array1D<LowTempRadiantSystem::HydronicRadiantSysNumericFieldData> HydronicRadiantSysNumericFields;
     Array1D<LowTempRadiantSystem::ConstantFlowRadDesignData> CflowRadiantSysDesign;
     Array1D<LowTempRadiantSystem::VarFlowRadDesignData> HydronicRadiantSysDesign;
+
+    void init_constant_state([[maybe_unused]] EnergyPlusData &state) override
+    {
+    }
+
+    void init_state([[maybe_unused]] EnergyPlusData &state) override
+    {
+    }
 
     void clear_state() override
     {
@@ -629,11 +608,6 @@ struct LowTempRadiantSystemData : BaseGlobalStruct
         warnTooHigh = false;
         //
 
-        QRadSysSrcAvg.clear();
-        ZeroSourceSumHATsurf.clear();
-        LastQRadSysSrc.clear();
-        LastSysTimeElapsed.clear();
-        LastTimeStepSys.clear();
         Ckj.clear();
         Cmj.clear();
         WaterTempOut.clear();

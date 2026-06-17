@@ -42,7 +42,7 @@ Simple Aggregation Types
 
 \emph{Advanced Aggregation Types}
 
-The advanced aggregation types are described below. These aggregation types rely on doing an operation on the current variable but only during the time or times defined by a previously defined field. The ValueWhenMaxOrMin displays the value of one variable at the same time as the maximum or minimum is set on a previous field that is defined as either a maximum or minimum. The ``Hours---`` aggregation types display then number of hours that a variable meets a condition. The ``---DuringHoursShown'' aggregation types perform those aggretations but instead of for all the hours in the month, only for the hours that the previous ``Hours---`` entry applies. Multiple ``---DuringHoursShown'' after an ``Hours---`` will all be based on that single ``Hours---`` entry, in fact the ``---DuringHoursShown'' is based on the next column to the left that contains an ``Hours---`` entry even if other types of aggregations are used in intermediate columns. Order of the variables in the report is important when using the advanced aggregation types since they often depend on a previous entry.
+The advanced aggregation types are described below. These aggregation types rely on doing an operation on the current variable but only during the time or times defined by a previously defined field. The ValueWhenMaxOrMin displays the value of one variable at the same time as the maximum or minimum is set on a previous field that is defined as either a maximum or minimum. The ``Hours---`` aggregation types display then number of hours that a variable meets a condition. The ``---DuringHoursShown'' aggregation types perform those aggregations but instead of for all the hours in the month, only for the hours that the previous ``Hours---`` entry applies. Multiple ``---DuringHoursShown'' after an ``Hours---`` will all be based on that single ``Hours---`` entry, in fact the ``---DuringHoursShown'' is based on the next column to the left that contains an ``Hours---`` entry even if other types of aggregations are used in intermediate columns. Order of the variables in the report is important when using the advanced aggregation types since they often depend on a previous entry.
 
 \textbf{ValueWhenMaximumOrMinimum} -- The ValueWhenMaximumOrMinimum option looks at the previous variable in the report that sets a maximum or minimum and displays the value of the current variable at that same timestep. Order of the variables in the report is important when using ValueWhenMaxMin. This can be used, for example, when an outdoor temperature should be reported for the time of the maximum cooling load.
 
@@ -55,14 +55,13 @@ The advanced aggregation types are described below. These aggregation types rely
 The VariableOrMeterName and AggregationType fields may be repeated for each column desired in the monthly report. These two fields define each column of the report.  These fields are extensible, so additional pairs of these fields can be added to the end of this object.  An example of this object follows.
 
 \begin{lstlisting}
-
 Output:Table:Monthly,
-    Building Monthly Cooling Load Report,               ! Name
-    3,                                                  ! Digits After Decimal
-    Zone Air System Sensible Cooling Energy,                   ! Variable or Meter 1 Name
-    SumOrAverage,                                       ! Aggregation Type for Variable or Meter 1
-    Zone Air System Sensible Cooling Energy,                   ! Variable or Meter 2 Name
-    Maximum,                                            ! Aggregation Type for Variable or Meter 2
-    Site Outdoor Air Drybulb Temperature,                                   ! Variable or Meter 3 Name
-    ValueWhenMaxMin;                                    ! Aggregation Type for Variable or Meter 3
+  Building Monthly Cooling Load Report,  !- Name
+  3,                          !- Digits After Decimal
+  Zone Air System Sensible Cooling Energy,  !- Variable or Meter 1 Name
+  SumOrAverage,               !- Aggregation Type for Variable or Meter 1
+  Zone Air System Sensible Cooling Energy,  !- Variable or Meter 2 Name
+  Maximum,                    !- Aggregation Type for Variable or Meter 2
+  Site Outdoor Air Drybulb Temperature,  !- Variable or Meter 3 Name
+  ValueWhenMaxMin;            !- Aggregation Type for Variable or Meter 3
 \end{lstlisting}

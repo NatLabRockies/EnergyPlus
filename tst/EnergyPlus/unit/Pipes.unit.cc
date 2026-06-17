@@ -1,7 +1,7 @@
-// EnergyPlus, Copyright (c) 1996-2023, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
-// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other
+// National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
 // contributors. All rights reserved.
 //
 // NOTICE: This Software was developed under funding from the U.S. Department of Energy and the
@@ -76,13 +76,13 @@ TEST_F(EnergyPlusFixture, TestPipesInput)
     ASSERT_TRUE(process_idf(idf_objects));
     Pipes::GetPipeInput(*state);
     EXPECT_EQ(2u, state->dataPipes->LocalPipe.size());
-    EXPECT_TRUE(compare_enums(DataPlant::PlantEquipmentType::Pipe, state->dataPipes->LocalPipe(1).Type));
-    EXPECT_TRUE(compare_enums(DataPlant::PlantEquipmentType::PipeSteam, state->dataPipes->LocalPipe(2).Type));
+    EXPECT_ENUM_EQ(DataPlant::PlantEquipmentType::Pipe, state->dataPipes->LocalPipe(1).Type);
+    EXPECT_ENUM_EQ(DataPlant::PlantEquipmentType::PipeSteam, state->dataPipes->LocalPipe(2).Type);
 }
 
 TEST_F(EnergyPlusFixture, CalcPipeHeatTransCoef)
 {
-
+    state->init_state(*state);
     state->dataPlnt->TotNumLoops = 1;
     state->dataPlnt->PlantLoop.allocate(1);
     state->dataLoopNodes->Node.allocate(2);
@@ -96,7 +96,7 @@ TEST_F(EnergyPlusFixture, CalcPipeHeatTransCoef)
     state->dataPlnt->PlantLoop(1).LoopSide(DataPlant::LoopSideLocation::Demand).Branch(1).Comp(1).Type = DataPlant::PlantEquipmentType::PipeInterior;
     state->dataPlnt->PlantLoop(1).LoopSide(DataPlant::LoopSideLocation::Supply).TotalBranches = 0; // just skip the supply side search
     state->dataPlnt->PlantLoop(1).FluidName = "WATER";
-    state->dataPlnt->PlantLoop(1).FluidIndex = 1;
+    state->dataPlnt->PlantLoop(1).glycol = Fluid::GetWater(*state);
 
     state->dataPipeHT->nsvNumOfPipeHT = 1;
     state->dataPipeHT->PipeHT.allocate(state->dataPipeHT->nsvNumOfPipeHT);
@@ -118,7 +118,7 @@ TEST_F(EnergyPlusFixture, CalcPipeHeatTransCoef)
     PlantUtilities::ScanPlantLoopsForObject(*state, pipe.Name, pipe.Type, pipe.plantLoc, errFlag);
     ASSERT_FALSE(errFlag);
     EXPECT_EQ(1, pipe.plantLoc.loopNum);
-    EXPECT_TRUE(compare_enums(DataPlant::LoopSideLocation::Demand, pipe.plantLoc.loopSideNum));
+    EXPECT_ENUM_EQ(DataPlant::LoopSideLocation::Demand, pipe.plantLoc.loopSideNum);
     EXPECT_EQ(1, pipe.plantLoc.branchNum);
     EXPECT_EQ(1, pipe.plantLoc.compNum);
 

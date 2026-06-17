@@ -1,0 +1,156 @@
+name: Develop Branch Testing
+
+on:
+  push:
+    branches: [ develop, fixPythonEngineBuild ]  # run this on all commits to the develop branch
+
+defaults:
+  run:
+    shell: bash
+
+env:
+  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  FC: gfortran-13
+  Python_REQUIRED_VERSION: 3.12.3  # 3.12.2 not available on Ubuntu 24 GHA
+
+jobs:
+  build_and_test:
+    name: ${{ matrix.pretty }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+#        - os: macos-15-intel
+#          macos_dev_target: 12.1
+#          arch: x86_64
+#          python-arch: x64
+#          generator: "Unix Makefiles"
+#          nproc: 3
+#          pretty: "Standard Build on Mac x64"
+#          alternate: false
+        - os: macos-14
+          macos_dev_target: 14.0
+          arch: arm64
+          python-arch: arm64
+          generator: "Unix Makefiles"
+          nproc: 3
+          pretty: "Standard Build on Mac arm64"
+          alternate: false
+#        - os: ubuntu-24.04
+#          arch: x86_64
+#          python-arch: x64
+#          generator: "Unix Makefiles"
+#          nproc: 4
+#          pretty: "Standard Build on Ubuntu 24.04"
+#          alternate: false
+#        - os: windows-2022
+#          arch: x86_64
+#          python-arch: x64
+#          generator: "Visual Studio 17 2022"
+#          nproc: 4
+#          pretty: "Standard Build on Windows VS 2022"
+#          alternate: false
+        - os: ubuntu-24.04
+          arch: x86_64
+          python-arch: x64
+          generator: "Unix Makefiles"
+          nproc: 4
+          pretty: "Alternate Build on Ubuntu 24.04"
+          alternate: true
+
+    steps:
+
+    - name: Set up Python ${{ env.Python_REQUIRED_VERSION }}
+      id: setup-python
+      uses: actions/setup-python@v6
+      with:
+        python-version: ${{ env.Python_REQUIRED_VERSION }}
+
+    - name: Install Dependencies for Mac
+      if: ${{ runner.os == 'macOS' }}
+      run: |
+        echo MACOSX_DEPLOYMENT_TARGET=${{ matrix.macos_dev_target }} >> $GITHUB_ENV
+
+    - name: Install Dependencies for Linux
+      if: ${{ runner.os == 'Linux' }}
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y libxkbcommon-x11-0 xorg-dev libgl1-mesa-dev
+        if [[ "${{ matrix.os }}" == "ubuntu-24.04" ]]; then
+          # https://github.com/actions/runner-images/issues/10025
+          echo "FC=gfortran-13" >> $GITHUB_ENV
+        fi
+
+    - uses: actions/checkout@v6
+
+    - name: Create Build Directory
+      run: cmake -E make_directory ./build/
+
+    - name: Configure CMake with Standard Flags
+      if: matrix.alternate == false
+      working-directory: ./build
+      run: >
+        cmake
+        -G "${{ matrix.generator }}"
+        -DCMAKE_BUILD_TYPE:STRING=Release
+        -DCMAKE_OSX_DEPLOYMENT_TARGET:STRING=${{ matrix.macos_dev_target }}
+        -DLINK_WITH_PYTHON:BOOL=ON
+        -DPYTHON_CLI:BOOL=ON
+        -DPython_REQUIRED_VERSION:STRING=${{ steps.setup-python.outputs.python-version }}
+        -DPython_ROOT_DIR:PATH=$RUNNER_TOOL_CACHE/Python/${{ steps.setup-python.outputs.python-version }}/${{ matrix.python-arch }}/
+        -DBUILD_TESTING:BOOL=ON
+        -DBUILD_FORTRAN:BOOL=ON
+        -DBUILD_PACKAGE:BOOL=OFF
+        -DDOCUMENTATION_BUILD:STRING=DoNotBuild
+        -DENABLE_OPENMP:BOOL=OFF
+        ../
+
+    - name: Configure CMake with Alternative Flags
+      if: matrix.alternate == true
+      working-directory: ./build/
+      run: >
+        cmake
+        -DCMAKE_BUILD_TYPE=Release
+        -DLINK_WITH_PYTHON=OFF
+        -DUSE_PSYCHROMETRICS_CACHING=OFF
+        -DUSE_GLYCOL_CACHING=OFF
+        -DOPENGL_REQUIRED=OFF
+        -DUSE_PSYCH_STATS=ON
+        -DUSE_PSYCH_ERRORS=OFF
+        -DENABLE_PCH=OFF
+        ../
+
+    - name: Build
+      id: build
+      working-directory: ./build
+      run: |
+        echo "::add-matcher::./.github/workflows/cpp-problem-matcher.json"
+        cmake --build . -j ${{ matrix.nproc }} --config Release
+        echo "::remove-matcher owner=gcc-problem-matcher::"
+
+    - name: Test
+      # Not running test on alternate build yet, I need to test things
+      if: matrix.alternate == false
+      working-directory: ./build
+      run: |
+        begin_group() { echo -e "::group::\033[93m$1\033[0m"; }
+
+        Color_Off='\033[0m'       # Text Reset
+
+        # Regular Colors
+        Red='\033[0;31m'
+        Green='\033[0;32m'
+
+        begin_group "Running CTests"
+        if ctest -C Release -j ${{ matrix.nproc }}; then
+          echo "::endgroup::"
+          echo -e "✅ ${Green}All tests passed${Color_Off}"
+        else
+          echo "::endgroup::"
+          echo -e "❌ ${Red}Some Tests Failed${Color_Off}"
+          begin_group "Re-running failed tests verbosely..."
+          ctest -C Release --rerun-failed -VV || true
+          echo "::endgroup::"
+          exit 1
+        fi;

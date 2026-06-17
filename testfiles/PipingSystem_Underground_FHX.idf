@@ -53,7 +53,7 @@
 !****** SIMULATION CONTROLS ********************************
 !***********************************************************
 
-  Version,23.1;
+  Version,26.2;
 
   Building,
     FHX House,               !- Name
@@ -208,7 +208,14 @@
     No,                      !- Account for Dedicated Outdoor Air System
     NeutralSupplyAir,        !- Dedicated Outdoor Air System Control Strategy
     autosize,                !- Dedicated Outdoor Air Low Setpoint Temperature for Design {C}
-    autosize;                !- Dedicated Outdoor Air High Setpoint Temperature for Design {C}
+    autosize,                !- Dedicated Outdoor Air High Setpoint Temperature for Design {C}
+    ,                        !- Zone Load Sizing Method
+    ,                        !- Zone Latent Cooling Design Supply Air Humidity Ratio Input Method
+    ,                        !- Zone Dehumidification Design Supply Air Humidity Ratio {kgWater/kgDryAir}
+    ,                        !- Zone Cooling Design Supply Air Humidity Ratio Difference {kgWater/kgDryAir}
+    ,                        !- Zone Latent Heating Design Supply Air Humidity Ratio Input Method
+    ,                        !- Zone Humidification Design Supply Air Humidity Ratio {kgWater/kgDryAir}
+    ;                        !- Zone Humidification Design Supply Air Humidity Ratio Difference {kgWater/kgDryAir}
 
   Sizing:Zone,
     Main Floor,              !- Zone or ZoneList Name
@@ -237,7 +244,14 @@
     No,                      !- Account for Dedicated Outdoor Air System
     NeutralSupplyAir,        !- Dedicated Outdoor Air System Control Strategy
     autosize,                !- Dedicated Outdoor Air Low Setpoint Temperature for Design {C}
-    autosize;                !- Dedicated Outdoor Air High Setpoint Temperature for Design {C}
+    autosize,                !- Dedicated Outdoor Air High Setpoint Temperature for Design {C}
+    ,                        !- Zone Load Sizing Method
+    ,                        !- Zone Latent Cooling Design Supply Air Humidity Ratio Input Method
+    ,                        !- Zone Dehumidification Design Supply Air Humidity Ratio {kgWater/kgDryAir}
+    ,                        !- Zone Cooling Design Supply Air Humidity Ratio Difference {kgWater/kgDryAir}
+    ,                        !- Zone Latent Heating Design Supply Air Humidity Ratio Input Method
+    ,                        !- Zone Humidification Design Supply Air Humidity Ratio {kgWater/kgDryAir}
+    ;                        !- Zone Humidification Design Supply Air Humidity Ratio Difference {kgWater/kgDryAir}
 
   Sizing:Plant,
     Condenser Loop,          !- Plant or Condenser Loop Name
@@ -812,6 +826,7 @@
     Autosize,                !- Cooling Supply Air Flow Rate {m3/s}
     Autosize,                !- Heating Supply Air Flow Rate {m3/s}
     ,                        !- No Load Supply Air Flow Rate {m3/s}
+    ,                        !- No Load Supply Air Flow Rate Control Set To Low Speed
     0.0,                     !- Cooling Outdoor Air Flow Rate {m3/s}
     0.0,                     !- Heating Outdoor Air Flow Rate {m3/s}
     ,                        !- No Load Outdoor Air Flow Rate {m3/s}
@@ -821,10 +836,6 @@
     Sys 2 Heat Pump Heating Mode,  !- Heating Coil Name
     Coil:Cooling:WaterToAirHeatPump:EquationFit,  !- Cooling Coil Object Type
     Sys 2 Heat Pump Cooling Mode,  !- Cooling Coil Name
-    2.5,                     !- Maximum Cycling Rate {cycles/hr}
-    60.0,                    !- Heat Pump Time Constant {s}
-    0.01,                    !- Fraction of On-Cycle Power Use
-    60,                      !- Heat Pump Fan Delay Time {s}
     Coil:Heating:Fuel,       !- Supplemental Heating Coil Object Type
     Heat Pump DX Supp Heating Coil 2,  !- Supplemental Heating Coil Name
     60.0,                    !- Maximum Supply Air Temperature from Supplemental Heater {C}
@@ -947,6 +958,7 @@
 
   Coil:Cooling:WaterToAirHeatPump:EquationFit,
     Sys 2 Heat Pump Cooling Mode,  !- Name
+    ,                        !- Availability Schedule Name
     Sys 2 Water to Air Heat Pump Source Side1 Inlet Node,  !- Water Inlet Node Name
     Sys 2 Water to Air Heat Pump Source Side1 Outlet Node,  !- Water Outlet Node Name
     Sys 2 Cooling Coil Air Inlet Node,  !- Air Inlet Node Name
@@ -962,11 +974,16 @@
     TotCoolCapCurve,         !- Total Cooling Capacity Curve Name
     CoolSensCapCurve,        !- Sensible Cooling Capacity Curve Name
     CoolPowCurve,            !- Cooling Power Consumption Curve Name
+    HPACCOOLPLFFPLR,         !- Part Load Fraction Correlation Curve Name
     0,                       !- Nominal Time for Condensate Removal to Begin {s}
-    0;                       !- Ratio of Initial Moisture Evaporation Rate and Steady State Latent Capacity {dimensionless}
+    0,                       !- Ratio of Initial Moisture Evaporation Rate and Steady State Latent Capacity {dimensionless}
+    2.5,                     !- Maximum Cycling Rate {cycles/hr}
+    60,                      !- Latent Capacity Time Constant {s}
+    60;                      !- Fan Delay Time {s}
 
   Coil:Heating:WaterToAirHeatPump:EquationFit,
     Sys 2 Heat Pump Heating Mode,  !- Name
+    ,                        !- Availability Schedule Name
     Sys 2 Water to Air Heat Pump Source Side2 Inlet Node,  !- Water Inlet Node Name
     Sys 2 Water to Air Heat Pump Source Side2 Outlet Node,  !- Water Outlet Node Name
     Sys 2 Heating Coil Air Inlet Node,  !- Air Inlet Node Name
@@ -979,7 +996,8 @@
     20.0,                    !- Rated Entering Air Dry-Bulb Temperature {C}
     1.0,                     !- Ratio of Rated Heating Capacity to Rated Cooling Capacity
     HeatCapCurve,            !- Heating Capacity Curve Name
-    HeatPowCurve;            !- Heating Power Consumption Curve Name
+    HeatPowCurve,            !- Heating Power Consumption Curve Name
+    HPACHEATPLFFPLR;         !- Part Load Fraction Correlation Curve Name
 
   Fan:OnOff,
     Zone 2 Fan,              !- Name
@@ -1033,6 +1051,7 @@
     Autosize,                !- Cooling Supply Air Flow Rate {m3/s}
     Autosize,                !- Heating Supply Air Flow Rate {m3/s}
     ,                        !- No Load Supply Air Flow Rate {m3/s}
+    ,                        !- No Load Supply Air Flow Rate Control Set To Low Speed
     0.0,                     !- Cooling Outdoor Air Flow Rate {m3/s}
     0.0,                     !- Heating Outdoor Air Flow Rate {m3/s}
     ,                        !- No Load Outdoor Air Flow Rate {m3/s}
@@ -1042,10 +1061,6 @@
     Sys 1 Heat Pump Heating Mode,  !- Heating Coil Name
     Coil:Cooling:WaterToAirHeatPump:EquationFit,  !- Cooling Coil Object Type
     Sys 1 Heat Pump Cooling Mode,  !- Cooling Coil Name
-    2.5,                     !- Maximum Cycling Rate {cycles/hr}
-    60.0,                    !- Heat Pump Time Constant {s}
-    0.01,                    !- Fraction of On-Cycle Power Use
-    60,                      !- Heat Pump Fan Delay Time {s}
     Coil:Heating:Fuel,       !- Supplemental Heating Coil Object Type
     Heat Pump DX Supp Heating Coil 1,  !- Supplemental Heating Coil Name
     60.0,                    !- Maximum Supply Air Temperature from Supplemental Heater {C}
@@ -1075,6 +1090,7 @@
 
   Coil:Cooling:WaterToAirHeatPump:EquationFit,
     Sys 1 Heat Pump Cooling Mode,  !- Name
+    ,                        !- Availability Schedule Name
     Sys 1 Water to Air Heat Pump Source Side1 Inlet Node,  !- Water Inlet Node Name
     Sys 1 Water to Air Heat Pump Source Side1 Outlet Node,  !- Water Outlet Node Name
     Sys 1 Cooling Coil Air Inlet Node,  !- Air Inlet Node Name
@@ -1090,11 +1106,16 @@
     TotCoolCapCurve,         !- Total Cooling Capacity Curve Name
     CoolSensCapCurve,        !- Sensible Cooling Capacity Curve Name
     CoolPowCurve,            !- Cooling Power Consumption Curve Name
+    HPACCOOLPLFFPLR,         !- Part Load Fraction Correlation Curve Name
     0,                       !- Nominal Time for Condensate Removal to Begin {s}
-    0;                       !- Ratio of Initial Moisture Evaporation Rate and Steady State Latent Capacity {dimensionless}
+    0,                       !- Ratio of Initial Moisture Evaporation Rate and Steady State Latent Capacity {dimensionless}
+    2.5,                     !- Maximum Cycling Rate {cycles/hr}
+    60,                      !- Latent Capacity Time Constant {s}
+    60;                      !- Fan Delay Time {s}
 
   Coil:Heating:WaterToAirHeatPump:EquationFit,
     Sys 1 Heat Pump Heating Mode,  !- Name
+    ,                        !- Availability Schedule Name
     Sys 1 Water to Air Heat Pump Source Side2 Inlet Node,  !- Water Inlet Node Name
     Sys 1 Water to Air Heat Pump Source Side2 Outlet Node,  !- Water Outlet Node Name
     Sys 1 Heating Coil Air Inlet Node,  !- Air Inlet Node Name
@@ -1107,7 +1128,8 @@
     20.0,                    !- Rated Entering Air Dry-Bulb Temperature {C}
     1.0,                     !- Ratio of Rated Heating Capacity to Rated Cooling Capacity
     HeatCapCurve,            !- Heating Capacity Curve Name
-    HeatPowCurve;            !- Heating Power Consumption Curve Name
+    HeatPowCurve,            !- Heating Power Consumption Curve Name
+    HPACHEATPLFFPLR;         !- Part Load Fraction Correlation Curve Name
 
   Fan:OnOff,
     Zone 1 Fan,              !- Name

@@ -1,7 +1,7 @@
-// EnergyPlus, Copyright (c) 1996-2023, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
-// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other
+// National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
 // contributors. All rights reserved.
 //
 // NOTICE: This Software was developed under funding from the U.S. Department of Energy and the
@@ -64,9 +64,7 @@
 #include <EnergyPlus/General.hh>
 
 using namespace EnergyPlus;
-using namespace EnergyPlus::DaylightingDevices;
-using namespace EnergyPlus::DaylightingManager;
-using namespace EnergyPlus::DataDaylighting;
+using namespace EnergyPlus::Dayltg;
 using namespace EnergyPlus::DataSurfaces;
 
 TEST_F(EnergyPlusFixture, DaylightingDevices_adjustViewFactorsWithShelfTest)
@@ -100,7 +98,7 @@ TEST_F(EnergyPlusFixture, DaylightingDevices_adjustViewFactorsWithShelfTest)
     vfShelfResult = 0.67;
     vfSkyResult = 0.0;
     vfGroundResult = 0.0;
-    EnergyPlus::DaylightingDevices::adjustViewFactorsWithShelf(*state, vfShelfSet, vfSkySet, vfGroundSet, WinSurf, ShelfNum);
+    adjustViewFactorsWithShelf(*state, vfShelfSet, vfSkySet, vfGroundSet, WinSurf, ShelfNum);
     EXPECT_NEAR(vfShelfSet, vfShelfResult, acceptableTolerance);
     EXPECT_NEAR(vfSkySet, vfSkyResult, acceptableTolerance);
     EXPECT_NEAR(vfGroundSet, vfGroundResult, acceptableTolerance);
@@ -112,7 +110,7 @@ TEST_F(EnergyPlusFixture, DaylightingDevices_adjustViewFactorsWithShelfTest)
     vfShelfResult = 1.0;
     vfSkyResult = 0.0;
     vfGroundResult = 0.0;
-    EnergyPlus::DaylightingDevices::adjustViewFactorsWithShelf(*state, vfShelfSet, vfSkySet, vfGroundSet, WinSurf, ShelfNum);
+    adjustViewFactorsWithShelf(*state, vfShelfSet, vfSkySet, vfGroundSet, WinSurf, ShelfNum);
     EXPECT_NEAR(vfShelfSet, vfShelfResult, acceptableTolerance);
     EXPECT_NEAR(vfSkySet, vfSkyResult, acceptableTolerance);
     EXPECT_NEAR(vfGroundSet, vfGroundResult, acceptableTolerance);
@@ -124,7 +122,7 @@ TEST_F(EnergyPlusFixture, DaylightingDevices_adjustViewFactorsWithShelfTest)
     vfShelfResult = 0.0;
     vfSkyResult = 0.4;
     vfGroundResult = 0.4;
-    EnergyPlus::DaylightingDevices::adjustViewFactorsWithShelf(*state, vfShelfSet, vfSkySet, vfGroundSet, WinSurf, ShelfNum);
+    adjustViewFactorsWithShelf(*state, vfShelfSet, vfSkySet, vfGroundSet, WinSurf, ShelfNum);
     EXPECT_NEAR(vfShelfSet, vfShelfResult, acceptableTolerance);
     EXPECT_NEAR(vfSkySet, vfSkyResult, acceptableTolerance);
     EXPECT_NEAR(vfGroundSet, vfGroundResult, acceptableTolerance);
@@ -136,7 +134,7 @@ TEST_F(EnergyPlusFixture, DaylightingDevices_adjustViewFactorsWithShelfTest)
     vfShelfResult = 0.0;
     vfSkyResult = 2.0 / 3.0;
     vfGroundResult = 1.0 / 3.0;
-    EnergyPlus::DaylightingDevices::adjustViewFactorsWithShelf(*state, vfShelfSet, vfSkySet, vfGroundSet, WinSurf, ShelfNum);
+    adjustViewFactorsWithShelf(*state, vfShelfSet, vfSkySet, vfGroundSet, WinSurf, ShelfNum);
     EXPECT_NEAR(vfShelfSet, vfShelfResult, acceptableTolerance);
     EXPECT_NEAR(vfSkySet, vfSkyResult, acceptableTolerance);
     EXPECT_NEAR(vfGroundSet, vfGroundResult, acceptableTolerance);
@@ -148,7 +146,7 @@ TEST_F(EnergyPlusFixture, DaylightingDevices_adjustViewFactorsWithShelfTest)
     vfShelfResult = 0.2;
     vfSkyResult = 0.3;
     vfGroundResult = 0.4;
-    EnergyPlus::DaylightingDevices::adjustViewFactorsWithShelf(*state, vfShelfSet, vfSkySet, vfGroundSet, WinSurf, ShelfNum);
+    adjustViewFactorsWithShelf(*state, vfShelfSet, vfSkySet, vfGroundSet, WinSurf, ShelfNum);
     EXPECT_NEAR(vfShelfSet, vfShelfResult, acceptableTolerance);
     EXPECT_NEAR(vfSkySet, vfSkyResult, acceptableTolerance);
     EXPECT_NEAR(vfGroundSet, vfGroundResult, acceptableTolerance);
@@ -168,7 +166,7 @@ TEST_F(EnergyPlusFixture, DaylightingDevices_adjustViewFactorsWithShelfTest)
     state->dataSurface->Surface(2).Vertex(2).z = 0.5;
     state->dataSurface->Surface(2).Vertex(3).z = 0.5;
     state->dataSurface->Surface(2).Vertex(4).z = 0.5;
-    EnergyPlus::DaylightingDevices::adjustViewFactorsWithShelf(*state, vfShelfSet, vfSkySet, vfGroundSet, WinSurf, ShelfNum);
+    adjustViewFactorsWithShelf(*state, vfShelfSet, vfSkySet, vfGroundSet, WinSurf, ShelfNum);
     EXPECT_NEAR(vfShelfSet, vfShelfResult, acceptableTolerance);
     EXPECT_NEAR(vfSkySet, vfSkyResult, acceptableTolerance);
     EXPECT_NEAR(vfGroundSet, vfGroundResult, acceptableTolerance);
@@ -188,7 +186,7 @@ TEST_F(EnergyPlusFixture, DaylightingDevices_adjustViewFactorsWithShelfTest)
     state->dataSurface->Surface(2).Vertex(2).z = 3.0;
     state->dataSurface->Surface(2).Vertex(3).z = 3.0;
     state->dataSurface->Surface(2).Vertex(4).z = 3.0;
-    EnergyPlus::DaylightingDevices::adjustViewFactorsWithShelf(*state, vfShelfSet, vfSkySet, vfGroundSet, WinSurf, ShelfNum);
+    adjustViewFactorsWithShelf(*state, vfShelfSet, vfSkySet, vfGroundSet, WinSurf, ShelfNum);
     EXPECT_NEAR(vfShelfSet, vfShelfResult, acceptableTolerance);
     EXPECT_NEAR(vfSkySet, vfSkyResult, acceptableTolerance);
     EXPECT_NEAR(vfGroundSet, vfGroundResult, acceptableTolerance);
@@ -208,7 +206,7 @@ TEST_F(EnergyPlusFixture, DaylightingDevices_adjustViewFactorsWithShelfTest)
     state->dataSurface->Surface(2).Vertex(2).z = 2.2;
     state->dataSurface->Surface(2).Vertex(3).z = 2.2;
     state->dataSurface->Surface(2).Vertex(4).z = 2.2;
-    EnergyPlus::DaylightingDevices::adjustViewFactorsWithShelf(*state, vfShelfSet, vfSkySet, vfGroundSet, WinSurf, ShelfNum);
+    adjustViewFactorsWithShelf(*state, vfShelfSet, vfSkySet, vfGroundSet, WinSurf, ShelfNum);
     EXPECT_NEAR(vfShelfSet, vfShelfResult, acceptableTolerance);
     EXPECT_NEAR(vfSkySet, vfSkyResult, acceptableTolerance);
     EXPECT_NEAR(vfGroundSet, vfGroundResult, acceptableTolerance);
@@ -228,7 +226,7 @@ TEST_F(EnergyPlusFixture, DaylightingDevices_adjustViewFactorsWithShelfTest)
     state->dataSurface->Surface(2).Vertex(2).z = 2.2;
     state->dataSurface->Surface(2).Vertex(3).z = 2.2;
     state->dataSurface->Surface(2).Vertex(4).z = 2.2;
-    EnergyPlus::DaylightingDevices::adjustViewFactorsWithShelf(*state, vfShelfSet, vfSkySet, vfGroundSet, WinSurf, ShelfNum);
+    adjustViewFactorsWithShelf(*state, vfShelfSet, vfSkySet, vfGroundSet, WinSurf, ShelfNum);
     EXPECT_NEAR(vfShelfSet, vfShelfResult, acceptableTolerance);
     EXPECT_NEAR(vfSkySet, vfSkyResult, acceptableTolerance);
     EXPECT_NEAR(vfGroundSet, vfGroundResult, acceptableTolerance);

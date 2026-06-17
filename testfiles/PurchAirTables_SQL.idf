@@ -99,7 +99,7 @@
 ! Environmental Emissions:        Yes
 ! Utility Tariffs:                None
 
-  Version,23.1;
+  Version,26.2;
 
   Timestep,6;
 
@@ -497,7 +497,7 @@
     Activity Sch,            !- Activity Level Schedule Name
     3.82E-8,                 !- Carbon Dioxide Generation Rate {m3/s-W}
     ,                        !- Enable ASHRAE 55 Comfort Warnings
-    zoneaveraged,            !- Mean Radiant Temperature Calculation Type
+    EnclosureAveraged,       !- Mean Radiant Temperature Calculation Type
     ,                        !- Surface Name/Angle Factor List Name
     Work Eff Sch,            !- Work Efficiency Schedule Name
     ClothingInsulationSchedule,  !- Clothing Insulation Calculation Method
@@ -511,7 +511,7 @@
     INTERMITTENT,            !- Schedule Name
     EquipmentLevel,          !- Design Level Calculation Method
     2928.751,                !- Design Level {W}
-    ,                        !- Watts per Zone Floor Area {W/m2}
+    ,                        !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0,                       !- Fraction Latent
     0.3000000,               !- Fraction Radiant
@@ -523,7 +523,7 @@
     INTERMITTENT,            !- Schedule Name
     EquipmentLevel,          !- Design Level Calculation Method
     1000,                    !- Design Level {W}
-    ,                        !- Power per Zone Floor Area {W/m2}
+    ,                        !- Power per Floor Area {W/m2}
     ,                        !- Power per Person {W/person}
     0.0,                     !- Fraction Latent
     0.0,                     !- Fraction Radiant
@@ -542,7 +542,7 @@
     Activity Sch,            !- Activity Level Schedule Name
     3.82E-8,                 !- Carbon Dioxide Generation Rate {m3/s-W}
     ,                        !- Enable ASHRAE 55 Comfort Warnings
-    zoneaveraged,            !- Mean Radiant Temperature Calculation Type
+    EnclosureAveraged,       !- Mean Radiant Temperature Calculation Type
     ,                        !- Surface Name/Angle Factor List Name
     Work Eff Sch,            !- Work Efficiency Schedule Name
     ClothingInsulationSchedule,  !- Clothing Insulation Calculation Method
@@ -556,7 +556,7 @@
     OFFICE LIGHTING,         !- Schedule Name
     LightingLevel,           !- Design Level Calculation Method
     1464.375,                !- Lighting Level {W}
-    ,                        !- Watts per Zone Floor Area {W/m2}
+    ,                        !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0,                       !- Return Air Fraction
     0.2000000,               !- Fraction Radiant
@@ -570,7 +570,7 @@
     INTERMITTENT,            !- Schedule Name
     EquipmentLevel,          !- Design Level Calculation Method
     1464.375,                !- Design Level {W}
-    ,                        !- Watts per Zone Floor Area {W/m2}
+    ,                        !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0,                       !- Fraction Latent
     0.3000000,               !- Fraction Radiant
@@ -589,7 +589,7 @@
     Activity Sch,            !- Activity Level Schedule Name
     3.82E-8,                 !- Carbon Dioxide Generation Rate {m3/s-W}
     ,                        !- Enable ASHRAE 55 Comfort Warnings
-    zoneaveraged,            !- Mean Radiant Temperature Calculation Type
+    EnclosureAveraged,       !- Mean Radiant Temperature Calculation Type
     ,                        !- Surface Name/Angle Factor List Name
     Work Eff Sch,            !- Work Efficiency Schedule Name
     ClothingInsulationSchedule,  !- Clothing Insulation Calculation Method
@@ -603,7 +603,7 @@
     OFFICE LIGHTING,         !- Schedule Name
     LightingLevel,           !- Design Level Calculation Method
     878.6252,                !- Lighting Level {W}
-    ,                        !- Watts per Zone Floor Area {W/m2}
+    ,                        !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0,                       !- Return Air Fraction
     0.2000000,               !- Fraction Radiant
@@ -617,7 +617,7 @@
     INTERMITTENT,            !- Schedule Name
     EquipmentLevel,          !- Design Level Calculation Method
     2928.751,                !- Design Level {W}
-    ,                        !- Watts per Zone Floor Area {W/m2}
+    ,                        !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0,                       !- Fraction Latent
     0.3000000,               !- Fraction Radiant
@@ -1222,9 +1222,9 @@
 
   Output:Meter,DistrictCooling:Facility,runperiod;
 
-  Output:Meter,DistrictHeating:Facility,monthly;
+  Output:Meter,DistrictHeatingWater:Facility,monthly;
 
-  Output:Meter,DistrictHeating:Facility,runperiod;
+  Output:Meter,DistrictHeatingWater:Facility,runperiod;
 
   Output:Meter,Electricity:Facility,monthly;
 
@@ -1246,9 +1246,9 @@
     Monthly;                 !- Reporting Frequency
 
   EnvironmentalImpactFactors,
-    0.3,                     !- District Heating Efficiency
+    0.3,                     !- District Heating Water Efficiency
     3.0,                     !- District Cooling COP {W/W}
-    0.25,                    !- Steam Conversion Efficiency
+    0.25,                    !- District Heating Steam Conversion Efficiency
     80.7272,                 !- Total Carbon Equivalent Emission Factor From N2O {kg/kg}
     6.2727,                  !- Total Carbon Equivalent Emission Factor From CH4 {kg/kg}
     0.2727;                  !- Total Carbon Equivalent Emission Factor From CO2 {kg/kg}
@@ -1348,7 +1348,7 @@
 
   Output:Table:TimeBins,
     *,                       !- Key Value
-    DistrictHeating:Facility,!- Variable Name
+    DistrictHeatingWater:Facility,  !- Variable Name
     15000000,                !- Interval Start
     1000000,                 !- Interval Size
     10;                      !- Interval Count
@@ -1517,9 +1517,9 @@
     SumOrAverage,            !- Aggregation Type for Variable or Meter 1
     DistrictCooling:Facility,!- Variable or Meter 2 Name
     Maximum,                 !- Aggregation Type for Variable or Meter 2
-    DistrictHeating:Facility,!- Variable or Meter 3 Name
+    DistrictHeatingWater:Facility,  !- Variable or Meter 3 Name
     SumOrAverage,            !- Aggregation Type for Variable or Meter 3
-    DistrictHeating:Facility,!- Variable or Meter 4 Name
+    DistrictHeatingWater:Facility,  !- Variable or Meter 4 Name
     Maximum;                 !- Aggregation Type for Variable or Meter 4
 
   Output:Table:Monthly,
@@ -1999,15 +1999,15 @@
     SumOrAverage,            !- Aggregation Type for Variable or Meter 1
     Zone Windows Total Heat Loss Rate,  !- Variable or Meter 2 Name
     SumOrAverage,            !- Aggregation Type for Variable or Meter 2
-    Zone Windows Total Transmitted Solar Radiation Rate,  !- Variable or Meter 3 Name
+    Enclosure Windows Total Transmitted Solar Radiation Rate,  !- Variable or Meter 3 Name
     SumOrAverage,            !- Aggregation Type for Variable or Meter 3
-    Zone Exterior Windows Total Transmitted Beam Solar Radiation Rate,  !- Variable or Meter 4 Name
+    Enclosure Exterior Windows Total Transmitted Beam Solar Radiation Rate,  !- Variable or Meter 4 Name
     SumOrAverage,            !- Aggregation Type for Variable or Meter 4
-    Zone Exterior Windows Total Transmitted Diffuse Solar Radiation Rate,  !- Variable or Meter 5 Name
+    Enclosure Exterior Windows Total Transmitted Diffuse Solar Radiation Rate,  !- Variable or Meter 5 Name
     SumOrAverage,            !- Aggregation Type for Variable or Meter 5
-    Zone Interior Windows Total Transmitted Diffuse Solar Radiation Rate,  !- Variable or Meter 6 Name
+    Enclosure Interior Windows Total Transmitted Diffuse Solar Radiation Rate,  !- Variable or Meter 6 Name
     SumOrAverage,            !- Aggregation Type for Variable or Meter 6
-    Zone Interior Windows Total Transmitted Beam Solar Radiation Rate,  !- Variable or Meter 7 Name
+    Enclosure Interior Windows Total Transmitted Beam Solar Radiation Rate,  !- Variable or Meter 7 Name
     SumOrAverage;            !- Aggregation Type for Variable or Meter 7
 
   Output:Table:Monthly,
@@ -2017,15 +2017,15 @@
     SumOrAverage,            !- Aggregation Type for Variable or Meter 1
     Zone Windows Total Heat Loss Energy,  !- Variable or Meter 2 Name
     SumOrAverage,            !- Aggregation Type for Variable or Meter 2
-    Zone Windows Total Transmitted Solar Radiation Energy,  !- Variable or Meter 3 Name
+    Enclosure Windows Total Transmitted Solar Radiation Energy,  !- Variable or Meter 3 Name
     SumOrAverage,            !- Aggregation Type for Variable or Meter 3
-    Zone Exterior Windows Total Transmitted Beam Solar Radiation Energy,  !- Variable or Meter 4 Name
+    Enclosure Exterior Windows Total Transmitted Beam Solar Radiation Energy,  !- Variable or Meter 4 Name
     SumOrAverage,            !- Aggregation Type for Variable or Meter 4
-    Zone Exterior Windows Total Transmitted Diffuse Solar Radiation Energy,  !- Variable or Meter 5 Name
+    Enclosure Exterior Windows Total Transmitted Diffuse Solar Radiation Energy,  !- Variable or Meter 5 Name
     SumOrAverage,            !- Aggregation Type for Variable or Meter 5
-    Zone Interior Windows Total Transmitted Diffuse Solar Radiation Energy,  !- Variable or Meter 6 Name
+    Enclosure Interior Windows Total Transmitted Diffuse Solar Radiation Energy,  !- Variable or Meter 6 Name
     SumOrAverage,            !- Aggregation Type for Variable or Meter 6
-    Zone Interior Windows Total Transmitted Beam Solar Radiation Energy,  !- Variable or Meter 7 Name
+    Enclosure Interior Windows Total Transmitted Beam Solar Radiation Energy,  !- Variable or Meter 7 Name
     SumOrAverage;            !- Aggregation Type for Variable or Meter 7
 
   Output:Table:Monthly,

@@ -11,10 +11,10 @@ This will eventually become a more structured file, but currently it isn't clear
 
 A new column "End Use Subcategory" has been added to the Equipment Summary:Pumps report
 
-See [7100](https://github.com/NREL/EnergyPlus/pull/7100)
+See [7100](https://github.com/NatLabRockies/EnergyPlus/pull/7100)
 
 ### Renamed field for Equipment Summary:Fans report
 
 The column "End Use" has been renamed to "End Use Subcategory" in the Equipment Summary:Fans report
 
-See [7068](https://github.com/NREL/EnergyPlus/pull/7068)
+See [7068](https://github.com/NatLabRockies/EnergyPlus/pull/7068)

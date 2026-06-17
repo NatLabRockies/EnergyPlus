@@ -1,7 +1,7 @@
-// EnergyPlus, Copyright (c) 1996-2023, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
-// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other
+// National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
 // contributors. All rights reserved.
 //
 // NOTICE: This Software was developed under funding from the U.S. Department of Energy and the
@@ -52,13 +52,20 @@
 /// \brief This file provides a define that enables exposing methods on the API.  No client needs to directly import this file.
 
 #if (_WIN32 || _MSC_VER) && !ENERGYPLUS_STATIC_API
-#if defined(energypluslib_EXPORTS) || defined(energyplusapi_EXPORTS) || defined(energypluslib2_EXPORTS)
-#define ENERGYPLUSLIB_API __declspec(dllexport)
+#    if defined(energypluslib_EXPORTS) || defined(energyplusapi_EXPORTS) || defined(energypluslib2_EXPORTS)
+#        define ENERGYPLUSLIB_API __declspec(dllexport)
+#    else
+#        define ENERGYPLUSLIB_API __declspec(dllimport)
+#    endif
 #else
-#define ENERGYPLUSLIB_API __declspec(dllimport)
+#    if defined(energypluslib_EXPORTS) || defined(energyplusapi_EXPORTS) || defined(energypluslib2_EXPORTS)
+#        if defined(__GNUC__) || defined(__clang__)
+#            define ENERGYPLUSLIB_API __attribute__((visibility("default")))
+#        endif
+#    endif
 #endif
-#else
-#define ENERGYPLUSLIB_API
+#ifndef ENERGYPLUSLIB_API
+#    define ENERGYPLUSLIB_API
 #endif
 
 #endif

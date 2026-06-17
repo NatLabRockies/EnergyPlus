@@ -1,0 +1,38 @@
+name: Enhancement Request
+description: Use this template for suggesting an enhancement.
+labels: Triage, NewFeatureRequest
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to submit a report.
+        Include all applicable information to help us reproduce.
+
+  - type: textarea
+    id: summary
+    attributes:
+      label: General Summary
+      description: |
+        Provide a general summary of the feature you would like to see implemented
+    validations:
+      required: true
+
+  - type: textarea
+    id: details
+    attributes:
+      label: Detailed Description
+      description: |
+        Provide a detailed description of the change or addition you are proposing.
+
+        Include screenshots, schemas, IDD/IDF snippets as appropriate.
+    validations:
+      required: true
+
+  - type: textarea
+    id: implementation
+    attributes:
+      label: Possible Implementation
+      description: |
+        Not mandatory, but if you can, suggest an idea for implementing the feature
+    validations:
+      required: false

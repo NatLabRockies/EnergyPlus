@@ -1,0 +1,79 @@
+! EquivAutoGrid BaseDepth is WAY too high > 17 meters
+
+SimParameters,
+  0.1,                                    !- F: Multiplier for the ADI solution
+  15;                                     !- IYRS: Maximum number of yearly iterations:
+
+MatlProps,
+  3,                                      !- NMAT: Number of materials in this domain
+  2500,                                   !- Density for Foundation Wall {kg/m3}
+  2500,                                   !- density for Floor Slab {kg/m3}
+  2500,                                   !- density for Ceiling {kg/m3}
+  1500,                                   !- density for Soil {kg/m3}
+  2000,                                   !- density for Gravel {kg/m3}
+  449,                                    !- density for Wood {kg/m3}
+  880,                                    !- Specific heat for foundation wall {J/kg-K}
+  880,                                    !- Specific heat for floor slab {J/kg-K}
+  880,                                    !- Specific heat for ceiling {J/kg-K}
+  2000,                                   !- Specific heat for soil {J/kg-K}
+  720,                                    !- Specific heat for gravel {J/kg-K}
+  1530,                                   !- Specific heat for wood {J/kg-K}
+  2.3,                                    !- Thermal conductivity for foundation wall {W/m-K}
+  2.3,                                    !- Thermal conductivity for floor slab {W/m-K}
+  2.3,                                    !- Thermal conductivity for ceiling {W/m-K}
+  1.5,                                    !- thermal conductivity for soil {W/m-K}
+  1.9,                                    !- thermal conductivity for gravel {W/m-K}
+  0.12;                                   !- thermal conductivity for wood {W/m-K}
+
+Insulation,
+  5,                                      !- REXT: R Value of any exterior insulation {m2-K/W}
+  True;                                   !- INSFULL: Flag: Is the wall fully insulated?
+
+SurfaceProps,
+  0.4,                                    !- ALBEDO: Surface albedo for No snow conditions
+  0.4,                                    !- ALBEDO: Surface albedo for snow conditions
+  0.94,                                   !- EPSLN: Surface emissivity No Snow
+  0.86,                                   !- EPSLN: Surface emissivity with Snow
+  6,                                      !- VEGHT: Surface roughness No snow conditions {cm}
+  0.25,                                   !- VEGHT: Surface roughness Snow conditions {cm}
+  True;                                   !- PET: Flag, Potential evapotranspiration on?
+
+BldgData,
+  0.72,                                   !- DWALL: Wall thickness {m}
+  0.25,                                   !- DSLAB: Floor slab thickness {m}
+  0.3,                                    !- DGRAVXY: Width of gravel pit beside basement wall {m}
+  0.2,                                    !- DGRAVZN: Gravel depth extending above the floor slab {m}
+  0.3;                                    !- DGRAVZP: Gravel depth below the floor slab {m}
+
+Interior,
+  True,                                   !- COND: Flag: Is the basement conditioned?
+  0.92,                                   !- HIN: Downward convection only heat transfer coefficient {W/m2-K}
+  4.04,                                   !- HIN: Upward convection only heat transfer coefficient {W/m2-K}
+  3.08,                                   !- HIN: Horizontal convection only heat transfer coefficient {W/m2-K}
+  6.13,                                   !- HIN: Downward combined (convection and radiation) heat transfer coefficient {W/m2-K}
+  9.26,                                   !- HIN: Upward combined (convection and radiation) heat transfer coefficient {W/m2-K}
+  8.29;                                   !- HIN: Horizontal combined (convection and radiation) heat transfer coefficient {W/m2-K}
+
+ComBldg,
+  19.112521,                              !- January average temperature {C}
+  19.3265,                                !- February average temperature {C}
+  19.639847,                              !- March average temperature {C}
+  20.215454,                              !- April average temperature {C}
+  20.415274,                              !- May average temperature {C}
+  21.524396,                              !- June average temperature {C}
+  21.880071,                              !- July average temperature {C}
+  21.659116,                              !- August average temperature {C}
+  21.114287,                              !- September average temperature {C}
+  20.383342,                              !- October average temperature {C}
+  19.553359,                              !- November average temperature {C}
+  19.233107,                              !- December average temperature {C}
+  ;                                       !- Daily variation sine wave amplitude {deltaC}
+
+EquivSlab,
+  20.045326,                              !- APRatio: The area to perimeter ratio for this slab {m}
+  TRUE;                                   !- EquivSizing: Flag
+
+EquivAutoGrid,
+  15,                                     !- CLEARANCE: Distance from outside of wall to edge of 3-D ground domain {m}
+  0.25,                                   !- SlabDepth: Thickness of the floor slab {m}
+  17.01;                                  !- BaseDepth: Depth of the basement wall below grade {m}

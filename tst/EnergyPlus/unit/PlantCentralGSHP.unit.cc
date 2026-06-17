@@ -1,7 +1,7 @@
-// EnergyPlus, Copyright (c) 1996-2023, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
-// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other
+// National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
 // contributors. All rights reserved.
 //
 // NOTICE: This Software was developed under funding from the U.S. Department of Energy and the
@@ -53,15 +53,18 @@
 // EnergyPlus Headers
 #include "Fixtures/EnergyPlusFixture.hh"
 #include <EnergyPlus/Data/EnergyPlusData.hh>
+#include <EnergyPlus/DataBranchNodeConnections.hh>
 #include <EnergyPlus/DataSizing.hh>
 #include <EnergyPlus/FluidProperties.hh>
 #include <EnergyPlus/Plant/DataPlant.hh>
 #include <EnergyPlus/PlantCentralGSHP.hh>
+#include <EnergyPlus/PlantUtilities.hh>
 
 using namespace EnergyPlus;
 
 TEST_F(EnergyPlusFixture, ChillerHeater_Autosize)
 {
+    state->init_state(*state);
     // Allocate One Wrapper with One module (=distinct ChillerHeaterPerformance:Electric:EIR)
     // but with a number of identical number module of 2 in CentralHeatPumpSystem
     int NumWrappers = 1;
@@ -74,7 +77,7 @@ TEST_F(EnergyPlusFixture, ChillerHeater_Autosize)
 
     state->dataPlantCentralGSHP->Wrapper(1).WrapperComp(1).WrapperPerformanceObjectType = "CHILLERHEATERPERFORMANCE:ELECTRIC:EIR";
     state->dataPlantCentralGSHP->Wrapper(1).WrapperComp(1).WrapperIdenticalObjectNum = 2;
-    state->dataPlantCentralGSHP->Wrapper(1).WrapperComp(1).CHSchedPtr = DataGlobalConstants::ScheduleAlwaysOn;
+    state->dataPlantCentralGSHP->Wrapper(1).WrapperComp(1).chSched = Sched::GetScheduleAlwaysOn(*state);
     state->dataPlantCentralGSHP->Wrapper(1).ChillerHeaterNums = 2;
     state->dataPlantCentralGSHP->Wrapper(1).ChillerHeater.allocate(2);
     // First test in SizeWrapper, so need to set that
@@ -118,48 +121,36 @@ TEST_F(EnergyPlusFixture, ChillerHeater_Autosize)
     // Chilled Water Loop
     int PltSizNum = 1;
     state->dataPlnt->PlantLoop(PltSizNum).PlantSizNum = 1;
-    state->dataPlnt->PlantLoop(PltSizNum).FluidIndex = 1;
     state->dataPlnt->PlantLoop(PltSizNum).FluidName = "WATER";
+    state->dataPlnt->PlantLoop(PltSizNum).glycol = Fluid::GetWater(*state);
     state->dataSize->PlantSizData(PltSizNum).DesVolFlowRate = 1.0;
     state->dataSize->PlantSizData(PltSizNum).DeltaT = 10.0;
     state->dataSize->PlantSizData(PltSizNum).LoopType = DataSizing::TypeOfPlantLoop::Cooling;
     // Assign to the wrapper
     state->dataPlantCentralGSHP->Wrapper(1).CWPlantLoc.loopNum = PltSizNum;
+    PlantUtilities::SetPlantLocationLinks(*state, state->dataPlantCentralGSHP->Wrapper(1).CWPlantLoc);
 
     // Condenser Loop
     int PltSizCondNum = 2;
     state->dataPlnt->PlantLoop(PltSizCondNum).PlantSizNum = PltSizCondNum;
-    state->dataPlnt->PlantLoop(PltSizCondNum).FluidIndex = 1;
     state->dataPlnt->PlantLoop(PltSizCondNum).FluidName = "WATER";
+    state->dataPlnt->PlantLoop(PltSizCondNum).glycol = Fluid::GetWater(*state);
     state->dataSize->PlantSizData(PltSizCondNum).DeltaT = 5.6;
     state->dataSize->PlantSizData(PltSizCondNum).LoopType = DataSizing::TypeOfPlantLoop::Condenser;
     // Assign to the wrapper
     state->dataPlantCentralGSHP->Wrapper(1).GLHEPlantLoc.loopNum = PltSizCondNum;
+    PlantUtilities::SetPlantLocationLinks(*state, state->dataPlantCentralGSHP->Wrapper(1).GLHEPlantLoc);
 
     // Calculate expected values
-    Real64 rho_evap = FluidProperties::GetDensityGlycol(*state,
-                                                        state->dataPlnt->PlantLoop(PltSizNum).FluidName,
-                                                        DataGlobalConstants::CWInitConvTemp,
-                                                        state->dataPlnt->PlantLoop(PltSizNum).FluidIndex,
-                                                        "ChillerHeater_Autosize_TEST");
+    Real64 rho_evap = state->dataPlnt->PlantLoop(PltSizNum).glycol->getDensity(*state, Constant::CWInitConvTemp, "ChillerHeater_Autosize_TEST");
 
-    Real64 Cp_evap = FluidProperties::GetSpecificHeatGlycol(*state,
-                                                            state->dataPlnt->PlantLoop(PltSizNum).FluidName,
-                                                            DataGlobalConstants::CWInitConvTemp,
-                                                            state->dataPlnt->PlantLoop(PltSizNum).FluidIndex,
-                                                            "ChillerHeater_Autosize_TEST");
+    Real64 Cp_evap = state->dataPlnt->PlantLoop(PltSizNum).glycol->getSpecificHeat(*state, Constant::CWInitConvTemp, "ChillerHeater_Autosize_TEST");
 
-    Real64 rho_cond = FluidProperties::GetDensityGlycol(*state,
-                                                        state->dataPlnt->PlantLoop(PltSizCondNum).FluidName,
-                                                        DataGlobalConstants::CWInitConvTemp,
-                                                        state->dataPlnt->PlantLoop(PltSizCondNum).FluidIndex,
-                                                        "ChillerHeater_Autosize_TEST");
+    Real64 rho_cond = state->dataPlnt->PlantLoop(PltSizCondNum).glycol->getDensity(*state, Constant::CWInitConvTemp, "ChillerHeater_Autosize_TEST");
 
-    Real64 Cp_cond = FluidProperties::GetSpecificHeatGlycol(*state,
-                                                            state->dataPlnt->PlantLoop(PltSizCondNum).FluidName,
-                                                            state->dataPlantCentralGSHP->Wrapper(1).ChillerHeater(1).TempRefCondInCooling,
-                                                            state->dataPlnt->PlantLoop(PltSizCondNum).FluidIndex,
-                                                            "ChillerHeater_Autosize_TEST");
+    Real64 Cp_cond = state->dataPlnt->PlantLoop(PltSizCondNum)
+                         .glycol->getSpecificHeat(
+                             *state, state->dataPlantCentralGSHP->Wrapper(1).ChillerHeater(1).TempRefCondInCooling, "ChillerHeater_Autosize_TEST");
 
     // Note: Each individual chiller heater module is sized to be capable of supporting the total load on the wrapper
 
@@ -353,6 +344,8 @@ TEST_F(EnergyPlusFixture, Test_CentralHeatPumpSystem_Control_Schedule_fix)
 
     ASSERT_TRUE(process_idf(idf_objects));
 
+    state->init_state(*state);
+
     // May not need for direct wrapper input processing call (need when caling factory)
     state->dataPlantCentralGSHP->getWrapperInputFlag = true;
 
@@ -360,5 +353,438 @@ TEST_F(EnergyPlusFixture, Test_CentralHeatPumpSystem_Control_Schedule_fix)
     PlantCentralGSHP::GetWrapperInput(*state);
 
     // verify that under this scenario of not finding a schedule match, ScheduleAlwaysOn is the treated default
-    EXPECT_EQ(state->dataPlantCentralGSHP->Wrapper(1).WrapperComp(1).CHSchedPtr, DataGlobalConstants::ScheduleAlwaysOn);
+    EXPECT_EQ(state->dataPlantCentralGSHP->Wrapper(1).WrapperComp(1).chSched, Sched::GetScheduleAlwaysOn(*state));
+
+    // verify that node names were processed correctly
+    EXPECT_EQ(state->dataBranchNodeConnections->NumOfNodeConnections, 6);
+
+    EXPECT_EQ(state->dataBranchNodeConnections->NodeConnections(1).NodeName, "CHW_LOOP HEATPUMP1 CHW INLET");
+    EXPECT_ENUM_EQ(state->dataBranchNodeConnections->NodeConnections(1).ConnectionType, Node::ConnectionType::Inlet);
+    EXPECT_ENUM_EQ(state->dataBranchNodeConnections->NodeConnections(1).FluidStream, Node::CompFluidStream::Primary);
+
+    EXPECT_EQ(state->dataBranchNodeConnections->NodeConnections(2).NodeName, "CHW_LOOP HEATPUMP1 CHW OUTLET");
+    EXPECT_ENUM_EQ(state->dataBranchNodeConnections->NodeConnections(2).ConnectionType, Node::ConnectionType::Outlet);
+    EXPECT_ENUM_EQ(state->dataBranchNodeConnections->NodeConnections(2).FluidStream, Node::CompFluidStream::Primary);
+
+    EXPECT_EQ(state->dataBranchNodeConnections->NodeConnections(3).NodeName, "CHW_LOOP HEATPUMP1 CND INLET");
+    EXPECT_ENUM_EQ(state->dataBranchNodeConnections->NodeConnections(3).ConnectionType, Node::ConnectionType::Inlet);
+    EXPECT_ENUM_EQ(state->dataBranchNodeConnections->NodeConnections(3).FluidStream, Node::CompFluidStream::Secondary);
+
+    EXPECT_EQ(state->dataBranchNodeConnections->NodeConnections(4).NodeName, "CHW_LOOP HEATPUMP1 CND OUTLET");
+    EXPECT_ENUM_EQ(state->dataBranchNodeConnections->NodeConnections(4).ConnectionType, Node::ConnectionType::Outlet);
+    EXPECT_ENUM_EQ(state->dataBranchNodeConnections->NodeConnections(4).FluidStream, Node::CompFluidStream::Secondary);
+
+    EXPECT_EQ(state->dataBranchNodeConnections->NodeConnections(5).NodeName, "CHW_LOOP HEATPUMP1 HHW INLET");
+    EXPECT_ENUM_EQ(state->dataBranchNodeConnections->NodeConnections(5).ConnectionType, Node::ConnectionType::Inlet);
+    EXPECT_ENUM_EQ(state->dataBranchNodeConnections->NodeConnections(5).FluidStream, Node::CompFluidStream::Tertiary);
+
+    EXPECT_EQ(state->dataBranchNodeConnections->NodeConnections(6).NodeName, "CHW_LOOP HEATPUMP1 HHW OUTLET");
+    EXPECT_ENUM_EQ(state->dataBranchNodeConnections->NodeConnections(6).ConnectionType, Node::ConnectionType::Outlet);
+    EXPECT_ENUM_EQ(state->dataBranchNodeConnections->NodeConnections(6).FluidStream, Node::CompFluidStream::Tertiary);
+}
+
+TEST_F(EnergyPlusFixture, Test_CentralHeatPumpSystem_adjustChillerHeaterCondFlowTemp)
+{
+    state->dataFluid->init_state(*state);
+    state->dataPlantCentralGSHP->Wrapper.allocate(1);
+    state->dataPlantCentralGSHP->Wrapper(1).WrapperComp.allocate(1);
+    state->dataPlantCentralGSHP->Wrapper(1).ChillerHeater.allocate(1);
+    auto &thisWrap = state->dataPlantCentralGSHP->Wrapper(1);
+    state->dataPlnt->PlantLoop.allocate(1);
+    state->dataPlnt->PlantLoop(1).FluidName = "WATER";
+    state->dataPlnt->PlantLoop(1).glycol = Fluid::GetWater(*state);
+    thisWrap.HWPlantLoc.loopNum = 1;
+    PlantUtilities::SetPlantLocationLinks(*state, thisWrap.HWPlantLoc);
+
+    Real64 qCondenser;
+    Real64 condMassFlowRate;
+    Real64 condOutletTemp;
+    Real64 condInletTemp;
+    Real64 condDeltaTemp;
+    Real64 expCondenser;
+    Real64 expMassFlowRate;
+    Real64 expOutletTemp;
+    Real64 constexpr allowedTolerance = 0.0001;
+
+    // Test 1: Variable Flow--qCondenser is less than what the conditions say (mass flow reduced, nothing else changes)
+    qCondenser = 1000.0;
+    condMassFlowRate = 1.0;
+    condOutletTemp = 60.0;
+    condInletTemp = 59.0;
+    condDeltaTemp = 1.0;
+    thisWrap.VariableFlowCH = true;
+    expCondenser = 1000.0;
+    expMassFlowRate = 0.23897;
+    expOutletTemp = 60.0;
+    thisWrap.adjustChillerHeaterCondFlowTemp(*state, qCondenser, condMassFlowRate, condOutletTemp, condInletTemp, condDeltaTemp);
+    EXPECT_NEAR(qCondenser, expCondenser, allowedTolerance);
+    EXPECT_NEAR(condMassFlowRate, expMassFlowRate, allowedTolerance);
+    EXPECT_NEAR(condOutletTemp, expOutletTemp, allowedTolerance);
+
+    // Test 2: Variable Flow--qCondenser is greater than what conditions say (load reduced, nothing else changes)
+    qCondenser = 5000.0;
+    condMassFlowRate = 1.0;
+    condOutletTemp = 60.0;
+    condInletTemp = 59.0;
+    condDeltaTemp = 1.0;
+    thisWrap.VariableFlowCH = true;
+    expCondenser = 4184.6;
+    expMassFlowRate = 1.0;
+    expOutletTemp = 60.0;
+    thisWrap.adjustChillerHeaterCondFlowTemp(*state, qCondenser, condMassFlowRate, condOutletTemp, condInletTemp, condDeltaTemp);
+    EXPECT_NEAR(qCondenser, expCondenser, allowedTolerance);
+    EXPECT_NEAR(condMassFlowRate, expMassFlowRate, allowedTolerance);
+    EXPECT_NEAR(condOutletTemp, expOutletTemp, allowedTolerance);
+
+    // Test 3: Constant Flow--Outlet Temp greater than calculated outlet temp (outlet temp changes, nothing else changes)
+    qCondenser = 1000.0;
+    condMassFlowRate = 1.0;
+    condOutletTemp = 60.0;
+    condInletTemp = 59.0;
+    condDeltaTemp = 1.0;
+    thisWrap.VariableFlowCH = false;
+    expCondenser = 1000.0;
+    expMassFlowRate = 1.0;
+    expOutletTemp = 59.23897;
+    thisWrap.adjustChillerHeaterCondFlowTemp(*state, qCondenser, condMassFlowRate, condOutletTemp, condInletTemp, condDeltaTemp);
+    EXPECT_NEAR(qCondenser, expCondenser, allowedTolerance);
+    EXPECT_NEAR(condMassFlowRate, expMassFlowRate, allowedTolerance);
+    EXPECT_NEAR(condOutletTemp, expOutletTemp, allowedTolerance);
+
+    // Test 4: Constant Flow--Outlet Temp less than calculated outlet temp (load changes, nothing else changes)
+    qCondenser = 8369.2;
+    condMassFlowRate = 1.0;
+    condOutletTemp = 60.0;
+    condInletTemp = 59.0;
+    condDeltaTemp = 1.0;
+    thisWrap.VariableFlowCH = false;
+    expCondenser = 4184.6;
+    expMassFlowRate = 1.0;
+    expOutletTemp = 60.0;
+    thisWrap.adjustChillerHeaterCondFlowTemp(*state, qCondenser, condMassFlowRate, condOutletTemp, condInletTemp, condDeltaTemp);
+    EXPECT_NEAR(qCondenser, expCondenser, allowedTolerance);
+    EXPECT_NEAR(condMassFlowRate, expMassFlowRate, allowedTolerance);
+    EXPECT_NEAR(condOutletTemp, expOutletTemp, allowedTolerance);
+}
+
+TEST_F(EnergyPlusFixture, Test_CentralHeatPumpSystem_adjustChillerHeaterEvapFlowTemp)
+{
+    state->dataFluid->init_state(*state);
+    state->dataPlantCentralGSHP->Wrapper.allocate(1);
+    state->dataPlantCentralGSHP->Wrapper(1).WrapperComp.allocate(1);
+    state->dataPlantCentralGSHP->Wrapper(1).ChillerHeater.allocate(1);
+    auto &thisWrap = state->dataPlantCentralGSHP->Wrapper(1);
+    state->dataPlnt->PlantLoop.allocate(1);
+    state->dataPlnt->PlantLoop(1).FluidName = "WATER";
+    state->dataPlnt->PlantLoop(1).glycol = Fluid::GetWater(*state);
+    thisWrap.HWPlantLoc.loopNum = 1;
+    PlantUtilities::SetPlantLocationLinks(*state, thisWrap.HWPlantLoc);
+
+    Real64 qEvaporator;
+    Real64 evapMassFlowRate;
+    Real64 evapOutletTemp;
+    Real64 evapInletTemp;
+    Real64 expMassFlowRate;
+    Real64 expOutletTemp;
+    Real64 constexpr allowedTolerance = 0.0001;
+
+    // Test 1a: qEvaporator is too low, flow rate set to zero and outlet temp set to inlet temp
+    qEvaporator = 0.00001;
+    evapMassFlowRate = 1.0;
+    evapOutletTemp = 34.0;
+    evapInletTemp = 35.0;
+    thisWrap.VariableFlowCH = false;
+    expMassFlowRate = 0.0;
+    expOutletTemp = 35.0;
+    thisWrap.adjustChillerHeaterEvapFlowTemp(*state, qEvaporator, evapMassFlowRate, evapOutletTemp, evapInletTemp);
+    EXPECT_NEAR(evapMassFlowRate, expMassFlowRate, allowedTolerance);
+    EXPECT_NEAR(evapOutletTemp, expOutletTemp, allowedTolerance);
+
+    // Test 1b: delta T is zero, load and flow rate set to zero and outlet temp set to inlet temp
+    qEvaporator = 1000.0;
+    evapMassFlowRate = 1.0;
+    evapOutletTemp = 35.0;
+    evapInletTemp = 35.0;
+    thisWrap.VariableFlowCH = false;
+    expMassFlowRate = 0.0;
+    expOutletTemp = 35.0;
+    thisWrap.adjustChillerHeaterEvapFlowTemp(*state, qEvaporator, evapMassFlowRate, evapOutletTemp, evapInletTemp);
+    EXPECT_NEAR(evapMassFlowRate, expMassFlowRate, allowedTolerance);
+    EXPECT_NEAR(evapOutletTemp, expOutletTemp, allowedTolerance);
+
+    // Test 2a: Variable Flow, Load higher than max flow rate passed in, keep flow rate and adjust outlet temp
+    qEvaporator = 5000.0;
+    evapMassFlowRate = 1.0;
+    evapOutletTemp = 34.0;
+    evapInletTemp = 35.0;
+    thisWrap.VariableFlowCH = true;
+    expMassFlowRate = 1.0;
+    expOutletTemp = 33.80383;
+    thisWrap.adjustChillerHeaterEvapFlowTemp(*state, qEvaporator, evapMassFlowRate, evapOutletTemp, evapInletTemp);
+    EXPECT_NEAR(evapMassFlowRate, expMassFlowRate, allowedTolerance);
+    EXPECT_NEAR(evapOutletTemp, expOutletTemp, allowedTolerance);
+
+    // Test 2b: Variable Flow, Load lower than max flow rate passed in, adjust flow rate and keep outlet temp
+    qEvaporator = 1045.0;
+    evapMassFlowRate = 1.0;
+    evapOutletTemp = 34.0;
+    evapInletTemp = 35.0;
+    thisWrap.VariableFlowCH = true;
+    expMassFlowRate = 0.25;
+    expOutletTemp = 34.0;
+    thisWrap.adjustChillerHeaterEvapFlowTemp(*state, qEvaporator, evapMassFlowRate, evapOutletTemp, evapInletTemp);
+    EXPECT_NEAR(evapMassFlowRate, expMassFlowRate, allowedTolerance);
+    EXPECT_NEAR(evapOutletTemp, expOutletTemp, allowedTolerance);
+
+    // Test 3: Constant Flow--adjust outlet temperature
+    qEvaporator = 2090.0;
+    evapMassFlowRate = 1.0;
+    evapOutletTemp = 34.0;
+    evapInletTemp = 35.0;
+    thisWrap.VariableFlowCH = false;
+    expMassFlowRate = 1.0;
+    expOutletTemp = 34.5;
+    thisWrap.adjustChillerHeaterEvapFlowTemp(*state, qEvaporator, evapMassFlowRate, evapOutletTemp, evapInletTemp);
+    EXPECT_NEAR(evapMassFlowRate, expMassFlowRate, allowedTolerance);
+    EXPECT_NEAR(evapOutletTemp, expOutletTemp, allowedTolerance);
+}
+
+TEST_F(EnergyPlusFixture, Test_CentralHeatPumpSystem_setChillerHeaterCondTemp)
+{
+    state->dataPlantCentralGSHP->Wrapper.allocate(1);
+    state->dataPlantCentralGSHP->Wrapper(1).WrapperComp.allocate(1);
+    state->dataPlantCentralGSHP->Wrapper(1).ChillerHeater.allocate(1);
+    auto &thisWrap = state->dataPlantCentralGSHP->Wrapper(1);
+    auto &thisCH = thisWrap.ChillerHeater(1);
+
+    Real64 functionAnswer;
+    Real64 expectedAnswer;
+    Real64 constexpr allowedTolerance = 0.001;
+    Real64 condEnterTemp;
+    Real64 condLeaveTemp;
+    int chillNum = 1;
+
+    // Test 1: get the condenser entering temperature
+    functionAnswer = 0.0;
+    thisCH.CondMode = EnergyPlus::PlantCentralGSHP::CondenserModeTemperature::EnteringCondenser;
+    condEnterTemp = 55.5;
+    condLeaveTemp = 44.4;
+    expectedAnswer = 55.5;
+    functionAnswer = thisWrap.setChillerHeaterCondTemp(*state, chillNum, condEnterTemp, condLeaveTemp);
+    EXPECT_NEAR(functionAnswer, expectedAnswer, allowedTolerance);
+
+    // Test 2: get the condenser leaving temperature
+    functionAnswer = 0.0;
+    thisCH.CondMode = EnergyPlus::PlantCentralGSHP::CondenserModeTemperature::LeavingCondenser;
+    condEnterTemp = 55.5;
+    condLeaveTemp = 44.4;
+    expectedAnswer = 44.4;
+    functionAnswer = thisWrap.setChillerHeaterCondTemp(*state, chillNum, condEnterTemp, condLeaveTemp);
+    EXPECT_NEAR(functionAnswer, expectedAnswer, allowedTolerance);
+}
+
+TEST_F(EnergyPlusFixture, Test_CentralHeatPumpSystem_checkEvapOutletTemp)
+{
+    state->dataPlantCentralGSHP->Wrapper.allocate(1);
+    state->dataPlantCentralGSHP->Wrapper(1).WrapperComp.allocate(1);
+    state->dataPlantCentralGSHP->Wrapper(1).ChillerHeater.allocate(1);
+    auto &thisWrap = state->dataPlantCentralGSHP->Wrapper(1);
+    auto &thisCH = thisWrap.ChillerHeater(1);
+
+    int chNum = 1;
+    Real64 evapOutletTemp;
+    Real64 lowTempLimitEout;
+    Real64 evapInletTemp;
+    Real64 qEvaporator;
+    Real64 evapMassFlowRate;
+    Real64 Cp = 4000.0;
+    Real64 expQEvap;
+    Real64 expTout;
+    Real64 constexpr allowedTolerance = 0.0001;
+
+    // Test 1a: Evaporator outlet temperature lower the evaporator outlet low temperature limit, adjust outlet and load
+    thisCH.EvapOutletNode.TempMin = 5.0;
+    evapInletTemp = 10.0;
+    evapOutletTemp = 8.0;
+    lowTempLimitEout = 9.0;
+    qEvaporator = 4000.0;
+    evapMassFlowRate = 0.5;
+    expQEvap = 2000.0;
+    expTout = 9.0;
+    thisWrap.checkEvapOutletTemp(*state, chNum, evapOutletTemp, lowTempLimitEout, evapInletTemp, qEvaporator, evapMassFlowRate, Cp);
+    EXPECT_NEAR(qEvaporator, expQEvap, allowedTolerance);
+    EXPECT_NEAR(evapOutletTemp, expTout, allowedTolerance);
+
+    // Test 1b: Evaporator outlet temperature lower the evaporator outlet low temperature limit and inlet temp at or below lowTempLimitEout,
+    //          zero flow and set outlet temperature to inlet temperature
+    thisCH.EvapOutletNode.TempMin = 5.0;
+    evapInletTemp = 8.0;
+    evapOutletTemp = 7.0;
+    lowTempLimitEout = 9.0;
+    qEvaporator = 2000.0;
+    evapMassFlowRate = 0.5;
+    expQEvap = 0.0;
+    expTout = 8.0;
+    thisWrap.checkEvapOutletTemp(*state, chNum, evapOutletTemp, lowTempLimitEout, evapInletTemp, qEvaporator, evapMassFlowRate, Cp);
+    EXPECT_NEAR(qEvaporator, expQEvap, allowedTolerance);
+    EXPECT_NEAR(evapOutletTemp, expTout, allowedTolerance);
+
+    // Test 2a: Evaporator outlet temperature lower the node minimum temperature limit, adjust outlet and load
+    thisCH.EvapOutletNode.TempMin = 9.0;
+    evapInletTemp = 10.0;
+    evapOutletTemp = 8.0;
+    lowTempLimitEout = 5.0;
+    qEvaporator = 4000.0;
+    evapMassFlowRate = 0.5;
+    expQEvap = 2000.0;
+    expTout = 9.0;
+    thisWrap.checkEvapOutletTemp(*state, chNum, evapOutletTemp, lowTempLimitEout, evapInletTemp, qEvaporator, evapMassFlowRate, Cp);
+    EXPECT_NEAR(qEvaporator, expQEvap, allowedTolerance);
+    EXPECT_NEAR(evapOutletTemp, expTout, allowedTolerance);
+
+    // Test 2b: Evaporator outlet temperature lower the node minimum temperature limit and inlet temp at or below node temperature limt,
+    //          zero flow and set outlet temperature to inlet temperature
+    thisCH.EvapOutletNode.TempMin = 9.0;
+    evapInletTemp = 8.0;
+    evapOutletTemp = 7.0;
+    lowTempLimitEout = 5.0;
+    qEvaporator = 2000.0;
+    evapMassFlowRate = 0.5;
+    expQEvap = 0.0;
+    expTout = 8.0;
+    thisWrap.checkEvapOutletTemp(*state, chNum, evapOutletTemp, lowTempLimitEout, evapInletTemp, qEvaporator, evapMassFlowRate, Cp);
+    EXPECT_NEAR(qEvaporator, expQEvap, allowedTolerance);
+    EXPECT_NEAR(evapOutletTemp, expTout, allowedTolerance);
+
+    // Test 3: Everything is fine, no changes to anything
+    thisCH.EvapOutletNode.TempMin = 5.0;
+    evapInletTemp = 8.0;
+    evapOutletTemp = 6.0;
+    lowTempLimitEout = 5.0;
+    qEvaporator = 4000.0;
+    evapMassFlowRate = 0.5;
+    expQEvap = 4000.0;
+    expTout = 6.0;
+    thisWrap.checkEvapOutletTemp(*state, chNum, evapOutletTemp, lowTempLimitEout, evapInletTemp, qEvaporator, evapMassFlowRate, Cp);
+    EXPECT_NEAR(qEvaporator, expQEvap, allowedTolerance);
+    EXPECT_NEAR(evapOutletTemp, expTout, allowedTolerance);
+}
+
+TEST_F(EnergyPlusFixture, Test_CentralHeatPumpSystem_calcPLRAndCyclingRatio)
+{
+    state->dataPlantCentralGSHP->Wrapper.allocate(1);
+    state->dataPlantCentralGSHP->Wrapper(1).WrapperComp.allocate(1);
+    state->dataPlantCentralGSHP->Wrapper(1).ChillerHeater.allocate(1);
+    auto &thisWrap = state->dataPlantCentralGSHP->Wrapper(1);
+
+    Real64 availChillerCap;
+    Real64 actualPartLoadRatio;
+    Real64 minPartLoadRatio;
+    Real64 maxPartLoadRatio;
+    Real64 qEvaporator;
+    Real64 frac;
+    Real64 expPLR;
+    Real64 expFrac;
+    Real64 expFalseLoad;
+    Real64 constexpr allowedTolerance = 0.0001;
+
+    // Test 1: available chiller capacity less than zero (PLR should be zero, frac should be 1.0)
+    availChillerCap = -10000.0;
+    actualPartLoadRatio = -1.0;
+    minPartLoadRatio = 0.1;
+    maxPartLoadRatio = 1.0;
+    qEvaporator = 50000.0;
+    frac = -1.0;
+    expPLR = 0.0;
+    expFrac = 1.0;
+    expFalseLoad = 0.0;
+    state->dataPlantCentralGSHP->ChillerCyclingRatio = -1.0;
+    state->dataPlantCentralGSHP->ChillerPartLoadRatio = -1.0;
+    state->dataPlantCentralGSHP->ChillerFalseLoadRate = -1.0;
+    thisWrap.calcPLRAndCyclingRatio(*state, availChillerCap, actualPartLoadRatio, minPartLoadRatio, maxPartLoadRatio, qEvaporator, frac);
+    EXPECT_NEAR(frac, expFrac, allowedTolerance);
+    EXPECT_NEAR(actualPartLoadRatio, expPLR, allowedTolerance);
+    EXPECT_NEAR(state->dataPlantCentralGSHP->ChillerCyclingRatio, expFrac, allowedTolerance);
+    EXPECT_NEAR(state->dataPlantCentralGSHP->ChillerPartLoadRatio, expPLR, allowedTolerance);
+    EXPECT_NEAR(state->dataPlantCentralGSHP->ChillerFalseLoadRate, expFalseLoad, allowedTolerance);
+
+    // Test 2a: valid chiller capacity and evaporator load, negative minPLR
+    availChillerCap = 50000.0;
+    actualPartLoadRatio = -1.0;
+    minPartLoadRatio = -0.1;
+    maxPartLoadRatio = 1.0;
+    qEvaporator = 10000.0;
+    frac = -1.0;
+    expPLR = 0.2;
+    expFrac = 1.0;
+    expFalseLoad = 0.0;
+    state->dataPlantCentralGSHP->ChillerCyclingRatio = -1.0;
+    state->dataPlantCentralGSHP->ChillerPartLoadRatio = -1.0;
+    state->dataPlantCentralGSHP->ChillerFalseLoadRate = -1.0;
+    thisWrap.calcPLRAndCyclingRatio(*state, availChillerCap, actualPartLoadRatio, minPartLoadRatio, maxPartLoadRatio, qEvaporator, frac);
+    EXPECT_NEAR(frac, expFrac, allowedTolerance);
+    EXPECT_NEAR(actualPartLoadRatio, expPLR, allowedTolerance);
+    EXPECT_NEAR(state->dataPlantCentralGSHP->ChillerCyclingRatio, expFrac, allowedTolerance);
+    EXPECT_NEAR(state->dataPlantCentralGSHP->ChillerPartLoadRatio, expPLR, allowedTolerance);
+    EXPECT_NEAR(state->dataPlantCentralGSHP->ChillerFalseLoadRate, expFalseLoad, allowedTolerance);
+
+    // Test 2b: valid chiller capacity and evaporator load, actualPLR lower then minPLR
+    availChillerCap = 50000.0;
+    actualPartLoadRatio = -1.0;
+    minPartLoadRatio = 0.4;
+    maxPartLoadRatio = 1.0;
+    qEvaporator = 10000.0;
+    frac = -1.0;
+    expPLR = 0.4;
+    expFrac = 0.5;
+    expFalseLoad = 0.0;
+    state->dataPlantCentralGSHP->ChillerCyclingRatio = -1.0;
+    state->dataPlantCentralGSHP->ChillerPartLoadRatio = -1.0;
+    state->dataPlantCentralGSHP->ChillerFalseLoadRate = -1.0;
+    thisWrap.calcPLRAndCyclingRatio(*state, availChillerCap, actualPartLoadRatio, minPartLoadRatio, maxPartLoadRatio, qEvaporator, frac);
+    EXPECT_NEAR(frac, expFrac, allowedTolerance);
+    EXPECT_NEAR(actualPartLoadRatio, expPLR, allowedTolerance);
+    EXPECT_NEAR(state->dataPlantCentralGSHP->ChillerCyclingRatio, expFrac, allowedTolerance);
+    EXPECT_NEAR(state->dataPlantCentralGSHP->ChillerPartLoadRatio, expPLR, allowedTolerance);
+    EXPECT_NEAR(state->dataPlantCentralGSHP->ChillerFalseLoadRate, expFalseLoad, allowedTolerance);
+
+    // Test 2c: valid chiller capacity and evaporator load, actualPLR higher then minPLR
+    availChillerCap = 50000.0;
+    actualPartLoadRatio = -1.0;
+    minPartLoadRatio = 0.4;
+    maxPartLoadRatio = 1.0;
+    qEvaporator = 30000.0;
+    frac = -1.0;
+    expPLR = 0.6;
+    expFrac = 1.0;
+    expFalseLoad = 0.0;
+    state->dataPlantCentralGSHP->ChillerCyclingRatio = -1.0;
+    state->dataPlantCentralGSHP->ChillerPartLoadRatio = -1.0;
+    state->dataPlantCentralGSHP->ChillerFalseLoadRate = -1.0;
+    thisWrap.calcPLRAndCyclingRatio(*state, availChillerCap, actualPartLoadRatio, minPartLoadRatio, maxPartLoadRatio, qEvaporator, frac);
+    EXPECT_NEAR(frac, expFrac, allowedTolerance);
+    EXPECT_NEAR(actualPartLoadRatio, expPLR, allowedTolerance);
+    EXPECT_NEAR(state->dataPlantCentralGSHP->ChillerCyclingRatio, expFrac, allowedTolerance);
+    EXPECT_NEAR(state->dataPlantCentralGSHP->ChillerPartLoadRatio, expPLR, allowedTolerance);
+    EXPECT_NEAR(state->dataPlantCentralGSHP->ChillerFalseLoadRate, expFalseLoad, allowedTolerance);
+
+    // Test 2d: valid chiller capacity and evaporator load, actualPLR higher then maxPLR
+    availChillerCap = 50000.0;
+    actualPartLoadRatio = -1.0;
+    minPartLoadRatio = 0.4;
+    maxPartLoadRatio = 1.0;
+    qEvaporator = 60000.0;
+    frac = -1.0;
+    expPLR = 1.0;
+    expFrac = 1.0;
+    expFalseLoad = 0.0;
+    state->dataPlantCentralGSHP->ChillerCyclingRatio = -1.0;
+    state->dataPlantCentralGSHP->ChillerPartLoadRatio = -1.0;
+    state->dataPlantCentralGSHP->ChillerFalseLoadRate = -1.0;
+    thisWrap.calcPLRAndCyclingRatio(*state, availChillerCap, actualPartLoadRatio, minPartLoadRatio, maxPartLoadRatio, qEvaporator, frac);
+    EXPECT_NEAR(frac, expFrac, allowedTolerance);
+    EXPECT_NEAR(actualPartLoadRatio, expPLR, allowedTolerance);
+    EXPECT_NEAR(state->dataPlantCentralGSHP->ChillerCyclingRatio, expFrac, allowedTolerance);
+    EXPECT_NEAR(state->dataPlantCentralGSHP->ChillerPartLoadRatio, expPLR, allowedTolerance);
+    EXPECT_NEAR(state->dataPlantCentralGSHP->ChillerFalseLoadRate, expFalseLoad, allowedTolerance);
 }

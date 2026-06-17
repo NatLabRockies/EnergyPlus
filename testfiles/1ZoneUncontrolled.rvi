@@ -9,4 +9,38 @@ Other Equipment Total Heating Energy
 Zone Other Equipment Total Heating Energy
 Site Day Type Index
 Site Daylight Saving Time Status
+Surface Inside Face Temperature
+Surface Outside Face Temperature
+Surface Inside Face Convection Heat Transfer Coefficient
+Surface Outside Face Convection Heat Transfer Coefficient
+Surface Inside Face Conduction Heat Transfer Rate
+Surface Inside Face Conduction Heat Gain Rate
+Surface Inside Face Conduction Heat Loss Rate
+Surface Inside Face Conduction Heat Transfer Rate per Area
+Surface Inside Face Conduction Heat Transfer Energy
+Surface Outside Face Conduction Heat Transfer Rate
+Surface Outside Face Conduction Heat Gain Rate
+Surface Outside Face Conduction Heat Loss Rate
+Surface Outside Face Conduction Heat Transfer Rate per Area
+Surface Outside Face Conduction Heat Transfer Energy
+Surface Average Face Conduction Heat Transfer Rate
+Surface Average Face Conduction Heat Gain Rate
+Surface Average Face Conduction Heat Loss Rate
+Surface Average Face Conduction Heat Transfer Rate per Area
+Surface Average Face Conduction Heat Transfer Energy
+Surface Heat Storage Rate
+Surface Heat Storage Gain Rate
+Surface Heat Storage Loss Rate
+Surface Heat Storage Rate per Area
+Surface Heat Storage Energy
+Zone Opaque Surface Inside Faces Conduction Rate
+Zone Opaque Surface Inside Faces Conduction Heat Gain Rate
+Zone Opaque Surface Inside Faces Conduction Heat Loss Rate
+Zone Opaque Surface Inside Faces Conduction Heat Gain Energy
+Zone Opaque Surface Inside Faces Conduction Heat Loss Energy
+Zone Opaque Surface Outside Faces Conduction Rate
+Zone Opaque Surface Outside Faces Conduction Heat Gain Rate
+Zone Opaque Surface Outside Faces Conduction Heat Loss Rate
+Zone Opaque Surface Outside Faces Conduction Heat Gain Energy
+Zone Opaque Surface Outside Faces Conduction Heat Loss Energy
 0

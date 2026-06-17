@@ -1,7 +1,7 @@
-// EnergyPlus, Copyright (c) 1996-2023, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
-// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other
+// National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
 // contributors. All rights reserved.
 //
 // NOTICE: This Software was developed under funding from the U.S. Department of Energy and the
@@ -49,12 +49,12 @@
 #include <algorithm>
 #include <cassert>
 #include <cmath>
+#include <format>
 #include <string>
 #include <unordered_map>
 
 // ObjexxFCL Headers
 #include <ObjexxFCL/Array.functions.hh>
-#include <ObjexxFCL/Fmath.hh>
 
 // EnergyPlus Headers
 #include <EnergyPlus/BranchNodeConnections.hh>
@@ -70,7 +70,11 @@
 #include <EnergyPlus/DataSizing.hh>
 #include <EnergyPlus/DataZoneEnergyDemands.hh>
 #include <EnergyPlus/DataZoneEquipment.hh>
+#include <EnergyPlus/DualDuct.hh>
 #include <EnergyPlus/FanCoilUnits.hh>
+#include <EnergyPlus/HVACCooledBeam.hh>
+#include <EnergyPlus/HVACFourPipeBeam.hh>
+#include <EnergyPlus/HVACSingleDuctInduc.hh>
 #include <EnergyPlus/HVACStandAloneERV.hh>
 #include <EnergyPlus/HVACVariableRefrigerantFlow.hh>
 #include <EnergyPlus/HybridUnitaryAirConditioners.hh>
@@ -79,6 +83,7 @@
 #include <EnergyPlus/OutputProcessor.hh>
 #include <EnergyPlus/OutputReportPredefined.hh>
 #include <EnergyPlus/Plant/DataPlant.hh>
+#include <EnergyPlus/PoweredInductionUnits.hh>
 #include <EnergyPlus/Psychrometrics.hh>
 #include <EnergyPlus/PurchasedAirManager.hh>
 #include <EnergyPlus/SystemReports.hh>
@@ -100,9 +105,7 @@ namespace EnergyPlus::SystemReports {
 // This module embodies the scheme(s) for reporting ventilation loads and energy use.
 
 // Using/Aliasing
-using namespace DataLoopNode;
 using namespace DataAirLoop;
-using namespace DataHVACGlobals;
 using namespace DataPlant;
 using namespace DataZoneEquipment;
 using namespace DataAirSystems;
@@ -125,7 +128,9 @@ void InitEnergyReports(EnergyPlusData &state)
 
     int constexpr EnergyTransfer(1);
 
-    if (!state.dataSysRpts->VentReportStructureCreated) return;
+    if (!state.dataSysRpts->VentReportStructureCreated) {
+        return;
+    }
 
     if (state.dataSysRpts->OneTimeFlag_InitEnergyReports) {
 
@@ -135,9 +140,10 @@ void InitEnergyReports(EnergyPlusData &state)
 
         for (int CtrlZoneNum = 1; CtrlZoneNum <= state.dataGlobal->NumOfZones; ++CtrlZoneNum) {
             auto &thisZoneEquipConfig = state.dataZoneEquip->ZoneEquipConfig(CtrlZoneNum);
-            if (!thisZoneEquipConfig.IsControlled) continue;
-            thisZoneEquipConfig.EquipListIndex =
-                UtilityRoutines::FindItemInList(thisZoneEquipConfig.EquipListName, state.dataZoneEquip->ZoneEquipList);
+            if (!thisZoneEquipConfig.IsControlled) {
+                continue;
+            }
+            thisZoneEquipConfig.EquipListIndex = Util::FindItemInList(thisZoneEquipConfig.EquipListName, state.dataZoneEquip->ZoneEquipList);
             auto &thisZoneEquipList = state.dataZoneEquip->ZoneEquipList(thisZoneEquipConfig.EquipListIndex);
             for (int ZoneInletNodeNum = 1; ZoneInletNodeNum <= thisZoneEquipConfig.NumInletNodes; ++ZoneInletNodeNum) {
                 int AirLoopNum = thisZoneEquipConfig.InletNodeAirLoopNum(ZoneInletNodeNum);
@@ -152,10 +158,12 @@ void InitEnergyReports(EnergyPlusData &state)
                                         if (thisZoneEquipConfig.AirDistUnitCool(ZoneInletNodeNum).InNode ==
                                             state.dataZoneEquip->SupplyAirPath(SAPNum).OutletNode(SAPOutNode)) {
                                             thisZoneEquipConfig.AirDistUnitCool(ZoneInletNodeNum).SupplyAirPathIndex = SAPNum;
+                                            thisZoneEquipConfig.AirDistUnitCool(ZoneInletNodeNum).SupplyAirPathOutNodeIndex = SAPOutNode;
                                             for (int OutNum = 1; OutNum <= state.dataAirLoop->AirToZoneNodeInfo(AirLoopNum).NumSupplyNodes;
                                                  ++OutNum) {
                                                 if (state.dataAirLoop->AirToZoneNodeInfo(AirLoopNum).ZoneEquipSupplyNodeNum(OutNum) ==
                                                     state.dataZoneEquip->SupplyAirPath(SAPNum).InletNodeNum) {
+                                                    thisZoneEquipConfig.AirDistUnitCool(ZoneInletNodeNum).AirLoopNum = AirLoopNum;
                                                     thisZoneEquipConfig.AirDistUnitCool(ZoneInletNodeNum).SupplyBranchIndex =
                                                         state.dataAirSystemsData->PrimaryAirSystems(AirLoopNum).OutletBranchNum[OutNum - 1];
                                                     if (state.dataAirSystemsData->PrimaryAirSystems(AirLoopNum).Splitter.Exists) {
@@ -188,6 +196,7 @@ void InitEnergyReports(EnergyPlusData &state)
                                                  ++BranchNum) {
                                                 if (state.dataAirSystemsData->PrimaryAirSystems(AirLoopNum).Branch(BranchNum).NodeNumOut ==
                                                     state.dataAirLoop->AirToZoneNodeInfo(AirLoopNum).AirLoopSupplyNodeNum(NodeIndex)) {
+                                                    thisZoneEquipConfig.AirDistUnitCool(ZoneInletNodeNum).AirLoopNum = AirLoopNum;
                                                     thisZoneEquipConfig.AirDistUnitCool(ZoneInletNodeNum).SupplyBranchIndex = BranchNum;
                                                     if (state.dataAirSystemsData->PrimaryAirSystems(AirLoopNum).Splitter.Exists) {
                                                         for (int MainBranchNum = 1;
@@ -210,20 +219,24 @@ void InitEnergyReports(EnergyPlusData &state)
                                     }
                                 }
                             }
-                        } else if (thisZoneEquipList.EquipData(CompNum).OutletNodeNums(NodeCount) ==
-                                   thisZoneEquipConfig.AirDistUnitHeat(ZoneInletNodeNum).InNode) {
+                        }
+                        if (thisZoneEquipList.EquipData(CompNum).OutletNodeNums(NodeCount) ==
+                            thisZoneEquipConfig.AirDistUnitHeat(ZoneInletNodeNum).OutNode) {
                             thisZoneEquipConfig.AirDistUnitHeat(ZoneInletNodeNum).AirDistUnitIndex = CompNum;
                             if (thisZoneEquipConfig.AirDistUnitHeat(ZoneInletNodeNum).SupplyAirPathExists) {
                                 for (int SAPNum = 1; SAPNum <= state.dataZoneEquip->NumSupplyAirPaths; ++SAPNum) {
-                                    for (int NodeIndex = 1; NodeIndex <= state.dataAirLoop->AirToZoneNodeInfo(AirLoopNum).NumSupplyNodes;
-                                         ++NodeIndex) {
-                                        if (state.dataAirLoop->AirToZoneNodeInfo(AirLoopNum).ZoneEquipSupplyNodeNum(NodeIndex) ==
-                                            state.dataZoneEquip->SupplyAirPath(SAPNum).InletNodeNum) {
-                                            for (int BranchNum = 1; BranchNum <= state.dataAirSystemsData->PrimaryAirSystems(AirLoopNum).NumBranches;
-                                                 ++BranchNum) {
-                                                if (state.dataAirSystemsData->PrimaryAirSystems(AirLoopNum).Branch(BranchNum).NodeNumOut ==
-                                                    state.dataAirLoop->AirToZoneNodeInfo(AirLoopNum).AirLoopSupplyNodeNum(NodeIndex)) {
-                                                    thisZoneEquipConfig.AirDistUnitHeat(ZoneInletNodeNum).SupplyBranchIndex = BranchNum;
+                                    for (int SAPOutNode = 1; SAPOutNode <= state.dataZoneEquip->SupplyAirPath(SAPNum).NumOutletNodes; ++SAPOutNode) {
+                                        if (thisZoneEquipConfig.AirDistUnitHeat(ZoneInletNodeNum).InNode ==
+                                            state.dataZoneEquip->SupplyAirPath(SAPNum).OutletNode(SAPOutNode)) {
+                                            thisZoneEquipConfig.AirDistUnitHeat(ZoneInletNodeNum).SupplyAirPathIndex = SAPNum;
+                                            thisZoneEquipConfig.AirDistUnitHeat(ZoneInletNodeNum).SupplyAirPathOutNodeIndex = SAPOutNode;
+                                            for (int OutNum = 1; OutNum <= state.dataAirLoop->AirToZoneNodeInfo(AirLoopNum).NumSupplyNodes;
+                                                 ++OutNum) {
+                                                if (state.dataAirLoop->AirToZoneNodeInfo(AirLoopNum).ZoneEquipSupplyNodeNum(OutNum) ==
+                                                    state.dataZoneEquip->SupplyAirPath(SAPNum).InletNodeNum) {
+                                                    thisZoneEquipConfig.AirDistUnitHeat(ZoneInletNodeNum).AirLoopNum = AirLoopNum;
+                                                    thisZoneEquipConfig.AirDistUnitHeat(ZoneInletNodeNum).SupplyBranchIndex =
+                                                        state.dataAirSystemsData->PrimaryAirSystems(AirLoopNum).OutletBranchNum[OutNum - 1];
                                                     if (state.dataAirSystemsData->PrimaryAirSystems(AirLoopNum).Splitter.Exists) {
                                                         for (int MainBranchNum = 1;
                                                              MainBranchNum <= state.dataAirSystemsData->PrimaryAirSystems(AirLoopNum).NumBranches;
@@ -237,16 +250,10 @@ void InitEnergyReports(EnergyPlusData &state)
                                                         }
                                                     } else { // no splitter
                                                         thisZoneEquipConfig.AirDistUnitHeat(ZoneInletNodeNum).MainBranchIndex =
-                                                            thisZoneEquipConfig.AirDistUnitHeat(ZoneInletNodeNum).SupplyAirPathIndex;
+                                                            thisZoneEquipConfig.AirDistUnitHeat(ZoneInletNodeNum).SupplyBranchIndex;
                                                     }
                                                 }
                                             }
-                                        }
-                                    }
-
-                                    for (int SAPOutNode = 1; SAPOutNode <= state.dataZoneEquip->SupplyAirPath(SAPNum).NumOutletNodes; ++SAPOutNode) {
-                                        if (ZoneInletNodeNum == state.dataZoneEquip->SupplyAirPath(SAPNum).OutletNode(SAPOutNode)) {
-                                            thisZoneEquipConfig.AirDistUnitHeat(ZoneInletNodeNum).SupplyAirPathIndex = SAPNum;
                                         }
                                     }
                                 }
@@ -260,6 +267,7 @@ void InitEnergyReports(EnergyPlusData &state)
                                                  ++BranchNum) {
                                                 if (state.dataAirSystemsData->PrimaryAirSystems(AirLoopNum).Branch(BranchNum).NodeNumOut ==
                                                     state.dataAirLoop->AirToZoneNodeInfo(AirLoopNum).AirLoopSupplyNodeNum(NodeIndex)) {
+                                                    thisZoneEquipConfig.AirDistUnitHeat(ZoneInletNodeNum).AirLoopNum = AirLoopNum;
                                                     thisZoneEquipConfig.AirDistUnitHeat(ZoneInletNodeNum).SupplyBranchIndex = BranchNum;
                                                     if (state.dataAirSystemsData->PrimaryAirSystems(AirLoopNum).Splitter.Exists) {
                                                         for (int MainBranchNum = 1;
@@ -282,9 +290,6 @@ void InitEnergyReports(EnergyPlusData &state)
                                     }
                                 }
                             }
-                        } else {
-
-                            // Can't tell if there's an error based on this code...need to check logical flags separately
                         }
                     }
                 }
@@ -293,9 +298,10 @@ void InitEnergyReports(EnergyPlusData &state)
 
         for (int CtrlZoneNum = 1; CtrlZoneNum <= state.dataGlobal->NumOfZones; ++CtrlZoneNum) {
             auto &thisZoneEquipConfig = state.dataZoneEquip->ZoneEquipConfig(CtrlZoneNum);
-            if (!thisZoneEquipConfig.IsControlled) continue;
-            thisZoneEquipConfig.EquipListIndex =
-                UtilityRoutines::FindItemInList(thisZoneEquipConfig.EquipListName, state.dataZoneEquip->ZoneEquipList);
+            if (!thisZoneEquipConfig.IsControlled) {
+                continue;
+            }
+            thisZoneEquipConfig.EquipListIndex = Util::FindItemInList(thisZoneEquipConfig.EquipListName, state.dataZoneEquip->ZoneEquipList);
             int ListNum = thisZoneEquipConfig.EquipListIndex;
             // loop over the zone supply air path inlet nodes
             for (int ZoneInletNodeNum = 1; ZoneInletNodeNum <= thisZoneEquipConfig.NumInletNodes; ++ZoneInletNodeNum) {
@@ -304,19 +310,24 @@ void InitEnergyReports(EnergyPlusData &state)
                 // 1. Find HVAC component plant loop connections
                 int MainBranchNum = thisZoneEquipConfig.AirDistUnitHeat(ZoneInletNodeNum).MainBranchIndex;
                 MainBranchNum = max(MainBranchNum, thisZoneEquipConfig.AirDistUnitCool(ZoneInletNodeNum).MainBranchIndex);
-                if (MainBranchNum > 0) MatchPlantSys(state, AirLoopNum, MainBranchNum);
+                if (MainBranchNum > 0) {
+                    MatchPlantSys(state, AirLoopNum, MainBranchNum);
+                }
                 int SupplyCoolBranchNum = thisZoneEquipConfig.AirDistUnitCool(ZoneInletNodeNum).SupplyBranchIndex;
-                if (SupplyCoolBranchNum > 0 && (SupplyCoolBranchNum != MainBranchNum)) MatchPlantSys(state, AirLoopNum, SupplyCoolBranchNum);
+                if (SupplyCoolBranchNum > 0 && (SupplyCoolBranchNum != MainBranchNum)) {
+                    MatchPlantSys(state, AirLoopNum, SupplyCoolBranchNum);
+                }
                 int SupplyHeatBranchNum = thisZoneEquipConfig.AirDistUnitHeat(ZoneInletNodeNum).SupplyBranchIndex;
-                if (SupplyHeatBranchNum > 0 && (SupplyHeatBranchNum != MainBranchNum)) MatchPlantSys(state, AirLoopNum, SupplyHeatBranchNum);
+                if (SupplyHeatBranchNum > 0 && (SupplyHeatBranchNum != MainBranchNum)) {
+                    MatchPlantSys(state, AirLoopNum, SupplyHeatBranchNum);
+                }
 
                 int AirDistUnitNum = thisZoneEquipConfig.AirDistUnitCool(ZoneInletNodeNum).AirDistUnitIndex;
                 AirDistUnitNum = max(AirDistUnitNum, thisZoneEquipConfig.AirDistUnitHeat(ZoneInletNodeNum).AirDistUnitIndex);
                 if (ListNum > 0 && AirDistUnitNum > 0) {
                     auto &thisZoneEquipList = state.dataZoneEquip->ZoneEquipList(ListNum);
                     for (int VarNum = 1; VarNum <= thisZoneEquipList.EquipData(AirDistUnitNum).NumMeteredVars; ++VarNum) {
-                        if (thisZoneEquipList.EquipData(AirDistUnitNum).MeteredVar(VarNum).ResourceType ==
-                            DataGlobalConstants::ResourceType::EnergyTransfer) {
+                        if (thisZoneEquipList.EquipData(AirDistUnitNum).MeteredVar(VarNum).resource == Constant::eResource::EnergyTransfer) {
                             thisZoneEquipList.EquipData(AirDistUnitNum).EnergyTransComp = EnergyTransfer;
                             const std::string &CompType = thisZoneEquipList.EquipData(AirDistUnitNum).TypeOf;
                             const std::string &CompName = thisZoneEquipList.EquipData(AirDistUnitNum).Name;
@@ -327,8 +338,9 @@ void InitEnergyReports(EnergyPlusData &state)
                             int MatchComp = 0;
                             bool MatchFound = false;
                             FindDemandSideMatch(state, CompType, CompName, MatchFound, MatchLoopType, MatchLoop, MatchBranch, MatchComp);
-                            if (MatchFound)
+                            if (MatchFound) {
                                 UpdateZoneCompPtrArray(state, Idx, ListNum, AirDistUnitNum, MatchLoopType, MatchLoop, MatchBranch, MatchComp);
+                            }
                             thisZoneEquipList.EquipData(AirDistUnitNum).ZoneEqToPlantPtr = Idx;
                             break;
                         }
@@ -336,8 +348,8 @@ void InitEnergyReports(EnergyPlusData &state)
                     for (int SubEquipNum = 1; SubEquipNum <= thisZoneEquipList.EquipData(AirDistUnitNum).NumSubEquip; ++SubEquipNum) {
                         for (int VarNum = 1; VarNum <= thisZoneEquipList.EquipData(AirDistUnitNum).SubEquipData(SubEquipNum).NumMeteredVars;
                              ++VarNum) {
-                            if (thisZoneEquipList.EquipData(AirDistUnitNum).SubEquipData(SubEquipNum).MeteredVar(VarNum).ResourceType ==
-                                DataGlobalConstants::ResourceType::EnergyTransfer) {
+                            if (thisZoneEquipList.EquipData(AirDistUnitNum).SubEquipData(SubEquipNum).MeteredVar(VarNum).resource ==
+                                Constant::eResource::EnergyTransfer) {
                                 thisZoneEquipList.EquipData(AirDistUnitNum).SubEquipData(SubEquipNum).EnergyTransComp = EnergyTransfer;
                                 const std::string &CompType = thisZoneEquipList.EquipData(AirDistUnitNum).SubEquipData(SubEquipNum).TypeOf;
                                 const std::string &CompName = thisZoneEquipList.EquipData(AirDistUnitNum).SubEquipData(SubEquipNum).Name;
@@ -348,9 +360,10 @@ void InitEnergyReports(EnergyPlusData &state)
                                 int MatchComp = 0;
                                 bool MatchFound = false;
                                 FindDemandSideMatch(state, CompType, CompName, MatchFound, MatchLoopType, MatchLoop, MatchBranch, MatchComp);
-                                if (MatchFound)
+                                if (MatchFound) {
                                     UpdateZoneSubCompPtrArray(
                                         state, Idx, ListNum, AirDistUnitNum, SubEquipNum, MatchLoopType, MatchLoop, MatchBranch, MatchComp);
+                                }
                                 thisZoneEquipList.EquipData(AirDistUnitNum).SubEquipData(SubEquipNum).ZoneEqToPlantPtr = Idx;
                                 break;
                             }
@@ -366,7 +379,7 @@ void InitEnergyReports(EnergyPlusData &state)
                                         .SubEquipData(SubEquipNum)
                                         .SubSubEquipData(SubSubEquipNum)
                                         .MeteredVar(VarNum)
-                                        .ResourceType == DataGlobalConstants::ResourceType::EnergyTransfer) {
+                                        .resource == Constant::eResource::EnergyTransfer) {
                                     thisZoneEquipList.EquipData(AirDistUnitNum)
                                         .SubEquipData(SubEquipNum)
                                         .SubSubEquipData(SubSubEquipNum)
@@ -382,7 +395,7 @@ void InitEnergyReports(EnergyPlusData &state)
                                     int MatchComp = 0;
                                     bool MatchFound = false;
                                     FindDemandSideMatch(state, CompType, CompName, MatchFound, MatchLoopType, MatchLoop, MatchBranch, MatchComp);
-                                    if (MatchFound)
+                                    if (MatchFound) {
                                         UpdateZoneSubSubCompPtrArray(state,
                                                                      Idx,
                                                                      ListNum,
@@ -393,6 +406,7 @@ void InitEnergyReports(EnergyPlusData &state)
                                                                      MatchLoop,
                                                                      MatchBranch,
                                                                      MatchComp);
+                                    }
                                     thisZoneEquipList.EquipData(AirDistUnitNum)
                                         .SubEquipData(SubEquipNum)
                                         .SubSubEquipData(SubSubEquipNum)
@@ -433,10 +447,10 @@ void InitEnergyReports(EnergyPlusData &state)
                 if (EquipNum > 0) {
                     int ArrayCount = 0;
                     for (int i = 1; i <= EquipNum; ++i) {
-                        auto const &zi(state.dataAirSystemsData->ZoneCompToPlant(i));
+                        auto const &zi = state.dataAirSystemsData->ZoneCompToPlant(i);
                         bool duplicate(false);
                         for (int j = 1; j <= ArrayCount; ++j) {
-                            auto const &zj(state.dataAirSystemsData->ZoneCompToPlant(j));
+                            auto const &zj = state.dataAirSystemsData->ZoneCompToPlant(j);
                             if ((zi.ZoneEqListNum == zj.ZoneEqListNum) && (zi.ZoneEqCompNum == zj.ZoneEqCompNum)) { // Duplicate
                                 duplicate = true;
                                 break;
@@ -445,7 +459,7 @@ void InitEnergyReports(EnergyPlusData &state)
                         if (!duplicate) {
                             ++ArrayCount;
                             if (i > ArrayCount) { // Copy to lower position
-                                auto &za(state.dataAirSystemsData->ZoneCompToPlant(ArrayCount));
+                                auto &za = state.dataAirSystemsData->ZoneCompToPlant(ArrayCount);
                                 za.ZoneEqListNum = zi.ZoneEqListNum;
                                 za.ZoneEqCompNum = zi.ZoneEqCompNum;
                                 za.PlantLoopType = zi.PlantLoopType;
@@ -458,7 +472,7 @@ void InitEnergyReports(EnergyPlusData &state)
                         }
                     }
                     for (int i = ArrayCount + 1; i <= EquipNum; ++i) { // Zero the now-unused entries
-                        auto &zi(state.dataAirSystemsData->ZoneCompToPlant(i));
+                        auto &zi = state.dataAirSystemsData->ZoneCompToPlant(i);
                         zi.ZoneEqListNum = 0;
                         zi.ZoneEqCompNum = 0;
                         zi.PlantLoopType = 0;
@@ -473,10 +487,10 @@ void InitEnergyReports(EnergyPlusData &state)
                 if (SubEquipNum > 0) {
                     int ArrayCount = 0;
                     for (int i = 1; i <= SubEquipNum; ++i) {
-                        auto const &zi(state.dataAirSystemsData->ZoneSubCompToPlant(i));
+                        auto const &zi = state.dataAirSystemsData->ZoneSubCompToPlant(i);
                         bool duplicate(false);
                         for (int j = 1; j <= ArrayCount; ++j) {
-                            auto const &zj(state.dataAirSystemsData->ZoneSubCompToPlant(j));
+                            auto const &zj = state.dataAirSystemsData->ZoneSubCompToPlant(j);
                             if ((zi.ZoneEqListNum == zj.ZoneEqListNum) && (zi.ZoneEqCompNum == zj.ZoneEqCompNum) &&
                                 (zi.ZoneEqSubCompNum == zj.ZoneEqSubCompNum)) { // Duplicate
                                 duplicate = true;
@@ -486,7 +500,7 @@ void InitEnergyReports(EnergyPlusData &state)
                         if (!duplicate) {
                             ++ArrayCount;
                             if (i > ArrayCount) { // Copy to lower position
-                                auto &za(state.dataAirSystemsData->ZoneSubCompToPlant(ArrayCount));
+                                auto &za = state.dataAirSystemsData->ZoneSubCompToPlant(ArrayCount);
                                 za.ZoneEqListNum = zi.ZoneEqListNum;
                                 za.ZoneEqCompNum = zi.ZoneEqCompNum;
                                 za.ZoneEqSubCompNum = zi.ZoneEqSubCompNum;
@@ -500,7 +514,7 @@ void InitEnergyReports(EnergyPlusData &state)
                         }
                     }
                     for (int i = ArrayCount + 1; i <= SubEquipNum; ++i) { // Zero the now-unused entries
-                        auto &zi(state.dataAirSystemsData->ZoneSubCompToPlant(i));
+                        auto &zi = state.dataAirSystemsData->ZoneSubCompToPlant(i);
                         zi.ZoneEqListNum = 0;
                         zi.ZoneEqCompNum = 0;
                         zi.ZoneEqSubCompNum = 0;
@@ -516,10 +530,10 @@ void InitEnergyReports(EnergyPlusData &state)
                 if (SubSubEquipNum > 0) {
                     int ArrayCount = 0;
                     for (int i = 1; i <= SubSubEquipNum; ++i) {
-                        auto const &zi(state.dataAirSystemsData->ZoneSubSubCompToPlant(i));
+                        auto const &zi = state.dataAirSystemsData->ZoneSubSubCompToPlant(i);
                         bool duplicate(false);
                         for (int j = 1; j <= ArrayCount; ++j) {
-                            auto const &zj(state.dataAirSystemsData->ZoneSubSubCompToPlant(j));
+                            auto const &zj = state.dataAirSystemsData->ZoneSubSubCompToPlant(j);
                             if ((zi.ZoneEqListNum == zj.ZoneEqListNum) && (zi.ZoneEqCompNum == zj.ZoneEqCompNum) &&
                                 (zi.ZoneEqSubCompNum == zj.ZoneEqSubCompNum) && (zi.ZoneEqSubSubCompNum == zj.ZoneEqSubSubCompNum)) { // Duplicate
                                 duplicate = true;
@@ -529,7 +543,7 @@ void InitEnergyReports(EnergyPlusData &state)
                         if (!duplicate) {
                             ++ArrayCount;
                             if (i > ArrayCount) { // Copy to lower position
-                                auto &za(state.dataAirSystemsData->ZoneSubSubCompToPlant(ArrayCount));
+                                auto &za = state.dataAirSystemsData->ZoneSubSubCompToPlant(ArrayCount);
                                 za.ZoneEqListNum = zi.ZoneEqListNum;
                                 za.ZoneEqCompNum = zi.ZoneEqCompNum;
                                 za.ZoneEqSubCompNum = zi.ZoneEqSubCompNum;
@@ -544,7 +558,7 @@ void InitEnergyReports(EnergyPlusData &state)
                         }
                     }
                     for (int i = ArrayCount + 1; i <= SubSubEquipNum; ++i) { // Zero the now-unused entries
-                        auto &zi(state.dataAirSystemsData->ZoneSubSubCompToPlant(i));
+                        auto &zi = state.dataAirSystemsData->ZoneSubSubCompToPlant(i);
                         zi.ZoneEqListNum = 0;
                         zi.ZoneEqCompNum = 0;
                         zi.ZoneEqSubCompNum = 0;
@@ -561,10 +575,10 @@ void InitEnergyReports(EnergyPlusData &state)
                 if (CompNum > 0) {
                     int ArrayCount = 0;
                     for (int i = 1; i <= CompNum; ++i) {
-                        auto const &ai(state.dataAirSystemsData->AirSysCompToPlant(i));
+                        auto const &ai = state.dataAirSystemsData->AirSysCompToPlant(i);
                         bool duplicate(false);
                         for (int j = 1; j <= ArrayCount; ++j) {
-                            auto const &aj(state.dataAirSystemsData->AirSysCompToPlant(j));
+                            auto const &aj = state.dataAirSystemsData->AirSysCompToPlant(j);
                             if ((ai.AirLoopNum == aj.AirLoopNum) && (ai.AirLoopBranch == aj.AirLoopBranch) &&
                                 (ai.AirLoopComp == aj.AirLoopComp)) { // Duplicate
                                 duplicate = true;
@@ -574,7 +588,7 @@ void InitEnergyReports(EnergyPlusData &state)
                         if (!duplicate) {
                             ++ArrayCount;
                             if (i > ArrayCount) { // Copy to lower position
-                                auto &aa(state.dataAirSystemsData->AirSysCompToPlant(ArrayCount));
+                                auto &aa = state.dataAirSystemsData->AirSysCompToPlant(ArrayCount);
                                 aa.AirLoopNum = ai.AirLoopNum;
                                 aa.AirLoopBranch = ai.AirLoopBranch;
                                 aa.AirLoopComp = ai.AirLoopComp;
@@ -588,7 +602,7 @@ void InitEnergyReports(EnergyPlusData &state)
                         }
                     }
                     for (int i = ArrayCount + 1; i <= CompNum; ++i) { // Zero the now-unused entries
-                        auto &ai(state.dataAirSystemsData->AirSysCompToPlant(i));
+                        auto &ai = state.dataAirSystemsData->AirSysCompToPlant(i);
                         ai.AirLoopNum = 0;
                         ai.AirLoopBranch = 0;
                         ai.AirLoopComp = 0;
@@ -604,10 +618,10 @@ void InitEnergyReports(EnergyPlusData &state)
                 if (SubCompNum > 0) {
                     int ArrayCount = 0;
                     for (int i = 1; i <= SubCompNum; ++i) {
-                        auto const &ai(state.dataAirSystemsData->AirSysSubCompToPlant(i));
+                        auto const &ai = state.dataAirSystemsData->AirSysSubCompToPlant(i);
                         bool duplicate(false);
                         for (int j = 1; j <= ArrayCount; ++j) {
-                            auto const &aj(state.dataAirSystemsData->AirSysSubCompToPlant(j));
+                            auto const &aj = state.dataAirSystemsData->AirSysSubCompToPlant(j);
                             if ((ai.AirLoopNum == aj.AirLoopNum) && (ai.AirLoopBranch == aj.AirLoopBranch) && (ai.AirLoopComp == aj.AirLoopComp) &&
                                 (ai.AirLoopSubComp == aj.AirLoopSubComp)) { // Duplicate
                                 duplicate = true;
@@ -617,7 +631,7 @@ void InitEnergyReports(EnergyPlusData &state)
                         if (!duplicate) {
                             ++ArrayCount;
                             if (i > ArrayCount) { // Copy to lower position
-                                auto &aa(state.dataAirSystemsData->AirSysSubCompToPlant(ArrayCount));
+                                auto &aa = state.dataAirSystemsData->AirSysSubCompToPlant(ArrayCount);
                                 aa.AirLoopNum = ai.AirLoopNum;
                                 aa.AirLoopBranch = ai.AirLoopBranch;
                                 aa.AirLoopComp = ai.AirLoopComp;
@@ -632,7 +646,7 @@ void InitEnergyReports(EnergyPlusData &state)
                         }
                     }
                     for (int i = ArrayCount + 1; i <= SubCompNum; ++i) { // Zero the now-unused entries
-                        auto &ai(state.dataAirSystemsData->AirSysSubCompToPlant(i));
+                        auto &ai = state.dataAirSystemsData->AirSysSubCompToPlant(i);
                         ai.AirLoopNum = 0;
                         ai.AirLoopBranch = 0;
                         ai.AirLoopComp = 0;
@@ -649,10 +663,10 @@ void InitEnergyReports(EnergyPlusData &state)
                 if (SubSubCompNum > 0) {
                     int ArrayCount = 0;
                     for (int i = 1; i <= SubCompNum; ++i) {
-                        auto const &ai(state.dataAirSystemsData->AirSysSubSubCompToPlant(i));
-                        bool duplicate(false);
+                        auto const &ai = state.dataAirSystemsData->AirSysSubSubCompToPlant(i);
+                        bool duplicate = false;
                         for (int j = 1; j <= ArrayCount; ++j) {
-                            auto const &aj(state.dataAirSystemsData->AirSysSubSubCompToPlant(j));
+                            auto const &aj = state.dataAirSystemsData->AirSysSubSubCompToPlant(j);
                             if ((ai.AirLoopNum == aj.AirLoopNum) && (ai.AirLoopBranch == aj.AirLoopBranch) && (ai.AirLoopComp == aj.AirLoopComp) &&
                                 (ai.AirLoopSubComp == aj.AirLoopSubComp) && (ai.AirLoopSubSubComp == aj.AirLoopSubSubComp)) { // Duplicate
                                 duplicate = true;
@@ -662,7 +676,7 @@ void InitEnergyReports(EnergyPlusData &state)
                         if (!duplicate) {
                             ++ArrayCount;
                             if (i > ArrayCount) { // Copy to lower position
-                                auto &aa(state.dataAirSystemsData->AirSysSubSubCompToPlant(ArrayCount));
+                                auto &aa = state.dataAirSystemsData->AirSysSubSubCompToPlant(ArrayCount);
                                 aa.AirLoopNum = ai.AirLoopNum;
                                 aa.AirLoopBranch = ai.AirLoopBranch;
                                 aa.AirLoopComp = ai.AirLoopComp;
@@ -678,7 +692,7 @@ void InitEnergyReports(EnergyPlusData &state)
                         }
                     }
                     for (int i = ArrayCount + 1; i <= SubCompNum; ++i) { // Zero the now-unused entries
-                        auto &ai(state.dataAirSystemsData->AirSysSubSubCompToPlant(i));
+                        auto &ai = state.dataAirSystemsData->AirSysSubSubCompToPlant(i);
                         ai.AirLoopNum = 0;
                         ai.AirLoopBranch = 0;
                         ai.AirLoopComp = 0;
@@ -708,9 +722,9 @@ void InitEnergyReports(EnergyPlusData &state)
                              state.dataPlnt->VentRepPlant[static_cast<int>(LoopSideLocation::Supply)](PlantLoopNum).Branch(BranchNum).TotalComponents;
                              ++CompNum) {
                             {
-                                auto &thisVentRepComp(state.dataPlnt->VentRepPlant[static_cast<int>(LoopSideLocation::Supply)](PlantLoopNum)
-                                                          .Branch(BranchNum)
-                                                          .Comp(CompNum));
+                                auto &thisVentRepComp = state.dataPlnt->VentRepPlant[static_cast<int>(LoopSideLocation::Supply)](PlantLoopNum)
+                                                            .Branch(BranchNum)
+                                                            .Comp(CompNum);
                                 const std::string &CompType = thisVentRepComp.TypeOf;
                                 const std::string &CompName = thisVentRepComp.Name;
                                 int MatchLoop = 0;
@@ -737,9 +751,9 @@ void InitEnergyReports(EnergyPlusData &state)
                              state.dataPlnt->VentRepCond[static_cast<int>(LoopSideLocation::Supply)](PlantLoopNum).Branch(BranchNum).TotalComponents;
                              ++CompNum) {
                             {
-                                auto &thisVentRepComp(state.dataPlnt->VentRepCond[static_cast<int>(LoopSideLocation::Supply)](PlantLoopNum)
-                                                          .Branch(BranchNum)
-                                                          .Comp(CompNum));
+                                auto &thisVentRepComp = state.dataPlnt->VentRepCond[static_cast<int>(LoopSideLocation::Supply)](PlantLoopNum)
+                                                            .Branch(BranchNum)
+                                                            .Comp(CompNum);
                                 const std::string &CompType = thisVentRepComp.TypeOf;
                                 const std::string &CompName = thisVentRepComp.Name;
                                 int MatchLoop = 0;
@@ -792,15 +806,17 @@ void InitEnergyReports(EnergyPlusData &state)
             int LoopType = state.dataAirSystemsData->ZoneCompToPlant(CompNum).PlantLoopType;
             int LoopNum = state.dataAirSystemsData->ZoneCompToPlant(CompNum).PlantLoopNum;
             int FirstIndex = ArrayCount + 1;
-            int LoopCount = 1;
             bool ConnectionFlag = false;
 
             if (LoopType > 0 && LoopNum > 0) {
+                int LoopCount = 1;
                 FindFirstLastPtr(state, LoopType, LoopNum, ArrayCount, LoopCount, ConnectionFlag);
             }
 
             int LastIndex = ArrayCount;
-            if (FirstIndex > LastIndex) FirstIndex = LastIndex;
+            if (FirstIndex > LastIndex) {
+                FirstIndex = LastIndex;
+            }
             if (ConnectionFlag) {
                 state.dataAirSystemsData->ZoneCompToPlant(CompNum).FirstDemandSidePtr = FirstIndex;
                 state.dataAirSystemsData->ZoneCompToPlant(CompNum).LastDemandSidePtr = LastIndex;
@@ -811,15 +827,17 @@ void InitEnergyReports(EnergyPlusData &state)
             int LoopType = state.dataAirSystemsData->ZoneSubCompToPlant(SubCompNum).PlantLoopType;
             int LoopNum = state.dataAirSystemsData->ZoneSubCompToPlant(SubCompNum).PlantLoopNum;
             int FirstIndex = ArrayCount + 1;
-            int LoopCount = 1;
 
             bool ConnectionFlag = false;
             if (LoopType > 0 && LoopNum > 0) {
+                int LoopCount = 1;
                 FindFirstLastPtr(state, LoopType, LoopNum, ArrayCount, LoopCount, ConnectionFlag);
             }
 
             int LastIndex = ArrayCount;
-            if (FirstIndex > LastIndex) FirstIndex = LastIndex;
+            if (FirstIndex > LastIndex) {
+                FirstIndex = LastIndex;
+            }
             if (ConnectionFlag) {
                 state.dataAirSystemsData->ZoneSubCompToPlant(SubCompNum).FirstDemandSidePtr = FirstIndex;
                 state.dataAirSystemsData->ZoneSubCompToPlant(SubCompNum).LastDemandSidePtr = LastIndex;
@@ -830,15 +848,17 @@ void InitEnergyReports(EnergyPlusData &state)
             int LoopType = state.dataAirSystemsData->ZoneSubSubCompToPlant(SubSubCompNum).PlantLoopType;
             int LoopNum = state.dataAirSystemsData->ZoneSubSubCompToPlant(SubSubCompNum).PlantLoopNum;
             int FirstIndex = ArrayCount + 1;
-            int LoopCount = 1;
             bool ConnectionFlag = false;
 
             if (LoopType > 0 && LoopNum > 0) {
+                int LoopCount = 1;
                 FindFirstLastPtr(state, LoopType, LoopNum, ArrayCount, LoopCount, ConnectionFlag);
             }
 
             int LastIndex = ArrayCount;
-            if (FirstIndex > LastIndex) FirstIndex = LastIndex;
+            if (FirstIndex > LastIndex) {
+                FirstIndex = LastIndex;
+            }
             if (ConnectionFlag) {
                 state.dataAirSystemsData->ZoneSubSubCompToPlant(SubSubCompNum).FirstDemandSidePtr = FirstIndex;
                 state.dataAirSystemsData->ZoneSubSubCompToPlant(SubSubCompNum).LastDemandSidePtr = LastIndex;
@@ -848,15 +868,17 @@ void InitEnergyReports(EnergyPlusData &state)
             int LoopType = state.dataAirSystemsData->AirSysCompToPlant(CompNum).PlantLoopType;
             int LoopNum = state.dataAirSystemsData->AirSysCompToPlant(CompNum).PlantLoopNum;
             int FirstIndex = ArrayCount + 1;
-            int LoopCount = 1;
             bool ConnectionFlag = false;
 
             if (LoopType > 0 && LoopNum > 0) {
+                int LoopCount = 1;
                 FindFirstLastPtr(state, LoopType, LoopNum, ArrayCount, LoopCount, ConnectionFlag);
             }
 
             int LastIndex = ArrayCount;
-            if (FirstIndex > LastIndex) FirstIndex = LastIndex;
+            if (FirstIndex > LastIndex) {
+                FirstIndex = LastIndex;
+            }
             if (ConnectionFlag) {
                 state.dataAirSystemsData->AirSysCompToPlant(CompNum).FirstDemandSidePtr = FirstIndex;
                 state.dataAirSystemsData->AirSysCompToPlant(CompNum).LastDemandSidePtr = LastIndex;
@@ -867,15 +889,17 @@ void InitEnergyReports(EnergyPlusData &state)
             int LoopType = state.dataAirSystemsData->AirSysSubCompToPlant(SubCompNum).PlantLoopType;
             int LoopNum = state.dataAirSystemsData->AirSysSubCompToPlant(SubCompNum).PlantLoopNum;
             int FirstIndex = ArrayCount + 1;
-            int LoopCount = 1;
             bool ConnectionFlag = false;
 
             if (LoopType > 0 && LoopNum > 0) {
+                int LoopCount = 1;
                 FindFirstLastPtr(state, LoopType, LoopNum, ArrayCount, LoopCount, ConnectionFlag);
             }
 
             int LastIndex = ArrayCount;
-            if (FirstIndex > LastIndex) FirstIndex = LastIndex;
+            if (FirstIndex > LastIndex) {
+                FirstIndex = LastIndex;
+            }
             if (ConnectionFlag) {
                 state.dataAirSystemsData->AirSysSubCompToPlant(SubCompNum).FirstDemandSidePtr = FirstIndex;
                 state.dataAirSystemsData->AirSysSubCompToPlant(SubCompNum).LastDemandSidePtr = LastIndex;
@@ -886,20 +910,28 @@ void InitEnergyReports(EnergyPlusData &state)
             int LoopType = state.dataAirSystemsData->AirSysSubSubCompToPlant(SubSubCompNum).PlantLoopType;
             int LoopNum = state.dataAirSystemsData->AirSysSubSubCompToPlant(SubSubCompNum).PlantLoopNum;
             int FirstIndex = ArrayCount + 1;
-            int LoopCount = 1;
             bool ConnectionFlag = false;
 
             if (LoopType > 0 && LoopNum > 0) {
+                int LoopCount = 1;
                 FindFirstLastPtr(state, LoopType, LoopNum, ArrayCount, LoopCount, ConnectionFlag);
             }
 
             int LastIndex = ArrayCount;
-            if (FirstIndex > LastIndex) FirstIndex = LastIndex;
+            if (FirstIndex > LastIndex) {
+                FirstIndex = LastIndex;
+            }
             if (ConnectionFlag) {
                 state.dataAirSystemsData->AirSysSubSubCompToPlant(SubSubCompNum).FirstDemandSidePtr = FirstIndex;
                 state.dataAirSystemsData->AirSysSubSubCompToPlant(SubSubCompNum).LastDemandSidePtr = LastIndex;
             }
         }
+
+        reportAirLoopToplogy(state);
+
+        reportZoneEquipmentToplogy(state);
+
+        reportAirDistributionUnits(state);
 
         state.dataSysRpts->OneTimeFlag_InitEnergyReports = false;
     }
@@ -913,25 +945,25 @@ void InitEnergyReports(EnergyPlusData &state)
                 auto &pasBranchComp = pasBranch.Comp(CompNum);
                 for (int VarNum = 1; VarNum <= pasBranchComp.NumMeteredVars; ++VarNum) {
                     auto &pasBranchCompMeter = pasBranchComp.MeteredVar(VarNum);
-                    OutputProcessor::VariableType VarType = pasBranchCompMeter.ReportVarType;
-                    int VarIndex = pasBranchCompMeter.ReportVarIndex;
-                    pasBranchCompMeter.CurMeterReading = GetInternalVariableValue(state, VarType, VarIndex);
+                    OutputProcessor::VariableType VarType = pasBranchCompMeter.varType;
+                    int VarIndex = pasBranchCompMeter.num;
+                    pasBranchCompMeter.curMeterReading = GetInternalVariableValue(state, VarType, VarIndex);
                 }
                 for (int SubCompNum = 1; SubCompNum <= pasBranchComp.NumSubComps; ++SubCompNum) {
                     auto &pasBranchSubComp = pasBranchComp.SubComp(SubCompNum);
                     for (int VarNum = 1; VarNum <= pasBranchSubComp.NumMeteredVars; ++VarNum) {
                         auto &pasBranchSubCompMeter = pasBranchSubComp.MeteredVar(VarNum);
-                        OutputProcessor::VariableType VarType = pasBranchSubCompMeter.ReportVarType;
-                        int VarIndex = pasBranchSubCompMeter.ReportVarIndex;
-                        pasBranchSubCompMeter.CurMeterReading = GetInternalVariableValue(state, VarType, VarIndex);
+                        OutputProcessor::VariableType VarType = pasBranchSubCompMeter.varType;
+                        int VarIndex = pasBranchSubCompMeter.num;
+                        pasBranchSubCompMeter.curMeterReading = GetInternalVariableValue(state, VarType, VarIndex);
                     }
                     for (int SubSubCompNum = 1; SubSubCompNum <= pasBranchSubComp.NumSubSubComps; ++SubSubCompNum) {
                         auto &pasBranchSubSubComp = pasBranchSubComp.SubSubComp(SubSubCompNum);
                         for (int VarNum = 1; VarNum <= pasBranchSubSubComp.NumMeteredVars; ++VarNum) {
                             auto &pasBranchSubSubCompMeter = pasBranchSubSubComp.MeteredVar(VarNum);
-                            OutputProcessor::VariableType VarType = pasBranchSubSubCompMeter.ReportVarType;
-                            int VarIndex = pasBranchSubSubCompMeter.ReportVarIndex;
-                            pasBranchSubSubCompMeter.CurMeterReading = GetInternalVariableValue(state, VarType, VarIndex);
+                            OutputProcessor::VariableType VarType = pasBranchSubSubCompMeter.varType;
+                            int VarIndex = pasBranchSubSubCompMeter.num;
+                            pasBranchSubSubCompMeter.curMeterReading = GetInternalVariableValue(state, VarType, VarIndex);
                         }
                     }
                 }
@@ -941,31 +973,33 @@ void InitEnergyReports(EnergyPlusData &state)
 
     // On every iteration, load the zone equipment energy data
     for (int ListNum = 1; ListNum <= state.dataGlobal->NumOfZones; ++ListNum) {
-        if (!state.dataZoneEquip->ZoneEquipConfig(ListNum).IsControlled) continue;
+        if (!state.dataZoneEquip->ZoneEquipConfig(ListNum).IsControlled) {
+            continue;
+        }
         auto &zel = state.dataZoneEquip->ZoneEquipList(ListNum);
         for (int CompNum = 1; CompNum <= zel.NumOfEquipTypes; ++CompNum) {
             auto &zelEquipData = zel.EquipData(CompNum);
             for (int VarNum = 1; VarNum <= zelEquipData.NumMeteredVars; ++VarNum) {
                 auto &zelEquipDataMeter = zelEquipData.MeteredVar(VarNum);
-                OutputProcessor::VariableType VarType = zelEquipDataMeter.ReportVarType;
-                int VarIndex = zelEquipDataMeter.ReportVarIndex;
-                zelEquipDataMeter.CurMeterReading = GetInternalVariableValue(state, VarType, VarIndex);
+                OutputProcessor::VariableType VarType = zelEquipDataMeter.varType;
+                int VarIndex = zelEquipDataMeter.num;
+                zelEquipDataMeter.curMeterReading = GetInternalVariableValue(state, VarType, VarIndex);
             }
             for (int SubCompNum = 1; SubCompNum <= zelEquipData.NumSubEquip; ++SubCompNum) {
                 auto &zelSubEquipData = zelEquipData.SubEquipData(SubCompNum);
                 for (int VarNum = 1; VarNum <= zelSubEquipData.NumMeteredVars; ++VarNum) {
                     auto &zelSubEquipDataMeter = zelSubEquipData.MeteredVar(VarNum);
-                    OutputProcessor::VariableType VarType = zelSubEquipDataMeter.ReportVarType;
-                    int VarIndex = zelSubEquipDataMeter.ReportVarIndex;
-                    zelSubEquipDataMeter.CurMeterReading = GetInternalVariableValue(state, VarType, VarIndex);
+                    OutputProcessor::VariableType VarType = zelSubEquipDataMeter.varType;
+                    int VarIndex = zelSubEquipDataMeter.num;
+                    zelSubEquipDataMeter.curMeterReading = GetInternalVariableValue(state, VarType, VarIndex);
                 }
                 for (int SubSubCompNum = 1; SubSubCompNum <= zelSubEquipData.NumSubSubEquip; ++SubSubCompNum) {
                     auto &zelSubSubEquipData = zelSubEquipData.SubSubEquipData(SubSubCompNum);
                     for (int VarNum = 1; VarNum <= zelSubSubEquipData.NumMeteredVars; ++VarNum) {
                         auto &zelSubSubEquipDataMeter = zelSubSubEquipData.MeteredVar(VarNum);
-                        OutputProcessor::VariableType VarType = zelSubSubEquipDataMeter.ReportVarType;
-                        int VarIndex = zelSubSubEquipDataMeter.ReportVarIndex;
-                        zelSubSubEquipDataMeter.CurMeterReading = GetInternalVariableValue(state, VarType, VarIndex); // Sankar Corrected zone array
+                        OutputProcessor::VariableType VarType = zelSubSubEquipDataMeter.varType;
+                        int VarIndex = zelSubSubEquipDataMeter.num;
+                        zelSubSubEquipDataMeter.curMeterReading = GetInternalVariableValue(state, VarType, VarIndex); // Sankar Corrected zone array
                     }
                 }
             }
@@ -982,9 +1016,9 @@ void InitEnergyReports(EnergyPlusData &state)
                     auto &vrpBranchComp = vrpBranch.Comp(CompNum);
                     for (int VarNum = 1; VarNum <= vrpBranchComp.NumMeteredVars; ++VarNum) {
                         auto &vrpBranchCompMeter = vrpBranchComp.MeteredVar(VarNum);
-                        OutputProcessor::VariableType VarType = vrpBranchCompMeter.ReportVarType;
-                        int VarIndex = vrpBranchCompMeter.ReportVarIndex;
-                        vrpBranchCompMeter.CurMeterReading = GetInternalVariableValue(state, VarType, VarIndex);
+                        OutputProcessor::VariableType VarType = vrpBranchCompMeter.varType;
+                        int VarIndex = vrpBranchCompMeter.num;
+                        vrpBranchCompMeter.curMeterReading = GetInternalVariableValue(state, VarType, VarIndex);
                     }
                 }
             }
@@ -999,9 +1033,9 @@ void InitEnergyReports(EnergyPlusData &state)
                     auto &vrcBranchComp = vrcBranch.Comp(CompNum);
                     for (int VarNum = 1; VarNum <= vrcBranchComp.NumMeteredVars; ++VarNum) {
                         auto &vrcBranchCompMeter = vrcBranchComp.MeteredVar(VarNum);
-                        OutputProcessor::VariableType VarType = vrcBranchCompMeter.ReportVarType;
-                        int VarIndex = vrcBranchCompMeter.ReportVarIndex;
-                        vrcBranchCompMeter.CurMeterReading = GetInternalVariableValue(state, VarType, VarIndex);
+                        OutputProcessor::VariableType VarType = vrcBranchCompMeter.varType;
+                        int VarIndex = vrcBranchCompMeter.num;
+                        vrcBranchCompMeter.curMeterReading = GetInternalVariableValue(state, VarType, VarIndex);
                     }
                 }
             }
@@ -1028,15 +1062,14 @@ void FindFirstLastPtr(EnergyPlusData &state, int &LoopType, int &LoopNum, int &A
     int DemandSideLoopNum;
     int DemandSideBranchNum;
     int DemandSideCompNum;
-    int SupplySideCompNum;
     int DemandSideLoopType;
     bool found;
 
     // Object Data
-    auto &LoopStack = state.dataSysRpts->LoopStack;
 
     return; // Autodesk:? Is this routine now an intentional NOOP?
 
+    auto &LoopStack = state.dataSysRpts->LoopStack;
     if (state.dataSysRpts->OneTimeFlag_FindFirstLastPtr) {
         LoopStack.allocate(state.dataSysRpts->MaxLoopArraySize);
         state.dataAirSystemsData->DemandSideConnect.allocate(state.dataSysRpts->MaxCompArraySize);
@@ -1066,9 +1099,9 @@ void FindFirstLastPtr(EnergyPlusData &state, int &LoopType, int &LoopNum, int &A
                      state.dataPlnt->VentRepPlant[static_cast<int>(LoopSideLocation::Supply)](LoopNum).Branch(BranchNum).TotalComponents;
                      ++SupplySideCompNum) {
                     {
-                        auto &thisVentRepComp(
+                        auto const &thisVentRepComp =
                             state.dataPlnt->VentRepPlant[static_cast<int>(LoopSideLocation::Supply)](LoopNum).Branch(BranchNum).Comp(
-                                SupplySideCompNum));
+                                SupplySideCompNum);
                         DemandSideLoopType = thisVentRepComp.ConnectPlant.LoopType;
                         DemandSideLoopNum = thisVentRepComp.ConnectPlant.LoopNum;
                         DemandSideBranchNum = thisVentRepComp.ConnectPlant.BranchNum;
@@ -1112,13 +1145,14 @@ void FindFirstLastPtr(EnergyPlusData &state, int &LoopType, int &LoopNum, int &A
         } else if (LoopType == 2) {
             for (int BranchNum = 1; BranchNum <= state.dataPlnt->VentRepCond[static_cast<int>(LoopSideLocation::Supply)](LoopNum).TotalBranches;
                  ++BranchNum) {
-                for (SupplySideCompNum = 1;
+                for (int SupplySideCompNum = 1;
                      SupplySideCompNum <=
                      state.dataPlnt->VentRepCond[static_cast<int>(LoopSideLocation::Supply)](LoopNum).Branch(BranchNum).TotalComponents;
                      ++SupplySideCompNum) {
                     {
-                        auto &thisVentRepComp(state.dataPlnt->VentRepCond[static_cast<int>(LoopSideLocation::Supply)](LoopNum).Branch(BranchNum).Comp(
-                            SupplySideCompNum));
+                        auto const &thisVentRepComp =
+                            state.dataPlnt->VentRepCond[static_cast<int>(LoopSideLocation::Supply)](LoopNum).Branch(BranchNum).Comp(
+                                SupplySideCompNum);
                         DemandSideLoopType = thisVentRepComp.ConnectPlant.LoopType;
                         DemandSideLoopNum = thisVentRepComp.ConnectPlant.LoopNum;
                         DemandSideBranchNum = thisVentRepComp.ConnectPlant.BranchNum;
@@ -1208,7 +1242,7 @@ void UpdateZoneCompPtrArray(EnergyPlusData &state,
         int const OldArrayLimit(state.dataSysRpts->ArrayLimit_UpdateZoneCompPtrArray);
         state.dataAirSystemsData->ZoneCompToPlant.redimension(state.dataSysRpts->ArrayLimit_UpdateZoneCompPtrArray *= 2);
         for (int i = OldArrayLimit + 1; i <= state.dataSysRpts->ArrayLimit_UpdateZoneCompPtrArray; ++i) {
-            auto &zctp(state.dataAirSystemsData->ZoneCompToPlant(i));
+            auto &zctp = state.dataAirSystemsData->ZoneCompToPlant(i);
             zctp.ZoneEqListNum = 0;
             zctp.ZoneEqCompNum = 0;
             zctp.PlantLoopType = 0;
@@ -1221,7 +1255,7 @@ void UpdateZoneCompPtrArray(EnergyPlusData &state,
     }
 
     Idx = state.dataSysRpts->ArrayCounter_UpdateZoneCompPtrArray;
-    auto &zctp(state.dataAirSystemsData->ZoneCompToPlant(Idx));
+    auto &zctp = state.dataAirSystemsData->ZoneCompToPlant(Idx);
     zctp.ZoneEqListNum = ListNum;
     zctp.ZoneEqCompNum = AirDistUnitNum;
     zctp.PlantLoopType = PlantLoopType;
@@ -1271,7 +1305,7 @@ void UpdateZoneSubCompPtrArray(EnergyPlusData &state,
         int const OldArrayLimit(state.dataSysRpts->ArrayLimit_UpdateZoneSubCompPtrArray);
         state.dataAirSystemsData->ZoneSubCompToPlant.redimension(state.dataSysRpts->ArrayLimit_UpdateZoneSubCompPtrArray *= 2);
         for (int i = OldArrayLimit + 1; i <= state.dataSysRpts->ArrayLimit_UpdateZoneSubCompPtrArray; ++i) {
-            auto &zctp(state.dataAirSystemsData->ZoneSubCompToPlant(i));
+            auto &zctp = state.dataAirSystemsData->ZoneSubCompToPlant(i);
             zctp.ZoneEqListNum = 0;
             zctp.ZoneEqCompNum = 0;
             zctp.ZoneEqSubCompNum = 0;
@@ -1285,7 +1319,7 @@ void UpdateZoneSubCompPtrArray(EnergyPlusData &state,
     }
 
     Idx = state.dataSysRpts->ArrayCounter_UpdateZoneSubCompPtrArray;
-    auto &zctp(state.dataAirSystemsData->ZoneSubCompToPlant(Idx));
+    auto &zctp = state.dataAirSystemsData->ZoneSubCompToPlant(Idx);
     zctp.ZoneEqListNum = ListNum;
     zctp.ZoneEqCompNum = AirDistUnitNum;
     zctp.ZoneEqSubCompNum = SubCompNum;
@@ -1339,7 +1373,7 @@ void UpdateZoneSubSubCompPtrArray(EnergyPlusData &state,
         int const OldArrayLimit(state.dataSysRpts->ArrayLimit_UpdateZoneSubSubCompPtrArray);
         state.dataAirSystemsData->ZoneSubSubCompToPlant.redimension(state.dataSysRpts->ArrayLimit_UpdateZoneSubSubCompPtrArray *= 2);
         for (int i = OldArrayLimit + 1; i <= state.dataSysRpts->ArrayLimit_UpdateZoneSubSubCompPtrArray; ++i) {
-            auto &zctp(state.dataAirSystemsData->ZoneSubSubCompToPlant(i));
+            auto &zctp = state.dataAirSystemsData->ZoneSubSubCompToPlant(i);
             zctp.ZoneEqListNum = 0;
             zctp.ZoneEqCompNum = 0;
             zctp.ZoneEqSubCompNum = 0;
@@ -1354,7 +1388,7 @@ void UpdateZoneSubSubCompPtrArray(EnergyPlusData &state,
     }
 
     Idx = state.dataSysRpts->ArrayCounter_UpdateZoneSubSubCompPtrArray;
-    auto &zctp(state.dataAirSystemsData->ZoneSubSubCompToPlant(Idx));
+    auto &zctp = state.dataAirSystemsData->ZoneSubSubCompToPlant(Idx);
     zctp.ZoneEqListNum = ListNum;
     zctp.ZoneEqCompNum = AirDistUnitNum;
     zctp.ZoneEqSubCompNum = SubCompNum;
@@ -1406,7 +1440,7 @@ void UpdateAirSysCompPtrArray(EnergyPlusData &state,
         int const OldArrayLimit(state.dataSysRpts->ArrayLimit_UpdateAirSysCompPtrArray);
         state.dataAirSystemsData->AirSysCompToPlant.redimension(state.dataSysRpts->ArrayLimit_UpdateAirSysCompPtrArray *= 2);
         for (int i = OldArrayLimit + 1; i <= state.dataSysRpts->ArrayLimit_UpdateAirSysCompPtrArray; ++i) {
-            auto &actp(state.dataAirSystemsData->AirSysCompToPlant(i));
+            auto &actp = state.dataAirSystemsData->AirSysCompToPlant(i);
             actp.AirLoopNum = 0;
             actp.AirLoopBranch = 0;
             actp.AirLoopComp = 0;
@@ -1420,7 +1454,7 @@ void UpdateAirSysCompPtrArray(EnergyPlusData &state,
     }
 
     Idx = state.dataSysRpts->ArrayCounter_UpdateAirSysCompPtrArray;
-    auto &actp(state.dataAirSystemsData->AirSysCompToPlant(Idx));
+    auto &actp = state.dataAirSystemsData->AirSysCompToPlant(Idx);
     actp.AirLoopNum = AirLoopNum;
     actp.AirLoopBranch = BranchNum;
     actp.AirLoopComp = CompNum;
@@ -1474,7 +1508,7 @@ void UpdateAirSysSubCompPtrArray(EnergyPlusData &state,
         int const OldArrayLimit(state.dataSysRpts->ArrayLimit_UpdateAirSysSubCompPtrArray);
         state.dataAirSystemsData->AirSysSubCompToPlant.redimension(state.dataSysRpts->ArrayLimit_UpdateAirSysSubCompPtrArray *= 2);
         for (int i = OldArrayLimit + 1; i <= state.dataSysRpts->ArrayLimit_UpdateAirSysSubCompPtrArray; ++i) {
-            auto &actp(state.dataAirSystemsData->AirSysSubCompToPlant(i));
+            auto &actp = state.dataAirSystemsData->AirSysSubCompToPlant(i);
             actp.AirLoopNum = 0;
             actp.AirLoopBranch = 0;
             actp.AirLoopComp = 0;
@@ -1489,7 +1523,7 @@ void UpdateAirSysSubCompPtrArray(EnergyPlusData &state,
     }
 
     Idx = state.dataSysRpts->ArrayCounter_UpdateAirSysSubCompPtrArray;
-    auto &actp(state.dataAirSystemsData->AirSysSubCompToPlant(Idx));
+    auto &actp = state.dataAirSystemsData->AirSysSubCompToPlant(Idx);
     actp.AirLoopNum = AirLoopNum;
     actp.AirLoopBranch = BranchNum;
     actp.AirLoopComp = CompNum;
@@ -1546,7 +1580,7 @@ void UpdateAirSysSubSubCompPtrArray(EnergyPlusData &state,
         int const OldArrayLimit(state.dataSysRpts->ArrayLimit_UpdateAirSysSubSubCompPtrArray);
         state.dataAirSystemsData->AirSysSubSubCompToPlant.redimension(state.dataSysRpts->ArrayLimit_UpdateAirSysSubSubCompPtrArray *= 2);
         for (int i = OldArrayLimit + 1; i <= state.dataSysRpts->ArrayLimit_UpdateAirSysSubSubCompPtrArray; ++i) {
-            auto &actp(state.dataAirSystemsData->AirSysSubSubCompToPlant(i));
+            auto &actp = state.dataAirSystemsData->AirSysSubSubCompToPlant(i);
             actp.AirLoopNum = 0;
             actp.AirLoopBranch = 0;
             actp.AirLoopComp = 0;
@@ -1562,7 +1596,7 @@ void UpdateAirSysSubSubCompPtrArray(EnergyPlusData &state,
     }
 
     Idx = state.dataSysRpts->ArrayCounter_UpdateAirSysSubSubCompPtrArray;
-    auto &actp(state.dataAirSystemsData->AirSysSubSubCompToPlant(Idx));
+    auto &actp = state.dataAirSystemsData->AirSysSubSubCompToPlant(Idx);
     actp.AirLoopNum = AirLoopNum;
     actp.AirLoopBranch = BranchNum;
     actp.AirLoopComp = CompNum;
@@ -1584,7 +1618,7 @@ void AllocateAndSetUpVentReports(EnergyPlusData &state)
     //       MODIFIED       na
     //       RE-ENGINEERED  na
 
-    auto &NumPrimaryAirSys = state.dataHVACGlobal->NumPrimaryAirSys;
+    int NumPrimaryAirSys = state.dataHVACGlobal->NumPrimaryAirSys;
 
     // PURPOSE OF THIS SUBROUTINE:
     // Allocates Arrays and setup output variables related to Ventilation reports.
@@ -1615,346 +1649,348 @@ void AllocateAndSetUpVentReports(EnergyPlusData &state)
             // SYSTEM LOADS REPORT
             SetupOutputVariable(state,
                                 "Air System Total Heating Energy",
-                                OutputProcessor::Unit::J,
+                                Constant::Units::J,
                                 thisSysLoadRepVars.TotHTNG,
-                                OutputProcessor::SOVTimeStepType::HVAC,
-                                OutputProcessor::SOVStoreType::Summed,
+                                OutputProcessor::TimeStepType::System,
+                                OutputProcessor::StoreType::Sum,
                                 primaryAirSysName);
 
             SetupOutputVariable(state,
                                 "Air System Total Cooling Energy",
-                                OutputProcessor::Unit::J,
+                                Constant::Units::J,
                                 thisSysLoadRepVars.TotCLNG,
-                                OutputProcessor::SOVTimeStepType::HVAC,
-                                OutputProcessor::SOVStoreType::Summed,
+                                OutputProcessor::TimeStepType::System,
+                                OutputProcessor::StoreType::Sum,
                                 primaryAirSysName);
 
             // SYSTEM ENERGY USE REPORT
             SetupOutputVariable(state,
                                 "Air System Hot Water Energy",
-                                OutputProcessor::Unit::J,
+                                Constant::Units::J,
                                 thisSysLoadRepVars.TotH2OHOT,
-                                OutputProcessor::SOVTimeStepType::HVAC,
-                                OutputProcessor::SOVStoreType::Summed,
+                                OutputProcessor::TimeStepType::System,
+                                OutputProcessor::StoreType::Sum,
                                 primaryAirSysName);
 
             SetupOutputVariable(state,
                                 "Air System Steam Energy",
-                                OutputProcessor::Unit::J,
+                                Constant::Units::J,
                                 thisSysLoadRepVars.TotSteam,
-                                OutputProcessor::SOVTimeStepType::HVAC,
-                                OutputProcessor::SOVStoreType::Summed,
+                                OutputProcessor::TimeStepType::System,
+                                OutputProcessor::StoreType::Sum,
                                 primaryAirSysName);
 
             SetupOutputVariable(state,
                                 "Air System Chilled Water Energy",
-                                OutputProcessor::Unit::J,
+                                Constant::Units::J,
                                 thisSysLoadRepVars.TotH2OCOLD,
-                                OutputProcessor::SOVTimeStepType::HVAC,
-                                OutputProcessor::SOVStoreType::Summed,
+                                OutputProcessor::TimeStepType::System,
+                                OutputProcessor::StoreType::Sum,
                                 primaryAirSysName);
 
             SetupOutputVariable(state,
                                 "Air System Electricity Energy",
-                                OutputProcessor::Unit::J,
+                                Constant::Units::J,
                                 thisSysLoadRepVars.TotElec,
-                                OutputProcessor::SOVTimeStepType::HVAC,
-                                OutputProcessor::SOVStoreType::Summed,
+                                OutputProcessor::TimeStepType::System,
+                                OutputProcessor::StoreType::Sum,
                                 primaryAirSysName);
 
             SetupOutputVariable(state,
                                 "Air System NaturalGas Energy",
-                                OutputProcessor::Unit::J,
+                                Constant::Units::J,
                                 thisSysLoadRepVars.TotNaturalGas,
-                                OutputProcessor::SOVTimeStepType::HVAC,
-                                OutputProcessor::SOVStoreType::Summed,
+                                OutputProcessor::TimeStepType::System,
+                                OutputProcessor::StoreType::Sum,
                                 primaryAirSysName);
 
             SetupOutputVariable(state,
                                 "Air System Propane Energy",
-                                OutputProcessor::Unit::J,
+                                Constant::Units::J,
                                 thisSysLoadRepVars.TotPropane,
-                                OutputProcessor::SOVTimeStepType::HVAC,
-                                OutputProcessor::SOVStoreType::Summed,
+                                OutputProcessor::TimeStepType::System,
+                                OutputProcessor::StoreType::Sum,
                                 primaryAirSysName);
 
             SetupOutputVariable(state,
                                 "Air System Water Volume",
-                                OutputProcessor::Unit::m3,
+                                Constant::Units::m3,
                                 thisSysLoadRepVars.DomesticH2O,
-                                OutputProcessor::SOVTimeStepType::HVAC,
-                                OutputProcessor::SOVStoreType::Summed,
+                                OutputProcessor::TimeStepType::System,
+                                OutputProcessor::StoreType::Sum,
                                 primaryAirSysName);
 
             // SYSTEM COMPONENT LOAD REPORT
             SetupOutputVariable(state,
                                 "Air System Fan Air Heating Energy",
-                                OutputProcessor::Unit::J,
+                                Constant::Units::J,
                                 thisSysLoadRepVars.FANCompHTNG,
-                                OutputProcessor::SOVTimeStepType::HVAC,
-                                OutputProcessor::SOVStoreType::Summed,
+                                OutputProcessor::TimeStepType::System,
+                                OutputProcessor::StoreType::Sum,
                                 primaryAirSysName);
 
             SetupOutputVariable(state,
                                 "Air System Cooling Coil Total Cooling Energy",
-                                OutputProcessor::Unit::J,
+                                Constant::Units::J,
                                 thisSysLoadRepVars.CCCompCLNG,
-                                OutputProcessor::SOVTimeStepType::HVAC,
-                                OutputProcessor::SOVStoreType::Summed,
+                                OutputProcessor::TimeStepType::System,
+                                OutputProcessor::StoreType::Sum,
                                 primaryAirSysName);
 
             SetupOutputVariable(state,
                                 "Air System Heating Coil Total Heating Energy",
-                                OutputProcessor::Unit::J,
+                                Constant::Units::J,
                                 thisSysLoadRepVars.HCCompHTNG,
-                                OutputProcessor::SOVTimeStepType::HVAC,
-                                OutputProcessor::SOVStoreType::Summed,
+                                OutputProcessor::TimeStepType::System,
+                                OutputProcessor::StoreType::Sum,
                                 primaryAirSysName);
 
             SetupOutputVariable(state,
                                 "Air System Heat Exchanger Total Heating Energy",
-                                OutputProcessor::Unit::J,
+                                Constant::Units::J,
                                 thisSysLoadRepVars.HeatExHTNG,
-                                OutputProcessor::SOVTimeStepType::HVAC,
-                                OutputProcessor::SOVStoreType::Summed,
+                                OutputProcessor::TimeStepType::System,
+                                OutputProcessor::StoreType::Sum,
                                 primaryAirSysName);
 
             SetupOutputVariable(state,
                                 "Air System Heat Exchanger Total Cooling Energy",
-                                OutputProcessor::Unit::J,
+                                Constant::Units::J,
                                 thisSysLoadRepVars.HeatExCLNG,
-                                OutputProcessor::SOVTimeStepType::HVAC,
-                                OutputProcessor::SOVStoreType::Summed,
+                                OutputProcessor::TimeStepType::System,
+                                OutputProcessor::StoreType::Sum,
                                 primaryAirSysName);
 
             SetupOutputVariable(state,
                                 "Air System Solar Collector Total Heating Energy",
-                                OutputProcessor::Unit::J,
+                                Constant::Units::J,
                                 thisSysLoadRepVars.SolarCollectHeating,
-                                OutputProcessor::SOVTimeStepType::HVAC,
-                                OutputProcessor::SOVStoreType::Summed,
+                                OutputProcessor::TimeStepType::System,
+                                OutputProcessor::StoreType::Sum,
                                 primaryAirSysName);
 
             SetupOutputVariable(state,
                                 "Air System Solar Collector Total Cooling Energy",
-                                OutputProcessor::Unit::J,
+                                Constant::Units::J,
                                 thisSysLoadRepVars.SolarCollectCooling,
-                                OutputProcessor::SOVTimeStepType::HVAC,
-                                OutputProcessor::SOVStoreType::Summed,
+                                OutputProcessor::TimeStepType::System,
+                                OutputProcessor::StoreType::Sum,
                                 primaryAirSysName);
 
             SetupOutputVariable(state,
                                 "Air System User Defined Air Terminal Total Heating Energy",
-                                OutputProcessor::Unit::J,
+                                Constant::Units::J,
                                 thisSysLoadRepVars.UserDefinedTerminalHeating,
-                                OutputProcessor::SOVTimeStepType::HVAC,
-                                OutputProcessor::SOVStoreType::Summed,
+                                OutputProcessor::TimeStepType::System,
+                                OutputProcessor::StoreType::Sum,
                                 primaryAirSysName);
 
             SetupOutputVariable(state,
                                 "Air System User Defined Air Terminal Total Cooling Energy",
-                                OutputProcessor::Unit::J,
+                                Constant::Units::J,
                                 thisSysLoadRepVars.UserDefinedTerminalCooling,
-                                OutputProcessor::SOVTimeStepType::HVAC,
-                                OutputProcessor::SOVStoreType::Summed,
+                                OutputProcessor::TimeStepType::System,
+                                OutputProcessor::StoreType::Sum,
                                 primaryAirSysName);
 
             SetupOutputVariable(state,
                                 "Air System Humidifier Total Heating Energy",
-                                OutputProcessor::Unit::J,
+                                Constant::Units::J,
                                 thisSysLoadRepVars.HumidHTNG,
-                                OutputProcessor::SOVTimeStepType::HVAC,
-                                OutputProcessor::SOVStoreType::Summed,
+                                OutputProcessor::TimeStepType::System,
+                                OutputProcessor::StoreType::Sum,
                                 primaryAirSysName);
 
             SetupOutputVariable(state,
                                 "Air System Evaporative Cooler Total Cooling Energy",
-                                OutputProcessor::Unit::J,
+                                Constant::Units::J,
                                 thisSysLoadRepVars.EvapCLNG,
-                                OutputProcessor::SOVTimeStepType::HVAC,
-                                OutputProcessor::SOVStoreType::Summed,
+                                OutputProcessor::TimeStepType::System,
+                                OutputProcessor::StoreType::Sum,
                                 primaryAirSysName);
 
             SetupOutputVariable(state,
                                 "Air System Desiccant Dehumidifier Total Cooling Energy",
-                                OutputProcessor::Unit::J,
+                                Constant::Units::J,
                                 thisSysLoadRepVars.DesDehumidCLNG,
-                                OutputProcessor::SOVTimeStepType::HVAC,
-                                OutputProcessor::SOVStoreType::Summed,
+                                OutputProcessor::TimeStepType::System,
+                                OutputProcessor::StoreType::Sum,
                                 primaryAirSysName);
 
             // SYSTEM COMPONENT ENERGY REPORT
             SetupOutputVariable(state,
                                 "Air System Fan Electricity Energy",
-                                OutputProcessor::Unit::J,
+                                Constant::Units::J,
                                 thisSysLoadRepVars.FANCompElec,
-                                OutputProcessor::SOVTimeStepType::HVAC,
-                                OutputProcessor::SOVStoreType::Summed,
+                                OutputProcessor::TimeStepType::System,
+                                OutputProcessor::StoreType::Sum,
                                 primaryAirSysName);
 
             SetupOutputVariable(state,
                                 "Air System Heating Coil Hot Water Energy",
-                                OutputProcessor::Unit::J,
+                                Constant::Units::J,
                                 thisSysLoadRepVars.HCCompH2OHOT,
-                                OutputProcessor::SOVTimeStepType::HVAC,
-                                OutputProcessor::SOVStoreType::Summed,
+                                OutputProcessor::TimeStepType::System,
+                                OutputProcessor::StoreType::Sum,
                                 primaryAirSysName);
 
             SetupOutputVariable(state,
                                 "Air System Cooling Coil Chilled Water Energy",
-                                OutputProcessor::Unit::J,
+                                Constant::Units::J,
                                 thisSysLoadRepVars.CCCompH2OCOLD,
-                                OutputProcessor::SOVTimeStepType::HVAC,
-                                OutputProcessor::SOVStoreType::Summed,
+                                OutputProcessor::TimeStepType::System,
+                                OutputProcessor::StoreType::Sum,
                                 primaryAirSysName);
 
             SetupOutputVariable(state,
                                 "Air System DX Heating Coil Electricity Energy",
-                                OutputProcessor::Unit::J,
+                                Constant::Units::J,
                                 thisSysLoadRepVars.HCCompElec,
-                                OutputProcessor::SOVTimeStepType::HVAC,
-                                OutputProcessor::SOVStoreType::Summed,
+                                OutputProcessor::TimeStepType::System,
+                                OutputProcessor::StoreType::Sum,
                                 primaryAirSysName);
 
             SetupOutputVariable(state,
                                 "Air System DX Cooling Coil Electricity Energy",
-                                OutputProcessor::Unit::J,
+                                Constant::Units::J,
                                 thisSysLoadRepVars.CCCompElec,
-                                OutputProcessor::SOVTimeStepType::HVAC,
-                                OutputProcessor::SOVStoreType::Summed,
+                                OutputProcessor::TimeStepType::System,
+                                OutputProcessor::StoreType::Sum,
                                 primaryAirSysName);
 
             SetupOutputVariable(state,
                                 "Air System Heating Coil Electricity Energy",
-                                OutputProcessor::Unit::J,
+                                Constant::Units::J,
                                 thisSysLoadRepVars.HCCompElecRes,
-                                OutputProcessor::SOVTimeStepType::HVAC,
-                                OutputProcessor::SOVStoreType::Summed,
+                                OutputProcessor::TimeStepType::System,
+                                OutputProcessor::StoreType::Sum,
                                 primaryAirSysName);
 
             SetupOutputVariable(state,
                                 "Air System Heating Coil NaturalGas Energy",
-                                OutputProcessor::Unit::J,
+                                Constant::Units::J,
                                 thisSysLoadRepVars.HCCompNaturalGas,
-                                OutputProcessor::SOVTimeStepType::HVAC,
-                                OutputProcessor::SOVStoreType::Summed,
+                                OutputProcessor::TimeStepType::System,
+                                OutputProcessor::StoreType::Sum,
                                 primaryAirSysName);
 
             SetupOutputVariable(state,
                                 "Air System Heating Coil Propane Energy",
-                                OutputProcessor::Unit::J,
+                                Constant::Units::J,
                                 thisSysLoadRepVars.HCCompPropane,
-                                OutputProcessor::SOVTimeStepType::HVAC,
-                                OutputProcessor::SOVStoreType::Summed,
+                                OutputProcessor::TimeStepType::System,
+                                OutputProcessor::StoreType::Sum,
                                 primaryAirSysName);
 
             SetupOutputVariable(state,
                                 "Air System Heating Coil Steam Energy",
-                                OutputProcessor::Unit::J,
+                                Constant::Units::J,
                                 thisSysLoadRepVars.HCCompSteam,
-                                OutputProcessor::SOVTimeStepType::HVAC,
-                                OutputProcessor::SOVStoreType::Summed,
+                                OutputProcessor::TimeStepType::System,
+                                OutputProcessor::StoreType::Sum,
                                 primaryAirSysName);
 
             SetupOutputVariable(state,
                                 "Air System Humidifier Electricity Energy",
-                                OutputProcessor::Unit::J,
+                                Constant::Units::J,
                                 thisSysLoadRepVars.HumidElec,
-                                OutputProcessor::SOVTimeStepType::HVAC,
-                                OutputProcessor::SOVStoreType::Summed,
+                                OutputProcessor::TimeStepType::System,
+                                OutputProcessor::StoreType::Sum,
                                 primaryAirSysName);
 
             SetupOutputVariable(state,
                                 "Air System Humidifier NaturalGas Energy",
-                                OutputProcessor::Unit::J,
+                                Constant::Units::J,
                                 thisSysLoadRepVars.HumidNaturalGas,
-                                OutputProcessor::SOVTimeStepType::HVAC,
-                                OutputProcessor::SOVStoreType::Summed,
+                                OutputProcessor::TimeStepType::System,
+                                OutputProcessor::StoreType::Sum,
                                 primaryAirSysName);
 
             SetupOutputVariable(state,
                                 "Air System Humidifier Propane Energy",
-                                OutputProcessor::Unit::J,
+                                Constant::Units::J,
                                 thisSysLoadRepVars.HumidPropane,
-                                OutputProcessor::SOVTimeStepType::HVAC,
-                                OutputProcessor::SOVStoreType::Summed,
+                                OutputProcessor::TimeStepType::System,
+                                OutputProcessor::StoreType::Sum,
                                 primaryAirSysName);
 
             SetupOutputVariable(state,
                                 "Air System Evaporative Cooler Electricity Energy",
-                                OutputProcessor::Unit::J,
+                                Constant::Units::J,
                                 thisSysLoadRepVars.EvapElec,
-                                OutputProcessor::SOVTimeStepType::HVAC,
-                                OutputProcessor::SOVStoreType::Summed,
+                                OutputProcessor::TimeStepType::System,
+                                OutputProcessor::StoreType::Sum,
                                 primaryAirSysName);
 
             SetupOutputVariable(state,
                                 "Air System Desiccant Dehumidifier Electricity Energy",
-                                OutputProcessor::Unit::J,
+                                Constant::Units::J,
                                 thisSysLoadRepVars.DesDehumidElec,
-                                OutputProcessor::SOVTimeStepType::HVAC,
-                                OutputProcessor::SOVStoreType::Summed,
+                                OutputProcessor::TimeStepType::System,
+                                OutputProcessor::StoreType::Sum,
                                 primaryAirSysName);
 
             SetupOutputVariable(state,
                                 "Air System Mechanical Ventilation Flow Rate",
-                                OutputProcessor::Unit::m3_s,
+                                Constant::Units::m3_s,
                                 thisSysVentRepVars.MechVentFlow,
-                                OutputProcessor::SOVTimeStepType::HVAC,
-                                OutputProcessor::SOVStoreType::Average,
+                                OutputProcessor::TimeStepType::System,
+                                OutputProcessor::StoreType::Average,
                                 primaryAirSysName);
 
             SetupOutputVariable(state,
                                 "Air System Natural Ventilation Flow Rate",
-                                OutputProcessor::Unit::m3_s,
+                                Constant::Units::m3_s,
                                 thisSysVentRepVars.NatVentFlow,
-                                OutputProcessor::SOVTimeStepType::HVAC,
-                                OutputProcessor::SOVStoreType::Average,
+                                OutputProcessor::TimeStepType::System,
+                                OutputProcessor::StoreType::Average,
                                 primaryAirSysName);
 
             SetupOutputVariable(state,
                                 "Air System Target Voz Ventilation Flow Rate",
-                                OutputProcessor::Unit::m3_s,
+                                Constant::Units::m3_s,
                                 thisSysVentRepVars.TargetVentilationFlowVoz,
-                                OutputProcessor::SOVTimeStepType::HVAC,
-                                OutputProcessor::SOVStoreType::Average,
+                                OutputProcessor::TimeStepType::System,
+                                OutputProcessor::StoreType::Average,
                                 primaryAirSysName);
 
             SetupOutputVariable(state,
                                 "Air System Ventilation Below Target Voz Time",
-                                OutputProcessor::Unit::hr,
+                                Constant::Units::hr,
                                 thisSysVentRepVars.TimeBelowVozDyn,
-                                OutputProcessor::SOVTimeStepType::HVAC,
-                                OutputProcessor::SOVStoreType::Summed,
+                                OutputProcessor::TimeStepType::System,
+                                OutputProcessor::StoreType::Sum,
                                 primaryAirSysName);
 
             SetupOutputVariable(state,
                                 "Air System Ventilation At Target Voz Time",
-                                OutputProcessor::Unit::hr,
+                                Constant::Units::hr,
                                 thisSysVentRepVars.TimeAtVozDyn,
-                                OutputProcessor::SOVTimeStepType::HVAC,
-                                OutputProcessor::SOVStoreType::Summed,
+                                OutputProcessor::TimeStepType::System,
+                                OutputProcessor::StoreType::Sum,
                                 primaryAirSysName);
 
             SetupOutputVariable(state,
                                 "Air System Ventilation Above Target Voz Time",
-                                OutputProcessor::Unit::hr,
+                                Constant::Units::hr,
                                 thisSysVentRepVars.TimeAboveVozDyn,
-                                OutputProcessor::SOVTimeStepType::HVAC,
-                                OutputProcessor::SOVStoreType::Summed,
+                                OutputProcessor::TimeStepType::System,
+                                OutputProcessor::StoreType::Sum,
                                 primaryAirSysName);
 
             SetupOutputVariable(state,
                                 "Air System Ventilation When Unoccupied Time",
-                                OutputProcessor::Unit::hr,
+                                Constant::Units::hr,
                                 thisSysVentRepVars.TimeVentUnocc,
-                                OutputProcessor::SOVTimeStepType::HVAC,
-                                OutputProcessor::SOVStoreType::Summed,
+                                OutputProcessor::TimeStepType::System,
+                                OutputProcessor::StoreType::Sum,
                                 primaryAirSysName);
         }
     }
     for (int ZoneIndex = 1; ZoneIndex <= state.dataGlobal->NumOfZones; ++ZoneIndex) {
-        if (!state.dataZoneEquip->ZoneEquipConfig(ZoneIndex).IsControlled) continue;
+        if (!state.dataZoneEquip->ZoneEquipConfig(ZoneIndex).IsControlled) {
+            continue;
+        }
         auto &thisZoneVentRepVars = state.dataSysRpts->ZoneVentRepVars(ZoneIndex);
         auto &thisZoneName = state.dataZoneEquip->ZoneEquipConfig(ZoneIndex).ZoneName;
         // CurrentModuleObject='Zones(Controlled)'
@@ -1962,197 +1998,197 @@ void AllocateAndSetUpVentReports(EnergyPlusData &state)
             // Cooling Loads
             SetupOutputVariable(state,
                                 "Zone Mechanical Ventilation No Load Heat Removal Energy",
-                                OutputProcessor::Unit::J,
+                                Constant::Units::J,
                                 thisZoneVentRepVars.NoLoadCoolingByVent,
-                                OutputProcessor::SOVTimeStepType::HVAC,
-                                OutputProcessor::SOVStoreType::Summed,
+                                OutputProcessor::TimeStepType::System,
+                                OutputProcessor::StoreType::Sum,
                                 thisZoneName);
 
             SetupOutputVariable(state,
                                 "Zone Mechanical Ventilation Cooling Load Increase Energy",
-                                OutputProcessor::Unit::J,
+                                Constant::Units::J,
                                 thisZoneVentRepVars.CoolingLoadAddedByVent,
-                                OutputProcessor::SOVTimeStepType::HVAC,
-                                OutputProcessor::SOVStoreType::Summed,
+                                OutputProcessor::TimeStepType::System,
+                                OutputProcessor::StoreType::Sum,
                                 thisZoneName);
 
             SetupOutputVariable(state,
                                 "Zone Mechanical Ventilation Cooling Load Increase Due to Overheating Energy",
-                                OutputProcessor::Unit::J,
+                                Constant::Units::J,
                                 thisZoneVentRepVars.OverheatingByVent,
-                                OutputProcessor::SOVTimeStepType::HVAC,
-                                OutputProcessor::SOVStoreType::Summed,
+                                OutputProcessor::TimeStepType::System,
+                                OutputProcessor::StoreType::Sum,
                                 thisZoneName);
 
             SetupOutputVariable(state,
                                 "Zone Mechanical Ventilation Cooling Load Decrease Energy",
-                                OutputProcessor::Unit::J,
+                                Constant::Units::J,
                                 thisZoneVentRepVars.CoolingLoadMetByVent,
-                                OutputProcessor::SOVTimeStepType::HVAC,
-                                OutputProcessor::SOVStoreType::Summed,
+                                OutputProcessor::TimeStepType::System,
+                                OutputProcessor::StoreType::Sum,
                                 thisZoneName);
             // Heating Loads
             SetupOutputVariable(state,
                                 "Zone Mechanical Ventilation No Load Heat Addition Energy",
-                                OutputProcessor::Unit::J,
+                                Constant::Units::J,
                                 thisZoneVentRepVars.NoLoadHeatingByVent,
-                                OutputProcessor::SOVTimeStepType::HVAC,
-                                OutputProcessor::SOVStoreType::Summed,
+                                OutputProcessor::TimeStepType::System,
+                                OutputProcessor::StoreType::Sum,
                                 thisZoneName);
 
             SetupOutputVariable(state,
                                 "Zone Mechanical Ventilation Heating Load Increase Energy",
-                                OutputProcessor::Unit::J,
+                                Constant::Units::J,
                                 thisZoneVentRepVars.HeatingLoadAddedByVent,
-                                OutputProcessor::SOVTimeStepType::HVAC,
-                                OutputProcessor::SOVStoreType::Summed,
+                                OutputProcessor::TimeStepType::System,
+                                OutputProcessor::StoreType::Sum,
                                 thisZoneName);
 
             SetupOutputVariable(state,
                                 "Zone Mechanical Ventilation Heating Load Increase Due to Overcooling Energy",
-                                OutputProcessor::Unit::J,
+                                Constant::Units::J,
                                 thisZoneVentRepVars.OvercoolingByVent,
-                                OutputProcessor::SOVTimeStepType::HVAC,
-                                OutputProcessor::SOVStoreType::Summed,
+                                OutputProcessor::TimeStepType::System,
+                                OutputProcessor::StoreType::Sum,
                                 thisZoneName);
 
             SetupOutputVariable(state,
                                 "Zone Mechanical Ventilation Heating Load Decrease Energy",
-                                OutputProcessor::Unit::J,
+                                Constant::Units::J,
                                 thisZoneVentRepVars.HeatingLoadMetByVent,
-                                OutputProcessor::SOVTimeStepType::HVAC,
-                                OutputProcessor::SOVStoreType::Summed,
+                                OutputProcessor::TimeStepType::System,
+                                OutputProcessor::StoreType::Sum,
                                 thisZoneName);
         }
 
         SetupOutputVariable(state,
                             "Zone Mechanical Ventilation Mass Flow Rate",
-                            OutputProcessor::Unit::kg_s,
+                            Constant::Units::kg_s,
                             thisZoneVentRepVars.OAMassFlow,
-                            OutputProcessor::SOVTimeStepType::HVAC,
-                            OutputProcessor::SOVStoreType::Average,
+                            OutputProcessor::TimeStepType::System,
+                            OutputProcessor::StoreType::Average,
                             thisZoneName);
 
         SetupOutputVariable(state,
                             "Zone Mechanical Ventilation Mass",
-                            OutputProcessor::Unit::kg,
+                            Constant::Units::kg,
                             thisZoneVentRepVars.OAMass,
-                            OutputProcessor::SOVTimeStepType::HVAC,
-                            OutputProcessor::SOVStoreType::Summed,
+                            OutputProcessor::TimeStepType::System,
+                            OutputProcessor::StoreType::Sum,
                             thisZoneName);
 
         SetupOutputVariable(state,
                             "Zone Mechanical Ventilation Standard Density Volume Flow Rate",
-                            OutputProcessor::Unit::m3_s,
+                            Constant::Units::m3_s,
                             thisZoneVentRepVars.OAVolFlowStdRho,
-                            OutputProcessor::SOVTimeStepType::HVAC,
-                            OutputProcessor::SOVStoreType::Average,
+                            OutputProcessor::TimeStepType::System,
+                            OutputProcessor::StoreType::Average,
                             thisZoneName);
 
         SetupOutputVariable(state,
                             "Zone Mechanical Ventilation Standard Density Volume",
-                            OutputProcessor::Unit::m3,
+                            Constant::Units::m3,
                             thisZoneVentRepVars.OAVolStdRho,
-                            OutputProcessor::SOVTimeStepType::HVAC,
-                            OutputProcessor::SOVStoreType::Summed,
+                            OutputProcessor::TimeStepType::System,
+                            OutputProcessor::StoreType::Sum,
                             thisZoneName);
 
         SetupOutputVariable(state,
                             "Zone Mechanical Ventilation Current Density Volume Flow Rate",
-                            OutputProcessor::Unit::m3_s,
+                            Constant::Units::m3_s,
                             thisZoneVentRepVars.OAVolFlowCrntRho,
-                            OutputProcessor::SOVTimeStepType::HVAC,
-                            OutputProcessor::SOVStoreType::Average,
+                            OutputProcessor::TimeStepType::System,
+                            OutputProcessor::StoreType::Average,
                             thisZoneName);
 
         SetupOutputVariable(state,
                             "Zone Mechanical Ventilation Current Density Volume",
-                            OutputProcessor::Unit::m3,
+                            Constant::Units::m3,
                             thisZoneVentRepVars.OAVolCrntRho,
-                            OutputProcessor::SOVTimeStepType::HVAC,
-                            OutputProcessor::SOVStoreType::Summed,
+                            OutputProcessor::TimeStepType::System,
+                            OutputProcessor::StoreType::Sum,
                             thisZoneName);
 
         SetupOutputVariable(state,
                             "Zone Mechanical Ventilation Air Changes per Hour",
-                            OutputProcessor::Unit::ach,
+                            Constant::Units::ach,
                             thisZoneVentRepVars.MechACH,
-                            OutputProcessor::SOVTimeStepType::HVAC,
-                            OutputProcessor::SOVStoreType::Average,
+                            OutputProcessor::TimeStepType::System,
+                            OutputProcessor::StoreType::Average,
                             thisZoneName);
 
         SetupOutputVariable(state,
                             "Zone Target Voz Ventilation Flow Rate",
-                            OutputProcessor::Unit::m3_s,
+                            Constant::Units::m3_s,
                             thisZoneVentRepVars.TargetVentilationFlowVoz,
-                            OutputProcessor::SOVTimeStepType::HVAC,
-                            OutputProcessor::SOVStoreType::Average,
+                            OutputProcessor::TimeStepType::System,
+                            OutputProcessor::StoreType::Average,
                             thisZoneName);
 
         SetupOutputVariable(state,
                             "Zone Ventilation Below Target Voz Time",
-                            OutputProcessor::Unit::hr,
+                            Constant::Units::hr,
                             thisZoneVentRepVars.TimeBelowVozDyn,
-                            OutputProcessor::SOVTimeStepType::HVAC,
-                            OutputProcessor::SOVStoreType::Summed,
+                            OutputProcessor::TimeStepType::System,
+                            OutputProcessor::StoreType::Sum,
                             thisZoneName);
 
         SetupOutputVariable(state,
                             "Zone Ventilation At Target Voz Time",
-                            OutputProcessor::Unit::hr,
+                            Constant::Units::hr,
                             thisZoneVentRepVars.TimeAtVozDyn,
-                            OutputProcessor::SOVTimeStepType::HVAC,
-                            OutputProcessor::SOVStoreType::Summed,
+                            OutputProcessor::TimeStepType::System,
+                            OutputProcessor::StoreType::Sum,
                             thisZoneName);
 
         SetupOutputVariable(state,
                             "Zone Ventilation Above Target Voz Time",
-                            OutputProcessor::Unit::hr,
+                            Constant::Units::hr,
                             thisZoneVentRepVars.TimeAboveVozDyn,
-                            OutputProcessor::SOVTimeStepType::HVAC,
-                            OutputProcessor::SOVStoreType::Summed,
+                            OutputProcessor::TimeStepType::System,
+                            OutputProcessor::StoreType::Sum,
                             thisZoneName);
 
         SetupOutputVariable(state,
                             "Zone Ventilation When Unoccupied Time",
-                            OutputProcessor::Unit::hr,
+                            Constant::Units::hr,
                             thisZoneVentRepVars.TimeVentUnocc,
-                            OutputProcessor::SOVTimeStepType::HVAC,
-                            OutputProcessor::SOVStoreType::Summed,
+                            OutputProcessor::TimeStepType::System,
+                            OutputProcessor::StoreType::Sum,
                             thisZoneName);
     }
 
     // Facility outputs
     SetupOutputVariable(state,
                         "Facility Any Zone Ventilation Below Target Voz Time",
-                        OutputProcessor::Unit::hr,
+                        Constant::Units::hr,
                         state.dataSysRpts->AnyZoneTimeBelowVozDyn,
-                        OutputProcessor::SOVTimeStepType::HVAC,
-                        OutputProcessor::SOVStoreType::Summed,
+                        OutputProcessor::TimeStepType::System,
+                        OutputProcessor::StoreType::Sum,
                         "Facility");
 
     SetupOutputVariable(state,
                         "Facility All Zones Ventilation At Target Voz Time",
-                        OutputProcessor::Unit::hr,
+                        Constant::Units::hr,
                         state.dataSysRpts->AllZonesTimeAtVozDyn,
-                        OutputProcessor::SOVTimeStepType::HVAC,
-                        OutputProcessor::SOVStoreType::Summed,
+                        OutputProcessor::TimeStepType::System,
+                        OutputProcessor::StoreType::Sum,
                         "Facility");
 
     SetupOutputVariable(state,
                         "Facility Any Zone Ventilation Above Target Voz Time",
-                        OutputProcessor::Unit::hr,
+                        Constant::Units::hr,
                         state.dataSysRpts->AnyZoneTimeAboveVozDyn,
-                        OutputProcessor::SOVTimeStepType::HVAC,
-                        OutputProcessor::SOVStoreType::Summed,
+                        OutputProcessor::TimeStepType::System,
+                        OutputProcessor::StoreType::Sum,
                         "Facility");
 
     SetupOutputVariable(state,
                         "Facility Any Zone Ventilation When Unoccupied Time",
-                        OutputProcessor::Unit::hr,
+                        Constant::Units::hr,
                         state.dataSysRpts->AnyZoneTimeVentUnocc,
-                        OutputProcessor::SOVTimeStepType::HVAC,
-                        OutputProcessor::SOVStoreType::Summed,
+                        OutputProcessor::TimeStepType::System,
+                        OutputProcessor::StoreType::Sum,
                         "Facility");
 }
 
@@ -2162,8 +2198,6 @@ void CreateEnergyReportStructure(EnergyPlusData &state)
     // SUBROUTINE INFORMATION:
     //       AUTHOR         Dan Fisher/Linda Lawrie
     //       DATE WRITTEN   June 2005
-    //       MODIFIED       na
-    //       RE-ENGINEERED  na
 
     // PURPOSE OF THIS SUBROUTINE:
     // Creates the Energy Reporting Structure.  This routine is only called once --
@@ -2172,13 +2206,6 @@ void CreateEnergyReportStructure(EnergyPlusData &state)
     // METHODOLOGY EMPLOYED:
     // Once all compsets/nodes/connections have been established find all components
     // subcomponents, etc.
-
-    // Using/Aliasing
-    using BranchNodeConnections::GetChildrenData;
-    using BranchNodeConnections::GetComponentData;
-    using BranchNodeConnections::GetNumChildren;
-    using BranchNodeConnections::IsParentObject;
-    using namespace DataGlobalConstants;
 
     // SUBROUTINE LOCAL VARIABLE DECLARATIONS:
     int AirLoopNum;
@@ -2196,29 +2223,20 @@ void CreateEnergyReportStructure(EnergyPlusData &state)
     int PlantLoopNum;
 
     // Dimension GetChildrenData arrays
-    EPVector<DataLoopNode::ConnectionObjectType> SubCompTypes;
+    EPVector<Node::ConnectionObjectType> SubCompTypes;
     Array1D_string SubCompNames;
     Array1D_string InletNodeNames;
     Array1D_int InletNodeNumbers;
-    Array1D<NodeInputManager::CompFluidStream> InletFluidStreams;
+    Array1D<Node::CompFluidStream> InletFluidStreams;
     Array1D_string OutletNodeNames;
     Array1D_int OutletNodeNumbers;
-    Array1D<NodeInputManager::CompFluidStream> OutletFluidStreams;
+    Array1D<Node::CompFluidStream> OutletFluidStreams;
     int NumChildren;
     int NumGrandChildren;
     bool IsParent;
 
     // Dimension GetMeteredVariables arrays
-    Array1D_int VarIndexes;                                         // Variable Numbers
-    Array1D<OutputProcessor::VariableType> VarTypes;                // Variable Types (1=integer, 2=real, 3=meter)
-    Array1D_string UnitsStrings;                                    // UnitsStrings for each variable
-    Array1D<OutputProcessor::TimeStepType> IndexTypes;              // Variable Idx Types (1=Zone,2=HVAC)
-    Array1D<OutputProcessor::Unit> unitsForVar;                     // units from enum for each variable
-    std::map<int, DataGlobalConstants::ResourceType> ResourceTypes; // ResourceTypes for each variable
-    Array1D_string EndUses;                                         // EndUses for each variable
-    Array1D_string Groups;                                          // Groups for each variable
-    Array1D_string Names;                                           // Variable Names for each variable
-    int NumFound;                                                   // Number Found
+    Array1D<OutputProcessor::MeteredVar> meteredVars;
     int NumVariables;
     int NumLeft; // Counter for deeper components
 
@@ -2228,15 +2246,15 @@ void CreateEnergyReportStructure(EnergyPlusData &state)
     for (AirLoopNum = 1; AirLoopNum <= state.dataHVACGlobal->NumPrimaryAirSys; ++AirLoopNum) {
         for (BranchNum = 1; BranchNum <= state.dataAirSystemsData->PrimaryAirSystems(AirLoopNum).NumBranches; ++BranchNum) {
             for (CompNum = 1; CompNum <= state.dataAirSystemsData->PrimaryAirSystems(AirLoopNum).Branch(BranchNum).TotalComponents; ++CompNum) {
-                DataLoopNode::ConnectionObjectType TypeOfComp = static_cast<DataLoopNode::ConnectionObjectType>(
-                    EnergyPlus::getEnumerationValue(BranchNodeConnections::ConnectionObjectTypeNamesUC,
-                                                    state.dataAirSystemsData->PrimaryAirSystems(AirLoopNum).Branch(BranchNum).Comp(CompNum).TypeOf));
+                Node::ConnectionObjectType TypeOfComp = static_cast<Node::ConnectionObjectType>(
+                    EnergyPlus::getEnumValue(Node::ConnectionObjectTypeNamesUC,
+                                             state.dataAirSystemsData->PrimaryAirSystems(AirLoopNum).Branch(BranchNum).Comp(CompNum).TypeOf));
                 std::string &NameOfComp = state.dataAirSystemsData->PrimaryAirSystems(AirLoopNum).Branch(BranchNum).Comp(CompNum).Name;
                 // Get complete list of components for complex branches
-                if (IsParentObject(state, TypeOfComp, NameOfComp)) {
+                if (Node::IsParentObject(state, TypeOfComp, NameOfComp)) {
 
                     state.dataAirSystemsData->PrimaryAirSystems(AirLoopNum).Branch(BranchNum).Comp(CompNum).Parent = true;
-                    NumChildren = GetNumChildren(state, TypeOfComp, NameOfComp);
+                    NumChildren = Node::GetNumChildren(state, TypeOfComp, NameOfComp);
 
                     SubCompTypes.allocate(NumChildren);
                     SubCompNames.allocate(NumChildren);
@@ -2246,23 +2264,23 @@ void CreateEnergyReportStructure(EnergyPlusData &state)
                     OutletNodeNumbers.allocate(NumChildren);
                     state.dataAirSystemsData->PrimaryAirSystems(AirLoopNum).Branch(BranchNum).Comp(CompNum).SubComp.allocate(NumChildren);
 
-                    GetChildrenData(state,
-                                    TypeOfComp,
-                                    NameOfComp,
-                                    NumChildren,
-                                    SubCompTypes,
-                                    SubCompNames,
-                                    InletNodeNames,
-                                    InletNodeNumbers,
-                                    OutletNodeNames,
-                                    OutletNodeNumbers,
-                                    ErrorsFound);
+                    Node::GetChildrenData(state,
+                                          TypeOfComp,
+                                          NameOfComp,
+                                          NumChildren,
+                                          SubCompTypes,
+                                          SubCompNames,
+                                          InletNodeNames,
+                                          InletNodeNumbers,
+                                          OutletNodeNames,
+                                          OutletNodeNumbers,
+                                          ErrorsFound);
 
                     for (SubCompNum = 1; SubCompNum <= NumChildren; ++SubCompNum) {
                         {
-                            auto &thisSubComponent(
-                                state.dataAirSystemsData->PrimaryAirSystems(AirLoopNum).Branch(BranchNum).Comp(CompNum).SubComp(SubCompNum));
-                            thisSubComponent.TypeOf = BranchNodeConnections::ConnectionObjectTypeNamesUC[static_cast<int>(SubCompTypes(SubCompNum))];
+                            auto &thisSubComponent =
+                                state.dataAirSystemsData->PrimaryAirSystems(AirLoopNum).Branch(BranchNum).Comp(CompNum).SubComp(SubCompNum);
+                            thisSubComponent.TypeOf = Node::ConnectionObjectTypeNamesUC[static_cast<int>(SubCompTypes(SubCompNum))];
                             thisSubComponent.Name = SubCompNames(SubCompNum);
                             thisSubComponent.NodeNameIn = InletNodeNames(SubCompNum);
                             thisSubComponent.NodeNameOut = OutletNodeNames(SubCompNum);
@@ -2286,14 +2304,13 @@ void CreateEnergyReportStructure(EnergyPlusData &state)
 
                 // check for 'grandchildren'
                 for (SubCompNum = 1; SubCompNum <= NumChildren; ++SubCompNum) {
-                    DataLoopNode::ConnectionObjectType TypeOfSubComp =
-                        static_cast<DataLoopNode::ConnectionObjectType>(EnergyPlus::getEnumerationValue(
-                            BranchNodeConnections::ConnectionObjectTypeNamesUC,
-                            state.dataAirSystemsData->PrimaryAirSystems(AirLoopNum).Branch(BranchNum).Comp(CompNum).SubComp(SubCompNum).TypeOf));
+                    Node::ConnectionObjectType TypeOfSubComp = static_cast<Node::ConnectionObjectType>(EnergyPlus::getEnumValue(
+                        Node::ConnectionObjectTypeNamesUC,
+                        state.dataAirSystemsData->PrimaryAirSystems(AirLoopNum).Branch(BranchNum).Comp(CompNum).SubComp(SubCompNum).TypeOf));
                     std::string &NameOfSubComp =
                         state.dataAirSystemsData->PrimaryAirSystems(AirLoopNum).Branch(BranchNum).Comp(CompNum).SubComp(SubCompNum).Name;
-                    if (IsParentObject(state, TypeOfSubComp, NameOfSubComp)) {
-                        NumGrandChildren = GetNumChildren(state, TypeOfSubComp, NameOfSubComp);
+                    if (Node::IsParentObject(state, TypeOfSubComp, NameOfSubComp)) {
+                        NumGrandChildren = Node::GetNumChildren(state, TypeOfSubComp, NameOfSubComp);
                         SubCompTypes.allocate(NumGrandChildren);
                         SubCompNames.allocate(NumGrandChildren);
                         InletNodeNames.allocate(NumGrandChildren);
@@ -2306,37 +2323,37 @@ void CreateEnergyReportStructure(EnergyPlusData &state)
                             .SubComp(SubCompNum)
                             .SubSubComp.allocate(NumGrandChildren);
 
-                        GetChildrenData(state,
-                                        TypeOfSubComp,
-                                        NameOfSubComp,
-                                        NumGrandChildren,
-                                        SubCompTypes,
-                                        SubCompNames,
-                                        InletNodeNames,
-                                        InletNodeNumbers,
-                                        OutletNodeNames,
-                                        OutletNodeNumbers,
-                                        ErrorsFound);
+                        Node::GetChildrenData(state,
+                                              TypeOfSubComp,
+                                              NameOfSubComp,
+                                              NumGrandChildren,
+                                              SubCompTypes,
+                                              SubCompNames,
+                                              InletNodeNames,
+                                              InletNodeNumbers,
+                                              OutletNodeNames,
+                                              OutletNodeNumbers,
+                                              ErrorsFound);
 
                         for (SubSubCompNum = 1; SubSubCompNum <= NumGrandChildren; ++SubSubCompNum) {
                             {
-                                auto &thisSubSubComponent(state.dataAirSystemsData->PrimaryAirSystems(AirLoopNum)
-                                                              .Branch(BranchNum)
-                                                              .Comp(CompNum)
-                                                              .SubComp(SubCompNum)
-                                                              .SubSubComp(SubSubCompNum));
-                                thisSubSubComponent.TypeOf = static_cast<std::string>(
-                                    BranchNodeConnections::ConnectionObjectTypeNamesUC[static_cast<int>(SubCompTypes(SubSubCompNum))]);
+                                auto &thisSubSubComponent = state.dataAirSystemsData->PrimaryAirSystems(AirLoopNum)
+                                                                .Branch(BranchNum)
+                                                                .Comp(CompNum)
+                                                                .SubComp(SubCompNum)
+                                                                .SubSubComp(SubSubCompNum);
+                                thisSubSubComponent.TypeOf =
+                                    static_cast<std::string>(Node::ConnectionObjectTypeNamesUC[static_cast<int>(SubCompTypes(SubSubCompNum))]);
                                 thisSubSubComponent.Name = SubCompNames(SubSubCompNum);
                                 thisSubSubComponent.NodeNameIn = InletNodeNames(SubSubCompNum);
                                 thisSubSubComponent.NodeNameOut = OutletNodeNames(SubSubCompNum);
                                 thisSubSubComponent.NodeNumIn = InletNodeNumbers(SubSubCompNum);
                                 thisSubSubComponent.NodeNumOut = OutletNodeNumbers(SubSubCompNum);
-                                NumLeft = GetNumChildren(state, SubCompTypes(SubSubCompNum), SubCompNames(SubSubCompNum));
+                                NumLeft = Node::GetNumChildren(state, SubCompTypes(SubSubCompNum), SubCompNames(SubSubCompNum));
                                 if (NumLeft > 0) {
                                     ShowSevereError(
                                         state,
-                                        format("Hanging Children for component={}:{}", thisSubSubComponent.TypeOf, SubCompNames(SubSubCompNum)));
+                                        std::format("Hanging Children for component={}:{}", thisSubSubComponent.TypeOf, SubCompNames(SubSubCompNum)));
                                 }
                             }
                         }
@@ -2364,73 +2381,38 @@ void CreateEnergyReportStructure(EnergyPlusData &state)
             for (CompNum = 1; CompNum <= state.dataAirSystemsData->PrimaryAirSystems(AirLoopNum).Branch(BranchNum).TotalComponents; ++CompNum) {
                 // Get complete list of components for complex branches
                 {
-                    auto &thisComp(state.dataAirSystemsData->PrimaryAirSystems(AirLoopNum).Branch(BranchNum).Comp(CompNum));
+                    auto &thisComp = state.dataAirSystemsData->PrimaryAirSystems(AirLoopNum).Branch(BranchNum).Comp(CompNum);
                     std::string &TypeOfComp = thisComp.TypeOf;
                     std::string &NameOfComp = thisComp.Name;
                     NumVariables = GetNumMeteredVariables(state, TypeOfComp, NameOfComp);
                     if (NumVariables > 0) {
-                        VarIndexes.allocate(NumVariables);
-                        VarTypes.allocate(NumVariables);
-                        IndexTypes.allocate(NumVariables);
-                        unitsForVar.allocate(NumVariables);
-
-                        for (int idx = 1; idx <= NumVariables; ++idx) {
-                            ResourceTypes.insert(std::pair<int, DataGlobalConstants::ResourceType>(idx, DataGlobalConstants::ResourceType::None));
-                        }
-
-                        EndUses.allocate(NumVariables);
-                        Groups.allocate(NumVariables);
-                        Names.allocate(NumVariables);
+                        meteredVars.allocate(NumVariables);
                         thisComp.MeteredVar.allocate(NumVariables);
 
                         thisComp.NumMeteredVars = NumVariables;
-                        GetMeteredVariables(state,
-                                            TypeOfComp,
-                                            NameOfComp,
-                                            VarIndexes,
-                                            VarTypes,
-                                            IndexTypes,
-                                            unitsForVar,
-                                            ResourceTypes,
-                                            EndUses,
-                                            Groups,
-                                            Names,
-                                            NumFound);
+                        GetMeteredVariables(state, NameOfComp, meteredVars);
                         ModeFlagOn = true;
                         for (VarNum = 1; VarNum <= NumVariables; ++VarNum) {
                             {
-                                auto &thisVar(thisComp.MeteredVar(VarNum));
-                                thisVar.ReportVarName = Names(VarNum);
-                                thisVar.ReportVarUnits = unitsForVar(VarNum);
-                                thisVar.ReportVarIndex = VarIndexes(VarNum);
-                                thisVar.ReportVarIndexType = IndexTypes(VarNum);
-                                thisVar.ReportVarType = VarTypes(VarNum);
-                                thisVar.ResourceType = ResourceTypes.at(VarNum);
-                                thisVar.EndUse = EndUses(VarNum);
-                                if (thisVar.EndUse == "HEATINGCOILS" && ModeFlagOn) {
+                                thisComp.MeteredVar(VarNum) = meteredVars(VarNum); // Copy
+                                auto &thisVar = thisComp.MeteredVar(VarNum);
+                                if (thisVar.endUseCat == OutputProcessor::EndUseCat::HeatingCoils && ModeFlagOn) {
                                     for (VarNum1 = 1; VarNum1 <= NumVariables; ++VarNum1) {
-                                        thisComp.MeteredVar(VarNum1).EndUse_CompMode = EndUseType::HeatingOnly;
+                                        thisComp.MeteredVar(VarNum1).heatOrCool = Constant::HeatOrCool::HeatingOnly;
                                     }
                                     ModeFlagOn = false;
-                                } else if (thisVar.EndUse == "COOLINGCOILS" && ModeFlagOn) {
+                                } else if (thisVar.endUseCat == OutputProcessor::EndUseCat::CoolingCoils && ModeFlagOn) {
                                     for (VarNum1 = 1; VarNum1 <= NumVariables; ++VarNum1) {
-                                        thisComp.MeteredVar(VarNum1).EndUse_CompMode = EndUseType::CoolingOnly;
+                                        thisComp.MeteredVar(VarNum1).heatOrCool = Constant::HeatOrCool::CoolingOnly;
                                     }
                                     ModeFlagOn = false;
                                 } else if (ModeFlagOn) {
-                                    thisVar.EndUse_CompMode = EndUseType::NoHeatNoCool;
+                                    thisVar.heatOrCool = Constant::HeatOrCool::NoHeatNoCool;
                                 }
-                                thisVar.Group = Groups(VarNum);
                             }
                         }
 
-                        VarIndexes.deallocate();
-                        VarTypes.deallocate();
-                        IndexTypes.deallocate();
-                        unitsForVar.deallocate();
-                        EndUses.deallocate();
-                        Groups.deallocate();
-                        Names.deallocate();
+                        meteredVars.deallocate();
                     }
                     for (SubCompNum = 1; SubCompNum <= thisComp.NumSubComps; ++SubCompNum) {
                         // Get complete list of components for complex branches
@@ -2438,67 +2420,32 @@ void CreateEnergyReportStructure(EnergyPlusData &state)
                         std::string &NameOfSubComp = thisComp.SubComp(SubCompNum).Name;
                         NumVariables = GetNumMeteredVariables(state, TypeOfSubComp, NameOfSubComp);
                         if (NumVariables > 0) {
-                            VarIndexes.allocate(NumVariables);
-                            VarTypes.allocate(NumVariables);
-                            IndexTypes.allocate(NumVariables);
-                            unitsForVar.allocate(NumVariables);
-                            ResourceTypes.clear();
-                            for (int idx = 1; idx <= NumVariables; ++idx) {
-                                ResourceTypes.insert(std::pair<int, DataGlobalConstants::ResourceType>(idx, DataGlobalConstants::ResourceType::None));
-                            }
-                            EndUses.allocate(NumVariables);
-                            Groups.allocate(NumVariables);
-                            Names.allocate(NumVariables);
+                            meteredVars.allocate(NumVariables);
                             thisComp.SubComp(SubCompNum).MeteredVar.allocate(NumVariables);
 
-                            GetMeteredVariables(state,
-                                                TypeOfSubComp,
-                                                NameOfSubComp,
-                                                VarIndexes,
-                                                VarTypes,
-                                                IndexTypes,
-                                                unitsForVar,
-                                                ResourceTypes,
-                                                EndUses,
-                                                Groups,
-                                                Names,
-                                                NumFound);
-
+                            GetMeteredVariables(state, NameOfSubComp, meteredVars);
                             ModeFlagOn = true;
                             for (VarNum = 1; VarNum <= NumVariables; ++VarNum) {
                                 {
-                                    auto &thisVar(thisComp.SubComp(SubCompNum).MeteredVar(VarNum));
-                                    thisVar.ReportVarName = Names(VarNum);
-                                    thisVar.ReportVarUnits = unitsForVar(VarNum);
-                                    thisVar.ReportVarIndex = VarIndexes(VarNum);
-                                    thisVar.ReportVarIndexType = IndexTypes(VarNum);
-                                    thisVar.ReportVarType = VarTypes(VarNum);
-                                    thisVar.ResourceType = ResourceTypes.at(VarNum);
-                                    thisVar.EndUse = EndUses(VarNum);
-                                    if (thisVar.EndUse == "HEATINGCOILS" && ModeFlagOn) {
+                                    thisComp.SubComp(SubCompNum).MeteredVar(VarNum) = meteredVars(VarNum);
+                                    auto &thisVar = thisComp.SubComp(SubCompNum).MeteredVar(VarNum);
+                                    if (thisVar.endUseCat == OutputProcessor::EndUseCat::HeatingCoils && ModeFlagOn) {
                                         for (VarNum1 = 1; VarNum1 <= NumVariables; ++VarNum1) {
-                                            thisComp.SubComp(SubCompNum).MeteredVar(VarNum1).EndUse_CompMode = EndUseType::HeatingOnly;
+                                            thisComp.SubComp(SubCompNum).MeteredVar(VarNum1).heatOrCool = Constant::HeatOrCool::HeatingOnly;
                                         }
                                         ModeFlagOn = false;
-                                    } else if (thisVar.EndUse == "COOLINGCOILS" && ModeFlagOn) {
+                                    } else if (thisVar.endUseCat == OutputProcessor::EndUseCat::CoolingCoils && ModeFlagOn) {
                                         for (VarNum1 = 1; VarNum1 <= NumVariables; ++VarNum1) {
-                                            thisComp.SubComp(SubCompNum).MeteredVar(VarNum1).EndUse_CompMode = EndUseType::CoolingOnly;
+                                            thisComp.SubComp(SubCompNum).MeteredVar(VarNum1).heatOrCool = Constant::HeatOrCool::CoolingOnly;
                                         }
                                         ModeFlagOn = false;
                                     } else if (ModeFlagOn) {
-                                        thisVar.EndUse_CompMode = EndUseType::NoHeatNoCool;
+                                        thisVar.heatOrCool = Constant::HeatOrCool::NoHeatNoCool;
                                     }
-                                    thisVar.Group = Groups(VarNum);
                                 }
                             }
 
-                            VarIndexes.deallocate();
-                            VarTypes.deallocate();
-                            IndexTypes.deallocate();
-                            unitsForVar.deallocate();
-                            EndUses.deallocate();
-                            Groups.deallocate();
-                            Names.deallocate();
+                            meteredVars.deallocate();
                         }
 
                         thisComp.SubComp(SubCompNum).NumMeteredVars = NumVariables;
@@ -2509,70 +2456,34 @@ void CreateEnergyReportStructure(EnergyPlusData &state)
                             std::string &NameOfSubSubComp = thisComp.SubComp(SubCompNum).SubSubComp(SubSubCompNum).Name;
                             NumVariables = GetNumMeteredVariables(state, TypeOfSubSubComp, NameOfSubSubComp);
                             if (NumVariables > 0) {
-                                VarIndexes.allocate(NumVariables);
-                                VarTypes.allocate(NumVariables);
-                                IndexTypes.allocate(NumVariables);
-                                unitsForVar.allocate(NumVariables);
-                                ResourceTypes.clear();
-                                for (int idx = 1; idx <= NumVariables; ++idx) {
-                                    ResourceTypes.insert(
-                                        std::pair<int, DataGlobalConstants::ResourceType>(idx, DataGlobalConstants::ResourceType::None));
-                                }
-                                EndUses.allocate(NumVariables);
-                                Groups.allocate(NumVariables);
-                                Names.allocate(NumVariables);
+                                meteredVars.allocate(NumVariables);
                                 thisComp.SubComp(SubCompNum).SubSubComp(SubSubCompNum).MeteredVar.allocate(NumVariables);
 
-                                GetMeteredVariables(state,
-                                                    TypeOfSubSubComp,
-                                                    NameOfSubSubComp,
-                                                    VarIndexes,
-                                                    VarTypes,
-                                                    IndexTypes,
-                                                    unitsForVar,
-                                                    ResourceTypes,
-                                                    EndUses,
-                                                    Groups,
-                                                    Names,
-                                                    NumFound);
-
+                                GetMeteredVariables(state, NameOfSubSubComp, meteredVars);
                                 ModeFlagOn = true;
                                 for (VarNum = 1; VarNum <= NumVariables; ++VarNum) {
                                     {
-                                        auto &thisVar(thisComp.SubComp(SubCompNum).SubSubComp(SubSubCompNum).MeteredVar(VarNum));
-                                        thisVar.ReportVarName = Names(VarNum);
-                                        thisVar.ReportVarUnits = unitsForVar(VarNum);
-                                        thisVar.ReportVarIndex = VarIndexes(VarNum);
-                                        thisVar.ReportVarIndexType = IndexTypes(VarNum);
-                                        thisVar.ReportVarType = VarTypes(VarNum);
-                                        thisVar.ResourceType = ResourceTypes.at(VarNum);
-                                        thisVar.EndUse = EndUses(VarNum);
-                                        if (thisVar.EndUse == "HEATINGCOILS" && ModeFlagOn) {
+                                        thisComp.SubComp(SubCompNum).SubSubComp(SubSubCompNum).MeteredVar(VarNum) = meteredVars(VarNum);
+                                        auto &thisVar = thisComp.SubComp(SubCompNum).SubSubComp(SubSubCompNum).MeteredVar(VarNum);
+                                        if (thisVar.endUseCat == OutputProcessor::EndUseCat::HeatingCoils && ModeFlagOn) {
                                             for (VarNum1 = 1; VarNum1 <= NumVariables; ++VarNum1) {
-                                                thisComp.SubComp(SubCompNum).SubSubComp(SubSubCompNum).MeteredVar(VarNum1).EndUse_CompMode =
-                                                    EndUseType::HeatingOnly;
+                                                thisComp.SubComp(SubCompNum).SubSubComp(SubSubCompNum).MeteredVar(VarNum1).heatOrCool =
+                                                    Constant::HeatOrCool::HeatingOnly;
                                             }
                                             ModeFlagOn = false;
-                                        } else if (thisVar.EndUse == "COOLINGCOILS" && ModeFlagOn) {
+                                        } else if (thisVar.endUseCat == OutputProcessor::EndUseCat::CoolingCoils && ModeFlagOn) {
                                             for (VarNum1 = 1; VarNum1 <= NumVariables; ++VarNum1) {
-                                                thisComp.SubComp(SubCompNum).SubSubComp(SubSubCompNum).MeteredVar(VarNum1).EndUse_CompMode =
-                                                    EndUseType::CoolingOnly;
+                                                thisComp.SubComp(SubCompNum).SubSubComp(SubSubCompNum).MeteredVar(VarNum1).heatOrCool =
+                                                    Constant::HeatOrCool::CoolingOnly;
                                             }
                                             ModeFlagOn = false;
                                         } else if (ModeFlagOn) {
-                                            thisVar.EndUse_CompMode = EndUseType::NoHeatNoCool;
+                                            thisVar.heatOrCool = Constant::HeatOrCool::NoHeatNoCool;
                                         }
-                                        thisVar.Group = Groups(VarNum);
                                     }
                                 }
 
-                                VarIndexes.deallocate();
-                                VarTypes.deallocate();
-                                IndexTypes.deallocate();
-                                unitsForVar.deallocate();
-                                EndUses.deallocate();
-                                Groups.deallocate();
-                                Names.deallocate();
+                                meteredVars.deallocate();
                             }
                             thisComp.SubComp(SubCompNum).SubSubComp(SubSubCompNum).NumMeteredVars = NumVariables;
                         }
@@ -2584,28 +2495,29 @@ void CreateEnergyReportStructure(EnergyPlusData &state)
 
     // Allocate the system serving zone equipment component arrays
     for (CtrlZoneNum = 1; CtrlZoneNum <= state.dataGlobal->NumOfZones; ++CtrlZoneNum) {
-        if (!state.dataZoneEquip->ZoneEquipConfig(CtrlZoneNum).IsControlled) continue;
+        if (!state.dataZoneEquip->ZoneEquipConfig(CtrlZoneNum).IsControlled) {
+            continue;
+        }
         // Set index of air loop serving zone
         for (CompNum = 1; CompNum <= state.dataZoneEquip->ZoneEquipList(CtrlZoneNum).NumOfEquipTypes; ++CompNum) {
-            std::string &TypeOfComp = state.dataZoneEquip->ZoneEquipList(CtrlZoneNum).EquipType(CompNum);
+            std::string &TypeOfComp = state.dataZoneEquip->ZoneEquipList(CtrlZoneNum).EquipTypeName(CompNum);
             std::string &NameOfComp = state.dataZoneEquip->ZoneEquipList(CtrlZoneNum).EquipName(CompNum);
-            DataLoopNode::ConnectionObjectType TypeOfCompNum = static_cast<DataLoopNode::ConnectionObjectType>(
-                EnergyPlus::getEnumerationValue(BranchNodeConnections::ConnectionObjectTypeNamesUC, TypeOfComp));
-            GetComponentData(state,
-                             TypeOfCompNum,
-                             NameOfComp,
-                             IsParent,
-                             NumInlets,
-                             InletNodeNames,
-                             InletNodeNumbers,
-                             InletFluidStreams,
-                             NumOutlets,
-                             OutletNodeNames,
-                             OutletNodeNumbers,
-                             OutletFluidStreams,
-                             ErrorsFound);
+            Node::ConnectionObjectType TypeOfCompNum =
+                static_cast<Node::ConnectionObjectType>(EnergyPlus::getEnumValue(Node::ConnectionObjectTypeNamesUC, TypeOfComp));
+            Node::GetComponentData(state,
+                                   TypeOfCompNum,
+                                   NameOfComp,
+                                   IsParent,
+                                   NumInlets,
+                                   InletNodeNames,
+                                   InletNodeNumbers,
+                                   InletFluidStreams,
+                                   NumOutlets,
+                                   OutletNodeNames,
+                                   OutletNodeNumbers,
+                                   OutletFluidStreams);
             {
-                auto &thisEquipData(state.dataZoneEquip->ZoneEquipList(CtrlZoneNum).EquipData(CompNum));
+                auto &thisEquipData = state.dataZoneEquip->ZoneEquipList(CtrlZoneNum).EquipData(CompNum);
                 thisEquipData.TypeOf = TypeOfComp;
                 thisEquipData.Name = NameOfComp;
                 thisEquipData.OutletNodeNums.allocate(NumOutlets);
@@ -2625,71 +2537,37 @@ void CreateEnergyReportStructure(EnergyPlusData &state)
                     OutletNodeNumbers.deallocate();
                     OutletFluidStreams.deallocate();
 
-                    VarIndexes.allocate(NumVariables);
-                    VarTypes.allocate(NumVariables);
-                    IndexTypes.allocate(NumVariables);
-                    unitsForVar.allocate(NumVariables);
-                    ResourceTypes.clear();
-                    for (int idx = 1; idx <= NumVariables; ++idx) {
-                        ResourceTypes.insert(std::pair<int, DataGlobalConstants::ResourceType>(idx, DataGlobalConstants::ResourceType::None));
-                    }
-                    EndUses.allocate(NumVariables);
-                    Groups.allocate(NumVariables);
-                    Names.allocate(NumVariables);
+                    meteredVars.allocate(NumVariables);
                     thisEquipData.MeteredVar.allocate(NumVariables);
 
-                    GetMeteredVariables(state,
-                                        TypeOfComp,
-                                        NameOfComp,
-                                        VarIndexes,
-                                        VarTypes,
-                                        IndexTypes,
-                                        unitsForVar,
-                                        ResourceTypes,
-                                        EndUses,
-                                        Groups,
-                                        Names,
-                                        NumFound);
+                    GetMeteredVariables(state, NameOfComp, meteredVars);
 
                     ModeFlagOn = true;
                     for (VarNum = 1; VarNum <= NumVariables; ++VarNum) {
                         {
-                            auto &thisVar(thisEquipData.MeteredVar(VarNum));
-                            thisVar.ReportVarName = Names(VarNum);
-                            thisVar.ReportVarUnits = unitsForVar(VarNum);
-                            thisVar.ReportVarIndex = VarIndexes(VarNum);
-                            thisVar.ReportVarIndexType = IndexTypes(VarNum);
-                            thisVar.ReportVarType = VarTypes(VarNum);
-                            thisVar.ResourceType = ResourceTypes.at(VarNum);
-                            thisVar.EndUse = EndUses(VarNum);
-                            if (thisVar.EndUse == "HEATINGCOILS" && ModeFlagOn) {
+                            thisEquipData.MeteredVar(VarNum) = meteredVars(VarNum);
+                            auto &thisVar = thisEquipData.MeteredVar(VarNum);
+                            if (thisVar.endUseCat == OutputProcessor::EndUseCat::HeatingCoils && ModeFlagOn) {
                                 for (VarNum1 = 1; VarNum1 <= NumVariables; ++VarNum1) {
-                                    thisEquipData.MeteredVar(VarNum1).EndUse_CompMode = EndUseType::HeatingOnly;
+                                    thisEquipData.MeteredVar(VarNum1).heatOrCool = Constant::HeatOrCool::HeatingOnly;
                                 }
                                 ModeFlagOn = false;
-                            } else if (thisVar.EndUse == "COOLINGCOILS" && ModeFlagOn) {
+                            } else if (thisVar.endUseCat == OutputProcessor::EndUseCat::CoolingCoils && ModeFlagOn) {
                                 for (VarNum1 = 1; VarNum1 <= NumVariables; ++VarNum1) {
-                                    thisEquipData.MeteredVar(VarNum1).EndUse_CompMode = EndUseType::CoolingOnly;
+                                    thisEquipData.MeteredVar(VarNum1).heatOrCool = Constant::HeatOrCool::CoolingOnly;
                                 }
                                 ModeFlagOn = false;
                             } else if (ModeFlagOn) {
-                                thisVar.EndUse_CompMode = EndUseType::NoHeatNoCool;
+                                thisVar.heatOrCool = Constant::HeatOrCool::NoHeatNoCool;
                             }
-                            thisVar.Group = Groups(VarNum);
                         }
                     }
 
-                    VarIndexes.deallocate();
-                    VarTypes.deallocate();
-                    IndexTypes.deallocate();
-                    unitsForVar.deallocate();
-                    EndUses.deallocate();
-                    Groups.deallocate();
-                    Names.deallocate();
+                    meteredVars.deallocate();
                 }
 
-                if (IsParentObject(state, TypeOfCompNum, NameOfComp)) {
-                    NumChildren = GetNumChildren(state, TypeOfCompNum, NameOfComp);
+                if (Node::IsParentObject(state, TypeOfCompNum, NameOfComp)) {
+                    NumChildren = Node::GetNumChildren(state, TypeOfCompNum, NameOfComp);
                     thisEquipData.NumSubEquip = NumChildren;
 
                     SubCompTypes.allocate(NumChildren);
@@ -2700,21 +2578,20 @@ void CreateEnergyReportStructure(EnergyPlusData &state)
                     OutletNodeNumbers.allocate(NumChildren);
                     thisEquipData.SubEquipData.allocate(NumChildren);
 
-                    GetChildrenData(state,
-                                    TypeOfCompNum,
-                                    NameOfComp,
-                                    NumChildren,
-                                    SubCompTypes,
-                                    SubCompNames,
-                                    InletNodeNames,
-                                    InletNodeNumbers,
-                                    OutletNodeNames,
-                                    OutletNodeNumbers,
-                                    ErrorsFound);
+                    Node::GetChildrenData(state,
+                                          TypeOfCompNum,
+                                          NameOfComp,
+                                          NumChildren,
+                                          SubCompTypes,
+                                          SubCompNames,
+                                          InletNodeNames,
+                                          InletNodeNumbers,
+                                          OutletNodeNames,
+                                          OutletNodeNumbers,
+                                          ErrorsFound);
 
                     for (SubCompNum = 1; SubCompNum <= NumChildren; ++SubCompNum) {
-                        thisEquipData.SubEquipData(SubCompNum).TypeOf =
-                            BranchNodeConnections::ConnectionObjectTypeNamesUC[static_cast<int>(SubCompTypes(SubCompNum))];
+                        thisEquipData.SubEquipData(SubCompNum).TypeOf = Node::ConnectionObjectTypeNamesUC[static_cast<int>(SubCompTypes(SubCompNum))];
                         thisEquipData.SubEquipData(SubCompNum).Name = SubCompNames(SubCompNum);
                         thisEquipData.SubEquipData(SubCompNum).OutletNodeNum = OutletNodeNumbers(SubCompNum);
                         thisEquipData.SubEquipData(SubCompNum).InletNodeNum = InletNodeNumbers(SubCompNum);
@@ -2733,10 +2610,10 @@ void CreateEnergyReportStructure(EnergyPlusData &state)
                 for (SubCompNum = 1; SubCompNum <= NumChildren; ++SubCompNum) {
                     std::string &TypeOfSubComp = thisEquipData.SubEquipData(SubCompNum).TypeOf;
                     std::string &NameOfSubComp = thisEquipData.SubEquipData(SubCompNum).Name;
-                    DataLoopNode::ConnectionObjectType TypeOfSubCompNum = static_cast<DataLoopNode::ConnectionObjectType>(
-                        EnergyPlus::getEnumerationValue(BranchNodeConnections::ConnectionObjectTypeNamesUC, TypeOfSubComp));
-                    if (IsParentObject(state, TypeOfSubCompNum, NameOfSubComp)) {
-                        NumGrandChildren = GetNumChildren(state, TypeOfSubCompNum, NameOfSubComp);
+                    Node::ConnectionObjectType TypeOfSubCompNum =
+                        static_cast<Node::ConnectionObjectType>(EnergyPlus::getEnumValue(Node::ConnectionObjectTypeNamesUC, TypeOfSubComp));
+                    if (Node::IsParentObject(state, TypeOfSubCompNum, NameOfSubComp)) {
+                        NumGrandChildren = Node::GetNumChildren(state, TypeOfSubCompNum, NameOfSubComp);
                         thisEquipData.SubEquipData(SubCompNum).NumSubSubEquip = NumGrandChildren;
                         SubCompTypes.allocate(NumGrandChildren);
                         SubCompNames.allocate(NumGrandChildren);
@@ -2746,21 +2623,21 @@ void CreateEnergyReportStructure(EnergyPlusData &state)
                         OutletNodeNumbers.allocate(NumGrandChildren);
                         thisEquipData.SubEquipData(SubCompNum).SubSubEquipData.allocate(NumGrandChildren);
                         // Sankar added the array number for EquipData
-                        GetChildrenData(state,
-                                        TypeOfSubCompNum,
-                                        NameOfSubComp,
-                                        NumGrandChildren,
-                                        SubCompTypes,
-                                        SubCompNames,
-                                        InletNodeNames,
-                                        InletNodeNumbers,
-                                        OutletNodeNames,
-                                        OutletNodeNumbers,
-                                        ErrorsFound);
+                        Node::GetChildrenData(state,
+                                              TypeOfSubCompNum,
+                                              NameOfSubComp,
+                                              NumGrandChildren,
+                                              SubCompTypes,
+                                              SubCompNames,
+                                              InletNodeNames,
+                                              InletNodeNumbers,
+                                              OutletNodeNames,
+                                              OutletNodeNumbers,
+                                              ErrorsFound);
 
                         for (SubSubCompNum = 1; SubSubCompNum <= NumGrandChildren; ++SubSubCompNum) {
                             thisEquipData.SubEquipData(SubCompNum).SubSubEquipData(SubSubCompNum).TypeOf =
-                                BranchNodeConnections::ConnectionObjectTypeNamesUC[static_cast<int>(SubCompTypes(SubSubCompNum))];
+                                Node::ConnectionObjectTypeNamesUC[static_cast<int>(SubCompTypes(SubSubCompNum))];
                             thisEquipData.SubEquipData(SubCompNum).SubSubEquipData(SubSubCompNum).Name = SubCompNames(SubSubCompNum);
                             thisEquipData.SubEquipData(SubCompNum).SubSubEquipData(SubSubCompNum).OutletNodeNum = OutletNodeNumbers(SubSubCompNum);
                             thisEquipData.SubEquipData(SubCompNum).SubSubEquipData(SubSubCompNum).InletNodeNum = InletNodeNumbers(SubSubCompNum);
@@ -2774,162 +2651,89 @@ void CreateEnergyReportStructure(EnergyPlusData &state)
                     } else {
                         NumGrandChildren = 0;
                     }
-                }
+                } // for (SubCompNum)
             }
-        }
-    }
+        } // for (CompNum)
+    } // for (CtrlZoneNum)
 
     for (CtrlZoneNum = 1; CtrlZoneNum <= state.dataGlobal->NumOfZones; ++CtrlZoneNum) {
-        if (!state.dataZoneEquip->ZoneEquipConfig(CtrlZoneNum).IsControlled) continue;
+        if (!state.dataZoneEquip->ZoneEquipConfig(CtrlZoneNum).IsControlled) {
+            continue;
+        }
         for (CompNum = 1; CompNum <= state.dataZoneEquip->ZoneEquipList(CtrlZoneNum).NumOfEquipTypes; ++CompNum) {
             for (SubCompNum = 1; SubCompNum <= state.dataZoneEquip->ZoneEquipList(CtrlZoneNum).EquipData(CompNum).NumSubEquip; ++SubCompNum) {
-                {
-                    auto &thisSubEquipData(state.dataZoneEquip->ZoneEquipList(CtrlZoneNum).EquipData(CompNum).SubEquipData(SubCompNum));
-                    std::string &TypeOfSubComp = thisSubEquipData.TypeOf;
-                    std::string &NameOfSubComp = thisSubEquipData.Name;
+                auto &thisSubEquipData = state.dataZoneEquip->ZoneEquipList(CtrlZoneNum).EquipData(CompNum).SubEquipData(SubCompNum);
+                std::string &TypeOfSubComp = thisSubEquipData.TypeOf;
+                std::string &NameOfSubComp = thisSubEquipData.Name;
 
-                    NumVariables = GetNumMeteredVariables(state, TypeOfSubComp, NameOfSubComp);
-                    thisSubEquipData.NumMeteredVars = NumVariables; // Sankar added this line
-                    if (NumVariables > 0) {
-                        VarIndexes.allocate(NumVariables);
-                        VarTypes.allocate(NumVariables);
-                        IndexTypes.allocate(NumVariables);
-                        unitsForVar.allocate(NumVariables);
-                        ResourceTypes.clear();
-                        for (int idx = 1; idx <= NumVariables; ++idx) {
-                            ResourceTypes.insert(std::pair<int, DataGlobalConstants::ResourceType>(idx, DataGlobalConstants::ResourceType::None));
+                NumVariables = GetNumMeteredVariables(state, TypeOfSubComp, NameOfSubComp);
+                thisSubEquipData.NumMeteredVars = NumVariables; // Sankar added this line
+                if (NumVariables > 0) {
+                    meteredVars.allocate(NumVariables);
+                    thisSubEquipData.MeteredVar.allocate(NumVariables);
+
+                    GetMeteredVariables(state, NameOfSubComp, meteredVars);
+
+                    ModeFlagOn = true;
+                    for (VarNum = 1; VarNum <= NumVariables; ++VarNum) {
+                        thisSubEquipData.MeteredVar(VarNum) = meteredVars(VarNum);
+                        auto &thisVar = thisSubEquipData.MeteredVar(VarNum);
+                        if (thisVar.endUseCat == OutputProcessor::EndUseCat::HeatingCoils && ModeFlagOn) {
+                            for (VarNum1 = 1; VarNum1 <= NumVariables; ++VarNum1) {
+                                thisSubEquipData.MeteredVar(VarNum1).heatOrCool = Constant::HeatOrCool::HeatingOnly;
+                            }
+                            ModeFlagOn = false;
+                        } else if (thisVar.endUseCat == OutputProcessor::EndUseCat::CoolingCoils && ModeFlagOn) {
+                            for (VarNum1 = 1; VarNum1 <= NumVariables; ++VarNum1) {
+                                thisSubEquipData.MeteredVar(VarNum1).heatOrCool = Constant::HeatOrCool::CoolingOnly;
+                            }
+                            ModeFlagOn = false;
+                        } else if (ModeFlagOn) {
+                            thisVar.heatOrCool = Constant::HeatOrCool::NoHeatNoCool;
                         }
-                        EndUses.allocate(NumVariables);
-                        Groups.allocate(NumVariables);
-                        Names.allocate(NumVariables);
-                        thisSubEquipData.MeteredVar.allocate(NumVariables);
+                    }
 
-                        GetMeteredVariables(state,
-                                            TypeOfSubComp,
-                                            NameOfSubComp,
-                                            VarIndexes,
-                                            VarTypes,
-                                            IndexTypes,
-                                            unitsForVar,
-                                            ResourceTypes,
-                                            EndUses,
-                                            Groups,
-                                            Names,
-                                            NumFound);
+                    meteredVars.deallocate();
+                } // if (NumVariables > 0)
 
+                for (SubSubCompNum = 1; SubSubCompNum <= thisSubEquipData.NumSubSubEquip; ++SubSubCompNum) {
+                    std::string &TypeOfSubSubComp = thisSubEquipData.SubSubEquipData(SubSubCompNum).TypeOf;
+                    std::string &NameOfSubSubComp = thisSubEquipData.SubSubEquipData(SubSubCompNum).Name;
+
+                    NumVariables = GetNumMeteredVariables(state, TypeOfSubSubComp, NameOfSubSubComp);
+                    thisSubEquipData.SubSubEquipData(SubSubCompNum).NumMeteredVars = NumVariables; // Sankar added this line
+                    if (NumVariables > 0) {
+                        meteredVars.allocate(NumVariables);
+                        thisSubEquipData.SubSubEquipData(SubSubCompNum).MeteredVar.allocate(NumVariables);
+
+                        GetMeteredVariables(state, NameOfSubSubComp, meteredVars);
                         ModeFlagOn = true;
                         for (VarNum = 1; VarNum <= NumVariables; ++VarNum) {
-                            {
-                                auto &thisVar(thisSubEquipData.MeteredVar(VarNum));
-                                thisVar.ReportVarName = Names(VarNum);
-                                thisVar.ReportVarUnits = unitsForVar(VarNum);
-                                thisVar.ReportVarIndex = VarIndexes(VarNum);
-                                thisVar.ReportVarIndexType = IndexTypes(VarNum);
-                                thisVar.ReportVarType = VarTypes(VarNum);
-                                thisVar.ResourceType = ResourceTypes.at(VarNum);
-                                thisVar.EndUse = EndUses(VarNum);
-                                if (thisVar.EndUse == "HEATINGCOILS" && ModeFlagOn) {
-                                    for (VarNum1 = 1; VarNum1 <= NumVariables; ++VarNum1) {
-                                        thisSubEquipData.MeteredVar(VarNum1).EndUse_CompMode = EndUseType::HeatingOnly;
-                                    }
-                                    ModeFlagOn = false;
-                                } else if (thisVar.EndUse == "COOLINGCOILS" && ModeFlagOn) {
-                                    for (VarNum1 = 1; VarNum1 <= NumVariables; ++VarNum1) {
-                                        thisSubEquipData.MeteredVar(VarNum1).EndUse_CompMode = EndUseType::CoolingOnly;
-                                    }
-                                    ModeFlagOn = false;
-                                } else if (ModeFlagOn) {
-                                    thisVar.EndUse_CompMode = EndUseType::NoHeatNoCool;
+                            thisSubEquipData.SubSubEquipData(SubSubCompNum).MeteredVar(VarNum) = meteredVars(VarNum);
+                            auto &thisVar = thisSubEquipData.SubSubEquipData(SubSubCompNum).MeteredVar(VarNum);
+                            if (thisVar.endUseCat == OutputProcessor::EndUseCat::HeatingCoils && ModeFlagOn) {
+                                for (VarNum1 = 1; VarNum1 <= NumVariables; ++VarNum1) {
+                                    thisSubEquipData.SubSubEquipData(SubSubCompNum).MeteredVar(VarNum1).heatOrCool =
+                                        Constant::HeatOrCool::HeatingOnly;
                                 }
-                                thisVar.Group = Groups(VarNum);
+                                ModeFlagOn = false;
+                            } else if (thisVar.endUseCat == OutputProcessor::EndUseCat::CoolingCoils && ModeFlagOn) {
+                                for (VarNum1 = 1; VarNum1 <= NumVariables; ++VarNum1) {
+                                    thisSubEquipData.SubSubEquipData(SubSubCompNum).MeteredVar(VarNum1).heatOrCool =
+                                        Constant::HeatOrCool::CoolingOnly;
+                                }
+                                ModeFlagOn = false;
+                            } else if (ModeFlagOn) {
+                                thisVar.heatOrCool = Constant::HeatOrCool::NoHeatNoCool;
                             }
                         }
 
-                        VarIndexes.deallocate();
-                        VarTypes.deallocate();
-                        IndexTypes.deallocate();
-                        unitsForVar.deallocate();
-                        EndUses.deallocate();
-                        Groups.deallocate();
-                        Names.deallocate();
-                    }
-
-                    for (SubSubCompNum = 1; SubSubCompNum <= thisSubEquipData.NumSubSubEquip; ++SubSubCompNum) {
-                        std::string &TypeOfSubSubComp = thisSubEquipData.SubSubEquipData(SubSubCompNum).TypeOf;
-                        std::string &NameOfSubSubComp = thisSubEquipData.SubSubEquipData(SubSubCompNum).Name;
-
-                        NumVariables = GetNumMeteredVariables(state, TypeOfSubSubComp, NameOfSubSubComp);
-                        thisSubEquipData.SubSubEquipData(SubSubCompNum).NumMeteredVars = NumVariables; // Sankar added this line
-                        if (NumVariables > 0) {
-                            VarIndexes.allocate(NumVariables);
-                            VarTypes.allocate(NumVariables);
-                            IndexTypes.allocate(NumVariables);
-                            unitsForVar.allocate(NumVariables);
-                            ResourceTypes.clear();
-                            for (int idx = 1; idx <= NumVariables; ++idx) {
-                                ResourceTypes.insert(std::pair<int, DataGlobalConstants::ResourceType>(idx, DataGlobalConstants::ResourceType::None));
-                            }
-                            EndUses.allocate(NumVariables);
-                            Groups.allocate(NumVariables);
-                            Names.allocate(NumVariables);
-                            thisSubEquipData.SubSubEquipData(SubSubCompNum).MeteredVar.allocate(NumVariables);
-
-                            GetMeteredVariables(state,
-                                                TypeOfSubSubComp,
-                                                NameOfSubSubComp,
-                                                VarIndexes,
-                                                VarTypes,
-                                                IndexTypes,
-                                                unitsForVar,
-                                                ResourceTypes,
-                                                EndUses,
-                                                Groups,
-                                                Names,
-                                                NumFound);
-
-                            ModeFlagOn = true;
-                            for (VarNum = 1; VarNum <= NumVariables; ++VarNum) {
-                                {
-                                    auto &thisVar(thisSubEquipData.SubSubEquipData(SubSubCompNum).MeteredVar(VarNum));
-                                    thisVar.ReportVarName = Names(VarNum);
-                                    thisVar.ReportVarUnits = unitsForVar(VarNum);
-                                    thisVar.ReportVarIndex = VarIndexes(VarNum);
-                                    thisVar.ReportVarIndexType = IndexTypes(VarNum);
-                                    thisVar.ReportVarType = VarTypes(VarNum);
-                                    thisVar.ResourceType = ResourceTypes.at(VarNum);
-                                    thisVar.EndUse = EndUses(VarNum);
-                                    if (thisVar.EndUse == "HEATINGCOILS" && ModeFlagOn) {
-                                        for (VarNum1 = 1; VarNum1 <= NumVariables; ++VarNum1) {
-                                            thisSubEquipData.SubSubEquipData(SubSubCompNum).MeteredVar(VarNum1).EndUse_CompMode =
-                                                EndUseType::HeatingOnly;
-                                        }
-                                        ModeFlagOn = false;
-                                    } else if (thisVar.EndUse == "COOLINGCOILS" && ModeFlagOn) {
-                                        for (VarNum1 = 1; VarNum1 <= NumVariables; ++VarNum1) {
-                                            thisSubEquipData.SubSubEquipData(SubSubCompNum).MeteredVar(VarNum1).EndUse_CompMode =
-                                                EndUseType::CoolingOnly;
-                                        }
-                                        ModeFlagOn = false;
-                                    } else if (ModeFlagOn) {
-                                        thisVar.EndUse_CompMode = EndUseType::NoHeatNoCool;
-                                    }
-                                    thisVar.Group = Groups(VarNum);
-                                }
-                            }
-
-                            VarIndexes.deallocate();
-                            VarTypes.deallocate();
-                            IndexTypes.deallocate();
-                            unitsForVar.deallocate();
-                            EndUses.deallocate();
-                            Groups.deallocate();
-                            Names.deallocate();
-                        }
-                    }
-                }
-            }
-        }
-    }
+                        meteredVars.deallocate();
+                    } // if (NumVariables > 0)
+                } // for (SubSubCompNum)
+            } // for (SubCompNum)
+        } // for (CompNum)
+    } // for (CtrlZoneNum)
 
     //***Plant Loops
 
@@ -2960,15 +2764,15 @@ void CreateEnergyReportStructure(EnergyPlusData &state)
             for (BranchNum = 1; BranchNum <= ThisReportData.TotalBranches; ++BranchNum) {
                 for (CompNum = 1; CompNum <= ThisReportData.Branch(BranchNum).TotalComponents; ++CompNum) {
                     {
-                        auto &thisComp(ThisReportData.Branch(BranchNum).Comp(CompNum));
+                        auto &thisComp = ThisReportData.Branch(BranchNum).Comp(CompNum);
                         std::string &TypeOfComp = thisComp.TypeOf;
                         std::string &NameOfComp = thisComp.Name;
-                        DataLoopNode::ConnectionObjectType TypeOfCompNum = static_cast<DataLoopNode::ConnectionObjectType>(
-                            EnergyPlus::getEnumerationValue(BranchNodeConnections::ConnectionObjectTypeNamesUC, TypeOfComp));
+                        Node::ConnectionObjectType TypeOfCompNum =
+                            static_cast<Node::ConnectionObjectType>(EnergyPlus::getEnumValue(Node::ConnectionObjectTypeNamesUC, TypeOfComp));
                         // Get complete list of components for complex branches
-                        if (IsParentObject(state, TypeOfCompNum, NameOfComp)) {
+                        if (Node::IsParentObject(state, TypeOfCompNum, NameOfComp)) {
 
-                            NumChildren = GetNumChildren(state, TypeOfCompNum, NameOfComp);
+                            NumChildren = Node::GetNumChildren(state, TypeOfCompNum, NameOfComp);
 
                             SubCompTypes.allocate(NumChildren);
                             SubCompNames.allocate(NumChildren);
@@ -2978,21 +2782,20 @@ void CreateEnergyReportStructure(EnergyPlusData &state)
                             OutletNodeNumbers.allocate(NumChildren);
                             thisComp.SubComp.allocate(NumChildren);
 
-                            GetChildrenData(state,
-                                            TypeOfCompNum,
-                                            NameOfComp,
-                                            NumChildren,
-                                            SubCompTypes,
-                                            SubCompNames,
-                                            InletNodeNames,
-                                            InletNodeNumbers,
-                                            OutletNodeNames,
-                                            OutletNodeNumbers,
-                                            ErrorsFound);
+                            Node::GetChildrenData(state,
+                                                  TypeOfCompNum,
+                                                  NameOfComp,
+                                                  NumChildren,
+                                                  SubCompTypes,
+                                                  SubCompNames,
+                                                  InletNodeNames,
+                                                  InletNodeNumbers,
+                                                  OutletNodeNames,
+                                                  OutletNodeNumbers,
+                                                  ErrorsFound);
 
                             for (SubCompNum = 1; SubCompNum <= NumChildren; ++SubCompNum) {
-                                thisComp.SubComp(SubCompNum).TypeOf =
-                                    BranchNodeConnections::ConnectionObjectTypeNamesUC[static_cast<int>(SubCompTypes(SubCompNum))];
+                                thisComp.SubComp(SubCompNum).TypeOf = Node::ConnectionObjectTypeNamesUC[static_cast<int>(SubCompTypes(SubCompNum))];
                                 thisComp.SubComp(SubCompNum).Name = SubCompNames(SubCompNum);
                                 thisComp.SubComp(SubCompNum).NodeNameIn = InletNodeNames(SubCompNum);
                                 thisComp.SubComp(SubCompNum).NodeNameOut = OutletNodeNames(SubCompNum);
@@ -3016,10 +2819,10 @@ void CreateEnergyReportStructure(EnergyPlusData &state)
                         for (SubCompNum = 1; SubCompNum <= NumChildren; ++SubCompNum) {
                             std::string &TypeOfSubComp = thisComp.SubComp(SubCompNum).TypeOf;
                             std::string NameOfSubComp = thisComp.SubComp(SubCompNum).Name;
-                            DataLoopNode::ConnectionObjectType TypeOfSubCompNum = static_cast<DataLoopNode::ConnectionObjectType>(
-                                EnergyPlus::getEnumerationValue(BranchNodeConnections::ConnectionObjectTypeNamesUC, TypeOfSubComp));
-                            if (IsParentObject(state, TypeOfSubCompNum, NameOfSubComp)) {
-                                NumGrandChildren = GetNumChildren(state, TypeOfSubCompNum, NameOfSubComp);
+                            Node::ConnectionObjectType TypeOfSubCompNum =
+                                static_cast<Node::ConnectionObjectType>(EnergyPlus::getEnumValue(Node::ConnectionObjectTypeNamesUC, TypeOfSubComp));
+                            if (Node::IsParentObject(state, TypeOfSubCompNum, NameOfSubComp)) {
+                                NumGrandChildren = Node::GetNumChildren(state, TypeOfSubCompNum, NameOfSubComp);
                                 SubCompTypes.allocate(NumGrandChildren);
                                 SubCompNames.allocate(NumGrandChildren);
                                 InletNodeNames.allocate(NumGrandChildren);
@@ -3028,23 +2831,22 @@ void CreateEnergyReportStructure(EnergyPlusData &state)
                                 OutletNodeNumbers.allocate(NumGrandChildren);
                                 thisComp.SubComp(SubCompNum).SubSubComp.allocate(NumGrandChildren);
 
-                                GetChildrenData(state,
-                                                TypeOfSubCompNum,
-                                                NameOfSubComp,
-                                                NumGrandChildren,
-                                                SubCompTypes,
-                                                SubCompNames,
-                                                InletNodeNames,
-                                                InletNodeNumbers,
-                                                OutletNodeNames,
-                                                OutletNodeNumbers,
-                                                ErrorsFound);
+                                Node::GetChildrenData(state,
+                                                      TypeOfSubCompNum,
+                                                      NameOfSubComp,
+                                                      NumGrandChildren,
+                                                      SubCompTypes,
+                                                      SubCompNames,
+                                                      InletNodeNames,
+                                                      InletNodeNumbers,
+                                                      OutletNodeNames,
+                                                      OutletNodeNumbers,
+                                                      ErrorsFound);
 
                                 for (SubSubCompNum = 1; SubSubCompNum <= NumGrandChildren; ++SubSubCompNum) {
                                     {
-                                        auto &thisSubSubComp(thisComp.SubComp(SubCompNum).SubSubComp(SubSubCompNum));
-                                        thisSubSubComp.TypeOf =
-                                            BranchNodeConnections::ConnectionObjectTypeNamesUC[static_cast<int>(SubCompTypes(SubSubCompNum))];
+                                        auto &thisSubSubComp = thisComp.SubComp(SubCompNum).SubSubComp(SubSubCompNum);
+                                        thisSubSubComp.TypeOf = Node::ConnectionObjectTypeNamesUC[static_cast<int>(SubCompTypes(SubSubCompNum))];
                                         thisSubSubComp.Name = SubCompNames(SubSubCompNum);
                                         thisSubSubComp.NodeNameIn = InletNodeNames(SubSubCompNum);
                                         thisSubSubComp.NodeNameOut = OutletNodeNames(SubSubCompNum);
@@ -3093,152 +2895,79 @@ void CreateEnergyReportStructure(EnergyPlusData &state)
             for (BranchNum = 1; BranchNum <= ThisReportData.TotalBranches; ++BranchNum) {
                 for (CompNum = 1; CompNum <= ThisReportData.Branch(BranchNum).TotalComponents; ++CompNum) {
                     // Get complete list of components for complex branches
-                    {
-                        auto &thisComp(ThisReportData.Branch(BranchNum).Comp(CompNum));
-                        std::string &TypeOfComp = thisComp.TypeOf;
-                        std::string &NameOfComp = thisComp.Name;
-                        NumVariables = GetNumMeteredVariables(state, TypeOfComp, NameOfComp);
+                    auto &thisComp = ThisReportData.Branch(BranchNum).Comp(CompNum);
+                    std::string &TypeOfComp = thisComp.TypeOf;
+                    std::string &NameOfComp = thisComp.Name;
+                    NumVariables = GetNumMeteredVariables(state, TypeOfComp, NameOfComp);
+                    if (NumVariables > 0) {
+                        meteredVars.allocate(NumVariables);
+                        thisComp.MeteredVar.allocate(NumVariables);
+
+                        thisComp.NumMeteredVars = NumVariables;
+                        GetMeteredVariables(state, NameOfComp, meteredVars);
+                        ModeFlagOn = true;
+
+                        for (VarNum = 1; VarNum <= NumVariables; ++VarNum) {
+                            thisComp.MeteredVar(VarNum) = meteredVars(VarNum);
+                            auto &thisVar = thisComp.MeteredVar(VarNum);
+                            if (thisVar.endUseCat == OutputProcessor::EndUseCat::HeatingCoils && ModeFlagOn) {
+                                for (VarNum1 = 1; VarNum1 <= NumVariables; ++VarNum1) {
+                                    thisComp.MeteredVar(VarNum1).heatOrCool = Constant::HeatOrCool::HeatingOnly;
+                                }
+                                ModeFlagOn = false;
+                            } else if (thisVar.endUseCat == OutputProcessor::EndUseCat::CoolingCoils && ModeFlagOn) {
+                                for (VarNum1 = 1; VarNum1 <= NumVariables; ++VarNum1) {
+                                    thisComp.MeteredVar(VarNum1).heatOrCool = Constant::HeatOrCool::CoolingOnly;
+                                }
+                                ModeFlagOn = false;
+                            } else if (ModeFlagOn) {
+                                thisVar.heatOrCool = Constant::HeatOrCool::NoHeatNoCool;
+                            }
+                        }
+
+                        meteredVars.deallocate();
+                    } // if (NumVariables > 0)
+
+                    for (SubCompNum = 1; SubCompNum <= thisComp.NumSubComps; ++SubCompNum) {
+                        // Get complete list of components for complex branches
+                        std::string &TypeOfSubComp = thisComp.SubComp(SubCompNum).TypeOf;
+                        std::string &NameOfSubComp = thisComp.SubComp(SubCompNum).Name;
+                        NumVariables = GetNumMeteredVariables(state, TypeOfSubComp, NameOfSubComp);
                         if (NumVariables > 0) {
-                            VarIndexes.allocate(NumVariables);
-                            VarTypes.allocate(NumVariables);
-                            IndexTypes.allocate(NumVariables);
-                            unitsForVar.allocate(NumVariables);
-                            ResourceTypes.clear();
-                            for (int idx = 1; idx <= NumVariables; ++idx) {
-                                ResourceTypes.insert(std::pair<int, DataGlobalConstants::ResourceType>(idx, DataGlobalConstants::ResourceType::None));
-                            }
-                            EndUses.allocate(NumVariables);
-                            Groups.allocate(NumVariables);
-                            Names.allocate(NumVariables);
-                            thisComp.MeteredVar.allocate(NumVariables);
+                            meteredVars.allocate(NumVariables);
+                            thisComp.SubComp(SubCompNum).MeteredVar.allocate(NumVariables);
 
-                            thisComp.NumMeteredVars = NumVariables;
-                            GetMeteredVariables(state,
-                                                TypeOfComp,
-                                                NameOfComp,
-                                                VarIndexes,
-                                                VarTypes,
-                                                IndexTypes,
-                                                unitsForVar,
-                                                ResourceTypes,
-                                                EndUses,
-                                                Groups,
-                                                Names,
-                                                NumFound);
-
+                            GetMeteredVariables(state, NameOfSubComp, meteredVars);
                             ModeFlagOn = true;
+
                             for (VarNum = 1; VarNum <= NumVariables; ++VarNum) {
-                                {
-                                    auto &thisVar(thisComp.MeteredVar(VarNum));
-                                    thisVar.ReportVarName = Names(VarNum);
-                                    thisVar.ReportVarUnits = unitsForVar(VarNum);
-                                    thisVar.ReportVarIndex = VarIndexes(VarNum);
-                                    thisVar.ReportVarIndexType = IndexTypes(VarNum);
-                                    thisVar.ReportVarType = VarTypes(VarNum);
-                                    thisVar.ResourceType = ResourceTypes.at(VarNum);
-                                    thisVar.EndUse = EndUses(VarNum);
-                                    if (thisVar.EndUse == "HEATINGCOILS" && ModeFlagOn) {
-                                        for (VarNum1 = 1; VarNum1 <= NumVariables; ++VarNum1) {
-                                            thisComp.MeteredVar(VarNum1).EndUse_CompMode = EndUseType::HeatingOnly;
-                                        }
-                                        ModeFlagOn = false;
-                                    } else if (thisVar.EndUse == "COOLINGCOILS" && ModeFlagOn) {
-                                        for (VarNum1 = 1; VarNum1 <= NumVariables; ++VarNum1) {
-                                            thisComp.MeteredVar(VarNum1).EndUse_CompMode = EndUseType::CoolingOnly;
-                                        }
-                                        ModeFlagOn = false;
-                                    } else if (ModeFlagOn) {
-                                        thisVar.EndUse_CompMode = EndUseType::NoHeatNoCool;
+                                thisComp.SubComp(SubCompNum).MeteredVar(VarNum) = meteredVars(VarNum);
+                                auto &thisVar = thisComp.SubComp(SubCompNum).MeteredVar(VarNum);
+                                if (thisVar.endUseCat == OutputProcessor::EndUseCat::HeatingCoils && ModeFlagOn) {
+                                    for (VarNum1 = 1; VarNum1 <= NumVariables; ++VarNum1) {
+                                        thisComp.SubComp(SubCompNum).MeteredVar(VarNum1).heatOrCool = Constant::HeatOrCool::HeatingOnly;
                                     }
-                                    thisVar.Group = Groups(VarNum);
+                                    ModeFlagOn = false;
+                                } else if (thisVar.endUseCat == OutputProcessor::EndUseCat::CoolingCoils && ModeFlagOn) {
+                                    for (VarNum1 = 1; VarNum1 <= NumVariables; ++VarNum1) {
+                                        thisComp.SubComp(SubCompNum).MeteredVar(VarNum1).heatOrCool = Constant::HeatOrCool::CoolingOnly;
+                                    }
+                                    ModeFlagOn = false;
+                                } else if (ModeFlagOn) {
+                                    thisVar.heatOrCool = Constant::HeatOrCool::NoHeatNoCool;
                                 }
                             }
 
-                            VarIndexes.deallocate();
-                            VarTypes.deallocate();
-                            IndexTypes.deallocate();
-                            unitsForVar.deallocate();
-                            EndUses.deallocate();
-                            Groups.deallocate();
-                            Names.deallocate();
-                        }
-                        for (SubCompNum = 1; SubCompNum <= thisComp.NumSubComps; ++SubCompNum) {
-                            // Get complete list of components for complex branches
-                            std::string &TypeOfSubComp = thisComp.SubComp(SubCompNum).TypeOf;
-                            std::string &NameOfSubComp = thisComp.SubComp(SubCompNum).Name;
-                            NumVariables = GetNumMeteredVariables(state, TypeOfSubComp, NameOfSubComp);
-                            if (NumVariables > 0) {
-                                VarIndexes.allocate(NumVariables);
-                                VarTypes.allocate(NumVariables);
-                                IndexTypes.allocate(NumVariables);
-                                unitsForVar.allocate(NumVariables);
-                                ResourceTypes.clear();
-                                for (int idx = 1; idx <= NumVariables; ++idx) {
-                                    ResourceTypes.insert(
-                                        std::pair<int, DataGlobalConstants::ResourceType>(idx, DataGlobalConstants::ResourceType::None));
-                                }
-                                EndUses.allocate(NumVariables);
-                                Groups.allocate(NumVariables);
-                                Names.allocate(NumVariables);
-                                thisComp.SubComp(SubCompNum).MeteredVar.allocate(NumVariables);
+                            meteredVars.deallocate();
+                        } // if (NumVariables > 0)
 
-                                GetMeteredVariables(state,
-                                                    TypeOfSubComp,
-                                                    NameOfSubComp,
-                                                    VarIndexes,
-                                                    VarTypes,
-                                                    IndexTypes,
-                                                    unitsForVar,
-                                                    ResourceTypes,
-                                                    EndUses,
-                                                    Groups,
-                                                    Names,
-                                                    NumFound);
-
-                                ModeFlagOn = true;
-                                for (VarNum = 1; VarNum <= NumVariables; ++VarNum) {
-                                    {
-                                        auto &thisVar(thisComp.SubComp(SubCompNum).MeteredVar(VarNum));
-                                        thisVar.ReportVarName = Names(VarNum);
-                                        thisVar.ReportVarUnits = unitsForVar(VarNum);
-                                        thisVar.ReportVarIndex = VarIndexes(VarNum);
-                                        thisVar.ReportVarIndexType = IndexTypes(VarNum);
-                                        thisVar.ReportVarType = VarTypes(VarNum);
-                                        thisVar.ResourceType = ResourceTypes.at(VarNum);
-                                        thisVar.EndUse = EndUses(VarNum);
-                                        if (thisVar.EndUse == "HEATINGCOILS" && ModeFlagOn) {
-                                            for (VarNum1 = 1; VarNum1 <= NumVariables; ++VarNum1) {
-                                                thisComp.SubComp(SubCompNum).MeteredVar(VarNum1).EndUse_CompMode = EndUseType::HeatingOnly;
-                                            }
-                                            ModeFlagOn = false;
-                                        } else if (thisVar.EndUse == "COOLINGCOILS" && ModeFlagOn) {
-                                            for (VarNum1 = 1; VarNum1 <= NumVariables; ++VarNum1) {
-                                                thisComp.SubComp(SubCompNum).MeteredVar(VarNum1).EndUse_CompMode = EndUseType::CoolingOnly;
-                                            }
-                                            ModeFlagOn = false;
-                                        } else if (ModeFlagOn) {
-                                            thisVar.EndUse_CompMode = EndUseType::NoHeatNoCool;
-                                        }
-                                        thisVar.Group = Groups(VarNum);
-                                    }
-                                }
-
-                                VarIndexes.deallocate();
-                                VarTypes.deallocate();
-                                IndexTypes.deallocate();
-                                unitsForVar.deallocate();
-                                EndUses.deallocate();
-                                Groups.deallocate();
-                                Names.deallocate();
-                            }
-                            thisComp.SubComp(SubCompNum).NumMeteredVars = NumVariables;
-                        }
-                    }
-                }
-            }
-        }
-    }
-}
+                        thisComp.SubComp(SubCompNum).NumMeteredVars = NumVariables;
+                    } // for (SubCompNum)
+                } // for (CompNum)
+            } // for (BranchNum)
+        } // for (LoopSide)
+    } // for (PlantLoopNum)
+} // CreateEnergyReportStructure()
 
 // End Initialization Section of the Module
 //******************************************************************************
@@ -3266,7 +2995,7 @@ void ReportSystemEnergyUse(EnergyPlusData &state)
     int CompNum;
     int SubCompNum;
     int SubSubCompNum;
-    EndUseType CompMode;
+    Constant::HeatOrCool CompMode;
     int InletNodeNum;
     int OutletNodeNum;
     int ADUNum;
@@ -3274,7 +3003,7 @@ void ReportSystemEnergyUse(EnergyPlusData &state)
     int ADUHeatNum;
     int AirDistCoolInletNodeNum;
     int AirDistHeatInletNodeNum;
-    DataGlobalConstants::ResourceType EnergyType;
+    Constant::eResource EnergyType;
     Real64 CompEnergyUse;
     Real64 ZoneLoad;
     Real64 CompLoad;
@@ -3282,7 +3011,10 @@ void ReportSystemEnergyUse(EnergyPlusData &state)
     Real64 ADUHeatFlowrate;
     bool CompLoadFlag;
 
-    if (!state.dataSysRpts->AirLoopLoadsReportEnabled) return;
+    Real64 TimeStepSysSec = state.dataHVACGlobal->TimeStepSysSec;
+    if (!state.dataSysRpts->AirLoopLoadsReportEnabled) {
+        return;
+    }
 
     for (int airLoopNum = 1; airLoopNum <= state.dataHVACGlobal->NumPrimaryAirSys; ++airLoopNum) {
         auto &thisSysLoadRepVars = state.dataSysRpts->SysLoadRepVars(airLoopNum);
@@ -3330,31 +3062,35 @@ void ReportSystemEnergyUse(EnergyPlusData &state)
         thisSysLoadRepVars.EvapElec = 0.0;
     }
 
-    auto &Node(state.dataLoopNodes->Node);
+    auto &Node = state.dataLoopNodes->Node;
 
     for (int AirLoopNum = 1; AirLoopNum <= state.dataHVACGlobal->NumPrimaryAirSys; ++AirLoopNum) {
         auto const &pas = state.dataAirSystemsData->PrimaryAirSystems(AirLoopNum);
         for (BranchNum = 1; BranchNum <= pas.NumBranches; ++BranchNum) {
             auto const &pasBranch = pas.Branch(BranchNum);
-            if (Node(pasBranch.NodeNumOut).MassFlowRate <= 0.0) continue;
+            if (Node(pasBranch.NodeNumOut).MassFlowRate <= 0.0) {
+                continue;
+            }
             for (CompNum = 1; CompNum <= pasBranch.TotalComponents; ++CompNum) {
                 auto const &pasBranchComp = pasBranch.Comp(CompNum);
                 InletNodeNum = pasBranchComp.NodeNumIn;
                 OutletNodeNum = pasBranchComp.NodeNumOut;
-                if (InletNodeNum <= 0 || OutletNodeNum <= 0) continue;
+                if (InletNodeNum <= 0 || OutletNodeNum <= 0) {
+                    continue;
+                }
                 CompLoad = Node(OutletNodeNum).MassFlowRate * (Psychrometrics::PsyHFnTdbW(Node(InletNodeNum).Temp, Node(InletNodeNum).HumRat) -
                                                                Psychrometrics::PsyHFnTdbW(Node(OutletNodeNum).Temp, Node(OutletNodeNum).HumRat));
-                CompLoad *= state.dataHVACGlobal->TimeStepSys * DataGlobalConstants::SecInHour;
+                CompLoad *= TimeStepSysSec;
                 CompEnergyUse = 0.0;
-                EnergyType = DataGlobalConstants::ResourceType::None;
+                EnergyType = Constant::eResource::Invalid;
                 CompLoadFlag = true;
                 CalcSystemEnergyUse(state, CompLoadFlag, AirLoopNum, pasBranchComp.TypeOf, EnergyType, CompLoad, CompEnergyUse);
                 CompLoadFlag = false;
                 for (VarNum = 1; VarNum <= pasBranchComp.NumMeteredVars; ++VarNum) {
                     auto const &pasBranchCompMeter = pasBranchComp.MeteredVar(VarNum);
-                    CompMode = pasBranchCompMeter.EndUse_CompMode;
-                    CompEnergyUse = pasBranchCompMeter.CurMeterReading;
-                    EnergyType = pasBranchCompMeter.ResourceType;
+                    CompMode = pasBranchCompMeter.heatOrCool;
+                    CompEnergyUse = pasBranchCompMeter.curMeterReading;
+                    EnergyType = pasBranchCompMeter.resource;
                     CalcSystemEnergyUse(state, CompLoadFlag, AirLoopNum, pasBranchComp.TypeOf, EnergyType, CompLoad, CompEnergyUse);
                 }
 
@@ -3362,20 +3098,22 @@ void ReportSystemEnergyUse(EnergyPlusData &state)
                     auto const &pasBranchSubComp = pasBranchComp.SubComp(SubCompNum);
                     InletNodeNum = pasBranchSubComp.NodeNumIn;
                     OutletNodeNum = pasBranchSubComp.NodeNumOut;
-                    if (InletNodeNum <= 0 || OutletNodeNum <= 0) continue;
+                    if (InletNodeNum <= 0 || OutletNodeNum <= 0) {
+                        continue;
+                    }
                     CompLoad = Node(OutletNodeNum).MassFlowRate * (Psychrometrics::PsyHFnTdbW(Node(InletNodeNum).Temp, Node(InletNodeNum).HumRat) -
                                                                    Psychrometrics::PsyHFnTdbW(Node(OutletNodeNum).Temp, Node(OutletNodeNum).HumRat));
-                    CompLoad *= state.dataHVACGlobal->TimeStepSys * DataGlobalConstants::SecInHour;
+                    CompLoad *= TimeStepSysSec;
                     CompEnergyUse = 0.0;
-                    EnergyType = DataGlobalConstants::ResourceType::None;
+                    EnergyType = Constant::eResource::Invalid;
                     CompLoadFlag = true;
                     CalcSystemEnergyUse(state, CompLoadFlag, AirLoopNum, pasBranchSubComp.TypeOf, EnergyType, CompLoad, CompEnergyUse);
                     CompLoadFlag = false;
                     for (VarNum = 1; VarNum <= pasBranchSubComp.NumMeteredVars; ++VarNum) {
                         auto const &pasBranchSubCompMeter = pasBranchSubComp.MeteredVar(VarNum);
-                        CompMode = pasBranchSubCompMeter.EndUse_CompMode;
-                        CompEnergyUse = pasBranchSubCompMeter.CurMeterReading;
-                        EnergyType = pasBranchSubCompMeter.ResourceType;
+                        CompMode = pasBranchSubCompMeter.heatOrCool;
+                        CompEnergyUse = pasBranchSubCompMeter.curMeterReading;
+                        EnergyType = pasBranchSubCompMeter.resource;
                         CalcSystemEnergyUse(state, CompLoadFlag, AirLoopNum, pasBranchSubComp.TypeOf, EnergyType, CompLoad, CompEnergyUse);
                     }
 
@@ -3383,43 +3121,51 @@ void ReportSystemEnergyUse(EnergyPlusData &state)
                         auto const &pasBranchSubSubComp = pasBranchSubComp.SubSubComp(SubSubCompNum);
                         InletNodeNum = pasBranchSubSubComp.NodeNumIn;
                         OutletNodeNum = pasBranchSubSubComp.NodeNumOut;
-                        if (InletNodeNum <= 0 || OutletNodeNum <= 0) continue;
+                        if (InletNodeNum <= 0 || OutletNodeNum <= 0) {
+                            continue;
+                        }
                         CompLoad =
                             Node(OutletNodeNum).MassFlowRate * (Psychrometrics::PsyHFnTdbW(Node(InletNodeNum).Temp, Node(InletNodeNum).HumRat) -
                                                                 Psychrometrics::PsyHFnTdbW(Node(OutletNodeNum).Temp, Node(OutletNodeNum).HumRat));
-                        CompLoad *= state.dataHVACGlobal->TimeStepSys * DataGlobalConstants::SecInHour;
+                        CompLoad *= TimeStepSysSec;
                         CompEnergyUse = 0.0;
-                        EnergyType = DataGlobalConstants::ResourceType::None;
+                        EnergyType = Constant::eResource::Invalid;
                         CompLoadFlag = true;
                         CalcSystemEnergyUse(state, CompLoadFlag, AirLoopNum, pasBranchSubSubComp.TypeOf, EnergyType, CompLoad, CompEnergyUse);
                         CompLoadFlag = false;
                         for (VarNum = 1; VarNum <= pasBranchSubSubComp.NumMeteredVars; ++VarNum) {
                             auto const &pasBranchSubSubCompMeter = pasBranchSubSubComp.MeteredVar(VarNum);
-                            CompMode = pasBranchSubSubCompMeter.EndUse_CompMode;
-                            CompEnergyUse = pasBranchSubSubCompMeter.CurMeterReading;
-                            EnergyType = pasBranchSubSubCompMeter.ResourceType;
+                            CompMode = pasBranchSubSubCompMeter.heatOrCool;
+                            CompEnergyUse = pasBranchSubSubCompMeter.curMeterReading;
+                            EnergyType = pasBranchSubSubCompMeter.resource;
                             CalcSystemEnergyUse(state, CompLoadFlag, AirLoopNum, pasBranchSubSubComp.TypeOf, EnergyType, CompLoad, CompEnergyUse);
                         }
-                    }
-                }
-            }
-        }
-    }
+                    } // for (SubSubCompNum)
+                } // for (SubCompNum)
+            } // for (CompNum)
+        } // for (BranchNum)
+    } // for (AirLoopNum)
 
     for (int CtrlZoneNum = 1; CtrlZoneNum <= state.dataGlobal->NumOfZones; ++CtrlZoneNum) {
         auto const &zecCtrlZone = state.dataZoneEquip->ZoneEquipConfig(CtrlZoneNum);
-        if (!zecCtrlZone.IsControlled) continue;
+        if (!zecCtrlZone.IsControlled) {
+            continue;
+        }
 
         ZoneLoad = state.dataZoneEnergyDemand->ZoneSysEnergyDemand(CtrlZoneNum).TotalOutputRequired;
 
         // if system operating in deadband reset zone load
-        if (state.dataZoneEnergyDemand->DeadBandOrSetback(CtrlZoneNum)) ZoneLoad = 0.0;
+        if (state.dataZoneEnergyDemand->DeadBandOrSetback(CtrlZoneNum)) {
+            ZoneLoad = 0.0;
+        }
 
         // loop over the zone supply air path inlet nodes
         for (int ZoneInNum = 1; ZoneInNum <= zecCtrlZone.NumInletNodes; ++ZoneInNum) {
             // retrieve air loop indexes
             int AirLoopNum = zecCtrlZone.InletNodeAirLoopNum(ZoneInNum);
-            if (AirLoopNum == 0) continue;
+            if (AirLoopNum == 0) {
+                continue;
+            }
 
             auto const &zecCtrlZoneCool = zecCtrlZone.AirDistUnitCool(ZoneInNum);
             auto const &zecCtrlZoneHeat = zecCtrlZone.AirDistUnitHeat(ZoneInNum);
@@ -3443,11 +3189,15 @@ void ReportSystemEnergyUse(EnergyPlusData &state)
             for (Idx = 1; Idx <= 2; ++Idx) {
                 if (Idx == 1) {
                     ADUCoolNum = max(zecCtrlZoneCool.AirDistUnitIndex, 0);
-                    if (ADUCoolNum == 0) continue;
+                    if (ADUCoolNum == 0) {
+                        continue;
+                    }
                     ADUNum = ADUCoolNum;
                 } else { //(Idx =2)THEN
                     ADUHeatNum = max(zecCtrlZoneHeat.AirDistUnitIndex, 0);
-                    if (ADUHeatNum == 0) continue;
+                    if (ADUHeatNum == 0) {
+                        continue;
+                    }
                     ADUNum = ADUHeatNum;
                 }
 
@@ -3466,15 +3216,15 @@ void ReportSystemEnergyUse(EnergyPlusData &state)
                             (Psychrometrics::PsyHFnTdbW(Node(OutletNodeNum).Temp, Node(OutletNodeNum).HumRat) * Node(OutletNodeNum).MassFlowRate);
                     }
                 }
-                CompLoad *= state.dataHVACGlobal->TimeStepSys * DataGlobalConstants::SecInHour;
+                CompLoad *= TimeStepSysSec;
                 CompEnergyUse = 0.0;
-                EnergyType = DataGlobalConstants::ResourceType::None;
+                EnergyType = Constant::eResource::Invalid;
                 CompLoadFlag = true;
                 CalcSystemEnergyUse(state, CompLoadFlag, AirLoopNum, zelEquipData.TypeOf, EnergyType, CompLoad, CompEnergyUse);
                 CompLoadFlag = false;
                 for (VarNum = 1; VarNum <= zelEquipData.NumMeteredVars; ++VarNum) {
-                    CompEnergyUse = zelEquipData.MeteredVar(VarNum).CurMeterReading;
-                    EnergyType = zelEquipData.MeteredVar(VarNum).ResourceType;
+                    CompEnergyUse = zelEquipData.MeteredVar(VarNum).curMeterReading;
+                    EnergyType = zelEquipData.MeteredVar(VarNum).resource;
                     CalcSystemEnergyUse(state, CompLoadFlag, AirLoopNum, zelEquipData.TypeOf, EnergyType, CompLoad, CompEnergyUse);
                 }
 
@@ -3482,18 +3232,20 @@ void ReportSystemEnergyUse(EnergyPlusData &state)
                     auto const &zelSubEquipData = zelEquipData.SubEquipData(SubCompNum);
                     InletNodeNum = zelSubEquipData.InletNodeNum;
                     OutletNodeNum = zelSubEquipData.OutletNodeNum;
-                    if (InletNodeNum <= 0 || OutletNodeNum <= 0) continue;
+                    if (InletNodeNum <= 0 || OutletNodeNum <= 0) {
+                        continue;
+                    }
                     CompLoad = Node(InletNodeNum).MassFlowRate * (Psychrometrics::PsyHFnTdbW(Node(InletNodeNum).Temp, Node(InletNodeNum).HumRat) -
                                                                   Psychrometrics::PsyHFnTdbW(Node(OutletNodeNum).Temp, Node(OutletNodeNum).HumRat));
-                    CompLoad *= state.dataHVACGlobal->TimeStepSys * DataGlobalConstants::SecInHour;
+                    CompLoad *= TimeStepSysSec;
                     CompEnergyUse = 0.0;
-                    EnergyType = DataGlobalConstants::ResourceType::None;
+                    EnergyType = Constant::eResource::Invalid;
                     CompLoadFlag = true;
                     CalcSystemEnergyUse(state, CompLoadFlag, AirLoopNum, zelSubEquipData.TypeOf, EnergyType, CompLoad, CompEnergyUse);
                     CompLoadFlag = false;
                     for (VarNum = 1; VarNum <= zelSubEquipData.NumMeteredVars; ++VarNum) {
-                        CompEnergyUse = zelSubEquipData.MeteredVar(VarNum).CurMeterReading;
-                        EnergyType = zelSubEquipData.MeteredVar(VarNum).ResourceType;
+                        CompEnergyUse = zelSubEquipData.MeteredVar(VarNum).curMeterReading;
+                        EnergyType = zelSubEquipData.MeteredVar(VarNum).resource;
                         CalcSystemEnergyUse(state, CompLoadFlag, AirLoopNum, zelSubEquipData.TypeOf, EnergyType, CompLoad, CompEnergyUse);
                     }
 
@@ -3501,26 +3253,28 @@ void ReportSystemEnergyUse(EnergyPlusData &state)
                         auto const &zelSubSubEquipData = zelSubEquipData.SubSubEquipData(SubSubCompNum);
                         InletNodeNum = zelSubSubEquipData.InletNodeNum;
                         OutletNodeNum = zelSubSubEquipData.OutletNodeNum;
-                        if (InletNodeNum <= 0 || OutletNodeNum <= 0) continue;
+                        if (InletNodeNum <= 0 || OutletNodeNum <= 0) {
+                            continue;
+                        }
                         CompLoad =
                             Node(InletNodeNum).MassFlowRate * (Psychrometrics::PsyHFnTdbW(Node(InletNodeNum).Temp, Node(InletNodeNum).HumRat) -
                                                                Psychrometrics::PsyHFnTdbW(Node(OutletNodeNum).Temp, Node(OutletNodeNum).HumRat));
-                        CompLoad *= state.dataHVACGlobal->TimeStepSys * DataGlobalConstants::SecInHour;
+                        CompLoad *= TimeStepSysSec;
                         CompEnergyUse = 0.0;
-                        EnergyType = DataGlobalConstants::ResourceType::None;
+                        EnergyType = Constant::eResource::Invalid;
                         CompLoadFlag = true;
                         CalcSystemEnergyUse(state, CompLoadFlag, AirLoopNum, zelSubSubEquipData.TypeOf, EnergyType, CompLoad, CompEnergyUse);
                         CompLoadFlag = false;
                         for (VarNum = 1; VarNum <= zelSubSubEquipData.NumMeteredVars; ++VarNum) {
-                            CompEnergyUse = zelSubSubEquipData.MeteredVar(VarNum).CurMeterReading;
-                            EnergyType = zelSubSubEquipData.MeteredVar(VarNum).ResourceType;
+                            CompEnergyUse = zelSubSubEquipData.MeteredVar(VarNum).curMeterReading;
+                            EnergyType = zelSubSubEquipData.MeteredVar(VarNum).resource;
                             CalcSystemEnergyUse(state, CompLoadFlag, AirLoopNum, zelSubSubEquipData.TypeOf, EnergyType, CompLoad, CompEnergyUse);
                         }
                     } // SubSubCompNum
-                }     // SubCompNum
-            }         // Idx
-        }             // ZoneInNum
-    }                 // Controlled Zone Loop
+                } // SubCompNum
+            } // Idx
+        } // ZoneInNum
+    } // Controlled Zone Loop
 
     for (int airLoopNum = 1; airLoopNum <= state.dataHVACGlobal->NumPrimaryAirSys; ++airLoopNum) {
         auto &thisSysLoadRepVars = state.dataSysRpts->SysLoadRepVars(airLoopNum);
@@ -3545,7 +3299,7 @@ void CalcSystemEnergyUse(EnergyPlusData &state,
                          bool const CompLoadFlag,
                          int const AirLoopNum,
                          std::string const &CompType,
-                         DataGlobalConstants::ResourceType const EnergyType,
+                         Constant::eResource const EnergyType,
                          Real64 const CompLoad,
                          Real64 const CompEnergy)
 {
@@ -3747,7 +3501,9 @@ void CalcSystemEnergyUse(EnergyPlusData &state,
         {"COIL:HEATING:DX:VARIABLEREFRIGERANTFLOW:FLUIDTEMPERATURECONTROL", COIL_HEATING_VRF_FTC}};
     assert(component_map.size() == n_ComponentTypes);
 
-    if (!state.dataSysRpts->AirLoopLoadsReportEnabled) return;
+    if (!state.dataSysRpts->AirLoopLoadsReportEnabled) {
+        return;
+    }
     auto &thisSysLoadRepVars = state.dataSysRpts->SysLoadRepVars(AirLoopNum);
 
     // Find enum for the component type string
@@ -3775,7 +3531,9 @@ void CalcSystemEnergyUse(EnergyPlusData &state,
     case FAN_SYSTEMMODEL:
     case FAN_COMPONENTMODEL:
 
-        if (CompLoadFlag) thisSysLoadRepVars.FANCompHTNG += std::abs(CompLoad);
+        if (CompLoadFlag) {
+            thisSysLoadRepVars.FANCompHTNG += std::abs(CompLoad);
+        }
         thisSysLoadRepVars.FANCompElec += CompEnergy;
 
         // Cooling Coil Types for the air sys simulation
@@ -3799,11 +3557,12 @@ void CalcSystemEnergyUse(EnergyPlusData &state,
     case COIL_COOLING_VRF_FTC:
     case COIL_WATERHEATING_AIRTOWATERHEATPUMP_VARIABLESPEED:
 
-        if (CompLoadFlag) thisSysLoadRepVars.CCCompCLNG += std::abs(CompLoad);
-        if ((EnergyType == DataGlobalConstants::ResourceType::PlantLoopCoolingDemand) ||
-            (EnergyType == DataGlobalConstants::ResourceType::DistrictCooling)) {
+        if (CompLoadFlag) {
+            thisSysLoadRepVars.CCCompCLNG += std::abs(CompLoad);
+        }
+        if ((EnergyType == Constant::eResource::PlantLoopCoolingDemand) || (EnergyType == Constant::eResource::DistrictCooling)) {
             thisSysLoadRepVars.CCCompH2OCOLD += CompEnergy;
-        } else if (EnergyType == DataGlobalConstants::ResourceType::Electricity) {
+        } else if (EnergyType == Constant::eResource::Electricity) {
             thisSysLoadRepVars.CCCompElec += CompEnergy;
         }
 
@@ -3821,17 +3580,18 @@ void CalcSystemEnergyUse(EnergyPlusData &state,
     case COIL_HEATING_GAS_MULTISTAGE:
     case COIL_HEATING_DESUPERHEATER:
 
-        if (CompLoadFlag) thisSysLoadRepVars.HCCompHTNG += std::abs(CompLoad);
-        if ((EnergyType == DataGlobalConstants::ResourceType::PlantLoopHeatingDemand) ||
-            (EnergyType == DataGlobalConstants::ResourceType::DistrictHeating)) {
+        if (CompLoadFlag) {
+            thisSysLoadRepVars.HCCompHTNG += std::abs(CompLoad);
+        }
+        if ((EnergyType == Constant::eResource::PlantLoopHeatingDemand) || (EnergyType == Constant::eResource::DistrictHeatingWater)) {
             thisSysLoadRepVars.HCCompH2OHOT += CompEnergy;
-        } else if (EnergyType == DataGlobalConstants::ResourceType::Steam) {
+        } else if (EnergyType == Constant::eResource::DistrictHeatingSteam) {
             thisSysLoadRepVars.HCCompSteam += CompEnergy;
-        } else if (EnergyType == DataGlobalConstants::ResourceType::Electricity) {
+        } else if (EnergyType == Constant::eResource::Electricity) {
             thisSysLoadRepVars.HCCompElec += CompEnergy;
-        } else if (EnergyType == DataGlobalConstants::ResourceType::Natural_Gas) {
+        } else if (EnergyType == Constant::eResource::NaturalGas) {
             thisSysLoadRepVars.HCCompNaturalGas += CompEnergy;
-        } else if (EnergyType == DataGlobalConstants::ResourceType::Propane) {
+        } else if (EnergyType == Constant::eResource::Propane) {
             thisSysLoadRepVars.HCCompPropane += CompEnergy;
         }
 
@@ -3839,8 +3599,10 @@ void CalcSystemEnergyUse(EnergyPlusData &state,
     case COIL_HEATING_ELECTRIC:
     case COIL_HEATING_ELECTRIC_MULTISTAGE:
 
-        if (CompLoadFlag) thisSysLoadRepVars.HCCompHTNG += std::abs(CompLoad);
-        if (EnergyType == DataGlobalConstants::ResourceType::Electricity) {
+        if (CompLoadFlag) {
+            thisSysLoadRepVars.HCCompHTNG += std::abs(CompLoad);
+        }
+        if (EnergyType == Constant::eResource::Electricity) {
             thisSysLoadRepVars.HCCompElecRes += CompEnergy;
         }
 
@@ -3854,23 +3616,21 @@ void CalcSystemEnergyUse(EnergyPlusData &state,
                 thisSysLoadRepVars.HCCompHTNG += std::abs(CompLoad);
             }
         }
-        if ((EnergyType == DataGlobalConstants::ResourceType::PlantLoopHeatingDemand) ||
-            (EnergyType == DataGlobalConstants::ResourceType::DistrictHeating)) {
+        if ((EnergyType == Constant::eResource::PlantLoopHeatingDemand) || (EnergyType == Constant::eResource::DistrictHeatingWater)) {
             thisSysLoadRepVars.HCCompH2OHOT += CompEnergy;
-        } else if ((EnergyType == DataGlobalConstants::ResourceType::PlantLoopCoolingDemand) ||
-                   (EnergyType == DataGlobalConstants::ResourceType::DistrictCooling)) {
+        } else if ((EnergyType == Constant::eResource::PlantLoopCoolingDemand) || (EnergyType == Constant::eResource::DistrictCooling)) {
             thisSysLoadRepVars.CCCompH2OCOLD += CompEnergy;
-        } else if (EnergyType == DataGlobalConstants::ResourceType::Steam) {
+        } else if (EnergyType == Constant::eResource::DistrictHeatingSteam) {
             thisSysLoadRepVars.HCCompSteam += CompEnergy;
-        } else if (EnergyType == DataGlobalConstants::ResourceType::Electricity) {
+        } else if (EnergyType == Constant::eResource::Electricity) {
             if (CompLoad > 0.0) {
                 thisSysLoadRepVars.CCCompElec += CompEnergy;
             } else {
                 thisSysLoadRepVars.HCCompElec += CompEnergy;
             }
-        } else if (EnergyType == DataGlobalConstants::ResourceType::Natural_Gas) {
+        } else if (EnergyType == Constant::eResource::NaturalGas) {
             thisSysLoadRepVars.HCCompNaturalGas += CompEnergy;
-        } else if (EnergyType == DataGlobalConstants::ResourceType::Propane) {
+        } else if (EnergyType == Constant::eResource::Propane) {
             thisSysLoadRepVars.HCCompPropane += CompEnergy;
         }
 
@@ -3917,14 +3677,16 @@ void CalcSystemEnergyUse(EnergyPlusData &state,
         // Humidifier Types for the air system simulation
     case HUMIDIFIER_STEAM_GAS:
     case HUMIDIFIER_STEAM_ELECTRIC:
-        if (CompLoadFlag) thisSysLoadRepVars.HumidHTNG += std::abs(CompLoad);
-        if (EnergyType == DataGlobalConstants::ResourceType::Water) {
+        if (CompLoadFlag) {
+            thisSysLoadRepVars.HumidHTNG += std::abs(CompLoad);
+        }
+        if (EnergyType == Constant::eResource::Water) {
             thisSysLoadRepVars.DomesticH2O += std::abs(CompEnergy);
-        } else if (EnergyType == DataGlobalConstants::ResourceType::Electricity) {
+        } else if (EnergyType == Constant::eResource::Electricity) {
             thisSysLoadRepVars.HumidElec += CompEnergy;
-        } else if (EnergyType == DataGlobalConstants::ResourceType::Natural_Gas) {
+        } else if (EnergyType == Constant::eResource::NaturalGas) {
             thisSysLoadRepVars.HumidNaturalGas += CompEnergy;
-        } else if (EnergyType == DataGlobalConstants::ResourceType::Propane) {
+        } else if (EnergyType == Constant::eResource::Propane) {
             thisSysLoadRepVars.HumidPropane += CompEnergy;
         }
 
@@ -3935,10 +3697,12 @@ void CalcSystemEnergyUse(EnergyPlusData &state,
     case EVAPORATIVECOOLER_INDIRECT_WETCOIL:
     case EVAPORATIVECOOLER_DIRECT_RESEARCHSPECIAL:
     case EVAPORATIVECOOLER_INDIRECT_RESEARCHSPECIAL:
-        if (CompLoadFlag) thisSysLoadRepVars.EvapCLNG += std::abs(CompLoad);
-        if (EnergyType == DataGlobalConstants::ResourceType::Water) {
+        if (CompLoadFlag) {
+            thisSysLoadRepVars.EvapCLNG += std::abs(CompLoad);
+        }
+        if (EnergyType == Constant::eResource::Water) {
             thisSysLoadRepVars.DomesticH2O += std::abs(CompEnergy);
-        } else if (EnergyType == DataGlobalConstants::ResourceType::Electricity) {
+        } else if (EnergyType == Constant::eResource::Electricity) {
             thisSysLoadRepVars.EvapElec += CompEnergy;
         }
 
@@ -3946,8 +3710,10 @@ void CalcSystemEnergyUse(EnergyPlusData &state,
         break;
     case DEHUMIDIFIER_DESICCANT_NOFANS:
     case DEHUMIDIFIER_DESICCANT_SYSTEM:
-        if (CompLoadFlag) thisSysLoadRepVars.DesDehumidCLNG += std::abs(CompLoad);
-        if (EnergyType == DataGlobalConstants::ResourceType::Electricity) {
+        if (CompLoadFlag) {
+            thisSysLoadRepVars.DesDehumidCLNG += std::abs(CompLoad);
+        }
+        if (EnergyType == Constant::eResource::Electricity) {
             thisSysLoadRepVars.DesDehumidElec += CompEnergy;
         }
 
@@ -4021,23 +3787,21 @@ void CalcSystemEnergyUse(EnergyPlusData &state,
                 thisSysLoadRepVars.UserDefinedTerminalHeating += std::abs(CompLoad);
             }
         }
-        if ((EnergyType == DataGlobalConstants::ResourceType::PlantLoopHeatingDemand) ||
-            (EnergyType == DataGlobalConstants::ResourceType::DistrictHeating)) {
+        if ((EnergyType == Constant::eResource::PlantLoopHeatingDemand) || (EnergyType == Constant::eResource::DistrictHeatingWater)) {
             thisSysLoadRepVars.HCCompH2OHOT += CompEnergy;
-        } else if ((EnergyType == DataGlobalConstants::ResourceType::PlantLoopCoolingDemand) ||
-                   (EnergyType == DataGlobalConstants::ResourceType::DistrictCooling)) {
+        } else if ((EnergyType == Constant::eResource::PlantLoopCoolingDemand) || (EnergyType == Constant::eResource::DistrictCooling)) {
             thisSysLoadRepVars.CCCompH2OCOLD += CompEnergy;
-        } else if (EnergyType == DataGlobalConstants::ResourceType::Steam) {
+        } else if (EnergyType == Constant::eResource::DistrictHeatingSteam) {
             thisSysLoadRepVars.HCCompSteam += CompEnergy;
-        } else if (EnergyType == DataGlobalConstants::ResourceType::Electricity) {
+        } else if (EnergyType == Constant::eResource::Electricity) {
             if (CompLoad > 0.0) {
                 thisSysLoadRepVars.CCCompElec += CompEnergy;
             } else {
                 thisSysLoadRepVars.HCCompElec += CompEnergy;
             }
-        } else if (EnergyType == DataGlobalConstants::ResourceType::Natural_Gas) {
+        } else if (EnergyType == Constant::eResource::NaturalGas) {
             thisSysLoadRepVars.HCCompNaturalGas += CompEnergy;
-        } else if (EnergyType == DataGlobalConstants::ResourceType::Propane) {
+        } else if (EnergyType == Constant::eResource::Propane) {
             thisSysLoadRepVars.HCCompPropane += CompEnergy;
         }
         // Recurring warning for unaccounted equipment types
@@ -4049,8 +3813,7 @@ void CalcSystemEnergyUse(EnergyPlusData &state,
     default:
         int found = 0;
         if (state.dataSysRpts->NumCompTypes > 0) {
-            found = UtilityRoutines::FindItemInList(
-                CompType, state.dataSysRpts->CompTypeErrors, &CompTypeError::CompType, state.dataSysRpts->NumCompTypes);
+            found = Util::FindItemInList(CompType, state.dataSysRpts->CompTypeErrors, &CompTypeError::CompType, state.dataSysRpts->NumCompTypes);
         }
         if (found == 0) {
             state.dataSysRpts->CompTypeErrors(++state.dataSysRpts->NumCompTypes).CompType = CompType;
@@ -4079,15 +3842,22 @@ void ReportVentilationLoads(EnergyPlusData &state)
 
     Real64 constexpr SmallLoad(0.1); // (W)
 
-    auto &Node(state.dataLoopNodes->Node);
-    auto &TimeStepSys(state.dataHVACGlobal->TimeStepSys);
+    auto &Node = state.dataLoopNodes->Node;
+    Real64 TimeStepSys = state.dataHVACGlobal->TimeStepSys;
+    Real64 TimeStepSysSec = state.dataHVACGlobal->TimeStepSysSec;
 
-    if (!state.dataSysRpts->VentReportStructureCreated) return;
-    if (!state.dataSysRpts->VentLoadsReportEnabled) return;
+    if (!state.dataSysRpts->VentReportStructureCreated) {
+        return;
+    }
+    if (!state.dataSysRpts->VentLoadsReportEnabled) {
+        return;
+    }
     // following inits are array assignments across all controlled zones.
     for (int zoneNum = 1; zoneNum <= state.dataGlobal->NumOfZones; ++zoneNum) {
         auto &thisZoneVentRepVars = state.dataSysRpts->ZoneVentRepVars(zoneNum);
-        if (!state.dataZoneEquip->ZoneEquipConfig(zoneNum).IsControlled) continue;
+        if (!state.dataZoneEquip->ZoneEquipConfig(zoneNum).IsControlled) {
+            continue;
+        }
         thisZoneVentRepVars.OAMassFlow = 0.0;
         thisZoneVentRepVars.OAMass = 0.0;
         thisZoneVentRepVars.OAVolFlowStdRho = 0.0;
@@ -4132,10 +3902,12 @@ void ReportVentilationLoads(EnergyPlusData &state)
 
     for (int CtrlZoneNum = 1; CtrlZoneNum <= state.dataGlobal->NumOfZones; ++CtrlZoneNum) {
         auto &thisZoneEquipConfig = state.dataZoneEquip->ZoneEquipConfig(CtrlZoneNum);
-        if (!thisZoneEquipConfig.IsControlled) continue;
+        if (!thisZoneEquipConfig.IsControlled) {
+            continue;
+        }
 
         Real64 ZAirSysZoneVentLoad = 0.0; // ventilation load attributed to a particular zone from all primary air systems serving the zone [J]
-        Real64 ZAirSysOutAirFlow = 0.0;   // outside air flow rate for zone from all primary air systems serving thezone [kg/s]
+        Real64 ZAirSysOutAirFlow = 0.0;   // outside air flow rate for zone from all primary air systems serving the zone [kg/s]
         Real64 ZFAUFlowRate = 0.0;        // Zone forced Air unit air mass flow rate [kg/s]
         Real64 ZFAUZoneVentLoad = 0.0;    // ventilation load attributed to a particular zone from zone forced air units [J]
         Real64 ZFAUOutAirFlow = 0.0;      // outside air flow rate for zone from zone forced air units. [kg/s]
@@ -4149,8 +3921,9 @@ void ReportVentilationLoads(EnergyPlusData &state)
 
         // retrieve the zone load for each zone
         Real64 ZoneLoad = state.dataZoneEnergyDemand->ZoneSysEnergyDemand(CtrlZoneNum).TotalOutputRequired;
-        Real64 ZoneVolume = state.dataHeatBal->Zone(CtrlZoneNum).Volume * state.dataHeatBal->Zone(CtrlZoneNum).Multiplier *
-                            state.dataHeatBal->Zone(CtrlZoneNum).ListMultiplier; // CR 7170
+        auto const &thisZone = state.dataHeatBal->Zone(CtrlZoneNum);
+        int const zoneMult = thisZone.Multiplier * thisZone.ListMultiplier;
+        Real64 const ZoneVolume = thisZone.Volume * zoneMult; // CR 7170
 
         bool constexpr UseOccSchFlag = true;
         bool constexpr UseMinOASchFlag = true;
@@ -4166,120 +3939,134 @@ void ReportVentilationLoads(EnergyPlusData &state)
         }
 
         // if system operating in deadband reset zone load
-        if (state.dataZoneEnergyDemand->DeadBandOrSetback(CtrlZoneNum)) ZoneLoad = 0.0;
+        if (state.dataZoneEnergyDemand->DeadBandOrSetback(CtrlZoneNum)) {
+            ZoneLoad = 0.0;
+        }
 
         // first deal with any (and all) Zone Forced Air Units that might have outside air.
         auto &thisZoneEquipList = state.dataZoneEquip->ZoneEquipList(thisZoneEquipConfig.EquipListIndex);
         for (int thisZoneEquipNum = 1; thisZoneEquipNum <= thisZoneEquipList.NumOfEquipTypes; ++thisZoneEquipNum) {
             auto &thisEquipIndex = thisZoneEquipList.EquipIndex(thisZoneEquipNum);
 
-            switch (thisZoneEquipList.EquipTypeEnum(thisZoneEquipNum)) {
+            switch (thisZoneEquipList.EquipType(thisZoneEquipNum)) {
                 // case statement to cover all possible zone forced air units that could have outside air
 
-            case DataZoneEquipment::ZoneEquip::WindowAC: { // Window Air Conditioner
+            case DataZoneEquipment::ZoneEquipType::WindowAirConditioner: { // Window Air Conditioner
                 int OutAirNode = WindowAC::GetWindowACOutAirNode(state, thisEquipIndex);
-                if (OutAirNode > 0) ZFAUOutAirFlow += Node(OutAirNode).MassFlowRate;
+                if (OutAirNode > 0) {
+                    ZFAUOutAirFlow += Node(OutAirNode).MassFlowRate;
+                }
 
                 int ZoneInletAirNode = WindowAC::GetWindowACZoneInletAirNode(state, thisEquipIndex);
-                if (ZoneInletAirNode > 0) ZFAUFlowRate = max(Node(ZoneInletAirNode).MassFlowRate, 0.0);
+                if (ZoneInletAirNode > 0) {
+                    ZFAUFlowRate = max(Node(ZoneInletAirNode).MassFlowRate, 0.0);
+                }
                 int MixedAirNode = WindowAC::GetWindowACMixedAirNode(state, thisEquipIndex);
                 int ReturnAirNode = WindowAC::GetWindowACReturnAirNode(state, thisEquipIndex);
                 if ((MixedAirNode > 0) && (ReturnAirNode > 0)) {
                     ZFAUEnthMixedAir = Psychrometrics::PsyHFnTdbW(Node(MixedAirNode).Temp, Node(MixedAirNode).HumRat);
                     ZFAUEnthReturnAir = Psychrometrics::PsyHFnTdbW(Node(ReturnAirNode).Temp, Node(ReturnAirNode).HumRat);
                     // Calculate the zone ventilation load for this supply air path (i.e. zone inlet)
-                    ZFAUZoneVentLoad +=
-                        (ZFAUFlowRate) * (ZFAUEnthMixedAir - ZFAUEnthReturnAir) * TimeStepSys * DataGlobalConstants::SecInHour; //*KJperJ
+                    ZFAUZoneVentLoad += (ZFAUFlowRate) * (ZFAUEnthMixedAir - ZFAUEnthReturnAir) * TimeStepSysSec; //*KJperJ
                 } else {
                     ZFAUZoneVentLoad += 0.0;
                 }
+            } break;
 
-                break;
-            }
-            case DataZoneEquipment::ZoneEquip::VRFTerminalUnit: {
+            case DataZoneEquipment::ZoneEquipType::VariableRefrigerantFlowTerminal: {
                 int OutAirNode = HVACVariableRefrigerantFlow::GetVRFTUOutAirNode(state, thisEquipIndex);
-                if (OutAirNode > 0) ZFAUOutAirFlow += Node(OutAirNode).MassFlowRate;
+                if (OutAirNode > 0) {
+                    ZFAUOutAirFlow += Node(OutAirNode).MassFlowRate;
+                }
                 int ZoneInletAirNode = HVACVariableRefrigerantFlow::GetVRFTUZoneInletAirNode(state, thisEquipIndex);
-                if (ZoneInletAirNode > 0) ZFAUFlowRate = max(Node(ZoneInletAirNode).MassFlowRate, 0.0);
+                if (ZoneInletAirNode > 0) {
+                    ZFAUFlowRate = max(Node(ZoneInletAirNode).MassFlowRate, 0.0);
+                }
                 int MixedAirNode = HVACVariableRefrigerantFlow::GetVRFTUMixedAirNode(state, thisEquipIndex);
                 int ReturnAirNode = HVACVariableRefrigerantFlow::GetVRFTUReturnAirNode(state, thisEquipIndex);
                 if ((MixedAirNode > 0) && (ReturnAirNode > 0)) {
                     ZFAUEnthMixedAir = Psychrometrics::PsyHFnTdbW(Node(MixedAirNode).Temp, Node(MixedAirNode).HumRat);
                     ZFAUEnthReturnAir = Psychrometrics::PsyHFnTdbW(Node(ReturnAirNode).Temp, Node(ReturnAirNode).HumRat);
                     // Calculate the zone ventilation load for this supply air path (i.e. zone inlet)
-                    ZFAUZoneVentLoad +=
-                        (ZFAUFlowRate) * (ZFAUEnthMixedAir - ZFAUEnthReturnAir) * TimeStepSys * DataGlobalConstants::SecInHour; //*KJperJ
+                    ZFAUZoneVentLoad += (ZFAUFlowRate) * (ZFAUEnthMixedAir - ZFAUEnthReturnAir) * TimeStepSysSec; //*KJperJ
                 } else {
                     ZFAUZoneVentLoad += 0.0;
                 }
+            } break;
 
-                break;
-            }
-            case DataZoneEquipment::ZoneEquip::PkgTermHPAirToAir:
-            case DataZoneEquipment::ZoneEquip::PkgTermACAirToAir:
-            case DataZoneEquipment::ZoneEquip::PkgTermHPWaterToAir: {
+            case DataZoneEquipment::ZoneEquipType::PackagedTerminalHeatPump:
+            case DataZoneEquipment::ZoneEquipType::PackagedTerminalAirConditioner:
+            case DataZoneEquipment::ZoneEquipType::PackagedTerminalHeatPumpWaterToAir: {
                 // loop index accesses correct pointer to equipment on this equipment list, DataZoneEquipment::GetZoneEquipmentData
                 // thisEquipIndex (EquipIndex) is used to access specific equipment for a single class of equipment (e.g., PTAC 1, 2 and 3)
                 int OutAirNode = thisZoneEquipList.compPointer[thisZoneEquipNum]->getMixerOANode();
-                if (OutAirNode > 0) ZFAUOutAirFlow += Node(OutAirNode).MassFlowRate;
+                if (OutAirNode > 0) {
+                    ZFAUOutAirFlow += Node(OutAirNode).MassFlowRate;
+                }
                 int ZoneInletAirNode = thisZoneEquipList.compPointer[thisZoneEquipNum]->getAirOutletNode();
-                if (ZoneInletAirNode > 0) ZFAUFlowRate = max(Node(ZoneInletAirNode).MassFlowRate, 0.0);
+                if (ZoneInletAirNode > 0) {
+                    ZFAUFlowRate = max(Node(ZoneInletAirNode).MassFlowRate, 0.0);
+                }
                 int MixedAirNode = thisZoneEquipList.compPointer[thisZoneEquipNum]->getMixerMixNode();
                 int ReturnAirNode = thisZoneEquipList.compPointer[thisZoneEquipNum]->getMixerRetNode();
                 if ((MixedAirNode > 0) && (ReturnAirNode > 0)) {
                     ZFAUEnthMixedAir = Psychrometrics::PsyHFnTdbW(Node(MixedAirNode).Temp, Node(MixedAirNode).HumRat);
                     ZFAUEnthReturnAir = Psychrometrics::PsyHFnTdbW(Node(ReturnAirNode).Temp, Node(ReturnAirNode).HumRat);
                     // Calculate the zone ventilation load for this supply air path (i.e. zone inlet)
-                    ZFAUZoneVentLoad +=
-                        (ZFAUFlowRate) * (ZFAUEnthMixedAir - ZFAUEnthReturnAir) * TimeStepSys * DataGlobalConstants::SecInHour; //*KJperJ
+                    ZFAUZoneVentLoad += (ZFAUFlowRate) * (ZFAUEnthMixedAir - ZFAUEnthReturnAir) * TimeStepSysSec; //*KJperJ
+                }
+            } break;
+
+            case DataZoneEquipment::ZoneEquipType::FourPipeFanCoil: {
+                int OutAirNode = FanCoilUnits::GetFanCoilOutAirNode(state, thisEquipIndex);
+                if (OutAirNode > 0) {
+                    ZFAUOutAirFlow += Node(OutAirNode).MassFlowRate;
                 }
 
-                break;
-            }
-            case DataZoneEquipment::ZoneEquip::FanCoil4Pipe: {
-                int OutAirNode = FanCoilUnits::GetFanCoilOutAirNode(state, thisEquipIndex);
-                if (OutAirNode > 0) ZFAUOutAirFlow += Node(OutAirNode).MassFlowRate;
-
                 int ZoneInletAirNode = FanCoilUnits::GetFanCoilZoneInletAirNode(state, thisEquipIndex);
-                if (ZoneInletAirNode > 0) ZFAUFlowRate = max(Node(ZoneInletAirNode).MassFlowRate, 0.0);
+                if (ZoneInletAirNode > 0) {
+                    ZFAUFlowRate = max(Node(ZoneInletAirNode).MassFlowRate, 0.0);
+                }
                 int MixedAirNode = FanCoilUnits::GetFanCoilMixedAirNode(state, thisEquipIndex);
                 int ReturnAirNode = FanCoilUnits::GetFanCoilReturnAirNode(state, thisEquipIndex);
                 if ((MixedAirNode > 0) && (ReturnAirNode > 0)) {
                     ZFAUEnthMixedAir = Psychrometrics::PsyHFnTdbW(Node(MixedAirNode).Temp, Node(MixedAirNode).HumRat);
                     ZFAUEnthReturnAir = Psychrometrics::PsyHFnTdbW(Node(ReturnAirNode).Temp, Node(ReturnAirNode).HumRat);
                     // Calculate the zone ventilation load for this supply air path (i.e. zone inlet)
-                    ZFAUZoneVentLoad +=
-                        (ZFAUFlowRate) * (ZFAUEnthMixedAir - ZFAUEnthReturnAir) * TimeStepSys * DataGlobalConstants::SecInHour; //*KJperJ
+                    ZFAUZoneVentLoad += (ZFAUFlowRate) * (ZFAUEnthMixedAir - ZFAUEnthReturnAir) * TimeStepSysSec; //*KJperJ
                 } else {
                     ZFAUZoneVentLoad += 0.0;
                 }
+            } break;
 
-                break;
-            }
-            case DataZoneEquipment::ZoneEquip::UnitVentilator: {
+            case DataZoneEquipment::ZoneEquipType::UnitVentilator: {
                 int OutAirNode = UnitVentilator::GetUnitVentilatorOutAirNode(state, thisEquipIndex);
-                if (OutAirNode > 0) ZFAUOutAirFlow += Node(OutAirNode).MassFlowRate;
+                if (OutAirNode > 0) {
+                    ZFAUOutAirFlow += Node(OutAirNode).MassFlowRate;
+                }
 
                 int ZoneInletAirNode = UnitVentilator::GetUnitVentilatorZoneInletAirNode(state, thisEquipIndex);
-                if (ZoneInletAirNode > 0) ZFAUFlowRate = max(Node(ZoneInletAirNode).MassFlowRate, 0.0);
+                if (ZoneInletAirNode > 0) {
+                    ZFAUFlowRate = max(Node(ZoneInletAirNode).MassFlowRate, 0.0);
+                }
                 int MixedAirNode = UnitVentilator::GetUnitVentilatorMixedAirNode(state, thisEquipIndex);
                 int ReturnAirNode = UnitVentilator::GetUnitVentilatorReturnAirNode(state, thisEquipIndex);
                 if ((MixedAirNode > 0) && (ReturnAirNode > 0)) {
                     ZFAUEnthMixedAir = Psychrometrics::PsyHFnTdbW(Node(MixedAirNode).Temp, Node(MixedAirNode).HumRat);
                     ZFAUEnthReturnAir = Psychrometrics::PsyHFnTdbW(Node(ReturnAirNode).Temp, Node(ReturnAirNode).HumRat);
                     // Calculate the zone ventilation load for this supply air path (i.e. zone inlet)
-                    ZFAUZoneVentLoad +=
-                        (ZFAUFlowRate) * (ZFAUEnthMixedAir - ZFAUEnthReturnAir) * TimeStepSys * DataGlobalConstants::SecInHour; //*KJperJ
+                    ZFAUZoneVentLoad += (ZFAUFlowRate) * (ZFAUEnthMixedAir - ZFAUEnthReturnAir) * TimeStepSysSec; //*KJperJ
                 } else {
                     ZFAUZoneVentLoad += 0.0;
                 }
+            } break;
 
-                break;
-            }
-            case DataZoneEquipment::ZoneEquip::PurchasedAir: {
+            case DataZoneEquipment::ZoneEquipType::PurchasedAir: {
                 ZFAUOutAirFlow += PurchasedAirManager::GetPurchasedAirOutAirMassFlow(state, thisEquipIndex);
                 int ZoneInletAirNode = PurchasedAirManager::GetPurchasedAirZoneInletAirNode(state, thisEquipIndex);
-                if (ZoneInletAirNode > 0) ZFAUFlowRate = max(Node(ZoneInletAirNode).MassFlowRate, 0.0);
+                if (ZoneInletAirNode > 0) {
+                    ZFAUFlowRate = max(Node(ZoneInletAirNode).MassFlowRate, 0.0);
+                }
                 ZFAUTempMixedAir = PurchasedAirManager::GetPurchasedAirMixedAirTemp(state, thisEquipIndex);
                 ZFAUHumRatMixedAir = PurchasedAirManager::GetPurchasedAirMixedAirHumRat(state, thisEquipIndex);
                 int ReturnAirNode = PurchasedAirManager::GetPurchasedAirReturnAirNode(state, thisEquipIndex);
@@ -4287,64 +4074,69 @@ void ReportVentilationLoads(EnergyPlusData &state)
                     ZFAUEnthMixedAir = Psychrometrics::PsyHFnTdbW(ZFAUTempMixedAir, ZFAUHumRatMixedAir);
                     ZFAUEnthReturnAir = Psychrometrics::PsyHFnTdbW(Node(ReturnAirNode).Temp, Node(ReturnAirNode).HumRat);
                     // Calculate the zone ventilation load for this supply air path (i.e. zone inlet)
-                    ZFAUZoneVentLoad +=
-                        (ZFAUFlowRate) * (ZFAUEnthMixedAir - ZFAUEnthReturnAir) * TimeStepSys * DataGlobalConstants::SecInHour; //*KJperJ
+                    ZFAUZoneVentLoad += (ZFAUFlowRate) * (ZFAUEnthMixedAir - ZFAUEnthReturnAir) * TimeStepSysSec; //*KJperJ
                 } else {
                     ZFAUZoneVentLoad += 0.0;
                 }
+            } break;
 
-                break;
-            }
-            case DataZoneEquipment::ZoneEquip::ERVStandAlone: {
+            case DataZoneEquipment::ZoneEquipType::EnergyRecoveryVentilator: {
                 int OutAirNode = HVACStandAloneERV::GetStandAloneERVOutAirNode(state, thisEquipIndex);
-                if (OutAirNode > 0) ZFAUOutAirFlow += Node(OutAirNode).MassFlowRate;
+                if (OutAirNode > 0) {
+                    ZFAUOutAirFlow += Node(OutAirNode).MassFlowRate;
+                }
 
                 int ZoneInletAirNode = HVACStandAloneERV::GetStandAloneERVZoneInletAirNode(state, thisEquipIndex);
-                if (ZoneInletAirNode > 0) ZFAUFlowRate = max(Node(ZoneInletAirNode).MassFlowRate, 0.0);
+                if (ZoneInletAirNode > 0) {
+                    ZFAUFlowRate = max(Node(ZoneInletAirNode).MassFlowRate, 0.0);
+                }
                 int MixedAirNode = ZoneInletAirNode;
                 int ReturnAirNode = HVACStandAloneERV::GetStandAloneERVReturnAirNode(state, thisEquipIndex);
                 if ((MixedAirNode > 0) && (ReturnAirNode > 0)) {
                     ZFAUEnthMixedAir = Psychrometrics::PsyHFnTdbW(Node(MixedAirNode).Temp, Node(MixedAirNode).HumRat);
                     ZFAUEnthReturnAir = Psychrometrics::PsyHFnTdbW(Node(ReturnAirNode).Temp, Node(ReturnAirNode).HumRat);
                     // Calculate the zone ventilation load for this supply air path (i.e. zone inlet)
-                    ZFAUZoneVentLoad +=
-                        (ZFAUFlowRate) * (ZFAUEnthMixedAir - ZFAUEnthReturnAir) * TimeStepSys * DataGlobalConstants::SecInHour; //*KJperJ
+                    ZFAUZoneVentLoad += (ZFAUFlowRate) * (ZFAUEnthMixedAir - ZFAUEnthReturnAir) * TimeStepSysSec; //*KJperJ
                 } else {
                     ZFAUZoneVentLoad += 0.0;
                 }
+            } break;
 
-                break;
-            }
-            case DataZoneEquipment::ZoneEquip::ZoneUnitarySys: {
+            case DataZoneEquipment::ZoneEquipType::UnitarySystem: {
                 // add accounting for OA when unitary system is used as zone equipment
+            } break;
 
-                break;
-            }
-            case DataZoneEquipment::ZoneEquip::OutdoorAirUnit: {
+            case DataZoneEquipment::ZoneEquipType::OutdoorAirUnit: {
                 int OutAirNode = OutdoorAirUnit::GetOutdoorAirUnitOutAirNode(state, thisEquipIndex);
-                if (OutAirNode > 0) ZFAUOutAirFlow += Node(OutAirNode).MassFlowRate;
+                if (OutAirNode > 0) {
+                    ZFAUOutAirFlow += Node(OutAirNode).MassFlowRate;
+                }
 
                 int ZoneInletAirNode = OutdoorAirUnit::GetOutdoorAirUnitZoneInletNode(state, thisEquipIndex);
-                if (ZoneInletAirNode > 0) ZFAUFlowRate = max(Node(ZoneInletAirNode).MassFlowRate, 0.0);
+                if (ZoneInletAirNode > 0) {
+                    ZFAUFlowRate = max(Node(ZoneInletAirNode).MassFlowRate, 0.0);
+                }
                 int ReturnAirNode = OutdoorAirUnit::GetOutdoorAirUnitReturnAirNode(state, thisEquipIndex);
                 if ((OutAirNode > 0) && (ReturnAirNode > 0)) {
                     ZFAUEnthReturnAir = Psychrometrics::PsyHFnTdbW(Node(ReturnAirNode).Temp, Node(ReturnAirNode).HumRat);
                     ZFAUEnthOutdoorAir = Psychrometrics::PsyHFnTdbW(Node(OutAirNode).Temp, Node(OutAirNode).HumRat);
                     // Calculate the zone ventilation load for this supply air path (i.e. zone inlet)
-                    ZFAUZoneVentLoad +=
-                        (ZFAUFlowRate) * (ZFAUEnthOutdoorAir - ZFAUEnthReturnAir) * TimeStepSys * DataGlobalConstants::SecInHour; //*KJperJ
+                    ZFAUZoneVentLoad += (ZFAUFlowRate) * (ZFAUEnthOutdoorAir - ZFAUEnthReturnAir) * TimeStepSysSec; //*KJperJ
                 } else {
                     ZFAUZoneVentLoad += 0.0;
                 }
+            } break;
 
-                break;
-            }
-            case DataZoneEquipment::ZoneEquip::ZoneHybridEvaporativeCooler: {
+            case DataZoneEquipment::ZoneEquipType::HybridEvaporativeCooler: {
                 int OutAirNode = HybridUnitaryAirConditioners::GetHybridUnitaryACOutAirNode(state, thisEquipIndex);
-                if (OutAirNode > 0) ZFAUOutAirFlow += Node(OutAirNode).MassFlowRate;
+                if (OutAirNode > 0) {
+                    ZFAUOutAirFlow += Node(OutAirNode).MassFlowRate;
+                }
 
                 int ZoneInletAirNode = HybridUnitaryAirConditioners::GetHybridUnitaryACZoneInletNode(state, thisEquipIndex);
-                if (ZoneInletAirNode > 0) ZFAUFlowRate = max(Node(ZoneInletAirNode).MassFlowRate, 0.0);
+                if (ZoneInletAirNode > 0) {
+                    ZFAUFlowRate = max(Node(ZoneInletAirNode).MassFlowRate, 0.0);
+                }
 
                 int ReturnAirNode = HybridUnitaryAirConditioners::GetHybridUnitaryACReturnAirNode(state, thisEquipIndex);
                 if ((OutAirNode > 0) && (ReturnAirNode > 0)) {
@@ -4352,41 +4144,40 @@ void ReportVentilationLoads(EnergyPlusData &state)
                     ZFAUEnthOutdoorAir = Psychrometrics::PsyHFnTdbW(Node(OutAirNode).Temp, Node(OutAirNode).HumRat);
                     // Calculate the zone ventilation load for this supply air path (i.e. zone inlet)
 
-                    ZFAUZoneVentLoad +=
-                        (ZFAUFlowRate) * (ZFAUEnthOutdoorAir - ZFAUEnthReturnAir) * TimeStepSys * DataGlobalConstants::SecInHour; //*KJperJ
+                    ZFAUZoneVentLoad += (ZFAUFlowRate) * (ZFAUEnthOutdoorAir - ZFAUEnthReturnAir) * TimeStepSysSec; //*KJperJ
                 } else {
                     ZFAUZoneVentLoad += 0.0;
                 }
+            } break;
 
-                break;
-            }
-            case DataZoneEquipment::ZoneEquip::UnitHeater:
-            case DataZoneEquipment::ZoneEquip::VentilatedSlab:
+            case DataZoneEquipment::ZoneEquipType::UnitHeater:
+            case DataZoneEquipment::ZoneEquipType::VentilatedSlab:
                 //    ZoneHVAC:EvaporativeCoolerUnit ?????
-            case DataZoneEquipment::ZoneEquip::ZoneEvaporativeCoolerUnit:
-            case DataZoneEquipment::ZoneEquip::AirDistUnit:
-            case DataZoneEquipment::ZoneEquip::BBWaterConvective:
-            case DataZoneEquipment::ZoneEquip::BBElectricConvective:
-            case DataZoneEquipment::ZoneEquip::HiTempRadiant:
+            case DataZoneEquipment::ZoneEquipType::EvaporativeCooler:
+            case DataZoneEquipment::ZoneEquipType::AirDistributionUnit:
+            case DataZoneEquipment::ZoneEquipType::BaseboardConvectiveWater:
+            case DataZoneEquipment::ZoneEquipType::BaseboardConvectiveElectric:
+            case DataZoneEquipment::ZoneEquipType::HighTemperatureRadiant:
                 //    not sure how HeatExchanger:* could be used as zone equipment ?????
-            case DataZoneEquipment::ZoneEquip::LoTempRadiant:
-            case DataZoneEquipment::ZoneEquip::ZoneExhaustFan:
-            case DataZoneEquipment::ZoneEquip::HeatXchngr:
+            case DataZoneEquipment::ZoneEquipType::LowTemperatureRadiantConstFlow:
+            case DataZoneEquipment::ZoneEquipType::LowTemperatureRadiantVarFlow:
+            case DataZoneEquipment::ZoneEquipType::LowTemperatureRadiantElectric:
+            case DataZoneEquipment::ZoneEquipType::ExhaustFan:
+            case DataZoneEquipment::ZoneEquipType::HeatExchanger:
                 // HPWaterHeater can be used as zone equipment
-            case DataZoneEquipment::ZoneEquip::HPWaterHeater:
-            case DataZoneEquipment::ZoneEquip::BBWater:
-            case DataZoneEquipment::ZoneEquip::ZoneDXDehumidifier:
-            case DataZoneEquipment::ZoneEquip::BBSteam:
-            case DataZoneEquipment::ZoneEquip::BBElectric:
-            case DataZoneEquipment::ZoneEquip::RefrigerationAirChillerSet:
-            case DataZoneEquipment::ZoneEquip::UserDefinedZoneHVACForcedAir:
-            case DataZoneEquipment::ZoneEquip::CoolingPanel: {
+            case DataZoneEquipment::ZoneEquipType::HeatPumpWaterHeaterPumpedCondenser:
+            case DataZoneEquipment::ZoneEquipType::HeatPumpWaterHeaterWrappedCondenser:
+            case DataZoneEquipment::ZoneEquipType::BaseboardWater:
+            case DataZoneEquipment::ZoneEquipType::DehumidifierDX:
+            case DataZoneEquipment::ZoneEquipType::BaseboardSteam:
+            case DataZoneEquipment::ZoneEquipType::BaseboardElectric:
+            case DataZoneEquipment::ZoneEquipType::RefrigerationChillerSet:
+            case DataZoneEquipment::ZoneEquipType::UserDefinedHVACForcedAir:
+            case DataZoneEquipment::ZoneEquipType::CoolingPanel: {
                 // do nothing, OA not included
+            } break;
 
-                break;
-            }
             default: {
-
                 ShowFatalError(state,
                                "ReportMaxVentilationLoads: Developer must either create accounting for OA or include in final else if "
                                "to do nothing");
@@ -4409,11 +4200,9 @@ void ReportVentilationLoads(EnergyPlusData &state)
             int AirLoopNum = thisZoneEquipConfig.InletNodeAirLoopNum(ZoneInNum);
             int MixedAirNode = 0;
             int ReturnAirNode = 0;
-            int AirDistCoolInletNodeNum = 0;
-            int AirDistHeatInletNodeNum = 0;
             if (AirLoopNum != 0) { // deal with primary air system
-                AirDistCoolInletNodeNum = max(thisZoneEquipConfig.AirDistUnitCool(ZoneInNum).InNode, 0);
-                AirDistHeatInletNodeNum = max(thisZoneEquipConfig.AirDistUnitHeat(ZoneInNum).InNode, 0);
+                int AirDistCoolInletNodeNum = max(thisZoneEquipConfig.AirDistUnitCool(ZoneInNum).InNode, 0);
+                int AirDistHeatInletNodeNum = max(thisZoneEquipConfig.AirDistUnitHeat(ZoneInNum).InNode, 0);
                 // Set for cooling or heating path
                 if (AirDistCoolInletNodeNum > 0 && AirDistHeatInletNodeNum == 0) {
                     ADUCoolFlowrate = max(Node(thisZoneEquipConfig.AirDistUnitCool(ZoneInNum).InNode).MassFlowRate,
@@ -4449,8 +4238,9 @@ void ReportVentilationLoads(EnergyPlusData &state)
                 }
                 state.dataSysRpts->SysVentRepVars(AirLoopNum).TargetVentilationFlowVoz +=
                     termUnitOAFrac * thisZoneVentRepVars.TargetVentilationFlowVoz;
-                Real64 naturalVentFlow = (state.dataHeatBal->ZnAirRpt(CtrlZoneNum).VentilVolumeStdDensity + thisZonePredefRep.AFNVentVolStdDen) /
-                                         (TimeStepSys * DataGlobalConstants::SecInHour);
+
+                Real64 naturalVentFlow = (state.dataHeatBal->ZnAirRpt(CtrlZoneNum).VentilVolumeStdDensity + thisZonePredefRep.AFNVentVolStdDen) *
+                                         zoneMult / TimeStepSysSec;
                 state.dataSysRpts->SysVentRepVars(AirLoopNum).NatVentFlow += termUnitOAFrac * naturalVentFlow;
 
                 if (thisZonePredefRep.isOccupied) {
@@ -4462,7 +4252,7 @@ void ReportVentilationLoads(EnergyPlusData &state)
                 AirSysZoneVentLoad = 0.0;
                 AirSysOutAirFlow = 0.0;
             } else {
-                // Calculate return and mixed air ethalpies
+                // Calculate return and mixed air enthalpies
                 AirSysEnthReturnAir = Psychrometrics::PsyHFnTdbW(Node(ReturnAirNode).Temp, Node(ReturnAirNode).HumRat);
                 AirSysEnthMixedAir = Psychrometrics::PsyHFnTdbW(Node(MixedAirNode).Temp, Node(MixedAirNode).HumRat);
 
@@ -4483,8 +4273,7 @@ void ReportVentilationLoads(EnergyPlusData &state)
                     AirSysOutAirFlow = 0.0;
                 }
                 // Calculate the zone ventilation load for this supply air path (i.e. zone inlet)
-                AirSysZoneVentLoad = (ADUCoolFlowrate + ADUHeatFlowrate) * (AirSysEnthMixedAir - AirSysEnthReturnAir) * TimeStepSys *
-                                     DataGlobalConstants::SecInHour; //*KJperJ
+                AirSysZoneVentLoad = (ADUCoolFlowrate + ADUHeatFlowrate) * (AirSysEnthMixedAir - AirSysEnthReturnAir) * TimeStepSysSec; //*KJperJ
             }
             ZAirSysZoneVentLoad += AirSysZoneVentLoad;
             ZAirSysOutAirFlow += AirSysOutAirFlow;
@@ -4494,16 +4283,17 @@ void ReportVentilationLoads(EnergyPlusData &state)
         OutAirFlow = ZAirSysOutAirFlow + ZFAUOutAirFlow;
         // assign report variables
         thisZoneVentRepVars.OAMassFlow = OutAirFlow;
-        thisZoneVentRepVars.OAMass = thisZoneVentRepVars.OAMassFlow * TimeStepSys * DataGlobalConstants::SecInHour;
+        thisZoneVentRepVars.OAMass = thisZoneVentRepVars.OAMassFlow * TimeStepSysSec;
 
         // determine volumetric values from mass flow using standard density (adjusted for elevation)
         thisZoneVentRepVars.OAVolFlowStdRho = thisZoneVentRepVars.OAMassFlow / state.dataEnvrn->StdRhoAir;
-        thisZoneVentRepVars.OAVolStdRho = thisZoneVentRepVars.OAVolFlowStdRho * TimeStepSys * DataGlobalConstants::SecInHour;
+        thisZoneVentRepVars.OAVolStdRho = thisZoneVentRepVars.OAVolFlowStdRho * TimeStepSysSec;
 
         // set time mechanical+natural ventilation is below, at, or above target Voz-dyn
         Real64 totMechNatVentVolStdRho =
-            thisZoneVentRepVars.OAVolStdRho + state.dataHeatBal->ZnAirRpt(CtrlZoneNum).VentilVolumeStdDensity + thisZonePredefRep.AFNVentVolStdDen;
-        Real64 targetVoz = thisZoneVentRepVars.TargetVentilationFlowVoz * TimeStepSys * DataGlobalConstants::SecInHour;
+            thisZoneVentRepVars.OAVolStdRho +
+            (state.dataHeatBal->ZnAirRpt(CtrlZoneNum).VentilVolumeStdDensity + thisZonePredefRep.AFNVentVolStdDen) * zoneMult;
+        Real64 targetVoz = thisZoneVentRepVars.TargetVentilationFlowVoz * TimeStepSysSec;
         // Allow 1% tolerance
         if (totMechNatVentVolStdRho < (0.99 * targetVoz)) {
             thisZoneVentRepVars.TimeBelowVozDyn = TimeStepSys;
@@ -4511,7 +4301,7 @@ void ReportVentilationLoads(EnergyPlusData &state)
         } else if (totMechNatVentVolStdRho > (1.01 * targetVoz)) {
             thisZoneVentRepVars.TimeAboveVozDyn = TimeStepSys;
             state.dataSysRpts->AnyZoneTimeAboveVozDyn = TimeStepSys;
-        } else if (totMechNatVentVolStdRho > SmallAirVolFlow) {
+        } else if (totMechNatVentVolStdRho > HVAC::SmallAirVolFlow) {
             thisZoneVentRepVars.TimeAtVozDyn = TimeStepSys;
             state.dataSysRpts->AllZonesTimeAtVozDyn = TimeStepSys;
         }
@@ -4521,10 +4311,14 @@ void ReportVentilationLoads(EnergyPlusData &state)
             Psychrometrics::PsyRhoAirFnPbTdbW(state,
                                               state.dataEnvrn->OutBaroPress,
                                               state.dataZoneTempPredictorCorrector->zoneHeatBalance(CtrlZoneNum).MAT,
-                                              state.dataZoneTempPredictorCorrector->zoneHeatBalance(CtrlZoneNum).ZoneAirHumRatAvg);
-        if (currentZoneAirDensity > 0.0) thisZoneVentRepVars.OAVolFlowCrntRho = thisZoneVentRepVars.OAMassFlow / currentZoneAirDensity;
-        thisZoneVentRepVars.OAVolCrntRho = thisZoneVentRepVars.OAVolFlowCrntRho * TimeStepSys * DataGlobalConstants::SecInHour;
-        if (ZoneVolume > 0.0) thisZoneVentRepVars.MechACH = (thisZoneVentRepVars.OAVolCrntRho / TimeStepSys) / ZoneVolume;
+                                              state.dataZoneTempPredictorCorrector->zoneHeatBalance(CtrlZoneNum).airHumRatAvg);
+        if (currentZoneAirDensity > 0.0) {
+            thisZoneVentRepVars.OAVolFlowCrntRho = thisZoneVentRepVars.OAMassFlow / currentZoneAirDensity;
+        }
+        thisZoneVentRepVars.OAVolCrntRho = thisZoneVentRepVars.OAVolFlowCrntRho * TimeStepSysSec;
+        if (ZoneVolume > 0.0) {
+            thisZoneVentRepVars.MechACH = (thisZoneVentRepVars.OAVolCrntRho / TimeStepSys) / ZoneVolume;
+        }
 
         // store data for predefined tabular report on outside air
         if (thisZonePredefRep.isOccupied) {
@@ -4558,7 +4352,7 @@ void ReportVentilationLoads(EnergyPlusData &state)
             thisZonePredefRep.VozTargetTimeBelowOcc += thisZoneVentRepVars.TimeBelowVozDyn;
             thisZonePredefRep.VozTargetTimeAtOcc += thisZoneVentRepVars.TimeAtVozDyn;
             thisZonePredefRep.VozTargetTimeAboveOcc += thisZoneVentRepVars.TimeAboveVozDyn;
-        } else if (totMechNatVentVolStdRho > SmallAirVolFlow) {
+        } else if (totMechNatVentVolStdRho > HVAC::SmallAirVolFlow) {
             thisZoneVentRepVars.TimeVentUnocc = TimeStepSys;
             state.dataSysRpts->AnyZoneTimeVentUnocc = TimeStepSys;
             thisZonePredefRep.TotVentTimeNonZeroUnocc += thisZoneVentRepVars.TimeVentUnocc;
@@ -4575,7 +4369,9 @@ void ReportVentilationLoads(EnergyPlusData &state)
         // now combine Vent load from zone forced air units with primary air system
         Real64 ZoneVentLoad = ZAirSysZoneVentLoad + ZFAUZoneVentLoad;
         // cycle if ZoneVentLoad is small
-        if (std::abs(ZoneVentLoad) < SmallLoad) continue; // orig. had RETURN here, BG changed to CYCLE for next controlled zone in do loop.
+        if (std::abs(ZoneVentLoad) < SmallLoad) {
+            continue; // orig. had RETURN here, BG changed to CYCLE for next controlled zone in do loop.
+        }
 
         // Ventilation Heating
         if (ZoneVentLoad > SmallLoad) {
@@ -4622,16 +4418,18 @@ void ReportVentilationLoads(EnergyPlusData &state)
     for (int sysNum = 1; sysNum <= state.dataHVACGlobal->NumPrimaryAirSys; ++sysNum) {
         auto &thisSysVentRepVars = state.dataSysRpts->SysVentRepVars(sysNum);
         auto &thisSysPreDefRep = state.dataSysRpts->SysPreDefRep(sysNum);
-        Real64 mechVentFlow = state.dataAirLoop->AirLoopFlow(sysNum).OAFlow * state.dataEnvrn->StdRhoAir;
+        auto &sysCtrlInfo = state.dataAirLoop->AirLoopControlInfo(sysNum);
+        auto &sysFlow = state.dataAirLoop->AirLoopFlow(sysNum);
+        Real64 mechVentFlow = sysFlow.OAFlow / state.dataEnvrn->StdRhoAir; // [m3/s]
         thisSysVentRepVars.MechVentFlow = mechVentFlow;
-        thisSysPreDefRep.MechVentTotal += mechVentFlow * TimeStepSys * DataGlobalConstants::SecInHour;
-        thisSysPreDefRep.NatVentTotal += thisSysVentRepVars.NatVentFlow * TimeStepSys * DataGlobalConstants::SecInHour;
+        thisSysPreDefRep.MechVentTotal += mechVentFlow * TimeStepSysSec;
+        thisSysPreDefRep.NatVentTotal += thisSysVentRepVars.NatVentFlow * TimeStepSysSec;
 
         // set time mechanical+natural ventilation is below, at, or above target Voz-dyn
         Real64 totMechNatVentVolFlowStdRho = mechVentFlow + thisSysVentRepVars.NatVentFlow;
 
         Real64 targetFlowVoz = thisSysVentRepVars.TargetVentilationFlowVoz;
-        thisSysPreDefRep.TargetVentTotalVoz += targetFlowVoz * TimeStepSys * DataGlobalConstants::SecInHour;
+        thisSysPreDefRep.TargetVentTotalVoz += targetFlowVoz * TimeStepSysSec;
         // Allow 1% tolerance
         if (totMechNatVentVolFlowStdRho < (0.99 * targetFlowVoz)) {
             thisSysVentRepVars.TimeBelowVozDyn = TimeStepSys;
@@ -4639,33 +4437,54 @@ void ReportVentilationLoads(EnergyPlusData &state)
         } else if (totMechNatVentVolFlowStdRho > (1.01 * targetFlowVoz)) {
             thisSysVentRepVars.TimeAboveVozDyn = TimeStepSys;
             thisSysPreDefRep.TimeAboveVozDynTotal += TimeStepSys;
-        } else if (totMechNatVentVolFlowStdRho > SmallAirVolFlow) {
+        } else if (totMechNatVentVolFlowStdRho > HVAC::SmallAirVolFlow) {
             thisSysVentRepVars.TimeAtVozDyn = TimeStepSys;
             thisSysPreDefRep.TimeAtVozDynTotal += TimeStepSys;
         }
 
         if (thisSysVentRepVars.AnyZoneOccupied) {
             thisSysPreDefRep.TimeOccupiedTotal += TimeStepSys;
-            thisSysPreDefRep.MechVentTotalOcc += mechVentFlow * TimeStepSys * DataGlobalConstants::SecInHour;
-            thisSysPreDefRep.NatVentTotalOcc += thisSysVentRepVars.NatVentFlow * TimeStepSys * DataGlobalConstants::SecInHour;
-            thisSysPreDefRep.TargetVentTotalVozOcc += targetFlowVoz * TimeStepSys * DataGlobalConstants::SecInHour;
+            thisSysPreDefRep.MechVentTotalOcc += mechVentFlow * TimeStepSysSec;
+            thisSysPreDefRep.NatVentTotalOcc += thisSysVentRepVars.NatVentFlow * TimeStepSysSec;
+            thisSysPreDefRep.TargetVentTotalVozOcc += targetFlowVoz * TimeStepSysSec;
             thisSysPreDefRep.TimeBelowVozDynTotalOcc += thisSysVentRepVars.TimeBelowVozDyn;
             thisSysPreDefRep.TimeAboveVozDynTotalOcc += thisSysVentRepVars.TimeAboveVozDyn;
             thisSysPreDefRep.TimeAtVozDynTotalOcc += thisSysVentRepVars.TimeAtVozDyn;
-        } else if (totMechNatVentVolFlowStdRho > SmallAirVolFlow) {
-            thisSysVentRepVars.TimeVentUnocc = TimeStepSys;
-            thisSysPreDefRep.TimeVentUnoccTotal += TimeStepSys;
+            if (sysFlow.SupFlow > HVAC::SmallMassFlow) {
+                if (sysCtrlInfo.fanOp == HVAC::FanOp::Continuous) {
+                    thisSysPreDefRep.TimeFanContTotalOcc += TimeStepSys;
+                } else {
+                    thisSysPreDefRep.TimeFanCycTotalOcc += TimeStepSys;
+                }
+            } else {
+                thisSysPreDefRep.TimeFanOffTotalOcc += TimeStepSys;
+            }
+        } else {
+            if (totMechNatVentVolFlowStdRho > HVAC::SmallAirVolFlow) {
+                thisSysVentRepVars.TimeVentUnocc = TimeStepSys;
+                thisSysPreDefRep.TimeVentUnoccTotal += TimeStepSys;
+            }
+            thisSysPreDefRep.TimeUnoccupiedTotal += TimeStepSys;
+            if (sysFlow.SupFlow > HVAC::SmallMassFlow) {
+                if (sysCtrlInfo.fanOp == HVAC::FanOp::Continuous) {
+                    thisSysPreDefRep.TimeFanContTotalUnocc += TimeStepSys;
+                } else {
+                    thisSysPreDefRep.TimeFanCycTotalUnocc += TimeStepSys;
+                }
+            } else {
+                thisSysPreDefRep.TimeFanOffTotalUnocc += TimeStepSys;
+            }
         }
 
         // set time at OA limiting factors
-        if (mechVentFlow > SmallAirVolFlow) {
+        if (mechVentFlow > HVAC::SmallAirVolFlow) {
             int thisOAControlNum = state.dataAirLoop->AirLoopControlInfo(sysNum).OACtrlNum;
             if (thisOAControlNum > 0) {
-                int limitFactorIndex = state.dataMixedAir->OAController(thisOAControlNum).OALimitingFactor;
+                int limitFactorIndex = static_cast<int>(state.dataMixedAir->OAController(thisOAControlNum).OALimitingFactor);
                 thisSysPreDefRep.TimeAtOALimit[limitFactorIndex] += TimeStepSys;
                 if (thisSysVentRepVars.AnyZoneOccupied) {
                     thisSysPreDefRep.TimeAtOALimitOcc[limitFactorIndex] += TimeStepSys;
-                    thisSysPreDefRep.MechVentTotAtLimitOcc[limitFactorIndex] += mechVentFlow * TimeStepSys * DataGlobalConstants::SecInHour;
+                    thisSysPreDefRep.MechVentTotAtLimitOcc[limitFactorIndex] += mechVentFlow * TimeStepSysSec;
                 }
             }
         }
@@ -4700,9 +4519,9 @@ void MatchPlantSys(EnergyPlusData &state,
 
     for (int CompNum = 1; CompNum <= state.dataAirSystemsData->PrimaryAirSystems(AirLoopNum).Branch(BranchNum).TotalComponents; ++CompNum) {
         {
-            auto &thisComp(state.dataAirSystemsData->PrimaryAirSystems(AirLoopNum).Branch(BranchNum).Comp(CompNum));
+            auto &thisComp = state.dataAirSystemsData->PrimaryAirSystems(AirLoopNum).Branch(BranchNum).Comp(CompNum);
             for (int VarNum = 1; VarNum <= thisComp.NumMeteredVars; ++VarNum) {
-                if (thisComp.MeteredVar(VarNum).ResourceType == DataGlobalConstants::ResourceType::EnergyTransfer) {
+                if (thisComp.MeteredVar(VarNum).resource == Constant::eResource::EnergyTransfer) {
                     thisComp.EnergyTransComp = EnergyTrans;
                     const std::string &CompType = thisComp.TypeOf;
                     const std::string &CompName = thisComp.Name;
@@ -4713,8 +4532,9 @@ void MatchPlantSys(EnergyPlusData &state,
                     int MatchLoopType = 0;
                     int Idx = 0;
                     FindDemandSideMatch(state, CompType, CompName, MatchFound, MatchLoopType, MatchLoop, MatchBranch, MatchComp);
-                    if (MatchFound)
+                    if (MatchFound) {
                         UpdateAirSysCompPtrArray(state, Idx, AirLoopNum, BranchNum, CompNum, MatchLoopType, MatchLoop, MatchBranch, MatchComp);
+                    }
                     thisComp.AirSysToPlantPtr = Idx;
                     break;
                 }
@@ -4724,7 +4544,7 @@ void MatchPlantSys(EnergyPlusData &state,
                 {
                     auto &thisSubComp(thisComp.SubComp(SubCompNum));
                     for (int VarNum = 1; VarNum <= thisSubComp.NumMeteredVars; ++VarNum) {
-                        if (thisSubComp.MeteredVar(VarNum).ResourceType == DataGlobalConstants::ResourceType::EnergyTransfer) {
+                        if (thisSubComp.MeteredVar(VarNum).resource == Constant::eResource::EnergyTransfer) {
                             thisSubComp.EnergyTransComp = EnergyTrans;
                             const std::string &CompType = thisComp.TypeOf;
                             const std::string &CompName = thisComp.Name;
@@ -4735,9 +4555,10 @@ void MatchPlantSys(EnergyPlusData &state,
                             int MatchLoopType = 0;
                             int Idx = 0;
                             FindDemandSideMatch(state, CompType, CompName, MatchFound, MatchLoopType, MatchLoop, MatchBranch, MatchComp);
-                            if (MatchFound)
+                            if (MatchFound) {
                                 UpdateAirSysSubCompPtrArray(
                                     state, Idx, AirLoopNum, BranchNum, CompNum, SubCompNum, MatchLoopType, MatchLoop, MatchBranch, MatchComp);
+                            }
                             thisSubComp.AirSysToPlantPtr = Idx;
                             break;
                         }
@@ -4745,9 +4566,9 @@ void MatchPlantSys(EnergyPlusData &state,
                     for (int SubSubCompNum = 1; SubSubCompNum <= thisSubComp.NumSubSubComps; ++SubSubCompNum) {
                         //!!!!            IF(SysVentLoad == 0.0d0)EXIT
                         {
-                            auto &thisSubSubComp(thisSubComp.SubSubComp(SubSubCompNum));
+                            auto &thisSubSubComp = thisSubComp.SubSubComp(SubSubCompNum);
                             for (int VarNum = 1; VarNum <= thisSubSubComp.NumMeteredVars; ++VarNum) {
-                                if (thisSubSubComp.MeteredVar(VarNum).ResourceType == DataGlobalConstants::ResourceType::EnergyTransfer) {
+                                if (thisSubSubComp.MeteredVar(VarNum).resource == Constant::eResource::EnergyTransfer) {
                                     thisSubSubComp.EnergyTransComp = EnergyTrans;
                                     const std::string &CompType = thisComp.TypeOf;
                                     const std::string &CompName = thisComp.Name;
@@ -4758,7 +4579,7 @@ void MatchPlantSys(EnergyPlusData &state,
                                     int MatchLoopType = 0;
                                     int Idx = 0;
                                     FindDemandSideMatch(state, CompType, CompName, MatchFound, MatchLoopType, MatchLoop, MatchBranch, MatchComp);
-                                    if (MatchFound)
+                                    if (MatchFound) {
                                         UpdateAirSysSubSubCompPtrArray(state,
                                                                        Idx,
                                                                        AirLoopNum,
@@ -4770,6 +4591,7 @@ void MatchPlantSys(EnergyPlusData &state,
                                                                        MatchLoop,
                                                                        MatchBranch,
                                                                        MatchComp);
+                                    }
                                     thisSubSubComp.AirSysToPlantPtr = Idx;
                                     break;
                                 }
@@ -4782,7 +4604,7 @@ void MatchPlantSys(EnergyPlusData &state,
     }
 }
 
-void FindDemandSideMatch(EnergyPlusData &state,
+void FindDemandSideMatch(EnergyPlusData const &state,
                          std::string const &CompType, // Inlet node of the component to find the match of
                          std::string_view CompName,   // Outlet node of the component to find the match of
                          bool &MatchFound,            // Set to .TRUE. when a match is found
@@ -4798,7 +4620,7 @@ void FindDemandSideMatch(EnergyPlusData &state,
     //       DATE WRITTEN   September 2004
 
     // PURPOSE OF THIS SUBROUTINE:
-    // This subroutine intializes the connections between various loops.
+    // This subroutine initializes the connections between various loops.
     // Due to the fact that this requires numerous string compares, it
     // is much more efficient to find this information once and then
     // store it in module level variables (LoopConnect derived type).
@@ -4812,44 +4634,46 @@ void FindDemandSideMatch(EnergyPlusData &state,
     MatchFound = false;
     MatchLoopType = 0;
     MatchLoop = 0;
-    MatchLoop = 0;
     MatchBranch = 0;
     MatchComp = 0;
 
     // Now cycle through all of the demand side loops to see if we can find
     // a match for the component type and name.  Once a match is found,
     // record the type of loop and the loop, branch, and component numbers.
-    if (!MatchFound) { // Go through the plant demand side loops
-        for (int PassLoopNum = 1; PassLoopNum <= state.dataHVACGlobal->NumPlantLoops; ++PassLoopNum) {
-            for (int PassBranchNum = 1;
-                 PassBranchNum <= state.dataPlnt->VentRepPlant[static_cast<int>(LoopSideLocation::Demand)](PassLoopNum).TotalBranches;
-                 ++PassBranchNum) {
-                for (int PassCompNum = 1;
-                     PassCompNum <=
-                     state.dataPlnt->VentRepPlant[static_cast<int>(LoopSideLocation::Demand)](PassLoopNum).Branch(PassBranchNum).TotalComponents;
-                     ++PassCompNum) {
-                    if (UtilityRoutines::SameString(CompType,
-                                                    state.dataPlnt->VentRepPlant[static_cast<int>(LoopSideLocation::Demand)](PassLoopNum)
-                                                        .Branch(PassBranchNum)
-                                                        .Comp(PassCompNum)
-                                                        .TypeOf) &&
-                        UtilityRoutines::SameString(CompName,
-                                                    state.dataPlnt->VentRepPlant[static_cast<int>(LoopSideLocation::Demand)](PassLoopNum)
-                                                        .Branch(PassBranchNum)
-                                                        .Comp(PassCompNum)
-                                                        .Name)) {
-                        // Found a match on the plant demand side--increment the counter
-                        MatchFound = true;
-                        MatchLoopType = 1;
-                        MatchLoop = PassLoopNum;
-                        MatchBranch = PassBranchNum;
-                        MatchComp = PassCompNum;
-                        break; // PassCompNum DO loop
-                    }
+    // Go through the plant demand side loops
+    for (int PassLoopNum = 1; PassLoopNum <= state.dataHVACGlobal->NumPlantLoops; ++PassLoopNum) {
+        for (int PassBranchNum = 1;
+             PassBranchNum <= state.dataPlnt->VentRepPlant[static_cast<int>(LoopSideLocation::Demand)](PassLoopNum).TotalBranches;
+             ++PassBranchNum) {
+            for (int PassCompNum = 1;
+                 PassCompNum <=
+                 state.dataPlnt->VentRepPlant[static_cast<int>(LoopSideLocation::Demand)](PassLoopNum).Branch(PassBranchNum).TotalComponents;
+                 ++PassCompNum) {
+                if (Util::SameString(CompType,
+                                     state.dataPlnt->VentRepPlant[static_cast<int>(LoopSideLocation::Demand)](PassLoopNum)
+                                         .Branch(PassBranchNum)
+                                         .Comp(PassCompNum)
+                                         .TypeOf) &&
+                    Util::SameString(CompName,
+                                     state.dataPlnt->VentRepPlant[static_cast<int>(LoopSideLocation::Demand)](PassLoopNum)
+                                         .Branch(PassBranchNum)
+                                         .Comp(PassCompNum)
+                                         .Name)) {
+                    // Found a match on the plant demand side--increment the counter
+                    MatchFound = true;
+                    MatchLoopType = 1;
+                    MatchLoop = PassLoopNum;
+                    MatchBranch = PassBranchNum;
+                    MatchComp = PassCompNum;
+                    break; // PassCompNum DO loop
                 }
-                if (MatchFound) break; // PassBranchNum DO loop
             }
-            if (MatchFound) break; // PassLoopNum DO loop
+            if (MatchFound) {
+                break; // PassBranchNum DO loop
+            }
+        }
+        if (MatchFound) {
+            break; // PassLoopNum DO loop
         }
     }
 
@@ -4862,16 +4686,16 @@ void FindDemandSideMatch(EnergyPlusData &state,
                      PassCompNum <=
                      state.dataPlnt->VentRepCond[static_cast<int>(LoopSideLocation::Demand)](PassLoopNum).Branch(PassBranchNum).TotalComponents;
                      ++PassCompNum) {
-                    if (UtilityRoutines::SameString(CompType,
-                                                    state.dataPlnt->VentRepCond[static_cast<int>(LoopSideLocation::Demand)](PassLoopNum)
-                                                        .Branch(PassBranchNum)
-                                                        .Comp(PassCompNum)
-                                                        .TypeOf) &&
-                        UtilityRoutines::SameString(CompName,
-                                                    state.dataPlnt->VentRepCond[static_cast<int>(LoopSideLocation::Demand)](PassLoopNum)
-                                                        .Branch(PassBranchNum)
-                                                        .Comp(PassCompNum)
-                                                        .Name)) {
+                    if (Util::SameString(CompType,
+                                         state.dataPlnt->VentRepCond[static_cast<int>(LoopSideLocation::Demand)](PassLoopNum)
+                                             .Branch(PassBranchNum)
+                                             .Comp(PassCompNum)
+                                             .TypeOf) &&
+                        Util::SameString(CompName,
+                                         state.dataPlnt->VentRepCond[static_cast<int>(LoopSideLocation::Demand)](PassLoopNum)
+                                             .Branch(PassBranchNum)
+                                             .Comp(PassCompNum)
+                                             .Name)) {
                         // Found a match on the plant demand side--increment the counter
                         MatchFound = true;
                         MatchLoopType = 2;
@@ -4881,9 +4705,13 @@ void FindDemandSideMatch(EnergyPlusData &state,
                         break; // PassCompNum DO loop
                     }
                 }
-                if (MatchFound) break; // PassBranchNum DO loop
+                if (MatchFound) {
+                    break; // PassBranchNum DO loop
+                }
             }
-            if (MatchFound) break; // PassLoopNum DO loop
+            if (MatchFound) {
+                break; // PassLoopNum DO loop
+            }
         }
     }
 }
@@ -4919,7 +4747,7 @@ void ReportAirLoopConnections(EnergyPlusData &state)
         "! <Outdoor Air Connections>,<OA Inlet Node #>,<OA Return Air Inlet Node Name>,<OA Outlet Node #>,<OA Mixed "
         "Air Outlet Node Name>,<AirLoopHVAC Name>");
 
-    auto &NodeID(state.dataLoopNodes->NodeID);
+    auto const &NodeID = state.dataLoopNodes->NodeID;
 
     print(state.files.bnd, "{}\n", "! ===============================================================");
     print(state.files.bnd, "{}\n", Format_706);
@@ -4943,9 +4771,8 @@ void ReportAirLoopConnections(EnergyPlusData &state)
         const auto oaSysExists = [&]() {
             if (state.dataAirLoop->AirToOANodeInfo(Count).OASysExists) {
                 return "Yes";
-            } else {
-                return "No";
             }
+            return "No";
         }();
 
         print(state.files.bnd,
@@ -4996,7 +4823,7 @@ void ReportAirLoopConnections(EnergyPlusData &state)
         }
 
         for (int Count1 = 1; Count1 <= state.dataAirLoop->AirToZoneNodeInfo(Count).NumZonesCooled; ++Count1) {
-            const auto CtrldZoneNum = state.dataAirLoop->AirToZoneNodeInfo(Count).CoolCtrlZoneNums(Count1);
+            const int CtrldZoneNum = state.dataAirLoop->AirToZoneNodeInfo(Count).CoolCtrlZoneNums(Count1);
             print(state.files.bnd, "   Cooled Zone Info,{},{},", Count1, state.dataHeatBal->Zone(CtrldZoneNum).Name);
             if (state.dataAirLoop->AirToZoneNodeInfo(Count).CoolZoneInletNodes(Count1) > 0) {
                 print(state.files.bnd,
@@ -5009,7 +4836,7 @@ void ReportAirLoopConnections(EnergyPlusData &state)
             }
         }
         for (int Count1 = 1; Count1 <= state.dataAirLoop->AirToZoneNodeInfo(Count).NumZonesHeated; ++Count1) {
-            const auto CtrldZoneNum = state.dataAirLoop->AirToZoneNodeInfo(Count).HeatCtrlZoneNums(Count1);
+            const int CtrldZoneNum = state.dataAirLoop->AirToZoneNodeInfo(Count).HeatCtrlZoneNums(Count1);
             print(state.files.bnd, "   Heated Zone Info,{},{},", Count1, state.dataHeatBal->Zone(CtrldZoneNum).Name);
             if (state.dataAirLoop->AirToZoneNodeInfo(Count).HeatZoneInletNodes(Count1) > 0) {
                 print(state.files.bnd,
@@ -5025,12 +4852,12 @@ void ReportAirLoopConnections(EnergyPlusData &state)
             std::string ChrOut;
             std::string ChrOut2;
             if (state.dataAirLoop->AirToOANodeInfo(Count).OASysInletNodeNum > 0) {
-                ChrOut = fmt::to_string(state.dataAirLoop->AirToOANodeInfo(Count).OASysInletNodeNum);
+                ChrOut = std::to_string(state.dataAirLoop->AirToOANodeInfo(Count).OASysInletNodeNum);
             } else {
                 ChrOut = errstring;
             }
             if (state.dataAirLoop->AirToOANodeInfo(Count).OASysOutletNodeNum > 0) {
-                ChrOut2 = fmt::to_string(state.dataAirLoop->AirToOANodeInfo(Count).OASysOutletNodeNum);
+                ChrOut2 = std::to_string(state.dataAirLoop->AirToOANodeInfo(Count).OASysOutletNodeNum);
             } else {
                 ChrOut2 = errstring;
             }
@@ -5094,6 +4921,379 @@ void ReportAirLoopConnections(EnergyPlusData &state)
                       state.dataAirSystemsData->PrimaryAirSystems(Count).Name);
             }
         }
+    }
+}
+
+void reportAirLoopToplogy(EnergyPlusData &state)
+{
+    // s->pdstTopAirLoop = newPreDefSubTable(state, s->pdrTopology, "Air Loop Supply Side Component Arrangement");
+    // s->pdchTopAirLoopName = newPreDefColumn(state, s->pdstTopAirLoop, "Airloop Name");
+    // s->pdchTopAirSplitName = newPreDefColumn(state, s->pdstTopAirLoop, "Splitter Name");
+    // s->pdchTopAirBranchName = newPreDefColumn(state, s->pdstTopAirLoop, "Supply Branch Name");
+    // s->pdchTopAirSupplyBranchType = newPreDefColumn(state, s->pdstTopAirLoop, "Supply Branch Type");
+    // s->pdchTopAirCompType = newPreDefColumn(state, s->pdstTopAirLoop, "Component Type");
+    // s->pdchTopAirCompName = newPreDefColumn(state, s->pdstTopAirLoop, "Component Name");
+    // s->pdchTopAirSubCompType = newPreDefColumn(state, s->pdstTopAirLoop, "Sub-Component Type");
+    // s->pdchTopAirSubCompName = newPreDefColumn(state, s->pdstTopAirLoop, "Sub-Component Name");
+    // s->pdchTopAirSubSubCompType = newPreDefColumn(state, s->pdstTopAirLoop, "Sub-Sub-Component Type");
+    // s->pdchTopAirSubSubCompName = newPreDefColumn(state, s->pdstTopAirLoop, "Sub-Sub-Component Name");
+    // s->pdchTopAirMixName = newPreDefColumn(state, s->pdstTopAirLoop, "Mixer Name");
+
+    auto &orp = state.dataOutRptPredefined;
+    int rowCounter = 1;
+    for (int airLoopNum = 1; airLoopNum <= state.dataHVACGlobal->NumPrimaryAirSys; ++airLoopNum) {
+        auto &pas = state.dataAirSystemsData->PrimaryAirSystems(airLoopNum);
+        OutputReportPredefined::PreDefTableEntry(state, orp->pdchTopAirLoopName, std::format("{}", rowCounter), pas.Name);
+        ++rowCounter;
+        for (int BranchNum = 1; BranchNum <= pas.NumBranches; ++BranchNum) {
+            auto &pasBranch = pas.Branch(BranchNum);
+            if (pas.Splitter.Exists) {
+                for (int outNum : pas.Splitter.BranchNumOut) {
+                    if (outNum == BranchNum) {
+                        OutputReportPredefined::PreDefTableEntry(state, orp->pdchTopAirSplitName, std::format("{}", rowCounter), pas.Splitter.Name);
+                        break;
+                    }
+                }
+            }
+            for (int CompNum = 1; CompNum <= pasBranch.TotalComponents; ++CompNum) {
+                auto &pasBranchComp = pasBranch.Comp(CompNum);
+                fillAirloopToplogyComponentRow(
+                    state, pas.Name, pasBranch.Name, pasBranch.DuctType, pasBranchComp.TypeOf, pasBranchComp.Name, rowCounter);
+                for (int SubCompNum = 1; SubCompNum <= pasBranchComp.NumSubComps; ++SubCompNum) {
+                    auto &pasBranchSubComp = pasBranchComp.SubComp(SubCompNum);
+                    OutputReportPredefined::PreDefTableEntry(
+                        state, orp->pdchTopAirSubCompType, std::format("{}", rowCounter), pasBranchSubComp.TypeOf);
+                    OutputReportPredefined::PreDefTableEntry(state, orp->pdchTopAirSubCompName, std::format("{}", rowCounter), pasBranchSubComp.Name);
+                    fillAirloopToplogyComponentRow(
+                        state, pas.Name, pasBranch.Name, pasBranch.DuctType, pasBranchComp.TypeOf, pasBranchComp.Name, rowCounter);
+                    for (int SubSubCompNum = 1; SubSubCompNum <= pasBranchSubComp.NumSubSubComps; ++SubSubCompNum) {
+                        auto &pasBranchSubSubComp = pasBranchSubComp.SubSubComp(SubSubCompNum);
+                        OutputReportPredefined::PreDefTableEntry(
+                            state, orp->pdchTopAirSubCompType, std::format("{}", rowCounter), pasBranchSubComp.TypeOf);
+                        OutputReportPredefined::PreDefTableEntry(
+                            state, orp->pdchTopAirSubCompName, std::format("{}", rowCounter), pasBranchSubComp.Name);
+                        OutputReportPredefined::PreDefTableEntry(
+                            state, orp->pdchTopAirSubSubCompType, std::format("{}", rowCounter), pasBranchSubSubComp.TypeOf);
+                        OutputReportPredefined::PreDefTableEntry(
+                            state, orp->pdchTopAirSubSubCompName, std::format("{}", rowCounter), pasBranchSubSubComp.Name);
+                        fillAirloopToplogyComponentRow(
+                            state, pas.Name, pasBranch.Name, pasBranch.DuctType, pasBranchComp.TypeOf, pasBranchComp.Name, rowCounter);
+                    }
+                }
+            }
+            if (pas.Mixer.Exists) {
+                for (int inNum : pas.Mixer.BranchNumIn) {
+                    if (inNum == BranchNum) {
+                        OutputReportPredefined::PreDefTableEntry(state, orp->pdchTopAirMixName, std::format("{}", rowCounter - 1), pas.Mixer.Name);
+                        break;
+                    }
+                }
+            }
+        }
+    }
+
+    // s->pdstTopAirDemand = newPreDefSubTable(state, s->pdrTopology, "Air Loop Demand Side Component Arrangement");
+    // s->pdchTopAirDemandName = newPreDefColumn(state, s->pdstTopAirDemand, "Airloop Name");
+    // s->pdchTopAirSupplyBranchName = newPreDefColumn(state, s->pdstTopAirDemand, "Supply Branch Name");
+    // s->pdchTopAirSupplyPCompType = newPreDefColumn(state, s->pdstTopAirDemand, "Supply Path Component Type");
+    // s->pdchTopAirSupplyPCompName = newPreDefColumn(state, s->pdstTopAirDemand, "Supply Path Component Name");
+    // s->pdchTopAirZoneName = newPreDefColumn(state, s->pdstTopAirDemand, "Zone Name");
+    // s->pdchTopAirTermUnitType = newPreDefColumn(state, s->pdstTopAirDemand, "Terminal Unit Type");
+    // s->pdchTopAirTermUnitName = newPreDefColumn(state, s->pdstTopAirDemand, "Terminal Unit Name");
+    // s->pdchTopAirReturnPCompType = newPreDefColumn(state, s->pdstTopAirDemand, "Return Path Component Type");
+    // s->pdchTopAirReturnPCompName = newPreDefColumn(state, s->pdstTopAirDemand, "Return Path Component Name");
+
+    rowCounter = 1;
+    for (int airLoopNum = 1; airLoopNum <= state.dataHVACGlobal->NumPrimaryAirSys; ++airLoopNum) {
+        auto &pas = state.dataAirSystemsData->PrimaryAirSystems(airLoopNum);
+        auto &thisAtoZInfo = state.dataAirLoop->AirToZoneNodeInfo(airLoopNum);
+        OutputReportPredefined::PreDefTableEntry(state, orp->pdchTopAirDemandName, std::format("{}", rowCounter), thisAtoZInfo.AirLoopName);
+        ++rowCounter;
+        for (int ductNum = 1; ductNum <= thisAtoZInfo.NumSupplyNodes; ++ductNum) {
+            auto &thisBranch = pas.Branch(thisAtoZInfo.SupplyDuctBranchNum(ductNum));
+            if (thisAtoZInfo.SupplyAirPathNum(ductNum) > 0) {
+                auto &thisSupplyPath = state.dataZoneEquip->SupplyAirPath(thisAtoZInfo.SupplyAirPathNum(ductNum));
+                for (int compNum = 1; compNum <= thisSupplyPath.NumOfComponents; ++compNum) {
+                    OutputReportPredefined::PreDefTableEntry(
+                        state, orp->pdchTopAirDemandName, std::format("{}", rowCounter), thisAtoZInfo.AirLoopName);
+                    OutputReportPredefined::PreDefTableEntry(state, orp->pdchTopAirSupplyBranchName, std::format("{}", rowCounter), thisBranch.Name);
+                    OutputReportPredefined::PreDefTableEntry(
+                        state, orp->pdchTopAirSupplyDuctType, std::format("{}", rowCounter), HVAC::airDuctTypeNames[(int)thisBranch.DuctType]);
+                    OutputReportPredefined::PreDefTableEntry(
+                        state, orp->pdchTopAirSupplyPCompType, std::format("{}", rowCounter), thisSupplyPath.ComponentType(compNum));
+                    OutputReportPredefined::PreDefTableEntry(
+                        state, orp->pdchTopAirSupplyPCompName, std::format("{}", rowCounter), thisSupplyPath.ComponentName(compNum));
+                    ++rowCounter;
+                }
+                if (thisBranch.DuctType == HVAC::AirDuctType::Cooling || thisBranch.DuctType == HVAC::AirDuctType::Main) {
+                    for (int zoneNum : thisAtoZInfo.CoolCtrlZoneNums) {
+                        auto &thisZoneEquipConfig = state.dataZoneEquip->ZoneEquipConfig(zoneNum);
+                        auto &zel = state.dataZoneEquip->ZoneEquipList(zoneNum);
+                        for (auto &thisCoolADU : thisZoneEquipConfig.AirDistUnitCool) {
+                            if (thisCoolADU.AirLoopNum != airLoopNum) {
+                                continue;
+                            }
+                            if (thisCoolADU.SupplyBranchIndex != thisAtoZInfo.SupplyDuctBranchNum(ductNum)) {
+                                continue;
+                            }
+                            if (thisCoolADU.SupplyAirPathExists) {
+                                int spCompNum = thisSupplyPath.OutletNodeSupplyPathCompNum(thisCoolADU.SupplyAirPathOutNodeIndex);
+                                OutputReportPredefined::PreDefTableEntry(
+                                    state, orp->pdchTopAirSupplyPCompType, std::format("{}", rowCounter), thisSupplyPath.ComponentType(spCompNum));
+                                OutputReportPredefined::PreDefTableEntry(
+                                    state, orp->pdchTopAirSupplyPCompName, std::format("{}", rowCounter), thisSupplyPath.ComponentName(spCompNum));
+                            }
+                            OutputReportPredefined::PreDefTableEntry(
+                                state, orp->pdchTopAirDemandName, std::format("{}", rowCounter), thisAtoZInfo.AirLoopName);
+                            OutputReportPredefined::PreDefTableEntry(
+                                state, orp->pdchTopAirSupplyBranchName, std::format("{}", rowCounter), thisBranch.Name);
+                            OutputReportPredefined::PreDefTableEntry(state,
+                                                                     orp->pdchTopAirSupplyDuctType,
+                                                                     std::format("{}", rowCounter),
+                                                                     HVAC::airDuctTypeNames[(int)thisBranch.DuctType]);
+                            OutputReportPredefined::PreDefTableEntry(
+                                state, orp->pdchTopAirZoneName, std::format("{}", rowCounter), thisZoneEquipConfig.ZoneName);
+                            auto &aduIndex = zel.EquipIndex(thisCoolADU.AirDistUnitIndex);
+                            OutputReportPredefined::PreDefTableEntry(state,
+                                                                     orp->pdchTopAirTermUnitType,
+                                                                     std::format("{}", rowCounter),
+                                                                     state.dataDefineEquipment->AirDistUnit(aduIndex).EquipType(1));
+                            OutputReportPredefined::PreDefTableEntry(state,
+                                                                     orp->pdchTopAirTermUnitName,
+                                                                     std::format("{}", rowCounter),
+                                                                     state.dataDefineEquipment->AirDistUnit(aduIndex).EquipName(1));
+                            if (thisAtoZInfo.ReturnAirPathNum(1) > 0) {
+                                auto &thisReturnPath = state.dataZoneEquip->ReturnAirPath(thisAtoZInfo.ReturnAirPathNum(1));
+                                for (int retNodeNum = 1; retNodeNum <= thisZoneEquipConfig.NumReturnNodes; ++retNodeNum) {
+                                    if (thisZoneEquipConfig.ReturnNodeAirLoopNum(retNodeNum) == airLoopNum) {
+                                        int retPathCompNum = thisZoneEquipConfig.ReturnNodeRetPathCompNum(retNodeNum);
+                                        if (retPathCompNum > 0) {
+                                            OutputReportPredefined::PreDefTableEntry(state,
+                                                                                     orp->pdchTopAirReturnPCompType,
+                                                                                     std::format("{}", rowCounter),
+                                                                                     thisReturnPath.ComponentType(retPathCompNum));
+                                            OutputReportPredefined::PreDefTableEntry(state,
+                                                                                     orp->pdchTopAirReturnPCompName,
+                                                                                     std::format("{}", rowCounter),
+                                                                                     thisReturnPath.ComponentName(retPathCompNum));
+                                        }
+                                        break;
+                                    }
+                                }
+                            }
+                            ++rowCounter;
+                        }
+                    }
+                } else if (thisBranch.DuctType == HVAC::AirDuctType::Heating) {
+                    for (int zoneNum : thisAtoZInfo.HeatCtrlZoneNums) {
+                        auto &thisZoneEquipConfig = state.dataZoneEquip->ZoneEquipConfig(zoneNum);
+                        auto &zel = state.dataZoneEquip->ZoneEquipList(zoneNum);
+                        for (auto &thisHeatADU : thisZoneEquipConfig.AirDistUnitHeat) {
+                            if (thisHeatADU.AirLoopNum != airLoopNum) {
+                                continue;
+                            }
+                            if (thisHeatADU.SupplyBranchIndex != thisAtoZInfo.SupplyDuctBranchNum(ductNum)) {
+                                continue;
+                            }
+                            if (thisHeatADU.SupplyAirPathExists) {
+                                int spCompNum = thisSupplyPath.OutletNodeSupplyPathCompNum(thisHeatADU.SupplyAirPathOutNodeIndex);
+                                OutputReportPredefined::PreDefTableEntry(
+                                    state, orp->pdchTopAirSupplyPCompType, std::format("{}", rowCounter), thisSupplyPath.ComponentType(spCompNum));
+                                OutputReportPredefined::PreDefTableEntry(
+                                    state, orp->pdchTopAirSupplyPCompName, std::format("{}", rowCounter), thisSupplyPath.ComponentName(spCompNum));
+                            }
+                            OutputReportPredefined::PreDefTableEntry(
+                                state, orp->pdchTopAirDemandName, std::format("{}", rowCounter), thisAtoZInfo.AirLoopName);
+                            OutputReportPredefined::PreDefTableEntry(
+                                state, orp->pdchTopAirSupplyBranchName, std::format("{}", rowCounter), thisBranch.Name);
+                            OutputReportPredefined::PreDefTableEntry(state,
+                                                                     orp->pdchTopAirSupplyDuctType,
+                                                                     std::format("{}", rowCounter),
+                                                                     HVAC::airDuctTypeNames[(int)thisBranch.DuctType]);
+                            OutputReportPredefined::PreDefTableEntry(
+                                state, orp->pdchTopAirZoneName, std::format("{}", rowCounter), thisZoneEquipConfig.ZoneName);
+                            auto &aduIndex = zel.EquipIndex(thisHeatADU.AirDistUnitIndex);
+                            OutputReportPredefined::PreDefTableEntry(state,
+                                                                     orp->pdchTopAirTermUnitType,
+                                                                     std::format("{}", rowCounter),
+                                                                     state.dataDefineEquipment->AirDistUnit(aduIndex).EquipType(1));
+                            OutputReportPredefined::PreDefTableEntry(state,
+                                                                     orp->pdchTopAirTermUnitName,
+                                                                     std::format("{}", rowCounter),
+                                                                     state.dataDefineEquipment->AirDistUnit(aduIndex).EquipName(1));
+                            if (thisAtoZInfo.ReturnAirPathNum(1) > 0) {
+                                auto &thisReturnPath = state.dataZoneEquip->ReturnAirPath(thisAtoZInfo.ReturnAirPathNum(1));
+                                for (int retNodeNum = 1; retNodeNum <= thisZoneEquipConfig.NumReturnNodes; ++retNodeNum) {
+                                    int retPathCompNum = thisZoneEquipConfig.ReturnNodeRetPathCompNum(retNodeNum);
+                                    if (retPathCompNum > 0) {
+                                        OutputReportPredefined::PreDefTableEntry(state,
+                                                                                 orp->pdchTopAirReturnPCompType,
+                                                                                 std::format("{}", rowCounter),
+                                                                                 thisReturnPath.ComponentType(retPathCompNum));
+                                        OutputReportPredefined::PreDefTableEntry(state,
+                                                                                 orp->pdchTopAirReturnPCompName,
+                                                                                 std::format("{}", rowCounter),
+                                                                                 thisReturnPath.ComponentName(retPathCompNum));
+                                    }
+                                }
+                            }
+                            ++rowCounter;
+                        }
+                    }
+                }
+
+            } else {
+                OutputReportPredefined::PreDefTableEntry(state, orp->pdchTopAirDemandName, std::format("{}", rowCounter), thisAtoZInfo.AirLoopName);
+                OutputReportPredefined::PreDefTableEntry(state, orp->pdchTopAirSupplyBranchName, std::format("{}", rowCounter), thisBranch.Name);
+                OutputReportPredefined::PreDefTableEntry(
+                    state, orp->pdchTopAirSupplyDuctType, std::format("{}", rowCounter), HVAC::airDuctTypeNames[(int)thisBranch.DuctType]);
+                ++rowCounter;
+            }
+        }
+        if (thisAtoZInfo.ReturnAirPathNum(1) > 0) {
+            auto &thisReturnPath = state.dataZoneEquip->ReturnAirPath(thisAtoZInfo.ReturnAirPathNum(1));
+            for (int compNum = 1; compNum <= thisReturnPath.NumOfComponents; ++compNum) {
+                OutputReportPredefined::PreDefTableEntry(state, orp->pdchTopAirDemandName, std::format("{}", rowCounter), thisAtoZInfo.AirLoopName);
+                if (compNum == thisReturnPath.OutletRetPathCompNum) {
+                    auto &thisBranch = pas.Branch(pas.InletBranchNum[0]);
+                    OutputReportPredefined::PreDefTableEntry(state, orp->pdchTopAirSupplyBranchName, std::format("{}", rowCounter), thisBranch.Name);
+                    OutputReportPredefined::PreDefTableEntry(
+                        state, orp->pdchTopAirSupplyDuctType, std::format("{}", rowCounter), HVAC::airDuctTypeNames[(int)thisBranch.DuctType]);
+                }
+                OutputReportPredefined::PreDefTableEntry(
+                    state, orp->pdchTopAirReturnPCompType, std::format("{}", rowCounter), thisReturnPath.ComponentType(compNum));
+                OutputReportPredefined::PreDefTableEntry(
+                    state, orp->pdchTopAirReturnPCompName, std::format("{}", rowCounter), thisReturnPath.ComponentName(compNum));
+                ++rowCounter;
+            }
+        }
+    }
+}
+
+void fillAirloopToplogyComponentRow(EnergyPlusData &state,
+                                    const std::string_view &loopName,
+                                    const std::string_view &branchName,
+                                    const HVAC::AirDuctType ductType,
+                                    const std::string_view &compType,
+                                    const std::string_view &compName,
+                                    int &rowCounter)
+{
+    auto &orp = state.dataOutRptPredefined;
+    // s->pdchTopAirLoopName = newPreDefColumn(state, s->pdstTopAirLoop, "Airloop Name");
+    // s->pdchTopAirBranchName = newPreDefColumn(state, s->pdstTopAirLoop, "Branch Name");
+    // s->pdchTopAirCompType = newPreDefColumn(state, s->pdstTopAirLoop, "Component Type");
+    // s->pdchTopAirCompName = newPreDefColumn(state, s->pdstTopAirLoop, "Component Name");
+    OutputReportPredefined::PreDefTableEntry(state, orp->pdchTopAirLoopName, std::format("{}", rowCounter), loopName);
+    OutputReportPredefined::PreDefTableEntry(state, orp->pdchTopAirBranchName, std::format("{}", rowCounter), branchName);
+    OutputReportPredefined::PreDefTableEntry(
+        state, orp->pdchTopAirSupplyBranchType, std::format("{}", rowCounter), HVAC::airDuctTypeNames[(int)ductType]);
+    OutputReportPredefined::PreDefTableEntry(state, orp->pdchTopAirCompType, std::format("{}", rowCounter), compType);
+    OutputReportPredefined::PreDefTableEntry(state, orp->pdchTopAirCompName, std::format("{}", rowCounter), compName);
+    ++rowCounter;
+}
+
+void reportZoneEquipmentToplogy(EnergyPlusData &state)
+{
+    // s->pdstTopZnEqp = newPreDefSubTable(state, s->pdrTopology, "Zone Equipment Component Arrangement");
+    // s->pdchTopZnEqpName = newPreDefColumn(state, s->pdstTopZnEqp, "Zone Name");
+    // s->pdchTopZnEqpCompType = newPreDefColumn(state, s->pdstTopZnEqp, "Component Type");
+    // s->pdchTopZnEqpCompName = newPreDefColumn(state, s->pdstTopZnEqp, "Component Name");
+    // s->pdchTopZnEqpSubCompType = newPreDefColumn(state, s->pdstTopZnEqp, "Sub-Component Type");
+    // s->pdchTopZnEqpSubCompName = newPreDefColumn(state, s->pdstTopZnEqp, "Sub-Component Name");
+    // s->pdchTopZnEqpSubSubCompType = newPreDefColumn(state, s->pdstTopZnEqp, "Sub-Sub-Component Type");
+    // s->pdchTopZnEqpSubSubCompName = newPreDefColumn(state, s->pdstTopZnEqp, "Sub-Sub-Component Name");
+
+    auto &orp = state.dataOutRptPredefined;
+    int rowCounter = 1;
+    for (int zoneNum = 1; zoneNum <= state.dataGlobal->NumOfZones; ++zoneNum) {
+        const std::string_view zoneName = state.dataHeatBal->Zone(zoneNum).Name;
+        OutputReportPredefined::PreDefTableEntry(state, orp->pdchTopZnEqpName, std::format("{}", rowCounter), zoneName);
+        ++rowCounter;
+        if (!state.dataZoneEquip->ZoneEquipConfig(zoneNum).IsControlled) {
+            continue;
+        }
+        auto &zel = state.dataZoneEquip->ZoneEquipList(zoneNum);
+        for (int CompNum = 1; CompNum <= zel.NumOfEquipTypes; ++CompNum) {
+            auto &zelEquipData = zel.EquipData(CompNum);
+            fillZoneEquipToplogyComponentRow(state, zoneName, zelEquipData.TypeOf, zelEquipData.Name, rowCounter);
+            for (int SubCompNum = 1; SubCompNum <= zelEquipData.NumSubEquip; ++SubCompNum) {
+                auto &zelSubEquipData = zelEquipData.SubEquipData(SubCompNum);
+                OutputReportPredefined::PreDefTableEntry(state, orp->pdchTopZnEqpSubCompType, std::format("{}", rowCounter), zelSubEquipData.TypeOf);
+                OutputReportPredefined::PreDefTableEntry(state, orp->pdchTopZnEqpSubCompName, std::format("{}", rowCounter), zelSubEquipData.Name);
+                fillZoneEquipToplogyComponentRow(state, zoneName, zelEquipData.TypeOf, zelEquipData.Name, rowCounter);
+                for (int SubSubCompNum = 1; SubSubCompNum <= zelSubEquipData.NumSubSubEquip; ++SubSubCompNum) {
+                    auto &zelSubSubEquipData = zelSubEquipData.SubSubEquipData(SubSubCompNum);
+                    OutputReportPredefined::PreDefTableEntry(
+                        state, orp->pdchTopZnEqpSubCompType, std::format("{}", rowCounter), zelSubEquipData.TypeOf);
+                    OutputReportPredefined::PreDefTableEntry(
+                        state, orp->pdchTopZnEqpSubCompName, std::format("{}", rowCounter), zelSubEquipData.Name);
+                    OutputReportPredefined::PreDefTableEntry(
+                        state, orp->pdchTopZnEqpSubSubCompType, std::format("{}", rowCounter), zelSubSubEquipData.TypeOf);
+                    OutputReportPredefined::PreDefTableEntry(
+                        state, orp->pdchTopZnEqpSubSubCompName, std::format("{}", rowCounter), zelSubSubEquipData.Name);
+                    fillZoneEquipToplogyComponentRow(state, zoneName, zelEquipData.TypeOf, zelEquipData.Name, rowCounter);
+                }
+            }
+        }
+    }
+}
+
+void fillZoneEquipToplogyComponentRow(
+    EnergyPlusData &state, const std::string_view &zoneName, const std::string_view &compType, const std::string_view &compName, int &rowCounter)
+{
+    auto &orp = state.dataOutRptPredefined;
+    // s->pdstTopZnEqp = newPreDefSubTable(state, s->pdrTopology, "Zone Equipment Component Arrangement");
+    // s->pdchTopZnEqpName = newPreDefColumn(state, s->pdstTopZnEqp, "Zone Name");
+    // s->pdchTopZnEqpCompType = newPreDefColumn(state, s->pdstTopZnEqp, "Component Type");
+    // s->pdchTopZnEqpCompName = newPreDefColumn(state, s->pdstTopZnEqp, "Component Name");
+    OutputReportPredefined::PreDefTableEntry(state, orp->pdchTopZnEqpName, std::format("{}", rowCounter), zoneName);
+    OutputReportPredefined::PreDefTableEntry(state, orp->pdchTopZnEqpCompType, std::format("{}", rowCounter), compType);
+    OutputReportPredefined::PreDefTableEntry(state, orp->pdchTopZnEqpCompName, std::format("{}", rowCounter), compName);
+    ++rowCounter;
+}
+
+void reportAirDistributionUnits(EnergyPlusData &state)
+{
+    // populate the predefined tabular report for Equipment Summary - Air Terminals
+
+    auto &orp = state.dataOutRptPredefined;
+    for (auto &adu : state.dataDefineEquipment->AirDistUnit) {
+        constexpr int aduCompNum = 1;
+        OutputReportPredefined::PreDefTableEntry(state, orp->pdchAirTermZoneName, adu.Name, state.dataHeatBal->Zone(adu.ZoneNum).Name);
+        switch (adu.EquipTypeEnum(aduCompNum)) {
+        case DataDefineEquip::ZnAirLoopEquipType::DualDuctConstVolume:
+        case DataDefineEquip::ZnAirLoopEquipType::DualDuctVAV:
+        case DataDefineEquip::ZnAirLoopEquipType::DualDuctVAVOutdoorAir:
+            state.dataDualDuct->dd_airterminal(adu.EquipIndex(aduCompNum)).reportTerminalUnit(state);
+            break;
+        case DataDefineEquip::ZnAirLoopEquipType::SingleDuctConstVolReheat:
+        case DataDefineEquip::ZnAirLoopEquipType::SingleDuctConstVolNoReheat:
+        case DataDefineEquip::ZnAirLoopEquipType::SingleDuctVAVReheat:
+        case DataDefineEquip::ZnAirLoopEquipType::SingleDuctVAVNoReheat:
+        case DataDefineEquip::ZnAirLoopEquipType::SingleDuctVAVReheatVSFan:
+        case DataDefineEquip::ZnAirLoopEquipType::SingleDuctCBVAVReheat:
+        case DataDefineEquip::ZnAirLoopEquipType::SingleDuctCBVAVNoReheat:
+            state.dataSingleDuct->sd_airterminal(adu.EquipIndex(aduCompNum)).reportTerminalUnit(state);
+            break;
+        case DataDefineEquip::ZnAirLoopEquipType::SingleDuct_SeriesPIU_Reheat:
+        case DataDefineEquip::ZnAirLoopEquipType::SingleDuct_ParallelPIU_Reheat:
+            state.dataPowerInductionUnits->PIU(adu.EquipIndex(aduCompNum)).reportTerminalUnit(state);
+            break;
+        case DataDefineEquip::ZnAirLoopEquipType::SingleDuct_ConstVol_4PipeInduc:
+            state.dataHVACSingleDuctInduc->IndUnit(adu.EquipIndex(aduCompNum)).reportTerminalUnit(state);
+            break;
+        case DataDefineEquip::ZnAirLoopEquipType::SingleDuctConstVolCooledBeam:
+            state.dataHVACCooledBeam->CoolBeam(adu.EquipIndex(aduCompNum)).reportTerminalUnit(state);
+            break;
+        case DataDefineEquip::ZnAirLoopEquipType::SingleDuctConstVolFourPipeBeam:
+            adu.airTerminalPtr->reportTerminalUnit(state);
+            break;
+        case DataDefineEquip::ZnAirLoopEquipType::SingleDuctUserDefined:
+        case DataDefineEquip::ZnAirLoopEquipType::SingleDuctATMixer:
+            break;
+        default:
+            break;
+        } // end switch
     }
 }
 

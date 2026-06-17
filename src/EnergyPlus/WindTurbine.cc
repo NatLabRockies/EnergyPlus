@@ -1,7 +1,7 @@
-// EnergyPlus, Copyright (c) 1996-2023, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
-// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other
+// National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
 // contributors. All rights reserved.
 //
 // NOTICE: This Software was developed under funding from the U.S. Department of Energy and the
@@ -48,10 +48,10 @@
 // C++ Headers
 #include <cassert>
 #include <cmath>
+#include <format>
 
 // ObjexxFCL Headers
 #include <ObjexxFCL/Array.functions.hh>
-#include <ObjexxFCL/Fmath.hh>
 #include <ObjexxFCL/string.functions.hh>
 
 // EnergyPlus Headers
@@ -80,8 +80,6 @@ namespace WindTurbine {
     // MODULE INFORMATION:
     //       AUTHOR         Daeho Kang
     //       DATE WRITTEN   October 2009
-    //       MODIFIED       na
-    //       RE-ENGINEERED  na
 
     // PURPOSE OF THIS MODULE:
     // This module is to calculate the electrical power output that wind turbine systems produce.
@@ -117,8 +115,6 @@ namespace WindTurbine {
         // SUBROUTINE INFORMATION:
         //       AUTHOR         Daeho Kang
         //       DATE WRITTEN   October 2009
-        //       MODIFIED       na
-        //       RE-ENGINEERED  na
 
         // PURPOSE OF THIS SUBROUTINE:
         // This subroutine manages the simulation of wind turbine component.
@@ -136,27 +132,29 @@ namespace WindTurbine {
         }
 
         if (GeneratorIndex == 0) {
-            WindTurbineNum = UtilityRoutines::FindItemInList(GeneratorName, state.dataWindTurbine->WindTurbineSys);
+            WindTurbineNum = Util::FindItemInList(GeneratorName, state.dataWindTurbine->WindTurbineSys);
             if (WindTurbineNum == 0) {
-                ShowFatalError(state, format("SimWindTurbine: Specified Generator not one of Valid Wind Turbine Generators {}", GeneratorName));
+                ShowFatalError(state, std::format("SimWindTurbine: Specified Generator not one of Valid Wind Turbine Generators {}", GeneratorName));
             }
             GeneratorIndex = WindTurbineNum;
         } else {
             WindTurbineNum = GeneratorIndex;
             int NumWindTurbines = (int)state.dataWindTurbine->WindTurbineSys.size();
             if (WindTurbineNum > NumWindTurbines || WindTurbineNum < 1) {
-                ShowFatalError(state,
-                               format("SimWindTurbine: Invalid GeneratorIndex passed={}, Number of Wind Turbine Generators={}, Generator name={}",
-                                      WindTurbineNum,
-                                      NumWindTurbines,
-                                      GeneratorName));
+                ShowFatalError(
+                    state,
+                    std::format("SimWindTurbine: Invalid GeneratorIndex passed={}, Number of Wind Turbine Generators={}, Generator name={}",
+                                WindTurbineNum,
+                                NumWindTurbines,
+                                GeneratorName));
             }
             if (GeneratorName != state.dataWindTurbine->WindTurbineSys(WindTurbineNum).Name) {
-                ShowFatalError(state,
-                               format("SimMWindTurbine: Invalid GeneratorIndex passed={}, Generator name={}, stored Generator Name for that index={}",
-                                      WindTurbineNum,
-                                      GeneratorName,
-                                      state.dataWindTurbine->WindTurbineSys(WindTurbineNum).Name));
+                ShowFatalError(
+                    state,
+                    std::format("SimMWindTurbine: Invalid GeneratorIndex passed={}, Generator name={}, stored Generator Name for that index={}",
+                                WindTurbineNum,
+                                GeneratorName,
+                                state.dataWindTurbine->WindTurbineSys(WindTurbineNum).Name));
             }
         }
 
@@ -180,10 +178,9 @@ namespace WindTurbine {
         //       AUTHOR         B. Griffith
         //       DATE WRITTEN   Aug. 2008
         //       MODIFIED       D Kang, October 2009 for Wind Turbine
-        //       RE-ENGINEERED  na
 
         // PURPOSE OF THIS SUBROUTINE:
-        // This subroutine provides a "get" method to collect results for individual electic load centers.
+        // This subroutine provides a "get" method to collect results for individual electric load centers.
 
         GeneratorPower = state.dataWindTurbine->WindTurbineSys(GeneratorIndex).Power;
         GeneratorEnergy = state.dataWindTurbine->WindTurbineSys(GeneratorIndex).Energy;
@@ -199,16 +196,12 @@ namespace WindTurbine {
         // SUBROUTINE INFORMATION:
         //       AUTHOR         Daeho Kang
         //       DATE WRITTEN   October 2009
-        //       MODIFIED       na
-        //       RE-ENGINEERED  na
 
         // PURPOSE OF THIS SUBROUTINE:
         // This subroutine gets input data for wind turbine components
         // and stores it in the wind turbine data structure.
 
-        // Using/Aliasing
-
-        using ScheduleManager::GetScheduleIndex;
+        static constexpr std::string_view routineName = "GetWindTurbineInput";
 
         // SUBROUTINE PARAMETER DEFINITIONS:
         static std::string const CurrentModuleObject("Generator:WindTurbine");
@@ -259,57 +252,49 @@ namespace WindTurbine {
                                                                      lAlphaBlanks,
                                                                      cAlphaFields,
                                                                      cNumericFields);
-            UtilityRoutines::IsNameEmpty(state, state.dataIPShortCut->cAlphaArgs(1), CurrentModuleObject, ErrorsFound);
+
+            ErrorObjectHeader eoh{routineName, CurrentModuleObject, state.dataIPShortCut->cAlphaArgs(1)};
 
             auto &windTurbine = state.dataWindTurbine->WindTurbineSys(WindTurbineNum);
 
             windTurbine.Name = state.dataIPShortCut->cAlphaArgs(1); // Name of wind turbine
 
-            windTurbine.Schedule = state.dataIPShortCut->cAlphaArgs(2); // Get schedule
             if (lAlphaBlanks(2)) {
-                windTurbine.SchedPtr = DataGlobalConstants::ScheduleAlwaysOn;
-            } else {
-                windTurbine.SchedPtr = GetScheduleIndex(state, state.dataIPShortCut->cAlphaArgs(2));
-                if (windTurbine.SchedPtr == 0) {
-                    ShowSevereError(state,
-                                    format("{}=\"{}\" invalid {}=\"{}\" not found.",
-                                           CurrentModuleObject,
-                                           state.dataIPShortCut->cAlphaArgs(1),
-                                           cAlphaFields(2),
-                                           state.dataIPShortCut->cAlphaArgs(2)));
-                    ErrorsFound = true;
-                }
+                windTurbine.availSched = Sched::GetScheduleAlwaysOn(state);
+            } else if ((windTurbine.availSched = Sched::GetSchedule(state, state.dataIPShortCut->cAlphaArgs(2))) == nullptr) {
+                ShowSevereItemNotFound(state, eoh, cAlphaFields(2), state.dataIPShortCut->cAlphaArgs(2));
+                ErrorsFound = true;
             }
             // Select rotor type
-            windTurbine.rotorType = static_cast<RotorType>(
-                getEnumerationValue(WindTurbine::RotorNamesUC, UtilityRoutines::MakeUPPERCase(state.dataIPShortCut->cAlphaArgs(3))));
+            windTurbine.rotorType =
+                static_cast<RotorType>(getEnumValue(WindTurbine::RotorNamesUC, Util::makeUPPER(state.dataIPShortCut->cAlphaArgs(3))));
             if (windTurbine.rotorType == RotorType::Invalid) {
                 if (state.dataIPShortCut->cAlphaArgs(3).empty()) {
                     windTurbine.rotorType = RotorType::HorizontalAxis;
                 } else {
                     ShowSevereError(state,
-                                    format("{}=\"{}\" invalid {}=\"{}\".",
-                                           CurrentModuleObject,
-                                           state.dataIPShortCut->cAlphaArgs(1),
-                                           cAlphaFields(3),
-                                           state.dataIPShortCut->cAlphaArgs(3)));
+                                    std::format("{}=\"{}\" invalid {}=\"{}\".",
+                                                CurrentModuleObject,
+                                                state.dataIPShortCut->cAlphaArgs(1),
+                                                cAlphaFields(3),
+                                                state.dataIPShortCut->cAlphaArgs(3)));
                     ErrorsFound = true;
                 }
             }
 
             // Select control type
-            windTurbine.controlType = static_cast<ControlType>(
-                getEnumerationValue(WindTurbine::ControlNamesUC, UtilityRoutines::MakeUPPERCase(state.dataIPShortCut->cAlphaArgs(4))));
+            windTurbine.controlType =
+                static_cast<ControlType>(getEnumValue(WindTurbine::ControlNamesUC, Util::makeUPPER(state.dataIPShortCut->cAlphaArgs(4))));
             if (windTurbine.controlType == ControlType::Invalid) {
                 if (state.dataIPShortCut->cAlphaArgs(4).empty()) {
                     windTurbine.controlType = ControlType::VariableSpeedVariablePitch;
                 } else {
                     ShowSevereError(state,
-                                    format("{}=\"{}\" invalid {}=\"{}\".",
-                                           CurrentModuleObject,
-                                           state.dataIPShortCut->cAlphaArgs(1),
-                                           cAlphaFields(4),
-                                           state.dataIPShortCut->cAlphaArgs(4)));
+                                    std::format("{}=\"{}\" invalid {}=\"{}\".",
+                                                CurrentModuleObject,
+                                                state.dataIPShortCut->cAlphaArgs(1),
+                                                cAlphaFields(4),
+                                                state.dataIPShortCut->cAlphaArgs(4)));
                     ErrorsFound = true;
                 }
             }
@@ -318,17 +303,17 @@ namespace WindTurbine {
             if (windTurbine.RatedRotorSpeed <= 0.0) {
                 if (lNumericBlanks(1)) {
                     ShowSevereError(state,
-                                    format("{}=\"{}\" invalid {} is required but input is blank.",
-                                           CurrentModuleObject,
-                                           state.dataIPShortCut->cAlphaArgs(1),
-                                           cNumericFields(1)));
+                                    std::format("{}=\"{}\" invalid {} is required but input is blank.",
+                                                CurrentModuleObject,
+                                                state.dataIPShortCut->cAlphaArgs(1),
+                                                cNumericFields(1)));
                 } else {
                     ShowSevereError(state,
-                                    format("{}=\"{}\" invalid {}=[{:.2R}] must be greater than zero.",
-                                           CurrentModuleObject,
-                                           state.dataIPShortCut->cAlphaArgs(1),
-                                           cNumericFields(1),
-                                           rNumericArgs(1)));
+                                    std::format("{}=\"{}\" invalid {}=[{:.2f}] must be greater than zero.",
+                                                CurrentModuleObject,
+                                                state.dataIPShortCut->cAlphaArgs(1),
+                                                cNumericFields(1),
+                                                rNumericArgs(1)));
                 }
                 ErrorsFound = true;
             }
@@ -337,17 +322,17 @@ namespace WindTurbine {
             if (windTurbine.RotorDiameter <= 0.0) {
                 if (lNumericBlanks(2)) {
                     ShowSevereError(state,
-                                    format("{}=\"{}\" invalid {} is required but input is blank.",
-                                           CurrentModuleObject,
-                                           state.dataIPShortCut->cAlphaArgs(1),
-                                           cNumericFields(2)));
+                                    std::format("{}=\"{}\" invalid {} is required but input is blank.",
+                                                CurrentModuleObject,
+                                                state.dataIPShortCut->cAlphaArgs(1),
+                                                cNumericFields(2)));
                 } else {
                     ShowSevereError(state,
-                                    format("{}=\"{}\" invalid {}=[{:.1R}] must be greater than zero.",
-                                           CurrentModuleObject,
-                                           state.dataIPShortCut->cAlphaArgs(1),
-                                           cNumericFields(2),
-                                           rNumericArgs(2)));
+                                    std::format("{}=\"{}\" invalid {}=[{:.1f}] must be greater than zero.",
+                                                CurrentModuleObject,
+                                                state.dataIPShortCut->cAlphaArgs(1),
+                                                cNumericFields(2),
+                                                rNumericArgs(2)));
                 }
                 ErrorsFound = true;
             }
@@ -356,17 +341,17 @@ namespace WindTurbine {
             if (windTurbine.RotorHeight <= 0.0) {
                 if (lNumericBlanks(3)) {
                     ShowSevereError(state,
-                                    format("{}=\"{}\" invalid {} is required but input is blank.",
-                                           CurrentModuleObject,
-                                           state.dataIPShortCut->cAlphaArgs(1),
-                                           cNumericFields(3)));
+                                    std::format("{}=\"{}\" invalid {} is required but input is blank.",
+                                                CurrentModuleObject,
+                                                state.dataIPShortCut->cAlphaArgs(1),
+                                                cNumericFields(3)));
                 } else {
                     ShowSevereError(state,
-                                    format("{}=\"{}\" invalid {}=[{:.1R}] must be greater than zero.",
-                                           CurrentModuleObject,
-                                           state.dataIPShortCut->cAlphaArgs(1),
-                                           cNumericFields(3),
-                                           rNumericArgs(3)));
+                                    std::format("{}=\"{}\" invalid {}=[{:.1f}] must be greater than zero.",
+                                                CurrentModuleObject,
+                                                state.dataIPShortCut->cAlphaArgs(1),
+                                                cNumericFields(3),
+                                                rNumericArgs(3)));
                 }
                 ErrorsFound = true;
             }
@@ -374,11 +359,11 @@ namespace WindTurbine {
             windTurbine.NumOfBlade = state.dataIPShortCut->rNumericArgs(4); // Total number of blade
             if (windTurbine.NumOfBlade == 0) {
                 ShowSevereError(state,
-                                format("{}=\"{}\" invalid {}=[{:.0R}] must be greater than zero.",
-                                       CurrentModuleObject,
-                                       state.dataIPShortCut->cAlphaArgs(1),
-                                       cNumericFields(4),
-                                       rNumericArgs(4)));
+                                std::format("{}=\"{}\" invalid {}=[{:.0f}] must be greater than zero.",
+                                            CurrentModuleObject,
+                                            state.dataIPShortCut->cAlphaArgs(1),
+                                            cNumericFields(4),
+                                            rNumericArgs(4)));
                 ErrorsFound = true;
             }
 
@@ -386,17 +371,17 @@ namespace WindTurbine {
             if (windTurbine.RatedPower == 0.0) {
                 if (lNumericBlanks(5)) {
                     ShowSevereError(state,
-                                    format("{}=\"{}\" invalid {} is required but input is blank.",
-                                           CurrentModuleObject,
-                                           state.dataIPShortCut->cAlphaArgs(1),
-                                           cNumericFields(5)));
+                                    std::format("{}=\"{}\" invalid {} is required but input is blank.",
+                                                CurrentModuleObject,
+                                                state.dataIPShortCut->cAlphaArgs(1),
+                                                cNumericFields(5)));
                 } else {
                     ShowSevereError(state,
-                                    format("{}=\"{}\" invalid {}=[{:.2R}] must be greater than zero.",
-                                           CurrentModuleObject,
-                                           state.dataIPShortCut->cAlphaArgs(1),
-                                           cNumericFields(5),
-                                           rNumericArgs(5)));
+                                    std::format("{}=\"{}\" invalid {}=[{:.2f}] must be greater than zero.",
+                                                CurrentModuleObject,
+                                                state.dataIPShortCut->cAlphaArgs(1),
+                                                cNumericFields(5),
+                                                rNumericArgs(5)));
                 }
                 ErrorsFound = true;
             }
@@ -405,17 +390,17 @@ namespace WindTurbine {
             if (windTurbine.RatedWindSpeed == 0.0) {
                 if (lNumericBlanks(6)) {
                     ShowSevereError(state,
-                                    format("{}=\"{}\" invalid {} is required but input is blank.",
-                                           CurrentModuleObject,
-                                           state.dataIPShortCut->cAlphaArgs(1),
-                                           cNumericFields(6)));
+                                    std::format("{}=\"{}\" invalid {} is required but input is blank.",
+                                                CurrentModuleObject,
+                                                state.dataIPShortCut->cAlphaArgs(1),
+                                                cNumericFields(6)));
                 } else {
                     ShowSevereError(state,
-                                    format("{}=\"{}\" invalid {}=[{:.2R}] must be greater than zero.",
-                                           CurrentModuleObject,
-                                           state.dataIPShortCut->cAlphaArgs(1),
-                                           cNumericFields(6),
-                                           rNumericArgs(6)));
+                                    std::format("{}=\"{}\" invalid {}=[{:.2f}] must be greater than zero.",
+                                                CurrentModuleObject,
+                                                state.dataIPShortCut->cAlphaArgs(1),
+                                                cNumericFields(6),
+                                                rNumericArgs(6)));
                 }
                 ErrorsFound = true;
             }
@@ -424,17 +409,17 @@ namespace WindTurbine {
             if (windTurbine.CutInSpeed == 0.0) {
                 if (lNumericBlanks(7)) {
                     ShowSevereError(state,
-                                    format("{}=\"{}\" invalid {} is required but input is blank.",
-                                           CurrentModuleObject,
-                                           state.dataIPShortCut->cAlphaArgs(1),
-                                           cNumericFields(7)));
+                                    std::format("{}=\"{}\" invalid {} is required but input is blank.",
+                                                CurrentModuleObject,
+                                                state.dataIPShortCut->cAlphaArgs(1),
+                                                cNumericFields(7)));
                 } else {
                     ShowSevereError(state,
-                                    format("{}=\"{}\" invalid {}=[{:.2R}] must be greater than zero.",
-                                           CurrentModuleObject,
-                                           state.dataIPShortCut->cAlphaArgs(1),
-                                           cNumericFields(7),
-                                           rNumericArgs(7)));
+                                    std::format("{}=\"{}\" invalid {}=[{:.2f}] must be greater than zero.",
+                                                CurrentModuleObject,
+                                                state.dataIPShortCut->cAlphaArgs(1),
+                                                cNumericFields(7),
+                                                rNumericArgs(7)));
                 }
                 ErrorsFound = true;
             }
@@ -443,26 +428,26 @@ namespace WindTurbine {
             if (windTurbine.CutOutSpeed == 0.0) {
                 if (lNumericBlanks(8)) {
                     ShowSevereError(state,
-                                    format("{}=\"{}\" invalid {} is required but input is blank.",
-                                           CurrentModuleObject,
-                                           state.dataIPShortCut->cAlphaArgs(1),
-                                           cNumericFields(8)));
+                                    std::format("{}=\"{}\" invalid {} is required but input is blank.",
+                                                CurrentModuleObject,
+                                                state.dataIPShortCut->cAlphaArgs(1),
+                                                cNumericFields(8)));
                 } else if (windTurbine.CutOutSpeed <= windTurbine.RatedWindSpeed) {
                     ShowSevereError(state,
-                                    format("{}=\"{}\" invalid {}=[{:.2R}] must be greater than {}=[{:.2R}].",
-                                           CurrentModuleObject,
-                                           state.dataIPShortCut->cAlphaArgs(1),
-                                           cNumericFields(8),
-                                           rNumericArgs(8),
-                                           cNumericFields(6),
-                                           rNumericArgs(6)));
+                                    std::format("{}=\"{}\" invalid {}=[{:.2f}] must be greater than {}=[{:.2f}].",
+                                                CurrentModuleObject,
+                                                state.dataIPShortCut->cAlphaArgs(1),
+                                                cNumericFields(8),
+                                                rNumericArgs(8),
+                                                cNumericFields(6),
+                                                rNumericArgs(6)));
                 } else {
                     ShowSevereError(state,
-                                    format("{}=\"{}\" invalid {}=[{:.2R}] must be greater than zero",
-                                           CurrentModuleObject,
-                                           state.dataIPShortCut->cAlphaArgs(1),
-                                           cNumericFields(8),
-                                           rNumericArgs(8)));
+                                    std::format("{}=\"{}\" invalid {}=[{:.2f}] must be greater than zero",
+                                                CurrentModuleObject,
+                                                state.dataIPShortCut->cAlphaArgs(1),
+                                                cNumericFields(8),
+                                                rNumericArgs(8)));
                 }
                 ErrorsFound = true;
             }
@@ -471,87 +456,87 @@ namespace WindTurbine {
             if (lNumericBlanks(9) || windTurbine.SysEfficiency == 0.0 || windTurbine.SysEfficiency > 1.0) {
                 windTurbine.SysEfficiency = SysEffDefault;
                 ShowWarningError(state,
-                                 format("{}=\"{}\" invalid {}=[{:.2R}].",
-                                        CurrentModuleObject,
-                                        state.dataIPShortCut->cAlphaArgs(1),
-                                        cNumericFields(9),
-                                        state.dataIPShortCut->rNumericArgs(9)));
-                ShowContinueError(state, format("...The default value of {:.3R} was assumed. for {}", SysEffDefault, cNumericFields(9)));
+                                 std::format("{}=\"{}\" invalid {}=[{:.2f}].",
+                                             CurrentModuleObject,
+                                             state.dataIPShortCut->cAlphaArgs(1),
+                                             cNumericFields(9),
+                                             state.dataIPShortCut->rNumericArgs(9)));
+                ShowContinueError(state, std::format("...The default value of {:.3f} was assumed. for {}", SysEffDefault, cNumericFields(9)));
             }
 
             windTurbine.MaxTipSpeedRatio = state.dataIPShortCut->rNumericArgs(10); // Maximum tip speed ratio
             if (windTurbine.MaxTipSpeedRatio == 0.0) {
                 if (lNumericBlanks(10)) {
                     ShowSevereError(state,
-                                    format("{}=\"{}\" invalid {} is required but input is blank.",
-                                           CurrentModuleObject,
-                                           state.dataIPShortCut->cAlphaArgs(1),
-                                           cNumericFields(10)));
+                                    std::format("{}=\"{}\" invalid {} is required but input is blank.",
+                                                CurrentModuleObject,
+                                                state.dataIPShortCut->cAlphaArgs(1),
+                                                cNumericFields(10)));
                 } else {
                     ShowSevereError(state,
-                                    format("{}=\"{}\" invalid {}=[{:.2R}] must be greater than zero.",
-                                           CurrentModuleObject,
-                                           state.dataIPShortCut->cAlphaArgs(1),
-                                           cNumericFields(10),
-                                           rNumericArgs(10)));
+                                    std::format("{}=\"{}\" invalid {}=[{:.2f}] must be greater than zero.",
+                                                CurrentModuleObject,
+                                                state.dataIPShortCut->cAlphaArgs(1),
+                                                cNumericFields(10),
+                                                rNumericArgs(10)));
                 }
                 ErrorsFound = true;
             }
             if (windTurbine.SysEfficiency > MaxTSR) {
                 windTurbine.SysEfficiency = MaxTSR;
                 ShowWarningError(state,
-                                 format("{}=\"{}\" invalid {}=[{:.2R}].",
-                                        CurrentModuleObject,
-                                        state.dataIPShortCut->cAlphaArgs(1),
-                                        cNumericFields(10),
-                                        state.dataIPShortCut->rNumericArgs(10)));
-                ShowContinueError(state, format("...The default value of {:.1R} was assumed. for {}", MaxTSR, cNumericFields(10)));
+                                 std::format("{}=\"{}\" invalid {}=[{:.2f}].",
+                                             CurrentModuleObject,
+                                             state.dataIPShortCut->cAlphaArgs(1),
+                                             cNumericFields(10),
+                                             state.dataIPShortCut->rNumericArgs(10)));
+                ShowContinueError(state, std::format("...The default value of {:.1f} was assumed. for {}", MaxTSR, cNumericFields(10)));
             }
 
             windTurbine.MaxPowerCoeff = state.dataIPShortCut->rNumericArgs(11); // Maximum power coefficient
             if (windTurbine.rotorType == RotorType::HorizontalAxis && windTurbine.MaxPowerCoeff == 0.0) {
                 if (lNumericBlanks(11)) {
                     ShowSevereError(state,
-                                    format("{}=\"{}\" invalid {} is required but input is blank.",
-                                           CurrentModuleObject,
-                                           state.dataIPShortCut->cAlphaArgs(1),
-                                           cNumericFields(11)));
+                                    std::format("{}=\"{}\" invalid {} is required but input is blank.",
+                                                CurrentModuleObject,
+                                                state.dataIPShortCut->cAlphaArgs(1),
+                                                cNumericFields(11)));
                 } else {
                     ShowSevereError(state,
-                                    format("{}=\"{}\" invalid {}=[{:.2R}] must be greater than zero.",
-                                           CurrentModuleObject,
-                                           state.dataIPShortCut->cAlphaArgs(1),
-                                           cNumericFields(11),
-                                           rNumericArgs(11)));
+                                    std::format("{}=\"{}\" invalid {}=[{:.2f}] must be greater than zero.",
+                                                CurrentModuleObject,
+                                                state.dataIPShortCut->cAlphaArgs(1),
+                                                cNumericFields(11),
+                                                rNumericArgs(11)));
                 }
                 ErrorsFound = true;
             }
             if (windTurbine.MaxPowerCoeff > MaxPowerCoeff) {
                 windTurbine.MaxPowerCoeff = DefaultPC;
                 ShowWarningError(state,
-                                 format("{}=\"{}\" invalid {}=[{:.2R}].",
-                                        CurrentModuleObject,
-                                        state.dataIPShortCut->cAlphaArgs(1),
-                                        cNumericFields(11),
-                                        state.dataIPShortCut->rNumericArgs(11)));
-                ShowContinueError(state, format("...The default value of {:.2R} will be used. for {}", DefaultPC, cNumericFields(11)));
+                                 std::format("{}=\"{}\" invalid {}=[{:.2f}].",
+                                             CurrentModuleObject,
+                                             state.dataIPShortCut->cAlphaArgs(1),
+                                             cNumericFields(11),
+                                             state.dataIPShortCut->rNumericArgs(11)));
+                ShowContinueError(state, std::format("...The default value of {:.2f} will be used. for {}", DefaultPC, cNumericFields(11)));
             }
 
             windTurbine.LocalAnnualAvgWS = state.dataIPShortCut->rNumericArgs(12); // Local wind speed annually averaged
             if (windTurbine.LocalAnnualAvgWS == 0.0) {
                 if (lNumericBlanks(12)) {
                     ShowWarningError(state,
-                                     format("{}=\"{}\" invalid {} is necessary for accurate prediction but input is blank.",
-                                            CurrentModuleObject,
-                                            state.dataIPShortCut->cAlphaArgs(1),
-                                            cNumericFields(12)));
+                                     std::format("{}=\"{}\" invalid {} is necessary for accurate prediction but input is blank.",
+                                                 CurrentModuleObject,
+                                                 state.dataIPShortCut->cAlphaArgs(1),
+                                                 cNumericFields(12)));
                 } else {
                     ShowSevereError(state,
-                                    format("{}=\"{}\" invalid {}=[{:.2R}] must be greater than zero.",
-                                           CurrentModuleObject,
-                                           state.dataIPShortCut->cAlphaArgs(1),
-                                           cNumericFields(12),
-                                           rNumericArgs(12)));
+                                    std::format("{}=\"{}\" invalid {}=[{:.2f}] must be greater than zero.",
+                                                CurrentModuleObject,
+                                                state.dataIPShortCut->cAlphaArgs(1),
+                                                cNumericFields(12),
+                                                rNumericArgs(12)));
                     ErrorsFound = true;
                 }
             }
@@ -564,18 +549,18 @@ namespace WindTurbine {
                     windTurbine.HeightForLocalWS = DefaultH;
                     if (lNumericBlanks(13)) {
                         ShowWarningError(state,
-                                         format("{}=\"{}\" invalid {} is necessary for accurate prediction but input is blank.",
-                                                CurrentModuleObject,
-                                                state.dataIPShortCut->cAlphaArgs(1),
-                                                cNumericFields(13)));
-                        ShowContinueError(state, format("...The default value of {:.2R} will be used. for {}", DefaultH, cNumericFields(13)));
+                                         std::format("{}=\"{}\" invalid {} is necessary for accurate prediction but input is blank.",
+                                                     CurrentModuleObject,
+                                                     state.dataIPShortCut->cAlphaArgs(1),
+                                                     cNumericFields(13)));
+                        ShowContinueError(state, std::format("...The default value of {:.2f} will be used. for {}", DefaultH, cNumericFields(13)));
                     } else {
                         ShowSevereError(state,
-                                        format("{}=\"{}\" invalid {}=[{:.2R}] must be greater than zero.",
-                                               CurrentModuleObject,
-                                               state.dataIPShortCut->cAlphaArgs(1),
-                                               cNumericFields(13),
-                                               rNumericArgs(13)));
+                                        std::format("{}=\"{}\" invalid {}=[{:.2f}] must be greater than zero.",
+                                                    CurrentModuleObject,
+                                                    state.dataIPShortCut->cAlphaArgs(1),
+                                                    cNumericFields(13),
+                                                    rNumericArgs(13)));
                         ErrorsFound = true;
                     }
                 }
@@ -585,17 +570,17 @@ namespace WindTurbine {
             if (windTurbine.rotorType == RotorType::VerticalAxis && windTurbine.ChordArea == 0.0) {
                 if (lNumericBlanks(14)) {
                     ShowSevereError(state,
-                                    format("{}=\"{}\" invalid {} is required but input is blank.",
-                                           CurrentModuleObject,
-                                           state.dataIPShortCut->cAlphaArgs(1),
-                                           cNumericFields(14)));
+                                    std::format("{}=\"{}\" invalid {} is required but input is blank.",
+                                                CurrentModuleObject,
+                                                state.dataIPShortCut->cAlphaArgs(1),
+                                                cNumericFields(14)));
                 } else {
                     ShowSevereError(state,
-                                    format("{}=\"{}\" invalid {}=[{:.2R}] must be greater than zero.",
-                                           CurrentModuleObject,
-                                           state.dataIPShortCut->cAlphaArgs(1),
-                                           cNumericFields(14),
-                                           rNumericArgs(14)));
+                                    std::format("{}=\"{}\" invalid {}=[{:.2f}] must be greater than zero.",
+                                                CurrentModuleObject,
+                                                state.dataIPShortCut->cAlphaArgs(1),
+                                                cNumericFields(14),
+                                                rNumericArgs(14)));
                 }
                 ErrorsFound = true;
             }
@@ -604,17 +589,17 @@ namespace WindTurbine {
             if (windTurbine.rotorType == RotorType::VerticalAxis && windTurbine.DragCoeff == 0.0) {
                 if (lNumericBlanks(15)) {
                     ShowSevereError(state,
-                                    format("{}=\"{}\" invalid {} is required but input is blank.",
-                                           CurrentModuleObject,
-                                           state.dataIPShortCut->cAlphaArgs(1),
-                                           cNumericFields(15)));
+                                    std::format("{}=\"{}\" invalid {} is required but input is blank.",
+                                                CurrentModuleObject,
+                                                state.dataIPShortCut->cAlphaArgs(1),
+                                                cNumericFields(15)));
                 } else {
                     ShowSevereError(state,
-                                    format("{}=\"{}\" invalid {}=[{:.2R}] must be greater than zero.",
-                                           CurrentModuleObject,
-                                           state.dataIPShortCut->cAlphaArgs(1),
-                                           cNumericFields(15),
-                                           rNumericArgs(15)));
+                                    std::format("{}=\"{}\" invalid {}=[{:.2f}] must be greater than zero.",
+                                                CurrentModuleObject,
+                                                state.dataIPShortCut->cAlphaArgs(1),
+                                                cNumericFields(15),
+                                                rNumericArgs(15)));
                 }
                 ErrorsFound = true;
             }
@@ -623,17 +608,17 @@ namespace WindTurbine {
             if (windTurbine.rotorType == RotorType::VerticalAxis && windTurbine.LiftCoeff == 0.0) {
                 if (lNumericBlanks(16)) {
                     ShowSevereError(state,
-                                    format("{}=\"{}\" invalid {} is required but input is blank.",
-                                           CurrentModuleObject,
-                                           state.dataIPShortCut->cAlphaArgs(1),
-                                           cNumericFields(16)));
+                                    std::format("{}=\"{}\" invalid {} is required but input is blank.",
+                                                CurrentModuleObject,
+                                                state.dataIPShortCut->cAlphaArgs(1),
+                                                cNumericFields(16)));
                 } else {
                     ShowSevereError(state,
-                                    format("{}=\"{}\" invalid {}=[{:.2R}] must be greater than zero.",
-                                           CurrentModuleObject,
-                                           state.dataIPShortCut->cAlphaArgs(1),
-                                           cNumericFields(16),
-                                           rNumericArgs(16)));
+                                    std::format("{}=\"{}\" invalid {}=[{:.2f}] must be greater than zero.",
+                                                CurrentModuleObject,
+                                                state.dataIPShortCut->cAlphaArgs(1),
+                                                cNumericFields(16),
+                                                rNumericArgs(16)));
                 }
                 ErrorsFound = true;
             }
@@ -671,88 +656,88 @@ namespace WindTurbine {
         lAlphaBlanks.deallocate();
         lNumericBlanks.deallocate();
 
-        if (ErrorsFound) ShowFatalError(state, format("{} errors occurred in input.  Program terminates.", CurrentModuleObject));
+        if (ErrorsFound) {
+            ShowFatalError(state, std::format("{} errors occurred in input.  Program terminates.", CurrentModuleObject));
+        }
 
         for (WindTurbineNum = 1; WindTurbineNum <= NumWindTurbines; ++WindTurbineNum) {
             auto &windTurbine = state.dataWindTurbine->WindTurbineSys(WindTurbineNum);
             SetupOutputVariable(state,
                                 "Generator Produced AC Electricity Rate",
-                                OutputProcessor::Unit::W,
+                                Constant::Units::W,
                                 windTurbine.Power,
-                                OutputProcessor::SOVTimeStepType::System,
-                                OutputProcessor::SOVStoreType::Average,
+                                OutputProcessor::TimeStepType::System,
+                                OutputProcessor::StoreType::Average,
                                 windTurbine.Name);
             SetupOutputVariable(state,
                                 "Generator Produced AC Electricity Energy",
-                                OutputProcessor::Unit::J,
+                                Constant::Units::J,
                                 windTurbine.Energy,
-                                OutputProcessor::SOVTimeStepType::System,
-                                OutputProcessor::SOVStoreType::Summed,
+                                OutputProcessor::TimeStepType::System,
+                                OutputProcessor::StoreType::Sum,
                                 windTurbine.Name,
-                                _,
-                                "ElectricityProduced",
-                                "WINDTURBINE",
-                                _,
-                                "Plant");
+                                Constant::eResource::ElectricityProduced,
+                                OutputProcessor::Group::Plant,
+                                OutputProcessor::EndUseCat::WindTurbine);
             SetupOutputVariable(state,
                                 "Generator Turbine Local Wind Speed",
-                                OutputProcessor::Unit::m_s,
+                                Constant::Units::m_s,
                                 windTurbine.LocalWindSpeed,
-                                OutputProcessor::SOVTimeStepType::System,
-                                OutputProcessor::SOVStoreType::Average,
+                                OutputProcessor::TimeStepType::System,
+                                OutputProcessor::StoreType::Average,
                                 windTurbine.Name);
             SetupOutputVariable(state,
                                 "Generator Turbine Local Air Density",
-                                OutputProcessor::Unit::kg_m3,
+                                Constant::Units::kg_m3,
                                 windTurbine.LocalAirDensity,
-                                OutputProcessor::SOVTimeStepType::System,
-                                OutputProcessor::SOVStoreType::Average,
+                                OutputProcessor::TimeStepType::System,
+                                OutputProcessor::StoreType::Average,
                                 windTurbine.Name);
             SetupOutputVariable(state,
                                 "Generator Turbine Tip Speed Ratio",
-                                OutputProcessor::Unit::None,
+                                Constant::Units::None,
                                 windTurbine.TipSpeedRatio,
-                                OutputProcessor::SOVTimeStepType::System,
-                                OutputProcessor::SOVStoreType::Average,
+                                OutputProcessor::TimeStepType::System,
+                                OutputProcessor::StoreType::Average,
                                 windTurbine.Name);
             switch (windTurbine.rotorType) {
             case RotorType::HorizontalAxis: {
                 SetupOutputVariable(state,
                                     "Generator Turbine Power Coefficient",
-                                    OutputProcessor::Unit::None,
+                                    Constant::Units::None,
                                     windTurbine.PowerCoeff,
-                                    OutputProcessor::SOVTimeStepType::System,
-                                    OutputProcessor::SOVStoreType::Average,
+                                    OutputProcessor::TimeStepType::System,
+                                    OutputProcessor::StoreType::Average,
                                     windTurbine.Name);
             } break;
             case RotorType::VerticalAxis: {
                 SetupOutputVariable(state,
                                     "Generator Turbine Chordal Component Velocity",
-                                    OutputProcessor::Unit::m_s,
+                                    Constant::Units::m_s,
                                     windTurbine.ChordalVel,
-                                    OutputProcessor::SOVTimeStepType::System,
-                                    OutputProcessor::SOVStoreType::Average,
+                                    OutputProcessor::TimeStepType::System,
+                                    OutputProcessor::StoreType::Average,
                                     windTurbine.Name);
                 SetupOutputVariable(state,
                                     "Generator Turbine Normal Component Velocity",
-                                    OutputProcessor::Unit::m_s,
+                                    Constant::Units::m_s,
                                     windTurbine.NormalVel,
-                                    OutputProcessor::SOVTimeStepType::System,
-                                    OutputProcessor::SOVStoreType::Average,
+                                    OutputProcessor::TimeStepType::System,
+                                    OutputProcessor::StoreType::Average,
                                     windTurbine.Name);
                 SetupOutputVariable(state,
                                     "Generator Turbine Relative Flow Velocity",
-                                    OutputProcessor::Unit::m_s,
+                                    Constant::Units::m_s,
                                     windTurbine.RelFlowVel,
-                                    OutputProcessor::SOVTimeStepType::System,
-                                    OutputProcessor::SOVStoreType::Average,
+                                    OutputProcessor::TimeStepType::System,
+                                    OutputProcessor::StoreType::Average,
                                     windTurbine.Name);
                 SetupOutputVariable(state,
                                     "Generator Turbine Attack Angle",
-                                    OutputProcessor::Unit::deg,
+                                    Constant::Units::deg,
                                     windTurbine.AngOfAttack,
-                                    OutputProcessor::SOVTimeStepType::System,
-                                    OutputProcessor::SOVStoreType::Average,
+                                    OutputProcessor::TimeStepType::System,
+                                    OutputProcessor::StoreType::Average,
                                     windTurbine.Name);
             } break;
             default:
@@ -768,7 +753,6 @@ namespace WindTurbine {
         //       AUTHOR         Daeho Kang
         //       DATE WRITTEN   Oct 2009
         //       MODIFIED       Linda K. Lawrie, December 2009 for reading stat file
-        //       RE-ENGINEERED  na
 
         // PURPOSE OF THIS SUBROUTINE:
         // This subroutine reads monthly average wind speed from stat file and then
@@ -781,40 +765,40 @@ namespace WindTurbine {
 
         static char const TabChr('\t'); // Tab character
 
-        int mon;           // loop counter
-        bool wsStatFound;  // logical noting that wind stats were found
-        bool warningShown; // true if the <365 warning has already been shown
         Array1D<Real64> MonthWS(12);
-        Real64 LocalTMYWS; // Annual average wind speed at the rotor height
 
         // Estimate average annual wind speed once
         if (state.dataWindTurbine->MyOneTimeFlag) {
-            wsStatFound = false;
             Real64 AnnualTMYWS = 0.0;
             if (FileSystem::fileExists(state.files.inStatFilePath.filePath)) {
                 auto statFile = state.files.inStatFilePath.open(state, "InitWindTurbine");
+                bool wsStatFound = false; // logical noting that wind stats were found
                 while (statFile.good()) { // end of file
                     auto lineIn = statFile.readLine();
                     // reconcile line with different versions of stat file
-                    auto lnPtr = index(lineIn.data, "Wind Speed");
-                    if (lnPtr == std::string::npos) continue;
+                    size_t lnPtr = index(lineIn.data, "Wind Speed");
+                    if (lnPtr == std::string::npos) {
+                        continue;
+                    }
                     // have hit correct section.
                     while (statFile.good()) { // find daily avg line
                         lineIn = statFile.readLine();
                         lnPtr = index(lineIn.data, "Daily Avg");
-                        if (lnPtr == std::string::npos) continue;
+                        if (lnPtr == std::string::npos) {
+                            continue;
+                        }
                         // tab delimited file
                         lineIn.data.erase(0, lnPtr + 10);
                         MonthWS = 0.0;
                         wsStatFound = true;
-                        warningShown = false;
-                        for (mon = 1; mon <= 12; ++mon) {
+                        bool warningShown = false; // true if the <365 warning has already been shown
+                        for (int mon = 1; mon <= 12; ++mon) {
                             lnPtr = index(lineIn.data, TabChr);
                             if (lnPtr != 1) {
                                 if ((lnPtr == std::string::npos) || (!stripped(lineIn.data.substr(0, lnPtr)).empty())) {
                                     if (lnPtr != std::string::npos) {
                                         bool error = false;
-                                        MonthWS(mon) = UtilityRoutines::ProcessNumber(lineIn.data.substr(0, lnPtr), error);
+                                        MonthWS(mon) = Util::ProcessNumber(lineIn.data.substr(0, lnPtr), error);
 
                                         if (error) {
                                             // probably should throw some error here
@@ -824,20 +808,22 @@ namespace WindTurbine {
                                     }
                                 } else { // blank field
                                     if (!warningShown) {
-                                        ShowWarningError(state,
-                                                         format("InitWindTurbine: read from {} file shows <365 days in weather file. Annual average "
-                                                                "wind speed used will be inaccurate.",
-                                                                state.files.inStatFilePath.filePath.string()));
+                                        ShowWarningError(
+                                            state,
+                                            std::format("InitWindTurbine: read from {} file shows <365 days in weather file. Annual average "
+                                                        "wind speed used will be inaccurate.",
+                                                        state.files.inStatFilePath.filePath.string()));
                                         lineIn.data.erase(0, lnPtr + 1);
                                         warningShown = true;
                                     }
                                 }
                             } else { // two tabs in succession
                                 if (!warningShown) {
-                                    ShowWarningError(state,
-                                                     format("InitWindTurbine: read from {} file shows <365 days in weather file. Annual average wind "
-                                                            "speed used will be inaccurate.",
-                                                            state.files.inStatFilePath.filePath.string()));
+                                    ShowWarningError(
+                                        state,
+                                        std::format("InitWindTurbine: read from {} file shows <365 days in weather file. Annual average wind "
+                                                    "speed used will be inaccurate.",
+                                                    state.files.inStatFilePath.filePath.string()));
                                     lineIn.data.erase(0, lnPtr + 1);
                                     warningShown = true;
                                 }
@@ -845,7 +831,9 @@ namespace WindTurbine {
                         }
                         break;
                     }
-                    if (wsStatFound) break;
+                    if (wsStatFound) {
+                        break;
+                    }
                 }
                 if (wsStatFound) {
                     AnnualTMYWS = sum(MonthWS) / 12.0;
@@ -870,12 +858,14 @@ namespace WindTurbine {
         // Factor differences between TMY wind data and local wind data once
         if (windTurbine.AnnualTMYWS > 0.0 && windTurbine.WSFactor == 0.0 && windTurbine.LocalAnnualAvgWS > 0) {
             // Convert the annual wind speed to the local wind speed at the height of the local station, then factor
-            LocalTMYWS = windTurbine.AnnualTMYWS * state.dataEnvrn->WeatherFileWindModCoeff *
-                         std::pow(windTurbine.HeightForLocalWS / state.dataEnvrn->SiteWindBLHeight, state.dataEnvrn->SiteWindExp);
+            Real64 LocalTMYWS = windTurbine.AnnualTMYWS * state.dataEnvrn->WeatherFileWindModCoeff *
+                                std::pow(windTurbine.HeightForLocalWS / state.dataEnvrn->SiteWindBLHeight, state.dataEnvrn->SiteWindExp);
             windTurbine.WSFactor = LocalTMYWS / windTurbine.LocalAnnualAvgWS;
         }
         // Assign factor of 1.0 if no stat file or no input of local average wind speed
-        if (windTurbine.WSFactor == 0.0) windTurbine.WSFactor = 1.0;
+        if (windTurbine.WSFactor == 0.0) {
+            windTurbine.WSFactor = 1.0;
+        }
 
         // Do every time step initialization
         windTurbine.Power = 0.0;
@@ -899,9 +889,7 @@ namespace WindTurbine {
 
         // SUBROUTINE INFORMATION:
         //       AUTHOR         Daeho Kang
-        //       DATE WRITTEN   Octorber 2009
-        //       MODIFIED       na
-        //       RE-ENGINEERED  na
+        //       DATE WRITTEN   October 2009
 
         // REFERENCES:
         // Sathyajith Mathew. 2006. Wind Energy: Fundamental, Resource Analysis and Economics. Springer,
@@ -914,7 +902,6 @@ namespace WindTurbine {
         using DataEnvironment::OutWetBulbTempAt;
         using Psychrometrics::PsyRhoAirFnPbTdbW;
         using Psychrometrics::PsyWFnTdbTwbPb;
-        using ScheduleManager::GetCurrentScheduleValue;
 
         Real64 constexpr MaxTheta(90.0);   // Maximum of theta
         Real64 constexpr MaxDegree(360.0); // Maximum limit of outdoor air wind speed in m/s
@@ -944,7 +931,7 @@ namespace WindTurbine {
         Real64 IntRelFlowVel;    // Integration of relative flow velocity
         Real64 TotTorque;        // Total torque for the number of blades
         Real64 Omega;            // Angular velocity of rotor in rad/s
-        Real64 TanForceCoeff;    // Tnagential force coefficient
+        Real64 TanForceCoeff;    // Tangential force coefficient
         Real64 NorForceCoeff;    // Normal force coefficient
         Real64 Period;           // Period of sine and cosine functions
         Real64 C1;               // Empirical power coefficient C1
@@ -973,13 +960,12 @@ namespace WindTurbine {
         LocalWindSpeed /= windTurbine.WSFactor;
 
         // Check wind conditions for system operation
-        if (GetCurrentScheduleValue(state, windTurbine.SchedPtr) > 0 && LocalWindSpeed > windTurbine.CutInSpeed &&
-            LocalWindSpeed < windTurbine.CutOutSpeed) {
+        if (windTurbine.availSched->getCurrentVal() > 0 && LocalWindSpeed > windTurbine.CutInSpeed && LocalWindSpeed < windTurbine.CutOutSpeed) {
 
             // System is on
-            Period = 2.0 * DataGlobalConstants::Pi;
+            Period = 2.0 * Constant::Pi;
             Omega = (RotorSpeed * Period) / SecInMin;
-            SweptArea = (DataGlobalConstants::Pi * pow_2(RotorD)) / 4;
+            SweptArea = (Constant::Pi * pow_2(RotorD)) / 4;
             TipSpeedRatio = (Omega * (RotorD / 2.0)) / LocalWindSpeed;
 
             // Limit maximum tip speed ratio
@@ -1045,8 +1031,8 @@ namespace WindTurbine {
 
                 InducedVel = LocalWindSpeed * 2.0 / 3.0;
                 // Velocity components
-                Real64 const sin_AzimuthAng(std::sin(AzimuthAng * DataGlobalConstants::DegToRadians));
-                Real64 const cos_AzimuthAng(std::cos(AzimuthAng * DataGlobalConstants::DegToRadians));
+                Real64 const sin_AzimuthAng = std::sin(AzimuthAng * Constant::DegToRad);
+                Real64 const cos_AzimuthAng = std::cos(AzimuthAng * Constant::DegToRad);
                 ChordalVel = RotorVel + InducedVel * cos_AzimuthAng;
                 NormalVel = InducedVel * sin_AzimuthAng;
                 RelFlowVel = std::sqrt(pow_2(ChordalVel) + pow_2(NormalVel));
@@ -1055,8 +1041,8 @@ namespace WindTurbine {
                 AngOfAttack = std::atan((sin_AzimuthAng / ((RotorVel / LocalWindSpeed) / (InducedVel / LocalWindSpeed) + cos_AzimuthAng)));
 
                 // Force coefficients
-                Real64 const sin_AngOfAttack(std::sin(AngOfAttack * DataGlobalConstants::DegToRadians));
-                Real64 const cos_AngOfAttack(std::cos(AngOfAttack * DataGlobalConstants::DegToRadians));
+                Real64 const sin_AngOfAttack = std::sin(AngOfAttack * Constant::DegToRad);
+                Real64 const cos_AngOfAttack = std::cos(AngOfAttack * Constant::DegToRad);
                 TanForceCoeff = std::abs(windTurbine.LiftCoeff * sin_AngOfAttack - windTurbine.DragCoeff * cos_AngOfAttack);
                 NorForceCoeff = windTurbine.LiftCoeff * cos_AngOfAttack + windTurbine.DragCoeff * sin_AngOfAttack;
 
@@ -1129,16 +1115,14 @@ namespace WindTurbine {
         // SUBROUTINE INFORMATION:
         //       AUTHOR         Daeho Kang
         //       DATE WRITTEN   October 2009
-        //       MODIFIED       na
-        //       RE-ENGINEERED  na
 
         // PURPOSE OF THIS SUBROUTINE:
         // This subroutine fills remaining report variables.
 
-        auto &TimeStepSys = state.dataHVACGlobal->TimeStepSys;
+        Real64 TimeStepSysSec = state.dataHVACGlobal->TimeStepSysSec;
         auto &windTurbine = state.dataWindTurbine->WindTurbineSys(WindTurbineNum);
 
-        windTurbine.Energy = windTurbine.Power * TimeStepSys * DataGlobalConstants::SecInHour;
+        windTurbine.Energy = windTurbine.Power * TimeStepSysSec;
     }
 
     //*****************************************************************************************

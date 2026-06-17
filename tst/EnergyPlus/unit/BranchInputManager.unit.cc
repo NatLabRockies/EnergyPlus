@@ -1,7 +1,7 @@
-// EnergyPlus, Copyright (c) 1996-2023, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
-// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other
+// National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
 // contributors. All rights reserved.
 //
 // NOTICE: This Software was developed under funding from the U.S. Department of Energy and the
@@ -53,6 +53,7 @@
 // EnergyPlus Headers
 #include <EnergyPlus/BranchInputManager.hh>
 #include <EnergyPlus/Data/EnergyPlusData.hh>
+#include <EnergyPlus/DataErrorTracking.hh>
 #include <EnergyPlus/DataSizing.hh>
 #include <EnergyPlus/InputProcessing/InputProcessor.hh>
 
@@ -90,8 +91,6 @@ TEST_F(EnergyPlusFixture, GetBranchInput_One_SingleComponentBranch)
     int NumParams;
     int NumAlphas;           // Used to retrieve names from IDF
     int NumNumbers;          // Used to retrieve numbers from IDF
-    bool IsNotOK;            // Flag to verify name
-    bool IsBlank;            // Flag for blank name
     Array1D_string Alphas;   // Used to retrieve names from IDF
     Array1D_int NodeNums;    // Possible Array of Node Numbers (only 1 allowed)
     Array1D<Real64> Numbers; // Used to retrieve numbers from IDF
@@ -103,8 +102,9 @@ TEST_F(EnergyPlusFixture, GetBranchInput_One_SingleComponentBranch)
 
     if (NumOfBranches > 0) {
         state->dataBranchInputManager->Branch.allocate(NumOfBranches);
-        for (auto &e : state->dataBranchInputManager->Branch)
+        for (auto &e : state->dataBranchInputManager->Branch) {
             e.AssignedLoopName.clear();
+        }
         state->dataInputProcessing->inputProcessor->getObjectDefMaxArgs(*state, "NodeList", NumParams, NumAlphas, NumNumbers);
         NodeNums.dimension(NumParams, 0);
         state->dataInputProcessing->inputProcessor->getObjectDefMaxArgs(*state, CurrentModuleObject, NumParams, NumAlphas, NumNumbers);
@@ -129,17 +129,6 @@ TEST_F(EnergyPlusFixture, GetBranchInput_One_SingleComponentBranch)
                                                                       lAlphaBlanks,
                                                                       cAlphaFields,
                                                                       cNumericFields);
-            IsNotOK = false;
-            IsBlank = false;
-            UtilityRoutines::VerifyName(
-                *state, Alphas(1), state->dataBranchInputManager->Branch, BCount, IsNotOK, IsBlank, CurrentModuleObject + " Name");
-            if (IsNotOK) {
-                if (IsBlank) {
-                    continue;
-                } else {
-                    Alphas(1) = Alphas(1) + "--dup";
-                }
-            }
             ++BCount;
 
             GetSingleBranchInput(*state, RoutineName, BCount, Alphas, cAlphaFields, NumAlphas, NodeNums, lAlphaBlanks);
@@ -147,12 +136,12 @@ TEST_F(EnergyPlusFixture, GetBranchInput_One_SingleComponentBranch)
 
         EXPECT_EQ(NumOfBranches, 1);
 
-        EXPECT_TRUE(UtilityRoutines::SameString(Alphas(1), "VAV Sys 1 Main Branch"));
+        EXPECT_TRUE(Util::SameString(Alphas(1), "VAV Sys 1 Main Branch"));
 
-        EXPECT_TRUE(UtilityRoutines::SameString(Alphas(3), "AirLoopHVAC:OutdoorAirSystem"));
-        EXPECT_TRUE(UtilityRoutines::SameString(Alphas(4), "OA Sys 1"));
-        EXPECT_TRUE(UtilityRoutines::SameString(Alphas(5), "VAV Sys 1 Inlet Node"));
-        EXPECT_TRUE(UtilityRoutines::SameString(Alphas(6), "Mixed Air Node 1"));
+        EXPECT_TRUE(Util::SameString(Alphas(3), "AirLoopHVAC:OutdoorAirSystem"));
+        EXPECT_TRUE(Util::SameString(Alphas(4), "OA Sys 1"));
+        EXPECT_TRUE(Util::SameString(Alphas(5), "VAV Sys 1 Inlet Node"));
+        EXPECT_TRUE(Util::SameString(Alphas(6), "Mixed Air Node 1"));
 
         NodeNums.deallocate();
         Alphas.deallocate();
@@ -256,8 +245,6 @@ TEST_F(EnergyPlusFixture, GetBranchInput_One_FourComponentBranch)
     int NumParams;
     int NumAlphas;           // Used to retrieve names from IDF
     int NumNumbers;          // Used to retrieve numbers from IDF
-    bool IsNotOK;            // Flag to verify name
-    bool IsBlank;            // Flag for blank name
     Array1D_string Alphas;   // Used to retrieve names from IDF
     Array1D_int NodeNums;    // Possible Array of Node Numbers (only 1 allowed)
     Array1D<Real64> Numbers; // Used to retrieve numbers from IDF
@@ -269,8 +256,9 @@ TEST_F(EnergyPlusFixture, GetBranchInput_One_FourComponentBranch)
 
     if (NumOfBranches > 0) {
         state->dataBranchInputManager->Branch.allocate(NumOfBranches);
-        for (auto &e : state->dataBranchInputManager->Branch)
+        for (auto &e : state->dataBranchInputManager->Branch) {
             e.AssignedLoopName.clear();
+        }
         state->dataInputProcessing->inputProcessor->getObjectDefMaxArgs(*state, "NodeList", NumParams, NumAlphas, NumNumbers);
         NodeNums.dimension(NumParams, 0);
         state->dataInputProcessing->inputProcessor->getObjectDefMaxArgs(*state, CurrentModuleObject, NumParams, NumAlphas, NumNumbers);
@@ -295,17 +283,7 @@ TEST_F(EnergyPlusFixture, GetBranchInput_One_FourComponentBranch)
                                                                       lAlphaBlanks,
                                                                       cAlphaFields,
                                                                       cNumericFields);
-            IsNotOK = false;
-            IsBlank = false;
-            UtilityRoutines::VerifyName(
-                *state, Alphas(1), state->dataBranchInputManager->Branch, BCount, IsNotOK, IsBlank, CurrentModuleObject + " Name");
-            if (IsNotOK) {
-                if (IsBlank) {
-                    continue;
-                } else {
-                    Alphas(1) = Alphas(1) + "--dup";
-                }
-            }
+
             ++BCount;
 
             GetSingleBranchInput(*state, RoutineName, BCount, Alphas, cAlphaFields, NumAlphas, NodeNums, lAlphaBlanks);
@@ -313,27 +291,27 @@ TEST_F(EnergyPlusFixture, GetBranchInput_One_FourComponentBranch)
 
         EXPECT_EQ(NumOfBranches, 1);
 
-        EXPECT_TRUE(UtilityRoutines::SameString(Alphas(1), "VAV Sys 1 Main Branch"));
+        EXPECT_TRUE(Util::SameString(Alphas(1), "VAV Sys 1 Main Branch"));
 
-        EXPECT_TRUE(UtilityRoutines::SameString(Alphas(3), "AirLoopHVAC:OutdoorAirSystem"));
-        EXPECT_TRUE(UtilityRoutines::SameString(Alphas(4), "OA Sys 1"));
-        EXPECT_TRUE(UtilityRoutines::SameString(Alphas(5), "VAV Sys 1 Inlet Node"));
-        EXPECT_TRUE(UtilityRoutines::SameString(Alphas(6), "Mixed Air Node 1"));
+        EXPECT_TRUE(Util::SameString(Alphas(3), "AirLoopHVAC:OutdoorAirSystem"));
+        EXPECT_TRUE(Util::SameString(Alphas(4), "OA Sys 1"));
+        EXPECT_TRUE(Util::SameString(Alphas(5), "VAV Sys 1 Inlet Node"));
+        EXPECT_TRUE(Util::SameString(Alphas(6), "Mixed Air Node 1"));
 
-        EXPECT_TRUE(UtilityRoutines::SameString(Alphas(7), "Coil:Cooling:Water"));
-        EXPECT_TRUE(UtilityRoutines::SameString(Alphas(8), "Main Cooling Coil 1"));
-        EXPECT_TRUE(UtilityRoutines::SameString(Alphas(9), "Mixed Air Node 1"));
-        EXPECT_TRUE(UtilityRoutines::SameString(Alphas(10), "Main Cooling Coil 1 Outlet Node"));
+        EXPECT_TRUE(Util::SameString(Alphas(7), "Coil:Cooling:Water"));
+        EXPECT_TRUE(Util::SameString(Alphas(8), "Main Cooling Coil 1"));
+        EXPECT_TRUE(Util::SameString(Alphas(9), "Mixed Air Node 1"));
+        EXPECT_TRUE(Util::SameString(Alphas(10), "Main Cooling Coil 1 Outlet Node"));
 
-        EXPECT_TRUE(UtilityRoutines::SameString(Alphas(11), "Coil:Heating:Water"));
-        EXPECT_TRUE(UtilityRoutines::SameString(Alphas(12), "Main Heating Coil 1"));
-        EXPECT_TRUE(UtilityRoutines::SameString(Alphas(13), "Main Cooling Coil 1 Outlet Node"));
-        EXPECT_TRUE(UtilityRoutines::SameString(Alphas(14), "Main Heating Coil 1 Outlet Node"));
+        EXPECT_TRUE(Util::SameString(Alphas(11), "Coil:Heating:Water"));
+        EXPECT_TRUE(Util::SameString(Alphas(12), "Main Heating Coil 1"));
+        EXPECT_TRUE(Util::SameString(Alphas(13), "Main Cooling Coil 1 Outlet Node"));
+        EXPECT_TRUE(Util::SameString(Alphas(14), "Main Heating Coil 1 Outlet Node"));
 
-        EXPECT_TRUE(UtilityRoutines::SameString(Alphas(15), "Fan:VariableVolume"));
-        EXPECT_TRUE(UtilityRoutines::SameString(Alphas(16), "Supply Fan 1"));
-        EXPECT_TRUE(UtilityRoutines::SameString(Alphas(17), "Main Heating Coil 1 Outlet Node"));
-        EXPECT_TRUE(UtilityRoutines::SameString(Alphas(18), "VAV Sys 1 Outlet Node"));
+        EXPECT_TRUE(Util::SameString(Alphas(15), "Fan:VariableVolume"));
+        EXPECT_TRUE(Util::SameString(Alphas(16), "Supply Fan 1"));
+        EXPECT_TRUE(Util::SameString(Alphas(17), "Main Heating Coil 1 Outlet Node"));
+        EXPECT_TRUE(Util::SameString(Alphas(18), "VAV Sys 1 Outlet Node"));
 
         NodeNums.deallocate();
         Alphas.deallocate();
@@ -500,6 +478,187 @@ TEST_F(EnergyPlusFixture, BranchInputManager_GetAirBranchIndex)
     BranchIndex = GetAirBranchIndex(*state, CompType, CompName);
 
     EXPECT_EQ(0, BranchIndex);
+}
+
+TEST_F(EnergyPlusFixture, BranchInputManager_OrphanObjects)
+{
+    // Branch
+    state->dataBranchInputManager->clear_state();
+    state->dataErrTracking->TotalSevereErrors = 0;
+    std::string idf_objects = delimited_string({
+        "Branch,",
+        "   Heating Supply Main Branch,     !- Name",
+        "   ,                               !- Pressure Drop Curve Name",
+        "   Coil:Heating:Water,             !- Component 1 Object Type",
+        "   Heating Supply Reheat Coil,     !- Component 1 Name",
+        "   Heating Supply Inlet Node,      !- Component 1 Inlet Node Name",
+        "   Heating Supply Outlet Node;     !- Component 1 Outlet Node Name",
+    });
+    ASSERT_TRUE(process_idf(idf_objects));
+    EXPECT_NO_THROW(ManageBranchInput(*state));
+
+    std::string expected_error = delimited_string({
+        "   ** Severe  ** During Branch Input, Invalid Component Name input=HEATING SUPPLY REHEAT COIL",
+        "   **   ~~~   ** Component type=COIL:HEATING:WATER",
+        "   **   ~~~   ** Occurs on Branch=HEATING SUPPLY MAIN BRANCH",
+        "   ** Severe  ** AuditBranches: There are 1 branch(es) that do not appear on any BranchList.",
+        "   **   ~~~   ** Use Output:Diagnostics,DisplayExtraWarnings; for detail of each branch not on a branch list.",
+    });
+    compare_err_stream(expected_error, true);
+
+    // BranchList
+    state->dataBranchInputManager->clear_state();
+    state->dataErrTracking->TotalSevereErrors = 0;
+    idf_objects = delimited_string({
+        "BranchList,",
+        "   Heating Supply Branches,        !- Name",
+        "   Heating Supply Main Branch;     !- Branch 1 Name",
+    });
+    ASSERT_TRUE(process_idf(idf_objects));
+    EXPECT_NO_THROW(ManageBranchInput(*state));
+
+    expected_error = delimited_string({
+        "   ** Severe  ** GetBranchListInput: BranchList=\"HEATING SUPPLY BRANCHES\", invalid data.",
+        "   **   ~~~   ** ..invalid Branch Name not found=\"HEATING SUPPLY MAIN BRANCH\".",
+        "   ** Severe  ** GetBranchListInput:  Invalid Input -- preceding condition(s) will likely cause termination.",
+    });
+    compare_err_stream(expected_error, true);
+
+    // Splitter
+    state->dataBranchInputManager->clear_state();
+    state->dataErrTracking->TotalSevereErrors = 0;
+    idf_objects = delimited_string({
+        "Connector:Splitter,",
+        "   Heating Supply Splitter,        !- Name",
+        "   Heating Supply Inlet Branch,    !- Inlet Branch Name",
+        "   Central Boiler Branch,          !- Outlet Branch 1 Name",
+        "   Heating Supply Bypass Branch;   !- Outlet Branch 2 Name",
+    });
+    ASSERT_TRUE(process_idf(idf_objects));
+    EXPECT_THROW(ManageConnectorInput(*state), EnergyPlus::FatalError);
+
+    expected_error = delimited_string({
+        "   ** Severe  ** GetSplitterInput: Invalid Branch=HEATING SUPPLY INLET BRANCH, referenced as Inlet Branch to Connector:Splitter=HEATING "
+        "SUPPLY SPLITTER",
+        "   ** Severe  ** GetSplitterInput: Invalid Branch=CENTRAL BOILER BRANCH, referenced as Outlet Branch # 1 to Connector:Splitter=HEATING "
+        "SUPPLY SPLITTER",
+        "   ** Severe  ** GetSplitterInput: Invalid Branch=HEATING SUPPLY BYPASS BRANCH, referenced as Outlet Branch # 2 to "
+        "Connector:Splitter=HEATING SUPPLY SPLITTER",
+        "   **  Fatal  ** GetSplitterInput: Fatal Errors Found in Connector:Splitter, program terminates.",
+        "   ...Summary of Errors that led to program termination:",
+        "   ..... Reference severe error count=3",
+        "   ..... Last severe error=GetSplitterInput: Invalid Branch=HEATING SUPPLY BYPASS BRANCH, referenced as Outlet Branch # 2 to "
+        "Connector:Splitter=HEATING SUPPLY SPLITTER",
+    });
+    compare_err_stream(expected_error, true);
+
+    // Mixer
+    state->dataBranchInputManager->clear_state();
+    state->dataErrTracking->TotalSevereErrors = 0;
+    idf_objects = delimited_string({
+        "Connector:Mixer,",
+        "   Heating Supply Mixer,           !- Name",
+        "   Heating Supply Outlet Branch,   !- Outlet Branch Name",
+        "   Central Boiler Branch,          !- Inlet Branch 1 Name",
+        "   Heating Supply Bypass Branch;   !- Inlet Branch 2 Name",
+    });
+    ASSERT_TRUE(process_idf(idf_objects));
+    EXPECT_THROW(ManageConnectorInput(*state), EnergyPlus::FatalError);
+
+    expected_error = delimited_string({
+        "   ** Severe  ** GetMixerInput: Invalid Branch=HEATING SUPPLY OUTLET BRANCH, referenced as Outlet Branch in Connector:Mixer=HEATING SUPPLY "
+        "MIXER",
+        "   ** Severe  ** GetMixerInput: Invalid Branch=CENTRAL BOILER BRANCH, referenced as Inlet Branch # 1 in Connector:Mixer=HEATING SUPPLY "
+        "MIXER",
+        "   ** Severe  ** GetMixerInput: Invalid Branch=HEATING SUPPLY BYPASS BRANCH, referenced as Inlet Branch # 2 in Connector:Mixer=HEATING "
+        "SUPPLY MIXER",
+        "   **  Fatal  ** GetMixerInput: Fatal Errors Found in Connector:Mixer, program terminates.",
+        "   ...Summary of Errors that led to program termination:",
+        "   ..... Reference severe error count=3",
+        "   ..... Last severe error=GetMixerInput: Invalid Branch=HEATING SUPPLY BYPASS BRANCH, referenced as Inlet Branch # 2 in "
+        "Connector:Mixer=HEATING SUPPLY MIXER",
+    });
+    compare_err_stream(expected_error, true);
+
+    // ConnectorList
+    state->dataBranchInputManager->clear_state();
+    state->dataErrTracking->TotalSevereErrors = 0;
+    idf_objects = delimited_string({
+        "ConnectorList,",
+        "   Heating Supply Side Connectors, !- Name",
+        "   Connector:Splitter,             !- Connector 1 Object Type",
+        "   Heating Supply Splitter,        !- Connector 1 Name",
+        "   Connector:Mixer,                !- Connector 2 Object Type",
+        "   Heating Supply Mixer;           !- Connector 2 Name",
+    });
+    ASSERT_TRUE(process_idf(idf_objects));
+    EXPECT_THROW(ManageConnectorInput(*state), EnergyPlus::FatalError);
+
+    expected_error = delimited_string({
+        "   ** Severe  ** Invalid Connector:Splitter(none)=HEATING SUPPLY SPLITTER, referenced by ConnectorList=HEATING SUPPLY SIDE CONNECTORS",
+        "   ** Severe  ** Invalid Connector:Mixer(none)=HEATING SUPPLY MIXER, referenced by ConnectorList=HEATING SUPPLY SIDE CONNECTORS",
+        "   ** Severe  ** For ConnectorList=HEATING SUPPLY SIDE CONNECTORS",
+        "   **   ~~~   ** ...Item=HEATING SUPPLY SPLITTER, Type=CONNECTOR:SPLITTER was not matched.",
+        "   **   ~~~   ** The BranchList for this Connector:Splitter does not match the BranchList for its corresponding Connector:Mixer.",
+        "   ** Severe  ** For ConnectorList=HEATING SUPPLY SIDE CONNECTORS",
+        "   **   ~~~   ** ...Item=HEATING SUPPLY MIXER, Type=CONNECTOR:MIXER was not matched.",
+        "   **   ~~~   ** The BranchList for this Connector:Mixer does not match the BranchList for its corresponding Connector:Splitter.",
+        "   **  Fatal  ** GetConnectorListInput: Program terminates for preceding conditions.",
+        "   ...Summary of Errors that led to program termination:",
+        "   ..... Reference severe error count=4",
+        "   ..... Last severe error=For ConnectorList=HEATING SUPPLY SIDE CONNECTORS",
+    });
+    compare_err_stream(expected_error, true);
+}
+
+TEST_F(EnergyPlusFixture, BranchInputManager_OrphanBaseboard)
+{
+    // Branch
+    state->dataBranchInputManager->clear_state();
+    state->dataErrTracking->TotalSevereErrors = 0;
+    std::string idf_objects = delimited_string({
+        "BranchList,",
+        "   Baseboard Heating Branches,          !- Name",
+        "   Baseboard Heating Branch;            !- Branch 1 Name",
+
+        "Branch,",
+        "   Baseboard Heating Branch,            !- Name",
+        "   ,                                    !- Pressure Drop Curve Name",
+        "   ZoneHVAC:Baseboard:Convective:Water, !- Component 1 Object Type",
+        "   Baseboard Heater,                    !- Component 1 Name",
+        "   Baseboard Water Inlet Node,          !- Component 1 Inlet Node Name",
+        "   Baseboard Water Outlet Node;         !- Component 1 Outlet Node Name",
+
+        "ZoneHVAC:Baseboard:Convective:Water,",
+        "   Baseboard Heater,                    !-Name",
+        "   ,                                    !-Availability Schedule Name",
+        "   Baseboard Water Inlet Node,          !-Inlet Node Name",
+        "   Baseboard Water Outlet Node,         !-Outlet Node Name",
+        "   HeatingDesignCapacity,               !-Heating Design Capacity Method",
+        "   Autosize,                            !-Heating Design Capacity{W}",
+        "   ,                                    !-Heating Design Capacity Per Floor Area{W/m2}",
+        "   ,                                    !-Fraction of Autosized Heating Design Capacity",
+        "   Autosize,                            !-U - Factor Times Area Value{W/K}",
+        "   Autosize;                            !-Maximum Water Flow Rate {m3/s}",
+
+    });
+    ASSERT_TRUE(process_idf(idf_objects));
+    EXPECT_NO_THROW(ManageBranchInput(*state));
+
+    std::string expected_error = "";
+    compare_err_stream(expected_error, true);
+
+    bool ErrFound = false;
+    BranchInputManager::TestBranchIntegrity(*state, ErrFound);
+
+    expected_error = delimited_string({
+        "   ************* Testing Individual Branch Integrity",
+        "   ** Severe  ** CheckBranchEquipInZoneHVACEquipList: Branch = BASEBOARD HEATING BRANCH, contains a component of type "
+        "ZONEHVAC:BASEBOARD:CONVECTIVE:WATER with name = BASEBOARD HEATER",
+        "   **   ~~~   ** but that component is not listed in any ZoneHVAC:EquipmentList.",
+        "   ** Severe  ** Branch(es) did not pass integrity testing",
+    });
+    compare_err_stream(expected_error, true);
 }
 
 } // namespace EnergyPlus

@@ -69,7 +69,7 @@
 
 % Provide better table spacing
 % From https://www.inf.ethz.ch/personal/markusp/teaching/guides/guide-tables.pdf
-\renewcommand{\arraystretch}{1.2} 
+\renewcommand{\arraystretch}{1.2}
 
 \graphicspath{{media/}}
 
@@ -109,6 +109,8 @@
 \DeclareSIUnit\wattperVolumeFlowRate{\watt\s\per\m\cubed} % Displays "W s/m^3"
 \DeclareSIUnit\volumeFlowRateperArea{\volumeFlowRate\per\area} % Unused
 \DeclareSIUnit\volumeFlowRateperWatt{\volumeFlowRate\per\watt} % Displays "m^3/(s W)"
+\DeclareSIUnit\umolperAreaperSecond{\umol\per\area\per\s} % Displays "µmol/(m^2 s)"
+\DeclareSIUnit\evapotranspirationRate{\kg\per\area\per\s} % Displays "kg / (m^2 s)"
 
 % Make alias, so its clear these are IP units
 \let\DeclareIPUnit\DeclareSIUnit
@@ -130,7 +132,7 @@
 
 % The current implementation of \degree doesn't use ensuremath and doesn't show
 % see https://github.com/josephwright/siunitx/issues/351
-% But requried mathspec with options 'math' above fixes it
+% But required mathspec with options 'math' above fixes it
 %\DeclareSIUnit[number-unit-product = \,]
 %\degree{ \ensuremath { { } ^ { \circ } } }
 

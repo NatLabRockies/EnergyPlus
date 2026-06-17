@@ -1,7 +1,7 @@
-// EnergyPlus, Copyright (c) 1996-2023, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
-// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other
+// National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
 // contributors. All rights reserved.
 //
 // NOTICE: This Software was developed under funding from the U.S. Department of Energy and the
@@ -58,6 +58,7 @@
 #include <EnergyPlus/EnergyPlus.hh>
 #include <EnergyPlus/Material.hh>
 #include <EnergyPlus/Vectors.hh>
+#include <WCEMultiLayerOptics.hpp>
 
 namespace EnergyPlus {
 
@@ -65,8 +66,9 @@ namespace EnergyPlus {
 struct EnergyPlusData;
 
 namespace DataHeatBalance {
-    struct MaterialProperties;
-}
+    struct MaterialBase;
+    struct MaterialChild;
+} // namespace DataHeatBalance
 
 } // namespace EnergyPlus
 
@@ -99,7 +101,7 @@ class CMultiLayerScattered;
 
 namespace EnergyPlus {
 
-namespace WindowManager {
+namespace Window {
 
     // using IGU_BSDFLayers = std::vector< std::shared_ptr< SingleLayerOptics::CBSDFLayer > >;
     using IGU_Layers = std::vector<SingleLayerOptics::CScatteringLayer>;
@@ -128,7 +130,7 @@ namespace WindowManager {
     {
     public:
         static std::shared_ptr<SpectralAveraging::CSpectralSampleData> getSpectralSample(EnergyPlusData &state, int const t_SampleDataPtr);
-        static std::shared_ptr<SpectralAveraging::CSpectralSampleData> getSpectralSample(Material::MaterialProperties const &t_MaterialProperties);
+        static std::shared_ptr<SpectralAveraging::CSpectralSampleData> getSpectralSample(Material::MaterialGlass const &t_MaterialProperties);
         static FenestrationCommon::CSeries getDefaultSolarRadiationSpectrum(EnergyPlusData &state);
         static FenestrationCommon::CSeries getDefaultVisiblePhotopicResponse(EnergyPlusData &state);
     };
@@ -140,28 +142,43 @@ namespace WindowManager {
     class CWindowConstructionsSimplified
     {
     public:
-        static CWindowConstructionsSimplified &instance();
+        static CWindowConstructionsSimplified &instance(EnergyPlusData &state);
 
-        void pushLayer(FenestrationCommon::WavelengthRange const t_Range, int const t_ConstrNum, const SingleLayerOptics::CScatteringLayer &t_Layer);
+        void pushLayer(FenestrationCommon::WavelengthRange const t_Range, int t_ConstrNum, const SingleLayerOptics::CScatteringLayer &t_Layer);
 
         std::shared_ptr<MultiLayerOptics::CMultiLayerScattered>
-        getEquivalentLayer(EnergyPlusData &state, FenestrationCommon::WavelengthRange const t_Range, int const t_ConstrNum);
+        getEquivalentLayer(EnergyPlusData &state, FenestrationCommon::WavelengthRange t_Range, int t_ConstrNum);
 
         static void clearState();
-
-    private:
         CWindowConstructionsSimplified();
 
-        IGU_Layers getLayers(EnergyPlusData &state, FenestrationCommon::WavelengthRange const t_Range, int const t_ConstrNum) const;
-
-        static std::unique_ptr<CWindowConstructionsSimplified> p_inst;
+    private:
+        IGU_Layers getLayers(EnergyPlusData &state, FenestrationCommon::WavelengthRange t_Range, int t_ConstrNum) const;
 
         // Need separate layer properties for Solar and Visible range
         std::map<FenestrationCommon::WavelengthRange, Layers_Map> m_Layers;
         std::map<std::pair<FenestrationCommon::WavelengthRange, int>, std::shared_ptr<MultiLayerOptics::CMultiLayerScattered>> m_Equivalent;
     };
 
-} // namespace WindowManager
+} // namespace Window
+
+struct WindowManagerExteriorData : BaseGlobalStruct
+{
+    std::unique_ptr<Window::CWindowConstructionsSimplified> p_inst;
+
+    void init_constant_state([[maybe_unused]] EnergyPlusData &state) override
+    {
+    }
+
+    void init_state([[maybe_unused]] EnergyPlusData &state) override
+    {
+    }
+
+    void clear_state() override
+    {
+        new (this) WindowManagerExteriorData();
+    }
+};
 
 } // namespace EnergyPlus
 

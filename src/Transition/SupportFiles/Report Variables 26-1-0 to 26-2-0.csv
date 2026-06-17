@@ -1,0 +1,3 @@
+26.1.0,26.2.0,Transition notes - some of these are EMS variable names
+0,0,These numbers should be the number of report variables in the following list (including deletes). Two columns/numbers.
+old variable name,new variable name,-- add variable names (before this line) and leave off units -- <DELETE> to delete

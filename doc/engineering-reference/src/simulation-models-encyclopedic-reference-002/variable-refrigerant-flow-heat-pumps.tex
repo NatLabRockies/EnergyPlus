@@ -438,20 +438,20 @@ e-h are the coefficient for cooling energy input ratio correlation when part-loa
 The total power consumed by the heat pump condenser in cooling mode is based on the user specified coefficient of performance (COP) and calculated as:
 
 \begin{equation}
-  CoolingPower = \left( \frac{\dot{Q}_{cooling,total,rated} CAPFT_{cooling}}{COP_{cooling,reference}} \right) \left( EIRFT_{cooling} \right) \left( EIRFPLR_{cooling} \right) \left( HPRTF \right)
+  P_{\mathrm{Cooling}} = \left( \frac{\dot{Q}_{cooling,total,rated} CAPFT_{cooling}}{COP_{cooling,reference}} \right) \left( EIRFT_{cooling} \right) \left( EIRFPLR_{cooling} \right) \left( HPRTF \right)
 \end{equation}
 
-The cooling COP is then calculated as the ratio of the outdoor unit cooling capacity divided by the total electric consumption rate of all components associated with the outdoor unit. Although included in the equiation, defrost power is typically 0 during cooling mode operation.
+The cooling COP is then calculated as the ratio of the outdoor unit cooling capacity divided by the total electric consumption rate of all components associated with the outdoor unit. Although included in the equation, defrost power is typically 0 during cooling mode operation.
 
 \begin{equation}
-  COP_{cooling} = \frac{\dot{Q}_{cooling,total}}{CoolingPower + P_{CrankCaseHeater} + P_{EvapCoolerPower} + P_{defrost}}
+  COP_{cooling} = \frac{\dot{Q}_{cooling,total}}{P_{\mathrm{Cooling}} + P_{CrankCaseHeater} + P_{EvapCoolerPump} + P_{defrost}}
 \end{equation}
 
 where:
 
 COP\(_{cooling}\) is the operating coefficient of performance, report variable ``VRF Heat Pump Cooling COP''
 
-CoolingPower is the operating electric consumption rate (W), report variable ``VRF Heat Pump Cooling Electric Power''
+$P_{\mathrm{Cooling}}$ is the operating electric consumption rate (W), report variable ``VRF Heat Pump Cooling Electric Power''
 
 P\(_{CrankcaseHeater}\) is the report variable for electric consumption rate of crankcase heater (W)
 
@@ -468,11 +468,11 @@ When operating in heat recovery mode, equations similar to those used for availa
 This equation can be used to provide a constant fractional difference for cooling electric consumption rate in heat recovery mode (i.e., only \emph{a} is non-zero) or a fractional term that varies with indoor and outdoor conditions. With very limited performance data available at this time, it is recommended that only the constant (a) term be used at this time. When the VRF system is not operating in heat recovery mode, this fraction is set to 1. The cooling electric consumption rate in heat recovery mode is then:
 
 \begin{equation}
-  CoolingPower_{HR} = CoolingPower \left( HREIRMod_{HP,\,cooling} \right)
+  P_{\mathrm{Cooling, HR}} = P_{\mathrm{Cooling}} \left( HREIRMod_{HP,\,cooling} \right)
 \end{equation}
 
 \begin{equation}
-  Power_{HR} = k_{EIR,\,cool} \left( CoolingPower_{HR} \right) + \left( 1 - k_{EIR,\,cool} \right) \left( CoolingPower_{HR} \right) \left( 1 - e^{\left( -t / \tau_{c,\,EIR,\,cool} \right)} \right)
+  Power_{HR} = k_{EIR,\,cool} \cdot P_{\mathrm{Cooling, HR}} + \left( 1 - k_{EIR,\,cool} \right) \cdot P_{\mathrm{Cooling, HR}} \cdot \left( 1 - e^{\left( -t / \tau_{c,\,EIR,\,cool} \right)} \right)
 \end{equation}
 
 where:
@@ -481,9 +481,9 @@ where:
 
 \(\tau_{c,EIR,cool}\) is the time constant to reach steady-state operation, 5 time constants equals 99\% of steady-state capacity (hr)
 
-\(CoolingPower_{HR}\) is the cooling electric consumption rate in heat recovery mode (W)
+$P_{\mathrm{Cooling, HR}}$ is the cooling electric consumption rate in heat recovery mode (W)
 
-\(\left( 1 - e^{\left( -t / \tau_{c,EIR,cool} \right)} \right)\) is the multiplier used during the transition period from cooling mode to heat recovery mode. This multiplier can be viewed using the report variable ``VRF Heat Pump Heat Recovery Status Change Multiplier'' (ref: Output:Variable).
+The term \(\left( 1 - e^{\left( -t / \tau_{c,EIR,cool} \right)} \right)\) is the multiplier used during the transition period from cooling mode to heat recovery mode. This multiplier can be viewed using the report variable ``VRF Heat Pump Heat Recovery Status Change Multiplier'' (ref: Output:Variable).
 
 \subsubsection{Heating Operation}\label{heating-operation-201605050924}
 
@@ -567,7 +567,7 @@ The piping correction factor is then used to adjust the zone heating requirement
 
 \subsubsection{Piping Correction Factor in heating mode}\label{piping-correction-factor-in-heating-mode}
 
-The piping correction factor in heating mode is calculated based on the length of the farthest terminal unit and the difference in height from the highest to lowest terminal unit. The piping losses are fixed throughout the simulation (i.e., these losses are not based on which terminal units are requesting refrigerant). Coefficients a-f in the following equations are inputs in the piping correction factor for length in heating mode curve object. The curve may use either one or two independent variables. Coefficient g is a direct input to the VRF model as piping correction factor for height in heating mode coefficient. The equivalent piping length in heating mode (P\(_{EQ,heating}\)) is also a direct input in the VRF model. The vertical height (P\(_H\)), the difference between the highest and lowest terminal unit (e.g., 12 m higher than condenser – 3 m lower than condenser = 9 m height), is a common input for both cooling and heating.
+The piping correction factor in heating mode is calculated based on the length of the farthest terminal unit and the difference in height from the highest to lowest terminal unit. The piping losses are fixed throughout the simulation (i.e., these losses are not based on which terminal units are requesting refrigerant). Coefficients a-f in the following equations are inputs in the piping correction factor for length in heating mode curve object. The curve may use either one or two independent variables. Coefficient g is a direct input to the VRF model as piping correction factor for height in heating mode coefficient. The equivalent piping length in heating mode (P\(_{EQ,heating}\)) is also a direct input in the VRF model. The vertical height (P\(_H\)), the difference between the highest and lowest terminal unit (e.g., 12 m higher than condenser – 3 m lower than condenser = 15 m height), is a common input for both cooling and heating.
 
 \begin{equation}
   P_{correction,heating} = a + b \left( P_{EQ,heating} \right) + c \left( P_{EQ,heating} \right)^2 + d \left( P_{EQ,heating} \right)^3 + g \left( P_H \right)
@@ -641,7 +641,7 @@ where:
 The defrost energy input ratio (EIR) modifier curve (function of temperature) is a bi-quadratic curve with two independent variables: heating coil average entering air wet-bulb temperature and outdoor air dry-bulb temperature. The output of this curve is multiplied by the heating coil capacity, the fractional defrost time period and the runtime fraction of the heating coil to give the defrost power at the specific temperatures at which the coil is operating. The use of outdoor wet-bulb temperature is explicit in this curve object and the defrost equation below and is independent of the selection for Heating Performance Curve Outdoor Temperature Type.
 
 \begin{equation}
-  DefrostEIRTempModFac = a + b\left( {{T_{wb,avg}}} \right) + c{\left( {{T_{wb,avg}}} \right)^2} + d\left( {{T_c}} \right) + e{\left( {{T_c}} \right)^2} + f\left( {{T_{wb,avg}}} \right)\left( {{T_c}} \right)
+  \mathrm{EIRTempModFac}_{\mathrm{Defrost}} = a + b\left( {{T_{wb,avg}}} \right) + c{\left( {{T_{wb,avg}}} \right)^2} + d\left( {{T_c}} \right) + e{\left( {{T_c}} \right)^2} + f\left( {{T_{wb,avg}}} \right)\left( {{T_c}} \right)
 \end{equation}
 
 The heat pump condenser's total heating load is then calculated as the quotient of the total terminal unit capacity and the piping correction factor. Additional load due to defrost is also included (see following section).
@@ -747,22 +747,22 @@ The total power consumed by the heat pump condenser in heating mode is based on 
 
 \begin{equation}
 \begin{array}{rl}
-  HeatingPower =& \left( \frac{\dot{Q}_{heating,\,total,\,rated} CAPFT_{heating}}{COP_{heating,reference}} \right) \left( EIRFT_{heating} \right) \left( EIRFPLR_{heating} \right) \\
-  & * \left( HPRTF \right) \left( EIR_{defrost} \right)
+  P_{\mathrm{Heating}} =& \left( \frac{\dot{Q}_{heating,\,total,\,rated} CAPFT_{heating}}{COP_{heating,reference}} \right) \cdot \left( EIRFT_{heating} \right) \cdot \left( EIRFPLR_{heating} \right) \\
+  & \cdot \left( HPRTF \right) \left( EIR_{defrost} \right)
 \end{array}
 \end{equation}
 
 The heating COP is then calculated as the ratio of the outdoor unit heating capacity divided by the total electric consumption rate of all components associated with the outdoor unit. Evaporatively-cooled condenser pump power is typically 0 during heating mode operation.
 
 \begin{equation}
-  COP_{heating} = \dot{Q}_{heating,total} / \left( HeatingPower + P_{CrankcaseHeater} + P_{EvapCoolerPower} + P_{defrost} \right)
+  COP_{heating} = \dot{Q}_{heating,total} / \left( P_{\mathrm{Heating}} + P_{CrankcaseHeater} + P_{EvapCoolerPower} + P_{defrost} \right)
 \end{equation}
 
 where:
 
 COP\(_{heating}\) is the operating coefficient of performance, report variable ``VRF Heat Pump Heating COP''
 
-HeatingPower is the operating electric consumption rate (W), report variable ``VRF Heat Pump Heating Electric Power''.
+$P_{\mathrm{Heating}}$ is the operating electric consumption rate (W), report variable ``VRF Heat Pump Heating Electric Power''.
 
 When operating in heat recovery mode, equations similar to those used for available heating capacity are used to model operating power.
 
@@ -770,14 +770,14 @@ When operating in heat recovery mode, equations similar to those used for availa
   HREIRMod_{HP,heating} = a + b \left( T_{ent} \right) + c \left( T_{ent} \right)^2 + d \left( T_{cond} \right) + e \left( T_{cond} \right)^2 + f \left( T_{ent} \right) \left( T_{cond} \right)
 \end{equation}
 
-This equation can be used to provide a constant fractional difference for heating electric consumption rate in heat recovery mode (i.e., only *a* is non-zero) or a fractional term that varies with indoor and outdoor conditions. With very limited performance data available at this time, it is recommended that only the constant (a) term be used at this time. When the VRF system is not operating in heat recovery mode, this fraction is set to 1.The available heating electric consumption rate in heat recovery mode is then calculated as:
+This equation can be used to provide a constant fractional difference for heating electric consumption rate in heat recovery mode (i.e., only `$a$' is non-zero) or a fractional term that varies with indoor and outdoor conditions. With very limited performance data available at this time, it is recommended that only the constant (a) term be used at this time. When the VRF system is not operating in heat recovery mode, this fraction is set to 1.The available heating electric consumption rate in heat recovery mode is then calculated as:
 
 \begin{equation}
-  HeatingPower_{HR} = HeatingPower \left( HREIRMod_{HP,heating} \right)
+  P_{\mathrm{Heating, HR}} = P_{\mathrm{Heating}} \left( HREIRMod_{HP,heating} \right)
 \end{equation}
 
 \begin{equation}
-  Power_{HR} = k_{EIR,heat} \left( HeatingPower_{HR} \right) + \left( 1 - k_{EIR,heat} \right) \left( HeatingPower_{HR} \right) \left( 1 - e^{\left( -t / \tau_{c,EIR,heat} \right)} \right)
+  Power_{HR} = k_{EIR,heat} \cdot P_{\mathrm{Heating, HR}} + \left( 1 - k_{EIR,heat} \right) \cdot P_{\mathrm{Heating, HR}} \cdot \left( 1 - e^{\left( -t / \tau_{c,EIR,heat} \right)} \right)
 \end{equation}
 
 where:
@@ -786,21 +786,21 @@ where:
 
 \(\tau_{c,EIR,heat}\) is the time constant to reach steady-state operation, 5 time constants equals 99\% of steady-state capacity (hr)
 
-HeatingPower\(_{HR}\) is the heating electric consumption rate in heat recovery mode (W)
+$P_{\mathrm{Heating, HR}}$ is the heating electric consumption rate in heat recovery mode (W)
 
-\(\left( 1 - e^{\left( -t / \tau_{c,EIR,heat} \right)} \right)\) = The multiplier used during the transition period from heating mode to heat recovery mode. This multiplier can be viewed using the report variable ``VRF Heat Pump Heat Recovery Status Change Multiplier'' (ref: Output:Variable).
+The term \(\left( 1 - e^{\left( -t / \tau_{c,EIR,heat} \right)} \right)\) = The multiplier used during the transition period from heating mode to heat recovery mode. This multiplier can be viewed using the report variable ``VRF Heat Pump Heat Recovery Status Change Multiplier'' (ref: Output:Variable).
 
 \subsubsection{Operating Coefficient of Performance}\label{operating-coefficient-of-performance}
 
 Similar to the cooling and heating COP report variables, a report variable is included to identify the overall COP of the system. The numerator represents the total cooling and heating coil capacities (or loads) where piping losses have been accounted for. If heat recovery is not used only one of these terms is non-zero. When heat recovery is used, one or both of these terms can be non-zero, therefore, the operating COP includes recovered energy. The denominator includes the electric consumption rates of all system components. For water-cooled VRF AC systems, the plant pump power is not included.
 
 \begin{equation}
-  COP_{operating} = \frac{\left( \dot{Q}_{cooling,TerminalUnits} + \dot{Q}_{heating,TerminalUnits} \right)}{\left( OutdoorUnitPower + P_{CrankcaseHeater} + P_{EvapCoolerPower} + P_{defrost} + P_{TU,fan} + P_{TU,parasitic} \right)}
+  COP_{operating} = \frac{\left( \dot{Q}_{cooling,TerminalUnits} + \dot{Q}_{heating,TerminalUnits} \right)}{\left( P_{\mathrm{OutdoorUnit}} + P_{CrankcaseHeater} + P_{EvapCoolerPower} + P_{defrost} + P_{TU,fan} + P_{TU,parasitic} \right)}
 \end{equation}
 
 where:
 
-OutdoorUnitPower is the cooling or heating electric consumption rate of outdoor unit (W)
+$P_{\mathrm{OutdoorUnit}}$ is the cooling or heating electric consumption rate of outdoor unit (W)
 
 P\(_{TU,fan}\) is the electric consumption rate of all terminal unit fans (W)
 
@@ -832,7 +832,7 @@ Frost formation on the outdoor coil must be periodically removed. The fraction o
   EIR_{defrost} = 0.9 - 36.45 \left( \Delta \omega_{coil,\,out} \right)
 \end{equation}
 
-If the outdoor air dry-bulb temperature is \emph{above} the specified maximum temperature for defrost operation, the fractional defrost time period is set to zero and the heating capacity/input power multipliers are set to unity (1).
+If the outdoor air dry-bulb temperature is \emph{above} the specified maximum temperature for defrost operation, the fractional defrost time period is set to zero and the heating capacity and input power multipliers are set to unity. Similarly, if the fractional defrost time period is set to zero, the capacity and input power multipliers are set to unity.
 
 \subsubsection{Defrost Operation}\label{defrost-operation-201605050925}
 
@@ -843,7 +843,7 @@ If the fractional defrost time period is greater than zero for the simulation ti
 \end{equation}
 
 \begin{equation}
-  P_{defrost} = DefrostEIRTempModFac \left( \frac{Q_{total,rated}}{1.01667} \right) \left( t_{frac,defrost} \right) \left( RTF \right)
+  P_{defrost} = \mathrm{EIRTempModFac}_{\mathrm{Defrost}} \left( \frac{Q_{total,rated}}{1.01667} \right) \left( t_{frac,defrost} \right) \left( RTF \right)
 \end{equation}
 
 where:
@@ -854,7 +854,7 @@ where:
 
 \(P_{defrost}\) is the report variable for average defrost power for the simulation time step (W)
 
-\emph{DefrostEIRTempModFac} is the energy input ratio modifier curve applicable during defrost
+$\mathrm{EIRTempModFac}_{\mathrm{Defrost}}$ is the energy input ratio modifier curve applicable during defrost
 
 \(t_{frac,\,defrost}\) is the defrost time period fraction specified by user
 
@@ -1798,7 +1798,7 @@ For the first iteration,
 \item
   Initialize outdoor unit \(SH\) with the reference value (from IDF input, e.g., 1.5\(^{\circ}\)C)
 \item
-  Iinitialize the compressor power \(N_{comp}\) with the value calculated from the reference \(COP\) (e.g., 3.5):
+  Initialize the compressor power \(N_{comp}\) with the value calculated from the reference \(COP\) (e.g., 3.5):
 \end{itemize}
 
 \begin{equation}

@@ -1,0 +1,36 @@
+From cda21c65088f67bd17eb506fb57375ef469c2479 Mon Sep 17 00:00:00 2001
+From: Julien Marrec <julien.marrec@gmail.com>
+Date: Tue, 22 Apr 2025 15:24:09 +0200
+Subject: [PATCH 1/1] Repatch json.hpp like current to use doj::alphanum_less
+
+---
+ third_party/nlohmann/json.hpp | 5 +++--
+ 1 file changed, 3 insertions(+), 2 deletions(-)
+
+diff --git a/third_party/nlohmann/json.hpp b/third_party/nlohmann/json.hpp
+index 82d69f7c5d..92b63ed0d7 100644
+--- a/third_party/nlohmann/json.hpp
++++ b/third_party/nlohmann/json.hpp
+@@ -30,6 +30,7 @@
+ #include <string> // string, stoi, to_string
+ #include <utility> // declval, forward, move, pair, swap
+ #include <vector> // vector
++#include <doj/alphanum.hpp>
+ 
+ // #include <nlohmann/adl_serializer.hpp>
+ //     __ _____ _____ _____
+@@ -20340,9 +20341,9 @@ class basic_json // NOLINT(cppcoreguidelines-special-member-functions,hicpp-spec
+ #if defined(JSON_HAS_CPP_14)
+     // use of transparent comparator avoids unnecessary repeated construction of temporaries
+     // in functions involving lookup by key with types other than object_t::key_type (aka. StringType)
+-    using default_object_comparator_t = std::less<>;
++    using default_object_comparator_t = doj::alphanum_less<>;
+ #else
+-    using default_object_comparator_t = std::less<StringType>;
++    using default_object_comparator_t = doj::alphanum_less<StringType>;
+ #endif
+ 
+     /// @brief a type for an object
+-- 
+2.39.5 (Apple Git-154)
+

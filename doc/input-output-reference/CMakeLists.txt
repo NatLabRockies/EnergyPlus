@@ -114,6 +114,11 @@ set(INCLUDED_TEX
 # to get the list of inluded images, go to the root of the document folder and:
 # grep -r '\\includegraphics' * | cut -d ':' -f 2 | rev | cut -d '{' -f 1 | rev | cut -d '}' -f 1 | sed 's/^/  /g' | sort -n -t'.' -k 1.14
 set(INCLUDED_IMAGES
+    ${PROJECT_SOURCE_DIR}/input-output-reference/media/HeatExchanger-FluidToFluid-Schematics.png
+    ${PROJECT_SOURCE_DIR}/input-output-reference/media/VSFanStagedHeatControlDiag.png
+    ${PROJECT_SOURCE_DIR}/input-output-reference/media/SeriesVSFanModulatedHeatControlDiag.png
+    ${PROJECT_SOURCE_DIR}/input-output-reference/media/vav_parallel_fpb_trane_staged.png
+    ${PROJECT_SOURCE_DIR}/input-output-reference/media/vav_parallel_fpb_trane_modulated.png
     ${PROJECT_SOURCE_DIR}/input-output-reference/media/ACBussDiagram.png
     ${PROJECT_SOURCE_DIR}/input-output-reference/media/ACStorageBussDiagram.png
     ${PROJECT_SOURCE_DIR}/input-output-reference/media/AirLoopComponentMatrix.png
@@ -307,6 +312,8 @@ set(INCLUDED_IMAGES
     ${PROJECT_SOURCE_DIR}/input-output-reference/media/image901.png
     ${PROJECT_SOURCE_DIR}/input-output-reference/media/image902.png
     ${PROJECT_SOURCE_DIR}/input-output-reference/media/image903.png
-    ${PROJECT_SOURCE_DIR}/input-output-reference/media/image904.png)
+    ${PROJECT_SOURCE_DIR}/input-output-reference/media/image904.png
+    ${PROJECT_SOURCE_DIR}/input-output-reference/media/ASHP_Plant.png
+    ${PROJECT_SOURCE_DIR}/input-output-reference/media/HW_reset.png)
 
 create_doc_target("input-output-reference" "InputOutputReference")

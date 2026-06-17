@@ -1,7 +1,7 @@
-// EnergyPlus, Copyright (c) 1996-2023, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
-// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other
+// National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
 // contributors. All rights reserved.
 //
 // NOTICE: This Software was developed under funding from the U.S. Department of Energy and the
@@ -74,7 +74,7 @@ void SetupZoneInternalGain(EnergyPlusData &state,
     Real64 gainFrac = 1.0;
     for (int spaceNum : state.dataHeatBal->Zone(ZoneNum).spaceIndexes) {
         if (state.dataHeatBal->Zone(ZoneNum).numSpaces > 1) {
-            gainFrac = state.dataHeatBal->space(spaceNum).floorArea / state.dataHeatBal->Zone(ZoneNum).FloorArea;
+            gainFrac = state.dataHeatBal->space(spaceNum).FloorArea / state.dataHeatBal->Zone(ZoneNum).FloorArea;
         }
         SetupSpaceInternalGain(state,
                                spaceNum,
@@ -119,38 +119,25 @@ void SetupSpaceInternalGain(EnergyPlusData &state,
     // devices are internal gains like people, lights, electric equipment
     // and HVAC components with skin loss models like thermal tanks, and power conditioning.
 
-    using namespace DataHeatBalance;
-
     int constexpr DeviceAllocInc(100);
 
-    int IntGainsNum;
-    bool FoundIntGainsType;
-    bool FoundDuplicate;
-    std::string UpperCaseObjectName;
-
-    // Object Data
-
-    FoundIntGainsType = false;
-    FoundDuplicate = false;
-    UpperCaseObjectName = UtilityRoutines::MakeUPPERCase(cComponentName);
+    bool FoundDuplicate = false;
+    std::string UpperCaseObjectName = Util::makeUPPER(cComponentName);
 
     auto &thisIntGain = state.dataHeatBal->spaceIntGainDevices(spaceNum);
-    for (IntGainsNum = 1; IntGainsNum <= thisIntGain.numberOfDevices; ++IntGainsNum) {
-        if ((thisIntGain.device(IntGainsNum).CompObjectType == DataHeatBalance::IntGainTypeNamesUC[static_cast<int>(IntGainCompType)]) &&
-            (thisIntGain.device(IntGainsNum).CompType == IntGainCompType)) {
-            FoundIntGainsType = true;
-            if (thisIntGain.device(IntGainsNum).CompObjectName == UpperCaseObjectName) {
-                FoundDuplicate = true;
-                break;
-            }
+    for (int IntGainsNum = 1; IntGainsNum <= thisIntGain.numberOfDevices; ++IntGainsNum) {
+        if ((thisIntGain.device(IntGainsNum).CompType == IntGainCompType) &&
+            (thisIntGain.device(IntGainsNum).CompObjectName == UpperCaseObjectName)) {
+            FoundDuplicate = true;
+            break;
         }
     }
 
     if (FoundDuplicate) {
         ShowSevereError(state, "SetupZoneInternalGain: developer error, trapped duplicate internal gains sent to SetupZoneInternalGain");
-        ShowContinueError(state, format("The duplicate object user name ={}", format(cComponentName)));
+        ShowContinueError(state, std::format("The duplicate object user name ={}", cComponentName));
         ShowContinueError(state,
-                          format("The duplicate object type = {}", format(DataHeatBalance::IntGainTypeNamesCC[static_cast<int>(IntGainCompType)])));
+                          std::format("The duplicate object type = {}", DataHeatBalance::IntGainTypeNamesCC[static_cast<int>(IntGainCompType)]));
         ShowContinueError(state, "This internal gain will not be modeled, and the simulation continues");
         return;
     }
@@ -165,43 +152,51 @@ void SetupSpaceInternalGain(EnergyPlusData &state,
     }
     ++thisIntGain.numberOfDevices;
 
-    thisIntGain.device(thisIntGain.numberOfDevices).CompObjectType = DataHeatBalance::IntGainTypeNamesUC[static_cast<int>(IntGainCompType)];
     thisIntGain.device(thisIntGain.numberOfDevices).CompObjectName = UpperCaseObjectName;
     thisIntGain.device(thisIntGain.numberOfDevices).CompType = IntGainCompType;
+
+    // Tank losses should be distributed across multiplied zones/spaces - adjust the space gain fraction to account for this
+    if (std::find(AdjustTankLossMultipliers.begin(), AdjustTankLossMultipliers.end(), IntGainCompType) != AdjustTankLossMultipliers.end()) {
+        const int zoneNum = state.dataHeatBal->space(spaceNum).zoneNum;
+        const int multiplier = state.dataHeatBal->Zone(zoneNum).Multiplier * state.dataHeatBal->Zone(zoneNum).ListMultiplier;
+        if (multiplier > 1) {
+            spaceGainFraction /= multiplier;
+        }
+    }
     thisIntGain.device(thisIntGain.numberOfDevices).spaceGainFrac = spaceGainFraction;
 
     // note pointer assignments in code below!
-    if (ConvectionGainRate) {
+    if (ConvectionGainRate != nullptr) {
         thisIntGain.device(thisIntGain.numberOfDevices).PtrConvectGainRate = ConvectionGainRate;
     } else {
         thisIntGain.device(thisIntGain.numberOfDevices).PtrConvectGainRate = &state.dataHeatBal->zeroPointerVal;
     }
-    if (ReturnAirConvectionGainRate) {
+    if (ReturnAirConvectionGainRate != nullptr) {
         thisIntGain.device(thisIntGain.numberOfDevices).PtrReturnAirConvGainRate = ReturnAirConvectionGainRate;
     } else {
         thisIntGain.device(thisIntGain.numberOfDevices).PtrReturnAirConvGainRate = &state.dataHeatBal->zeroPointerVal;
     }
-    if (ThermalRadiationGainRate) {
+    if (ThermalRadiationGainRate != nullptr) {
         thisIntGain.device(thisIntGain.numberOfDevices).PtrRadiantGainRate = ThermalRadiationGainRate;
     } else {
         thisIntGain.device(thisIntGain.numberOfDevices).PtrRadiantGainRate = &state.dataHeatBal->zeroPointerVal;
     }
-    if (LatentGainRate) {
+    if (LatentGainRate != nullptr) {
         thisIntGain.device(thisIntGain.numberOfDevices).PtrLatentGainRate = LatentGainRate;
     } else {
         thisIntGain.device(thisIntGain.numberOfDevices).PtrLatentGainRate = &state.dataHeatBal->zeroPointerVal;
     }
-    if (ReturnAirLatentGainRate) {
+    if (ReturnAirLatentGainRate != nullptr) {
         thisIntGain.device(thisIntGain.numberOfDevices).PtrReturnAirLatentGainRate = ReturnAirLatentGainRate;
     } else {
         thisIntGain.device(thisIntGain.numberOfDevices).PtrReturnAirLatentGainRate = &state.dataHeatBal->zeroPointerVal;
     }
-    if (CarbonDioxideGainRate) {
+    if (CarbonDioxideGainRate != nullptr) {
         thisIntGain.device(thisIntGain.numberOfDevices).PtrCarbonDioxideGainRate = CarbonDioxideGainRate;
     } else {
         thisIntGain.device(thisIntGain.numberOfDevices).PtrCarbonDioxideGainRate = &state.dataHeatBal->zeroPointerVal;
     }
-    if (GenericContamGainRate) {
+    if (GenericContamGainRate != nullptr) {
         thisIntGain.device(thisIntGain.numberOfDevices).PtrGenericContamGainRate = GenericContamGainRate;
     } else {
         thisIntGain.device(thisIntGain.numberOfDevices).PtrGenericContamGainRate = &state.dataHeatBal->zeroPointerVal;

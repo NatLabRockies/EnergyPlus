@@ -14,7 +14,7 @@
 !
 !
 
-  Version,23.1;
+  Version,26.2;
 
 !-   ===========  ALL OBJECTS IN CLASS: BUILDING ===========
 
@@ -466,7 +466,7 @@
 
 !-   ===========  ALL OBJECTS IN CLASS: REPORT METER ===========
 
-  Output:Meter,DistrictHeating:Facility,Hourly;
+  Output:Meter,DistrictHeatingWater:Facility,Hourly;
 
   Output:Meter,DistrictCooling:Facility,Hourly;
 

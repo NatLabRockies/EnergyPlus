@@ -1,10 +1,10 @@
 /*********************************** FIT Carbon Dioxide (NREL v1) **********************************
-ó
+‚Äî
 Copyright (c) 2016, Northland Numerics LLC
 All rights reserved.
 
 Use of this software in source and binary forms, with or without modification, is permitted for
-Alliance for Sustainable Energy, LLC (the ìLicenseeî) and for third parties that receive this
+Alliance for Sustainable Energy, LLC (the ‚ÄúLicensee‚Äù) and for third parties that receive this
 software, with or without modification, directly from Licensee.  Licensee is permitted to
 redistribute this software in source and binary forms, with or without modification, provided
 that redistributions of source code must retain the above copyright notice and reservation of
@@ -25,7 +25,7 @@ OR LOSS OF USE, DATA, OR PROFITS), HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY
 CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE), ARISING IN ANY WAY
 OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-ó
+‚Äî
 
 ***************************************************************************************************/
 

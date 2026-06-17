@@ -1,7 +1,7 @@
-// EnergyPlus, Copyright (c) 1996-2023, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
-// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other
+// National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
 // contributors. All rights reserved.
 //
 // NOTICE: This Software was developed under funding from the U.S. Department of Energy and the
@@ -65,6 +65,8 @@ enum class Stdrd
     EN673Design, // standard = EN 673 / ISO 10292 Design
     Num
 };
+
+static constexpr std::array<std::string_view, (int)Stdrd::Num> stdrdNamesUC = {"ISO15099", "EN673DECLARED", "EN673DESIGN"};
 
 int constexpr MinStandard = static_cast<int>(Stdrd::ISO15099);    // minimum index for standard
 int constexpr MaxStandard = static_cast<int>(Stdrd::EN673Design); // maximum index for standard

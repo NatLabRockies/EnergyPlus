@@ -47,16 +47,15 @@ This field is optional. If left blank or omitted, then the humidifier obtains it
 An IDF example:
 
 \begin{lstlisting}
-
 Humidifier:Steam:Electric,
-  Humidifier 1,                   !- Name
-  FanAndCoilAvailSched,   !- Availability Schedule Name
-  0.00000379,                       !- Rated Capacity {m3/s}
-  10200.,                               !- Rated Power {W}
-  27.,                                     !- Rated Fan Power {W}
-  2.,                                       !- Standby Power {W}
-  Cooling Coil Air Outlet Node, !- Air Inlet Node Name
-  Air Loop Outlet Node;   !- Air Outlet Node Name
+  Humidifier 1,               !- Name
+  FanAndCoilAvailSched,       !- Availability Schedule Name
+  0.00000379,                 !- Rated Capacity {m3/s}
+  10200.,                     !- Rated Power {W}
+  27.,                        !- Rated Fan Power {W}
+  2.,                         !- Standby Power {W}
+  Cooling Coil Air Outlet Node,  !- Air Inlet Node Name
+  Air Loop Outlet Node;       !- Air Outlet Node Name
 \end{lstlisting}
 
 \subsubsection{Outputs}\label{outputs-016}
@@ -94,7 +93,7 @@ This field reports the water consumption rate of the steam humidifier in cubic m
 
 \paragraph{Humidifier Water Volume{[}m3{]}}\label{humidifier-water-volumem3}
 
-This ouput is the cubic meters of water consumed by the steam humidifier over the timestep being reported.
+This output is the cubic meters of water consumed by the steam humidifier over the timestep being reported.
 
 \paragraph{Humidifier Electricity Rate {[}W{]}}\label{humidifier-electric-powerw}
 
@@ -130,7 +129,7 @@ This output contains the volume of water obtained from the mains.
 
 \subsection{Humidifier:Steam:Gas}\label{humidifiersteamgas}
 
-The gas fired steam humidifier is a component that represents a gas fired self-contained steam humidifier. The component uses gas fired energy to convert ordinary tap water to steam which it then blows or injects into the supply air stream. Blower fan may not be required depending on how the dry steam is delivered into the supply air stream. The humidifier model includes local control of the humidifier unit to meet a humidity ratio setpoint on its air outlet node of the unit. A humidity set point manager is needed to put a setpoint on the outlet node but no other local controllers are needed. The humidifier either blows or injects dry steam to meet the humidity ratio setpoint requirement. If the Rated Gas Use Rate input field is not autosized, the thermal efficiency input specified will be ignored and ovverriden by a thermal efficiency value determined from user specified Rated Gas Use Rate, rated capacity (m3/s) and design conditions for sizing calculation.
+The gas fired steam humidifier is a component that represents a gas fired self-contained steam humidifier. The component uses gas fired energy to convert ordinary tap water to steam which it then blows or injects into the supply air stream. Blower fan may not be required depending on how the dry steam is delivered into the supply air stream. The humidifier model includes local control of the humidifier unit to meet a humidity ratio setpoint on its air outlet node of the unit. A humidity set point manager is needed to put a setpoint on the outlet node but no other local controllers are needed. The humidifier either blows or injects dry steam to meet the humidity ratio setpoint requirement. If the Rated Gas Use Rate input field is not autosized, the thermal efficiency input specified will be ignored and overridden by a thermal efficiency value determined from user specified Rated Gas Use Rate, rated capacity (m3/s) and design conditions for sizing calculation.
 
 \subsubsection{Inputs}\label{inputs-1-021}
 
@@ -185,19 +184,18 @@ This field is a key/choice field that tells which humidifier water inlet tempera
 An IDF example:
 
 \begin{lstlisting}
-
 Humidifier:Steam:Gas,
-  Main Gas Humidifier,!- Name
-  ALWAYS_ON,          !- Availability Schedule Name
-  4.00E-5,            !- Rated Capacity {m3/s}
-  104000,             !- Rated Gas Use Rate {W}
-  1.0,                !- Thermal Efficiency {-}
-  ,                   !- Thermal Efficiency Modifier Curve Name
-  0,                  !- Rated Fan Power {W}
-  0,                  !- Auxiliary Electric Power {W}
-  Mixed Air Node 1,   !- Air Inlet Node Name
-  Main Humidifier Outlet Node,  !- Air Outlet Node Name
-  ;                   !- Water Storage Tank Name
+  Main Gas Humidifier,        !- Name
+  ALWAYS_ON,                  !- Availability Schedule Name
+  4.00E-5,                    !- Rated Capacity {m3/s}
+  104000,                     !- Rated Gas Use Rate {W}
+  1.0,                        !- Thermal Efficiency {-}
+  ,                           !- Thermal Efficiency Modifier Curve Name
+  0,                          !- Rated Fan Power {W}
+  0,                          !- Auxiliary Electric Power {W}
+  Mixed Air Node 1,           !- Air Inlet Node Name
+  Main Humidifier Outlet Node,!- Air Outlet Node Name
+  ;                           !- Water Storage Tank Name
 \end{lstlisting}
 
 Steam Gas Humidifier Outputs
@@ -209,9 +207,11 @@ Steam Gas Humidifier Outputs
 \item
   HVAC,Sum,Humidifier Water Volume{[}m3{]}
 \item
-  HVAC,Average,Humidifier Gas Use Rate{[}W{]}
+  HVAC,Average,Humidifier NaturalGas Use Rate{[}W{]}
 \item
-  HVAC,Sum,Humidifier Gas Use Energy {[}J{]}
+  HVAC,Sum,Humidifier NaturalGas Use Energy {[}J{]}
+ \item
+  HVAC,Average,Humidifier NaturalGas Use Thermal Efficiency {[}{]}
 \item
   HVAC,Average,Humidifier Auxiliary Electricity Rate {[}W{]}
 \item
@@ -219,7 +219,7 @@ Steam Gas Humidifier Outputs
 \item
   HVAC,Meter,Humidifier:Water {[}m3{]}
 \item
-  HVAC,Meter,Humidifier:Gas {[}J{]}
+  HVAC,Meter,Humidifier:NaturalGas {[}J{]}
 \item
   HVAC,Meter,Humidifier:Electricity {[}J{]}
 \item
@@ -244,13 +244,17 @@ This field reports the water consumption rate of the steam humidifier in cubic m
 
 This output is the cubic meters of water consumed by the steam humidifier over the timestep being reported.
 
-\paragraph{Humidifier Gas Use Rate {[}W{]}}\label{humidifier-gas-use-rate-w}
+\paragraph{Humidifier NaturalGas Use Rate {[}W{]}}\label{humidifier-naturalgas-use-rate-w}
 
-This output is the gas use rate of the gas fired steam humidifier in Watts.
+This output is the natural gas use rate of the natural gas fired steam humidifier in Watts.
 
-\paragraph{Humidifier Gas Use Energy {[}J{]}}\label{humidifier-gas-use-energy-j}
+\paragraph{Humidifier NaturalGas Use Energy {[}J{]}}\label{humidifier-naturalgas-use-energy-j}
 
-This output is the gas consumption of the gas fired steam humidifier in Joules.
+This output is the natural gas consumption of the natural gas fired steam humidifier in Joules.
+
+\paragraph{Humidifier NaturalGas Use Thermal Efficiency {[}{]}}\label{humidifier-naturalgas-use-thermal-efficiency-j}
+
+This output is the thermal efficiency of the natural gas consumed by the natural gas fired steam humidifier.
 
 \paragraph{Humidifier Auxiliary Electricity Rate {[}W{]}}\label{humidifier-auxiliary-electric-power-w}
 
@@ -264,9 +268,9 @@ This is the auxiliary electricity consumption in Joules of the gas fired steam h
 
 This meter output contains the sum of the water consumed (in cubic meters of water during the report timestep) by all the steam humidifiers at the HVAC level in the simulation.
 
-\paragraph{Humidifier:Gas {[}J{]}}\label{humidifiergas-j}
+\paragraph{Humidifier:NaturalGas {[}J{]}}\label{humidifiernaturalgas-j}
 
-This meter output contains the sum of the gas consumed (in Joules during the report timestep) by all the steam humidifiers at the HVAC level in the simulation.
+This meter output contains the sum of the natural gas consumed (in Joules during the report timestep) by all the steam humidifiers at the HVAC level in the simulation.
 
 \paragraph{Humidifier Storage Tank Water Volume Flow Rate {[}m3/s{]}}\label{humidifier-storage-tank-water-volume-flow-rate-m3s-1}
 
@@ -338,7 +342,7 @@ Type of setpoint control. Options are
   \hyperref[setpointmanagermultizonehumiditymaximum]{SetpointManager:MultiZone:Humidity:Maximum}
 \end{itemize}
 
-This will also require the use of a \textbf{\hyperref[zonecontrolhumidistat]{ZoneControl:Humidistat}} object. If the dehumidifer is located in the outdoor air stream, it may also be necessary to use \textbf{\hyperref[setpointmanageroutdoorairpretreat]{SetpointManager:OutdoorAirPretreat}}.
+This will also require the use of a \textbf{\hyperref[zonecontrolhumidistat]{ZoneControl:Humidistat}} object. If the dehumidifier is located in the outdoor air stream, it may also be necessary to use \textbf{\hyperref[setpointmanageroutdoorairpretreat]{SetpointManager:OutdoorAirPretreat}}.
 
 \paragraph{Field: Leaving Maximum Humidity Ratio Setpoint}\label{field-leaving-maximum-humidity-ratio-setpoint}
 
@@ -510,35 +514,33 @@ This field is nominal power consumption per unit air flow rate. It is used to ca
 An example of this statement in an IDF is:
 
 \begin{lstlisting}
-
 Dehumidifier:Desiccant:NoFans,
-  Desiccant 1,                         !- Name
+  Desiccant 1,                !- Name
   FanAndCoilAvailSched,       !- Availability Schedule Name
-  Outside Air Inlet Node,   !- Process Air Inlet Node Name
-  Desiccant Process Outlet Node,   !- Process Air Outlet Node Name
-  Regen Coil Out Node,         !- Regeneration Air Inlet Node Name
-  Outside Air Inlet Node 2,!- Regeneration Fan Inlet Node Name
-  SystemNodeMaximumHumidityRatioSetpoint,   !- Control Type
-  0.007,                                     !- Leaving Maximum Humidity Ratio Setpoint {kgWater/kgDryAir}
-  1,                                             !- Nominal Process Air Flow Rate {m3/s}
-  2.5,                                         !- Nominal Process Air Velocity {m/s}
-  10,                                           !- Rotor Power {W}
-  Coil:Heating:Fuel,               !- Regeneration Coil Object Type
+  Outside Air Inlet Node,     !- Process Air Inlet Node Name
+  Desiccant Process Outlet Node,  !- Process Air Outlet Node Name
+  Regen Coil Out Node,        !- Regeneration Air Inlet Node Name
+  Outside Air Inlet Node 2,   !- Regeneration Fan Inlet Node Name
+  SystemNodeMaximumHumidityRatioSetpoint,  !- Control Type
+  0.007,                      !- Leaving Maximum Humidity Ratio Setpoint {kgWater/kgDryAir}
+  1,                          !- Nominal Process Air Flow Rate {m3/s}
+  2.5,                        !- Nominal Process Air Velocity {m/s}
+  10,                         !- Rotor Power {W}
+  Coil:Heating:Fuel,          !- Regeneration Coil Object Type
   Desiccant Regen Coil,       !- Regeneration Coil Name
-  Fan:SystemModel,           !- Regeneration Fan Object Type
-  Desiccant Regen Fan,         !- Regeneration Fan Name
-  UserCurves,                           !- Performance Model Type
-  Desiccant DryBulb fTW Curve, !- Leaving Dry-Bulb Function of Entering Dry-Bulb and Humidity Ratio
-  !                                                 Curve Name
-  Desiccant DryBulb fV Curve,   !- Leaving Dry-Bulb Function of Air Velocity Curve Name
-  Desiccant HumRat fTW Curve,   !- Leaving Humidity Ratio Function of Entering Dry-Bulb and Humidity Ratio Curve Name
-  Desiccant HumRat fV Curve,     !- Leaving Humidity Ratio Function of Air Velocity Curve Name
-  Desiccant RegenEnergy fTW Curve, !- Regeneration Energy Function of Entering Dry-Bulb and Humidity Ratio Curve Name
-  Desiccant RegenEnergy fV Curve,   !- Regeneration Energy Function of Air Velocity Curve Name
-  Desiccant RegenVel fTW Curve,       !- Regeneration Velocity Function of Entering Dry-Bulb and Humidity Ratio Curve Name
-  Desiccant RegenVel fV Curve,         !- Regeneration Velocity Function of Air Velocity Curve Name
-  121,                                         !- Nominal Regeneration Temperature {C}
-  ;                                  !- Nominal Power Per Unit Air Flow Rate {W/m3/s}
+  Fan:SystemModel,            !- Regeneration Fan Object Type
+  Desiccant Regen Fan,        !- Regeneration Fan Name
+  UserCurves,                 !- Performance Model Type
+  Desiccant DryBulb fTW Curve,!- Leaving Dry-Bulb Function of Entering Dry-Bulb and Humidity Ratio Curve Name
+  Desiccant DryBulb fV Curve, !- Leaving Dry-Bulb Function of Air Velocity Curve Name
+  Desiccant HumRat fTW Curve, !- Leaving Humidity Ratio Function of Entering Dry-Bulb and Humidity Ratio Curve Name
+  Desiccant HumRat fV Curve,  !- Leaving Humidity Ratio Function of Air Velocity Curve Name
+  Desiccant RegenEnergy fTW Curve,  !- Regeneration Energy Function of Entering Dry-Bulb and Humidity Ratio Curve Name
+  Desiccant RegenEnergy fV Curve,  !- Regeneration Energy Function of Air Velocity Curve Name
+  Desiccant RegenVel fTW Curve,  !- Regeneration Velocity Function of Entering Dry-Bulb and Humidity Ratio Curve Name
+  Desiccant RegenVel fV Curve,!- Regeneration Velocity Function of Air Velocity Curve Name
+  121,                        !- Nominal Regeneration Temperature {C}
+  ;                           !- Nominal Power Per Unit Air Flow Rate {W/m3/s}
 \end{lstlisting}
 
 \subsubsection{Outputs}\label{outputs-008}
@@ -755,26 +757,25 @@ This optional alpha field contains the name of the exhaust fan power modifier cu
 Following is an example input for this object:
 
 \begin{lstlisting}
-
 Dehumidifier:Desiccant:System,
-  Desiccant 1,                         !- Name
-  FanAvailSched,                     !- Availability Schedule Name
-  HeatExchanger:Desiccant:BalancedFlow,   !- Desiccant Heat Exchanger Object Type
-  Desiccant Heat Exchanger 1,   !- Desiccant Heat Exchanger Name
-  HX Process Outlet Node,   !- Sensor Node Name
-  Fan:SystemModel,           !- Regeneration Air Fan Object Type
-  Desiccant Regen Fan,         !- Regeneration Air Fan Name
-  DrawThrough,                         !- Regeneration Air Fan Placement
-  Coil:Heating:Fuel,               !- Regeneration Air Heater Object Type
+  Desiccant 1,                !- Name
+  FanAvailSched,              !- Availability Schedule Name
+  HeatExchanger:Desiccant:BalancedFlow,  !- Desiccant Heat Exchanger Object Type
+  Desiccant Heat Exchanger 1, !- Desiccant Heat Exchanger Name
+  HX Process Outlet Node,     !- Sensor Node Name
+  Fan:SystemModel,            !- Regeneration Air Fan Object Type
+  Desiccant Regen Fan,        !- Regeneration Air Fan Name
+  DrawThrough,                !- Regeneration Air Fan Placement
+  Coil:Heating:Fuel,          !- Regeneration Air Heater Object Type
   Desiccant Regen Coil,       !- Regeneration Air Heater Name
-  46.111111,                             !- Regeneration Inlet Air Setpoint Temperature {C}
-  Coil:Cooling:DX:SingleSpeed,   !- Companion Cooling Coil Object Type
-  Desiccant DXSystem Cooling Coil,   !- Companion Cooling Coil Name
-  Yes,                           !- Companion Cooling Coil Upstream of Dehumidifier Process Inlet
-  Yes,                                         !- Companion Coil Regeneration Air Heating
-  1.05,                                       !- Exhaust Fan Maximum Flow Rate {m3/s}
-  50,                                           !- Exhaust Fan Maximum Power {W}
-  EXHAUSTFANPLF;                     !- Exhaust Fan Power Curve Name
+  46.111111,                  !- Regeneration Inlet Air Setpoint Temperature {C}
+  Coil:Cooling:DX:SingleSpeed,!- Companion Cooling Coil Object Type
+  Desiccant DXSystem Cooling Coil,  !- Companion Cooling Coil Name
+  Yes,                        !- Companion Cooling Coil Upstream of Dehumidifier Process Inlet
+  Yes,                        !- Companion Coil Regeneration Air Heating
+  1.05,                       !- Exhaust Fan Maximum Flow Rate {m3/s}
+  50,                         !- Exhaust Fan Maximum Power {W}
+  EXHAUSTFANPLF;              !- Exhaust Fan Power Curve Name
 \end{lstlisting}
 
 \subsubsection{Outputs}\label{outputs-1-006}

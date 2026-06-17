@@ -1,7 +1,7 @@
-// EnergyPlus, Copyright (c) 1996-2023, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
-// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other
+// National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
 // contributors. All rights reserved.
 //
 // NOTICE: This Software was developed under funding from the U.S. Department of Energy and the
@@ -67,43 +67,44 @@ namespace ElectricBaseboardRadiator {
     {
         // Members
         std::string EquipName;
-        int EquipType;
+        int EquipType = 0;
         std::string Schedule;
         Array1D_string SurfaceName;
         Array1D_int SurfacePtr;
-        int ZonePtr;
-        int SchedPtr;
-        int TotSurfToDistrib;
-        Real64 NominalCapacity;
-        Real64 BaseboardEfficiency;
-        Real64 AirInletTemp;
-        Real64 AirInletHumRat;
-        Real64 AirOutletTemp;
-        Real64 ElecUseLoad;
-        Real64 ElecUseRate;
-        Real64 FracRadiant;
-        Real64 FracConvect;
-        Real64 FracDistribPerson;
-        Real64 TotPower;
-        Real64 Power;
-        Real64 ConvPower;
-        Real64 RadPower;
-        Real64 TotEnergy;
-        Real64 Energy;
-        Real64 ConvEnergy;
-        Real64 RadEnergy;
+        int ZonePtr = 0;
+        Sched::Schedule *availSched = nullptr; // Assuming availability schedule
+        int TotSurfToDistrib = 0;
+        Real64 NominalCapacity = 0.0;
+        Real64 BaseboardEfficiency = 0.0;
+        Real64 AirInletTemp = 0.0;
+        Real64 AirInletHumRat = 0.0;
+        Real64 AirOutletTemp = 0.0;
+        Real64 ElecUseLoad = 0.0;
+        Real64 ElecUseRate = 0.0;
+        Real64 FracRadiant = 0.0;
+        Real64 FracConvect = 0.0;
+        Real64 FracDistribPerson = 0.0;
+        Real64 TotPower = 0.0;
+        Real64 Power = 0.0;
+        Real64 ConvPower = 0.0;
+        Real64 RadPower = 0.0;
+        Real64 TotEnergy = 0.0;
+        Real64 Energy = 0.0;
+        Real64 ConvEnergy = 0.0;
+        Real64 RadEnergy = 0.0;
         Array1D<Real64> FracDistribToSurf;
-        int HeatingCapMethod;         // - Method for electric baseboard heating capacity scalable sizing calculation
-        Real64 ScaledHeatingCapacity; // - electric baseboard scaled maximum heating capacity {W} or scalable variable for sizing in {-}, or {W/m2}
-
-        // Default Constructor
-        ElecBaseboardParams()
-            : EquipType(0), ZonePtr(0), SchedPtr(0), TotSurfToDistrib(0), NominalCapacity(0.0), BaseboardEfficiency(0.0), AirInletTemp(0.0),
-              AirInletHumRat(0.0), AirOutletTemp(0.0), ElecUseLoad(0.0), ElecUseRate(0.0), FracRadiant(0.0), FracConvect(0.0), FracDistribPerson(0.0),
-              TotPower(0.0), Power(0.0), ConvPower(0.0), RadPower(0.0), TotEnergy(0.0), Energy(0.0), ConvEnergy(0.0), RadEnergy(0.0),
-              HeatingCapMethod(0), ScaledHeatingCapacity(0.0)
-        {
-        }
+        int HeatingCapMethod = 0;           // - Method for electric baseboard heating capacity scalable sizing calculation
+        Real64 ScaledHeatingCapacity = 0.0; // - scaled maximum heating capacity {W} or scalable variable for sizing in {-}, or {W/m2}
+        bool MySizeFlag = true;
+        bool MyEnvrnFlag = true;
+        bool CheckEquipName = true;
+        Real64 ZeroBBSourceSumHATsurf = 0.0; // used in baseboard energy balance
+        // Record keeping variables used to calculate QBBRadSrcAvg locally
+        Real64 QBBElecRadSource = 0.0;   // Need to keep the last value in case we are still iterating
+        Real64 QBBElecRadSrcAvg = 0.0;   // Need to keep the last value in case we are still iterating
+        Real64 LastSysTimeElapsed = 0.0; // Need to keep the last value in case we are still iterating
+        Real64 LastTimeStepSys = 0.0;    // Need to keep the last value in case we are still iterating
+        Real64 LastQBBElecRadSrc = 0.0;  // Need to keep the last value in case we are still iterating
     };
 
     struct ElecBaseboardNumericFieldData
@@ -155,35 +156,22 @@ struct ElectricBaseboardRadiatorData : BaseGlobalStruct
 
     // Object Data
     int NumElecBaseboards = 0;
-    Array1D<Real64> QBBElecRadSource;     // Need to keep the last value in case we are still iterating
-    Array1D<Real64> QBBElecRadSrcAvg;     // Need to keep the last value in case we are still iterating
-    Array1D<Real64> ZeroSourceSumHATsurf; // Equal to the SumHATsurf for all the walls in a zone with no source
-    // Record keeping variables used to calculate QBBRadSrcAvg locally
-    Array1D<Real64> LastQBBElecRadSrc;  // Need to keep the last value in case we are still iterating
-    Array1D<Real64> LastSysTimeElapsed; // Need to keep the last value in case we are still iterating
-    Array1D<Real64> LastTimeStepSys;    // Need to keep the last value in case we are still iterating
-    Array1D_bool MySizeFlag;
-    Array1D_bool CheckEquipName;
     Array1D<ElectricBaseboardRadiator::ElecBaseboardParams> ElecBaseboard;
     Array1D<ElectricBaseboardRadiator::ElecBaseboardNumericFieldData> ElecBaseboardNumericFields;
     bool GetInputFlag = true; // One time get input flag
-    bool MyOneTimeFlag = true;
 
-    Array1D_bool MyEnvrnFlag;
+    void init_constant_state([[maybe_unused]] EnergyPlusData &state) override
+    {
+    }
+
+    void init_state([[maybe_unused]] EnergyPlusData &state) override
+    {
+    }
+
     void clear_state() override
     {
-        this->MyEnvrnFlag.clear();
         this->NumElecBaseboards = 0;
         this->GetInputFlag = true;
-        this->MyOneTimeFlag = true;
-        this->QBBElecRadSource.clear();     // Need to keep the last value in case we are still iterating
-        this->QBBElecRadSrcAvg.clear();     // Need to keep the last value in case we are still iterating
-        this->ZeroSourceSumHATsurf.clear(); // Equal to the SumHATsurf for all the walls in a zone with no source
-        this->LastQBBElecRadSrc.clear();    // Need to keep the last value in case we are still iterating
-        this->LastSysTimeElapsed.clear();   // Need to keep the last value in case we are still iterating
-        this->LastTimeStepSys.clear();      // Need to keep the last value in case we are still iterating
-        this->MySizeFlag.clear();
-        this->CheckEquipName.clear();
         this->ElecBaseboard.clear();
         this->ElecBaseboardNumericFields.clear();
     }

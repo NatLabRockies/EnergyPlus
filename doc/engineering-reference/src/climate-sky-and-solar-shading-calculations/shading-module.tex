@@ -337,7 +337,7 @@ x'_2 = x_0 + t_2 \Delta x
 y'_2 = y_0 + t_2 \Delta y
 \end{equation}
 
-The Slater-Barsky algorithm uses space subdivision to reduce the number of pre-emptive calculations. We break the plane into 9 parts, where region (4) is the clipping region.
+The Slater-Barsky algorithm uses space subdivision to reduce the number of preemptive calculations. We break the plane into 9 parts, where region (4) is the clipping region.
 
 
 | 6 | 7 | 8 | \\
@@ -406,31 +406,34 @@ The area is positive if the vertices are counter-clockwise and negative if they 
 \caption{Complex Overlapping Condition \protect \label{fig:complex-overlapping-condition}}
 \end{figure}
 
-If two shadows overlap the receiving surface, they may also overlap each other as in Figure~\ref{fig:multiple-shadow-overlaps}. The vertices of this overlap can be computed.~ The areas of all overlaps can be computed.~ The total sunlit area can be expressed as the sum of all polygon areas given a proper sign on each of the areas.
+If two shadows overlap the receiving surface, they may also overlap each other as in Figure~\ref{fig:multiple-shadow-overlaps}. The vertices of this overlap can be computed, and the areas of all overlaps can be computed. For opaque shadows, the total sunlit area can be expressed as the sum of all polygon areas using the sign convention shown in Table \ref{table:surface-area-characteristic-convention}:
 
-The following convention was adopted:
+\begin{equation}
+SunlitArea = {\sum\limits_{i = 1}^n {A_i}}
+\end{equation}
 
-% table 24
-\begin{longtable}[c]{@{}ll@{}}
-\caption{Surface / Area Characteristic / Convention \label{table:surface-area-characteristic-convention}} \tabularnewline
+Each shadow's area is subtracted from the receiving surface and so on through multiple overlaps where the sign of the overlap area is the product of the signs of the overlapping areas. For the shadows in Figure~\ref{fig:multiple-shadow-overlaps}, start with the receiving surface area A, subtract shadow area B, then subtract shadow area C. Because shadows B and C overlap, the overlap area D has been subtracted twice, so add back area D to get the final sunlit area on the receiving surface.
+
+
+\begin{longtable}[c]{>{\raggedright}p{2.9in}p{1.5in}p{1.59in}}
+\caption{Overlapping Shadow Surface Area Convention \label{table:surface-area-characteristic-convention}} \tabularnewline
 \toprule
-Surface Characteristic & Area Convention \tabularnewline
+Surface Characteristic & Area Convention & Sunlit Area \tabularnewline
 \midrule
 \endfirsthead
 
-\caption[]{Surface / Area Characteristic / Convention} \tabularnewline
+\caption[]{Overlapping Shadow Surface Area Convention} \tabularnewline
 \toprule
-Surface Characteristic & Area Convention \tabularnewline
+Surface Characteristic & Area Convention & Sunlit Area \tabularnewline
 \midrule
 \endhead
 
-receiving surface & positive (A) \tabularnewline
-overlap between shadow and receiving & negative (B  \&  C) \tabularnewline
-overlap between two shadows & positive (D) \tabularnewline
+receiving surface & positive A & A \tabularnewline
+overlap between shadow and receiving & negative B & A-B \tabularnewline
+overlap between shadow and receiving & negative C & A-B-C \tabularnewline
+overlap between two shadows & positive D & A-B-C+D \tabularnewline
 \bottomrule
 \end{longtable}
-
-and so on through multiple overlaps where the sign of the overlap area is the product of the signs of the overlapping areas.
 
 \begin{figure}[hbtp] % fig 47
 \centering
@@ -438,7 +441,58 @@ and so on through multiple overlaps where the sign of the overlap area is the pr
 \caption{Multiple Shadow Overlaps \protect \label{fig:multiple-shadow-overlaps}}
 \end{figure}
 
-Partially transparent shadowing surfaces can also be modeled by giving a transparency ($\tau$) to every shadowing polygon. Let $\tau$ of the receiving polygon be one. Then the $\tau$ of every overlap of polygons i and j is the product of $\tau$\(_{i}\)and $\tau$\(_{j}\). The shaded area is then computed by summing A\(_{i}\)*(1 - $\tau$\(_{i}\)) for all overlap polygons.
+Partially transparent shadowing surfaces can also be modeled by giving a transparency ($\tau$) to every shadowing polygon. The sunlit area is computed by:
+
+\begin{equation}
+SunlitArea = A_1 + {\sum\limits_{i = 2}^n {A_i}*(1-\tau_i)}
+\end{equation}
+
+The actual $\tau$ of overlapping polygons i and j is the product of $\tau_i$ and $\tau_j$. For example, if a wall is fully shaded by two partially transparent shades, one with a transmittance of 0.8 and one with a transmittance of 0.5, the resulting sunlit fraction would be $0.8 * 0.5 = 0.4$. Because each shadow is first applied with its own transmittance, the ``transmittance'' for the overlap correction ($\tau_k$) in the sunlit area summation is derived from the individual surface transmittance values:
+
+\begin{equation}
+\tau_k = (\tau_{i} + \tau_{j}) - (\tau_{i} * \tau_{j})
+\end{equation}
+
+where $\tau_k$ is the correction ``transmittance''  for the shadow overlap area (D in Figure~\ref{fig:multiple-shadow-overlaps}).
+
+For example, using the overlapping shadows in Figure~\ref{fig:multiple-shadow-overlaps}, the sunlit area can be calculated two ways as shown in Table~\ref{table:sunlit-area-calculation-overlapping-shadows}. Method 1 avoids any overlaps by calculating adjusted areas. Method 2 uses the EnergyPlus summation approach and shows the transmittance correction calculation for the overlap area to arrive at the same result. Stepping through Method 2: start with the full surface area A, subtract the shaded area $B*(1-\tau_b)$, subtract the shaded area $C*(1-\tau_c)$. At this point, the overlapping area D has been subtracted twice, once using $\tau_b$ and once using $\tau_c$. To correct for this, area D is added back in with the adjusted ``transmittance'' using the equation shown above for $\tau_k$. Once the sunlit area is known for each surface, the sunlit fraction is calculated, which is $13.56/20=0.678$ for this example.
+
+\begin{longtable}[c]{>{\raggedright}p{1.2in}p{1.5in}p{2.0in}p{2.0in}}
+\caption{Sunlit Area Calculations with Overlapping Partially Transmitting Shadows\label{table:sunlit-area-calculation-overlapping-shadows}} \tabularnewline
+\toprule
+Region & Area & Transmittance & Sunlit Area \tabularnewline
+\midrule
+\endfirsthead
+
+\caption[]{Sunlit Area Calculations with Overlapping Partially Transmitting Shadows} \tabularnewline
+\toprule
+Region & Area & Transmittance & Sunlit Area \tabularnewline
+\midrule
+\endhead
+
+Assumptions: \tabularnewline
+A & 20 & 1.0 \tabularnewline
+B & 10 & 0.8 \tabularnewline
+C & 8 & 0.4 \tabularnewline
+D & 3 &  \tabularnewline
+\midrule
+Method 1 & Adjusted Areas:\tabularnewline
+$A-B-C+D$ & $20-10-8+3 = 5$ & $1.0$               & $5*1.0 = 5.00$ \tabularnewline
+$B-D$     & $10-3=7$        & $0.8$               & $7*0.8 = 5.60$ \tabularnewline
+$C-D$     & $8-3=5$         & $0.4$               & $5*0.4 = 2.00$ \tabularnewline
+$D$       & $3$             & $0.8 * 0.4 = 0.32$  & $3*0.32 = 0.96$ \tabularnewline
+Total     & $20$            &                     & $13.56$ \tabularnewline
+\midrule
+Method 2 & Full Areas:\tabularnewline
+$A$   & $20$         & n/a                             & $20.00$ \tabularnewline
+$B$   & $-10$        & $0.8$                           & $-10*(1-0.8) = -2.00$ \tabularnewline
+$C$   & $-8$         & $0.4$                           & $-8*(1-0.4) = -4.80$ \tabularnewline
+$D$   & $3$          & $(0.8+0.4)-(0.8 * 0.4) = 0.88$  & $+3*(1-0.88) = 0.36$ \tabularnewline
+Total &              &                                 & $13.56$ \tabularnewline
+\bottomrule
+\end{longtable}
+
+
 
 It is easy to determine the sunlit area of a window once all the shadow and overlap vertices on the wall have been computed. Consider wall 2 of Figure~\ref{fig:overall-shadowing-scheme-depiction}. First, the wall is considered a simple rectangle and the window on it is ignored. The shadow overlapping is performed and the sunlit portion of the gross wall area is computed. Then the window rectangle is overlapped with the shadow to determine its sunlit area. The sunlit area of the window is subtracted from the gross wall sunlit area to determine the net wall sunlit area. During this calculation it is not necessary to recompute the shadows, because they were precisely determined on the wall.
 
@@ -538,7 +592,7 @@ This case is the same interior distribution as the preceding option but uses ext
 
 \subsection{Details of the Interior Solar Distribution Calculation}\label{details-of-the-interior-solar-distribution-calculation}
 
-EnergyPlus calculates the distribution of short-wave radiation in the interior of each thermal zone. This radiation consists of beam solar radiation, diffuse solar radiation, and short-wave radiation from electric lights. The program determines the amount of this radiation that is (1) absorbed on the inside face of opaque surfaces, (2) absorbed in the glass and shading device layers of the zone's exterior and interior windows, (3) transmitted through the zone's interior windows to adjacent zones, and (4) transmitted back out of the exterior windows. The effects of movable shading devices on the exterior windows are taken into account; \emph{the program does not allow shading devices on interior windows}. Most of this calculation is done in subroutine CalcInteriorSolarDistribution in the SolarShading module. EnergyPlus will use either Polygon Clipping or Pixel Counting--depending on the method of shading algorithm selected by the user--to determine interior solar distibution if full interior solar distribution is requested.
+EnergyPlus calculates the distribution of short-wave radiation in the interior of each thermal zone. This radiation consists of beam solar radiation, diffuse solar radiation, and short-wave radiation from electric lights. The program determines the amount of this radiation that is (1) absorbed on the inside face of opaque surfaces, (2) absorbed in the glass and shading device layers of the zone's exterior and interior windows, (3) transmitted through the zone's interior windows to adjacent zones, and (4) transmitted back out of the exterior windows. The effects of movable shading devices on the exterior windows are taken into account; \emph{the program does not allow shading devices on interior windows}. Most of this calculation is done in subroutine CalcInteriorSolarDistribution in the SolarShading module. EnergyPlus will use either Polygon Clipping or Pixel Counting--depending on the method of shading algorithm selected by the user--to determine interior solar distribution if full interior solar distribution is requested.
 
 \subsubsection{Initial Distribution of Diffuse Solar Transmitted through Exterior and Interior Windows}\label{initial-distribution-of-diffuse-solar-transmitted-through-exterior-and-interior-windows}
 

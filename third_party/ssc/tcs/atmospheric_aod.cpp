@@ -496,7 +496,7 @@ public:
 		   of the Brighter Planets," The Astronomical Journal, vol. 72, 
 		   pp. 945-950, 1967.
 		   [3] Fritz Kasten and Andrew Young. "Revised optical air mass tables and
-		   approximation formula". Applied Optics 28:4735–4738
+		   approximation formula". Applied Optics 28:4735â€“4738
 		   [4] C. Gueymard, "Critical analysis and performance assessment of 
 		   clear sky solar irradiance models using theoretical and measured data,"
 		   Solar Energy, vol. 51, pp. 121-138, 1993.

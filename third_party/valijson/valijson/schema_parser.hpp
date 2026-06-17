@@ -1,19 +1,18 @@
 #pragma once
 
-#include <stdexcept>
+#include <functional>
 #include <iostream>
 #include <vector>
-#include <memory>
-#include <functional>
 
-#include <valijson/adapters/adapter.hpp>
 #include <valijson/constraints/concrete_constraints.hpp>
+#include <valijson/internal/adapter.hpp>
 #include <valijson/internal/debug.hpp>
 #include <valijson/internal/json_pointer.hpp>
 #include <valijson/internal/json_reference.hpp>
 #include <valijson/internal/uri.hpp>
 #include <valijson/constraint_builder.hpp>
 #include <valijson/schema.hpp>
+#include <valijson/schema_cache.hpp>
 #include <valijson/exceptions.hpp>
 
 namespace valijson {
@@ -71,7 +70,7 @@ public:
     };
 
     /**
-     * @brief  Add a custom contraint to this SchemaParser
+     * @brief  Add a custom constraint to this SchemaParser
 
      * @param  key      name that will be used to identify relevant constraints
      *                  while parsing a schema document
@@ -109,8 +108,8 @@ public:
     void populateSchema(
         const AdapterType &node,
         Schema &schema,
-        typename FunctionPtrs<AdapterType>::FetchDoc fetchDoc = nullptr ,
-        typename FunctionPtrs<AdapterType>::FreeDoc freeDoc = nullptr )
+        typename FunctionPtrs<AdapterType>::FetchDoc fetchDoc = nullptr,
+        typename FunctionPtrs<AdapterType>::FreeDoc freeDoc = nullptr)
     {
         if ((fetchDoc == nullptr ) ^ (freeDoc == nullptr)) {
             throwRuntimeError("Remote document fetching can't be enabled without both fetch and free functions");
@@ -148,8 +147,6 @@ private:
         typedef std::map<std::string, const DocumentType*> Type;
     };
 
-    typedef std::map<std::string, const Subschema *> SchemaCache;
-
     /**
      * @brief  Free memory used by fetched documents
      *
@@ -171,21 +168,21 @@ private:
     }
 
     /**
-     * @brief  Find the absolute URI for a document, within a resolution scope
+     * @brief  Find the complete URI for a document, within a resolution scope
      *
      * This function captures five different cases that can occur when
      * attempting to resolve a document URI within a particular resolution
      * scope:
      *
-     *  - resolution scope not present, but absolute document URI is
+     *  (1) resolution scope not present, but URN or absolute document URI is
      *       => document URI as-is
-     *  - resolution scope not present, and document URI is relative or absent
-     *       => no result
-     *  - resolution scope is present, and document URI is a relative path
+     *  (2) resolution scope not present, and document URI is relative or absent
+     *       => document URI, if present, otherwise no result
+     *  (3) resolution scope is present, and document URI is a relative path
      *       => resolve document URI relative to resolution scope
-     *  - resolution scope is present, and document URI is absolute
+     *  (4) resolution scope is present, and document URI is absolute
      *       => document URI as-is
-     *  - resolution scope is present, but document URI is not
+     *  (5) resolution scope is present, but document URI is not
      *       => resolution scope as-is
      *
      * This function assumes that the resolution scope is absolute.
@@ -194,24 +191,39 @@ private:
      * document URI should be used to replace the path, query and fragment
      * portions of URI provided by the resolution scope.
      */
-    virtual opt::optional<std::string> findAbsoluteDocumentUri(
+    virtual opt::optional<std::string> resolveDocumentUri(
             const opt::optional<std::string>& resolutionScope,
             const opt::optional<std::string>& documentUri)
     {
         if (resolutionScope) {
             if (documentUri) {
-                if (internal::uri::isUriAbsolute(*documentUri)) {
+                if (internal::uri::isUriAbsolute(*documentUri) || internal::uri::isUrn(*documentUri)) {
+                    // (4) resolution scope is present, and document URI is absolute
+                    //      => document URI as-is
                     return *documentUri;
                 } else {
+                    // (3) resolution scope is present, and document URI is a relative path
+                    //      => resolve document URI relative to resolution scope
                     return internal::uri::resolveRelativeUri(*resolutionScope, *documentUri);
                 }
             } else {
+                // (5) resolution scope is present, but document URI is not
+                //      => resolution scope as-is
                 return *resolutionScope;
             }
         } else if (documentUri && internal::uri::isUriAbsolute(*documentUri)) {
+            // (1a) resolution scope not present, but absolute document URI is
+            //      => document URI as-is
+            return *documentUri;
+        } else if (documentUri && internal::uri::isUrn(*documentUri)) {
+            // (1b) resolution scope not present, but URN is
+            //       => document URI as-is
             return *documentUri;
         } else {
-            return opt::optional<std::string>();
+            // (2) resolution scope not present, and document URI is relative or absent
+            //      => document URI, if present, otherwise no result
+            // documentUri is already std::optional
+            return documentUri;
         }
     }
 
@@ -323,24 +335,24 @@ private:
      * those $ref nodes in the schema cache. An entry will be added to the
      * schema cache for each node visited on the path to the concrete node.
      *
-     * @param  rootSchema    The Schema instance, and root subschema, through
-     *                       which other subschemas can be created and
-     *                       modified
-     * @param  rootNode      Reference to the node from which JSON References
-     *                       will be resolved when they refer to the current
-     *                       document
-     * @param  node          Reference to the node to parse
-     * @param  currentScope  URI for current resolution scope
-     * @param  nodePath      JSON Pointer representing path to current node
-     * @param  fetchDoc      Function to fetch remote JSON documents (optional)
-     * @param  parentSchema  Optional pointer to the parent schema, used to
-     *                       support required keyword in Draft 3
-     * @param  ownName       Optional pointer to a node name, used to support
-     *                       the 'required' keyword in Draft 3
-     * @param  docCache      Cache of resolved and fetched remote documents
-     * @param  schemaCache   Cache of populated schemas
-     * @param  newCacheKeys  A list of keys that should be added to the cache
-     *                       when recursion terminates
+     * @param  rootSchema      The Schema instance, and root subschema, through
+     *                         which other subschemas can be created and
+     *                         modified
+     * @param  rootNode        Reference to the node from which JSON References
+     *                         will be resolved when they refer to the current
+     *                         document
+     * @param  node            Reference to the node to parse
+     * @param  currentScope    URI for current resolution scope
+     * @param  nodePath        JSON Pointer representing path to current node
+     * @param  fetchDoc        Function to fetch remote JSON documents (optional)
+     * @param  parentSubschema Optional pointer to the parent schema, used to
+     *                         support required keyword in Draft 3
+     * @param  ownName         Optional pointer to a node name, used to support
+     *                         the 'required' keyword in Draft 3
+     * @param  docCache        Cache of resolved and fetched remote documents
+     * @param  schemaCache     Cache of populated schemas
+     * @param  newCacheKeys    A list of keys that should be added to the cache
+     *                         when recursion terminates
      */
     template<typename AdapterType>
     const Subschema * makeOrReuseSchema(
@@ -375,7 +387,7 @@ private:
             // visited before arriving at the current node
             updateSchemaCache(schemaCache, newCacheKeys, subschema);
 
-            // Schema cache did not contain a pre-existing schema corresponding
+            // Schema cache did not contain a preexisting schema corresponding
             // to the current node, so the schema that was returned will need
             // to be populated
             if (!cachedPtr) {
@@ -401,7 +413,7 @@ private:
         // scope. An absolute document URI will take precedence when
         // present, otherwise we need to resolve the URI relative to
         // the current resolution scope
-        const opt::optional<std::string> actualDocumentUri = findAbsoluteDocumentUri(currentScope, documentUri);
+        const opt::optional<std::string> actualDocumentUri = resolveDocumentUri(currentScope, documentUri);
 
         // Construct a key to search the schema cache for an existing schema
         const std::string queryKey = actualDocumentUri ? (*actualDocumentUri + actualJsonPointer) : actualJsonPointer;
@@ -463,6 +475,10 @@ private:
 
         }
 
+        if (std::find(newCacheKeys.begin(), newCacheKeys.end(), queryKey) != newCacheKeys.end()) {
+            throwRuntimeError("found cycle while resolving JSON reference");
+        }
+
         // JSON References in nested schema will be resolved relative to the
         // current document
         const AdapterType &referencedAdapter =
@@ -489,22 +505,22 @@ private:
      * a concrete node, an entry will be added to the schema cache for each of
      * the nodes in that path.
      *
-     * @param  rootSchema    The Schema instance, and root subschema, through
-     *                       which other subschemas can be created and
-     *                       modified
-     * @param  rootNode      Reference to the node from which JSON References
-     *                       will be resolved when they refer to the current
-     *                       document
-     * @param  node          Reference to the node to parse
-     * @param  currentScope  URI for current resolution scope
-     * @param  nodePath      JSON Pointer representing path to current node
-     * @param  fetchDoc      Function to fetch remote JSON documents (optional)
-     * @param  parentSchema  Optional pointer to the parent schema, used to
-     *                       support required keyword in Draft 3
-     * @param  ownName       Optional pointer to a node name, used to support
-     *                       the 'required' keyword in Draft 3
-     * @param  docCache      Cache of resolved and fetched remote documents
-     * @param  schemaCache   Cache of populated schemas
+     * @param  rootSchema      The Schema instance, and root subschema, through
+     *                         which other subschemas can be created and
+     *                         modified
+     * @param  rootNode        Reference to the node from which JSON References
+     *                         will be resolved when they refer to the current
+     *                         document
+     * @param  node            Reference to the node to parse
+     * @param  currentScope    URI for current resolution scope
+     * @param  nodePath        JSON Pointer representing path to current node
+     * @param  fetchDoc        Function to fetch remote JSON documents (optional)
+     * @param  parentSubschema Optional pointer to the parent schema, used to
+     *                         support required keyword in Draft 3
+     * @param  ownName         Optional pointer to a node name, used to support
+     *                         the 'required' keyword in Draft 3
+     * @param  docCache        Cache of resolved and fetched remote documents
+     * @param  schemaCache     Cache of populated schemas
      */
     template<typename AdapterType>
     const Subschema * makeOrReuseSchema(
@@ -541,7 +557,7 @@ private:
      *                          will be resolved when they refer to the current
      *                          document
      * @param  node             Reference to node to parse
-     * @param  schema           Reference to Schema to populate
+     * @param  subschema        Reference to Schema to populate
      * @param  currentScope     URI for current resolution scope
      * @param  nodePath         JSON Pointer representing path to current node
      * @param  fetchDoc         Optional function to fetch remote JSON documents
@@ -600,13 +616,21 @@ private:
         if ((itr = object.find("id")) != object.end() && itr->second.maybeString()) {
             const std::string id = itr->second.asString();
             rootSchema.setSubschemaId(&subschema, itr->second.asString());
-            if (!currentScope || internal::uri::isUriAbsolute(id)) {
+            if (!currentScope || internal::uri::isUriAbsolute(id) || internal::uri::isUrn(id)) {
                 updatedScope = id;
             } else {
                 updatedScope = internal::uri::resolveRelativeUri(*currentScope, id);
             }
         } else {
             updatedScope = currentScope;
+        }
+
+        // Add the type constraint first to be the first one to check because other constraints may rely on it
+        if ((itr = object.find("type")) != object.end()) {
+            rootSchema.addConstraintToSubschema(
+                    makeTypeConstraint(rootSchema, rootNode, itr->second, updatedScope, nodePath + "/type", fetchDoc,
+                            docCache, schemaCache),
+                    &subschema);
         }
 
         if ((itr = object.find("allOf")) != object.end()) {
@@ -677,6 +701,10 @@ private:
 
         if ((itr = object.find("enum")) != object.end()) {
             rootSchema.addConstraintToSubschema(makeEnumConstraint(itr->second), &subschema);
+        }
+
+        if ((itr = object.find("format")) != object.end()) {
+            rootSchema.addConstraintToSubschema(makeFormatConstraint(itr->second), &subschema);
         }
 
         {
@@ -906,13 +934,6 @@ private:
             }
         }
 
-        if ((itr = object.find("type")) != object.end()) {
-            rootSchema.addConstraintToSubschema(
-                    makeTypeConstraint(rootSchema, rootNode, itr->second, updatedScope, nodePath + "/type", fetchDoc,
-                            docCache, schemaCache),
-                    &subschema);
-        }
-
         if ((itr = object.find("uniqueItems")) != object.end()) {
             opt::optional<constraints::UniqueItemsConstraint> constraint = makeUniqueItemsConstraint(itr->second);
             if (constraint) {
@@ -993,7 +1014,7 @@ private:
         const std::string actualJsonPointer = sanitiseJsonPointer(
                 internal::json_reference::getJsonReferencePointer(jsonRef));
 
-        if (documentUri && internal::uri::isUriAbsolute(*documentUri)) {
+        if (documentUri && (internal::uri::isUriAbsolute(*documentUri) || internal::uri::isUrn(*documentUri))) {
             // Resolve reference against remote document
             if (!fetchDoc) {
                 throwRuntimeError("Fetching of remote JSON References not enabled.");
@@ -1020,13 +1041,14 @@ private:
             resolveThenPopulateSchema(rootSchema, newRootNode, referencedAdapter, subschema, {}, actualJsonPointer,
                     fetchDoc, parentSchema, ownName, docCache, schemaCache);
 
-        } else {
+        } else if (!actualJsonPointer.empty()) {
             const AdapterType &referencedAdapter =
                     internal::json_pointer::resolveJsonPointer(rootNode, actualJsonPointer);
 
-            // TODO: Need to detect degenerate circular references
             resolveThenPopulateSchema(rootSchema, rootNode, referencedAdapter, subschema, {}, actualJsonPointer,
                     fetchDoc, parentSchema, ownName, docCache, schemaCache);
+        } else {
+            throwRuntimeError("Cannot resolve reference \"" + jsonRef + "\".");
         }
     }
 
@@ -1153,7 +1175,7 @@ private:
      *                               a schema that will be used when the conditional
      *                               evaluates to false.
      * @param   currentScope         URI for current resolution scope
-     * @param   containsPath         JSON Pointer representing the path to
+     * @param   nodePath             JSON Pointer representing the path to
      *                               the 'contains' node
      * @param   fetchDoc             Function to fetch remote JSON documents
      *                               (optional)
@@ -1285,11 +1307,11 @@ private:
      * When parsing a Draft 3 schema, in addition to the formats above, the
      * following format can be used:
      *  - a string that names a single property that must be present if the
-     *    dependent property is presnet
+     *    dependent property is present
      *
      * Multiple methods can be used in the same dependency constraint.
      *
-     * If the format of any part of the the dependency node does not match one
+     * If the format of any part of the dependency node does not match one
      * of these formats, an exception will be thrown.
      *
      * @param   rootSchema    The Schema instance, and root subschema, through
@@ -1407,6 +1429,29 @@ private:
     }
 
     /**
+     * @brief   Make a new FormatConstraint object
+     *
+     * @param   node  JSON node containing the configuration for this constraint
+     *
+     * @return  pointer to a new FormatConstraint that belongs to the caller
+     */
+    template<typename AdapterType>
+    constraints::FormatConstraint makeFormatConstraint(
+        const AdapterType &node)
+    {
+        if (node.isString()) {
+            const std::string value = node.asString();
+            if (!value.empty()) {
+                constraints::FormatConstraint constraint;
+                constraint.setFormat(value);
+                return constraint;
+            }
+        }
+
+        throwRuntimeError("Expected a string value for 'format' constraint.");
+    }
+
+    /**
      * @brief   Make a new ItemsConstraint object.
      *
      * @param   rootSchema           The Schema instance, and root subschema,
@@ -1450,7 +1495,7 @@ private:
     {
         constraints::LinearItemsConstraint constraint;
 
-        // Construct a Schema object for the the additionalItems constraint,
+        // Construct a Schema object for the additionalItems constraint,
         // if the additionalItems property is present
         if (additionalItems) {
             if (additionalItems->maybeBool()) {
@@ -1521,14 +1566,9 @@ private:
      * @param   items                Optional pointer to a JSON node containing
      *                               an object mapping property names to
      *                               schemas.
-     * @param   additionalItems      Optional pointer to a JSON node containing
-     *                               an additional properties schema or a
-     *                               boolean value.
      * @param   currentScope         URI for current resolution scope
      * @param   itemsPath            JSON Pointer representing the path to
      *                               the 'items' node
-     * @param   additionalItemsPath  JSON Pointer representing the path to
-     *                               the 'additionalItems' node
      * @param   fetchDoc             Function to fetch remote JSON documents
      *                               (optional)
      * @param   docCache             Cache of resolved and fetched remote
@@ -1580,13 +1620,6 @@ private:
     /**
      * @brief   Make a new MaximumConstraint object (draft 3 and 4).
      *
-     * @param   rootSchema        The Schema instance, and root subschema,
-     *                            through which other subschemas can be
-     *                            created and modified
-     * @param   rootNode          Reference to the node from which JSON
-     *                            References will be resolved when they refer
-     *                            to the current document; used for recursive
-     *                            parsing of schemas
      * @param   node              JSON node containing the maximum value.
      * @param   exclusiveMaximum  Optional pointer to a JSON boolean value that
      *                            indicates whether maximum value is excluded
@@ -1622,9 +1655,6 @@ private:
      *
      * @param   node       JSON node containing an integer, representing the maximum value.
      *
-     * @param   exclusive  Optional pointer to a JSON boolean value that indicates whether the
-     *                     maximum value is excluded from the range of permitted values.
-     *
      * @return  pointer to a new Maximum that belongs to the caller
      */
     template<typename AdapterType>
@@ -1644,7 +1674,7 @@ private:
      * @brief   Make a new MaxItemsConstraint object.
      *
      * @param   node  JSON node containing an integer value representing the
-     *                maximum number of items that may be contaned by an array.
+     *                maximum number of items that may be contained by an array.
      *
      * @return  pointer to a new MaxItemsConstraint that belongs to the caller.
      */
@@ -1720,7 +1750,7 @@ private:
      * @param  node              JSON node containing an integer, representing
      *                           the minimum value.
      *
-     * @param  exclusiveMaximum  Optional pointer to a JSON boolean value that
+     * @param  exclusiveMinimum  Optional pointer to a JSON boolean value that
      *                           indicates whether the minimum value is
      *                           excluded from the range of permitted values.
      *
@@ -1753,9 +1783,6 @@ private:
      * @brief   Make a new MinimumConstraint object that is always exclusive (draft 7).
      *
      * @param   node       JSON node containing an integer, representing the minimum value.
-     *
-     * @param   exclusive  Optional pointer to a JSON boolean value that indicates whether the
-     *                     minimum value is excluded from the range of permitted values.
      *
      * @return  pointer to a new MinimumConstraint that belongs to the caller
      */
@@ -2276,7 +2303,7 @@ private:
 private:
 
     /// Version of JSON Schema that should be expected when parsing
-    const Version m_version;
+    Version m_version;
 };
 
 }  // namespace valijson

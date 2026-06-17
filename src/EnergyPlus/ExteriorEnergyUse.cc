@@ -1,7 +1,7 @@
-// EnergyPlus, Copyright (c) 1996-2023, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
-// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other
+// National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
 // contributors. All rights reserved.
 //
 // NOTICE: This Software was developed under funding from the U.S. Department of Energy and the
@@ -48,7 +48,7 @@
 // EnergyPlus Headers
 #include <EnergyPlus/Data/EnergyPlusData.hh>
 #include <EnergyPlus/DataEnvironment.hh>
-#include <EnergyPlus/DataIPShortCuts.hh>
+#include <EnergyPlus/DataGlobalConstants.hh>
 #include <EnergyPlus/EMSManager.hh>
 #include <EnergyPlus/ExteriorEnergyUse.hh>
 #include <EnergyPlus/GlobalNames.hh>
@@ -106,33 +106,20 @@ namespace ExteriorEnergyUse {
         // This subroutine gets the input for the Exterior Lights and Equipment.
 
         // Using/Aliasing
-
-        using ScheduleManager::GetScheduleIndex;
-        using ScheduleManager::GetScheduleMaxValue;
-        using ScheduleManager::GetScheduleMinValue;
-        using ScheduleManager::GetScheduleName;
         using namespace OutputReportPredefined;
         // SUBROUTINE PARAMETER DEFINITIONS:
-        auto constexpr RoutineName("GetExteriorEnergyUseInput: ");
+        std::string_view constexpr routineName = "GetExteriorEnergyUseInput";
 
         // SUBROUTINE LOCAL VARIABLE DECLARATIONS:
-        int Item;                // Item to be "gotten"
-        int NumAlphas;           // Number of Alphas for each GetObjectItem call
-        int NumNumbers;          // Number of Numbers for each GetObjectItem call
-        int IOStatus;            // Used in GetObjectItem
         bool ErrorsFound(false); // Set to true if errors in input, fatal at end of routine
-        int NumFuelEq;           // Temporary -- number of ExteriorFuelEquipment statements
-        int NumWtrEq;            // Temporary -- number of ExteriorWaterEquipment statements
-        std::string TypeString;  // Fuel Type string (returned from Validation)
         std::string EndUseSubcategoryName;
-        Real64 SchMax; // Max value of schedule for item
-        Real64 SchMin; // Min value of schedule for item
+        auto *inputProcessor = state.dataInputProcessing->inputProcessor.get();
 
         state.dataExteriorEnergyUse->NumExteriorLights = state.dataInputProcessing->inputProcessor->getNumObjectsFound(state, "Exterior:Lights");
         state.dataExteriorEnergyUse->ExteriorLights.allocate(state.dataExteriorEnergyUse->NumExteriorLights);
 
-        NumFuelEq = state.dataInputProcessing->inputProcessor->getNumObjectsFound(state, "Exterior:FuelEquipment");
-        NumWtrEq = state.dataInputProcessing->inputProcessor->getNumObjectsFound(state, "Exterior:WaterEquipment");
+        int NumFuelEq = state.dataInputProcessing->inputProcessor->getNumObjectsFound(state, "Exterior:FuelEquipment");
+        int NumWtrEq = state.dataInputProcessing->inputProcessor->getNumObjectsFound(state, "Exterior:WaterEquipment");
         state.dataExteriorEnergyUse->ExteriorEquipment.allocate(NumFuelEq + NumWtrEq);
         state.dataExteriorEnergyUse->UniqueExteriorEquipNames.reserve(NumFuelEq + NumWtrEq);
 
@@ -140,147 +127,105 @@ namespace ExteriorEnergyUse {
         state.dataExteriorEnergyUse->NumExteriorEqs = 0;
 
         // =================================  Get Exterior Lights
-        std::string_view cCurrentModuleObject = state.dataIPShortCut->cCurrentModuleObject;
-        cCurrentModuleObject = "Exterior:Lights";
-        for (Item = 1; Item <= state.dataExteriorEnergyUse->NumExteriorLights; ++Item) {
-            state.dataInputProcessing->inputProcessor->getObjectItem(state,
-                                                                     cCurrentModuleObject,
-                                                                     Item,
-                                                                     state.dataIPShortCut->cAlphaArgs,
-                                                                     NumAlphas,
-                                                                     state.dataIPShortCut->rNumericArgs,
-                                                                     NumNumbers,
-                                                                     IOStatus,
-                                                                     state.dataIPShortCut->lNumericFieldBlanks,
-                                                                     state.dataIPShortCut->lAlphaFieldBlanks,
-                                                                     state.dataIPShortCut->cAlphaFieldNames,
-                                                                     state.dataIPShortCut->cNumericFieldNames);
-            if (UtilityRoutines::IsNameEmpty(state, state.dataIPShortCut->cAlphaArgs(1), cCurrentModuleObject, ErrorsFound)) continue;
+        std::string cCurrentModuleObject = "Exterior:Lights";
+        auto const &exteriorLightsSchemaProps = inputProcessor->getObjectSchemaProps(state, cCurrentModuleObject);
+        auto const exteriorLightsObjects = inputProcessor->epJSON.find(cCurrentModuleObject);
+        if (exteriorLightsObjects != inputProcessor->epJSON.end()) {
+            int Item = 1;
+            for (auto const &lightInstance : exteriorLightsObjects.value().items()) {
+                auto const &lightFields = lightInstance.value();
+                auto const lightName = Util::makeUPPER(lightInstance.key());
+                auto const scheduleName = inputProcessor->getAlphaFieldValue(lightFields, exteriorLightsSchemaProps, "schedule_name");
+                auto const controlOption = lightFields.contains("control_option")
+                                               ? inputProcessor->getAlphaFieldValue(lightFields, exteriorLightsSchemaProps, "control_option")
+                                               : std::string();
 
-            state.dataExteriorEnergyUse->ExteriorLights(Item).Name = state.dataIPShortCut->cAlphaArgs(1);
-            state.dataExteriorEnergyUse->ExteriorLights(Item).SchedPtr = GetScheduleIndex(state, state.dataIPShortCut->cAlphaArgs(2));
-            if (state.dataExteriorEnergyUse->ExteriorLights(Item).SchedPtr == 0) {
-                if (state.dataIPShortCut->lAlphaFieldBlanks(2)) {
-                    ShowSevereError(state,
-                                    format("{}{}: {} is required, missing for {}={}",
-                                           RoutineName,
-                                           cCurrentModuleObject,
-                                           state.dataIPShortCut->cAlphaFieldNames(2),
-                                           state.dataIPShortCut->cAlphaFieldNames(1),
-                                           state.dataIPShortCut->cAlphaArgs(1)));
+                inputProcessor->markObjectAsUsed(cCurrentModuleObject, lightInstance.key());
+
+                ErrorObjectHeader eoh{routineName, cCurrentModuleObject, lightName};
+
+                state.dataExteriorEnergyUse->ExteriorLights(Item).Name = lightName;
+
+                if (scheduleName.empty()) {
+                    ShowSevereEmptyField(state, eoh, "schedule_name");
+                    ErrorsFound = true;
+                } else if ((state.dataExteriorEnergyUse->ExteriorLights(Item).sched = Sched::GetSchedule(state, scheduleName)) == nullptr) {
+                    ShowSevereItemNotFound(state, eoh, "schedule_name", scheduleName);
+                    ErrorsFound = true;
+                } else if (int SchMin = state.dataExteriorEnergyUse->ExteriorLights(Item).sched->getMinVal(state); SchMin < 0.0) {
+                    ShowSevereCustom(
+                        state, eoh, std::format("{} = {} minimum is [{}]. Values must be >= 0.0.", "schedule_name", scheduleName, SchMin));
+                    ErrorsFound = true;
+                }
+
+                if (controlOption.empty()) {
+                    state.dataExteriorEnergyUse->ExteriorLights(Item).ControlMode = ExteriorEnergyUse::LightControlType::ScheduleOnly;
+                } else if (Util::SameString(controlOption, "ScheduleNameOnly")) {
+                    state.dataExteriorEnergyUse->ExteriorLights(Item).ControlMode = ExteriorEnergyUse::LightControlType::ScheduleOnly;
+                } else if (Util::SameString(controlOption, "AstronomicalClock")) {
+                    state.dataExteriorEnergyUse->ExteriorLights(Item).ControlMode = ExteriorEnergyUse::LightControlType::AstroClockOverride;
                 } else {
-                    ShowSevereError(state,
-                                    format("{}{}: invalid {} entered={} for {}={}",
-                                           RoutineName,
-                                           cCurrentModuleObject,
-                                           state.dataIPShortCut->cAlphaFieldNames(2),
-                                           state.dataIPShortCut->cAlphaArgs(2),
-                                           state.dataIPShortCut->cAlphaFieldNames(1),
-                                           state.dataIPShortCut->cAlphaArgs(1)));
+                    ShowSevereInvalidKey(state, eoh, "control_option", controlOption);
                 }
-                ErrorsFound = true;
-            } else { // check min/max on schedule
-                SchMin = GetScheduleMinValue(state, state.dataExteriorEnergyUse->ExteriorLights(Item).SchedPtr);
-                SchMax = GetScheduleMaxValue(state, state.dataExteriorEnergyUse->ExteriorLights(Item).SchedPtr);
-                if (SchMin < 0.0 || SchMax < 0.0) {
-                    if (SchMin < 0.0) {
-                        ShowSevereError(state,
-                                        format("{}{}: invalid {} minimum, is < 0.0 for {}={}",
-                                               RoutineName,
-                                               cCurrentModuleObject,
-                                               state.dataIPShortCut->cAlphaFieldNames(2),
-                                               state.dataIPShortCut->cAlphaFieldNames(1),
-                                               state.dataIPShortCut->cAlphaArgs(1)));
-                        ShowContinueError(state,
-                                          format("{}\". Minimum is [{:.1R}]. Values must be >= 0.0.", state.dataIPShortCut->cAlphaArgs(2), SchMin));
-                        ErrorsFound = true;
-                    }
-                    if (SchMax < 0.0) {
-                        ShowSevereError(state,
-                                        format("{}{}: invalid {} maximum, is < 0.0 for {}={}",
-                                               RoutineName,
-                                               cCurrentModuleObject,
-                                               state.dataIPShortCut->cAlphaFieldNames(2),
-                                               state.dataIPShortCut->cAlphaFieldNames(1),
-                                               state.dataIPShortCut->cAlphaArgs(1)));
-                        ShowContinueError(state,
-                                          format("{}\". Maximum is [{:.1R}]. Values must be >= 0.0.", state.dataIPShortCut->cAlphaArgs(2), SchMax));
-                        ErrorsFound = true;
-                    }
+
+                if (lightFields.find("end_use_subcategory") != lightFields.end()) {
+                    EndUseSubcategoryName = inputProcessor->getAlphaFieldValue(lightFields, exteriorLightsSchemaProps, "end_use_subcategory");
+                } else {
+                    EndUseSubcategoryName = "General";
                 }
-            }
-            if (state.dataIPShortCut->lAlphaFieldBlanks(3)) {
-                state.dataExteriorEnergyUse->ExteriorLights(Item).ControlMode = ExteriorEnergyUse::LightControlType::ScheduleOnly;
-            } else if (UtilityRoutines::SameString(state.dataIPShortCut->cAlphaArgs(3), "ScheduleNameOnly")) {
-                state.dataExteriorEnergyUse->ExteriorLights(Item).ControlMode = ExteriorEnergyUse::LightControlType::ScheduleOnly;
-            } else if (UtilityRoutines::SameString(state.dataIPShortCut->cAlphaArgs(3), "AstronomicalClock")) {
-                state.dataExteriorEnergyUse->ExteriorLights(Item).ControlMode = ExteriorEnergyUse::LightControlType::AstroClockOverride;
-            } else {
-                ShowSevereError(state,
-                                format("{}{}: invalid {} entered={} for {}={}",
-                                       RoutineName,
-                                       cCurrentModuleObject,
-                                       state.dataIPShortCut->cAlphaFieldNames(3),
-                                       state.dataIPShortCut->cAlphaArgs(3),
-                                       state.dataIPShortCut->cAlphaFieldNames(1),
-                                       state.dataIPShortCut->cAlphaArgs(1)));
-            }
 
-            if (NumAlphas > 3) {
-                EndUseSubcategoryName = state.dataIPShortCut->cAlphaArgs(4);
-            } else {
-                EndUseSubcategoryName = "General";
-            }
+                state.dataExteriorEnergyUse->ExteriorLights(Item).DesignLevel =
+                    inputProcessor->getRealFieldValue(lightFields, exteriorLightsSchemaProps, "design_level");
+                if (state.dataGlobal->AnyEnergyManagementSystemInModel) {
+                    SetupEMSActuator(state,
+                                     "ExteriorLights",
+                                     state.dataExteriorEnergyUse->ExteriorLights(Item).Name,
+                                     "Electricity Rate",
+                                     "W",
+                                     state.dataExteriorEnergyUse->ExteriorLights(Item).PowerActuatorOn,
+                                     state.dataExteriorEnergyUse->ExteriorLights(Item).PowerActuatorValue);
+                }
 
-            state.dataExteriorEnergyUse->ExteriorLights(Item).DesignLevel = state.dataIPShortCut->rNumericArgs(1);
-            if (state.dataGlobal->AnyEnergyManagementSystemInModel) {
-                SetupEMSActuator(state,
-                                 "ExteriorLights",
-                                 state.dataExteriorEnergyUse->ExteriorLights(Item).Name,
-                                 "Electricity Rate",
-                                 "W",
-                                 state.dataExteriorEnergyUse->ExteriorLights(Item).PowerActuatorOn,
-                                 state.dataExteriorEnergyUse->ExteriorLights(Item).PowerActuatorValue);
-            }
+                SetupOutputVariable(state,
+                                    "Exterior Lights Electricity Rate",
+                                    Constant::Units::W,
+                                    state.dataExteriorEnergyUse->ExteriorLights(Item).Power,
+                                    OutputProcessor::TimeStepType::Zone,
+                                    OutputProcessor::StoreType::Average,
+                                    state.dataExteriorEnergyUse->ExteriorLights(Item).Name);
 
-            SetupOutputVariable(state,
-                                "Exterior Lights Electricity Rate",
-                                OutputProcessor::Unit::W,
-                                state.dataExteriorEnergyUse->ExteriorLights(Item).Power,
-                                OutputProcessor::SOVTimeStepType::Zone,
-                                OutputProcessor::SOVStoreType::Average,
-                                state.dataExteriorEnergyUse->ExteriorLights(Item).Name);
+                SetupOutputVariable(state,
+                                    "Exterior Lights Electricity Energy",
+                                    Constant::Units::J,
+                                    state.dataExteriorEnergyUse->ExteriorLights(Item).CurrentUse,
+                                    OutputProcessor::TimeStepType::Zone,
+                                    OutputProcessor::StoreType::Sum,
+                                    state.dataExteriorEnergyUse->ExteriorLights(Item).Name,
+                                    Constant::eResource::Electricity,
+                                    OutputProcessor::Group::Invalid,
+                                    OutputProcessor::EndUseCat::ExteriorLights,
+                                    EndUseSubcategoryName);
 
-            SetupOutputVariable(state,
-                                "Exterior Lights Electricity Energy",
-                                OutputProcessor::Unit::J,
-                                state.dataExteriorEnergyUse->ExteriorLights(Item).CurrentUse,
-                                OutputProcessor::SOVTimeStepType::Zone,
-                                OutputProcessor::SOVStoreType::Summed,
-                                state.dataExteriorEnergyUse->ExteriorLights(Item).Name,
-                                _,
-                                "Electricity",
-                                "Exterior Lights",
-                                EndUseSubcategoryName);
-
-            // entries for predefined tables
-            PreDefTableEntry(state,
-                             state.dataOutRptPredefined->pdchExLtPower,
-                             state.dataExteriorEnergyUse->ExteriorLights(Item).Name,
-                             state.dataExteriorEnergyUse->ExteriorLights(Item).DesignLevel);
-            state.dataExteriorEnergyUse->sumDesignLevel += state.dataExteriorEnergyUse->ExteriorLights(Item).DesignLevel;
-            if (state.dataExteriorEnergyUse->ExteriorLights(Item).ControlMode ==
-                ExteriorEnergyUse::LightControlType::AstroClockOverride) { // photocell/schedule
-                PreDefTableEntry(
-                    state, state.dataOutRptPredefined->pdchExLtClock, state.dataExteriorEnergyUse->ExteriorLights(Item).Name, "AstronomicalClock");
-                PreDefTableEntry(state, state.dataOutRptPredefined->pdchExLtSchd, state.dataExteriorEnergyUse->ExteriorLights(Item).Name, "-");
-            } else {
-                PreDefTableEntry(
-                    state, state.dataOutRptPredefined->pdchExLtClock, state.dataExteriorEnergyUse->ExteriorLights(Item).Name, "Schedule");
                 PreDefTableEntry(state,
-                                 state.dataOutRptPredefined->pdchExLtSchd,
+                                 state.dataOutRptPredefined->pdchExLtPower,
                                  state.dataExteriorEnergyUse->ExteriorLights(Item).Name,
-                                 GetScheduleName(state, state.dataExteriorEnergyUse->ExteriorLights(Item).SchedPtr));
+                                 state.dataExteriorEnergyUse->ExteriorLights(Item).DesignLevel);
+                state.dataExteriorEnergyUse->sumDesignLevel += state.dataExteriorEnergyUse->ExteriorLights(Item).DesignLevel;
+                if (state.dataExteriorEnergyUse->ExteriorLights(Item).ControlMode == ExteriorEnergyUse::LightControlType::AstroClockOverride) {
+                    PreDefTableEntry(state,
+                                     state.dataOutRptPredefined->pdchExLtClock,
+                                     state.dataExteriorEnergyUse->ExteriorLights(Item).Name,
+                                     "AstronomicalClock");
+                    PreDefTableEntry(state, state.dataOutRptPredefined->pdchExLtSchd, state.dataExteriorEnergyUse->ExteriorLights(Item).Name, "-");
+                } else {
+                    PreDefTableEntry(
+                        state, state.dataOutRptPredefined->pdchExLtClock, state.dataExteriorEnergyUse->ExteriorLights(Item).Name, "Schedule");
+                    PreDefTableEntry(state,
+                                     state.dataOutRptPredefined->pdchExLtSchd,
+                                     state.dataExteriorEnergyUse->ExteriorLights(Item).Name,
+                                     state.dataExteriorEnergyUse->ExteriorLights(Item).sched->Name);
+                }
+                ++Item;
             }
         }
         PreDefTableEntry(state, state.dataOutRptPredefined->pdchExLtPower, "Exterior Lighting Total", state.dataExteriorEnergyUse->sumDesignLevel);
@@ -288,369 +233,175 @@ namespace ExteriorEnergyUse {
         // =================================  Get Exterior Fuel Equipment
 
         cCurrentModuleObject = "Exterior:FuelEquipment";
-        for (Item = 1; Item <= NumFuelEq; ++Item) {
-            state.dataInputProcessing->inputProcessor->getObjectItem(state,
-                                                                     cCurrentModuleObject,
-                                                                     Item,
-                                                                     state.dataIPShortCut->cAlphaArgs,
-                                                                     NumAlphas,
-                                                                     state.dataIPShortCut->rNumericArgs,
-                                                                     NumNumbers,
-                                                                     IOStatus,
-                                                                     state.dataIPShortCut->lNumericFieldBlanks,
-                                                                     state.dataIPShortCut->lAlphaFieldBlanks,
-                                                                     state.dataIPShortCut->cAlphaFieldNames,
-                                                                     state.dataIPShortCut->cNumericFieldNames);
-            if (UtilityRoutines::IsNameEmpty(state, state.dataIPShortCut->cAlphaArgs(1), cCurrentModuleObject, ErrorsFound)) continue;
-            GlobalNames::VerifyUniqueInterObjectName(state,
-                                                     state.dataExteriorEnergyUse->UniqueExteriorEquipNames,
-                                                     state.dataIPShortCut->cAlphaArgs(1),
-                                                     cCurrentModuleObject,
-                                                     state.dataIPShortCut->cAlphaFieldNames(1),
-                                                     ErrorsFound);
+        auto const &exteriorFuelSchemaProps = inputProcessor->getObjectSchemaProps(state, cCurrentModuleObject);
+        auto const exteriorFuelObjects = inputProcessor->epJSON.find(cCurrentModuleObject);
+        if (exteriorFuelObjects != inputProcessor->epJSON.end()) {
+            for (auto const &fuelEquipInstance : exteriorFuelObjects.value().items()) {
+                auto const &fuelEquipFields = fuelEquipInstance.value();
+                auto const equipName = Util::makeUPPER(fuelEquipInstance.key());
+                auto const fuelUseType = inputProcessor->getAlphaFieldValue(fuelEquipFields, exteriorFuelSchemaProps, "fuel_use_type");
+                auto const scheduleName = inputProcessor->getAlphaFieldValue(fuelEquipFields, exteriorFuelSchemaProps, "schedule_name");
 
-            ++state.dataExteriorEnergyUse->NumExteriorEqs;
-            state.dataExteriorEnergyUse->ExteriorEquipment(state.dataExteriorEnergyUse->NumExteriorEqs).Name = state.dataIPShortCut->cAlphaArgs(1);
+                inputProcessor->markObjectAsUsed(cCurrentModuleObject, fuelEquipInstance.key());
+                GlobalNames::VerifyUniqueInterObjectName(
+                    state, state.dataExteriorEnergyUse->UniqueExteriorEquipNames, equipName, cCurrentModuleObject, "Name", ErrorsFound);
 
-            if (NumAlphas > 3) {
-                EndUseSubcategoryName = state.dataIPShortCut->cAlphaArgs(4);
-            } else {
-                EndUseSubcategoryName = "General";
-            }
+                ErrorObjectHeader eoh{routineName, cCurrentModuleObject, equipName};
 
-            ExteriorEnergyUse::ValidateFuelType(state,
-                                                state.dataExteriorEnergyUse->ExteriorEquipment(state.dataExteriorEnergyUse->NumExteriorEqs).FuelType,
-                                                state.dataIPShortCut->cAlphaArgs(2),
-                                                TypeString,
-                                                cCurrentModuleObject,
-                                                state.dataIPShortCut->cAlphaFieldNames(2),
-                                                state.dataIPShortCut->cAlphaArgs(2));
-            if (state.dataExteriorEnergyUse->ExteriorEquipment(state.dataExteriorEnergyUse->NumExteriorEqs).FuelType ==
-                ExteriorEnergyUse::ExteriorFuelUsage::Invalid) {
-                if (state.dataIPShortCut->lAlphaFieldBlanks(2)) {
-                    ShowSevereError(state,
-                                    format("{}{}: {} is required, missing for {}={}",
-                                           RoutineName,
-                                           cCurrentModuleObject,
-                                           state.dataIPShortCut->cAlphaFieldNames(2),
-                                           state.dataIPShortCut->cAlphaFieldNames(1),
-                                           state.dataIPShortCut->cAlphaArgs(1)));
+                ++state.dataExteriorEnergyUse->NumExteriorEqs;
+
+                auto &exteriorEquip = state.dataExteriorEnergyUse->ExteriorEquipment(state.dataExteriorEnergyUse->NumExteriorEqs);
+                exteriorEquip.Name = equipName;
+
+                if (fuelEquipFields.find("end_use_subcategory") != fuelEquipFields.end()) {
+                    EndUseSubcategoryName = inputProcessor->getAlphaFieldValue(fuelEquipFields, exteriorFuelSchemaProps, "end_use_subcategory");
                 } else {
-                    ShowSevereError(state,
-                                    format("{}{}: invalid {} entered={} for {}={}",
-                                           RoutineName,
-                                           cCurrentModuleObject,
-                                           state.dataIPShortCut->cAlphaFieldNames(2),
-                                           state.dataIPShortCut->cAlphaArgs(2),
-                                           state.dataIPShortCut->cAlphaFieldNames(1),
-                                           state.dataIPShortCut->cAlphaArgs(1)));
+                    EndUseSubcategoryName = "General";
                 }
-                ErrorsFound = true;
-            } else {
-                if (state.dataExteriorEnergyUse->ExteriorEquipment(state.dataExteriorEnergyUse->NumExteriorEqs).FuelType !=
-                    ExteriorEnergyUse::ExteriorFuelUsage::WaterUse) {
+
+                if (fuelUseType.empty()) {
+                    ShowSevereEmptyField(state, eoh, "fuel_use_type");
+                    ErrorsFound = true;
+                } else if ((exteriorEquip.FuelType = static_cast<Constant::eFuel>(getEnumValue(Constant::eFuelNamesUC, fuelUseType))) ==
+                           Constant::eFuel::Invalid) {
+                    ShowSevereInvalidKey(state, eoh, "fuel_use_type", fuelUseType);
+                    ErrorsFound = true;
+                } else if (exteriorEquip.FuelType != Constant::eFuel::Water) {
                     SetupOutputVariable(state,
                                         "Exterior Equipment Fuel Rate",
-                                        OutputProcessor::Unit::W,
-                                        state.dataExteriorEnergyUse->ExteriorEquipment(state.dataExteriorEnergyUse->NumExteriorEqs).Power,
-                                        OutputProcessor::SOVTimeStepType::Zone,
-                                        OutputProcessor::SOVStoreType::Average,
-                                        state.dataExteriorEnergyUse->ExteriorEquipment(state.dataExteriorEnergyUse->NumExteriorEqs).Name);
+                                        Constant::Units::W,
+                                        exteriorEquip.Power,
+                                        OutputProcessor::TimeStepType::Zone,
+                                        OutputProcessor::StoreType::Average,
+                                        exteriorEquip.Name);
                     SetupOutputVariable(state,
-                                        "Exterior Equipment " + TypeString + " Energy",
-                                        OutputProcessor::Unit::J,
-                                        state.dataExteriorEnergyUse->ExteriorEquipment(state.dataExteriorEnergyUse->NumExteriorEqs).CurrentUse,
-                                        OutputProcessor::SOVTimeStepType::Zone,
-                                        OutputProcessor::SOVStoreType::Summed,
-                                        state.dataExteriorEnergyUse->ExteriorEquipment(state.dataExteriorEnergyUse->NumExteriorEqs).Name,
-                                        _,
-                                        TypeString,
-                                        "ExteriorEquipment",
+                                        std::format("Exterior Equipment {} Energy", Constant::eFuelNames[(int)exteriorEquip.FuelType]),
+                                        Constant::Units::J,
+                                        exteriorEquip.CurrentUse,
+                                        OutputProcessor::TimeStepType::Zone,
+                                        OutputProcessor::StoreType::Sum,
+                                        exteriorEquip.Name,
+                                        Constant::eFuel2eResource[(int)exteriorEquip.FuelType],
+                                        OutputProcessor::Group::Invalid,
+                                        OutputProcessor::EndUseCat::ExteriorEquipment,
                                         EndUseSubcategoryName);
                 } else {
                     SetupOutputVariable(state,
                                         "Exterior Equipment Water Volume Flow Rate",
-                                        OutputProcessor::Unit::m3_s,
-                                        state.dataExteriorEnergyUse->ExteriorEquipment(state.dataExteriorEnergyUse->NumExteriorEqs).Power,
-                                        OutputProcessor::SOVTimeStepType::Zone,
-                                        OutputProcessor::SOVStoreType::Average,
-                                        state.dataExteriorEnergyUse->ExteriorEquipment(state.dataExteriorEnergyUse->NumExteriorEqs).Name);
+                                        Constant::Units::m3_s,
+                                        exteriorEquip.Power,
+                                        OutputProcessor::TimeStepType::Zone,
+                                        OutputProcessor::StoreType::Average,
+                                        exteriorEquip.Name);
                     SetupOutputVariable(state,
-                                        "Exterior Equipment " + TypeString + " Volume",
-                                        OutputProcessor::Unit::m3,
-                                        state.dataExteriorEnergyUse->ExteriorEquipment(state.dataExteriorEnergyUse->NumExteriorEqs).CurrentUse,
-                                        OutputProcessor::SOVTimeStepType::Zone,
-                                        OutputProcessor::SOVStoreType::Summed,
-                                        state.dataExteriorEnergyUse->ExteriorEquipment(state.dataExteriorEnergyUse->NumExteriorEqs).Name,
-                                        _,
-                                        TypeString,
-                                        "ExteriorEquipment",
+                                        std::format("Exterior Equipment {} Volume", Constant::eFuelNames[(int)exteriorEquip.FuelType]),
+                                        Constant::Units::m3,
+                                        exteriorEquip.CurrentUse,
+                                        OutputProcessor::TimeStepType::Zone,
+                                        OutputProcessor::StoreType::Sum,
+                                        exteriorEquip.Name,
+                                        Constant::eFuel2eResource[(int)exteriorEquip.FuelType],
+                                        OutputProcessor::Group::Invalid,
+                                        OutputProcessor::EndUseCat::ExteriorEquipment,
                                         EndUseSubcategoryName);
                 }
-            }
-            state.dataExteriorEnergyUse->ExteriorEquipment(state.dataExteriorEnergyUse->NumExteriorEqs).SchedPtr =
-                GetScheduleIndex(state, state.dataIPShortCut->cAlphaArgs(3));
-            if (state.dataExteriorEnergyUse->ExteriorEquipment(state.dataExteriorEnergyUse->NumExteriorEqs).SchedPtr == 0) {
-                if (state.dataIPShortCut->lAlphaFieldBlanks(3)) {
-                    ShowSevereError(state,
-                                    format("{}{}: {} is required, missing for {}={}",
-                                           RoutineName,
-                                           cCurrentModuleObject,
-                                           state.dataIPShortCut->cAlphaFieldNames(3),
-                                           state.dataIPShortCut->cAlphaFieldNames(1),
-                                           state.dataIPShortCut->cAlphaArgs(1)));
-                } else {
-                    ShowSevereError(state,
-                                    format("{}{}: invalid {} entered={} for {}={}",
-                                           RoutineName,
-                                           cCurrentModuleObject,
-                                           state.dataIPShortCut->cAlphaFieldNames(3),
-                                           state.dataIPShortCut->cAlphaArgs(3),
-                                           state.dataIPShortCut->cAlphaFieldNames(1),
-                                           state.dataIPShortCut->cAlphaArgs(1)));
+
+                if (scheduleName.empty()) {
+                    ShowSevereEmptyField(state, eoh, "schedule_name");
+                    ErrorsFound = true;
+                } else if ((exteriorEquip.sched = Sched::GetSchedule(state, scheduleName)) == nullptr) {
+                    ShowSevereItemNotFound(state, eoh, "schedule_name", scheduleName);
+                    ErrorsFound = true;
+                } else if (int SchMin = exteriorEquip.sched->getMinVal(state); SchMin < 0.0) {
+                    ShowSevereCustom(
+                        state, eoh, std::format("{} = {} minimum is [{}]. Values must be >= 0.0.", "schedule_name", scheduleName, SchMin));
+                    ErrorsFound = true;
                 }
-                ErrorsFound = true;
-            } else { // check min/max on schedule
-                SchMin =
-                    GetScheduleMinValue(state, state.dataExteriorEnergyUse->ExteriorEquipment(state.dataExteriorEnergyUse->NumExteriorEqs).SchedPtr);
-                SchMax =
-                    GetScheduleMaxValue(state, state.dataExteriorEnergyUse->ExteriorEquipment(state.dataExteriorEnergyUse->NumExteriorEqs).SchedPtr);
-                if (SchMin < 0.0 || SchMax < 0.0) {
-                    if (SchMin < 0.0) {
-                        ShowSevereError(state,
-                                        format("{}{}: invalid {} minimum, is < 0.0 for {}={}",
-                                               RoutineName,
-                                               cCurrentModuleObject,
-                                               state.dataIPShortCut->cAlphaFieldNames(3),
-                                               state.dataIPShortCut->cAlphaFieldNames(1),
-                                               state.dataIPShortCut->cAlphaArgs(1)));
-                        ShowContinueError(state,
-                                          format("{}\". Minimum is [{:.1R}]. Values must be >= 0.0.", state.dataIPShortCut->cAlphaArgs(3), SchMin));
-                        ErrorsFound = true;
-                    }
-                    if (SchMax < 0.0) {
-                        ShowSevereError(state,
-                                        format("{}{}: invalid {} maximum, is < 0.0 for {}={}",
-                                               RoutineName,
-                                               cCurrentModuleObject,
-                                               state.dataIPShortCut->cAlphaFieldNames(3),
-                                               state.dataIPShortCut->cAlphaFieldNames(1),
-                                               state.dataIPShortCut->cAlphaArgs(1)));
-                        ShowContinueError(state,
-                                          format("{}\". Maximum is [{:.1R}]. Values must be >= 0.0.", state.dataIPShortCut->cAlphaArgs(3), SchMax));
-                        ErrorsFound = true;
-                    }
-                }
+                exteriorEquip.DesignLevel = inputProcessor->getRealFieldValue(fuelEquipFields, exteriorFuelSchemaProps, "design_level");
             }
-            state.dataExteriorEnergyUse->ExteriorEquipment(state.dataExteriorEnergyUse->NumExteriorEqs).DesignLevel =
-                state.dataIPShortCut->rNumericArgs(1);
         }
 
         // =================================  Get Exterior Water Equipment
 
         cCurrentModuleObject = "Exterior:WaterEquipment";
-        for (Item = 1; Item <= NumWtrEq; ++Item) {
-            state.dataInputProcessing->inputProcessor->getObjectItem(state,
-                                                                     cCurrentModuleObject,
-                                                                     Item,
-                                                                     state.dataIPShortCut->cAlphaArgs,
-                                                                     NumAlphas,
-                                                                     state.dataIPShortCut->rNumericArgs,
-                                                                     NumNumbers,
-                                                                     IOStatus,
-                                                                     state.dataIPShortCut->lNumericFieldBlanks,
-                                                                     state.dataIPShortCut->lAlphaFieldBlanks,
-                                                                     state.dataIPShortCut->cAlphaFieldNames,
-                                                                     state.dataIPShortCut->cNumericFieldNames);
-            if (UtilityRoutines::IsNameEmpty(state, state.dataIPShortCut->cAlphaArgs(1), cCurrentModuleObject, ErrorsFound)) continue;
-            GlobalNames::VerifyUniqueInterObjectName(state,
-                                                     state.dataExteriorEnergyUse->UniqueExteriorEquipNames,
-                                                     state.dataIPShortCut->cAlphaArgs(1),
-                                                     cCurrentModuleObject,
-                                                     state.dataIPShortCut->cAlphaFieldNames(1),
-                                                     ErrorsFound);
+        auto const &exteriorWaterSchemaProps = inputProcessor->getObjectSchemaProps(state, cCurrentModuleObject);
+        auto const exteriorWaterObjects = inputProcessor->epJSON.find(cCurrentModuleObject);
+        if (exteriorWaterObjects != inputProcessor->epJSON.end()) {
+            for (auto const &waterEquipInstance : exteriorWaterObjects.value().items()) {
+                auto const &waterEquipFields = waterEquipInstance.value();
+                auto const equipName = Util::makeUPPER(waterEquipInstance.key());
+                auto const scheduleName = inputProcessor->getAlphaFieldValue(waterEquipFields, exteriorWaterSchemaProps, "schedule_name");
 
-            ++state.dataExteriorEnergyUse->NumExteriorEqs;
-            state.dataExteriorEnergyUse->ExteriorEquipment(state.dataExteriorEnergyUse->NumExteriorEqs).Name = state.dataIPShortCut->cAlphaArgs(1);
-            state.dataExteriorEnergyUse->ExteriorEquipment(state.dataExteriorEnergyUse->NumExteriorEqs).FuelType =
-                ExteriorEnergyUse::ExteriorFuelUsage::WaterUse;
-            state.dataExteriorEnergyUse->ExteriorEquipment(state.dataExteriorEnergyUse->NumExteriorEqs).SchedPtr =
-                GetScheduleIndex(state, state.dataIPShortCut->cAlphaArgs(3));
-            if (state.dataExteriorEnergyUse->ExteriorEquipment(state.dataExteriorEnergyUse->NumExteriorEqs).SchedPtr == 0) {
-                if (state.dataIPShortCut->lAlphaFieldBlanks(3)) {
-                    ShowSevereError(state,
-                                    format("{}{}: {} is required, missing for {}={}",
-                                           RoutineName,
-                                           cCurrentModuleObject,
-                                           state.dataIPShortCut->cAlphaFieldNames(3),
-                                           state.dataIPShortCut->cAlphaFieldNames(1),
-                                           state.dataIPShortCut->cAlphaArgs(1)));
+                inputProcessor->markObjectAsUsed(cCurrentModuleObject, waterEquipInstance.key());
+
+                ErrorObjectHeader eoh{routineName, cCurrentModuleObject, equipName};
+
+                GlobalNames::VerifyUniqueInterObjectName(
+                    state, state.dataExteriorEnergyUse->UniqueExteriorEquipNames, equipName, cCurrentModuleObject, "Name", ErrorsFound);
+
+                ++state.dataExteriorEnergyUse->NumExteriorEqs;
+
+                auto &exteriorEquip = state.dataExteriorEnergyUse->ExteriorEquipment(state.dataExteriorEnergyUse->NumExteriorEqs);
+                exteriorEquip.Name = equipName;
+                exteriorEquip.FuelType = Constant::eFuel::Water;
+
+                if (scheduleName.empty()) {
+                    ShowSevereEmptyField(state, eoh, "schedule_name");
+                    ErrorsFound = true;
+                } else if ((exteriorEquip.sched = Sched::GetSchedule(state, scheduleName)) == nullptr) {
+                    ShowSevereItemNotFound(state, eoh, "schedule_name", scheduleName);
+                    ErrorsFound = true;
+                } else if (int SchMin = exteriorEquip.sched->getMinVal(state); SchMin < 0.0) {
+                    ShowSevereCustom(
+                        state, eoh, std::format("{} = {} minimum is [{}]. Values must be >= 0.0.", "schedule_name", scheduleName, SchMin));
+                    ErrorsFound = true;
+                }
+
+                if (waterEquipFields.find("end_use_subcategory") != waterEquipFields.end()) {
+                    EndUseSubcategoryName = inputProcessor->getAlphaFieldValue(waterEquipFields, exteriorWaterSchemaProps, "end_use_subcategory");
                 } else {
-                    ShowSevereError(state,
-                                    format("{}{}: invalid {} entered={} for {}={}",
-                                           RoutineName,
-                                           cCurrentModuleObject,
-                                           state.dataIPShortCut->cAlphaFieldNames(3),
-                                           state.dataIPShortCut->cAlphaArgs(3),
-                                           state.dataIPShortCut->cAlphaFieldNames(1),
-                                           state.dataIPShortCut->cAlphaArgs(1)));
+                    EndUseSubcategoryName = "General";
                 }
-                ErrorsFound = true;
-            } else { // check min/max on schedule
-                SchMin =
-                    GetScheduleMinValue(state, state.dataExteriorEnergyUse->ExteriorEquipment(state.dataExteriorEnergyUse->NumExteriorEqs).SchedPtr);
-                SchMax =
-                    GetScheduleMaxValue(state, state.dataExteriorEnergyUse->ExteriorEquipment(state.dataExteriorEnergyUse->NumExteriorEqs).SchedPtr);
-                if (SchMin < 0.0 || SchMax < 0.0) {
-                    if (SchMin < 0.0) {
-                        ShowSevereError(state,
-                                        format("{}{}: invalid {} minimum, is < 0.0 for {}={}",
-                                               RoutineName,
-                                               cCurrentModuleObject,
-                                               state.dataIPShortCut->cAlphaFieldNames(3),
-                                               state.dataIPShortCut->cAlphaFieldNames(1),
-                                               state.dataIPShortCut->cAlphaArgs(1)));
-                        ShowContinueError(state,
-                                          format("{}\". Minimum is [{:.1R}]. Values must be >= 0.0.", state.dataIPShortCut->cAlphaArgs(3), SchMin));
-                        ErrorsFound = true;
-                    }
-                    if (SchMax < 0.0) {
-                        ShowSevereError(state,
-                                        format("{}{}: invalid {} maximum, is < 0.0 for {}={}",
-                                               RoutineName,
-                                               cCurrentModuleObject,
-                                               state.dataIPShortCut->cAlphaFieldNames(3),
-                                               state.dataIPShortCut->cAlphaFieldNames(1),
-                                               state.dataIPShortCut->cAlphaArgs(1)));
-                        ShowContinueError(state,
-                                          format("{}\". Maximum is [{:.1R}]. Values must be >= 0.0.", state.dataIPShortCut->cAlphaArgs(3), SchMax));
-                        ErrorsFound = true;
-                    }
-                }
+
+                exteriorEquip.DesignLevel = inputProcessor->getRealFieldValue(waterEquipFields, exteriorWaterSchemaProps, "design_level");
+
+                SetupOutputVariable(state,
+                                    "Exterior Equipment Water Volume Flow Rate",
+                                    Constant::Units::m3_s,
+                                    exteriorEquip.Power,
+                                    OutputProcessor::TimeStepType::Zone,
+                                    OutputProcessor::StoreType::Average,
+                                    exteriorEquip.Name);
+
+                SetupOutputVariable(state,
+                                    "Exterior Equipment Water Volume",
+                                    Constant::Units::m3,
+                                    exteriorEquip.CurrentUse,
+                                    OutputProcessor::TimeStepType::Zone,
+                                    OutputProcessor::StoreType::Sum,
+                                    exteriorEquip.Name,
+                                    Constant::eResource::Water,
+                                    OutputProcessor::Group::Invalid,
+                                    OutputProcessor::EndUseCat::ExteriorEquipment,
+                                    EndUseSubcategoryName);
+                SetupOutputVariable(state,
+                                    "Exterior Equipment Mains Water Volume",
+                                    Constant::Units::m3,
+                                    exteriorEquip.CurrentUse,
+                                    OutputProcessor::TimeStepType::Zone,
+                                    OutputProcessor::StoreType::Sum,
+                                    exteriorEquip.Name,
+                                    Constant::eResource::MainsWater,
+                                    OutputProcessor::Group::Invalid,
+                                    OutputProcessor::EndUseCat::ExteriorEquipment,
+                                    EndUseSubcategoryName);
             }
-
-            if (NumAlphas > 3) {
-                EndUseSubcategoryName = state.dataIPShortCut->cAlphaArgs(4);
-            } else {
-                EndUseSubcategoryName = "General";
-            }
-
-            state.dataExteriorEnergyUse->ExteriorEquipment(state.dataExteriorEnergyUse->NumExteriorEqs).DesignLevel =
-                state.dataIPShortCut->rNumericArgs(1);
-
-            SetupOutputVariable(state,
-                                "Exterior Equipment Water Volume Flow Rate",
-                                OutputProcessor::Unit::m3_s,
-                                state.dataExteriorEnergyUse->ExteriorEquipment(state.dataExteriorEnergyUse->NumExteriorEqs).Power,
-                                OutputProcessor::SOVTimeStepType::Zone,
-                                OutputProcessor::SOVStoreType::Average,
-                                state.dataExteriorEnergyUse->ExteriorEquipment(state.dataExteriorEnergyUse->NumExteriorEqs).Name);
-
-            SetupOutputVariable(state,
-                                "Exterior Equipment Water Volume",
-                                OutputProcessor::Unit::m3,
-                                state.dataExteriorEnergyUse->ExteriorEquipment(state.dataExteriorEnergyUse->NumExteriorEqs).CurrentUse,
-                                OutputProcessor::SOVTimeStepType::Zone,
-                                OutputProcessor::SOVStoreType::Summed,
-                                state.dataExteriorEnergyUse->ExteriorEquipment(state.dataExteriorEnergyUse->NumExteriorEqs).Name,
-                                _,
-                                "Water",
-                                "ExteriorEquipment",
-                                EndUseSubcategoryName);
-            SetupOutputVariable(state,
-                                "Exterior Equipment Mains Water Volume",
-                                OutputProcessor::Unit::m3,
-                                state.dataExteriorEnergyUse->ExteriorEquipment(state.dataExteriorEnergyUse->NumExteriorEqs).CurrentUse,
-                                OutputProcessor::SOVTimeStepType::Zone,
-                                OutputProcessor::SOVStoreType::Summed,
-                                state.dataExteriorEnergyUse->ExteriorEquipment(state.dataExteriorEnergyUse->NumExteriorEqs).Name,
-                                _,
-                                "MainsWater",
-                                "ExteriorEquipment",
-                                EndUseSubcategoryName);
         }
 
         if (ErrorsFound) {
-            ShowFatalError(state, format("{}Errors found in input.  Program terminates.", RoutineName));
+            ShowFatalError(state, std::format("{}Errors found in input.  Program terminates.", routineName));
         }
-    }
-
-    void ValidateFuelType(EnergyPlusData &state,
-                          ExteriorEnergyUse::ExteriorFuelUsage &FuelTypeNumber, // Fuel Type to be set in structure.
-                          std::string const &FuelTypeAlpha,                     // Fuel Type String
-                          std::string &FuelTypeString,                          // Standardized Fuel Type String (for variable naming)
-                          std::string_view CurrentModuleObject,                 // object being parsed
-                          std::string const &CurrentField,                      // current field being parsed
-                          std::string const &CurrentName                        // current object name being parsed
-    )
-    {
-
-        // SUBROUTINE INFORMATION:
-        //       AUTHOR         Linda K. Lawrie
-        //       DATE WRITTEN   January 2001
-        //       MODIFIED       na
-        //       RE-ENGINEERED  na
-
-        // PURPOSE OF THIS SUBROUTINE:
-        // This subroutine compares the input Fuel Type value against the
-        // valid values and sets the correct in the returned FuelTypeNumber.
-
-        // SUBROUTINE PARAMETER DEFINITIONS:
-        static constexpr std::string_view RoutineName("ValidateFuelType: ");
-
-        // SUBROUTINE LOCAL VARIABLE DECLARATIONS:
-
-        FuelTypeNumber = ExteriorEnergyUse::ExteriorFuelUsage::Invalid;
-        FuelTypeString = "";
-
-        // Select the correct Number for the associated ascii name for the fuel type
-        if (UtilityRoutines::SameString(FuelTypeAlpha, "Electricity")) {
-            FuelTypeNumber = ExteriorEnergyUse::ExteriorFuelUsage::ElecUse;
-            FuelTypeString = "Electricity";
-        } else if (UtilityRoutines::SameString(FuelTypeAlpha, "NaturalGas")) {
-            FuelTypeNumber = ExteriorEnergyUse::ExteriorFuelUsage::GasUse;
-            FuelTypeString = "NaturalGas";
-        } else if (UtilityRoutines::SameString(FuelTypeAlpha, "Coal")) {
-            FuelTypeNumber = ExteriorEnergyUse::ExteriorFuelUsage::CoalUse;
-            FuelTypeString = "Coal";
-        } else if (UtilityRoutines::SameString(FuelTypeAlpha, "FuelOilNo1")) {
-            FuelTypeNumber = ExteriorEnergyUse::ExteriorFuelUsage::FuelOil1Use;
-            FuelTypeString = "FuelOilNo1";
-        } else if (UtilityRoutines::SameString(FuelTypeAlpha, "Propane")) {
-            FuelTypeNumber = ExteriorEnergyUse::ExteriorFuelUsage::PropaneUse;
-            FuelTypeString = "Propane";
-        } else if (UtilityRoutines::SameString(FuelTypeAlpha, "Gasoline")) {
-            FuelTypeNumber = ExteriorEnergyUse::ExteriorFuelUsage::GasolineUse;
-            FuelTypeString = "Gasoline";
-        } else if (UtilityRoutines::SameString(FuelTypeAlpha, "Diesel")) {
-            FuelTypeNumber = ExteriorEnergyUse::ExteriorFuelUsage::DieselUse;
-            FuelTypeString = "Diesel";
-        } else if (UtilityRoutines::SameString(FuelTypeAlpha, "FuelOilNo2")) {
-            FuelTypeNumber = ExteriorEnergyUse::ExteriorFuelUsage::FuelOil2Use;
-            FuelTypeString = "FuelOilNo2";
-        } else if (UtilityRoutines::SameString(FuelTypeAlpha, "OtherFuel1")) {
-            FuelTypeNumber = ExteriorEnergyUse::ExteriorFuelUsage::OtherFuel1Use;
-            FuelTypeString = "OtherFuel1";
-        } else if (UtilityRoutines::SameString(FuelTypeAlpha, "OtherFuel2")) {
-            FuelTypeNumber = ExteriorEnergyUse::ExteriorFuelUsage::OtherFuel1Use;
-            FuelTypeString = "OtherFuel2";
-        } else if (UtilityRoutines::SameString(FuelTypeAlpha, "Water")) {
-            FuelTypeNumber = ExteriorEnergyUse::ExteriorFuelUsage::WaterUse;
-            FuelTypeString = "Water";
-        } else if (UtilityRoutines::SameString(FuelTypeAlpha, "Steam")) {
-            FuelTypeNumber = ExteriorEnergyUse::ExteriorFuelUsage::SteamUse;
-            FuelTypeString = "Steam";
-        } else if (UtilityRoutines::SameString(FuelTypeAlpha, "DistrictCooling")) {
-            FuelTypeNumber = ExteriorEnergyUse::ExteriorFuelUsage::DistrictCoolUse;
-            FuelTypeString = "DistrictCooling";
-        } else if (UtilityRoutines::SameString(FuelTypeAlpha, "DistrictHeating")) {
-            FuelTypeNumber = ExteriorEnergyUse::ExteriorFuelUsage::DistrictHeatUse;
-            FuelTypeString = "DistrictHeating";
-        } else {
-            ShowSevereError(state, format("{}{}=\"{}\".", RoutineName, CurrentModuleObject, CurrentName));
-            ShowFatalError(state, format("Heating source/fuel type not recognized. Check input field {}=\"{}", CurrentField, FuelTypeAlpha));
-        }
-    }
+    } // GetExteriorEnergyUseInput()
 
     void ReportExteriorEnergyUse(EnergyPlusData &state)
     {
@@ -658,44 +409,16 @@ namespace ExteriorEnergyUse {
         // SUBROUTINE INFORMATION:
         //       AUTHOR         Linda Lawrie
         //       DATE WRITTEN   January 2001
-        //       MODIFIED       na
-        //       RE-ENGINEERED  na
 
         // PURPOSE OF THIS SUBROUTINE:
         // This subroutine performs the calculations necessary to report
         // the exterior energy use types.
 
-        // METHODOLOGY EMPLOYED:
-        // na
-
-        // REFERENCES:
-        // na
-
-        // Using/Aliasing
-        using ScheduleManager::GetCurrentScheduleValue;
-
-        // Locals
-        // SUBROUTINE ARGUMENT DEFINITIONS:
-        // na
-
-        // SUBROUTINE PARAMETER DEFINITIONS:
-        // na
-
-        // INTERFACE BLOCK SPECIFICATIONS:
-        // na
-
-        // DERIVED TYPE DEFINITIONS:
-        // na
-
-        // SUBROUTINE LOCAL VARIABLE DECLARATIONS:
-        int Item; // Loop Control
-
-        for (Item = 1; Item <= state.dataExteriorEnergyUse->NumExteriorLights; ++Item) {
+        for (int Item = 1; Item <= state.dataExteriorEnergyUse->NumExteriorLights; ++Item) {
             switch (state.dataExteriorEnergyUse->ExteriorLights(Item).ControlMode) {
             case ExteriorEnergyUse::LightControlType::ScheduleOnly:
-                state.dataExteriorEnergyUse->ExteriorLights(Item).Power =
-                    state.dataExteriorEnergyUse->ExteriorLights(Item).DesignLevel *
-                    GetCurrentScheduleValue(state, state.dataExteriorEnergyUse->ExteriorLights(Item).SchedPtr);
+                state.dataExteriorEnergyUse->ExteriorLights(Item).Power = state.dataExteriorEnergyUse->ExteriorLights(Item).DesignLevel *
+                                                                          state.dataExteriorEnergyUse->ExteriorLights(Item).sched->getCurrentVal();
                 state.dataExteriorEnergyUse->ExteriorLights(Item).CurrentUse =
                     state.dataExteriorEnergyUse->ExteriorLights(Item).Power * state.dataGlobal->TimeStepZoneSec;
                 break;
@@ -706,7 +429,7 @@ namespace ExteriorEnergyUse {
                 } else {
                     state.dataExteriorEnergyUse->ExteriorLights(Item).Power =
                         state.dataExteriorEnergyUse->ExteriorLights(Item).DesignLevel *
-                        GetCurrentScheduleValue(state, state.dataExteriorEnergyUse->ExteriorLights(Item).SchedPtr);
+                        state.dataExteriorEnergyUse->ExteriorLights(Item).sched->getCurrentVal();
                     state.dataExteriorEnergyUse->ExteriorLights(Item).CurrentUse =
                         state.dataExteriorEnergyUse->ExteriorLights(Item).Power * state.dataGlobal->TimeStepZoneSec;
                 }
@@ -724,8 +447,9 @@ namespace ExteriorEnergyUse {
                     state.dataExteriorEnergyUse->ExteriorLights(Item).Power * state.dataGlobal->TimeStepZoneSec;
             }
             // EMS controls
-            if (state.dataExteriorEnergyUse->ExteriorLights(Item).PowerActuatorOn)
+            if (state.dataExteriorEnergyUse->ExteriorLights(Item).PowerActuatorOn) {
                 state.dataExteriorEnergyUse->ExteriorLights(Item).Power = state.dataExteriorEnergyUse->ExteriorLights(Item).PowerActuatorValue;
+            }
 
             state.dataExteriorEnergyUse->ExteriorLights(Item).CurrentUse =
                 state.dataExteriorEnergyUse->ExteriorLights(Item).Power * state.dataGlobal->TimeStepZoneSec;
@@ -734,7 +458,7 @@ namespace ExteriorEnergyUse {
             if (!state.dataGlobal->WarmupFlag) {
                 //      IF (DoOutputReporting .AND.  WriteTabularFiles .and. (KindOfSim == ksRunPeriodWeather)) THEN !for weather simulations only
                 if (state.dataGlobal->DoOutputReporting &&
-                    (state.dataGlobal->KindOfSim == DataGlobalConstants::KindOfSim::RunPeriodWeather)) { // for weather simulations only
+                    (state.dataGlobal->KindOfSim == Constant::KindOfSim::RunPeriodWeather)) { // for weather simulations only
                     // for tabular report, accumua the total electricity used for each ExteriorLights object
                     state.dataExteriorEnergyUse->ExteriorLights(Item).SumConsumption += state.dataExteriorEnergyUse->ExteriorLights(Item).CurrentUse;
                     // for tabular report, accumulate the time when each ExteriorLights has consumption
@@ -746,10 +470,9 @@ namespace ExteriorEnergyUse {
             }
         }
 
-        for (Item = 1; Item <= state.dataExteriorEnergyUse->NumExteriorEqs; ++Item) {
-            state.dataExteriorEnergyUse->ExteriorEquipment(Item).Power =
-                state.dataExteriorEnergyUse->ExteriorEquipment(Item).DesignLevel *
-                GetCurrentScheduleValue(state, state.dataExteriorEnergyUse->ExteriorEquipment(Item).SchedPtr);
+        for (int Item = 1; Item <= state.dataExteriorEnergyUse->NumExteriorEqs; ++Item) {
+            state.dataExteriorEnergyUse->ExteriorEquipment(Item).Power = state.dataExteriorEnergyUse->ExteriorEquipment(Item).DesignLevel *
+                                                                         state.dataExteriorEnergyUse->ExteriorEquipment(Item).sched->getCurrentVal();
             state.dataExteriorEnergyUse->ExteriorEquipment(Item).CurrentUse =
                 state.dataExteriorEnergyUse->ExteriorEquipment(Item).Power * state.dataGlobal->TimeStepZoneSec;
         }

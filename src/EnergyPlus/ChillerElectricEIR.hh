@@ -1,7 +1,7 @@
-// EnergyPlus, Copyright (c) 1996-2023, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
-// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other
+// National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
 // contributors. All rights reserved.
 //
 // NOTICE: This Software was developed under funding from the U.S. Department of Energy and the
@@ -75,9 +75,10 @@ namespace ChillerElectricEIR {
         bool RefCapWasAutoSized = false;                                            // reference capacity was autosized on input
         Real64 RefCOP = 0.0;                                                        // Reference coefficient of performance [W/W]
         DataPlant::FlowMode FlowMode = DataPlant::FlowMode::Invalid;                // one of 3 modes for component flow during operation
-        bool ModulatedFlowSetToLoop = false;                                        // True if the setpoint is missing at the outlet node
-        bool ModulatedFlowErrDone = false;                                          // true if setpoint warning issued
-        bool HRSPErrDone = false;                                                   // TRUE if set point warning issued for heat recovery loop
+        DataPlant::CondenserFlowControl CondenserFlowControl = DataPlant::CondenserFlowControl::Invalid;
+        bool ModulatedFlowSetToLoop = false;      // True if the setpoint is missing at the outlet node
+        bool ModulatedFlowErrDone = false;        // true if setpoint warning issued
+        bool HRSPErrDone = false;                 // TRUE if set point warning issued for heat recovery loop
         Real64 EvapVolFlowRate = 0.0;             // Reference water volumetric flow rate through the evaporator [m3/s]
         bool EvapVolFlowRateWasAutoSized = false; // true if previous was autosize input
         Real64 EvapMassFlowRate = 0.0;
@@ -116,28 +117,28 @@ namespace ChillerElectricEIR {
         Real64 HeatRecCapacityFraction = 0.0;              // user input for heat recovery capacity fraction []
         Real64 HeatRecMaxCapacityLimit = 0.0;              // Capacity limit for Heat recovery, one time calc [W]
         int HeatRecSetPointNodeNum = 0;                    // index for system node with the heat recover leaving setpoint
-        int HeatRecInletLimitSchedNum = 0;                 // index for schedule for the inlet high limit for heat recovery operation
+        Sched::Schedule *heatRecInletLimitSched = nullptr; // schedule for the inlet high limit for heat recovery operation
         int ChillerCapFTIndex = 0;                         // Index for the total cooling capacity modifier curve
         // (function of leaving chilled water temperature and
         //  entering condenser fluid temperature)
         int ChillerEIRFTIndex = 0; // Index for the energy input ratio modifier curve
         // (function of leaving chilled water temperature and
         //  entering condenser fluid temperature)
-        int ChillerEIRFPLRIndex = 0;      // Index for the EIR vs part-load ratio curve
-        int ChillerCapFTError = 0;        // Used for negative capacity as a function of temp warnings
-        int ChillerCapFTErrorIndex = 0;   // Used for negative capacity as a function of temp warnings
-        int ChillerEIRFTError = 0;        // Used for negative EIR as a function of temp warnings
-        int ChillerEIRFTErrorIndex = 0;   // Used for negative EIR as a function of temp warnings
-        int ChillerEIRFPLRError = 0;      // Used for negative EIR as a function of PLR warnings
-        int ChillerEIRFPLRErrorIndex = 0; // Used for negative EIR as a function of PLR warnings
-        Real64 ChillerEIRFPLRMin = 0.0;   // Minimum value of PLR from EIRFPLR curve
-        Real64 ChillerEIRFPLRMax = 0.0;   // Maximum value of PLR from EIRFPLR curve
-        int DeltaTErrCount = 0;           // Evaporator delta T equals 0 for variable flow chiller warning messages
-        int DeltaTErrCountIndex = 0;      // Index to evaporator delta T = 0 for variable flow chiller warning messages
-        PlantLocation CWPlantLoc;         // chilled water plant loop component index
-        PlantLocation CDPlantLoc;         // condenser water plant loop component index
-        PlantLocation HRPlantLoc;         // heat recovery water plant loop component index
-        int BasinHeaterSchedulePtr = 0;   // Pointer to basin heater schedule
+        int ChillerEIRFPLRIndex = 0;                 // Index for the EIR vs part-load ratio curve
+        int ChillerCapFTError = 0;                   // Used for negative capacity as a function of temp warnings
+        int ChillerCapFTErrorIndex = 0;              // Used for negative capacity as a function of temp warnings
+        int ChillerEIRFTError = 0;                   // Used for negative EIR as a function of temp warnings
+        int ChillerEIRFTErrorIndex = 0;              // Used for negative EIR as a function of temp warnings
+        int ChillerEIRFPLRError = 0;                 // Used for negative EIR as a function of PLR warnings
+        int ChillerEIRFPLRErrorIndex = 0;            // Used for negative EIR as a function of PLR warnings
+        Real64 ChillerEIRFPLRMin = 0.0;              // Minimum value of PLR from EIRFPLR curve
+        Real64 ChillerEIRFPLRMax = 0.0;              // Maximum value of PLR from EIRFPLR curve
+        int DeltaTErrCount = 0;                      // Evaporator delta T equals 0 for variable flow chiller warning messages
+        int DeltaTErrCountIndex = 0;                 // Index to evaporator delta T = 0 for variable flow chiller warning messages
+        PlantLocation CWPlantLoc;                    // chilled water plant loop component index
+        PlantLocation CDPlantLoc;                    // condenser water plant loop component index
+        PlantLocation HRPlantLoc;                    // heat recovery water plant loop component index
+        Sched::Schedule *basinHeaterSched = nullptr; // basin heater schedule
         int CondMassFlowIndex = 0;
         std::string MsgBuffer1;          // - buffer to print warning messages on following time step
         std::string MsgBuffer2;          // - buffer to print warning messages on following time step
@@ -187,9 +188,21 @@ namespace ChillerElectricEIR {
         Real64 CondenserFanEnergyConsumption = 0.0; // reporting: Air-cooled condenser fan energy [J]
         Real64 BasinHeaterConsumption = 0.0;        // Basin heater energy consumption (J)
         bool IPLVFlag = true;
+        int ChillerCondLoopFlowFLoopPLRIndex = 0; // Condenser loop flow rate fraction function of loop PLR
+        int CondDT = 0;                           // Temperature difference across condenser
+        Sched::Schedule *condDTSched = nullptr;   // Temperature difference across condenser schedule
+        Real64 MinCondFlowRatio = 0.2;            // Minimum condenser flow fraction
         DataBranchAirLoopPlant::ControlType EquipFlowCtrl = DataBranchAirLoopPlant::ControlType::Invalid;
+        Real64 VSBranchPumpMinLimitMassFlowCond = 0.0;
+        bool VSBranchPumpFoundCond = false;
+        bool VSLoopPumpFoundCond = false;
 
-        static PlantComponent *factory(EnergyPlusData &state, std::string const &objectName);
+        // thermosiphon model
+        int thermosiphonTempCurveIndex = 0;
+        Real64 thermosiphonMinTempDiff = 0.0;
+        int thermosiphonStatus = 0;
+
+        static ElectricEIRChillerSpecs *factory(EnergyPlusData &state, std::string const &objectName);
 
         void setupOutputVars(EnergyPlusData &state);
 
@@ -226,6 +239,8 @@ namespace ChillerElectricEIR {
         );
 
         virtual void update(EnergyPlusData &state, Real64 MyLoad, bool RunFlag);
+
+        bool thermosiphonDisabled(EnergyPlusData &state);
     };
 
     void GetElectricEIRChillerInput(EnergyPlusData &state);
@@ -237,9 +252,17 @@ struct ChillerElectricEIRData : BaseGlobalStruct
     bool getInputFlag = true;
     Array1D<ChillerElectricEIR::ElectricEIRChillerSpecs> ElectricEIRChiller;
 
+    void init_constant_state([[maybe_unused]] EnergyPlusData &state) override
+    {
+    }
+
+    void init_state([[maybe_unused]] EnergyPlusData &state) override
+    {
+    }
+
     void clear_state() override
     {
-        *this = ChillerElectricEIRData();
+        new (this) ChillerElectricEIRData();
     }
 };
 

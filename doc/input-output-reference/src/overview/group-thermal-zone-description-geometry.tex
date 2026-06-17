@@ -9,11 +9,11 @@ Every Zone contains one or more spaces.
 
 Space is an optional input. If a Zone has no Space(s) specified in the input then a default Space named \textless{}Zone Name\textgreater{} will be created.
 If some surfaces in a Zone are assigned to a Space and some are not, then a default Space
-named \textless{}Zone Name\textgreater{}-Remainder will be created. 
-Input references to Space Names must have a matching Space object. 
+named \textless{}Zone Name\textgreater{}-Remainder will be created.
+Input references to Space Names must have a matching Space object.
 Default space names may not be referenced in the input except for \hyperref[outputvariable]{Output:Variable} keys).
 
-Space geometry is specified by attaching surfaces to a space using the ``Space Name'' field. If a Space has only floor surface(s) and internal mass assigned to it, the Space is assumed to share the same enclosure with other such Spaces in the same Zone (and with any surfaces that are not explicitly assinged to a space). If a Space also has other types of surfaces (e.g. wall, ceiling, or roof) then the Space forms its own enclosure unless it is connected to other spaces with air boundaries (see \hyperref[constructionairboundary]{Construction:AirBoundary}).
+Space geometry is specified by attaching surfaces to a space using the ``Space Name'' field. If a Space has only floor surface(s) and internal mass assigned to it, the Space is assumed to share the same enclosure with other such Spaces in the same Zone (and with any surfaces that are not explicitly assigned to a space). If a Space also has other types of surfaces (e.g. wall, ceiling, or roof) then the Space forms its own enclosure unless it is connected to other spaces with air boundaries (see \hyperref[constructionairboundary]{Construction:AirBoundary}).
 
 \subsubsection{Inputs}\label{space-inputs-048}
 
@@ -31,7 +31,7 @@ Space ceiling height is used in several areas within EnergyPlus (such as various
 
 Note that the Ceiling Height is the distance from the Floor to the Ceiling in the Space, not an absolute height from the ground.
 
-NOTE: At the moment, the autocalcuted Space ceiling height is set to the Zone ceiling height.
+NOTE: At the moment, the autocalculated Space ceiling height is set to the Zone ceiling height.
 
 \paragraph{Field: Volume}\label{field-space-volume}
 
@@ -47,13 +47,13 @@ For each Zone, the calculated floor area is the sum of the space floor areas bel
 
 \paragraph{Field: Space Type}\label{space-type}
 
-Space type is used to categorize spaces by activity type, such as office, classroom, storage, etc. There is no predefined list of space types; 
+Space type is used to categorize spaces by activity type, such as office, classroom, storage, etc. There is no predefined list of space types;
 any valid input string may be used. Several table outputs include a subtable by Space Type. There are also SpaceType \hyperref[outputmeter-and-outputmetermeterfileonly]{Output:Meters}. See the meter details (mtd) output file for a list of all available meters for a given simulation.
 If left blank, this field defaults to ``General'''.
- 
+
 \paragraph{Field: Tag \textless{}\#\textgreater{}}\label{field-space-tag}
 
-Tags are used to group spaces by additional characteristics that may be more or less detailed than Space Type. For example, codes and standards designations for ventilation or occupancy may use specific terms that are different from one standard to the next. There is no predefined list of tags; 
+Tags are used to group spaces by additional characteristics that may be more or less detailed than Space Type. For example, codes and standards designations for ventilation or occupancy may use specific terms that are different from one standard to the next. There is no predefined list of tags;
 any valid input string may be used. Several table outputs include a subtable by Space Tag.
 
 
@@ -74,12 +74,11 @@ The name of the SpaceList object. This name must be unique across Zone, Space, Z
 Reference to a Space object.
 
 \begin{lstlisting}
-
 SpaceList,
-  Mid Floor List,   !- Name
-  Mid West Space,   !- Space 1 Name
-  Mid Center Space, !- Space 2 Name
-  Mid East Space;   !- Space 3 Name
+  Mid Floor List,             !- Name
+  Mid West Space,             !- Space 1 Name
+  Mid Center Space,           !- Space 2 Name
+  Mid East Space;             !- Space 3 Name
 \end{lstlisting}
 
 
@@ -90,8 +89,8 @@ This object defines a thermal zone of the building. Every Zone contains one or m
 
 Space is an optional input. If a Zone has no Space(s) specified in the input then a default Space named \textless{}Zone Name\textgreater{} will be created.
 If some surfaces in a Zone are assigned to a Space and some are not, then a default Space
-named \textless{}Zone Name\textgreater{}-Remainder will be created. 
-Input references to Space Names must have a matching Space object. 
+named \textless{}Zone Name\textgreater{}-Remainder will be created.
+Input references to Space Names must have a matching Space object.
 Default space names may not be referenced in the input except for \hyperref[outputvariable]{Output:Variable} keys).
 
 \subsubsection{Inputs}\label{inputs-048}
@@ -106,7 +105,7 @@ The Zone North Axis is specified \textbf{relative to the Building North Axis}. T
 
 \paragraph{Field(s): (X,Y,Z) Origin}\label{fields-xyz-origin}
 
-The X,Y,Z coordinates of a zone origin can be specified, for convenience in vertice entry. Depending on the values in ``\hyperref[globalgeometryrules]{GlobalGeometryRules}'' (see description later in this section), these will be used to completely specify the building coordinates in ``world coordinate'' or not. Zone Origin coordinates are specified \textbf{relative to the Building Origin (which always 0,0,0)}. The following figure illustrates the use of Zone North Axis as well as Zone Origin values.
+The X,Y,Z coordinates of a zone origin can be specified, for convenience in vertices entry. Depending on the values in ``\hyperref[globalgeometryrules]{GlobalGeometryRules}'' (see description later in this section), these will be used to completely specify the building coordinates in ``world coordinate'' or not. Zone Origin coordinates are specified \textbf{relative to the Building Origin (which always 0,0,0)}. The following figure illustrates the use of Zone North Axis as well as Zone Origin values.
 
 \begin{figure}[hbtp] % fig 27
 \centering
@@ -157,17 +156,16 @@ This optional field defaults to Yes if not specified. The field is used to show 
 And, an IDF example:
 
 \begin{lstlisting}
-
-  Zone,
-      DORM ROOMS AND COMMON AREAS,  !- Name
-      0.0000000E+00,           !- Direction of Relative North {deg}
-      0.0000000E+00,           !- X Origin {m}
-      6.096000,                !- Y Origin {m}
-      0.0000000E+00,           !- Z Origin {m}
-      1,                       !- Type
-      1,                       !- Multiplier
-      autocalculate,           !-Ceiling Height {m}
-      autocalculate;           !- Volume {m3}
+Zone,
+  DORM ROOMS AND COMMON AREAS,!- Name
+  0.0000000E+00,              !- Direction of Relative North {deg}
+  0.0000000E+00,              !- X Origin {m}
+  6.096000,                   !- Y Origin {m}
+  0.0000000E+00,              !- Z Origin {m}
+  1,                          !- Type
+  1,                          !- Multiplier
+  autocalculate,              !- Ceiling Height {m}
+  autocalculate;              !- Volume {m3}
 \end{lstlisting}
 
 \subsubsection{Zone Outputs}\label{outputs-037}
@@ -224,6 +222,8 @@ The outdoor wind speed calculated at the height above ground of the zone centroi
   Zone,Average,Space Mean Air Dewpoint Temperature {[}C{]}
 \item
   Zone,Average,Space Mean Radiant Temperature {[}C{]}
+\item
+  Zone,Average,Enclosure Mean Radiant Temperature {[}C{]}
 \item
   Zone,Average,Space Operative Temperature {[}C{]}
 \item
@@ -293,6 +293,10 @@ In addition to the canned Surface reports (view the Reports section later in thi
   Zone,Sum,Zone Total Internal Total Heating Energy {[}J{]}
 \item
   Zone,Average,Zone Total Internal Total Heating Rate {[}W{]}
+ \item
+  Zone Phase Change Material Melting Enthalpy{[{J/kg}]}
+ \item
+  Zone Phase Change Material Freezing Enthalpy{[{J/kg}]}
 \item
   HVAC,Average,Zone Exfiltration Heat Transfer Rate {[}W{]}
 \item
@@ -371,6 +375,13 @@ These two variable outputs are/should be identical. However, note that they can 
 
 From the code definition, the zone mean air temperature is the average temperature of the air temperatures at the system timestep. Remember that the zone heat balance represents a ``well stirred'' model for a zone, therefore there is only one mean air temperature to represent the air temperature for the zone unless a non-mixing RoomAirModel is specified.
 
+\paragraph{Zone Wetbulb Globe Temperature {[}C{]}}\label{zone-wetbulb-globe-temperature-c}
+
+The indoor wet-bulb globe temperature (WBGT) is a measure of indoor heat stress as it affects humans.
+It is calculated as a weighted average of the zone wet-bulb temperature (WBT) and the operative temperature (OT) as follows
+
+WBGT = 0.7*WBT + 0.3*OT
+
 \paragraph{Zone Air Temperature {[}C{]}}\label{zone-air-temperature-c}
 
 This is very similar to the mean air temperature in the last field. The ``well stirred'' model for the zone is the basis, but this temperature is also available at the ``detailed'' system timestep.
@@ -384,8 +395,10 @@ This is the dewpoint temperature of the zone calculated from the Zone Mean Air T
 This is the zone air node temperature for the well-mixed room air model, which is the default room air model type (\hyperref[roomairmodeltype]{RoomAirModelType} = Mixing). But for other types of Room Air Model (the RoomAir:TemperaturePattern:* and RoomAirSettings:* objects) the zone thermostat air temperature may depend on the Thermostat Height and Thermostat Offset.
 
 \paragraph{Zone Mean Radiant Temperature {[}C{]}}\label{zone-mean-radiant-temperature-c}
+\paragraph{Space Mean Radiant Temperature {[}C{]}}\label{space-mean-radiant-temperature-c}
+\paragraph{Enclosure Mean Radiant Temperature {[}C{]}}\label{enclosure-mean-radiant-temperature-c}
 
-The Mean Radiant Temperature (MRT) in degrees Celsius of a space is a measure of the combined effects of temperatures of surfaces within that space. Specifically it is the surface area $\times$ emissivity weighted average of the zone inside surface temperatures (ref. Surface Inside Temperature), where emissivity is the Thermal Absorptance of the inside material layer of each surface.
+The Mean Radiant Temperature (MRT) in degrees Celsius is the surface area $\times$ emissivity weighted average of the \hyperref[surface-inside-face-temperature-c]{Surface Inside Face Temperature}, where emissivity is the Thermal Absorptance of the inside material layer of each surface. Zone Mean Radiant Temperature is based on all surfaces in the zone (regardless of what enclosure each surface is in). Enclosure Mean Radiant Temperature is based on all surfaces in an enclosure (one or more \hyperref[space]{Spaces}, see \hyperref[constructionairboundary]{Construction:AirBoundary}). Space Mean Radiant Temperature is based on all surfaces in the enclosure which contains the space (same as its Enclsoure Mean Radiant Temperature).
 
 \paragraph{Zone Operative Temperature {[}C{]}}\label{zone-operative-temperature-c}
 
@@ -393,7 +406,104 @@ Zone Operative Temperature (OT) is the average of the Zone Mean Air Temperature 
 
 \paragraph{Zone Air Heat Balance Internal Convective Heat Gain Rate {[}W{]}}\label{zone-air-heat-balance-internal-convective-heat-gain-rate-w}
 
-The Zone Air Heat Balance Internal Convective Heat Gain Rate is the sum, in watts, of heat transferred to the zone air from all types of internal gains, including people, lights, equipment etc. This and the following provide results on the load components of the zone air heat balance. This field is not multiplied by zone or group multipliers.
+The Zone Air Heat Balance Internal Convective Heat Gain Rate is the sum, in watts, of heat transferred to the zone air from all types of internal gains from energyplus objects (e.g., people, lights, devices, appliances, equipment) listed in Tables \ref{table:space-or-zone-air-heat-balance-internal-convective-heat-gain-constituents} and \ref{table:space-or-zone-air-heat-balance-internal-convective-heat-gain-from-fenestration}. In addition to the convective heat gains listed in these tables, if a zone or a space is served by a zone HVAC equipment, i.e., the zone has no return air node, or served by an AirloopHVAC system that has cycling fan operating mode, then the convective heat gain specified to the return air is re-directed to the space or the zone air heat balance as convective internal heat gain. This and the following provide results on the load components of the zone air heat balance. This field is not multiplied by zone or group multipliers.
+
+\begin{longtable}[c]{@{}lc@{}}
+	\caption{Space or Zone Zone Air Heat Balance Internal Convective Heat Gain Constituents} \label{table:space-or-zone-air-heat-balance-internal-convective-heat-gain-constituents} \tabularnewline
+	\toprule
+	EnergyPlus Object &  Convective Heat Gain Type \tabularnewline
+	\midrule
+	\endfirsthead
+
+	\caption[]{Space or Zone Zone Air Heat Balance Internal Convective Heat Gain Constituents} \tabularnewline
+	\toprule
+	EnergyPlus Object &  Convective Heat Gain Type \tabularnewline
+	\midrule
+	\endhead
+
+	People     &     People    \tabularnewline
+	Lights     &     Lights    \tabularnewline
+	ElectricEquipment     &     ElectricEquipment    \tabularnewline
+	ElectricEquipment:ITE:AirCooled     &     ElectricEquipmentITEAirCooled    \tabularnewline
+	GasEquipment     &     GasEquipment    \tabularnewline
+	HotWaterEquipment     &     HotWaterEquipment    \tabularnewline
+	SteamEquipment     &     SteamEquipment    \tabularnewline
+	OtherEquipment     &     OtherEquipment    \tabularnewline
+	Refrigeration:Case     &     RefrigerationCase    \tabularnewline
+	Refrigeration:CompressorRack     &     RefrigerationCompressorRack    \tabularnewline
+	Refrigeration:System:Condenser:AirCooled     &     RefrigerationSystemAirCooledCondenser    \tabularnewline
+	Refrigeration:System:SuctionPipe     &     RefrigerationSystemSuctionPipe    \tabularnewline
+	Refrigeration:SecondarySystem:Receiver     &     RefrigerationSecondaryReceiver    \tabularnewline
+	Refrigeration:SecondarySystem:Pipe     &     RefrigerationSecondaryPipe    \tabularnewline
+	Refrigeration:WalkIn     &     RefrigerationWalkIn    \tabularnewline
+	Refrigeration:TranscriticalSystem:GasCooler:AirCooled     &     RefrigerationTransSysAirCooledGasCooler    \tabularnewline
+	Refrigeration:TranscriticalSystem:SuctionPipeMT     &     RefrigerationTransSysSuctionPipeMT    \tabularnewline
+	Refrigeration:TranscriticalSystem:SuctionPipeLT     &     RefrigerationTransSysSuctionPipeLT    \tabularnewline
+	WaterUse:Equipment     &     WaterUseEquipment    \tabularnewline
+	WaterHeater:Mixed     &     WaterHeaterMixed    \tabularnewline
+	WaterHeater:Stratified     &     WaterHeaterStratified    \tabularnewline
+	ZoneBaseboard:OutdoorTemperatureControlled     &     ZoneBaseboardOutdoorTemperatureControlled    \tabularnewline
+	ThermalStorage:ChilledWater:Mixed     &     ThermalStorageChilledWaterMixed    \tabularnewline
+	ThermalStorage:ChilledWater:Stratified     &     ThermalStorageChilledWaterStratified    \tabularnewline
+	Pipe:Indoor     &     PipeIndoor    \tabularnewline
+	Pump:VariableSpeed     &     Pump\textunderscore VarSpeed    \tabularnewline
+	Pump:ConstantSpeed     &     Pump\textunderscore ConSpeed    \tabularnewline
+	Pump:VariableSpeed:Condensate     &     Pump\textunderscore Cond    \tabularnewline
+	HeaderedPumps:VariableSpeed     &     PumpBank\textunderscore VarSpeed    \tabularnewline
+	HeaderedPumps:ConstantSpeed     &     PumpBank\textunderscore ConSpeed    \tabularnewline
+	PlantComponent:UserDefined     &     PlantComponentUserDefined    \tabularnewline
+	Coil:UserDefined     &     CoilUserDefined    \tabularnewline
+	ZoneHVAC:ForcedAir:UserDefined     &     ZoneHVACForcedAirUserDefined    \tabularnewline
+	AirTerminal:SingleDuct:UserDefined     &     AirTerminalUserDefined    \tabularnewline
+	Coil:Cooling:DX:SingleSpeed:ThermalStorage     &     PackagedTESCoilTank    \tabularnewline
+	Fan:SystemModel     &     FanSystemModel    \tabularnewline
+	Coil:Cooling:DX:SingleSpeed     &     SecCoolingDXCoilSingleSpeed    \tabularnewline
+	Coil:Heating:DX:SingleSpeed     &     SecHeatingDXCoilSingleSpeed    \tabularnewline
+	Coil:Cooling:DX:TwoSpeed     &     SecCoolingDXCoilTwoSpeed    \tabularnewline
+	Coil:Cooling:DX:MultiSpeed     &     SecCoolingDXCoilMultiSpeed    \tabularnewline
+	Coil:Heating:DX:MultiSpeed     &     SecHeatingDXCoilMultiSpeed    \tabularnewline
+	Generator:FuelCell     &     GeneratorFuelCell    \tabularnewline
+	Generator:MicroCHP     &     GeneratorMicroCHP    \tabularnewline
+	ElectricLoadCenter:Transformer     &     ElectricLoadCenterTransformer    \tabularnewline
+	ElectricLoadCenter:Inverter:Simple     &     ElectricLoadCenterInverterSimple    \tabularnewline
+	ElectricLoadCenter:Inverter:FunctionOfPower     &     ElectricLoadCenterInverterFunctionOfPower    \tabularnewline
+	ElectricLoadCenter:Inverter:LookUpTable     &     ElectricLoadCenterInverterLookUpTable    \tabularnewline
+	ElectricLoadCenter:Storage:LiIonNMCBattery     &     ElectricLoadCenterStorageLiIonNmcBattery    \tabularnewline
+	ElectricLoadCenter:Storage:Battery     &     ElectricLoadCenterStorageBattery    \tabularnewline
+	ElectricLoadCenter:Storage:Simple     &     ElectricLoadCenterStorageSimple    \tabularnewline
+	ElectricLoadCenter:Storage:Converter     &     ElectricLoadCenterConverter    \tabularnewline
+
+	\bottomrule
+
+\end{longtable}
+
+
+
+\begin{longtable}[c]{@{}lcc@{}}
+	\caption{Space or Zone Zone Air Heat Balance Internal Convective Heat Gain from fenestration} \label{table:space-or-zone-air-heat-balance-internal-convective-heat-gain-from-fenestration} \tabularnewline
+	\toprule
+	FenestrationSurface:Detailed Components &  Internal Convective Heat Gain Sources \tabularnewline
+	\midrule
+	\endfirsthead
+
+	\caption[]{Space or Zone Zone Air Heat Balance Internal Convective Heat Gain Constituents} \tabularnewline
+	\toprule
+	FenestrationSurface:Detailed Components &  Internal Convective Heat Gain Sources \tabularnewline
+	\midrule
+	\endhead
+
+	WindowProperty:FrameAndDivider &  Convective heat gain from window frame and divider  \tabularnewline
+	Construction:WindowEquivalentLayer  &  Other convective heat gain from equivalent layer window model \tabularnewline
+	Construction &  Natural convection heat gain from a gap \tabularnewline
+	  &             between glass and interior shade or blind \tabularnewline
+	Construction:ComplexFenestrationState &  Convective heat gain from air flow \tabularnewline
+	  &             through a gap between glass and interior shade or blind \tabularnewline
+
+
+	\bottomrule
+
+\end{longtable}
+
 
 \paragraph{Zone Air Heat Balance Surface Convection Rate {[}W{]}}\label{zone-air-heat-balance-surface-convection-rate-w}
 
@@ -512,19 +622,53 @@ These output variables express the sum of heat gain in Watts (for rate) or joule
 
 \paragraph{Space or Zone Total Internal Convective Heating Energy {[}J{]}}\label{zone-total-internal-convective-heating-energy-j}
 
-These output variables represent the sum of convective gains from specific sources (e.g.~equipment) throughout the space or zone in Watts (for rate) or joules. This includes convective gain from \hyperref[people]{People}, Lights, Electric Equipment, Gas Equipment, Other Equipment, Hot Water Equipment, and Steam Equipment.
+These output variables represent the sum of convective gains from specific sources (e.g.~equipment) throughout the space or zone in Watts (for rate) or joules. This includes convective gain from Energyplus objects that are listed in Table \ref{table:space-or-zone-total-internal-heat-gain-constituents}:
+
+\begin{longtable}[c]{@{}lcc@{}}
+	\caption{Space or Zone Total Internal Heat Gain Constituents} \label{table:space-or-zone-total-internal-heat-gain-constituents} \tabularnewline
+	\toprule
+	EnergyPlus Object &  Internal Heat Gain Type \tabularnewline
+	\midrule
+	\endfirsthead
+
+	\caption[]{Space or Zone Total Internal Heat Gain Constituents} \tabularnewline
+	\toprule
+	EnergyPlus Object &  Internal Heat Gain Type \tabularnewline
+	\midrule
+	\endhead
+
+	People   &  People \tabularnewline
+	Lights   &  Lights \tabularnewline
+	ElectricEquipment   &  ElectricEquipment \tabularnewline
+	ElectricEquipment:ITE:AirCooled   &  ElectricEquipmentITEAirCooled \tabularnewline
+	GasEquipment   &  GasEquipment \tabularnewline
+	HotWaterEquipment   &  HotWaterEquipment \tabularnewline
+	SteamEquipment   &  SteamEquipment \tabularnewline
+	OtherEquipment   &  OtherEquipment \tabularnewline
+
+	\bottomrule
+
+\end{longtable}
 
 \paragraph{Space or Zone Total Internal Latent Gain Rate {[}W{]}}\label{zone-total-internal-latent-gain-rate-w}
 
 \paragraph{Space or Zone Total Internal Latent Gain Energy {[}J{]}}\label{zone-total-internal-latent-gain-energy-j}
 
-These output variables represent the sum of latent gains from specific internal sources (e.g.~equipment) throughout the space or zone in Watts (for rate) or joules. This includes latent gain from \hyperref[people]{People}, Electric Equipment, Gas Equipment, Other Equipment, Hot Water Equipment, and Steam Equipment.
+These output variables represent the sum of latent gains from specific internal sources (e.g.~equipment) throughout the space or zone in Watts (for rate) or joules. This includes latent gain from Energyplus objects that are listed in Table \ref{table:space-or-zone-total-internal-heat-gain-constituents}.
 
 \paragraph{Space or Zone Total Internal Total Heating Rate {[}W{]}}\label{zone-total-internal-total-heating-rate-w}
 
 \paragraph{Space or Zone Total Internal Total Heating Energy {[}J{]}}\label{zone-total-internal-total-heating-energy-j}
 
-These output variables represent the sum of all heat gains throughout the space or zone in Watts (for rate) or joules. This includes all heat gains from \hyperref[people]{People}, Lights, Electric Equipment, Gas Equipment, Other Equipment, Hot Water Equipment, and Steam Equipment.
+These output variables represent the sum of all heat gains throughout the space or zone in Watts (for rate) or joules. This includes all heat gains from Energyplus objects that are listed in Table \ref{table:space-or-zone-total-internal-heat-gain-constituents}.
+
+\paragraph{Zone Phase Change Material Melting Enthalpy {[}J/kg{]}}\label{zone-phase-change-material-melting-enthalpy-jkg}
+
+This output variable tracks the summation of all energy within a zone that is associated with phase change materials melting during the current time period in J/kg.  This report is only produced when the user enters phase change materials (see \hyperref[materialpropertyphasechange]{MaterialProperty:PhaseChange}), opts to use the Conduction Finite Difference (aka CondFD) solution algorithm (see \hyperref[heatbalancealgorithm]{HeatBalanceAlgorithm}), and requests DisplayAdvancedReportVariables (see \hyperref[outputdiagnostics]{Output:Diagnostics}).
+
+\paragraph{Zone Phase Change Material Freezing Enthalpy {[}J/kg{]}}\label{zone-phase-change-material-freezing-enthalpy-jkg}
+
+This output variable tracks the summation of all energy within a zone that is associated with phase change materials freezing during the current time period in J/kg.  This report is only produced when the user enters phase change materials (\hyperref[materialpropertyphasechange]{MaterialProperty:PhaseChange}), opts to use the Conduction Finite Difference (aka CondFD) solution algorithm (see \hyperref[heatbalancealgorithm]{HeatBalanceAlgorithm}), and requests DisplayAdvancedReportVariables (see \hyperref[outputdiagnostics]{Output:Diagnostics}).
 
 \paragraph{Zone Exfiltration Heat Transfer Rate {[}W{]}}\label{zone-exfiltration-heat-transfer-rate-w}
 
@@ -532,7 +676,7 @@ These output variables represent the sum of all heat gains throughout the space 
 
 \paragraph{Zone Exfiltration Latent Heat Transfer Rate {[}W{]}}\label{zone-exfiltration-latent-heat-transfer-rate-w}
 
-These output variables represent the heat emitted to ambient from exfiltration in Watts. The exfiltration rate is calculated by solving a mass flow balance on the zone including infiltration, ventilation, outdoor air mixing, zone-to-zone mixing, and all of the zone inlet, exhaust, and return nodes. The latent parts are determined by taking the difference between the total and the sensible rate. Positive values indicate the zone injects heat to the environment, while negative values indicate the building extracts heat from the environment. 
+These output variables represent the heat emitted to ambient from exfiltration in Watts. The exfiltration rate is calculated by solving a mass flow balance on the zone including infiltration, ventilation, outdoor air mixing, zone-to-zone mixing, and all of the zone inlet, exhaust, and return nodes. The latent parts are determined by taking the difference between the total and the sensible rate. Positive values indicate the zone injects heat to the environment, while negative values indicate the building extracts heat from the environment.
 
 \paragraph{Zone Exhaust Air Heat Transfer Rate {[}W{]}}\label{zone-exhaust-heat-transfer-rate-w}
 
@@ -540,7 +684,7 @@ These output variables represent the heat emitted to ambient from exfiltration i
 
 \paragraph{Zone Exhaust Air Latent Heat Transfer Rate {[}W{]}}\label{zone-exhaust-latent-heat-transfer-rate-w}
 
-These output variables represent the heat emitted to ambient from exhaust air in Watts. The zone exhaust air flow rate is aggregated from the zone exhaust nodes. Positive values indicate the building injects heat to the environment, while negative values indicate the building extracts heat from the environment. 
+These output variables represent the heat emitted to ambient from exhaust air in Watts. The zone exhaust air flow rate is aggregated from the zone exhaust nodes. Positive values indicate the building injects heat to the environment, while negative values indicate the building extracts heat from the environment.
 
 \paragraph{Site Total Zone Exfiltration Heat Loss {[}W{]}}\label{site-total-exfiltration-heat-transfer-rate-w}
 
@@ -567,12 +711,11 @@ The name of the ZoneList object. This name must be unique across Zone, Space, Zo
 Reference to a Zone object. This object is extensible, so additional fields of this type can be added to the end of this object.
 
 \begin{lstlisting}
-
 ZoneList,
-  Mid Floor List,  !- Name
-  Mid West Zone,   !- Zone 1 Name
-  Mid Center Zone, !- Zone 2 Name
-  Mid East Zone;   !- Zone 3 Name
+  Mid Floor List,             !- Name
+  Mid West Zone,              !- Zone 1 Name
+  Mid Center Zone,            !- Zone 2 Name
+  Mid East Zone;              !- Zone 3 Name
 \end{lstlisting}
 
 \subsubsection{Outputs}\label{outputs-1-028}
@@ -628,11 +771,10 @@ Reference to a \hyperref[zonelist]{ZoneList} object. The zones in the list const
 An integer multiplier. Zone List Multiplier is designed as a ``multiplier'' for floor area, zone loads, and energy consumed by internal gains. It takes the calculated load for the zone and multiplies it, sending the multiplied load to the attached HVAC system. The HVAC system size is specified to meet the entire multiplied zone load and will report the amount of the load met in the Zone Air System Sensible Heating or Cooling Energy/Rate output variable. Autosizing automatically accounts for multipliers. Metered energy consumption by internal gains objects such as Lights or Electric Equipment will be multiplied. The default is 1.
 
 \begin{lstlisting}
-
 ZONE GROUP,
-    Mid Floor,  !- Zone Group Name
-    Mid Floor List,  !- Zone List Name
-    8;  !- Zone List Multiplier
+  Mid Floor,                  !- Zone Group Name
+  Mid Floor List,             !- Zone List Name
+  8;                          !- Zone List Multiplier
 \end{lstlisting}
 
 \subsubsection{Outputs}\label{outputs-2-023}
@@ -1419,7 +1561,7 @@ This is a unique name associated with the window.
 
 This is the name of the subsurface's construction (ref: objects: Construction, \hyperref[constructionwindowdatafile]{Construction:WindowDataFile}, \hyperref[constructioncomplexfenestrationstate]{Construction:ComplexFenestrationState}).
 
-For windows, if Construction Name is not found among the constructions on the input (.idf) file, the Window Data File (ref. \hyperref[constructionwindowdatafile]{Construction:WindowDataFile} object) will be searched for that Construction Name (see ``Importing Windows from WINDOW''). If that file is not present or if the Construction Name does not match the name of an entry on the file, an error will result. If there is a match, a window construction and its corresponding glass and gas materials will be created from the information read from the file.
+For windows, if Construction Name is not found among the constructions on the input (.idf) file, the ``Window data file'' (ref. \hyperref[constructionwindowdatafile]{Construction:WindowDataFile} object) will be searched for that Construction Name (see \hyperref[importing-windows-from-window-program]{Importing Windows from WINDOW Program}). If that file is not present or if the Construction Name does not match the name of an entry on the file, an error will result. If there is a match, a window construction and its corresponding glass and gas materials will be created from the information read from the file.
 
 \paragraph{Field: Building Surface Name}\label{field-building-surface-name-000}
 
@@ -1527,7 +1669,7 @@ This is a unique name associated with the glass door.
 
 This is the name of the subsurface's construction (ref: objects: Construction, \hyperref[constructionwindowdatafile]{Construction:WindowDataFile}, \hyperref[constructioncomplexfenestrationstate]{Construction:ComplexFenestrationState}).
 
-For windows, if Construction Name is not found among the constructions on the input (.idf) file, the Window Data File (ref. \hyperref[constructionwindowdatafile]{Construction:WindowDataFile} object) will be searched for that Construction Name (see ``Importing Windows from WINDOW''). If that file is not present or if the Construction Name does not match the name of an entry on the file, an error will result. If there is a match, a window construction and its corresponding glass and gas materials will be created from the information read from the file.
+For windows, if Construction Name is not found among the constructions on the input (.idf) file, the ``Window data file'' (ref. \hyperref[constructionwindowdatafile]{Construction:WindowDataFile} object) will be searched for that Construction Name (see \hyperref[importing-windows-from-window-program]{Importing Windows from WINDOW Program}). If that file is not present or if the Construction Name does not match the name of an entry on the file, an error will result. If there is a match, a window construction and its corresponding glass and gas materials will be created from the information read from the file.
 
 \paragraph{Field: Building Surface Name}\label{field-building-surface-name-2}
 
@@ -1585,7 +1727,7 @@ This is a unique name associated with the window.
 
 This is the name of the subsurface's construction (ref: objects: Construction, \hyperref[constructionwindowdatafile]{Construction:WindowDataFile}, \hyperref[constructioncomplexfenestrationstate]{Construction:ComplexFenestrationState}).
 
-For windows, if Construction Name is not found among the constructions on the input (.idf) file, the Window Data File (ref. \hyperref[constructionwindowdatafile]{Construction:WindowDataFile} object) will be searched for that Construction Name (see ``Importing Windows from WINDOW''). If that file is not present or if the Construction Name does not match the name of an entry on the file, an error will result. If there is a match, a window construction and its corresponding glass and gas materials will be created from the information read from the file.
+For windows, if Construction Name is not found among the constructions on the input (.idf) file, the ``Window data file'' (ref. \hyperref[constructionwindowdatafile]{Construction:WindowDataFile} object) will be searched for that Construction Name (see \hyperref[importing-windows-from-window-program]{Importing Windows from WINDOW Program}). If that file is not present or if the Construction Name does not match the name of an entry on the file, an error will result. If there is a match, a window construction and its corresponding glass and gas materials will be created from the information read from the file.
 
 \paragraph{Field: Building Surface Name}\label{field-building-surface-name-3}
 
@@ -1695,7 +1837,7 @@ This is a unique name associated with the glass door.
 
 This is the name of the subsurface's construction (ref: objects: Construction, \hyperref[constructionwindowdatafile]{Construction:WindowDataFile}, \hyperref[constructioncomplexfenestrationstate]{Construction:ComplexFenestrationState}).
 
-For windows, if Construction Name is not found among the constructions on the input (.idf) file, the Window Data File (ref. \hyperref[constructionwindowdatafile]{Construction:WindowDataFile} object) will be searched for that Construction Name (see ``Importing Windows from WINDOW''). If that file is not present or if the Construction Name does not match the name of an entry on the file, an error will result. If there is a match, a window construction and its corresponding glass and gas materials will be created from the information read from the file.
+For windows, if Construction Name is not found among the constructions on the input (.idf) file, the ``Window data file'' (ref. \hyperref[constructionwindowdatafile]{Construction:WindowDataFile} object) will be searched for that Construction Name (see \hyperref[importing-windows-from-window-program]{Importing Windows from WINDOW Program}). If that file is not present or if the Construction Name does not match the name of an entry on the file, an error will result. If there is a match, a window construction and its corresponding glass and gas materials will be created from the information read from the file.
 
 \paragraph{Field: Building Surface Name}\label{field-building-surface-name-5}
 
@@ -1740,87 +1882,86 @@ This field is the height of the door in meters.
 Examples of the rectangular surfaces are found in the example files 4ZoneWithShading\_Simple\_1.idf and 4ZoneWithShading\_Simple\_2. Some examples:
 
 \begin{lstlisting}
+Wall:Exterior,
+  Zn001:Wall001,              !- Name
+  EXTERIOR,                   !- Construction Name
+  ZONE 1,                     !- Zone Name
+  180,                        !- Azimuth Angle {deg}
+  90,                         !- Tilt Angle {deg}
+  0,                          !- Starting X Coordinate {m}
+  0,                          !- Starting Y Coordinate {m}
+  0,                          !- Starting Z Coordinate {m}
+  20,                         !- Length {m}
+  10;                         !- Height {m}
 
-  Wall:Exterior,
-      Zn001:Wall001,           !- Name
-      EXTERIOR,                !- Construction Name
-      ZONE 1,                  !- Zone Name
-      180,                     !- Azimuth Angle {deg}
-      90,                      !- Tilt Angle {deg}
-      0,                       !- Starting X Coordinate {m}
-      0,                       !- Starting Y Coordinate {m}
-      0,                       !- Starting Z Coordinate {m}
-      20,                      !- Length {m}
-      10;                      !- Height {m}
+Window,
+  Zn001:Wall001:Win001,       !- Name
+  SINGLE PANE HW WINDOW,      !- Construction Name
+  Zn001:Wall001,              !- Building Surface Name
+  ,                           !- Frame and Divider Name
+  1,                          !- Multiplier
+  4,                          !- Starting X Coordinate {m}
+  3,                          !- Starting Z Coordinate {m}
+  3,                          !- Length {m}
+  5;                          !- Height {m}
 
-    Window,
-      Zn001:Wall001:Win001,    !- Name
-      SINGLE PANE HW WINDOW,   !- Construction Name
-      Zn001:Wall001,           !- Building Surface Name
-      ,                        !- Frame and Divider Name
-      1,                       !- Multiplier
-      4,                       !- Starting X Coordinate {m}
-      3,                       !- Starting Z Coordinate {m}
-      3,                       !- Length {m}
-      5;                       !- Height {m}
+Door,
+  Zn001:Wall001:Door001,      !- Name
+  HOLLOW WOOD DOOR,           !- Construction Name
+  Zn001:Wall001,              !- Building Surface Name
+  1,                          !- Multiplier
+  14,                         !- Starting X Coordinate {m}
+  0,                          !- Starting Z Coordinate {m}
+  3,                          !- Length {m}
+  5;                          !- Height {m}
 
-    Door,
-      Zn001:Wall001:Door001,   !- Name
-      HOLLOW WOOD DOOR,        !- Construction Name
-      Zn001:Wall001,           !- Building Surface Name
-      1,                       !- Multiplier
-      14,                      !- Starting X Coordinate {m}
-      0,                       !- Starting Z Coordinate {m}
-      3,                       !- Length {m}
-      5;                       !- Height {m}
+Wall:Adiabatic,
+  Zn001:Wall004,              !- Name
+  INTERIOR,                   !- Construction Name
+  ZONE 1,                     !- Zone Name
+  90,                         !- Azimuth Angle {deg}
+  90,                         !- Tilt Angle {deg}
+  20,                         !- Starting X Coordinate {m}
+  0,                          !- Starting Y Coordinate {m}
+  0,                          !- Starting Z Coordinate {m}
+  20,                         !- Length {m}
+  10;                         !- Height {m}
 
-    Wall:Adiabatic,
-      Zn001:Wall004,           !- Name
-      INTERIOR,                !- Construction Name
-      ZONE 1,                  !- Zone Name
-      90,                      !- Azimuth Angle {deg}
-      90,                      !- Tilt Angle {deg}
-      20,                      !- Starting X Coordinate {m}
-      0,                       !- Starting Y Coordinate {m}
-      0,                       !- Starting Z Coordinate {m}
-      20,                      !- Length {m}
-      10;                      !- Height {m}
+Floor:Adiabatic,
+  Zn001:Flr001,               !- Name
+  FLOOR,                      !- Construction Name
+  ZONE 1,                     !- Zone Name
+  90,                         !- Azimuth Angle {deg}
+  180,                        !- Tilt Angle {deg}
+  0,                          !- Starting X Coordinate {m}
+  0,                          !- Starting Y Coordinate {m}
+  0,                          !- Starting Z Coordinate {m}
+  20,                         !- Length {m}
+  20;                         !- Width {m}
 
-    Floor:Adiabatic,
-      Zn001:Flr001,            !- Name
-      FLOOR,                   !- Construction Name
-      ZONE 1,                  !- Zone Name
-      90,                      !- Azimuth Angle {deg}
-      180,                     !- Tilt Angle {deg}
-      0,                       !- Starting X Coordinate {m}
-      0,                       !- Starting Y Coordinate {m}
-      0,                       !- Starting Z Coordinate {m}
-      20,                      !- Length {m}
-      20;                      !- Width {m}
+Ceiling:Interzone,
+  Zn001:Roof001,              !- Name
+  CEILING34,                  !- Construction Name
+  ZONE 1,                     !- Zone Name
+  Zn003:Flr001,               !- Outside Boundary Condition Object
+  180,                        !- Azimuth Angle {deg}
+  0,                          !- Tilt Angle {deg}
+  0,                          !- Starting X Coordinate {m}
+  0,                          !- Starting Y Coordinate {m}
+  10,                         !- Starting Z Coordinate {m}
+  20,                         !- Length {m}
+  20;                         !- Width {m}
 
-    Ceiling:Interzone,
-      Zn001:Roof001,           !- Name
-      CEILING34,               !- Construction Name
-      ZONE 1,                  !- Zone Name
-      Zn003:Flr001,            !- Outside Boundary Condition Object
-      180,                     !- Azimuth Angle {deg}
-      0,                       !- Tilt Angle {deg}
-      0,                       !- Starting X Coordinate {m}
-      0,                       !- Starting Y Coordinate {m}
-      10,                      !- Starting Z Coordinate {m}
-      20,                      !- Length {m}
-      20;                      !- Width {m}
-
-    Window,
-      Zn002:Wall001:Win001,    !- Name
-      SINGLE PANE HW WINDOW,   !- Construction Name
-      Zn002:Wall001,           !- Building Surface Name
-      ,                        !- Frame and Divider Name
-      1,                       !- Multiplier
-      4,                       !- Starting X Coordinate {m}
-      3,                       !- Starting Z Coordinate {m}
-      3,                       !- Length {m}
-      5;                       !- Height {m}
+Window,
+  Zn002:Wall001:Win001,       !- Name
+  SINGLE PANE HW WINDOW,      !- Construction Name
+  Zn002:Wall001,              !- Building Surface Name
+  ,                           !- Frame and Divider Name
+  1,                          !- Multiplier
+  4,                          !- Starting X Coordinate {m}
+  3,                          !- Starting Z Coordinate {m}
+  3,                          !- Length {m}
+  5;                          !- Height {m}
 \end{lstlisting}
 
 \subsection{Surface Vertices}\label{surface-vertices}
@@ -1849,7 +1990,7 @@ Each of the following surfaces:
 use the same vertex input. The numeric parameters indicated below are taken from the \hyperref[buildingsurfacedetailed]{BuildingSurface:Detailed} definition; the others may not be exactly the same but are identical in configuration. They are also ``extensible'' -- so, to define more vertices for these surfaces, simply add the required number of vertices (X, Y, and Z coordinates for each vertex) to the input file. Note that \hyperref[fenestrationsurfacedetailed]{FenestrationSurface:Detailed} is not extensible and is limited to 4 (max) vertices. If the Number of Surface Vertex groups is left blank or entered as \textbf{autocalculate}, EnergyPlus looks at the number of groups entered and figures out how many coordinate groups are entered.
 
 \begin{callout}
-\warning{Note that the resolution on the surface vertex input is 1 millimeter (.001 meter). Therefore, using vertices that are very close together (\textless{} 1 mm) may result in invalid dot product and fatal errors during shading calculations.}
+\warning{Note that the resolution for surface vertex input is 1 centimeter (0.01 meter). Vertices that are \textless{} 1 cm apart will be combined.}
 \end{callout}
 
 \begin{figure}[hbtp] % fig 29
@@ -1861,12 +2002,13 @@ use the same vertex input. The numeric parameters indicated below are taken from
 The figure above will help illustrate Surface Vertex entry. The convention used in ``\hyperref[globalgeometryrules]{GlobalGeometryRules}'' dictates the order of the vertices (ref: \hyperref[globalgeometryrules]{GlobalGeometryRules}). In this example, the conventions used are Starting Vertex Position = UpperLeftCorner and Vertex Entry Direction = CounterClockwise. The surfaces for this single zone are:
 
 \begin{lstlisting}
-4,0,0,H, 0,0,0, A,0,0, A,0,H; ! (4 vertices, South Wall)
-4,A,0,H,A,0,0,A,B,0,A,B,H; ! (4 vertices, East Wall)
-     ignore other walls that are not shown in this figure
-4,C,0,J,A,0,H,A,B,H,C,B,J; ! (4 vertices, roof)
-3,C,0,J,0,0,H,A,0,H; ! (3 vertices, gable end)
-4,0,0,H, 0,0,0, A,0,0, A,0,H; ! (4 vertices, South Wall)
+4,0,0,H, 0,0,0, A,0,0, A,0,H; !- (4 vertices, South Wall)
+4,A,0,H,A,0,0,A,B,0,A,B,H;    !- (4 vertices, East Wall)
+ignore other walls that are not shown in this figure
+  4,C,0,J,A,0,H,A,B,H,C,B,J;  !- (4 vertices, roof)
+
+3,C,0,J,0,0,H,A,0,H;          !- (3 vertices, gable end)
+4,0,0,H, 0,0,0, A,0,0, A,0,H; !- (4 vertices, South Wall)
 \end{lstlisting}
 
 Note that in this example, point 1 of the entry is the Upper Left Corner of the rectangular surfaces and the point of the triangle for the 3 sided surface. The east wall shows the order of vertex entry. For horizontal surfaces, any vertex may be chosen as the starting position, but the Vertex Entry Direction convention must be followed. The surface details report (Output: Surfaces:List, Details;) is very useful for reviewing the accuracy of surface geometry inputs (ref: Surface Output Variables/Reports and Variable Dictionary Reports).
@@ -1911,6 +2053,8 @@ This value can be one of several things depending on the actual kind of surface.
   \item
     \textbf{Zone} -- this is similar to Surface but EnergyPlus will automatically create the required surface in the adjacent zone when this is entered for the surface. If there are windows or doors on the surface, EnergyPlus automatically creates appropriate sub-surfaces as well.
   \item
+    \textbf{Space} -- this is similar to Surface but EnergyPlus will automatically create the required surface in the adjacent space when this is entered for the surface. If there are windows or doors on the surface, EnergyPlus automatically creates appropriate sub-surfaces as well.
+  \item
     \textbf{Outdoors} -- if this surface is exposed to outside temperature conditions, then this is the choice. See Sun Exposure and Wind Exposure below for further specifications on this kind of surface.
   \item
     \textbf{Foundation} - uses an alternative model (currently only the Kiva\textsuperscript{TM} model) to account for the multi-dimensional heat transfer of foundation surfaces. The Outside Boundary Condition Object will refer to the name of a \hyperref[foundationkiva]{Foundation:Kiva} object (or be left blank to use the default foundation without extra insulation).
@@ -1940,11 +2084,11 @@ This value can be one of several things depending on the actual kind of surface.
 
 \paragraph{Field: Outside Boundary Condition Object}\label{field-outside-boundary-condition-object-6}
 
-If neither Surface, Zone, Foundation, OtherSideCoefficients, or OtherSideConditionsModel are specified for the Outside Boundary Condition (previous field), then this field should be left blank.
+If neither Surface, Zone, Space, Foundation, OtherSideCoefficients, or OtherSideConditionsModel are specified for the Outside Boundary Condition (previous field), then this field should be left blank.
 
 As stated above, if the Outside Boundary Condition is ``Surface'', then this field's value must be the surface name whose inside face temperature will be forced on the outside face of the base surface. This permits heat exchange between adjacent zones (interzone heat transfer) when multiple zones are simulated, but can also be used to simulate middle zone behavior without modeling the adjacent zones. This is done by specifying a surface within the zone. For example, a middle floor zone can be modeled by making the floor the Outside Boundary Condition Object for the ceiling, and the ceiling the Outside Boundary Condition Object for the floor.
 
-If the Outside Boundary Condition is Zone, then this field should contain the zone name of the adjacent zone for the surface.
+If the Outside Boundary Condition is Zone or Space, then this field should contain the zone or space name for the adjacent surface.
 
 \begin{callout}
 Note: Zones with interzone heat transfer are not adiabatic and the internal surfaces contribute to gains or losses. Adiabatic surfaces are modeled by specifying the base surface itself in this field. Also, for interzone heat transfer, both surfaces must be represented -- for example, if you want interzone heat transfer to an attic space, the ceiling in the lower zone must have a surface object with the outside face environment as the floor in the attic and, likewise, there must be a floor surface object in the attic that references the ceiling surface name in the lower zone.
@@ -2028,6 +2172,8 @@ This value can be one of several things depending on the actual kind of surface.
   \item
     \textbf{Zone} -- this is similar to Surface but EnergyPlus will automatically create the required surface in the adjacent zone when this is entered for the surface. If there are windows or doors on the surface, EnergyPlus automatically creates appropriate sub-surfaces as well.
   \item
+    \textbf{Space} -- this is similar to Surface but EnergyPlus will automatically create the required surface in the adjacent space when this is entered for the surface. If there are windows or doors on the surface, EnergyPlus automatically creates appropriate sub-surfaces as well.
+  \item
     \textbf{Outdoors} -- if this surface is exposed to outside temperature conditions, then this is the choice. See Sun Exposure and Wind Exposure below for further specifications on this kind of surface.
   \item
     \textbf{Ground} -- The temperature on the outside of this surface will be the Ground Temperature.
@@ -2053,11 +2199,11 @@ This value can be one of several things depending on the actual kind of surface.
 
 \paragraph{Field: Outside Boundary Condition Object}\label{field-outside-boundary-condition-object-7}
 
-If neither Surface, Zone, Foundation, OtherSideCoefficients, or OtherSideConditionsModel are specified for the Outside Boundary Condition (previous field), then this field should be left blank.
+If neither Surface, Zone, Space, Foundation, OtherSideCoefficients, or OtherSideConditionsModel are specified for the Outside Boundary Condition (previous field), then this field should be left blank.
 
 As stated above, if the Outside Boundary Condition is ``Surface'', then this field's value must be the surface name whose inside face temperature will be forced on the outside face of the base surface. This permits heat exchange between adjacent zones (interzone heat transfer) when multiple zones are simulated, but can also be used to simulate middle zone behavior without modeling the adjacent zones. This is done by specifying a surface within the zone. For example, a middle floor zone can be modeled by making the floor the Outside Boundary Condition Object for the ceiling, and the ceiling the Outside Boundary Condition Object for the floor.
 
-If the Outside Boundary Condition is Zone, then this field should contain the zone name of the adjacent zone for the surface.
+If the Outside Boundary Condition is Zone or Space, then this field should contain the zone or space name for the adjacent surface.
 
 \begin{callout}
 Note: Zones with interzone heat transfer are not adiabatic and the internal surfaces contribute to gains or losses. Adiabatic surfaces are modeled by specifying the base surface itself in this field. Also, for interzone heat transfer, both surfaces must be represented -- for example, if you want interzone heat transfer to an attic space, the ceiling in the lower zone must have a surface object with the outside face environment as the floor in the attic and, likewise, there must be a floor surface object in the attic that references the ceiling surface name in the lower zone.
@@ -2141,6 +2287,8 @@ This value can be one of several things depending on the actual kind of surface.
   \item
     \textbf{Zone} -- this is similar to Surface but EnergyPlus will automatically create the required surface in the adjacent zone when this is entered for the surface. If there are windows or doors on the surface, EnergyPlus automatically creates appropriate sub-surfaces as well.
   \item
+    \textbf{Space} -- this is similar to Surface but EnergyPlus will automatically create the required surface in the adjacent space when this is entered for the surface. If there are windows or doors on the surface, EnergyPlus automatically creates appropriate sub-surfaces as well.
+  \item
     \textbf{Outdoors} -- if this surface is exposed to outside temperature conditions, then this is the choice. See Sun Exposure and Wind Exposure below for further specifications on this kind of surface.
   \item
     \textbf{Foundation} - uses an alternative model (currently only the Kiva\textsuperscript{TM} model) to account for the multi-dimensional heat transfer of foundation surfaces. The Outside Boundary Condition Object will refer to the name of a \hyperref[foundationkiva]{Foundation:Kiva} object (or be left blank to use the default foundation without extra insulation).
@@ -2170,11 +2318,11 @@ This value can be one of several things depending on the actual kind of surface.
 
 \paragraph{Field: Outside Boundary Condition Object}\label{field-outside-boundary-condition-object-8}
 
-If neither Surface, Zone, Foundation, OtherSideCoefficients, or OtherSideConditionsModel are specified for the Outside Boundary Condition (previous field), then this field should be left blank.
+If neither Surface, Zone, Space, Foundation, OtherSideCoefficients, or OtherSideConditionsModel are specified for the Outside Boundary Condition (previous field), then this field should be left blank.
 
 As stated above, if the Outside Boundary Condition is ``Surface'', then this field's value must be the surface name whose inside face temperature will be forced on the outside face of the base surface. This permits heat exchange between adjacent zones (interzone heat transfer) when multiple zones are simulated, but can also be used to simulate middle zone behavior without modeling the adjacent zones. This is done by specifying a surface within the zone. For example, a middle floor zone can be modeled by making the floor the Outside Boundary Condition Object for the ceiling, and the ceiling the Outside Boundary Condition Object for the floor.
 
-If the Outside Boundary Condition is Zone, then this field should contain the zone name of the adjacent zone for the surface.
+If the Outside Boundary Condition is Zone or Space, then this field should contain the zone or space name for the adjacent surface.
 
 \begin{callout}
 Note: Zones with interzone heat transfer are not adiabatic and the internal surfaces contribute to gains or losses. Adiabatic surfaces are modeled by specifying the base surface itself in this field. Also, for interzone heat transfer, both surfaces must be represented -- for example, if you want interzone heat transfer to an attic space, the ceiling in the lower zone must have a surface object with the outside face environment as the floor in the attic and, likewise, there must be a floor surface object in the attic that references the ceiling surface name in the lower zone.
@@ -2227,51 +2375,50 @@ This field specifies the number of sides in the surface (number of X,Y,Z vertex 
 Some examples of using these objects:
 
 \begin{lstlisting}
-
 Floor:Detailed,
-      Floor_NorthZone_1stFloor,!- Name
-      FLOOR-SLAB-ASSEMBLY,     !- Construction Name
-      NorthZone_1stFloor,      !- Zone Name
-      Ground,                  !- Outside Boundary Condition
-      ,                        !- Outside Boundary Condition Object
-      NoSun,                   !- Sun Exposure
-      NoWind,                  !- Wind Exposure
-      0.0,                     !- View Factor to Ground
-      4,                       !- Number of Vertices
-      0, 11, 0,                           !- X,Y,Z  1 {m}
-      25, 11, 0,                          !- X,Y,Z  2 {m}
-      25, 5.5, 0,                         !- X,Y,Z  3 {m}
-     0, 5.5, 0;                          !- X,Y,Z  4 {m}
+  Floor_NorthZone_1stFloor,   !- Name
+  FLOOR-SLAB-ASSEMBLY,        !- Construction Name
+  NorthZone_1stFloor,         !- Zone Name
+  Ground,                     !- Outside Boundary Condition
+  ,                           !- Outside Boundary Condition Object
+  NoSun,                      !- Sun Exposure
+  NoWind,                     !- Wind Exposure
+  0.0,                        !- View Factor to Ground
+  4,                          !- Number of Vertices
+  0, 11, 0,                   !- X,Y,Z  1 {m}
+  25, 11, 0,                  !- X,Y,Z  2 {m}
+  25, 5.5, 0,                 !- X,Y,Z  3 {m}
+  0, 5.5, 0;                  !- X,Y,Z  4 {m}
 
-  RoofCeiling:Detailed,
-      Ceiling_SouthZone_1stFloor,  !- Name
-      CEILING-FLOOR-ASSEMBLY,  !- Construction Name
-      SouthZone_1stFloor,      !- Zone Name
-      Surface,                 !- Outside Boundary Condition
-      Floor_SouthZone_2ndFloor,!- Outside Boundary Condition Object
-      NoSun,                   !- Sun Exposure
-      NoWind,                  !- Wind Exposure
-      0.0,                     !- View Factor to Ground
-      4,                       !- Number of Vertices
-      0, 0, 3.4,                          !- X,Y,Z  1 {m}
-      25, 0, 3.4,                         !- X,Y,Z  2 {m}
-      25, 5.5, 3.4,                       !- X,Y,Z  3 {m}
-     0, 5.5, 3.4;                        !- X,Y,Z  4 {m}
+RoofCeiling:Detailed,
+  Ceiling_SouthZone_1stFloor, !- Name
+  CEILING-FLOOR-ASSEMBLY,     !- Construction Name
+  SouthZone_1stFloor,         !- Zone Name
+  Surface,                    !- Outside Boundary Condition
+  Floor_SouthZone_2ndFloor,   !- Outside Boundary Condition Object
+  NoSun,                      !- Sun Exposure
+  NoWind,                     !- Wind Exposure
+  0.0,                        !- View Factor to Ground
+  4,                          !- Number of Vertices
+  0, 0, 3.4,                  !- X,Y,Z  1 {m}
+  25, 0, 3.4,                 !- X,Y,Z  2 {m}
+  25, 5.5, 3.4,               !- X,Y,Z  3 {m}
+  0, 5.5, 3.4;                !- X,Y,Z  4 {m}
 
-  Wall:Detailed,
-      InteriorWall_SouthZone_1stFloor,  !- Name
-      INTERIOR-WALL-ASSEMBLY,  !- Construction Name
-      SouthZone_1stFloor,      !- Zone Name
-      Surface,                 !- Outside Boundary Condition
-      InteriorWall_NorthZone_1stFloor,  !- Outside Boundary Condition Object
-      NoSun,                   !- Sun Exposure
-      NoWind,                  !- Wind Exposure
-      0,                       !- View Factor to Ground
-      4,                       !- Number of Vertices
-      25, 5.5, 3.7,                       !- X,Y,Z  1 {m}
-      25, 5.5, 0,                         !- X,Y,Z  2 {m}
-      0, 5.5, 0,                          !- X,Y,Z  3 {m}
-     0, 5.5, 3.7;                        !- X,Y,Z  4 {m}
+Wall:Detailed,
+  InteriorWall_SouthZone_1stFloor,  !- Name
+  INTERIOR-WALL-ASSEMBLY,     !- Construction Name
+  SouthZone_1stFloor,         !- Zone Name
+  Surface,                    !- Outside Boundary Condition
+  InteriorWall_NorthZone_1stFloor,  !- Outside Boundary Condition Object
+  NoSun,                      !- Sun Exposure
+  NoWind,                     !- Wind Exposure
+  0,                          !- View Factor to Ground
+  4,                          !- Number of Vertices
+  25, 5.5, 3.7,               !- X,Y,Z  1 {m}
+  25, 5.5, 0,                 !- X,Y,Z  2 {m}
+  0, 5.5, 0,                  !- X,Y,Z  3 {m}
+  0, 5.5, 3.7;                !- X,Y,Z  4 {m}
 \end{lstlisting}
 
 \subsection{BuildingSurface:Detailed}\label{buildingsurfacedetailed}
@@ -2314,6 +2461,8 @@ This value can be one of several things depending on the actual kind of surface.
   \item
     \textbf{Zone} -- this is similar to Surface but EnergyPlus will automatically create the required surface in the adjacent zone when this is entered for the surface. If there are windows or doors on the surface, EnergyPlus automatically creates appropriate sub-surfaces as well.
   \item
+    \textbf{Space} -- this is similar to Surface but EnergyPlus will automatically create the required surface in the adjacent space when this is entered for the surface. If there are windows or doors on the surface, EnergyPlus automatically creates appropriate sub-surfaces as well.
+  \item
     \textbf{Outdoors} -- if this surface is exposed to outside temperature conditions, then this is the choice. See Sun Exposure and Wind Exposure below for further specifications on this kind of surface.
   \item
     \textbf{Foundation} - uses an alternative model (currently only the Kiva\textsuperscript{TM} model) to account for the multi-dimensional heat transfer of foundation surfaces. The Outside Boundary Condition Object will refer to the name of a \hyperref[foundationkiva]{Foundation:Kiva} object (or be left blank to use the default foundation without extra insulation).
@@ -2343,11 +2492,11 @@ This value can be one of several things depending on the actual kind of surface.
 
 \paragraph{Field: Outside Boundary Condition Object}\label{field-outside-boundary-condition-object-9}
 
-If neither Surface, Zone, Foundation, OtherSideCoefficients, or OtherSideConditionsModel are specified for the Outside Boundary Condition (previous field), then this field should be left blank.
+If neither Surface, Zone, Space, Foundation, OtherSideCoefficients, or OtherSideConditionsModel are specified for the Outside Boundary Condition (previous field), then this field should be left blank.
 
 As stated above, if the Outside Boundary Condition is ``Surface'', then this field's value must be the surface name whose inside face temperature will be forced on the outside face of the base surface. This permits heat exchange between adjacent zones (interzone heat transfer) when multiple zones are simulated, but can also be used to simulate middle zone behavior without modeling the adjacent zones. This is done by specifying a surface within the zone. For example, a middle floor zone can be modeled by making the floor the Outside Boundary Condition Object for the ceiling, and the ceiling the Outside Boundary Condition Object for the floor.
 
-If the Outside Boundary Condition is Zone, then this field should contain the zone name of the adjacent zone for the surface.
+If the Outside Boundary Condition is Zone or Space, then this field should contain the zone or space name for the adjacent surface.
 
 \begin{callout}
 Note: Zones with interzone heat transfer are not adiabatic and the internal surfaces contribute to gains or losses. Adiabatic surfaces are modeled by specifying the base surface itself in this field. Also, for interzone heat transfer, both surfaces must be represented -- for example, if you want interzone heat transfer to an attic space, the ceiling in the lower zone must have a surface object with the outside face environment as the floor in the attic and, likewise, there must be a floor surface object in the attic that references the ceiling surface name in the lower zone.
@@ -2400,45 +2549,44 @@ This field specifies the number of sides in the surface (number of X,Y,Z vertex 
 IDF example of three walls (first is an exterior wall, second and third are interzone partitions):
 
 \begin{lstlisting}
-
 BuildingSurface:Detailed,Zn001:Wall001,  !- Base Surface Name
-    Wall,EXTERIOR,  !- Class and Construction Name
-    ZONE 1 @ 200 601 0 T,  !- Zone
-    Outdoors,,  !- Outside Boundary Condition  and Target (if applicable)
-     SunExposed,  !- Solar Exposure
-     WindExposed,  !- Wind Exposure
-    0.5000000    ,  !- VF to Ground
-             4, !-Rectangle
-    0.0000000E+00,  0.0000000E+00,   3.048000    ,
-    0.0000000E+00,  0.0000000E+00,  0.0000000E+00,
-     6.096000    ,  0.0000000E+00,  0.0000000E+00,
-     6.096000    ,  0.0000000E+00,   3.048000    ;
+  Wall,EXTERIOR,              !- Class and Construction Name
+  ZONE 1 @ 200 601 0 T,       !- Zone
+  Outdoors,,                  !- Outside Boundary Condition  and Target (if applicable)
+  SunExposed,                 !- Solar Exposure
+  WindExposed,                !- Wind Exposure
+  0.5000000,                  !- VF to Ground
+  4,                          !- Rectangle
+  0.0000000E+00,  0.0000000E+00,   3.048000,
+  0.0000000E+00,  0.0000000E+00,  0.0000000E+00,
+  6.096000    ,  0.0000000E+00,  0.0000000E+00,
+  6.096000    ,  0.0000000E+00,   3.048000;
 
-  BuildingSurface:Detailed,Zn001:Wall006,  !-Base Surface Name
-    Wall,INTERIOR,  !- Class and Construction Name
-    HEARTLAND AREA,  !- Zone
-    Surface,Zn004:Wall005,  !- Outside Boundary Conditions and Target (if applicable)
-     NoSun,  !- Solar Exposure
-     NoWind,  !- Wind Exposure
-    0.5000000    ,  !- VF to Ground
-             4, !-Rectangle
-     38.01000    ,   28.25000    ,   10.00000    ,
-     38.01000    ,   28.25000    ,  0.0000000E+00,
-     38.01000    ,   18.25000    ,  0.0000000E+00,
-     38.01000    ,   18.25000    ,   10.00000    ;
+BuildingSurface:Detailed,Zn001:Wall006,  !- Base Surface Name
+  Wall,INTERIOR,              !- Class and Construction Name
+  HEARTLAND AREA,             !- Zone
+  Surface,Zn004:Wall005,      !- Outside Boundary Conditions and Target (if applicable)
+  NoSun,                      !- Solar Exposure
+  NoWind,                     !- Wind Exposure
+  0.5000000,                  !- VF to Ground
+  4,                          !- Rectangle
+  38.01000    ,   28.25000    ,   10.00000,
+  38.01000    ,   28.25000    ,  0.0000000E+00,
+  38.01000    ,   18.25000    ,  0.0000000E+00,
+  38.01000    ,   18.25000    ,   10.00000;
 
-  BuildingSurface:Detailed,Zn001:Wall007,  !- Base Surface Name
-    Wall,INTERIOR,  !- Class and Construction Name
-    HEARTLAND AREA,  !- Zone
-    Surface,Zn003:Wall006,  !- Outside Boundary Conditions and Target (if applicable)
-     NoSun,  !- Solar Exposure
-     NoWind,  !- Wind Exposure
-    0.5000000    ,  !- VF to Ground
-             4, !-Rectangle
-     58.01000    ,   18.25000    ,   10.00000    ,
-     58.01000    ,   18.25000    ,  0.0000000E+00,
-     58.01000    ,   28.25000    ,  0.0000000E+00,
-     58.01000    ,   28.25000    ,   10.00000    ;
+BuildingSurface:Detailed,Zn001:Wall007,  !- Base Surface Name
+  Wall,INTERIOR,              !- Class and Construction Name
+  HEARTLAND AREA,             !- Zone
+  Surface,Zn003:Wall006,      !- Outside Boundary Conditions and Target (if applicable)
+  NoSun,                      !- Solar Exposure
+  NoWind,                     !- Wind Exposure
+  0.5000000,                  !- VF to Ground
+  4,                          !- Rectangle
+  58.01000    ,   18.25000    ,   10.00000,
+  58.01000    ,   18.25000    ,  0.0000000E+00,
+  58.01000    ,   28.25000    ,  0.0000000E+00,
+  58.01000    ,   28.25000    ,   10.00000;
 \end{lstlisting}
 
 \subsection{FenestrationSurface:Detailed}\label{fenestrationsurfacedetailed}
@@ -2463,7 +2611,7 @@ As noted in the description of the \hyperref[buildingsurfacedetailed]{BuildingSu
 
 This is the name of the subsurface's construction (ref: Construction object {[}for Door{]} and Construction, \hyperref[constructioncomplexfenestrationstate]{Construction:ComplexFenestrationState}, \hyperref[constructionwindowdatafile]{Construction:WindowDataFile} objects {[}for Window and GlassDoor{]}).
 
-For windows, if Construction Name is not found among the constructions on the input (.idf) file, the Window Data File (ref. \hyperref[constructionwindowdatafile]{Construction:WindowDataFile} object) will be searched for that Construction Name (see ``Importing Windows from WINDOW''). If that file is not present or if the Construction Name does not match the name of an entry on the file, an error will result. If there is a match, a window construction and its corresponding glass and gas materials will be created from the information read from the file.
+For windows, if Construction Name is not found among the constructions on the input (.idf) file, the ``Window data file'' (ref. \hyperref[constructionwindowdatafile]{Construction:WindowDataFile} object) will be searched for that Construction Name (see \hyperref[importing-windows-from-window-program]{Importing Windows from WINDOW Program}). If that file is not present or if the Construction Name does not match the name of an entry on the file, an error will result. If there is a match, a window construction and its corresponding glass and gas materials will be created from the information read from the file.
 
 \paragraph{Field: Building Surface Name}\label{field-building-surface-name-6}
 
@@ -2473,7 +2621,7 @@ This is the name of a surface that contains this subsurface. Certain kinds of su
 
 If the base surface has Outside Boundary Condition = Surface or OtherSideCoefficients, then this field must also be specified for the subsurface. Otherwise, it can be left blank.
 
-If the base surface has Outside Boundary Condition = Zone, then this surface retains that characteristic and uses the same zone of the base surface. It can be entered here for clarity or it can be left blank.
+If the base surface has Outside Boundary Condition = Zone or Space, then this surface retains that characteristic and uses the same zone or space of the base surface. It can be entered here for clarity or it can be left blank.
 
 If Outside Boundary Condition for the base surface is Surface, this field should specify the subsurface in the opposing zone that is the counterpart to this subsurface. The constructions of the subsurface and opposing subsurface must match, except that, for multi-layer constructions, the layer order of the opposing subsurface's construction must be the reverse of that of the subsurface.
 
@@ -2536,20 +2684,19 @@ For triangular windows the first vertex listed can be any of the three vertices,
 An IDF example of a rectangular subsurface (Window):
 
 \begin{lstlisting}
-
 FenestrationSurface:Detailed,
-   Zn001:Wall001:Win001,  !- SubSurface Name
-    Window,SINGLE PANE HW WINDOW,  !- Class and Construction Name
-    Zn001:Wall001,,         !- Base Surface Name and Target (if applicable)
-    0.5000000    ,          !- VF to Ground
-    WINDOW-CONTROL-DRAPES,  !- Window Shading Control
-    TestFrameAndDivider,    !- Frame/Divider name
-    5,                      !- Multiplier
-    4,                      !- Rectangle (number of sides)
-     1.524000    ,  0.1520000    ,   2.743000    ,
-     1.524000    ,  0.1520000    ,  0.3050000    ,
-     4.572000    ,  0.1520000    ,  0.3050000    ,
-     4.572000    ,  0.1520000    ,   2.743000    ;
+  Zn001:Wall001:Win001,       !- SubSurface Name
+  Window,SINGLE PANE HW WINDOW,  !- Class and Construction Name
+  Zn001:Wall001,,             !- Base Surface Name and Target (if applicable)
+  0.5000000,                  !- VF to Ground
+  WINDOW-CONTROL-DRAPES,      !- Window Shading Control
+  TestFrameAndDivider,        !- Frame/Divider name
+  5,                          !- Multiplier
+  4,                          !- Rectangle (number of sides)
+  1.524000    ,  0.1520000    ,   2.743000,
+  1.524000    ,  0.1520000    ,  0.3050000,
+  4.572000    ,  0.1520000    ,  0.3050000,
+  4.572000    ,  0.1520000    ,   2.743000;
 \end{lstlisting}
 
 \subsection{Window Modeling Options}\label{window-modeling-options}
@@ -2590,7 +2737,7 @@ Add a \textbf{storm window} glass layer & Window\-Property:\-Storm\-Window & Sto
 Add \textbf{natural ventilation} through an open window & Ventilation or Airflow\-Network objects (Airflow\-Network:\-Multizone:\-Surface, Airflow\-Network:\-Multi\-Zone:\-Component:\-Detailed\-Opening, etc.) & Airflow\-Network\-3zvent.idf \tabularnewline
 Add \textbf{diffusing glass} & Window\-Material:\-Glazing/\-Solar Diffusing = Yes & \tabularnewline
 Add \textbf{dirt on window} & Window\-Material:\-Glazing/\-Dirt Correction Factor for Solar and Visible Transmittance & \tabularnewline
-Import window (and frame/divider if present) from \textbf{WINDOW} program & See ``Importing Windows from WINDOW program'' & \tabularnewline
+Import window (and frame/divider if present) from \textbf{WINDOW} program & See \hyperref[importing-windows-from-window-program]{Importing Windows from WINDOW Program} & \tabularnewline
 Find \textbf{daylighting through interior windows} & See ``Double Facades: Daylighting through Interior Windows'' & Purch\-Air\-With\-Double\-Facade\-Daylighting.idf \tabularnewline
 Determine when \textbf{condensation} occurs & Print the variables ``Surface Window Inside Face Glazing Condensation Status,'' ``Surface Window Inside Face Frame Condensation Status,'' ``Surface Window Inside Face Divider Condensation Status'' & \tabularnewline
 \bottomrule
@@ -2626,11 +2773,11 @@ This is the name of the construction (ref: Construction object) used in the surf
 
 \paragraph{Field: Zone or ZoneList Name}\label{field-zone-or-zonelist-name-14}
 
-This field is the name of the \hyperref[zone]{Zone} or \hyperref[zonelist]{ZoneList} in which the internal mass will be added. When the ZoneList option is used then this internal mass object is applied to each of zone in the list. The name of the actual internal mass object in each zone becomes <Zone Name> <InternalMass Object Name> and should be less than the standard length (100 characters) for a name field. If it is greater than this standard length, it may be difficult to specify in output reporting as it will be truncated. A warning will be shown if the generated name is greater than 100 characters. If it duplicates another such concatenated name, there will be a severe error and terminate the run.
+This field is the name of the \hyperref[zone]{Zone} or \hyperref[zonelist]{ZoneList} in which the internal mass will be added. When the ZoneList option is used then this internal mass object is applied to each zone in the list. The name of the actual internal mass object in each zone becomes <Zone Name> <InternalMass Object Name> and should be less than the standard length (100 characters) for a name field. If it is greater than this standard length, it may be difficult to specify in output reporting as it will be truncated. A warning will be shown if the generated name is greater than 100 characters. If it duplicates another such concatenated name, there will be a severe error and terminate the run. This field is ignored when a Space or SpaceList Name is specified.
 
 \paragraph{Field: Space or SpaceList Name}\label{field-space-or-spacelist-name-14}
 
-This field is the name of the \hyperref[space]{Space} or \hyperref[spacelist]{SpaceList} in which the internal mass will be added. When the SpaceList option is used then this internal mass object is applied to each space in the list. The name of the actual internal mass object in each space becomes <Space Name> <InternalMass Object Name> and should be less than the standard length (100 characters) for a name field. If it is greater than this standard length, it may be difficult to specify in output reporting as it will be truncated. A warning will be shown if the generated name is greater than 100 characters. If it duplicates another such concatenated name, there will be a severe error and terminate the run. This field is ignored when a ZoneList Name is specified for Zone or ZoneList Name. If a Space Name is used, then the Space must be part of Zone Name. If a SpaceList Name is used, then the Zone Name is ignored (even though it is a required field), and the surface is assigned to the corresponding Zone(s) for each Space in the SpaceList.
+This field is the name of the \hyperref[space]{Space} or \hyperref[spacelist]{SpaceList} in which the internal mass will be added. If this field is blank (or a ZoneList Name is specified), the internal mass will be added to the last space attached to the zone. When the SpaceList option is used then this internal mass object is applied to each space in the list. The name of the actual internal mass object in each space becomes <Space Name> <InternalMass Object Name> and should be less than the standard length (100 characters) for a name field. If it is greater than this standard length, it may be difficult to specify in output reporting as it will be truncated. A warning will be shown if the generated name is greater than 100 characters. If it duplicates another such concatenated name, there will be a severe error and terminate the run. This field is ignored when a ZoneList Name is specified for Zone or ZoneList Name. If this field is entered, then the Zone or ZoneList Name is ignored, and the surface is assigned to the corresponding Zone(s) for the Space(s).
 
 \paragraph{Field: Surface Area}\label{field-surface-area}
 
@@ -2640,16 +2787,18 @@ IDF examples of Internal Mass surfaces:
 
 \begin{lstlisting}
 InternalMass,
-  Zn002:IntM001,                !- Surface Name
-  INTERIOR,                     !- Construction Name
-  DORM ROOMS AND COMMON AREAS,  !- Zone or ZoneList Name
-  408.7734;                     !- Total area exposed to Zone {m2}
+  Zn002:IntM001,              !- Surface Name
+  INTERIOR,                   !- Construction Name
+  DORM ROOMS AND COMMON AREAS,!- Zone or ZoneList Name
+  ,                           !- Space or SpaceList Name
+  408.7734;                   !- Surface Area {m2}
 
 InternalMass,
-  Zn002:IntM002,                !- Surface Name
-  PARTITION02,                  !- Construction Name
-  DORM ROOMS AND COMMON AREAS,  !- Zone or ZoneList Name
-  371.6122;                     !- Total area exposed to Zone {m2}
+  Zn002:IntM002,              !- Surface Name
+  PARTITION02,                !- Construction Name
+  DORM ROOMS AND COMMON AREAS,!- Zone or ZoneList Name
+  ,                           !- Space or SpaceList Name
+  371.6122;                   !- Surface Area {m2}
 \end{lstlisting}
 
 \subsection{Surface Output Variables/Reports}\label{surface-output-variablesreports}
@@ -2703,12 +2852,14 @@ Zone,Sum,Surface Outside Face Net Thermal Radiation Heat Gain Energy [J]
 Zone,Average,Surface Outside Face Thermal Radiation to Air Heat Transfer Coefficient [W/m2-K]
 Zone,Average,Surface Outside Face Thermal Radiation to Sky Heat Transfer Coefficient [W/m2-K]
 Zone,Average,Surface Outside Face Thermal Radiation to Ground Heat Transfer Coefficient [W/m2-K]
+Zone,Average,Surface Outside Face Thermal Radiation to Surrounding Surfaces Heat Transfer Coefficient [W/m2-K]
+Zone,Average,Surface Outside Face Surrounding Surfaces Average Temperature [C]
 Zone,Average,Surface Inside Face Exterior Windows Incident Beam Solar Radiation Rate [W]
 Zone,Sum,Surface Inside Face Exterior Windows Incident Beam Solar Radiation Energy [J]
 Zone,Average,Surface Inside Face Exterior Windows Incident Beam Solar Radiation Rate per Area[W/m2]
 Zone,Average,Surface Inside Face Interior Windows Incident Beam Solar Radiation Rate [W]
 Zone,Average,Surface Inside Face Interior Windows Incident Beam Solar Radiation Rate per Area[W/m2]
-Zone, Sum,Surface Inside Face Interior Windows Incident Beam Solar Radiation Energy [J]
+Zone,Sum,Surface Inside Face Interior Windows Incident Beam Solar Radiation Energy [J]
 Zone,Average,Surface Inside Face Initial Transmitted Diffuse Absorbed Solar Radiation Rate [W]
 Zone,Average,Surface Inside Face Initial Transmitted Diffuse Transmitted Out Window Solar Radiation Rate [W]
 Zone,Average,Surface Inside Face Absorbed Shortwave Radiation Rate [W]
@@ -2723,7 +2874,7 @@ Zone,Average,Surface Outside Face Outdoor Air Wetbulb Temperature [C]
 Zone,Average,Surface Outside Face Outdoor Air Wind Speed [m/s]
 Zone,Average,Surface Outside Face Outdoor Air Wind Direction [deg]
 Zone,Average,Surface Outside Face Sunlit Area [m2]
-Zone,Average,Surface Outside Face Sunlit Fraction \protect\hyperlinksection-1
+Zone,Average,Surface Outside Face Sunlit Fraction []
 Zone,Average,Surface Outside Face Incident Solar Radiation Rate per Area[W/m2]
 Zone,Average,Surface Outside Face Solar Radiation Heat Gain Rate [W]
 Zone,Average,Surface Outside Face Solar Radiation Heat Gain Rate per Area [W/m2]
@@ -2774,14 +2925,16 @@ Zone,Average,Surface Heat Storage Gain Rate [W]
 Zone,Average,Surface Heat Storage Loss Rate [W]
 Zone,Average,Surface Heat Storage Rate per Area [W/m2]
 Zone,Sum,Surface Heat Storage Energy [J]
-Zone,Average,Zone Opaque Surface Inside Face Conduction [W]
-Zone,Average,Zone Opaque Surface Inside Faces Total Conduction Heat Gain Rate [W]
-Zone,Average,Zone Opaque Surface Inside Faces Total Conduction Heat Loss Rate [W]
-Zone,Sum,Zone Opaque Surface Inside Faces Total Conduction Heat Gain Energy [J]
-Zone,Sum,Zone Opaque Surface Inside Faces Total Conduction Heat Loss Energy [J]
-Zone,Average,Zone Opaque Surface Outside Face Conduction [W]
-Zone,Average,Zone Opaque Surface Outside Face Conduction Gain[W]
-Zone,Average,Zone Opaque Surface Outside Face Conduction Loss[W]
+Zone,Average,Zone Opaque Surface Inside Faces Conduction Rate [W]
+Zone,Average,Zone Opaque Surface Inside Faces Conduction Heat Gain Rate [W]
+Zone,Average,Zone Opaque Surface Inside Faces Conduction Heat Loss Rate [W]
+Zone,Sum,Zone Opaque Surface Inside Faces Conduction Heat Gain Energy [J]
+Zone,Sum,Zone Opaque Surface Inside Faces Conduction Heat Loss Energy [J]
+Zone,Average,Zone Opaque Surface Outside Faces Conduction Rate [W]
+Zone,Average,Zone Opaque Surface Outside Faces Conduction Heat Gain Rate [W]
+Zone,Average,Zone Opaque Surface Outside Faces Conduction Heat Loss Rate [W]
+Zone,Sum,Zone Opaque Surface Outside Faces Conduction Heat Gain Energy [J]
+Zone,Sum,Zone Opaque Surface Outside Faces Conduction Heat Loss Energy [J]
 Zone,Average, Surface Inside Face Beam Solar Radiation Heat Gain Rate [W]
 \end{lstlisting}
 
@@ -2790,19 +2943,21 @@ Zone,Average, Surface Inside Face Beam Solar Radiation Heat Gain Rate [W]
 Output variables applicable to exterior windows and glass doors:
 
 \begin{lstlisting}
-Zone,Average,Zone Windows Total Transmitted Solar Radiation Rate [W]
+Zone,Average,Enclosure Windows Total Transmitted Solar Radiation Rate [W]
+Zone,Sum,Enclosure Windows Total Transmitted Solar Radiation Energy [J]
 Zone,Sum,Zone Transmitted Solar Energy [J]
 Zone,Average,Zone Windows Total Heat Gain Rate [W]
 Zone,Sum,Zone Windows Total Heat Gain Energy [J]
 Zone,Average,Zone Windows Total Heat Loss Rate [W]
 Zone,Sum,Zone Windows Total Heat Loss Energy [J]
-Zone,Average,Zone Exterior Windows Total Transmitted Beam Solar Radiation Rate [W]
-Zone,Sum,Zone Exterior Windows Total Transmitted Beam Solar Radiation Energy [J]
-Zone,Average,Zone Interior Windows Total Transmitted Beam Solar Radiation Rate [W]
-Zone,Sum,Zone Interior Windows Total Transmitted Beam Solar Radiation Energy [J]
-Zone,Average,Zone Exterior Windows Total Transmitted Diffuse Solar Radiation Rate [W]
-Zone,Sum,Zone Exterior Windows Total Transmitted Diffuse Solar Radiation Energy [J]
-Zone,Average,Zone Interior Windows Total Transmitted Diffuse Solar Radiation Rate [W]
+Zone,Average,Enclosure Exterior Windows Total Transmitted Beam Solar Radiation Rate [W]
+Zone,Sum,Enclosure Exterior Windows Total Transmitted Beam Solar Radiation Energy [J]
+Zone,Average,Enclosure Interior Windows Total Transmitted Beam Solar Radiation Rate [W]
+Zone,Sum,Enclosure Interior Windows Total Transmitted Beam Solar Radiation Energy [J]
+Zone,Average,Enclosure Exterior Windows Total Transmitted Diffuse Solar Radiation Rate [W]
+Zone,Sum,Enclosure Exterior Windows Total Transmitted Diffuse Solar Radiation Energy [J]
+Zone,Average,Enclosure Interior Windows Total Transmitted Diffuse Solar Radiation Rate [W]
+Zone,Sum,Enclosure Interior Windows Total Transmitted Diffuse Solar Radiation Energy [J]
 Zone,Average,Surface Window Total Glazing Layers Absorbed Solar Radiation Rate [W]
 Zone,Average,Surface Window Total Glazing Layers Absorbed Shortwave Radiation Rate [W]
 Zone,Sum,Surface Window Total Glazing Layers Absorbed Solar Radiation Energy [J]
@@ -2940,7 +3095,7 @@ This is the temperature of the surface's inside face, in degrees Celsius. Former
 This is the temperature of movable insulation installed on the inside of the construction at the movable insulation's inside face (the one facing the zone), in degrees Celsius. This variable is only valid when the surface has movable insulation and the movable insulation is actually scheduled to be present.  For surfaces that have no movable insulation or the movable insulation is not scheduled to be present, the value of this variable is set to the Surface Inside Face Temperature.  It should be noted that users can limit how often this output variable is generating by using a schedule to control when this output is produced.  For example, this user could add the following syntax to an input file that includes movable insulation:
 
 \begin{lstlisting}
-  Output:Variable,Zone1:WestWall,Surface Inside Face Interior Movable Insulation Temperature,timestep,MovableInsulationSchedule;
+Output:Variable,Zone1:WestWall,Surface Inside Face Interior Movable Insulation Temperature,timestep,MovableInsulationSchedule;
 \end{lstlisting}
 
 In this example, interior movable insulation is used on the west wall of zone 1 and is only present when the schedule (MovableInsulationSchedule) is greater than zero.  Adding this output variable syntax to the input file reports the temperature at the inside face of the interior movable insulation only when the movable insulation is present.  The use of the movable insulation schedule in the output variable designation limits when this value shows up in the EnergyPlus output file to when it is actually scheduled to be present.  At other times, no value will be reported.  The limiting of when the output is generated allows the user to generate useful statistics instead of having those statistics influenced by values for when the movable insulation is not present.  If the user does not use the output variable schedule feature, the output for this variable will equal the surface inside face temperature when the movable insulation is not present.
@@ -2989,7 +3144,7 @@ These ``inside face solar radiation heat gain'' output variables describe the he
 
 \subsubsection{Surface Inside Face Lights Radiation Heat Gain Energy {[}J{]}}\label{surface-inside-face-lights-radiation-heat-gain-energy-j}
 
-These ``inside face lights radiation heat gain'' output variables describe the heat transferred by shortwave radiation onto the inside face. The values are always positive and indicate heat is being added to the surface's face by shortwave radiation that emanated from electric lighting equipment and was absorbed by the surface. Different versions of the report are available including the basic heat gain rate (W), and a per unit area flux (W/m2), and an energy version (J).
+These ``inside face lights radiation heat gain'' output variables describe the heat transferred by shortwave radiation onto the inside face. The values are always positive and indicate heat is being added to the surface's face by shortwave radiation that emanated from electric lighting equipment and was absorbed by the surface. Note that this includes light from other zones that are transmitted through interzone windows. Different versions of the report are available including the basic heat gain rate (W), and a per unit area flux (W/m2), and an energy version (J).
 
 \subsubsection{Surface Inside Face Internal Gains Radiation Heat Gain Rate {[}W{]}}\label{surface-inside-face-internal-gains-radiation-heat-gain-rate-w}
 
@@ -3119,6 +3274,14 @@ This is thermal radiation heat transfer rate between the outside face and the ai
 
 This is total heat transfer rate between the outside face and the air mass surrounding the surface by convection and thermal radiation.
 
+\subsubsection{Surface Outside Face Thermal Radiation to Surrounding Surfaces Heat Transfer Coefficient {[}W/m2-K{]}}\label{surface-outside-face-thermal-radiation-to-surrounding-surfaces-heat-transfer-coefficient-wm2-k}
+
+This is the coefficient that describes thermal radiation heat transfer between the outside face of an exterior surface and the surrounding surfaces it views. It is the value of ``Hr'' in the classic linearized model for thermal radiation exchange Q = Hr * A * (T\_surf -- T\_srdsurfs) when applied to the surrounding surfaces. Where T\_surf = Surface Outside Face Temperature, and T\_srdsurf = Average temperature of the surrounding surfaces viewed by an exterior surface.
+
+\subsubsection{Surface Outside Face Surrounding Surfaces Average Temperature {[}C{]}}\label{surface-outside-face-surrounding-surfaces-average-temperature-C}
+
+This is the average surface temperature of the surrounding surfaces viewed by an exterior surface, in degrees Celsius. The surrounding surfaces average temperature is a view factor weighed surface temperature of multiple surrounding surfaces seen by an exterior surface. If an exterior surface views a single surrounding surface then the average temperature is the same as the user specified surrounding surface temperature.
+
 \subsubsection{Surface Outside Face Solar Radiation Heat Gain Rate {[}W{]}}\label{surface-outside-face-solar-radiation-heat-gain-rate-w}
 
 \subsubsection{Surface Outside Face Solar Radiation Heat Gain Rate per Area {[}W/m2{]}}\label{surface-outside-face-solar-radiation-heat-gain-rate-per-area-wm2}
@@ -3208,7 +3371,7 @@ The following variables apply only to opaque surfaces, where an opaque surface i
 
 These ``inside face conduction'' output variables describe heat flow by conduction right at the inside face of an opaque heat transfer surface. A positive value means that the conduction is from just inside the inside face toward the inside face. A negative value means that the conduction is from the inside face into the core of the heat transfer surface.
 
-Note that Inside Face Conduction, when positive, does \textbf{not} indicate the heat flow from the surface to the zone air, which is governed by the inside face convection coefficient and the difference in temperature between the inside face and the zone air.
+Note that Inside Face Conduction, when positive, does \textbf{not} necessarily indicate the heat flow from the surface to the zone air, which is governed by the inside face convection coefficient, the difference in temperature between the inside face and the zone air, and various radiation terms due to solar, internal gains, and radiant exchange with other surfaces in the zone.
 
 Different versions of the reports are available. The basic heat gain rate (W) and a per unit area flux (W/m\(^{2}\)) can have positive or negative values with the sign convention that positive indicates heat flowing toward the face itself. There are also directed ``gain'' and ``loss'' versions that have only positive values or zero when the heat flow direction opposes.
 
@@ -3226,7 +3389,9 @@ Former Name: For Conduction Finite Difference simulations (CondFD), CondFD Insid
 
 These ``outside face conduction'' output variables describe heat flow by conduction right at the outside face of an opaque heat transfer surface. A positive value means that the conduction is from just inside the outside face toward the outside face. A negative value means that the conduction is from the outside face into the core of the heat transfer surface.
 
-Note that outside face conduction, when positive, does \textbf{not} indicate the heat flow from the surface to the surrounding air, which is governed by the outside face convection coefficient and the difference in temperature between the inside face and the surrounding air.
+Note that outside face conduction, when positive, does \textbf{not} necessarily indicate the heat flow from the surface to the surrounding air, due to the fact that there could be various terms such as convection and/or radiation terms based on whatever is the ''outside'' environment for this surface.
+
+When the surface in question is a partition, the output for this variable is set to zero because there is no outside face because the surface is fully exposed to the zone.  When the surface is an interzone partition, the value will be non-zero because there will potentially be conduction into or out of the zone on the other side at this surface.
 
 Different versions of the reports are available. The basic heat transfer rate (W) and a per unit area flux (W/m\(^{2}\)) can have positive or negative values with the sign convention that positive indicates heat flowing toward the face itself. There are also directed ``gain'' and ``loss'' versions that have only positive values or zero when the heat flow direction opposes.
 
@@ -3260,37 +3425,37 @@ These ``heat storage'' output variables combine the inside face conduction and o
 
 Different versions of the reports are available. The basic heat storage rate (W) and a per unit area flux (W/m\(^{2}\)) can have positive or negative values with the sign convention that positive indicates heat being added to the surface's mass. There are also directed ``gain'' and ``loss'' versions that have only positive values or zero when the heat storage direction opposes (W). Finally there is a version for total energy stored (J).
 
-\subsubsection{Zone Opaque Surface Inside Face Conduction {[}W{]}}\label{zone-opaque-surface-inside-face-conduction-w}
+\subsubsection{Zone Opaque Surface Inside Faces Conduction Rate {[}W{]}}\label{zone-opaque-surface-inside-face-conduction-w}
 
-The sum of the Opaque Surface Inside Face Conduction values for all opaque surfaces in a zone for both positive and negative sums. For example, assume a zone has six opaque surfaces with Opaque Surface Inside Face Conduction values of 100, -200, 400, 50, 150 and --300 W. Then Zone Opaque Surface Inside Face Conduction = 700 - 500 = 200 W. Or if a zone has six opaque surfaces with Opaque Surface Inside Face Conduction values of -100, -200, 400, -50, 150 and --300W. Then Zone Opaque Surface Inside Face Conduction = 550 -- 650 = -100 W.
+The sum of the Opaque Surface Inside Face Conduction values for all opaque surfaces in a zone for both positive and negative sums. For example, assume a zone has six opaque surfaces with Opaque Surface Inside Face Conduction values of 100, -200, 400, 50, 150 and --300 W. Then Zone Opaque Surface Inside Faces Conduction = 700 - 500 = 200 W. Or if a zone has six opaque surfaces with Opaque Surface Inside Face Conduction values of -100, -200, 400, -50, 150 and --300W. Then Zone Opaque Surface Inside Faces Conduction = 550 -- 650 = -100 W.
 
-\subsubsection{Zone Opaque Surface Inside Faces Total Conduction Heat Gain Rate {[}W{]}}\label{zone-opaque-surface-inside-faces-total-conduction-heat-gain-rate-w}
+\subsubsection{Zone Opaque Surface Inside Faces Conduction Heat Gain Rate {[}W{]}}\label{zone-opaque-surface-inside-faces-conduction-heat-gain-rate-w}
 
-\subsubsection{Zone Opaque Surface Inside Faces Total Conduction Heat Gain Energy {[}J{]}}\label{zone-opaque-surface-inside-faces-total-conduction-heat-gain-energy-j}
+\subsubsection{Zone Opaque Surface Inside Faces Conduction Heat Gain Energy {[}J{]}}\label{zone-opaque-surface-inside-faces-conduction-heat-gain-energy-j}
 
 These are the power and energy sums for the Opaque Surface Inside Face Conduction values for all opaque surfaces in a zone when that sum is positive. For example, assume a zone has six opaque surfaces with Opaque Surface Inside Face Conduction values of 100, -200, 400, 50, 150 and --300 W. Then Zone Opaque Surface Inside Faces Total Conduction Heat Gain Rate = 700 - 500 = 200 W.
 
-\subsubsection{Zone Opaque Surface Inside Faces Total Conduction Heat Loss Rate {[}W{]}}\label{zone-opaque-surface-inside-faces-total-conduction-heat-loss-rate-w}
+\subsubsection{Zone Opaque Surface Inside Faces Conduction Heat Loss Rate {[}W{]}}\label{zone-opaque-surface-inside-faces-conduction-heat-loss-rate-w}
 
-\subsubsection{Zone Opaque Surface Inside Faces Total Conduction Heat Loss Energy {[}J{]}}\label{zone-opaque-surface-inside-faces-total-conduction-heat-loss-energy-j}
+\subsubsection{Zone Opaque Surface Inside Faces Conduction Heat Loss Energy {[}J{]}}\label{zone-opaque-surface-inside-faces-conduction-heat-loss-energy-j}
 
 These are the power and energy absolute value for the sums of the Opaque Surface Inside Face Conduction values for all opaque surfaces in a zone when that sum is negative. For example, assume a zone has six opaque surfaces with Opaque Surface Inside Face Conduction values of -100, -200, 400, -50, 150 and --300W. Then Zone Opaque Surface Inside Faces Total Conduction Heat Loss Rate = \textbar{}550 -- 650\textbar{} = \textbar{}-100\textbar{} = 100 W.
 
-\subsubsection{Zone Opaque Surface Outside Face Conduction {[}W{]}}\label{zone-opaque-surface-outside-face-conduction-w}
+\subsubsection{Zone Opaque Surface Outside Faces Conduction Rate {[}W{]}}\label{zone-opaque-surface-outside-face-conduction-w}
 
-The sum of the Opaque Surface Outside Face Conduction values for all opaque surfaces in a zone for both positive and negative sums. For example, assume a zone has six opaque surfaces with Opaque Surface Outside Face Conduction values of 100, -200, 400, 50, 150 and --300 W. Then Zone Opaque Surface Outside Face Conduction = 700 - 500 = 200 W. Or if a zone has six opaque surfaces with Opaque Surface Outside Face Conduction values of -100, -200, 400, -50, 150 and --300W. Then Zone Opaque Surface Outside Face Conduction = 550 -- 650 = -100 W.
+The sum of the Opaque Surface Outside Face Conduction values for all opaque surfaces in a zone for both positive and negative sums. For example, assume a zone has six opaque surfaces with Opaque Surface Outside Face Conduction values of 100, -200, 400, 50, 150 and --300 W. Then Zone Opaque Surface Outside Faces Conduction = 700 - 500 = 200 W. Or if a zone has six opaque surfaces with Opaque Surface Outside Face Conduction values of -100, -200, 400, -50, 150 and --300W. Then Zone Opaque Surface Outside Faces Conduction = 550 -- 650 = -100 W.
 
-\subsubsection{Zone Opaque Surface Outside Face Conduction Gain {[}W{]}}\label{zone-opaque-surface-outside-face-conduction-gain-w}
+\subsubsection{Zone Opaque Surface Outside Faces Conduction Heat Gain Rate {[}W{]}}\label{zone-opaque-surface-outside-face-conduction-gain-w}
 
-\subsubsection{Zone Opaque Surface Outside Face Conduction Gain Energy {[}J{]}}\label{zone-opaque-surface-outside-face-conduction-gain-energy-j}
+\subsubsection{Zone Opaque Surface Outside Faces Conduction Heat Gain Energy {[}J{]}}\label{zone-opaque-surface-outside-face-conduction-gain-energy-j}
 
-These are the power and energy sums for the Opaque Surface Outside Face Conduction values for all opaque surfaces in a zone when that sum is positive. For example, assume a zone has six opaque surfaces with Opaque Surface Outside Face Conduction values of 100, -200, 400, 50, 150 and --300 W. Then Zone Opaque Surface Outside Face Conduction Gain = 700 - 500 = 200 W.
+These are the power and energy sums for the Opaque Surface Outside Face Conduction values for all opaque surfaces in a zone when that sum is positive. For example, assume a zone has six opaque surfaces with Opaque Surface Outside Face Conduction values of 100, -200, 400, 50, 150 and --300 W. Then Zone Opaque Surface Outside Faces Conduction Gain = 700 - 500 = 200 W.
 
-\subsubsection{Zone Opaque Surface Outside Face Conduction Loss {[}W{]}}\label{zone-opaque-surface-outside-face-conduction-loss-w}
+\subsubsection{Zone Opaque Surface Outside Faces Conduction Heat Loss Rate {[}W{]}}\label{zone-opaque-surface-outside-face-conduction-loss-w}
 
-\subsubsection{Zone Opaque Surface Outside Face Conduction Loss Energy {[}J{]}}\label{zone-opaque-surface-outside-face-conduction-loss-energy-j}
+\subsubsection{Zone Opaque Surface Outside Faces Conduction Heat Loss Energy {[}J{]}}\label{zone-opaque-surface-outside-face-conduction-loss-energy-j}
 
-These are the power and energy absolute value for the sums of the Opaque Surface Outside Face Conduction values for all opaque surfaces in a zone when that sum is negative. For example, assume a zone has six opaque surfaces with Opaque Surface Outside Face Conduction values of -100, -200, 400, -50, 150 and -300W. Then Zone Opaque Surface Outside Face Conduction Loss = \textbar{}550 -- 650\textbar{} = \textbar{}-100\textbar{} = 100 W.
+These are the power and energy absolute value for the sums of the Opaque Surface Outside Face Conduction values for all opaque surfaces in a zone when that sum is negative. For example, assume a zone has six opaque surfaces with Opaque Surface Outside Face Conduction values of -100, -200, 400, -50, 150 and -300W. Then Zone Opaque Surface Outside Faces Conduction Loss = \textbar{}550 -- 650\textbar{} = \textbar{}-100\textbar{} = 100 W.
 
 \subsubsection{Surface Inside Face Beam Solar Radiation Heat Gain Rate {[}W{]}}\label{surface-inside-face-beam-solar-radiation-heat-gain-rate-w}
 
@@ -3300,11 +3465,11 @@ Beam solar radiation from exterior windows absorbed on the inside face of an opa
 
 The following output variables apply to subsurfaces that are windows or glass doors. These two subsurface types are called ``window'' here. ``Exterior window'' means that the base surface of the window is an exterior wall, floor, roof or ceiling (i.e., the base surface is a \hyperref[buildingsurfacedetailed]{BuildingSurface:Detailed} with OutsideFaceEnvironment = ExteriorEnvironment). ``Interior window'' means that the base surface of the window is an inter-zone wall, floor or ceiling. ``Glass'' means a transparent solid layer, usually glass, but possibly plastic or other transparent material. ``Shading device'' means an interior, exterior or between-glass shade or blind, or an exterior screen (only exterior windows can have a shading device).
 
-\subsubsection{Zone Windows Total Transmitted Solar Radiation Rate {[}W{]}}\label{zone-windows-total-transmitted-solar-radiation-rate-w}
+\subsubsection{Enclosure Windows Total Transmitted Solar Radiation Rate {[}W{]}}\label{zone-windows-total-transmitted-solar-radiation-rate-w}
 
-\subsubsection{Zone Windows Total Transmitted Solar Radiation Energy {[}J{]}}\label{zone-windows-total-transmitted-solar-radiation-energy-j}
+\subsubsection{Enclosure Windows Total Transmitted Solar Radiation Energy {[}J{]}}\label{zone-windows-total-transmitted-solar-radiation-energy-j}
 
-The total Surface Window Transmitted Solar Radiation Rate of all the exterior windows in a zone.
+The total Surface Window Transmitted Solar Radiation Rate of all the exterior windows in an enclosure. If the user wishes to report these variables only for a specific enclosure and is uncertain as to what the name of the enclosure is, the enclosure name can be obtained from the the "Input Verification and Results Summary" output report in the "Space Summary" subtable.
 
 \subsubsection{Zone Windows Total Heat Gain Rate {[}W{]}}\label{zone-windows-total-heat-gain-rate-w}
 
@@ -3362,17 +3527,17 @@ For a window with a blind, this transmitted radiation consists of beam radiation
 
 For a window with a blind, this transmitted radiation consists of diffuse radiation reflected from beam by the slats. For a window with a screen, this value consists of diffuse radiation reflected by the screen material.
 
-\subsubsection{Zone Exterior Windows Total Transmitted Beam Solar Radiation Rate {[}W{]}}\label{zone-exterior-windows-total-transmitted-beam-solar-radiation-rate-w}
+\subsubsection{Enclosure Exterior Windows Total Transmitted Beam Solar Radiation Rate {[}W{]}}\label{zone-exterior-windows-total-transmitted-beam-solar-radiation-rate-w}
 
-\subsubsection{Zone Exterior Windows Total Transmitted Beam Solar Radiation Energy {[}J{]}}\label{zone-exterior-windows-total-transmitted-beam-solar-radiation-energy-j}
+\subsubsection{Enclosure Exterior Windows Total Transmitted Beam Solar Radiation Energy {[}J{]}}\label{zone-exterior-windows-total-transmitted-beam-solar-radiation-energy-j}
 
-The sum of the Surface Window Transmitted Beam Solar Radiation Rate (see definition above) from all exterior windows in a zone.
+The sum of the Surface Window Transmitted Beam Solar Radiation Rate (see definition above) from all exterior windows in an enclosure. If the user wishes to report these variables only for a specific enclosure and is uncertain as to what the name of the enclosure is, the enclosure name can be obtained from the the "Input Verification and Results Summary" output report in the "Space Summary" subtable.
 
-\subsubsection{Zone Interior Windows Total Transmitted Beam Solar Radiation Rate {[}W{]}}\label{zone-interior-windows-total-transmitted-beam-solar-radiation-rate-w}
+\subsubsection{Enclosure Interior Windows Total Transmitted Beam Solar Radiation Rate {[}W{]}}\label{zone-interior-windows-total-transmitted-beam-solar-radiation-rate-w}
 
-\subsubsection{Zone Interior Windows Total Transmitted Beam Solar Radiation Energy {[}J{]}}\label{zone-interior-windows-total-transmitted-beam-solar-radiation-energy-j}
+\subsubsection{Enclosure Interior Windows Total Transmitted Beam Solar Radiation Energy {[}J{]}}\label{zone-interior-windows-total-transmitted-beam-solar-radiation-energy-j}
 
-The sum of the Surface Window Transmitted Beam Solar Radiation Rate (see definition above) from all interior windows in a zone.
+The sum of the Surface Window Transmitted Beam Solar Radiation Rate (see definition above) from all interior windows in an enclosure. If the user wishes to report these variables only for a specific enclosure and is uncertain as to what the name of the enclosure is, the enclosure name can be obtained from the the "Input Verification and Results Summary" output report in the "Space Summary" subtable.
 
 \subsubsection{Surface Window Transmitted Diffuse Solar Radiation Rate {[}W{]}}\label{surface-window-transmitted-diffuse-solar-radiation-rate-w}
 
@@ -3380,17 +3545,17 @@ The sum of the Surface Window Transmitted Beam Solar Radiation Rate (see definit
 
 The solar radiation transmitted by an exterior window whose source is diffuse solar incident on the outside of the window. For a bare window, this transmitted radiation consists of diffuse radiation passing through the glass. For a window with a shade, this transmitted radiation is totally diffuse (shades are assumed to be perfect diffusers). For a window with a blind, this transmitted radiation consists of diffuse radiation that passes between the slats and diffuse radiation from diffuse-to-diffuse reflection from the slats. For a window with a screen, this value consists of diffuse radiation transmitted through the screen (gaps between the screen material) and diffuse radiation from diffuse-to-diffuse reflection from the screen material.
 
-\subsubsection{Zone Exterior Windows Total Transmitted Diffuse Solar Radiation Rate {[}W{]}}\label{zone-exterior-windows-total-transmitted-diffuse-solar-radiation-rate-w}
+\subsubsection{Enclosure Exterior Windows Total Transmitted Diffuse Solar Radiation Rate {[}W{]}}\label{zone-exterior-windows-total-transmitted-diffuse-solar-radiation-rate-w}
 
-\subsubsection{Zone Exterior Windows Total Transmitted Diffuse Solar Radiation Energy {[}J{]}}\label{zone-exterior-windows-total-transmitted-diffuse-solar-radiation-energy-j}
+\subsubsection{Enclosure Exterior Windows Total Transmitted Diffuse Solar Radiation Energy {[}J{]}}\label{zone-exterior-windows-total-transmitted-diffuse-solar-radiation-energy-j}
 
-The combined beam and diffuse solar that first entered adjacent zones through exterior windows in the adjacent zones, was subsequently reflected from interior surfaces in those zones (becoming diffuse through that reflection), and was then transmitted through interior windows into the current zone.
+The combined beam and diffuse solar that first entered adjacent zones through exterior windows in the adjacent zones, was subsequently reflected from interior surfaces in those zones (becoming diffuse through that reflection), and was then transmitted through interior windows into the current enclosure. If the user wishes to report these variables only for a specific enclosure and is uncertain as to what the name of the enclosure is, the enclosure name can be obtained from the the "Input Verification and Results Summary" output report in the "Space Summary" subtable.
 
-\subsubsection{Zone Interior Windows Total Transmitted Diffuse Solar Radiation Rate {[}W{]}}\label{zone-interior-windows-total-transmitted-diffuse-solar-radiation-rate-w}
+\subsubsection{Enclosure Interior Windows Total Transmitted Diffuse Solar Radiation Rate {[}W{]}}\label{zone-interior-windows-total-transmitted-diffuse-solar-radiation-rate-w}
 
-\subsubsection{Zone Interior Windows Total Transmitted Diffuse Solar Radiation Energy {[}J{]}}\label{zone-interior-windows-total-transmitted-diffuse-solar-radiation-energy-j}
+\subsubsection{Enclosure Interior Windows Total Transmitted Diffuse Solar Radiation Energy {[}J{]}}\label{zone-interior-windows-total-transmitted-diffuse-solar-radiation-energy-j}
 
-The sum of the Surface Window Transmitted Diffuse Solar Radiation Rate (see definition above) from all interior windows in a zone.
+The sum of the Surface Window Transmitted Diffuse Solar Radiation Rate (see definition above) from all interior windows in an enclosure. If the user wishes to report these variables only for a specific enclosure and is uncertain as to what the name of the enclosure is, the enclosure name can be obtained from the the "Input Verification and Results Summary" output report in the "Space Summary" subtable.
 
 \subsubsection{Surface Window System Solar Transmittance {[]}}\label{surface-window-system-solar-transmittance}
 
@@ -3410,101 +3575,63 @@ Effective solar reflectance of an exterior window, including effect of shading d
 
 For an airflow window, the forced convective heat flow from the gap through which airflow occurs. This is the heat gained (or lost) by the air from the glass surfaces (and between-glass shading device surfaces, if present) that the air comes in contact with as it flows through the gap. If the gap airflow goes to the zone indoor air, the gap convective heat flow is added to the zone load. Applicable to exterior windows only.
 
+\subsubsection{Surface Window Net Heat Transfer Rate {[}W{]}}\label{surface-window-net-heat-transfer-rate-w}
+
+\subsubsection{Surface Window Net Heat Transfer Energy {[}J{]}}\label{surface-window-net-heat-transfer-rate-j}
+
+The net heat flow to the zone through the glazing, frame and divider of an exterior window, including net solar gains. Negative values imply heat flow to the exterior. It is important to note that the boundary volume is at the inside face of the window surface (or shading device). Beam and diffuse solar which is absorbed in the window (and/or shading) layers will impact the window surface temperature which impacts the convective and IR heat flow components.
+
+For a window \emph{without an interior shading device}, this heat flow is equal to:
+
+  {[}Surface Window Transmitted Solar Radiation Rate{]}
+
+  + {[}Surface Window Inside Face Glazing Zone Convection Heat Gain Rate{]}
+
+  + {[}Surface Window Inside Face Glazing Net Infrared Heat Transfer Rate{]}
+
+  + {[}Surface Window Inside Face Frame and Divider Zone Heat Gain Rate{]} (if present)
+
+  - {[}Surface Window Shortwave from Zone Back Out Window Heat Transfer Rate{]}
+
+  - {[}Surface Inside Face Initial Transmitted Diffuse Transmitted Out Window Solar Radiation Rate{]}
+
+  + {[Surface Window Gap Convective Heat Transfer Rate] (for \hyperref[windowpropertyairflowcontrol]{WindowProperty:AirflowControl} with destination IndoorAir)}
+
+Here, short-wave radiation is that from lights and interior solar radiation (beam and diffuse) incident on this window.
+
+For a window \emph{with an interior shading device}, this heat flow is equal to:
+
+  {[}Surface Window Transmitted Solar Radiation Rate{]}
+
+  + {[}Surface Window Inside Face Gap between Shade and Glazing Zone Convection Heat Gain Rate{]}
+
+  + {[}Surface Window Inside Face Shade Zone Convection Heat Gain Rate{]}
+
+  + {[}Surface Window Inside Face Glazing Net Infrared Heat Transfer Rate{]}
+
+  + {[}Surface Window Inside Face Shade Net Infrared Heat Transfer Rate{]}
+
+  + {[}Surface Window Inside Face Frame and Divider Zone Heat Gain Rate{]} (if present)
+
+  - {[}Surface Window Shortwave from Zone Back Out Window Heat Transfer Rate{]}
+
+  - {[}Surface Inside Face Initial Transmitted Diffuse Transmitted Out Window Solar Radiation Rate{]}
+
+  + {[Surface Window Gap Convective Heat Transfer Rate] (for \hyperref[windowpropertyairflowcontrol]{WindowProperty:AirflowControl} with destination IndoorAir)}
+
+The total window heat flow can also be thought of as the sum of the solar and conductive gain \emph{to the zone} from the window.
+
 \subsubsection{Surface Window Heat Gain Rate {[}W{]}}\label{surface-window-heat-gain-rate-w}
 
 \subsubsection{Surface Window Heat Gain Energy {[}J{]}}\label{surface-window-heat-gain-energy-j}
 
-The total heat flow \emph{to the zone} from the glazing, frame and divider of an exterior window when the total heat flow is positive.
-
-For a window \emph{without an interior shading device}, this heat flow is equal to:
-
-\begin{itemize}
-\item
-  {[}Surface Window Transmitted Solar Radiation Rate (see definition, above){]}
-\item
-  {[}Convective heat flow to the zone from the zone side of the glazing{]}
-\item
-  {[}Net IR heat flow to the zone from zone side of the glazing{]}
-\item
-  {[}Short-wave radiation from zone transmitted back out the window{]}
-\item
-  {[}Convection to zone from window frame and divider, if present{]}
-\end{itemize}
-
-Here, short-wave radiation is that from lights and diffuse interior solar radiation.
-
-For a window \emph{with an interior shading device}, this heat flow is equal to:
-
-
-\begin{itemize}
-\item
-  {[}Surface Window Transmitted Solar Radiation Rate{]}
-\item
-  {[}Convective heat flow to the zone from the air flowing through the gap between glazing and shading device{]}
-\item
-  {[}Convective heat flow to the zone from the zone side of the shading device{]}
-\item
-  {[}Net IR heat flow to the zone from the zone side of the glazing{]}
-\item
-  {[}Net IR heat flow to the zone from the zone side of the shading device{]}
-\item
-  {[}Short-wave radiation from zone transmitted back out the window{]}
-\item
-  {[}Convection to zone from window frame and divider, if present{]}
-\end{itemize}
-
-The total window heat flow can also be thought of as the sum of the solar and conductive gain \emph{to the zone} from the window.
+The total heat flow \emph{to the zone} from the glazing, frame and divider of an exterior window when the Surface Window Net Heat Transfer (see definition above) is positive.
 
 \subsubsection{Surface Window Heat Loss Rate {[}W{]}}\label{surface-window-heat-loss-rate-w}
 
 \subsubsection{Surface Window Heat Loss Energy {[}J{]}}\label{surface-window-heat-loss-energy-j}
 
-The absolute value of the total heat flow through an exterior window when the total heat flow is negative. (See definition of ``total heat flow'' under ``Surface Window Heat Gain Rate,'' above.)
-
-\subsubsection{Surface Window Net Heat Transfer Rate {[}W{]}}\label{surface-window-net-heat-transfer-rate-w}
-
-\subsubsection{Surface Window Net Heat Transfer Energy {[}J{]}}\label{surface-window-net-heat-transfer-rate-j}
-
-The total heat flow through the glazing, frame and divider of an exterior window. Negative values imply heat flow to the exterior.
-
-The important distinction between this output variable and those for ``Surface Window Heat Gain/Loss'' is that this represents the net heat flow through the window and not the heat flow \emph{to the zone}. The only difference is the heat flow \emph{to the zone} does not account for radiation from the opaque frame and divider components. This is because these components, as a simplification, do not participate in the overall radiative exchange with other surfaces in the zone.
-
-For a window \emph{without an interior shading device}, this heat flow is equal to:
-
-\begin{itemize}
-\item
-  {[}Surface Window Transmitted Solar Radiation Rate (see definition, above){]}
-\item
-  {[}Convective heat flow from the zone side of the glazing{]}
-\item
-  {[}Net IR heat flow from the zone side of the glazing{]}
-\item
-  {[}Short-wave radiation from zone transmitted back out the window{]}
-\item
-  {[}Conduction through window frame and divider, if present{]}
-\end{itemize}
-
-Here, short-wave radiation is that from lights and diffuse interior solar radiation.
-
-For a window \emph{with an interior shading device}, this heat flow is equal to:
-
-
-\begin{itemize}
-\item
-  {[}Surface Window Transmitted Solar Radiation Rate{]}
-\item
-  {[}Convective heat flow from the air flowing through the gap between glazing and shading device{]}
-\item
-  {[}Convective heat flow from the zone side of the shading device{]}
-\item
-  {[}Net IR heat flow from the zone side of the glazing{]}
-\item
-  {[}Net IR heat flow from the zone side of the shading device{]}
-\item
-  {[}Short-wave radiation from zone transmitted back out the window{]}
-\item
-  {[}Conduction through the window frame and divider, if present{]}
-\end{itemize}
+The total heat flow \emph{from the zone} from the glazing, frame and divider of an exterior window when the Surface Window Net Heat Transfer (see definition above) is negative.
 
 \subsubsection{Surface Window Glazing Beam to Beam Solar Transmittance {[]}}\label{surface-window-glazing-beam-to-beam-solar-transmittance}
 
@@ -3664,7 +3791,7 @@ Indicates whether a storm window glass layer is present (ref: StormWindow object
 
 \subsubsection{Surface Inside Face Initial Transmitted Diffuse Transmitted Out Window Solar Radiation Rate {[}W{]}}\label{surface-inside-face-initial-transmitted-diffuse-transmitted-out-window-solar-radiation-rate-w}
 
-As of Version 2.1, the diffuse solar transmitted through exterior windows that is initially distributed to another window in the zone and transmitted out of the zone through that window. For exterior windows, this transmitted diffuse solar is ``lost'' to the exterior environment For interior windows, this transmitted diffuse solar is distributed to heat transfer surfaces in the adjacent zone, and is part of the Surface Inside Face Initial Transmitted Diffuse Absorbed Solar Radiation Rate for these adjacent zone surfaces.
+As of Version 2.1, the diffuse solar transmitted through exterior windows that is initially distributed to another window in the zone and transmitted out of the zone through the inside face of the window. Some of this will be absorbed in the window layers and some will be transmitted through. For exterior windows, transmitted diffuse solar is ``lost'' to the exterior environment. For interior windows, this transmitted diffuse solar is distributed to heat transfer surfaces in the adjacent zone, and is part of the Surface Inside Face Initial Transmitted Diffuse Absorbed Solar Radiation Rate for these adjacent zone surfaces.
 
 \subsubsection{Additional Window Outputs (Advanced)}\label{additional-window-outputs-advanced}
 
@@ -3680,11 +3807,11 @@ The net exchange of infrared radiation heat transfer from the glazing to the zon
 
 \subsubsection{Surface Window Shortwave from Zone Back Out Window Heat Transfer Rate {[}W{]}}\label{surface-window-shortwave-from-zone-back-out-window-heat-transfer-rate-w}
 
-This is the short-wave radiation heat transfer from the zone back out the window in watts. This is a measure of the diffuse short-wave light (from reflected solar and electric lighting) that leave the zone through the window. This output variable is the term called ``{[}Short-wave radiation from zone transmitted back out the window{]}'' under the description above for Surface Window Heat Gain Rate output variable.
+This is the short-wave radiation heat transfer from the zone back out the inside face of the window in watts. This is a measure of the diffuse short-wave light (from beam and diffuse solar and electric lighting) that leaves the zone through the window.
 
 \subsubsection{Surface Window Inside Face Frame and Divider Zone Heat Gain Rate {[}W{]}}\label{surface-window-inside-face-frame-and-divider-zone-heat-gain-rate-w}
 
-This is the heat transfer from any frames and/or dividers to the zone in watts. This output variable is the term called ``{[}Conduction to zone from window frame and divider, if present{]}'' under the description above for Surface Window Heat Gain Rate output variable. (The word ``conduction'' here is used because the models is simplified compared to the complexities of surface convection and radiation.)
+This is the convective heat transfer from any frames and/or dividers to the zone in watts. Negative values imply heat flow to the exterior. The Surface Window Frame Inside Temperature and Surface Window Divider Inside Temperature are computed from a heat balance on the frame/divider that includes solar radiation, long-wave radiation, convection, and conduction. The frame/divider is then included in the zone heat balance via convection at this inside temperature. See Engineering Reference ``Window Frame and Divider Calculation'' for more details.
 
 \subsubsection{Surface Window Frame Heat Gain Rate {[}W{]}}\label{surface-window-frame-heat-gain-rate-w}
 
@@ -3767,7 +3894,6 @@ This report produces a special file (\textbf{eplusout.dxf}) in the industry stan
 EnergyPlus produces this file from the Report command:
 
 \begin{lstlisting}
-
 Output:Reports, Surfaces, DXF;
 \end{lstlisting}
 
@@ -3870,26 +3996,25 @@ This field is the width of the shade in meters.
 Examples of these (can be found in example files 4ZoneWithShading\_Simple\_1.idf and 4ZoneWithShading\_Simple\_2.idf)
 
 \begin{lstlisting}
+Shading:Building,
+  Bushes-East,                !- Name
+  90,                         !- Azimuth Angle {deg}
+  90,                         !- Tilt Angle {deg}
+  45,                         !- Starting X Coordinate {m}
+  0,                          !- Starting Y Coordinate {m}
+  0,                          !- Starting Z Coordinate {m}
+  50,                         !- Length {m}
+  1;                          !- Height {m}
 
-  Shading:Building,
-      Bushes-East,             !- Name
-      90,                      !- Azimuth Angle {deg}
-      90,                      !- Tilt Angle {deg}
-      45,                      !- Starting X Coordinate {m}
-      0,                       !- Starting Y Coordinate {m}
-      0,                       !- Starting Z Coordinate {m}
-      50,                      !- Length {m}
-      1;                       !- Height {m}
-
-    Shading:Site,
-      Bushes-North,            !- Name
-      0,                       !- Azimuth Angle {deg}
-      90,                      !- Tilt Angle {deg}
-      45,                      !- Starting X Coordinate {m}
-      50,                      !- Starting Y Coordinate {m}
-      0,                       !- Starting Z Coordinate {m}
-      50,                      !- Length {m}
-      1;                       !- Height {m}
+Shading:Site,
+  Bushes-North,               !- Name
+  0,                          !- Azimuth Angle {deg}
+  90,                         !- Tilt Angle {deg}
+  45,                         !- Starting X Coordinate {m}
+  50,                         !- Starting Y Coordinate {m}
+  0,                          !- Starting Z Coordinate {m}
+  50,                         !- Length {m}
+  1;                          !- Height {m}
 \end{lstlisting}
 
 \subsection{Shading:Site:Detailed, Shading:Building:Detailed}\label{shadingsitedetailed-shadingbuildingdetailed}
@@ -3936,22 +4061,21 @@ The number of sides in the surface (number of X,Y,Z vertex groups). For further 
 IDF example of Detached Shading Surfaces:
 
 \begin{lstlisting}
+Shading:Building:Detailed,
+  EAST SIDE TREE,             !- Detached Shading
+  ShadingTransmittance:0002,  !- Shadowing Transmittance & Schedule
+  3,                          !- Triangle
+  33.52800    ,   10.66800    ,   10.05800,
+  33.52800    ,   13.71600    ,  0.9140000,
+  33.52800    ,   4.572000    ,  0.9140000;
 
 Shading:Building:Detailed,
-     EAST SIDE TREE,  !- Detached Shading
-     ShadingTransmittance:0002,  !- Shadowing Transmittance & Schedule
-     3, !-Triangle
-     33.52800    ,   10.66800    ,   10.05800    ,
-     33.52800    ,   13.71600    ,  0.9140000    ,
-     33.52800    ,   4.572000    ,  0.9140000    ;
-
-  Shading:Building:Detailed,
-     WEST SIDE TREE,  !- Detached Shading
-     ShadingTransmittance:0002,  !- Shadowing Transmittance & Schedule
-     3, !-Triangle
-    -3.048000    ,   7.620000    ,   10.05800    ,
-    -3.048000    ,   4.572000    ,  0.9140000    ,
-    -3.048000    ,   13.71600    ,  0.9140000    ;
+  WEST SIDE TREE,             !- Detached Shading
+  ShadingTransmittance:0002,  !- Shadowing Transmittance & Schedule
+  3,                          !- Triangle
+  -3.048000    ,   7.620000    ,   10.05800,
+  -3.048000    ,   4.572000    ,  0.9140000,
+  -3.048000    ,   13.71600    ,  0.9140000;
 \end{lstlisting}
 
 \subsection{Attached Shading Surfaces}\label{attached-shading-surfaces}
@@ -4137,38 +4261,37 @@ This field is the fraction of the window/door width to specify as the depth of t
 Examples of these (can be found in example files 4ZoneWithShading\_Simple\_1.idf and 4ZoneWithShading\_Simple\_2.idf)
 
 \begin{lstlisting}
+Shading:Overhang:Projection,
+  Zn001:Wall001:Win001:Shade001,  !- Name
+  Zn001:Wall001:Win001,       !- Window or Door Name
+  .7,                         !- Height above Window or Door {m}
+  90,                         !- Tilt Angle from Window/Door {deg}
+  .2,                         !- Left extension from Window/Door Width {m}
+  .2,                         !- Right extension from Window/Door Width {m}
+  .6;                         !- Depth as Fraction of Window/Door Height {m}
 
-  Shading:Overhang:Projection,
-      Zn001:Wall001:Win001:Shade001,  !- Name
-      Zn001:Wall001:Win001,    !- Window or Door Name
-      .7,                      !- Height above Window or Door {m}
-      90,                      !- Tilt Angle from Window/Door {deg}
-      .2,                      !- Left extension from Window/Door Width {m}
-      .2,                      !- Right extension from Window/Door Width {m}
-      .6;                      !- Depth as Fraction of Window/Door Height {m}
+Shading:Overhang,
+  Zn001:Wall001:Door001:Shade001,  !- Name
+  Zn001:Wall001:Door001,      !- Window or Door Name
+  .6,                         !- Height above Window or Door {m}
+  90,                         !- Tilt Angle from Window/Door {deg}
+  0,                          !- Left extension from Window/Door Width {m}
+  0,                          !- Right extension from Window/Door Width {m}
+  3;                          !- Depth {m}
 
-    Shading:Overhang,
-      Zn001:Wall001:Door001:Shade001,  !- Name
-      Zn001:Wall001:Door001,   !- Window or Door Name
-      .6,                      !- Height above Window or Door {m}
-      90,                      !- Tilt Angle from Window/Door {deg}
-      0,                       !- Left extension from Window/Door Width {m}
-      0,                       !- Right extension from Window/Door Width {m}
-      3;                       !- Depth {m}
-
-    Shading:Fin:Projection,
-      Zn001:Wall001:Shade003,  !- Name
-      Zn001:Wall001:Win001,    !- Window or Door Name
-      .1,                      !- Left Extension from Window/Door {m}
-      .1,                   !- Left Distance Above Top of Window {m}
-      .1,                   !- Left Distance Below Bottom of Window {m}
-      90,                   !- Left Tilt Angle from Window/Door {deg}
-      .6,                   !- Left Depth as Fraction of Window/Door Width {m}
-      .1,                   !- Right Extension from Window/Door {m}
-      .1,                   !- Right Distance Above Top of Window {m}
-      .1,                   !- Right Distance Below Bottom of Window {m}
-      90,                   !- Right Tilt Angle from Window/Door {deg}
-      .6;                   !- Right Depth as Fraction of Window/Door Width {m}
+Shading:Fin:Projection,
+  Zn001:Wall001:Shade003,     !- Name
+  Zn001:Wall001:Win001,       !- Window or Door Name
+  .1,                         !- Left Extension from Window/Door {m}
+  .1,                         !- Left Distance Above Top of Window {m}
+  .1,                         !- Left Distance Below Bottom of Window {m}
+  90,                         !- Left Tilt Angle from Window/Door {deg}
+  .6,                         !- Left Depth as Fraction of Window/Door Width {m}
+  .1,                         !- Right Extension from Window/Door {m}
+  .1,                         !- Right Distance Above Top of Window {m}
+  .1,                         !- Right Distance Below Bottom of Window {m}
+  90,                         !- Right Tilt Angle from Window/Door {deg}
+  .6;                         !- Right Depth as Fraction of Window/Door Width {m}
 \end{lstlisting}
 
 \subsection{Shading:Zone:Detailed}\label{shadingzonedetailed-000}
@@ -4240,34 +4363,34 @@ IDF example of attached shading surfaces (overhang, fin):
 
 \begin{lstlisting}
 Shading:Zone:Detailed,
-  Zn001:Wall001:Shade001,       !- Surface Name
-  Zn001:Wall001,                !- Base Surface Name
-  ShadingTransmittance:0001,    !- Shadowing Transmittance Schedule
-  4,                            !-RectangularOverhang
+  Zn001:Wall001:Shade001,     !- Surface Name
+  Zn001:Wall001,              !- Base Surface Name
+  ShadingTransmittance:0001,  !- Shadowing Transmittance Schedule
+  4,                          !- RectangularOverhang
   1.524000 , -0.3050000    , 2.865000,
   1.524000 ,  0.0000000E+00, 2.865000,
   4.572000 ,  0.0000000E+00, 2.865000,
   4.572000 , -0.3050000    , 2.865000;
 
 Shading:Zone:Detailed,
-  Zn003:Wall001:Shade001,       !- Surface Name
-  Zn003:Wall001,                !- Base Surface Name
-  ShadingTransmittance:0001,    !- Shadowing Transmittance Schedule
-  4,                            !-RectangularLeftFin
-  57.97000 ,   8.450000    ,10.00000      ,
+  Zn003:Wall001:Shade001,     !- Surface Name
+  Zn003:Wall001,              !- Base Surface Name
+  ShadingTransmittance:0001,  !- Shadowing Transmittance Schedule
+  4,                          !- RectangularLeftFin
+  57.97000 ,   8.450000    ,10.00000,
   57.97000 ,   8.450000    , 0.0000000E+00,
   57.97000 ,   6.450000    , 0.0000000E+00,
-  57.97000 ,   6.450000    ,10.00000      ;
+  57.97000 ,   6.450000    ,10.00000;
 
 Shading:Zone:Detailed,
-  Zn003:Wall001:Shade002,       !- Surface Name
-  Zn003:Wall001,                !- Base Surface Name
-  ShadingTransmittance:0003,    !- Shadowing Transmittance Schedule
-  4,                            !-RectangularRightFin
-  77.97000 ,   6.450000    ,10.00000      ,
+  Zn003:Wall001:Shade002,     !- Surface Name
+  Zn003:Wall001,              !- Base Surface Name
+  ShadingTransmittance:0003,  !- Shadowing Transmittance Schedule
+  4,                          !- RectangularRightFin
+  77.97000 ,   6.450000    ,10.00000,
   77.97000 ,   6.450000    , 0.0000000E+00,
   77.97000 ,   8.450000    , 0.0000000E+00,
-  77.97000 ,   8.450000    ,10.00000      ;
+  77.97000 ,   8.450000    ,10.00000;
 \end{lstlisting}
 
 \subsection{ShadingProperty:Reflectance}\label{shadingpropertyreflectance}
@@ -4309,45 +4432,41 @@ The name of the construction of the windows on the shading surface. Required if 
 IDF example of Shading Surface Reflectance for shading surface with specular reflection
 
 \begin{lstlisting}
-
 Shading:Site:Detailed,
-  Adjacent Glazed Facade,  !- User Supplied Surface Name
-  ,   !- Shadowing Transmittance Schedule
-  4,  !- Number of Surface Vertex Groups -- Number of (X,Y,Z) groups
-  0,-24,30, !- Vertex 1 X,Y,Z coordinates
-  0,-24,0,  !- Vertex 2 X,Y,Z coordinates
-  0,0,0,    !- Vertex 3 X,Y,Z coordinates
-  0,0,30;   !-Vertex 3 X,Y,Z coordinates
+  Adjacent Glazed Facade,     !- User Supplied Surface Name
+  ,                           !- Shadowing Transmittance Schedule
+  4,                          !- Number of Surface Vertex Groups -- Number of (X,Y,Z) groups
+  0,-24,30,                   !- Vertex 1 X,Y,Z coordinates
+  0,-24,0,                    !- Vertex 2 X,Y,Z coordinates
+  0,0,0,                      !- Vertex 3 X,Y,Z coordinates
+  0,0,30;                     !- Vertex 3 X,Y,Z coordinates
 
-
-  ShadingProperty:Reflectance,
-  Adjacent Glazed Facade, !- Name of Surface:Shading Object
-  0.3,  !- Diffuse Solar Reflectance of Unglazed Part of Shading Surface
-  0.3,  !- Diffuse Visible Reflectance of Unglazed Part of Shading Surface
-  0.7,  !- Fraction of Shading Surface That Is Glazed
-  GlassCon-1; !- Name of Glazing Construction
+ShadingProperty:Reflectance,
+  Adjacent Glazed Facade,     !- Name of Surface:Shading Object
+  0.3,                        !- Diffuse Solar Reflectance of Unglazed Part of Shading Surface
+  0.3,                        !- Diffuse Visible Reflectance of Unglazed Part of Shading Surface
+  0.7,                        !- Fraction of Shading Surface That Is Glazed
+  GlassCon-1;                 !- Name of Glazing Construction
 \end{lstlisting}
 
 IDF example of Shading Surface Reflectance for shading surface without specular reflection
 
 \begin{lstlisting}
-
 Shading:Site:Detailed,
-  Adjacent Blank Facade,  !- User Supplied Surface Name
-  ,   !- Shadowing Transmittance Schedule
-  4,  !- Number of Surface Vertex Groups -- Number of (X,Y,Z) groups
+  Adjacent Blank Facade,      !- User Supplied Surface Name
+  ,                           !- Shadowing Transmittance Schedule
+  4,                          !- Number of Surface Vertex Groups -- Number of (X,Y,Z) groups
   0,-24,30,
   0,-24,0,
   0,0,0,
   0,0,30;
 
-
-  ShadingProperty:Reflectance,
-  Adjacent Blank Facade, !- Name of Surface:Shading Object
-  0.4,  !- Diffuse Solar Reflectance of Unglazed Part of Shading Surface
-  0.4,  !- Diffuse Visible Reflectance of Unglazed Part of Shading Surface
-  0.0,  !- Fraction of Shading Surface That Is Glazed
-  ;     !- Name of glazing construction
+ShadingProperty:Reflectance,
+  Adjacent Blank Facade,      !- Name of Surface:Shading Object
+  0.4,                        !- Diffuse Solar Reflectance of Unglazed Part of Shading Surface
+  0.4,                        !- Diffuse Visible Reflectance of Unglazed Part of Shading Surface
+  0.0,                        !- Fraction of Shading Surface That Is Glazed
+  ;                           !- Name of glazing construction
 \end{lstlisting}
 
 \subsection{WindowShadingControl}\label{windowpropertyshadingcontrol}
@@ -4356,7 +4475,7 @@ Window shading with coverings like drapes, blinds, screens or pull-down shades c
 
 With WindowShadingControl you specify the type,  location, and timing of the shading device, what variable or combination of variables controls deployment of the shading device, and what the control setpoint is. If the shading device is a blind, you also specify how the slat angle is controlled. Each WindowShadingControl object is associated with a zone and has a list of one or more windows and glass doors to which the shading control is applied (ref: \hyperref[fenestrationsurfacedetailed]{FenestrationSurface:Detailed} with Type = Window or GlassDoor, Window, and \hyperref[glazeddoor]{GlazedDoor}).
 
-NOTE: WindowShadingControl does not work with complex fenestration systems. Controlled complex fenestration systems can be made only with Energy Management Systems objects. Refrencing a \hyperref[fenestrationsurfacedetailed]{FenestrationSurface:Detailed} in a WindowShadingControl while using complex fenestration systems will be ignored by program.
+NOTE: WindowShadingControl does not work with complex fenestration systems. Controlled complex fenestration systems can be made only with Energy Management Systems objects. Referencing a \hyperref[fenestrationsurfacedetailed]{FenestrationSurface:Detailed} in a WindowShadingControl while using complex fenestration systems will be ignored by program.
 
 As shown in Figure~\ref{fig:allowed-locations-of-a-window-shading-device.}, a shading device can be inside the window (Shading Type = InteriorShade or InteriorBlind), outside the window (Shading Type = ExteriorShade or ExteriorBlind), or between panes of glass (Shading Type = BetweenGlassShade or BetweenGlassBlind). The exception is window screens which can only be outside the window (Shading Type = ExteriorScreen).
 
@@ -4389,12 +4508,12 @@ This is the name of a \hyperref[windowmaterialshade]{WindowMaterial:Shade}, \hyp
 
 When this method is used, the program will automatically create a shaded window construction by adding a shading layer to the outside or inside of the construction corresponding to the windows referenced by the WindowShadingControl. The name, created by the program, of this shaded construction is composed as follows: if the name of the window construction is CCC and the material name of the shading device is DDD, then the shaded construction name is CCC:DDD:INT for an interior shading device and CCC:DDD:EXT for an exterior shading device.
 
-This method is the required if you want to add a shading device to a construction brought in from a WINDOW Data File (ref:\hyperref[constructionwindowdatafile]{Construction:WindowDataFile}).
+This method is the required if you want to add a shading device to a construction brought in from a ``Window data file'' (ref:\hyperref[constructionwindowdatafile]{Construction:WindowDataFile}).
 
 Note that if both ``Name of Construction with Shading'' and ``Material Name of Shading Device'' are specified, the former takes precedence.
 \end{itemize}
 
-Most Shading Control Types allow you to specify a schedule that determines when the control is active. One example is a control that is active seasonally. For example, to deploy shading only in the summer when the incident solar is high enough, use Shading Control Type = OnIfHighSolarOnWindow with a schedule that is 1 during the summer months and 0 otherwise and specify Shading Control Is Scheduled = YES. 
+Most Shading Control Types allow you to specify a schedule that determines when the control is active. One example is a control that is active seasonally. For example, to deploy shading only in the summer when the incident solar is high enough, use Shading Control Type = OnIfHighSolarOnWindow with a schedule that is 1 during the summer months and 0 otherwise and specify Shading Control Is Scheduled = YES.
 
 To deploy one shading device during one time period and another during another time period for the same window, specify two different WindowShadingControl objects that both reference the same fenestration.  Each of the WindowShadingControl input objects would include the same window on their lists of fenestration objects, but would reference different schedule input objects. The referenced schedule input objects should have non-zero values specified at different times for each WindowShadingControl. This approach can be used to add shading that is different for different seasons. When more than one WindowShadingControl is used for the same window based on schedule, the type of shading, control type, setpoints, and several other parameters must be the same in the different WindowShadingControl objects, but the shading device and construction can be different.
 
@@ -4607,148 +4726,146 @@ An IDF example: window with interior roll shade that is deployed when solar inci
 \begin{lstlisting}
 ! Example 1: Interior movable shade specified by giving name of shaded construction
 ! in WindowShadingControl
-
-WindowMaterial:Glazing, GLASS - CLEAR SHEET 1 / 8 IN,  !- Material Name
-       SpectralAverage,! Optical data type {SpectralAverage or Spectral}
-       ,               ! Name of spectral data set when Optical Data Type = Spectral
-       0.003        ,  !- Thickness {m}
-       0.837        ,  !- Solar Transmittance at Normal Incidence
-       0.075        ,  !- Solar Reflectance at Normal Incidence: Front Side
-       0.075        ,  !- Solar Reflectance at Normal Incidence: Back Side
-       0.898        ,  !- Visible Transmittance at Normal Incidence
-       0.081        ,  !- Visible Reflectance at Normal Incidence: Front Side
-       0.081        ,  !- Visible Reflectance at Normal Incidence: Back Side
-       0.0          ,  !- IR Transmittance
-       0.8400000    ,  !- IR Emissivity: Front Side
-       0.8400000    ,  !- IR Emissivity: Back Side
-       0.9000000    ;  !- Conductivity {W/m-K}
+  WindowMaterial:Glazing, GLASS - CLEAR SHEET 1 / 8 IN,  !- Material Name
+  SpectralAverage,            !- Optical data type {SpectralAverage or Spectral}
+  ,                           !- Name of spectral data set when Optical Data Type = Spectral
+  0.003,                      !- Thickness {m}
+  0.837,                      !- Solar Transmittance at Normal Incidence
+  0.075,                      !- Solar Reflectance at Normal Incidence: Front Side
+  0.075,                      !- Solar Reflectance at Normal Incidence: Back Side
+  0.898,                      !- Visible Transmittance at Normal Incidence
+  0.081,                      !- Visible Reflectance at Normal Incidence: Front Side
+  0.081,                      !- Visible Reflectance at Normal Incidence: Back Side
+  0.0,                        !- IR Transmittance
+  0.8400000,                  !- IR Emissivity: Front Side
+  0.8400000,                  !- IR Emissivity: Back Side
+  0.9000000;                  !- Conductivity {W/m-K}
 
 WindowMaterial:Shade, ROLL SHADE,  !- Material Name
-       0.3          ,   !- Solar Transmittance at normal incidence
-       0.5000000    ,   !- Solar Reflectance (same for front and back side)
-       0.3          ,   !- Visible Transmittance at normal incidence
-       0.5000000    ,   !- Visible reflectance (same for front and back side)
-       0.9000000    ,   !- IR Emissivity (same for front and back side)
-       0.05         ,   !- IR Transmittance
-       0.003        ,   !- Thickness
-       0.1          ,   !- Conductivity {W/m-K}
-       0.0          ,   !- Top Opening Multiplier
-       0.0          ,   !- Bottom Opening Multiplier
-       0.5          ,   !- Left-Side Opening Multiplier
-       0.5          ,   !- Right-Side Opening Multiplier
-       0.0          ;   !- Air-Flow Permeability
+  0.3,                        !- Solar Transmittance at normal incidence
+  0.5000000,                  !- Solar Reflectance (same for front and back side)
+  0.3,                        !- Visible Transmittance at normal incidence
+  0.5000000,                  !- Visible reflectance (same for front and back side)
+  0.9000000,                  !- IR Emissivity (same for front and back side)
+  0.05,                       !- IR Transmittance
+  0.003,                      !- Thickness
+  0.1,                        !- Conductivity {W/m-K}
+  0.0,                        !- Top Opening Multiplier
+  0.0,                        !- Bottom Opening Multiplier
+  0.5,                        !- Left-Side Opening Multiplier
+  0.5,                        !- Right-Side Opening Multiplier
+  0.0;                        !- Air-Flow Permeability
 
-Construction, SINGLE PANE WITH NO SHADE,  ! Name of construction without shade
-       GLASS - CLEAR SHEET 1 / 8 IN;  !- First material layer
+Construction, SINGLE PANE WITH NO SHADE,  !- Name of construction without shade
+  GLASS - CLEAR SHEET 1 / 8 IN;  !- First material layer
 
-Construction, SINGLE PANE WITH INT SHADE, ! Name of construction with shade
-       GLASS - CLEAR SHEET 1 / 8 IN,  !- First material layer
-       ROLL SHADE                  ;  !- Second material layer
+Construction, SINGLE PANE WITH INT SHADE,  !- Name of construction with shade
+  GLASS - CLEAR SHEET 1 / 8 IN,  !- First material layer
+  ROLL SHADE;                 !- Second material layer
 
 WindowShadingControl,
-       CONTROL ON INCIDENT SOLAR,    !- Name
-       West Zone,                    !- Zone Name
-       1,                            !- Shading Control Sequence Number
-       InteriorShade,                !- Shading Type
-       SINGLE PANE WITH INT SHADE,   !- Name of construction with shading device
-       OnIfHighSolarOnWindow,        !- Shading Control Type
-       ,                             !- Schedule name
-       50.0,                         !- Setpoint {W/m2}
-       NO,                           !- Shading Control Is Scheduled
-       NO,                           !- Glare Control Is Active
-       ,                             !- Material Name of Shading Device
-       ,                             !- Type of Slat Angle Control for Blinds
-       ,                             !- Slat Angle Schedule Name
-       ,                             !- Setpoint 2 {W/m2, deg C or cd/m2}
-       West Zone_DaylCtrl,           !- Daylighting Control Object Name
-       Sequential,                   !- Multiple Surface Control Type
-       Zn001:Wall001:Win001;         !- Fenestration Surface 1 Name
+  CONTROL ON INCIDENT SOLAR,  !- Name
+  West Zone,                  !- Zone Name
+  1,                          !- Shading Control Sequence Number
+  InteriorShade,              !- Shading Type
+  SINGLE PANE WITH INT SHADE, !- Name of construction with shading device
+  OnIfHighSolarOnWindow,      !- Shading Control Type
+  ,                           !- Schedule name
+  50.0,                       !- Setpoint {W/m2}
+  NO,                         !- Shading Control Is Scheduled
+  NO,                         !- Glare Control Is Active
+  ,                           !- Material Name of Shading Device
+  ,                           !- Type of Slat Angle Control for Blinds
+  ,                           !- Slat Angle Schedule Name
+  ,                           !- Setpoint 2 {W/m2, deg C or cd/m2}
+  West Zone_DaylCtrl,         !- Daylighting Control Object Name
+  Sequential,                 !- Multiple Surface Control Type
+  Zn001:Wall001:Win001;       !- Fenestration Surface 1 Name
 
 FenestrationSurface:Detailed,
-       Zn001:Wall001:Win001,         !- SubSurface Name
-       Window                   ,    !- Class
-       SINGLE PANE WITH NO SHADE,    !- Name of construction without shading device
-       Zn001:Wall001            ,    !- Base Surface Name
-       ,                             !- Target
-       0.5000000                ,    !- VF to Ground
-       ,                             !- Frame/Divider name
-       1.0                      ,    !- Multiplier
-       4                        ,    !- Number of vertices (assumed rectangular)
-       0.548 ,  0.0 ,   2.5     ,    !- x,y,z of vertices {m}
-       0.548 ,  0.0 ,   0.5     ,
-       5.548 ,  0.0 ,   0.5     ,
-       5.548 ,  0.0 ,   2.5     ;
+  Zn001:Wall001:Win001,       !- SubSurface Name
+  Window,                     !- Class
+  SINGLE PANE WITH NO SHADE,  !- Name of construction without shading device
+  Zn001:Wall001,              !- Base Surface Name
+  ,                           !- Target
+  0.5000000,                  !- VF to Ground
+  ,                           !- Frame/Divider name
+  1.0,                        !- Multiplier
+  4,                          !- Number of vertices (assumed rectangular)
+  0.548 ,  0.0 ,   2.5,       !- x,y,z of vertices {m}
+  0.548 ,  0.0 ,   0.5,
+  5.548 ,  0.0 ,   0.5,
+  5.548 ,  0.0 ,   2.5;
 \end{lstlisting}
 
 \begin{lstlisting}
 ! Example 2: Interior movable shade specified by giving name of shading device in WindowShadingControl
-
-WindowMaterial:Glazing, GLASS - CLEAR SHEET 1 / 8 IN,  !- Material Name
-       SpectralAverage,! Optical data type {SpectralAverage or Spectral}
-       ,               ! Name of spectral data set when Optical Data Type = Spectral
-       0.003        ,  !- Thickness {m}
-       0.837        ,  !- Solar Transmittance at Normal Incidence
-       0.075        ,  !- Solar Reflectance at Normal Incidence: Front Side
-       0.075        ,  !- Solar Reflectance at Normal Incidence: Back Side
-       0.898        ,  !- Visible Transmittance at Normal Incidence
-       0.081        ,  !- Visible Reflectance at Normal Incidence: Front Side
-       0.081        ,  !- Visible Reflectance at Normal Incidence: Back Side
-       0.0          ,  !- IR Transmittance
-       0.8400000    ,  !- IR Emissivity: Front Side
-       0.8400000    ,  !- IR Emissivity: Back Side
-       0.9000000    ;  !- Conductivity {W/m-K}
+  WindowMaterial:Glazing, GLASS - CLEAR SHEET 1 / 8 IN,  !- Material Name
+  SpectralAverage,            !- Optical data type {SpectralAverage or Spectral}
+  ,                           !- Name of spectral data set when Optical Data Type = Spectral
+  0.003,                      !- Thickness {m}
+  0.837,                      !- Solar Transmittance at Normal Incidence
+  0.075,                      !- Solar Reflectance at Normal Incidence: Front Side
+  0.075,                      !- Solar Reflectance at Normal Incidence: Back Side
+  0.898,                      !- Visible Transmittance at Normal Incidence
+  0.081,                      !- Visible Reflectance at Normal Incidence: Front Side
+  0.081,                      !- Visible Reflectance at Normal Incidence: Back Side
+  0.0,                        !- IR Transmittance
+  0.8400000,                  !- IR Emissivity: Front Side
+  0.8400000,                  !- IR Emissivity: Back Side
+  0.9000000;                  !- Conductivity {W/m-K}
 
 WindowMaterial:Shade, ROLL SHADE,  !- Material Name
-       0.3          ,   !- Solar Transmittance at normal incidence
-       0.5000000    ,   !- Solar Reflectance (same for front and back side)
-       0.3          ,   !- Visible Transmittance at normal incidence
-       0.5000000    ,   !- Visible reflectance (same for front and back side)
-       0.9000000    ,   !- IR Emissivity (same for front and back side)
-       0.05         ,   !- IR Transmittance
-       0.003        ,   !- Thickness
-       0.1          ,   !- Conductivity {W/m-K}
-       0.0          ,   !- Top Opening Multiplier
-       0.0          ,   !- Bottom Opening Multiplier
-       0.5          ,   !- Left-Side Opening Multiplier
-       0.5          ,   !- Right-Side Opening Multiplier
-       0.0          ;   !- Air-Flow Permeability
+  0.3,                        !- Solar Transmittance at normal incidence
+  0.5000000,                  !- Solar Reflectance (same for front and back side)
+  0.3,                        !- Visible Transmittance at normal incidence
+  0.5000000,                  !- Visible reflectance (same for front and back side)
+  0.9000000,                  !- IR Emissivity (same for front and back side)
+  0.05,                       !- IR Transmittance
+  0.003,                      !- Thickness
+  0.1,                        !- Conductivity {W/m-K}
+  0.0,                        !- Top Opening Multiplier
+  0.0,                        !- Bottom Opening Multiplier
+  0.5,                        !- Left-Side Opening Multiplier
+  0.5,                        !- Right-Side Opening Multiplier
+  0.0;                        !- Air-Flow Permeability
 
-Construction, SINGLE PANE WITH NO SHADE,  ! Name of construction without shade
-       GLASS - CLEAR SHEET 1 / 8 IN;  !- First material layer
+Construction, SINGLE PANE WITH NO SHADE,  !- Name of construction without shade
+  GLASS - CLEAR SHEET 1 / 8 IN;  !- First material layer
 
 WindowShadingControl,
-       CONTROL ON INCIDENT SOLAR,    !- Name
-       West Zone,                    !- Zone Name
-       1,                            !- Shading Control Sequence Number
-       InteriorShade,                !- Shading Type
-       ,                             !- Name of shaded construction
-       OnIfHighSolarOnWindow,        !- Shading Control Type
-       ,                             !- Schedule name
-       50.0,                         !- Setpoint {W/m2}
-       NO,                           !- Shading Control Is Scheduled
-       NO,                           !- Glare Control Is Active
-       ROLL SHADE,                   !- Material Name of Shading Device
-       ,                             !- Type of Slat Angle Control for Blinds
-       ,                             !- Slat Angle Schedule Name
-       ,                             !- Setpoint 2 {W/m2, deg C or cd/m2}
-       West Zone_DaylCtrl,           !- Daylighting Control Object Name
-       Sequential,                   !- Multiple Surface Control Type
-       Zn001:Wall001:Win001;         !- Fenestration Surface 1 Name
+  CONTROL ON INCIDENT SOLAR,  !- Name
+  West Zone,                  !- Zone Name
+  1,                          !- Shading Control Sequence Number
+  InteriorShade,              !- Shading Type
+  ,                           !- Name of shaded construction
+  OnIfHighSolarOnWindow,      !- Shading Control Type
+  ,                           !- Schedule name
+  50.0,                       !- Setpoint {W/m2}
+  NO,                         !- Shading Control Is Scheduled
+  NO,                         !- Glare Control Is Active
+  ROLL SHADE,                 !- Material Name of Shading Device
+  ,                           !- Type of Slat Angle Control for Blinds
+  ,                           !- Slat Angle Schedule Name
+  ,                           !- Setpoint 2 {W/m2, deg C or cd/m2}
+  West Zone_DaylCtrl,         !- Daylighting Control Object Name
+  Sequential,                 !- Multiple Surface Control Type
+  Zn001:Wall001:Win001;       !- Fenestration Surface 1 Name
 
 FenestrationSurface:Detailed,
-       Zn001:Wall001:Win001,         !- SubSurface Name
-       Window                   ,    !- Class
-       SINGLE PANE WITH NO SHADE,    !- Name of construction without shade
-       Zn001:Wall001            ,    !- Base Surface Name
-       ,                             !- Target
-       0.5000000                ,    !- VF to Ground
-       ,                             !- Frame/Divider name
-       1.0                      ,    !- Multiplier
-       4                        ,    !- Number of vertices (assumed rectangular)
-       0.548 ,  0.0 ,   2.5     ,    !- x,y,z of vertices {m}
-       0.548 ,  0.0 ,   0.5     ,
-       5.548 ,  0.0 ,   0.5     ,
-       5.548 ,  0.0 ,   2.5     ;
+  Zn001:Wall001:Win001,       !- SubSurface Name
+  Window,                     !- Class
+  SINGLE PANE WITH NO SHADE,  !- Name of construction without shade
+  Zn001:Wall001,              !- Base Surface Name
+  ,                           !- Target
+  0.5000000,                  !- VF to Ground
+  ,                           !- Frame/Divider name
+  1.0,                        !- Multiplier
+  4,                          !- Number of vertices (assumed rectangular)
+  0.548 ,  0.0 ,   2.5,       !- x,y,z of vertices {m}
+  0.548 ,  0.0 ,   0.5,
+  5.548 ,  0.0 ,   0.5,
+  5.548 ,  0.0 ,   2.5;
 \end{lstlisting}
 
 \subsection{WindowProperty:FrameAndDivider}\label{windowpropertyframeanddivider}
@@ -4774,9 +4891,9 @@ A \textbf{\emph{divider}}, as shown in Figure~\ref{fig:a-window-with-a-frame-and
 
 In EnergyPlus, a window can have any combination of frame, divider and reveal surfaces, or none of these.
 
-The best source of frame and divider characteristics is the WINDOW program, which will calculate the values required by EnergyPlus for different frame and divider types. In particular, the THERM program within the WINDOW program will calculate the effective conductance of frames and dividers; this is the conductance taking 2-D heat transfer effects into account.
+The best source of frame and divider characteristics is the \href{https://windows.lbl.gov/software-tools#window-heading}{WINDOW} program, which will calculate the values required by EnergyPlus for different frame and divider types. In particular, the \href{https://windows.lbl.gov/software-tools#therm-heading}{THERM} program within the \href{https://windows.lbl.gov/software-tools#window-heading}{WINDOW} program will calculate the effective conductance of frames and dividers; this is the conductance taking 2-D heat transfer effects into account.
 
-Note that a window's frame and divider characteristics, along with other window information, can be read in from the Window Data File (see ``Importing Windows from the WINDOW program'' and ``\hyperref[constructionwindowdatafile]{Construction:WindowDataFile} object''). In this case the WindowProperty:FrameAndDivider referenced by the window is not applicable and should be blank unless you want to specify reveal surfaces for beam solar reflection.
+Note that a window's frame and divider characteristics, along with other window information, can be read in from the ``Window data file'' (see \hyperref[importing-windows-from-window-program]{Importing Windows from WINDOW Program} and \hyperref[constructionwindowdatafile]{Construction:WindowDataFile}). In this case the WindowProperty:FrameAndDivider referenced by the window is not applicable and should be blank unless you want to specify reveal surfaces for beam solar reflection.
 
 \begin{figure}[hbtp] % fig 35
 \centering
@@ -4796,15 +4913,15 @@ The name of the frame/divider object. It is referenced by WindowProperty:FrameAn
 
 \paragraph{Field: Frame Width}\label{field-frame-width}
 
-The width of the frame elements when projected onto the plane of the window. It is assumed that the top, bottom and side elements of the frame have the same width. If not, an average frame width should be entered such that the projected frame area calculated using the average value equals the sum of the areas of the frame elements.
+The width of the frame elements when projected onto the plane of the window. It is assumed that the top, bottom and side elements of the frame have the same width. If not, an average frame width should be entered such that the projected frame area calculated using the average value equals the sum of the areas of the frame elements. Default: 0.0 m.
 
 \paragraph{Field: Frame Outside Projection}\label{field-frame-outside-projection}
 
-The amount by which the frame projects outward from the outside surface of the window glazing. If the outer surface of the frame is flush with the glazing, Frame Outside Projection = 0.0. Used to calculate shadowing of frame onto glass, solar absorbed by frame, IR emitted and absorbed by frame, and convection from frame.
+The amount by which the frame projects outward from the outside surface of the window glazing. If the outer surface of the frame is flush with the glazing, Frame Outside Projection = 0.0. Used to calculate shadowing of frame onto glass, solar absorbed by frame, IR emitted and absorbed by frame, and convection from frame.  Default: 0.0 m.
 
 \paragraph{Field: Frame Inside Projection}\label{field-frame-inside-projection}
 
-The amount by which the frame projects inward from the inside surface of the window glazing. If the inner surface of the frame is flush with the glazing, Frame Inside Projection = 0.0. Used to calculate solar absorbed by frame, IR emitted and absorbed by frame, and convection from frame.
+The amount by which the frame projects inward from the inside surface of the window glazing. If the inner surface of the frame is flush with the glazing, Frame Inside Projection = 0.0. Used to calculate solar absorbed by frame, IR emitted and absorbed by frame, and convection from frame. Default: 0.0 m.
 
 \begin{figure}[hbtp] % fig 36
 \centering
@@ -4814,29 +4931,31 @@ The amount by which the frame projects inward from the inside surface of the win
 
 \paragraph{Field: Frame Conductance}\label{field-frame-conductance}
 
-The effective thermal conductance of the frame measured from inside to outside frame surface (no air films) and taking 2-D conduction effects into account. Obtained from the WINDOW program or other 2-D calculation.
+The effective thermal conductance of the frame measured from inside to outside frame surface (no air films) and taking 2-D conduction effects into account. Obtained from the \href{https://windows.lbl.gov/software-tools#window-heading}{WINDOW} program or other 2-D calculation. Default: 0.0 W/m2-K.
 
 \paragraph{Field: Ratio of Frame-Edge Glass Conductance to Center-Of-Glass Conductance}\label{field-ratio-of-frame-edge-glass-conductance-to-center-of-glass-conductance}
 
-The glass conductance near the frame (excluding air films) divided by the glass conductance at the center of the glazing (excluding air films). Used only for multi-pane glazing constructions. This ratio is greater than 1.0 because of thermal bridging from the glazing across the frame and across the spacer that separates the glass panes. Values can be obtained from the WINDOW program the user-selected glazing construction and frame characteristics.
+The glass conductance near the frame (excluding air films) divided by the glass conductance at the center of the glazing (excluding air films). Used only for multi-pane glazing constructions. This ratio is greater than 1.0 because of thermal bridging from the glazing across the frame and across the spacer that separates the glass panes. Values can be obtained from the \href{https://windows.lbl.gov/software-tools#window-heading}{WINDOW} program for the user-selected glazing construction and frame characteristics. Default: 1.0.
 
 \paragraph{Field: Frame Solar Absorptance}\label{field-frame-solar-absorptance}
 
-The solar absorptance of the frame. The value is assumed to be the same on the inside and outside of the frame and to be independent of angle of incidence of solar radiation. If solar reflectance (or reflectivity) data is available, then absorptance is equal to 1.0 minus reflectance (for opaque materials).
+The solar absorptance of the frame. The value is assumed to be the same on the inside and outside of the frame and to be independent of angle of incidence of solar radiation. If solar reflectance (or reflectivity) data is available, then absorptance is equal to 1.0 minus reflectance (for opaque materials). Default: 0.7.
 
 \paragraph{Field: Frame Visible Absorptance}\label{field-frame-visible-absorptance}
 
-The visible absorptance of the frame. The value is assumed to be the same on the inside and outside of the frame and to be independent of angle of incidence of solar radiation. If visible reflectance (or reflectivity) data is available, then absorptance is equal to 1.0 minus reflectance (for opaque materials).
+The visible absorptance of the frame. The value is assumed to be the same on the inside and outside of the frame and to be independent of angle of incidence of solar radiation. If visible reflectance (or reflectivity) data is available, then absorptance is equal to 1.0 minus reflectance (for opaque materials). Default: 0.7.
 
 \paragraph{Field: Frame Thermal Hemispherical Emissivity}\label{field-frame-thermal-hemispherical-emissivity}
 
-The thermal emissivity of the frame, assumed the same on the inside and outside.
+The thermal emissivity of the frame, assumed the same on the inside and outside. Default: 0.9.
 
 \textbf{\emph{Divider Fields}}
 
 \paragraph{Field: Divider Type}\label{field-divider-type}
 
-The type of divider (see figure below). Divider Type = Suspended is applicable only to multi-pane glazing. It means that the divider is suspended between the panes. (If there are more than two glass layers, the divider is assumed to be placed between the two outermost layers.)
+The type of divider (see figure below). Default: DividedLite.
+
+Divider Type = Suspended is applicable only to multi-pane glazing. It means that the divider is suspended between the panes. (If there are more than two glass layers, the divider is assumed to be placed between the two outermost layers.)
 
 Divider Type = DividedLite means that the divider elements project out from the outside and inside surfaces of the glazing and divide the glazing into individual lites. For multi-pane glazing, this type of divider also has between-glass elements that separate the panes.
 
@@ -4848,43 +4967,43 @@ Divider Type = DividedLite means that the divider elements project out from the 
 
 \paragraph{Field: Divider Width}\label{field-divider-width}
 
-The width of the divider elements when projected onto the plane of the window. It is assumed that the horizontal and vertical divider elements have the same width. If not, an average divider width should be entered such that the projected divider area calculated using the average value equals the sum of the areas of the divider elements.
+The width of the divider elements when projected onto the plane of the window. It is assumed that the horizontal and vertical divider elements have the same width. If not, an average divider width should be entered such that the projected divider area calculated using the average value equals the sum of the areas of the divider elements. Default: 0.0 m.
 
 \paragraph{Field: Number of Horizontal Dividers}\label{field-number-of-horizontal-dividers}
 
-The number of divider elements parallel to the top and bottom of the window.
+The number of divider elements parallel to the top and bottom of the window. Default: 0. The total horizontal divider width (Divider Width times Number of Horizontal Dividers) must not exceed the glazed opening height of the window.
 
 \paragraph{Field: Number of Vertical Dividers}\label{field-number-of-vertical-dividers}
 
-The number of divider elements parallel to the sides of the window.
+The number of divider elements parallel to the sides of the window. Default: 0. The total vertical divider width (Divider Width times Number of Vertical Dividers) must not exceed the glazed opening width of the window.
 
 \paragraph{Field: Divider Outside Projection}\label{field-divider-outside-projection}
 
-The amount by which the divider projects out from the outside surface of the window glazing. For Divider Type = Suspended, Divider Projection = 0.0. Used to calculate shadowing of divider onto glass, solar absorbed by divider, IR emitted and absorbed by divider, and convection from divider.
+The amount by which the divider projects out from the outside surface of the window glazing. For Divider Type = Suspended, Divider Projection = 0.0. Used to calculate shadowing of divider onto glass, solar absorbed by divider, IR emitted and absorbed by divider, and convection from divider. Default: 0.0 m.
 
 \paragraph{Field: Divider Inside Projection}\label{field-divider-inside-projection}
 
-The amount by which the divider projects inward from the inside surface of the window glazing. If the inner surface of the divider is flush with the glazing, Divider Inside Projection = 0.0. Used to calculate solar absorbed by divider, IR emitted and absorbed by divider, and convection from divider.
+The amount by which the divider projects inward from the inside surface of the window glazing. If the inner surface of the divider is flush with the glazing, Divider Inside Projection = 0.0. Used to calculate solar absorbed by divider, IR emitted and absorbed by divider, and convection from divider. Default: 0.0 m.
 
 \paragraph{Field: Divider Conductance}\label{field-divider-conductance}
 
-The effective thermal conductance of the divider measured from inside to outside divider surface (no air films) and taking 2-D conduction effects into account. Obtained from the WINDOW program or other 2-D calculation.
+The effective thermal conductance of the divider measured from inside to outside divider surface (no air films) and taking 2-D conduction effects into account. Obtained from the \href{https://windows.lbl.gov/software-tools#window-heading}{WINDOW} program or other 2-D calculation. Default: 0.0 W/m2-K.
 
 \paragraph{Field: Ratio of Divider-Edge Glass Conductance to Center-Of-Glass Conductance}\label{field-ratio-of-divider-edge-glass-conductance-to-center-of-glass-conductance}
 
-The glass conductance near the divider (excluding air films) divided by the glass conductance at the center of the glazing (excluding air films). Used only for multi-pane glazing constructions. This ratio is greater than 1.0 because of thermal bridging from the glazing across the divider and across the spacer that separates the glass panes. Values can be obtained from the WINDOW program for the user-selected glazing construction and divider characteristics.
+The glass conductance near the divider (excluding air films) divided by the glass conductance at the center of the glazing (excluding air films). Used only for multi-pane glazing constructions. This ratio is greater than 1.0 because of thermal bridging from the glazing across the divider and across the spacer that separates the glass panes. Values can be obtained from the \href{https://windows.lbl.gov/software-tools#window-heading}{WINDOW} program for the user-selected glazing construction and divider characteristics. Default: 1.0.
 
 \paragraph{Field: Divider Solar Absorptance}\label{field-divider-solar-absorptance}
 
-The solar absorptance of the divider. The value is assumed to be the same on the inside and outside of the divider and to be independent of angle of incidence of solar radiation. If solar reflectance (or reflectivity) data is available, then absorptance is equal to 1.0 minus reflectance (for opaque materials).
+The solar absorptance of the divider. The value is assumed to be the same on the inside and outside of the divider and to be independent of angle of incidence of solar radiation. If solar reflectance (or reflectivity) data is available, then absorptance is equal to 1.0 minus reflectance (for opaque materials). Default: 0.0.
 
 \paragraph{Field: Divider Visible Absorptance}\label{field-divider-visible-absorptance}
 
-The visible absorptance of the divider. The value is assumed to be the same on the inside and outside of the divider and to be independent of angle of incidence of solar radiation. If visible reflectance (or reflectivity) data is available, then absorptance is equal to 1.0 minus reflectance (for opaque materials).
+The visible absorptance of the divider. The value is assumed to be the same on the inside and outside of the divider and to be independent of angle of incidence of solar radiation. If visible reflectance (or reflectivity) data is available, then absorptance is equal to 1.0 minus reflectance (for opaque materials). Default: 0.0.
 
 \paragraph{Field: Divider Thermal Hemispherical Emissivity}\label{field-divider-thermal-hemispherical-emissivity}
 
-The thermal emissivity of the divider, assumed the same on the inside and outside.
+The thermal emissivity of the divider, assumed the same on the inside and outside. Default: 0.9.
 
 \textbf{\emph{Reveal Surface Fields}}
 
@@ -4927,28 +5046,74 @@ The net effect of beam solar reflected from outside reveal surfaces is to increa
 
 \paragraph{Field: Outside Reveal Solar Absorptance}\label{field-outside-reveal-solar-absorptance}
 
-The solar absorptance of outside reveal surfaces.
+The solar absorptance of outside reveal surfaces. Default: 0.0.
 
 \paragraph{Field: Inside Sill Depth}\label{field-inside-sill-depth}
 
-The depth of the inside sill, measured from the inside surface of the glazing to the edge of the sill (see Figure~\ref{fig:a-vertical-section-through-a-window-with}).
+The depth of the inside sill, measured from the inside surface of the glazing to the edge of the sill (see Figure~\ref{fig:a-vertical-section-through-a-window-with}). Default: 0.0 m.
 
 \paragraph{Field: Inside Sill Solar Absorptance}\label{field-inside-sill-solar-absorptance}
 
-The solar absorptance of the inside sill.
+The solar absorptance of the inside sill. Default: 0.0.
 
 \textbf{\emph{Field: Inside Reveal Depth}}
 
-The depth of the inside reveal surfaces other than the sill, measured from the inside surface of the glazing to the edge of the reveal surface (see Figure~\ref{fig:a-vertical-section-through-a-window-with}).
+The depth of the inside reveal surfaces other than the sill, measured from the inside surface of the glazing to the edge of the reveal surface (see Figure~\ref{fig:a-vertical-section-through-a-window-with}). Default: 0.0 m.
 
 \paragraph{Field: Inside Reveal Solar Absorptance}\label{field-inside-reveal-solar-absorptance}
 
-The solar absorptance of the inside reveal surfaces other than the sill.
+The solar absorptance of the inside reveal surfaces other than the sill. Default: 0.0.
 
 \paragraph{Field: NFRC Product Type for Assembly Calculations}\label{field-nfrc-product-type-for-assembly-calculations}
 
-The selection made for this field corresponds to NFRC 100 ``Procedure for Determining Fenestration Product U-factors'' product types which are used when computing the overall u-factor, SHGC, and visual transmittance. The default is CurtainWall. The options are: CasementDouble, CasementSingle, DualAction, Fixed, Garage, Greenhouse, HingedEscape, HorizontalSlider, Jal, Pivoted, Projecting, DoorSidelite, Skylight, SlidingPatioDoor, CurtainWall, SpandrelPanel, SideHingedDoor, DoorTransom, TropicalAwning, TubularDaylightingDevice, and VerticalSlider. The sizes used in the calculation of the overall u-factor, overall SHGC, and overall VT are based on NFRC 100 Table 4-3 (see Figure~\ref{fig:nfrc100-product-types} ). 
+The selection made for this field corresponds to NFRC 100 ``Procedure for Determining Fenestration Product U-factors'' product types which are used when computing the overall u-factor, SHGC, and visual transmittance. The default is CurtainWall. The options are:
 
+\begin{itemize}
+\item
+  CasementDouble
+\item
+  CasementSingle
+\item
+  DualAction
+\item
+  Fixed
+\item
+  Garage
+\item
+  Greenhouse
+\item
+  HingedEscape
+\item
+  HorizontalSlider
+\item
+  Jal
+\item
+  Pivoted
+\item
+  Projecting
+\item
+  DoorSidelite
+\item
+  Skylight
+\item
+  SlidingPatioDoor
+\item
+  CurtainWall
+\item
+  SpandrelPanel
+\item
+  SideHingedDoor
+\item
+  DoorTransom
+\item
+  TropicalAwning
+\item
+  TubularDaylightingDevice
+\item
+  VerticalSlider
+\end{itemize}
+
+The sizes used in the calculation of the overall u-factor, overall SHGC, and overall VT are based on NFRC 100 Table 4-3 (see Figure~\ref{fig:nfrc100-product-types} ).
 
 \begin{figure}[hbtp] % fig 38
 \centering
@@ -4965,34 +5130,33 @@ The selection made for this field corresponds to NFRC 100 ``Procedure for Determ
 An IDF example:
 
 \begin{lstlisting}
-
-  WindowProperty:FrameAndDivider,
-        TestFrameAndDivider, ! Frame/Divider Name
-        0.05, ! Frame Width
-        0.04, ! Frame Outside Projection
-        0.03, ! Frame Inside Projection
-        5.0,  ! Frame Conductance
-        1.3,  ! Ratio of Frame-Edge Glass Conductance to Center-Of-Glass Conductance
-        0.8,  ! Frame Solar Absorptance
-        0.8,  ! Frame Visible Absorptance
-        0.9,  ! Frame Thermal Emissivity
-        DividedLite, ! Divider Type
-        0.03, ! Divider Width
-        2,    ! Number of Horizontal Dividers
-        2,    ! Number of Vertical Dividers
-        0.03, ! Divider Outside Projection
-        0.03, ! Divider Inside Projection
-        5.0,  ! Divider Conductance
-        1.3,  ! Ratio of Divider-Edge Glass Conductance to Center-Of-Glass Conductance
-        0.8,  ! Divider Solar Absorptance
-        0.8,  ! Divider Visible Absorptance
-        0.9,  ! Divider Thermal Emissivity
-        0.7,  ! Outside Reveal Solar Absorptance
-        0.25, ! Inside Sill Depth (m)
-        0.6,  ! Inside Sill Solar Absorptance
-        0.2,  ! Inside Reveal Depth (m)
-        0.5,  ! Inside Reveal Solar Absorptance
-        ProjectingSingle; ! NFRC Product Type for Assembly Calculations
+WindowProperty:FrameAndDivider,
+  TestFrameAndDivider,        !- Frame/Divider Name
+  0.05,                       !- Frame Width
+  0.04,                       !- Frame Outside Projection
+  0.03,                       !- Frame Inside Projection
+  5.0,                        !- Frame Conductance
+  1.3,                        !- Ratio of Frame-Edge Glass Conductance to Center-Of-Glass Conductance
+  0.8,                        !- Frame Solar Absorptance
+  0.8,                        !- Frame Visible Absorptance
+  0.9,                        !- Frame Thermal Emissivity
+  DividedLite,                !- Divider Type
+  0.03,                       !- Divider Width
+  2,                          !- Number of Horizontal Dividers
+  2,                          !- Number of Vertical Dividers
+  0.03,                       !- Divider Outside Projection
+  0.03,                       !- Divider Inside Projection
+  5.0,                        !- Divider Conductance
+  1.3,                        !- Ratio of Divider-Edge Glass Conductance to Center-Of-Glass Conductance
+  0.8,                        !- Divider Solar Absorptance
+  0.8,                        !- Divider Visible Absorptance
+  0.9,                        !- Divider Thermal Emissivity
+  0.7,                        !- Outside Reveal Solar Absorptance
+  0.25,                       !- Inside Sill Depth (m)
+  0.6,                        !- Inside Sill Solar Absorptance
+  0.2,                        !- Inside Reveal Depth (m)
+  0.5,                        !- Inside Reveal Solar Absorptance
+  ProjectingSingle;           !- NFRC Product Type for Assembly Calculations
 \end{lstlisting}
 
 \subsection{WindowProperty:AirflowControl}\label{windowpropertyairflowcontrol}
@@ -5087,14 +5251,15 @@ An IDF example: window with a constant airflow from inside to outside at 0.008 m
 
 \begin{lstlisting}
 WindowProperty:AirflowControl,
-      Zn001:Wall001:Win002,   !- Name
-      InsideAir,              !- Airflow Source
-      OutsideAir,             !- Airflow Destination
-      0.008,                  !- Maximum Flow Rate {m3/s-m}
-      AlwaysOnAtMaxFlow,      !- Airflow Control Type
-      No,                     !- Airflow Is Scheduled
-      ;                       !- Airflow Multiplier Schedule Name
-      ,                       !- Airflow Return Air Node Name
+  Zn001:Wall001:Win002,       !- Name
+  InsideAir,                  !- Airflow Source
+  OutsideAir,                 !- Airflow Destination
+  0.008,                      !- Maximum Flow Rate {m3/s-m}
+  AlwaysOnAtMaxFlow,          !- Airflow Control Type
+  No,                         !- Airflow Is Scheduled
+  ;                           !- Airflow Multiplier Schedule Name
+
+,                             !- Airflow Return Air Node Name
 \end{lstlisting}
 
 \subsection{WindowProperty:StormWindow}\label{windowpropertystormwindow}
@@ -5171,28 +5336,28 @@ An IDF example of WindowProperty:StormWindow. The storm window is put in place o
 
 \begin{lstlisting}
 WindowProperty:StormWindow,
-   Window1, !- Name of Window to Which Storm Window Glass Layer is Applied
-   GlassA,  !- Name of Material:WindowGlass or MATERIAL:WindowGlass:AltInput that is the storm window layer
-   0.060,   !- Distance from storm window to adjacent glass (m)
-   10,      !- Month that Storm Window Is Put On
-   15,      !- Day of Month that Storm Window Is Put On
-   5,       !- Month that Storm Window Is Taken Off
-   1;       !- Day of Month that Storm Window Is Taken Off
+  Window1,                    !- Name of Window to Which Storm Window Glass Layer is Applied
+  GlassA,                     !- Name of Material:WindowGlass or MATERIAL:WindowGlass:AltInput that is the storm window layer
+  0.060,                      !- Distance from storm window to adjacent glass (m)
+  10,                         !- Month that Storm Window Is Put On
+  15,                         !- Day of Month that Storm Window Is Put On
+  5,                          !- Month that Storm Window Is Taken Off
+  1;                          !- Day of Month that Storm Window Is Taken Off
 \end{lstlisting}
 
-\subsection{Importing Windows from WINDOW program}\label{importing-windows-from-window-program}
+\subsection{Importing Windows from WINDOW Program}\label{importing-windows-from-window-program}
 
 \begin{callout}
-WINDOW v6.3 and later is capable of writing IDF excerpts for Window data. This is the preferred method as no external file is necessary. See the Tips document for details on obtaining the IDF excerpt.
+\href{https://windows.lbl.gov/software-tools#window-heading}{WINDOW} v6.3 and later is capable of writing IDF excerpts for Window data. This is the preferred method as no external file is necessary. See the Tips document for details on obtaining the IDF excerpt.
 \end{callout}
 
-The WINDOW program calculates the U-value, Solar Heat Gain Coefficient, solar transmission/absorption characteristics, visible transmission characteristics and other properties of a window under standard indoor and outdoor conditions. WINDOW treats the whole window system---glazing, frame and divider. A sub-program of WINDOW called THERM uses a 2-D finite element calculation to determine the effective conductance of frame, divider and edge-of-glass elements. Another sub-program, OPTICS, determines the solar-optical properties of glazing, including laminates and coated glass.
+The \href{https://windows.lbl.gov/software-tools#window-heading}{WINDOW} program calculates the U-value, Solar Heat Gain Coefficient, solar transmission/absorption characteristics, visible transmission characteristics and other properties of a window under standard indoor and outdoor conditions. \href{https://windows.lbl.gov/software-tools#window-heading}{WINDOW} treats the whole window system---glazing, frame and divider. A sub-program of \href{https://windows.lbl.gov/software-tools#window-heading}{WINDOW} called \href{https://windows.lbl.gov/software-tools#therm-heading}{THERM} uses a 2-D finite element calculation to determine the effective conductance of frame, divider and edge-of-glass elements. Another sub-program, \href{https://windows.lbl.gov/software-tools#optics-heading}{OPTICS}, determines the solar-optical properties of glazing, including laminates and coated glass.
 
-WINDOW can write a data file containing a description of the window that was analyzed. An example of this file (which is no longer the preferred method) is shown in the Tips document under WINDOW generated files. is shown below. This file, which can be named by the user, can be read by EnergyPlus. For more complete description and examples, see the object description -- \hyperref[constructionwindowdatafile]{Construction:WindowDataFile}.
+\href{https://windows.lbl.gov/software-tools#window-heading}{WINDOW} can write a data file containing a description of the window that was analyzed. An example of this file (which is no longer the preferred method) is shown in the Tips document under \href{https://windows.lbl.gov/software-tools#window-heading}{WINDOW} generated files. This file, which can be named by the user, can be read by EnergyPlus. For more complete description and examples, see the object description -- \hyperref[constructionwindowdatafile]{Construction:WindowDataFile}.
 
-In this way, the same window that was created in WINDOW can be imported into EnergyPlus for annual energy analysis without having to re-input the window data. To obtain WINDOW, THERM, or OPTICS go to \url{http://windows.lbl.gov} and choose the software link. A major advantage of using WINDOW to create window input for EnergyPlus is that you will have direct access to WINDOW's expanding database of over 1000 different glass types; and you will be able to browse through this database according to different criteria (color, transmittance, solar heat gain coefficient, etc.) to help you select the best glass type for your application.
+In this way, the same window that was created in \href{https://windows.lbl.gov/software-tools#window-heading}{WINDOW} can be imported into EnergyPlus for annual energy analysis without having to re-input the window data. To obtain \href{https://windows.lbl.gov/software-tools#window-heading}{WINDOW}, \href{https://windows.lbl.gov/software-tools#therm-heading}{THERM}, or \href{https://windows.lbl.gov/software-tools#optics-heading}{OPTICS} go to \url{http://windows.lbl.gov} and choose the software link. A major advantage of using \href{https://windows.lbl.gov/software-tools#window-heading}{WINDOW} to create window input for EnergyPlus is that you will have direct access to \href{https://windows.lbl.gov/software-tools#window-heading}{WINDOW}'s expanding database of over 1000 different glass types; and you will be able to browse through this database according to different criteria (color, transmittance, solar heat gain coefficient, etc.) to help you select the best glass type for your application.
 
-Although WINDOW writes only one window entry on the WINDOW data file, EnergyPlus users can combine two or more of these files to end up with a single data file with multiple window entries of different types. In this way a library of windows from WINDOW can be built up if so desired. If you combine files like this you should be sure not to leave out or change any of lines from the original files.
+Although \href{https://windows.lbl.gov/software-tools#window-heading}{WINDOW} writes only one window entry on the ``Window data file'', EnergyPlus users can combine two or more of these files to end up with a single data file with multiple window entries of different types. In this way a library of windows from WINDOW can be built up if so desired. If you combine files like this you should be sure not to leave out or change any of lines from the original files.
 
 There are four methods for inputting window constructions in EnergyPlus:
 
@@ -5203,36 +5368,36 @@ There are four methods for inputting window constructions in EnergyPlus:
 \item
   input spectral average data for each layer in the IDF,
 \item
-  items 1 and 2 can be accomplished by reporting the IDF excerpt method from WINDOW
+  items 1 and 2 can be accomplished by reporting the IDF excerpt method from \href{https://windows.lbl.gov/software-tools#window-heading}{WINDOW}, and
 \item
-  import WINDOW report containing layer-by-layer calculated values and overall glazing system angular values.
+  import \href{https://windows.lbl.gov/software-tools#window-heading}{WINDOW} report containing layer-by-layer calculated values and overall glazing system angular values.
 \end{enumerate}
 
 \begin{callout}
-  \warning{Note: When using method 4, the overall glazing system angular dependent properties, including Tsol, Abs, Rfsol, Rbsol, Tvis, Rfvis, and Rbvis, are not used by EnergyPlus. Therefore, methods 1 and 2 and preferably 3 are recommended.}
+  Note: When using method 4, the overall glazing system angular dependent properties, including Tsol, Abs, Rfsol, Rbsol, Tvis, Rfvis, and Rbvis, are not used by EnergyPlus. Therefore, methods 1 and 2 and preferably 3 are recommended.
 \end{callout}
 
 \begin{itemize}
 \item
-  The SHGC calculations in EnergyPlus for window layers input using full spectral data use a spectral weighting data set (derived from Optics5 data file ISO-9845GlobalNorm.std) that is different from the WINDOW default spectral weighting data set (W5\_NFRC\_2003.std). This difference accounts for most of the variation in SHGC values reported by EnergyPlus and WINDOW for full spectral data window layer input. This variation is more pronounced for window constructions of three glass layers or more.
+  The SHGC calculations in EnergyPlus for window layers input using full spectral data use a spectral weighting data set (derived from Optics5 data file ISO-9845GlobalNorm.std) that is different from the \href{https://windows.lbl.gov/software-tools#window-heading}{WINDOW} default spectral weighting data set (W5\_NFRC\_2003.std). This difference accounts for most of the variation in SHGC values reported by EnergyPlus and \href{https://windows.lbl.gov/software-tools#window-heading}{WINDOW} for full spectral data window layer input. This variation is more pronounced for window constructions of three glass layers or more.
 \item
-  Users intending to select a window construction based on SHGC value for energy code compliance should base their selection on the value reported by WINDOW since this is the officially recognized value.
+  Users intending to select a window construction based on SHGC value for energy code compliance should base their selection on the value reported by \href{https://windows.lbl.gov/software-tools#window-heading}{WINDOW} since this is the officially recognized value.
 \end{itemize}
 
-In EnergyPlus, the Window data file is searched for each ``\hyperref[constructionwindowdatafile]{Construction:WindowDataFile}'' object in the EnergyPlus input. This object has a very simple form:
+In EnergyPlus, the ``Window data file'' is searched for each ``\hyperref[constructionwindowdatafile]{Construction:WindowDataFile}'' object in the EnergyPlus input. This object has a very simple form:
 
 \begin{lstlisting}
 Construction:WindowDataFile,
   ConstructionName,
-  FileName; ! Default is Window5DataFile.dat in the ``run'' folder.
+  FileName;                   !- Default is Window5DataFile.dat in the ``run'' folder.
 \end{lstlisting}
 
-If there is a window called ConstructionName on the Window data file, the data for that window is read from the file and the following EnergyPlus objects and their names are created. The ``W5'' prefixed to these names indicates that the object originated in the Window data file.
+If there is a window called ConstructionName on the ``Window data file'', the data for that window is read from the file and the following EnergyPlus objects and their names are created. The ``W5'' prefixed to these names indicates that the object originated in the ``Window data file''.
 
 \subsection{Using LBNLs Windows Calculation Engine}\label{windowscalculationengine}
-This is new windows simulation engine that will be used in both EnergyPlus and Berkeley Lab WINDOW. The intent is for this engine to replace all other window calculation modules in EnergyPlus. For the time being, other modules will still be available. To use the new Window Calculation Engine, insert the following into IDF:
+This is new windows simulation engine that will be used in both EnergyPlus and Berkeley Lab \href{https://windows.lbl.gov/software-tools#window-heading}{WINDOW}. The intent is for this engine to replace all other window calculation modules in EnergyPlus. For the time being, other modules will still be available. To use the new Windows Calculation Engine, insert the following into IDF:
 
 \begin{lstlisting}
 WindowsCalculationEngine,
-ExternalWindowsModel;
+  ExternalWindowsModel;
 \end{lstlisting}

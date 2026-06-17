@@ -1,7 +1,7 @@
-// EnergyPlus, Copyright (c) 1996-2023, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
-// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other
+// National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
 // contributors. All rights reserved.
 //
 // NOTICE: This Software was developed under funding from the U.S. Department of Energy and the
@@ -64,8 +64,10 @@
 #include <EnergyPlus/Fans.hh>
 #include <EnergyPlus/HVACMultiSpeedHeatPump.hh>
 #include <EnergyPlus/HeatBalanceManager.hh>
+#include <EnergyPlus/HeatingCoils.hh>
 #include <EnergyPlus/IOFiles.hh>
 #include <EnergyPlus/MixedAir.hh>
+#include <EnergyPlus/PlantUtilities.hh>
 #include <EnergyPlus/Psychrometrics.hh>
 #include <EnergyPlus/ScheduleManager.hh>
 #include <EnergyPlus/SimAirServingZones.hh>
@@ -77,14 +79,12 @@
 
 using namespace EnergyPlus::BranchInputManager;
 using namespace EnergyPlus::DataHeatBalance;
-using namespace EnergyPlus::DataHVACGlobals;
 using namespace EnergyPlus::DataZoneControls;
 using namespace EnergyPlus::DataZoneEquipment;
 using namespace EnergyPlus::DataZoneEnergyDemands;
 using namespace EnergyPlus::HeatBalanceManager;
 using namespace EnergyPlus::HVACMultiSpeedHeatPump;
 using namespace EnergyPlus::MixedAir;
-using namespace EnergyPlus::ScheduleManager;
 using namespace EnergyPlus::SimAirServingZones;
 using namespace EnergyPlus::SingleDuct;
 using namespace EnergyPlus::SplitterComponent;
@@ -237,6 +237,7 @@ TEST_F(EnergyPlusFixture, HVACMultiSpeedHeatPump_ReportVariableInitTest)
         "    No,                      !- Apply Part Load Fraction to Speeds Greater than 1",
         "    No,                      !- Apply Latent Degradation to Speeds Greater than 1",
         "    0,                       !- Crankcase Heater Capacity {W}",
+        "    ,                        !- Crankcase Heater Capacity Function of Temperature Curve Name",
         "    10,                      !- Maximum Outdoor Dry-Bulb Temperature for Crankcase Heater Operation {C}",
         "    ,                        !- Basin Heater Capacity {W/K}",
         "    ,                        !- Basin Heater Setpoint Temperature {C}",
@@ -334,6 +335,7 @@ TEST_F(EnergyPlusFixture, HVACMultiSpeedHeatPump_ReportVariableInitTest)
         "    No,                      !- Apply Part Load Fraction to Speeds Greater than 1",
         "    No,                      !- Apply Latent Degradation to Speeds Greater than 1",
         "    0,                       !- Crankcase Heater Capacity {W}",
+        "    ,                        !- Crankcase Heater Capacity Function of Temperature Curve Name",
         "    10,                      !- Maximum Outdoor Dry-Bulb Temperature for Crankcase Heater Operation {C}",
         "    ,                        !- Basin Heater Capacity {W/K}",
         "    ,                        !- Basin Heater Setpoint Temperature {C}",
@@ -443,6 +445,7 @@ TEST_F(EnergyPlusFixture, HVACMultiSpeedHeatPump_ReportVariableInitTest)
         "    -8,                      !- Minimum Outdoor Dry-Bulb Temperature for Compressor Operation {C}",
         "    ,                        !- Outdoor Dry-Bulb Temperature to Turn On Compressor {C}",
         "    0,                       !- Crankcase Heater Capacity {W}",
+        "    ,                        !- Crankcase Heater Capacity Function of Temperature Curve Name",
         "    10,                      !- Maximum Outdoor Dry-Bulb Temperature for Crankcase Heater Operation {C}",
         "    DefrostTempCurve,        !- Defrost Energy Input Ratio Function of Temperature Curve Name",
         "    4.4,                     !- Maximum Outdoor Dry-Bulb Temperature for Defrost Operation {C}",
@@ -487,6 +490,7 @@ TEST_F(EnergyPlusFixture, HVACMultiSpeedHeatPump_ReportVariableInitTest)
         "    -8,                      !- Minimum Outdoor Dry-Bulb Temperature for Compressor Operation {C}",
         "    ,                        !- Outdoor Dry-Bulb Temperature to Turn On Compressor {C}",
         "    0,                       !- Crankcase Heater Capacity {W}",
+        "    ,                        !- Crankcase Heater Capacity Function of Temperature Curve Name",
         "    10,                      !- Maximum Outdoor Dry-Bulb Temperature for Crankcase Heater Operation {C}",
         "    DefrostTempCurve,        !- Defrost Energy Input Ratio Function of Temperature Curve Name",
         "    4.4,                     !- Maximum Outdoor Dry-Bulb Temperature for Defrost Operation {C}",
@@ -536,7 +540,7 @@ TEST_F(EnergyPlusFixture, HVACMultiSpeedHeatPump_ReportVariableInitTest)
         "    AC-24sched,              !- Supply Air Fan Operating Mode Schedule Name",
         "    Coil:Heating:DX:MultiSpeed,  !- Heating Coil Object Type",
         "    AC24Heating,             !- Heating Coil Name",
-        "    -8,                      !- Minimum Outdoor Dry-Bulb Temperature for Compressor Operation {C}",
+        "    ,                        !- DX Heating Coil Sizing Ratio",
         "    Coil:Cooling:DX:MultiSpeed,  !- Cooling Coil Object Type",
         "    AC24_cooling,            !- Cooling Coil Name",
         "    Coil:Heating:Electric,   !- Supplemental Heating Coil Object Type",
@@ -571,7 +575,7 @@ TEST_F(EnergyPlusFixture, HVACMultiSpeedHeatPump_ReportVariableInitTest)
         "    AC-25 sched,             !- Supply Air Fan Operating Mode Schedule Name",
         "    Coil:Heating:DX:MultiSpeed,  !- Heating Coil Object Type",
         "    AC25Heating,             !- Heating Coil Name",
-        "    -8,                      !- Minimum Outdoor Dry-Bulb Temperature for Compressor Operation {C}",
+        "    ,                        !- DX Heating Coil Sizing Ratio",
         "    Coil:Cooling:DX:MultiSpeed,  !- Cooling Coil Object Type",
         "    AC25_cooling,            !- Cooling Coil Name",
         "    Coil:Heating:Electric,   !- Supplemental Heating Coil Object Type",
@@ -1255,9 +1259,9 @@ TEST_F(EnergyPlusFixture, HVACMultiSpeedHeatPump_ReportVariableInitTest)
     });
 
     ASSERT_TRUE(process_idf(idf_objects));
-    state->dataGlobal->NumOfTimeStepInHour = 1; // must initialize this to get schedules initialized
-    state->dataGlobal->MinutesPerTimeStep = 60; // must initialize this to get schedules initialized
-    ProcessScheduleInput(*state);
+    state->dataGlobal->TimeStepsInHour = 1;    // must initialize this to get schedules initialized
+    state->dataGlobal->MinutesInTimeStep = 60; // must initialize this to get schedules initialized
+    state->init_state(*state);
 
     HeatBalanceManager::GetZoneData(*state, ErrorsFound); // read zone data
     EXPECT_FALSE(ErrorsFound);                            // zones are specified in the idf snippet
@@ -1321,8 +1325,15 @@ TEST_F(EnergyPlusFixture, HVACMultiSpeedHeatPump_ReportVariableInitTest)
     state->dataHVACMultiSpdHP->MSHeatPump(2).TotCoolEnergyRate = 1000.0;
     state->dataHVACMultiSpdHP->MSHeatPump(1).FlowFraction = 1.0;
     state->dataHVACMultiSpdHP->MSHeatPump(2).FlowFraction = 1.0;
-    state->dataScheduleMgr->Schedule(17).CurrentValue = 1.0;
-    state->dataScheduleMgr->Schedule(9).CurrentValue = 1.0;
+    // because sizing isn't occurring, we must set these
+    for (auto &dxCoil : state->dataDXCoils->DXCoil) {
+        for (int i = 1; i <= dxCoil.NumOfSpeeds; ++i) {
+            dxCoil.MSRatedAirMassFlowRate(i) = dxCoil.MSRatedAirVolFlowRate(i) * 1.2;
+        }
+    }
+
+    Sched::GetSchedule(*state, "AC-24SCHED")->currentVal = 1.0;
+    Sched::GetSchedule(*state, "AC-25 SCHED")->currentVal = 1.0;
     state->dataEnvrn->StdRhoAir = 1.2;
     state->dataEnvrn->OutDryBulbTemp = 35.0;
     state->dataEnvrn->OutHumRat = 0.012;
@@ -1352,8 +1363,8 @@ TEST_F(EnergyPlusFixture, HVACMultiSpeedHeatPump_ReportVariableInitTest)
     state->dataLoopNodes->Node(16).Enthalpy = Psychrometrics::PsyHFnTdbW(state->dataLoopNodes->Node(16).Temp, state->dataLoopNodes->Node(16).HumRat);
     state->dataLoopNodes->Node(24).MassFlowRateMax = state->dataLoopNodes->Node(16).MassFlowRateMaxAvail;
 
-    state->dataFans->Fan(2).MaxAirMassFlowRate = state->dataLoopNodes->Node(16).MassFlowRateMaxAvail;
-    state->dataFans->Fan(2).RhoAirStdInit = state->dataEnvrn->StdRhoAir;
+    state->dataFans->fans(2)->maxAirMassFlowRate = state->dataLoopNodes->Node(16).MassFlowRateMaxAvail;
+    state->dataFans->fans(2)->rhoAirStdInit = state->dataEnvrn->StdRhoAir;
     state->dataDXCoils->DXCoil(2).MSRatedAirMassFlowRate(1) = state->dataDXCoils->DXCoil(2).MSRatedAirVolFlowRate(1) * state->dataEnvrn->StdRhoAir;
     state->dataDXCoils->DXCoil(2).MSRatedAirMassFlowRate(2) = state->dataDXCoils->DXCoil(2).MSRatedAirVolFlowRate(2) * state->dataEnvrn->StdRhoAir;
     state->dataDXCoils->DXCoil(2).MSRatedCBF(1) = 0.2;
@@ -1448,7 +1459,7 @@ TEST_F(EnergyPlusFixture, HVACMultiSpeedHeatPump_ReportVariableInitTest)
 
 TEST_F(EnergyPlusFixture, HVACMultiSpeedHeatPump_HeatRecoveryTest)
 {
-
+    state->init_state(*state);
     state->dataLoopNodes->Node.allocate(2);
     state->dataHVACMultiSpdHP->MSHeatPump.allocate(1);
     int HeatRecInNode(1);
@@ -1462,14 +1473,16 @@ TEST_F(EnergyPlusFixture, HVACMultiSpeedHeatPump_HeatRecoveryTest)
 
     state->dataPlnt->PlantLoop.allocate(1);
     state->dataPlnt->PlantLoop(1).FluidName = "WATER";
-    state->dataPlnt->PlantLoop(1).FluidIndex = 1;
+    state->dataPlnt->PlantLoop(1).glycol = Fluid::GetWater(*state);
+
+    state->dataHVACMultiSpdHP->MSHeatPump(1).HRPlantLoc.loopNum = 1;
+    PlantUtilities::SetPlantLocationLinks(*state, state->dataHVACMultiSpdHP->MSHeatPump(1).HRPlantLoc);
 
     state->dataLoopNodes->Node(HeatRecInNode).MassFlowRate = 0.0; // test heat recovery result with 0 water flow rate
     HVACMultiSpeedHeatPump::MSHPHeatRecovery(*state, 1);
 
     // outlet temp should equal inlet temp since mass flow rate = 0
-    Real64 calculatedOutletTemp = state->dataLoopNodes->Node(HeatRecInNode).Temp +
-                                  state->dataHVACGlobal->MSHPWasteHeat / (state->dataLoopNodes->Node(HeatRecInNode).MassFlowRate * 4181.0);
+    Real64 calculatedOutletTemp = state->dataLoopNodes->Node(HeatRecInNode).Temp;
     EXPECT_DOUBLE_EQ(0.0, state->dataHVACMultiSpdHP->MSHeatPump(1).HeatRecoveryRate);
     EXPECT_DOUBLE_EQ(50.0, state->dataHVACMultiSpdHP->MSHeatPump(1).HeatRecoveryInletTemp);
     EXPECT_DOUBLE_EQ(50.0, state->dataHVACMultiSpdHP->MSHeatPump(1).HeatRecoveryOutletTemp);
@@ -1502,4 +1515,744 @@ TEST_F(EnergyPlusFixture, HVACMultiSpeedHeatPump_HeatRecoveryTest)
     EXPECT_DOUBLE_EQ(QHeatRecovery, state->dataHVACMultiSpdHP->MSHeatPump(1).HeatRecoveryRate);
     EXPECT_DOUBLE_EQ(12543.0, QHeatRecovery);
 }
+
+TEST_F(EnergyPlusFixture, HVACMSHP_UnitarySystemElectricityRateTest)
+{
+
+    bool ErrorsFound(false);
+    int constexpr MSHeatPumpNum(1);
+    bool const FirstHVACIteration(true);
+    int constexpr AirLoopNum(1);
+    Real64 QZnReq(-10000.0);
+    Real64 OnOffAirFlowRatio(1.0);
+
+    std::string const idf_objects = delimited_string({
+
+        "!-   ===========  ALL OBJECTS IN CLASS: ZONECONTROL:THERMOSTAT ===========",
+
+        "  ZoneControl:Thermostat,",
+        "    Z401TempCtrl,            !- Name",
+        "    401,                     !- Zone or ZoneList Name",
+        "    Zone Control Type Sched, !- Control Type Schedule Name",
+        "    ThermostatSetpoint:DualSetpoint,   !- Control 3 Object Type",
+        "    DualSetPoint1;            !- Control 3 Name",
+
+        "  ThermostatSetpoint:DualSetpoint,",
+        "    DualSetPoint1,            !- Name",
+        "    401HeatingSP,            !- Heating Setpoint Temperature Schedule Name",
+        "    401CoolingSP;            !- Cooling Setpoint Temperature Schedule Name",
+
+        "!-   ===========  ALL OBJECTS IN CLASS: AIRTERMINAL:SINGLEDUCT:CONSTANTVOLUME:NOREHEAT ===========",
+
+        "  AirTerminal:SingleDuct:ConstantVolume:NoReheat,",
+        "    401directair,            !- Name",
+        "    AC-24sched,              !- Availability Schedule Name",
+        "    Z401 zone inlet 2AT,     !- Air Inlet Node Name",
+        "    Z401 zone inlet,         !- Air Outlet Node Name",
+        "    3.209;                   !- Maximum Air Flow Rate {m3/s}",
+        "!-   ===========  ALL OBJECTS IN CLASS: ZONEHVAC:EQUIPMENTLIST ===========",
+
+        "  ZoneHVAC:EquipmentList,",
+        "    Z401 terminal list,      !- Name",
+        "    SequentialLoad,          !- Load Distribution Scheme",
+        "    ZoneHVAC:AirDistributionUnit,  !- Zone Equipment 1 Object Type",
+        "    401directairADU,         !- Zone Equipment 1 Name",
+        "    1,                       !- Zone Equipment 1 Cooling Sequence",
+        "    1;                       !- Zone Equipment 1 Heating or No-Load Sequence",
+
+        "!-   ===========  ALL OBJECTS IN CLASS: ZONEHVAC:AIRDISTRIBUTIONUNIT ===========",
+
+        "  ZoneHVAC:AirDistributionUnit,",
+        "    401directairADU,         !- Name",
+        "    Z401 zone inlet,         !- Air Distribution Unit Outlet Node Name",
+        "    AirTerminal:SingleDuct:ConstantVolume:NoReheat,  !- Air Terminal Object Type",
+        "    401directair;            !- Air Terminal Name",
+
+        "!-   ===========  ALL OBJECTS IN CLASS: ZONEHVAC:EQUIPMENTCONNECTIONS ===========",
+
+        "  ZoneHVAC:EquipmentConnections,",
+        "    401,                     !- Zone Name",
+        "    Z401 terminal list,      !- Zone Conditioning Equipment List Name",
+        "    Z401 zone inlet,         !- Zone Air Inlet Node or NodeList Name",
+        "    ,                        !- Zone Air Exhaust Node or NodeList Name",
+        "    Z401 air node,           !- Zone Air Node Name",
+        "    Z401 outlet node;        !- Zone Return Air Node Name",
+
+        "!-   ===========  ALL OBJECTS IN CLASS: FAN:ONOFF ===========",
+        "  Fan:OnOff,",
+        "    AC24_Fan,                !- Name",
+        "    AC-24sched,              !- Availability Schedule Name",
+        "    0.25,                    !- Fan Total Efficiency",
+        "    249.089,                 !- Pressure Rise {Pa}",
+        "    3.209,                   !- Maximum Flow Rate {m3/s}",
+        "    0.85,                    !- Motor Efficiency",
+        "    1,                       !- Motor In Airstream Fraction",
+        "    AC-24 SF inlet air node, !- Air Inlet Node Name",
+        "    AC-24 SF outlet air node,!- Air Outlet Node Name",
+        "    ,                        !- Fan Power Ratio Function of Speed Ratio Curve Name",
+        "    ,                        !- Fan Efficiency Ratio Function of Speed Ratio Curve Name",
+        "    General;                 !- End-Use Subcategory",
+        "  Coil:Cooling:DX:MultiSpeed,",
+        "    AC24_cooling,            !- Name",
+        "    AC-24sched,              !- Availability Schedule Name",
+        "    AC-24 SF outlet air node,!- Air Inlet Node Name",
+        "    AC-24 HC inlet node,     !- Air Outlet Node Name",
+        "    ,                        !- Condenser Air Inlet Node Name",
+        "    AirCooled,               !- Condenser Type",
+        "    ,                        !- Minimum Outdoor Dry-Bulb Temperature for Compressor Operation {C}",
+        "    ,                        !- Supply Water Storage Tank Name",
+        "    ,                        !- Condensate Collection Water Storage Tank Name",
+        "    No,                      !- Apply Part Load Fraction to Speeds Greater than 1",
+        "    No,                      !- Apply Latent Degradation to Speeds Greater than 1",
+        "    0,                       !- Crankcase Heater Capacity {W}",
+        "    ,                        !- Crankcase Heater Capacity Function of Temperature Curve Name",
+        "    10,                      !- Maximum Outdoor Dry-Bulb Temperature for Crankcase Heater Operation {C}",
+        "    ,                        !- Basin Heater Capacity {W/K}",
+        "    ,                        !- Basin Heater Setpoint Temperature {C}",
+        "    ,                        !- Basin Heater Operating Schedule Name",
+        "    Electricity,             !- Fuel Type",
+        "    2,                       !- Number of Speeds",
+        "    53500,                   !- Speed 1 Gross Rated Total Cooling Capacity {W}",
+        "    0.737,                   !- Speed 1 Gross Rated Sensible Heat Ratio",
+        "    3.42,                    !- Speed 1 Gross Rated Cooling COP {W/W}",
+        "    3.209,                   !- Speed 1 Rated Air Flow Rate {m3/s}",
+        "    ,                        !- 2017 Speed 1 Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}",
+        "    ,                        !- 2023 Speed 1 Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}",
+        "    CoolingTempCurve,        !- Speed 1 Total Cooling Capacity Function of Temperature Curve Name",
+        "    CoolingFlowCurve,        !- Speed 1 Total Cooling Capacity Function of Flow Fraction Curve Name",
+        "    EIRTempCurve,            !- Speed 1 Energy Input Ratio Function of Temperature Curve Name",
+        "    EIRFlowCurve,            !- Speed 1 Energy Input Ratio Function of Flow Fraction Curve Name",
+        "    PLFCurve,                !- Speed 1 Part Load Fraction Correlation Curve Name",
+        "    ,                        !- Speed 1 Nominal Time for Condensate Removal to Begin {s}",
+        "    ,                        !- Speed 1 Ratio of Initial Moisture Evaporation Rate and Steady State Latent Capacity {dimensionless}",
+        "    3,                       !- Speed 1 Maximum Cycling Rate {cycles/hr}",
+        "    ,                        !- Speed 1 Latent Capacity Time Constant {s}",
+        "    0.001,                   !- Speed 1 Rated Waste Heat Fraction of Power Input {dimensionless}",
+        "    WasteHeatTempCurve,      !- Speed 1 Waste Heat Function of Temperature Curve Name",
+        "    0.9,                     !- Speed 1 Evaporative Condenser Effectiveness {dimensionless}",
+        "    ,                        !- Speed 1 Evaporative Condenser Air Flow Rate {m3/s}",
+        "    ,                        !- Speed 1 Rated Evaporative Condenser Pump Power Consumption {W}",
+        "    67992.5,                 !- Speed 2 Gross Rated Total Cooling Capacity {W}",
+        "    0.737,                   !- Speed 2 Gross Rated Sensible Heat Ratio",
+        "    3.42,                    !- Speed 2 Gross Rated Cooling COP {W/W}",
+        "    3.209,                   !- Speed 2 Rated Air Flow Rate {m3/s}",
+        "    ,                        !- 2017 Speed 2 Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}",
+        "    ,                        !- 2023 Speed 2 Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}",
+        "    CoolingTempCurve,        !- Speed 2 Total Cooling Capacity Function of Temperature Curve Name",
+        "    CoolingFlowCurve,        !- Speed 2 Total Cooling Capacity Function of Flow Fraction Curve Name",
+        "    EIRTempCurve,            !- Speed 2 Energy Input Ratio Function of Temperature Curve Name",
+        "    EIRFlowCurve,            !- Speed 2 Energy Input Ratio Function of Flow Fraction Curve Name",
+        "    PLFCurve,                !- Speed 2 Part Load Fraction Correlation Curve Name",
+        "    ,                        !- Speed 2 Nominal Time for Condensate Removal to Begin {s}",
+        "    ,                        !- Speed 2 Ratio of Initial Moisture Evaporation Rate and steady state Latent Capacity {dimensionless}",
+        "    0,                       !- Speed 2 Maximum Cycling Rate {cycles/hr}",
+        "    ,                        !- Speed 2 Latent Capacity Time Constant {s}",
+        "    0.001,                   !- Speed 2 Rated Waste Heat Fraction of Power Input {dimensionless}",
+        "    WasteHeatTempCurve,      !- Speed 2 Waste Heat Function of Temperature Curve Name",
+        "    0.9,                     !- Speed 2 Evaporative Condenser Effectiveness {dimensionless}",
+        "    ,                        !- Speed 2 Evaporative Condenser Air Flow Rate {m3/s}",
+        "    ;                        !- Speed 2 Rated Evaporative Condenser Pump Power Consumption {W}",
+
+        "!-   ===========  ALL OBJECTS IN CLASS: COIL:HEATING:ELECTRIC ===========",
+        "  Coil:Heating:Electric,",
+        "    AC24ElecHeater,          !- Name",
+        "    AC-24sched,              !- Availability Schedule Name",
+        "    1,                       !- Efficiency",
+        "    55000,                   !- Nominal Capacity {W}",
+        "    AC-24 RHC inlet node,    !- Air Inlet Node Name",
+        "    AC-24 airloop outlet node;  !- Air Outlet Node Name",
+
+        "!-   ===========  ALL OBJECTS IN CLASS: COIL:HEATING:DX:MULTISPEED ===========",
+        "  Coil:Heating:DX:MultiSpeed,",
+        "    AC24Heating,             !- Name",
+        "    AC-24sched,              !- Availability Schedule Name",
+        "    AC-24 HC inlet node,     !- Air Inlet Node Name",
+        "    AC-24 RHC inlet node,    !- Air Outlet Node Name",
+        "    -8,                      !- Minimum Outdoor Dry-Bulb Temperature for Compressor Operation {C}",
+        "    ,                        !- Outdoor Dry-Bulb Temperature to Turn On Compressor {C}",
+        "    0,                       !- Crankcase Heater Capacity {W}",
+        "    ,                        !- Crankcase Heater Capacity Function of Temperature Curve Name",
+        "    10,                      !- Maximum Outdoor Dry-Bulb Temperature for Crankcase Heater Operation {C}",
+        "    DefrostTempCurve,        !- Defrost Energy Input Ratio Function of Temperature Curve Name",
+        "    4.4,                     !- Maximum Outdoor Dry-Bulb Temperature for Defrost Operation {C}",
+        "    ReverseCycle,            !- Defrost Strategy",
+        "    OnDemand,                !- Defrost Control",
+        "    0.087,                   !- Defrost Time Period Fraction",
+        "    0,                       !- Resistive Defrost Heater Capacity {W}",
+        "    No,                      !- Apply Part Load Fraction to Speeds Greater than 1",
+        "    Electricity,             !- Fuel Type",
+        "    ,                        !- Region number for Calculating HSPF",
+        "    2,                       !- Number of Speeds",
+        "    53500,                   !- Speed 1 Gross Rated Heating Capacity {W}",
+        "    2.85,                    !- Speed 1 Gross Rated Heating COP {W/W}",
+        "    3.209,                   !- Speed 1 Rated Air Flow Rate {m3/s}",
+        "    ,                        !- 2017 Speed 1 Rated Supply Air Fan Power Per Volume Flow Rate {W/(m3/s)}",
+        "    ,                        !- 2023 Speed 1 Rated Supply Air Fan Power Per Volume Flow Rate {W/(m3/s)}",
+        "    HeatingTempCurve,        !- Speed 1 Heating Capacity Function of Temperature Curve Name",
+        "    HeatingFlowCurve,        !- Speed 1 Heating Capacity Function of Flow Fraction Curve Name",
+        "    HeatingEIRTempCurve,     !- Speed 1 Energy Input Ratio Function of Temperature Curve Name",
+        "    EIRFlowCurve,            !- Speed 1 Energy Input Ratio Function of Flow Fraction Curve Name",
+        "    PLFCurve,                !- Speed 1 Part Load Fraction Correlation Curve Name",
+        "    0.0001,                  !- Speed 1 Rated Waste Heat Fraction of Power Input {dimensionless}",
+        "    WasteHeatTempCurve,      !- Speed 1 Waste Heat Function of Temperature Curve Name",
+        "    59587.2,                 !- Speed 2 Gross Rated Heating Capacity {W}",
+        "    2.85,                    !- Speed 2 Gross Rated Heating COP {W/W}",
+        "    3.209,                   !- Speed 2 Rated Air Flow Rate {m3/s}",
+        "    ,                        !- 2017 Speed 2 Rated Supply Air Fan Power Per Volume Flow Rate {W/(m3/s)}",
+        "    ,                        !- 2023 Speed 2 Rated Supply Air Fan Power Per Volume Flow Rate {W/(m3/s)}",
+        "    HeatingTempCurve,        !- Speed 2 Heating Capacity Function of Temperature Curve Name",
+        "    HeatingFlowCurve,        !- Speed 2 Heating Capacity Function of Flow Fraction Curve Name",
+        "    HeatingEIRTempCurve,     !- Speed 2 Energy Input Ratio Function of Temperature Curve Name",
+        "    EIRFlowCurve,            !- Speed 2 Energy Input Ratio Function of Flow Fraction Curve Name",
+        "    PLFCurve,                !- Speed 2 Part Load Fraction Correlation Curve Name",
+        "    0.0001,                  !- Speed 2 Rated Waste Heat Fraction of Power Input {dimensionless}",
+        "    WasteHeatTempCurve;      !- Speed 2 Waste Heat Function of Temperature Curve Name",
+
+        "!-   ===========  ALL OBJECTS IN CLASS: AIRLOOPHVAC:UNITARYHEATPUMP:AIRTOAIR:MULTISPEED ===========",
+        "  AirLoopHVAC:UnitaryHeatPump:AirToAir:MultiSpeed,",
+        "    AC-24 heat pump,         !- Name",
+        "    AC-24sched,              !- Availability Schedule Name",
+        "    AC-24 SF inlet air node, !- Air Inlet Node Name",
+        "    AC-24 airloop outlet node,  !- Air Outlet Node Name",
+        "    401,                     !- Controlling Zone or Thermostat Location",
+        "    Fan:OnOff,               !- Supply Air Fan Object Type",
+        "    AC24_Fan,                !- Supply Air Fan Name",
+        "    BlowThrough,             !- Supply Air Fan Placement",
+        "    AC-24sched,              !- Supply Air Fan Operating Mode Schedule Name",
+        "    Coil:Heating:DX:MultiSpeed,  !- Heating Coil Object Type",
+        "    AC24Heating,             !- Heating Coil Name",
+        "    ,                        !- DX Heating Coil Sizing Ratio",
+        "    Coil:Cooling:DX:MultiSpeed,  !- Cooling Coil Object Type",
+        "    AC24_cooling,            !- Cooling Coil Name",
+        "    Coil:Heating:Electric,   !- Supplemental Heating Coil Object Type",
+        "    AC24ElecHeater,          !- Supplemental Heating Coil Name",
+        "    45,                      !- Maximum Supply Air Temperature from Supplemental Heater {C}",
+        "    15,                      !- Maximum Outdoor Dry-Bulb Temperature for Supplemental Heater Operation {C}",
+        "    0,                       !- Auxiliary On-Cycle Electric Power {W}",
+        "    0,                       !- Auxiliary Off-Cycle Electric Power {W}",
+        "    0,                       !- Design Heat Recovery Water Flow Rate {m3/s}",
+        "    80,                      !- Maximum Temperature for Heat Recovery {C}",
+        "    ,                        !- Heat Recovery Water Inlet Node Name",
+        "    ,                        !- Heat Recovery Water Outlet Node Name",
+        "    3.209,                   !- No Load Supply Air Flow Rate {m3/s}",
+        "    2,                       !- Number of Speeds for Heating",
+        "    2,                       !- Number of Speeds for Cooling",
+        "    3.209,                   !- Heating Speed 1 Supply Air Flow Rate {m3/s}",
+        "    3.209,                   !- Heating Speed 2 Supply Air Flow Rate {m3/s}",
+        "    ,                        !- Heating Speed 3 Supply Air Flow Rate {m3/s}",
+        "    ,                        !- Heating Speed 4 Supply Air Flow Rate {m3/s}",
+        "    3.209,                   !- Cooling Speed 1 Supply Air Flow Rate {m3/s}",
+        "    3.209;                   !- Cooling Speed 2 Supply Air Flow Rate {m3/s}",
+
+        "  Timestep,6;",
+
+        "  Zone,",
+        "    401,                     !- Name",
+        "    48.33,                   !- Direction of Relative North {deg}",
+        "    15.002524,               !- X Origin {m}",
+        "    -50.24491,               !- Y Origin {m}",
+        "    0.0,                     !- Z Origin {m}",
+        "    ,                        !- Type",
+        "    1;                       !- Multiplier",
+
+        "  Schedule:Compact,",
+        "    ActSchd,                 !- Name",
+        "    Any Number,              !- Schedule Type Limits Name",
+        "    Through: 12/31,          !- Field 1",
+        "    For: AllDays,            !- Field 2",
+        "    Until: 24:00,118;        !- Field 3",
+
+        "  Schedule:Compact,",
+        "    Space temp SP,           !- Name",
+        "    Temperature,             !- Schedule Type Limits Name",
+        "    Through: 12/31,          !- Field 1",
+        "    For: AllDays,            !- Field 2",
+        "    Until: 24:00,22.00;      !- Field 3",
+
+        "  Schedule:Compact,",
+        "    Zone Control Type Sched, !- Name",
+        "    Control Type,            !- Schedule Type Limits Name",
+        "    Through: 12/31,          !- Field 1",
+        "    For: AllDays,            !- Field 2",
+        "    Until: 24:00,4.00;       !- Field 3",
+
+        "  Schedule:Compact,",
+        "    Fan_schd,                !- Name",
+        "    Fraction,                !- Schedule Type Limits Name",
+        "    Through: 12/31,          !- Field 1",
+        "    For: Alldays,            !- Field 2",
+        "    Until: 24:00,1;          !- Field 17",
+
+        "  Schedule:Compact,",
+        "    HeatP fan cyc_sched,     !- Name",
+        "    Fraction,                !- Schedule Type Limits Name",
+        "    Through: 12/31,          !- Field 1",
+        "    For: Alldays,            !- Field 2",
+        "    Until: 24:00,0;          !- Field 10",
+
+        "  Schedule:Compact,",
+        "    Econ sched,              !- Name",
+        "    Fraction,                !- Schedule Type Limits Name",
+        "    Through: 12/31,          !- Field 1",
+        "    For: Alldays,            !- Field 2",
+        "    Until: 24:00,1.00;       !- Field 3",
+
+        "  Schedule:Compact,",
+        "    HeatingPlant ON,         !- Name",
+        "    Fraction,                !- Schedule Type Limits Name",
+        "    Through: 12/31,          !- Field 1",
+        "    For: Alldays,            !- Field 2",
+        "    Until: 24:00,1.00;       !- Field 3",
+
+        "  Schedule:Compact,",
+        "    INFIL_QUARTER_ON_SCH,    !- Name",
+        "    Fraction,                !- Schedule Type Limits Name",
+        "    Through: 12/31,          !- Field 1",
+        "    For: Alldays,            !- Field 2",
+        "    Until: 24:00,1.00;       !- Field 3",
+
+        "  Schedule:Compact,",
+        "    401HeatingSP,            !- Name",
+        "    Temperature,             !- Schedule Type Limits Name",
+        "    Through: 12/31,          !- Field 1",
+        "    For: Alldays,            !- Field 2",
+        "    Until: 24:00,21.11;      !- Field 7",
+
+        "  Schedule:Compact,",
+        "    401CoolingSP,            !- Name",
+        "    Temperature,             !- Schedule Type Limits Name",
+        "    Through: 12/31,          !- Field 1",
+        "    For: Alldays,            !- Field 2",
+        "    Until: 24:00,22.2;       !- Field 7",
+
+        "  Schedule:Compact,",
+        "    AC-24sched,              !- Name",
+        "    Fraction,                !- Schedule Type Limits Name",
+        "    Through: 12/31,          !- Field 1",
+        "	 For: Alldays,			  !- Field 2",
+        "    Until: 24:00,1;          !- Field 3",
+
+        "!-   ===========  ALL OBJECTS IN CLASS: CONTROLLER:OUTDOORAIR ===========",
+
+        "  Controller:OutdoorAir,",
+        "    AC-24 OA Controller,     !- Name",
+        "    AC-24 EA node,           !- Relief Air Outlet Node Name",
+        "    AC-24 airloop inlet node,!- Return Air Node Name",
+        "    AC-24 SF inlet air node, !- Mixed Air Node Name",
+        "    AC-24 OA inlet node,     !- Actuator Node Name",
+        "    0.481,                   !- Minimum Outdoor Air Flow Rate {m3/s}",
+        "    0.481,                   !- Maximum Outdoor Air Flow Rate {m3/s}",
+        "    NoEconomizer,            !- Economizer Control Type",
+        "    ,                        !- Economizer Control Action Type",
+        "    ,                        !- Economizer Maximum Limit Dry-Bulb Temperature {C}",
+        "    ,                        !- Economizer Maximum Limit Enthalpy {J/kg}",
+        "    ,                        !- Economizer Maximum Limit Dewpoint Temperature {C}",
+        "    ,                        !- Electronic Enthalpy Limit Curve Name",
+        "    ,                        !- Economizer Minimum Limit Dry-Bulb Temperature {C}",
+        "    ,                        !- Lockout Type",
+        "    ;                        !- Minimum Limit Type",
+
+        "!-   ===========  ALL OBJECTS IN CLASS: AIRLOOPHVAC:CONTROLLERLIST ===========",
+
+        "  AirLoopHVAC:ControllerList,",
+        "    Z401OA controller list,  !- Name",
+        "    Controller:OutdoorAir,   !- Controller 1 Object Type",
+        "    AC-24 OA Controller;     !- Controller 1 Name",
+
+        "!-   ===========  ALL OBJECTS IN CLASS: AIRLOOPHVAC ===========",
+
+        "  AirLoopHVAC,",
+        "    Z401 airloop,            !- Name",
+        "    ,                        !- Controller List Name",
+        "    AC24,                    !- Availability Manager List Name",
+        "    3.209,                   !- Design Supply Air Flow Rate {m3/s}",
+        "    Z401 branch list,        !- Branch List Name",
+        "    ,                        !- Connector List Name",
+        "    AC-24 airloop inlet node,!- Supply Side Inlet Node Name",
+        "    Z401 RA node,            !- Demand Side Outlet Node Name",
+        "    Z401 splitter inlet,     !- Demand Side Inlet Node Names",
+        "    AC-24 airloop outlet node;  !- Supply Side Outlet Node Names",
+
+        "!-   ===========  ALL OBJECTS IN CLASS: AIRLOOPHVAC:OUTDOORAIRSYSTEM:EQUIPMENTLIST ===========",
+
+        "  AirLoopHVAC:OutdoorAirSystem:EquipmentList,",
+        "    Z401OA equip list,       !- Name",
+        "    OutdoorAir:Mixer,        !- Component 1 Object Type",
+        "    AC-24 OA intake;         !- Component 1 Name",
+
+        "!-   ===========  ALL OBJECTS IN CLASS: AIRLOOPHVAC:OUTDOORAIRSYSTEM ===========",
+
+        "  AirLoopHVAC:OutdoorAirSystem,",
+        "    Z401 OA Sys,             !- Name",
+        "    Z401OA controller list,  !- Controller List Name",
+        "    Z401OA equip list;       !- Outdoor Air Equipment List Name",
+
+        "!-   ===========  ALL OBJECTS IN CLASS: OUTDOORAIR:MIXER ===========",
+
+        "  OutdoorAir:Mixer,",
+        "    AC-24 OA intake,         !- Name",
+        "    AC-24 SF inlet air node, !- Mixed Air Node Name",
+        "    AC-24 OA inlet node,     !- Outdoor Air Stream Node Name",
+        "    AC-24 EA node,           !- Relief Air Stream Node Name",
+        "    AC-24 airloop inlet node;!- Return Air Stream Node Name",
+
+        "!-   ===========  ALL OBJECTS IN CLASS: AIRLOOPHVAC:ZONESPLITTER ===========",
+
+        "  AirLoopHVAC:ZoneSplitter,",
+        "    Z401 SA splitter,        !- Name",
+        "    Z401 splitter inlet,     !- Inlet Node Name",
+        "    Z401 zone inlet 2AT;     !- Outlet 1 Node Name",
+
+        "!-   ===========  ALL OBJECTS IN CLASS: AIRLOOPHVAC:SUPPLYPATH ===========",
+
+        "  AirLoopHVAC:SupplyPath,",
+        "    Z401SupplyPath,          !- Name",
+        "    Z401 splitter inlet,     !- Supply Air Path Inlet Node Name",
+        "    AirLoopHVAC:ZoneSplitter,!- Component 1 Object Type",
+        "    Z401 SA splitter;        !- Component 1 Name",
+
+        "!-   ===========  ALL OBJECTS IN CLASS: AIRLOOPHVAC:ZONEMIXER ===========",
+
+        "  AirLoopHVAC:ZoneMixer,",
+        "    Z401 RA mixer,           !- Name",
+        "    Z401 RA node,            !- Outlet Node Name",
+        "    Z401 outlet node;        !- Inlet 1 Node Name",
+
+        "!-   ===========  ALL OBJECTS IN CLASS: AIRLOOPHVAC:RETURNPATH ===========",
+
+        "  AirLoopHVAC:ReturnPath,",
+        "    Z401RApath,              !- Name",
+        "    Z401 RA node,            !- Return Air Path Outlet Node Name",
+        "    AirLoopHVAC:ZoneMixer,   !- Component 1 Object Type",
+        "    Z401 RA mixer;           !- Component 1 Name",
+
+        "!-   ===========  ALL OBJECTS IN CLASS: BRANCH ===========",
+
+        "  Branch,",
+        "    Z401 main branch,        !- Name",
+        "    ,                        !- Pressure Drop Curve Name",
+        "    AirLoopHVAC:OutdoorAirSystem,  !- Component 1 Object Type",
+        "    Z401 OA Sys,             !- Component 1 Name",
+        "    AC-24 airloop inlet node,!- Component 1 Inlet Node Name",
+        "    AC-24 SF inlet air node, !- Component 1 Outlet Node Name",
+        "    AirLoopHVAC:UnitaryHeatPump:AirToAir:MultiSpeed,  !- Component 2 Object Type",
+        "    AC-24 heat pump,         !- Component 2 Name",
+        "    AC-24 SF inlet air node, !- Component 2 Inlet Node Name",
+        "    AC-24 airloop outlet node;  !- Component 2 Outlet Node Name",
+
+        "!-   ===========  ALL OBJECTS IN CLASS: BRANCHLIST ===========",
+
+        "  BranchList,",
+        "    Z401 branch list,        !- Name",
+        "    Z401 main branch;        !- Branch 1 Name",
+
+        "!-   ===========  ALL OBJECTS IN CLASS: NODELIST ===========",
+
+        "  NodeList,",
+        "    AC-24 OA intake list,    !- Name",
+        "    AC-24 OA inlet node;     !- Node 1 Name",
+
+        "!-   ===========  ALL OBJECTS IN CLASS: OUTDOORAIR:NODELIST ===========",
+
+        "  OutdoorAir:NodeList,",
+        "    AC-24 OA Intake list;    !- Node or NodeList Name 1",
+
+        "!-   ===========  ALL OBJECTS IN CLASS: AVAILABILITYMANAGER:SCHEDULED ===========",
+
+        "  AvailabilityManager:Scheduled,",
+        "    AC24 OnOff,              !- Name",
+        "    AC-24sched;              !- Schedule Name",
+
+        "!-   ===========  ALL OBJECTS IN CLASS: AVAILABILITYMANAGERASSIGNMENTLIST ===========",
+
+        "  AvailabilityManagerAssignmentList,",
+        "    AC24,                    !- Name",
+        "    AvailabilityManager:Scheduled,  !- Availability Manager 1 Object Type",
+        "    AC24 OnOff;              !- Availability Manager 1 Name",
+
+        "!-   ===========  ALL OBJECTS IN CLASS: CURVE:QUADRATIC ===========",
+
+        "  Curve:Quadratic,",
+        "    CoolingFlowCurve,        !- Name",
+        "    1,                       !- Coefficient1 Constant",
+        "    0,                       !- Coefficient2 x",
+        "    0,                       !- Coefficient3 x**2",
+        "    0.1,                     !- Minimum Value of x",
+        "    2;                       !- Maximum Value of x",
+
+        "  Curve:Quadratic,",
+        "    EIRFlowCurve,            !- Name",
+        "    1,                       !- Coefficient1 Constant",
+        "    0,                       !- Coefficient2 x",
+        "    0,                       !- Coefficient3 x**2",
+        "    0.1,                     !- Minimum Value of x",
+        "    2;                       !- Maximum Value of x",
+
+        "  Curve:Quadratic,",
+        "    PLFCurve,                !- Name",
+        "    0.75,                    !- Coefficient1 Constant",
+        "    0.25,                    !- Coefficient2 x",
+        "    0,                       !- Coefficient3 x**2",
+        "    0.1,                     !- Minimum Value of x",
+        "    1;                       !- Maximum Value of x",
+
+        "  Curve:Quadratic,",
+        "    HeatingFlowCurve,        !- Name",
+        "    1,                       !- Coefficient1 Constant",
+        "    0,                       !- Coefficient2 x",
+        "    0,                       !- Coefficient3 x**2",
+        "    0.1,                     !- Minimum Value of x",
+        "    2;                       !- Maximum Value of x",
+
+        "  Curve:Quadratic,",
+        "    BLCoolingFlowCurve,      !- Name",
+        "    0.86187,                 !- Coefficient1 Constant",
+        "    0.14853,                 !- Coefficient2 x",
+        "    -.009899,                !- Coefficient3 x**2",
+        "    0.1,                     !- Minimum Value of x",
+        "    2;                       !- Maximum Value of x",
+
+        "  Curve:Quadratic,",
+        "    BLEIRFlowCurve,          !- Name",
+        "    1.1085,                  !- Coefficient1 Constant",
+        "    -.1266,                  !- Coefficient2 x",
+        "    0.017998,                !- Coefficient3 x**2",
+        "    0.1,                     !- Minimum Value of x",
+        "    2;                       !- Maximum Value of x",
+
+        "!-   ===========  ALL OBJECTS IN CLASS: CURVE:BIQUADRATIC ===========",
+
+        "  Curve:Biquadratic,",
+        "    CoolingTempCurve,        !- Name",
+        "    0.66896,                 !- Coefficient1 Constant",
+        "    0.023936,                !- Coefficient2 x",
+        "    -.00015091,              !- Coefficient3 x**2",
+        "    -.00128818,              !- Coefficient4 y",
+        "    -.000168897,             !- Coefficient5 y**2",
+        "    0.000258167,             !- Coefficient6 x*y",
+        "    0,                       !- Minimum Value of x",
+        "    20,                      !- Maximum Value of x",
+        "    0,                       !- Minimum Value of y",
+        "    40;                      !- Maximum Value of y",
+
+        "  Curve:Biquadratic,",
+        "    EIRTempCurve,            !- Name",
+        "    0.574095,                !- Coefficient1 Constant",
+        "    -.003463,                !- Coefficient2 x",
+        "    0.00029161,              !- Coefficient3 x**2",
+        "    0.012714,                !- Coefficient4 y",
+        "    0.00034595,              !- Coefficient5 y**2",
+        "    -.000714,                !- Coefficient6 x*y",
+        "    0,                       !- Minimum Value of x",
+        "    20,                      !- Maximum Value of x",
+        "    0,                       !- Minimum Value of y",
+        "    40;                      !- Maximum Value of y",
+
+        "  Curve:Biquadratic,",
+        "    WasteHeatFrac,           !- Name",
+        "    0,                       !- Coefficient1 Constant",
+        "    0,                       !- Coefficient2 x",
+        "    0,                       !- Coefficient3 x**2",
+        "    0,                       !- Coefficient4 y",
+        "    0,                       !- Coefficient5 y**2",
+        "    0,                       !- Coefficient6 x*y",
+        "    0,                       !- Minimum Value of x",
+        "    50,                      !- Maximum Value of x",
+        "    0,                       !- Minimum Value of y",
+        "    50;                      !- Maximum Value of y",
+
+        "  Curve:Biquadratic,",
+        "    DefrostTempCurve,        !- Name",
+        "    0.43264,                 !- Coefficient1 Constant",
+        "    0.0013974,               !- Coefficient2 x",
+        "    0.00026958,              !- Coefficient3 x**2",
+        "    -.02639,                 !- Coefficient4 y",
+        "    -.000142377,             !- Coefficient5 y**2",
+        "    -.0016066,               !- Coefficient6 x*y",
+        "    -10,                     !- Minimum Value of x",
+        "    20,                      !- Maximum Value of x",
+        "    -10,                     !- Minimum Value of y",
+        "    50;                      !- Maximum Value of y",
+
+        "  Curve:Biquadratic,",
+        "    HeatingTempCurve,        !- Name",
+        "    0.830527,                !- Coefficient1 Constant",
+        "    -.00086702,              !- Coefficient2 x",
+        "    -.00016316,              !- Coefficient3 x**2",
+        "    0.022539,                !- Coefficient4 y",
+        "    0.000142796,             !- Coefficient5 y**2",
+        "    0.000046064,             !- Coefficient6 x*y",
+        "    -10,                     !- Minimum Value of x",
+        "    50,                      !- Maximum Value of x",
+        "    -10,                     !- Minimum Value of y",
+        "    20;                      !- Maximum Value of y",
+
+        "  Curve:Biquadratic,",
+        "    HeatingEIRTempCurve,     !- Name",
+        "    0.9111,                  !- Coefficient1 Constant",
+        "    -.0106,                  !- Coefficient2 x",
+        "    0.000879,                !- Coefficient3 x**2",
+        "    0.0051,                  !- Coefficient4 y",
+        "    0.00119,                 !- Coefficient5 y**2",
+        "    -.00147,                 !- Coefficient6 x*y",
+        "    -10,                     !- Minimum Value of x",
+        "    50,                      !- Maximum Value of x",
+        "    -10,                     !- Minimum Value of y",
+        "    20;                      !- Maximum Value of y",
+
+        "  Curve:Biquadratic,",
+        "    WasteHeatTempCurve,      !- Name",
+        "    1,                       !- Coefficient1 Constant",
+        "    0,                       !- Coefficient2 x",
+        "    0,                       !- Coefficient3 x**2",
+        "    0,                       !- Coefficient4 y",
+        "    0,                       !- Coefficient5 y**2",
+        "    0,                       !- Coefficient6 x*y",
+        "    -10,                     !- Minimum Value of x",
+        "    50,                      !- Maximum Value of x",
+        "    -10,                     !- Minimum Value of y",
+        "    50;                      !- Maximum Value of y",
+
+        "  Curve:Biquadratic,",
+        "    BLCoolingTempCurve,      !- Name",
+        "    0.54353,                 !- Coefficient1 Constant",
+        "    0.020175,                !- Coefficient2 x",
+        "    0.00034548,              !- Coefficient3 x**2",
+        "    0.00085622,              !- Coefficient4 y",
+        "    -.000085034,             !- Coefficient5 y**2",
+        "    -.00007994,              !- Coefficient6 x*y",
+        "    -10,                     !- Minimum Value of x",
+        "    50,                      !- Maximum Value of x",
+        "    -10,                     !- Minimum Value of y",
+        "    50;                      !- Maximum Value of y",
+
+        "  Curve:Biquadratic,",
+        "    BLEIRTempCurve,          !- Name",
+        "    1.01728,                 !- Coefficient1 Constant",
+        "    -.021724,                !- Coefficient2 x",
+        "    0.00025326,              !- Coefficient3 x**2",
+        "    0.017851,                !- Coefficient4 y",
+        "    0.00014881,              !- Coefficient5 y**2",
+        "    -.00043614,              !- Coefficient6 x*y",
+        "    -10,                     !- Minimum Value of x",
+        "    50,                      !- Maximum Value of x",
+        "    -10,                     !- Minimum Value of y",
+        "    50;                      !- Maximum Value of y",
+
+    });
+
+    ASSERT_TRUE(process_idf(idf_objects));
+    state->dataGlobal->TimeStepsInHour = 1;    // must initialize this to get schedules initialized
+    state->dataGlobal->MinutesInTimeStep = 60; // must initialize this to get schedules initialized
+    state->init_state(*state);
+
+    HeatBalanceManager::GetZoneData(*state, ErrorsFound); // read zone data
+    EXPECT_FALSE(ErrorsFound);                            // zones are specified in the idf snippet
+
+    // Get Zone Equipment Configuration data
+    DataZoneEquipment::GetZoneEquipmentData(*state);
+    state->dataZoneEquip->ZoneEquipList(1).EquipIndex(1) = 1;
+    MixedAir::GetOutsideAirSysInputs(*state);
+    MixedAir::GetOAControllerInputs(*state);
+    SplitterComponent::GetSplitterInput(*state);
+    BranchInputManager::GetMixerInput(*state);
+    BranchInputManager::ManageBranchInput(*state);
+    GetZoneAirLoopEquipment(*state);
+    SingleDuct::GetSysInput(*state);
+
+    // Get Air Loop HVAC Data
+    SimAirServingZones::GetAirPathData(*state);
+    SimAirServingZones::InitAirLoops(*state, FirstHVACIteration);
+    ZoneTempPredictorCorrector::GetZoneAirSetPoints(*state);
+
+    state->dataZoneEnergyDemand->CurDeadBandOrSetback.allocate(1);
+    state->dataZoneEnergyDemand->CurDeadBandOrSetback(1) = false;
+    state->dataZoneEnergyDemand->ZoneSysEnergyDemand.allocate(1);
+    auto &zoneSysEnergyDemand = state->dataZoneEnergyDemand->ZoneSysEnergyDemand(1);
+    zoneSysEnergyDemand.RemainingOutputRequired = 50000;
+    zoneSysEnergyDemand.OutputRequiredToHeatingSP = 50000;
+    zoneSysEnergyDemand.OutputRequiredToCoolingSP = 55000.0;
+    zoneSysEnergyDemand.SequencedOutputRequired.allocate(1);
+    zoneSysEnergyDemand.SequencedOutputRequiredToCoolingSP.allocate(1);
+    zoneSysEnergyDemand.SequencedOutputRequiredToHeatingSP.allocate(1);
+    zoneSysEnergyDemand.SequencedOutputRequired(1) = zoneSysEnergyDemand.RemainingOutputRequired;
+    zoneSysEnergyDemand.SequencedOutputRequiredToCoolingSP(1) = zoneSysEnergyDemand.OutputRequiredToCoolingSP;
+    zoneSysEnergyDemand.SequencedOutputRequiredToHeatingSP(1) = zoneSysEnergyDemand.OutputRequiredToHeatingSP;
+
+    HVACMultiSpeedHeatPump::GetMSHeatPumpInput(*state);
+    state->dataGlobal->SysSizingCalc = true; // disable sizing calculation
+    state->dataHVACMultiSpdHP->FlowFracFlagReady = false;
+    auto &msHeatPump = state->dataHVACMultiSpdHP->MSHeatPump(1);
+    msHeatPump.HeatCoolMode = EnergyPlus::HVACMultiSpeedHeatPump::ModeOfOperation::HeatingMode;
+    msHeatPump.TotHeatEnergyRate = 5000.0;
+    msHeatPump.TotCoolEnergyRate = 5000.0;
+    msHeatPump.MyFlowFracFlag = false;
+    msHeatPump.FlowFraction = 1.0;
+    msHeatPump.MyEnvrnFlag = true;
+    // verify min OAT from coil inputs
+    EXPECT_EQ(msHeatPump.MinOATCompressorCooling, -25.0);
+    EXPECT_EQ(msHeatPump.MinOATCompressorHeating, -8.0);
+    // set local variables for convenience
+    auto *supplyFan = state->dataFans->fans(1);
+    auto &dxClgCoilMain = state->dataDXCoils->DXCoil(1);
+    auto &dxHtgCoilMain = state->dataDXCoils->DXCoil(2);
+    auto &elecHtgCoilSupp = state->dataHeatingCoils->HeatingCoil(msHeatPump.SuppHeatCoilNum);
+    Sched::GetSchedule(*state, "AC-24SCHED")->currentVal = 1.0;
+    state->dataEnvrn->StdRhoAir = 1.2;
+    supplyFan->rhoAirStdInit = state->dataEnvrn->StdRhoAir;
+    state->dataGlobal->DoCoilDirectSolutions = false;
+    state->dataGlobal->BeginEnvrnFlag = true;
+    state->dataGlobal->DoCoilDirectSolutions = false;
+    // set outdoor air conditions
+    state->dataEnvrn->OutDryBulbTemp = 5.0;
+    state->dataEnvrn->OutHumRat = 0.005;
+    state->dataEnvrn->StdBaroPress = 101325.0;
+    state->dataEnvrn->OutBaroPress = 101325.0;
+
+    for (int Mode = 1; Mode <= dxClgCoilMain.NumOfSpeeds; ++Mode) {
+        dxClgCoilMain.MSRatedAirMassFlowRate(Mode) = dxClgCoilMain.MSRatedAirVolFlowRate(Mode) * state->dataEnvrn->StdRhoAir;
+    }
+    for (int Mode = 1; Mode <= dxHtgCoilMain.NumOfSpeeds; ++Mode) {
+        dxHtgCoilMain.MSRatedAirMassFlowRate(Mode) = dxHtgCoilMain.MSRatedAirVolFlowRate(Mode) * state->dataEnvrn->StdRhoAir;
+    }
+
+    // set zone air conditions
+    auto &zoneAirNode =
+        state->dataLoopNodes->Node(Util::FindItemInList("Z401 AIR NODE", state->dataLoopNodes->NodeID, state->dataLoopNodes->NumOfNodes));
+    zoneAirNode.Temp = 21.1;
+    zoneAirNode.HumRat = 0.0035;
+    zoneAirNode.Enthalpy = Psychrometrics::PsyHFnTdbW(zoneAirNode.Temp, zoneAirNode.HumRat);
+    // set mixed air node conditions
+    auto &mixedAirNode =
+        state->dataLoopNodes->Node(Util::FindItemInList("AC-24 SF INLET AIR NODE", state->dataLoopNodes->NodeID, state->dataLoopNodes->NumOfNodes));
+    mixedAirNode.Temp = 10.0;
+    mixedAirNode.HumRat = 0.005;
+    mixedAirNode.Enthalpy = Psychrometrics::PsyHFnTdbW(mixedAirNode.Temp, mixedAirNode.HumRat);
+    // init ms heat pump
+    HVACMultiSpeedHeatPump::InitMSHeatPump(*state, MSHeatPumpNum, FirstHVACIteration, AirLoopNum, QZnReq, OnOffAirFlowRatio);
+    // run the unit at zero load
+    Real64 QSensUnitOut = 0.0;
+    SimMSHP(*state, MSHeatPumpNum, FirstHVACIteration, AirLoopNum, QSensUnitOut, 0.0, OnOffAirFlowRatio);
+    // set zone heating load
+    QZnReq = zoneSysEnergyDemand.RemainingOutputRequired;
+    msHeatPump.HeatCoolMode = EnergyPlus::HVACMultiSpeedHeatPump::ModeOfOperation::HeatingMode;
+    SimMSHP(*state, MSHeatPumpNum, FirstHVACIteration, AirLoopNum, QSensUnitOut, QZnReq, OnOffAirFlowRatio);
+    // calculate the total electricity rate
+    Real64 result_msHeatPump_ElectricityRate = supplyFan->totalPower + state->dataHVACGlobal->DXElecCoolingPower +
+                                               state->dataHVACGlobal->DXElecHeatingPower + state->dataHVACGlobal->ElecHeatingCoilPower +
+                                               state->dataHVACGlobal->SuppHeatingCoilPower + msHeatPump.AuxElecPower;
+    // test results
+    EXPECT_NEAR(55366.46, msHeatPump.ElecPower, 0.01);
+    EXPECT_NEAR(55366.46, result_msHeatPump_ElectricityRate, 0.01);
+    EXPECT_NEAR(3197.31, supplyFan->totalPower, 0.01);
+    EXPECT_NEAR(0.0, dxClgCoilMain.ElecCoolingPower, 0.01);
+    EXPECT_NEAR(0.0, state->dataHVACGlobal->DXElecCoolingPower, 0.01);
+    EXPECT_NEAR(16846.22, dxHtgCoilMain.ElecHeatingPower, 0.01);
+    EXPECT_NEAR(16846.22, state->dataHVACGlobal->DXElecHeatingPower, 0.01);
+    EXPECT_NEAR(0.0, state->dataHVACGlobal->ElecHeatingCoilPower, 0.01);
+    EXPECT_NEAR(35322.93, elecHtgCoilSupp.ElecUseRate, 0.01);
+    EXPECT_NEAR(35322.93, state->dataHVACGlobal->SuppHeatingCoilPower, 0.01);
+    EXPECT_NEAR(0.0, msHeatPump.AuxElecPower, 0.01);
+}
+
 } // namespace EnergyPlus

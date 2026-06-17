@@ -47,11 +47,6 @@ set(src
   src/ObjexxFCL/Array4D.hh
   src/ObjexxFCL/Array4S.fwd.hh
   src/ObjexxFCL/Array4S.hh
-  src/ObjexxFCL/Array5.all.fwd.hh
-  src/ObjexxFCL/Array5.fwd.hh
-  src/ObjexxFCL/Array5.hh
-  src/ObjexxFCL/Array5D.fwd.hh
-  src/ObjexxFCL/Array5D.hh
   src/ObjexxFCL/ArrayRS.fwd.hh
   src/ObjexxFCL/ArrayRS.hh
   src/ObjexxFCL/ArrayS.all.fwd.hh
@@ -162,6 +157,6 @@ set( test_src
 add_library( ${target_name} ${src} )
 
 if (BUILD_TESTING AND BUILD_OBJEXXFCL_TESTING)
-  CREATE_TEST_TARGETS( ${target_name} "${test_src}" "" False)
+  create_test_targets(${target_name} "${test_src}" "")
 endif()
 

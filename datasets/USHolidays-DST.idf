@@ -4,9 +4,6 @@
 ! US National Holidays
 ! The objects and syntax in this dataset comply with EnergyPlus, Version 8.4.0 and above, unless otherwise noted.
 
-!  Version,
-!    9.0;                    !- Version Identifier
-
   RunPeriodControl:SpecialDays,
     New Years Day,           !- Name
     January 1,               !- Start Date

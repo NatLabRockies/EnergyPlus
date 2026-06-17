@@ -2,7 +2,7 @@ VERSION 5.00
 Object = "{F9043C88-F6F2-101A-A3C9-08002B2F49FB}#1.2#0"; "ComDlg32.OCX"
 Object = "{831FDD16-0C5C-11D2-A9FC-0000F8754DA1}#2.1#0"; "MSCOMCTL.OCX"
 Object = "{C0A63B80-4B21-11D3-BD95-D426EF2C7949}#1.0#0"; "Vsflex7L.ocx"
-Begin VB.Form IDFEdit 
+Begin VB.Form IDFEdit
    Caption         =   "IDF Edit"
    ClientHeight    =   7275
    ClientLeft      =   150
@@ -13,7 +13,7 @@ Begin VB.Form IDFEdit
    MDIChild        =   -1  'True
    ScaleHeight     =   7275
    ScaleWidth      =   10035
-   Begin VB.CommandButton cmdDuplicateObjectAndChange 
+   Begin VB.CommandButton cmdDuplicateObjectAndChange
       Caption         =   "Dup Obj + Chg"
       Height          =   330
       Left            =   3120
@@ -21,12 +21,12 @@ Begin VB.Form IDFEdit
       Top             =   60
       Width           =   1260
    End
-   Begin VB.Timer timerJumpList 
+   Begin VB.Timer timerJumpList
       Interval        =   100
       Left            =   1680
       Top             =   480
    End
-   Begin VB.ComboBox cboClassCategories 
+   Begin VB.ComboBox cboClassCategories
       BackColor       =   &H00E1FFFF&
       Height          =   315
       Left            =   135
@@ -36,7 +36,7 @@ Begin VB.Form IDFEdit
       Top             =   870
       Width           =   4980
    End
-   Begin VB.ComboBox cboClasses 
+   Begin VB.ComboBox cboClasses
       BackColor       =   &H00E1FFFF&
       Height          =   315
       Left            =   135
@@ -46,12 +46,12 @@ Begin VB.Form IDFEdit
       Top             =   1305
       Width           =   4950
    End
-   Begin VB.Timer mainTimer 
+   Begin VB.Timer mainTimer
       Interval        =   500
       Left            =   8520
       Top             =   480
    End
-   Begin VB.PictureBox picRightSplitter 
+   Begin VB.PictureBox picRightSplitter
       Appearance      =   0  'Flat
       BackColor       =   &H00000000&
       BorderStyle     =   0  'None
@@ -67,7 +67,7 @@ Begin VB.Form IDFEdit
       Visible         =   0   'False
       Width           =   135
    End
-   Begin VB.PictureBox picLeftSplitter 
+   Begin VB.PictureBox picLeftSplitter
       Appearance      =   0  'Flat
       BackColor       =   &H00000000&
       BorderStyle     =   0  'None
@@ -83,7 +83,7 @@ Begin VB.Form IDFEdit
       Visible         =   0   'False
       Width           =   135
    End
-   Begin VB.PictureBox picLowerSplitter 
+   Begin VB.PictureBox picLowerSplitter
       Appearance      =   0  'Flat
       BackColor       =   &H00000000&
       BorderStyle     =   0  'None
@@ -99,7 +99,7 @@ Begin VB.Form IDFEdit
       Visible         =   0   'False
       Width           =   2535
    End
-   Begin VB.PictureBox picUpperSplitter 
+   Begin VB.PictureBox picUpperSplitter
       Appearance      =   0  'Flat
       BackColor       =   &H00000000&
       BorderStyle     =   0  'None
@@ -115,7 +115,7 @@ Begin VB.Form IDFEdit
       Visible         =   0   'False
       Width           =   2535
    End
-   Begin VB.CommandButton cmdCopyObject 
+   Begin VB.CommandButton cmdCopyObject
       Caption         =   "Copy Obj"
       Height          =   330
       Left            =   5400
@@ -123,7 +123,7 @@ Begin VB.Form IDFEdit
       Top             =   60
       Width           =   900
    End
-   Begin VB.CommandButton cmdPasteObject 
+   Begin VB.CommandButton cmdPasteObject
       Caption         =   "Paste Obj"
       Enabled         =   0   'False
       Height          =   330
@@ -132,7 +132,7 @@ Begin VB.Form IDFEdit
       Top             =   60
       Width           =   900
    End
-   Begin VB.CommandButton cmdNewObject 
+   Begin VB.CommandButton cmdNewObject
       Caption         =   "New Obj"
       Height          =   330
       Left            =   1200
@@ -140,7 +140,7 @@ Begin VB.Form IDFEdit
       Top             =   60
       Width           =   900
    End
-   Begin VB.CommandButton cmdDuplicateObject 
+   Begin VB.CommandButton cmdDuplicateObject
       Caption         =   "Dup Obj"
       Height          =   330
       Left            =   2160
@@ -148,7 +148,7 @@ Begin VB.Form IDFEdit
       Top             =   60
       Width           =   900
    End
-   Begin VB.CommandButton cmdDeleteObject 
+   Begin VB.CommandButton cmdDeleteObject
       Caption         =   "Del Obj"
       Height          =   330
       Left            =   4440
@@ -156,7 +156,7 @@ Begin VB.Form IDFEdit
       Top             =   60
       Width           =   900
    End
-   Begin MSComctlLib.ImageList ilToolBar 
+   Begin MSComctlLib.ImageList ilToolBar
       Left            =   7680
       Top             =   480
       _ExtentX        =   1005
@@ -166,59 +166,59 @@ Begin VB.Form IDFEdit
       ImageHeight     =   16
       MaskColor       =   12632256
       _Version        =   393216
-      BeginProperty Images {2C247F25-8591-11D1-B16A-00C0F0283628} 
+      BeginProperty Images {2C247F25-8591-11D1-B16A-00C0F0283628}
          NumListImages   =   12
-         BeginProperty ListImage1 {2C247F27-8591-11D1-B16A-00C0F0283628} 
+         BeginProperty ListImage1 {2C247F27-8591-11D1-B16A-00C0F0283628}
             Picture         =   "IDFEd-main.frx":08CA
             Key             =   ""
          EndProperty
-         BeginProperty ListImage2 {2C247F27-8591-11D1-B16A-00C0F0283628} 
+         BeginProperty ListImage2 {2C247F27-8591-11D1-B16A-00C0F0283628}
             Picture         =   "IDFEd-main.frx":09DC
             Key             =   ""
          EndProperty
-         BeginProperty ListImage3 {2C247F27-8591-11D1-B16A-00C0F0283628} 
+         BeginProperty ListImage3 {2C247F27-8591-11D1-B16A-00C0F0283628}
             Picture         =   "IDFEd-main.frx":0AEE
             Key             =   ""
          EndProperty
-         BeginProperty ListImage4 {2C247F27-8591-11D1-B16A-00C0F0283628} 
+         BeginProperty ListImage4 {2C247F27-8591-11D1-B16A-00C0F0283628}
             Picture         =   "IDFEd-main.frx":0C00
             Key             =   ""
          EndProperty
-         BeginProperty ListImage5 {2C247F27-8591-11D1-B16A-00C0F0283628} 
+         BeginProperty ListImage5 {2C247F27-8591-11D1-B16A-00C0F0283628}
             Picture         =   "IDFEd-main.frx":0D12
             Key             =   ""
          EndProperty
-         BeginProperty ListImage6 {2C247F27-8591-11D1-B16A-00C0F0283628} 
+         BeginProperty ListImage6 {2C247F27-8591-11D1-B16A-00C0F0283628}
             Picture         =   "IDFEd-main.frx":0E24
             Key             =   ""
          EndProperty
-         BeginProperty ListImage7 {2C247F27-8591-11D1-B16A-00C0F0283628} 
+         BeginProperty ListImage7 {2C247F27-8591-11D1-B16A-00C0F0283628}
             Picture         =   "IDFEd-main.frx":0F36
             Key             =   ""
          EndProperty
-         BeginProperty ListImage8 {2C247F27-8591-11D1-B16A-00C0F0283628} 
+         BeginProperty ListImage8 {2C247F27-8591-11D1-B16A-00C0F0283628}
             Picture         =   "IDFEd-main.frx":1048
             Key             =   ""
          EndProperty
-         BeginProperty ListImage9 {2C247F27-8591-11D1-B16A-00C0F0283628} 
+         BeginProperty ListImage9 {2C247F27-8591-11D1-B16A-00C0F0283628}
             Picture         =   "IDFEd-main.frx":115A
             Key             =   ""
          EndProperty
-         BeginProperty ListImage10 {2C247F27-8591-11D1-B16A-00C0F0283628} 
+         BeginProperty ListImage10 {2C247F27-8591-11D1-B16A-00C0F0283628}
             Picture         =   "IDFEd-main.frx":12B4
             Key             =   ""
          EndProperty
-         BeginProperty ListImage11 {2C247F27-8591-11D1-B16A-00C0F0283628} 
+         BeginProperty ListImage11 {2C247F27-8591-11D1-B16A-00C0F0283628}
             Picture         =   "IDFEd-main.frx":1B8E
             Key             =   ""
          EndProperty
-         BeginProperty ListImage12 {2C247F27-8591-11D1-B16A-00C0F0283628} 
+         BeginProperty ListImage12 {2C247F27-8591-11D1-B16A-00C0F0283628}
             Picture         =   "IDFEd-main.frx":2468
             Key             =   ""
          EndProperty
       EndProperty
    End
-   Begin MSComctlLib.Toolbar Toolbar1 
+   Begin MSComctlLib.Toolbar Toolbar1
       Align           =   1  'Align Top
       Height          =   336
       Left            =   0
@@ -233,32 +233,32 @@ Begin VB.Form IDFEdit
       Appearance      =   1
       ImageList       =   "ilToolBar"
       _Version        =   393216
-      BeginProperty Buttons {66833FE8-8583-11D1-B16A-00C0F0283628} 
+      BeginProperty Buttons {66833FE8-8583-11D1-B16A-00C0F0283628}
          NumButtons      =   5
-         BeginProperty Button1 {66833FEA-8583-11D1-B16A-00C0F0283628} 
+         BeginProperty Button1 {66833FEA-8583-11D1-B16A-00C0F0283628}
             Style           =   3
          EndProperty
-         BeginProperty Button2 {66833FEA-8583-11D1-B16A-00C0F0283628} 
+         BeginProperty Button2 {66833FEA-8583-11D1-B16A-00C0F0283628}
             Key             =   "newIDF"
             Description     =   "New IDF File"
             Object.ToolTipText     =   "Create New IDF File"
             ImageIndex      =   1
          EndProperty
-         BeginProperty Button3 {66833FEA-8583-11D1-B16A-00C0F0283628} 
+         BeginProperty Button3 {66833FEA-8583-11D1-B16A-00C0F0283628}
             Key             =   "openIDF"
             Object.ToolTipText     =   "Open IDF File"
             ImageIndex      =   2
          EndProperty
-         BeginProperty Button4 {66833FEA-8583-11D1-B16A-00C0F0283628} 
+         BeginProperty Button4 {66833FEA-8583-11D1-B16A-00C0F0283628}
             Key             =   "saveIDF"
             Object.ToolTipText     =   "Save Current IDF File"
             ImageIndex      =   3
          EndProperty
-         BeginProperty Button5 {66833FEA-8583-11D1-B16A-00C0F0283628} 
+         BeginProperty Button5 {66833FEA-8583-11D1-B16A-00C0F0283628}
             Style           =   3
          EndProperty
       EndProperty
-      Begin VB.Label Label5 
+      Begin VB.Label Label5
          Caption         =   "Object"
          Height          =   255
          Left            =   3960
@@ -266,7 +266,7 @@ Begin VB.Form IDFEdit
          Top             =   2160
          Width           =   1215
       End
-      Begin VB.Label Label4 
+      Begin VB.Label Label4
          Caption         =   "Label4"
          Height          =   255
          Left            =   3360
@@ -275,7 +275,7 @@ Begin VB.Form IDFEdit
          Width           =   1575
       End
    End
-   Begin VSFlex7LCtl.VSFlexGrid grdNew 
+   Begin VSFlex7LCtl.VSFlexGrid grdNew
       Height          =   2415
       Left            =   120
       TabIndex        =   14
@@ -287,7 +287,7 @@ Begin VB.Form IDFEdit
       Appearance      =   1
       BorderStyle     =   1
       Enabled         =   -1  'True
-      BeginProperty Font {0BE35203-8F91-11CE-9DE3-00AA004BB851} 
+      BeginProperty Font {0BE35203-8F91-11CE-9DE3-00AA004BB851}
          Name            =   "MS Sans Serif"
          Size            =   8.25
          Charset         =   0
@@ -366,14 +366,14 @@ Begin VB.Form IDFEdit
       ForeColorFrozen =   0
       WallPaperAlignment=   9
    End
-   Begin MSComDlg.CommonDialog CommonDialog1 
+   Begin MSComDlg.CommonDialog CommonDialog1
       Left            =   6960
       Top             =   480
       _ExtentX        =   847
       _ExtentY        =   847
       _Version        =   393216
    End
-   Begin VB.TextBox txtExplain 
+   Begin VB.TextBox txtExplain
       BackColor       =   &H8000000F&
       Height          =   1575
       Left            =   5280
@@ -384,7 +384,7 @@ Begin VB.Form IDFEdit
       Top             =   2760
       Width           =   4575
    End
-   Begin VB.TextBox txtComment 
+   Begin VB.TextBox txtComment
       BackColor       =   &H00C0C0C0&
       Height          =   1695
       Left            =   5280
@@ -395,42 +395,42 @@ Begin VB.Form IDFEdit
       Top             =   720
       Width           =   4575
    End
-   Begin VB.ListBox lstObjectTypes 
+   Begin VB.ListBox lstObjectTypes
       Height          =   2205
       Left            =   120
       TabIndex        =   9
       Top             =   1725
       Width           =   5055
    End
-   Begin VB.Image imgRightSplitter 
+   Begin VB.Image imgRightSplitter
       Height          =   2295
       Left            =   9840
       MousePointer    =   9  'Size W E
       Top             =   720
       Width           =   135
    End
-   Begin VB.Image imgLeftSplitter 
+   Begin VB.Image imgLeftSplitter
       Height          =   2295
       Left            =   5160
       MousePointer    =   9  'Size W E
       Top             =   720
       Width           =   135
    End
-   Begin VB.Image imgLowerSplitter 
+   Begin VB.Image imgLowerSplitter
       Height          =   135
       Left            =   120
       MousePointer    =   7  'Size N S
       Top             =   4320
       Width           =   6975
    End
-   Begin VB.Image imgUpperSplitter 
+   Begin VB.Image imgUpperSplitter
       Height          =   135
       Left            =   5280
       MousePointer    =   7  'Size N S
       Top             =   2400
       Width           =   1935
    End
-   Begin VB.Label lblExplain 
+   Begin VB.Label lblExplain
       Caption         =   "Explanation of Object and Current Field"
       Height          =   255
       Left            =   5280
@@ -438,7 +438,7 @@ Begin VB.Form IDFEdit
       Top             =   2520
       Width           =   3500
    End
-   Begin VB.Label lblObjectList 
+   Begin VB.Label lblObjectList
       Caption         =   "Class List"
       Height          =   255
       Left            =   120
@@ -446,7 +446,7 @@ Begin VB.Form IDFEdit
       Top             =   480
       Width           =   975
    End
-   Begin VB.Label lblComment 
+   Begin VB.Label lblComment
       Caption         =   "Comments from IDF"
       Height          =   255
       Left            =   5280
@@ -454,354 +454,363 @@ Begin VB.Form IDFEdit
       Top             =   480
       Width           =   1695
    End
-   Begin VB.Menu mnuFileTop 
+   Begin VB.Menu mnuFileTop
       Caption         =   "&File"
-      Begin VB.Menu mnuFileNew 
+      Begin VB.Menu mnuFileNew
          Caption         =   "&New"
          Shortcut        =   ^N
       End
-      Begin VB.Menu mnuFileOpen 
+      Begin VB.Menu mnuFileOpen
          Caption         =   "&Open..."
          Shortcut        =   ^O
       End
-      Begin VB.Menu mnuFileOpenDataSet 
+      Begin VB.Menu mnuFileOpenDataSet
          Caption         =   "Open &DataSet"
-         Begin VB.Menu mnuFileOpenDataSetSub 
+         Begin VB.Menu mnuFileOpenDataSetSub
             Caption         =   "datasetfile"
             Index           =   1
          End
       End
-      Begin VB.Menu mnuFileClose 
+      Begin VB.Menu mnuFileClose
          Caption         =   "&Close"
       End
-      Begin VB.Menu mnuFileSpace1 
+      Begin VB.Menu mnuFileSpace1
          Caption         =   "-"
       End
-      Begin VB.Menu mnuFileSave 
+      Begin VB.Menu mnuFileSave
          Caption         =   "&Save"
          Enabled         =   0   'False
          Shortcut        =   ^S
       End
-      Begin VB.Menu mnuFileSaveAs 
+      Begin VB.Menu mnuFileSaveAs
          Caption         =   "Save &As..."
       End
-      Begin VB.Menu mnuFileSaveOption 
+      Begin VB.Menu mnuFileSaveOption
          Caption         =   "Sa&ve Options..."
       End
-      Begin VB.Menu mnuFileSpace2 
+      Begin VB.Menu mnuFileSpace2
          Caption         =   "-"
       End
-      Begin VB.Menu mnuFilePageSetup 
+      Begin VB.Menu mnuFilePageSetup
          Caption         =   "Page Set&up"
          Enabled         =   0   'False
       End
-      Begin VB.Menu mnuFilePrint 
+      Begin VB.Menu mnuFilePrint
          Caption         =   "&Print"
          Enabled         =   0   'False
          Shortcut        =   ^P
       End
-      Begin VB.Menu mnuFileSpace3 
+      Begin VB.Menu mnuFileSpace3
          Caption         =   "-"
       End
-      Begin VB.Menu mnuFileRecent 
+      Begin VB.Menu mnuFileRecent
          Caption         =   "mru1"
          Index           =   1
       End
-      Begin VB.Menu mnuFileRecent 
+      Begin VB.Menu mnuFileRecent
          Caption         =   "mru2"
          Index           =   2
       End
-      Begin VB.Menu mnuFileRecent 
+      Begin VB.Menu mnuFileRecent
          Caption         =   "mru3"
          Index           =   3
       End
-      Begin VB.Menu mnuFileRecent 
+      Begin VB.Menu mnuFileRecent
          Caption         =   "mru4"
          Index           =   4
       End
-      Begin VB.Menu mnuFileRecent 
+      Begin VB.Menu mnuFileRecent
          Caption         =   "mru5"
          Index           =   5
       End
-      Begin VB.Menu mnuFileRecent 
+      Begin VB.Menu mnuFileRecent
          Caption         =   "mru6"
          Index           =   6
       End
-      Begin VB.Menu mnuFileSpace4 
+      Begin VB.Menu mnuFileSpace4
          Caption         =   "-"
       End
-      Begin VB.Menu mnuFileExit 
+      Begin VB.Menu mnuFileExit
          Caption         =   "E&xit"
       End
    End
-   Begin VB.Menu mnuEditTop 
+   Begin VB.Menu mnuEditTop
       Caption         =   "&Edit"
-      Begin VB.Menu mnuEditUndo 
+      Begin VB.Menu mnuEditUndo
          Caption         =   "&Undo"
          Enabled         =   0   'False
          Shortcut        =   ^Z
       End
-      Begin VB.Menu mnuEditRedo 
+      Begin VB.Menu mnuEditRedo
          Caption         =   "Red&o"
          Enabled         =   0   'False
          Shortcut        =   ^Y
       End
-      Begin VB.Menu mnuEditDiv1 
+      Begin VB.Menu mnuEditDiv1
          Caption         =   "-"
       End
-      Begin VB.Menu mnuEditCut 
+      Begin VB.Menu mnuEditCut
          Caption         =   "Cu&t Object"
          Enabled         =   0   'False
          Shortcut        =   ^X
       End
-      Begin VB.Menu mnuEditCopy 
+      Begin VB.Menu mnuEditCopy
          Caption         =   "&Copy Object"
          Shortcut        =   ^C
       End
-      Begin VB.Menu mnuEditPaste 
+      Begin VB.Menu mnuEditPaste
          Caption         =   "&Paste Object"
          Shortcut        =   ^V
       End
-      Begin VB.Menu mnuEditCopySpread 
+      Begin VB.Menu mnuEditCopySpread
          Caption         =   "Copy for &Spreadsheet"
       End
-      Begin VB.Menu mnuEditDiv4 
+      Begin VB.Menu mnuEditDiv4
          Caption         =   "-"
       End
-      Begin VB.Menu mnuEditFillRight 
+      Begin VB.Menu mnuEditFillRight
          Caption         =   "Fill Right"
          Shortcut        =   ^D
       End
-      Begin VB.Menu mnuEditDiv2 
+      Begin VB.Menu mnuEditDiv2
          Caption         =   "-"
       End
-      Begin VB.Menu mnuEditNew 
+      Begin VB.Menu mnuEditNew
          Caption         =   "&New Object"
       End
-      Begin VB.Menu mnuEditDuplicate 
+      Begin VB.Menu mnuEditDuplicate
          Caption         =   "Dup&licate Object"
       End
-      Begin VB.Menu mnuEditDuplicateAndChange 
+      Begin VB.Menu mnuEditDuplicateAndChange
          Caption         =   "Duplicate and Change Object"
       End
-      Begin VB.Menu mnuEditDelete 
+      Begin VB.Menu mnuEditDelete
          Caption         =   "&Delete Object"
       End
-      Begin VB.Menu mnuEditDiv3 
+      Begin VB.Menu mnuEditDiv3
          Caption         =   "-"
       End
-      Begin VB.Menu mnuEditFind 
+      Begin VB.Menu mnuEditFind
          Caption         =   "Find Class.."
          Shortcut        =   ^F
       End
-      Begin VB.Menu mnuEditFindPrevious 
+      Begin VB.Menu mnuEditFindPrevious
          Caption         =   "Find Previous Class"
          Shortcut        =   ^T
       End
-      Begin VB.Menu mnuEditFindNext 
+      Begin VB.Menu mnuEditFindNext
          Caption         =   "Find Next Class"
          Shortcut        =   ^G
       End
-      Begin VB.Menu mnuEditSearch 
+      Begin VB.Menu mnuEditSearch
          Caption         =   "Search and Replace.."
          Shortcut        =   ^H
       End
-      Begin VB.Menu mnuEditDiv5 
+      Begin VB.Menu mnuEditDiv5
          Caption         =   "-"
       End
-      Begin VB.Menu mnuEditNextRowAfterEnter 
+      Begin VB.Menu mnuEditNextRowAfterEnter
          Caption         =   "Next Row after Enter"
          Checked         =   -1  'True
       End
    End
-   Begin VB.Menu mnuViewTop 
+   Begin VB.Menu mnuViewTop
       Caption         =   "&View"
-      Begin VB.Menu mnuViewIP 
+      Begin VB.Menu mnuViewIP
          Caption         =   "&Inch-Pound"
       End
-      Begin VB.Menu mnuViewSi 
+      Begin VB.Menu mnuViewSi
          Caption         =   "&SI Units"
          Checked         =   -1  'True
       End
-      Begin VB.Menu mnuViewDiv1 
+      Begin VB.Menu mnuViewDiv1
          Caption         =   "-"
       End
-      Begin VB.Menu mnuViewNarrowColumn 
+      Begin VB.Menu mnuViewNarrowColumn
          Caption         =   "&Narrow Column"
       End
-      Begin VB.Menu mnuViewMediumColumn 
+      Begin VB.Menu mnuViewMediumColumn
          Caption         =   "&Medium Column"
       End
-      Begin VB.Menu mnuViewWideColumn 
+      Begin VB.Menu mnuViewWideColumn
          Caption         =   "&Wide Column"
       End
-      Begin VB.Menu mnuViewWider 
+      Begin VB.Menu mnuViewWider
          Caption         =   "W&ider"
-         Begin VB.Menu mnuViewWidth30 
+         Begin VB.Menu mnuViewWidth30
             Caption         =   "30"
          End
-         Begin VB.Menu mnuViewWidth40 
+         Begin VB.Menu mnuViewWidth40
             Caption         =   "40"
          End
-         Begin VB.Menu mnuViewWidth50 
+         Begin VB.Menu mnuViewWidth50
             Caption         =   "50"
          End
-         Begin VB.Menu mnuViewWidth60 
+         Begin VB.Menu mnuViewWidth60
             Caption         =   "60"
          End
-         Begin VB.Menu mnuViewWidth70 
+         Begin VB.Menu mnuViewWidth70
             Caption         =   "70"
          End
-         Begin VB.Menu mnuViewWidth80 
+         Begin VB.Menu mnuViewWidth80
             Caption         =   "80"
          End
-         Begin VB.Menu mnuViewWidth90 
+         Begin VB.Menu mnuViewWidth90
             Caption         =   "90"
          End
       End
-      Begin VB.Menu mnuViewDiv2 
+      Begin VB.Menu mnuViewDiv2
          Caption         =   "-"
       End
-      Begin VB.Menu mnuViewWordWrap 
+      Begin VB.Menu mnuViewWordWrap
          Caption         =   "Word Wrap"
       End
-      Begin VB.Menu mnuDiv5 
+      Begin VB.Menu mnuDiv5
          Caption         =   "-"
       End
-      Begin VB.Menu mnuViewClassesWithObjs 
+      Begin VB.Menu mnuViewClassesWithObjs
          Caption         =   "Show Classes with Objects Only"
          Shortcut        =   ^L
       End
-      Begin VB.Menu mnuQuickSelect 
+      Begin VB.Menu mnuQuickSelect
          Caption         =   "Show Quick Select Dropdowns"
          Checked         =   -1  'True
          Shortcut        =   ^Q
       End
-      Begin VB.Menu mnuDiv7 
+      Begin VB.Menu mnuDiv7
          Caption         =   "-"
       End
-      Begin VB.Menu mnuViewUseNodeEditor 
+      Begin VB.Menu mnuViewUseNodeEditor
          Caption         =   "Use Node Name Editor"
          Checked         =   -1  'True
       End
-      Begin VB.Menu mnuDiv3 
+      Begin VB.Menu mnuDiv3
          Caption         =   "-"
       End
-      Begin VB.Menu mnuViewLayoutOptions 
+      Begin VB.Menu mnuViewLayoutOptions
          Caption         =   "Layout Options.."
       End
-      Begin VB.Menu mnuViewDiv4 
+      Begin VB.Menu mnuViewDiv4
          Caption         =   "-"
       End
-      Begin VB.Menu mnuViewValidityCheck 
+      Begin VB.Menu mnuViewValidityCheck
          Caption         =   "Validity Check.."
          Shortcut        =   ^R
       End
    End
-   Begin VB.Menu mnuJumpTop 
+   Begin VB.Menu mnuJumpTop
       Caption         =   "&Jump"
-      Begin VB.Menu mnuJumpItem 
+      Begin VB.Menu mnuJumpItem
          Caption         =   "No items"
          Index           =   0
       End
    End
-   Begin VB.Menu mnuWindow 
+   Begin VB.Menu mnuWindow
       Caption         =   "&Window"
       WindowList      =   -1  'True
-      Begin VB.Menu mnuWindowCascade 
+      Begin VB.Menu mnuWindowCascade
          Caption         =   "&Cascade"
       End
-      Begin VB.Menu mnuWindowTileHoriz 
+      Begin VB.Menu mnuWindowTileHoriz
          Caption         =   "Tile &Horizontal"
       End
-      Begin VB.Menu mnuWindowTileVert 
+      Begin VB.Menu mnuWindowTileVert
          Caption         =   "Tile &Vertical"
       End
-      Begin VB.Menu mnuWindowArrange 
+      Begin VB.Menu mnuWindowArrange
          Caption         =   "&Arrange Icons"
       End
    End
-   Begin VB.Menu mnuHelp 
+   Begin VB.Menu mnuHelp
       Caption         =   "&Help"
-      Begin VB.Menu mnuHelpWhatsNew 
+      Begin VB.Menu mnuHelpWhatsNew
          Caption         =   "&Whats New"
       End
-      Begin VB.Menu mnuHelpDiv0 
+      Begin VB.Menu mnuHelpDiv0
          Caption         =   "-"
       End
-      Begin VB.Menu mnuHelpContents 
+      Begin VB.Menu mnuHelpContents
          Caption         =   "&Contents"
          Enabled         =   0   'False
       End
-      Begin VB.Menu mnuHelpIndex 
+      Begin VB.Menu mnuHelpIndex
          Caption         =   "&Index"
          Enabled         =   0   'False
       End
-      Begin VB.Menu mnuHelpDocs 
+      Begin VB.Menu mnuHelpDocs
          Caption         =   "&Documentation"
          Enabled         =   0   'False
       End
-      Begin VB.Menu mnuHelpDiv1 
+      Begin VB.Menu mnuHelpDiv1
          Caption         =   "-"
       End
-      Begin VB.Menu mnuHelpEPDocs 
-         Caption         =   "EnergyPlus Documentation Menu"
+      Begin VB.Menu mnuHelpQuickStart
+         Caption         =   "EnergyPlus QuickStart Webpage"
       End
-      Begin VB.Menu mnuHelpDiv2 
-         Caption         =   "-"
+      Begin VB.Menu mnuHelpEssentials
+         Caption         =   "EnergyPlus Essentials"
       End
-      Begin VB.Menu mnuHelpGettingStarted 
-         Caption         =   "EnergyPlus Getting Started"
-      End
-      Begin VB.Menu mnuHelpIORef 
+      Begin VB.Menu mnuHelpIORef
          Caption         =   "EnergyPlus I/O Reference"
       End
-      Begin VB.Menu mnuHelpOutDetails 
+      Begin VB.Menu mnuHelpOutDetails
          Caption         =   "EnergyPlus Output Details and Examples"
       End
-      Begin VB.Menu mnuHelpEngRef 
+      Begin VB.Menu mnuHelpEngRef
          Caption         =   "EnergyPlus Engineering Reference"
       End
-      Begin VB.Menu mnuHelpAuxProgs 
-         Caption         =   "EnergyPlus Auxiliary Programs"
+      Begin VB.Menu mnuHelpDiv6
+         Caption         =   "-"
       End
-      Begin VB.Menu mnuHelpEMSguide 
+      Begin VB.Menu mnuHelpPlant
+         Caption         =   "EnergyPlus Plant Applications Guide"
+      End
+      Begin VB.Menu mnuHelpEMSguide
          Caption         =   "EnergyPlus EMS Application Guide"
       End
-      Begin VB.Menu mnuHelpCompliance 
+      Begin VB.Menu mnuHelpCompliance
          Caption         =   "Using EnergyPlus for Compliance"
       End
-      Begin VB.Menu mnuHelpExtInterface 
+      Begin VB.Menu mnuHelpExtInterface
          Caption         =   "External Interface Application Guide "
       End
-      Begin VB.Menu mnuHelpTips 
-         Caption         =   "Tips and Tricks Using EnergyPlus"
+      Begin VB.Menu mnuHelpDiv5
+         Caption         =   "-"
       End
-      Begin VB.Menu mnuHelpAcknowledge 
+      Begin VB.Menu mnuHelpGettingStarted
+         Caption         =   "EnergyPlus Getting Started"
+      End
+      Begin VB.Menu mnuHelpAuxProgs
+         Caption         =   "EnergyPlus Auxiliary Programs"
+      End
+      Begin VB.Menu mnuHelpTips
+         Caption         =   "EnergyPlus Tips and Tricks"
+      End
+      Begin VB.Menu mnuHelpAcknowledge
          Caption         =   "EnergyPlus Acknowledgments"
       End
-      Begin VB.Menu mnuHelpDiv3 
+      Begin VB.Menu mnuHelpDiv3
          Caption         =   "-"
       End
-      Begin VB.Menu mnuCreateObjectList 
+      Begin VB.Menu mnuCreateObjectList
          Caption         =   "Create objectList.txt"
       End
-      Begin VB.Menu mnuCreateAllObjectIDF 
+      Begin VB.Menu mnuCreateAllObjectIDF
          Caption         =   "Create allObject.idf"
       End
-      Begin VB.Menu mnuCreateFieldsMissingUnits 
+      Begin VB.Menu mnuCreateFieldsMissingUnits
          Caption         =   "Create fieldsMissingUnits.txt"
       End
-      Begin VB.Menu mnuCreateRefObjListTxt 
+      Begin VB.Menu mnuCreateRefObjListTxt
          Caption         =   "Create RefObjList.txt"
       End
-      Begin VB.Menu mnuHelpDiv4 
+      Begin VB.Menu mnuHelpDiv4
          Caption         =   "-"
       End
-      Begin VB.Menu mnuHelpAbout 
+      Begin VB.Menu mnuHelpAbout
          Caption         =   "About IDF Editor"
       End
-      Begin VB.Menu mnuCreateRangeTestFiles 
+      Begin VB.Menu mnuCreateRangeTestFiles
          Caption         =   "Run Range Tests"
          Visible         =   0   'False
       End
@@ -1343,7 +1352,7 @@ Dim iObject As Long
 Dim classIndex As Long
 Dim firstValue As Long
 Dim firstField As Long
-Dim numFields  As Long
+Dim numfields  As Long
 Dim valueIndx As Long
 Dim fieldIndx As Long
 Dim jFld As Long
@@ -1362,8 +1371,8 @@ For iObject = 1 To maxUsedObject
     classIndex = IDFObject(iObject).classType
     firstValue = IDFObject(iObject).valueStart
     firstField = IDDClassDat(classIndex).fieldStart
-    numFields = IDDClassDat(classIndex).fieldEnd - firstField + 1
-    For jFld = 1 To numFields
+    numfields = IDDClassDat(classIndex).fieldEnd - firstField + 1
+    For jFld = 1 To numfields
       valueIndx = firstValue + jFld - 1
       fieldIndx = firstField + jFld - 1
       If IDDField(fieldIndx).type = 6 Then  'node
@@ -2211,11 +2220,8 @@ Call CreateRangeTestFiles
 End Sub
 
 
+
 ' References to EnergyPlus Documentation
-Private Sub mnuHelpEPDocs_Click()
-'Call startAcrobat("EPlusMainMenu.pdf")
-Call viewWebPage(documentationPath + "index.html")
-End Sub
 Private Sub mnuHelpGettingStarted_Click()
 Call startAcrobat("GettingStarted.pdf")
 End Sub
@@ -2229,23 +2235,38 @@ Private Sub mnuHelpOutDetails_Click()
 Call startAcrobat("OutputDetailsAndExamples.pdf")
 End Sub
 Private Sub mnuHelpAuxProgs_Click()
-Call startAcrobat("AuxiliaryPrograms.pdf")
+'Call startAcrobat("AuxiliaryPrograms.pdf")
+Call viewWebPage("https://energyplus.readthedocs.io/en/latest/auxiliary-programs/auxiliary-programs.html")
 End Sub
 Private Sub mnuHelpAcknowledge_Click()
-Call startAcrobat("Acknowledgments.pdf")
+'Call startAcrobat("Acknowledgments.pdf")
+Call viewWebPage("https://energyplus.readthedocs.io/en/latest/acknowledgments/acknowledgments.html")
 End Sub
 Private Sub mnuHelpCompliance_Click()
-Call startAcrobat("Using_EnergyPlus_for_Compliance.pdf")
+Call startAcrobat("UsingEnergyPlusForCompliance.pdf")
 End Sub
 Private Sub mnuHelpEMSguide_Click()
-Call startAcrobat("EMS_Application_Guide.pdf")
+'Call startAcrobat("EMSApplicationGuide.pdf")
+Call viewWebPage("https://energyplus.readthedocs.io/en/latest/ems-application-guide/ems-application-guide.html")
 End Sub
 Private Sub mnuHelpExtInterface_Click()
-Call startAcrobat("ExternalInterfaces_Application_Guide.pdf")
+Call startAcrobat("ExternalInterfacesApplicationGuide.pdf")
+End Sub
+Private Sub mnuHelpQuickStart_Click()
+Call viewWebPage("https://energyplus.readthedocs.io/en/latest/quick_start/quick_start.html")
+End Sub
+Private Sub mnuHelpEssentials_Click()
+'Call startAcrobat("EnergyPlusEssentials.pdf")
+Call viewWebPage("https://energyplus.readthedocs.io/en/latest/essentials/essentials.html")
+End Sub
+Private Sub mnuHelpPlant_Click()
+Call startAcrobat("PlantApplicationGuide.pdf")
 End Sub
 Private Sub mnuHelpTips_Click()
-Call startAcrobat("Tips_and_Tricks_Using_EnergyPlus.pdf")
+Call viewWebPage("https://energyplus.readthedocs.io/en/latest/tips_and_tricks/tips_and_tricks.html")
 End Sub
+
+
 
 
 Private Sub mnuHelpWhatsNew_Click()
@@ -2696,7 +2717,7 @@ fn = FreeFile
 Open App.Path & "\RefObjList.txt" For Output As fn
 For i = 1 To maxUsedObjListName
   Print #fn, IDDObjListName(i).name
-  
+
 Next i
 Close fn
 End Sub
@@ -2737,7 +2758,7 @@ End Sub
 '-----------------------------------------------------------------------------
 Sub FillGrid()
 Dim i As Long, j As Long
-Dim numFields As Long, firstField As Long
+Dim numfields As Long, firstField As Long
 Dim curObject As Long 'current object being displayed (each object in different column)
 Dim curField As Long ' pointer to the current item in IDDField array
 Dim StartVal As Long ' the first value pointed to by the current object being displayed
@@ -2752,14 +2773,14 @@ grdNew.TextMatrix(0, 0) = "Field"
 grdNew.TextMatrix(0, 1) = "Units"
 'set some general field level variables
 firstField = IDDClassDat(curIDDClass).fieldStart
-numFields = IDDClassDat(curIDDClass).fieldEnd - firstField + 1
+numfields = IDDClassDat(curIDDClass).fieldEnd - firstField + 1
 'define the size of the grid for the particular class
-grdNew.Rows = numFields + 1  'set the number of rows on the grid
+grdNew.Rows = numfields + 1  'set the number of rows on the grid
 grdNew.Cols = IDDClassObjPt(curIDDClass).objectCount + 2  'set the number of columns on the grid
 'create an array for rows with special unit handling
 'ReDim specialUnit(grdNew.Rows, grdNew.Cols)
 'fill heading (left) columns
-For j = 1 To numFields
+For j = 1 To numfields
   grdNew.TextMatrix(j, 0) = IDDField(firstField + j - 1).name
   useUnits = IDDField(firstField + j - 1).unitsIndex
   grdNew.RowData(j) = useUnits
@@ -2813,7 +2834,7 @@ i = grdNew.FixedCols  'pointer to the first column for data
 Do While curObject > 0
   StartVal = IDFObject(curObject).valueStart
   grdNew.ColData(i) = curObject  'store the current object pointer for the column
-  For j = 1 To numFields
+  For j = 1 To numfields
     curField = firstField + j - 1
     curAN = IDDField(curField).AN
     'special handling of ScheduleCompact fields
@@ -2884,7 +2905,7 @@ Do While curObject > 0
     If IDDField(curField).required And Trim(grdNew.TextMatrix(j, i)) = "" And Not IDDField(curField).defSpecified Then
       grdNew.Cell(flexcpBackColor, j, i) = outOfRangeColor
     End If
-    
+
     'indicate the REQUIRED by a grey bar in each cell
     'If IDDField(curField).required Then
       'grdNew.Cell(flexcpFloodPercent, j, i) = -3
@@ -3420,7 +3441,7 @@ Dim curClass As Long  ' the class pointer for the object being parsed
 Dim curField As Long  ' the pointer to the field number in the class
 Dim aField As Long    ' the pointer to the IDDField array
 Dim curValue As Long  ' the pointer to the current item in the IDFValue array
-Dim numFields As Long ' the number of possible fields for that class
+Dim numfields As Long ' the number of possible fields for that class
 Dim commentBlockStart As Long  'points to the beginning of the comments
 Dim objPoint As Long  ' used to transverse the object list looking for an empty object pointer
 Dim lastObjectWithPt As Long 'used to hold last good pointer in object array
@@ -3601,19 +3622,19 @@ Do While Not fileEnd
                 IDFObject(maxUsedObject).nextObjectInClass = 0 'set the next object link to zero to show last defined
                 IDDClassObjPt(curClass).objectCount = IDDClassObjPt(curClass).objectCount + 1
                 'calculate the number of fields that should be reserved for this object based on the class
-                numFields = IDDClassDat(curClass).fieldEnd - IDDClassDat(curClass).fieldStart + 1
+                numfields = IDDClassDat(curClass).fieldEnd - IDDClassDat(curClass).fieldStart + 1
                 'clear the fields for the new object
                 'This makes sure that the fields are clear for the recently read object
                 'remember these must be cleared incase not all fields are given values in the
                 'IDF file for that object, i.e., location has five values, if only three are
                 'given the other two still should be blank and allocated.
-                Call resizeValueArray(numFields)
-                For i = 1 To numFields
+                Call resizeValueArray(numfields)
+                For i = 1 To numfields
                   IDFValue(maxUsedValue + i).entry = ""
                 Next i
                 curValue = maxUsedValue  'set the pointer to the IDFValue array to be the next value
                 curField = 0
-                maxUsedValue = maxUsedValue + numFields
+                maxUsedValue = maxUsedValue + numfields
                 parseMode = InObject
                 lastWord = ""
               End If
@@ -3693,7 +3714,7 @@ If curValue > maxUsedValue Then
   "Not all objects may have been loaded into the IDF Editor and data could be lost. It is recommended that you save the file using a different name or close the " & _
   "file without saving.  You may fix the file using a text editor such as Notepad. In a text editor, look for the object listed above.  Each object should end with a semi-colon. " & _
   "In addition, the object may be extensible, see Energy+.idd in main EnergyPlus install folder and search for \extensible for instructions.", "IDF Parsing Error")
-  Debug.Print lastWord, curField, numFields, maxUsedValue
+  Debug.Print lastWord, curField, numfields, maxUsedValue
 End If
 lastWord = ""
 Return
@@ -3848,7 +3869,7 @@ Sub saveSingleObject(objIndex As Long, fileHandle As Integer)
 Static prevFormat As Integer
 Dim classIndex As Long
 Dim iValue As Long, iComment As Long, iField As Long
-Dim firstField As Long, numFields As Long
+Dim firstField As Long, numfields As Long
 Dim StartVal As Long, numFilledfields As Long
 Dim j As Long, tabPlace As Long
 Dim commaLoc As Long
@@ -3867,12 +3888,12 @@ Dim valueTab As Integer
 numFilledfields = 1
 classIndex = IDFObject(objIndex).classType
 firstField = IDDClassDat(classIndex).fieldStart
-numFields = IDDClassDat(classIndex).fieldEnd - firstField + 1
+numfields = IDDClassDat(classIndex).fieldEnd - firstField + 1
 outputObjectNameYet = False
 'Print #fileHandle, iddclassdat(classIndex).name & ","   'print the class name - left justified
 StartVal = IDFObject(objIndex).valueStart
 'first go through fields and find last non-blank
-For j = numFields To 1 Step -1
+For j = numfields To 1 Step -1
   iValue = StartVal + j - 1
   If IDFValue(iValue).entry <> "" Then
     numFilledfields = j
@@ -3894,7 +3915,7 @@ If numFilledfields < IDDClassDat(classIndex).minFields Then
   numFilledfields = IDDClassDat(classIndex).minFields
 End If
 ' now scan through the fields
-If numFilledfields <= 0 And numFields > 0 Then numFilledfields = 1
+If numFilledfields <= 0 And numfields > 0 Then numFilledfields = 1
 'first go through all fields and create the output strings for each
 For j = 1 To numFilledfields
   iValue = StartVal + j - 1
@@ -4191,7 +4212,7 @@ End Sub
 '-----------------------------------------------------------------------------
 Sub IDFDuplicateObject()
 Dim rowSt As Long, rowEnd As Long, colSt As Long, colEnd As Long
-Dim iVal As Long, i As Long, numFields As Long
+Dim iVal As Long, i As Long, numfields As Long
 Dim li As Long
 Dim iCol As Long, iObj As Long
 li = lstObjectTypes.ListIndex
@@ -4200,11 +4221,11 @@ If actObject = 0 Then Exit Sub    'can't duplicate if not on a selected object
 For iCol = colSt To colEnd
   iObj = grdNew.ColData(iCol)
   iVal = IDFObject(iObj).valueStart
-  numFields = IDDClassDat(actClass).fieldEnd - IDDClassDat(actClass).fieldStart + 1
+  numfields = IDDClassDat(actClass).fieldEnd - IDDClassDat(actClass).fieldStart + 1
   Call IDFNewObject 'first make a new object
   ' now copy values into new object
-  For i = 0 To numFields - 1
-    IDFValue(maxUsedValue + i - numFields).entry = IDFValue(iVal + i).entry
+  For i = 0 To numfields - 1
+    IDFValue(maxUsedValue + i - numfields).entry = IDFValue(iVal + i).entry
     Debug.Print "dup "; IDFValue(iVal + i).entry
   Next i
 Next iCol
@@ -4227,7 +4248,7 @@ End Sub
 '-----------------------------------------------------------------------------
 Sub IDFDuplicateObjectAndChange()
 Dim rowSt As Long, rowEnd As Long, colSt As Long, colEnd As Long
-Dim curVal As Long, jField As Long, numFields As Long, iLength As Long
+Dim curVal As Long, jField As Long, numfields As Long, iLength As Long
 Dim li As Long
 Dim curObj As Long
 Dim numChar As Long
@@ -4240,12 +4261,12 @@ If colEnd <> colEnd Then Exit Sub 'can't do changes across multiple objects
 ' find the text suggestion for search box
 curObj = grdNew.ColData(colSt)
 curVal = IDFObject(curObj).valueStart
-numFields = IDDClassDat(actClass).fieldEnd - IDDClassDat(actClass).fieldStart + 1
+numfields = IDDClassDat(actClass).fieldEnd - IDDClassDat(actClass).fieldStart + 1
 numChar = 2 'assume that this is the minimum number of characters that must match
 For iLength = 1 To Len(IDFValue(curVal).entry)
   found = False
   hintText = Left(IDFValue(curVal).entry, numChar)
-  For jField = 1 To numFields - 1
+  For jField = 1 To numfields - 1
     If InStr(IDFValue(curVal + jField).entry, hintText) > 0 Then
       found = True
       Exit For
@@ -4269,8 +4290,8 @@ frmDuplicateAndChange.Show vbModal
 If replaceTerm <> "" Then
   Call IDFNewObject 'first make a new object
   ' now copy values into new object
-  For jField = 0 To numFields - 1
-    IDFValue(maxUsedValue + jField - numFields).entry = Replace(IDFValue(curVal + jField).entry, searchTerm, replaceTerm)
+  For jField = 0 To numfields - 1
+    IDFValue(maxUsedValue + jField - numfields).entry = Replace(IDFValue(curVal + jField).entry, searchTerm, replaceTerm)
     Debug.Print "dup "; IDFValue(curVal + jField).entry
   Next jField
   Call FillList
@@ -4290,7 +4311,7 @@ End Sub
 ' This routine creates a new blank object with all default values set
 '-----------------------------------------------------------------------------
 Sub IDFNewObject()
-Dim objPoint As Long, lastObjectWithPt As Long, numFields As Long
+Dim objPoint As Long, lastObjectWithPt As Long, numfields As Long
 Dim i As Long, iField As Long, refPt As Long
 'Debug.Print actClass, actField, iddclassdat(actClass).name, IDDField(actField).name
 'find the last object in class
@@ -4313,14 +4334,14 @@ End If
 IDFObject(maxUsedObject).nextObjectInClass = 0 'set the next object link to zero to show last defined
 IDDClassObjPt(actClass).objectCount = IDDClassObjPt(actClass).objectCount + 1
 'calculate the number of fields that should be reserved for this object based on the class
-numFields = IDDClassDat(actClass).fieldEnd - IDDClassDat(actClass).fieldStart + 1
+numfields = IDDClassDat(actClass).fieldEnd - IDDClassDat(actClass).fieldStart + 1
 'clear the fields for the new object
 'This makes sure that the fields are clear for the recently read object
 'remember these must be cleared incase not all fields are given values in the
 'IDF file for that object, i.e., location has five values, if only three are
 'given the other two still should be blank and allocated.
-Call resizeValueArray(numFields)
-For i = 0 To numFields
+Call resizeValueArray(numfields)
+For i = 0 To numfields
 '  iField = i + iddclassdat(actClass).fieldStart - 1 original line before LL reported problem
   iField = i + IDDClassDat(actClass).fieldStart
   If IDDField(iField).AN = 1 Then 'alpha
@@ -4341,7 +4362,7 @@ For i = 0 To numFields
     End If
   End If
 Next i
-maxUsedValue = maxUsedValue + numFields
+maxUsedValue = maxUsedValue + numfields
 'grdNew.ShowCell grdNew.TopRow - 1, grdNew.LeftCol - 1
 End Sub
 
@@ -4518,7 +4539,7 @@ End Sub
 Function rangeSaveIDF(rangeItem As Long, subTest As String, testName As String, testedField As Long, testedClass As Long) As Boolean
 Dim iClass As Long, iObject As Long, iField As Long
 Dim iValue As Long, iComment As Long
-Dim firstField As Long, numFields As Long
+Dim firstField As Long, numfields As Long
 Dim StartVal As Long, numFilledfields As Long
 Dim j As Long, tabPlace As Long
 Dim t As String
@@ -4558,12 +4579,12 @@ For iClass = 1 To maxUsedIDDClass
     Print #3, ""
     iObject = IDDClassObjPt(iClass).objectStart
     firstField = IDDClassDat(iClass).fieldStart
-    numFields = IDDClassDat(iClass).fieldEnd - firstField + 1
+    numfields = IDDClassDat(iClass).fieldEnd - firstField + 1
     Do While iObject > 0
       Print #3, IDDClassDat(iClass).name & ","   'print the class name - left justified
       StartVal = IDFObject(iObject).valueStart
       'first go through fields and find last non-blank
-      For j = numFields To 1 Step -1
+      For j = numfields To 1 Step -1
         iValue = StartVal + j - 1
         If IDFValue(iValue).entry <> "" Then
           numFilledfields = j
@@ -4585,7 +4606,7 @@ For iClass = 1 To maxUsedIDDClass
           'if an alpha leave more room for alpha prior to field name
           tabPlace = 30
         Else  'if a numeric
-        
+
           '========== TESTING SECTION START
           ' replace the current value of t with a test value
           If IDFValue(iValue).rangeTestStatus Then  'if part of the range testing
@@ -4697,7 +4718,7 @@ For iClass = 1 To maxUsedIDDClass
             End If
           End If
           '========== TESTING SECTION END
-          
+
           If LTrim(t) <> "" Then  'if blank leave blank - don't convert to a zero
             Print #3, Tab(5); LTrim(Val(t));
           Else
@@ -5044,7 +5065,7 @@ End Sub
 ' Copy the currently selected object to the clipboard
 '-----------------------------------------------------------------------------
 Sub doCopyObject()
-Dim iVal As Long, i As Long, numFields As Long, toClip As String
+Dim iVal As Long, i As Long, numfields As Long, toClip As String
 Dim rowStart As Long, rowEnd As Long, colStart As Long, colEnd As Long
 Dim columnSelected As Long
 Dim selectedObject As Long
@@ -5058,11 +5079,11 @@ toClip = "IDF,"
 For columnSelected = colStart To colEnd
   selectedObject = grdNew.ColData(columnSelected)
   iVal = IDFObject(selectedObject).valueStart
-  numFields = IDDClassDat(actClass).fieldEnd - IDDClassDat(actClass).fieldStart + 1
+  numfields = IDDClassDat(actClass).fieldEnd - IDDClassDat(actClass).fieldStart + 1
   'add name of object type
   toClip = toClip & IDDClassDat(actClass).name
   ' now copy values into a string
-  For i = 0 To numFields - 1
+  For i = 0 To numfields - 1
     toClip = toClip & "," & IDFValue(iVal + i).entry
   Next i
   toClip = toClip & ";"
@@ -5078,7 +5099,7 @@ End Sub
 ' appropriate for spreadsheet use.
 '-----------------------------------------------------------------------------
 Sub doCopyForSpreadsheet()
-Dim iVal As Long, jField As Long, numFields As Long, toClip As String
+Dim iVal As Long, jField As Long, numfields As Long, toClip As String
 Dim rowStart As Long, rowEnd As Long, colStart As Long, colEnd As Long
 Dim columnSelected As Long
 Dim selectedObject As Long
@@ -5088,9 +5109,9 @@ grdNew.GetSelection rowStart, colStart, rowEnd, colEnd
 'always clear the clipboard before writing to it
 Clipboard.Clear
 toClip = ""
-numFields = IDDClassDat(actClass).fieldEnd - IDDClassDat(actClass).fieldStart + 1
+numfields = IDDClassDat(actClass).fieldEnd - IDDClassDat(actClass).fieldStart + 1
 'loop through the selection to copy multiple columns as necessary
-For jField = 0 To numFields - 1
+For jField = 0 To numfields - 1
   toClip = toClip & IDDField(IDDClassDat(actClass).fieldStart + jField).name & vbTab
   For iCol = colStart To colEnd
     selectedObject = grdNew.ColData(iCol)
@@ -5173,7 +5194,7 @@ Dim fromClip As String
 Dim found As Long
 Dim atLeastOneFound As Boolean
 Dim possibleObjectName As String
-Dim numFields As Long
+Dim numfields As Long
 Dim wasCollapsedList As Boolean
 Dim nextChar As String
 Dim isComment As Boolean
@@ -5242,7 +5263,7 @@ If doesClipContainObject Then
       Call lstObjectTypes_Click
       Call IDFNewObject
       'match the number of possible fields and the number of parts
-      numFields = IDDClassDat(actClass).fieldEnd - IDDClassDat(actClass).fieldStart + 1
+      numfields = IDDClassDat(actClass).fieldEnd - IDDClassDat(actClass).fieldStart + 1
       'If numFields <> numParts - 2 Then
       '  MsgBox "The number of copied fields does not match the number of fields in the target object", vbInformation, "Paste Warning"
       '  If numFields > numParts - 2 Then numFields = numParts - 2
@@ -5253,7 +5274,7 @@ If doesClipContainObject Then
       For i = 0 To numParts - 1
         curPart = Trim(parts(i + 1))
         Debug.Print "  "; curPart
-        IDFValue(maxUsedValue + i - numFields).entry = curPart
+        IDFValue(maxUsedValue + i - numfields).entry = curPart
       Next i
       If wasCollapsedList Then Call mnuViewClassesWithObjs_Click
     End If
@@ -5443,7 +5464,7 @@ End Sub
 Sub doValidityCheck(validityMsg() As String, classForMsg() As Long, objForMsg() As Long, fldForMsg() As Long)
 Dim classIndex As Long
 Dim firstField As Long
-Dim numFields As Long
+Dim numfields As Long
 Dim firstValue As Long
 Dim curNumericValue As Double
 Dim curAlphaValue As String
@@ -5474,8 +5495,8 @@ For iObject = 1 To maxUsedObject
     classIndex = IDFObject(iObject).classType
     firstValue = IDFObject(iObject).valueStart
     firstField = IDDClassDat(classIndex).fieldStart
-    numFields = IDDClassDat(classIndex).fieldEnd - firstField + 1
-    For j = 1 To numFields
+    numfields = IDDClassDat(classIndex).fieldEnd - firstField + 1
+    For j = 1 To numfields
       outOfRange = False
       valueIndx = firstValue + j - 1
       fieldIndx = firstField + j - 1
@@ -5764,7 +5785,7 @@ Dim jField As Long
 Dim classIndex As Long
 Dim firstValue As Long
 Dim firstField As Long
-Dim numFields As Long
+Dim numfields As Long
 Dim curValue As String
 Dim fieldIndx As Long
 Dim valueIndx As Long
@@ -5786,8 +5807,8 @@ For iObject = 1 To maxUsedObject
     classIndex = IDFObject(iObject).classType
     firstValue = IDFObject(iObject).valueStart
     firstField = IDDClassDat(classIndex).fieldStart
-    numFields = IDDClassDat(classIndex).fieldEnd - firstField + 1
-    For jField = 1 To numFields
+    numfields = IDDClassDat(classIndex).fieldEnd - firstField + 1
+    For jField = 1 To numfields
       valueIndx = firstValue + jField - 1
       fieldIndx = firstField + jField - 1
       curValue = IDFValue(valueIndx).entry
@@ -5968,7 +5989,7 @@ Dim iObject As Long
 Dim classIndex As Long
 Dim firstValue As Long
 Dim firstField As Long
-Dim numFields  As Long
+Dim numfields  As Long
 Dim valueIndx As Long
 Dim fieldIndx As Long
 Dim jFld As Long
@@ -6002,8 +6023,8 @@ If curFieldName <> "" Then
       classIndex = IDFObject(iObject).classType
       firstValue = IDFObject(iObject).valueStart
       firstField = IDDClassDat(classIndex).fieldStart
-      numFields = IDDClassDat(classIndex).fieldEnd - firstField + 1
-      For jFld = 1 To numFields
+      numfields = IDDClassDat(classIndex).fieldEnd - firstField + 1
+      For jFld = 1 To numfields
         valueIndx = firstValue + jFld - 1
         fieldIndx = firstField + jFld - 1
         'check if a node or a reference or name in first field of object

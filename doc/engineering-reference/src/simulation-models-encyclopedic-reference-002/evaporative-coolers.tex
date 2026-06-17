@@ -12,12 +12,28 @@ The input object EvaporativeCooler:Direct:CelDekPad provides a model of a direct
 \caption{Direct Stage Evaporative Cooler \protect \label{fig:direct-stage-evaporative-cooler}}
 \end{figure}
 
-The thermodynamic process is a simultaneous heat and mass transfer, or adiabatic cooling, and follows a constant enthalpy line on the psychrometric chart; it is shown in the figure below as a process from A to B.~ Since the deviation of the constant wet-bulb line and the constant enthalpy line is small, it is assumed that the wet-bulb temperature is constant across the direct evaporative stage.
+The thermodynamic process is a simultaneous, adiabatic heat and mass transfer.~ On the psychrometric chart, the process follows a line of constant wet-bulb temperature -- this is in fact the process that defines the thermodynamic wet-bulb temperature -- and is shown in the figure below as a process from A to B.~ The moist-air enthalpy changes slightly between inlet and outlet to account for the enthalpy of the liquid water just prior to evaporation:
+
+\begin{equation}
+{h_{sup,out}} = {h_{sup,in}} + {h_{water}} \cdot \left( {{w_{sup,out}} - {w_{sup,in}}} \right)
+\end{equation}
+
+where
+
+\({h_{sup,out}}\) is the specific enthalpy of the moist air leaving the direct evaporative cooler (J/kg\({_{dry \, air}}\)),
+
+\({h_{sup,in}}\) is the specific enthalpy of the moist air entering the direct evaporative cooler (J/kg\({_{dry \, air}}\)),
+
+\({h_{water}}\) is the specific enthalpy of the liquid water being evaporated (J/kg\({_{water\,liquid}}\)),
+
+\({w_{sup,out}}\) is the humidity ratio of the air leaving the direct evaporative cooler (kg\({_{water\,vapor}}\)/kg\({_{dry \, air}}\)), and
+
+\({w_{sup,in}}\) is the humidity ratio of the air entering the direct evaporative cooler (kg\({_{water\,vapor}}\)/kg\({_{dry \, air}}\)).
 
 \begin{figure}[hbtp] % fig 198
 \centering
 \includegraphics[width=0.9\textwidth, height=0.9\textheight, keepaspectratio=true]{media/image4790.png}
-\caption{Psychrometric Chart -- Constant Enthalpy \protect \label{fig:psychrometric-chart-constant-enthalpy}}
+\caption{Psychrometric Chart -- Constant Wet-Bulb Temperature \protect \label{fig:psychrometric-chart-constant-wetbulb}}
 \end{figure}
 
 If the direct evaporative process were 100\% efficient, the leaving dry-bulb temperature would equal the entering wet-bulb temperature.~ The efficiency of the direct evaporative process is less than 100\% and by defining saturation efficiency (\(\varepsilon_{se}\)) for the direct stage or evaporative pad, the leaving dry-bulb temperature can be expressed by the following equation.
@@ -38,7 +54,7 @@ The saturation efficiency is determined from manufacturer's data, and the least 
 
 Using the saturation efficiency (\(\varepsilon_{se}\)) for the direct stage evaporative pad, the leaving dry-bulb temperature can be determined directly.~ The evaporative process approximately follows a constant wet-bulb line.~ Therefore, with the leaving dry-bulb temperature and assuming adiabatic heat transfer across the direct stage, the outlet conditions for the direct stage are known.
 
-The saturation efficiency of the direct evaporative cooler is a function of the pad geometry and airflow rate.~ The pad geometry is constant throughout the simulation, but the airflow rate can change from hour to hour when the evaporative cooler is used with an air economizer.~ The saturation efficiency would then be determined from the flow for that hour with the geometry of the direct evaporative cooler.~ This gives the dry-bulb temperature leaving the evaporative cooler.~ Assuming adiabatic heat transfer across the direct stage, the evaporative process follows the constant wet-bulb line or the constant enthalpy line on the psychrometric chart, therefore the wet-bulb temperature is constant from inlet to outlet.
+The saturation efficiency of the direct evaporative cooler is a function of the pad geometry and airflow rate.~ The pad geometry is constant throughout the simulation, but the airflow rate can change from hour to hour when the evaporative cooler is used with an air economizer.~ The saturation efficiency would then be determined from the flow for that hour with the geometry of the direct evaporative cooler.~ This gives the dry-bulb temperature leaving the evaporative cooler.~ Assuming adiabatic heat transfer across the direct stage, the evaporative process follows the constant wet-bulb line on the psychrometric chart, therefore the wet-bulb temperature is constant from inlet to outlet.
 
 Some things that can cause departure from the ideal adiabatic saturation process in the direct evaporative cooler are:
 
@@ -123,7 +139,7 @@ The input object EvaporativeCooler:Indirect:WetCoil provides a model for a wette
 \caption{Wet Coil Indirect Evaporative Cooler \protect \label{fig:wet-coil-indirect-evaporative-cooler}}
 \end{figure}
 
-The process that the secondary air goes through, A to C on the following figure, is a path of simultaneous heat and mass transfer, but it does not follow a line of constant enthalpy as in the direct stage.~ The process is not adiabatic due to the heat gain from the supply air flowing through the tubes of the heat exchanger.
+The process that the secondary air goes through, A to C on the following figure, is a path of simultaneous heat and mass transfer, but it does not follow the constant wet-bulb-temperature path of the direct stage.~ The process is not adiabatic due to the heat gain from the supply air flowing through the tubes of the heat exchanger.
 
 \begin{figure}[hbtp] % fig 203
 \centering
@@ -197,7 +213,7 @@ A two stage cooler can be modeled by combining either a wet coil or the dry coil
 \caption{Two Stage Evaporative Cooler \protect \label{fig:two-stage-evaporative-cooler}}
 \end{figure}
 
-The thermodynamic process for the supply air is shown below, going from A to B to C.~ The process from A to B is sensible cooling in the indirect stage.~ The process from B to C is simultaneous heat and mass transfer following a constant enthalpy line.~ The air leaving the final stage has a lower dry-bulb and wet-bulb temperature, and an increase in moisture from the direct stage.
+The thermodynamic process for the supply air is shown below, going from A to B to C.~ The process from A to B is sensible cooling in the indirect stage.~ The process from B to C is simultaneous heat and mass transfer following a constant wet-bulb temperature line.~ The air leaving the final stage has a lower dry-bulb and wet-bulb temperature, and an increase in moisture from the direct stage.
 
 \begin{figure}[hbtp] % fig 205
 \centering
@@ -271,7 +287,7 @@ Then check that there is sufficient heat capacitance flux (mcT) in the secondary
   Calculate heat transfer rate
 \end{enumerate}
 
-The secondary air entering wet-bulb temperature would be the loswest limit allowed, although this temperature cannot be attained in most practical situations. This is checked as a limiting case.
+The secondary air entering wet-bulb temperature would be the lowest limit allowed, although this temperature cannot be attained in most practical situations. This is checked as a limiting case.
 
 \begin{equation}
   \begin{array}{rl}
@@ -390,7 +406,7 @@ IF~\left(T_{db,out,sec}>T_{db,in,sys}\right),~THEN~T_{db,out,sec} = T_{db,in,sys
 \setcounter{enumi}{4}
 \tightlist
 \item
-  Recalculate leaving supply air dryblub using new heat transfer rate from step 4
+  Recalculate leaving supply air drybulb using new heat transfer rate from step 4
 \end{enumerate}
 
 \begin{equation}
@@ -467,13 +483,13 @@ Algorithm to determine cooler operation proceeds as follows:
 
 \begin{longtable}[c]{@{}lll@{}}
 \caption{Indirect Evaporative Cooler Operation \label{table:indirect-evaporative-cooler-operation}} \tabularnewline
-\toprule 
+\toprule
 Case & Criteria & Secondary Air Flow \tabularnewline
 \midrule
 \endfirsthead
 
 \caption[]{Indirect Evaporative Cooler Operation} \tabularnewline
-\toprule 
+\toprule
 Case & Criteria & Secondary Air Flow \tabularnewline
 \midrule
 \endhead
@@ -584,7 +600,7 @@ The model for the object called EvaporativeCooler:Indirect:ResearchSpecial has a
 
 \paragraph{Secondary Air DesignFan Flow Rate}\label{secondary-air-designfan-flow-rate}
 
-The secondary air design flow rate fan is not part of an airstream that is directly modeled in EnergyPlus. Because the primary side air flows can be autosized as part of the air system, it is convenentconvenient to also scale the size of the secondary flow. If the cooler is part of the main loop of a central air system, then the secondary fan flow rate is sized to equal to the main design flow rate.
+The secondary air design flow rate fan is not part of an airstream that is directly modeled in EnergyPlus. Because the primary side air flows can be autosized as part of the air system, it is convenient to also scale the size of the secondary flow. If the cooler is part of the main loop of a central air system, then the secondary fan flow rate is sized to equal to the main design flow rate.
 
 User inputs for autosizing scaling factors are included so that when modeling an autosized IEC, all the design values can be scaled off of Primary Design Air Flow Rate. User input for Secondary Air Flow Sizing Factor is multiplied by DesMainVolFlow\(_{sys}\) as follows:
 
@@ -600,7 +616,7 @@ If the cooler is part of the outdoor air path of a central air system, then the 
 
 \paragraph{Secondary Fan Design Power}\label{secondary-fan-design-power}
 
-The Secondary Fan Design Power is outosized from secondary air design flow rate and user input for Secondary Fan Sizing Specific Power in units of W/(m3/s) as follows:
+The Secondary Fan Design Power is autosized from secondary air design flow rate and user input for Secondary Fan Sizing Specific Power in units of W/(m3/s) as follows:
 
 \begin{equation}
 P_{sec,fan,design} = \dot{V}_{sec,design}\cdot\text{FanPowerScalingFactor}
@@ -649,7 +665,7 @@ This section summarizes the model implemented in the component EvaporativeCooler
 
 where:
 
-\({T_{db,out,sys}}\) is the drybub temperature of the air leaving the cooler (\(^{\circ}\)C)
+\({T_{db,out,sys}}\) is the drybulb temperature of the air leaving the cooler (\(^{\circ}\)C)
 \({T_{db,in,sys}}\) is the drybulb temperature of the air entering the cooler (\(^{\circ}\)C)
 \({T_{wb,in,sys}}\) is the wetbulb temperature of the air entering the cooler (\(^{\circ}\)C)
 \(\varepsilon_{design}\) is the cooler design effectiveness

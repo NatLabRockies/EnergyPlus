@@ -1,7 +1,7 @@
-// EnergyPlus, Copyright (c) 1996-2023, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
-// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other
+// National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
 // contributors. All rights reserved.
 //
 // NOTICE: This Software was developed under funding from the U.S. Department of Energy and the
@@ -129,6 +129,56 @@ TEST_F(EnergyPlusFixture, HeatBalanceIntRadExchange_CarrollMRT)
     EXPECT_TRUE(compare_err_stream(error_string, true));
 
     CalcFp(N, EMISS, FMRT, Fp);
+
+    int ENCLOSURES = 1;
+    int SURFACES = 6;
+    int HISTORY = 1;
+
+    state->dataGlobal->BeginEnvrnFlag = true;
+    state->dataHeatBalIntRadExchg->CarrollMethod = true;
+
+    state->dataConstruction->Construct.allocate(SURFACES);
+
+    state->dataSurface->TotSurfaces = SURFACES;
+    state->dataSurface->Surface.allocate(SURFACES);
+    state->dataSurface->SurfaceWindow.allocate(SURFACES);
+    state->dataSurface->SurfWinIRfromParentZone.allocate(SURFACES);
+    state->dataSurface->SurfWinShadingFlag.allocate(SURFACES);
+    state->dataSurface->SurfWinWindowModelType.allocate(SURFACES);
+
+    state->dataViewFactor->NumOfRadiantEnclosures = ENCLOSURES;
+    state->dataViewFactor->EnclRadInfo.allocate(ENCLOSURES);
+    state->dataViewFactor->EnclRadInfo(ENCLOSURES).NumOfSurfaces = SURFACES;
+    state->dataViewFactor->EnclRadInfo(ENCLOSURES).Area.allocate(SURFACES);
+    state->dataViewFactor->EnclRadInfo(ENCLOSURES).Emissivity.allocate(SURFACES);
+    state->dataViewFactor->EnclRadInfo(ENCLOSURES).FMRT.allocate(SURFACES);
+    state->dataViewFactor->EnclRadInfo(ENCLOSURES).Fp.allocate(SURFACES);
+    state->dataViewFactor->EnclRadInfo(ENCLOSURES).SurfacePtr.allocate(SURFACES);
+
+    state->dataHeatBalSurf->SurfAbsThermalInt.allocate(SURFACES);
+    state->dataHeatBalSurf->SurfInsideTempHist.allocate(HISTORY);
+    state->dataHeatBalSurf->SurfInsideTempHist(HISTORY).allocate(SURFACES);
+    state->dataHeatBalSurf->SurfQdotRadNetLWInPerArea.allocate(SURFACES);
+
+    state->dataHeatBalIntRadExchg->MaxNumOfRadEnclosureSurfs = SURFACES;
+    state->dataHeatBalIntRadExchg->SurfaceEmiss.allocate(SURFACES);
+    state->dataHeatBalIntRadExchg->SurfaceTempInKto4th.allocate(SURFACES);
+    state->dataHeatBalIntRadExchg->SurfaceTempRad.allocate(SURFACES);
+
+    for (int surfaceNum = 1; surfaceNum <= SURFACES; surfaceNum++) {
+        state->dataSurface->Surface(surfaceNum).Construction = surfaceNum;
+
+        state->dataViewFactor->EnclRadInfo(ENCLOSURES).Area(surfaceNum) = 10;
+        state->dataViewFactor->EnclRadInfo(ENCLOSURES).SurfacePtr(surfaceNum) = surfaceNum;
+
+        state->dataHeatBalSurf->SurfAbsThermalInt(surfaceNum) = 0.9;
+        state->dataHeatBalSurf->SurfInsideTempHist(1)(surfaceNum) = 293.15 + (surfaceNum % 2);
+    }
+
+    CalcFMRT(*state, SURFACES, state->dataViewFactor->EnclRadInfo(ENCLOSURES).Area, state->dataViewFactor->EnclRadInfo(ENCLOSURES).FMRT);
+    CalcInteriorRadExchange(*state, state->dataHeatBalSurf->SurfInsideTempHist(HISTORY), 0, state->dataHeatBalSurf->SurfQdotRadNetLWInPerArea);
+
+    EXPECT_NEAR(sum(state->dataHeatBalSurf->SurfQdotRadNetLWInPerArea), 0, 0.001);
 }
 
 TEST_F(EnergyPlusFixture, HeatBalanceIntRadExchange_FixViewFactorsTest)
@@ -393,41 +443,38 @@ TEST_F(EnergyPlusFixture, HeatBalanceIntRadExchange_UpdateMovableInsulationFlagT
     int SurfNum;
 
     state->dataConstruction->Construct.allocate(1);
-    Material::MaterialProperties *mat = new Material::MaterialProperties;
-    state->dataMaterial->Material.push_back(mat);
+    auto *mat = new Material::MaterialBase;
+    state->dataMaterial->materials.push_back(mat);
     state->dataSurface->Surface.allocate(1);
-    state->dataSurface->SurfMaterialMovInsulInt.allocate(1);
-    state->dataHeatBalSurf->SurfMovInsulIntPresent.allocate(1);
-    state->dataHeatBalSurf->SurfMovInsulIntPresentPrevTS.allocate(1);
-    state->dataHeatBalSurf->SurfMovInsulIndexList.push_back(1);
+    state->dataSurface->intMovInsuls.allocate(1);
 
     SurfNum = 1;
-    state->dataHeatBalSurf->SurfMovInsulIntPresent(1) = false;
-    state->dataHeatBalSurf->SurfMovInsulIntPresentPrevTS(1) = false;
+    state->dataSurface->intMovInsuls(1).present = false;
+    state->dataSurface->intMovInsuls(1).presentPrevTS = false;
     state->dataSurface->Surface(1).Construction = 1;
-    state->dataSurface->SurfMaterialMovInsulInt(1) = 1;
+    state->dataSurface->intMovInsuls(1).matNum = 1;
 
     state->dataConstruction->Construct(1).InsideAbsorpThermal = 0.9;
-    state->dataMaterial->Material(1)->AbsorpThermal = 0.5;
-    state->dataMaterial->Material(1)->Resistance = 1.25;
-    state->dataMaterial->Material(1)->AbsorpSolar = 0.25;
+    mat->AbsorpThermal = 0.5;
+    mat->Resistance = 1.25;
+    mat->AbsorpSolar = 0.25;
 
     // Test 1: Movable insulation present but wasn't in previous time step, also movable insulation emissivity different than base construction
     //         This should result in a true value from the algorithm which will cause interior radiant exchange matrices to be recalculated
     HeatBalanceIntRadExchange::UpdateMovableInsulationFlag(*state, DidMIChange, SurfNum);
-    EXPECT_TRUE(!DidMIChange);
+    EXPECT_FALSE(DidMIChange);
 
     // Test 2: Movable insulation present and was also present in previous time step.  This should result in a false value since nothing has changed.
-    state->dataHeatBalSurf->SurfMovInsulIntPresentPrevTS(1) = true;
+    state->dataSurface->intMovInsuls(1).presentPrevTS = true;
     HeatBalanceIntRadExchange::UpdateMovableInsulationFlag(*state, DidMIChange, SurfNum);
     EXPECT_TRUE(DidMIChange);
 
     // Test 2: Movable insulation present but wasn't in previous time step.  However, the emissivity of the movable insulation and that of the
     // 		   construction are the same so nothing has actually changed.  This should result in a false value.
-    state->dataHeatBalSurf->SurfMovInsulIntPresentPrevTS(1) = true;
-    state->dataMaterial->Material(1)->AbsorpThermal = state->dataConstruction->Construct(1).InsideAbsorpThermal;
+    state->dataSurface->intMovInsuls(1).presentPrevTS = true;
+    mat->AbsorpThermal = state->dataConstruction->Construct(1).InsideAbsorpThermal;
     HeatBalanceIntRadExchange::UpdateMovableInsulationFlag(*state, DidMIChange, SurfNum);
-    EXPECT_TRUE(!DidMIChange);
+    EXPECT_FALSE(DidMIChange);
 }
 
 TEST_F(EnergyPlusFixture, HeatBalanceIntRadExchange_AlignInputViewFactorsTest)
@@ -505,17 +552,17 @@ TEST_F(EnergyPlusFixture, HeatBalanceIntRadExchange_AlignInputViewFactorsTest)
     state->dataViewFactor->EnclSolInfo.allocate(3);
     state->dataViewFactor->EnclRadInfo(1).Name = "Enclosure 1";
     state->dataViewFactor->EnclRadInfo(1).spaceNums.push_back(
-        UtilityRoutines::FindItemInList(UtilityRoutines::MakeUPPERCase("Zone 2"), state->dataHeatBal->space, state->dataGlobal->numSpaces));
+        Util::FindItemInList(Util::makeUPPER("Zone 2"), state->dataHeatBal->space, state->dataGlobal->numSpaces));
     state->dataViewFactor->EnclRadInfo(1).spaceNums.push_back(
-        UtilityRoutines::FindItemInList(UtilityRoutines::MakeUPPERCase("Zone 1"), state->dataHeatBal->space, state->dataGlobal->numSpaces));
+        Util::FindItemInList(Util::makeUPPER("Zone 1"), state->dataHeatBal->space, state->dataGlobal->numSpaces));
     state->dataViewFactor->EnclRadInfo(2).Name = "Enclosure 2";
     state->dataViewFactor->EnclRadInfo(2).spaceNums.push_back(
-        UtilityRoutines::FindItemInList(UtilityRoutines::MakeUPPERCase("Zone 4"), state->dataHeatBal->space, state->dataGlobal->numSpaces));
+        Util::FindItemInList(Util::makeUPPER("Zone 4"), state->dataHeatBal->space, state->dataGlobal->numSpaces));
     state->dataViewFactor->EnclRadInfo(2).spaceNums.push_back(
-        UtilityRoutines::FindItemInList(UtilityRoutines::MakeUPPERCase("Zone 5"), state->dataHeatBal->space, state->dataGlobal->numSpaces));
+        Util::FindItemInList(Util::makeUPPER("Zone 5"), state->dataHeatBal->space, state->dataGlobal->numSpaces));
     state->dataViewFactor->EnclRadInfo(3).Name = "Space 3";
     state->dataViewFactor->EnclRadInfo(3).spaceNums.push_back(
-        UtilityRoutines::FindItemInList(UtilityRoutines::MakeUPPERCase("Zone 3"), state->dataHeatBal->space, state->dataGlobal->numSpaces));
+        Util::FindItemInList(Util::makeUPPER("Zone 3"), state->dataHeatBal->space, state->dataGlobal->numSpaces));
 
     ErrorsFound = false;
     HeatBalanceIntRadExchange::AlignInputViewFactors(*state, "ZoneProperty:UserViewFactors:BySurfaceName", ErrorsFound);
@@ -607,17 +654,17 @@ TEST_F(EnergyPlusFixture, HeatBalanceIntRadExchange_AlignInputViewFactorsTest2)
     state->dataViewFactor->EnclSolInfo.allocate(3);
     state->dataViewFactor->EnclRadInfo(1).Name = "Enclosure 1";
     state->dataViewFactor->EnclRadInfo(1).spaceNums.push_back(
-        UtilityRoutines::FindItemInList(UtilityRoutines::MakeUPPERCase("Space 2"), state->dataHeatBal->space, state->dataGlobal->numSpaces));
+        Util::FindItemInList(Util::makeUPPER("Space 2"), state->dataHeatBal->space, state->dataGlobal->numSpaces));
     state->dataViewFactor->EnclRadInfo(1).spaceNums.push_back(
-        UtilityRoutines::FindItemInList(UtilityRoutines::MakeUPPERCase("Space 5"), state->dataHeatBal->space, state->dataGlobal->numSpaces));
+        Util::FindItemInList(Util::makeUPPER("Space 5"), state->dataHeatBal->space, state->dataGlobal->numSpaces));
     state->dataViewFactor->EnclRadInfo(2).Name = "Enclosure 2";
     state->dataViewFactor->EnclRadInfo(2).spaceNums.push_back(
-        UtilityRoutines::FindItemInList(UtilityRoutines::MakeUPPERCase("Space 4"), state->dataHeatBal->space, state->dataGlobal->numSpaces));
+        Util::FindItemInList(Util::makeUPPER("Space 4"), state->dataHeatBal->space, state->dataGlobal->numSpaces));
     state->dataViewFactor->EnclRadInfo(2).spaceNums.push_back(
-        UtilityRoutines::FindItemInList(UtilityRoutines::MakeUPPERCase("Space 5"), state->dataHeatBal->space, state->dataGlobal->numSpaces));
+        Util::FindItemInList(Util::makeUPPER("Space 5"), state->dataHeatBal->space, state->dataGlobal->numSpaces));
     state->dataViewFactor->EnclRadInfo(3).Name = "Space 3";
     state->dataViewFactor->EnclRadInfo(3).spaceNums.push_back(
-        UtilityRoutines::FindItemInList(UtilityRoutines::MakeUPPERCase("Space 3"), state->dataHeatBal->space, state->dataGlobal->numSpaces));
+        Util::FindItemInList(Util::makeUPPER("Space 3"), state->dataHeatBal->space, state->dataGlobal->numSpaces));
 
     ErrorsFound = false;
     HeatBalanceIntRadExchange::AlignInputViewFactors(*state, "ZoneProperty:UserViewFactors:BySurfaceName", ErrorsFound);
@@ -706,17 +753,17 @@ TEST_F(EnergyPlusFixture, HeatBalanceIntRadExchange_AlignInputViewFactorsTest3)
     state->dataViewFactor->EnclSolInfo.allocate(3);
     state->dataViewFactor->EnclRadInfo(1).Name = "Enclosure 1";
     state->dataViewFactor->EnclRadInfo(1).spaceNums.push_back(
-        UtilityRoutines::FindItemInList(UtilityRoutines::MakeUPPERCase("Zone 2"), state->dataHeatBal->space, state->dataGlobal->numSpaces));
+        Util::FindItemInList(Util::makeUPPER("Zone 2"), state->dataHeatBal->space, state->dataGlobal->numSpaces));
     state->dataViewFactor->EnclRadInfo(1).spaceNums.push_back(
-        UtilityRoutines::FindItemInList(UtilityRoutines::MakeUPPERCase("Zone 1"), state->dataHeatBal->space, state->dataGlobal->numSpaces));
+        Util::FindItemInList(Util::makeUPPER("Zone 1"), state->dataHeatBal->space, state->dataGlobal->numSpaces));
     state->dataViewFactor->EnclRadInfo(2).Name = "Enclosure 2";
     state->dataViewFactor->EnclRadInfo(2).spaceNums.push_back(
-        UtilityRoutines::FindItemInList(UtilityRoutines::MakeUPPERCase("Zone 4"), state->dataHeatBal->space, state->dataGlobal->numSpaces));
+        Util::FindItemInList(Util::makeUPPER("Zone 4"), state->dataHeatBal->space, state->dataGlobal->numSpaces));
     state->dataViewFactor->EnclRadInfo(2).spaceNums.push_back(
-        UtilityRoutines::FindItemInList(UtilityRoutines::MakeUPPERCase("Zone 5"), state->dataHeatBal->space, state->dataGlobal->numSpaces));
+        Util::FindItemInList(Util::makeUPPER("Zone 5"), state->dataHeatBal->space, state->dataGlobal->numSpaces));
     state->dataViewFactor->EnclRadInfo(3).Name = "Space 3";
     state->dataViewFactor->EnclRadInfo(3).spaceNums.push_back(
-        UtilityRoutines::FindItemInList(UtilityRoutines::MakeUPPERCase("Zone 3"), state->dataHeatBal->space, state->dataGlobal->numSpaces));
+        Util::FindItemInList(Util::makeUPPER("Zone 3"), state->dataHeatBal->space, state->dataGlobal->numSpaces));
 
     ErrorsFound = false;
     HeatBalanceIntRadExchange::AlignInputViewFactors(*state, "ZoneProperty:UserViewFactors:BySurfaceName", ErrorsFound);
@@ -808,17 +855,17 @@ TEST_F(EnergyPlusFixture, HeatBalanceIntRadExchange_AlignInputViewFactorsTest4)
     state->dataViewFactor->EnclSolInfo.allocate(3);
     state->dataViewFactor->EnclRadInfo(1).Name = "Enclosure 1";
     state->dataViewFactor->EnclRadInfo(1).spaceNums.push_back(
-        UtilityRoutines::FindItemInList(UtilityRoutines::MakeUPPERCase("Space 2"), state->dataHeatBal->space, state->dataGlobal->numSpaces));
+        Util::FindItemInList(Util::makeUPPER("Space 2"), state->dataHeatBal->space, state->dataGlobal->numSpaces));
     state->dataViewFactor->EnclRadInfo(1).spaceNums.push_back(
-        UtilityRoutines::FindItemInList(UtilityRoutines::MakeUPPERCase("Space 5"), state->dataHeatBal->space, state->dataGlobal->numSpaces));
+        Util::FindItemInList(Util::makeUPPER("Space 5"), state->dataHeatBal->space, state->dataGlobal->numSpaces));
     state->dataViewFactor->EnclRadInfo(2).Name = "Enclosure 2";
     state->dataViewFactor->EnclRadInfo(2).spaceNums.push_back(
-        UtilityRoutines::FindItemInList(UtilityRoutines::MakeUPPERCase("Space 4"), state->dataHeatBal->space, state->dataGlobal->numSpaces));
+        Util::FindItemInList(Util::makeUPPER("Space 4"), state->dataHeatBal->space, state->dataGlobal->numSpaces));
     state->dataViewFactor->EnclRadInfo(2).spaceNums.push_back(
-        UtilityRoutines::FindItemInList(UtilityRoutines::MakeUPPERCase("Space 5"), state->dataHeatBal->space, state->dataGlobal->numSpaces));
+        Util::FindItemInList(Util::makeUPPER("Space 5"), state->dataHeatBal->space, state->dataGlobal->numSpaces));
     state->dataViewFactor->EnclRadInfo(3).Name = "Space 3";
     state->dataViewFactor->EnclRadInfo(3).spaceNums.push_back(
-        UtilityRoutines::FindItemInList(UtilityRoutines::MakeUPPERCase("Space 3"), state->dataHeatBal->space, state->dataGlobal->numSpaces));
+        Util::FindItemInList(Util::makeUPPER("Space 3"), state->dataHeatBal->space, state->dataGlobal->numSpaces));
 
     ErrorsFound = false;
     HeatBalanceIntRadExchange::AlignInputViewFactors(*state, "ZoneProperty:UserViewFactors:BySurfaceName", ErrorsFound);

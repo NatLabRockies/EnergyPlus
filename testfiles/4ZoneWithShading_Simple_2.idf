@@ -81,7 +81,7 @@
 ! Environmental Emissions:        None
 ! Utility Tariffs:                None
 
-  Version,23.1;
+  Version,26.2;
 
   Timestep,4;
 
@@ -1270,7 +1270,7 @@
 
   Output:Variable,*,Zone Air System Sensible Heating Rate,hourly;
 
-  Output:Meter,DistrictHeating:Facility,hourly;
+  Output:Meter,DistrictHeatingWater:Facility,hourly;
 
   Output:Meter,DistrictCooling:Facility,hourly;
 

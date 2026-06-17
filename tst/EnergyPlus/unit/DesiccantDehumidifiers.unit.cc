@@ -1,7 +1,7 @@
-// EnergyPlus, Copyright (c) 1996-2023, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
-// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other
+// National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
 // contributors. All rights reserved.
 //
 // NOTICE: This Software was developed under funding from the U.S. Department of Energy and the
@@ -89,7 +89,7 @@ namespace EnergyPlus {
 TEST_F(EnergyPlusFixture, DesiccantDehum_OnOASystemTest)
 {
 
-    std::string CompName("");
+    std::string CompName;
     bool FirstHVACIteration(true);
     int DesicDehumNum(1);
     int CompIndex(1);
@@ -2648,6 +2648,8 @@ TEST_F(EnergyPlusFixture, DesiccantDehum_OnOASystemTest)
         "    autosize,                !- Gross Rated Sensible Heat Ratio",
         "    3.0,                     !- High Speed Gross Rated Cooling COP {W/W}",
         "    autosize,                !- High Speed Rated Air Flow Rate {m3/s}",
+        "    773.3,                   !- High Speed 2017 Rated Evaporator Fan Power Per Volume Flow Rate [W/(m3/s)]",
+        "    934.4,                   !- High Speed 2023 Rated Evaporator Fan Power Per Volume Flow Rate [W/(m3/s)]",
         "    ,                        !- Unit Internal Static Air Pressure {Pa}",
         "    Mixed Air Node 1,        !- Air Inlet Node Name",
         "    Main Cooling Coil 1 Outlet Node,  !- Air Outlet Node Name",
@@ -2660,6 +2662,8 @@ TEST_F(EnergyPlusFixture, DesiccantDehum_OnOASystemTest)
         "    autosize,                !- Low Speed Gross Rated Sensible Heat Ratio",
         "    4.2,                     !- Low Speed Gross Rated Cooling COP {W/W}",
         "    autosize,                !- Low Speed Rated Air Flow Rate {m3/s}",
+        "    773.3,                   !- Low Speed 2017 Rated Evaporator Fan Power Per Volume Flow Rate [W/(m3/s)]",
+        "    934.4,                   !- Low Speed 2023 Rated Evaporator Fan Power Per Volume Flow Rate [W/(m3/s)]",
         "    VarSpeedCoolCapLSFT,     !- Low Speed Total Cooling Capacity Function of Temperature Curve Name",
         "    VarSpeedCoolEIRLSFT,     !- Low Speed Energy Input Ratio Function of Temperature Curve Name",
         "    Main Cooling Coil 1 Condenser Node;  !- Condenser Air Inlet Node Name",
@@ -2778,7 +2782,7 @@ TEST_F(EnergyPlusFixture, DesiccantDehum_OnOASystemTest)
         "  ZoneControl:Humidistat,",
         "    SPACE1-1 Humidistat,     !- Name",
         "    SPACE1-1,                !- Zone Name",
-        "    Relative Humidity Sched; !- Humidifying Relative Humidity Setpoint Schedule Name",
+        "    Relative Humidity Sched; !- Humidifying Setpoint Schedule Name",
 
         "  HeatExchanger:Desiccant:BalancedFlow,",
         "    OA Desiccant Heat Exchanger,  !- Name",
@@ -2847,12 +2851,12 @@ TEST_F(EnergyPlusFixture, DesiccantDehum_OnOASystemTest)
     });
 
     ASSERT_TRUE(process_idf(idf_objects));
+    state->init_state(*state);
 
     // OutputProcessor::TimeValue.allocate(2);
     state->dataGlobal->DDOnlySimulation = true;
 
     SimulationManager::GetProjectData(*state);
-    OutputReportPredefined::SetPredefinedTables(*state);
     createFacilityElectricPowerServiceObject(*state);
     SetPreConstructionInputParameters(*state); // establish array bounds for constructions early
     BranchInputManager::ManageBranchInput(*state);
@@ -2888,12 +2892,26 @@ TEST_F(EnergyPlusFixture, DesiccantDehum_OnOASystemTest)
         }
     }
     EXPECT_EQ(RegCoilCapacity, state->dataHeatingCoils->HeatingCoil(CoilIndex).NominalCapacity);
+
+    // testing system peak cooling load timestamp
+    int coolPeakDD = 2;
+    auto &finalSysSizing = state->dataSize->FinalSysSizing(1);
+    auto &sysSizPeakDDNum = state->dataSize->SysSizPeakDDNum(1);
+    EXPECT_ENUM_EQ(finalSysSizing.coolingPeakLoad, DataSizing::PeakLoad::SensibleCooling);
+    EXPECT_ENUM_EQ(finalSysSizing.SizingOption, DataSizing::SizingConcurrence::NonCoincident);
+    EXPECT_EQ(sysSizPeakDDNum.SensCoolPeakDD, coolPeakDD);
+    int timeStepIndexAtPeakCoolLoad = sysSizPeakDDNum.TimeStepAtSensCoolPk(coolPeakDD);
+    EXPECT_EQ(sysSizPeakDDNum.TimeStepAtTotCoolPk(coolPeakDD), timeStepIndexAtPeakCoolLoad);
+    std::string coolPeakDDDate = sysSizPeakDDNum.cTotCoolPeakDDDate;
+    EXPECT_EQ(coolPeakDDDate, "7/21");
+    std::string dateHrMin = coolPeakDDDate + " " + SizingManager::TimeIndexToHrMinString(*state, timeStepIndexAtPeakCoolLoad);
+    EXPECT_EQ(dateHrMin, "7/21 10:30:00");
 }
 
 TEST_F(EnergyPlusFixture, DesiccantDehum_OnPrimaryAirSystemTest)
 {
 
-    std::string CompName("");
+    std::string CompName;
     bool FirstHVACIteration(true);
     int DesicDehumNum(1);
     int CompIndex(1);
@@ -3833,7 +3851,7 @@ TEST_F(EnergyPlusFixture, DesiccantDehum_OnPrimaryAirSystemTest)
         "  ZoneControl:Humidistat,",
         "    Main Zone Humidistat,     !- Name",
         "    Main Zone,                !- Zone Name",
-        "    Relative Humidity Sched; !- Humidifying Relative Humidity Setpoint Schedule Name",
+        "    Relative Humidity Sched; !- Humidifying Setpoint Schedule Name",
 
         "  Schedule:Compact,",
         "    Relative Humidity Sched, !- Name",
@@ -4036,12 +4054,12 @@ TEST_F(EnergyPlusFixture, DesiccantDehum_OnPrimaryAirSystemTest)
     });
 
     ASSERT_TRUE(process_idf(idf_objects));
+    state->init_state(*state);
 
     // OutputProcessor::TimeValue.allocate(2);
     state->dataGlobal->DDOnlySimulation = true;
 
     SimulationManager::GetProjectData(*state);
-    OutputReportPredefined::SetPredefinedTables(*state);
     createFacilityElectricPowerServiceObject(*state);
     SetPreConstructionInputParameters(*state); // establish array bounds for constructions early
     BranchInputManager::ManageBranchInput(*state);
@@ -4079,7 +4097,7 @@ TEST_F(EnergyPlusFixture, DesiccantDehum_OnPrimaryAirSystemTest)
 TEST_F(EnergyPlusFixture, DesiccantDehum_RegenAirHeaterHWCoilSizingTest)
 {
 
-    std::string CompName("");
+    std::string CompName;
     bool FirstHVACIteration(true);
     int DesicDehumNum(1);
     int CompIndex(1);
@@ -5019,7 +5037,7 @@ TEST_F(EnergyPlusFixture, DesiccantDehum_RegenAirHeaterHWCoilSizingTest)
         "  ZoneControl:Humidistat,",
         "    Main Zone Humidistat,     !- Name",
         "    Main Zone,                !- Zone Name",
-        "    Relative Humidity Sched; !- Humidifying Relative Humidity Setpoint Schedule Name",
+        "    Relative Humidity Sched; !- Humidifying Setpoint Schedule Name",
 
         "  Schedule:Compact,",
         "    Relative Humidity Sched, !- Name",
@@ -5297,7 +5315,7 @@ TEST_F(EnergyPlusFixture, DesiccantDehum_RegenAirHeaterHWCoilSizingTest)
         "  Branch,",
         "    Heating Purchased Hot Water Branch,  !- Name",
         "    ,                        !- Pressure Drop Curve Name",
-        "    DistrictHeating,         !- Component 1 Object Type",
+        "    DistrictHeating:Water,         !- Component 1 Object Type",
         "    Purchased Heating,       !- Component 1 Name",
         "    Purchased Heat Inlet Node,  !- Component 1 Inlet Node Name",
         "    Purchased Heat Outlet Node;  !- Component 1 Outlet Node Name",
@@ -5448,10 +5466,10 @@ TEST_F(EnergyPlusFixture, DesiccantDehum_RegenAirHeaterHWCoilSizingTest)
 
         "  PlantEquipmentList,",
         "    heating plant,           !- Name",
-        "    DistrictHeating,         !- Equipment 1 Object Type",
+        "    DistrictHeating:Water,         !- Equipment 1 Object Type",
         "    Purchased Heating;       !- Equipment 1 Name",
 
-        "  DistrictHeating,",
+        "  DistrictHeating:Water,",
         "    Purchased Heating,       !- Name",
         "    Purchased Heat Inlet Node,  !- Hot Water Inlet Node Name",
         "    Purchased Heat Outlet Node,  !- Hot Water Outlet Node Name",
@@ -5460,12 +5478,12 @@ TEST_F(EnergyPlusFixture, DesiccantDehum_RegenAirHeaterHWCoilSizingTest)
     });
 
     ASSERT_TRUE(process_idf(idf_objects));
+    state->init_state(*state);
 
     // OutputProcessor::TimeValue.allocate(2);
     state->dataGlobal->DDOnlySimulation = true;
 
     SimulationManager::GetProjectData(*state);
-    OutputReportPredefined::SetPredefinedTables(*state);
     createFacilityElectricPowerServiceObject(*state);
     SetPreConstructionInputParameters(*state); // establish array bounds for constructions early
     BranchInputManager::ManageBranchInput(*state);
@@ -5483,7 +5501,7 @@ TEST_F(EnergyPlusFixture, DesiccantDehum_RegenAirHeaterHWCoilSizingTest)
     EXPECT_EQ(1, state->dataDesiccantDehumidifiers->NumGenericDesicDehums);
     EXPECT_EQ("DESICCANT 1", state->dataDesiccantDehumidifiers->DesicDehum(DesicDehumNum).Name);
     EXPECT_EQ("DESICCANT REGEN COIL", state->dataDesiccantDehumidifiers->DesicDehum(DesicDehumNum).RegenCoilName);
-    EXPECT_EQ("COIL:HEATING:WATER", state->dataDesiccantDehumidifiers->DesicDehum(DesicDehumNum).RegenCoilType);
+    EXPECT_ENUM_EQ(HVAC::CoilType::HeatingWater, state->dataDesiccantDehumidifiers->DesicDehum(DesicDehumNum).regenCoilType);
 
     CompName = state->dataDesiccantDehumidifiers->DesicDehum(DesicDehumNum).Name;
     CompIndex = state->dataDesiccantDehumidifiers->NumGenericDesicDehums;
@@ -5511,7 +5529,7 @@ TEST_F(EnergyPlusFixture, DesiccantDehum_VSCoolingCoilOnPrimaryAirSystemTest)
 
     // this unit test is derived from DesiccantDehum_OnPrimaryAirSystemTest but uses a VS dx coil instead
 
-    std::string CompName("");
+    std::string CompName;
     bool FirstHVACIteration(true);
     int DesicDehumNum(1);
     int CompIndex(1);
@@ -6451,7 +6469,7 @@ TEST_F(EnergyPlusFixture, DesiccantDehum_VSCoolingCoilOnPrimaryAirSystemTest)
         "  ZoneControl:Humidistat,",
         "    Main Zone Humidistat,     !- Name",
         "    Main Zone,                !- Zone Name",
-        "    Relative Humidity Sched; !- Humidifying Relative Humidity Setpoint Schedule Name",
+        "    Relative Humidity Sched; !- Humidifying Setpoint Schedule Name",
 
         "  Schedule:Compact,",
         "    Relative Humidity Sched, !- Name",
@@ -6524,6 +6542,7 @@ TEST_F(EnergyPlusFixture, DesiccantDehum_VSCoolingCoilOnPrimaryAirSystemTest)
 
         "  Coil:Cooling:DX:VariableSpeed,",
         "    Desiccant DXSystem Cooling Coil,    !- Name",
+        "    ,                        !- Availability Schedule Name",
         "     Desiccant DXSystem Mixed Air Node,  !- Indoor Air Inlet Node Name",
         "    HX Process Inlet Node,   !- Indoor Air Outlet Node Name",
         "    1,                       !- Number of Speeds {dimensionless}",
@@ -6532,11 +6551,15 @@ TEST_F(EnergyPlusFixture, DesiccantDehum_VSCoolingCoilOnPrimaryAirSystemTest)
         "    1.05,                    !- Rated Air Flow Rate At Selected Nominal Speed Level {m3/s}",
         "    1000,                    !- Nominal Time for Condensate to Begin Leaving the Coil {s}",
         "    0.4,                     !- Initial Moisture Evaporation Rate Divided by Steady-State AC Latent Capacity {dimensionless}",
+        "    ,                        !- Maximum Cycling Rate",
+        "    ,                        !- Latent Capacity Time Constant",
+        "    ,                        !- Fan Delay Time",
         "    HPACCOOLPLFFPLR,         !- Energy Part Load Fraction Curve Name",
         "    Condenser Inlet Node,    !- Condenser Air Inlet Node Name",
         "    AirCooled,               !- Condenser Type",
         "    ,                        !- Evaporative Condenser Pump Rated Power Consumption {W}",
         "    0.0,                     !- Crankcase Heater Capacity {W}",
+        "    ,                        !- Crankcase Heater Capacity Function of Temperature Curve Name",
         "    10.0,                    !- Maximum Outdoor Dry-Bulb Temperature for Crankcase Heater Operation {C}",
         "    ,                        !- Minimum Outdoor Dry-Bulb Temperature for Compressor Operation {C}",
         "    ,                        !- Supply Water Storage Tank Name",
@@ -6548,6 +6571,8 @@ TEST_F(EnergyPlusFixture, DesiccantDehum_VSCoolingCoilOnPrimaryAirSystemTest)
         "    0.75,                    !- Speed 1 Reference Unit Gross Rated Sensible Heat Ratio {dimensionless}",
         "    3.5,                     !- Speed 1 Reference Unit Gross Rated Cooling COP {dimensionless}",
         "    3.776,                   !- Speed 1 Reference Unit Rated Air Flow Rate {m3/s}",
+        "    773.3,                   !- Speed 1 2017 Rated Evaporator Fan Power Per Volume Flow Rate [W/(m3/s)]",
+        "    934.4,                   !- Speed 1 2023 Rated Evaporator Fan Power Per Volume Flow Rate [W/(m3/s)]",
         "    10.62,                   !- Speed 1 Reference Unit Rated Condenser Air Flow Rate {m3/s}",
         "    ,                        !- Speed 1 Reference Unit Rated Pad Effectiveness of Evap Precooling {dimensionless}",
         "    HPCoolingCAPFTemp4,      !- Speed 1 Total Cooling Capacity Function of Temperature Curve Name",
@@ -6708,12 +6733,12 @@ TEST_F(EnergyPlusFixture, DesiccantDehum_VSCoolingCoilOnPrimaryAirSystemTest)
     });
 
     ASSERT_TRUE(process_idf(idf_objects));
+    state->init_state(*state);
 
     // OutputProcessor::TimeValue.allocate(2);
     state->dataGlobal->DDOnlySimulation = true;
 
     SimulationManager::GetProjectData(*state);
-    OutputReportPredefined::SetPredefinedTables(*state);
     createFacilityElectricPowerServiceObject(*state);
     SetPreConstructionInputParameters(*state); // establish array bounds for constructions early
     BranchInputManager::ManageBranchInput(*state);
@@ -6731,9 +6756,9 @@ TEST_F(EnergyPlusFixture, DesiccantDehum_VSCoolingCoilOnPrimaryAirSystemTest)
     EXPECT_EQ("DESICCANT 1", state->dataDesiccantDehumidifiers->DesicDehum(DesicDehumNum).Name);
     EXPECT_EQ("DESICCANT REGEN COIL", state->dataDesiccantDehumidifiers->DesicDehum(DesicDehumNum).RegenCoilName);
 
-    EXPECT_EQ(state->dataDesiccantDehumidifiers->DesicDehum(DesicDehumNum).coolingCoil_TypeNum, DataHVACGlobals::Coil_CoolingAirToAirVariableSpeed);
+    EXPECT_ENUM_EQ(state->dataDesiccantDehumidifiers->DesicDehum(DesicDehumNum).coolCoilType, HVAC::CoilType::CoolingDXVariableSpeed);
 
-    EXPECT_TRUE(compare_enums(state->dataDesiccantDehumidifiers->DesicDehum(DesicDehumNum).CoilUpstreamOfProcessSide, Selection::Yes));
+    EXPECT_ENUM_EQ(state->dataDesiccantDehumidifiers->DesicDehum(DesicDehumNum).CoilUpstreamOfProcessSide, Selection::Yes);
 
     CompName = state->dataDesiccantDehumidifiers->DesicDehum(DesicDehumNum).Name;
     CompIndex = state->dataDesiccantDehumidifiers->NumGenericDesicDehums;

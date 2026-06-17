@@ -1,57 +1,61 @@
-# GLAD library
+include(initialize-submodules)
+initialize_submodules()
+
+# GLAD
 add_subdirectory(glad)
+target_include_directories(glad PUBLIC ${PROJECT_SOURCE_DIR}/vendor/glad/include)
 
-if(GIT_FOUND AND EXISTS "${PROJECT_SOURCE_DIR}/.git")
-  # Update submodules as needed
-  option(GIT_SUBMODULE "Check submodules during build" ON)
-  if(GIT_SUBMODULE)
-    message(STATUS "Submodule update")
-    execute_process(COMMAND ${GIT_EXECUTABLE} submodule update --init --recursive
-      WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
-      RESULT_VARIABLE GIT_SUBMOD_RESULT)
-    if(NOT GIT_SUBMOD_RESULT EQUAL "0")
-      message(FATAL_ERROR "git submodule update --init failed with ${GIT_SUBMOD_RESULT}, please checkout submodules")
-    endif()
-  endif()
-endif()
-
-#if(NOT EXISTS "${PROJECT_SOURCE_DIR}/extern/repo/CMakeLists.txt")
-#  message(FATAL_ERROR "The submodules were not downloaded! GIT_SUBMODULE was turned off or failed. Please update submodules and try again.")
-#endif()
-
-# GLFW libaray
+# GLFW library
 set(GLFW_BUILD_DOCS OFF CACHE BOOL "" FORCE)
 set(GLFW_BUILD_TESTS OFF CACHE BOOL "" FORCE)
 set(GLFW_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
 set(GLFW_INSTALL OFF CACHE BOOL "" FORCE)
-
 if (APPLE)
   set(GLFW_USE_MENUBAR OFF CACHE BOOL "" FORCE)
 endif()
 
+mark_as_advanced(
+  GLFW_BUILD_DOCS
+  GLFW_BUILD_TESTS
+  GLFW_BUILD_EXAMPLES
+  GLFW_INSTALL
+  GLFW_USE_MENUBAR
+  GLFW_USE_OSMESA
+  GLFW_VULKAN_STATIC
+  BUILD_SHARED_LIBS
+)
+
 add_subdirectory(glfw)
+target_include_directories(glfw PUBLIC
+ ${PROJECT_SOURCE_DIR}/vendor/glfw/include
+ ${PROJECT_SOURCE_DIR}/vendor/glfw/deps
+)
 
 # tess2 library
 file(GLOB libtess2_sources "${CMAKE_CURRENT_SOURCE_DIR}/libtess2/Source/[a-zA-Z]*.c")
-
-if (UNIX)
-  ADD_DEFINITIONS("-fPIC")
-endif()
 
 add_library(tess2 ${libtess2_sources})
 
 target_include_directories(tess2 PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/libtess2/Include)
 target_include_directories(tess2 PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/libtess2/Source)
+target_compile_options(tess2 PRIVATE $<$<COMPILE_LANG_AND_ID:C,AppleClang>:-Wno-shorten-64-to-32>)
 
+if (NOT TARGET courierr)
+  add_subdirectory(courierr)
+  mark_as_advanced(courierr_BUILD_TESTING courierr_COVERAGE courierr_STATIC_LIB)
+endif ()
 
 # googletest library
-if (BUILD_PENUMBRA_TESTING AND NOT TARGET gtest)
+if (${PROJECT_NAME}_BUILD_TESTING AND NOT TARGET gtest)
 
   # Prevent GoogleTest from overriding our compiler/linker options
   # when building with Visual Studio
   set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
-  set(BUILD_GTEST ON CACHE BOOL "" FORCE)
+  set(BUILD_GTEST ON CACHE BOOL "" FORCE MARK)
+  set(BUILD_GMOCK ON CACHE BOOL "" FORCE)
+  set(INSTALL_GTEST OFF CACHE BOOL "" FORCE)
+  mark_as_advanced(BUILD_GTEST BUILD_GMOCK INSTALL_GTEST)
 
-  add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/googletest ${googletest_BINARY_DIR})
+  add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/googletest)
 
 endif()

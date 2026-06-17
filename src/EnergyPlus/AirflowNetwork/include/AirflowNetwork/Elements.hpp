@@ -1,7 +1,7 @@
-// EnergyPlus, Copyright (c) 1996-2023, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
-// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other
+// National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
 // contributors. All rights reserved.
 //
 // NOTICE: This Software was developed under funding from the U.S. Department of Energy and the
@@ -49,7 +49,9 @@
 #define AIRFLOWNETWORK_ELEMENTS_HPP
 
 #include "AirflowNetwork/Properties.hpp"
+#include <EnergyPlus/DataHVACGlobals.hh>
 #include <EnergyPlus/EPVector.hh>
+#include <EnergyPlus/ScheduleManager.hh>
 
 namespace EnergyPlus {
 
@@ -199,6 +201,7 @@ namespace AirflowNetwork {
         DOU = 12, // Damper Outlet Node
         SPI = 13, // Splitter inlet Node
         SPO = 14, // Splitter Outlet Node
+        ZON = 15, // Zone node
         Num
     };
 
@@ -220,7 +223,7 @@ namespace AirflowNetwork {
     // Link simulation variable in air distribution system
     // Sensible and latent exchange variable in air distribution system
 
-    void generic_crack(Real64 &coef,             // Flow coefficient
+    void generic_crack(Real64 const coef,        // Flow coefficient
                        Real64 const expn,        // Flow exponent
                        bool const LFLAG,         // Initialization flag.If = 1, use laminar relationship
                        Real64 const PDROP,       // Total pressure drop across a component (P1 - P2) [Pa]
@@ -244,11 +247,11 @@ namespace AirflowNetwork {
     struct MultizoneZoneProp // Zone information
     {
         // Members
-        std::string ZoneName;    // Name of Associated EnergyPlus Thermal Zone
-        std::string VentControl; // Ventilation Control Mode: "TEMPERATURE", "ENTHALPIC", "CONSTANT", or "NOVENT"
-        std::string VentSchName; // Name of ventilation temperature control schedule
-        Real64 Height;           // Nodal height
-        Real64 OpenFactor;       // Limit Value on Multiplier for Modulating Venting Open Factor,
+        std::string ZoneName;         // Name of Associated EnergyPlus Thermal Zone
+        std::string VentControl;      // Ventilation Control Mode: "TEMPERATURE", "ENTHALPIC", "CONSTANT", or "NOVENT"
+        std::string VentAvailSchName; // Ventilation availability schedule
+        Real64 Height;                // Nodal height
+        Real64 OpenFactor;            // Limit Value on Multiplier for Modulating Venting Open Factor,
         // Not applicable if Vent Control Mode = CONSTANT or NOVENT
         Real64 LowValueTemp; // Lower Value on Inside/Outside Temperature Difference for
         // Modulating the Venting Open Factor with temp control
@@ -258,24 +261,24 @@ namespace AirflowNetwork {
         // Modulating the Venting Open Factor with Enthalpic control
         Real64 UpValueEnth; // Upper Value on Inside/Outside Temperature Difference for
         // Modulating the Venting Open Factor with Enthalpic control
-        int ZoneNum;                                // Zone number associated with ZoneName
-        int VentSchNum;                             // Zone ventilation schedule number associated with ventilation schedule name
-        int VentCtrNum;                             // Ventilation control mode number: 1 "Temperature", 2 "ENTHALPIC", 3 "CONSTANT", 4 "NOVENT"
-        std::string VentingSchName;                 // Name of ventilation temperature control schedule
-        int VentingSchNum;                          // Ventilation schedule number
-        std::string SingleSidedCpType;              // Type of calculation method for single sided wind pressure coefficients
-        Real64 BuildWidth;                          // The width of the building along the facade that contains this zone.
-        int ASH55PeopleInd;                         // Index of people object with ASH55 comfort calcs for ventilation control
-        int CEN15251PeopleInd;                      // Index of people object with CEN15251 comfort calcs for ventilation control
-        std::string OccupantVentilationControlName; // Occupant ventilation control name
-        int OccupantVentilationControlNum;          // Occupant ventilation control number
-        int RAFNNodeNum;                            // Index of RAFN node number
+        int ZoneNum;                                     // Zone number associated with ZoneName
+        Sched::Schedule *ventTempControlSched = nullptr; // Ventilation temperature control schedule
+        int VentCtrNum;                                  // Ventilation control mode number: 1 "Temperature", 2 "ENTHALPIC", 3 "CONSTANT", 4 "NOVENT"
+        std::string VentTempControlSchName;              // Name of ventilation temperature control schedule
+        Sched::Schedule *ventAvailSched = nullptr;       // Ventilation availability schedule
+        std::string SingleSidedCpType;                   // Type of calculation method for single sided wind pressure coefficients
+        Real64 BuildWidth;                               // The width of the building along the facade that contains this zone.
+        int ASH55PeopleInd;                              // Index of people object with ASH55 comfort calcs for ventilation control
+        int CEN15251PeopleInd;                           // Index of people object with CEN15251 comfort calcs for ventilation control
+        std::string OccupantVentilationControlName;      // Occupant ventilation control name
+        int OccupantVentilationControlNum;               // Occupant ventilation control number
+        int RAFNNodeNum;                                 // Index of RAFN node number
 
         // Default Constructor
         MultizoneZoneProp()
             : VentControl("NoVent"), Height(0.0), OpenFactor(1.0), LowValueTemp(0.0), UpValueTemp(100.0), LowValueEnth(0.0), UpValueEnth(300000.0),
-              ZoneNum(0), VentSchNum(0), VentCtrNum(VentControlType::None), VentingSchNum(0), SingleSidedCpType("STANDARD"), BuildWidth(10.0),
-              ASH55PeopleInd(0), CEN15251PeopleInd(0), OccupantVentilationControlNum(0), RAFNNodeNum(0)
+              ZoneNum(0), VentCtrNum(VentControlType::None), SingleSidedCpType("STANDARD"), BuildWidth(10.0), ASH55PeopleInd(0), CEN15251PeopleInd(0),
+              OccupantVentilationControlNum(0), RAFNNodeNum(0)
         {
         }
     };
@@ -297,7 +300,6 @@ namespace AirflowNetwork {
         Real64 Width;                 // Surface width
         Real64 CHeight;               // Surface central height in z direction
         std::string VentControl;      // Ventilation Control Mode: TEMPERATURE, ENTHALPIC, CONSTANT, ZONELEVEL or NOVENT
-        std::string VentSchName;      // ! Name of ventilation temperature control schedule
         Real64 ModulateFactor;        // Limit Value on Multiplier for Modulating Venting Open Factor
         Real64 LowValueTemp;          // Lower Value on Inside/Outside Temperature Difference for
         // Modulating the Venting Open Factor with temp control
@@ -307,31 +309,32 @@ namespace AirflowNetwork {
         // Modulating the Venting Open Factor with Enthalpic control
         Real64 UpValueEnth; // Upper Value on Inside/Outside Temperature Difference for
         // Modulating the Venting Open Factor with Enthalpic control
-        std::string VentingSchName;                 // Name of ventilation temperature control schedule
-        int VentSchNum;                             // Zone ventilation schedule number associated with ventilation schedule name
-        VentControlType VentSurfCtrNum;             // Ventilation control mode number: 1 "Temperature", 2 "ENTHALPIC", 3 "CONSTANT", 4 "NOVENT"
-        int VentingSchNum;                          // Ventilation schedule number
-        int ZonePtr;                                // Pointer to inside face zone
-        bool IndVentControl;                        // Individual surface venting control
-        int ExtLargeOpeningErrCount;                // Exterior large opening error count during HVAC system operation
-        int ExtLargeOpeningErrIndex;                // Exterior large opening error index during HVAC system operation
-        int OpenFactorErrCount;                     // Large opening error count at Open factor > 1.0
-        int OpenFactorErrIndex;                     // Large opening error error index at Open factor > 1.0
-        Real64 Multiplier;                          // Window multiplier
-        bool HybridVentClose;                       // Hybrid ventilation window close control logical
-        bool HybridCtrlGlobal;                      // Hybrid ventilation global control logical
-        bool HybridCtrlMaster;                      // Hybrid ventilation global control master
-        Real64 WindModifier;                        // Wind modifier from hybrid ventilation control
-        std::string OccupantVentilationControlName; // Occupant ventilation control name
-        int OccupantVentilationControlNum;          // Occupant ventilation control number
-        int OpeningStatus;                          // Open status at current time step
-        int PrevOpeningstatus;                      // Open status at previous time step
-        Real64 CloseElapsedTime;                    // Elapsed time during closing (min)
-        Real64 OpenElapsedTime;                     // Elapsed time during closing (min)
-        int ClosingProbStatus;                      // Closing probability status
-        int OpeningProbStatus;                      // Opening probability status
-        bool RAFNflag;                              // True if this surface is used in AirflowNetwork:IntraZone:Linkage
-        bool NonRectangular;                        // True if this surface is not rectangular
+        std::string VentTempControlSchName;              // Name of ventilation temperature control schedule
+        Sched::Schedule *ventTempControlSched = nullptr; // Ventilation temperature control schedule
+        VentControlType VentSurfCtrNum;                  // Ventilation control mode number: 1 "Temperature", 2 "ENTHALPIC", 3 "CONSTANT", 4 "NOVENT"
+        std::string VentAvailSchName;                    // Ventilation availability schedule
+        Sched::Schedule *ventAvailSched = nullptr;       // Ventilation availability schedule
+        int ZonePtr;                                     // Pointer to inside face zone
+        bool IndVentControl;                             // Individual surface venting control
+        int ExtLargeOpeningErrCount;                     // Exterior large opening error count during HVAC system operation
+        int ExtLargeOpeningErrIndex;                     // Exterior large opening error index during HVAC system operation
+        int OpenFactorErrCount;                          // Large opening error count at Open factor > 1.0
+        int OpenFactorErrIndex;                          // Large opening error error index at Open factor > 1.0
+        Real64 Multiplier;                               // Window multiplier
+        bool HybridVentClose;                            // Hybrid ventilation window close control logical
+        bool HybridCtrlGlobal;                           // Hybrid ventilation global control logical
+        bool HybridCtrlMaster;                           // Hybrid ventilation global control master
+        Real64 WindModifier;                             // Wind modifier from hybrid ventilation control
+        std::string OccupantVentilationControlName;      // Occupant ventilation control name
+        int OccupantVentilationControlNum;               // Occupant ventilation control number
+        int OpeningStatus;                               // Open status at current time step
+        int PrevOpeningstatus;                           // Open status at previous time step
+        Real64 CloseElapsedTime;                         // Elapsed time during closing (min)
+        Real64 OpenElapsedTime;                          // Elapsed time during closing (min)
+        int ClosingProbStatus;                           // Closing probability status
+        int OpeningProbStatus;                           // Opening probability status
+        bool RAFNflag;                                   // True if this surface is used in AirflowNetwork:IntraZone:Linkage
+        bool NonRectangular;                             // True if this surface is not rectangular
         EquivRec EquivRecMethod;        // Equivalent Rectangle Method input: 1 Height; 2 Base surface aspect ratio; 3 User input aspect ratio
         Real64 EquivRecUserAspectRatio; // user input value when EquivRecMethod = 3
 
@@ -339,13 +342,12 @@ namespace AirflowNetwork {
         MultizoneSurfaceProp()
             : Factor(0.0), SurfNum(0), NodeNums{{0, 0}}, OpenFactor(0.0), OpenFactorLast(0.0), EMSOpenFactorActuated(false), EMSOpenFactor(0.0),
               Height(0.0), Width(0.0), CHeight(0.0), VentControl("ZONELEVEL"), ModulateFactor(0.0), LowValueTemp(0.0), UpValueTemp(100.0),
-              LowValueEnth(0.0), UpValueEnth(300000.0), VentSchNum(0), VentSurfCtrNum(VentControlType::None), VentingSchNum(0), ZonePtr(0),
-              IndVentControl(false), ExtLargeOpeningErrCount(0), ExtLargeOpeningErrIndex(0), OpenFactorErrCount(0), OpenFactorErrIndex(0),
-              Multiplier(1.0), HybridVentClose(false), HybridCtrlGlobal(false), HybridCtrlMaster(false), WindModifier(1.0),
-              OccupantVentilationControlNum(0), OpeningStatus(OpenStatus::FreeOperation), PrevOpeningstatus(OpenStatus::FreeOperation),
-              CloseElapsedTime(0.0), OpenElapsedTime(0.0), ClosingProbStatus(ProbabilityCheck::NoAction),
-              OpeningProbStatus(ProbabilityCheck::NoAction), RAFNflag(false), NonRectangular(false), EquivRecMethod(EquivRec::Height),
-              EquivRecUserAspectRatio(1.0)
+              LowValueEnth(0.0), UpValueEnth(300000.0), VentSurfCtrNum(VentControlType::None), ZonePtr(0), IndVentControl(false),
+              ExtLargeOpeningErrCount(0), ExtLargeOpeningErrIndex(0), OpenFactorErrCount(0), OpenFactorErrIndex(0), Multiplier(1.0),
+              HybridVentClose(false), HybridCtrlGlobal(false), HybridCtrlMaster(false), WindModifier(1.0), OccupantVentilationControlNum(0),
+              OpeningStatus(OpenStatus::FreeOperation), PrevOpeningstatus(OpenStatus::FreeOperation), CloseElapsedTime(0.0), OpenElapsedTime(0.0),
+              ClosingProbStatus(ProbabilityCheck::NoAction), OpeningProbStatus(ProbabilityCheck::NoAction), RAFNflag(false), NonRectangular(false),
+              EquivRecMethod(EquivRec::Height), EquivRecUserAspectRatio(1.0)
         {
         }
     };
@@ -751,21 +753,21 @@ namespace AirflowNetwork {
     struct ZoneExhaustFan : public AirflowElement // Zone exhaust fan component
     {
         // Members
-        Real64 FlowRate;  // mass flow rate
-        int SchedPtr;     // Schedule pointer
-        Real64 FlowCoef;  // Air Mass Flow Coefficient [kg/s at 1Pa]
-        Real64 FlowExpo;  // Air Mass Flow exponent [dimensionless]
-        Real64 StandardT; // Standard temperature for crack data
-        Real64 StandardP; // Standard barometric pressure for crack data
-        Real64 StandardW; // Standard humidity ratio for crack data
-        int InletNode;    // Inlet node number
-        int OutletNode;   // Outlet node number
-        int EPlusZoneNum; // Zone number
-        int PressCtrlNum; // pressure control number
+        Real64 FlowRate;                  // mass flow rate
+        Sched::Schedule *sched = nullptr; // Schedule pointer
+        Real64 FlowCoef;                  // Air Mass Flow Coefficient [kg/s at 1Pa]
+        Real64 FlowExpo;                  // Air Mass Flow exponent [dimensionless]
+        Real64 StandardT;                 // Standard temperature for crack data
+        Real64 StandardP;                 // Standard barometric pressure for crack data
+        Real64 StandardW;                 // Standard humidity ratio for crack data
+        int InletNode;                    // Inlet node number
+        int OutletNode;                   // Outlet node number
+        int EPlusZoneNum;                 // Zone number
+        int PressCtrlNum;                 // pressure control number
 
         // Default Constructor
         ZoneExhaustFan()
-            : FlowRate(0.0), SchedPtr(0), FlowCoef(0.0), FlowExpo(0.0), StandardT(0.0), StandardP(0.0), StandardW(0.0), InletNode(0), OutletNode(0),
+            : FlowRate(0.0), FlowCoef(0.0), FlowExpo(0.0), StandardT(0.0), StandardP(0.0), StandardW(0.0), InletNode(0), OutletNode(0),
               EPlusZoneNum(0), PressCtrlNum(0)
         {
         }
@@ -882,12 +884,13 @@ namespace AirflowNetwork {
     struct DisSysNodeProp // CP Value
     {
         // Members
-        std::string Name;      // Name of node
-        std::string EPlusName; // EnergyPlus node name
-        std::string EPlusType; // EnergyPlus node type
-        Real64 Height;         // Nodal height
-        int EPlusNodeNum;      // EPlus node number
-        int AirLoopNum;        // AirLoop number
+        std::string Name;          // Name of node
+        std::string EPlusName;     // EnergyPlus node name
+        std::string EPlusType;     // EnergyPlus node type
+        Real64 Height;             // Nodal height
+        int EPlusNodeNum;          // EPlus node number
+        int AirLoopNum;            // AirLoop number
+        int EPlusZoneInletNodeNum; // Air terminal outlet
 
         // Default Constructor
         DisSysNodeProp() : Height(0.0), EPlusNodeNum(0), AirLoopNum(0)
@@ -1085,7 +1088,7 @@ namespace AirflowNetwork {
         // Members
         Real64 FlowRate;           // Air volume flow rate
         Real64 Ctrl;               // Control ratio
-        int FanTypeNum;            // Fan type: Constant volume or ONOFF
+        HVAC::FanType fanType;     // Fan type: Constant volume or ONOFF
         int FanIndex;              // Fan index
         int InletNode;             // Inlet node number
         int OutletNode;            // Outlet node number
@@ -1095,8 +1098,8 @@ namespace AirflowNetwork {
 
         // Default Constructor
         ConstantVolumeFan()
-            : FlowRate(0.0), Ctrl(0.0), FanTypeNum(0), FanIndex(0), InletNode(0), OutletNode(0), MaxAirMassFlowRate(0.0), AirLoopNum(0),
-              FanModelFlag(false)
+            : FlowRate(0.0), Ctrl(0.0), fanType(HVAC::FanType::Invalid), FanIndex(0), InletNode(0), OutletNode(0), MaxAirMassFlowRate(0.0),
+              AirLoopNum(0), FanModelFlag(false)
         {
         }
 
@@ -1389,24 +1392,22 @@ namespace AirflowNetwork {
     struct PressureControllerProp
     {
         // Members
-        std::string Name;              // Provide a unique object name
-        std::string ZoneName;          // Name of the zone that is being controlled
-        int ZoneNum;                   // Zone number
-        int AFNNodeNum;                // AFN node number
-        std::string ControlObjectType; // The control type to be used for pressure control
-        std::string ControlObjectName; // Corresponding control type name
-        int ControlTypeSet;            // Control type set to be used for pressure control
-        int AvailSchedPtr;             // Availability schedule pointer
-        int PresSetpointSchedPtr;      // Pressure setpoint schedule pointer
-        int AirLoopNum;                // Air loop number
-        int OANodeNum;                 // outdoor air node number
-        bool bypass;                   // Can not perform pressure control as true
+        std::string Name;                             // Provide a unique object name
+        std::string ZoneName;                         // Name of the zone that is being controlled
+        int ZoneNum;                                  // Zone number
+        int AFNNodeNum;                               // AFN node number
+        std::string ControlObjectType;                // The control type to be used for pressure control
+        std::string ControlObjectName;                // Corresponding control type name
+        int ControlTypeSet;                           // Control type set to be used for pressure control
+        Sched::Schedule *availSched = nullptr;        // Availability schedule pointer
+        Sched::Schedule *presSetpointSched = nullptr; // Pressure setpoint schedule pointer
+        int AirLoopNum;                               // Air loop number
+        int OANodeNum;                                // outdoor air node number
+        bool bypass;                                  // Can not perform pressure control as true
         Real64 PresCtrlMassRate;
 
         // Default Constructor
-        PressureControllerProp()
-            : ZoneNum(0), AFNNodeNum(0), ControlTypeSet(0), AvailSchedPtr(0), PresSetpointSchedPtr(0), AirLoopNum(0), OANodeNum(0), bypass(false),
-              PresCtrlMassRate(0.0)
+        PressureControllerProp() : ZoneNum(0), AFNNodeNum(0), ControlTypeSet(0), AirLoopNum(0), OANodeNum(0), bypass(false), PresCtrlMassRate(0.0)
         {
         }
     };
@@ -1414,20 +1415,20 @@ namespace AirflowNetwork {
     struct OutdoorAirFan : public AirflowElement // OA fan component
     {
         // Members
-        int SchedPtr;     // Schedule pointer
-        Real64 FlowCoef;  // Air Mass Flow Coefficient [kg/s at 1Pa]
-        Real64 FlowExpo;  // Air Mass Flow exponent [dimensionless]
-        Real64 StandardT; // Standard temperature for crack data [C]
-        Real64 StandardP; // Standard barometric pressure for crack data [Pa]
-        Real64 StandardW; // Standard humidity ratio for crack data [kg/kg]
-        int InletNode;    // Inlet node number
-        int OutletNode;   // Outlet node number
-        int OAMixerNum;   // OA Mixer number
-        int PressCtrlNum; // Pressure control number
+        Sched::Schedule *sched = nullptr; // Schedule pointer
+        Real64 FlowCoef;                  // Air Mass Flow Coefficient [kg/s at 1Pa]
+        Real64 FlowExpo;                  // Air Mass Flow exponent [dimensionless]
+        Real64 StandardT;                 // Standard temperature for crack data [C]
+        Real64 StandardP;                 // Standard barometric pressure for crack data [Pa]
+        Real64 StandardW;                 // Standard humidity ratio for crack data [kg/kg]
+        int InletNode;                    // Inlet node number
+        int OutletNode;                   // Outlet node number
+        int OAMixerNum;                   // OA Mixer number
+        int PressCtrlNum;                 // Pressure control number
 
         // Default Constructor
         OutdoorAirFan()
-            : SchedPtr(0), FlowCoef(0.0), FlowExpo(0.0), StandardT(0.0), StandardP(0.0), StandardW(0.0), InletNode(0), OutletNode(0), OAMixerNum(0),
+            : FlowCoef(0.0), FlowExpo(0.0), StandardT(0.0), StandardP(0.0), StandardW(0.0), InletNode(0), OutletNode(0), OAMixerNum(0),
               PressCtrlNum(0)
         {
         }

@@ -1,7 +1,7 @@
-// EnergyPlus, Copyright (c) 1996-2023, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
-// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other
+// National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
 // contributors. All rights reserved.
 //
 // NOTICE: This Software was developed under funding from the U.S. Department of Energy and the
@@ -50,10 +50,16 @@
 // Google Test Headers
 #include <gtest/gtest.h>
 
+// Fixture Headers
 #include "Fixtures/EnergyPlusFixture.hh"
+
+// EnergyPlus Headers
+#include <EnergyPlus/ConfiguredFunctions.hh>
 #include <EnergyPlus/Data/EnergyPlusData.hh>
+#include <EnergyPlus/DataEnvironment.hh>
 #include <EnergyPlus/DataHeatBalance.hh>
 #include <EnergyPlus/DataSurfaces.hh>
+#include <EnergyPlus/ElectricPowerServiceManager.hh>
 #include <EnergyPlus/HeatBalanceManager.hh>
 #include <EnergyPlus/HeatBalanceSurfaceManager.hh>
 #include <EnergyPlus/InputProcessing/InputProcessor.hh>
@@ -61,6 +67,7 @@
 #include <EnergyPlus/Plant/DataPlant.hh>
 #include <EnergyPlus/Plant/PlantLocation.hh>
 #include <EnergyPlus/PlantPipingSystemsManager.hh>
+#include <EnergyPlus/SimulationManager.hh>
 #include <EnergyPlus/SurfaceGeometry.hh>
 
 using namespace EnergyPlus;
@@ -73,50 +80,50 @@ TEST_F(EnergyPlusFixture, SiteGroundDomainSlab_CheckInputs_CorrectInputs)
 
     std::string const idf_objects = delimited_string({
         "Site:GroundDomain:Slab,",
-        "CoupledSlab,	!- Name",
-        "5,				!- Ground Domain Depth {m}",
-        "1,				!- Aspect Ratio",
-        "5,				!- Domain Perimeter Offset {m}",
-        "1.8,			!- Soil Thermal Conductivity {W/m-K}",
-        "3200,			!- Soil Density {kg/m3}",
-        "836,			!- Soil Specific Heat {J/kg-K}",
-        "30,			!- Soil Moisture Content Volume Fraction {percent}",
-        "50,			!- Soil Moisture Content Volume Fraction at Saturation {percent}",
-        "Site:GroundTemperature:Undisturbed:KusudaAchenbach,	!- Type of Undisturbed Ground Temperature Model",
-        "KATemps,		!- Name of Undisturbed Ground Temperature Model",
-        "1,				!- Evapotranspiration Ground Cover Parameter",
-        "GroundCoupledOSCM,	!- Name of Floor Boundary Condition Model",
-        "InGrade,		!- Slab Location (InGrade/OnGrade)",
-        "Dummy Material,	!- Slab Material Name",
-        "Yes,			!- Horizontal Insulation (Yes/No)",
-        "Dummy Material,	!- Horizontal Insulation Material Name",
-        "Full,			!- Full Horizontal or Perimeter Only (Full/Perimeter)",
-        ",				!- Perimeter insulation width (m)",
-        "Yes,			!- Vertical Insulation (Yes/No)",
-        "Dummy Material,	!- Vertical Insulation Name",
-        "1.5,			!- Vertical perimeter insulation depth from surface (m)",
-        "Hourly;		!- Domain Simulation Interval. (Timestep/Hourly)",
+        "CoupledSlab,   !- Name",
+        "5,             !- Ground Domain Depth {m}",
+        "1,             !- Aspect Ratio",
+        "5,             !- Domain Perimeter Offset {m}",
+        "1.8,           !- Soil Thermal Conductivity {W/m-K}",
+        "3200,          !- Soil Density {kg/m3}",
+        "836,           !- Soil Specific Heat {J/kg-K}",
+        "30,            !- Soil Moisture Content Volume Fraction {percent}",
+        "50,            !- Soil Moisture Content Volume Fraction at Saturation {percent}",
+        "Site:GroundTemperature:Undisturbed:KusudaAchenbach,    !- Type of Undisturbed Ground Temperature Model",
+        "KATemps,       !- Name of Undisturbed Ground Temperature Model",
+        "1,             !- Evapotranspiration Ground Cover Parameter",
+        "GroundCoupledOSCM, !- Name of Floor Boundary Condition Model",
+        "InGrade,       !- Slab Location (InGrade/OnGrade)",
+        "Dummy Material,    !- Slab Material Name",
+        "Yes,           !- Horizontal Insulation (Yes/No)",
+        "Dummy Material,    !- Horizontal Insulation Material Name",
+        "Full,          !- Full Horizontal or Perimeter Only (Full/Perimeter)",
+        ",              !- Perimeter insulation width (m)",
+        "Yes,           !- Vertical Insulation (Yes/No)",
+        "Dummy Material,    !- Vertical Insulation Name",
+        "1.5,           !- Vertical perimeter insulation depth from surface (m)",
+        "Hourly;        !- Domain Simulation Interval. (Timestep/Hourly)",
         "Site:GroundTemperature:Undisturbed:KusudaAchenbach,",
-        "KATemps,		!- Name of object",
-        "1.8,			!- Soil Thermal Conductivity {W/m-K}",
-        "3200,			!- Soil Density {kg/m3}",
-        "836,			!- Soil Specific Heat {J/kg-K}",
-        "15.5,			!- Annual average surface temperature {C}",
-        "12.8,			!- Annual amplitude of surface temperature {delta C}",
-        "17.3;			!- Phase shift of minimum surface temperature {days}",
+        "KATemps,       !- Name of object",
+        "1.8,           !- Soil Thermal Conductivity {W/m-K}",
+        "3200,          !- Soil Density {kg/m3}",
+        "836,           !- Soil Specific Heat {J/kg-K}",
+        "15.5,          !- Annual average surface temperature {C}",
+        "12.8,          !- Annual amplitude of surface temperature {delta C}",
+        "17.3;          !- Phase shift of minimum surface temperature {days}",
         "SurfaceProperty:OtherSideConditionsModel,",
-        "GroundCoupledOSCM,		!- Name",
-        "GroundCoupledSurface;	!- Type of Modeling",
+        "GroundCoupledOSCM,     !- Name",
+        "GroundCoupledSurface;  !- Type of Modeling",
         "Material,",
         "Dummy Material, !- Name",
-        "MediumRough,	!- Roughness",
-        "0.1397,		!- Thickness {m}",
-        "1.8,			!- Conductivity {W/m-K}",
-        "2400,			!- Density {kg/m3}",
-        "750,			!- Specific Heat {J/kg-K}",
-        "0.9,			!- Thermal Absorptance",
-        "0.65,			!- Solar Absorptance",
-        "0.65;			!- Visible Absorptance",
+        "MediumRough,   !- Roughness",
+        "0.1397,        !- Thickness {m}",
+        "1.8,           !- Conductivity {W/m-K}",
+        "2400,          !- Density {kg/m3}",
+        "750,           !- Specific Heat {J/kg-K}",
+        "0.9,           !- Thermal Absorptance",
+        "0.65,          !- Solar Absorptance",
+        "0.65;          !- Visible Absorptance",
     });
 
     ASSERT_TRUE(process_idf(idf_objects));
@@ -129,7 +136,7 @@ TEST_F(EnergyPlusFixture, SiteGroundDomainSlab_CheckInputs_CorrectInputs)
     bool errorsFound = false;
 
     // Other necessary inputs
-    GetOSCMData(*state, errorsFound);
+    GetOSCMData(*state);
     GetMaterialData(*state, errorsFound);
 
     state->dataPlantPipingSysMgr->domains.resize(1);
@@ -143,50 +150,50 @@ TEST_F(EnergyPlusFixture, SiteGroundDomainSlab_CheckInputs_BadOSCMName)
 
     std::string const idf_objects = delimited_string({
         "Site:GroundDomain:Slab,",
-        "CoupledSlab,	!- Name",
-        "5,				!- Ground Domain Depth {m}",
-        "1,				!- Aspect Ratio",
-        "5,				!- Domain Perimeter Offset {m}",
-        "1.8,			!- Soil Thermal Conductivity {W/m-K}",
-        "3200,			!- Soil Density {kg/m3}",
-        "836,			!- Soil Specific Heat {J/kg-K}",
-        "30,			!- Soil Moisture Content Volume Fraction {percent}",
-        "50,			!- Soil Moisture Content Volume Fraction at Saturation {percent}",
-        "Site:GroundTemperature:Undisturbed:KusudaAchenbach,	!- Type of Undisturbed Ground Temperature Model",
-        "KATemps,		!- Name of Undisturbed Ground Temperature Model",
-        "1,				!- Evapotranspiration Ground Cover Parameter",
-        "GroundCoupledOSC,	!- Name of Floor Boundary Condition Model",
-        "InGrade,		!- Slab Location (InGrade/OnGrade)",
-        "Dummy Material,	!- Slab Material Name",
-        "Yes,			!- Horizontal Insulation (Yes/No)",
-        "Dummy Material,	!- Horizontal Insulation Material Name",
-        "Full,			!- Full Horizontal or Perimeter Only (Full/Perimeter)",
-        ",				!- Perimeter insulation width (m)",
-        "Yes,			!- Vertical Insulation (Yes/No)",
-        "Dummy Material,	!- Vertical Insulation Name",
-        "1.5,			!- Vertical perimeter insulation depth from surface (m)",
-        "Hourly;		!- Domain Simulation Interval. (Timestep/Hourly)",
+        "CoupledSlab,   !- Name",
+        "5,             !- Ground Domain Depth {m}",
+        "1,             !- Aspect Ratio",
+        "5,             !- Domain Perimeter Offset {m}",
+        "1.8,           !- Soil Thermal Conductivity {W/m-K}",
+        "3200,          !- Soil Density {kg/m3}",
+        "836,           !- Soil Specific Heat {J/kg-K}",
+        "30,            !- Soil Moisture Content Volume Fraction {percent}",
+        "50,            !- Soil Moisture Content Volume Fraction at Saturation {percent}",
+        "Site:GroundTemperature:Undisturbed:KusudaAchenbach,    !- Type of Undisturbed Ground Temperature Model",
+        "KATemps,       !- Name of Undisturbed Ground Temperature Model",
+        "1,             !- Evapotranspiration Ground Cover Parameter",
+        "GroundCoupledOSC,  !- Name of Floor Boundary Condition Model",
+        "InGrade,       !- Slab Location (InGrade/OnGrade)",
+        "Dummy Material,    !- Slab Material Name",
+        "Yes,           !- Horizontal Insulation (Yes/No)",
+        "Dummy Material,    !- Horizontal Insulation Material Name",
+        "Full,          !- Full Horizontal or Perimeter Only (Full/Perimeter)",
+        ",              !- Perimeter insulation width (m)",
+        "Yes,           !- Vertical Insulation (Yes/No)",
+        "Dummy Material,    !- Vertical Insulation Name",
+        "1.5,           !- Vertical perimeter insulation depth from surface (m)",
+        "Hourly;        !- Domain Simulation Interval. (Timestep/Hourly)",
         "Site:GroundTemperature:Undisturbed:KusudaAchenbach,",
-        "KATemps,		!- Name of object",
-        "1.8,			!- Soil Thermal Conductivity {W/m-K}",
-        "3200,			!- Soil Density {kg/m3}",
-        "836,			!- Soil Specific Heat {J/kg-K}",
-        "15.5,			!- Annual average surface temperature {C}",
-        "12.8,			!- Annual amplitude of surface temperature {delta C}",
-        "17.3;			!- Phase shift of minimum surface temperature {days}",
+        "KATemps,       !- Name of object",
+        "1.8,           !- Soil Thermal Conductivity {W/m-K}",
+        "3200,          !- Soil Density {kg/m3}",
+        "836,           !- Soil Specific Heat {J/kg-K}",
+        "15.5,          !- Annual average surface temperature {C}",
+        "12.8,          !- Annual amplitude of surface temperature {delta C}",
+        "17.3;          !- Phase shift of minimum surface temperature {days}",
         "SurfaceProperty:OtherSideConditionsModel,",
-        "GroundCoupledOSCM,		!- Name",
-        "GroundCoupledSurface;	!- Type of Modeling",
+        "GroundCoupledOSCM,     !- Name",
+        "GroundCoupledSurface;  !- Type of Modeling",
         "Material,",
         "Dummy Material, !- Name",
-        "MediumRough,	!- Roughness",
-        "0.1397,		!- Thickness {m}",
-        "1.8,			!- Conductivity {W/m-K}",
-        "2400,			!- Density {kg/m3}",
-        "750,			!- Specific Heat {J/kg-K}",
-        "0.9,			!- Thermal Absorptance",
-        "0.65,			!- Solar Absorptance",
-        "0.65;			!- Visible Absorptance",
+        "MediumRough,   !- Roughness",
+        "0.1397,        !- Thickness {m}",
+        "1.8,           !- Conductivity {W/m-K}",
+        "2400,          !- Density {kg/m3}",
+        "750,           !- Specific Heat {J/kg-K}",
+        "0.9,           !- Thermal Absorptance",
+        "0.65,          !- Solar Absorptance",
+        "0.65;          !- Visible Absorptance",
     });
 
     ASSERT_TRUE(process_idf(idf_objects));
@@ -199,7 +206,7 @@ TEST_F(EnergyPlusFixture, SiteGroundDomainSlab_CheckInputs_BadOSCMName)
     bool errorsFound = false;
 
     // Other necessary inputs
-    GetOSCMData(*state, errorsFound);
+    GetOSCMData(*state);
     GetMaterialData(*state, errorsFound);
 
     state->dataPlantPipingSysMgr->domains.resize(1);
@@ -213,50 +220,50 @@ TEST_F(EnergyPlusFixture, SiteGroundDomainSlab_CheckInputs_BadSlabLocation)
 
     std::string const idf_objects = delimited_string({
         "Site:GroundDomain:Slab,",
-        "CoupledSlab,	!- Name",
-        "5,				!- Ground Domain Depth {m}",
-        "1,				!- Aspect Ratio",
-        "5,				!- Domain Perimeter Offset {m}",
-        "1.8,			!- Soil Thermal Conductivity {W/m-K}",
-        "3200,			!- Soil Density {kg/m3}",
-        "836,			!- Soil Specific Heat {J/kg-K}",
-        "30,			!- Soil Moisture Content Volume Fraction {percent}",
-        "50,			!- Soil Moisture Content Volume Fraction at Saturation {percent}",
-        "Site:GroundTemperature:Undisturbed:KusudaAchenbach,	!- Type of Undisturbed Ground Temperature Model",
-        "KATemps,		!- Name of Undisturbed Ground Temperature Model",
-        "1,				!- Evapotranspiration Ground Cover Parameter",
-        "GroundCoupledOSCM,	!- Name of Floor Boundary Condition Model",
-        "InGade,		!- Slab Location (InGrade/OnGrade)",
-        "Dummy Material,	!- Slab Material Name",
-        "Yes,			!- Horizontal Insulation (Yes/No)",
-        "Dummy Material,	!- Horizontal Insulation Material Name",
-        "Full,			!- Full Horizontal or Perimeter Only (Full/Perimeter)",
-        ",				!- Perimeter insulation width (m)",
-        "Yes,			!- Vertical Insulation (Yes/No)",
-        "Dummy Material,	!- Vertical Insulation Name",
-        "1.5,			!- Vertical perimeter insulation depth from surface (m)",
-        "Hourly;		!- Domain Simulation Interval. (Timestep/Hourly)",
+        "CoupledSlab,   !- Name",
+        "5,             !- Ground Domain Depth {m}",
+        "1,             !- Aspect Ratio",
+        "5,             !- Domain Perimeter Offset {m}",
+        "1.8,           !- Soil Thermal Conductivity {W/m-K}",
+        "3200,          !- Soil Density {kg/m3}",
+        "836,           !- Soil Specific Heat {J/kg-K}",
+        "30,            !- Soil Moisture Content Volume Fraction {percent}",
+        "50,            !- Soil Moisture Content Volume Fraction at Saturation {percent}",
+        "Site:GroundTemperature:Undisturbed:KusudaAchenbach,    !- Type of Undisturbed Ground Temperature Model",
+        "KATemps,       !- Name of Undisturbed Ground Temperature Model",
+        "1,             !- Evapotranspiration Ground Cover Parameter",
+        "GroundCoupledOSCM, !- Name of Floor Boundary Condition Model",
+        "InGade,        !- Slab Location (InGrade/OnGrade)",
+        "Dummy Material,    !- Slab Material Name",
+        "Yes,           !- Horizontal Insulation (Yes/No)",
+        "Dummy Material,    !- Horizontal Insulation Material Name",
+        "Full,          !- Full Horizontal or Perimeter Only (Full/Perimeter)",
+        ",              !- Perimeter insulation width (m)",
+        "Yes,           !- Vertical Insulation (Yes/No)",
+        "Dummy Material,    !- Vertical Insulation Name",
+        "1.5,           !- Vertical perimeter insulation depth from surface (m)",
+        "Hourly;        !- Domain Simulation Interval. (Timestep/Hourly)",
         "Site:GroundTemperature:Undisturbed:KusudaAchenbach,",
-        "KATemps,		!- Name of object",
-        "1.8,			!- Soil Thermal Conductivity {W/m-K}",
-        "3200,			!- Soil Density {kg/m3}",
-        "836,			!- Soil Specific Heat {J/kg-K}",
-        "15.5,			!- Annual average surface temperature {C}",
-        "12.8,			!- Annual amplitude of surface temperature {delta C}",
-        "17.3;			!- Phase shift of minimum surface temperature {days}",
+        "KATemps,       !- Name of object",
+        "1.8,           !- Soil Thermal Conductivity {W/m-K}",
+        "3200,          !- Soil Density {kg/m3}",
+        "836,           !- Soil Specific Heat {J/kg-K}",
+        "15.5,          !- Annual average surface temperature {C}",
+        "12.8,          !- Annual amplitude of surface temperature {delta C}",
+        "17.3;          !- Phase shift of minimum surface temperature {days}",
         "SurfaceProperty:OtherSideConditionsModel,",
-        "GroundCoupledOSCM,		!- Name",
-        "GroundCoupledSurface;	!- Type of Modeling",
+        "GroundCoupledOSCM,     !- Name",
+        "GroundCoupledSurface;  !- Type of Modeling",
         "Material,",
         "Dummy Material, !- Name",
-        "MediumRough,	!- Roughness",
-        "0.1397,		!- Thickness {m}",
-        "1.8,			!- Conductivity {W/m-K}",
-        "2400,			!- Density {kg/m3}",
-        "750,			!- Specific Heat {J/kg-K}",
-        "0.9,			!- Thermal Absorptance",
-        "0.65,			!- Solar Absorptance",
-        "0.65;			!- Visible Absorptance",
+        "MediumRough,   !- Roughness",
+        "0.1397,        !- Thickness {m}",
+        "1.8,           !- Conductivity {W/m-K}",
+        "2400,          !- Density {kg/m3}",
+        "750,           !- Specific Heat {J/kg-K}",
+        "0.9,           !- Thermal Absorptance",
+        "0.65,          !- Solar Absorptance",
+        "0.65;          !- Visible Absorptance",
     });
 
     EXPECT_FALSE(process_idf(idf_objects, false));
@@ -269,7 +276,7 @@ TEST_F(EnergyPlusFixture, SiteGroundDomainSlab_CheckInputs_BadSlabLocation)
     bool errorsFound = false;
 
     // Other necessary inputs
-    GetOSCMData(*state, errorsFound);
+    GetOSCMData(*state);
     GetMaterialData(*state, errorsFound);
 
     state->dataPlantPipingSysMgr->domains.resize(1);
@@ -283,50 +290,50 @@ TEST_F(EnergyPlusFixture, SiteGroundDomainSlab_CheckInputs_BadSlabMaterialName)
 
     std::string const idf_objects = delimited_string({
         "Site:GroundDomain:Slab,",
-        "CoupledSlab,	!- Name",
-        "5,				!- Ground Domain Depth {m}",
-        "1,				!- Aspect Ratio",
-        "5,				!- Domain Perimeter Offset {m}",
-        "1.8,			!- Soil Thermal Conductivity {W/m-K}",
-        "3200,			!- Soil Density {kg/m3}",
-        "836,			!- Soil Specific Heat {J/kg-K}",
-        "30,			!- Soil Moisture Content Volume Fraction {percent}",
-        "50,			!- Soil Moisture Content Volume Fraction at Saturation {percent}",
-        "Site:GroundTemperature:Undisturbed:KusudaAchenbach,	!- Type of Undisturbed Ground Temperature Model",
-        "KATemps,		!- Name of Undisturbed Ground Temperature Model",
-        "1,				!- Evapotranspiration Ground Cover Parameter",
-        "GroundCoupledOSCM,	!- Name of Floor Boundary Condition Model",
-        "InGrade,		!- Slab Location (InGrade/OnGrade)",
-        "Dummy Materia,	!- Slab Material Name",
-        "Yes,			!- Horizontal Insulation (Yes/No)",
-        "Dummy Material,	!- Horizontal Insulation Material Name",
-        "Full,			!- Full Horizontal or Perimeter Only (Full/Perimeter)",
-        ",				!- Perimeter insulation width (m)",
-        "Yes,			!- Vertical Insulation (Yes/No)",
-        "Dummy Material,	!- Vertical Insulation Name",
-        "1.5,			!- Vertical perimeter insulation depth from surface (m)",
-        "Hourly;		!- Domain Simulation Interval. (Timestep/Hourly)",
+        "CoupledSlab,   !- Name",
+        "5,             !- Ground Domain Depth {m}",
+        "1,             !- Aspect Ratio",
+        "5,             !- Domain Perimeter Offset {m}",
+        "1.8,           !- Soil Thermal Conductivity {W/m-K}",
+        "3200,          !- Soil Density {kg/m3}",
+        "836,           !- Soil Specific Heat {J/kg-K}",
+        "30,            !- Soil Moisture Content Volume Fraction {percent}",
+        "50,            !- Soil Moisture Content Volume Fraction at Saturation {percent}",
+        "Site:GroundTemperature:Undisturbed:KusudaAchenbach,    !- Type of Undisturbed Ground Temperature Model",
+        "KATemps,       !- Name of Undisturbed Ground Temperature Model",
+        "1,             !- Evapotranspiration Ground Cover Parameter",
+        "GroundCoupledOSCM, !- Name of Floor Boundary Condition Model",
+        "InGrade,       !- Slab Location (InGrade/OnGrade)",
+        "Dummy Materia, !- Slab Material Name",
+        "Yes,           !- Horizontal Insulation (Yes/No)",
+        "Dummy Material,    !- Horizontal Insulation Material Name",
+        "Full,          !- Full Horizontal or Perimeter Only (Full/Perimeter)",
+        ",              !- Perimeter insulation width (m)",
+        "Yes,           !- Vertical Insulation (Yes/No)",
+        "Dummy Material,    !- Vertical Insulation Name",
+        "1.5,           !- Vertical perimeter insulation depth from surface (m)",
+        "Hourly;        !- Domain Simulation Interval. (Timestep/Hourly)",
         "Site:GroundTemperature:Undisturbed:KusudaAchenbach,",
-        "KATemps,		!- Name of object",
-        "1.8,			!- Soil Thermal Conductivity {W/m-K}",
-        "3200,			!- Soil Density {kg/m3}",
-        "836,			!- Soil Specific Heat {J/kg-K}",
-        "15.5,			!- Annual average surface temperature {C}",
-        "12.8,			!- Annual amplitude of surface temperature {delta C}",
-        "17.3;			!- Phase shift of minimum surface temperature {days}",
+        "KATemps,       !- Name of object",
+        "1.8,           !- Soil Thermal Conductivity {W/m-K}",
+        "3200,          !- Soil Density {kg/m3}",
+        "836,           !- Soil Specific Heat {J/kg-K}",
+        "15.5,          !- Annual average surface temperature {C}",
+        "12.8,          !- Annual amplitude of surface temperature {delta C}",
+        "17.3;          !- Phase shift of minimum surface temperature {days}",
         "SurfaceProperty:OtherSideConditionsModel,",
-        "GroundCoupledOSCM,		!- Name",
-        "GroundCoupledSurface;	!- Type of Modeling",
+        "GroundCoupledOSCM,     !- Name",
+        "GroundCoupledSurface;  !- Type of Modeling",
         "Material,",
         "Dummy Material, !- Name",
-        "MediumRough,	!- Roughness",
-        "0.1397,		!- Thickness {m}",
-        "1.8,			!- Conductivity {W/m-K}",
-        "2400,			!- Density {kg/m3}",
-        "750,			!- Specific Heat {J/kg-K}",
-        "0.9,			!- Thermal Absorptance",
-        "0.65,			!- Solar Absorptance",
-        "0.65;			!- Visible Absorptance",
+        "MediumRough,   !- Roughness",
+        "0.1397,        !- Thickness {m}",
+        "1.8,           !- Conductivity {W/m-K}",
+        "2400,          !- Density {kg/m3}",
+        "750,           !- Specific Heat {J/kg-K}",
+        "0.9,           !- Thermal Absorptance",
+        "0.65,          !- Solar Absorptance",
+        "0.65;          !- Visible Absorptance",
     });
 
     ASSERT_TRUE(process_idf(idf_objects));
@@ -339,7 +346,7 @@ TEST_F(EnergyPlusFixture, SiteGroundDomainSlab_CheckInputs_BadSlabMaterialName)
     bool errorsFound = false;
 
     // Other necessary inputs
-    GetOSCMData(*state, errorsFound);
+    GetOSCMData(*state);
     GetMaterialData(*state, errorsFound);
 
     state->dataPlantPipingSysMgr->domains.resize(1);
@@ -353,50 +360,50 @@ TEST_F(EnergyPlusFixture, SiteGroundDomainSlab_CheckInputs_BadHorizInsSelection)
 
     std::string const idf_objects = delimited_string({
         "Site:GroundDomain:Slab,",
-        "CoupledSlab,	!- Name",
-        "5,				!- Ground Domain Depth {m}",
-        "1,				!- Aspect Ratio",
-        "5,				!- Domain Perimeter Offset {m}",
-        "1.8,			!- Soil Thermal Conductivity {W/m-K}",
-        "3200,			!- Soil Density {kg/m3}",
-        "836,			!- Soil Specific Heat {J/kg-K}",
-        "30,			!- Soil Moisture Content Volume Fraction {percent}",
-        "50,			!- Soil Moisture Content Volume Fraction at Saturation {percent}",
-        "Site:GroundTemperature:Undisturbed:KusudaAchenbach,	!- Type of Undisturbed Ground Temperature Model",
-        "KATemps,		!- Name of Undisturbed Ground Temperature Model",
-        "1,				!- Evapotranspiration Ground Cover Parameter",
-        "GroundCoupledOSCM,	!- Name of Floor Boundary Condition Model",
-        "InGrade,		!- Slab Location (InGrade/OnGrade)",
-        "Dummy Material,	!- Slab Material Name",
-        "Ye,			!- Horizontal Insulation (Yes/No)",
-        "Dummy Material,	!- Horizontal Insulation Material Name",
-        "Full,			!- Full Horizontal or Perimeter Only (Full/Perimeter)",
-        ",				!- Perimeter insulation width (m)",
-        "Yes,			!- Vertical Insulation (Yes/No)",
-        "Dummy Material,	!- Vertical Insulation Name",
-        "1.5,			!- Vertical perimeter insulation depth from surface (m)",
-        "Hourly;		!- Domain Simulation Interval. (Timestep/Hourly)",
+        "CoupledSlab,   !- Name",
+        "5,             !- Ground Domain Depth {m}",
+        "1,             !- Aspect Ratio",
+        "5,             !- Domain Perimeter Offset {m}",
+        "1.8,           !- Soil Thermal Conductivity {W/m-K}",
+        "3200,          !- Soil Density {kg/m3}",
+        "836,           !- Soil Specific Heat {J/kg-K}",
+        "30,            !- Soil Moisture Content Volume Fraction {percent}",
+        "50,            !- Soil Moisture Content Volume Fraction at Saturation {percent}",
+        "Site:GroundTemperature:Undisturbed:KusudaAchenbach,    !- Type of Undisturbed Ground Temperature Model",
+        "KATemps,       !- Name of Undisturbed Ground Temperature Model",
+        "1,             !- Evapotranspiration Ground Cover Parameter",
+        "GroundCoupledOSCM, !- Name of Floor Boundary Condition Model",
+        "InGrade,       !- Slab Location (InGrade/OnGrade)",
+        "Dummy Material,    !- Slab Material Name",
+        "Ye,            !- Horizontal Insulation (Yes/No)",
+        "Dummy Material,    !- Horizontal Insulation Material Name",
+        "Full,          !- Full Horizontal or Perimeter Only (Full/Perimeter)",
+        ",              !- Perimeter insulation width (m)",
+        "Yes,           !- Vertical Insulation (Yes/No)",
+        "Dummy Material,    !- Vertical Insulation Name",
+        "1.5,           !- Vertical perimeter insulation depth from surface (m)",
+        "Hourly;        !- Domain Simulation Interval. (Timestep/Hourly)",
         "Site:GroundTemperature:Undisturbed:KusudaAchenbach,",
-        "KATemps,		!- Name of object",
-        "1.8,			!- Soil Thermal Conductivity {W/m-K}",
-        "3200,			!- Soil Density {kg/m3}",
-        "836,			!- Soil Specific Heat {J/kg-K}",
-        "15.5,			!- Annual average surface temperature {C}",
-        "12.8,			!- Annual amplitude of surface temperature {delta C}",
-        "17.3;			!- Phase shift of minimum surface temperature {days}",
+        "KATemps,       !- Name of object",
+        "1.8,           !- Soil Thermal Conductivity {W/m-K}",
+        "3200,          !- Soil Density {kg/m3}",
+        "836,           !- Soil Specific Heat {J/kg-K}",
+        "15.5,          !- Annual average surface temperature {C}",
+        "12.8,          !- Annual amplitude of surface temperature {delta C}",
+        "17.3;          !- Phase shift of minimum surface temperature {days}",
         "SurfaceProperty:OtherSideConditionsModel,",
-        "GroundCoupledOSCM,		!- Name",
-        "GroundCoupledSurface;	!- Type of Modeling",
+        "GroundCoupledOSCM,     !- Name",
+        "GroundCoupledSurface;  !- Type of Modeling",
         "Material,",
         "Dummy Material, !- Name",
-        "MediumRough,	!- Roughness",
-        "0.1397,		!- Thickness {m}",
-        "1.8,			!- Conductivity {W/m-K}",
-        "2400,			!- Density {kg/m3}",
-        "750,			!- Specific Heat {J/kg-K}",
-        "0.9,			!- Thermal Absorptance",
-        "0.65,			!- Solar Absorptance",
-        "0.65;			!- Visible Absorptance",
+        "MediumRough,   !- Roughness",
+        "0.1397,        !- Thickness {m}",
+        "1.8,           !- Conductivity {W/m-K}",
+        "2400,          !- Density {kg/m3}",
+        "750,           !- Specific Heat {J/kg-K}",
+        "0.9,           !- Thermal Absorptance",
+        "0.65,          !- Solar Absorptance",
+        "0.65;          !- Visible Absorptance",
     });
 
     EXPECT_FALSE(process_idf(idf_objects, false));
@@ -409,7 +416,7 @@ TEST_F(EnergyPlusFixture, SiteGroundDomainSlab_CheckInputs_BadHorizInsSelection)
     bool errorsFound = false;
 
     // Other necessary inputs
-    GetOSCMData(*state, errorsFound);
+    GetOSCMData(*state);
     GetMaterialData(*state, errorsFound);
 
     state->dataPlantPipingSysMgr->domains.resize(1);
@@ -423,50 +430,50 @@ TEST_F(EnergyPlusFixture, SiteGroundDomainSlab_CheckInputs_BadHorizInsMaterialNa
 
     std::string const idf_objects = delimited_string({
         "Site:GroundDomain:Slab,",
-        "CoupledSlab,	!- Name",
-        "5,				!- Ground Domain Depth {m}",
-        "1,				!- Aspect Ratio",
-        "5,				!- Domain Perimeter Offset {m}",
-        "1.8,			!- Soil Thermal Conductivity {W/m-K}",
-        "3200,			!- Soil Density {kg/m3}",
-        "836,			!- Soil Specific Heat {J/kg-K}",
-        "30,			!- Soil Moisture Content Volume Fraction {percent}",
-        "50,			!- Soil Moisture Content Volume Fraction at Saturation {percent}",
-        "Site:GroundTemperature:Undisturbed:KusudaAchenbach,	!- Type of Undisturbed Ground Temperature Model",
-        "KATemps,		!- Name of Undisturbed Ground Temperature Model",
-        "1,				!- Evapotranspiration Ground Cover Parameter",
-        "GroundCoupledOSCM,	!- Name of Floor Boundary Condition Model",
-        "InGrade,		!- Slab Location (InGrade/OnGrade)",
-        "Dummy Material,	!- Slab Material Name",
-        "Yes,			!- Horizontal Insulation (Yes/No)",
-        "Dummy Materal,	!- Horizontal Insulation Material Name",
-        "Full,			!- Full Horizontal or Perimeter Only (Full/Perimeter)",
-        ",				!- Perimeter insulation width (m)",
-        "Yes,			!- Vertical Insulation (Yes/No)",
-        "Dummy Material,	!- Vertical Insulation Name",
-        "1.5,			!- Vertical perimeter insulation depth from surface (m)",
-        "Hourly;		!- Domain Simulation Interval. (Timestep/Hourly)",
+        "CoupledSlab,   !- Name",
+        "5,             !- Ground Domain Depth {m}",
+        "1,             !- Aspect Ratio",
+        "5,             !- Domain Perimeter Offset {m}",
+        "1.8,           !- Soil Thermal Conductivity {W/m-K}",
+        "3200,          !- Soil Density {kg/m3}",
+        "836,           !- Soil Specific Heat {J/kg-K}",
+        "30,            !- Soil Moisture Content Volume Fraction {percent}",
+        "50,            !- Soil Moisture Content Volume Fraction at Saturation {percent}",
+        "Site:GroundTemperature:Undisturbed:KusudaAchenbach,    !- Type of Undisturbed Ground Temperature Model",
+        "KATemps,       !- Name of Undisturbed Ground Temperature Model",
+        "1,             !- Evapotranspiration Ground Cover Parameter",
+        "GroundCoupledOSCM, !- Name of Floor Boundary Condition Model",
+        "InGrade,       !- Slab Location (InGrade/OnGrade)",
+        "Dummy Material,    !- Slab Material Name",
+        "Yes,           !- Horizontal Insulation (Yes/No)",
+        "Dummy Materal, !- Horizontal Insulation Material Name",
+        "Full,          !- Full Horizontal or Perimeter Only (Full/Perimeter)",
+        ",              !- Perimeter insulation width (m)",
+        "Yes,           !- Vertical Insulation (Yes/No)",
+        "Dummy Material,    !- Vertical Insulation Name",
+        "1.5,           !- Vertical perimeter insulation depth from surface (m)",
+        "Hourly;        !- Domain Simulation Interval. (Timestep/Hourly)",
         "Site:GroundTemperature:Undisturbed:KusudaAchenbach,",
-        "KATemps,		!- Name of object",
-        "1.8,			!- Soil Thermal Conductivity {W/m-K}",
-        "3200,			!- Soil Density {kg/m3}",
-        "836,			!- Soil Specific Heat {J/kg-K}",
-        "15.5,			!- Annual average surface temperature {C}",
-        "12.8,			!- Annual amplitude of surface temperature {delta C}",
-        "17.3;			!- Phase shift of minimum surface temperature {days}",
+        "KATemps,       !- Name of object",
+        "1.8,           !- Soil Thermal Conductivity {W/m-K}",
+        "3200,          !- Soil Density {kg/m3}",
+        "836,           !- Soil Specific Heat {J/kg-K}",
+        "15.5,          !- Annual average surface temperature {C}",
+        "12.8,          !- Annual amplitude of surface temperature {delta C}",
+        "17.3;          !- Phase shift of minimum surface temperature {days}",
         "SurfaceProperty:OtherSideConditionsModel,",
-        "GroundCoupledOSCM,		!- Name",
-        "GroundCoupledSurface;	!- Type of Modeling",
+        "GroundCoupledOSCM,     !- Name",
+        "GroundCoupledSurface;  !- Type of Modeling",
         "Material,",
         "Dummy Material, !- Name",
-        "MediumRough,	!- Roughness",
-        "0.1397,		!- Thickness {m}",
-        "1.8,			!- Conductivity {W/m-K}",
-        "2400,			!- Density {kg/m3}",
-        "750,			!- Specific Heat {J/kg-K}",
-        "0.9,			!- Thermal Absorptance",
-        "0.65,			!- Solar Absorptance",
-        "0.65;			!- Visible Absorptance",
+        "MediumRough,   !- Roughness",
+        "0.1397,        !- Thickness {m}",
+        "1.8,           !- Conductivity {W/m-K}",
+        "2400,          !- Density {kg/m3}",
+        "750,           !- Specific Heat {J/kg-K}",
+        "0.9,           !- Thermal Absorptance",
+        "0.65,          !- Solar Absorptance",
+        "0.65;          !- Visible Absorptance",
     });
 
     ASSERT_TRUE(process_idf(idf_objects));
@@ -479,7 +486,7 @@ TEST_F(EnergyPlusFixture, SiteGroundDomainSlab_CheckInputs_BadHorizInsMaterialNa
     bool errorsFound = false;
 
     // Other necessary inputs
-    GetOSCMData(*state, errorsFound);
+    GetOSCMData(*state);
     GetMaterialData(*state, errorsFound);
 
     state->dataPlantPipingSysMgr->domains.resize(1);
@@ -493,50 +500,50 @@ TEST_F(EnergyPlusFixture, SiteGroundDomainSlab_CheckInputs_BadHorizInsExtentsSel
 
     std::string const idf_objects = delimited_string({
         "Site:GroundDomain:Slab,",
-        "CoupledSlab,	!- Name",
-        "5,				!- Ground Domain Depth {m}",
-        "1,				!- Aspect Ratio",
-        "5,				!- Domain Perimeter Offset {m}",
-        "1.8,			!- Soil Thermal Conductivity {W/m-K}",
-        "3200,			!- Soil Density {kg/m3}",
-        "836,			!- Soil Specific Heat {J/kg-K}",
-        "30,			!- Soil Moisture Content Volume Fraction {percent}",
-        "50,			!- Soil Moisture Content Volume Fraction at Saturation {percent}",
-        "Site:GroundTemperature:Undisturbed:KusudaAchenbach,	!- Type of Undisturbed Ground Temperature Model",
-        "KATemps,		!- Name of Undisturbed Ground Temperature Model",
-        "1,				!- Evapotranspiration Ground Cover Parameter",
-        "GroundCoupledOSCM,	!- Name of Floor Boundary Condition Model",
-        "InGrade,		!- Slab Location (InGrade/OnGrade)",
-        "Dummy Material,	!- Slab Material Name",
-        "Yes,			!- Horizontal Insulation (Yes/No)",
-        "Dummy Material,	!- Horizontal Insulation Material Name",
-        "Ful,			!- Full Horizontal or Perimeter Only (Full/Perimeter)",
-        ",				!- Perimeter insulation width (m)",
-        "Yes,			!- Vertical Insulation (Yes/No)",
-        "Dummy Material,	!- Vertical Insulation Name",
-        "1.5,			!- Vertical perimeter insulation depth from surface (m)",
-        "Hourly;		!- Domain Simulation Interval. (Timestep/Hourly)",
+        "CoupledSlab,   !- Name",
+        "5,             !- Ground Domain Depth {m}",
+        "1,             !- Aspect Ratio",
+        "5,             !- Domain Perimeter Offset {m}",
+        "1.8,           !- Soil Thermal Conductivity {W/m-K}",
+        "3200,          !- Soil Density {kg/m3}",
+        "836,           !- Soil Specific Heat {J/kg-K}",
+        "30,            !- Soil Moisture Content Volume Fraction {percent}",
+        "50,            !- Soil Moisture Content Volume Fraction at Saturation {percent}",
+        "Site:GroundTemperature:Undisturbed:KusudaAchenbach,    !- Type of Undisturbed Ground Temperature Model",
+        "KATemps,       !- Name of Undisturbed Ground Temperature Model",
+        "1,             !- Evapotranspiration Ground Cover Parameter",
+        "GroundCoupledOSCM, !- Name of Floor Boundary Condition Model",
+        "InGrade,       !- Slab Location (InGrade/OnGrade)",
+        "Dummy Material,    !- Slab Material Name",
+        "Yes,           !- Horizontal Insulation (Yes/No)",
+        "Dummy Material,    !- Horizontal Insulation Material Name",
+        "Ful,           !- Full Horizontal or Perimeter Only (Full/Perimeter)",
+        ",              !- Perimeter insulation width (m)",
+        "Yes,           !- Vertical Insulation (Yes/No)",
+        "Dummy Material,    !- Vertical Insulation Name",
+        "1.5,           !- Vertical perimeter insulation depth from surface (m)",
+        "Hourly;        !- Domain Simulation Interval. (Timestep/Hourly)",
         "Site:GroundTemperature:Undisturbed:KusudaAchenbach,",
-        "KATemps,		!- Name of object",
-        "1.8,			!- Soil Thermal Conductivity {W/m-K}",
-        "3200,			!- Soil Density {kg/m3}",
-        "836,			!- Soil Specific Heat {J/kg-K}",
-        "15.5,			!- Annual average surface temperature {C}",
-        "12.8,			!- Annual amplitude of surface temperature {delta C}",
-        "17.3;			!- Phase shift of minimum surface temperature {days}",
+        "KATemps,       !- Name of object",
+        "1.8,           !- Soil Thermal Conductivity {W/m-K}",
+        "3200,          !- Soil Density {kg/m3}",
+        "836,           !- Soil Specific Heat {J/kg-K}",
+        "15.5,          !- Annual average surface temperature {C}",
+        "12.8,          !- Annual amplitude of surface temperature {delta C}",
+        "17.3;          !- Phase shift of minimum surface temperature {days}",
         "SurfaceProperty:OtherSideConditionsModel,",
-        "GroundCoupledOSCM,		!- Name",
-        "GroundCoupledSurface;	!- Type of Modeling",
+        "GroundCoupledOSCM,     !- Name",
+        "GroundCoupledSurface;  !- Type of Modeling",
         "Material,",
         "Dummy Material, !- Name",
-        "MediumRough,	!- Roughness",
-        "0.1397,		!- Thickness {m}",
-        "1.8,			!- Conductivity {W/m-K}",
-        "2400,			!- Density {kg/m3}",
-        "750,			!- Specific Heat {J/kg-K}",
-        "0.9,			!- Thermal Absorptance",
-        "0.65,			!- Solar Absorptance",
-        "0.65;			!- Visible Absorptance",
+        "MediumRough,   !- Roughness",
+        "0.1397,        !- Thickness {m}",
+        "1.8,           !- Conductivity {W/m-K}",
+        "2400,          !- Density {kg/m3}",
+        "750,           !- Specific Heat {J/kg-K}",
+        "0.9,           !- Thermal Absorptance",
+        "0.65,          !- Solar Absorptance",
+        "0.65;          !- Visible Absorptance",
     });
 
     EXPECT_FALSE(process_idf(idf_objects, false));
@@ -549,7 +556,7 @@ TEST_F(EnergyPlusFixture, SiteGroundDomainSlab_CheckInputs_BadHorizInsExtentsSel
     bool errorsFound = false;
 
     // Other necessary inputs
-    GetOSCMData(*state, errorsFound);
+    GetOSCMData(*state);
     GetMaterialData(*state, errorsFound);
 
     state->dataPlantPipingSysMgr->domains.resize(1);
@@ -563,50 +570,50 @@ TEST_F(EnergyPlusFixture, SiteGroundDomainSlab_CheckInputs_PerimeterInsulationWi
 
     std::string const idf_objects = delimited_string({
         "Site:GroundDomain:Slab,",
-        "CoupledSlab,	!- Name",
-        "5,				!- Ground Domain Depth {m}",
-        "1,				!- Aspect Ratio",
-        "5,				!- Domain Perimeter Offset {m}",
-        "1.8,			!- Soil Thermal Conductivity {W/m-K}",
-        "3200,			!- Soil Density {kg/m3}",
-        "836,			!- Soil Specific Heat {J/kg-K}",
-        "30,			!- Soil Moisture Content Volume Fraction {percent}",
-        "50,			!- Soil Moisture Content Volume Fraction at Saturation {percent}",
-        "Site:GroundTemperature:Undisturbed:KusudaAchenbach,	!- Type of Undisturbed Ground Temperature Model",
-        "KATemps,		!- Name of Undisturbed Ground Temperature Model",
-        "1,				!- Evapotranspiration Ground Cover Parameter",
-        "GroundCoupledOSCM,	!- Name of Floor Boundary Condition Model",
-        "InGrade,		!- Slab Location (InGrade/OnGrade)",
-        "Dummy Material,	!- Slab Material Name",
-        "Yes,			!- Horizontal Insulation (Yes/No)",
-        "Dummy Material,	!- Horizontal Insulation Material Name",
-        "Perimeter,			!- Full Horizontal or Perimeter Only (Full/Perimeter)",
-        ",				!- Perimeter insulation width (m)",
-        "Yes,			!- Vertical Insulation (Yes/No)",
-        "Dummy Material,	!- Vertical Insulation Name",
-        "1.5,			!- Vertical perimeter insulation depth from surface (m)",
-        "Hourly;		!- Domain Simulation Interval. (Timestep/Hourly)",
+        "CoupledSlab,   !- Name",
+        "5,             !- Ground Domain Depth {m}",
+        "1,             !- Aspect Ratio",
+        "5,             !- Domain Perimeter Offset {m}",
+        "1.8,           !- Soil Thermal Conductivity {W/m-K}",
+        "3200,          !- Soil Density {kg/m3}",
+        "836,           !- Soil Specific Heat {J/kg-K}",
+        "30,            !- Soil Moisture Content Volume Fraction {percent}",
+        "50,            !- Soil Moisture Content Volume Fraction at Saturation {percent}",
+        "Site:GroundTemperature:Undisturbed:KusudaAchenbach,    !- Type of Undisturbed Ground Temperature Model",
+        "KATemps,       !- Name of Undisturbed Ground Temperature Model",
+        "1,             !- Evapotranspiration Ground Cover Parameter",
+        "GroundCoupledOSCM, !- Name of Floor Boundary Condition Model",
+        "InGrade,       !- Slab Location (InGrade/OnGrade)",
+        "Dummy Material,    !- Slab Material Name",
+        "Yes,           !- Horizontal Insulation (Yes/No)",
+        "Dummy Material,    !- Horizontal Insulation Material Name",
+        "Perimeter,         !- Full Horizontal or Perimeter Only (Full/Perimeter)",
+        ",              !- Perimeter insulation width (m)",
+        "Yes,           !- Vertical Insulation (Yes/No)",
+        "Dummy Material,    !- Vertical Insulation Name",
+        "1.5,           !- Vertical perimeter insulation depth from surface (m)",
+        "Hourly;        !- Domain Simulation Interval. (Timestep/Hourly)",
         "Site:GroundTemperature:Undisturbed:KusudaAchenbach,",
-        "KATemps,		!- Name of object",
-        "1.8,			!- Soil Thermal Conductivity {W/m-K}",
-        "3200,			!- Soil Density {kg/m3}",
-        "836,			!- Soil Specific Heat {J/kg-K}",
-        "15.5,			!- Annual average surface temperature {C}",
-        "12.8,			!- Annual amplitude of surface temperature {delta C}",
-        "17.3;			!- Phase shift of minimum surface temperature {days}",
+        "KATemps,       !- Name of object",
+        "1.8,           !- Soil Thermal Conductivity {W/m-K}",
+        "3200,          !- Soil Density {kg/m3}",
+        "836,           !- Soil Specific Heat {J/kg-K}",
+        "15.5,          !- Annual average surface temperature {C}",
+        "12.8,          !- Annual amplitude of surface temperature {delta C}",
+        "17.3;          !- Phase shift of minimum surface temperature {days}",
         "SurfaceProperty:OtherSideConditionsModel,",
-        "GroundCoupledOSCM,		!- Name",
-        "GroundCoupledSurface;	!- Type of Modeling",
+        "GroundCoupledOSCM,     !- Name",
+        "GroundCoupledSurface;  !- Type of Modeling",
         "Material,",
         "Dummy Material, !- Name",
-        "MediumRough,	!- Roughness",
-        "0.1397,		!- Thickness {m}",
-        "1.8,			!- Conductivity {W/m-K}",
-        "2400,			!- Density {kg/m3}",
-        "750,			!- Specific Heat {J/kg-K}",
-        "0.9,			!- Thermal Absorptance",
-        "0.65,			!- Solar Absorptance",
-        "0.65;			!- Visible Absorptance",
+        "MediumRough,   !- Roughness",
+        "0.1397,        !- Thickness {m}",
+        "1.8,           !- Conductivity {W/m-K}",
+        "2400,          !- Density {kg/m3}",
+        "750,           !- Specific Heat {J/kg-K}",
+        "0.9,           !- Thermal Absorptance",
+        "0.65,          !- Solar Absorptance",
+        "0.65;          !- Visible Absorptance",
     });
 
     ASSERT_TRUE(process_idf(idf_objects));
@@ -619,7 +626,7 @@ TEST_F(EnergyPlusFixture, SiteGroundDomainSlab_CheckInputs_PerimeterInsulationWi
     bool errorsFound = false;
 
     // Other necessary inputs
-    GetOSCMData(*state, errorsFound);
+    GetOSCMData(*state);
     GetMaterialData(*state, errorsFound);
 
     state->dataPlantPipingSysMgr->domains.resize(1);
@@ -633,50 +640,50 @@ TEST_F(EnergyPlusFixture, SiteGroundDomainSlab_CheckInputs_BadVertInsSelection)
 
     std::string const idf_objects = delimited_string({
         "Site:GroundDomain:Slab,",
-        "CoupledSlab,	!- Name",
-        "5,				!- Ground Domain Depth {m}",
-        "1,				!- Aspect Ratio",
-        "5,				!- Domain Perimeter Offset {m}",
-        "1.8,			!- Soil Thermal Conductivity {W/m-K}",
-        "3200,			!- Soil Density {kg/m3}",
-        "836,			!- Soil Specific Heat {J/kg-K}",
-        "30,			!- Soil Moisture Content Volume Fraction {percent}",
-        "50,			!- Soil Moisture Content Volume Fraction at Saturation {percent}",
-        "Site:GroundTemperature:Undisturbed:KusudaAchenbach,	!- Type of Undisturbed Ground Temperature Model",
-        "KATemps,		!- Name of Undisturbed Ground Temperature Model",
-        "1,				!- Evapotranspiration Ground Cover Parameter",
-        "GroundCoupledOSCM,	!- Name of Floor Boundary Condition Model",
-        "InGrade,		!- Slab Location (InGrade/OnGrade)",
-        "Dummy Material,	!- Slab Material Name",
-        "Yes,			!- Horizontal Insulation (Yes/No)",
-        "Dummy Material,	!- Horizontal Insulation Material Name",
-        "Full,			!- Full Horizontal or Perimeter Only (Full/Perimeter)",
-        ",				!- Perimeter insulation width (m)",
-        "Ye,			!- Vertical Insulation (Yes/No)",
-        "Dummy Material,	!- Vertical Insulation Name",
-        "1.5,			!- Vertical perimeter insulation depth from surface (m)",
-        "Hourly;		!- Domain Simulation Interval. (Timestep/Hourly)",
+        "CoupledSlab,   !- Name",
+        "5,             !- Ground Domain Depth {m}",
+        "1,             !- Aspect Ratio",
+        "5,             !- Domain Perimeter Offset {m}",
+        "1.8,           !- Soil Thermal Conductivity {W/m-K}",
+        "3200,          !- Soil Density {kg/m3}",
+        "836,           !- Soil Specific Heat {J/kg-K}",
+        "30,            !- Soil Moisture Content Volume Fraction {percent}",
+        "50,            !- Soil Moisture Content Volume Fraction at Saturation {percent}",
+        "Site:GroundTemperature:Undisturbed:KusudaAchenbach,    !- Type of Undisturbed Ground Temperature Model",
+        "KATemps,       !- Name of Undisturbed Ground Temperature Model",
+        "1,             !- Evapotranspiration Ground Cover Parameter",
+        "GroundCoupledOSCM, !- Name of Floor Boundary Condition Model",
+        "InGrade,       !- Slab Location (InGrade/OnGrade)",
+        "Dummy Material,    !- Slab Material Name",
+        "Yes,           !- Horizontal Insulation (Yes/No)",
+        "Dummy Material,    !- Horizontal Insulation Material Name",
+        "Full,          !- Full Horizontal or Perimeter Only (Full/Perimeter)",
+        ",              !- Perimeter insulation width (m)",
+        "Ye,            !- Vertical Insulation (Yes/No)",
+        "Dummy Material,    !- Vertical Insulation Name",
+        "1.5,           !- Vertical perimeter insulation depth from surface (m)",
+        "Hourly;        !- Domain Simulation Interval. (Timestep/Hourly)",
         "Site:GroundTemperature:Undisturbed:KusudaAchenbach,",
-        "KATemps,		!- Name of object",
-        "1.8,			!- Soil Thermal Conductivity {W/m-K}",
-        "3200,			!- Soil Density {kg/m3}",
-        "836,			!- Soil Specific Heat {J/kg-K}",
-        "15.5,			!- Annual average surface temperature {C}",
-        "12.8,			!- Annual amplitude of surface temperature {delta C}",
-        "17.3;			!- Phase shift of minimum surface temperature {days}",
+        "KATemps,       !- Name of object",
+        "1.8,           !- Soil Thermal Conductivity {W/m-K}",
+        "3200,          !- Soil Density {kg/m3}",
+        "836,           !- Soil Specific Heat {J/kg-K}",
+        "15.5,          !- Annual average surface temperature {C}",
+        "12.8,          !- Annual amplitude of surface temperature {delta C}",
+        "17.3;          !- Phase shift of minimum surface temperature {days}",
         "SurfaceProperty:OtherSideConditionsModel,",
-        "GroundCoupledOSCM,		!- Name",
-        "GroundCoupledSurface;	!- Type of Modeling",
+        "GroundCoupledOSCM,     !- Name",
+        "GroundCoupledSurface;  !- Type of Modeling",
         "Material,",
         "Dummy Material, !- Name",
-        "MediumRough,	!- Roughness",
-        "0.1397,		!- Thickness {m}",
-        "1.8,			!- Conductivity {W/m-K}",
-        "2400,			!- Density {kg/m3}",
-        "750,			!- Specific Heat {J/kg-K}",
-        "0.9,			!- Thermal Absorptance",
-        "0.65,			!- Solar Absorptance",
-        "0.65;			!- Visible Absorptance",
+        "MediumRough,   !- Roughness",
+        "0.1397,        !- Thickness {m}",
+        "1.8,           !- Conductivity {W/m-K}",
+        "2400,          !- Density {kg/m3}",
+        "750,           !- Specific Heat {J/kg-K}",
+        "0.9,           !- Thermal Absorptance",
+        "0.65,          !- Solar Absorptance",
+        "0.65;          !- Visible Absorptance",
     });
 
     EXPECT_FALSE(process_idf(idf_objects, false));
@@ -689,7 +696,7 @@ TEST_F(EnergyPlusFixture, SiteGroundDomainSlab_CheckInputs_BadVertInsSelection)
     bool errorsFound = false;
 
     // Other necessary inputs
-    GetOSCMData(*state, errorsFound);
+    GetOSCMData(*state);
     GetMaterialData(*state, errorsFound);
 
     state->dataPlantPipingSysMgr->domains.resize(1);
@@ -703,50 +710,50 @@ TEST_F(EnergyPlusFixture, SiteGroundDomainSlab_CheckInputs_BadVertInsMaterialNam
 
     std::string const idf_objects = delimited_string({
         "Site:GroundDomain:Slab,",
-        "CoupledSlab,	!- Name",
-        "5,				!- Ground Domain Depth {m}",
-        "1,				!- Aspect Ratio",
-        "5,				!- Domain Perimeter Offset {m}",
-        "1.8,			!- Soil Thermal Conductivity {W/m-K}",
-        "3200,			!- Soil Density {kg/m3}",
-        "836,			!- Soil Specific Heat {J/kg-K}",
-        "30,			!- Soil Moisture Content Volume Fraction {percent}",
-        "50,			!- Soil Moisture Content Volume Fraction at Saturation {percent}",
-        "Site:GroundTemperature:Undisturbed:KusudaAchenbach,	!- Type of Undisturbed Ground Temperature Model",
-        "KATemps,		!- Name of Undisturbed Ground Temperature Model",
-        "1,				!- Evapotranspiration Ground Cover Parameter",
-        "GroundCoupledOSCM,	!- Name of Floor Boundary Condition Model",
-        "InGrade,		!- Slab Location (InGrade/OnGrade)",
-        "Dummy Material,	!- Slab Material Name",
-        "Yes,			!- Horizontal Insulation (Yes/No)",
-        "Dummy Material,	!- Horizontal Insulation Material Name",
-        "Full,			!- Full Horizontal or Perimeter Only (Full/Perimeter)",
-        ",				!- Perimeter insulation width (m)",
-        "Yes,			!- Vertical Insulation (Yes/No)",
-        "Dummy Materia,	!- Vertical Insulation Name",
-        "1.5,			!- Vertical perimeter insulation depth from surface (m)",
-        "Hourly;		!- Domain Simulation Interval. (Timestep/Hourly)",
+        "CoupledSlab,   !- Name",
+        "5,             !- Ground Domain Depth {m}",
+        "1,             !- Aspect Ratio",
+        "5,             !- Domain Perimeter Offset {m}",
+        "1.8,           !- Soil Thermal Conductivity {W/m-K}",
+        "3200,          !- Soil Density {kg/m3}",
+        "836,           !- Soil Specific Heat {J/kg-K}",
+        "30,            !- Soil Moisture Content Volume Fraction {percent}",
+        "50,            !- Soil Moisture Content Volume Fraction at Saturation {percent}",
+        "Site:GroundTemperature:Undisturbed:KusudaAchenbach,    !- Type of Undisturbed Ground Temperature Model",
+        "KATemps,       !- Name of Undisturbed Ground Temperature Model",
+        "1,             !- Evapotranspiration Ground Cover Parameter",
+        "GroundCoupledOSCM, !- Name of Floor Boundary Condition Model",
+        "InGrade,       !- Slab Location (InGrade/OnGrade)",
+        "Dummy Material,    !- Slab Material Name",
+        "Yes,           !- Horizontal Insulation (Yes/No)",
+        "Dummy Material,    !- Horizontal Insulation Material Name",
+        "Full,          !- Full Horizontal or Perimeter Only (Full/Perimeter)",
+        ",              !- Perimeter insulation width (m)",
+        "Yes,           !- Vertical Insulation (Yes/No)",
+        "Dummy Materia, !- Vertical Insulation Name",
+        "1.5,           !- Vertical perimeter insulation depth from surface (m)",
+        "Hourly;        !- Domain Simulation Interval. (Timestep/Hourly)",
         "Site:GroundTemperature:Undisturbed:KusudaAchenbach,",
-        "KATemps,		!- Name of object",
-        "1.8,			!- Soil Thermal Conductivity {W/m-K}",
-        "3200,			!- Soil Density {kg/m3}",
-        "836,			!- Soil Specific Heat {J/kg-K}",
-        "15.5,			!- Annual average surface temperature {C}",
-        "12.8,			!- Annual amplitude of surface temperature {delta C}",
-        "17.3;			!- Phase shift of minimum surface temperature {days}",
+        "KATemps,       !- Name of object",
+        "1.8,           !- Soil Thermal Conductivity {W/m-K}",
+        "3200,          !- Soil Density {kg/m3}",
+        "836,           !- Soil Specific Heat {J/kg-K}",
+        "15.5,          !- Annual average surface temperature {C}",
+        "12.8,          !- Annual amplitude of surface temperature {delta C}",
+        "17.3;          !- Phase shift of minimum surface temperature {days}",
         "SurfaceProperty:OtherSideConditionsModel,",
-        "GroundCoupledOSCM,		!- Name",
-        "GroundCoupledSurface;	!- Type of Modeling",
+        "GroundCoupledOSCM,     !- Name",
+        "GroundCoupledSurface;  !- Type of Modeling",
         "Material,",
         "Dummy Material, !- Name",
-        "MediumRough,	!- Roughness",
-        "0.1397,		!- Thickness {m}",
-        "1.8,			!- Conductivity {W/m-K}",
-        "2400,			!- Density {kg/m3}",
-        "750,			!- Specific Heat {J/kg-K}",
-        "0.9,			!- Thermal Absorptance",
-        "0.65,			!- Solar Absorptance",
-        "0.65;			!- Visible Absorptance",
+        "MediumRough,   !- Roughness",
+        "0.1397,        !- Thickness {m}",
+        "1.8,           !- Conductivity {W/m-K}",
+        "2400,          !- Density {kg/m3}",
+        "750,           !- Specific Heat {J/kg-K}",
+        "0.9,           !- Thermal Absorptance",
+        "0.65,          !- Solar Absorptance",
+        "0.65;          !- Visible Absorptance",
     });
 
     ASSERT_TRUE(process_idf(idf_objects));
@@ -759,7 +766,7 @@ TEST_F(EnergyPlusFixture, SiteGroundDomainSlab_CheckInputs_BadVertInsMaterialNam
     bool errorsFound = false;
 
     // Other necessary inputs
-    GetOSCMData(*state, errorsFound);
+    GetOSCMData(*state);
     GetMaterialData(*state, errorsFound);
 
     state->dataPlantPipingSysMgr->domains.resize(1);
@@ -773,50 +780,50 @@ TEST_F(EnergyPlusFixture, SiteGroundDomainSlab_CheckInputs_BadVertInsDepth)
 
     std::string const idf_objects = delimited_string({
         "Site:GroundDomain:Slab,",
-        "CoupledSlab,	!- Name",
-        "5,				!- Ground Domain Depth {m}",
-        "1,				!- Aspect Ratio",
-        "5,				!- Domain Perimeter Offset {m}",
-        "1.8,			!- Soil Thermal Conductivity {W/m-K}",
-        "3200,			!- Soil Density {kg/m3}",
-        "836,			!- Soil Specific Heat {J/kg-K}",
-        "30,			!- Soil Moisture Content Volume Fraction {percent}",
-        "50,			!- Soil Moisture Content Volume Fraction at Saturation {percent}",
-        "Site:GroundTemperature:Undisturbed:KusudaAchenbach,	!- Type of Undisturbed Ground Temperature Model",
-        "KATemps,		!- Name of Undisturbed Ground Temperature Model",
-        "1,				!- Evapotranspiration Ground Cover Parameter",
-        "GroundCoupledOSCM,	!- Name of Floor Boundary Condition Model",
-        "InGrade,		!- Slab Location (InGrade/OnGrade)",
-        "Dummy Material,	!- Slab Material Name",
-        "Yes,			!- Horizontal Insulation (Yes/No)",
-        "Dummy Material,	!- Horizontal Insulation Material Name",
-        "Full,			!- Full Horizontal or Perimeter Only (Full/Perimeter)",
-        ",				!- Perimeter insulation width (m)",
-        "Yes,			!- Vertical Insulation (Yes/No)",
-        "Dummy Material,	!- Vertical Insulation Name",
-        ",			!- Vertical perimeter insulation depth from surface (m)",
-        "Hourly;		!- Domain Simulation Interval. (Timestep/Hourly)",
+        "CoupledSlab,   !- Name",
+        "5,             !- Ground Domain Depth {m}",
+        "1,             !- Aspect Ratio",
+        "5,             !- Domain Perimeter Offset {m}",
+        "1.8,           !- Soil Thermal Conductivity {W/m-K}",
+        "3200,          !- Soil Density {kg/m3}",
+        "836,           !- Soil Specific Heat {J/kg-K}",
+        "30,            !- Soil Moisture Content Volume Fraction {percent}",
+        "50,            !- Soil Moisture Content Volume Fraction at Saturation {percent}",
+        "Site:GroundTemperature:Undisturbed:KusudaAchenbach,    !- Type of Undisturbed Ground Temperature Model",
+        "KATemps,       !- Name of Undisturbed Ground Temperature Model",
+        "1,             !- Evapotranspiration Ground Cover Parameter",
+        "GroundCoupledOSCM, !- Name of Floor Boundary Condition Model",
+        "InGrade,       !- Slab Location (InGrade/OnGrade)",
+        "Dummy Material,    !- Slab Material Name",
+        "Yes,           !- Horizontal Insulation (Yes/No)",
+        "Dummy Material,    !- Horizontal Insulation Material Name",
+        "Full,          !- Full Horizontal or Perimeter Only (Full/Perimeter)",
+        ",              !- Perimeter insulation width (m)",
+        "Yes,           !- Vertical Insulation (Yes/No)",
+        "Dummy Material,    !- Vertical Insulation Name",
+        ",          !- Vertical perimeter insulation depth from surface (m)",
+        "Hourly;        !- Domain Simulation Interval. (Timestep/Hourly)",
         "Site:GroundTemperature:Undisturbed:KusudaAchenbach,",
-        "KATemps,		!- Name of object",
-        "1.8,			!- Soil Thermal Conductivity {W/m-K}",
-        "3200,			!- Soil Density {kg/m3}",
-        "836,			!- Soil Specific Heat {J/kg-K}",
-        "15.5,			!- Annual average surface temperature {C}",
-        "12.8,			!- Annual amplitude of surface temperature {delta C}",
-        "17.3;			!- Phase shift of minimum surface temperature {days}",
+        "KATemps,       !- Name of object",
+        "1.8,           !- Soil Thermal Conductivity {W/m-K}",
+        "3200,          !- Soil Density {kg/m3}",
+        "836,           !- Soil Specific Heat {J/kg-K}",
+        "15.5,          !- Annual average surface temperature {C}",
+        "12.8,          !- Annual amplitude of surface temperature {delta C}",
+        "17.3;          !- Phase shift of minimum surface temperature {days}",
         "SurfaceProperty:OtherSideConditionsModel,",
-        "GroundCoupledOSCM,		!- Name",
-        "GroundCoupledSurface;	!- Type of Modeling",
+        "GroundCoupledOSCM,     !- Name",
+        "GroundCoupledSurface;  !- Type of Modeling",
         "Material,",
         "Dummy Material, !- Name",
-        "MediumRough,	!- Roughness",
-        "0.1397,		!- Thickness {m}",
-        "1.8,			!- Conductivity {W/m-K}",
-        "2400,			!- Density {kg/m3}",
-        "750,			!- Specific Heat {J/kg-K}",
-        "0.9,			!- Thermal Absorptance",
-        "0.65,			!- Solar Absorptance",
-        "0.65;			!- Visible Absorptance",
+        "MediumRough,   !- Roughness",
+        "0.1397,        !- Thickness {m}",
+        "1.8,           !- Conductivity {W/m-K}",
+        "2400,          !- Density {kg/m3}",
+        "750,           !- Specific Heat {J/kg-K}",
+        "0.9,           !- Thermal Absorptance",
+        "0.65,          !- Solar Absorptance",
+        "0.65;          !- Visible Absorptance",
     });
 
     ASSERT_TRUE(process_idf(idf_objects));
@@ -829,7 +836,7 @@ TEST_F(EnergyPlusFixture, SiteGroundDomainSlab_CheckInputs_BadVertInsDepth)
     bool errorsFound = false;
 
     // Other necessary inputs
-    GetOSCMData(*state, errorsFound);
+    GetOSCMData(*state);
     GetMaterialData(*state, errorsFound);
 
     state->dataPlantPipingSysMgr->domains.resize(1);
@@ -838,55 +845,56 @@ TEST_F(EnergyPlusFixture, SiteGroundDomainSlab_CheckInputs_BadVertInsDepth)
     EXPECT_TRUE(errorsFound);
 }
 
-TEST_F(EnergyPlusFixture, DISABLED_SiteGroundDomainSlab_CheckInputs_BadTimeStepSelection)
+#ifdef GET_OUT // TimeStepSelection is not used
+TEST_F(EnergyPlusFixture, SiteGroundDomainSlab_CheckInputs_BadTimeStepSelection)
 {
 
     std::string const idf_objects = delimited_string({
         "Site:GroundDomain:Slab,",
-        "CoupledSlab,	!- Name",
-        "5,				!- Ground Domain Depth {m}",
-        "1,				!- Aspect Ratio",
-        "5,				!- Domain Perimeter Offset {m}",
-        "1.8,			!- Soil Thermal Conductivity {W/m-K}",
-        "3200,			!- Soil Density {kg/m3}",
-        "836,			!- Soil Specific Heat {J/kg-K}",
-        "30,			!- Soil Moisture Content Volume Fraction {percent}",
-        "50,			!- Soil Moisture Content Volume Fraction at Saturation {percent}",
-        "Site:GroundTemperature:Undisturbed:KusudaAchenbach,	!- Type of Undisturbed Ground Temperature Model",
-        "KATemps,		!- Name of Undisturbed Ground Temperature Model",
-        "1,				!- Evapotranspiration Ground Cover Parameter",
-        "GroundCoupledOSCM,	!- Name of Floor Boundary Condition Model",
-        "InGrade,		!- Slab Location (InGrade/OnGrade)",
-        "Dummy Material,	!- Slab Material Name",
-        "Yes,			!- Horizontal Insulation (Yes/No)",
-        "Dummy Material,	!- Horizontal Insulation Material Name",
-        "Full,			!- Full Horizontal or Perimeter Only (Full/Perimeter)",
-        ",				!- Perimeter insulation width (m)",
-        "Yes,			!- Vertical Insulation (Yes/No)",
-        "Dummy Material,	!- Vertical Insulation Name",
-        "1.5,			!- Vertical perimeter insulation depth from surface (m)",
-        "Hourl;		!- Domain Simulation Interval. (Timestep/Hourly)",
+        "CoupledSlab,   !- Name",
+        "5,             !- Ground Domain Depth {m}",
+        "1,             !- Aspect Ratio",
+        "5,             !- Domain Perimeter Offset {m}",
+        "1.8,           !- Soil Thermal Conductivity {W/m-K}",
+        "3200,          !- Soil Density {kg/m3}",
+        "836,           !- Soil Specific Heat {J/kg-K}",
+        "30,            !- Soil Moisture Content Volume Fraction {percent}",
+        "50,            !- Soil Moisture Content Volume Fraction at Saturation {percent}",
+        "Site:GroundTemperature:Undisturbed:KusudaAchenbach,    !- Type of Undisturbed Ground Temperature Model",
+        "KATemps,       !- Name of Undisturbed Ground Temperature Model",
+        "1,             !- Evapotranspiration Ground Cover Parameter",
+        "GroundCoupledOSCM, !- Name of Floor Boundary Condition Model",
+        "InGrade,       !- Slab Location (InGrade/OnGrade)",
+        "Dummy Material,    !- Slab Material Name",
+        "Yes,           !- Horizontal Insulation (Yes/No)",
+        "Dummy Material,    !- Horizontal Insulation Material Name",
+        "Full,          !- Full Horizontal or Perimeter Only (Full/Perimeter)",
+        ",              !- Perimeter insulation width (m)",
+        "Yes,           !- Vertical Insulation (Yes/No)",
+        "Dummy Material,    !- Vertical Insulation Name",
+        "1.5,           !- Vertical perimeter insulation depth from surface (m)",
+        "Hourl;     !- Domain Simulation Interval. (Timestep/Hourly)",
         "Site:GroundTemperature:Undisturbed:KusudaAchenbach,",
-        "KATemps,		!- Name of object",
-        "1.8,			!- Soil Thermal Conductivity {W/m-K}",
-        "3200,			!- Soil Density {kg/m3}",
-        "836,			!- Soil Specific Heat {J/kg-K}",
-        "15.5,			!- Annual average surface temperature {C}",
-        "12.8,			!- Annual amplitude of surface temperature {delta C}",
-        "17.3;			!- Phase shift of minimum surface temperature {days}",
+        "KATemps,       !- Name of object",
+        "1.8,           !- Soil Thermal Conductivity {W/m-K}",
+        "3200,          !- Soil Density {kg/m3}",
+        "836,           !- Soil Specific Heat {J/kg-K}",
+        "15.5,          !- Annual average surface temperature {C}",
+        "12.8,          !- Annual amplitude of surface temperature {delta C}",
+        "17.3;          !- Phase shift of minimum surface temperature {days}",
         "SurfaceProperty:OtherSideConditionsModel,",
-        "GroundCoupledOSCM,		!- Name",
-        "GroundCoupledSurface;	!- Type of Modeling",
+        "GroundCoupledOSCM,     !- Name",
+        "GroundCoupledSurface;  !- Type of Modeling",
         "Material,",
         "Dummy Material, !- Name",
-        "MediumRough,	!- Roughness",
-        "0.1397,		!- Thickness {m}",
-        "1.8,			!- Conductivity {W/m-K}",
-        "2400,			!- Density {kg/m3}",
-        "750,			!- Specific Heat {J/kg-K}",
-        "0.9,			!- Thermal Absorptance",
-        "0.65,			!- Solar Absorptance",
-        "0.65;			!- Visible Absorptance",
+        "MediumRough,   !- Roughness",
+        "0.1397,        !- Thickness {m}",
+        "1.8,           !- Conductivity {W/m-K}",
+        "2400,          !- Density {kg/m3}",
+        "750,           !- Specific Heat {J/kg-K}",
+        "0.9,           !- Thermal Absorptance",
+        "0.65,          !- Solar Absorptance",
+        "0.65;          !- Visible Absorptance",
     });
 
     EXPECT_FALSE(process_idf(idf_objects, false));
@@ -899,7 +907,7 @@ TEST_F(EnergyPlusFixture, DISABLED_SiteGroundDomainSlab_CheckInputs_BadTimeStepS
     bool errorsFound = false;
 
     // Other necessary inputs
-    GetOSCMData(*state, errorsFound);
+    GetOSCMData(*state);
     GetMaterialData(*state, errorsFound);
 
     state->dataPlantPipingSysMgr->domains.resize(1);
@@ -907,56 +915,57 @@ TEST_F(EnergyPlusFixture, DISABLED_SiteGroundDomainSlab_CheckInputs_BadTimeStepS
 
     EXPECT_TRUE(errorsFound);
 }
+#endif // GET_OUT
 
 TEST_F(EnergyPlusFixture, SiteGroundDomainBasement_CheckInputs_CorrectInputs)
 {
 
     std::string const idf_objects = delimited_string({
         "Site:GroundDomain:Basement,",
-        "CoupledBasement,	!- Name",
-        "5,				!- Ground Domain Depth {m}",
-        "1,				!- Aspect Ratio",
-        "5,				!- Domain Perimeter Offset {m}",
-        "1.8,			!- Soil Thermal Conductivity {W/m-K}",
-        "3200,			!- Soil Density {kg/m3}",
-        "836,			!- Soil Specific Heat {J/kg-K}",
-        "30,			!- Soil Moisture Content Volume Fraction {percent}",
-        "50,			!- Soil Moisture Content Volume Fraction at Saturation {percent}",
-        "Site:GroundTemperature:Undisturbed:KusudaAchenbach,	!- Type of Undisturbed Ground Temperature Model",
-        "KATemps,		!- Name of Undisturbed Ground Temperature Model",
-        "1,				!- Evapotranspiration Ground Cover Parameter",
-        "GroundCoupledOSCM,		!- Name of Basement Floor Boundary Condition Model",
-        "Yes,					!- Basement Horizontal Underfloor Insulation Present (Yes/No)",
-        "Dummy Material,		!- Basement Horizontal Insulation Underfloor Material Name",
-        "Perimeter,				!- Full Horizontal or Perimeter Only (Full/Perimeter)",
-        "1,						!- Perimeter width (m)",
-        "2.5,					!- Depth of Basement Wall In Ground Domain {m}",
-        "GroundCoupledOSCM,		!- Name of Basement Floor Boundary Condition Model",
-        "Yes,					!- Basement Wall Vertical Insulation Present(Yes/No)",
-        "Dummy Material,		!- Basement Wall Vertical Insulation Material Name",
-        "2.3,					!- Vertical insulation depth from surface (m)",
-        "timestep;				!- Domain Update interval. (Timestep, Hourly)",
+        "CoupledBasement,   !- Name",
+        "5,             !- Ground Domain Depth {m}",
+        "1,             !- Aspect Ratio",
+        "5,             !- Domain Perimeter Offset {m}",
+        "1.8,           !- Soil Thermal Conductivity {W/m-K}",
+        "3200,          !- Soil Density {kg/m3}",
+        "836,           !- Soil Specific Heat {J/kg-K}",
+        "30,            !- Soil Moisture Content Volume Fraction {percent}",
+        "50,            !- Soil Moisture Content Volume Fraction at Saturation {percent}",
+        "Site:GroundTemperature:Undisturbed:KusudaAchenbach,    !- Type of Undisturbed Ground Temperature Model",
+        "KATemps,       !- Name of Undisturbed Ground Temperature Model",
+        "1,             !- Evapotranspiration Ground Cover Parameter",
+        "GroundCoupledOSCM,     !- Name of Basement Floor Boundary Condition Model",
+        "Yes,                   !- Basement Horizontal Underfloor Insulation Present (Yes/No)",
+        "Dummy Material,        !- Basement Horizontal Insulation Underfloor Material Name",
+        "Perimeter,             !- Full Horizontal or Perimeter Only (Full/Perimeter)",
+        "1,                     !- Perimeter width (m)",
+        "2.5,                   !- Depth of Basement Wall In Ground Domain {m}",
+        "GroundCoupledOSCM,     !- Name of Basement Floor Boundary Condition Model",
+        "Yes,                   !- Basement Wall Vertical Insulation Present(Yes/No)",
+        "Dummy Material,        !- Basement Wall Vertical Insulation Material Name",
+        "2.3,                   !- Vertical insulation depth from surface (m)",
+        "timestep;              !- Domain Update interval. (Timestep, Hourly)",
         "Site:GroundTemperature:Undisturbed:KusudaAchenbach,",
-        "KATemps,		!- Name of object",
-        "1.8,			!- Soil Thermal Conductivity {W/m-K}",
-        "3200,			!- Soil Density {kg/m3}",
-        "836,			!- Soil Specific Heat {J/kg-K}",
-        "15.5,			!- Annual average surface temperature {C}",
-        "12.8,			!- Annual amplitude of surface temperature {delta C}",
-        "17.3;			!- Phase shift of minimum surface temperature {days}",
+        "KATemps,       !- Name of object",
+        "1.8,           !- Soil Thermal Conductivity {W/m-K}",
+        "3200,          !- Soil Density {kg/m3}",
+        "836,           !- Soil Specific Heat {J/kg-K}",
+        "15.5,          !- Annual average surface temperature {C}",
+        "12.8,          !- Annual amplitude of surface temperature {delta C}",
+        "17.3;          !- Phase shift of minimum surface temperature {days}",
         "SurfaceProperty:OtherSideConditionsModel,",
-        "GroundCoupledOSCM,		!- Name",
-        "GroundCoupledSurface;	!- Type of Modeling",
+        "GroundCoupledOSCM,     !- Name",
+        "GroundCoupledSurface;  !- Type of Modeling",
         "Material,",
         "Dummy Material, !- Name",
-        "MediumRough,	!- Roughness",
-        "0.1397,		!- Thickness {m}",
-        "1.8,			!- Conductivity {W/m-K}",
-        "2400,			!- Density {kg/m3}",
-        "750,			!- Specific Heat {J/kg-K}",
-        "0.9,			!- Thermal Absorptance",
-        "0.65,			!- Solar Absorptance",
-        "0.65;			!- Visible Absorptance",
+        "MediumRough,   !- Roughness",
+        "0.1397,        !- Thickness {m}",
+        "1.8,           !- Conductivity {W/m-K}",
+        "2400,          !- Density {kg/m3}",
+        "750,           !- Specific Heat {J/kg-K}",
+        "0.9,           !- Thermal Absorptance",
+        "0.65,          !- Solar Absorptance",
+        "0.65;          !- Visible Absorptance",
     });
 
     ASSERT_TRUE(process_idf(idf_objects));
@@ -969,7 +978,7 @@ TEST_F(EnergyPlusFixture, SiteGroundDomainBasement_CheckInputs_CorrectInputs)
     bool errorsFound = false;
 
     // Other necessary inputs
-    GetOSCMData(*state, errorsFound);
+    GetOSCMData(*state);
     GetMaterialData(*state, errorsFound);
 
     state->dataPlantPipingSysMgr->domains.resize(1);
@@ -983,50 +992,50 @@ TEST_F(EnergyPlusFixture, SiteGroundDomainBasement_CheckInputs_BadOSCMName)
 
     std::string const idf_objects = delimited_string({
         "Site:GroundDomain:Basement,",
-        "CoupledBasement,	!- Name",
-        "5,				!- Ground Domain Depth {m}",
-        "1,				!- Aspect Ratio",
-        "5,				!- Domain Perimeter Offset {m}",
-        "1.8,			!- Soil Thermal Conductivity {W/m-K}",
-        "3200,			!- Soil Density {kg/m3}",
-        "836,			!- Soil Specific Heat {J/kg-K}",
-        "30,			!- Soil Moisture Content Volume Fraction {percent}",
-        "50,			!- Soil Moisture Content Volume Fraction at Saturation {percent}",
-        "Site:GroundTemperature:Undisturbed:KusudaAchenbach,	!- Type of Undisturbed Ground Temperature Model",
-        "KATemps,		!- Name of Undisturbed Ground Temperature Model",
-        "1,				!- Evapotranspiration Ground Cover Parameter",
-        "GroundCoupledOSC,		!- Name of Basement Floor Boundary Condition Model",
-        "Yes,					!- Basement Horizontal Underfloor Insulation Present (Yes/No)",
-        "Dummy Material,		!- Basement Horizontal Insulation Underfloor Material Name",
-        "Perimeter,				!- Full Horizontal or Perimeter Only (Full/Perimeter)",
-        "1,						!- Perimeter width (m)",
-        "2.5,					!- Depth of Basement Wall In Ground Domain {m}",
-        "GroundCoupledOSCM,		!- Name of Basement Floor Boundary Condition Model",
-        "Yes,					!- Basement Wall Vertical Insulation Present(Yes/No)",
-        "Dummy Material,		!- Basement Wall Vertical Insulation Material Name",
-        "2.3,					!- Vertical insulation depth from surface (m)",
-        "timestep;				!- Domain Update interval. (Timestep, Hourly)",
+        "CoupledBasement,   !- Name",
+        "5,             !- Ground Domain Depth {m}",
+        "1,             !- Aspect Ratio",
+        "5,             !- Domain Perimeter Offset {m}",
+        "1.8,           !- Soil Thermal Conductivity {W/m-K}",
+        "3200,          !- Soil Density {kg/m3}",
+        "836,           !- Soil Specific Heat {J/kg-K}",
+        "30,            !- Soil Moisture Content Volume Fraction {percent}",
+        "50,            !- Soil Moisture Content Volume Fraction at Saturation {percent}",
+        "Site:GroundTemperature:Undisturbed:KusudaAchenbach,    !- Type of Undisturbed Ground Temperature Model",
+        "KATemps,       !- Name of Undisturbed Ground Temperature Model",
+        "1,             !- Evapotranspiration Ground Cover Parameter",
+        "GroundCoupledOSC,      !- Name of Basement Floor Boundary Condition Model",
+        "Yes,                   !- Basement Horizontal Underfloor Insulation Present (Yes/No)",
+        "Dummy Material,        !- Basement Horizontal Insulation Underfloor Material Name",
+        "Perimeter,             !- Full Horizontal or Perimeter Only (Full/Perimeter)",
+        "1,                     !- Perimeter width (m)",
+        "2.5,                   !- Depth of Basement Wall In Ground Domain {m}",
+        "GroundCoupledOSCM,     !- Name of Basement Floor Boundary Condition Model",
+        "Yes,                   !- Basement Wall Vertical Insulation Present(Yes/No)",
+        "Dummy Material,        !- Basement Wall Vertical Insulation Material Name",
+        "2.3,                   !- Vertical insulation depth from surface (m)",
+        "timestep;              !- Domain Update interval. (Timestep, Hourly)",
         "Site:GroundTemperature:Undisturbed:KusudaAchenbach,",
-        "KATemps,		!- Name of object",
-        "1.8,			!- Soil Thermal Conductivity {W/m-K}",
-        "3200,			!- Soil Density {kg/m3}",
-        "836,			!- Soil Specific Heat {J/kg-K}",
-        "15.5,			!- Annual average surface temperature {C}",
-        "12.8,			!- Annual amplitude of surface temperature {delta C}",
-        "17.3;			!- Phase shift of minimum surface temperature {days}",
+        "KATemps,       !- Name of object",
+        "1.8,           !- Soil Thermal Conductivity {W/m-K}",
+        "3200,          !- Soil Density {kg/m3}",
+        "836,           !- Soil Specific Heat {J/kg-K}",
+        "15.5,          !- Annual average surface temperature {C}",
+        "12.8,          !- Annual amplitude of surface temperature {delta C}",
+        "17.3;          !- Phase shift of minimum surface temperature {days}",
         "SurfaceProperty:OtherSideConditionsModel,",
-        "GroundCoupledOSCM,		!- Name",
-        "GroundCoupledSurface;	!- Type of Modeling",
+        "GroundCoupledOSCM,     !- Name",
+        "GroundCoupledSurface;  !- Type of Modeling",
         "Material,",
         "Dummy Material, !- Name",
-        "MediumRough,	!- Roughness",
-        "0.1397,		!- Thickness {m}",
-        "1.8,			!- Conductivity {W/m-K}",
-        "2400,			!- Density {kg/m3}",
-        "750,			!- Specific Heat {J/kg-K}",
-        "0.9,			!- Thermal Absorptance",
-        "0.65,			!- Solar Absorptance",
-        "0.65;			!- Visible Absorptance",
+        "MediumRough,   !- Roughness",
+        "0.1397,        !- Thickness {m}",
+        "1.8,           !- Conductivity {W/m-K}",
+        "2400,          !- Density {kg/m3}",
+        "750,           !- Specific Heat {J/kg-K}",
+        "0.9,           !- Thermal Absorptance",
+        "0.65,          !- Solar Absorptance",
+        "0.65;          !- Visible Absorptance",
     });
 
     ASSERT_TRUE(process_idf(idf_objects));
@@ -1039,7 +1048,7 @@ TEST_F(EnergyPlusFixture, SiteGroundDomainBasement_CheckInputs_BadOSCMName)
     bool errorsFound = false;
 
     // Other necessary inputs
-    GetOSCMData(*state, errorsFound);
+    GetOSCMData(*state);
     GetMaterialData(*state, errorsFound);
 
     state->dataPlantPipingSysMgr->domains.resize(1);
@@ -1053,50 +1062,50 @@ TEST_F(EnergyPlusFixture, SiteGroundDomainBasement_CheckInputs_BadHorizInsSelect
 
     std::string const idf_objects = delimited_string({
         "Site:GroundDomain:Basement,",
-        "CoupledBasement,	!- Name",
-        "5,				!- Ground Domain Depth {m}",
-        "1,				!- Aspect Ratio",
-        "5,				!- Domain Perimeter Offset {m}",
-        "1.8,			!- Soil Thermal Conductivity {W/m-K}",
-        "3200,			!- Soil Density {kg/m3}",
-        "836,			!- Soil Specific Heat {J/kg-K}",
-        "30,			!- Soil Moisture Content Volume Fraction {percent}",
-        "50,			!- Soil Moisture Content Volume Fraction at Saturation {percent}",
-        "Site:GroundTemperature:Undisturbed:KusudaAchenbach,	!- Type of Undisturbed Ground Temperature Model",
-        "KATemps,		!- Name of Undisturbed Ground Temperature Model",
-        "1,				!- Evapotranspiration Ground Cover Parameter",
-        "GroundCoupledOSCM,		!- Name of Basement Floor Boundary Condition Model",
-        "Ye,					!- Basement Horizontal Underfloor Insulation Present (Yes/No)",
-        "Dummy Material,		!- Basement Horizontal Insulation Underfloor Material Name",
-        "Perimeter,				!- Full Horizontal or Perimeter Only (Full/Perimeter)",
-        "1,						!- Perimeter width (m)",
-        "2.5,					!- Depth of Basement Wall In Ground Domain {m}",
-        "GroundCoupledOSCM,		!- Name of Basement Floor Boundary Condition Model",
-        "Yes,					!- Basement Wall Vertical Insulation Present(Yes/No)",
-        "Dummy Material,		!- Basement Wall Vertical Insulation Material Name",
-        "2.3,					!- Vertical insulation depth from surface (m)",
-        "timestep;				!- Domain Update interval. (Timestep, Hourly)",
+        "CoupledBasement,   !- Name",
+        "5,             !- Ground Domain Depth {m}",
+        "1,             !- Aspect Ratio",
+        "5,             !- Domain Perimeter Offset {m}",
+        "1.8,           !- Soil Thermal Conductivity {W/m-K}",
+        "3200,          !- Soil Density {kg/m3}",
+        "836,           !- Soil Specific Heat {J/kg-K}",
+        "30,            !- Soil Moisture Content Volume Fraction {percent}",
+        "50,            !- Soil Moisture Content Volume Fraction at Saturation {percent}",
+        "Site:GroundTemperature:Undisturbed:KusudaAchenbach,    !- Type of Undisturbed Ground Temperature Model",
+        "KATemps,       !- Name of Undisturbed Ground Temperature Model",
+        "1,             !- Evapotranspiration Ground Cover Parameter",
+        "GroundCoupledOSCM,     !- Name of Basement Floor Boundary Condition Model",
+        "Ye,                    !- Basement Horizontal Underfloor Insulation Present (Yes/No)",
+        "Dummy Material,        !- Basement Horizontal Insulation Underfloor Material Name",
+        "Perimeter,             !- Full Horizontal or Perimeter Only (Full/Perimeter)",
+        "1,                     !- Perimeter width (m)",
+        "2.5,                   !- Depth of Basement Wall In Ground Domain {m}",
+        "GroundCoupledOSCM,     !- Name of Basement Floor Boundary Condition Model",
+        "Yes,                   !- Basement Wall Vertical Insulation Present(Yes/No)",
+        "Dummy Material,        !- Basement Wall Vertical Insulation Material Name",
+        "2.3,                   !- Vertical insulation depth from surface (m)",
+        "timestep;              !- Domain Update interval. (Timestep, Hourly)",
         "Site:GroundTemperature:Undisturbed:KusudaAchenbach,",
-        "KATemps,		!- Name of object",
-        "1.8,			!- Soil Thermal Conductivity {W/m-K}",
-        "3200,			!- Soil Density {kg/m3}",
-        "836,			!- Soil Specific Heat {J/kg-K}",
-        "15.5,			!- Annual average surface temperature {C}",
-        "12.8,			!- Annual amplitude of surface temperature {delta C}",
-        "17.3;			!- Phase shift of minimum surface temperature {days}",
+        "KATemps,       !- Name of object",
+        "1.8,           !- Soil Thermal Conductivity {W/m-K}",
+        "3200,          !- Soil Density {kg/m3}",
+        "836,           !- Soil Specific Heat {J/kg-K}",
+        "15.5,          !- Annual average surface temperature {C}",
+        "12.8,          !- Annual amplitude of surface temperature {delta C}",
+        "17.3;          !- Phase shift of minimum surface temperature {days}",
         "SurfaceProperty:OtherSideConditionsModel,",
-        "GroundCoupledOSCM,		!- Name",
-        "GroundCoupledSurface;	!- Type of Modeling",
+        "GroundCoupledOSCM,     !- Name",
+        "GroundCoupledSurface;  !- Type of Modeling",
         "Material,",
         "Dummy Material, !- Name",
-        "MediumRough,	!- Roughness",
-        "0.1397,		!- Thickness {m}",
-        "1.8,			!- Conductivity {W/m-K}",
-        "2400,			!- Density {kg/m3}",
-        "750,			!- Specific Heat {J/kg-K}",
-        "0.9,			!- Thermal Absorptance",
-        "0.65,			!- Solar Absorptance",
-        "0.65;			!- Visible Absorptance",
+        "MediumRough,   !- Roughness",
+        "0.1397,        !- Thickness {m}",
+        "1.8,           !- Conductivity {W/m-K}",
+        "2400,          !- Density {kg/m3}",
+        "750,           !- Specific Heat {J/kg-K}",
+        "0.9,           !- Thermal Absorptance",
+        "0.65,          !- Solar Absorptance",
+        "0.65;          !- Visible Absorptance",
     });
 
     EXPECT_FALSE(process_idf(idf_objects, false));
@@ -1109,7 +1118,7 @@ TEST_F(EnergyPlusFixture, SiteGroundDomainBasement_CheckInputs_BadHorizInsSelect
     bool errorsFound = false;
 
     // Other necessary inputs
-    GetOSCMData(*state, errorsFound);
+    GetOSCMData(*state);
     GetMaterialData(*state, errorsFound);
 
     state->dataPlantPipingSysMgr->domains.resize(1);
@@ -1123,50 +1132,50 @@ TEST_F(EnergyPlusFixture, SiteGroundDomainBasement_CheckInputs_BadHorizInsMateri
 
     std::string const idf_objects = delimited_string({
         "Site:GroundDomain:Basement,",
-        "CoupledBasement,	!- Name",
-        "5,				!- Ground Domain Depth {m}",
-        "1,				!- Aspect Ratio",
-        "5,				!- Domain Perimeter Offset {m}",
-        "1.8,			!- Soil Thermal Conductivity {W/m-K}",
-        "3200,			!- Soil Density {kg/m3}",
-        "836,			!- Soil Specific Heat {J/kg-K}",
-        "30,			!- Soil Moisture Content Volume Fraction {percent}",
-        "50,			!- Soil Moisture Content Volume Fraction at Saturation {percent}",
-        "Site:GroundTemperature:Undisturbed:KusudaAchenbach,	!- Type of Undisturbed Ground Temperature Model",
-        "KATemps,		!- Name of Undisturbed Ground Temperature Model",
-        "1,				!- Evapotranspiration Ground Cover Parameter",
-        "GroundCoupledOSCM,		!- Name of Basement Floor Boundary Condition Model",
-        "Yes,					!- Basement Horizontal Underfloor Insulation Present (Yes/No)",
-        "Dummy Materia,			!- Basement Horizontal Insulation Underfloor Material Name",
-        "Perimeter,				!- Full Horizontal or Perimeter Only (Full/Perimeter)",
-        "1,						!- Perimeter width (m)",
-        "2.5,					!- Depth of Basement Wall In Ground Domain {m}",
-        "GroundCoupledOSCM,		!- Name of Basement Floor Boundary Condition Model",
-        "Yes,					!- Basement Wall Vertical Insulation Present(Yes/No)",
-        "Dummy Material,		!- Basement Wall Vertical Insulation Material Name",
-        "2.3,					!- Vertical insulation depth from surface (m)",
-        "timestep;				!- Domain Update interval. (Timestep, Hourly)",
+        "CoupledBasement,   !- Name",
+        "5,             !- Ground Domain Depth {m}",
+        "1,             !- Aspect Ratio",
+        "5,             !- Domain Perimeter Offset {m}",
+        "1.8,           !- Soil Thermal Conductivity {W/m-K}",
+        "3200,          !- Soil Density {kg/m3}",
+        "836,           !- Soil Specific Heat {J/kg-K}",
+        "30,            !- Soil Moisture Content Volume Fraction {percent}",
+        "50,            !- Soil Moisture Content Volume Fraction at Saturation {percent}",
+        "Site:GroundTemperature:Undisturbed:KusudaAchenbach,    !- Type of Undisturbed Ground Temperature Model",
+        "KATemps,       !- Name of Undisturbed Ground Temperature Model",
+        "1,             !- Evapotranspiration Ground Cover Parameter",
+        "GroundCoupledOSCM,     !- Name of Basement Floor Boundary Condition Model",
+        "Yes,                   !- Basement Horizontal Underfloor Insulation Present (Yes/No)",
+        "Dummy Materia,         !- Basement Horizontal Insulation Underfloor Material Name",
+        "Perimeter,             !- Full Horizontal or Perimeter Only (Full/Perimeter)",
+        "1,                     !- Perimeter width (m)",
+        "2.5,                   !- Depth of Basement Wall In Ground Domain {m}",
+        "GroundCoupledOSCM,     !- Name of Basement Floor Boundary Condition Model",
+        "Yes,                   !- Basement Wall Vertical Insulation Present(Yes/No)",
+        "Dummy Material,        !- Basement Wall Vertical Insulation Material Name",
+        "2.3,                   !- Vertical insulation depth from surface (m)",
+        "timestep;              !- Domain Update interval. (Timestep, Hourly)",
         "Site:GroundTemperature:Undisturbed:KusudaAchenbach,",
-        "KATemps,		!- Name of object",
-        "1.8,			!- Soil Thermal Conductivity {W/m-K}",
-        "3200,			!- Soil Density {kg/m3}",
-        "836,			!- Soil Specific Heat {J/kg-K}",
-        "15.5,			!- Annual average surface temperature {C}",
-        "12.8,			!- Annual amplitude of surface temperature {delta C}",
-        "17.3;			!- Phase shift of minimum surface temperature {days}",
+        "KATemps,       !- Name of object",
+        "1.8,           !- Soil Thermal Conductivity {W/m-K}",
+        "3200,          !- Soil Density {kg/m3}",
+        "836,           !- Soil Specific Heat {J/kg-K}",
+        "15.5,          !- Annual average surface temperature {C}",
+        "12.8,          !- Annual amplitude of surface temperature {delta C}",
+        "17.3;          !- Phase shift of minimum surface temperature {days}",
         "SurfaceProperty:OtherSideConditionsModel,",
-        "GroundCoupledOSCM,		!- Name",
-        "GroundCoupledSurface;	!- Type of Modeling",
+        "GroundCoupledOSCM,     !- Name",
+        "GroundCoupledSurface;  !- Type of Modeling",
         "Material,",
         "Dummy Material, !- Name",
-        "MediumRough,	!- Roughness",
-        "0.1397,		!- Thickness {m}",
-        "1.8,			!- Conductivity {W/m-K}",
-        "2400,			!- Density {kg/m3}",
-        "750,			!- Specific Heat {J/kg-K}",
-        "0.9,			!- Thermal Absorptance",
-        "0.65,			!- Solar Absorptance",
-        "0.65;			!- Visible Absorptance",
+        "MediumRough,   !- Roughness",
+        "0.1397,        !- Thickness {m}",
+        "1.8,           !- Conductivity {W/m-K}",
+        "2400,          !- Density {kg/m3}",
+        "750,           !- Specific Heat {J/kg-K}",
+        "0.9,           !- Thermal Absorptance",
+        "0.65,          !- Solar Absorptance",
+        "0.65;          !- Visible Absorptance",
     });
 
     ASSERT_TRUE(process_idf(idf_objects));
@@ -1179,7 +1188,7 @@ TEST_F(EnergyPlusFixture, SiteGroundDomainBasement_CheckInputs_BadHorizInsMateri
     bool errorsFound = false;
 
     // Other necessary inputs
-    GetOSCMData(*state, errorsFound);
+    GetOSCMData(*state);
     GetMaterialData(*state, errorsFound);
 
     state->dataPlantPipingSysMgr->domains.resize(1);
@@ -1193,50 +1202,50 @@ TEST_F(EnergyPlusFixture, SiteGroundDomainBasement_CheckInputs_BadHorizInsExtent
 
     std::string const idf_objects = delimited_string({
         "Site:GroundDomain:Basement,",
-        "CoupledBasement,	!- Name",
-        "5,				!- Ground Domain Depth {m}",
-        "1,				!- Aspect Ratio",
-        "5,				!- Domain Perimeter Offset {m}",
-        "1.8,			!- Soil Thermal Conductivity {W/m-K}",
-        "3200,			!- Soil Density {kg/m3}",
-        "836,			!- Soil Specific Heat {J/kg-K}",
-        "30,			!- Soil Moisture Content Volume Fraction {percent}",
-        "50,			!- Soil Moisture Content Volume Fraction at Saturation {percent}",
-        "Site:GroundTemperature:Undisturbed:KusudaAchenbach,	!- Type of Undisturbed Ground Temperature Model",
-        "KATemps,		!- Name of Undisturbed Ground Temperature Model",
-        "1,				!- Evapotranspiration Ground Cover Parameter",
-        "GroundCoupledOSCM,		!- Name of Basement Floor Boundary Condition Model",
-        "Yes,					!- Basement Horizontal Underfloor Insulation Present (Yes/No)",
-        "Dummy Material,			!- Basement Horizontal Insulation Underfloor Material Name",
-        "Perimete,				!- Full Horizontal or Perimeter Only (Full/Perimeter)",
-        "1,						!- Perimeter width (m)",
-        "2.5,					!- Depth of Basement Wall In Ground Domain {m}",
-        "GroundCoupledOSCM,		!- Name of Basement Floor Boundary Condition Model",
-        "Yes,					!- Basement Wall Vertical Insulation Present(Yes/No)",
-        "Dummy Material,		!- Basement Wall Vertical Insulation Material Name",
-        "2.3,					!- Vertical insulation depth from surface (m)",
-        "timestep;				!- Domain Update interval. (Timestep, Hourly)",
+        "CoupledBasement,   !- Name",
+        "5,             !- Ground Domain Depth {m}",
+        "1,             !- Aspect Ratio",
+        "5,             !- Domain Perimeter Offset {m}",
+        "1.8,           !- Soil Thermal Conductivity {W/m-K}",
+        "3200,          !- Soil Density {kg/m3}",
+        "836,           !- Soil Specific Heat {J/kg-K}",
+        "30,            !- Soil Moisture Content Volume Fraction {percent}",
+        "50,            !- Soil Moisture Content Volume Fraction at Saturation {percent}",
+        "Site:GroundTemperature:Undisturbed:KusudaAchenbach,    !- Type of Undisturbed Ground Temperature Model",
+        "KATemps,       !- Name of Undisturbed Ground Temperature Model",
+        "1,             !- Evapotranspiration Ground Cover Parameter",
+        "GroundCoupledOSCM,     !- Name of Basement Floor Boundary Condition Model",
+        "Yes,                   !- Basement Horizontal Underfloor Insulation Present (Yes/No)",
+        "Dummy Material,            !- Basement Horizontal Insulation Underfloor Material Name",
+        "Perimete,              !- Full Horizontal or Perimeter Only (Full/Perimeter)",
+        "1,                     !- Perimeter width (m)",
+        "2.5,                   !- Depth of Basement Wall In Ground Domain {m}",
+        "GroundCoupledOSCM,     !- Name of Basement Floor Boundary Condition Model",
+        "Yes,                   !- Basement Wall Vertical Insulation Present(Yes/No)",
+        "Dummy Material,        !- Basement Wall Vertical Insulation Material Name",
+        "2.3,                   !- Vertical insulation depth from surface (m)",
+        "timestep;              !- Domain Update interval. (Timestep, Hourly)",
         "Site:GroundTemperature:Undisturbed:KusudaAchenbach,",
-        "KATemps,		!- Name of object",
-        "1.8,			!- Soil Thermal Conductivity {W/m-K}",
-        "3200,			!- Soil Density {kg/m3}",
-        "836,			!- Soil Specific Heat {J/kg-K}",
-        "15.5,			!- Annual average surface temperature {C}",
-        "12.8,			!- Annual amplitude of surface temperature {delta C}",
-        "17.3;			!- Phase shift of minimum surface temperature {days}",
+        "KATemps,       !- Name of object",
+        "1.8,           !- Soil Thermal Conductivity {W/m-K}",
+        "3200,          !- Soil Density {kg/m3}",
+        "836,           !- Soil Specific Heat {J/kg-K}",
+        "15.5,          !- Annual average surface temperature {C}",
+        "12.8,          !- Annual amplitude of surface temperature {delta C}",
+        "17.3;          !- Phase shift of minimum surface temperature {days}",
         "SurfaceProperty:OtherSideConditionsModel,",
-        "GroundCoupledOSCM,		!- Name",
-        "GroundCoupledSurface;	!- Type of Modeling",
+        "GroundCoupledOSCM,     !- Name",
+        "GroundCoupledSurface;  !- Type of Modeling",
         "Material,",
         "Dummy Material, !- Name",
-        "MediumRough,	!- Roughness",
-        "0.1397,		!- Thickness {m}",
-        "1.8,			!- Conductivity {W/m-K}",
-        "2400,			!- Density {kg/m3}",
-        "750,			!- Specific Heat {J/kg-K}",
-        "0.9,			!- Thermal Absorptance",
-        "0.65,			!- Solar Absorptance",
-        "0.65;			!- Visible Absorptance",
+        "MediumRough,   !- Roughness",
+        "0.1397,        !- Thickness {m}",
+        "1.8,           !- Conductivity {W/m-K}",
+        "2400,          !- Density {kg/m3}",
+        "750,           !- Specific Heat {J/kg-K}",
+        "0.9,           !- Thermal Absorptance",
+        "0.65,          !- Solar Absorptance",
+        "0.65;          !- Visible Absorptance",
     });
 
     EXPECT_FALSE(process_idf(idf_objects, false));
@@ -1249,7 +1258,7 @@ TEST_F(EnergyPlusFixture, SiteGroundDomainBasement_CheckInputs_BadHorizInsExtent
     bool errorsFound = false;
 
     // Other necessary inputs
-    GetOSCMData(*state, errorsFound);
+    GetOSCMData(*state);
     GetMaterialData(*state, errorsFound);
 
     state->dataPlantPipingSysMgr->domains.resize(1);
@@ -1263,50 +1272,50 @@ TEST_F(EnergyPlusFixture, SiteGroundDomainBasement_CheckInputs_BadBasementDepth)
 
     std::string const idf_objects = delimited_string({
         "Site:GroundDomain:Basement,",
-        "CoupledBasement,	!- Name",
-        "5,				!- Ground Domain Depth {m}",
-        "1,				!- Aspect Ratio",
-        "5,				!- Domain Perimeter Offset {m}",
-        "1.8,			!- Soil Thermal Conductivity {W/m-K}",
-        "3200,			!- Soil Density {kg/m3}",
-        "836,			!- Soil Specific Heat {J/kg-K}",
-        "30,			!- Soil Moisture Content Volume Fraction {percent}",
-        "50,			!- Soil Moisture Content Volume Fraction at Saturation {percent}",
-        "Site:GroundTemperature:Undisturbed:KusudaAchenbach,	!- Type of Undisturbed Ground Temperature Model",
-        "KATemps,		!- Name of Undisturbed Ground Temperature Model",
-        "1,				!- Evapotranspiration Ground Cover Parameter",
-        "GroundCoupledOSCM,		!- Name of Basement Floor Boundary Condition Model",
-        "Yes,					!- Basement Horizontal Underfloor Insulation Present (Yes/No)",
-        "Dummy Material,		!- Basement Horizontal Insulation Underfloor Material Name",
-        "Perimeter,				!- Full Horizontal or Perimeter Only (Full/Perimeter)",
-        "1,						!- Perimeter width (m)",
-        "25,					!- Depth of Basement Wall In Ground Domain {m}",
-        "GroundCoupledOSCM,		!- Name of Basement Floor Boundary Condition Model",
-        "Yes,					!- Basement Wall Vertical Insulation Present(Yes/No)",
-        "Dummy Material,		!- Basement Wall Vertical Insulation Material Name",
-        "2.3,					!- Vertical insulation depth from surface (m)",
-        "timestep;				!- Domain Update interval. (Timestep, Hourly)",
+        "CoupledBasement,   !- Name",
+        "5,             !- Ground Domain Depth {m}",
+        "1,             !- Aspect Ratio",
+        "5,             !- Domain Perimeter Offset {m}",
+        "1.8,           !- Soil Thermal Conductivity {W/m-K}",
+        "3200,          !- Soil Density {kg/m3}",
+        "836,           !- Soil Specific Heat {J/kg-K}",
+        "30,            !- Soil Moisture Content Volume Fraction {percent}",
+        "50,            !- Soil Moisture Content Volume Fraction at Saturation {percent}",
+        "Site:GroundTemperature:Undisturbed:KusudaAchenbach,    !- Type of Undisturbed Ground Temperature Model",
+        "KATemps,       !- Name of Undisturbed Ground Temperature Model",
+        "1,             !- Evapotranspiration Ground Cover Parameter",
+        "GroundCoupledOSCM,     !- Name of Basement Floor Boundary Condition Model",
+        "Yes,                   !- Basement Horizontal Underfloor Insulation Present (Yes/No)",
+        "Dummy Material,        !- Basement Horizontal Insulation Underfloor Material Name",
+        "Perimeter,             !- Full Horizontal or Perimeter Only (Full/Perimeter)",
+        "1,                     !- Perimeter width (m)",
+        "25,                    !- Depth of Basement Wall In Ground Domain {m}",
+        "GroundCoupledOSCM,     !- Name of Basement Floor Boundary Condition Model",
+        "Yes,                   !- Basement Wall Vertical Insulation Present(Yes/No)",
+        "Dummy Material,        !- Basement Wall Vertical Insulation Material Name",
+        "2.3,                   !- Vertical insulation depth from surface (m)",
+        "timestep;              !- Domain Update interval. (Timestep, Hourly)",
         "Site:GroundTemperature:Undisturbed:KusudaAchenbach,",
-        "KATemps,		!- Name of object",
-        "1.8,			!- Soil Thermal Conductivity {W/m-K}",
-        "3200,			!- Soil Density {kg/m3}",
-        "836,			!- Soil Specific Heat {J/kg-K}",
-        "15.5,			!- Annual average surface temperature {C}",
-        "12.8,			!- Annual amplitude of surface temperature {delta C}",
-        "17.3;			!- Phase shift of minimum surface temperature {days}",
+        "KATemps,       !- Name of object",
+        "1.8,           !- Soil Thermal Conductivity {W/m-K}",
+        "3200,          !- Soil Density {kg/m3}",
+        "836,           !- Soil Specific Heat {J/kg-K}",
+        "15.5,          !- Annual average surface temperature {C}",
+        "12.8,          !- Annual amplitude of surface temperature {delta C}",
+        "17.3;          !- Phase shift of minimum surface temperature {days}",
         "SurfaceProperty:OtherSideConditionsModel,",
-        "GroundCoupledOSCM,		!- Name",
-        "GroundCoupledSurface;	!- Type of Modeling",
+        "GroundCoupledOSCM,     !- Name",
+        "GroundCoupledSurface;  !- Type of Modeling",
         "Material,",
         "Dummy Material, !- Name",
-        "MediumRough,	!- Roughness",
-        "0.1397,		!- Thickness {m}",
-        "1.8,			!- Conductivity {W/m-K}",
-        "2400,			!- Density {kg/m3}",
-        "750,			!- Specific Heat {J/kg-K}",
-        "0.9,			!- Thermal Absorptance",
-        "0.65,			!- Solar Absorptance",
-        "0.65;			!- Visible Absorptance",
+        "MediumRough,   !- Roughness",
+        "0.1397,        !- Thickness {m}",
+        "1.8,           !- Conductivity {W/m-K}",
+        "2400,          !- Density {kg/m3}",
+        "750,           !- Specific Heat {J/kg-K}",
+        "0.9,           !- Thermal Absorptance",
+        "0.65,          !- Solar Absorptance",
+        "0.65;          !- Visible Absorptance",
     });
 
     ASSERT_TRUE(process_idf(idf_objects));
@@ -1319,7 +1328,7 @@ TEST_F(EnergyPlusFixture, SiteGroundDomainBasement_CheckInputs_BadBasementDepth)
     bool errorsFound = false;
 
     // Other necessary inputs
-    GetOSCMData(*state, errorsFound);
+    GetOSCMData(*state);
     GetMaterialData(*state, errorsFound);
 
     state->dataPlantPipingSysMgr->domains.resize(1);
@@ -1333,50 +1342,50 @@ TEST_F(EnergyPlusFixture, SiteGroundDomainBasement_CheckInputs_BadFloorOSCMName)
 
     std::string const idf_objects = delimited_string({
         "Site:GroundDomain:Basement,",
-        "CoupledBasement,	!- Name",
-        "5,				!- Ground Domain Depth {m}",
-        "1,				!- Aspect Ratio",
-        "5,				!- Domain Perimeter Offset {m}",
-        "1.8,			!- Soil Thermal Conductivity {W/m-K}",
-        "3200,			!- Soil Density {kg/m3}",
-        "836,			!- Soil Specific Heat {J/kg-K}",
-        "30,			!- Soil Moisture Content Volume Fraction {percent}",
-        "50,			!- Soil Moisture Content Volume Fraction at Saturation {percent}",
-        "Site:GroundTemperature:Undisturbed:KusudaAchenbach,	!- Type of Undisturbed Ground Temperature Model",
-        "KATemps,		!- Name of Undisturbed Ground Temperature Model",
-        "1,				!- Evapotranspiration Ground Cover Parameter",
-        "GroundCoupledOSCM,		!- Name of Basement Floor Boundary Condition Model",
-        "Yes,					!- Basement Horizontal Underfloor Insulation Present (Yes/No)",
-        "Dummy Material,		!- Basement Horizontal Insulation Underfloor Material Name",
-        "Perimeter,				!- Full Horizontal or Perimeter Only (Full/Perimeter)",
-        "1,						!- Perimeter width (m)",
-        "2.5,					!- Depth of Basement Wall In Ground Domain {m}",
-        "GroundCoupledOSC,		!- Name of Basement Floor Boundary Condition Model",
-        "Yes,					!- Basement Wall Vertical Insulation Present(Yes/No)",
-        "Dummy Material,		!- Basement Wall Vertical Insulation Material Name",
-        "2.3,					!- Vertical insulation depth from surface (m)",
-        "timestep;				!- Domain Update interval. (Timestep, Hourly)",
+        "CoupledBasement,   !- Name",
+        "5,             !- Ground Domain Depth {m}",
+        "1,             !- Aspect Ratio",
+        "5,             !- Domain Perimeter Offset {m}",
+        "1.8,           !- Soil Thermal Conductivity {W/m-K}",
+        "3200,          !- Soil Density {kg/m3}",
+        "836,           !- Soil Specific Heat {J/kg-K}",
+        "30,            !- Soil Moisture Content Volume Fraction {percent}",
+        "50,            !- Soil Moisture Content Volume Fraction at Saturation {percent}",
+        "Site:GroundTemperature:Undisturbed:KusudaAchenbach,    !- Type of Undisturbed Ground Temperature Model",
+        "KATemps,       !- Name of Undisturbed Ground Temperature Model",
+        "1,             !- Evapotranspiration Ground Cover Parameter",
+        "GroundCoupledOSCM,     !- Name of Basement Floor Boundary Condition Model",
+        "Yes,                   !- Basement Horizontal Underfloor Insulation Present (Yes/No)",
+        "Dummy Material,        !- Basement Horizontal Insulation Underfloor Material Name",
+        "Perimeter,             !- Full Horizontal or Perimeter Only (Full/Perimeter)",
+        "1,                     !- Perimeter width (m)",
+        "2.5,                   !- Depth of Basement Wall In Ground Domain {m}",
+        "GroundCoupledOSC,      !- Name of Basement Floor Boundary Condition Model",
+        "Yes,                   !- Basement Wall Vertical Insulation Present(Yes/No)",
+        "Dummy Material,        !- Basement Wall Vertical Insulation Material Name",
+        "2.3,                   !- Vertical insulation depth from surface (m)",
+        "timestep;              !- Domain Update interval. (Timestep, Hourly)",
         "Site:GroundTemperature:Undisturbed:KusudaAchenbach,",
-        "KATemps,		!- Name of object",
-        "1.8,			!- Soil Thermal Conductivity {W/m-K}",
-        "3200,			!- Soil Density {kg/m3}",
-        "836,			!- Soil Specific Heat {J/kg-K}",
-        "15.5,			!- Annual average surface temperature {C}",
-        "12.8,			!- Annual amplitude of surface temperature {delta C}",
-        "17.3;			!- Phase shift of minimum surface temperature {days}",
+        "KATemps,       !- Name of object",
+        "1.8,           !- Soil Thermal Conductivity {W/m-K}",
+        "3200,          !- Soil Density {kg/m3}",
+        "836,           !- Soil Specific Heat {J/kg-K}",
+        "15.5,          !- Annual average surface temperature {C}",
+        "12.8,          !- Annual amplitude of surface temperature {delta C}",
+        "17.3;          !- Phase shift of minimum surface temperature {days}",
         "SurfaceProperty:OtherSideConditionsModel,",
-        "GroundCoupledOSCM,		!- Name",
-        "GroundCoupledSurface;	!- Type of Modeling",
+        "GroundCoupledOSCM,     !- Name",
+        "GroundCoupledSurface;  !- Type of Modeling",
         "Material,",
         "Dummy Material, !- Name",
-        "MediumRough,	!- Roughness",
-        "0.1397,		!- Thickness {m}",
-        "1.8,			!- Conductivity {W/m-K}",
-        "2400,			!- Density {kg/m3}",
-        "750,			!- Specific Heat {J/kg-K}",
-        "0.9,			!- Thermal Absorptance",
-        "0.65,			!- Solar Absorptance",
-        "0.65;			!- Visible Absorptance",
+        "MediumRough,   !- Roughness",
+        "0.1397,        !- Thickness {m}",
+        "1.8,           !- Conductivity {W/m-K}",
+        "2400,          !- Density {kg/m3}",
+        "750,           !- Specific Heat {J/kg-K}",
+        "0.9,           !- Thermal Absorptance",
+        "0.65,          !- Solar Absorptance",
+        "0.65;          !- Visible Absorptance",
     });
 
     ASSERT_TRUE(process_idf(idf_objects));
@@ -1389,7 +1398,7 @@ TEST_F(EnergyPlusFixture, SiteGroundDomainBasement_CheckInputs_BadFloorOSCMName)
     bool errorsFound = false;
 
     // Other necessary inputs
-    GetOSCMData(*state, errorsFound);
+    GetOSCMData(*state);
     GetMaterialData(*state, errorsFound);
 
     state->dataPlantPipingSysMgr->domains.resize(1);
@@ -1403,50 +1412,50 @@ TEST_F(EnergyPlusFixture, SiteGroundDomainBasement_CheckInputs_BadVertInsSelecti
 
     std::string const idf_objects = delimited_string({
         "Site:GroundDomain:Basement,",
-        "CoupledBasement,	!- Name",
-        "5,				!- Ground Domain Depth {m}",
-        "1,				!- Aspect Ratio",
-        "5,				!- Domain Perimeter Offset {m}",
-        "1.8,			!- Soil Thermal Conductivity {W/m-K}",
-        "3200,			!- Soil Density {kg/m3}",
-        "836,			!- Soil Specific Heat {J/kg-K}",
-        "30,			!- Soil Moisture Content Volume Fraction {percent}",
-        "50,			!- Soil Moisture Content Volume Fraction at Saturation {percent}",
-        "Site:GroundTemperature:Undisturbed:KusudaAchenbach,	!- Type of Undisturbed Ground Temperature Model",
-        "KATemps,		!- Name of Undisturbed Ground Temperature Model",
-        "1,				!- Evapotranspiration Ground Cover Parameter",
-        "GroundCoupledOSCM,		!- Name of Basement Floor Boundary Condition Model",
-        "Yes,					!- Basement Horizontal Underfloor Insulation Present (Yes/No)",
-        "Dummy Material,		!- Basement Horizontal Insulation Underfloor Material Name",
-        "Perimeter,				!- Full Horizontal or Perimeter Only (Full/Perimeter)",
-        "1,						!- Perimeter width (m)",
-        "2.5,					!- Depth of Basement Wall In Ground Domain {m}",
-        "GroundCoupledOSCM,		!- Name of Basement Floor Boundary Condition Model",
-        "Ye,					!- Basement Wall Vertical Insulation Present(Yes/No)",
-        "Dummy Material,		!- Basement Wall Vertical Insulation Material Name",
-        "2.3,					!- Vertical insulation depth from surface (m)",
-        "timestep;				!- Domain Update interval. (Timestep, Hourly)",
+        "CoupledBasement,   !- Name",
+        "5,             !- Ground Domain Depth {m}",
+        "1,             !- Aspect Ratio",
+        "5,             !- Domain Perimeter Offset {m}",
+        "1.8,           !- Soil Thermal Conductivity {W/m-K}",
+        "3200,          !- Soil Density {kg/m3}",
+        "836,           !- Soil Specific Heat {J/kg-K}",
+        "30,            !- Soil Moisture Content Volume Fraction {percent}",
+        "50,            !- Soil Moisture Content Volume Fraction at Saturation {percent}",
+        "Site:GroundTemperature:Undisturbed:KusudaAchenbach,    !- Type of Undisturbed Ground Temperature Model",
+        "KATemps,       !- Name of Undisturbed Ground Temperature Model",
+        "1,             !- Evapotranspiration Ground Cover Parameter",
+        "GroundCoupledOSCM,     !- Name of Basement Floor Boundary Condition Model",
+        "Yes,                   !- Basement Horizontal Underfloor Insulation Present (Yes/No)",
+        "Dummy Material,        !- Basement Horizontal Insulation Underfloor Material Name",
+        "Perimeter,             !- Full Horizontal or Perimeter Only (Full/Perimeter)",
+        "1,                     !- Perimeter width (m)",
+        "2.5,                   !- Depth of Basement Wall In Ground Domain {m}",
+        "GroundCoupledOSCM,     !- Name of Basement Floor Boundary Condition Model",
+        "Ye,                    !- Basement Wall Vertical Insulation Present(Yes/No)",
+        "Dummy Material,        !- Basement Wall Vertical Insulation Material Name",
+        "2.3,                   !- Vertical insulation depth from surface (m)",
+        "timestep;              !- Domain Update interval. (Timestep, Hourly)",
         "Site:GroundTemperature:Undisturbed:KusudaAchenbach,",
-        "KATemps,		!- Name of object",
-        "1.8,			!- Soil Thermal Conductivity {W/m-K}",
-        "3200,			!- Soil Density {kg/m3}",
-        "836,			!- Soil Specific Heat {J/kg-K}",
-        "15.5,			!- Annual average surface temperature {C}",
-        "12.8,			!- Annual amplitude of surface temperature {delta C}",
-        "17.3;			!- Phase shift of minimum surface temperature {days}",
+        "KATemps,       !- Name of object",
+        "1.8,           !- Soil Thermal Conductivity {W/m-K}",
+        "3200,          !- Soil Density {kg/m3}",
+        "836,           !- Soil Specific Heat {J/kg-K}",
+        "15.5,          !- Annual average surface temperature {C}",
+        "12.8,          !- Annual amplitude of surface temperature {delta C}",
+        "17.3;          !- Phase shift of minimum surface temperature {days}",
         "SurfaceProperty:OtherSideConditionsModel,",
-        "GroundCoupledOSCM,		!- Name",
-        "GroundCoupledSurface;	!- Type of Modeling",
+        "GroundCoupledOSCM,     !- Name",
+        "GroundCoupledSurface;  !- Type of Modeling",
         "Material,",
         "Dummy Material, !- Name",
-        "MediumRough,	!- Roughness",
-        "0.1397,		!- Thickness {m}",
-        "1.8,			!- Conductivity {W/m-K}",
-        "2400,			!- Density {kg/m3}",
-        "750,			!- Specific Heat {J/kg-K}",
-        "0.9,			!- Thermal Absorptance",
-        "0.65,			!- Solar Absorptance",
-        "0.65;			!- Visible Absorptance",
+        "MediumRough,   !- Roughness",
+        "0.1397,        !- Thickness {m}",
+        "1.8,           !- Conductivity {W/m-K}",
+        "2400,          !- Density {kg/m3}",
+        "750,           !- Specific Heat {J/kg-K}",
+        "0.9,           !- Thermal Absorptance",
+        "0.65,          !- Solar Absorptance",
+        "0.65;          !- Visible Absorptance",
     });
 
     EXPECT_FALSE(process_idf(idf_objects, false));
@@ -1459,7 +1468,7 @@ TEST_F(EnergyPlusFixture, SiteGroundDomainBasement_CheckInputs_BadVertInsSelecti
     bool errorsFound = false;
 
     // Other necessary inputs
-    GetOSCMData(*state, errorsFound);
+    GetOSCMData(*state);
     GetMaterialData(*state, errorsFound);
 
     state->dataPlantPipingSysMgr->domains.resize(1);
@@ -1473,50 +1482,50 @@ TEST_F(EnergyPlusFixture, SiteGroundDomainBasement_CheckInputs_BadVertInsName)
 
     std::string const idf_objects = delimited_string({
         "Site:GroundDomain:Basement,",
-        "CoupledBasement,	!- Name",
-        "5,				!- Ground Domain Depth {m}",
-        "1,				!- Aspect Ratio",
-        "5,				!- Domain Perimeter Offset {m}",
-        "1.8,			!- Soil Thermal Conductivity {W/m-K}",
-        "3200,			!- Soil Density {kg/m3}",
-        "836,			!- Soil Specific Heat {J/kg-K}",
-        "30,			!- Soil Moisture Content Volume Fraction {percent}",
-        "50,			!- Soil Moisture Content Volume Fraction at Saturation {percent}",
-        "Site:GroundTemperature:Undisturbed:KusudaAchenbach,	!- Type of Undisturbed Ground Temperature Model",
-        "KATemps,		!- Name of Undisturbed Ground Temperature Model",
-        "1,				!- Evapotranspiration Ground Cover Parameter",
-        "GroundCoupledOSCM,		!- Name of Basement Floor Boundary Condition Model",
-        "Yes,					!- Basement Horizontal Underfloor Insulation Present (Yes/No)",
-        "Dummy Material,		!- Basement Horizontal Insulation Underfloor Material Name",
-        "Perimeter,				!- Full Horizontal or Perimeter Only (Full/Perimeter)",
-        "1,						!- Perimeter width (m)",
-        "2.5,					!- Depth of Basement Wall In Ground Domain {m}",
-        "GroundCoupledOSCM,		!- Name of Basement Floor Boundary Condition Model",
-        "Yes,					!- Basement Wall Vertical Insulation Present(Yes/No)",
-        "Dummy Materia,			!- Basement Wall Vertical Insulation Material Name",
-        "2.3,					!- Vertical insulation depth from surface (m)",
-        "timestep;				!- Domain Update interval. (Timestep, Hourly)",
+        "CoupledBasement,   !- Name",
+        "5,             !- Ground Domain Depth {m}",
+        "1,             !- Aspect Ratio",
+        "5,             !- Domain Perimeter Offset {m}",
+        "1.8,           !- Soil Thermal Conductivity {W/m-K}",
+        "3200,          !- Soil Density {kg/m3}",
+        "836,           !- Soil Specific Heat {J/kg-K}",
+        "30,            !- Soil Moisture Content Volume Fraction {percent}",
+        "50,            !- Soil Moisture Content Volume Fraction at Saturation {percent}",
+        "Site:GroundTemperature:Undisturbed:KusudaAchenbach,    !- Type of Undisturbed Ground Temperature Model",
+        "KATemps,       !- Name of Undisturbed Ground Temperature Model",
+        "1,             !- Evapotranspiration Ground Cover Parameter",
+        "GroundCoupledOSCM,     !- Name of Basement Floor Boundary Condition Model",
+        "Yes,                   !- Basement Horizontal Underfloor Insulation Present (Yes/No)",
+        "Dummy Material,        !- Basement Horizontal Insulation Underfloor Material Name",
+        "Perimeter,             !- Full Horizontal or Perimeter Only (Full/Perimeter)",
+        "1,                     !- Perimeter width (m)",
+        "2.5,                   !- Depth of Basement Wall In Ground Domain {m}",
+        "GroundCoupledOSCM,     !- Name of Basement Floor Boundary Condition Model",
+        "Yes,                   !- Basement Wall Vertical Insulation Present(Yes/No)",
+        "Dummy Materia,         !- Basement Wall Vertical Insulation Material Name",
+        "2.3,                   !- Vertical insulation depth from surface (m)",
+        "timestep;              !- Domain Update interval. (Timestep, Hourly)",
         "Site:GroundTemperature:Undisturbed:KusudaAchenbach,",
-        "KATemps,		!- Name of object",
-        "1.8,			!- Soil Thermal Conductivity {W/m-K}",
-        "3200,			!- Soil Density {kg/m3}",
-        "836,			!- Soil Specific Heat {J/kg-K}",
-        "15.5,			!- Annual average surface temperature {C}",
-        "12.8,			!- Annual amplitude of surface temperature {delta C}",
-        "17.3;			!- Phase shift of minimum surface temperature {days}",
+        "KATemps,       !- Name of object",
+        "1.8,           !- Soil Thermal Conductivity {W/m-K}",
+        "3200,          !- Soil Density {kg/m3}",
+        "836,           !- Soil Specific Heat {J/kg-K}",
+        "15.5,          !- Annual average surface temperature {C}",
+        "12.8,          !- Annual amplitude of surface temperature {delta C}",
+        "17.3;          !- Phase shift of minimum surface temperature {days}",
         "SurfaceProperty:OtherSideConditionsModel,",
-        "GroundCoupledOSCM,		!- Name",
-        "GroundCoupledSurface;	!- Type of Modeling",
+        "GroundCoupledOSCM,     !- Name",
+        "GroundCoupledSurface;  !- Type of Modeling",
         "Material,",
         "Dummy Material, !- Name",
-        "MediumRough,	!- Roughness",
-        "0.1397,		!- Thickness {m}",
-        "1.8,			!- Conductivity {W/m-K}",
-        "2400,			!- Density {kg/m3}",
-        "750,			!- Specific Heat {J/kg-K}",
-        "0.9,			!- Thermal Absorptance",
-        "0.65,			!- Solar Absorptance",
-        "0.65;			!- Visible Absorptance",
+        "MediumRough,   !- Roughness",
+        "0.1397,        !- Thickness {m}",
+        "1.8,           !- Conductivity {W/m-K}",
+        "2400,          !- Density {kg/m3}",
+        "750,           !- Specific Heat {J/kg-K}",
+        "0.9,           !- Thermal Absorptance",
+        "0.65,          !- Solar Absorptance",
+        "0.65;          !- Visible Absorptance",
     });
 
     ASSERT_TRUE(process_idf(idf_objects));
@@ -1529,7 +1538,7 @@ TEST_F(EnergyPlusFixture, SiteGroundDomainBasement_CheckInputs_BadVertInsName)
     bool errorsFound = false;
 
     // Other necessary inputs
-    GetOSCMData(*state, errorsFound);
+    GetOSCMData(*state);
     GetMaterialData(*state, errorsFound);
 
     state->dataPlantPipingSysMgr->domains.resize(1);
@@ -1538,55 +1547,56 @@ TEST_F(EnergyPlusFixture, SiteGroundDomainBasement_CheckInputs_BadVertInsName)
     EXPECT_TRUE(errorsFound);
 }
 
+#ifdef GET_OUT // TimeStep is not actually used
 TEST_F(EnergyPlusFixture, SiteGroundDomainBasement_CheckInputs_BadTimestepSelection)
 {
 
     std::string const idf_objects = delimited_string({
         "Site:GroundDomain:Basement,",
-        "CoupledBasement,	!- Name",
-        "5,				!- Ground Domain Depth {m}",
-        "1,				!- Aspect Ratio",
-        "5,				!- Domain Perimeter Offset {m}",
-        "1.8,			!- Soil Thermal Conductivity {W/m-K}",
-        "3200,			!- Soil Density {kg/m3}",
-        "836,			!- Soil Specific Heat {J/kg-K}",
-        "30,			!- Soil Moisture Content Volume Fraction {percent}",
-        "50,			!- Soil Moisture Content Volume Fraction at Saturation {percent}",
-        "Site:GroundTemperature:Undisturbed:KusudaAchenbach,	!- Type of Undisturbed Ground Temperature Model",
-        "KATemps,		!- Name of Undisturbed Ground Temperature Model",
-        "1,				!- Evapotranspiration Ground Cover Parameter",
-        "GroundCoupledOSCM,		!- Name of Basement Floor Boundary Condition Model",
-        "Yes,					!- Basement Horizontal Underfloor Insulation Present (Yes/No)",
-        "Dummy Material,		!- Basement Horizontal Insulation Underfloor Material Name",
-        "Perimeter,				!- Full Horizontal or Perimeter Only (Full/Perimeter)",
-        "1,						!- Perimeter width (m)",
-        "2.5,					!- Depth of Basement Wall In Ground Domain {m}",
-        "GroundCoupledOSCM,		!- Name of Basement Floor Boundary Condition Model",
-        "Yes,					!- Basement Wall Vertical Insulation Present(Yes/No)",
-        "Dummy Material,		!- Basement Wall Vertical Insulation Material Name",
-        "2.3,					!- Vertical insulation depth from surface (m)",
-        "timeste;				!- Domain Update interval. (Timestep, Hourly)",
+        "CoupledBasement,   !- Name",
+        "5,             !- Ground Domain Depth {m}",
+        "1,             !- Aspect Ratio",
+        "5,             !- Domain Perimeter Offset {m}",
+        "1.8,           !- Soil Thermal Conductivity {W/m-K}",
+        "3200,          !- Soil Density {kg/m3}",
+        "836,           !- Soil Specific Heat {J/kg-K}",
+        "30,            !- Soil Moisture Content Volume Fraction {percent}",
+        "50,            !- Soil Moisture Content Volume Fraction at Saturation {percent}",
+        "Site:GroundTemperature:Undisturbed:KusudaAchenbach,    !- Type of Undisturbed Ground Temperature Model",
+        "KATemps,       !- Name of Undisturbed Ground Temperature Model",
+        "1,             !- Evapotranspiration Ground Cover Parameter",
+        "GroundCoupledOSCM,     !- Name of Basement Floor Boundary Condition Model",
+        "Yes,                   !- Basement Horizontal Underfloor Insulation Present (Yes/No)",
+        "Dummy Material,        !- Basement Horizontal Insulation Underfloor Material Name",
+        "Perimeter,             !- Full Horizontal or Perimeter Only (Full/Perimeter)",
+        "1,                     !- Perimeter width (m)",
+        "2.5,                   !- Depth of Basement Wall In Ground Domain {m}",
+        "GroundCoupledOSCM,     !- Name of Basement Floor Boundary Condition Model",
+        "Yes,                   !- Basement Wall Vertical Insulation Present(Yes/No)",
+        "Dummy Material,        !- Basement Wall Vertical Insulation Material Name",
+        "2.3,                   !- Vertical insulation depth from surface (m)",
+        "timeste;               !- Domain Update interval. (Timestep, Hourly)",
         "Site:GroundTemperature:Undisturbed:KusudaAchenbach,",
-        "KATemps,		!- Name of object",
-        "1.8,			!- Soil Thermal Conductivity {W/m-K}",
-        "3200,			!- Soil Density {kg/m3}",
-        "836,			!- Soil Specific Heat {J/kg-K}",
-        "15.5,			!- Annual average surface temperature {C}",
-        "12.8,			!- Annual amplitude of surface temperature {delta C}",
-        "17.3;			!- Phase shift of minimum surface temperature {days}",
+        "KATemps,       !- Name of object",
+        "1.8,           !- Soil Thermal Conductivity {W/m-K}",
+        "3200,          !- Soil Density {kg/m3}",
+        "836,           !- Soil Specific Heat {J/kg-K}",
+        "15.5,          !- Annual average surface temperature {C}",
+        "12.8,          !- Annual amplitude of surface temperature {delta C}",
+        "17.3;          !- Phase shift of minimum surface temperature {days}",
         "SurfaceProperty:OtherSideConditionsModel,",
-        "GroundCoupledOSCM,		!- Name",
-        "GroundCoupledSurface;	!- Type of Modeling",
+        "GroundCoupledOSCM,     !- Name",
+        "GroundCoupledSurface;  !- Type of Modeling",
         "Material,",
         "Dummy Material, !- Name",
-        "MediumRough,	!- Roughness",
-        "0.1397,		!- Thickness {m}",
-        "1.8,			!- Conductivity {W/m-K}",
-        "2400,			!- Density {kg/m3}",
-        "750,			!- Specific Heat {J/kg-K}",
-        "0.9,			!- Thermal Absorptance",
-        "0.65,			!- Solar Absorptance",
-        "0.65;			!- Visible Absorptance",
+        "MediumRough,   !- Roughness",
+        "0.1397,        !- Thickness {m}",
+        "1.8,           !- Conductivity {W/m-K}",
+        "2400,          !- Density {kg/m3}",
+        "750,           !- Specific Heat {J/kg-K}",
+        "0.9,           !- Thermal Absorptance",
+        "0.65,          !- Solar Absorptance",
+        "0.65;          !- Visible Absorptance",
     });
 
     EXPECT_FALSE(process_idf(idf_objects, false));
@@ -1599,7 +1609,7 @@ TEST_F(EnergyPlusFixture, SiteGroundDomainBasement_CheckInputs_BadTimestepSelect
     bool errorsFound = false;
 
     // Other necessary inputs
-    GetOSCMData(*state, errorsFound);
+    GetOSCMData(*state);
     GetMaterialData(*state, errorsFound);
 
     state->dataPlantPipingSysMgr->domains.resize(1);
@@ -1607,119 +1617,123 @@ TEST_F(EnergyPlusFixture, SiteGroundDomainBasement_CheckInputs_BadTimestepSelect
 
     EXPECT_TRUE(errorsFound);
 }
+#endif // GET_OUT
 
 TEST_F(EnergyPlusFixture, PipingSystemFullSimulation)
 {
 
-    std::string const idf_objects =
-        delimited_string({"Site:GroundDomain:Basement,",
-                          "CoupledBasement,	!- Name",
-                          "5,				!- Ground Domain Depth {m}",
-                          "1,				!- Aspect Ratio",
-                          "5,				!- Domain Perimeter Offset {m}",
-                          "1.8,			!- Soil Thermal Conductivity {W/m-K}",
-                          "3200,			!- Soil Density {kg/m3}",
-                          "836,			!- Soil Specific Heat {J/kg-K}",
-                          "30,			!- Soil Moisture Content Volume Fraction {percent}",
-                          "50,			!- Soil Moisture Content Volume Fraction at Saturation {percent}",
-                          "Site:GroundTemperature:Undisturbed:KusudaAchenbach,	!- Type of Undisturbed Ground Temperature Model",
-                          "KATemps,		!- Name of Undisturbed Ground Temperature Model",
-                          "1,				!- Evapotranspiration Ground Cover Parameter",
-                          "GroundCoupledOSCM,		!- Name of Basement Floor Boundary Condition Model",
-                          "Yes,					!- Basement Horizontal Underfloor Insulation Present (Yes/No)",
-                          "Dummy Material,		!- Basement Horizontal Insulation Underfloor Material Name",
-                          "Perimeter,				!- Full Horizontal or Perimeter Only (Full/Perimeter)",
-                          "1,						!- Perimeter width (m)",
-                          "2.5,					!- Depth of Basement Wall In Ground Domain {m}",
-                          "GroundCoupledOSCM,		!- Name of Basement Floor Boundary Condition Model",
-                          "Yes,					!- Basement Wall Vertical Insulation Present(Yes/No)",
-                          "Dummy Material,		!- Basement Wall Vertical Insulation Material Name",
-                          "2.3,					!- Vertical insulation depth from surface (m)",
-                          "timestep;				!- Domain Update interval. (Timestep, Hourly)",
-                          "Site:GroundTemperature:Undisturbed:KusudaAchenbach,",
-                          "KATemps,		!- Name of object",
-                          "1.8,			!- Soil Thermal Conductivity {W/m-K}",
-                          "3200,			!- Soil Density {kg/m3}",
-                          "836,			!- Soil Specific Heat {J/kg-K}",
-                          "15.5,			!- Annual average surface temperature {C}",
-                          "12.8,			!- Annual amplitude of surface temperature {delta C}",
-                          "17.3;			!- Phase shift of minimum surface temperature {days}",
-                          "SurfaceProperty:OtherSideConditionsModel,",
-                          "GroundCoupledOSCM,		!- Name",
-                          "GroundCoupledSurface;	!- Type of Modeling",
-                          "Material,",
-                          "Dummy Material, !- Name",
-                          "MediumRough,	!- Roughness",
-                          "0.1397,		!- Thickness {m}",
-                          "1.8,			!- Conductivity {W/m-K}",
-                          "2400,			!- Density {kg/m3}",
-                          "750,			!- Specific Heat {J/kg-K}",
-                          "0.9,			!- Thermal Absorptance",
-                          "0.65,			!- Solar Absorptance",
-                          "0.65;			!- Visible Absorptance",
+    std::string const idf_objects = delimited_string({
+        "Site:GroundDomain:Basement,",
+        "  CoupledBasement, !- Name",
+        "  5,               !- Ground Domain Depth {m}",
+        "  1,               !- Aspect Ratio",
+        "  5,               !- Domain Perimeter Offset {m}",
+        "  1.8,         !- Soil Thermal Conductivity {W/m-K}",
+        "  3200,            !- Soil Density {kg/m3}",
+        "  836,         !- Soil Specific Heat {J/kg-K}",
+        "  30,          !- Soil Moisture Content Volume Fraction {percent}",
+        "  50,          !- Soil Moisture Content Volume Fraction at Saturation {percent}",
+        "  Site:GroundTemperature:Undisturbed:KusudaAchenbach,  !- Type of Undisturbed Ground Temperature Model",
+        "  KATemps,     !- Name of Undisturbed Ground Temperature Model",
+        "  1,               !- Evapotranspiration Ground Cover Parameter",
+        "  GroundCoupledOSCM,       !- Name of Basement Floor Boundary Condition Model",
+        "  Yes,                 !- Basement Horizontal Underfloor Insulation Present (Yes/No)",
+        "  Dummy Material,      !- Basement Horizontal Insulation Underfloor Material Name",
+        "  Perimeter,               !- Full Horizontal or Perimeter Only (Full/Perimeter)",
+        "  1,                       !- Perimeter width (m)",
+        "  2.5,                 !- Depth of Basement Wall In Ground Domain {m}",
+        "  GroundCoupledOSCM,       !- Name of Basement Floor Boundary Condition Model",
+        "  Yes,                 !- Basement Wall Vertical Insulation Present(Yes/No)",
+        "  Dummy Material,      !- Basement Wall Vertical Insulation Material Name",
+        "  2.3,                 !- Vertical insulation depth from surface (m)",
+        "  timestep;                !- Domain Update interval. (Timestep, Hourly)",
 
-                          "  PipingSystem:Underground:Domain,",
-                          "    My Piping System,        !- Name",
-                          "    4,                       !- Xmax {m}",
-                          "    2.5,                     !- Ymax {m}",
-                          "    75,                      !- Zmax {m}",
-                          "    2,                       !- X-Direction Mesh Density Parameter",
-                          "    Uniform,                 !- X-Direction Mesh Type",
-                          "    ,                        !- X-Direction Geometric Coefficient",
-                          "    2,                       !- Y-Direction Mesh Density Parameter",
-                          "    Uniform,                 !- Y-Direction Mesh Type",
-                          "    ,                        !- Y-Direction Geometric Coefficient",
-                          "    6,                       !- Z-Direction Mesh Density Parameter",
-                          "    Uniform,                 !- Z-Direction Mesh Type",
-                          "    ,                        !- Z-Direction Geometric Coefficient",
-                          "    1.08,                    !- Soil Thermal Conductivity {W/m-K}",
-                          "    962,                     !- Soil Density {kg/m3}",
-                          "    2576,                    !- Soil Specific Heat {J/kg-K}",
-                          "    30,                      !- Soil Moisture Content Volume Fraction {percent}",
-                          "    50,                      !- Soil Moisture Content Volume Fraction at Saturation {percent}",
-                          "    Site:GroundTemperature:Undisturbed:KusudaAchenbach,  !- Undisturbed Ground Temperature Model Type",
-                          "    KATemps,                 !- Undisturbed Ground Temperature Model Name",
-                          "    No,                      !- This Domain Includes Basement Surface Interaction",
-                          "    ,                        !- Width of Basement Floor in Ground Domain {m}",
-                          "    ,                        !- Depth of Basement Wall In Ground Domain {m}",
-                          "    ,                        !- Shift Pipe X Coordinates By Basement Width",
-                          "    ,                        !- Name of Basement Wall Boundary Condition Model",
-                          "    ,                        !- Name of Basement Floor Boundary Condition Model",
-                          "    0.005,                   !- Convergence Criterion for the Outer Cartesian Domain Iteration Loop {deltaC}",
-                          "    100,                     !- Maximum Iterations in the Outer Cartesian Domain Iteration Loop",
-                          "    0.408,                   !- Evapotranspiration Ground Cover Parameter",
-                          "    1,                       !- Number of Pipe Circuits Entered for this Domain",
-                          "    My Pipe Circuit;         !- Pipe Circuit 1",
+        "Site:GroundTemperature:Undisturbed:KusudaAchenbach,",
+        "  KATemps,     !- Name of object",
+        "  1.8,         !- Soil Thermal Conductivity {W/m-K}",
+        "  3200,            !- Soil Density {kg/m3}",
+        "  836,         !- Soil Specific Heat {J/kg-K}",
+        "  15.5,            !- Annual average surface temperature {C}",
+        "  12.8,            !- Annual amplitude of surface temperature {delta C}",
+        "  17.3;            !- Phase shift of minimum surface temperature {days}",
 
-                          "  PipingSystem:Underground:PipeCircuit,",
-                          "    My Pipe Circuit,         !- Name",
-                          "    0.3895,                  !- Pipe Thermal Conductivity {W/m-K}",
-                          "    641,                     !- Pipe Density {kg/m3}",
-                          "    2405,                    !- Pipe Specific Heat {J/kg-K}",
-                          "    0.016,                   !- Pipe Inner Diameter {m}",
-                          "    0.02667,                 !- Pipe Outer Diameter {m}",
-                          "    0.004,                   !- Design Flow Rate {m3/s}",
-                          "    Plant Supply Intermediate Node,  !- Circuit Inlet Node",
-                          "    Plant Supply Outlet Node,!- Circuit Outlet Node",
-                          "    0.001,                   !- Convergence Criterion for the Inner Radial Iteration Loop {deltaC}",
-                          "    100,                     !- Maximum Iterations in the Inner Radial Iteration Loop",
-                          "    2,                       !- Number of Soil Nodes in the Inner Radial Near Pipe Mesh Region",
-                          "    0.03,                    !- Radial Thickness of Inner Radial Near Pipe Mesh Region",
-                          "    2,                       !- Number of Pipe Segments Entered for this Pipe Circuit",
-                          "    Segment 1,               !- Pipe Segment 1",
-                          "    Segment 2;               !- Pipe Segment 2",
+        "SurfaceProperty:OtherSideConditionsModel,",
+        "  GroundCoupledOSCM,       !- Name",
+        "  GroundCoupledSurface;    !- Type of Modeling",
+        "  Material,",
+        "  Dummy Material, !- Name",
+        "  MediumRough, !- Roughness",
+        "  0.1397,      !- Thickness {m}",
+        "  1.8,         !- Conductivity {W/m-K}",
+        "  2400,            !- Density {kg/m3}",
+        "  750,         !- Specific Heat {J/kg-K}",
+        "  0.9,         !- Thermal Absorptance",
+        "  0.65,            !- Solar Absorptance",
+        "  0.65;            !- Visible Absorptance",
 
-                          "  PipingSystem:Underground:PipeSegment,",
-                          "    Segment 1,               !- Name",
-                          "    1.95,                    !- X Position {m}",
-                          "    1.25,                    !- Y Position {m}",
-                          "    IncreasingZ;             !- Flow Direction",
+        "PipingSystem:Underground:Domain,",
+        "  My Piping System,        !- Name",
+        "  4,                       !- Xmax {m}",
+        "  2.5,                     !- Ymax {m}",
+        "  75,                      !- Zmax {m}",
+        "  2,                       !- X-Direction Mesh Density Parameter",
+        "  Uniform,                 !- X-Direction Mesh Type",
+        "  ,                        !- X-Direction Geometric Coefficient",
+        "  2,                       !- Y-Direction Mesh Density Parameter",
+        "  Uniform,                 !- Y-Direction Mesh Type",
+        "  ,                        !- Y-Direction Geometric Coefficient",
+        "  6,                       !- Z-Direction Mesh Density Parameter",
+        "  Uniform,                 !- Z-Direction Mesh Type",
+        "  ,                        !- Z-Direction Geometric Coefficient",
+        "  1.08,                    !- Soil Thermal Conductivity {W/m-K}",
+        "  962,                     !- Soil Density {kg/m3}",
+        "  2576,                    !- Soil Specific Heat {J/kg-K}",
+        "  30,                      !- Soil Moisture Content Volume Fraction {percent}",
+        "  50,                      !- Soil Moisture Content Volume Fraction at Saturation {percent}",
+        "  Site:GroundTemperature:Undisturbed:KusudaAchenbach,  !- Undisturbed Ground Temperature Model Type",
+        "  KATemps,                 !- Undisturbed Ground Temperature Model Name",
+        "  No,                      !- This Domain Includes Basement Surface Interaction",
+        "  ,                        !- Width of Basement Floor in Ground Domain {m}",
+        "  ,                        !- Depth of Basement Wall In Ground Domain {m}",
+        "  ,                        !- Shift Pipe X Coordinates By Basement Width",
+        "  ,                        !- Name of Basement Wall Boundary Condition Model",
+        "  ,                        !- Name of Basement Floor Boundary Condition Model",
+        "  0.005,                   !- Convergence Criterion for the Outer Cartesian Domain Iteration Loop {deltaC}",
+        "  100,                     !- Maximum Iterations in the Outer Cartesian Domain Iteration Loop",
+        "  0.408,                   !- Evapotranspiration Ground Cover Parameter",
+        "  1,                       !- Number of Pipe Circuits Entered for this Domain",
+        "  My Pipe Circuit;         !- Pipe Circuit 1",
 
-                          "  PipingSystem:Underground:PipeSegment,",
-                          "    Segment 2,               !- Name",
-                          "    2.05,                    !- X Position {m}",
-                          "    1.25,                    !- Y Position {m}",
-                          "    DecreasingZ;             !- Flow Direction"});
+        "PipingSystem:Underground:PipeCircuit,",
+        "  My Pipe Circuit,         !- Name",
+        "  0.3895,                  !- Pipe Thermal Conductivity {W/m-K}",
+        "  641,                     !- Pipe Density {kg/m3}",
+        "  2405,                    !- Pipe Specific Heat {J/kg-K}",
+        "  0.016,                   !- Pipe Inner Diameter {m}",
+        "  0.02667,                 !- Pipe Outer Diameter {m}",
+        "  0.004,                   !- Design Flow Rate {m3/s}",
+        "  Plant Supply Intermediate Node,  !- Circuit Inlet Node",
+        "  Plant Supply Outlet Node,!- Circuit Outlet Node",
+        "  0.001,                   !- Convergence Criterion for the Inner Radial Iteration Loop {deltaC}",
+        "  100,                     !- Maximum Iterations in the Inner Radial Iteration Loop",
+        "  2,                       !- Number of Soil Nodes in the Inner Radial Near Pipe Mesh Region",
+        "  0.03,                    !- Radial Thickness of Inner Radial Near Pipe Mesh Region",
+        "  2,                       !- Number of Pipe Segments Entered for this Pipe Circuit",
+        "  Segment 1,               !- Pipe Segment 1",
+        "  Segment 2;               !- Pipe Segment 2",
+
+        "PipingSystem:Underground:PipeSegment,",
+        "  Segment 1,               !- Name",
+        "  1.95,                    !- X Position {m}",
+        "  1.25,                    !- Y Position {m}",
+        "  IncreasingZ;             !- Flow Direction",
+
+        "PipingSystem:Underground:PipeSegment,",
+        "  Segment 2,               !- Name",
+        "  2.05,                    !- X Position {m}",
+        "  1.25,                    !- Y Position {m}",
+        "  DecreasingZ;             !- Flow Direction",
+    });
 
     ASSERT_TRUE(process_idf(idf_objects));
 
@@ -1727,6 +1741,8 @@ TEST_F(EnergyPlusFixture, PipingSystemFullSimulation)
     state->dataPlnt->TotNumLoops = 1;
     state->dataPlnt->PlantLoop.allocate(1);
 
+    state->dataPlnt->PlantLoop(1).FluidName = "WATER";
+    state->dataPlnt->PlantLoop(1).glycol = Fluid::GetWater(*state);
     state->dataPlnt->PlantLoop(1).LoopSide(DataPlant::LoopSideLocation::Demand).TotalBranches = 1;
     state->dataPlnt->PlantLoop(1).LoopSide(DataPlant::LoopSideLocation::Demand).Branch.allocate(1);
     state->dataPlnt->PlantLoop(1).LoopSide(DataPlant::LoopSideLocation::Demand).Branch(1).TotalComponents = 1;
@@ -1749,7 +1765,7 @@ TEST_F(EnergyPlusFixture, PipingSystemFullSimulation)
 
     // Other necessary inputs
     bool errorsFound = false;
-    GetOSCMData(*state, errorsFound);
+    GetOSCMData(*state);
     GetMaterialData(*state, errorsFound);
 
     // first call the factory, it will call GetInput
@@ -1773,11 +1789,12 @@ TEST_F(EnergyPlusFixture, PipingSystemFullSimulation)
     initLoopEquip = false;
     EnergyPlus::PlantLocation myLocation = EnergyPlus::PlantLocation(1, DataPlant::LoopSideLocation::Supply, 1, 1);
     Real64 curLoad = 0.0;
+    state->dataGlobal->BeginSimFlag = true;
+    state->dataGlobal->BeginEnvrnFlag = true;
+    state->dataEnvrn->SOLCOS(3) = 1.0;
     thisCircuit->simulate(*state, myLocation, true, curLoad, true);
 
     // we can also try to call from the Domain side
-    state->dataGlobal->BeginSimFlag = true;
-    state->dataGlobal->BeginEnvrnFlag = true;
     PlantPipingSystemsManager::SimulateGroundDomains(*state, false);
 }
 
@@ -1900,9 +1917,9 @@ TEST_F(EnergyPlusFixture, PipingSystem_Check_Correct_Pipe_Diameters)
     EXPECT_TRUE(ErrorsFound);
 
     std::string error_string = delimited_string({
-        R"(   ** Severe  ** ReadPipeCircuitInputs:PipingSystem:Underground:PipeCircuit="MY PIPE CIRCUIT", invalid Pipe Outer Diameter="1.200E-002", Condition: Outer diameter must be greater than inner diameter.)",
+        R"(   ** Severe  ** ReadPipeCircuitInputs:PipingSystem:Underground:PipeCircuit="MY PIPE CIRCUIT", invalid Pipe Outer Diameter="0.012", Condition: Outer diameter must be greater than inner diameter.)",
         R"(   ** Severe  ** ReadPipeCircuitInputs: GroundHeatExchanger:HorizontalTrench="GHX HORIZONTAL TRENCH" has invalid pipe diameters.)",
-        R"(   **   ~~~   ** Outer diameter [1.100E-002] must be greater than inner diameter [1.500E-002].)",
+        R"(   **   ~~~   ** Outer diameter [0.011] must be greater than inner diameter [0.015].)",
     });
     EXPECT_TRUE(compare_err_stream(error_string, true));
 }
@@ -1915,12 +1932,13 @@ TEST_F(EnergyPlusFixture, PipingSystem_SiteGroundDomainUsingNoMassMatTest)
     Real64 Thickness;
     int MaterialIndex;
 
-    Material::MaterialProperties *p = new Material::MaterialProperties;
-    state->dataMaterial->Material.push_back(p);
+    Material::MaterialBase *p = new Material::MaterialBase;
+    state->dataMaterial->materials.push_back(p);
 
     // Test 1: Material has a valid thickness and is not R-only, result should be false
     MaterialIndex = 1;
-    state->dataMaterial->Material(MaterialIndex)->ROnly = false;
+    auto *thisMaterial = state->dataMaterial->materials(MaterialIndex);
+    thisMaterial->ROnly = false;
     Thickness = 0.01;
     ExpectedResult = false;
     TestResult = SiteGroundDomainUsingNoMassMat(*state, Thickness, MaterialIndex);
@@ -1929,8 +1947,7 @@ TEST_F(EnergyPlusFixture, PipingSystem_SiteGroundDomainUsingNoMassMatTest)
 
     // Test 2a: Material has a valid thickness but is R-only, result should be true
     //         Note that generally this case would not be encountered in EnergyPlus
-    MaterialIndex = 1;
-    state->dataMaterial->Material(MaterialIndex)->ROnly = true;
+    thisMaterial->ROnly = true;
     Thickness = 0.01;
     ExpectedResult = true;
     TestResult = SiteGroundDomainUsingNoMassMat(*state, Thickness, MaterialIndex);
@@ -1939,8 +1956,7 @@ TEST_F(EnergyPlusFixture, PipingSystem_SiteGroundDomainUsingNoMassMatTest)
 
     // Test 2b: Material does not have a valid thickness but is not R-only, result should be true
     //         Note that generally this case would not be encountered in EnergyPlus
-    MaterialIndex = 1;
-    state->dataMaterial->Material(MaterialIndex)->ROnly = false;
+    thisMaterial->ROnly = false;
     Thickness = 0.0;
     ExpectedResult = true;
     TestResult = SiteGroundDomainUsingNoMassMat(*state, Thickness, MaterialIndex);
@@ -1948,8 +1964,7 @@ TEST_F(EnergyPlusFixture, PipingSystem_SiteGroundDomainUsingNoMassMatTest)
     EXPECT_EQ(TestResult, ExpectedResult);
 
     // Test 3: Material does not have a valid thickness and is not R-only, result should be true
-    MaterialIndex = 1;
-    state->dataMaterial->Material(MaterialIndex)->ROnly = true;
+    thisMaterial->ROnly = true;
     Thickness = 0.0;
     ExpectedResult = true;
     TestResult = SiteGroundDomainUsingNoMassMat(*state, Thickness, MaterialIndex);
@@ -1961,51 +1976,51 @@ TEST_F(EnergyPlusFixture, SiteGroundDomainSlab_Fix_HorizInsDepth)
 {
     std::string const idf_objects = delimited_string({
         "Site:GroundDomain:Slab,",
-        "CoupledSlab,	!- Name",
-        "5,				!- Ground Domain Depth {m}",
-        "1,				!- Aspect Ratio",
-        "5,				!- Domain Perimeter Offset {m}",
-        "1.8,			!- Soil Thermal Conductivity {W/m-K}",
-        "3200,			!- Soil Density {kg/m3}",
-        "836,			!- Soil Specific Heat {J/kg-K}",
-        "30,			!- Soil Moisture Content Volume Fraction {percent}",
-        "50,			!- Soil Moisture Content Volume Fraction at Saturation {percent}",
-        "Site:GroundTemperature:Undisturbed:KusudaAchenbach,	!- Type of Undisturbed Ground Temperature Model",
-        "KATemps,		!- Name of Undisturbed Ground Temperature Model",
-        "1,				!- Evapotranspiration Ground Cover Parameter",
-        "GroundCoupledOSCM,	!- Name of Floor Boundary Condition Model",
-        "InGrade,		!- Slab Location (InGrade/OnGrade)",
-        "SlabMaterial,	!- Slab Material Name",
-        "Yes,			!- Horizontal Insulation (Yes/No)",
-        "HorizInsulation,	!- Horizontal Insulation Material Name",
-        "Full,			!- Full Horizontal or Perimeter Only (Full/Perimeter)",
-        ",				!- Perimeter insulation width (m)",
-        "Yes,			!- Vertical Insulation (Yes/No)",
-        "VertiInsulation,	!- Vertical Insulation Name",
-        "0.5,			!- Vertical perimeter insulation depth from surface (m)",
-        "Hourly;		!- Domain Simulation Interval. (Timestep/Hourly)",
+        "CoupledSlab,   !- Name",
+        "5,             !- Ground Domain Depth {m}",
+        "1,             !- Aspect Ratio",
+        "5,             !- Domain Perimeter Offset {m}",
+        "1.8,           !- Soil Thermal Conductivity {W/m-K}",
+        "3200,          !- Soil Density {kg/m3}",
+        "836,           !- Soil Specific Heat {J/kg-K}",
+        "30,            !- Soil Moisture Content Volume Fraction {percent}",
+        "50,            !- Soil Moisture Content Volume Fraction at Saturation {percent}",
+        "Site:GroundTemperature:Undisturbed:KusudaAchenbach,    !- Type of Undisturbed Ground Temperature Model",
+        "KATemps,       !- Name of Undisturbed Ground Temperature Model",
+        "1,             !- Evapotranspiration Ground Cover Parameter",
+        "GroundCoupledOSCM, !- Name of Floor Boundary Condition Model",
+        "InGrade,       !- Slab Location (InGrade/OnGrade)",
+        "SlabMaterial,  !- Slab Material Name",
+        "Yes,           !- Horizontal Insulation (Yes/No)",
+        "HorizInsulation,   !- Horizontal Insulation Material Name",
+        "Full,          !- Full Horizontal or Perimeter Only (Full/Perimeter)",
+        ",              !- Perimeter insulation width (m)",
+        "Yes,           !- Vertical Insulation (Yes/No)",
+        "VertiInsulation,   !- Vertical Insulation Name",
+        "0.5,           !- Vertical perimeter insulation depth from surface (m)",
+        "Hourly;        !- Domain Simulation Interval. (Timestep/Hourly)",
         "Site:GroundTemperature:Undisturbed:KusudaAchenbach,",
-        "KATemps,		!- Name of object",
-        "1.8,			!- Soil Thermal Conductivity {W/m-K}",
-        "3200,			!- Soil Density {kg/m3}",
-        "836,			!- Soil Specific Heat {J/kg-K}",
-        "15.5,			!- Annual average surface temperature {C}",
-        "12.8,			!- Annual amplitude of surface temperature {delta C}",
-        "17.3;			!- Phase shift of minimum surface temperature {days}",
+        "KATemps,       !- Name of object",
+        "1.8,           !- Soil Thermal Conductivity {W/m-K}",
+        "3200,          !- Soil Density {kg/m3}",
+        "836,           !- Soil Specific Heat {J/kg-K}",
+        "15.5,          !- Annual average surface temperature {C}",
+        "12.8,          !- Annual amplitude of surface temperature {delta C}",
+        "17.3;          !- Phase shift of minimum surface temperature {days}",
         "SurfaceProperty:OtherSideConditionsModel,",
-        "GroundCoupledOSCM,		!- Name",
-        "GroundCoupledSurface;	!- Type of Modeling",
+        "GroundCoupledOSCM,     !- Name",
+        "GroundCoupledSurface;  !- Type of Modeling",
 
         "Material,",
         "SlabMaterial,  !- Name",
-        "MediumRough,	!- Roughness",
-        "0.2,		    !- Thickness {m}",
-        "1.8,			!- Conductivity {W/m-K}",
-        "2400,			!- Density {kg/m3}",
-        "750,			!- Specific Heat {J/kg-K}",
-        "0.9,			!- Thermal Absorptance",
-        "0.65,			!- Solar Absorptance",
-        "0.65;			!- Visible Absorptance",
+        "MediumRough,   !- Roughness",
+        "0.2,           !- Thickness {m}",
+        "1.8,           !- Conductivity {W/m-K}",
+        "2400,          !- Density {kg/m3}",
+        "750,           !- Specific Heat {J/kg-K}",
+        "0.9,           !- Thermal Absorptance",
+        "0.65,          !- Solar Absorptance",
+        "0.65;          !- Visible Absorptance",
 
         "Material,",
         "HorizInsulation,         !- Name",
@@ -2040,7 +2055,7 @@ TEST_F(EnergyPlusFixture, SiteGroundDomainSlab_Fix_HorizInsDepth)
     bool errorsFound = false;
 
     // Other necessary inputs
-    GetOSCMData(*state, errorsFound);
+    GetOSCMData(*state);
     GetMaterialData(*state, errorsFound);
 
     state->dataPlantPipingSysMgr->domains.resize(1);
@@ -2089,51 +2104,51 @@ TEST_F(EnergyPlusFixture, SiteGroundDomainSlab_Fix_HorizInsDepth_Test2)
 
     std::string const idf_objects = delimited_string({
         "Site:GroundDomain:Slab,",
-        "CoupledSlab,	!- Name",
-        "5,				!- Ground Domain Depth {m}",
-        "1,				!- Aspect Ratio",
-        "5,				!- Domain Perimeter Offset {m}",
-        "1.8,			!- Soil Thermal Conductivity {W/m-K}",
-        "3200,			!- Soil Density {kg/m3}",
-        "836,			!- Soil Specific Heat {J/kg-K}",
-        "30,			!- Soil Moisture Content Volume Fraction {percent}",
-        "50,			!- Soil Moisture Content Volume Fraction at Saturation {percent}",
-        "Site:GroundTemperature:Undisturbed:KusudaAchenbach,	!- Type of Undisturbed Ground Temperature Model",
-        "KATemps,		!- Name of Undisturbed Ground Temperature Model",
-        "1,				!- Evapotranspiration Ground Cover Parameter",
-        "GroundCoupledOSCM,	!- Name of Floor Boundary Condition Model",
-        "InGrade,		!- Slab Location (InGrade/OnGrade)",
-        "SlabMaterial,	!- Slab Material Name",
-        "Yes,			!- Horizontal Insulation (Yes/No)",
-        "HorizInsulation,	!- Horizontal Insulation Material Name",
-        "Full,			!- Full Horizontal or Perimeter Only (Full/Perimeter)",
-        ",				!- Perimeter insulation width (m)",
-        "Yes,			!- Vertical Insulation (Yes/No)",
-        "VertiInsulation,	!- Vertical Insulation Name",
-        "0.5,			!- Vertical perimeter insulation depth from surface (m)",
-        "Hourly;		!- Domain Simulation Interval. (Timestep/Hourly)",
+        "CoupledSlab,   !- Name",
+        "5,             !- Ground Domain Depth {m}",
+        "1,             !- Aspect Ratio",
+        "5,             !- Domain Perimeter Offset {m}",
+        "1.8,           !- Soil Thermal Conductivity {W/m-K}",
+        "3200,          !- Soil Density {kg/m3}",
+        "836,           !- Soil Specific Heat {J/kg-K}",
+        "30,            !- Soil Moisture Content Volume Fraction {percent}",
+        "50,            !- Soil Moisture Content Volume Fraction at Saturation {percent}",
+        "Site:GroundTemperature:Undisturbed:KusudaAchenbach,    !- Type of Undisturbed Ground Temperature Model",
+        "KATemps,       !- Name of Undisturbed Ground Temperature Model",
+        "1,             !- Evapotranspiration Ground Cover Parameter",
+        "GroundCoupledOSCM, !- Name of Floor Boundary Condition Model",
+        "InGrade,       !- Slab Location (InGrade/OnGrade)",
+        "SlabMaterial,  !- Slab Material Name",
+        "Yes,           !- Horizontal Insulation (Yes/No)",
+        "HorizInsulation,   !- Horizontal Insulation Material Name",
+        "Full,          !- Full Horizontal or Perimeter Only (Full/Perimeter)",
+        ",              !- Perimeter insulation width (m)",
+        "Yes,           !- Vertical Insulation (Yes/No)",
+        "VertiInsulation,   !- Vertical Insulation Name",
+        "0.5,           !- Vertical perimeter insulation depth from surface (m)",
+        "Hourly;        !- Domain Simulation Interval. (Timestep/Hourly)",
         "Site:GroundTemperature:Undisturbed:KusudaAchenbach,",
-        "KATemps,		!- Name of object",
-        "1.8,			!- Soil Thermal Conductivity {W/m-K}",
-        "3200,			!- Soil Density {kg/m3}",
-        "836,			!- Soil Specific Heat {J/kg-K}",
-        "15.5,			!- Annual average surface temperature {C}",
-        "12.8,			!- Annual amplitude of surface temperature {delta C}",
-        "17.3;			!- Phase shift of minimum surface temperature {days}",
+        "KATemps,       !- Name of object",
+        "1.8,           !- Soil Thermal Conductivity {W/m-K}",
+        "3200,          !- Soil Density {kg/m3}",
+        "836,           !- Soil Specific Heat {J/kg-K}",
+        "15.5,          !- Annual average surface temperature {C}",
+        "12.8,          !- Annual amplitude of surface temperature {delta C}",
+        "17.3;          !- Phase shift of minimum surface temperature {days}",
         "SurfaceProperty:OtherSideConditionsModel,",
-        "GroundCoupledOSCM,		!- Name",
-        "GroundCoupledSurface;	!- Type of Modeling",
+        "GroundCoupledOSCM,     !- Name",
+        "GroundCoupledSurface;  !- Type of Modeling",
 
         "Material,",
         "SlabMaterial,  !- Name",
-        "MediumRough,	!- Roughness",
-        "0.2,		    !- Thickness {m}",
-        "1.8,			!- Conductivity {W/m-K}",
-        "2400,			!- Density {kg/m3}",
-        "750,			!- Specific Heat {J/kg-K}",
-        "0.9,			!- Thermal Absorptance",
-        "0.65,			!- Solar Absorptance",
-        "0.65;			!- Visible Absorptance",
+        "MediumRough,   !- Roughness",
+        "0.2,           !- Thickness {m}",
+        "1.8,           !- Conductivity {W/m-K}",
+        "2400,          !- Density {kg/m3}",
+        "750,           !- Specific Heat {J/kg-K}",
+        "0.9,           !- Thermal Absorptance",
+        "0.65,          !- Solar Absorptance",
+        "0.65;          !- Visible Absorptance",
 
         "Material,",
         "HorizInsulation,         !- Name",
@@ -2168,7 +2183,7 @@ TEST_F(EnergyPlusFixture, SiteGroundDomainSlab_Fix_HorizInsDepth_Test2)
     bool errorsFound = false;
 
     // Other necessary inputs
-    GetOSCMData(*state, errorsFound);
+    GetOSCMData(*state);
     GetMaterialData(*state, errorsFound);
 
     state->dataPlantPipingSysMgr->domains.resize(1);
@@ -2214,4 +2229,133 @@ TEST_F(EnergyPlusFixture, SiteGroundDomainSlab_Fix_HorizInsDepth_Test2)
     EXPECT_NEAR(theDomain.Partitions.Y[partySize - 1].TotalWidth, totalWid, err_tol);
 
     EXPECT_TRUE(theDomain.Partitions.Y[partySize - 1].partitionType == PartitionType::UnderFloor);
+}
+
+TEST_F(EnergyPlusFixture, SiteGroundDomainSlab_FiniteDifference)
+{
+
+    std::string const idf_objects = delimited_string({
+
+        "Site:GroundTemperature:Undisturbed:FiniteDifference,",
+        "  Ground,                  !- Name",
+        "  1,                       !- Soil Thermal Conductivity {W/m-K}",
+        "  1250,                    !- Soil Density {kg/m3}",
+        "  1200,                    !- Soil Specific Heat {J/kg-K}",
+        "  30,                      !- Soil Moisture Content Volume Fraction {percent}",
+        "  50,                      !- Soil Moisture Content Volume Fraction at Saturation {percent}",
+        "  ;                        !- Evapotranspiration Ground Cover Parameter {dimensionless}",
+
+        "Site:GroundDomain:Slab,",
+        "  Slab,                    !- Name",
+        "  10,                      !- Ground Domain Depth {m}",
+        "  1,                       !- Aspect Ratio",
+        "  5,                       !- Perimeter Offset {m}",
+        "  ,                        !- Soil Thermal Conductivity {W/m-K}",
+        "  2800,                    !- Soil Density {kg/m3}",
+        "  850,                     !- Soil Specific Heat {J/kg-K}",
+        "  30,                      !- Soil Moisture Content Volume Fraction {percent}",
+        "  50,                      !- Soil Moisture Content Volume Fraction at Saturation {percent}",
+        "  Site:GroundTemperature:Undisturbed:FiniteDifference,  !- Undisturbed Ground Temperature Model Type",
+        "  Ground,                  !- Undisturbed Ground Temperature Model Name",
+        "  ,                        !- Evapotranspiration Ground Cover Parameter",
+        "  GroundDomain,            !- Slab Boundary Condition Model Name",
+        "  OnGrade,                 !- Slab Location",
+        "  ,                        !- Slab Material Name",
+        "  No,                      !- Horizontal Insulation",
+        "  ,                        !- Horizontal Insulation Material Name",
+        "  Full,                    !- Horizontal Insulation Extents",
+        "  ,                        !- Perimeter Insulation Width {m}",
+        "  No,                      !- Vertical Insulation",
+        "  ,                        !- Vertical Insulation Material Name",
+        "  ,                        !- Vertical Insulation Depth {m}",
+        "  Hourly,                  !- Simulation Timestep",
+        "  ,                        !- Geometric Mesh Coefficient",
+        "  6;                       !- Mesh Density Parameter",
+
+        "SurfaceProperty:OtherSideConditionsModel,",
+        "  GroundDomain,            !- Name",
+        "  GroundCoupledSurface;    !- Type of Modeling",
+
+        "RunPeriod,",
+        "  January,                 !- Name",
+        "  1,                       !- Begin Month",
+        "  1,                       !- Begin Day of Month",
+        "  ,                        !- Begin Year",
+        "  1,                       !- End Month",
+        "  31,                      !- End Day of Month",
+        "  ,                        !- End Year",
+        "  Tuesday,                 !- Day of Week for Start Day",
+        "  Yes,                     !- Use Weather File Holidays and Special Days",
+        "  Yes,                     !- Use Weather File Daylight Saving Period",
+        "  No,                      !- Apply Weekend Holiday Rule",
+        "  Yes,                     !- Use Weather File Rain Indicators",
+        "  Yes;                     !- Use Weather File Snow Indicators",
+    });
+
+    EXPECT_TRUE(process_idf(idf_objects));
+
+    // Set an actual weather file to Chicago EPW
+    state->dataWeather->WeatherFileExists = true;
+    state->files.inputWeatherFilePath.filePath = fs::path(configured_source_directory()) / "weather/USA_IL_Chicago-OHare.Intl.AP.725300_TMY3.epw";
+
+    // Read the project data, such as Timestep
+    state->dataGlobal->BeginSimFlag = true;
+    SimulationManager::GetProjectData(*state);
+    EXPECT_EQ(state->dataGlobal->TimeStepsInHour, 4);
+
+    // Needed to avoid crash in SetupSimulation (from ElectricPowerServiceManager.hh)
+    createFacilityElectricPowerServiceObject(*state);
+
+    bool errorsFound = false;
+    SimulationManager::SetupSimulation(*state, errorsFound);
+    ASSERT_FALSE(errorsFound);
+
+    EXPECT_EQ(state->dataWeather->NumOfEnvrn, 1);
+    EXPECT_EQ(state->dataEnvrn->TotDesDays, 0);
+    EXPECT_EQ(state->dataWeather->TotRunPers, 1);
+
+    // Dummy surface
+    state->dataSurface->Surface.allocate(1);
+    state->dataSurface->Surface(1).OSCMPtr = 1;
+    state->dataSurface->Surface(1).Area = 100;
+
+    // Other necessary inputs
+    GetOSCMData(*state);
+    GetMaterialData(*state, errorsFound);
+
+    state->dataPlantPipingSysMgr->domains.resize(1);
+    EXPECT_NO_THROW(ReadZoneCoupledDomainInputs(*state, 1, 1, errorsFound));
+
+    EXPECT_FALSE(errorsFound);
+    EXPECT_TRUE(compare_err_stream(""));
+}
+
+TEST_F(EnergyPlusFixture, calcFluxWeightingFactorTest)
+{
+    Real64 weightedFlux;
+    Real64 uniformFlux;
+    Real64 actualResult;
+    Real64 expectedResult;
+    Real64 constexpr allowedTolerance = 0.00001;
+
+    // Test 1a: Everything normal and positive, simple calculation.
+    weightedFlux = 1.0;
+    uniformFlux = 1.0;
+    expectedResult = 1.0;
+    actualResult = calcFluxWeightingFactor(weightedFlux, uniformFlux);
+    EXPECT_NEAR(actualResult, expectedResult, allowedTolerance);
+
+    // Test 1b: Everything normal and negative, simple calculation.
+    weightedFlux = -0.1;
+    uniformFlux = -0.5;
+    expectedResult = 0.2;
+    actualResult = calcFluxWeightingFactor(weightedFlux, uniformFlux);
+    EXPECT_NEAR(actualResult, expectedResult, allowedTolerance);
+
+    // Test 2: Zero uniform flux--the condition that caused the problem.  Return a unity value.
+    weightedFlux = 1.0;
+    uniformFlux = 0.0;
+    expectedResult = 1.0;
+    actualResult = calcFluxWeightingFactor(weightedFlux, uniformFlux);
+    EXPECT_NEAR(actualResult, expectedResult, allowedTolerance);
 }

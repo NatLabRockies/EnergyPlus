@@ -1,0 +1,11 @@
+.wy-nav-content {
+    max-width: 1500px;
+}
+
+.form__field {
+    width: 100%;
+    font-size: 1.3rem;
+    padding: 7px 7px;
+    margin-bottom: 10px;
+    background: transparent;
+}

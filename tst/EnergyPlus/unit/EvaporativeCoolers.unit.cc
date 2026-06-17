@@ -1,7 +1,7 @@
-// EnergyPlus, Copyright (c) 1996-2023, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
-// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other
+// National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
 // contributors. All rights reserved.
 //
 // NOTICE: This Software was developed under funding from the U.S. Department of Energy and the
@@ -77,6 +77,7 @@ namespace EnergyPlus {
 
 TEST_F(EnergyPlusFixture, EvapCoolers_SecondaryAirOutletCondition)
 {
+    state->init_state(*state);
     auto &EvapCond(state->dataEvapCoolers->EvapCond);
 
     EvapCond.allocate(1);
@@ -104,8 +105,6 @@ TEST_F(EnergyPlusFixture, EvapCoolers_SecondaryAirOutletCondition)
     AirMassFlowSec = 2.0;
     QHXTotal = 10206.410750000941;
 
-    InitializePsychRoutines(*state);
-
     // make the call for dry operating mode
     CalcSecondaryAirOutletCondition(*state, EvapCoolNum, OperatingMode, AirMassFlowSec, EDBTSec, EWBTSec, EHumRatSec, QHXTotal, QHXLatent);
 
@@ -131,6 +130,7 @@ TEST_F(EnergyPlusFixture, EvapCoolers_SecondaryAirOutletCondition)
 
 TEST_F(EnergyPlusFixture, EvapCoolers_IndEvapCoolerOutletTemp)
 {
+    state->init_state(*state);
     auto &EvapCond(state->dataEvapCoolers->EvapCond);
 
     int constexpr EvapCoolNum(1);
@@ -167,6 +167,7 @@ TEST_F(EnergyPlusFixture, EvapCoolers_IndEvapCoolerOutletTemp)
 
 TEST_F(EnergyPlusFixture, EvapCoolers_SizeIndEvapCoolerTest)
 {
+    state->init_state(*state);
     auto &EvapCond(state->dataEvapCoolers->EvapCond);
 
     int constexpr EvapCoolNum(1);
@@ -260,6 +261,7 @@ TEST_F(EnergyPlusFixture, EvapCoolers_SizeIndEvapCoolerTest)
 
 TEST_F(EnergyPlusFixture, EvapCoolers_SizeDirEvapCoolerTest)
 {
+    state->init_state(*state);
     auto &EvapCond(state->dataEvapCoolers->EvapCond);
 
     int constexpr EvapCoolNum(1);
@@ -327,6 +329,7 @@ TEST_F(EnergyPlusFixture, EvapCoolers_SizeDirEvapCoolerTest)
 
 TEST_F(EnergyPlusFixture, EvaporativeCoolers_CalcSecondaryAirOutletCondition)
 {
+    state->init_state(*state);
     auto &EvapCond(state->dataEvapCoolers->EvapCond);
 
     EvapCond.allocate(1);
@@ -355,8 +358,6 @@ TEST_F(EnergyPlusFixture, EvaporativeCoolers_CalcSecondaryAirOutletCondition)
     AirMassFlowSec = 2.0;
     QHXTotal = 10206.410750000941;
 
-    InitializePsychRoutines(*state);
-
     // make the call for dry operating mode
     EvaporativeCoolers::CalcSecondaryAirOutletCondition(
         *state, EvapCoolNum, OperatingMode, AirMassFlowSec, EDBTSec, EWBTSec, EHumRatSec, QHXTotal, QHXLatent);
@@ -384,6 +385,7 @@ TEST_F(EnergyPlusFixture, EvaporativeCoolers_CalcSecondaryAirOutletCondition)
 
 TEST_F(EnergyPlusFixture, EvaporativeCoolers_CalcIndirectRDDEvapCoolerOutletTemp)
 {
+    state->init_state(*state);
     auto &EvapCond(state->dataEvapCoolers->EvapCond);
 
     state->dataEnvrn->OutBaroPress = 101325.0;
@@ -419,6 +421,7 @@ TEST_F(EnergyPlusFixture, EvaporativeCoolers_CalcIndirectRDDEvapCoolerOutletTemp
 
 TEST_F(EnergyPlusFixture, EvaporativeCoolers_IndEvapCoolerPower)
 {
+    state->init_state(*state);
     auto &EvapCond(state->dataEvapCoolers->EvapCond);
 
     EvapCond.allocate(1);
@@ -430,11 +433,10 @@ TEST_F(EnergyPlusFixture, EvaporativeCoolers_IndEvapCoolerPower)
     OperatingMode DryWetMode(EvaporativeCoolers::OperatingMode::DryFull);
     Real64 FlowRatio(1.0);
 
-    EvapCond(EvapCoolNum).FanPowerModifierCurveIndex = 1;
-    state->dataCurveManager->allocateCurveVector(1);
-    auto *curve = state->dataCurveManager->PerfCurve(1);
+    auto *curve = AddCurve(*state, "Curve1");
+    EvapCond(EvapCoolNum).FanPowerModifierCurve = curve;
+
     curve->curveType = CurveType::Quadratic;
-    curve->interpolationType = InterpType::EvaluateCurveToLimits;
     curve->coeff[0] = 0.0;
     curve->coeff[1] = 1.0;
     curve->coeff[2] = 0.0;
@@ -465,11 +467,12 @@ TEST_F(EnergyPlusFixture, EvaporativeCoolers_IndEvapCoolerPower)
     EXPECT_EQ(200 * 0.8 + 100 * 0.8 * 0.5, EvapCond(EvapCoolNum).EvapCoolerPower);
 
     EvapCond.deallocate();
-    state->dataCurveManager->PerfCurve.deallocate();
+    state->dataCurveManager->curves.deallocate();
 }
 
 TEST_F(EnergyPlusFixture, EvaporativeCoolers_SizeEvapCooler)
 {
+    state->init_state(*state);
     auto &EvapCond(state->dataEvapCoolers->EvapCond);
 
     // one-time setup of evap cooler instance
@@ -551,6 +554,7 @@ TEST_F(EnergyPlusFixture, EvaporativeCoolers_SizeEvapCooler)
 
 TEST_F(EnergyPlusFixture, DefaultAutosizeIndEvapCoolerTest)
 {
+    state->init_state(*state);
 
     int constexpr EvapCoolNum(1);
     Real64 PrimaryAirDesignFlow(0.0);
@@ -649,6 +653,7 @@ TEST_F(EnergyPlusFixture, DefaultAutosizeIndEvapCoolerTest)
 
 TEST_F(EnergyPlusFixture, DefaultAutosizeDirEvapCoolerTest)
 {
+    state->init_state(*state);
 
     int constexpr EvapCoolNum(1);
     Real64 PrimaryAirDesignFlow(0.0);
@@ -718,6 +723,7 @@ TEST_F(EnergyPlusFixture, DefaultAutosizeDirEvapCoolerTest)
 
 TEST_F(EnergyPlusFixture, DirectEvapCoolerResearchSpecialCalcTest)
 {
+    state->init_state(*state);
     auto &EvapCond(state->dataEvapCoolers->EvapCond);
 
     // one-time setup of evap cooler instance
@@ -727,10 +733,8 @@ TEST_F(EnergyPlusFixture, DirectEvapCoolerResearchSpecialCalcTest)
     auto &thisEvapCooler = EvapCond(EvapCoolNum);
     state->dataEnvrn->OutBaroPress = 101325.0;
 
-    state->dataCurveManager->allocateCurveVector(1);
-    auto *curve = state->dataCurveManager->PerfCurve(1);
+    auto *curve = AddCurve(*state, "Curve1");
     curve->curveType = CurveType::Quadratic;
-    curve->interpolationType = InterpType::EvaluateCurveToLimits;
     curve->coeff[0] = 0.0;
     curve->coeff[1] = 1.0;
     curve->inputLimits[0].min = 0.0;
@@ -739,8 +743,8 @@ TEST_F(EnergyPlusFixture, DirectEvapCoolerResearchSpecialCalcTest)
     // set up the flow rates for a direct RDDSpecial
     thisEvapCooler.evapCoolerType = EvapCoolerType::DirectResearchSpecial;
     thisEvapCooler.Name = "MyDirectEvapCoolerRS";
-    thisEvapCooler.SchedPtr = DataGlobalConstants::ScheduleAlwaysOn;
-    thisEvapCooler.PumpPowerModifierCurveIndex = 1;
+    thisEvapCooler.availSched = Sched::GetScheduleAlwaysOn(*state);
+    thisEvapCooler.PumpPowerModifierCurve = curve;
     thisEvapCooler.DirectEffectiveness = 0.75;
     thisEvapCooler.DesVolFlowRate = 1.0;
     thisEvapCooler.InletNode = 1;
@@ -769,6 +773,7 @@ TEST_F(EnergyPlusFixture, DirectEvapCoolerResearchSpecialCalcTest)
 
 TEST_F(EnergyPlusFixture, EvaporativeCoolers_IndirectRDDEvapCoolerOperatingMode)
 {
+    state->init_state(*state);
     auto &EvapCond(state->dataEvapCoolers->EvapCond);
 
     state->dataEnvrn->OutBaroPress = 101325.0;
@@ -800,7 +805,7 @@ TEST_F(EnergyPlusFixture, EvaporativeCoolers_IndirectRDDEvapCoolerOperatingMode)
     OperatingMode Result_WetFullOperatingMode = EvaporativeCoolers::IndirectResearchSpecialEvapCoolerOperatingMode(
         *state, EvapCoolNum, thisEvapCooler.SecInletTemp, thisEvapCooler.SecInletWetBulbTemp, TdbOutSysWetMin, TdbOutSysDryMin);
     // check operating mode
-    EXPECT_TRUE(compare_enums(Result_WetFullOperatingMode, EvaporativeCoolers::OperatingMode::WetFull));
+    EXPECT_ENUM_EQ(Result_WetFullOperatingMode, EvaporativeCoolers::OperatingMode::WetFull);
     // get outlet temperature in full wet operating mode
     EvaporativeCoolers::CalcIndirectRDDEvapCoolerOutletTemp(*state,
                                                             EvapCoolNum,
@@ -815,6 +820,7 @@ TEST_F(EnergyPlusFixture, EvaporativeCoolers_IndirectRDDEvapCoolerOperatingMode)
 
 TEST_F(EnergyPlusFixture, DirectEvapCoolerAutosizeWithoutSysSizingRunDone)
 {
+    state->init_state(*state);
 
     int constexpr EvapCoolNum(1);
     state->dataSize->NumSysSizInput = 1;
@@ -866,6 +872,7 @@ TEST_F(EnergyPlusFixture, DirectEvapCoolerAutosizeWithoutSysSizingRunDone)
     ASSERT_THROW(EvaporativeCoolers::SizeEvapCooler(*state, 1), std::runtime_error);
 
     std::string const error_string = delimited_string({
+        std::format("   ** Warning ** Version: missing in IDF, processing for EnergyPlus version=\"{}\"", DataStringGlobals::MatchVersion),
         "   ** Severe  ** For autosizing of EvaporativeCooler:Direct:ResearchSpecial DIRECTEVAPCOOLER, a system sizing run must be done.",
         "   **   ~~~   ** The \"SimulationControl\" object did not have the field \"Do System Sizing Calculation\" set to Yes.",
         "   **  Fatal  ** Program terminates due to previously shown condition(s).",
@@ -897,6 +904,7 @@ TEST_F(EnergyPlusFixture, EvapCoolerAirLoopPumpCycling)
     });
 
     ASSERT_TRUE(process_idf(idf_objects));
+    state->init_state(*state);
 
     EvaporativeCoolers::GetEvapInput(*state);
     ASSERT_FALSE(ErrorsFound);

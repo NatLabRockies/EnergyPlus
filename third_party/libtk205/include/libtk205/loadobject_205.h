@@ -2,12 +2,12 @@
 #define LOADOBJECT_205_H_
 
 #include <nlohmann/json.hpp>
-#include <error_handling_tk205.h>
+#include <courierr/courierr.h>
 
 namespace tk205 {
 
     template<class T>
-    void a205_json_get(nlohmann::json j, const char *subnode, T& a205_object, bool& object_is_set, bool required = false)
+    void a205_json_get(nlohmann::json j, Courierr::Courierr& logger, const char *subnode, T& a205_object, bool& object_is_set, bool required = false)
     {
 		try 
         {
@@ -19,7 +19,7 @@ namespace tk205 {
             object_is_set = false;
             if (required)
             {
-                show_message(MsgSeverity::WARN_205, ex.what());
+                logger.warning(ex.what());
             }
         }
     }

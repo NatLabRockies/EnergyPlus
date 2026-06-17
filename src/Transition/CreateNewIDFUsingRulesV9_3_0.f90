@@ -1137,7 +1137,7 @@ SUBROUTINE CreateNewIDFUsingRules(EndOfFile,DiffOnly,InLfn,AskForInput,InputFile
                      nodiff=.false.
                    END IF
                  END DO
-			
+
 			 CASE('ENERGYMANAGEMENTSYSTEM:ACTUATOR')
                   CALL GetNewObjectDefInIDD(ObjectName,NwNumArgs,NwAorN,NwReqFld,NwObjMinFlds,NwFldNames,NwFldDefaults,NwFldUnits)
                   nodiff=.true.

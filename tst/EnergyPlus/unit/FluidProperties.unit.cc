@@ -1,7 +1,7 @@
-// EnergyPlus, Copyright (c) 1996-2023, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
-// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other
+// National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
 // contributors. All rights reserved.
 //
 // NOTICE: This Software was developed under funding from the U.S. Department of Energy and the
@@ -54,16 +54,14 @@
 #include <EnergyPlus/Data/EnergyPlusData.hh>
 #include <EnergyPlus/FluidProperties.hh>
 
-#include <ctgmath>
+#include <cmath>
 
 #include "Fixtures/EnergyPlusFixture.hh"
 
 using namespace EnergyPlus;
-using namespace EnergyPlus::FluidProperties;
 
 TEST_F(EnergyPlusFixture, FluidProperties_GetDensityGlycol)
 {
-
     std::string const idf_objects = delimited_string({"FluidProperties:GlycolConcentration,",
                                                       "  GLHXFluid,       !- Name",
                                                       "  PropyleneGlycol, !- Glycol Type",
@@ -73,25 +71,25 @@ TEST_F(EnergyPlusFixture, FluidProperties_GetDensityGlycol)
 
     ASSERT_TRUE(process_idf(idf_objects));
     EXPECT_FALSE(has_err_output());
+    state->init_state(*state);
 
-    int FluidIndex = 0;
+    auto *fluid = Fluid::GetGlycol(*state, "GLHXFLUID");
 
-    EXPECT_NEAR(1037.89, GetDensityGlycol(*state, "GLHXFLUID", -35.0, FluidIndex, "UnitTest"), 0.01);
-    EXPECT_NEAR(1037.89, GetDensityGlycol(*state, "GLHXFLUID", -15.0, FluidIndex, "UnitTest"), 0.01);
-    EXPECT_NEAR(1034.46, GetDensityGlycol(*state, "GLHXFLUID", 5.0, FluidIndex, "UnitTest"), 0.01);
-    EXPECT_NEAR(1030.51, GetDensityGlycol(*state, "GLHXFLUID", 15.0, FluidIndex, "UnitTest"), 0.01);
-    EXPECT_NEAR(1026.06, GetDensityGlycol(*state, "GLHXFLUID", 25.0, FluidIndex, "UnitTest"), 0.01);
-    EXPECT_NEAR(1021.09, GetDensityGlycol(*state, "GLHXFLUID", 35.0, FluidIndex, "UnitTest"), 0.01);
-    EXPECT_NEAR(1015.62, GetDensityGlycol(*state, "GLHXFLUID", 45.0, FluidIndex, "UnitTest"), 0.01);
-    EXPECT_NEAR(1003.13, GetDensityGlycol(*state, "GLHXFLUID", 65.0, FluidIndex, "UnitTest"), 0.01);
-    EXPECT_NEAR(988.60, GetDensityGlycol(*state, "GLHXFLUID", 85.0, FluidIndex, "UnitTest"), 0.01);
-    EXPECT_NEAR(972.03, GetDensityGlycol(*state, "GLHXFLUID", 105.0, FluidIndex, "UnitTest"), 0.01);
-    EXPECT_NEAR(953.41, GetDensityGlycol(*state, "GLHXFLUID", 125.0, FluidIndex, "UnitTest"), 0.01);
+    EXPECT_NEAR(1037.89, fluid->getDensity(*state, -35.0, "UnitTest"), 0.01);
+    EXPECT_NEAR(1037.89, fluid->getDensity(*state, -15.0, "UnitTest"), 0.01);
+    EXPECT_NEAR(1034.46, fluid->getDensity(*state, 5.0, "UnitTest"), 0.01);
+    EXPECT_NEAR(1030.51, fluid->getDensity(*state, 15.0, "UnitTest"), 0.01);
+    EXPECT_NEAR(1026.06, fluid->getDensity(*state, 25.0, "UnitTest"), 0.01);
+    EXPECT_NEAR(1021.09, fluid->getDensity(*state, 35.0, "UnitTest"), 0.01);
+    EXPECT_NEAR(1015.62, fluid->getDensity(*state, 45.0, "UnitTest"), 0.01);
+    EXPECT_NEAR(1003.13, fluid->getDensity(*state, 65.0, "UnitTest"), 0.01);
+    EXPECT_NEAR(988.60, fluid->getDensity(*state, 85.0, "UnitTest"), 0.01);
+    EXPECT_NEAR(972.03, fluid->getDensity(*state, 105.0, "UnitTest"), 0.01);
+    EXPECT_NEAR(953.41, fluid->getDensity(*state, 125.0, "UnitTest"), 0.01);
 }
 
 TEST_F(EnergyPlusFixture, FluidProperties_GetSpecificHeatGlycol)
 {
-
     std::string const idf_objects = delimited_string({"FluidProperties:GlycolConcentration,",
                                                       "  GLHXFluid,       !- Name",
                                                       "  PropyleneGlycol, !- Glycol Type",
@@ -102,19 +100,42 @@ TEST_F(EnergyPlusFixture, FluidProperties_GetSpecificHeatGlycol)
     ASSERT_TRUE(process_idf(idf_objects));
     EXPECT_FALSE(has_err_output());
 
-    int FluidIndex = 0;
+    state->init_state(*state);
+    auto *fluid = Fluid::GetGlycol(*state, "GLHXFLUID");
 
-    EXPECT_NEAR(3779, GetSpecificHeatGlycol(*state, "GLHXFLUID", -35.0, FluidIndex, "UnitTest"), 0.01);
-    EXPECT_NEAR(3779, GetSpecificHeatGlycol(*state, "GLHXFLUID", -15.0, FluidIndex, "UnitTest"), 0.01);
-    EXPECT_NEAR(3807, GetSpecificHeatGlycol(*state, "GLHXFLUID", 5.0, FluidIndex, "UnitTest"), 0.01);
-    EXPECT_NEAR(3834, GetSpecificHeatGlycol(*state, "GLHXFLUID", 15.0, FluidIndex, "UnitTest"), 0.01);
-    EXPECT_NEAR(3862, GetSpecificHeatGlycol(*state, "GLHXFLUID", 25.0, FluidIndex, "UnitTest"), 0.01);
-    EXPECT_NEAR(3889, GetSpecificHeatGlycol(*state, "GLHXFLUID", 35.0, FluidIndex, "UnitTest"), 0.01);
-    EXPECT_NEAR(3917, GetSpecificHeatGlycol(*state, "GLHXFLUID", 45.0, FluidIndex, "UnitTest"), 0.01);
-    EXPECT_NEAR(3972, GetSpecificHeatGlycol(*state, "GLHXFLUID", 65.0, FluidIndex, "UnitTest"), 0.01);
-    EXPECT_NEAR(4027, GetSpecificHeatGlycol(*state, "GLHXFLUID", 85.0, FluidIndex, "UnitTest"), 0.01);
-    EXPECT_NEAR(4082, GetSpecificHeatGlycol(*state, "GLHXFLUID", 105.0, FluidIndex, "UnitTest"), 0.01);
-    EXPECT_NEAR(4137, GetSpecificHeatGlycol(*state, "GLHXFLUID", 125.0, FluidIndex, "UnitTest"), 0.01);
+    EXPECT_NEAR(3779, fluid->getSpecificHeat(*state, -35.0, "UnitTest"), 0.01);
+    EXPECT_NEAR(3779, fluid->getSpecificHeat(*state, -15.0, "UnitTest"), 0.01);
+    EXPECT_NEAR(3807, fluid->getSpecificHeat(*state, 5.0, "UnitTest"), 0.01);
+    EXPECT_NEAR(3834, fluid->getSpecificHeat(*state, 15.0, "UnitTest"), 0.01);
+    EXPECT_NEAR(3862, fluid->getSpecificHeat(*state, 25.0, "UnitTest"), 0.01);
+    EXPECT_NEAR(3889, fluid->getSpecificHeat(*state, 35.0, "UnitTest"), 0.01);
+    EXPECT_NEAR(3917, fluid->getSpecificHeat(*state, 45.0, "UnitTest"), 0.01);
+    EXPECT_NEAR(3972, fluid->getSpecificHeat(*state, 65.0, "UnitTest"), 0.01);
+    EXPECT_NEAR(4027, fluid->getSpecificHeat(*state, 85.0, "UnitTest"), 0.01);
+    EXPECT_NEAR(4082, fluid->getSpecificHeat(*state, 105.0, "UnitTest"), 0.01);
+    EXPECT_NEAR(4137, fluid->getSpecificHeat(*state, 125.0, "UnitTest"), 0.01);
+}
+
+TEST_F(EnergyPlusFixture, FluidProperties_GetViscosityGlycolOutOfRangeWarnings)
+{
+    std::string const idf_objects = delimited_string({"FluidProperties:GlycolConcentration,",
+                                                      "  GLHXFluid,       !- Name",
+                                                      "  PropyleneGlycol, !- Glycol Type",
+                                                      "  ,                !- User Defined Glycol Name",
+                                                      "  0.3;             !- Glycol Concentration",
+                                                      " "});
+
+    ASSERT_TRUE(process_idf(idf_objects));
+    EXPECT_FALSE(has_err_output());
+
+    state->init_state(*state);
+    auto *fluid = Fluid::GetGlycol(*state, "GLHXFLUID");
+
+    fluid->getViscosity(*state, -100.0, "UnitTest");
+    EXPECT_TRUE(compare_err_stream_substring("Temperature is out of range (too low) for fluid [GLHXFLUID] viscosity **", true));
+
+    fluid->getViscosity(*state, 200.0, "UnitTest");
+    EXPECT_TRUE(compare_err_stream_substring("Temperature is out of range (too high) for fluid [GLHXFLUID] viscosity **", true));
 }
 
 TEST_F(EnergyPlusFixture, FluidProperties_InterpValuesForGlycolConc)
@@ -142,13 +163,13 @@ TEST_F(EnergyPlusFixture, FluidProperties_InterpValuesForGlycolConc)
     Result.allocate(NumTemp);
 
     // Test interpolation for the single-concentration scenario
-    InterpValuesForGlycolConc(*state,
-                              NumCon,   // number of concentrations (dimension of raw data)
-                              NumTemp,  // number of temperatures (dimension of raw data)
-                              ConData,  // concentrations for raw data
-                              PropData, // raw property data (temperature,concentration)
-                              ActCon,   // concentration of actual fluid mix
-                              Result);  // interpolated output data at proper concentration
+    Fluid::InterpValuesForGlycolConc(*state,
+                                     NumCon,   // number of concentrations (dimension of raw data)
+                                     NumTemp,  // number of temperatures (dimension of raw data)
+                                     ConData,  // concentrations for raw data
+                                     PropData, // raw property data (temperature,concentration)
+                                     ActCon,   // concentration of actual fluid mix
+                                     Result);  // interpolated output data at proper concentration
 
     EXPECT_NEAR(1020.0, Result(1), 1e-6);
     EXPECT_NEAR(1010.0, Result(2), 1e-6);

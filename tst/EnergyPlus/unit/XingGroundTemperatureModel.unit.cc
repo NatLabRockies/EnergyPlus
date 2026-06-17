@@ -1,7 +1,7 @@
-// EnergyPlus, Copyright (c) 1996-2023, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
-// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other
+// National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
 // contributors. All rights reserved.
 //
 // NOTICE: This Software was developed under funding from the U.S. Department of Energy and the
@@ -52,12 +52,11 @@
 
 // EnergyPlus Headers
 #include "EnergyPlus/DataIPShortCuts.hh"
-#include "EnergyPlus/GroundTemperatureModeling/GroundTemperatureModelManager.hh"
+#include "EnergyPlus/GroundTemperatureModeling/BaseGroundTemperatureModel.hh"
 #include "Fixtures/EnergyPlusFixture.hh"
 #include <EnergyPlus/Data/EnergyPlusData.hh>
 
 using namespace EnergyPlus;
-using namespace EnergyPlus::GroundTemperatureManager;
 
 TEST_F(EnergyPlusFixture, XingGroundTempsModelTest)
 {
@@ -67,7 +66,7 @@ TEST_F(EnergyPlusFixture, XingGroundTempsModelTest)
         "	1.08,			!- Soil Thermal Conductivity {W/m-K}",
         "	962,			!- Soil Density {kg/m3}",
         "	2576,			!- Soil Specific Heat {J/kg-K}",
-        "	11.1,			!- Average Soil Surface Tempeature {C}",
+        "	11.1,			!- Average Soil Surface Temperature {C}",
         "	13.4,			!- Soil Surface Temperature Amplitude 1 {deltaC}",
         "	0.7,			!- Soil Surface Temperature Amplitude 2 {deltaC}",
         "	25,			!- Phase Shift of Temperature Amplitude 1 {days}",
@@ -76,9 +75,7 @@ TEST_F(EnergyPlusFixture, XingGroundTempsModelTest)
 
     ASSERT_TRUE(process_idf(idf_objects));
 
-    std::string const CurrentModuleObject = static_cast<std::string>(groundTempModelNamesUC[static_cast<int>(GroundTempObjType::XingGroundTemp)]);
-
-    auto thisModel = GetGroundTempModelAndInit(*state, CurrentModuleObject, "TEST");
+    auto *thisModel = GroundTemp::GetGroundTempModelAndInit(*state, GroundTemp::ModelType::Xing, "TEST");
 
     EXPECT_NEAR(-1.43, thisModel->getGroundTempAtTimeInSeconds(*state, 0.0, 0.0), 0.01);
     EXPECT_NEAR(2.15, thisModel->getGroundTempAtTimeInSeconds(*state, 0.0, 6393600), 0.1);   // March 15
@@ -91,4 +88,44 @@ TEST_F(EnergyPlusFixture, XingGroundTempsModelTest)
     EXPECT_NEAR(-2.12, thisModel->getGroundTempAtTimeInMonths(*state, 0.0, 14), 0.1); // Feb of next year
 
     EXPECT_NEAR(11.1, thisModel->getGroundTempAtTimeInMonths(*state, 100.0, 1), 0.1); // January--deep
+}
+
+TEST_F(EnergyPlusFixture, XingGroundTempsGetInputTest)
+{
+    std::string const idf_objects = delimited_string({
+        "Site:GroundTemperature:Undisturbed:Xing,",
+        "    Test1,   !- Name of object",
+        "    1.0,     !- Soil Thermal Conductivity {W/m-K}",
+        "    1000.0,  !- Soil Density {kg/m3}",
+        "    2500,    !- Soil Specific Heat {J/kg-K}",
+        "    10.0,    !- Average Soil Surface Temperature {C}",
+        "    12.0,    !- Soil Surface Temperature Amplitude 1 {deltaC}",
+        "    1.0,     !- Soil Surface Temperature Amplitude 2 {deltaC}",
+        "    25,      !- Phase Shift of Temperature Amplitude 1 {days}",
+        "    30;      !- Phase Shift of Temperature Amplitude 2 {days}",
+        "",
+        "Site:GroundTemperature:Undisturbed:Xing,",
+        "    Test2,   !- Name of object",
+        "    2.0,     !- Soil Thermal Conductivity {W/m-K}",
+        "    1200,    !- Soil Density {kg/m3}",
+        "    2400,    !- Soil Specific Heat {J/kg-K}",
+        "    11.1,    !- Average Soil Surface Temperature {C}",
+        "    22.2,    !- Soil Surface Temperature Amplitude 1 {deltaC}",
+        "    2.5,     !- Soil Surface Temperature Amplitude 2 {deltaC}",
+        "    20,      !- Phase Shift of Temperature Amplitude 1 {days}",
+        "    40;      !- Phase Shift of Temperature Amplitude 2 {days}",
+    });
+
+    ASSERT_TRUE(process_idf(idf_objects));
+
+    // Tests to verify fix for Defect #10981 (overwrote the name of the object which resulted in a fatal error
+    // Test 1: First object instance--make sure name and model type are read in correctly
+    auto *thisModel1 = GroundTemp::GetGroundTempModelAndInit(*state, GroundTemp::ModelType::Xing, "TEST1");
+    EXPECT_EQ(thisModel1->Name, "TEST1");
+    EXPECT_EQ(thisModel1->modelType, GroundTemp::ModelType::Xing);
+
+    // Test 2: Second object instance--another test to make sure name and model type are read in correctly
+    auto *thisModel2 = GroundTemp::GetGroundTempModelAndInit(*state, GroundTemp::ModelType::Xing, "TEST2");
+    EXPECT_EQ(thisModel2->Name, "TEST2");
+    EXPECT_EQ(thisModel2->modelType, GroundTemp::ModelType::Xing);
 }

@@ -1,4 +1,4 @@
-Task: 4.1.1 Single Duct Constant Volume Air Terminal Without Reheat 
+Task: 4.1.1 Single Duct Constant Volume Air Terminal Without Reheat
 
 Single Duct Constant Volume Air Terminal NoReheat New Object
 ================
@@ -29,14 +29,14 @@ This looks good in general. I've noted some editorial changes here and there. Al
 
 Mike Witte provided detailed review comments on github pull request.
 
-Larry: can we keep the *Uncontrolled object for longer period (e.g. up to 2 years) before removing it. 
+Larry: can we keep the *Uncontrolled object for longer period (e.g. up to 2 years) before removing it.
 Mike W. Adding "Deprecated" to the IDD causes warning error messaged but we can add that at the last minutes to avoid huge warning error messages.
 
-Brent: suggested that a new object should use oo design approach. He said consider the HVACFourPipeBeam as an example. 
+Brent: suggested that a new object should use oo design approach. He said consider the HVACFourPipeBeam as an example.
 
 Bereket: OO design will be considered in the design of the implementation.
 
-Agreed to keep the *Uncontrolled object for a couple of years before fully removing it. Needs a transition plan. 
+Agreed to keep the *Uncontrolled object for a couple of years before fully removing it. Needs a transition plan.
 Mike also offered to help in the transition effort.
 
 
@@ -48,12 +48,12 @@ The scope of work for this new feature is:
 - will have inlet and outlet air nodes.
 - allow the new object to be referenced by ZoneHVAC:AirDistributionUnit
 - will have capabilities of AirTerminal:SingleDuct:Uncontrolled object.
- 
+
 The expectation is that the AirTerminal:SingleDuct:ConstantVolume:NoReheat will replace AirTerminal:SingleDuct:Uncontrolled object.
 
 ## Approach ##
 
-- creates the new object AirTerminal:SingleDuct:ConstantVolume:NoReheat and adds to the ADU equipment list 
+- creates the new object AirTerminal:SingleDuct:ConstantVolume:NoReheat and adds to the ADU equipment list
 - the new object will have inlet and outlet air node (see below the new IDD and idf objects)
 - adds new get input section in GetSysInput() function under SingleDuct.cc module
 - adds new sim function for air terminal Single Duct CV No Reheat object
@@ -101,14 +101,14 @@ AirTerminal:SingleDuct:ConstantVolume:NoReheat,
 
        \required-field
        \type node
-       \note This is an air outlet node from the air distribution unit. This node name should be one of the 
+       \note This is an air outlet node from the air distribution unit. This node name should be one of the
        \note supply air inlet node names of a zone served by this component.
 
   A4,  \field Air Inlet Node Name
 
        \required-field
        \type node
-       \note The air inlet node name that connects the air splitter to the individual zone air distribution 
+       \note The air inlet node name that connects the air splitter to the individual zone air distribution
        \note unit. This node should also be one of the outlet air node of an AirLoopHVAC:ZoneSplitter or
        \note AirLoopHVAC:SupplyPlenum component.
 
@@ -124,10 +124,10 @@ AirTerminal:SingleDuct:ConstantVolume:NoReheat,
 
        \type object-list
        \object-list DesignSpecificationOutdoorAirNames
-       \note This field is used to modulate the terminal unit flow rate based on the specified outdoor air 
+       \note This field is used to modulate the terminal unit flow rate based on the specified outdoor air
        \note requirement. When the name of a DesignSpecification:OutdoorAir object is entered, the terminal unit will
        \note adjust flow to meet this outdoor air requirement and no more. Load is still "Uncontrolled."
-       \note If Outdoor Air Flow per Person is non-zero, then the outdoor air requirement will be computed based 
+       \note If Outdoor Air Flow per Person is non-zero, then the outdoor air requirement will be computed based
        \note on either the current or design occupancy as specified in the Per Person Ventilation Rate Mode field.
        \note At no time will the supply air flow rate exceed the value for Maximum Air Flow Rate. The requested fl
        \note rate may not be fully met if the system is operating with cycling fan. If this field is blank, then
@@ -207,7 +207,7 @@ AirTerminal:SingleDuct:ConstantVolume:NoReheat,
 
   HVAC,Average,Zone Air Terminal Outdoor Air Volume Flow Rate {[}m3/s{]}
 
-Zone Air Terminal Sensible Heating Energy 
+Zone Air Terminal Sensible Heating Energy
 
 Zone Air Terminal Sensible Heating Rate
 
@@ -233,7 +233,7 @@ information about the design flow rate for single duct constant volume no reheat
 
 ## Engineering Reference ##
 
-The input object AirTerminal:SingleDuct:ConstantVolume:NoReheat is used to pass conditioned or treated central supply air directly into a zone without any reheat. This terminal air equipment allows to supply central system air directly to a zone without any zone level control or tempering. The supply air temperature is controlled by the central system to meet the load in a controlled zone. This object is configured for use with a constant volume central air system or Furnace and variable supply air temperature. This unit allows the program to know what zone this branch of the air system is attached to, air inlet and outlet nodes, an input field for the maximum air flow rate, and other two optional input fields. The air inlet node should be the same as one of the AirLoopHVAC:ZoneSplitter or AirLoopHVAC:SupplyPlenum component outlet nodes. The air outlet node name should be same as zone air inlet node name and the air distribution unit air outlet node name. The last two input fields: *Design Specification Outdoor Air Object Name*, and *Per Person Ventilation Rate Mode* are used to compute the outdoor air requirement of an air terminal unit and the air terminal mass flow rate is set to the value calculated using these two input fields. 
+The input object AirTerminal:SingleDuct:ConstantVolume:NoReheat is used to pass conditioned or treated central supply air directly into a zone without any reheat. This terminal air equipment allows to supply central system air directly to a zone without any zone level control or tempering. The supply air temperature is controlled by the central system to meet the load in a controlled zone. This object is configured for use with a constant volume central air system or Furnace and variable supply air temperature. This unit allows the program to know what zone this branch of the air system is attached to, air inlet and outlet nodes, an input field for the maximum air flow rate, and other two optional input fields. The air inlet node should be the same as one of the AirLoopHVAC:ZoneSplitter or AirLoopHVAC:SupplyPlenum component outlet nodes. The air outlet node name should be same as zone air inlet node name and the air distribution unit air outlet node name. The last two input fields: *Design Specification Outdoor Air Object Name*, and *Per Person Ventilation Rate Mode* are used to compute the outdoor air requirement of an air terminal unit and the air terminal mass flow rate is set to the value calculated using these two input fields.
 
 
 ## Example File and Transition Changes ##
@@ -262,11 +262,11 @@ All air terminal single duct related code is located in the ***SingleDuct.cc*** 
 ## Approach
 ### Changes to the **SingleDuct.cc** file
 - adds new object AirTerminal:SingleDuct:ConstantVolume:NoReheat
-- adds this new object to the Air Distribution Unit equipment list 
+- adds this new object to the Air Distribution Unit equipment list
 - adds new get input section in **GetSysInput()** function under SingleDuct.cc module
 - adds new function **SimConstVolNoReheat()** for air terminal Single Duct CV No Reheat object
- 
-	the new function **SimConstVolNoReheat()** will be a member of derived struct SysDesignParams 
+
+	the new function **SimConstVolNoReheat()** will be a member of derived struct SysDesignParams
 
 - adds a calling point for **SimConstVolNoReheat()** new function under "SimulateSingleDuct" function
 
@@ -298,7 +298,7 @@ Adds module parameter for the new object added
 
  - DataHVACGlobals.hh
 
-	Adds  **ZoneEquipTypeOf_AirTerminalSingleDuctConstantVolumeNoReheat** parameter to the ZoneHVACTerminalTypes list 
+	Adds  **ZoneEquipTypeOf_AirTerminalSingleDuctConstantVolumeNoReheat** parameter to the ZoneHVACTerminalTypes list
 	extern int const ZoneEquipTypeOf_AirTerminalSingleDuctConstantVolumeNoReheat;
 
 ### Other modules cc files change include:
@@ -320,6 +320,5 @@ Adds module parameter for the new object added
  - ZoneAirLoopEquipmentManager.cc
 
 	- Adds AirDistUnit( AirDistUnitNum ).EquipType_Num( AirDistCompUnitNum ) = SingleDuctConstVolNoReheat; case statement in get input function GetZoneAirLoopEquipment().
-	
-	- Adds calling point for SimulateSingleDuct for SingleDuctConstVolNoReheat case in SimZoneAirLoopEquipment() function
 
+	- Adds calling point for SimulateSingleDuct for SingleDuctConstVolNoReheat case in SimZoneAirLoopEquipment() function

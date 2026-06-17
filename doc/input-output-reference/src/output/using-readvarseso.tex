@@ -1,4 +1,5 @@
 \section{Using ReadVarsESO}\label{using-readvarseso}
+As of version 9.4.0 \hyperref[outputcontrolfiles]{OutputControl:Files} may be used to write native CSV output directly from EnergyPlus instead of using the ReadVarsESO postprocessor.
 
 \subsection{Creating Charts and Spreadsheet files from Output Variables}\label{creating-charts-and-spreadsheet-files-from-output-variables}
 
@@ -37,7 +38,7 @@ Annual (or RunPeriod) & Only variables with reported frequency “runperiod”~ 
 
 In addition, another argument can be used so that the output file is only one time frequency. (By default, all variables -- hourly, monthly, annual, etc. are mixed together in the output file). By using ``Timestep'' as an argument, you would get only the TimeStep reported variables. Using ``Monthly'', only the monthly variables. This is not automated in either \textbf{EP-Launch} or the \textbf{RunEPlus} batch file but can easily be accomplished.
 
-The program is run automatically from the \textbf{EP-Launch} program or the \textbf{RunEPlus} batch file (both these methods for executing EnergyPlus are described in the GettingStarted document). These programs use \textbf{\textless{}filename\textgreater{}.rvi} for input to the ReadVarsESO program executed first after the EnergyPlus execution and \textbf{\textless{}filename\textgreater{}.mvi} for the second execution. Ostensibly, the .rvi file would apply to the eplusout.eso file and the .mvi would apply to the eplusout.mtr file, BUT the contents of the files actually specify the ``\textbf{input}'' reporting file and the ``\textbf{output}'' reorganized file. Typical contents of an .rvi file are:
+The program is run automatically from the \textbf{EP-Launch} program or the \textbf{RunEPlus} batch file (both these methods for executing EnergyPlus are described in the GettingStarted document) if native CSV output is not present (see \hyperref[outputcontrolfiles]{OutputControl:Files}). These programs use \textbf{\textless{}filename\textgreater{}.rvi} for input to the ReadVarsESO program executed first after the EnergyPlus execution and \textbf{\textless{}filename\textgreater{}.mvi} for the second execution. Ostensibly, the .rvi file would apply to the eplusout.eso file and the .mvi would apply to the eplusout.mtr file, BUT the contents of the files actually specify the ``\textbf{input}'' reporting file and the ``\textbf{output}'' reorganized file. Typical contents of an .rvi file are:
 
 % table 42
 \begin{longtable}[c]{p{2.1in}p{3.9in}}

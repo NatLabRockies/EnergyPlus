@@ -46,7 +46,7 @@ levels: Safe, Caution, Extreme caution, Danger and Extreme danger, defined in
 Table ~\ref{table:heat-index-chart} and color coded in Figure
 ~\ref{fig:heat-index-lookup-table}.
 
-\begin{figure}[hbtp] 
+\begin{figure}[hbtp]
 \centering
 \includegraphics[width=0.9\textwidth, height=0.9\textheight, keepaspectratio=true]{media/heat_index_chart.png}
 \caption{Heat Index lookup table \protect \label{fig:heat-index-lookup-table}}
@@ -57,7 +57,7 @@ Table ~\ref{table:heat-index-chart} and color coded in Figure
 \caption{Definition of four levels of Heat Index \label{table:heat-index-chart}} \tabularnewline
 \begin{tabular}{ |p{1in}|p{1in}|p{2in}|  }
 \hline
-    \textbf{Heat Index in Celsius} & \textbf{Heat Index in Fahrenheit} & \textbf{Heat Index Level} \\ \hline 
+    \textbf{Heat Index in Celsius} & \textbf{Heat Index in Fahrenheit} & \textbf{Heat Index Level} \\ \hline
     Less than \SI{26.7}{\celsius} & Less than \IP{80}{\fahrenheit} & Safe: no risk of heat hazard \\ \hline
     \SI{26.7}{\celsius} - \SI{32.2}{\celsius} & \IP{80}{\fahrenheit} - \IP{90}{\fahrenheit} & Caution: fatigue is possible with prolonged exposure and activity. Continuing activity could result in heat cramps. \\ \hline
     \SI{32.2}{\celsius} - \SI{39.4}{\celsius}& \IP{90}{\fahrenheit} – \IP{103}{\fahrenheit} & Extreme caution: heat cramps and heat exhaustion are possible. Continuing activity could result in heat stroke. \\ \hline
@@ -66,7 +66,7 @@ Table ~\ref{table:heat-index-chart} and color coded in Figure
 \end{tabular}
 \end{table}
 
-The computation of the heat index is a refinement of a result obtained by
+Before version 25.1, the computation of the heat index is a refinement of a result obtained by
 multiple regression analysis carried out by Lans P. Rothfusz and described in a
 1990 National Weather Service (NWS) Technical Attachment (SR 90-23) [4-5]. The
 calculation is based on degree Fahrenheit.
@@ -130,6 +130,17 @@ equation along with any adjustment as described above is applied. The Rothfusz
 regression is not valid for extreme temperature and relative humidity conditions
 beyond the range of data considered by Steadman.
 
+Starting from version 25.1, the heat index calculation allows the use of the extended heat
+index method developed by Lu \& Romps [17]. By selecting ``Extended'' in the ``Algorithm''
+field of HeatIndexAlgorithm, this extended heat index will be used. If the field is
+``Simplified'' or left empty, the Rothfusz-Steadman method described above will be used.
+The heat index calculated with Rothfusz-Steadman method can give
+unrealistic results for very hot and humid or very cold and dry conditions. The
+extended index extends the domain of the heat index calculation to all
+combinations of temperature and relative humidity and gives a more realistic heat
+index for the extreme conditions. The implementation in EnergyPlus is based on
+the released Python code by Lu and Romps [18].
+
 The Heat Index Hours (accumulated hours for a space) and Heat Index
 OccupantHours (accumulated hours for the sum of all occupants in a space) of
 each level for each zone and the whole building are reported under the Annual
@@ -149,7 +160,7 @@ discomfort, Some discomfort, Great discomfort; avoid exertion, Dangerous and
 Heat stroke imminent, defined in Table ~\ref{table:humidex-chart} and color
 coded in Figure ~\ref{fig:humidex-lookup-table}.
 
-\begin{figure}[hbtp] 
+\begin{figure}[hbtp]
 \centering
 \includegraphics[width=0.9\textwidth, height=0.9\textheight, keepaspectratio=true]{media/humidex_chart.jpg}
 \caption{Humidex lookup table \protect \label{fig:humidex-lookup-table}}
@@ -370,21 +381,21 @@ high contrast and less detailed tasks require less light.
 \caption{GSA recommended lighting levels \label{table:lighting-level-chart}}
 \tabularnewline
 \begin{tabular}{ |p{2in}|p{1in}|p{1in}| } \hline \textbf{Room Type} &
-\textbf{Light Level (Foot Candles)} & \textbf{Light Level (Lux)} \\ 
+\textbf{Light Level (Foot Candles)} & \textbf{Light Level (Lux)} \\
 \hline
-Bedroom - Dormitory & 20-30 FC & 200-300 lux \\ 
-\hline 
-Cafeteria - Eating & 20-30 FC & 200-300 lux \\ 
-\hline 
+Bedroom - Dormitory & 20-30 FC & 200-300 lux \\
+\hline
+Cafeteria - Eating & 20-30 FC & 200-300 lux \\
+\hline
 Classroom - General & 30-50 FC & 300-500 lux \\
-\hline 
-Conference Room & 30-50 FC & 300-500 lux \\ 
-\hline 
-Corridor & 5-10 FC & 50-100 lux \\ 
-\hline Exhibit Space & 30-50 FC & 300-500 lux \\ 
-\hline 
-Gymnasium - Exercise / Workout & 20-30 FC & 200-300 lux \\ 
-\hline 
+\hline
+Conference Room & 30-50 FC & 300-500 lux \\
+\hline
+Corridor & 5-10 FC & 50-100 lux \\
+\hline Exhibit Space & 30-50 FC & 300-500 lux \\
+\hline
+Gymnasium - Exercise / Workout & 20-30 FC & 200-300 lux \\
+\hline
 Gymnasium - Sports / Games & 30-50 FC & 300-500 lux \\
  \hline Kitchen / Food Prep & 30-75 FC &
 300-750 lux \\
@@ -486,7 +497,7 @@ using humidex as an indoor thermal comfort predictor, Energy Build. 64 (2013)
 17–25. doi:10.1016/j.enbuild.2013.04.019.
 
 {[}8{]} L.G. Gagge, A. P., Fobelets, A. P. and Berglund, A standard predictive
-Index of human reponse to thermal enviroment, Am. Soc. Heating, Refrig.
+Index of human response to thermal environment, Am. Soc. Heating, Refrig.
 Air-Conditioning Eng. (1986) 709–731.
 
 {[}9{]} ASHRAE, ASHRAE STANDARD 55-2010: Thermal Environmental Conditions for
@@ -516,3 +527,11 @@ SoftwareX, vol. 12, p. 100563, Jul. 2020, doi: 10.1016/j.softx.2020.100563.
 
 {[}16{]} ACGIH, Threshold Limit Values (TLVs) and Biological Exposure Indices
 (BEIs), 2012. doi:10.1073/pnas.0703993104.
+
+{[}17{]} Lu, Yi-Chuan, and David M. Romps. ``Extending the heat index''. Journal
+of Applied Meteorology and Climatology 61, no. 10 (2022): 1367-1383.
+doi:10.1073/pnas.0703993104.
+
+{[}18{]} Lu, Yi-Chuan, and David M. Romps. ``Lu and Romps, Extending the heat index, JAMC, 2022'',
+Physics of Climate, February 23, 2023.
+https://romps.berkeley.edu/papers/pubs-2020-heatindex.html.

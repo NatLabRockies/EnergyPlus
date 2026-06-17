@@ -1,7 +1,7 @@
-// EnergyPlus, Copyright (c) 1996-2023, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
-// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other
+// National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
 // contributors. All rights reserved.
 //
 // NOTICE: This Software was developed under funding from the U.S. Department of Energy and the
@@ -46,46 +46,50 @@
 // POSSIBILITY OF SUCH DAMAGE.
 
 // C++ Headers
+#include <format>
 #include <thread>
 
 // CLI Headers
-#include <ezOptionParser.hpp>
+#include <CLI/CLI11.hpp>
 
-// Project headers
+// EnergyPlus Headers
 #include <EnergyPlus/CommandLineInterface.hh>
 #include <EnergyPlus/Data/EnergyPlusData.hh>
 #include <EnergyPlus/DataStringGlobals.hh>
 #include <EnergyPlus/DisplayRoutines.hh>
 #include <EnergyPlus/EnergyPlus.hh>
 #include <EnergyPlus/FileSystem.hh>
+#include <EnergyPlus/Formatters.hh>
 #include <EnergyPlus/PluginManager.hh>
+#if LINK_WITH_PYTHON
+#    include <EnergyPlus/PythonEngine.hh>
+#endif
 #include <EnergyPlus/UtilityRoutines.hh>
 
 namespace EnergyPlus {
 
 namespace CommandLineInterface {
 
-    using namespace ez;
-
-    int ProcessArgs(EnergyPlusData &state, int argc, const char *argv[])
+    int ProcessArgs(EnergyPlusData &state, const std::vector<std::string> &args)
     {
-        typedef std::string::size_type size_type;
+        using size_type = std::string::size_type;
 
         // Expand long-name options using "=" sign in to two arguments
         // and expand multiple short options into separate arguments
         std::vector<std::string> arguments;
 
-        for (int i = 0; i < argc; ++i) {
+        std::string const dash("-");
 
-            std::string inputArg(argv[i]);
+        for (const auto &inputArg : args) {
 
-            std::string const dash("-");
             size_type const doubleDashPosition = inputArg.find("--");
             size_type const equalsPosition = inputArg.find("=");
 
             if (doubleDashPosition == 0 && equalsPosition != std::string::npos) { // --option=value
                 arguments.push_back(inputArg.substr(0, equalsPosition));
                 arguments.push_back(inputArg.substr(equalsPosition + 1, inputArg.size() - 1));
+            } else if (doubleDashPosition == 0 && inputArg.size() == 2) {
+                // Filter it out, it's a bash-like separator (end of the command options, before positionals arguments are accepted)
             } else if ((inputArg.size() > 2) && (inputArg[0] == '-') && (inputArg[1] != '-')) { // -abc style
                 for (size_type c = 1; c < inputArg.size(); ++c) {
                     arguments.push_back(dash + inputArg[c]);
@@ -95,163 +99,303 @@ namespace CommandLineInterface {
             }
         }
 
-        // Fix This is problematic for a few reasons:
-        //  Using ezOptionParser with a raw C-string interface is asking for trouble: Find something taking std::string if possible
-        //  Passing out pointers returned by c_str() is bad form:
-        //   They are pointers to internally-managed memory in std::string
-        //   They are invalid as soon as the string goes out of scope or is modified
-        //   In this case the strings may be in scope and unmodified until parse is done but this is red flag usage
-        // convert to vector of C strings for option parser
-        std::vector<const char *> cStrArgs;
-        cStrArgs.reserve(arguments.size());
-        for (size_type i = 0; i < arguments.size(); ++i) {
-            cStrArgs.push_back(arguments[i].c_str());
-        }
+        // erase the first element, which is the name of the program
+        const std::string programName = std::move(arguments.front());
+        arguments.erase(arguments.begin());
 
-        size_type const argCount = cStrArgs.size();
-
-        bool const legacyMode = (argCount == 1);
-
-        // Define options
-        ezOptionParser opt;
-
-        opt.overview = state.dataStrGlobals->VerStringVar;
-        opt.overview.append("\nPythonLinkage: " + PluginManagement::pythonStringForUsage(state));
-        opt.overview.append("\nBuilt on Platform: " + DataStringGlobals::BuildPlatformString);
-
-        opt.syntax = "energyplus [options] [input-file]";
-
-        opt.add("", 0, 0, 0, "Force annual simulation", "-a", "--annual");
-
-        opt.add("", 0, 1, 0, "Output directory path (default: current directory)", "-d", "--output-directory");
-
-        opt.add("", 0, 0, 0, "Force design-day-only simulation", "-D", "--design-day");
-
-        opt.add("", 0, 0, 0, "Display help information", "-h", "--help");
-
-        opt.add("Energy+.idd", 0, 1, 0, "Input data dictionary path (default: Energy+.idd in executable directory)", "-i", "--idd");
-
-        opt.add("", 0, 0, 0, "Run EPMacro prior to simulation", "-m", "--epmacro");
-
-        opt.add("", 0, 1, 0, "Prefix for output file names (default: eplus)", "-p", "--output-prefix");
-
-        opt.add("", 0, 0, 0, "Run ReadVarsESO after simulation", "-r", "--readvars");
-
-        opt.add("", 0, 0, 0, "Output IDF->epJSON or epJSON->IDF, dependent on input file type", "-c", "--convert");
-
-        opt.add("", 0, 0, 0, "Only convert IDF->epJSON or epJSON->IDF, dependent on input file type. No simulation", "--convert-only");
-
-        opt.add("L",
-                0,
-                1,
-                0,
-                "Suffix style for output file names (default: L)\n   L: Legacy (e.g., eplustbl.csv)\n   C: Capital (e.g., eplusTable.csv)\n   D: "
-                "Dash (e.g., eplus-table.csv)",
-                "-s",
-                "--output-suffix");
-
-        opt.add("", false, 0, 0, "Display version information", "-v", "--version");
-
-        opt.add("1", false, 1, 0, "Multi-thread with N threads; 1 thread with no arg. (Currently only for G-Function generation)", "-j", "--jobs");
-
-        opt.add("in.epw", false, 1, 0, "Weather file path (default: in.epw in current directory)", "-w", "--weather");
-
-        opt.add("", false, 0, 0, "Run ExpandObjects prior to simulation", "-x", "--expandobjects");
-
-        opt.example = "energyplus -w weather.epw -r input.idf";
-
-        std::string errorFollowUp = "Type 'energyplus --help' for usage.";
-
-        // Parse arguments
-        opt.parse(argCount, &cStrArgs[0]);
-
-        // print arguments parsed (useful for debugging)
-        //        std::string pretty;
-        //        opt.prettyPrint(pretty);
-        //        std::cout << pretty << std::endl;
-
-        std::string usage;
-        opt.getUsage(usage);
+        size_type const argCount = arguments.size();
+        bool const legacyMode = (argCount == 0);
 
         // Set path of EnergyPlus program path (if we aren't overriding it)
         if (!state.dataGlobal->installRootOverride) {
             state.dataStrGlobals->exeDirectoryPath = FileSystem::getParentDirectoryPath(FileSystem::getAbsolutePath(FileSystem::getProgramPath()));
         }
 
-        // ezOptionParser doesn't have a getPath, so we get a string, then convert it to path
-        // I'm limiting the scope of the std::string temporaries I used to avoid mistakes
-        {
-            std::string inputWeatherFileName;
-            opt.get("-w")->getString(inputWeatherFileName);
-            state.files.inputWeatherFilePath.filePath = fs::path{inputWeatherFileName};
+        CLI::App app{"energyplus", programName};
+        // opt.add("", false, 0, 0, "Display version information", "-v", "--version");
+        app.set_version_flag("-v,--version", EnergyPlus::DataStringGlobals::VerString);
+
+        std::string const description = std::format(R"({}
+PythonLinkage: {}
+Built on Platform: {}
+)",
+                                                    state.dataStrGlobals->VerStringVar,
+                                                    PluginManagement::pythonStringForUsage(state),
+                                                    DataStringGlobals::BuildPlatformString);
+        app.description(description);
+
+        auto *annualOpt = app.add_flag("-a,--annual", state.dataGlobal->AnnualSimulation, "Force annual simulation");
+
+        app.add_flag("-D,--design-day", state.dataGlobal->DDOnlySimulation, "Force design-day-only simulation")->excludes(annualOpt);
+
+        app.add_option("-d,--output-directory", state.dataStrGlobals->outDirPath, "Output directory path (default: current directory)")
+            ->option_text("DIR")
+            ->required(false);
+        // ->check(CLI::ExistingDirectory) // We don't require it to exist, we make it if needed
+
+        if (legacyMode) {
+            state.dataStrGlobals->inputIddFilePath = "Energy+.idd";
+        } else {
+            state.dataStrGlobals->inputIddFilePath = state.dataStrGlobals->exeDirectoryPath / "Energy+.idd";
         }
+        app.add_option(
+               "-i,--idd", state.dataStrGlobals->inputIddFilePath, "Input data dictionary path (default: Energy+.idd in executable directory)")
+            ->required(false)
+            ->option_text("IDD")
+            ->check(CLI::ExistingFile);
 
-        {
-            // TODO: should this be in IOFiles as an InputFile?
-            std::string inputIddFileName;
-            opt.get("-i")->getString(inputIddFileName);
-            state.dataStrGlobals->inputIddFilePath = fs::path{inputIddFileName};
-        }
+        bool runEPMacro = false;
+        app.add_flag("-m,--epmacro", runEPMacro, "Run EPMacro prior to simulation");
 
-        if (!opt.isSet("-i") && !legacyMode) {
-            state.dataStrGlobals->inputIddFilePath = state.dataStrGlobals->exeDirectoryPath / state.dataStrGlobals->inputIddFilePath;
-        }
+        std::string prefixOutName = "eplus";
+        app.add_option("-p,--output-prefix", prefixOutName, "Prefix for output file names (default: eplus)")->required(false)->option_text("PRE");
 
-        {
-            std::string outDirPathName;
-            opt.get("-d")->getString(outDirPathName);
-            state.dataStrGlobals->outDirPath = fs::path{outDirPathName};
-        }
+        app.add_flag("-r,--readvars", state.dataGlobal->runReadVars, "Run ReadVarsESO after simulation");
 
-        state.dataGlobal->runReadVars = opt.isSet("-r");
+        app.add_flag("-c,--convert", state.dataGlobal->outputEpJSONConversion, "Output IDF->epJSON or epJSON->IDF, dependent on input file type");
 
-        state.dataGlobal->DDOnlySimulation = opt.isSet("-D");
+        app.add_flag("--convert-only",
+                     state.dataGlobal->outputEpJSONConversionOnly,
+                     "Only convert IDF->epJSON or epJSON->IDF, dependent on input file type. No simulation");
 
-        state.dataGlobal->AnnualSimulation = opt.isSet("-a");
+        std::string suffixType = "L";
+        std::string const suffixHelp = R"help(Suffix style for output file names (default: L)
+   L: Legacy (e.g., eplustbl.csv)
+   C: Capital (e.g., eplusTable.csv)
+   D: Dash (e.g., eplus-table.csv))help";
+        app.add_option("-s,--output-suffix", suffixType, suffixHelp)
+            ->option_text("SUFFIX")
+            ->required(false)
+            ->check(CLI::IsMember({"L", "C", "D"}, CLI::ignore_case));
 
-        state.dataGlobal->outputEpJSONConversion = opt.isSet("-c");
+        // TODO: maybe delay validation to output a better error message?
+        const int MAX_N = static_cast<int>(std::thread::hardware_concurrency());
+        app.add_option("-j,--jobs",
+                       state.dataGlobal->numThread,
+                       "Multi-thread with N threads; 1 thread with no arg. (Currently only for G-Function generation)")
+            ->option_text("N")
+            // ->check(CLI::Range(1, MAX_N)  // Tempted to just do that... much simpler
+            // ->check(CLI::Number)
+            ->transform([MAX_N, &state](std::string input) -> std::string {
+                int number_of_threads = -1;
+                bool const converted = CLI::detail::lexical_cast(input, number_of_threads);
+                if (!converted) {
+                    // CLI::ValidationError
+                    return std::format("Argument should be an integer, not '{}'", input);
+                }
+                if (number_of_threads <= 0) {
+                    DisplayString(state, "Invalid value for -j arg. Defaulting to 1.");
+                    return "1";
+                }
+                if (number_of_threads > MAX_N) {
+                    DisplayString(state,
+                                  std::format("Invalid value for -j arg. Value exceeds num available. Defaulting to num available. -j {}", MAX_N));
+                    return std::to_string(MAX_N);
+                }
+                return input;
+            });
 
-        state.dataGlobal->outputEpJSONConversionOnly = opt.isSet("--convert-only");
+        state.files.inputWeatherFilePath.filePath = "in.epw";
+        // Note: we can't do check(CLI::ExistingFile) here since passing a non-existing /path/to/myfile.epw file
+        // when there exists a /path/to/myfile.stat would mean the Weather File Statistics are still parsed and reported to the tabular output
+        // We still report a message + fail later if DDOnlySimulation is false
+        auto *weatherPathOpt =
+            app.add_option("-w,--weather", state.files.inputWeatherFilePath.filePath, "Weather file path (default: in.epw in current directory)")
+                ->required(false)
+                ->option_text("EPW");
 
-        bool eplusRunningViaAPI = state.dataGlobal->eplusRunningViaAPI;
+        bool runExpandObjects = false;
+        app.add_flag("-x,--expandobjects", runExpandObjects, "Run ExpandObjects prior to simulation");
 
-        opt.get("-j")->getInt(state.dataGlobal->numThread);
+        // Positional
+        state.dataStrGlobals->inputFilePath = "in.idf";
+        app.add_option("input_file", state.dataStrGlobals->inputFilePath, "Input file (default: in.idf in current directory)")
+            ->required(false)
+            ->check(CLI::ExistingFile);
 
-        if (state.dataGlobal->numThread == 0) {
-            DisplayString(state, "Invalid value for -j arg. Defaulting to 1.");
-            state.dataGlobal->numThread = 1;
-        } else if (state.dataGlobal->numThread > (int)std::thread::hardware_concurrency()) {
-            DisplayString(state,
-                          fmt::format("Invalid value for -j arg. Value exceeds num available. Defaulting to num available. -j {}",
-                                      (int)std::thread::hardware_concurrency()));
-            state.dataGlobal->numThread = (int)std::thread::hardware_concurrency();
-        }
-
-        // Process standard arguments
-        if (opt.isSet("-h")) {
-            DisplayString(state, usage);
-            if (eplusRunningViaAPI) {
-                // we need another return code to let runEnergyPlusAsLibrary know it should not try to run anything
-                return static_cast<int>(ReturnCodes::SuccessButHelper);
-            } else {
-                exit(EXIT_SUCCESS);
+        // Catching it myself, so I can print the arguments vector before it's mutated
+        bool debugCLI = std::any_of(args.begin(), args.end(), [](const auto &arg) { return arg == "--debug-cli"; });
+        if (debugCLI) {
+            {
+                EnergyPlus::print("ProcessArgs: received args\n");
+                int na = 0;
+                for (const auto &a : args) {
+                    EnergyPlus::print("* {}: '{}'\n", na++, a);
+                }
             }
-        }
-
-        if (opt.isSet("-v")) {
-            DisplayString(state, state.dataStrGlobals->VerStringVar);
-            if (eplusRunningViaAPI) {
-                // we need another return code to let runEnergyPlusAsLibrary know it should not try to run anything
-                return static_cast<int>(ReturnCodes::SuccessButHelper);
-            } else {
-                exit(EXIT_SUCCESS);
+            {
+                EnergyPlus::print("\nAfter massaging/expanding of args\n");
+                int na = 0;
+                for (const auto &a : arguments) {
+                    EnergyPlus::print("* {}: '{}'\n", na++, a);
+                }
             }
+            EnergyPlus::print("\n");
+        }
+        // bool debugCLI = false;
+        app.add_flag("--debug-cli", debugCLI, "Print the result of the CLI assignments to the console and exit")->group(""); // Empty group to hide it
+
+#if LINK_WITH_PYTHON
+#    ifdef PYTHON_CLI
+        auto *auxiliaryToolsSubcommand = app.add_subcommand("auxiliary", "Run Auxiliary Python Tools");
+        auxiliaryToolsSubcommand->require_subcommand(); // should default to requiring 1 or more additional args?
+
+        std::vector<std::string> python_fwd_args;
+        auto *epLaunchSubCommand = auxiliaryToolsSubcommand->add_subcommand("eplaunch", "EnergyPlus Launch");
+        epLaunchSubCommand->add_option("args", python_fwd_args, "Extra Arguments forwarded to EnergyPlus Launch")->option_text("ARG ...");
+        epLaunchSubCommand->positionals_at_end(true);
+        epLaunchSubCommand->footer("You can pass extra arguments after the eplaunch keyword, they will be forwarded to EnergyPlus Launch.");
+
+        epLaunchSubCommand->callback([&state, &python_fwd_args] {
+            EnergyPlus::Python::PythonEngine engine(state);
+            // There's probably better to be done, like instantiating the pythonEngine with the argc/argv then calling PyRun_SimpleFile but whatever
+            std::string cmd = Python::PythonEngine::getTclPreppedPreamble(python_fwd_args);
+            cmd += R"python(
+from eplaunch.tk_runner import main_gui
+main_gui(True)
+)python";
+            engine.exec(cmd);
+            exit(0);
+        });
+
+        auto *updaterSubCommand = auxiliaryToolsSubcommand->add_subcommand("updater", "IDF Version Updater GUI");
+        updaterSubCommand->add_option("args", python_fwd_args, "Extra Arguments forwarded to IDF Version Updater")->option_text("ARG ...");
+        updaterSubCommand->positionals_at_end(true);
+        updaterSubCommand->footer("You can pass extra arguments after the updater keyword, they will be forwarded to IDF Version Updater.");
+
+        updaterSubCommand->callback([&state, &python_fwd_args] {
+            EnergyPlus::Python::PythonEngine engine(state);
+            // There's probably better to be done, like instantiating the pythonEngine with the argc/argv then calling PyRun_SimpleFile but whatever
+            std::string cmd = Python::PythonEngine::getTclPreppedPreamble(python_fwd_args);
+            cmd += R"python(
+from energyplus_transition.runner import main_gui
+main_gui(True)
+)python";
+            engine.exec(cmd);
+            exit(0);
+        });
+
+        auto *updaterCLISubCommand = auxiliaryToolsSubcommand->add_subcommand("updater-cli", "IDF Version Updater CLI");
+        updaterCLISubCommand->allow_extras();
+        updaterCLISubCommand->footer("You can pass extra arguments after the updater-cli keyword, they will be forwarded to IDF Version Updater.\n"
+                                     "To get updater-cli's help, invoke without any arguments.");
+
+        updaterCLISubCommand->callback([&state, updaterCLISubCommand] {
+            EnergyPlus::Python::PythonEngine engine(state);
+            auto const &fwd_args = updaterCLISubCommand->remaining();
+
+            std::string cmd = R"python(import sys
+sys.argv = ["energyplus auxiliary updater-cli"]
+
+from energyplus_transition.cli import main
+main([)python";
+            if (fwd_args.empty()) {
+                cmd += "\"--help\"";
+            } else {
+                // Unless specifically passed, we pass eplus-dir to the current executable directory, so it doesn't try to auto find in the usual
+                // installation paths
+                bool eplus_dir_provided =
+                    std::any_of(fwd_args.begin(), fwd_args.end(), [](const std::string &a) { return a == "-e" || a == "--eplus-dir"; });
+                if (!eplus_dir_provided) {
+                    cmd += std::format(R"("--eplus-dir", "{:g}", )", state.dataStrGlobals->exeDirectoryPath);
+                }
+                for (const auto &arg : fwd_args) {
+                    cmd += std::format("\"{}\", ", arg);
+                }
+            }
+            cmd += "])\n";
+            engine.exec(cmd);
+            exit(0);
+        });
+
+        auto *gheDesignerSubCommand = auxiliaryToolsSubcommand->add_subcommand("ghedesigner", "GHEDesigner Operation");
+        gheDesignerSubCommand->add_option("args", python_fwd_args, "Extra Arguments forwarded to GHEDesigner")->option_text("ARG ...");
+        gheDesignerSubCommand->positionals_at_end(true);
+        gheDesignerSubCommand->footer(
+            "You can pass extra arguments after the ghedesigner keyword, they should be the input file and output directory.");
+
+        gheDesignerSubCommand->callback([&state, &python_fwd_args] {
+            EnergyPlus::Python::PythonEngine engine(state);
+            // There's probably better to be done, like instantiating the pythonEngine with the argc/argv then calling PyRun_SimpleFile but whatever
+            std::string cmd = Python::PythonEngine::getTclPreppedPreamble(python_fwd_args);
+            cmd += R"python(
+from ghedesigner.main import run_manager_from_cli
+run_manager_from_cli()
+)python";
+            try {
+                engine.exec(cmd);
+                exit(0);
+            } catch (std::runtime_error &) {
+                exit(1);
+            }
+        });
+#    endif
+#endif
+
+        app.footer("Example: energyplus -w weather.epw -r input.idf");
+
+        const bool eplusRunningViaAPI = state.dataGlobal->eplusRunningViaAPI;
+
+        try {
+            // app.parse(argc, argv);
+            // CLI11 when passing argc, argv creates a vector<string> but **in reverse** order:
+            // https://github.com/CLIUtils/CLI11/blob/291c58789c031208f08f4f261a858b5b7083e8e2/include/CLI/impl/App_inl.hpp#L476-L488
+            std::reverse(arguments.begin(), arguments.end());
+            app.parse(arguments);
+        } catch (const CLI::Success &e) {
+            int const return_code = app.exit(e);
+            if (eplusRunningViaAPI) {
+                return static_cast<int>(ReturnCodes::SuccessButHelper);
+            }
+            exit(return_code);
+
+        } catch (const CLI::ParseError &e) {
+            int const return_code = app.exit(e);
+            if (eplusRunningViaAPI) {
+                return static_cast<int>(ReturnCodes::Failure);
+            }
+            exit(return_code);
         }
 
-        if (opt.lastArgs.size() == 1) {
-            state.dataStrGlobals->inputFilePath = fs::path{*opt.lastArgs[0]};
-        } else if (opt.lastArgs.empty()) {
-            state.dataStrGlobals->inputFilePath = "in.idf";
+        if (debugCLI) {
+            EnergyPlus::print(stderr,
+                              R"debug(
+state.dataGlobal->AnnualSimulation = {},
+state.dataGlobal->DDOnlySimulation = {},
+state.dataStrGlobals->outDirPath = '{:g}',
+state.dataStrGlobals->inputIddFilePath= '{:g}',
+
+runEPMacro = {},
+prefixOutName = {},
+
+state.dataGlobal->runReadVars={},
+state.dataGlobal->outputEpJSONConversion={},
+state.dataGlobal->outputEpJSONConversionOnly={},
+
+suffixType={},
+
+state.dataGlobal->numThread={},
+state.files.inputWeatherFilePath.filePath='{:g}',
+state.dataStrGlobals->inputFilePath='{:g}',
+)debug",
+                              state.dataGlobal->AnnualSimulation,
+                              state.dataGlobal->DDOnlySimulation,
+                              state.dataStrGlobals->outDirPath,
+                              state.dataStrGlobals->inputIddFilePath,
+
+                              runEPMacro,
+                              prefixOutName,
+                              state.dataGlobal->runReadVars,
+                              state.dataGlobal->outputEpJSONConversion,
+                              state.dataGlobal->outputEpJSONConversionOnly,
+                              suffixType,
+                              state.dataGlobal->numThread,
+                              state.files.inputWeatherFilePath.filePath,
+                              state.dataStrGlobals->inputFilePath);
+
+            EnergyPlus::print(stderr, "--debug-cli passed: exiting early\n");
+
+            exit(0);
         }
 
         // Convert all paths to native paths
@@ -259,38 +403,6 @@ namespace CommandLineInterface {
         state.files.inputWeatherFilePath.filePath = FileSystem::makeNativePath(state.files.inputWeatherFilePath.filePath);
         state.dataStrGlobals->inputIddFilePath = FileSystem::makeNativePath(state.dataStrGlobals->inputIddFilePath);
         state.dataStrGlobals->outDirPath = FileSystem::makeNativePath(state.dataStrGlobals->outDirPath);
-
-        std::vector<std::string> badOptions;
-        if (opt.lastArgs.size() > 1u) {
-            bool invalidOptionFound = false;
-            for (size_type i = 0; i < opt.lastArgs.size(); ++i) {
-                std::string const &arg(*opt.lastArgs[i]);
-                if (arg.substr(0, 1) == "-") {
-                    invalidOptionFound = true;
-                    DisplayString(state, "ERROR: Invalid option: " + arg);
-                }
-            }
-            if (invalidOptionFound) {
-                DisplayString(state, errorFollowUp);
-                if (eplusRunningViaAPI) {
-                    return static_cast<int>(ReturnCodes::Failure);
-                } else {
-                    exit(EXIT_FAILURE);
-                }
-            } else {
-                DisplayString(state, "ERROR: Multiple input files specified:");
-                for (size_type i = 0; i < opt.lastArgs.size(); ++i) {
-                    std::string const &arg(*opt.lastArgs[i]);
-                    DisplayString(state, format("  Input file #{}: {}", i + 1, arg));
-                }
-                DisplayString(state, errorFollowUp);
-                if (eplusRunningViaAPI) {
-                    return static_cast<int>(ReturnCodes::Failure);
-                } else {
-                    exit(EXIT_FAILURE);
-                }
-            }
-        }
 
         state.dataStrGlobals->inputFilePathNameOnly = FileSystem::getFileName(state.dataStrGlobals->inputFilePath);
         state.dataStrGlobals->inputDirPath = FileSystem::getParentDirectoryPath(state.dataStrGlobals->inputFilePath);
@@ -317,33 +429,22 @@ namespace CommandLineInterface {
                 DisplayString(state, "BSON input format is experimental and unsupported.");
                 break;
             default:
-                DisplayString(state, "ERROR: Input file must have IDF, IMF, or epJSON extension.");
+                DisplayString(state,
+                              std::format("ERROR: Input file must have IDF, IMF, or epJSON extension: {:g}", state.dataStrGlobals->inputFilePath));
                 if (eplusRunningViaAPI) {
                     return static_cast<int>(ReturnCodes::Failure);
-                } else {
-                    exit(EXIT_FAILURE);
                 }
+                exit(EXIT_FAILURE);
             }
         }
 
-        bool runExpandObjects = opt.isSet("-x");
-        bool runEPMacro = opt.isSet("-m");
-
-        if (opt.isSet("-d")) {
+        if (!state.dataStrGlobals->outDirPath.empty()) {
             // Create directory if it doesn't already exist
             FileSystem::makeDirectory(state.dataStrGlobals->outDirPath);
         }
 
         // File naming scheme
-        fs::path outputFilePrefixFullPath;
-        if (opt.isSet("-p")) {
-            std::string prefixOutName;
-            opt.get("-p")->getString(prefixOutName);
-            fs::path prefix = FileSystem::makeNativePath(fs::path(prefixOutName)); // Why is this needed?
-            outputFilePrefixFullPath = state.dataStrGlobals->outDirPath / prefixOutName;
-        } else {
-            outputFilePrefixFullPath = state.dataStrGlobals->outDirPath / "eplus";
-        }
+        fs::path outputFilePrefixFullPath = state.dataStrGlobals->outDirPath / prefixOutName;
 
         fs::path outputEpmdetFilePath;
         fs::path outputEpmidfFilePath;
@@ -355,17 +456,18 @@ namespace CommandLineInterface {
         std::string tableSuffix;
         std::string mapSuffix;
         std::string zszSuffix;
+        std::string spszSuffix;
         std::string sszSuffix;
+        std::string pszSuffix;
         std::string meterSuffix;
         std::string sqliteSuffix;
         std::string adsSuffix;
         std::string screenSuffix;
         std::string shdSuffix;
 
-        std::string suffixType;
+        std::string const errorFollowUp = "Type 'energyplus --help' for usage.";
         {
-            opt.get("-s")->getString(suffixType);
-            std::transform((suffixType).begin(), (suffixType).end(), (suffixType).begin(), ::toupper);
+            std::transform(suffixType.begin(), suffixType.end(), suffixType.begin(), ::toupper);
 
             if (suffixType == "L") {
 
@@ -373,7 +475,9 @@ namespace CommandLineInterface {
                 tableSuffix = "tbl";
                 mapSuffix = "map";
                 zszSuffix = "zsz";
+                spszSuffix = "spsz";
                 sszSuffix = "ssz";
+                pszSuffix = "psz";
                 meterSuffix = "mtr";
                 sqliteSuffix = "sqlite";
                 adsSuffix = "ADS";
@@ -386,7 +490,9 @@ namespace CommandLineInterface {
                 tableSuffix = "-table";
                 mapSuffix = "-map";
                 zszSuffix = "-zsz";
+                spszSuffix = "-spsz";
                 sszSuffix = "-ssz";
+                pszSuffix = "-psz";
                 meterSuffix = "-meter";
                 sqliteSuffix = "-sqlite";
                 adsSuffix = "-ads";
@@ -399,27 +505,21 @@ namespace CommandLineInterface {
                 tableSuffix = "Table";
                 mapSuffix = "Map";
                 zszSuffix = "Zsz";
+                spszSuffix = "Spsz";
                 sszSuffix = "Ssz";
+                pszSuffix = "Psz";
                 meterSuffix = "Meter";
                 sqliteSuffix = "Sqlite";
                 adsSuffix = "Ads";
                 screenSuffix = "Screen";
                 shdSuffix = "Shading";
-
-            } else {
-                DisplayString(state, "ERROR: Unrecognized argument for output suffix style: " + suffixType);
-                DisplayString(state, errorFollowUp);
-                if (eplusRunningViaAPI) {
-                    return static_cast<int>(ReturnCodes::Failure);
-                } else {
-                    exit(EXIT_FAILURE);
-                }
             }
+            // No else needed, this is validated at CLI level above
         }
 
         // Helper to construct output file path
         auto composePath = [&outputFilePrefixFullPath](const std::string &suffix) -> fs::path {
-            return fs::path(outputFilePrefixFullPath.string() + suffix);
+            return FileSystem::appendSuffixToPath(outputFilePrefixFullPath, suffix);
         };
 
         // EnergyPlus files
@@ -485,9 +585,15 @@ namespace CommandLineInterface {
         state.files.outputZszCsvFilePath = composePath(zszSuffix + ".csv");
         state.files.outputZszTabFilePath = composePath(zszSuffix + ".tab");
         state.files.outputZszTxtFilePath = composePath(zszSuffix + ".txt");
+        state.files.outputSpszCsvFilePath = composePath(spszSuffix + ".csv");
+        state.files.outputSpszTabFilePath = composePath(spszSuffix + ".tab");
+        state.files.outputSpszTxtFilePath = composePath(spszSuffix + ".txt");
         state.files.outputSszCsvFilePath = composePath(sszSuffix + ".csv");
         state.files.outputSszTabFilePath = composePath(sszSuffix + ".tab");
         state.files.outputSszTxtFilePath = composePath(sszSuffix + ".txt");
+        state.files.outputPszCsvFilePath = composePath(pszSuffix + ".csv");
+        state.files.outputPszTabFilePath = composePath(pszSuffix + ".tab");
+        state.files.outputPszTxtFilePath = composePath(pszSuffix + ".txt");
         state.dataStrGlobals->outputAdsFilePath = composePath(adsSuffix + ".out");
         state.files.shade.filePath = composePath(shdSuffix + ".csv");
         if (suffixType == "L") {
@@ -528,77 +634,22 @@ namespace CommandLineInterface {
         outputExpidfFilePath = composePath(normalSuffix + ".expidf");
         outputExperrFilePath = composePath(normalSuffix + ".experr");
 
-        // Handle bad options
-        if (!opt.gotExpected(badOptions)) {
-            for (size_type i = 0; i < badOptions.size(); ++i) {
-                DisplayString(state, "ERROR: Unexpected number of arguments for option " + badOptions[i]);
-            }
-            DisplayString(state, errorFollowUp);
-            if (eplusRunningViaAPI) {
-                return static_cast<int>(ReturnCodes::Failure);
-            } else {
-                exit(EXIT_FAILURE);
-            }
-        }
-
-        // This is a placeholder in case there are required options in the future
-        if (!opt.gotRequired(badOptions)) {
-            for (size_type i = 0; i < badOptions.size(); ++i) {
-                DisplayString(state, "ERROR: Missing required option " + badOptions[i]);
-            }
-            DisplayString(state, errorFollowUp);
-            if (eplusRunningViaAPI) {
-                return static_cast<int>(ReturnCodes::Failure);
-            } else {
-                exit(EXIT_FAILURE);
-            }
-        }
-
-        if (opt.firstArgs.size() > 1 || opt.unknownArgs.size() > 0) {
-            for (size_type i = 1; i < opt.firstArgs.size(); ++i) {
-                std::string const &arg(*opt.firstArgs[i]);
-                DisplayString(state, "ERROR: Invalid option: " + arg);
-            }
-            for (size_type i = 0; i < opt.unknownArgs.size(); ++i) {
-                std::string const &arg(*opt.unknownArgs[i]);
-                DisplayString(state, "ERROR: Invalid option: " + arg);
-            }
-            DisplayString(state, errorFollowUp);
-            if (eplusRunningViaAPI) {
-                return static_cast<int>(ReturnCodes::Failure);
-            } else {
-                exit(EXIT_FAILURE);
-            }
-        }
-
-        // Error for cases where both design-day and annual simulation switches are set
-        if (state.dataGlobal->DDOnlySimulation && state.dataGlobal->AnnualSimulation) {
-            DisplayString(state, "ERROR: Cannot force both design-day and annual simulations. Set either '-D' or '-a', but not both.");
-            DisplayString(state, errorFollowUp);
-            if (eplusRunningViaAPI) {
-                return static_cast<int>(ReturnCodes::Failure);
-            } else {
-                exit(EXIT_FAILURE);
-            }
-        }
-
         // Read path from INI file if it exists
 
         // Check for IDD and IDF files
         if (FileSystem::fileExists(state.files.iniFile.filePath)) {
             EnergyPlus::InputFile iniFile = state.files.iniFile.try_open();
             if (!iniFile.good()) {
-                DisplayString(state, "ERROR: Could not open file " + iniFile.filePath.string() + " for input (read).");
+                DisplayString(state, std::format("ERROR: Could not open file {} for input (read).", iniFile.filePath));
                 if (eplusRunningViaAPI) {
                     return static_cast<int>(ReturnCodes::Failure);
-                } else {
-                    exit(EXIT_FAILURE);
                 }
+                exit(EXIT_FAILURE);
             }
             state.dataStrGlobals->CurrentWorkingFolder = iniFile.filePath;
             // Relying on compiler to supply full path name here
             // TODO: not sure I understand this block
-            // const auto TempIndx = index(state.dataStrGlobals->CurrentWorkingFolder, state.dataStrGlobals->pathChar, true);
+            // const int TempIndx = index(state.dataStrGlobals->CurrentWorkingFolder, state.dataStrGlobals->pathChar, true);
             // if (TempIndx == std::string::npos) {
             // state.dataStrGlobals->CurrentWorkingFolder = "";
             //} else {
@@ -607,34 +658,34 @@ namespace CommandLineInterface {
             //       Get directories from ini file
             std::string programPathStr;
             ReadINIFile(iniFile, "program", "dir", programPathStr);
-            state.dataStrGlobals->ProgramPath = fs::path(programPathStr);
 
-            state.dataStrGlobals->inputIddFilePath = state.dataStrGlobals->ProgramPath / "Energy+.idd";
+            if (!programPathStr.empty()) {
+                state.dataStrGlobals->ProgramPath = fs::path(programPathStr);
+                state.dataStrGlobals->inputIddFilePath = state.dataStrGlobals->ProgramPath / "Energy+.idd";
+            }
         }
 
         // Check if specified files exist
         if (!FileSystem::fileExists(state.dataStrGlobals->inputFilePath)) {
             DisplayString(
-                state, "ERROR: Could not find input data file: " + FileSystem::getAbsolutePath(state.dataStrGlobals->inputFilePath).string() + ".");
+                state, std::format("ERROR: Could not find input data file: {}.", FileSystem::getAbsolutePath(state.dataStrGlobals->inputFilePath)));
             DisplayString(state, errorFollowUp);
             if (eplusRunningViaAPI) {
                 return static_cast<int>(ReturnCodes::Failure);
-            } else {
-                exit(EXIT_FAILURE);
             }
+            exit(EXIT_FAILURE);
         }
 
-        if (opt.isSet("-w") && !state.dataGlobal->DDOnlySimulation) {
+        if ((weatherPathOpt->count() > 0) && !state.dataGlobal->DDOnlySimulation) {
             if (!FileSystem::fileExists(state.files.inputWeatherFilePath.filePath)) {
                 DisplayString(
                     state,
-                    "ERROR: Could not find weather file: " + FileSystem::getAbsolutePath(state.files.inputWeatherFilePath.filePath).string() + ".");
+                    std::format("ERROR: Could not find weather file: {}.", FileSystem::getAbsolutePath(state.files.inputWeatherFilePath.filePath)));
                 DisplayString(state, errorFollowUp);
                 if (eplusRunningViaAPI) {
                     return static_cast<int>(ReturnCodes::Failure);
-                } else {
-                    exit(EXIT_FAILURE);
                 }
+                exit(EXIT_FAILURE);
             }
         }
 
@@ -644,14 +695,13 @@ namespace CommandLineInterface {
         if (runEPMacro) {
             fs::path epMacroPath = (state.dataStrGlobals->exeDirectoryPath / "EPMacro").replace_extension(FileSystem::exeExtension);
             if (!FileSystem::fileExists(epMacroPath)) {
-                DisplayString(state, "ERROR: Could not find EPMacro executable: " + FileSystem::getAbsolutePath(epMacroPath).string() + ".");
+                DisplayString(state, std::format("ERROR: Could not find EPMacro executable: {}.", FileSystem::getAbsolutePath(epMacroPath)));
                 if (eplusRunningViaAPI) {
                     return static_cast<int>(ReturnCodes::Failure);
-                } else {
-                    exit(EXIT_FAILURE);
                 }
+                exit(EXIT_FAILURE);
             }
-            std::string epMacroCommand = "\"" + epMacroPath.string() + "\"";
+            std::string epMacroCommand = "\"" + FileSystem::toString(epMacroPath) + "\"";
             bool inputFilePathdIn = (FileSystem::getAbsolutePath(state.dataStrGlobals->inputFilePath) == FileSystem::getAbsolutePath("in.imf"));
 
             if (!inputFilePathdIn) {
@@ -672,27 +722,25 @@ namespace CommandLineInterface {
                 (state.dataStrGlobals->exeDirectoryPath / fs::path("ExpandObjects")).replace_extension(FileSystem::exeExtension);
             if (!FileSystem::fileExists(expandObjectsPath)) {
                 DisplayString(state,
-                              "ERROR: Could not find ExpandObjects executable: " + FileSystem::getAbsolutePath(expandObjectsPath).string() + ".");
+                              std::format("ERROR: Could not find ExpandObjects executable: {}.", FileSystem::getAbsolutePath(expandObjectsPath)));
                 if (eplusRunningViaAPI) {
                     return static_cast<int>(ReturnCodes::Failure);
-                } else {
-                    exit(EXIT_FAILURE);
                 }
+                exit(EXIT_FAILURE);
             }
-            std::string expandObjectsCommand = "\"" + expandObjectsPath.string() + "\"";
+            std::string expandObjectsCommand = "\"" + FileSystem::toString(expandObjectsPath) + "\"";
             bool inputFilePathdIn = (FileSystem::getAbsolutePath(state.dataStrGlobals->inputFilePath) == FileSystem::getAbsolutePath("in.idf"));
 
             // check if IDD actually exists since ExpandObjects still requires it
             if (!FileSystem::fileExists(state.dataStrGlobals->inputIddFilePath)) {
                 DisplayString(state,
-                              "ERROR: Could not find input data dictionary: " +
-                                  FileSystem::getAbsolutePath(state.dataStrGlobals->inputIddFilePath).string() + ".");
+                              std::format("ERROR: Could not find input data dictionary: {}.",
+                                          FileSystem::getAbsolutePath(state.dataStrGlobals->inputIddFilePath)));
                 DisplayString(state, errorFollowUp);
                 if (eplusRunningViaAPI) {
                     return static_cast<int>(ReturnCodes::Failure);
-                } else {
-                    exit(EXIT_FAILURE);
                 }
+                exit(EXIT_FAILURE);
             }
 
             bool iddFilePathdEnergy =
@@ -750,25 +798,9 @@ namespace CommandLineInterface {
         // Duplicate the kind of reading the Windows "GetINISetting" would
         // do.
 
-        // REFERENCES:
-        // na
-
         // Using/Aliasing
         using namespace EnergyPlus;
         using namespace DataStringGlobals;
-
-        // Locals
-        // SUBROUTINE ARGUMENT DEFINITIONS:
-
-        // SUBROUTINE PARAMETER DEFINITIONS:
-
-        // INTERFACE BLOCK SPECIFICATIONS
-        // na
-
-        // DERIVED TYPE DEFINITIONS
-        // na
-
-        // SUBROUTINE LOCAL VARIABLE DECLARATIONS:
 
         std::string Param;
         std::string::size_type ILB;
@@ -776,7 +808,6 @@ namespace CommandLineInterface {
         std::string::size_type IEQ;
         std::string::size_type IPAR;
         std::string::size_type IPOS;
-        std::string::size_type ILEN;
 
         // Formats
 
@@ -786,7 +817,6 @@ namespace CommandLineInterface {
 
         Param = KindofParameter;
         strip(Param);
-        ILEN = len(Param);
         inputFile.rewind();
         bool Found = false;
         bool NewHeading = false;
@@ -806,25 +836,33 @@ namespace CommandLineInterface {
             ConvertCaseToLower(readResult.data, LINEOut); // Turn line into lower case
             //        LINE=LINEOut
 
-            if (!has(LINEOut, Heading)) continue;
+            if (!has(LINEOut, Heading)) {
+                continue;
+            }
 
             //                                  See if [ and ] are on line
             ILB = index(LINEOut, '[');
             IRB = index(LINEOut, ']');
-            if (ILB == std::string::npos && IRB == std::string::npos) continue;
-            if (!has(LINEOut, '[' + Heading + ']')) continue; // Must be really correct heading line
+            if (ILB == std::string::npos && IRB == std::string::npos) {
+                continue;
+            }
+            if (!has(LINEOut, '[' + Heading + ']')) {
+                continue; // Must be really correct heading line
+            }
 
             //                                  Heading line found, now looking for Kind
             while (inputFile.good() && !NewHeading) {
-                const auto innerReadResult = inputFile.readLine();
+                const auto innerReadResult = inputFile.readLine(); // readLine returns a ReadResult<std::string>, hence no & (THIS_AUTO_OK)
                 if (innerReadResult.eof) {
                     break;
                 }
 
-                auto line = innerReadResult.data;
+                std::string line = innerReadResult.data;
                 strip(line);
 
-                if (line.empty()) continue; // Ignore Blank Lines
+                if (line.empty()) {
+                    continue; // Ignore Blank Lines
+                }
 
                 ConvertCaseToLower(line, LINEOut); // Turn line into lower case
                 //         LINE=LINEOut
@@ -837,13 +875,23 @@ namespace CommandLineInterface {
                 //                                  KindofParameter = string
                 IEQ = index(LINEOut, '=');
                 IPAR = index(LINEOut, Param);
-                if (IEQ == std::string::npos) continue;
-                if (IPAR == std::string::npos) continue;
-                if (IPAR != 0) continue;
-                if (!has(LINEOut, Param + '=')) continue; // needs to be param=
+                if (IEQ == std::string::npos) {
+                    continue;
+                }
+                if (IPAR == std::string::npos) {
+                    continue;
+                }
+                if (IPAR != 0) {
+                    continue;
+                }
+                if (!has(LINEOut, Param + '=')) {
+                    continue; // needs to be param=
+                }
 
                 //                                  = found and parameter found.
-                if (IPAR > IEQ) continue;
+                if (IPAR > IEQ) {
+                    continue;
+                }
 
                 //                                  parameter = found
                 //                                  Set output string to start with non-blank character
@@ -880,7 +928,7 @@ namespace CommandLineInterface {
                         state,
                         "ERROR: Could not find ReadVarsESO executable.  When calling through C API, make sure to call setEnergyPlusRootDirectory");
                 } else {
-                    DisplayString(state, "ERROR: Could not find ReadVarsESO executable: " + FileSystem::getAbsolutePath(readVarsPath).string() + ".");
+                    DisplayString(state, std::format("ERROR: Could not find ReadVarsESO executable: {}.", FileSystem::getAbsolutePath(readVarsPath)));
                 }
                 return static_cast<int>(ReturnCodes::Failure);
             }
@@ -889,32 +937,32 @@ namespace CommandLineInterface {
         fs::path const RVIfile = (state.dataStrGlobals->inputDirPath / state.dataStrGlobals->inputFilePathNameOnly).replace_extension(".rvi");
         fs::path const MVIfile = (state.dataStrGlobals->inputDirPath / state.dataStrGlobals->inputFilePathNameOnly).replace_extension(".mvi");
 
-        const auto rviFileExists = FileSystem::fileExists(RVIfile);
+        const bool rviFileExists = FileSystem::fileExists(RVIfile);
         if (!rviFileExists) {
             std::ofstream ofs{RVIfile};
             if (!ofs.good()) {
-                ShowFatalError(state, format("EnergyPlus: Could not open file \"{}\" for output (write).", RVIfile.string()));
+                ShowFatalError(state, std::format("EnergyPlus: Could not open file \"{}\" for output (write).", RVIfile));
             } else {
-                ofs << state.files.eso.filePath.string() << '\n';
-                ofs << state.files.csv.filePath.string() << '\n';
+                ofs << FileSystem::toString(state.files.eso.filePath) << '\n';
+                ofs << FileSystem::toString(state.files.csv.filePath) << '\n';
             }
         }
 
-        const auto mviFileExists = FileSystem::fileExists(MVIfile);
+        const bool mviFileExists = FileSystem::fileExists(MVIfile);
         if (!mviFileExists) {
             std::ofstream ofs{MVIfile};
             if (!ofs.good()) {
-                ShowFatalError(state, format("EnergyPlus: Could not open file \"{}\" for output (write).", RVIfile.string()));
+                ShowFatalError(state, std::format("EnergyPlus: Could not open file \"{}\" for output (write).", RVIfile));
             } else {
-                ofs << state.files.mtr.filePath.string() << '\n';
-                ofs << state.files.mtr_csv.filePath.string() << '\n';
+                ofs << FileSystem::toString(state.files.mtr.filePath) << '\n';
+                ofs << FileSystem::toString(state.files.mtr_csv.filePath) << '\n';
             }
         }
 
         // We quote the paths in case we have spaces
         // "/Path/to/ReadVarEso" "/Path/to/folder with spaces/file.rvi" unlimited
-        std::string const readVarsRviCommand = "\"" + readVarsPath.string() + "\" \"" + RVIfile.string() + "\" unlimited";
-        std::string const readVarsMviCommand = "\"" + readVarsPath.string() + "\" \"" + MVIfile.string() + "\" unlimited";
+        std::string const readVarsRviCommand = "\"" + FileSystem::toString(readVarsPath) + "\" \"" + FileSystem::toString(RVIfile) + "\" unlimited";
+        std::string const readVarsMviCommand = "\"" + FileSystem::toString(readVarsPath) + "\" \"" + FileSystem::toString(MVIfile) + "\" unlimited";
 
         // systemCall will be responsible to handle to above command on Windows versus Unix
         FileSystem::systemCall(readVarsRviCommand);

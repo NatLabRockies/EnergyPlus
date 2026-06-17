@@ -1,0 +1,193 @@
+exclude: |
+  (?x)(
+      ^bin/.*                    # bin/ at repo root
+    | ^third_party/.*            # third_party/ at repo root
+    | .*\.(bat|BAT|dat|gtp)$     # .bat and a few similar
+    | .*\.(epw|stat|audit)$      # EnergyPlus specific files
+  )
+fail_fast: false
+repos:
+- repo: https://github.com/pre-commit/pre-commit-hooks
+  rev: v6.0.0
+  hooks:
+  - id: trailing-whitespace
+  - id: end-of-file-fixer
+    # We exclude these because ddy/epw are treated as immutable, and the idf/imf etc are formatted by Transition tool probably
+    exclude: '.*\.(idf|imf|rvi|mvi|epw|ddy)$'
+  - id: check-merge-conflict
+  - id: check-yaml
+  - id: fix-byte-order-marker
+
+- repo: https://github.com/psf/black
+  rev: 25.9.0
+  hooks:
+  - id: black
+
+- repo: https://github.com/pycqa/isort
+  rev: 6.1.0
+  hooks:
+  - id: isort
+
+- repo: https://github.com/pre-commit/mirrors-clang-format
+  rev: 'v19.1.1'
+  hooks:
+  - id: clang-format
+    files: '^(src|tst)/.*\.(cpp|cc|c|hpp|hh|h)$'
+    args: ["-style=file", "--verbose"]
+
+- repo: local
+  hooks:
+#  - id: test-hook
+#    name:  test-hook
+#    entry: python scripts/dev/test_hook.py
+#    args: ['--verbose'] #, '--gha']
+#    language: python
+#    files: '.*\.cc'
+#    pass_filenames: true
+#    # I am handling concurrency in the script. Note that if you run with --all-files and do not add a filter, it might run twice or more, because of limitation in SC_ARG_MAX
+#    # (The maximum length of all arguments and environment strings to exec())
+#    # Passing about 2500 relative paths exceeds the limit so it MUST break it down in chunks anyways
+#    require_serial: true
+
+  - id: check-constexpr
+    name: check constexpr usage
+    entry: python scripts/dev/check_constexpr.py
+    args: ['--verbose']
+    language: python
+    files: '^src/EnergyPlus/.*\.(cc|hh)$|^tst/EnergyPlus/unit/.*\.(cc|hh)$'
+    pass_filenames: true
+    require_serial: true
+
+  - id: license-check
+    name: license check
+    entry: python scripts/dev/license-check.py
+    args: ['--verbose']
+    language: python
+    types_or: [python, c, c++]
+    pass_filenames: true
+    require_serial: true
+
+  - id: validate-idd-units
+    name: validate IDD units
+    entry: python scripts/dev/validate_idd_units.py
+    args: ['--verbose']
+    language: python
+    # files: '.*\.(idd.in|idd)'
+    files: '.*\.idd.in$'  # The old IDDs will issue a ton of warnings
+    pass_filenames: true
+    require_serial: true
+
+  - id: check-stray-fields-in-idd
+    name: check stray fields in IDD
+    entry: python scripts/dev/check_stray_fields_in_idd.py
+    args: ['--verbose']
+    language: python
+    files: '.*\.idd.in$'  # The old IDDs will issue a ton of warnings
+    pass_filenames: true
+    require_serial: true
+
+  - id: verify-idfs-in-cmake
+    name: verify IDFs in testfiles CMake
+    entry: python scripts/dev/verify_idfs_in_cmake.py
+    args: ['--verbose']
+    language: python
+    files: '^testfiles/.*\.(idf|imf)$|^testfiles/CMakeLists\.txt$'
+    pass_filenames: true
+    require_serial: true
+
+  - id: check-non-utf8
+    name: check files are UTF-8
+    entry: python scripts/dev/check_non_utf8.py
+    language: python
+    args: ['--fix', '--verbose']
+    pass_filenames: true
+    require_serial: true
+
+  - id: verify-cmake-dirs
+    name: verify cmake dirs
+    entry: python scripts/dev/verify_cmake_dirs.py
+    args: ['--verbose']
+    language: python
+    files: "^testfiles/.*"
+    pass_filenames: false
+
+  - id: find-byref-bool-override
+    name: find byref bool override
+    entry: python scripts/dev/find_byref_bool_override.py
+    args: ['--verbose']
+    language: python
+    files: '^src/EnergyPlus/.*\.cc$'
+    pass_filenames: true
+    require_serial: true
+
+  - id: check-for-tabs
+    name: check for tabs in IDFs
+    entry: python scripts/dev/check_for_tabs.py
+    language: python
+    args: ['--verbose']
+    files: '^testfiles/.*\.(idf|imf)$|^datasets/.*\.(idf|imf)$|.*\.idd.in$'
+    pass_filenames: true
+    require_serial: true
+
+  - id: find-included-cc-files
+    name: find included cc files
+    entry: python scripts/dev/find_included_cc_files.py
+    args: ['--verbose']
+    language: python
+    files: '^src/EnergyPlus/.*\.(cc|hh)$|^tst/EnergyPlus/unit/.*\.(cc|hh)$'
+    pass_filenames: true
+    require_serial: true
+
+  - id: analyze-state
+    name: analyze state
+    entry: python scripts/dev/analyze_state.py
+    args: ['--verbose']
+    language: python
+    files: '^src/EnergyPlus/Data/EnergyPlusData\.(cc|hh)$'
+    pass_filenames: false
+
+  - id: check-for-c-style-comments
+    name: check for C style comments
+    entry: python scripts/dev/check_for_c_style_comments.py
+    args: ['--verbose']
+    language: python
+    files: '^src/EnergyPlus/.*\.(cc|hh)$|^tst/EnergyPlus/unit/.*\.(cc|hh)$'
+    pass_filenames: true
+    require_serial: true
+
+  - id: check-for-switch-case-parentheses
+    name: check for switch case parentheses
+    entry: python scripts/dev/check_for_switch_case_parentheses.py
+    args: ['--verbose']
+    language: python
+    files: '^src/EnergyPlus/.*\.(cc|hh)$'
+    pass_filenames: true
+    require_serial: true
+
+  - id: check-for-malformed-enums
+    name: check for malformed enums
+    entry: python scripts/dev/check_for_malformed_enums.py
+    args: ['--verbose']
+    language: python
+    files: '^src/EnergyPlus/.*\.(cc|hh)$'
+    pass_filenames: true
+    require_serial: true
+
+  - id: check-format-strings
+    name: check format strings
+    entry: python scripts/dev/check_format_strings.py
+    args: ['--verbose']
+    language: python
+    files: '^src/EnergyPlus/.*\.(cc|hh)$|^tst/EnergyPlus/.*\.(cc|hh)$'
+    pass_filenames: true
+    require_serial: true
+
+  # This was taking 1min20 before, and 14s with parallel on my 16-thread machine but it's still too slow for a pre-commit hook, so manual only
+  # Run it with: pre-commit run --hook-stage manual check-for-enum-scope-usage --verbose --all-files
+  - id: check-for-enum-scope-usage
+    stages: [manual]
+    name: check_for_enum_scope_usage
+    entry: python scripts/dev/check_for_enum_scope_usage.py
+    args: ['--verbose']
+    language: python
+    pass_filenames: false

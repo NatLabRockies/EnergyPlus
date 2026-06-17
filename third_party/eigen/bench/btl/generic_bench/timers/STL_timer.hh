@@ -1,7 +1,7 @@
 //=====================================================
 // File   :  STL_Timer.hh
 // Author :  L. Plagne <laurent.plagne@edf.fr)>        
-// Copyright (C) EDF R&D,  mar déc 3 18:59:35 CET 2002
+// Copyright (C) EDF R&D,  mar dÃ©c 3 18:59:35 CET 2002
 //=====================================================
 // 
 // This program is free software; you can redistribute it and/or

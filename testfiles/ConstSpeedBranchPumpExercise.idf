@@ -1,4 +1,4 @@
-  Version,23.1;
+  Version,26.2;
 
   Building,
     Building 1,              !- Name
@@ -193,7 +193,7 @@
     Boiler 1 Outlet Node,    !- Boiler Water Outlet Node Name
     99,                      !- Water Outlet Upper Temperature Limit {C}
     ConstantFlow,            !- Boiler Flow Mode
-    0,                       !- Parasitic Electric Load {W}
+    0,                       !- On Cycle Parasitic Electric Load {W}
     1;                       !- Sizing Factor
 
   Branch,
@@ -234,7 +234,7 @@
     Boiler 2 Outlet Node,    !- Boiler Water Outlet Node Name
     99,                      !- Water Outlet Upper Temperature Limit {C}
     ConstantFlow,            !- Boiler Flow Mode
-    0,                       !- Parasitic Electric Load {W}
+    0,                       !- On Cycle Parasitic Electric Load {W}
     1;                       !- Sizing Factor
 
   Branch,
@@ -283,7 +283,8 @@
     Demand Outlet Node,      !- Outlet Node Name
     Load Profile 1 load Schedule,  !- Load Schedule Name
     0.002,                   !- Peak Flow Rate {m3/s}
-    Load Profile 1 flow Schedule;  !- Flow Rate Fraction Schedule Name
+    Load Profile 1 flow Schedule,  !- Flow Rate Fraction Schedule Name
+    ;                        !- Plant Loop Fluid Type
 
 !Schedule:Constant,
 !  Load Profile 1 load Schedule,

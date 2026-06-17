@@ -1,7 +1,7 @@
-// EnergyPlus, Copyright (c) 1996-2023, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
-// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other
+// National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
 // contributors. All rights reserved.
 //
 // NOTICE: This Software was developed under funding from the U.S. Department of Energy and the
@@ -129,14 +129,14 @@ namespace PlantUtilities {
                                          bool FirstHVACIteration);
 
     void UpdateAbsorberChillerComponentGeneratorSide(EnergyPlusData &state,
-                                                     int LoopNum,                                // component's loop index
-                                                     DataPlant::LoopSideLocation LoopSide,       // component's loop side number
-                                                     DataPlant::PlantEquipmentType Type,         // Component's type index
-                                                     int InletNodeNum,                           // Component's inlet node pointer
-                                                     int OutletNodeNum,                          // Component's outlet node pointer
-                                                     DataLoopNode::NodeFluidType HeatSourceType, // Type of fluid in Generator loop
-                                                     Real64 ModelGeneratorHeatRate,              // model's generator heat rate (W)
-                                                     Real64 ModelMassFlowRate,                   // model's generator mass flow rate (kg/s)
+                                                     int LoopNum,                          // component's loop index
+                                                     DataPlant::LoopSideLocation LoopSide, // component's loop side number
+                                                     DataPlant::PlantEquipmentType Type,   // Component's type index
+                                                     int InletNodeNum,                     // Component's inlet node pointer
+                                                     int OutletNodeNum,                    // Component's outlet node pointer
+                                                     Node::FluidType HeatSourceType,       // Type of fluid in Generator loop
+                                                     Real64 ModelGeneratorHeatRate,        // model's generator heat rate (W)
+                                                     Real64 ModelMassFlowRate,             // model's generator mass flow rate (kg/s)
                                                      bool FirstHVACIteration);
 
     void InterConnectTwoPlantLoopSides(EnergyPlusData &state,
@@ -169,6 +169,8 @@ namespace PlantUtilities {
 
     void LogPlantConvergencePoints(EnergyPlusData &state, bool FirstHVACIteration);
 
+    void SetPlantLocationLinks(EnergyPlusData &state, PlantLocation &plantLoc);
+
     void ScanPlantLoopsForObject(EnergyPlusData &state,
                                  std::string_view CompName,
                                  DataPlant::PlantEquipmentType CompType,
@@ -178,13 +180,22 @@ namespace PlantUtilities {
                                  ObjexxFCL::Optional<Real64 const> HighLimitTemp = _,
                                  ObjexxFCL::Optional_int CountMatchPlantLoops = _,
                                  ObjexxFCL::Optional_int_const InletNodeNumber = _,
-                                 ObjexxFCL::Optional_int_const SingleLoopSearch = _);
+                                 ObjexxFCL::Optional_int_const SingleLoopSearch = _,
+                                 ObjexxFCL::Optional_bool_const suppressErrors = _);
 
     void ScanPlantLoopsForNodeNum(EnergyPlusData &state,
                                   std::string_view const CallerName, // really used for error messages
                                   int NodeNum,                       // index in Node structure of node to be scanned
                                   PlantLocation &pLantLoc,           // return value for location
-                                  ObjexxFCL::Optional_int CompNum = _);
+                                  int &CompNum,                      // return value for component number
+                                  bool reportError = true);          // optional parameter for reporting
+
+    // overloaded without CompNum
+    void ScanPlantLoopsForNodeNum(EnergyPlusData &state,
+                                  std::string_view const CallerName, // really used for error messages
+                                  int NodeNum,                       // index in Node structure of node to be scanned
+                                  PlantLocation &pLantLoc,           // return value for location
+                                  bool reportError = true);          // optional parameter for reporting
 
     bool AnyPlantLoopSidesNeedSim(EnergyPlusData &state);
 
@@ -193,31 +204,25 @@ namespace PlantUtilities {
     void ShowBranchesOnLoop(EnergyPlusData &state, int LoopNum); // Loop number of loop
 
     int MyPlantSizingIndex(EnergyPlusData &state,
-                           std::string const &CompType,                     // component description
-                           std::string_view CompName,                       // user name of component
-                           int NodeNumIn,                                   // component water inlet node
-                           int NodeNumOut,                                  // component water outlet node
-                           bool &ErrorsFound,                               // set to true if there's an error
-                           ObjexxFCL::Optional_bool_const SupressErrors = _ // used for WSHP's where condenser loop may not be on a plant loop
+                           std::string_view CompType,       // component description
+                           std::string_view CompName,       // user name of component
+                           int NodeNumIn,                   // component water inlet node
+                           int NodeNumOut,                  // component water outlet node
+                           bool &ErrorsFound,               // set to true if there's an error
+                           bool const PrintErrorFlag = true // used for WSHP's where condenser loop may not be on a plant loop
     );
 
     bool verifyTwoNodeNumsOnSamePlantLoop(EnergyPlusData &state, int nodeIndexA, int nodeIndexB);
 
+    Real64 MinFlowIfBranchHasVSPump(
+        EnergyPlusData &state, PlantLocation const &pLantLoc, bool &foundBranchPump, bool &foundLoopPump, bool const setFlowStatus);
+
     struct CriteriaData
     {
         // Members
-        int CallingCompLoopNum;                             // for debug error handling
-        DataPlant::LoopSideLocation CallingCompLoopSideNum; // for debug error handling
-        int CallingCompBranchNum;                           // for debug error handling
-        int CallingCompCompNum;                             // for debug error handling
-        Real64 ThisCriteriaCheckValue;                      // the previous value, to check the current against
-
-        // Default Constructor
-        CriteriaData()
-            : CallingCompLoopNum(0), CallingCompLoopSideNum(DataPlant::LoopSideLocation::Invalid), CallingCompBranchNum(0), CallingCompCompNum(0),
-              ThisCriteriaCheckValue(0.0)
-        {
-        }
+        int CallingCompLoopNum = 0;                                                                // for debug error handling
+        DataPlant::LoopSideLocation CallingCompLoopSideNum = DataPlant::LoopSideLocation::Invalid; // for debug error handling
+        Real64 ThisCriteriaCheckValue = 0.0;                                                       // the previous value, to check the current against
     };
 
 } // namespace PlantUtilities
@@ -226,6 +231,14 @@ struct PlantUtilitiesData : BaseGlobalStruct
 {
 
     Array1D<PlantUtilities::CriteriaData> CriteriaChecks; // stores criteria information
+
+    void init_constant_state([[maybe_unused]] EnergyPlusData &state) override
+    {
+    }
+
+    void init_state([[maybe_unused]] EnergyPlusData &state) override
+    {
+    }
 
     void clear_state() override
     {

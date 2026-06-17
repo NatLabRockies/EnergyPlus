@@ -1,7 +1,0 @@
-\section{Run EnergyPlus in Parallel}\label{run-energyplus-in-parallel}
-
-EnergyPlus is a multi-thread application but is not optimized for parallel runs on multi-core machines. However, multiple parametric runs can be launched in parallel if these runs are independent. One way to do it is to create multiple folders and copy files EnergyPlus.exe, Energy+.idd, DElight2.dll, libexpat.dll, bcvtb.dll, EPMacro.exe (if macros are used), ExpandObjects.exe (if HVACTemplate or Compact HVAC objects are used) from the original EnergyPlus installed folder. Inside each folder, copy IDF file as in.idf and EPW file as in.epw, then run EnergyPlus.exe from each folder. This is better handled with a batch file. If the Energy+.ini file exists in one of the created folders, make sure it is empty or points to the current EnergyPlus folder.
-
-EP-Launch now does this automatically for Group or Parametric-Preprocessor runs.
-
-The benefit of run time savings depends on computer configurations including number of CPUs, CPU clock speed, amount of RAM and cache, and hard drive speed. To be time efficient, the number of parallel EnergyPlus runs should not be more than the number of CPUs on a computer. The EnergyPlus utility program EP-Launch is being modified to add the parallel capability for group simulations. The long term goal is to run EnergyPlus in parallel on multi-core computers even for a single EnergyPlus run without degradation to accuracy.

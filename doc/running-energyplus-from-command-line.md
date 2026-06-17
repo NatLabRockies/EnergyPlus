@@ -63,7 +63,9 @@ The options generally fall into four categories:
 Notes
 -----
 
-As of V9.6, the `--jobs` option is only configured to increase thread usage for `GroundHeatExchanger:System` objects with the g-Function calculation method set to `UBHWTcalc`. As EnergyPlus continues to evolve, this may be adapted to control other features or models.
+1. As of V9.6, the `--jobs` option is only configured to increase thread usage for `GroundHeatExchanger:System` objects with the g-Function calculation method set to `UBHWTcalc`. As EnergyPlus continues to evolve, this may be adapted to control other features or models.
+
+2. If native csv output is requested using OutputControl:Files, the `--readvars` postprocessing option will overwrite the native csv output.
 
 Examples
 --------

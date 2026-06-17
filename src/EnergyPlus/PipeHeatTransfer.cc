@@ -1,7 +1,7 @@
-// EnergyPlus, Copyright (c) 1996-2023, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
-// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other
+// National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
 // contributors. All rights reserved.
 //
 // NOTICE: This Software was developed under funding from the U.S. Department of Energy and the
@@ -47,6 +47,7 @@
 
 // C++ Headers
 #include <cmath>
+#include <format>
 #include <memory>
 
 // ObjexxFCL Headers
@@ -120,9 +121,6 @@ enum class PipeIndoorBoundaryType
 };
 constexpr std::array<std::string_view, static_cast<int>(PipeIndoorBoundaryType::Num)> pipeIndoorBoundaryTypeNamesUC = {"ZONE", "SCHEDULE"};
 
-// Using/Aliasing
-using namespace GroundTemperatureManager;
-
 // Functions
 
 PlantComponent *PipeHTData::factory(EnergyPlusData &state, DataPlant::PlantEquipmentType objectType, std::string const &objectName)
@@ -133,13 +131,14 @@ PlantComponent *PipeHTData::factory(EnergyPlusData &state, DataPlant::PlantEquip
         state.dataPipeHT->GetPipeInputFlag = false;
     }
     // Now look for this particular pipe in the list
-    for (auto &pipe : state.dataPipeHT->PipeHT) {
-        if (pipe.Type == objectType && pipe.Name == objectName) {
-            return &pipe;
-        }
+    auto thisObj = std::find_if(state.dataPipeHT->PipeHT.begin(),
+                                state.dataPipeHT->PipeHT.end(),
+                                [&objectType, &objectName](const PipeHTData &myObj) { return myObj.Type == objectType && myObj.Name == objectName; });
+    if (thisObj != state.dataPipeHT->PipeHT.end()) {
+        return thisObj;
     }
     // If we didn't find it, fatal
-    ShowFatalError(state, format("PipeHTFactory: Error getting inputs for pipe named: {}", objectName));
+    ShowFatalError(state, std::format("PipeHTFactory: Error getting inputs for pipe named: {}", objectName));
     // Shut up the compiler
     return nullptr;
 }
@@ -202,476 +201,446 @@ void GetPipesHeatTransfer(EnergyPlusData &state)
     // needed to define and simulate the surface.
 
     // Using/Aliasing
-    using BranchNodeConnections::TestCompSet;
+    using Node::TestCompSet;
 
-    using NodeInputManager::GetOnlySingleNode;
-    using namespace DataLoopNode;
+    using Node::GetOnlySingleNode;
     using OutAirNodeManager::CheckOutAirNodeNumber;
-    using ScheduleManager::GetScheduleIndex;
+
+    static constexpr std::string_view routineName = "GetPipeHeatTransfer";
 
     // SUBROUTINE PARAMETER DEFINITIONS:
     int constexpr NumPipeSections(20);
     int constexpr NumberOfDepthNodes(8); // Number of nodes in the cartesian grid-Should be an even # for now
-    Real64 const SecondsInHour(DataGlobalConstants::SecInHour);
 
     // SUBROUTINE LOCAL VARIABLE DECLARATIONS:
     bool ErrorsFound(false); // Set to true if errors in input,
 
     // fatal at end of routine
-    int IOStatus; // Used in GetObjectItem
-    int Item;     // Item to be "gotten"
-    int PipeItem;
+    int IOStatus;       // Used in GetObjectItem
     int NumAlphas;      // Number of Alphas for each GetObjectItem call
     int NumNumbers;     // Number of Numbers for each GetObjectItem call
     int NumOfPipeHTInt; // Number of Pipe Heat Transfer objects
     int NumOfPipeHTExt; // Number of Pipe Heat Transfer objects
     int NumOfPipeHTUG;  // Number of Pipe Heat Transfer objects
-    int NumSections;    // total number of sections in pipe
-    auto &cCurrentModuleObject = state.dataIPShortCut->cCurrentModuleObject;
+
+    auto &s_ipsc = state.dataIPShortCut;
+    auto &s_mat = state.dataMaterial;
     // Initializations and allocations
-    cCurrentModuleObject = "Pipe:Indoor";
-    NumOfPipeHTInt = state.dataInputProcessing->inputProcessor->getNumObjectsFound(state, cCurrentModuleObject);
-    cCurrentModuleObject = "Pipe:Outdoor";
-    NumOfPipeHTExt = state.dataInputProcessing->inputProcessor->getNumObjectsFound(state, cCurrentModuleObject);
-    cCurrentModuleObject = "Pipe:Underground";
-    NumOfPipeHTUG = state.dataInputProcessing->inputProcessor->getNumObjectsFound(state, cCurrentModuleObject);
+    s_ipsc->cCurrentModuleObject = "Pipe:Indoor";
+    NumOfPipeHTInt = state.dataInputProcessing->inputProcessor->getNumObjectsFound(state, s_ipsc->cCurrentModuleObject);
+    s_ipsc->cCurrentModuleObject = "Pipe:Outdoor";
+    NumOfPipeHTExt = state.dataInputProcessing->inputProcessor->getNumObjectsFound(state, s_ipsc->cCurrentModuleObject);
+    s_ipsc->cCurrentModuleObject = "Pipe:Underground";
+    NumOfPipeHTUG = state.dataInputProcessing->inputProcessor->getNumObjectsFound(state, s_ipsc->cCurrentModuleObject);
 
     state.dataPipeHT->nsvNumOfPipeHT = NumOfPipeHTInt + NumOfPipeHTExt + NumOfPipeHTUG;
     // allocate data structures
-    if (allocated(state.dataPipeHT->PipeHT)) state.dataPipeHT->PipeHT.deallocate();
+    if (allocated(state.dataPipeHT->PipeHT)) {
+        state.dataPipeHT->PipeHT.deallocate();
+    }
 
     state.dataPipeHT->PipeHT.allocate(state.dataPipeHT->nsvNumOfPipeHT);
     state.dataPipeHT->PipeHTUniqueNames.reserve(static_cast<unsigned>(state.dataPipeHT->nsvNumOfPipeHT));
-    Item = 0;
+    int Item = 0;
 
-    cCurrentModuleObject = "Pipe:Indoor";
-    for (PipeItem = 1; PipeItem <= NumOfPipeHTInt; ++PipeItem) {
+    s_ipsc->cCurrentModuleObject = "Pipe:Indoor";
+    for (int PipeItem = 1; PipeItem <= NumOfPipeHTInt; ++PipeItem) {
         ++Item;
         // get the object name
         state.dataInputProcessing->inputProcessor->getObjectItem(state,
-                                                                 cCurrentModuleObject,
+                                                                 s_ipsc->cCurrentModuleObject,
                                                                  PipeItem,
-                                                                 state.dataIPShortCut->cAlphaArgs,
+                                                                 s_ipsc->cAlphaArgs,
                                                                  NumAlphas,
-                                                                 state.dataIPShortCut->rNumericArgs,
+                                                                 s_ipsc->rNumericArgs,
                                                                  NumNumbers,
                                                                  IOStatus,
-                                                                 state.dataIPShortCut->lNumericFieldBlanks,
-                                                                 state.dataIPShortCut->lAlphaFieldBlanks,
-                                                                 state.dataIPShortCut->cAlphaFieldNames,
-                                                                 state.dataIPShortCut->cNumericFieldNames);
+                                                                 s_ipsc->lNumericFieldBlanks,
+                                                                 s_ipsc->lAlphaFieldBlanks,
+                                                                 s_ipsc->cAlphaFieldNames,
+                                                                 s_ipsc->cNumericFieldNames);
 
         GlobalNames::VerifyUniqueInterObjectName(state,
                                                  state.dataPipeHT->PipeHTUniqueNames,
-                                                 state.dataIPShortCut->cAlphaArgs(1),
-                                                 cCurrentModuleObject,
-                                                 state.dataIPShortCut->cAlphaFieldNames(1),
+                                                 s_ipsc->cAlphaArgs(1),
+                                                 s_ipsc->cCurrentModuleObject,
+                                                 s_ipsc->cAlphaFieldNames(1),
                                                  ErrorsFound);
-        state.dataPipeHT->PipeHT(Item).Name = state.dataIPShortCut->cAlphaArgs(1);
+        state.dataPipeHT->PipeHT(Item).Name = s_ipsc->cAlphaArgs(1);
         state.dataPipeHT->PipeHT(Item).Type = DataPlant::PlantEquipmentType::PipeInterior;
 
         // General user input data
-        state.dataPipeHT->PipeHT(Item).Construction = state.dataIPShortCut->cAlphaArgs(2);
-        state.dataPipeHT->PipeHT(Item).ConstructionNum =
-            UtilityRoutines::FindItemInList(state.dataIPShortCut->cAlphaArgs(2), state.dataConstruction->Construct);
+        state.dataPipeHT->PipeHT(Item).Construction = s_ipsc->cAlphaArgs(2);
+        state.dataPipeHT->PipeHT(Item).ConstructionNum = Util::FindItemInList(s_ipsc->cAlphaArgs(2), state.dataConstruction->Construct);
 
         if (state.dataPipeHT->PipeHT(Item).ConstructionNum == 0) {
-            ShowSevereError(state, format("Invalid {}={}", state.dataIPShortCut->cAlphaFieldNames(2), state.dataIPShortCut->cAlphaArgs(2)));
-            ShowContinueError(state, format("Entered in {}={}", cCurrentModuleObject, state.dataIPShortCut->cAlphaArgs(1)));
+            ShowSevereError(state, std::format("Invalid {}={}", s_ipsc->cAlphaFieldNames(2), s_ipsc->cAlphaArgs(2)));
+            ShowContinueError(state, std::format("Entered in {}={}", s_ipsc->cCurrentModuleObject, s_ipsc->cAlphaArgs(1)));
             ErrorsFound = true;
         }
 
         // get inlet node data
-        state.dataPipeHT->PipeHT(Item).InletNode = state.dataIPShortCut->cAlphaArgs(3);
+        state.dataPipeHT->PipeHT(Item).InletNode = s_ipsc->cAlphaArgs(3);
         state.dataPipeHT->PipeHT(Item).InletNodeNum = GetOnlySingleNode(state,
-                                                                        state.dataIPShortCut->cAlphaArgs(3),
+                                                                        s_ipsc->cAlphaArgs(3),
                                                                         ErrorsFound,
-                                                                        DataLoopNode::ConnectionObjectType::PipeIndoor,
-                                                                        state.dataIPShortCut->cAlphaArgs(1),
-                                                                        DataLoopNode::NodeFluidType::Water,
-                                                                        DataLoopNode::ConnectionType::Inlet,
-                                                                        NodeInputManager::CompFluidStream::Primary,
-                                                                        ObjectIsNotParent);
+                                                                        Node::ConnectionObjectType::PipeIndoor,
+                                                                        s_ipsc->cAlphaArgs(1),
+                                                                        Node::FluidType::Water,
+                                                                        Node::ConnectionType::Inlet,
+                                                                        Node::CompFluidStream::Primary,
+                                                                        Node::ObjectIsNotParent);
         if (state.dataPipeHT->PipeHT(Item).InletNodeNum == 0) {
-            ShowSevereError(state, format("Invalid {}={}", state.dataIPShortCut->cAlphaFieldNames(3), state.dataIPShortCut->cAlphaArgs(3)));
-            ShowContinueError(state, format("Entered in {}={}", cCurrentModuleObject, state.dataIPShortCut->cAlphaArgs(1)));
+            ShowSevereError(state, std::format("Invalid {}={}", s_ipsc->cAlphaFieldNames(3), s_ipsc->cAlphaArgs(3)));
+            ShowContinueError(state, std::format("Entered in {}={}", s_ipsc->cCurrentModuleObject, s_ipsc->cAlphaArgs(1)));
             ErrorsFound = true;
         }
 
         // get outlet node data
-        state.dataPipeHT->PipeHT(Item).OutletNode = state.dataIPShortCut->cAlphaArgs(4);
+        state.dataPipeHT->PipeHT(Item).OutletNode = s_ipsc->cAlphaArgs(4);
         state.dataPipeHT->PipeHT(Item).OutletNodeNum = GetOnlySingleNode(state,
-                                                                         state.dataIPShortCut->cAlphaArgs(4),
+                                                                         s_ipsc->cAlphaArgs(4),
                                                                          ErrorsFound,
-                                                                         DataLoopNode::ConnectionObjectType::PipeIndoor,
-                                                                         state.dataIPShortCut->cAlphaArgs(1),
-                                                                         DataLoopNode::NodeFluidType::Water,
-                                                                         DataLoopNode::ConnectionType::Outlet,
-                                                                         NodeInputManager::CompFluidStream::Primary,
-                                                                         ObjectIsNotParent);
+                                                                         Node::ConnectionObjectType::PipeIndoor,
+                                                                         s_ipsc->cAlphaArgs(1),
+                                                                         Node::FluidType::Water,
+                                                                         Node::ConnectionType::Outlet,
+                                                                         Node::CompFluidStream::Primary,
+                                                                         Node::ObjectIsNotParent);
         if (state.dataPipeHT->PipeHT(Item).OutletNodeNum == 0) {
-            ShowSevereError(state, format("Invalid {}={}", state.dataIPShortCut->cAlphaFieldNames(4), state.dataIPShortCut->cAlphaArgs(4)));
-            ShowContinueError(state, format("Entered in {}={}", cCurrentModuleObject, state.dataIPShortCut->cAlphaArgs(1)));
+            ShowSevereError(state, std::format("Invalid {}={}", s_ipsc->cAlphaFieldNames(4), s_ipsc->cAlphaArgs(4)));
+            ShowContinueError(state, std::format("Entered in {}={}", s_ipsc->cCurrentModuleObject, s_ipsc->cAlphaArgs(1)));
             ErrorsFound = true;
         }
 
-        TestCompSet(state,
-                    cCurrentModuleObject,
-                    state.dataIPShortCut->cAlphaArgs(1),
-                    state.dataIPShortCut->cAlphaArgs(3),
-                    state.dataIPShortCut->cAlphaArgs(4),
-                    "Pipe Nodes");
+        TestCompSet(state, s_ipsc->cCurrentModuleObject, s_ipsc->cAlphaArgs(1), s_ipsc->cAlphaArgs(3), s_ipsc->cAlphaArgs(4), "Pipe Nodes");
 
         // get environmental boundary condition type
 
-        if (state.dataIPShortCut->lAlphaFieldBlanks(5)) state.dataIPShortCut->cAlphaArgs(5) = "ZONE";
+        if (s_ipsc->lAlphaFieldBlanks(5)) {
+            s_ipsc->cAlphaArgs(5) = "ZONE";
+        }
 
-        auto indoorType =
-            static_cast<PipeIndoorBoundaryType>(getEnumerationValue(pipeIndoorBoundaryTypeNamesUC, state.dataIPShortCut->cAlphaArgs(5)));
+        PipeIndoorBoundaryType indoorType = static_cast<PipeIndoorBoundaryType>(getEnumValue(pipeIndoorBoundaryTypeNamesUC, s_ipsc->cAlphaArgs(5)));
         switch (indoorType) {
         case PipeIndoorBoundaryType::Zone:
             state.dataPipeHT->PipeHT(Item).EnvironmentPtr = EnvrnPtr::ZoneEnv;
-            state.dataPipeHT->PipeHT(Item).EnvrZonePtr =
-                UtilityRoutines::FindItemInList(state.dataIPShortCut->cAlphaArgs(6), state.dataHeatBal->Zone);
+            state.dataPipeHT->PipeHT(Item).EnvrZonePtr = Util::FindItemInList(s_ipsc->cAlphaArgs(6), state.dataHeatBal->Zone);
             if (state.dataPipeHT->PipeHT(Item).EnvrZonePtr == 0) {
-                ShowSevereError(state, format("Invalid {}={}", state.dataIPShortCut->cAlphaFieldNames(6), state.dataIPShortCut->cAlphaArgs(6)));
-                ShowContinueError(state, format("Entered in {}={}", cCurrentModuleObject, state.dataIPShortCut->cAlphaArgs(1)));
+                ShowSevereError(state, std::format("Invalid {}={}", s_ipsc->cAlphaFieldNames(6), s_ipsc->cAlphaArgs(6)));
+                ShowContinueError(state, std::format("Entered in {}={}", s_ipsc->cCurrentModuleObject, s_ipsc->cAlphaArgs(1)));
                 ErrorsFound = true;
             }
             break;
 
         case PipeIndoorBoundaryType::Schedule:
             state.dataPipeHT->PipeHT(Item).EnvironmentPtr = EnvrnPtr::ScheduleEnv;
-            state.dataPipeHT->PipeHT(Item).EnvrSchedule = state.dataIPShortCut->cAlphaArgs(7);
-            state.dataPipeHT->PipeHT(Item).EnvrSchedPtr = GetScheduleIndex(state, state.dataPipeHT->PipeHT(Item).EnvrSchedule);
-            state.dataPipeHT->PipeHT(Item).EnvrVelSchedule = state.dataIPShortCut->cAlphaArgs(8);
-            state.dataPipeHT->PipeHT(Item).EnvrVelSchedPtr = GetScheduleIndex(state, state.dataPipeHT->PipeHT(Item).EnvrVelSchedule);
-            if (state.dataPipeHT->PipeHT(Item).EnvrSchedPtr == 0) {
-                ShowSevereError(state, format("Invalid {}={}", state.dataIPShortCut->cAlphaFieldNames(7), state.dataIPShortCut->cAlphaArgs(7)));
-                ShowContinueError(state, format("Entered in {}={}", cCurrentModuleObject, state.dataIPShortCut->cAlphaArgs(1)));
+
+            state.dataPipeHT->PipeHT(Item).envrSched = Sched::GetSchedule(state, s_ipsc->cAlphaArgs(7));
+            state.dataPipeHT->PipeHT(Item).envrVelSched = Sched::GetSchedule(state, s_ipsc->cAlphaArgs(8));
+            if (state.dataPipeHT->PipeHT(Item).envrSched == nullptr) {
+                ShowSevereError(state, std::format("Invalid {}={}", s_ipsc->cAlphaFieldNames(7), s_ipsc->cAlphaArgs(7)));
+                ShowContinueError(state, std::format("Entered in {}={}", s_ipsc->cCurrentModuleObject, s_ipsc->cAlphaArgs(1)));
                 ErrorsFound = true;
             }
-            if (state.dataPipeHT->PipeHT(Item).EnvrVelSchedPtr == 0) {
-                ShowSevereError(state, format("Invalid {}={}", state.dataIPShortCut->cAlphaFieldNames(8), state.dataIPShortCut->cAlphaArgs(8)));
-                ShowContinueError(state, format("Entered in {}={}", cCurrentModuleObject, state.dataIPShortCut->cAlphaArgs(1)));
+            if (state.dataPipeHT->PipeHT(Item).envrVelSched == nullptr) {
+                ShowSevereError(state, std::format("Invalid {}={}", s_ipsc->cAlphaFieldNames(8), s_ipsc->cAlphaArgs(8)));
+                ShowContinueError(state, std::format("Entered in {}={}", s_ipsc->cCurrentModuleObject, s_ipsc->cAlphaArgs(1)));
                 ErrorsFound = true;
             }
             break;
 
         default:
-            ShowSevereError(state, format("Invalid {}={}", state.dataIPShortCut->cAlphaFieldNames(5), state.dataIPShortCut->cAlphaArgs(5)));
-            ShowContinueError(state, format("Entered in {}={}", cCurrentModuleObject, state.dataIPShortCut->cAlphaArgs(1)));
+            ShowSevereError(state, std::format("Invalid {}={}", s_ipsc->cAlphaFieldNames(5), s_ipsc->cAlphaArgs(5)));
+            ShowContinueError(state, std::format("Entered in {}={}", s_ipsc->cCurrentModuleObject, s_ipsc->cAlphaArgs(1)));
             ShowContinueError(state, R"(Should be "ZONE" or "SCHEDULE")"); // TODO rename point
             ErrorsFound = true;
         }
 
         // dimensions
-        state.dataPipeHT->PipeHT(Item).PipeID = state.dataIPShortCut->rNumericArgs(1);
-        if (state.dataIPShortCut->rNumericArgs(1) <= 0.0) { // not really necessary because idd field has "minimum> 0"
-            ShowSevereError(state,
-                            format("GetPipesHeatTransfer: invalid {} of {:.4R}",
-                                   state.dataIPShortCut->cNumericFieldNames(1),
-                                   state.dataIPShortCut->rNumericArgs(1)));
-            ShowContinueError(state, format("{} must be > 0.0", state.dataIPShortCut->cNumericFieldNames(1)));
-            ShowContinueError(state, format("Entered in {}={}", cCurrentModuleObject, state.dataIPShortCut->cAlphaArgs(1)));
+        state.dataPipeHT->PipeHT(Item).PipeID = s_ipsc->rNumericArgs(1);
+        if (s_ipsc->rNumericArgs(1) <= 0.0) { // not really necessary because idd field has "minimum> 0"
+            ShowSevereError(state, std::format("GetPipesHeatTransfer: invalid {} of {:.4f}", s_ipsc->cNumericFieldNames(1), s_ipsc->rNumericArgs(1)));
+            ShowContinueError(state, std::format("{} must be > 0.0", s_ipsc->cNumericFieldNames(1)));
+            ShowContinueError(state, std::format("Entered in {}={}", s_ipsc->cCurrentModuleObject, s_ipsc->cAlphaArgs(1)));
 
             ErrorsFound = true;
         }
 
-        state.dataPipeHT->PipeHT(Item).Length = state.dataIPShortCut->rNumericArgs(2);
-        if (state.dataIPShortCut->rNumericArgs(2) <= 0.0) { // not really necessary because idd field has "minimum> 0"
-            ShowSevereError(state,
-                            format("GetPipesHeatTransfer: invalid {} of {:.4R}",
-                                   state.dataIPShortCut->cNumericFieldNames(2),
-                                   state.dataIPShortCut->rNumericArgs(2)));
-            ShowContinueError(state, format("{} must be > 0.0", state.dataIPShortCut->cNumericFieldNames(2)));
-            ShowContinueError(state, format("Entered in {}={}", cCurrentModuleObject, state.dataIPShortCut->cAlphaArgs(1)));
+        state.dataPipeHT->PipeHT(Item).Length = s_ipsc->rNumericArgs(2);
+        if (s_ipsc->rNumericArgs(2) <= 0.0) { // not really necessary because idd field has "minimum> 0"
+            ShowSevereError(state, std::format("GetPipesHeatTransfer: invalid {} of {:.4f}", s_ipsc->cNumericFieldNames(2), s_ipsc->rNumericArgs(2)));
+            ShowContinueError(state, std::format("{} must be > 0.0", s_ipsc->cNumericFieldNames(2)));
+            ShowContinueError(state, std::format("Entered in {}={}", s_ipsc->cCurrentModuleObject, s_ipsc->cAlphaArgs(1)));
             ErrorsFound = true;
         }
 
         if (state.dataPipeHT->PipeHT(Item).ConstructionNum != 0) {
             state.dataPipeHT->PipeHT(Item).ValidatePipeConstruction(state,
-                                                                    cCurrentModuleObject,
-                                                                    state.dataIPShortCut->cAlphaArgs(2),
-                                                                    state.dataIPShortCut->cAlphaFieldNames(2),
+                                                                    s_ipsc->cCurrentModuleObject,
+                                                                    s_ipsc->cAlphaArgs(2),
+                                                                    s_ipsc->cAlphaFieldNames(2),
                                                                     state.dataPipeHT->PipeHT(Item).ConstructionNum,
                                                                     ErrorsFound);
         }
 
     } // end of input loop
 
-    cCurrentModuleObject = "Pipe:Outdoor";
-    for (PipeItem = 1; PipeItem <= NumOfPipeHTExt; ++PipeItem) {
+    s_ipsc->cCurrentModuleObject = "Pipe:Outdoor";
+    for (int PipeItem = 1; PipeItem <= NumOfPipeHTExt; ++PipeItem) {
         ++Item;
         // get the object name
         state.dataInputProcessing->inputProcessor->getObjectItem(state,
-                                                                 cCurrentModuleObject,
+                                                                 s_ipsc->cCurrentModuleObject,
                                                                  PipeItem,
-                                                                 state.dataIPShortCut->cAlphaArgs,
+                                                                 s_ipsc->cAlphaArgs,
                                                                  NumAlphas,
-                                                                 state.dataIPShortCut->rNumericArgs,
+                                                                 s_ipsc->rNumericArgs,
                                                                  NumNumbers,
                                                                  IOStatus,
-                                                                 state.dataIPShortCut->lNumericFieldBlanks,
-                                                                 state.dataIPShortCut->lAlphaFieldBlanks,
-                                                                 state.dataIPShortCut->cAlphaFieldNames,
-                                                                 state.dataIPShortCut->cNumericFieldNames);
+                                                                 s_ipsc->lNumericFieldBlanks,
+                                                                 s_ipsc->lAlphaFieldBlanks,
+                                                                 s_ipsc->cAlphaFieldNames,
+                                                                 s_ipsc->cNumericFieldNames);
 
         GlobalNames::VerifyUniqueInterObjectName(state,
                                                  state.dataPipeHT->PipeHTUniqueNames,
-                                                 state.dataIPShortCut->cAlphaArgs(1),
-                                                 cCurrentModuleObject,
-                                                 state.dataIPShortCut->cAlphaFieldNames(1),
+                                                 s_ipsc->cAlphaArgs(1),
+                                                 s_ipsc->cCurrentModuleObject,
+                                                 s_ipsc->cAlphaFieldNames(1),
                                                  ErrorsFound);
-        state.dataPipeHT->PipeHT(Item).Name = state.dataIPShortCut->cAlphaArgs(1);
+        state.dataPipeHT->PipeHT(Item).Name = s_ipsc->cAlphaArgs(1);
         state.dataPipeHT->PipeHT(Item).Type = DataPlant::PlantEquipmentType::PipeExterior;
 
         // General user input data
-        state.dataPipeHT->PipeHT(Item).Construction = state.dataIPShortCut->cAlphaArgs(2);
-        state.dataPipeHT->PipeHT(Item).ConstructionNum =
-            UtilityRoutines::FindItemInList(state.dataIPShortCut->cAlphaArgs(2), state.dataConstruction->Construct);
+        state.dataPipeHT->PipeHT(Item).Construction = s_ipsc->cAlphaArgs(2);
+        state.dataPipeHT->PipeHT(Item).ConstructionNum = Util::FindItemInList(s_ipsc->cAlphaArgs(2), state.dataConstruction->Construct);
 
         if (state.dataPipeHT->PipeHT(Item).ConstructionNum == 0) {
-            ShowSevereError(state, format("Invalid {}={}", state.dataIPShortCut->cAlphaFieldNames(2), state.dataIPShortCut->cAlphaArgs(2)));
-            ShowContinueError(state, format("Entered in {}={}", cCurrentModuleObject, state.dataIPShortCut->cAlphaArgs(1)));
+            ShowSevereError(state, std::format("Invalid {}={}", s_ipsc->cAlphaFieldNames(2), s_ipsc->cAlphaArgs(2)));
+            ShowContinueError(state, std::format("Entered in {}={}", s_ipsc->cCurrentModuleObject, s_ipsc->cAlphaArgs(1)));
             ErrorsFound = true;
         }
 
         // get inlet node data
-        state.dataPipeHT->PipeHT(Item).InletNode = state.dataIPShortCut->cAlphaArgs(3);
+        state.dataPipeHT->PipeHT(Item).InletNode = s_ipsc->cAlphaArgs(3);
         state.dataPipeHT->PipeHT(Item).InletNodeNum = GetOnlySingleNode(state,
-                                                                        state.dataIPShortCut->cAlphaArgs(3),
+                                                                        s_ipsc->cAlphaArgs(3),
                                                                         ErrorsFound,
-                                                                        DataLoopNode::ConnectionObjectType::PipeOutdoor,
-                                                                        state.dataIPShortCut->cAlphaArgs(1),
-                                                                        DataLoopNode::NodeFluidType::Water,
-                                                                        DataLoopNode::ConnectionType::Inlet,
-                                                                        NodeInputManager::CompFluidStream::Primary,
-                                                                        ObjectIsNotParent);
+                                                                        Node::ConnectionObjectType::PipeOutdoor,
+                                                                        s_ipsc->cAlphaArgs(1),
+                                                                        Node::FluidType::Water,
+                                                                        Node::ConnectionType::Inlet,
+                                                                        Node::CompFluidStream::Primary,
+                                                                        Node::ObjectIsNotParent);
         if (state.dataPipeHT->PipeHT(Item).InletNodeNum == 0) {
-            ShowSevereError(state, format("Invalid {}={}", state.dataIPShortCut->cAlphaFieldNames(3), state.dataIPShortCut->cAlphaArgs(3)));
-            ShowContinueError(state, format("Entered in {}={}", cCurrentModuleObject, state.dataIPShortCut->cAlphaArgs(1)));
+            ShowSevereError(state, std::format("Invalid {}={}", s_ipsc->cAlphaFieldNames(3), s_ipsc->cAlphaArgs(3)));
+            ShowContinueError(state, std::format("Entered in {}={}", s_ipsc->cCurrentModuleObject, s_ipsc->cAlphaArgs(1)));
             ErrorsFound = true;
         }
 
         // get outlet node data
-        state.dataPipeHT->PipeHT(Item).OutletNode = state.dataIPShortCut->cAlphaArgs(4);
+        state.dataPipeHT->PipeHT(Item).OutletNode = s_ipsc->cAlphaArgs(4);
         state.dataPipeHT->PipeHT(Item).OutletNodeNum = GetOnlySingleNode(state,
-                                                                         state.dataIPShortCut->cAlphaArgs(4),
+                                                                         s_ipsc->cAlphaArgs(4),
                                                                          ErrorsFound,
-                                                                         DataLoopNode::ConnectionObjectType::PipeOutdoor,
-                                                                         state.dataIPShortCut->cAlphaArgs(1),
-                                                                         DataLoopNode::NodeFluidType::Water,
-                                                                         DataLoopNode::ConnectionType::Outlet,
-                                                                         NodeInputManager::CompFluidStream::Primary,
-                                                                         ObjectIsNotParent);
+                                                                         Node::ConnectionObjectType::PipeOutdoor,
+                                                                         s_ipsc->cAlphaArgs(1),
+                                                                         Node::FluidType::Water,
+                                                                         Node::ConnectionType::Outlet,
+                                                                         Node::CompFluidStream::Primary,
+                                                                         Node::ObjectIsNotParent);
         if (state.dataPipeHT->PipeHT(Item).OutletNodeNum == 0) {
-            ShowSevereError(state, format("Invalid {}={}", state.dataIPShortCut->cAlphaFieldNames(4), state.dataIPShortCut->cAlphaArgs(4)));
-            ShowContinueError(state, format("Entered in {}={}", cCurrentModuleObject, state.dataIPShortCut->cAlphaArgs(1)));
+            ShowSevereError(state, std::format("Invalid {}={}", s_ipsc->cAlphaFieldNames(4), s_ipsc->cAlphaArgs(4)));
+            ShowContinueError(state, std::format("Entered in {}={}", s_ipsc->cCurrentModuleObject, s_ipsc->cAlphaArgs(1)));
             ErrorsFound = true;
         }
 
-        TestCompSet(state,
-                    cCurrentModuleObject,
-                    state.dataIPShortCut->cAlphaArgs(1),
-                    state.dataIPShortCut->cAlphaArgs(3),
-                    state.dataIPShortCut->cAlphaArgs(4),
-                    "Pipe Nodes");
+        TestCompSet(state, s_ipsc->cCurrentModuleObject, s_ipsc->cAlphaArgs(1), s_ipsc->cAlphaArgs(3), s_ipsc->cAlphaArgs(4), "Pipe Nodes");
 
         // get environmental boundary condition type
         //    PipeHT(Item)%Environment = 'OutdoorAir'
         state.dataPipeHT->PipeHT(Item).EnvironmentPtr = EnvrnPtr::OutsideAirEnv;
 
-        state.dataPipeHT->PipeHT(Item).EnvrAirNode = state.dataIPShortCut->cAlphaArgs(5);
+        state.dataPipeHT->PipeHT(Item).EnvrAirNode = s_ipsc->cAlphaArgs(5);
         state.dataPipeHT->PipeHT(Item).EnvrAirNodeNum = GetOnlySingleNode(state,
-                                                                          state.dataIPShortCut->cAlphaArgs(5),
+                                                                          s_ipsc->cAlphaArgs(5),
                                                                           ErrorsFound,
-                                                                          DataLoopNode::ConnectionObjectType::PipeOutdoor,
-                                                                          state.dataIPShortCut->cAlphaArgs(1),
-                                                                          DataLoopNode::NodeFluidType::Air,
-                                                                          DataLoopNode::ConnectionType::OutsideAirReference,
-                                                                          NodeInputManager::CompFluidStream::Primary,
-                                                                          ObjectIsNotParent);
-        if (!state.dataIPShortCut->lAlphaFieldBlanks(5)) {
+                                                                          Node::ConnectionObjectType::PipeOutdoor,
+                                                                          s_ipsc->cAlphaArgs(1),
+                                                                          Node::FluidType::Air,
+                                                                          Node::ConnectionType::OutsideAirReference,
+                                                                          Node::CompFluidStream::Primary,
+                                                                          Node::ObjectIsNotParent);
+        if (!s_ipsc->lAlphaFieldBlanks(5)) {
             if (!CheckOutAirNodeNumber(state, state.dataPipeHT->PipeHT(Item).EnvrAirNodeNum)) {
-                ShowSevereError(state, format("Invalid {}={}", state.dataIPShortCut->cAlphaFieldNames(5), state.dataIPShortCut->cAlphaArgs(5)));
-                ShowContinueError(state, format("Entered in {}={}", cCurrentModuleObject, state.dataIPShortCut->cAlphaArgs(1)));
+                ShowSevereError(state, std::format("Invalid {}={}", s_ipsc->cAlphaFieldNames(5), s_ipsc->cAlphaArgs(5)));
+                ShowContinueError(state, std::format("Entered in {}={}", s_ipsc->cCurrentModuleObject, s_ipsc->cAlphaArgs(1)));
                 ShowContinueError(state, "Outdoor Air Node not on OutdoorAir:NodeList or OutdoorAir:Node");
                 ErrorsFound = true;
             }
         } else {
-            ShowSevereError(state, format("Invalid {}={}", state.dataIPShortCut->cAlphaFieldNames(5), state.dataIPShortCut->cAlphaArgs(5)));
-            ShowContinueError(state, format("Entered in {}={}", cCurrentModuleObject, state.dataIPShortCut->cAlphaArgs(1)));
-            ShowContinueError(state, format("An {} must be used ", state.dataIPShortCut->cAlphaFieldNames(5)));
+            ShowSevereError(state, std::format("Invalid {}={}", s_ipsc->cAlphaFieldNames(5), s_ipsc->cAlphaArgs(5)));
+            ShowContinueError(state, std::format("Entered in {}={}", s_ipsc->cCurrentModuleObject, s_ipsc->cAlphaArgs(1)));
+            ShowContinueError(state, std::format("An {} must be used ", s_ipsc->cAlphaFieldNames(5)));
             ErrorsFound = true;
         }
 
         // dimensions
-        state.dataPipeHT->PipeHT(Item).PipeID = state.dataIPShortCut->rNumericArgs(1);
-        if (state.dataIPShortCut->rNumericArgs(1) <= 0.0) { // not really necessary because idd field has "minimum> 0"
-            ShowSevereError(state,
-                            format("Invalid {} of {:.4R}", state.dataIPShortCut->cNumericFieldNames(1), state.dataIPShortCut->rNumericArgs(1)));
-            ShowContinueError(state, format("{} must be > 0.0", state.dataIPShortCut->cNumericFieldNames(1)));
-            ShowContinueError(state, format("Entered in {}={}", cCurrentModuleObject, state.dataIPShortCut->cAlphaArgs(1)));
+        state.dataPipeHT->PipeHT(Item).PipeID = s_ipsc->rNumericArgs(1);
+        if (s_ipsc->rNumericArgs(1) <= 0.0) { // not really necessary because idd field has "minimum> 0"
+            ShowSevereError(state, std::format("Invalid {} of {:.4f}", s_ipsc->cNumericFieldNames(1), s_ipsc->rNumericArgs(1)));
+            ShowContinueError(state, std::format("{} must be > 0.0", s_ipsc->cNumericFieldNames(1)));
+            ShowContinueError(state, std::format("Entered in {}={}", s_ipsc->cCurrentModuleObject, s_ipsc->cAlphaArgs(1)));
             ErrorsFound = true;
         }
 
-        state.dataPipeHT->PipeHT(Item).Length = state.dataIPShortCut->rNumericArgs(2);
-        if (state.dataIPShortCut->rNumericArgs(2) <= 0.0) { // not really necessary because idd field has "minimum> 0"
-            ShowSevereError(state,
-                            format("Invalid {} of {:.4R}", state.dataIPShortCut->cNumericFieldNames(2), state.dataIPShortCut->rNumericArgs(2)));
-            ShowContinueError(state, format("{} must be > 0.0", state.dataIPShortCut->cNumericFieldNames(2)));
-            ShowContinueError(state, format("Entered in {}={}", cCurrentModuleObject, state.dataIPShortCut->cAlphaArgs(1)));
+        state.dataPipeHT->PipeHT(Item).Length = s_ipsc->rNumericArgs(2);
+        if (s_ipsc->rNumericArgs(2) <= 0.0) { // not really necessary because idd field has "minimum> 0"
+            ShowSevereError(state, std::format("Invalid {} of {:.4f}", s_ipsc->cNumericFieldNames(2), s_ipsc->rNumericArgs(2)));
+            ShowContinueError(state, std::format("{} must be > 0.0", s_ipsc->cNumericFieldNames(2)));
+            ShowContinueError(state, std::format("Entered in {}={}", s_ipsc->cCurrentModuleObject, s_ipsc->cAlphaArgs(1)));
             ErrorsFound = true;
         }
 
         if (state.dataPipeHT->PipeHT(Item).ConstructionNum != 0) {
             state.dataPipeHT->PipeHT(Item).ValidatePipeConstruction(state,
-                                                                    cCurrentModuleObject,
-                                                                    state.dataIPShortCut->cAlphaArgs(2),
-                                                                    state.dataIPShortCut->cAlphaFieldNames(2),
+                                                                    s_ipsc->cCurrentModuleObject,
+                                                                    s_ipsc->cAlphaArgs(2),
+                                                                    s_ipsc->cAlphaFieldNames(2),
                                                                     state.dataPipeHT->PipeHT(Item).ConstructionNum,
                                                                     ErrorsFound);
         }
 
     } // end of input loop
 
-    cCurrentModuleObject = "Pipe:Underground";
-    for (PipeItem = 1; PipeItem <= NumOfPipeHTUG; ++PipeItem) {
-
+    s_ipsc->cCurrentModuleObject = "Pipe:Underground";
+    for (int PipeItem = 1; PipeItem <= NumOfPipeHTUG; ++PipeItem) {
         ++Item;
         // get the object name
         state.dataInputProcessing->inputProcessor->getObjectItem(state,
-                                                                 cCurrentModuleObject,
+                                                                 s_ipsc->cCurrentModuleObject,
                                                                  PipeItem,
-                                                                 state.dataIPShortCut->cAlphaArgs,
+                                                                 s_ipsc->cAlphaArgs,
                                                                  NumAlphas,
-                                                                 state.dataIPShortCut->rNumericArgs,
+                                                                 s_ipsc->rNumericArgs,
                                                                  NumNumbers,
                                                                  IOStatus,
-                                                                 state.dataIPShortCut->lNumericFieldBlanks,
-                                                                 state.dataIPShortCut->lAlphaFieldBlanks,
-                                                                 state.dataIPShortCut->cAlphaFieldNames,
-                                                                 state.dataIPShortCut->cNumericFieldNames);
+                                                                 s_ipsc->lNumericFieldBlanks,
+                                                                 s_ipsc->lAlphaFieldBlanks,
+                                                                 s_ipsc->cAlphaFieldNames,
+                                                                 s_ipsc->cNumericFieldNames);
+
+        ErrorObjectHeader eoh{routineName, s_ipsc->cCurrentModuleObject, s_ipsc->cAlphaArgs(1)};
 
         GlobalNames::VerifyUniqueInterObjectName(state,
                                                  state.dataPipeHT->PipeHTUniqueNames,
-                                                 state.dataIPShortCut->cAlphaArgs(1),
-                                                 cCurrentModuleObject,
-                                                 state.dataIPShortCut->cAlphaFieldNames(1),
+                                                 s_ipsc->cAlphaArgs(1),
+                                                 s_ipsc->cCurrentModuleObject,
+                                                 s_ipsc->cAlphaFieldNames(1),
                                                  ErrorsFound);
-        state.dataPipeHT->PipeHT(Item).Name = state.dataIPShortCut->cAlphaArgs(1);
+        state.dataPipeHT->PipeHT(Item).Name = s_ipsc->cAlphaArgs(1);
         state.dataPipeHT->PipeHT(Item).Type = DataPlant::PlantEquipmentType::PipeUnderground;
 
         // General user input data
-        state.dataPipeHT->PipeHT(Item).Construction = state.dataIPShortCut->cAlphaArgs(2);
-        state.dataPipeHT->PipeHT(Item).ConstructionNum =
-            UtilityRoutines::FindItemInList(state.dataIPShortCut->cAlphaArgs(2), state.dataConstruction->Construct);
+        state.dataPipeHT->PipeHT(Item).Construction = s_ipsc->cAlphaArgs(2);
+        state.dataPipeHT->PipeHT(Item).ConstructionNum = Util::FindItemInList(s_ipsc->cAlphaArgs(2), state.dataConstruction->Construct);
 
         if (state.dataPipeHT->PipeHT(Item).ConstructionNum == 0) {
-            ShowSevereError(state, format("Invalid {}={}", state.dataIPShortCut->cAlphaFieldNames(2), state.dataIPShortCut->cAlphaArgs(2)));
-            ShowContinueError(state, format("Entered in {}={}", cCurrentModuleObject, state.dataIPShortCut->cAlphaArgs(1)));
+            ShowSevereError(state, std::format("Invalid {}={}", s_ipsc->cAlphaFieldNames(2), s_ipsc->cAlphaArgs(2)));
+            ShowContinueError(state, std::format("Entered in {}={}", s_ipsc->cCurrentModuleObject, s_ipsc->cAlphaArgs(1)));
             ErrorsFound = true;
         }
 
         // get inlet node data
-        state.dataPipeHT->PipeHT(Item).InletNode = state.dataIPShortCut->cAlphaArgs(3);
+        state.dataPipeHT->PipeHT(Item).InletNode = s_ipsc->cAlphaArgs(3);
         state.dataPipeHT->PipeHT(Item).InletNodeNum = GetOnlySingleNode(state,
-                                                                        state.dataIPShortCut->cAlphaArgs(3),
+                                                                        s_ipsc->cAlphaArgs(3),
                                                                         ErrorsFound,
-                                                                        DataLoopNode::ConnectionObjectType::PipeUnderground,
-                                                                        state.dataIPShortCut->cAlphaArgs(1),
-                                                                        DataLoopNode::NodeFluidType::Water,
-                                                                        DataLoopNode::ConnectionType::Inlet,
-                                                                        NodeInputManager::CompFluidStream::Primary,
-                                                                        ObjectIsNotParent);
+                                                                        Node::ConnectionObjectType::PipeUnderground,
+                                                                        s_ipsc->cAlphaArgs(1),
+                                                                        Node::FluidType::Water,
+                                                                        Node::ConnectionType::Inlet,
+                                                                        Node::CompFluidStream::Primary,
+                                                                        Node::ObjectIsNotParent);
         if (state.dataPipeHT->PipeHT(Item).InletNodeNum == 0) {
-            ShowSevereError(state, format("Invalid {}={}", state.dataIPShortCut->cAlphaFieldNames(3), state.dataIPShortCut->cAlphaArgs(3)));
-            ShowContinueError(state, format("Entered in {}={}", cCurrentModuleObject, state.dataIPShortCut->cAlphaArgs(1)));
+            ShowSevereError(state, std::format("Invalid {}={}", s_ipsc->cAlphaFieldNames(3), s_ipsc->cAlphaArgs(3)));
+            ShowContinueError(state, std::format("Entered in {}={}", s_ipsc->cCurrentModuleObject, s_ipsc->cAlphaArgs(1)));
             ErrorsFound = true;
         }
 
         // get outlet node data
-        state.dataPipeHT->PipeHT(Item).OutletNode = state.dataIPShortCut->cAlphaArgs(4);
+        state.dataPipeHT->PipeHT(Item).OutletNode = s_ipsc->cAlphaArgs(4);
         state.dataPipeHT->PipeHT(Item).OutletNodeNum = GetOnlySingleNode(state,
-                                                                         state.dataIPShortCut->cAlphaArgs(4),
+                                                                         s_ipsc->cAlphaArgs(4),
                                                                          ErrorsFound,
-                                                                         DataLoopNode::ConnectionObjectType::PipeUnderground,
-                                                                         state.dataIPShortCut->cAlphaArgs(1),
-                                                                         DataLoopNode::NodeFluidType::Water,
-                                                                         DataLoopNode::ConnectionType::Outlet,
-                                                                         NodeInputManager::CompFluidStream::Primary,
-                                                                         ObjectIsNotParent);
+                                                                         Node::ConnectionObjectType::PipeUnderground,
+                                                                         s_ipsc->cAlphaArgs(1),
+                                                                         Node::FluidType::Water,
+                                                                         Node::ConnectionType::Outlet,
+                                                                         Node::CompFluidStream::Primary,
+                                                                         Node::ObjectIsNotParent);
         if (state.dataPipeHT->PipeHT(Item).OutletNodeNum == 0) {
-            ShowSevereError(state, format("Invalid {}={}", state.dataIPShortCut->cAlphaFieldNames(4), state.dataIPShortCut->cAlphaArgs(4)));
-            ShowContinueError(state, format("Entered in {}={}", cCurrentModuleObject, state.dataIPShortCut->cAlphaArgs(1)));
+            ShowSevereError(state, std::format("Invalid {}={}", s_ipsc->cAlphaFieldNames(4), s_ipsc->cAlphaArgs(4)));
+            ShowContinueError(state, std::format("Entered in {}={}", s_ipsc->cCurrentModuleObject, s_ipsc->cAlphaArgs(1)));
             ErrorsFound = true;
         }
 
-        TestCompSet(state,
-                    cCurrentModuleObject,
-                    state.dataIPShortCut->cAlphaArgs(1),
-                    state.dataIPShortCut->cAlphaArgs(3),
-                    state.dataIPShortCut->cAlphaArgs(4),
-                    "Pipe Nodes");
+        TestCompSet(state, s_ipsc->cCurrentModuleObject, s_ipsc->cAlphaArgs(1), s_ipsc->cAlphaArgs(3), s_ipsc->cAlphaArgs(4), "Pipe Nodes");
 
         state.dataPipeHT->PipeHT(Item).EnvironmentPtr = EnvrnPtr::GroundEnv;
 
         // Solar inclusion flag
         // A6,  \field Sun Exposure
-        if (UtilityRoutines::SameString(state.dataIPShortCut->cAlphaArgs(5), "SUNEXPOSED")) {
+        if (Util::SameString(s_ipsc->cAlphaArgs(5), "SUNEXPOSED")) {
             state.dataPipeHT->PipeHT(Item).SolarExposed = true;
-        } else if (UtilityRoutines::SameString(state.dataIPShortCut->cAlphaArgs(5), "NOSUN")) {
+        } else if (Util::SameString(s_ipsc->cAlphaArgs(5), "NOSUN")) {
             state.dataPipeHT->PipeHT(Item).SolarExposed = false;
         } else {
-            ShowSevereError(state, format("GetPipesHeatTransfer: invalid key for sun exposure flag for {}", state.dataIPShortCut->cAlphaArgs(1)));
-            ShowContinueError(state, format("Key should be either SunExposed or NoSun.  Entered Key: {}", state.dataIPShortCut->cAlphaArgs(5)));
+            ShowSevereError(state, std::format("GetPipesHeatTransfer: invalid key for sun exposure flag for {}", s_ipsc->cAlphaArgs(1)));
+            ShowContinueError(state, std::format("Key should be either SunExposed or NoSun.  Entered Key: {}", s_ipsc->cAlphaArgs(5)));
             ErrorsFound = true;
         }
 
         // dimensions
-        state.dataPipeHT->PipeHT(Item).PipeID = state.dataIPShortCut->rNumericArgs(1);
-        if (state.dataIPShortCut->rNumericArgs(1) <= 0.0) { // not really necessary because idd field has "minimum> 0"
-            ShowSevereError(state,
-                            format("Invalid {} of {:.4R}", state.dataIPShortCut->cNumericFieldNames(1), state.dataIPShortCut->rNumericArgs(1)));
-            ShowContinueError(state, format("{} must be > 0.0", state.dataIPShortCut->cNumericFieldNames(1)));
-            ShowContinueError(state, format("Entered in {}={}", cCurrentModuleObject, state.dataIPShortCut->cAlphaArgs(1)));
+        state.dataPipeHT->PipeHT(Item).PipeID = s_ipsc->rNumericArgs(1);
+        if (s_ipsc->rNumericArgs(1) <= 0.0) { // not really necessary because idd field has "minimum> 0"
+            ShowSevereError(state, std::format("Invalid {} of {:.4f}", s_ipsc->cNumericFieldNames(1), s_ipsc->rNumericArgs(1)));
+            ShowContinueError(state, std::format("{} must be > 0.0", s_ipsc->cNumericFieldNames(1)));
+            ShowContinueError(state, std::format("Entered in {}={}", s_ipsc->cCurrentModuleObject, s_ipsc->cAlphaArgs(1)));
             ErrorsFound = true;
         }
 
-        state.dataPipeHT->PipeHT(Item).Length = state.dataIPShortCut->rNumericArgs(2);
-        if (state.dataIPShortCut->rNumericArgs(2) <= 0.0) { // not really necessary because idd field has "minimum> 0"
-            ShowSevereError(state,
-                            format("Invalid {} of {:.4R}", state.dataIPShortCut->cNumericFieldNames(2), state.dataIPShortCut->rNumericArgs(2)));
-            ShowContinueError(state, format("{} must be > 0.0", state.dataIPShortCut->cNumericFieldNames(2)));
-            ShowContinueError(state, format("Entered in {}={}", cCurrentModuleObject, state.dataIPShortCut->cAlphaArgs(1)));
+        state.dataPipeHT->PipeHT(Item).Length = s_ipsc->rNumericArgs(2);
+        if (s_ipsc->rNumericArgs(2) <= 0.0) { // not really necessary because idd field has "minimum> 0"
+            ShowSevereError(state, std::format("Invalid {} of {:.4f}", s_ipsc->cNumericFieldNames(2), s_ipsc->rNumericArgs(2)));
+            ShowContinueError(state, std::format("{} must be > 0.0", s_ipsc->cNumericFieldNames(2)));
+            ShowContinueError(state, std::format("Entered in {}={}", s_ipsc->cCurrentModuleObject, s_ipsc->cAlphaArgs(1)));
             ErrorsFound = true;
         }
 
         // Also get the soil material name
         // A7,  \field Soil Material
-        state.dataPipeHT->PipeHT(Item).SoilMaterial = state.dataIPShortCut->cAlphaArgs(6);
-        state.dataPipeHT->PipeHT(Item).SoilMaterialNum =
-            UtilityRoutines::FindItemInPtrList(state.dataIPShortCut->cAlphaArgs(6), state.dataMaterial->Material);
+        state.dataPipeHT->PipeHT(Item).SoilMaterial = s_ipsc->cAlphaArgs(6);
+        state.dataPipeHT->PipeHT(Item).SoilMaterialNum = Material::GetMaterialNum(state, s_ipsc->cAlphaArgs(6));
         if (state.dataPipeHT->PipeHT(Item).SoilMaterialNum == 0) {
-            ShowSevereError(state, format("Invalid {}={}", state.dataIPShortCut->cAlphaFieldNames(6), state.dataPipeHT->PipeHT(Item).SoilMaterial));
-            ShowContinueError(state, format("Found in {}={}", cCurrentModuleObject, state.dataPipeHT->PipeHT(Item).Name));
+            ShowSevereItemNotFound(state, eoh, s_ipsc->cAlphaFieldNames(6), s_ipsc->cAlphaArgs(6));
             ErrorsFound = true;
         } else {
-            state.dataPipeHT->PipeHT(Item).SoilDensity = state.dataMaterial->Material(state.dataPipeHT->PipeHT(Item).SoilMaterialNum)->Density;
-            state.dataPipeHT->PipeHT(Item).SoilDepth = state.dataMaterial->Material(state.dataPipeHT->PipeHT(Item).SoilMaterialNum)->Thickness;
-            state.dataPipeHT->PipeHT(Item).SoilCp = state.dataMaterial->Material(state.dataPipeHT->PipeHT(Item).SoilMaterialNum)->SpecHeat;
-            state.dataPipeHT->PipeHT(Item).SoilConductivity =
-                state.dataMaterial->Material(state.dataPipeHT->PipeHT(Item).SoilMaterialNum)->Conductivity;
-            state.dataPipeHT->PipeHT(Item).SoilThermAbs = state.dataMaterial->Material(state.dataPipeHT->PipeHT(Item).SoilMaterialNum)->AbsorpThermal;
-            state.dataPipeHT->PipeHT(Item).SoilSolarAbs = state.dataMaterial->Material(state.dataPipeHT->PipeHT(Item).SoilMaterialNum)->AbsorpSolar;
-            state.dataPipeHT->PipeHT(Item).SoilRoughness = state.dataMaterial->Material(state.dataPipeHT->PipeHT(Item).SoilMaterialNum)->Roughness;
+            auto const *matSoil = s_mat->materials(state.dataPipeHT->PipeHT(Item).SoilMaterialNum);
+
+            state.dataPipeHT->PipeHT(Item).SoilDensity = matSoil->Density;
+            state.dataPipeHT->PipeHT(Item).SoilDepth = matSoil->Thickness;
+            state.dataPipeHT->PipeHT(Item).SoilCp = matSoil->SpecHeat;
+            state.dataPipeHT->PipeHT(Item).SoilConductivity = matSoil->Conductivity;
+            state.dataPipeHT->PipeHT(Item).SoilThermAbs = matSoil->AbsorpThermal;
+            state.dataPipeHT->PipeHT(Item).SoilSolarAbs = matSoil->AbsorpSolar;
+            state.dataPipeHT->PipeHT(Item).SoilRoughness = matSoil->Roughness;
             state.dataPipeHT->PipeHT(Item).PipeDepth = state.dataPipeHT->PipeHT(Item).SoilDepth + state.dataPipeHT->PipeHT(Item).PipeID / 2.0;
             state.dataPipeHT->PipeHT(Item).DomainDepth = state.dataPipeHT->PipeHT(Item).PipeDepth * 2.0;
             state.dataPipeHT->PipeHT(Item).SoilDiffusivity = state.dataPipeHT->PipeHT(Item).SoilConductivity /
                                                              (state.dataPipeHT->PipeHT(Item).SoilDensity * state.dataPipeHT->PipeHT(Item).SoilCp);
-            state.dataPipeHT->PipeHT(Item).SoilDiffusivityPerDay =
-                state.dataPipeHT->PipeHT(Item).SoilDiffusivity * SecondsInHour * DataGlobalConstants::HoursInDay;
+            state.dataPipeHT->PipeHT(Item).SoilDiffusivityPerDay = state.dataPipeHT->PipeHT(Item).SoilDiffusivity * Constant::rSecsInDay;
 
             // Mesh the cartesian domain
             state.dataPipeHT->PipeHT(Item).NumDepthNodes = NumberOfDepthNodes;
@@ -684,19 +653,23 @@ void GetPipesHeatTransfer(EnergyPlusData &state)
 
         if (state.dataPipeHT->PipeHT(Item).ConstructionNum != 0) {
             state.dataPipeHT->PipeHT(Item).ValidatePipeConstruction(state,
-                                                                    cCurrentModuleObject,
-                                                                    state.dataIPShortCut->cAlphaArgs(2),
-                                                                    state.dataIPShortCut->cAlphaFieldNames(2),
+                                                                    s_ipsc->cCurrentModuleObject,
+                                                                    s_ipsc->cAlphaArgs(2),
+                                                                    s_ipsc->cAlphaFieldNames(2),
                                                                     state.dataPipeHT->PipeHT(Item).ConstructionNum,
                                                                     ErrorsFound);
         }
 
         // Get ground temperature model
-        state.dataPipeHT->PipeHT(Item).groundTempModel =
-            GetGroundTempModelAndInit(state, state.dataIPShortCut->cAlphaArgs(7), state.dataIPShortCut->cAlphaArgs(8));
+        GroundTemp::ModelType gtmType = static_cast<GroundTemp::ModelType>(getEnumValue(GroundTemp::modelTypeNamesUC, s_ipsc->cAlphaArgs(7)));
+        if (gtmType == GroundTemp::ModelType::Invalid) {
+            ShowSevereInvalidKey(state, eoh, s_ipsc->cAlphaFieldNames(7), s_ipsc->cAlphaArgs(7));
+            ErrorsFound = true;
+        }
+
+        state.dataPipeHT->PipeHT(Item).groundTempModel = GroundTemp::GetGroundTempModelAndInit(state, gtmType, s_ipsc->cAlphaArgs(8));
 
         // Select number of pipe sections.  Hanby's optimal number of 20 section is selected.
-        NumSections = NumPipeSections;
         state.dataPipeHT->PipeHT(Item).NumSections = NumPipeSections;
 
         // For buried pipes, we need to allocate the cartesian finite difference array
@@ -710,7 +683,7 @@ void GetPipesHeatTransfer(EnergyPlusData &state)
 
     for (Item = 1; Item <= state.dataPipeHT->nsvNumOfPipeHT; ++Item) {
         // Select number of pipe sections.  Hanby's optimal number of 20 section is selected.
-        NumSections = NumPipeSections;
+        int NumSections = NumPipeSections;
         state.dataPipeHT->PipeHT(Item).NumSections = NumPipeSections;
 
         // We need to allocate the Hanby model arrays for all pipes, including buried
@@ -730,18 +703,18 @@ void GetPipesHeatTransfer(EnergyPlusData &state)
 
         // work out heat transfer areas (area per section)
         state.dataPipeHT->PipeHT(Item).InsideArea =
-            DataGlobalConstants::Pi * state.dataPipeHT->PipeHT(Item).PipeID * state.dataPipeHT->PipeHT(Item).Length / NumSections;
+            Constant::Pi * state.dataPipeHT->PipeHT(Item).PipeID * state.dataPipeHT->PipeHT(Item).Length / NumSections;
         state.dataPipeHT->PipeHT(Item).OutsideArea =
-            DataGlobalConstants::Pi * (state.dataPipeHT->PipeHT(Item).PipeOD + 2 * state.dataPipeHT->PipeHT(Item).InsulationThickness) *
+            Constant::Pi * (state.dataPipeHT->PipeHT(Item).PipeOD + 2 * state.dataPipeHT->PipeHT(Item).InsulationThickness) *
             state.dataPipeHT->PipeHT(Item).Length / NumSections;
 
         // cross sectional area
-        state.dataPipeHT->PipeHT(Item).SectionArea = DataGlobalConstants::Pi * 0.25 * pow_2(state.dataPipeHT->PipeHT(Item).PipeID);
+        state.dataPipeHT->PipeHT(Item).SectionArea = Constant::Pi * 0.25 * pow_2(state.dataPipeHT->PipeHT(Item).PipeID);
 
         // pipe & insulation mass
-        state.dataPipeHT->PipeHT(Item).PipeHeatCapacity = state.dataPipeHT->PipeHT(Item).PipeCp * state.dataPipeHT->PipeHT(Item).PipeDensity *
-                                                          (DataGlobalConstants::Pi * 0.25 * pow_2(state.dataPipeHT->PipeHT(Item).PipeOD) -
-                                                           state.dataPipeHT->PipeHT(Item).SectionArea); // the metal component
+        state.dataPipeHT->PipeHT(Item).PipeHeatCapacity =
+            state.dataPipeHT->PipeHT(Item).PipeCp * state.dataPipeHT->PipeHT(Item).PipeDensity *
+            (Constant::Pi * 0.25 * pow_2(state.dataPipeHT->PipeHT(Item).PipeOD) - state.dataPipeHT->PipeHT(Item).SectionArea); // the metal component
     }
 
     // final error check
@@ -754,33 +727,33 @@ void GetPipesHeatTransfer(EnergyPlusData &state)
 
         SetupOutputVariable(state,
                             "Pipe Fluid Heat Transfer Rate",
-                            OutputProcessor::Unit::W,
+                            Constant::Units::W,
                             state.dataPipeHT->PipeHT(Item).FluidHeatLossRate,
-                            OutputProcessor::SOVTimeStepType::Plant,
-                            OutputProcessor::SOVStoreType::Average,
+                            OutputProcessor::TimeStepType::System,
+                            OutputProcessor::StoreType::Average,
                             state.dataPipeHT->PipeHT(Item).Name);
         SetupOutputVariable(state,
                             "Pipe Fluid Heat Transfer Energy",
-                            OutputProcessor::Unit::J,
+                            Constant::Units::J,
                             state.dataPipeHT->PipeHT(Item).FluidHeatLossEnergy,
-                            OutputProcessor::SOVTimeStepType::Plant,
-                            OutputProcessor::SOVStoreType::Summed,
+                            OutputProcessor::TimeStepType::System,
+                            OutputProcessor::StoreType::Sum,
                             state.dataPipeHT->PipeHT(Item).Name);
 
         if (state.dataPipeHT->PipeHT(Item).EnvironmentPtr == EnvrnPtr::ZoneEnv) {
             SetupOutputVariable(state,
                                 "Pipe Ambient Heat Transfer Rate",
-                                OutputProcessor::Unit::W,
+                                Constant::Units::W,
                                 state.dataPipeHT->PipeHT(Item).EnvironmentHeatLossRate,
-                                OutputProcessor::SOVTimeStepType::Plant,
-                                OutputProcessor::SOVStoreType::Average,
+                                OutputProcessor::TimeStepType::System,
+                                OutputProcessor::StoreType::Average,
                                 state.dataPipeHT->PipeHT(Item).Name);
             SetupOutputVariable(state,
                                 "Pipe Ambient Heat Transfer Energy",
-                                OutputProcessor::Unit::J,
+                                Constant::Units::J,
                                 state.dataPipeHT->PipeHT(Item).EnvHeatLossEnergy,
-                                OutputProcessor::SOVTimeStepType::Plant,
-                                OutputProcessor::SOVStoreType::Summed,
+                                OutputProcessor::TimeStepType::System,
+                                OutputProcessor::StoreType::Sum,
                                 state.dataPipeHT->PipeHT(Item).Name);
 
             SetupZoneInternalGain(state,
@@ -792,31 +765,31 @@ void GetPipesHeatTransfer(EnergyPlusData &state)
 
         SetupOutputVariable(state,
                             "Pipe Mass Flow Rate",
-                            OutputProcessor::Unit::kg_s,
+                            Constant::Units::kg_s,
                             state.dataPipeHT->PipeHT(Item).MassFlowRate,
-                            OutputProcessor::SOVTimeStepType::Plant,
-                            OutputProcessor::SOVStoreType::Average,
+                            OutputProcessor::TimeStepType::System,
+                            OutputProcessor::StoreType::Average,
                             state.dataPipeHT->PipeHT(Item).Name);
         SetupOutputVariable(state,
                             "Pipe Volume Flow Rate",
-                            OutputProcessor::Unit::m3_s,
+                            Constant::Units::m3_s,
                             state.dataPipeHT->PipeHT(Item).VolumeFlowRate,
-                            OutputProcessor::SOVTimeStepType::Plant,
-                            OutputProcessor::SOVStoreType::Average,
+                            OutputProcessor::TimeStepType::System,
+                            OutputProcessor::StoreType::Average,
                             state.dataPipeHT->PipeHT(Item).Name);
         SetupOutputVariable(state,
                             "Pipe Inlet Temperature",
-                            OutputProcessor::Unit::C,
+                            Constant::Units::C,
                             state.dataPipeHT->PipeHT(Item).FluidInletTemp,
-                            OutputProcessor::SOVTimeStepType::Plant,
-                            OutputProcessor::SOVStoreType::Average,
+                            OutputProcessor::TimeStepType::System,
+                            OutputProcessor::StoreType::Average,
                             state.dataPipeHT->PipeHT(Item).Name);
         SetupOutputVariable(state,
                             "Pipe Outlet Temperature",
-                            OutputProcessor::Unit::C,
+                            Constant::Units::C,
                             state.dataPipeHT->PipeHT(Item).FluidOutletTemp,
-                            OutputProcessor::SOVTimeStepType::Plant,
-                            OutputProcessor::SOVStoreType::Average,
+                            OutputProcessor::TimeStepType::System,
+                            OutputProcessor::StoreType::Average,
                             state.dataPipeHT->PipeHT(Item).Name);
     }
 }
@@ -865,33 +838,31 @@ void PipeHTData::ValidatePipeConstruction(EnergyPlusData &state,
     Real64 Resistance = 0.0;
     Real64 TotThickness = 0.0;
 
+    auto const &s_mat = state.dataMaterial;
+
     // CTF stuff
     int TotalLayers = state.dataConstruction->Construct(ConstructionNum).TotLayers;
     // get pipe properties
     if (TotalLayers == 1) { // no insulation layer
+        auto const *mat = s_mat->materials(state.dataConstruction->Construct(ConstructionNum).LayerPoint(1));
 
-        this->PipeConductivity = state.dataMaterial->Material(state.dataConstruction->Construct(ConstructionNum).LayerPoint(1))->Conductivity;
-        this->PipeDensity = state.dataMaterial->Material(state.dataConstruction->Construct(ConstructionNum).LayerPoint(1))->Density;
-        this->PipeCp = state.dataMaterial->Material(state.dataConstruction->Construct(ConstructionNum).LayerPoint(1))->SpecHeat;
-        this->PipeOD = this->PipeID + 2.0 * state.dataMaterial->Material(state.dataConstruction->Construct(ConstructionNum).LayerPoint(1))->Thickness;
+        this->PipeConductivity = mat->Conductivity;
+        this->PipeDensity = mat->Density;
+        this->PipeCp = mat->SpecHeat;
+        this->PipeOD = this->PipeID + 2.0 * mat->Thickness;
         this->InsulationOD = this->PipeOD;
-        this->SumTK = state.dataMaterial->Material(state.dataConstruction->Construct(ConstructionNum).LayerPoint(1))->Thickness /
-                      state.dataMaterial->Material(state.dataConstruction->Construct(ConstructionNum).LayerPoint(1))->Conductivity;
+        this->SumTK = mat->Thickness / mat->Conductivity;
 
     } else if (TotalLayers >= 2) { // first layers are insulation, last layer is pipe
 
         for (int LayerNum = 1; LayerNum <= TotalLayers - 1; ++LayerNum) {
-            Resistance += state.dataMaterial->Material(state.dataConstruction->Construct(ConstructionNum).LayerPoint(LayerNum))->Thickness /
-                          state.dataMaterial->Material(state.dataConstruction->Construct(ConstructionNum).LayerPoint(LayerNum))->Conductivity;
-            Density = state.dataMaterial->Material(state.dataConstruction->Construct(ConstructionNum).LayerPoint(LayerNum))->Density *
-                      state.dataMaterial->Material(state.dataConstruction->Construct(ConstructionNum).LayerPoint(LayerNum))->Thickness;
-            TotThickness += state.dataMaterial->Material(state.dataConstruction->Construct(ConstructionNum).LayerPoint(LayerNum))->Thickness;
-            SpHeat = state.dataMaterial->Material(state.dataConstruction->Construct(ConstructionNum).LayerPoint(LayerNum))->SpecHeat *
-                     state.dataMaterial->Material(state.dataConstruction->Construct(ConstructionNum).LayerPoint(LayerNum))->Thickness;
-            this->InsulationThickness =
-                state.dataMaterial->Material(state.dataConstruction->Construct(ConstructionNum).LayerPoint(LayerNum))->Thickness;
-            this->SumTK += state.dataMaterial->Material(state.dataConstruction->Construct(ConstructionNum).LayerPoint(LayerNum))->Thickness /
-                           state.dataMaterial->Material(state.dataConstruction->Construct(ConstructionNum).LayerPoint(LayerNum))->Conductivity;
+            auto const *mat = state.dataMaterial->materials(state.dataConstruction->Construct(ConstructionNum).LayerPoint(LayerNum));
+            Resistance += mat->Thickness / mat->Conductivity;
+            Density = mat->Density * mat->Thickness;
+            TotThickness += mat->Thickness;
+            SpHeat = mat->SpecHeat * mat->Thickness;
+            this->InsulationThickness = mat->Thickness;
+            this->SumTK += mat->Thickness / mat->Conductivity;
         }
 
         this->InsulationResistance = Resistance;
@@ -900,18 +871,18 @@ void PipeHTData::ValidatePipeConstruction(EnergyPlusData &state,
         this->InsulationCp = SpHeat / TotThickness;
         this->InsulationThickness = TotThickness;
 
-        this->PipeConductivity =
-            state.dataMaterial->Material(state.dataConstruction->Construct(ConstructionNum).LayerPoint(TotalLayers))->Conductivity;
-        this->PipeDensity = state.dataMaterial->Material(state.dataConstruction->Construct(ConstructionNum).LayerPoint(TotalLayers))->Density;
-        this->PipeCp = state.dataMaterial->Material(state.dataConstruction->Construct(ConstructionNum).LayerPoint(TotalLayers))->SpecHeat;
+        auto const *mat = state.dataMaterial->materials(state.dataConstruction->Construct(ConstructionNum).LayerPoint(TotalLayers));
+        this->PipeConductivity = mat->Conductivity;
+        this->PipeDensity = mat->Density;
+        this->PipeCp = mat->SpecHeat;
 
-        this->PipeOD =
-            this->PipeID + 2.0 * state.dataMaterial->Material(state.dataConstruction->Construct(ConstructionNum).LayerPoint(TotalLayers))->Thickness;
+        this->PipeOD = this->PipeID + 2.0 * mat->Thickness;
         this->InsulationOD = this->PipeOD + 2.0 * this->InsulationThickness;
 
     } else {
         ShowSevereError(
-            state, format("{}: invalid {}=\"{}\", too many layers=[{}], only 1 or 2 allowed.", PipeType, FieldName, ConstructionName, TotalLayers));
+            state,
+            std::format("{}: invalid {}=\"{}\", too many layers=[{}], only 1 or 2 allowed.", PipeType, FieldName, ConstructionName, TotalLayers));
         ErrorsFound = true;
     }
 }
@@ -943,11 +914,8 @@ void PipeHTData::InitPipesHeatTransfer(EnergyPlusData &state, bool const FirstHV
     // Check flags and update data structure
 
     // Using/Aliasing
-    auto &SysTimeElapsed = state.dataHVACGlobal->SysTimeElapsed;
-    auto &TimeStepSys = state.dataHVACGlobal->TimeStepSys;
-    using FluidProperties::GetDensityGlycol;
-    using FluidProperties::GetSpecificHeatGlycol;
-    using ScheduleManager::GetCurrentScheduleValue;
+    Real64 SysTimeElapsed = state.dataHVACGlobal->SysTimeElapsed;
+    Real64 TimeStepSysSec = state.dataHVACGlobal->TimeStepSysSec;
 
     // SUBROUTINE PARAMETER DEFINITIONS:
     static constexpr std::string_view RoutineName("InitPipesHeatTransfer");
@@ -1009,11 +977,15 @@ void PipeHTData::InitPipesHeatTransfer(EnergyPlusData &state, bool const FirstHV
         this->BeginSimEnvrn = false;
     }
 
-    if (!state.dataGlobal->BeginSimFlag) this->BeginSimInit = true;
-    if (!state.dataGlobal->BeginEnvrnFlag) this->BeginSimEnvrn = true;
+    if (!state.dataGlobal->BeginSimFlag) {
+        this->BeginSimInit = true;
+    }
+    if (!state.dataGlobal->BeginEnvrnFlag) {
+        this->BeginSimEnvrn = true;
+    }
 
     // time step in seconds
-    state.dataPipeHT->nsvDeltaTime = TimeStepSys * DataGlobalConstants::SecInHour;
+    state.dataPipeHT->nsvDeltaTime = TimeStepSysSec;
     state.dataPipeHT->nsvNumInnerTimeSteps = int(state.dataPipeHT->nsvDeltaTime / InnerDeltaTime);
 
     // previous temps are updated if necessary at start of timestep rather than end
@@ -1053,7 +1025,7 @@ void PipeHTData::InitPipesHeatTransfer(EnergyPlusData &state, bool const FirstHV
             state.dataPipeHT->nsvEnvironmentTemp = state.dataZoneTempPredictorCorrector->zoneHeatBalance(this->EnvrZonePtr).MAT;
         } break;
         case EnvrnPtr::ScheduleEnv: {
-            state.dataPipeHT->nsvEnvironmentTemp = GetCurrentScheduleValue(state, this->EnvrSchedPtr);
+            state.dataPipeHT->nsvEnvironmentTemp = this->envrSched->getCurrentVal();
         } break;
         case EnvrnPtr::None: { // default to outside temp
             state.dataPipeHT->nsvEnvironmentTemp = state.dataEnvrn->OutDryBulbTemp;
@@ -1066,8 +1038,12 @@ void PipeHTData::InitPipesHeatTransfer(EnergyPlusData &state, bool const FirstHV
         this->FirstHVACupdateFlag = false;
     }
 
-    if (!state.dataGlobal->BeginEnvrnFlag) this->BeginEnvrnupdateFlag = true;
-    if (!FirstHVACIteration) this->FirstHVACupdateFlag = true;
+    if (!state.dataGlobal->BeginEnvrnFlag) {
+        this->BeginEnvrnupdateFlag = true;
+    }
+    if (!FirstHVACIteration) {
+        this->FirstHVACupdateFlag = true;
+    }
 
     // Calculate the current sim time for this pipe (not necessarily structure variable, but it is ok for consistency)
     this->CurrentSimTime = (state.dataGlobal->DayOfSim - 1) * 24 + state.dataGlobal->HourOfDay - 1 +
@@ -1125,16 +1101,8 @@ void PipeHTData::InitPipesHeatTransfer(EnergyPlusData &state, bool const FirstHV
     // Even though the loop eventually has no flow rate, it appears it initializes to a value, then converges to OFF
     // Thus, this is called at the beginning of every time step once.
 
-    this->FluidSpecHeat = GetSpecificHeatGlycol(state,
-                                                state.dataPlnt->PlantLoop(this->plantLoc.loopNum).FluidName,
-                                                state.dataPipeHT->nsvInletTemp,
-                                                state.dataPlnt->PlantLoop(this->plantLoc.loopNum).FluidIndex,
-                                                RoutineName);
-    this->FluidDensity = GetDensityGlycol(state,
-                                          state.dataPlnt->PlantLoop(this->plantLoc.loopNum).FluidName,
-                                          state.dataPipeHT->nsvInletTemp,
-                                          state.dataPlnt->PlantLoop(this->plantLoc.loopNum).FluidIndex,
-                                          RoutineName);
+    this->FluidSpecHeat = this->plantLoc.loop->glycol->getSpecificHeat(state, state.dataPipeHT->nsvInletTemp, RoutineName);
+    this->FluidDensity = this->plantLoc.loop->glycol->getDensity(state, state.dataPipeHT->nsvInletTemp, RoutineName);
 
     // At this point, for all Pipe:Interior objects we should zero out the energy and rate arrays
     this->FluidHeatLossRate = 0.0;
@@ -1194,9 +1162,6 @@ void PipeHTData::CalcPipesHeatTransfer(EnergyPlusData &state, ObjexxFCL::Optiona
     Real64 EnvHeatTransCoef(0.0);      // external convection coefficient (outside pipe)
     Real64 FluidNodeHeatCapacity(0.0); // local var for MCp for single node of pipe
 
-    int PipeDepth(0);
-    int PipeWidth(0);
-    int curnode;
     Real64 TempBelow;
     Real64 TempBeside;
     Real64 TempAbove;
@@ -1277,8 +1242,8 @@ void PipeHTData::CalcPipesHeatTransfer(EnergyPlusData &state, ObjexxFCL::Optiona
 
     if (present(LengthIndex)) { // Just simulate the single section if being called from Pipe:Underground
 
-        PipeDepth = this->PipeNodeDepth;
-        PipeWidth = this->PipeNodeWidth;
+        int PipeDepth = this->PipeNodeDepth;
+        int PipeWidth = this->PipeNodeWidth;
         TempBelow = this->T(PipeWidth, PipeDepth + 1, LengthIndex, TimeIndex::Current);
         TempBeside = this->T(PipeWidth - 1, PipeDepth, LengthIndex, TimeIndex::Current);
         TempAbove = this->T(PipeWidth, PipeDepth - 1, LengthIndex, TimeIndex::Current);
@@ -1304,7 +1269,7 @@ void PipeHTData::CalcPipesHeatTransfer(EnergyPlusData &state, ObjexxFCL::Optiona
 
         // start loop along pipe
         // b1 must not be zero but this should have been checked on input
-        for (curnode = 1; curnode <= this->NumSections; ++curnode) {
+        for (int curnode = 1; curnode <= this->NumSections; ++curnode) {
             this->TentativeFluidTemp(curnode) = (A2 * this->TentativeFluidTemp(curnode - 1) +
                                                  A3 / B1 * (B3 * state.dataPipeHT->nsvEnvironmentTemp + B4 * this->PreviousPipeTemp(curnode)) +
                                                  A4 * this->PreviousFluidTemp(curnode)) /
@@ -1349,7 +1314,7 @@ void PipeHTData::CalcBuriedPipeSoil(EnergyPlusData &state) // Current Simulation
     // This then interfaces with the Hanby model for near-pipe region
 
     // Using/Aliasing
-    using ConvectionCoefficients::CalcASHRAESimpExtConvectCoeff;
+    using Convect::CalcASHRAESimpExtConvCoeff;
 
     // SUBROUTINE PARAMETER DEFINITIONS:
     int constexpr NumSections(20);
@@ -1359,7 +1324,6 @@ void PipeHTData::CalcBuriedPipeSoil(EnergyPlusData &state) // Current Simulation
 
     // SUBROUTINE LOCAL VARIABLE DECLARATIONS:
     int IterationIndex(0);    // Index when stepping through equations
-    int LengthIndex(0);       // Index for nodes along length of pipe
     int DepthIndex(0);        // Index for nodes in the depth direction
     int WidthIndex(0);        // Index for nodes in the width direction
     Real64 ConvCoef(0.0);     // Current convection coefficient = f(Wind Speed,Roughness)
@@ -1368,23 +1332,23 @@ void PipeHTData::CalcBuriedPipeSoil(EnergyPlusData &state) // Current Simulation
     Array3D<Real64> T_O(this->PipeNodeWidth, this->NumDepthNodes, NumSections);
 
     // Local variable placeholders for code readability
-    Real64 A1(0.0);              // Placeholder for CoefA1
-    Real64 A2(0.0);              // Placeholder for CoefA2
-    Real64 NodeBelow(0.0);       // Placeholder for Node temp below current node
-    Real64 NodeAbove(0.0);       // Placeholder for Node temp above current node
-    Real64 NodeRight(0.0);       // Placeholder for Node temp to the right of current node
-    Real64 NodeLeft(0.0);        // Placeholder for Node temp to the left of current node
-    Real64 NodePast(0.0);        // Placeholder for Node temp at current node but previous time step
-    Real64 PastNodeTempAbs(0.0); // Placeholder for absolute temperature (K) version of NodePast
-    Real64 Ttemp(0.0);           // Placeholder for a current temperature node in convergence check
-    Real64 SkyTempAbs(0.0);      // Placeholder for current sky temperature in Kelvin
-    DataSurfaces::SurfaceRoughness TopRoughness(DataSurfaces::SurfaceRoughness::Invalid); // Placeholder for soil surface roughness
-    Real64 TopThermAbs(0.0);                                                              // Placeholder for soil thermal radiation absorptivity
-    Real64 TopSolarAbs(0.0);                                                              // Placeholder for soil solar radiation absorptivity
-    Real64 kSoil(0.0);                                                                    // Placeholder for soil conductivity
-    Real64 dS(0.0);                                                                       // Placeholder for soil grid spacing
-    Real64 rho(0.0);                                                                      // Placeholder for soil density
-    Real64 Cp(0.0);                                                                       // Placeholder for soil specific heat
+    Real64 A1(0.0);                                                               // Placeholder for CoefA1
+    Real64 A2(0.0);                                                               // Placeholder for CoefA2
+    Real64 NodeBelow(0.0);                                                        // Placeholder for Node temp below current node
+    Real64 NodeAbove(0.0);                                                        // Placeholder for Node temp above current node
+    Real64 NodeRight(0.0);                                                        // Placeholder for Node temp to the right of current node
+    Real64 NodeLeft(0.0);                                                         // Placeholder for Node temp to the left of current node
+    Real64 NodePast(0.0);                                                         // Placeholder for Node temp at current node but previous time step
+    Real64 PastNodeTempAbs(0.0);                                                  // Placeholder for absolute temperature (K) version of NodePast
+    Real64 Ttemp(0.0);                                                            // Placeholder for a current temperature node in convergence check
+    Real64 SkyTempAbs(0.0);                                                       // Placeholder for current sky temperature in Kelvin
+    Material::SurfaceRoughness TopRoughness(Material::SurfaceRoughness::Invalid); // Placeholder for soil surface roughness
+    Real64 TopThermAbs(0.0);                                                      // Placeholder for soil thermal radiation absorptivity
+    Real64 TopSolarAbs(0.0);                                                      // Placeholder for soil solar radiation absorptivity
+    Real64 kSoil(0.0);                                                            // Placeholder for soil conductivity
+    Real64 dS(0.0);                                                               // Placeholder for soil grid spacing
+    Real64 rho(0.0);                                                              // Placeholder for soil density
+    Real64 Cp(0.0);                                                               // Placeholder for soil specific heat
 
     // There are a number of coefficients which change through the simulation, and they are updated here
     this->FourierDS = this->SoilDiffusivity * state.dataPipeHT->nsvDeltaTime / pow_2(this->dSregular); // Eq. D4
@@ -1393,11 +1357,11 @@ void PipeHTData::CalcBuriedPipeSoil(EnergyPlusData &state) // Current Simulation
 
     for (IterationIndex = 1; IterationIndex <= MaxIterations; ++IterationIndex) {
         if (IterationIndex == MaxIterations) {
-            ShowWarningError(state, format("BuriedPipeHeatTransfer: Large number of iterations detected in object: {}", this->Name));
+            ShowWarningError(state, std::format("BuriedPipeHeatTransfer: Large number of iterations detected in object: {}", this->Name));
         }
 
         // Store computed values in T_O array
-        for (LengthIndex = 2; LengthIndex <= this->NumSections; ++LengthIndex) {
+        for (int LengthIndex = 2; LengthIndex <= this->NumSections; ++LengthIndex) {
             for (DepthIndex = 1; DepthIndex <= this->NumDepthNodes - 1; ++DepthIndex) {
                 for (WidthIndex = 2; WidthIndex <= this->PipeNodeWidth; ++WidthIndex) {
                     T_O(WidthIndex, DepthIndex, LengthIndex) = this->T(WidthIndex, DepthIndex, LengthIndex, TimeIndex::Tentative);
@@ -1406,7 +1370,7 @@ void PipeHTData::CalcBuriedPipeSoil(EnergyPlusData &state) // Current Simulation
         }
 
         // Loop along entire length of pipe, analyzing cross sects
-        for (LengthIndex = 1; LengthIndex <= this->NumSections; ++LengthIndex) {
+        for (int LengthIndex = 1; LengthIndex <= this->NumSections; ++LengthIndex) {
             for (DepthIndex = 1; DepthIndex <= this->NumDepthNodes - 1; ++DepthIndex) {
                 for (WidthIndex = 2; WidthIndex <= this->PipeNodeWidth; ++WidthIndex) {
 
@@ -1414,8 +1378,8 @@ void PipeHTData::CalcBuriedPipeSoil(EnergyPlusData &state) // Current Simulation
 
                         // If on soil boundary, load up local variables and perform calculations
                         NodePast = this->T(WidthIndex, DepthIndex, LengthIndex, TimeIndex::Previous);
-                        PastNodeTempAbs = NodePast + DataGlobalConstants::KelvinConv;
-                        SkyTempAbs = state.dataEnvrn->SkyTemp + DataGlobalConstants::KelvinConv;
+                        PastNodeTempAbs = NodePast + Constant::Kelvin;
+                        SkyTempAbs = state.dataEnvrn->SkyTemp + Constant::Kelvin;
                         TopRoughness = this->SoilRoughness;
                         TopThermAbs = this->SoilThermAbs;
                         TopSolarAbs = this->SoilSolarAbs;
@@ -1425,11 +1389,11 @@ void PipeHTData::CalcBuriedPipeSoil(EnergyPlusData &state) // Current Simulation
                         Cp = this->SoilCp;
 
                         // ASHRAE simple convection coefficient model for external surfaces.
-                        this->OutdoorConvCoef = CalcASHRAESimpExtConvectCoeff(TopRoughness, state.dataEnvrn->WindSpeed);
+                        this->OutdoorConvCoef = CalcASHRAESimpExtConvCoeff(TopRoughness, state.dataEnvrn->WindSpeed);
                         ConvCoef = this->OutdoorConvCoef;
 
                         // thermal radiation coefficient using surf temp from past time step
-                        if (std::abs(PastNodeTempAbs - SkyTempAbs) > DataGlobalConstants::rTinyValue) {
+                        if (std::abs(PastNodeTempAbs - SkyTempAbs) > Constant::rTinyValue) {
                             RadCoef = StefBoltzmann * TopThermAbs * (pow_4(PastNodeTempAbs) - pow_4(SkyTempAbs)) / (PastNodeTempAbs - SkyTempAbs);
                         } else {
                             RadCoef = 0.0;
@@ -1482,7 +1446,7 @@ void PipeHTData::CalcBuriedPipeSoil(EnergyPlusData &state) // Current Simulation
                             //-Update node for cartesian system
                             this->T(WidthIndex, DepthIndex, LengthIndex, TimeIndex::Tentative) = this->PipeTemp(LengthIndex);
 
-                        } else if (DepthIndex != 1) { // Not surface node
+                        } else { // Not surface node
 
                             //-Coefficients and Temperatures
                             NodeLeft = this->T(WidthIndex - 1, DepthIndex, LengthIndex, TimeIndex::Current);
@@ -1518,11 +1482,13 @@ void PipeHTData::CalcBuriedPipeSoil(EnergyPlusData &state) // Current Simulation
         }
 
         // Check for convergence
-        for (LengthIndex = 2; LengthIndex <= this->NumSections; ++LengthIndex) {
+        for (int LengthIndex = 2; LengthIndex <= this->NumSections; ++LengthIndex) {
             for (DepthIndex = 1; DepthIndex <= this->NumDepthNodes - 1; ++DepthIndex) {
                 for (WidthIndex = 2; WidthIndex <= this->PipeNodeWidth; ++WidthIndex) {
                     Ttemp = this->T(WidthIndex, DepthIndex, LengthIndex, TimeIndex::Tentative);
-                    if (std::abs(T_O(WidthIndex, DepthIndex, LengthIndex) - Ttemp) > ConvCrit) goto IterationLoop_loop;
+                    if (std::abs(T_O(WidthIndex, DepthIndex, LengthIndex) - Ttemp) > ConvCrit) {
+                        goto IterationLoop_loop;
+                    }
                 }
             }
         }
@@ -1587,7 +1553,7 @@ void PipeHTData::UpdatePipesHeatTransfer(EnergyPlusData &state)
         state.dataLoopNodes->Node(state.dataPipeHT->nsvInletNodeNum).MassFlowRateMaxAvail;
     state.dataLoopNodes->Node(state.dataPipeHT->nsvOutletNodeNum).Quality = state.dataLoopNodes->Node(state.dataPipeHT->nsvInletNodeNum).Quality;
     // Only pass pressure if we aren't doing a pressure simulation
-    switch (state.dataPlnt->PlantLoop(this->plantLoc.loopNum).PressureSimType) {
+    switch (this->plantLoc.loop->PressureSimType) {
     case DataPlant::PressSimType::NoPressure:
         state.dataLoopNodes->Node(state.dataPipeHT->nsvOutletNodeNum).Press = state.dataLoopNodes->Node(state.dataPipeHT->nsvInletNodeNum).Press;
         break;
@@ -1675,15 +1641,20 @@ void PipeHTData::CalcZonePipesHeatGain(EnergyPlusData &state)
     // Sums the heat losses from all of the water heaters in the zone to add as a gain to the zone.
 
     // Using/Aliasing
-    if (state.dataPipeHT->nsvNumOfPipeHT == 0) return;
+    if (state.dataPipeHT->nsvNumOfPipeHT == 0) {
+        return;
+    }
 
     if (state.dataGlobal->BeginEnvrnFlag && state.dataPipeHT->MyEnvrnFlag) {
-        for (auto &e : state.dataPipeHT->PipeHT)
+        for (auto &e : state.dataPipeHT->PipeHT) {
             e.ZoneHeatGainRate = 0.0;
+        }
         state.dataPipeHT->MyEnvrnFlag = false;
     }
 
-    if (!state.dataGlobal->BeginEnvrnFlag) state.dataPipeHT->MyEnvrnFlag = true;
+    if (!state.dataGlobal->BeginEnvrnFlag) {
+        state.dataPipeHT->MyEnvrnFlag = true;
+    }
 }
 
 //==============================================================================
@@ -1714,10 +1685,6 @@ Real64 PipeHTData::CalcPipeHeatTransCoef(EnergyPlusData &state,
     // Incropera and DeWitt, Introduction to Heat Transfer, Table A.6.
     // Heat exchanger information also from Incropera and DeWitt.
     // Code based loosely on code from IBLAST program (research version)
-
-    // Using/Aliasing
-    using FluidProperties::GetConductivityGlycol;
-    using FluidProperties::GetViscosityGlycol;
 
     // Return value
     Real64 CalcPipeHeatTransCoef;
@@ -1765,15 +1732,12 @@ Real64 PipeHTData::CalcPipeHeatTransCoef(EnergyPlusData &state,
     }
 
     // look up conductivity and viscosity
-    Kactual = GetConductivityGlycol(
-        state, state.dataPlnt->PlantLoop(LoopNum).FluidName, this->FluidTemp(0), state.dataPlnt->PlantLoop(LoopNum).FluidIndex, RoutineName); // W/m-K
-    MUactual =
-        GetViscosityGlycol(
-            state, state.dataPlnt->PlantLoop(LoopNum).FluidName, this->FluidTemp(0), state.dataPlnt->PlantLoop(LoopNum).FluidIndex, RoutineName) /
-        1000.0; // Note fluid properties routine returns mPa-s, we need Pa-s
+    Kactual = state.dataPlnt->PlantLoop(LoopNum).glycol->getConductivity(state, this->FluidTemp(0), RoutineName); // W/m-K
+    MUactual = state.dataPlnt->PlantLoop(LoopNum).glycol->getViscosity(state, this->FluidTemp(0), RoutineName) /
+               1000.0; // Note fluid properties routine returns mPa-s, we need Pa-s
 
     // Calculate the Reynold's number from RE=(4*Mdot)/(Pi*Mu*Diameter) - as RadiantSysLowTemp
-    ReD = 4.0 * MassFlowRate / (DataGlobalConstants::Pi * MUactual * Diameter);
+    ReD = 4.0 * MassFlowRate / (Constant::Pi * MUactual * Diameter);
 
     if (ReD == 0.0) { // No flow
 
@@ -1813,9 +1777,6 @@ Real64 PipeHTData::OutsidePipeHeatTransCoef(EnergyPlusData &state)
     // REFERENCES:
     // Fundamentals of Heat and Mass Transfer: Incropera and DeWitt, 4th ed.
     // p. 369-370 (Eq. 7:55b)
-
-    // Using/Aliasing
-    using ScheduleManager::GetCurrentScheduleValue;
 
     // Return value
     Real64 OutsidePipeHeatTransCoef;
@@ -1860,8 +1821,8 @@ Real64 PipeHTData::OutsidePipeHeatTransCoef(EnergyPlusData &state)
     case DataPlant::PlantEquipmentType::PipeInterior: {
         switch (this->EnvironmentPtr) {
         case EnvrnPtr::ScheduleEnv: {
-            AirTemp = GetCurrentScheduleValue(state, this->EnvrSchedPtr);
-            AirVel = GetCurrentScheduleValue(state, this->EnvrVelSchedPtr);
+            AirTemp = this->envrSched->getCurrentVal();
+            AirVel = this->envrVelSched->getCurrentVal();
         } break;
         case EnvrnPtr::ZoneEnv: {
             AirTemp = state.dataZoneTempPredictorCorrector->zoneHeatBalance(this->EnvrZonePtr).MAT;
@@ -1899,8 +1860,8 @@ Real64 PipeHTData::OutsidePipeHeatTransCoef(EnergyPlusData &state)
     if (!ViscositySet) {
         AirVisc = DynVisc[NumOfPropDivisions - 1];
         if (AirTemp > Temperature[NumOfPropDivisions - 1]) {
-            ShowWarningError(state,
-                             format("Heat Transfer Pipe = {}Viscosity out of range, air temperature too high, setting to upper limit.", this->Name));
+            ShowWarningError(
+                state, std::format("Heat Transfer Pipe = {}Viscosity out of range, air temperature too high, setting to upper limit.", this->Name));
         }
     }
 
@@ -1923,7 +1884,8 @@ Real64 PipeHTData::OutsidePipeHeatTransCoef(EnergyPlusData &state)
         Coef = CCoef[NumOfParamDivisions - 1];
         rExp = mExp[NumOfParamDivisions - 1];
         if (ReD > UpperBound[NumOfParamDivisions - 1]) {
-            ShowWarningError(state, format("Heat Transfer Pipe = {}Reynolds Number out of range, setting coefficients to upper limit.", this->Name));
+            ShowWarningError(state,
+                             std::format("Heat Transfer Pipe = {}Reynolds Number out of range, setting coefficients to upper limit.", this->Name));
         }
     }
 
@@ -1959,12 +1921,8 @@ Real64 PipeHTData::TBND(EnergyPlusData &state,
     // REFERENCES: See Module Level Description
 
     // Using/Aliasing
-    Real64 curSimTime = state.dataGlobal->DayOfSim * DataGlobalConstants::SecsInDay;
-    Real64 TBND;
-
-    TBND = this->groundTempModel->getGroundTempAtTimeInSeconds(state, z, curSimTime);
-
-    return TBND;
+    Real64 curSimTime = state.dataGlobal->DayOfSim * Constant::rSecsInDay;
+    return this->groundTempModel->getGroundTempAtTimeInSeconds(state, z, curSimTime);
 }
 
 void PipeHTData::oneTimeInit([[maybe_unused]] EnergyPlusData &state)

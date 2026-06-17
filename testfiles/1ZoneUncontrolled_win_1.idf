@@ -88,7 +88,7 @@
 ! Environmental Emissions:        None
 ! Utility Tariffs:                None
 
-  Version,23.1;
+  Version,26.2;
 
   Timestep,4;
 
@@ -391,7 +391,7 @@
 
   Output:Variable,*,Zone Mean Air Temperature,timestep;
 
-  Output:Variable,*,Zone Windows Total Transmitted Solar Radiation Rate,timestep;
+  Output:Variable,*,Enclosure Windows Total Transmitted Solar Radiation Rate,timestep;
 
   Output:Variable,ZN001:WALL001,Surface Outside Face Incident Solar Radiation Rate per Area,timestep;
 

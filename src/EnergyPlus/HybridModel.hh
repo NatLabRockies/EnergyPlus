@@ -1,7 +1,7 @@
-// EnergyPlus, Copyright (c) 1996-2023, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
-// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other
+// National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
 // contributors. All rights reserved.
 //
 // NOTICE: This Software was developed under funding from the U.S. Department of Energy and the
@@ -74,52 +74,39 @@ namespace HybridModel {
 
     // Types
 
-    struct HybridModelProperties
+    struct HybridModelZone
     {
         // Members
         std::string Name;
-        int ZoneMeasuredTemperatureSchedulePtr;
-        int ZoneMeasuredHumidityRatioSchedulePtr;
-        int ZoneMeasuredCO2ConcentrationSchedulePtr;
+        Sched::Schedule *measuredTempSched = nullptr;
+        Sched::Schedule *measuredHumRatSched = nullptr;
+        Sched::Schedule *measuredCO2ConcSched = nullptr;
 
-        int ZonePeopleActivityLevelSchedulePtr;
-        int ZonePeopleSensibleFractionSchedulePtr;
-        int ZonePeopleRadiationFractionSchedulePtr;
-        int ZonePeopleCO2GenRateSchedulePtr;
+        Sched::Schedule *peopleActivityLevelSched = nullptr;
+        Sched::Schedule *peopleSensibleFracSched = nullptr;
+        Sched::Schedule *peopleRadiantFracSched = nullptr;
+        Sched::Schedule *peopleCO2GenRateSched = nullptr;
 
-        int ZoneSupplyAirTemperatureSchedulePtr;
-        int ZoneSupplyAirMassFlowRateSchedulePtr;
-        int ZoneSupplyAirHumidityRatioSchedulePtr;
-        int ZoneSupplyAirCO2ConcentrationSchedulePtr;
+        Sched::Schedule *supplyAirTempSched = nullptr;
+        Sched::Schedule *supplyAirMassFlowRateSched = nullptr;
+        Sched::Schedule *supplyAirHumRatSched = nullptr;
+        Sched::Schedule *supplyAirCO2ConcSched = nullptr;
 
-        bool InternalThermalMassCalc_T;     // Calculate thermal mass flag with measured temperature
-        bool InfiltrationCalc_T;            // Calculate air infiltration rate flag with measured temperature
-        bool InfiltrationCalc_H;            // Calculate air infiltration rate flag with measured humidity ratio
-        bool InfiltrationCalc_C;            // Calculate air infiltration rate flag with measured CO2 concentration
-        bool PeopleCountCalc_T;             // Calculate zone people count flag with measured temperature
-        bool PeopleCountCalc_H;             // Calculate zone people count flag with measured humidity ratio
-        bool PeopleCountCalc_C;             // Calculate zone people count flag with measured CO2 concentration
-        bool IncludeSystemSupplyParameters; // Flag to decide whether to include system supply terms
+        bool InternalThermalMassCalc_T = false;     // Calculate thermal mass flag with measured temperature
+        bool InfiltrationCalc_T = false;            // Calculate air infiltration rate flag with measured temperature
+        bool InfiltrationCalc_H = false;            // Calculate air infiltration rate flag with measured humidity ratio
+        bool InfiltrationCalc_C = false;            // Calculate air infiltration rate flag with measured CO2 concentration
+        bool PeopleCountCalc_T = false;             // Calculate zone people count flag with measured temperature
+        bool PeopleCountCalc_H = false;             // Calculate zone people count flag with measured humidity ratio
+        bool PeopleCountCalc_C = false;             // Calculate zone people count flag with measured CO2 concentration
+        bool IncludeSystemSupplyParameters = false; // Flag to decide whether to include system supply terms
 
-        int ZoneMeasuredTemperatureStartMonth;
-        int ZoneMeasuredTemperatureStartDate;
-        int ZoneMeasuredTemperatureEndMonth;
-        int ZoneMeasuredTemperatureEndDate;
-        int HybridStartDayOfYear; // Hybrid model start date of year
-        int HybridEndDayOfYear;   // Hybrid model end date of year
-
-        // Default Constructor
-        HybridModelProperties()
-            : ZoneMeasuredTemperatureSchedulePtr(0), ZoneMeasuredHumidityRatioSchedulePtr(0), ZoneMeasuredCO2ConcentrationSchedulePtr(0),
-              ZonePeopleActivityLevelSchedulePtr(0), ZonePeopleSensibleFractionSchedulePtr(0), ZonePeopleRadiationFractionSchedulePtr(0),
-              ZonePeopleCO2GenRateSchedulePtr(0), ZoneSupplyAirTemperatureSchedulePtr(0), ZoneSupplyAirMassFlowRateSchedulePtr(0),
-              ZoneSupplyAirHumidityRatioSchedulePtr(0), ZoneSupplyAirCO2ConcentrationSchedulePtr(0), InternalThermalMassCalc_T(false),
-              InfiltrationCalc_T(false), InfiltrationCalc_H(false), InfiltrationCalc_C(false), PeopleCountCalc_T(false), PeopleCountCalc_H(false),
-              PeopleCountCalc_C(false), IncludeSystemSupplyParameters(false), ZoneMeasuredTemperatureStartMonth(0),
-              ZoneMeasuredTemperatureStartDate(0), ZoneMeasuredTemperatureEndMonth(0), ZoneMeasuredTemperatureEndDate(0), HybridStartDayOfYear(0),
-              HybridEndDayOfYear(0)
-        {
-        }
+        int measuredTempStartMonth = 0;
+        int measuredTempStartDate = 0;
+        int measuredTempEndMonth = 0;
+        int measuredTempEndDate = 0;
+        int HybridStartDayOfYear = 0; // Hybrid model start date of year
+        int HybridEndDayOfYear = 0;   // Hybrid model end date of year
     };
 
     // Object Data
@@ -141,7 +128,15 @@ struct HybridModelData : BaseGlobalStruct
     int NumOfHybridModelZones = 0;   // Number of hybrid model zones in the model
     std::string CurrentModuleObject; // to assist in getting input
 
-    Array1D<HybridModel::HybridModelProperties> HybridModelZone;
+    Array1D<HybridModel::HybridModelZone> hybridModelZones;
+
+    void init_constant_state([[maybe_unused]] EnergyPlusData &state) override
+    {
+    }
+
+    void init_state([[maybe_unused]] EnergyPlusData &state) override
+    {
+    }
 
     void clear_state() override
     {
@@ -151,7 +146,7 @@ struct HybridModelData : BaseGlobalStruct
         this->FlagHybridModel_PC = false;
         this->NumOfHybridModelZones = 0;
         this->CurrentModuleObject.clear();
-        this->HybridModelZone.deallocate();
+        this->hybridModelZones.deallocate();
     }
 };
 

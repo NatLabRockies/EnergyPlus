@@ -1,3 +1,0 @@
-\section{After Component Model Input has Been Read In}\label{after-component-model-input-has-been-read-in}
-
-The calling point called ``AfterComponentInputReadIn'' is used to alter the results of individual autosize fields.~ It executes whenever one of the selected components has finished reading in its input data.~ Those, and only those, component models that have some type of actuator with an ``Autosized'' control type will also have this calling point.~ This same calling point identifier is used for different HVAC components so programs executed from this point will be repeated.~ Currently this calling point exists in three different places:~ (1) after DX coil input, (2) after fan input, and (3) after unitary system input.

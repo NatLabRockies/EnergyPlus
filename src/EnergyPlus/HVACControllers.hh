@@ -1,7 +1,7 @@
-// EnergyPlus, Copyright (c) 1996-2023, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
-// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other
+// National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
 // contributors. All rights reserved.
 //
 // NOTICE: This Software was developed under funding from the U.S. Department of Energy and the
@@ -150,17 +150,18 @@ namespace HVACControllers {
         Real64 ActuatedValue;               // Value of actuated variable before change by the controller
         Real64 NextActuatedValue;           // The new control actuated value
         PlantLocation ActuatedNodePlantLoc; // Location for actuated node
+        DataPlant::PlantEquipmentType WaterCoilType = DataPlant::PlantEquipmentType::Invalid;
         // --------------------
         // Sensed variable
         // --------------------
         int SensedNode;             // The sensed node number from the grid
         bool IsSetPointDefinedFlag; // If TRUE indicates that the setpoint has been defined and can
         // be used to compute DeltaSensed
-        Real64 SetPointValue;                         // Desired setpoint; set in the SetPoint Manager or computed in Init() routine
-        Real64 SensedValue;                           // The sensed control variable of any type
-        Real64 DeltaSensed;                           // Difference of sensed to setpoint value for calculating proportional gain
-        Real64 Offset;                                // This is the tolerance or droop from the error
-        SetPointManager::CtrlVarType HumRatCntrlType; // iCtrlVarType_HumRat=4,iCtrlVarType_MaxHumRat=5,iCtrlVarType_MinHumRat=6
+        Real64 SetPointValue;              // Desired setpoint; set in the SetPoint Manager or computed in Init() routine
+        Real64 SensedValue;                // The sensed control variable of any type
+        Real64 DeltaSensed;                // Difference of sensed to setpoint value for calculating proportional gain
+        Real64 Offset;                     // This is the tolerance or droop from the error
+        HVAC::CtrlVarType HumRatCntrlType; // iCtrlVarType_HumRat=4,iCtrlVarType_MaxHumRat=5,iCtrlVarType_MinHumRat=6
         // --------------------
         // Other controller inputs, not yet used
         // --------------------
@@ -190,7 +191,7 @@ namespace HVACControllers {
               ReuseIntermediateSolutionFlag(false), ReusePreviousSolutionFlag(false), SolutionTrackers(2), MaxAvailActuated(0.0), MaxAvailSensed(0.0),
               MinAvailActuated(0.0), MinAvailSensed(0.0), MaxVolFlowActuated(0.0), MinVolFlowActuated(0.0), MaxActuated(0.0), MinActuated(0.0),
               ActuatedNode(0), ActuatedValue(0.0), NextActuatedValue(0.0), ActuatedNodePlantLoc{}, SensedNode(0), IsSetPointDefinedFlag(false),
-              SetPointValue(0.0), SensedValue(0.0), DeltaSensed(0.0), Offset(0.0), HumRatCntrlType(SetPointManager::CtrlVarType::Invalid), Range(0.0),
+              SetPointValue(0.0), SensedValue(0.0), DeltaSensed(0.0), Offset(0.0), HumRatCntrlType(HVAC::CtrlVarType::Invalid), Range(0.0),
               Limit(0.0), FirstTraceFlag(true), BadActionErrCount(0), BadActionErrIndex(0), FaultyCoilSATFlag(false), FaultyCoilSATIndex(0),
               FaultyCoilSATOffset(0.0), BypassControllerCalc(false), AirLoopControllerIndex(0), HumRatCtrlOverride(false)
         {
@@ -235,7 +236,7 @@ namespace HVACControllers {
                            DataHVACControllers::ControllerOperation Operation,
                            bool &IsConvergedFlag,
                            bool &IsUpToDateFlag,
-                           bool &BypassOAController,
+                           bool const BypassOAController,
                            ObjexxFCL::Optional_bool AllowWarmRestartFlag = _);
 
     void GetControllerInput(EnergyPlusData &state);
@@ -315,15 +316,15 @@ namespace HVACControllers {
                                    DataHVACControllers::ControllerOperation Operation, // Operation to execute
                                    bool IsConvergedFlag);
 
-    Real64 GetCurrentHVACTime(EnergyPlusData &state);
+    Real64 GetCurrentHVACTime(const EnergyPlusData &state);
 
-    Real64 GetPreviousHVACTime(EnergyPlusData &state);
+    Real64 GetPreviousHVACTime(const EnergyPlusData &state);
 
-    std::string CreateHVACTimeString(EnergyPlusData &state);
+    std::string CreateHVACTimeString(const EnergyPlusData &state);
 
-    std::string CreateHVACStepFullString(EnergyPlusData &state);
+    std::string CreateHVACStepFullString(const EnergyPlusData &state);
 
-    std::string MakeHVACTimeIntervalString(EnergyPlusData &state);
+    std::string MakeHVACTimeIntervalString(const EnergyPlusData &state);
 
     void CheckControllerListOrder(EnergyPlusData &state);
 
@@ -366,9 +367,17 @@ struct HVACControllersData : BaseGlobalStruct
     Array1D_bool MySizeFlag;
     Array1D_bool MyPlantIndexsFlag;
 
+    void init_constant_state([[maybe_unused]] EnergyPlusData &state) override
+    {
+    }
+
+    void init_state([[maybe_unused]] EnergyPlusData &state) override
+    {
+    }
+
     void clear_state() override
     {
-        *this = HVACControllersData();
+        new (this) HVACControllersData();
     }
 };
 

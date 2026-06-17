@@ -86,20 +86,15 @@ The proposed EMPD model will *add* the following:
     0.00,                !- Deep-layer Penetration Depth {m}
     0.00,                !- Coating layer thickness, m
     0.00,                !- Coating layer vapor diffusion resistance factor {dimensionless}
-    
+
 ```
 
 For older versions of the .idf, the deep-layer depth and coating thickness will be set to zero and the vapor resistance factor will be calculated based on the penetration depth and calculated slope of the moisture capacitance equation (derived from a-d coefficients), assuming a nominal temperature and humidity and 24 hours for the cycle period. See Janssen and Roels, 2009 (Eq. (5) and accompanying text) for details.
 
 ## References ##
 
-Woods, J., Winkler, J, and Christensen, D. [*Evaluation of the Effective Moisture Penetration Depth Model for Estimating Moisture Buffering in Buildings*](http://www.nrel.gov/docs/fy13osti/57441.pdf), NREL/TP-5500-57441, 2013.
+Woods, J., Winkler, J, and Christensen, D. [*Evaluation of the Effective Moisture Penetration Depth Model for Estimating Moisture Buffering in Buildings*](http://www.nlr.gov/docs/fy13osti/57441.pdf), NREL/TP-5500-57441, 2013.
 
-Woods, J., J. Winkler, D. Christensen, E. Hancock, [*Using Whole-House Field Tests to Empirically Derive Moisture Buffering Model Inputs*](http://www.nrel.gov/docs/fy14osti/62456.pdf). NREL/TP-5500-62456, 2014.
+Woods, J., J. Winkler, D. Christensen, E. Hancock, [*Using Whole-House Field Tests to Empirically Derive Moisture Buffering Model Inputs*](http://www.nlr.gov/docs/fy14osti/62456.pdf). NREL/TP-5500-62456, 2014.
 
 Janssen, H. and S. Roels, [*Qualitative and quantitative assessment of interior moisture buffering by enclosures*](http://www.sciencedirect.com/science/article/pii/S0378778808002387), Energ. Buildings. 41 (2009) 382-94.
-
-
-
-
-

@@ -1,7 +1,7 @@
-// EnergyPlus, Copyright (c) 1996-2023, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
-// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other
+// National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
 // contributors. All rights reserved.
 //
 // NOTICE: This Software was developed under funding from the U.S. Department of Energy and the
@@ -52,7 +52,6 @@
 #include <ObjexxFCL/Array2A.hh>
 
 // EnergyPlus Headers
-#include <EnergyPlus/BITF.hh>
 #include <EnergyPlus/Data/BaseData.hh>
 #include <EnergyPlus/EnergyPlus.hh>
 #include <EnergyPlus/TARCOGParams.hh>
@@ -71,9 +70,9 @@ namespace TARCOGCommon {
         // Using/Aliasing
         using namespace TARCOGParams;
 
-        return BITF_TEST_ANY(BITF(layertype),
-                             BITF(TARCOGLayerType::VENETBLIND_HORIZ) | BITF(TARCOGLayerType::VENETBLIND_VERT) | BITF(TARCOGLayerType::WOVSHADE) |
-                                 BITF(TARCOGLayerType::PERFORATED) | BITF(TARCOGLayerType::BSDF) | BITF(TARCOGLayerType::DIFFSHADE));
+        return (layertype == TARCOGLayerType::VENETBLIND_HORIZ || layertype == TARCOGLayerType::VENETBLIND_VERT ||
+                layertype == TARCOGLayerType::WOVSHADE || layertype == TARCOGLayerType::PERFORATED || layertype == TARCOGLayerType::BSDF ||
+                layertype == TARCOGLayerType::DIFFSHADE);
     }
 
     Real64 LDSumMax(Real64 Width, Real64 Height);
@@ -120,6 +119,14 @@ namespace TARCOGCommon {
 struct TARCOGCommonData : BaseGlobalStruct
 {
     Array1D<Real64> vv = Array1D<Real64>(TARCOGCommon::NMAX);
+
+    void init_constant_state([[maybe_unused]] EnergyPlusData &state) override
+    {
+    }
+
+    void init_state([[maybe_unused]] EnergyPlusData &state) override
+    {
+    }
 
     void clear_state() override
     {

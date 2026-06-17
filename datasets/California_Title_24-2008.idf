@@ -21,28 +21,25 @@
 ! ;                         !Reserved
 ! The objects and syntax in this dataset comply with EnergyPlus, Version 8.4.0 and above, unless otherwise noted.
 
-!  Version,
-!    9.0;                    !- Version Identifier
-
   People,
     Auditoriums,             !- Name
-    Auditoriums,             !- Zone or ZoneList Name
+    Auditoriums,             !- Zone or ZoneList or Space or SpaceList Name
     OCC-SCHED-BldgAvg,       !- Number of People Schedule Name
     Area/Person,             !- Number of People Calculation Method
     ,                        !- Number of People
-    ,                        !- People per Zone Floor Area {person/m2}
-    0.65,                    !- Zone Floor Area per Person {m2/person}
+    ,                        !- People per Floor Area {person/m2}
+    0.65,                    !- Floor Area per Person {m2/person}
     0.3,                     !- Fraction Radiant
     0.7,                     !- Sensible Heat Fraction
     ActSchd103;              !- Activity Level Schedule Name
 
   Lights,
     Auditoriums,             !- Name
-    Auditoriums,             !- Zone or ZoneList Name
+    Auditoriums,             !- Zone or ZoneList or Space or SpaceList Name
     LIT-SCHED-BldgAvg,       !- Schedule Name
     Watts/Area,              !- Design Level Calculation Method
     ,                        !- Lighting Level {W}
-    15.15,                   !- Watts per Zone Floor Area {W/m2}
+    15.15,                   !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0,                       !- Return Air Fraction
     0.42,                    !- Fraction Radiant
@@ -52,11 +49,11 @@
 
   ElectricEquipment,
     Auditoriums,             !- Name
-    Auditoriums,             !- Zone or ZoneList Name
+    Auditoriums,             !- Zone or ZoneList or Space or SpaceList Name
     EQP-SCHED-BldgAvg,       !- Schedule Name
     Watts/Area,              !- Design Level Calculation Method
     ,                        !- Design Level {W}
-    10.77,                   !- Watts per Zone Floor Area {W/m2}
+    10.77,                   !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0,                       !- Fraction Latent
     0.3,                     !- Fraction Radiant
@@ -64,12 +61,12 @@
 
   HotWaterEquipment,
     Auditoriums,             !- Name
-    Auditoriums,             !- Zone or ZoneList Name
+    Auditoriums,             !- Zone or ZoneList or Space or SpaceList Name
     DHW-SCHED-BldgAvg,       !- Schedule Name
     Watts/Person,            !- Design Level Calculation Method
     ,                        !- Design Level {W}
-    ,                        !- Power per Zone Floor Area {W/m2}
-    17.6,                    !- Power per Person {W/Person}
+    ,                        !- Power per Floor Area {W/m2}
+    17.6,                    !- Power per Person {W/person}
     0.2,                     !- Fraction Latent
     0.1,                     !- Fraction Radiant
     0.5,                     !- Fraction Lost
@@ -90,23 +87,23 @@
 
   People,
     Classroom Building,      !- Name
-    Classroom Building,      !- Zone or ZoneList Name
+    Classroom Building,      !- Zone or ZoneList or Space or SpaceList Name
     OCC-SCHED-BldgAvg,       !- Number of People Schedule Name
     Area/Person,             !- Number of People Calculation Method
     ,                        !- Number of People
-    ,                        !- People per Zone Floor Area {person/m2}
-    2.32,                    !- Zone Floor Area per Person {m2/person}
+    ,                        !- People per Floor Area {person/m2}
+    2.32,                    !- Floor Area per Person {m2/person}
     0.3,                     !- Fraction Radiant
     0.59,                    !- Sensible Heat Fraction
     ActSchd122;              !- Activity Level Schedule Name
 
   Lights,
     Classroom Building,      !- Name
-    Classroom Building,      !- Zone or ZoneList Name
+    Classroom Building,      !- Zone or ZoneList or Space or SpaceList Name
     LIT-SCHED-BldgAvg,       !- Schedule Name
     Watts/Area,              !- Design Level Calculation Method
     ,                        !- Lighting Level {W}
-    11.84,                   !- Watts per Zone Floor Area {W/m2}
+    11.84,                   !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0,                       !- Return Air Fraction
     0.42,                    !- Fraction Radiant
@@ -116,11 +113,11 @@
 
   ElectricEquipment,
     Classroom Building,      !- Name
-    Classroom Building,      !- Zone or ZoneList Name
+    Classroom Building,      !- Zone or ZoneList or Space or SpaceList Name
     EQP-SCHED-BldgAvg,       !- Schedule Name
     Watts/Area,              !- Design Level Calculation Method
     ,                        !- Design Level {W}
-    10.77,                   !- Watts per Zone Floor Area {W/m2}
+    10.77,                   !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0,                       !- Fraction Latent
     0.3,                     !- Fraction Radiant
@@ -128,12 +125,12 @@
 
   HotWaterEquipment,
     Classroom Building,      !- Name
-    Classroom Building,      !- Zone or ZoneList Name
+    Classroom Building,      !- Zone or ZoneList or Space or SpaceList Name
     DHW-SCHED-BldgAvg,       !- Schedule Name
     Watts/Person,            !- Design Level Calculation Method
     ,                        !- Design Level {W}
-    ,                        !- Power per Zone Floor Area {W/m2}
-    31.6,                    !- Power per Person {W/Person}
+    ,                        !- Power per Floor Area {W/m2}
+    31.6,                    !- Power per Person {W/person}
     0.2,                     !- Fraction Latent
     0.1,                     !- Fraction Radiant
     0.5,                     !- Fraction Lost
@@ -154,23 +151,23 @@
 
   People,
     Commercial and Industrial Building,  !- Name
-    Commercial and Industrial Building,  !- Zone or ZoneList Name
+    Commercial and Industrial Building,  !- Zone or ZoneList or Space or SpaceList Name
     OCC-SCHED-BldgAvg,       !- Number of People Schedule Name
     Area/Person,             !- Number of People Calculation Method
     ,                        !- Number of People
-    ,                        !- People per Zone Floor Area {person/m2}
-    18.58,                   !- Zone Floor Area per Person {m2/person}
+    ,                        !- People per Floor Area {person/m2}
+    18.58,                   !- Floor Area per Person {m2/person}
     0.3,                     !- Fraction Radiant
     0.40,                    !- Sensible Heat Fraction
     ActSchd197;              !- Activity Level Schedule Name
 
   Lights,
     Commercial and Industrial Building,  !- Name
-    Commercial and Industrial Building,  !- Zone or ZoneList Name
+    Commercial and Industrial Building,  !- Zone or ZoneList or Space or SpaceList Name
     LIT-SCHED-BldgAvg,       !- Schedule Name
     Watts/Area,              !- Design Level Calculation Method
     ,                        !- Lighting Level {W}
-    6.46,                    !- Watts per Zone Floor Area {W/m2}
+    6.46,                    !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0,                       !- Return Air Fraction
     0.42,                    !- Fraction Radiant
@@ -180,11 +177,11 @@
 
   ElectricEquipment,
     Commercial and Industrial Building,  !- Name
-    Commercial and Industrial Building,  !- Zone or ZoneList Name
+    Commercial and Industrial Building,  !- Zone or ZoneList or Space or SpaceList Name
     EQP-SCHED-BldgAvg,       !- Schedule Name
     Watts/Area,              !- Design Level Calculation Method
     ,                        !- Design Level {W}
-    4.63,                    !- Watts per Zone Floor Area {W/m2}
+    4.63,                    !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0,                       !- Fraction Latent
     0.3,                     !- Fraction Radiant
@@ -192,12 +189,12 @@
 
   HotWaterEquipment,
     Commercial and Industrial Building,  !- Name
-    Commercial and Industrial Building,  !- Zone or ZoneList Name
+    Commercial and Industrial Building,  !- Zone or ZoneList or Space or SpaceList Name
     DHW-SCHED-BldgAvg,       !- Schedule Name
     Watts/Person,            !- Design Level Calculation Method
     ,                        !- Design Level {W}
-    ,                        !- Power per Zone Floor Area {W/m2}
-    31.6,                    !- Power per Person {W/Person}
+    ,                        !- Power per Floor Area {W/m2}
+    31.6,                    !- Power per Person {W/person}
     0.2,                     !- Fraction Latent
     0.1,                     !- Fraction Radiant
     0.5,                     !- Fraction Lost
@@ -218,23 +215,23 @@
 
   People,
     Convention Centers,      !- Name
-    Convention Centers,      !- Zone or ZoneList Name
+    Convention Centers,      !- Zone or ZoneList or Space or SpaceList Name
     OCC-SCHED-BldgAvg,       !- Number of People Schedule Name
     Area/Person,             !- Number of People Calculation Method
     ,                        !- Number of People
-    ,                        !- People per Zone Floor Area {person/m2}
-    0.68,                    !- Zone Floor Area per Person {m2/person}
+    ,                        !- People per Floor Area {person/m2}
+    0.68,                    !- Floor Area per Person {m2/person}
     0.3,                     !- Fraction Radiant
     0.69,                    !- Sensible Heat Fraction
     ActSchd105;              !- Activity Level Schedule Name
 
   Lights,
     Convention Centers,      !- Name
-    Convention Centers,      !- Zone or ZoneList Name
+    Convention Centers,      !- Zone or ZoneList or Space or SpaceList Name
     LIT-SCHED-BldgAvg,       !- Schedule Name
     Watts/Area,              !- Design Level Calculation Method
     ,                        !- Lighting Level {W}
-    12.92,                   !- Watts per Zone Floor Area {W/m2}
+    12.92,                   !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0,                       !- Return Air Fraction
     0.42,                    !- Fraction Radiant
@@ -244,11 +241,11 @@
 
   ElectricEquipment,
     Convention Centers,      !- Name
-    Convention Centers,      !- Zone or ZoneList Name
+    Convention Centers,      !- Zone or ZoneList or Space or SpaceList Name
     EQP-SCHED-BldgAvg,       !- Schedule Name
     Watts/Area,              !- Design Level Calculation Method
     ,                        !- Design Level {W}
-    10.33,                   !- Watts per Zone Floor Area {W/m2}
+    10.33,                   !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0,                       !- Fraction Latent
     0.3,                     !- Fraction Radiant
@@ -256,12 +253,12 @@
 
   HotWaterEquipment,
     Convention Centers,      !- Name
-    Convention Centers,      !- Zone or ZoneList Name
+    Convention Centers,      !- Zone or ZoneList or Space or SpaceList Name
     DHW-SCHED-BldgAvg,       !- Schedule Name
     Watts/Person,            !- Design Level Calculation Method
     ,                        !- Design Level {W}
-    ,                        !- Power per Zone Floor Area {W/m2}
-    16.7,                    !- Power per Person {W/Person}
+    ,                        !- Power per Floor Area {W/m2}
+    16.7,                    !- Power per Person {W/person}
     0.2,                     !- Fraction Latent
     0.1,                     !- Fraction Radiant
     0.5,                     !- Fraction Lost
@@ -282,23 +279,23 @@
 
   People,
     Financial Institutions,  !- Name
-    Financial Institutions,  !- Zone or ZoneList Name
+    Financial Institutions,  !- Zone or ZoneList or Space or SpaceList Name
     OCC-SCHED-BldgAvg,       !- Number of People Schedule Name
     Area/Person,             !- Number of People Calculation Method
     ,                        !- Number of People
-    ,                        !- People per Zone Floor Area {person/m2}
-    9.29,                    !- Zone Floor Area per Person {m2/person}
+    ,                        !- People per Floor Area {person/m2}
+    9.29,                    !- Floor Area per Person {m2/person}
     0.3,                     !- Fraction Radiant
     0.50,                    !- Sensible Heat Fraction
     ActSchd146;              !- Activity Level Schedule Name
 
   Lights,
     Financial Institutions,  !- Name
-    Financial Institutions,  !- Zone or ZoneList Name
+    Financial Institutions,  !- Zone or ZoneList or Space or SpaceList Name
     LIT-SCHED-BldgAvg,       !- Schedule Name
     Watts/Area,              !- Design Level Calculation Method
     ,                        !- Lighting Level {W}
-    11.84,                   !- Watts per Zone Floor Area {W/m2}
+    11.84,                   !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0,                       !- Return Air Fraction
     0.42,                    !- Fraction Radiant
@@ -308,11 +305,11 @@
 
   ElectricEquipment,
     Financial Institutions,  !- Name
-    Financial Institutions,  !- Zone or ZoneList Name
+    Financial Institutions,  !- Zone or ZoneList or Space or SpaceList Name
     EQP-SCHED-BldgAvg,       !- Schedule Name
     Watts/Area,              !- Design Level Calculation Method
     ,                        !- Design Level {W}
-    16.15,                   !- Watts per Zone Floor Area {W/m2}
+    16.15,                   !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0,                       !- Fraction Latent
     0.3,                     !- Fraction Radiant
@@ -320,12 +317,12 @@
 
   HotWaterEquipment,
     Financial Institutions,  !- Name
-    Financial Institutions,  !- Zone or ZoneList Name
+    Financial Institutions,  !- Zone or ZoneList or Space or SpaceList Name
     DHW-SCHED-BldgAvg,       !- Schedule Name
     Watts/Person,            !- Design Level Calculation Method
     ,                        !- Design Level {W}
-    ,                        !- Power per Zone Floor Area {W/m2}
-    35.2,                    !- Power per Person {W/Person}
+    ,                        !- Power per Floor Area {W/m2}
+    35.2,                    !- Power per Person {W/person}
     0.2,                     !- Fraction Latent
     0.1,                     !- Fraction Radiant
     0.5,                     !- Fraction Lost
@@ -346,23 +343,23 @@
 
   People,
     General Commercial and Industrial Work Buildings,  !- Name
-    General Commercial and Industrial Work Buildings,  !- Zone or ZoneList Name
+    General Commercial and Industrial Work Buildings,  !- Zone or ZoneList or Space or SpaceList Name
     OCC-SCHED-BldgAvg,       !- Number of People Schedule Name
     Area/Person,             !- Number of People Calculation Method
     ,                        !- Number of People
-    ,                        !- People per Zone Floor Area {person/m2}
-    13.27,                   !- Zone Floor Area per Person {m2/person}
+    ,                        !- People per Floor Area {person/m2}
+    13.27,                   !- Floor Area per Person {m2/person}
     0.3,                     !- Fraction Radiant
     0.38,                    !- Sensible Heat Fraction
     ActSchd293;              !- Activity Level Schedule Name
 
   Lights,
     General Commercial and Industrial Work Buildings,  !- Name
-    General Commercial and Industrial Work Buildings,  !- Zone or ZoneList Name
+    General Commercial and Industrial Work Buildings,  !- Zone or ZoneList or Space or SpaceList Name
     LIT-SCHED-BldgAvg,       !- Schedule Name
     Watts/Area,              !- Design Level Calculation Method
     ,                        !- Lighting Level {W}
-    10.77,                   !- Watts per Zone Floor Area {W/m2}
+    10.77,                   !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0,                       !- Return Air Fraction
     0.42,                    !- Fraction Radiant
@@ -372,11 +369,11 @@
 
   ElectricEquipment,
     General Commercial and Industrial Work Buildings,  !- Name
-    General Commercial and Industrial Work Buildings,  !- Zone or ZoneList Name
+    General Commercial and Industrial Work Buildings,  !- Zone or ZoneList or Space or SpaceList Name
     EQP-SCHED-BldgAvg,       !- Schedule Name
     Watts/Area,              !- Design Level Calculation Method
     ,                        !- Design Level {W}
-    10.77,                   !- Watts per Zone Floor Area {W/m2}
+    10.77,                   !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0,                       !- Fraction Latent
     0.3,                     !- Fraction Radiant
@@ -384,12 +381,12 @@
 
   HotWaterEquipment,
     General Commercial and Industrial Work Buildings,  !- Name
-    General Commercial and Industrial Work Buildings,  !- Zone or ZoneList Name
+    General Commercial and Industrial Work Buildings,  !- Zone or ZoneList or Space or SpaceList Name
     DHW-SCHED-BldgAvg,       !- Schedule Name
     Watts/Person,            !- Design Level Calculation Method
     ,                        !- Design Level {W}
-    ,                        !- Power per Zone Floor Area {W/m2}
-    35.2,                    !- Power per Person {W/Person}
+    ,                        !- Power per Floor Area {W/m2}
+    35.2,                    !- Power per Person {W/person}
     0.2,                     !- Fraction Latent
     0.1,                     !- Fraction Radiant
     0.5,                     !- Fraction Lost
@@ -410,23 +407,23 @@
 
   People,
     Grocery Stores,          !- Name
-    Grocery Stores,          !- Zone or ZoneList Name
+    Grocery Stores,          !- Zone or ZoneList or Space or SpaceList Name
     OCC-SCHED-BldgAvg,       !- Number of People Schedule Name
     Area/Person,             !- Number of People Calculation Method
     ,                        !- Number of People
-    ,                        !- People per Zone Floor Area {person/m2}
-    3.20,                    !- Zone Floor Area per Person {m2/person}
+    ,                        !- People per Floor Area {person/m2}
+    3.20,                    !- Floor Area per Person {m2/person}
     0.3,                     !- Fraction Radiant
     0.53,                    !- Sensible Heat Fraction
     ActSchd140;              !- Activity Level Schedule Name
 
   Lights,
     Grocery Stores,          !- Name
-    Grocery Stores,          !- Zone or ZoneList Name
+    Grocery Stores,          !- Zone or ZoneList or Space or SpaceList Name
     LIT-SCHED-BldgAvg,       !- Schedule Name
     Watts/Area,              !- Design Level Calculation Method
     ,                        !- Lighting Level {W}
-    16.15,                   !- Watts per Zone Floor Area {W/m2}
+    16.15,                   !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0,                       !- Return Air Fraction
     0.42,                    !- Fraction Radiant
@@ -436,11 +433,11 @@
 
   ElectricEquipment,
     Grocery Stores,          !- Name
-    Grocery Stores,          !- Zone or ZoneList Name
+    Grocery Stores,          !- Zone or ZoneList or Space or SpaceList Name
     EQP-SCHED-BldgAvg,       !- Schedule Name
     Watts/Area,              !- Design Level Calculation Method
     ,                        !- Design Level {W}
-    9.80,                    !- Watts per Zone Floor Area {W/m2}
+    9.80,                    !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0,                       !- Fraction Latent
     0.3,                     !- Fraction Radiant
@@ -448,12 +445,12 @@
 
   HotWaterEquipment,
     Grocery Stores,          !- Name
-    Grocery Stores,          !- Zone or ZoneList Name
+    Grocery Stores,          !- Zone or ZoneList or Space or SpaceList Name
     DHW-SCHED-BldgAvg,       !- Schedule Name
     Watts/Person,            !- Design Level Calculation Method
     ,                        !- Design Level {W}
-    ,                        !- Power per Zone Floor Area {W/m2}
-    33.1,                    !- Power per Person {W/Person}
+    ,                        !- Power per Floor Area {W/m2}
+    33.1,                    !- Power per Person {W/person}
     0.2,                     !- Fraction Latent
     0.1,                     !- Fraction Radiant
     0.5,                     !- Fraction Lost
@@ -474,23 +471,23 @@
 
   People,
     Library,                 !- Name
-    Library,                 !- Zone or ZoneList Name
+    Library,                 !- Zone or ZoneList or Space or SpaceList Name
     OCC-SCHED-BldgAvg,       !- Number of People Schedule Name
     Area/Person,             !- Number of People Calculation Method
     ,                        !- Number of People
-    ,                        !- People per Zone Floor Area {person/m2}
-    9.29,                    !- Zone Floor Area per Person {m2/person}
+    ,                        !- People per Floor Area {person/m2}
+    9.29,                    !- Floor Area per Person {m2/person}
     0.3,                     !- Fraction Radiant
     0.50,                    !- Sensible Heat Fraction
     ActSchd146;              !- Activity Level Schedule Name
 
   Lights,
     Library,                 !- Name
-    Library,                 !- Zone or ZoneList Name
+    Library,                 !- Zone or ZoneList or Space or SpaceList Name
     LIT-SCHED-BldgAvg,       !- Schedule Name
     Watts/Area,              !- Design Level Calculation Method
     ,                        !- Lighting Level {W}
-    13.99,                   !- Watts per Zone Floor Area {W/m2}
+    13.99,                   !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0,                       !- Return Air Fraction
     0.42,                    !- Fraction Radiant
@@ -500,11 +497,11 @@
 
   ElectricEquipment,
     Library,                 !- Name
-    Library,                 !- Zone or ZoneList Name
+    Library,                 !- Zone or ZoneList or Space or SpaceList Name
     EQP-SCHED-BldgAvg,       !- Schedule Name
     Watts/Area,              !- Design Level Calculation Method
     ,                        !- Design Level {W}
-    16.15,                   !- Watts per Zone Floor Area {W/m2}
+    16.15,                   !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0,                       !- Fraction Latent
     0.3,                     !- Fraction Radiant
@@ -512,12 +509,12 @@
 
   HotWaterEquipment,
     Library,                 !- Name
-    Library,                 !- Zone or ZoneList Name
+    Library,                 !- Zone or ZoneList or Space or SpaceList Name
     DHW-SCHED-BldgAvg,       !- Schedule Name
     Watts/Person,            !- Design Level Calculation Method
     ,                        !- Design Level {W}
-    ,                        !- Power per Zone Floor Area {W/m2}
-    35.2,                    !- Power per Person {W/Person}
+    ,                        !- Power per Floor Area {W/m2}
+    35.2,                    !- Power per Person {W/person}
     0.2,                     !- Fraction Latent
     0.1,                     !- Fraction Radiant
     0.5,                     !- Fraction Lost
@@ -538,23 +535,23 @@
 
   People,
     Medical Buildings and Clinics,  !- Name
-    Medical Buildings and Clinics,  !- Zone or ZoneList Name
+    Medical Buildings and Clinics,  !- Zone or ZoneList or Space or SpaceList Name
     OCC-SCHED-BldgAvg,       !- Number of People Schedule Name
     Area/Person,             !- Number of People Calculation Method
     ,                        !- Number of People
-    ,                        !- People per Zone Floor Area {person/m2}
-    9.29,                    !- Zone Floor Area per Person {m2/person}
+    ,                        !- People per Floor Area {person/m2}
+    9.29,                    !- Floor Area per Person {m2/person}
     0.3,                     !- Fraction Radiant
     0.54,                    !- Sensible Heat Fraction
     ActSchd136;              !- Activity Level Schedule Name
 
   Lights,
     Medical Buildings and Clinics,  !- Name
-    Medical Buildings and Clinics,  !- Zone or ZoneList Name
+    Medical Buildings and Clinics,  !- Zone or ZoneList or Space or SpaceList Name
     LIT-SCHED-BldgAvg,       !- Schedule Name
     Watts/Area,              !- Design Level Calculation Method
     ,                        !- Lighting Level {W}
-    11.84,                   !- Watts per Zone Floor Area {W/m2}
+    11.84,                   !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0,                       !- Return Air Fraction
     0.42,                    !- Fraction Radiant
@@ -564,11 +561,11 @@
 
   ElectricEquipment,
     Medical Buildings and Clinics,  !- Name
-    Medical Buildings and Clinics,  !- Zone or ZoneList Name
+    Medical Buildings and Clinics,  !- Zone or ZoneList or Space or SpaceList Name
     EQP-SCHED-BldgAvg,       !- Schedule Name
     Watts/Area,              !- Design Level Calculation Method
     ,                        !- Design Level {W}
-    12.7,                    !- Watts per Zone Floor Area {W/m2}
+    12.7,                    !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0,                       !- Fraction Latent
     0.3,                     !- Fraction Radiant
@@ -576,12 +573,12 @@
 
   HotWaterEquipment,
     Medical Buildings and Clinics,  !- Name
-    Medical Buildings and Clinics,  !- Zone or ZoneList Name
+    Medical Buildings and Clinics,  !- Zone or ZoneList or Space or SpaceList Name
     DHW-SCHED-BldgAvg,       !- Schedule Name
     Watts/Person,            !- Design Level Calculation Method
     ,                        !- Design Level {W}
-    ,                        !- Power per Zone Floor Area {W/m2}
-    32.2,                    !- Power per Person {W/Person}
+    ,                        !- Power per Floor Area {W/m2}
+    32.2,                    !- Power per Person {W/person}
     0.2,                     !- Fraction Latent
     0.1,                     !- Fraction Radiant
     0.5,                     !- Fraction Lost
@@ -602,23 +599,23 @@
 
   People,
     Office Buildings,        !- Name
-    Office Buildings,        !- Zone or ZoneList Name
+    Office Buildings,        !- Zone or ZoneList or Space or SpaceList Name
     OCC-SCHED-BldgAvg,       !- Number of People Schedule Name
     Area/Person,             !- Number of People Calculation Method
     ,                        !- Number of People
-    ,                        !- People per Zone Floor Area {person/m2}
-    9.29,                    !- Zone Floor Area per Person {m2/person}
+    ,                        !- People per Floor Area {person/m2}
+    9.29,                    !- Floor Area per Person {m2/person}
     0.3,                     !- Fraction Radiant
     0.55,                    !- Sensible Heat Fraction
     ActSchd134;              !- Activity Level Schedule Name
 
   Lights,
     Office Buildings,        !- Name
-    Office Buildings,        !- Zone or ZoneList Name
+    Office Buildings,        !- Zone or ZoneList or Space or SpaceList Name
     LIT-SCHED-BldgAvg,       !- Schedule Name
     Watts/Area,              !- Design Level Calculation Method
     ,                        !- Lighting Level {W}
-    9.15,                    !- Watts per Zone Floor Area {W/m2}
+    9.15,                    !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0,                       !- Return Air Fraction
     0.42,                    !- Fraction Radiant
@@ -628,11 +625,11 @@
 
   ElectricEquipment,
     Office Buildings,        !- Name
-    Office Buildings,        !- Zone or ZoneList Name
+    Office Buildings,        !- Zone or ZoneList or Space or SpaceList Name
     EQP-SCHED-BldgAvg,       !- Schedule Name
     Watts/Area,              !- Design Level Calculation Method
     ,                        !- Design Level {W}
-    14.43,                   !- Watts per Zone Floor Area {W/m2}
+    14.43,                   !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0,                       !- Fraction Latent
     0.3,                     !- Fraction Radiant
@@ -640,12 +637,12 @@
 
   HotWaterEquipment,
     Office Buildings,        !- Name
-    Office Buildings,        !- Zone or ZoneList Name
+    Office Buildings,        !- Zone or ZoneList or Space or SpaceList Name
     DHW-SCHED-BldgAvg,       !- Schedule Name
     Watts/Person,            !- Design Level Calculation Method
     ,                        !- Design Level {W}
-    ,                        !- Power per Zone Floor Area {W/m2}
-    31.1,                    !- Power per Person {W/Person}
+    ,                        !- Power per Floor Area {W/m2}
+    31.1,                    !- Power per Person {W/person}
     0.2,                     !- Fraction Latent
     0.1,                     !- Fraction Radiant
     0.5,                     !- Fraction Lost
@@ -666,23 +663,23 @@
 
   People,
     Religious Facilities,    !- Name
-    Religious Facilities,    !- Zone or ZoneList Name
+    Religious Facilities,    !- Zone or ZoneList or Space or SpaceList Name
     OCC-SCHED-BldgAvg,       !- Number of People Schedule Name
     Area/Person,             !- Number of People Calculation Method
     ,                        !- Number of People
-    ,                        !- People per Zone Floor Area {person/m2}
-    0.68,                    !- Zone Floor Area per Person {m2/person}
+    ,                        !- People per Floor Area {person/m2}
+    0.68,                    !- Floor Area per Person {m2/person}
     0.3,                     !- Fraction Radiant
     0.69,                    !- Sensible Heat Fraction
     ActSchd105;              !- Activity Level Schedule Name
 
   Lights,
     Religious Facilities,    !- Name
-    Religious Facilities,    !- Zone or ZoneList Name
+    Religious Facilities,    !- Zone or ZoneList or Space or SpaceList Name
     LIT-SCHED-BldgAvg,       !- Schedule Name
     Watts/Area,              !- Design Level Calculation Method
     ,                        !- Lighting Level {W}
-    17.22,                   !- Watts per Zone Floor Area {W/m2}
+    17.22,                   !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0,                       !- Return Air Fraction
     0.42,                    !- Fraction Radiant
@@ -692,11 +689,11 @@
 
   ElectricEquipment,
     Religious Facilities,    !- Name
-    Religious Facilities,    !- Zone or ZoneList Name
+    Religious Facilities,    !- Zone or ZoneList or Space or SpaceList Name
     EQP-SCHED-BldgAvg,       !- Schedule Name
     Watts/Area,              !- Design Level Calculation Method
     ,                        !- Design Level {W}
-    10.33,                   !- Watts per Zone Floor Area {W/m2}
+    10.33,                   !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0,                       !- Fraction Latent
     0.3,                     !- Fraction Radiant
@@ -704,12 +701,12 @@
 
   HotWaterEquipment,
     Religious Facilities,    !- Name
-    Religious Facilities,    !- Zone or ZoneList Name
+    Religious Facilities,    !- Zone or ZoneList or Space or SpaceList Name
     DHW-SCHED-BldgAvg,       !- Schedule Name
     Watts/Person,            !- Design Level Calculation Method
     ,                        !- Design Level {W}
-    ,                        !- Power per Zone Floor Area {W/m2}
-    16.7,                    !- Power per Person {W/Person}
+    ,                        !- Power per Floor Area {W/m2}
+    16.7,                    !- Power per Person {W/person}
     0.2,                     !- Fraction Latent
     0.1,                     !- Fraction Radiant
     0.5,                     !- Fraction Lost
@@ -730,23 +727,23 @@
 
   People,
     Restaurants,             !- Name
-    Restaurants,             !- Zone or ZoneList Name
+    Restaurants,             !- Zone or ZoneList or Space or SpaceList Name
     OCC-SCHED-BldgAvg,       !- Number of People Schedule Name
     Area/Person,             !- Number of People Calculation Method
     ,                        !- Number of People
-    ,                        !- People per Zone Floor Area {person/m2}
-    2.06,                    !- Zone Floor Area per Person {m2/person}
+    ,                        !- People per Floor Area {person/m2}
+    2.06,                    !- Floor Area per Person {m2/person}
     0.3,                     !- Fraction Radiant
     0.45,                    !- Sensible Heat Fraction
     ActSchd178;              !- Activity Level Schedule Name
 
   Lights,
     Restaurants,             !- Name
-    Restaurants,             !- Zone or ZoneList Name
+    Restaurants,             !- Zone or ZoneList or Space or SpaceList Name
     LIT-SCHED-BldgAvg,       !- Schedule Name
     Watts/Area,              !- Design Level Calculation Method
     ,                        !- Lighting Level {W}
-    12.92,                   !- Watts per Zone Floor Area {W/m2}
+    12.92,                   !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0,                       !- Return Air Fraction
     0.42,                    !- Fraction Radiant
@@ -756,11 +753,11 @@
 
   ElectricEquipment,
     Restaurants,             !- Name
-    Restaurants,             !- Zone or ZoneList Name
+    Restaurants,             !- Zone or ZoneList or Space or SpaceList Name
     EQP-SCHED-BldgAvg,       !- Schedule Name
     Watts/Area,              !- Design Level Calculation Method
     ,                        !- Design Level {W}
-    8.50,                    !- Watts per Zone Floor Area {W/m2}
+    8.50,                    !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0,                       !- Fraction Latent
     0.3,                     !- Fraction Radiant
@@ -768,12 +765,12 @@
 
   HotWaterEquipment,
     Restaurants,             !- Name
-    Restaurants,             !- Zone or ZoneList Name
+    Restaurants,             !- Zone or ZoneList or Space or SpaceList Name
     DHW-SCHED-BldgAvg,       !- Schedule Name
     Watts/Person,            !- Design Level Calculation Method
     ,                        !- Design Level {W}
-    ,                        !- Power per Zone Floor Area {W/m2}
-    107.2,                   !- Power per Person {W/Person}
+    ,                        !- Power per Floor Area {W/m2}
+    107.2,                   !- Power per Person {W/person}
     0.2,                     !- Fraction Latent
     0.1,                     !- Fraction Radiant
     0.5,                     !- Fraction Lost
@@ -794,23 +791,23 @@
 
   People,
     Schools,                 !- Name
-    Schools,                 !- Zone or ZoneList Name
+    Schools,                 !- Zone or ZoneList or Space or SpaceList Name
     OCC-SCHED-BldgAvg,       !- Number of People Schedule Name
     Area/Person,             !- Number of People Calculation Method
     ,                        !- Number of People
-    ,                        !- People per Zone Floor Area {person/m2}
-    2.32,                    !- Zone Floor Area per Person {m2/person}
+    ,                        !- People per Floor Area {person/m2}
+    2.32,                    !- Floor Area per Person {m2/person}
     0.3,                     !- Fraction Radiant
     0.59,                    !- Sensible Heat Fraction
     ActSchd122;              !- Activity Level Schedule Name
 
   Lights,
     Schools,                 !- Name
-    Schools,                 !- Zone or ZoneList Name
+    Schools,                 !- Zone or ZoneList or Space or SpaceList Name
     LIT-SCHED-BldgAvg,       !- Schedule Name
     Watts/Area,              !- Design Level Calculation Method
     ,                        !- Lighting Level {W}
-    10.77,                   !- Watts per Zone Floor Area {W/m2}
+    10.77,                   !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0,                       !- Return Air Fraction
     0.42,                    !- Fraction Radiant
@@ -820,11 +817,11 @@
 
   ElectricEquipment,
     Schools,                 !- Name
-    Schools,                 !- Zone or ZoneList Name
+    Schools,                 !- Zone or ZoneList or Space or SpaceList Name
     EQP-SCHED-BldgAvg,       !- Schedule Name
     Watts/Area,              !- Design Level Calculation Method
     ,                        !- Design Level {W}
-    10.77,                   !- Watts per Zone Floor Area {W/m2}
+    10.77,                   !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0,                       !- Fraction Latent
     0.3,                     !- Fraction Radiant
@@ -832,12 +829,12 @@
 
   HotWaterEquipment,
     Schools,                 !- Name
-    Schools,                 !- Zone or ZoneList Name
+    Schools,                 !- Zone or ZoneList or Space or SpaceList Name
     DHW-SCHED-BldgAvg,       !- Schedule Name
     Watts/Person,            !- Design Level Calculation Method
     ,                        !- Design Level {W}
-    ,                        !- Power per Zone Floor Area {W/m2}
-    31.6,                    !- Power per Person {W/Person}
+    ,                        !- Power per Floor Area {W/m2}
+    31.6,                    !- Power per Person {W/person}
     0.2,                     !- Fraction Latent
     0.1,                     !- Fraction Radiant
     0.5,                     !- Fraction Lost
@@ -858,23 +855,23 @@
 
   People,
     Theaters,                !- Name
-    Theaters,                !- Zone or ZoneList Name
+    Theaters,                !- Zone or ZoneList or Space or SpaceList Name
     OCC-SCHED-BldgAvg,       !- Number of People Schedule Name
     Area/Person,             !- Number of People Calculation Method
     ,                        !- Number of People
-    ,                        !- People per Zone Floor Area {person/m2}
-    0.71,                    !- Zone Floor Area per Person {m2/person}
+    ,                        !- People per Floor Area {person/m2}
+    0.71,                    !- Floor Area per Person {m2/person}
     0.3,                     !- Fraction Radiant
     0.40,                    !- Sensible Heat Fraction
     ActSchd197;              !- Activity Level Schedule Name
 
   Lights,
     Theaters,                !- Name
-    Theaters,                !- Zone or ZoneList Name
+    Theaters,                !- Zone or ZoneList or Space or SpaceList Name
     LIT-SCHED-BldgAvg,       !- Schedule Name
     Watts/Area,              !- Design Level Calculation Method
     ,                        !- Lighting Level {W}
-    13.99,                   !- Watts per Zone Floor Area {W/m2}
+    13.99,                   !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0,                       !- Return Air Fraction
     0.42,                    !- Fraction Radiant
@@ -884,11 +881,11 @@
 
   ElectricEquipment,
     Theaters,                !- Name
-    Theaters,                !- Zone or ZoneList Name
+    Theaters,                !- Zone or ZoneList or Space or SpaceList Name
     EQP-SCHED-BldgAvg,       !- Schedule Name
     Watts/Area,              !- Design Level Calculation Method
     ,                        !- Design Level {W}
-    5.81,                    !- Watts per Zone Floor Area {W/m2}
+    5.81,                    !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0,                       !- Fraction Latent
     0.3,                     !- Fraction Radiant
@@ -896,12 +893,12 @@
 
   HotWaterEquipment,
     Theaters,                !- Name
-    Theaters,                !- Zone or ZoneList Name
+    Theaters,                !- Zone or ZoneList or Space or SpaceList Name
     DHW-SCHED-BldgAvg,       !- Schedule Name
     Watts/Person,            !- Design Level Calculation Method
     ,                        !- Design Level {W}
-    ,                        !- Power per Zone Floor Area {W/m2}
-    17.6,                    !- Power per Person {W/Person}
+    ,                        !- Power per Floor Area {W/m2}
+    17.6,                    !- Power per Person {W/person}
     0.2,                     !- Fraction Latent
     0.1,                     !- Fraction Radiant
     0.5,                     !- Fraction Lost

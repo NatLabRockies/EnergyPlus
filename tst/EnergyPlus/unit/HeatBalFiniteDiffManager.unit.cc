@@ -1,7 +1,7 @@
-// EnergyPlus, Copyright (c) 1996-2023, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
-// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other
+// National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
 // contributors. All rights reserved.
 //
 // NOTICE: This Software was developed under funding from the U.S. Department of Energy and the
@@ -53,7 +53,10 @@
 // EnergyPlus Headers
 #include <EnergyPlus/Construction.hh>
 #include <EnergyPlus/Data/EnergyPlusData.hh>
+#include <EnergyPlus/DataEnvironment.hh>
 #include <EnergyPlus/DataHeatBalSurface.hh>
+#include <EnergyPlus/DataMoistureBalance.hh>
+#include <EnergyPlus/DataSurfaces.hh>
 #include <EnergyPlus/HeatBalFiniteDiffManager.hh>
 #include <EnergyPlus/HeatBalanceManager.hh>
 #include <EnergyPlus/Material.hh>
@@ -70,15 +73,18 @@ TEST_F(EnergyPlusFixture, HeatBalFiniteDiffManager_CalcNodeHeatFluxTest)
 {
     auto &SurfaceFD = state->dataHeatBalFiniteDiffMgr->SurfaceFD;
     int constexpr numNodes(4);
+    Real64 constexpr allowedTolerance = 0.0001;
     int nodeNum(0);
     SurfaceFD.allocate(1);
     int constexpr SurfNum(1);
-    SurfaceFD(SurfNum).QDreport.allocate(numNodes + 1);
-    SurfaceFD(SurfNum).TDpriortimestep.allocate(numNodes + 1);
-    SurfaceFD(SurfNum).TDT.allocate(numNodes + 1);
-    SurfaceFD(SurfNum).CpDelXRhoS1.allocate(numNodes + 1);
-    SurfaceFD(SurfNum).CpDelXRhoS2.allocate(numNodes + 1);
+    auto &surfFD = SurfaceFD(SurfNum);
+    surfFD.QDreport.allocate(numNodes + 1);
+    surfFD.TDpriortimestep.allocate(numNodes + 1);
+    surfFD.TDT.allocate(numNodes + 1);
+    surfFD.CpDelXRhoS1.allocate(numNodes + 1);
+    surfFD.CpDelXRhoS2.allocate(numNodes + 1);
     state->dataHeatBalSurf->SurfOpaqInsFaceCondFlux.allocate(1);
+    state->dataHeatBalSurf->SurfOpaqOutFaceCondFlux.allocate(1);
     state->dataGlobal->TimeStepZoneSec = 600.0;
 
     Real64 expectedResult1(0.0);
@@ -86,53 +92,71 @@ TEST_F(EnergyPlusFixture, HeatBalFiniteDiffManager_CalcNodeHeatFluxTest)
     Real64 expectedResult3(0.0);
     Real64 expectedResult4(0.0);
     Real64 expectedResult5(0.0);
+    Real64 expectedResultO(1.0);
 
     // Steady-state case
     state->dataHeatBalSurf->SurfOpaqInsFaceCondFlux(SurfNum) = 100.0;
     nodeNum = 1;
-    SurfaceFD(SurfNum).TDpriortimestep(nodeNum) = 20.0;
-    SurfaceFD(SurfNum).TDT(nodeNum) = 20.0;
-    SurfaceFD(SurfNum).CpDelXRhoS1(nodeNum) = 1000.0;
-    SurfaceFD(SurfNum).CpDelXRhoS2(nodeNum) = 2000.0;
+    surfFD.TDpriortimestep(nodeNum) = 20.0;
+    surfFD.TDT(nodeNum) = 20.0;
+    surfFD.CpDelXRhoS1(nodeNum) = 1000.0;
+    surfFD.CpDelXRhoS2(nodeNum) = 2000.0;
     expectedResult1 = state->dataHeatBalSurf->SurfOpaqInsFaceCondFlux(SurfNum);
 
     nodeNum = 2;
-    SurfaceFD(SurfNum).TDpriortimestep(nodeNum) = 22.0;
-    SurfaceFD(SurfNum).TDT(nodeNum) = 22.0;
-    SurfaceFD(SurfNum).CpDelXRhoS1(nodeNum) = 1000.0;
-    SurfaceFD(SurfNum).CpDelXRhoS2(nodeNum) = 2000.0;
+    surfFD.TDpriortimestep(nodeNum) = 22.0;
+    surfFD.TDT(nodeNum) = 22.0;
+    surfFD.CpDelXRhoS1(nodeNum) = 1000.0;
+    surfFD.CpDelXRhoS2(nodeNum) = 2000.0;
     expectedResult2 = state->dataHeatBalSurf->SurfOpaqInsFaceCondFlux(SurfNum);
 
     nodeNum = 3;
-    SurfaceFD(SurfNum).TDpriortimestep(nodeNum) = 23.0;
-    SurfaceFD(SurfNum).TDT(nodeNum) = 23.0;
-    SurfaceFD(SurfNum).CpDelXRhoS1(nodeNum) = 1000.0;
-    SurfaceFD(SurfNum).CpDelXRhoS2(nodeNum) = 2000.0;
+    surfFD.TDpriortimestep(nodeNum) = 23.0;
+    surfFD.TDT(nodeNum) = 23.0;
+    surfFD.CpDelXRhoS1(nodeNum) = 1000.0;
+    surfFD.CpDelXRhoS2(nodeNum) = 2000.0;
     expectedResult3 = state->dataHeatBalSurf->SurfOpaqInsFaceCondFlux(SurfNum);
 
     nodeNum = 4;
-    SurfaceFD(SurfNum).TDpriortimestep(nodeNum) = 26.0;
-    SurfaceFD(SurfNum).TDT(nodeNum) = 26.0;
-    SurfaceFD(SurfNum).CpDelXRhoS1(nodeNum) = 1000.0;
-    SurfaceFD(SurfNum).CpDelXRhoS2(nodeNum) = 2000.0;
+    surfFD.TDpriortimestep(nodeNum) = 26.0;
+    surfFD.TDT(nodeNum) = 26.0;
+    surfFD.CpDelXRhoS1(nodeNum) = 1000.0;
+    surfFD.CpDelXRhoS2(nodeNum) = 2000.0;
     expectedResult4 = state->dataHeatBalSurf->SurfOpaqInsFaceCondFlux(SurfNum);
 
     nodeNum = 5;
-    SurfaceFD(SurfNum).TDpriortimestep(nodeNum) = 27.0;
-    SurfaceFD(SurfNum).TDT(nodeNum) = 27.0;
-    SurfaceFD(SurfNum).CpDelXRhoS1(nodeNum) = 1000.0;
-    SurfaceFD(SurfNum).CpDelXRhoS2(nodeNum) = 2000.0;
+    surfFD.TDpriortimestep(nodeNum) = 27.0;
+    surfFD.TDT(nodeNum) = 27.0;
+    surfFD.CpDelXRhoS1(nodeNum) = 1000.0;
+    surfFD.CpDelXRhoS2(nodeNum) = 2000.0;
     expectedResult5 = state->dataHeatBalSurf->SurfOpaqInsFaceCondFlux(SurfNum);
 
+    state->dataEnvrn->IsRain = false;
+    state->dataHeatBalSurf->SurfOpaqOutFaceCondFlux(SurfNum) = 77.0;
+    expectedResultO = 77.0;
+
     CalcNodeHeatFlux(*state, SurfNum, numNodes);
-    EXPECT_NEAR(SurfaceFD(SurfNum).QDreport(1), expectedResult1, 0.0001);
-    EXPECT_NEAR(SurfaceFD(SurfNum).QDreport(2), expectedResult2, 0.0001);
-    EXPECT_NEAR(SurfaceFD(SurfNum).QDreport(3), expectedResult3, 0.0001);
-    EXPECT_NEAR(SurfaceFD(SurfNum).QDreport(4), expectedResult4, 0.0001);
-    EXPECT_NEAR(SurfaceFD(SurfNum).QDreport(5), expectedResult5, 0.0001);
+    EXPECT_NEAR(surfFD.QDreport(1), expectedResult1, allowedTolerance);
+    EXPECT_NEAR(surfFD.QDreport(2), expectedResult2, allowedTolerance);
+    EXPECT_NEAR(surfFD.QDreport(3), expectedResult3, allowedTolerance);
+    EXPECT_NEAR(surfFD.QDreport(4), expectedResult4, allowedTolerance);
+    EXPECT_NEAR(surfFD.QDreport(5), expectedResult5, allowedTolerance);
+    EXPECT_NEAR(state->dataHeatBalSurf->SurfOpaqOutFaceCondFlux(SurfNum), expectedResultO, allowedTolerance);
+
+    state->dataEnvrn->IsRain = true;
+    state->dataHeatBalSurf->SurfOpaqOutFaceCondFlux(SurfNum) = 77.0;
+    expectedResultO = -state->dataHeatBalSurf->SurfOpaqInsFaceCondFlux(SurfNum);
+
+    CalcNodeHeatFlux(*state, SurfNum, numNodes);
+    EXPECT_NEAR(surfFD.QDreport(1), expectedResult1, allowedTolerance);
+    EXPECT_NEAR(surfFD.QDreport(2), expectedResult2, allowedTolerance);
+    EXPECT_NEAR(surfFD.QDreport(3), expectedResult3, allowedTolerance);
+    EXPECT_NEAR(surfFD.QDreport(4), expectedResult4, allowedTolerance);
+    EXPECT_NEAR(surfFD.QDreport(5), expectedResult5, allowedTolerance);
+    EXPECT_NEAR(state->dataHeatBalSurf->SurfOpaqOutFaceCondFlux(SurfNum), expectedResultO, allowedTolerance);
 
     // Reset
-    SurfaceFD(SurfNum).QDreport = 0.0;
+    surfFD.QDreport = 0.0;
     expectedResult1 = 0.0;
     expectedResult2 = 0.0;
     expectedResult3 = 0.0;
@@ -144,54 +168,73 @@ TEST_F(EnergyPlusFixture, HeatBalFiniteDiffManager_CalcNodeHeatFluxTest)
     state->dataHeatBalSurf->SurfOpaqInsFaceCondFlux(SurfNum) = -200.0;
 
     nodeNum = 5;
-    SurfaceFD(SurfNum).TDpriortimestep(nodeNum) = 27.5;
-    SurfaceFD(SurfNum).TDT(nodeNum) = 27.0;
-    SurfaceFD(SurfNum).CpDelXRhoS1(nodeNum) = 0.0;
-    SurfaceFD(SurfNum).CpDelXRhoS2(nodeNum) = 0.0;
+    surfFD.TDpriortimestep(nodeNum) = 27.5;
+    surfFD.TDT(nodeNum) = 27.0;
+    surfFD.CpDelXRhoS1(nodeNum) = 0.0;
+    surfFD.CpDelXRhoS2(nodeNum) = 0.0;
     expectedResult5 = state->dataHeatBalSurf->SurfOpaqInsFaceCondFlux(SurfNum);
 
     nodeNum = 4;
-    SurfaceFD(SurfNum).TDpriortimestep(nodeNum) = 26.0;
-    SurfaceFD(SurfNum).TDT(nodeNum) = 26.0;
-    SurfaceFD(SurfNum).CpDelXRhoS1(nodeNum) = 0.0;
-    SurfaceFD(SurfNum).CpDelXRhoS2(nodeNum) = 2000.0;
+    surfFD.TDpriortimestep(nodeNum) = 26.0;
+    surfFD.TDT(nodeNum) = 26.0;
+    surfFD.CpDelXRhoS1(nodeNum) = 0.0;
+    surfFD.CpDelXRhoS2(nodeNum) = 2000.0;
     expectedResult4 = expectedResult5; // r-layer with zero heat capacity, so flux passes through
 
     nodeNum = 3;
-    SurfaceFD(SurfNum).TDpriortimestep(nodeNum) = 23.0;
-    SurfaceFD(SurfNum).TDT(nodeNum) = 23.0;
-    SurfaceFD(SurfNum).CpDelXRhoS1(nodeNum) = 1000.0;
-    SurfaceFD(SurfNum).CpDelXRhoS2(nodeNum) = 2000.0;
+    surfFD.TDpriortimestep(nodeNum) = 23.0;
+    surfFD.TDT(nodeNum) = 23.0;
+    surfFD.CpDelXRhoS1(nodeNum) = 1000.0;
+    surfFD.CpDelXRhoS2(nodeNum) = 2000.0;
     expectedResult3 = expectedResult4; // no change in temperature at nodes 4 and 3, so flux passes through
 
     nodeNum = 2;
-    SurfaceFD(SurfNum).TDpriortimestep(nodeNum) = 22.2;
-    SurfaceFD(SurfNum).TDT(nodeNum) = 22.0;
-    SurfaceFD(SurfNum).CpDelXRhoS1(nodeNum) = 1000.0;
-    SurfaceFD(SurfNum).CpDelXRhoS2(nodeNum) = 2000.0;
-    expectedResult2 = expectedResult3 + (SurfaceFD(SurfNum).TDT(nodeNum) - SurfaceFD(SurfNum).TDpriortimestep(nodeNum)) *
-                                            SurfaceFD(SurfNum).CpDelXRhoS2(nodeNum) / state->dataGlobal->TimeStepZoneSec;
+    surfFD.TDpriortimestep(nodeNum) = 22.2;
+    surfFD.TDT(nodeNum) = 22.0;
+    surfFD.CpDelXRhoS1(nodeNum) = 1000.0;
+    surfFD.CpDelXRhoS2(nodeNum) = 2000.0;
+    expectedResult2 =
+        expectedResult3 + (surfFD.TDT(nodeNum) - surfFD.TDpriortimestep(nodeNum)) * surfFD.CpDelXRhoS2(nodeNum) / state->dataGlobal->TimeStepZoneSec;
 
     nodeNum = 1;
-    SurfaceFD(SurfNum).TDpriortimestep(nodeNum) = 20.1;
-    SurfaceFD(SurfNum).TDT(nodeNum) = 20.0;
-    SurfaceFD(SurfNum).CpDelXRhoS1(nodeNum) = 1000.0;
-    SurfaceFD(SurfNum).CpDelXRhoS2(nodeNum) = 2000.0;
-    expectedResult1 = expectedResult2 + (SurfaceFD(SurfNum).TDT(nodeNum + 1) - SurfaceFD(SurfNum).TDpriortimestep(nodeNum + 1)) *
-                                            SurfaceFD(SurfNum).CpDelXRhoS1(nodeNum + 1) / state->dataGlobal->TimeStepZoneSec;
-    expectedResult1 = expectedResult1 + (SurfaceFD(SurfNum).TDT(nodeNum) - SurfaceFD(SurfNum).TDpriortimestep(nodeNum)) *
-                                            SurfaceFD(SurfNum).CpDelXRhoS2(nodeNum) / state->dataGlobal->TimeStepZoneSec;
+    surfFD.TDpriortimestep(nodeNum) = 20.1;
+    surfFD.TDT(nodeNum) = 20.0;
+    surfFD.CpDelXRhoS1(nodeNum) = 1000.0;
+    surfFD.CpDelXRhoS2(nodeNum) = 2000.0;
+    expectedResult1 = expectedResult2 + (surfFD.TDT(nodeNum + 1) - surfFD.TDpriortimestep(nodeNum + 1)) * surfFD.CpDelXRhoS1(nodeNum + 1) /
+                                            state->dataGlobal->TimeStepZoneSec;
+    expectedResult1 =
+        expectedResult1 + (surfFD.TDT(nodeNum) - surfFD.TDpriortimestep(nodeNum)) * surfFD.CpDelXRhoS2(nodeNum) / state->dataGlobal->TimeStepZoneSec;
+
+    state->dataEnvrn->IsRain = false;
+    state->dataHeatBalSurf->SurfOpaqOutFaceCondFlux(SurfNum) = 123.0;
+    expectedResultO = 123.0;
 
     CalcNodeHeatFlux(*state, SurfNum, numNodes);
-    EXPECT_NEAR(SurfaceFD(SurfNum).QDreport(1), expectedResult1, 0.0001);
-    EXPECT_NEAR(SurfaceFD(SurfNum).QDreport(2), expectedResult2, 0.0001);
-    EXPECT_NEAR(SurfaceFD(SurfNum).QDreport(3), expectedResult3, 0.0001);
-    EXPECT_NEAR(SurfaceFD(SurfNum).QDreport(4), expectedResult4, 0.0001);
-    EXPECT_NEAR(SurfaceFD(SurfNum).QDreport(5), expectedResult5, 0.0001);
+    EXPECT_NEAR(surfFD.QDreport(1), expectedResult1, allowedTolerance);
+    EXPECT_NEAR(surfFD.QDreport(2), expectedResult2, allowedTolerance);
+    EXPECT_NEAR(surfFD.QDreport(3), expectedResult3, allowedTolerance);
+    EXPECT_NEAR(surfFD.QDreport(4), expectedResult4, allowedTolerance);
+    EXPECT_NEAR(surfFD.QDreport(5), expectedResult5, allowedTolerance);
+    EXPECT_NEAR(state->dataHeatBalSurf->SurfOpaqOutFaceCondFlux(SurfNum), expectedResultO, allowedTolerance);
+
+    state->dataEnvrn->IsRain = true;
+    state->dataHeatBalSurf->SurfOpaqOutFaceCondFlux(SurfNum) = 123.0;
+    expectedResultO = -expectedResult1;
+
+    CalcNodeHeatFlux(*state, SurfNum, numNodes);
+    EXPECT_NEAR(surfFD.QDreport(1), expectedResult1, allowedTolerance);
+    EXPECT_NEAR(surfFD.QDreport(2), expectedResult2, allowedTolerance);
+    EXPECT_NEAR(surfFD.QDreport(3), expectedResult3, allowedTolerance);
+    EXPECT_NEAR(surfFD.QDreport(4), expectedResult4, allowedTolerance);
+    EXPECT_NEAR(surfFD.QDreport(5), expectedResult5, allowedTolerance);
+    EXPECT_NEAR(state->dataHeatBalSurf->SurfOpaqOutFaceCondFlux(SurfNum), expectedResultO, allowedTolerance);
 }
 
 TEST_F(EnergyPlusFixture, HeatBalFiniteDiffManager_adjustPropertiesForPhaseChange)
 {
+    auto &s_mat = state->dataMaterial;
+
     // create a single PCM object in the input and process it
     std::string const idf_objects = delimited_string({"  MaterialProperty:PhaseChangeHysteresis,",
                                                       "    PCMNAME,   !- Name",
@@ -218,18 +261,31 @@ TEST_F(EnergyPlusFixture, HeatBalFiniteDiffManager_adjustPropertiesForPhaseChang
     SurfaceFD(surfaceIndex).PhaseChangeTemperatureReverse.allocate(1);
     SurfaceFD(surfaceIndex).PhaseChangeTemperatureReverse(finiteDiffLayerIndex) = 20.0;
     SurfaceFD(surfaceIndex).PhaseChangeState.allocate(1);
-    SurfaceFD(surfaceIndex).PhaseChangeState(finiteDiffLayerIndex) = HysteresisPhaseChange::PhaseChangeStates::LIQUID;
+    SurfaceFD(surfaceIndex).PhaseChangeState(finiteDiffLayerIndex) = Material::Phase::Liquid;
     SurfaceFD(surfaceIndex).PhaseChangeStateOld.allocate(1);
-    SurfaceFD(surfaceIndex).PhaseChangeStateOld(finiteDiffLayerIndex) = HysteresisPhaseChange::PhaseChangeStates::MELTING;
+    SurfaceFD(surfaceIndex).PhaseChangeStateOld(finiteDiffLayerIndex) = Material::Phase::Melting;
+    SurfaceFD(surfaceIndex).PhaseChangeStateRep.allocate(1);
+    SurfaceFD(surfaceIndex).PhaseChangeStateRep(finiteDiffLayerIndex) = Material::phaseInts[(int)Material::Phase::Liquid];
+    SurfaceFD(surfaceIndex).PhaseChangeStateOldRep.allocate(1);
+    SurfaceFD(surfaceIndex).PhaseChangeStateOldRep(finiteDiffLayerIndex) = Material::phaseInts[(int)Material::Phase::Melting];
 
     // create a materials data object and assign the phase change variable based on above IDF processing
-    Material::MaterialProperties material;
-    material.phaseChange = HysteresisPhaseChange::HysteresisPhaseChange::factory(*state, "PCMNAME");
+    auto *mat = new Material::MaterialBase;
+    mat->Name = "PCMNAME";
+    mat->group = Material::Group::Regular;
+    s_mat->materials.push_back(mat);
+    mat->Num = s_mat->materials.isize();
+    s_mat->materialMap.insert_or_assign(mat->Name, mat->Num);
+
+    bool ErrorsFound;
+    Material::GetHysteresisData(*state, ErrorsFound);
+
+    auto *matPC = dynamic_cast<Material::MaterialPhaseChange *>(s_mat->materials(Material::GetMaterialNum(*state, "PCMNAME")));
 
     // create local variables to calculate and call the new worker function
     Real64 newSpecificHeat, newDensity, newThermalConductivity;
     adjustPropertiesForPhaseChange(
-        *state, finiteDiffLayerIndex, surfaceIndex, &material, 20.0, 20.1, newSpecificHeat, newDensity, newThermalConductivity);
+        *state, finiteDiffLayerIndex, surfaceIndex, matPC, 20.0, 20.1, newSpecificHeat, newDensity, newThermalConductivity);
 
     // check the values are correct
     EXPECT_NEAR(10187.3, newSpecificHeat, 0.1);
@@ -240,103 +296,108 @@ TEST_F(EnergyPlusFixture, HeatBalFiniteDiffManager_adjustPropertiesForPhaseChang
     SurfaceFD.deallocate();
 }
 
-TEST_F(EnergyPlusFixture, DISABLED_HeatBalFiniteDiffManager_skipNotUsedConstructionAndAirLayer)
-{
-    bool ErrorsFound(false);
-    // create three construction objects with one object not in use and another object assigned to surfaces, and one object as air wall.
-    std::string const idf_objects = delimited_string({
-        "Material,",
-        "   MAT - CC05 4 HW CONCRETE, !- Name",
-        "   Rough, !- Roughness",
-        "   0.1016, !- Thickness{ m }",
-        "   1.311, !- Conductivity{ W / m - K }",
-        "   2240, !- Density{ kg / m3 }",
-        "   836.800000000001, !- Specific Heat{ J / kg - K }",
-        "   0.9, !- Thermal Absorptance",
-        "   0.85, !- Solar Absorptance",
-        "   0.85;                    !- Visible Absorptance",
-        "Material:AirGap,",
-        "   F05 Ceiling air space resistance, !- Name",
-        "   0.18;                    !- Thermal Resistance{ m2 - K / W }",
-        "Material:NoMass,",
-        "   CP02 CARPET PAD, !- Name",
-        "   Smooth, !- Roughness",
-        "   0.1, !- Thermal Resistance{ m2 - K / W }",
-        "   0.9, !- Thermal Absorptance",
-        "   0.8, !- Solar Absorptance",
-        "   0.8;                     !- Visible Absorptance",
-
-        "Material,",
-        "   F16 Acoustic tile, !- Name",
-        "   MediumSmooth, !- Roughness",
-        "   0.0191, !- Thickness{ m }",
-        "   0.06, !- Conductivity{ W / m - K }",
-        "   368, !- Density{ kg / m3 }",
-        "   590.000000000002, !- Specific Heat{ J / kg - K }",
-        "   0.9, !- Thermal Absorptance",
-        "   0.3, !- Solar Absorptance",
-        "   0.3;                     !- Visible Absorptance",
-
-        "Material,",
-        "   M11 100mm lightweight concrete, !- Name",
-        "   MediumRough, !- Roughness",
-        "   0.1016, !- Thickness{ m }",
-        "   0.53, !- Conductivity{ W / m - K }",
-        "   1280, !- Density{ kg / m3 }",
-        "   840.000000000002, !- Specific Heat{ J / kg - K }",
-        "   0.9, !- Thermal Absorptance",
-        "   0.5, !- Solar Absorptance",
-        "   0.5;                     !- Visible Absorptance",
-
-        "Construction,",
-        "  ExtSlabCarpet 4in ClimateZone 1 - 8, !- Name",
-        "  MAT - CC05 4 HW CONCRETE, !- Outside Layer",
-        "  CP02 CARPET PAD;         !- Layer 2",
-        "Construction,",
-        "   Interior Floor, !- Name",
-        "   F16 Acoustic tile, !- Outside Layer",
-        "   F05 Ceiling air space resistance, !- Layer 2",
-        "   M11 100mm lightweight concrete;  !- Layer 3",
-        "Construction:AirBoundary,",
-        "   Air Wall_ConstructionAirBoundary,  !- Name",
-        "   None,                    !- Air Exchange Method",
-        "   0;                       !- Simple Mixing Air Changes per Hour {1 / hr}",
-        "Output:Constructions,",
-        "Constructions;",
-        "Output:Constructions,",
-        "Materials;",
-    });
-
-    ASSERT_TRUE(process_idf(idf_objects));
-
-    ErrorsFound = false;
-    Material::GetMaterialData(*state, ErrorsFound); // read material data
-    EXPECT_FALSE(ErrorsFound);                      // expect no errors
-
-    ErrorsFound = false;
-    HeatBalanceManager::GetConstructData(*state, ErrorsFound); // read construction data
-    EXPECT_FALSE(ErrorsFound);                                 // expect no errors
-
-    // allocate properties for construction objects when it is used or not for building surfaces in the model
-
-    state->dataConstruction->Construct(1).IsUsed = false;
-    state->dataConstruction->Construct(2).IsUsed = true;
-    state->dataConstruction->Construct(3).IsUsed = true;
-
-    // call the function for initialization of finite difference calculation
-    InitialInitHeatBalFiniteDiff(*state);
-    auto &ConstructFD = state->dataHeatBalFiniteDiffMgr->ConstructFD;
-    // check the values are correct
-    EXPECT_EQ(0, ConstructFD(1).Name.size());
-    EXPECT_EQ(3, ConstructFD(2).Name.size());
-    EXPECT_EQ(0, ConstructFD(3).Name.size());
-    EXPECT_EQ("F16 ACOUSTIC TILE", ConstructFD(2).Name(1));
-    EXPECT_EQ("F05 CEILING AIR SPACE RESISTANCE", ConstructFD(2).Name(2));
-    EXPECT_EQ("M11 100MM LIGHTWEIGHT CONCRETE", ConstructFD(2).Name(3));
-
-    // deallocate
-    ConstructFD.deallocate();
-}
+// I'm not sure how this test was intended to work, there doesn't appear to be anything setting the constructions
+// to finite difference, and there aren't any surfaces.  So it fails when enabled.  Feel free to fix it up and get it running.
+// TEST_F(EnergyPlusFixture, HeatBalFiniteDiffManager_skipNotUsedConstructionAndAirLayer)
+// {
+//     bool ErrorsFound(false);
+//     // create three construction objects with one object not in use and another object assigned to surfaces, and one object as air wall.
+//     std::string const idf_objects = delimited_string({
+//         "Material,",
+//         "   MAT - CC05 4 HW CONCRETE, !- Name",
+//         "   Rough, !- Roughness",
+//         "   0.1016, !- Thickness{ m }",
+//         "   1.311, !- Conductivity{ W / m - K }",
+//         "   2240, !- Density{ kg / m3 }",
+//         "   836.800000000001, !- Specific Heat{ J / kg - K }",
+//         "   0.9, !- Thermal Absorptance",
+//         "   0.85, !- Solar Absorptance",
+//         "   0.85;                    !- Visible Absorptance",
+//         "Material:AirGap,",
+//         "   F05 Ceiling air space resistance, !- Name",
+//         "   0.18;                    !- Thermal Resistance{ m2 - K / W }",
+//         "Material:NoMass,",
+//         "   CP02 CARPET PAD, !- Name",
+//         "   Smooth, !- Roughness",
+//         "   0.1, !- Thermal Resistance{ m2 - K / W }",
+//         "   0.9, !- Thermal Absorptance",
+//         "   0.8, !- Solar Absorptance",
+//         "   0.8;                     !- Visible Absorptance",
+//
+//         "Material,",
+//         "   F16 Acoustic tile, !- Name",
+//         "   MediumSmooth, !- Roughness",
+//         "   0.0191, !- Thickness{ m }",
+//         "   0.06, !- Conductivity{ W / m - K }",
+//         "   368, !- Density{ kg / m3 }",
+//         "   590.000000000002, !- Specific Heat{ J / kg - K }",
+//         "   0.9, !- Thermal Absorptance",
+//         "   0.3, !- Solar Absorptance",
+//         "   0.3;                     !- Visible Absorptance",
+//
+//         "Material,",
+//         "   M11 100mm lightweight concrete, !- Name",
+//         "   MediumRough, !- Roughness",
+//         "   0.1016, !- Thickness{ m }",
+//         "   0.53, !- Conductivity{ W / m - K }",
+//         "   1280, !- Density{ kg / m3 }",
+//         "   840.000000000002, !- Specific Heat{ J / kg - K }",
+//         "   0.9, !- Thermal Absorptance",
+//         "   0.5, !- Solar Absorptance",
+//         "   0.5;                     !- Visible Absorptance",
+//
+//         "Construction,",
+//         "  ExtSlabCarpet 4in ClimateZone 1 - 8, !- Name",
+//         "  MAT - CC05 4 HW CONCRETE, !- Outside Layer",
+//         "  CP02 CARPET PAD;         !- Layer 2",
+//         "Construction,",
+//         "   Interior Floor, !- Name",
+//         "   F16 Acoustic tile, !- Outside Layer",
+//         "   F05 Ceiling air space resistance, !- Layer 2",
+//         "   M11 100mm lightweight concrete;  !- Layer 3",
+//         "Construction:AirBoundary,",
+//         "   Air Wall_ConstructionAirBoundary,  !- Name",
+//         "   None,                    !- Air Exchange Method",
+//         "   0;                       !- Simple Mixing Air Changes per Hour {1 / hr}",
+//         "Output:Constructions,",
+//         "Constructions;",
+//         "Output:Constructions,",
+//         "Materials;",
+//     });
+//
+//     ASSERT_TRUE(process_idf(idf_objects));
+//
+//     state->dataGlobal->TimeStepsInHour = 1;    // must initialize this to get schedules initialized
+//     state->dataGlobal->MinutesInTimeStep = 60; // must initialize this to get schedules initialized
+//
+//     ErrorsFound = false;
+//     Material::GetMaterialData(*state, ErrorsFound); // read material data
+//     EXPECT_FALSE(ErrorsFound);                      // expect no errors
+//
+//     ErrorsFound = false;
+//     HeatBalanceManager::GetConstructData(*state, ErrorsFound); // read construction data
+//     EXPECT_FALSE(ErrorsFound);                                 // expect no errors
+//
+//     // allocate properties for construction objects when it is used or not for building surfaces in the model
+//
+//     state->dataConstruction->Construct(1).IsUsed = false;
+//     state->dataConstruction->Construct(2).IsUsed = true;
+//     state->dataConstruction->Construct(3).IsUsed = true;
+//
+//     // call the function for initialization of finite difference calculation
+//     InitialInitHeatBalFiniteDiff(*state);
+//     auto &ConstructFD = state->dataHeatBalFiniteDiffMgr->ConstructFD;
+//     // check the values are correct
+//     EXPECT_EQ(0, ConstructFD(1).Name.size());
+//     EXPECT_EQ(3, ConstructFD(2).Name.size());
+//     EXPECT_EQ(0, ConstructFD(3).Name.size());
+//     EXPECT_EQ("F16 ACOUSTIC TILE", ConstructFD(2).Name(1));
+//     EXPECT_EQ("F05 CEILING AIR SPACE RESISTANCE", ConstructFD(2).Name(2));
+//     EXPECT_EQ("M11 100MM LIGHTWEIGHT CONCRETE", ConstructFD(2).Name(3));
+//
+//     // deallocate
+//     ConstructFD.deallocate();
+// }
 
 TEST_F(EnergyPlusFixture, HeatBalFiniteDiffManager_findAnySurfacesUsingConstructionAndCondFDTest)
 {
@@ -415,19 +476,20 @@ TEST_F(EnergyPlusFixture, HeatBalFiniteDiffManager_findAnySurfacesUsingConstruct
     state->dataHeatBalSurf->SurfOpaqInsFaceCondFlux.allocate(thisData->TotSurfaces);
     state->dataHeatBalSurf->SurfOpaqOutFaceCondFlux.allocate(thisData->TotSurfaces);
     state->dataGlobal->TimeStepZoneSec = 600.0;
+    state->dataGlobal->TimeStepsInHour = 6;
 
     // call the function for initialization of finite difference calculation
     std::string const error_string = delimited_string({"   ** Severe  ** InitialInitHeatBalFiniteDiff: Found Material that is too thin and/or too "
-                                                       "highly conductive, material name = REG MAT F05 CEILING AIR SPACE RESISTANCE",
+                                                       "highly conductive, material name = Reg Mat F05 Ceiling air space resistance",
                                                        "   **   ~~~   ** High conductivity Material layers are not well supported by Conduction "
-                                                       "Finite Difference, material conductivity = 2.000 [W/m-K]",
-                                                       "   **   ~~~   ** Material thermal diffusivity = 1.626E-003 [m2/s]",
+                                                       "Finite Difference, material conductivity = 2.00000 [W/m-K]",
+                                                       "   **   ~~~   ** Material thermal diffusivity = 0.00162602 [m2/s]",
                                                        "   **   ~~~   ** Material with this thermal diffusivity should have thickness > 1.71080 [m]",
                                                        "   **  Fatal  ** Preceding conditions cause termination.",
                                                        "   ...Summary of Errors that led to program termination:",
                                                        "   ..... Reference severe error count=1",
                                                        "   ..... Last severe error=InitialInitHeatBalFiniteDiff: Found Material that is too thin "
-                                                       "and/or too highly conductive, material name = REG MAT F05 CEILING AIR SPACE RESISTANCE"});
+                                                       "and/or too highly conductive, material name = Reg Mat F05 Ceiling air space resistance"});
     EXPECT_ANY_THROW(InitialInitHeatBalFiniteDiff(*state));
 
     compare_err_stream(error_string, true);
@@ -436,6 +498,1079 @@ TEST_F(EnergyPlusFixture, HeatBalFiniteDiffManager_findAnySurfacesUsingConstruct
     thisData->Surface(2).HeatTransferAlgorithm = DataSurfaces::HeatTransferModel::CTF;
     EXPECT_TRUE(EnergyPlus::HeatBalFiniteDiffManager::findAnySurfacesUsingConstructionAndCondFD(*state, 1));
     EXPECT_FALSE(EnergyPlus::HeatBalFiniteDiffManager::findAnySurfacesUsingConstructionAndCondFD(*state, 2));
+}
+
+TEST_F(EnergyPlusFixture, HeatBalFiniteDiffManager_CheckFDNodeTempLimitsTest)
+{
+    int surfNum;
+    int nodeNum;
+    Real64 nodeTemp;
+    Real64 expectedAnswer;
+
+    auto &thisData = state->dataSurface;
+    auto &thisSurf = thisData->Surface;
+    auto &thisSurfFD = state->dataHeatBalFiniteDiffMgr->SurfaceFD;
+    thisData->TotSurfaces = 2;
+    thisSurf.allocate(thisData->TotSurfaces);
+    thisSurfFD.allocate(thisData->TotSurfaces);
+
+    thisSurf(1).Name = "CONDFD SURFACE 1";
+    thisSurf(2).Name = "CONDFD SURFACE 2";
+    thisSurfFD(1).indexNodeMinTempLimit = 0;
+    thisSurfFD(1).indexNodeMaxTempLimit = 0;
+    thisSurfFD(2).indexNodeMinTempLimit = 0;
+    thisSurfFD(2).indexNodeMaxTempLimit = 0;
+
+    // Test 1-Surface 1: Temperature is within the max and min limits.  Don't do anything to the temperature.  No error messages
+    surfNum = 1;
+    nodeNum = 1;
+    nodeTemp = 1.23;
+    expectedAnswer = nodeTemp;
+    EnergyPlus::HeatBalFiniteDiffManager::CheckFDNodeTempLimits(*state, surfNum, nodeNum, nodeTemp);
+    EXPECT_EQ(nodeTemp, expectedAnswer);
+    EXPECT_EQ(thisSurfFD(1).indexNodeMinTempLimit, 0);
+    EXPECT_EQ(thisSurfFD(1).indexNodeMaxTempLimit, 0);
+
+    // Test 1-Surface 2: Temperature is within the max and min limits.  Don't do anything to the temperature.  No error messages
+    surfNum = 2;
+    nodeNum = 2;
+    nodeTemp = 4.56;
+    expectedAnswer = nodeTemp;
+    EnergyPlus::HeatBalFiniteDiffManager::CheckFDNodeTempLimits(*state, surfNum, nodeNum, nodeTemp);
+    EXPECT_EQ(nodeTemp, expectedAnswer);
+    EXPECT_EQ(thisSurfFD(2).indexNodeMinTempLimit, 0);
+    EXPECT_EQ(thisSurfFD(2).indexNodeMaxTempLimit, 0);
+
+    // Test 2-Surface 1: Temperature is below the minimum value.  Gets reset, error messages
+    surfNum = 1;
+    nodeNum = 3;
+    nodeTemp = -3000.0;
+    expectedAnswer = DataHeatBalSurface::MinSurfaceTempLimit;
+    EnergyPlus::HeatBalFiniteDiffManager::CheckFDNodeTempLimits(*state, surfNum, nodeNum, nodeTemp);
+    EXPECT_EQ(nodeTemp, expectedAnswer);
+    EXPECT_EQ(thisSurfFD(1).indexNodeMinTempLimit, 1);
+    EXPECT_EQ(thisSurfFD(1).indexNodeMaxTempLimit, 0);
+    std::string const error_string_21 = delimited_string({"   ** Severe  ** Node temperature (low) out of bounds [-3000.00] for "
+                                                          "surface=CONDFD SURFACE 1, node=3",
+                                                          "   **   ~~~   **  Environment=, at Simulation time= 00:00 - 00:00",
+                                                          "   **   ~~~   ** Value has been reset to the lower limit value of -100.00."});
+    compare_err_stream(error_string_21, true);
+
+    // Test 2-Surface 2: Temperature is below the minimum value.  Gets reset, error messages
+    surfNum = 2;
+    nodeNum = 4;
+    nodeTemp = -4000.0;
+    expectedAnswer = DataHeatBalSurface::MinSurfaceTempLimit;
+    EnergyPlus::HeatBalFiniteDiffManager::CheckFDNodeTempLimits(*state, surfNum, nodeNum, nodeTemp);
+    EXPECT_EQ(nodeTemp, expectedAnswer);
+    EXPECT_EQ(thisSurfFD(2).indexNodeMinTempLimit, 2);
+    EXPECT_EQ(thisSurfFD(2).indexNodeMaxTempLimit, 0);
+    std::string const error_string_22 = delimited_string({"   ** Severe  ** Node temperature (low) out of bounds [-4000.00] for "
+                                                          "surface=CONDFD SURFACE 2, node=4",
+                                                          "   **   ~~~   **  Environment=, at Simulation time= 00:00 - 00:00",
+                                                          "   **   ~~~   ** Value has been reset to the lower limit value of -100.00."});
+    compare_err_stream(error_string_22, true);
+
+    // Test 3-Surface 1: Temperature is below the minimum value for a second time.  Gets reset, but NO error messages
+    surfNum = 1;
+    nodeNum = 5;
+    nodeTemp = -3000.0;
+    expectedAnswer = DataHeatBalSurface::MinSurfaceTempLimit;
+    EnergyPlus::HeatBalFiniteDiffManager::CheckFDNodeTempLimits(*state, surfNum, nodeNum, nodeTemp);
+    EXPECT_EQ(nodeTemp, expectedAnswer);
+    EXPECT_EQ(thisSurfFD(1).indexNodeMinTempLimit, 1);
+    EXPECT_EQ(thisSurfFD(1).indexNodeMaxTempLimit, 0);
+
+    // Test 3-Surface 2: Temperature is below the minimum value for a second time.  Gets reset, but NO error messages
+    surfNum = 2;
+    nodeNum = 6;
+    nodeTemp = -4000.0;
+    expectedAnswer = DataHeatBalSurface::MinSurfaceTempLimit;
+    EnergyPlus::HeatBalFiniteDiffManager::CheckFDNodeTempLimits(*state, surfNum, nodeNum, nodeTemp);
+    EXPECT_EQ(nodeTemp, expectedAnswer);
+    EXPECT_EQ(thisSurfFD(2).indexNodeMinTempLimit, 2);
+    EXPECT_EQ(thisSurfFD(2).indexNodeMaxTempLimit, 0);
+
+    // Test 4-Surface 1: Temperature is above the maximum value.  Gets reset, error message.
+    surfNum = 1;
+    nodeNum = 7;
+    nodeTemp = 3000.0;
+    expectedAnswer = state->dataHeatBalSurf->MaxSurfaceTempLimit;
+    EnergyPlus::HeatBalFiniteDiffManager::CheckFDNodeTempLimits(*state, surfNum, nodeNum, nodeTemp);
+    EXPECT_EQ(nodeTemp, expectedAnswer);
+    EXPECT_EQ(thisSurfFD(1).indexNodeMinTempLimit, 1);
+    EXPECT_EQ(thisSurfFD(1).indexNodeMaxTempLimit, 3);
+    std::string const error_string_41 = delimited_string({"   ** Severe  ** Node temperature (high) out of bounds [3000.00] for "
+                                                          "surface=CONDFD SURFACE 1, node=7",
+                                                          "   **   ~~~   **  Environment=, at Simulation time= 00:00 - 00:00",
+                                                          "   **   ~~~   ** Value has been reset to the upper limit value of 200.00."});
+    compare_err_stream(error_string_41, true);
+
+    // Test 4-Surface 2: Temperature is above the maximum value.  Gets reset, error message.
+    surfNum = 2;
+    nodeNum = 8;
+    nodeTemp = 4000.0;
+    expectedAnswer = state->dataHeatBalSurf->MaxSurfaceTempLimit;
+    EnergyPlus::HeatBalFiniteDiffManager::CheckFDNodeTempLimits(*state, surfNum, nodeNum, nodeTemp);
+    EXPECT_EQ(nodeTemp, expectedAnswer);
+    EXPECT_EQ(thisSurfFD(2).indexNodeMinTempLimit, 2);
+    EXPECT_EQ(thisSurfFD(2).indexNodeMaxTempLimit, 4);
+    std::string const error_string_42 = delimited_string({"   ** Severe  ** Node temperature (high) out of bounds [4000.00] for "
+                                                          "surface=CONDFD SURFACE 2, node=8",
+                                                          "   **   ~~~   **  Environment=, at Simulation time= 00:00 - 00:00",
+                                                          "   **   ~~~   ** Value has been reset to the upper limit value of 200.00."});
+    compare_err_stream(error_string_42, true);
+
+    // Test 5-Surface 1: Temperature is above the maximum value for a second time.  Gets reset, NO error message.
+    surfNum = 1;
+    nodeNum = 9;
+    nodeTemp = 3000.0;
+    expectedAnswer = state->dataHeatBalSurf->MaxSurfaceTempLimit;
+    EnergyPlus::HeatBalFiniteDiffManager::CheckFDNodeTempLimits(*state, surfNum, nodeNum, nodeTemp);
+    EXPECT_EQ(nodeTemp, expectedAnswer);
+    EXPECT_EQ(thisSurfFD(1).indexNodeMinTempLimit, 1);
+    EXPECT_EQ(thisSurfFD(1).indexNodeMaxTempLimit, 3);
+
+    // Test 5-Surface 2: Temperature is above the maximum value for a second time.  Gets reset, NO error message.
+    surfNum = 2;
+    nodeNum = 10;
+    nodeTemp = 4000.0;
+    expectedAnswer = state->dataHeatBalSurf->MaxSurfaceTempLimit;
+    EnergyPlus::HeatBalFiniteDiffManager::CheckFDNodeTempLimits(*state, surfNum, nodeNum, nodeTemp);
+    EXPECT_EQ(nodeTemp, expectedAnswer);
+    EXPECT_EQ(thisSurfFD(2).indexNodeMinTempLimit, 2);
+    EXPECT_EQ(thisSurfFD(2).indexNodeMaxTempLimit, 4);
+}
+
+TEST_F(EnergyPlusFixture, HeatBalFiniteDiffManager_setSizeMaxPropertiesTest)
+{
+    std::string const idf_objects = delimited_string({
+        "MaterialProperty:VariableThermalConductivity,",
+        "    PCMPlasterBoard , !- Name",
+        "    0,    !- Temperature 1 {C}",
+        "    4.2,  !- Thermal Conductivity 1 {W/m-K}",
+        "    22,   !- Temperature 2 {C}",
+        "    4.2,  !- Thermal Conductivity 2 {W/m-K}",
+        "    22.1, !- Temperature 3 {C}",
+        "    2.5,  !- Thermal Conductivity 3 {W/m-K}",
+        "    100,  !- Temperature 4 {C}",
+        "    2.5;  !- Thermal Conductivity 4 {W/m-K}",
+        "MaterialProperty:PhaseChange,",
+        "    E1 - 3 / 4 IN PLASTER OR GYP BOARD , !- Name",
+        "    0.0,    !- Temperature coefficient ,thermal conductivity(W/m K2)",
+        "    -20.,   !- Temperature 1, C",
+        "    0.01,   !- Enthalpy 1 at –20C, (J/kg)",
+        "    20.,    !- Temperature 2, C",
+        "    33400,  !- Enthalpy 2, (J/kg)",
+        "    20.5,   !- temperature 3, C",
+        "    70000,  !- Enthalpy 3, (J/kg)",
+        "    100.,   !- Temperature 4, C",
+        "    137000; !- Enthalpy 4, (J/kg)",
+        "MaterialProperty:VariableThermalConductivity,",
+        "    PCMPlasterBoard 2, !- Name",
+        "    0,    !- Temperature 1 {C}",
+        "    4.2,  !- Thermal Conductivity 1 {W/m-K}",
+        "    22,   !- Temperature 2 {C}",
+        "    4.2,  !- Thermal Conductivity 2 {W/m-K}",
+        "    22.1, !- Temperature 3 {C}",
+        "    2.5,  !- Thermal Conductivity 3 {W/m-K}",
+        "    100,  !- Temperature 4 {C}",
+        "    2.5,  !- Thermal Conductivity 4 {W/m-K}",
+        "    0,    !- Temperature 5 {C}",
+        "    4.2,  !- Thermal Conductivity 5 {W/m-K}",
+        "    22,   !- Temperature 6 {C}",
+        "    4.2,  !- Thermal Conductivity 6 {W/m-K}",
+        "    22.1, !- Temperature 7 {C}",
+        "    2.5,  !- Thermal Conductivity 7 {W/m-K}",
+        "    100,  !- Temperature 8 {C}",
+        "    2.5,  !- Thermal Conductivity 8 {W/m-K}",
+        "    0,    !- Temperature 9 {C}",
+        "    4.2,  !- Thermal Conductivity 9 {W/m-K}",
+        "    22,   !- Temperature 10 {C}",
+        "    4.2,  !- Thermal Conductivity 10 {W/m-K}",
+        "    0,    !- Temperature 11 {C}",
+        "    4.2,  !- Thermal Conductivity 11 {W/m-K}",
+        "    22,   !- Temperature 12 {C}",
+        "    4.2,  !- Thermal Conductivity 12 {W/m-K}",
+        "    22.1, !- Temperature 13 {C}",
+        "    2.5,  !- Thermal Conductivity 13 {W/m-K}",
+        "    100,  !- Temperature 14 {C}",
+        "    2.5,  !- Thermal Conductivity 14 {W/m-K}",
+        "    0,    !- Temperature 15 {C}",
+        "    4.2,  !- Thermal Conductivity 15 {W/m-K}",
+        "    22,   !- Temperature 16 {C}",
+        "    4.2,  !- Thermal Conductivity 16 {W/m-K}",
+        "    22.1, !- Temperature 17 {C}",
+        "    2.5,  !- Thermal Conductivity 17 {W/m-K}",
+        "    100,  !- Temperature 18 {C}",
+        "    2.5,  !- Thermal Conductivity 18 {W/m-K}",
+        "    0,    !- Temperature 19 {C}",
+        "    4.2,  !- Thermal Conductivity 19 {W/m-K}",
+        "    22,   !- Temperature 20 {C}",
+        "    4.2,  !- Thermal Conductivity 20 {W/m-K}",
+        "    0,    !- Temperature 21 {C}",
+        "    4.2,  !- Thermal Conductivity 21 {W/m-K}",
+        "    22,   !- Temperature 22 {C}",
+        "    4.2,  !- Thermal Conductivity 22 {W/m-K}",
+        "    22.1, !- Temperature 23 {C}",
+        "    2.5,  !- Thermal Conductivity 23 {W/m-K}",
+        "    100,  !- Temperature 24 {C}",
+        "    2.5,  !- Thermal Conductivity 24 {W/m-K}",
+        "    0,    !- Temperature 25 {C}",
+        "    4.2,  !- Thermal Conductivity 25 {W/m-K}",
+        "    22,   !- Temperature 26 {C}",
+        "    4.2,  !- Thermal Conductivity 26 {W/m-K}",
+        "    22.1, !- Temperature 27 {C}",
+        "    2.5,  !- Thermal Conductivity 27 {W/m-K}",
+        "    100,  !- Temperature 28 {C}",
+        "    2.5,  !- Thermal Conductivity 28 {W/m-K}",
+        "    0,    !- Temperature 29 {C}",
+        "    4.2,  !- Thermal Conductivity 29 {W/m-K}",
+        "    22,   !- Temperature 30 {C}",
+        "    4.2,  !- Thermal Conductivity 30 {W/m-K}",
+        "    0,    !- Temperature 31 {C}",
+        "    4.2,  !- Thermal Conductivity 31 {W/m-K}",
+        "    22,   !- Temperature 32 {C}",
+        "    4.2,  !- Thermal Conductivity 32 {W/m-K}",
+        "    22.1, !- Temperature 33 {C}",
+        "    2.5,  !- Thermal Conductivity 33 {W/m-K}",
+        "    100,  !- Temperature 34 {C}",
+        "    2.5,  !- Thermal Conductivity 34 {W/m-K}",
+        "    0,    !- Temperature 35 {C}",
+        "    4.2,  !- Thermal Conductivity 35 {W/m-K}",
+        "    22,   !- Temperature 36 {C}",
+        "    4.2,  !- Thermal Conductivity 36 {W/m-K}",
+        "    22.1, !- Temperature 37 {C}",
+        "    2.5,  !- Thermal Conductivity 37 {W/m-K}",
+        "    100,  !- Temperature 38 {C}",
+        "    2.5,  !- Thermal Conductivity 38 {W/m-K}",
+        "    0,    !- Temperature 39 {C}",
+        "    4.2,  !- Thermal Conductivity 39 {W/m-K}",
+        "    22,   !- Temperature 40 {C}",
+        "    4.2,  !- Thermal Conductivity 40 {W/m-K}",
+        "    0,    !- Temperature 41 {C}",
+        "    4.2,  !- Thermal Conductivity 41 {W/m-K}",
+        "    22,   !- Temperature 42 {C}",
+        "    4.2,  !- Thermal Conductivity 42 {W/m-K}",
+        "    22.1, !- Temperature 43 {C}",
+        "    2.5,  !- Thermal Conductivity 43 {W/m-K}",
+        "    100,  !- Temperature 44 {C}",
+        "    2.5,  !- Thermal Conductivity 44 {W/m-K}",
+        "    0,    !- Temperature 45 {C}",
+        "    4.2,  !- Thermal Conductivity 45 {W/m-K}",
+        "    22,   !- Temperature 46 {C}",
+        "    4.2,  !- Thermal Conductivity 46 {W/m-K}",
+        "    22.1, !- Temperature 47 {C}",
+        "    2.5,  !- Thermal Conductivity 47 {W/m-K}",
+        "    100,  !- Temperature 48 {C}",
+        "    2.5,  !- Thermal Conductivity 48 {W/m-K}",
+        "    0,    !- Temperature 49 {C}",
+        "    4.2,  !- Thermal Conductivity 49 {W/m-K}",
+        "    22,   !- Temperature 50 {C}",
+        "    4.2;  !- Thermal Conductivity 10 {W/m-K}",
+        "MaterialProperty:VariableThermalConductivity,",
+        "    PCMPlasterBoard3, !- Name",
+        "    0,    !- Temperature 1 {C}",
+        "    7.11, !- Thermal Conductivity 1 {W/m-K}",
+        "    100,  !- Temperature 2 {C}",
+        "    2.3;  !- Thermal Conductivity 2 {W/m-K}",
+        "MaterialProperty:PhaseChange,",
+        "    E1 - 3 / 4 IN PLASTER OR GYP BOARD c, !- Name",
+        "    0.0,    !- Temperature coefficient ,thermal conductivity(W/m K2)",
+        "    -20.,   !- Temperature 1, C",
+        "    0.01,   !- Enthalpy 1 at –20C, (J/kg)",
+        "    20.,    !- Temperature 2, C",
+        "    33400,  !- Enthalpy 2, (J/kg)",
+        "    20.5,   !- Temperature 3, C",
+        "    70000,  !- Enthalpy 3, (J/kg)",
+        "    100.,   !- Temperature 4, C",
+        "    137000, !- Enthalpy 4, (J/kg)",
+        "    -20.,   !- Temperature 5, C",
+        "    0.01,   !- Enthalpy 5 at –20C, (J/kg)",
+        "    20.,    !- Temperature 6, C",
+        "    33400,  !- Enthalpy 6, (J/kg)",
+        "    20.5,   !- Temperature 7, C",
+        "    70000,  !- Enthalpy 7, (J/kg)",
+        "    100.,   !- Temperature 8, C",
+        "    137000, !- Enthalpy 8, (J/kg)",
+        "    -20.,   !- Temperature 9, C",
+        "    0.01,   !- Enthalpy 9 at –20C, (J/kg)",
+        "    20.,    !- Temperature 10, C",
+        "    33400,  !- Enthalpy 10, (J/kg)",
+        "    -20.,   !- Temperature 11, C",
+        "    0.01,   !- Enthalpy 11 at –20C, (J/kg)",
+        "    20.,    !- Temperature 12, C",
+        "    33400,  !- Enthalpy 12, (J/kg)",
+        "    20.5,   !- Temperature 13, C",
+        "    70000,  !- Enthalpy 13, (J/kg)",
+        "    100.,   !- Temperature 14, C",
+        "    137000, !- Enthalpy 14, (J/kg)",
+        "    -20.,   !- Temperature 15, C",
+        "    0.01,   !- Enthalpy 15 at –20C, (J/kg)",
+        "    20.,    !- Temperature 16, C",
+        "    33400,  !- Enthalpy 16, (J/kg)",
+        "    20.5,   !- Temperature 17, C",
+        "    70000,  !- Enthalpy 17, (J/kg)",
+        "    100.,   !- Temperature 18, C",
+        "    137000, !- Enthalpy 18, (J/kg)",
+        "    -20.,   !- Temperature 19, C",
+        "    0.01,   !- Enthalpy 19 at –20C, (J/kg)",
+        "    20.,    !- Temperature 20, C",
+        "    33400,  !- Enthalpy 20, (J/kg)",
+        "    -20.,   !- Temperature 21, C",
+        "    0.01,   !- Enthalpy 21 at –20C, (J/kg)",
+        "    20.,    !- Temperature 22, C",
+        "    33400,  !- Enthalpy 22, (J/kg)",
+        "    20.5,   !- Temperature 23, C",
+        "    70000,  !- Enthalpy 23, (J/kg)",
+        "    100.,   !- Temperature 24, C",
+        "    137000, !- Enthalpy 24, (J/kg)",
+        "    -20.,   !- Temperature 25, C",
+        "    0.01,   !- Enthalpy 25 at –20C, (J/kg)",
+        "    20.,    !- Temperature 26, C",
+        "    33400,  !- Enthalpy 26, (J/kg)",
+        "    20.5,   !- Temperature 27, C",
+        "    70000,  !- Enthalpy 27, (J/kg)",
+        "    100.,   !- Temperature 28, C",
+        "    137000, !- Enthalpy 28, (J/kg)",
+        "    -20.,   !- Temperature 29, C",
+        "    0.01,   !- Enthalpy 29 at –20C, (J/kg)",
+        "    20.,    !- Temperature 30, C",
+        "    33400,  !- Enthalpy 30, (J/kg)",
+        "    -20.,   !- Temperature 31, C",
+        "    0.01,   !- Enthalpy 31 at –20C, (J/kg)",
+        "    20.,    !- Temperature 32, C",
+        "    33400,  !- Enthalpy 32, (J/kg)",
+        "    20.5,   !- Temperature 33, C",
+        "    70000,  !- Enthalpy 33, (J/kg)",
+        "    100.,   !- Temperature 34, C",
+        "    137000, !- Enthalpy 34, (J/kg)",
+        "    -20.,   !- Temperature 35, C",
+        "    0.01,   !- Enthalpy 35 at –20C, (J/kg)",
+        "    20.,    !- Temperature 36, C",
+        "    33400,  !- Enthalpy 36, (J/kg)",
+        "    20.5,   !- Temperature 37, C",
+        "    70000,  !- Enthalpy 37, (J/kg)",
+        "    100.,   !- Temperature 38, C",
+        "    137000, !- Enthalpy 38, (J/kg)",
+        "    -20.,   !- Temperature 39, C",
+        "    0.01,   !- Enthalpy 39 at –20C, (J/kg)",
+        "    20.,    !- Temperature 40, C",
+        "    33400,  !- Enthalpy 40, (J/kg)",
+        "    -20.,   !- Temperature 41, C",
+        "    0.01,   !- Enthalpy 41 at –20C, (J/kg)",
+        "    20.,    !- Temperature 42, C",
+        "    33400,  !- Enthalpy 42, (J/kg)",
+        "    20.5,   !- Temperature 43, C",
+        "    70000,  !- Enthalpy 43, (J/kg)",
+        "    100.,   !- Temperature 44, C",
+        "    137000, !- Enthalpy 44, (J/kg)",
+        "    -20.,   !- Temperature 45, C",
+        "    0.01,   !- Enthalpy 45 at –20C, (J/kg)",
+        "    20.,    !- Temperature 46, C",
+        "    33400,  !- Enthalpy 46, (J/kg)",
+        "    20.5,   !- Temperature 47, C",
+        "    70000,  !- Enthalpy 47, (J/kg)",
+        "    100.,   !- Temperature 48, C",
+        "    137000, !- Enthalpy 48, (J/kg)",
+        "    -20.,   !- Temperature 49, C",
+        "    0.01,   !- Enthalpy 49 at –20C, (J/kg)",
+        "    20.,    !- Temperature 50, C",
+        "    33400;  !- Enthalpy 50, (J/kg)",
+        "MaterialProperty:PhaseChange,",
+        "    E1 - 3 / 4 IN PLASTER OR GYP BOARD b, !- Name",
+        "    1.2,    !- Temperature coefficient ,thermal conductivity(W/m K2)",
+        "    -20.,   !- Temperature 1, C",
+        "    0.001,  !- Enthalpy 1 at –20C, (J/kg)",
+        "    100.0,  !- Temperature 2, C",
+        "    233400; !- Enthalpy 2, (J/kg)",
+    });
+
+    ASSERT_TRUE(process_idf(idf_objects));
+
+    // Test Data
+    int functionAnswer = 0;
+    int expectedAnswer = 101; // 50 sets of properties for the largest input objects, plus one additional real parameter for phase change
+
+    // int function call
+    functionAnswer = EnergyPlus::HeatBalFiniteDiffManager::setSizeMaxProperties(*state);
+
+    // Check answer vs. expected
+    EXPECT_EQ(functionAnswer, expectedAnswer);
+}
+
+TEST_F(EnergyPlusFixture, HeatBalFiniteDiffManager_EnetActuatorOverride)
+{
+    // Test that the sky LW radiation EMS actuator correctly modifies ExteriorBCEqns behavior.
+    // Uses FullyImplicitFirstOrder scheme with a single-layer concrete surface.
+    // Compares: actuator OFF (baseline), ON with Enet=0 (no sky cooling), ON with Enet=-200 (strong sky cooling).
+
+    int constexpr SurfNum = 1;
+    int constexpr TotNodes = 3;
+    int constexpr TotLayers = 1;
+
+    // Allocate surfaces
+    state->dataSurface->TotSurfaces = 1;
+    state->dataSurface->Surface.allocate(1);
+    auto &surf = state->dataSurface->Surface(SurfNum);
+    surf.Name = "ZN001:ROOF001";
+    surf.HeatTransSurf = true;
+    surf.HeatTransferAlgorithm = DataSurfaces::HeatTransferModel::CondFD;
+    surf.ExtBoundCond = DataSurfaces::ExternalEnvironment;
+    surf.Construction = 1;
+    surf.Area = 10.0;
+    surf.Class = DataSurfaces::SurfaceClass::Roof;
+
+    // Construct with one concrete layer
+    state->dataHeatBal->TotConstructs = 1;
+    state->dataConstruction->Construct.allocate(1);
+    auto &constr = state->dataConstruction->Construct(1);
+    constr.TotLayers = TotLayers;
+    constr.LayerPoint.allocate(TotLayers);
+    constr.LayerPoint(1) = 1;
+
+    // Material: HW concrete
+    auto *mat = new Material::MaterialBase;
+    mat->Name = "C5 - 4 IN HW CONCRETE";
+    mat->group = Material::Group::Regular;
+    mat->Roughness = Material::SurfaceRoughness::MediumRough;
+    mat->Thickness = 0.1016;
+    mat->Conductivity = 1.311;
+    mat->Density = 2240.0;
+    mat->SpecHeat = 836.8;
+    mat->AbsorpThermal = 0.9;
+    mat->AbsorpSolar = 0.85;
+    mat->AbsorpVisible = 0.85;
+    mat->ROnly = false;
+    mat->hasPCM = false;
+    state->dataMaterial->materials.push_back(mat);
+    mat->Num = state->dataMaterial->materials.isize();
+
+    // CondFD data
+    auto &s_hbfd = state->dataHeatBalFiniteDiffMgr;
+    s_hbfd->CondFDSchemeType = CondFDScheme::FullyImplicitFirstOrder;
+
+    // ConstructFD
+    s_hbfd->ConstructFD.allocate(1);
+    s_hbfd->ConstructFD(1).TotNodes = TotNodes;
+    s_hbfd->ConstructFD(1).DelX.allocate(TotLayers);
+    s_hbfd->ConstructFD(1).DelX(1) = 0.0254; // ~1 inch per node
+    s_hbfd->ConstructFD(1).NodeNumPoint.allocate(TotLayers);
+    s_hbfd->ConstructFD(1).NodeNumPoint(1) = TotNodes;
+
+    // MaterialFD
+    s_hbfd->MaterialFD.allocate(1);
+    s_hbfd->MaterialFD(1).tk1 = 0.0;
+    s_hbfd->MaterialFD(1).numTempEnth = 0;
+    s_hbfd->MaterialFD(1).numTempCond = 0;
+    // TempCond and TempEnth: 2D arrays with negative sentinel values to skip variable property branches
+    s_hbfd->MaterialFD(1).TempCond.allocate(2, 3);
+    s_hbfd->MaterialFD(1).TempCond = -1.0;
+    s_hbfd->MaterialFD(1).TempEnth.allocate(2, 3);
+    s_hbfd->MaterialFD(1).TempEnth = -1.0;
+
+    // SurfaceFD
+    s_hbfd->SurfaceFD.allocate(1);
+    auto &surfFD = s_hbfd->SurfaceFD(SurfNum);
+    int const numNodes = TotNodes + 1; // include inside face node
+    surfFD.T.allocate(numNodes);
+    surfFD.TOld.allocate(numNodes);
+    surfFD.TT.allocate(numNodes);
+    surfFD.Rhov.allocate(numNodes);
+    surfFD.RhovOld.allocate(numNodes);
+    surfFD.RhoT.allocate(numNodes);
+    surfFD.TD.allocate(numNodes);
+    surfFD.TDT.allocate(numNodes);
+    surfFD.TDTLast.allocate(numNodes);
+    surfFD.TDOld.allocate(numNodes);
+    surfFD.TDreport.allocate(numNodes);
+    surfFD.RH.allocate(numNodes);
+    surfFD.RHreport.allocate(numNodes);
+    surfFD.EnthOld.allocate(numNodes);
+    surfFD.EnthNew.allocate(numNodes);
+    surfFD.EnthLast.allocate(numNodes);
+    surfFD.QDreport.allocate(numNodes);
+    surfFD.CpDelXRhoS1.allocate(numNodes);
+    surfFD.CpDelXRhoS2.allocate(numNodes);
+    surfFD.TDpriortimestep.allocate(numNodes);
+    surfFD.PhaseChangeState.allocate(numNodes);
+    surfFD.PhaseChangeStateOld.allocate(numNodes);
+    surfFD.PhaseChangeStateOldOld.allocate(numNodes);
+    surfFD.PhaseChangeStateRep.allocate(numNodes);
+    surfFD.PhaseChangeStateOldRep.allocate(numNodes);
+    surfFD.PhaseChangeStateOldOldRep.allocate(numNodes);
+    surfFD.PhaseChangeTemperatureReverse.allocate(numNodes);
+    surfFD.condMaterialActuators.allocate(TotLayers);
+    surfFD.specHeatMaterialActuators.allocate(TotLayers);
+    surfFD.condNodeReport.allocate(numNodes);
+    surfFD.specHeatNodeReport.allocate(numNodes);
+    surfFD.heatSourceFluxMaterialActuators.allocate(1);
+    surfFD.heatSourceInternalFluxLayerReport.allocate(1);
+    surfFD.heatSourceInternalFluxEnergyLayerReport.allocate(1);
+    surfFD.heatSourceEMSFluxLayerReport.allocate(1);
+    surfFD.heatSourceEMSFluxEnergyLayerReport.allocate(1);
+
+    // Initialize arrays
+    surfFD.T = 20.0;
+    surfFD.TOld = 20.0;
+    surfFD.TT = 20.0;
+    surfFD.Rhov = 0.0;
+    surfFD.RhovOld = 0.0;
+    surfFD.RhoT = 0.0;
+    surfFD.TD = 20.0;
+    surfFD.TDT = 20.0;
+    surfFD.TDTLast = 20.0;
+    surfFD.TDOld = 20.0;
+    surfFD.TDreport = 20.0;
+    surfFD.RH = 0.0;
+    surfFD.RHreport = 0.0;
+    surfFD.EnthOld = 100.0;
+    surfFD.EnthNew = 100.0;
+    surfFD.EnthLast = 100.0;
+    surfFD.QDreport = 0.0;
+    surfFD.CpDelXRhoS1 = 0.0;
+    surfFD.CpDelXRhoS2 = 0.0;
+    surfFD.TDpriortimestep = 20.0;
+    surfFD.PhaseChangeState = Material::Phase::Transition;
+    surfFD.PhaseChangeStateOld = Material::Phase::Transition;
+    surfFD.PhaseChangeStateOldOld = Material::Phase::Transition;
+    surfFD.PhaseChangeTemperatureReverse = 50.0;
+    surfFD.condNodeReport = 0.0;
+    surfFD.specHeatNodeReport = 0.0;
+
+    // Allocate heat balance surface arrays
+    state->dataHeatBalSurf->SurfOpaqInsFaceCondFlux.allocate(1);
+    state->dataHeatBalSurf->SurfOpaqOutFaceCondFlux.allocate(1);
+    state->dataHeatBalSurf->SurfQdotRadOutRepPerArea.allocate(1);
+    state->dataHeatBalSurf->SurfQdotRadOutRep.allocate(1);
+    state->dataHeatBalSurf->SurfQRadOutReport.allocate(1);
+    state->dataHeatBalSurf->SurfOpaqQRadSWOutAbs.allocate(1);
+    state->dataHeatBalSurf->SurfQRadSWOutMvIns.allocate(1);
+    state->dataHeatBalSurf->SurfOpaqInsFaceCondFlux(1) = 0.0;
+    state->dataHeatBalSurf->SurfOpaqOutFaceCondFlux(1) = 0.0;
+    state->dataHeatBalSurf->SurfQdotRadOutRepPerArea(1) = 0.0;
+    state->dataHeatBalSurf->SurfQdotRadOutRep(1) = 0.0;
+    state->dataHeatBalSurf->SurfQRadOutReport(1) = 0.0;
+    state->dataHeatBalSurf->SurfOpaqQRadSWOutAbs(1) = 0.0;
+    state->dataHeatBalSurf->SurfQRadSWOutMvIns(1) = 0.0;
+
+    // Allocate moisture balance arrays
+    state->dataMstBal->TempOutsideAirFD.allocate(1);
+    state->dataMstBal->RhoVaporAirOut.allocate(1);
+    state->dataMstBal->HConvExtFD.allocate(1);
+    state->dataMstBal->HSkyFD.allocate(1);
+    state->dataMstBal->HGrndFD.allocate(1);
+    state->dataMstBal->HAirFD.allocate(1);
+    state->dataMstBal->HSurrFD.allocate(1);
+
+    // Set exterior boundary conditions
+    constexpr Real64 Toa = 10.0;   // outdoor air temp, C
+    constexpr Real64 Tsky = -20.0; // sky temp, C
+    state->dataMstBal->TempOutsideAirFD(1) = Toa;
+    state->dataMstBal->RhoVaporAirOut(1) = 0.005;
+    state->dataMstBal->HConvExtFD(1) = 10.0; // convection coefficient
+    state->dataMstBal->HSkyFD(1) = 5.0;      // sky radiation coefficient
+    state->dataMstBal->HGrndFD(1) = 3.0;     // ground radiation coefficient
+    state->dataMstBal->HAirFD(1) = 1.0;      // air radiation coefficient
+    state->dataMstBal->HSurrFD(1) = 0.0;     // surrounding surfaces coefficient
+
+    state->dataEnvrn->SkyTemp = Tsky;
+    state->dataEnvrn->IsRain = false;
+    state->dataGlobal->TimeStepZoneSec = 600.0;
+
+    // Surface ground temp
+    surf.UseSurfPropertyGndSurfTemp = false;
+    surf.SurfHasSurroundingSurfProperty = false;
+
+    // QHeatOutFlux
+    s_hbfd->QHeatOutFlux.allocate(1);
+    s_hbfd->QHeatOutFlux(1) = 0.0;
+
+    // ExteriorBCEqns parameters
+    constexpr int Delt = 600;
+    constexpr int nodeIdx = 1; // outside face node
+    constexpr int Lay = 1;     // first layer
+    constexpr Real64 HMovInsul = 0.0;
+
+    // Create local arrays for function call
+    Array1D<Real64> T_arr(numNodes, 20.0);
+    Array1D<Real64> TT_arr(numNodes, 20.0);
+    Array1D<Real64> Rhov_arr(numNodes, 0.0);
+    Array1D<Real64> RhoT_arr(numNodes, 0.0);
+    Array1D<Real64> RH_arr(numNodes, 0.0);
+    Array1D<Real64> TD_arr(numNodes, 20.0);
+    Array1D<Real64> TDT_arr(numNodes, 20.0);
+    Array1D<Real64> EnthOld_arr(numNodes, 100.0);
+    Array1D<Real64> EnthNew_arr(numNodes, 100.0);
+
+    // --- Sub-case 1: Actuator OFF (baseline with sky radiation) ---
+    surfFD.enetActuator.isActuated = false;
+    surfFD.enetActuator.actuatedValue = 0.0;
+    TDT_arr = 20.0; // reset
+
+    ExteriorBCEqns(*state,
+                   Delt,
+                   nodeIdx,
+                   Lay,
+                   SurfNum,
+                   T_arr,
+                   TT_arr,
+                   Rhov_arr,
+                   RhoT_arr,
+                   RH_arr,
+                   TD_arr,
+                   TDT_arr,
+                   EnthOld_arr,
+                   EnthNew_arr,
+                   TotNodes,
+                   HMovInsul);
+
+    Real64 const TDT_baseline = TDT_arr(nodeIdx);
+    Real64 const QRad_baseline = state->dataHeatBalSurf->SurfQdotRadOutRepPerArea(1);
+    Real64 const CondFlux_baseline = state->dataHeatBalSurf->SurfOpaqOutFaceCondFlux(1);
+
+    EXPECT_EQ(surfFD.enetActuatorReport, 0.0);
+    // With sky at -20C and surface at 20C, baseline has large net outgoing radiation → QRad negative
+    EXPECT_LT(QRad_baseline, 0.0);
+
+    // --- Sub-case 2: Actuator ON, Enet=0 (no sky LW exchange) ---
+    surfFD.enetActuator.isActuated = true;
+    surfFD.enetActuator.actuatedValue = 0.0;
+    TDT_arr = 20.0; // reset
+
+    ExteriorBCEqns(*state,
+                   Delt,
+                   nodeIdx,
+                   Lay,
+                   SurfNum,
+                   T_arr,
+                   TT_arr,
+                   Rhov_arr,
+                   RhoT_arr,
+                   RH_arr,
+                   TD_arr,
+                   TDT_arr,
+                   EnthOld_arr,
+                   EnthNew_arr,
+                   TotNodes,
+                   HMovInsul);
+
+    Real64 const TDT_enet0 = TDT_arr(nodeIdx);
+    Real64 const QRad_enet0 = state->dataHeatBalSurf->SurfQdotRadOutRepPerArea(1);
+    Real64 const CondFlux_enet0 = state->dataHeatBalSurf->SurfOpaqOutFaceCondFlux(1);
+
+    EXPECT_EQ(surfFD.enetActuatorReport, 0.0);
+    // With Enet=0, no sky cooling, so surface should be warmer than baseline (where sky cools it)
+    EXPECT_GT(TDT_enet0, TDT_baseline);
+    // Sky at -20C vs surface at 20C → baseline has large outgoing radiation; Enet=0 removes that sky term
+    EXPECT_GT(QRad_enet0, QRad_baseline);
+    // Less radiation out → less heat pulled through wall → smaller outward conduction flux
+    EXPECT_LT(CondFlux_enet0, CondFlux_baseline);
+
+    // --- Sub-case 3: Actuator ON, Enet=-200 (strong sky cooling) ---
+    surfFD.enetActuator.isActuated = true;
+    surfFD.enetActuator.actuatedValue = -200.0;
+    TDT_arr = 20.0; // reset
+
+    ExteriorBCEqns(*state,
+                   Delt,
+                   nodeIdx,
+                   Lay,
+                   SurfNum,
+                   T_arr,
+                   TT_arr,
+                   Rhov_arr,
+                   RhoT_arr,
+                   RH_arr,
+                   TD_arr,
+                   TDT_arr,
+                   EnthOld_arr,
+                   EnthNew_arr,
+                   TotNodes,
+                   HMovInsul);
+
+    Real64 const TDT_enetNeg200 = TDT_arr(nodeIdx);
+    Real64 const QRad_enetNeg200 = state->dataHeatBalSurf->SurfQdotRadOutRepPerArea(1);
+    Real64 const CondFlux_enetNeg200 = state->dataHeatBalSurf->SurfOpaqOutFaceCondFlux(1);
+
+    EXPECT_EQ(surfFD.enetActuatorReport, -200.0);
+    // Enet=-200 is much stronger cooling than the default sky term, so surface should be colder
+    EXPECT_LT(TDT_enetNeg200, TDT_baseline);
+
+    // --- Sub-case 4: Actuator ON, Enet=+200 (sky heats surface) ---
+    surfFD.enetActuator.isActuated = true;
+    surfFD.enetActuator.actuatedValue = 200.0;
+    TDT_arr = 20.0; // reset
+
+    ExteriorBCEqns(*state,
+                   Delt,
+                   nodeIdx,
+                   Lay,
+                   SurfNum,
+                   T_arr,
+                   TT_arr,
+                   Rhov_arr,
+                   RhoT_arr,
+                   RH_arr,
+                   TD_arr,
+                   TDT_arr,
+                   EnthOld_arr,
+                   EnthNew_arr,
+                   TotNodes,
+                   HMovInsul);
+
+    Real64 const TDT_enetPos200 = TDT_arr(nodeIdx);
+    Real64 const QRad_enetPos200 = state->dataHeatBalSurf->SurfQdotRadOutRepPerArea(1);
+    Real64 const CondFlux_enetPos200 = state->dataHeatBalSurf->SurfOpaqOutFaceCondFlux(1);
+
+    EXPECT_EQ(surfFD.enetActuatorReport, 200.0);
+    // Enet=+200 W/m² net incoming → QRad sign flips positive (surface gains radiation)
+    EXPECT_GT(QRad_enetPos200, 0.0);
+
+    // Ordering: Enet=-200 < baseline < Enet=0 < Enet=+200
+    EXPECT_LT(TDT_enetNeg200, TDT_baseline);
+    EXPECT_LT(TDT_baseline, TDT_enet0);
+    EXPECT_LT(TDT_enet0, TDT_enetPos200);
+
+    // QRad and CondFlux have matching monotonic ordering: stronger cooling → more negative QRad, larger outward CondFlux
+    EXPECT_LT(QRad_enetNeg200, QRad_baseline);
+    EXPECT_LT(QRad_baseline, QRad_enet0);
+    EXPECT_LT(QRad_enet0, QRad_enetPos200);
+    EXPECT_GT(CondFlux_enetNeg200, CondFlux_baseline);
+    EXPECT_GT(CondFlux_baseline, CondFlux_enet0);
+    EXPECT_GT(CondFlux_enet0, CondFlux_enetPos200);
+
+    // --- Sub-case 5: Actuator toggled back OFF → recovers baseline ---
+    surfFD.enetActuator.isActuated = false;
+    // EMS Null clears the actuation flag but leaves the last numeric value in place.
+    surfFD.enetActuator.actuatedValue = 200.0;
+    TDT_arr = 20.0; // reset
+
+    ExteriorBCEqns(*state,
+                   Delt,
+                   nodeIdx,
+                   Lay,
+                   SurfNum,
+                   T_arr,
+                   TT_arr,
+                   Rhov_arr,
+                   RhoT_arr,
+                   RH_arr,
+                   TD_arr,
+                   TDT_arr,
+                   EnthOld_arr,
+                   EnthNew_arr,
+                   TotNodes,
+                   HMovInsul);
+
+    EXPECT_NEAR(TDT_arr(nodeIdx), TDT_baseline, 1e-10);
+    EXPECT_NEAR(state->dataHeatBalSurf->SurfQdotRadOutRepPerArea(1), QRad_baseline, 1e-10);
+    EXPECT_NEAR(state->dataHeatBalSurf->SurfOpaqOutFaceCondFlux(1), CondFlux_baseline, 1e-10);
+    EXPECT_EQ(surfFD.enetActuatorReport, 0.0);
+}
+
+TEST_F(EnergyPlusFixture, HeatBalFiniteDiffManager_EnetActuatorOverride_CrankNicolson)
+{
+    // Same as EnetActuatorOverride but with CrankNicholsonSecondOrder scheme.
+    // Verifies the CN code path produces the same temperature ordering.
+
+    int constexpr SurfNum = 1;
+    int constexpr TotNodes = 3;
+    int constexpr TotLayers = 1;
+
+    // Allocate surfaces
+    state->dataSurface->TotSurfaces = 1;
+    state->dataSurface->Surface.allocate(1);
+    auto &surf = state->dataSurface->Surface(SurfNum);
+    surf.Name = "ZN001:ROOF001";
+    surf.HeatTransSurf = true;
+    surf.HeatTransferAlgorithm = DataSurfaces::HeatTransferModel::CondFD;
+    surf.ExtBoundCond = DataSurfaces::ExternalEnvironment;
+    surf.Construction = 1;
+    surf.Area = 10.0;
+    surf.Class = DataSurfaces::SurfaceClass::Roof;
+
+    // Construct with one concrete layer
+    state->dataHeatBal->TotConstructs = 1;
+    state->dataConstruction->Construct.allocate(1);
+    auto &constr = state->dataConstruction->Construct(1);
+    constr.TotLayers = TotLayers;
+    constr.LayerPoint.allocate(TotLayers);
+    constr.LayerPoint(1) = 1;
+
+    // Material: HW concrete
+    auto *mat = new Material::MaterialBase;
+    mat->Name = "C5 - 4 IN HW CONCRETE";
+    mat->group = Material::Group::Regular;
+    mat->Roughness = Material::SurfaceRoughness::MediumRough;
+    mat->Thickness = 0.1016;
+    mat->Conductivity = 1.311;
+    mat->Density = 2240.0;
+    mat->SpecHeat = 836.8;
+    mat->AbsorpThermal = 0.9;
+    mat->AbsorpSolar = 0.85;
+    mat->AbsorpVisible = 0.85;
+    mat->ROnly = false;
+    mat->hasPCM = false;
+    state->dataMaterial->materials.push_back(mat);
+    mat->Num = state->dataMaterial->materials.isize();
+
+    // CondFD data — CrankNicholsonSecondOrder
+    auto &s_hbfd = state->dataHeatBalFiniteDiffMgr;
+    s_hbfd->CondFDSchemeType = CondFDScheme::CrankNicholsonSecondOrder;
+
+    // ConstructFD
+    s_hbfd->ConstructFD.allocate(1);
+    s_hbfd->ConstructFD(1).TotNodes = TotNodes;
+    s_hbfd->ConstructFD(1).DelX.allocate(TotLayers);
+    s_hbfd->ConstructFD(1).DelX(1) = 0.0254;
+    s_hbfd->ConstructFD(1).NodeNumPoint.allocate(TotLayers);
+    s_hbfd->ConstructFD(1).NodeNumPoint(1) = TotNodes;
+
+    // MaterialFD
+    s_hbfd->MaterialFD.allocate(1);
+    s_hbfd->MaterialFD(1).tk1 = 0.0;
+    s_hbfd->MaterialFD(1).numTempEnth = 0;
+    s_hbfd->MaterialFD(1).numTempCond = 0;
+    s_hbfd->MaterialFD(1).TempCond.allocate(2, 3);
+    s_hbfd->MaterialFD(1).TempCond = -1.0;
+    s_hbfd->MaterialFD(1).TempEnth.allocate(2, 3);
+    s_hbfd->MaterialFD(1).TempEnth = -1.0;
+
+    // SurfaceFD
+    s_hbfd->SurfaceFD.allocate(1);
+    auto &surfFD = s_hbfd->SurfaceFD(SurfNum);
+    int const numNodes = TotNodes + 1;
+    surfFD.T.allocate(numNodes);
+    surfFD.TOld.allocate(numNodes);
+    surfFD.TT.allocate(numNodes);
+    surfFD.Rhov.allocate(numNodes);
+    surfFD.RhovOld.allocate(numNodes);
+    surfFD.RhoT.allocate(numNodes);
+    surfFD.TD.allocate(numNodes);
+    surfFD.TDT.allocate(numNodes);
+    surfFD.TDTLast.allocate(numNodes);
+    surfFD.TDOld.allocate(numNodes);
+    surfFD.TDreport.allocate(numNodes);
+    surfFD.RH.allocate(numNodes);
+    surfFD.RHreport.allocate(numNodes);
+    surfFD.EnthOld.allocate(numNodes);
+    surfFD.EnthNew.allocate(numNodes);
+    surfFD.EnthLast.allocate(numNodes);
+    surfFD.QDreport.allocate(numNodes);
+    surfFD.CpDelXRhoS1.allocate(numNodes);
+    surfFD.CpDelXRhoS2.allocate(numNodes);
+    surfFD.TDpriortimestep.allocate(numNodes);
+    surfFD.PhaseChangeState.allocate(numNodes);
+    surfFD.PhaseChangeStateOld.allocate(numNodes);
+    surfFD.PhaseChangeStateOldOld.allocate(numNodes);
+    surfFD.PhaseChangeStateRep.allocate(numNodes);
+    surfFD.PhaseChangeStateOldRep.allocate(numNodes);
+    surfFD.PhaseChangeStateOldOldRep.allocate(numNodes);
+    surfFD.PhaseChangeTemperatureReverse.allocate(numNodes);
+    surfFD.condMaterialActuators.allocate(TotLayers);
+    surfFD.specHeatMaterialActuators.allocate(TotLayers);
+    surfFD.condNodeReport.allocate(numNodes);
+    surfFD.specHeatNodeReport.allocate(numNodes);
+    surfFD.heatSourceFluxMaterialActuators.allocate(1);
+    surfFD.heatSourceInternalFluxLayerReport.allocate(1);
+    surfFD.heatSourceInternalFluxEnergyLayerReport.allocate(1);
+    surfFD.heatSourceEMSFluxLayerReport.allocate(1);
+    surfFD.heatSourceEMSFluxEnergyLayerReport.allocate(1);
+
+    // Initialize arrays
+    surfFD.T = 20.0;
+    surfFD.TOld = 20.0;
+    surfFD.TT = 20.0;
+    surfFD.Rhov = 0.0;
+    surfFD.RhovOld = 0.0;
+    surfFD.RhoT = 0.0;
+    surfFD.TD = 20.0;
+    surfFD.TDT = 20.0;
+    surfFD.TDTLast = 20.0;
+    surfFD.TDOld = 20.0;
+    surfFD.TDreport = 20.0;
+    surfFD.RH = 0.0;
+    surfFD.RHreport = 0.0;
+    surfFD.EnthOld = 100.0;
+    surfFD.EnthNew = 100.0;
+    surfFD.EnthLast = 100.0;
+    surfFD.QDreport = 0.0;
+    surfFD.CpDelXRhoS1 = 0.0;
+    surfFD.CpDelXRhoS2 = 0.0;
+    surfFD.TDpriortimestep = 20.0;
+    surfFD.PhaseChangeState = Material::Phase::Transition;
+    surfFD.PhaseChangeStateOld = Material::Phase::Transition;
+    surfFD.PhaseChangeStateOldOld = Material::Phase::Transition;
+    surfFD.PhaseChangeTemperatureReverse = 50.0;
+    surfFD.condNodeReport = 0.0;
+    surfFD.specHeatNodeReport = 0.0;
+
+    // Allocate heat balance surface arrays
+    state->dataHeatBalSurf->SurfOpaqInsFaceCondFlux.allocate(1);
+    state->dataHeatBalSurf->SurfOpaqOutFaceCondFlux.allocate(1);
+    state->dataHeatBalSurf->SurfQdotRadOutRepPerArea.allocate(1);
+    state->dataHeatBalSurf->SurfQdotRadOutRep.allocate(1);
+    state->dataHeatBalSurf->SurfQRadOutReport.allocate(1);
+    state->dataHeatBalSurf->SurfOpaqQRadSWOutAbs.allocate(1);
+    state->dataHeatBalSurf->SurfQRadSWOutMvIns.allocate(1);
+    state->dataHeatBalSurf->SurfOpaqInsFaceCondFlux(1) = 0.0;
+    state->dataHeatBalSurf->SurfOpaqOutFaceCondFlux(1) = 0.0;
+    state->dataHeatBalSurf->SurfQdotRadOutRepPerArea(1) = 0.0;
+    state->dataHeatBalSurf->SurfQdotRadOutRep(1) = 0.0;
+    state->dataHeatBalSurf->SurfQRadOutReport(1) = 0.0;
+    state->dataHeatBalSurf->SurfOpaqQRadSWOutAbs(1) = 0.0;
+    state->dataHeatBalSurf->SurfQRadSWOutMvIns(1) = 0.0;
+
+    // Allocate moisture balance arrays
+    state->dataMstBal->TempOutsideAirFD.allocate(1);
+    state->dataMstBal->RhoVaporAirOut.allocate(1);
+    state->dataMstBal->HConvExtFD.allocate(1);
+    state->dataMstBal->HSkyFD.allocate(1);
+    state->dataMstBal->HGrndFD.allocate(1);
+    state->dataMstBal->HAirFD.allocate(1);
+    state->dataMstBal->HSurrFD.allocate(1);
+
+    // Set exterior boundary conditions
+    constexpr Real64 Toa = 10.0;
+    constexpr Real64 Tsky = -20.0;
+    state->dataMstBal->TempOutsideAirFD(1) = Toa;
+    state->dataMstBal->RhoVaporAirOut(1) = 0.005;
+    state->dataMstBal->HConvExtFD(1) = 10.0;
+    state->dataMstBal->HSkyFD(1) = 5.0;
+    state->dataMstBal->HGrndFD(1) = 3.0;
+    state->dataMstBal->HAirFD(1) = 1.0;
+    state->dataMstBal->HSurrFD(1) = 0.0;
+
+    state->dataEnvrn->SkyTemp = Tsky;
+    state->dataEnvrn->IsRain = false;
+    state->dataGlobal->TimeStepZoneSec = 600.0;
+
+    surf.UseSurfPropertyGndSurfTemp = false;
+    surf.SurfHasSurroundingSurfProperty = false;
+
+    s_hbfd->QHeatOutFlux.allocate(1);
+    s_hbfd->QHeatOutFlux(1) = 0.0;
+
+    constexpr int Delt = 600;
+    constexpr int nodeIdx = 1;
+    constexpr int Lay = 1;
+    constexpr Real64 HMovInsul = 0.0;
+
+    int const numNodesArr = numNodes;
+    Array1D<Real64> T_arr(numNodesArr, 20.0);
+    Array1D<Real64> TT_arr(numNodesArr, 20.0);
+    Array1D<Real64> Rhov_arr(numNodesArr, 0.0);
+    Array1D<Real64> RhoT_arr(numNodesArr, 0.0);
+    Array1D<Real64> RH_arr(numNodesArr, 0.0);
+    Array1D<Real64> TD_arr(numNodesArr, 20.0);
+    Array1D<Real64> TDT_arr(numNodesArr, 20.0);
+    Array1D<Real64> EnthOld_arr(numNodesArr, 100.0);
+    Array1D<Real64> EnthNew_arr(numNodesArr, 100.0);
+
+    // --- Sub-case 1: Actuator OFF (baseline) ---
+    surfFD.enetActuator.isActuated = false;
+    surfFD.enetActuator.actuatedValue = 0.0;
+    TDT_arr = 20.0;
+
+    ExteriorBCEqns(*state,
+                   Delt,
+                   nodeIdx,
+                   Lay,
+                   SurfNum,
+                   T_arr,
+                   TT_arr,
+                   Rhov_arr,
+                   RhoT_arr,
+                   RH_arr,
+                   TD_arr,
+                   TDT_arr,
+                   EnthOld_arr,
+                   EnthNew_arr,
+                   TotNodes,
+                   HMovInsul);
+
+    Real64 const TDT_baseline = TDT_arr(nodeIdx);
+    Real64 const QRad_baseline = state->dataHeatBalSurf->SurfQdotRadOutRepPerArea(1);
+
+    EXPECT_LT(QRad_baseline, 0.0);
+
+    // --- Sub-case 2: Actuator ON, Enet=0 ---
+    surfFD.enetActuator.isActuated = true;
+    surfFD.enetActuator.actuatedValue = 0.0;
+    TDT_arr = 20.0;
+
+    ExteriorBCEqns(*state,
+                   Delt,
+                   nodeIdx,
+                   Lay,
+                   SurfNum,
+                   T_arr,
+                   TT_arr,
+                   Rhov_arr,
+                   RhoT_arr,
+                   RH_arr,
+                   TD_arr,
+                   TDT_arr,
+                   EnthOld_arr,
+                   EnthNew_arr,
+                   TotNodes,
+                   HMovInsul);
+
+    Real64 const TDT_enet0 = TDT_arr(nodeIdx);
+
+    // --- Sub-case 3: Actuator ON, Enet=-200 ---
+    surfFD.enetActuator.isActuated = true;
+    surfFD.enetActuator.actuatedValue = -200.0;
+    TDT_arr = 20.0;
+
+    ExteriorBCEqns(*state,
+                   Delt,
+                   nodeIdx,
+                   Lay,
+                   SurfNum,
+                   T_arr,
+                   TT_arr,
+                   Rhov_arr,
+                   RhoT_arr,
+                   RH_arr,
+                   TD_arr,
+                   TDT_arr,
+                   EnthOld_arr,
+                   EnthNew_arr,
+                   TotNodes,
+                   HMovInsul);
+
+    Real64 const TDT_enetNeg200 = TDT_arr(nodeIdx);
+
+    // --- Sub-case 4: Actuator ON, Enet=+200 ---
+    surfFD.enetActuator.isActuated = true;
+    surfFD.enetActuator.actuatedValue = 200.0;
+    TDT_arr = 20.0;
+
+    ExteriorBCEqns(*state,
+                   Delt,
+                   nodeIdx,
+                   Lay,
+                   SurfNum,
+                   T_arr,
+                   TT_arr,
+                   Rhov_arr,
+                   RhoT_arr,
+                   RH_arr,
+                   TD_arr,
+                   TDT_arr,
+                   EnthOld_arr,
+                   EnthNew_arr,
+                   TotNodes,
+                   HMovInsul);
+
+    Real64 const TDT_enetPos200 = TDT_arr(nodeIdx);
+
+    // Same ordering: Enet=-200 < baseline < Enet=0 < Enet=+200
+    EXPECT_LT(TDT_enetNeg200, TDT_baseline);
+    EXPECT_LT(TDT_baseline, TDT_enet0);
+    EXPECT_LT(TDT_enet0, TDT_enetPos200);
 }
 
 } // namespace EnergyPlus

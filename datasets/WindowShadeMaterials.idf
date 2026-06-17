@@ -7,9 +7,6 @@
 ! TRANS          Solar or visible transmittance (assumed independent of angle of incidence)
 ! The objects and syntax in this dataset comply with EnergyPlus, Version 8.4.0 and above, unless otherwise noted.
 
-!  Version,
-!    9.0;                    !- Version Identifier
-
   WindowMaterial:Shade,
     HIGH REFLECT - LOW TRANS SHADE,  !- Name
     0.1,                     !- Solar Transmittance {dimensionless}

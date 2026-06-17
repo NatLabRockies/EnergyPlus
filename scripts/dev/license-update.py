@@ -1,10 +1,10 @@
 #!/usr/bin/env python
-# EnergyPlus, Copyright (c) 1996-2023, The Board of Trustees of the University
-# of Illinois, The Regents of the University of California, through Lawrence
-# Berkeley National Laboratory (subject to receipt of any required approvals
-# from the U.S. Dept. of Energy), Oak Ridge National Laboratory, managed by UT-
-# Battelle, Alliance for Sustainable Energy, LLC, and other contributors. All
-# rights reserved.
+# EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the
+# University of Illinois, The Regents of the University of California, through
+# Lawrence Berkeley National Laboratory (subject to receipt of any required
+# approvals from the U.S. Dept. of Energy), Oak Ridge National Laboratory,
+# managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
+# contributors. All rights reserved.
 #
 # NOTICE: This Software was developed under funding from the U.S. Department of
 # Energy and the U.S. Government consequently retains certain rights. As such,
@@ -107,74 +107,78 @@
 #
 # These are both pretty awful and need to be improved, and it would help if the
 # exclusions were uniform.
-
 import licensetext
-import argparse
+from base_hook import ROOT_DIR
 
-parser = argparse.ArgumentParser(description='Update the E+ license year.')
-parser.add_argument('-v', '--verbose', dest='verbose', action='store_true',
-                    default=False, help='operate verbosely')
-# Maybe next year
-#parser.add_argument('--update', dest='dryrun', action='store_false',
-#                    default=True, help='update the license year')
-
-args = parser.parse_args()
-
-TOOL_NAME = 'license-update'
+TOOL_NAME = "license-update"
 dryrun = True
 
-#
 # Directories to check
-#
-cpp_dirs = ["./src/",
-            "./tst/EnergyPlus/"]
-python_dirs = ["./"]
+CPP_DIRS = [ROOT_DIR / "src", ROOT_DIR / "tst/EnergyPlus/"]
+PYTHON_DIRS = [ROOT_DIR]
 
-# Get the C++ current text
-current = licensetext.current()
-previous = licensetext.previous()
+CPP_CURRENT_LICENSE = licensetext.current()
+CPP_PREVIOUS_LICENSE = licensetext.previous()
+PYTHON_CURRENT_LICENSE = licensetext.current_python()
+PYTHON_PREVIOUS_LICENSE = licensetext.previous_python()
 
-# Create LICENSE.txt
-licensetxt = licensetext.merge_paragraphs(current)
 
-if not dryrun:
-    print('Writing out LICENSE.txt')
-    filename = "LICENSE.txt"
-    fp = open(filename, 'w')
-    fp.write(licensetxt)
-    fp.close()
-else:
-    print('Skipping writing out LICENSE.txt')
+# Relative from ROOT_DIR patterns
+PYTHON_EXCLUDE_PATTERNS = [
+    r".*third_party.*",
+    r"^build.*",
+    r"^bin.*",
+    r".*readthedocs.*",
+    r".*venv.*",
+    r".*cmake-build-.*",
+    r".*colorize_cppcheck_results.py.*",
+    r".*__init__.py",
+]
 
-full_count = 1
 
-# Create C++ Replacer object
-replacer = licensetext.Replacer(previous, current, dryrun=dryrun)
+def write_root_license_txt() -> None:
+    # Create LICENSE.txt
+    licensetxt = licensetext.merge_paragraphs(CPP_CURRENT_LICENSE)
 
-# Check C++ files
-for base in cpp_dirs:
-    replacer.visit(base)
+    if not dryrun:
+        print("Writing out LICENSE.txt")
+        license_txt_path = ROOT_DIR / "LICENSE.txt"
+        license_txt_path.write_text(licensetxt)
+    else:
+        print("Skipping writing out LICENSE.txt")
 
-print('\nC++ Summary')
-print(replacer.summary())
-full_count += len(replacer.replaced)
 
-# Get the Python current text
-current = licensetext.current_python()
-previous = licensetext.previous_python()
+def replace_cpp_repo() -> int:
+    replacer = licensetext.Replacer(oldtext=CPP_PREVIOUS_LICENSE, newtext=CPP_CURRENT_LICENSE, dryrun=dryrun)
 
-# Create Python Replacer object
-replacer = licensetext.Replacer(previous, current, extensions=['py'],
-                                dryrun=dryrun)
+    # Check C++ files
+    for base in CPP_DIRS:
+        replacer.visit(base)
 
-# Check Python files
-patterns = [r'.*third_party.*', r'^\.(\\|/)build.*',
-            r'^\.(\\|/)bin.*', r'.*readthedocs.*',
-            r'.*venv.*', r'.*cmake-build-.*']
-for base in python_dirs:
-    replacer.visit(base, exclude_patterns=patterns)
+    print("\nC++ Summary")
+    print(replacer.summary())
 
-print('\nPython Summary')
-print(replacer.summary(full_report=args.verbose))
-full_count += len(replacer.replaced)
-print('\nFull count of files: %d' % full_count)
+    return len(replacer.replaced)
+
+
+def replace_python_repo() -> int:
+    replacer = licensetext.Replacer(
+        oldtext=PYTHON_PREVIOUS_LICENSE, newtext=PYTHON_CURRENT_LICENSE, extensions=["py"], dryrun=dryrun
+    )
+
+    # Check Python files
+    for base in PYTHON_DIRS:
+        replacer.visit(base, exclude_patterns=PYTHON_EXCLUDE_PATTERNS)
+
+    print("\nPython Summary")
+    print(replacer.summary())
+
+    return len(replacer.replaced)
+
+
+if __name__ == "__main__":
+    write_root_license_txt()
+
+    full_count = replace_cpp_repo()
+    full_count += replace_python_repo()
+    print("\nFull count of Replaced files: %d" % full_count)

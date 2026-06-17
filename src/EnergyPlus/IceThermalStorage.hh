@@ -1,7 +1,7 @@
-// EnergyPlus, Copyright (c) 1996-2023, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
-// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other
+// National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
 // contributors. All rights reserved.
 //
 // NOTICE: This Software was developed under funding from the U.S. Department of Energy and the
@@ -59,6 +59,7 @@
 #include <EnergyPlus/Plant/Enums.hh>
 #include <EnergyPlus/Plant/PlantLocation.hh>
 #include <EnergyPlus/PlantComponent.hh>
+#include <EnergyPlus/ScheduleManager.hh>
 
 namespace EnergyPlus {
 
@@ -93,17 +94,26 @@ namespace IceThermalStorage {
         Num
     };
 
+    struct ThermalStorageSizingData
+    {
+        std::string name;
+        Real64 onPeakStart = 0.0;
+        Real64 onPeakEnd = 0.0;
+        Real64 sizingFactor = 1.0;
+    };
+
     struct SimpleIceStorageData : PlantComponent
     {
-        std::string Name;         // User identifier
-        std::string ITSType;      // Ice Thermal Storage Type
-        enum ITSType ITSType_Num; // Storage Type as number (IceOnCoilInternal,IceOnCoilExternal)
-        int MapNum;               // Number to Map structure
-        int UratePtr;             // Charging/Discharging SchedulePtr: u value schedule
-        Real64 ITSNomCap;         // Design nominal capacity of Ice Thermal Storage [J] (user input in GJ)
-        int PltInletNodeNum;      // Node number on the inlet side of the plant
-        int PltOutletNodeNum;     // Node number on the outlet side of the plant
-                                  // loop topology variables
+        std::string Name;                     // User identifier
+        std::string ITSType;                  // Ice Thermal Storage Type
+        enum ITSType ITSType_Num;             // Storage Type as number (IceOnCoilInternal,IceOnCoilExternal)
+        int MapNum;                           // Number to Map structure
+        int UratePtr;                         // Charging/Discharging SchedulePtr: u value schedule
+        Real64 ITSNomCap;                     // Design nominal capacity of Ice Thermal Storage [J] (user input in GJ)
+        bool NomCapacityWasAutoSized = false; // Design storage capacity of Ice Thermal Storage system was autosized
+        int PltInletNodeNum;                  // Node number on the inlet side of the plant
+        int PltOutletNodeNum;                 // Node number on the outlet side of the plant
+                                              // loop topology variables
         PlantLocation plantLoc;
         Real64 DesignMassFlowRate;
         Real64 FreezeTemp;
@@ -134,6 +144,7 @@ namespace IceThermalStorage {
 
         bool MyPlantScanFlag;
         bool MyEnvrnFlag2;
+        int TESSizingIndex = 0;
 
         // Default Constructor
         SimpleIceStorageData()
@@ -150,7 +161,13 @@ namespace IceThermalStorage {
         void
         simulate(EnergyPlusData &state, const PlantLocation &calledFromLocation, bool FirstHVACIteration, Real64 &CurLoad, bool RunFlag) override;
 
+        void onInitLoopEquip([[maybe_unused]] EnergyPlusData &state, [[maybe_unused]] const PlantLocation &calledFromLocation) override;
+
         void oneTimeInit(EnergyPlusData &state) override;
+
+        void initialize(EnergyPlusData &state);
+
+        void size(EnergyPlusData &state);
 
         void CalcIceStorageDormant(EnergyPlusData &state);
 
@@ -177,10 +194,10 @@ namespace IceThermalStorage {
 
     struct DetailedIceStorageData : PlantComponent
     {
-        std::string Name;         // User identifier
-        std::string ScheduleName; // User identifier
-        int ScheduleIndex;        // Plant inlet node number for ice storage unit
-        Real64 NomCapacity;       // Design storage capacity of Ice Thermal Storage system [W-hr]
+        std::string Name;                     // User identifier // What kind of a comment is this?
+        Sched::Schedule *availSched;          // schedule (availability?)
+        Real64 NomCapacity;                   // Design storage capacity of Ice Thermal Storage system [W-hr]
+        bool NomCapacityWasAutoSized = false; // Design storage capacity of Ice Thermal Storage system was autosized
         // (User input for this parameter in GJ--need to convert to W-hr)
         int PlantInNodeNum;  // Plant inlet node number for ice storage unit
         int PlantOutNodeNum; // Plant outlet node number for ice storage unit
@@ -228,16 +245,17 @@ namespace IceThermalStorage {
         bool CheckEquipName;
         bool MyPlantScanFlag;
         bool MyEnvrnFlag2;
+        int TESSizingIndex = 0;
 
         // Default Constructor
         DetailedIceStorageData()
-            : ScheduleIndex(0), NomCapacity(0.0), PlantInNodeNum(0), PlantOutNodeNum(0), plantLoc{}, DesignMassFlowRate(0.0), MapNum(0),
-              DischargeCurveNum(0), ChargeCurveNum(0), CurveFitTimeStep(1.0), DischargeParaElecLoad(0.0), ChargeParaElecLoad(0.0), TankLossCoeff(0.0),
-              FreezingTemp(0.0), CompLoad(0.0), IceFracChange(0.0), IceFracRemaining(1.0), IceFracOnCoil(1.0), DischargingRate(0.0),
-              DischargingEnergy(0.0), ChargingRate(0.0), ChargingEnergy(0.0), MassFlowRate(0.0), BypassMassFlowRate(0.0), TankMassFlowRate(0.0),
-              InletTemp(0.0), OutletTemp(0.0), TankOutletTemp(0.0), ParasiticElecRate(0.0), ParasiticElecEnergy(0.0), DischargeIterErrors(0),
-              DischargeErrorCount(0), ChargeIterErrors(0), ChargeErrorCount(0), ResetXForITSFlag(false), MyEnvrnFlag(true), CheckEquipName(true),
-              MyPlantScanFlag(true), MyEnvrnFlag2(true)
+            : NomCapacity(0.0), PlantInNodeNum(0), PlantOutNodeNum(0), plantLoc{}, DesignMassFlowRate(0.0), MapNum(0), DischargeCurveNum(0),
+              ChargeCurveNum(0), CurveFitTimeStep(1.0), DischargeParaElecLoad(0.0), ChargeParaElecLoad(0.0), TankLossCoeff(0.0), FreezingTemp(0.0),
+              CompLoad(0.0), IceFracChange(0.0), IceFracRemaining(1.0), IceFracOnCoil(1.0), DischargingRate(0.0), DischargingEnergy(0.0),
+              ChargingRate(0.0), ChargingEnergy(0.0), MassFlowRate(0.0), BypassMassFlowRate(0.0), TankMassFlowRate(0.0), InletTemp(0.0),
+              OutletTemp(0.0), TankOutletTemp(0.0), ParasiticElecRate(0.0), ParasiticElecEnergy(0.0), DischargeIterErrors(0), DischargeErrorCount(0),
+              ChargeIterErrors(0), ChargeErrorCount(0), ResetXForITSFlag(false), MyEnvrnFlag(true), CheckEquipName(true), MyPlantScanFlag(true),
+              MyEnvrnFlag2(true)
         {
         }
 
@@ -249,7 +267,13 @@ namespace IceThermalStorage {
                       Real64 &CurLoad,
                       bool RunFlag) override;
 
+        void onInitLoopEquip([[maybe_unused]] EnergyPlusData &state, [[maybe_unused]] const PlantLocation &calledFromLocation) override;
+
         void oneTimeInit(EnergyPlusData &state) override;
+
+        void initialize(EnergyPlusData &state);
+
+        void size(EnergyPlusData &state);
 
         void SimDetailedIceStorage(EnergyPlusData &state);
 
@@ -279,7 +303,7 @@ namespace IceThermalStorage {
 
     Real64 TempIPtoSI(Real64 Temp);
 
-    void UpdateIceFractions(EnergyPlusData &state);
+    void UpdateIceFractions(EnergyPlusData const &state);
 
 } // namespace IceThermalStorage
 
@@ -287,11 +311,21 @@ struct IceThermalStorageData : BaseGlobalStruct
 {
 
     bool getITSInput = true;
+    int NumThermalStorageSizing = 0;
     int NumSimpleIceStorage = 0;
     int NumDetailedIceStorage = 0;
     int TotalNumIceStorage = 0;
+    EPVector<IceThermalStorage::ThermalStorageSizingData> ThermalStorageSizing;
     EPVector<IceThermalStorage::SimpleIceStorageData> SimpleIceStorage;
     EPVector<IceThermalStorage::DetailedIceStorageData> DetailedIceStorage;
+
+    void init_constant_state([[maybe_unused]] EnergyPlusData &state) override
+    {
+    }
+
+    void init_state([[maybe_unused]] EnergyPlusData &state) override
+    {
+    }
 
     void clear_state() override
     {

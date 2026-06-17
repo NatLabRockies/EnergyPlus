@@ -17,7 +17,7 @@ ANSI/AMCA Standard 208-18 defines the calculation method for FEI. The standard h
 
 Implementing FEI, based on the ANSI/AMCA standards 208-18 and 207-17, in EnergyPlus will enable its use to support: (1) building energy codes and standards, (2) mechanical engineers to evaluate and select energy efficient fans for various applications, and (3) utilities incentives/rebates programs for fans.
 
-## Fan Energy Index and Calculations 
+## Fan Energy Index and Calculations
 The following algorithms and calculation procedures (the SI unit version) are reproduced from the ANSI/AMCA standards 208-18: Calculation of the Fan Energy Index, and 207-17: Fan System Efficiency and Fan System Input Power Calculation.
 The fan energy index (FEI) is defined as a ratio of the electrical input power of a reference fan to the electrical input power of the actual fan for which the FEI is calculated, both calculated at the same duty point, i, which is characterized by a value of airflow (Q<sub>i</sub>) and pressure (P<sub>t,i</sub> or P<sub>s,i</sub>). FEI can be calculated for each point on a fan curve.
 
@@ -31,7 +31,7 @@ FEI<sub>s,i</sub>: FEI based on fan static pressure
 
 We propose to report the design point FEI of the current fan models, including **Fan:SystemModel**, **Fan:ConstantVolume**,**Fan:OnOff**, **Fan:VariableVolume**, and **FanPerformance:NightVentilation**. We will use the user defined Fan objects to simulate the actual fan electrical input power FEP<sub>act,i</sub> at the design operating point. We will calculate the reference fan electrical input power FEP<sub>ref,i</sub> using the following method.
 
-Reference fan shaft power (H<sub>i,ref</sub>) is calculated on a fan total pressure basis or a static pressure basis, depending on the category of the reference fan to calculate FEI. However, in EnergyPlus **Fan:SystemModel**, only total pressure is defined. So the FEI is reportable only for limited category of fans that are calculated based on the fan total pressure, namely Centrifugal Housed, Centrifugal Inline, Centrifugal PRV Supply, Axial Inline, Laboratory Exhaust, Jet Fan and Circulating 
+Reference fan shaft power (H<sub>i,ref</sub>) is calculated on a fan total pressure basis or a static pressure basis, depending on the category of the reference fan to calculate FEI. However, in EnergyPlus **Fan:SystemModel**, only total pressure is defined. So the FEI is reportable only for limited category of fans that are calculated based on the fan total pressure, namely Centrifugal Housed, Centrifugal Inline, Centrifugal PRV Supply, Axial Inline, Laboratory Exhaust, Jet Fan and Circulating
 
 The reference fan concept is used to normalize the FEI calculation to a consistent power level independent of fan type, fan drive components or any regulatory requirements. The reference fan electrical input power is a function of airflow and fan pressure. The reference fan is defined as one that requires a certain reference fan shaft power, uses a V-belt drive, has a motor efficiency based on the IE3 level for a four-pole 60 Hz motor and does not have a speed control.
 

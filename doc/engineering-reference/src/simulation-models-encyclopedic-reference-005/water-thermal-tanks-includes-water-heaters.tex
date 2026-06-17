@@ -102,7 +102,7 @@ Incorporating all of these equations into the original differential equation:
 
 \begin{equation}
   \begin{array}{rl}
-    mC_p\frac{dT}{dt} =& q_{heater} + q_{oncyc} + q_{offcyc} + UA_{oncyc} \PB{T_{amb} - T} + UA_{offcyc} \PB{T_{amb} - T} \\ 
+    mC_p\frac{dT}{dt} =& q_{heater} + q_{oncyc} + q_{offcyc} + UA_{oncyc} \PB{T_{amb} - T} + UA_{offcyc} \PB{T_{amb} - T} \\
                       &+ \varepsilon_{use}\dot{m}_{use}C_p \PB{T_{use} - T} + \varepsilon_{source}\dot{m}_{source}C_p \PB{T_{source} - T}
   \end{array}
 \end{equation}
@@ -179,7 +179,7 @@ Within a time step, the differential equation is solved separately for when the 
 
 An illustration of how the control algorithm cycles on and off is shown below.~ Ambient losses cool the tank temperature until the bottom of the deadband is reached (50\(^{\circ}\)C) at which point the heater cycles on and reheats the tank back to the setpoint (60\(^{\circ}\)C).~ A water draw causes hot water to be replaced with cold water from the water mains.~ The incoming cold water rapidly cools the tank.~ In this example the heater cannot keep up with the water draw and the tank temperature continues to drop until the water draw ends.
 
-Although the instantaneous tank water temperature may vary considerably within a timestep (due to cycling, etc.), only the average temperature over the timestep is reported.~ The model calculates the average by piece-wise integration of the area under the instantaneous temperature curve for each unique set of conditions.~ The instantaneous temperature is preserved internally by the program and is propogated from the end of one timestep to the beginning of the next.
+Although the instantaneous tank water temperature may vary considerably within a timestep (due to cycling, etc.), only the average temperature over the timestep is reported.~ The model calculates the average by piece-wise integration of the area under the instantaneous temperature curve for each unique set of conditions.~ The instantaneous temperature is preserved internally by the program and is propagated from the end of one timestep to the beginning of the next.
 
 \begin{figure}[hbtp] % fig 311
 \centering
@@ -189,7 +189,7 @@ Although the instantaneous tank water temperature may vary considerably within a
 
 \subsubsection{Chilled Water Tank Control Algorithm}\label{chilled-water-tank-control-algorithm}
 
-The input objects ThermalStorage:ChilledWater:Mixed and ThermalStorage:ChilledWater:Stratified provide chilled water tank models that do not include active cooling elements, there is only indirect cooling by remote devices such as a chiller.~ The tank's setpoint controls are used to determine if flow is to be requested through the source side of the tank.~ The setpont and deadband control scheme is similar to the water heater but the logic is flipped around for cooling instead of heating.~ The setpoint temperatue is the ``cut-out'' temperature and the setpoint plus deadband is the ``cut-in'' temperature.~ If the tank temperature ( or tank sensing node for stratified tanks) is above the ``cut-in'' temperature, then flow is requested.~ If temperatures are below the ``cut-out'' temperature, then flow is not requested.~ The chilled water tanks also have separate availability schedules for the use side and source side for additional control options.
+The input objects ThermalStorage:ChilledWater:Mixed and ThermalStorage:ChilledWater:Stratified provide chilled water tank models that do not include active cooling elements, there is only indirect cooling by remote devices such as a chiller.~ The tank's setpoint controls are used to determine if flow is to be requested through the source side of the tank.~ The setpoint and deadband control scheme is similar to the water heater but the logic is flipped around for cooling instead of heating.~ The setpoint temperature is the ``cut-out'' temperature and the setpoint plus deadband is the ``cut-in'' temperature.~ If the tank temperature ( or tank sensing node for stratified tanks) is above the ``cut-in'' temperature, then flow is requested.~ If temperatures are below the ``cut-out'' temperature, then flow is not requested.~ The chilled water tanks also have separate availability schedules for the use side and source side for additional control options.
 
 \subsubsection{Standard Ratings}\label{standard-ratings-000}
 
@@ -261,12 +261,12 @@ Each type of WaterHeater:HeatPump:* object is compatible with certain Coil:Water
 
 \begin{longtable}[c]{@{}ll@{}}
 \caption{Compatibility of Water Heater Objects \label{table:compatibility-of-water-heater-objects}} \tabularnewline
-\toprule 
+\toprule
 WaterHeater:HeatPump:* & WaterHeater:* \tabularnewline
 \midrule
 \endfirsthead
 
-\toprule 
+\toprule
 WaterHeater:HeatPump:* & WaterHeater:* \tabularnewline
 \midrule
 \endhead
@@ -498,7 +498,17 @@ Note: All heat pump water heater output variables, including off-cycle ancillary
 
 \subsection{Stratified Water Thermal Tank}\label{stratified-water-thermal-tank}
 
-The input objects WaterHeater:Stratified and ThermalStorage:ChilledWater:Stratified provide models for a stratified water thermal tank that divides the water tank into multiple nodes of equal volume. This model is used for both the stratified water heater and the stratified chilled water storage tank. The nodes are coupled by vertical conduction effects, internode fluid flow, and temperature inversion mixing. The object simultaneously solves the differential equations governing the energy balances on the nodes using an analytical solution to a simplified representation of the heat balance equation. The system time step is divided into multiple substeps at which control decisions are evaluated that allow the simulation to capture events that occur on a short time scale.
+The input objects WaterHeater:Stratified,
+ThermalStorage:ChilledWater:Stratified, and ThermalStorage:HotWater:Stratified
+provide models for a stratified water thermal tank that divides the water tank
+into multiple nodes of equal volume. This model is used for both the stratified
+water heater and the stratified hot and chilled water storage tank. The nodes are
+coupled by vertical conduction effects, internode fluid flow, and temperature
+inversion mixing. The object simultaneously solves the differential equations
+governing the energy balances on the nodes using an analytical solution to a
+simplified representation of the heat balance equation. The system time step is
+divided into multiple substeps at which control decisions are evaluated that
+allow the simulation to capture events that occur on a short time scale.
 
 \subsubsection{Energy Balance}\label{energy-balance-1}
 
@@ -548,7 +558,7 @@ The net heat transfer rate \emph{q\(_{net}\)} is the sum of gains and losses due
 
 \begin{equation}
   \begin{array}{ll}
-    q_{net,n} &= q_{heater,n} + q_{oncycpara,n} + q_{offcycpara,n} + q_{oncycloss,n} + q_{offcycloss,n} \\ 
+    q_{net,n} &= q_{heater,n} + q_{oncycpara,n} + q_{offcycpara,n} + q_{oncycloss,n} + q_{offcycloss,n} \\
               &+ q_{cond,n} + q_{use,n} + q_{source,n} + q_{flow,n}
   \end{array}
 \end{equation}
@@ -694,6 +704,15 @@ And for the use side connection:
   \end{array}
 \end{equation}
 
+Note that two schedule fields, ``Use Side Flow Direction Schedule'' and ``Source Side
+Flow Direction Schedule'', are available in the ThermalStorage:HotWater:Stratified
+to allow the user to specify the flow direction of the use side and source side
+plant connections. The schedule value of 1 indicates that the water flows in at
+the inlet node and out the outlet node, while a value of -1 indicates that the
+use side water flows out of the tank at the use side inlet node and in the
+outlet node. In short, the inlet and outlet nodes are swapped when the schedule
+is -1.
+
 \paragraph{Internodal Flow}
 
 \(q_{flow,n}\) is defined as:
@@ -749,9 +768,9 @@ To solve the differential equations the nodal heat balance equations are modifie
   \frac{d{T_n}}{dt} = a T_n + b
 \end{equation}
 
-Where $a$ is a constant and $b$ can be a function of either time or the temperature of adjacent nodes. If $b$ is assumed to be constant, the solution of the differential equation is readily solved. Since $b$ is not generally constant a reasonable approximation can be made by assuming $b$ is equal to its average value over the sub timestep. 
+Where $a$ is a constant and $b$ can be a function of either time or the temperature of adjacent nodes. If $b$ is assumed to be constant, the solution of the differential equation is readily solved. Since $b$ is not generally constant a reasonable approximation can be made by assuming $b$ is equal to its average value over the sub timestep.
 
-Solving the differential equation yields the following solution for the temperature of a node at the end of a sub timestep. 
+Solving the differential equation yields the following solution for the temperature of a node at the end of a sub timestep.
 
 \begin{equation}
   T_{final} = \left( T_{initial} + \frac{b}{a} \right) e ^ {a \Delta t} - \frac{b}{a}
@@ -817,20 +836,20 @@ The volume a water heater can be sized in the following ways depending on the de
 \begin{itemize}
   \item Peak Draw. The volume is determined from the loop design flow rate.~ The water heater is positioned on the supply side of a plant loop.~ After the plant sizing routines have run, the model~ obtains the design flow rate for all components on the demand side.~ The tank volume is then: \(V = {\dot V_{loop.des}}*{t_{draw}}\)
 
-  \item Residential HUD-FHA Minimum. The volume is determined from a set of rules defined in Table~\ref{table:residential-hud-fha-minimum}.~ This is from Chapter 48 of 1999 ASHRAE Handbook HVAC Applications, Americal Society of Heating Refrigeration and Air-conditioning Engineeers, Atlanta GA.~ (also used in the Building America Benchmark).
+  \item Residential HUD-FHA Minimum. The volume is determined from a set of rules defined in Table~\ref{table:residential-hud-fha-minimum}.~ This is from Chapter 48 of 1999 ASHRAE Handbook HVAC Applications, American Society of Heating Refrigeration and Air-conditioning Engineers, Atlanta GA.~ (also used in the Building America Benchmark).
 \end{itemize}
 
 % table 85
 {\scriptsize
 \begin{longtable}[c]{>{\raggedright}p{0.8in}p{0.35in}p{0.35in}p{0.35in}p{0.35in}p{0.35in}p{0.35in}p{0.35in}p{0.35in}p{0.35in}p{0.35in}p{0.35in}p{0.35in}}
 \caption{Residential HUD-FHA Minimum \label{table:residential-hud-fha-minimum}} \tabularnewline
-\toprule 
+\toprule
 \multicolumn{13}{p{5in}}{\raggedright Residential HUD-FHA Minimum DHW Storage and Burner Capacity (ASHRAE 1999)} \tabularnewline
 \midrule
 \endfirsthead
 
 \caption[]{Residential HUD-FHA Minimum} \tabularnewline
-\toprule 
+\toprule
 \multicolumn{13}{p{5in}}{\raggedright Residential HUD-FHA Minimum DHW Storage and Burner Capacity (ASHRAE 1999)} \tabularnewline
 \midrule
 \endhead
@@ -879,7 +898,7 @@ where:
 \end{equation}
 
 \begin{itemize}
-\item Residential HUD-FHA Minimum.~ The heater capacity is determined from a set of rules defined by the table above.~ This is from 1999 ASHRAE Handbook HVAC Applications, Americal Society of Heating Refrigeration and Air-conditioning Engineeers, Atlanta GA.~ (also used the Building America Benchmark).
+\item Residential HUD-FHA Minimum.~ The heater capacity is determined from a set of rules defined by the table above.~ This is from 1999 ASHRAE Handbook HVAC Applications, American Society of Heating Refrigeration and Air-conditioning Engineers, Atlanta GA.~ (also used the Building America Benchmark).
 \item Per Person.~ The heater capacity is determined by summing the design level of people in the model and using a user-entered factor for recovery capacity per person.~ The heater capacity is then:
 \end{itemize}
 
@@ -917,7 +936,7 @@ H = {\left( {\frac{{4~V~A{R^2}}}{\pi }} \right)^{1/3}}
 
 \subsubsection{Autosizing Plant Connection Flow Rates}\label{autosizing-plant-connection-flow-rates}
 
-When the water thermal tank is connected to a plant loop, it is convient to autosize the design volume flow rates through the plant connections.~ When the water thermal tank is connected to the supply side of plant loop and flow rates are autosized, the flow rate is the sum of the flow requests of all the various components on the demand side of that plant loop.~ When the water thermal tank is connected on the demand side of a plant loop (e.g.~as for indirect water heating with a boiler) and flow rates are autosized, the design flow rates are calculated with the following equation:
+When the water thermal tank is connected to a plant loop, it is convenient to autosize the design volume flow rates through the plant connections.~ When the water thermal tank is connected to the supply side of plant loop and flow rates are autosized, the flow rate is the sum of the flow requests of all the various components on the demand side of that plant loop.~ When the water thermal tank is connected on the demand side of a plant loop (e.g.~as for indirect water heating with a boiler) and flow rates are autosized, the design flow rates are calculated with the following equation:
 
 \begin{equation}
 \dot V =  - \left( \frac{V}{t_{Recover} * 3600 * \varepsilon } \right) * Ln\left( \frac{T_{PlantDesign} - T_{Setpoint}}{T_{PlantDesign} - T_{start}}  \right)

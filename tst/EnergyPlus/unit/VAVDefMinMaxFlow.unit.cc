@@ -1,7 +1,7 @@
-// EnergyPlus, Copyright (c) 1996-2023, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
-// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other
+// National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
 // contributors. All rights reserved.
 //
 // NOTICE: This Software was developed under funding from the U.S. Department of Energy and the
@@ -69,15 +69,12 @@
 #include "Fixtures/EnergyPlusFixture.hh"
 
 using namespace EnergyPlus;
-using namespace EnergyPlus::DataHVACGlobals;
-using namespace EnergyPlus::DataLoopNode;
 using namespace EnergyPlus::GlobalNames;
 using namespace EnergyPlus::DataHeatBalance;
 using namespace EnergyPlus::DataSizing;
 using namespace EnergyPlus::DataZoneEquipment;
 using namespace EnergyPlus::HeatBalanceManager;
 using namespace EnergyPlus::Psychrometrics;
-using namespace EnergyPlus::ScheduleManager;
 using namespace EnergyPlus::SimAirServingZones;
 using namespace EnergyPlus::SingleDuct;
 using namespace EnergyPlus::SizingManager;
@@ -122,8 +119,6 @@ TEST_F(EnergyPlusFixture, VAVDefMinMaxFlowTestSizing1)
     //	set by the 0.4 max reheat fraction in Sizing:Zone
 
     bool ErrorsFound(false);
-
-    InitializePsychRoutines(*state);
 
     std::string const idf_objects = delimited_string({
         "	Zone,",
@@ -231,10 +226,13 @@ TEST_F(EnergyPlusFixture, VAVDefMinMaxFlowTestSizing1)
     });
 
     ASSERT_TRUE(process_idf(idf_objects));
+    state->init_state(*state);
 
     state->dataSize->FinalZoneSizing.allocate(1);
+    state->dataSize->FinalZoneSizing(1).allocateMemberArrays(96);
     state->dataSize->NumAirTerminalSizingSpec = 1;
     state->dataSize->TermUnitFinalZoneSizing.allocate(1);
+    state->dataSize->TermUnitFinalZoneSizing(1).allocateMemberArrays(96);
     state->dataSize->CalcFinalZoneSizing.allocate(1);
     state->dataSize->TermUnitSizing.allocate(1);
     GetZoneData(*state, ErrorsFound);
@@ -243,8 +241,6 @@ TEST_F(EnergyPlusFixture, VAVDefMinMaxFlowTestSizing1)
     GetZoneAirDistribution(*state); // get zone air distribution objects
     GetZoneSizingInput(*state);
     GetZoneEquipmentData(*state);
-    ProcessScheduleInput(*state);
-    state->dataScheduleMgr->ScheduleInputProcessed = true;
     GetZoneAirLoopEquipment(*state);
     GetSysInput(*state);
     state->dataSize->ZoneSizingRunDone = true;
@@ -314,8 +310,6 @@ TEST_F(EnergyPlusFixture, VAVDefMinMaxFlowTestSizing2)
     // Test whether all blank inputs for min cool flow and max heat and reheat flow yield sensible results
 
     bool ErrorsFound(false);
-
-    InitializePsychRoutines(*state);
 
     std::string const idf_objects = delimited_string({
         "	Zone,",
@@ -423,9 +417,12 @@ TEST_F(EnergyPlusFixture, VAVDefMinMaxFlowTestSizing2)
     });
 
     ASSERT_TRUE(process_idf(idf_objects));
+    state->init_state(*state);
 
     state->dataSize->FinalZoneSizing.allocate(1);
+    state->dataSize->FinalZoneSizing(1).allocateMemberArrays(96);
     state->dataSize->TermUnitFinalZoneSizing.allocate(1);
+    state->dataSize->TermUnitFinalZoneSizing(1).allocateMemberArrays(96);
     state->dataSize->NumAirTerminalSizingSpec = 1;
     state->dataSize->CalcFinalZoneSizing.allocate(1);
     state->dataSize->TermUnitSizing.allocate(1);
@@ -435,8 +432,6 @@ TEST_F(EnergyPlusFixture, VAVDefMinMaxFlowTestSizing2)
     GetZoneAirDistribution(*state); // get zone air distribution objects
     GetZoneSizingInput(*state);
     GetZoneEquipmentData(*state);
-    ProcessScheduleInput(*state);
-    state->dataScheduleMgr->ScheduleInputProcessed = true;
     GetZoneAirLoopEquipment(*state);
     GetSysInput(*state);
     state->dataSize->ZoneSizingRunDone = true;
@@ -487,8 +482,12 @@ TEST_F(EnergyPlusFixture, VAVDefMinMaxFlowTestSizing2)
     state->dataSingleDuct->sd_airterminal(1).ZoneFloorArea = state->dataHeatBal->Zone(1).FloorArea;
     UpdateTermUnitFinalZoneSizing(*state); // Fills the TermUnitFinalZoneSizing array
     state->dataSingleDuct->sd_airterminal(1).SizeSys(*state);
+    Real64 heatVolFlow = (state->dataSize->FinalZoneSizing(state->dataSize->CurZoneEqNum).DesHeatVolFlow >
+                          state->dataSize->FinalZoneSizing(state->dataSize->CurZoneEqNum).DesHeatVolFlowMax)
+                             ? state->dataSize->FinalZoneSizing(state->dataSize->CurZoneEqNum).DesHeatVolFlowMax
+                             : state->dataSize->FinalZoneSizing(state->dataSize->CurZoneEqNum).DesHeatVolFlow;
     EXPECT_NEAR(state->dataSingleDuct->sd_airterminal(state->dataSize->CurZoneEqNum).ZoneMinAirFracDes, 0.348739, 0.000001);
-    EXPECT_NEAR(state->dataSingleDuct->sd_airterminal(state->dataSize->CurZoneEqNum).MaxAirVolFlowRateDuringReheat, 0.196047, 0.000001);
+    EXPECT_NEAR(state->dataSingleDuct->sd_airterminal(state->dataSize->CurZoneEqNum).MaxAirVolFlowRateDuringReheat, heatVolFlow, 0.000001);
 
     state->dataLoopNodes->Node.deallocate();
     state->dataZoneEquip->ZoneEquipConfig.deallocate();
@@ -506,8 +505,6 @@ TEST_F(EnergyPlusFixture, VAVDefMinMaxFlowTestSizing3)
     // Test user input at the terminal unit level and make sure it overrides any defaults or input coming from Sizing:Zone
 
     bool ErrorsFound(false);
-
-    InitializePsychRoutines(*state);
 
     std::string const idf_objects = delimited_string({
         "	Zone,",
@@ -615,9 +612,12 @@ TEST_F(EnergyPlusFixture, VAVDefMinMaxFlowTestSizing3)
     });
 
     ASSERT_TRUE(process_idf(idf_objects));
+    state->init_state(*state);
 
     state->dataSize->FinalZoneSizing.allocate(1);
+    state->dataSize->FinalZoneSizing(1).allocateMemberArrays(96);
     state->dataSize->TermUnitFinalZoneSizing.allocate(1);
+    state->dataSize->TermUnitFinalZoneSizing(1).allocateMemberArrays(96);
     state->dataSize->CalcFinalZoneSizing.allocate(1);
     state->dataSize->TermUnitSizing.allocate(1);
     GetZoneData(*state, ErrorsFound);
@@ -626,8 +626,6 @@ TEST_F(EnergyPlusFixture, VAVDefMinMaxFlowTestSizing3)
     GetZoneAirDistribution(*state); // get zone air distribution objects
     GetZoneSizingInput(*state);
     GetZoneEquipmentData(*state);
-    ProcessScheduleInput(*state);
-    state->dataScheduleMgr->ScheduleInputProcessed = true;
     GetZoneAirLoopEquipment(*state);
     GetSysInput(*state);
     state->dataSize->ZoneSizingRunDone = true;
@@ -696,11 +694,9 @@ TEST_F(EnergyPlusFixture, VAVDefMinMaxFlowTestSizing4)
 {
 
     // Test all blank inputs for min cool flow and max heat and reheat flow and there have been no sizing calculations.
-    // What will happen? It is suposed to autocalculate inputs anyway!
+    // What will happen? It is supposed to autocalculate inputs anyway!
 
     bool ErrorsFound(false);
-
-    InitializePsychRoutines(*state);
 
     std::string const idf_objects = delimited_string({
         "	Zone,",
@@ -808,9 +804,12 @@ TEST_F(EnergyPlusFixture, VAVDefMinMaxFlowTestSizing4)
     });
 
     ASSERT_TRUE(process_idf(idf_objects));
+    state->init_state(*state);
 
     state->dataSize->FinalZoneSizing.allocate(1);
+    state->dataSize->FinalZoneSizing(1).allocateMemberArrays(96);
     state->dataSize->TermUnitFinalZoneSizing.allocate(1);
+    state->dataSize->TermUnitFinalZoneSizing(1).allocateMemberArrays(96);
     state->dataSize->CalcFinalZoneSizing.allocate(1);
     state->dataSize->TermUnitSizing.allocate(1);
     GetZoneData(*state, ErrorsFound);
@@ -819,8 +818,6 @@ TEST_F(EnergyPlusFixture, VAVDefMinMaxFlowTestSizing4)
     // GetZoneAirDistribution(*state); // get zone air distribution objects
     // GetZoneSizingInput(*state);
     GetZoneEquipmentData(*state);
-    ProcessScheduleInput(*state);
-    state->dataScheduleMgr->ScheduleInputProcessed = true;
     GetZoneAirLoopEquipment(*state);
     GetSysInput(*state);
     state->dataSize->ZoneSizingRunDone = false;
@@ -848,8 +845,6 @@ TEST_F(EnergyPlusFixture, VAVDefMinMaxFlowTestSizing5)
     // Test max heating input in Sizing:Zone - use Heating Maximum Air Flow input and Design Day sizing
 
     bool ErrorsFound(false);
-
-    InitializePsychRoutines(*state);
 
     std::string const idf_objects = delimited_string({
         "	Zone,",
@@ -957,10 +952,12 @@ TEST_F(EnergyPlusFixture, VAVDefMinMaxFlowTestSizing5)
     });
 
     ASSERT_TRUE(process_idf(idf_objects));
-
+    state->init_state(*state);
     state->dataSize->FinalZoneSizing.allocate(1);
+    state->dataSize->FinalZoneSizing(1).allocateMemberArrays(96);
     state->dataSize->NumAirTerminalSizingSpec = 1;
     state->dataSize->TermUnitFinalZoneSizing.allocate(1);
+    state->dataSize->TermUnitFinalZoneSizing(1).allocateMemberArrays(96);
     state->dataSize->CalcFinalZoneSizing.allocate(1);
     state->dataSize->TermUnitSizing.allocate(1);
     GetZoneData(*state, ErrorsFound);
@@ -969,8 +966,6 @@ TEST_F(EnergyPlusFixture, VAVDefMinMaxFlowTestSizing5)
     GetZoneAirDistribution(*state); // get zone air distribution objects
     GetZoneSizingInput(*state);
     GetZoneEquipmentData(*state);
-    ProcessScheduleInput(*state);
-    state->dataScheduleMgr->ScheduleInputProcessed = true;
     GetZoneAirLoopEquipment(*state);
     GetSysInput(*state);
     state->dataSize->ZoneSizingRunDone = true;

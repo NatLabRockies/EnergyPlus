@@ -1,7 +1,7 @@
-// EnergyPlus, Copyright (c) 1996-2023, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
-// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other
+// National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
 // contributors. All rights reserved.
 //
 // NOTICE: This Software was developed under funding from the U.S. Department of Energy and the
@@ -67,8 +67,6 @@
 
 using namespace EnergyPlus;
 using namespace DXCoils;
-using namespace DataHVACGlobals;
-using Psychrometrics::InitializePsychRoutines;
 using Psychrometrics::PsyHFnTdbW;
 using Psychrometrics::PsyRhoAirFnPbTdbW;
 using Psychrometrics::PsyTwbFnTdbWPb;
@@ -82,7 +80,7 @@ TEST_F(EnergyPlusFixture, SecondaryDXCoolingCoilSingleSpeed_Test1)
     DXCoilNum = 1;
     state->dataDXCoils->DXCoil.allocate(state->dataDXCoils->NumDXCoils);
     state->dataDXCoils->DXCoil(DXCoilNum).IsSecondaryDXCoilInZone = true;
-    state->dataDXCoils->DXCoil(DXCoilNum).DXCoilType_Num = CoilDX_CoolingSingleSpeed;
+    state->dataDXCoils->DXCoil(DXCoilNum).coilType = HVAC::CoilType::CoolingDXSingleSpeed;
     state->dataDXCoils->DXCoil(DXCoilNum).TotalCoolingEnergyRate = 5000.0;
     state->dataDXCoils->DXCoil(DXCoilNum).ElecCoolingPower = 500.0;
     state->dataDXCoils->DXCoil(DXCoilNum).SecCoilSensibleHeatGainRate = 0.0;
@@ -105,7 +103,7 @@ TEST_F(EnergyPlusFixture, SecondaryDXCoolingCoilTwoSpeed_Test2)
     DXCoilNum = 1;
     state->dataDXCoils->DXCoil.allocate(state->dataDXCoils->NumDXCoils);
     state->dataDXCoils->DXCoil(DXCoilNum).IsSecondaryDXCoilInZone = true;
-    state->dataDXCoils->DXCoil(DXCoilNum).DXCoilType_Num = CoilDX_CoolingTwoSpeed;
+    state->dataDXCoils->DXCoil(DXCoilNum).coilType = HVAC::CoilType::CoolingDXTwoSpeed;
     state->dataDXCoils->DXCoil(DXCoilNum).TotalCoolingEnergyRate = 5000.0;
     state->dataDXCoils->DXCoil(DXCoilNum).ElecCoolingPower = 500.0;
     state->dataDXCoils->DXCoil(DXCoilNum).SecCoilSensibleHeatGainRate = 0.0;
@@ -128,7 +126,7 @@ TEST_F(EnergyPlusFixture, SecondaryDXCoolingCoilMultiSpeed_Test3)
     DXCoilNum = 1;
     state->dataDXCoils->DXCoil.allocate(state->dataDXCoils->NumDXCoils);
     state->dataDXCoils->DXCoil(DXCoilNum).IsSecondaryDXCoilInZone = true;
-    state->dataDXCoils->DXCoil(DXCoilNum).DXCoilType_Num = CoilDX_MultiSpeedCooling;
+    state->dataDXCoils->DXCoil(DXCoilNum).coilType = HVAC::CoilType::CoolingDXMultiSpeed;
     state->dataDXCoils->DXCoil(DXCoilNum).TotalCoolingEnergyRate = 5000.0;
     state->dataDXCoils->DXCoil(DXCoilNum).ElecCoolingPower = 500.0;
     state->dataDXCoils->DXCoil(DXCoilNum).SecCoilSensibleHeatGainRate = 0.0;
@@ -144,13 +142,14 @@ TEST_F(EnergyPlusFixture, SecondaryDXCoolingCoilMultiSpeed_Test3)
 TEST_F(EnergyPlusFixture, SecondaryDXHeatingCoilSingleSpeed_Test4)
 {
     // tests secondary DX coil calculation of single speed heat pump
+    state->init_state(*state);
     int DXCoilNum;
 
     state->dataDXCoils->NumDXCoils = 1;
     DXCoilNum = 1;
     state->dataDXCoils->DXCoil.allocate(state->dataDXCoils->NumDXCoils);
     state->dataDXCoils->DXCoil(DXCoilNum).IsSecondaryDXCoilInZone = true;
-    state->dataDXCoils->DXCoil(DXCoilNum).DXCoilType_Num = CoilDX_HeatingEmpirical;
+    state->dataDXCoils->DXCoil(DXCoilNum).coilType = HVAC::CoilType::HeatingDXSingleSpeed;
     state->dataDXCoils->DXCoil(DXCoilNum).MinOATCompressor = -5.0;
     state->dataDXCoils->DXCoil(DXCoilNum).TotalHeatingEnergyRate = 5500.0;
     state->dataDXCoils->DXCoil(DXCoilNum).ElecHeatingPower = 500.0;
@@ -162,7 +161,7 @@ TEST_F(EnergyPlusFixture, SecondaryDXHeatingCoilSingleSpeed_Test4)
     state->dataLoopNodes->Node.allocate(2);
     state->dataZoneTempPredictorCorrector->zoneHeatBalance.allocate(1);
     state->dataZoneTempPredictorCorrector->zoneHeatBalance(1).ZT = 10.0;
-    state->dataZoneTempPredictorCorrector->zoneHeatBalance(1).ZoneAirHumRat = 0.003;
+    state->dataZoneTempPredictorCorrector->zoneHeatBalance(1).airHumRat = 0.003;
     state->dataDXCoils->DXCoil(DXCoilNum).SecCoilAirFlow = 1.0;
     state->dataDXCoils->DXCoil(DXCoilNum).CompressorPartLoadRatio = 1.0;
     state->dataDXCoils->DXCoil(DXCoilNum).SecCoilRatedSHR = 1.0;
@@ -170,7 +169,6 @@ TEST_F(EnergyPlusFixture, SecondaryDXHeatingCoilSingleSpeed_Test4)
     state->dataEnvrn->OutBaroPress = 101325.0;
     state->dataDXCoils->DXCoil(DXCoilNum).AirInNode = 2;
     state->dataLoopNodes->Node(state->dataDXCoils->DXCoil(DXCoilNum).AirInNode).Temp = 20.0;
-    InitializePsychRoutines(*state);
 
     CalcSecondaryDXCoils(*state, DXCoilNum);
     EXPECT_DOUBLE_EQ(-5000.0, state->dataDXCoils->DXCoil(DXCoilNum).SecCoilTotalHeatRemovalRate);
@@ -215,10 +213,12 @@ TEST_F(EnergyPlusFixture, SecondaryDXHeatingCoilSingleSpeed_Test4)
     state->dataDXCoils->DXCoil.deallocate();
     state->dataLoopNodes->Node.deallocate();
 }
+
 TEST_F(EnergyPlusFixture, SecondaryDXHeatingCoilMultiSpeed_Test5)
 {
-
     // tests secondary DX coil calculation of multi speed heat pump
+    state->init_state(*state);
+
     int DXCoilNum;
 
     state->dataDXCoils->NumDXCoils = 1;
@@ -231,7 +231,7 @@ TEST_F(EnergyPlusFixture, SecondaryDXHeatingCoilMultiSpeed_Test5)
     state->dataDXCoils->DXCoil(DXCoilNum).MSSecCoilSHRFF.allocate(state->dataDXCoils->DXCoil(DXCoilNum).NumOfSpeeds);
 
     state->dataDXCoils->DXCoil(DXCoilNum).IsSecondaryDXCoilInZone = true;
-    state->dataDXCoils->DXCoil(DXCoilNum).DXCoilType_Num = CoilDX_MultiSpeedHeating;
+    state->dataDXCoils->DXCoil(DXCoilNum).coilType = HVAC::CoilType::HeatingDXMultiSpeed;
     state->dataDXCoils->DXCoil(DXCoilNum).MinOATCompressor = -5.0;
     state->dataDXCoils->DXCoil(DXCoilNum).TotalHeatingEnergyRate = 5500.0;
     state->dataDXCoils->DXCoil(DXCoilNum).ElecHeatingPower = 500.0;
@@ -243,7 +243,7 @@ TEST_F(EnergyPlusFixture, SecondaryDXHeatingCoilMultiSpeed_Test5)
     state->dataLoopNodes->Node.allocate(2);
     state->dataZoneTempPredictorCorrector->zoneHeatBalance.allocate(1);
     state->dataZoneTempPredictorCorrector->zoneHeatBalance(1).ZT = 10.0;
-    state->dataZoneTempPredictorCorrector->zoneHeatBalance(1).ZoneAirHumRat = 0.003;
+    state->dataZoneTempPredictorCorrector->zoneHeatBalance(1).airHumRat = 0.003;
     state->dataDXCoils->DXCoil(DXCoilNum).MSSecCoilAirFlow(1) = 1.0;
     state->dataDXCoils->DXCoil(DXCoilNum).MSSecCoilAirFlow(2) = 1.0;
     state->dataDXCoils->DXCoil(DXCoilNum).MSSecCoilSHRFT(1) = 0;
@@ -261,7 +261,6 @@ TEST_F(EnergyPlusFixture, SecondaryDXHeatingCoilMultiSpeed_Test5)
     state->dataEnvrn->OutBaroPress = 101325.0;
     state->dataDXCoils->DXCoil(DXCoilNum).AirInNode = 2;
     state->dataLoopNodes->Node(state->dataDXCoils->DXCoil(DXCoilNum).AirInNode).Temp = 20.0;
-    InitializePsychRoutines(*state);
 
     CalcSecondaryDXCoils(*state, DXCoilNum);
     EXPECT_DOUBLE_EQ(-5000.0, state->dataDXCoils->DXCoil(DXCoilNum).SecCoilTotalHeatRemovalRate);

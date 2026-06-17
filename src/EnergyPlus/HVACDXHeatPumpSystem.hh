@@ -1,7 +1,7 @@
-// EnergyPlus, Copyright (c) 1996-2023, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
-// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other
+// National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
 // contributors. All rights reserved.
 //
 // NOTICE: This Software was developed under funding from the U.S. Department of Energy and the
@@ -73,9 +73,8 @@ namespace HVACDXHeatPumpSystem {
         // Members
         std::string DXHeatPumpSystemType; // Type of DXHeatingSystem
         std::string Name;                 // Name of the DXHeatingSystem
-        int SchedPtr;
-        std::string HeatPumpCoilType;
-        int HeatPumpCoilType_Num;
+        Sched::Schedule *availSched = nullptr;
+        HVAC::CoilType coilType = HVAC::CoilType::Invalid;
         std::string HeatPumpCoilName;
         int HeatPumpCoilIndex;
         int DXHeatPumpCoilInletNodeNum;
@@ -83,10 +82,10 @@ namespace HVACDXHeatPumpSystem {
         int DXSystemControlNodeNum; // the node number of the node with the set point
         Real64 DesiredOutletTemp;   // the temperature at the unit outlet node needed
         // to meet the supply air set point.
-        Real64 PartLoadFrac; // part load fraction for current time step (single speed)
-        Real64 SpeedRatio;   // current compressor speed ratio (variable speed)
-        Real64 CycRatio;     // cycling part load ratio (variable speed)
-        int FanOpMode;       // Fan operating mode (see parameter above)
+        Real64 PartLoadFrac;                      // part load fraction for current time step (single speed)
+        Real64 SpeedRatio;                        // current compressor speed ratio (variable speed)
+        Real64 CycRatio;                          // cycling part load ratio (variable speed)
+        HVAC::FanOp fanOp = HVAC::FanOp::Invalid; // Fan operating mode (see parameter above)
         // Warning message variables
         int DXCoilSensPLRIter;      // used in DXCoil calculations
         int DXCoilSensPLRIterIndex; // used in DXCoil calculations
@@ -103,10 +102,9 @@ namespace HVACDXHeatPumpSystem {
 
         // Default Constructor
         DXHeatPumpSystemStruct()
-            : SchedPtr(0), HeatPumpCoilType_Num(0), HeatPumpCoilIndex(0), DXHeatPumpCoilInletNodeNum(0), DXHeatPumpCoilOutletNodeNum(0),
-              DXSystemControlNodeNum(0), DesiredOutletTemp(0.0), PartLoadFrac(0.0), SpeedRatio(0.0), CycRatio(0.0), FanOpMode(0),
-              DXCoilSensPLRIter(0), DXCoilSensPLRIterIndex(0), DXCoilSensPLRFail(0), DXCoilSensPLRFailIndex(0), OAUnitSetTemp(0.0), SpeedNum(0),
-              FaultyCoilSATFlag(false), FaultyCoilSATIndex(0), FaultyCoilSATOffset(0.0)
+            : HeatPumpCoilIndex(0), DXHeatPumpCoilInletNodeNum(0), DXHeatPumpCoilOutletNodeNum(0), DXSystemControlNodeNum(0), DesiredOutletTemp(0.0),
+              PartLoadFrac(0.0), SpeedRatio(0.0), CycRatio(0.0), DXCoilSensPLRIter(0), DXCoilSensPLRIterIndex(0), DXCoilSensPLRFail(0),
+              DXCoilSensPLRFailIndex(0), OAUnitSetTemp(0.0), SpeedNum(0), FaultyCoilSATFlag(false), FaultyCoilSATIndex(0), FaultyCoilSATOffset(0.0)
         {
         }
     };
@@ -154,7 +152,7 @@ namespace HVACDXHeatPumpSystem {
                                  Real64 PartLoadRatio, // compressor cycling ratio (1.0 is continuous, 0.0 is off)
                                  int CoilIndex,
                                  Real64 desiredTemp,
-                                 int FanOpMode);
+                                 HVAC::FanOp const fanOp);
 
     //******************************************************************************
 
@@ -163,7 +161,7 @@ namespace HVACDXHeatPumpSystem {
                                int CoilIndex,
                                Real64 desiredTemp,
                                int speedNumber,
-                               int FanOpMode);
+                               HVAC::FanOp const fanOp);
 
     int GetHeatingCoilInletNodeNum(EnergyPlusData &state, std::string const &DXCoilSysName, bool &InletNodeErrFlag);
 
@@ -180,31 +178,30 @@ struct HVACDXHeatPumpSystemData : BaseGlobalStruct
     Array1D_bool CheckEquipName;
     Array1D<HVACDXHeatPumpSystem::DXHeatPumpSystemStruct> DXHeatPumpSystem;
 
-    Real64 QZnReq = 0.001;              // Zone load (W), input to variable-speed DX coil
-    Real64 QLatReq = 0.0;               // Zone latent load, input to variable-speed DX coil
-    Real64 MaxONOFFCyclesperHour = 4.0; // Maximum cycling rate of heat pump [cycles/hr]
-    Real64 HPTimeConstant = 0.0;        // Heat pump time constant [s]
-    Real64 FanDelayTime = 0.0;          // Fan delay time, time delay for the HP's fan to
-    Real64 OnOffAirFlowRatio = 1.0;     // ratio of compressor on flow to average flow over time step
-    bool ErrorsFound = false;           // If errors detected in input
-    int TotalArgs = 0;                  // Total number of alpha and numeric arguments (max) for a certain object in the input file
+    Real64 QZnReq = 0.001;          // Zone load (W), input to variable-speed DX coil
+    Real64 QLatReq = 0.0;           // Zone latent load, input to variable-speed DX coil
+    Real64 OnOffAirFlowRatio = 1.0; // ratio of compressor on flow to average flow over time step
+    bool ErrorsFound = false;       // If errors detected in input
+    int TotalArgs = 0;              // Total number of alpha and numeric arguments (max) for a certain object in the input file
     bool MySetPointCheckFlag = true;
-    int SpeedNum = 1;                       // speed number of variable speed DX cooling coil
-    Real64 QZnReqr = 0.001;                 // Zone load (W), input to variable-speed DX coil
-    Real64 QLatReqr = 0.0;                  // Zone latent load, input to variable-speed DX coil
-    Real64 MaximumONOFFCyclesperHour = 4.0; // Maximum cycling rate of heat pump [cycles/hr]
-    Real64 TimeConstant = 0.0;              // Heat pump time constant [s]
-    Real64 HeatPumpFanDelayTime = 0.0;      // Fan delay time, time delay for the HP's fan to
-    Real64 OnandOffAirFlowRatio = 1.0;      // ratio of compressor on flow to average flow over time step
-    Real64 SpeedRatio = 0.0;                // SpeedRatio varies between 1.0 (higher speed) and 0.0 (lower speed)
-    int SpeedNumber = 1;                    // speed number of variable speed DX cooling coil
-    Real64 QZoneReq = 0.001;                // Zone load (W), input to variable-speed DX coil
-    Real64 QLatentReq = 0.0;                // Zone latent load, input to variable-speed DX coil
-    Real64 MaxONOFFCyclesperHr = 4.0;       // Maximum cycling rate of heat pump [cycles/hr]
-    Real64 HPTimeConst = 0.0;               // Heat pump time constant [s]
-    Real64 HPFanDelayTime = 0.0;            // Fan delay time, time delay for the HP's fan to
-    Real64 AirFlowOnOffRatio = 1.0;         // ratio of compressor on flow to average flow over time step
-    Real64 SpeedPartLoadRatio = 1.0;        // SpeedRatio varies between 1.0 (higher speed) and 0.0 (lower speed)
+    int SpeedNum = 1;                  // speed number of variable speed DX cooling coil
+    Real64 QZnReqr = 0.001;            // Zone load (W), input to variable-speed DX coil
+    Real64 QLatReqr = 0.0;             // Zone latent load, input to variable-speed DX coil
+    Real64 OnandOffAirFlowRatio = 1.0; // ratio of compressor on flow to average flow over time step
+    Real64 SpeedRatio = 0.0;           // SpeedRatio varies between 1.0 (higher speed) and 0.0 (lower speed)
+    int SpeedNumber = 1;               // speed number of variable speed DX cooling coil
+    Real64 QZoneReq = 0.001;           // Zone load (W), input to variable-speed DX coil
+    Real64 QLatentReq = 0.0;           // Zone latent load, input to variable-speed DX coil
+    Real64 AirFlowOnOffRatio = 1.0;    // ratio of compressor on flow to average flow over time step
+    Real64 SpeedPartLoadRatio = 1.0;   // SpeedRatio varies between 1.0 (higher speed) and 0.0 (lower speed)
+
+    void init_constant_state([[maybe_unused]] EnergyPlusData &state) override
+    {
+    }
+
+    void init_state([[maybe_unused]] EnergyPlusData &state) override
+    {
+    }
 
     void clear_state() override
     {
@@ -215,9 +212,6 @@ struct HVACDXHeatPumpSystemData : BaseGlobalStruct
         this->DXHeatPumpSystem.deallocate();
         this->QZnReq = 0.001;
         this->QLatReq = 0.0;
-        this->MaxONOFFCyclesperHour = 4.0;
-        this->HPTimeConstant = 0.0;
-        this->FanDelayTime = 0.0;
         this->OnOffAirFlowRatio = 1.0;
         this->ErrorsFound = false;
         this->TotalArgs = 0;
@@ -225,17 +219,11 @@ struct HVACDXHeatPumpSystemData : BaseGlobalStruct
         this->SpeedNum = 1;
         this->QZnReq = 0.001;
         this->QLatReq = 0.0;
-        this->MaxONOFFCyclesperHour = 4.0;
-        this->HPTimeConstant = 0.0;
-        this->FanDelayTime = 0.0;
         this->OnOffAirFlowRatio = 1.0;
         this->SpeedRatio = 0.0;
         this->SpeedNumber = 1;
         this->QZoneReq = 0.001;
         this->QLatentReq = 0.0;
-        this->MaxONOFFCyclesperHr = 4.0;
-        this->HPTimeConst = 0.0;
-        this->HPFanDelayTime = 0.0;
         this->AirFlowOnOffRatio = 1.0;
         this->SpeedPartLoadRatio = 1.0;
     }

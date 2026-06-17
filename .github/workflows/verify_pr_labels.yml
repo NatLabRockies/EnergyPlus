@@ -1,0 +1,17 @@
+name: Pull Request Labels
+
+on:
+  pull_request:
+    types: [opened, labeled, unlabeled, synchronize]
+
+jobs:
+  check_pr_labels:
+    name: Verification
+    runs-on: ubuntu-latest
+    steps:
+      - name: Verify PR label action
+        uses: mheap/github-action-required-labels@v5
+        with:
+          mode: minimum
+          count: 1
+          labels: "Defect, Refactoring, NewFeature, Performance, DoNotPublish"

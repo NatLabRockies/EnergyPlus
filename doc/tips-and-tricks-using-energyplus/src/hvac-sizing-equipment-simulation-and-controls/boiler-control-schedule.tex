@@ -1,9 +1,0 @@
-\section{Boiler Control Schedule}\label{boiler-control-schedule}
-
-\emph{How can I get my boiler to only work when the outdoor temperature is less than 5°C?}
-
-To schedule the boiler to work only when the outdoor dry bulb temperature is below 5°C, create two schedules based on the temperatures in the weather file. You can do this by reporting Outdoor Dry Bulb hourly, then make a spreadsheet with two columns, one which = 1 whenever ODB≥5, and the other which = 1 whenever ODB \textless{} 5. Save this spreadsheet as a csv format file, and then you can use Schedule:File to read these as EnergyPlus schedules. Use these schedules in the PlantEquipmentOperationSchemes object to make ``boiler heating'' active in cold weather and ``heatpump Heating'' active in warmer weather.
-
-Note that you will need to have two PlantEquipmentList objects, one which lists only the boiler, and the other which lists only the heat pump. And the two different PlantEquipmentOperation:HeatingLoad objects should reference different PlantEquipmentList objects.
-
-Report temperatures and flow rates at selected points on the hot water loop to see if things are working properly.

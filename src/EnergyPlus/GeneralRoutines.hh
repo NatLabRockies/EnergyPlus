@@ -1,7 +1,7 @@
-// EnergyPlus, Copyright (c) 1996-2023, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
-// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other
+// National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
 // contributors. All rights reserved.
 //
 // NOTICE: This Software was developed under funding from the U.S. Department of Energy and the
@@ -53,12 +53,11 @@
 #include <ObjexxFCL/Optional.hh>
 
 // EnergyPlus Headers
-#include <EnergyPlus/ConvectionCoefficients.hh>
 #include <EnergyPlus/Data/BaseData.hh>
-#include <EnergyPlus/DataSurfaces.hh>
 #include <EnergyPlus/EnergyPlus.hh>
 #include <EnergyPlus/Plant/Enums.hh>
 #include <EnergyPlus/Plant/PlantLocation.hh>
+#include <EnergyPlus/ScheduleManager.hh>
 
 namespace EnergyPlus {
 
@@ -154,8 +153,8 @@ void CheckSysSizing(EnergyPlusData &state,
 void CheckThisAirSystemForSizing(EnergyPlusData &state, int const AirLoopNum, bool &AirLoopWasSized);
 
 void CheckZoneSizing(EnergyPlusData &state,
-                     std::string_view const CompType, // Component Type (e.g. Chiller:Electric)
-                     std::string const &CompName      // Component Name (e.g. Big Chiller)
+                     std::string_view CompType, // Component Type (e.g. Chiller:Electric)
+                     std::string_view CompName  // Component Name (e.g. Big Chiller)
 );
 
 void CheckThisZoneForSizing(EnergyPlusData &state,
@@ -163,55 +162,24 @@ void CheckThisZoneForSizing(EnergyPlusData &state,
                             bool &ZoneWasSized);
 
 void ValidateComponent(EnergyPlusData &state,
-                       std::string_view CompType,    // Component Type (e.g. Chiller:Electric)
-                       std::string const &CompName,  // Component Name (e.g. Big Chiller)
-                       bool &IsNotOK,                // .TRUE. if this component pair is invalid
-                       std::string const &CallString // Context of this pair -- for error message
+                       std::string_view CompType,   // Component Type (e.g. Chiller:Electric)
+                       std::string const &CompName, // Component Name (e.g. Big Chiller)
+                       bool &IsNotOK,               // .TRUE. if this component pair is invalid
+                       std::string_view CallString  // Context of this pair -- for error message
 );
 
 void ValidateComponent(EnergyPlusData &state,
-                       std::string const &CompType,    // Component Type (e.g. Chiller:Electric)
+                       std::string_view CompType,      // Component Type (e.g. Chiller:Electric)
                        std::string const &CompValType, // Component "name" field type
                        std::string const &CompName,    // Component Name (e.g. Big Chiller)
                        bool &IsNotOK,                  // .TRUE. if this component pair is invalid
-                       std::string const &CallString   // Context of this pair -- for error message
+                       std::string_view CallString     // Context of this pair -- for error message
 );
 
-void CalcPassiveExteriorBaffleGap(EnergyPlusData &state,
-                                  const Array1D_int &SurfPtrARR, // Array of indexes pointing to Surface structure in DataSurfaces
-                                  Real64 const VentArea,         // Area available for venting the gap [m2]
-                                  Real64 const Cv,               // Oriface coefficient for volume-based discharge, wind-driven [--]
-                                  Real64 const Cd,               // oriface coefficient for discharge,  buoyancy-driven [--]
-                                  Real64 const HdeltaNPL,        // Height difference from neutral pressure level [m]
-                                  Real64 const SolAbs,           // solar absorptivity of baffle [--]
-                                  Real64 const AbsExt,           // thermal absorptance/emittance of baffle material [--]
-                                  Real64 const Tilt,             // Tilt of gap [Degrees]
-                                  Real64 const AspRat,           // aspect ratio of gap  Height/gap [--]
-                                  Real64 const GapThick,         // Thickness of air space between baffle and underlying heat transfer surface
-                                  DataSurfaces::SurfaceRoughness const Roughness, // Roughness index (1-6), see DataHeatBalance parameters
-                                  Real64 const QdotSource,                        // Source/sink term, e.g. electricity exported from solar cell [W]
-                                  Real64 &TsBaffle,                               // Temperature of baffle (both sides) use lagged value on input [C]
-                                  Real64 &TaGap, // Temperature of air gap (assumed mixed) use lagged value on input [C]
-                                  ObjexxFCL::Optional<Real64> HcGapRpt = _,
-                                  ObjexxFCL::Optional<Real64> HrGapRpt = _,
-                                  ObjexxFCL::Optional<Real64> IscRpt = _,
-                                  ObjexxFCL::Optional<Real64> MdotVentRpt = _,
-                                  ObjexxFCL::Optional<Real64> VdotWindRpt = _,
-                                  ObjexxFCL::Optional<Real64> VdotBuoyRpt = _);
-
-//****************************************************************************
-
-void PassiveGapNusseltNumber(Real64 const AspRat, // Aspect Ratio of Gap height to gap width
-                             Real64 const Tilt,   // Tilt of gap, degrees
-                             Real64 const Tso,    // Temperature of gap surface closest to outside (K)
-                             Real64 const Tsi,    // Temperature of gap surface closest to zone (K)
-                             Real64 const Gr,     // Gap gas Grashof number
-                             Real64 &gNu          // Gap gas Nusselt number
-);
-
-void CalcBasinHeaterPower(EnergyPlusData &state,
+// Why is this in GeneralRoutines? Asking for a friend
+void CalcBasinHeaterPower(EnergyPlusData const &state,
                           Real64 const Capacity,     // Basin heater capacity per degree C below setpoint (W/C)
-                          int const SchedulePtr,     // Pointer to basin heater schedule
+                          Sched::Schedule *sched,    // Pointer to basin heater schedule
                           Real64 const SetPointTemp, // setpoint temperature for basin heater operation (C)
                           Real64 &Power              // Basin heater power (W)
 );
@@ -247,12 +215,22 @@ Real64 calcZoneSensibleOutput(Real64 const MassFlow, // air mass flow rate, {kg/
                               Real64 const TDBZone,  // dry-bulb temperature at zone air node {C}
                               Real64 const WZone);
 
+void CheckBranchEquipInZoneHVACEquipList(EnergyPlusData &state, int const branchNum, bool &errorsFound);
+
 struct GeneralRoutinesData : BaseGlobalStruct
 {
 
     bool MyICSEnvrnFlag = true;
     IntervalHalf ZoneInterHalf = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, false, false, false, false};
     ZoneEquipControllerProps ZoneController = {0.0, 0.0, 0.0, 0.0, 0.0};
+
+    void init_constant_state([[maybe_unused]] EnergyPlusData &state) override
+    {
+    }
+
+    void init_state([[maybe_unused]] EnergyPlusData &state) override
+    {
+    }
 
     void clear_state() override
     {

@@ -1,7 +1,7 @@
-// EnergyPlus, Copyright (c) 1996-2023, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
-// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other
+// National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
 // contributors. All rights reserved.
 //
 // NOTICE: This Software was developed under funding from the U.S. Department of Energy and the
@@ -54,6 +54,7 @@
 // EnergyPlus Headers
 #include <EnergyPlus/Data/BaseData.hh>
 #include <EnergyPlus/DataGlobals.hh>
+#include <EnergyPlus/DataSizing.hh>
 #include <EnergyPlus/EnergyPlus.hh>
 #include <EnergyPlus/Plant/Enums.hh>
 #include <EnergyPlus/Plant/PlantLocation.hh>
@@ -70,87 +71,74 @@ namespace HWBaseboardRadiator {
     struct HWBaseboardParams
     {
         // Members
-        std::string EquipID;
-        DataPlant::PlantEquipmentType EquipType;
+        std::string Name;
+        DataPlant::PlantEquipmentType EquipType = DataPlant::PlantEquipmentType::Invalid;
         std::string designObjectName; // Design Object
-        int DesignObjectPtr;
-        std::string Schedule;
-        Array1D_string SurfaceName;
+        int DesignObjectPtr = 0;
         Array1D_int SurfacePtr;
-        int ZonePtr;
-        int SchedPtr;
-        int WaterInletNode;
-        int WaterOutletNode;
-        int TotSurfToDistrib;
-        int ControlCompTypeNum;
-        int CompErrIndex;
-        Real64 AirMassFlowRate;
-        Real64 AirMassFlowRateStd;
-        Real64 WaterTempAvg;
-        Real64 RatedCapacity;
-        Real64 UA;
-        Real64 WaterMassFlowRate;
-        Real64 WaterMassFlowRateMax;
-        Real64 WaterMassFlowRateStd;
-        Real64 WaterVolFlowRateMax;
-        Real64 WaterInletTempStd;
-        Real64 WaterInletTemp;
-        Real64 WaterInletEnthalpy;
-        Real64 WaterOutletTempStd;
-        Real64 WaterOutletTemp;
-        Real64 WaterOutletEnthalpy;
-        Real64 AirInletTempStd;
-        Real64 AirInletTemp;
-        Real64 AirOutletTemp;
-        Real64 AirInletHumRat;
-        Real64 AirOutletTempStd;
-        Real64 FracConvect;
+        int ZonePtr = 0;
+        Sched::Schedule *availSched = nullptr;
+        int WaterInletNode = 0;
+        int WaterOutletNode = 0;
+        int TotSurfToDistrib = 0;
+        int ControlCompTypeNum = 0;
+        int CompErrIndex = 0;
+        Real64 AirMassFlowRate = 0.0;
+        Real64 AirMassFlowRateStd = 0.0;
+        Real64 WaterTempAvg = 0.0;
+        Real64 RatedCapacity = 0.0;
+        Real64 UA = 0.0;
+        Real64 WaterMassFlowRate = 0.0;
+        Real64 WaterMassFlowRateMax = 0.0;
+        Real64 WaterMassFlowRateStd = 0.0;
+        Real64 WaterVolFlowRateMax = 0.0;
+        Real64 WaterInletTempStd = 0.0;
+        Real64 WaterInletTemp = 0.0;
+        Real64 WaterInletEnthalpy = 0.0;
+        Real64 WaterOutletTempStd = 0.0;
+        Real64 WaterOutletTemp = 0.0;
+        Real64 WaterOutletEnthalpy = 0.0;
+        Real64 AirInletTempStd = 0.0;
+        Real64 AirInletTemp = 0.0;
+        Real64 AirOutletTemp = 0.0;
+        Real64 AirInletHumRat = 0.0;
+        Real64 AirOutletTempStd = 0.0;
+        Real64 FracConvect = 0.0;
         Array1D<Real64> FracDistribToSurf;
-        Real64 TotPower;
-        Real64 Power;
-        Real64 ConvPower;
-        Real64 RadPower;
-        Real64 TotEnergy;
-        Real64 Energy;
-        Real64 ConvEnergy;
-        Real64 RadEnergy;
-        PlantLocation plantLoc;
-        int BBLoadReSimIndex;
-        int BBMassFlowReSimIndex;
-        int BBInletTempFlowReSimIndex;
-        int HeatingCapMethod;         // - Method for heating capacity scaled sizing calculation (HeatingDesignCapacity, CapacityPerFloorArea,
-                                      // FracOfAutosizedHeatingCapacity)
-        Real64 ScaledHeatingCapacity; // - scaled maximum heating capacity {W} or scalable variable of zone HVAC equipment, {-}, or {W/m2}
-
-        // Default Constructor
-        HWBaseboardParams()
-            : EquipType(DataPlant::PlantEquipmentType::Invalid), DesignObjectPtr(0), ZonePtr(0), SchedPtr(0), WaterInletNode(0), WaterOutletNode(0),
-              TotSurfToDistrib(0), ControlCompTypeNum(0), CompErrIndex(0), AirMassFlowRate(0.0), AirMassFlowRateStd(0.0), WaterTempAvg(0.0),
-              RatedCapacity(0.0), UA(0.0), WaterMassFlowRate(0.0), WaterMassFlowRateMax(0.0), WaterMassFlowRateStd(0.0), WaterVolFlowRateMax(0.0),
-              WaterInletTempStd(0.0), WaterInletTemp(0.0), WaterInletEnthalpy(0.0), WaterOutletTempStd(0.0), WaterOutletTemp(0.0),
-              WaterOutletEnthalpy(0.0), AirInletTempStd(0.0), AirInletTemp(0.0), AirOutletTemp(0.0), AirInletHumRat(0.0), AirOutletTempStd(0.0),
-              FracConvect(0.0), TotPower(0.0), Power(0.0), ConvPower(0.0), RadPower(0.0), TotEnergy(0.0), Energy(0.0), ConvEnergy(0.0),
-              RadEnergy(0.0), plantLoc{}, BBLoadReSimIndex(0), BBMassFlowReSimIndex(0), BBInletTempFlowReSimIndex(0), HeatingCapMethod(0),
-              ScaledHeatingCapacity(0.0)
-        {
-        }
+        Real64 TotPower = 0.0;
+        Real64 Power = 0.0;
+        Real64 ConvPower = 0.0;
+        Real64 RadPower = 0.0;
+        Real64 TotEnergy = 0.0;
+        Real64 Energy = 0.0;
+        Real64 ConvEnergy = 0.0;
+        Real64 RadEnergy = 0.0;
+        PlantLocation plantLoc = {};
+        int BBLoadReSimIndex = 0;
+        int BBMassFlowReSimIndex = 0;
+        int BBInletTempFlowReSimIndex = 0;
+        int HeatingCapMethod = 0;            // - Method for heating capacity scaled sizing calculation (HeatingDesignCapacity, CapacityPerFloorArea,
+                                             // FracOfAutosizedHeatingCapacity)
+        Real64 ScaledHeatingCapacity = 0.0;  // - scaled maximum heating capacity {W} or scalable variable of zone HVAC equipment, {-}, or {W/m2}
+        Real64 ZeroBBSourceSumHATsurf = 0.0; // used in baseboard energy balance
+        // Record keeping variables used to calculate QBBRadSrcAvg locally
+        Real64 QBBRadSource = 0.0;       // Need to keep the last value in case we are still iterating
+        Real64 QBBRadSrcAvg = 0.0;       // Need to keep the last value in case we are still iterating
+        Real64 LastSysTimeElapsed = 0.0; // Need to keep the last value in case we are still iterating
+        Real64 LastTimeStepSys = 0.0;    // Need to keep the last value in case we are still iterating
+        Real64 LastQBBRadSrc = 0.0;      // Need to keep the last value in case we are still iterating
     };
 
     struct HWBaseboardDesignData : HWBaseboardParams
     {
         // Members
         std::string designName;
-        int HeatingCapMethod;         // - Method for heating capacity scaledsizing calculation (HeatingDesignCapacity, CapacityPerFloorArea,
-                                      // FracOfAutosizedHeatingCapacity)
-        Real64 ScaledHeatingCapacity; // - scaled maximum heating capacity {W} or scalable variable of zone HVAC equipment, {-}, or {W/m2}
-        Real64 Offset;
-        Real64 FracRadiant;
-        Real64 FracDistribPerson;
-
-        // Default Constructor
-        HWBaseboardDesignData() : HeatingCapMethod(0), ScaledHeatingCapacity(0.0), Offset(0.0), FracRadiant(0.0), FracDistribPerson(0.0)
-        {
-        }
+        // - Method for heating capacity scaledsizing calculation (HeatingDesignCapacity, CapacityPerFloorArea, FracOfAutosizedHeatingCapacity)
+        DataSizing::DesignSizingType HeatingCapMethod = DataSizing::DesignSizingType::Invalid;
+        Real64 ScaledHeatingCapacity = 0.0; // scaled maximum heating capacity {W} or scalable variable of zone HVAC equipment, {-}, or {W/m2}
+        Real64 Offset = 0.0;
+        Real64 FracRadiant = 0.0;
+        Real64 FracDistribPerson = 0.0;
     };
 
     struct HWBaseboardNumericFieldData
@@ -216,48 +204,39 @@ namespace HWBaseboardRadiator {
 struct HWBaseboardRadiatorData : BaseGlobalStruct
 {
 
-    Array1D<Real64> QBBRadSource;         // Need to keep the last value in case we are still iterating
-    Array1D<Real64> QBBRadSrcAvg;         // Need to keep the last value in case we are still iterating
-    Array1D<Real64> ZeroSourceSumHATsurf; // Equal to the SumHATsurf for all the walls in a zone with no source
-    // Record keeping variables used to calculate QBBRadSrcAvg locally
-    Array1D<Real64> LastQBBRadSrc;      // Need to keep the last value in case we are still iterating
-    Array1D<Real64> LastSysTimeElapsed; // Need to keep the last value in case we are still iterating
-    Array1D<Real64> LastTimeStepSys;    // Need to keep the last value in case we are still iterating
     Array1D_bool MySizeFlag;
     Array1D_bool CheckEquipName;
     Array1D_bool SetLoopIndexFlag; // get loop number flag
-    Array1D_string HWBaseboardDesignNames;
     int NumHWBaseboards = 0;
     int NumHWBaseboardDesignObjs = 0; // Number of HW Baseboard systems design objects
     // Object Data
     Array1D<HWBaseboardRadiator::HWBaseboardParams> HWBaseboard;
     Array1D<HWBaseboardRadiator::HWBaseboardDesignData> HWBaseboardDesignObject;
     Array1D<HWBaseboardRadiator::HWBaseboardNumericFieldData> HWBaseboardNumericFields;
-    Array1D<HWBaseboardRadiator::HWBaseboardDesignNumericFieldData> HWBaseboardDesignNumericFields;
     bool GetInputFlag = true; // One time get input flag
     bool MyOneTimeFlag = true;
     int Iter = 0;
     bool MyEnvrnFlag2 = true;
     Array1D_bool MyEnvrnFlag;
 
+    void init_constant_state([[maybe_unused]] EnergyPlusData &state) override
+    {
+    }
+
+    void init_state([[maybe_unused]] EnergyPlusData &state) override
+    {
+    }
+
     void clear_state() override
     {
-        this->QBBRadSource.clear();
-        this->QBBRadSrcAvg.clear();
-        this->ZeroSourceSumHATsurf.clear();
-        this->LastQBBRadSrc.clear();
-        this->LastSysTimeElapsed.clear();
-        this->LastTimeStepSys.clear();
         this->MySizeFlag.clear();
         this->CheckEquipName.clear();
         this->SetLoopIndexFlag.clear();
-        this->HWBaseboardDesignNames.clear();
         this->NumHWBaseboards = 0;
         this->NumHWBaseboardDesignObjs = 0;
         this->HWBaseboard.clear();
         this->HWBaseboardDesignObject.clear();
         this->HWBaseboardNumericFields.clear();
-        this->HWBaseboardDesignNumericFields.clear();
         this->GetInputFlag = true;
         this->MyOneTimeFlag = true;
         this->MyEnvrnFlag.clear();

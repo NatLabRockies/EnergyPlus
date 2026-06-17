@@ -4,9 +4,6 @@
 ! Moisture Material Reference Data Set for Effective Moisture Penetration Depth (EMPD) materials
 ! The objects and syntax in this dataset comply with EnergyPlus, Version 8.4.0 and above, unless otherwise noted.
 
-!  Version,
-!    9.0;                    !- Version Identifier
-
   MaterialProperty:MoisturePenetrationDepth:Settings,
     Gypsum,                  !- Name
     6,                       !- Water Vapor Diffusion Resistance Factor {dimensionless}

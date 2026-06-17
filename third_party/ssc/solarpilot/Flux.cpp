@@ -45,13 +45,13 @@ Several algorithms in this class are based on the Hermite expansion technique fo
 Gaussian flux distributions which was developed by Dellin, Walzel, Lipps, et al, and implemented 
 in DELSOL3. These algorithms are publicly available through the following publications:
 
-[1] T. A. Dellin, “An improved Hermite expansion calculation of the flux distribution from 
-	heliostats,” Sandia National Laboratory, Livermore, CA, 1979. SAND79-8619.
-[2] M. D. Walzel, F. W. Lipps, and Vant-Hull, “A solar flux density calculation for a solar 
-	tower concentrator using a two-dimensional Hermite function expansion,” Solar Energy, 
-	vol. 19, pp. 239–256, 1977.
-[3] B. L. Kistler, “A user’s manual for DELSOL3: A computer code for calculating the optical 
-	performance and optimal system design for solar thermal central receiver plants,” Sandia 
+[1] T. A. Dellin, "An improved Hermite expansion calculation of the flux distribution from
+	heliostats", Sandia National Laboratory, Livermore, CA, 1979. SAND79-8619.
+[2] M. D. Walzel, F. W. Lipps, and Vant-Hull, "A solar flux density calculation for a solar
+	tower concentrator using a two-dimensional Hermite function expansion", Solar Energy,
+	vol. 19, pp. 239-256, 1977.
+[3] B. L. Kistler, "A user's manual for DELSOL3: A computer code for calculating the optical
+	performance and optimal system design for solar thermal central receiver plants", Sandia
 	National Laboratory, Albuquerque, NM, 1986. SAND86-8018.
 
 
@@ -433,8 +433,8 @@ void Flux::hermiteSunCoefs(var_map &V, matrix_t<double> &mSun) {
 			user_sun = &temp_sun;		//Assign
 		}
 		else if(suntype == 5){	//Create the Buie (2003) sun shape based on CSR
-			//[1] Buie, D., Dey, C., & Bosi, S. (2003). The effective size of the solar cone for solar concentrating systems. Solar energy, 74(2003), 417–427. 
-			//[2] Buie, D., Monger, A., & Dey, C. (2003). Sunshape distributions for terrestrial solar simulations. Solar Energy, 74(March 2003), 113–122. 
+			//[1] Buie, D., Dey, C., & Bosi, S. (2003). The effective size of the solar cone for solar concentrating systems. Solar energy, 74(2003), 417-427.
+			//[2] Buie, D., Monger, A., & Dey, C. (2003). Sunshape distributions for terrestrial solar simulations. Solar Energy, 74(March 2003), 113-122.
 
 			double
 				kappa, gamma, theta, chi;

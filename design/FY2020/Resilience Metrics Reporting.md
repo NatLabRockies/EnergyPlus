@@ -23,7 +23,7 @@ We reviewed literature on resilience metrics [1] and propose to add the followin
 
 1.1	Heat Index
 
-The heat index (HI) is an index that combines air temperature and relative humidity (Steadman 1979), in shaded areas, to posit a human-perceived equivalent temperature, as how hot it would feel if the humidity were some other value in the shade. The HI measures the temperature feels like to the human body when relative humidity is combined with the air temperature. HI is widely used in the United States. The Occupational Safety and Health Administration (OSHA) uses HI as an indicator to assess heat stress [2]. This has important considerations for the human body's comfort.  When the body gets too hot, it begins to perspire or sweat to cool itself off.  If the perspiration is not able to evaporate, the body cannot regulate its temperature. When the atmospheric moisture content (i.e. relative humidity) is high, the rate of evaporation from the body decreases.  In other words, the human body feels warmer in humid conditions.  The opposite is true when the relative humidity decreases because the rate of perspiration increases.  
+The heat index (HI) is an index that combines air temperature and relative humidity (Steadman 1979), in shaded areas, to posit a human-perceived equivalent temperature, as how hot it would feel if the humidity were some other value in the shade. The HI measures the temperature feels like to the human body when relative humidity is combined with the air temperature. HI is widely used in the United States. The Occupational Safety and Health Administration (OSHA) uses HI as an indicator to assess heat stress [2]. This has important considerations for the human body's comfort.  When the body gets too hot, it begins to perspire or sweat to cool itself off.  If the perspiration is not able to evaporate, the body cannot regulate its temperature. When the atmospheric moisture content (i.e. relative humidity) is high, the rate of evaporation from the body decreases.  In other words, the human body feels warmer in humid conditions.  The opposite is true when the relative humidity decreases because the rate of perspiration increases.
 
 Table 1 developed by U.S. National Oceanic and Atmospheric Administration (NOAA) is used to look up the heat index by temperature (°C) and relative humidity (%). The HI effects on human health are categorized at five levels: Safe, Caution, Extreme caution, Danger and Extreme danger, defined in Table 2 and color coded in Table 1.
 
@@ -38,8 +38,8 @@ Table 1 developed by U.S. National Oceanic and Atmospheric Administration (NOAA)
 |26.7 - 32.2 °C       |80–90 °F                |Caution: fatigue is possible with prolonged exposure and activity. Continuing activity could result in heat cramps.|
 |32.2 - 39.4 °C       |90–103 °F               |Extreme caution: heat cramps and heat exhaustion are possible. Continuing activity could result in heat stroke.    |
 |39.4 - 51.7 °C       |103–125 °F              |Danger: heat cramps and heat exhaustion are likely; heat stroke is probable with continued activity.               |
-|over 51.7 °C         |over 124 °F             |Extreme danger: heat stroke is imminent.  
-                                                                         
+|over 51.7 °C         |over 124 °F             |Extreme danger: heat stroke is imminent.
+
 The computation of the heat index is a refinement of a result obtained by multiple regression analysis carried out by Lans P. Rothfusz and described in a 1990 National Weather Service (NWS) Technical Attachment (SR 90-23). The calculation is based on degree Fahrenheit.
 
 The regression equation of Rothfusz is

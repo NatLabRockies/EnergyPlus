@@ -59,13 +59,13 @@ One more consideration is important in dealing with thermal comfort - the effect
 % table 78
 \begin{longtable}[c]{p{1.2in}p{2.0in}p{0.8in}p{0.8in}p{1.2in}}
 \caption{General Nomenclature list for Thermal Comfort Models \label{table:general-nomenclature-list-for-thermal-comfort}} \tabularnewline
-\toprule 
+\toprule
 Mathematical variable & Description & Units ~ & Range & Source Code Variable \tabularnewline
 \midrule
 \endfirsthead
 
 \caption[]{General Nomenclature list for Thermal Comfort Models} \tabularnewline
-\toprule 
+\toprule
 Mathematical variable & Description & Units ~ & Range & Source Code Variable \tabularnewline
 \midrule
 \endhead
@@ -92,13 +92,13 @@ Many researchers have been exploring ways to predict the thermal sensation of pe
 % table 79
 \begin{longtable}[c]{@{}ll@{}}
 \caption{Seven point Thermal Sensation Scale \label{table:seven-point-thermal-sensation-scale}} \tabularnewline
-\toprule 
+\toprule
 Sensation & Description \tabularnewline
 \midrule
 \endfirsthead
 
 \caption[]{Seven point Thermal Sensation Scale} \tabularnewline
-\toprule 
+\toprule
 Sensation & Description \tabularnewline
 \midrule
 \endhead
@@ -116,13 +116,13 @@ Sensation & Description \tabularnewline
 % table 80
 \begin{longtable}[c]{@{}ll@{}}
 \caption{Nine point Thermal Sensation Scale \label{table:nine-point-thermal-sensation-scale}} \tabularnewline
-\toprule 
+\toprule
 Sensation Value & Description \tabularnewline
 \midrule
 \endfirsthead
 
 \caption[]{Nine point Thermal Sensation Scale} \tabularnewline
-\toprule 
+\toprule
 Sensation Value & Description \tabularnewline
 \midrule
 \endhead
@@ -154,13 +154,13 @@ Fanger's Comfort model was the first human comfort model that was developed. It 
 % table 81
 \begin{longtable}[c]{p{1.2in}p{2.0in}p{0.8in}p{0.8in}p{1.2in}}
 \caption{Nomenclature list for Fanger model \label{table:nomenclature-list-for-fanger-model}} \tabularnewline
-\toprule 
+\toprule
 Mathematical variable & Description & Units & Range & Source Code Variable \tabularnewline
 \midrule
 \endfirsthead
 
 \caption[]{Nomenclature list for Fanger model} \tabularnewline
-\toprule 
+\toprule
 Mathematical variable & Description & Units & Range & Source Code Variable \tabularnewline
 \midrule
 \endhead
@@ -231,6 +231,8 @@ DryRespHeatLoss = 0.0014*ActLevel*(34.- AirTemp)
 \label{eq:FangerQr}
 \end{equation}
 
+It should be noted that the calculation of the clothing surface temperature in the previous two equations is based on ANSI/ASHRAE Standard 55-2020 and ISO 7730:2005. The equations and iterative algorithm used by EnergyPlus to calculate the clothing surface temperature variables are equivalent to these standards.
+
 In the EnergyPlus source code, Q\(_{dry}\), Q\(_{c}\) and Q\(_{r}\) are calculated using the following equations, respectively:
 
 DryHeatLoss = ConvHeatLoss + RadHeatLoss
@@ -292,13 +294,13 @@ The Pierce Two-Node model was developed at the John B. Pierce Foundation at Yale
 % table 82
 \begin{longtable}[c]{p{1.2in}p{2.0in}p{0.8in}p{0.8in}p{1.2in}}
 \caption{Nomenclature list for Pierce Two-Node model \label{table:nomenclature-list-for-pierce-two-node-model}} \tabularnewline
-\toprule 
+\toprule
 Mathematical variable & Description & Units ~ & Range & Source Code Variable \tabularnewline
 \midrule
 \endfirsthead
 
 \caption[]{Nomenclature list for Pierce Two-Node model} \tabularnewline
-\toprule 
+\toprule
 Mathematical variable & Description & Units ~ & Range & Source Code Variable \tabularnewline
 \midrule
 \endhead
@@ -389,7 +391,7 @@ SI{G_{sk}} = {T_{sk}} - 33.7
 SI{G_b} = {T_b} - 36.49
 \end{equation}
 
-In the EnergyPlus code, when SkinTemp is greater than SkinTempSet (33.7$^{\circ}$C), then SkinThermSigWarm = SkinTemp - SkinTempSet and 
+In the EnergyPlus code, when SkinTemp is greater than SkinTempSet (33.7$^{\circ}$C), then SkinThermSigWarm = SkinTemp - SkinTempSet and
 SkinThermSigCold = 0.0. Otherwise, when SkinTemp is less than or equal to SkinTempSet, then SkinThermSigWarm = 0.0 and SkinThermSigCold = SkinTempSet - SkinTemp.
 
 In the EnergyPlus code, when CoreTemp is greater than CoreTempSet (36.8$^{\circ}$C), then CoreThermSigWarm = CoreTemp - CoreTempSet and CoreThermSigCold = 0.0. Otherwise, when CoreTemp is less than or equal to CoreTempSet, then CoreThermSigWarm = 0.0 and CoreThermSigCold = CoreTempSet - CoreTemp.
@@ -618,7 +620,7 @@ Besides PMV*, the Pierce Two Node Model uses the indices TSENS and DISC as predi
 When \({T_b} \le {T_{b - c}}\), TSENS is calculated using:
 
 \begin{equation}
-TSEN{S_c} = 0.68175({T_b} - {T_{b - c}}) 
+TSEN{S_c} = 0.68175({T_b} - {T_{b - c}})
 \end{equation}
 
 Otherwise, when \({T_b} > {T_{b - c}}\), TSENS is calculated using:
@@ -656,13 +658,13 @@ The KSU Two-Node Model, developed at Kansas State University, was published in 1
 % table 83
 \begin{longtable}[c]{p{1.2in}p{2.0in}p{0.8in}p{0.8in}p{1.2in}}
 \caption{  Nomenclature list for KSU Two-Node model \protect \label{table:nomenclature-list-for-ksu-two-node-model}}\\
-\toprule 
+\toprule
 Mathematical variable & Description & Units ~ & Range & Source Code Variable \tabularnewline
 \midrule
 \endfirsthead
 
 \caption[]{Nomenclature list for KSU Two-Node model} \tabularnewline
-\toprule 
+\toprule
 Mathematical variable & Description & Units ~ & Range & Source Code Variable \tabularnewline
 \midrule
 \endhead
@@ -1105,15 +1107,15 @@ There are three options to calculate mean radiant temperature in the thermal com
 % table 84
 \begin{longtable}[c]{p{1.2in}p{2.0in}p{0.8in}p{0.8in}}
 \caption{Nomenclature and variable list for MRT calculation \label{table:nomenclature-and-variable-list-for-mrt}} \tabularnewline
-\toprule 
+\toprule
 Mathematical variable & Description & Units ~ & Range
 \tabularnewline
 \midrule
 \endfirsthead
 
 \caption[]{Nomenclature and variable list for MRT calculation} \tabularnewline
-\toprule 
-Mathematical variable & Description & Units ~ & Range  
+\toprule
+Mathematical variable & Description & Units ~ & Range
 \tabularnewline
 \midrule
 \endhead
@@ -1174,7 +1176,7 @@ The Pierce Two-Node Standard Effective Temperature (SET) model is used to accoun
 The following is a formal description of this process. To define the CE, we assert that it satisfies the following:
 
 \begin{equation}
-SET(t_{a}, t_{r}, v_{elev}, *) = SET(t_{a} - CE, t_{r} - CE, v_{still}, *) 
+SET(t_{a}, t_{r}, v_{elev}, *) = SET(t_{a} - CE, t_{r} - CE, v_{still}, *)
 \end{equation}
 
 where \(t_{a}\) is the average air temperature, \(t_{r}\) is the mean radiant temperature, \(v_{elev}\) is the elevated average air speed, such that \(v_{elev} > 0.1 m/s\) , \(v_{still}\) is the elevated average air speed (\(v_{still} = 0.1 m/s\)). The other parameters (indoor air humidity, clothing, metabolic rate) that stay the same are denoted by “*”.

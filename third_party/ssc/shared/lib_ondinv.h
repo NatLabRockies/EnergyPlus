@@ -53,10 +53,10 @@ public:
 	double INomDC; // [A]
 	double INomAC; // [A]
 	double IMaxAC; // [A]
-	double TPNom; // [캜]
-	double TPMax; // [캜]
-	double TPLim1; // [캜]
-	double TPLimAbs; // [캜]
+	double TPNom; // [째C]
+	double TPMax; // [째C]
+	double TPLim1; // [째C]
+	double TPLimAbs; // [째C]
 	double PLim1; // [kW]
 	double PLimAbs; // [kW]
 	double VNomEff[3]; // [V]
@@ -77,7 +77,7 @@ public:
 		/* inputs */
 		double Pdc,			/* Input power to inverter (Wdc) */
 		double Vdc,			/* Voltage input to inverter (Vdc) */
-		double Tamb,		/* Ambient temperature (캜) */
+		double Tamb,		/* Ambient temperature (째C) */
 
 		/* outputs */
 		double *Pac,		/* AC output power (Wac) */

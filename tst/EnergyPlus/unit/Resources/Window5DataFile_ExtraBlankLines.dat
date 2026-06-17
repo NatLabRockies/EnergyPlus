@@ -1,0 +1,75 @@
+Window5 Data File for EnergyPlus
+BERKELEY LAB WINDOW v7.6.4.0
+Date             : Thu Aug 20 14:36:08 2025
+Window name      : Example A
+Description      : Fixed (picture)
+# Glazing Systems: 1
+GLAZING SYSTEM DATA: Height Width nPanes Uval-center SC-center SHGC-center Tvis-center
+ System1         :     1398     1098      1      5.624       0.938       0.816       0.886
+FRAME/MULLION DATA: Width OutsideProj InsideProj Cond EdgeCondRatio SolAbs VisAbs Emiss  Orient'n (mull)
+    L Sill       :   50.8     25.4       25.4    500.000    0.524      0.300  0.300  0.90 
+    R Sill       :   50.8     25.4       25.4    500.000    0.524      0.300  0.300  0.90 
+    L Head       :   50.8     25.4       25.4    500.000    0.522      0.300  0.300  0.90 
+    R Head       :   50.8     25.4       25.4    500.000    0.522      0.300  0.300  0.90 
+    Top L Jamb   :   50.8     25.4       25.4    500.000    0.522      0.300  0.300  0.90 
+    Bot L Jamb   :   50.8     25.4       25.4    500.000    0.522      0.300  0.300  0.90 
+    Top R Jamb   :   50.8     25.4       25.4    500.000    0.522      0.300  0.300  0.90 
+    Bot R Jamb   :   50.8     25.4       25.4    500.000    0.522      0.300  0.300  0.90 
+    Mullion      :   0.0     0.0       0.0    0.000    0.000      0.000  0.000  0.00 
+    Average frame:   50.8     25.4       25.4    500.000    0.522      0.300  0.300  0.90 
+DIVIDER DATA     : Width OutsideProj InsideProj Cond EdgeCondRatio SolAbs VisAbs Emiss Type            #Hor #Vert
+ System1         :   0.0     0.0        0.0    0.000      0.000     0.000  0.000 0.000 None              0    0
+GLASS DATA       : Layer#  Thickness  Cond  Tsol  Rfsol  Rbsol  Tvis  Rfvis  Rbvis   Tir  EmissF   EmissB   SpectralDataFile
+ System1         :   1     5.664     1.000 0.771  0.072  0.073 0.886  0.085  0.085 0.000   0.840    0.840   Clear_6.VTA
+GAP DATA         : Gap# Thick nGasses
+GAS DATA         : GasName       Fraction MWeight    ACond      BCond   CCond      AVisc      BVisc  CVisc ASpHeat  BSpHeat CSpHeat
+GLAZING SYSTEM OPTICAL DATA
+Angle     0    10    20    30    40    50    60    70    80    90 Hemis
+System1
+Tsol  0.771 0.770 0.767 0.761 0.750 0.728 0.681 0.575 0.347 0.000 0.689
+Abs1  0.157 0.158 0.161 0.165 0.171 0.177 0.183 0.184 0.167 0.000 0.171
+Rfsol 0.072 0.072 0.072 0.074 0.079 0.095 0.137 0.241 0.486 1.000 0.130
+Rbsol 0.073 0.072 0.072 0.074 0.079 0.095 0.137 0.241 0.486 1.000 0.130
+Tvis  0.886 0.886 0.885 0.882 0.875 0.856 0.808 0.692 0.431 0.000 0.808
+Rfvis 0.085 0.085 0.085 0.087 0.093 0.111 0.157 0.272 0.533 1.000 0.149
+Rbvis 0.085 0.085 0.085 0.087 0.093 0.111 0.157 0.272 0.533 1.000 0.149
+
+Window5 Data File for EnergyPlus
+
+
+BERKELEY LAB WINDOW v7.6.4.0
+
+Date             : Thu Aug 20 14:36:08 2025
+Window name      : Example B
+Description      : Fixed (picture)
+# Glazing Systems: 1
+GLAZING SYSTEM DATA: Height Width nPanes Uval-center SC-center SHGC-center Tvis-center
+ System1         :     1398     1098      1      5.624       0.938       0.816       0.886
+FRAME/MULLION DATA: Width OutsideProj InsideProj Cond EdgeCondRatio SolAbs VisAbs Emiss  Orient'n (mull)
+    L Sill       :   50.8     25.4       25.4    500.000    0.524      0.300  0.300  0.90 
+    R Sill       :   50.8     25.4       25.4    500.000    0.524      0.300  0.300  0.90 
+    L Head       :   50.8     25.4       25.4    500.000    0.522      0.300  0.300  0.90 
+    R Head       :   50.8     25.4       25.4    500.000    0.522      0.300  0.300  0.90 
+    Top L Jamb   :   50.8     25.4       25.4    500.000    0.522      0.300  0.300  0.90 
+    Bot L Jamb   :   50.8     25.4       25.4    500.000    0.522      0.300  0.300  0.90 
+    Top R Jamb   :   50.8     25.4       25.4    500.000    0.522      0.300  0.300  0.90 
+    Bot R Jamb   :   50.8     25.4       25.4    500.000    0.522      0.300  0.300  0.90 
+    Mullion      :   0.0     0.0       0.0    0.000    0.000      0.000  0.000  0.00 
+    Average frame:   50.8     25.4       25.4    500.000    0.522      0.300  0.300  0.90 
+DIVIDER DATA     : Width OutsideProj InsideProj Cond EdgeCondRatio SolAbs VisAbs Emiss Type            #Hor #Vert
+ System1         :   0.0     0.0        0.0    0.000      0.000     0.000  0.000 0.000 None              0    0
+GLASS DATA       : Layer#  Thickness  Cond  Tsol  Rfsol  Rbsol  Tvis  Rfvis  Rbvis   Tir  EmissF   EmissB   SpectralDataFile
+ System1         :   1     5.664     1.000 0.771  0.072  0.073 0.886  0.085  0.085 0.000   0.840    0.840   Clear_6.VTA
+GAP DATA         : Gap# Thick nGasses
+GAS DATA         : GasName       Fraction MWeight    ACond      BCond   CCond      AVisc      BVisc  CVisc ASpHeat  BSpHeat CSpHeat
+GLAZING SYSTEM OPTICAL DATA
+Angle     0    10    20    30    40    50    60    70    80    90 Hemis
+System1
+Tsol  0.771 0.770 0.767 0.761 0.750 0.728 0.681 0.575 0.347 0.000 0.689
+Abs1  0.157 0.158 0.161 0.165 0.171 0.177 0.183 0.184 0.167 0.000 0.171
+Rfsol 0.072 0.072 0.072 0.074 0.079 0.095 0.137 0.241 0.486 1.000 0.130
+Rbsol 0.073 0.072 0.072 0.074 0.079 0.095 0.137 0.241 0.486 1.000 0.130
+Tvis  0.886 0.886 0.885 0.882 0.875 0.856 0.808 0.692 0.431 0.000 0.808
+Rfvis 0.085 0.085 0.085 0.087 0.093 0.111 0.157 0.272 0.533 1.000 0.149
+Rbvis 0.085 0.085 0.085 0.087 0.093 0.111 0.157 0.272 0.533 1.000 0.149
+

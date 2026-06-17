@@ -4,7 +4,7 @@
 #include <vector>
 #include <nlohmann/json.hpp>
 #include <typeinfo_205.h>
-#include <rs_instance_base.h>
+#include <courierr/courierr.h>
 
 /// @note  This class has been auto-generated. Local changes will not be saved!
 
@@ -31,7 +31,7 @@ namespace tk205  {
 			{SchemaType::RS0001, {"RS0001", "RS0001", "Liquid-Cooled Chiller"}},
 			{SchemaType::RS0002, {"RS0002", "RS0002", "Unitary Cooling Air-Conditioning Equipment"}},
 			{SchemaType::RS0003, {"RS0003", "RS0003", "Fan Assembly"}},
-			{SchemaType::RS0004, {"RS0004", "RS0004", "Air-to-Air Direct Expansion Refrigerant Coil System"}},
+			{SchemaType::RS0004, {"RS0004", "RS0004", "Air-to-Air Direct Expansion Refrigerant System"}},
 			{SchemaType::RS0005, {"RS0005", "RS0005", "Motor"}},
 			{SchemaType::RS0006, {"RS0006", "RS0006", "Electronic Motor Drive"}},
 			{SchemaType::RS0007, {"RS0007", "RS0007", "Mechanical Drive"}},
@@ -53,15 +53,15 @@ namespace tk205  {
 			{CompressorType::SCROLL, {"SCROLL", "Scroll", "Scroll compressor"}},
 			{CompressorType::UNKNOWN, {"UNKNOWN", "None","None"}}
 		};
-		enum class CompressorSpeedControlType {
+		enum class SpeedControlType {
 			DISCRETE,
 			CONTINUOUS,
 			UNKNOWN
 		};
-		const static std::unordered_map<CompressorSpeedControlType, enum_info> CompressorSpeedControlType_info {
-			{CompressorSpeedControlType::DISCRETE, {"DISCRETE", "Discrete", "Compressor loading is controlled by cycling between one or more discrete stages"}},
-			{CompressorSpeedControlType::CONTINUOUS, {"CONTINUOUS", "Continuous", "Compressor loading is controlled by continuously varying the speed of the compressor"}},
-			{CompressorSpeedControlType::UNKNOWN, {"UNKNOWN", "None","None"}}
+		const static std::unordered_map<SpeedControlType, enum_info> SpeedControlType_info {
+			{SpeedControlType::DISCRETE, {"DISCRETE", "Discrete", "Loading is controlled by cycling between one or more discrete stages"}},
+			{SpeedControlType::CONTINUOUS, {"CONTINUOUS", "Continuous", "Loading is controlled by continuously varying the speed"}},
+			{SpeedControlType::UNKNOWN, {"UNKNOWN", "None","None"}}
 		};
 		enum class CondenserType {
 			AIR,
@@ -105,9 +105,18 @@ namespace tk205  {
 			{ConcentrationType::BY_MASS, {"BY_MASS", "By Mass", "Concentration is defined as a fraction of total liquid mixture mass"}},
 			{ConcentrationType::UNKNOWN, {"UNKNOWN", "None","None"}}
 		};
-		class Metadata  : public RSInstanceBase {
+		class Schema  {
 		public:
-			void initialize (const nlohmann::json& j) override;
+			const static std::string_view schema_title;
+			const static std::string_view schema_version;
+			const static std::string_view schema_description;
+		};
+		class ASHRAE205  {
+		public:
+			static std::shared_ptr<Courierr::Courierr> logger;
+		};
+		class Metadata  {
+		public:
 			std::string data_model;
 			ashrae205_ns::SchemaType schema;
 			ashrae205_ns::Version schema_version;
@@ -159,9 +168,8 @@ namespace tk205  {
 			const static std::string_view disclaimer_name;
 			const static std::string_view notes_name;
 		};
-		class LiquidComponent  : public RSInstanceBase {
+		class LiquidComponent  {
 		public:
-			void initialize (const nlohmann::json& j) override;
 			ashrae205_ns::LiquidConstituent liquid_constituent;
 			double concentration;
 			bool liquid_constituent_is_set;
@@ -173,9 +181,8 @@ namespace tk205  {
 			const static std::string_view liquid_constituent_name;
 			const static std::string_view concentration_name;
 		};
-		class LiquidMixture  : public RSInstanceBase {
+		class LiquidMixture  {
 		public:
-			void initialize (const nlohmann::json& j) override;
 			std::vector<ashrae205_ns::LiquidComponent> liquid_components;
 			ashrae205_ns::ConcentrationType concentration_type;
 			bool liquid_components_is_set;
@@ -205,10 +212,10 @@ namespace tk205  {
 			{CompressorType::ROTARY, "ROTARY"},
 			{CompressorType::SCROLL, "SCROLL"},
 		})
-		NLOHMANN_JSON_SERIALIZE_ENUM (CompressorSpeedControlType, {
-			{CompressorSpeedControlType::UNKNOWN, "UNKNOWN"},
-			{CompressorSpeedControlType::DISCRETE, "DISCRETE"},
-			{CompressorSpeedControlType::CONTINUOUS, "CONTINUOUS"},
+		NLOHMANN_JSON_SERIALIZE_ENUM (SpeedControlType, {
+			{SpeedControlType::UNKNOWN, "UNKNOWN"},
+			{SpeedControlType::DISCRETE, "DISCRETE"},
+			{SpeedControlType::CONTINUOUS, "CONTINUOUS"},
 		})
 		NLOHMANN_JSON_SERIALIZE_ENUM (CondenserType, {
 			{CondenserType::UNKNOWN, "UNKNOWN"},

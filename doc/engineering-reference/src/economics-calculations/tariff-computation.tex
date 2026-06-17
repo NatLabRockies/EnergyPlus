@@ -29,12 +29,12 @@ To understand how to use the utility bill calculation portion of EnergyPlus you 
 
 \begin{longtable}[c]{@{}lc@{}}
 \caption{Example of Monthly Electric Energy Use \label{table:example-monthly-electric-energy-use}} \tabularnewline
-\toprule 
+\toprule
 Month & Electric Energy Use \tabularnewline
 \midrule
 \endfirsthead
 
-\toprule 
+\toprule
 Month & Electric Energy Use \tabularnewline
 \midrule
 \endhead
@@ -103,7 +103,7 @@ The user has the option of two different ways to determine the order of computat
 
 The order in which the computation should be made is complicated by the fact that the objects can each have variables that are inputs and others that are outputs.~ Since any of the variables can be used as inputs, we must ensure that they are computed prior to being used. In other words, because the objects allow a great deal of flexibility, there is no simple default order that the computations should be made.
 
-Luckily there are known algorithms for sorting though these types of interdependencies.~ In fact, the method that spreadsheets use for sorting through the dependencies of cell formulas referencing other cells with formula is very similar.~ In addition, linkers (used as part of the computer language compiling process) face similar issues of sorting through dependences. Figuring out the optimal path in a complex project represented by a PERT Chart also uses a similar algorithm.
+Luckily there are known algorithms for sorting though these types of interdependencies.~ In fact, the method that spreadsheets use for sorting through the dependencies of cell formulas referencing other cells with formula is very similar.~ In addition, linkers (used as part of the computer language compiling process) face similar issues of sorting through dependencies. Figuring out the optimal path in a complex project represented by a PERT Chart also uses a similar algorithm.
 
 Generically, dependency problems are usually characterized as Directed Acycle Graphs (DAGs). A DAG shows the individual formulas as circles and uses arrows between the circles to show which formula is dependent on which other formulas.~ One example algorithm that was used in EnergyPlus is described below:
 
@@ -126,12 +126,12 @@ The objects have specific variables that are used as inputs and outputs, and thu
 
 \begin{longtable}[c]{@{}lll@{}}
 \caption{Object Variables: Inputs and Outputs \label{table:object-variables-input-output}} \tabularnewline
-\toprule 
+\toprule
 Object & Outputs & Inputs \tabularnewline
 \midrule
 \endfirsthead
 
-\toprule 
+\toprule
 Object & Outputs & Inputs \tabularnewline
 \midrule
 \endhead

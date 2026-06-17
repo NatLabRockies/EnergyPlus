@@ -1,0 +1,6 @@
+coverage:
+  precision: 2
+  round: nearest
+  range: "0...100"
+  ignore:
+    - "vendor/**/*"

@@ -1,7 +1,7 @@
-// EnergyPlus, Copyright (c) 1996-2023, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
-// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other
+// National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
 // contributors. All rights reserved.
 //
 // NOTICE: This Software was developed under funding from the U.S. Department of Energy and the
@@ -53,16 +53,22 @@
 
 // EnergyPlus Headers
 #include <EnergyPlus/Data/BaseData.hh>
+#include <EnergyPlus/DataGlobalConstants.hh>
 #include <EnergyPlus/DataGlobals.hh>
 #include <EnergyPlus/EnergyPlus.hh>
 #include <EnergyPlus/Plant/Enums.hh>
 #include <EnergyPlus/Plant/PlantLocation.hh>
 #include <EnergyPlus/PlantComponent.hh>
+#include <EnergyPlus/UtilityRoutines.hh>
 
 namespace EnergyPlus {
 
 // Forward declarations
 struct EnergyPlusData;
+
+namespace Curve {
+    struct Curve;
+}
 
 namespace ChillerGasAbsorption {
 
@@ -76,7 +82,7 @@ namespace ChillerGasAbsorption {
         bool InHeatingMode = false;
         // Part of Type that directly corresponds with IDD definition
         std::string Name;                         // user identifier
-        std::string FuelType;                     // Type of Fuel - DIESEL, GASOLINE, GAS
+        Constant::eFuel FuelType;                 // Type of Fuel - DIESEL, GASOLINE, GAS
         Real64 NomCoolingCap = 0.0;               // W - design nominal capacity of Absorber
         bool NomCoolingCapWasAutoSized = false;   // true if nominal capacity was autosize on input
         Real64 NomHeatCoolRatio = 0.0;            // ratio of heating to cooling capacity
@@ -106,19 +112,19 @@ namespace ChillerGasAbsorption {
         Real64 HeatVolFlowRate = 0.0;             // m**3/s - design nominal water volumetric flow rate through the heater side
         bool HeatVolFlowRateWasAutoSized = false; // true if hot water flow rate was autosize on input
         Real64 SizFac = 0.0;                      // sizing factor
-        int CoolCapFTCurve = 0;                   // cooling capacity as a function of temperature curve (chilled water temp,
+        Curve::Curve *CoolCapFTCurve = nullptr;   // cooling capacity as a function of temperature curve (chilled water temp,
         // condenser water temp)
-        int FuelCoolFTCurve = 0; // Fuel-Input-to cooling output Ratio Function of Temperature Curve (chilled
+        Curve::Curve *FuelCoolFTCurve = nullptr; // Fuel-Input-to cooling output Ratio Function of Temperature Curve (chilled
         // water temp, condenser water temp)
-        int FuelCoolFPLRCurve = 0; // Fuel-Input-to cooling output Ratio Function of Part Load Ratio Curve
-        int ElecCoolFTCurve = 0;   // Electric-Input-to cooling output Ratio Function of Temperature Curve
+        Curve::Curve *FuelCoolFPLRCurve = nullptr; // Fuel-Input-to cooling output Ratio Function of Part Load Ratio Curve
+        Curve::Curve *ElecCoolFTCurve = nullptr;   // Electric-Input-to cooling output Ratio Function of Temperature Curve
         // (chilled water temp, condenser water temp)
-        int ElecCoolFPLRCurve = 0;       // Electric-Input-to cooling output Ratio Function of Part Load Ratio Curve
-        int HeatCapFCoolCurve = 0;       // Heating Capacity Function of Cooling Capacity Curve
-        int FuelHeatFHPLRCurve = 0;      // Fuel Input to heat output ratio during heating only function
-        bool isEnterCondensTemp = false; // if using entering conderser water temperature is TRUE, exiting is FALSE
-        bool isWaterCooled = false;      // if water cooled it is TRUE
-        Real64 CHWLowLimitTemp = 0.0;    // Chilled Water Lower Limit Temperature
+        Curve::Curve *ElecCoolFPLRCurve = nullptr;  // Electric-Input-to cooling output Ratio Function of Part Load Ratio Curve
+        Curve::Curve *HeatCapFCoolCurve = nullptr;  // Heating Capacity Function of Cooling Capacity Curve
+        Curve::Curve *FuelHeatFHPLRCurve = nullptr; // Fuel Input to heat output ratio during heating only function
+        bool isEnterCondensTemp = false;            // if using entering conderser water temperature is TRUE, exiting is FALSE
+        bool isWaterCooled = false;                 // if water cooled it is TRUE
+        Real64 CHWLowLimitTemp = 0.0;               // Chilled Water Lower Limit Temperature
         Real64 FuelHeatingValue = 0.0;
         // Calculated design values
         Real64 DesCondMassFlowRate = 0.0; // design nominal mass flow rate of water through the condenser [kg/s]
@@ -172,7 +178,7 @@ namespace ChillerGasAbsorption {
         Real64 FractionOfPeriodRunning = 0.0; // fraction of the time period that the unit is operating
         Real64 FuelCOP = 0.0;                 // reporting: cooling output/fuel input = CoolingLoad/CoolFuelUseRate
 
-        static PlantComponent *factory(EnergyPlusData &state, std::string const &objectName);
+        static GasAbsorberSpecs *factory(EnergyPlusData &state, std::string const &objectName);
 
         void
         simulate(EnergyPlusData &state, const PlantLocation &calledFromLocation, bool FirstHVACIteration, Real64 &CurLoad, bool RunFlag) override;
@@ -220,9 +226,17 @@ struct ChillerGasAbsorptionData : BaseGlobalStruct
     bool getGasAbsorberInputs = true;
     Array1D<ChillerGasAbsorption::GasAbsorberSpecs> GasAbsorber;
 
+    void init_constant_state([[maybe_unused]] EnergyPlusData &state) override
+    {
+    }
+
+    void init_state([[maybe_unused]] EnergyPlusData &state) override
+    {
+    }
+
     void clear_state() override
     {
-        *this = ChillerGasAbsorptionData();
+        new (this) ChillerGasAbsorptionData();
     }
 };
 

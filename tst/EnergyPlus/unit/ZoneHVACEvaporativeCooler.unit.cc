@@ -1,7 +1,7 @@
-// EnergyPlus, Copyright (c) 1996-2023, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
-// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other
+// National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
 // contributors. All rights reserved.
 //
 // NOTICE: This Software was developed under funding from the U.S. Department of Energy and the
@@ -99,7 +99,7 @@ protected:
         state->dataZoneEquip->ZoneEquipList.allocate(state->dataGlobal->NumOfZones);
         state->dataLoopNodes->Node.allocate(NumOfNodes);
         state->dataZoneEnergyDemand->ZoneSysEnergyDemand.allocate(1);
-        state->dataHeatBalFanSys->ZoneThermostatSetPointHi.allocate(1);
+        state->dataHeatBalFanSys->zoneTstatSetpts.allocate(1);
 
         state->dataZoneEquip->ZoneEquipConfig(1).ZoneName = "One Zone";
         state->dataZoneEquip->ZoneEquipConfig(1).NumInletNodes = 1;
@@ -122,18 +122,18 @@ protected:
 
         state->dataZoneEquip->ZoneEquipList(1).Name = "ZONEHVACEVAPEQUIPMENT";
         state->dataZoneEquip->ZoneEquipList(1).NumOfEquipTypes = 1;
+        state->dataZoneEquip->ZoneEquipList(1).EquipTypeName.allocate(state->dataZoneEquip->ZoneEquipList(1).NumOfEquipTypes);
         state->dataZoneEquip->ZoneEquipList(1).EquipType.allocate(state->dataZoneEquip->ZoneEquipList(1).NumOfEquipTypes);
-        state->dataZoneEquip->ZoneEquipList(1).EquipTypeEnum.allocate(state->dataZoneEquip->ZoneEquipList(1).NumOfEquipTypes);
         state->dataZoneEquip->ZoneEquipList(1).EquipName.allocate(state->dataZoneEquip->ZoneEquipList(1).NumOfEquipTypes);
         state->dataZoneEquip->ZoneEquipList(1).EquipIndex.allocate(state->dataZoneEquip->ZoneEquipList(1).NumOfEquipTypes);
         state->dataZoneEquip->ZoneEquipList(1).EquipIndex = 1;
         state->dataZoneEquip->ZoneEquipList(1).EquipData.allocate(state->dataZoneEquip->ZoneEquipList(1).NumOfEquipTypes);
         state->dataZoneEquip->ZoneEquipList(1).CoolingPriority.allocate(state->dataZoneEquip->ZoneEquipList(1).NumOfEquipTypes);
         state->dataZoneEquip->ZoneEquipList(1).HeatingPriority.allocate(state->dataZoneEquip->ZoneEquipList(1).NumOfEquipTypes);
-        state->dataZoneEquip->ZoneEquipList(1).EquipType(1) = "ZoneHVAC:EvaporativeCoolerUnit";
+        state->dataZoneEquip->ZoneEquipList(1).EquipTypeName(1) = "ZoneHVAC:EvaporativeCoolerUnit";
         state->dataZoneEquip->ZoneEquipList(1).CoolingPriority(1) = 1;
         state->dataZoneEquip->ZoneEquipList(1).HeatingPriority(1) = 1;
-        state->dataZoneEquip->ZoneEquipList(1).EquipTypeEnum(1) = DataZoneEquipment::ZoneEquip::ZoneEvaporativeCoolerUnit;
+        state->dataZoneEquip->ZoneEquipList(1).EquipType(1) = DataZoneEquipment::ZoneEquipType::EvaporativeCooler;
     }
 
     virtual void TearDown()
@@ -191,9 +191,7 @@ TEST_F(ZoneHVACEvapCoolerUnitTest, DirectCelDekPad_CyclingUnit_Sim)
 
     });
     ASSERT_TRUE(process_idf(idf_objects));
-
-    ScheduleManager::ProcessScheduleInput(*state);
-    state->dataScheduleMgr->ScheduleInputProcessed = true;
+    state->init_state(*state);
 
     Fans::GetFanInput(*state);
     ASSERT_FALSE(ErrorsFound);
@@ -221,15 +219,15 @@ TEST_F(ZoneHVACEvapCoolerUnitTest, DirectCelDekPad_CyclingUnit_Sim)
     state->dataLoopNodes->Node(thisZoneEvapCooler.OAInletNodeNum).Enthalpy =
         Psychrometrics::PsyHFnTdbW(state->dataEnvrn->OutDryBulbTemp, state->dataEnvrn->OutHumRat);
 
-    state->dataHeatBalFanSys->ZoneThermostatSetPointHi(1) = 23.0;
+    state->dataHeatBalFanSys->zoneTstatSetpts(1).setptHi = 23.0;
 
     state->dataZoneEnergyDemand->ZoneSysEnergyDemand(1).RemainingOutputReqToHeatSP = 0.0;
     state->dataZoneEnergyDemand->ZoneSysEnergyDemand(1).RemainingOutputReqToCoolSP = -15000.0;
     state->dataZoneEquip->ZoneEquipList(1).EquipName(1) = thisZoneEvapCooler.Name;
 
     // Evap Cooler Unit Control Method = Zone Temperature Dead Band OnOff Cycling
-    EXPECT_EQ(thisZoneEvapCooler.OpMode, DataHVACGlobals::CycFanCycCoil);
-    EXPECT_TRUE(compare_enums(thisZoneEvapCooler.ControlSchemeType, ControlType::ZoneTemperatureDeadBandOnOffCycling));
+    EXPECT_EQ((int)thisZoneEvapCooler.fanOp, (int)HVAC::FanOp::Cycling);
+    EXPECT_ENUM_EQ(thisZoneEvapCooler.ControlSchemeType, ControlType::ZoneTemperatureDeadBandOnOffCycling);
     EvaporativeCoolers::SimZoneEvaporativeCoolerUnit(
         *state, thisZoneEvapCooler.Name, ActualZoneNum, SensOutputProvided, LatOutputProvided, ZoneEquipIndex);
     Real64 FullSensibleOutput = 0.0;
@@ -317,9 +315,7 @@ TEST_F(ZoneHVACEvapCoolerUnitTest, DirectResearchSpecial_CyclingUnit_Sim)
         "    ZoneEvapCool Inlet Node;     !- Sensor Node Name",
     });
     ASSERT_TRUE(process_idf(idf_objects));
-
-    ScheduleManager::ProcessScheduleInput(*state);
-    state->dataScheduleMgr->ScheduleInputProcessed = true;
+    state->init_state(*state);
 
     Fans::GetFanInput(*state);
     ASSERT_FALSE(ErrorsFound);
@@ -347,14 +343,14 @@ TEST_F(ZoneHVACEvapCoolerUnitTest, DirectResearchSpecial_CyclingUnit_Sim)
     state->dataLoopNodes->Node(thisZoneEvapCooler.OAInletNodeNum).Enthalpy =
         Psychrometrics::PsyHFnTdbW(state->dataEnvrn->OutDryBulbTemp, state->dataEnvrn->OutHumRat);
 
-    state->dataHeatBalFanSys->ZoneThermostatSetPointHi(1) = 23.0;
+    state->dataHeatBalFanSys->zoneTstatSetpts(1).setptHi = 23.0;
     state->dataZoneEnergyDemand->ZoneSysEnergyDemand(1).RemainingOutputReqToHeatSP = 0.0;
     state->dataZoneEnergyDemand->ZoneSysEnergyDemand(1).RemainingOutputReqToCoolSP = -15000.0;
     state->dataZoneEquip->ZoneEquipList(1).EquipName(1) = thisZoneEvapCooler.Name;
 
     // Evap Cooler Unit Control Method = Zone Temperature Dead Band OnOff Cycling
-    EXPECT_EQ(thisZoneEvapCooler.OpMode, DataHVACGlobals::CycFanCycCoil);
-    EXPECT_TRUE(compare_enums(thisZoneEvapCooler.ControlSchemeType, ControlType::ZoneTemperatureDeadBandOnOffCycling));
+    EXPECT_ENUM_EQ(thisZoneEvapCooler.fanOp, HVAC::FanOp::Cycling);
+    EXPECT_ENUM_EQ(thisZoneEvapCooler.ControlSchemeType, ControlType::ZoneTemperatureDeadBandOnOffCycling);
     EvaporativeCoolers::SimZoneEvaporativeCoolerUnit(
         *state, thisZoneEvapCooler.Name, ActualZoneNum, SensOutputProvided, LatOutputProvided, ZoneEquipIndex);
     Real64 FullSensibleOutput = 0.0;
@@ -448,9 +444,7 @@ TEST_F(ZoneHVACEvapCoolerUnitTest, IndirectWetCoil_CyclingUnit_Sim)
 
     });
     ASSERT_TRUE(process_idf(idf_objects));
-
-    ScheduleManager::ProcessScheduleInput(*state);
-    state->dataScheduleMgr->ScheduleInputProcessed = true;
+    state->init_state(*state);
 
     Fans::GetFanInput(*state);
     ASSERT_FALSE(ErrorsFound);
@@ -486,14 +480,14 @@ TEST_F(ZoneHVACEvapCoolerUnitTest, IndirectWetCoil_CyclingUnit_Sim)
     state->dataLoopNodes->Node(thisEvapCooler.SecondaryInletNode).Enthalpy =
         Psychrometrics::PsyHFnTdbW(state->dataEnvrn->OutDryBulbTemp, state->dataEnvrn->OutHumRat);
 
-    state->dataHeatBalFanSys->ZoneThermostatSetPointHi(1) = 23.0;
+    state->dataHeatBalFanSys->zoneTstatSetpts(1).setptHi = 23.0;
     state->dataZoneEnergyDemand->ZoneSysEnergyDemand(1).RemainingOutputReqToHeatSP = 0.0;
     state->dataZoneEnergyDemand->ZoneSysEnergyDemand(1).RemainingOutputReqToCoolSP = -15000.0;
     state->dataZoneEquip->ZoneEquipList(1).EquipName(1) = thisZoneEvapCooler.Name;
 
     // Evap Cooler Unit Control Method = Zone Temperature Dead Band OnOff Cycling
-    EXPECT_EQ(thisZoneEvapCooler.OpMode, DataHVACGlobals::CycFanCycCoil);
-    EXPECT_TRUE(compare_enums(thisZoneEvapCooler.ControlSchemeType, ControlType::ZoneTemperatureDeadBandOnOffCycling));
+    EXPECT_EQ((int)thisZoneEvapCooler.fanOp, (int)HVAC::FanOp::Cycling);
+    EXPECT_ENUM_EQ(thisZoneEvapCooler.ControlSchemeType, ControlType::ZoneTemperatureDeadBandOnOffCycling);
     EvaporativeCoolers::SimZoneEvaporativeCoolerUnit(
         *state, thisZoneEvapCooler.Name, ActualZoneNum, SensOutputProvided, LatOutputProvided, ZoneEquipIndex);
     Real64 FullSensibleOutput = 0.0;
@@ -528,4 +522,115 @@ TEST_F(ZoneHVACEvapCoolerUnitTest, IndirectWetCoil_CyclingUnit_Sim)
     EXPECT_NEAR(0.500000, thisZoneEvapCooler.UnitPartLoadRatio, 0.000001);
     EvaporativeCoolers::CalcZoneEvapUnitOutput(*state, UnitNum, thisZoneEvapCooler.UnitPartLoadRatio, SensOutputProvided, LatOutputProvided);
     EXPECT_NEAR(HalfOfFullLoad, SensOutputProvided, 0.01);
+}
+
+TEST_F(ZoneHVACEvapCoolerUnitTest, RHcontrol)
+{
+
+    int ActualZoneNum = 1;
+    int ZoneEquipIndex = 1;
+    Real64 SensOutputProvided(0.0);
+    Real64 LatOutputProvided(0.0);
+
+    std::string const idf_objects = delimited_string({
+        " ZoneHVAC:EvaporativeCoolerUnit,",
+        "   ZoneEvapCooler Unit,          !- Name",
+        "   ,                             !- Availability Schedule Name",
+        "   ,                             !- Availability Manager List Name",
+        "   ZoneEvapCool OA Inlet,        !- Outdoor Air Inlet Node Name",
+        "   ZoneEvapCool Inlet Node,      !- Cooler Outlet Node Name",
+        "   ZoneEvapCool Relief Node,     !- Zone Relief Air Node Name",
+        "   Fan:OnOff,                    !- Supply Air Fan Object Type",
+        "   ZoneEvapCool Supply Fan,      !- Supply Air Fan Name",
+        "   1.0,                          !- Design Supply Air Flow Rate {m3/s}",
+        "   BlowThrough,                  !- Fan Placement",
+        "   ZoneTemperatureDeadbandOnOffCycling,  !- Cooler Unit Control Method",
+        "   1.0,                          !- Throttling Range Temperature Difference {deltaC}",
+        "   100.0,                        !- Cooling Load Control Threshold Heat Transfer Rate {W}",
+        "   EvaporativeCooler:Direct:CelDekPad,  !- First Evaporative Cooler Object Type",
+        "   Direct CelDekPad EvapCooler,  !- First Evaporative Cooler Object Name",
+        "   ,",
+        "   ,",
+        "   ,",
+        "   40;                           !- Shut Off Relative Humidity",
+
+        " Fan:OnOff,",
+        "    ZoneEvapCool Supply Fan,     !- Name",
+        "    ,                            !- Availability Schedule Name",
+        "    0.7,                         !- Fan Total Efficiency",
+        "    300.0,                       !- Pressure Rise {Pa}",
+        "    1.0,                         !- Maximum Flow Rate {m3/s}",
+        "    0.9,                         !- Motor Efficiency",
+        "    1.0,                         !- Motor In Airstream Fraction",
+        "    ZoneEvapCool OA Inlet,       !- Air Inlet Node Name",
+        "    ZoneEvapCool Fan outlet;     !- Air Outlet Node Name",
+
+        " EvaporativeCooler:Direct:CelDekPad,",
+        "    Direct CelDekPad EvapCooler, !- Name",
+        "    ,                            !- Availability Schedule Name",
+        "    0.6,                         !- Direct Pad Area {m2}",
+        "    0.17,                        !- Direct Pad Depth {m}",
+        "    55,                          !- Recirculating Water Pump Power Consumption {W}",
+        "    ZoneEvapCool Fan outlet,     !- Air Inlet Node Name",
+        "    ZoneEvapCool Inlet Node,     !- Air Outlet Node Name",
+        "    ;                            !- Control Type",
+
+        "    OutdoorAir:Node,",
+        "    Secondary OA inlet node;     !- Name",
+
+    });
+    ASSERT_TRUE(process_idf(idf_objects));
+    state->init_state(*state);
+
+    Fans::GetFanInput(*state);
+    ASSERT_FALSE(ErrorsFound);
+    EvaporativeCoolers::GetEvapInput(*state);
+    ASSERT_FALSE(ErrorsFound);
+    EvaporativeCoolers::GetInputZoneEvaporativeCoolerUnit(*state);
+    ASSERT_FALSE(ErrorsFound);
+
+    OutAirNodeManager::SetOutAirNodes(*state);
+
+    state->dataGlobal->BeginEnvrnFlag = true;
+    state->dataZoneEquip->ZoneEquipInputsFilled = true;
+
+    auto &thisZoneEvapCooler(state->dataEvapCoolers->ZoneEvapUnit(UnitNum));
+
+    state->dataZoneEquip->ZoneEquipConfig(1).ExhaustNode(1) = thisZoneEvapCooler.UnitReliefNodeNum;
+
+    state->dataLoopNodes->Node.redimension(NumOfNodes);
+    state->dataLoopNodes->Node(state->dataZoneEquip->ZoneEquipConfig(1).ZoneNode).Temp = 24.0;
+    state->dataLoopNodes->Node(state->dataZoneEquip->ZoneEquipConfig(1).ZoneNode).HumRat = 0.0080;
+    state->dataLoopNodes->Node(state->dataZoneEquip->ZoneEquipConfig(1).ZoneNode).Enthalpy =
+        Psychrometrics::PsyHFnTdbW(state->dataLoopNodes->Node(state->dataZoneEquip->ZoneEquipConfig(1).ZoneNode).Temp,
+                                   state->dataLoopNodes->Node(state->dataZoneEquip->ZoneEquipConfig(1).ZoneNode).HumRat);
+
+    state->dataLoopNodes->Node(thisZoneEvapCooler.OAInletNodeNum).Temp = state->dataEnvrn->OutDryBulbTemp;
+    state->dataLoopNodes->Node(thisZoneEvapCooler.OAInletNodeNum).HumRat = state->dataEnvrn->OutHumRat;
+    state->dataLoopNodes->Node(thisZoneEvapCooler.OAInletNodeNum).Enthalpy =
+        Psychrometrics::PsyHFnTdbW(state->dataEnvrn->OutDryBulbTemp, state->dataEnvrn->OutHumRat);
+
+    state->dataHeatBalFanSys->zoneTstatSetpts(1).setptHi = 23.0;
+    state->dataZoneEnergyDemand->ZoneSysEnergyDemand(1).RemainingOutputReqToHeatSP = 0.0;
+    state->dataZoneEnergyDemand->ZoneSysEnergyDemand(1).RemainingOutputReqToCoolSP = -15000.0;
+    state->dataZoneEquip->ZoneEquipList(1).EquipName(1) = thisZoneEvapCooler.Name;
+
+    // Evap Cooler Unit Control Method = Zone Temperature Dead Band OnOff Cycling
+    EvaporativeCoolers::SimZoneEvaporativeCoolerUnit(
+        *state, thisZoneEvapCooler.Name, ActualZoneNum, SensOutputProvided, LatOutputProvided, ZoneEquipIndex);
+    Real64 FullSensibleOutput = 0.0;
+    Real64 FullLatentOutput = 0.0;
+    Real64 PartLoadRatio = 1.0;
+    EvaporativeCoolers::CalcZoneEvapUnitOutput(*state, UnitNum, PartLoadRatio, FullSensibleOutput, FullLatentOutput);
+
+    Real64 relativeHumidity =
+        100.0 * Psychrometrics::PsyRhFnTdbWPb(*state,
+                                              state->dataLoopNodes->Node(state->dataZoneEquip->ZoneEquipConfig(1).ZoneNode).Temp,
+                                              state->dataLoopNodes->Node(state->dataZoneEquip->ZoneEquipConfig(1).ZoneNode).HumRat,
+                                              state->dataEnvrn->OutBaroPress,
+                                              "CalcZoneEvaporativeCoolerUnit");
+    //    when relative humidity is higher than the threshold, the evaporative cooler is off
+    EXPECT_EQ(thisZoneEvapCooler.ShutOffRelativeHumidity, 40);
+    ASSERT_TRUE(relativeHumidity > thisZoneEvapCooler.ShutOffRelativeHumidity);
+    EXPECT_FALSE(thisZoneEvapCooler.IsOnThisTimestep);
 }

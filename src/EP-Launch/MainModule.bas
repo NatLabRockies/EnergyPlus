@@ -6,7 +6,7 @@ Attribute VB_Name = "MainModule"
 ' needed both inside and outside of the main epl-ui.frm
 '=======================================================
 
-Public Const numOutputKinds = 58
+Public Const numOutputKinds = 64
 Public Const numOutputSets = 12
 Type outputKindType
   suffix As String 'end of file name plus extension (like "Table.html")
@@ -89,8 +89,14 @@ Public Const okSlab = 53
 Public Const okSlabOut = 54
 Public Const okSlabErr = 55
 Public Const okPerfLogCSV = 56
-Public Const okErr = 57 'at end so it opens last
-Public Const okCsv = 58 'at end so it opens last
+Public Const okSpszCsv = 57
+Public Const okSpszTab = 58
+Public Const okSpszTxt = 59
+Public Const okPszCsv = 60
+Public Const okPszTab = 61
+Public Const okPszTxt = 62
+Public Const okErr = 63 'at end so it opens last
+Public Const okCsv = 64 'at end so it opens last
 
 
 '=======================================================
@@ -314,6 +320,31 @@ outputKind(okSlabErr).viewer = ovpTextEditor
 outputKind(okPerfLogCSV).suffix = "_perflog.csv"
 outputKind(okPerfLogCSV).viewer = ovpSpreadsheet
 outputKind(okPerfLogCSV).outSet(outSetSpreadsheets) = True
+'Spsz
+outputKind(okSpszCsv).suffix = "Spsz.csv"
+outputKind(okSpszCsv).viewer = ovpSpreadsheet
+outputKind(okSpszCsv).outSet(outSetSpreadsheets) = True
+outputKind(okSpszTab).suffix = "Spsz.tab"
+outputKind(okSpszTab).viewer = ovpSpreadsheet + ovpTextEditor
+outputKind(okSpszTab).outSet(outSetTextOutputFiles) = True
+outputKind(okSpszTab).outSet(outSetSpreadsheets) = True
+outputKind(okSpszTab).containsTabs = True
+outputKind(okSpszTxt).suffix = "Spsz.txt"
+outputKind(okSpszTxt).viewer = ovpTextEditor
+outputKind(okSpszTxt).outSet(outSetTextOutputFiles) = True
+'Psz
+outputKind(okPszCsv).suffix = "Psz.csv"
+outputKind(okPszCsv).viewer = ovpSpreadsheet
+outputKind(okPszCsv).outSet(outSetSpreadsheets) = True
+outputKind(okPszTab).suffix = "Psz.tab"
+outputKind(okPszTab).viewer = ovpSpreadsheet + ovpTextEditor
+outputKind(okPszTab).outSet(outSetTextOutputFiles) = True
+outputKind(okPszTab).outSet(outSetSpreadsheets) = True
+outputKind(okPszTab).containsTabs = True
+outputKind(okPszTxt).suffix = "Psz.txt"
+outputKind(okPszTxt).viewer = ovpTextEditor
+outputKind(okPszTxt).outSet(outSetTextOutputFiles) = True
+
 
 
 

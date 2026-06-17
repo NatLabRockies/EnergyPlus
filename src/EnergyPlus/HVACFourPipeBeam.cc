@@ -1,7 +1,7 @@
-// EnergyPlus, Copyright (c) 1996-2023, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
-// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other
+// National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
 // contributors. All rights reserved.
 //
 // NOTICE: This Software was developed under funding from the U.S. Department of Energy and the
@@ -47,6 +47,7 @@
 
 // C++ Headers
 #include <cmath>
+#include <format>
 
 // ObjexxFCL Headers
 #include <ObjexxFCL/Array.functions.hh>
@@ -74,6 +75,7 @@
 #include <EnergyPlus/InputProcessing/InputProcessor.hh>
 #include <EnergyPlus/NodeInputManager.hh>
 #include <EnergyPlus/OutputProcessor.hh>
+#include <EnergyPlus/OutputReportPredefined.hh>
 #include <EnergyPlus/Plant/DataPlant.hh>
 #include <EnergyPlus/PlantUtilities.hh>
 #include <EnergyPlus/Psychrometrics.hh>
@@ -89,27 +91,20 @@ namespace FourPipeBeam {
     std::shared_ptr<AirTerminalUnit> HVACFourPipeBeam::fourPipeBeamFactory(EnergyPlusData &state, std::string objectName)
     {
 
-        using BranchNodeConnections::TestCompSet;
-        using DataLoopNode::ObjectIsNotParent;
-        using DataLoopNode::ObjectIsParent;
-        using NodeInputManager::GetOnlySingleNode;
+        using Node::GetOnlySingleNode;
+        using Node::ObjectIsNotParent;
+        using Node::ObjectIsParent;
+        using Node::TestCompSet;
         using namespace DataSizing;
         using Curve::GetCurveIndex;
-        using ScheduleManager::GetScheduleIndex;
         static constexpr std::string_view routineName("FourPipeBeamFactory "); // include trailing blank space
 
         int beamIndex; // loop index
 
-        int NumAlphas(0);  // Number of Alphas for each GetObjectItem call
-        int NumNumbers(0); // Number of Numbers for each GetObjectItem call
-
         //  certain object in the input file
-        int IOStatus; // Used in GetObjectItem
         bool errFlag = false;
         bool ErrorsFound(false); // Set to true if errors in input, fatal at end of routine
         bool found = false;
-        int ctrlZone; // controlled zome do loop index
-        int supAirIn; // controlled zone supply air inlet index
         bool airNodeFound;
         int aDUIndex;
 
@@ -119,12 +114,12 @@ namespace FourPipeBeam {
         // find the number of cooled beam units
         cCurrentModuleObject = "AirTerminal:SingleDuct:ConstantVolume:FourPipeBeam";
 
-        NumAlphas = 16;
-        NumNumbers = 11;
-
         // find beam index from name
         beamIndex = state.dataInputProcessing->inputProcessor->getObjectItemNum(state, cCurrentModuleObject, objectName);
         if (beamIndex > 0) {
+            int IOStatus;
+            int NumAlphas = 16;
+            int NumNumbers = 11;
             state.dataInputProcessing->inputProcessor->getObjectItem(state,
                                                                      cCurrentModuleObject,
                                                                      beamIndex,
@@ -142,6 +137,8 @@ namespace FourPipeBeam {
             ErrorsFound = true;
         }
 
+        ErrorObjectHeader eoh{routineName, cCurrentModuleObject, state.dataIPShortCut->cAlphaArgs(1)};
+
         errFlag = false;
         GlobalNames::VerifyUniqueADUName(state, cCurrentModuleObject, state.dataIPShortCut->cAlphaArgs(1), errFlag, cCurrentModuleObject + " Name");
         if (errFlag) {
@@ -151,72 +148,43 @@ namespace FourPipeBeam {
         thisBeam->unitType = cCurrentModuleObject;
 
         if (state.dataIPShortCut->lAlphaFieldBlanks(2)) {
-            thisBeam->airAvailSchedNum = DataGlobalConstants::ScheduleAlwaysOn;
-        } else {
-            thisBeam->airAvailSchedNum = GetScheduleIndex(state, state.dataIPShortCut->cAlphaArgs(2)); // convert schedule name to pointer
-            if (thisBeam->airAvailSchedNum == 0) {
-                ShowSevereError(state,
-                                format("{}{}: invalid {} entered ={} for {}={}",
-                                       routineName,
-                                       cCurrentModuleObject,
-                                       state.dataIPShortCut->cAlphaFieldNames(2),
-                                       state.dataIPShortCut->cAlphaArgs(2),
-                                       state.dataIPShortCut->cAlphaFieldNames(1),
-                                       state.dataIPShortCut->cAlphaArgs(1)));
-                ErrorsFound = true;
-            }
+            thisBeam->airAvailSched = Sched::GetScheduleAlwaysOn(state);
+        } else if ((thisBeam->airAvailSched = Sched::GetSchedule(state, state.dataIPShortCut->cAlphaArgs(2))) == nullptr) {
+            ShowSevereItemNotFound(state, eoh, state.dataIPShortCut->cAlphaFieldNames(2), state.dataIPShortCut->cAlphaArgs(2));
+            ErrorsFound = true;
         }
+
         if (state.dataIPShortCut->lAlphaFieldBlanks(3)) {
-            thisBeam->coolingAvailSchedNum = DataGlobalConstants::ScheduleAlwaysOn;
-        } else {
-            thisBeam->coolingAvailSchedNum = GetScheduleIndex(state, state.dataIPShortCut->cAlphaArgs(3)); // convert schedule name to index
-            if (thisBeam->coolingAvailSchedNum == 0) {
-                ShowSevereError(state,
-                                format("{}{}: invalid {} entered ={} for {}={}",
-                                       routineName,
-                                       cCurrentModuleObject,
-                                       state.dataIPShortCut->cAlphaFieldNames(3),
-                                       state.dataIPShortCut->cAlphaArgs(3),
-                                       state.dataIPShortCut->cAlphaFieldNames(1),
-                                       state.dataIPShortCut->cAlphaArgs(1)));
-                ErrorsFound = true;
-            }
+            thisBeam->coolingAvailSched = Sched::GetScheduleAlwaysOn(state);
+        } else if ((thisBeam->coolingAvailSched = Sched::GetSchedule(state, state.dataIPShortCut->cAlphaArgs(3))) == nullptr) {
+            ShowSevereItemNotFound(state, eoh, state.dataIPShortCut->cAlphaFieldNames(3), state.dataIPShortCut->cAlphaArgs(3));
+            ErrorsFound = true;
         }
         if (state.dataIPShortCut->lAlphaFieldBlanks(4)) {
-            thisBeam->heatingAvailSchedNum = DataGlobalConstants::ScheduleAlwaysOn;
-        } else {
-            thisBeam->heatingAvailSchedNum = GetScheduleIndex(state, state.dataIPShortCut->cAlphaArgs(4)); // convert schedule name to index
-            if (thisBeam->heatingAvailSchedNum == 0) {
-                ShowSevereError(state,
-                                format("{}{}: invalid {} entered ={} for {}={}",
-                                       routineName,
-                                       cCurrentModuleObject,
-                                       state.dataIPShortCut->cAlphaFieldNames(4),
-                                       state.dataIPShortCut->cAlphaArgs(4),
-                                       state.dataIPShortCut->cAlphaFieldNames(1),
-                                       state.dataIPShortCut->cAlphaArgs(1)));
-                ErrorsFound = true;
-            }
+            thisBeam->heatingAvailSched = Sched::GetScheduleAlwaysOn(state);
+        } else if ((thisBeam->heatingAvailSched = Sched::GetSchedule(state, state.dataIPShortCut->cAlphaArgs(4))) == nullptr) {
+            ShowSevereItemNotFound(state, eoh, state.dataIPShortCut->cAlphaFieldNames(4), state.dataIPShortCut->cAlphaArgs(4));
+            ErrorsFound = true;
         }
 
         thisBeam->airInNodeNum = GetOnlySingleNode(state,
                                                    state.dataIPShortCut->cAlphaArgs(5),
                                                    ErrorsFound,
-                                                   DataLoopNode::ConnectionObjectType::AirTerminalSingleDuctConstantVolumeFourPipeBeam,
+                                                   Node::ConnectionObjectType::AirTerminalSingleDuctConstantVolumeFourPipeBeam,
                                                    state.dataIPShortCut->cAlphaArgs(1),
-                                                   DataLoopNode::NodeFluidType::Air,
-                                                   DataLoopNode::ConnectionType::Inlet,
-                                                   NodeInputManager::CompFluidStream::Primary,
+                                                   Node::FluidType::Air,
+                                                   Node::ConnectionType::Inlet,
+                                                   Node::CompFluidStream::Primary,
                                                    ObjectIsNotParent,
                                                    state.dataIPShortCut->cAlphaFieldNames(5));
         thisBeam->airOutNodeNum = GetOnlySingleNode(state,
                                                     state.dataIPShortCut->cAlphaArgs(6),
                                                     ErrorsFound,
-                                                    DataLoopNode::ConnectionObjectType::AirTerminalSingleDuctConstantVolumeFourPipeBeam,
+                                                    Node::ConnectionObjectType::AirTerminalSingleDuctConstantVolumeFourPipeBeam,
                                                     state.dataIPShortCut->cAlphaArgs(1),
-                                                    DataLoopNode::NodeFluidType::Air,
-                                                    DataLoopNode::ConnectionType::Outlet,
-                                                    NodeInputManager::CompFluidStream::Primary,
+                                                    Node::FluidType::Air,
+                                                    Node::ConnectionType::Outlet,
+                                                    Node::CompFluidStream::Primary,
                                                     ObjectIsNotParent,
                                                     state.dataIPShortCut->cAlphaFieldNames(6));
         if (state.dataIPShortCut->lAlphaFieldBlanks(7) && state.dataIPShortCut->lAlphaFieldBlanks(8)) { // no chilled water nodes, no beam cooling
@@ -225,42 +193,42 @@ namespace FourPipeBeam {
                    !state.dataIPShortCut->lAlphaFieldBlanks(8)) { // outlet node but no inlet node for chilled water
             thisBeam->beamCoolingPresent = false;
             ShowWarningError(state,
-                             format("{}{}: missing {} for {}={}, simulation continues with no beam cooling",
-                                    routineName,
-                                    cCurrentModuleObject,
-                                    state.dataIPShortCut->cAlphaFieldNames(7),
-                                    state.dataIPShortCut->cAlphaFieldNames(1),
-                                    state.dataIPShortCut->cAlphaArgs(1)));
+                             std::format("{}{}: missing {} for {}={}, simulation continues with no beam cooling",
+                                         routineName,
+                                         cCurrentModuleObject,
+                                         state.dataIPShortCut->cAlphaFieldNames(7),
+                                         state.dataIPShortCut->cAlphaFieldNames(1),
+                                         state.dataIPShortCut->cAlphaArgs(1)));
         } else if (!state.dataIPShortCut->lAlphaFieldBlanks(7) &&
                    state.dataIPShortCut->lAlphaFieldBlanks(8)) { // inlet node but no outlet node for chilled water
             thisBeam->beamCoolingPresent = false;
             ShowWarningError(state,
-                             format("{}{}: missing {} for {}={}, simulation continues with no beam cooling",
-                                    routineName,
-                                    cCurrentModuleObject,
-                                    state.dataIPShortCut->cAlphaFieldNames(8),
-                                    state.dataIPShortCut->cAlphaFieldNames(1),
-                                    state.dataIPShortCut->cAlphaArgs(1)));
+                             std::format("{}{}: missing {} for {}={}, simulation continues with no beam cooling",
+                                         routineName,
+                                         cCurrentModuleObject,
+                                         state.dataIPShortCut->cAlphaFieldNames(8),
+                                         state.dataIPShortCut->cAlphaFieldNames(1),
+                                         state.dataIPShortCut->cAlphaArgs(1)));
         } else {
             thisBeam->beamCoolingPresent = true;
             thisBeam->cWInNodeNum = GetOnlySingleNode(state,
                                                       state.dataIPShortCut->cAlphaArgs(7),
                                                       ErrorsFound,
-                                                      DataLoopNode::ConnectionObjectType::AirTerminalSingleDuctConstantVolumeFourPipeBeam,
+                                                      Node::ConnectionObjectType::AirTerminalSingleDuctConstantVolumeFourPipeBeam,
                                                       state.dataIPShortCut->cAlphaArgs(1),
-                                                      DataLoopNode::NodeFluidType::Water,
-                                                      DataLoopNode::ConnectionType::Inlet,
-                                                      NodeInputManager::CompFluidStream::Secondary,
+                                                      Node::FluidType::Water,
+                                                      Node::ConnectionType::Inlet,
+                                                      Node::CompFluidStream::Secondary,
                                                       ObjectIsParent,
                                                       state.dataIPShortCut->cAlphaFieldNames(7));
             thisBeam->cWOutNodeNum = GetOnlySingleNode(state,
                                                        state.dataIPShortCut->cAlphaArgs(8),
                                                        ErrorsFound,
-                                                       DataLoopNode::ConnectionObjectType::AirTerminalSingleDuctConstantVolumeFourPipeBeam,
+                                                       Node::ConnectionObjectType::AirTerminalSingleDuctConstantVolumeFourPipeBeam,
                                                        state.dataIPShortCut->cAlphaArgs(1),
-                                                       DataLoopNode::NodeFluidType::Water,
-                                                       DataLoopNode::ConnectionType::Outlet,
-                                                       NodeInputManager::CompFluidStream::Secondary,
+                                                       Node::FluidType::Water,
+                                                       Node::ConnectionType::Outlet,
+                                                       Node::CompFluidStream::Secondary,
                                                        ObjectIsParent,
                                                        state.dataIPShortCut->cAlphaFieldNames(8));
         }
@@ -270,42 +238,42 @@ namespace FourPipeBeam {
                    !state.dataIPShortCut->lAlphaFieldBlanks(10)) { // outlet node but no inlet node for hot water
             thisBeam->beamHeatingPresent = false;
             ShowWarningError(state,
-                             format("{}{}: missing {} for {}={}, simulation continues with no beam heating",
-                                    routineName,
-                                    cCurrentModuleObject,
-                                    state.dataIPShortCut->cAlphaFieldNames(9),
-                                    state.dataIPShortCut->cAlphaFieldNames(1),
-                                    state.dataIPShortCut->cAlphaArgs(1)));
+                             std::format("{}{}: missing {} for {}={}, simulation continues with no beam heating",
+                                         routineName,
+                                         cCurrentModuleObject,
+                                         state.dataIPShortCut->cAlphaFieldNames(9),
+                                         state.dataIPShortCut->cAlphaFieldNames(1),
+                                         state.dataIPShortCut->cAlphaArgs(1)));
         } else if (!state.dataIPShortCut->lAlphaFieldBlanks(9) &&
                    state.dataIPShortCut->lAlphaFieldBlanks(10)) { // inlet node but no outlet node for hot water
             thisBeam->beamHeatingPresent = false;
             ShowWarningError(state,
-                             format("{}{}: missing {} for {}={}, simulation continues with no beam heating",
-                                    routineName,
-                                    cCurrentModuleObject,
-                                    state.dataIPShortCut->cAlphaFieldNames(10),
-                                    state.dataIPShortCut->cAlphaFieldNames(1),
-                                    state.dataIPShortCut->cAlphaArgs(1)));
+                             std::format("{}{}: missing {} for {}={}, simulation continues with no beam heating",
+                                         routineName,
+                                         cCurrentModuleObject,
+                                         state.dataIPShortCut->cAlphaFieldNames(10),
+                                         state.dataIPShortCut->cAlphaFieldNames(1),
+                                         state.dataIPShortCut->cAlphaArgs(1)));
         } else {
             thisBeam->beamHeatingPresent = true;
             thisBeam->hWInNodeNum = GetOnlySingleNode(state,
                                                       state.dataIPShortCut->cAlphaArgs(9),
                                                       ErrorsFound,
-                                                      DataLoopNode::ConnectionObjectType::AirTerminalSingleDuctConstantVolumeFourPipeBeam,
+                                                      Node::ConnectionObjectType::AirTerminalSingleDuctConstantVolumeFourPipeBeam,
                                                       state.dataIPShortCut->cAlphaArgs(1),
-                                                      DataLoopNode::NodeFluidType::Water,
-                                                      DataLoopNode::ConnectionType::Inlet,
-                                                      NodeInputManager::CompFluidStream::Secondary,
+                                                      Node::FluidType::Water,
+                                                      Node::ConnectionType::Inlet,
+                                                      Node::CompFluidStream::Secondary,
                                                       ObjectIsParent,
                                                       state.dataIPShortCut->cAlphaFieldNames(9));
             thisBeam->hWOutNodeNum = GetOnlySingleNode(state,
                                                        state.dataIPShortCut->cAlphaArgs(10),
                                                        ErrorsFound,
-                                                       DataLoopNode::ConnectionObjectType::AirTerminalSingleDuctConstantVolumeFourPipeBeam,
+                                                       Node::ConnectionObjectType::AirTerminalSingleDuctConstantVolumeFourPipeBeam,
                                                        state.dataIPShortCut->cAlphaArgs(1),
-                                                       DataLoopNode::NodeFluidType::Water,
-                                                       DataLoopNode::ConnectionType::Outlet,
-                                                       NodeInputManager::CompFluidStream::Secondary,
+                                                       Node::FluidType::Water,
+                                                       Node::ConnectionType::Outlet,
+                                                       Node::CompFluidStream::Secondary,
                                                        ObjectIsParent,
                                                        state.dataIPShortCut->cAlphaFieldNames(10));
         }
@@ -332,20 +300,20 @@ namespace FourPipeBeam {
 
         thisBeam->modCoolingQdotDeltaTFuncNum = GetCurveIndex(state, state.dataIPShortCut->cAlphaArgs(11));
         if (thisBeam->modCoolingQdotDeltaTFuncNum == 0 && thisBeam->beamCoolingPresent) {
-            ShowSevereError(state, format("{}{}=\"{}\"", routineName, cCurrentModuleObject, state.dataIPShortCut->cAlphaArgs(1)));
-            ShowContinueError(state, format("Invalid {}={}", state.dataIPShortCut->cAlphaFieldNames(11), state.dataIPShortCut->cAlphaArgs(11)));
+            ShowSevereError(state, std::format("{}{}=\"{}\"", routineName, cCurrentModuleObject, state.dataIPShortCut->cAlphaArgs(1)));
+            ShowContinueError(state, std::format("Invalid {}={}", state.dataIPShortCut->cAlphaFieldNames(11), state.dataIPShortCut->cAlphaArgs(11)));
             ErrorsFound = true;
         }
         thisBeam->modCoolingQdotAirFlowFuncNum = GetCurveIndex(state, state.dataIPShortCut->cAlphaArgs(12));
         if (thisBeam->modCoolingQdotAirFlowFuncNum == 0 && thisBeam->beamCoolingPresent) {
-            ShowSevereError(state, format("{}{}=\"{}\"", routineName, cCurrentModuleObject, state.dataIPShortCut->cAlphaArgs(1)));
-            ShowContinueError(state, format("Invalid {}={}", state.dataIPShortCut->cAlphaFieldNames(12), state.dataIPShortCut->cAlphaArgs(12)));
+            ShowSevereError(state, std::format("{}{}=\"{}\"", routineName, cCurrentModuleObject, state.dataIPShortCut->cAlphaArgs(1)));
+            ShowContinueError(state, std::format("Invalid {}={}", state.dataIPShortCut->cAlphaFieldNames(12), state.dataIPShortCut->cAlphaArgs(12)));
             ErrorsFound = true;
         }
         thisBeam->modCoolingQdotCWFlowFuncNum = GetCurveIndex(state, state.dataIPShortCut->cAlphaArgs(13));
         if (thisBeam->modCoolingQdotCWFlowFuncNum == 0 && thisBeam->beamCoolingPresent) {
-            ShowSevereError(state, format("{}{}=\"{}\"", routineName, cCurrentModuleObject, state.dataIPShortCut->cAlphaArgs(1)));
-            ShowContinueError(state, format("Invalid {}={}", state.dataIPShortCut->cAlphaFieldNames(13), state.dataIPShortCut->cAlphaArgs(13)));
+            ShowSevereError(state, std::format("{}{}=\"{}\"", routineName, cCurrentModuleObject, state.dataIPShortCut->cAlphaArgs(1)));
+            ShowContinueError(state, std::format("Invalid {}={}", state.dataIPShortCut->cAlphaFieldNames(13), state.dataIPShortCut->cAlphaArgs(13)));
             ErrorsFound = true;
         }
         thisBeam->qDotNormRatedHeating = state.dataIPShortCut->rNumericArgs(9);
@@ -353,20 +321,20 @@ namespace FourPipeBeam {
         thisBeam->vDotNormRatedHW = state.dataIPShortCut->rNumericArgs(11);
         thisBeam->modHeatingQdotDeltaTFuncNum = GetCurveIndex(state, state.dataIPShortCut->cAlphaArgs(14));
         if (thisBeam->modHeatingQdotDeltaTFuncNum == 0 && thisBeam->beamHeatingPresent) {
-            ShowSevereError(state, format("{}{}=\"{}\"", routineName, cCurrentModuleObject, state.dataIPShortCut->cAlphaArgs(1)));
-            ShowContinueError(state, format("Invalid {}={}", state.dataIPShortCut->cAlphaFieldNames(14), state.dataIPShortCut->cAlphaArgs(14)));
+            ShowSevereError(state, std::format("{}{}=\"{}\"", routineName, cCurrentModuleObject, state.dataIPShortCut->cAlphaArgs(1)));
+            ShowContinueError(state, std::format("Invalid {}={}", state.dataIPShortCut->cAlphaFieldNames(14), state.dataIPShortCut->cAlphaArgs(14)));
             ErrorsFound = true;
         }
         thisBeam->modHeatingQdotAirFlowFuncNum = GetCurveIndex(state, state.dataIPShortCut->cAlphaArgs(15));
         if (thisBeam->modHeatingQdotAirFlowFuncNum == 0 && thisBeam->beamHeatingPresent) {
-            ShowSevereError(state, format("{}{}=\"{}\"", routineName, cCurrentModuleObject, state.dataIPShortCut->cAlphaArgs(1)));
-            ShowContinueError(state, format("Invalid {}={}", state.dataIPShortCut->cAlphaFieldNames(15), state.dataIPShortCut->cAlphaArgs(15)));
+            ShowSevereError(state, std::format("{}{}=\"{}\"", routineName, cCurrentModuleObject, state.dataIPShortCut->cAlphaArgs(1)));
+            ShowContinueError(state, std::format("Invalid {}={}", state.dataIPShortCut->cAlphaFieldNames(15), state.dataIPShortCut->cAlphaArgs(15)));
             ErrorsFound = true;
         }
         thisBeam->modHeatingQdotHWFlowFuncNum = GetCurveIndex(state, state.dataIPShortCut->cAlphaArgs(16));
         if (thisBeam->modHeatingQdotHWFlowFuncNum == 0 && thisBeam->beamHeatingPresent) {
-            ShowSevereError(state, format("{}{}=\"{}\"", routineName, cCurrentModuleObject, state.dataIPShortCut->cAlphaArgs(1)));
-            ShowContinueError(state, format("Invalid {}={}", state.dataIPShortCut->cAlphaFieldNames(16), state.dataIPShortCut->cAlphaArgs(16)));
+            ShowSevereError(state, std::format("{}{}=\"{}\"", routineName, cCurrentModuleObject, state.dataIPShortCut->cAlphaArgs(1)));
+            ShowContinueError(state, std::format("Invalid {}={}", state.dataIPShortCut->cAlphaFieldNames(16), state.dataIPShortCut->cAlphaArgs(16)));
             ErrorsFound = true;
         }
         // Register component set data
@@ -397,87 +365,83 @@ namespace FourPipeBeam {
         if (thisBeam->beamCoolingPresent) {
             SetupOutputVariable(state,
                                 "Zone Air Terminal Beam Sensible Cooling Energy",
-                                OutputProcessor::Unit::J,
+                                Constant::Units::J,
                                 thisBeam->beamCoolingEnergy,
-                                OutputProcessor::SOVTimeStepType::System,
-                                OutputProcessor::SOVStoreType::Summed,
+                                OutputProcessor::TimeStepType::System,
+                                OutputProcessor::StoreType::Sum,
                                 thisBeam->name,
-                                _,
-                                "ENERGYTRANSFER",
-                                "COOLINGCOILS",
-                                _,
-                                "System");
+                                Constant::eResource::EnergyTransfer,
+                                OutputProcessor::Group::HVAC,
+                                OutputProcessor::EndUseCat::CoolingCoils);
             SetupOutputVariable(state,
                                 "Zone Air Terminal Beam Sensible Cooling Rate",
-                                OutputProcessor::Unit::W,
+                                Constant::Units::W,
                                 thisBeam->beamCoolingRate,
-                                OutputProcessor::SOVTimeStepType::System,
-                                OutputProcessor::SOVStoreType::Average,
+                                OutputProcessor::TimeStepType::System,
+                                OutputProcessor::StoreType::Average,
                                 thisBeam->name);
         }
         if (thisBeam->beamHeatingPresent) {
             SetupOutputVariable(state,
                                 "Zone Air Terminal Beam Sensible Heating Energy",
-                                OutputProcessor::Unit::J,
+                                Constant::Units::J,
                                 thisBeam->beamHeatingEnergy,
-                                OutputProcessor::SOVTimeStepType::System,
-                                OutputProcessor::SOVStoreType::Summed,
+                                OutputProcessor::TimeStepType::System,
+                                OutputProcessor::StoreType::Sum,
                                 thisBeam->name,
-                                _,
-                                "ENERGYTRANSFER",
-                                "HEATINGCOILS",
-                                _,
-                                "System");
+                                Constant::eResource::EnergyTransfer,
+                                OutputProcessor::Group::HVAC,
+                                OutputProcessor::EndUseCat::HeatingCoils);
             SetupOutputVariable(state,
                                 "Zone Air Terminal Beam Sensible Heating Rate",
-                                OutputProcessor::Unit::W,
+                                Constant::Units::W,
                                 thisBeam->beamHeatingRate,
-                                OutputProcessor::SOVTimeStepType::System,
-                                OutputProcessor::SOVStoreType::Average,
+                                OutputProcessor::TimeStepType::System,
+                                OutputProcessor::StoreType::Average,
                                 thisBeam->name);
         }
         SetupOutputVariable(state,
                             "Zone Air Terminal Primary Air Sensible Cooling Energy",
-                            OutputProcessor::Unit::J,
+                            Constant::Units::J,
                             thisBeam->supAirCoolingEnergy,
-                            OutputProcessor::SOVTimeStepType::System,
-                            OutputProcessor::SOVStoreType::Summed,
+                            OutputProcessor::TimeStepType::System,
+                            OutputProcessor::StoreType::Sum,
                             thisBeam->name);
         SetupOutputVariable(state,
                             "Zone Air Terminal Primary Air Sensible Cooling Rate",
-                            OutputProcessor::Unit::W,
+                            Constant::Units::W,
                             thisBeam->supAirCoolingRate,
-                            OutputProcessor::SOVTimeStepType::System,
-                            OutputProcessor::SOVStoreType::Average,
+                            OutputProcessor::TimeStepType::System,
+                            OutputProcessor::StoreType::Average,
                             thisBeam->name);
         SetupOutputVariable(state,
                             "Zone Air Terminal Primary Air Sensible Heating Energy",
-                            OutputProcessor::Unit::J,
+                            Constant::Units::J,
                             thisBeam->supAirHeatingEnergy,
-                            OutputProcessor::SOVTimeStepType::System,
-                            OutputProcessor::SOVStoreType::Summed,
+                            OutputProcessor::TimeStepType::System,
+                            OutputProcessor::StoreType::Sum,
                             thisBeam->name);
         SetupOutputVariable(state,
                             "Zone Air Terminal Primary Air Sensible Heating Rate",
-                            OutputProcessor::Unit::W,
+                            Constant::Units::W,
                             thisBeam->supAirHeatingRate,
-                            OutputProcessor::SOVTimeStepType::System,
-                            OutputProcessor::SOVStoreType::Average,
+                            OutputProcessor::TimeStepType::System,
+                            OutputProcessor::StoreType::Average,
                             thisBeam->name);
         SetupOutputVariable(state,
                             "Zone Air Terminal Primary Air Flow Rate",
-                            OutputProcessor::Unit::m3_s,
+                            Constant::Units::m3_s,
                             thisBeam->primAirFlow,
-                            OutputProcessor::SOVTimeStepType::System,
-                            OutputProcessor::SOVStoreType::Average,
+                            OutputProcessor::TimeStepType::System,
+                            OutputProcessor::StoreType::Average,
                             thisBeam->name);
 
         SetupOutputVariable(state,
                             "Zone Air Terminal Outdoor Air Volume Flow Rate",
-                            OutputProcessor::Unit::m3_s,
+                            Constant::Units::m3_s,
                             thisBeam->OutdoorAirFlowRate,
-                            OutputProcessor::SOVTimeStepType::System,
-                            OutputProcessor::SOVStoreType::Average,
+                            OutputProcessor::TimeStepType::System,
+                            OutputProcessor::StoreType::Average,
                             thisBeam->name);
 
         airNodeFound = false;
@@ -489,16 +453,18 @@ namespace FourPipeBeam {
         }
         // assumes if there isn't one assigned, it's an error
         if (thisBeam->aDUNum == 0) {
-            ShowSevereError(state,
-                            format("{}No matching Air Distribution Unit, for Unit = [{},{}].", routineName, cCurrentModuleObject, thisBeam->name));
-            ShowContinueError(state, format("...should have outlet node={}", state.dataLoopNodes->NodeID(thisBeam->airOutNodeNum)));
+            ShowSevereError(
+                state, std::format("{}No matching Air Distribution Unit, for Unit = [{},{}].", routineName, cCurrentModuleObject, thisBeam->name));
+            ShowContinueError(state, std::format("...should have outlet node={}", state.dataLoopNodes->NodeID(thisBeam->airOutNodeNum)));
             ErrorsFound = true;
         } else {
 
             // Fill the Zone Equipment data with the supply air inlet node number of this unit.
-            for (ctrlZone = 1; ctrlZone <= state.dataGlobal->NumOfZones; ++ctrlZone) {
-                if (!state.dataZoneEquip->ZoneEquipConfig(ctrlZone).IsControlled) continue;
-                for (supAirIn = 1; supAirIn <= state.dataZoneEquip->ZoneEquipConfig(ctrlZone).NumInletNodes; ++supAirIn) {
+            for (int ctrlZone = 1; ctrlZone <= state.dataGlobal->NumOfZones; ++ctrlZone) {
+                if (!state.dataZoneEquip->ZoneEquipConfig(ctrlZone).IsControlled) {
+                    continue;
+                }
+                for (int supAirIn = 1; supAirIn <= state.dataZoneEquip->ZoneEquipConfig(ctrlZone).NumInletNodes; ++supAirIn) {
                     if (thisBeam->airOutNodeNum == state.dataZoneEquip->ZoneEquipConfig(ctrlZone).InletNode(supAirIn)) {
                         thisBeam->zoneIndex = ctrlZone;
                         thisBeam->zoneNodeIndex = state.dataZoneEquip->ZoneEquipConfig(ctrlZone).ZoneNode;
@@ -520,18 +486,17 @@ namespace FourPipeBeam {
             }
         }
         if (!airNodeFound) {
-            ShowSevereError(state, format("The outlet air node from the {} = {}", cCurrentModuleObject, thisBeam->name));
-            ShowContinueError(state, format("did not have a matching Zone Equipment Inlet Node, Node ={}", state.dataIPShortCut->cAlphaArgs(5)));
+            ShowSevereError(state, std::format("The outlet air node from the {} = {}", cCurrentModuleObject, thisBeam->name));
+            ShowContinueError(state, std::format("did not have a matching Zone Equipment Inlet Node, Node ={}", state.dataIPShortCut->cAlphaArgs(5)));
             ErrorsFound = true;
         }
 
         if (found && !ErrorsFound) {
             state.dataFourPipeBeam->FourPipeBeams.push_back(thisBeam);
             return thisBeam;
-        } else {
-            ShowFatalError(state, format("{}Errors found in getting input. Preceding conditions cause termination.", routineName));
-            return nullptr;
         }
+        ShowFatalError(state, std::format("{}Errors found in getting input. Preceding conditions cause termination.", routineName));
+        return nullptr;
     }
 
     int HVACFourPipeBeam::getAirLoopNum()
@@ -585,14 +550,11 @@ namespace FourPipeBeam {
         using PlantUtilities::InitComponentNodes;
         using PlantUtilities::ScanPlantLoopsForObject;
         using PlantUtilities::SetComponentFlowRate;
-        using ScheduleManager::GetCurrentScheduleValue;
 
         static constexpr std::string_view routineName("HVACFourPipeBeam::init");
 
-        bool errFlag = false;
-
         if (this->plantLoopScanFlag && allocated(state.dataPlnt->PlantLoop)) {
-            errFlag = false;
+            bool errFlag = false;
             if (this->beamCoolingPresent) {
                 ScanPlantLoopsForObject(state,
                                         this->name,
@@ -605,7 +567,7 @@ namespace FourPipeBeam {
                                         this->cWInNodeNum,
                                         _);
                 if (errFlag) {
-                    ShowFatalError(state, format("{} Program terminated for previous conditions.", routineName));
+                    ShowFatalError(state, std::format("{} Program terminated for previous conditions.", routineName));
                 }
             }
             if (this->beamHeatingPresent) {
@@ -620,7 +582,7 @@ namespace FourPipeBeam {
                                         this->hWInNodeNum,
                                         _);
                 if (errFlag) {
-                    ShowFatalError(state, format("{} Program terminated for previous conditions.", routineName));
+                    ShowFatalError(state, std::format("{} Program terminated for previous conditions.", routineName));
                 }
             }
             this->plantLoopScanFlag = false;
@@ -631,10 +593,10 @@ namespace FourPipeBeam {
             if (this->aDUNum != 0) {
                 if (!CheckZoneEquipmentList(state, "ZONEHVAC:AIRDISTRIBUTIONUNIT", state.dataDefineEquipment->AirDistUnit(this->aDUNum).Name)) {
                     ShowSevereError(state,
-                                    format("{}: ADU=[Air Distribution Unit,{}] is not on any ZoneHVAC:EquipmentList.",
-                                           routineName,
-                                           state.dataDefineEquipment->AirDistUnit(this->aDUNum).Name));
-                    ShowContinueError(state, format("...Unit=[{},{}] will not be simulated.", this->unitType, this->name));
+                                    std::format("{}: ADU=[Air Distribution Unit,{}] is not on any ZoneHVAC:EquipmentList.",
+                                                routineName,
+                                                state.dataDefineEquipment->AirDistUnit(this->aDUNum).Name));
+                    ShowContinueError(state, std::format("...Unit=[{},{}] will not be simulated.", this->unitType, this->name));
                 }
                 this->zoneEquipmentListChecked = true;
             }
@@ -685,21 +647,10 @@ namespace FourPipeBeam {
         // Do the start of HVAC time step initializations
         if (FirstHVACIteration) {
             // check availability schedules and set flags
-            if (GetCurrentScheduleValue(state, this->airAvailSchedNum) > 0.0) {
-                this->airAvailable = true;
-            } else {
-                this->airAvailable = false;
-            }
-            if (this->airAvailable && beamCoolingPresent && (GetCurrentScheduleValue(state, this->coolingAvailSchedNum) > 0.0)) {
-                this->coolingAvailable = true;
-            } else {
-                this->coolingAvailable = false;
-            }
-            if (this->airAvailable && beamHeatingPresent && (GetCurrentScheduleValue(state, this->heatingAvailSchedNum) > 0.0)) {
-                this->heatingAvailable = true;
-            } else {
-                this->heatingAvailable = false;
-            }
+            this->airAvailable = (this->airAvailSched->getCurrentVal() > 0.0);
+            this->coolingAvailable = (this->airAvailable && beamCoolingPresent && (this->coolingAvailSched->getCurrentVal() > 0.0));
+            this->heatingAvailable = (this->airAvailable && beamHeatingPresent && (this->heatingAvailSched->getCurrentVal() > 0.0));
+
             // check for upstream zero flow. If nonzero and air available, set primary flow to max
             if (this->airAvailable && state.dataLoopNodes->Node(this->airInNodeNum).MassFlowRate > 0.0) {
                 state.dataLoopNodes->Node(this->airInNodeNum).MassFlowRate = this->mDotDesignPrimAir;
@@ -746,8 +697,6 @@ namespace FourPipeBeam {
 
         // Using
         using namespace DataSizing;
-        using FluidProperties::GetDensityGlycol;
-        using FluidProperties::GetSpecificHeatGlycol;
         using PlantUtilities::MyPlantSizingIndex;
         using PlantUtilities::RegisterPlantCompDesignFlow;
         using Psychrometrics::PsyCpAirFnW;
@@ -759,7 +708,6 @@ namespace FourPipeBeam {
         Real64 rho;                     // local fluid density
         bool noHardSizeAnchorAvailable; // aid for complex logic surrounding mix of hard size and autosizes
         Real64 cpAir = 0.0;
-        int SolFlag;
         Real64 ErrTolerance = 0.001;
 
         Real64 mDotAirSolutionHeating = 0.0;
@@ -827,7 +775,7 @@ namespace FourPipeBeam {
                     // should not come here, developer exception
                 }
             } // no air flow rate
-        }     // no beam length
+        } // no beam length
 
         if (noHardSizeAnchorAvailable && (state.dataSize->CurZoneEqNum > 0) &&
             (state.dataSize->CurTermUnitSizingNum > 0)) { // need to use central sizing results to calculate
@@ -862,7 +810,7 @@ namespace FourPipeBeam {
                 int pltSizCoolNum = MyPlantSizingIndex(state, "four pipe beam unit", this->name, this->cWInNodeNum, this->cWOutNodeNum, ErrorsFound);
                 if (pltSizCoolNum == 0) {
                     ShowSevereError(state, "Autosizing of water flow requires a cooling loop Sizing:Plant object");
-                    ShowContinueError(state, format("Occurs in {} Object={}", this->unitType, this->name));
+                    ShowContinueError(state, std::format("Occurs in {} Object={}", this->unitType, this->name));
                     ErrorsFound = true;
                 } else {
                     this->cWTempIn = state.dataSize->PlantSizData(pltSizCoolNum).ExitTemp;
@@ -884,11 +832,7 @@ namespace FourPipeBeam {
                     this->totBeamLength = this->vDotDesignPrimAir / this->vDotNormRatedPrimAir;
                     if (this->vDotDesignCWWasAutosized) {
                         this->vDotDesignCW = this->vDotNormRatedCW * this->totBeamLength;
-                        Real64 const rho = FluidProperties::GetDensityGlycol(state,
-                                                                             state.dataPlnt->PlantLoop(this->cWplantLoc.loopNum).FluidName,
-                                                                             DataGlobalConstants::CWInitConvTemp,
-                                                                             state.dataPlnt->PlantLoop(this->cWplantLoc.loopNum).FluidIndex,
-                                                                             routineName);
+                        Real64 const rho = this->cWplantLoc.loop->glycol->getDensity(state, Constant::CWInitConvTemp, routineName);
                         this->mDotNormRatedCW = this->vDotNormRatedCW * rho;
                         this->mDotCW = this->vDotDesignCW * rho;
                         if (this->beamCoolingPresent) {
@@ -897,11 +841,7 @@ namespace FourPipeBeam {
                     }
                     if (vDotDesignHWWasAutosized) {
                         this->vDotDesignHW = this->vDotNormRatedHW * this->totBeamLength;
-                        Real64 const rho = FluidProperties::GetDensityGlycol(state,
-                                                                             state.dataPlnt->PlantLoop(this->hWplantLoc.loopNum).FluidName,
-                                                                             DataGlobalConstants::HWInitConvTemp,
-                                                                             state.dataPlnt->PlantLoop(this->hWplantLoc.loopNum).FluidIndex,
-                                                                             routineName);
+                        Real64 const rho = this->hWplantLoc.loop->glycol->getDensity(state, Constant::HWInitConvTemp, routineName);
                         this->mDotNormRatedHW = this->vDotNormRatedHW * rho;
                         this->mDotHW = this->vDotDesignHW * rho;
                         if (this->beamHeatingPresent) {
@@ -911,16 +851,16 @@ namespace FourPipeBeam {
                     this->calc(state);
                     if (this->qDotZoneReq != 0.0) {
                         return ((this->qDotZoneReq - this->qDotTotalDelivered) / this->qDotZoneReq);
-                    } else {
-                        return 1.0;
                     }
+                    return 1.0;
                 };
+                int SolFlag = 0;
                 General::SolveRoot(state, ErrTolerance, 50, SolFlag, mDotAirSolutionCooling, f, minFlow, maxFlowCool);
                 if (SolFlag == -1) {
-                    ShowWarningError(state, format("Cooling load sizing search failed in four pipe beam unit called {}", this->name));
+                    ShowWarningError(state, std::format("Cooling load sizing search failed in four pipe beam unit called {}", this->name));
                     ShowContinueError(state, "  Iteration limit exceeded in calculating size for design cooling load");
                 } else if (SolFlag == -2) {
-                    ShowWarningError(state, format("Cooling load sizing search failed in four pipe beam unit called {}", this->name));
+                    ShowWarningError(state, std::format("Cooling load sizing search failed in four pipe beam unit called {}", this->name));
                     ShowContinueError(state, "  Bad size limits");
                 }
             }
@@ -941,7 +881,7 @@ namespace FourPipeBeam {
                 int pltSizHeatNum = MyPlantSizingIndex(state, "four pipe beam unit", this->name, this->hWInNodeNum, this->hWOutNodeNum, ErrorsFound);
                 if (pltSizHeatNum == 0) {
                     ShowSevereError(state, "Autosizing of water flow requires a heating loop Sizing:Plant object");
-                    ShowContinueError(state, format("Occurs in {} Object={}", this->unitType, this->name));
+                    ShowContinueError(state, std::format("Occurs in {} Object={}", this->unitType, this->name));
                     ErrorsFound = true;
                 } else {
                     this->hWTempIn = state.dataSize->PlantSizData(pltSizHeatNum).ExitTemp;
@@ -963,11 +903,7 @@ namespace FourPipeBeam {
                     this->totBeamLength = this->vDotDesignPrimAir / this->vDotNormRatedPrimAir;
                     if (this->vDotDesignCWWasAutosized) {
                         this->vDotDesignCW = this->vDotNormRatedCW * this->totBeamLength;
-                        Real64 const rho = FluidProperties::GetDensityGlycol(state,
-                                                                             state.dataPlnt->PlantLoop(this->cWplantLoc.loopNum).FluidName,
-                                                                             DataGlobalConstants::CWInitConvTemp,
-                                                                             state.dataPlnt->PlantLoop(this->cWplantLoc.loopNum).FluidIndex,
-                                                                             routineName);
+                        Real64 const rho = this->cWplantLoc.loop->glycol->getDensity(state, Constant::CWInitConvTemp, routineName);
                         this->mDotNormRatedCW = this->vDotNormRatedCW * rho;
                         this->mDotCW = this->vDotDesignCW * rho;
                         if (this->beamCoolingPresent) {
@@ -976,11 +912,7 @@ namespace FourPipeBeam {
                     }
                     if (vDotDesignHWWasAutosized) {
                         this->vDotDesignHW = this->vDotNormRatedHW * this->totBeamLength;
-                        Real64 const rho = FluidProperties::GetDensityGlycol(state,
-                                                                             state.dataPlnt->PlantLoop(this->hWplantLoc.loopNum).FluidName,
-                                                                             DataGlobalConstants::HWInitConvTemp,
-                                                                             state.dataPlnt->PlantLoop(this->hWplantLoc.loopNum).FluidIndex,
-                                                                             routineName);
+                        Real64 const rho = this->hWplantLoc.loop->glycol->getDensity(state, Constant::HWInitConvTemp, routineName);
                         this->mDotNormRatedHW = this->vDotNormRatedHW * rho;
                         this->mDotHW = this->vDotDesignHW * rho;
                         if (this->beamHeatingPresent) {
@@ -990,16 +922,16 @@ namespace FourPipeBeam {
                     this->calc(state);
                     if (this->qDotZoneReq != 0.0) {
                         return ((this->qDotZoneReq - this->qDotTotalDelivered) / this->qDotZoneReq);
-                    } else {
-                        return 1.0;
                     }
+                    return 1.0;
                 };
+                int SolFlag = 0;
                 General::SolveRoot(state, ErrTolerance, 50, SolFlag, mDotAirSolutionHeating, f, 0.0, maxFlowHeat);
                 if (SolFlag == -1) {
-                    ShowWarningError(state, format("Heating load sizing search failed in four pipe beam unit called {}", this->name));
+                    ShowWarningError(state, std::format("Heating load sizing search failed in four pipe beam unit called {}", this->name));
                     ShowContinueError(state, "  Iteration limit exceeded in calculating size for design heating load");
                 } else if (SolFlag == -2) {
-                    ShowWarningError(state, format("Heating load sizing search failed in four pipe beam unit called {}", this->name));
+                    ShowWarningError(state, std::format("Heating load sizing search failed in four pipe beam unit called {}", this->name));
                     ShowContinueError(state, "  Bad size limits");
                 }
             }
@@ -1045,21 +977,13 @@ namespace FourPipeBeam {
         }
 
         if (this->beamCoolingPresent) {
-            rho = FluidProperties::GetDensityGlycol(state,
-                                                    state.dataPlnt->PlantLoop(this->cWplantLoc.loopNum).FluidName,
-                                                    DataGlobalConstants::CWInitConvTemp,
-                                                    state.dataPlnt->PlantLoop(this->cWplantLoc.loopNum).FluidIndex,
-                                                    routineName);
+            rho = this->cWplantLoc.loop->glycol->getDensity(state, Constant::CWInitConvTemp, routineName);
             this->mDotNormRatedCW = this->vDotNormRatedCW * rho;
             this->mDotDesignCW = this->vDotDesignCW * rho;
             PlantUtilities::InitComponentNodes(state, 0.0, this->mDotDesignCW, this->cWInNodeNum, this->cWOutNodeNum);
         }
         if (this->beamHeatingPresent) {
-            rho = FluidProperties::GetDensityGlycol(state,
-                                                    state.dataPlnt->PlantLoop(this->hWplantLoc.loopNum).FluidName,
-                                                    DataGlobalConstants::HWInitConvTemp,
-                                                    state.dataPlnt->PlantLoop(this->hWplantLoc.loopNum).FluidIndex,
-                                                    routineName);
+            rho = this->hWplantLoc.loop->glycol->getDensity(state, Constant::HWInitConvTemp, routineName);
             this->mDotNormRatedHW = this->vDotNormRatedHW * rho;
             this->mDotDesignHW = this->vDotDesignHW * rho;
             PlantUtilities::InitComponentNodes(state, 0.0, this->mDotDesignHW, this->hWInNodeNum, this->hWOutNodeNum);
@@ -1081,10 +1005,32 @@ namespace FourPipeBeam {
         // save the design water volume flow rate for use by the water loop sizing algorithms
         if (this->vDotDesignCW > 0.0 && this->beamCoolingPresent) {
             RegisterPlantCompDesignFlow(state, this->cWInNodeNum, this->vDotDesignCW);
+            BaseSizer::calcCoilWaterFlowRates(state,
+                                              this->name,
+                                              this->unitType,
+                                              this->vDotDesignCW,
+                                              this->cWplantLoc.loopNum,
+                                              state.dataSize->CurZoneEqNum,
+                                              state.dataSize->CurSysNum,
+                                              state.dataSize->CurOASysNum,
+                                              state.dataSize->FinalZoneSizing,
+                                              state.dataSize->FinalSysSizing);
         }
+
         if (this->vDotDesignHW > 0.0 && this->beamHeatingPresent) {
             RegisterPlantCompDesignFlow(state, this->hWInNodeNum, this->vDotDesignHW);
+            BaseSizer::calcCoilWaterFlowRates(state,
+                                              this->name,
+                                              this->unitType,
+                                              this->vDotDesignHW,
+                                              this->hWplantLoc.loopNum,
+                                              state.dataSize->CurZoneEqNum,
+                                              state.dataSize->CurSysNum,
+                                              state.dataSize->CurOASysNum,
+                                              state.dataSize->FinalZoneSizing,
+                                              state.dataSize->FinalSysSizing);
         }
+
         if (ErrorsFound) {
             ShowFatalError(state, "Preceding four pipe beam sizing errors cause program termination");
         }
@@ -1102,14 +1048,12 @@ namespace FourPipeBeam {
         using PlantUtilities::SetComponentFlowRate;
         using namespace std::placeholders;
 
-        bool dOASMode = false; // true if unit is operating as DOAS terminal with no heating or cooling by beam
-
         int SolFlag;
         Real64 ErrTolerance;
 
         NonAirSysOutput = 0.0; // initialize
 
-        if (this->mDotSystemAir < DataHVACGlobals::VerySmallMassFlow ||
+        if (this->mDotSystemAir < HVAC::VerySmallMassFlow ||
             (!this->airAvailable && !this->coolingAvailable && !this->heatingAvailable)) { // unit is off
             this->mDotHW = 0.0;
             if (this->beamHeatingPresent) {
@@ -1127,8 +1071,7 @@ namespace FourPipeBeam {
             return;
         }
 
-        if (this->airAvailable && this->mDotSystemAir > DataHVACGlobals::VerySmallMassFlow && !this->coolingAvailable && !this->heatingAvailable) {
-            dOASMode = true;
+        if (this->airAvailable && this->mDotSystemAir > HVAC::VerySmallMassFlow && !this->coolingAvailable && !this->heatingAvailable) {
             this->mDotHW = 0.0;
             if (this->beamHeatingPresent) {
                 SetComponentFlowRate(state, this->mDotHW, this->hWInNodeNum, this->hWOutNodeNum, this->hWplantLoc);
@@ -1157,7 +1100,7 @@ namespace FourPipeBeam {
 
         this->qDotBeamReq = this->qDotZoneReq - this->qDotSystemAir;
 
-        if (this->qDotBeamReq < -DataHVACGlobals::SmallLoad && this->coolingAvailable) { // beam cooling needed
+        if (this->qDotBeamReq < -HVAC::SmallLoad && this->coolingAvailable) { // beam cooling needed
             // first calc with max chilled water flow
             this->mDotHW = 0.0;
             if (this->beamHeatingPresent) {
@@ -1166,7 +1109,7 @@ namespace FourPipeBeam {
             this->hWTempOut = this->hWTempIn;
             this->mDotCW = this->mDotDesignCW;
             this->calc(state);
-            if (this->qDotBeamCooling < (qDotBeamReq - DataHVACGlobals::SmallLoad)) {
+            if (this->qDotBeamCooling < (qDotBeamReq - HVAC::SmallLoad)) {
                 // can overcool, modulate chilled water flow rate to meet load
                 this->qDotBeamCoolingMax = this->qDotBeamCooling;
                 ErrTolerance = 0.01;
@@ -1176,9 +1119,8 @@ namespace FourPipeBeam {
                     this->calc(state);
                     if (this->qDotBeamCoolingMax != 0.0) {
                         return (((this->qDotZoneToCoolSetPt - this->qDotSystemAir) - this->qDotBeamCooling) / this->qDotBeamCoolingMax);
-                    } else {
-                        return 1.0;
                     }
+                    return 1.0;
                 };
                 General::SolveRoot(state, ErrTolerance, 50, SolFlag, this->mDotCW, f, 0.0, this->mDotDesignCW);
                 if (SolFlag == -1) {
@@ -1191,12 +1133,11 @@ namespace FourPipeBeam {
                 this->calc(state);
                 NonAirSysOutput = this->qDotBeamCooling;
                 return;
-            } else { // can run flat out without overcooling, which we just did
-                NonAirSysOutput = this->qDotBeamCooling;
-                return;
-            }
-
-        } else if (qDotBeamReq > DataHVACGlobals::SmallLoad && this->heatingAvailable) { // beam heating needed
+            } // can run flat out without overcooling, which we just did
+            NonAirSysOutput = this->qDotBeamCooling;
+            return;
+        }
+        if (qDotBeamReq > HVAC::SmallLoad && this->heatingAvailable) { // beam heating needed
             // first calc with max hot water flow
             this->mDotCW = 0.0;
             if (this->beamCoolingPresent) {
@@ -1205,7 +1146,7 @@ namespace FourPipeBeam {
             this->cWTempOut = this->cWTempIn;
             this->mDotHW = this->mDotDesignHW;
             this->calc(state);
-            if (this->qDotBeamHeating > (qDotBeamReq + DataHVACGlobals::SmallLoad)) {
+            if (this->qDotBeamHeating > (qDotBeamReq + HVAC::SmallLoad)) {
                 this->qDotBeamHeatingMax = this->qDotBeamHeating;
                 // can overheat, modulate hot water flow to meet load
                 ErrTolerance = 0.01;
@@ -1215,9 +1156,8 @@ namespace FourPipeBeam {
                     this->calc(state);
                     if (this->qDotBeamHeatingMax != 0.0) {
                         return (((this->qDotZoneToHeatSetPt - this->qDotSystemAir) - this->qDotBeamHeating) / this->qDotBeamHeatingMax);
-                    } else {
-                        return 1.0;
                     }
+                    return 1.0;
                 };
                 General::SolveRoot(state, ErrTolerance, 50, SolFlag, this->mDotHW, f, 0.0, this->mDotDesignHW);
                 if (SolFlag == -1) {
@@ -1231,35 +1171,30 @@ namespace FourPipeBeam {
                 NonAirSysOutput = this->qDotBeamHeating;
                 return;
 
-            } else { // can run flat out without overheating, which we just did
-                NonAirSysOutput = this->qDotBeamHeating;
-                return;
-            }
-
-        } else {
-            this->mDotHW = 0.0;
-            if (this->beamHeatingPresent) {
-                SetComponentFlowRate(state, this->mDotHW, this->hWInNodeNum, this->hWOutNodeNum, this->hWplantLoc);
-            }
-            this->hWTempOut = this->hWTempIn;
-            // assume if there is still flow that unit has an internal bypass and convector does not still heat
-            this->mDotCW = 0.0;
-            this->cWTempOut = this->cWTempIn;
-            if (this->beamCoolingPresent) {
-                SetComponentFlowRate(state, this->mDotCW, this->cWInNodeNum, this->cWOutNodeNum, this->cWplantLoc);
-            }
-            // assume if there is still flow that unit has an internal bypass and convector does not still cool
-            // don't even need to run calc
+            } // can run flat out without overheating, which we just did
+            NonAirSysOutput = this->qDotBeamHeating;
             return;
         }
+        this->mDotHW = 0.0;
+        if (this->beamHeatingPresent) {
+            SetComponentFlowRate(state, this->mDotHW, this->hWInNodeNum, this->hWOutNodeNum, this->hWplantLoc);
+        }
+        this->hWTempOut = this->hWTempIn;
+        // assume if there is still flow that unit has an internal bypass and convector does not still heat
+        this->mDotCW = 0.0;
+        this->cWTempOut = this->cWTempIn;
+        if (this->beamCoolingPresent) {
+            SetComponentFlowRate(state, this->mDotCW, this->cWInNodeNum, this->cWOutNodeNum, this->cWplantLoc);
+        }
+        // assume if there is still flow that unit has an internal bypass and convector does not still cool
+        // don't even need to run calc
+        return;
     }
 
     void HVACFourPipeBeam::calc(EnergyPlusData &state)
     {
 
         // Using/Aliasing
-        using FluidProperties::GetDensityGlycol;
-        using FluidProperties::GetSpecificHeatGlycol;
         using PlantUtilities::SetComponentFlowRate;
 
         // Locals
@@ -1287,7 +1222,7 @@ namespace FourPipeBeam {
         this->qDotBeamCooling = 0.0;
         this->qDotSystemAir = this->mDotSystemAir * ((this->cpSystemAir * this->tDBSystemAir) - (this->cpZoneAir * this->tDBZoneAirTemp));
 
-        if (this->coolingAvailable && this->mDotCW > DataHVACGlobals::VerySmallMassFlow) {
+        if (this->coolingAvailable && this->mDotCW > HVAC::VerySmallMassFlow) {
             // test chilled water flow against plant, it might not all be available
             SetComponentFlowRate(state, this->mDotCW, this->cWInNodeNum, this->cWOutNodeNum, this->cWplantLoc);
             fModCoolCWMdot =
@@ -1297,11 +1232,7 @@ namespace FourPipeBeam {
             fModCoolAirMdot = Curve::CurveValue(
                 state, this->modCoolingQdotAirFlowFuncNum, ((this->mDotSystemAir / this->totBeamLength) / this->mDotNormRatedPrimAir));
             this->qDotBeamCooling = -1.0 * this->qDotNormRatedCooling * fModCoolDeltaT * fModCoolAirMdot * fModCoolCWMdot * this->totBeamLength;
-            cp = GetSpecificHeatGlycol(state,
-                                       state.dataPlnt->PlantLoop(this->cWplantLoc.loopNum).FluidName,
-                                       this->cWTempIn,
-                                       state.dataPlnt->PlantLoop(this->cWplantLoc.loopNum).FluidIndex,
-                                       routineName);
+            cp = this->cWplantLoc.loop->glycol->getSpecificHeat(state, this->cWTempIn, routineName);
             if (this->mDotCW > 0.0) {
                 this->cWTempOut = this->cWTempIn - (this->qDotBeamCooling / (this->mDotCW * cp));
             } else {
@@ -1328,7 +1259,7 @@ namespace FourPipeBeam {
             this->cWTempOut = this->cWTempIn;
             this->qDotBeamCooling = 0.0;
         }
-        if (this->heatingAvailable && this->mDotHW > DataHVACGlobals::VerySmallMassFlow) {
+        if (this->heatingAvailable && this->mDotHW > HVAC::VerySmallMassFlow) {
             // test hot water flow against plant, it might not all be available
             SetComponentFlowRate(state, this->mDotHW, this->hWInNodeNum, this->hWOutNodeNum, this->hWplantLoc);
             fModHeatHWMdot =
@@ -1338,11 +1269,7 @@ namespace FourPipeBeam {
             fModHeatAirMdot = Curve::CurveValue(
                 state, this->modHeatingQdotAirFlowFuncNum, ((this->mDotSystemAir / this->totBeamLength) / this->mDotNormRatedPrimAir));
             this->qDotBeamHeating = this->qDotNormRatedHeating * fModHeatDeltaT * fModHeatAirMdot * fModHeatHWMdot * this->totBeamLength;
-            cp = GetSpecificHeatGlycol(state,
-                                       state.dataPlnt->PlantLoop(this->hWplantLoc.loopNum).FluidName,
-                                       this->hWTempIn,
-                                       state.dataPlnt->PlantLoop(this->hWplantLoc.loopNum).FluidIndex,
-                                       routineName);
+            cp = this->hWplantLoc.loop->glycol->getSpecificHeat(state, this->hWTempIn, routineName);
             if (this->mDotHW > 0.0) {
                 this->hWTempOut = this->hWTempIn - (this->qDotBeamHeating / (this->mDotHW * cp));
             } else {
@@ -1416,7 +1343,7 @@ namespace FourPipeBeam {
 
         Real64 ReportingConstant;
 
-        ReportingConstant = state.dataHVACGlobal->TimeStepSys * DataGlobalConstants::SecInHour;
+        ReportingConstant = state.dataHVACGlobal->TimeStepSysSec;
 
         if (this->beamCoolingPresent) {
             this->beamCoolingRate = std::abs(this->qDotBeamCooling); // report var has positive sign convention
@@ -1450,6 +1377,41 @@ namespace FourPipeBeam {
         } else {
             this->OutdoorAirFlowRate = 0.0;
         }
+    }
+
+    void HVACFourPipeBeam::reportTerminalUnit(EnergyPlusData &state)
+    {
+        // populate the predefined equipment summary report related to air terminals
+        auto &orp = state.dataOutRptPredefined;
+        auto &adu = state.dataDefineEquipment->AirDistUnit(this->aDUNum);
+        if (!state.dataSize->TermUnitFinalZoneSizing.empty()) {
+            auto &sizing = state.dataSize->TermUnitFinalZoneSizing(adu.TermUnitSizingNum);
+            OutputReportPredefined::PreDefTableEntry(state, orp->pdchAirTermMinFlow, adu.Name, sizing.DesCoolVolFlowMin);
+            OutputReportPredefined::PreDefTableEntry(state, orp->pdchAirTermMinOutdoorFlow, adu.Name, sizing.MinOA);
+            OutputReportPredefined::PreDefTableEntry(state, orp->pdchAirTermSupCoolingSP, adu.Name, sizing.CoolDesTemp);
+            OutputReportPredefined::PreDefTableEntry(state, orp->pdchAirTermSupHeatingSP, adu.Name, sizing.HeatDesTemp);
+            OutputReportPredefined::PreDefTableEntry(state, orp->pdchAirTermHeatingCap, adu.Name, sizing.DesHeatLoad);
+            OutputReportPredefined::PreDefTableEntry(state, orp->pdchAirTermCoolingCap, adu.Name, sizing.DesCoolLoad);
+        }
+        OutputReportPredefined::PreDefTableEntry(state, orp->pdchAirTermTypeInp, adu.Name, "AirTerminal:SingleDuct:ConstantVolume:FourPipeBeam");
+        OutputReportPredefined::PreDefTableEntry(state, orp->pdchAirTermPrimFlow, adu.Name, this->vDotNormRatedPrimAir);
+        OutputReportPredefined::PreDefTableEntry(state, orp->pdchAirTermSecdFlow, adu.Name, "n/a");
+        OutputReportPredefined::PreDefTableEntry(state, orp->pdchAirTermMinFlowSch, adu.Name, "n/a");
+        OutputReportPredefined::PreDefTableEntry(state, orp->pdchAirTermMaxFlowReh, adu.Name, "n/a");
+        OutputReportPredefined::PreDefTableEntry(state, orp->pdchAirTermMinOAflowSch, adu.Name, "n/a");
+        if (this->beamHeatingPresent) {
+            OutputReportPredefined::PreDefTableEntry(state, orp->pdchAirTermHeatCoilType, adu.Name, "Included");
+        } else {
+            OutputReportPredefined::PreDefTableEntry(state, orp->pdchAirTermHeatCoilType, adu.Name, "None");
+        }
+
+        if (this->beamCoolingPresent) {
+            OutputReportPredefined::PreDefTableEntry(state, orp->pdchAirTermCoolCoilType, adu.Name, "Included");
+        } else {
+            OutputReportPredefined::PreDefTableEntry(state, orp->pdchAirTermCoolCoilType, adu.Name, "None");
+        }
+        OutputReportPredefined::PreDefTableEntry(state, orp->pdchAirTermFanType, adu.Name, "n/a");
+        OutputReportPredefined::PreDefTableEntry(state, orp->pdchAirTermFanName, adu.Name, "n/a");
     }
 
 } // namespace FourPipeBeam

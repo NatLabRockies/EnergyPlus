@@ -179,6 +179,12 @@ IF EXIST eplusout.sln   DEL eplusout.sln
 IF EXIST epluszsz.csv   DEL epluszsz.csv
 IF EXIST epluszsz.tab   DEL epluszsz.tab
 IF EXIST epluszsz.txt   DEL epluszsz.txt
+IF EXIST epluspsz.csv   DEL epluspsz.csv
+IF EXIST epluspsz.tab   DEL epluspsz.tab
+IF EXIST epluspsz.txt   DEL epluspsz.txt
+IF EXIST eplusspsz.csv  DEL eplusspsz.csv
+IF EXIST eplusspsz.tab  DEL eplusspsz.tab
+IF EXIST eplusspsz.txt  DEL eplusspsz.txt
 IF EXIST eplusssz.csv   DEL eplusssz.csv
 IF EXIST eplusssz.tab   DEL eplusssz.tab
 IF EXIST eplusssz.txt   DEL eplusssz.txt
@@ -224,6 +230,35 @@ IF EXIST eplusout.dfs  DEL eplusout.dfs
 IF EXIST slab.int DEL slab.int
 IF EXIST BasementGHTIn.idf DEL BasementGHTIn.idf
 IF EXIST eplusshading.csv DEL eplusshading.csv
+
+IF EXIST eplusout.json DEL eplusout.json
+IF EXIST eplusout_detailed_zone.json DEL eplusout_detailed_zone.json
+IF EXIST eplusout_detailed_HVAC.json DEL eplusout_detailed_HVAC.json
+IF EXIST eplusout_timestep.json DEL eplusout_timestep.json
+IF EXIST eplusout_yearly.json DEL eplusout_yearly.json
+IF EXIST eplusout_monthly.json DEL eplusout_monthly.json
+IF EXIST eplusout_daily.json DEL eplusout_daily.json
+IF EXIST eplusout_hourly.json DEL eplusout_hourly.json
+IF EXIST eplusout_runperiod.json DEL eplusout_runperiod.json
+IF EXIST eplusout.cbor DEL eplusout.cbor
+IF EXIST eplusout_detailed_zone.cbor DEL eplusout_detailed_zone.cbor
+IF EXIST eplusout_detailed_HVAC.cbor DEL eplusout_detailed_HVAC.cbor
+IF EXIST eplusout_timestep.cbor DEL eplusout_timestep.cbor
+IF EXIST eplusout_yearly.cbor DEL eplusout_yearly.cbor
+IF EXIST eplusout_monthly.cbor DEL eplusout_monthly.cbor
+IF EXIST eplusout_daily.cbor DEL eplusout_daily.cbor
+IF EXIST eplusout_hourly.cbor DEL eplusout_hourly.cbor
+IF EXIST eplusout_runperiod.cbor DEL eplusout_runperiod.cbor
+IF EXIST eplusout.msgpack DEL eplusout.msgpack
+IF EXIST eplusout_detailed_zone.msgpack DEL eplusout_detailed_zone.msgpack
+IF EXIST eplusout_detailed_HVAC.msgpack DEL eplusout_detailed_HVAC.msgpack
+IF EXIST eplusout_timestep.msgpack DEL eplusout_timestep.msgpack
+IF EXIST eplusout_yearly.msgpack DEL eplusout_yearly.msgpack
+IF EXIST eplusout_monthly.msgpack DEL eplusout_monthly.msgpack
+IF EXIST eplusout_daily.msgpack DEL eplusout_daily.msgpack
+IF EXIST eplusout_hourly.msgpack DEL eplusout_hourly.msgpack
+IF EXIST eplusout_runperiod.msgpack DEL eplusout_runperiod.msgpack
+
 :if %pausing%==Y pause
 
 :  2. Copy input data file to working directory
@@ -321,7 +356,15 @@ IF EXIST SLABSurfaceTemps.TXT DEL SLABSurfaceTemps.TXT
 "%program_path%EnergyPlus"
 if %pausing%==Y pause
 
-:  5. Copy Post Processing Program command file(s) to working directory
+:  5.0 If native csv output is present, then skip convertESOMTR and ReadVarsESO post-processing
+IF EXIST eplusout.csv GOTO skipReadVars
+IF EXIST eplusout.tab GOTO skipReadVars
+IF EXIST eplusout.txt GOTO skipReadVars
+IF EXIST eplusmtr.csv GOTO skipReadVars
+IF EXIST eplusmtr.tab GOTO skipReadVars
+IF EXIST eplusmtr.txt GOTO skipReadVars
+
+:  5.1 Copy Post Processing Program command file(s) to working directory
 IF EXIST "%epin%.rvi" copy "%epin%.rvi" Eplusout.inp
 IF EXIST "%epin%.mvi" copy "%epin%.mvi" Eplusmtr.inp
 :if %pausing%==Y pause
@@ -349,8 +392,9 @@ IF EXIST eplusmtr.inp "%program_path%postprocess\ReadVarsESO.exe" eplusmtr.inp %
 IF NOT EXIST eplusmtr.inp echo eplusout.mtr >test.mvi
 IF NOT EXIST eplusmtr.inp echo eplusmtr.csv >>test.mvi
 IF NOT EXIST eplusmtr.inp "%program_path%postprocess\ReadVarsESO.exe" test.mvi %rvset%
-"%program_path%postprocess\HVAC-Diagram.exe"
+:skipReadVars
 
+"%program_path%postprocess\HVAC-Diagram.exe"
 if %pausing%==Y pause
 
 :  7. Copy output files to input/output path
@@ -371,6 +415,12 @@ IF EXIST "%epout%.sln" DEL "%epout%.sln"
 IF EXIST "%epout%Zsz.csv" DEL "%epout%Zsz.csv"
 IF EXIST "%epout%Zsz.tab" DEL "%epout%Zsz.tab"
 IF EXIST "%epout%Zsz.txt" DEL "%epout%Zsz.txt"
+IF EXIST "%epout%Psz.csv" DEL "%epout%Psz.csv"
+IF EXIST "%epout%Psz.tab" DEL "%epout%Psz.tab"
+IF EXIST "%epout%Psz.txt" DEL "%epout%Psz.txt"
+IF EXIST "%epout%Spsz.csv" DEL "%epout%Spsz.csv"
+IF EXIST "%epout%Spsz.tab" DEL "%epout%Spsz.tab"
+IF EXIST "%epout%Spsz.txt" DEL "%epout%Spsz.txt"
 IF EXIST "%epout%Ssz.csv" DEL "%epout%Ssz.csv"
 IF EXIST "%epout%Ssz.tab" DEL "%epout%Ssz.tab"
 IF EXIST "%epout%Ssz.txt" DEL "%epout%Ssz.txt"
@@ -405,6 +455,34 @@ IF EXIST "%epout%DFS.csv" DEL "%epout%DFS.csv"
 IF EXIST "%epout%.epJSONout" DEL "%epout%.epJSONout"
 IF EXIST "%epout%Shading.csv" DEL "%epout%Shading.csv"
 
+IF EXIST "%epout%.json" DEL "%epout%.json"
+IF EXIST "%epout%_detailed_zone.json" DEL "%epout%_detailed_zone.json"
+IF EXIST "%epout%_detailed_HVAC.json" DEL "%epout%_detailed_HVAC.json"
+IF EXIST "%epout%_timestep.json" DEL "%epout%_timestep.json"
+IF EXIST "%epout%_yearly.json" DEL "%epout%_yearly.json"
+IF EXIST "%epout%_monthly.json" DEL "%epout%_monthly.json"
+IF EXIST "%epout%_daily.json" DEL "%epout%_daily.json"
+IF EXIST "%epout%_hourly.json" DEL "%epout%_hourly.json"
+IF EXIST "%epout%_runperiod.json" DEL "%epout%_runperiod.json"
+IF EXIST "%epout%.cbor" DEL "%epout%.cbor"
+IF EXIST "%epout%_detailed_zone.cbor" DEL "%epout%_detailed_zone.cbor"
+IF EXIST "%epout%_detailed_HVAC.cbor" DEL "%epout%_detailed_HVAC.cbor"
+IF EXIST "%epout%_timestep.cbor" DEL "%epout%_timestep.cbor"
+IF EXIST "%epout%_yearly.cbor" DEL "%epout%_yearly.cbor"
+IF EXIST "%epout%_monthly.cbor" DEL "%epout%_monthly.cbor"
+IF EXIST "%epout%_daily.cbor" DEL "%epout%_daily.cbor"
+IF EXIST "%epout%_hourly.cbor" DEL "%epout%_hourly.cbor"
+IF EXIST "%epout%_runperiod.cbor" DEL "%epout%_runperiod.cbor"
+IF EXIST "%epout%.msgpack" DEL "%epout%.msgpack"
+IF EXIST "%epout%_detailed_zone.msgpack" DEL "%epout%_detailed_zone.msgpack"
+IF EXIST "%epout%_detailed_HVAC.msgpack" DEL "%epout%_detailed_HVAC.msgpack"
+IF EXIST "%epout%_timestep.msgpack" DEL "%epout%_timestep.msgpack"
+IF EXIST "%epout%_yearly.msgpack" DEL "%epout%_yearly.msgpack"
+IF EXIST "%epout%_monthly.msgpack" DEL "%epout%_monthly.msgpack"
+IF EXIST "%epout%_daily.msgpack" DEL "%epout%_daily.msgpack"
+IF EXIST "%epout%_hourly.msgpack" DEL "%epout%_hourly.msgpack"
+IF EXIST "%epout%_runperiod.msgpack" DEL "%epout%_runperiod.msgpack"
+
 IF EXIST eplusout.eso MOVE eplusout.eso "%epout%.eso"
 IF EXIST eplusout.rdd MOVE eplusout.rdd "%epout%.rdd"
 IF EXIST eplusout.mdd MOVE eplusout.mdd "%epout%.mdd"
@@ -421,6 +499,12 @@ IF EXIST eplusout.sln MOVE eplusout.sln "%epout%.sln"
 IF EXIST epluszsz.csv MOVE epluszsz.csv "%epout%Zsz.csv"
 IF EXIST epluszsz.tab MOVE epluszsz.tab "%epout%Zsz.tab"
 IF EXIST epluszsz.txt MOVE epluszsz.txt "%epout%Zsz.txt"
+IF EXIST epluspsz.csv MOVE epluspsz.csv "%epout%Psz.csv"
+IF EXIST epluspsz.tab MOVE epluspsz.tab "%epout%Psz.tab"
+IF EXIST epluspsz.txt MOVE epluspsz.txt "%epout%Psz.txt"
+IF EXIST eplusspsz.csv MOVE eplusspsz.csv "%epout%Spsz.csv"
+IF EXIST eplusspsz.tab MOVE eplusspsz.tab "%epout%Spsz.tab"
+IF EXIST eplusspsz.txt MOVE eplusspsz.txt "%epout%Spsz.txt"
 IF EXIST eplusssz.csv MOVE eplusssz.csv "%epout%Ssz.csv"
 IF EXIST eplusssz.tab MOVE eplusssz.tab "%epout%Ssz.tab"
 IF EXIST eplusssz.txt MOVE eplusssz.txt "%epout%Ssz.txt"
@@ -453,6 +537,34 @@ IF EXIST eplusout.dfs MOVE eplusout.dfs "%epout%DFS.csv"
 IF EXIST in.epJSON MOVE in.epJSON "%epout%.epJSONout"
 IF EXIST eplusshading.csv MOVE eplusshading.csv "%epout%Shading.csv"
 IF EXIST eplusout_perflog.csv MOVE eplusout_perflog.csv "%epout%_perflog.csv" 
+
+IF EXIST eplusout.json MOVE eplusout.json "%epout%.json"
+IF EXIST eplusout_detailed_zone.json MOVE eplusout_detailed_zone.json "%epout%_detailed_zone.json"
+IF EXIST eplusout_detailed_HVAC.json MOVE eplusout_detailed_HVAC.json "%epout%_detailed_HVAC.json"
+IF EXIST eplusout_timestep.json MOVE eplusout_timestep.json "%epout%_timestep.json"
+IF EXIST eplusout_yearly.json MOVE eplusout_yearly.json "%epout%_yearly.json"
+IF EXIST eplusout_monthly.json MOVE eplusout_monthly.json "%epout%_monthly.json"
+IF EXIST eplusout_daily.json MOVE eplusout_daily.json "%epout%_daily.json"
+IF EXIST eplusout_hourly.json MOVE eplusout_hourly.json "%epout%_hourly.json"
+IF EXIST eplusout_runperiod.json MOVE eplusout_runperiod.json "%epout%_runperiod.json"
+IF EXIST eplusout.cbor MOVE eplusout.cbor "%epout%.cbor"
+IF EXIST eplusout_detailed_zone.cbor MOVE eplusout_detailed_zone.cbor "%epout%_detailed_zone.cbor"
+IF EXIST eplusout_detailed_HVAC.cbor MOVE eplusout_detailed_HVAC.cbor "%epout%_detailed_HVAC.cbor"
+IF EXIST eplusout_timestep.cbor MOVE eplusout_timestep.cbor "%epout%_timestep.cbor"
+IF EXIST eplusout_yearly.cbor MOVE eplusout_yearly.cbor "%epout%_yearly.cbor"
+IF EXIST eplusout_monthly.cbor MOVE eplusout_monthly.cbor "%epout%_monthly.cbor"
+IF EXIST eplusout_daily.cbor MOVE eplusout_daily.cbor "%epout%_daily.cbor"
+IF EXIST eplusout_hourly.cbor MOVE eplusout_hourly.cbor "%epout%_hourly.cbor"
+IF EXIST eplusout_runperiod.cbor MOVE eplusout_runperiod.cbor "%epout%_runperiod.cbor"
+IF EXIST eplusout.msgpack MOVE eplusout.msgpack "%epout%.msgpack"
+IF EXIST eplusout_detailed_zone.msgpack MOVE eplusout_detailed_zone.msgpack "%epout%_detailed_zone.msgpack"
+IF EXIST eplusout_detailed_HVAC.msgpack MOVE eplusout_detailed_HVAC.msgpack "%epout%_detailed_HVAC.msgpack"
+IF EXIST eplusout_timestep.msgpack MOVE eplusout_timestep.msgpack "%epout%_timestep.msgpack"
+IF EXIST eplusout_yearly.msgpack MOVE eplusout_yearly.msgpack "%epout%_yearly.msgpack"
+IF EXIST eplusout_monthly.msgpack MOVE eplusout_monthly.msgpack "%epout%_monthly.msgpack"
+IF EXIST eplusout_daily.msgpack MOVE eplusout_daily.msgpack "%epout%_daily.msgpack"
+IF EXIST eplusout_hourly.msgpack MOVE eplusout_hourly.msgpack "%epout%_hourly.msgpack"
+IF EXIST eplusout_runperiod.msgpack MOVE eplusout_runperiod.msgpack "%epout%_runperiod.msgpack"
 
 : Determine whether FMUImport or FMUExport -- Added for FMI
 IF NOT EXIST tmp-fmus GOTO :CSVproc

@@ -1,7 +1,7 @@
-// EnergyPlus, Copyright (c) 1996-2023, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
-// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other
+// National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
 // contributors. All rights reserved.
 //
 // NOTICE: This Software was developed under funding from the U.S. Department of Energy and the
@@ -66,7 +66,6 @@
 
 using namespace EnergyPlus;
 using namespace EnergyPlus::DataEnvironment;
-using namespace EnergyPlus::DataHVACGlobals;
 using namespace EnergyPlus::DataPlant;
 using namespace EnergyPlus::DataSizing;
 using namespace EnergyPlus::Psychrometrics;
@@ -75,119 +74,131 @@ using namespace EnergyPlus::WaterToAirHeatPump;
 TEST_F(EnergyPlusFixture, WaterToAirHeatPumpTest_SimWaterToAir)
 {
 
-    std::string const idf_objects =
-        delimited_string({" Coil:Cooling:WaterToAirHeatPump:ParameterEstimation, ",
-                          "   Sys 1 Heat Pump Cooling Mode, !- Name",
-                          "   Scroll,      !- Compressor Type",
-                          "   R22,         !- Refrigerant Type",
-                          "   0.0015,      !- Design Source Side Flow Rate{ m3 / s }",
-                          "   38000,       !- Nominal Cooling Coil Capacity{ W }",
-                          "   0,           !- Nominal Time for Condensate Removal to Begin{ s }",
-                          "   0,           !- Ratio of Initial Moisture Evaporation Rate and Steady State Latent Capacity{ dimensionless }",
-                          "   3000000,     !- High Pressure Cutoff{ Pa }",
-                          "   0,           !- Low Pressure Cutoff{ Pa }",
-                          "   Sys 1 Water to Air Heat Pump Source Side1 Inlet Node, !- Water Inlet Node Name",
-                          "   Sys 1 Water to Air Heat Pump Source Side1 Outlet Node, !- Water Outlet Node Name",
-                          "   Sys 1 Cooling Coil Air Inlet Node, !- Air Inlet Node Name",
-                          "   Sys 1 Heating Coil Air Inlet Node, !- Air Outlet Node Name",
-                          "   3.78019E+03, !- Load Side Total Heat Transfer Coefficient{ W / K }",
-                          "   2.80303E+03, !- Load Side Outside Surface Heat Transfer Coefficient{ W / K }",
-                          "   7.93591E-01, !- Superheat Temperature at the Evaporator Outlet{ C }",
-                          "   1.91029E+03, !- Compressor Power Losses{ W }",
-                          "   2.66127E+00, !- Compressor Efficiency",
-                          "   ,            !- Compressor Piston Displacement{ m3 / s }",
-                          "   ,            !- Compressor Suction / Discharge Pressure Drop{ Pa }",
-                          "   ,            !- Compressor Clearance Factor{ dimensionless }",
-                          "   1.06009E-01, !- Refrigerant Volume Flow Rate{ m3 / s }",
-                          "   1.65103E+00, !- Volume Ratio{ dimensionless }",
-                          "   9.73887E-03, !- Leak Rate Coefficient",
-                          "   1.04563E+03, !- Source Side Heat Transfer Coefficient{ W / K }",
-                          "   0.8,         !- Source Side Heat Transfer Resistance1{ dimensionless }",
-                          "   20.0;       !- Source Side Heat Transfer Resistance2{ W / K }",
+    std::string const idf_objects = delimited_string({
+        " Coil:Cooling:WaterToAirHeatPump:ParameterEstimation, ",
+        "   Sys 1 Heat Pump Cooling Mode, !- Name",
+        "   ,            !- Availability Schedule Name",
+        "   Scroll,      !- Compressor Type",
+        "   R22,         !- Refrigerant Type",
+        "   0.0015,      !- Design Source Side Flow Rate{ m3 / s }",
+        "   38000,       !- Nominal Cooling Coil Capacity{ W }",
+        "   0,           !- Nominal Time for Condensate Removal to Begin{ s }",
+        "   0,           !- Ratio of Initial Moisture Evaporation Rate and Steady State Latent Capacity{ dimensionless }",
+        "   3000000,     !- High Pressure Cutoff{ Pa }",
+        "   0,           !- Low Pressure Cutoff{ Pa }",
+        "   Sys 1 Water to Air Heat Pump Source Side1 Inlet Node, !- Water Inlet Node Name",
+        "   Sys 1 Water to Air Heat Pump Source Side1 Outlet Node, !- Water Outlet Node Name",
+        "   Sys 1 Cooling Coil Air Inlet Node, !- Air Inlet Node Name",
+        "   Sys 1 Heating Coil Air Inlet Node, !- Air Outlet Node Name",
+        "   3.78019E+03, !- Load Side Total Heat Transfer Coefficient{ W / K }",
+        "   2.80303E+03, !- Load Side Outside Surface Heat Transfer Coefficient{ W / K }",
+        "   7.93591E-01, !- Superheat Temperature at the Evaporator Outlet{ C }",
+        "   1.91029E+03, !- Compressor Power Losses{ W }",
+        "   2.66127E+00, !- Compressor Efficiency",
+        "   ,            !- Compressor Piston Displacement{ m3 / s }",
+        "   ,            !- Compressor Suction / Discharge Pressure Drop{ Pa }",
+        "   ,            !- Compressor Clearance Factor{ dimensionless }",
+        "   1.06009E-01, !- Refrigerant Volume Flow Rate{ m3 / s }",
+        "   1.65103E+00, !- Volume Ratio{ dimensionless }",
+        "   9.73887E-03, !- Leak Rate Coefficient",
+        "   1.04563E+03, !- Source Side Heat Transfer Coefficient{ W / K }",
+        "   0.8,         !- Source Side Heat Transfer Resistance1{ dimensionless }",
+        "   20.0,        !- Source Side Heat Transfer Resistance2{ W / K }",
+        "   PLFFPLR;     !- Part Load Fraction Correlation Curve Name",
 
-                          " Coil:Heating:WaterToAirHeatPump:ParameterEstimation,",
-                          "   Sys 1 Heat Pump HEATING Mode, !- Name",
-                          "   Scroll,      !- Compressor Type",
-                          "   R22,         !- Refrigerant Type",
-                          "   0.0015,      !- Design Source Side Flow Rate{ m3 / s }",
-                          "   38000,       !- Gross Rated Heating Capacity{ W }",
-                          "   3000000,     !- High Pressure Cutoff",
-                          "   0,           !- Low Pressure Cutoff{ Pa }",
-                          "   Sys 1 Water to Air Heat Pump Source Side2 Inlet Node, !- Water Inlet Node Name",
-                          "   Sys 1 Water to Air Heat Pump Source Side2 Outlet Node, !- Water Outlet Node Name",
-                          "   Sys 1 Heating Coil Air Inlet Node, !- Air Inlet Node Name",
-                          "   Sys 1 SuppHeating Coil Air Inlet Node, !- Air Outlet Node Name",
-                          "   3.91379E+03, !- Load Side Total Heat Transfer Coefficient{ W / K }",
-                          "   5.94753E-01, !- Superheat Temperature at the Evaporator Outlet{ C }",
-                          "   2.49945E+03, !- Compressor Power Losses{ W }",
-                          "   8.68734E-01, !- Compressor Efficiency",
-                          "   ,            !- Compressor Piston Displacement{ m3 / s }",
-                          "   ,            !- Compressor Suction / Discharge Pressure Drop{ Pa }",
-                          "   ,            !- Compressor Clearance Factor{ dimensionless }",
-                          "   7.23595E-02, !- Refrigerant Volume Flow Rate{ m3 / s }",
-                          "   3.69126E+00, !- Volume Ratio{ dimensionless }",
-                          "   1.75701E-05, !- Leak Rate Coefficient{ dimensionless }",
-                          "   3.65348E+03, !- Source Side Heat Transfer Coefficient{ W / K }",
-                          "   0.8,         !- Source Side Heat Transfer Resistance1{ dimensionless }",
-                          "   20.0;        !- Source Side Heat Transfer Resistance2{ W / K }"});
+        " Coil:Heating:WaterToAirHeatPump:ParameterEstimation,",
+        "   Sys 1 Heat Pump HEATING Mode, !- Name",
+        "   ,            !- Availability Schedule Name",
+        "   Scroll,      !- Compressor Type",
+        "   R22,         !- Refrigerant Type",
+        "   0.0015,      !- Design Source Side Flow Rate{ m3 / s }",
+        "   38000,       !- Gross Rated Heating Capacity{ W }",
+        "   3000000,     !- High Pressure Cutoff",
+        "   0,           !- Low Pressure Cutoff{ Pa }",
+        "   Sys 1 Water to Air Heat Pump Source Side2 Inlet Node, !- Water Inlet Node Name",
+        "   Sys 1 Water to Air Heat Pump Source Side2 Outlet Node, !- Water Outlet Node Name",
+        "   Sys 1 Heating Coil Air Inlet Node, !- Air Inlet Node Name",
+        "   Sys 1 SuppHeating Coil Air Inlet Node, !- Air Outlet Node Name",
+        "   3.91379E+03, !- Load Side Total Heat Transfer Coefficient{ W / K }",
+        "   5.94753E-01, !- Superheat Temperature at the Evaporator Outlet{ C }",
+        "   2.49945E+03, !- Compressor Power Losses{ W }",
+        "   8.68734E-01, !- Compressor Efficiency",
+        "   ,            !- Compressor Piston Displacement{ m3 / s }",
+        "   ,            !- Compressor Suction / Discharge Pressure Drop{ Pa }",
+        "   ,            !- Compressor Clearance Factor{ dimensionless }",
+        "   7.23595E-02, !- Refrigerant Volume Flow Rate{ m3 / s }",
+        "   3.69126E+00, !- Volume Ratio{ dimensionless }",
+        "   1.75701E-05, !- Leak Rate Coefficient{ dimensionless }",
+        "   3.65348E+03, !- Source Side Heat Transfer Coefficient{ W / K }",
+        "   0.8,         !- Source Side Heat Transfer Resistance1{ dimensionless }",
+        "   20.0,        !- Source Side Heat Transfer Resistance2{ W / K }",
+        "   PLFFPLR;     !- Part Load Fraction Correlation Curve Name",
+
+        "Curve:Quadratic, PLFFPLR, 0.85, 0.83, 0.0, 0.0, 0.3, 0.85, 1.0, Dimensionless, Dimensionless; ",
+    });
 
     ASSERT_TRUE(process_idf(idf_objects));
+    state->init_state(*state);
 
-    state->dataFluidProps->RefrigData.allocate(1);
-    state->dataFluidProps->RefrigData(1).Name = "R22";
-    state->dataFluidProps->RefrigData(1).PsLowTempIndex = 1;
-    state->dataFluidProps->RefrigData(1).PsHighTempIndex = 2;
-    state->dataFluidProps->RefrigData(1).PsTemps.allocate(2);
-    state->dataFluidProps->RefrigData(1).PsTemps(1) = -157.42;
-    state->dataFluidProps->RefrigData(1).PsTemps(2) = 96.145;
-    state->dataFluidProps->RefrigData(1).PsValues.allocate(2);
-    state->dataFluidProps->RefrigData(1).PsValues(1) = 0.3795;
-    state->dataFluidProps->RefrigData(1).PsValues(2) = 4990000.0;
+    auto *refrig = new Fluid::RefrigProps;
 
-    state->dataFluidProps->RefrigData(1).HfLowTempIndex = 1;
-    state->dataFluidProps->RefrigData(1).HfHighTempIndex = 2;
-    state->dataFluidProps->RefrigData(1).PsLowPresIndex = 1;
-    state->dataFluidProps->RefrigData(1).PsHighPresIndex = 2;
-    state->dataFluidProps->RefrigData(1).HTemps.allocate(2);
-    state->dataFluidProps->RefrigData(1).HfValues.allocate(2);
-    state->dataFluidProps->RefrigData(1).HfgValues.allocate(2);
+    refrig->Name = "R22";
+    state->dataFluid->refrigs.push_back(refrig);
+    refrig->Num = state->dataFluid->refrigs.isize();
 
-    state->dataFluidProps->RefrigData(1).HTemps(1) = -157.42;
-    state->dataFluidProps->RefrigData(1).HTemps(2) = 96.145;
-    state->dataFluidProps->RefrigData(1).HfValues(1) = 29600.0;
-    state->dataFluidProps->RefrigData(1).HfValues(2) = 366900.0;
-    state->dataFluidProps->RefrigData(1).HfgValues(1) = 332700.0;
-    state->dataFluidProps->RefrigData(1).HfgValues(2) = 366900.0;
-    state->dataFluidProps->RefrigData(1).NumSuperTempPts = 2;
-    state->dataFluidProps->RefrigData(1).NumSuperPressPts = 2;
-    state->dataFluidProps->RefrigData(1).SHTemps.allocate(2);
-    state->dataFluidProps->RefrigData(1).SHPress.allocate(2);
-    state->dataFluidProps->RefrigData(1).SHTemps(1) = -157.15;
-    state->dataFluidProps->RefrigData(1).SHTemps(2) = 152.85;
-    state->dataFluidProps->RefrigData(1).SHPress(1) = 0.4043;
-    state->dataFluidProps->RefrigData(1).SHPress(2) = 16500000.0;
-    state->dataFluidProps->RefrigData(1).HshValues.allocate(2, 2);
-    state->dataFluidProps->RefrigData(1).HshValues(1, 1) = 332800.0;
-    state->dataFluidProps->RefrigData(1).HshValues(1, 2) = 537000.0;
-    state->dataFluidProps->RefrigData(1).HshValues(2, 1) = 332800.0;
-    state->dataFluidProps->RefrigData(1).HshValues(2, 2) = 537000.0;
-    state->dataFluidProps->RefrigData(1).RhoshValues.allocate(2, 2);
-    state->dataFluidProps->RefrigData(1).RhoshValues(1, 1) = 0.00003625;
-    state->dataFluidProps->RefrigData(1).RhoshValues(1, 2) = 0.0;
-    state->dataFluidProps->RefrigData(1).RhoshValues(2, 1) = 0.00003625;
-    state->dataFluidProps->RefrigData(1).RhoshValues(2, 2) = 0.0;
+    refrig->PsLowTempIndex = 1;
+    refrig->PsHighTempIndex = 2;
+    refrig->PsTemps.allocate(2);
+    refrig->PsTemps(1) = -157.42;
+    refrig->PsTemps(2) = 96.145;
+    refrig->PsValues.allocate(2);
+    refrig->PsValues(1) = 0.3795;
+    refrig->PsValues(2) = 4990000.0;
 
-    state->dataFluidProps->RefrigData(1).RhofLowTempIndex = 1;
-    state->dataFluidProps->RefrigData(1).RhofHighTempIndex = 2;
-    state->dataFluidProps->RefrigData(1).RhoTemps.allocate(2);
-    state->dataFluidProps->RefrigData(1).RhoTemps(1) = -157.42;
-    state->dataFluidProps->RefrigData(1).RhoTemps(2) = 96.145;
-    state->dataFluidProps->RefrigData(1).RhofValues.allocate(2);
-    state->dataFluidProps->RefrigData(1).RhofValues(1) = 1721.0;
-    state->dataFluidProps->RefrigData(1).RhofValues(2) = 523.8;
-    state->dataFluidProps->RefrigData(1).RhofgValues.allocate(2);
-    state->dataFluidProps->RefrigData(1).RhofgValues(1) = 0.341;
-    state->dataFluidProps->RefrigData(1).RhofgValues(2) = 523.8;
+    refrig->HfLowTempIndex = 1;
+    refrig->HfHighTempIndex = 2;
+    refrig->PsLowPresIndex = 1;
+    refrig->PsHighPresIndex = 2;
+    refrig->HTemps.allocate(2);
+    refrig->HfValues.allocate(2);
+    refrig->HfgValues.allocate(2);
+
+    refrig->HTemps(1) = -157.42;
+    refrig->HTemps(2) = 96.145;
+    refrig->HfValues(1) = 29600.0;
+    refrig->HfValues(2) = 366900.0;
+    refrig->HfgValues(1) = 332700.0;
+    refrig->HfgValues(2) = 366900.0;
+    refrig->NumSupTempPoints = 2;
+    refrig->NumSupPressPoints = 2;
+    refrig->SupTemps.allocate(2);
+    refrig->SupPress.allocate(2);
+    refrig->SupTemps(1) = -157.15;
+    refrig->SupTemps(2) = 152.85;
+    refrig->SupPress(1) = 0.4043;
+    refrig->SupPress(2) = 16500000.0;
+    refrig->HshValues.allocate(2, 2);
+    refrig->HshValues(1, 1) = 332800.0;
+    refrig->HshValues(1, 2) = 537000.0;
+    refrig->HshValues(2, 1) = 332800.0;
+    refrig->HshValues(2, 2) = 537000.0;
+    refrig->RhoshValues.allocate(2, 2);
+    refrig->RhoshValues(1, 1) = 0.00003625;
+    refrig->RhoshValues(1, 2) = 0.0;
+    refrig->RhoshValues(2, 1) = 0.00003625;
+    refrig->RhoshValues(2, 2) = 0.0;
+
+    refrig->RhofLowTempIndex = 1;
+    refrig->RhofHighTempIndex = 2;
+    refrig->RhoTemps.allocate(2);
+    refrig->RhoTemps(1) = -157.42;
+    refrig->RhoTemps(2) = 96.145;
+    refrig->RhofValues.allocate(2);
+    refrig->RhofValues(1) = 1721.0;
+    refrig->RhofValues(2) = 523.8;
+    refrig->RhofgValues.allocate(2);
+    refrig->RhofgValues(1) = 0.341;
+    refrig->RhofgValues(2) = 523.8;
 
     GetWatertoAirHPInput(*state);
 
@@ -222,9 +233,8 @@ TEST_F(EnergyPlusFixture, WaterToAirHeatPumpTest_SimWaterToAir)
     }
 
     state->dataPlnt->PlantLoop(1).Name = "ChilledWaterLoop";
-    state->dataPlnt->PlantLoop(1).FluidName = "ChilledWater";
-    state->dataPlnt->PlantLoop(1).FluidIndex = 1;
     state->dataPlnt->PlantLoop(1).FluidName = "WATER";
+    state->dataPlnt->PlantLoop(1).glycol = Fluid::GetWater(*state);
     state->dataPlnt->PlantLoop(1).LoopSide(DataPlant::LoopSideLocation::Demand).Branch(1).Comp(1).Name =
         state->dataWaterToAirHeatPump->WatertoAirHP(HPNum).Name;
     state->dataPlnt->PlantLoop(1).LoopSide(DataPlant::LoopSideLocation::Demand).Branch(1).Comp(1).Type =
@@ -233,22 +243,17 @@ TEST_F(EnergyPlusFixture, WaterToAirHeatPumpTest_SimWaterToAir)
         state->dataWaterToAirHeatPump->WatertoAirHP(HPNum).WaterInletNodeNum;
 
     bool InitFlag(true);
-    Real64 MaxONOFFCyclesperHour(4.0);
-    Real64 HPTimeConstant(0.1);
-    Real64 FanDelayTime(60.0);
     Real64 SensLoad(38000.0);
     Real64 LatentLoad(0.0);
     Real64 PartLoadRatio(1.0);
-    int CyclingScheme(1);
+    HVAC::FanOp fanOp = HVAC::FanOp::Cycling;
     bool FirstHVACIteration(true);
-    Real64 RuntimeFrac(1.0);
-    DataHVACGlobals::CompressorOperation CompressorOp = DataHVACGlobals::CompressorOperation::On;
+    HVAC::CompressorOp compressorOp = HVAC::CompressorOp::On;
     state->dataWaterToAirHeatPump->WatertoAirHP(HPNum).plantLoc.loopNum = 1;
 
-    InitWatertoAirHP(
-        *state, HPNum, InitFlag, MaxONOFFCyclesperHour, HPTimeConstant, FanDelayTime, SensLoad, LatentLoad, DesignAirflow, PartLoadRatio);
+    InitWatertoAirHP(*state, HPNum, InitFlag, SensLoad, LatentLoad, DesignAirflow, PartLoadRatio);
 
-    CalcWatertoAirHPCooling(*state, HPNum, CyclingScheme, FirstHVACIteration, RuntimeFrac, InitFlag, SensLoad, CompressorOp, PartLoadRatio);
+    CalcWatertoAirHPCooling(*state, HPNum, fanOp, FirstHVACIteration, InitFlag, SensLoad, compressorOp, PartLoadRatio);
 
     // make sure the coil is active
     EXPECT_NE(state->dataWaterToAirHeatPump->WatertoAirHP(HPNum).QSource, 0.0);
@@ -263,9 +268,8 @@ TEST_F(EnergyPlusFixture, WaterToAirHeatPumpTest_SimWaterToAir)
     HPNum = 2;
     state->dataWaterToAirHeatPump->WatertoAirHP(HPNum).plantLoc.loopNum = 2;
     state->dataPlnt->PlantLoop(2).Name = "HotWaterLoop";
-    state->dataPlnt->PlantLoop(2).FluidName = "HotWater";
-    state->dataPlnt->PlantLoop(2).FluidIndex = 1;
     state->dataPlnt->PlantLoop(2).FluidName = "WATER";
+    state->dataPlnt->PlantLoop(2).glycol = Fluid::GetWater(*state);
     state->dataPlnt->PlantLoop(2).LoopSide(DataPlant::LoopSideLocation::Demand).Branch(1).Comp(1).Name =
         state->dataWaterToAirHeatPump->WatertoAirHP(HPNum).Name;
     state->dataPlnt->PlantLoop(2).LoopSide(DataPlant::LoopSideLocation::Demand).Branch(1).Comp(1).Type =
@@ -291,10 +295,9 @@ TEST_F(EnergyPlusFixture, WaterToAirHeatPumpTest_SimWaterToAir)
 
     state->dataWaterToAirHeatPump->WatertoAirHP(HPNum).DesignWaterMassFlowRate = 15.0;
 
-    InitWatertoAirHP(
-        *state, HPNum, InitFlag, MaxONOFFCyclesperHour, HPTimeConstant, FanDelayTime, SensLoad, LatentLoad, DesignAirflow, PartLoadRatio);
+    InitWatertoAirHP(*state, HPNum, InitFlag, SensLoad, LatentLoad, DesignAirflow, PartLoadRatio);
 
-    CalcWatertoAirHPHeating(*state, HPNum, CyclingScheme, FirstHVACIteration, RuntimeFrac, InitFlag, SensLoad, CompressorOp, PartLoadRatio);
+    CalcWatertoAirHPHeating(*state, HPNum, fanOp, FirstHVACIteration, InitFlag, SensLoad, compressorOp, PartLoadRatio);
 
     // make sure the coil is active
     EXPECT_NE(state->dataWaterToAirHeatPump->WatertoAirHP(HPNum).QSource, 0.0);
@@ -308,5 +311,4 @@ TEST_F(EnergyPlusFixture, WaterToAirHeatPumpTest_SimWaterToAir)
 
     // clean up
     state->dataWaterToAirHeatPump->WatertoAirHP.deallocate();
-    state->dataFluidProps->RefrigData.deallocate();
 }

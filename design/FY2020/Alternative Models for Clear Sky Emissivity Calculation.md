@@ -5,18 +5,18 @@ Alternative Models for Clear Sky Emissivity Calculation
 
 **Lawrence Berkeley National Laboratory**
 
- - Original Date: October 15, 2019 
+ - Original Date: October 15, 2019
 
 ## Justification for New Feature ##
 
 Sky emissivity, which represents the complex combination of the spectrally-dependent emissivity of atmospheric constituents, is fundamental to the calculation of downwelling longwave atmospheric radiation [1]. In EnergyPlus, the clear sky emissivity is used to calculated the clear sky temperature. Over the last century, researchers have proposed empirical sky emissivity models as a function of meteorological variables, including ambient temperature, water vapor pressure, or dew point temperature. The differences in these models result in large differences in estimations of thermal energy exchange that can be amplified by climate or application, such as radiative cooling [2].
 
-There are two major algorithms adopted in BPS programs, one based on the work of Clark & Allen (1978) [3], the other Martin & Berdahl (1984) [4]. Currently, EnergyPlus uses the Clark-Allen model based on a logarithmic relationship to dew point temperature, which was formulated using measurements limited to data collected over one year in San Antonio, Texas. While the original authors reported a low root mean square error (RMSE) of 10 W/m<sup>2</sup> while used to caculate long wave radiations, studies by the International Energy Agency and Dai and Fang demonstrated that, out of the empirical models examined, Clark-Allen had among the highest high errors when tested against MODTRAN predictions and observed data, respectively [5-6]. Further illustrating the limitations of Clark-Allen, a more recent assessment by Zhang et al shows that application of this model to calculate downwelling radiation in all-sky conditions tends to result in larger errors for low altitude and humid climates [6]. Literature indicates that this model is of insufficient accuracy. However, because the accuracy of emissivity models is limited by available measured data and strongly correlated to local conditions, it is difficult to establish a clear consensus among literature of the “best” model. For example, the most accurate model presented is often the model that was developed or fitted to the same region or climate as the dataset being studied. Despite this challenge, there is convincing evidence that more appropriate models than Clark-Allen for wide application to the contiguous United States exist. 
+There are two major algorithms adopted in BPS programs, one based on the work of Clark & Allen (1978) [3], the other Martin & Berdahl (1984) [4]. Currently, EnergyPlus uses the Clark-Allen model based on a logarithmic relationship to dew point temperature, which was formulated using measurements limited to data collected over one year in San Antonio, Texas. While the original authors reported a low root mean square error (RMSE) of 10 W/m<sup>2</sup> while used to caculate long wave radiations, studies by the International Energy Agency and Dai and Fang demonstrated that, out of the empirical models examined, Clark-Allen had among the highest high errors when tested against MODTRAN predictions and observed data, respectively [5-6]. Further illustrating the limitations of Clark-Allen, a more recent assessment by Zhang et al shows that application of this model to calculate downwelling radiation in all-sky conditions tends to result in larger errors for low altitude and humid climates [6]. Literature indicates that this model is of insufficient accuracy. However, because the accuracy of emissivity models is limited by available measured data and strongly correlated to local conditions, it is difficult to establish a clear consensus among literature of the “best” model. For example, the most accurate model presented is often the model that was developed or fitted to the same region or climate as the dataset being studied. Despite this challenge, there is convincing evidence that more appropriate models than Clark-Allen for wide application to the contiguous United States exist.
 
 We propose to add the calibrated version [7] of the Berdahl and Martin [4], Brunt [8] and Idso [9] models, identified as three models with higher accuracy compared to Clark-Allen and other existing popular models. The three models are calibrated using the radiation and meteorological measurements from the SURFRAD (Surface Radiation Budget Network) and ASOS (Automated Surface Observing System) operated by NOAA (National Oceanic and Atmospheric Administration). Currently seven SURFRAD stations are operating
 in climatologically diverse regions over the contiguous United States including Bondville (in Illinois), Boulder (in Colorado), Desert Rock (in Nevada), Fort Peck (in Montana), Goodwin Creek (in Mississippi), Penn State University (in Pennsylvania) and Sioux Falls (in South Dakota) represent the climatological diversities.
 
-This feature update would allow users to select from these three models as alternatives to Clark-Allen to calculate the sky emissivity and temperature. 
+This feature update would allow users to select from these three models as alternatives to Clark-Allen to calculate the sky emissivity and temperature.
 
 ## E-mail and  Conference Call Conclusions ##
 
@@ -36,7 +36,7 @@ Idso (1981) uses both partial water vapor pressure (Pw, hPa) and ambient tempera
 
 ε = 0.70 + 5.95・10E-5・(P<sub>w</sub> ∙ exp(1500/T<sub>a</sub>))  &nbsp;&nbsp;    Eq. (3)
 
-These three models are among the most widely accepted models, and all show improved performance over Clark-Allen in comparisons for locations across the United States [5-6]. When analyzed against observed longwave irradiance data, irradiation calculated with these models had relative RMSEs as low as 4% [10-11]. However, in order to address the challenge of location dependence, Li et al performed a grid-search recalibration using data from seven SURFRAD stations across the United States. Their study indicates that, after calibration, the models not only improved significantly in accuracy but also can be grouped into a few families yielding the same longwave irradiance values. This suggests that one of the most important factors in the accuracy of the proposed model is the fitting dataset, for local climate and geography cause large variations in emissivity. Original formulations of these models using small datasets in one location to fit the relationship between the desired meteorological variable and sky emissivity are likely to produce large errors when applied to data outside that region [12]. 
+These three models are among the most widely accepted models, and all show improved performance over Clark-Allen in comparisons for locations across the United States [5-6]. When analyzed against observed longwave irradiance data, irradiation calculated with these models had relative RMSEs as low as 4% [10-11]. However, in order to address the challenge of location dependence, Li et al performed a grid-search recalibration using data from seven SURFRAD stations across the United States. Their study indicates that, after calibration, the models not only improved significantly in accuracy but also can be grouped into a few families yielding the same longwave irradiance values. This suggests that one of the most important factors in the accuracy of the proposed model is the fitting dataset, for local climate and geography cause large variations in emissivity. Original formulations of these models using small datasets in one location to fit the relationship between the desired meteorological variable and sky emissivity are likely to produce large errors when applied to data outside that region [12].
 
 Newly calibrated forms of the three models proposed by Li et al are chosen for implementation in EnergyPlus. Li et al’s extensive dataset of over 30,000 data points and subsequent analysis provides conclusive results that both of these models will accurately estimate sky emissivity. The calibrated forms of Martin & Berdahl, Brunt, and Idso from Li et alare listed:
 
@@ -58,7 +58,7 @@ LW = ε ∙ 5.6697 ∙ 10E-8 ∙ T<sub>a</sub><sup>4</sup>  &nbsp;&nbsp;    Eq (
 | Idso(1981)                       | 14.03                           | 13.18                           |
 | Berdahl & Martine (1984)         | 22.42                           | 13.24                           |
 
-This improved sky emissivity feature would allow the user to select one of the three models, the calibrated Brunt (1932), the calibrated Idso (1981), and Clark-Allen (1978) using common meteorological inputs of ambient temperature (all), dewpoint temperature (Clark-Allen), and water vapor pressure (Idso and Brunt). The user can expect errors within 4-5% or around 14 W/m<sup>2</sup> when using these models as reported by Li et al. 
+This improved sky emissivity feature would allow the user to select one of the three models, the calibrated Brunt (1932), the calibrated Idso (1981), and Clark-Allen (1978) using common meteorological inputs of ambient temperature (all), dewpoint temperature (Clark-Allen), and water vapor pressure (Idso and Brunt). The user can expect errors within 4-5% or around 14 W/m<sup>2</sup> when using these models as reported by Li et al.
 
 ## Approach ##
 
@@ -105,9 +105,9 @@ To be developed.
 
 The `Calculation Type` field under the _WeatherProperty:SkyTemperature_ object will be modified to take two new keys as the choice:
 
-- **UseBerdahlMartinModel** 
-- **UseBruntModel** 
-- **UseIdsoModel** 
+- **UseBerdahlMartinModel**
+- **UseBruntModel**
+- **UseIdsoModel**
 
 ## Outputs Description ##
 
@@ -148,6 +148,3 @@ No transition change is required.
 [11]  F. Carmona, R. Rivas, and V. Caselles, “Estimation of daytime downward longwave radiation under clear and cloudy skies conditions over a sub-humid region,” Theor. Appl. Climatol., vol. 115, no. 1–2, pp. 281–295, 2014.
 
 [12] M. G. G. Iziomon, H. Mayer, and A. Matzarakis, “Downward atmospheric longwave irradiance under clear and cloudy skies: Measurement and parameterization,” J. Atmos. Solar-Terrestrial Phys., vol. 65, no. 10, pp. 1107–1116, Jul. 2003.
-
-
-

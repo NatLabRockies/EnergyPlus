@@ -1,7 +1,7 @@
-// EnergyPlus, Copyright (c) 1996-2023, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
-// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other
+// National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
 // contributors. All rights reserved.
 //
 // NOTICE: This Software was developed under funding from the U.S. Department of Energy and the
@@ -45,20 +45,24 @@
 // OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 // POSSIBILITY OF SUCH DAMAGE.
 
+// C++ Headers
+#include <algorithm>
+#include <format>
+#include <memory>
+
+// Third Party Headers
+#include <embedded/EmbeddedEpJSONSchema.hh>
+
+// EnergyPlus Headers
 #include <EnergyPlus/IOFiles.hh>
 
+// Local Headers
 #include "Data/EnergyPlusData.hh"
 #include "DataStringGlobals.hh"
 #include "FileSystem.hh"
-#include "InputProcessing/EmbeddedEpJSONSchema.hh"
 #include "InputProcessing/InputProcessor.hh"
 #include "ResultsFramework.hh"
 #include "UtilityRoutines.hh"
-
-#include <algorithm>
-#include <fmt/format.h>
-#include <memory>
-#include <stdexcept>
 
 namespace EnergyPlus {
 
@@ -68,7 +72,7 @@ InputFile &InputFile::ensure_open(EnergyPlusData &state, const std::string &call
         open(false, output_to_file);
     }
     if (!good()) {
-        ShowFatalError(state, fmt::format("{}: Could not open file {} for input (read).", caller, filePath.string()));
+        ShowFatalError(state, std::format("{}: Could not open file {} for input (read).", caller, filePath));
     }
     return *this;
 }
@@ -77,9 +81,8 @@ bool InputFile::good() const noexcept
 {
     if (is) {
         return is->good();
-    } else {
-        return false;
     }
+    return false;
 }
 
 void InputFile::close()
@@ -89,16 +92,19 @@ void InputFile::close()
 
 InputFile::ReadResult<std::string> InputFile::readLine() noexcept
 {
-    if (is) {
-        std::string line;
-        std::getline(*is, line);
+    if (!is) {
+        return {"", true, false};
+    }
+
+    std::string line;
+    if (std::getline(*is, line)) {
         if (!line.empty() && line.back() == '\r') {
             line.pop_back();
         }
-        return {std::move(line), is->eof(), is->good()};
-    } else {
-        return {"", true, false};
+        // Use operator bool, see ReadResult::good() docstring
+        return {std::move(line), is->eof(), bool(is)};
     }
+    return {"", is->eof(), false};
 }
 
 std::string InputFile::readFile()
@@ -110,7 +116,7 @@ std::string InputFile::readFile()
 
 nlohmann::json InputFile::readJSON()
 {
-    auto const ext = FileSystem::getFileType(filePath);
+    FileSystem::FileTypes const ext = FileSystem::getFileType(filePath);
     switch (ext) {
     case FileSystem::FileTypes::EpJSON:
     case FileSystem::FileTypes::JSON:
@@ -148,7 +154,7 @@ void InputFile::open(bool, bool)
 
 std::string InputFile::error_state_to_string() const
 {
-    const auto state = rdstate();
+    const std::istream::iostate state = rdstate();
 
     if (!is_open()) {
         return "file not opened'";
@@ -156,36 +162,34 @@ std::string InputFile::error_state_to_string() const
 
     if (state == std::ios_base::failbit) {
         return "io operation failed";
-    } else if (state == std::ios_base::badbit) {
-        return "irrecoverable stream error";
-    } else if (state == std::ios_base::eofbit) {
-        return "end of file reached";
-    } else {
-        return "no error";
     }
+    if (state == std::ios_base::badbit) {
+        return "irrecoverable stream error";
+    }
+    if (state == std::ios_base::eofbit) {
+        return "end of file reached";
+    }
+    return "no error";
 }
 
 std::istream::iostate InputFile::rdstate() const noexcept
 {
     if (is) {
         return is->rdstate();
-    } else {
-        return std::ios_base::badbit;
     }
+    return std::ios_base::badbit;
 }
 
 bool InputFile::is_open() const noexcept
 {
     if (is) {
         auto *ss = dynamic_cast<std::ifstream *>(is.get());
-        if (ss) {
+        if (ss != nullptr) {
             return ss->is_open();
-        } else {
-            return true;
         }
-    } else {
-        return false;
+        return true;
     }
+    return false;
 }
 
 void InputFile::backspace() noexcept
@@ -196,7 +200,9 @@ void InputFile::backspace() noexcept
         is->seekg(0, std::ios::beg);    // Beginning of file
         std::streampos const g0(is->tellg());
         is->seekg(g1, std::ios::beg); // Restore position
-        if (g1 > g0) --g1;
+        if (g1 > g0) {
+            --g1;
+        }
         while (g1 > g0) {
             is->seekg(--g1, std::ios::beg); // Backup by 1
             if (is->peek() == '\n') {       // Found end of previous record
@@ -213,7 +219,7 @@ InputOutputFile &InputOutputFile::ensure_open(EnergyPlusData &state, const std::
         open(false, output_to_file);
     }
     if (!good()) {
-        ShowFatalError(state, fmt::format("{}: Could not open file {} for output (write).", caller, filePath.string()));
+        ShowFatalError(state, std::format("{}: Could not open file {} for output (write).", caller, filePath));
     }
     return *this;
 }
@@ -222,11 +228,11 @@ bool InputOutputFile::good() const
 {
     if (os && print_to_dev_null && os->bad()) { // badbit is set
         return true;
-    } else if (os) {
-        return os->good();
-    } else {
-        return false;
     }
+    if (os) {
+        return os->good();
+    }
+    return false;
 }
 
 void InputOutputFile::close()
@@ -257,11 +263,10 @@ void InputOutputFile::flush()
 std::string InputOutputFile::get_output()
 {
     auto *ss = dynamic_cast<std::stringstream *>(os.get());
-    if (ss) {
+    if (ss != nullptr) {
         return ss->str();
-    } else {
-        return "";
     }
+    return "";
 }
 
 InputOutputFile::InputOutputFile(fs::path FilePath, const bool DefaultToStdout) : filePath{std::move(FilePath)}, defaultToStdOut{DefaultToStdout}
@@ -278,9 +283,8 @@ void InputOutputFile::open(const bool forAppend, bool output_to_file)
     auto appendMode = [=]() {
         if (forAppend) {
             return std::ios_base::app;
-        } else {
-            return std::ios_base::trunc;
         }
+        return std::ios_base::trunc;
     }();
     if (!output_to_file) {
         os = std::make_unique<std::iostream>(nullptr);
@@ -298,7 +302,7 @@ std::vector<std::string> InputOutputFile::getLines()
     if (os) {
         // avoid saving and reloading the file by simply reading the current input stream
         os->flush();
-        const auto last_pos = os->tellg();
+        const size_t last_pos = os->tellg();
         std::string line;
         std::vector<std::string> lines;
         os->seekg(0);
@@ -315,17 +319,26 @@ std::vector<std::string> InputOutputFile::getLines()
     return std::vector<std::string>();
 }
 
+bool IOFiles::OutputControl::writeTabular(EnergyPlusData &state)
+{
+    bool const htmlTabular = state.files.outputControl.tabular;
+    bool const jsonTabular = state.files.outputControl.json && state.dataResultsFramework->resultsFramework->timeSeriesAndTabularEnabled();
+    bool const sqliteTabular = state.files.outputControl.sqlite; // && @JasonGlazer thinks something else maybe?
+    return (htmlTabular || jsonTabular || sqliteTabular);
+}
+
 void IOFiles::OutputControl::getInput(EnergyPlusData &state)
 {
-    auto const instances = state.dataInputProcessing->inputProcessor->epJSON.find("OutputControl:Files");
-    if (instances != state.dataInputProcessing->inputProcessor->epJSON.end()) {
+    auto &ip = state.dataInputProcessing->inputProcessor;
+    auto const instances = ip->epJSON.find("OutputControl:Files");
+    if (instances != ip->epJSON.end()) {
 
         auto find_input = [=, &state](nlohmann::json const &fields, std::string const &field_name) -> std::string {
             std::string input;
             auto found = fields.find(field_name);
             if (found != fields.end()) {
                 input = found.value().get<std::string>();
-                input = UtilityRoutines::MakeUPPERCase(input);
+                input = Util::makeUPPER(input);
             } else {
                 state.dataInputProcessing->inputProcessor->getDefaultValue(state, "OutputControl:Files", field_name, input);
             }
@@ -335,7 +348,8 @@ void IOFiles::OutputControl::getInput(EnergyPlusData &state)
         auto boolean_choice = [=, &state](std::string const &input) -> bool {
             if (input == "YES") {
                 return true;
-            } else if (input == "NO") {
+            }
+            if (input == "NO") {
                 return false;
             }
             ShowFatalError(state, "Invalid boolean Yes/No choice input");
@@ -346,7 +360,7 @@ void IOFiles::OutputControl::getInput(EnergyPlusData &state)
         for (auto instance = instancesValue.begin(); instance != instancesValue.end(); ++instance) {
             auto const &fields = instance.value();
 
-            state.dataInputProcessing->inputProcessor->markObjectAsUsed("OutputControl:Files", instance.key());
+            ip->markObjectAsUsed("OutputControl:Files", instance.key());
 
             { // "output_csv"
                 csv = boolean_choice(find_input(fields, "output_csv"));
@@ -362,6 +376,9 @@ void IOFiles::OutputControl::getInput(EnergyPlusData &state)
             }
             { // "output_audit"
                 audit = boolean_choice(find_input(fields, "output_audit"));
+            }
+            { // "output_space_sizing"
+                spsz = boolean_choice(find_input(fields, "output_space_sizing"));
             }
             { // "output_zone_sizing"
                 zsz = boolean_choice(find_input(fields, "output_zone_sizing"));
@@ -392,9 +409,6 @@ void IOFiles::OutputControl::getInput(EnergyPlusData &state)
             }
             { // "output_dfs"
                 dfs = boolean_choice(find_input(fields, "output_dfs"));
-            }
-            { // "output_glhe"
-                glhe = boolean_choice(find_input(fields, "output_glhe"));
             }
             { // "output_delightin"
                 delightin = boolean_choice(find_input(fields, "output_delightin"));
@@ -441,10 +455,31 @@ void IOFiles::OutputControl::getInput(EnergyPlusData &state)
             { // "sqlite"
                 sqlite = boolean_choice(find_input(fields, "output_sqlite"));
             }
+            { // "psz"
+                psz = boolean_choice(find_input(fields, "output_plant_component_sizing"));
+            }
         }
     }
 
-    auto &ip = state.dataInputProcessing->inputProcessor;
+    auto const timestamp_instances = ip->epJSON.find("OutputControl:Timestamp");
+    if (timestamp_instances != ip->epJSON.end()) {
+        auto const &instancesValue = timestamp_instances.value();
+        for (auto instance = instancesValue.begin(); instance != instancesValue.end(); ++instance) {
+            auto const &fields = instance.value();
+            ip->markObjectAsUsed("OutputControl:Timestamp", instance.key());
+
+            auto item = fields.find("iso_8601_format");
+            if (item != fields.end()) {
+                state.dataResultsFramework->resultsFramework->setISO8601(item->get<std::string>() == "Yes");
+            }
+
+            item = fields.find("timestamp_at_beginning_of_interval");
+            if (item != fields.end()) {
+                state.dataResultsFramework->resultsFramework->setBeginningOfInterval(item->get<std::string>() == "Yes");
+            }
+        }
+    }
+
     auto const rvi_instances = ip->epJSON.find("OutputControl:RVI");
     if (rvi_instances != ip->epJSON.end()) {
         auto const &objectSchemaProps = ip->getObjectSchemaProps(state, "OutputControl:RVI");
@@ -485,25 +520,6 @@ void IOFiles::OutputControl::getInput(EnergyPlusData &state)
         }
     }
 
-    auto const timestamp_instances = ip->epJSON.find("OutputControl:Timestamp");
-    if (timestamp_instances != ip->epJSON.end()) {
-        auto const &objectSchemaProps = ip->getObjectSchemaProps(state, "OutputControl:Timestamp");
-        auto const &instancesValue = timestamp_instances.value();
-        for (auto instance = instancesValue.begin(); instance != instancesValue.end(); ++instance) {
-            auto const &fields = instance.value();
-            ip->markObjectAsUsed("OutputControl:Timestamp", instance.key());
-
-            auto item = fields.find("iso_8601_format");
-            if (item != fields.end()) {
-                state.dataResultsFramework->resultsFramework->setISO8601(item->get<std::string>() == "Yes");
-            }
-
-            item = fields.find("timestamp_at_end_of_interval");
-            if (item != fields.end()) {
-                state.dataResultsFramework->resultsFramework->setStartOfInterval(item->get<std::string>() == "Yes");
-            }
-        }
-    }
 }
 
 void IOFiles::flushAll()
@@ -513,6 +529,7 @@ void IOFiles::flushAll()
     eio.flush();
     eso.flush();
     zsz.flush();
+    spsz.flush();
     ssz.flush();
     map.flush();
     mtr.flush();
@@ -532,49 +549,3 @@ void IOFiles::flushAll()
 }
 
 } // namespace EnergyPlus
-
-template std::string EnergyPlus::format<EnergyPlus::FormatSyntax::Fortran, int>(std::string_view, int &&);
-template std::string EnergyPlus::format<EnergyPlus::FormatSyntax::Fortran, const char *const &>(std::string_view, const char *const &);
-template std::string EnergyPlus::format<EnergyPlus::FormatSyntax::Fortran, int &, std::string &>(std::string_view, int &, std::string &);
-template std::string EnergyPlus::format<EnergyPlus::FormatSyntax::Fortran, std::string &, std::string &, std::string &, double &>(
-    std::string_view, std::string &, std::string &, std::string &, double &);
-template std::string EnergyPlus::format<EnergyPlus::FormatSyntax::Fortran, const std::string_view &>(std::string_view, const std::string_view &);
-template std::string EnergyPlus::format<EnergyPlus::FormatSyntax::Fortran, const std::string_view &, std::string &>(std::string_view,
-                                                                                                                    const std::string_view &,
-                                                                                                                    std::string &);
-template std::string
-EnergyPlus::format<EnergyPlus::FormatSyntax::Fortran, std::string &, double &, double &>(std::string_view, std::string &, double &, double &);
-template std::string
-EnergyPlus::format<EnergyPlus::FormatSyntax::Fortran, std::string &, std::string &, int &>(std::string_view, std::string &, std::string &, int &);
-template std::string
-EnergyPlus::format<EnergyPlus::FormatSyntax::Fortran, double &, double &, double &>(std::string_view, double &, double &, double &);
-template std::string EnergyPlus::format<EnergyPlus::FormatSyntax::Fortran, double &, std::string &>(std::string_view, double &, std::string &);
-template std::string EnergyPlus::format<EnergyPlus::FormatSyntax::Fortran, std::string &>(std::string_view, std::string &);
-template std::string EnergyPlus::format<EnergyPlus::FormatSyntax::Fortran, const int &, int &>(std::string_view, const int &, int &);
-template std::string EnergyPlus::format<EnergyPlus::FormatSyntax::Fortran, double>(std::string_view, double &&);
-template std::string EnergyPlus::format<EnergyPlus::FormatSyntax::Fortran, int &, int &>(std::string_view, int &, int &);
-template std::string EnergyPlus::format<EnergyPlus::FormatSyntax::Fortran, const double &>(std::string_view, const double &);
-template std::string EnergyPlus::format<EnergyPlus::FormatSyntax::Fortran, std::string &, int &>(std::string_view, std::string &, int &);
-template std::string EnergyPlus::format<EnergyPlus::FormatSyntax::Fortran, std::string &, std::string &, double &>(std::string_view,
-                                                                                                                   std::string &,
-                                                                                                                   std::string &,
-                                                                                                                   double &);
-template std::string EnergyPlus::format<EnergyPlus::FormatSyntax::Fortran, std::string &, double &, std::string &, double &>(
-    std::string_view, std::string &, double &, std::string &, double &);
-template std::string EnergyPlus::format<EnergyPlus::FormatSyntax::Fortran, const int &>(std::string_view, const int &);
-template std::string EnergyPlus::format<EnergyPlus::FormatSyntax::Fortran, int &, const std::string &, std::string &>(std::string_view,
-                                                                                                                      int &,
-                                                                                                                      const std::string &,
-                                                                                                                      std::string &);
-template std::string
-EnergyPlus::format<EnergyPlus::FormatSyntax::Fortran, int &, int &, const std::string &>(std::string_view, int &, int &, const std::string &);
-template std::string
-EnergyPlus::format<EnergyPlus::FormatSyntax::Fortran, int &, int &, std::string_view &>(std::string_view, int &, int &, std::string_view &);
-template std::string EnergyPlus::format<EnergyPlus::FormatSyntax::Fortran, int &, std::string_view &, std::string &>(std::string_view,
-                                                                                                                     int &,
-                                                                                                                     std::string_view &,
-                                                                                                                     std::string &);
-template std::string EnergyPlus::format<EnergyPlus::FormatSyntax::Fortran, double &, double &>(std::string_view, double &, double &);
-template std::string EnergyPlus::format<EnergyPlus::FormatSyntax::Fortran, int &>(std::string_view, int &);
-template std::string EnergyPlus::format<EnergyPlus::FormatSyntax::Fortran, std::string &, double &>(std::string_view, std::string &, double &);
-template std::string EnergyPlus::format<EnergyPlus::FormatSyntax::Fortran, double &>(std::string_view, double &);

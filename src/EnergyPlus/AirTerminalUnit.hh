@@ -1,7 +1,7 @@
-// EnergyPlus, Copyright (c) 1996-2023, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
-// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other
+// National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
 // contributors. All rights reserved.
 //
 // NOTICE: This Software was developed under funding from the U.S. Department of Energy and the
@@ -54,6 +54,7 @@
 // EnergyPlus Headers
 #include <EnergyPlus/Data/BaseData.hh>
 #include <EnergyPlus/EnergyPlus.hh>
+#include <EnergyPlus/ScheduleManager.hh>
 
 namespace EnergyPlus {
 
@@ -101,12 +102,14 @@ public: // Methods
 
     virtual int getTermUnitSizingIndex() = 0;
 
+    virtual void reportTerminalUnit(EnergyPlusData &state) = 0;
+
 protected:                                               // Data
     AirTerminalUnitType terminalType = notYetDetermined; // Type of air distribution unit  //Legacy For use during transition to OO
     std::string name;                                    // name of unit
     std::string unitType;                                // type of unit = e.g. AirTerminal:SingleDuct:ConstantVolume:FourPipeBeam
     int aDUNum = 0;                                      // index of this unit in the corresponding air distribution unit structure
-    int airAvailSchedNum = 0;                            // index to schedule for pimary air availability
+    Sched::Schedule *airAvailSched = nullptr;            // schedule for pimary air availability
     bool airAvailable = false;                           // true if primary air is available
     Real64 vDotDesignPrimAir = 0.0;                      // Design primary air volume flow rate m3/s (autosizable)
     bool vDotDesignPrimAirWasAutosized = false;          // true if user input for design air flow was autsized on input
@@ -118,7 +121,7 @@ protected:                                               // Data
     int ctrlZoneInNodeIndex = 0;                         // which controlled zone inlet node number corresponds with this unit
     int airLoopNum = 0;                                  // index to airloop that this terminal unit is connected to
     int termUnitSizingNum = 0;                           // index to TermUnitSizing, TermUnitFinalZoneSizing, and more for this air distribution unit
-};                                                       // AirTerminalUnit
+}; // AirTerminalUnit
 
 } // namespace EnergyPlus
 

@@ -1,7 +1,7 @@
-// EnergyPlus, Copyright (c) 1996-2023, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
-// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other
+// National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
 // contributors. All rights reserved.
 //
 // NOTICE: This Software was developed under funding from the U.S. Department of Energy and the
@@ -91,13 +91,11 @@ namespace Vectors {
     void VecRound(Vector &vec, Real64 const roundto);
 
     void DetermineAzimuthAndTilt(Array1D<Vector> const &Surf, // Surface Definition
-                                 int const NSides,            // Number of sides to surface
                                  Real64 &Azimuth,             // Outward Normal Azimuth Angle
                                  Real64 &Tilt,                // Tilt angle of surface
                                  Vector &lcsx,
                                  Vector &lcsy,
                                  Vector &lcsz,
-                                 Real64 const surfaceArea,
                                  Vector const &NewellSurfaceNormalVector);
 
     void PlaneEquation(Array1D<Vector> &verts, // Structure of the surface
@@ -123,15 +121,23 @@ namespace Vectors {
     void CalcCoPlanarNess(Array1D<Vector> &Surf, int const NSides, bool &IsCoPlanar, Real64 &MaxDist, int &ErrorVertex);
 
     std::vector<int>
-    PointsInPlane(Array1D<Vector> &BaseSurf, int const BaseSides, Array1D<Vector> &QuerySurf, int const QuerySides, bool &ErrorFound);
+    PointsInPlane(Array1D<Vector> &BaseSurf, int const BaseSides, Array1D<Vector> const &QuerySurf, int const QuerySides, bool &ErrorFound);
 
-    Real64 CalcPolyhedronVolume(EnergyPlusData &state, Polyhedron const &Poly);
+    Real64 CalcPolyhedronVolume(EnergyPlusData const &state, Polyhedron const &Poly);
 
 } // namespace Vectors
 
 struct VectorsData : BaseGlobalStruct
 {
     Vectors::Vector p0 = Vectors::Vector(0.0, 0.0, 0.0);
+
+    void init_constant_state([[maybe_unused]] EnergyPlusData &state) override
+    {
+    }
+
+    void init_state([[maybe_unused]] EnergyPlusData &state) override
+    {
+    }
 
     void clear_state() override
     {

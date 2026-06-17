@@ -1,7 +1,7 @@
-// EnergyPlus, Copyright (c) 1996-2023, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
-// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other
+// National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
 // contributors. All rights reserved.
 //
 // NOTICE: This Software was developed under funding from the U.S. Department of Energy and the
@@ -61,7 +61,7 @@
 #include <EnergyPlus/DataGlobals.hh>
 #include <EnergyPlus/DataSurfaces.hh>
 #include <EnergyPlus/EnergyPlus.hh>
-#include <EnergyPlus/GroundTemperatureModeling/GroundTemperatureModelManager.hh>
+#include <EnergyPlus/GroundTemperatureModeling/BaseGroundTemperatureModel.hh>
 #include <EnergyPlus/Plant/Enums.hh>
 #include <EnergyPlus/Plant/PlantLocation.hh>
 #include <EnergyPlus/PlantComponent.hh>
@@ -72,9 +72,6 @@ namespace EnergyPlus {
 struct EnergyPlusData;
 
 namespace PipeHeatTransfer {
-
-    // Using/Aliasing
-    using namespace GroundTemperatureManager;
 
     enum class EnvrnPtr
     {
@@ -105,23 +102,21 @@ namespace PipeHeatTransfer {
         // Members
         // Input data
         std::string Name;
-        std::string Construction;           // construction object name
-        std::string Environment;            // keyword:  'Schedule', 'OutdoorAir', 'Zone'
-        std::string EnvrSchedule;           // temperature schedule for environmental temp
-        std::string EnvrVelSchedule;        // temperature schedule for environmental temp
-        std::string EnvrAirNode;            // outside air node providing environmental temp
-        Real64 Length;                      // total pipe length [m]
-        Real64 PipeID;                      // pipe inside diameter [m]
-        std::string InletNode;              // inlet node name
-        std::string OutletNode;             // outlet node name
-        int InletNodeNum;                   // inlet node number
-        int OutletNodeNum;                  // outlet node number
-        DataPlant::PlantEquipmentType Type; // Type of pipe
+        std::string Construction;                // construction object name
+        std::string Environment;                 // keyword:  'Schedule', 'OutdoorAir', 'Zone'
+        Sched::Schedule *envrSched = nullptr;    // temperature schedule for environmental temp
+        Sched::Schedule *envrVelSched = nullptr; // temperature schedule for environmental temp
+        std::string EnvrAirNode;                 // outside air node providing environmental temp
+        Real64 Length;                           // total pipe length [m]
+        Real64 PipeID;                           // pipe inside diameter [m]
+        std::string InletNode;                   // inlet node name
+        std::string OutletNode;                  // outlet node name
+        int InletNodeNum;                        // inlet node number
+        int OutletNodeNum;                       // outlet node number
+        DataPlant::PlantEquipmentType Type;      // Type of pipe
         // derived data
         int ConstructionNum; // construction ref number
         EnvrnPtr EnvironmentPtr;
-        int EnvrSchedPtr;              // pointer to schedule used to set environmental temp
-        int EnvrVelSchedPtr;           // pointer to schedule used to set environmental temp
         int EnvrZonePtr;               // pointer to zone number used to set environmental temp
         int EnvrAirNodeNum;            // pointer to outside air node used to set environmental temp
         int NumSections;               // total number of nodes along pipe length
@@ -133,7 +128,7 @@ namespace PipeHeatTransfer {
         Real64 SectionArea;            // cross sectional area [m^2]
         Real64 PipeHeatCapacity;       // heat capacity of pipe section [J/m.K]
         Real64 PipeOD;                 // pipe outside diameter [m]
-        Real64 PipeCp;                 // pipe materail Cp [J/kg.K]
+        Real64 PipeCp;                 // pipe material Cp [J/kg.K]
         Real64 PipeDensity;            // pipe material density [kg/m3]
         Real64 PipeConductivity;       // pipe material thermal conductivity [W/m.K]
         Real64 InsulationOD;           // insulation outside diameter [m]
@@ -150,32 +145,32 @@ namespace PipeHeatTransfer {
         Array1D<Real64> TentativePipeTemp;
         Array1D<Real64> PipeTemp;
         Array1D<Real64> PreviousPipeTemp;
-        int NumDepthNodes;                            // number of soil grid points in the depth direction
-        int PipeNodeDepth;                            // soil depth grid point where pipe is located
-        int PipeNodeWidth;                            // soil width grid point where pipe is located
-        Real64 PipeDepth;                             // pipe burial depth [m]
-        Real64 DomainDepth;                           // soil grid depth [m]
-        Real64 dSregular;                             // grid spacing in cartesian domain [m]
-        Real64 OutdoorConvCoef;                       // soil to air convection coefficient [W/m2.K]
-        std::string SoilMaterial;                     // name of soil material:regular object
-        int SoilMaterialNum;                          // soil material index in material data structure
-        int MonthOfMinSurfTemp;                       // month of minimum ground surface temperature
-        Real64 MinSurfTemp;                           // minimum annual surface temperature [C]
-        Real64 SoilDensity;                           // density of soil [kg/m3]
-        Real64 SoilDepth;                             // thickness of soil [m]
-        Real64 SoilCp;                                // specific heat of soil [J/kg.K]
-        Real64 SoilConductivity;                      // thermal conductivity of soil [W/m.K]
-        DataSurfaces::SurfaceRoughness SoilRoughness; // ground surface roughness
-        Real64 SoilThermAbs;                          // ground surface thermal absorptivity
-        Real64 SoilSolarAbs;                          // ground surface solar absorptivity
-        Real64 CoefA1;                                // soil finite difference coefficient
-        Real64 CoefA2;                                // soil finite difference coefficient
-        Real64 FourierDS;                             // soil Fourier number based on grid spacing
-        Real64 SoilDiffusivity;                       // soil thermal diffusivity [m2/s]
-        Real64 SoilDiffusivityPerDay;                 // soil thermal diffusivity [m2/day]
-        Array4D<Real64> T;                            // soil temperature array
-        bool BeginSimInit;                            // begin sim and begin environment flag
-        bool BeginSimEnvrn;                           // begin sim and begin environment flag
+        int NumDepthNodes;                        // number of soil grid points in the depth direction
+        int PipeNodeDepth;                        // soil depth grid point where pipe is located
+        int PipeNodeWidth;                        // soil width grid point where pipe is located
+        Real64 PipeDepth;                         // pipe burial depth [m]
+        Real64 DomainDepth;                       // soil grid depth [m]
+        Real64 dSregular;                         // grid spacing in cartesian domain [m]
+        Real64 OutdoorConvCoef;                   // soil to air convection coefficient [W/m2.K]
+        std::string SoilMaterial;                 // name of soil material:regular object
+        int SoilMaterialNum;                      // soil material index in material data structure
+        int MonthOfMinSurfTemp;                   // month of minimum ground surface temperature
+        Real64 MinSurfTemp;                       // minimum annual surface temperature [C]
+        Real64 SoilDensity;                       // density of soil [kg/m3]
+        Real64 SoilDepth;                         // thickness of soil [m]
+        Real64 SoilCp;                            // specific heat of soil [J/kg.K]
+        Real64 SoilConductivity;                  // thermal conductivity of soil [W/m.K]
+        Material::SurfaceRoughness SoilRoughness; // ground surface roughness
+        Real64 SoilThermAbs;                      // ground surface thermal absorptivity
+        Real64 SoilSolarAbs;                      // ground surface solar absorptivity
+        Real64 CoefA1;                            // soil finite difference coefficient
+        Real64 CoefA2;                            // soil finite difference coefficient
+        Real64 FourierDS;                         // soil Fourier number based on grid spacing
+        Real64 SoilDiffusivity;                   // soil thermal diffusivity [m2/s]
+        Real64 SoilDiffusivityPerDay;             // soil thermal diffusivity [m2/day]
+        Array4D<Real64> T;                        // soil temperature array
+        bool BeginSimInit;                        // begin sim and begin environment flag
+        bool BeginSimEnvrn;                       // begin sim and begin environment flag
         bool FirstHVACupdateFlag;
         bool BeginEnvrnupdateFlag;
         bool SolarExposed;       // Flag to determine if solar is included at ground surface
@@ -183,7 +178,7 @@ namespace PipeHeatTransfer {
         Real64 ZoneHeatGainRate; // Lagged energy summation for zone heat gain {W}
         PlantLocation plantLoc;
         bool CheckEquipName;
-        std::shared_ptr<BaseGroundTempsModel> groundTempModel;
+        GroundTemp::BaseGroundTempsModel *groundTempModel; // non-owning pointer
 
         // Report data
         Real64 FluidInletTemp;          // inlet temperature [C]
@@ -200,13 +195,13 @@ namespace PipeHeatTransfer {
         // Default Constructor
         PipeHTData()
             : Length(0.0), PipeID(0.0), InletNodeNum(0), OutletNodeNum(0), Type(DataPlant::PlantEquipmentType::Invalid), ConstructionNum(0),
-              EnvironmentPtr(EnvrnPtr::None), EnvrSchedPtr(0), EnvrVelSchedPtr(0), EnvrZonePtr(0), EnvrAirNodeNum(0), NumSections(0),
-              FluidSpecHeat(0.0), FluidDensity(0.0), MaxFlowRate(0.0), InsideArea(0.0), OutsideArea(0.0), SectionArea(0.0), PipeHeatCapacity(0.0),
-              PipeOD(0.0), PipeCp(0.0), PipeDensity(0.0), PipeConductivity(0.0), InsulationOD(0.0), InsulationCp(0.0), InsulationDensity(0.0),
-              InsulationConductivity(0.0), InsulationThickness(0.0), InsulationResistance(0.0), CurrentSimTime(0.0), PreviousSimTime(0.0),
-              NumDepthNodes(0), PipeNodeDepth(0), PipeNodeWidth(0), PipeDepth(0.0), DomainDepth(0.0), dSregular(0.0), OutdoorConvCoef(0.0),
-              SoilMaterialNum(0), MonthOfMinSurfTemp(0), MinSurfTemp(0.0), SoilDensity(0.0), SoilDepth(0.0), SoilCp(0.0), SoilConductivity(0.0),
-              SoilRoughness(DataSurfaces::SurfaceRoughness::Invalid), SoilThermAbs(0.0), SoilSolarAbs(0.0), CoefA1(0.0), CoefA2(0.0), FourierDS(0.0),
+              EnvironmentPtr(EnvrnPtr::None), EnvrZonePtr(0), EnvrAirNodeNum(0), NumSections(0), FluidSpecHeat(0.0), FluidDensity(0.0),
+              MaxFlowRate(0.0), InsideArea(0.0), OutsideArea(0.0), SectionArea(0.0), PipeHeatCapacity(0.0), PipeOD(0.0), PipeCp(0.0),
+              PipeDensity(0.0), PipeConductivity(0.0), InsulationOD(0.0), InsulationCp(0.0), InsulationDensity(0.0), InsulationConductivity(0.0),
+              InsulationThickness(0.0), InsulationResistance(0.0), CurrentSimTime(0.0), PreviousSimTime(0.0), NumDepthNodes(0), PipeNodeDepth(0),
+              PipeNodeWidth(0), PipeDepth(0.0), DomainDepth(0.0), dSregular(0.0), OutdoorConvCoef(0.0), SoilMaterialNum(0), MonthOfMinSurfTemp(0),
+              MinSurfTemp(0.0), SoilDensity(0.0), SoilDepth(0.0), SoilCp(0.0), SoilConductivity(0.0),
+              SoilRoughness(Material::SurfaceRoughness::Invalid), SoilThermAbs(0.0), SoilSolarAbs(0.0), CoefA1(0.0), CoefA2(0.0), FourierDS(0.0),
               SoilDiffusivity(0.0), SoilDiffusivityPerDay(0.0), BeginSimInit(true), BeginSimEnvrn(true), FirstHVACupdateFlag(true),
               BeginEnvrnupdateFlag(true), SolarExposed(true), SumTK(0.0), ZoneHeatGainRate(0.0), plantLoc{}, CheckEquipName(true),
               FluidInletTemp(0.0), FluidOutletTemp(0.0), MassFlowRate(0.0), FluidHeatLossRate(0.0), FluidHeatLossEnergy(0.0), PipeInletTemp(0.0),
@@ -285,6 +280,14 @@ struct PipeHeatTransferData : BaseGlobalStruct
     bool MyEnvrnFlag = true;
     Array1D<PipeHeatTransfer::PipeHTData> PipeHT;
     std::unordered_map<std::string, std::string> PipeHTUniqueNames;
+
+    void init_constant_state([[maybe_unused]] EnergyPlusData &state) override
+    {
+    }
+
+    void init_state([[maybe_unused]] EnergyPlusData &state) override
+    {
+    }
 
     void clear_state() override
     {

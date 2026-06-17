@@ -1,7 +1,7 @@
-// EnergyPlus, Copyright (c) 1996-2023, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
-// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other
+// National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
 // contributors. All rights reserved.
 //
 // NOTICE: This Software was developed under funding from the U.S. Department of Energy and the
@@ -105,6 +105,7 @@ protected:
         ss->str(std::string());
     }
 
+#ifdef GET_OUT
     std::string storageType(const int storageTypeIndex)
     {
         return state->dataSQLiteProcedures->sqlite->storageType(storageTypeIndex);
@@ -119,7 +120,7 @@ protected:
     {
         return state->dataSQLiteProcedures->sqlite->reportingFreqName(reportingFreqIndex);
     }
-
+#endif // GET_OUT
     std::string columnText(const unsigned char *column)
     {
         return std::string(reinterpret_cast<const char *>(column));
@@ -174,7 +175,9 @@ protected:
         std::vector<std::vector<std::string>> queryVector;
 
         int rowCount = columnCount(tableName);
-        if (rowCount < 1) return queryVector;
+        if (rowCount < 1) {
+            return queryVector;
+        }
 
         sqlite3_stmt *sqlStmtPtr;
 
@@ -195,7 +198,7 @@ protected:
         return queryVector;
     }
 
-    // Helper method that will return the first double it finds, or -10000.0 if not found (abritrarily chosen value)
+    // Helper method that will return the first double it finds, or -10000.0 if not found (arbitrarily chosen value)
     Real64 execAndReturnFirstDouble(const std::string &statement)
     {
 

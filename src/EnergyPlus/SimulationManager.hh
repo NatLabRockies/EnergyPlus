@@ -1,7 +1,7 @@
-// EnergyPlus, Copyright (c) 1996-2023, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
-// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other
+// National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
 // contributors. All rights reserved.
 //
 // NOTICE: This Software was developed under funding from the U.S. Department of Energy and the
@@ -64,7 +64,7 @@ namespace SimulationManager {
 
     void GetProjectData(EnergyPlusData &state);
 
-    void writeIntialPerfLogValues(EnergyPlusData &state, std::string const &currentOverrideModeValue);
+    void writeInitialPerfLogValues(EnergyPlusData &state, std::string const &currentOverrideModeValue);
 
     std::string bool_to_string(bool logical);
 
@@ -74,8 +74,6 @@ namespace SimulationManager {
 
     std::unique_ptr<std::ostream>
     OpenStreamFile(EnergyPlusData &state, const fs::path &fileName, std::ios_base::openmode mode = (std::ios_base::out | std::ios_base::trunc));
-
-    std::unique_ptr<fmt::ostream> OpenFmtStreamFile(EnergyPlusData &state, const fs::path &filePath);
 
     void OpenOutputFiles(EnergyPlusData &state);
 
@@ -99,6 +97,17 @@ struct SimulationManagerData : BaseGlobalStruct
     bool RunControlInInput = false;
     bool PreP_Fatal = false;
     bool WarningOut = true;
+
+    void init_constant_state([[maybe_unused]] EnergyPlusData &state) override
+    {
+    }
+
+    void init_state(EnergyPlusData &state) override
+    {
+        SimulationManager::OpenOutputFiles(state);
+        SimulationManager::GetProjectData(state);
+    }
+
     void clear_state() override
     {
         this->RunPeriodsInInput = false;
@@ -109,9 +118,9 @@ struct SimulationManagerData : BaseGlobalStruct
 };
 
 void Resimulate(EnergyPlusData &state,
-                bool &ResimExt, // Flag to resimulate the exterior energy use simulation
-                bool &ResimHB,  // Flag to resimulate the heat balance simulation (including HVAC)
-                bool &ResimHVAC // Flag to resimulate the HVAC simulation
+                bool const ResimExt, // Flag to resimulate the exterior energy use simulation
+                bool const ResimHB,  // Flag to resimulate the heat balance simulation (including HVAC)
+                bool &ResimHVAC      // Flag to resimulate the HVAC simulation
 );
 
 } // namespace EnergyPlus

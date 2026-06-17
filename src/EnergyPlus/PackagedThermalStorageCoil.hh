@@ -1,7 +1,7 @@
-// EnergyPlus, Copyright (c) 1996-2023, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
-// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other
+// National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
 // contributors. All rights reserved.
 //
 // NOTICE: This Software was developed under funding from the U.S. Department of Energy and the
@@ -59,14 +59,12 @@
 #include <EnergyPlus/DataHVACGlobals.hh>
 #include <EnergyPlus/DataHeatBalance.hh>
 #include <EnergyPlus/EnergyPlus.hh>
+#include <EnergyPlus/FluidProperties.hh>
 #include <EnergyPlus/HVACUnitaryBypassVAV.hh>
 
 namespace EnergyPlus {
 
 namespace PackagedThermalStorageCoil {
-
-    // Using/Aliasing
-    using namespace DataHVACGlobals;
 
     // control types
     enum class PTSCCtrlType
@@ -131,12 +129,12 @@ namespace PackagedThermalStorageCoil {
     struct PackagedTESCoolingCoilStruct
     {
         // Members
-        std::string Name;             // Name of TES cooling package
-        int AvailSchedNum;            // pointer to availability schedule
-        PTSCCtrlType ModeControlType; // how are operation modes controlled
-        int ControlModeSchedNum;      // pointer to control schedule if used
-        bool EMSControlModeOn;        // if true, then EMS actuator has been used
-        Real64 EMSControlModeValue;   // value to use from EMS actuator for control mode
+        std::string Name;                            // Name of TES cooling package
+        Sched::Schedule *availSched = nullptr;       // availability schedule
+        PTSCCtrlType ModeControlType;                // how are operation modes controlled
+        Sched::Schedule *controlModeSched = nullptr; // control schedule if used
+        bool EMSControlModeOn;                       // if true, then EMS actuator has been used
+        Real64 EMSControlModeValue;                  // value to use from EMS actuator for control mode
         PTSCOperatingMode CurControlMode = PTSCOperatingMode::Off;
         int curControlModeReport = static_cast<int>(PTSCOperatingMode::Off);
         int ControlModeErrorIndex;
@@ -166,7 +164,7 @@ namespace PackagedThermalStorageCoil {
         int CoolingOnlySHRFTempCurve;     // curve index for sensible heat ratio modifier curve
         // (function of entering wetbulb and drybulb)
         int CoolingOnlySHRFTempObjectNum; // type of object used for curve input
-        int CoolingOnlySHRFFlowCurve;     // curve index for sensible heat ratio modifer curve
+        int CoolingOnlySHRFFlowCurve;     // curve index for sensible heat ratio modifier curve
         // (function of actual supply air flow vs rated air flow)
         int CoolingOnlySHRFFlowObjectNum;
         // cooling and charge mode
@@ -210,7 +208,7 @@ namespace PackagedThermalStorageCoil {
         int CoolingAndChargeChargingPLFFPLRObjectNum;
         int CoolingAndChargeSHRFTempCurve; // curve index for sensible heat ratio modifier curve
         // (function of entering wetbulb and drybulb)
-        int CoolingAndChargeSHRFFlowCurve; // curve index for sensible heat ratio modifer curve
+        int CoolingAndChargeSHRFFlowCurve; // curve index for sensible heat ratio modifier curve
         // (function of actual supply air flow vs rated air flow)
         int CoolingAndChargeSHRFFlowObjectNum;
         // cooling and discharge mode
@@ -258,7 +256,7 @@ namespace PackagedThermalStorageCoil {
         int CoolingAndDischargeSHRFTempCurve; // curve index for sensible heat ratio modifier curve
         // (function of entering wetbulb and drybulb)
         int CoolingAndDischargeSHRFTempObjectNum;
-        int CoolingAndDischargeSHRFFlowCurve; // curve index for sensible heat ratio modifer curve
+        int CoolingAndDischargeSHRFFlowCurve; // curve index for sensible heat ratio modifier curve
         // (function of actual supply air flow vs rated air flow)
         int CoolingAndDischargeSHRFFlowObjectNum;
         // Charge Only Mode
@@ -312,7 +310,7 @@ namespace PackagedThermalStorageCoil {
         Real64 EvapCondPumpElecNomPower;                        // Nominal power input to the evap condenser water circulation pump [W]
         Real64 EvapCondPumpElecEnergy;                          // Electric energy used by condenser water circulation pump [J]
         Real64 BasinHeaterPowerFTempDiff;                       // Basin heater power for evaporatively cooled condensers [W/K]
-        int BasinHeaterAvailSchedNum;                           // basin heater availability schedule pointer num
+        Sched::Schedule *basinHeaterAvailSched = nullptr;       // basin heater availability schedule pointer num
         Real64 BasinHeaterSetpointTemp;                         // evap water basin temperature setpoint [C]
         EvapWaterSupply EvapWaterSupplyMode;                    // where does evap water come from
         std::string EvapWaterSupplyName;                        // name of water source e.g. water storage tank
@@ -323,9 +321,10 @@ namespace PackagedThermalStorageCoil {
         int CondensateTankID;
         int CondensateTankSupplyARRID;
         // TES tank
-        MediaType StorageMedia;             // water/fluid or ice based TES
-        std::string StorageFluidName;       // if user defined, name of fluid type
-        int StorageFluidIndex;              // if user defined, index of fluid type
+        MediaType StorageMedia;       // water/fluid or ice based TES
+        std::string StorageFluidName; // if user defined, name of fluid type
+        Fluid::GlycolProps *glycol = nullptr;
+
         Real64 FluidStorageVolume;          // volume of water in storage tank for water systems [m3/s]
         Real64 IceStorageCapacity;          // capacity of storage in J
         Real64 StorageCapacitySizingFactor; // storage time used to autocalculate capacity [hr]
@@ -379,8 +378,8 @@ namespace PackagedThermalStorageCoil {
 
         // Default Constructor
         PackagedTESCoolingCoilStruct()
-            : AvailSchedNum(0), ModeControlType(PTSCCtrlType::Invalid), ControlModeSchedNum(0), EMSControlModeOn(false), EMSControlModeValue(0.0),
-              ControlModeErrorIndex(0), RatedEvapAirVolFlowRate(0.0), RatedEvapAirMassFlowRate(0.0), EvapAirInletNodeNum(0), EvapAirOutletNodeNum(0),
+            : ModeControlType(PTSCCtrlType::Invalid), EMSControlModeOn(false), EMSControlModeValue(0.0), ControlModeErrorIndex(0),
+              RatedEvapAirVolFlowRate(0.0), RatedEvapAirMassFlowRate(0.0), EvapAirInletNodeNum(0), EvapAirOutletNodeNum(0),
               CoolingOnlyModeIsAvailable(false), CoolingOnlyRatedTotCap(0.0), CoolingOnlyRatedSHR(0.0), CoolingOnlyRatedCOP(0.0),
               CoolingOnlyCapFTempCurve(0), CoolingOnlyCapFTempObjectNum(0), CoolingOnlyCapFFlowCurve(0), CoolingOnlyCapFFlowObjectNum(0),
               CoolingOnlyEIRFTempCurve(0), CoolingOnlyEIRFTempObjectNum(0), CoolingOnlyEIRFFlowCurve(0), CoolingOnlyEIRFFlowObjectNum(0),
@@ -420,19 +419,19 @@ namespace PackagedThermalStorageCoil {
               AncillaryControlsPower(0.0), ColdWeatherMinimumTempLimit(0.0), ColdWeatherAncillaryPower(0.0), CondAirInletNodeNum(0),
               CondAirOutletNodeNum(0), CondenserAirVolumeFlow(0.0), CondenserAirFlowSizingFactor(0.0), CondenserAirMassFlow(0.0), EvapCondEffect(0.0),
               CondInletTemp(0.0), EvapCondPumpElecNomPower(0.0), EvapCondPumpElecEnergy(0.0), BasinHeaterPowerFTempDiff(0.0),
-              BasinHeaterAvailSchedNum(0), BasinHeaterSetpointTemp(0.0), EvapWaterSupplyMode(EvapWaterSupply::WaterSupplyFromMains),
-              EvapWaterSupTankID(0), EvapWaterTankDemandARRID(0), CondensateCollectMode(CondensateAction::Discard), CondensateTankID(0),
-              CondensateTankSupplyARRID(0), StorageMedia(MediaType::Invalid), StorageFluidIndex(0), FluidStorageVolume(0.0), IceStorageCapacity(0.0),
-              StorageCapacitySizingFactor(0.0), MinimumFluidTankTempLimit(0.0), MaximumFluidTankTempLimit(100.0), RatedFluidTankTemp(0.0),
-              StorageAmbientNodeNum(0), StorageUA(0.0), TESPlantConnectionAvailable(false), TESPlantInletNodeNum(0), TESPlantOutletNodeNum(0),
-              TESPlantLoopNum(0), TESPlantLoopSideNum(DataPlant::LoopSideLocation::Invalid), TESPlantBranchNum(0), TESPlantCompNum(0),
-              TESPlantDesignVolumeFlowRate(0.0), TESPlantDesignMassFlowRate(0.0), TESPlantEffectiveness(0.0), TimeElapsed(0.0), IceFracRemain(0.0),
-              IceFracRemainLastTimestep(0.0), FluidTankTempFinal(0.0), FluidTankTempFinalLastTimestep(0.0), QdotPlant(0.0), Q_Plant(0.0),
-              QdotAmbient(0.0), Q_Ambient(0.0), QdotTES(0.0), Q_TES(0.0), ElecCoolingPower(0.0), ElecCoolingEnergy(0.0), EvapTotCoolingRate(0.0),
-              EvapTotCoolingEnergy(0.0), EvapSensCoolingRate(0.0), EvapSensCoolingEnergy(0.0), EvapLatCoolingRate(0.0), EvapLatCoolingEnergy(0.0),
-              RuntimeFraction(0.0), CondenserRuntimeFraction(0.0), ElectColdWeatherPower(0.0), ElectColdWeatherEnergy(0.0),
-              ElectEvapCondBasinHeaterPower(0.0), ElectEvapCondBasinHeaterEnergy(0.0), EvapWaterConsumpRate(0.0), EvapWaterConsump(0.0),
-              EvapWaterStarvMakupRate(0.0), EvapWaterStarvMakup(0.0), EvapCondPumpElecPower(0.0), EvapCondPumpElecConsumption(0.0)
+              BasinHeaterSetpointTemp(0.0), EvapWaterSupplyMode(EvapWaterSupply::WaterSupplyFromMains), EvapWaterSupTankID(0),
+              EvapWaterTankDemandARRID(0), CondensateCollectMode(CondensateAction::Discard), CondensateTankID(0), CondensateTankSupplyARRID(0),
+              StorageMedia(MediaType::Invalid), FluidStorageVolume(0.0), IceStorageCapacity(0.0), StorageCapacitySizingFactor(0.0),
+              MinimumFluidTankTempLimit(0.0), MaximumFluidTankTempLimit(100.0), RatedFluidTankTemp(0.0), StorageAmbientNodeNum(0), StorageUA(0.0),
+              TESPlantConnectionAvailable(false), TESPlantInletNodeNum(0), TESPlantOutletNodeNum(0), TESPlantLoopNum(0),
+              TESPlantLoopSideNum(DataPlant::LoopSideLocation::Invalid), TESPlantBranchNum(0), TESPlantCompNum(0), TESPlantDesignVolumeFlowRate(0.0),
+              TESPlantDesignMassFlowRate(0.0), TESPlantEffectiveness(0.0), TimeElapsed(0.0), IceFracRemain(0.0), IceFracRemainLastTimestep(0.0),
+              FluidTankTempFinal(0.0), FluidTankTempFinalLastTimestep(0.0), QdotPlant(0.0), Q_Plant(0.0), QdotAmbient(0.0), Q_Ambient(0.0),
+              QdotTES(0.0), Q_TES(0.0), ElecCoolingPower(0.0), ElecCoolingEnergy(0.0), EvapTotCoolingRate(0.0), EvapTotCoolingEnergy(0.0),
+              EvapSensCoolingRate(0.0), EvapSensCoolingEnergy(0.0), EvapLatCoolingRate(0.0), EvapLatCoolingEnergy(0.0), RuntimeFraction(0.0),
+              CondenserRuntimeFraction(0.0), ElectColdWeatherPower(0.0), ElectColdWeatherEnergy(0.0), ElectEvapCondBasinHeaterPower(0.0),
+              ElectEvapCondBasinHeaterEnergy(0.0), EvapWaterConsumpRate(0.0), EvapWaterConsump(0.0), EvapWaterStarvMakupRate(0.0),
+              EvapWaterStarvMakup(0.0), EvapCondPumpElecPower(0.0), EvapCondPumpElecConsumption(0.0)
         {
         }
     };
@@ -440,7 +439,7 @@ namespace PackagedThermalStorageCoil {
     void SimTESCoil(EnergyPlusData &state,
                     std::string_view CompName, // name of the fan coil unit
                     int &CompIndex,
-                    int const FanOpMode, // allows parent object to control fan mode
+                    HVAC::FanOp const fanOp, // allows parent object to control fan mode
                     PTSCOperatingMode &TESOpMode,
                     ObjexxFCL::Optional<Real64 const> PartLoadRatio = _ // part load ratio (for single speed cycling unit)
     );
@@ -453,11 +452,11 @@ namespace PackagedThermalStorageCoil {
 
     void CalcTESCoilOffMode(EnergyPlusData &state, int const TESCoilNum);
 
-    void CalcTESCoilCoolingOnlyMode(EnergyPlusData &state, int const TESCoilNum, int const FanOpMode, Real64 const PartLoadRatio);
+    void CalcTESCoilCoolingOnlyMode(EnergyPlusData &state, int const TESCoilNum, HVAC::FanOp const fanOp, Real64 const PartLoadRatio);
 
-    void CalcTESCoilCoolingAndChargeMode(EnergyPlusData &state, int const TESCoilNum, int const FanOpMode, Real64 const PartLoadRatio);
+    void CalcTESCoilCoolingAndChargeMode(EnergyPlusData &state, int const TESCoilNum, HVAC::FanOp const fanOp, Real64 const PartLoadRatio);
 
-    void CalcTESCoilCoolingAndDischargeMode(EnergyPlusData &state, int const TESCoilNum, int const FanOpMode, Real64 const PartLoadRatio);
+    void CalcTESCoilCoolingAndDischargeMode(EnergyPlusData &state, int const TESCoilNum, HVAC::FanOp const fanOp, Real64 const PartLoadRatio);
 
     void CalcTESCoilChargeOnlyMode(EnergyPlusData &state, int const TESCoilNum);
 
@@ -504,6 +503,14 @@ struct PackagedThermalStorageCoilData : BaseGlobalStruct
     Array1D_bool MySizeFlag;   // One time sizing flag
     Array1D_bool MyEnvrnFlag;  // flag for init once at start of environment
     Array1D_bool MyWarmupFlag; // flag for init after warmup complete
+
+    void init_constant_state([[maybe_unused]] EnergyPlusData &state) override
+    {
+    }
+
+    void init_state([[maybe_unused]] EnergyPlusData &state) override
+    {
+    }
 
     void clear_state() override
     {

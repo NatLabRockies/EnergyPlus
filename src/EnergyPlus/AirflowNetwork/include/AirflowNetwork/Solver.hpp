@@ -1,7 +1,7 @@
-// EnergyPlus, Copyright (c) 1996-2023, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
-// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other
+// National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
 // contributors. All rights reserved.
 //
 // NOTICE: This Software was developed under funding from the U.S. Department of Energy and the
@@ -64,6 +64,7 @@
 #include <EnergyPlus/Data/BaseData.hh>
 #include <EnergyPlus/EPVector.hh>
 #include <EnergyPlus/EnergyPlus.hh>
+#include <EnergyPlus/SystemAvailabilityManager.hh>
 
 namespace EnergyPlus {
 
@@ -87,6 +88,7 @@ namespace AirflowNetwork {
         // Members
         Real64 InfilVolume;         // Volume of Air {m3} due to infiltration
         Real64 InfilMass;           // Mass of Air {kg} due to infiltration
+        Real64 infilMassFlow;       // Mass flow rate of air {kg/s} due to infiltration
         Real64 InfilAirChangeRate;  // Infiltration air change rate {ach}
         Real64 VentilHeatLoss;      // Heat Gain {W} due to ventilation
         Real64 VentilHeatGain;      // Heat Loss {W} due to ventilation
@@ -106,9 +108,9 @@ namespace AirflowNetwork {
 
         // Default Constructor
         AirflowNetworkReportVars()
-            : InfilVolume(0.0), InfilMass(0.0), InfilAirChangeRate(0.0), VentilHeatLoss(0.0), VentilHeatGain(0.0), VentilVolume(0.0), VentilMass(0.0),
-              VentilAirChangeRate(0.0), VentilFanElec(0.0), VentilAirTemp(0.0), MixVolume(0.0), MixMass(0.0), ExfilSensiLoss(0.0),
-              ExfilLatentLoss(0.0), ExfilTotalLoss(0.0), ExfilMass(0.0), InletMass(0.0), OutletMass(0.0)
+            : InfilVolume(0.0), InfilMass(0.0), infilMassFlow(0.0), InfilAirChangeRate(0.0), VentilHeatLoss(0.0), VentilHeatGain(0.0),
+              VentilVolume(0.0), VentilMass(0.0), VentilAirChangeRate(0.0), VentilFanElec(0.0), VentilAirTemp(0.0), MixVolume(0.0), MixMass(0.0),
+              ExfilSensiLoss(0.0), ExfilLatentLoss(0.0), ExfilTotalLoss(0.0), ExfilMass(0.0), InletMass(0.0), OutletMass(0.0)
         {
         }
     };
@@ -128,26 +130,26 @@ namespace AirflowNetwork {
     struct OccupantVentilationControlProp
     {
 
-        std::string Name;                     // Provide a unique object name
-        Real64 MinOpeningTime;                // Minimum Opening Time
-        Real64 MinClosingTime;                // Minimum Closing Time
-        std::string ComfortLowTempCurveName;  // Thermal Comfort Low Temperature Curve Name
-        std::string ComfortHighTempCurveName; // Thermal Comfort High Temperature Curve Name
-        int ComfortLowTempCurveNum;           // Thermal Comfort Low Temperature Curve number
-        int ComfortHighTempCurveNum;          // Thermal Comfort high Temperature Curve number
-        int OpeningProbSchNum;                // Opening probability schedule pointer
-        int ClosingProbSchNum;                // Closing probability schedule pointer
-        Real64 ComfortBouPoint;               // Thermal Comfort Temperature Boundary Point
-        bool OccupancyCheck;                  // Occupancy check
-        std::string OpeningProbSchName;       // Opening probability schedule name
-        std::string ClosingProbSchName;       // Closing probability schedule name
-        Real64 MaxPPD;                        // Maximum PPD used to calculate comfort band (%)
-        bool MinTimeControlOnly;              // Chach minimum opening and closing time only
+        std::string Name;                            // Provide a unique object name
+        Real64 MinOpeningTime;                       // Minimum Opening Time
+        Real64 MinClosingTime;                       // Minimum Closing Time
+        std::string ComfortLowTempCurveName;         // Thermal Comfort Low Temperature Curve Name
+        std::string ComfortHighTempCurveName;        // Thermal Comfort High Temperature Curve Name
+        int ComfortLowTempCurveNum;                  // Thermal Comfort Low Temperature Curve number
+        int ComfortHighTempCurveNum;                 // Thermal Comfort high Temperature Curve number
+        Sched::Schedule *openingProbSched = nullptr; // Opening probability schedule pointer
+        Sched::Schedule *closingProbSched = nullptr; // Closing probability schedule pointer
+        Real64 ComfortBouPoint;                      // Thermal Comfort Temperature Boundary Point
+        bool OccupancyCheck;                         // Occupancy check
+        std::string OpeningProbSchName;              // Opening probability schedule name
+        std::string ClosingProbSchName;              // Closing probability schedule name
+        Real64 MaxPPD;                               // Maximum PPD used to calculate comfort band (%)
+        bool MinTimeControlOnly;                     // Chach minimum opening and closing time only
 
         // Default Constructor
         OccupantVentilationControlProp()
-            : MinOpeningTime(0.0), MinClosingTime(0.0), ComfortLowTempCurveNum(0), ComfortHighTempCurveNum(0), OpeningProbSchNum(0),
-              ClosingProbSchNum(0), ComfortBouPoint(10.0), OccupancyCheck(false), MaxPPD(10.0), MinTimeControlOnly(false)
+            : MinOpeningTime(0.0), MinClosingTime(0.0), ComfortLowTempCurveNum(0), ComfortHighTempCurveNum(0), ComfortBouPoint(10.0),
+              OccupancyCheck(false), MaxPPD(10.0), MinTimeControlOnly(false)
         {
         }
 
@@ -218,6 +220,7 @@ namespace AirflowNetwork {
         bool allow_unsupported_zone_equipment = false; // Allow unsupported zone equipment
         bool autosize_ducts = false;                   // True: perform duct autosize, otherwise no duct autosize
         DuctSizing ductSizing;
+        bool DuctLoss = false; // Duct loss calculation without AFN flag
     };
 
     struct Solver : BaseGlobalStruct
@@ -306,14 +309,15 @@ namespace AirflowNetwork {
         void venting_control(int i,                                         // AirflowNetwork surface number
                              Real64 &OpenFactor                             // Window or door opening factor (used to calculate airflow)
         );
-        void assign_fan_airloop();
         void validate_distribution();
         void validate_fan_flowrate(); // Catch a fan flow rate from EPlus input file and add a flag for VAV terminal damper
         void validate_exhaust_fan_input();
+        int get_people_index(int const zoneNum, int ventCtrlNum, bool &errorFound);
         void hybrid_ventilation_control();
         void single_sided_Cps(std::vector<std::vector<Real64>> &valsByFacade, int numWindDirs = 36);
-        Real64 zone_OA_change_rate(int ZoneNum); // hybrid ventilation system controlled zone number
-        int get_airloop_number(int NodeNumber);  // Get air loop number for each distribution node and linkage
+        Real64 zone_OA_change_rate(int ZoneNum);  // hybrid ventilation system controlled zone number
+        int get_airloop_number(int NodeNumber);   // Get air loop number for each distribution node and linkage
+        void resolveAirLoopNum(bool &errorFound); // Resolve air loop number for all of the nodes that are linked together
         void SizeDucts();
         Real64 CalcDuctDiameter(Real64 hydraulicDiameter, Real64 DeltaP, Real64 MassFlowrate, Real64 TotalL, Real64 TotalLossCoe, Real64 MaxRough);
 
@@ -324,8 +328,8 @@ namespace AirflowNetwork {
         Array1D<Real64> MA;
         Array1D<Real64> MV;
         Array1D_int IVEC;
-        int VentilationCtrl = 0;  // Hybrid ventilation control type
-        int NumOfExhaustFans = 0; // Number of exhaust fans
+        Avail::VentCtrlStatus ventCtrlStatus = Avail::VentCtrlStatus::NoAction; // Hybrid ventilation control type
+        int NumOfExhaustFans = 0;                                               // Number of exhaust fans
         int NumAirflowNetwork = 0;
         int AirflowNetworkNumOfDetOpenings = 0;
         int AirflowNetworkNumOfSimOpenings = 0;
@@ -350,11 +354,11 @@ namespace AirflowNetwork {
         int DisSysNumOfTermUnits = 0;
         int DisSysNumOfLinks = 0;
         int NumOfExtNodes = 0;
-        Real64 IncAng = 0.0;                     // Wind incidence angle relative to facade normal (deg)
-        int SupplyFanType = 0;                   // Supply air fan type
-        Real64 MaxOnOffFanRunTimeFraction = 0.0; // max Run time fraction for an On/Off fan flow rate among airloops
-        Real64 CurrentEndTimeLast = 0.0;         // last end time
-        Real64 TimeStepSysLast = 0.0;            // last system time step
+        Real64 IncAng = 0.0;                                  // Wind incidence angle relative to facade normal (deg)
+        HVAC::FanType supplyFanType = HVAC::FanType::Invalid; // Supply air fan type
+        Real64 MaxOnOffFanRunTimeFraction = 0.0;              // max Run time fraction for an On/Off fan flow rate among airloops
+        Real64 CurrentEndTimeLast = 0.0;                      // last end time
+        Real64 TimeStepSysLast = 0.0;                         // last system time step
         int AirflowNetworkNumOfOccuVentCtrls = 0;
         int IntraZoneNumOfNodes = 0;
         int IntraZoneNumOfLinks = 0;
@@ -363,7 +367,6 @@ namespace AirflowNetwork {
         int NumOfOAFans = 0;              // number of OutdoorAir fans
         int NumOfReliefFans = 0;          // number of OutdoorAir relief fans
         bool AirflowNetworkGetInputFlag = true;
-        bool AssignFanAirLoopNumFlag = true;
         bool ValidateDistributionSystemFlag = true;
         Array1D<Real64> FacadeAng =
             Array1D<Real64>(5); // Facade azimuth angle (for walls, angle of outward normal to facade measured clockwise from North) (deg)
@@ -400,7 +403,7 @@ namespace AirflowNetwork {
         EPVector<AirflowNetwork::AirflowNetworkNodeReportData> nodeReport;
         EPVector<AirflowNetwork::AirflowNetworkLinkReportData> linkReport1;
 
-        // used to be statics
+        // used to be statistics
         Array1D<bool> onceZoneFlag;
         Array1D<bool> onceSurfFlag;
         bool onetime = false;
@@ -430,7 +433,7 @@ namespace AirflowNetwork {
         Array1D<Real64> PS;
         Array1D<Real64> PW;
 
-        // Common block CONTRL
+        // Common block CONTROL
         Real64 PB = 0.0;
 
         // Common block ZONL
@@ -540,6 +543,14 @@ namespace AirflowNetwork {
         Array1D<AirflowNetwork::ReliefFlow> DisSysCompReliefAirData;
         Array1D<AirflowNetwork::AirflowNetworkLinkageViewFactorProp> AirflowNetworkLinkageViewFactorData;
 
+        void init_constant_state([[maybe_unused]] EnergyPlusData &state) override
+        {
+        }
+
+        void init_state([[maybe_unused]] EnergyPlusData &state) override
+        {
+        }
+
         void clear_state() override
         {
             OccupantVentilationControl.deallocate();
@@ -548,7 +559,7 @@ namespace AirflowNetwork {
             MA.deallocate();
             MV.deallocate();
             IVEC.deallocate();
-            VentilationCtrl = 0;
+            ventCtrlStatus = Avail::VentCtrlStatus::NoAction;
             NumOfExhaustFans = 0;
             NumAirflowNetwork = 0;
             AirflowNetworkNumOfDetOpenings = 0;
@@ -575,7 +586,7 @@ namespace AirflowNetwork {
             DisSysNumOfLinks = 0;
             NumOfExtNodes = 0;
             IncAng = 0.0;
-            SupplyFanType = 0;
+            supplyFanType = HVAC::FanType::Invalid;
             MaxOnOffFanRunTimeFraction = 0.0;
             CurrentEndTimeLast = 0.0;
             TimeStepSysLast = 0.0;
@@ -587,7 +598,6 @@ namespace AirflowNetwork {
             NumOfOAFans = 0;
             NumOfReliefFans = 0;
             AirflowNetworkGetInputFlag = true;
-            AssignFanAirLoopNumFlag = true;
             ValidateDistributionSystemFlag = true;
             FacadeAng = Array1D<Real64>(5);
             AirflowNetworkZnRpt.deallocate();

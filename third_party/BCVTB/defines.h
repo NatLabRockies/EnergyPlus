@@ -4,7 +4,7 @@
  * \brief  Define statements used by the BCVTB C methods.
  *
  * \author Michael Wetter,
- *         Simulation Research Group, 
+ *         Simulation Research Group,
  *         LBNL,
  *         MWetter@lbl.gov
  *
@@ -13,31 +13,30 @@
  */
 
 #ifndef __DEFINES_H__
-#define __DEFINES_H__
+#  define __DEFINES_H__
 
-/** \val Debug flag, uncomment to enable debug messages 
+/** \val Debug flag, uncomment to enable debug messages
 
-#ifndef NDEBUG 
-#define NDEBUG 
+#ifndef NDEBUG
+#define NDEBUG
 #endif
 */
 
 /** \val Lenght of buffer used to communicate with the BSD socket. */
-#define BUFFER_LENGTH  1024
+#  define BUFFER_LENGTH 1024
 
 /** \val Maximum number of double values that can be exchanged by Simulink.
  *     To increase this value, change it in this file and in the files
- *     \c matlab/compile.m and 
+ *     \c matlab/compile.m and
  *     \c matlab/exchangeDoublesWithSocket.m
  */
-#define NDBLMAX 1024
+#  define NDBLMAX 1024
 
 /** \val The main version of the socket interface.
  */
-#define MAINVERSION 2
+#  define MAINVERSION 2
 
 #endif /*__DEFINES_H__*/
-
 
 /*
 ********************************************************************
@@ -87,7 +86,7 @@ modification, are permitted provided that the following conditions are met:
    3. Neither the name of the University of California, Lawrence
       Berkeley National Laboratory, U.S. Dept. of Energy nor the names
       of its contributors may be used to endorse or promote products
-      derived from this software without specific prior written permission. 
+      derived from this software without specific prior written permission.
 
 THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS
 IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED

@@ -1,7 +1,7 @@
-// EnergyPlus, Copyright (c) 1996-2023, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
-// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other
+// National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
 // contributors. All rights reserved.
 //
 // NOTICE: This Software was developed under funding from the U.S. Department of Energy and the
@@ -57,8 +57,8 @@
 #define AIRCP(W) Psychrometrics::PsyCpAirFnW(W)
 #define AIRDYNAMICVISCOSITY_CONSTEXPR(T) air_dynamic_viscosity(T)
 #ifndef TOKELVIN
-#include "../../../DataGlobals.hh"
-#define TOKELVIN(T) (T + DataGlobalConstants::KelvinConv)
+#    include "../../../DataGlobals.hh"
+#    define TOKELVIN(T) (T + Constant::Kelvin)
 #endif
 
 namespace EnergyPlus {
@@ -121,14 +121,14 @@ namespace AirflowNetwork {
     struct AirState
     {
         Real64 temperature;
-        // Real64 pressure;      //{0.0}; // gage pressure
+        // Real64 pressure;      //{0.0}; // gauge pressure
         Real64 humidity_ratio;
         Real64 density;
         Real64 sqrt_density;
         Real64 viscosity;
 
         AirState();
-        explicit AirState(double const airDensity);
+        explicit AirState(double density);
     };
 
 } // namespace AirflowNetwork

@@ -1,7 +1,7 @@
-// EnergyPlus, Copyright (c) 1996-2023, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
-// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other
+// National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
 // contributors. All rights reserved.
 //
 // NOTICE: This Software was developed under funding from the U.S. Department of Energy and the
@@ -54,6 +54,7 @@
 // EnergyPlus Headers
 #include <EnergyPlus/Data/BaseData.hh>
 #include <EnergyPlus/EnergyPlus.hh>
+#include <EnergyPlus/Material.hh>
 
 namespace EnergyPlus {
 
@@ -64,8 +65,40 @@ namespace HeatBalanceHAMTManager {
 
     // Data
     // MODULE PARAMETER DEFINITIONS:
+    struct MaterialHAMT : public Material::MaterialBase
+    {
+        // HAMT
+        int niso = -1;                                       // Number of data points
+        Array1D<Real64> isodata = Array1D<Real64>(27, 0.0);  // isotherm values
+        Array1D<Real64> isorh = Array1D<Real64>(27, 0.0);    // isotherm RH values
+        int nsuc = -1;                                       // Number of data points
+        Array1D<Real64> sucdata = Array1D<Real64>(27, 0.0);  // suction values
+        Array1D<Real64> sucwater = Array1D<Real64>(27, 0.0); // suction water values
+        int nred = -1;                                       // Number of data points
+        Array1D<Real64> reddata = Array1D<Real64>(27, 0.0);  // redistribution values
+        Array1D<Real64> redwater = Array1D<Real64>(27, 0.0); // redistribution water values
+        int nmu = -1;                                        // Number of data points
+        Array1D<Real64> mudata = Array1D<Real64>(27, 0.0);   // mu values
+        Array1D<Real64> murh = Array1D<Real64>(27, 0.0);     // mu rh values
+        int ntc = -1;                                        // Number of data points
+        Array1D<Real64> tcdata = Array1D<Real64>(27, 0.0);   // thermal conductivity values
+        Array1D<Real64> tcwater = Array1D<Real64>(27, 0.0);  // thermal conductivity water values
+        Real64 itemp = 10.0;                                 // initial Temperature
+        Real64 irh = 0.5;                                    // Initial RH
+        Real64 iwater = 0.2;                                 // Initial water content kg/kg
+        int divs = 3;                                        // Number of divisions
+        Real64 divsize = 0.005;                              // Average Cell Size
+        int divmin = 3;                                      // Minimum number of cells
+        int divmax = 10;                                     // Maximum number of cells
 
-    constexpr int ittermax(150); // Maximum Number of itterations
+        MaterialHAMT() : Material::MaterialBase()
+        {
+            group = Material::Group::Regular;
+        }
+        ~MaterialHAMT() = default;
+    };
+
+    constexpr int ittermax(150); // Maximum Number of iterations
     constexpr int adjmax(6);     // Maximum Number of Adjacent Cells
 
     constexpr Real64 wdensity(1000.0); // Density of water kg.m-3
@@ -83,7 +116,7 @@ namespace HeatBalanceHAMTManager {
         int sid;          // Surface Id Number
         Real64 Qadds;     // Additional sources of heat
         Real64 density;   // Density
-        Real64 wthermalc; // Moisture Dependant Thermal Conductivity
+        Real64 wthermalc; // Moisture Dependent Thermal Conductivity
         Real64 spech;     // Specific Heat capacity
         Real64 htc;       // Heat Transfer Coefficient
         Real64 vtc;       // Vapor Transfer Coefficient
@@ -193,6 +226,14 @@ struct HeatBalHAMTMgrData : BaseGlobalStruct
     bool OneTimeFlag = true;
     int qvpErrCount = 0;
     int qvpErrReport = 0;
+
+    void init_constant_state([[maybe_unused]] EnergyPlusData &state) override
+    {
+    }
+
+    void init_state([[maybe_unused]] EnergyPlusData &state) override
+    {
+    }
 
     void clear_state() override
     {

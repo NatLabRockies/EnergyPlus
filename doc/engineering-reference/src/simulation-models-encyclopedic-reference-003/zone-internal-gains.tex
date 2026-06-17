@@ -8,7 +8,7 @@ Internal heat gains from lights, people, and equipment of various types are ofte
 
 The input object Lights provides a model for internal gains from lights.~ Radiant gains from lights must be handled differently from other radiant gains for reasons described here (long wavelength description).~ The total radiant gains from lights must be divided into visible and thermal portions.~ For example, the total electric input to typical incandescent lights is converted to 10\% visible radiation, 80\% thermal radiation, and 10\% convective gain.~ In contrast, the electric input to typical fluorescent lights is converted to 20\% visible radiation, 20\% thermal radiation, and 60\% convective gain (see Carrier 1965).~ These percentage splits are under user control with the Lights input object.
 
-When the value of Return Air Fraction is greater than 0 and  the return air flow rate is greater than 0, the portion of light heat will be added to the return air node. The added heat will make the node temperature rise. The temperature difference is calculated in the CalcZoneLeavingConditions funtion of the ZoneEquipmentManager module:
+When the value of Return Air Fraction is greater than 0 and  the return air flow rate is greater than 0, the portion of light heat will be added to the return air node. The added heat will make the node temperature rise. The temperature difference is calculated in the CalcZoneLeavingConditions function of the ZoneEquipmentManager module:
 
 
 \begin{equation}
@@ -43,7 +43,7 @@ where:
 
 \(CpAir\) is the specific heat (J/kg-K)
 
-Although a single Lights object allows a return node and an exhaust node, it is possible to have multiple Lights objects with different return nodes and referrred to the same exhaust node. Therefore, the exhaust node will share return heat from different return nodes. The temperature rise at i-th return node is given below:
+Although a single Lights object allows a return node and an exhaust node, it is possible to have multiple Lights objects with different return nodes and referred to the same exhaust node. Therefore, the exhaust node will share return heat from different return nodes. The temperature rise at i-th return node is given below:
 
 \begin{equation}
 TempRetRise_i = \frac{QRetAir_i} {(MassFlowRA_i + MassFlowEx ) * CpAir}
@@ -352,9 +352,9 @@ $T_{\textrm{return}}$ is the actual AHU return air temperature;
 
 and $T_{\textrm{out}}$ is the IT equipment outlet temperature.
 
-The two approach temperatures can be calculated by CFD tools for typical IT load levels and air flow management of data centers, or provided by measurement data or lookup tables. 
+The two approach temperatures can be calculated by CFD tools for typical IT load levels and air flow management of data centers, or provided by measurement data or lookup tables.
 
-It should be noted that, when \textbf{FlowControlWithApproachTemperatures} is chosen, 
+It should be noted that, when \textbf{FlowControlWithApproachTemperatures} is chosen,
 
 \begin{itemize}
 \item The inputs of Air Inlet Connection Type, Design Recirculation Fraction and Recirculation Function of Loading and Supply Temperature Curve Name are ignored.

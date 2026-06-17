@@ -1,7 +1,7 @@
-// EnergyPlus, Copyright (c) 1996-2023, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
-// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other
+// National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
 // contributors. All rights reserved.
 //
 // NOTICE: This Software was developed under funding from the U.S. Department of Energy and the
@@ -52,6 +52,9 @@
 #include <ObjexxFCL/Array1D.hh>
 #include <ObjexxFCL/Array2D.hh>
 #include <ObjexxFCL/Array3D.hh>
+#include <ObjexxFCL/Vector3.fwd.hh>
+
+using ObjexxFCL::Vector3;
 
 // EnergyPlus Headers
 #include <EnergyPlus/Data/BaseData.hh>
@@ -74,6 +77,8 @@ namespace DataBSDFWindow {
         Num
     };
 
+    static constexpr std::array<std::string_view, (int)Basis::Num> basisNamesUC = {"LBNLWINDOW", "USERDEFINED"};
+
     enum class BasisSymmetry
     {
         Invalid = -1,
@@ -81,6 +86,8 @@ namespace DataBSDFWindow {
         None,
         Num
     };
+
+    static constexpr std::array<std::string_view, (int)BasisSymmetry::Num> basisSymmetryNamesUC = {"AXISYMMETRIC", "NONE"};
 
     // Thermal calculations for complex fenestration can be used to generate reports for standard cases
     // noCondition is used when performing timestep calculations
@@ -145,7 +152,7 @@ namespace DataBSDFWindow {
         BasisSymmetry BasisSymmetryType = BasisSymmetry::Invalid; // BasisSymmetry_Axisymmetric or BasisSymmetry_None  (see HeatBalanceManager)
         int BasisMatIndex = 0;                                    // pointer to matrix for basis
         int NBasis = 0;                                           // No. elements in basis
-        Array1D<Real64> Lamda;                                    // Vector of diagonal Lamda matrix elems for grid
+        Array1D<Real64> Lamda;                                    // Vector of diagonal Lambda matrix elems for grid
         Array1D<Real64> SolAng;                                   // Vector of basis element solid angles for grid
         int NThetas = 0;                                          // No. Theta values in basis
         Array1D<Real64> Thetas;                                   // List of basis theta values
@@ -183,8 +190,8 @@ namespace DataBSDFWindow {
         Array2D_int SolBmIndex;      // Basis index corresponding to beam dir (hour, timestep)
         // Note this is zero if sun is not in incident hemisphere
         // otherwise in range 1..NBasis
-        Array2D<Real64> ThetaBm; // Theta angle corresponging to beam dir (hour, timestep) (rad)
-        Array2D<Real64> PhiBm;   // Theta angle corresponging to beam dir (hour, timestep) (rad)
+        Array2D<Real64> ThetaBm; // Theta angle corresponding to beam dir (hour, timestep) (rad)
+        Array2D<Real64> PhiBm;   // Theta angle corresponding to beam dir (hour, timestep) (rad)
         BasisStruct Trn;
         Array1D<Vector> sTrn;              // Central direction vectors of Outgoing grid (World coords)
         Array1D<BSDFDaylghtPosition> pTrn; // azimuth and altitude of incidence vectors
@@ -217,7 +224,7 @@ namespace DataBSDFWindow {
         Array3D_int HitSurfNo;        // for a given ray striking surface, list of intersected surf nos (# window el, NReflSurf, RefRayNHits)
         Array3D<Real64> HitSurfDSq;   // for a given ray striking surface, list of distance^2 from window (# window el, NReflSurf, RefRayNHits)
         Array3D<Vector> HitPt;        // for a given ray striking surface, list of hit pts (# window el, NReflSurf, RefRayNHits)
-        Array1D_int RefPointIndex;    // outgoing direction which containts reference point (# window el)
+        Array1D_int RefPointIndex;    // outgoing direction which contains reference point (# window el)
         Array1D_bool RefPointIntersection; // determines if reference point is laying in light tube of bsdf outgoing direction (NTrnBasis)
         Array1D<Real64> RefPtIntPosFac; // position factors for intersections from reference point to window for each outgoing direction (NTrnBasis)
     };
@@ -250,7 +257,7 @@ namespace DataBSDFWindow {
         // INTEGER      :: ThermConst =0  ! pointer to thermal construction for this state
         Real64 WinDiffTrans = 0.0; // Window hemispherical ave diff trans
         // for use in corrections requiring a diffuse trans
-        // that have not been redone in detail for Compex Fen
+        // that have not been redone in detail for Complex Fen
         Real64 WinDiffVisTrans = 0.0;    // Window hemispherical ave diff trans for visible spectrum
         Array2D<Real64> WinDirHemiTrans; // Directional-hemispherical transmittance(hr,ts)
         Array2D<Real64> WinDirSpecTrans; // Directional specular transmittance(hr,ts)
@@ -389,9 +396,17 @@ struct BSDFWindowData : BaseGlobalStruct
     Array2D<Real64> BSDFTempMtrx;                                         // Temporary matrix for holding axisymmetric input
     EPVector<DataBSDFWindow::BSDFWindowGeomDescr> ComplexWind;            // Window geometry structure: set in CalcPerSolarBeam/SolarShading
 
+    void init_constant_state([[maybe_unused]] EnergyPlusData &state) override
+    {
+    }
+
+    void init_state([[maybe_unused]] EnergyPlusData &state) override
+    {
+    }
+
     void clear_state() override
     {
-        *this = BSDFWindowData();
+        new (this) BSDFWindowData();
     }
 };
 

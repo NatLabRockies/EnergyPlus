@@ -22,7 +22,6 @@
 #include <ObjexxFCL/Array2D.hh>
 #include <ObjexxFCL/Array3D.hh>
 #include <ObjexxFCL/Array4D.hh>
-#include <ObjexxFCL/Array5D.hh>
 #include <ObjexxFCL/Fmath.hh>
 
 // C++ Headers
@@ -893,21 +892,6 @@ reshape( Array1S< T > const & a, std::array< I, 4 > const & shape )
 {
 	typedef  BArray::size_type  size_type;
 	Array4D< T > r( shape[ 0 ], shape[ 1 ], shape[ 2 ], shape[ 3 ] );
-	size_type l( 0u );
-	size_type const s( r.size() );
-	for ( int i = 1, e = a.u(); ( ( i <= e ) && ( l < s ) ); ++i, ++l ) {
-		r[ l ] = a( i );
-	}
-	return r;
-}
-
-template< typename T, typename I >
-inline
-Array5D< T >
-reshape( Array1S< T > const & a, std::array< I, 5 > const & shape )
-{
-	typedef  BArray::size_type  size_type;
-	Array5D< T > r( shape[ 0 ], shape[ 1 ], shape[ 2 ], shape[ 3 ], shape[ 4 ] );
 	size_type l( 0u );
 	size_type const s( r.size() );
 	for ( int i = 1, e = a.u(); ( ( i <= e ) && ( l < s ) ); ++i, ++l ) {

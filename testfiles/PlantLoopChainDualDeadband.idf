@@ -13,7 +13,7 @@
 ! System:   None.
 ! Plant:    A chain of 4plant loops that connect LoadProfile:Plant objects to DistrictCooling and DistrictHeating by heat exchangers
 
-  Version,23.1;
+  Version,26.2;
 
   Building,
     Plant Load Profile Example,  !- Name
@@ -305,7 +305,8 @@
     Heat Demand Load Profile 1 Outlet Node,  !- Outlet Node Name
     Heat Load Profile 1 Load Schedule,  !- Load Schedule Name
     0.002,                   !- Peak Flow Rate {m3/s}
-    Heat Load Profile 1 Flow Frac Schedule;  !- Flow Rate Fraction Schedule Name
+    Heat Load Profile 1 Flow Frac Schedule,  !- Flow Rate Fraction Schedule Name
+    Water;                   !- Plant Loop Fluid Type
 
   Branch,
     USE Heat Demand Outlet Branch,  !- Name
@@ -503,7 +504,8 @@
     Demand Cool Load Profile 1 Outlet Node,  !- Outlet Node Name
     Cool Load Profile 1 Load Schedule,  !- Load Schedule Name
     0.002,                   !- Peak Flow Rate {m3/s}
-    Cool Load Profile 1 Flow Frac Schedule;  !- Flow Rate Fraction Schedule Name
+    Cool Load Profile 1 Flow Frac Schedule,  !- Flow Rate Fraction Schedule Name
+    ;                        !- Plant Loop Fluid Type
 
   Branch,
     USE Cool Demand Outlet Branch,  !- Name
@@ -778,7 +780,7 @@
     SOURCE Supply Cooling Outlet Node,  !- Setpoint 1 Node Name
     0.003,                   !- Component 1 Flow Rate {m3/s}
     Cooling,                 !- Operation 1 Type
-    DistrictHeating,         !- Equipment 2 Object Type
+    DistrictHeating:Water,   !- Equipment 2 Object Type
     SOURCE Purchased Heating,!- Equipment 2 Name
     SOURCE Supply Heating Inlet Node,  !- Demand Calculation 2 Node Name
     SOURCE Supply Heating Outlet Node,  !- Setpoint 2 Node Name
@@ -857,12 +859,12 @@
   Branch,
     SOURCE Heating Branch,   !- Name
     ,                        !- Pressure Drop Curve Name
-    DistrictHeating,         !- Component 1 Object Type
+    DistrictHeating:Water,   !- Component 1 Object Type
     SOURCE Purchased Heating,!- Component 1 Name
     SOURCE Supply Heating Inlet Node,  !- Component 1 Inlet Node Name
     SOURCE Supply Heating Outlet Node;  !- Component 1 Outlet Node Name
 
-  DistrictHeating,
+  DistrictHeating:Water,
     SOURCE Purchased Heating,!- Name
     SOURCE Supply Heating Inlet Node,  !- Hot Water Inlet Node Name
     SOURCE Supply Heating Outlet Node,  !- Hot Water Outlet Node Name
@@ -1049,9 +1051,9 @@
 
   Output:Variable,*,Plant Load Profile Heat Transfer Energy,Hourly;
 
-  Output:Meter:MeterFileOnly,Heating:DistrictHeating,monthly;
+  Output:Meter:MeterFileOnly,Heating:DistrictHeatingWater,monthly;
 
-  Output:Meter:MeterFileOnly,Heating:DistrictHeating,runperiod;
+  Output:Meter:MeterFileOnly,Heating:DistrictHeatingWater,runperiod;
 
   Output:Meter:MeterFileOnly,Electricity:Facility,monthly;
 
@@ -1106,7 +1108,7 @@
 
   Output:Variable,*,Pump Fluid Heat Gain Rate,Hourly;
 
-  Output:Variable,*,District Heating Rate,Hourly;
+  Output:Variable,*,District Heating Water Rate,Hourly;
 
-  Output:Variable,*,District Cooling Rate,Hourly;
+  Output:Variable,*,District Cooling Water Rate,Hourly;
 

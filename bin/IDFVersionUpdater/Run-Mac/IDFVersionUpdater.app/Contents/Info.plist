@@ -11,7 +11,7 @@
    <key>CFBundleInfoDictionaryVersion</key>
    <string>6.0</string>
    <key>CFBundleVersion</key>
-   <string>0.16.0.2.0</string>
+   <string>0.17.0.2.0</string>
    <key>CFBundleDevelopmentRegion</key>
    <string>en</string>
    <key>CFBundlePackageType</key>
@@ -19,9 +19,9 @@
    <key>CFBundleSignature</key>
    <string>????</string>
    <key>NSHumanReadableCopyright</key>
-   <string>0.16</string>
+   <string>GARD Analytics 2024</string>
    <key>CFBundleShortVersionString</key>
-   <string>0.16</string>
+   <string>0.17</string>
    <key>CFBundleIconFile</key>
    <string>App</string>
    <key>LSMinimumSystemVersion</key>

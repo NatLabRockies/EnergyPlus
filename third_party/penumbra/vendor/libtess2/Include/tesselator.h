@@ -136,7 +136,7 @@ typedef struct TESSalloc TESSalloc;
 
 #define TESS_UNDEF (~(TESSindex)0)
 
-#define TESS_NOTUSED(v) do { (void)(1 ? (void)0 : ( (void)(v) ) ); } while(0)
+#define TESS_NOTUSED(v) (void)(v)
 
 // Custom memory allocator interface.
 // The internal memory allocator allocates mesh edges, vertices and faces
@@ -236,7 +236,7 @@ int tessGetElementCount( TESStesselator *tess );
 const TESSindex* tessGetElements( TESStesselator *tess );
 
 #ifdef __cplusplus
-};
+}
 #endif
 
 #endif // TESSELATOR_H

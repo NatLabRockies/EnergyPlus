@@ -772,8 +772,10 @@ battery_state battery_t::get_state() { return *state; }
 
 battery_params battery_t::get_params() { return *params; }
 
-void battery_t::set_state(const battery_state& tmp_state) {
+void battery_t::set_state(const battery_state& tmp_state, double dt_hr) {
     *state = tmp_state;
+    if (dt_hr > 0 && dt_hr <= 1)
+        params->dt_hr = dt_hr;
 }
 
 void battery_t::update_state(double I) {

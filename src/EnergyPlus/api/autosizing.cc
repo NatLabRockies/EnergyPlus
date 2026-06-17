@@ -1,7 +1,7 @@
-// EnergyPlus, Copyright (c) 1996-2023, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
-// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other
+// National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
 // contributors. All rights reserved.
 //
 // NOTICE: This Software was developed under funding from the U.S. Department of Energy and the
@@ -52,7 +52,7 @@
 
 char *sizerGetLastErrorMessages(Sizer sizer)
 {
-    auto s = reinterpret_cast<EnergyPlus::BaseSizer *>(sizer);
+    auto *s = reinterpret_cast<EnergyPlus::BaseSizer *>(sizer);
     std::string const msg = s->getLastErrorMessages();
     // note that we cannot just return a c_str to the local string, as the string will be destructed upon leaving
     // this function, and undefined behavior will occur.
@@ -64,7 +64,7 @@ char *sizerGetLastErrorMessages(Sizer sizer)
 
 Sizer sizerHeatingAirflowUANew()
 {
-    auto sizer = new EnergyPlus::HeatingAirflowUASizer();
+    auto *sizer = new EnergyPlus::HeatingAirflowUASizer();
     return reinterpret_cast<Sizer>(sizer);
 }
 void sizerHeatingAirflowUADelete(Sizer sizer)
@@ -74,7 +74,7 @@ void sizerHeatingAirflowUADelete(Sizer sizer)
 void sizerHeatingAirflowUAInitializeForZone(
     EnergyPlusState, Sizer sizer, HeatingAirflowUAZoneConfigType zoneConfig, Real64 elevation, Real64 representativeFlowRate, Real64 reheatMultiplier)
 {
-    auto s = reinterpret_cast<EnergyPlus::HeatingAirflowUASizer *>(sizer);
+    auto *s = reinterpret_cast<EnergyPlus::HeatingAirflowUASizer *>(sizer);
     switch (zoneConfig) {
     case HeatingAirflowUAZoneTerminal:
         s->initializeForSingleDuctZoneTerminal(state, elevation, representativeFlowRate);
@@ -95,7 +95,7 @@ void sizerHeatingAirflowUAInitializeForSystem(EnergyPlusState,
                                               Real64 minFlowRateRatio,
                                               int DOAS)
 {
-    auto s = reinterpret_cast<EnergyPlus::HeatingAirflowUASizer *>(sizer);
+    auto *s = reinterpret_cast<EnergyPlus::HeatingAirflowUASizer *>(sizer);
     switch (sysConfig) {
     case HeatingAirflowUASystemConfigTypeOutdoorAir:
         s->initializeForSystemOutdoorAir(state, elevation, representativeFlowRate, DOAS == 1);
@@ -116,8 +116,8 @@ void sizerHeatingAirflowUAInitializeForSystem(EnergyPlusState,
 }
 int sizerHeatingAirflowUASize(EnergyPlusState state, Sizer sizer)
 {
-    auto s = reinterpret_cast<EnergyPlus::HeatingAirflowUASizer *>(sizer);
-    auto st = reinterpret_cast<EnergyPlus::EnergyPlusData *>(state);
+    auto *s = reinterpret_cast<EnergyPlus::HeatingAirflowUASizer *>(sizer);
+    auto *st = reinterpret_cast<EnergyPlus::EnergyPlusData *>(state);
     bool errorsFound = false;
     s->size(*st, EnergyPlus::DataSizing::AutoSize, errorsFound);
     if (errorsFound) {

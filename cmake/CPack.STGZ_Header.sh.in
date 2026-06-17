@@ -118,7 +118,6 @@ if [ ! "$link_directory" = "n" ]; then
 	ln -sf "${install_directory}/energyplus" "${link_directory}/energyplus" 2> /dev/null > /dev/null || link_err
 	ln -sf "${install_directory}/Energy+.idd" "${link_directory}" 2> /dev/null > /dev/null || link_err
 	ln -sf "${install_directory}/Energy+.schema.epJSON" "${link_directory}" 2> /dev/null > /dev/null || link_err
-	ln -sf "${install_directory}/PostProcess/EP-Compare/EP-Compare" "${link_directory}" 2> /dev/null > /dev/null || link_err
 	ln -sf "${install_directory}/EPMacro" "${link_directory}" 2> /dev/null > /dev/null || link_err
 	ln -sf "${install_directory}/ExpandObjects" "${link_directory}" 2> /dev/null > /dev/null || link_err
 	ln -sf "${install_directory}/PostProcess/HVAC-Diagram" "${link_directory}" 2> /dev/null > /dev/null || link_err
@@ -141,7 +140,6 @@ if [ ! "$link_directory" = "n" ]; then
 		rm -f "${link_directory}/energyplus"
 		rm -f "${link_directory}/Energy+.idd"
 		rm -f "${link_directory}/Energy+.schema.epJSON"
-		rm -f "${link_directory}/EP-Compare"
 		rm -f "${link_directory}/EPMacro"
 		rm -f "${link_directory}/ExpandObjects"
 		rm -f "${link_directory}/HVAC-Diagram"

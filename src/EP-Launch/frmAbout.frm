@@ -1,5 +1,5 @@
 VERSION 5.00
-Begin VB.Form frmAbout 
+Begin VB.Form frmAbout
    BorderStyle     =   3  'Fixed Dialog
    Caption         =   "About EP-Launch"
    ClientHeight    =   5505
@@ -16,7 +16,7 @@ Begin VB.Form frmAbout
    ScaleWidth      =   5380.766
    ShowInTaskbar   =   0   'False
    StartUpPosition =   1  'CenterOwner
-   Begin VB.CommandButton Command1 
+   Begin VB.CommandButton Command1
       Caption         =   "Command1"
       Height          =   195
       Left            =   0
@@ -24,8 +24,8 @@ Begin VB.Form frmAbout
       Top             =   5400
       Width           =   135
    End
-   Begin VB.TextBox txtNotice 
-      BeginProperty Font 
+   Begin VB.TextBox txtNotice
+      BeginProperty Font
          Name            =   "Courier New"
          Size            =   9
          Charset         =   0
@@ -43,7 +43,7 @@ Begin VB.Form frmAbout
       Top             =   1200
       Width           =   5535
    End
-   Begin VB.PictureBox picIcon 
+   Begin VB.PictureBox picIcon
       AutoSize        =   -1  'True
       ClipControls    =   0   'False
       Height          =   540
@@ -56,7 +56,7 @@ Begin VB.Form frmAbout
       Top             =   240
       Width           =   540
    End
-   Begin VB.CommandButton cmdOK 
+   Begin VB.CommandButton cmdOK
       Cancel          =   -1  'True
       Caption         =   "OK"
       Default         =   -1  'True
@@ -66,7 +66,7 @@ Begin VB.Form frmAbout
       Top             =   5040
       Width           =   1260
    End
-   Begin VB.Label lblPlatform 
+   Begin VB.Label lblPlatform
       Caption         =   "Label1"
       Height          =   255
       Left            =   1680
@@ -74,9 +74,9 @@ Begin VB.Form frmAbout
       Top             =   720
       Width           =   3855
    End
-   Begin VB.Label lblTitle 
-      Caption         =   "EP-Launch  -  Version 2.14c"
-      BeginProperty Font 
+   Begin VB.Label lblTitle
+      Caption         =   "EP-Launch  -  Version 2.17"
+      BeginProperty Font
          Name            =   "MS Sans Serif"
          Size            =   12
          Charset         =   0
@@ -114,9 +114,9 @@ Private Sub Form_Load()
 If eplUI.getOSVersion() = 1 Then
   lblPlatform.Caption = "Running on Windows 95, 98 or ME"
 Else
-  lblPlatform.Caption = "Running on Windows NT, 2000, XP, Vista, 7, 8, 10"
+  lblPlatform.Caption = "Running on Windows NT, 2000, XP, Vista, 7, 8, 10, 11"
 End If
-txtNotice.Text = "Copyright (c) 2000-2020 GARD Analytics, " & vbCrLf
+txtNotice.Text = "Copyright (c) 2000-2025 GARD Analytics, " & vbCrLf
 txtNotice.Text = txtNotice.Text & "All rights reserved.                    " & vbCrLf
 txtNotice.Text = txtNotice.Text & "                                        " & vbCrLf
 txtNotice.Text = txtNotice.Text & "NOTICE: The U.S. Government is granted  " & vbCrLf
@@ -200,7 +200,7 @@ End Sub
 '     WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License for
 '     the specific language governing rights and limitations under the License.
 '
-'     Copyright © 1996-2014 GARD Analytics.  All rights reserved.
+'     Copyright © 1996-2025 GARD Analytics.  All rights reserved.
 '
 '     NOTICE: The U.S. Government is granted for itself and others acting on its
 '     behalf a paid-up, nonexclusive, irrevocable, worldwide license in this data to

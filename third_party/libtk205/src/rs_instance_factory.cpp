@@ -1,5 +1,7 @@
-#include "rs_instance_factory.h"
 #include <map>
+#include <courierr/courierr.h>
+#include "rs_instance_factory.h"
+#include "rs_instance_base.h"
 
 namespace
 {
@@ -23,10 +25,11 @@ namespace tk205 {
 
     //static
     std::shared_ptr<RSInstanceBase> RSInstanceFactory::create(std::string const& RS_ID, 
-                                                              const char* RS_instance_file)
+                                                              const char* RS_instance_file,
+                                                              std::shared_ptr<Courierr::Courierr> logger)
     {
     const auto factory = get_RS_factory_map()[RS_ID];
     
-    return (factory == nullptr) ? nullptr : factory->create_instance(RS_instance_file);
+    return (factory == nullptr) ? nullptr : factory->create_instance(RS_instance_file, logger);
     }
 }

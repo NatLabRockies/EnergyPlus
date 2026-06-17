@@ -86,7 +86,7 @@ Environment:Site Atmospheric Variation,0.330,460.000,6.500000E-003
 
 ~SurfaceGeometry,UpperLeftCorner,CounterClockwise,RelativeCoordinateSystem
 
-The simulation parameters output is the simplest form of reporting in the \textbf{eplusout.eio} file. Each of the ``header'' records (lines starting with an ``!'') are followed immediately by the one and only data line. By and large, these data lines are all merely echoes of the entries in the IDF (or defaulted for blank fields). For most of these descriptions, you can look at the object fields (of same name) in the \href{file:///E:/Docs4PDFs/InputOutputReference.pdf}{Input Output Reference} document.
+The simulation parameters output is the simplest form of reporting in the \textbf{eplusout.eio} file. Each of the ``header'' records (lines starting with an ``!'') are followed immediately by the one and only data line. By and large, these data lines are all merely echoes of the entries in the IDF (or defaulted for blank fields). For most of these descriptions, you can look at the object fields (of same name) in the \href{InputOutputReference.pdf}{Input Output Reference} document.
 
 \subsection{Version}\label{version}
 
@@ -308,7 +308,7 @@ This is the WindPressureCoefficientValues object name entered from the IDF.
 
 \subsubsection{Field: Wind Pressure Coefficients \#1 to n}\label{field-wind-pressure-coefficients-1-to-n}
 
-These values are the wind pressure coefficient for the building façade. These wind pressure coefficient values correspond to the first through Nth wind directions reported above for \textless{}AirflowNetwork Model:Wind Direction\textgreater{}. If Wind Pressure Coefficient Type = INPUT in the AirflowNetwork:SimulationControl object, the wind pressure coefficients described here are the inputs specified in the AirflowNetwork:MultiZone:Wind Pressure Coefficient Values object,. If Wind Pressure Coefficient Type = SurfaceAverageCalculation in the AirflowNetwork:SimulationControl object, the wind pressure coefficients are calculated internally and also described here.
+These values are the wind pressure coefficient for the building facade. These wind pressure coefficient values correspond to the first through Nth wind directions reported above for \textless{}AirflowNetwork Model:Wind Direction\textgreater{}. If Wind Pressure Coefficient Type = INPUT in the AirflowNetwork:SimulationControl object, the wind pressure coefficients described here are the inputs specified in the AirflowNetwork:MultiZone:Wind Pressure Coefficient Values object,. If Wind Pressure Coefficient Type = SurfaceAverageCalculation in the AirflowNetwork:SimulationControl object, the wind pressure coefficients are calculated internally and also described here.
 
 \subsection{Zone Volume Capacitance Multiplier}\label{zone-volume-capacitance-multiplier}
 
@@ -458,11 +458,11 @@ This is the name given to the location whether from the IDF or the weather file.
 
 \subsubsection{Field: Latitude}\label{field-latitude}
 
-This is the latitude of the site, expressed decimally. Convention uses positive (+) values for North of the Equator and negative (-) values for South of the Equator. For example, S 30° 15' is expressed as --30.25.
+This is the latitude of the site, expressed decimally. Convention uses positive (+) values for North of the Equator and negative (-) values for South of the Equator. For example, S 30$^{\circ}$ 15' is expressed as --30.25.
 
 \subsubsection{Field: Longitude}\label{field-longitude}
 
-This is the longitude of the site, expressed decimally. Convention uses positive (+) values for East of the Greenwich meridian and negative (-) values for West of the Greenwich meridian. For example, E 130° 45' is expressed as +130.75.
+This is the longitude of the site, expressed decimally. Convention uses positive (+) values for East of the Greenwich meridian and negative (-) values for West of the Greenwich meridian. For example, E 130$^{\circ}$ 45' is expressed as +130.75.
 
 \subsubsection{Field: Time Zone Number}\label{field-time-zone-number}
 
@@ -1019,17 +1019,17 @@ This field is ``yes'' if there is outdoor controlled baseboard heat in a Zone.
 
 \subsection{People Gains}\label{people-gains}
 
-! \textless{}People Internal Gains - Nominal\textgreater{},Name,Schedule Name,Zone Name,Zone Floor Area \{m2\},\# Zone Occupants,Number of People \{\},People/Floor Area \{person/m2\},Floor Area per person \{m2/person\},Fraction Radiant,Fraction Convected,Sensible Fraction Calculation,Activity level,ASHRAE 55 Warnings,Carbon Dioxide Generation Rate,Nominal Minimum Number of People,Nominal Maximum Number of People
+! \textless{}People Internal Gains Nominal\textgreater{}, Name, Schedule Name, Zone Name, Zone Floor Area \{m2\}, \# Zone Occupants, Number of People \{\}, People/Floor Area \{person/m2\}, Floor Area per person \{m2/person\}, Fraction Radiant, Fraction Convected, Sensible Fraction Calculation, Activity level, ASHRAE 55 Warnings, Carbon Dioxide Generation Rate, Minimum Number of People for All Day Types, Maximum Number of People for All Day Types, Minimum Number of People for Weekdays,  Maximum Number of People for Weekdays,  Minimum Number of People for Weekends/Holidays,  Maximum Number of People for Weekends /Holidays, Minimum Number of People for Summer Design Days,  Maximum Number of People for Summer Design Days, Minimum Number of People for Winter Design Days,  Maximum Number of People for WinterDesign Days
 
-People Internal Gains,~ SPACE1-1 PEOPLE 1, OCCUPY-1, SPACE1-1, 99.16, 11.0, 11.0, 0.111, 9.015, 0.300, 0.700, AutoCalculate, ACTSCHD, No, 3.8200E-008, 0, 11
+ People Internal Gains Nominal,  SPACE1-1 PEOPLE 1, OCCUPY-1, SPACE1-1, 90.00, 10.0, 10.0, 0.111, 9.009, 0.300, 0.700, 0.550, ACTSCHD, No, 3.8200E-008, 0.0, 10.0, 0.8, 4.0, 0.6, 2.5, 9.5, 10.0, 0.0, 0.5,
 
-~People Internal Gains,~ SPACE2-1 PEOPLE 1, OCCUPY-1, SPACE2-1, 42.74, 5.0, 5.0, 0.117, 8.547, 0.300, 0.700, AutoCalculate, ACTSCHD, No, 3.8200E-008, 0, 5
+~People Internal Gains Nominal,  SPACE2-1 PEOPLE 1, OCCUPY-1, SPACE2-1, 42.37, 5.0, 5.0, 0.117, 8.547, 0.300, 0.700, 0.550, ACTSCHD, No, 3.8200E-008, 0.0, 5.0, 0.4, 2.0, 0.3, 1.2, 4.7, 5.0, 0.0, 0.2,
 
-~People Internal Gains,~ SPACE3-1 PEOPLE 1, OCCUPY-1, SPACE3-1, 96.48, 11.0, 11.0, 0.114, 8.771, 0.300, 0.700, AutoCalculate, ACTSCHD, No, 3.8200E-008, 0, 11
+~People Internal Gains Nominal,  SPACE3-1 PEOPLE 1, OCCUPY-1, SPACE3-1, 96.48, 11.0, 11.0, 0.114, 8.771, 0.300, 0.700, 0.550, ACTSCHD, No, 3.8200E-008, 0.0, 11.0, 0.9, 4.4, 0.7, 2.8, 10.5, 11.0, 0.0, 0.6,
 
-~People Internal Gains,~ SPACE4-1 PEOPLE 1, OCCUPY-1, SPACE4-1, 42.74, 5.0, 5.0, 0.117, 8.547, 0.300, 0.700, AutoCalculate, ACTSCHD, No, 3.8200E-008, 0, 5
+~People Internal Gains Nominal,  SPACE4-1 PEOPLE 1, OCCUPY-1, SPACE4-1, 42.74, 5.0, 5.0, 0.117, 8.547, 0.300, 0.700, 0.550, ACTSCHD, No, 3.8200E-008, 0.0, 5.0, 0.4, 2.0, 0.3, 1.3, 4.8, 5.0, 0.0, 0.3,
 
-~People Internal Gains,~ SPACE5-1 PEOPLE 1, OCCUPY-1, SPACE5-1, 182.49, 20.0, 20.0, 0.110, 9.125, 0.300, 0.700, AutoCalculate, ACTSCHD, No, 3.8200E-008, 0, 20
+~People Internal Gains Nominal,  SPACE5-1 PEOPLE 1, OCCUPY-1, SPACE5-1, 182.49, 20.0, 20.0, 0.110, 9.125, 0.300, 0.700, 0.550, ACTSCHD, No, 3.8200E-008, 0.0, 20.0, 1.6, 8.0, 1.2, 5.0, 19.0, 20.0, 0.0, 1.0,
 
 \subsubsection{Field: \textless{}People Internal Gains - Nominal\textgreater{}}\label{field-people-internal-gains---nominal}
 
@@ -1123,27 +1123,70 @@ This numeric input field specifies carbon dioxide generation rate per person wit
 
 Number of People * People Schedule * People Activity * Carbon Dioxide Generation Rate. The default value is 3.82E-8 m3/s-W (obtained from ASHRAE Standard 62.1-2007 value at 0.0084 cfm/met/person over the general adult population). The maximum value can be 10 times the default value.
 
-\subsubsection{Field: Nominal Minimum Number of People}\label{field-nominal-minimum-number-of-people}
+\subsubsection{Field: Minimum Number of People for All Day Types}\label{field-minimum-number-of-people-for-all-day-types}
 
-This numeric field is the calculated minimum number of people based on the number of people field * the minimum value (annual) for the people schedule. It may be useful in diagnosing errors that occur during simulation.
+This numeric field is the calculated minimum number of people based on the number of people field * the minimum value for the people schedule across all day types (weekday, weekends, holidays, design days and custom days). It may be useful in diagnosing errors that occur during simulation.
 
-\subsubsection{Field: Nominal Maximum Number of People}\label{field-nominal-maximum-number-of-people}
+\subsubsection{Field: Maximum Number of People for All Day Types}\label{field-maximum-number-of-people-for-all-day-types}
 
-This numeric field is the calculated maximum number of people based on the number of people field * the maxnimum value (annual) for the people schedule. It may be useful in diagnosing errors that occur during simulation.
+This numeric field is the calculated maximum number of people based on the number of people field * the maximum value for the people schedule across all day types (weekday, weekends, holidays, design days and custom days). It may be useful in diagnosing errors that occur during simulation.
+
+\subsubsection{Field: Minimum Number of People for Weekdays}\label{field-minimum-number-of-people-for-weekdays}
+
+This numeric field is the calculated minimum number of people based on the number of people field * the minimum value for the people schedule for weekday day types (Monday through Friday).
+
+\subsubsection{Field: Maximum Number of People for Weekdays}\label{field-maximum-number-of-people-for-weekdays}
+
+This numeric field is the calculated maximum number of people based on the number of people field * the maximum value for the people schedule for weekday day types (Monday through Friday).
+
+\subsubsection{Field: Minimum Number of People for Weekends/Holidays}\label{field-minimum-number-of-people-for-weekends-holidays}
+
+This numeric field is the calculated minimum number of people based on the number of people field * the minimum value for the people schedule for weekend (Saturday and Sunday) or holiday day types.
+
+\subsubsection{Field: Maximum Number of People for Weekends/Holidays}\label{field-maximum-number-of-people-for-weekends-holidays}
+
+This numeric field is the calculated maximum number of people based on the number of people field * the maximum value for the people schedule for weekend (Saturday and Sunday) or holiday day types
+
+\subsubsection{Field: Minimum Number of People for Summer Design Days}\label{field-minimum-number-of-people-for-summer-designdays}
+
+This numeric field is the calculated minimum number of people based on the number of people field * the minimum value for the people schedule for the summer design day type.
+
+\subsubsection{Field: Maximum Number of People for Summer Design Days}\label{field-maximum-number-of-people-for-summer-designdays}
+
+This numeric field is the calculated maximum number of people based on the number of people field * the maximum value for the people schedule for the summer design day type.
+
+\subsubsection{Field: Minimum Number of People for Winter Design Days}\label{field-minimum-number-of-people-for-winter-designdays}
+
+This numeric field is the calculated minimum number of people based on the number of people field * the minimum value for the people schedule for the winter design day type.
+
+\subsubsection{Field: Maximum Number of People for Winter Design Days}\label{field-maximum-number-of-people-for-winter-designdays}
+
+This numeric field is the calculated maximum number of people based on the number of people field * the maximum value for the people schedule for the winter design day type.
 
 \subsection{Lights Gains}\label{lights-gains}
 
-! \textless{}Lights Internal Gains - Nominal\textgreater{}, Name, Schedule Name, Zone Name, Zone Floor Area \{m2\}, \# Zone Occupants, Lighting Level \{W\}, Lights/Floor Area \{W/m2\}, Lights per person \{W/person\}, Fraction Return Air, Fraction Radiant, Fraction Short Wave, Fraction Convected, Fraction Replaceable, End-Use Category, Nominal Minimum Lighting Level \{W\}, Nominal Maximum Lighting Level \{W\}
+! \textless{}Lights Internal Gains Nominal\textgreater{}, Name, Schedule Name, Zone Name, Zone Floor Area \{m2\}, \# Zone Occupants, Lighting Level \{W\}, Lights/Floor Area \{W/m2\}, Lights per person \{W/person\}, Fraction Return Air, Fraction Radiant, Fraction Short Wave, Fraction Convected, Fraction Replaceable, End-Use,  Minimum Lighting Level for All Day Types \{W\}, Maximum Lighting Level for All Day Types \{W\}, Minimum Lighting Level for Weekdays \{W\},  Maximum Lighting Level for Weekdays \{W\}, Minimum Lighting Level for Weekends/Holidays \{W\}, Maximum Lighting Level for Weekends /Holidays \{W\}, Minimum Lighting Level for Summer Design Days \{W\}, Maximum Lighting Level for Summer Design Days \{W\}, Minimum Lighting Level for Winter Design Days \{W\}, Maximum Lighting Level for WinterDesign Days \{W\}
 
-Lights Internal Gains,~ SPACE1-1 LIGHTS 1, LIGHTS-1, SPACE1-1, 99.16, 11.0, 1584.000, 15.974, 144.000, 0.200, 0.590, 0.200, 1.000E-002, 0.000, GeneralLights, 79.200, 1584.000
+Lights Internal Gains Nominal, SPACE1-1 LIGHTS 1, LIGHTS-1, SPACE1-1, 90.00, 10.0, 1437.660, 15.974, 143.910, 0.200, 0.590, 0.200, 1.000E-002, 1.000, General, 71.883, 1437.660, 71.883, 1437.7, 71.883, 71.883, 71.883, 1437.660, 71.883, 71.883
 
-~Lights Internal Gains,~ SPACE2-1 LIGHTS 1, LIGHTS-1, SPACE2-1, 42.74, 5.0, 684.000, 16.006, 136.800, 0.200, 0.590, 0.200, 1.000E-002, 0.000, GeneralLights, 34.200, 684.000
+~Lights Internal Gains Nominal, SPACE1-1 LIGHTS 2, LIGHTS-1, SPACE1-1, 90.00, 10.0, 480.000, 5.333, 48.048, 0.200, 0.590, 0.200, 1.000E-002, 0.000, Task Lights, 24.000, 480.000, 24.000, 480.0, 24.000, 24.000, 24.000, 480.000, 24.000, 24.000
 
-~Lights Internal Gains,~ SPACE3-1 LIGHTS 1, LIGHTS-1, SPACE3-1, 96.48, 11.0, 1584.000, 16.418, 144.000, 0.200, 0.590, 0.200, 1.000E-002, 0.000, GeneralLights, 79.200, 1584.000
+~Lights Internal Gains Nominal, SPACE2-1 LIGHTS 1, LIGHTS-1, SPACE2-1, 42.37, 5.0, 678.142, 16.006, 136.800, 0.200, 0.590, 0.200, 1.000E-002, 1.000, General, 33.907, 678.142, 33.907, 678.1, 33.907, 33.907, 33.907, 678.142, 33.907, 33.907
 
-~Lights Internal Gains,~ SPACE4-1 LIGHTS 1, LIGHTS-1, SPACE4-1, 42.74, 5.0, 684.000, 16.006, 136.800, 0.200, 0.590, 0.200, 1.000E-002, 0.000, GeneralLights, 34.200, 684.000
+~Lights Internal Gains Nominal,  SPACE2-1 LIGHTS 2,LIGHTS-1, SPACE2-1, 42.37, 5.0, 684.000, 16.144, 137.982, 0.200, 0.590, 0.200, 1.000E-002, 0.000, Accent Lighting, 34.200, 684.000, 34.200, 684.0, 34.200, 34.200, 34.200, 684.000, 34.200, 34.200
 
-~Lights Internal Gains,~ SPACE5-1 LIGHTS 1, LIGHTS-1, SPACE5-1, 182.49, 20.0, 2964.000, 16.242, 148.200, 0.200, 0.590, 0.200, 1.000E-002, 0.000, GeneralLights, 148.200, 2964.000
+~Lights Internal Gains Nominal, SPACE3-1 LIGHTS 1, LIGHTS-1, SPACE3-1, 96.48, 11.0, 1584.000, 16.418, 144.000, 0.200, 0.590, 0.200, 1.000E-002, 1.000, General, 79.200, 1584.000, 79.200, 1584.0, 79.200, 79.200, 79.200, 1584.000, 79.200, 79.200
+
+~Lights Internal Gains Nominal, SPACE3-1 LIGHTS 2, LIGHTS-1, SPACE3-1, 96.48, 11.0, 480.000, 4.975, 43.636, 0.200, 0.590, 0.200, 1.000E-002, 1.000, Task Lights, 24.000, 480.000, 24.000, 480.0, 24.000, 24.000, 24.000, 480.000, 24.000, 24.000
+
+~Lights Internal Gains Nominal, SPACE4-1 LIGHTS 1, LIGHTS-1, SPACE4-1, 42.74, 5.0, 684.000, 16.006, 136.800, 0.200, 0.590, 0.200, 1.000E-002, 1.000, General, 34.200, 684.000, 34.200, 684.0, 34.200, 34.200, 34.200, 684.000, 34.200, 34.200
+
+~Lights Internal Gains Nominal, SPACE5-1 LIGHTS 1, LIGHTS-1, SPACE5-1, 182.49, 20.0, 2964.000, 16.242, 148.200, 0.200, 0.590, 0.200, 1.000E-002, 1.000, General, 148.200, 2964.000, 148.200, 2964.0, 148.200, 148.200, 148.200, 2964.000, 148.200, 148.200
+
+~Lights Internal Gains Nominal, SPACE5-1 LIGHTS 2, LIGHTS-1, SPACE5-1, 182.49, 20.0, 2964.000, 16.242, 148.200, 0.200, 0.590, 0.200, 1.000E-002, 0.000, Task Lights, 148.200, 2964.000, 148.200, 2964.0, 148.200, 148.200, 148.200, 2964.000, 148.200, 148.200
+
+~Lights Internal Gains Nominal, PROCESS LIGHTING, EQUIP-1, SPACE5-1, 182.49, 20.0, 500.000, 2.740, 25.000, 0.000, 0.200, 0.200, 0.600, 1.000, Interior Lighting-Process, 10.000, 450.000, 10.000, 450.0, 100.000, 100.000, 10.000, 450.000, 100.000, 100.000
+
 
 \subsubsection{Field: \textless{}Lights Internal Gains - Nominal\textgreater{}}\label{field-lights-internal-gains---nominal}
 
@@ -1205,29 +1248,84 @@ This is the fraction replaceable for this lighting level. For daylighting calcul
 
 This field shows the end-use category for this lights statement. Usage can be reported by end-use category.
 
-\subsubsection{Field: Nominal Minimum Lighting Level \{W\}}\label{field-nominal-minimum-lighting-level-w}
+\subsubsection{Field: Minimum Lighting Level for All Day Types \{W\}}\label{field-minimum-lighting-level-for-all-day-types-w}
 
-This numeric field is the calculated minimum amount of lighting in Watts based on the calculated lighting level (above) * the minimum value (annual) for the lights schedule. It may be useful in diagnosing errors that occur during simulation.
+This numeric field is the calculated minimum amount of lighting in Watts based on the calculated lighting level (above) * the minimum value for the lights schedule across all day types (weekday, weekends, holidays, design days and custom days). It may be useful in diagnosing errors that occur during simulation.
 
-\subsubsection{Field: Nominal Maximum Lighting Level \{W\}}\label{field-nominal-maximum-lighting-level-w}
+\subsubsection{Field: Maximum Lighting Level for All Day Types \{W\}}\label{field-maximum-lighting-level-for-all-day-types-w}
 
-This numeric field is the calculated maximum amount of lighting in Watts based on the calculated lighting level (above) * the maximum value (annual) for the lights schedule. It may be useful in diagnosing errors that occur during simulation.
+This numeric field is the calculated maximum amount of lighting in Watts based on the calculated lighting level (above) * the maximum value for the lights schedule across all day types (weekday, weekends, holidays, design days and custom days). It may be useful in diagnosing errors that occur during simulation.
+
+\subsubsection{Field: Minimum Lighting Level for Weekdays \{W\}}\label{field-minimum-lighting-level-for-weekdays-w}
+
+This numeric field is the calculated minimum amount of lighting in Watts based on the calculated lighting level (above) * the minimum value for the lights schedule for weekday day types (Monday through Friday).
+
+\subsubsection{Field: Maximum Lighting Level for Weekdays \{W\}}\label{field-maximum-lighting-level-for-weekdays-w}
+
+This numeric field is the calculated maximum amount of lighting in Watts based on the calculated lighting level (above) * the maximum value for the lights schedule for weekday day types (Monday through Friday).
+
+\subsubsection{Field: Minimum Lighting Level for Weekends/Holidays \{W\}}\label{field-minimum-lighting-level-for-weekends-holidays-w}
+
+This numeric field is the calculated minimum amount of lighting in Watts based on the calculated lighting level (above) * the minimum value for the lights schedule for weekend (Saturday and Sunday) or holiday day types.
+
+\subsubsection{Field: Maximum Lighting Level for Weekends/Holidays \{W\}}\label{field-maximum-lighting-level-for-weekends-holidays-w}
+
+This numeric field is the calculated maximum amount of lighting in Watts based on the calculated lighting level (above) * the maximum value for the lights schedule for weekend (Saturday and Sunday) or holiday day types.
+
+\subsubsection{Field: Minimum Lighting Level for Summer Design Days \{W\}}\label{field-minimum-lighting-level-for-summer-designdays-w}
+
+This numeric field is the calculated minimum amount of lighting in Watts based on the calculated lighting level (above) * the minimum value for the lights schedule for the summer design day type.
+
+\subsubsection{Field: Maximum Lighting Level for Summer Design Days \{W\}}\label{field-maximum-lighting-level-for-summer-designdays-w}
+
+This numeric field is the calculated maximum amount of lighting in Watts based on the calculated lighting level (above) * the maximum value for the lights schedule for the summer design day type.
+
+\subsubsection{Field: Minimum Lighting Level for Winter Design Days \{W\}}\label{field-minimum-lighting-level-for-winter-designdays-w}
+
+This numeric field is the calculated minimum amount of lighting in Watts based on the calculated lighting level (above) * the minimum value for the lights schedule for the winter design day type.
+
+\subsubsection{Field: Maximum Lighting Level for Winter Design Days \{W\}}\label{field-maximum-lighting-level-for-winter-designdays-w}
+
+This numeric field is the calculated maximum amount of lighting in Watts based on the calculated lighting level (above) * the maximum value for the lights schedule for the winter design day type.
 
 \subsection{Equipment (Electric, Gas, Steam, Hot Water) Gains}\label{equipment-electric-gas-steam-hot-water-gains}
 
 These equipments are all reported similarly. Electric Equipment is used in the example below:
 
-! \textless{}ElectricEquipment Internal Gains - Nominal\textgreater{}, Name, Schedule Name, Zone Name, Zone Floor Area \{m2\}, \# Zone Occupants, Equipment Level \{W\}, Equipment/Floor Area \{W/m2\}, Equipment per person \{W/person\}, Fraction Latent, Fraction Radiant, Fraction Lost, Fraction Convected, End-Use SubCategory, Nominal Minimum Equipment Level \{W\}, Nominal Maximum Equipment Level \{W\}
+! \textless{}ElectricEquipment Internal Gains Nominal\textgreater{}, Name, Schedule Name, Zone Name, Zone Floor Area \{m2\}, \# Zone Occupants,Equipment Level \{W\}, Equipment/Floor Area \{W/m2\}, Equipment per person \{W/person\},Fraction Latent,Fraction Radiant, Fraction Lost, Fraction Convected, End-Use SubCategory, Minimum Equipment Level for All Day Types \{W\}, Maximum Equipment Level for All Day Types \{W\}, Minimum Equipment Level for Weekdays \{W\}, Maximum Equipment Level for Weekdays \{W\}, Minimum Equipment Level for Weekends/Holidays \{W\}, Maximum Equipment Level for Weekends /Holidays \{W\}, Minimum Equipment Level for Design Days \{W\}, Maximum Equipment Level for Design Days \{W\}
 
-ElectricEquipment Internal Gains,~ SPACE1-1 ELECEQ 1, EQUIP-1, SPACE1-1, 99.16, 11.0, 1056.000, 10.649, 96.000, 0.000, 0.300, 0.000, 0.700, General, 21.120, 950.400
+ElectricEquipment Internal Gains Nominal,~ SPACE1-1 ELECEQ 1, EQUIP-1, SPACE1-1, 90.00, 10.0, 958.410, 10.649, 95.937, 0.000, 0.300, 0.000, 0.700, Computers, 19.168, 862.569, 19.168, 862.569, 191.682, 191.682, 19.168, 862.569
 
-~ElectricEquipment Internal Gains,~ SPACE2-1 ELECEQ 1, EQUIP-1, SPACE2-1, 42.74, 5.0, 456.000, 10.670, 91.200, 0.000, 0.300, 0.000, 0.700, General, 9.120, 410.400
+~ElectricEquipment Internal Gains Nominal,~ SPACE1-1 ELECEQ 2, EQUIP-1, SPACE1-1, 90.00, 10.0, 200.000, 2.222, 20.020, 0.000, 0.300, 0.000, 0.700, Copy Machines, 4.000, 180.000, 4.000, 180.000, 40.000, 40.000, 4.000, 180.000
 
-~ElectricEquipment Internal Gains,~ SPACE3-1 ELECEQ 1, EQUIP-1, SPACE3-1, 96.48, 11.0, 1056.000, 10.945, 96.000, 0.000, 0.300, 0.000, 0.700, General, 21.120, 950.400
+~ElectricEquipment Internal Gains Nominal,~ SPACE1-1 ELECEQ 3, EQUIP-1, SPACE1-1, 90.00, 10.0, 200.000, 2.222, 20.020, 0.000, 0.100, 0.000, 0.900, People Movers, 4.000, 180.000, 4.000, 180.000, 40.000, 40.000, 4.000, 180.000
 
-~ElectricEquipment Internal Gains,~ SPACE4-1 ELECEQ 1, EQUIP-1, SPACE4-1, 42.74, 5.0, 456.000, 10.670, 91.200, 0.000, 0.300, 0.000, 0.700, General, 9.120, 410.400
+~ElectricEquipment Internal Gains Nominal,~ SPACE2-1 ELECEQ 1, EQUIP-1, SPACE2-1, 42.37, 5.0, 452.095, 10.670, 91.200, 0.000, 0.300, 0.000, 0.700, Computers, 9.042, 406.885, 9.042, 406.885, 90.419, 90.419, 9.042, 406.885
 
-~ElectricEquipment Internal Gains,~ SPACE5-1 ELECEQ 1, EQUIP-1, SPACE5-1, 182.49, 20.0, 1976.000, 10.828, 98.800, 0.000, 0.300, 0.000, 0.700, General, 39.520, 1778.400
+
+! \textless{}ElectricEquipment Internal Gains Nominal\textgreater{}, Name, Schedule Name, Zone Name, Zone Floor Area \{m2\}, \# Zone Occupants, Equipment Level \{W\}, Equipment/Floor Area \{W/m2\}, Equipment per person \{W/person\}, Fraction Latent, Fraction Radiant, Fraction Lost, Fraction Convected, End-Use SubCategory, Minimum Equipment Level for All Day Types \{W\}, Maximum Equipment Level for All Day Types \{W\}, Minimum Equipment Level for Weekdays \{W\},  Maximum Equipment Level for Weekdays \{W\}, Minimum Equipment Level for Weekends/Holidays \{W\},  Maximum Equipment Level for Weekends /Holidays \{W\}, Minimum Equipment Level for Summer Design Days \{W\},  Maximum Equipment Level for Summer Design Days \{W\}, Minimum Equipment Level for Winter Design Days \{W\}, Maximum Equipment Level for Winter Design Days \{W\}
+
+ ElectricEquipment Internal Gains Nominal, SPACE1-1 ELECEQ 1, EQUIP-1, SPACE1-1, 90.00, 10.0, 958.410, 10.649, 95.937, 0.000, 0.300, 0.000, 0.700, Computers, 19.168, 862.569, 19.168, 862.569, 191.682, 191.682, 19.168, 862.569, 191.682, 191.682
+
+~ElectricEquipment Internal Gains Nominal, SPACE1-1 ELECEQ 2, EQUIP-1, SPACE1-1, 90.00, 10.0, 200.000, 2.222, 20.020, 0.000, 0.300, 0.000, 0.700, Copy Machines, 4.000, 180.000, 4.000, 180.000, 40.000, 40.000, 4.000, 180.000, 40.000, 40.000
+
+~ElectricEquipment Internal Gains Nominal,  SPACE1-1 ELECEQ 3, EQUIP-1, SPACE1-1, 90.00, 10.0, 200.000, 2.222, 20.020, 0.000, 0.100, 0.000, 0.900, People Movers, 4.000, 180.000, 4.000, 180.000, 40.000, 40.000, 4.000, 180.000, 40.000, 40.000
+
+~ElectricEquipment Internal Gains Nominal, SPACE2-1 ELECEQ 1, EQUIP-1, SPACE2-1, 42.37, 5.0, 452.095, 10.670, 91.200, 0.000, 0.300, 0.000, 0.700, Computers, 9.042, 406.885, 9.042, 406.885, 90.419, 90.419, 9.042, 406.885, 90.419, 90.419
+
+~ElectricEquipment Internal Gains Nominal, INDUSTRIAL EQUIP, EQUIP-1, SPACE3-1, 96.48, 11.0, 3000.000, 31.095, 272.727, 0.000, 0.200, 0.200, 0.600, Industrial Process, 60.000, 2700.000, 60.000, 2700.000, 600.000, 600.000, 60.000, 2700.000, 600.000, 600.000
+
+~ElectricEquipment Internal Gains Nominal, VERTICAL TRANSPORTATION, OCCUPY-1, SPACE2-1, 42.37, 5.0, 1000.000, 23.602, 201.728, 0.000, 0.000, 0.000, 1.000, Elevators and Escalators, 0.000, 1000.000, 80.000, 400.000, 60.000, 250.000, 950.000, 1000.000, 0.000, 50.000
+
+~ElectricEquipment Internal Gains Nominal, SPACE3-1 ELECEQ 1, EQUIP-1, SPACE3-1, 96.48, 11.0, 1056.000, 10.945, 96.000, 0.000, 0.300, 0.000, 0.700, Computers, 21.120, 950.400, 21.120, 950.400, 211.200, 211.200, 21.120, 950.400, 211.200, 211.200~
+
+~ElectricEquipment Internal Gains Nominal, SPACE3-1 ELECEQ 2, EQUIP-1, SPACE3-1, 96.48, 11.0, 200.000, 2.073, 18.182, 0.000, 0.300, 0.000, 0.700, Fax Machines, 4.000, 180.000, 4.000, 180.000, 40.000, 40.000, 4.000, 180.000, 40.000, 40.000
+
+~ElectricEquipment Internal Gains Nominal, SPACE4-1 ELECEQ 1, EQUIP-1, SPACE4-1, 42.74, 5.0, 100.000, 2.340, 20.000, 0.000, 0.300, 0.000, 0.700, Laundry, 2.000, 90.000, 2.000, 90.000, 20.000, 20.000, 2.000, 90.000, 20.000, 20.000
+
+~ElectricEquipment Internal Gains Nominal, SPACE5-1 ELECEQ 1, EQUIP-1, SPACE5-1, 182.49, 20.0, 1976.000, 10.828, 98.800, 0.000, 0.300, 0.000, 0.700, Computers, 39.520, 1778.400, 39.520, 1778.400, 395.200, 395.200, 39.520, 1778.400, 395.200, 395.200
+
+
 
 \subsubsection{Field: \textless{}{[}Specific{]} Equipment Internal Gains - Nominal\textgreater{}}\label{field-specific-equipment-internal-gains---nominal}
 
@@ -1285,23 +1383,57 @@ This is the fraction convected for this equipment.
 
 This field shows the end-use category for this statement. Usage can be reported by end-use category.
 
-\subsubsection{Field: Nominal Minimum Equipment Level \{W\}}\label{field-nominal-minimum-equipment-level-w}
 
-This numeric field is the calculated minimum amount of the equipment in Watts based on the calculated design level (above) * the minimum value (annual) for the equipment schedule. It may be useful in diagnosing errors that occur during simulation.
 
-\subsubsection{Field: Nominal Maximum Equipment Level \{W\}}\label{field-nominal-maximum-equipment-level-w}
+\subsubsection{Field: Minimum Equipment Level for All Day Types \{W\}}\label{field-minimum-equipment-level-for-all-day-types-w}
 
-This numeric field is the calculated maximum amount of the equipment in Watts based on the calculated design level (above) * the maximum value (annual) for the equipment schedule. It may be useful in diagnosing errors that occur during simulation.
+This numeric field is the calculated minimum amount of the equipment in Watts based on the calculated design level (above) * the minimum value for the equipment schedule across all day types (weekday, weekends, holidays, design days and custom days). It may be useful in diagnosing errors that occur during simulation.
+
+\subsubsection{Field: Maximum Equipment Level for All Day Types \{W\}}\label{field-maximum-equipment-level-for-all-day-types-w}
+
+This numeric field is the calculated maximum amount of the equipment in Watts based on the calculated design level (above) * the maximum value for the equipment schedule across all day types (weekday, weekends, holidays, design days and custom days). It may be useful in diagnosing errors that occur during simulation.
+
+\subsubsection{Field: Minimum Equipment Level for Weekdays \{W\}}\label{field-minimum-equipment-level-for-weekdays-w}
+
+This numeric field is the calculated minimum amount of the equipment in Watts based on the calculated design level (above) * the minimum value for the equipment schedule across weekday day types (Monday through Friday).
+
+\subsubsection{Field: Maximum Equipment Level for Weekdays \{W\}}\label{field-maximum-equipment-level-for-weekdays-w}
+
+This numeric field is the calculated maximum amount of the equipment in Watts based on the calculated design level (above) * the maximum value for the equipment schedule across weekday day types (Monday through Friday).
+
+\subsubsection{Field: Minimum Equipment Level for Weekends/Holidays \{W\}}\label{field-minimum-equipment-level-for-weekends-holidays-w}
+
+This numeric field is the calculated minimum amount of the equipment in Watts based on the calculated design level (above) * the minimum value for the equipment schedule across weekend (Saturday and Sunday) or holiday day types.
+
+\subsubsection{Field: Maximum Equipment Level for Weekends/Holidays \{W\}}\label{field-maximum-equipment-level-for-weekends-holidays-w}
+
+This numeric field is the calculated maximum amount of the equipment in Watts based on the calculated design level (above) * the maximum value for the equipment schedule across weekend (Saturday and Sunday) or holiday day types.
+
+\subsubsection{Field: Minimum Equipment Level for Summer Design Days \{W\}}\label{field-minimum-equipment-level-for-summer-designdays-w}
+
+This numeric field is the calculated minimum amount of the equipment in Watts based on the calculated design level (above) * the minimum value for the equipment schedule for the summer design day type.
+
+\subsubsection{Field: Maximum Equipment Level for Summer Design Days \{W\}}\label{field-maximum-equipment-level-for-summer-designdays-w}
+
+This numeric field is the calculated maximum amount of the equipment in Watts based on the calculated design level (above) * the maximum value for the equipment schedule for the summer design day type.
+
+\subsubsection{Field: Minimum Equipment Level for Winter Design Days \{W\}}\label{field-minimum-equipment-level-for-winter-designdays-w}
+
+This numeric field is the calculated minimum amount of the equipment in Watts based on the calculated design level (above) * the minimum value for the equipment schedule for the winter design day type.
+
+\subsubsection{Field: Maximum Equipment Level for Winter Design Days \{W\}}\label{field-maximum-equipment-level-for-winter-designdays-w}
+
+This numeric field is the calculated maximum amount of the equipment in Watts based on the calculated design level (above) * the maximum value for the equipment schedule for the winter design day type.
 
 \subsection{Other Equipment Gains}\label{other-equipment-gains}
 
 Other equipment report is shown below (does not have an end-use category -- is not attached to any normal meter):
 
-! \textless{}OtherEquipment Internal Gains - Nominal\textgreater{}, Name, Schedule Name, Zone Name, Zone Floor Area \{m2\}, \# Zone Occupants, Equipment Level \{W\}, Equipment/Floor Area \{W/m2\}, Equipment per person \{W/person\}, Fraction Latent, Fraction Radiant, Fraction Lost, Fraction Convected, Nominal Minimum Equipment Level \{W\}, Nominal Maximum Equipment Level \{W\}
+! \textless{}OtherEquipment Internal Gains - Nominal\textgreater{}, Name, Schedule Name, Zone Name, Zone Floor Area \{m2\}, \# Zone Occupants, Equipment Level \{W\}, Equipment/Floor Area \{W/m2\}, Equipment per person \{W/person\}, Fraction Latent, Fraction Radiant, Fraction Lost, Fraction Convected, Minimum Equipment Level for All Day Types \{W\}, Maximum Equipment Level for All Day Types \{W\}, Minimum Equipment Level for Weekdays \{W\}, Maximum Equipment Level for Weekdays \{W\}, Minimum Equipment Level for Weekends/Holidays \{W\}, Maximum Equipment Level for Weekends /Holidays \{W\}, Minimum Equipment Level for Summer Design Days \{W\}, Maximum Equipment Level for Summer Design Days \{W\}, Minimum Equipment Level for Winter Design Days \{W\}, Maximum Equipment Level for Winter Design Days \{W\}
 
-OtherEquipment Internal Gains,~ TEST 352A, ALWAYSON, ZONE ONE, 232.26, 0.0, 352.000, 1.516, N/A, 0.000, 0.000, 0.000, 1.000, 352.000, 352.000
+OtherEquipment Internal Gains,~ TEST 352A, ALWAYSON, ZONE ONE, 232.26, 0.0, 352.000, 1.516, N/A, 0.000, 0.000, 0.000, 1.000, 352.000, 352.000, 352.000, 352.000
 
-~OtherEquipment Internal Gains,~ TEST 352 MINUS, ALWAYSON, ZONE ONE, 232.26, 0.0, -352.000, -1.516, N/A, 0.000, 0.000, 0.000, 1.000, -352.000, -352.000
+~OtherEquipment Internal Gains,~ TEST 352 MINUS, ALWAYSON, ZONE ONE, 232.26, 0.0, -352.000, -1.516, N/A, 0.000, 0.000, 0.000, 1.000, -352.000, -352.000, -352.000, -352.000
 
 \subsubsection{Field: \textless{}Other Equipment Internal Gains - Nominal\textgreater{}}\label{field-other-equipment-internal-gains---nominal}
 
@@ -1355,13 +1487,49 @@ This is the fraction lost (not attributed to the zone) for this equipment.
 
 This is the fraction convected for this equipment.
 
-\subsubsection{Field: Nominal Minimum Equipment Level \{W\}}\label{field-nominal-minimum-equipment-level-w-1}
 
-This numeric field is the calculated minimum amount of the equipment in Watts based on the calculated design level (above) * the minimum value (annual) for the equipment schedule. It may be useful in diagnosing errors that occur during simulation.
 
-\subsubsection{Field: Nominal Maximum Equipment Level \{W\}}\label{field-nominal-maximum-equipment-level-w-1}
 
-This numeric field is the calculated maximum amount of the equipment in Watts based on the calculated design level (above) * the maximum value (annual) for the equipment schedule. It may be useful in diagnosing errors that occur during simulation.
+\subsubsection{Field: Minimum Equipment Level for All Day Types \{W\}}\label{field-minimum-equipment-level-for-all-day-types-w-1}
+
+This numeric field is the calculated minimum amount of the equipment in Watts based on the calculated design level (above) * the minimum value for the equipment schedule across all day types (weekday, weekends, holidays, design days and custom days). It may be useful in diagnosing errors that occur during simulation.
+
+\subsubsection{Field: Maximum Equipment Level for All Day Types \{W\}}\label{field-maximum-equipment-level-for-all-day-types-w-1}
+
+This numeric field is the calculated maximum amount of the equipment in Watts based on the calculated design level (above) * the maximum value for the equipment schedule across all day types (weekday, weekends, holidays, design days and custom days). It may be useful in diagnosing errors that occur during simulation.
+
+\subsubsection{Field: Minimum Equipment Level for Weekdays \{W\}}\label{field-minimum-equipment-level-for-weekdays-w-1}
+
+This numeric field is the calculated minimum amount of the equipment in Watts based on the calculated design level (above) * the minimum value for the equipment schedule across weekday day types (Monday through Friday).
+
+\subsubsection{Field: Maximum Equipment Level for Weekdays \{W\}}\label{field-maximum-equipment-level-for-weekdays-w-1}
+
+This numeric field is the calculated maximum amount of the equipment in Watts based on the calculated design level (above) * the maximum value for the equipment schedule across weekday day types (Monday through Friday).
+
+\subsubsection{Field: Minimum Equipment Level for Weekends/Holidays \{W\}}\label{field-minimum-equipment-level-for-weekends-holidays-w-1}
+
+This numeric field is the calculated minimum amount of the equipment in Watts based on the calculated design level (above) * the minimum value for the equipment schedule across weekend (Saturday and Sunday) or holiday day types.
+
+\subsubsection{Field: Maximum Equipment Level for Weekends/Holidays \{W\}}\label{field-maximum-equipment-level-for-weekends-holidays-w-1}
+
+This numeric field is the calculated maximum amount of the equipment in Watts based on the calculated design level (above) * the maximum value for the equipment schedule across weekend (Saturday and Sunday) or holiday day types.
+
+\subsubsection{Field: Minimum Equipment Level for Summer Design Days \{W\}}\label{field-minimum-equipment-level-for-summer-designdays-w-1}
+
+This numeric field is the calculated minimum amount of the equipment in Watts based on the calculated design level (above) * the minimum value for the equipment schedule for the summer design day type.
+
+\subsubsection{Field: Maximum Equipment Level for Summer Design Days \{W\}}\label{field-maximum-equipment-level-for-summer-designdays-w-1}
+
+This numeric field is the calculated maximum amount of the equipment in Watts based on the calculated design level (above) * the maximum value for the equipment schedule for the summer design day type.
+
+\subsubsection{Field: Minimum Equipment Level for Winter Design Days \{W\}}\label{field-minimum-equipment-level-for-winter-designdays-w-1}
+
+This numeric field is the calculated minimum amount of the equipment in Watts based on the calculated design level (above) * the minimum value for the equipment schedule for the winter design day type.
+
+\subsubsection{Field: Maximum Equipment Level for Winter Design Days \{W\}}\label{field-maximum-equipment-level-for-winter-designdays-w-1}
+
+This numeric field is the calculated maximum amount of the equipment in Watts based on the calculated design level (above) * the maximum value for the equipment schedule for the winter design day type.
+
 
 \subsection{Outdoor Controlled Baseboard Heat}\label{outdoor-controlled-baseboard-heat}
 
@@ -1561,7 +1729,7 @@ This field is the air changes per hour for the given ventilation rate.
 
 \subsubsection{Field: Fan Type \{Exhaust;Intake;Natural\}}\label{field-fan-type-exhaustintakenatural}
 
-This field shows the entered value for the type of ventilation {[}NATURAL, EXHAUST, or INTAKE{]}. Natural ventilation is the air movement/exchange a result of openings in the building façade and does not consume any fan energy. For either EXHAUST or INTAKE, values for fan pressure and efficiency define the fan electric consumption. For NATURAL and EXHAUST ventilation, the conditions of the air entering the space are assumed to be equivalent to outdoor air conditions. For INTAKE ventilation, an appropriate amount of fan heat is added to the air stream.
+This field shows the entered value for the type of ventilation {[}NATURAL, EXHAUST, or INTAKE{]}. Natural ventilation is the air movement/exchange a result of openings in the building facade and does not consume any fan energy. For either EXHAUST or INTAKE, values for fan pressure and efficiency define the fan electric consumption. For NATURAL and EXHAUST ventilation, the conditions of the air entering the space are assumed to be equivalent to outdoor air conditions. For INTAKE ventilation, an appropriate amount of fan heat is added to the air stream.
 
 \subsubsection{Field: Fan Pressure Rise \{Pa\}}\label{field-fan-pressure-rise-pa}
 
@@ -2118,11 +2286,11 @@ where:
 \item
   T = Exterior Surface Temperatre when Combined convective/radiative film Coeff \textless{} = 0
 \item
-  Tzone~ = Temperature of the zone being simulated (°C)
+  Tzone~ = Temperature of the zone being simulated (Celsius)
 \item
-  Toadb~ = Dry-bulb temperature of the outdoor air (°C)
+  Toadb~ = Dry-bulb temperature of the outdoor air (Celsius)
 \item
-  Tgrnd~ = Temperature of the ground (°C)
+  Tgrnd~ = Temperature of the ground (Celsius)
 \item
   Wspd~ = Outdoor wind speed (m/sec)
 \end{itemize}
@@ -2243,7 +2411,7 @@ This is the calculated number of CTFs (Conduction Transfer Functions). The condu
 
 \subsubsection{Field: Time Step}\label{field-time-step}
 
-The ``timestep'' in the construction line is the timestep at which the CTFs are valid. Because CTFs for certain constructions might not be stable at the user specified timestep (might be too ``heavy'' from a thermal mass standpoint), this may be different from the zone timestep (specified in ``TimeStep in Hour''). In all cases though, this will be greater than or equal to the zone timestep. If the timestep for the construction is greater than the zone timestep, E+ will use interpolated histories to solve for the surface heat balances for this surface (see discussion on interpolated histories in the \href{file:///E:/Docs4PDFs/EngineeringDoc.pdf}{Engineering Reference} document).
+The ``timestep'' in the construction line is the timestep at which the CTFs are valid. Because CTFs for certain constructions might not be stable at the user specified timestep (might be too ``heavy'' from a thermal mass standpoint), this may be different from the zone timestep (specified in ``TimeStep in Hour''). In all cases though, this will be greater than or equal to the zone timestep. If the timestep for the construction is greater than the zone timestep, E+ will use interpolated histories to solve for the surface heat balances for this surface (see discussion on interpolated histories in the \href{EngineeringDoc.pdf}{Engineering Reference} document).
 
 \subsubsection{Field: Thermal Conductance}\label{field-thermal-conductance}
 
@@ -2673,7 +2841,7 @@ WindowMaterial:Gas,AIR 8MM,Air,~ 8.000E-03,
 WindowMaterial:Glazing,SB60CLEAR3PPG,Spectral,SB60CLEAR3PPGSP,~ 0.00328,~ 0.00000,~ 0.00000,~ 0.00000,~ 0.00000,~ 0.00000,~ 0.00000,~ 0.00000,~ 0.03500,~ 0.84000,~ 1.00000,~ 1.00000,No
 \end{lstlisting}
 
-Then, there will be a list of window constructions reported with each one corresponding to a particular temperature of the thermochromic glazing layer. For example, the following excerpt shows a list of window constructions for the thermochromic window TCWINDOW at different temperature of the thermochromic layer - TCWINDOW\_TC\_25 at 25°C, TCWINDOW\_TC\_27 at 27°C, and TCWINDOW\_TC\_29 at 29°C. Detailed properties of the thermochromic glazing layer are also listed for each temperature - WO18RT25 \textbf{at} 25°C, WO18RT27 \textbf{at} 27°C, and WO18RT29 \textbf{at} 29°C.
+Then, there will be a list of window constructions reported with each one corresponding to a particular temperature of the thermochromic glazing layer. For example, the following excerpt shows a list of window constructions for the thermochromic window TCWINDOW at different temperature of the thermochromic layer - TCWINDOW\_TC\_25 at 25$^{\circ}$C, TCWINDOW\_TC\_27 at 27$^{\circ}$C, and TCWINDOW\_TC\_29 at 29$^{\circ}$C. Detailed properties of the thermochromic glazing layer are also listed for each temperature - WO18RT25 \textbf{at} 25$^{\circ}$C, WO18RT27 \textbf{at} 27$^{\circ}$C, and WO18RT29 \textbf{at} 29$^{\circ}$C.
 
 \begin{lstlisting}
 WindowConstruction,TCWINDOW\_TC\_25,~~ 5,VerySmooth,~~ 1.666,~~ 1.666,~~ 1.000,~~ 0.429,~~ 0.242,~~ 0.520
@@ -4186,16 +4354,12 @@ Finally, grey interchange coefficients are presented. These are the coefficients
 
 \subsection{DX Coil Outputs}\label{dx-coil-outputs}
 
-\subsection{DX Cooling Coil Outputs}\label{dx-cooling-coil-outputs}
+\subsection{DX Cooling Coil Standard Rating Information}\label{dx-cooling-coil-standard-ratings-2010}
 
 Outputs are provided for air-cooled, single-speed direct expansion (DX) cooling coils as follows:
 
 \begin{lstlisting}
-! <DX Cooling Coil Standard Rating Information>, Component Type, Component Name, Standard Rating (Net) Cooling Capacity {W}, Standard Rated Net COP {W/W}, EER {Btu/W-h}, SEER {Btu/W-h}, SEER Default {Btu/W-h}, IEER {Btu/W-h}
-\end{lstlisting}
-~ DX Cooling Coil Standard Rating Information, Coil:Cooling:DX:SingleSpeed, PSZ-AC\_1:1\_COOLC DXCOIL, 23990.7, 2.57, 8.77, 9.30, 8.80, 9.03
-\begin{lstlisting}
-DX Cooling Coil Standard Rating Information, Coil:Cooling:DX:SingleSpeed, PSZ-AC\_2:2\_COOLC DXCOIL, 17626.1, 3.19, 10.88, 12.53, 11.46, 12.16
+! <DX Cooling Coil Standard Rating Information>, Component Type, Component Name, Standard Rating (Net) Cooling Capacity {W}, Standard Rated Net COP {W/W}, EER {Btu/W-h}, SEER User {Btu/W-h}, SEER Standard {Btu/W-h}, IEER {Btu/W-h}
 \end{lstlisting}
 
 \subsubsection{Field: Component Type}\label{field-component-type-3}
@@ -4206,15 +4370,15 @@ This is the component type, currently Coil:Cooling:DX:SingleSpeed is the only va
 
 The name of the DX cooling coil from the input data file (IDF).
 
-\subsubsection{Field: Standard Rating (Net) Cooling Capacity \{W\}}\label{field-standard-rating-net-cooling-capacity-w}
+\subsubsection{Field: Standard Rating (Net) Cooling Capacity \{W\}}
 
 The standard rating (net) cooling capacity for this DX cooling coil. Units are Watts. See the EnergyPlus Engineering Reference (Single Speed DX Cooling Coil, Standard Ratings) for details on how this value is calculated.
 
-\subsubsection{Field: Standard Rated Net COP \{W/W\}}\label{field-standard-rated-net-cop-ww}
+\subsubsection{Field: Standard Rated Net COP \{W/W\}}
 
 The standard rated net COP or energy efficiency ratio (\emph{EER}) at standard rating conditions for the DX cooling coil in SI units of W/W. See the EnergyPlus Engineering Reference (Single Speed DX Cooling Coil, Standard Ratings) for details on how this value is calculated.
 
-\subsubsection{Field: EER \{Btu/W-h\}}\label{field-eer-btuw-h}
+\subsubsection{Field: EER \{Btu/W-h\}}
 
 The energy efficiency ratio (\emph{EER}) at standard rating conditions for the DX cooling coil in IP units of Btu/W-hr. See the EnergyPlus Engineering Reference (Single Speed DX Cooling Coil, Standard Ratings) for details on how this value is calculated.
 
@@ -4222,21 +4386,102 @@ The energy efficiency ratio (\emph{EER}) at standard rating conditions for the D
 
 The seasonal energy efficiency ratio (SEER) for the DX cooling coil in IP units of Btu/W-hr. See the EnergyPlus Engineering Reference (Single Speed DX Cooling Coil and Multi Speed DX Cooling Coil, Standard Ratings) for details on how this value is calculated. SEER User value calculation uses user specified Part Load Factor (PLF) curve to account for cycling effect.
 
-\subsubsection{Field: SEER Standard \{Btu/W-h\}}\label{field-seer-btuw-h}
+\subsubsection{Field: SEER Standard \{Btu/W-h\}}
 
 The seasonal energy efficiency ratio (SEER) for the DX cooling coil in IP units of Btu/W-hr. See the EnergyPlus Engineering Reference (Single Speed DX Cooling Coil and Multi Speed DX Cooling Coil, Standard Ratings) for details on how this value is calculated. SEER Standard value calculation uses AHRI Standard 210/240-2008 default Part Load Factor (PLF) curve and cooling coefficient of degradation value of 0.25 to account for cycling effect. Otherwise, the SEER User and SEER Standard values calculation use identical procedure.
 
-\subsubsection{Field: IEER \{Btu/W-h\}}\label{field-ieer-btuw-h}
+\subsubsection{Field: IEER \{Btu/W-h\}}
 
 The integrated energy efficiency ratio (\emph{IEER}) for the DX cooling coil in IP units of Btu/W-hr. See the EnergyPlus Engineering Reference (Single Speed DX Cooling Coil, Standard Ratings) for details on how this value is calculated.
 
-\subsection{DX Cooling Coil Outputs for ASHRAE 127 Standard Ratings}\label{dx-cooling-coil-outputs-for-ashrae-127-standard-ratings}
+
+\subsection{DX Cooling Coil Standard Ratings 2017}\label{dx-cooling-coil-standard-ratings-2017}
+
+Outputs are provided for air-cooled, single-speed and multi-speed direct expansion (DX) cooling coils as follows:
+
+\begin{lstlisting}
+! <DX Cooling Coil Standard Ratings 2017>, Component Name, Component Type, Standard Rating (Net) Cooling Capacity {W}, Standard Rated Net COP {W/W}, EER {Btu/W-h}, SEER User {Btu/W-h}, SEER Standard {Btu/W-h}, IEER {Btu/W-h}
+\end{lstlisting}
+
+\subsubsection{field: Component Name}\label{field-component-name-4}
+
+The name of the DX cooling coil from the input data file (IDF).
 
 \subsubsection{Field: Component Type}\label{field-component-type-4}
 
+In the 2017 implementation, supported compontent types include: Coil:Cooling:DX:SingleSpeed and Coil:Cooling:DX:MultiSpeed.
+
+\subsubsection{Field: Standard Rating (Net) Cooling Capacity \{W\}}
+
+The standard rating (net) cooling capacity for this DX cooling coil. Units are Watts. See the EnergyPlus Engineering Reference (Single Speed DX Cooling Coil and Multi Speed DX Cooling Coil, Standard Ratings) for details on how this value is calculated.
+
+\subsubsection{Field: Standard Rated Net COP \{W/W\}}
+
+The standard rated net COP or energy efficiency ratio (\emph{EER}) at standard rating conditions for the DX cooling coil in SI units of W/W. See the EnergyPlus Engineering Reference (Single Speed DX Cooling Coil and Multi Speed DX Cooling Coil, Standard Ratings) for details on how this value is calculated.
+
+\subsubsection{Field: EER \{Btu/W-h\}}
+
+The energy efficiency ratio (\emph{EER}) at standard rating conditions for the DX cooling coil in IP units of Btu/W-hr. See the EnergyPlus Engineering Reference (Single Speed DX Cooling Coil and Multi Speed DX Cooling Coil, Standard Ratings) for details on how this value is calculated.
+
+\subsubsection{Field: SEER User \{Btu/W-h\}}
+
+The seasonal energy efficiency ratio (SEER) for the DX cooling coil in IP units of Btu/W-hr. This calculation uses the user specified Part Load Factor (PLF) curve and cooling coefficient of degradation to account for cycling effects. See the EnergyPlus Engineering Reference (Single Speed DX Cooling Coil and Multi Speed DX Cooling Coil, Standard Ratings) for details on how this value is calculated.
+
+\subsubsection{Field: SEER Standard \{Btu/W-h\}}
+
+The seasonal energy efficiency ratio (SEER) for the DX cooling coil in IP units of Btu/W-hr. This calculation uses the AHRI Standard 210/240-2017 default Part Load Factor (PLF) curve and cooling coefficient of degradation value of 0.25 to account for cycling effects. Otherwise, the SEER User and SEER Standard values calculation use identical procedure. See the EnergyPlus Engineering Reference (DX Cooling Coil and Multi Speed DX Cooling Coil, Standard Ratings) for details on how this value is calculated.
+
+\subsubsection{Field: IEER \{Btu/W-h\}}
+
+The integrated energy efficiency ratio (\emph{IEER}) for the DX cooling coil in IP units of Btu/W-hr. See the EnergyPlus Engineering Reference (DX Cooling Coil and Multi Speed DX Cooling Coil, Standard Ratings) for details on how this value is calculated.
+
+\subsection{DX Cooling Coil Standard Ratings 2023}\label{dx-cooling-coil-standard-ratings-2023}
+
+Outputs are provided for the following types of air cooled and evaporatively cooled direct expansion (DX) cooling coils: CurveFit, SingleSpeed, ToSpeed, MultiSpeed, and VariableSpeed.
+
+\begin{lstlisting}
+! <DX Cooling Coil Standard Ratings 2023>, Component Name, Component Type, Standard Rating (Net) Cooling Capacity {W}, Standard Rated Net COP {W/W}, EER {Btu/W-h}, SEER User {Btu/W-h}, SEER Standard {Btu/W-h}, IEER {Btu/W-h}
+\end{lstlisting}
+
+\subsubsection{field: Component Name}\label{field-component-name-5}
+
+The name of the DX cooling coil from the input data file (IDF).
+
+\subsubsection{Field: Component Type}\label{field-component-type-5}
+
+In the 2023 implementation, supported compontent types include: Coil:Cooling:DX:CurveFit, Coil:Cooling:DX:SingleSpeed, Coil:Cooling:DX:TwoSpeed, Coil:Cooling:DX:MultiSpeed, and Coil:Cooling:DX:VariableSpeed.
+
+\subsubsection{Field: Standard Rating (Net) Cooling Capacity \{W\}}
+
+The standard rating (net) cooling capacity for this DX cooling coil. Units are Watts. See the EnergyPlus Engineering Reference (Single Speed DX Cooling Coil and Multi Speed DX Cooling Coil, Standard Ratings) for details on how this value is calculated.
+
+\subsubsection{Field: Standard Rated Net COP \{W/W\}}
+
+The standard rated net COP or energy efficiency ratio (\emph{EER}) at standard rating conditions for the DX cooling coil in SI units of W/W. See the EnergyPlus Engineering Reference (CurveFit, SingleSpeed, TwoSpeed, MultiSpeed, and VariableSpeed DX Cooling Coils, Standard Ratings) for details on how this value is calculated for the various configurations.
+
+\subsubsection{Field: EER \{Btu/W-h\}}
+
+The energy efficiency ratio (\emph{EER}) at standard rating conditions for the DX cooling coil in IP units of Btu/W-hr. See the EnergyPlus Engineering Reference (CurveFit, SingleSpeed, TwoSpeed, MultiSpeed, and VariableSpeed DX Cooling Coils, Standard Ratings) for details on how this value is calculated.
+
+\subsubsection{Field: SEER User \{Btu/W-h\}}
+
+The seasonal energy efficiency ratio (SEER) for the DX cooling coil in IP units of Btu/W-hr. This calculation uses the user specified Part Load Factor (PLF) curve and cooling coefficient of degradation to account for cycling effects. See the EnergyPlus Engineering Reference (CurveFit, SingleSpeed, TwoSpeed, MultiSpeed, and VariableSpeed DX Cooling Coils, Standard Ratings) for details on how this value is calculated.
+
+\subsubsection{Field: SEER Standard \{Btu/W-h\}}
+
+The seasonal energy efficiency ratio (SEER) for the DX cooling coil in IP units of Btu/W-hr. This calculation uses the AHRI Standard 210/240-2017 default Part Load Factor (PLF) curve and cooling coefficient of degradation value of 0.25 to account for cycling effects. Otherwise, the SEER User and SEER Standard values calculation use identical procedure. See the EnergyPlus Engineering Reference (CurveFit, SingleSpeed, TwoSpeed, MultiSpeed, and VariableSpeed DX Cooling Coils, Standard Ratings) for details on how this value is calculated.
+
+\subsubsection{Field: IEER \{Btu/W-h\}}
+
+The integrated energy efficiency ratio (\emph{IEER}) for the DX cooling coil in IP units of Btu/W-hr. See the EnergyPlus Engineering Reference (CurveFit, SingleSpeed, TwoSpeed, MultiSpeed, and VariableSpeed DX Cooling Coils, Standard Ratings) for details on how this value is calculated.
+
+\subsection{DX Cooling Coil Outputs for ASHRAE 127 Standard Ratings}\label{dx-cooling-coil-outputs-for-ashrae-127-standard-ratings}
+
+\subsubsection{Field: Component Type}\label{field-component-type-6}
+
 This is the component type, currently Coil:Cooling:DX:SingleSpeed is the only valid type.
 
-\subsubsection{Field: Component Name}\label{field-component-name-4}
+\subsubsection{Field: Component Name}\label{field-component-name-6}
 
 The name of the DX cooling coil from the input data file (IDF).
 
@@ -4293,11 +4538,11 @@ Outputs are provided for single-speed direct expansion (DX) heating coils as fol
 DX Heating Coil Standard Rating Information, Coil:Heating:DX:SingleSpeed, PSZ-AC\_1:1\_HEATC DXCOIL, 10476.1, 5833.2, 6.10, 4
 \end{lstlisting}
 
-\subsubsection{Field: Component Type}\label{field-component-type-5}
+\subsubsection{Field: Component Type}\label{field-component-type-7}
 
 This is the component type, currently Coil:Heating:DX:SingleSpeed is the only valid type.
 
-\subsubsection{Field: Component Name}\label{field-component-name-5}
+\subsubsection{Field: Component Name}\label{field-component-name-7}
 
 The name of the DX heating coil from the input data file (IDF).
 
@@ -4327,11 +4572,11 @@ Chiller Standard Rating Information, Chiller:Electric:EIR, Big Chiller 1, 4.5, 1
 Chiller Standard Rating Information, Chiller:Electric:ReformulatedEIR, Big Chiller 2, 4.8, 16.4
 \end{lstlisting}
 
-\subsubsection{Field: Component Type}\label{field-component-type-6}
+\subsubsection{Field: Component Type}\label{field-component-type-8}
 
 This is the component type, Chiller:Electric:EIR and/or Chiller:Electric:ReformulatedEIR.
 
-\subsubsection{Field: Component Name}\label{field-component-name-6}
+\subsubsection{Field: Component Name}\label{field-component-name-8}
 
 The name of the Chiller:Electric:EIR and Chiller:Electric:ReformulatedEIR objects from the input data file (IDF).
 
@@ -4345,7 +4590,7 @@ The integrated part load value (\emph{IPLV}) for the Chiller:Electric:EIR and Ch
 
 \subsection{Warmup Days Line}
 
-As described elsewhere, EnergyPlus simulates the first day of each simulation period until it reaches “convergence”. This data line will show how many warm up days were required to reach that state.
+As described elsewhere, EnergyPlus simulates the first day of each simulation period until it reaches ``convergence''. This data line will show how many warm up days were required to reach that state.
 
 \begin{lstlisting}
 ! <Environment:WarmupDays>, NumberofWarmupDays
@@ -4362,7 +4607,7 @@ This field will show the number of days required to reach the convergence state 
 
 \subsection{Warmup Convergence Outputs}
 
-Warmup is performed for each environment being simulated. When a file passes convergence, no warnings are shown.  However, when it doesn’t a warning appears in the eplusout.err file, for example:
+Warmup is performed for each environment being simulated. When a file passes convergence, no warnings are shown.  However, when it doesn't a warning appears in the eplusout.err file, for example:
 
 \begin{lstlisting}
 CheckWarmupConvergence: Loads Initialization, Zone = "BACKROOM" did not converge after 25 warmup days.
@@ -4384,11 +4629,11 @@ See Warmup Convergence Information in .eio file for details
 
 \subsection{Warmup Convergence Information}
 
-Warmup convergence information reflects the warmup days calculations and whether or not the zone has reached “convergence”. Warmup calculations are done for each environment (e.g. each sizing period simulated, each run period simulated). Reference the building parameters on Minimum and Maximum Number of Warmup Days as well as Loads and Temperature convergence Tolerance. The file contains two possible flavors of warmup information: summary and detailed.
+Warmup convergence information reflects the warmup days calculations and whether or not the zone has reached ``convergence''. Warmup calculations are done for each environment (e.g. each sizing period simulated, each run period simulated). Reference the building parameters on Minimum and Maximum Number of Warmup Days as well as Loads and Temperature convergence Tolerance. The file contains two possible flavors of warmup information: summary and detailed.
 
 \subsection{Summary Warmup Convergence Information}
 
-Summary (warmup convergance information is not reported during sizing and only at the end of the calculations). The below information is included after each warmup period.
+Summary (warmup convergence information is not reported during sizing and only at the end of the calculations). The below information is included after each warmup period.
 
 \begin{lstlisting}
 ! <Warmup Convergence Information>,Zone Name,Environment Type/Name,Average Warmup Temperature Difference {deltaC},Std Dev Warmup Temperature Difference {deltaC},Max Temperature Pass/Fail Convergence,Min Temperature Pass/Fail Convergence,Average Warmup Load Difference {W},Std Dev Warmup Load Difference {W},Heating Load Pass/Fail Convergence,Cooling Load Pass/Fail Convergence
@@ -4412,7 +4657,7 @@ This field will show the name of individual zone.
 
 \subsubsection{Field: Environment Type/Name}
 
-Type of environment being run (SizingPeriod, RunPeriod) as well as it’s "name".
+Type of environment being run (SizingPeriod, RunPeriod) as well as it's ``name''.
 
 \subsubsection{Field: Average Warmup Temperature Difference \{deltaC\}}
 

@@ -752,7 +752,7 @@ The results of the component autosizing calculations are reported on the \emph{e
 The complete list of objects that have autosized fields is shown in the following table. Note that spaces may be inserted in object names to facilitate readability.
 
 % table 23
-\begin{longtable}[c]{p{3.02in}p{2.97in}}
+\begin{longtable}[c]{p{3.3in}p{3.3in}}
 \caption{Complete list of Objects with autosized Fields \label{table:complete-list-of-objects-with-autosized}} \tabularnewline
 \toprule
 Object Name & Object Name \tabularnewline
@@ -767,17 +767,22 @@ Object Name & Object Name \tabularnewline
 
 AirConditioner:VariableRefrigerantFlow & AirLoopHVAC \tabularnewline
 AirLoopHVAC:Unitary:Furnace:HeatCool & AirLoopHVAC:Unitary:Furnace:HeatOnly \tabularnewline
-AirLoopHVAC:UnitaryHeatCool & AirLoopHVAC:UnitaryHeatCool:VAVChangeoverBypass \tabularnewline
+AirLoopHVAC:UnitaryHeatCool & \tabularnewline
+AirLoopHVAC:UnitaryHeatCool:VAVChangeoverBypass & \tabularnewline
 AirLoopHVAC:UnitaryHeatOnly & AirLoopHVAC:UnitaryHeatPump:AirToAir \tabularnewline
-AirLoopHVAC:UnitaryHeatPump:AirToAir:MultiSpeed & AirLoopHVAC:UnitaryHeatPump:WaterToAir \tabularnewline
+AirLoopHVAC:UnitaryHeatPump:AirToAir:MultiSpeed & \tabularnewline
+AirLoopHVAC:UnitaryHeatPump:WaterToAir & \tabularnewline
 AirLoopHVAC:UnitarySystem & AirTerminal:DualDuct:ConstantVolume \tabularnewline
 AirTerminal:DualDuct:VAV & AirTerminal:DualDuct:VAV:OutdoorAir \tabularnewline
-AirTerminal:SingleDuct:ConstantVolume:CooledBeam & AirTerminal:SingleDuct:ConstantVolume:FourPipeInduction \tabularnewline
+AirTerminal:SingleDuct:ConstantVolume:CooledBeam & \tabularnewline
+AirTerminal:SingleDuct:ConstantVolume:FourPipeInduction & \tabularnewline
 AirTerminal:SingleDuct:ConstantVolume:Reheat & AirTerminal:SingleDuct:ParallelPIU:Reheat \tabularnewline
 AirTerminal:SingleDuct:SeriesPIU:Reheat & AirTerminal:SingleDuct:ConstantVolume:NoReheat \tabularnewline
-AirTerminal:SingleDuct:VAV:HeatAndCool:NoReheat & AirTerminal:SingleDuct:VAV:HeatAndCool:Reheat \tabularnewline
+AirTerminal:SingleDuct:VAV:HeatAndCool:NoReheat & \tabularnewline
+ & AirTerminal:SingleDuct:VAV:HeatAndCool:Reheat \tabularnewline
 AirTerminal:SingleDuct:VAV:NoReheat & AirTerminal:SingleDuct:VAV:Reheat \tabularnewline
-AirTerminal:SingleDuct:VAV:Reheat:VariableSpeedFan & Boiler:HotWater \tabularnewline
+AirTerminal:SingleDuct:VAV:Reheat:VariableSpeedFan & \tabularnewline
+ & Boiler:HotWater \tabularnewline
 Boiler:Steam & Branch \tabularnewline
 Chiller:Absorption & Chiller:Absorption:Indirect \tabularnewline
 Chiller:CombustionTurbine & Chiller:ConstantCOP \tabularnewline
@@ -789,13 +794,15 @@ Coil:Cooling:DX:SingleSpeed & Coil:Cooling:DX:SingleSpeed:ThermalStorage \tabula
 Coil:Cooling:DX:TwoSpeed & Coil:Cooling:DX:VariableRefrigerantFlow \tabularnewline
 Coil:Cooling:DX:VariableSpeed & Coil:Cooling:Water \tabularnewline
 Coil:Cooling:Water:DetailedGeometry & Coil:Cooling:WaterToAirHeatPump:EquationFit \tabularnewline
-Coil:Cooling:WaterToAirHeatPump:VariableSpeedEquationFit & Coil:Heating:DX:MultiSpeed \tabularnewline
+Coil:Cooling:WaterToAirHeatPump:VariableSpeedEquationFit & \tabularnewline
+ & Coil:Heating:DX:MultiSpeed \tabularnewline
 Coil:Heating:DX:SingleSpeed & Coil:Heating:DX:VariableRefrigerantFlow \tabularnewline
 Coil:Heating:DX:VariableSpeed & Coil:Heating:Electric \tabularnewline
 Coil:Heating:Electric:MultiStage & Coil:Heating:Fuel \tabularnewline
 Coil:Heating:Gas:MultiStage & Coil:Heating:Steam \tabularnewline
 Coil:Heating:Water & Coil:Heating:WaterToAirHeatPump:EquationFit \tabularnewline
-Coil:Heating:WaterToAirHeatPump:VariableSpeedEquationFit & CoilPerformance:DX:Cooling \tabularnewline
+Coil:Heating:WaterToAirHeatPump:VariableSpeedEquationFit & \tabularnewline
+ & CoilPerformance:DX:Cooling \tabularnewline
 CondenserLoop & Controller:OutdoorAir \tabularnewline
 Controller:WaterCoil & CoolingTower:SingleSpeed \tabularnewline
 CoolingTower:TwoSpeed & CoolingTower:VariableSpeed \tabularnewline
@@ -811,7 +818,8 @@ HVACTemplate:Plant:Boiler & HVACTemplate:Plant:Chiller \tabularnewline
 HVACTemplate:Plant:Tower & HVACTemplate:System:ConstantVolume \tabularnewline
 HVACTemplate:System:DedicatedOutdoorAir & HVACTemplate:System:DualDuct \tabularnewline
 HVACTemplate:System:PackagedVAV & HVACTemplate:System:Unitary \tabularnewline
-HVACTemplate:System:UnitaryHeatPump:AirToAir & HVACTemplate:System:UnitarySystem \tabularnewline
+HVACTemplate:System:UnitaryHeatPump:AirToAir & \tabularnewline
+ & HVACTemplate:System:UnitarySystem \tabularnewline
 HVACTemplate:System:VAV & HVACTemplate:System:VRF \tabularnewline
 HVACTemplate:Zone:BaseboardHeat & HVACTemplate:Zone:ConstantVolume \tabularnewline
 HVACTemplate:Zone:DualDuct & HVACTemplate:Zone:FanCoil \tabularnewline
@@ -922,26 +930,23 @@ This field is the name of schedule that defines how minimum outdoor air requirem
 An IDF example:
 
 \begin{lstlisting}
-
 DesignSpecification:OutdoorAir
-      ZoneOAData,            !- Name
-      Sum,                   !- Outdoor Air Method
-      0.00944,               !- Outdoor Air Flow per Person {m3/s}
-      0.00305,               !- Outdoor Air Flow per Zone Floor Area {m3/s-m2}
-      ,                      !- Outdoor Air Flow per Zone {m3/s}
-      ,                      !- Outdoor Air Flow Air Changes per Hour
-      OARequirements Sched;  !- Outdoor Air Schedule Name
+  ZoneOAData,                 !- Name
+  Sum,                        !- Outdoor Air Method
+  0.00944,                    !- Outdoor Air Flow per Person {m3/s}
+  0.00305,                    !- Outdoor Air Flow per Zone Floor Area {m3/s-m2}
+  ,                           !- Outdoor Air Flow per Zone {m3/s}
+  ,                           !- Outdoor Air Flow Air Changes per Hour
+  OARequirements Sched;       !- Outdoor Air Schedule Name
 
-
-  Schedule:Compact,
-      OARequirements Sched,    !- Name
-      Any Number,              !- Schedule Type Limits Name
-      Through: 12/31,          !- Field 1
-      For: Weekdays SummerDesignDay WinterDesignDay,  !- Field 2
-      Until: 24:00, 1.0,       !- Field 4
-      For: AllOtherDays,       !- Field 5
-      Until: 24:00, 0.5;       !- Field 7
-
+Schedule:Compact,
+  OARequirements Sched,       !- Name
+  Any Number,                 !- Schedule Type Limits Name
+  Through: 12/31,             !- Field 1
+  For: Weekdays SummerDesignDay WinterDesignDay,  !- Field 2
+  Until: 24:00, 1.0,          !- Field 4
+  For: AllOtherDays,          !- Field 5
+  Until: 24:00, 0.5;          !- Field 7
 \end{lstlisting}
 
 \subsection{DesignSpecification:OutdoorAir:SpaceList}\label{designspecificationoutdoorairspacelist}
@@ -965,14 +970,12 @@ Reference to a \hyperref[designspecificationoutdoorair]{DesignSpecification:Outd
 An IDF example:
 
 \begin{lstlisting}
-
 DesignSpecification:OutdoorAir:SpaceList,
-    SZ DSOA Zone 5 List,     !- Name
-    Space 5 Office,          !- Space 1 Name
-    SZ DSOA Zone 5 Office,   !- Space 1 Design Specification Outdoor Air Object Name
-    Space 5 Conference,      !- Space 2 Name
-    SZ DSOA Zone 5 Conference;  !- Space 2 Design Specification Outdoor Air Object Name
-
+  SZ DSOA Zone 5 List,        !- Name
+  Space 5 Office,             !- Space 1 Name
+  SZ DSOA Zone 5 Office,      !- Space 1 Design Specification Outdoor Air Object Name
+  Space 5 Conference,         !- Space 2 Name
+  SZ DSOA Zone 5 Conference;  !- Space 2 Design Specification Outdoor Air Object Name
 \end{lstlisting}
 
 \subsection{DesignSpecification:ZoneAirDistribution}\label{designspecificationzoneairdistribution}
@@ -1015,12 +1018,11 @@ This optional input sets a minimum on the ventilation efficiency for the zone. I
 An example of this in an IDF context is shown:
 
 \begin{lstlisting}
-
 DesignSpecification:ZoneAirDistribution,
-      CM DSZAD ZN_1_FLR_1_SEC_1,  !- Name
-      1,                       !- Zone Air Distribution Effectiveness in Cooling Mode {dimensionless}
-      1,                       !- Zone Air Distribution Effectiveness in Heating Mode {dimensionless}
-      ;                        !- Zone Air Distribution Effectiveness Schedule Name
+  CM DSZAD ZN_1_FLR_1_SEC_1,  !- Name
+  1,                          !- Zone Air Distribution Effectiveness in Cooling Mode {dimensionless}
+  1,                          !- Zone Air Distribution Effectiveness in Heating Mode {dimensionless}
+  ;                           !- Zone Air Distribution Effectiveness Schedule Name
 \end{lstlisting}
 
 \subsection{Sizing:Parameters}\label{sizingparameters}
@@ -1076,17 +1078,18 @@ As described early in the document (see: EnergyPlus Output Processing), the user
 
 \begin{lstlisting}
 OutputControl:Sizing:Style,
-       \memo default style for the Sizing output files is comma -- this works well for
-       \memo importing into spreadsheet programs such as Excel(tm) but not so well for word
-       \memo processing progams -- there tab may be a better choice.  fixed puts spaces between
-       \memo the "columns"
-       \unique-object
-   A1; \field Column Separator
-       \required-field
-       \type choice
-       \key Comma
-       \key Tab
-       \key Fixed
+  \memo default style for the Sizing output files is comma -- this works well for
+  \memo importing into spreadsheet programs such as Excel(tm) but not so well for word
+  \memo processing progams -- there tab may be a better choice.  fixed puts spaces between
+  \memo the "columns"
+  \unique-object
+  A1; \field Column Separator
+
+\required-field
+  \type choice
+  \key Comma
+  \key Tab
+  \key Fixed
 \end{lstlisting}
 
 \subsubsection{Inputs}\label{inputs-3-009}
@@ -1101,11 +1104,11 @@ Note that both tab and comma separated files easily import into Excel\textsupers
 
 The Sizing:Zone object provides the data needed to perform a zone design air flow calculation for a single zone. This calculation assumes a variable amount of supply air at a fixed temperature and humidity. The information needed consists of the zone inlet supply air conditions: temperature and humidity ratio for heating and cooling. The calculation is done for every design day included in the input. The maximum cooling load and air flow and the maximum heating load and air flow are then saved for the system level design calculations and for the component automatic sizing calculations.
 
-The Sizing:Zone object is also the place where the user can specify the design outdoor air flow rate by referencing the name of a design specification outdoor air object. This can be specified in a number of ways (ref. \hyperref[designspecificationoutdoorair]{DesignSpecification:OutdoorAir}).This data is saved for use in the system sizing calculation or for sizing zone components that use outdoor air.
+The Sizing:Zone object is also the place where the user can specify the design outdoor air flow rate by referencing the name of a design specification outdoor air object. This can be specified in a number of ways (ref. \hyperref[designspecificationoutdoorair]{DesignSpecification:OutdoorAir}). This data is saved for use in the system sizing calculation or for sizing zone components that use outdoor air.
 
 The user can also place limits on the heating and design cooling air flow rates. See \emph{~Heating Design Air Flow Method} and \emph{Cooling Design Air Flow Method} below and the explanations of the various heating and cooling flow input fields.
 
-The user can ask the zone design calculation to take into account the effect of a Dedicated Outdoor Air System on the zone design loads and airflow rates. The design calculation will calculate the heat addition rate to the zone of an idealized SOA system and add or subtract the result from the total zone loads and flow rates.
+The user can ask the zone design calculation to take into account the effect of a Dedicated Outdoor Air (DOA) System on the zone design loads and airflow rates. The design calculation will calculate the heat addition rate to the zone of an idealized DOA system and add or subtract the result from the total zone loads and flow rates.
 
 Latent zone loads can also be calulated when specifying a \hyperref[field-zone-load-sizing-method]{Zone Load Sizing Method} other than Sensible Load Only No Latent Load. The design latent cooling and heating air flow will be calculated using the specified supply air humidity ratio and saved for further processing. Depending on the user choice for \emph{Zone Load Sizing Method},  the sensible, latent or largest load will determine the air flow rate used for the simulation. Care should be used to select appropriate values for \emph{Zone Cooling Design Supply Air Temperature}, \emph{Zone Heating Design Supply Air Temperature}, \emph{Zone Dehumidification Design Supply Air Humidity Ratio} and \emph{Zone Humidification Design Supply Air Humidity Ratio} as these values determine the zone sensible and latent mass flow rates. The larger the temperature difference, the smaller the air flow. Similarly, the larger the humidity ratio difference, the smaller the air flow. Coordinating these inputs will provide accurate results for air mass flow rate and which loads (i.e., sensible or latent) are largest.
 
@@ -1232,114 +1235,134 @@ The higher setpoint temperature to be used with the DOAS design control strategy
 
 \paragraph{Field: Zone Load Sizing Method}\label{field-zone-load-sizing-method}
 
-Specifies the basis for sizing the zone supply air flow rate. Valid choices are Sensible Load, Latent Load, Sensible And Latent Load and Sensible Load Only No Latent Load. 
-Zone latent loads will not be used during sizing only when Zone Load Sizing Method = Sensible Load Only No Latent Load (default). For this case the zone humidity level 
-will float according to the fields Cooling and Heating Design Supply Air Humidity Ratio. For all other choices the zone humidity level will be controlled. Sensible Load will 
-use zone sensible air flow rate for zone component sizing. Latent loads will also be reported during sizing. Latent Load will use zone latent air flow rate for zone component 
-sizing. Sensible loads will also be reported during sizing. Sensible and Latent Load will use the larger of sensible and latent air flow rate for zone component sizing. Sensible 
+Specifies the basis for sizing the zone supply air flow rate. Valid choices are Sensible Load, Latent Load, Sensible And Latent Load and Sensible Load Only No Latent Load.
+Zone latent loads will not be used during sizing only when Zone Load Sizing Method = Sensible Load Only No Latent Load (default). For this case the zone humidity level
+will float according to the fields Cooling and Heating Design Supply Air Humidity Ratio. For all other choices the zone humidity level will be controlled. Sensible Load will
+use zone sensible air flow rate for zone component sizing. Latent loads will also be reported during sizing. Latent Load will use zone latent air flow rate for zone component
+sizing. Sensible loads will also be reported during sizing. Sensible and Latent Load will use the larger of sensible and latent air flow rate for zone component sizing. Sensible
 Load Only No Latent Load or leaving this field blank will disable zone latent sizing and reporting. Latent loads will not be reported during sizing (reported as 0's).
 
 \paragraph{Field: Zone Latent Cooling Design Supply Air Humidity Ratio Input Method}\label{field-zone-latent-cooling-design-supply-air-humidity-ratio-input-method}
 
-Specifies the method for supply air humidity ratio used for latent sizing. Valid choices are SupplyAirHumidityRatio and HumidityRatioDifference (default). Use 
-SupplyAirHumidityRatio to enter the humidity ratio when zone dehumidification is required. The supply air humidity ratio should be less than the zone humidity 
-ratio at the zone thermostat and humidistat set point condition. Use HumidityRatioDifference to enter the difference in humidity ratio from the zone thermostat and 
+Specifies the method for supply air humidity ratio used for latent sizing. Valid choices are SupplyAirHumidityRatio and HumidityRatioDifference (default). Use
+SupplyAirHumidityRatio to enter the humidity ratio when zone dehumidification is required. The supply air humidity ratio should be less than the zone humidity
+ratio at the zone thermostat and humidistat set point condition. Use HumidityRatioDifference to enter the difference in humidity ratio from the zone thermostat and
 humidistat set point condition.
 
 \paragraph{Field: Zone Dehumidification Design Supply Air Humidity Ratio}\label{field-zone-dehumidification-design-supply-air-humidity-ratio}
 
-Zone Dehumidification Design Supply Air Humidity Ratio (kgWater/kgDryAir) is only used when Zone Latent Cooling Design Supply Air Humidity Ratio Input Method = 
+Zone Dehumidification Design Supply Air Humidity Ratio (kgWater/kgDryAir) is only used when Zone Latent Cooling Design Supply Air Humidity Ratio Input Method =
 SupplyAirHumidityRatio. This input must be less than the zone humidity ratio at the humidistat set point so that dehumidification can occur.
 
 \paragraph{Field: Zone Cooling Design Supply Air Humidity Ratio Difference}\label{field-zone-cooling-design-supply-air-humidity-ratio-difference}
 
-Zone Dehumidification Design Supply Air Humidity Ratio Difference (kgWater/kgDryAir) is only used when Zone Latent Cooling Design Supply Air Humidity Ratio Input 
-Method = HumidityRatioDifference. This input is a positive value and defines the difference between the zone humidity ratio at the thermostat and humidistat set point 
-condition and the supply air humidity ratio entering the zone. 
+Zone Dehumidification Design Supply Air Humidity Ratio Difference (kgWater/kgDryAir) is only used when Zone Latent Cooling Design Supply Air Humidity Ratio Input
+Method = HumidityRatioDifference. This input is a positive value and defines the difference between the zone humidity ratio at the thermostat and humidistat set point
+condition and the supply air humidity ratio entering the zone.
 
 \paragraph{Field: Zone Latent Heating Design Supply Air Humidity Ratio Input Method}\label{field-zone-latent-heating-design-supply-air-humidity-ratio-input-method}
 
-Specifies the method for supply air humidity ratio used for latent sizing. Valid choices are SupplyAirHumidityRatio and HumidityRatioDifference (default). Use 
-SupplyAirHumidityRatio to enter the humidity ratio when zone humidification is required. The supply air humidity ratio should be greater than the zone humidity 
-ratio at the zone thermostat and humidistat set point condition. Use HumidityRatioDifference to enter the difference in humidity ratio from the zone thermostat and 
+Specifies the method for supply air humidity ratio used for latent sizing. Valid choices are SupplyAirHumidityRatio and HumidityRatioDifference (default). Use
+SupplyAirHumidityRatio to enter the humidity ratio when zone humidification is required. The supply air humidity ratio should be greater than the zone humidity
+ratio at the zone thermostat and humidistat set point condition. Use HumidityRatioDifference to enter the difference in humidity ratio from the zone thermostat and
 humidistat set point condition.
 
 \paragraph{Field: Zone Humidification Design Supply Air Humidity Ratio}\label{field-zone-humidification-design-supply-air-humidity-ratio}
 
-Zone Humidification Design Supply Air Humidity Ratio (kgWater/kgDryAir) is only used when Zone Latent Heating Design Supply Air Humidity Ratio Input Method = 
+Zone Humidification Design Supply Air Humidity Ratio (kgWater/kgDryAir) is only used when Zone Latent Heating Design Supply Air Humidity Ratio Input Method =
 SupplyAirHumidityRatio. This input must be greater than the zone humidity ratio at the humidistat set point so that humidification can occur.
 
 \paragraph{Field: Zone Heating Design Supply Air Humidity Ratio Difference}\label{field-zone-heating-design-supply-air-humidity-ratio-difference}
 
-Zone Humidification Design Supply Air Humidity Ratio Difference (kgWater/kgDryAir) is only used when Zone Latent Heating Design Supply Air Humidity Ratio Input 
-Method = HumidityRatioDifference. This input is a positive value and defines the difference between the zone humidity ratio at the thermostat and humidistat set point 
-condition and the supply air humidity ratio entering the zone. 
+Zone Humidification Design Supply Air Humidity Ratio Difference (kgWater/kgDryAir) is only used when Zone Latent Heating Design Supply Air Humidity Ratio Input
+Method = HumidityRatioDifference. This input is a positive value and defines the difference between the zone humidity ratio at the thermostat and humidistat set point
+condition and the supply air humidity ratio entering the zone.
 
 \paragraph{Field: Zone Humidistat Dehumidification Set Point Schedule Name}\label{field-zone-humidistat-dehumidification-set-point-schedule-name}
 
-Enter the zone relative humidity schedule used for zone latent cooling calculations. A zone humidistat will take priority over this input. This field is not used if Zone Load 
-Sizing Method = Sensible Load Only No Latent Load or a zone humidistat is present. A default of 50.0 will be used if no schedule is provided and no humidistat is 
+Enter the zone relative humidity schedule used for zone latent cooling calculations. A zone humidistat will take priority over this input. This field is not used if Zone Load
+Sizing Method = Sensible Load Only No Latent Load or a zone humidistat is present. A default of 50.0 will be used if no schedule is provided and no humidistat is
 associated with this zone.
 
 \paragraph{Field: Zone Humidistat Humidification Set Point Schedule Name}\label{field-zone-humidistat-humidification-set-point-schedule-name}
 
-Enter the zone relative humidity schedule used for zone latent heating calculations. A zone humidistat will take priority over this input. This field is not used if Zone Load 
-Sizing Method = Sensible Load Only No Latent Load or a zone humidistat is present. A default of 50.0 will be used if no schedule is provided and no humidistat is 
+Enter the zone relative humidity schedule used for zone latent heating calculations. A zone humidistat will take priority over this input. This field is not used if Zone Load
+Sizing Method = Sensible Load Only No Latent Load or a zone humidistat is present. A default of 50.0 will be used if no schedule is provided and no humidistat is
 associated with this zone.
+
+\paragraph{Field: Type of Space Sum to Use}\label{field-type-of-space-sum-to-use}
+
+If the input is \emph{coincident} the zone equipment will be sized on the coincident zone load across all spaces in the zone. If the input is \emph{noncoincident} the zone equipment will be sized on the sum of the noncoincident space loads. The default is \emph{coincident}. This field is ignored unless \hyperref[zoneairheatbalancealgorithm]{ZoneAirHeatBalanceAlgorithm} ``Do Space Heat Balance for Sizing'' is Yes.
+
+\paragraph{Field: Heating Coil Sizing Method}\label{field-heating-coil-sizing-method-0101}
+
+This input is used for sizing heat pumps and can size the heating coil based on several options. The available options are \emph{None}, \emph{Cooling Capacity}, \emph{Heating Capacity}, or \emph{GreaterOfHeatingOrCooling}. The default value is None. If this field is blank or None is selected, heat pump sizing will not be affected. Otherwise, the heat pump heating coil will size on the required cooling capacity, heating capacity, or larger of these values.
+
+Heat Pump sizing is according to ACCA Manual S requirements. To properly size a heat pump specify this field as either \emph{Cooling Capacity}, \emph{Heating Capacity}, or \emph{GreaterOfHeatingOrCooling} and include a limit for maximum heating capacity to cooling load sizing ratio in the following field if desired. Also specify Sensible And Latent Load in \hyperref[field-zone-load-sizing-method]{Zone Load Sizing Method} above to correctly account for latent loads.
+
+\paragraph{Field: Maximum Heating Capacity To Cooling Load Sizing Ratio}\label{maximum-heating-capacity-to-cooling-load-sizing-ratio-0101}
+
+This input sets a limit to how much the heating capacity can exceed the cooling load or cooling capacity required to meet the cooling load including the outdoor air load. If the heating capacity is determined to be larger than the cooling load multiplied by this value, and also considers the value of the DX Heating Coil Sizing Ratio specified in parent objects, then the heating capacity will be limited by this input. Otherwise the heating capacity considers only the DX Heating Coil Sizing Ratio specified in parent objects.
 
 An IDF example:
 
 \begin{lstlisting}
-
 Sizing:Zone,
-      SPACE5-1,                !- Name of a zone
-      14.,                     !- Zone cooling design supply air temperature {C}
-      50.,                     !- Zone heating design supply air temperature {C}
-      0.009,                   !- Zone cooling design supply air humidity ratio {kg-H2O/kg-air}
-      0.004,                   !- Zone heating design supply air humidity ratio {kg-H2O/kg-air}
-      DSOA1,                   !- Design Specification Outdoor Air Object Name
-      0.0,                     !- zone heating sizing factor
-      0.0,                     !- zone cooling sizing factor
-      designdaywithlimit,      !- Cooling Design Air Flow Method
-      ,                        !- cooling design air flow rate {m3/s}
-      ,                        !- Cooling Minimum Air Flow per zone area {m3/s-m2}
-      ,                        !- Cooling Minimum Air Flow {m3/s}
-      ,                        !- fraction of the cooling design air flow rate
-      designday,               !- Heating Design Air Flow Method
-      ,                        !- heating design air flow rate {m3/s}
-      ,                        !- heating max air flow per zone area {m3/s-m2}
-      ,                        !- heating max air flow {m3/s}
-      ,                        !- fraction of the cooling design air flow rate
-      DSZADO1,                 !- Design Specification Zone Air Distribution Object Name
-      Yes,                     !- Account for Dedicated Outside Air System
-      ColdSupplyAir,           !- Dedicated Outside Air System Control Strategy
-      12.2,                    !- Dedicated Outside Air Low Setpoint for Design
-      14.4,                    !- Dedicated Outside Air High Setpoint for Design
-      Sensible And Latent Load, !- Zone Load Sizing Method
-      HumidityRatioDifference, !- Zone Latent Cooling Design Supply Air Humidity Ratio Input Method
-      ,                        !- Zone Dehumidification Design Supply Air Humidity Ratio
-      0.005,                   !- Zone Cooling Design Supply Air Humidity Ratio Difference
-      HumidityRatioDifference, !- Zone Latent Heating Design Supply Air Humidity Ratio Input Method
-      ,                        !- Zone Humidification Design Supply Air Humidity Ratio
-      0.005,                   !- Zone Heating Design Supply Air Humidity Ratio Difference
-      ,                        !- Zone Humidistat Dehumidification Set Point Schedule Name
-      ;                        !- Zone Humidistat Humidification Set Point Schedule Name
+  SPACE5-1,                   !- Name of a zone
+  SupplyAirTemperature,       !- Zone cooling design supply air temperature input method
+  14.,                        !- Zone cooling design supply air temperature {C}
+  0.0,                        !- Zone cooling design supply air temperature difference {C}
+  SupplyAirTemperature,       !- Zone heating design supply air temperature input method
+  50.,                        !- Zone heating design supply air temperature {C}
+  0.0,                        !- Zone heating design supply air temperature difference {C}
+  0.009,                      !- Zone cooling design supply air humidity ratio {kg-H2O/kg-air}
+  0.004,                      !- Zone heating design supply air humidity ratio {kg-H2O/kg-air}
+  DSOA1,                      !- Design Specification Outdoor Air Object Name
+  0.0,                        !- zone heating sizing factor
+  0.0,                        !- zone cooling sizing factor
+  designdaywithlimit,         !- Cooling Design Air Flow Method
+  ,                           !- cooling design air flow rate {m3/s}
+  ,                           !- Cooling Minimum Air Flow per zone area {m3/s-m2}
+  ,                           !- Cooling Minimum Air Flow {m3/s}
+  ,                           !- fraction of the cooling design air flow rate
+  designday,                  !- Heating Design Air Flow Method
+  ,                           !- heating design air flow rate {m3/s}
+  ,                           !- heating max air flow per zone area {m3/s-m2}
+  ,                           !- heating max air flow {m3/s}
+  ,                           !- fraction of the cooling design air flow rate
+  DSZADO1,                    !- Design Specification Zone Air Distribution Object Name
+  Yes,                        !- Account for Dedicated Outside Air System
+  ColdSupplyAir,              !- Dedicated Outside Air System Control Strategy
+  12.2,                       !- Dedicated Outside Air Low Setpoint for Design
+  14.4,                       !- Dedicated Outside Air High Setpoint for Design
+  Sensible And Latent Load,   !- Zone Load Sizing Method
+  HumidityRatioDifference,    !- Zone Latent Cooling Design Supply Air Humidity Ratio Input Method
+  ,                           !- Zone Dehumidification Design Supply Air Humidity Ratio
+  0.005,                      !- Zone Cooling Design Supply Air Humidity Ratio Difference
+  HumidityRatioDifference,    !- Zone Latent Heating Design Supply Air Humidity Ratio Input Method
+  ,                           !- Zone Humidification Design Supply Air Humidity Ratio
+  0.005,                      !- Zone Heating Design Supply Air Humidity Ratio Difference
+  ,                           !- Zone Humidistat Dehumidification Set Point Schedule Name
+  ,                           !- Zone Humidistat Humidification Set Point Schedule Name
+  Coincident,                 !- Type of Space Sum to Use
+  Cooling,                    !- Heating Coil Sizing Method
+  1.1;                        !- Maximum Heating Capacity To Cooling Load Sizing Ratio
 
-  DesignSpecification:OutdoorAir,
-  DSOA1,                   !- Name
-  SUM,                     !- Outdoor Air Method
-  0.00236,                 !- Outdoor Air Flow per Person
-  0.000305,                !- Outdoor Air Flow per Zone Floor Area
-  0.0,                     !- Outdoor Air Flow per Zone
-  0.0,                     !- Outdoor Air Flow Air Changes per Hour
-  ;                        !- Outdoor Air Flow Rate Fraction Schedule Name
+DesignSpecification:OutdoorAir,
+  DSOA1,                      !- Name
+  SUM,                        !- Outdoor Air Method
+  0.00236,                    !- Outdoor Air Flow per Person
+  0.000305,                   !- Outdoor Air Flow per Zone Floor Area
+  0.0,                        !- Outdoor Air Flow per Zone
+  0.0,                        !- Outdoor Air Flow Air Changes per Hour
+  ;                           !- Outdoor Air Flow Rate Fraction Schedule Name
 
-  DesignSpecification:ZoneAirDistribution,
-      DSZADO1,                 !- Name
-      1.0,                     !- Zone Air Distribution Effectiveness in Cooling Mode
-      1.0,                     !- Zone Air Distribution Effectiveness in Heating Mode
-      ,                        !- Zone Air Distribution Effectiveness Schedule Name
-      0.3;                     !- Zone Secondary Recirculation Fraction
+DesignSpecification:ZoneAirDistribution,
+  DSZADO1,                    !- Name
+  1.0,                        !- Zone Air Distribution Effectiveness in Cooling Mode
+  1.0,                        !- Zone Air Distribution Effectiveness in Heating Mode
+  ,                           !- Zone Air Distribution Effectiveness Schedule Name
+  0.3;                        !- Zone Secondary Recirculation Fraction
 \end{lstlisting}
 
 \subsubsection{Outputs}\label{outputs-1-007}
@@ -1481,7 +1504,7 @@ Enter the heating supply air volume flow rate per unit heating capacity in m3/s-
 
 \paragraph{Field Cooling Design Capacity Method}\label{field-cooling-design-capacity-method}
 
-Enter the method used to determine the cooling design capacity for scalable sizing. Input allowed is either \emph{None}, \emph{CoolingDesignCapacity}, \emph{CapacityPerFloorArea}, and \emph{FractionOfAutosizedCoolingCapacity}. None is used when a cooling coil is not included in the Zone HVAC equipment or this field may be left blank. If this input field is left blank, then the design cooling capacity is set to zero. \emph{CoolingDesignCapacity} means user specifies the magnitude of cooling capacity or the program calculates the design cooling capacity if autosize is specified. \emph{CapacityPerFloorArea} means the program calculates the design cooling capacity from user specified cooling capacity per floor area and floor area of the zone served by the HVAC unit. \emph{FractionOfAutosizedCoolingCapacity} means the program calculates the design cooling capacity from user specified fraction and the auto-sized design cooling capacity. The default method is \emph{CoolingDesignCapacity}.
+Enter the method used to determine the cooling design capacity for scalable sizing. Input allowed is either \emph{None}, \emph{CoolingDesignCapacity}, \emph{CapacityPerFloorArea}, and \emph{FractionOfAutosizedCoolingCapacity}. None is used when a cooling coil is not included in the zone HVAC equipment or this field may be left blank. If this input field is left blank, then the design cooling capacity is set to zero. \emph{CoolingDesignCapacity} means user specifies the magnitude of cooling capacity or the program calculates the design cooling capacity if autosize is specified. \emph{CapacityPerFloorArea} means the program calculates the design cooling capacity from user specified cooling capacity per floor area and floor area of the zone served by the HVAC unit. \emph{FractionOfAutosizedCoolingCapacity} means the program calculates the design cooling capacity from user specified fraction and the auto-sized design cooling capacity. The default method is \emph{CoolingDesignCapacity}.
 
 \paragraph{Field: Cooling Design Capacity \{W\}}\label{field-cooling-design-capacity-w}
 
@@ -1497,7 +1520,7 @@ Enter the cooling capacity as a fraction of the autosized cooling capacity. This
 
 \paragraph{Field: Heating Design Capacity Method}\label{field-heating-design-capacity-method}
 
-Enter the method used to determine the heating design capacity for scalable sizing. Input allowed is either \emph{None}, \emph{HeatingDesignCapacity}, \emph{CapacityPerFloorArea}, and \emph{FractionOfAutosizedHeatingCapacity}. None is used when a heating coil is not included in the Zone HVAC equipment or this field may be left blank. If this input field is left blank, then the design heating capacity is set to zero. \emph{HeatingDesignCapacity} means user specifies the magnitude of heating capacity or the program calculates the design heating capacity if autosize is specified. \emph{CapacityPerFloorArea} means the program calculates the design heating capacity from user specified heating capacity per floor area and floor area of the zone served by the HVAC unit. \emph{FractionOfAutosizedHeatingCapacity} means the program calculates the design heating capacity from user specified fraction and the auto-sized design heating capacity. The default method is \emph{HeatingDesignCapacity}.
+Enter the method used to determine the heating design capacity for scalable sizing. Input allowed is either \emph{None}, \emph{HeatingDesignCapacity}, \emph{CapacityPerFloorArea}, and \emph{FractionOfAutosizedHeatingCapacity}. None is used when a heating coil is not included in the zone HVAC equipment or this field may be left blank. If this input field is left blank, then the design heating capacity is set to zero. \emph{HeatingDesignCapacity} means user specifies the magnitude of heating capacity or the program calculates the design heating capacity if autosize is specified. \emph{CapacityPerFloorArea} means the program calculates the design heating capacity from user specified heating capacity per floor area and floor area of the zone served by the HVAC unit. \emph{FractionOfAutosizedHeatingCapacity} means the program calculates the design heating capacity from user specified fraction and the auto-sized design heating capacity. The default method is \emph{HeatingDesignCapacity}.
 
 \paragraph{Field: Heating Design Capacity \{W\}}\label{field-heating-design-capacity-w}
 
@@ -1512,110 +1535,109 @@ Enter the heating capacity per unit floor area in m3/s-m2. This field is require
 Enter the heating capacity as a fraction of the autosized heating capacity. This input field is required when the Heating Design Capacity Method is \emph{FractionOfAutosizedHeatingCapacity}. This input field may be left blank if a heating coil is not included in the zone HVAC equipment or the Heating Design Capacity Method is not \emph{FractionOfAutosizedHeatingCapacity}. The program calculates the heating capacity from the design autosized cooling capacity and user specified fraction. Design day sizing run must be specified.
 
 \begin{lstlisting}
+DesignSpecification:ZoneHVAC:Sizing,
+  VRFDesignSpec1,             !- Name
+  SupplyAirFlowRate,          !- Cooling Design Air Flow Method
+  autosize,                   !- Cooling Design Supply Air Flow Rate
+  ,                           !- Cooling Design Supply Air Flow Rate Per Floor Area
+  ,                           !- Fraction of Autosized Cooling Design Supply Air Flow Rate
+  ,                           !- Cooling Design Supply Air Flow Rate Per Unit of Capacity {m3/s-W}
+  SupplyAirFlowRate,          !- Supply Air Flow Rate Method When No Cooling or Heating is Required
+  autosize,                   !- Supply Air Flow Rate When No Cooling or Heating is Required
+  ,                           !- Supply Air Flow Rate Per Floor Area When No Clg or Htg is Required
+  ,                           !- Fraction of Autosized Design Cooling Supply Air Flow Rate When No Clg or Htg
+  ,                           !- Fraction of Autosized Design Heating Supply Air Flow Rate When No Clg or Htg
+  SupplyAirFlowRate,          !- Heating Design Air Flow Method
+  autosize,                   !- Heating Design Supply Air Flow Rate
+  ,                           !- Heating Design Supply Air Flow Rate Per Floor Area
+  ,                           !- Fraction of Autosized Heating Design Supply Air Flow Rate
+  ,                           !- Heating Design Supply Air Flow Rate Per Unit of Heating Capacity
+  CoolingDesignCapacity,      !- Cooling Design Capacity Method
+  autosize,                   !- Cooling Design Capacity {W}
+  ,                           !- Cooling Design Capacity Per Floor Area {W/m2}
+  ,                           !- Fraction of Autosized Cooling Design Capacity {-}
+  HeatingDesignCapacity,      !- Heating Design Capacity Method
+  autosize,                   !- Heating Design Capacity {W}
+  ,                           !- Heating Design Capacity Per Floor Area {W/m2}
+  ;                           !- Fraction of Autosized Cooling Design Capacity {-}
 
-  DesignSpecification:ZoneHVAC:Sizing,
-      VRFDesignSpec1,          !- Name
-      SupplyAirFlowRate,       !- Cooling Design Air Flow Method
-      autosize,                !- Cooling Design Supply Air Flow Rate
-      ,                        !- Cooling Design Supply Air Flow Rate Per Floor Area
-      ,                        !- Fraction of Autosized Cooling Design Supply Air Flow Rate
-      ,                        !- Cooling Design Supply Air Flow Rate Per Unit of Capacity {m3/s-W}
-      SupplyAirFlowRate,       !- Supply Air Flow Rate Method When No Cooling or Heating is Required
-      autosize,                !- Supply Air Flow Rate When No Cooling or Heating is Required
-      ,                        !- Supply Air Flow Rate Per Floor Area When No Clg or Htg is Required
-      ,                     !- Fraction of Autosized Design Cooling Supply Air Flow Rate When No Clg or Htg
-      ,                     !- Fraction of Autosized Design Heating Supply Air Flow Rate When No Clg or Htg
-      SupplyAirFlowRate,       !- Heating Design Air Flow Method
-      autosize,                !- Heating Design Supply Air Flow Rate
-      ,                        !- Heating Design Supply Air Flow Rate Per Floor Area
-      ,                        !- Fraction of Autosized Heating Design Supply Air Flow Rate
-      ,                        !- Heating Design Supply Air Flow Rate Per Unit of Heating Capacity
-      CoolingDesignCapacity,   !- Cooling Design Capacity Method
-      autosize,                !- Cooling Design Capacity {W}
-      ,                        !- Cooling Design Capacity Per Floor Area {W/m2}
-      ,                        !- Fraction of Autosized Cooling Design Capacity {-}
-      HeatingDesignCapacity,   !- Heating Design Capacity Method
-      autosize,                !- Heating Design Capacity {W}
-      ,                        !- Heating Design Capacity Per Floor Area {W/m2}
-      ;                        !- Fraction of Autosized Cooling Design Capacity {-}
+DesignSpecification:ZoneHVAC:Sizing,
+  VRFDesignSpec2,             !- Name
+  FlowPerFloorArea,           !- Cooling Design Air Flow Method
+  ,                           !- Cooling Design Supply Air Flow Rate
+  3.6311418E-03,              !- Cooling Design Supply Air Flow Rate Per Floor Area
+  ,                           !- Fraction of Autosized Cooling Design Supply Air Flow Rate
+  ,                           !- Cooling Design Supply Air Flow Rate Per Unit of Capacity {m3/s-W}
+  FlowPerFloorArea,           !- Supply Air Flow Rate Method When No Cooling or Heating is Required
+  ,                           !- Supply Air Flow Rate When No Cooling or Heating is Required
+  3.6311418E-03,              !- Supply Air Flow Rate Per Floor Area When No Clg or Htg is Required
+  ,                           !- Fraction of Autosized Design Cooling Supply Air Flow Rate When No Clg or Htg
+  ,                           !- Fraction of Autosized Design Heating Supply Air Flow Rate When No Clg or Htg
+  FlowPerFloorArea,           !- Heating Design Air Flow Method
+  ,                           !- Heating Design Supply Air Flow Rate
+  3.6311418E-03,              !- Heating Design Supply Air Flow Rate Per Floor Area
+  ,                           !- Fraction of Autosized Heating Design Supply Air Flow Rate
+  ,                           !- Heating Design Supply Air Flow Rate Per Unit of Heating Capacity
+  CoolingDesignCapacity,      !- Cooling Design Capacity Method
+  autosize,                   !- Cooling Design Capacity {W}
+  ,                           !- Cooling Design Capacity Per Floor Area {W/m2}
+  ,                           !- Fraction of Autosized Cooling Design Capacity {-}
+  HeatingDesignCapacity,      !- Heating Design Capacity Method
+  autosize,                   !- Heating Design Capacity {W}
+  ,                           !- Heating Design Capacity Per Floor Area {W/m2}
+  ;                           !- Fraction of Autosized Cooling Design Capacity {-}
 
-    DesignSpecification:ZoneHVAC:Sizing,
-      VRFDesignSpec2,          !- Name
-      FlowPerFloorArea,        !- Cooling Design Air Flow Method
-      ,                        !- Cooling Design Supply Air Flow Rate
-      3.6311418E-03,           !- Cooling Design Supply Air Flow Rate Per Floor Area
-      ,                        !- Fraction of Autosized Cooling Design Supply Air Flow Rate
-      ,                        !- Cooling Design Supply Air Flow Rate Per Unit of Capacity {m3/s-W}
-      FlowPerFloorArea,        !- Supply Air Flow Rate Method When No Cooling or Heating is Required
-      ,                        !- Supply Air Flow Rate When No Cooling or Heating is Required
-      3.6311418E-03,           !- Supply Air Flow Rate Per Floor Area When No Clg or Htg is Required
-      ,                     !- Fraction of Autosized Design Cooling Supply Air Flow Rate When No Clg or Htg
-      ,                     !- Fraction of Autosized Design Heating Supply Air Flow Rate When No Clg or Htg
-      FlowPerFloorArea,        !- Heating Design Air Flow Method
-      ,                        !- Heating Design Supply Air Flow Rate
-      3.6311418E-03,           !- Heating Design Supply Air Flow Rate Per Floor Area
-      ,                        !- Fraction of Autosized Heating Design Supply Air Flow Rate
-      ,                        !- Heating Design Supply Air Flow Rate Per Unit of Heating Capacity
-      CoolingDesignCapacity,   !- Cooling Design Capacity Method
-      autosize,                !- Cooling Design Capacity {W}
-      ,                        !- Cooling Design Capacity Per Floor Area {W/m2}
-      ,                        !- Fraction of Autosized Cooling Design Capacity {-}
-      HeatingDesignCapacity,   !- Heating Design Capacity Method
-      autosize,                !- Heating Design Capacity {W}
-      ,                        !- Heating Design Capacity Per Floor Area {W/m2}
-      ;                        !- Fraction of Autosized Cooling Design Capacity {-}
+DesignSpecification:ZoneHVAC:Sizing,
+  VRFDesignSpec3,             !- Name
+  FractionOfAutosizedCoolingAirflow,  !- Cooling Design Air Flow Method
+  ,                           !- Cooling Design Supply Air Flow Rate
+  ,                           !- Cooling Design Supply Air Flow Rate Per Floor Area
+  0.5,                        !- Fraction of Autosized Cooling Design Supply Air Flow Rate
+  ,                           !- Cooling Design Supply Air Flow Rate Per Unit of Capacity {m3/s-W}
+  FractionOfAutosizedCoolingAirflow,  !- Supply Air Flow Rate Method When No Cooling or Heating is Required
+  ,                           !- Supply Air Flow Rate When No Cooling or Heating is Required
+  ,                           !- Supply Air Flow Rate Per Floor Area When No Clg or Htg is Required
+  0.5,                        !- Fraction of Autosized Design Cooling Supply Air Flow Rate When No Clg or Htg
+  ,                           !- Fraction of Autosized Design Heating Supply Air Flow Rate When No Clg or Htg
+  FractionOfAutosizedHeatingAirflow,  !- Heating Design Air Flow Method
+  ,                           !- Heating Design Supply Air Flow Rate
+  ,                           !- Heating Design Supply Air Flow Rate Per Floor Area
+  0.5,                        !- Fraction of Autosized Heating Design Supply Air Flow Rate
+  ,                           !- Heating Design Supply Air Flow Rate Per Unit of Heating Capacity
+  CoolingDesignCapacity,      !- Cooling Design Capacity Method
+  autosize,                   !- Cooling Design Capacity {W}
+  ,                           !- Cooling Design Capacity Per Floor Area {W/m2}
+  ,                           !- Fraction of Autosized Cooling Design Capacity {-}
+  HeatingDesignCapacity,      !- Heating Design Capacity Method
+  autosize,                   !- Heating Design Capacity {W}
+  ,                           !- Heating Design Capacity Per Floor Area {W/m2}
+  ;                           !- Fraction of Autosized Cooling Design Capacity {-}
 
-  DesignSpecification:ZoneHVAC:Sizing,
-      VRFDesignSpec3,          !- Name
-      FractionOfAutosizedCoolingAirflow,  !- Cooling Design Air Flow Method
-      ,                        !- Cooling Design Supply Air Flow Rate
-      ,                        !- Cooling Design Supply Air Flow Rate Per Floor Area
-      0.5,                     !- Fraction of Autosized Cooling Design Supply Air Flow Rate
-      ,                        !- Cooling Design Supply Air Flow Rate Per Unit of Capacity {m3/s-W}
-    FractionOfAutosizedCoolingAirflow, !- Supply Air Flow Rate Method When No Cooling or Heating is Required
-      ,                        !- Supply Air Flow Rate When No Cooling or Heating is Required
-      ,                        !- Supply Air Flow Rate Per Floor Area When No Clg or Htg is Required
-      0.5,                 !- Fraction of Autosized Design Cooling Supply Air Flow Rate When No Clg or Htg
-      ,                    !- Fraction of Autosized Design Heating Supply Air Flow Rate When No Clg or Htg
-      FractionOfAutosizedHeatingAirflow,  !- Heating Design Air Flow Method
-      ,                        !- Heating Design Supply Air Flow Rate
-      ,                        !- Heating Design Supply Air Flow Rate Per Floor Area
-      0.5,                     !- Fraction of Autosized Heating Design Supply Air Flow Rate
-      ,                        !- Heating Design Supply Air Flow Rate Per Unit of Heating Capacity
-      CoolingDesignCapacity,   !- Cooling Design Capacity Method
-      autosize,                !- Cooling Design Capacity {W}
-      ,                        !- Cooling Design Capacity Per Floor Area {W/m2}
-      ,                        !- Fraction of Autosized Cooling Design Capacity {-}
-      HeatingDesignCapacity,   !- Heating Design Capacity Method
-      autosize,                !- Heating Design Capacity {W}
-      ,                        !- Heating Design Capacity Per Floor Area {W/m2}
-      ;                        !- Fraction of Autosized Cooling Design Capacity {-}
-
-  DesignSpecification:ZoneHVAC:Sizing,
-      VRFDesignSpec4,          !- Name
-      FlowPerCoolingCapacity,  !- Cooling Design Air Flow Method
-      ,                        !- Cooling Design Supply Air Flow Rate
-      ,                        !- Cooling Design Supply Air Flow Rate Per Floor Area
-      ,                        !- Fraction of Autosized Cooling Design Supply Air Flow Rate
-      2.9541628E-05,           !- Cooling Design Supply Air Flow Rate Per Unit of Capacity {m3/s-W}
-    FractionOfAutosizedHeatingAirflow, !- Supply Air Flow Rate Method When No Cooling or Heating is Required
-      ,                        !- Supply Air Flow Rate When No Cooling or Heating is Required
-      ,                        !- Supply Air Flow Rate Per Floor Area When No Clg or Htg is Required
-      ,                    !- Fraction of Autosized Design Cooling Supply Air Flow Rate When No Clg or Htg
-      0.413231177,         !- Fraction of Autosized Design Heating Supply Air Flow Rate When No Clg or Htg
-      FlowPerHeatingCapacity,  !- Heating Design Air Flow Method
-      ,                        !- Heating Design Supply Air Flow Rate
-      ,                        !- Heating Design Supply Air Flow Rate Per Floor Area
-      ,                        !- Fraction of Autosized Heating Design Supply Air Flow Rate
-      2.9541628E-05,           !- Heating Design Supply Air Flow Rate Per Unit of Heating Capacity
-      CoolingDesignCapacity,   !- Cooling Design Capacity Method
-      autosize,                !- Cooling Design Capacity {W}
-      ,                        !- Cooling Design Capacity Per Floor Area {W/m2}
-      ,                        !- Fraction of Autosized Cooling Design Capacity {-}
-      HeatingDesignCapacity,   !- Heating Design Capacity Method
-      autosize,                !- Heating Design Capacity {W}
-      ,                        !- Heating Design Capacity Per Floor Area {W/m2}
-      ;                        !- Fraction of Autosized Cooling Design Capacity {-}
+DesignSpecification:ZoneHVAC:Sizing,
+  VRFDesignSpec4,             !- Name
+  FlowPerCoolingCapacity,     !- Cooling Design Air Flow Method
+  ,                           !- Cooling Design Supply Air Flow Rate
+  ,                           !- Cooling Design Supply Air Flow Rate Per Floor Area
+  ,                           !- Fraction of Autosized Cooling Design Supply Air Flow Rate
+  2.9541628E-05,              !- Cooling Design Supply Air Flow Rate Per Unit of Capacity {m3/s-W}
+  FractionOfAutosizedHeatingAirflow,  !- Supply Air Flow Rate Method When No Cooling or Heating is Required
+  ,                           !- Supply Air Flow Rate When No Cooling or Heating is Required
+  ,                           !- Supply Air Flow Rate Per Floor Area When No Clg or Htg is Required
+  ,                           !- Fraction of Autosized Design Cooling Supply Air Flow Rate When No Clg or Htg
+  0.413231177,                !- Fraction of Autosized Design Heating Supply Air Flow Rate When No Clg or Htg
+  FlowPerHeatingCapacity,     !- Heating Design Air Flow Method
+  ,                           !- Heating Design Supply Air Flow Rate
+  ,                           !- Heating Design Supply Air Flow Rate Per Floor Area
+  ,                           !- Fraction of Autosized Heating Design Supply Air Flow Rate
+  2.9541628E-05,              !- Heating Design Supply Air Flow Rate Per Unit of Heating Capacity
+  CoolingDesignCapacity,      !- Cooling Design Capacity Method
+  autosize,                   !- Cooling Design Capacity {W}
+  ,                           !- Cooling Design Capacity Per Floor Area {W/m2}
+  ,                           !- Fraction of Autosized Cooling Design Capacity {-}
+  HeatingDesignCapacity,      !- Heating Design Capacity Method
+  autosize,                   !- Heating Design Capacity {W}
+  ,                           !- Heating Design Capacity Per Floor Area {W/m2}
+  ;                           !- Fraction of Autosized Cooling Design Capacity {-}
 \end{lstlisting}
 
 \subsection{DesignSpecification:AirTerminal:Sizing}\label{designspecificationairterminalsizing}
@@ -1651,14 +1673,13 @@ The fraction of the zone minimum outdoor air requirement to be met by this termi
 An IDF example:
 
 \begin{lstlisting}
-
-  DesignSpecification:AirTerminal:Sizing,
-    Recirculation System A Terminal Sizing, !- Name
-    0.6,                     !- Fraction of Design Cooling Load
-    0.8,                     !- Cooling Design Supply Air Temperature Difference Ratio
-    1.0,                     !- Fraction of Design Heating Load
-    1.0,                     !- Heating Design Supply Air Temperature Difference Ratio
-    0.0;                     !- Fraction of Minimum Outdoor Air Flow
+DesignSpecification:AirTerminal:Sizing,
+  Recirculation System A Terminal Sizing,  !- Name
+  0.6,                        !- Fraction of Design Cooling Load
+  0.8,                        !- Cooling Design Supply Air Temperature Difference Ratio
+  1.0,                        !- Fraction of Design Heating Load
+  1.0,                        !- Heating Design Supply Air Temperature Difference Ratio
+  0.0;                        !- Fraction of Minimum Outdoor Air Flow
 \end{lstlisting}
 
 \subsection{Sizing:System}\label{sizingsystem}
@@ -1781,8 +1802,8 @@ Enter the heating supply air volume flow rate per unit heating capacity in m3/s-
 
 \paragraph{Field: System Outdoor Air Method}\label{field-system-outdoor-air-method-000}
 
-The method used to calculate the system minimum outdoor air flow. The three choices are ZoneSum, Standard62.1VentilationRateProcedure (VRP), and Standard62.1SimplifiedProcedure (SP). ZoneSum sums the outdoor air flows across all zones served by the system. VRP uses the multi-zone equations defined in ASHRAE Standard 62.1 to calculate the system outdoor air flow. VRP considers zone air distribution effectiveness and zone diversification of outdoor air fractions. VRP may also adjust autosized air terminal maximum and minimum supply flow rates if needed to ensure adequate outdoor air flow rate to each zone. SP is similar to VRP and was introduced in ASHRAE Standard 62.1-2019. The main difference with VRP is that it uses a simplified approach to calculate a system's ventilation efficiency which is in turn used to calculate the system outdoor air flow. Additionally, when set to autosize, the minimum (primary) air flow (or air flow fraction) of these types of air terminals will be calculated following SP: \hyperref[airterminalsingleductvavnoreheat]{AirTerminal:SingleDuct:VAV:NoReheat} (\emph{Constant Minimum Air Flow Fraction} or \emph{Fixed Minimum Air Flow Fraction}), 
-\hyperref[airterminalsingleductvavreheat]{AirTerminal:SingleDuct:VAV:Reheat} (\emph{Constant Minimum Air Flow Fraction} or \emph{Fixed Minimum Air Flow Fraction}), \hyperref[airterminalsingleductseriespiureheat]{AirTerminal:SingleDuct:SeriesPIU:Reheat} (\emph{Minimum Primary Air Flow Fraction}), 
+The method used to calculate the system minimum outdoor air flow. The three choices are ZoneSum, Standard62.1VentilationRateProcedure (VRP), and Standard62.1SimplifiedProcedure (SP). ZoneSum sums the outdoor air flows across all zones served by the system. VRP uses the multi-zone equations defined in ASHRAE Standard 62.1 to calculate the system outdoor air flow. VRP considers zone air distribution effectiveness and zone diversification of outdoor air fractions. VRP may also adjust autosized air terminal maximum and minimum supply flow rates if needed to ensure adequate outdoor air flow rate to each zone. SP is similar to VRP and was introduced in ASHRAE Standard 62.1-2019. The main difference with VRP is that it uses a simplified approach to calculate a system's ventilation efficiency which is in turn used to calculate the system outdoor air flow. Additionally, when set to autosize, the minimum (primary) air flow (or air flow fraction) of these types of air terminals will be calculated following SP: \hyperref[airterminalsingleductvavnoreheat]{AirTerminal:SingleDuct:VAV:NoReheat} (\emph{Constant Minimum Air Flow Fraction} or \emph{Fixed Minimum Air Flow Fraction}),
+\hyperref[airterminalsingleductvavreheat]{AirTerminal:SingleDuct:VAV:Reheat} (\emph{Constant Minimum Air Flow Fraction} or \emph{Fixed Minimum Air Flow Fraction}), \hyperref[airterminalsingleductseriespiureheat]{AirTerminal:SingleDuct:SeriesPIU:Reheat} (\emph{Minimum Primary Air Flow Fraction}),
  \hyperref[airterminalsingleductparallelpiureheat]{AirTerminal:SingleDuct:ParallelPIU:Reheat}(\emph{Minimum Primary Air Flow Fraction}).
 
 \paragraph{Field: Zone Maximum Outdoor Air Fraction}\label{field-zone-maximum-outdoor-air-fraction-000}
@@ -1795,7 +1816,7 @@ Enter the method used to determine the cooling design capacity for scalable sizi
 
 \paragraph{Field: Cooling Design Capacity \{W\}}\label{field-cooling-design-capacity-w-1}
 
-Enter the magnitude of the cooling capacity in Watts. This input is an alternative to using the program auto-calculated cooling capacity value. This input is a required field when the Cooling Design Capacity Method is \emph{CoolingDesignCapacity}. This field may be left blank if a cooling coil is not included in the air loop or alternative method is specified. This input field is autosizable.
+Enter the magnitude of the cooling capacity in Watts. This input is an alternative to using the program auto-calculated cooling capacity value. This input is a required field when the Cooling Design Capacity Method is \emph{CoolingDesignCapacity}. This field may be left blank if a cooling coil is not included in the airloop or alternative method is specified. This input field is autosizable. Design day sizing run must be specified.
 
 \paragraph{Field: Cooling Design Capacity Per Floor Area \{W/m2\}}\label{field-cooling-design-capacity-per-floor-area-wm2-1}
 
@@ -1803,7 +1824,7 @@ Enter the cooling capacity per unit floor area in m3/s-m2. This field is require
 
 \paragraph{Field: Fraction of Autosized Cooling Design Capacity}\label{field-fraction-of-autosized-cooling-design-capacity-1}
 
-Enter the cooling capacity as a fraction of the autosized cooling capacity. This input field is required when the Cooling Design Capacity Method is \emph{FractionOfAutosizedCoolingCapacity}. This input field may be left blank if a cooling coil is not included in the zone HVAC equipment or the Cooling Design Capacity Method is not \emph{FractionOfAutosizedCoolingCapacity}. The program calculates the cooling capacity from the design autosized cooling capacity and user specified fraction. Design day sizing run must be specified.
+Enter the cooling capacity as a fraction of the autosized cooling capacity. This input field is required when the Cooling Design Capacity Method is \emph{FractionOfAutosizedCoolingCapacity}. This input field may be left blank if a cooling coil is not included in the airloop or the Cooling Design Capacity Method is not \emph{FractionOfAutosizedCoolingCapacity}. The program calculates the cooling capacity from the design autosized cooling capacity and user specified fraction. Design day sizing run must be specified.
 
 \paragraph{Field: Heating Design Capacity Method}\label{field-heating-design-capacity-method-1}
 
@@ -1811,7 +1832,7 @@ Enter the method used to determine the heating design capacity for scalable sizi
 
 \paragraph{Field: Heating Design Capacity \{W\}}\label{field-heating-design-capacity-w-1}
 
-Enter the magnitude of the heating capacity in Watts. This input is an alternative to using the program auto-calculated heating capacity value. This input is a required field when the Heating Design Capacity Method is \emph{HeatingDesignCapacity}. This field may be left blank if a heating coil is not included in the airloop or alternative method is specified. This input field is autosizable.
+Enter the magnitude of the heating capacity in Watts. This input is an alternative to using the program auto-calculated heating capacity value. This input is a required field when the Heating Design Capacity Method is \emph{HeatingDesignCapacity}. This field may be left blank if a heating coil is not included in the airloop or alternative method is specified. This input field is autosizable. Design day sizing run must be specified.
 
 \paragraph{Field: Heating Design Capacity Per Floor Area \{W/m2\}}\label{field-heating-design-capacity-per-floor-area-wm2-1}
 
@@ -1819,7 +1840,7 @@ Enter the heating capacity per unit floor area in m3/s-m2. This field is require
 
 \paragraph{Field: Fraction of Autosized Heating Design Capacity}\label{field-fraction-of-autosized-heating-design-capacity-1}
 
-Enter the heating capacity as a fraction of the autosized heating capacity. This input field is required when the Heating Design Capacity Method is FractionOfAutosizedHeatingCapacity. This input field may be left blank if heating coil is not included in the airloop or the Heating Design Capacity Method is not FractionOfAutosizedHeatingCapacity. The program calculates the heating capacity from the design autosized cooling capacity and user specified fraction.
+Enter the heating capacity as a fraction of the autosized heating capacity. This input field is required when the Heating Design Capacity Method is \emph{FractionOfAutosizedHeatingCapacity}. This input field may be left blank if a heating coil is not included in the airloop or the Heating Design Capacity Method is not \emph{FractionOfAutosizedHeatingCapacity}. The program calculates the heating capacity from the design autosized cooling capacity and user specified fraction. Design day sizing run must be specified.
 
 \paragraph{Field: Central Cooling Capacity Control Method}\label{field-central-cooling-capacity-control-method}
 
@@ -1829,47 +1850,60 @@ Specifies how the central cooling coil will be controlled, which affects the coi
 
 The Occupant Diversity (D) as defined in ASHRAE Standard 62.1. The Occupant Diversity is a ratio of the expected peak population to the design zone population for all zones attached to the air system. If left blank or set to autosize, EnergyPlus will calculate it by using the people schedules and design levels included in the model.
 
+\paragraph{Field: Heating Coil Sizing Method}\label{field-heating-coil-sizing-method-0102}
+
+This input is used for sizing heat pumps and can size the heating coil based on several options. The available options are \emph{None}, \emph{Cooling Capacity}, \emph{Heating Capacity}, or \emph{GreaterOfHeatingOrCooling}. The default value is None. If this field is blank or None is selected, heat pump sizing will not be affected. Otherwise, the heat pump heating coil will size on the required cooling capacity, heating capacity, or larger of these values.
+
+Heat Pump sizing is according to ACCA Manual S requirements. To properly size a heat pump specify this field as either \emph{Cooling Capacity}, \emph{Heating Capacity}, or \emph{GreaterOfHeatingOrCooling} and include a limit for maximum heating capacity to cooling load sizing ratio in the following field if desired. Also specify Sensible And Latent Load in \hyperref[field-zone-load-sizing-method]{Zone Load Sizing Method} in the \hyperref[sizingzone]{Sizing:Zone} object to correctly account for latent loads.
+
+\paragraph{Field: Maximum Heating Capacity To Cooling Load Sizing Ratio}\label{maximum-heating-capacity-to-cooling-load-sizing-ratio-0102}
+
+This input sets a limit to how much the heating capacity can exceed the cooling load or cooling capacity required to meet the cooling load including the outdoor air load. If the heating capacity is determined to be larger than the cooling load multiplied by this value, and also considers the value of the DX Heating Coil Sizing Ratio specified in parent objects, then the heating capacity will be limited by this input. Otherwise the heating capacity considers only the DX Heating Coil Sizing Ratio specified in parent objects.
+
 An IDF example:
 
 \begin{lstlisting}
-
 Sizing:System,
-  VAV Sys 1,               !- AirLoop Name
-  sensible,                !- Type of Load to Size On
-  autosize,                !- Design Outdoor Air Flow Rate {m3/s}
-  0.3,                     !- Minimum System Air Flow Ratio
-  4.5,                     !- Preheat Design Temperature {C}
-  .008,                    !- Preheat Design Humidity Ratio {kgWater/kgDryAir}
-  11.0,                    !- Precool Design Temperature {C}
-  .008,                    !- Precool Design Humidity Ratio {kgWater/kgDryAir}
-  12.8,                    !- Central Cooling Design Supply Air Temperature {C}
-  16.7,                    !- Central Heating Design Supply Air Temperature {C}
-  noncoincident,           !- Sizing Option
-  no,                      !- 100% Outdoor Air in Cooling
-  no,                      !- 100% Outdoor Air in Heating
-  0.008,                   !- Central Cooling Design Supply Air Humidity Ratio {kgWater/kgDryAir}
-  0.008,                   !- Central Heating Design Supply Air Humidity Ratio {kgWater/kgDryAir}
-  designday,               !- Cooling Supply Air Flow Rate Method
-  0,                       !- Cooling Supply Air Flow Rate {m3/s}
-  ,                        !- Cooling Supply Air Flow Rate Per Floor Area {m3/s-m2}
-  ,                        !- Cooling Fraction of Autosized Cooling Supply Air Flow Rate {-}
-  ,                        !- Cooling Supply Air Flow Rate Per Unit Cooling Capacity {m3/s-W}
-  designday,               !- Heating Supply Air Flow Rate Method
-  0,                       !- Heating Supply Air Flow Rate {m3/s}
-  ,                        !- Heating Supply Air Flow Rate Per Floor Area {m3/s-m2}
-  ,                        !- Heating Fraction of Autosized Heating Supply Air Flow Rate {-}
-  ,                        !- Heating Fraction of Autosized Cooling Supply Air Flow Rate {-}
-  ,                        !- Heating Supply Air Flow Rate Per Unit Heating Capacity {m3/s-W}
-  ZoneSum,                 !- System Outdoor Air Method
-  0.5,                     !- Zone Maximum Outdoor Air Fraction
-  CoolingDesignCapacity,   !- Cooling Design Capacity Method
-  autosize,                !- Cooling Design Capacity {W}
-  ,                        !- Cooling Design Capacity Per Floor Area {W/m2}
-  ,                        !- Fraction of Autosized Cooling Design Capacity {-}
-  HeatingDesignCapacity,   !- Heating Design Capacity Method
-  autosize,                !- Heating Design Capacity {W}
-  ,                        !- Heating Design Capacity Per Floor Area {W/m2}
-  ;                        !- Fraction of Autosized Cooling Design Capacity {-}
+  VAV Sys 1,                  !- AirLoop Name
+  sensible,                   !- Type of Load to Size On
+  autosize,                   !- Design Outdoor Air Flow Rate {m3/s}
+  0.3,                        !- Minimum System Air Flow Ratio
+  4.5,                        !- Preheat Design Temperature {C}
+  .008,                       !- Preheat Design Humidity Ratio {kgWater/kgDryAir}
+  11.0,                       !- Precool Design Temperature {C}
+  .008,                       !- Precool Design Humidity Ratio {kgWater/kgDryAir}
+  12.8,                       !- Central Cooling Design Supply Air Temperature {C}
+  16.7,                       !- Central Heating Design Supply Air Temperature {C}
+  noncoincident,              !- Sizing Option
+  no,                         !- 100% Outdoor Air in Cooling
+  no,                         !- 100% Outdoor Air in Heating
+  0.008,                      !- Central Cooling Design Supply Air Humidity Ratio {kgWater/kgDryAir}
+  0.008,                      !- Central Heating Design Supply Air Humidity Ratio {kgWater/kgDryAir}
+  designday,                  !- Cooling Supply Air Flow Rate Method
+  0,                          !- Cooling Supply Air Flow Rate {m3/s}
+  ,                           !- Cooling Supply Air Flow Rate Per Floor Area {m3/s-m2}
+  ,                           !- Cooling Fraction of Autosized Cooling Supply Air Flow Rate {-}
+  ,                           !- Cooling Supply Air Flow Rate Per Unit Cooling Capacity {m3/s-W}
+  designday,                  !- Heating Supply Air Flow Rate Method
+  0,                          !- Heating Supply Air Flow Rate {m3/s}
+  ,                           !- Heating Supply Air Flow Rate Per Floor Area {m3/s-m2}
+  ,                           !- Heating Fraction of Autosized Heating Supply Air Flow Rate {-}
+  ,                           !- Heating Fraction of Autosized Cooling Supply Air Flow Rate {-}
+  ,                           !- Heating Supply Air Flow Rate Per Unit Heating Capacity {m3/s-W}
+  ZoneSum,                    !- System Outdoor Air Method
+  0.5,                        !- Zone Maximum Outdoor Air Fraction
+  CoolingDesignCapacity,      !- Cooling Design Capacity Method
+  autosize,                   !- Cooling Design Capacity {W}
+  ,                           !- Cooling Design Capacity Per Floor Area {W/m2}
+  ,                           !- Fraction of Autosized Cooling Design Capacity {-}
+  HeatingDesignCapacity,      !- Heating Design Capacity Method
+  autosize,                   !- Heating Design Capacity {W}
+  ,                           !- Heating Design Capacity Per Floor Area {W/m2}
+  ,                           !- Fraction of Autosized Cooling Design Capacity {-}
+  ,                           !- Central Cooling Capacity Control Method
+  ,                           !- Occupant Diversity
+  ,                           !- Heating Coil Sizing Method
+  ;                           !- Maximum Heating Capacity To Cooling Capacity Sizing Ratio
 \end{lstlisting}
 
 \subsubsection{Outputs}\label{outputs-2-006}
@@ -1925,15 +1959,14 @@ This field is only used if the sizing option is set to Coincident. This field co
 An IDF example:
 
 \begin{lstlisting}
-
 Sizing:Plant,
-     Chilled Water Loop, ! name of loop
-     Cooling,            ! type of loop
-     7.22,               ! chilled water supply temperature
-     6.67,               ! chilled water delta T
-  NonCoincident,      !- Sizing Option
-  1,                  !- Zone Timesteps in Averaging Window
-  GlobalCoolingSizingFactor; !- Coincident Sizing Factor Mode
+  Chilled Water Loop,         !- name of loop
+  Cooling,                    !- type of loop
+  7.22,                       !- chilled water supply temperature
+  6.67,                       !- chilled water delta T
+  NonCoincident,              !- Sizing Option
+  1,                          !- Zone Timesteps in Averaging Window
+  GlobalCoolingSizingFactor;  !- Coincident Sizing Factor Mode
 \end{lstlisting}
 
 \subsubsection{Outputs}\label{outputs-3-004}

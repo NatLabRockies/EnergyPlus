@@ -1,7 +1,0 @@
-\chapter{EMS Sensors}\label{ems-sensors}
-
-This section provides more information about EMS sensors.
-
-The input object EnergyManagementSystem:Sensor is simple but quite powerful. It reuses the normal EnergyPlus output variables to provide a general way of obtaining a wide variety of input data with minimal complications.
-
-One odd result of the approach taken for EMS sensors is that information about the available sensors is derived from what are usually the outputs of EnergyPlus. The RDD file is an important resource for EMS users. The RDD file is an output from running EnergyPlus and is called ``eplusout.rdd'' (but you may rename it to \textless{}your-filename\textgreater{}.rdd with a run manager such as EP-Launch). This output file is often needed to develop EMS input, so you may need to do an initial run of the model with traditional controls to obtain an RDD file. The contents of an RDD file will vary depending on the type of model. Once you have experience and familiarity with the outputs expected from a model, you should not need to prerun models, as you will be able to foresee the available output. The RDD file from a similar model with the same types of components and systems can also be used as a guide for what will be available in a specific model.

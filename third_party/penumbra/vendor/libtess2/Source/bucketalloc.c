@@ -55,15 +55,15 @@ struct BucketAlloc
 
 static int CreateBucket( struct BucketAlloc* ba )
 {
-	unsigned int size;
+	size_t size;
 	Bucket* bucket;
 	void* freelist;
 	unsigned char* head;
 	unsigned char* it;
 
 	// Allocate memory for the bucket
-	size = (unsigned int)sizeof(Bucket) + ba->itemSize * ba->bucketSize;
-	bucket = (Bucket*)ba->alloc->memalloc( ba->alloc->userData, size );
+	size = sizeof(Bucket) + (size_t) (ba->itemSize * ba->bucketSize);
+	bucket = (Bucket*)ba->alloc->memalloc( ba->alloc->userData, (unsigned int) size );
 	if ( !bucket )
 		return 0;
 	bucket->next = 0;

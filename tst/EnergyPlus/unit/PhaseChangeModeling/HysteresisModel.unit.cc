@@ -1,7 +1,7 @@
-// EnergyPlus, Copyright (c) 1996-2023, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
-// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other
+// National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
 // contributors. All rights reserved.
 //
 // NOTICE: This Software was developed under funding from the U.S. Department of Energy and the
@@ -47,7 +47,6 @@
 
 // Google Test Headers
 #include <EnergyPlus/PhaseChangeModeling/HysteresisModel.hh>
-#include <fstream>
 #include <gtest/gtest.h>
 #include <vector>
 
@@ -57,10 +56,10 @@ using namespace EnergyPlus;
 class HysteresisTest : public testing::Test
 {
 public:
-    HysteresisPhaseChange::HysteresisPhaseChange ModelA;
+    Material::MaterialPhaseChange ModelA;
     virtual void SetUp()
     {
-        this->ModelA.name = "PCM Name";
+        this->ModelA.Name = "PCM Name";
         this->ModelA.totalLatentHeat = 25000;     // J/kg ?
         this->ModelA.specificHeatLiquid = 25000;  // J/kgK
         this->ModelA.deltaTempMeltingHigh = 1.0;  // deltaC
@@ -88,15 +87,15 @@ struct GetSpecHeatArgs
     Real64 previousTemperature;
     Real64 updatedTemperature;
     Real64 temperatureReverse;
-    int previousPhaseChangeState;
-    int expectedUpdatedPhaseChangeState;
+    Material::Phase previousPhaseChangeState;
+    Material::Phase expectedUpdatedPhaseChangeState;
     Real64 expectedSpecificHeat;
 
     GetSpecHeatArgs(Real64 _previousTemperature,
                     Real64 _updatedTemperature,
                     Real64 _temperatureReverse,
-                    int _previousPhaseChangeState,
-                    int _expectedUpdatedPhaseChangeState,
+                    Material::Phase _previousPhaseChangeState,
+                    Material::Phase _expectedUpdatedPhaseChangeState,
                     Real64 _expectedSpecificHeat)
         : previousTemperature(_previousTemperature), updatedTemperature(_updatedTemperature), temperatureReverse(_temperatureReverse),
           previousPhaseChangeState(_previousPhaseChangeState), expectedUpdatedPhaseChangeState(_expectedUpdatedPhaseChangeState),
@@ -159,33 +158,33 @@ TEST_F(HysteresisTest, StraightUpCurve)
     //         0            5             10           15            20           25
     //
     std::vector<GetSpecHeatArgs> args_list;
-    args_list.push_back(GetSpecHeatArgs(14.0, 14.5, -999.000000, 2, 2, 20000.417543));
-    args_list.push_back(GetSpecHeatArgs(14.5, 15.0, -999.000000, 2, 2, 20001.134998));
-    args_list.push_back(GetSpecHeatArgs(15.0, 15.5, -999.000000, 2, 2, 20003.085245));
-    args_list.push_back(GetSpecHeatArgs(15.5, 16.0, -999.000000, 2, 2, 20008.386566));
-    args_list.push_back(GetSpecHeatArgs(16.0, 16.5, -999.000000, 2, 2, 20022.797049));
-    args_list.push_back(GetSpecHeatArgs(16.5, 17.0, -999.000000, 2, 2, 20061.968804));
-    args_list.push_back(GetSpecHeatArgs(17.0, 17.5, -999.000000, 2, 2, 20168.448675));
-    args_list.push_back(GetSpecHeatArgs(17.5, 18.0, -999.000000, 2, 2, 20457.890972));
-    args_list.push_back(GetSpecHeatArgs(18.0, 18.5, -999.000000, 2, 2, 21244.676709));
-    args_list.push_back(GetSpecHeatArgs(18.5, 19.0, -999.000000, 2, -1, 23383.382081));
-    args_list.push_back(GetSpecHeatArgs(19.0, 19.5, -999.000000, -1, -1, 29196.986029));
-    args_list.push_back(GetSpecHeatArgs(19.5, 20.0, -999.000000, -1, -1, 35803.013971));
-    args_list.push_back(GetSpecHeatArgs(20.0, 20.5, -999.000000, -1, -1, 34196.986029));
-    args_list.push_back(GetSpecHeatArgs(20.5, 21.0, -999.000000, -1, -1, 28383.382081));
-    args_list.push_back(GetSpecHeatArgs(21.0, 21.5, -999.000000, -1, -2, 26244.676709));
-    args_list.push_back(GetSpecHeatArgs(21.5, 22.0, -999.000000, -2, -2, 25457.890972));
-    args_list.push_back(GetSpecHeatArgs(22.0, 22.5, -999.000000, -2, -2, 25168.448675));
-    args_list.push_back(GetSpecHeatArgs(22.5, 23.0, -999.000000, -2, -2, 25061.968804));
-    args_list.push_back(GetSpecHeatArgs(23.0, 23.5, -999.000000, -2, -2, 25022.797049));
-    args_list.push_back(GetSpecHeatArgs(23.5, 24.0, -999.000000, -2, -2, 25008.386566));
-    args_list.push_back(GetSpecHeatArgs(24.0, 24.5, -999.000000, -2, -2, 25003.085245));
-    args_list.push_back(GetSpecHeatArgs(24.5, 25.0, -999.000000, -2, -2, 25001.134998));
-    args_list.push_back(GetSpecHeatArgs(25.0, 25.5, -999.000000, -2, -2, 25000.417543));
-    args_list.push_back(GetSpecHeatArgs(25.5, 26.0, -999.000000, -2, -2, 25000.153605));
-    args_list.push_back(GetSpecHeatArgs(26.0, 26.5, -999.000000, -2, -2, 25000.056508));
+    args_list.emplace_back(14.0, 14.5, -999.000000, Material::Phase::Crystallized, Material::Phase::Crystallized, 20000.417543);
+    args_list.emplace_back(14.5, 15.0, -999.000000, Material::Phase::Crystallized, Material::Phase::Crystallized, 20001.134998);
+    args_list.emplace_back(15.0, 15.5, -999.000000, Material::Phase::Crystallized, Material::Phase::Crystallized, 20003.085245);
+    args_list.emplace_back(15.5, 16.0, -999.000000, Material::Phase::Crystallized, Material::Phase::Crystallized, 20008.386566);
+    args_list.emplace_back(16.0, 16.5, -999.000000, Material::Phase::Crystallized, Material::Phase::Crystallized, 20022.797049);
+    args_list.emplace_back(16.5, 17.0, -999.000000, Material::Phase::Crystallized, Material::Phase::Crystallized, 20061.968804);
+    args_list.emplace_back(17.0, 17.5, -999.000000, Material::Phase::Crystallized, Material::Phase::Crystallized, 20168.448675);
+    args_list.emplace_back(17.5, 18.0, -999.000000, Material::Phase::Crystallized, Material::Phase::Crystallized, 20457.890972);
+    args_list.emplace_back(18.0, 18.5, -999.000000, Material::Phase::Crystallized, Material::Phase::Crystallized, 21244.676709);
+    args_list.emplace_back(18.5, 19.0, -999.000000, Material::Phase::Crystallized, Material::Phase::Melting, 23383.382081);
+    args_list.emplace_back(19.0, 19.5, -999.000000, Material::Phase::Melting, Material::Phase::Melting, 29196.986029);
+    args_list.emplace_back(19.5, 20.0, -999.000000, Material::Phase::Melting, Material::Phase::Melting, 35803.013971);
+    args_list.emplace_back(20.0, 20.5, -999.000000, Material::Phase::Melting, Material::Phase::Melting, 34196.986029);
+    args_list.emplace_back(20.5, 21.0, -999.000000, Material::Phase::Melting, Material::Phase::Melting, 28383.382081);
+    args_list.emplace_back(21.0, 21.5, -999.000000, Material::Phase::Melting, Material::Phase::Liquid, 26244.676709);
+    args_list.emplace_back(21.5, 22.0, -999.000000, Material::Phase::Liquid, Material::Phase::Liquid, 25457.890972);
+    args_list.emplace_back(22.0, 22.5, -999.000000, Material::Phase::Liquid, Material::Phase::Liquid, 25168.448675);
+    args_list.emplace_back(22.5, 23.0, -999.000000, Material::Phase::Liquid, Material::Phase::Liquid, 25061.968804);
+    args_list.emplace_back(23.0, 23.5, -999.000000, Material::Phase::Liquid, Material::Phase::Liquid, 25022.797049);
+    args_list.emplace_back(23.5, 24.0, -999.000000, Material::Phase::Liquid, Material::Phase::Liquid, 25008.386566);
+    args_list.emplace_back(24.0, 24.5, -999.000000, Material::Phase::Liquid, Material::Phase::Liquid, 25003.085245);
+    args_list.emplace_back(24.5, 25.0, -999.000000, Material::Phase::Liquid, Material::Phase::Liquid, 25001.134998);
+    args_list.emplace_back(25.0, 25.5, -999.000000, Material::Phase::Liquid, Material::Phase::Liquid, 25000.417543);
+    args_list.emplace_back(25.5, 26.0, -999.000000, Material::Phase::Liquid, Material::Phase::Liquid, 25000.153605);
+    args_list.emplace_back(26.0, 26.5, -999.000000, Material::Phase::Liquid, Material::Phase::Liquid, 25000.056508);
     for (auto &cp_call : args_list) {
-        int calculated_pcm_state = -99;
+        Material::Phase calculated_pcm_state = Material::Phase::Invalid;
         Real64 calculated_cp = this->ModelA.getCurrentSpecificHeat(cp_call.previousTemperature,
                                                                    cp_call.updatedTemperature,
                                                                    cp_call.temperatureReverse,
@@ -197,7 +196,7 @@ TEST_F(HysteresisTest, StraightUpCurve)
 }
 
 // Generated by this call:
-// generate_test_data(this->ModelA, "StraightDownCurve", 30.000000, 15.000000, -0.500000, -2);
+// generate_test_data(this->ModelA, "StraightDownCurve", 30.000000, 15.000000, -0.500000, Material::Phase::Liquid);
 TEST_F(HysteresisTest, StraightDownCurve)
 {
     // TestDescription
@@ -250,39 +249,39 @@ TEST_F(HysteresisTest, StraightDownCurve)
     //         0          5          10          15         20         25         30
     //
     std::vector<GetSpecHeatArgs> args_list;
-    args_list.push_back(GetSpecHeatArgs(30.0, 29.5, -999.000000, -2, -2, 25000.056508));
-    args_list.push_back(GetSpecHeatArgs(29.5, 29.0, -999.000000, -2, -2, 25000.153605));
-    args_list.push_back(GetSpecHeatArgs(29.0, 28.5, -999.000000, -2, -2, 25000.417543));
-    args_list.push_back(GetSpecHeatArgs(28.5, 28.0, -999.000000, -2, -2, 25001.134998));
-    args_list.push_back(GetSpecHeatArgs(28.0, 27.5, -999.000000, -2, -2, 25003.085245));
-    args_list.push_back(GetSpecHeatArgs(27.5, 27.0, -999.000000, -2, -2, 25008.386566));
-    args_list.push_back(GetSpecHeatArgs(27.0, 26.5, -999.000000, -2, -2, 25022.797049));
-    args_list.push_back(GetSpecHeatArgs(26.5, 26.0, -999.000000, -2, -2, 25061.968804));
-    args_list.push_back(GetSpecHeatArgs(26.0, 25.5, -999.000000, -2, -2, 25168.448675));
-    args_list.push_back(GetSpecHeatArgs(25.5, 25.0, -999.000000, -2, -2, 25457.890972));
-    args_list.push_back(GetSpecHeatArgs(25.0, 24.5, -999.000000, -2, -2, 26244.676709));
-    args_list.push_back(GetSpecHeatArgs(24.5, 24.0, -999.000000, -2, 1, 28383.382081));
-    args_list.push_back(GetSpecHeatArgs(24.0, 23.5, -999.000000, 1, 1, 34196.986029));
-    args_list.push_back(GetSpecHeatArgs(23.5, 23.0, -999.000000, 1, 1, 40803.013971));
-    args_list.push_back(GetSpecHeatArgs(23.0, 22.5, -999.000000, 1, 1, 29196.986029));
-    args_list.push_back(GetSpecHeatArgs(22.5, 22.0, -999.000000, 1, 1, 23383.382081));
-    args_list.push_back(GetSpecHeatArgs(22.0, 21.5, -999.000000, 1, 2, 21244.676709));
-    args_list.push_back(GetSpecHeatArgs(21.5, 21.0, -999.000000, 2, 2, 20457.890972));
-    args_list.push_back(GetSpecHeatArgs(21.0, 20.5, -999.000000, 2, 2, 20168.448675));
-    args_list.push_back(GetSpecHeatArgs(20.5, 20.0, -999.000000, 2, 2, 20061.968804));
-    args_list.push_back(GetSpecHeatArgs(20.0, 19.5, -999.000000, 2, 2, 20022.797049));
-    args_list.push_back(GetSpecHeatArgs(19.5, 19.0, -999.000000, 2, 2, 20008.386566));
-    args_list.push_back(GetSpecHeatArgs(19.0, 18.5, -999.000000, 2, 2, 20003.085245));
-    args_list.push_back(GetSpecHeatArgs(18.5, 18.0, -999.000000, 2, 2, 20001.134998));
-    args_list.push_back(GetSpecHeatArgs(18.0, 17.5, -999.000000, 2, 2, 20000.417543));
-    args_list.push_back(GetSpecHeatArgs(17.5, 17.0, -999.000000, 2, 2, 20000.153605));
-    args_list.push_back(GetSpecHeatArgs(17.0, 16.5, -999.000000, 2, 2, 20000.056508));
-    args_list.push_back(GetSpecHeatArgs(16.5, 16.0, -999.000000, 2, 2, 20000.020788));
-    args_list.push_back(GetSpecHeatArgs(16.0, 15.5, -999.000000, 2, 2, 20000.007648));
-    args_list.push_back(GetSpecHeatArgs(15.5, 15.0, -999.000000, 2, 2, 20000.002813));
-    args_list.push_back(GetSpecHeatArgs(15.0, 14.5, -999.000000, 2, 2, 20000.001035));
+    args_list.emplace_back(30.0, 29.5, -999.000000, Material::Phase::Liquid, Material::Phase::Liquid, 25000.056508);
+    args_list.emplace_back(29.5, 29.0, -999.000000, Material::Phase::Liquid, Material::Phase::Liquid, 25000.153605);
+    args_list.emplace_back(29.0, 28.5, -999.000000, Material::Phase::Liquid, Material::Phase::Liquid, 25000.417543);
+    args_list.emplace_back(28.5, 28.0, -999.000000, Material::Phase::Liquid, Material::Phase::Liquid, 25001.134998);
+    args_list.emplace_back(28.0, 27.5, -999.000000, Material::Phase::Liquid, Material::Phase::Liquid, 25003.085245);
+    args_list.emplace_back(27.5, 27.0, -999.000000, Material::Phase::Liquid, Material::Phase::Liquid, 25008.386566);
+    args_list.emplace_back(27.0, 26.5, -999.000000, Material::Phase::Liquid, Material::Phase::Liquid, 25022.797049);
+    args_list.emplace_back(26.5, 26.0, -999.000000, Material::Phase::Liquid, Material::Phase::Liquid, 25061.968804);
+    args_list.emplace_back(26.0, 25.5, -999.000000, Material::Phase::Liquid, Material::Phase::Liquid, 25168.448675);
+    args_list.emplace_back(25.5, 25.0, -999.000000, Material::Phase::Liquid, Material::Phase::Liquid, 25457.890972);
+    args_list.emplace_back(25.0, 24.5, -999.000000, Material::Phase::Liquid, Material::Phase::Liquid, 26244.676709);
+    args_list.emplace_back(24.5, 24.0, -999.000000, Material::Phase::Liquid, Material::Phase::Freezing, 28383.382081);
+    args_list.emplace_back(24.0, 23.5, -999.000000, Material::Phase::Freezing, Material::Phase::Freezing, 34196.986029);
+    args_list.emplace_back(23.5, 23.0, -999.000000, Material::Phase::Freezing, Material::Phase::Freezing, 40803.013971);
+    args_list.emplace_back(23.0, 22.5, -999.000000, Material::Phase::Freezing, Material::Phase::Freezing, 29196.986029);
+    args_list.emplace_back(22.5, 22.0, -999.000000, Material::Phase::Freezing, Material::Phase::Freezing, 23383.382081);
+    args_list.emplace_back(22.0, 21.5, -999.000000, Material::Phase::Freezing, Material::Phase::Crystallized, 21244.676709);
+    args_list.emplace_back(21.5, 21.0, -999.000000, Material::Phase::Crystallized, Material::Phase::Crystallized, 20457.890972);
+    args_list.emplace_back(21.0, 20.5, -999.000000, Material::Phase::Crystallized, Material::Phase::Crystallized, 20168.448675);
+    args_list.emplace_back(20.5, 20.0, -999.000000, Material::Phase::Crystallized, Material::Phase::Crystallized, 20061.968804);
+    args_list.emplace_back(20.0, 19.5, -999.000000, Material::Phase::Crystallized, Material::Phase::Crystallized, 20022.797049);
+    args_list.emplace_back(19.5, 19.0, -999.000000, Material::Phase::Crystallized, Material::Phase::Crystallized, 20008.386566);
+    args_list.emplace_back(19.0, 18.5, -999.000000, Material::Phase::Crystallized, Material::Phase::Crystallized, 20003.085245);
+    args_list.emplace_back(18.5, 18.0, -999.000000, Material::Phase::Crystallized, Material::Phase::Crystallized, 20001.134998);
+    args_list.emplace_back(18.0, 17.5, -999.000000, Material::Phase::Crystallized, Material::Phase::Crystallized, 20000.417543);
+    args_list.emplace_back(17.5, 17.0, -999.000000, Material::Phase::Crystallized, Material::Phase::Crystallized, 20000.153605);
+    args_list.emplace_back(17.0, 16.5, -999.000000, Material::Phase::Crystallized, Material::Phase::Crystallized, 20000.056508);
+    args_list.emplace_back(16.5, 16.0, -999.000000, Material::Phase::Crystallized, Material::Phase::Crystallized, 20000.020788);
+    args_list.emplace_back(16.0, 15.5, -999.000000, Material::Phase::Crystallized, Material::Phase::Crystallized, 20000.007648);
+    args_list.emplace_back(15.5, 15.0, -999.000000, Material::Phase::Crystallized, Material::Phase::Crystallized, 20000.002813);
+    args_list.emplace_back(15.0, 14.5, -999.000000, Material::Phase::Crystallized, Material::Phase::Crystallized, 20000.001035);
     for (auto &cp_call : args_list) {
-        int calculated_pcm_state = -99;
+        Material::Phase calculated_pcm_state = Material::Phase::Invalid;
         Real64 calculated_cp = this->ModelA.getCurrentSpecificHeat(cp_call.previousTemperature,
                                                                    cp_call.updatedTemperature,
                                                                    cp_call.temperatureReverse,
@@ -353,75 +352,75 @@ TEST_F(HysteresisTest, CompletelyThroughMeltingAndBackDown)
     //         0         10       20        30       40        50       60        70
     //
     std::vector<GetSpecHeatArgs> args_list;
-    args_list.push_back(GetSpecHeatArgs(14.0, 14.5, -999.000000, 2, 2, 20000.417543));
-    args_list.push_back(GetSpecHeatArgs(14.5, 15.0, -999.000000, 2, 2, 20001.134998));
-    args_list.push_back(GetSpecHeatArgs(15.0, 15.5, -999.000000, 2, 2, 20003.085245));
-    args_list.push_back(GetSpecHeatArgs(15.5, 16.0, -999.000000, 2, 2, 20008.386566));
-    args_list.push_back(GetSpecHeatArgs(16.0, 16.5, -999.000000, 2, 2, 20022.797049));
-    args_list.push_back(GetSpecHeatArgs(16.5, 17.0, -999.000000, 2, 2, 20061.968804));
-    args_list.push_back(GetSpecHeatArgs(17.0, 17.5, -999.000000, 2, 2, 20168.448675));
-    args_list.push_back(GetSpecHeatArgs(17.5, 18.0, -999.000000, 2, 2, 20457.890972));
-    args_list.push_back(GetSpecHeatArgs(18.0, 18.5, -999.000000, 2, 2, 21244.676709));
-    args_list.push_back(GetSpecHeatArgs(18.5, 19.0, -999.000000, 2, -1, 23383.382081));
-    args_list.push_back(GetSpecHeatArgs(19.0, 19.5, -999.000000, -1, -1, 29196.986029));
-    args_list.push_back(GetSpecHeatArgs(19.5, 20.0, -999.000000, -1, -1, 35803.013971));
-    args_list.push_back(GetSpecHeatArgs(20.0, 20.5, -999.000000, -1, -1, 34196.986029));
-    args_list.push_back(GetSpecHeatArgs(20.5, 21.0, -999.000000, -1, -1, 28383.382081));
-    args_list.push_back(GetSpecHeatArgs(21.0, 21.5, -999.000000, -1, -2, 26244.676709));
-    args_list.push_back(GetSpecHeatArgs(21.5, 22.0, -999.000000, -2, -2, 25457.890972));
-    args_list.push_back(GetSpecHeatArgs(22.0, 22.5, -999.000000, -2, -2, 25168.448675));
-    args_list.push_back(GetSpecHeatArgs(22.5, 23.0, -999.000000, -2, -2, 25061.968804));
-    args_list.push_back(GetSpecHeatArgs(23.0, 23.5, -999.000000, -2, -2, 25022.797049));
-    args_list.push_back(GetSpecHeatArgs(23.5, 24.0, -999.000000, -2, -2, 25008.386566));
-    args_list.push_back(GetSpecHeatArgs(24.0, 24.5, -999.000000, -2, -2, 25003.085245));
-    args_list.push_back(GetSpecHeatArgs(24.5, 25.0, -999.000000, -2, -2, 25001.134998));
-    args_list.push_back(GetSpecHeatArgs(25.0, 25.5, -999.000000, -2, -2, 25000.417543));
-    args_list.push_back(GetSpecHeatArgs(25.5, 26.0, -999.000000, -2, -2, 25000.153605));
-    args_list.push_back(GetSpecHeatArgs(26.0, 26.5, -999.000000, -2, -2, 25000.056508));
-    args_list.push_back(GetSpecHeatArgs(26.5, 27.0, -999.000000, -2, -2, 25000.020788));
-    args_list.push_back(GetSpecHeatArgs(27.0, 27.5, -999.000000, -2, -2, 25000.007648));
-    args_list.push_back(GetSpecHeatArgs(27.5, 28.0, -999.000000, -2, -2, 25000.002813));
-    args_list.push_back(GetSpecHeatArgs(28.0, 28.5, -999.000000, -2, -2, 25000.001035));
-    args_list.push_back(GetSpecHeatArgs(28.5, 29.0, -999.000000, -2, -2, 25000.000381));
-    args_list.push_back(GetSpecHeatArgs(29.0, 29.5, -999.000000, -2, -2, 25000.000140));
-    args_list.push_back(GetSpecHeatArgs(29.5, 30.0, -999.000000, -2, -2, 25000.000052));
-    args_list.push_back(GetSpecHeatArgs(30.0, 30.5, -999.000000, -2, -2, 25000.000019));
-    args_list.push_back(GetSpecHeatArgs(30.5, 30.0, -999.000000, -2, -2, 25000.020788));
-    args_list.push_back(GetSpecHeatArgs(30.0, 29.5, -999.000000, -2, -2, 25000.056508));
-    args_list.push_back(GetSpecHeatArgs(29.5, 29.0, -999.000000, -2, -2, 25000.153605));
-    args_list.push_back(GetSpecHeatArgs(29.0, 28.5, -999.000000, -2, -2, 25000.417543));
-    args_list.push_back(GetSpecHeatArgs(28.5, 28.0, -999.000000, -2, -2, 25001.134998));
-    args_list.push_back(GetSpecHeatArgs(28.0, 27.5, -999.000000, -2, -2, 25003.085245));
-    args_list.push_back(GetSpecHeatArgs(27.5, 27.0, -999.000000, -2, -2, 25008.386566));
-    args_list.push_back(GetSpecHeatArgs(27.0, 26.5, -999.000000, -2, -2, 25022.797049));
-    args_list.push_back(GetSpecHeatArgs(26.5, 26.0, -999.000000, -2, -2, 25061.968804));
-    args_list.push_back(GetSpecHeatArgs(26.0, 25.5, -999.000000, -2, -2, 25168.448675));
-    args_list.push_back(GetSpecHeatArgs(25.5, 25.0, -999.000000, -2, -2, 25457.890972));
-    args_list.push_back(GetSpecHeatArgs(25.0, 24.5, -999.000000, -2, -2, 26244.676709));
-    args_list.push_back(GetSpecHeatArgs(24.5, 24.0, -999.000000, -2, 1, 28383.382081));
-    args_list.push_back(GetSpecHeatArgs(24.0, 23.5, -999.000000, 1, 1, 34196.986029));
-    args_list.push_back(GetSpecHeatArgs(23.5, 23.0, -999.000000, 1, 1, 40803.013971));
-    args_list.push_back(GetSpecHeatArgs(23.0, 22.5, -999.000000, 1, 1, 29196.986029));
-    args_list.push_back(GetSpecHeatArgs(22.5, 22.0, -999.000000, 1, 1, 23383.382081));
-    args_list.push_back(GetSpecHeatArgs(22.0, 21.5, -999.000000, 1, 2, 21244.676709));
-    args_list.push_back(GetSpecHeatArgs(21.5, 21.0, -999.000000, 2, 2, 20457.890972));
-    args_list.push_back(GetSpecHeatArgs(21.0, 20.5, -999.000000, 2, 2, 20168.448675));
-    args_list.push_back(GetSpecHeatArgs(20.5, 20.0, -999.000000, 2, 2, 20061.968804));
-    args_list.push_back(GetSpecHeatArgs(20.0, 19.5, -999.000000, 2, 2, 20022.797049));
-    args_list.push_back(GetSpecHeatArgs(19.5, 19.0, -999.000000, 2, 2, 20008.386566));
-    args_list.push_back(GetSpecHeatArgs(19.0, 18.5, -999.000000, 2, 2, 20003.085245));
-    args_list.push_back(GetSpecHeatArgs(18.5, 18.0, -999.000000, 2, 2, 20001.134998));
-    args_list.push_back(GetSpecHeatArgs(18.0, 17.5, -999.000000, 2, 2, 20000.417543));
-    args_list.push_back(GetSpecHeatArgs(17.5, 17.0, -999.000000, 2, 2, 20000.153605));
-    args_list.push_back(GetSpecHeatArgs(17.0, 16.5, -999.000000, 2, 2, 20000.056508));
-    args_list.push_back(GetSpecHeatArgs(16.5, 16.0, -999.000000, 2, 2, 20000.020788));
-    args_list.push_back(GetSpecHeatArgs(16.0, 15.5, -999.000000, 2, 2, 20000.007648));
-    args_list.push_back(GetSpecHeatArgs(15.5, 15.0, -999.000000, 2, 2, 20000.002813));
-    args_list.push_back(GetSpecHeatArgs(15.0, 14.5, -999.000000, 2, 2, 20000.001035));
-    args_list.push_back(GetSpecHeatArgs(14.5, 14.0, -999.000000, 2, 2, 20000.000381));
-    args_list.push_back(GetSpecHeatArgs(14.0, 13.5, -999.000000, 2, 2, 20000.000140));
+    args_list.emplace_back(14.0, 14.5, -999.000000, Material::Phase::Crystallized, Material::Phase::Crystallized, 20000.417543);
+    args_list.emplace_back(14.5, 15.0, -999.000000, Material::Phase::Crystallized, Material::Phase::Crystallized, 20001.134998);
+    args_list.emplace_back(15.0, 15.5, -999.000000, Material::Phase::Crystallized, Material::Phase::Crystallized, 20003.085245);
+    args_list.emplace_back(15.5, 16.0, -999.000000, Material::Phase::Crystallized, Material::Phase::Crystallized, 20008.386566);
+    args_list.emplace_back(16.0, 16.5, -999.000000, Material::Phase::Crystallized, Material::Phase::Crystallized, 20022.797049);
+    args_list.emplace_back(16.5, 17.0, -999.000000, Material::Phase::Crystallized, Material::Phase::Crystallized, 20061.968804);
+    args_list.emplace_back(17.0, 17.5, -999.000000, Material::Phase::Crystallized, Material::Phase::Crystallized, 20168.448675);
+    args_list.emplace_back(17.5, 18.0, -999.000000, Material::Phase::Crystallized, Material::Phase::Crystallized, 20457.890972);
+    args_list.emplace_back(18.0, 18.5, -999.000000, Material::Phase::Crystallized, Material::Phase::Crystallized, 21244.676709);
+    args_list.emplace_back(18.5, 19.0, -999.000000, Material::Phase::Crystallized, Material::Phase::Melting, 23383.382081);
+    args_list.emplace_back(19.0, 19.5, -999.000000, Material::Phase::Melting, Material::Phase::Melting, 29196.986029);
+    args_list.emplace_back(19.5, 20.0, -999.000000, Material::Phase::Melting, Material::Phase::Melting, 35803.013971);
+    args_list.emplace_back(20.0, 20.5, -999.000000, Material::Phase::Melting, Material::Phase::Melting, 34196.986029);
+    args_list.emplace_back(20.5, 21.0, -999.000000, Material::Phase::Melting, Material::Phase::Melting, 28383.382081);
+    args_list.emplace_back(21.0, 21.5, -999.000000, Material::Phase::Melting, Material::Phase::Liquid, 26244.676709);
+    args_list.emplace_back(21.5, 22.0, -999.000000, Material::Phase::Liquid, Material::Phase::Liquid, 25457.890972);
+    args_list.emplace_back(22.0, 22.5, -999.000000, Material::Phase::Liquid, Material::Phase::Liquid, 25168.448675);
+    args_list.emplace_back(22.5, 23.0, -999.000000, Material::Phase::Liquid, Material::Phase::Liquid, 25061.968804);
+    args_list.emplace_back(23.0, 23.5, -999.000000, Material::Phase::Liquid, Material::Phase::Liquid, 25022.797049);
+    args_list.emplace_back(23.5, 24.0, -999.000000, Material::Phase::Liquid, Material::Phase::Liquid, 25008.386566);
+    args_list.emplace_back(24.0, 24.5, -999.000000, Material::Phase::Liquid, Material::Phase::Liquid, 25003.085245);
+    args_list.emplace_back(24.5, 25.0, -999.000000, Material::Phase::Liquid, Material::Phase::Liquid, 25001.134998);
+    args_list.emplace_back(25.0, 25.5, -999.000000, Material::Phase::Liquid, Material::Phase::Liquid, 25000.417543);
+    args_list.emplace_back(25.5, 26.0, -999.000000, Material::Phase::Liquid, Material::Phase::Liquid, 25000.153605);
+    args_list.emplace_back(26.0, 26.5, -999.000000, Material::Phase::Liquid, Material::Phase::Liquid, 25000.056508);
+    args_list.emplace_back(26.5, 27.0, -999.000000, Material::Phase::Liquid, Material::Phase::Liquid, 25000.020788);
+    args_list.emplace_back(27.0, 27.5, -999.000000, Material::Phase::Liquid, Material::Phase::Liquid, 25000.007648);
+    args_list.emplace_back(27.5, 28.0, -999.000000, Material::Phase::Liquid, Material::Phase::Liquid, 25000.002813);
+    args_list.emplace_back(28.0, 28.5, -999.000000, Material::Phase::Liquid, Material::Phase::Liquid, 25000.001035);
+    args_list.emplace_back(28.5, 29.0, -999.000000, Material::Phase::Liquid, Material::Phase::Liquid, 25000.000381);
+    args_list.emplace_back(29.0, 29.5, -999.000000, Material::Phase::Liquid, Material::Phase::Liquid, 25000.000140);
+    args_list.emplace_back(29.5, 30.0, -999.000000, Material::Phase::Liquid, Material::Phase::Liquid, 25000.000052);
+    args_list.emplace_back(30.0, 30.5, -999.000000, Material::Phase::Liquid, Material::Phase::Liquid, 25000.000019);
+    args_list.emplace_back(30.5, 30.0, -999.000000, Material::Phase::Liquid, Material::Phase::Liquid, 25000.020788);
+    args_list.emplace_back(30.0, 29.5, -999.000000, Material::Phase::Liquid, Material::Phase::Liquid, 25000.056508);
+    args_list.emplace_back(29.5, 29.0, -999.000000, Material::Phase::Liquid, Material::Phase::Liquid, 25000.153605);
+    args_list.emplace_back(29.0, 28.5, -999.000000, Material::Phase::Liquid, Material::Phase::Liquid, 25000.417543);
+    args_list.emplace_back(28.5, 28.0, -999.000000, Material::Phase::Liquid, Material::Phase::Liquid, 25001.134998);
+    args_list.emplace_back(28.0, 27.5, -999.000000, Material::Phase::Liquid, Material::Phase::Liquid, 25003.085245);
+    args_list.emplace_back(27.5, 27.0, -999.000000, Material::Phase::Liquid, Material::Phase::Liquid, 25008.386566);
+    args_list.emplace_back(27.0, 26.5, -999.000000, Material::Phase::Liquid, Material::Phase::Liquid, 25022.797049);
+    args_list.emplace_back(26.5, 26.0, -999.000000, Material::Phase::Liquid, Material::Phase::Liquid, 25061.968804);
+    args_list.emplace_back(26.0, 25.5, -999.000000, Material::Phase::Liquid, Material::Phase::Liquid, 25168.448675);
+    args_list.emplace_back(25.5, 25.0, -999.000000, Material::Phase::Liquid, Material::Phase::Liquid, 25457.890972);
+    args_list.emplace_back(25.0, 24.5, -999.000000, Material::Phase::Liquid, Material::Phase::Liquid, 26244.676709);
+    args_list.emplace_back(24.5, 24.0, -999.000000, Material::Phase::Liquid, Material::Phase::Freezing, 28383.382081);
+    args_list.emplace_back(24.0, 23.5, -999.000000, Material::Phase::Freezing, Material::Phase::Freezing, 34196.986029);
+    args_list.emplace_back(23.5, 23.0, -999.000000, Material::Phase::Freezing, Material::Phase::Freezing, 40803.013971);
+    args_list.emplace_back(23.0, 22.5, -999.000000, Material::Phase::Freezing, Material::Phase::Freezing, 29196.986029);
+    args_list.emplace_back(22.5, 22.0, -999.000000, Material::Phase::Freezing, Material::Phase::Freezing, 23383.382081);
+    args_list.emplace_back(22.0, 21.5, -999.000000, Material::Phase::Freezing, Material::Phase::Crystallized, 21244.676709);
+    args_list.emplace_back(21.5, 21.0, -999.000000, Material::Phase::Crystallized, Material::Phase::Crystallized, 20457.890972);
+    args_list.emplace_back(21.0, 20.5, -999.000000, Material::Phase::Crystallized, Material::Phase::Crystallized, 20168.448675);
+    args_list.emplace_back(20.5, 20.0, -999.000000, Material::Phase::Crystallized, Material::Phase::Crystallized, 20061.968804);
+    args_list.emplace_back(20.0, 19.5, -999.000000, Material::Phase::Crystallized, Material::Phase::Crystallized, 20022.797049);
+    args_list.emplace_back(19.5, 19.0, -999.000000, Material::Phase::Crystallized, Material::Phase::Crystallized, 20008.386566);
+    args_list.emplace_back(19.0, 18.5, -999.000000, Material::Phase::Crystallized, Material::Phase::Crystallized, 20003.085245);
+    args_list.emplace_back(18.5, 18.0, -999.000000, Material::Phase::Crystallized, Material::Phase::Crystallized, 20001.134998);
+    args_list.emplace_back(18.0, 17.5, -999.000000, Material::Phase::Crystallized, Material::Phase::Crystallized, 20000.417543);
+    args_list.emplace_back(17.5, 17.0, -999.000000, Material::Phase::Crystallized, Material::Phase::Crystallized, 20000.153605);
+    args_list.emplace_back(17.0, 16.5, -999.000000, Material::Phase::Crystallized, Material::Phase::Crystallized, 20000.056508);
+    args_list.emplace_back(16.5, 16.0, -999.000000, Material::Phase::Crystallized, Material::Phase::Crystallized, 20000.020788);
+    args_list.emplace_back(16.0, 15.5, -999.000000, Material::Phase::Crystallized, Material::Phase::Crystallized, 20000.007648);
+    args_list.emplace_back(15.5, 15.0, -999.000000, Material::Phase::Crystallized, Material::Phase::Crystallized, 20000.002813);
+    args_list.emplace_back(15.0, 14.5, -999.000000, Material::Phase::Crystallized, Material::Phase::Crystallized, 20000.001035);
+    args_list.emplace_back(14.5, 14.0, -999.000000, Material::Phase::Crystallized, Material::Phase::Crystallized, 20000.000381);
+    args_list.emplace_back(14.0, 13.5, -999.000000, Material::Phase::Crystallized, Material::Phase::Crystallized, 20000.000140);
     for (auto &cp_call : args_list) {
-        int calculated_pcm_state = -99;
+        Material::Phase calculated_pcm_state = Material::Phase::Invalid;
         Real64 calculated_cp = this->ModelA.getCurrentSpecificHeat(cp_call.previousTemperature,
                                                                    cp_call.updatedTemperature,
                                                                    cp_call.temperatureReverse,
@@ -487,35 +486,35 @@ TEST_F(HysteresisTest, IntoMeltingAndBackDown)
     //         0            5             10           15            20           25
     //
     std::vector<GetSpecHeatArgs> args_list;
-    args_list.push_back(GetSpecHeatArgs(14.0, 14.5, -999.000000, 2, 2, 20000.417543));
-    args_list.push_back(GetSpecHeatArgs(14.5, 15.0, -999.000000, 2, 2, 20001.134998));
-    args_list.push_back(GetSpecHeatArgs(15.0, 15.5, -999.000000, 2, 2, 20003.085245));
-    args_list.push_back(GetSpecHeatArgs(15.5, 16.0, -999.000000, 2, 2, 20008.386566));
-    args_list.push_back(GetSpecHeatArgs(16.0, 16.5, -999.000000, 2, 2, 20022.797049));
-    args_list.push_back(GetSpecHeatArgs(16.5, 17.0, -999.000000, 2, 2, 20061.968804));
-    args_list.push_back(GetSpecHeatArgs(17.0, 17.5, -999.000000, 2, 2, 20168.448675));
-    args_list.push_back(GetSpecHeatArgs(17.5, 18.0, -999.000000, 2, 2, 20457.890972));
-    args_list.push_back(GetSpecHeatArgs(18.0, 18.5, -999.000000, 2, 2, 21244.676709));
-    args_list.push_back(GetSpecHeatArgs(18.5, 19.0, -999.000000, 2, -1, 23383.382081));
-    args_list.push_back(GetSpecHeatArgs(19.0, 19.5, -999.000000, -1, -1, 29196.986029));
-    args_list.push_back(GetSpecHeatArgs(19.5, 20.0, -999.000000, -1, -1, 35803.013971));
-    args_list.push_back(GetSpecHeatArgs(20.0, 20.5, -999.000000, -1, -1, 34196.986029));
-    args_list.push_back(GetSpecHeatArgs(20.5, 20.0, -999.000000, -1, 2, 20061.968804));
-    args_list.push_back(GetSpecHeatArgs(20.0, 19.5, -999.000000, 2, 2, 20022.797049));
-    args_list.push_back(GetSpecHeatArgs(19.5, 19.0, -999.000000, 2, 2, 20008.386566));
-    args_list.push_back(GetSpecHeatArgs(19.0, 18.5, -999.000000, 2, 2, 20003.085245));
-    args_list.push_back(GetSpecHeatArgs(18.5, 18.0, -999.000000, 2, 2, 20001.134998));
-    args_list.push_back(GetSpecHeatArgs(18.0, 17.5, -999.000000, 2, 2, 20000.417543));
-    args_list.push_back(GetSpecHeatArgs(17.5, 17.0, -999.000000, 2, 2, 20000.153605));
-    args_list.push_back(GetSpecHeatArgs(17.0, 16.5, -999.000000, 2, 2, 20000.056508));
-    args_list.push_back(GetSpecHeatArgs(16.5, 16.0, -999.000000, 2, 2, 20000.020788));
-    args_list.push_back(GetSpecHeatArgs(16.0, 15.5, -999.000000, 2, 2, 20000.007648));
-    args_list.push_back(GetSpecHeatArgs(15.5, 15.0, -999.000000, 2, 2, 20000.002813));
-    args_list.push_back(GetSpecHeatArgs(15.0, 14.5, -999.000000, 2, 2, 20000.001035));
-    args_list.push_back(GetSpecHeatArgs(14.5, 14.0, -999.000000, 2, 2, 20000.000381));
-    args_list.push_back(GetSpecHeatArgs(14.0, 13.5, -999.000000, 2, 2, 20000.000140));
+    args_list.emplace_back(14.0, 14.5, -999.000000, Material::Phase::Crystallized, Material::Phase::Crystallized, 20000.417543);
+    args_list.emplace_back(14.5, 15.0, -999.000000, Material::Phase::Crystallized, Material::Phase::Crystallized, 20001.134998);
+    args_list.emplace_back(15.0, 15.5, -999.000000, Material::Phase::Crystallized, Material::Phase::Crystallized, 20003.085245);
+    args_list.emplace_back(15.5, 16.0, -999.000000, Material::Phase::Crystallized, Material::Phase::Crystallized, 20008.386566);
+    args_list.emplace_back(16.0, 16.5, -999.000000, Material::Phase::Crystallized, Material::Phase::Crystallized, 20022.797049);
+    args_list.emplace_back(16.5, 17.0, -999.000000, Material::Phase::Crystallized, Material::Phase::Crystallized, 20061.968804);
+    args_list.emplace_back(17.0, 17.5, -999.000000, Material::Phase::Crystallized, Material::Phase::Crystallized, 20168.448675);
+    args_list.emplace_back(17.5, 18.0, -999.000000, Material::Phase::Crystallized, Material::Phase::Crystallized, 20457.890972);
+    args_list.emplace_back(18.0, 18.5, -999.000000, Material::Phase::Crystallized, Material::Phase::Crystallized, 21244.676709);
+    args_list.emplace_back(18.5, 19.0, -999.000000, Material::Phase::Crystallized, Material::Phase::Melting, 23383.382081);
+    args_list.emplace_back(19.0, 19.5, -999.000000, Material::Phase::Melting, Material::Phase::Melting, 29196.986029);
+    args_list.emplace_back(19.5, 20.0, -999.000000, Material::Phase::Melting, Material::Phase::Melting, 35803.013971);
+    args_list.emplace_back(20.0, 20.5, -999.000000, Material::Phase::Melting, Material::Phase::Melting, 34196.986029);
+    args_list.emplace_back(20.5, 20.0, -999.000000, Material::Phase::Melting, Material::Phase::Crystallized, 20061.968804);
+    args_list.emplace_back(20.0, 19.5, -999.000000, Material::Phase::Crystallized, Material::Phase::Crystallized, 20022.797049);
+    args_list.emplace_back(19.5, 19.0, -999.000000, Material::Phase::Crystallized, Material::Phase::Crystallized, 20008.386566);
+    args_list.emplace_back(19.0, 18.5, -999.000000, Material::Phase::Crystallized, Material::Phase::Crystallized, 20003.085245);
+    args_list.emplace_back(18.5, 18.0, -999.000000, Material::Phase::Crystallized, Material::Phase::Crystallized, 20001.134998);
+    args_list.emplace_back(18.0, 17.5, -999.000000, Material::Phase::Crystallized, Material::Phase::Crystallized, 20000.417543);
+    args_list.emplace_back(17.5, 17.0, -999.000000, Material::Phase::Crystallized, Material::Phase::Crystallized, 20000.153605);
+    args_list.emplace_back(17.0, 16.5, -999.000000, Material::Phase::Crystallized, Material::Phase::Crystallized, 20000.056508);
+    args_list.emplace_back(16.5, 16.0, -999.000000, Material::Phase::Crystallized, Material::Phase::Crystallized, 20000.020788);
+    args_list.emplace_back(16.0, 15.5, -999.000000, Material::Phase::Crystallized, Material::Phase::Crystallized, 20000.007648);
+    args_list.emplace_back(15.5, 15.0, -999.000000, Material::Phase::Crystallized, Material::Phase::Crystallized, 20000.002813);
+    args_list.emplace_back(15.0, 14.5, -999.000000, Material::Phase::Crystallized, Material::Phase::Crystallized, 20000.001035);
+    args_list.emplace_back(14.5, 14.0, -999.000000, Material::Phase::Crystallized, Material::Phase::Crystallized, 20000.000381);
+    args_list.emplace_back(14.0, 13.5, -999.000000, Material::Phase::Crystallized, Material::Phase::Crystallized, 20000.000140);
     for (auto &cp_call : args_list) {
-        int calculated_pcm_state = -99;
+        Material::Phase calculated_pcm_state = Material::Phase::Invalid;
         Real64 calculated_cp = this->ModelA.getCurrentSpecificHeat(cp_call.previousTemperature,
                                                                    cp_call.updatedTemperature,
                                                                    cp_call.temperatureReverse,

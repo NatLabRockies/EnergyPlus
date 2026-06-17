@@ -1,7 +1,7 @@
-// EnergyPlus, Copyright (c) 1996-2023, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
-// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other
+// National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
 // contributors. All rights reserved.
 //
 // NOTICE: This Software was developed under funding from the U.S. Department of Energy and the
@@ -50,6 +50,14 @@
 // Google Test Headers
 #include <gtest/gtest.h>
 
+#ifdef DEBUG_ARITHM_GCC_OR_CLANG
+#    include <EnergyPlus/fenv_missing.h>
+#endif
+
+#ifdef DEBUG_ARITHM_MSVC
+#    include <cfloat>
+#endif
+
 // Google Test main
 int main(int argc, char **argv)
 {
@@ -61,5 +69,20 @@ int main(int argc, char **argv)
     ::testing::GTEST_FLAG(shuffle) = true;
 #endif
     ::testing::InitGoogleTest(&argc, argv);
+#ifdef DEBUG_ARITHM_GCC_OR_CLANG
+    feenableexcept(FE_DIVBYZERO | FE_INVALID | FE_OVERFLOW);
+#endif
+
+#ifdef DEBUG_ARITHM_MSVC
+    // Note: what you need to pass to the _controlfp_s is actually the opposite
+    // By default all bits are 1, and the exceptions are turned off, so you need to turn off the bits for the exceptions you want to enable
+    // > For the _MCW_EM mask, clearing it sets the exception, which allows the hardware exception; setting it hides the exception.
+    unsigned int fpcntrl = 0;
+    _controlfp_s(&fpcntrl, 0, 0);
+    unsigned int new_exceptions = _EM_ZERODIVIDE | _EM_INVALID | _EM_OVERFLOW;
+    unsigned int new_control = fpcntrl & ~new_exceptions;
+    _controlfp_s(&fpcntrl, new_control, _MCW_EM);
+#endif
+
     return RUN_ALL_TESTS();
 }

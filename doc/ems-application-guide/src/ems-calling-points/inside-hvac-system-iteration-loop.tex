@@ -1,3 +1,0 @@
-\section{Inside HVAC System Iteration Loop}\label{inside-hvac-system-iteration-loop}
-
-The calling point called ``InsideHVACSystemIterationLoop'' occurs before HVAC systems are modeled. Within a timestep, EnergyPlus loops over the HVAC model to solve a system of systems. It recurs after each HVAC system iteration within each timestep and can be used for a variety of control actions that affect system operation. Being within the iteration loop can increase the accuracy of control modeling when the inputs to the controls are also changing interactively. The disadvantage is extra computational expense.

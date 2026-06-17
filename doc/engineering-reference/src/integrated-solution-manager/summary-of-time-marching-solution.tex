@@ -66,6 +66,40 @@ for the system time steps using the history data for the zone time step. If two 
 
 Simultaneous solution of the system and plant operating parameters required that the temperature of the water entering the coils must be the same as the temperature leaving the chillers or boilers. In addition, the temperature of the return water from the coils must be equal to the chiller or boiler entering water temperature. In practice so long as the plant is not out of capacity the leaving water temperature from chillers and boilers is constant and equal to the design value. No iteration was required to match system and plant boundary conditions. However, if either the chiller or boiler plant was overloaded then the temperature of the water leaving the plant was not equal to the design value and the maximum output of the plant could change because of the off-design conditions. An iterative scheme using the secant method to predict successive updates to the plant leaving water conditions was therefore employed to solve for the water loop conditions with the plant operating at its maximum capacity. The simulation of the system and plant loops is described in greater detail in the later sections.
 
+\subsection{Space HVAC Simulation and Control}\label{space-hvac-simulation-and-control}
+When Space HVAC is simulated (see SpaceHVAC:EquipmentConnections), the HVAC equipment is modeled at the zone level as usual with adjustements made before and after the zone equipment simulation in function ZoneEquipmentManager:SimZoneEquipment. The space air temperatures and humidity will be calculated for each space along with lumped zone air conditions.
+
+\subsubsection{SpaceHVAC:ZoneEquipmentSplitter Adjustments}\label{space-hvac-zoneeqsplitter-adjustments}
+When a SpaceHVAC:ZoneEquipmentSplitter is used, the zone loads may be saved and adjusted prior to simulating a piece of zone equipment, according to the specified Thermostat Control Method. For Ideal control, no adjustement is made. For SingleSpace and Max control, the zone sensible and latent loads are save and then adjusted by the space load and the space fraction as shown below. Adjustments are made independently for sensible and latent loads.
+
+\begin{equation}
+{Ratio} = \dot Q_{space} / (SpaceFraction * {\dot Q_{zone}})
+\label{eq:SpaceHVACLoadAdjustment1}
+\end{equation}
+
+\begin{equation}
+{\dot Q_{adjusted}} = {Ratio}{\dot Q_{zone}}
+\label{eq:SpaceHVACLoadAdjustment2}
+\end{equation}
+
+where:
+
+${\dot Q_{space}}$ is the remaining load (sensible or latent) for the control space
+
+${\dot Q_{zone}}$ is the remaining load (sensible or latent) for the zone
+
+$Ratio$ is the ratio applied to all load types for the zone (remaining, load to heating setpoint, load to cooling setpoint, and sequenced loads).
+
+After the piece of zone equipment is simulated, any saved zone loads are restored, the equipment outlet node flow is distributed to the space outlet nodes, and any non-air system output is also distributed to the spaces. For the Ideal control option, the space fractions are recaculated every time step based on the current space load to zone load ratio.
+
+\subsubsection{SpaceHVAC:ZoneEquipmentMixer Adjustments}\label{space-hvac-zoneeqmixer-adjustments}
+When a SpaceHVAC:ZoneEquipmentMixer is used, before any zone HVAC equipment is simulated, the conditions on the mixer's zone equipment inlet node are set to the combined space outlet node conditions weighted by the space fractions.
+
+After all of the zone HVAC equipment is simulated, the flow rates on the space outlet nodes are set to the space fraction times the zone equipment inlet node flow rate.
+
+\subsubsection{SpaceHVAC:ZoneReturnMixer Adjustments}\label{space-hvac-zoneretmixer-adjustments}
+When a SpaceHVAC:ZoneReturnMixer is used, after zone-level return node flow rates are set, the space return node flow rates are set. The space flow rates are set based on the same method used for zones (sum of inlet flows minus sum of exhaust flows). Then the space flow rates are adjusted proportionately so the sum is equal to the previously determined zone-level return node flow rate. Then the conditions on the zone return nodes are set to the combined space outlet node conditions weighted by the space return node flow rates.
+
 \subsection{References}\label{references-043}
 
 Ceylan, H. T., and G. E. Myers. 1980. Long-time Solutions to Heat Conduction Transients with Time-Dependent Inputs. ASME Journal of Heat Transfer, Volume 102, No. 1, pp.~115-120.

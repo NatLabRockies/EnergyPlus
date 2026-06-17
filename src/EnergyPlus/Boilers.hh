@@ -1,7 +1,7 @@
-// EnergyPlus, Copyright (c) 1996-2023, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
-// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other
+// National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
 // contributors. All rights reserved.
 //
 // NOTICE: This Software was developed under funding from the U.S. Department of Energy and the
@@ -50,9 +50,6 @@
 
 #include <array>
 
-// ObjexxFCL Headers
-#include <ObjexxFCL/Array1D.hh>
-
 // EnergyPlus Headers
 #include <EnergyPlus/Data/BaseData.hh>
 #include <EnergyPlus/DataBranchAirLoopPlant.hh>
@@ -61,11 +58,16 @@
 #include <EnergyPlus/EnergyPlus.hh>
 #include <EnergyPlus/Plant/DataPlant.hh>
 #include <EnergyPlus/PlantComponent.hh>
+#include <EnergyPlus/UtilityRoutines.hh>
 
 namespace EnergyPlus {
 
 // Forward declarations
 struct EnergyPlusData;
+
+namespace Curve {
+    struct Curve;
+}
 
 namespace Boilers {
 
@@ -82,10 +84,10 @@ namespace Boilers {
     struct BoilerSpecs : PlantComponent
     {
         // Members
-        std::string Name;                                                                     // user identifier
-        DataGlobalConstants::ResourceType FuelType = DataGlobalConstants::ResourceType::None; // resource type assignment
-        DataPlant::PlantEquipmentType Type = DataPlant::PlantEquipmentType::Invalid;          // plant loop type identifier
-        PlantLocation plantLoc;
+        std::string Name;                                                            // user identifier
+        Constant::eFuel FuelType = Constant::eFuel::Invalid;                         // resource type assignment
+        DataPlant::PlantEquipmentType Type = DataPlant::PlantEquipmentType::Invalid; // plant loop type identifier
+        PlantLocation plantLoc{};
         bool Available = false;                                      // TRUE if machine available in current time step
         bool ON = false;                                             // TRUE: simulate the machine at it's operating part load ratio
         Real64 NomCap = 0.0;                                         // W - design nominal capacity of Boiler
@@ -107,14 +109,17 @@ namespace Boilers {
         Real64 OptPartLoadRat = 0.0;                                 // Optimal operating part load ratio
         Real64 OperPartLoadRat = 0.0;                                // Actual operating part load ratio
         TempMode CurveTempMode = TempMode::NOTSET;                   // water temp to use in curve, switch between entering and leaving
-        int EfficiencyCurvePtr = 0;                                  // Index to efficiency curve
+        Curve::Curve *EfficiencyCurve = nullptr;                     // Efficiency curve
         Real64 TempUpLimitBoilerOut = 0.0;                           // C - Boiler outlet maximum temperature limit
         Real64 ParasiticElecLoad = 0.0;                              // W - Parasitic electric power (e.g. forced draft fan)
-        int EffCurveOutputError = 0;                                 // efficiency curve output <=0 recurring warning error counter
-        int EffCurveOutputIndex = 0;                                 // efficiency curve output <=0 recurring warning error message index
-        int CalculatedEffError = 0;                                  // calculated efficiency >1.1 recurring warning error counter
-        int CalculatedEffIndex = 0;                                  // calculated efficiency >1.1 recurring warning error message index
-        bool IsThisSized = false;                                    // TRUE if sizing is done
+        Real64 ParasiticFuelConsumption = 0.0; // parasitic fuel consumption associated with the boiler (standing pilot light) [J]
+        Real64 ParasiticFuelRate = 0.0;        // avg. parasitic fuel consumption rate with the gas boiler (standing pilot light) [W]
+        Real64 ParasiticFuelCapacity = 0.0;    // capacity of parasitic fuel consumption rate, input by user [W]
+        int EffCurveOutputError = 0;           // efficiency curve output <=0 recurring warning error counter
+        int EffCurveOutputIndex = 0;           // efficiency curve output <=0 recurring warning error message index
+        int CalculatedEffError = 0;            // calculated efficiency >1.1 recurring warning error counter
+        int CalculatedEffIndex = 0;            // calculated efficiency >1.1 recurring warning error message index
+        bool IsThisSized = false;              // TRUE if sizing is done
         // Operational fault parameters
         bool FaultyBoilerFoulingFlag = false;   // True if the boiler has fouling fault
         int FaultyBoilerFoulingIndex = 0;       // Index of the fault object corresponding to the boiler
@@ -135,13 +140,6 @@ namespace Boilers {
         Real64 FuelConsumed = 0.0;             // J - Boiler Fuel consumed integrated over time
         Real64 BoilerInletTemp = 0.0;          // C - Boiler inlet temperature
         Real64 ParasiticElecConsumption = 0.0; // J - Parasitic Electrical Consumption (e.g. forced draft fan)
-
-        std::string BoilerFuelTypeForOutputVariable = "";
-
-        // Default Constructor
-        BoilerSpecs() : plantLoc{}
-        {
-        }
 
         void simulate([[maybe_unused]] EnergyPlusData &state,
                       const PlantLocation &calledFromLocation,
@@ -180,7 +178,7 @@ namespace Boilers {
                                  bool RunFlag   // boiler on when TRUE
         );
 
-        static PlantComponent *factory(EnergyPlusData &state, std::string const &objectName);
+        static BoilerSpecs *factory(EnergyPlusData &state, std::string const &objectName);
     };
 
     void GetBoilerInput(EnergyPlusData &state);
@@ -190,11 +188,19 @@ namespace Boilers {
 struct BoilersData : BaseGlobalStruct
 {
     bool getBoilerInputFlag = true;
-    Array1D<Boilers::BoilerSpecs> Boiler;
+    std::vector<Boilers::BoilerSpecs> Boiler;
+
+    void init_constant_state([[maybe_unused]] EnergyPlusData &state) override
+    {
+    }
+
+    void init_state([[maybe_unused]] EnergyPlusData &state) override
+    {
+    }
 
     void clear_state() override
     {
-        *this = BoilersData();
+        new (this) BoilersData();
     }
 };
 

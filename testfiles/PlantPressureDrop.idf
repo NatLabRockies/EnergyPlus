@@ -15,7 +15,7 @@
 ! System:   None.
 ! Plant:    PLANT LOAD PROFILE with DistrictHeating and Pressure drop components.
 
-  Version,23.1;
+  Version,26.2;
 
   Building,
     Plant Load Profile Example,  !- Name
@@ -174,7 +174,7 @@
 
   PlantEquipmentList,
     Heating Plant,           !- Name
-    DistrictHeating,         !- Equipment 1 Object Type
+    DistrictHeating:Water,   !- Equipment 1 Object Type
     Purchased Heating;       !- Equipment 1 Name
 
   BranchList,
@@ -238,12 +238,12 @@
   Branch,
     Heating Branch,          !- Name
     ,                        !- Pressure Drop Curve Name
-    DistrictHeating,         !- Component 1 Object Type
+    DistrictHeating:Water,   !- Component 1 Object Type
     Purchased Heating,       !- Component 1 Name
     Supply Heating Inlet Node,  !- Component 1 Inlet Node Name
     Supply Heating Outlet Node;  !- Component 1 Outlet Node Name
 
-  DistrictHeating,
+  DistrictHeating:Water,
     Purchased Heating,       !- Name
     Supply Heating Inlet Node,  !- Hot Water Inlet Node Name
     Supply Heating Outlet Node,  !- Hot Water Outlet Node Name
@@ -330,7 +330,8 @@
     Demand Load Profile 1 Outlet Node,  !- Outlet Node Name
     Load Profile 1 Load Schedule,  !- Load Schedule Name
     0.002,                   !- Peak Flow Rate {m3/s}
-    Load Profile 1 Flow Frac Schedule;  !- Flow Rate Fraction Schedule Name
+    Load Profile 1 Flow Frac Schedule,  !- Flow Rate Fraction Schedule Name
+    Water;                   !- Plant Loop Fluid Type
 
   Branch,
     Demand Outlet Branch,    !- Name
@@ -404,11 +405,11 @@
 
   Output:Variable,*,Pump Electricity Rate,Hourly;
 
-  Output:Meter,Heating:DistrictHeating,Daily;
+  Output:Meter,Heating:DistrictHeatingWater,Daily;
 
-  Output:Meter:MeterFileOnly,Heating:DistrictHeating,monthly;
+  Output:Meter:MeterFileOnly,Heating:DistrictHeatingWater,monthly;
 
-  Output:Meter:MeterFileOnly,Heating:DistrictHeating,runperiod;
+  Output:Meter:MeterFileOnly,Heating:DistrictHeatingWater,runperiod;
 
   Output:Meter:MeterFileOnly,Electricity:Facility,monthly;
 

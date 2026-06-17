@@ -1,7 +1,7 @@
-// EnergyPlus, Copyright (c) 1996-2023, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
-// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other
+// National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
 // contributors. All rights reserved.
 //
 // NOTICE: This Software was developed under funding from the U.S. Department of Energy and the
@@ -77,7 +77,6 @@ using namespace EnergyPlus::DataSurfaces;
 using namespace EnergyPlus::EMSManager;
 using namespace EnergyPlus::HeatBalanceManager;
 using namespace EnergyPlus::OutputProcessor;
-using namespace EnergyPlus::ScheduleManager;
 using namespace EnergyPlus::SimulationManager;
 using namespace EnergyPlus::SurfaceGeometry;
 
@@ -85,7 +84,6 @@ using namespace EnergyPlus::SurfaceGeometry;
 
 TEST_F(EnergyPlusFixture, DataHeatBalance_CheckConstructLayers)
 {
-
     bool ErrorsFound(false);
 
     std::string const idf_objects = delimited_string({
@@ -462,7 +460,7 @@ TEST_F(EnergyPlusFixture, DataHeatBalance_CheckConstructLayers)
         "    Activity Sch,            !- Activity Level Schedule Name",
         "    3.82E-8,                 !- Carbon Dioxide Generation Rate {m3/s-W}",
         "    ,                        !- Enable ASHRAE 55 Comfort Warnings",
-        "    zoneaveraged,            !- Mean Radiant Temperature Calculation Type",
+        "    EnclosureAveraged,            !- Mean Radiant Temperature Calculation Type",
         "    ,                        !- Surface Name/Angle Factor List Name",
         "    Work Eff Sch,            !- Work Efficiency Schedule Name",
         "    ClothingInsulationSchedule,  !- Clothing Insulation Calculation Method",
@@ -805,20 +803,14 @@ TEST_F(EnergyPlusFixture, DataHeatBalance_CheckConstructLayers)
     ASSERT_TRUE(process_idf(idf_objects));
 
     // OutputProcessor::TimeValue.allocate(2);
-
-    ScheduleManager::ProcessScheduleInput(*state); // read schedules
-
-    ErrorsFound = false;
-    GetProjectControlData(*state, ErrorsFound); // read project control data
-    EXPECT_FALSE(ErrorsFound);                  // expect no errors
+    state->init_state(*state);
 
     ErrorsFound = false;
     Material::GetMaterialData(*state, ErrorsFound); // read material data
     EXPECT_FALSE(ErrorsFound);                      // expect no errors
 
     ErrorsFound = false;
-    GetFrameAndDividerData(*state, ErrorsFound);
-    EXPECT_FALSE(ErrorsFound);
+    GetFrameAndDividerData(*state);
 
     SetPreConstructionInputParameters(*state);
 
@@ -844,16 +836,16 @@ TEST_F(EnergyPlusFixture, DataHeatBalance_CheckConstructLayers)
     EXPECT_EQ(state->dataConstruction->Construct(4).TotGlassLayers, 2);          // outer glass, inner glass
     EXPECT_EQ(state->dataConstruction->Construct(4).TotSolidLayers, 2);          // outer glass, inner glass
 
-    EXPECT_EQ(state->dataMaterial->Material(4)->Name, "SINGLEPANE"); // single pane glass
-    EXPECT_EQ(state->dataMaterial->Material(5)->Name, "WINGAS");     // air gap
-    EXPECT_EQ(state->dataMaterial->Material(6)->Name, "BLIND");      // window blind
+    EXPECT_EQ(state->dataMaterial->materials(4)->Name, "SINGLEPANE"); // single pane glass
+    EXPECT_EQ(state->dataMaterial->materials(5)->Name, "WINGAS");     // air gap
+    EXPECT_EQ(state->dataMaterial->materials(6)->Name, "BLIND");      // window blind
 
     // construction layer material pointers. this construction has no blind
     EXPECT_EQ(state->dataConstruction->Construct(4).LayerPoint(1), 4); // glass, outer layer
     EXPECT_EQ(state->dataConstruction->Construct(4).LayerPoint(2), 5); // air gap
     EXPECT_EQ(state->dataConstruction->Construct(4).LayerPoint(3), 4); // glass, inner layer
 
-    int windowSurfNum = UtilityRoutines::FindItemInList("ZN001:WALL001:WIN001", state->dataSurface->Surface);
+    int windowSurfNum = Util::FindItemInList("ZN001:WALL001:WIN001", state->dataSurface->Surface);
 
     EXPECT_FALSE(state->dataSurface->SurfWinHasShadeOrBlindLayer(windowSurfNum)); // the window construction has no blind
     // check if the construction has a blind material layer
@@ -863,7 +855,9 @@ TEST_F(EnergyPlusFixture, DataHeatBalance_CheckConstructLayers)
     GetEMSInput(*state);
     // check if EMS actuator is not setup because there is no blind/shade layer
     SetupWindowShadingControlActuators(*state);
-    EXPECT_EQ(state->dataRuntimeLang->numEMSActuatorsAvailable, 0); // no EMS actuator because there is shade/blind layer
+
+    // init_state() checks for EMS so there will be actuators for schedules and materials already
+    EXPECT_EQ(state->dataRuntimeLang->numEMSActuatorsAvailable, 19);
 
     // add a blind layer in between glass
     state->dataConstruction->Construct(4).TotLayers = 5;
@@ -874,7 +868,7 @@ TEST_F(EnergyPlusFixture, DataHeatBalance_CheckConstructLayers)
     state->dataConstruction->Construct(4).LayerPoint(3) = 6; // window blind
     state->dataConstruction->Construct(4).LayerPoint(4) = 5; // air gap
     state->dataConstruction->Construct(4).LayerPoint(5) = 4; // glass
-    // updated contruction and material layers data
+    // updated construction and material layers data
     EXPECT_EQ(state->dataConstruction->Construct(4).TotLayers, 5);      // outer glass, air gap, blind, air gap, inner glass
     EXPECT_EQ(state->dataConstruction->Construct(4).TotGlassLayers, 2); // outer glass, inner glass
     EXPECT_EQ(state->dataConstruction->Construct(4).TotSolidLayers, 3); // glass, blind, glass
@@ -889,20 +883,21 @@ TEST_F(EnergyPlusFixture, DataHeatBalance_CheckConstructLayers)
     SetFlagForWindowConstructionWithShadeOrBlindLayer(*state);
     EXPECT_TRUE(state->dataSurface->SurfWinHasShadeOrBlindLayer(windowSurfNum)); // the window construction has blind
     // set the blind to movable
-    state->dataSurface->SurfWinMovableSlats(windowSurfNum) = true;
+    state->dataSurface->surfShades(windowSurfNum).blind.movableSlats = true;
     // check if EMS actuator is available when blind layer is added
     SetupWindowShadingControlActuators(*state);
-    EXPECT_EQ(state->dataRuntimeLang->numEMSActuatorsAvailable, 2);
-    EXPECT_EQ(state->dataRuntimeLang->EMSActuatorAvailable(1).ComponentTypeName, "Window Shading Control");
-    EXPECT_EQ(state->dataRuntimeLang->EMSActuatorAvailable(1).ControlTypeName, "Control Status");
-    EXPECT_EQ(state->dataRuntimeLang->EMSActuatorAvailable(1).Units, "[ShadeStatus]");
-    EXPECT_EQ(state->dataRuntimeLang->EMSActuatorAvailable(2).ComponentTypeName, "Window Shading Control");
-    EXPECT_EQ(state->dataRuntimeLang->EMSActuatorAvailable(2).ControlTypeName, "Slat Angle");
-    EXPECT_EQ(state->dataRuntimeLang->EMSActuatorAvailable(2).Units, "[degrees]");
+    EXPECT_EQ(state->dataRuntimeLang->numEMSActuatorsAvailable, 21);
+    EXPECT_EQ(state->dataRuntimeLang->EMSActuatorAvailable(20).ComponentTypeName, "Window Shading Control");
+    EXPECT_EQ(state->dataRuntimeLang->EMSActuatorAvailable(20).ControlTypeName, "Control Status");
+    EXPECT_EQ(state->dataRuntimeLang->EMSActuatorAvailable(20).Units, "[ShadeStatus]");
+    EXPECT_EQ(state->dataRuntimeLang->EMSActuatorAvailable(21).ComponentTypeName, "Window Shading Control");
+    EXPECT_EQ(state->dataRuntimeLang->EMSActuatorAvailable(21).ControlTypeName, "Slat Angle");
+    EXPECT_EQ(state->dataRuntimeLang->EMSActuatorAvailable(21).Units, "[degrees]");
 }
 
 TEST_F(EnergyPlusFixture, DataHeatBalance_setUserTemperatureLocationPerpendicular)
 {
+    state->init_state(*state);
 
     Real64 userInputValue;
     Real64 expectedReturnValue;
@@ -933,6 +928,7 @@ TEST_F(EnergyPlusFixture, DataHeatBalance_setUserTemperatureLocationPerpendicula
 
 TEST_F(EnergyPlusFixture, DataHeatBalance_setNodeSourceAndUserTemp)
 {
+    state->init_state(*state);
     int expectedNodeNumberAtSource;
     int expectedNodeNumberAtUserSpecifiedLocation;
     state->dataConstruction->Construct.allocate(1);
@@ -993,6 +989,7 @@ TEST_F(EnergyPlusFixture, DataHeatBalance_setNodeSourceAndUserTemp)
 
 TEST_F(EnergyPlusFixture, DataHeatBalance_AssignReverseConstructionNumberTest)
 {
+    state->init_state(*state);
     int ConstrNum;
     int expectedResultRevConstrNum;
     int functionResultRevConstrNum;
@@ -1040,7 +1037,7 @@ TEST_F(EnergyPlusFixture, DataHeatBalance_AssignReverseConstructionNumberTest)
 
 TEST_F(EnergyPlusFixture, DataHeatBalance_setThicknessPerpendicularTest)
 {
-
+    state->init_state(*state);
     Real64 userInputValue;
     Real64 expectedReturnValue;
     Real64 actualReturnValue;
@@ -1049,6 +1046,12 @@ TEST_F(EnergyPlusFixture, DataHeatBalance_setThicknessPerpendicularTest)
     auto &thisConstruct(state->dataConstruction->Construct(1));
     thisConstruct.Name = "TestThisConstruction";
 
+    std::string const error_string0 = delimited_string(
+        {std::format("   ** Warning ** Version: missing in IDF, processing for EnergyPlus version=\"{}\"", DataStringGlobals::MatchVersion),
+         "   ** Warning ** ConstructionProperty:InternalHeatSource has a tube spacing that is less than 2 mm.  This is not allowed.",
+         "   **   ~~~   ** Construction=TestThisConstruction has this problem.  The tube spacing has been reset to 0.15m (~6 "
+         "inches) for this construction.",
+         "   **   ~~~   ** As per the Input Output Reference, tube spacing is only used for 2-D solutions and autosizing."});
     std::string const error_string1 =
         delimited_string({"   ** Warning ** ConstructionProperty:InternalHeatSource has a tube spacing that is less than 2 mm.  This is not allowed.",
                           "   **   ~~~   ** Construction=TestThisConstruction has this problem.  The tube spacing has been reset to 0.15m (~6 "
@@ -1068,7 +1071,7 @@ TEST_F(EnergyPlusFixture, DataHeatBalance_setThicknessPerpendicularTest)
     expectedReturnValue = 0.075;
     actualReturnValue = thisConstruct.setThicknessPerpendicular(*state, userInputValue);
     EXPECT_NEAR(expectedReturnValue, actualReturnValue, 0.0001);
-    EXPECT_TRUE(compare_err_stream(error_string1, true));
+    EXPECT_TRUE(compare_err_stream(error_string0, true));
 
     // Test 2: User value is greater than zero but still too small--should be reset to the "default" value (warning messages produced)
     userInputValue = 0.0001;
@@ -1099,6 +1102,7 @@ TEST_F(EnergyPlusFixture, DataHeatBalance_setThicknessPerpendicularTest)
 
 TEST_F(EnergyPlusFixture, DataHeatBalance_ComputeNominalUwithConvCoeffsTest)
 {
+    state->init_state(*state);
     Real64 expectedAnswer;
     Real64 actualAnswer;
     Real64 allowableTolerance = 0.00001;
@@ -1359,6 +1363,8 @@ TEST_F(EnergyPlusFixture, DataHeatBalance_ComputeNominalUwithConvCoeffsTest)
     // in DataHeatBalance.cc
     int numTypesSurfaceClass = static_cast<int>(DataSurfaces::SurfaceClass::Num);
     bool surfClassOK = false;
-    if (numTypesSurfaceClass == 15) surfClassOK = true;
+    if (numTypesSurfaceClass == 15) {
+        surfClassOK = true;
+    }
     EXPECT_TRUE(surfClassOK);
 }

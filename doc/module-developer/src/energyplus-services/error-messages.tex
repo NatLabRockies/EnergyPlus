@@ -116,7 +116,7 @@ Both of these calls produce messages onto the .err file that signal a warning:
 
 ~~ ** Warning ** Processing Monthly Tabular Reports: PEAK SPACE GAINS
 
-The important difference between the two calls is that the ``Error'' call will incrase the ``number of warnings'' counter whereas the ``Message'' call does not incrase the counter.~ The ``Message'' call can, therefore, be used ro ``start'' off a recurring sequence without disturbing the total warning count.~ To do this, one would place the calls:
+The important difference between the two calls is that the ``Error'' call will increase the ``number of warnings'' counter whereas the ``Message'' call does not increase the counter.~ The ``Message'' call can, therefore, be used to ``start'' off a recurring sequence without disturbing the total warning count.~ To do this, one would place the calls:
 
 CALL ShowWarningMessage(xxx)
 
@@ -132,7 +132,7 @@ Both of these calls produce messages onto the .err file that signal a warning:
 
 ~~ ** Severe~ ** Node Connection Error, Node = ``SOFC AIR INLET NODE'', ZoneExhaust node did not find a matching inlet node.
 
-The important difference between the two calls is that the ``Error'' call will incrase the ``number of severe errors'' counter whereas the ``Message'' call does not incrase the counter.~ The ``Message'' call can, therefore, be used ro ``start'' off a recurring sequence without disturbing the total warning count.~ To do this, one would place the calls:
+The important difference between the two calls is that the ``Error'' call will increase the ``number of severe errors'' counter whereas the ``Message'' call does not increase the counter.~ The ``Message'' call can, therefore, be used to ``start'' off a recurring sequence without disturbing the total warning count.~ To do this, one would place the calls:
 
 CALL ShowSevereMessage(xxx)
 
@@ -148,7 +148,7 @@ This error terminates the program.
 
 ~~ **~ Fatal~ ** EMS user program halted simulation with error code = 9001.30
 
-For clarity, the sequence ending in the fatal error, should start with a Severe error and give the user a good indication of the problem.~ During execution, this Severe error may immediately preceed the Fata call. During get input, errors may be found previously in the input, interspersed with Warning errors.~ The last Severe error is stored and displayed as the program terminates.
+For clarity, the sequence ending in the fatal error, should start with a Severe error and give the user a good indication of the problem.~ During execution, this Severe error may immediately precede the Fatal call. During get input, errors may be found previously in the input, interspersed with Warning errors.~ The last Severe error is stored and displayed as the program terminates.
 
 \subsection{ShowContinueError, ShowContinueErrorTimeStamp}\label{showcontinueerror-showcontinueerrortimestamp}
 
@@ -196,7 +196,7 @@ SUBROUTINE ShowRecurringContinueErrorAtEnd(Message,MsgIndex,ReportMaxOf,ReportMi
 
 The first two parameters (Message, MsgIndex) are required.~ The remaining six arguments (ReportMaxOf, ReportMinOf, ReportSumOf, ReportMaxUnits, ReportMinUnits, ReportSumUnits) are optional. To illustrate, we re-write the above call using the recurring error routines.~ (Note that we still do the first few counted because we are using the TimeStamp routine -- however a message buffer is set up in this instance.).
 
-!~~ Print warning messages only when valid and only for the first ocurrance. Let summary provide statistics.
+!~~ Print warning messages only when valid and only for the first occurrence. Let summary provide statistics.
 
 !~~ Wait for next time step to print warnings. If simulation iterates, print out
 
@@ -236,7 +236,7 @@ The first two parameters (Message, MsgIndex) are required.~ The remaining six ar
 
 Illustrations of use of these calls is seen in the Chiller modules, PurchasedAir modules, DXCoil modules and others.
 
-Another example is seen in the Dessicant routines:
+Another example is seen in the Desiccant routines:
 
 ~ IF (Node(DesicDehum(DesicDehumNum)\%RegenAirInNode)\%MassFlowRate .NE. \&
 

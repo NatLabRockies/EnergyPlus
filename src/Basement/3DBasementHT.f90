@@ -1008,7 +1008,7 @@ IMPLICIT NONE
        SimParams%F=.1d0
      ENDIF
      SimParams%IYRS =NumArray(2)
-     
+
      ! Override with environment variable for quicker testing
      CALL GET_ENVIRONMENT_VARIABLE("CI_BASEMENT_NUMYEARS", EnvVarNumYearsString, EnvVarNumYearsStringLength, EnvVarNumYearsStatus)
      SELECT CASE (EnvVarNumYearsStatus)
@@ -1026,7 +1026,7 @@ IMPLICIT NONE
          SimParams%IYRS = EnvVarNumYears
        END IF
      END SELECT
-          
+
      IF (SimParams%IYRS <= 0.d0) THEN
        CALL ShowSevereError('GetSimParams: Entered "IYRS: Maximum number of yearly iterations:" '//  &
           'choice is not valid.'//  &
@@ -2266,6 +2266,7 @@ IMPLICIT NONE
   REAL(r64) Elapsed_Time
   INTEGER IHrStart
   INTEGER IHrEnd
+  INTEGER CI_BAIL_EARLY_STATUS
 
 
       CALL CPU_TIME(Time_Start)
@@ -2588,6 +2589,12 @@ IMPLICIT NONE
 
 !***  Echo input data
       CALL PrelimOutput(ACEIL,AFLOOR,ARIM,ASILL,AWALL,PERIM,RUNID,TDBH,TDBC)
+
+      CALL GET_ENVIRONMENT_VARIABLE("CI_BAIL_EARLY", status=CI_BAIL_EARLY_STATUS)
+      IF (CI_BAIL_EARLY_STATUS == 0) THEN
+        print *, 'Exiting early because envionment variable CI_BAIL_EARLY was found'
+        CALL EXIT(0)
+      END IF
 
 !***  Initialize temperatures in 3-D domain
 !***  T(X,Y,Z)=TG(Z)
@@ -9634,7 +9641,7 @@ SUBROUTINE CalcTearth(IEXT,JEXT,DZ,DZP,TG,CVG)
 
 
 !*** DECLARATIONS:
-     REAL(r64) A(50), B(50), C(50), R(50), X(50), ALB, ALBEDO(2),             &
+     REAL(r64) A(100), B(100), C(100), R(100), X(100), ALB, ALBEDO(2),             &
      & AVGWND, CG, CONST(0:100,2), CPA, DH, DODPG, DW,                   &
      & DZ(-35:100), DZP(-35:100), ELEV, EPS, EPSLN(2),                   &
      & GOFT, GOLD, HRAT(24), IEXT, JEXT, LAT, LONG, MSTD, PBAR(24),      &
@@ -10576,15 +10583,14 @@ SUBROUTINE PrelimOutput(ACEIL,AFLOOR,ARIM,ASILL,AWALL,PERIM,RUNID,TDBH,TDBC)
        WRITE (InputEcho,600)
      END IF
 500  FORMAT (/5X,'EXTERIOR INSULATION IS FULL LENGTH')
-600  FORMAT (/5X,'IF INSULATED ON EXTERIOR, '                                &
-            & 'INSULATION IS PARTIAL LENGTH')
+600  FORMAT (/5X,'IF INSULATED ON EXTERIOR, ','INSULATION IS PARTIAL LENGTH')
 
      WRITE (InputEcho,700) ALBEDO(1), ALBEDO(2), EPSLN(1), EPSLN(2),         &
            & VEGHT(1), VEGHT(2), RHO(4), CP(4), TCON(4)
 700  FORMAT (/'SOIL AND SURFACE PROPERTIES:'//                               &
      & 5X,'ALBEDO:'/5X,'NO SNOW:',2X,F5.2,5X,'SNOW:',2X,F5.2//               &
      & 5X,'LONG-WAVE EMISSIVITY:'/5X,'NO SNOW:',2X,F5.2,5X,                  &
-     & 'SNOW:',2X,F5.2//5X'VEGETATION HEIGHT (CM):'/                         &
+     & 'SNOW:',2X,F5.2//5X,'VEGETATION HEIGHT (CM):'/                         &
      & 5X,'NO SNOW:',2X,F5.2,5X,'SNOW:',2X,F5.2//                            &
      & 5X,'DENSITY (KG/M**3):',2X,F7.2,                                      &
      & 5X,'SPECIFIC HEAT (J/KG/K):',2X,F6.2/                                 &
@@ -10602,7 +10608,7 @@ SUBROUTINE PrelimOutput(ACEIL,AFLOOR,ARIM,ASILL,AWALL,PERIM,RUNID,TDBH,TDBC)
      & ARIM, ASILL, AWALL, XFACE(0), XFACE(IBASE+3), YFACE(0),               &
      & YFACE(JBASE+3), ZFACE(KBASE)
 
-1000 FORMAT (/'FOUNDATION WALL MATERIAL PROPERTIES AND '                     &
+1000 FORMAT (/'FOUNDATION WALL MATERIAL PROPERTIES AND ',                    &
      & 'BASEMENT DIMENSIONS:'//5X,'DENSITY (KG/M**3):',2X,                   &
      & F7.2,                                                                 &
      & 5X,'SPECIFIC HEAT (J/KG/K):',2X,F6.2/                                 &
@@ -10633,7 +10639,7 @@ SUBROUTINE PrelimOutput(ACEIL,AFLOOR,ARIM,ASILL,AWALL,PERIM,RUNID,TDBH,TDBC)
 
      WRITE (InputEcho,1300) HIN(4), HIN(5), HIN(6)
 
-1300 FORMAT (/'BOUNDARY CONDITIONS:'//5X,'INSIDE HEAT TRANSFER'              &
+1300 FORMAT (/'BOUNDARY CONDITIONS:'//5X,'INSIDE HEAT TRANSFER',             &
      & ' COEFFICIENTS, CONVECTION AND RADIATION (W/M**2/K):'/                &
      & 5X,'Q DOWNWARD:',2X,F6.2,5X,'Q UPWARD:',2X,F6.2,5X,                   &
      &'Q HORIZONTAL:',2X,F6.2)
@@ -11382,7 +11388,7 @@ IMPLICIT NONE
 5200  FORMAT('YEARLY NET SURFACE HEAT LOSSES [W-H]'/                 &
       &  'CEILING:  ',8X,F15.1/,'FLOOR:  ',10X,F15.1/,               &
       &  'RIM JOIST:  ',6X,F15.1/,'SILL PLATE:  ',5X,F15.1/,         &
-      &  'FOUNDATION WALL:  ',F15.1/,'BASEMENT:  '7X,F15.1)
+      &  'FOUNDATION WALL:  ',F15.1/,'BASEMENT:  ',7X,F15.1)
      RETURN
 END SUBROUTINE YearlyOutput
 
@@ -11425,6 +11431,8 @@ END SUBROUTINE InitializeTemps
 !********************************   AUTOGRIDDING  ***************************************
 SUBROUTINE AutoGridding
 USE BasementSimData
+USE DataGlobals, ONLY: ShowSevereError,ShowContinueError,ShowFatalError
+USE General, ONLY: RoundSigDigits
 IMPLICIT NONE
 ! THIS PROGRAM WILL ESTABLISH THE SIMULATION GRID FOR A BASEMENT FOUNDATION
 ! WHOSE DIMENSIONS ARE INPUT BY THE USER
@@ -11766,6 +11774,13 @@ IMPLICIT NONE
      NZ5=2          ! For the next meter, cells are spaced at 0.5m
      NZ6=7          ! To the edge of the domain, cells are spaced at 2m
      NZBG=NZ1+NZ2+NZ3+NZ4+NZ5+NZ6
+
+     IF(NZBG.GT.100) THEN
+      CALL ShowSevereError('AutoGrid BaseDepth is too high, reduce it below 17.0 meters')
+      CALL ShowContinueError('BaseDepth=['//trim(RoundSigDigits(BaseDepth,4))//'], '&
+        'resulting  NZBG=['//trim(RoundSigDigits(NZBG,0))//'] (max 100).')
+      CALL ShowFatalError('Program terminates due to preceding condition(s).')
+     END IF
 
      ZFACEINIT(-NZAG+3)=-ConcAGHeight
      ZFACEINIT(-NZAG+2)=ZFACEINIT(-NZAG+3)-SillPlateHeight
@@ -12871,7 +12886,7 @@ IMPLICIT NONE
      WRITE  (XZWallTs,4300)
 4300 FORMAT (7X,'YZ Wall TS',9X,'Inside',6X,'YZ Heat flux',5X,'Base T')
      WRITE  (YZWallTs,4301)
-4301 FORMAT (7X,'XZ Wall TS',9X,'Inside'6X,'XZ Heat flux',5X,'Base T')
+4301 FORMAT (7X,'XZ Wall TS',9X,'Inside',6X,'XZ Heat flux',5X,'Base T')
      WRITE  (FloorTs,4302)
 4302 FORMAT (7X,'Floor TS',7X,'Inside',6X,'Floor heat flux',5X,'Base T')
      WRITE  (Centerline,4303)

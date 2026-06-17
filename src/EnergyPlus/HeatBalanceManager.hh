@@ -1,7 +1,7 @@
-// EnergyPlus, Copyright (c) 1996-2023, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
-// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other
+// National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
 // contributors. All rights reserved.
 //
 // NOTICE: This Software was developed under funding from the U.S. Department of Energy and the
@@ -89,7 +89,7 @@ namespace HeatBalanceManager {
 
     void GetHeatBalanceInput(EnergyPlusData &state);
 
-    void CheckUsedConstructions(EnergyPlusData &state, bool &ErrorsFound);
+    void CheckUsedConstructions(EnergyPlusData &state, [[maybe_unused]] bool &ErrorsFound);
 
     bool CheckValidSimulationObjects(EnergyPlusData &state);
 
@@ -98,8 +98,6 @@ namespace HeatBalanceManager {
     void GetProjectControlData(EnergyPlusData &state, bool &ErrorsFound); // Set to true if errors detected during getting data
 
     void GetSiteAtmosphereData(EnergyPlusData &state, bool &ErrorsFound);
-
-    void GetWindowGlassSpectralData(EnergyPlusData &state, bool &ErrorsFound); // set to true if errors found in input
 
     void GetConstructData(EnergyPlusData &state, bool &ErrorsFound); // If errors found in input
 
@@ -117,9 +115,9 @@ namespace HeatBalanceManager {
                          std::string const &cCurrentModuleObject,
                          int const ZoneLoop,
                          Array1D_string const &cAlphaArgs,
-                         int &NumAlphas,
+                         int const NumAlphas,
                          Array1D<Real64> const &rNumericArgs,
-                         int &NumNumbers,
+                         int const NumNumbers,
                          Array1D_bool const &lNumericFieldBlanks, // Unused
                          Array1D_bool const &lAlphaFieldBlanks,
                          Array1D_string const &cAlphaFieldNames,
@@ -145,7 +143,7 @@ namespace HeatBalanceManager {
 
     void OpenShadingFile(EnergyPlusData &state);
 
-    void GetFrameAndDividerData(EnergyPlusData &state, bool &ErrorsFound); // set to true if errors found in input
+    void GetFrameAndDividerData(EnergyPlusData &state); // set to true if errors found in input
 
     void SearchWindow5DataFile(EnergyPlusData &state,
                                fs::path const &DesiredFilePath,            // File path (or just name) that contains the Window5 constructions.
@@ -175,12 +173,6 @@ namespace HeatBalanceManager {
 
     void CreateTCConstructions(EnergyPlusData &state, bool &ErrorsFound); // If errors found in input
 
-    void SetupSimpleWindowGlazingSystem(EnergyPlusData &state, int &MaterNum);
-
-    void SetupComplexFenestrationMaterialInput(EnergyPlusData &state,
-                                               int &MaterNum, // num of material items thus far
-                                               bool &ErrorsFound);
-
     void SetupComplexFenestrationStateInput(EnergyPlusData &state,
                                             int &ConstrNum, // num of construction items thus far
                                             bool &ErrorsFound);
@@ -201,7 +193,6 @@ struct HeatBalanceMgrData : BaseGlobalStruct
     bool ReportWarmupConvergenceFirstWarmupWrite = true;
 
     std::string CurrentModuleObject; // to assist in getting input
-    std::unordered_map<std::string, std::string> UniqueMaterialNames;
     std::unordered_map<std::string, std::string> UniqueConstructNames;
 
     // Real Variables for the Heat Balance Simulation
@@ -236,11 +227,18 @@ struct HeatBalanceMgrData : BaseGlobalStruct
     Array1D<HeatBalanceManager::WarmupConvergence> WarmupConvergenceValues;
     SurfaceOctreeCube surfaceOctree;
 
+    void init_constant_state([[maybe_unused]] EnergyPlusData &state) override
+    {
+    }
+
+    void init_state([[maybe_unused]] EnergyPlusData &state) override
+    {
+    }
+
     void clear_state() override
     {
 
         ManageHeatBalanceGetInputFlag = true;
-        UniqueMaterialNames.clear();
         UniqueConstructNames.clear();
         DoReport = false;
         ChangeSet = true;

@@ -1,7 +1,7 @@
-// EnergyPlus, Copyright (c) 1996-2023, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
-// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other
+// National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
 // contributors. All rights reserved.
 //
 // NOTICE: This Software was developed under funding from the U.S. Department of Energy and the
@@ -46,14 +46,12 @@
 // POSSIBILITY OF SUCH DAMAGE.
 
 // C++ Headers
-#include <memory>
+#include <array>
 
 // EnergyPlus Headers
 #include <EnergyPlus/Data/EnergyPlusData.hh>
 #include <EnergyPlus/DataEnvironment.hh>
 #include <EnergyPlus/DataGlobals.hh>
-#include <EnergyPlus/DataIPShortCuts.hh>
-#include <EnergyPlus/GroundTemperatureModeling/GroundTemperatureModelManager.hh>
 #include <EnergyPlus/GroundTemperatureModeling/SiteFCFactorMethodGroundTemperatures.hh>
 #include <EnergyPlus/InputProcessing/InputProcessor.hh>
 #include <EnergyPlus/UtilityRoutines.hh>
@@ -62,167 +60,157 @@
 namespace EnergyPlus {
 
 //******************************************************************************
+namespace GroundTemp {
+    // Site:GroundTemperature:FCFactorMethod factory
+    SiteFCFactorMethodGroundTemps *SiteFCFactorMethodGroundTemps::FCFactorGTMFactory(EnergyPlusData &state, const std::string &objectName)
+    {
+        // SUBROUTINE INFORMATION:
+        //       AUTHOR         Matt Mitchell
+        //       DATE WRITTEN   Summer 2015
 
-// Site:GroundTemperature:FCFactorMethod factory
-std::shared_ptr<SiteFCFactorMethodGroundTemps> SiteFCFactorMethodGroundTemps::FCFactorGTMFactory(EnergyPlusData &state, std::string objectName)
-{
-    // SUBROUTINE INFORMATION:
-    //       AUTHOR         Matt Mitchell
-    //       DATE WRITTEN   Summer 2015
-    //       MODIFIED       na
-    //       RE-ENGINEERED  na
+        // PURPOSE OF THIS SUBROUTINE:
+        // Reads input and creates instance of Site:GroundTemperature:FCfactorMethod object
 
-    // PURPOSE OF THIS SUBROUTINE:
-    // Reads input and creates instance of Site:GroundTemperature:FCfactorMethod object
+        // SUBROUTINE LOCAL VARIABLE DECLARATIONS:
+        constexpr int numMonths = 12;
+        bool found = false;
 
-    // USE STATEMENTS:
-    using namespace GroundTemperatureManager;
+        // New shared pointer for this model object
+        auto *thisModel = new SiteFCFactorMethodGroundTemps();
 
-    // Locals
-    // SUBROUTINE LOCAL VARIABLE DECLARATIONS:
-    bool found = false;
-    int NumNums;
-    int NumAlphas;
-    int IOStat;
-    bool errorsFound = false;
+        ModelType modelType = ModelType::SiteFCFactorMethod;
 
-    // New shared pointer for this model object
-    std::shared_ptr<SiteFCFactorMethodGroundTemps> thisModel(new SiteFCFactorMethodGroundTemps());
+        std::string_view const cCurrentModuleObject = GroundTemp::modelTypeNames[(int)modelType];
+        std::string const currentModuleObject(cCurrentModuleObject);
+        auto *inputProcessor = state.dataInputProcessing->inputProcessor.get();
+        const int numCurrObjects = inputProcessor->getNumObjectsFound(state, cCurrentModuleObject);
 
-    GroundTempObjType objType = GroundTempObjType::SiteFCFactorMethodGroundTemp;
+        thisModel->modelType = modelType;
+        thisModel->Name = objectName;
 
-    std::string_view const cCurrentModuleObject = GroundTemperatureManager::groundTempModelNamesUC[static_cast<int>(objType)];
-    int numCurrObjects = state.dataInputProcessing->inputProcessor->getNumObjectsFound(state, cCurrentModuleObject);
+        if (numCurrObjects == 1) {
+            auto const &groundTempsInstances = inputProcessor->epJSON.at(currentModuleObject);
+            auto const groundTempsInstance = groundTempsInstances.begin();
+            auto const &groundTempsFields = groundTempsInstance.value();
+            auto const &groundTempsSchemaProps = inputProcessor->getObjectSchemaProps(state, currentModuleObject);
+            inputProcessor->markObjectAsUsed(currentModuleObject, groundTempsInstance.key());
+            static constexpr std::array<std::string_view, numMonths> fieldNames = {"january_ground_temperature",
+                                                                                   "february_ground_temperature",
+                                                                                   "march_ground_temperature",
+                                                                                   "april_ground_temperature",
+                                                                                   "may_ground_temperature",
+                                                                                   "june_ground_temperature",
+                                                                                   "july_ground_temperature",
+                                                                                   "august_ground_temperature",
+                                                                                   "september_ground_temperature",
+                                                                                   "october_ground_temperature",
+                                                                                   "november_ground_temperature",
+                                                                                   "december_ground_temperature"};
 
-    thisModel->objectType = objType;
-    thisModel->objectName = objectName;
+            // overwrite values read from weather file for the 0.5m set ground temperatures
+            for (int i = 0; i < numMonths; ++i) {
+                thisModel->fcFactorGroundTemps[i] =
+                    inputProcessor->getRealFieldValue(groundTempsFields, groundTempsSchemaProps, std::string(fieldNames[i]));
+            }
 
-    if (numCurrObjects == 1) {
+            state.dataEnvrn->GroundTempInputs[static_cast<int>(DataEnvironment::GroundTempType::FCFactorMethod)] = true;
+            found = true;
 
-        // Get the object names for each construction from the input processor
-        state.dataInputProcessing->inputProcessor->getObjectItem(
-            state, cCurrentModuleObject, 1, state.dataIPShortCut->cAlphaArgs, NumAlphas, state.dataIPShortCut->rNumericArgs, NumNums, IOStat);
+        } else if (numCurrObjects > 1) {
+            ShowSevereError(state, std::format("{}: Too many objects entered. Only one allowed.", GroundTemp::modelTypeNames[(int)modelType]));
+            // found stays false
 
-        if (NumNums < 12) {
-            ShowSevereError(
-                state, fmt::format("{}: Less than 12 values entered.", GroundTemperatureManager::groundTempModelNames[static_cast<int>(objType)]));
-            errorsFound = true;
+        } else if (state.dataWeather->wthFCGroundTemps) {
+
+            for (int i = 1; i <= 12; ++i) {
+                thisModel->fcFactorGroundTemps[i - 1] = state.dataWeather->GroundTempsFCFromEPWHeader(i);
+            }
+
+            state.dataEnvrn->GroundTempInputs[static_cast<int>(DataEnvironment::GroundTempType::FCFactorMethod)] = true;
+            found = true;
+
+        } else {
+            std::fill(thisModel->fcFactorGroundTemps.begin(), thisModel->fcFactorGroundTemps.end(), 0.0);
+            found = true;
         }
 
-        // overwrite values read from weather file for the 0.5m set ground temperatures
-        for (int i = 1; i <= 12; ++i) {
-            thisModel->fcFactorGroundTemps(i) = state.dataIPShortCut->rNumericArgs(i);
+        // Write Final Ground Temp Information to the initialization output file
+        if (state.dataEnvrn->GroundTempInputs[static_cast<int>(DataEnvironment::GroundTempType::FCFactorMethod)]) {
+            write_ground_temps(state.files.eio, "FCfactorMethod", thisModel->fcFactorGroundTemps);
         }
 
-        state.dataEnvrn->FCGroundTemps = true;
-        found = true;
-
-    } else if (numCurrObjects > 1) {
-        ShowSevereError(state,
-                        fmt::format("{}: Too many objects entered. Only one allowed.",
-                                    GroundTemperatureManager::groundTempModelNames[static_cast<int>(objType)]));
-        errorsFound = true;
-
-    } else if (state.dataWeatherManager->wthFCGroundTemps) {
-
-        for (int i = 1; i <= 12; ++i) {
-            thisModel->fcFactorGroundTemps(i) = state.dataWeatherManager->GroundTempsFCFromEPWHeader(i);
+        if (found) {
+            state.dataGrndTempModelMgr->groundTempModels.push_back(thisModel);
+            return thisModel;
         }
-
-        state.dataEnvrn->FCGroundTemps = true;
-        found = true;
-
-    } else {
-        thisModel->fcFactorGroundTemps = 0.0;
-        found = true;
-    }
-
-    // Write Final Ground Temp Information to the initialization output file
-    if (state.dataEnvrn->FCGroundTemps) {
-        write_ground_temps(state.files.eio, "FCfactorMethod", thisModel->fcFactorGroundTemps);
-    }
-
-    if (found && !errorsFound) {
-        state.dataGrndTempModelMgr->groundTempModels.push_back(thisModel);
-        return thisModel;
-    } else {
-        ShowFatalError(state,
-                       fmt::format("{}--Errors getting input for ground temperature model",
-                                   GroundTemperatureManager::groundTempModelNames[static_cast<int>(objType)]));
+        ShowFatalError(state, std::format("{}--Errors getting input for ground temperature model", GroundTemp::modelTypeNames[(int)modelType]));
         return nullptr;
     }
-}
 
-//******************************************************************************
+    //******************************************************************************
 
-Real64 SiteFCFactorMethodGroundTemps::getGroundTemp([[maybe_unused]] EnergyPlusData &state)
-{
-    // SUBROUTINE INFORMATION:
-    //       AUTHOR         Matt Mitchell
-    //       DATE WRITTEN   Summer 2015
-    //       MODIFIED       na
-    //       RE-ENGINEERED  na
+    Real64 SiteFCFactorMethodGroundTemps::getGroundTemp([[maybe_unused]] EnergyPlusData &state)
+    {
+        // SUBROUTINE INFORMATION:
+        //       AUTHOR         Matt Mitchell
+        //       DATE WRITTEN   Summer 2015
 
-    // PURPOSE OF THIS SUBROUTINE:
-    // Returns the ground temperature for Site:GroundTemperature:FCFactorMethod
+        // PURPOSE OF THIS SUBROUTINE:
+        // Returns the ground temperature for Site:GroundTemperature:FCFactorMethod
 
-    return fcFactorGroundTemps(timeOfSimInMonths);
-}
-
-//******************************************************************************
-
-Real64 SiteFCFactorMethodGroundTemps::getGroundTempAtTimeInSeconds(EnergyPlusData &state, [[maybe_unused]] Real64 const _depth, Real64 const _seconds)
-{
-    // SUBROUTINE INFORMATION:
-    //       AUTHOR         Matt Mitchell
-    //       DATE WRITTEN   Summer 2015
-    //       MODIFIED       na
-    //       RE-ENGINEERED  na
-
-    // PURPOSE OF THIS SUBROUTINE:
-    // Returns the ground temperature when input time is in seconds
-
-    // USE STATEMENTS:
-    // SUBROUTINE LOCAL VARIABLE DECLARATIONS:
-    Real64 secPerMonth = state.dataWeatherManager->NumDaysInYear * DataGlobalConstants::SecsInDay / 12;
-
-    // Convert secs to months
-    int month = ceil(_seconds / secPerMonth);
-
-    if (month >= 1 && month <= 12) {
-        timeOfSimInMonths = month;
-    } else {
-        timeOfSimInMonths = remainder(month, 12);
+        return fcFactorGroundTemps[timeOfSimInMonths - 1];
     }
 
-    // Get and return ground temp
-    return getGroundTemp(state);
-}
+    //******************************************************************************
 
-//******************************************************************************
+    Real64
+    SiteFCFactorMethodGroundTemps::getGroundTempAtTimeInSeconds(EnergyPlusData &state, [[maybe_unused]] Real64 const _depth, Real64 const _seconds)
+    {
+        // SUBROUTINE INFORMATION:
+        //       AUTHOR         Matt Mitchell
+        //       DATE WRITTEN   Summer 2015
 
-Real64 SiteFCFactorMethodGroundTemps::getGroundTempAtTimeInMonths(EnergyPlusData &state, [[maybe_unused]] Real64 const _depth, int const _month)
-{
-    // SUBROUTINE INFORMATION:
-    //       AUTHOR         Matt Mitchell
-    //       DATE WRITTEN   Summer 2015
-    //       MODIFIED       na
-    //       RE-ENGINEERED  na
+        // PURPOSE OF THIS SUBROUTINE:
+        // Returns the ground temperature when input time is in seconds
 
-    // PURPOSE OF THIS SUBROUTINE:
-    // Returns the ground temperature when input time is in months
+        // SUBROUTINE LOCAL VARIABLE DECLARATIONS:
+        const Real64 secPerMonth = state.dataWeather->NumDaysInYear * Constant::rSecsInDay / 12;
 
-    // Set month
-    if (_month >= 1 && _month <= 12) {
-        timeOfSimInMonths = _month;
-    } else {
-        timeOfSimInMonths = remainder(_month, 12);
+        // Convert secs to months
+        const int month = ceil(_seconds / secPerMonth);
+
+        if (month >= 1 && month <= 12) {
+            timeOfSimInMonths = month;
+        } else {
+            timeOfSimInMonths = month % 12;
+        }
+
+        // Get and return ground temp
+        return getGroundTemp(state);
     }
 
-    // Get and return ground temp
-    return getGroundTemp(state);
-}
+    //******************************************************************************
 
-//******************************************************************************
+    Real64 SiteFCFactorMethodGroundTemps::getGroundTempAtTimeInMonths(EnergyPlusData &state, [[maybe_unused]] Real64 const _depth, int const _month)
+    {
+        // SUBROUTINE INFORMATION:
+        //       AUTHOR         Matt Mitchell
+        //       DATE WRITTEN   Summer 2015
 
+        // PURPOSE OF THIS SUBROUTINE:
+        // Returns the ground temperature when input time is in months
+
+        // Set month
+        if (_month >= 1 && _month <= 12) {
+            timeOfSimInMonths = _month;
+        } else {
+            timeOfSimInMonths = _month % 12;
+        }
+
+        // Get and return ground temp
+        return getGroundTemp(state);
+    }
+
+    //******************************************************************************
+} // namespace GroundTemp
 } // namespace EnergyPlus

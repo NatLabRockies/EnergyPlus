@@ -1,7 +1,7 @@
-// EnergyPlus, Copyright (c) 1996-2023, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
-// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other
+// National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
 // contributors. All rights reserved.
 //
 // NOTICE: This Software was developed under funding from the U.S. Department of Energy and the
@@ -45,6 +45,7 @@
 // OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 // POSSIBILITY OF SUCH DAMAGE.
 
+// EnergyPlus Headers
 #include <EnergyPlus/Data/EnergyPlusData.hh>
 #include <EnergyPlus/DataStringGlobals.hh>
 #include <EnergyPlus/FluidProperties.hh>
@@ -57,10 +58,12 @@
 
 void initializeFunctionalAPI(EnergyPlusState state)
 {
-    auto thisState = reinterpret_cast<EnergyPlus::EnergyPlusData *>(state);
-    thisState->dataInputProcessing->inputProcessor = EnergyPlus::InputProcessor::factory();
-    EnergyPlus::Psychrometrics::InitializePsychRoutines(*thisState);
-    EnergyPlus::FluidProperties::InitializeGlycRoutines();
+    auto *thisState = reinterpret_cast<EnergyPlus::EnergyPlusData *>(state);
+    if (!thisState->dataInputProcessing->inputProcessor) {
+        thisState->dataInputProcessing->inputProcessor = EnergyPlus::InputProcessor::factory();
+    }
+    thisState->init_constant_state(*thisState);
+    thisState->init_state(*thisState);
 }
 
 const char *apiVersionFromEPlus(EnergyPlusState)
@@ -74,7 +77,7 @@ const char *energyPlusVersion()
 
 void registerErrorCallback(EnergyPlusState state, std::function<void(EnergyPlus::Error, const std::string &)> f)
 {
-    auto thisState = reinterpret_cast<EnergyPlus::EnergyPlusData *>(state);
+    auto *thisState = reinterpret_cast<EnergyPlus::EnergyPlusData *>(state);
     thisState->dataGlobal->errorCallback = f;
 }
 
@@ -86,69 +89,69 @@ void registerErrorCallback(EnergyPlusState state, void (*f)(int, const char *))
 
 Glycol glycolNew(EnergyPlusState state, const char *glycolName)
 {
-    auto thisState = reinterpret_cast<EnergyPlus::EnergyPlusData *>(state);
-    auto *glycol = new EnergyPlus::FluidProperties::GlycolAPI(*thisState, glycolName);
+    auto *thisState = reinterpret_cast<EnergyPlus::EnergyPlusData *>(state);
+    auto *glycol = EnergyPlus::Fluid::GetGlycol(*thisState, EnergyPlus::Util::makeUPPER(glycolName));
     return reinterpret_cast<Glycol>(glycol);
 }
-void glycolDelete(EnergyPlusState, Glycol glycol)
+void glycolDelete(EnergyPlusState, Glycol)
 {
-    delete reinterpret_cast<EnergyPlus::FluidProperties::GlycolAPI *>(glycol);
 }
+
 Real64 glycolSpecificHeat(EnergyPlusState state, Glycol glycol, Real64 temperature)
 {
-    auto thisState = reinterpret_cast<EnergyPlus::EnergyPlusData *>(state);
-    return reinterpret_cast<EnergyPlus::FluidProperties::GlycolAPI *>(glycol)->specificHeat(*thisState, temperature);
+    auto *thisState = reinterpret_cast<EnergyPlus::EnergyPlusData *>(state);
+    return reinterpret_cast<EnergyPlus::Fluid::GlycolProps *>(glycol)->getSpecificHeat(*thisState, temperature, "C-API");
 }
 Real64 glycolDensity(EnergyPlusState state, Glycol glycol, Real64 temperature)
 {
-    auto thisState = reinterpret_cast<EnergyPlus::EnergyPlusData *>(state);
-    return reinterpret_cast<EnergyPlus::FluidProperties::GlycolAPI *>(glycol)->density(*thisState, temperature);
+    auto *thisState = reinterpret_cast<EnergyPlus::EnergyPlusData *>(state);
+    return reinterpret_cast<EnergyPlus::Fluid::GlycolProps *>(glycol)->getDensity(*thisState, temperature, "C-API");
 }
 Real64 glycolConductivity(EnergyPlusState state, Glycol glycol, Real64 temperature)
 {
-    auto thisState = reinterpret_cast<EnergyPlus::EnergyPlusData *>(state);
-    return reinterpret_cast<EnergyPlus::FluidProperties::GlycolAPI *>(glycol)->conductivity(*thisState, temperature);
+    auto *thisState = reinterpret_cast<EnergyPlus::EnergyPlusData *>(state);
+    return reinterpret_cast<EnergyPlus::Fluid::GlycolProps *>(glycol)->getConductivity(*thisState, temperature, "C-API");
 }
 Real64 glycolViscosity(EnergyPlusState state, Glycol glycol, Real64 temperature)
 {
-    auto thisState = reinterpret_cast<EnergyPlus::EnergyPlusData *>(state);
-    return reinterpret_cast<EnergyPlus::FluidProperties::GlycolAPI *>(glycol)->viscosity(*thisState, temperature);
+    auto *thisState = reinterpret_cast<EnergyPlus::EnergyPlusData *>(state);
+    return reinterpret_cast<EnergyPlus::Fluid::GlycolProps *>(glycol)->getViscosity(*thisState, temperature, "C-API");
 }
 
 Refrigerant refrigerantNew(EnergyPlusState state, const char *refrigerantName)
 {
-    auto thisState = reinterpret_cast<EnergyPlus::EnergyPlusData *>(state);
-    auto *refrigerant = new EnergyPlus::FluidProperties::RefrigerantAPI(*thisState, refrigerantName);
+    auto *thisState = reinterpret_cast<EnergyPlus::EnergyPlusData *>(state);
+    auto *refrigerant = EnergyPlus::Fluid::GetRefrig(*thisState, EnergyPlus::Util::makeUPPER(refrigerantName));
     return reinterpret_cast<Refrigerant>(refrigerant);
 }
-void refrigerantDelete(EnergyPlusState, Refrigerant refrigerant)
+void refrigerantDelete(EnergyPlusState, Refrigerant)
 {
-    delete reinterpret_cast<EnergyPlus::FluidProperties::RefrigerantAPI *>(refrigerant);
 }
+
 Real64 refrigerantSaturationPressure(EnergyPlusState state, Refrigerant refrigerant, Real64 temperature)
 {
-    auto thisState = reinterpret_cast<EnergyPlus::EnergyPlusData *>(state);
-    return reinterpret_cast<EnergyPlus::FluidProperties::RefrigerantAPI *>(refrigerant)->saturationPressure(*thisState, temperature);
+    auto *thisState = reinterpret_cast<EnergyPlus::EnergyPlusData *>(state);
+    return reinterpret_cast<EnergyPlus::Fluid::RefrigProps *>(refrigerant)->getSatPressure(*thisState, temperature, "C-API");
 }
 Real64 refrigerantSaturationTemperature(EnergyPlusState state, Refrigerant refrigerant, Real64 pressure)
 {
-    auto thisState = reinterpret_cast<EnergyPlus::EnergyPlusData *>(state);
-    return reinterpret_cast<EnergyPlus::FluidProperties::RefrigerantAPI *>(refrigerant)->saturationTemperature(*thisState, pressure);
+    auto *thisState = reinterpret_cast<EnergyPlus::EnergyPlusData *>(state);
+    return reinterpret_cast<EnergyPlus::Fluid::RefrigProps *>(refrigerant)->getSatTemperature(*thisState, pressure, "C-API");
 }
 Real64 refrigerantSaturatedEnthalpy(EnergyPlusState state, Refrigerant refrigerant, Real64 temperature, Real64 quality)
 {
-    auto thisState = reinterpret_cast<EnergyPlus::EnergyPlusData *>(state);
-    return reinterpret_cast<EnergyPlus::FluidProperties::RefrigerantAPI *>(refrigerant)->saturatedEnthalpy(*thisState, temperature, quality);
+    auto *thisState = reinterpret_cast<EnergyPlus::EnergyPlusData *>(state);
+    return reinterpret_cast<EnergyPlus::Fluid::RefrigProps *>(refrigerant)->getSatEnthalpy(*thisState, temperature, quality, "C-API");
 }
 Real64 refrigerantSaturatedDensity(EnergyPlusState state, Refrigerant refrigerant, Real64 temperature, Real64 quality)
 {
-    auto thisState = reinterpret_cast<EnergyPlus::EnergyPlusData *>(state);
-    return reinterpret_cast<EnergyPlus::FluidProperties::RefrigerantAPI *>(refrigerant)->saturatedDensity(*thisState, temperature, quality);
+    auto *thisState = reinterpret_cast<EnergyPlus::EnergyPlusData *>(state);
+    return reinterpret_cast<EnergyPlus::Fluid::RefrigProps *>(refrigerant)->getSatDensity(*thisState, temperature, quality, "C-API");
 }
 Real64 refrigerantSaturatedSpecificHeat(EnergyPlusState state, Refrigerant refrigerant, Real64 temperature, Real64 quality)
 {
-    auto thisState = reinterpret_cast<EnergyPlus::EnergyPlusData *>(state);
-    return reinterpret_cast<EnergyPlus::FluidProperties::RefrigerantAPI *>(refrigerant)->saturatedSpecificHeat(*thisState, temperature, quality);
+    auto *thisState = reinterpret_cast<EnergyPlus::EnergyPlusData *>(state);
+    return reinterpret_cast<EnergyPlus::Fluid::RefrigProps *>(refrigerant)->getSatSpecificHeat(*thisState, temperature, quality, "C-API");
 }
 // Real64 refrigerantSuperHeatedEnthalpy(EnergyPlusState, Refrigerant refrigerant, Real64 temperature, Real64 pressure) {
 //    return reinterpret_cast<EnergyPlus::FluidProperties::RefrigerantAPI *>(refrigerant)->superHeatedEnthalpy(temperature, pressure);
@@ -165,7 +168,7 @@ Real64 psyRhoFnPbTdbW(EnergyPlusState state, Real64 const pb, Real64 const tdb, 
     // barometric pressure (Pascals)
     // dry bulb temperature (Celsius)
     // humidity ratio (kgWater/kgDryAir)
-    auto thisState = reinterpret_cast<EnergyPlus::EnergyPlusData *>(state);
+    auto *thisState = reinterpret_cast<EnergyPlus::EnergyPlusData *>(state);
     return EnergyPlus::Psychrometrics::PsyRhoAirFnPbTdbW_fast(*thisState, pb, tdb, dw);
 }
 Real64 psyHfgAirFnWTdb(EnergyPlusState, Real64 const T)
@@ -208,7 +211,7 @@ Real64 psyTwbFnTdbWPb(EnergyPlusState state, Real64 const Tdb, Real64 const W, R
     // dry-bulb temperature {C}
     // humidity ratio
     // barometric pressure {Pascals}
-    auto thisState = reinterpret_cast<EnergyPlus::EnergyPlusData *>(state);
+    auto *thisState = reinterpret_cast<EnergyPlus::EnergyPlusData *>(state);
     return EnergyPlus::Psychrometrics::PsyTwbFnTdbWPb(*thisState, Tdb, W, Pb);
 }
 Real64 psyVFnTdbWPb(EnergyPlusState state, Real64 const TDB, Real64 const dW, Real64 const PB)
@@ -216,7 +219,7 @@ Real64 psyVFnTdbWPb(EnergyPlusState state, Real64 const TDB, Real64 const dW, Re
     // dry-bulb temperature {C}
     // humidity ratio
     // barometric pressure {Pascals}
-    auto thisState = reinterpret_cast<EnergyPlus::EnergyPlusData *>(state);
+    auto *thisState = reinterpret_cast<EnergyPlus::EnergyPlusData *>(state);
     return EnergyPlus::Psychrometrics::PsyVFnTdbWPb(*thisState, TDB, dW, PB);
 }
 Real64 psyWFnTdbH(EnergyPlusState state, Real64 const TDB, Real64 const H)
@@ -224,34 +227,34 @@ Real64 psyWFnTdbH(EnergyPlusState state, Real64 const TDB, Real64 const H)
     // dry-bulb temperature {C}
     // enthalpy {J/kg}
     std::string dummyString;
-    auto thisState = reinterpret_cast<EnergyPlus::EnergyPlusData *>(state);
+    auto *thisState = reinterpret_cast<EnergyPlus::EnergyPlusData *>(state);
     return EnergyPlus::Psychrometrics::PsyWFnTdbH(*thisState, TDB, H, dummyString, true);
 }
 Real64 psyPsatFnTemp(EnergyPlusState state, Real64 const T)
 {
     // dry-bulb temperature {C}
-    auto thisState = reinterpret_cast<EnergyPlus::EnergyPlusData *>(state);
+    auto *thisState = reinterpret_cast<EnergyPlus::EnergyPlusData *>(state);
     return EnergyPlus::Psychrometrics::PsyPsatFnTemp(*thisState, T);
 }
 Real64 psyTsatFnHPb(EnergyPlusState state, Real64 const H, Real64 const Pb)
 {
     // enthalpy {J/kg}
     // barometric pressure {Pascals}
-    auto thisState = reinterpret_cast<EnergyPlus::EnergyPlusData *>(state);
+    auto *thisState = reinterpret_cast<EnergyPlus::EnergyPlusData *>(state);
     return EnergyPlus::Psychrometrics::PsyTsatFnHPb(*thisState, H, Pb);
 }
 Real64 psyRhovFnTdbRh(EnergyPlusState state, Real64 const Tdb, Real64 const RH)
 {
     // dry-bulb temperature {C}
     // relative humidity value (0.0-1.0)
-    auto thisState = reinterpret_cast<EnergyPlus::EnergyPlusData *>(state);
+    auto *thisState = reinterpret_cast<EnergyPlus::EnergyPlusData *>(state);
     return EnergyPlus::Psychrometrics::PsyRhovFnTdbRh(*thisState, Tdb, RH);
 }
 Real64 psyRhFnTdbRhov(EnergyPlusState state, Real64 const Tdb, Real64 const Rhovapor)
 {
     // dry-bulb temperature {C}
     // vapor density in air {kg/m3}
-    auto thisState = reinterpret_cast<EnergyPlus::EnergyPlusData *>(state);
+    auto *thisState = reinterpret_cast<EnergyPlus::EnergyPlusData *>(state);
     return EnergyPlus::Psychrometrics::PsyRhFnTdbRhov(*thisState, Tdb, Rhovapor);
 }
 Real64 psyRhFnTdbWPb(EnergyPlusState state, Real64 const TDB, Real64 const dW, Real64 const PB)
@@ -259,14 +262,14 @@ Real64 psyRhFnTdbWPb(EnergyPlusState state, Real64 const TDB, Real64 const dW, R
     // dry-bulb temperature {C}
     // humidity ratio
     // barometric pressure {Pascals}
-    auto thisState = reinterpret_cast<EnergyPlus::EnergyPlusData *>(state);
+    auto *thisState = reinterpret_cast<EnergyPlus::EnergyPlusData *>(state);
     return EnergyPlus::Psychrometrics::PsyRhFnTdbWPb(*thisState, TDB, dW, PB);
 }
 Real64 psyWFnTdpPb(EnergyPlusState state, Real64 const TDP, Real64 const PB)
 {
     // dew-point temperature {C}
     // barometric pressure {Pascals}
-    auto thisState = reinterpret_cast<EnergyPlus::EnergyPlusData *>(state);
+    auto *thisState = reinterpret_cast<EnergyPlus::EnergyPlusData *>(state);
     return EnergyPlus::Psychrometrics::PsyWFnTdpPb(*thisState, TDP, PB);
 }
 Real64 psyWFnTdbRhPb(EnergyPlusState state, Real64 const TDB, Real64 const RH, Real64 const PB)
@@ -274,7 +277,7 @@ Real64 psyWFnTdbRhPb(EnergyPlusState state, Real64 const TDB, Real64 const RH, R
     // dry-bulb temperature {C}
     // relative humidity value (0.0-1.0)
     // barometric pressure {Pascals}
-    auto thisState = reinterpret_cast<EnergyPlus::EnergyPlusData *>(state);
+    auto *thisState = reinterpret_cast<EnergyPlus::EnergyPlusData *>(state);
     return EnergyPlus::Psychrometrics::PsyWFnTdbRhPb(*thisState, TDB, RH, PB);
 }
 Real64 psyWFnTdbTwbPb(EnergyPlusState state, Real64 const TDB, Real64 const TWBin, Real64 const PB)
@@ -282,7 +285,7 @@ Real64 psyWFnTdbTwbPb(EnergyPlusState state, Real64 const TDB, Real64 const TWBi
     // dry-bulb temperature {C}
     // wet-bulb temperature {C}
     // barometric pressure {Pascals}
-    auto thisState = reinterpret_cast<EnergyPlus::EnergyPlusData *>(state);
+    auto *thisState = reinterpret_cast<EnergyPlus::EnergyPlusData *>(state);
     return EnergyPlus::Psychrometrics::PsyWFnTdbTwbPb(*thisState, TDB, TWBin, PB);
 }
 Real64 psyHFnTdbRhPb(EnergyPlusState state, Real64 const TDB, Real64 const RH, Real64 const PB)
@@ -290,14 +293,14 @@ Real64 psyHFnTdbRhPb(EnergyPlusState state, Real64 const TDB, Real64 const RH, R
     // dry-bulb temperature {C}
     // relative humidity value (0.0 - 1.0)
     // barometric pressure (N/M**2) {Pascals}
-    auto thisState = reinterpret_cast<EnergyPlus::EnergyPlusData *>(state);
+    auto *thisState = reinterpret_cast<EnergyPlus::EnergyPlusData *>(state);
     return EnergyPlus::Psychrometrics::PsyHFnTdbRhPb(*thisState, TDB, RH, PB);
 }
 Real64 psyTdpFnWPb(EnergyPlusState state, Real64 const W, Real64 const PB)
 {
     // humidity ratio
     // barometric pressure (N/M**2) {Pascals}
-    auto thisState = reinterpret_cast<EnergyPlus::EnergyPlusData *>(state);
+    auto *thisState = reinterpret_cast<EnergyPlus::EnergyPlusData *>(state);
     return EnergyPlus::Psychrometrics::PsyTdpFnWPb(*thisState, W, PB);
 }
 Real64 psyTdpFnTdbTwbPb(EnergyPlusState state, Real64 const TDB, Real64 const TWB, Real64 const PB)
@@ -305,6 +308,6 @@ Real64 psyTdpFnTdbTwbPb(EnergyPlusState state, Real64 const TDB, Real64 const TW
     // dry-bulb temperature {C}
     // wet-bulb temperature {C}
     // barometric pressure (N/M**2) {Pascals}
-    auto thisState = reinterpret_cast<EnergyPlus::EnergyPlusData *>(state);
+    auto *thisState = reinterpret_cast<EnergyPlus::EnergyPlusData *>(state);
     return EnergyPlus::Psychrometrics::PsyTdpFnTdbTwbPb(*thisState, TDB, TWB, PB);
 }

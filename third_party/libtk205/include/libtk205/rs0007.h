@@ -5,6 +5,7 @@
 #include <vector>
 #include <nlohmann/json.hpp>
 #include <typeinfo_205.h>
+#include <courierr/courierr.h>
 #include <rs_instance_base.h>
 #include <performance_map_base.h>
 #include <grid_variables_base.h>
@@ -31,6 +32,12 @@ namespace tk205  {
 			{DriveType::GEAR, {"GEAR", "Gear", "Gear"}},
 			{DriveType::CHAIN, {"CHAIN", "Chain", "Chain"}},
 			{DriveType::UNKNOWN, {"UNKNOWN", "None","None"}}
+		};
+		class Schema  {
+		public:
+			const static std::string_view schema_title;
+			const static std::string_view schema_version;
+			const static std::string_view schema_description;
 		};
 		class ProductInformation  {
 		public:
@@ -101,7 +108,7 @@ namespace tk205  {
 			const static std::string_view grid_variables_name;
 			const static std::string_view lookup_variables_name;
 			using PerformanceMapBase::calculate_performance;
-			LookupVariablesStruct calculate_performance (double output_power, Btwxt::Method performance_interpolation_method = Btwxt::Method::LINEAR);
+			LookupVariablesStruct calculate_performance (double output_power, Btwxt::InterpolationMethod performance_interpolation_method = Btwxt::InterpolationMethod::linear);
 		};
 		class Performance  {
 		public:
@@ -119,6 +126,7 @@ namespace tk205  {
 		class RS0007  : public RSInstanceBase {
 		public:
 			void initialize (const nlohmann::json& j) override;
+			static std::shared_ptr<Courierr::Courierr> logger;
 			ashrae205_ns::Metadata metadata;
 			rs0007_ns::Description description;
 			rs0007_ns::Performance performance;

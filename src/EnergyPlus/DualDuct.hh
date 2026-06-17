@@ -1,7 +1,7 @@
-// EnergyPlus, Copyright (c) 1996-2023, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
-// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other
+// National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
 // contributors. All rights reserved.
 //
 // NOTICE: This Software was developed under funding from the U.S. Department of Energy and the
@@ -73,6 +73,9 @@ namespace DualDuct {
         Num
     };
 
+    static constexpr std::array<std::string_view, static_cast<int>(DualDuctDamper::Num)> dualDuctDamperNames = {
+        "ConstantVolume", "VariableVolume", "OutdoorAir"};
+
     enum class PerPersonMode
     {
         Invalid = -1,
@@ -101,9 +104,9 @@ namespace DualDuct {
     {
         std::string Name;                                    // Name of the Damper
         DualDuctDamper DamperType = DualDuctDamper::Invalid; // Type of Damper ie. VAV, Mixing, Inducing, etc.
-        int SchedPtr = 0;                                    // Pointer to the correct schedule
-        Real64 MaxAirVolFlowRate = 0.0;                      // Max Specified Volume Flow Rate of Damper [m3/sec]
-        Real64 MaxAirMassFlowRate = 0.0;                     // Max Specified MAss Flow Rate of Damper [kg/s]
+        Sched::Schedule *availSched = nullptr; // Pointer to the correct schedule // brazenly assume that this is an availability schedule
+        Real64 MaxAirVolFlowRate = 0.0;        // Max Specified Volume Flow Rate of Damper [m3/sec]
+        Real64 MaxAirMassFlowRate = 0.0;       // Max Specified MAss Flow Rate of Damper [kg/s]
         int HotAirInletNodeNum = 0;
         int ColdAirInletNodeNum = 0;
         int OutletNodeNum = 0;
@@ -127,12 +130,11 @@ namespace DualDuct {
         int OARequirementsPtr = 0;                                 // - Index to DesignSpecification:OutdoorAir object
         PerPersonMode OAPerPersonMode = PerPersonMode::ModeNotSet; // mode for how per person rates are determined, DCV or design.
         int AirLoopNum = 0;                                        // index to airloop that this terminal unit is connected to
-        int ZoneTurndownMinAirFracSchPtr = 0;                      // pointer to the schedule for turndown minimum airflow fraction
-        Real64 ZoneTurndownMinAirFrac = 1.0;         // turndown minimum airflow fraction value, multiplier of zone design minimum air flow
-        bool ZoneTurndownMinAirFracSchExist = false; // if true, if zone turndown min air frac schedule exist
-        bool MyEnvrnFlag = true;                     // environment flag
-        bool MySizeFlag = true;                      // sizing flag
-        bool MyAirLoopFlag = true;                   // airloop flag
+        Sched::Schedule *zoneTurndownMinAirFracSched = nullptr;    // pointer to the schedule for turndown minimum airflow fraction
+        Real64 ZoneTurndownMinAirFrac = 1.0; // turndown minimum airflow fraction value, multiplier of zone design minimum air flow
+        bool MyEnvrnFlag = true;             // environment flag
+        bool MySizeFlag = true;              // sizing flag
+        bool MyAirLoopFlag = true;           // airloop flag
         bool CheckEquipName = true;
         DualDuctAirTerminalFlowConditions dd_airterminalHotAirInlet;
         DualDuctAirTerminalFlowConditions dd_airterminalColdAirInlet;
@@ -163,6 +165,8 @@ namespace DualDuct {
         void CalcOutdoorAirVolumeFlowRate(EnergyPlusData &state);
 
         void UpdateDualDuct(EnergyPlusData &state);
+
+        void reportTerminalUnit(EnergyPlusData &state);
     };
 
     void SimulateDualDuct(EnergyPlusData &state, std::string_view CompName, bool FirstHVACIteration, int ZoneNum, int ZoneNodeNum, int &CompIndex);
@@ -187,9 +191,17 @@ struct DualDuctData : BaseGlobalStruct
     Array1D_bool RecircIsUsedARR;
     Array1D_string DamperNamesARR;
 
+    void init_constant_state([[maybe_unused]] EnergyPlusData &state) override
+    {
+    }
+
+    void init_state([[maybe_unused]] EnergyPlusData &state) override
+    {
+    }
+
     void clear_state() override
     {
-        *this = DualDuctData();
+        new (this) DualDuctData();
     }
 };
 

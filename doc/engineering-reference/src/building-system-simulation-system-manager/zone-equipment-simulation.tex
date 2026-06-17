@@ -17,7 +17,7 @@ ELSE
 END IF
 
 CALL RecordZoneEquipment(SimAir)
- 
+
 CALL ReportZoneEquipment
 
 SimZone = .False.
@@ -163,7 +163,7 @@ This completes a single simulation sequence of all the zone equipment.
 
 \subsection{Zone Equipment Load Distribution}\label{zone-equipment-load-distribution}
 
-The function \emph{DistributeSystemOutputRequired} allocates the curent zone load among the available pieces of zone equipment for the current load type (cooling, heating, or no-load). Because some air loop components such as AirLoopHVAC:UnitarySystem may be controlled based on a control zone load, the sequenced loads must be known prior to the final iteration of the HVAC simulation so that the air loop equipment will adjust its output accordingly. When the zone equipment list is initially read, the maximum number of equipment across all zones is used to set the number of air loop iterations required after the initial iteration, \emph{MinAirLoopIterationsAfterFirst}. The control sequence is shown below.
+The function \emph{DistributeSystemOutputRequired} allocates the current zone load among the available pieces of zone equipment for the current load type (cooling, heating, or no-load). Because some air loop components such as AirLoopHVAC:UnitarySystem may be controlled based on a control zone load, the sequenced loads must be known prior to the final iteration of the HVAC simulation so that the air loop equipment will adjust its output accordingly. When the zone equipment list is initially read, the maximum number of equipment across all zones is used to set the number of air loop iterations required after the initial iteration, \emph{MinAirLoopIterationsAfterFirst}. The control sequence is shown below.
 \begin{enumerate}
 \item
   Initial iteration (\emph{FirstHVACIteration} is true)
@@ -188,7 +188,7 @@ The function \emph{DistributeSystemOutputRequired} allocates the curent zone loa
     \item
       UniformLoad - The sequenced loads for all active equipment are set to the full load divided by the number of active pieces of equipment. All inactive sequenced loads are set to zero.
     \item
-      UniformPLR - Using the current equipment capacities (stored during the initial iteration), distribute the load among the availalbe pieces of equipment, such that each one is operating at the same part load ratio (PLR).
+      UniformPLR - Using the current equipment capacities (stored during the initial iteration), distribute the load among the available pieces of equipment, such that each one is operating at the same part load ratio (PLR).
     \item
       SequentialUniformPLR - Using the current equipment capacities (stored during the initial iteration), determine how many of the available pieces of equipment are required to meet the current full load.  Then distribute the load among those pieces of equipment, such that each one is operating at the same part load ratio (PLR).
     \end{itemize}
@@ -198,7 +198,7 @@ The function \emph{DistributeSystemOutputRequired} allocates the curent zone loa
     Simulate zone equipment.
     \begin{itemize}
     \item
-      If the load distribution type is SequentialLoad, update each successive sequenced load to be the current remaining load. 
+      If the load distribution type is SequentialLoad, update each successive sequenced load to be the current remaining load.
     \item
       Otherwise, leave the sequenced loads as-is from the initial distribution.
     \end{itemize}
@@ -212,10 +212,9 @@ The function \emph{DistributeSystemOutputRequired} allocates the curent zone loa
     Simulate zone equipment.
     \begin{itemize}
     \item
-      If the load distribution type is SequentialLoad, update each successive sequenced load to be the current remaining load. 
+      If the load distribution type is SequentialLoad, update each successive sequenced load to be the current remaining load.
     \item
       Otherwise, leave the sequenced loads as-is from the initial distribution.
     \end{itemize}
   \end{enumerate}
 \end{enumerate}
-

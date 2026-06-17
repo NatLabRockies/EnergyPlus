@@ -1,7 +1,7 @@
-// EnergyPlus, Copyright (c) 1996-2023, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
-// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other
+// National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
 // contributors. All rights reserved.
 //
 // NOTICE: This Software was developed under funding from the U.S. Department of Energy and the
@@ -75,6 +75,8 @@ namespace DataConvergParams {
     constexpr Real64 HVACTemperatureSlopeToler(0.001);          // Slope tolerance for Temperature, Deg C/iteration
     constexpr Real64 HVACTemperatureOscillationToler(0.000001); // tolerance for detecting duplicate temps in stack
     constexpr Real64 HVACEnergyToler(10.0);                     // Tolerance for Energy comparisons (in Watts W)
+    constexpr Real64 HVACCO2Toler(0.1);                         // Tolerance for CO2 comparisons (in ppm)
+    constexpr Real64 HVACGenContamToler(0.1);                   // Tolerance for generic contaminant comparisons (in ppm)
     // to be consistent, should be 20.d0 (BG Aug 2012)
 
     constexpr Real64 HVACCpApprox(1004.844); // Air Cp (20C,0.0Kg/Kg) Only for energy Tolerance Calculation
@@ -92,8 +94,7 @@ namespace DataConvergParams {
     constexpr Real64 PlantEnergyToler(10.0); // Tolerance for Energy comparisons (in Watts W)
 
     // Energy Tolerance Calculation, used to scale the answer for a more intuitive answer for comparison
-    constexpr Real64 PlantFlowFlowRateToler(0.01);    // Tolerance for mass flow rate convergence (in kg/s)
-    constexpr Real64 PlantLowFlowRateToler(0.000001); // Tolerance for low flow rate used for determining when plant pumps can be shut down
+    constexpr Real64 PlantFlowFlowRateToler(0.01); // Tolerance for mass flow rate convergence (in kg/s)
 
     constexpr int ConvergLogStackDepth(10);
 
@@ -137,14 +138,22 @@ namespace DataConvergParams {
         std::array<Real64, ConvergLogStackDepth> HVACTempSupplyDeck2ToDemandTolValue = {0.0}; // Queue of convergence "results"
         std::array<bool, 3> HVACEnergyNotConverged = {false};                                 // Flag to show energy convergence   or failure
         std::array<Real64, ConvergLogStackDepth> HVACEnergyDemandToSupplyTolValue = {0.0};    // Queue of convergence "results"
-        std::array<Real64, ConvergLogStackDepth> HVACEnergySupplyDeck1ToDemandTolValue = {0.0};   // Queue of convergence "results"
-        std::array<Real64, ConvergLogStackDepth> HVACEnergySupplyDeck2ToDemandTolValue = {0.0};   // Queue of convergence "results"
-        std::array<Real64, ConvergLogStackDepth> HVACEnthalpyDemandToSupplyTolValue = {0.0};      // Queue of convergence "results"
-        std::array<Real64, ConvergLogStackDepth> HVACEnthalpySupplyDeck1ToDemandTolValue = {0.0}; // Queue of convergence "results"
-        std::array<Real64, ConvergLogStackDepth> HVACEnthalpySupplyDeck2ToDemandTolValue = {0.0}; // Queue of convergence "results"
-        std::array<Real64, ConvergLogStackDepth> HVACPressureDemandToSupplyTolValue = {0.0};      // Queue of convergence "results"
-        std::array<Real64, ConvergLogStackDepth> HVACPressureSupplyDeck1ToDemandTolValue = {0.0}; // Queue of convergence "results"
-        std::array<Real64, ConvergLogStackDepth> HVACPressueSupplyDeck2ToDemandTolValue = {0.0};  // Queue of convergence "results"
+        std::array<Real64, ConvergLogStackDepth> HVACEnergySupplyDeck1ToDemandTolValue = {0.0};    // Queue of convergence "results"
+        std::array<Real64, ConvergLogStackDepth> HVACEnergySupplyDeck2ToDemandTolValue = {0.0};    // Queue of convergence "results"
+        std::array<Real64, ConvergLogStackDepth> HVACEnthalpyDemandToSupplyTolValue = {0.0};       // Queue of convergence "results"
+        std::array<Real64, ConvergLogStackDepth> HVACEnthalpySupplyDeck1ToDemandTolValue = {0.0};  // Queue of convergence "results"
+        std::array<Real64, ConvergLogStackDepth> HVACEnthalpySupplyDeck2ToDemandTolValue = {0.0};  // Queue of convergence "results"
+        std::array<Real64, ConvergLogStackDepth> HVACPressureDemandToSupplyTolValue = {0.0};       // Queue of convergence "results"
+        std::array<Real64, ConvergLogStackDepth> HVACPressureSupplyDeck1ToDemandTolValue = {0.0};  // Queue of convergence "results"
+        std::array<Real64, ConvergLogStackDepth> HVACPressueSupplyDeck2ToDemandTolValue = {0.0};   // Queue of convergence "results"
+        std::array<bool, 3> HVACCO2NotConverged = {false};                                         // Flag to show mass flow convergence
+        std::array<Real64, ConvergLogStackDepth> HVACCO2DemandToSupplyTolValue = {0.0};            // Queue of convergence "results"
+        std::array<Real64, ConvergLogStackDepth> HVACCO2SupplyDeck1ToDemandTolValue = {0.0};       // Queue of convergence "results"
+        std::array<Real64, ConvergLogStackDepth> HVACCO2SupplyDeck2ToDemandTolValue = {0.0};       // Queue of convergence "results"
+        std::array<bool, 3> HVACGenContamNotConverged = {false};                                   // Flag to show mass flow convergence
+        std::array<Real64, ConvergLogStackDepth> HVACGenContamDemandToSupplyTolValue = {0.0};      // Queue of convergence "results"
+        std::array<Real64, ConvergLogStackDepth> HVACGenContamSupplyDeck1ToDemandTolValue = {0.0}; // Queue of convergence "results"
+        std::array<Real64, ConvergLogStackDepth> HVACGenContamSupplyDeck2ToDemandTolValue = {0.0}; // Queue of convergence "results"
     };
 
     struct PlantIterationConvergenceStruct
@@ -174,9 +183,17 @@ struct ConvergParamsData : BaseGlobalStruct
     Array1D<DataConvergParams::HVACAirLoopIterationConvergenceStruct> AirLoopConvergence;
     Array1D<DataConvergParams::PlantIterationConvergenceStruct> PlantConvergence;
 
+    void init_constant_state([[maybe_unused]] EnergyPlusData &state) override
+    {
+    }
+
+    void init_state([[maybe_unused]] EnergyPlusData &state) override
+    {
+    }
+
     void clear_state() override
     {
-        *this = ConvergParamsData();
+        new (this) ConvergParamsData();
     }
 };
 

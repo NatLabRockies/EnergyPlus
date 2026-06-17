@@ -7,16 +7,15 @@ While the details of the UtilityCost:Ratchet command are described further in th
 Ratchet Example: A utility has a single ratchet that says that the billing demand for each month of the year is the higher value of the actual demand or 60\% of the peak summer demand
 
 \begin{lstlisting}
-
 UtilityCost:Ratchet,
-    BillingDemand1,   ! Ratchet Variable Name
-    ExampleTariff1,   ! Tariff Name
-    TotalDemand,      ! Baseline Source Variable
-    TotalDemand,      ! Adjustment Source Variable
-    Summer,           ! Season From
-    Annual,           ! Season To
-    0.60,             ! Multiplier Value or Variable Name
-    0;                ! Offset Value or Variable Name
+  BillingDemand1,             !- Ratchet Variable Name
+  ExampleTariff1,             !- Tariff Name
+  TotalDemand,                !- Baseline Source Variable
+  TotalDemand,                !- Adjustment Source Variable
+  Summer,                     !- Season From
+  Annual,                     !- Season To
+  0.60,                       !- Multiplier Value or Variable Name
+  0;                          !- Offset Value or Variable Name
 \end{lstlisting}
 
 The Ratchet Variable Name (the first field) should be used wherever the ratchet should be applied and is often the source variable for \hyperref[utilitycostchargesimple]{UtilityCost:Charge:Simple} or \hyperref[utilitycostchargeblock]{UtilityCost:Charge:Block}.
@@ -44,7 +43,7 @@ The detailed steps taken for the ratchet are the following:
 
 If multiple ratchets occur in the same tariff, multiple UtilityCost:Ratchet commands should be ``chained'' together with the Baseline Source Variable subsequent ratchets referencing the Ratchet Variable Name of the previous UtilityCost:Ratchet.
 
-Since the ratchet command can add together two variables, mutliply two variables, or take the maximum value between two variables, it may be used for other difficult to model tariffs without needing to use \hyperref[utilitycostcomputation]{UtilityCost:Computation}. Clever use of UtilityCost:Ratchet should be well documented with comments.
+Since the ratchet command can add together two variables, multiply two variables, or take the maximum value between two variables, it may be used for other difficult to model tariffs without needing to use \hyperref[utilitycostcomputation]{UtilityCost:Computation}. Clever use of UtilityCost:Ratchet should be well documented with comments.
 
 \subsection{Inputs}\label{inputs-071}
 

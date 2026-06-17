@@ -1,7 +1,7 @@
-// EnergyPlus, Copyright (c) 1996-2023, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
-// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other
+// National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
 // contributors. All rights reserved.
 //
 // NOTICE: This Software was developed under funding from the U.S. Department of Energy and the
@@ -56,6 +56,7 @@
 #include "Fixtures/EnergyPlusFixture.hh"
 #include <EnergyPlus/Data/EnergyPlusData.hh>
 #include <EnergyPlus/DataAirLoop.hh>
+#include <EnergyPlus/DataDefineEquip.hh>
 #include <EnergyPlus/DataEnvironment.hh>
 #include <EnergyPlus/DataHVACGlobals.hh>
 #include <EnergyPlus/DataHeatBalFanSys.hh>
@@ -67,6 +68,7 @@
 #include <EnergyPlus/DualDuct.hh>
 #include <EnergyPlus/General.hh>
 #include <EnergyPlus/HeatBalanceManager.hh>
+#include <EnergyPlus/OutputReportPredefined.hh>
 #include <EnergyPlus/Psychrometrics.hh>
 #include <EnergyPlus/ScheduleManager.hh>
 #include <EnergyPlus/ZoneAirLoopEquipmentManager.hh>
@@ -86,6 +88,8 @@ TEST_F(EnergyPlusFixture, TestDualDuctOAMassFlowRateUsingStdRhoAir)
     Real64 OAMassFlow;
 
     int numOfdd_airterminals = 2;
+
+    state->init_state(*state);
 
     state->dataHeatBal->Zone.allocate(1);
     state->dataSize->OARequirements.allocate(1);
@@ -286,9 +290,9 @@ TEST_F(EnergyPlusFixture, TestDualDuctOAMassFlowRateUsingStdRhoAir)
 //
 //		ASSERT_FALSE( process_idf( idf_objects ) );
 //
-//		DataGlobals::NumOfTimeStepInHour = 1; // must initialize this to get schedules initialized
-//		DataGlobals::MinutesPerTimeStep = 60; // must initialize this to get schedules initialized
-//		ScheduleManager::ProcessScheduleInput(); // read schedules
+//		DataGlobals::TimeStepsInHour = 1; // must initialize this to get schedules initialized
+//		DataGlobals::MinutesInTimeStep = 60; // must initialize this to get schedules initialized
+//		state->init_state(*state);
 //
 //		HeatBalanceManager::GetZoneData(*state,  ErrorsFound );
 //		ASSERT_FALSE( ErrorsFound );
@@ -298,9 +302,9 @@ TEST_F(EnergyPlusFixture, TestDualDuctOAMassFlowRateUsingStdRhoAir)
 //		DualDuct::GetDualDuctInput(*state);
 //
 //		EXPECT_EQ(3u, dd_airterminal.size());
-//		EXPECT_TRUE(compare_enums( DualDuct::DualDuct_ConstantVolume, dd_airterminal( 1 ).dd_airterminalType ));
-//		EXPECT_TRUE(compare_enums( DualDuct::DualDuct_VariableVolume, dd_airterminal( 2 ).dd_airterminalType )); // AT SD VAV HeatCool Reheat
-// Type 		EXPECT_TRUE(compare_enums( DualDuct::DualDuct_OutdoorAir, dd_airterminal( 3 ).dd_airterminalType )); // AT SD VAV HeatCool
+//		EXPECT_ENUM_EQ( DualDuct::DualDuct_ConstantVolume, dd_airterminal( 1 ).dd_airterminalType );
+//		EXPECT_ENUM_EQ( DualDuct::DualDuct_VariableVolume, dd_airterminal( 2 ).dd_airterminalType ); // AT SD VAV HeatCool Reheat
+// Type 		EXPECT_ENUM_EQ( DualDuct::DualDuct_OutdoorAir, dd_airterminal( 3 ).dd_airterminalType ); // AT SD VAV HeatCool
 // Reheat Type
 //
 //
@@ -345,16 +349,17 @@ TEST_F(EnergyPlusFixture, DualDuctVAVAirTerminals_GetInputs)
     });
 
     ASSERT_TRUE(process_idf(idf_objects));
+    state->init_state(*state);
 
     ZoneAirLoopEquipmentManager::GetZoneAirLoopEquipment(*state);
     DualDuct::GetDualDuctInput(*state);
 
     // dual duct  VAV air terminal get input test
-    EXPECT_TRUE(compare_enums(state->dataDualDuct->dd_airterminal(1).DamperType, DualDuctDamper::VariableVolume)); // dual duct VAV Type
-    EXPECT_EQ(state->dataDualDuct->dd_airterminal(1).Name, "VAV DUAL DUCT AT");                                    // dual duct VAV Name
-    EXPECT_TRUE(state->dataDualDuct->dd_airterminal(1).ZoneTurndownMinAirFracSchExist);                            // turndown schdule exists
-    EXPECT_EQ(state->dataDualDuct->dd_airterminal(1).ZoneTurndownMinAirFrac, 1.0); // turndown fraction initialized to 1.0
-    EXPECT_EQ(state->dataDualDuct->dd_airterminal(1).ZoneMinAirFracDes, 0.3);      // design minimum flow fraction
+    EXPECT_ENUM_EQ(state->dataDualDuct->dd_airterminal(1).DamperType, DualDuctDamper::VariableVolume); // dual duct VAV Type
+    EXPECT_EQ(state->dataDualDuct->dd_airterminal(1).Name, "VAV DUAL DUCT AT");                        // dual duct VAV Name
+    EXPECT_TRUE(state->dataDualDuct->dd_airterminal(1).zoneTurndownMinAirFracSched != nullptr);        // turndown schedule exists
+    EXPECT_EQ(state->dataDualDuct->dd_airterminal(1).ZoneTurndownMinAirFrac, 1.0);                     // turndown fraction initialized to 1.0
+    EXPECT_EQ(state->dataDualDuct->dd_airterminal(1).ZoneMinAirFracDes, 0.3);                          // design minimum flow fraction
 }
 
 TEST_F(EnergyPlusFixture, DualDuctVAVAirTerminals_MinFlowTurnDownTest)
@@ -426,10 +431,10 @@ TEST_F(EnergyPlusFixture, DualDuctVAVAirTerminals_MinFlowTurnDownTest)
     bool ErrorsFound = false;
     bool FirstHVACIteration = true;
 
-    state->dataGlobal->NumOfTimeStepInHour = 1;
-    state->dataGlobal->MinutesPerTimeStep = 60;
-    ScheduleManager::ProcessScheduleInput(*state);
-    state->dataScheduleMgr->ScheduleInputProcessed = true;
+    state->dataGlobal->TimeStepsInHour = 1;
+    state->dataGlobal->MinutesInTimeStep = 60;
+    state->init_state(*state);
+
     state->dataEnvrn->Month = 1;
     state->dataEnvrn->DayOfMonth = 21;
     state->dataGlobal->HourOfDay = 1;
@@ -439,10 +444,10 @@ TEST_F(EnergyPlusFixture, DualDuctVAVAirTerminals_MinFlowTurnDownTest)
     state->dataEnvrn->HolidayIndex = 0;
     state->dataEnvrn->DayOfYear_Schedule = General::OrdinalDay(state->dataEnvrn->Month, state->dataEnvrn->DayOfMonth, 1);
     state->dataEnvrn->StdRhoAir = Psychrometrics::PsyRhoAirFnPbTdbW(*state, 101325.0, 20.0, 0.0);
-    ScheduleManager::UpdateScheduleValues(*state);
+    Sched::UpdateScheduleVals(*state);
     state->dataZoneEnergyDemand->ZoneSysEnergyDemand.allocate(1);
     state->dataHeatBalFanSys->TempControlType.allocate(1);
-    state->dataHeatBalFanSys->TempControlType(1) = DataHVACGlobals::ThermostatType::DualSetPointWithDeadBand;
+    state->dataHeatBalFanSys->TempControlType(1) = HVAC::SetptType::DualHeatCool;
     HeatBalanceManager::GetZoneData(*state, ErrorsFound);
     ASSERT_FALSE(ErrorsFound);
     DataZoneEquipment::GetZoneEquipmentData(*state);
@@ -452,11 +457,11 @@ TEST_F(EnergyPlusFixture, DualDuctVAVAirTerminals_MinFlowTurnDownTest)
     auto &thisDDAirTerminal = state->dataDualDuct->dd_airterminal(DDNum);
 
     // dual duct  VAV air terminal get input test
-    EXPECT_TRUE(compare_enums(thisDDAirTerminal.DamperType, DualDuctDamper::VariableVolume)); // dual duct VAV Type
-    EXPECT_EQ(thisDDAirTerminal.Name, "VAV DUAL DUCT AT");                                    // dual duct VAV Name
-    EXPECT_TRUE(thisDDAirTerminal.ZoneTurndownMinAirFracSchExist);                            // turndown schdule exists
-    EXPECT_EQ(thisDDAirTerminal.ZoneTurndownMinAirFrac, 1.0);                                 // turndown fraction initialized to 1.0
-    EXPECT_EQ(thisDDAirTerminal.ZoneMinAirFracDes, 0.3);                                      // design minimum flow fraction
+    EXPECT_ENUM_EQ(thisDDAirTerminal.DamperType, DualDuctDamper::VariableVolume); // dual duct VAV Type
+    EXPECT_EQ(thisDDAirTerminal.Name, "VAV DUAL DUCT AT");                        // dual duct VAV Name
+    EXPECT_TRUE(thisDDAirTerminal.zoneTurndownMinAirFracSched != nullptr);        // turndown schedule exists
+    EXPECT_EQ(thisDDAirTerminal.ZoneTurndownMinAirFrac, 1.0);                     // turndown fraction initialized to 1.0
+    EXPECT_EQ(thisDDAirTerminal.ZoneMinAirFracDes, 0.3);                          // design minimum flow fraction
 
     int OutNode = thisDDAirTerminal.OutletNodeNum;
     int HotInNode = thisDDAirTerminal.HotAirInletNodeNum;
@@ -474,7 +479,7 @@ TEST_F(EnergyPlusFixture, DualDuctVAVAirTerminals_MinFlowTurnDownTest)
         Psychrometrics::PsyHFnTdbW(state->dataLoopNodes->Node(HotInNode).Temp, state->dataLoopNodes->Node(HotInNode).HumRat);
 
     // test with heating load and turndown fraction schedule value set 1.0
-    state->dataDualDuct->dd_airterminal(DDNum).ZoneTurndownMinAirFracSchPtr = 1; //
+    state->dataDualDuct->dd_airterminal(DDNum).zoneTurndownMinAirFracSched = Sched::GetSchedule(*state, "TURNDOWNMINAIRFLOWSCH1"); //
     state->dataLoopNodes->Node(OutNode).MassFlowRate = SysMaxMassFlowRes;
     state->dataLoopNodes->Node(HotInNode).MassFlowRate = SysMaxMassFlowRes;
     state->dataLoopNodes->Node(HotInNode).MassFlowRateMaxAvail = SysMaxMassFlowRes;
@@ -499,7 +504,7 @@ TEST_F(EnergyPlusFixture, DualDuctVAVAirTerminals_MinFlowTurnDownTest)
     EXPECT_EQ(0.0, state->dataLoopNodes->Node(ColdInNode).MassFlowRate);
 
     // test with heating load and turndown fraction schedule value set 0.5
-    state->dataDualDuct->dd_airterminal(DDNum).ZoneTurndownMinAirFracSchPtr = 2;
+    state->dataDualDuct->dd_airterminal(DDNum).zoneTurndownMinAirFracSched = Sched::GetSchedule(*state, "TURNDOWNMINAIRFLOWSCH2");
     SysMinMassFlowRes = 1.0 * state->dataEnvrn->StdRhoAir * 0.30 * 0.5; // min flow rate at 0.5 turndown fraction
     state->dataLoopNodes->Node(OutNode).MassFlowRate = SysMaxMassFlowRes;
     state->dataLoopNodes->Node(HotInNode).MassFlowRate = SysMaxMassFlowRes;
@@ -523,4 +528,95 @@ TEST_F(EnergyPlusFixture, DualDuctVAVAirTerminals_MinFlowTurnDownTest)
               thisDDAirTerminal.dd_airterminalHotAirInlet.AirMassFlowRateMax * thisDDAirTerminal.ZoneMinAirFracDes *
                   thisDDAirTerminal.ZoneTurndownMinAirFrac);
     EXPECT_EQ(0.0, state->dataLoopNodes->Node(ColdInNode).MassFlowRate);
+}
+
+TEST_F(EnergyPlusFixture, DualDuctAirTerminal_reportTerminalUnit)
+{
+    using namespace EnergyPlus::OutputReportPredefined;
+    state->init_state(*state);
+
+    auto &orp = *state->dataOutRptPredefined;
+
+    auto *schedA = Sched::AddScheduleConstant(*state, "schA");
+    auto *schedB = Sched::AddScheduleConstant(*state, "schB");
+
+    auto &adu = state->dataDefineEquipment->AirDistUnit;
+    adu.allocate(2);
+    adu(1).Name = "ADU a";
+    adu(1).TermUnitSizingNum = 1;
+
+    auto &siz = state->dataSize->TermUnitFinalZoneSizing;
+    siz.allocate(2);
+    siz(1).DesCoolVolFlowMin = 0.15;
+    siz(1).MinOA = 0.05;
+    siz(1).CoolDesTemp = 12.5;
+    siz(1).HeatDesTemp = 40.0;
+    siz(1).DesHeatLoad = 2000.0;
+    siz(1).DesCoolLoad = 3000.0;
+
+    auto &ddat = state->dataDualDuct->dd_airterminal;
+    ddat.allocate(2);
+    ddat(1).ADUNum = 1;
+    ddat(1).DamperType = DualDuctDamper::ConstantVolume;
+    ddat(1).MaxAirVolFlowRate = 0.30;
+    ddat(1).zoneTurndownMinAirFracSched = schedA;
+    ddat(1).OARequirementsPtr = 0;
+
+    ddat(1).reportTerminalUnit(*state);
+
+    EXPECT_EQ("0.15", RetrievePreDefTableEntry(*state, orp.pdchAirTermMinFlow, "ADU a"));
+    EXPECT_EQ("0.05", RetrievePreDefTableEntry(*state, orp.pdchAirTermMinOutdoorFlow, "ADU a"));
+    EXPECT_EQ("12.50", RetrievePreDefTableEntry(*state, orp.pdchAirTermSupCoolingSP, "ADU a"));
+    EXPECT_EQ("40.00", RetrievePreDefTableEntry(*state, orp.pdchAirTermSupHeatingSP, "ADU a"));
+    EXPECT_EQ("2000.00", RetrievePreDefTableEntry(*state, orp.pdchAirTermHeatingCap, "ADU a"));
+    EXPECT_EQ("3000.00", RetrievePreDefTableEntry(*state, orp.pdchAirTermCoolingCap, "ADU a"));
+    EXPECT_EQ("ConstantVolume", RetrievePreDefTableEntry(*state, orp.pdchAirTermTypeInp, "ADU a"));
+    EXPECT_EQ("0.30", RetrievePreDefTableEntry(*state, orp.pdchAirTermPrimFlow, "ADU a"));
+    EXPECT_EQ("n/a", RetrievePreDefTableEntry(*state, orp.pdchAirTermSecdFlow, "ADU a"));
+    EXPECT_EQ("schA", RetrievePreDefTableEntry(*state, orp.pdchAirTermMinFlowSch, "ADU a"));
+    EXPECT_EQ("n/a", RetrievePreDefTableEntry(*state, orp.pdchAirTermMaxFlowReh, "ADU a"));
+    EXPECT_EQ("n/a", RetrievePreDefTableEntry(*state, orp.pdchAirTermMinOAflowSch, "ADU a"));
+    EXPECT_EQ("n/a", RetrievePreDefTableEntry(*state, orp.pdchAirTermHeatCoilType, "ADU a"));
+    EXPECT_EQ("n/a", RetrievePreDefTableEntry(*state, orp.pdchAirTermCoolCoilType, "ADU a"));
+    EXPECT_EQ("n/a", RetrievePreDefTableEntry(*state, orp.pdchAirTermFanType, "ADU a"));
+    EXPECT_EQ("n/a", RetrievePreDefTableEntry(*state, orp.pdchAirTermFanName, "ADU a"));
+
+    adu(2).Name = "ADU b";
+    adu(2).TermUnitSizingNum = 2;
+
+    siz(2).DesCoolVolFlowMin = 0.16;
+    siz(2).MinOA = 0.06;
+    siz(2).CoolDesTemp = 12.6;
+    siz(2).HeatDesTemp = 41.0;
+    siz(2).DesHeatLoad = 2100.0;
+    siz(2).DesCoolLoad = 3100.0;
+
+    ddat(2).ADUNum = 2;
+    ddat(2).DamperType = DualDuctDamper::VariableVolume;
+    ddat(2).MaxAirVolFlowRate = 0.31;
+    ddat(2).zoneTurndownMinAirFracSched = nullptr;
+    ddat(2).OARequirementsPtr = 1;
+
+    auto &oa = state->dataSize->OARequirements;
+    oa.allocate(1);
+    oa(1).oaFlowFracSched = schedB;
+
+    ddat(2).reportTerminalUnit(*state);
+
+    EXPECT_EQ("0.16", RetrievePreDefTableEntry(*state, orp.pdchAirTermMinFlow, "ADU b"));
+    EXPECT_EQ("0.06", RetrievePreDefTableEntry(*state, orp.pdchAirTermMinOutdoorFlow, "ADU b"));
+    EXPECT_EQ("12.60", RetrievePreDefTableEntry(*state, orp.pdchAirTermSupCoolingSP, "ADU b"));
+    EXPECT_EQ("41.00", RetrievePreDefTableEntry(*state, orp.pdchAirTermSupHeatingSP, "ADU b"));
+    EXPECT_EQ("2100.00", RetrievePreDefTableEntry(*state, orp.pdchAirTermHeatingCap, "ADU b"));
+    EXPECT_EQ("3100.00", RetrievePreDefTableEntry(*state, orp.pdchAirTermCoolingCap, "ADU b"));
+    EXPECT_EQ("VariableVolume", RetrievePreDefTableEntry(*state, orp.pdchAirTermTypeInp, "ADU b"));
+    EXPECT_EQ("0.31", RetrievePreDefTableEntry(*state, orp.pdchAirTermPrimFlow, "ADU b"));
+    EXPECT_EQ("n/a", RetrievePreDefTableEntry(*state, orp.pdchAirTermSecdFlow, "ADU b"));
+    EXPECT_EQ("n/a", RetrievePreDefTableEntry(*state, orp.pdchAirTermMinFlowSch, "ADU b"));
+    EXPECT_EQ("n/a", RetrievePreDefTableEntry(*state, orp.pdchAirTermMaxFlowReh, "ADU b"));
+    EXPECT_EQ("schB", RetrievePreDefTableEntry(*state, orp.pdchAirTermMinOAflowSch, "ADU b"));
+    EXPECT_EQ("n/a", RetrievePreDefTableEntry(*state, orp.pdchAirTermHeatCoilType, "ADU b"));
+    EXPECT_EQ("n/a", RetrievePreDefTableEntry(*state, orp.pdchAirTermCoolCoilType, "ADU b"));
+    EXPECT_EQ("n/a", RetrievePreDefTableEntry(*state, orp.pdchAirTermFanType, "ADU b"));
+    EXPECT_EQ("n/a", RetrievePreDefTableEntry(*state, orp.pdchAirTermFanName, "ADU b"));
 }

@@ -6,11 +6,11 @@ Window Shade Order
  - December 21, 2017
  - January 10, 2018
  - January 15, 2018 - Added design section
- 
+
 
 ## Justification for New Feature ##
 
-When windows shades (including shades, blinds and switchable glazing) are deployed for glare control or daylighing, they are deployed in the order that the windows appear in the input file rather than a user specified order. 
+When windows shades (including shades, blinds and switchable glazing) are deployed for glare control or daylighing, they are deployed in the order that the windows appear in the input file rather than a user specified order.
 
 ## E-mail and  Conference Call Conclusions ##
 
@@ -20,7 +20,7 @@ Raustad provided suggestion on maintaining backward compatibility when transitio
 
 ## Overview ##
 
-Zones often have more than one window. Currently, EnergyPlus applies window shades in the order of their appearance in the input file. The first shade is applied, and if it does not meet the shading control requirement the second shade is applied, and so on. Users do not have a way to specify how multiple shades can be applied in a certain order or in certain sets. 
+Zones often have more than one window. Currently, EnergyPlus applies window shades in the order of their appearance in the input file. The first shade is applied, and if it does not meet the shading control requirement the second shade is applied, and so on. Users do not have a way to specify how multiple shades can be applied in a certain order or in certain sets.
 
 Currently, each FenestrationSurface:Detailed or Window or GlazedDoor has a field called "Shading Control Name" that references the name of WindowProperty:ShadingControl. Multiple FenestrationSurface:Detailed objects can reference the same WindowProperty:ShadingControl. The WindowProperty:ShadingControl has a field called "Shading Control Type" which has several options but control of window shades occurs with the following options:
 
@@ -134,7 +134,7 @@ WindowShadingControl,
 + A17; \field Fenestration Surface 5 Name
 ```
 
-Notes: 
+Notes:
 
 - WindowProperty:ShadingControl renamed to WindowShadingControl
 - Window and GlazedDoor objects would also have Shading Control Name field removed.
@@ -184,7 +184,7 @@ The field can have one of two options:
 
 **Field: Fenestration Surface 1 Name**
 
-The name of the FenestrationSurface:Detailed, Window, or GlazedDoor objects. WHen Multiple Surface Control Type is set to Sequential, the order of the  FenestrationSurface:Detailed, Window, or GlazedDoor objects is the order that the shades will be deployed. This field can be repeated for each fenestration surface with shading. The object is extensible so that additional fields of fenestration surface names can be added to the object. 
+The name of the FenestrationSurface:Detailed, Window, or GlazedDoor objects. WHen Multiple Surface Control Type is set to Sequential, the order of the  FenestrationSurface:Detailed, Window, or GlazedDoor objects is the order that the shades will be deployed. This field can be repeated for each fenestration surface with shading. The object is extensible so that additional fields of fenestration surface names can be added to the object.
 
 
 ## Outputs Description ##
@@ -231,7 +231,7 @@ Bullet (3) will be rewritten to read:
 
 Signaticant transition changes will be necessary since the referencing between objects is changing as well as the addition of new fields.
 
-To help provide backward compatibility the transition program will set WindowShadingControl Shading Control Sequence Number = n, where n is the order of occurrence of WindowProperty:ShadingControl in the idf. 
+To help provide backward compatibility the transition program will set WindowShadingControl Shading Control Sequence Number = n, where n is the order of occurrence of WindowProperty:ShadingControl in the idf.
 
 ## References ##
 
@@ -243,7 +243,7 @@ In order to read the objects that have changed, the following will be modified:
 
 - GetHTSubSurfaceData() and GetRectSubSurfaces() and GetWindowShadingControlData() in SurfaceGeometry.cc
 - SurfData struct will be modified to remove  the member WindowShadingControlPtr
-- WindowShadingControlData struct will be modified to add the new input fields  
+- WindowShadingControlData struct will be modified to add the new input fields
 
 WindowShadingControlPtr is used in:
 
@@ -262,7 +262,4 @@ While the object is changing name from WindowProperty:ShadingControl to WindowSh
 
 The DayltgInteriorIllum() function is in DaylightingManager.cc is the main function to be updated to support the new ordered window shading controls. The function will be modified to traverse the list of SurfaceWindows in an order established by the revised objects. A sort of the WindowShadingControl objects will be made once based on the Shading Control Sequence Number during GetInput and not repeated during timestep simulation.
 
-Testing will be done by comparing the results on a timestep basis with develop for buildings with multiple window shades. 
-
-
-
+Testing will be done by comparing the results on a timestep basis with develop for buildings with multiple window shades.

@@ -1,9 +1,9 @@
-# EnergyPlus, Copyright (c) 1996-2023, The Board of Trustees of the University
-# of Illinois, The Regents of the University of California, through Lawrence
-# Berkeley National Laboratory (subject to receipt of any required approvals
-# from the U.S. Dept. of Energy), Oak Ridge National Laboratory, managed by UT-
-# Battelle, Alliance for Sustainable Energy, LLC, and other contributors. All
-# rights reserved.
+# EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the
+# University of Illinois, The Regents of the University of California, through
+# Lawrence Berkeley National Laboratory (subject to receipt of any required
+# approvals from the U.S. Dept. of Energy), Oak Ridge National Laboratory,
+# managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
+# contributors. All rights reserved.
 #
 # NOTICE: This Software was developed under funding from the U.S. Department of
 # Energy and the U.S. Government consequently retains certain rights. As such,
@@ -91,14 +91,12 @@ class ZN_1_wall_south_Window_1_Control(EnergyPlusPlugin):
             # get variable handles if needed
             if self.need_to_get_handles:
                 self.Win1_Tout_handle = self.api.exchange.get_variable_handle(
-                    state,
-                    "Surface Outside Face Temperature",
-                    "Perimeter_ZN_1_wall_south_Window_1")
+                    state, "Surface Outside Face Temperature", "Perimeter_ZN_1_wall_south_Window_1"
+                )
 
-                self.Win1_Construct_handle = self.api.exchange.get_actuator_handle(state,
-                                                                                   "Surface",
-                                                                                   "Construction State",
-                                                                                   "Perimeter_ZN_1_wall_south_Window_1")
+                self.Win1_Construct_handle = self.api.exchange.get_actuator_handle(
+                    state, "Surface", "Construction State", "Perimeter_ZN_1_wall_south_Window_1"
+                )
 
                 self.TCwindow_25_handle = self.api.exchange.get_construction_handle(state, "TCwindow_25")
 

@@ -8,10 +8,15 @@ namespace valijson {
 class Schema;
 class ValidationResults;
 
+
 /**
- * @brief  Class that provides validation functionality.
+ * @brief   Class that provides validation functionality.
+ *
+ * @tparam  RegexEngine regular expression engine used for pattern constraint validation.
+
  */
-class Validator
+template <typename RegexEngine>
+class ValidatorT
 {
 public:
     enum TypeCheckingMode
@@ -20,19 +25,29 @@ public:
         kWeakTypes
     };
 
+    enum DateTimeMode
+    {
+        kStrictDateTime,
+        kPermissiveDateTime
+    };
+
     /**
      * @brief  Construct a Validator that uses strong type checking by default
      */
-    Validator()
-      : strictTypes(true) { }
+    ValidatorT()
+      : strictTypes(true)
+      , strictDateTime(true)
+    { }
 
     /**
      * @brief  Construct a Validator using a specific type checking mode
      *
      * @param  typeCheckingMode  choice of strong or weak type checking
      */
-    Validator(TypeCheckingMode typeCheckingMode)
-      : strictTypes(typeCheckingMode == kStrongTypes) { }
+    ValidatorT(TypeCheckingMode typeCheckingMode, DateTimeMode dateTimeMode = kStrictDateTime)
+      : strictTypes(typeCheckingMode == kStrongTypes)
+      , strictDateTime(dateTimeMode == kStrictDateTime)
+    { }
 
     /**
      * @brief  Validate a JSON document and optionally return the results.
@@ -58,8 +73,13 @@ public:
             ValidationResults *results)
     {
         // Construct a ValidationVisitor to perform validation at the root level
-        ValidationVisitor<AdapterType> v(target,
-                std::vector<std::string>(1, "<root>"), strictTypes, results, regexesCache);
+        ValidationVisitor<AdapterType, RegexEngine> v(
+                target,
+                std::vector<std::string>(1, "<root>"),
+                strictTypes,
+                strictDateTime,
+                results,
+                regexesCache);
 
         return v.validateSchema(schema);
     }
@@ -67,11 +87,32 @@ public:
 private:
 
     /// Flag indicating that strict type comparisons should be used
-    const bool strictTypes;
+    bool strictTypes;
+
+    /// Parse date/time values strictly, according to RFC-3999
+    bool strictDateTime;
 
     /// Cached regex objects for pattern constraint. Key - pattern.
-    std::unordered_map<std::string, std::unique_ptr<re2::RE2>> regexesCache;
-
+    std::unordered_map<std::string, RegexEngine> regexesCache;
 };
+
+/**
+ * @brief   Struct that provides a default Regular Expression Engine using std::regex
+ */
+struct DefaultRegexEngine
+{
+    DefaultRegexEngine(const std::string& pattern)
+      : regex(pattern) { }
+
+    static bool search(const std::string& s, const DefaultRegexEngine& r)
+    {
+        return std::regex_search(s, r.regex);
+    }
+
+private:
+    std::regex regex;
+};
+
+using Validator = ValidatorT<DefaultRegexEngine>;
 
 }  // namespace valijson

@@ -1,7 +1,7 @@
-// EnergyPlus, Copyright (c) 1996-2023, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
-// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other
+// National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
 // contributors. All rights reserved.
 //
 // NOTICE: This Software was developed under funding from the U.S. Department of Energy and the
@@ -45,9 +45,15 @@
 // OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 // POSSIBILITY OF SUCH DAMAGE.
 
+// C++ Headers
+#include <format>
+
+// Local Headers
 #include "AirflowNetwork/Properties.hpp"
-#include <EnergyPlus/Data/EnergyPlusData.hh>
+
+// EnergyPlus Headers
 #include <EnergyPlus/General.hh>
+#include <EnergyPlus/UtilityRoutines.hh>
 
 namespace EnergyPlus {
 
@@ -91,21 +97,23 @@ namespace AirflowNetwork {
             if (lowerLimitErrIdx == 0) {
                 ShowWarningMessage(m_state, "Air temperature below lower limit of -20C for conductivity calculation");
             }
-            ShowRecurringWarningErrorAtEnd(m_state,
-                                           format("Air temperature below lower limit of -20C for conductivity calculation. Air temperature of {:.1R} "
-                                                  "used for conductivity calculation.",
-                                                  LowerLimit),
-                                           lowerLimitErrIdx);
+            ShowRecurringWarningErrorAtEnd(
+                m_state,
+                std::format("Air temperature below lower limit of -20C for conductivity calculation. Air temperature of {:.1f} "
+                            "used for conductivity calculation.",
+                            LowerLimit),
+                lowerLimitErrIdx);
             T = LowerLimit;
         } else if (T > UpperLimit) {
             if (upperLimitErrIdx == 0) {
                 ShowWarningMessage(m_state, "Air temperature above upper limit of 70C for conductivity calculation");
             }
-            ShowRecurringWarningErrorAtEnd(m_state,
-                                           format("Air temperature above upper limit of 70C for conductivity calculation. Air temperature of {:.1R} "
-                                                  "used for conductivity calculation.",
-                                                  UpperLimit),
-                                           upperLimitErrIdx);
+            ShowRecurringWarningErrorAtEnd(
+                m_state,
+                std::format("Air temperature above upper limit of 70C for conductivity calculation. Air temperature of {:.1f} "
+                            "used for conductivity calculation.",
+                            UpperLimit),
+                upperLimitErrIdx);
             T = UpperLimit;
         }
 

@@ -103,31 +103,27 @@ derivative works thereof, in binary and source code form.
 
 #include "utilXml.h"
 
+Stack2 expStk;  ///< Variables for getxmlvalue function
 
-
-Stack2 expStk; ///< Variables for getxmlvalue function
-
-char * att; ///< Local global variable for function \c getxmlvalue
-char * vals;  ///< Local global variable for function \c getxmlvalue
-size_t * numVals; ///< Local global variable for function \c getxmlvalue
-int PARSEVALUE; ///< flag for parsing xml values 1 if parse, 0 if not parse
-int ERROR_STATUS; ///< flag for xml element handler error status settings
+char* att;         ///< Local global variable for function \c getxmlvalue
+char* vals;        ///< Local global variable for function \c getxmlvalue
+size_t* numVals;   ///< Local global variable for function \c getxmlvalue
+int PARSEVALUE;    ///< flag for parsing xml values 1 if parse, 0 if not parse
+int ERROR_STATUS;  ///< flag for xml element handler error status settings
 
 ////////////////////////////////////////////////////////////////
 /// local global variables for function \c getepvariables
 ////////////////////////////////////////////////////////////////
-char *  outputVarsName; ///< the string pointer to the parsed output variable names
-char *  outputVarsType; ///< the string pointer to the parsed output variable types
-int *   numOutputVars;  ///< the integer pointer to the number of output variables
-char *  inputVars;      ///< the string pointer to the input variables
-int *   numInputVars;   ///< the integer pointer to the number of input variables
-int *   inputVarsType;  ///< the integer array to store the types of each input variables
-char ** inputKeys;      ///< the string array to store the types of input variable types
-int     numInputKeys;   ///< the number of input variable types
-int     source;         ///< flag for function /c getepvariables 0=EnergyPlus, 1=Ptolemy
-size_t const * strLen;     ///< the length of string parsed to this function
-
-
+char* outputVarsName;  ///< the string pointer to the parsed output variable names
+char* outputVarsType;  ///< the string pointer to the parsed output variable types
+int* numOutputVars;    ///< the integer pointer to the number of output variables
+char* inputVars;       ///< the string pointer to the input variables
+int* numInputVars;     ///< the integer pointer to the number of input variables
+int* inputVarsType;    ///< the integer array to store the types of each input variables
+char** inputKeys;      ///< the string array to store the types of input variable types
+int numInputKeys;      ///< the number of input variable types
+int source;            ///< flag for function /c getepvariables 0=EnergyPlus, 1=Ptolemy
+size_t const* strLen;  ///< the length of string parsed to this function
 
 ////////////////////////////////////////////////////////////////
 /// Call back functions that will be used by the expat xml parser.
@@ -137,84 +133,95 @@ size_t const * strLen;     ///< the length of string parsed to this function
 /// to get input and output variables in the same order as they
 /// appear in the configuration file
 ////////////////////////////////////////////////////////////////
-static void XMLCALL
-EPstart(void * data, char const * el, char const ** attr)
-{
+static void XMLCALL EPstart(void* data, char const* el, char const** attr) {
   (void)data;
   int i, j;
-  if(ERROR_STATUS == 1) return;
-  if( 0 == strcmp(el, "BCVTB-variables") )
-    return;
-  if( 0 == strcmp(el, "variable") ) {
-    if( 0 == strcmp(attr[1], "EnergyPlus") )
+  if (ERROR_STATUS == 1) return;
+  if (0 == strcmp(el, "BCVTB-variables")) return;
+  if (0 == strcmp(el, "variable")) {
+    if (0 == strcmp(attr[1], "EnergyPlus"))
       source = 0;
     else
       source = 1;
     return;
   }
-  if( 0 == strcmp(el, "EnergyPlus") ) {
-    if( 0 == source){
-      for(i=0; attr[i]; i++){}
+  if (0 == strcmp(el, "EnergyPlus")) {
+    if (0 == source) {
+      for (i = 0; attr[i]; i++) {
+      }
       if (i != 4) {
         fprintf(stderr, "Error: Variable configuration file invalid.\n"
                         "       Expected two attribute values for source\n"
                         "       of EnergyPlus: 'name' and 'type'.\n");
-        ERROR_STATUS = 1; return;
+        ERROR_STATUS = 1;
+        return;
       }
-      if ( 0 == strcmp(attr[0], "name") && 0 == strcmp(attr[2], "type") )
+      if (0 == strcmp(attr[0], "name") && 0 == strcmp(attr[2], "type"))
         i = 0;
-      else if( 0 == strcmp(attr[2], "name") && 0 == strcmp(attr[0],"type"))
+      else if (0 == strcmp(attr[2], "name") && 0 == strcmp(attr[0], "type"))
         i = 2;
       else {
         fprintf(stderr, "Error: Variable configuration file not valide.\n"
                         "       Expected two attribute values for source\n"
                         "       of EnergyPlus: 'name' and 'type'.\n");
-        ERROR_STATUS = 1; return;
+        ERROR_STATUS = 1;
+        return;
       }
 
-      if( (strlen(outputVarsName)+strlen(attr[(i+1)%4])+2u) > (*strLen) ){
-        fprintf(stderr, "Error: Not enough memory allocated for EnergyPlus output.\n"
-                        "       Allocated: %d.\n", (int)*strLen);
-        ERROR_STATUS = 1; return;
+      if ((strlen(outputVarsName) + strlen(attr[(i + 1) % 4]) + 2u) > (*strLen)) {
+        fprintf(stderr,
+                "Error: Not enough memory allocated for EnergyPlus output.\n"
+                "       Allocated: %d.\n",
+                (int)*strLen);
+        ERROR_STATUS = 1;
+        return;
       }
-      strcat(outputVarsName,(char *) attr[(i+1)%4]);
-      strcat(outputVarsName, (char *) ";");
+      strcat(outputVarsName, (char*)attr[(i + 1) % 4]);
+      strcat(outputVarsName, (char*)";");
 
-      if( (strlen(outputVarsType)+strlen(attr[(i+3)%4])+2u) > *strLen ){
-        fprintf(stderr, "Error: Not enough memory allocated for EnergyPlus output.\n"
-                        "       Allocated: %d.\n", (int)*strLen);
-        ERROR_STATUS = 1; return;
+      if ((strlen(outputVarsType) + strlen(attr[(i + 3) % 4]) + 2u) > *strLen) {
+        fprintf(stderr,
+                "Error: Not enough memory allocated for EnergyPlus output.\n"
+                "       Allocated: %d.\n",
+                (int)*strLen);
+        ERROR_STATUS = 1;
+        return;
       }
-      strcat(outputVarsType, (char *) attr[(i+3)%4]);
-      strcat(outputVarsType, (char *) ";");
+      strcat(outputVarsType, (char*)attr[(i + 3) % 4]);
+      strcat(outputVarsType, (char*)";");
 
       *numOutputVars = *numOutputVars + 1;
-    }
-    else if( 1 == source) {
-      for( i=0; attr[i]; i++){}
-      if( 2 != i ){
+    } else if (1 == source) {
+      for (i = 0; attr[i]; i++) {
+      }
+      if (2 != i) {
         fprintf(stderr, "Error: Expecting one input variable in one\n"
                         "       element in xml file.\n");
-        ERROR_STATUS = 1; return;
+        ERROR_STATUS = 1;
+        return;
       }
-      for( j=0; j< numInputKeys; j++) {
-        if( 0 == strcmp((char *)inputKeys[j], (char *)attr[0]) ){
-          if( (strlen(inputVars)+strlen(attr[1])+2u) > *strLen){
-            fprintf(stderr, "Error: Memory allocated for parsed E+ input\n"
-                            "       variables name is not enough,\n"
-                            "       allocated: %d.\n", (int)*strLen);
-            ERROR_STATUS = 1; return;
+      for (j = 0; j < numInputKeys; j++) {
+        if (0 == strcmp((char*)inputKeys[j], (char*)attr[0])) {
+          if ((strlen(inputVars) + strlen(attr[1]) + 2u) > *strLen) {
+            fprintf(stderr,
+                    "Error: Memory allocated for parsed E+ input\n"
+                    "       variables name is not enough,\n"
+                    "       allocated: %d.\n",
+                    (int)*strLen);
+            ERROR_STATUS = 1;
+            return;
           }
-          inputVarsType[*numInputVars] = j+1;
-          strcat(inputVars,attr[1]);
+          inputVarsType[*numInputVars] = j + 1;
+          strcat(inputVars, attr[1]);
           strcat(inputVars, ";");
           *numInputVars = *numInputVars + 1;
           break;
         }
       }
-      if( numInputKeys == j) {
+      if (numInputKeys == j) {
         fprintf(stderr, "Error: Unknown input variable type: %s.\n", attr[0]);
-        ERROR_STATUS = 1; return;
+        ERROR_STATUS = 1;
+        return;
       }
     }
   }
@@ -227,14 +234,11 @@ EPstart(void * data, char const * el, char const ** attr)
 /// to get input and output variables in the same order as they
 /// appear in the configuration file
 ////////////////////////////////////////////////////////////////
-static void XMLCALL
-EPend(void * data, char const * el)
-{
+static void XMLCALL EPend(void* data, char const* el) {
   (void)data;
   (void)el;
   source = -1;
 }
-
 
 ////////////////////////////////////////////////////////////////
 ///  This method frees the local memory allocated
@@ -242,15 +246,12 @@ EPend(void * data, char const * el)
 ///\param strArr 1D string array to be freed
 ///\param n the size of the 1D string array
 ////////////////////////////////////////////////////////////////
-void
-freeResource(char ** strArr, int n)
-{
+void freeResource(char** strArr, int n) {
   int i;
-  for(i=0; i<n; i++)
+  for (i = 0; i < n; i++)
     free(strArr[i]);
   free(strArr);
 }
-
 
 ////////////////////////////////////////////////////////////////
 ///  This method will return the input and output variable for EnergyPlus
@@ -268,37 +269,25 @@ freeResource(char ** strArr, int n)
 ///\param myStrLen The length of the string that is passed to this function.
 ///
 ////////////////////////////////////////////////////////////////
-int
-getepvariables(
- char const *	const  fileName,
- char *	const myOutputVarsName,
- char *	const myOutputVarsType,
- int *	const myNumOutputVars,
- char const *	const myInputKeys,
- int const *	const myNumInputKeys,
- char *	const myInputVars,
- int *	const myNumInputVars,
- int *	const myInputVarsType,
- size_t const *	const myStrLen
-)
-{
+int getepvariables(char const* const fileName, char* const myOutputVarsName, char* const myOutputVarsType, int* const myNumOutputVars,
+                   char const* const myInputKeys, int const* const myNumInputKeys, char* const myInputVars, int* const myNumInputVars,
+                   int* const myInputVarsType, size_t const* const myStrLen) {
 
-  char Buff[BUFFSIZE]; ///< Local buffer for reading in the xml file
-  FILE * fd;
+  char Buff[BUFFSIZE];  ///< Local buffer for reading in the xml file
+  FILE* fd;
   XML_Parser p;
   int i, j, count, ret;
 
   ret = check_variable_cfg_Validate(fileName);
-  if(-1 == ret)
-    return -1;
+  if (-1 == ret) return -1;
 
   fd = fopen(fileName, "r");
-  if(!fd){
+  if (!fd) {
     fprintf(stderr, "Error: Could not open file '%s' when getting EnergyPlus variables.\n", fileName);
     return -1;
   }
   p = XML_ParserCreate(NULL);
-  if(!p){
+  if (!p) {
     fprintf(stderr, "Error: Could not allocate memory for parser in function 'getepvariables'.\n");
     fclose(fd);
     return -1;
@@ -312,25 +301,25 @@ getepvariables(
   numInputVars = myNumInputVars;
   numInputKeys = *myNumInputKeys;
   strLen = myStrLen;
-  i=0; j=0; count=0;
+  i = 0;
+  j = 0;
+  count = 0;
   inputKeys = NULL;
-  while(1){
-    if(myInputKeys[count] == '\0') {
-      if(inputKeys[i][j] != '\0')
-        inputKeys[i][j] = '\0';
+  while (1) {
+    if (myInputKeys[count] == '\0') {
+      if (inputKeys[i][j] != '\0') inputKeys[i][j] = '\0';
       break;
     }
-    if(myInputKeys[count] == ','){
-      inputKeys[i][j]='\0';
+    if (myInputKeys[count] == ',') {
+      inputKeys[i][j] = '\0';
       i++;
-      j=0;
+      j = 0;
       count++;
-    }
-    else {
-      if(j == 0) {
-        char ** tmpInputKeys;
-        tmpInputKeys = (char **) realloc(inputKeys, sizeof(char *) * (i+1) );
-        if(tmpInputKeys == NULL) {
+    } else {
+      if (j == 0) {
+        char** tmpInputKeys;
+        tmpInputKeys = (char**)realloc(inputKeys, sizeof(char*) * (i + 1));
+        if (tmpInputKeys == NULL) {
           fprintf(stderr, "Error: Memory allocation failed in 'utilXml.c'\n");
           return -1;
         }
@@ -338,20 +327,19 @@ getepvariables(
         inputKeys[i] = NULL;
       }
 
-      inputKeys[i] = (char *)realloc(inputKeys[i], sizeof(char) * (j+2) );
-      if(inputKeys[i] == NULL) {
+      inputKeys[i] = (char*)realloc(inputKeys[i], sizeof(char) * (j + 2));
+      if (inputKeys[i] == NULL) {
         fprintf(stderr, "Error: Memory allocation failed in 'utilXml.c'.\n");
         return -1;
       }
       inputKeys[i][j] = myInputKeys[count];
-      j++; count++;
+      j++;
+      count++;
     }
   }
-  if((i+1) != *myNumInputKeys ){
-    fprintf(stderr,
-	    "Error: Number of input variables keys found does not match:\nFound %d, expected %d\n",
-	    i+1, *myNumInputKeys);
-    freeResource(inputKeys, i+1);
+  if ((i + 1) != *myNumInputKeys) {
+    fprintf(stderr, "Error: Number of input variables keys found does not match:\nFound %d, expected %d\n", i + 1, *myNumInputKeys);
+    freeResource(inputKeys, i + 1);
     return -1;
   }
   *numOutputVars = 0;
@@ -375,17 +363,13 @@ getepvariables(
     }
     done = feof(fd);
 
-    if (XML_Parse(p, Buff, len, done) == XML_STATUS_ERROR
-	|| ERROR_STATUS == 1) {
-      fprintf(stderr, "Error: Parser error in file '%s':\n%s\n",
-	      fileName,
-	      XML_ErrorString(XML_GetErrorCode(p)));
+    if (XML_Parse(p, Buff, len, done) == XML_STATUS_ERROR || ERROR_STATUS == 1) {
+      fprintf(stderr, "Error: Parser error in file '%s':\n%s\n", fileName, XML_ErrorString(XML_GetErrorCode(p)));
       freeResource(inputKeys, numInputKeys);
       return -1;
     }
 
-    if (done)
-      break;
+    if (done) break;
   }
   XML_ParserFree(p);
   fclose(fd);
@@ -410,36 +394,25 @@ getepvariables(
 ///\param myStrLen The length of the string that is passed to this function.
 ///
 ////////////////////////////////////////////////////////////////
-int
-getepvariablesFMU(
- char const *	const fileName,
- char *	const myOutputVarsName,
- char *	const myOutputVarsType,
- int *	const myNumOutputVars,
- char const *	const myInputKeys,
- int const *	const myNumInputKeys,
- char *	const myInputVars,
- int *	const myNumInputVars,
- int *	const myInputVarsType,
- size_t const *	const myStrLen
-)
-{
+int getepvariablesFMU(char const* const fileName, char* const myOutputVarsName, char* const myOutputVarsType, int* const myNumOutputVars,
+                      char const* const myInputKeys, int const* const myNumInputKeys, char* const myInputVars, int* const myNumInputVars,
+                      int* const myInputVarsType, size_t const* const myStrLen) {
 
-  char Buff[BUFFSIZE]; ///< Local buffer for reading in the xml file
-  FILE * fd;
+  char Buff[BUFFSIZE];  ///< Local buffer for reading in the xml file
+  FILE* fd;
   XML_Parser p;
   int i, j, count;
 
   //ret = check_variable_cfg_Validate(fileName);
   //if(-1 == ret)
-    //return -1;
+  //return -1;
   fd = fopen(fileName, "r");
-  if(!fd){
+  if (!fd) {
     fprintf(stderr, "Error: Could not open file '%s' when getting EnergyPlus variables.\n", fileName);
     return -1;
   }
   p = XML_ParserCreate(NULL);
-  if(!p){
+  if (!p) {
     fprintf(stderr, "Error: Could not allocate memory for parser in function 'getepvariables'.\n");
     fclose(fd);
     return -1;
@@ -453,25 +426,25 @@ getepvariablesFMU(
   numInputVars = myNumInputVars;
   numInputKeys = *myNumInputKeys;
   strLen = myStrLen;
-  i=0; j=0; count=0;
+  i = 0;
+  j = 0;
+  count = 0;
   inputKeys = NULL;
-  while(1){
-    if(myInputKeys[count] == '\0') {
-      if(inputKeys[i][j] != '\0')
-        inputKeys[i][j] = '\0';
+  while (1) {
+    if (myInputKeys[count] == '\0') {
+      if (inputKeys[i][j] != '\0') inputKeys[i][j] = '\0';
       break;
     }
-    if(myInputKeys[count] == ','){
-      inputKeys[i][j]='\0';
+    if (myInputKeys[count] == ',') {
+      inputKeys[i][j] = '\0';
       i++;
-      j=0;
+      j = 0;
       count++;
-    }
-    else {
-      if(j == 0) {
-        char ** tmpInputKeys;
-        tmpInputKeys = (char **) realloc(inputKeys, sizeof(char *) * (i+1) );
-        if(tmpInputKeys == NULL) {
+    } else {
+      if (j == 0) {
+        char** tmpInputKeys;
+        tmpInputKeys = (char**)realloc(inputKeys, sizeof(char*) * (i + 1));
+        if (tmpInputKeys == NULL) {
           fprintf(stderr, "Error: Memory allocation failed in 'utilXml.c'\n");
           return -1;
         }
@@ -479,20 +452,19 @@ getepvariablesFMU(
         inputKeys[i] = NULL;
       }
 
-      inputKeys[i] = (char *)realloc(inputKeys[i], sizeof(char) * (j+2) );
-      if(inputKeys[i] == NULL) {
+      inputKeys[i] = (char*)realloc(inputKeys[i], sizeof(char) * (j + 2));
+      if (inputKeys[i] == NULL) {
         fprintf(stderr, "Error: Memory allocation failed in 'utilXml.c'.\n");
         return -1;
       }
       inputKeys[i][j] = myInputKeys[count];
-      j++; count++;
+      j++;
+      count++;
     }
   }
-  if((i+1) != *myNumInputKeys ){
-    fprintf(stderr,
-	    "Error: Number of input variables keys found does not match:\nFound %d, expected %d\n",
-	    i+1, *myNumInputKeys);
-    freeResource(inputKeys, i+1);
+  if ((i + 1) != *myNumInputKeys) {
+    fprintf(stderr, "Error: Number of input variables keys found does not match:\nFound %d, expected %d\n", i + 1, *myNumInputKeys);
+    freeResource(inputKeys, i + 1);
     return -1;
   }
   *numOutputVars = 0;
@@ -516,17 +488,13 @@ getepvariablesFMU(
     }
     done = feof(fd);
 
-    if (XML_Parse(p, Buff, len, done) == XML_STATUS_ERROR
-	|| ERROR_STATUS == 1) {
-      fprintf(stderr, "Error: Parser error in file '%s':\n%s\n",
-	      fileName,
-	      XML_ErrorString(XML_GetErrorCode(p)));
+    if (XML_Parse(p, Buff, len, done) == XML_STATUS_ERROR || ERROR_STATUS == 1) {
+      fprintf(stderr, "Error: Parser error in file '%s':\n%s\n", fileName, XML_ErrorString(XML_GetErrorCode(p)));
       freeResource(inputKeys, numInputKeys);
       return -1;
     }
 
-    if (done)
-      break;
+    if (done) break;
   }
   XML_ParserFree(p);
   fclose(fd);
@@ -534,19 +502,15 @@ getepvariablesFMU(
   return 0;
 }
 
-
 ////////////////////////////////////////////////////////////////
 /// Stack operation, this function will pop one element from stack
 /// and will free the resource unused
 ////////////////////////////////////////////////////////////////
-int
-stackPopBCVTB()
-{
-  if(0==expStk.top)
-    return -1;
+int stackPopBCVTB() {
+  if (0 == expStk.top) return -1;
   free((expStk.head)[expStk.top]);
-  expStk.head = (char **) realloc(expStk.head, sizeof(char *) * (expStk.top));
-  if(expStk.head == NULL) {
+  expStk.head = (char**)realloc(expStk.head, sizeof(char*) * (expStk.top));
+  if (expStk.head == NULL) {
     fprintf(stderr, "Error: Memory allocation failed in 'utilXml.c'.\n");
     return -1;
   }
@@ -558,18 +522,16 @@ stackPopBCVTB()
 /// Stack operation, will push one element into the stack
 /// and will allocate memory for the new element, hence is deep copy
 ////////////////////////////////////////////////////////////////
-int
-stackPushBCVTB(char const * str)
-{
-  if(!str) return -1;
+int stackPushBCVTB(char const* str) {
+  if (!str) return -1;
   expStk.top++;
-  expStk.head = (char **) realloc(expStk.head, sizeof(char *) * (expStk.top+1));
-  if(expStk.head == NULL) {
+  expStk.head = (char**)realloc(expStk.head, sizeof(char*) * (expStk.top + 1));
+  if (expStk.head == NULL) {
     fprintf(stderr, "Error: Memory allocation failed in 'utilXml.c'");
     return -1;
   }
-  expStk.head[expStk.top] = (char *)malloc(sizeof(char) * (strlen(str)+1) );
-  if(expStk.head[expStk.top] == NULL) {
+  expStk.head[expStk.top] = (char*)malloc(sizeof(char) * (strlen(str) + 1));
+  if (expStk.head[expStk.top] == NULL) {
     fprintf(stderr, "Error: Memory allocation failed in 'utilXml.c'");
     return -1;
   }
@@ -582,27 +544,24 @@ stackPushBCVTB(char const * str)
 //
 /// This function is used for \c getxmlvalues
 ////////////////////////////////////////////////////////////////
-static void XMLCALL
-start(void * data, char const * el, char const ** attr)
-{
+static void XMLCALL start(void* data, char const* el, char const** attr) {
   (void)data;
   int i;
-  if(0 == strcmp(el, expStk.head[expStk.cur]) && expStk.cur < expStk.top )
-    expStk.cur++;
-  if(expStk.cur == expStk.top){
-    for(i=0; attr[i]; i += 2) {
-      if( 0 == strcmp(attr[i], att) ){
-        if(1 == PARSEVALUE){
-          if( (strlen(vals)+strlen(attr[i+1])+2) > *strLen){
-            fprintf(stderr, "Error: Memory allocated for parsed attribute\n"
-                             "      values is not enough, allocated: %d.\n",
-                             (int)*strLen);
-            *numVals = strlen(vals) + strlen(attr[i+1])+2;
+  if (0 == strcmp(el, expStk.head[expStk.cur]) && expStk.cur < expStk.top) expStk.cur++;
+  if (expStk.cur == expStk.top) {
+    for (i = 0; attr[i]; i += 2) {
+      if (0 == strcmp(attr[i], att)) {
+        if (1 == PARSEVALUE) {
+          if ((strlen(vals) + strlen(attr[i + 1]) + 2) > *strLen) {
+            fprintf(stderr,
+                    "Error: Memory allocated for parsed attribute\n"
+                    "      values is not enough, allocated: %d.\n",
+                    (int)*strLen);
+            *numVals = strlen(vals) + strlen(attr[i + 1]) + 2;
             return;
           }
-          if(vals[0] != '\0')
-            strcat(vals, ";");
-          strcat(vals, attr[i+1]);
+          if (vals[0] != '\0') strcat(vals, ";");
+          strcat(vals, attr[i + 1]);
         }
         *numVals = *numVals + 1;
       }
@@ -615,14 +574,10 @@ start(void * data, char const * el, char const ** attr)
 //
 /// This function is used for \c getxmlvalues
 ////////////////////////////////////////////////////////////////
-static void XMLCALL
-end(void * data, char const * el)
-{
+static void XMLCALL end(void* data, char const* el) {
   (void)data;
-  if(!strcmp(el, expStk.head[expStk.cur])&& expStk.cur>0)
-    expStk.cur--;
+  if (!strcmp(el, expStk.head[expStk.cur]) && expStk.cur > 0) expStk.cur--;
 }
-
 
 ////////////////////////////////////////////////////////////////
 /// This is a general function that returns the value according to \c exp
@@ -641,19 +596,11 @@ end(void * data, char const * el)
 ///\param mynumVals number of values found.
 ///\param myStrLen length of the string that is passed.
 ////////////////////////////////////////////////////////////////
-int
-getxmlvalues(
- char const * const fileName,
- char const * const exp,
- char * const myVals,
- size_t * const myNumVals,
- size_t const myStrLen
-)
-{
-  char Buff[BUFFSIZE]; ///< Local buffer for reading in the xml file
-  char * temp;
-  int i,j;
-  FILE * fd;
+int getxmlvalues(char const* const fileName, char const* const exp, char* const myVals, size_t* const myNumVals, size_t const myStrLen) {
+  char Buff[BUFFSIZE];  ///< Local buffer for reading in the xml file
+  char* temp;
+  int i, j;
+  FILE* fd;
   XML_Parser p;
   vals = myVals;
   numVals = myNumVals;
@@ -664,7 +611,7 @@ getxmlvalues(
   expStk.top = -1;
   expStk.cur = -1;
   fd = fopen(fileName, "r");
-  if(!fd) {
+  if (!fd) {
     fprintf(stderr, "Error: Could not open file '%s'.\n", fileName);
     return -1;
   }
@@ -674,65 +621,65 @@ getxmlvalues(
     fclose(fd);
     return -1;
   }
-  i=2; j=0;
-  if(!exp || '\0' == exp[0]) {
+  i = 2;
+  j = 0;
+  if (!exp || '\0' == exp[0]) {
     fclose(fd);
-    return -1; }
-  if( exp[0] != '/' || exp[1] != '/') {
+    return -1;
+  }
+  if (exp[0] != '/' || exp[1] != '/') {
     fclose(fd);
-    return -1; }
+    return -1;
+  }
 
   temp = NULL;
-  while(exp[i] != '\0'){
-    if( exp[i] == '/' || exp[i] == '[' || exp[i] == ']') {
-      if(0==j && 0==expStk.top) {
+  while (exp[i] != '\0') {
+    if (exp[i] == '/' || exp[i] == '[' || exp[i] == ']') {
+      if (0 == j && 0 == expStk.top) {
         fprintf(stderr, "Error when parsing expression in 'utilXml.c'.\n");
         return -1;
       }
       i++;
-      if(strchr(temp, '@'))
-        break;
+      if (strchr(temp, '@')) break;
       stackPushBCVTB(temp);
       free(temp);
       temp = NULL;
-      j=0;
-    }
-    else {
+      j = 0;
+    } else {
       j++;
-      char * thisTemp;
-      thisTemp = (char *) realloc(temp, sizeof(char)*(j+1));
-      if(thisTemp == NULL) {
+      char* thisTemp;
+      thisTemp = (char*)realloc(temp, sizeof(char) * (j + 1));
+      if (thisTemp == NULL) {
         fprintf(stderr, "Error: Memory allocation failed in 'utilXml.c'.\n");
         return -1;
       }
       temp = thisTemp;
-      temp[j-1]=exp[i];
-      temp[j]='\0';
+      temp[j - 1] = exp[i];
+      temp[j] = '\0';
       i++;
     }
   }
-  if(temp[0] == '@'){
-    att = (char *) malloc(sizeof(char) * (strlen(temp) ) );
-    if(att == NULL) {
+  if (temp[0] == '@') {
+    att = (char*)malloc(sizeof(char) * (strlen(temp)));
+    if (att == NULL) {
       fprintf(stderr, "Error: Memory allocation failed in 'utilXml.c'.\n");
-	  free(temp);
+      free(temp);
       return -1;
     }
-    for(i=1; i<(int)strlen(temp); i++)
-      att[i-1] = temp[i];
-    att[i-1]='\0';
+    for (i = 1; i < (int)strlen(temp); i++)
+      att[i - 1] = temp[i];
+    att[i - 1] = '\0';
     free(temp);
-  }
-  else {
+  } else {
     fprintf(stderr, "Error when parsing expression in 'utilXml.c'.\n");
-	free(temp);
-	free(att);
-	while(i!= -1) stackPopBCVTB();
+    free(temp);
+    free(att);
+    while (i != -1)
+      stackPopBCVTB();
     return -1;
   }
   expStk.cur = 0;
-  if(1 == PARSEVALUE)
-    vals[0]='\0';
+  if (1 == PARSEVALUE) vals[0] = '\0';
   *numVals = 0;
   XML_SetElementHandler(p, start, end);
 
@@ -748,28 +695,22 @@ getxmlvalues(
     done = feof(fd);
 
     if (XML_Parse(p, Buff, len, done) == XML_STATUS_ERROR) {
-      fprintf(stderr, "Error: Parse error in file '%s':\n%s\n",
-	      fileName,
-              XML_ErrorString(XML_GetErrorCode(p)));
+      fprintf(stderr, "Error: Parse error in file '%s':\n%s\n", fileName, XML_ErrorString(XML_GetErrorCode(p)));
       return -1;
     }
 
-    if (done)
-      break;
+    if (done) break;
   }
-  if( 0 == *numVals ){
-	  fprintf(stderr, "Error: Did not find xml value\n       for expression '%s'.\n       in file '%s'\n",
-		  exp, fileName);
+  if (0 == *numVals) {
+    fprintf(stderr, "Error: Did not find xml value\n       for expression '%s'.\n       in file '%s'\n", exp, fileName);
   }
-  while( i != -1 )
+  while (i != -1)
     i = stackPopBCVTB();
   att = NULL;
   XML_ParserFree(p);
   fclose(fd);
   return 0;
-
 }
-
 
 ////////////////////////////////////////////////////////////////
 /// This method returns the number of xmlvalues given xPath expressions.
@@ -786,25 +727,16 @@ getxmlvalues(
 ///\param fileName the name of the xml file
 ///\param exp the xPath expression
 ////////////////////////////////////////////////////////////////
-size_t
-getnumberofxmlvalues(
- char const * const fileName,
- char const * const exp
-)
-{
+size_t getnumberofxmlvalues(char const* const fileName, char const* const exp) {
   size_t n;
   int ret;
-  char * str;
+  char* str;
   int strLen = 0;
-  n=0;
+  n = 0;
   str = NULL;
   PARSEVALUE = 0;
-  ret = getxmlvalues(fileName,
-                     exp,
-                     str,
-                     &n,
-                     strLen);
-  if(-1 == ret){
+  ret = getxmlvalues(fileName, exp, str, &n, strLen);
+  if (-1 == ret) {
     fprintf(stderr, "Error: In getnumberofxmlvalues.\n");
     return ret;
   }
@@ -837,41 +769,26 @@ getnumberofxmlvalues(
 ///\param str string to store the found values, semicolon separated.
 ///\param strLen the string length allocated
 ////////////////////////////////////////////////////////////////
-int
-getxmlvaluesf(
- char const * const fileName,
- char const * const exp,
- char const * const atrName,
- size_t * const nVal,
- char * str,
- size_t * const strLen
-)
-{
+int getxmlvaluesf(char const* const fileName, char const* const exp, char const* const atrName, size_t* const nVal, char* str, size_t* const strLen) {
   ///////////////////////////////////////////////
   /// This part of the code is for compatibility
   /// with the BCVTB version 0.2 and earlier
   (void)atrName;
   int ret = check_variable_cfg_Validate(fileName);
-  if(-1 == ret)
-    return -1;
+  if (-1 == ret) return -1;
   //////////////////////////////////////////////
   PARSEVALUE = 1;
-  ret = getxmlvalues(fileName,
-	                   exp,
-	                   str,
-	                   nVal,
-	                   *strLen);
-  if( -1 == ret || *nVal > *strLen )
-    return -1;
-  if( strlen(str)+2 >= *strLen ) {
-    fprintf(stderr, "Error: Not enough memory allocated for parsed xml\n"
-                    "       values in getxmlvaluesf, allocated: %zx.\n",
-	    (size_t)*strlen);
+  ret = getxmlvalues(fileName, exp, str, nVal, *strLen);
+  if (-1 == ret || *nVal > *strLen) return -1;
+  if (strlen(str) + 2 >= *strLen) {
+    fprintf(stderr,
+            "Error: Not enough memory allocated for parsed xml\n"
+            "       values in getxmlvaluesf, allocated: %zx.\n",
+            (size_t)*strlen);
     return -1;
   }
-  strcat(str,";");
+  strcat(str, ";");
   return 0;
-
 }
 
 ////////////////////////////////////////////////////////////////
@@ -895,37 +812,26 @@ getxmlvaluesf(
 ///\param nVals number of values found.
 ///\param strLen the string length allocated.
 ////////////////////////////////////////////////////////////////
-int
-getxmlvalue(
- char const * const fileName,
- char const * const exp,
- char * const str,
- size_t * const nVals,
- int const strLen
-)
-{
+int getxmlvalue(char const* const fileName, char const* const exp, char* const str, size_t* const nVals, int const strLen) {
   int ret;
   PARSEVALUE = 1;
-  ret = getxmlvalues(fileName,
-	                   exp,
-	                   str,
-	                   nVals,
-	                   strLen);
+  ret = getxmlvalues(fileName, exp, str, nVals, strLen);
 
-  if(ret != 0){
-    fprintf(stderr,"Error: Error when attempting to parse file '%s'\n",fileName);
+  if (ret != 0) {
+    fprintf(stderr, "Error: Error when attempting to parse file '%s'\n", fileName);
     return -1;
   }
-  if(*nVals == 0){
-    fprintf(stderr,"Error: No xml value parsed in file '%s'\n",fileName);
+  if (*nVals == 0) {
+    fprintf(stderr, "Error: No xml value parsed in file '%s'\n", fileName);
     return -1;
   }
-  if(*nVals > 1){
-    fprintf(stderr, "Error: More than one xml values parsed, \n"
-                    "       while expecting one value. \n"
-                    "       number of xml values parsed is: %d\n"
-                    "       xPath: '%s'\n",
-                    (int)*nVals, exp);
+  if (*nVals > 1) {
+    fprintf(stderr,
+            "Error: More than one xml values parsed, \n"
+            "       while expecting one value. \n"
+            "       number of xml values parsed is: %d\n"
+            "       xPath: '%s'\n",
+            (int)*nVals, exp);
     return -1;
   }
   return 0;
@@ -940,71 +846,83 @@ getxmlvalue(
 ///
 ///
 ////////////////////////////////////////////////////////////////
-int
-check_variable_cfg_Validate(char const * const fileName)
-{
+int check_variable_cfg_Validate(char const* const fileName) {
 
-  char * BCVTB_HOME, * dtdFileName;
-  char * command;
-  FILE * dtdF;
-  int ret;
+  char const* const dtdName = "variables.dtd";
 #ifdef _MSC_VER /************* Windows specific code ********/
-  char const * const xmlPath = "\\lib\\xml\\";
-  char const * const jarPath = "\\lib\\xml\\build\\jar\\DTDValidator.jar";
-#else  /************* End of Windows specific code *******/
-  char const * const xmlPath = "/lib/xml/";
-  char const * const jarPath = "/lib/xml/build/jar/DTDValidator.jar";
+  char const* const xmlPath = "\\lib\\xml\\";
+  char const* const jarPath = "\\lib\\xml\\build\\jar\\DTDValidator.jar";
+#else /************* End of Windows specific code *******/
+  char const* const xmlPath = "/lib/xml/";
+  char const* const jarPath = "/lib/xml/build/jar/DTDValidator.jar";
 #endif
 
-  BCVTB_HOME = getenv("BCVTB_HOME");
-  if(NULL == BCVTB_HOME){
+  char const* const BCVTB_HOME = getenv("BCVTB_HOME");
+  if (BCVTB_HOME == NULL) {
     fprintf(stderr, "Error: Cannot get environment variable: BCVTB_HOME.\n");
     return -1;
   }
-  command = (char *) malloc( sizeof(char) *
-                            ( strlen(BCVTB_HOME) +
-                              strlen(fileName) +
-                              strlen("variables.dtd")
-                              + 20
-                            )
-                            * 3
-                          );
-  if(NULL == command) {
-    fprintf(stderr, "Error: Memory allocation failed in"
-                    "       check_variable_cfg_Validate"
-                    "       when parsing file '%s'.\n"
-                    "       Program aborting.\n", fileName);
-    return -1;
-  }
-  dtdFileName = (char *) malloc( sizeof (char) * ( strlen(BCVTB_HOME) + 30));
-  if(NULL == command) {
-    fprintf(stderr, "Error: Memory allocation failed in"
-                    "       check_variable_cfg_Validate"
-                    "       when parsing file '%s'. \n"
-                    "       Program aborting.\n", fileName);
+
+  size_t n_BCVTB_HOME = strlen(BCVTB_HOME);
+  size_t n_fileName = strlen(fileName);
+  size_t n_xmlPath = strlen(xmlPath);  // 9
+  size_t n_jarPath = strlen(jarPath);  // 35
+  size_t n_dtdName = strlen(dtdName);  // 13
+
+  // Verify that variables.dtd exists and is readable
+  {
+    // Add 1 for the null terminator
+    size_t n_needed = n_BCVTB_HOME + n_xmlPath + n_dtdName + 1;
+
+    char* dtdFileName = (char*)malloc(sizeof(char) * n_needed);
+    if (!dtdFileName) {
+      fprintf(stderr,
+              "Error: Memory allocation for 'dtdFileName' failed in check_variable_cfg_Validate when parsing file '%s'. \n"
+              "       Program aborting.\n",
+              fileName);
+      // free(dtdFileName);
+      return -1;
+    }
+
+    snprintf(dtdFileName, n_needed, "%s%s%s", BCVTB_HOME, xmlPath, dtdName);
+    FILE* dtdF = fopen(dtdFileName, "r");
+    if (!dtdF) {
+      fprintf(stderr, "Error: Cannot open '%s'.\n", dtdFileName);
+      free(dtdFileName);
+      return -1;
+    } else {
+      fclose(dtdF);
+    }
     free(dtdFileName);
-    return -1;
   }
 
-  sprintf(dtdFileName, "%s%s%s", BCVTB_HOME, xmlPath, "variables.dtd");
-  dtdF = fopen(dtdFileName, "r");
-  if( NULL == dtdF ){
-    fprintf(stderr, "Error: Cannot open '%s'.\n", dtdFileName);
-    free(command);
-    free(dtdFileName);
-    return -1;
+  char* command = NULL;
+  {
+    char const* const cmd_fmt = "java -jar \"%s%s\" \"%s\" \"%s%s\"";
+
+    // Add 1 for the null terminator
+    size_t n_needed = 18 + 2 * n_BCVTB_HOME + n_jarPath + n_xmlPath + n_fileName + 1;
+    // int n_needed = snprintf(NULL, 0, cmd_fmt, BCVTB_HOME, jarPath, fileName, BCVTB_HOME, xmlPath) + 1;
+    command = (char*)malloc(sizeof(char) * n_needed);
+    if (!command) {
+      fprintf(stderr,
+              "Error: Memory allocation for command failed in check_variable_cfg_Validate when parsing file '%s'. \n"
+              "       Program aborting.\n",
+              fileName);
+      // free(command);
+      return -1;
+    }
+
+    snprintf(command, n_needed, cmd_fmt, BCVTB_HOME, jarPath, fileName, BCVTB_HOME, xmlPath);
   }
-  else fclose(dtdF);
-  sprintf(command, "java -jar \"%s%s\" \"%s\" \"%s%s\"",
-                    BCVTB_HOME, jarPath, fileName, BCVTB_HOME, xmlPath);
-  ret = system(command);
-  if( ret != 0) {
-    free(command);
-    free(dtdFileName);
+
+  // printf("command=%s\n", command);
+  int const ret = system(command);
+  free(command);
+
+  if (ret != 0) {
     return -1;
   } else {
-    free(command);
-    free(dtdFileName);
     return 0;
   }
 }

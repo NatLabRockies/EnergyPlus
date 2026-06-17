@@ -392,24 +392,21 @@
 !Example CaseAndWalkInList object
 ! The objects and syntax in this dataset comply with EnergyPlus, Version 8.4.0 and above, unless otherwise noted.
 
-!  Version,
-!    9.0;                    !- Version Identifier
-
   Refrigeration:CaseAndWalkInList,
     NameofCaseList,          !- Name
-    Multi-Deck Dairy/Deli Merchandiser with Synergy-E 1,  !- Case or WalkIn 1a Name
-    Multi-Deck Dairy/Deli Merchandiser with Synergy-E 2,  !- Case or WalkIn 1b Name
-    Multi-Deck Deli back,    !- Case or WalkIn 2 Name
-    Single Deck Club Case Merchandiser 1,  !- Case or WalkIn 3 Name
-    Single Deck Club Case Merchandiser 2,  !- Case or WalkIn 4 Name
-    Multi-Deck Produce/Dairy/Deli/Meat/Seafood Merchandiser 1,  !- Case or WalkIn 5a Name
-    Multi-Deck Produce/Dairy/Deli/Meat/Seafood Merchandiser 2,  !- Case or WalkIn 5b Name
-    Multi-Deck Produce/Dairy/Deli/Meat/Seafood Merchandiser 3,  !- Case or WalkIn 5b Name
-    Multi-Deck Produce/Dairy/Deli/Meat/Seafood Merchandiser 4,  !- Case or WalkIn 5b Name
-    Multi Deck Frozen Food Merchandiser 1,  !- Case or WalkIn 6a Name
-    Multi Deck Frozen Food Merchandiser 2,  !- Case or WalkIn 6b Name
-    Wide Island Multi-Deck Deli/Meat Merchandiser,  !- Case or WalkIn 7 Name
-    International Style Service Deli/Meat/Seafood Merchandiser;  !- Case or WalkIn 8 Name
+    Multi-Deck Dairy/Deli Merchandiser with Synergy-E 1,  !- Case or WalkIn 1 Name
+    Multi-Deck Dairy/Deli Merchandiser with Synergy-E 2,  !- Case or WalkIn 2 Name
+    Multi-Deck Deli back,    !- Case or WalkIn 3 Name
+    Single Deck Club Case Merchandiser 1,  !- Case or WalkIn 4 Name
+    Single Deck Club Case Merchandiser 2,  !- Case or WalkIn 5 Name
+    Multi-Deck Produce/Dairy/Deli/Meat/Seafood Merchandiser 1,  !- Case or WalkIn 6 Name
+    Multi-Deck Produce/Dairy/Deli/Meat/Seafood Merchandiser 2,  !- Case or WalkIn 7 Name
+    Multi-Deck Produce/Dairy/Deli/Meat/Seafood Merchandiser 3,  !- Case or WalkIn 8 Name
+    Multi-Deck Produce/Dairy/Deli/Meat/Seafood Merchandiser 4,  !- Case or WalkIn 9 Name
+    Multi Deck Frozen Food Merchandiser 1,  !- Case or WalkIn 10 Name
+    Multi Deck Frozen Food Merchandiser 2,  !- Case or WalkIn 11 Name
+    Wide Island Multi-Deck Deli/Meat Merchandiser,  !- Case or WalkIn 12 Name
+    International Style Service Deli/Meat/Seafood Merchandiser;  !- Case or WalkIn 13 Name
 
 !- Multi-Deck Dairy/Deli Merchandiser with Synergy-E is a Doored Case based on Hill Phoenix 6DMLH-NRG served by the Medium Temperature .
 !- NOTES : Data sheet 11/09
@@ -443,7 +440,7 @@
     ,                        !- Case Height {m}
     1.0,                     !- Fraction of Anti-Sweat Heater Energy to Case
     0.0,                     !- Case Defrost Power per Unit Length {W/m}
-    OffCycle,               !- Case Defrost Type
+    OffCycle,                !- Case Defrost Type
     UserProvideDefSched6PerDay45MinEa,  !- Case Defrost Schedule Name
     UserProvideDefSched4PerDay42MinEa,  !- Case Defrost Drip-Down Schedule Name
     CaseTemperatureMethod,   !- Defrost Energy Correction Curve Type
@@ -486,7 +483,7 @@
     ,                        !- Case Height {m}
     1.0,                     !- Fraction of Anti-Sweat Heater Energy to Case
     0.0,                     !- Case Defrost Power per Unit Length {W/m}
-    OffCycle,               !- Case Defrost Type
+    OffCycle,                !- Case Defrost Type
     UserProvideDefSched6PerDay45MinEa,  !- Case Defrost Schedule Name
     UserProvideDefSched6PerDay45MinEa,  !- Case Defrost Drip-Down Schedule Name
     CaseTemperatureMethod,   !- Defrost Energy Correction Curve Type
@@ -572,7 +569,7 @@
     ,                        !- Case Height {m}
     1.0,                     !- Fraction of Anti-Sweat Heater Energy to Case
     0.0,                     !- Case Defrost Power per Unit Length {W/m}
-    OffCycle,               !- Case Defrost Type
+    OffCycle,                !- Case Defrost Type
     UserProvideDefSched3PerDay20MinEa,  !- Case Defrost Schedule Name
     UserProvideDefSched3PerDay27MinEa,  !- Case Defrost Drip-Down Schedule Name
     CaseTemperatureMethod,   !- Defrost Energy Correction Curve Type
@@ -582,7 +579,6 @@
     ,                        !- Case Credit Fraction Schedule Name
     -5.56,                   !- Design Evaporator Temperature or Brine Inlet Temperature {C}
     ;                        !- Average Refrigerant Charge Inventory {kg/m}
-
 
 !- Single Deck Club Merchandiser is a Doored Case based on Hill Phoenix CUBW served by the Medium Temperature .
 !- NOTES : Data sheet 03/08
@@ -616,7 +612,7 @@
     ,                        !- Case Height {m}
     1.0,                     !- Fraction of Anti-Sweat Heater Energy to Case
     0.0,                     !- Case Defrost Power per Unit Length {W/m}
-    OffCycle,               !- Case Defrost Type
+    OffCycle,                !- Case Defrost Type
     UserProvideDefSched3PerDay20MinEa,  !- Case Defrost Schedule Name
     UserProvideDefSched3PerDay27MinEa,  !- Case Defrost Drip-Down Schedule Name
     CaseTemperatureMethod,   !- Defrost Energy Correction Curve Type
@@ -634,7 +630,7 @@
 !- Defrost Notes :
 
   Refrigeration:Case,
-    Single Deck Club Case Merchandiser 2 ,  !- Name
+    Single Deck Club Case Merchandiser 2,  !- Name
     ,                        !- Availability Schedule Name
     UserProvideZoneName,     !- Zone Name
     23.89,                   !- Rated Ambient Temperature {C}
@@ -1261,7 +1257,7 @@
     ,                        !- Case Height {m}
     1.0,                     !- Fraction of Anti-Sweat Heater Energy to Case
     0.0,                     !- Case Defrost Power per Unit Length {W/m}
-    OffCycle,               !- Case Defrost Type
+    OffCycle,                !- Case Defrost Type
     UserProvideDefSched6PerDay30MinEa,  !- Case Defrost Schedule Name
     UserProvideDripSched6PerDay30MinEa,  !- Case Defrost Drip-Down Schedule Name
     CaseTemperatureMethod,   !- Defrost Energy Correction Curve Type
@@ -1304,7 +1300,7 @@
     ,                        !- Case Height {m}
     1.0,                     !- Fraction of Anti-Sweat Heater Energy to Case
     0.0,                     !- Case Defrost Power per Unit Length {W/m}
-    OffCycle,               !- Case Defrost Type
+    OffCycle,                !- Case Defrost Type
     UserProvideDefSched6PerDay30MinEa,  !- Case Defrost Schedule Name
     UserProvideDripSched6PerDay30MinEa,  !- Case Defrost Drip-Down Schedule Name
     CaseTemperatureMethod,   !- Defrost Energy Correction Curve Type
@@ -1347,7 +1343,7 @@
     ,                        !- Case Height {m}
     1.0,                     !- Fraction of Anti-Sweat Heater Energy to Case
     0.0,                     !- Case Defrost Power per Unit Length {W/m}
-    OffCycle,               !- Case Defrost Type
+    OffCycle,                !- Case Defrost Type
     UserProvideDefSched4PerDay40MinEa,  !- Case Defrost Schedule Name
     UserProvideDripSched4PerDay40MinEa,  !- Case Defrost Drip-Down Schedule Name
     CaseTemperatureMethod,   !- Defrost Energy Correction Curve Type
@@ -1863,7 +1859,7 @@
     ,                        !- Case Height {m}
     1.0,                     !- Fraction of Anti-Sweat Heater Energy to Case
     0.0,                     !- Case Defrost Power per Unit Length {W/m}
-    OffCycle,               !- Case Defrost Type
+    OffCycle,                !- Case Defrost Type
     UserProvideDefSched6PerDay40MinEa,  !- Case Defrost Schedule Name
     UserProvideDripSched6PerDay47MinEa,  !- Case Defrost Drip-Down Schedule Name
     CaseTemperatureMethod,   !- Defrost Energy Correction Curve Type
@@ -1906,7 +1902,7 @@
     ,                        !- Case Height {m}
     1.0,                     !- Fraction of Anti-Sweat Heater Energy to Case
     0.0,                     !- Case Defrost Power per Unit Length {W/m}
-    OffCycle,               !- Case Defrost Type
+    OffCycle,                !- Case Defrost Type
     UserProvideDefSched3PerDay46MinEa,  !- Case Defrost Schedule Name
     UserProvideDripSched3PerDay46MinEa,  !- Case Defrost Drip-Down Schedule Name
     CaseTemperatureMethod,   !- Defrost Energy Correction Curve Type
@@ -2250,7 +2246,7 @@
     ,                        !- Case Height {m}
     1.0,                     !- Fraction of Anti-Sweat Heater Energy to Case
     0.0,                     !- Case Defrost Power per Unit Length {W/m}
-    OffCycle,               !- Case Defrost Type
+    OffCycle,                !- Case Defrost Type
     UserProvideDefSched6PerDay30MinEa,  !- Case Defrost Schedule Name
     UserProvideDripSched6PerDay30MinEa,  !- Case Defrost Drip-Down Schedule Name
     CaseTemperatureMethod,   !- Defrost Energy Correction Curve Type
@@ -2293,7 +2289,7 @@
     ,                        !- Case Height {m}
     1.0,                     !- Fraction of Anti-Sweat Heater Energy to Case
     0.0,                     !- Case Defrost Power per Unit Length {W/m}
-    OffCycle,               !- Case Defrost Type
+    OffCycle,                !- Case Defrost Type
     UserProvideDefSched6PerDay30MinEa,  !- Case Defrost Schedule Name
     UserProvideDripSched6PerDay30MinEa,  !- Case Defrost Drip-Down Schedule Name
     CaseTemperatureMethod,   !- Defrost Energy Correction Curve Type
@@ -2379,7 +2375,7 @@
     ,                        !- Case Height {m}
     1.0,                     !- Fraction of Anti-Sweat Heater Energy to Case
     0.0,                     !- Case Defrost Power per Unit Length {W/m}
-    OffCycle,               !- Case Defrost Type
+    OffCycle,                !- Case Defrost Type
     UserProvideDefSched6PerDay40MinEa,  !- Case Defrost Schedule Name
     UserProvideDripSched3PerDay40MinEa,  !- Case Defrost Drip-Down Schedule Name
     CaseTemperatureMethod,   !- Defrost Energy Correction Curve Type
@@ -2422,7 +2418,7 @@
     ,                        !- Case Height {m}
     1.0,                     !- Fraction of Anti-Sweat Heater Energy to Case
     0.0,                     !- Case Defrost Power per Unit Length {W/m}
-    OffCycle,               !- Case Defrost Type
+    OffCycle,                !- Case Defrost Type
     UserProvideDefSched6PerDay40MinEa,  !- Case Defrost Schedule Name
     UserProvideDripSched3PerDay40MinEa,  !- Case Defrost Drip-Down Schedule Name
     CaseTemperatureMethod,   !- Defrost Energy Correction Curve Type
@@ -2594,7 +2590,7 @@
     ,                        !- Case Height {m}
     1.0,                     !- Fraction of Anti-Sweat Heater Energy to Case
     0.0,                     !- Case Defrost Power per Unit Length {W/m}
-    OffCycle,               !- Case Defrost Type
+    OffCycle,                !- Case Defrost Type
     UserProvideDefSched6PerDay40MinEa,  !- Case Defrost Schedule Name
     UserProvideDefSched6PerDay40MinEa,  !- Case Defrost Drip-Down Schedule Name
     CaseTemperatureMethod,   !- Defrost Energy Correction Curve Type
@@ -2637,7 +2633,7 @@
     ,                        !- Case Height {m}
     1.0,                     !- Fraction of Anti-Sweat Heater Energy to Case
     0.0,                     !- Case Defrost Power per Unit Length {W/m}
-    OffCycle,               !- Case Defrost Type
+    OffCycle,                !- Case Defrost Type
     UserProvideDefSched2PerDay30MinEa,  !- Case Defrost Schedule Name
     UserProvideDefSched2PerDay30MinEa,  !- Case Defrost Drip-Down Schedule Name
     CaseTemperatureMethod,   !- Defrost Energy Correction Curve Type
@@ -2809,7 +2805,7 @@
     ,                        !- Case Height {m}
     1.0,                     !- Fraction of Anti-Sweat Heater Energy to Case
     436.9,                   !- Case Defrost Power per Unit Length {W/m}
-    OffCycle,               !- Case Defrost Type
+    OffCycle,                !- Case Defrost Type
     UserProvideDefSched6PerDay40MinEa,  !- Case Defrost Schedule Name
     UserProvideDefSched6PerDay40MinEa,  !- Case Defrost Drip-Down Schedule Name
     CaseTemperatureMethod,   !- Defrost Energy Correction Curve Type
@@ -3024,7 +3020,7 @@
     ,                        !- Case Height {m}
     1.0,                     !- Fraction of Anti-Sweat Heater Energy to Case
     436.9,                   !- Case Defrost Power per Unit Length {W/m}
-    OffCycle,               !- Case Defrost Type
+    OffCycle,                !- Case Defrost Type
     UserProvideDefSched6PerDay40MinEa,  !- Case Defrost Schedule Name
     UserProvideDefSched6PerDay40MinEa,  !- Case Defrost Drip-Down Schedule Name
     CaseTemperatureMethod,   !- Defrost Energy Correction Curve Type
@@ -3110,7 +3106,7 @@
     ,                        !- Case Height {m}
     1.0,                     !- Fraction of Anti-Sweat Heater Energy to Case
     0.0,                     !- Case Defrost Power per Unit Length {W/m}
-    OffCycle,               !- Case Defrost Type
+    OffCycle,                !- Case Defrost Type
     UserProvideDefSched6PerDay40MinEa,  !- Case Defrost Schedule Name
     UserProvideDefSched6PerDay40MinEa,  !- Case Defrost Drip-Down Schedule Name
     CaseTemperatureMethod,   !- Defrost Energy Correction Curve Type
@@ -3325,7 +3321,7 @@
     ,                        !- Case Height {m}
     1.0,                     !- Fraction of Anti-Sweat Heater Energy to Case
     0.0,                     !- Case Defrost Power per Unit Length {W/m}
-    OffCycle,               !- Case Defrost Type
+    OffCycle,                !- Case Defrost Type
     UserProvideDefSched6PerDay30MinEa,  !- Case Defrost Schedule Name
     UserProvideDefSched6PerDay30MinEa,  !- Case Defrost Drip-Down Schedule Name
     CaseTemperatureMethod,   !- Defrost Energy Correction Curve Type
@@ -3368,7 +3364,7 @@
     ,                        !- Case Height {m}
     1.0,                     !- Fraction of Anti-Sweat Heater Energy to Case
     0.0,                     !- Case Defrost Power per Unit Length {W/m}
-    OffCycle,               !- Case Defrost Type
+    OffCycle,                !- Case Defrost Type
     UserProvideDefSched6PerDay30MinEa,  !- Case Defrost Schedule Name
     UserProvideDefSched6PerDay30MinEa,  !- Case Defrost Drip-Down Schedule Name
     CaseTemperatureMethod,   !- Defrost Energy Correction Curve Type
@@ -3454,7 +3450,7 @@
     ,                        !- Case Height {m}
     1.0,                     !- Fraction of Anti-Sweat Heater Energy to Case
     0.0,                     !- Case Defrost Power per Unit Length {W/m}
-    OffCycle,               !- Case Defrost Type
+    OffCycle,                !- Case Defrost Type
     UserProvideDefSched3PerDay45MinEa,  !- Case Defrost Schedule Name
     UserProvideDefSched3PerDay52MinEa,  !- Case Defrost Drip-Down Schedule Name
     CaseTemperatureMethod,   !- Defrost Energy Correction Curve Type
@@ -3497,7 +3493,7 @@
     ,                        !- Case Height {m}
     1.0,                     !- Fraction of Anti-Sweat Heater Energy to Case
     0.0,                     !- Case Defrost Power per Unit Length {W/m}
-    OffCycle,               !- Case Defrost Type
+    OffCycle,                !- Case Defrost Type
     UserProvideDefSched4PerDay40MinEa,  !- Case Defrost Schedule Name
     UserProvideDefSched4PerDay40MinEa,  !- Case Defrost Drip-Down Schedule Name
     CaseTemperatureMethod,   !- Defrost Energy Correction Curve Type
@@ -3540,7 +3536,7 @@
     ,                        !- Case Height {m}
     1.0,                     !- Fraction of Anti-Sweat Heater Energy to Case
     0.0,                     !- Case Defrost Power per Unit Length {W/m}
-    OffCycle,               !- Case Defrost Type
+    OffCycle,                !- Case Defrost Type
     UserProvideDefSched3PerDay45MinEa,  !- Case Defrost Schedule Name
     UserProvideDefSched3PerDay52MinEa,  !- Case Defrost Drip-Down Schedule Name
     CaseTemperatureMethod,   !- Defrost Energy Correction Curve Type
@@ -3583,7 +3579,7 @@
     ,                        !- Case Height {m}
     1.0,                     !- Fraction of Anti-Sweat Heater Energy to Case
     0.0,                     !- Case Defrost Power per Unit Length {W/m}
-    OffCycle,               !- Case Defrost Type
+    OffCycle,                !- Case Defrost Type
     UserProvideDefSched3PerDay45MinEa,  !- Case Defrost Schedule Name
     UserProvideDefSched3PerDay52MinEa,  !- Case Defrost Drip-Down Schedule Name
     CaseTemperatureMethod,   !- Defrost Energy Correction Curve Type
@@ -3626,7 +3622,7 @@
     ,                        !- Case Height {m}
     1.0,                     !- Fraction of Anti-Sweat Heater Energy to Case
     0.0,                     !- Case Defrost Power per Unit Length {W/m}
-    OffCycle,               !- Case Defrost Type
+    OffCycle,                !- Case Defrost Type
     UserProvideDefSched3PerDay45MinEa,  !- Case Defrost Schedule Name
     UserProvideDefSched3PerDay52MinEa,  !- Case Defrost Drip-Down Schedule Name
     CaseTemperatureMethod,   !- Defrost Energy Correction Curve Type
@@ -3841,7 +3837,7 @@
     ,                        !- Case Height {m}
     1.0,                     !- Fraction of Anti-Sweat Heater Energy to Case
     0.0,                     !- Case Defrost Power per Unit Length {W/m}
-    OffCycle,               !- Case Defrost Type
+    OffCycle,                !- Case Defrost Type
     UserProvideDefSched2PerDay65MinEa,  !- Case Defrost Schedule Name
     UserProvideDefSched2PerDay65MinEa,  !- Case Defrost Drip-Down Schedule Name
     CaseTemperatureMethod,   !- Defrost Energy Correction Curve Type
@@ -3970,7 +3966,7 @@
     ,                        !- Case Height {m}
     1.0,                     !- Fraction of Anti-Sweat Heater Energy to Case
     0.0,                     !- Case Defrost Power per Unit Length {W/m}
-    OffCycle,               !- Case Defrost Type
+    OffCycle,                !- Case Defrost Type
     UserProvideDefSched6PerDay40MinEa,  !- Case Defrost Schedule Name
     UserProvideDefSched6PerDay40MinEa,  !- Case Defrost Drip-Down Schedule Name
     CaseTemperatureMethod,   !- Defrost Energy Correction Curve Type
@@ -4013,7 +4009,7 @@
     ,                        !- Case Height {m}
     1.0,                     !- Fraction of Anti-Sweat Heater Energy to Case
     0.0,                     !- Case Defrost Power per Unit Length {W/m}
-    OffCycle,               !- Case Defrost Type
+    OffCycle,                !- Case Defrost Type
     UserProvideDefSched6PerDay40MinEa,  !- Case Defrost Schedule Name
     UserProvideDefSched6PerDay40MinEa,  !- Case Defrost Drip-Down Schedule Name
     CaseTemperatureMethod,   !- Defrost Energy Correction Curve Type
@@ -4228,7 +4224,7 @@
     ,                        !- Case Height {m}
     1.0,                     !- Fraction of Anti-Sweat Heater Energy to Case
     0.0,                     !- Case Defrost Power per Unit Length {W/m}
-    OffCycle,               !- Case Defrost Type
+    OffCycle,                !- Case Defrost Type
     UserProvideDefSched6PerDay40MinEa,  !- Case Defrost Schedule Name
     UserProvideDefSched6PerDay40MinEa,  !- Case Defrost Drip-Down Schedule Name
     CaseTemperatureMethod,   !- Defrost Energy Correction Curve Type
@@ -4271,7 +4267,7 @@
     ,                        !- Case Height {m}
     1.0,                     !- Fraction of Anti-Sweat Heater Energy to Case
     0.0,                     !- Case Defrost Power per Unit Length {W/m}
-    OffCycle,               !- Case Defrost Type
+    OffCycle,                !- Case Defrost Type
     UserProvideDefSched6PerDay40MinEa,  !- Case Defrost Schedule Name
     UserProvideDefSched6PerDay40MinEa,  !- Case Defrost Drip-Down Schedule Name
     CaseTemperatureMethod,   !- Defrost Energy Correction Curve Type
@@ -4658,7 +4654,7 @@
     ,                        !- Case Height {m}
     1.0,                     !- Fraction of Anti-Sweat Heater Energy to Case
     0.0,                     !- Case Defrost Power per Unit Length {W/m}
-    OffCycle,               !- Case Defrost Type
+    OffCycle,                !- Case Defrost Type
     UserProvideDefSched3PerDay44MinEa,  !- Case Defrost Schedule Name
     UserProvideDefSched3PerDay51MinEa,  !- Case Defrost Drip-Down Schedule Name
     CaseTemperatureMethod,   !- Defrost Energy Correction Curve Type
@@ -4701,7 +4697,7 @@
     ,                        !- Case Height {m}
     1.0,                     !- Fraction of Anti-Sweat Heater Energy to Case
     0.0,                     !- Case Defrost Power per Unit Length {W/m}
-    OffCycle,               !- Case Defrost Type
+    OffCycle,                !- Case Defrost Type
     UserProvideDefSched3PerDay44MinEa,  !- Case Defrost Schedule Name
     UserProvideDefSched3PerDay51MinEa,  !- Case Defrost Drip-Down Schedule Name
     CaseTemperatureMethod,   !- Defrost Energy Correction Curve Type
@@ -4744,7 +4740,7 @@
     ,                        !- Case Height {m}
     1.0,                     !- Fraction of Anti-Sweat Heater Energy to Case
     0.0,                     !- Case Defrost Power per Unit Length {W/m}
-    OffCycle,               !- Case Defrost Type
+    OffCycle,                !- Case Defrost Type
     UserProvideDefSched3PerDay44MinEa,  !- Case Defrost Schedule Name
     UserProvideDefSched3PerDay51MinEa,  !- Case Defrost Drip-Down Schedule Name
     CaseTemperatureMethod,   !- Defrost Energy Correction Curve Type
@@ -4959,7 +4955,7 @@
     ,                        !- Case Height {m}
     1.0,                     !- Fraction of Anti-Sweat Heater Energy to Case
     0.0,                     !- Case Defrost Power per Unit Length {W/m}
-    OffCycle,               !- Case Defrost Type
+    OffCycle,                !- Case Defrost Type
     UserProvideDefSched6PerDay50MinEa,  !- Case Defrost Schedule Name
     UserProvideDefSched6PerDay50MinEa,  !- Case Defrost Drip-Down Schedule Name
     CaseTemperatureMethod,   !- Defrost Energy Correction Curve Type
@@ -6077,7 +6073,7 @@
     ,                        !- Case Height {m}
     1.0,                     !- Fraction of Anti-Sweat Heater Energy to Case
     429.6,                   !- Case Defrost Power per Unit Length {W/m}
-    OffCycle,               !- Case Defrost Type
+    OffCycle,                !- Case Defrost Type
     UserProvideDefSched2PerDay45MinEa,  !- Case Defrost Schedule Name
     UserProvideDefSched2PerDay49MinEa,  !- Case Defrost Drip-Down Schedule Name
     CaseTemperatureMethod,   !- Defrost Energy Correction Curve Type
@@ -6550,7 +6546,7 @@
     ,                        !- Case Height {m}
     1.0,                     !- Fraction of Anti-Sweat Heater Energy to Case
     0.0,                     !- Case Defrost Power per Unit Length {W/m}
-    OffCycle,               !- Case Defrost Type
+    OffCycle,                !- Case Defrost Type
     UserProvideDefSched3PerDay44MinEa,  !- Case Defrost Schedule Name
     UserProvideDefSched3PerDay51MinEa,  !- Case Defrost Drip-Down Schedule Name
     CaseTemperatureMethod,   !- Defrost Energy Correction Curve Type
@@ -6593,7 +6589,7 @@
     ,                        !- Case Height {m}
     1.0,                     !- Fraction of Anti-Sweat Heater Energy to Case
     0.0,                     !- Case Defrost Power per Unit Length {W/m}
-    OffCycle,               !- Case Defrost Type
+    OffCycle,                !- Case Defrost Type
     UserProvideDefSched3PerDay44MinEa,  !- Case Defrost Schedule Name
     UserProvideDefSched3PerDay51MinEa,  !- Case Defrost Drip-Down Schedule Name
     CaseTemperatureMethod,   !- Defrost Energy Correction Curve Type
@@ -6636,7 +6632,7 @@
     ,                        !- Case Height {m}
     1.0,                     !- Fraction of Anti-Sweat Heater Energy to Case
     0.0,                     !- Case Defrost Power per Unit Length {W/m}
-    OffCycle,               !- Case Defrost Type
+    OffCycle,                !- Case Defrost Type
     UserProvideDefSched3PerDay44MinEa,  !- Case Defrost Schedule Name
     UserProvideDefSched3PerDay51MinEa,  !- Case Defrost Drip-Down Schedule Name
     CaseTemperatureMethod,   !- Defrost Energy Correction Curve Type
@@ -8743,7 +8739,7 @@
     ,                        !- Case Height {m}
     1.0,                     !- Fraction of Anti-Sweat Heater Energy to Case
     0.0,                     !- Case Defrost Power per Unit Length {W/m}
-    OffCycle,               !- Case Defrost Type
+    OffCycle,                !- Case Defrost Type
     UserProvideDefSched2PerDay65MinEa,  !- Case Defrost Schedule Name
     UserProvideDefSched2PerDay72MinEa,  !- Case Defrost Drip-Down Schedule Name
     CaseTemperatureMethod,   !- Defrost Energy Correction Curve Type
@@ -8786,7 +8782,7 @@
     ,                        !- Case Height {m}
     1.0,                     !- Fraction of Anti-Sweat Heater Energy to Case
     0.0,                     !- Case Defrost Power per Unit Length {W/m}
-    OffCycle,               !- Case Defrost Type
+    OffCycle,                !- Case Defrost Type
     UserProvideDefSched2PerDay65MinEa,  !- Case Defrost Schedule Name
     UserProvideDefSched2PerDay72MinEa,  !- Case Defrost Drip-Down Schedule Name
     CaseTemperatureMethod,   !- Defrost Energy Correction Curve Type
@@ -8829,7 +8825,7 @@
     ,                        !- Case Height {m}
     1.0,                     !- Fraction of Anti-Sweat Heater Energy to Case
     0.0,                     !- Case Defrost Power per Unit Length {W/m}
-    OffCycle,               !- Case Defrost Type
+    OffCycle,                !- Case Defrost Type
     UserProvideDefSched2PerDay75MinEa,  !- Case Defrost Schedule Name
     UserProvideDefSched2PerDay82MinEa,  !- Case Defrost Drip-Down Schedule Name
     CaseTemperatureMethod,   !- Defrost Energy Correction Curve Type
@@ -8872,7 +8868,7 @@
     ,                        !- Case Height {m}
     1.0,                     !- Fraction of Anti-Sweat Heater Energy to Case
     0.0,                     !- Case Defrost Power per Unit Length {W/m}
-    OffCycle,               !- Case Defrost Type
+    OffCycle,                !- Case Defrost Type
     UserProvideDefSched2PerDay75MinEa,  !- Case Defrost Schedule Name
     UserProvideDefSched2PerDay82MinEa,  !- Case Defrost Drip-Down Schedule Name
     CaseTemperatureMethod,   !- Defrost Energy Correction Curve Type
@@ -8915,7 +8911,7 @@
     ,                        !- Case Height {m}
     1.0,                     !- Fraction of Anti-Sweat Heater Energy to Case
     0.0,                     !- Case Defrost Power per Unit Length {W/m}
-    OffCycle,               !- Case Defrost Type
+    OffCycle,                !- Case Defrost Type
     UserProvideDefSched2PerDay65MinEa,  !- Case Defrost Schedule Name
     UserProvideDefSched2PerDay72MinEa,  !- Case Defrost Drip-Down Schedule Name
     CaseTemperatureMethod,   !- Defrost Energy Correction Curve Type
@@ -10377,7 +10373,7 @@
     ,                        !- Case Height {m}
     1.0,                     !- Fraction of Anti-Sweat Heater Energy to Case
     0.0,                     !- Case Defrost Power per Unit Length {W/m}
-    OffCycle,               !- Case Defrost Type
+    OffCycle,                !- Case Defrost Type
     UserProvideDefSched2PerDay90MinEa,  !- Case Defrost Schedule Name
     UserProvideDefSched2PerDay90MinEa,  !- Case Defrost Drip-Down Schedule Name
     CaseTemperatureMethod,   !- Defrost Energy Correction Curve Type
@@ -10420,7 +10416,7 @@
     ,                        !- Case Height {m}
     1.0,                     !- Fraction of Anti-Sweat Heater Energy to Case
     0.0,                     !- Case Defrost Power per Unit Length {W/m}
-    OffCycle,               !- Case Defrost Type
+    OffCycle,                !- Case Defrost Type
     UserProvideDefSched2PerDay90MinEa,  !- Case Defrost Schedule Name
     UserProvideDefSched2PerDay90MinEa,  !- Case Defrost Drip-Down Schedule Name
     CaseTemperatureMethod,   !- Defrost Energy Correction Curve Type
@@ -10463,7 +10459,7 @@
     ,                        !- Case Height {m}
     1.0,                     !- Fraction of Anti-Sweat Heater Energy to Case
     0.0,                     !- Case Defrost Power per Unit Length {W/m}
-    OffCycle,               !- Case Defrost Type
+    OffCycle,                !- Case Defrost Type
     UserProvideDefSched4PerDay30MinEa,  !- Case Defrost Schedule Name
     UserProvideDefSched4PerDay30MinEa,  !- Case Defrost Drip-Down Schedule Name
     CaseTemperatureMethod,   !- Defrost Energy Correction Curve Type
@@ -10506,7 +10502,7 @@
     ,                        !- Case Height {m}
     1.0,                     !- Fraction of Anti-Sweat Heater Energy to Case
     0.0,                     !- Case Defrost Power per Unit Length {W/m}
-    OffCycle,               !- Case Defrost Type
+    OffCycle,                !- Case Defrost Type
     UserProvideDefSched4PerDay30MinEa,  !- Case Defrost Schedule Name
     UserProvideDefSched4PerDay30MinEa,  !- Case Defrost Drip-Down Schedule Name
     CaseTemperatureMethod,   !- Defrost Energy Correction Curve Type
@@ -10549,7 +10545,7 @@
     ,                        !- Case Height {m}
     1.0,                     !- Fraction of Anti-Sweat Heater Energy to Case
     0.0,                     !- Case Defrost Power per Unit Length {W/m}
-    OffCycle,               !- Case Defrost Type
+    OffCycle,                !- Case Defrost Type
     UserProvideDefSched4PerDay45MinEa,  !- Case Defrost Schedule Name
     UserProvideDefSched4PerDay45MinEa,  !- Case Defrost Drip-Down Schedule Name
     CaseTemperatureMethod,   !- Defrost Energy Correction Curve Type
@@ -10592,7 +10588,7 @@
     ,                        !- Case Height {m}
     1.0,                     !- Fraction of Anti-Sweat Heater Energy to Case
     0.0,                     !- Case Defrost Power per Unit Length {W/m}
-    OffCycle,               !- Case Defrost Type
+    OffCycle,                !- Case Defrost Type
     UserProvideDefSched4PerDay45MinEa,  !- Case Defrost Schedule Name
     UserProvideDefSched4PerDay45MinEa,  !- Case Defrost Drip-Down Schedule Name
     CaseTemperatureMethod,   !- Defrost Energy Correction Curve Type
@@ -10635,7 +10631,7 @@
     ,                        !- Case Height {m}
     1.0,                     !- Fraction of Anti-Sweat Heater Energy to Case
     0.0,                     !- Case Defrost Power per Unit Length {W/m}
-    OffCycle,               !- Case Defrost Type
+    OffCycle,                !- Case Defrost Type
     UserProvideDefSched4PerDay45MinEa,  !- Case Defrost Schedule Name
     UserProvideDefSched4PerDay45MinEa,  !- Case Defrost Drip-Down Schedule Name
     CaseTemperatureMethod,   !- Defrost Energy Correction Curve Type
@@ -10678,7 +10674,7 @@
     ,                        !- Case Height {m}
     1.0,                     !- Fraction of Anti-Sweat Heater Energy to Case
     0.0,                     !- Case Defrost Power per Unit Length {W/m}
-    OffCycle,               !- Case Defrost Type
+    OffCycle,                !- Case Defrost Type
     UserProvideDefSched4PerDay45MinEa,  !- Case Defrost Schedule Name
     UserProvideDefSched4PerDay45MinEa,  !- Case Defrost Drip-Down Schedule Name
     CaseTemperatureMethod,   !- Defrost Energy Correction Curve Type
@@ -10721,7 +10717,7 @@
     ,                        !- Case Height {m}
     1.0,                     !- Fraction of Anti-Sweat Heater Energy to Case
     0.0,                     !- Case Defrost Power per Unit Length {W/m}
-    OffCycle,               !- Case Defrost Type
+    OffCycle,                !- Case Defrost Type
     UserProvideDefSched4PerDay45MinEa,  !- Case Defrost Schedule Name
     UserProvideDefSched4PerDay45MinEa,  !- Case Defrost Drip-Down Schedule Name
     CaseTemperatureMethod,   !- Defrost Energy Correction Curve Type
@@ -10764,7 +10760,7 @@
     ,                        !- Case Height {m}
     1.0,                     !- Fraction of Anti-Sweat Heater Energy to Case
     0.0,                     !- Case Defrost Power per Unit Length {W/m}
-    OffCycle,               !- Case Defrost Type
+    OffCycle,                !- Case Defrost Type
     UserProvideDefSched4PerDay45MinEa,  !- Case Defrost Schedule Name
     UserProvideDefSched4PerDay45MinEa,  !- Case Defrost Drip-Down Schedule Name
     CaseTemperatureMethod,   !- Defrost Energy Correction Curve Type
@@ -10807,7 +10803,7 @@
     ,                        !- Case Height {m}
     1.0,                     !- Fraction of Anti-Sweat Heater Energy to Case
     0.0,                     !- Case Defrost Power per Unit Length {W/m}
-    OffCycle,               !- Case Defrost Type
+    OffCycle,                !- Case Defrost Type
     UserProvideDefSched4PerDay45MinEa,  !- Case Defrost Schedule Name
     UserProvideDefSched4PerDay45MinEa,  !- Case Defrost Drip-Down Schedule Name
     CaseTemperatureMethod,   !- Defrost Energy Correction Curve Type
@@ -10850,7 +10846,7 @@
     ,                        !- Case Height {m}
     1.0,                     !- Fraction of Anti-Sweat Heater Energy to Case
     0.0,                     !- Case Defrost Power per Unit Length {W/m}
-    OffCycle,               !- Case Defrost Type
+    OffCycle,                !- Case Defrost Type
     UserProvideDefSched4PerDay45MinEa,  !- Case Defrost Schedule Name
     UserProvideDefSched4PerDay45MinEa,  !- Case Defrost Drip-Down Schedule Name
     CaseTemperatureMethod,   !- Defrost Energy Correction Curve Type
@@ -10893,7 +10889,7 @@
     ,                        !- Case Height {m}
     1.0,                     !- Fraction of Anti-Sweat Heater Energy to Case
     0.0,                     !- Case Defrost Power per Unit Length {W/m}
-    OffCycle,               !- Case Defrost Type
+    OffCycle,                !- Case Defrost Type
     UserProvideDefSched4PerDay40MinEa,  !- Case Defrost Schedule Name
     UserProvideDefSched4PerDay40MinEa,  !- Case Defrost Drip-Down Schedule Name
     CaseTemperatureMethod,   !- Defrost Energy Correction Curve Type
@@ -10936,7 +10932,7 @@
     ,                        !- Case Height {m}
     1.0,                     !- Fraction of Anti-Sweat Heater Energy to Case
     0.0,                     !- Case Defrost Power per Unit Length {W/m}
-    OffCycle,               !- Case Defrost Type
+    OffCycle,                !- Case Defrost Type
     UserProvideDefSched4PerDay40MinEa,  !- Case Defrost Schedule Name
     UserProvideDefSched4PerDay40MinEa,  !- Case Defrost Drip-Down Schedule Name
     CaseTemperatureMethod,   !- Defrost Energy Correction Curve Type
@@ -10979,7 +10975,7 @@
     ,                        !- Case Height {m}
     1.0,                     !- Fraction of Anti-Sweat Heater Energy to Case
     0.0,                     !- Case Defrost Power per Unit Length {W/m}
-    OffCycle,               !- Case Defrost Type
+    OffCycle,                !- Case Defrost Type
     UserProvideDefSched4PerDay40MinEa,  !- Case Defrost Schedule Name
     UserProvideDefSched4PerDay40MinEa,  !- Case Defrost Drip-Down Schedule Name
     CaseTemperatureMethod,   !- Defrost Energy Correction Curve Type
@@ -11022,7 +11018,7 @@
     ,                        !- Case Height {m}
     1.0,                     !- Fraction of Anti-Sweat Heater Energy to Case
     0.0,                     !- Case Defrost Power per Unit Length {W/m}
-    OffCycle,               !- Case Defrost Type
+    OffCycle,                !- Case Defrost Type
     UserProvideDefSched2PerDay90MinEa,  !- Case Defrost Schedule Name
     UserProvideDefSched2PerDay90MinEa,  !- Case Defrost Drip-Down Schedule Name
     CaseTemperatureMethod,   !- Defrost Energy Correction Curve Type
@@ -11065,7 +11061,7 @@
     ,                        !- Case Height {m}
     1.0,                     !- Fraction of Anti-Sweat Heater Energy to Case
     0.0,                     !- Case Defrost Power per Unit Length {W/m}
-    OffCycle,               !- Case Defrost Type
+    OffCycle,                !- Case Defrost Type
     UserProvideDefSched2PerDay90MinEa,  !- Case Defrost Schedule Name
     UserProvideDefSched2PerDay90MinEa,  !- Case Defrost Drip-Down Schedule Name
     CaseTemperatureMethod,   !- Defrost Energy Correction Curve Type
@@ -11108,7 +11104,7 @@
     ,                        !- Case Height {m}
     1.0,                     !- Fraction of Anti-Sweat Heater Energy to Case
     0.0,                     !- Case Defrost Power per Unit Length {W/m}
-    OffCycle,               !- Case Defrost Type
+    OffCycle,                !- Case Defrost Type
     UserProvideDefSched2PerDay90MinEa,  !- Case Defrost Schedule Name
     UserProvideDefSched2PerDay90MinEa,  !- Case Defrost Drip-Down Schedule Name
     CaseTemperatureMethod,   !- Defrost Energy Correction Curve Type
@@ -11151,7 +11147,7 @@
     ,                        !- Case Height {m}
     1.0,                     !- Fraction of Anti-Sweat Heater Energy to Case
     0.0,                     !- Case Defrost Power per Unit Length {W/m}
-    OffCycle,               !- Case Defrost Type
+    OffCycle,                !- Case Defrost Type
     UserProvideDefSched2PerDay90MinEa,  !- Case Defrost Schedule Name
     UserProvideDefSched2PerDay90MinEa,  !- Case Defrost Drip-Down Schedule Name
     CaseTemperatureMethod,   !- Defrost Energy Correction Curve Type
@@ -11194,7 +11190,7 @@
     ,                        !- Case Height {m}
     1.0,                     !- Fraction of Anti-Sweat Heater Energy to Case
     0.0,                     !- Case Defrost Power per Unit Length {W/m}
-    OffCycle,               !- Case Defrost Type
+    OffCycle,                !- Case Defrost Type
     UserProvideDefSched2PerDay90MinEa,  !- Case Defrost Schedule Name
     UserProvideDefSched2PerDay90MinEa,  !- Case Defrost Drip-Down Schedule Name
     CaseTemperatureMethod,   !- Defrost Energy Correction Curve Type
@@ -11237,7 +11233,7 @@
     ,                        !- Case Height {m}
     1.0,                     !- Fraction of Anti-Sweat Heater Energy to Case
     0.0,                     !- Case Defrost Power per Unit Length {W/m}
-    OffCycle,               !- Case Defrost Type
+    OffCycle,                !- Case Defrost Type
     UserProvideDefSched4PerDay40MinEa,  !- Case Defrost Schedule Name
     UserProvideDefSched4PerDay40MinEa,  !- Case Defrost Drip-Down Schedule Name
     CaseTemperatureMethod,   !- Defrost Energy Correction Curve Type
@@ -11280,7 +11276,7 @@
     ,                        !- Case Height {m}
     1.0,                     !- Fraction of Anti-Sweat Heater Energy to Case
     0.0,                     !- Case Defrost Power per Unit Length {W/m}
-    OffCycle,               !- Case Defrost Type
+    OffCycle,                !- Case Defrost Type
     UserProvideDefSched4PerDay40MinEa,  !- Case Defrost Schedule Name
     UserProvideDefSched4PerDay40MinEa,  !- Case Defrost Drip-Down Schedule Name
     CaseTemperatureMethod,   !- Defrost Energy Correction Curve Type
@@ -11323,7 +11319,7 @@
     ,                        !- Case Height {m}
     1.0,                     !- Fraction of Anti-Sweat Heater Energy to Case
     0.0,                     !- Case Defrost Power per Unit Length {W/m}
-    OffCycle,               !- Case Defrost Type
+    OffCycle,                !- Case Defrost Type
     UserProvideDefSched4PerDay40MinEa,  !- Case Defrost Schedule Name
     UserProvideDefSched4PerDay40MinEa,  !- Case Defrost Drip-Down Schedule Name
     CaseTemperatureMethod,   !- Defrost Energy Correction Curve Type
@@ -11366,7 +11362,7 @@
     ,                        !- Case Height {m}
     1.0,                     !- Fraction of Anti-Sweat Heater Energy to Case
     0.0,                     !- Case Defrost Power per Unit Length {W/m}
-    OffCycle,               !- Case Defrost Type
+    OffCycle,                !- Case Defrost Type
     UserProvideDefSched4PerDay40MinEa,  !- Case Defrost Schedule Name
     UserProvideDefSched4PerDay40MinEa,  !- Case Defrost Drip-Down Schedule Name
     CaseTemperatureMethod,   !- Defrost Energy Correction Curve Type
@@ -11409,7 +11405,7 @@
     ,                        !- Case Height {m}
     1.0,                     !- Fraction of Anti-Sweat Heater Energy to Case
     0.0,                     !- Case Defrost Power per Unit Length {W/m}
-    OffCycle,               !- Case Defrost Type
+    OffCycle,                !- Case Defrost Type
     UserProvideDefSched4PerDay40MinEa,  !- Case Defrost Schedule Name
     UserProvideDefSched4PerDay40MinEa,  !- Case Defrost Drip-Down Schedule Name
     CaseTemperatureMethod,   !- Defrost Energy Correction Curve Type
@@ -11452,7 +11448,7 @@
     ,                        !- Case Height {m}
     1.0,                     !- Fraction of Anti-Sweat Heater Energy to Case
     0.0,                     !- Case Defrost Power per Unit Length {W/m}
-    OffCycle,               !- Case Defrost Type
+    OffCycle,                !- Case Defrost Type
     UserProvideDefSched4PerDay40MinEa,  !- Case Defrost Schedule Name
     UserProvideDefSched4PerDay40MinEa,  !- Case Defrost Drip-Down Schedule Name
     CaseTemperatureMethod,   !- Defrost Energy Correction Curve Type
@@ -11495,7 +11491,7 @@
     ,                        !- Case Height {m}
     1.0,                     !- Fraction of Anti-Sweat Heater Energy to Case
     0.0,                     !- Case Defrost Power per Unit Length {W/m}
-    OffCycle,               !- Case Defrost Type
+    OffCycle,                !- Case Defrost Type
     UserProvideDefSched4PerDay40MinEa,  !- Case Defrost Schedule Name
     UserProvideDefSched4PerDay40MinEa,  !- Case Defrost Drip-Down Schedule Name
     CaseTemperatureMethod,   !- Defrost Energy Correction Curve Type
@@ -11538,7 +11534,7 @@
     ,                        !- Case Height {m}
     1.0,                     !- Fraction of Anti-Sweat Heater Energy to Case
     0.0,                     !- Case Defrost Power per Unit Length {W/m}
-    OffCycle,               !- Case Defrost Type
+    OffCycle,                !- Case Defrost Type
     UserProvideDefSched4PerDay40MinEa,  !- Case Defrost Schedule Name
     UserProvideDefSched4PerDay40MinEa,  !- Case Defrost Drip-Down Schedule Name
     CaseTemperatureMethod,   !- Defrost Energy Correction Curve Type
@@ -11581,7 +11577,7 @@
     ,                        !- Case Height {m}
     1.0,                     !- Fraction of Anti-Sweat Heater Energy to Case
     0.0,                     !- Case Defrost Power per Unit Length {W/m}
-    OffCycle,               !- Case Defrost Type
+    OffCycle,                !- Case Defrost Type
     UserProvideDefSched4PerDay35MinEa,  !- Case Defrost Schedule Name
     UserProvideDefSched4PerDay35MinEa,  !- Case Defrost Drip-Down Schedule Name
     CaseTemperatureMethod,   !- Defrost Energy Correction Curve Type
@@ -11624,7 +11620,7 @@
     ,                        !- Case Height {m}
     1.0,                     !- Fraction of Anti-Sweat Heater Energy to Case
     0.0,                     !- Case Defrost Power per Unit Length {W/m}
-    OffCycle,               !- Case Defrost Type
+    OffCycle,                !- Case Defrost Type
     UserProvideDefSched2PerDay90MinEa,  !- Case Defrost Schedule Name
     UserProvideDefSched2PerDay90MinEa,  !- Case Defrost Drip-Down Schedule Name
     CaseTemperatureMethod,   !- Defrost Energy Correction Curve Type
@@ -11667,7 +11663,7 @@
     ,                        !- Case Height {m}
     1.0,                     !- Fraction of Anti-Sweat Heater Energy to Case
     0.0,                     !- Case Defrost Power per Unit Length {W/m}
-    OffCycle,               !- Case Defrost Type
+    OffCycle,                !- Case Defrost Type
     UserProvideDefSched2PerDay90MinEa,  !- Case Defrost Schedule Name
     UserProvideDefSched2PerDay90MinEa,  !- Case Defrost Drip-Down Schedule Name
     CaseTemperatureMethod,   !- Defrost Energy Correction Curve Type
@@ -11710,7 +11706,7 @@
     ,                        !- Case Height {m}
     1.0,                     !- Fraction of Anti-Sweat Heater Energy to Case
     0.0,                     !- Case Defrost Power per Unit Length {W/m}
-    OffCycle,               !- Case Defrost Type
+    OffCycle,                !- Case Defrost Type
     UserProvideDefSched2PerDay90MinEa,  !- Case Defrost Schedule Name
     UserProvideDefSched2PerDay90MinEa,  !- Case Defrost Drip-Down Schedule Name
     CaseTemperatureMethod,   !- Defrost Energy Correction Curve Type
@@ -11753,7 +11749,7 @@
     ,                        !- Case Height {m}
     1.0,                     !- Fraction of Anti-Sweat Heater Energy to Case
     0.0,                     !- Case Defrost Power per Unit Length {W/m}
-    OffCycle,               !- Case Defrost Type
+    OffCycle,                !- Case Defrost Type
     UserProvideDefSched2PerDay90MinEa,  !- Case Defrost Schedule Name
     UserProvideDefSched2PerDay90MinEa,  !- Case Defrost Drip-Down Schedule Name
     CaseTemperatureMethod,   !- Defrost Energy Correction Curve Type
@@ -11796,7 +11792,7 @@
     ,                        !- Case Height {m}
     1.0,                     !- Fraction of Anti-Sweat Heater Energy to Case
     0.0,                     !- Case Defrost Power per Unit Length {W/m}
-    OffCycle,               !- Case Defrost Type
+    OffCycle,                !- Case Defrost Type
     UserProvideDefSched2PerDay90MinEa,  !- Case Defrost Schedule Name
     UserProvideDefSched2PerDay90MinEa,  !- Case Defrost Drip-Down Schedule Name
     CaseTemperatureMethod,   !- Defrost Energy Correction Curve Type
@@ -11839,7 +11835,7 @@
     ,                        !- Case Height {m}
     1.0,                     !- Fraction of Anti-Sweat Heater Energy to Case
     0.0,                     !- Case Defrost Power per Unit Length {W/m}
-    OffCycle,               !- Case Defrost Type
+    OffCycle,                !- Case Defrost Type
     UserProvideDefSched1PerDay90MinEa,  !- Case Defrost Schedule Name
     UserProvideDefSched1PerDay90MinEa,  !- Case Defrost Drip-Down Schedule Name
     CaseTemperatureMethod,   !- Defrost Energy Correction Curve Type
@@ -11882,7 +11878,7 @@
     ,                        !- Case Height {m}
     1.0,                     !- Fraction of Anti-Sweat Heater Energy to Case
     0.0,                     !- Case Defrost Power per Unit Length {W/m}
-    OffCycle,               !- Case Defrost Type
+    OffCycle,                !- Case Defrost Type
     UserProvideDefSched1PerDay90MinEa,  !- Case Defrost Schedule Name
     UserProvideDefSched1PerDay90MinEa,  !- Case Defrost Drip-Down Schedule Name
     CaseTemperatureMethod,   !- Defrost Energy Correction Curve Type
@@ -11925,7 +11921,7 @@
     ,                        !- Case Height {m}
     1.0,                     !- Fraction of Anti-Sweat Heater Energy to Case
     0.0,                     !- Case Defrost Power per Unit Length {W/m}
-    OffCycle,               !- Case Defrost Type
+    OffCycle,                !- Case Defrost Type
     UserProvideDefSched1PerDay75MinEa,  !- Case Defrost Schedule Name
     UserProvideDefSched1PerDay75MinEa,  !- Case Defrost Drip-Down Schedule Name
     CaseTemperatureMethod,   !- Defrost Energy Correction Curve Type
@@ -11968,7 +11964,7 @@
     ,                        !- Case Height {m}
     1.0,                     !- Fraction of Anti-Sweat Heater Energy to Case
     0.0,                     !- Case Defrost Power per Unit Length {W/m}
-    OffCycle,               !- Case Defrost Type
+    OffCycle,                !- Case Defrost Type
     UserProvideDefSched1PerDay110MinEa,  !- Case Defrost Schedule Name
     UserProvideDefSched1PerDay110MinEa,  !- Case Defrost Drip-Down Schedule Name
     CaseTemperatureMethod,   !- Defrost Energy Correction Curve Type
@@ -12011,7 +12007,7 @@
     ,                        !- Case Height {m}
     1.0,                     !- Fraction of Anti-Sweat Heater Energy to Case
     0.0,                     !- Case Defrost Power per Unit Length {W/m}
-    OffCycle,               !- Case Defrost Type
+    OffCycle,                !- Case Defrost Type
     UserProvideDefSched1PerDay110MinEa,  !- Case Defrost Schedule Name
     UserProvideDefSched1PerDay110MinEa,  !- Case Defrost Drip-Down Schedule Name
     CaseTemperatureMethod,   !- Defrost Energy Correction Curve Type
@@ -12054,7 +12050,7 @@
     ,                        !- Case Height {m}
     1.0,                     !- Fraction of Anti-Sweat Heater Energy to Case
     0.0,                     !- Case Defrost Power per Unit Length {W/m}
-    OffCycle,               !- Case Defrost Type
+    OffCycle,                !- Case Defrost Type
     UserProvideDefSched2PerDay90MinEa,  !- Case Defrost Schedule Name
     UserProvideDefSched2PerDay90MinEa,  !- Case Defrost Drip-Down Schedule Name
     CaseTemperatureMethod,   !- Defrost Energy Correction Curve Type
@@ -12097,7 +12093,7 @@
     ,                        !- Case Height {m}
     1.0,                     !- Fraction of Anti-Sweat Heater Energy to Case
     0.0,                     !- Case Defrost Power per Unit Length {W/m}
-    OffCycle,               !- Case Defrost Type
+    OffCycle,                !- Case Defrost Type
     UserProvideDefSched3PerDay60MinEa,  !- Case Defrost Schedule Name
     UserProvideDefSched3PerDay60MinEa,  !- Case Defrost Drip-Down Schedule Name
     CaseTemperatureMethod,   !- Defrost Energy Correction Curve Type
@@ -12140,7 +12136,7 @@
     ,                        !- Case Height {m}
     1.0,                     !- Fraction of Anti-Sweat Heater Energy to Case
     0.0,                     !- Case Defrost Power per Unit Length {W/m}
-    OffCycle,               !- Case Defrost Type
+    OffCycle,                !- Case Defrost Type
     UserProvideDefSched3PerDay30MinEa,  !- Case Defrost Schedule Name
     UserProvideDefSched3PerDay30MinEa,  !- Case Defrost Drip-Down Schedule Name
     CaseTemperatureMethod,   !- Defrost Energy Correction Curve Type
@@ -12183,7 +12179,7 @@
     ,                        !- Case Height {m}
     1.0,                     !- Fraction of Anti-Sweat Heater Energy to Case
     0.0,                     !- Case Defrost Power per Unit Length {W/m}
-    OffCycle,               !- Case Defrost Type
+    OffCycle,                !- Case Defrost Type
     UserProvideDefSched3PerDay30MinEa,  !- Case Defrost Schedule Name
     UserProvideDefSched3PerDay30MinEa,  !- Case Defrost Drip-Down Schedule Name
     CaseTemperatureMethod,   !- Defrost Energy Correction Curve Type
@@ -12226,7 +12222,7 @@
     ,                        !- Case Height {m}
     1.0,                     !- Fraction of Anti-Sweat Heater Energy to Case
     0.0,                     !- Case Defrost Power per Unit Length {W/m}
-    OffCycle,               !- Case Defrost Type
+    OffCycle,                !- Case Defrost Type
     UserProvideDefSched4PerDay40MinEa,  !- Case Defrost Schedule Name
     UserProvideDefSched4PerDay40MinEa,  !- Case Defrost Drip-Down Schedule Name
     CaseTemperatureMethod,   !- Defrost Energy Correction Curve Type
@@ -12269,7 +12265,7 @@
     ,                        !- Case Height {m}
     1.0,                     !- Fraction of Anti-Sweat Heater Energy to Case
     0.0,                     !- Case Defrost Power per Unit Length {W/m}
-    OffCycle,               !- Case Defrost Type
+    OffCycle,                !- Case Defrost Type
     UserProvideDefSched4PerDay30MinEa,  !- Case Defrost Schedule Name
     UserProvideDefSched4PerDay30MinEa,  !- Case Defrost Drip-Down Schedule Name
     CaseTemperatureMethod,   !- Defrost Energy Correction Curve Type
@@ -12312,7 +12308,7 @@
     ,                        !- Case Height {m}
     1.0,                     !- Fraction of Anti-Sweat Heater Energy to Case
     0.0,                     !- Case Defrost Power per Unit Length {W/m}
-    OffCycle,               !- Case Defrost Type
+    OffCycle,                !- Case Defrost Type
     UserProvideDefSched2PerDay30MinEa,  !- Case Defrost Schedule Name
     UserProvideDefSched2PerDay30MinEa,  !- Case Defrost Drip-Down Schedule Name
     CaseTemperatureMethod,   !- Defrost Energy Correction Curve Type
@@ -12355,7 +12351,7 @@
     ,                        !- Case Height {m}
     1.0,                     !- Fraction of Anti-Sweat Heater Energy to Case
     0.0,                     !- Case Defrost Power per Unit Length {W/m}
-    OffCycle,               !- Case Defrost Type
+    OffCycle,                !- Case Defrost Type
     UserProvideDefSched2PerDay30MinEa,  !- Case Defrost Schedule Name
     UserProvideDefSched2PerDay30MinEa,  !- Case Defrost Drip-Down Schedule Name
     CaseTemperatureMethod,   !- Defrost Energy Correction Curve Type
@@ -12398,7 +12394,7 @@
     ,                        !- Case Height {m}
     1.0,                     !- Fraction of Anti-Sweat Heater Energy to Case
     0.0,                     !- Case Defrost Power per Unit Length {W/m}
-    OffCycle,               !- Case Defrost Type
+    OffCycle,                !- Case Defrost Type
     UserProvideDefSched4PerDay30MinEa,  !- Case Defrost Schedule Name
     UserProvideDefSched4PerDay30MinEa,  !- Case Defrost Drip-Down Schedule Name
     CaseTemperatureMethod,   !- Defrost Energy Correction Curve Type
@@ -12441,7 +12437,7 @@
     ,                        !- Case Height {m}
     1.0,                     !- Fraction of Anti-Sweat Heater Energy to Case
     0.0,                     !- Case Defrost Power per Unit Length {W/m}
-    OffCycle,               !- Case Defrost Type
+    OffCycle,                !- Case Defrost Type
     UserProvideDefSched2PerDay30MinEa,  !- Case Defrost Schedule Name
     UserProvideDefSched2PerDay30MinEa,  !- Case Defrost Drip-Down Schedule Name
     CaseTemperatureMethod,   !- Defrost Energy Correction Curve Type
@@ -12484,7 +12480,7 @@
     ,                        !- Case Height {m}
     1.0,                     !- Fraction of Anti-Sweat Heater Energy to Case
     0.0,                     !- Case Defrost Power per Unit Length {W/m}
-    OffCycle,               !- Case Defrost Type
+    OffCycle,                !- Case Defrost Type
     UserProvideDefSched2PerDay30MinEa,  !- Case Defrost Schedule Name
     UserProvideDefSched2PerDay30MinEa,  !- Case Defrost Drip-Down Schedule Name
     CaseTemperatureMethod,   !- Defrost Energy Correction Curve Type
@@ -12527,7 +12523,7 @@
     ,                        !- Case Height {m}
     1.0,                     !- Fraction of Anti-Sweat Heater Energy to Case
     0.0,                     !- Case Defrost Power per Unit Length {W/m}
-    OffCycle,               !- Case Defrost Type
+    OffCycle,                !- Case Defrost Type
     UserProvideDefSched4PerDay30MinEa,  !- Case Defrost Schedule Name
     UserProvideDefSched4PerDay30MinEa,  !- Case Defrost Drip-Down Schedule Name
     CaseTemperatureMethod,   !- Defrost Energy Correction Curve Type
@@ -12570,7 +12566,7 @@
     ,                        !- Case Height {m}
     1.0,                     !- Fraction of Anti-Sweat Heater Energy to Case
     0.0,                     !- Case Defrost Power per Unit Length {W/m}
-    OffCycle,               !- Case Defrost Type
+    OffCycle,                !- Case Defrost Type
     UserProvideDefSched2PerDay30MinEa,  !- Case Defrost Schedule Name
     UserProvideDefSched2PerDay30MinEa,  !- Case Defrost Drip-Down Schedule Name
     CaseTemperatureMethod,   !- Defrost Energy Correction Curve Type
@@ -12613,7 +12609,7 @@
     ,                        !- Case Height {m}
     1.0,                     !- Fraction of Anti-Sweat Heater Energy to Case
     0.0,                     !- Case Defrost Power per Unit Length {W/m}
-    OffCycle,               !- Case Defrost Type
+    OffCycle,                !- Case Defrost Type
     UserProvideDefSched2PerDay30MinEa,  !- Case Defrost Schedule Name
     UserProvideDefSched2PerDay30MinEa,  !- Case Defrost Drip-Down Schedule Name
     CaseTemperatureMethod,   !- Defrost Energy Correction Curve Type
@@ -12656,7 +12652,7 @@
     ,                        !- Case Height {m}
     1.0,                     !- Fraction of Anti-Sweat Heater Energy to Case
     0.0,                     !- Case Defrost Power per Unit Length {W/m}
-    OffCycle,               !- Case Defrost Type
+    OffCycle,                !- Case Defrost Type
     UserProvideDefSched2PerDay30MinEa,  !- Case Defrost Schedule Name
     UserProvideDefSched2PerDay30MinEa,  !- Case Defrost Drip-Down Schedule Name
     CaseTemperatureMethod,   !- Defrost Energy Correction Curve Type
@@ -12699,7 +12695,7 @@
     ,                        !- Case Height {m}
     1.0,                     !- Fraction of Anti-Sweat Heater Energy to Case
     0.0,                     !- Case Defrost Power per Unit Length {W/m}
-    OffCycle,               !- Case Defrost Type
+    OffCycle,                !- Case Defrost Type
     UserProvideDefSched2PerDay30MinEa,  !- Case Defrost Schedule Name
     UserProvideDefSched2PerDay30MinEa,  !- Case Defrost Drip-Down Schedule Name
     CaseTemperatureMethod,   !- Defrost Energy Correction Curve Type
@@ -12742,7 +12738,7 @@
     ,                        !- Case Height {m}
     1.0,                     !- Fraction of Anti-Sweat Heater Energy to Case
     0.0,                     !- Case Defrost Power per Unit Length {W/m}
-    OffCycle,               !- Case Defrost Type
+    OffCycle,                !- Case Defrost Type
     UserProvideDefSched4PerDay30MinEa,  !- Case Defrost Schedule Name
     UserProvideDefSched4PerDay30MinEa,  !- Case Defrost Drip-Down Schedule Name
     CaseTemperatureMethod,   !- Defrost Energy Correction Curve Type
@@ -12785,7 +12781,7 @@
     ,                        !- Case Height {m}
     1.0,                     !- Fraction of Anti-Sweat Heater Energy to Case
     0.0,                     !- Case Defrost Power per Unit Length {W/m}
-    OffCycle,               !- Case Defrost Type
+    OffCycle,                !- Case Defrost Type
     UserProvideDefSched2PerDay30MinEa,  !- Case Defrost Schedule Name
     UserProvideDefSched2PerDay30MinEa,  !- Case Defrost Drip-Down Schedule Name
     CaseTemperatureMethod,   !- Defrost Energy Correction Curve Type
@@ -12828,7 +12824,7 @@
     ,                        !- Case Height {m}
     1.0,                     !- Fraction of Anti-Sweat Heater Energy to Case
     0.0,                     !- Case Defrost Power per Unit Length {W/m}
-    OffCycle,               !- Case Defrost Type
+    OffCycle,                !- Case Defrost Type
     UserProvideDefSched2PerDay30MinEa,  !- Case Defrost Schedule Name
     UserProvideDefSched2PerDay30MinEa,  !- Case Defrost Drip-Down Schedule Name
     CaseTemperatureMethod,   !- Defrost Energy Correction Curve Type
@@ -12871,7 +12867,7 @@
     ,                        !- Case Height {m}
     1.0,                     !- Fraction of Anti-Sweat Heater Energy to Case
     0.0,                     !- Case Defrost Power per Unit Length {W/m}
-    OffCycle,               !- Case Defrost Type
+    OffCycle,                !- Case Defrost Type
     UserProvideDefSched4PerDay30MinEa,  !- Case Defrost Schedule Name
     UserProvideDefSched4PerDay30MinEa,  !- Case Defrost Drip-Down Schedule Name
     CaseTemperatureMethod,   !- Defrost Energy Correction Curve Type
@@ -12914,7 +12910,7 @@
     ,                        !- Case Height {m}
     1.0,                     !- Fraction of Anti-Sweat Heater Energy to Case
     0.0,                     !- Case Defrost Power per Unit Length {W/m}
-    OffCycle,               !- Case Defrost Type
+    OffCycle,                !- Case Defrost Type
     UserProvideDefSched2PerDay30MinEa,  !- Case Defrost Schedule Name
     UserProvideDefSched2PerDay30MinEa,  !- Case Defrost Drip-Down Schedule Name
     CaseTemperatureMethod,   !- Defrost Energy Correction Curve Type
@@ -12957,7 +12953,7 @@
     ,                        !- Case Height {m}
     1.0,                     !- Fraction of Anti-Sweat Heater Energy to Case
     0.0,                     !- Case Defrost Power per Unit Length {W/m}
-    OffCycle,               !- Case Defrost Type
+    OffCycle,                !- Case Defrost Type
     UserProvideDefSched2PerDay30MinEa,  !- Case Defrost Schedule Name
     UserProvideDefSched2PerDay30MinEa,  !- Case Defrost Drip-Down Schedule Name
     CaseTemperatureMethod,   !- Defrost Energy Correction Curve Type
@@ -13000,7 +12996,7 @@
     ,                        !- Case Height {m}
     1.0,                     !- Fraction of Anti-Sweat Heater Energy to Case
     0.0,                     !- Case Defrost Power per Unit Length {W/m}
-    OffCycle,               !- Case Defrost Type
+    OffCycle,                !- Case Defrost Type
     UserProvideDefSched2PerDay30MinEa,  !- Case Defrost Schedule Name
     UserProvideDefSched2PerDay30MinEa,  !- Case Defrost Drip-Down Schedule Name
     CaseTemperatureMethod,   !- Defrost Energy Correction Curve Type
@@ -13043,7 +13039,7 @@
     ,                        !- Case Height {m}
     1.0,                     !- Fraction of Anti-Sweat Heater Energy to Case
     0.0,                     !- Case Defrost Power per Unit Length {W/m}
-    OffCycle,               !- Case Defrost Type
+    OffCycle,                !- Case Defrost Type
     UserProvideDefSched2PerDay30MinEa,  !- Case Defrost Schedule Name
     UserProvideDefSched2PerDay30MinEa,  !- Case Defrost Drip-Down Schedule Name
     CaseTemperatureMethod,   !- Defrost Energy Correction Curve Type
@@ -13086,7 +13082,7 @@
     ,                        !- Case Height {m}
     1.0,                     !- Fraction of Anti-Sweat Heater Energy to Case
     0.0,                     !- Case Defrost Power per Unit Length {W/m}
-    OffCycle,               !- Case Defrost Type
+    OffCycle,                !- Case Defrost Type
     UserProvideDefSched4PerDay30MinEa,  !- Case Defrost Schedule Name
     UserProvideDefSched4PerDay30MinEa,  !- Case Defrost Drip-Down Schedule Name
     CaseTemperatureMethod,   !- Defrost Energy Correction Curve Type
@@ -13129,7 +13125,7 @@
     ,                        !- Case Height {m}
     1.0,                     !- Fraction of Anti-Sweat Heater Energy to Case
     0.0,                     !- Case Defrost Power per Unit Length {W/m}
-    OffCycle,               !- Case Defrost Type
+    OffCycle,                !- Case Defrost Type
     UserProvideDefSched3PerDay30MinEa,  !- Case Defrost Schedule Name
     UserProvideDefSched3PerDay30MinEa,  !- Case Defrost Drip-Down Schedule Name
     CaseTemperatureMethod,   !- Defrost Energy Correction Curve Type
@@ -13172,7 +13168,7 @@
     ,                        !- Case Height {m}
     1.0,                     !- Fraction of Anti-Sweat Heater Energy to Case
     0.0,                     !- Case Defrost Power per Unit Length {W/m}
-    OffCycle,               !- Case Defrost Type
+    OffCycle,                !- Case Defrost Type
     UserProvideDefSched4PerDay30MinEa,  !- Case Defrost Schedule Name
     UserProvideDefSched4PerDay30MinEa,  !- Case Defrost Drip-Down Schedule Name
     CaseTemperatureMethod,   !- Defrost Energy Correction Curve Type
@@ -13215,7 +13211,7 @@
     ,                        !- Case Height {m}
     1.0,                     !- Fraction of Anti-Sweat Heater Energy to Case
     0.0,                     !- Case Defrost Power per Unit Length {W/m}
-    OffCycle,               !- Case Defrost Type
+    OffCycle,                !- Case Defrost Type
     UserProvideDefSched4PerDay30MinEa,  !- Case Defrost Schedule Name
     UserProvideDefSched4PerDay30MinEa,  !- Case Defrost Drip-Down Schedule Name
     CaseTemperatureMethod,   !- Defrost Energy Correction Curve Type
@@ -13258,7 +13254,7 @@
     ,                        !- Case Height {m}
     1.0,                     !- Fraction of Anti-Sweat Heater Energy to Case
     0.0,                     !- Case Defrost Power per Unit Length {W/m}
-    OffCycle,               !- Case Defrost Type
+    OffCycle,                !- Case Defrost Type
     UserProvideDefSched4PerDay30MinEa,  !- Case Defrost Schedule Name
     UserProvideDefSched4PerDay30MinEa,  !- Case Defrost Drip-Down Schedule Name
     CaseTemperatureMethod,   !- Defrost Energy Correction Curve Type
@@ -13301,7 +13297,7 @@
     ,                        !- Case Height {m}
     1.0,                     !- Fraction of Anti-Sweat Heater Energy to Case
     0.0,                     !- Case Defrost Power per Unit Length {W/m}
-    OffCycle,               !- Case Defrost Type
+    OffCycle,                !- Case Defrost Type
     UserProvideDefSched4PerDay35MinEa,  !- Case Defrost Schedule Name
     UserProvideDefSched4PerDay35MinEa,  !- Case Defrost Drip-Down Schedule Name
     CaseTemperatureMethod,   !- Defrost Energy Correction Curve Type
@@ -13344,7 +13340,7 @@
     ,                        !- Case Height {m}
     1.0,                     !- Fraction of Anti-Sweat Heater Energy to Case
     0.0,                     !- Case Defrost Power per Unit Length {W/m}
-    OffCycle,               !- Case Defrost Type
+    OffCycle,                !- Case Defrost Type
     UserProvideDefSched4PerDay35MinEa,  !- Case Defrost Schedule Name
     UserProvideDefSched4PerDay35MinEa,  !- Case Defrost Drip-Down Schedule Name
     CaseTemperatureMethod,   !- Defrost Energy Correction Curve Type
@@ -13387,7 +13383,7 @@
     ,                        !- Case Height {m}
     1.0,                     !- Fraction of Anti-Sweat Heater Energy to Case
     0.0,                     !- Case Defrost Power per Unit Length {W/m}
-    OffCycle,               !- Case Defrost Type
+    OffCycle,                !- Case Defrost Type
     UserProvideDefSched4PerDay35MinEa,  !- Case Defrost Schedule Name
     UserProvideDefSched4PerDay35MinEa,  !- Case Defrost Drip-Down Schedule Name
     CaseTemperatureMethod,   !- Defrost Energy Correction Curve Type
@@ -13430,7 +13426,7 @@
     ,                        !- Case Height {m}
     1.0,                     !- Fraction of Anti-Sweat Heater Energy to Case
     0.0,                     !- Case Defrost Power per Unit Length {W/m}
-    OffCycle,               !- Case Defrost Type
+    OffCycle,                !- Case Defrost Type
     UserProvideDefSched4PerDay35MinEa,  !- Case Defrost Schedule Name
     UserProvideDefSched4PerDay35MinEa,  !- Case Defrost Drip-Down Schedule Name
     CaseTemperatureMethod,   !- Defrost Energy Correction Curve Type
@@ -13473,7 +13469,7 @@
     ,                        !- Case Height {m}
     1.0,                     !- Fraction of Anti-Sweat Heater Energy to Case
     0.0,                     !- Case Defrost Power per Unit Length {W/m}
-    OffCycle,               !- Case Defrost Type
+    OffCycle,                !- Case Defrost Type
     UserProvideDefSched4PerDay35MinEa,  !- Case Defrost Schedule Name
     UserProvideDefSched4PerDay35MinEa,  !- Case Defrost Drip-Down Schedule Name
     CaseTemperatureMethod,   !- Defrost Energy Correction Curve Type
@@ -13516,7 +13512,7 @@
     ,                        !- Case Height {m}
     1.0,                     !- Fraction of Anti-Sweat Heater Energy to Case
     0.0,                     !- Case Defrost Power per Unit Length {W/m}
-    OffCycle,               !- Case Defrost Type
+    OffCycle,                !- Case Defrost Type
     UserProvideDefSched2PerDay30MinEa,  !- Case Defrost Schedule Name
     UserProvideDefSched2PerDay30MinEa,  !- Case Defrost Drip-Down Schedule Name
     CaseTemperatureMethod,   !- Defrost Energy Correction Curve Type
@@ -13559,7 +13555,7 @@
     ,                        !- Case Height {m}
     1.0,                     !- Fraction of Anti-Sweat Heater Energy to Case
     0.0,                     !- Case Defrost Power per Unit Length {W/m}
-    OffCycle,               !- Case Defrost Type
+    OffCycle,                !- Case Defrost Type
     UserProvideDefSched2PerDay30MinEa,  !- Case Defrost Schedule Name
     UserProvideDefSched2PerDay30MinEa,  !- Case Defrost Drip-Down Schedule Name
     CaseTemperatureMethod,   !- Defrost Energy Correction Curve Type
@@ -13602,7 +13598,7 @@
     ,                        !- Case Height {m}
     1.0,                     !- Fraction of Anti-Sweat Heater Energy to Case
     0.0,                     !- Case Defrost Power per Unit Length {W/m}
-    OffCycle,               !- Case Defrost Type
+    OffCycle,                !- Case Defrost Type
     UserProvideDefSched4PerDay30MinEa,  !- Case Defrost Schedule Name
     UserProvideDefSched4PerDay30MinEa,  !- Case Defrost Drip-Down Schedule Name
     CaseTemperatureMethod,   !- Defrost Energy Correction Curve Type
@@ -13645,7 +13641,7 @@
     ,                        !- Case Height {m}
     1.0,                     !- Fraction of Anti-Sweat Heater Energy to Case
     0.0,                     !- Case Defrost Power per Unit Length {W/m}
-    OffCycle,               !- Case Defrost Type
+    OffCycle,                !- Case Defrost Type
     UserProvideDefSched4PerDay30MinEa,  !- Case Defrost Schedule Name
     UserProvideDefSched4PerDay30MinEa,  !- Case Defrost Drip-Down Schedule Name
     CaseTemperatureMethod,   !- Defrost Energy Correction Curve Type
@@ -13688,7 +13684,7 @@
     ,                        !- Case Height {m}
     1.0,                     !- Fraction of Anti-Sweat Heater Energy to Case
     0.0,                     !- Case Defrost Power per Unit Length {W/m}
-    OffCycle,               !- Case Defrost Type
+    OffCycle,                !- Case Defrost Type
     UserProvideDefSched4PerDay30MinEa,  !- Case Defrost Schedule Name
     UserProvideDefSched4PerDay30MinEa,  !- Case Defrost Drip-Down Schedule Name
     CaseTemperatureMethod,   !- Defrost Energy Correction Curve Type
@@ -13731,7 +13727,7 @@
     ,                        !- Case Height {m}
     1.0,                     !- Fraction of Anti-Sweat Heater Energy to Case
     0.0,                     !- Case Defrost Power per Unit Length {W/m}
-    OffCycle,               !- Case Defrost Type
+    OffCycle,                !- Case Defrost Type
     UserProvideDefSched2PerDay30MinEa,  !- Case Defrost Schedule Name
     UserProvideDefSched2PerDay30MinEa,  !- Case Defrost Drip-Down Schedule Name
     CaseTemperatureMethod,   !- Defrost Energy Correction Curve Type
@@ -13774,7 +13770,7 @@
     ,                        !- Case Height {m}
     1.0,                     !- Fraction of Anti-Sweat Heater Energy to Case
     0.0,                     !- Case Defrost Power per Unit Length {W/m}
-    OffCycle,               !- Case Defrost Type
+    OffCycle,                !- Case Defrost Type
     UserProvideDefSched6PerDay30MinEa,  !- Case Defrost Schedule Name
     UserProvideDefSched6PerDay30MinEa,  !- Case Defrost Drip-Down Schedule Name
     CaseTemperatureMethod,   !- Defrost Energy Correction Curve Type
@@ -13817,7 +13813,7 @@
     ,                        !- Case Height {m}
     1.0,                     !- Fraction of Anti-Sweat Heater Energy to Case
     0.0,                     !- Case Defrost Power per Unit Length {W/m}
-    OffCycle,               !- Case Defrost Type
+    OffCycle,                !- Case Defrost Type
     UserProvideDefSched6PerDay30MinEa,  !- Case Defrost Schedule Name
     UserProvideDefSched6PerDay30MinEa,  !- Case Defrost Drip-Down Schedule Name
     CaseTemperatureMethod,   !- Defrost Energy Correction Curve Type
@@ -13860,7 +13856,7 @@
     ,                        !- Case Height {m}
     1.0,                     !- Fraction of Anti-Sweat Heater Energy to Case
     0.0,                     !- Case Defrost Power per Unit Length {W/m}
-    OffCycle,               !- Case Defrost Type
+    OffCycle,                !- Case Defrost Type
     UserProvideDefSched6PerDay30MinEa,  !- Case Defrost Schedule Name
     UserProvideDefSched6PerDay30MinEa,  !- Case Defrost Drip-Down Schedule Name
     CaseTemperatureMethod,   !- Defrost Energy Correction Curve Type
@@ -13903,7 +13899,7 @@
     ,                        !- Case Height {m}
     1.0,                     !- Fraction of Anti-Sweat Heater Energy to Case
     0.0,                     !- Case Defrost Power per Unit Length {W/m}
-    OffCycle,               !- Case Defrost Type
+    OffCycle,                !- Case Defrost Type
     UserProvideDefSched2PerDay30MinEa,  !- Case Defrost Schedule Name
     UserProvideDefSched2PerDay30MinEa,  !- Case Defrost Drip-Down Schedule Name
     CaseTemperatureMethod,   !- Defrost Energy Correction Curve Type
@@ -13946,7 +13942,7 @@
     ,                        !- Case Height {m}
     1.0,                     !- Fraction of Anti-Sweat Heater Energy to Case
     0.0,                     !- Case Defrost Power per Unit Length {W/m}
-    OffCycle,               !- Case Defrost Type
+    OffCycle,                !- Case Defrost Type
     UserProvideDefSched6PerDay30MinEa,  !- Case Defrost Schedule Name
     UserProvideDefSched6PerDay30MinEa,  !- Case Defrost Drip-Down Schedule Name
     CaseTemperatureMethod,   !- Defrost Energy Correction Curve Type
@@ -13989,7 +13985,7 @@
     ,                        !- Case Height {m}
     1.0,                     !- Fraction of Anti-Sweat Heater Energy to Case
     0.0,                     !- Case Defrost Power per Unit Length {W/m}
-    OffCycle,               !- Case Defrost Type
+    OffCycle,                !- Case Defrost Type
     UserProvideDefSched6PerDay30MinEa,  !- Case Defrost Schedule Name
     UserProvideDefSched6PerDay30MinEa,  !- Case Defrost Drip-Down Schedule Name
     CaseTemperatureMethod,   !- Defrost Energy Correction Curve Type
@@ -14032,7 +14028,7 @@
     ,                        !- Case Height {m}
     1.0,                     !- Fraction of Anti-Sweat Heater Energy to Case
     0.0,                     !- Case Defrost Power per Unit Length {W/m}
-    OffCycle,               !- Case Defrost Type
+    OffCycle,                !- Case Defrost Type
     UserProvideDefSched6PerDay30MinEa,  !- Case Defrost Schedule Name
     UserProvideDefSched6PerDay30MinEa,  !- Case Defrost Drip-Down Schedule Name
     CaseTemperatureMethod,   !- Defrost Energy Correction Curve Type
@@ -14075,7 +14071,7 @@
     ,                        !- Case Height {m}
     1.0,                     !- Fraction of Anti-Sweat Heater Energy to Case
     0.0,                     !- Case Defrost Power per Unit Length {W/m}
-    OffCycle,               !- Case Defrost Type
+    OffCycle,                !- Case Defrost Type
     UserProvideDefSched2PerDay30MinEa,  !- Case Defrost Schedule Name
     UserProvideDefSched2PerDay30MinEa,  !- Case Defrost Drip-Down Schedule Name
     CaseTemperatureMethod,   !- Defrost Energy Correction Curve Type
@@ -14118,7 +14114,7 @@
     ,                        !- Case Height {m}
     1.0,                     !- Fraction of Anti-Sweat Heater Energy to Case
     0.0,                     !- Case Defrost Power per Unit Length {W/m}
-    OffCycle,               !- Case Defrost Type
+    OffCycle,                !- Case Defrost Type
     UserProvideDefSched4PerDay35MinEa,  !- Case Defrost Schedule Name
     UserProvideDefSched4PerDay35MinEa,  !- Case Defrost Drip-Down Schedule Name
     CaseTemperatureMethod,   !- Defrost Energy Correction Curve Type
@@ -14161,7 +14157,7 @@
     ,                        !- Case Height {m}
     1.0,                     !- Fraction of Anti-Sweat Heater Energy to Case
     0.0,                     !- Case Defrost Power per Unit Length {W/m}
-    OffCycle,               !- Case Defrost Type
+    OffCycle,                !- Case Defrost Type
     UserProvideDefSched4PerDay20MinEa,  !- Case Defrost Schedule Name
     UserProvideDefSched4PerDay20MinEa,  !- Case Defrost Drip-Down Schedule Name
     CaseTemperatureMethod,   !- Defrost Energy Correction Curve Type
@@ -14204,7 +14200,7 @@
     ,                        !- Case Height {m}
     1.0,                     !- Fraction of Anti-Sweat Heater Energy to Case
     0.0,                     !- Case Defrost Power per Unit Length {W/m}
-    OffCycle,               !- Case Defrost Type
+    OffCycle,                !- Case Defrost Type
     UserProvideDefSched4PerDay35MinEa,  !- Case Defrost Schedule Name
     UserProvideDefSched4PerDay35MinEa,  !- Case Defrost Drip-Down Schedule Name
     CaseTemperatureMethod,   !- Defrost Energy Correction Curve Type
@@ -14247,7 +14243,7 @@
     ,                        !- Case Height {m}
     1.0,                     !- Fraction of Anti-Sweat Heater Energy to Case
     0.0,                     !- Case Defrost Power per Unit Length {W/m}
-    OffCycle,               !- Case Defrost Type
+    OffCycle,                !- Case Defrost Type
     UserProvideDefSched3PerDay30MinEa,  !- Case Defrost Schedule Name
     UserProvideDefSched3PerDay30MinEa,  !- Case Defrost Drip-Down Schedule Name
     CaseTemperatureMethod,   !- Defrost Energy Correction Curve Type
@@ -14290,7 +14286,7 @@
     ,                        !- Case Height {m}
     1.0,                     !- Fraction of Anti-Sweat Heater Energy to Case
     0.0,                     !- Case Defrost Power per Unit Length {W/m}
-    OffCycle,               !- Case Defrost Type
+    OffCycle,                !- Case Defrost Type
     UserProvideDefSched3PerDay30MinEa,  !- Case Defrost Schedule Name
     UserProvideDefSched3PerDay30MinEa,  !- Case Defrost Drip-Down Schedule Name
     CaseTemperatureMethod,   !- Defrost Energy Correction Curve Type
@@ -14333,7 +14329,7 @@
     ,                        !- Case Height {m}
     1.0,                     !- Fraction of Anti-Sweat Heater Energy to Case
     0.0,                     !- Case Defrost Power per Unit Length {W/m}
-    OffCycle,               !- Case Defrost Type
+    OffCycle,                !- Case Defrost Type
     UserProvideDefSched4PerDay35MinEa,  !- Case Defrost Schedule Name
     UserProvideDefSched4PerDay35MinEa,  !- Case Defrost Drip-Down Schedule Name
     CaseTemperatureMethod,   !- Defrost Energy Correction Curve Type
@@ -14376,7 +14372,7 @@
     ,                        !- Case Height {m}
     1.0,                     !- Fraction of Anti-Sweat Heater Energy to Case
     0.0,                     !- Case Defrost Power per Unit Length {W/m}
-    OffCycle,               !- Case Defrost Type
+    OffCycle,                !- Case Defrost Type
     UserProvideDefSched2PerDay40MinEa,  !- Case Defrost Schedule Name
     UserProvideDefSched2PerDay40MinEa,  !- Case Defrost Drip-Down Schedule Name
     CaseTemperatureMethod,   !- Defrost Energy Correction Curve Type
@@ -14419,7 +14415,7 @@
     ,                        !- Case Height {m}
     1.0,                     !- Fraction of Anti-Sweat Heater Energy to Case
     0.0,                     !- Case Defrost Power per Unit Length {W/m}
-    OffCycle,               !- Case Defrost Type
+    OffCycle,                !- Case Defrost Type
     UserProvideDefSched4PerDay35MinEa,  !- Case Defrost Schedule Name
     UserProvideDefSched4PerDay35MinEa,  !- Case Defrost Drip-Down Schedule Name
     CaseTemperatureMethod,   !- Defrost Energy Correction Curve Type
@@ -14462,7 +14458,7 @@
     ,                        !- Case Height {m}
     1.0,                     !- Fraction of Anti-Sweat Heater Energy to Case
     0.0,                     !- Case Defrost Power per Unit Length {W/m}
-    OffCycle,               !- Case Defrost Type
+    OffCycle,                !- Case Defrost Type
     UserProvideDefSched3PerDay30MinEa,  !- Case Defrost Schedule Name
     UserProvideDefSched3PerDay30MinEa,  !- Case Defrost Drip-Down Schedule Name
     CaseTemperatureMethod,   !- Defrost Energy Correction Curve Type
@@ -14505,7 +14501,7 @@
     ,                        !- Case Height {m}
     1.0,                     !- Fraction of Anti-Sweat Heater Energy to Case
     0.0,                     !- Case Defrost Power per Unit Length {W/m}
-    OffCycle,               !- Case Defrost Type
+    OffCycle,                !- Case Defrost Type
     UserProvideDefSched3PerDay30MinEa,  !- Case Defrost Schedule Name
     UserProvideDefSched3PerDay30MinEa,  !- Case Defrost Drip-Down Schedule Name
     CaseTemperatureMethod,   !- Defrost Energy Correction Curve Type
@@ -14548,7 +14544,7 @@
     ,                        !- Case Height {m}
     1.0,                     !- Fraction of Anti-Sweat Heater Energy to Case
     0.0,                     !- Case Defrost Power per Unit Length {W/m}
-    OffCycle,               !- Case Defrost Type
+    OffCycle,                !- Case Defrost Type
     UserProvideDefSched4PerDay35MinEa,  !- Case Defrost Schedule Name
     UserProvideDefSched4PerDay35MinEa,  !- Case Defrost Drip-Down Schedule Name
     CaseTemperatureMethod,   !- Defrost Energy Correction Curve Type
@@ -14591,7 +14587,7 @@
     ,                        !- Case Height {m}
     1.0,                     !- Fraction of Anti-Sweat Heater Energy to Case
     0.0,                     !- Case Defrost Power per Unit Length {W/m}
-    OffCycle,               !- Case Defrost Type
+    OffCycle,                !- Case Defrost Type
     UserProvideDefSched4PerDay50MinEa,  !- Case Defrost Schedule Name
     UserProvideDefSched4PerDay50MinEa,  !- Case Defrost Drip-Down Schedule Name
     CaseTemperatureMethod,   !- Defrost Energy Correction Curve Type
@@ -14634,7 +14630,7 @@
     ,                        !- Case Height {m}
     1.0,                     !- Fraction of Anti-Sweat Heater Energy to Case
     0.0,                     !- Case Defrost Power per Unit Length {W/m}
-    OffCycle,               !- Case Defrost Type
+    OffCycle,                !- Case Defrost Type
     UserProvideDefSched4PerDay50MinEa,  !- Case Defrost Schedule Name
     UserProvideDefSched4PerDay50MinEa,  !- Case Defrost Drip-Down Schedule Name
     CaseTemperatureMethod,   !- Defrost Energy Correction Curve Type
@@ -14677,7 +14673,7 @@
     ,                        !- Case Height {m}
     1.0,                     !- Fraction of Anti-Sweat Heater Energy to Case
     0.0,                     !- Case Defrost Power per Unit Length {W/m}
-    OffCycle,               !- Case Defrost Type
+    OffCycle,                !- Case Defrost Type
     UserProvideDefSched4PerDay35MinEa,  !- Case Defrost Schedule Name
     UserProvideDefSched4PerDay35MinEa,  !- Case Defrost Drip-Down Schedule Name
     CaseTemperatureMethod,   !- Defrost Energy Correction Curve Type
@@ -14720,7 +14716,7 @@
     ,                        !- Case Height {m}
     1.0,                     !- Fraction of Anti-Sweat Heater Energy to Case
     0.0,                     !- Case Defrost Power per Unit Length {W/m}
-    OffCycle,               !- Case Defrost Type
+    OffCycle,                !- Case Defrost Type
     UserProvideDefSched4PerDay35MinEa,  !- Case Defrost Schedule Name
     UserProvideDefSched4PerDay35MinEa,  !- Case Defrost Drip-Down Schedule Name
     CaseTemperatureMethod,   !- Defrost Energy Correction Curve Type
@@ -14763,7 +14759,7 @@
     ,                        !- Case Height {m}
     1.0,                     !- Fraction of Anti-Sweat Heater Energy to Case
     0.0,                     !- Case Defrost Power per Unit Length {W/m}
-    OffCycle,               !- Case Defrost Type
+    OffCycle,                !- Case Defrost Type
     UserProvideDefSched2PerDay30MinEa,  !- Case Defrost Schedule Name
     UserProvideDefSched2PerDay30MinEa,  !- Case Defrost Drip-Down Schedule Name
     CaseTemperatureMethod,   !- Defrost Energy Correction Curve Type
@@ -14806,7 +14802,7 @@
     ,                        !- Case Height {m}
     1.0,                     !- Fraction of Anti-Sweat Heater Energy to Case
     0.0,                     !- Case Defrost Power per Unit Length {W/m}
-    OffCycle,               !- Case Defrost Type
+    OffCycle,                !- Case Defrost Type
     UserProvideDefSched2PerDay30MinEa,  !- Case Defrost Schedule Name
     UserProvideDefSched2PerDay30MinEa,  !- Case Defrost Drip-Down Schedule Name
     CaseTemperatureMethod,   !- Defrost Energy Correction Curve Type
@@ -14849,7 +14845,7 @@
     ,                        !- Case Height {m}
     1.0,                     !- Fraction of Anti-Sweat Heater Energy to Case
     0.0,                     !- Case Defrost Power per Unit Length {W/m}
-    OffCycle,               !- Case Defrost Type
+    OffCycle,                !- Case Defrost Type
     UserProvideDefSched4PerDay25MinEa,  !- Case Defrost Schedule Name
     UserProvideDefSched4PerDay25MinEa,  !- Case Defrost Drip-Down Schedule Name
     CaseTemperatureMethod,   !- Defrost Energy Correction Curve Type
@@ -15365,7 +15361,7 @@
     ,                        !- Case Height {m}
     1.0,                     !- Fraction of Anti-Sweat Heater Energy to Case
     0.0,                     !- Case Defrost Power per Unit Length {W/m}
-    OffCycle,               !- Case Defrost Type
+    OffCycle,                !- Case Defrost Type
     UserProvideDefSched3PerDay20MinEa,  !- Case Defrost Schedule Name
     UserProvideDefSched3PerDay20MinEa,  !- Case Defrost Drip-Down Schedule Name
     CaseTemperatureMethod,   !- Defrost Energy Correction Curve Type

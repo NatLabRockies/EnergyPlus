@@ -44,7 +44,7 @@ The aggregation type determines how the variable is aggregated in the table. The
 
 \textbf{HoursNonNegative} -- The HoursNonNegative option adds up the elapsed time during the month that this variable has non-negative value. Hours with a positive value and hours with a zero value are all included.
 
-\textbf{HourInTenBinsMinToMax} - Creates 10 columns for the specified variable and shows the number of hours in each of 10 bins based on the minimum and maximum value. The bin sizes will be rounded up to the next most signficant digit value (if the min is 0 and the max is 28786.3, the bin size would be 3000 not 2878.63). A table of the bin ranges would be generated below the main table when this option is selected.
+\textbf{HourInTenBinsMinToMax} - Creates 10 columns for the specified variable and shows the number of hours in each of 10 bins based on the minimum and maximum value. The bin sizes will be rounded up to the next most significant digit value (if the min is 0 and the max is 28786.3, the bin size would be 3000 not 2878.63). A table of the bin ranges would be generated below the main table when this option is selected.
 
 \textbf{HourInTenBinsZeroToMax} - Creates 11 columns for the specified variable and shows the number of hours in each of 10 bins from zero to the maximum value and a bin for hours below zero. The bin sizes will be rounded up to the next most significant digit value (if the min is 0 and the max is 28786.3, the bin size would be 3000 not 2878.63). A table of the bin ranges would be generated below the main table when this option is selected.
 
@@ -69,24 +69,23 @@ The Digits After Decimal field is a numeric value that indicates how many digits
 The VariableOrMeterName, AggregationType, and DigitsAfterDecimal fields may be repeated for each column desired in the annual report. These three fields define each column of the report.  These fields are extensible, so additional groups of these fields can be added to the end of this object.  An example of this object follows.
 
 \begin{lstlisting}
-
 Output:Table:Annual,
-  Custom Annual Window Report,  !- Name
-  , !- Filter
-  , !- Schedule Name
+  Custom Annual Window Report,!- Name
+  ,                           !- Filter
+  ,                           !- Schedule Name
   SURFACE WINDOW TRANSMITTED SOLAR RADIATION RATE,  !- Variable, Meter, EMS Int Var, IDF field Name 1
-  SumOrAverage,  !- Aggregation Type for 1
-  2,  !- Digits After Decimal for 1
+  SumOrAverage,               !- Aggregation Type for 1
+  2,                          !- Digits After Decimal for 1
   SURFACE WINDOW TRANSMITTED BEAM SOLAR RADIATION RATE,  !- Variable, Meter, EMS Int Var, IDF field Name 2
-  SumOrAverage,  !- Aggregation Type for 2
-  2,  !- Digits After Decimal for 2
+  SumOrAverage,               !- Aggregation Type for 2
+  2,                          !- Digits After Decimal for 2
   SURFACE WINDOW TRANSMITTED DIFFUSE SOLAR RADIATION RATE,  !- Variable, Meter, EMS Int Var, IDF field Name 3
-  SumOrAverage,  !- Aggregation Type for 3
-  2,  !- Digits After Decimal for 3
+  SumOrAverage,               !- Aggregation Type for 3
+  2,                          !- Digits After Decimal for 3
   SURFACE WINDOW HEAT GAIN RATE,  !- Variable, Meter, EMS Int Var, IDF field Name 4
-  SumOrAverage,  !- Aggregation Type for 4
-  2,  !- Digits After Decimal for 4
+  SumOrAverage,               !- Aggregation Type for 4
+  2,                          !- Digits After Decimal for 4
   ACE WINDOW HEAT LOSS RATE,  !- Variable, Meter, EMS Int Var, IDF field Name 5
-  SumOrAverage,  !- Aggregation Type for 5
-  2;  !- Digits After Decimal for 5
+  SumOrAverage,               !- Aggregation Type for 5
+  2;                          !- Digits After Decimal for 5
 \end{lstlisting}

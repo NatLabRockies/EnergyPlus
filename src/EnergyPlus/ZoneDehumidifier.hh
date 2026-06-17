@@ -1,7 +1,7 @@
-// EnergyPlus, Copyright (c) 1996-2023, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
-// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other
+// National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
 // contributors. All rights reserved.
 //
 // NOTICE: This Software was developed under funding from the U.S. Department of Energy and the
@@ -61,6 +61,10 @@ namespace EnergyPlus {
 // Forward declarations
 struct EnergyPlusData;
 
+namespace Curve {
+    struct Curve;
+}
+
 namespace ZoneDehumidifier {
 
     enum class CondensateOutlet
@@ -76,7 +80,7 @@ namespace ZoneDehumidifier {
         // input data and others required during calculations
         std::string Name;                                                     // Name of unit
         std::string UnitType;                                                 // Type of unit
-        int SchedPtr = 0;                                                     // Index number to availability schedule
+        Sched::Schedule *availSched = nullptr;                                // availability schedule
         Real64 RatedWaterRemoval = 0.0;                                       // Rated water removal [liters/day]
         Real64 RatedEnergyFactor = 0.0;                                       // Rated energy factor [liters/kWh]
         Real64 RatedAirVolFlow = 0.0;                                         // Rated air flow rate through the dehumidifier [m3/s]
@@ -89,13 +93,13 @@ namespace ZoneDehumidifier {
         Real64 OffCycleParasiticLoad = 0.0;                                   // Off Cycle Parasitic Load, user input [W]
         int AirInletNodeNum = 0;                                              // Inlet air node number
         int AirOutletNodeNum = 0;                                             // Outlet air node number
-        int WaterRemovalCurveIndex = 0;                                       // Index for water removal curve
+        Curve::Curve *WaterRemovalCurve = nullptr;                            // Water removal curve
         int WaterRemovalCurveErrorCount = 0;                                  // Count number of times water removal curve returns a negative value
         int WaterRemovalCurveErrorIndex = 0;                                  // Index for negative value water removal factor recurring messages
-        int EnergyFactorCurveIndex = 0;                                       // Index for energy factor curve
+        Curve::Curve *EnergyFactorCurve = nullptr;                            // Energy factor curve
         int EnergyFactorCurveErrorCount = 0;                                  // Count number of times energy factor curve returns negative value
         int EnergyFactorCurveErrorIndex = 0;                                  // Index for negative value energy factor recurring messages
-        int PartLoadCurveIndex = 0;                                           // Index for part load curve
+        Curve::Curve *PartLoadCurve = nullptr;                                // Index for part load curve
         int LowPLFErrorCount = 0;                                             // Count number of times PLF < 0.7
         int LowPLFErrorIndex = 0;                                             // Index for PLF < 0.7 recurring warning messages
         int HighPLFErrorCount = 0;                                            // Count number of times PLF > 1.0
@@ -153,6 +157,8 @@ namespace ZoneDehumidifier {
 
     bool GetZoneDehumidifierNodeNumber(EnergyPlusData &state, int NodeNumber); // Node being tested
 
+    int getZoneDehumidifierIndex(EnergyPlusData &state, std::string_view CompName);
+
 } // namespace ZoneDehumidifier
 
 struct ZoneDehumidifierData : BaseGlobalStruct
@@ -160,9 +166,17 @@ struct ZoneDehumidifierData : BaseGlobalStruct
     bool GetInputFlag = true; // Set to FALSE after first time input is "gotten"
     EPVector<ZoneDehumidifier::ZoneDehumidifierParams> ZoneDehumid;
 
+    void init_constant_state([[maybe_unused]] EnergyPlusData &state) override
+    {
+    }
+
+    void init_state([[maybe_unused]] EnergyPlusData &state) override
+    {
+    }
+
     void clear_state() override
     {
-        *this = ZoneDehumidifierData();
+        new (this) ZoneDehumidifierData();
     }
 };
 

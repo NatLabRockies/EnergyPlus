@@ -18,7 +18,6 @@
 #include <ObjexxFCL/Array2D.hh>
 #include <ObjexxFCL/Array3D.hh>
 #include <ObjexxFCL/Array4D.hh>
-#include <ObjexxFCL/Array5D.hh>
 #include <ObjexxFCL/Fmath.hh>
 
 // C++ Headers
@@ -72,14 +71,6 @@ void
 allocate( Array4D< T > & a, IndexRange const & I1, IndexRange const & I2, IndexRange const & I3, IndexRange const & I4 )
 {
 	a.allocate( I1, I2, I3, I4 );
-}
-
-template< typename T >
-inline
-void
-allocate( Array5D< T > & a, IndexRange const & I1, IndexRange const & I2, IndexRange const & I3, IndexRange const & I4, IndexRange const & I5 )
-{
-	a.allocate( I1, I2, I3, I4, I5 );
 }
 
 template< typename T >
@@ -179,17 +170,6 @@ operator !( Array4< bool > const & a )
 	return r;
 }
 
-inline
-Array5D< bool >
-operator !( Array5< bool > const & a )
-{
-	Array5D< bool > r( a );
-	for ( BArray::size_type i = 0, e = a.size(); i < e; ++i ) {
-		r[ i ] = ! r[ i ];
-	}
-	return r;
-}
-
 
 
 // pow /////
@@ -240,19 +220,6 @@ pow( Array4< T > const & a, X const & x )
 {
 	assert( a.size_bounded() );
 	Array4D< T > r( a );
-	for ( BArray::size_type i = 0, e = a.size(); i < e; ++i ) {
-		r[ i ] = T( std::pow( r[ i ], x ) );
-	}
-	return r;
-}
-
-template< typename T, typename X >
-inline
-Array5D< T >
-pow( Array5< T > const & a, X const & x )
-{
-	assert( a.size_bounded() );
-	Array5D< T > r( a );
 	for ( BArray::size_type i = 0, e = a.size(); i < e; ++i ) {
 		r[ i ] = T( std::pow( r[ i ], x ) );
 	}
@@ -313,19 +280,6 @@ sign( Array4< T > const & a, X const & x )
 	return r;
 }
 
-template< typename T, typename X >
-inline
-Array5D< T >
-sign( Array5< T > const & a, X const & x )
-{
-	assert( a.size_bounded() );
-	Array5D< T > r( a );
-	for ( BArray::size_type i = 0, e = a.size(); i < e; ++i ) {
-		r[ i ] = sign( r[ i ], x );
-	}
-	return r;
-}
-
 template< typename X, typename T >
 inline
 Array1D< X >
@@ -372,19 +326,6 @@ sign( X const & x, Array4< T > const & a )
 {
 	assert( a.size_bounded() );
 	Array4D< X > r( a );
-	for ( BArray::size_type i = 0, e = a.size(); i < e; ++i ) {
-		r[ i ] = sign( x, r[ i ] );
-	}
-	return r;
-}
-
-template< typename X, typename T >
-inline
-Array5D< X >
-sign( X const & x, Array5< T > const & a )
-{
-	assert( a.size_bounded() );
-	Array5D< X > r( a );
 	for ( BArray::size_type i = 0, e = a.size(); i < e; ++i ) {
 		r[ i ] = sign( x, r[ i ] );
 	}
@@ -495,14 +436,6 @@ lbound( Array4< T > const & a )
 
 template< typename T >
 inline
-Array1D< int >
-lbound( Array5< T > const & a )
-{
-	return Array1D< int >( 5, { a.l1(), a.l2(), a.l3(), a.l4(), a.l5() } );
-}
-
-template< typename T >
-inline
 int
 lbound( Array1< T > const & a, int const dim )
 {
@@ -569,28 +502,6 @@ lbound( Array4< T > const & a, int const dim )
 	}
 }
 
-template< typename T >
-inline
-int
-lbound( Array5< T > const & a, int const dim )
-{
-	switch ( dim ) {
-	case 1:
-		return a.l1();
-	case 2:
-		return a.l2();
-	case 3:
-		return a.l3();
-	case 4:
-		return a.l4();
-	case 5:
-		return a.l5();
-	default:
-		assert( false );
-		return 0;
-	}
-}
-
 // ubound /////
 
 template< typename T >
@@ -627,15 +538,6 @@ ubound( Array4< T > const & a )
 {
 	assert( a.size_bounded() );
 	return Array1D< int >( 4, { a.u1(), a.u2(), a.u3(), a.u4() } );
-}
-
-template< typename T >
-inline
-Array1D< int >
-ubound( Array5< T > const & a )
-{
-	assert( a.size_bounded() );
-	return Array1D< int >( 5, { a.u1(), a.u2(), a.u3(), a.u4(), a.u5() } );
 }
 
 template< typename T >
@@ -710,29 +612,6 @@ ubound( Array4< T > const & a, int const dim )
 	}
 }
 
-template< typename T >
-inline
-int
-ubound( Array5< T > const & a, int const dim )
-{
-	switch ( dim ) {
-	case 1:
-		assert( a.I1().bounded() );
-		return a.u1();
-	case 2:
-		return a.u2();
-	case 3:
-		return a.u3();
-	case 4:
-		return a.u4();
-	case 5:
-		return a.u5();
-	default:
-		assert( false );
-		return 0;
-	}
-}
-
 // shape /////
 
 template< typename T >
@@ -769,15 +648,6 @@ shape( Array4< T > const & a )
 {
 	assert( a.size_bounded() );
 	return Array1D< int >( 4, { a.isize1(), a.isize2(), a.isize3(), a.isize4() } );
-}
-
-template< typename T >
-inline
-Array1D< int >
-shape( Array5< T > const & a )
-{
-	assert( a.size_bounded() );
-	return Array1D< int >( 5, { a.isize1(), a.isize2(), a.isize3(), a.isize4(), a.isize5() } );
 }
 
 // size /////
@@ -857,29 +727,6 @@ size( Array4< T > const & a, int const dim )
 		return a.size3();
 	case 4:
 		return a.size4();
-	default:
-		assert( false );
-		return 0;
-	}
-}
-
-template< typename T >
-inline
-BArray::size_type
-size( Array5< T > const & a, int const dim )
-{
-	switch ( dim ) {
-	case 1:
-		assert( a.I1().bounded() );
-		return a.size1();
-	case 2:
-		return a.size2();
-	case 3:
-		return a.size3();
-	case 4:
-		return a.size4();
-	case 5:
-		return a.size5();
 	default:
 		assert( false );
 		return 0;

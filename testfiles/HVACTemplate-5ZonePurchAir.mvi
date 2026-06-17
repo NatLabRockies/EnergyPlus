@@ -4,5 +4,5 @@ InteriorLights:Electricity
 Electricity:Building
 Electricity:Facility
 DistrictCooling:Facility
-DistrictHeating:Facility
+DistrictHeatingWater:Facility
 0

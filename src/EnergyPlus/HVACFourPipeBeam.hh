@@ -1,7 +1,7 @@
-// EnergyPlus, Copyright (c) 1996-2023, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
-// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other
+// National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
 // contributors. All rights reserved.
 //
 // NOTICE: This Software was developed under funding from the U.S. Department of Energy and the
@@ -73,15 +73,14 @@ namespace FourPipeBeam {
     private: // Creation
         // Default Constructor
         HVACFourPipeBeam()
-            : coolingAvailSchedNum(0), coolingAvailable(false), heatingAvailSchedNum(0), heatingAvailable(false), totBeamLength(0.0),
-              totBeamLengthWasAutosized(false), vDotNormRatedPrimAir(0.0), mDotNormRatedPrimAir(0.0), beamCoolingPresent(false), vDotDesignCW(0.0),
-              vDotDesignCWWasAutosized(false), mDotDesignCW(0.0), qDotNormRatedCooling(0.0), deltaTempRatedCooling(0.0), vDotNormRatedCW(0.0),
-              mDotNormRatedCW(0.0), modCoolingQdotDeltaTFuncNum(0), modCoolingQdotAirFlowFuncNum(0), modCoolingQdotCWFlowFuncNum(0), mDotCW(0.0),
-              cWTempIn(0.0), cWTempOut(0.0), cWTempOutErrorCount(0), cWInNodeNum(0), cWOutNodeNum(0),
-              cWplantLoc(PlantLocation(0, DataPlant::LoopSideLocation::Invalid, 0, 0)), beamHeatingPresent(false), vDotDesignHW(0.0),
-              vDotDesignHWWasAutosized(false), mDotDesignHW(0.0), qDotNormRatedHeating(0.0), deltaTempRatedHeating(0.0), vDotNormRatedHW(0.0),
-              mDotNormRatedHW(0.0), modHeatingQdotDeltaTFuncNum(0), modHeatingQdotAirFlowFuncNum(0), modHeatingQdotHWFlowFuncNum(0), mDotHW(0.0),
-              hWTempIn(0.0), hWTempOut(0.0), hWTempOutErrorCount(0), hWInNodeNum(0), hWOutNodeNum(0),
+            : coolingAvailable(false), heatingAvailable(false), totBeamLength(0.0), totBeamLengthWasAutosized(false), vDotNormRatedPrimAir(0.0),
+              mDotNormRatedPrimAir(0.0), beamCoolingPresent(false), vDotDesignCW(0.0), vDotDesignCWWasAutosized(false), mDotDesignCW(0.0),
+              qDotNormRatedCooling(0.0), deltaTempRatedCooling(0.0), vDotNormRatedCW(0.0), mDotNormRatedCW(0.0), modCoolingQdotDeltaTFuncNum(0),
+              modCoolingQdotAirFlowFuncNum(0), modCoolingQdotCWFlowFuncNum(0), mDotCW(0.0), cWTempIn(0.0), cWTempOut(0.0), cWTempOutErrorCount(0),
+              cWInNodeNum(0), cWOutNodeNum(0), cWplantLoc(PlantLocation(0, DataPlant::LoopSideLocation::Invalid, 0, 0)), beamHeatingPresent(false),
+              vDotDesignHW(0.0), vDotDesignHWWasAutosized(false), mDotDesignHW(0.0), qDotNormRatedHeating(0.0), deltaTempRatedHeating(0.0),
+              vDotNormRatedHW(0.0), mDotNormRatedHW(0.0), modHeatingQdotDeltaTFuncNum(0), modHeatingQdotAirFlowFuncNum(0),
+              modHeatingQdotHWFlowFuncNum(0), mDotHW(0.0), hWTempIn(0.0), hWTempOut(0.0), hWTempOutErrorCount(0), hWInNodeNum(0), hWOutNodeNum(0),
               hWplantLoc(PlantLocation(0, DataPlant::LoopSideLocation::Invalid, 0, 0)), beamCoolingEnergy(0.0), beamCoolingRate(0.0),
               beamHeatingEnergy(0.0), beamHeatingRate(0.0), supAirCoolingEnergy(0.0), supAirCoolingRate(0.0), supAirHeatingEnergy(0.0),
               supAirHeatingRate(0.0), primAirFlow(0.0), OutdoorAirFlowRate(0.0), myEnvrnFlag(true), mySizeFlag(true), plantLoopScanFlag(true),
@@ -113,6 +112,8 @@ namespace FourPipeBeam {
 
         int getTermUnitSizingIndex();
 
+        void reportTerminalUnit(EnergyPlusData &state);
+
     private: // Methods
         void
         init(EnergyPlusData &state,
@@ -134,11 +135,11 @@ namespace FourPipeBeam {
 
         void CalcOutdoorAirVolumeFlowRate(EnergyPlusData &state);
 
-    private:                      // data
-        int coolingAvailSchedNum; // index to schedule for cooling availability
-        bool coolingAvailable;    // true if beam cooling is available
-        int heatingAvailSchedNum; // index to schedule for heating availability
-        bool heatingAvailable;    // true if beam heating is available
+    private:                                          // data
+        Sched::Schedule *coolingAvailSched = nullptr; // schedule for cooling availability
+        bool coolingAvailable;                        // true if beam cooling is available
+        Sched::Schedule *heatingAvailSched = nullptr; // schedule for heating availability
+        bool heatingAvailable;                        // true if beam heating is available
 
         Real64 totBeamLength;           // length of all the beams in the zone (autosizable) (m)
         bool totBeamLengthWasAutosized; // true if beam length was autosized on input
@@ -207,7 +208,7 @@ namespace FourPipeBeam {
         Real64 cpSystemAir;         // current specific heat of primary supply air
         Real64 qDotSystemAir;       // current heat transfer rate of primary supply air wrt zone, W
         Real64 qDotBeamCoolingMax;  // current beam cooling rate at maximum chilled water flow rate, W
-        Real64 qDotBeamHeatingMax;  // curent beam heating rate at maximum hot water flow rate, W
+        Real64 qDotBeamHeatingMax;  // current beam heating rate at maximum hot water flow rate, W
         Real64 qDotTotalDelivered;  // current combined heat transfer rate of primary supply air and beam, W
         Real64 qDotBeamCooling;     // current beam cooling rate, W
         Real64 qDotBeamHeating;     // current beam heating rate, W
@@ -225,6 +226,14 @@ struct FourPipeBeamData : BaseGlobalStruct
 
     ///// Note use of shared_ptr here is not a good pattern, not to be replicated without further discussion.
     Array1D<std::shared_ptr<FourPipeBeam::HVACFourPipeBeam>> FourPipeBeams; // dimension to number of machines
+
+    void init_constant_state([[maybe_unused]] EnergyPlusData &state) override
+    {
+    }
+
+    void init_state([[maybe_unused]] EnergyPlusData &state) override
+    {
+    }
 
     void clear_state() override
     {

@@ -1,7 +1,7 @@
-// EnergyPlus, Copyright (c) 1996-2023, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
-// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other
+// National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
 // contributors. All rights reserved.
 //
 // NOTICE: This Software was developed under funding from the U.S. Department of Energy and the
@@ -53,10 +53,12 @@
 
 // EnergyPlus Headers
 #include <EnergyPlus/Data/BaseData.hh>
+#include <EnergyPlus/DataGlobalConstants.hh>
 #include <EnergyPlus/DataGlobals.hh>
 #include <EnergyPlus/ElectricPowerServiceManager.hh>
 #include <EnergyPlus/EnergyPlus.hh>
 #include <EnergyPlus/PlantComponent.hh>
+#include <EnergyPlus/UtilityRoutines.hh>
 
 namespace EnergyPlus {
 
@@ -86,7 +88,7 @@ namespace MicroturbineElectricGenerator {
         Real64 FuelLowerHeatingValue;      // Lower Heating Value for Fuel (kJ/kg)
         Real64 StandbyPower;               // Standby Power entered by user (W)
         Real64 AncillaryPower;             // Ancillary Power entered by user (W)
-        int AncillaryPowerFuelCurveNum;    // Index to ancillary power modifer curve (function of fuel input)
+        int AncillaryPowerFuelCurveNum;    // Index to ancillary power modifier curve (function of fuel input)
         int HeatRecInletNodeNum;           // Heat Recovery Water Inlet Node number
         int HeatRecOutletNodeNum;          // Heat Recovery Water Outlet Node number
         Real64 RefThermalEffLHV;           // Reference Thermal Efficiency (LHV Basis)
@@ -163,7 +165,7 @@ namespace MicroturbineElectricGenerator {
         Real64 ThermalEfficiencyLHV;  // Reporting: Thermal (heat recovery to water) efficiency LHV (-)
         Real64 AncillaryEnergy;       // Reporting: Ancillary energy use (J)
         Real64 StandbyEnergy;         // Reporting: Standby energy use (J)
-        std::string FuelType;
+        Constant::eFuel FuelType = Constant::eFuel::None;
         bool myFlag;
 
         // Default Constructor
@@ -232,6 +234,14 @@ struct MicroturbineElectricGeneratorData : BaseGlobalStruct
     int NumMTGenerators = 0;
     bool GetMTInput = true;
     EPVector<MicroturbineElectricGenerator::MTGeneratorSpecs> MTGenerator;
+
+    void init_constant_state([[maybe_unused]] EnergyPlusData &state) override
+    {
+    }
+
+    void init_state([[maybe_unused]] EnergyPlusData &state) override
+    {
+    }
 
     void clear_state() override
     {

@@ -1,7 +1,7 @@
-// EnergyPlus, Copyright (c) 1996-2023, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
-// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other
+// National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
 // contributors. All rights reserved.
 //
 // NOTICE: This Software was developed under funding from the U.S. Department of Energy and the
@@ -72,7 +72,6 @@ struct BaseSizerWithFanHeatInputs : BaseSizer
     Real64 motInPower = 0.0;
 
     void getFanInputsForDesHeatGain(EnergyPlusData &state,
-                                    int fanEnumType,
                                     int fanIndex,
                                     Real64 &deltaP,
                                     Real64 &motEff,
@@ -82,7 +81,7 @@ struct BaseSizerWithFanHeatInputs : BaseSizer
                                     Real64 &motInPower,
                                     bool &fanCompModel);
 
-    Real64 calcFanDesHeatGain(Real64 &airVolFlow);
+    Real64 calcFanDesHeatGain(Real64 const &airVolFlow);
 
     void initializeWithinEP(EnergyPlusData &state,
                             std::string_view const _compType,
@@ -107,6 +106,13 @@ struct BaseSizerWithFanHeatInputs : BaseSizer
 
 struct BaseSizerWithFanHeatInputsData : BaseGlobalStruct
 {
+    void init_constant_state([[maybe_unused]] EnergyPlusData &state) override
+    {
+    }
+
+    void init_state([[maybe_unused]] EnergyPlusData &state) override
+    {
+    }
 
     void clear_state() override
     {

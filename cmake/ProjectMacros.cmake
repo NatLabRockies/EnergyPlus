@@ -1,19 +1,5 @@
 include(CMakeParseArguments)
-
-# Add google tests macro
-macro(ADD_GOOGLE_TESTS executable)
-  foreach(source ${ARGN})
-    string(REGEX MATCH .*cpp|.*cc source "${source}")
-    if(source)
-      file(READ "${source}" contents)
-      string(REGEX MATCHALL "TEST_?F?\\(([A-Za-z_0-9 ,]+)\\)" found_tests ${contents})
-      foreach(hit ${found_tests})
-        string(REGEX REPLACE ".*\\(( )*([A-Za-z_0-9]+)( )*,( )*([A-Za-z_0-9]+)( )*\\).*" "\\2.\\5" test_name ${hit})
-        add_test(NAME ${test_name} COMMAND "${executable}" "--gtest_filter=${test_name}")
-      endforeach(hit)
-    endif()
-  endforeach()
-endmacro()
+include(GoogleTest)
 
 # Create source groups automatically based on file path
 macro(CREATE_SRC_GROUPS SRC)
@@ -29,15 +15,11 @@ macro(CREATE_SRC_GROUPS SRC)
 endmacro()
 
 # Create test targets
-macro(CREATE_TEST_TARGETS BASE_NAME SRC DEPENDENCIES USE_PCH)
+macro(CREATE_TEST_TARGETS BASE_NAME SRC DEPENDENCIES)
   if(BUILD_TESTING)
 
     add_executable(${BASE_NAME}_tests ${SRC})
     target_link_libraries(${BASE_NAME}_tests PRIVATE project_options project_warnings)
-
-    if(USE_PCH)
-      target_link_libraries(${BASE_NAME}_tests PRIVATE cpp_pch_files)
-    endif()
 
     if(ENABLE_GTEST_DEBUG_MODE)
       target_compile_definitions(${BASE_NAME}_tests PRIVATE ENABLE_GTEST_DEBUG_MODE)
@@ -62,7 +44,18 @@ macro(CREATE_TEST_TARGETS BASE_NAME SRC DEPENDENCIES USE_PCH)
 
     target_link_libraries(${BASE_NAME}_tests PRIVATE ${ALL_DEPENDENCIES} gtest)
 
-    add_google_tests(${BASE_NAME}_tests ${SRC})
+    if(APPLE AND CMAKE_GENERATOR STREQUAL "Xcode")
+      set(_gtest_discovery_mode PRE_TEST)
+    else()
+      set(_gtest_discovery_mode POST_BUILD)
+    endif()
+
+    gtest_discover_tests(${BASE_NAME}_tests
+      WORKING_DIRECTORY ${PROJECT_BINARY_DIR}
+      DISCOVERY_MODE ${_gtest_discovery_mode}
+      DISCOVERY_TIMEOUT 30
+    )
+
   endif()
 endmacro()
 
@@ -112,10 +105,6 @@ function(ADD_SIMULATION_TEST)
     if(ADD_SIM_TEST_PERFORMANCE)
       # For performance testing, it's more problematic, because that'll cut on the ReadVarEso time
       message(WARNING "Will not be able to call ReadVarEso unless BUILD_FORTRAN=TRUE, skipping flag -r.")
-    elseif(DO_REGRESSION_TESTING)
-      # DO_REGRESSION_TESTING shouldn't really occur here since EnergyPlus/CMakeLists.txt will throw an error if BUILD_FORTRAN isn't enabled
-      # Not that bad, just a dev warning
-      message(AUTHOR_WARNING "Will not be able to call ReadVarEso unless BUILD_FORTRAN=TRUE, skipping flag -r.")
     endif()
   endif()
 
@@ -135,13 +124,21 @@ function(ADD_SIMULATION_TEST)
     set(RUN_CALLGRIND FALSE)
   endif()
 
+  if(ADD_SIM_TEST_PERFORMANCE AND PERF_STAT_ANALYZE_PERFORMANCE_TESTS)
+    set(RUN_PERF_STAT TRUE)
+  else()
+    set(RUN_PERF_STAT FALSE)
+  endif()
+
+
   add_test(
     NAME "${TEST_CATEGORY}.${IDF_NAME}"
     COMMAND
       ${CMAKE_COMMAND} -DSOURCE_DIR=${PROJECT_SOURCE_DIR} -DBINARY_DIR=${PROJECT_BINARY_DIR} -DENERGYPLUS_EXE=$<TARGET_FILE:energyplus>
       -DIDF_FILE=${ADD_SIM_TEST_IDF_FILE} -DEPW_FILE=${ADD_SIM_TEST_EPW_FILE} -DENERGYPLUS_FLAGS=${ENERGYPLUS_FLAGS} -DBUILD_FORTRAN=${BUILD_FORTRAN}
-      -DTEST_FILE_FOLDER=${TEST_FILE_FOLDER} -DRUN_CALLGRIND:BOOL=${RUN_CALLGRIND} -DVALGRIND=${VALGRIND} -P
-      ${PROJECT_SOURCE_DIR}/cmake/RunSimulation.cmake)
+      -DTEST_FILE_FOLDER=${TEST_FILE_FOLDER} -DRUN_CALLGRIND:BOOL=${RUN_CALLGRIND} -DVALGRIND=${VALGRIND} -DRUN_PERF_STAT:BOOL=${RUN_PERF_STAT}
+      -DPERF=${PERF} -DPython_EXECUTABLE=${Python_EXECUTABLE}
+      -P ${PROJECT_SOURCE_DIR}/cmake/RunSimulation.cmake)
 
   if(ADD_SIM_TEST_COST AND NOT ADD_SIM_TEST_COST STREQUAL "")
     set_tests_properties("${TEST_CATEGORY}.${IDF_NAME}" PROPERTIES COST ${ADD_SIM_TEST_COST})
@@ -154,21 +151,6 @@ function(ADD_SIMULATION_TEST)
   else()
     set_tests_properties("${TEST_CATEGORY}.${IDF_NAME}" PROPERTIES PASS_REGULAR_EXPRESSION "Test Passed")
     set_tests_properties("${TEST_CATEGORY}.${IDF_NAME}" PROPERTIES FAIL_REGULAR_EXPRESSION "ERROR;FAIL;Test Failed")
-  endif()
-
-  if(DO_REGRESSION_TESTING AND (NOT ADD_SIM_TEST_EXPECT_FATAL))
-    add_test(
-      NAME "regression.${IDF_NAME}"
-      COMMAND
-        ${CMAKE_COMMAND} -DBINARY_DIR=${PROJECT_BINARY_DIR} -DPYTHON_EXECUTABLE=${Python_EXECUTABLE} -DIDF_FILE=${ADD_SIM_TEST_IDF_FILE}
-        -DREGRESSION_SCRIPT_PATH=${REGRESSION_SCRIPT_PATH} -DREGRESSION_BASELINE_PATH=${REGRESSION_BASELINE_PATH}
-        -DREGRESSION_BASELINE_SHA=${REGRESSION_BASELINE_SHA} -DCOMMIT_SHA=${COMMIT_SHA} -DDEVICE_ID=${DEVICE_ID} -P
-        ${PROJECT_SOURCE_DIR}/cmake/RunRegression.cmake)
-    # Note, CMake / CTest doesn't seem to validate if this dependent name actually exists,
-    # but it does seem to honor the requirement
-    set_tests_properties("regression.${IDF_NAME}" PROPERTIES DEPENDS "${TEST_CATEGORY}.${IDF_NAME}")
-    set_tests_properties("regression.${IDF_NAME}" PROPERTIES PASS_REGULAR_EXPRESSION "Success")
-    set_tests_properties("regression.${IDF_NAME}" PROPERTIES FAIL_REGULAR_EXPRESSION "ERROR;FAIL;Test Failed")
   endif()
 
   if(ENABLE_REVERSE_DD_TESTING AND (NOT ADD_SIM_TEST_EXPECT_FATAL))
@@ -184,6 +166,25 @@ function(ADD_SIMULATION_TEST)
     set_tests_properties("reverseDD.${IDF_NAME}" PROPERTIES FAIL_REGULAR_EXPRESSION "ERROR;FAIL;Test Failed")
   endif()
 
+endfunction()
+
+function(ADD_API_SIMULATION_TEST)
+  # Used for running API tests in the testfiles/API folder
+  # The only argument should be the Python file that drives the simulation run
+  # The Python file should expect a single argument - the build/Products directory where
+  # energyplus(.exe) and pyenergyplus/ live.  The Python script should be able to locate
+  # the associated IDF(s) and run successfully
+  set(options)
+  set(oneValueArgs PYTHON_FILE)
+  set(multiValueArgs)
+  cmake_parse_arguments(ADD_API_SIMULATION_TEST "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
+  if(NOT ADD_API_SIMULATION_TEST_PYTHON_FILE)
+    message(FATAL_ERROR "You must provide a PYTHON_FILE argument to ADD_API_SIMULATION_TEST")
+  endif()
+  set(DIR_WITH_PY_ENERGYPLUS $<TARGET_FILE_DIR:energyplusapi>)
+  add_test(
+          NAME "APISimulation.${ADD_API_SIMULATION_TEST_PYTHON_FILE}"
+          COMMAND ${Python_EXECUTABLE} ${PROJECT_SOURCE_DIR}/testfiles/API/${ADD_API_SIMULATION_TEST_PYTHON_FILE} ${DIR_WITH_PY_ENERGYPLUS})
 endfunction()
 
 function(fixup_executable EXECUTABLE_PATH)

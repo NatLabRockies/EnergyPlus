@@ -42,7 +42,7 @@ else()
   cmake_policy(SET CMP0048 NEW)
   project(gmock VERSION ${GOOGLETEST_VERSION} LANGUAGES CXX C)
 endif()
-cmake_minimum_required(VERSION 2.8.12)
+cmake_minimum_required(VERSION 2.8.12...4.0.3)  # bumped max support to hush a cmake deprecation warning
 
 if (COMMAND set_up_hermetic_build)
   set_up_hermetic_build()

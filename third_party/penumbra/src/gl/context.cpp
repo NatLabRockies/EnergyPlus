@@ -8,12 +8,12 @@
 #endif
 
 // Penumbra
+#include <penumbra/logging.h>
 #include "context.h"
-#include "../error.h"
 
-namespace Pumbra {
+namespace Penumbra {
 
-const char *Context::renderVertexShaderSource =
+const char *Context::render_vertex_shader_source =
     R"src(
   #version 120
   uniform mat4 MVP;
@@ -27,7 +27,7 @@ const char *Context::renderVertexShaderSource =
   }
 )src";
 
-const char *Context::renderFragmentShaderSource =
+const char *Context::render_fragment_shader_source =
     R"src(
   #version 120
   varying vec3 color;
@@ -37,7 +37,7 @@ const char *Context::renderFragmentShaderSource =
   }
 )src";
 
-const char *Context::calculationVertexShaderSource =
+const char *Context::calculation_vertex_shader_source =
     R"src(
   #version 120
   uniform mat4 MVP;
@@ -48,19 +48,24 @@ const char *Context::calculationVertexShaderSource =
   }
 )src";
 
-static void glErrorCallback(int, const char *description) {
-  showMessage(MSG_INFO, description);
+thread_local static Courierr::Courierr *glfw_logger{nullptr};
+
+static void glfw_error_callback(int, const char *description) {
+  if (glfw_logger) {
+    glfw_logger->info(std::format("GLFW message: {}", description));
+  }
 }
 
-Context::Context(unsigned size)
-    : size(size), modelSet(false), isWireFrame(false), isCameraMode(false), viewScale(1.f),
-      cameraRotAngleX(0.f), cameraRotAngleY(0.f), lbutton_down(true), isRenderMode(false) {
+Context::Context(GLint size_in, Courierr::Courierr *logger_in) : size(size_in), logger(logger_in) {
 
-  glfwSetErrorCallback(glErrorCallback);
+  glfw_logger = logger;
+  glfwSetErrorCallback(glfw_error_callback);
 
   if (!glfwInit()) {
-    showMessage(MSG_ERR, "Unable to initialize GLFW.");
-    showMessage(MSG_ERR, "Either there is no GPU, libraries are missing, or some other error happened.");
+    throw PenumbraException(
+        "Unable to initialize GLFW. Either there is no GPU, libraries are missing, or "
+        "some other error happened.",
+        *logger);
   }
 
   glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 2);
@@ -72,7 +77,7 @@ Context::Context(unsigned size)
   fedisableexcept(FE_DIVBYZERO | FE_INVALID | FE_OVERFLOW);
 #endif
 #endif
-  window = glfwCreateWindow(1, 1, "Penumbra", NULL, NULL);
+  window = glfwCreateWindow(1, 1, "Penumbra", nullptr, nullptr);
 #ifndef NDEBUG
 #ifdef __unix__
   feenableexcept(FE_DIVBYZERO | FE_INVALID | FE_OVERFLOW);
@@ -80,37 +85,39 @@ Context::Context(unsigned size)
 #endif
   glfwMakeContextCurrent(window);
   if (!window) {
-    showMessage(
-        MSG_ERR,
-        "Unable to create OpenGL context. OpenGL 2.1+ is required to perform GPU accelerated shading calculations.");
+    throw PenumbraException(
+        "Unable to create OpenGL context. OpenGL 2.1+ is required to perform GPU "
+        "accelerated shading calculations.",
+        *logger);
   }
 
   // OpenGL extension loader
   if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
-    showMessage(MSG_ERR, "Failed to load OpenGL extensions.");
+    throw PenumbraException("Failed to load required OpenGL extensions.", *logger);
   }
 
   if (!glfwExtensionSupported("GL_ARB_vertex_array_object") &&
       !glfwExtensionSupported("GL_APPLE_vertex_array_object")) {
-    showMessage(MSG_ERR, "The current version of OpenGL does not support vertex array objects.");
+    throw PenumbraException("The current version of OpenGL does not support vertex array objects.",
+                            *logger);
   }
   if (!glfwExtensionSupported("GL_EXT_framebuffer_object")) {
-    showMessage(MSG_ERR, "The current version of OpenGL does not support framebuffer objects.");
+    throw PenumbraException("The current version of OpenGL does not support framebuffer objects.",
+                            *logger);
   }
 
-  // std::string glVersion = (char*)glGetString(GL_VERSION);
-  // showMessage(MSG_INFO, "OpenGL version = " + glVersion);
   GLint max_view_size[2];
   glGetIntegerv(GL_MAX_VIEWPORT_DIMS, &max_view_size[0]);
-  GLuint max_res = std::min(GL_MAX_RENDERBUFFER_SIZE_EXT, max_view_size[0]);
+  GLint max_res = std::min(GL_MAX_RENDERBUFFER_SIZE_EXT, max_view_size[0]);
   if (size >= max_res) {
-    showMessage(MSG_WARN,
-                "The selected resolution is larger than the maximum allowable by your hardware. "
-                "The size will be reset to be equal to the maximum allowable."); // TODO: Format
-    this->size = max_res;
+    logger->warning(
+        std::format("The selected resolution, {}, is larger than the maximum allowable by your "
+                    "hardware, {}. The size will be reset to be equal to the maximum allowable.",
+                    size, max_res));
+    size = max_res;
   }
 
-  glViewport(0, 0, this->size, this->size);
+  glViewport(0, 0, size, size);
 
   // Input callbacks for orbit mode
   glfwSetWindowUserPointer(window, this);
@@ -118,61 +125,65 @@ Context::Context(unsigned size)
 
   auto key_callback = [](GLFWwindow *w, int key, int /*scancode*/, int action, int /*mods*/) {
     if (key == GLFW_KEY_W && action == GLFW_PRESS) {
-      glfwWPtr(w)->toggleWireFrame();
+      glfwWPtr(w)->toggle_wire_frame_mode();
     }
 
     if (key == GLFW_KEY_O && action == GLFW_PRESS) {
-      glfwWPtr(w)->toggleCameraMode();
+      glfwWPtr(w)->toggle_camera_mode();
     }
   };
 
   auto scroll_callback = [](GLFWwindow *w, double /*xOffset*/, double yOffset) {
-    glfwWPtr(w)->viewScale += 0.1f * yOffset;
+    glfwWPtr(w)->view_scale += static_cast<float>(0.1 * yOffset);
 
-    if (glfwWPtr(w)->isCameraMode) {
-      glfwWPtr(w)->setCameraMVP();
+    if (glfwWPtr(w)->is_camera_mode) {
+      glfwWPtr(w)->set_camera_mvp();
     }
   };
 
   auto mouse_callback = [](GLFWwindow *w, int button, int action, int /*mods*/) {
-    // Set a booleon to tell if the left button is down. And at the actual press, initialize the
-    // curosor position.  Note that you only come in here the moments the button is pressed and
+    // Set a boolean to tell if the left button is down. And at the actual press, initialize the
+    // cursor position.  Note that you only come in here the moments the button is pressed and
     // released, not between.
 
     if (button == GLFW_MOUSE_BUTTON_LEFT) {
       if (GLFW_PRESS == action) {
-        glfwWPtr(w)->lbutton_down = true;
-        glfwGetCursorPos(w, &glfwWPtr(w)->prevPosX, &glfwWPtr(w)->prevPosY);
+        glfwWPtr(w)->left_mouse_button_pressed = true;
+        glfwGetCursorPos(w, &glfwWPtr(w)->previous_x_position, &glfwWPtr(w)->previous_y_position);
       } else if (GLFW_RELEASE == action) {
-        glfwWPtr(w)->lbutton_down = false;
+        glfwWPtr(w)->left_mouse_button_pressed = false;
       }
     }
   };
 
-  auto cursor_Pos_callback = [](GLFWwindow *w, double xPos, double yPos) {
+  auto cursor_position_callback = [](GLFWwindow *w, double x_position, double y_position) {
     // Constantly monitored cursor position.
 
-    if (glfwWPtr(w)->lbutton_down && glfwWPtr(w)->isCameraMode) {
+    if (glfwWPtr(w)->left_mouse_button_pressed && glfwWPtr(w)->is_camera_mode) {
 
-      static const double rotationSpeed = 1. / 300.;
+      static constexpr double rotation_speed = 1. / 300.;
 
-      glfwWPtr(w)->cameraRotAngleX =
-          -(yPos - glfwWPtr(w)->prevPosY) * rotationSpeed; // Y motion should produce x rotation
-      glfwWPtr(w)->cameraRotAngleY =
-          (xPos - glfwWPtr(w)->prevPosX) * rotationSpeed; // X motion should produce -y rotation
+      glfwWPtr(w)->camera_x_rotation_angle =
+          static_cast<float>(-(y_position - glfwWPtr(w)->previous_y_position) *
+                             rotation_speed); // Y motion should produce x rotation
+      glfwWPtr(w)->camera_y_rotation_angle =
+          static_cast<float>((x_position - glfwWPtr(w)->previous_x_position) *
+                             rotation_speed); // X motion should produce -y rotation
 
-      glfwWPtr(w)->prevPosX = xPos;
-      glfwWPtr(w)->prevPosY = yPos;
+      glfwWPtr(w)->previous_x_position = x_position;
+      glfwWPtr(w)->previous_y_position = y_position;
 
-      glfwWPtr(w)->calcCameraView();
-      glfwWPtr(w)->setCameraMVP();
+      glfwWPtr(w)->calculate_camera_view();
+      glfwWPtr(w)->set_camera_mvp();
     }
   };
+
+#undef glfwWPtr
 
   glfwSetKeyCallback(window, key_callback);
   glfwSetScrollCallback(window, scroll_callback);
   glfwSetMouseButtonCallback(window, mouse_callback);
-  glfwSetCursorPosCallback(window, cursor_Pos_callback);
+  glfwSetCursorPosCallback(window, cursor_position_callback);
 
   glfwSwapInterval(1);
 
@@ -181,118 +192,120 @@ Context::Context(unsigned size)
   // Shader programs
 
   // Program for off-screen calculation
-  calcProgram = std::unique_ptr<GLProgram>(new GLProgram(calculationVertexShaderSource, nullptr));
+  calculation_program =
+      std::make_unique<GLProgram>(calculation_vertex_shader_source, nullptr, logger);
 
-  glBindAttribLocation(calcProgram->getInt(), 0, "vPos");
+  glBindAttribLocation(calculation_program->get(), 0, "vPos");
 
   // Program for on-screen rendering (mostly for debugging)
-  renderProgram = std::unique_ptr<GLProgram>(
-      new GLProgram(renderVertexShaderSource, renderFragmentShaderSource));
-  glBindAttribLocation(renderProgram->getInt(), 0, "vPos");
-  vColLocation = glGetUniformLocation(renderProgram->getInt(), "vCol");
+  render_program = std::make_unique<GLProgram>(render_vertex_shader_source,
+                                               render_fragment_shader_source, logger);
+  glBindAttribLocation(render_program->get(), 0, "vPos");
+  vertex_color_location = glGetUniformLocation(render_program->get(), "vCol");
 
   // Frame and render buffers
-  glGenFramebuffersEXT(1, &fbo);
-  glGenRenderbuffersEXT(1, &rbo);
+  glGenFramebuffersEXT(1, &framebuffer_object);
+  glGenRenderbuffersEXT(1, &renderbuffer_object);
 
   // Start in off-screen mode
-  initOffScreenMode();
+  initialize_off_screen_mode();
 }
 
 Context::~Context() {
-  glDeleteQueries(queries.size(), queries.data());
-  glDeleteFramebuffersEXT(1, &fbo);
-  glDeleteRenderbuffersEXT(1, &rbo);
-  glDeleteProgram(calcProgram->getInt());
-  glDeleteProgram(renderProgram->getInt());
-  glfwDestroyWindow(window);
+  glDeleteQueries(static_cast<GLsizei>(queries.size()), queries.data());
+  glDeleteFramebuffersEXT(1, &framebuffer_object);
+  glDeleteRenderbuffersEXT(1, &renderbuffer_object);
+  glDeleteProgram(calculation_program->get());
+  glDeleteProgram(render_program->get());
+  model.clear_model();
+  glfwTerminate();
 }
-void Context::toggleWireFrame() {
-  isWireFrame = !isWireFrame;
-  if (isWireFrame) {
+void Context::toggle_wire_frame_mode() {
+  is_wire_frame_mode = !is_wire_frame_mode;
+  if (is_wire_frame_mode) {
     glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
   } else {
     glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
   }
 }
-void Context::toggleCameraMode() {
-  isCameraMode = !isCameraMode;
-  lbutton_down =
+void Context::toggle_camera_mode() {
+  is_camera_mode = !is_camera_mode;
+  left_mouse_button_pressed =
       false; // There are things, like killing the last window, that may have left this true.
-  if (isCameraMode) {
-    viewScale = 1.0;
-    mat4x4_dup(cameraView, view);
-    setCameraMVP();
+  if (is_camera_mode) {
+    view_scale = 1.0;
+    mat4x4_dup(camera_view, view);
+    set_camera_mvp();
   } else {
-    setMVP();
+    set_mvp();
   }
 }
 
-std::string Context::vendorName() {
-    return reinterpret_cast<const char*>(glGetString(GL_VENDOR));
+std::string Context::get_vendor_name() {
+  return reinterpret_cast<const char *>(glGetString(GL_VENDOR));
 }
 
-void Context::clearModel() {
-  model.clearModel();
-  glDeleteQueries(queries.size(), queries.data());
-  modelSet = false;
+void Context::clear_model() {
+  model.clear_model();
+  glDeleteQueries(static_cast<GLsizei>(queries.size()), queries.data());
+  model_is_set = false;
 }
 
-void Context::setModel(const std::vector<float> &vertices, const std::vector<SurfaceBuffer> &surfaceBuffers) {
-  if (modelSet) {
-    clearModel();
+void Context::set_model(const std::vector<float> &vertices,
+                        const std::vector<SurfaceBuffer> &surface_buffers) {
+  if (model_is_set) {
+    clear_model();
   }
 
   // set model vertices
-  model.setVertices(vertices);
-  model.setSurfaceBuffers(surfaceBuffers);
-  queries.resize(surfaceBuffers.size());
-  // queries.resize(bufferSize);
-  // indexBuffer = std::vector<int>(bufferSize, -1);
-  pixelAreas.resize(surfaceBuffers.size());
-  pixelCounts = std::vector<GLint>(surfaceBuffers.size(), -1);
+  model.set_vertices(vertices);
+  model.set_surface_buffers(surface_buffers);
+  queries.resize(surface_buffers.size());
+  pixel_areas.resize(surface_buffers.size());
+  pixel_counts = std::vector<GLint>(surface_buffers.size(), -1);
 
-  glGenQueries(queries.size(), queries.data());
+  glGenQueries(static_cast<GLsizei>(queries.size()), queries.data());
 
-  float bLeft = MAX_FLOAT, bBottom = MAX_FLOAT, bFront = MAX_FLOAT;
-  float bRight = -MAX_FLOAT, bTop = -MAX_FLOAT, bBack = -MAX_FLOAT;
+  float box_left = MAX_FLOAT, box_bottom = MAX_FLOAT, box_front = MAX_FLOAT;
+  float box_right = -MAX_FLOAT, box_top = -MAX_FLOAT, box_back = -MAX_FLOAT;
 
   // calculate bounding box
-  for (int i = 0; i < (int)vertices.size(); i += model.vertexSize) {
+  for (int i = 0; i < (int)vertices.size(); i += GLModel::vertex_size) {
     float x = vertices[i];
     float y = vertices[i + 1];
     float z = vertices[i + 2];
-    bLeft = std::min(x, bLeft);
-    bRight = std::max(x, bRight);
-    bFront = std::min(y, bFront);
-    bBack = std::max(y, bBack);
-    bBottom = std::min(z, bBottom);
-    bTop = std::max(z, bTop);
+    box_left = std::min(x, box_left);
+    box_right = std::max(x, box_right);
+    box_front = std::min(y, box_front);
+    box_back = std::max(y, box_back);
+    box_bottom = std::min(z, box_bottom);
+    box_top = std::max(z, box_top);
   }
 
-  float tempBox[8][4] = {{bLeft, bFront, bBottom, 0.0},  {bLeft, bFront, bTop, 0.0},
-                         {bLeft, bBack, bBottom, 0.0},   {bLeft, bBack, bTop, 0.0},
-                         {bRight, bFront, bBottom, 0.0}, {bRight, bFront, bTop, 0.0},
-                         {bRight, bBack, bBottom, 0.0},  {bRight, bBack, bTop, 0.0}};
+  float tempBox[8][4] = {
+      {box_left, box_front, box_bottom, 0.0},  {box_left, box_front, box_top, 0.0},
+      {box_left, box_back, box_bottom, 0.0},   {box_left, box_back, box_top, 0.0},
+      {box_right, box_front, box_bottom, 0.0}, {box_right, box_front, box_top, 0.0},
+      {box_right, box_back, box_bottom, 0.0},  {box_right, box_back, box_top, 0.0}};
 
   for (std::size_t i = 0; i < 8; i++) {
     for (std::size_t j = 0; j < 4; j++) {
-      modelBox[i][j] = tempBox[i][j];
+      model_bounding_box[i][j] = tempBox[i][j];
     }
   }
 
-  modelSet = true;
+  model_is_set = true;
 }
 
-float Context::setScene(mat4x4 sunView, const SurfaceBuffer *surfaceBuffer, bool clipFar) {
+float Context::set_scene(mat4x4 sun_view, const SurfaceBuffer *surface_buffer, bool clip_far) {
 
-  if (!modelSet) {
-    showMessage(MSG_ERR, "Model has not been set. Cannot set OpenGL scene.");
+  if (!model_is_set) {
+    throw PenumbraException("Model has not been set. Cannot set OpenGL scene.", *logger);
   }
 
-  mat4x4_dup(view, sunView);
+  mat4x4_dup(view, sun_view);
 
-  // calculate clipping planes in rendered coorinates
+  // calculate clipping planes in rendered coordinates
   left = MAX_FLOAT;
   right = -MAX_FLOAT;
   bottom = MAX_FLOAT;
@@ -301,110 +314,110 @@ float Context::setScene(mat4x4 sunView, const SurfaceBuffer *surfaceBuffer, bool
   far_ = MAX_FLOAT;
 
   // If surface buffer has not been set use entire model instead.
-  GLuint beg = surfaceBuffer ? surfaceBuffer->begin * model.vertexSize : 0;
-  GLuint end = surfaceBuffer ? surfaceBuffer->begin * model.vertexSize + surfaceBuffer->count * model.vertexSize : model.vertexArray.size();
+  GLuint beg = surface_buffer ? surface_buffer->begin * GLModel::vertex_size : 0;
+  GLuint end = surface_buffer ? surface_buffer->begin * GLModel::vertex_size +
+                                    surface_buffer->count * GLModel::vertex_size
+                              : static_cast<GLuint>(model.vertex_array.size());
 
-  for (GLuint i = beg; i < end; i += model.vertexSize) {
-    vec4 point = {model.vertexArray[i], model.vertexArray[i + 1], model.vertexArray[i + 2], 0};
-    vec4 trans;
-    mat4x4_mul_vec4(trans, view, point);
-    left = std::min(trans[0], left);
-    right = std::max(trans[0], right);
-    bottom = std::min(trans[1], bottom);
-    top = std::max(trans[1], top);
-    // near_ = min(trans[2], near_);
-    far_ = std::min(trans[2], far_);
+  for (GLuint i = beg; i < end; i += GLModel::vertex_size) {
+    vec4 translation;
+    vec4 point = {model.vertex_array[i], model.vertex_array[i + 1], model.vertex_array[i + 2], 0};
+    mat4x4_mul_vec4(translation, view, point);
+    left = std::min(translation[0], left);
+    right = std::max(translation[0], right);
+    bottom = std::min(translation[1], bottom);
+    top = std::max(translation[1], top);
+    // near_ = min(translation[2], near_);
+    far_ = std::min(translation[2], far_);
   }
 
   // Use model box to determine near clipping plane (and far if looking interior)
-  for (std::size_t i = 0; i < 8; i++) {
-    vec4 trans;
-    mat4x4_mul_vec4(trans, view, modelBox[i]);
-    near_ = std::max(trans[2], near_);
-    if (!clipFar) {
-      far_ = std::min(trans[2], far_);
+  for (auto const coordinate : model_bounding_box) {
+    vec4 translation;
+    mat4x4_mul_vec4(translation, view, coordinate);
+    near_ = std::max(translation[2], near_);
+    if (!clip_far) {
+      far_ = std::min(translation[2], far_);
     }
   }
 
   // account for camera position
   near_ -= 0.999f; // For some reason, -1. is too tight when sun is perpendicular to the surface.
-  far_ -= 1.001f; // For some reason, -1. is too tight when sun is perpendicular to the surface.
+  far_ -= 1.001f;  // For some reason, -1. is too tight when sun is perpendicular to the surface.
 
   // Grow horizontal extents of view by one pixel on each side
-  float deltaX = (right - left) / size;
-  left -= deltaX;
-  right += deltaX;
+
+  const float inverse_size = 1.f / static_cast<float>(size);
+
+  const float delta_x = (right - left) * inverse_size;
+  left -= delta_x;
+  right += delta_x;
 
   // Grow vertical extents of view by one pixel on each side
-  float deltaY = (top - bottom) / size;
-  bottom -= deltaY;
-  top += deltaY;
+  const float delta_y = (top - bottom) * inverse_size;
+  bottom -= delta_y;
+  top += delta_y;
 
   // calculate pixel area (A[i]*cos(theta) for each pixel of the surface)
   // multiplies by the number of pixels to get projected sunlit surface area
 
-  auto const pixelArea = (right - left) * (top - bottom) / (size * size);
+  auto const pixel_area = (right - left) * (top - bottom) * inverse_size * inverse_size;
 
-  if (pixelArea > 0.0)
-  {
-      mat4x4_ortho(projection, left, right, bottom, top, -near_, -far_);
-      mat4x4_mul(mvp, projection, view);
+  if (pixel_area > 0.0) {
+    mat4x4_ortho(projection, left, right, bottom, top, -near_, -far_);
+    mat4x4_mul(mvp, projection, view);
 
-      setMVP();
+    set_mvp();
   }
 
-  // TODO: Consider what to do with the camera if pixelArea happens to be zero
+  // TODO: Consider what to do with the camera if pixel_area happens to be zero
 
-  return pixelArea;
+  return pixel_area;
 }
 
-void Context::calcCameraView() {
-  // Do something here to give the appearance of rotating the scene.
-  mat4x4
-  tempMat; // Transpose changes the affects of consecutive rotations from local to global space.
-  mat4x4_transpose(tempMat, cameraView);
-  mat4x4_rotate_X(cameraView, tempMat, cameraRotAngleX);
-  mat4x4_rotate_Y(tempMat, cameraView, cameraRotAngleY);
-  mat4x4_transpose(cameraView, tempMat); // Transpose back.
+void Context::calculate_camera_view() {
+  // Transpose changes the affects of consecutive rotations from local to global space.
+  mat4x4 temporary_matrix;
+  mat4x4_transpose(temporary_matrix, camera_view);
+  mat4x4_rotate_X(camera_view, temporary_matrix, camera_x_rotation_angle);
+  mat4x4_rotate_Y(temporary_matrix, camera_view, camera_y_rotation_angle);
+  mat4x4_transpose(camera_view, temporary_matrix); // Transpose back.
 }
 
-void Context::setMVP() {
-  glUniformMatrix4fv(mvpLocation, 1, GL_FALSE, (const GLfloat *)mvp);
+void Context::set_mvp() {
+  glUniformMatrix4fv(mvp_location, 1, GL_FALSE, (const GLfloat *)mvp);
 }
 
-void Context::setCameraMVP() {
-  float deltaW, deltaH;
-  float cRight = right;
-  float cLeft = left;
-  float cTop = top;
-  float cBottom = bottom;
-  float cNear = near_;
-  float cFar = far_;
+void Context::set_camera_mvp() {
+  float delta_width, delta_height;
+  float camera_right = right;
+  float camera_left = left;
+  float camera_top = top;
+  float camera_bottom = bottom;
+  float camera_near = 100.; // Set near and far to something now and make it tighter later.
+  float camera_far = -100.; // To tighten, look at the sphere of possible rotations.
 
-  deltaW = (cRight - cLeft) / 2.;
-  deltaH = (cTop - cBottom) / 2.;
+  delta_width = (camera_right - camera_left) / 2.f;
+  delta_height = (camera_top - camera_bottom) / 2.f;
 
-  if (deltaW > deltaH) {
-    cTop += (deltaW - deltaH);
-    cBottom -= (deltaW - deltaH);
+  if (delta_width > delta_height) {
+    camera_top += (delta_width - delta_height);
+    camera_bottom -= (delta_width - delta_height);
   } else {
-    cLeft -= (deltaH - deltaW);
-    cRight += (deltaW - deltaH);
+    camera_left -= (delta_height - delta_width);
+    camera_right += (delta_width - delta_height);
   }
 
-  cNear = 100.; // Set near and far to something now and make it tighter later.
-  cFar = -100.; // To tighten, look at the sphere of possible rotations.
+  mat4x4 camera_projection;
+  mat4x4 camera_mvp;
 
-  mat4x4 cProjection;
-  mat4x4 cMVP;
-
-  mat4x4_ortho(cProjection, viewScale * cLeft, viewScale * cRight, viewScale * cBottom,
-               viewScale * cTop, -cNear, -cFar);
-  mat4x4_mul(cMVP, cProjection, cameraView);
-  glUniformMatrix4fv(mvpLocation, 1, GL_FALSE, (const GLfloat *)cMVP);
+  mat4x4_ortho(camera_projection, view_scale * camera_left, view_scale * camera_right,
+               view_scale * camera_bottom, view_scale * camera_top, -camera_near, -camera_far);
+  mat4x4_mul(camera_mvp, camera_projection, camera_view);
+  glUniformMatrix4fv(mvp_location, 1, GL_FALSE, (const GLfloat *)camera_mvp);
 }
 
-void Context::drawModel() {
+void Context::draw_model() {
   glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 #ifndef NDEBUG
 #ifdef __unix__
@@ -413,17 +426,17 @@ void Context::drawModel() {
 #endif
 #endif
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+  glDepthFunc(GL_LESS);
+  model.draw_all();
+  glDepthFunc(GL_EQUAL);
 #ifndef NDEBUG
 #ifdef __unix__
   feenableexcept(FE_DIVBYZERO | FE_INVALID | FE_OVERFLOW);
 #endif
 #endif
-  glDepthFunc(GL_LESS);
-  model.drawAll();
-  glDepthFunc(GL_EQUAL);
 }
 
-void Context::drawExcept(const std::vector<SurfaceBuffer> &hiddenSurfaces) {
+void Context::draw_except(const std::vector<SurfaceBuffer> &hidden_surfaces) {
   glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 #ifndef NDEBUG
 #ifdef __unix__
@@ -432,244 +445,172 @@ void Context::drawExcept(const std::vector<SurfaceBuffer> &hiddenSurfaces) {
 #endif
 #endif
   glClear(GL_DEPTH_BUFFER_BIT);
+  glDepthFunc(GL_LESS);
+  model.draw_except(hidden_surfaces);
+  glDepthFunc(GL_EQUAL);
 #ifndef NDEBUG
 #ifdef __unix__
   feenableexcept(FE_DIVBYZERO | FE_INVALID | FE_OVERFLOW);
 #endif
 #endif
-  glDepthFunc(GL_LESS);
-  model.drawExcept(hiddenSurfaces);
-  glDepthFunc(GL_EQUAL);
 }
 
-void Context::showRendering(const unsigned surfaceIndex, mat4x4 sunView) {
+void Context::show_rendering(const unsigned int surface_index, mat4x4 sun_view) {
   glfwSetWindowSize(window, size, size);
   glfwShowWindow(window);
 
-  if (!isRenderMode) { // if not currently render mode, switch to it
-    initRenderMode();
-    isRenderMode = true;
-  }
+  initialize_render_mode();
 
-  auto const & surfaceBuffer = model.surfaceBuffers[surfaceIndex];
-  setScene(sunView, &surfaceBuffer);
+  auto const &surface_buffer = model.surface_buffers[surface_index];
+  set_scene(sun_view, &surface_buffer);
 
   while (!glfwWindowShouldClose(window)) {
-    glUniform3f(vColLocation, 0.5f, 0.5f, 0.5f);
-    drawModel();
-    glUniform3f(vColLocation, 1.f, 1.f, 1.f);
-    model.drawSurface(surfaceBuffer);
+    glUniform3f(vertex_color_location, 0.5f, 0.5f, 0.5f);
+    draw_model();
+    glUniform3f(vertex_color_location, 1.f, 1.f, 1.f);
+    GLModel::draw_surface(surface_buffer);
     glfwSwapBuffers(window);
     glfwPollEvents();
   }
 
   glfwSetWindowShouldClose(window, 0);
   glfwHideWindow(window);
+
+  initialize_off_screen_mode();
 }
 
-void Context::showInteriorRendering(const std::vector<unsigned> &hiddenSurfaceIndices,
-                                    const unsigned interiorSurfaceIndex,
-                                    mat4x4 sunView) {
+void Context::show_interior_rendering(const std::vector<unsigned int> &hidden_surface_indices,
+                                      const unsigned interior_surface_index, mat4x4 sun_view) {
   glfwSetWindowSize(window, size, size);
   glfwShowWindow(window);
 
-  if (!isRenderMode) { /// if not currently render mode, switch to it
-    initRenderMode();
-    isRenderMode = true;
+  initialize_render_mode();
+
+  auto const &interior_surface = model.surface_buffers[interior_surface_index];
+  std::vector<SurfaceBuffer> hidden_surfaces;
+  hidden_surfaces.reserve(hidden_surface_indices.size());
+  for (auto const hidden_surface : hidden_surface_indices) {
+    hidden_surfaces.push_back(model.surface_buffers[hidden_surface]);
   }
 
-  auto const & interiorSurface = model.surfaceBuffers[interiorSurfaceIndex];
-  std::vector<SurfaceBuffer> hiddenSurfaces;
-  for (auto const hiddenSurf : hiddenSurfaceIndices) {
-    hiddenSurfaces.push_back(model.surfaceBuffers[hiddenSurf]);
-  }
-
-  setScene(sunView, &model.surfaceBuffers[hiddenSurfaceIndices.at(0)], false);
+  set_scene(sun_view, &model.surface_buffers[hidden_surface_indices.at(0)], false);
 
   while (!glfwWindowShouldClose(window)) {
-    glUniform3f(vColLocation, 0.5f, 0.5f, 0.5f);
-    drawExcept(hiddenSurfaces);
-    glUniform3f(vColLocation, 1.f, 1.f, 1.f);
-    model.drawSurface(interiorSurface);
+    glUniform3f(vertex_color_location, 0.5f, 0.5f, 0.5f);
+    draw_except(hidden_surfaces);
+    glUniform3f(vertex_color_location, 1.f, 1.f, 1.f);
+    GLModel::draw_surface(interior_surface);
     glfwSwapBuffers(window);
     glfwPollEvents();
   }
 
   glfwSetWindowShouldClose(window, 0);
   glfwHideWindow(window);
+
+  initialize_off_screen_mode();
 }
 
-void Context::submitPSSA(const unsigned surfaceIndex, mat4x4 sunView) {
-  auto const & surfaceBuffer = model.surfaceBuffers[surfaceIndex];
-  auto const pixelArea = setScene(sunView, &surfaceBuffer);
-  drawModel();
-  glBeginQuery(GL_SAMPLES_PASSED, queries.at(surfaceBuffer.index));
-  model.drawSurface(surfaceBuffer);
+void Context::submit_pssa(const SurfaceBuffer &surface_buffer, mat4x4 sun_view) {
+  auto const pixel_area = set_scene(sun_view, &surface_buffer);
+  draw_model();
+  glBeginQuery(GL_SAMPLES_PASSED, queries.at(surface_buffer.index));
+  GLModel::draw_surface(surface_buffer);
   glEndQuery(GL_SAMPLES_PASSED);
-  pixelAreas.at(surfaceBuffer.index) = pixelArea;
+  pixel_areas.at(surface_buffer.index) = pixel_area;
 }
 
-void Context::bufferedQuery(const unsigned surfaceIndex) {
-  int i = 0;
-  for (; i < bufferSize; ++i) {
-    if (indexBuffer[i] == static_cast<int>(surfaceIndex)) break;
-  }
-  if (i == bufferSize) return;
-
-  glGetQueryObjectiv(queries[i], GL_QUERY_RESULT, &(pixelCounts.at(indexBuffer[i])));
-  indexBuffer[i] = -1;
+void Context::submit_pssa(const unsigned int surface_index, mat4x4 sun_view) {
+  submit_pssa(model.surface_buffers[surface_index], sun_view);
 }
 
-void Context::bufferedQuery(const SurfaceBuffer &surfaceBuffer) {
-  if (indexBuffer[currentBufferIndex] > -1) {
-    glGetQueryObjectiv(queries[currentBufferIndex], GL_QUERY_RESULT, &(pixelCounts.at(indexBuffer[currentBufferIndex])));
-  }
-
-  glBeginQuery(GL_SAMPLES_PASSED, queries[currentBufferIndex]);
-  model.drawSurface(surfaceBuffer);
-  glEndQuery(GL_SAMPLES_PASSED);
-  pixelCounts.at(surfaceBuffer.index) = -1;
-  indexBuffer[currentBufferIndex] = surfaceBuffer.index;
-  currentBufferIndex++;
-  if (currentBufferIndex % bufferSize == 0) {
-    currentBufferIndex = 0;
+void Context::submit_pssas(const std::vector<unsigned int> &surface_indices, mat4x4 sun_view) {
+  for (auto const surface_index : surface_indices) {
+    submit_pssa(surface_index, sun_view);
   }
 }
 
-void Context::submitPSSA(const std::vector<unsigned> &surfaceIndices, mat4x4 sunView) {
-  for (auto const surfaceIndex : surfaceIndices) {
-    auto const & surfaceBuffer = model.surfaceBuffers[surfaceIndex];
-    auto const pixelArea = setScene(sunView, &surfaceBuffer);
-    drawModel();
-    glBeginQuery(GL_SAMPLES_PASSED, queries.at(surfaceBuffer.index));
-    model.drawSurface(surfaceBuffer);
-    glEndQuery(GL_SAMPLES_PASSED);
-    pixelAreas.at(surfaceBuffer.index) = pixelArea;
+void Context::submit_pssa(mat4x4 sun_view) {
+  for (auto const &surface_buffer : model.surface_buffers) {
+    submit_pssa(surface_buffer, sun_view);
   }
 }
 
-void Context::submitPSSA(mat4x4 sunView) {
-  for (auto const & surfaceBuffer : model.surfaceBuffers) {
-    auto const pixelArea = setScene(sunView, &surfaceBuffer);
-    drawModel();
-    glBeginQuery(GL_SAMPLES_PASSED, queries.at(surfaceBuffer.index));
-    model.drawSurface(surfaceBuffer);
-    glEndQuery(GL_SAMPLES_PASSED);
-    // bufferedQuery(surfaceBuffer);
-    pixelAreas.at(surfaceBuffer.index) = pixelArea;
-  }
+float Context::retrieve_pssa(const unsigned int surface_index) {
+  glGetQueryObjectiv(queries[surface_index], GL_QUERY_RESULT, &(pixel_counts.at(surface_index)));
+  return static_cast<float>(pixel_counts[surface_index]) * pixel_areas[surface_index];
 }
 
-float Context::calculatePSSA(const unsigned surfaceIndex) {
-
-  if (isRenderMode) { // if currently render mode, switch to off screen mode
-    initOffScreenMode();
-    isRenderMode = false;
+std::vector<float> Context::retrieve_pssas(const std::vector<unsigned int> &surface_indices) {
+  std::vector<float> pssas;
+  pssas.reserve(surface_indices.size());
+  for (const unsigned int surface_index : surface_indices) {
+    pssas.push_back(retrieve_pssa(surface_index));
   }
-
-  // wait until the result is available
-  GLint ready(0);
-  while (!ready) {
-    glGetQueryObjectiv(queries[surfaceIndex], GL_QUERY_RESULT_AVAILABLE, &ready);
-  }
-
-  // retrieve result
-  glGetQueryObjectiv(queries[surfaceIndex], GL_QUERY_RESULT, &(pixelCounts.at(surfaceIndex)));
-
-  return pixelCounts[surfaceIndex] * pixelAreas[surfaceIndex];
-}
-
-std::vector<float> Context::calculatePSSA(const std::vector<unsigned> &surfaceIndices) {
-
-  if (isRenderMode) { // if currently render mode, switch to off screen mode
-    initOffScreenMode();
-    isRenderMode = false;
-  }
-
-  // retrieve result
-  std::vector<float> results;
-  results.reserve(surfaceIndices.size());
-  for (auto const & surfaceIndex : surfaceIndices) {
-    glGetQueryObjectiv(queries[surfaceIndex], GL_QUERY_RESULT, &(pixelCounts.at(surfaceIndex)));
-    results.emplace_back(pixelCounts[surfaceIndex] * pixelAreas[surfaceIndex]);
-  }
-
-  return results;
-}
-
-std::vector<float> Context::calculatePSSA() {
-
-  if (isRenderMode) { // if currently render mode, switch to off screen mode
-    initOffScreenMode();
-    isRenderMode = false;
-  }
-
-  // retrieve result
-  std::vector<float> results;
-  results.reserve(model.surfaceBuffers.size());
-  for (auto const & surfaceBuffer : model.surfaceBuffers) {
-    glGetQueryObjectiv(queries[surfaceBuffer.index], GL_QUERY_RESULT, &(pixelCounts.at(surfaceBuffer.index)));
-    results.emplace_back(pixelCounts[surfaceBuffer.index] * pixelAreas[surfaceBuffer.index]);
-  }
-
-  return results;
-}
-
-std::map<unsigned, float>
-Context::calculateInteriorPSSAs(const std::vector<unsigned> &hiddenSurfaceIndices,
-                                const std::vector<unsigned> &interiorSurfaceIndices, mat4x4 sunView) {
-
-  if (isRenderMode) { // if currently render mode, switch to off screen mode
-    initOffScreenMode();
-    isRenderMode = false;
-  }
-
-  std::vector<GLuint> pssasQueries(interiorSurfaceIndices.size());
-  std::map<unsigned, float> pssas;
-
-  glGenQueries(pssasQueries.size(), pssasQueries.data());
-
-  auto const pixelArea = setScene( sunView, &model.surfaceBuffers[hiddenSurfaceIndices.at(0)], false);
-
-  std::vector<SurfaceBuffer> hiddenSurfaces;
-  for (auto const hiddenSurf : hiddenSurfaceIndices) {
-    hiddenSurfaces.push_back(model.surfaceBuffers[hiddenSurf]);
-  }
-  std::vector<SurfaceBuffer> interiorSurfaces;
-  for (auto &intSurf : interiorSurfaceIndices) {
-    interiorSurfaces.push_back(model.surfaceBuffers[intSurf]);
-  }
-
-  drawExcept(hiddenSurfaces);
-
-  for (size_t i = 0; i < interiorSurfaces.size(); ++i) {
-    glBeginQuery(GL_SAMPLES_PASSED, pssasQueries[i]);
-    model.drawSurface(interiorSurfaces[i]);
-    glEndQuery(GL_SAMPLES_PASSED);
-  }
-
-  for (size_t i = 0; i < interiorSurfaces.size(); ++i) {
-    // retrieve result
-    GLint pixelCount;
-    glGetQueryObjectiv(pssasQueries[i], GL_QUERY_RESULT, &pixelCount);
-
-    pssas[interiorSurfaces[i].index] = pixelCount * pixelArea;
-  }
-
-  glDeleteQueries(pssasQueries.size(), pssasQueries.data());
   return pssas;
 }
 
-void Context::initOffScreenMode() {
-  glUseProgram(calcProgram->getInt());
-  mvpLocation = glGetUniformLocation(calcProgram->getInt(), "MVP");
-  glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, fbo);
+std::vector<float> Context::retrieve_pssa() {
+  std::vector<float> pssas;
+  pssas.reserve(model.surface_buffers.size());
+  for (auto const &surface_buffer : model.surface_buffers) {
+    pssas.push_back(retrieve_pssa(surface_buffer.index));
+  }
+  return pssas;
+}
+
+std::unordered_map<unsigned int, float>
+Context::calculate_interior_pssas(const std::vector<unsigned int> &hidden_surface_indices,
+                                  const std::vector<unsigned int> &interior_surface_indices,
+                                  mat4x4 sun_view) {
+
+  std::vector<GLuint> interior_queries(interior_surface_indices.size());
+  std::unordered_map<unsigned int, float> pssas;
+
+  glGenQueries(static_cast<GLsizei>(interior_queries.size()), interior_queries.data());
+
+  auto const pixel_area =
+      set_scene(sun_view, &model.surface_buffers[hidden_surface_indices.at(0)], false);
+
+  std::vector<SurfaceBuffer> hidden_surfaces;
+  hidden_surfaces.reserve(hidden_surface_indices.size());
+  for (auto const hidden_surface : hidden_surface_indices) {
+    hidden_surfaces.push_back(model.surface_buffers[hidden_surface]);
+  }
+  std::vector<SurfaceBuffer> interior_surfaces;
+  interior_surfaces.reserve(interior_surface_indices.size());
+  for (auto const interior_surface : interior_surface_indices) {
+    interior_surfaces.push_back(model.surface_buffers[interior_surface]);
+  }
+
+  draw_except(hidden_surfaces);
+
+  for (size_t i = 0; i < interior_surfaces.size(); ++i) {
+    glBeginQuery(GL_SAMPLES_PASSED, interior_queries[i]);
+    GLModel::draw_surface(interior_surfaces[i]);
+    glEndQuery(GL_SAMPLES_PASSED);
+  }
+
+  for (size_t i = 0; i < interior_surfaces.size(); ++i) {
+    GLint pixel_count;
+    glGetQueryObjectiv(interior_queries[i], GL_QUERY_RESULT, &pixel_count);
+
+    pssas[interior_surfaces[i].index] = static_cast<float>(pixel_count) * pixel_area;
+  }
+
+  glDeleteQueries(static_cast<GLsizei>(interior_queries.size()), interior_queries.data());
+  return pssas;
+}
+
+void Context::initialize_off_screen_mode() {
+  glUseProgram(calculation_program->get());
+  mvp_location = glGetUniformLocation(calculation_program->get(), "MVP");
+  glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, framebuffer_object);
   glDrawBuffer(GL_NONE);
   glReadBuffer(GL_NONE);
-  glBindRenderbufferEXT(GL_RENDERBUFFER_EXT, rbo);
+  glBindRenderbufferEXT(GL_RENDERBUFFER_EXT, renderbuffer_object);
   glRenderbufferStorageEXT(GL_RENDERBUFFER_EXT, GL_DEPTH_COMPONENT24, size, size);
   glFramebufferRenderbufferEXT(GL_FRAMEBUFFER_EXT, GL_DEPTH_ATTACHMENT_EXT, GL_RENDERBUFFER_EXT,
-                               rbo);
+                               renderbuffer_object);
 
   GLenum status = glCheckFramebufferStatusEXT(GL_FRAMEBUFFER_EXT);
   if (status != GL_FRAMEBUFFER_COMPLETE_EXT) {
@@ -697,20 +638,20 @@ void Context::initOffScreenMode() {
       reason = "Reason unknown.";
     }
     }
-    showMessage(MSG_ERR, "Unable to create framebuffer. " + reason);
+    throw PenumbraException(std::format("Unable to create framebuffer. {}", reason), *logger);
   }
 
   glColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE);
 }
 
-void Context::initRenderMode() {
+void Context::initialize_render_mode() {
   // set to default framebuffer and renderbuffer
-  glUseProgram(renderProgram->getInt());
-  mvpLocation = glGetUniformLocation(renderProgram->getInt(), "MVP");
-  setMVP();
+  glUseProgram(render_program->get());
+  mvp_location = glGetUniformLocation(render_program->get(), "MVP");
+  set_mvp();
   glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
   glBindRenderbufferEXT(GL_RENDERBUFFER_EXT, 0);
   glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
 }
 
-}
+} // namespace Penumbra

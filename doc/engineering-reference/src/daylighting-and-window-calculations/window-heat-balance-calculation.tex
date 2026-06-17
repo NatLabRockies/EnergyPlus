@@ -3,19 +3,19 @@
 % table 36
 \begin{longtable}[c]{p{1.0in}p{2.5in}p{1.0in}p{1.5in}}
 \caption{C++ Variables used in Window Heat Balance Calculations \label{table:c++-variables-used-in-window-heat-balance}} \tabularnewline
-\toprule 
+\toprule
 Mathematical variable & Description & Units & C++ variable \tabularnewline
 \midrule
 \endfirsthead
 
 \caption[]{C++ Variables used in Window Heat Balance Calculations} \tabularnewline
-\toprule 
+\toprule
 Mathematical variable & Description & Units & C++ variable \tabularnewline
 \midrule
 \endhead
 
 N & Number of glass layers & - & nlayer \tabularnewline
-$\alpha$ & Stefan-Boltzmann constant & ~ & sigma \tabularnewline 
+$\alpha$ & Stefan-Boltzmann constant & ~ & sigma \tabularnewline
 $\varepsilon$\(_{i}\) & Emissivity of face i & - & emis \tabularnewline
 k\(_{i}\) & Conductance of glass layer i & W/m\(^{2}\)-K & scon \tabularnewline
 h\(_{o}\), h\(_{i}\) & Outside, inside air film convective conductance & W/m\(^{2}\)-K & hcout, hcout \tabularnewline
@@ -173,7 +173,7 @@ Case D. \(179^\circ < \gamma \le 180^\circ\)
 Nu = 0.58Ra_H^{{\raise0.7ex\hbox{1} \!\mathord{\left/ {\vphantom {1 5}}\right.}\!\lower0.7ex\hbox{5}}};\;R{a_H} \le {10^{11}}
 \end{equation}
 
-The material properties are evaluated at the mean film temperature.~ Standard EnergyPlus pyschrometric functions are used for \(\rho\) ~and \({c_p}\).~ Thermal conductivity is calculated using:
+The material properties are evaluated at the mean film temperature.~ Standard EnergyPlus psychrometric functions are used for \(\rho\) ~and \({c_p}\).~ Thermal conductivity is calculated using:
 
 \begin{equation}
 \lambda = 2.873 \times {10^{ - 3}} + 7.76 \times {10^{ - 5}}{T_{m,f}}
@@ -185,7 +185,7 @@ Kinematic viscosity is calculated using:
 \mu = 3.723 \times {10^{ - 6}} + 4.94 \times {10^{ - 8}}{T_{m,f}}
 \end{equation}
 
-This correlation depends on the surface temperature of the room-side glazing surface and is therefore included inside the window heat balance interation loop.
+This correlation depends on the surface temperature of the room-side glazing surface and is therefore included inside the window heat balance iteration loop.
 
 \subsection{Solving the Glazing Heat Balance Equations}\label{solving-the-glazing-heat-balance-equations}
 
@@ -228,13 +228,13 @@ The value of the inside face temperature, \({\theta_{2N}}\), determined in this 
 % table 37
 \begin{longtable}[c]{p{1.0in}p{2.5in}p{1.0in}p{1.5in}}
 \caption{C++ Variables used in Edge of Glass calculations \label{table:c++-variables-used-in-edge-of-glass}} \tabularnewline
-\toprule 
+\toprule
 Mathematical variable & Description & Units & C++ variable \tabularnewline
 \midrule
 \endfirsthead
 
 \caption[]{C++ Variables used in Edge of Glass calculations} \tabularnewline
-\toprule 
+\toprule
 Mathematical variable & Description & Units & C++ variable \tabularnewline
 \midrule
 \endhead
@@ -396,13 +396,13 @@ For the zone heat balance calculation the inside surface temperature of the fram
 % table 38
 \begin{longtable}[c]{p{1.0in}p{2.5in}p{1.0in}p{1.5in}}
 \caption{C++ Variables used in Window/Frame and Divider calculations \label{table:c++-variables-used-in-windowframe}} \tabularnewline
-\toprule 
+\toprule
 Mathematical variable & Description & Units & C++ variable \tabularnewline
 \midrule
 \endfirsthead
 
 \caption[]{C++ Variables used in Window/Frame and Divider calculations} \tabularnewline
-\toprule 
+\toprule
 Mathematical variable & Description & Units & C++ variable \tabularnewline
 \midrule
 \endhead
@@ -1011,20 +1011,20 @@ The quantities \emph{h\(_{cv}\)} and \emph{T\(_{gap}\)} depend on the airflow ve
 The heat balance equation for the shading layer surface facing the gap is:
 
 \begin{equation}
-\frac{E_i \tau_{sh} \rho_4 \varepsilon_{sh}} {1 - \rho_4 \rho_{sh}} + 
+\frac{E_i \tau_{sh} \rho_4 \varepsilon_{sh}} {1 - \rho_4 \rho_{sh}} +
   \frac{\sigma \varepsilon_{sh}} {1 - \rho_4 \rho_{sh}} \left[
     \varepsilon_4 \theta_4^4 - \theta_5^4 (
-      1 - \rho_4( 
+      1 - \rho_4(
         \varepsilon_{sh} + \rho_{sh}
       )
     )
-  \right] + 
+  \right] +
   k_{sh} \left(
     \theta_6 - \theta_5
-  \right) + 
+  \right) +
   h_{cv} \left(
     T_{gap} - \theta_5
-  \right) + 
+  \right) +
   S_{sh,1} = 0
 \end{equation}
 
@@ -1131,7 +1131,7 @@ If T\(_{gap}\) \textgreater{} T\(_{gap,in}\):
 \begin{equation}
   \begin{array}{rl}
     A_{eq,in}  & = A_{bot} + \frac{A_{top}}{2(A_{bot}+A_{top}} \left( A_l + A_r + A_h \right) \\
-    A_{eq,out} & = A_{top} + \frac{A_{bot}}{2(A_{bot}+A_{top}} \left( A_l + A_r + A_h \right) 
+    A_{eq,out} & = A_{top} + \frac{A_{bot}}{2(A_{bot}+A_{top}} \left( A_l + A_r + A_h \right)
   \end{array}
 \end{equation}
 
@@ -1140,7 +1140,7 @@ If T\(_{gap}\) \(\leq\) T\(_{gap,in}\):
 \begin{equation}
   \begin{array}{rl}
     A_{eq,in}  & = A_{top} + \frac{A_{bot}}{2(A_{bot}+A_{top}} \left( A_l + A_r + A_h \right) \\
-    A_{eq,out} & = A_{bot} + \frac{A_{top}}{2(A_{bot}+A_{top}} \left( A_l + A_r + A_h \right) 
+    A_{eq,out} & = A_{bot} + \frac{A_{top}}{2(A_{bot}+A_{top}} \left( A_l + A_r + A_h \right)
   \end{array}
 \end{equation}
 
@@ -1289,7 +1289,7 @@ A_s & = d_{gap}W
 \label{eq:OpennesCalcs}
 \end{equation}
 
-Where $\rho$ is the fluid density, $v$ s the fluid velocity, $Z_{in/out}$ is the pressure loss factor of the cavity, As is the cross-section area of the cavity, $d_{gap}$ is the glass-to-shade cavity depth, $d_{surface}$ is the openness fraction (0 - 1), W is the window width, H is the window height, $A_{eq}$, is the equivalent inlet/outlet area of the cavity, and Al, Ar, Atop, Abot, Ah are the areas of the left, right, top, bottom, and front surface ventilation gaps respectively. 
+Where $\rho$ is the fluid density, $v$ s the fluid velocity, $Z_{in/out}$ is the pressure loss factor of the cavity, As is the cross-section area of the cavity, $d_{gap}$ is the glass-to-shade cavity depth, $d_{surface}$ is the openness fraction (0 - 1), W is the window width, H is the window height, $A_{eq}$, is the equivalent inlet/outlet area of the cavity, and Al, Ar, Atop, Abot, Ah are the areas of the left, right, top, bottom, and front surface ventilation gaps respectively.
 
 The set of equations~\ref{eq:OpennesCalcs} include an inherent minimum of pressure loss coefficient, Z, when the calculated inlet or outlet area, $A_{eq}$, equals 5/3 the cross section area, As. This limits the validity of the model to $A_{eq}$ less than 5/3 of As. Figure~\ref{fig:PressureLossFacor} illustrates this minimum with a surface map of calculated Z values (log(Z) plotted to show contours) over a range of $A_{eq}$ based on a 1m x 1m window. Figure~\ref{fig:PressureLossFacor} shows a slice of the surface plot at a typical $d_{gap} = 15 mm$. Window surface area, Aw, is typically one to two orders of magnitude larger than the cross-section area, As. This means that $A_{eq}$ exceeds As at relatively low surface openness. For a typical glass-to-shade gap, $d_{gap} = 15mm$, the local minimum in Z, and in turn valid openness range of the algorithm, occurs at an openness of $d_{surface} \cong 0.1$.
 
@@ -1300,7 +1300,7 @@ The set of equations~\ref{eq:OpennesCalcs} include an inherent minimum of pressu
 \end{figure}
 
 \subsubsection{Screen Heat Flux}
-To improve the simulation correlation, correlation coefficients are proposed to the five ventilated layer opening parameters defined in ISO 15099; $A_h$, $A_{top}$, $A_{bot}$, $A_l$, and $A_r$. This model includes two correlation constants, C1 and C2 that are determined based on regression analysis of the measured dataset. An additional two constants, C3 and C4, are also optimized and used to correlate the to left/right and top/bottom gaps respectively as shown in Equations~\ref{eq:ScreenCorrelations}. 
+To improve the simulation correlation, correlation coefficients are proposed to the five ventilated layer opening parameters defined in ISO 15099; $A_h$, $A_{top}$, $A_{bot}$, $A_l$, and $A_r$. This model includes two correlation constants, C1 and C2 that are determined based on regression analysis of the measured dataset. An additional two constants, C3 and C4, are also optimized and used to correlate the to left/right and top/bottom gaps respectively as shown in Equations~\ref{eq:ScreenCorrelations}.
 
 \begin{equation}
 \begin{array}{rl}
@@ -1314,7 +1314,7 @@ A_{t,b}^* & = C_4 \cdot A_{t,b}
 Where correlation constants are:
 
 \begin{tabular}{ l c }
-	\hline	
+	\hline
 	Coefficient & Value \\
 	\hline
 	\hline
@@ -1322,8 +1322,8 @@ Where correlation constants are:
 	$C_2$ & 1.20 \\
 	$C_3$ & 1 \\
 	$C_4$ & 1 \\
-	\hline  
-	
+	\hline
+
 \end{tabular}
 
 \subsubsection{Horizontal Louvered Blind}
@@ -1349,7 +1349,7 @@ where $t^*$ and $k^*$ are the revised layer thickness and equivalent conductivit
 Where correlation constants are:
 
 \begin{tabular}{ l c c }
-	\hline	
+	\hline
 	Coefficient & Horizontal Blinds & Vertical Blinds \\
 	\hline
 	\hline
@@ -1357,8 +1357,8 @@ Where correlation constants are:
 	$D_2$ & -0.63 & -0.00 \\
 	$D_3$ & 0.53 & 0.270 \\
 	$D_4$ & 0.043 & 0.012 \\
-	\hline  
-	
+	\hline
+
 \end{tabular}
 
 \subsection{Heat Balance Equations for Between-Glass Shading Device}\label{heat-balance-equations-for-between-glass-shading-device}
@@ -2149,7 +2149,7 @@ Measured value is typically gap width at the point of maximum deflection, which 
 \begin{figure}[hbtp] % fig 112
 \centering
 \includegraphics[width=0.9\textwidth, height=0.9\textheight, keepaspectratio=true]{media/image1798.png}
-\caption{Sketch of the non-symetrically Deflected Glazing Panes \protect \label{fig:sketch-of-the-non-symetrically-deflected}}
+\caption{Sketch of the non-symmetrically Deflected Glazing Panes \protect \label{fig:sketch-of-the-non-symmetrically-deflected}}
 \end{figure}
 
 If we label the ratio of mean deflection and maximum deflection as R\(_{(i)}\), then:
@@ -2298,7 +2298,7 @@ Timoshenko, S., \& Kreiger-Woinowsky, S. 1959. ``Theory of Plates and Shells'' 2
 
 \subsection{Equivalent Layer Fenestration Model}\label{equivalent-layer-fenestration-model}
 
-The section describes the equivalent layer fenestration optical and thermal model. The Equivalent Layer fenestration model can have four types of attachments: drapes, venetian blinds, roller blinds and insect screens. In this model shading layers are assumed to be uniform and can be represented by an equivalent homogenous layer that has spatially-averaged ``effective'' optical and thermal properties (ASHRAE 1311-RP). Likewise, venetian blinds can be characterized using effective optical and thermal properties. When solar radiation strikes a window surface some fraction of the incident solar radiation passes unobstructed through openings in a shading layer and the remaining fraction is intercepted by the structure of the layer. The intercepted radiation is partly absorbed, partly reflected and partly transmitted. These reflected and transmitted components of the scattered solar radiation are assumed to be uniformly diffuse. Shading layers, because of their openness, generally transmit longwave radiation, and the effective infrared properties of shades account for that. Using effective optical properties and a beam/diffuse split of solar radiation at each layer, the equivalent layer approach can represent multi-layer systems. This representation provides virtually unlimited flexibility to combine different types of shading layers in a fenestration. The equivalent layer window model requires a few set of optical data to characterize a particular layer and this set of data is used to calculate effective layer properties. For instance, the effective solar optical properties of a venetian blind can be calculated as a function of slats optical properties and geometry. Also, it is possible to adjust slat angle at each time step in response to the changing angular position of the sun. Moreover, the model provides control strategies as a function of slat angle that can be changed at each time step as needed. Likewise, effective properties of a pleated drape are calculated as a function of fabric properties and a specified value of fullness. The only input data needed to fully characterize drapery fabrics, roller blinds and insect screens are material openness as area fraction, and the transmittance and reflectance at normal incidence. Shade openness area fraction is the same as the beam-beam transmittance at normal incidence. In multilayer fenestration, each layer is separated by a gap. A gap in equivalent layer model is defined by specifying the fill gas and the gap spacing. Currently five gas types are allowed: Air, Argon, Xenon, Krypton and Custom. The convective heat transfer coefficient in a gap is calculated depending on the spacing, the temperatures of the layers and the fill gas properties. Equivalent-layer concept -- offers wide range of multiple glazing and shading layers combination and can simulate multi-layer complex fenestration systems. The effective layer properties of venetian blinds, pleated drapes, roller blinds, and insect screens are calculated from geometric layer models and material properties. A set of empirical correlations for estimating off-normal material properties were developed under ASHRAE research project (ASHRAE 1311-RP). The equivalent layer window model supports many layers of glazing and shade combination in any order but does not support WindowShadingControl. However, the venetian blind model of equivalent layer window model provides three types of blind slat angle control.
+The section describes the equivalent layer fenestration optical and thermal model. The Equivalent Layer fenestration model can have four types of attachments: drapes, venetian blinds, roller blinds and insect screens. In this model shading layers are assumed to be uniform and can be represented by an equivalent homogeneous layer that has spatially-averaged ``effective'' optical and thermal properties (ASHRAE 1311-RP). Likewise, venetian blinds can be characterized using effective optical and thermal properties. When solar radiation strikes a window surface some fraction of the incident solar radiation passes unobstructed through openings in a shading layer and the remaining fraction is intercepted by the structure of the layer. The intercepted radiation is partly absorbed, partly reflected and partly transmitted. These reflected and transmitted components of the scattered solar radiation are assumed to be uniformly diffuse. Shading layers, because of their openness, generally transmit longwave radiation, and the effective infrared properties of shades account for that. Using effective optical properties and a beam/diffuse split of solar radiation at each layer, the equivalent layer approach can represent multi-layer systems. This representation provides virtually unlimited flexibility to combine different types of shading layers in a fenestration. The equivalent layer window model requires a few set of optical data to characterize a particular layer and this set of data is used to calculate effective layer properties. For instance, the effective solar optical properties of a venetian blind can be calculated as a function of slats optical properties and geometry. Also, it is possible to adjust slat angle at each time step in response to the changing angular position of the sun. Moreover, the model provides control strategies as a function of slat angle that can be changed at each time step as needed. Likewise, effective properties of a pleated drape are calculated as a function of fabric properties and a specified value of fullness. The only input data needed to fully characterize drapery fabrics, roller blinds and insect screens are material openness as area fraction, and the transmittance and reflectance at normal incidence. Shade openness area fraction is the same as the beam-beam transmittance at normal incidence. In multilayer fenestration, each layer is separated by a gap. A gap in equivalent layer model is defined by specifying the fill gas and the gap spacing. Currently five gas types are allowed: Air, Argon, Xenon, Krypton and Custom. The convective heat transfer coefficient in a gap is calculated depending on the spacing, the temperatures of the layers and the fill gas properties. Equivalent-layer concept -- offers wide range of multiple glazing and shading layers combination and can simulate multi-layer complex fenestration systems. The effective layer properties of venetian blinds, pleated drapes, roller blinds, and insect screens are calculated from geometric layer models and material properties. A set of empirical correlations for estimating off-normal material properties were developed under ASHRAE research project (ASHRAE 1311-RP). The equivalent layer window model supports many layers of glazing and shade combination in any order but does not support WindowShadingControl. However, the venetian blind model of equivalent layer window model provides three types of blind slat angle control.
 
 \subsubsection{The Equivalent Layer Analysis}\label{the-equivalent-layer-analysis}
 
@@ -2501,7 +2501,7 @@ The off-normal properties of roller-blind are determined from solar properties o
 \end{equation}
 
 \begin{equation}
-b = \left\{ 
+b = \left\{
     \begin{array}{lc}
       0.133 \cdot \left( \rm{\tau}^{str} + 0.003 \right)^{-0.467} &\text{if} \left( 0 \le \rm{\tau}^{str} \le 0.33 \right) \\
       0.33 \cdot \left( 1 - \rm{\tau}^{str} \right)               &\text{if} \left( 0.33 < \rm{\tau}^{str} \le 1 \right)
@@ -2615,7 +2615,7 @@ The equivalent layer window solar model calculates the transmittance of the wind
 
 \subsubsection{Equivalent Layer Window Thermal Model}\label{equivalent-layer-window-thermal-model}
 
-The equivalent layer thermal model is calculated only once for each time step. But the thermal model has internal iterative solutions scheme. During each time step, the procedure initially assumes that room air and means radiant temperatures are known. The surface heat balance loops through all zone surfaces while invoking the Equivalent Layer thermal model only once for each window surface at the first iteration. The window surfaces temperatures from the first iteration are used to complete the heat balances for the indoor (and implicitly the outdoor) face of each surface iteratively. Once indoor surface temperatures are calculated using the surface heat balance, the zone air temperature can be updated and the loads are predicted. Shaded fenestration in general do not have single inside temperature by virture their long-wave radiation transmittance. The equivalent layer window model accounts for this using effective emissivity of the composite layers derived for each fenestration (ASHRAE 1311-RP) as shown below:
+The equivalent layer thermal model is calculated only once for each time step. But the thermal model has internal iterative solutions scheme. During each time step, the procedure initially assumes that room air and means radiant temperatures are known. The surface heat balance loops through all zone surfaces while invoking the Equivalent Layer thermal model only once for each window surface at the first iteration. The window surfaces temperatures from the first iteration are used to complete the heat balances for the indoor (and implicitly the outdoor) face of each surface iteratively. Once indoor surface temperatures are calculated using the surface heat balance, the zone air temperature can be updated and the loads are predicted. Shaded fenestration in general do not have single inside temperature by virtue of their long-wave radiation transmittance. The equivalent layer window model accounts for this using effective emissivity of the composite layers derived for each fenestration (ASHRAE 1311-RP) as shown below:
 
 \begin{equation}
 {\varepsilon ^{eff}} = \sum\limits_{j = 0}^{nl} {\left[ {{\varepsilon_j} \cdot \prod\limits_{k = j{ + 1}}^{nl + {1}} {{\tau_k}} } \right]}
@@ -2631,7 +2631,7 @@ where
 
 \emph{nl~~~ = ~~~~~~~~~} number of layers in fenestration system (glazing and shade). Layers are numbered outside to inside (layer 1 is outermost, layer \emph{nl} is innermost).
 
-Each equivalent layer window surafce yields net longwave radiant flux exchanged with the zone surfaces. Net longwave radiation exchange from the window to the zone is recast for a composite surface temperature calculation as follows:
+Each equivalent layer window surface yields net longwave radiant flux exchanged with the zone surfaces. Net longwave radiation exchange from the window to the zone is recast for a composite surface temperature calculation as follows:
 
 \begin{equation}
 {T^{eff}} = \sqrt[4]{{\frac{{{Q_{lw}}}}{{\sigma {\varepsilon ^{eff}}}}}} + {T_0}

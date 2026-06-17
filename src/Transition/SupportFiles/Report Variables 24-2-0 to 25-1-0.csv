@@ -1,0 +1,7 @@
+24.2.0,25.1.0,Transition notes - some of these are EMS variable names
+5,5,These numbers should be the number of report variables in the following list (including deletes). Two columns/numbers.
+Zone Hybrid Unitary HVAC DehumidificationLoad to Humidistat Setpoint Heat Tansfer Energy,Zone Hybrid Unitary HVAC Dehumidification Load to Humidistat Setpoint Heat Transfer Energy,
+Zone Hybrid Unitary HVAC Humidification Load to Humidistat Setpoint Heat Tansfer Energy,Zone Hybrid Unitary HVAC Humidification Load to Humidistat Setpoint Heat Transfer Energy,
+Infiltration Air Change Rate,Infiltration Current Density Air Change Rate,
+Zone Infiltration Air Change Rate,Zone Infiltration Current Density Air Change Rate,
+Zone Ventilation Air Change Rate,Zone Ventilation Current Density Air Change Rate,

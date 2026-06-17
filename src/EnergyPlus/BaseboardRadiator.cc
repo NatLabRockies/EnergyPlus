@@ -1,7 +1,7 @@
-// EnergyPlus, Copyright (c) 1996-2023, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
-// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other
+// National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
 // contributors. All rights reserved.
 //
 // NOTICE: This Software was developed under funding from the U.S. Department of Energy and the
@@ -47,10 +47,10 @@
 
 // C++ Headers
 #include <cmath>
+#include <format>
 
 // ObjexxFCL Headers
 #include <ObjexxFCL/Array.functions.hh>
-#include <ObjexxFCL/Fmath.hh>
 
 // EnergyPlus Headers
 #include <EnergyPlus/Autosizing/HeatingCapacitySizing.hh>
@@ -59,7 +59,6 @@
 #include <EnergyPlus/Data/EnergyPlusData.hh>
 #include <EnergyPlus/DataHVACGlobals.hh>
 #include <EnergyPlus/DataHeatBalance.hh>
-#include <EnergyPlus/DataIPShortCuts.hh>
 #include <EnergyPlus/DataLoopNode.hh>
 #include <EnergyPlus/DataPrecisionGlobals.hh>
 #include <EnergyPlus/DataSizing.hh>
@@ -91,12 +90,9 @@ namespace BaseboardRadiator {
     //       RE-ENGINEERED  na
 
     // Using/Aliasing
-    using DataHVACGlobals::SmallLoad;
+    using HVAC::SmallLoad;
 
     // Use statements for access to subroutines in other modules
-    using namespace ScheduleManager;
-    using FluidProperties::GetDensityGlycol;
-    using FluidProperties::GetSpecificHeatGlycol;
     using Psychrometrics::PsyCpAirFnW;
     using Psychrometrics::PsyRhoAirFnPbTdbW;
 
@@ -124,9 +120,9 @@ namespace BaseboardRadiator {
 
         // Find the correct Baseboard Equipment
         if (CompIndex == 0) {
-            int BaseboardNum = UtilityRoutines::FindItemInList(EquipName, state.dataBaseboardRadiator->baseboards, &BaseboardParams::EquipID);
+            int BaseboardNum = Util::FindItemInList(EquipName, state.dataBaseboardRadiator->baseboards, &BaseboardParams::EquipID);
             if (BaseboardNum == 0) {
-                ShowFatalError(state, format("SimBaseboard: Unit not found={}", EquipName));
+                ShowFatalError(state, std::format("SimBaseboard: Unit not found={}", EquipName));
             }
             CompIndex = BaseboardNum;
         }
@@ -135,10 +131,10 @@ namespace BaseboardRadiator {
         if (thisBaseboard.CheckEquipName) {
             if (EquipName != thisBaseboard.EquipID) {
                 ShowFatalError(state,
-                               format("SimBaseboard: Invalid CompIndex passed={}, Unit name={}, stored Unit Name for that index={}",
-                                      CompIndex,
-                                      EquipName,
-                                      thisBaseboard.EquipID));
+                               std::format("SimBaseboard: Invalid CompIndex passed={}, Unit name={}, stored Unit Name for that index={}",
+                                           CompIndex,
+                                           EquipName,
+                                           thisBaseboard.EquipID));
             }
             thisBaseboard.CheckEquipName = false;
         }
@@ -201,7 +197,7 @@ namespace BaseboardRadiator {
         }
 
         UpdateBaseboard(state, CompIndex);
-        thisBaseboard.Energy = thisBaseboard.Power * state.dataHVACGlobal->TimeStepSys * DataGlobalConstants::SecInHour;
+        thisBaseboard.Energy = thisBaseboard.Power * state.dataHVACGlobal->TimeStepSysSec;
     }
 
     void GetBaseboardInput(EnergyPlusData &state)
@@ -218,25 +214,19 @@ namespace BaseboardRadiator {
         // Standard input processor calls.
 
         // Using/Aliasing
-        using BranchNodeConnections::TestCompSet;
-        using NodeInputManager::GetOnlySingleNode;
-        using namespace DataLoopNode;
         using GlobalNames::VerifyUniqueBaseboardName;
+        using Node::GetOnlySingleNode;
+        using Node::TestCompSet;
         using namespace DataSizing;
 
         // SUBROUTINE PARAMETER DEFINITIONS:
-        static constexpr std::string_view RoutineName("GetBaseboardInput: "); // include trailing blank space
-        int constexpr iHeatCAPMAlphaNum(5);             // get input index to water baseboard Radiator system heating capacity sizing method
-        int constexpr iHeatDesignCapacityNumericNum(1); // get input index to water baseboard Radiator system electric heating capacity
-        int constexpr iHeatCapacityPerFloorAreaNumericNum(
-            2); // get input index to water baseboard Radiator system electric heating capacity per floor area sizing
-        int constexpr iHeatFracOfAutosizedCapacityNumericNum(
-            3); //  get input index to water baseboard Radiator system electric heating capacity sizing as fraction of autozized heating capacity
+        static constexpr std::string_view RoutineName = "GetBaseboardInput: "; // include trailing blank space
+        static constexpr std::string_view routineName = "GetBaseboardInput";
+        int constexpr iHeatDesignCapacityNumericNum = 1;       // get input index to water baseboard Radiator system electric heating capacity
+        int constexpr iHeatCapacityPerFloorAreaNumericNum = 2; // index to baseboard Radiator system electric heating capacity per floor area sizing
+        int constexpr iHeatFracOfAutosizedCapacityNumericNum = 3; //  index to baseboard heating capacity fraction of autosized heating capacity
 
-        bool ErrorsFound(false); // If errors detected in input
-        auto &cCurrentModuleObject = state.dataIPShortCut->cCurrentModuleObject;
-
-        cCurrentModuleObject = cCMO_BBRadiator_Water;
+        std::string const cCurrentModuleObject = cCMO_BBRadiator_Water;
 
         int NumConvHWBaseboards = state.dataInputProcessing->inputProcessor->getNumObjectsFound(state, cCurrentModuleObject);
 
@@ -245,190 +235,166 @@ namespace BaseboardRadiator {
         state.dataBaseboardRadiator->baseboards.allocate(NumConvHWBaseboards);
 
         if (NumConvHWBaseboards > 0) { // Get the data for cooling schemes
-            for (int ConvHWBaseboardNum = 1; ConvHWBaseboardNum <= NumConvHWBaseboards; ++ConvHWBaseboardNum) {
-                int NumAlphas = 0;
-                int NumNums = 0;
-                int IOStat = 0;
+            bool ErrorsFound(false);   // If errors detected in input
+            auto *inputProcessor = state.dataInputProcessing->inputProcessor.get();
+            auto const &baseboardSchemaProps = inputProcessor->getObjectSchemaProps(state, cCurrentModuleObject);
+            auto const baseboardObjects = inputProcessor->epJSON.find(cCurrentModuleObject);
+            static constexpr std::array<std::string_view, 6> numericFieldNames = {"Heating Design Capacity",
+                                                                                  "Heating Design Capacity Per Floor Area",
+                                                                                  "Fraction of Autosized Heating Design Capacity",
+                                                                                  "U-Factor Times Area Value",
+                                                                                  "Maximum Water Flow Rate",
+                                                                                  "Convergence Tolerance"};
+            static constexpr std::string_view availabilityScheduleFieldName = "Availability Schedule Name";
+            static constexpr std::string_view heatingDesignCapacityMethodFieldName = "Heating Design Capacity Method";
 
-                state.dataInputProcessing->inputProcessor->getObjectItem(state,
-                                                                         cCurrentModuleObject,
-                                                                         ConvHWBaseboardNum,
-                                                                         state.dataIPShortCut->cAlphaArgs,
-                                                                         NumAlphas,
-                                                                         state.dataIPShortCut->rNumericArgs,
-                                                                         NumNums,
-                                                                         IOStat,
-                                                                         state.dataIPShortCut->lNumericFieldBlanks,
-                                                                         state.dataIPShortCut->lAlphaFieldBlanks,
-                                                                         state.dataIPShortCut->cAlphaFieldNames,
-                                                                         state.dataIPShortCut->cNumericFieldNames);
+            if (baseboardObjects != inputProcessor->epJSON.end()) {
+                int ConvHWBaseboardNum = 0;
+                for (auto const &baseboardInstance : baseboardObjects.value().items()) {
+                    auto const &baseboardFields = baseboardInstance.value();
+                    auto const baseboardName = Util::makeUPPER(baseboardInstance.key());
+                    auto const availabilityScheduleName =
+                        inputProcessor->getAlphaFieldValue(baseboardFields, baseboardSchemaProps, "availability_schedule_name");
+                    auto const inletNodeName = inputProcessor->getAlphaFieldValue(baseboardFields, baseboardSchemaProps, "inlet_node_name");
+                    auto const outletNodeName = inputProcessor->getAlphaFieldValue(baseboardFields, baseboardSchemaProps, "outlet_node_name");
+                    auto const heatingDesignCapacityMethod =
+                        inputProcessor->getAlphaFieldValue(baseboardFields, baseboardSchemaProps, "heating_design_capacity_method");
 
-                auto &thisBaseboard = state.dataBaseboardRadiator->baseboards(ConvHWBaseboardNum);
-                thisBaseboard.FieldNames.allocate(NumNums);
-                thisBaseboard.FieldNames = "";
-                thisBaseboard.FieldNames = state.dataIPShortCut->cNumericFieldNames;
+                    inputProcessor->markObjectAsUsed(cCurrentModuleObject, baseboardInstance.key());
 
-                if (UtilityRoutines::IsNameEmpty(state, state.dataIPShortCut->cAlphaArgs(1), cCurrentModuleObject, ErrorsFound)) {
-                    continue;
-                }
+                    ++ConvHWBaseboardNum;
+                    auto &thisBaseboard = state.dataBaseboardRadiator->baseboards(ConvHWBaseboardNum);
+                    thisBaseboard.FieldNames.assign(numericFieldNames.begin(), numericFieldNames.end());
 
-                // ErrorsFound will be set to True if problem was found, left untouched otherwise
-                VerifyUniqueBaseboardName(
-                    state, cCurrentModuleObject, state.dataIPShortCut->cAlphaArgs(1), ErrorsFound, cCurrentModuleObject + " Name");
+                    ErrorObjectHeader eoh{routineName, cCurrentModuleObject, baseboardName};
 
-                thisBaseboard.EquipID = state.dataIPShortCut->cAlphaArgs(1); // name of this baseboard
-                thisBaseboard.EquipType = DataPlant::PlantEquipmentType::Baseboard_Conv_Water;
-                thisBaseboard.Schedule = state.dataIPShortCut->cAlphaArgs(2);
-                if (state.dataIPShortCut->lAlphaFieldBlanks(2)) {
-                    thisBaseboard.SchedPtr = DataGlobalConstants::ScheduleAlwaysOn;
-                } else {
-                    thisBaseboard.SchedPtr = GetScheduleIndex(state, state.dataIPShortCut->cAlphaArgs(2));
-                    if (thisBaseboard.SchedPtr == 0) {
-                        ShowSevereError(state,
-                                        format("{}{}: invalid {} entered ={} for {}={}",
-                                               RoutineName,
-                                               cCurrentModuleObject,
-                                               state.dataIPShortCut->cAlphaFieldNames(2),
-                                               state.dataIPShortCut->cAlphaArgs(2),
-                                               state.dataIPShortCut->cAlphaFieldNames(1),
-                                               state.dataIPShortCut->cAlphaArgs(1)));
+                    VerifyUniqueBaseboardName(state, cCurrentModuleObject, baseboardName, ErrorsFound, cCurrentModuleObject + " Name");
+
+                    thisBaseboard.EquipID = baseboardName;
+                    thisBaseboard.EquipType = DataPlant::PlantEquipmentType::Baseboard_Conv_Water;
+                    thisBaseboard.Schedule = availabilityScheduleName;
+                    if (availabilityScheduleName.empty()) {
+                        thisBaseboard.availSched = Sched::GetScheduleAlwaysOn(state);
+                    } else if ((thisBaseboard.availSched = Sched::GetSchedule(state, availabilityScheduleName)) == nullptr) {
+                        ShowSevereItemNotFound(state, eoh, availabilityScheduleFieldName, availabilityScheduleName);
                         ErrorsFound = true;
                     }
-                }
-                // get inlet node number
-                thisBaseboard.WaterInletNode = GetOnlySingleNode(state,
-                                                                 state.dataIPShortCut->cAlphaArgs(3),
-                                                                 ErrorsFound,
-                                                                 DataLoopNode::ConnectionObjectType::ZoneHVACBaseboardConvectiveWater,
-                                                                 state.dataIPShortCut->cAlphaArgs(1),
-                                                                 DataLoopNode::NodeFluidType::Water,
-                                                                 DataLoopNode::ConnectionType::Inlet,
-                                                                 NodeInputManager::CompFluidStream::Primary,
-                                                                 ObjectIsNotParent);
-                // get outlet node number
-                thisBaseboard.WaterOutletNode = GetOnlySingleNode(state,
-                                                                  state.dataIPShortCut->cAlphaArgs(4),
-                                                                  ErrorsFound,
-                                                                  DataLoopNode::ConnectionObjectType::ZoneHVACBaseboardConvectiveWater,
-                                                                  state.dataIPShortCut->cAlphaArgs(1),
-                                                                  DataLoopNode::NodeFluidType::Water,
-                                                                  DataLoopNode::ConnectionType::Outlet,
-                                                                  NodeInputManager::CompFluidStream::Primary,
-                                                                  ObjectIsNotParent);
+                    thisBaseboard.WaterInletNode = GetOnlySingleNode(state,
+                                                                     inletNodeName,
+                                                                     ErrorsFound,
+                                                                     Node::ConnectionObjectType::ZoneHVACBaseboardConvectiveWater,
+                                                                     baseboardName,
+                                                                     Node::FluidType::Water,
+                                                                     Node::ConnectionType::Inlet,
+                                                                     Node::CompFluidStream::Primary,
+                                                                     Node::ObjectIsNotParent);
+                    thisBaseboard.WaterOutletNode = GetOnlySingleNode(state,
+                                                                      outletNodeName,
+                                                                      ErrorsFound,
+                                                                      Node::ConnectionObjectType::ZoneHVACBaseboardConvectiveWater,
+                                                                      baseboardName,
+                                                                      Node::FluidType::Water,
+                                                                      Node::ConnectionType::Outlet,
+                                                                      Node::CompFluidStream::Primary,
+                                                                      Node::ObjectIsNotParent);
 
-                TestCompSet(state,
-                            cCMO_BBRadiator_Water,
-                            state.dataIPShortCut->cAlphaArgs(1),
-                            state.dataIPShortCut->cAlphaArgs(3),
-                            state.dataIPShortCut->cAlphaArgs(4),
-                            "Hot Water Nodes");
+                    Node::TestCompSet(state, cCMO_BBRadiator_Water, baseboardName, inletNodeName, outletNodeName, "Hot Water Nodes");
 
-                // Determine steam baseboard radiator system heating design capacity sizing method
-                if (UtilityRoutines::SameString(state.dataIPShortCut->cAlphaArgs(iHeatCAPMAlphaNum), "HeatingDesignCapacity")) {
-                    thisBaseboard.HeatingCapMethod = HeatingDesignCapacity;
-                    if (!state.dataIPShortCut->lNumericFieldBlanks(iHeatDesignCapacityNumericNum)) {
-                        thisBaseboard.ScaledHeatingCapacity = state.dataIPShortCut->rNumericArgs(iHeatDesignCapacityNumericNum);
-                        if (thisBaseboard.ScaledHeatingCapacity < 0.0 && thisBaseboard.ScaledHeatingCapacity != AutoSize) {
-                            ShowSevereError(state, format("{} = {}", cCMO_BBRadiator_Water, thisBaseboard.EquipID));
+                    if (Util::SameString(heatingDesignCapacityMethod, "HeatingDesignCapacity")) {
+                        thisBaseboard.HeatingCapMethod = HeatingDesignCapacity;
+                        auto const heatingDesignCapacityField = baseboardFields.find("heating_design_capacity");
+                        if (heatingDesignCapacityField != baseboardFields.end()) {
+                            thisBaseboard.ScaledHeatingCapacity =
+                                inputProcessor->getRealFieldValue(baseboardFields, baseboardSchemaProps, "heating_design_capacity");
+                            if (thisBaseboard.ScaledHeatingCapacity < 0.0 && thisBaseboard.ScaledHeatingCapacity != AutoSize) {
+                                ShowSevereError(state, std::format("{} = {}", cCMO_BBRadiator_Water, thisBaseboard.EquipID));
+                                ShowContinueError(state,
+                                                  std::format("Illegal {} = {:.7f}",
+                                                              numericFieldNames[iHeatDesignCapacityNumericNum - 1],
+                                                              thisBaseboard.ScaledHeatingCapacity));
+                                ErrorsFound = true;
+                            }
+                        } else {
+                            ShowSevereError(state, std::format("{} = {}", cCMO_BBRadiator_Water, thisBaseboard.EquipID));
                             ShowContinueError(state,
-                                              format("Illegal {} = {:.7T}",
-                                                     state.dataIPShortCut->cNumericFieldNames(iHeatDesignCapacityNumericNum),
-                                                     state.dataIPShortCut->rNumericArgs(iHeatDesignCapacityNumericNum)));
+                                              std::format("Input for {} = {}", heatingDesignCapacityMethodFieldName, heatingDesignCapacityMethod));
+                            ShowContinueError(state,
+                                              std::format("Blank field not allowed for {}", numericFieldNames[iHeatDesignCapacityNumericNum - 1]));
                             ErrorsFound = true;
                         }
-                    } else {
-                        ShowSevereError(state, format("{} = {}", cCMO_BBRadiator_Water, thisBaseboard.EquipID));
-                        ShowContinueError(state,
-                                          format("Input for {} = {}",
-                                                 state.dataIPShortCut->cAlphaFieldNames(iHeatCAPMAlphaNum),
-                                                 state.dataIPShortCut->cAlphaArgs(iHeatCAPMAlphaNum)));
-                        ShowContinueError(
-                            state, format("Blank field not allowed for {}", state.dataIPShortCut->cNumericFieldNames(iHeatDesignCapacityNumericNum)));
-                        ErrorsFound = true;
-                    }
-                } else if (UtilityRoutines::SameString(state.dataIPShortCut->cAlphaArgs(iHeatCAPMAlphaNum), "CapacityPerFloorArea")) {
-                    thisBaseboard.HeatingCapMethod = CapacityPerFloorArea;
-                    if (!state.dataIPShortCut->lNumericFieldBlanks(iHeatCapacityPerFloorAreaNumericNum)) {
-                        thisBaseboard.ScaledHeatingCapacity = state.dataIPShortCut->rNumericArgs(iHeatCapacityPerFloorAreaNumericNum);
-                        if (thisBaseboard.ScaledHeatingCapacity <= 0.0) {
-                            ShowSevereError(state, format("{} = {}", cCMO_BBRadiator_Water, thisBaseboard.EquipID));
+                    } else if (Util::SameString(heatingDesignCapacityMethod, "CapacityPerFloorArea")) {
+                        thisBaseboard.HeatingCapMethod = CapacityPerFloorArea;
+                        auto const heatingDesignCapacityPerFloorAreaField = baseboardFields.find("heating_design_capacity_per_floor_area");
+                        if (heatingDesignCapacityPerFloorAreaField != baseboardFields.end()) {
+                            thisBaseboard.ScaledHeatingCapacity =
+                                inputProcessor->getRealFieldValue(baseboardFields, baseboardSchemaProps, "heating_design_capacity_per_floor_area");
+                            if (thisBaseboard.ScaledHeatingCapacity <= 0.0) {
+                                ShowSevereError(state, std::format("{} = {}", cCMO_BBRadiator_Water, thisBaseboard.EquipID));
+                                ShowContinueError(
+                                    state, std::format("Input for {} = {}", heatingDesignCapacityMethodFieldName, heatingDesignCapacityMethod));
+                                ShowContinueError(state,
+                                                  std::format("Illegal {} = {:.7f}",
+                                                              numericFieldNames[iHeatCapacityPerFloorAreaNumericNum - 1],
+                                                              thisBaseboard.ScaledHeatingCapacity));
+                                ErrorsFound = true;
+                            } else if (thisBaseboard.ScaledHeatingCapacity == AutoSize) {
+                                ShowSevereError(state, std::format("{} = {}", cCMO_BBRadiator_Water, thisBaseboard.EquipID));
+                                ShowContinueError(
+                                    state, std::format("Input for {} = {}", heatingDesignCapacityMethodFieldName, heatingDesignCapacityMethod));
+                                ShowContinueError(state,
+                                                  std::format("Illegal {} = Autosize", numericFieldNames[iHeatCapacityPerFloorAreaNumericNum - 1]));
+                                ErrorsFound = true;
+                            }
+                        } else {
+                            ShowSevereError(state, std::format("{} = {}", cCMO_BBRadiator_Water, thisBaseboard.EquipID));
                             ShowContinueError(state,
-                                              format("Input for {} = {}",
-                                                     state.dataIPShortCut->cAlphaFieldNames(iHeatCAPMAlphaNum),
-                                                     state.dataIPShortCut->cAlphaArgs(iHeatCAPMAlphaNum)));
-                            ShowContinueError(state,
-                                              format("Illegal {} = {:.7T}",
-                                                     state.dataIPShortCut->cNumericFieldNames(iHeatCapacityPerFloorAreaNumericNum),
-                                                     state.dataIPShortCut->rNumericArgs(iHeatCapacityPerFloorAreaNumericNum)));
-                            ErrorsFound = true;
-                        } else if (thisBaseboard.ScaledHeatingCapacity == AutoSize) {
-                            ShowSevereError(state, format("{} = {}", cCMO_BBRadiator_Water, thisBaseboard.EquipID));
-                            ShowContinueError(state,
-                                              format("Input for {} = {}",
-                                                     state.dataIPShortCut->cAlphaFieldNames(iHeatCAPMAlphaNum),
-                                                     state.dataIPShortCut->cAlphaArgs(iHeatCAPMAlphaNum)));
+                                              std::format("Input for {} = {}", heatingDesignCapacityMethodFieldName, heatingDesignCapacityMethod));
                             ShowContinueError(
-                                state,
-                                format("Illegal {} = Autosize", state.dataIPShortCut->cNumericFieldNames(iHeatCapacityPerFloorAreaNumericNum)));
+                                state, std::format("Blank field not allowed for {}", numericFieldNames[iHeatCapacityPerFloorAreaNumericNum - 1]));
                             ErrorsFound = true;
                         }
-                    } else {
-                        ShowSevereError(state, format("{} = {}", cCMO_BBRadiator_Water, thisBaseboard.EquipID));
-                        ShowContinueError(state,
-                                          format("Input for {} = {}",
-                                                 state.dataIPShortCut->cAlphaFieldNames(iHeatCAPMAlphaNum),
-                                                 state.dataIPShortCut->cAlphaArgs(iHeatCAPMAlphaNum)));
-                        ShowContinueError(
-                            state,
-                            format("Blank field not allowed for {}", state.dataIPShortCut->cNumericFieldNames(iHeatCapacityPerFloorAreaNumericNum)));
-                        ErrorsFound = true;
-                    }
-                } else if (UtilityRoutines::SameString(state.dataIPShortCut->cAlphaArgs(iHeatCAPMAlphaNum), "FractionOfAutosizedHeatingCapacity")) {
-                    thisBaseboard.HeatingCapMethod = FractionOfAutosizedHeatingCapacity;
-                    if (!state.dataIPShortCut->lNumericFieldBlanks(iHeatFracOfAutosizedCapacityNumericNum)) {
-                        thisBaseboard.ScaledHeatingCapacity = state.dataIPShortCut->rNumericArgs(iHeatFracOfAutosizedCapacityNumericNum);
-                        if (thisBaseboard.ScaledHeatingCapacity < 0.0) {
-                            ShowSevereError(state, format("{} = {}", cCMO_BBRadiator_Water, thisBaseboard.EquipID));
+                    } else if (Util::SameString(heatingDesignCapacityMethod, "FractionOfAutosizedHeatingCapacity")) {
+                        thisBaseboard.HeatingCapMethod = FractionOfAutosizedHeatingCapacity;
+                        auto const fractionOfAutosizedHeatingCapacityField = baseboardFields.find("fraction_of_autosized_heating_design_capacity");
+                        if (fractionOfAutosizedHeatingCapacityField != baseboardFields.end()) {
+                            thisBaseboard.ScaledHeatingCapacity = inputProcessor->getRealFieldValue(
+                                baseboardFields, baseboardSchemaProps, "fraction_of_autosized_heating_design_capacity");
+                            if (thisBaseboard.ScaledHeatingCapacity < 0.0) {
+                                ShowSevereError(state, std::format("{} = {}", cCMO_BBRadiator_Water, thisBaseboard.EquipID));
+                                ShowContinueError(state,
+                                                  std::format("Illegal {} = {:.7f}",
+                                                              numericFieldNames[iHeatFracOfAutosizedCapacityNumericNum - 1],
+                                                              thisBaseboard.ScaledHeatingCapacity));
+                                ErrorsFound = true;
+                            }
+                        } else {
+                            ShowSevereError(state, std::format("{} = {}", cCMO_BBRadiator_Water, thisBaseboard.EquipID));
                             ShowContinueError(state,
-                                              format("Illegal {} = {:.7T}",
-                                                     state.dataIPShortCut->cNumericFieldNames(iHeatFracOfAutosizedCapacityNumericNum),
-                                                     state.dataIPShortCut->rNumericArgs(iHeatFracOfAutosizedCapacityNumericNum)));
+                                              std::format("Input for {} = {}", heatingDesignCapacityMethodFieldName, heatingDesignCapacityMethod));
+                            ShowContinueError(
+                                state, std::format("Blank field not allowed for {}", numericFieldNames[iHeatFracOfAutosizedCapacityNumericNum - 1]));
                             ErrorsFound = true;
                         }
-                    } else {
-                        ShowSevereError(state, format("{} = {}", cCMO_BBRadiator_Water, thisBaseboard.EquipID));
-                        ShowContinueError(state,
-                                          format("Input for {} = {}",
-                                                 state.dataIPShortCut->cAlphaFieldNames(iHeatCAPMAlphaNum),
-                                                 state.dataIPShortCut->cAlphaArgs(iHeatCAPMAlphaNum)));
-                        ShowContinueError(state,
-                                          format("Blank field not allowed for {}",
-                                                 state.dataIPShortCut->cNumericFieldNames(iHeatFracOfAutosizedCapacityNumericNum)));
-                        ErrorsFound = true;
                     }
-                } else {
-                    ShowSevereError(state, format("{} = {}", cCMO_BBRadiator_Water, thisBaseboard.EquipID));
-                    ShowContinueError(state,
-                                      format("Illegal {} = {}",
-                                             state.dataIPShortCut->cAlphaFieldNames(iHeatCAPMAlphaNum),
-                                             state.dataIPShortCut->cAlphaArgs(iHeatCAPMAlphaNum)));
-                    ErrorsFound = true;
-                }
 
-                thisBaseboard.UA = state.dataIPShortCut->rNumericArgs(4);
-                thisBaseboard.WaterVolFlowRateMax = state.dataIPShortCut->rNumericArgs(5);
-                thisBaseboard.Offset = state.dataIPShortCut->rNumericArgs(6);
-                // Set default convergence tolerance
-                if (thisBaseboard.Offset <= 0.0) {
-                    thisBaseboard.Offset = 0.001;
-                }
+                    thisBaseboard.UA = inputProcessor->getRealFieldValue(baseboardFields, baseboardSchemaProps, "u_factor_times_area_value");
+                    thisBaseboard.WaterVolFlowRateMax =
+                        inputProcessor->getRealFieldValue(baseboardFields, baseboardSchemaProps, "maximum_water_flow_rate");
+                    thisBaseboard.Offset = inputProcessor->getRealFieldValue(baseboardFields, baseboardSchemaProps, "convergence_tolerance");
+                    // Set default convergence tolerance
+                    if (thisBaseboard.Offset <= 0.0) {
+                        thisBaseboard.Offset = 0.001;
+                    }
 
-                thisBaseboard.ZonePtr =
-                    DataZoneEquipment::GetZoneEquipControlledZoneNum(state, DataZoneEquipment::ZoneEquip::BBWaterConvective, thisBaseboard.EquipID);
+                    thisBaseboard.ZonePtr = DataZoneEquipment::GetZoneEquipControlledZoneNum(
+                        state, DataZoneEquipment::ZoneEquipType::BaseboardConvectiveWater, thisBaseboard.EquipID);
+
+                    thisBaseboard.checkForZoneSizing(state); // check if any autosizing is being done
+                }
             }
 
             if (ErrorsFound) {
-                ShowFatalError(state, format("{}Errors found in getting input.  Preceding condition(s) cause termination.", RoutineName));
+                ShowFatalError(state, std::format("{}Errors found in getting input.  Preceding condition(s) cause termination.", RoutineName));
             }
         }
 
@@ -439,84 +405,80 @@ namespace BaseboardRadiator {
             auto &thisBaseboard = state.dataBaseboardRadiator->baseboards(BaseboardNum);
             SetupOutputVariable(state,
                                 "Baseboard Total Heating Energy",
-                                OutputProcessor::Unit::J,
+                                Constant::Units::J,
                                 thisBaseboard.Energy,
-                                OutputProcessor::SOVTimeStepType::System,
-                                OutputProcessor::SOVStoreType::Summed,
+                                OutputProcessor::TimeStepType::System,
+                                OutputProcessor::StoreType::Sum,
                                 thisBaseboard.EquipID,
-                                _,
-                                "ENERGYTRANSFER",
-                                "BASEBOARD",
-                                _,
-                                "System");
+                                Constant::eResource::EnergyTransfer,
+                                OutputProcessor::Group::HVAC,
+                                OutputProcessor::EndUseCat::Baseboard);
 
             SetupOutputVariable(state,
                                 "Baseboard Hot Water Energy",
-                                OutputProcessor::Unit::J,
+                                Constant::Units::J,
                                 thisBaseboard.Energy,
-                                OutputProcessor::SOVTimeStepType::System,
-                                OutputProcessor::SOVStoreType::Summed,
+                                OutputProcessor::TimeStepType::System,
+                                OutputProcessor::StoreType::Sum,
                                 thisBaseboard.EquipID,
-                                _,
-                                "PLANTLOOPHEATINGDEMAND",
-                                "BASEBOARD",
-                                _,
-                                "System");
+                                Constant::eResource::PlantLoopHeatingDemand,
+                                OutputProcessor::Group::HVAC,
+                                OutputProcessor::EndUseCat::Baseboard);
 
             SetupOutputVariable(state,
                                 "Baseboard Total Heating Rate",
-                                OutputProcessor::Unit::W,
+                                Constant::Units::W,
                                 thisBaseboard.Power,
-                                OutputProcessor::SOVTimeStepType::System,
-                                OutputProcessor::SOVStoreType::Average,
+                                OutputProcessor::TimeStepType::System,
+                                OutputProcessor::StoreType::Average,
                                 thisBaseboard.EquipID);
 
             SetupOutputVariable(state,
                                 "Baseboard Hot Water Mass Flow Rate",
-                                OutputProcessor::Unit::kg_s,
+                                Constant::Units::kg_s,
                                 thisBaseboard.WaterMassFlowRate,
-                                OutputProcessor::SOVTimeStepType::System,
-                                OutputProcessor::SOVStoreType::Average,
+                                OutputProcessor::TimeStepType::System,
+                                OutputProcessor::StoreType::Average,
                                 thisBaseboard.EquipID);
 
             SetupOutputVariable(state,
                                 "Baseboard Air Mass Flow Rate",
-                                OutputProcessor::Unit::kg_s,
+                                Constant::Units::kg_s,
                                 thisBaseboard.AirMassFlowRate,
-                                OutputProcessor::SOVTimeStepType::System,
-                                OutputProcessor::SOVStoreType::Average,
+                                OutputProcessor::TimeStepType::System,
+                                OutputProcessor::StoreType::Average,
                                 thisBaseboard.EquipID);
 
             SetupOutputVariable(state,
                                 "Baseboard Air Inlet Temperature",
-                                OutputProcessor::Unit::C,
+                                Constant::Units::C,
                                 thisBaseboard.AirInletTemp,
-                                OutputProcessor::SOVTimeStepType::System,
-                                OutputProcessor::SOVStoreType::Average,
+                                OutputProcessor::TimeStepType::System,
+                                OutputProcessor::StoreType::Average,
                                 thisBaseboard.EquipID);
 
             SetupOutputVariable(state,
                                 "Baseboard Air Outlet Temperature",
-                                OutputProcessor::Unit::C,
+                                Constant::Units::C,
                                 thisBaseboard.AirOutletTemp,
-                                OutputProcessor::SOVTimeStepType::System,
-                                OutputProcessor::SOVStoreType::Average,
+                                OutputProcessor::TimeStepType::System,
+                                OutputProcessor::StoreType::Average,
                                 thisBaseboard.EquipID);
 
             SetupOutputVariable(state,
                                 "Baseboard Water Inlet Temperature",
-                                OutputProcessor::Unit::C,
+                                Constant::Units::C,
                                 thisBaseboard.WaterInletTemp,
-                                OutputProcessor::SOVTimeStepType::System,
-                                OutputProcessor::SOVStoreType::Average,
+                                OutputProcessor::TimeStepType::System,
+                                OutputProcessor::StoreType::Average,
                                 thisBaseboard.EquipID);
 
             SetupOutputVariable(state,
                                 "Baseboard Water Outlet Temperature",
-                                OutputProcessor::Unit::C,
+                                Constant::Units::C,
                                 thisBaseboard.WaterOutletTemp,
-                                OutputProcessor::SOVTimeStepType::System,
-                                OutputProcessor::SOVStoreType::Average,
+                                OutputProcessor::TimeStepType::System,
+                                OutputProcessor::StoreType::Average,
                                 thisBaseboard.EquipID);
         }
     }
@@ -531,7 +493,7 @@ namespace BaseboardRadiator {
         // PURPOSE OF THIS SUBROUTINE:
         // This subroutine initializes the Baseboard units during simulation.
 
-        static constexpr std::string_view RoutineName("BaseboardRadiator:InitBaseboard");
+        static constexpr std::string_view RoutineName = "BaseboardRadiator:InitBaseboard";
 
         if (this->SetLoopIndexFlag && allocated(state.dataPlnt->PlantLoop)) {
             bool errFlag = false;
@@ -552,19 +514,11 @@ namespace BaseboardRadiator {
         // Do the Begin Environment initializations
         if (state.dataGlobal->BeginEnvrnFlag && this->MyEnvrnFlag && !this->SetLoopIndexFlag) {
             int WaterInletNode = this->WaterInletNode;
-            Real64 rho = GetDensityGlycol(state,
-                                          state.dataPlnt->PlantLoop(this->plantLoc.loopNum).FluidName,
-                                          DataGlobalConstants::HWInitConvTemp,
-                                          state.dataPlnt->PlantLoop(this->plantLoc.loopNum).FluidIndex,
-                                          RoutineName);
+            Real64 rho = this->plantLoc.loop->glycol->getDensity(state, Constant::HWInitConvTemp, RoutineName);
             this->WaterMassFlowRateMax = rho * this->WaterVolFlowRateMax;
             PlantUtilities::InitComponentNodes(state, 0.0, this->WaterMassFlowRateMax, this->WaterInletNode, this->WaterOutletNode);
-            state.dataLoopNodes->Node(WaterInletNode).Temp = DataGlobalConstants::HWInitConvTemp;
-            Real64 Cp = GetSpecificHeatGlycol(state,
-                                              state.dataPlnt->PlantLoop(this->plantLoc.loopNum).FluidName,
-                                              state.dataLoopNodes->Node(WaterInletNode).Temp,
-                                              state.dataPlnt->PlantLoop(this->plantLoc.loopNum).FluidIndex,
-                                              RoutineName);
+            state.dataLoopNodes->Node(WaterInletNode).Temp = Constant::HWInitConvTemp;
+            Real64 Cp = this->plantLoc.loop->glycol->getSpecificHeat(state, state.dataLoopNodes->Node(WaterInletNode).Temp, RoutineName);
             state.dataLoopNodes->Node(WaterInletNode).Enthalpy = Cp * state.dataLoopNodes->Node(WaterInletNode).Temp;
             state.dataLoopNodes->Node(WaterInletNode).Quality = 0.0;
             state.dataLoopNodes->Node(WaterInletNode).Press = 0.0;
@@ -598,7 +552,6 @@ namespace BaseboardRadiator {
         //       DATE WRITTEN   February 2002
         //       MODIFIED       August 2013 Daeho Kang, add component sizing table entries
         //                      July 2014, B.Nigusse, added scalable sizing
-        //       RE-ENGINEERED  na
 
         // PURPOSE OF THIS SUBROUTINE:
         // This subroutine is for sizing hot water baseboard components for which flow rates and UAs have not been
@@ -608,58 +561,36 @@ namespace BaseboardRadiator {
         // Obtains flow rates from the zone sizing arrays and plant sizing data. UAs are
         // calculated by numerically inverting the baseboard calculation routine.
 
-        // Using/Aliasing
-        using namespace DataSizing;
-        using DataHVACGlobals::HeatingCapacitySizing;
-
-        using PlantUtilities::RegisterPlantCompDesignFlow;
-
         // SUBROUTINE PARAMETER DEFINITIONS:
-        Real64 constexpr Acc(0.0001); // Accuracy of result
-        int constexpr MaxIte(500);    // Maximum number of iterations
-        static std::string const RoutineName(cCMO_BBRadiator_Water + ":SizeBaseboard");
+        Real64 constexpr Acc = 0.0001; // Accuracy of result
+        int constexpr MaxIte = 500;    // Maximum number of iterations
+        static std::string const RoutineName = cCMO_BBRadiator_Water + ":SizeBaseboard";
 
         // SUBROUTINE LOCAL VARIABLE DECLARATIONS:
-        int WaterInletNode;
-        int PltSizHeatNum(0); // index of plant sizing object for 1st heating loop
         Real64 DesCoilLoad(0.0);
-        int SolFla; // Flag of solver
         Real64 UA0; // lower bound for UA
         Real64 UA1; // upper bound for UA
         Real64 UA;
         bool ErrorsFound(false);             // If errors detected in input
         Real64 rho;                          // local fluid density
         Real64 Cp;                           // local fluid specific heat
-        bool FlowAutoSize(false);            // Indicator to autosizing water volume flow
-        bool UAAutoSize(false);              // Indicator to autosizing UA
-        Real64 WaterVolFlowRateMaxDes(0.0);  // Design water volume flow for reproting
+        Real64 WaterVolFlowRateMaxDes(0.0);  // Design water volume flow for reporting
         Real64 WaterVolFlowRateMaxUser(0.0); // User hard-sized volume flow for reporting
-        Real64 UADes(0.0);                   // Design UA value for reproting
+        Real64 UADes(0.0);                   // Design UA value for reporting
         Real64 UAUser(0.0);                  // User hard-sized value for reporting
-        std::string CompName;                // component name
-        std::string CompType;                // component type
-        std::string SizingString;            // input field sizing description (e.g., Nominal Capacity)
         Real64 TempSize;                     // autosized value of coil input field
-        int FieldNum = 1;                    // IDD numeric field number where input field description is found
-        int SizingMethod;                    // Integer representation of sizing method name (HeatingCapacitySizing)
-        bool PrintFlag;                      // TRUE when sizing information is reported in the eio file
-        int CapSizingMethod(0); // capacity sizing methods (HeatingDesignCapacity, CapacityPerFloorArea, and FractionOfAutosizedHeatingCapacity )
-
-        auto &ZoneEqSizing(state.dataSize->ZoneEqSizing);
-        auto &CurZoneEqNum(state.dataSize->CurZoneEqNum);
-        auto &FinalZoneSizing(state.dataSize->FinalZoneSizing);
-        auto &DataScalableCapSizingON(state.dataSize->DataScalableCapSizingON);
 
         // find the appropriate heating Plant Sizing object
-        PltSizHeatNum = state.dataPlnt->PlantLoop(this->plantLoc.loopNum).PlantSizNum;
+        int PltSizHeatNum = this->plantLoc.loop->PlantSizNum;
 
         if (PltSizHeatNum > 0) {
 
-            DataScalableCapSizingON = false;
+            state.dataSize->DataScalableCapSizingON = false;
 
-            if (CurZoneEqNum > 0) {
+            if (state.dataSize->CurZoneEqNum > 0) {
+                bool FlowAutoSize = false; // Indicator to autosizing water volume flow
 
-                if (this->WaterVolFlowRateMax == AutoSize) {
+                if (this->WaterVolFlowRateMax == DataSizing::AutoSize) {
                     FlowAutoSize = true;
                 }
                 if (!FlowAutoSize && !state.dataSize->ZoneSizingRunDone) { // Simulation should continue
@@ -668,66 +599,63 @@ namespace BaseboardRadiator {
                             state, cCMO_BBRadiator_Water, this->EquipID, "User-Specified Maximum Water Flow Rate [m3/s]", this->WaterVolFlowRateMax);
                     }
                 } else {
-                    CheckZoneSizing(state, cCMO_BBRadiator_Water, this->EquipID);
-                    CompType = cCMO_BBRadiator_Water;
-                    CompName = this->EquipID;
+                    auto &zoneEqSizing = state.dataSize->ZoneEqSizing(state.dataSize->CurZoneEqNum);
+                    auto const &finalZoneSizing = state.dataSize->FinalZoneSizing(state.dataSize->CurZoneEqNum);
+                    std::string_view const CompType = cCMO_BBRadiator_Water;
+                    std::string_view const CompName = this->EquipID;
                     state.dataSize->DataFracOfAutosizedHeatingCapacity = 1.0;
                     state.dataSize->DataZoneNumber = this->ZonePtr;
-                    SizingMethod = HeatingCapacitySizing;
-                    FieldNum = 1;
-                    PrintFlag = false;
-                    SizingString = this->FieldNames(FieldNum) + " [W]";
-                    CapSizingMethod = this->HeatingCapMethod;
-                    ZoneEqSizing(CurZoneEqNum).SizingMethod(SizingMethod) = CapSizingMethod;
-                    if (CapSizingMethod == HeatingDesignCapacity || CapSizingMethod == CapacityPerFloorArea ||
-                        CapSizingMethod == FractionOfAutosizedHeatingCapacity) {
+                    int SizingMethod = HVAC::HeatingCapacitySizing;
+                    int FieldNum = 1;
+                    std::string const SizingString = std::format("{} [W]", this->FieldNames[FieldNum - 1]);
+                    int CapSizingMethod = this->HeatingCapMethod;
+                    zoneEqSizing.SizingMethod(SizingMethod) = CapSizingMethod;
+                    if (CapSizingMethod == DataSizing::HeatingDesignCapacity || CapSizingMethod == DataSizing::CapacityPerFloorArea ||
+                        CapSizingMethod == DataSizing::FractionOfAutosizedHeatingCapacity) {
 
-                        if (CapSizingMethod == HeatingDesignCapacity) {
-                            if (this->ScaledHeatingCapacity == AutoSize) {
-                                CheckZoneSizing(state, CompType, CompName);
-                                ZoneEqSizing(CurZoneEqNum).DesHeatingLoad = FinalZoneSizing(CurZoneEqNum).NonAirSysDesHeatLoad;
+                        if (CapSizingMethod == DataSizing::HeatingDesignCapacity) {
+                            if (this->ScaledHeatingCapacity == DataSizing::AutoSize) {
+                                zoneEqSizing.DesHeatingLoad = finalZoneSizing.NonAirSysDesHeatLoad;
                             } else {
-                                ZoneEqSizing(CurZoneEqNum).DesHeatingLoad = this->ScaledHeatingCapacity;
+                                zoneEqSizing.DesHeatingLoad = this->ScaledHeatingCapacity;
                             }
-                            ZoneEqSizing(CurZoneEqNum).HeatingCapacity = true;
-                            TempSize = ZoneEqSizing(CurZoneEqNum).DesHeatingLoad;
-                        } else if (CapSizingMethod == CapacityPerFloorArea) {
-                            ZoneEqSizing(CurZoneEqNum).HeatingCapacity = true;
-                            ZoneEqSizing(CurZoneEqNum).DesHeatingLoad =
+                            zoneEqSizing.HeatingCapacity = true;
+                            TempSize = zoneEqSizing.DesHeatingLoad;
+                        } else if (CapSizingMethod == DataSizing::CapacityPerFloorArea) {
+                            zoneEqSizing.HeatingCapacity = true;
+                            zoneEqSizing.DesHeatingLoad =
                                 this->ScaledHeatingCapacity * state.dataHeatBal->Zone(state.dataSize->DataZoneNumber).FloorArea;
-                            TempSize = ZoneEqSizing(CurZoneEqNum).DesHeatingLoad;
-                            DataScalableCapSizingON = true;
-                        } else if (CapSizingMethod == FractionOfAutosizedHeatingCapacity) {
-                            CheckZoneSizing(state, CompType, CompName);
-                            ZoneEqSizing(CurZoneEqNum).HeatingCapacity = true;
+                            TempSize = zoneEqSizing.DesHeatingLoad;
+                            state.dataSize->DataScalableCapSizingON = true;
+                        } else { // CapSizingMethod == DataSizing::FractionOfAutosizedHeatingCapacity
+                            zoneEqSizing.HeatingCapacity = true;
                             state.dataSize->DataFracOfAutosizedHeatingCapacity = this->ScaledHeatingCapacity;
-                            ZoneEqSizing(CurZoneEqNum).DesHeatingLoad = FinalZoneSizing(CurZoneEqNum).NonAirSysDesHeatLoad;
-                            TempSize = AutoSize;
-                            DataScalableCapSizingON = true;
-                        } else {
-                            TempSize = this->ScaledHeatingCapacity;
+                            zoneEqSizing.DesHeatingLoad = finalZoneSizing.NonAirSysDesHeatLoad;
+                            TempSize = DataSizing::AutoSize;
+                            state.dataSize->DataScalableCapSizingON = true;
                         }
+                        if (!state.dataSize->FinalZoneSizing.empty() &&
+                            state.dataSize->CurZoneEqNum <= static_cast<int>(state.dataSize->FinalZoneSizing.size())) {
+                            BaseSizer::reportSizerOutput(state,
+                                                         cCMO_BBRadiator_Water,
+                                                         this->EquipID,
+                                                         "Design Size Heating Load [W]",
+                                                         state.dataSize->FinalZoneSizing(state.dataSize->CurZoneEqNum).NonAirSysDesHeatLoad);
+                        }
+                        bool PrintFlag = false; // TRUE when sizing information is reported in the eio file
                         bool errorsFound = false;
                         HeatingCapacitySizer sizerHeatingCapacity;
                         sizerHeatingCapacity.overrideSizingString(SizingString);
                         sizerHeatingCapacity.initializeWithinEP(state, CompType, CompName, PrintFlag, RoutineName);
                         DesCoilLoad = sizerHeatingCapacity.size(state, TempSize, errorsFound);
-                        DataScalableCapSizingON = false;
+                        state.dataSize->DataScalableCapSizingON = false;
                     } else {
                         DesCoilLoad = 0.0;
                     }
 
                     if (DesCoilLoad >= SmallLoad) {
-                        Cp = GetSpecificHeatGlycol(state,
-                                                   state.dataPlnt->PlantLoop(this->plantLoc.loopNum).FluidName,
-                                                   DataGlobalConstants::HWInitConvTemp,
-                                                   state.dataPlnt->PlantLoop(this->plantLoc.loopNum).FluidIndex,
-                                                   RoutineName);
-                        rho = GetDensityGlycol(state,
-                                               state.dataPlnt->PlantLoop(this->plantLoc.loopNum).FluidName,
-                                               DataGlobalConstants::HWInitConvTemp,
-                                               state.dataPlnt->PlantLoop(this->plantLoc.loopNum).FluidIndex,
-                                               RoutineName);
+                        Cp = this->plantLoc.loop->glycol->getSpecificHeat(state, Constant::HWInitConvTemp, RoutineName);
+                        rho = this->plantLoc.loop->glycol->getDensity(state, Constant::HWInitConvTemp, RoutineName);
                         WaterVolFlowRateMaxDes = DesCoilLoad / (state.dataSize->PlantSizData(PltSizHeatNum).DeltaT * Cp * rho);
                     } else {
                         WaterVolFlowRateMaxDes = 0.0;
@@ -753,12 +681,14 @@ namespace BaseboardRadiator {
                                     state.dataSize->AutoVsHardSizingThreshold) {
                                     ShowMessage(
                                         state,
-                                        format("SizeBaseboard: Potential issue with equipment sizing for ZoneHVAC:Baseboard:Convective:Water=\"{}\".",
-                                               this->EquipID));
+                                        std::format(
+                                            "SizeBaseboard: Potential issue with equipment sizing for ZoneHVAC:Baseboard:Convective:Water=\"{}\".",
+                                            this->EquipID));
                                     ShowContinueError(state,
-                                                      format("User-Specified Maximum Water Flow Rate of {:.5R} [m3/s]", WaterVolFlowRateMaxUser));
+                                                      std::format("User-Specified Maximum Water Flow Rate of {:#G} [m3/s]", WaterVolFlowRateMaxUser));
                                     ShowContinueError(
-                                        state, format("differs from Design Size Maximum Water Flow Rate of {:.5R} [m3/s]", WaterVolFlowRateMaxDes));
+                                        state,
+                                        std::format("differs from Design Size Maximum Water Flow Rate of {:#G} [m3/s]", WaterVolFlowRateMaxDes));
                                     ShowContinueError(state, "This may, or may not, indicate mismatched component sizes.");
                                     ShowContinueError(state, "Verify that the value entered is intended and is consistent with other components.");
                                 }
@@ -768,8 +698,9 @@ namespace BaseboardRadiator {
                 }
 
                 // UA sizing
-                // Set hard-sized values to the local variable to correct a false indication aftet SolFla function calculation
-                if (this->UA == AutoSize) {
+                bool UAAutoSize = false; // Indicator to autosizing UA
+                // Set hard-sized values to the local variable to correct a false indication after SolFla function calculation
+                if (this->UA == DataSizing::AutoSize) {
                     UAAutoSize = true;
                 } else {
                     UAUser = this->UA;
@@ -780,60 +711,55 @@ namespace BaseboardRadiator {
                             state, cCMO_BBRadiator_Water, this->EquipID, "User-Specified U-Factor Times Area Value [W/K]", this->UA);
                     }
                 } else {
+                    auto &zoneEqSizing = state.dataSize->ZoneEqSizing(state.dataSize->CurZoneEqNum);
+                    auto const &finalZoneSizing = state.dataSize->FinalZoneSizing(state.dataSize->CurZoneEqNum);
                     this->WaterInletTemp = state.dataSize->PlantSizData(PltSizHeatNum).ExitTemp;
-                    this->AirInletTemp = FinalZoneSizing(CurZoneEqNum).ZoneTempAtHeatPeak;
-                    this->AirInletHumRat = FinalZoneSizing(CurZoneEqNum).ZoneHumRatAtHeatPeak;
-                    WaterInletNode = this->WaterInletNode;
-                    rho = GetDensityGlycol(state,
-                                           state.dataPlnt->PlantLoop(this->plantLoc.loopNum).FluidName,
-                                           DataGlobalConstants::HWInitConvTemp,
-                                           state.dataPlnt->PlantLoop(this->plantLoc.loopNum).FluidIndex,
-                                           RoutineName);
-                    state.dataLoopNodes->Node(WaterInletNode).MassFlowRate = rho * this->WaterVolFlowRateMax;
+                    this->AirInletTemp = finalZoneSizing.ZoneTempAtHeatPeak;
+                    this->AirInletHumRat = finalZoneSizing.ZoneHumRatAtHeatPeak;
+                    rho = this->plantLoc.loop->glycol->getDensity(state, Constant::HWInitConvTemp, RoutineName);
+                    state.dataLoopNodes->Node(this->WaterInletNode).MassFlowRate = rho * this->WaterVolFlowRateMax;
 
-                    CompType = cCMO_BBRadiator_Water;
-                    CompName = this->EquipID;
+                    std::string_view const CompType = cCMO_BBRadiator_Water;
+                    std::string_view const CompName = this->EquipID;
                     state.dataSize->DataFracOfAutosizedHeatingCapacity = 1.0;
                     state.dataSize->DataZoneNumber = this->ZonePtr;
-                    SizingMethod = HeatingCapacitySizing;
-                    FieldNum = 1;
-                    PrintFlag = false;
-                    SizingString = this->FieldNames(FieldNum) + " [W]";
-                    CapSizingMethod = this->HeatingCapMethod;
-                    ZoneEqSizing(CurZoneEqNum).SizingMethod(SizingMethod) = CapSizingMethod;
-                    if (CapSizingMethod == HeatingDesignCapacity || CapSizingMethod == CapacityPerFloorArea ||
-                        CapSizingMethod == FractionOfAutosizedHeatingCapacity) {
-                        if (CapSizingMethod == HeatingDesignCapacity) {
-                            if (this->ScaledHeatingCapacity == AutoSize) {
-                                CheckZoneSizing(state, CompType, CompName);
-                                ZoneEqSizing(CurZoneEqNum).DesHeatingLoad = FinalZoneSizing(CurZoneEqNum).NonAirSysDesHeatLoad;
+                    int SizingMethod = HVAC::HeatingCapacitySizing;
+                    int FieldNum = 1;
+                    std::string const SizingString = std::format("{} [W]", this->FieldNames[FieldNum - 1]);
+                    int CapSizingMethod = this->HeatingCapMethod;
+                    zoneEqSizing.SizingMethod(SizingMethod) = CapSizingMethod;
+                    if (CapSizingMethod == DataSizing::HeatingDesignCapacity || CapSizingMethod == DataSizing::CapacityPerFloorArea ||
+                        CapSizingMethod == DataSizing::FractionOfAutosizedHeatingCapacity) {
+                        if (CapSizingMethod == DataSizing::HeatingDesignCapacity) {
+                            if (this->ScaledHeatingCapacity == DataSizing::AutoSize) {
+                                zoneEqSizing.DesHeatingLoad = finalZoneSizing.NonAirSysDesHeatLoad;
                             } else {
-                                ZoneEqSizing(CurZoneEqNum).DesHeatingLoad = this->ScaledHeatingCapacity;
+                                zoneEqSizing.DesHeatingLoad = this->ScaledHeatingCapacity;
                             }
-                            ZoneEqSizing(CurZoneEqNum).HeatingCapacity = true;
-                            TempSize = ZoneEqSizing(CurZoneEqNum).DesHeatingLoad;
-                        } else if (CapSizingMethod == CapacityPerFloorArea) {
-                            ZoneEqSizing(CurZoneEqNum).HeatingCapacity = true;
-                            ZoneEqSizing(CurZoneEqNum).DesHeatingLoad =
+                            zoneEqSizing.HeatingCapacity = true;
+                            TempSize = zoneEqSizing.DesHeatingLoad;
+                        } else if (CapSizingMethod == DataSizing::CapacityPerFloorArea) {
+                            zoneEqSizing.HeatingCapacity = true;
+                            zoneEqSizing.DesHeatingLoad =
                                 this->ScaledHeatingCapacity * state.dataHeatBal->Zone(state.dataSize->DataZoneNumber).FloorArea;
-                            TempSize = ZoneEqSizing(CurZoneEqNum).DesHeatingLoad;
-                            DataScalableCapSizingON = true;
-                        } else if (CapSizingMethod == FractionOfAutosizedHeatingCapacity) {
-                            CheckZoneSizing(state, CompType, CompName);
-                            ZoneEqSizing(CurZoneEqNum).HeatingCapacity = true;
+                            TempSize = zoneEqSizing.DesHeatingLoad;
+                            state.dataSize->DataScalableCapSizingON = true;
+                        } else if (CapSizingMethod == DataSizing::FractionOfAutosizedHeatingCapacity) {
+                            zoneEqSizing.HeatingCapacity = true;
                             state.dataSize->DataFracOfAutosizedHeatingCapacity = this->ScaledHeatingCapacity;
-                            ZoneEqSizing(CurZoneEqNum).DesHeatingLoad = FinalZoneSizing(CurZoneEqNum).NonAirSysDesHeatLoad;
-                            TempSize = AutoSize;
-                            DataScalableCapSizingON = true;
+                            zoneEqSizing.DesHeatingLoad = finalZoneSizing.NonAirSysDesHeatLoad;
+                            TempSize = DataSizing::AutoSize;
+                            state.dataSize->DataScalableCapSizingON = true;
                         } else {
                             TempSize = this->ScaledHeatingCapacity;
                         }
+                        bool PrintFlag = false;
                         bool errorsFound = false;
                         HeatingCapacitySizer sizerHeatingCapacity;
                         sizerHeatingCapacity.overrideSizingString(SizingString);
                         sizerHeatingCapacity.initializeWithinEP(state, CompType, CompName, PrintFlag, RoutineName);
                         DesCoilLoad = sizerHeatingCapacity.size(state, TempSize, errorsFound);
-                        DataScalableCapSizingON = false;
+                        state.dataSize->DataScalableCapSizingON = false;
                     } else {
                         DesCoilLoad = 0.0; // FinalZoneSizing(CurZoneEqNum).NonAirSysDesHeatLoad;
                     }
@@ -862,13 +788,14 @@ namespace BaseboardRadiator {
                                     SimHWConvective(state, localBaseBoardNum, LoadMet);
                                     return (DesCoilLoad - LoadMet) / DesCoilLoad;
                                 };
+                                int SolFla = 0;
                                 General::SolveRoot(state, Acc, MaxIte, SolFla, UA, f, UA0, UA1);
                                 // if the numerical inversion failed, issue error messages.
                                 if (SolFla == -1) {
                                     ShowSevereError(state,
-                                                    format("SizeBaseboard: Autosizing of HW baseboard UA failed for {}=\"{}\"",
-                                                           cCMO_BBRadiator_Water,
-                                                           this->EquipID));
+                                                    std::format("SizeBaseboard: Autosizing of HW baseboard UA failed for {}=\"{}\"",
+                                                                cCMO_BBRadiator_Water,
+                                                                this->EquipID));
                                     ShowContinueError(state, "Iteration limit exceeded in calculating coil UA");
                                     if (UAAutoSize) {
                                         ErrorsFound = true;
@@ -879,9 +806,9 @@ namespace BaseboardRadiator {
                                     }
                                 } else if (SolFla == -2) {
                                     ShowSevereError(state,
-                                                    format("SizeBaseboard: Autosizing of HW baseboard UA failed for {}=\"{}\"",
-                                                           cCMO_BBRadiator_Water,
-                                                           this->EquipID));
+                                                    std::format("SizeBaseboard: Autosizing of HW baseboard UA failed for {}=\"{}\"",
+                                                                cCMO_BBRadiator_Water,
+                                                                this->EquipID));
                                     ShowContinueError(state, "Bad starting values for UA");
                                     if (UAAutoSize) {
                                         ErrorsFound = true;
@@ -896,27 +823,30 @@ namespace BaseboardRadiator {
                                 UADes = UA1;
                                 if (UAAutoSize) {
                                     ShowWarningError(state,
-                                                     format("SizeBaseboard: Autosizing of HW baseboard UA failed for {}=\"{}\"",
-                                                            cCMO_BBRadiator_Water,
-                                                            this->EquipID));
+                                                     std::format("SizeBaseboard: Autosizing of HW baseboard UA failed for {}=\"{}\"",
+                                                                 cCMO_BBRadiator_Water,
+                                                                 this->EquipID));
                                     ShowContinueError(
-                                        state, format("Design UA set equal to design coil load for {}=\"{}\"", cCMO_BBRadiator_Water, this->EquipID));
-                                    ShowContinueError(state, format("Design coil load used during sizing = {:.5R} W.", DesCoilLoad));
-                                    ShowContinueError(state, format("Inlet water temperature used during sizing = {:.5R} C.", this->WaterInletTemp));
+                                        state,
+                                        std::format("Design UA set equal to design coil load for {}=\"{}\"", cCMO_BBRadiator_Water, this->EquipID));
+                                    ShowContinueError(state, std::format("Design coil load used during sizing = {:.5f} W.", DesCoilLoad));
+                                    ShowContinueError(state,
+                                                      std::format("Inlet water temperature used during sizing = {:.5f} C.", this->WaterInletTemp));
                                 }
                             }
                         } else { // baseboard design load is less than output at UA = 0.001 * design load so set UA to minimum value
                             UADes = UA0;
                             if (UAAutoSize) {
                                 ShowWarningError(state,
-                                                 format("SizeBaseboard: Autosizing of HW baseboard UA failed for {}=\"{}\"",
-                                                        cCMO_BBRadiator_Water,
-                                                        this->EquipID));
-                                ShowContinueError(
-                                    state,
-                                    format("Design UA set equal to 0.001 * design coil load for {}=\"{}\"", cCMO_BBRadiator_Water, this->EquipID));
-                                ShowContinueError(state, format("Design coil load used during sizing = {:.5R} W.", DesCoilLoad));
-                                ShowContinueError(state, format("Inlet water temperature used during sizing = {:.5R} C.", this->WaterInletTemp));
+                                                 std::format("SizeBaseboard: Autosizing of HW baseboard UA failed for {}=\"{}\"",
+                                                             cCMO_BBRadiator_Water,
+                                                             this->EquipID));
+                                ShowContinueError(state,
+                                                  std::format("Design UA set equal to 0.001 * design coil load for {}=\"{}\"",
+                                                              cCMO_BBRadiator_Water,
+                                                              this->EquipID));
+                                ShowContinueError(state, std::format("Design coil load used during sizing = {:.5f} W.", DesCoilLoad));
+                                ShowContinueError(state, std::format("Inlet water temperature used during sizing = {:.5f} C.", this->WaterInletTemp));
                             }
                         }
 
@@ -943,10 +873,12 @@ namespace BaseboardRadiator {
                                 if ((std::abs(UADes - UAUser) / UAUser) > state.dataSize->AutoVsHardSizingThreshold) {
                                     ShowMessage(
                                         state,
-                                        format("SizeBaseboard: Potential issue with equipment sizing for ZoneHVAC:Baseboard:Convective:Water=\"{}\".",
-                                               this->EquipID));
-                                    ShowContinueError(state, format("User-Specified U-Factor Times Area Value of {:.2R} [W/K]", UAUser));
-                                    ShowContinueError(state, format("differs from Design Size U-Factor Times Area Value of {:.2R} [W/K]", UADes));
+                                        std::format(
+                                            "SizeBaseboard: Potential issue with equipment sizing for ZoneHVAC:Baseboard:Convective:Water=\"{}\".",
+                                            this->EquipID));
+                                    ShowContinueError(state, std::format("User-Specified U-Factor Times Area Value of {:.2f} [W/K]", UAUser));
+                                    ShowContinueError(state,
+                                                      std::format("differs from Design Size U-Factor Times Area Value of {:.2f} [W/K]", UADes));
                                     ShowContinueError(state, "This may, or may not, indicate mismatched component sizes.");
                                     ShowContinueError(state, "Verify that the value entered is intended and is consistent with other components.");
                                 }
@@ -956,19 +888,33 @@ namespace BaseboardRadiator {
                 }
             }
         } else {
-            // if there is no heating Sizing:Plant object and autosizng was requested, issue an error message
-            if (FlowAutoSize || UAAutoSize) {
-                ShowSevereError(state, format("SizeBaseboard: {}=\"{}\"", cCMO_BBRadiator_Water, this->EquipID));
+            // if there is no heating Sizing:Plant object and autosizing was requested, issue an error message
+            if (this->WaterVolFlowRateMax == DataSizing::AutoSize || this->UA == DataSizing::AutoSize) {
+                ShowSevereError(state, std::format("SizeBaseboard: {}=\"{}\"", cCMO_BBRadiator_Water, this->EquipID));
                 ShowContinueError(state, "...Autosizing of hot water baseboard requires a heating loop Sizing:Plant object");
                 ErrorsFound = true;
             }
         }
 
         // save the design water flow rate for use by the water loop sizing algorithms
-        RegisterPlantCompDesignFlow(state, this->WaterInletNode, this->WaterVolFlowRateMax);
+        PlantUtilities::RegisterPlantCompDesignFlow(state, this->WaterInletNode, this->WaterVolFlowRateMax);
 
         if (ErrorsFound) {
             ShowFatalError(state, "SizeBaseboard: Preceding sizing errors cause program termination");
+        }
+    }
+
+    void BaseboardParams::checkForZoneSizing(EnergyPlusData &state)
+    {
+        // If any sizing is requested, check that zone sizing has been done
+        // Condition 1: Is UA autosized)?
+        // Condition 2: Is max flow rate  autosized?
+        // Condition 3: Is HeatingDesignCapacity used and autosized)
+        // Condition 4: Is FractionOfAutosizedHeatingCapacity used and heating capacity is autosized
+        if ((this->UA == DataSizing::AutoSize) || (this->WaterVolFlowRateMax == DataSizing::AutoSize) ||
+            ((this->HeatingCapMethod == DataSizing::HeatingDesignCapacity) && (this->ScaledHeatingCapacity == DataSizing::AutoSize)) ||
+            ((this->HeatingCapMethod == DataSizing::FractionOfAutosizedHeatingCapacity) && (this->ScaledHeatingCapacity == DataSizing::AutoSize))) {
+            CheckZoneSizing(state, cCMO_BBRadiator_Water, this->EquipID);
         }
     }
 
@@ -993,7 +939,7 @@ namespace BaseboardRadiator {
 
         // Using/Aliasing
         using namespace DataSizing;
-        using DataHVACGlobals::SmallLoad;
+        using HVAC::SmallLoad;
         using PlantUtilities::SetActuatedBranchFlowRate;
 
         // SUBROUTINE PARAMETER DEFINITIONS:
@@ -1021,42 +967,41 @@ namespace BaseboardRadiator {
         Real64 CC;
         Real64 QZnReq;
 
-        auto &baseboard = state.dataBaseboardRadiator;
+        auto &baseboard = state.dataBaseboardRadiator->baseboards(BaseboardNum);
 
-        ZoneNum = baseboard->baseboards(BaseboardNum).ZonePtr;
+        ZoneNum = baseboard.ZonePtr;
         QZnReq = state.dataZoneEnergyDemand->ZoneSysEnergyDemand(ZoneNum).RemainingOutputReqToHeatSP;
-        if (baseboard->baseboards(BaseboardNum).MySizeFlag)
+        if (baseboard.MySizeFlag) {
             QZnReq = state.dataSize->FinalZoneSizing(state.dataSize->CurZoneEqNum).NonAirSysDesHeatLoad; // If in sizing, assign design condition
-
-        WaterInletTemp = baseboard->baseboards(BaseboardNum).WaterInletTemp;
-        AirInletTemp = baseboard->baseboards(BaseboardNum).AirInletTemp;
-
-        CpWater = GetSpecificHeatGlycol(state,
-                                        state.dataPlnt->PlantLoop(baseboard->baseboards(BaseboardNum).plantLoc.loopNum).FluidName,
-                                        WaterInletTemp,
-                                        state.dataPlnt->PlantLoop(baseboard->baseboards(BaseboardNum).plantLoc.loopNum).FluidIndex,
-                                        RoutineName);
-        CpAir = PsyCpAirFnW(baseboard->baseboards(BaseboardNum).AirInletHumRat);
-
-        if (baseboard->baseboards(BaseboardNum).DesAirMassFlowRate > 0.0) { // If UA is autosized, assign design condition
-            AirMassFlowRate = baseboard->baseboards(BaseboardNum).DesAirMassFlowRate;
-        } else {
-            AirMassFlowRate = baseboard->baseboards(BaseboardNum).AirMassFlowRate;
-            // pick a mass flow rate that depends on the max water mass flow rate. CR 8842 changed to factor of 2.0
-            if (AirMassFlowRate <= 0.0) AirMassFlowRate = 2.0 * baseboard->baseboards(BaseboardNum).WaterMassFlowRateMax;
         }
 
-        WaterMassFlowRate = state.dataLoopNodes->Node(baseboard->baseboards(BaseboardNum).WaterInletNode).MassFlowRate;
+        WaterInletTemp = baseboard.WaterInletTemp;
+        AirInletTemp = baseboard.AirInletTemp;
+
+        CpWater = baseboard.plantLoc.loop->glycol->getSpecificHeat(state, WaterInletTemp, RoutineName);
+        CpAir = PsyCpAirFnW(baseboard.AirInletHumRat);
+
+        if (baseboard.DesAirMassFlowRate > 0.0) { // If UA is autosized, assign design condition
+            AirMassFlowRate = baseboard.DesAirMassFlowRate;
+        } else {
+            AirMassFlowRate = baseboard.AirMassFlowRate;
+            // pick a mass flow rate that depends on the max water mass flow rate. CR 8842 changed to factor of 2.0
+            if (AirMassFlowRate <= 0.0) {
+                AirMassFlowRate = 2.0 * baseboard.WaterMassFlowRateMax;
+            }
+        }
+
+        WaterMassFlowRate = state.dataLoopNodes->Node(baseboard.WaterInletNode).MassFlowRate;
         CapacitanceAir = CpAir * AirMassFlowRate;
 
-        if (QZnReq > SmallLoad && (!state.dataZoneEnergyDemand->CurDeadBandOrSetback(ZoneNum) || baseboard->baseboards(BaseboardNum).MySizeFlag) &&
-            (GetCurrentScheduleValue(state, baseboard->baseboards(BaseboardNum).SchedPtr) > 0 || baseboard->baseboards(BaseboardNum).MySizeFlag) &&
-            (WaterMassFlowRate > 0.0)) {
+        if (QZnReq > SmallLoad && (!state.dataZoneEnergyDemand->CurDeadBandOrSetback(ZoneNum) || baseboard.MySizeFlag) &&
+            (baseboard.availSched->getCurrentVal() > 0 || baseboard.MySizeFlag) && (WaterMassFlowRate > 0.0)) {
+
             CapacitanceWater = CpWater * WaterMassFlowRate;
             CapacitanceMax = max(CapacitanceAir, CapacitanceWater);
             CapacitanceMin = min(CapacitanceAir, CapacitanceWater);
             CapacityRatio = CapacitanceMin / CapacitanceMax;
-            NTU = baseboard->baseboards(BaseboardNum).UA / CapacitanceMin;
+            NTU = baseboard.UA / CapacitanceMin;
             // The effectiveness is given by the following formula:
             // Effectiveness = 1. - EXP((1./CapacityRatio)*(NTU)**0.22*(EXP(-CapacityRatio*(NTU)**0.78)-1.))
             // To prevent possible underflows (numbers smaller than the computer can handle) we must break
@@ -1076,25 +1021,23 @@ namespace BaseboardRadiator {
             AirOutletTemp = AirInletTemp + Effectiveness * CapacitanceMin * (WaterInletTemp - AirInletTemp) / CapacitanceAir;
             WaterOutletTemp = WaterInletTemp - CapacitanceAir * (AirOutletTemp - AirInletTemp) / CapacitanceWater;
             LoadMet = CapacitanceWater * (WaterInletTemp - WaterOutletTemp);
-            baseboard->baseboards(BaseboardNum).WaterOutletEnthalpy =
-                baseboard->baseboards(BaseboardNum).WaterInletEnthalpy - LoadMet / WaterMassFlowRate;
+            baseboard.WaterOutletEnthalpy = baseboard.WaterInletEnthalpy - LoadMet / WaterMassFlowRate;
         } else {
             AirOutletTemp = AirInletTemp;
             WaterOutletTemp = WaterInletTemp;
             LoadMet = 0.0;
-            baseboard->baseboards(BaseboardNum).WaterOutletEnthalpy = baseboard->baseboards(BaseboardNum).WaterInletEnthalpy;
+            baseboard.WaterOutletEnthalpy = baseboard.WaterInletEnthalpy;
             WaterMassFlowRate = 0.0;
 
-            SetActuatedBranchFlowRate(
-                state, WaterMassFlowRate, baseboard->baseboards(BaseboardNum).WaterInletNode, baseboard->baseboards(BaseboardNum).plantLoc, false);
+            SetActuatedBranchFlowRate(state, WaterMassFlowRate, baseboard.WaterInletNode, baseboard.plantLoc, false);
             AirMassFlowRate = 0.0;
         }
 
-        baseboard->baseboards(BaseboardNum).WaterOutletTemp = WaterOutletTemp;
-        baseboard->baseboards(BaseboardNum).AirOutletTemp = AirOutletTemp;
-        baseboard->baseboards(BaseboardNum).Power = LoadMet;
-        baseboard->baseboards(BaseboardNum).WaterMassFlowRate = WaterMassFlowRate;
-        baseboard->baseboards(BaseboardNum).AirMassFlowRate = AirMassFlowRate;
+        baseboard.WaterOutletTemp = WaterOutletTemp;
+        baseboard.AirOutletTemp = AirOutletTemp;
+        baseboard.Power = LoadMet;
+        baseboard.WaterMassFlowRate = WaterMassFlowRate;
+        baseboard.AirMassFlowRate = AirMassFlowRate;
     }
 
     void UpdateBaseboard(EnergyPlusData &state, int &BaseboardNum)

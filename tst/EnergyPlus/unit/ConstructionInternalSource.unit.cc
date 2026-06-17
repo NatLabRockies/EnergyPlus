@@ -1,7 +1,7 @@
-// EnergyPlus, Copyright (c) 1996-2023, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
-// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other
+// National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
 // contributors. All rights reserved.
 //
 // NOTICE: This Software was developed under funding from the U.S. Department of Energy and the
@@ -90,4 +90,52 @@ TEST_F(EnergyPlusFixture, ConstructionInternalSource)
     GetConstructData(*state, errorsFound);
 
     EXPECT_NEAR(0.1524, state->dataConstruction->Construct(1).ThicknessPerpend, 0.0001);
+}
+
+TEST_F(EnergyPlusFixture, ConstructionInternalSourceEmptyField)
+{
+
+    // test whether empty "Two-Dimensional Temperature Calculation Position" causes reading errors
+    std::string const idf_objects = delimited_string({
+        "	ConstructionProperty:InternalHeatSource,	",
+        "	Radiant Source,          !- Name",
+        "	Slab Floor with Radiant, !- Construction Name",
+        "	4,                       !- Source Present After Layer Number",
+        "	4,                       !- Temperature Calculation Requested After Layer Number",
+        "	2,                       !- Dimensions for the CTF Calculation",
+        "	0.3048,                  !- Tube Spacing {m}",
+        "	;                        !- Two-Dimensional Temperature Calculation Position",
+        "	Construction,	",
+        "	Slab Floor with Radiant, !- Name",
+        "	CONCRETE - DRIED SAND AND GRAVEL 4 IN,  !- Outside Layer",
+        "	INS - EXPANDED EXT POLYSTYRENE R12 2 IN,  !- Layer 2",
+        "	GYP1,                    !- Layer 3",
+        "	GYP2,                    !- Layer 4",
+        "	FINISH FLOORING - TILE 1 / 16 IN;  !- Layer 5",
+        "	ConstructionProperty:InternalHeatSource,	",
+        "	Radiant Source 2,          !- Name",
+        "	Slab Floor with Radiant 2, !- Construction Name",
+        "	4,                       !- Source Present After Layer Number",
+        "	4,                       !- Temperature Calculation Requested After Layer Number",
+        "	2,                       !- Dimensions for the CTF Calculation",
+        "	0.3048,                  !- Tube Spacing {m}",
+        "	0.2;                     !- Two-Dimensional Temperature Calculation Position",
+        "	Construction,	",
+        "	Slab Floor with Radiant 2, !- Name",
+        "	CONCRETE - DRIED SAND AND GRAVEL 4 IN,  !- Outside Layer",
+        "	INS - EXPANDED EXT POLYSTYRENE R12 2 IN,  !- Layer 2",
+        "	GYP1,                    !- Layer 3",
+        "	GYP2,                    !- Layer 4",
+        "	FINISH FLOORING - TILE 1 / 16 IN;  !- Layer 5",
+    });
+
+    ASSERT_TRUE(process_idf(idf_objects));
+
+    bool errorsFound(false);
+
+    GetConstructData(*state, errorsFound);
+    // errorsFound is true, because the materials are included in the idf snippet - that's ok
+
+    EXPECT_EQ(state->dataConstruction->Construct(1).userTemperatureLocationPerpendicular, 0.0);
+    EXPECT_EQ(state->dataConstruction->Construct(2).userTemperatureLocationPerpendicular, 0.2);
 }

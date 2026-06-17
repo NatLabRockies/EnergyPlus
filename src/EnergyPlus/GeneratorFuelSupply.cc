@@ -1,7 +1,7 @@
-// EnergyPlus, Copyright (c) 1996-2023, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
-// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other
+// National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
 // contributors. All rights reserved.
 //
 // NOTICE: This Software was developed under funding from the U.S. Department of Energy and the
@@ -57,7 +57,6 @@
 #include <EnergyPlus/CurveManager.hh>
 #include <EnergyPlus/Data/EnergyPlusData.hh>
 #include <EnergyPlus/DataGenerators.hh>
-#include <EnergyPlus/DataIPShortCuts.hh>
 #include <EnergyPlus/DataLoopNode.hh>
 #include <EnergyPlus/General.hh>
 #include <EnergyPlus/GeneratorFuelSupply.hh>
@@ -77,13 +76,11 @@ namespace GeneratorFuelSupply {
     //   reused among some generators to define gaseous fuel chemistry, optional compressor)
 
     // Module containing the routines dealing with the fuel supply for some generators
-    // different generator modules can reuse the same fuel supply code, hence a seperate module
+    // different generator modules can reuse the same fuel supply code, hence a separate module
 
     // MODULE INFORMATION:
     //       AUTHOR         B Griffith
     //       DATE WRITTEN   July 2006
-    //       MODIFIED       na
-    //       RE-ENGINEERED  na
 
     // METHODOLOGY EMPLOYED:
     // data defined in DataGenerators.cc
@@ -93,158 +90,157 @@ namespace GeneratorFuelSupply {
     // REFERENCES:
     // Annex 42 documentation
 
-    // Using/Aliasing
-    using namespace DataGenerators;
-
     void GetGeneratorFuelSupplyInput(EnergyPlusData &state)
     {
 
         // SUBROUTINE INFORMATION:
         //       AUTHOR         B Griffith
         //       DATE WRITTEN   July 2006,
-        //       MODIFIED       na
         //       RE-ENGINEERED  this module extracted from older SOFC module for
         //                      reuse with both Annex 42 models,
 
-        // Using/Aliasing
-        using Curve::GetCurveIndex;
-        using DataLoopNode::ObjectIsNotParent;
-        using NodeInputManager::GetOnlySingleNode;
-        using ScheduleManager::GetScheduleIndex;
-
-        // SUBROUTINE LOCAL VARIABLE DECLARATIONS:
-        //  INTEGER                     :: GeneratorNum !Generator counter
-        int NumAlphas;                 // Number of elements in the alpha array
-        int NumNums;                   // Number of elements in the numeric array
-        int IOStat;                    // IO Status when calling get input subroutine
-        Array1D_string AlphArray(25);  // character string data
-        Array1D<Real64> NumArray(200); // numeric data TODO deal with allocatable for extensible
-        bool ErrorsFound(false);       // error flag
-        int FuelSupNum;
-        std::string ObjMSGName;
-        int ConstitNum;
-        auto &cCurrentModuleObject = state.dataIPShortCut->cCurrentModuleObject;
-
+        static constexpr std::string_view routineName = "GetGeneratorFuelSupplyInput";
         if (state.dataGeneratorFuelSupply->MyOneTimeFlag) {
-            cCurrentModuleObject = "Generator:FuelSupply";
-            int NumGeneratorFuelSups = state.dataInputProcessing->inputProcessor->getNumObjectsFound(state, cCurrentModuleObject);
+            bool ErrorsFound = false;
+            std::string const cCurrentModuleObject = "Generator:FuelSupply";
+            auto *inputProcessor = state.dataInputProcessing->inputProcessor.get();
+            int NumGeneratorFuelSups = inputProcessor->getNumObjectsFound(state, cCurrentModuleObject);
+            auto const &fuelSupplySchemaProps = inputProcessor->getObjectSchemaProps(state, cCurrentModuleObject);
+            static constexpr std::string_view fuelTemperatureModelingModeFieldName = "Fuel Temperature Modeling Mode";
+            static constexpr std::string_view fuelTemperatureScheduleNameFieldName = "Fuel Temperature Schedule Name";
+            static constexpr std::string_view compressorPowerCurveFieldName = "Compressor Power Multiplier Function of Fuel Rate Curve Name";
+            static constexpr std::string_view fuelTypeFieldName = "Fuel Type";
 
             if (NumGeneratorFuelSups <= 0) {
-                ShowSevereError(state, format("No {} equipment specified in input file", cCurrentModuleObject));
+                ShowSevereError(state, std::format("No {} equipment specified in input file", cCurrentModuleObject));
                 ErrorsFound = true;
             }
 
             state.dataGenerator->FuelSupply.allocate(NumGeneratorFuelSups);
+            auto const fuelSupplyObjects = inputProcessor->epJSON.find(cCurrentModuleObject);
+            if (fuelSupplyObjects != inputProcessor->epJSON.end()) {
+                int FuelSupNum = 0;
+                for (auto const &fuelSupplyInstance : fuelSupplyObjects.value().items()) {
+                    auto const &fuelSupplyFields = fuelSupplyInstance.value();
+                    auto const fuelSupplyName = Util::makeUPPER(fuelSupplyInstance.key());
+                    auto const fuelTemperatureModelingMode =
+                        inputProcessor->getAlphaFieldValue(fuelSupplyFields, fuelSupplySchemaProps, "fuel_temperature_modeling_mode");
+                    auto const fuelTemperatureReferenceNodeName = Util::makeUPPER(
+                        inputProcessor->getAlphaFieldValue(fuelSupplyFields, fuelSupplySchemaProps, "fuel_temperature_reference_node_name"));
+                    auto const fuelTemperatureScheduleName = Util::makeUPPER(
+                        inputProcessor->getAlphaFieldValue(fuelSupplyFields, fuelSupplySchemaProps, "fuel_temperature_schedule_name"));
+                    auto const compressorPowerCurveName = Util::makeUPPER(inputProcessor->getAlphaFieldValue(
+                        fuelSupplyFields, fuelSupplySchemaProps, "compressor_power_multiplier_function_of_fuel_rate_curve_name"));
+                    auto const fuelType = inputProcessor->getAlphaFieldValue(fuelSupplyFields, fuelSupplySchemaProps, "fuel_type");
 
-            for (FuelSupNum = 1; FuelSupNum <= NumGeneratorFuelSups; ++FuelSupNum) {
-                state.dataInputProcessing->inputProcessor->getObjectItem(state,
-                                                                         cCurrentModuleObject,
-                                                                         FuelSupNum,
-                                                                         AlphArray,
-                                                                         NumAlphas,
-                                                                         NumArray,
-                                                                         NumNums,
-                                                                         IOStat,
-                                                                         _,
-                                                                         _,
-                                                                         state.dataIPShortCut->cAlphaFieldNames,
-                                                                         state.dataIPShortCut->cNumericFieldNames);
-                UtilityRoutines::IsNameEmpty(state, AlphArray(1), cCurrentModuleObject, ErrorsFound);
+                    inputProcessor->markObjectAsUsed(cCurrentModuleObject, fuelSupplyInstance.key());
 
-                state.dataGenerator->FuelSupply(FuelSupNum).Name = AlphArray(1);
-                ObjMSGName = cCurrentModuleObject + " Named " + AlphArray(1);
-                if (UtilityRoutines::SameString("TemperatureFromAirNode", AlphArray(2))) {
-                    state.dataGenerator->FuelSupply(FuelSupNum).FuelTempMode = DataGenerators::FuelTemperatureMode::FuelInTempFromNode;
-                } else if (UtilityRoutines::SameString("Scheduled", AlphArray(2))) {
-                    state.dataGenerator->FuelSupply(FuelSupNum).FuelTempMode = DataGenerators::FuelTemperatureMode::FuelInTempSchedule;
-                } else {
-                    ShowSevereError(state, format("Invalid, {} = {}", state.dataIPShortCut->cAlphaFieldNames(2), AlphArray(2)));
-                    ShowContinueError(state, format("Entered in {}={}", cCurrentModuleObject, AlphArray(1)));
-                    ErrorsFound = true;
-                }
-
-                state.dataGenerator->FuelSupply(FuelSupNum).NodeName = AlphArray(3);
-                state.dataGenerator->FuelSupply(FuelSupNum).NodeNum = GetOnlySingleNode(state,
-                                                                                        AlphArray(3),
-                                                                                        ErrorsFound,
-                                                                                        DataLoopNode::ConnectionObjectType::GeneratorFuelSupply,
-                                                                                        AlphArray(1),
-                                                                                        DataLoopNode::NodeFluidType::Air,
-                                                                                        DataLoopNode::ConnectionType::Sensor,
-                                                                                        NodeInputManager::CompFluidStream::Primary,
-                                                                                        ObjectIsNotParent);
-
-                state.dataGenerator->FuelSupply(FuelSupNum).SchedNum = GetScheduleIndex(state, AlphArray(4));
-                if ((state.dataGenerator->FuelSupply(FuelSupNum).SchedNum == 0) &&
-                    (state.dataGenerator->FuelSupply(FuelSupNum).FuelTempMode == DataGenerators::FuelTemperatureMode::FuelInTempSchedule)) {
-                    ShowSevereError(state, format("Invalid, {} = {}", state.dataIPShortCut->cAlphaFieldNames(4), AlphArray(4)));
-                    ShowContinueError(state, format("Entered in {}={}", cCurrentModuleObject, AlphArray(1)));
-                    ShowContinueError(state, "Schedule named was not found");
-                    ErrorsFound = true;
-                }
-
-                state.dataGenerator->FuelSupply(FuelSupNum).CompPowerCurveID = GetCurveIndex(state, AlphArray(5));
-                if (state.dataGenerator->FuelSupply(FuelSupNum).CompPowerCurveID == 0) {
-                    ShowSevereError(state, format("Invalid, {} = {}", state.dataIPShortCut->cAlphaFieldNames(5), AlphArray(5)));
-                    ShowContinueError(state, format("Entered in {}={}", cCurrentModuleObject, AlphArray(1)));
-                    ShowContinueError(state, "Curve named was not found ");
-                    ErrorsFound = true;
-                }
-
-                for (auto &e : state.dataGenerator->FuelSupply)
-                    e.CompPowerLossFactor = NumArray(1);
-
-                if (UtilityRoutines::SameString(AlphArray(6), "GaseousConstituents")) {
-                    state.dataGenerator->FuelSupply(FuelSupNum).FuelTypeMode = DataGenerators::FuelMode::GaseousConstituents;
-                } else if (UtilityRoutines::SameString(AlphArray(6), "LiquidGeneric")) {
-                    state.dataGenerator->FuelSupply(FuelSupNum).FuelTypeMode = DataGenerators::FuelMode::GenericLiquid;
-                } else {
-                    ShowSevereError(state, format("Invalid, {} = {}", state.dataIPShortCut->cAlphaFieldNames(6), AlphArray(6)));
-                    ShowContinueError(state, format("Entered in {}={}", cCurrentModuleObject, AlphArray(1)));
-                    ErrorsFound = true;
-                }
-
-                state.dataGenerator->FuelSupply(FuelSupNum).LHVliquid = NumArray(2) * 1000.0; // generic liquid LHV  (kJ/kG input converted to J/kG )
-                state.dataGenerator->FuelSupply(FuelSupNum).HHV = NumArray(3) * 1000.0;       // generic liquid HHV (kJ/kG input converted to J/kG )
-                state.dataGenerator->FuelSupply(FuelSupNum).MW = NumArray(4);
-                state.dataGenerator->FuelSupply(FuelSupNum).eCO2 = NumArray(5);
-
-                if (state.dataGenerator->FuelSupply(FuelSupNum).FuelTypeMode == DataGenerators::FuelMode::GaseousConstituents) {
-                    int NumFuelConstit = NumArray(6);
-                    state.dataGenerator->FuelSupply(FuelSupNum).NumConstituents = NumFuelConstit;
-
-                    if (NumFuelConstit > 12) {
-                        ShowSevereError(state, format("{} model not set up for more than 12 fuel constituents", cCurrentModuleObject));
-                        ErrorsFound = true;
-                    }
-                    if (NumFuelConstit < 1) {
-                        ShowSevereError(state, format("{} model needs at least one fuel constituent", cCurrentModuleObject));
+                    ++FuelSupNum;
+                    ErrorObjectHeader eoh{routineName, cCurrentModuleObject, fuelSupplyName};
+                    auto &fuelSupply = state.dataGenerator->FuelSupply(FuelSupNum);
+                    fuelSupply.Name = fuelSupplyName;
+                    if (Util::SameString("TemperatureFromAirNode", fuelTemperatureModelingMode)) {
+                        fuelSupply.FuelTempMode = DataGenerators::FuelTemperatureMode::FuelInTempFromNode;
+                    } else if (Util::SameString("Scheduled", fuelTemperatureModelingMode)) {
+                        fuelSupply.FuelTempMode = DataGenerators::FuelTemperatureMode::FuelInTempSchedule;
+                    } else {
+                        ShowSevereError(state, std::format("Invalid, {} = {}", fuelTemperatureModelingModeFieldName, fuelTemperatureModelingMode));
+                        ShowContinueError(state, std::format("Entered in {}={}", cCurrentModuleObject, fuelSupplyName));
                         ErrorsFound = true;
                     }
 
-                    for (ConstitNum = 1; ConstitNum <= NumFuelConstit; ++ConstitNum) {
-                        state.dataGenerator->FuelSupply(FuelSupNum).ConstitName(ConstitNum) = AlphArray(ConstitNum + 6);
-                        state.dataGenerator->FuelSupply(FuelSupNum).ConstitMolalFract(ConstitNum) = NumArray(ConstitNum + 6);
+                    fuelSupply.NodeName = fuelTemperatureReferenceNodeName;
+                    fuelSupply.NodeNum = Node::GetOnlySingleNode(state,
+                                                                 fuelTemperatureReferenceNodeName,
+                                                                 ErrorsFound,
+                                                                 Node::ConnectionObjectType::GeneratorFuelSupply,
+                                                                 fuelSupplyName,
+                                                                 Node::FluidType::Air,
+                                                                 Node::ConnectionType::Sensor,
+                                                                 Node::CompFluidStream::Primary,
+                                                                 Node::ObjectIsNotParent);
+
+                    if (fuelSupply.FuelTempMode == DataGenerators::FuelTemperatureMode::FuelInTempSchedule) {
+                        if ((fuelSupply.sched = Sched::GetSchedule(state, fuelTemperatureScheduleName)) == nullptr) {
+                            ShowSevereItemNotFound(state, eoh, fuelTemperatureScheduleNameFieldName, fuelTemperatureScheduleName);
+                            ErrorsFound = true;
+                        }
                     }
 
-                    // check for molar fractions summing to 1.0.
-                    if (std::abs(sum(state.dataGenerator->FuelSupply(FuelSupNum).ConstitMolalFract) - 1.0) > 0.0001) {
-                        ShowSevereError(state, format("{} molar fractions do not sum to 1.0", cCurrentModuleObject));
-                        ShowContinueError(state, format("Sum was={:.5R}", sum(state.dataGenerator->FuelSupply(FuelSupNum).ConstitMolalFract)));
-                        ShowContinueError(state, format("Entered in {} = {}", cCurrentModuleObject, AlphArray(1)));
+                    fuelSupply.CompPowerCurveID = Curve::GetCurveIndex(state, compressorPowerCurveName);
+                    if (fuelSupply.CompPowerCurveID == 0) {
+                        ShowSevereError(state, std::format("Invalid, {} = {}", compressorPowerCurveFieldName, compressorPowerCurveName));
+                        ShowContinueError(state, std::format("Entered in {}={}", cCurrentModuleObject, fuelSupplyName));
+                        ShowContinueError(state, "Curve named was not found ");
                         ErrorsFound = true;
+                    }
+
+                    fuelSupply.CompPowerLossFactor =
+                        inputProcessor->getRealFieldValue(fuelSupplyFields, fuelSupplySchemaProps, "compressor_heat_loss_factor");
+
+                    if (Util::SameString(fuelType, "GaseousConstituents")) {
+                        fuelSupply.FuelTypeMode = DataGenerators::FuelMode::GaseousConstituents;
+                    } else if (Util::SameString(fuelType, "LiquidGeneric")) {
+                        fuelSupply.FuelTypeMode = DataGenerators::FuelMode::GenericLiquid;
+                    } else {
+                        ShowSevereError(state, std::format("Invalid, {} = {}", fuelTypeFieldName, fuelType));
+                        ShowContinueError(state, std::format("Entered in {}={}", cCurrentModuleObject, fuelSupplyName));
+                        ErrorsFound = true;
+                    }
+
+                    fuelSupply.LHVliquid =
+                        inputProcessor->getRealFieldValue(fuelSupplyFields, fuelSupplySchemaProps, "liquid_generic_fuel_lower_heating_value") *
+                        1000.0; // generic liquid LHV  (kJ/kG input converted to J/kG )
+                    fuelSupply.HHV =
+                        inputProcessor->getRealFieldValue(fuelSupplyFields, fuelSupplySchemaProps, "liquid_generic_fuel_higher_heating_value") *
+                        1000.0; // generic liquid HHV (kJ/kG input converted to J/kG )
+                    fuelSupply.MW =
+                        inputProcessor->getRealFieldValue(fuelSupplyFields, fuelSupplySchemaProps, "liquid_generic_fuel_molecular_weight");
+                    fuelSupply.eCO2 =
+                        inputProcessor->getRealFieldValue(fuelSupplyFields, fuelSupplySchemaProps, "liquid_generic_fuel_co2_emission_factor");
+
+                    if (fuelSupply.FuelTypeMode == DataGenerators::FuelMode::GaseousConstituents) {
+                        int const NumFuelConstit = inputProcessor->getIntFieldValue(
+                            fuelSupplyFields, fuelSupplySchemaProps, "number_of_constituents_in_gaseous_constituent_fuel_supply");
+                        fuelSupply.NumConstituents = NumFuelConstit;
+
+                        if (NumFuelConstit > 12) {
+                            ShowSevereError(state, std::format("{} model not set up for more than 12 fuel constituents", cCurrentModuleObject));
+                            ErrorsFound = true;
+                        }
+                        if (NumFuelConstit < 1) {
+                            ShowSevereError(state, std::format("{} model needs at least one fuel constituent", cCurrentModuleObject));
+                            ErrorsFound = true;
+                        }
+
+                        for (int ConstitNum = 1; ConstitNum <= NumFuelConstit; ++ConstitNum) {
+                            auto const constituentNameFieldName = std::format("constituent_{}_name", ConstitNum);
+                            auto const constituentMolarFractionFieldName = std::format("constituent_{}_molar_fraction", ConstitNum);
+                            fuelSupply.ConstitName(ConstitNum) =
+                                inputProcessor->getAlphaFieldValue(fuelSupplyFields, fuelSupplySchemaProps, constituentNameFieldName);
+                            fuelSupply.ConstitMolalFract(ConstitNum) =
+                                inputProcessor->getRealFieldValue(fuelSupplyFields, fuelSupplySchemaProps, constituentMolarFractionFieldName);
+                        }
+
+                        // check for molar fractions summing to 1.0.
+                        if (std::abs(sum(fuelSupply.ConstitMolalFract) - 1.0) > 0.0001) {
+                            ShowSevereError(state, std::format("{} molar fractions do not sum to 1.0", cCurrentModuleObject));
+                            ShowContinueError(state, std::format("Sum was={:#G}", sum(fuelSupply.ConstitMolalFract)));
+                            ShowContinueError(state, std::format("Entered in {} = {}", cCurrentModuleObject, fuelSupplyName));
+                            ErrorsFound = true;
+                        }
                     }
                 }
             }
 
             // now make calls to Setup
 
-            for (FuelSupNum = 1; FuelSupNum <= NumGeneratorFuelSups; ++FuelSupNum) {
+            for (int FuelSupNum = 1; FuelSupNum <= NumGeneratorFuelSups; ++FuelSupNum) {
                 SetupFuelConstituentData(state, FuelSupNum, ErrorsFound);
             }
 
             if (ErrorsFound) {
-                ShowFatalError(state, format("Problem found processing input for {}", cCurrentModuleObject));
+                ShowFatalError(state, std::format("Problem found processing input for {}", cCurrentModuleObject));
             }
 
             state.dataGeneratorFuelSupply->MyOneTimeFlag = false;
@@ -259,7 +255,6 @@ namespace GeneratorFuelSupply {
         // SUBROUTINE INFORMATION:
         //       AUTHOR         B Griffith
         //       DATE WRITTEN   Aug 2005,
-        //       MODIFIED       na
         //       RE-ENGINEERED  July/Aug 2006, extracted to own module. added liquid fuel option
 
         // PURPOSE OF THIS SUBROUTINE:
@@ -268,30 +263,12 @@ namespace GeneratorFuelSupply {
         // METHODOLOGY EMPLOYED:
         // Hardcoded data from NIST is filled into data structure one time only
 
-        // SUBROUTINE LOCAL VARIABLE DECLARATIONS:
-        int NumHardCodedConstituents; // number of gases included in data
-        Real64 LHVfuel;               // lower heating value of fuel, working var
-        Real64 HHVfuel;               // higher heating value of fuel, working var
-        Real64 O2Stoic;               // stochiometric oxygen coef in chemical equation (15)
-        Real64 CO2ProdStoic;          // product gases carbon dioxide coeff
-        Real64 H2OProdStoic;          // product gases water coeff
-        int i;                        // loop index
-        std::string thisName;         // working string var
-        int thisGasID;                // working index in Gas phase data structure
-        int CO2dataID;                // hard wired to CO2 index in gas data struct
-        int WaterDataID;              // hard wired to Water index in gas data struct
-        Real64 LHVi;                  // working var for lower heating value calc
-        Real64 HHVi;                  // working var for higher heating value calc
-        //  INTEGER   :: thisConstituent
-        Real64 MWfuel;
-        // unused  REAL(r64) :: DelfHfuel
-        // unused  REAL(r64) :: h_i
-        // unused  REAL(r64) :: LHV
+        int constexpr NumHardCodedConstituents = 14; // number of gases included in data
 
-        NumHardCodedConstituents = 14;
-
+        bool first_time = false;
         if (!allocated(state.dataGenerator->GasPhaseThermoChemistryData)) {
             state.dataGenerator->GasPhaseThermoChemistryData.allocate(NumHardCodedConstituents);
+            first_time = true;
         }
         // Carbon Dioxide (CO2) Temp K 298-1200 (Chase 1998)
         state.dataGenerator->GasPhaseThermoChemistryData(1).ConstituentName = "CarbonDioxide";
@@ -602,21 +579,21 @@ namespace GeneratorFuelSupply {
             // now calculate LHV of fuel for entire simulation
 
             // sum over each constituent
-            O2Stoic = 0.0;
-            CO2ProdStoic = 0.0;
-            H2OProdStoic = 0.0;
-            CO2dataID = 1;   // hard-coded above
-            WaterDataID = 4; // hard-coded above
+            Real64 O2Stoic = 0.0;      // stochiometric oxygen coef in chemical equation (15)
+            Real64 CO2ProdStoic = 0.0; // product gases carbon dioxide coeff
+            Real64 H2OProdStoic = 0.0; // product gases water coeff
+            int CO2dataID = 1;         // hard-coded above
+            int WaterDataID = 4;       // hard-coded above
             // Loop over fuel constituents and do one-time setup
-            for (i = 1; i <= state.dataGenerator->FuelSupply(FuelSupplyNum).NumConstituents; ++i) {
+            for (int i = 1; i <= state.dataGenerator->FuelSupply(FuelSupplyNum).NumConstituents; ++i) {
 
-                thisName = state.dataGenerator->FuelSupply(FuelSupplyNum).ConstitName(i);
-                thisGasID =
-                    UtilityRoutines::FindItem(thisName, state.dataGenerator->GasPhaseThermoChemistryData, &GasPropertyDataStruct::ConstituentName);
+                std::string const &thisName = state.dataGenerator->FuelSupply(FuelSupplyNum).ConstitName(i);
+                int thisGasID = Util::FindItem(
+                    thisName, state.dataGenerator->GasPhaseThermoChemistryData, &DataGenerators::GasPropertyDataStruct::ConstituentName);
                 state.dataGenerator->FuelSupply(FuelSupplyNum).GasLibID(i) = thisGasID;
 
                 if (thisGasID == 0) {
-                    ShowSevereError(state, format("Fuel constituent not found in thermochemistry data: {}", thisName));
+                    ShowSevereError(state, std::format("Fuel constituent not found in thermochemistry data: {}", thisName));
                     ErrorsFound = true;
                 }
 
@@ -639,9 +616,10 @@ namespace GeneratorFuelSupply {
             state.dataGenerator->FuelSupply(FuelSupplyNum).H2OProductGasCoef = H2OProdStoic;
 
             // Calculate LHV for an NdotFuel of 1.0
-            LHVfuel = 0.0;
-            for (i = 1; i <= state.dataGenerator->FuelSupply(FuelSupplyNum).NumConstituents; ++i) {
-                thisGasID = state.dataGenerator->FuelSupply(FuelSupplyNum).GasLibID(i);
+            Real64 LHVfuel = 0.0;
+            Real64 LHVi; // working var for lower heating value calc
+            for (int i = 1; i <= state.dataGenerator->FuelSupply(FuelSupplyNum).NumConstituents; ++i) {
+                int thisGasID = state.dataGenerator->FuelSupply(FuelSupplyNum).GasLibID(i);
                 if (state.dataGenerator->GasPhaseThermoChemistryData(thisGasID).NumHydrogens == 0.0) {
                     LHVi = 0.0;
                 } else {
@@ -656,9 +634,10 @@ namespace GeneratorFuelSupply {
             state.dataGenerator->FuelSupply(FuelSupplyNum).LHV = LHVfuel;
 
             // Calculate HHV for an NdotFuel of 1.0
-            HHVfuel = 0.0;
-            for (i = 1; i <= state.dataGenerator->FuelSupply(FuelSupplyNum).NumConstituents; ++i) {
-                thisGasID = state.dataGenerator->FuelSupply(FuelSupplyNum).GasLibID(i);
+            Real64 HHVfuel = 0.0;
+            Real64 HHVi; // working var for higher heating value calc
+            for (int i = 1; i <= state.dataGenerator->FuelSupply(FuelSupplyNum).NumConstituents; ++i) {
+                int thisGasID = state.dataGenerator->FuelSupply(FuelSupplyNum).GasLibID(i);
                 if (state.dataGenerator->GasPhaseThermoChemistryData(thisGasID).NumHydrogens == 0.0) {
                     HHVi = 0.0;
                 } else {
@@ -674,9 +653,9 @@ namespace GeneratorFuelSupply {
             }
 
             // Calculate Molecular Weight for this fuel
-            MWfuel = 0.0;
-            for (i = 1; i <= state.dataGenerator->FuelSupply(FuelSupplyNum).NumConstituents; ++i) {
-                thisGasID = state.dataGenerator->FuelSupply(FuelSupplyNum).GasLibID(i);
+            Real64 MWfuel = 0.0;
+            for (int i = 1; i <= state.dataGenerator->FuelSupply(FuelSupplyNum).NumConstituents; ++i) {
+                int thisGasID = state.dataGenerator->FuelSupply(FuelSupplyNum).GasLibID(i);
                 MWfuel += state.dataGenerator->FuelSupply(FuelSupplyNum).ConstitMolalFract(i) *
                           state.dataGenerator->GasPhaseThermoChemistryData(thisGasID).MolecularWeight;
             }
@@ -695,10 +674,12 @@ namespace GeneratorFuelSupply {
         }
 
         // report Heating Values in EIO.
-        print(state.files.eio,
-              "! <Fuel Supply>, Fuel Supply Name, Lower Heating Value [J/kmol], Lower Heating Value [kJ/kg], Higher "
-              "Heating Value [KJ/kg],  Molecular Weight [g/mol] \n");
-        static constexpr std::string_view Format_501(" Fuel Supply, {},{:13.6N},{:13.6N},{:13.6N},{:13.6N}\n");
+        if (first_time) {
+            print(state.files.eio,
+                  "! <Fuel Supply>, Fuel Supply Name, Lower Heating Value [J/kmol], Lower Heating Value [kJ/kg], Higher "
+                  "Heating Value [KJ/kg],  Molecular Weight [g/mol] \n");
+        }
+        static constexpr std::string_view Format_501(" Fuel Supply, {},{:13.6G},{:13.6G},{:13.6G},{:13.6G}\n");
         print(state.files.eio,
               Format_501,
               state.dataGenerator->FuelSupply(FuelSupplyNum).Name,

@@ -22,28 +22,7 @@ The doj library had an issue with ordering numerics, so this was patched here: h
 
 As of [nlhohmann/json](https://github.com/nlohmann/json) version 3.7.3, the only changes needed are the use of the `doj` library for comparator.
 
-```
---- a/third_party/nlohmann/json.hpp
-+++ b/third_party/nlohmann/json.hpp
-@@ -47,6 +47,7 @@ SOFTWARE.
- #include <string> // string, stoi, to_string
- #include <utility> // declval, forward, move, pair, swap
- #include <vector> // vector
-+#include <doj/alphanum.hpp>
-
- // #include <nlohmann/adl_serializer.hpp>
-
-@@ -14931,9 +14932,9 @@ class basic_json
- #if defined(JSON_HAS_CPP_14)
-     // Use transparent comparator if possible, combined with perfect forwarding
-     // on find() and count() calls prevents unnecessary string construction.
--    using object_comparator_t = std::less<>;
-+    using object_comparator_t = doj::alphanum_less<>;
- #else
--    using object_comparator_t = std::less<StringType>;
-+    using object_comparator_t = doj::alphanum_less<StringType>;
- #endif
-```
+cf [third_party/nlohmann/json3.12.0.patch](third_party/nlohmann/json3.12.0.patch)
 
 ## valijson
 

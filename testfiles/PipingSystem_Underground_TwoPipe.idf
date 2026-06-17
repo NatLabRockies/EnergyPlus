@@ -51,7 +51,7 @@
 !****** SIMULATION CONTROLS ********************************
 !***********************************************************
 
-  Version,23.1;
+  Version,26.2;
 
   Building,
     Piping System Example,   !- Name
@@ -365,7 +365,8 @@
     Plant Demand Outlet Node,!- Outlet Node Name
     LoadSchedule,            !- Load Schedule Name
     0.004,                   !- Peak Flow Rate {m3/s}
-    FlowFracSchedule;        !- Flow Rate Fraction Schedule Name
+    FlowFracSchedule,        !- Flow Rate Fraction Schedule Name
+    Water;                   !- Plant Loop Fluid Type
 
   PlantEquipmentOperationSchemes,
     Loop Operation,          !- Name

@@ -1,7 +1,7 @@
-// EnergyPlus, Copyright (c) 1996-2023, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
-// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other
+// National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
 // contributors. All rights reserved.
 //
 // NOTICE: This Software was developed under funding from the U.S. Department of Energy and the
@@ -70,43 +70,43 @@ namespace HVACStandAloneERV {
     {
         // Members
         // input data
-        std::string Name;               // name of the stand alone ERV unit
-        std::string UnitType;           // ZoneHVAC:EnergyRecoveryVentilator
-        int SchedPtr;                   // pointer to availability schedule
-        std::string HeatExchangerName;  // name of the heat exchanger within the ERV unit
-        int HeatExchangerIndex;         // Pointer to heat exchanger
-        int HeatExchangerTypeNum;       // Parameter equivalent of HX object type
-        int SupplyAirInletNode;         // supply air inlet node for the stand alone ERV
-        int SupplyAirOutletNode;        // supply air outlet node for the stand alone ERV
-        std::string SupplyAirFanName;   // fan name in the supply air stream of the ERV
-        int SupplyAirFanIndex;          // index to supply air fan
-        int SupplyAirFanSchPtr;         // index to supply air fan schedule
-        int SupplyAirFanType_Num;       // parameter equivalent of fan type
-        int ExhaustAirInletNode;        // exhaust air inlet node for the stand alone ERV
-        int ExhaustAirOutletNode;       // exhaust air outlet node for the stand alone ERV
-        std::string ExhaustAirFanName;  // fan name in exhaust air stream of the ERV
-        int ExhaustAirFanIndex;         // index to exhaust air fan
-        int ExhaustAirFanSchPtr;        // index to exhaust air fan schedule
-        int ExhaustAirFanType_Num;      // paramter equivalent of fan type
-        Real64 SupplyAirVolFlow;        // volumetric flow rate through the supply side of the ERV
-        Real64 ExhaustAirVolFlow;       // volumetric flow rate through the exhaust side of the ERV
-        std::string ControllerName;     // name of the controller for the stand alone ERV
-        bool ControllerNameDefined;     // controller for the stand alone ERV is defined
-        int ControlledZoneNum;          // index to controlled zone for stand alone ERV
-        int ControllerIndex;            // Pointer for updates by routines this module calls.
-        Real64 MaxSupAirMassFlow;       // air mass flow rate through the supply side of the ERV
-        Real64 MaxExhAirMassFlow;       // air mass flow rate through the exhaust side of the ERV
-        Real64 HighRHOAFlowRatio;       // ratio of outside air flow to max outside air flow
-        Real64 DesignSAFanVolFlowRate;  // SA fan volumetric flow rate
-        Real64 DesignEAFanVolFlowRate;  // EA fan volumetric flow rate
-        Real64 DesignHXVolFlowRate;     // HX (heat exchanger) volumetric flow rate
-        Real64 DesignSAFanMassFlowRate; // SA fan mass flow rate
-        Real64 DesignEAFanMassFlowRate; // EA fan mass flow rate
-        Real64 AirVolFlowPerFloorArea;  // Air flow rate per unit floor area, used for autosizing
-        Real64 AirVolFlowPerOccupant;   // Air flow rate per occupant, used for autosizing
-        int EconomizerOASchedPtr;       // schedule to modify outdoor air
-        bool FlowError;                 // used for one-time warning message for flow imbalance (Init)
-        int AvailStatus;
+        std::string Name;                              // name of the stand alone ERV unit
+        std::string UnitType;                          // ZoneHVAC:EnergyRecoveryVentilator
+        Sched::Schedule *availSched = nullptr;         // availability schedule
+        std::string HeatExchangerName;                 // name of the heat exchanger within the ERV unit
+        int HeatExchangerIndex;                        // Pointer to heat exchanger
+        HVAC::HXType hxType = HVAC::HXType::Invalid;   // Parameter equivalent of HX object type
+        int SupplyAirInletNode;                        // supply air inlet node for the stand alone ERV
+        int SupplyAirOutletNode;                       // supply air outlet node for the stand alone ERV
+        std::string SupplyAirFanName;                  // fan name in the supply air stream of the ERV
+        int SupplyAirFanIndex;                         // index to supply air fan
+        Sched::Schedule *supplyAirFanSched = nullptr;  // supply air fan schedule
+        HVAC::FanType supplyAirFanType;                // parameter equivalent of fan type
+        int ExhaustAirInletNode;                       // exhaust air inlet node for the stand alone ERV
+        int ExhaustAirOutletNode;                      // exhaust air outlet node for the stand alone ERV
+        std::string ExhaustAirFanName;                 // fan name in exhaust air stream of the ERV
+        int ExhaustAirFanIndex;                        // index to exhaust air fan
+        Sched::Schedule *exhaustAirFanSched = nullptr; // exhaust air fan schedule
+        HVAC::FanType exhaustAirFanType;               // parameter equivalent of fan type
+        Real64 SupplyAirVolFlow;                       // volumetric flow rate through the supply side of the ERV
+        Real64 ExhaustAirVolFlow;                      // volumetric flow rate through the exhaust side of the ERV
+        std::string ControllerName;                    // name of the controller for the stand alone ERV
+        bool ControllerNameDefined;                    // controller for the stand alone ERV is defined
+        int ControlledZoneNum;                         // index to controlled zone for stand alone ERV
+        int ControllerIndex;                           // Pointer for updates by routines this module calls.
+        Real64 MaxSupAirMassFlow;                      // air mass flow rate through the supply side of the ERV
+        Real64 MaxExhAirMassFlow;                      // air mass flow rate through the exhaust side of the ERV
+        Real64 HighRHOAFlowRatio;                      // ratio of outside air flow to max outside air flow
+        Real64 DesignSAFanVolFlowRate;                 // SA fan volumetric flow rate
+        Real64 DesignEAFanVolFlowRate;                 // EA fan volumetric flow rate
+        Real64 DesignHXVolFlowRate;                    // HX (heat exchanger) volumetric flow rate
+        Real64 DesignSAFanMassFlowRate;                // SA fan mass flow rate
+        Real64 DesignEAFanMassFlowRate;                // EA fan mass flow rate
+        Real64 AirVolFlowPerFloorArea;                 // Air flow rate per unit floor area, used for autosizing
+        Real64 AirVolFlowPerOccupant;                  // Air flow rate per occupant, used for autosizing
+        Sched::Schedule *economizerOASched = nullptr;  // schedule to modify outdoor air
+        bool FlowError;                                // used for one-time warning message for flow imbalance (Init)
+        Avail::Status availStatus = Avail::Status::NoAction;
         std::string AvailManagerListName; // Name of an availability manager list object
         // report variables
         Real64 ElecUseRate;       // total electric use rate (power) for supply/exhaust fans & generic HX parasitics [W]
@@ -127,15 +127,14 @@ namespace HVACStandAloneERV {
 
         // Default Constructor
         StandAloneERVData()
-            : SchedPtr(0), HeatExchangerIndex(0), HeatExchangerTypeNum(0), SupplyAirInletNode(0), SupplyAirOutletNode(0), SupplyAirFanIndex(0),
-              SupplyAirFanSchPtr(0), SupplyAirFanType_Num(0), ExhaustAirInletNode(0), ExhaustAirOutletNode(0), ExhaustAirFanIndex(0),
-              ExhaustAirFanSchPtr(0), ExhaustAirFanType_Num(0), SupplyAirVolFlow(0.0), ExhaustAirVolFlow(0.0), ControllerNameDefined(false),
-              ControlledZoneNum(0), ControllerIndex(0), MaxSupAirMassFlow(0.0), MaxExhAirMassFlow(0.0), HighRHOAFlowRatio(1.0),
-              DesignSAFanVolFlowRate(0.0), DesignEAFanVolFlowRate(0.0), DesignHXVolFlowRate(0.0), DesignSAFanMassFlowRate(0.0),
-              DesignEAFanMassFlowRate(0.0), AirVolFlowPerFloorArea(0.0), AirVolFlowPerOccupant(0.0), EconomizerOASchedPtr(0), FlowError(true),
-              AvailStatus(0), ElecUseRate(0.0), ElecUseEnergy(0.0), SensCoolingEnergy(0.0), SensCoolingRate(0.0), LatCoolingEnergy(0.0),
-              LatCoolingRate(0.0), TotCoolingEnergy(0.0), TotCoolingRate(0.0), SensHeatingEnergy(0.0), SensHeatingRate(0.0), LatHeatingEnergy(0.0),
-              LatHeatingRate(0.0), TotHeatingEnergy(0.0), TotHeatingRate(0.0), FirstPass(true)
+            : HeatExchangerIndex(0), SupplyAirInletNode(0), SupplyAirOutletNode(0), SupplyAirFanIndex(0), supplyAirFanType(HVAC::FanType::Invalid),
+              ExhaustAirInletNode(0), ExhaustAirOutletNode(0), ExhaustAirFanIndex(0), exhaustAirFanType(HVAC::FanType::Invalid),
+              SupplyAirVolFlow(0.0), ExhaustAirVolFlow(0.0), ControllerNameDefined(false), ControlledZoneNum(0), ControllerIndex(0),
+              MaxSupAirMassFlow(0.0), MaxExhAirMassFlow(0.0), HighRHOAFlowRatio(1.0), DesignSAFanVolFlowRate(0.0), DesignEAFanVolFlowRate(0.0),
+              DesignHXVolFlowRate(0.0), DesignSAFanMassFlowRate(0.0), DesignEAFanMassFlowRate(0.0), AirVolFlowPerFloorArea(0.0),
+              AirVolFlowPerOccupant(0.0), FlowError(true), ElecUseRate(0.0), ElecUseEnergy(0.0), SensCoolingEnergy(0.0), SensCoolingRate(0.0),
+              LatCoolingEnergy(0.0), LatCoolingRate(0.0), TotCoolingEnergy(0.0), TotCoolingRate(0.0), SensHeatingEnergy(0.0), SensHeatingRate(0.0),
+              LatHeatingEnergy(0.0), LatHeatingRate(0.0), TotHeatingEnergy(0.0), TotHeatingRate(0.0), FirstPass(true)
         {
         }
     };
@@ -178,18 +177,6 @@ namespace HVACStandAloneERV {
                                 bool &ErrorsFound               // set to true if problem
     );
 
-    int GetSupplyAirInletNode(EnergyPlusData &state,
-                              std::string const &ERVType,     // must be "ZoneHVAC:EnergyRecoveryVentilator"
-                              std::string const &ERVCtrlName, // must match a controller name in the ERV data structure
-                              bool &ErrorsFound               // set to true if problem
-    );
-
-    int GetExhaustAirInletNode(EnergyPlusData &state,
-                               std::string const &ERVType,     // must be "ZoneHVAC:EnergyRecoveryVentilator"
-                               std::string const &ERVCtrlName, // must match a controller name in the ERV data structure
-                               bool &ErrorsFound               // set to true if problem
-    );
-
     int GetStandAloneERVOutAirNode(EnergyPlusData &state, int StandAloneERVNum);
 
     int GetStandAloneERVZoneInletAirNode(EnergyPlusData &state, int StandAloneERVNum);
@@ -197,6 +184,8 @@ namespace HVACStandAloneERV {
     int GetStandAloneERVReturnAirNode(EnergyPlusData &state, int StandAloneERVNum);
 
     bool GetStandAloneERVNodeNumber(EnergyPlusData &state, int NodeNumber);
+
+    int getEqIndex(EnergyPlusData &state, std::string_view CompName);
 
 } // namespace HVACStandAloneERV
 
@@ -217,6 +206,14 @@ struct HVACStandAloneERVData : BaseGlobalStruct
     Array1D_bool MyEnvrnFlag;
     Array1D_bool MyZoneEqFlag;             // used to set up zone equipment availability managers
     bool ZoneEquipmentListChecked = false; // True after the Zone Equipment List has been checked for items
+
+    void init_constant_state([[maybe_unused]] EnergyPlusData &state) override
+    {
+    }
+
+    void init_state([[maybe_unused]] EnergyPlusData &state) override
+    {
+    }
 
     void clear_state() override
     {

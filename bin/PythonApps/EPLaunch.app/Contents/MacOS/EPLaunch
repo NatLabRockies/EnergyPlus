@@ -1,0 +1,15 @@
+#!/bin/bash
+SCRIPT_DIR="$( cd -- "$(dirname "${BASH_SOURCE[0]}")" >/dev/null 2>&1 ; pwd -P )"
+echo "Script Path: $SCRIPT_DIR"
+EP_ROOT_DIR=$(dirname "$(dirname "$(dirname "$SCRIPT_DIR")")")
+if [[ "$DEBUG" = 1 ]]; then
+  result=`osascript -e "display dialog \"Script Path: $SCRIPT_DIR\nEP_ROOT_DIR: $EP_ROOT_DIR\" buttons {\"Ok\"}"`
+fi;
+
+EP_CLI=$EP_ROOT_DIR/energyplus
+if [ -f "$EP_CLI" ]; then
+  $EP_CLI auxiliary eplaunch
+else
+  ICON_PATH=$(dirname $SCRIPT_DIR)/Resources/Icon.icns
+  osascript -e 'beep' -e "display dialog \"Could not locate energyplus CLI at\n'$EP_CLI'\" with title \"⚠️  Error\" buttons {\"OK\"} default button \"OK\" with icon POSIX file \"$ICON_PATH\""
+fi

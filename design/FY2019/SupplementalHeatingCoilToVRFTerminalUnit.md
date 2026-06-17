@@ -65,17 +65,17 @@ Four new input fields: "Supplemental Heating Coil Object Type", "Supplemental He
   A18, \field Supplemental Heating Coil Name
        \type object-list
        \object-list HeatingCoilName
-       \note Needs to match in the supplemental heating coil object. 
+       \note Needs to match in the supplemental heating coil object.
   N11, \field Maximum Supply Air Temperature from Supplemental Heater
        \type real
        \units C
-       \autosizable   
+       \autosizable
   N12; \field Maximum Outdoor Dry-Bulb Temperature for Supplemental Heater Operation
        \type real
        \maximum 21.0
        \default 21.0
        \units C
-       \note Supplemental heater will not operate when outdoor temperature exceeds this value. 
+       \note Supplemental heater will not operate when outdoor temperature exceeds this value.
 ```
 
 When there is remaining heating load not met by the DX heating coil of a VRF Air Terminal Unit, then the supplemental heating coil will run to meet the remaining heating load. Below is a modified sample ZoneHVAC:TerminalUnit:VariableRefrigerantFlow object with the four optional new input fields added.
@@ -132,7 +132,7 @@ A supply air fan is also required and can be modeled as either draw through or b
 ZoneHVAC:TerminalUnit:VariableRefrigerantFlow,
         \memo Zone terminal unit with variable refrigerant flow (VRF) DX cooling and heating coils
         \memo (air-to-air heat pump). The VRF terminal units are served by an
-        \memo AirConditioner:VariableRefrigerantFlow or 
+        \memo AirConditioner:VariableRefrigerantFlow or
         \memo AirConditioner:VariableRefrigerantFlow:FluidTemperatureControl:* system.
         \min-fields 19
   A1 ,  \field Zone Terminal Unit Name
@@ -312,11 +312,11 @@ ZoneHVAC:TerminalUnit:VariableRefrigerantFlow,
   A18, \field Supplemental Heating Coil Name
        \type object-list
        \object-list HeatingCoilName
-       \note Needs to match in the supplemental heating coil object. 
+       \note Needs to match in the supplemental heating coil object.
   N11, \field Maximum Supply Air Temperature from Supplemental Heater
        \type real
        \units C
-       \autosizable   
+       \autosizable
   N12; \field Maximum Outdoor Dry-Bulb Temperature for Supplemental Heater Operation
        \type real
        \maximum 21.0
@@ -341,7 +341,7 @@ This alpha field defines the type of supplemental heating coil to be used by thi
 
 #### Field: Supplemental Heating Coil Name
 
-This alpha field defines the name of the supplemental heating coil used by this VRF terminal unit, and this name should match the name specified in the corresponding heating coil object. 
+This alpha field defines the name of the supplemental heating coil used by this VRF terminal unit, and this name should match the name specified in the corresponding heating coil object.
 
 #### Field: Maximum Supply Air Temperature from Supplemental Heater
 
@@ -388,7 +388,7 @@ Tianzhen: Your proposed two new fields require IDD transition changes. If they a
 # Design Document #
 
 ## Approach ##
-New variables and functions will be added to support supplemental heating coil for VRF air terminal unit.  The new functions will be designed to support OO programming implementation. 
+New variables and functions will be added to support supplemental heating coil for VRF air terminal unit.  The new functions will be designed to support OO programming implementation.
 
 ### Changes to the **HVACVariableRefrigerantFlow.cc** file
  -Modifies the get input function **GetVRFInputData()** under HVACVariableRefrigerantFlow.cc module. Allow to read in four optional input variables to support the four heating coil types.
@@ -416,7 +416,7 @@ New variables and functions will be added to support supplemental heating coil f
             }
         }
 
-- 
+-
 The following code snippet will be added to "CalcVRF()" and "CalcVRF_FluidTCtrl()" functions to run the supplemental heating coil, if the supplemental heating coil present. The supplemental heating capacity will be capped if the coil outlet air temperature exceeds user specified maximum supply air temperature.
 
         // run supplemental heating coil
@@ -447,17 +447,17 @@ The following code snippet will be added to "CalcVRF()" and "CalcVRF_FluidTCtrl(
         // Manages VRF terminal unit supplemental heaters simulation.
 
         SuppHeatCoilLoad = 0.0;
-        
+
         if (DataEnvironment::OutDryBulbTemp <= this->MaxOATSuppHeatingCoil) {
             SuppHeatCoilLoad = SuppCoilLoad;
-        } 
+        }
         {
             // simulate gas, electric, hot water, and steam heating coils
             auto const SELECT_CASE_var(this->SuppHeatCoilType_Num);
             if ((SELECT_CASE_var == Coil_HeatingGasOrOtherFuel) || (SELECT_CASE_var == Coil_HeatingElectric)) {
 
             } else if (SELECT_CASE_var == DataHVACGlobals::Coil_HeatingWater) {
- 
+
             } else if (SELECT_CASE_var == DataHVACGlobals::Coil_HeatingSteam) {
                 //     simulate steam heating coil
         }
@@ -499,7 +499,7 @@ The following code snippet will be added to "CalcVRF()" and "CalcVRF_FluidTCtrl(
 - these three new functions are member of "VRFTerminalUnitEquipment" struct
 
 
-    Real64 VRFTerminalUnitEquipment::HeatingCoilCapacityLimit( Real64 const HeatCoilAirInletNode, 
+    Real64 VRFTerminalUnitEquipment::HeatingCoilCapacityLimit( Real64 const HeatCoilAirInletNode,
                           Real64 const HeatCoilAirOutletNode, Real64 const HeatCoilMaxSATAllowed)
     {
         // PURPOSE OF THIS FUNCTION:
@@ -521,15 +521,15 @@ The following code snippet will be added to "CalcVRF()" and "CalcVRF_FluidTCtrl(
     }
 
 - moves the following two functions as a member function to "VRFTerminalUnitEquipment" struct for OO programming implementation
-   **VRFTerminalUnitEquipment::ControlVRF()** 
-   **VRFTerminalUnitEquipment::CalcVRF()** 
+   **VRFTerminalUnitEquipment::ControlVRF()**
+   **VRFTerminalUnitEquipment::CalcVRF()**
 
 - adds the supplemental heating coil load variable "SuppHeatCoilLoad" as an argument to the following existing functions:
-   **VRFTerminalUnitEquipment::ControlVRF()** 
-   **VRFTerminalUnitEquipment::ControlVRF_FluidTCtrl()** 
-   **VRFTerminalUnitEquipment::CalcVRF()** 
-   **VRFTerminalUnitEquipment::CalcVRF_FluidTCtrl()** 
-   
+   **VRFTerminalUnitEquipment::ControlVRF()**
+   **VRFTerminalUnitEquipment::ControlVRF_FluidTCtrl()**
+   **VRFTerminalUnitEquipment::CalcVRF()**
+   **VRFTerminalUnitEquipment::CalcVRF_FluidTCtrl()**
+
 ### Changes to the **HVACVariableRefrigerantFlow.hh** file
 The data structures of **VRFTerminalUnitEquipment()** will change to support the supplemental heating coils by adding the following member variables:
 
@@ -563,4 +563,3 @@ The data structures of **VRFTerminalUnitEquipment()** will change to support the
 
 ### Unit Tests:
  - adds unit tests to verify the modified get-input and the three new functions
- 

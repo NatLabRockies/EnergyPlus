@@ -10,7 +10,7 @@ Enhancement to Resilience Metrics Reporting
 
 ## Justification for New Feature ##
 
-With the increasing frequency and severity of extreme weather events (e.g., heat waves), it is crucial to ensure urban buildings and infrastructure are resilient to provide critical services to preserve human life and properties during natural disasters. Building resilience could become an additional value proposition for technologies and systems if it can be reliably quantified, valued, and trusted by stakeholders. Resilience metrics or an assessment of potential vulnerability, likelihood, and consequence for each risk would help to prioritize further consideration of these risk factors of building resilience. 
+With the increasing frequency and severity of extreme weather events (e.g., heat waves), it is crucial to ensure urban buildings and infrastructure are resilient to provide critical services to preserve human life and properties during natural disasters. Building resilience could become an additional value proposition for technologies and systems if it can be reliably quantified, valued, and trusted by stakeholders. Resilience metrics or an assessment of potential vulnerability, likelihood, and consequence for each risk would help to prioritize further consideration of these risk factors of building resilience.
 
 EnergyPlus currently calculates a set of thermal, visual, and indoor air quality (IAQ) resilience metrics as optional reportable variables. The resilience reports are presented as three tabular summary reports (Thermal Resilience Summary, Indoor Air Quality Resilience Summary, and Visual Resilience Summary) and can be requested as part of the tabular reports. The thermal resilience report includes Heat Index, Humidex, and Standard Effective Temperature (SET) hours as three separate metrics. To support the need for new resilience metrics in building simulation and to provide a more convenient path in adopting existing metrics, we propose to (1) calculate and report Hours of Safety, Setpoint Degree Hours Unmet, Discomfort Weighted Hours as three additional building thermal resilience metrics following EPA and ASHRAE Standard 55–2020 guidance, and (2) improve current resilience metrics reporting by allowing users to specify the period of calculating and reporting the metrics which is not necessarily the same as the simulation period.
 
@@ -18,11 +18,11 @@ EnergyPlus currently calculates a set of thermal, visual, and indoor air quality
 
 ### 1.1 1. Hours of Safety ###
 
-Hours of Safety is a framework developed by EPA and RMI to help understand how long a home can maintain thresholds of comfort and safety before reaching unsafe indoor temperature levels [1]. The concept attempts to define the duration of time that homes can be expected to provide safe temperatures when the power goes out based on building characteristics and energy efficiency levels (e.g., insulation, infiltration). This metric can be used to quantify the amount of time people are exposed to extremely hot or cold temperatures indoors. The information can be used to guide weatherization efforts and emergency response measures in considering the health and safety of vulnerable populations as extreme weather events increase in frequency. 
+Hours of Safety is a framework developed by EPA and RMI to help understand how long a home can maintain thresholds of comfort and safety before reaching unsafe indoor temperature levels [1]. The concept attempts to define the duration of time that homes can be expected to provide safe temperatures when the power goes out based on building characteristics and energy efficiency levels (e.g., insulation, infiltration). This metric can be used to quantify the amount of time people are exposed to extremely hot or cold temperatures indoors. The information can be used to guide weatherization efforts and emergency response measures in considering the health and safety of vulnerable populations as extreme weather events increase in frequency.
 
-Hours of Safety for cold or hot weather events should be defined by the longest duration (number of hours), starting from the beginning time of the risk period (e.g., the start time of a power outage), to not exceed temperature thresholds defined for a specific type of population (e.g., cold stress safety temperature for the healthy population as 60°F, or 16°C). To define the thresholds, we will use EnergyPlus’ existing thermal comfort model controlled primarily by the People input object, and add two fields in the *People* object, namely "*Cold Stress Temperature Threshold*" and "*Heat Stress Temperature Threshold*". To define the risk period, we will add a new object in EnergyPlus to declare the start and end time to evaluate the resilience metrics within those dates. 
+Hours of Safety for cold or hot weather events should be defined by the longest duration (number of hours), starting from the beginning time of the risk period (e.g., the start time of a power outage), to not exceed temperature thresholds defined for a specific type of population (e.g., cold stress safety temperature for the healthy population as 60°F, or 16°C). To define the thresholds, we will use EnergyPlus’ existing thermal comfort model controlled primarily by the People input object, and add two fields in the *People* object, namely "*Cold Stress Temperature Threshold*" and "*Heat Stress Temperature Threshold*". To define the risk period, we will add a new object in EnergyPlus to declare the start and end time to evaluate the resilience metrics within those dates.
 
-The default "*Cold Stress Temperature Thresholds*": 60°F (16°C) for the healthy population [1]. Other values can be used: 64°F (18°C) for the elderly [1], and 71°F (22°C) for nursing home residents [2]. The default "*Hot Stress Temperature Threshold*" is selected as 86°F (30°C) [2]. Users can modify these default thresholds with the "*Cold Stress Temperature Threshold*" and "*Heat Stress Temperature Threshold*" input fields in the *People* object. 
+The default "*Cold Stress Temperature Thresholds*": 60°F (16°C) for the healthy population [1]. Other values can be used: 64°F (18°C) for the elderly [1], and 71°F (22°C) for nursing home residents [2]. The default "*Hot Stress Temperature Threshold*" is selected as 86°F (30°C) [2]. Users can modify these default thresholds with the "*Cold Stress Temperature Threshold*" and "*Heat Stress Temperature Threshold*" input fields in the *People* object.
 
 We will report both the zone and building-level Hours of Safety. For the zone level, we will report the longest duration in a risk period a zone can maintain comfort and safety before reaching unsafe indoor temperature thresholds. For the building level, we’ll provide four summary statistics across all zones in the building: min, max, average, and sum.
 
@@ -34,7 +34,7 @@ The concept of UDH is analogous to that of temperature-weighted exceedance hours
 
 UDH is calculated as follows:
 
-![UDH_calc](https://github.com/NREL/EnergyPlus/blob/enhanceResilienceMetrics/design/FY2022/UDH_eq.png)
+![UDH_calc](https://github.com/NatLabRockies/EnergyPlus/blob/enhanceResilienceMetrics/design/FY2022/UDH_eq.png)
 
 where T is the indoor air temperature [°C]; t is time [h]; and x<sub>+</sub> = x if x > 0, or 0 otherwise. T<sub>threshold</sub> is the indoor cooling or heating setpoint [°C] in both the grid-on and grid-off scenarios. A similar metric, the Exceedance Degree-Hour, is recently developed by Salimi et al [4]. Instead of thresholding, this metric weights each hour by the distance from the current SET to the comfort zone [4].
 
@@ -48,7 +48,7 @@ For reporting, we will present the zone-level and the aggregated building-level 
 
 ### 4. Timespan of Report ###
 
-Resilience metrics are more often evaluated during a certain period when a building is at risk (e.g., during the power outage event or heatwave event), and the period is not necessarily the same as the whole simulation period. We propose to improve current resilience metrics tabular reporting (in the html output) by allowing users to specify the period of calculating and reporting the metrics. 
+Resilience metrics are more often evaluated during a certain period when a building is at risk (e.g., during the power outage event or heatwave event), and the period is not necessarily the same as the whole simulation period. We propose to improve current resilience metrics tabular reporting (in the html output) by allowing users to specify the period of calculating and reporting the metrics.
 
 We propose to add an *Output:Table:ReportPeriod* that takes an input of a Summary Report name (e.g. *ThermalResilienceSummary*). The reporting period can be defined with a start-date field and an end-date field as supplementary inputs to the *ThermalResilienceSummary* report.
 
@@ -96,7 +96,7 @@ Timestamp: **2022-04-13 10:00:00**
 
 **Unmet Degree Hours**
 
-|     |Cooling Setpoint Unmet Degree-Hours (°C·h) | Cooling Setpoint Unmet Occupant-Weighted Degree-Hours (°C·h) | Cooling Setpoint Unmet Occupied Degree-Hours (°C·h) | Heating Setpoint Unmet Degree-Hours (°C·h) | Heating Setpoint Unmet Occupant-Weighted Degree-Hours (°C·h) | Heating Setpoint Unmet Occupied Degree-Hours (°C·h) 
+|     |Cooling Setpoint Unmet Degree-Hours (°C·h) | Cooling Setpoint Unmet Occupant-Weighted Degree-Hours (°C·h) | Cooling Setpoint Unmet Occupied Degree-Hours (°C·h) | Heating Setpoint Unmet Degree-Hours (°C·h) | Heating Setpoint Unmet Occupant-Weighted Degree-Hours (°C·h) | Heating Setpoint Unmet Occupied Degree-Hours (°C·h)
 |----|------------------|---------------------------------|---------------------------------------|---------------------------------------|---------------------------------------|------------------|
 |Space<sub>1</sub>|||||||
 |...|||||||
@@ -147,7 +147,7 @@ In the develop branch, for Heating and Cooling SET degree-hours tabular report, 
 
 Another issue more general to all thermal resilience metrics is that when computing the OccupantHour values, the floating point version of the number of occupants for a specific zone and timestep is cast into an integer first, than multiplied when computing the OccupantHour values. This means when the number of occupants is between 0 and 1, the tabular thermal resilience report treats it as not occupied.
 
-This feature branch removes the restriction in SET degree-hour calculation and computes the aggregated SET degree-hours for the whole run/reporting period in the first column of the SET degree-hour tabular report. It will also remove the integer casting when computing the OccupantHour columns.   
+This feature branch removes the restriction in SET degree-hour calculation and computes the aggregated SET degree-hours for the whole run/reporting period in the first column of the SET degree-hour tabular report. It will also remove the integer casting when computing the OccupantHour columns.
 
 ### 4. Documentation updates ###
 
@@ -176,7 +176,7 @@ Two extra fields will be added to the current People object to define the safe t
 We will add a new object *Output:Table:ReportPeriod* to add supplementary information to define the reporting period of certain summary tables.
 
     Output:Table:ReportPeriod,
-        \memo This object allows the user to add a reporting period to a certain tabular report when the reporting period is not the whole simulation period. When defined, the declared summary report is based on aggregations from the start date to the end date defined. 
+        \memo This object allows the user to add a reporting period to a certain tabular report when the reporting period is not the whole simulation period. When defined, the declared summary report is based on aggregations from the start date to the end date defined.
         \memo Multiple run periods may be input.
       A1, \field Name,
           \required-field
@@ -241,4 +241,3 @@ The following variables will be added to the "advanced report variable" set: Hea
 [4]	S. Salimi, E. Estrella Guillén, and H. Samuelson, “Exceedance Degree-Hours: A new method for assessing long-term thermal conditions,” Indoor Air, vol. 31, no. 6, pp. 2296–2311, 2021, doi: 10.1111/ina.12855.<br>
 [5]	R. Levinson et al., “Key performance indicators for cool envelope materials, windows and shading, natural ventilation, and personal comfort systems,” Nov. 10, 2020.<br>
 [6]	F. Tartarini, S. Schiavon, T. Cheung, and T. Hoyt, “CBE Thermal Comfort Tool: Online tool for thermal comfort calculations and visualizations,” SoftwareX, vol. 12, p. 100563, Jul. 2020, doi: 10.1016/j.softx.2020.100563.<br>
-

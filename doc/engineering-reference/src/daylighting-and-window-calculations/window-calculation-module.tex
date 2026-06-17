@@ -6,7 +6,7 @@ The primary Window calculation is a layer-by-layer approach where windows are co
 
 \begin{itemize}
 \item
-  \textbf{\emph{Glazing}}, which consists of one or more plane/parallel glass layers. If there are two or more glass layers, the layers are separated by gaps filled with air or another gas. The glazing optical and thermal calculations are based on algorithms from the WINDOW 4 and WINDOW 5 programs {[}Arasteh et al., 1989{]}, {[}Finlayson et al., 1993{]}.~ Glazing layers are described using te input object WindowMaterial:Glazing.
+  \textbf{\emph{Glazing}}, which consists of one or more plane/parallel glass layers. If there are two or more glass layers, the layers are separated by gaps filled with air or another gas. The glazing optical and thermal calculations are based on algorithms from the WINDOW 4 and WINDOW 5 programs {[}Arasteh et al., 1989{]}, {[}Finlayson et al., 1993{]}.~ Glazing layers are described using the input object WindowMaterial:Glazing.
 \item
   \textbf{\emph{Gap}}, layers filled with air or another gas that separate glazing layers.~ Gaps are described using the input object WindowMaterial:Gas.
 \item
@@ -19,7 +19,7 @@ The primary Window calculation is a layer-by-layer approach where windows are co
 
 In the following, the description of the layer-by-layer glazing algorithms is based on material from Finlayson et al., 1993. The frame and divider thermal model, and the shading device optical and thermal models, are new to EnergyPlus.
 
-A second approch has been developed where windows are modeled in a simplified approach that requires minimal user input that is processed to develop and equivalent layer that then reuses much of the layer-by-model.~ This ``Simple Window Construction: model is described below.
+A second approach has been developed where windows are modeled in a simplified approach that requires minimal user input that is processed to develop and equivalent layer that then reuses much of the layer-by-model.~ This ``Simple Window Construction: model is described below.
 
 \subsection{Optical Properties of Glazing}\label{optical-properties-of-glazing}
 
@@ -175,7 +175,7 @@ Where,
 
 \({R_{o,w}}\)~is the resistance of the exterior film coefficient under standard winter conditions in units of m\(^{2}\)·K/W, and
 
-\({R_{l,w}}\)~is the resisance of the bare window under winter conditions (without the film coefficients) in units of m\(^{2}\)·K/W.
+\({R_{l,w}}\)~is the resistance of the bare window under winter conditions (without the film coefficients) in units of m\(^{2}\)·K/W.
 
 The values for \({R_{i,w}}\)~and \({R_{o,w}}\)~depend on U and are calculated using the following correlations.
 
@@ -197,7 +197,7 @@ So that the glass-to-glass resistance is calculated using:
 {R_{l,w}} = \frac{1}{U} - {R_{i,w}} - {R_{o,w}}
 \end{equation}
 
-Because the window model in EnergyPlus is for flat geometries, the models are not necessarily applicable to low-performance projecting products, such as skylights with unisulated curbs.~ The model cannot support glazing systems with a U higher than 7.0 because the thermal resistance of the film coefficients alone can provide this level of performance and none of the various resistances can be negative.
+Because the window model in EnergyPlus is for flat geometries, the models are not necessarily applicable to low-performance projecting products, such as skylights with uninsulated curbs.~ The model cannot support glazing systems with a U higher than 7.0 because the thermal resistance of the film coefficients alone can provide this level of performance and none of the various resistances can be negative.
 
 \subsubsection{Step 2.~ Determine Layer Thickness.}\label{step-2.-determine-layer-thickness.}
 
@@ -559,7 +559,7 @@ Calculation of optical properties is divided into two categories: uncoated glass
 
 \subsubsection{Angular Properties for Uncoated Glass}\label{angular-properties-for-uncoated-glass}
 
-The following discussion assumes that optical quantities such as transmissivity, reflectvity, absorptivity, and index of refraction are a function of wavelength, λ. If there are no spectral data the angular dependence is calculated based on the single values for transmittance and reflectance in the visible and solar range. In the visible range an average wavelength of 0.575 microns is used in the calculations. In the solar range an average wavelength of 0.898 microns is used.
+The following discussion assumes that optical quantities such as transmissivity, reflectivity, absorptivity, and index of refraction are a function of wavelength, λ. If there are no spectral data the angular dependence is calculated based on the single values for transmittance and reflectance in the visible and solar range. In the visible range an average wavelength of 0.575 microns is used in the calculations. In the solar range an average wavelength of 0.898 microns is used.
 
 The spectral data include the transmittance, \emph{T}, and the reflectance, \emph{R}. For uncoated glass the reflectance is the same for the front and back surfaces. For angle of incidence, \(\phi\) , the transmittance and reflectance are related to the transmissivity, \(\tau\), and reflectivity, \(\rho\), by the following relationships:
 
@@ -707,7 +707,7 @@ In EnergyPlus, shading devices are divided into four categories, ``shades,'' ''b
 
 With ``Switchable glazing,'' shading is achieved making the glazing more absorbing or more reflecting, usually by an electrical or chemical mechanism. An example is electrochromic glazing where the application of an electrical voltage or current causes the glazing to switch from light to dark.
 
-Shades and blinds can be either fixed or moveable. If moveable, they can be deployed according to a schedule or according to a trigger variable, such as solar radiation incident on the window. Screens can be either fixed or moveable according to a schedule.
+Shades and blinds can be either fixed or movable. If movable, they can be deployed according to a schedule or according to a trigger variable, such as solar radiation incident on the window. Screens can be either fixed or movable according to a schedule.
 
 \subsubsection{Shades}\label{shades}
 
@@ -1134,7 +1134,7 @@ The diffuse-to-diffuse calculations are performed separately for solar, visible 
 
 \subsubsection{Blind properties for sky and ground diffuse radiation}\label{blind-properties-for-sky-and-ground-diffuse-radiation}
 
-For horizontal slats on a vertical window (the most common configuration) the blind diffuse-to-diffuse properties will be sensitve to whether the radiation is incident upward from the ground or downward from the sky (Figure~\ref{fig:side-view-of-horizontal-slats-in-a-vertical}). For this reason we also calculate the following solar properties for a blind consisting of horizontal slats in a vertical plane:
+For horizontal slats on a vertical window (the most common configuration) the blind diffuse-to-diffuse properties will be sensitive to whether the radiation is incident upward from the ground or downward from the sky (Figure~\ref{fig:side-view-of-horizontal-slats-in-a-vertical}). For this reason we also calculate the following solar properties for a blind consisting of horizontal slats in a vertical plane:
 
 \(\tau_{bl,f}^{gnd - dif,dif} = {\rm{ }}\) front transmittance for ground diffuse solar
 
@@ -1960,13 +1960,13 @@ Then we have the following expressions for different classes of transmitted and 
 
 \subsection{Complex Fenestration Calculation Module}\label{complex-fenestration-calculation-module}
 
-This section describes detailed method for modeling complex fenestration systems, including shading devices and general fenestration attachments. This detailed method primarily refers to the optical side of modeling complex fenestration systems. Thermal modeling is done according to ISO 15099 standard, which is described in the Window Heat Balance Calculation section with the addition of deflection and vacuum glazing systems modeling and some modifications to shading layer algorithms, which is described in Shading Device Thermal Model section. Optical caclulations in this method are done using Bidirectional Scattering Distribution Function (BSDF) approach.~ The concept behind BSDF is based on the definition of descrete set of incident and outgoing angles, which fully describes optical performance of any system, simple or complex, limited only by the resolution of angular discretization.~ In this method each layer, as well as the whole system is described by a matrix of incident and outgoing angles.
+This section describes detailed method for modeling complex fenestration systems, including shading devices and general fenestration attachments. This detailed method primarily refers to the optical side of modeling complex fenestration systems. Thermal modeling is done according to ISO 15099 standard, which is described in the Window Heat Balance Calculation section with the addition of deflection and vacuum glazing systems modeling and some modifications to shading layer algorithms, which is described in Shading Device Thermal Model section. Optical calculations in this method are done using Bidirectional Scattering Distribution Function (BSDF) approach.~ The concept behind BSDF is based on the definition of discrete set of incident and outgoing angles, which fully describes optical performance of any system, simple or complex, limited only by the resolution of angular discretization.~ In this method each layer, as well as the whole system is described by a matrix of incident and outgoing angles.
 
 \subsubsection{Complex Fenestration Solar-Optical Calculations}\label{complex-fenestration-solar-optical-calculations}
 
 \paragraph{\textbf{Solar radiation calculation outline}}\label{solar-radiation-calculation-outline}
 
-For solar radiation calculations, each of the layers as well as entire glazing system can be represented with the set of Bi-directional Scattering Distribution Functions or BSDF, consisting of Bi-directional Reflectance Distribution Function or BRDF and Bi-directional Transmittance Distribution Function or BTDF.~ Each function is a matrix 145 x 145 that describes reflectance or transmittance distribution in the outgoing hemisphere for each incident angle in the incidence hemisphere.~ For each function there is forward and back matrix, for a total of 4 145 x 145 matrices.~ Depending on the purpose of calculations, description of entire glazing system is divided into solar and visible spectrum, which means that there can be 8 matrices describing visible and complete solar spectrums.~ Reflectance and transmittance being non-dimnsional ratios of reflected or transmitted energy over incident energy, in order to get total reflected and transmitted energy it is necessary to supply vector of incident solar energy, which usually consists of direct and diffuse radition.Specifics of calculations of direct and diffuse solar radiationis be described in some detail in oncoming chapters.
+For solar radiation calculations, each of the layers as well as entire glazing system can be represented with the set of Bi-directional Scattering Distribution Functions or BSDF, consisting of Bi-directional Reflectance Distribution Function or BRDF and Bi-directional Transmittance Distribution Function or BTDF.~ Each function is a matrix 145 x 145 that describes reflectance or transmittance distribution in the outgoing hemisphere for each incident angle in the incidence hemisphere.~ For each function there is forward and back matrix, for a total of 4 145 x 145 matrices.~ Depending on the purpose of calculations, description of entire glazing system is divided into solar and visible spectrum, which means that there can be 8 matrices describing visible and complete solar spectrums.~ Reflectance and transmittance being non-dimensional ratios of reflected or transmitted energy over incident energy, in order to get total reflected and transmitted energy it is necessary to supply vector of incident solar energy, which usually consists of direct and diffuse radiation.Specifics of calculations of direct and diffuse solar radiation is be described in some detail in oncoming chapters.
 
 \subparagraph{\textbf{Scattering (Non-Specular) Glazing and Shading Devices}}\label{scattering-non-specular-glazing-and-shading-devices}
 
@@ -2679,7 +2679,7 @@ Z\(^{(Sky), k}\) & Sky irradiation factor; N\(_{IntSurf}\) \tabularnewline
 Z\(^{(sp,Sf,n),k}_{r(t)}\) & Exterior surface specular irradiation factor; N\(^{(Sf,n)}_{Sun}\) X N\(_{Sf}\) X N\(_{IntSurf}\) \tabularnewline
 Z\(^{(Sun,Sf,n),k}_{s(t)}\) & Exterior surface direct-diffuse irradiation factor; N\(^{(Sf,n)}_{Sun}\) X N\(_{Sf}\) X N\(_{IntSurf}\) \tabularnewline
 Z\(^{(Sky,Sf,n),k}\) & Exterior surface sky irradiation factor; N\(_{Sf}\) X N\(_{IntSurf}\) \tabularnewline
-Z\(^{(D,Gnd),k}_{s(t)}\) & Ground-reflected direct solar irradiaton factor (given sun direction s(\emph{t})); N\(^{(Gnd)}_{Sun}\) X N\(_{IntSurf}\) \tabularnewline
+Z\(^{(D,Gnd),k}_{s(t)}\) & Ground-reflected direct solar irradiation factor (given sun direction s(\emph{t})); N\(^{(Gnd)}_{Sun}\) X N\(_{IntSurf}\) \tabularnewline
 Z\(^{(Sky,Gnd),k}\) & Ground-reflected diffuse solar irradiation factor; N\(_{IntSurf}\) \tabularnewline
 Z\(^{(Sun),k}_{s(t)}\) & Direct solar irradiation factor; N\(_{Sun}\) X N\(_{IntSurf}\) \tabularnewline
 K\(^{(Sky),l}\) & Sky absorption factor; N\(_{Layers}\) \tabularnewline
@@ -2770,11 +2770,11 @@ Diffuse Solar Radiation Transmitted by Complex Fenestration
 
 Distribution of solar radiation transmitted through exterior window is divided on diffuse and direct part.
 
-Diffuse solar transmitted through exterior complex fenestration and absorbed in interor walls is calculated and treated in same way as described in the section on Initial Distribution of Diffuse Solar Transmitted through Exterior and Interior Windows. Even though that BSDF is given for various directions, for purpose of diffuse solar radiation, transmittance and reflectances of fenestration system is integrated over incoming and outgoing hemisphere.~ Because incoming diffuse solar radiation is divided on ground and sky parts, integration of incoming hemisphere is also perfomed over ground and sky part (see Equation~\ref{eq:SSfnpTEquation}).
+Diffuse solar transmitted through exterior complex fenestration and absorbed in interior walls is calculated and treated in same way as described in the section on Initial Distribution of Diffuse Solar Transmitted through Exterior and Interior Windows. Even though that BSDF is given for various directions, for purpose of diffuse solar radiation, transmittance and reflectances of fenestration system is integrated over incoming and outgoing hemisphere.~ Because incoming diffuse solar radiation is divided on ground and sky parts, integration of incoming hemisphere is also performed over ground and sky part (see Equation~\ref{eq:SSfnpTEquation}).
 
 Direct Solar Radiation Transmitted by Complex Fenestration
 
-Direct solar (beam) transmitted through exterior window is using same overlap calculations (see Figure~\ref{fig:vertical-section-through-a-two-zone-building}) for each outgoing basis direction.~ For certain sun position, algorithm calculatates equivalent incoming beam number.~ The inside beam solar irradiance is calculated in similar manner as described in the section titled Interior Beam Radiation.
+Direct solar (beam) transmitted through exterior window is using same overlap calculations (see Figure~\ref{fig:vertical-section-through-a-two-zone-building}) for each outgoing basis direction.~ For certain sun position, algorithm calculates equivalent incoming beam number.~ The inside beam solar irradiance is calculated in similar manner as described in the section titled Interior Beam Radiation.
 
 \begin{equation}
 \begin{split}

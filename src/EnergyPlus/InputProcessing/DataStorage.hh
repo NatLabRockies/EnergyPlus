@@ -1,7 +1,7 @@
-// EnergyPlus, Copyright (c) 1996-2023, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
-// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other
+// National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
 // contributors. All rights reserved.
 //
 // NOTICE: This Software was developed under funding from the U.S. Department of Energy and the
@@ -91,9 +91,13 @@ public:
     template <typename T> T *objectFactory(std::string const &name)
     {
         auto const it = storage.find(T::objectTypeHash());
-        if (it == storage.end()) return nullptr;
+        if (it == storage.end()) {
+            return nullptr;
+        }
         auto const it2 = it->second.find(name);
-        if (it2 == it->second.end()) return nullptr;
+        if (it2 == it->second.end()) {
+            return nullptr;
+        }
         T *p = static_cast<T *>(it2->second.get());
         return p;
     }
@@ -102,9 +106,13 @@ public:
     {
         static const std::string blankString;
         auto const it = storage.find(T::objectTypeHash());
-        if (it == storage.end()) return nullptr;
+        if (it == storage.end()) {
+            return nullptr;
+        }
         auto const it2 = it->second.find(blankString);
-        if (it2 == it->second.end()) return nullptr;
+        if (it2 == it->second.end()) {
+            return nullptr;
+        }
         T *p = static_cast<T *>(it2->second.get());
         return p;
     }

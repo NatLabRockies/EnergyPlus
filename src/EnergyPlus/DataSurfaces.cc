@@ -1,7 +1,7 @@
-// EnergyPlus, Copyright (c) 1996-2023, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
-// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other
+// National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
 // contributors. All rights reserved.
 //
 // NOTICE: This Software was developed under funding from the U.S. Department of Energy and the
@@ -74,29 +74,18 @@ namespace EnergyPlus::DataSurfaces {
 //                      Dec 2006, DJS (PSU) added logical ecoroof variable
 //                      Dec 2008, TH added new properties to SurfaceWindowCalc for thermochromic windows
 //                      Jul 2011, M.J. Witte and C.O. Pedersen, add new fields to OSC for last T, max and min
-//       RE-ENGINEERED  na
 
 // Using/Aliasing
 using namespace DataVectorTypes;
 using namespace DataBSDFWindow;
 using namespace DataHeatBalance;
 using namespace DataZoneEquipment;
-using namespace DataLoopNode;
 using namespace Psychrometrics;
 using namespace DataEnvironment;
-using namespace WindowManager;
+using namespace Window;
 
 Array1D_string const cExtBoundCondition({-6, 0}, {"KivaFoundation", "FCGround", "OSCM", "OSC", "OSC", "Ground", "ExternalEnvironment"});
 
-// Parameters to indicate surface classes
-// Surface Class (FLOOR, WALL, ROOF (incl's CEILING), WINDOW, DOOR, GLASSDOOR,
-// SHADING (includes OVERHANG, WING), DETACHED, INTMASS),
-// TDD:DOME, TDD:DIFFUSER (for tubular daylighting device)
-// (Note: GLASSDOOR and TDD:DIFFUSER get overwritten as WINDOW
-// in SurfaceGeometry.cc, SurfaceWindow%OriginalClass holds the true value)
-// why aren't these sequential (LKL - 13 Aug 2007)
-
-// Constructor
 Surface2D::Surface2D(ShapeCat const shapeCat, int const axis, Vertices const &v, Vector2D const &vl, Vector2D const &vu)
     : axis(axis), vertices(v), vl(vl), vu(vu)
 {
@@ -111,7 +100,9 @@ Surface2D::Surface2D(ShapeCat const shapeCat, int const axis, Vertices const &v,
         Vector2D const &w(vertices[(i + 1) % n]);
         area += (v.x * w.y) - (w.x * v.y);
     }
-    if (area < 0.0) std::reverse(vertices.begin() + 1, vertices.end()); // Vertices in clockwise order: Reverse all but first
+    if (area < 0.0) {
+        std::reverse(vertices.begin() + 1, vertices.end()); // Vertices in clockwise order: Reverse all but first
+    }
 
     // Set up edge vectors for ray--surface intersection tests
     edges.reserve(n);
@@ -125,8 +116,9 @@ Surface2D::Surface2D(ShapeCat const shapeCat, int const axis, Vertices const &v,
     } else if ((shapeCat == ShapeCat::Nonconvex) || (n >= nVerticesBig)) { // Set up slabs
         assert(n >= 4u);
         slabYs.reserve(n);
-        for (size_type i = 0; i < n; ++i)
+        for (size_type i = 0; i < n; ++i) {
             slabYs.push_back(vertices[i].y);
+        }
         std::sort(slabYs.begin(), slabYs.end());                     // Sort the vertex y coordinates
         auto const iClip(std::unique(slabYs.begin(), slabYs.end())); // Remove duplicate y-coordinate elements
         slabYs.erase(iClip, slabYs.end());
@@ -136,7 +128,7 @@ Surface2D::Surface2D(ShapeCat const shapeCat, int const axis, Vertices const &v,
             Real64 xu(std::numeric_limits<Real64>::lowest());
             Real64 const yl(slabYs[iSlab]);
             Real64 const yu(slabYs[iSlab + 1]);
-            slabs.push_back(Slab(yl, yu));
+            slabs.emplace_back(yl, yu);
             Slab &slab(slabs.back());
             using CrossEdge = std::tuple<Real64, Real64, size_type>;
             using CrossEdges = std::vector<CrossEdge>;
@@ -154,7 +146,7 @@ Surface2D::Surface2D(ShapeCat const shapeCat, int const axis, Vertices const &v,
                     Real64 const xt(v.x + (yu - v.y) * exy); // x_top coordinate where edge intersects yu
                     xl = std::min(xl, std::min(xb, xt));
                     xu = std::max(xu, std::max(xb, xt));
-                    crossEdges.push_back(std::make_tuple(xb, xt, i));
+                    crossEdges.emplace_back(xb, xt, i);
                 }
             }
             slab.xl = xl;
@@ -180,7 +172,7 @@ Surface2D::Surface2D(ShapeCat const shapeCat, int const axis, Vertices const &v,
                 xt = xte;
             }
 #endif
-            assert((shapeCat == ShapeCat::Nonconvex) || (crossEdges.size() == 2));
+            assert((shapeCat == ShapeCat::Nonconvex) || (crossEdges.size() == 2u));
             for (auto const &edge : crossEdges) {
                 size_type const iEdge(std::get<2>(edge));
                 slab.edges.push_back(iEdge); // Add edge to slab
@@ -226,10 +218,10 @@ Real64 SurfaceData::getInsideAirTemperature(EnergyPlusData &state, const int t_S
     Real64 RefAirTemp = 0;
 
     // determine reference air temperature for this surface
-    auto &thisZoneHB = state.dataZoneTempPredictorCorrector->zoneHeatBalance(this->Zone);
+    auto &thisSpaceHB = state.dataZoneTempPredictorCorrector->spaceHeatBalance(this->spaceNum);
     switch (state.dataSurface->SurfTAirRef(t_SurfNum)) {
     case RefAirTemp::ZoneMeanAirTemp: {
-        RefAirTemp = thisZoneHB.MAT;
+        RefAirTemp = thisSpaceHB.MAT;
     } break;
     case RefAirTemp::AdjacentAirTemp: {
         RefAirTemp = state.dataHeatBal->SurfTempEffBulkAir(t_SurfNum);
@@ -241,31 +233,32 @@ Real64 SurfaceData::getInsideAirTemperature(EnergyPlusData &state, const int t_S
         // check whether this zone is a controlled zone or not
         if (!state.dataHeatBal->Zone(Zone).IsControlled) {
             ShowFatalError(state,
-                           format("Zones must be controlled for Ceiling-Diffuser Convection model. No system serves zone {}",
-                                  state.dataHeatBal->Zone(Zone).Name));
+                           std::format("Zones must be controlled for Ceiling-Diffuser Convection model. No system serves zone {}",
+                                       state.dataHeatBal->Zone(Zone).Name));
             // return;
         }
         // determine supply air conditions
         Real64 SumSysMCp = 0;
         Real64 SumSysMCpT = 0;
-        for (int NodeNum = 1; NodeNum <= state.dataZoneEquip->ZoneEquipConfig(Zone).NumInletNodes; ++NodeNum) {
-            Real64 NodeTemp = state.dataLoopNodes->Node(state.dataZoneEquip->ZoneEquipConfig(Zone).InletNode(NodeNum)).Temp;
-            Real64 MassFlowRate = state.dataLoopNodes->Node(state.dataZoneEquip->ZoneEquipConfig(Zone).InletNode(NodeNum)).MassFlowRate;
-            Real64 CpAir = PsyCpAirFnW(thisZoneHB.ZoneAirHumRat);
-            SumSysMCp += MassFlowRate * CpAir;
-            SumSysMCpT += MassFlowRate * CpAir * NodeTemp;
+        auto const &inletNodes = (state.dataHeatBal->doSpaceHeatBalance) ? state.dataZoneEquip->spaceEquipConfig(this->spaceNum).InletNode
+                                                                         : state.dataZoneEquip->ZoneEquipConfig(Zone).InletNode;
+        for (int nodeNum : inletNodes) {
+            auto const &inNode = state.dataLoopNodes->Node(nodeNum);
+            Real64 CpAir = PsyCpAirFnW(thisSpaceHB.airHumRat);
+            SumSysMCp += inNode.MassFlowRate * CpAir;
+            SumSysMCpT += inNode.MassFlowRate * CpAir * inNode.Temp;
         }
         // a weighted average of the inlet temperatures.
         if (SumSysMCp > 0.0) {
             // a weighted average of the inlet temperatures.
             RefAirTemp = SumSysMCpT / SumSysMCp;
         } else {
-            RefAirTemp = thisZoneHB.MAT;
+            RefAirTemp = thisSpaceHB.MAT;
         }
     } break;
     default: {
         // currently set to mean air temp but should add error warning here
-        RefAirTemp = thisZoneHB.MAT;
+        RefAirTemp = thisSpaceHB.MAT;
     } break;
     }
 
@@ -324,12 +317,12 @@ Real64 SurfaceData::getOutsideIR(EnergyPlusData &state, const int t_SurfNum) con
     if (ExtBoundCond > 0) {
         value = state.dataSurface->SurfWinIRfromParentZone(ExtBoundCond) + state.dataHeatBalSurf->SurfQdotRadHVACInPerArea(ExtBoundCond);
     } else {
-        Real64 tout = getOutsideAirTemperature(state, t_SurfNum) + DataGlobalConstants::KelvinConv;
-        value = state.dataWindowManager->sigma * pow_4(tout);
-        value = ViewFactorSkyIR *
-                    (state.dataSurface->SurfAirSkyRadSplit(t_SurfNum) * state.dataWindowManager->sigma * pow_4(state.dataEnvrn->SkyTempKelvin) +
-                     (1.0 - state.dataSurface->SurfAirSkyRadSplit(t_SurfNum)) * value) +
-                ViewFactorGroundIR * value;
+        Real64 tout = getOutsideAirTemperature(state, t_SurfNum) + Constant::Kelvin;
+        value = Constant::StefanBoltzmann * pow_4(tout);
+        value =
+            ViewFactorSkyIR * (state.dataSurface->SurfAirSkyRadSplit(t_SurfNum) * Constant::StefanBoltzmann * pow_4(state.dataEnvrn->SkyTempKelvin) +
+                               (1.0 - state.dataSurface->SurfAirSkyRadSplit(t_SurfNum)) * value) +
+            ViewFactorGroundIR * value;
     }
     return value;
 }
@@ -369,23 +362,32 @@ ShapeCat SurfaceData::computed_shapeCat() const
 {
     if (Shape == SurfaceShape::Triangle) {
         return ShapeCat::Triangular;
-    } else if (Shape == SurfaceShape::TriangularWindow) {
+    }
+    if (Shape == SurfaceShape::TriangularWindow) {
         return ShapeCat::Triangular;
-    } else if (Shape == SurfaceShape::TriangularDoor) {
+    }
+    if (Shape == SurfaceShape::TriangularDoor) {
         return ShapeCat::Triangular;
-    } else if (Shape == SurfaceShape::Rectangle) {
+    }
+    if (Shape == SurfaceShape::Rectangle) {
         return ShapeCat::Rectangular;
-    } else if (Shape == SurfaceShape::RectangularDoorWindow) {
+    }
+    if (Shape == SurfaceShape::RectangularDoorWindow) {
         return ShapeCat::Rectangular;
-    } else if (Shape == SurfaceShape::RectangularOverhang) {
+    }
+    if (Shape == SurfaceShape::RectangularOverhang) {
         return ShapeCat::Rectangular;
-    } else if (Shape == SurfaceShape::RectangularLeftFin) {
+    }
+    if (Shape == SurfaceShape::RectangularLeftFin) {
         return ShapeCat::Rectangular;
-    } else if (Shape == SurfaceShape::RectangularRightFin) {
+    }
+    if (Shape == SurfaceShape::RectangularRightFin) {
         return ShapeCat::Rectangular;
-    } else if (IsConvex) {
+    }
+    if (IsConvex) {
         return ShapeCat::Convex;
-    } else {
+    }
+    {
         return ShapeCat::Nonconvex;
     }
 }
@@ -440,7 +442,8 @@ Surface2D SurfaceData::computed_surface2d() const
             zu = std::max(zu, v.z);
         }
         return Surface2D(shapeCat, axis, v2d, Vertex2D(yl, zl), Vertex2D(yu, zu));
-    } else if (axis == 1) {        // Use x,z for 2D surface
+    }
+    if (axis == 1) {               // Use x,z for 2D surface
         Real64 xl(v0.x), xu(v0.x); // x coordinate ranges
         Real64 zl(v0.z), zu(v0.z); // z coordinate ranges
         for (Vertices::size_type i = 0; i < n; ++i) {
@@ -452,24 +455,23 @@ Surface2D SurfaceData::computed_surface2d() const
             zu = std::max(zu, v.z);
         }
         return Surface2D(shapeCat, axis, v2d, Vertex2D(xl, zl), Vertex2D(xu, zu));
-    } else {                       // Use x,y for 2D surface
-        Real64 xl(v0.x), xu(v0.x); // x coordinate ranges
-        Real64 yl(v0.y), yu(v0.y); // y coordinate ranges
-        for (Vertices::size_type i = 0; i < n; ++i) {
-            Vector const &v(Vertex[i]);
-            v2d[i] = Vertex2D(v.x, v.y);
-            xl = std::min(xl, v.x);
-            xu = std::max(xu, v.x);
-            yl = std::min(yl, v.y);
-            yu = std::max(yu, v.y);
-        }
-        return Surface2D(shapeCat, axis, v2d, Vertex2D(xl, yl), Vertex2D(xu, yu));
+    } // Use x,y for 2D surface
+    Real64 xl(v0.x), xu(v0.x); // x coordinate ranges
+    Real64 yl(v0.y), yu(v0.y); // y coordinate ranges
+    for (Vertices::size_type i = 0; i < n; ++i) {
+        Vector const &v(Vertex[i]);
+        v2d[i] = Vertex2D(v.x, v.y);
+        xl = std::min(xl, v.x);
+        xu = std::max(xu, v.x);
+        yl = std::min(yl, v.y);
+        yu = std::max(yu, v.y);
     }
+    return Surface2D(shapeCat, axis, v2d, Vertex2D(xl, yl), Vertex2D(xu, yu));
 }
 
 Real64 SurfaceData::get_average_height(EnergyPlusData &state) const
 {
-    if (std::abs(SinTilt) < 1.e-4) {
+    if (std::abs(SinTilt) < Constant::SmallDistance) {
         return 0.0;
     }
     using Vertex2D = ObjexxFCL::Vector2<Real64>;
@@ -503,14 +505,14 @@ Real64 SurfaceData::get_average_height(EnergyPlusData &state) const
     if (totalWidth == 0.0) {
         // This should never happen, but if it does, print a somewhat meaningful fatal error
         // (instead of allowing a divide by zero).
-        ShowFatalError(state, format("Calculated projected surface width is zero for surface=\"{}\"", Name));
+        ShowFatalError(state, std::format("Calculated projected surface width is zero for surface=\"{}\"", Name));
     }
 
     Real64 averageHeight = 0.0;
     for (Vertices::size_type i = 0; i < n; ++i) {
         Vertex2D const &v(v2d[i]);
 
-        Vertex2D *v2;
+        Vertex2D const *v2;
         if (i == n - 1) {
             v2 = &v2d[0];
         } else {
@@ -523,6 +525,8 @@ Real64 SurfaceData::get_average_height(EnergyPlusData &state) const
 
 void SurfaceData::make_hash_key(EnergyPlusData &state, const int SurfNum)
 {
+    auto &s_surf = state.dataSurface;
+
     calcHashKey = SurfaceCalcHashKey();
     calcHashKey.Construction = Construction;
     calcHashKey.Azimuth = round(Azimuth * 10.0) / 10.0;
@@ -530,12 +534,12 @@ void SurfaceData::make_hash_key(EnergyPlusData &state, const int SurfNum)
     calcHashKey.Height = round(Height * 10.0) / 10.0;
     calcHashKey.Zone = Zone;
     calcHashKey.EnclIndex = SolarEnclIndex;
-    calcHashKey.TAirRef = state.dataSurface->SurfTAirRef(SurfNum);
+    calcHashKey.TAirRef = s_surf->SurfTAirRef(SurfNum);
 
-    int extBoundCond = state.dataSurface->Surface(SurfNum).ExtBoundCond;
+    int extBoundCond = s_surf->Surface(SurfNum).ExtBoundCond;
     if (extBoundCond > 0) {
-        calcHashKey.ExtZone = state.dataSurface->Surface(extBoundCond).Zone;
-        calcHashKey.ExtEnclIndex = state.dataSurface->Surface(extBoundCond).SolarEnclIndex;
+        calcHashKey.ExtZone = s_surf->Surface(extBoundCond).Zone;
+        calcHashKey.ExtEnclIndex = s_surf->Surface(extBoundCond).SolarEnclIndex;
         calcHashKey.ExtCond = 1;
     } else {
         calcHashKey.ExtZone = 0;
@@ -549,23 +553,28 @@ void SurfaceData::make_hash_key(EnergyPlusData &state, const int SurfNum)
     calcHashKey.ViewFactorSky = round(ViewFactorSky * 10.0) / 10.0;
 
     calcHashKey.HeatTransferAlgorithm = HeatTransferAlgorithm;
-    calcHashKey.IntConvCoeff = state.dataSurface->SurfIntConvCoeffIndex(SurfNum);
-    calcHashKey.ExtConvCoeff = state.dataSurface->SurfExtConvCoeffIndex(SurfNum);
+    calcHashKey.intConvModel = s_surf->surfIntConv(SurfNum).model;
+    calcHashKey.extConvModel = s_surf->surfExtConv(SurfNum).model;
+    calcHashKey.intConvUserModelNum = s_surf->surfIntConv(SurfNum).userModelNum;
+    calcHashKey.extConvUserModelNum = s_surf->surfExtConv(SurfNum).userModelNum;
     calcHashKey.OSCPtr = OSCPtr;
     calcHashKey.OSCMPtr = OSCMPtr;
 
     calcHashKey.FrameDivider = FrameDivider;
-    calcHashKey.SurfWinStormWinConstr = state.dataSurface->SurfWinStormWinConstr(SurfNum);
+    calcHashKey.SurfWinStormWinConstr = s_surf->SurfWinStormWinConstr(SurfNum);
 
-    calcHashKey.MaterialMovInsulExt = state.dataSurface->SurfMaterialMovInsulExt(SurfNum);
-    calcHashKey.MaterialMovInsulInt = state.dataSurface->SurfMaterialMovInsulInt(SurfNum);
-    calcHashKey.SchedMovInsulExt = state.dataSurface->SurfSchedMovInsulExt(SurfNum);
-    calcHashKey.SchedMovInsulInt = state.dataSurface->SurfSchedMovInsulInt(SurfNum);
-    calcHashKey.ExternalShadingSchInd = state.dataSurface->Surface(SurfNum).SurfExternalShadingSchInd;
-    calcHashKey.SurroundingSurfacesNum = state.dataSurface->Surface(SurfNum).SurfSurroundingSurfacesNum;
-    calcHashKey.LinkedOutAirNode = state.dataSurface->Surface(SurfNum).SurfLinkedOutAirNode;
-    calcHashKey.OutsideHeatSourceTermSchedule = OutsideHeatSourceTermSchedule;
-    calcHashKey.InsideHeatSourceTermSchedule = InsideHeatSourceTermSchedule;
+    calcHashKey.MaterialMovInsulExt = s_surf->extMovInsuls(SurfNum).matNum;
+    calcHashKey.MaterialMovInsulInt = s_surf->intMovInsuls(SurfNum).matNum;
+    calcHashKey.movInsulExtSchedNum = (s_surf->extMovInsuls(SurfNum).sched == nullptr) ? -1 : s_surf->extMovInsuls(SurfNum).sched->Num;
+    calcHashKey.movInsulIntSchedNum = (s_surf->intMovInsuls(SurfNum).sched == nullptr) ? -1 : s_surf->intMovInsuls(SurfNum).sched->Num;
+
+    calcHashKey.externalShadingSchedNum =
+        (s_surf->Surface(SurfNum).surfExternalShadingSched != nullptr) ? s_surf->Surface(SurfNum).surfExternalShadingSched->Num : -1;
+    calcHashKey.SurroundingSurfacesNum = s_surf->Surface(SurfNum).SurfSurroundingSurfacesNum;
+    calcHashKey.LinkedOutAirNode = s_surf->Surface(SurfNum).SurfLinkedOutAirNode;
+    calcHashKey.outsideHeatSourceTermSchedNum = (outsideHeatSourceTermSched != nullptr) ? outsideHeatSourceTermSched->Num : -1;
+    calcHashKey.insideHeatSourceTermSchedNum = (insideHeatSourceTermSched != nullptr) ? insideHeatSourceTermSched->Num : -1;
+    calcHashKey.ViewFactorSrdSurfs = s_surf->Surface(SurfNum).ViewFactorSrdSurfs;
 }
 
 void SurfaceData::set_representative_surface(EnergyPlusData &state, const int SurfNum)
@@ -616,8 +625,9 @@ void CheckSurfaceOutBulbTempAt(EnergyPlusData &state)
     Real64 minBulb = 0.0;
     for (int SurfNum = 1; SurfNum <= state.dataSurface->TotSurfaces; SurfNum++) {
         minBulb = min(minBulb, state.dataSurface->SurfOutDryBulbTemp(SurfNum), state.dataSurface->SurfOutWetBulbTemp(SurfNum));
-        if (minBulb < -100.0)
+        if (minBulb < -100.0) {
             SetOutBulbTempAt_error(state, "Surface", state.dataSurface->Surface(SurfNum).Centroid.z, state.dataSurface->Surface(SurfNum).Name);
+        }
     }
 }
 
@@ -632,7 +642,9 @@ void SetSurfaceWindSpeedAt(EnergyPlusData &state)
     } else {
 
         for (int SurfNum = 1; SurfNum <= state.dataSurface->TotSurfaces; SurfNum++) {
-            if (!state.dataSurface->Surface(SurfNum).ExtWind) continue;
+            if (!state.dataSurface->Surface(SurfNum).ExtWind) {
+                continue;
+            }
             Real64 const Z(state.dataSurface->Surface(SurfNum).Centroid.z); // Centroid value
             if (Z <= 0.0) {
                 state.dataSurface->SurfOutWindSpeed(SurfNum) = 0.0;
@@ -732,6 +744,96 @@ Real64 AbsBackSide(EnergyPlusData &state, int SurfNum)
         (state.dataSurface->SurfWinExtBeamAbsByShade(SurfNum) + state.dataSurface->SurfWinExtDiffAbsByShade(SurfNum)) *
         state.dataSurface->SurfWinShadeAbsFacFace2(SurfNum);
     return AbsorptanceFromExteriorBackSide + AbsorptanceFromInteriorBackSide;
+}
+
+void GetVariableAbsorptanceSurfaceList(EnergyPlusData &state)
+{
+    if (!state.dataMaterial->AnyVariableAbsorptance) {
+        return;
+    }
+    for (int surfNum : state.dataSurface->AllHTSurfaceList) {
+        auto const &thisSurface = state.dataSurface->Surface(surfNum);
+        auto const &thisConstruct = state.dataConstruction->Construct(thisSurface.Construction);
+        if (thisConstruct.TotLayers == 0) {
+            continue;
+        }
+        if (thisConstruct.LayerPoint(1) == 0) {
+            continue; // error finding material number
+        }
+        auto const *mat = state.dataMaterial->materials(thisConstruct.LayerPoint(1));
+        if (mat->group != Material::Group::Regular) {
+            continue;
+        }
+
+        if (mat->absorpVarCtrlSignal != Material::VariableAbsCtrlSignal::Invalid) {
+            // check for dynamic coating defined on interior surface
+            if (thisSurface.ExtBoundCond != ExternalEnvironment) {
+                ShowWarningError(
+                    state,
+                    std::format("MaterialProperty:VariableAbsorptance defined on an interior surface, {}. This VariableAbsorptance property "
+                                "will be ignored here",
+                                thisSurface.Name));
+            } else {
+                state.dataSurface->AllVaryAbsOpaqSurfaceList.push_back(surfNum);
+            }
+        }
+    }
+    // check for dynamic coating defined on the non-outside layer of a construction
+    for (int ConstrNum = 1; ConstrNum <= state.dataHeatBal->TotConstructs; ++ConstrNum) {
+        auto const &thisConstruct = state.dataConstruction->Construct(ConstrNum);
+        for (int Layer = 2; Layer <= thisConstruct.TotLayers; ++Layer) {
+            auto const *mat = state.dataMaterial->materials(thisConstruct.LayerPoint(Layer));
+            if (mat->group != Material::Group::Regular) {
+                continue;
+            }
+            if (mat->absorpVarCtrlSignal != Material::VariableAbsCtrlSignal::Invalid) {
+                ShowWarningError(state,
+                                 std::format("MaterialProperty:VariableAbsorptance defined on a inside-layer materials, {}. This VariableAbsorptance "
+                                             "property will be ignored here",
+                                             mat->Name));
+            }
+        }
+    }
+} // GetVariableAbsorptanceSurfaceList()
+
+Compass4 AzimuthToCompass4(Real64 azimuth)
+{
+    assert(azimuth >= 0.0 && azimuth < 360.0);
+    for (int c4 = 0; c4 < static_cast<int>(Compass4::Num); ++c4) {
+        Real64 lo = Compass4AzimuthLo[c4];
+        Real64 hi = Compass4AzimuthHi[c4];
+        if (lo > hi) {
+            if (azimuth >= lo || azimuth < hi) {
+                return static_cast<Compass4>(c4);
+            }
+        } else {
+            if (azimuth >= lo && azimuth < hi) {
+                return static_cast<Compass4>(c4);
+            }
+        }
+    }
+    assert(false);
+    return Compass4::Invalid;
+}
+
+Compass8 AzimuthToCompass8(Real64 azimuth)
+{
+    assert(azimuth >= 0.0 && azimuth < 360.0);
+    for (int c8 = 0; c8 < static_cast<int>(Compass8::Num); ++c8) {
+        Real64 lo = Compass8AzimuthLo[c8];
+        Real64 hi = Compass8AzimuthHi[c8];
+        if (lo > hi) {
+            if (azimuth >= lo || azimuth < hi) {
+                return static_cast<Compass8>(c8);
+            }
+        } else {
+            if (azimuth >= lo && azimuth < hi) {
+                return static_cast<Compass8>(c8);
+            }
+        }
+    }
+    assert(false);
+    return Compass8::Invalid;
 }
 
 } // namespace EnergyPlus::DataSurfaces

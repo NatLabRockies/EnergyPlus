@@ -1,7 +1,7 @@
-// EnergyPlus, Copyright (c) 1996-2023, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
-// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other
+// National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
 // contributors. All rights reserved.
 //
 // NOTICE: This Software was developed under funding from the U.S. Department of Energy and the
@@ -45,6 +45,9 @@
 // OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 // POSSIBILITY OF SUCH DAMAGE.
 
+// C++ Headers
+#include <format>
+
 // ObjexxFCL Headers
 #include <ObjexxFCL/Array1D.hh>
 #include <ObjexxFCL/Optional.hh>
@@ -68,25 +71,19 @@
 
 namespace EnergyPlus::IntegratedHeatPump {
 
-// Using/Aliasing
-using namespace DataLoopNode;
-
 Real64 constexpr WaterDensity(986.0); // standard water density at 60 C
 
 void SimIHP(EnergyPlusData &state,
-            std::string_view CompName,                               // Coil Name
-            int &CompIndex,                                          // Index for Component name
-            int const CyclingScheme,                                 // Continuous fan OR cycling compressor
-            Real64 &MaxONOFFCyclesperHour,                           // Maximum cycling rate of heat pump [cycles/hr]
-            Real64 &HPTimeConstant,                                  // Heat pump time constant [s]
-            Real64 &FanDelayTime,                                    // Fan delay time, time delay for the HP's fan to
-            DataHVACGlobals::CompressorOperation const CompressorOp, // compressor on/off. 0 = off; 1= on
-            Real64 const PartLoadFrac,                               // part load fraction
-            int const SpeedNum,                                      // compressor speed number
-            Real64 const SpeedRatio,                                 // compressor speed ratio
-            Real64 const SensLoad,                                   // Sensible demand load [W]
-            Real64 const LatentLoad,                                 // Latent demand load [W]
-            bool const IsCallbyWH, // whether the call from the water heating loop or air loop, true = from water heating loop
+            std::string_view CompName,             // Coil Name
+            int &CompIndex,                        // Index for Component name
+            HVAC::FanOp const fanOp,               // Continuous fan OR cycling compressor
+            HVAC::CompressorOp const compressorOp, // compressor on/off. 0 = off; 1= on
+            Real64 const PartLoadFrac,             // part load fraction
+            int const SpeedNum,                    // compressor speed number
+            Real64 const SpeedRatio,               // compressor speed ratio
+            Real64 const SensLoad,                 // Sensible demand load [W]
+            Real64 const LatentLoad,               // Latent demand load [W]
+            bool const IsCallbyWH,                 // whether the call from the water heating loop or air loop, true = from water heating loop
             [[maybe_unused]] bool const FirstHVACIteration,   // TRUE if First iteration of simulation
             ObjexxFCL::Optional<Real64 const> OnOffAirFlowRat // ratio of comp on to comp off air flow rate
 )
@@ -114,32 +111,34 @@ void SimIHP(EnergyPlusData &state,
     }
 
     if (CompIndex == 0) {
-        DXCoilNum = UtilityRoutines::FindItemInList(CompName, state.dataIntegratedHP->IntegratedHeatPumps);
+        DXCoilNum = Util::FindItemInList(CompName, state.dataIntegratedHP->IntegratedHeatPumps);
         if (DXCoilNum == 0) {
-            ShowFatalError(state, format("Integrated Heat Pump not found={}", CompName));
+            ShowFatalError(state, std::format("Integrated Heat Pump not found={}", CompName));
         }
         CompIndex = DXCoilNum;
     } else {
         DXCoilNum = CompIndex;
         if (DXCoilNum > static_cast<int>(state.dataIntegratedHP->IntegratedHeatPumps.size()) || DXCoilNum < 1) {
             ShowFatalError(state,
-                           format("SimIHP: Invalid CompIndex passed={}, Number of Integrated HPs={}, IHP name={}",
-                                  DXCoilNum,
-                                  state.dataIntegratedHP->IntegratedHeatPumps.size(),
-                                  CompName));
+                           std::format("SimIHP: Invalid CompIndex passed={}, Number of Integrated HPs={}, IHP name={}",
+                                       DXCoilNum,
+                                       state.dataIntegratedHP->IntegratedHeatPumps.size(),
+                                       CompName));
         }
         if (!CompName.empty() && CompName != state.dataIntegratedHP->IntegratedHeatPumps(DXCoilNum).Name) {
             ShowFatalError(state,
-                           format("SimIHP: Invalid CompIndex passed={}, Integrated HP name={}, stored Integrated HP Name for that index={}",
-                                  DXCoilNum,
-                                  CompName,
-                                  state.dataIntegratedHP->IntegratedHeatPumps(DXCoilNum).Name));
+                           std::format("SimIHP: Invalid CompIndex passed={}, Integrated HP name={}, stored Integrated HP Name for that index={}",
+                                       DXCoilNum,
+                                       CompName,
+                                       state.dataIntegratedHP->IntegratedHeatPumps(DXCoilNum).Name));
         }
     };
 
     auto &ihp = state.dataIntegratedHP->IntegratedHeatPumps(DXCoilNum);
 
-    if (!ihp.IHPCoilsSized) SizeIHP(state, DXCoilNum);
+    if (!ihp.IHPCoilsSized) {
+        SizeIHP(state, DXCoilNum);
+    }
 
     InitializeIHP(state, DXCoilNum);
 
@@ -150,99 +149,18 @@ void SimIHP(EnergyPlusData &state,
     case IHPOperationMode::SpaceClg:
         if (!IsCallbyWH) // process when called from air loop
         {
-            SimVariableSpeedCoils(state,
-                                  std::string(),
-                                  ihp.SCDWHCoolCoilIndex,
-                                  CyclingScheme,
-                                  MaxONOFFCyclesperHour,
-                                  HPTimeConstant,
-                                  FanDelayTime,
-                                  CompressorOp,
-                                  0.0,
-                                  1,
-                                  0.0,
-                                  0.0,
-                                  0.0,
-                                  OnOffAirFlowRat);
-            SimVariableSpeedCoils(state,
-                                  std::string(),
-                                  ihp.SCDWHWHCoilIndex,
-                                  CyclingScheme,
-                                  MaxONOFFCyclesperHour,
-                                  HPTimeConstant,
-                                  FanDelayTime,
-                                  CompressorOp,
-                                  0.0,
-                                  1,
-                                  0.0,
-                                  0.0,
-                                  0.0,
-                                  OnOffAirFlowRat);
-            SimVariableSpeedCoils(state,
-                                  std::string(),
-                                  ihp.SHDWHHeatCoilIndex,
-                                  CyclingScheme,
-                                  MaxONOFFCyclesperHour,
-                                  HPTimeConstant,
-                                  FanDelayTime,
-                                  CompressorOp,
-                                  0.0,
-                                  1,
-                                  0.0,
-                                  0.0,
-                                  0.0,
-                                  OnOffAirFlowRat);
-            SimVariableSpeedCoils(state,
-                                  std::string(),
-                                  ihp.SHDWHWHCoilIndex,
-                                  CyclingScheme,
-                                  MaxONOFFCyclesperHour,
-                                  HPTimeConstant,
-                                  FanDelayTime,
-                                  CompressorOp,
-                                  0.0,
-                                  1,
-                                  0.0,
-                                  0.0,
-                                  0.0,
-                                  OnOffAirFlowRat);
-            SimVariableSpeedCoils(state,
-                                  std::string(),
-                                  ihp.SCWHCoilIndex,
-                                  CyclingScheme,
-                                  MaxONOFFCyclesperHour,
-                                  HPTimeConstant,
-                                  FanDelayTime,
-                                  CompressorOp,
-                                  0.0,
-                                  1,
-                                  0.0,
-                                  0.0,
-                                  0.0,
-                                  OnOffAirFlowRat);
-            SimVariableSpeedCoils(state,
-                                  std::string(),
-                                  ihp.DWHCoilIndex,
-                                  CyclingScheme,
-                                  MaxONOFFCyclesperHour,
-                                  HPTimeConstant,
-                                  FanDelayTime,
-                                  CompressorOp,
-                                  0.0,
-                                  1,
-                                  0.0,
-                                  0.0,
-                                  0.0,
-                                  OnOffAirFlowRat);
+            SimVariableSpeedCoils(state, std::string(), ihp.SCDWHCoolCoilIndex, fanOp, compressorOp, 0.0, 1, 0.0, 0.0, 0.0, OnOffAirFlowRat);
+            SimVariableSpeedCoils(state, std::string(), ihp.SCDWHWHCoilIndex, fanOp, compressorOp, 0.0, 1, 0.0, 0.0, 0.0, OnOffAirFlowRat);
+            SimVariableSpeedCoils(state, std::string(), ihp.SHDWHHeatCoilIndex, fanOp, compressorOp, 0.0, 1, 0.0, 0.0, 0.0, OnOffAirFlowRat);
+            SimVariableSpeedCoils(state, std::string(), ihp.SHDWHWHCoilIndex, fanOp, compressorOp, 0.0, 1, 0.0, 0.0, 0.0, OnOffAirFlowRat);
+            SimVariableSpeedCoils(state, std::string(), ihp.SCWHCoilIndex, fanOp, compressorOp, 0.0, 1, 0.0, 0.0, 0.0, OnOffAirFlowRat);
+            SimVariableSpeedCoils(state, std::string(), ihp.DWHCoilIndex, fanOp, compressorOp, 0.0, 1, 0.0, 0.0, 0.0, OnOffAirFlowRat);
 
             SimVariableSpeedCoils(state,
                                   std::string(),
                                   ihp.SCCoilIndex,
-                                  CyclingScheme,
-                                  MaxONOFFCyclesperHour,
-                                  HPTimeConstant,
-                                  FanDelayTime,
-                                  CompressorOp,
+                                  fanOp,
+                                  compressorOp,
                                   PartLoadFrac,
                                   SpeedNum,
                                   SpeedRatio,
@@ -250,20 +168,7 @@ void SimIHP(EnergyPlusData &state,
                                   LatentLoad,
                                   OnOffAirFlowRat);
 
-            SimVariableSpeedCoils(state,
-                                  std::string(),
-                                  ihp.SHCoilIndex,
-                                  CyclingScheme,
-                                  MaxONOFFCyclesperHour,
-                                  HPTimeConstant,
-                                  FanDelayTime,
-                                  CompressorOp,
-                                  0.0,
-                                  1,
-                                  0.0,
-                                  0.0,
-                                  0.0,
-                                  OnOffAirFlowRat);
+            SimVariableSpeedCoils(state, std::string(), ihp.SHCoilIndex, fanOp, compressorOp, 0.0, 1, 0.0, 0.0, 0.0, OnOffAirFlowRat);
 
             ihp.AirFlowSavInAirLoop = airMassFlowRate;
         }
@@ -273,113 +178,19 @@ void SimIHP(EnergyPlusData &state,
     case IHPOperationMode::SpaceHtg:
         if (!IsCallbyWH) // process when called from air loop
         {
-            SimVariableSpeedCoils(state,
-                                  std::string(),
-                                  ihp.SCDWHCoolCoilIndex,
-                                  CyclingScheme,
-                                  MaxONOFFCyclesperHour,
-                                  HPTimeConstant,
-                                  FanDelayTime,
-                                  CompressorOp,
-                                  0.0,
-                                  1,
-                                  0.0,
-                                  0.0,
-                                  0.0,
-                                  OnOffAirFlowRat);
-            SimVariableSpeedCoils(state,
-                                  std::string(),
-                                  ihp.SCDWHWHCoilIndex,
-                                  CyclingScheme,
-                                  MaxONOFFCyclesperHour,
-                                  HPTimeConstant,
-                                  FanDelayTime,
-                                  CompressorOp,
-                                  0.0,
-                                  1,
-                                  0.0,
-                                  0.0,
-                                  0.0,
-                                  OnOffAirFlowRat);
-            SimVariableSpeedCoils(state,
-                                  std::string(),
-                                  ihp.SHDWHHeatCoilIndex,
-                                  CyclingScheme,
-                                  MaxONOFFCyclesperHour,
-                                  HPTimeConstant,
-                                  FanDelayTime,
-                                  CompressorOp,
-                                  0.0,
-                                  1,
-                                  0.0,
-                                  0.0,
-                                  0.0,
-                                  OnOffAirFlowRat);
-            SimVariableSpeedCoils(state,
-                                  std::string(),
-                                  ihp.SHDWHWHCoilIndex,
-                                  CyclingScheme,
-                                  MaxONOFFCyclesperHour,
-                                  HPTimeConstant,
-                                  FanDelayTime,
-                                  CompressorOp,
-                                  0.0,
-                                  1,
-                                  0.0,
-                                  0.0,
-                                  0.0,
-                                  OnOffAirFlowRat);
-            SimVariableSpeedCoils(state,
-                                  std::string(),
-                                  ihp.SCWHCoilIndex,
-                                  CyclingScheme,
-                                  MaxONOFFCyclesperHour,
-                                  HPTimeConstant,
-                                  FanDelayTime,
-                                  CompressorOp,
-                                  0.0,
-                                  1,
-                                  0.0,
-                                  0.0,
-                                  0.0,
-                                  OnOffAirFlowRat);
-            SimVariableSpeedCoils(state,
-                                  std::string(),
-                                  ihp.SCCoilIndex,
-                                  CyclingScheme,
-                                  MaxONOFFCyclesperHour,
-                                  HPTimeConstant,
-                                  FanDelayTime,
-                                  CompressorOp,
-                                  0.0,
-                                  1,
-                                  0.0,
-                                  0.0,
-                                  0.0,
-                                  OnOffAirFlowRat);
-            SimVariableSpeedCoils(state,
-                                  std::string(),
-                                  ihp.DWHCoilIndex,
-                                  CyclingScheme,
-                                  MaxONOFFCyclesperHour,
-                                  HPTimeConstant,
-                                  FanDelayTime,
-                                  CompressorOp,
-                                  0.0,
-                                  1,
-                                  0.0,
-                                  0.0,
-                                  0.0,
-                                  OnOffAirFlowRat);
+            SimVariableSpeedCoils(state, std::string(), ihp.SCDWHCoolCoilIndex, fanOp, compressorOp, 0.0, 1, 0.0, 0.0, 0.0, OnOffAirFlowRat);
+            SimVariableSpeedCoils(state, std::string(), ihp.SCDWHWHCoilIndex, fanOp, compressorOp, 0.0, 1, 0.0, 0.0, 0.0, OnOffAirFlowRat);
+            SimVariableSpeedCoils(state, std::string(), ihp.SHDWHHeatCoilIndex, fanOp, compressorOp, 0.0, 1, 0.0, 0.0, 0.0, OnOffAirFlowRat);
+            SimVariableSpeedCoils(state, std::string(), ihp.SHDWHWHCoilIndex, fanOp, compressorOp, 0.0, 1, 0.0, 0.0, 0.0, OnOffAirFlowRat);
+            SimVariableSpeedCoils(state, std::string(), ihp.SCWHCoilIndex, fanOp, compressorOp, 0.0, 1, 0.0, 0.0, 0.0, OnOffAirFlowRat);
+            SimVariableSpeedCoils(state, std::string(), ihp.SCCoilIndex, fanOp, compressorOp, 0.0, 1, 0.0, 0.0, 0.0, OnOffAirFlowRat);
+            SimVariableSpeedCoils(state, std::string(), ihp.DWHCoilIndex, fanOp, compressorOp, 0.0, 1, 0.0, 0.0, 0.0, OnOffAirFlowRat);
 
             SimVariableSpeedCoils(state,
                                   std::string(),
                                   ihp.SHCoilIndex,
-                                  CyclingScheme,
-                                  MaxONOFFCyclesperHour,
-                                  HPTimeConstant,
-                                  FanDelayTime,
-                                  CompressorOp,
+                                  fanOp,
+                                  compressorOp,
                                   PartLoadFrac,
                                   SpeedNum,
                                   SpeedRatio,
@@ -394,113 +205,19 @@ void SimIHP(EnergyPlusData &state,
     case IHPOperationMode::DedicatedWaterHtg:
         if (IsCallbyWH) // process when called from water loop
         {
-            SimVariableSpeedCoils(state,
-                                  std::string(),
-                                  ihp.SCDWHCoolCoilIndex,
-                                  CyclingScheme,
-                                  MaxONOFFCyclesperHour,
-                                  HPTimeConstant,
-                                  FanDelayTime,
-                                  CompressorOp,
-                                  0.0,
-                                  1,
-                                  0.0,
-                                  0.0,
-                                  0.0,
-                                  OnOffAirFlowRat);
-            SimVariableSpeedCoils(state,
-                                  std::string(),
-                                  ihp.SCDWHWHCoilIndex,
-                                  CyclingScheme,
-                                  MaxONOFFCyclesperHour,
-                                  HPTimeConstant,
-                                  FanDelayTime,
-                                  CompressorOp,
-                                  0.0,
-                                  1,
-                                  0.0,
-                                  0.0,
-                                  0.0,
-                                  OnOffAirFlowRat);
-            SimVariableSpeedCoils(state,
-                                  std::string(),
-                                  ihp.SHDWHHeatCoilIndex,
-                                  CyclingScheme,
-                                  MaxONOFFCyclesperHour,
-                                  HPTimeConstant,
-                                  FanDelayTime,
-                                  CompressorOp,
-                                  0.0,
-                                  1,
-                                  0.0,
-                                  0.0,
-                                  0.0,
-                                  OnOffAirFlowRat);
-            SimVariableSpeedCoils(state,
-                                  std::string(),
-                                  ihp.SHDWHWHCoilIndex,
-                                  CyclingScheme,
-                                  MaxONOFFCyclesperHour,
-                                  HPTimeConstant,
-                                  FanDelayTime,
-                                  CompressorOp,
-                                  0.0,
-                                  1,
-                                  0.0,
-                                  0.0,
-                                  0.0,
-                                  OnOffAirFlowRat);
-            SimVariableSpeedCoils(state,
-                                  std::string(),
-                                  ihp.SCWHCoilIndex,
-                                  CyclingScheme,
-                                  MaxONOFFCyclesperHour,
-                                  HPTimeConstant,
-                                  FanDelayTime,
-                                  CompressorOp,
-                                  0.0,
-                                  1,
-                                  0.0,
-                                  0.0,
-                                  0.0,
-                                  OnOffAirFlowRat);
-            SimVariableSpeedCoils(state,
-                                  std::string(),
-                                  ihp.SCCoilIndex,
-                                  CyclingScheme,
-                                  MaxONOFFCyclesperHour,
-                                  HPTimeConstant,
-                                  FanDelayTime,
-                                  CompressorOp,
-                                  0.0,
-                                  1,
-                                  0.0,
-                                  0.0,
-                                  0.0,
-                                  OnOffAirFlowRat);
-            SimVariableSpeedCoils(state,
-                                  std::string(),
-                                  ihp.SHCoilIndex,
-                                  CyclingScheme,
-                                  MaxONOFFCyclesperHour,
-                                  HPTimeConstant,
-                                  FanDelayTime,
-                                  CompressorOp,
-                                  0.0,
-                                  1,
-                                  0.0,
-                                  0.0,
-                                  0.0,
-                                  OnOffAirFlowRat);
+            SimVariableSpeedCoils(state, std::string(), ihp.SCDWHCoolCoilIndex, fanOp, compressorOp, 0.0, 1, 0.0, 0.0, 0.0, OnOffAirFlowRat);
+            SimVariableSpeedCoils(state, std::string(), ihp.SCDWHWHCoilIndex, fanOp, compressorOp, 0.0, 1, 0.0, 0.0, 0.0, OnOffAirFlowRat);
+            SimVariableSpeedCoils(state, std::string(), ihp.SHDWHHeatCoilIndex, fanOp, compressorOp, 0.0, 1, 0.0, 0.0, 0.0, OnOffAirFlowRat);
+            SimVariableSpeedCoils(state, std::string(), ihp.SHDWHWHCoilIndex, fanOp, compressorOp, 0.0, 1, 0.0, 0.0, 0.0, OnOffAirFlowRat);
+            SimVariableSpeedCoils(state, std::string(), ihp.SCWHCoilIndex, fanOp, compressorOp, 0.0, 1, 0.0, 0.0, 0.0, OnOffAirFlowRat);
+            SimVariableSpeedCoils(state, std::string(), ihp.SCCoilIndex, fanOp, compressorOp, 0.0, 1, 0.0, 0.0, 0.0, OnOffAirFlowRat);
+            SimVariableSpeedCoils(state, std::string(), ihp.SHCoilIndex, fanOp, compressorOp, 0.0, 1, 0.0, 0.0, 0.0, OnOffAirFlowRat);
 
             SimVariableSpeedCoils(state,
                                   std::string(),
                                   ihp.DWHCoilIndex,
-                                  CyclingScheme,
-                                  MaxONOFFCyclesperHour,
-                                  HPTimeConstant,
-                                  FanDelayTime,
-                                  CompressorOp,
+                                  fanOp,
+                                  compressorOp,
                                   PartLoadFrac,
                                   SpeedNum,
                                   SpeedRatio,
@@ -516,99 +233,18 @@ void SimIHP(EnergyPlusData &state,
     case IHPOperationMode::SCWHMatchSC:
         if (!IsCallbyWH) // process when called from air loop
         {
-            SimVariableSpeedCoils(state,
-                                  std::string(),
-                                  ihp.SCDWHCoolCoilIndex,
-                                  CyclingScheme,
-                                  MaxONOFFCyclesperHour,
-                                  HPTimeConstant,
-                                  FanDelayTime,
-                                  CompressorOp,
-                                  0.0,
-                                  1,
-                                  0.0,
-                                  0.0,
-                                  0.0,
-                                  OnOffAirFlowRat);
-            SimVariableSpeedCoils(state,
-                                  std::string(),
-                                  ihp.SCDWHWHCoilIndex,
-                                  CyclingScheme,
-                                  MaxONOFFCyclesperHour,
-                                  HPTimeConstant,
-                                  FanDelayTime,
-                                  CompressorOp,
-                                  0.0,
-                                  1,
-                                  0.0,
-                                  0.0,
-                                  0.0,
-                                  OnOffAirFlowRat);
-            SimVariableSpeedCoils(state,
-                                  std::string(),
-                                  ihp.SHDWHHeatCoilIndex,
-                                  CyclingScheme,
-                                  MaxONOFFCyclesperHour,
-                                  HPTimeConstant,
-                                  FanDelayTime,
-                                  CompressorOp,
-                                  0.0,
-                                  1,
-                                  0.0,
-                                  0.0,
-                                  0.0,
-                                  OnOffAirFlowRat);
-            SimVariableSpeedCoils(state,
-                                  std::string(),
-                                  ihp.SHDWHWHCoilIndex,
-                                  CyclingScheme,
-                                  MaxONOFFCyclesperHour,
-                                  HPTimeConstant,
-                                  FanDelayTime,
-                                  CompressorOp,
-                                  0.0,
-                                  1,
-                                  0.0,
-                                  0.0,
-                                  0.0,
-                                  OnOffAirFlowRat);
-            SimVariableSpeedCoils(state,
-                                  std::string(),
-                                  ihp.SCCoilIndex,
-                                  CyclingScheme,
-                                  MaxONOFFCyclesperHour,
-                                  HPTimeConstant,
-                                  FanDelayTime,
-                                  CompressorOp,
-                                  0.0,
-                                  1,
-                                  0.0,
-                                  0.0,
-                                  0.0,
-                                  OnOffAirFlowRat);
-            SimVariableSpeedCoils(state,
-                                  std::string(),
-                                  ihp.DWHCoilIndex,
-                                  CyclingScheme,
-                                  MaxONOFFCyclesperHour,
-                                  HPTimeConstant,
-                                  FanDelayTime,
-                                  CompressorOp,
-                                  0.0,
-                                  1,
-                                  0.0,
-                                  0.0,
-                                  0.0,
-                                  OnOffAirFlowRat);
+            SimVariableSpeedCoils(state, std::string(), ihp.SCDWHCoolCoilIndex, fanOp, compressorOp, 0.0, 1, 0.0, 0.0, 0.0, OnOffAirFlowRat);
+            SimVariableSpeedCoils(state, std::string(), ihp.SCDWHWHCoilIndex, fanOp, compressorOp, 0.0, 1, 0.0, 0.0, 0.0, OnOffAirFlowRat);
+            SimVariableSpeedCoils(state, std::string(), ihp.SHDWHHeatCoilIndex, fanOp, compressorOp, 0.0, 1, 0.0, 0.0, 0.0, OnOffAirFlowRat);
+            SimVariableSpeedCoils(state, std::string(), ihp.SHDWHWHCoilIndex, fanOp, compressorOp, 0.0, 1, 0.0, 0.0, 0.0, OnOffAirFlowRat);
+            SimVariableSpeedCoils(state, std::string(), ihp.SCCoilIndex, fanOp, compressorOp, 0.0, 1, 0.0, 0.0, 0.0, OnOffAirFlowRat);
+            SimVariableSpeedCoils(state, std::string(), ihp.DWHCoilIndex, fanOp, compressorOp, 0.0, 1, 0.0, 0.0, 0.0, OnOffAirFlowRat);
 
             SimVariableSpeedCoils(state,
                                   std::string(),
                                   ihp.SCWHCoilIndex,
-                                  CyclingScheme,
-                                  MaxONOFFCyclesperHour,
-                                  HPTimeConstant,
-                                  FanDelayTime,
-                                  CompressorOp,
+                                  fanOp,
+                                  compressorOp,
                                   PartLoadFrac,
                                   SpeedNum,
                                   SpeedRatio,
@@ -616,20 +252,7 @@ void SimIHP(EnergyPlusData &state,
                                   LatentLoad,
                                   OnOffAirFlowRat);
 
-            SimVariableSpeedCoils(state,
-                                  std::string(),
-                                  ihp.SHCoilIndex,
-                                  CyclingScheme,
-                                  MaxONOFFCyclesperHour,
-                                  HPTimeConstant,
-                                  FanDelayTime,
-                                  CompressorOp,
-                                  0.0,
-                                  1,
-                                  0.0,
-                                  0.0,
-                                  0.0,
-                                  OnOffAirFlowRat);
+            SimVariableSpeedCoils(state, std::string(), ihp.SHCoilIndex, fanOp, compressorOp, 0.0, 1, 0.0, 0.0, 0.0, OnOffAirFlowRat);
 
             ihp.AirFlowSavInAirLoop = airMassFlowRate;
         }
@@ -640,99 +263,18 @@ void SimIHP(EnergyPlusData &state,
     case IHPOperationMode::SCWHMatchWH:
         if (IsCallbyWH) // process when called from water loop
         {
-            SimVariableSpeedCoils(state,
-                                  std::string(),
-                                  ihp.SCDWHCoolCoilIndex,
-                                  CyclingScheme,
-                                  MaxONOFFCyclesperHour,
-                                  HPTimeConstant,
-                                  FanDelayTime,
-                                  CompressorOp,
-                                  0.0,
-                                  1,
-                                  0.0,
-                                  0.0,
-                                  0.0,
-                                  OnOffAirFlowRat);
-            SimVariableSpeedCoils(state,
-                                  std::string(),
-                                  ihp.SCDWHWHCoilIndex,
-                                  CyclingScheme,
-                                  MaxONOFFCyclesperHour,
-                                  HPTimeConstant,
-                                  FanDelayTime,
-                                  CompressorOp,
-                                  0.0,
-                                  1,
-                                  0.0,
-                                  0.0,
-                                  0.0,
-                                  OnOffAirFlowRat);
-            SimVariableSpeedCoils(state,
-                                  std::string(),
-                                  ihp.SHDWHHeatCoilIndex,
-                                  CyclingScheme,
-                                  MaxONOFFCyclesperHour,
-                                  HPTimeConstant,
-                                  FanDelayTime,
-                                  CompressorOp,
-                                  0.0,
-                                  1,
-                                  0.0,
-                                  0.0,
-                                  0.0,
-                                  OnOffAirFlowRat);
-            SimVariableSpeedCoils(state,
-                                  std::string(),
-                                  ihp.SHDWHWHCoilIndex,
-                                  CyclingScheme,
-                                  MaxONOFFCyclesperHour,
-                                  HPTimeConstant,
-                                  FanDelayTime,
-                                  CompressorOp,
-                                  0.0,
-                                  1,
-                                  0.0,
-                                  0.0,
-                                  0.0,
-                                  OnOffAirFlowRat);
-            SimVariableSpeedCoils(state,
-                                  std::string(),
-                                  ihp.SCCoilIndex,
-                                  CyclingScheme,
-                                  MaxONOFFCyclesperHour,
-                                  HPTimeConstant,
-                                  FanDelayTime,
-                                  CompressorOp,
-                                  0.0,
-                                  1,
-                                  0.0,
-                                  0.0,
-                                  0.0,
-                                  OnOffAirFlowRat);
-            SimVariableSpeedCoils(state,
-                                  std::string(),
-                                  ihp.DWHCoilIndex,
-                                  CyclingScheme,
-                                  MaxONOFFCyclesperHour,
-                                  HPTimeConstant,
-                                  FanDelayTime,
-                                  CompressorOp,
-                                  0.0,
-                                  1,
-                                  0.0,
-                                  0.0,
-                                  0.0,
-                                  OnOffAirFlowRat);
+            SimVariableSpeedCoils(state, std::string(), ihp.SCDWHCoolCoilIndex, fanOp, compressorOp, 0.0, 1, 0.0, 0.0, 0.0, OnOffAirFlowRat);
+            SimVariableSpeedCoils(state, std::string(), ihp.SCDWHWHCoilIndex, fanOp, compressorOp, 0.0, 1, 0.0, 0.0, 0.0, OnOffAirFlowRat);
+            SimVariableSpeedCoils(state, std::string(), ihp.SHDWHHeatCoilIndex, fanOp, compressorOp, 0.0, 1, 0.0, 0.0, 0.0, OnOffAirFlowRat);
+            SimVariableSpeedCoils(state, std::string(), ihp.SHDWHWHCoilIndex, fanOp, compressorOp, 0.0, 1, 0.0, 0.0, 0.0, OnOffAirFlowRat);
+            SimVariableSpeedCoils(state, std::string(), ihp.SCCoilIndex, fanOp, compressorOp, 0.0, 1, 0.0, 0.0, 0.0, OnOffAirFlowRat);
+            SimVariableSpeedCoils(state, std::string(), ihp.DWHCoilIndex, fanOp, compressorOp, 0.0, 1, 0.0, 0.0, 0.0, OnOffAirFlowRat);
 
             SimVariableSpeedCoils(state,
                                   std::string(),
                                   ihp.SCWHCoilIndex,
-                                  CyclingScheme,
-                                  MaxONOFFCyclesperHour,
-                                  HPTimeConstant,
-                                  FanDelayTime,
-                                  CompressorOp,
+                                  fanOp,
+                                  compressorOp,
                                   PartLoadFrac,
                                   SpeedNum,
                                   SpeedRatio,
@@ -740,20 +282,7 @@ void SimIHP(EnergyPlusData &state,
                                   LatentLoad,
                                   OnOffAirFlowRat);
 
-            SimVariableSpeedCoils(state,
-                                  std::string(),
-                                  ihp.SHCoilIndex,
-                                  CyclingScheme,
-                                  MaxONOFFCyclesperHour,
-                                  HPTimeConstant,
-                                  FanDelayTime,
-                                  CompressorOp,
-                                  0.0,
-                                  1,
-                                  0.0,
-                                  0.0,
-                                  0.0,
-                                  OnOffAirFlowRat);
+            SimVariableSpeedCoils(state, std::string(), ihp.SHCoilIndex, fanOp, compressorOp, 0.0, 1, 0.0, 0.0, 0.0, OnOffAirFlowRat);
 
             ihp.AirFlowSavInWaterLoop = airMassFlowRate;
         }
@@ -763,85 +292,17 @@ void SimIHP(EnergyPlusData &state,
     case IHPOperationMode::SpaceClgDedicatedWaterHtg:
         if (!IsCallbyWH) // process when called from air loop
         {
-            SimVariableSpeedCoils(state,
-                                  std::string(),
-                                  ihp.SHDWHHeatCoilIndex,
-                                  CyclingScheme,
-                                  MaxONOFFCyclesperHour,
-                                  HPTimeConstant,
-                                  FanDelayTime,
-                                  CompressorOp,
-                                  0.0,
-                                  1,
-                                  0.0,
-                                  0.0,
-                                  0.0,
-                                  OnOffAirFlowRat);
-            SimVariableSpeedCoils(state,
-                                  std::string(),
-                                  ihp.SHDWHWHCoilIndex,
-                                  CyclingScheme,
-                                  MaxONOFFCyclesperHour,
-                                  HPTimeConstant,
-                                  FanDelayTime,
-                                  CompressorOp,
-                                  0.0,
-                                  1,
-                                  0.0,
-                                  0.0,
-                                  0.0,
-                                  OnOffAirFlowRat);
-            SimVariableSpeedCoils(state,
-                                  std::string(),
-                                  ihp.SCWHCoilIndex,
-                                  CyclingScheme,
-                                  MaxONOFFCyclesperHour,
-                                  HPTimeConstant,
-                                  FanDelayTime,
-                                  CompressorOp,
-                                  0.0,
-                                  1,
-                                  0.0,
-                                  0.0,
-                                  0.0,
-                                  OnOffAirFlowRat);
-            SimVariableSpeedCoils(state,
-                                  std::string(),
-                                  ihp.SCCoilIndex,
-                                  CyclingScheme,
-                                  MaxONOFFCyclesperHour,
-                                  HPTimeConstant,
-                                  FanDelayTime,
-                                  CompressorOp,
-                                  0.0,
-                                  1,
-                                  0.0,
-                                  0.0,
-                                  0.0,
-                                  OnOffAirFlowRat);
-            SimVariableSpeedCoils(state,
-                                  std::string(),
-                                  ihp.DWHCoilIndex,
-                                  CyclingScheme,
-                                  MaxONOFFCyclesperHour,
-                                  HPTimeConstant,
-                                  FanDelayTime,
-                                  CompressorOp,
-                                  0.0,
-                                  1,
-                                  0.0,
-                                  0.0,
-                                  0.0,
-                                  OnOffAirFlowRat);
+            SimVariableSpeedCoils(state, std::string(), ihp.SHDWHHeatCoilIndex, fanOp, compressorOp, 0.0, 1, 0.0, 0.0, 0.0, OnOffAirFlowRat);
+            SimVariableSpeedCoils(state, std::string(), ihp.SHDWHWHCoilIndex, fanOp, compressorOp, 0.0, 1, 0.0, 0.0, 0.0, OnOffAirFlowRat);
+            SimVariableSpeedCoils(state, std::string(), ihp.SCWHCoilIndex, fanOp, compressorOp, 0.0, 1, 0.0, 0.0, 0.0, OnOffAirFlowRat);
+            SimVariableSpeedCoils(state, std::string(), ihp.SCCoilIndex, fanOp, compressorOp, 0.0, 1, 0.0, 0.0, 0.0, OnOffAirFlowRat);
+            SimVariableSpeedCoils(state, std::string(), ihp.DWHCoilIndex, fanOp, compressorOp, 0.0, 1, 0.0, 0.0, 0.0, OnOffAirFlowRat);
 
             SimVariableSpeedCoils(state,
                                   std::string(),
                                   ihp.SCDWHWHCoilIndex,
-                                  CyclingScheme,
-                                  MaxONOFFCyclesperHour,
-                                  HPTimeConstant,
-                                  FanDelayTime,
-                                  CompressorOp,
+                                  fanOp,
+                                  compressorOp,
                                   PartLoadFrac,
                                   SpeedNum,
                                   SpeedRatio,
@@ -851,11 +312,8 @@ void SimIHP(EnergyPlusData &state,
             SimVariableSpeedCoils(state,
                                   std::string(),
                                   ihp.SCDWHCoolCoilIndex,
-                                  CyclingScheme,
-                                  MaxONOFFCyclesperHour,
-                                  HPTimeConstant,
-                                  FanDelayTime,
-                                  CompressorOp,
+                                  fanOp,
+                                  compressorOp,
                                   PartLoadFrac,
                                   SpeedNum,
                                   SpeedRatio,
@@ -863,20 +321,7 @@ void SimIHP(EnergyPlusData &state,
                                   LatentLoad,
                                   OnOffAirFlowRat);
 
-            SimVariableSpeedCoils(state,
-                                  std::string(),
-                                  ihp.SHCoilIndex,
-                                  CyclingScheme,
-                                  MaxONOFFCyclesperHour,
-                                  HPTimeConstant,
-                                  FanDelayTime,
-                                  CompressorOp,
-                                  0.0,
-                                  1,
-                                  0.0,
-                                  0.0,
-                                  0.0,
-                                  OnOffAirFlowRat);
+            SimVariableSpeedCoils(state, std::string(), ihp.SHCoilIndex, fanOp, compressorOp, 0.0, 1, 0.0, 0.0, 0.0, OnOffAirFlowRat);
 
             ihp.AirFlowSavInAirLoop = airMassFlowRate;
         }
@@ -887,99 +332,18 @@ void SimIHP(EnergyPlusData &state,
     case IHPOperationMode::SHDWHElecHeatOn:
         if (!IsCallbyWH) // process when called from air loop
         {
-            SimVariableSpeedCoils(state,
-                                  std::string(),
-                                  ihp.SCDWHCoolCoilIndex,
-                                  CyclingScheme,
-                                  MaxONOFFCyclesperHour,
-                                  HPTimeConstant,
-                                  FanDelayTime,
-                                  CompressorOp,
-                                  0.0,
-                                  1,
-                                  0.0,
-                                  0.0,
-                                  0.0,
-                                  OnOffAirFlowRat);
-            SimVariableSpeedCoils(state,
-                                  std::string(),
-                                  ihp.SCDWHWHCoilIndex,
-                                  CyclingScheme,
-                                  MaxONOFFCyclesperHour,
-                                  HPTimeConstant,
-                                  FanDelayTime,
-                                  CompressorOp,
-                                  0.0,
-                                  1,
-                                  0.0,
-                                  0.0,
-                                  0.0,
-                                  OnOffAirFlowRat);
-            SimVariableSpeedCoils(state,
-                                  std::string(),
-                                  ihp.SCWHCoilIndex,
-                                  CyclingScheme,
-                                  MaxONOFFCyclesperHour,
-                                  HPTimeConstant,
-                                  FanDelayTime,
-                                  CompressorOp,
-                                  0.0,
-                                  1,
-                                  0.0,
-                                  0.0,
-                                  0.0,
-                                  OnOffAirFlowRat);
-            SimVariableSpeedCoils(state,
-                                  std::string(),
-                                  ihp.SCCoilIndex,
-                                  CyclingScheme,
-                                  MaxONOFFCyclesperHour,
-                                  HPTimeConstant,
-                                  FanDelayTime,
-                                  CompressorOp,
-                                  0.0,
-                                  1,
-                                  0.0,
-                                  0.0,
-                                  0.0,
-                                  OnOffAirFlowRat);
-            SimVariableSpeedCoils(state,
-                                  std::string(),
-                                  ihp.SHCoilIndex,
-                                  CyclingScheme,
-                                  MaxONOFFCyclesperHour,
-                                  HPTimeConstant,
-                                  FanDelayTime,
-                                  CompressorOp,
-                                  0.0,
-                                  1,
-                                  0.0,
-                                  0.0,
-                                  0.0,
-                                  OnOffAirFlowRat);
-            SimVariableSpeedCoils(state,
-                                  std::string(),
-                                  ihp.DWHCoilIndex,
-                                  CyclingScheme,
-                                  MaxONOFFCyclesperHour,
-                                  HPTimeConstant,
-                                  FanDelayTime,
-                                  CompressorOp,
-                                  0.0,
-                                  1,
-                                  0.0,
-                                  0.0,
-                                  0.0,
-                                  OnOffAirFlowRat);
+            SimVariableSpeedCoils(state, std::string(), ihp.SCDWHCoolCoilIndex, fanOp, compressorOp, 0.0, 1, 0.0, 0.0, 0.0, OnOffAirFlowRat);
+            SimVariableSpeedCoils(state, std::string(), ihp.SCDWHWHCoilIndex, fanOp, compressorOp, 0.0, 1, 0.0, 0.0, 0.0, OnOffAirFlowRat);
+            SimVariableSpeedCoils(state, std::string(), ihp.SCWHCoilIndex, fanOp, compressorOp, 0.0, 1, 0.0, 0.0, 0.0, OnOffAirFlowRat);
+            SimVariableSpeedCoils(state, std::string(), ihp.SCCoilIndex, fanOp, compressorOp, 0.0, 1, 0.0, 0.0, 0.0, OnOffAirFlowRat);
+            SimVariableSpeedCoils(state, std::string(), ihp.SHCoilIndex, fanOp, compressorOp, 0.0, 1, 0.0, 0.0, 0.0, OnOffAirFlowRat);
+            SimVariableSpeedCoils(state, std::string(), ihp.DWHCoilIndex, fanOp, compressorOp, 0.0, 1, 0.0, 0.0, 0.0, OnOffAirFlowRat);
 
             SimVariableSpeedCoils(state,
                                   std::string(),
                                   ihp.SHDWHWHCoilIndex,
-                                  CyclingScheme,
-                                  MaxONOFFCyclesperHour,
-                                  HPTimeConstant,
-                                  FanDelayTime,
-                                  CompressorOp,
+                                  fanOp,
+                                  compressorOp,
                                   PartLoadFrac,
                                   SpeedNum,
                                   SpeedRatio,
@@ -989,11 +353,8 @@ void SimIHP(EnergyPlusData &state,
             SimVariableSpeedCoils(state,
                                   std::string(),
                                   ihp.SHDWHHeatCoilIndex,
-                                  CyclingScheme,
-                                  MaxONOFFCyclesperHour,
-                                  HPTimeConstant,
-                                  FanDelayTime,
-                                  CompressorOp,
+                                  fanOp,
+                                  compressorOp,
                                   PartLoadFrac,
                                   SpeedNum,
                                   SpeedRatio,
@@ -1008,118 +369,14 @@ void SimIHP(EnergyPlusData &state,
         break;
     case IHPOperationMode::Idle:
     default: // clear up
-        SimVariableSpeedCoils(state,
-                              std::string(),
-                              ihp.SCDWHCoolCoilIndex,
-                              CyclingScheme,
-                              MaxONOFFCyclesperHour,
-                              HPTimeConstant,
-                              FanDelayTime,
-                              CompressorOp,
-                              0.0,
-                              1,
-                              0.0,
-                              0.0,
-                              0.0,
-                              OnOffAirFlowRat);
-        SimVariableSpeedCoils(state,
-                              std::string(),
-                              ihp.SCDWHWHCoilIndex,
-                              CyclingScheme,
-                              MaxONOFFCyclesperHour,
-                              HPTimeConstant,
-                              FanDelayTime,
-                              CompressorOp,
-                              0.0,
-                              1,
-                              0.0,
-                              0.0,
-                              0.0,
-                              OnOffAirFlowRat);
-        SimVariableSpeedCoils(state,
-                              std::string(),
-                              ihp.SHDWHHeatCoilIndex,
-                              CyclingScheme,
-                              MaxONOFFCyclesperHour,
-                              HPTimeConstant,
-                              FanDelayTime,
-                              CompressorOp,
-                              0.0,
-                              1,
-                              0.0,
-                              0.0,
-                              0.0,
-                              OnOffAirFlowRat);
-        SimVariableSpeedCoils(state,
-                              std::string(),
-                              ihp.SHDWHWHCoilIndex,
-                              CyclingScheme,
-                              MaxONOFFCyclesperHour,
-                              HPTimeConstant,
-                              FanDelayTime,
-                              CompressorOp,
-                              0.0,
-                              1,
-                              0.0,
-                              0.0,
-                              0.0,
-                              OnOffAirFlowRat);
-        SimVariableSpeedCoils(state,
-                              std::string(),
-                              ihp.SCWHCoilIndex,
-                              CyclingScheme,
-                              MaxONOFFCyclesperHour,
-                              HPTimeConstant,
-                              FanDelayTime,
-                              CompressorOp,
-                              0.0,
-                              1,
-                              0.0,
-                              0.0,
-                              0.0,
-                              OnOffAirFlowRat);
-        SimVariableSpeedCoils(state,
-                              std::string(),
-                              ihp.SCCoilIndex,
-                              CyclingScheme,
-                              MaxONOFFCyclesperHour,
-                              HPTimeConstant,
-                              FanDelayTime,
-                              CompressorOp,
-                              0.0,
-                              1,
-                              0.0,
-                              0.0,
-                              0.0,
-                              OnOffAirFlowRat);
-        SimVariableSpeedCoils(state,
-                              std::string(),
-                              ihp.SHCoilIndex,
-                              CyclingScheme,
-                              MaxONOFFCyclesperHour,
-                              HPTimeConstant,
-                              FanDelayTime,
-                              CompressorOp,
-                              0.0,
-                              1,
-                              0.0,
-                              0.0,
-                              0.0,
-                              OnOffAirFlowRat);
-        SimVariableSpeedCoils(state,
-                              std::string(),
-                              ihp.DWHCoilIndex,
-                              CyclingScheme,
-                              MaxONOFFCyclesperHour,
-                              HPTimeConstant,
-                              FanDelayTime,
-                              CompressorOp,
-                              0.0,
-                              1,
-                              0.0,
-                              0.0,
-                              0.0,
-                              OnOffAirFlowRat);
+        SimVariableSpeedCoils(state, std::string(), ihp.SCDWHCoolCoilIndex, fanOp, compressorOp, 0.0, 1, 0.0, 0.0, 0.0, OnOffAirFlowRat);
+        SimVariableSpeedCoils(state, std::string(), ihp.SCDWHWHCoilIndex, fanOp, compressorOp, 0.0, 1, 0.0, 0.0, 0.0, OnOffAirFlowRat);
+        SimVariableSpeedCoils(state, std::string(), ihp.SHDWHHeatCoilIndex, fanOp, compressorOp, 0.0, 1, 0.0, 0.0, 0.0, OnOffAirFlowRat);
+        SimVariableSpeedCoils(state, std::string(), ihp.SHDWHWHCoilIndex, fanOp, compressorOp, 0.0, 1, 0.0, 0.0, 0.0, OnOffAirFlowRat);
+        SimVariableSpeedCoils(state, std::string(), ihp.SCWHCoilIndex, fanOp, compressorOp, 0.0, 1, 0.0, 0.0, 0.0, OnOffAirFlowRat);
+        SimVariableSpeedCoils(state, std::string(), ihp.SCCoilIndex, fanOp, compressorOp, 0.0, 1, 0.0, 0.0, 0.0, OnOffAirFlowRat);
+        SimVariableSpeedCoils(state, std::string(), ihp.SHCoilIndex, fanOp, compressorOp, 0.0, 1, 0.0, 0.0, 0.0, OnOffAirFlowRat);
+        SimVariableSpeedCoils(state, std::string(), ihp.DWHCoilIndex, fanOp, compressorOp, 0.0, 1, 0.0, 0.0, 0.0, OnOffAirFlowRat);
         ihp.TankSourceWaterMassFlowRate = 0.0;
         ihp.AirFlowSavInAirLoop = 0.0;
         ihp.AirFlowSavInWaterLoop = 0.0;
@@ -1144,12 +401,11 @@ void GetIHPInput(EnergyPlusData &state)
     // Uses "Get" routines to read in data.
 
     // Using/Aliasing
-    using namespace NodeInputManager;
-    using BranchNodeConnections::OverrideNodeConnectionType;
-    using BranchNodeConnections::RegisterNodeConnection;
-    using BranchNodeConnections::SetUpCompSets;
-    using BranchNodeConnections::TestCompSet;
     using GlobalNames::VerifyUniqueCoilName;
+    using Node::OverrideNodeConnectionType;
+    using Node::RegisterNodeConnection;
+    using Node::SetUpCompSets;
+    using Node::TestCompSet;
     using VariableSpeedCoils::GetCoilIndexVariableSpeed;
 
     // SUBROUTINE PARAMETER DEFINITIONS:
@@ -1161,10 +417,7 @@ void GetIHPInput(EnergyPlusData &state)
     int NumParams;                   // Total number of input fields
     int MaxNums(0);                  // Maximum number of numeric input fields
     int MaxAlphas(0);                // Maximum number of alpha input fields
-    std::string InNodeName;          // Name of coil inlet node
-    std::string OutNodeName;         // Name of coil outlet node
     std::string CurrentModuleObject; // for ease in getting objects
-    std::string sIHPType;            // specify IHP type
     Array1D_string AlphArray;        // Alpha input items for object
     Array1D_string cAlphaFields;     // Alpha field names
     Array1D_string cNumericFields;   // Numeric field names
@@ -1176,13 +429,12 @@ void GetIHPInput(EnergyPlusData &state)
     bool IsNotOK;            // Flag to verify name
     bool errFlag;
     int IOStat;
-    int InNode(0);         // inlet air or water node
-    int OutNode(0);        // outlet air or water node
-    int ChildCoilIndex(0); // refer to a child coil
 
     int NumASIHPs = state.dataInputProcessing->inputProcessor->getNumObjectsFound(state, "COILSYSTEM:INTEGRATEDHEATPUMP:AIRSOURCE");
 
-    if (NumASIHPs <= 0) return;
+    if (NumASIHPs <= 0) {
+        return;
+    }
 
     // Allocate Arrays
     state.dataIntegratedHP->IntegratedHeatPumps.allocate(NumASIHPs);
@@ -1201,7 +453,6 @@ void GetIHPInput(EnergyPlusData &state)
 
     // Get the data for air-source IHPs
     CurrentModuleObject = "COILSYSTEM:INTEGRATEDHEATPUMP:AIRSOURCE"; // for reporting
-    sIHPType = "COILSYSTEM:INTEGRATEDHEATPUMP:AIRSOURCE";            // for checking
 
     for (int CoilCounter = 1; CoilCounter <= NumASIHPs; ++CoilCounter) {
 
@@ -1230,102 +481,102 @@ void GetIHPInput(EnergyPlusData &state)
 
         ihp.SCCoilType = "COIL:COOLING:DX:VARIABLESPEED";
         ihp.SCCoilName = AlphArray(3);
-        ihp.SCCoilTypeNum = DataLoopNode::ConnectionObjectType::CoilCoolingDXVariableSpeed;
+        ihp.SCCoilTypeNum = Node::ConnectionObjectType::CoilCoolingDXVariableSpeed;
 
         ValidateComponent(state, ihp.SCCoilType, ihp.SCCoilName, IsNotOK, CurrentModuleObject);
         if (IsNotOK) {
-            ShowContinueError(state, format("...specified in {}=\"{}\".", CurrentModuleObject, AlphArray(1)));
+            ShowContinueError(state, std::format("...specified in {}=\"{}\".", CurrentModuleObject, AlphArray(1)));
             ErrorsFound = true;
         } else {
             errFlag = false;
             ihp.SCCoilIndex = GetCoilIndexVariableSpeed(state, ihp.SCCoilType, ihp.SCCoilName, errFlag);
             if (errFlag) {
-                ShowContinueError(state, format("...specified in {}=\"{}\".", CurrentModuleObject, AlphArray(1)));
+                ShowContinueError(state, std::format("...specified in {}=\"{}\".", CurrentModuleObject, AlphArray(1)));
                 ErrorsFound = true;
             }
         }
 
         ihp.SHCoilType = "COIL:HEATING:DX:VARIABLESPEED";
         ihp.SHCoilName = AlphArray(4);
-        ihp.SHCoilTypeNum = DataLoopNode::ConnectionObjectType::CoilHeatingDXVariableSpeed;
+        ihp.SHCoilTypeNum = Node::ConnectionObjectType::CoilHeatingDXVariableSpeed;
 
         ValidateComponent(state, ihp.SHCoilType, ihp.SHCoilName, IsNotOK, CurrentModuleObject);
         if (IsNotOK) {
-            ShowContinueError(state, format("...specified in {}=\"{}\".", CurrentModuleObject, AlphArray(1)));
+            ShowContinueError(state, std::format("...specified in {}=\"{}\".", CurrentModuleObject, AlphArray(1)));
             ErrorsFound = true;
         } else {
             errFlag = false;
             ihp.SHCoilIndex = GetCoilIndexVariableSpeed(state, ihp.SHCoilType, ihp.SHCoilName, errFlag);
             if (errFlag) {
-                ShowContinueError(state, format("...specified in {}=\"{}\".", CurrentModuleObject, AlphArray(1)));
+                ShowContinueError(state, std::format("...specified in {}=\"{}\".", CurrentModuleObject, AlphArray(1)));
                 ErrorsFound = true;
             }
         }
 
         ihp.DWHCoilType = "COIL:WATERHEATING:AIRTOWATERHEATPUMP:VARIABLESPEED";
         ihp.DWHCoilName = AlphArray(5);
-        ihp.DWHCoilTypeNum = DataLoopNode::ConnectionObjectType::CoilWaterHeatingAirToWaterHeatPumpVariableSpeed;
+        ihp.DWHCoilTypeNum = Node::ConnectionObjectType::CoilWaterHeatingAirToWaterHeatPumpVariableSpeed;
 
         ValidateComponent(state, ihp.DWHCoilType, ihp.DWHCoilName, IsNotOK, CurrentModuleObject);
         if (IsNotOK) {
-            ShowContinueError(state, format("...specified in {}=\"{}\".", CurrentModuleObject, AlphArray(1)));
+            ShowContinueError(state, std::format("...specified in {}=\"{}\".", CurrentModuleObject, AlphArray(1)));
             ErrorsFound = true;
         } else {
             errFlag = false;
             ihp.DWHCoilIndex = GetCoilIndexVariableSpeed(state, ihp.DWHCoilType, ihp.DWHCoilName, errFlag);
             if (errFlag) {
-                ShowContinueError(state, format("...specified in {}=\"{}\".", CurrentModuleObject, AlphArray(1)));
+                ShowContinueError(state, std::format("...specified in {}=\"{}\".", CurrentModuleObject, AlphArray(1)));
                 ErrorsFound = true;
             }
         }
 
         ihp.SCWHCoilType = "COIL:WATERHEATING:AIRTOWATERHEATPUMP:VARIABLESPEED";
         ihp.SCWHCoilName = AlphArray(6);
-        ihp.SCWHCoilTypeNum = DataLoopNode::ConnectionObjectType::CoilWaterHeatingAirToWaterHeatPumpVariableSpeed;
+        ihp.SCWHCoilTypeNum = Node::ConnectionObjectType::CoilWaterHeatingAirToWaterHeatPumpVariableSpeed;
 
         ValidateComponent(state, ihp.SCWHCoilType, ihp.SCWHCoilName, IsNotOK, CurrentModuleObject);
         if (IsNotOK) {
-            ShowContinueError(state, format("...specified in {}=\"{}\".", CurrentModuleObject, AlphArray(1)));
+            ShowContinueError(state, std::format("...specified in {}=\"{}\".", CurrentModuleObject, AlphArray(1)));
             ErrorsFound = true;
         } else {
             errFlag = false;
             ihp.SCWHCoilIndex = GetCoilIndexVariableSpeed(state, ihp.SCWHCoilType, ihp.SCWHCoilName, errFlag);
             if (errFlag) {
-                ShowContinueError(state, format("...specified in {}=\"{}\".", CurrentModuleObject, AlphArray(1)));
+                ShowContinueError(state, std::format("...specified in {}=\"{}\".", CurrentModuleObject, AlphArray(1)));
                 ErrorsFound = true;
             }
         }
 
         ihp.SCDWHCoolCoilType = "COIL:COOLING:DX:VARIABLESPEED";
         ihp.SCDWHCoolCoilName = AlphArray(7);
-        ihp.SCDWHCoolCoilTypeNum = DataLoopNode::ConnectionObjectType::CoilCoolingDXVariableSpeed;
+        ihp.SCDWHCoolCoilTypeNum = Node::ConnectionObjectType::CoilCoolingDXVariableSpeed;
 
         ValidateComponent(state, ihp.SCDWHCoolCoilType, ihp.SCDWHCoolCoilName, IsNotOK, CurrentModuleObject);
         if (IsNotOK) {
-            ShowContinueError(state, format("...specified in {}=\"{}\".", CurrentModuleObject, AlphArray(1)));
+            ShowContinueError(state, std::format("...specified in {}=\"{}\".", CurrentModuleObject, AlphArray(1)));
             ErrorsFound = true;
         } else {
             errFlag = false;
             ihp.SCDWHCoolCoilIndex = GetCoilIndexVariableSpeed(state, ihp.SCDWHCoolCoilType, ihp.SCDWHCoolCoilName, errFlag);
             if (errFlag) {
-                ShowContinueError(state, format("...specified in {}=\"{}\".", CurrentModuleObject, AlphArray(1)));
+                ShowContinueError(state, std::format("...specified in {}=\"{}\".", CurrentModuleObject, AlphArray(1)));
                 ErrorsFound = true;
             }
         }
 
         ihp.SCDWHWHCoilType = "COIL:WATERHEATING:AIRTOWATERHEATPUMP:VARIABLESPEED";
         ihp.SCDWHWHCoilName = AlphArray(8);
-        ihp.SCDWHWHCoilTypeNum = DataLoopNode::ConnectionObjectType::CoilWaterHeatingAirToWaterHeatPumpVariableSpeed;
+        ihp.SCDWHWHCoilTypeNum = Node::ConnectionObjectType::CoilWaterHeatingAirToWaterHeatPumpVariableSpeed;
 
         ValidateComponent(state, ihp.SCDWHWHCoilType, ihp.SCDWHWHCoilName, IsNotOK, CurrentModuleObject);
         if (IsNotOK) {
-            ShowContinueError(state, format("...specified in {}=\"{}\".", CurrentModuleObject, AlphArray(1)));
+            ShowContinueError(state, std::format("...specified in {}=\"{}\".", CurrentModuleObject, AlphArray(1)));
             ErrorsFound = true;
         } else {
             errFlag = false;
             ihp.SCDWHWHCoilIndex = GetCoilIndexVariableSpeed(state, ihp.SCDWHWHCoilType, ihp.SCDWHWHCoilName, errFlag);
             if (errFlag) {
-                ShowContinueError(state, format("...specified in {}=\"{}\".", CurrentModuleObject, AlphArray(1)));
+                ShowContinueError(state, std::format("...specified in {}=\"{}\".", CurrentModuleObject, AlphArray(1)));
                 ErrorsFound = true;
             } else {
                 state.dataVariableSpeedCoils->VarSpeedCoil(ihp.SCDWHWHCoilIndex).bIsDesuperheater = true;
@@ -1334,34 +585,34 @@ void GetIHPInput(EnergyPlusData &state)
 
         ihp.SHDWHHeatCoilType = "COIL:HEATING:DX:VARIABLESPEED";
         ihp.SHDWHHeatCoilName = AlphArray(9);
-        ihp.SHDWHHeatCoilTypeNum = DataLoopNode::ConnectionObjectType::CoilHeatingDXVariableSpeed;
+        ihp.SHDWHHeatCoilTypeNum = Node::ConnectionObjectType::CoilHeatingDXVariableSpeed;
 
         ValidateComponent(state, ihp.SHDWHHeatCoilType, ihp.SHDWHHeatCoilName, IsNotOK, CurrentModuleObject);
         if (IsNotOK) {
-            ShowContinueError(state, format("...specified in {}=\"{}\".", CurrentModuleObject, AlphArray(1)));
+            ShowContinueError(state, std::format("...specified in {}=\"{}\".", CurrentModuleObject, AlphArray(1)));
             ErrorsFound = true;
         } else {
             errFlag = false;
             ihp.SHDWHHeatCoilIndex = GetCoilIndexVariableSpeed(state, ihp.SHDWHHeatCoilType, ihp.SHDWHHeatCoilName, errFlag);
             if (errFlag) {
-                ShowContinueError(state, format("...specified in {}=\"{}\".", CurrentModuleObject, AlphArray(1)));
+                ShowContinueError(state, std::format("...specified in {}=\"{}\".", CurrentModuleObject, AlphArray(1)));
                 ErrorsFound = true;
             }
         }
 
         ihp.SHDWHWHCoilType = "COIL:WATERHEATING:AIRTOWATERHEATPUMP:VARIABLESPEED";
         ihp.SHDWHWHCoilName = AlphArray(10);
-        ihp.SHDWHWHCoilTypeNum = DataLoopNode::ConnectionObjectType::CoilWaterHeatingAirToWaterHeatPumpVariableSpeed;
+        ihp.SHDWHWHCoilTypeNum = Node::ConnectionObjectType::CoilWaterHeatingAirToWaterHeatPumpVariableSpeed;
 
         ValidateComponent(state, ihp.SHDWHWHCoilType, ihp.SHDWHWHCoilName, IsNotOK, CurrentModuleObject);
         if (IsNotOK) {
-            ShowContinueError(state, format("...specified in {}=\"{}\".", CurrentModuleObject, AlphArray(1)));
+            ShowContinueError(state, std::format("...specified in {}=\"{}\".", CurrentModuleObject, AlphArray(1)));
             ErrorsFound = true;
         } else {
             errFlag = false;
             ihp.SHDWHWHCoilIndex = GetCoilIndexVariableSpeed(state, ihp.SHDWHWHCoilType, ihp.SHDWHWHCoilName, errFlag);
             if (errFlag) {
-                ShowContinueError(state, format("...specified in {}=\"{}\".", CurrentModuleObject, AlphArray(1)));
+                ShowContinueError(state, std::format("...specified in {}=\"{}\".", CurrentModuleObject, AlphArray(1)));
                 ErrorsFound = true;
             } else {
                 state.dataVariableSpeedCoils->VarSpeedCoil(ihp.SHDWHWHCoilIndex).bIsDesuperheater = true;
@@ -1392,11 +643,11 @@ void GetIHPInput(EnergyPlusData &state)
         //     using OverrideNodeConnectionType
 
         // cooling coil air node connections
-        ChildCoilIndex = ihp.SCCoilIndex;
-        InNode = state.dataVariableSpeedCoils->VarSpeedCoil(ChildCoilIndex).AirInletNodeNum;
-        OutNode = state.dataVariableSpeedCoils->VarSpeedCoil(ChildCoilIndex).AirOutletNodeNum;
-        InNodeName = state.dataLoopNodes->NodeID(InNode);
-        OutNodeName = state.dataLoopNodes->NodeID(OutNode);
+        int ChildCoilIndex = ihp.SCCoilIndex;
+        int InNode = state.dataVariableSpeedCoils->VarSpeedCoil(ChildCoilIndex).AirInletNodeNum;
+        int OutNode = state.dataVariableSpeedCoils->VarSpeedCoil(ChildCoilIndex).AirOutletNodeNum;
+        std::string InNodeName = state.dataLoopNodes->NodeID(InNode);
+        std::string OutNodeName = state.dataLoopNodes->NodeID(OutNode);
 
         ihp.AirCoolInletNodeNum = InNode;
         ihp.AirHeatInletNodeNum = OutNode;
@@ -1405,20 +656,20 @@ void GetIHPInput(EnergyPlusData &state)
         RegisterNodeConnection(state,
                                InNode,
                                state.dataLoopNodes->NodeID(InNode),
-                               DataLoopNode::ConnectionObjectType::CoilSystemIntegratedHeatPumpAirSource,
+                               Node::ConnectionObjectType::CoilSystemIntegratedHeatPumpAirSource,
                                ihp.Name + " Cooling Coil",
-                               DataLoopNode::ConnectionType::Inlet,
-                               NodeInputManager::CompFluidStream::Primary,
-                               ObjectIsNotParent,
+                               Node::ConnectionType::Inlet,
+                               Node::CompFluidStream::Primary,
+                               Node::ObjectIsNotParent,
                                ErrorsFound);
         RegisterNodeConnection(state,
                                OutNode,
                                state.dataLoopNodes->NodeID(OutNode),
-                               DataLoopNode::ConnectionObjectType::CoilSystemIntegratedHeatPumpAirSource,
+                               Node::ConnectionObjectType::CoilSystemIntegratedHeatPumpAirSource,
                                ihp.Name + " Cooling Coil",
-                               DataLoopNode::ConnectionType::Outlet,
-                               NodeInputManager::CompFluidStream::Primary,
-                               ObjectIsNotParent,
+                               Node::ConnectionType::Outlet,
+                               Node::CompFluidStream::Primary,
+                               Node::ObjectIsNotParent,
                                ErrorsFound);
 
         SetUpCompSets(state, CurrentModuleObject, ihp.Name + " Cooling Coil", ihp.SCCoilType, ihp.SCCoilName, InNodeName, OutNodeName);
@@ -1427,23 +678,23 @@ void GetIHPInput(EnergyPlusData &state)
                                    InNodeName,
                                    ihp.SCCoilTypeNum,
                                    ihp.SCCoilName,
-                                   DataLoopNode::ConnectionType::Internal,
-                                   NodeInputManager::CompFluidStream::Primary,
-                                   ObjectIsNotParent,
+                                   Node::ConnectionType::Internal,
+                                   Node::CompFluidStream::Primary,
+                                   Node::ObjectIsNotParent,
                                    ErrorsFound);
         OverrideNodeConnectionType(state,
                                    OutNode,
                                    OutNodeName,
                                    ihp.SCCoilTypeNum,
                                    ihp.SCCoilName,
-                                   DataLoopNode::ConnectionType::Internal,
-                                   NodeInputManager::CompFluidStream::Primary,
-                                   ObjectIsNotParent,
+                                   Node::ConnectionType::Internal,
+                                   Node::CompFluidStream::Primary,
+                                   Node::ObjectIsNotParent,
                                    ErrorsFound);
 
         if ((state.dataVariableSpeedCoils->VarSpeedCoil(ihp.SCWHCoilIndex).AirInletNodeNum != InNode) ||
             (state.dataVariableSpeedCoils->VarSpeedCoil(ihp.SCWHCoilIndex).AirOutletNodeNum != OutNode)) {
-            ShowContinueError(state, format("Mistaken air node connection: {}{}-wrong coil node names.", CurrentModuleObject, ihp.SCWHCoilName));
+            ShowContinueError(state, std::format("Mistaken air node connection: {}{}-wrong coil node names.", CurrentModuleObject, ihp.SCWHCoilName));
             ErrorsFound = true;
         }
         SetUpCompSets(state, CurrentModuleObject, ihp.Name + " Cooling Coil", ihp.SCWHCoilType, ihp.SCWHCoilName, InNodeName, OutNodeName);
@@ -1452,23 +703,24 @@ void GetIHPInput(EnergyPlusData &state)
                                    InNodeName,
                                    ihp.SCWHCoilTypeNum,
                                    ihp.SCWHCoilName,
-                                   DataLoopNode::ConnectionType::Internal,
-                                   NodeInputManager::CompFluidStream::Primary,
-                                   ObjectIsNotParent,
+                                   Node::ConnectionType::Internal,
+                                   Node::CompFluidStream::Primary,
+                                   Node::ObjectIsNotParent,
                                    ErrorsFound);
         OverrideNodeConnectionType(state,
                                    OutNode,
                                    OutNodeName,
                                    ihp.SCWHCoilTypeNum,
                                    ihp.SCWHCoilName,
-                                   DataLoopNode::ConnectionType::Internal,
-                                   NodeInputManager::CompFluidStream::Primary,
-                                   ObjectIsNotParent,
+                                   Node::ConnectionType::Internal,
+                                   Node::CompFluidStream::Primary,
+                                   Node::ObjectIsNotParent,
                                    ErrorsFound);
 
         if ((state.dataVariableSpeedCoils->VarSpeedCoil(ihp.SCDWHCoolCoilIndex).AirInletNodeNum != InNode) ||
             (state.dataVariableSpeedCoils->VarSpeedCoil(ihp.SCDWHCoolCoilIndex).AirOutletNodeNum != OutNode)) {
-            ShowContinueError(state, format("Mistaken air node connection: {}{}-wrong coil node names.", CurrentModuleObject, ihp.SCDWHCoolCoilName));
+            ShowContinueError(state,
+                              std::format("Mistaken air node connection: {}{}-wrong coil node names.", CurrentModuleObject, ihp.SCDWHCoolCoilName));
             ErrorsFound = true;
         }
         SetUpCompSets(state, CurrentModuleObject, ihp.Name + " Cooling Coil", ihp.SCDWHCoolCoilType, ihp.SCDWHCoolCoilName, InNodeName, OutNodeName);
@@ -1477,18 +729,18 @@ void GetIHPInput(EnergyPlusData &state)
                                    InNodeName,
                                    ihp.SCDWHCoolCoilTypeNum,
                                    ihp.SCDWHCoolCoilName,
-                                   DataLoopNode::ConnectionType::Internal,
-                                   NodeInputManager::CompFluidStream::Primary,
-                                   ObjectIsNotParent,
+                                   Node::ConnectionType::Internal,
+                                   Node::CompFluidStream::Primary,
+                                   Node::ObjectIsNotParent,
                                    ErrorsFound);
         OverrideNodeConnectionType(state,
                                    OutNode,
                                    OutNodeName,
                                    ihp.SCDWHCoolCoilTypeNum,
                                    ihp.SCDWHCoolCoilName,
-                                   DataLoopNode::ConnectionType::Internal,
-                                   NodeInputManager::CompFluidStream::Primary,
-                                   ObjectIsNotParent,
+                                   Node::ConnectionType::Internal,
+                                   Node::CompFluidStream::Primary,
+                                   Node::ObjectIsNotParent,
                                    ErrorsFound);
 
         // heating coil air node connections
@@ -1500,28 +752,28 @@ void GetIHPInput(EnergyPlusData &state)
         InNodeName = state.dataLoopNodes->NodeID(InNode);
         OutNodeName = state.dataLoopNodes->NodeID(OutNode);
         if (state.dataVariableSpeedCoils->VarSpeedCoil(ChildCoilIndex).AirInletNodeNum != InNode) {
-            ShowContinueError(state,
-                              format("Mistaken air node connection: {}- cooling coil outlet mismatches heating coil inlet.", CurrentModuleObject));
+            ShowContinueError(
+                state, std::format("Mistaken air node connection: {}- cooling coil outlet mismatches heating coil inlet.", CurrentModuleObject));
             ErrorsFound = true;
         }
         TestCompSet(state, CurrentModuleObject, ihp.Name + " Heating Coil", InNodeName, OutNodeName, "Heating Air Nodes");
         RegisterNodeConnection(state,
                                InNode,
                                state.dataLoopNodes->NodeID(InNode),
-                               DataLoopNode::ConnectionObjectType::CoilSystemIntegratedHeatPumpAirSource,
+                               Node::ConnectionObjectType::CoilSystemIntegratedHeatPumpAirSource,
                                ihp.Name + " Heating Coil",
-                               DataLoopNode::ConnectionType::Inlet,
-                               NodeInputManager::CompFluidStream::Primary,
-                               ObjectIsNotParent,
+                               Node::ConnectionType::Inlet,
+                               Node::CompFluidStream::Primary,
+                               Node::ObjectIsNotParent,
                                ErrorsFound);
         RegisterNodeConnection(state,
                                OutNode,
                                state.dataLoopNodes->NodeID(OutNode),
-                               DataLoopNode::ConnectionObjectType::CoilSystemIntegratedHeatPumpAirSource,
+                               Node::ConnectionObjectType::CoilSystemIntegratedHeatPumpAirSource,
                                ihp.Name + " Heating Coil",
-                               DataLoopNode::ConnectionType::Outlet,
-                               NodeInputManager::CompFluidStream::Primary,
-                               ObjectIsNotParent,
+                               Node::ConnectionType::Outlet,
+                               Node::CompFluidStream::Primary,
+                               Node::ObjectIsNotParent,
                                ErrorsFound);
 
         SetUpCompSets(state, CurrentModuleObject, ihp.Name + " Heating Coil", ihp.SHCoilType, ihp.SHCoilName, InNodeName, OutNodeName);
@@ -1530,24 +782,24 @@ void GetIHPInput(EnergyPlusData &state)
                                    InNodeName,
                                    ihp.SHCoilTypeNum,
                                    ihp.SHCoilName,
-                                   DataLoopNode::ConnectionType::Internal,
-                                   NodeInputManager::CompFluidStream::Primary,
-                                   ObjectIsNotParent,
+                                   Node::ConnectionType::Internal,
+                                   Node::CompFluidStream::Primary,
+                                   Node::ObjectIsNotParent,
                                    ErrorsFound);
         OverrideNodeConnectionType(state,
                                    OutNode,
                                    OutNodeName,
                                    ihp.SHCoilTypeNum,
                                    ihp.SHCoilName,
-                                   DataLoopNode::ConnectionType::Internal,
-                                   NodeInputManager::CompFluidStream::Primary,
-                                   ObjectIsNotParent,
+                                   Node::ConnectionType::Internal,
+                                   Node::CompFluidStream::Primary,
+                                   Node::ObjectIsNotParent,
                                    ErrorsFound);
 
         if ((state.dataVariableSpeedCoils->VarSpeedCoil(ihp.SHDWHHeatCoilIndex).AirInletNodeNum != InNode) ||
             (state.dataVariableSpeedCoils->VarSpeedCoil(ihp.SHDWHHeatCoilIndex).AirOutletNodeNum != OutNode)) {
             ShowContinueError(state,
-                              format("Mistaken air node connection: {}:{}-wrong coil node names.", CurrentModuleObject, ihp.SHDWHHeatCoilName));
+                              std::format("Mistaken air node connection: {}:{}-wrong coil node names.", CurrentModuleObject, ihp.SHDWHHeatCoilName));
             ErrorsFound = true;
         }
         SetUpCompSets(state, CurrentModuleObject, ihp.Name + " Heating Coil", ihp.SHDWHHeatCoilType, ihp.SHDWHHeatCoilName, InNodeName, OutNodeName);
@@ -1556,18 +808,18 @@ void GetIHPInput(EnergyPlusData &state)
                                    InNodeName,
                                    ihp.SHDWHHeatCoilTypeNum,
                                    ihp.SHDWHHeatCoilName,
-                                   DataLoopNode::ConnectionType::Internal,
-                                   NodeInputManager::CompFluidStream::Primary,
-                                   ObjectIsNotParent,
+                                   Node::ConnectionType::Internal,
+                                   Node::CompFluidStream::Primary,
+                                   Node::ObjectIsNotParent,
                                    ErrorsFound);
         OverrideNodeConnectionType(state,
                                    OutNode,
                                    OutNodeName,
                                    ihp.SHDWHHeatCoilTypeNum,
                                    ihp.SHDWHHeatCoilName,
-                                   DataLoopNode::ConnectionType::Internal,
-                                   NodeInputManager::CompFluidStream::Primary,
-                                   ObjectIsNotParent,
+                                   Node::ConnectionType::Internal,
+                                   Node::CompFluidStream::Primary,
+                                   Node::ObjectIsNotParent,
                                    ErrorsFound);
 
         // water node connections
@@ -1581,7 +833,8 @@ void GetIHPInput(EnergyPlusData &state)
         ihp.WaterOutletNodeNum = OutNode;
         if ((state.dataVariableSpeedCoils->VarSpeedCoil(ihp.SCDWHWHCoilIndex).WaterInletNodeNum != InNode) ||
             (state.dataVariableSpeedCoils->VarSpeedCoil(ihp.SCDWHWHCoilIndex).WaterOutletNodeNum != OutNode)) {
-            ShowContinueError(state, format("Mistaken air node connection: {}:{}-wrong coil node names.", CurrentModuleObject, ihp.SCDWHWHCoilName));
+            ShowContinueError(state,
+                              std::format("Mistaken air node connection: {}:{}-wrong coil node names.", CurrentModuleObject, ihp.SCDWHWHCoilName));
             ErrorsFound = true;
         }
 
@@ -1589,20 +842,20 @@ void GetIHPInput(EnergyPlusData &state)
         RegisterNodeConnection(state,
                                InNode,
                                state.dataLoopNodes->NodeID(InNode),
-                               DataLoopNode::ConnectionObjectType::CoilSystemIntegratedHeatPumpAirSource,
+                               Node::ConnectionObjectType::CoilSystemIntegratedHeatPumpAirSource,
                                ihp.Name + " Water Coil",
-                               DataLoopNode::ConnectionType::Inlet,
-                               NodeInputManager::CompFluidStream::Primary,
-                               ObjectIsNotParent,
+                               Node::ConnectionType::Inlet,
+                               Node::CompFluidStream::Primary,
+                               Node::ObjectIsNotParent,
                                ErrorsFound);
         RegisterNodeConnection(state,
                                OutNode,
                                state.dataLoopNodes->NodeID(InNode),
-                               DataLoopNode::ConnectionObjectType::CoilSystemIntegratedHeatPumpAirSource,
+                               Node::ConnectionObjectType::CoilSystemIntegratedHeatPumpAirSource,
                                ihp.Name + " Water Coil",
-                               DataLoopNode::ConnectionType::Outlet,
-                               NodeInputManager::CompFluidStream::Primary,
-                               ObjectIsNotParent,
+                               Node::ConnectionType::Outlet,
+                               Node::CompFluidStream::Primary,
+                               Node::ObjectIsNotParent,
                                ErrorsFound);
 
         SetUpCompSets(state, CurrentModuleObject, ihp.Name + " Water Coil", ihp.SCWHCoilType, ihp.SCWHCoilName, InNodeName, OutNodeName);
@@ -1611,18 +864,18 @@ void GetIHPInput(EnergyPlusData &state)
                                    InNodeName,
                                    ihp.SCWHCoilTypeNum,
                                    ihp.SCWHCoilName,
-                                   DataLoopNode::ConnectionType::Internal,
-                                   NodeInputManager::CompFluidStream::Secondary,
-                                   ObjectIsNotParent,
+                                   Node::ConnectionType::Internal,
+                                   Node::CompFluidStream::Secondary,
+                                   Node::ObjectIsNotParent,
                                    ErrorsFound);
         OverrideNodeConnectionType(state,
                                    OutNode,
                                    OutNodeName,
                                    ihp.SCWHCoilTypeNum,
                                    ihp.SCWHCoilName,
-                                   DataLoopNode::ConnectionType::Internal,
-                                   NodeInputManager::CompFluidStream::Secondary,
-                                   ObjectIsNotParent,
+                                   Node::ConnectionType::Internal,
+                                   Node::CompFluidStream::Secondary,
+                                   Node::ObjectIsNotParent,
                                    ErrorsFound);
 
         SetUpCompSets(state, CurrentModuleObject, ihp.Name + " Water Coil", ihp.SCDWHWHCoilType, ihp.SCDWHWHCoilName, InNodeName, OutNodeName);
@@ -1631,23 +884,24 @@ void GetIHPInput(EnergyPlusData &state)
                                    InNodeName,
                                    ihp.SCDWHWHCoilTypeNum,
                                    ihp.SCDWHWHCoilName,
-                                   DataLoopNode::ConnectionType::Internal,
-                                   NodeInputManager::CompFluidStream::Secondary,
-                                   ObjectIsNotParent,
+                                   Node::ConnectionType::Internal,
+                                   Node::CompFluidStream::Secondary,
+                                   Node::ObjectIsNotParent,
                                    ErrorsFound);
         OverrideNodeConnectionType(state,
                                    OutNode,
                                    OutNodeName,
                                    ihp.SCDWHWHCoilTypeNum,
                                    ihp.SCDWHWHCoilName,
-                                   DataLoopNode::ConnectionType::Internal,
-                                   NodeInputManager::CompFluidStream::Secondary,
-                                   ObjectIsNotParent,
+                                   Node::ConnectionType::Internal,
+                                   Node::CompFluidStream::Secondary,
+                                   Node::ObjectIsNotParent,
                                    ErrorsFound);
 
         if ((state.dataVariableSpeedCoils->VarSpeedCoil(ihp.SHDWHWHCoilIndex).WaterInletNodeNum != InNode) ||
             (state.dataVariableSpeedCoils->VarSpeedCoil(ihp.SHDWHWHCoilIndex).WaterOutletNodeNum != OutNode)) {
-            ShowContinueError(state, format("Mistaken air node connection: {}:{}-wrong coil node names.", CurrentModuleObject, ihp.SHDWHWHCoilName));
+            ShowContinueError(state,
+                              std::format("Mistaken air node connection: {}:{}-wrong coil node names.", CurrentModuleObject, ihp.SHDWHWHCoilName));
             ErrorsFound = true;
         }
         SetUpCompSets(state, CurrentModuleObject, ihp.Name + " Water Coil", ihp.SHDWHWHCoilType, ihp.SHDWHWHCoilName, InNodeName, OutNodeName);
@@ -1656,23 +910,23 @@ void GetIHPInput(EnergyPlusData &state)
                                    InNodeName,
                                    ihp.SHDWHWHCoilTypeNum,
                                    ihp.SHDWHWHCoilName,
-                                   DataLoopNode::ConnectionType::Internal,
-                                   NodeInputManager::CompFluidStream::Secondary,
-                                   ObjectIsNotParent,
+                                   Node::ConnectionType::Internal,
+                                   Node::CompFluidStream::Secondary,
+                                   Node::ObjectIsNotParent,
                                    ErrorsFound);
         OverrideNodeConnectionType(state,
                                    OutNode,
                                    OutNodeName,
                                    ihp.SHDWHWHCoilTypeNum,
                                    ihp.SHDWHWHCoilName,
-                                   DataLoopNode::ConnectionType::Internal,
-                                   NodeInputManager::CompFluidStream::Secondary,
-                                   ObjectIsNotParent,
+                                   Node::ConnectionType::Internal,
+                                   Node::CompFluidStream::Secondary,
+                                   Node::ObjectIsNotParent,
                                    ErrorsFound);
 
         if ((state.dataVariableSpeedCoils->VarSpeedCoil(ihp.DWHCoilIndex).WaterInletNodeNum != InNode) ||
             (state.dataVariableSpeedCoils->VarSpeedCoil(ihp.DWHCoilIndex).WaterOutletNodeNum != OutNode)) {
-            ShowContinueError(state, format("Mistaken air node connection: {}:{}-wrong coil node names.", CurrentModuleObject, ihp.DWHCoilName));
+            ShowContinueError(state, std::format("Mistaken air node connection: {}:{}-wrong coil node names.", CurrentModuleObject, ihp.DWHCoilName));
             ErrorsFound = true;
         }
         SetUpCompSets(state, CurrentModuleObject, ihp.Name + " Water Coil", ihp.DWHCoilType, ihp.DWHCoilName, InNodeName, OutNodeName);
@@ -1681,29 +935,29 @@ void GetIHPInput(EnergyPlusData &state)
                                    InNodeName,
                                    ihp.DWHCoilTypeNum,
                                    ihp.DWHCoilName,
-                                   DataLoopNode::ConnectionType::Internal,
-                                   NodeInputManager::CompFluidStream::Secondary,
-                                   ObjectIsNotParent,
+                                   Node::ConnectionType::Internal,
+                                   Node::CompFluidStream::Secondary,
+                                   Node::ObjectIsNotParent,
                                    ErrorsFound);
         OverrideNodeConnectionType(state,
                                    OutNode,
                                    OutNodeName,
                                    ihp.DWHCoilTypeNum,
                                    ihp.DWHCoilName,
-                                   DataLoopNode::ConnectionType::Internal,
-                                   NodeInputManager::CompFluidStream::Secondary,
-                                   ObjectIsNotParent,
+                                   Node::ConnectionType::Internal,
+                                   Node::CompFluidStream::Secondary,
+                                   Node::ObjectIsNotParent,
                                    ErrorsFound);
 
         ihp.WaterTankoutNod = GetOnlySingleNode(state,
                                                 AlphArray(2),
                                                 ErrorsFound,
-                                                DataLoopNode::ConnectionObjectType::CoilSystemIntegratedHeatPumpAirSource,
+                                                Node::ConnectionObjectType::CoilSystemIntegratedHeatPumpAirSource,
                                                 AlphArray(1),
-                                                DataLoopNode::NodeFluidType::Water,
-                                                DataLoopNode::ConnectionType::Sensor,
-                                                NodeInputManager::CompFluidStream::Secondary,
-                                                ObjectIsNotParent);
+                                                Node::FluidType::Water,
+                                                Node::ConnectionType::Sensor,
+                                                Node::CompFluidStream::Secondary,
+                                                Node::ObjectIsNotParent);
 
         // outdoor air node connections for water heating coils
         // DWH, SCDWH, SHDWH coils have the same outdoor air nodes
@@ -1716,7 +970,8 @@ void GetIHPInput(EnergyPlusData &state)
         ihp.ODAirOutletNodeNum = OutNode;
         if ((state.dataVariableSpeedCoils->VarSpeedCoil(ihp.SCDWHWHCoilIndex).AirInletNodeNum != InNode) ||
             (state.dataVariableSpeedCoils->VarSpeedCoil(ihp.SCDWHWHCoilIndex).AirOutletNodeNum != OutNode)) {
-            ShowContinueError(state, format("Mistaken air node connection: {}:{}-wrong coil node names.", CurrentModuleObject, ihp.SCDWHWHCoilName));
+            ShowContinueError(state,
+                              std::format("Mistaken air node connection: {}:{}-wrong coil node names.", CurrentModuleObject, ihp.SCDWHWHCoilName));
             ErrorsFound = true;
         }
 
@@ -1724,20 +979,20 @@ void GetIHPInput(EnergyPlusData &state)
         RegisterNodeConnection(state,
                                InNode,
                                state.dataLoopNodes->NodeID(InNode),
-                               DataLoopNode::ConnectionObjectType::CoilSystemIntegratedHeatPumpAirSource,
+                               Node::ConnectionObjectType::CoilSystemIntegratedHeatPumpAirSource,
                                ihp.Name + " Outdoor Coil",
-                               DataLoopNode::ConnectionType::Inlet,
-                               NodeInputManager::CompFluidStream::Primary,
-                               ObjectIsNotParent,
+                               Node::ConnectionType::Inlet,
+                               Node::CompFluidStream::Primary,
+                               Node::ObjectIsNotParent,
                                ErrorsFound);
         RegisterNodeConnection(state,
                                OutNode,
                                state.dataLoopNodes->NodeID(InNode),
-                               DataLoopNode::ConnectionObjectType::CoilSystemIntegratedHeatPumpAirSource,
+                               Node::ConnectionObjectType::CoilSystemIntegratedHeatPumpAirSource,
                                ihp.Name + " Outdoor Coil",
-                               DataLoopNode::ConnectionType::Outlet,
-                               NodeInputManager::CompFluidStream::Primary,
-                               ObjectIsNotParent,
+                               Node::ConnectionType::Outlet,
+                               Node::CompFluidStream::Primary,
+                               Node::ObjectIsNotParent,
                                ErrorsFound);
 
         SetUpCompSets(state, CurrentModuleObject, ihp.Name + " Outdoor Coil", ihp.DWHCoilType, ihp.DWHCoilName, InNodeName, OutNodeName);
@@ -1746,18 +1001,18 @@ void GetIHPInput(EnergyPlusData &state)
                                    InNodeName,
                                    ihp.DWHCoilTypeNum,
                                    ihp.DWHCoilName,
-                                   DataLoopNode::ConnectionType::Internal,
-                                   NodeInputManager::CompFluidStream::Primary,
-                                   ObjectIsNotParent,
+                                   Node::ConnectionType::Internal,
+                                   Node::CompFluidStream::Primary,
+                                   Node::ObjectIsNotParent,
                                    ErrorsFound);
         OverrideNodeConnectionType(state,
                                    OutNode,
                                    OutNodeName,
                                    ihp.DWHCoilTypeNum,
                                    ihp.DWHCoilName,
-                                   DataLoopNode::ConnectionType::Internal,
-                                   NodeInputManager::CompFluidStream::Primary,
-                                   ObjectIsNotParent,
+                                   Node::ConnectionType::Internal,
+                                   Node::CompFluidStream::Primary,
+                                   Node::ObjectIsNotParent,
                                    ErrorsFound);
 
         SetUpCompSets(state, CurrentModuleObject, ihp.Name + " Outdoor Coil", ihp.SCDWHWHCoilType, ihp.SCDWHWHCoilName, InNodeName, OutNodeName);
@@ -1766,18 +1021,18 @@ void GetIHPInput(EnergyPlusData &state)
                                    InNodeName,
                                    ihp.SCDWHWHCoilTypeNum,
                                    ihp.SCDWHWHCoilName,
-                                   DataLoopNode::ConnectionType::Internal,
-                                   NodeInputManager::CompFluidStream::Primary,
-                                   ObjectIsNotParent,
+                                   Node::ConnectionType::Internal,
+                                   Node::CompFluidStream::Primary,
+                                   Node::ObjectIsNotParent,
                                    ErrorsFound);
         OverrideNodeConnectionType(state,
                                    OutNode,
                                    OutNodeName,
                                    ihp.SCDWHWHCoilTypeNum,
                                    ihp.SCDWHWHCoilName,
-                                   DataLoopNode::ConnectionType::Internal,
-                                   NodeInputManager::CompFluidStream::Primary,
-                                   ObjectIsNotParent,
+                                   Node::ConnectionType::Internal,
+                                   Node::CompFluidStream::Primary,
+                                   Node::ObjectIsNotParent,
                                    ErrorsFound);
 
         // why was this here
@@ -1786,7 +1041,8 @@ void GetIHPInput(EnergyPlusData &state)
 
         if ((state.dataVariableSpeedCoils->VarSpeedCoil(ihp.SHDWHWHCoilIndex).AirInletNodeNum != InNode) ||
             (state.dataVariableSpeedCoils->VarSpeedCoil(ihp.SHDWHWHCoilIndex).AirOutletNodeNum != OutNode)) {
-            ShowContinueError(state, format("Mistaken air node connection: {}:{}-wrong coil node names.", CurrentModuleObject, ihp.SHDWHWHCoilName));
+            ShowContinueError(state,
+                              std::format("Mistaken air node connection: {}:{}-wrong coil node names.", CurrentModuleObject, ihp.SHDWHWHCoilName));
             ErrorsFound = true;
         }
         SetUpCompSets(state, CurrentModuleObject, ihp.Name + " Outdoor Coil", ihp.SHDWHWHCoilType, ihp.SHDWHWHCoilName, InNodeName, OutNodeName);
@@ -1795,18 +1051,18 @@ void GetIHPInput(EnergyPlusData &state)
                                    InNodeName,
                                    ihp.SHDWHWHCoilTypeNum,
                                    ihp.SHDWHWHCoilName,
-                                   DataLoopNode::ConnectionType::Internal,
-                                   NodeInputManager::CompFluidStream::Primary,
-                                   ObjectIsNotParent,
+                                   Node::ConnectionType::Internal,
+                                   Node::CompFluidStream::Primary,
+                                   Node::ObjectIsNotParent,
                                    ErrorsFound);
         OverrideNodeConnectionType(state,
                                    OutNode,
                                    OutNodeName,
                                    ihp.SHDWHWHCoilTypeNum,
                                    ihp.SHDWHWHCoilName,
-                                   DataLoopNode::ConnectionType::Internal,
-                                   NodeInputManager::CompFluidStream::Primary,
-                                   ObjectIsNotParent,
+                                   Node::ConnectionType::Internal,
+                                   Node::CompFluidStream::Primary,
+                                   Node::ObjectIsNotParent,
                                    ErrorsFound);
 
         ihp.IHPCoilsSized = false;
@@ -1817,11 +1073,14 @@ void GetIHPInput(EnergyPlusData &state)
         ihp.MaxHeatAirVolFlow = 1e10;
         ihp.MaxCoolAirMassFlow = 1e10;
         ihp.MaxCoolAirVolFlow = 1e10;
+
+        VariableSpeedCoils::SetCoilSystemHeatingDXFlag(state, ihp.SHCoilType, ihp.SHCoilName);
+        VariableSpeedCoils::SetCoilSystemHeatingDXFlag(state, ihp.SHDWHHeatCoilType, ihp.SHDWHHeatCoilName);
     }
 
     if (ErrorsFound) {
-        ShowFatalError(state,
-                       format("{} Errors found in getting {} input. Preceding condition(s) causes termination.", RoutineName, CurrentModuleObject));
+        ShowFatalError(
+            state, std::format("{} Errors found in getting {} input. Preceding condition(s) causes termination.", RoutineName, CurrentModuleObject));
     }
 
     for (int CoilCounter = 1; CoilCounter <= NumASIHPs; ++CoilCounter) {
@@ -1831,108 +1090,108 @@ void GetIHPInput(EnergyPlusData &state)
         // set up output variables, not reported in the individual coil models
         SetupOutputVariable(state,
                             "Integrated Heat Pump Air Loop Mass Flow Rate",
-                            OutputProcessor::Unit::kg_s,
+                            Constant::Units::kg_s,
                             ihp.AirLoopFlowRate,
-                            OutputProcessor::SOVTimeStepType::System,
-                            OutputProcessor::SOVStoreType::Average,
+                            OutputProcessor::TimeStepType::System,
+                            OutputProcessor::StoreType::Average,
                             ihp.Name);
         SetupOutputVariable(state,
                             "Integrated Heat Pump Condenser Water Mass Flow Rate",
-                            OutputProcessor::Unit::kg_s,
+                            Constant::Units::kg_s,
                             ihp.TankSourceWaterMassFlowRate,
-                            OutputProcessor::SOVTimeStepType::System,
-                            OutputProcessor::SOVStoreType::Average,
+                            OutputProcessor::TimeStepType::System,
+                            OutputProcessor::StoreType::Average,
                             ihp.Name);
         SetupOutputVariable(state,
                             "Integrated Heat Pump Air Total Cooling Rate",
-                            OutputProcessor::Unit::W,
+                            Constant::Units::W,
                             ihp.TotalCoolingRate,
-                            OutputProcessor::SOVTimeStepType::System,
-                            OutputProcessor::SOVStoreType::Average,
+                            OutputProcessor::TimeStepType::System,
+                            OutputProcessor::StoreType::Average,
                             ihp.Name);
         SetupOutputVariable(state,
                             "Integrated Heat Pump Air Heating Rate",
-                            OutputProcessor::Unit::W,
+                            Constant::Units::W,
                             ihp.TotalSpaceHeatingRate,
-                            OutputProcessor::SOVTimeStepType::System,
-                            OutputProcessor::SOVStoreType::Average,
+                            OutputProcessor::TimeStepType::System,
+                            OutputProcessor::StoreType::Average,
                             ihp.Name);
         SetupOutputVariable(state,
                             "Integrated Heat Pump Water Heating Rate",
-                            OutputProcessor::Unit::W,
+                            Constant::Units::W,
                             ihp.TotalWaterHeatingRate,
-                            OutputProcessor::SOVTimeStepType::System,
-                            OutputProcessor::SOVStoreType::Average,
+                            OutputProcessor::TimeStepType::System,
+                            OutputProcessor::StoreType::Average,
                             ihp.Name);
         SetupOutputVariable(state,
                             "Integrated Heat Pump Electricity Rate",
-                            OutputProcessor::Unit::W,
+                            Constant::Units::W,
                             ihp.TotalPower,
-                            OutputProcessor::SOVTimeStepType::System,
-                            OutputProcessor::SOVStoreType::Average,
+                            OutputProcessor::TimeStepType::System,
+                            OutputProcessor::StoreType::Average,
                             ihp.Name);
         SetupOutputVariable(state,
                             "Integrated Heat Pump Air Latent Cooling Rate",
-                            OutputProcessor::Unit::W,
+                            Constant::Units::W,
                             ihp.TotalLatentLoad,
-                            OutputProcessor::SOVTimeStepType::System,
-                            OutputProcessor::SOVStoreType::Average,
+                            OutputProcessor::TimeStepType::System,
+                            OutputProcessor::StoreType::Average,
                             ihp.Name);
         SetupOutputVariable(state,
                             "Integrated Heat Pump Source Heat Transfer Rate",
-                            OutputProcessor::Unit::W,
+                            Constant::Units::W,
                             ihp.Qsource,
-                            OutputProcessor::SOVTimeStepType::System,
-                            OutputProcessor::SOVStoreType::Average,
+                            OutputProcessor::TimeStepType::System,
+                            OutputProcessor::StoreType::Average,
                             ihp.Name);
         SetupOutputVariable(state,
                             "Integrated Heat Pump COP",
-                            OutputProcessor::Unit::None,
+                            Constant::Units::None,
                             ihp.TotalCOP,
-                            OutputProcessor::SOVTimeStepType::System,
-                            OutputProcessor::SOVStoreType::Average,
+                            OutputProcessor::TimeStepType::System,
+                            OutputProcessor::StoreType::Average,
                             ihp.Name);
         SetupOutputVariable(state,
                             "Integrated Heat Pump Electricity Energy",
-                            OutputProcessor::Unit::J,
+                            Constant::Units::J,
                             ihp.Energy,
-                            OutputProcessor::SOVTimeStepType::System,
-                            OutputProcessor::SOVStoreType::Summed,
+                            OutputProcessor::TimeStepType::System,
+                            OutputProcessor::StoreType::Sum,
                             ihp.Name);
         SetupOutputVariable(state,
                             "Integrated Heat Pump Air Total Cooling Energy",
-                            OutputProcessor::Unit::J,
+                            Constant::Units::J,
                             ihp.EnergyLoadTotalCooling,
-                            OutputProcessor::SOVTimeStepType::System,
-                            OutputProcessor::SOVStoreType::Summed,
+                            OutputProcessor::TimeStepType::System,
+                            OutputProcessor::StoreType::Sum,
                             ihp.Name);
         SetupOutputVariable(state,
                             "Integrated Heat Pump Air Heating Energy",
-                            OutputProcessor::Unit::J,
+                            Constant::Units::J,
                             ihp.EnergyLoadTotalHeating,
-                            OutputProcessor::SOVTimeStepType::System,
-                            OutputProcessor::SOVStoreType::Summed,
+                            OutputProcessor::TimeStepType::System,
+                            OutputProcessor::StoreType::Sum,
                             ihp.Name);
         SetupOutputVariable(state,
                             "Integrated Heat Pump Water Heating Energy",
-                            OutputProcessor::Unit::J,
+                            Constant::Units::J,
                             ihp.EnergyLoadTotalWaterHeating,
-                            OutputProcessor::SOVTimeStepType::System,
-                            OutputProcessor::SOVStoreType::Summed,
+                            OutputProcessor::TimeStepType::System,
+                            OutputProcessor::StoreType::Sum,
                             ihp.Name);
         SetupOutputVariable(state,
                             "Integrated Heat Pump Air Latent Cooling Energy",
-                            OutputProcessor::Unit::J,
+                            Constant::Units::J,
                             ihp.EnergyLatent,
-                            OutputProcessor::SOVTimeStepType::System,
-                            OutputProcessor::SOVStoreType::Summed,
+                            OutputProcessor::TimeStepType::System,
+                            OutputProcessor::StoreType::Sum,
                             ihp.Name);
         SetupOutputVariable(state,
                             "Integrated Heat Pump Source Heat Transfer Energy",
-                            OutputProcessor::Unit::J,
+                            Constant::Units::J,
                             ihp.EnergySource,
-                            OutputProcessor::SOVTimeStepType::System,
-                            OutputProcessor::SOVStoreType::Summed,
+                            OutputProcessor::TimeStepType::System,
+                            OutputProcessor::StoreType::Sum,
                             ihp.Name);
     }
 }
@@ -1955,9 +1214,9 @@ void SizeIHP(EnergyPlusData &state, int const DXCoilNum)
 
     if (DXCoilNum > static_cast<int>(state.dataIntegratedHP->IntegratedHeatPumps.size()) || DXCoilNum < 1) {
         ShowFatalError(state,
-                       format("SizeIHP: Invalid CompIndex passed={}, Number of Integrated HPs={}, IHP name=AS-IHP",
-                              DXCoilNum,
-                              state.dataIntegratedHP->IntegratedHeatPumps.size()));
+                       std::format("SizeIHP: Invalid CompIndex passed={}, Number of Integrated HPs={}, IHP name=AS-IHP",
+                                   DXCoilNum,
+                                   state.dataIntegratedHP->IntegratedHeatPumps.size()));
     }
 
     if (state.dataIntegratedHP->IntegratedHeatPumps(DXCoilNum).IHPCoilsSized) {
@@ -1970,14 +1229,14 @@ void SizeIHP(EnergyPlusData &state, int const DXCoilNum)
     bool errFlag = false;
     SetVarSpeedCoilData(state, ihp.SCCoilIndex, errFlag, _, ihp.SHCoilIndex);
     if (errFlag) {
-        ShowSevereError(state, format(R"(SizeIHP: Could not match cooling coil"{}" with heating coil="{}")", ihp.SCCoilName, ihp.SHCoilName));
+        ShowSevereError(state, std::format(R"(SizeIHP: Could not match cooling coil"{}" with heating coil="{}")", ihp.SCCoilName, ihp.SHCoilName));
         ErrorsFound = true;
     };
 
     errFlag = false;
     SizeVarSpeedCoil(state, ihp.SCCoilIndex, errFlag); // size cooling coil
     if (errFlag) {
-        ShowSevereError(state, format("SizeIHP: failed to size SC coil\"{}\"", ihp.SCCoilName));
+        ShowSevereError(state, std::format("SizeIHP: failed to size SC coil\"{}\"", ihp.SCCoilName));
         ErrorsFound = true;
     } else {
         RatedCapacity = state.dataVariableSpeedCoils->VarSpeedCoil(ihp.SCCoilIndex).RatedCapCoolTotal;
@@ -1986,7 +1245,7 @@ void SizeIHP(EnergyPlusData &state, int const DXCoilNum)
     errFlag = false;
     SizeVarSpeedCoil(state, ihp.SHCoilIndex, errFlag); // size heating coil
     if (errFlag) {
-        ShowSevereError(state, format("SizeIHP: failed to size SH coil\"{}\"", ihp.SHCoilName));
+        ShowSevereError(state, std::format("SizeIHP: failed to size SH coil\"{}\"", ihp.SHCoilName));
         ErrorsFound = true;
     };
 
@@ -2001,7 +1260,7 @@ void SizeIHP(EnergyPlusData &state, int const DXCoilNum)
     // size SCDWH air coil
     SizeVarSpeedCoil(state, ihp.SCDWHCoolCoilIndex, errFlag);
     if (errFlag) {
-        ShowSevereError(state, format("SizeIHP: failed to size SCDWH cooling coil\"{}\"", ihp.SCDWHCoolCoilName));
+        ShowSevereError(state, std::format("SizeIHP: failed to size SCDWH cooling coil\"{}\"", ihp.SCDWHCoolCoilName));
         ErrorsFound = true;
     };
 
@@ -2009,7 +1268,7 @@ void SizeIHP(EnergyPlusData &state, int const DXCoilNum)
     errFlag = false;
     SizeVarSpeedCoil(state, ihp.SHDWHHeatCoilIndex, errFlag);
     if (errFlag) {
-        ShowSevereError(state, format("SizeIHP: failed to size SHDWH heating coil\"{}\"", ihp.SHDWHHeatCoilName));
+        ShowSevereError(state, std::format("SizeIHP: failed to size SHDWH heating coil\"{}\"", ihp.SHDWHHeatCoilName));
         ErrorsFound = true;
     };
 
@@ -2023,7 +1282,7 @@ void SizeIHP(EnergyPlusData &state, int const DXCoilNum)
     errFlag = false;
     SizeVarSpeedCoil(state, ihp.SCWHCoilIndex, errFlag);
     if (errFlag) {
-        ShowSevereError(state, format("SizeIHP: failed to size SCWH coil\"{}\"", ihp.SCWHCoilName));
+        ShowSevereError(state, std::format("SizeIHP: failed to size SCWH coil\"{}\"", ihp.SCWHCoilName));
         ErrorsFound = true;
     };
 
@@ -2035,7 +1294,7 @@ void SizeIHP(EnergyPlusData &state, int const DXCoilNum)
     errFlag = false;
     SizeVarSpeedCoil(state, ihp.DWHCoilIndex, errFlag);
     if (errFlag) {
-        ShowSevereError(state, format("SizeIHP: failed to size DWH coil\"{}\"", ihp.DWHCoilName));
+        ShowSevereError(state, std::format("SizeIHP: failed to size DWH coil\"{}\"", ihp.DWHCoilName));
         ErrorsFound = true;
     };
 
@@ -2047,7 +1306,7 @@ void SizeIHP(EnergyPlusData &state, int const DXCoilNum)
     errFlag = false;
     SizeVarSpeedCoil(state, ihp.SCDWHWHCoilIndex, errFlag);
     if (errFlag) {
-        ShowSevereError(state, format("SizeIHP: failed to size SCDWH water heating coil\"{}\"", ihp.SCDWHWHCoilName));
+        ShowSevereError(state, std::format("SizeIHP: failed to size SCDWH water heating coil\"{}\"", ihp.SCDWHWHCoilName));
         ErrorsFound = true;
     };
 
@@ -2059,7 +1318,7 @@ void SizeIHP(EnergyPlusData &state, int const DXCoilNum)
     errFlag = false;
     SizeVarSpeedCoil(state, ihp.SHDWHWHCoilIndex, errFlag);
     if (errFlag) {
-        ShowSevereError(state, format("SizeIHP: failed to size SHDWH water heating coil\"{}\"", ihp.SHDWHWHCoilName));
+        ShowSevereError(state, std::format("SizeIHP: failed to size SHDWH water heating coil\"{}\"", ihp.SHDWHWHCoilName));
         ErrorsFound = true;
     };
 
@@ -2080,9 +1339,9 @@ void InitializeIHP(EnergyPlusData &state, int const DXCoilNum)
 
     if (DXCoilNum > static_cast<int>(state.dataIntegratedHP->IntegratedHeatPumps.size()) || DXCoilNum < 1) {
         ShowFatalError(state,
-                       format("InitializeIHP: Invalid CompIndex passed={}, Number of Integrated HPs={}, IHP name=AS-IHP",
-                              DXCoilNum,
-                              state.dataIntegratedHP->IntegratedHeatPumps.size()));
+                       std::format("InitializeIHP: Invalid CompIndex passed={}, Number of Integrated HPs={}, IHP name=AS-IHP",
+                                   DXCoilNum,
+                                   state.dataIntegratedHP->IntegratedHeatPumps.size()));
     }
 
     auto &ihp = state.dataIntegratedHP->IntegratedHeatPumps(DXCoilNum);
@@ -2106,7 +1365,7 @@ void InitializeIHP(EnergyPlusData &state, int const DXCoilNum)
 
 void UpdateIHP(EnergyPlusData &state, int const DXCoilNum)
 {
-    auto &TimeStepSys = state.dataHVACGlobal->TimeStepSys;
+    Real64 TimeStepSysSec = state.dataHVACGlobal->TimeStepSysSec;
 
     // Obtains and Allocates AS-IHP related parameters from input file
     if (state.dataIntegratedHP->GetCoilsInputFlag) { // First time subroutine has been entered
@@ -2116,9 +1375,9 @@ void UpdateIHP(EnergyPlusData &state, int const DXCoilNum)
 
     if (DXCoilNum > static_cast<int>(state.dataIntegratedHP->IntegratedHeatPumps.size()) || DXCoilNum < 1) {
         ShowFatalError(state,
-                       format("UpdateIHP: Invalid CompIndex passed={}, Number of Integrated HPs={}, IHP name=AS-IHP",
-                              DXCoilNum,
-                              state.dataIntegratedHP->IntegratedHeatPumps.size()));
+                       std::format("UpdateIHP: Invalid CompIndex passed={}, Number of Integrated HPs={}, IHP name=AS-IHP",
+                                   DXCoilNum,
+                                   state.dataIntegratedHP->IntegratedHeatPumps.size()));
     }
 
     auto &ihp = state.dataIntegratedHP->IntegratedHeatPumps(DXCoilNum);
@@ -2183,15 +1442,12 @@ void UpdateIHP(EnergyPlusData &state, int const DXCoilNum)
         break;
     }
 
-    Real64 ReportingConstant = TimeStepSys * DataGlobalConstants::SecInHour;
-
-    ihp.Energy = ihp.TotalPower * ReportingConstant;                                 // total electric energy consumption
-                                                                                     // [J]
-    ihp.EnergyLoadTotalCooling = ihp.TotalCoolingRate * ReportingConstant;           // total cooling energy [J]
-    ihp.EnergyLoadTotalHeating = ihp.TotalSpaceHeatingRate * ReportingConstant;      // total heating energy [J]
-    ihp.EnergyLoadTotalWaterHeating = ihp.TotalWaterHeatingRate * ReportingConstant; // total heating energy [J]
-    ihp.EnergyLatent = ihp.TotalLatentLoad * ReportingConstant;                      // total latent energy [J]
-    ihp.EnergySource = ihp.Qsource * ReportingConstant;                              // total source energy
+    ihp.Energy = ihp.TotalPower * TimeStepSysSec;                                 // total electric energy consumption [J]
+    ihp.EnergyLoadTotalCooling = ihp.TotalCoolingRate * TimeStepSysSec;           // total cooling energy [J]
+    ihp.EnergyLoadTotalHeating = ihp.TotalSpaceHeatingRate * TimeStepSysSec;      // total heating energy [J]
+    ihp.EnergyLoadTotalWaterHeating = ihp.TotalWaterHeatingRate * TimeStepSysSec; // total heating energy [J]
+    ihp.EnergyLatent = ihp.TotalLatentLoad * TimeStepSysSec;                      // total latent energy [J]
+    ihp.EnergySource = ihp.Qsource * TimeStepSysSec;                              // total source energy
 
     if (ihp.TotalPower > 0.0) {
         Real64 TotalDelivery = ihp.TotalCoolingRate + ihp.TotalSpaceHeatingRate + ihp.TotalWaterHeatingRate;
@@ -2214,10 +1470,10 @@ void DecideWorkMode(EnergyPlusData &state,
     // it should be called by an air loop parent object, when FirstHVACIteration == true
 
     // Using/Aliasing
-    using DataHVACGlobals::SmallLoad;
+    using HVAC::SmallLoad;
     using WaterThermalTanks::GetWaterThermalTankInput;
 
-    auto &TimeStepSys = state.dataHVACGlobal->TimeStepSys;
+    Real64 TimeStepSysSec = state.dataHVACGlobal->TimeStepSysSec;
 
     Real64 MyLoad(0.0);
     Real64 WHHeatTimeSav(0.0); // time accumulation for water heating
@@ -2231,14 +1487,16 @@ void DecideWorkMode(EnergyPlusData &state,
 
     if (DXCoilNum > static_cast<int>(state.dataIntegratedHP->IntegratedHeatPumps.size()) || DXCoilNum < 1) {
         ShowFatalError(state,
-                       format("DecideWorkMode: Invalid CompIndex passed={}, Number of Integrated HPs={}, IHP name=AS-IHP",
-                              DXCoilNum,
-                              state.dataIntegratedHP->IntegratedHeatPumps.size()));
+                       std::format("DecideWorkMode: Invalid CompIndex passed={}, Number of Integrated HPs={}, IHP name=AS-IHP",
+                                   DXCoilNum,
+                                   state.dataIntegratedHP->IntegratedHeatPumps.size()));
     }
 
     auto &ihp = state.dataIntegratedHP->IntegratedHeatPumps(DXCoilNum);
 
-    if (ihp.IHPCoilsSized == false) SizeIHP(state, DXCoilNum);
+    if (ihp.IHPCoilsSized == false) {
+        SizeIHP(state, DXCoilNum);
+    }
 
     // decide working mode at the first moment
     // check if there is a water heating call
@@ -2293,8 +1551,8 @@ void DecideWorkMode(EnergyPlusData &state,
     // keep the water heating time and volume history
     WHHeatTimeSav = ihp.SHDWHRunTime;
     if (IHPOperationMode::SpaceClgDedicatedWaterHtg == ihp.CurMode) {
-        WHHeatVolSave = ihp.WaterFlowAccumVol + state.dataLoopNodes->Node(ihp.WaterTankoutNod).MassFlowRate / 983.0 * TimeStepSys *
-                                                    DataGlobalConstants::SecInHour; // 983 - water density at 60 C
+        WHHeatVolSave = ihp.WaterFlowAccumVol +
+                        state.dataLoopNodes->Node(ihp.WaterTankoutNod).MassFlowRate / 983.0 * TimeStepSysSec; // 983 - water density at 60 C
     } else {
         WHHeatVolSave = 0.0;
     }
@@ -2310,10 +1568,11 @@ void DecideWorkMode(EnergyPlusData &state,
             ihp.CurMode = IHPOperationMode::SpaceClg;
         } else if (SensLoad > SmallLoad) {
             if ((ihp.ControlledZoneTemp > ihp.TindoorOverCoolAllow) &&
-                (state.dataEnvrn->OutDryBulbTemp > ihp.TambientOverCoolAllow)) // used for cooling season, avoid heating after SCWH mode
+                (state.dataEnvrn->OutDryBulbTemp > ihp.TambientOverCoolAllow)) { // used for cooling season, avoid heating after SCWH mode
                 ihp.CurMode = IHPOperationMode::Idle;
-            else
+            } else {
                 ihp.CurMode = IHPOperationMode::SpaceHtg;
+            }
         } else {
             ihp.CurMode = IHPOperationMode::Idle;
         }
@@ -2326,10 +1585,11 @@ void DecideWorkMode(EnergyPlusData &state,
             ihp.CurMode = IHPOperationMode::SpaceClgDedicatedWaterHtg;
             ihp.WaterFlowAccumVol = WHHeatVolSave;
         } else {
-            if (1 == ihp.ModeMatchSCWH) // water heating priority
+            if (1 == ihp.ModeMatchSCWH) { // water heating priority
                 ihp.CurMode = IHPOperationMode::SCWHMatchWH;
-            else // space cooling priority
+            } else { // space cooling priority
                 ihp.CurMode = IHPOperationMode::SCWHMatchSC;
+            }
         };
 
     } else if ((ihp.ControlledZoneTemp > ihp.TindoorOverCoolAllow) &&
@@ -2341,7 +1601,7 @@ void DecideWorkMode(EnergyPlusData &state,
     {
         ihp.CurMode = IHPOperationMode::DedicatedWaterHtg;
     } else if (SensLoad > SmallLoad) {
-        ihp.SHDWHRunTime = WHHeatTimeSav + TimeStepSys * DataGlobalConstants::SecInHour;
+        ihp.SHDWHRunTime = WHHeatTimeSav + TimeStepSysSec;
 
         if (WHHeatTimeSav > ihp.TimeLimitSHDWH) {
             ihp.CurMode = IHPOperationMode::SHDWHElecHeatOn;
@@ -2360,9 +1620,6 @@ void ClearCoils(EnergyPlusData &state, int const DXCoilNum)
 {
     using VariableSpeedCoils::SimVariableSpeedCoils;
 
-    Real64 EMP1(0.0), EMP2(0.0), EMP3(0.0); // place holder to calling clear up function
-    int CycFanCycCoil(1);                   // fan cycl manner place holder
-
     // Obtains and Allocates WatertoAirHP related parameters from input file
     if (state.dataIntegratedHP->GetCoilsInputFlag) { // First time subroutine has been entered
         GetIHPInput(state);
@@ -2371,126 +1628,22 @@ void ClearCoils(EnergyPlusData &state, int const DXCoilNum)
 
     if (DXCoilNum > static_cast<int>(state.dataIntegratedHP->IntegratedHeatPumps.size()) || DXCoilNum < 1) {
         ShowFatalError(state,
-                       format("ClearCoils: Invalid CompIndex passed={}, Number of Integrated HPs={}, IHP name=AS-IHP",
-                              DXCoilNum,
-                              state.dataIntegratedHP->IntegratedHeatPumps.size()));
+                       std::format("ClearCoils: Invalid CompIndex passed={}, Number of Integrated HPs={}, IHP name=AS-IHP",
+                                   DXCoilNum,
+                                   state.dataIntegratedHP->IntegratedHeatPumps.size()));
     }
 
     auto &ihp = state.dataIntegratedHP->IntegratedHeatPumps(DXCoilNum);
 
     // clear up
-    SimVariableSpeedCoils(state,
-                          std::string(),
-                          ihp.SCDWHCoolCoilIndex,
-                          CycFanCycCoil,
-                          EMP1,
-                          EMP2,
-                          EMP3,
-                          DataHVACGlobals::CompressorOperation::On,
-                          0.0,
-                          1.0,
-                          0.0,
-                          0.0,
-                          0.0,
-                          1.0);
-    SimVariableSpeedCoils(state,
-                          std::string(),
-                          ihp.SCDWHWHCoilIndex,
-                          CycFanCycCoil,
-                          EMP1,
-                          EMP2,
-                          EMP3,
-                          DataHVACGlobals::CompressorOperation::On,
-                          0.0,
-                          1.0,
-                          0.0,
-                          0.0,
-                          0.0,
-                          1.0);
-    SimVariableSpeedCoils(state,
-                          std::string(),
-                          ihp.SHDWHHeatCoilIndex,
-                          CycFanCycCoil,
-                          EMP1,
-                          EMP2,
-                          EMP3,
-                          DataHVACGlobals::CompressorOperation::On,
-                          0.0,
-                          1.0,
-                          0.0,
-                          0.0,
-                          0.0,
-                          1.0);
-    SimVariableSpeedCoils(state,
-                          std::string(),
-                          ihp.SHDWHWHCoilIndex,
-                          CycFanCycCoil,
-                          EMP1,
-                          EMP2,
-                          EMP3,
-                          DataHVACGlobals::CompressorOperation::On,
-                          0.0,
-                          1.0,
-                          0.0,
-                          0.0,
-                          0.0,
-                          1.0);
-    SimVariableSpeedCoils(state,
-                          std::string(),
-                          ihp.SCWHCoilIndex,
-                          CycFanCycCoil,
-                          EMP1,
-                          EMP2,
-                          EMP3,
-                          DataHVACGlobals::CompressorOperation::On,
-                          0.0,
-                          1.0,
-                          0.0,
-                          0.0,
-                          0.0,
-                          1.0);
-    SimVariableSpeedCoils(state,
-                          std::string(),
-                          ihp.SCCoilIndex,
-                          CycFanCycCoil,
-                          EMP1,
-                          EMP2,
-                          EMP3,
-                          DataHVACGlobals::CompressorOperation::On,
-                          0.0,
-                          1.0,
-                          0.0,
-                          0.0,
-                          0.0,
-                          1.0);
-    SimVariableSpeedCoils(state,
-                          std::string(),
-                          ihp.SHCoilIndex,
-                          CycFanCycCoil,
-                          EMP1,
-                          EMP2,
-                          EMP3,
-                          DataHVACGlobals::CompressorOperation::On,
-                          0.0,
-                          1.0,
-                          0.0,
-                          0.0,
-                          0.0,
-                          1.0);
-    SimVariableSpeedCoils(state,
-                          std::string(),
-                          ihp.DWHCoilIndex,
-                          CycFanCycCoil,
-                          EMP1,
-                          EMP2,
-                          EMP3,
-                          DataHVACGlobals::CompressorOperation::On,
-                          0.0,
-                          1.0,
-                          0.0,
-                          0.0,
-                          0.0,
-                          1.0);
+    SimVariableSpeedCoils(state, std::string(), ihp.SCDWHCoolCoilIndex, HVAC::FanOp::Cycling, HVAC::CompressorOp::On, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0);
+    SimVariableSpeedCoils(state, std::string(), ihp.SCDWHWHCoilIndex, HVAC::FanOp::Cycling, HVAC::CompressorOp::On, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0);
+    SimVariableSpeedCoils(state, std::string(), ihp.SHDWHHeatCoilIndex, HVAC::FanOp::Cycling, HVAC::CompressorOp::On, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0);
+    SimVariableSpeedCoils(state, std::string(), ihp.SHDWHWHCoilIndex, HVAC::FanOp::Cycling, HVAC::CompressorOp::On, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0);
+    SimVariableSpeedCoils(state, std::string(), ihp.SCWHCoilIndex, HVAC::FanOp::Cycling, HVAC::CompressorOp::On, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0);
+    SimVariableSpeedCoils(state, std::string(), ihp.SCCoilIndex, HVAC::FanOp::Cycling, HVAC::CompressorOp::On, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0);
+    SimVariableSpeedCoils(state, std::string(), ihp.SHCoilIndex, HVAC::FanOp::Cycling, HVAC::CompressorOp::On, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0);
+    SimVariableSpeedCoils(state, std::string(), ihp.DWHCoilIndex, HVAC::FanOp::Cycling, HVAC::CompressorOp::On, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0);
 }
 
 IHPOperationMode GetCurWorkMode(EnergyPlusData &state, int const DXCoilNum)
@@ -2503,12 +1656,14 @@ IHPOperationMode GetCurWorkMode(EnergyPlusData &state, int const DXCoilNum)
 
     if (DXCoilNum > static_cast<int>(state.dataIntegratedHP->IntegratedHeatPumps.size()) || DXCoilNum < 1) {
         ShowFatalError(state,
-                       format("GetCurWorkMode: Invalid CompIndex passed={}, Number of Integrated HPs={}, IHP name=AS-IHP",
-                              DXCoilNum,
-                              state.dataIntegratedHP->IntegratedHeatPumps.size()));
+                       std::format("GetCurWorkMode: Invalid CompIndex passed={}, Number of Integrated HPs={}, IHP name=AS-IHP",
+                                   DXCoilNum,
+                                   state.dataIntegratedHP->IntegratedHeatPumps.size()));
     }
 
-    if (state.dataIntegratedHP->IntegratedHeatPumps(DXCoilNum).IHPCoilsSized == false) SizeIHP(state, DXCoilNum);
+    if (state.dataIntegratedHP->IntegratedHeatPumps(DXCoilNum).IHPCoilsSized == false) {
+        SizeIHP(state, DXCoilNum);
+    }
 
     return (state.dataIntegratedHP->IntegratedHeatPumps(DXCoilNum).CurMode);
 }
@@ -2549,10 +1704,10 @@ int GetCoilIndexIHP(EnergyPlusData &state,
         state.dataIntegratedHP->GetCoilsInputFlag = false;
     }
 
-    IndexNum = UtilityRoutines::FindItemInList(CoilName, state.dataIntegratedHP->IntegratedHeatPumps);
+    IndexNum = Util::FindItemInList(CoilName, state.dataIntegratedHP->IntegratedHeatPumps);
 
     if (IndexNum == 0) {
-        ShowSevereError(state, format(R"(GetCoilIndexIHP: Could not find CoilType="{}" with Name="{}")", CoilType, CoilName));
+        ShowSevereError(state, std::format(R"(GetCoilIndexIHP: Could not find CoilType="{}" with Name="{}")", CoilType, CoilName));
         ErrorsFound = true;
     }
 
@@ -2588,13 +1743,13 @@ int GetCoilInletNodeIHP(EnergyPlusData &state,
         state.dataIntegratedHP->GetCoilsInputFlag = false;
     }
 
-    WhichCoil = UtilityRoutines::FindItemInList(CoilName, state.dataIntegratedHP->IntegratedHeatPumps);
+    WhichCoil = Util::FindItemInList(CoilName, state.dataIntegratedHP->IntegratedHeatPumps);
     if (WhichCoil != 0) {
         NodeNumber = state.dataIntegratedHP->IntegratedHeatPumps(WhichCoil).AirCoolInletNodeNum;
     }
 
     if (WhichCoil == 0) {
-        ShowSevereError(state, format(R"(GetCoilInletNodeIHP: Could not find CoilType="{}" with Name="{}")", CoilType, CoilName));
+        ShowSevereError(state, std::format(R"(GetCoilInletNodeIHP: Could not find CoilType="{}" with Name="{}")", CoilType, CoilName));
         ErrorsFound = true;
         NodeNumber = 0;
     }
@@ -2631,13 +1786,13 @@ int GetDWHCoilInletNodeIHP(EnergyPlusData &state,
         state.dataIntegratedHP->GetCoilsInputFlag = false;
     }
 
-    WhichCoil = UtilityRoutines::FindItemInList(CoilName, state.dataIntegratedHP->IntegratedHeatPumps);
+    WhichCoil = Util::FindItemInList(CoilName, state.dataIntegratedHP->IntegratedHeatPumps);
     if (WhichCoil != 0) {
         NodeNumber = state.dataIntegratedHP->IntegratedHeatPumps(WhichCoil).ODAirInletNodeNum;
     }
 
     if (WhichCoil == 0) {
-        ShowSevereError(state, format(R"(GetCoilInletNodeIHP: Could not find CoilType="{}" with Name="{}")", CoilType, CoilName));
+        ShowSevereError(state, std::format(R"(GetCoilInletNodeIHP: Could not find CoilType="{}" with Name="{}")", CoilType, CoilName));
         ErrorsFound = true;
         NodeNumber = 0;
     }
@@ -2674,13 +1829,13 @@ int GetDWHCoilOutletNodeIHP(EnergyPlusData &state,
         state.dataIntegratedHP->GetCoilsInputFlag = false;
     }
 
-    WhichCoil = UtilityRoutines::FindItemInList(CoilName, state.dataIntegratedHP->IntegratedHeatPumps);
+    WhichCoil = Util::FindItemInList(CoilName, state.dataIntegratedHP->IntegratedHeatPumps);
     if (WhichCoil != 0) {
         NodeNumber = state.dataIntegratedHP->IntegratedHeatPumps(WhichCoil).ODAirOutletNodeNum;
     }
 
     if (WhichCoil == 0) {
-        ShowSevereError(state, format(R"(GetCoilInletNodeIHP: Could not find CoilType="{}" with Name="{}")", CoilType, CoilName));
+        ShowSevereError(state, std::format(R"(GetCoilInletNodeIHP: Could not find CoilType="{}" with Name="{}")", CoilType, CoilName));
         ErrorsFound = true;
         NodeNumber = 0;
     }
@@ -2718,22 +1873,23 @@ int GetIHPDWHCoilPLFFPLR(EnergyPlusData &state,
         state.dataIntegratedHP->GetCoilsInputFlag = false;
     }
 
-    int WhichCoil = UtilityRoutines::FindItemInList(CoilName, state.dataIntegratedHP->IntegratedHeatPumps);
+    int WhichCoil = Util::FindItemInList(CoilName, state.dataIntegratedHP->IntegratedHeatPumps);
     if (WhichCoil != 0) {
 
         auto &ihp = state.dataIntegratedHP->IntegratedHeatPumps(WhichCoil);
 
         // this will be called by HPWH parent
-        if (ihp.DWHCoilIndex > 0)
+        if (ihp.DWHCoilIndex > 0) {
             PLRNumber = GetVSCoilPLFFPLR(state, ihp.DWHCoilType, ihp.DWHCoilName, ErrorsFound);
-        else
+        } else {
             PLRNumber = GetVSCoilPLFFPLR(state, ihp.SCWHCoilType, ihp.SCWHCoilName, ErrorsFound);
+        }
     } else {
         WhichCoil = 0;
     }
 
     if (WhichCoil == 0) {
-        ShowSevereError(state, format(R"(GetIHPDWHCoilPLFFPLR: Could not find CoilType="{}" with Name="{}")", CoilType, CoilName));
+        ShowSevereError(state, std::format(R"(GetIHPDWHCoilPLFFPLR: Could not find CoilType="{}" with Name="{}")", CoilType, CoilName));
         ErrorsFound = true;
         PLRNumber = 0;
     }
@@ -2772,12 +1928,14 @@ Real64 GetDWHCoilCapacityIHP(EnergyPlusData &state,
         state.dataIntegratedHP->GetCoilsInputFlag = false;
     }
 
-    int WhichCoil = UtilityRoutines::FindItemInList(CoilName, state.dataIntegratedHP->IntegratedHeatPumps);
+    int WhichCoil = Util::FindItemInList(CoilName, state.dataIntegratedHP->IntegratedHeatPumps);
     if (WhichCoil != 0) {
 
         auto &ihp = state.dataIntegratedHP->IntegratedHeatPumps(WhichCoil);
 
-        if (ihp.IHPCoilsSized == false) SizeIHP(state, WhichCoil);
+        if (ihp.IHPCoilsSized == false) {
+            SizeIHP(state, WhichCoil);
+        }
 
         if (ihp.DWHCoilIndex > 0) {
             CoilCapacity = GetCoilCapacityVariableSpeed(state, ihp.DWHCoilType, ihp.DWHCoilName, ErrorsFound);
@@ -2789,7 +1947,7 @@ Real64 GetDWHCoilCapacityIHP(EnergyPlusData &state,
     }
 
     if (WhichCoil == 0) {
-        ShowSevereError(state, format(R"(GetCoilCapacityVariableSpeed: Could not find CoilType="{}" with Name="{}")", CoilType, CoilName));
+        ShowSevereError(state, std::format(R"(GetCoilCapacityVariableSpeed: Could not find CoilType="{}" with Name="{}")", CoilType, CoilName));
         ErrorsFound = true;
         CoilCapacity = -1000.0;
     }
@@ -2809,12 +1967,12 @@ int GetLowSpeedNumIHP(EnergyPlusData &state, int const DXCoilNum)
 
     if (DXCoilNum > static_cast<int>(state.dataIntegratedHP->IntegratedHeatPumps.size()) || DXCoilNum < 1) {
         ShowFatalError(state,
-                       format("GetLowSpeedNumIHP: Invalid CompIndex passed={}, Number of Integrated HPs={}, IHP name=AS-IHP",
-                              DXCoilNum,
-                              state.dataIntegratedHP->IntegratedHeatPumps.size()));
+                       std::format("GetLowSpeedNumIHP: Invalid CompIndex passed={}, Number of Integrated HPs={}, IHP name=AS-IHP",
+                                   DXCoilNum,
+                                   state.dataIntegratedHP->IntegratedHeatPumps.size()));
     }
 
-    auto &ihp = state.dataIntegratedHP->IntegratedHeatPumps(DXCoilNum);
+    auto const &ihp = state.dataIntegratedHP->IntegratedHeatPumps(DXCoilNum);
 
     switch (ihp.CurMode) {
     case IHPOperationMode::Idle:
@@ -2852,9 +2010,9 @@ int GetMaxSpeedNumIHP(EnergyPlusData &state, int const DXCoilNum)
 
     if (DXCoilNum > static_cast<int>(state.dataIntegratedHP->IntegratedHeatPumps.size()) || DXCoilNum < 1) {
         ShowFatalError(state,
-                       format("GetMaxSpeedNumIHP: Invalid CompIndex passed={}, Number of Integrated HPs={}, IHP name=AS-IHP",
-                              DXCoilNum,
-                              state.dataIntegratedHP->IntegratedHeatPumps.size()));
+                       std::format("GetMaxSpeedNumIHP: Invalid CompIndex passed={}, Number of Integrated HPs={}, IHP name=AS-IHP",
+                                   DXCoilNum,
+                                   state.dataIntegratedHP->IntegratedHeatPumps.size()));
     }
 
     int SpeedNum(0);
@@ -2910,14 +2068,16 @@ Real64 GetAirVolFlowRateIHP(EnergyPlusData &state,
 
     if (DXCoilNum > static_cast<int>(state.dataIntegratedHP->IntegratedHeatPumps.size()) || DXCoilNum < 1) {
         ShowFatalError(state,
-                       format("GetAirVolFlowRateIHP: Invalid CompIndex passed={}, Number of Integrated HPs={}, IHP name=AS-IHP",
-                              DXCoilNum,
-                              state.dataIntegratedHP->IntegratedHeatPumps.size()));
+                       std::format("GetAirVolFlowRateIHP: Invalid CompIndex passed={}, Number of Integrated HPs={}, IHP name=AS-IHP",
+                                   DXCoilNum,
+                                   state.dataIntegratedHP->IntegratedHeatPumps.size()));
     }
 
     auto &ihp = state.dataIntegratedHP->IntegratedHeatPumps(DXCoilNum);
 
-    if (!ihp.IHPCoilsSized) SizeIHP(state, DXCoilNum);
+    if (!ihp.IHPCoilsSized) {
+        SizeIHP(state, DXCoilNum);
+    }
 
     FlowScale = 0.0;
     switch (ihp.CurMode) {
@@ -2984,17 +2144,22 @@ Real64 GetAirVolFlowRateIHP(EnergyPlusData &state,
     }
 
     if (!IsResultFlow) {
-        if (1 == SpeedNum)
+        if (1 == SpeedNum) {
             AirVolFlowRate = state.dataVariableSpeedCoils->VarSpeedCoil(IHPCoilIndex).MSRatedAirVolFlowRate(SpeedNum);
-        else
+        } else {
             AirVolFlowRate = SpeedRatio * state.dataVariableSpeedCoils->VarSpeedCoil(IHPCoilIndex).MSRatedAirVolFlowRate(SpeedNum) +
                              (1.0 - SpeedRatio) * state.dataVariableSpeedCoils->VarSpeedCoil(IHPCoilIndex).MSRatedAirVolFlowRate(SpeedNum - 1);
+        }
 
         AirVolFlowRate = AirVolFlowRate * FlowScale;
     }
 
-    if (AirVolFlowRate > ihp.MaxCoolAirVolFlow) AirVolFlowRate = ihp.MaxCoolAirVolFlow;
-    if (AirVolFlowRate > ihp.MaxHeatAirVolFlow) AirVolFlowRate = ihp.MaxHeatAirVolFlow;
+    if (AirVolFlowRate > ihp.MaxCoolAirVolFlow) {
+        AirVolFlowRate = ihp.MaxCoolAirVolFlow;
+    }
+    if (AirVolFlowRate > ihp.MaxHeatAirVolFlow) {
+        AirVolFlowRate = ihp.MaxHeatAirVolFlow;
+    }
 
     return (AirVolFlowRate);
 }
@@ -3012,14 +2177,16 @@ Real64 GetWaterVolFlowRateIHP(EnergyPlusData &state, int const DXCoilNum, int co
 
     if (DXCoilNum > static_cast<int>(state.dataIntegratedHP->IntegratedHeatPumps.size()) || DXCoilNum < 1) {
         ShowFatalError(state,
-                       format("GetWaterVolFlowRateIHP: Invalid CompIndex passed={}, Number of Integrated HPs={}, IHP name=AS-IHP",
-                              DXCoilNum,
-                              state.dataIntegratedHP->IntegratedHeatPumps.size()));
+                       std::format("GetWaterVolFlowRateIHP: Invalid CompIndex passed={}, Number of Integrated HPs={}, IHP name=AS-IHP",
+                                   DXCoilNum,
+                                   state.dataIntegratedHP->IntegratedHeatPumps.size()));
     }
 
-    auto &ihp = state.dataIntegratedHP->IntegratedHeatPumps(DXCoilNum);
+    auto const &ihp = state.dataIntegratedHP->IntegratedHeatPumps(DXCoilNum);
 
-    if (!ihp.IHPCoilsSized) SizeIHP(state, DXCoilNum);
+    if (!ihp.IHPCoilsSized) {
+        SizeIHP(state, DXCoilNum);
+    }
 
     switch (ihp.CurMode) {
     case IHPOperationMode::Idle:
@@ -3029,37 +2196,41 @@ Real64 GetWaterVolFlowRateIHP(EnergyPlusData &state, int const DXCoilNum, int co
         break;
     case IHPOperationMode::DedicatedWaterHtg:
         IHPCoilIndex = ihp.DWHCoilIndex;
-        if (1 == SpeedNum)
+        if (1 == SpeedNum) {
             WaterVolFlowRate = state.dataVariableSpeedCoils->VarSpeedCoil(IHPCoilIndex).MSRatedWaterVolFlowRate(SpeedNum);
-        else
+        } else {
             WaterVolFlowRate = SpeedRatio * state.dataVariableSpeedCoils->VarSpeedCoil(IHPCoilIndex).MSRatedWaterVolFlowRate(SpeedNum) +
                                (1.0 - SpeedRatio) * state.dataVariableSpeedCoils->VarSpeedCoil(IHPCoilIndex).MSRatedWaterVolFlowRate(SpeedNum - 1);
+        }
         break;
     case IHPOperationMode::SCWHMatchSC:
     case IHPOperationMode::SCWHMatchWH:
         IHPCoilIndex = ihp.SCWHCoilIndex;
-        if (1 == SpeedNum)
+        if (1 == SpeedNum) {
             WaterVolFlowRate = state.dataVariableSpeedCoils->VarSpeedCoil(IHPCoilIndex).MSRatedWaterVolFlowRate(SpeedNum);
-        else
+        } else {
             WaterVolFlowRate = SpeedRatio * state.dataVariableSpeedCoils->VarSpeedCoil(IHPCoilIndex).MSRatedWaterVolFlowRate(SpeedNum) +
                                (1.0 - SpeedRatio) * state.dataVariableSpeedCoils->VarSpeedCoil(IHPCoilIndex).MSRatedWaterVolFlowRate(SpeedNum - 1);
+        }
         break;
     case IHPOperationMode::SpaceClgDedicatedWaterHtg:
         IHPCoilIndex = ihp.SCDWHWHCoilIndex;
-        if (1 == SpeedNum)
+        if (1 == SpeedNum) {
             WaterVolFlowRate = state.dataVariableSpeedCoils->VarSpeedCoil(IHPCoilIndex).MSRatedWaterVolFlowRate(SpeedNum);
-        else
+        } else {
             WaterVolFlowRate = SpeedRatio * state.dataVariableSpeedCoils->VarSpeedCoil(IHPCoilIndex).MSRatedWaterVolFlowRate(SpeedNum) +
                                (1.0 - SpeedRatio) * state.dataVariableSpeedCoils->VarSpeedCoil(IHPCoilIndex).MSRatedWaterVolFlowRate(SpeedNum - 1);
+        }
         break;
     case IHPOperationMode::SHDWHElecHeatOff:
     case IHPOperationMode::SHDWHElecHeatOn:
         IHPCoilIndex = ihp.SHDWHWHCoilIndex;
-        if (1 == SpeedNum)
+        if (1 == SpeedNum) {
             WaterVolFlowRate = state.dataVariableSpeedCoils->VarSpeedCoil(IHPCoilIndex).MSRatedWaterVolFlowRate(SpeedNum);
-        else
+        } else {
             WaterVolFlowRate = SpeedRatio * state.dataVariableSpeedCoils->VarSpeedCoil(IHPCoilIndex).MSRatedWaterVolFlowRate(SpeedNum) +
                                (1.0 - SpeedRatio) * state.dataVariableSpeedCoils->VarSpeedCoil(IHPCoilIndex).MSRatedWaterVolFlowRate(SpeedNum - 1);
+        }
         break;
     default:
         WaterVolFlowRate = 0.0;
@@ -3089,14 +2260,16 @@ Real64 GetAirMassFlowRateIHP(EnergyPlusData &state,
 
     if (DXCoilNum > static_cast<int>(state.dataIntegratedHP->IntegratedHeatPumps.size()) || DXCoilNum < 1) {
         ShowFatalError(state,
-                       format("GetAirMassFlowRateIHP: Invalid CompIndex passed={}, Number of Integrated HPs={}, IHP name=AS-IHP",
-                              DXCoilNum,
-                              state.dataIntegratedHP->IntegratedHeatPumps.size()));
+                       std::format("GetAirMassFlowRateIHP: Invalid CompIndex passed={}, Number of Integrated HPs={}, IHP name=AS-IHP",
+                                   DXCoilNum,
+                                   state.dataIntegratedHP->IntegratedHeatPumps.size()));
     }
 
     auto &ihp = state.dataIntegratedHP->IntegratedHeatPumps(DXCoilNum);
 
-    if (!ihp.IHPCoilsSized) SizeIHP(state, DXCoilNum);
+    if (!ihp.IHPCoilsSized) {
+        SizeIHP(state, DXCoilNum);
+    }
 
     FlowScale = 0.0;
     switch (ihp.CurMode) {

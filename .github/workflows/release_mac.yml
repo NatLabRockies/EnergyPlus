@@ -1,0 +1,383 @@
+name: Mac Releases
+
+on:
+  push:
+    tags:
+      - '*'
+  workflow_dispatch:
+    inputs:
+      BUILD_DOCS:
+        description: 'Whether to build docs or not as it takes 15 minutes to install MacTex'
+        required: true
+        type: boolean
+        default: false
+
+env:
+  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  BUILD_TYPE: Release
+  FC: gfortran-13
+  SDKROOT: /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk
+  Python_REQUIRED_VERSION: 3.12.2
+  BUILD_DOCS: true  # Installing MacTex takes like 15min, so you can speed things up by disabling it
+
+jobs:
+  build_installer_artifact:
+    name: Build Packages for ${{ matrix.pretty }}
+    runs-on: ${{ matrix.os }}
+    continue-on-error: ${{ matrix.allow_failure }}
+    strategy:
+      # fail-fast: Default is true, switch to false to allow one platform to fail and still run others
+      fail-fast: false
+      matrix:
+        os: [macos-15-intel, macos-14]
+        include:
+        - os: macos-15-intel
+          macos_dev_target: 13.3
+          allow_failure: false
+          arch: x86_64
+          python-arch: x64
+          pretty: "Mac x64"
+        - os: macos-14
+          macos_dev_target: 14.0
+          allow_failure: false
+          arch: arm64
+          python-arch: arm64
+          pretty: "Mac arm64"
+
+    permissions:
+      # Needed permission to upload the release asset
+      contents: write
+
+    steps:
+    - uses: actions/checkout@v6
+
+#    - name: Setup QtIFW 4.x
+#      uses: jmarrec/setup-qtifw@v1
+#      with:
+#        qtifw-version: '4.6.1'
+
+    - name: "Configure for codesigning"
+      run: |
+        set -x
+        cd $RUNNER_TEMP
+        mkdir codesigning && cd codesigning
+        # ----- Create certificate files from secrets base64 -----
+        echo "${{ secrets.MACOS_DEVELOPER_ID_APPLICATION_CERTIFICATE_P12_BASE64 }}" | base64 --decode > certificate_application.p12
+        echo "${{ secrets.MACOS_DEVELOPER_ID_INSTALLER_CERTIFICATE_P12_BASE64 }}" | base64 --decode > certificate_installer.p12
+
+        # ----- Configure Keychain -----
+        KEYCHAIN_PATH=$RUNNER_TEMP/app-signing.keychain-db
+        security create-keychain -p "${{ secrets.MACOS_KEYCHAIN_PASSWORD }}" $KEYCHAIN_PATH
+        # Unlock it for 6 hours
+        security set-keychain-settings -lut 21600 $KEYCHAIN_PATH
+        security unlock-keychain -p "${{ secrets.MACOS_KEYCHAIN_PASSWORD }}" $KEYCHAIN_PATH
+
+        # ----- Import certificates on Keychain -----
+        security import certificate_application.p12 -P '${{ secrets.MACOS_DEVELOPER_ID_APPLICATION_CERTIFICATE_P12_PASSWORD }}' -A -t cert -f pkcs12 -k $KEYCHAIN_PATH
+        security import certificate_installer.p12   -P '${{ secrets.MACOS_DEVELOPER_ID_INSTALLER_CERTIFICATE_P12_PASSWORD }}'   -A -t cert -f pkcs12 -k $KEYCHAIN_PATH
+        security list-keychain -d user -s $KEYCHAIN_PATH
+        security find-identity -vvvv $KEYCHAIN_PATH
+
+        # Add needed intermediary certificates
+        aria2c https://www.apple.com/certificateauthority/AppleWWDRCAG2.cer
+        aria2c https://www.apple.com/certificateauthority/DeveloperIDG2CA.cer
+        security import AppleWWDRCAG2.cer -k $KEYCHAIN_PATH
+        security import DeveloperIDG2CA.cer -k $KEYCHAIN_PATH || true  # macos-15-intel seems to already have it
+        security find-identity -vvvv $KEYCHAIN_PATH
+        security find-identity -v -p codesigning
+
+        # Store AppConnect credentials
+        echo "${{ secrets.NOTARIZATION_API_KEY }}" > AppConnect_Developer_API_Key.p8
+        xcrun notarytool store-credentials EnergyPlus \
+              --key AppConnect_Developer_API_Key.p8 \
+              --key-id ${{ secrets.NOTARIZATION_API_TEAM_ID }} \
+              --issuer ${{ secrets.NOTARIZATION_API_ISSUER_ID }} \
+              --keychain $KEYCHAIN_PATH
+
+        cd .. && rm -Rf codesigning
+
+        # Download my patched QtIFW
+        mkdir QtIFW && cd QtIFW
+        aria2c https://github.com/jmarrec/QtIFW-fixup/releases/download/v4.11.0-Patched/QtIFW-4.11.0-${{ matrix.arch }}.zip
+        xattr -r -d com.apple.quarantine ./QtIFW-4.11.0-${{ matrix.arch }}.zip
+        unzip QtIFW-4.11.0-${{ matrix.arch }}.zip
+        rm -Rf ./*.zip
+        chmod +x *
+        ./installerbase --version
+        echo "$(pwd)" >> $GITHUB_PATH
+
+    - name: Remove python ${{ env.Python_REQUIRED_VERSION }} from the toolcache
+      run: |
+        ls $RUNNER_TOOL_CACHE/Python || true
+        rm -Rf "$RUNNER_TOOL_CACHE/Python/${{ env.Python_REQUIRED_VERSION }}"
+        rm -Rf "$RUNNER_TOOL_CACHE/Python/${{ env.Python_REQUIRED_VERSION }}*/"
+
+    - name: Set up Python ${{ env.Python_REQUIRED_VERSION }}
+      id: setup-python
+      uses: jmarrec/setup-python@v5.4.0
+      with:
+        python-version: ${{ env.Python_REQUIRED_VERSION }}
+        # check-latest: true # Force pick up the python I built instead of the (potential) toolcache one. I could also do `rm -Rf $RUNNER_TOOL_CACHE/Python/3.12.2` before this action
+
+    - name: Install Python dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install aqtinstall
+
+    - name: Install System dependencies and LaTeX
+      shell: bash
+      run: |
+        set -x
+        brew update
+        if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
+          BUILD_DOCS="${{ inputs.BUILD_DOCS }}"
+          echo "BUILD_DOCS=$BUILD_DOCS" >> $GITHUB_ENV
+        fi
+
+        if [[ "$BUILD_DOCS" != "false" ]]; then
+          echo "Using brew to install basictex and adding it to PATH"
+          brew install --cask basictex
+          echo "/Library/TeX/texbin" >> $GITHUB_PATH
+          echo "DOCUMENTATION_BUILD=BuildWithAll" >> $GITHUB_ENV
+        else
+          echo "DOCUMENTATION_BUILD=DoNotBuild" >> $GITHUB_ENV
+        fi
+        # The MACOSX_DEPLOYMENT_TARGET environment variable sets the default value for the CMAKE_OSX_DEPLOYMENT_TARGET variable.
+        # We use cmake commands to build some subprojects, so setting it globally
+        echo MACOSX_DEPLOYMENT_TARGET=${{ matrix.macos_dev_target }} >> $GITHUB_ENV
+        brew install ninja tcl-tk
+
+    - name: Install required LaTeX packages by building the Test document
+      shell: bash
+      working-directory: ./doc/test
+      run: |
+        sudo tlmgr update --self
+        sudo tlmgr install enumitem framed multirow siunitx
+        xelatex dependencies.tex
+
+    - name: Create Build Directory
+      run: cmake -E make_directory ./build/
+
+      # should we pin to a specific version of CMake here like we did on Windows?
+
+    - name: Configure CMake
+      working-directory: ./build
+      shell: bash
+      run: |
+        cmake -G Ninja -DCMAKE_BUILD_TYPE:STRING=$BUILD_TYPE \
+              -DCMAKE_OSX_DEPLOYMENT_TARGET:STRING=${{ matrix.macos_dev_target }} \
+              -DLINK_WITH_PYTHON:BOOL=ON -DPYTHON_CLI:BOOL=ON \
+              -DPython_REQUIRED_VERSION:STRING=${{ steps.setup-python.outputs.python-version }} \
+              -DPython_ROOT_DIR:PATH=$RUNNER_TOOL_CACHE/Python/${{ steps.setup-python.outputs.python-version }}/${{ matrix.python-arch }}/ \
+              -DBUILD_FORTRAN:BOOL=ON -DBUILD_PACKAGE:BOOL=ON \
+              -DDOCUMENTATION_BUILD:STRING=$DOCUMENTATION_BUILD -DTEX_INTERACTION:STRING="batchmode" \
+              -DENABLE_OPENMP:BOOL=OFF \
+              -DCPACK_CODESIGNING_DEVELOPPER_ID_APPLICATION:STRING="Developer ID Application: National Renewable Energy Laboratory (K7JYVQJL7R)" \
+              -DCPACK_CODESIGNING_NOTARY_PROFILE_NAME:STRING=EnergyPlus \
+              ../
+
+    - name: Build Package
+      working-directory: ./build
+      shell: bash
+      run: |
+        ninja package
+
+    - name: Upload Tarball as artifact for testing
+      uses: actions/upload-artifact@v7
+      with:
+        name: energyplus-${{ matrix.os }}.tar.gz
+        path: build/EnergyPlus-*-${{ matrix.arch }}.tar.gz
+        if-no-files-found: error
+        retention-days: 7
+        overwrite: false
+
+    - name: Upload DMG as artifact for testing
+      uses: actions/upload-artifact@v7
+      with:
+        name: energyplus-${{ matrix.os }}.dmg
+        path: build/EnergyPlus-*-${{ matrix.arch }}.dmg
+        if-no-files-found: error
+        retention-days: 7
+        overwrite: false
+
+    - name: Quick Test Package Signing and otool exes and libs
+      shell: bash
+      working-directory: ./build
+      run: |
+        begin_group() { echo -e "::group::\033[93m$1\033[0m"; }
+
+        subheader() { echo -e "\033[95m---- $1\033[0m"; }
+
+        exes=(
+          "energyplus" "libenergyplusapi.dylib"
+          "ExpandObjects" "ConvertInputFormat"
+          "PreProcess/IDFVersionUpdater/Transition-V23-1-0-to-V23-2-0"
+          "PostProcess/ReadVarsESO" "PostProcess/HVAC-Diagram"
+        )
+
+        TGZ_DIR=$(find _CPack_Packages/Darwin/TGZ -name "EnergyPlus*" -type d -maxdepth 1)
+        echo "TGZ_DIR=$TGZ_DIR" >> $GITHUB_ENV
+        echo "Checking TGZ dir at $TGZ_DIR"
+
+        for rel_exe in "${exes[@]}"; do
+          exe="$TGZ_DIR/$rel_exe"
+          begin_group "Checking $exe"
+          subheader "otool"
+          otool -L "${exe}" || true
+          subheader "codesign"
+          siginfo=$(codesign --display -vv "${exe}" 2>&1)
+          if [[ $siginfo == *"K7JYVQJL7R"* ]]; then
+            echo -e "\033[92mSIGNATURE OK\033[0m"
+            echo "$siginfo" | grep Authority
+          else
+            echo -e "\033[91mSignature not ok for ${exe}\033[0m"
+            echo "::error::title=Signature not ok for ${exe}::$siginfo"
+          fi
+          echo "::endgroup::"
+        done
+
+    - name: Full Test Package signing and otool for IFW and TGZ
+      working-directory: ./build
+      shell: bash
+      run: |
+        begin_group() { echo -e "::group::\033[93m$1\033[0m"; }
+
+        begin_group "Full Check signature of _CPack_Packages for both IFW and TGZ and resolve otool libraries"
+        python ../scripts/dev/verify_signature.py --verbose --otool --otool-out-file otool_infos_cpack.json .
+        echo "::endgroup::"
+
+        begin_group "Running a simulation with python"
+        ./$TGZ_DIR/energyplus --help
+        ./$TGZ_DIR/energyplus -w ./$TGZ_DIR/WeatherData/USA_IL_Chicago-OHare.Intl.AP.725300_TMY3.epw -d out ./$TGZ_DIR/ExampleFiles/PythonPluginCustomSchedule.idf
+        echo "::endgroup::"
+
+    - name: Upload otool info as artifact
+      uses: actions/upload-artifact@v7
+      with:
+        name: otool_infos_cpack_${{ matrix.os }}_${{ matrix.arch }}
+        path: build/otool*json
+        if-no-files-found: error
+
+    - name: Upload Tarball to release
+      uses: svenstaro/upload-release-action@v2
+      with:
+        repo_token: ${{ secrets.GITHUB_TOKEN }}
+        file: build/EnergyPlus-*-${{ matrix.arch }}.tar.gz
+        tag: ${{ github.ref }}
+        overwrite: true
+        file_glob: true
+
+    - name: Upload DMG to release
+      uses: svenstaro/upload-release-action@v2
+      with:
+        repo_token: ${{ secrets.GITHUB_TOKEN }}
+        file: build/EnergyPlus-*-${{ matrix.arch }}.dmg
+        tag: ${{ github.ref }}
+        overwrite: true
+        file_glob: true
+
+  test_package:
+    name: Test Built Package
+    needs: build_installer_artifact
+    runs-on: ${{ matrix.os }}
+    strategy:
+      # fail-fast: Default is true, switch to false to allow one platform to fail and still run others
+      fail-fast: false
+      matrix:
+        os: [macos-15-intel, macos-14]
+        include:
+          - os: macos-15-intel
+            macos_dev_target: 13.3
+            arch: x86_64
+            python-arch: x64
+            test_key: mac12
+          - os: macos-14
+            macos_dev_target: 14.0
+            arch: arm64
+            python-arch: arm64
+            test_key: mac14-arm64
+
+    steps:
+    - uses: actions/checkout@v6  # Still need E+ checked out to get testing scripts
+      with:
+        path: checkout
+
+    - name: Set up Python ${{ env.Python_REQUIRED_VERSION }}
+      uses: actions/setup-python@v6
+      id: setup-python
+      with:
+        python-version: ${{ env.Python_REQUIRED_VERSION }}
+        architecture: ${{ matrix.python-arch }}
+
+    - name: Gather Test Package from Artifacts
+      uses: actions/download-artifact@v8
+      with:
+        name: energyplus-${{ matrix.os }}.tar.gz
+        path: package
+
+    - name: Check Contents
+      shell: bash
+      run: ls
+
+    - name: Check Package contents
+      shell: bash
+      working-directory: package
+      run: ls
+
+    - name: Run Package Tests
+      run: python checkout/scripts/package_tests/runner.py --verbose ${{ matrix.test_key }} package/
+
+    - name: Gather Dmg Package from Artifacts
+      uses: actions/download-artifact@v8
+      with:
+        name: energyplus-${{ matrix.os }}.dmg
+        path: dmg
+
+    - name: Test Dmg Install and Package signing
+      working-directory: ./dmg
+      shell: bash
+      run: |
+        begin_group() { echo -e "::group::\033[93m$1\033[0m"; }
+
+        set -x
+
+        dmg=$(ls EnergyPlus-*.dmg)
+        begin_group "Checking Signature of .dmg"
+        spctl --assess --type open --context context:primary-signature -vvvv $dmg
+        echo "::endgroup::"
+
+        begin_group "Mounting Dmg, and checking signature of installer app"
+        mkdir temp_mount
+        hdiutil attach -mountpoint ./temp_mount/ $dmg
+        filename="${dmg%.*}"
+        spctl --assess --type open --context context:primary-signature -vvvv ./temp_mount/$filename.app
+        echo "::endgroup::"
+
+        begin_group "Installing"
+        sudo ./temp_mount/$filename.app/Contents/MacOS/$filename --accept-licenses --default-answer --confirm-command --root $(pwd)/test_install install
+        hdiutil detach ./temp_mount/
+        echo "::endgroup::"
+
+        begin_group "Quick Check signature of inner executables and binaries"
+        codesign -dvvv ./test_install/energyplus
+        codesign -dvvv ./test_install/libenergyplusapi.dylib
+        codesign -dvvv ./test_install/libpython*.dylib
+        codesign -dvvv ./test_install/ConvertInputFormat
+        codesign -dvvv ./test_install/PostProcess/ReadVarsESO
+        echo "::endgroup::"
+
+        begin_group "Full Check signature of installed DMG for all executables and resolve otool libraries"
+        python ../checkout/scripts/dev/verify_signature.py --otool --otool-out-file otool_info_dmg.json --verbose --install test_install
+        echo "::endgroup::"
+
+        begin_group "Running a simulation with python"
+        ./test_install/energyplus --help
+        ./test_install/energyplus -w ./test_install/WeatherData/USA_IL_Chicago-OHare.Intl.AP.725300_TMY3.epw -d out ./test_install/ExampleFiles/PythonPluginCustomSchedule.idf
+        echo "::endgroup::"
+
+    - name: Upload otool info as artifact
+      uses: actions/upload-artifact@v7
+      with:
+        name: otool_info_dmg_${{ matrix.os }}_${{ matrix.arch }}
+        path: dmg/otool*json
+        if-no-files-found: error

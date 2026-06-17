@@ -1,5 +1,0 @@
-\section{Using Well Water}\label{using-well-water}
-
-The water-to-water heat pumps have not been programmed to allow well water. However, cooling towers have (see 5ZoneWaterSystems.idf) and you should be able to connect the WSHP to a condenser loop with a cooling tower.
-
-Currently, there is no method to directly simulate well water as the condensing fluid for water source heat pumps. So to get as close as possible, program the cooling towers to allow well water via the water use object. If the cooling tower inlet node water temperature represents the well water temperature, and if you can set up the cooling tower to provide an outlet water temperature very close to the inlet water temperature, then this would be the same as connecting the well water directly to the WSHP. Minimize the cooling tower fan energy or disregard it completely when performing your simulation. Use report variables at the inlet/outlet node of the cooling tower to investigate how close you can get to your equipment configuration.

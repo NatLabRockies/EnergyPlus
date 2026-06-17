@@ -1,0 +1,170 @@
+name: Debug Testing
+
+on:
+  pull_request:
+    branches: [ develop ]  # run this on any PR pointing to develop
+  push:
+    branches: [ develop ]  # also run this on any commit to develop
+
+defaults:
+  run:
+    shell: bash
+
+env:
+  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  FC: gfortran-13
+  Python_REQUIRED_VERSION: 3.12.3  # 3.12.2 not available on Ubuntu 24 GHA
+
+jobs:
+  run_debug_integration:
+    name: Integration Testing
+    runs-on: ubuntu-24.04
+    permissions:
+      pull-requests: write
+    env:
+      CI_FORCE_TIME_STEP: 'Y'  # Force E+ to run integration tests at 30 minutes for CI time saving!
+
+    steps:
+
+    - name: Set up Python ${{ env.Python_REQUIRED_VERSION }}
+      id: setup-python
+      uses: actions/setup-python@v5
+      with:
+        python-version: ${{ env.Python_REQUIRED_VERSION }}
+
+    - name: Install Dependencies for Linux
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y libxkbcommon-x11-0 xorg-dev libgl1-mesa-dev lcov gcovr
+        # https://github.com/actions/runner-images/issues/10025
+        echo "FC=gfortran-13" >> $GITHUB_ENV
+
+    - uses: actions/checkout@v4
+
+    - name: Create Build Directory
+      run: cmake -E make_directory ./build/
+
+    - name: Configure CMake
+      working-directory: ./build
+      run: >
+        cmake
+        -G "Unix Makefiles"
+        -DCMAKE_BUILD_TYPE:STRING=RelWithDebInfo
+        -DFORCE_DEBUG_ARITHM_GCC_OR_CLANG:BOOL=ON
+        -DLINK_WITH_PYTHON:BOOL=ON
+        -DPython_REQUIRED_VERSION:STRING=${{ steps.setup-python.outputs.python-version }}
+        -DPython_ROOT_DIR:PATH=$RUNNER_TOOL_CACHE/Python/${{ steps.setup-python.outputs.python-version }}/x64/
+        -DBUILD_TESTING:BOOL=ON
+        -DBUILD_FORTRAN:BOOL=ON
+        -DBUILD_PACKAGE:BOOL=OFF
+        -DDOCUMENTATION_BUILD:STRING=DoNotBuild
+        -DENABLE_OPENMP:BOOL=OFF
+        ../
+
+    - name: Build
+      working-directory: ./build
+      run: cmake --build . -j 4 --target energyplus ExpandObjects ReadVarsESO Slab Basement AppGPostProcess ParametricPreprocessor
+
+    - name: Run Integration Tests
+      working-directory: ./build
+      # skipping several here because they take a hideously long time in debug builds, would love to clean them up:
+      #      integration.UnitaryHybridAC_DedicatedOutsideAir  # 952 seconds
+      #      integration.DirectIndirectEvapCoolersVSAS  # 847 seconds
+      #      integration.HospitalBaselineReheatReportEMS  # 705 seconds
+      #      integration.ASHRAE901_ApartmentHighRise_STD2019_Denver  # 614 seconds
+      #      integration.HospitalBaseline  # 610 seconds
+      #      integration.RefBldgOutPatientNew2004_Chicago  # 586 seconds
+      #      integration.UnitarySystem_MultiSpeedDX_EconoStaging  # 536 seconds
+      #      integration.RefrigeratedWarehouse  # 445 seconds
+      #      integration.RefBldgSecondarySchoolNew2004_Chicago  # 378 seconds
+      #      integration.ASHRAE901_OutPatientHealthCare_STD2019_Denver  # 373 seconds
+      # after this, there is a big drop and everything is less than 5 minutes.
+      # by skipping these 10 tests, we remove over 6000 test seconds, and on a 4 core machine, that's almost a half hour
+      # I'm also skipping the SolarShadingTest_ImportedShading file because we force CI to a 30 minute timestep, but this causes a mismatch on importing that solar data
+      # I'm also skipping ShopWithPVandLiIonBattery because now that we are checking for NaNs aggressively, this one is failing because of NaN calculations inside SSC
+      run: >
+        ctest
+        -R "integration.*"
+        -E "UnitaryHybridAC_DedicatedOutsideAir|DirectIndirectEvapCoolersVSAS|HospitalBaselineReheatReportEMS|ASHRAE901_ApartmentHighRise_STD2019_Denver|HospitalBaseline|RefBldgOutPatientNew2004_Chicago|UnitarySystem_MultiSpeedDX_EconoStaging|RefrigeratedWarehouse|RefBldgSecondarySchoolNew2004_Chicago|ASHRAE901_OutPatientHealthCare_STD2019_Denver|SolarShadingTest_ImportedShading|ShopWithPVandLiIonBattery"
+        -j 4
+
+  run_unit_test_debug_coverage:
+    name: Unit Test Coverage
+    runs-on: ubuntu-24.04
+    permissions:
+      pull-requests: write
+    steps:
+
+      - name: Set up Python ${{ env.Python_REQUIRED_VERSION }}
+        id: setup-python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.Python_REQUIRED_VERSION }}
+
+      - name: Install Dependencies for Linux
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libxkbcommon-x11-0 xorg-dev libgl1-mesa-dev lcov gcovr
+          # https://github.com/actions/runner-images/issues/10025
+          echo "FC=gfortran-13" >> $GITHUB_ENV
+
+      - uses: actions/checkout@v4
+
+      - name: Create Build Directory
+        run: cmake -E make_directory ./build/
+
+      - name: Configure CMake
+        working-directory: ./build
+        run: >
+          cmake
+          -G "Unix Makefiles"
+          -DCMAKE_BUILD_TYPE:STRING=RelWithDebInfo
+          -DFORCE_DEBUG_ARITHM_GCC_OR_CLANG:BOOL=ON
+          -DLINK_WITH_PYTHON:BOOL=ON
+          -DPython_REQUIRED_VERSION:STRING=${{ steps.setup-python.outputs.python-version }}
+          -DPython_ROOT_DIR:PATH=$RUNNER_TOOL_CACHE/Python/${{ steps.setup-python.outputs.python-version }}/x64/
+          -DBUILD_TESTING:BOOL=ON
+          -DBUILD_FORTRAN:BOOL=OFF
+          -DBUILD_PACKAGE:BOOL=OFF
+          -DDOCUMENTATION_BUILD:STRING=DoNotBuild
+          -DENABLE_OPENMP:BOOL=OFF
+          -DENABLE_COVERAGE:BOOL=ON
+          ../
+
+      - name: Build
+        working-directory: ./build
+        run: >
+          cmake
+          --build .
+          -j 4
+          --target
+          energyplus_tests energyplusapi energyplus parser ConvertInputFormat
+          TestAPI_DataTransfer_C TestAPI_Functional_C TestAPI_RuntimeDeleteState_C TestAPI_RuntimeResetState_C TestAPI_Runtime_C TestEnergyPlusCallbacks energyplusapi_tests
+
+      - name: Run Unit Tests
+        working-directory: ./build
+        run: ctest -E "integration.*" -j 4
+
+      - name: Generate Raw Unit Test Coverage Results
+        working-directory: ./build
+        run: lcov -c -d . -o ./lcov.output --no-external --base-directory ../src/EnergyPlus/
+
+      - name: Generate Filtered Unit Test Coverage Results
+        working-directory: ./build
+        run: lcov -r ./lcov.output "${{ github.workspace }}/build/*" -o lcov.output.filtered
+
+      - name: Generate HTML Unit Test Coverage Results
+        working-directory: ./build
+        run: genhtml ./lcov.output.filtered -o lcov-html --demangle-cpp --function-coverage | tee cover.txt
+
+      - name: Process Unit Test Coverage Summary
+        working-directory: ./build
+        run: python ${{ github.workspace }}/scripts/dev/gha_coverage_summary.py
+
+      - name: Generate Unit Test Artifact Summary
+        run: echo "$(cat ${{ github.workspace }}/build/cover.md)" >> $GITHUB_STEP_SUMMARY
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: "unit_test_coverage_results"
+          path: "${{ github.workspace }}/build/lcov-html"

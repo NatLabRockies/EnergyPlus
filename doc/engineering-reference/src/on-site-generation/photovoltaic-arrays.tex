@@ -2,7 +2,7 @@
 
 The Photovoltaics module includes three different models referred to as ``Simple'', ``Equivalent One-Diode'' and ``Sandia'' and the choice will determine the mathematical models (and input data) used to determine the energy produced by solar/electric conversion panels. There is also a PVWatts generator which abstracts away specifying PV modules and array properties for a simpler input structure. The EnergyPlus photovoltaic array models are called one at a time at the HVAC system timestep along with other electrical generation components such as gas turbines and diesel engines.
 
-All of the photovoltaic models with the exception of the PVWatts model share the same models for predicting incident solar radiation that are also used for the solar thermal calculations and are described in the section Climate, Sky and Solar/Shading Calculations. The PVWatts generator uses the same solar calculations as the SAM software or PVWatts web API. 
+All of the photovoltaic models with the exception of the PVWatts model share the same models for predicting incident solar radiation that are also used for the solar thermal calculations and are described in the section Climate, Sky and Solar/Shading Calculations. The PVWatts generator uses the same solar calculations as the SAM software or PVWatts web API.
 
 Note that some of the terminology used to discussed photovoltaics overlaps with terminology in software development and both may apply in these descriptions. The word \emph{module} may refer to a PV panel or to a C++ programming entity. \emph{Model} may refer to a manufacturers production model for a specific type of PV module or to a mathematical model used for engineering analysis. \emph{Array} may refer to a collection of PV modules wired together or to a mathematical variable with multiple elements.
 
@@ -19,13 +19,13 @@ The Generator:PV:Simple object describes about the simplest model for predicting
 % table 89
 \begin{longtable}[l]{p{1.2in}p{4.8in}}
 \caption{Nomenclature for Simple Photovoltaic model \label{table:nomenclature-for-simple-photovoltaic-model}} \tabularnewline
-\toprule 
+\toprule
 Mathematical Variable & Description \tabularnewline
 \midrule
 \endfirsthead
 
 \caption[]{Nomenclature for Simple Photovoltaic model} \tabularnewline
-\toprule 
+\toprule
 Mathematical Variable & Description \tabularnewline
 \midrule
 \endhead
@@ -62,13 +62,13 @@ The module determines PV current as a function of load voltage. Other OUTPUTS in
 % table 90
 \begin{longtable}[l]{p{1.2in}p{4.8in}}
 \caption{General Nomenclature for the PV model \label{table:general-nomenclature-for-the-pv-model}} \tabularnewline
-\toprule 
+\toprule
 Mathematical variable & Description \tabularnewline
 \midrule
 \endfirsthead
 
 \caption[]{General Nomenclature for the PV model} \tabularnewline
-\toprule 
+\toprule
 Mathematical variable & Description \tabularnewline
 \midrule
 \endhead
@@ -222,7 +222,7 @@ The ``TRNSYS PV model'' uses an iterative search routine in these four equations
 
 The PV model uses one of five methods for determining cell temperature data. The cell temperature of a PV module is important because the hotter the temperature of the panel, the lower its electrical output. The cell temperature calculation method is chosen by the user in the EnergyPlus IDF file through a parameter choice in the IDD entry called Integration and Cell Temperature Mode.
 
-If the value of this parameter is ``\textbf{Decoupled NOCT Conditions}'' then the cell temperature of the PV is modeled using the method from the Duffie and Beckman (1991) for estimating cell temperature. This is based upon the standard NOCT (Nominal Operating Cell Temperature) measurements to compute the module temperature \(T_c\) at each timestep. The NOCT temperature (\(T_c\),NOCT) is the operating temperature of the module with a wind speed of 1 m/s, no electrical load, and a certain specified insolation and ambient temperature {[}Beckman and Duffie, 1991{]}. The values for insolation GT,NOCT ~and ambient temperature \(T_{a,NOCT}\) are usually 800 W/m\(^{2}\) and 20\(^{\circ}\)C. \(\eta_{c}\) is the convesion efficiency of the module, which varies with ambient conditions. \({\tau \alpha}\) is a user-defined constant.
+If the value of this parameter is ``\textbf{Decoupled NOCT Conditions}'' then the cell temperature of the PV is modeled using the method from the Duffie and Beckman (1991) for estimating cell temperature. This is based upon the standard NOCT (Nominal Operating Cell Temperature) measurements to compute the module temperature \(T_c\) at each timestep. The NOCT temperature (\(T_c\),NOCT) is the operating temperature of the module with a wind speed of 1 m/s, no electrical load, and a certain specified insolation and ambient temperature {[}Beckman and Duffie, 1991{]}. The values for insolation GT,NOCT ~and ambient temperature \(T_{a,NOCT}\) are usually 800 W/m\(^{2}\) and 20\(^{\circ}\)C. \(\eta_{c}\) is the conversion efficiency of the module, which varies with ambient conditions. \({\tau \alpha}\) is a user-defined constant.
 
 The equation is:
 
@@ -236,7 +236,7 @@ If the user specifies the ``\textbf{Decoupled Ulleberg Dynamic''} mode for calcu
 {\left. {{T_{cell}}} \right|_t} = {T_{ambient}} + \left( {{{\left. {{T_{cell}}} \right|}_{t - 1}} - {T_{ambient}}} \right)*{e^{\frac{{ - UL}}{{Cap}}\Delta t}}
 \end{equation}
 
-In other words, the cell temperature is a function of the privious cell temperature and the thermal capacity of the PV module material.
+In other words, the cell temperature is a function of the previous cell temperature and the thermal capacity of the PV module material.
 
 If the user specifies ``\textbf{Integrated Surface Outside Face''} for this parameter, then the temperature result from EnergyPlus's modeling of surfaces is used for the cell temperature. Also the energy exported from the surface as electricity becomes a sink in the internal source modeling for the heat transfer surface.
 
@@ -273,13 +273,13 @@ This section presents the mathematical description of the Sandia model from a dr
 % table 91
 \begin{longtable}[c]{p{1.2in}p{4.8in}}
 \caption{Nomenclature for Sandia PV model \label{table:nomenclature-for-sandia-pv-model}} \tabularnewline
-\toprule 
+\toprule
 Mathematical variable & Description \tabularnewline
 \midrule
 \endfirsthead
 
 \caption[]{Nomenclature for Sandia PV model} \tabularnewline
-\toprule 
+\toprule
 Mathematical variable & Description \tabularnewline
 \midrule
 \endhead
@@ -326,8 +326,8 @@ $\beta$\(_{Voco}\) & Temperature coefficient for module open-circuit-voltage at 
 m\(_{\beta}\)\(_{Voco}\) & Coefficient for irradiance dependence of open-circuit-voltage-temperature coefficient, often zero (V/\(^{\circ}\)C) \tabularnewline
 $\beta$\(_{Vmp}\)(E\(_{e}\)) & Temperature coefficient for module maximum-power-voltage as a function of E \tabularnewline
 $\beta$\(_{Vmpo}\) & Temperature coefficient for module maximum-power-voltage at reference conditions \tabularnewline
-m\(_{\beta}\)\(_{Voco}\) & Cofficient for irradiance dependence of maximum-power-voltage-temperature coefficient, often zero (V/\(^{\circ}\)C) \tabularnewline
-T\(_{m}\) & PV module temperature at back suface (\(^{\circ}\)C) \tabularnewline
+m\(_{\beta}\)\(_{Voco}\) & Coefficient for irradiance dependence of maximum-power-voltage-temperature coefficient, often zero (V/\(^{\circ}\)C) \tabularnewline
+T\(_{m}\) & PV module temperature at back surface (\(^{\circ}\)C) \tabularnewline
 T\(_{a}\) & Ambient outdoor drybulb temperature (\(^{\circ}\)C) \tabularnewline
 E & Solar irradiance incident on module surface (W/m\(^{2}\)) \tabularnewline
 WS & Wind speed at standard 10-m height (m/s) \tabularnewline
@@ -419,8 +419,8 @@ King, D.L. 1996. Photovoltaic Module and Array Performance Characterization Meth
 
 \subsection{PVWatts}\label{pvwattsgenerator}
 
-The PVWatts model was developed by NREL to calculate the energy production of a grid-connected PV system based on a few simple inputs. It was originally developed and maintained for the System Advisor Model software and is also available as a stand-alone web API. It is implemented as Generator and Inverter objects in EnergyPlus rather than as a photovoltaic performance object because the inputs are more high-level than Generator:Photovoltaic. Full details of the PVWatts model are explained in \href{https://www.nrel.gov/docs/fy14osti/62641.pdf}{PVWatts Version 5 Manual}.
+The PVWatts model was developed by NREL to calculate the energy production of a grid-connected PV system based on a few simple inputs. It was originally developed and maintained for the System Advisor Model software and is also available as a stand-alone web API. It is implemented as Generator and Inverter objects in EnergyPlus rather than as a photovoltaic performance object because the inputs are more high-level than Generator:Photovoltaic. Full details of the PVWatts model are explained in \href{https://www.nlr.gov/docs/fy14osti/62641.pdf}{PVWatts Version 5 Manual}.
 
 \subsubsection{References}\label{references-pvwatts}
 
-Dobos, Aron P. \textit{PVWatts Version 5 Manual}. National Renewable Energy Laboratory, Golden, CO 80401, September 2014. \url{https://www.nrel.gov/docs/fy14osti/62641.pdf}
+Dobos, Aron P. \textit{PVWatts Version 5 Manual}. National Renewable Energy Laboratory, Golden, CO 80401, September 2014. \url{https://www.nlr.gov/docs/fy14osti/62641.pdf}

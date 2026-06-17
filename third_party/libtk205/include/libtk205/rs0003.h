@@ -7,6 +7,7 @@
 #include <vector>
 #include <nlohmann/json.hpp>
 #include <typeinfo_205.h>
+#include <courierr/courierr.h>
 #include <rs_instance_base.h>
 #include <performance_map_base.h>
 #include <grid_variables_base.h>
@@ -18,16 +19,6 @@ namespace tk205  {
 
 	namespace rs0003_ns  {
 	
-		enum class OperationSpeedControlType {
-			DISCRETE,
-			CONTINUOUS,
-			UNKNOWN
-		};
-		const static std::unordered_map<OperationSpeedControlType, enum_info> OperationSpeedControlType_info {
-			{OperationSpeedControlType::DISCRETE, {"DISCRETE", "Discrete", "Fan assemblies that operate at one or more defined speeds dictated by a tap or dip switch"}},
-			{OperationSpeedControlType::CONTINUOUS, {"CONTINUOUS", "Continuous", "Fan assemblies that operate within a continuous range of speeds"}},
-			{OperationSpeedControlType::UNKNOWN, {"UNKNOWN", "None","None"}}
-		};
 		enum class InstallationSpeedControlType {
 			FIXED,
 			VARIABLE,
@@ -73,6 +64,12 @@ namespace tk205  {
 			{ComponentType::DIRECT_EVAPORATIVE, {"DIRECT_EVAPORATIVE", "Direct Evaporative", "Wetted evaporative cooling media"}},
 			{ComponentType::OTHER, {"OTHER", "Other", "Additional components in air stream"}},
 			{ComponentType::UNKNOWN, {"UNKNOWN", "None","None"}}
+		};
+		class Schema  {
+		public:
+			const static std::string_view schema_title;
+			const static std::string_view schema_version;
+			const static std::string_view schema_description;
 		};
 		class ProductInformation  {
 		public:
@@ -150,7 +147,7 @@ namespace tk205  {
 			double maximum_impeller_rotational_speed;
 			double minimum_impeller_rotational_speed;
 			rs0003_ns::SystemCurve stability_curve;
-			rs0003_ns::OperationSpeedControlType operation_speed_control_type;
+			ashrae205_ns::SpeedControlType operation_speed_control_type;
 			rs0003_ns::InstallationSpeedControlType installation_speed_control_type;
 			rs0005_ns::RS0005 motor_representation;
 			rs0007_ns::RS0007 mechanical_drive_representation;
@@ -207,6 +204,7 @@ namespace tk205  {
 		class RS0003  : public RSInstanceBase {
 		public:
 			void initialize (const nlohmann::json& j) override;
+			static std::shared_ptr<Courierr::Courierr> logger;
 			ashrae205_ns::Metadata metadata;
 			rs0003_ns::Description description;
 			rs0003_ns::Performance performance;
@@ -279,7 +277,7 @@ namespace tk205  {
 			const static std::string_view grid_variables_name;
 			const static std::string_view lookup_variables_name;
 			using PerformanceMapBase::calculate_performance;
-			LookupVariablesContinuousStruct calculate_performance (double standard_air_volumetric_flow_rate, double static_pressure_difference, Btwxt::Method performance_interpolation_method = Btwxt::Method::LINEAR);
+			LookupVariablesContinuousStruct calculate_performance (double standard_air_volumetric_flow_rate, double static_pressure_difference, Btwxt::InterpolationMethod performance_interpolation_method = Btwxt::InterpolationMethod::linear);
 		};
 		class GridVariablesDiscrete  : public GridVariablesBase {
 		public:
@@ -344,13 +342,8 @@ namespace tk205  {
 			const static std::string_view grid_variables_name;
 			const static std::string_view lookup_variables_name;
 			using PerformanceMapBase::calculate_performance;
-			LookupVariablesDiscreteStruct calculate_performance (double speed_number, double static_pressure_difference, Btwxt::Method performance_interpolation_method = Btwxt::Method::LINEAR);
+			LookupVariablesDiscreteStruct calculate_performance (double speed_number, double static_pressure_difference, Btwxt::InterpolationMethod performance_interpolation_method = Btwxt::InterpolationMethod::linear);
 		};
-		NLOHMANN_JSON_SERIALIZE_ENUM (OperationSpeedControlType, {
-			{OperationSpeedControlType::UNKNOWN, "UNKNOWN"},
-			{OperationSpeedControlType::DISCRETE, "DISCRETE"},
-			{OperationSpeedControlType::CONTINUOUS, "CONTINUOUS"},
-		})
 		NLOHMANN_JSON_SERIALIZE_ENUM (InstallationSpeedControlType, {
 			{InstallationSpeedControlType::UNKNOWN, "UNKNOWN"},
 			{InstallationSpeedControlType::FIXED, "FIXED"},

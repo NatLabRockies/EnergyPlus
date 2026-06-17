@@ -151,9 +151,9 @@
 			</g>
 		</g>
 	</g>
-	<polygon fill-rule="evenodd" clip-rule="evenodd" fill="#FFFF00" points="6.894,20.681 6.894,129.447 219.83,129.447 
+	<polygon fill-rule="evenodd" clip-rule="evenodd" fill="#FFFF00" points="6.894,20.681 6.894,129.447 219.83,129.447
 		219.83,20.681 6.894,20.681 	"/>
-	
+
 		<rect x="6.894" y="20.681" fill="none" stroke="#000000" stroke-width="0" stroke-linecap="square" stroke-miterlimit="10" width="212.936" height="108.766"/>
 	<g>
 		<defs>
@@ -597,9 +597,9 @@
 	<polygon fill-rule="evenodd" clip-rule="evenodd" points="336.256,62.809 340.086,73.532 343.915,62.809 336.256,62.809 	"/>
 	<polygon fill="none" stroke="#000000" stroke-width="1.5319" stroke-linecap="square" stroke-miterlimit="10" points="
 		336.256,62.809 340.086,73.532 343.915,62.809 336.256,62.809 	"/>
-	<polygon fill-rule="evenodd" clip-rule="evenodd" fill="#00FFFF" points="322.469,73.532 322.469,135.574 507.065,135.574 
+	<polygon fill-rule="evenodd" clip-rule="evenodd" fill="#00FFFF" points="322.469,73.532 322.469,135.574 507.065,135.574
 		507.065,73.532 322.469,73.532 	"/>
-	
+
 		<rect x="322.469" y="73.532" fill="none" stroke="#000000" stroke-width="0" stroke-linecap="square" stroke-miterlimit="10" width="184.596" height="62.042"/>
 	<g>
 		<defs>
@@ -1163,9 +1163,9 @@
 	<polygon fill-rule="evenodd" clip-rule="evenodd" points="301.022,133.276 304.852,144.766 308.682,133.276 301.022,133.276 	"/>
 	<polygon fill="none" stroke="#000000" stroke-width="1.5319" stroke-linecap="square" stroke-miterlimit="10" points="
 		301.022,133.276 304.852,144.766 308.682,133.276 301.022,133.276 	"/>
-	<polygon fill-rule="evenodd" clip-rule="evenodd" fill="#00FFFF" points="274.979,142.468 274.979,216 462.639,216 
+	<polygon fill-rule="evenodd" clip-rule="evenodd" fill="#00FFFF" points="274.979,142.468 274.979,216 462.639,216
 		462.639,142.468 274.979,142.468 	"/>
-	
+
 		<rect x="274.979" y="142.468" fill="none" stroke="#000000" stroke-width="0" stroke-linecap="square" stroke-miterlimit="10" width="187.66" height="73.532"/>
 	<g>
 		<defs>
@@ -1692,9 +1692,9 @@
 			</g>
 		</g>
 	</g>
-	<polygon fill-rule="evenodd" clip-rule="evenodd" fill="#00FFFF" points="231.319,225.191 231.319,287.234 444.256,287.234 
+	<polygon fill-rule="evenodd" clip-rule="evenodd" fill="#00FFFF" points="231.319,225.191 231.319,287.234 444.256,287.234
 		444.256,225.191 231.319,225.191 	"/>
-	
+
 		<rect x="231.319" y="225.191" fill="none" stroke="#000000" stroke-width="0" stroke-linecap="square" stroke-miterlimit="10" width="212.937" height="62.043"/>
 	<g>
 		<defs>
@@ -1972,7 +1972,7 @@
 			</g>
 		</g>
 	</g>
-	<polyline opacity="0.5" fill-rule="evenodd" clip-rule="evenodd" fill="#FFFF00" points="16.085,94.213 16.085,115.66 
+	<polyline opacity="0.5" fill-rule="evenodd" clip-rule="evenodd" fill="#FFFF00" points="16.085,94.213 16.085,115.66
 		110.298,115.66 110.298,94.213 16.085,94.213 	"/>
 	<g>
 		<defs>
@@ -1981,7 +1981,7 @@
 		<clipPath id="SVGID_114_">
 			<use xlink:href="#SVGID_113_"  overflow="visible"/>
 		</clipPath>
-		<polyline clip-path="url(#SVGID_114_)" fill-rule="evenodd" clip-rule="evenodd" fill="#FFFF00" points="23.745,98.042 
+		<polyline clip-path="url(#SVGID_114_)" fill-rule="evenodd" clip-rule="evenodd" fill="#FFFF00" points="23.745,98.042
 			23.745,111.83 100.341,111.83 100.341,98.042 23.745,98.042 		"/>
 		<g clip-path="url(#SVGID_114_)">
 			<defs>
@@ -2069,15 +2069,15 @@
 			</g>
 		</g>
 	</g>
-	
+
 		<line fill="none" stroke="#000000" stroke-width="1.5319" stroke-linecap="square" stroke-miterlimit="10" x1="110.298" y1="103.404" x2="188.426" y2="103.404"/>
 	<path stroke="#000000" stroke-width="0" stroke-linecap="square" stroke-miterlimit="10" d="M189.192,103.404v186.894h-1.532
 		V103.404H189.192L189.192,103.404z M191.49,289.532l-3.064,6.127l-3.064-6.127H191.49L191.49,289.532z"/>
-	<polygon fill-rule="evenodd" clip-rule="evenodd" fill="#00FFFF" points="160.085,295.659 160.085,345.446 404.426,345.446 
+	<polygon fill-rule="evenodd" clip-rule="evenodd" fill="#00FFFF" points="160.085,295.659 160.085,345.446 404.426,345.446
 		404.426,295.659 160.085,295.659 	"/>
-	
+
 		<rect x="160.085" y="295.659" fill="none" stroke="#000000" stroke-width="0.766" stroke-linecap="square" stroke-miterlimit="10" width="244.341" height="49.787"/>
-	<polygon fill-rule="evenodd" clip-rule="evenodd" fill="#00FFFF" points="166.213,298.724 166.213,317.872 301.022,317.872 
+	<polygon fill-rule="evenodd" clip-rule="evenodd" fill="#00FFFF" points="166.213,298.724 166.213,317.872 301.022,317.872
 		301.022,298.724 166.213,298.724 	"/>
 	<g>
 		<defs>
@@ -2172,7 +2172,7 @@
 			</g>
 		</g>
 	</g>
-	<polygon fill-rule="evenodd" clip-rule="evenodd" fill="#00FFFF" points="200.681,321.702 200.681,335.489 396,335.489 
+	<polygon fill-rule="evenodd" clip-rule="evenodd" fill="#00FFFF" points="200.681,321.702 200.681,335.489 396,335.489
 		396,321.702 200.681,321.702 	"/>
 	<g>
 		<defs>
@@ -2371,7 +2371,7 @@
 			</g>
 		</g>
 	</g>
-	
+
 		<line fill="none" stroke="#000000" stroke-width="1.5319" stroke-linecap="square" stroke-miterlimit="10" x1="88.085" y1="86.553" x2="260.426" y2="86.553"/>
 	<path stroke="#000000" stroke-width="0" stroke-linecap="square" stroke-miterlimit="10" d="M261.192,86.553V219.83h-1.531V86.553
 		H261.192L261.192,86.553z M263.489,219.063l-3.063,6.128l-3.064-6.128H263.489L263.489,219.063z"/>

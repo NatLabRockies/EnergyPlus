@@ -223,6 +223,33 @@ Wray, C.P. and N.E. Matson. 2003. ``Duct Leakage Impacts on VAV System Performan
 
 Wray, C.P., R.C. Diamond, and M.H. Sherman. 2005. ``Rationale for Measuring Duct Leakage Flows in Large Commercial Buildings''. Proceedings -- 26th AIVC Conference, Brussels, Belgium, September. LBNL-58252.
 
+\subsection{Air Leakage in Parallel Fan-Powered Terminal Units}\label{parallel_piu_leakage}
+As described in (O'Neal et al., 2016) and (Sardoueinasab et al., 2018), backdraft damper leakage in parallel fan-powered terminal units can be characterized using a leakage fraction at a constant static pressure setpoint:
+
+\begin{equation}
+{f_{leakage}} = \frac{\dot m_{leakage}}{\dot m_{primary}}
+\end{equation}
+
+Leakage is only simulated when the terminal fan is off. The impact of the simulated leakage is twofold:
+\begin{enumerate}
+    \item To make up for the leaked air, the primary air flow rate should be increased to meet the zone load
+    \item The air escaping from the terminal impacts the heat balance of the thermal zone designated as the destination for the leaks
+\end{enumerate}
+
+The new primary flow rate is adjusted as follows:
+\begin{equation}
+{\dot m_{primary, adj}} = {\dot m_{primary}} \times \frac{1}{1 - {f_{leakage}}}
+\end{equation}
+
+The new primary flow rate won't exceed the maximum primary flow rate of the terminal.
+
+Since leakage only occurs during dead-band and cooling operation (i.e., not during heating operation), the new primary air flow rate doesn't have an impact on the terminal mixer and heater. Leaks are accounted for after the terminal has been simulated, outlet nodes are updated then. The last step is to account for the thermal impact of the leakage on the thermal zone designated as the destination for the leaks. When an `AirLoopHVAC:ReturnPlenum`, this is handled in a similar fashion as leakage simulation using the Simplified Duct Leakage Model, see \ref{implementation-000}. Since users can select the thermal zone designated as the destination for the leaks, this feature also supports models that use an AirLoopHVAC:ZoneMixer as the return path. The leakage flow rate (at the conditions of each destination zone) is added to the mixer to calculate the new mixed air conditions.
+
+\subsubsection{References}\label{references_parallel_piu_leakage}
+D.L. O'Neal, J.L. Edmondson, Characterizing air leakage in parallel fan-powered terminal units, ASHRAE Trans., 122 (1) (2016), pp. 343-353
+
+Zahra Sardoueinasab, Peng Yin, Dennis O'Neal, Energy modeling and analysis of inherent air leakage from parallel fan-powered terminal units using EMS in EnergyPlus, (2018), Energy and Buildings, https://doi.org/10.1016/j.enbuild.2018.07.019
+
 \subsection{Fan Coil Unit}\label{fan-coil-unit}
 
 \subsubsection{Overview}\label{overview-4-003}
@@ -412,7 +439,7 @@ The input object ZoneHVAC:WindowAirConditioner provides a model for a window air
 
 \subsubsection{Model}\label{model-4}
 
-The window air conditioner is modeled as a compound component consisting of 3 sub-components: an outdoor air mixer, a fan, and a DX coil. In terms of EnergyPlus objects these are OutdoorAir:Mixer, Fan:ConstantVolume or Fan:OnOff, and Coil:Coolilng:DX:SingleSpeed or CoilSystem:Cooling:DX:HeatExchangerAssisted. The unit is a forward model: its inputs are defined by the state of its inlets: namely its 2 air streams -- recirculated and outdoor air. The outputs of the model are the conditions of the outlet air stream: flow rate, temperature and humidity ratio. The model is also an averaged model: the performance of the unit is averaged over the time step. That is, the unit is assumed to cycle on/off during the time step and this on/off cycling is averaged over the simulation time step. The unit data and simulation are encapsulated in the module WindowAC.
+The window air conditioner is modeled as a compound component consisting of 3 sub-components: an outdoor air mixer, a fan, and a DX coil. In terms of EnergyPlus objects these are OutdoorAir:Mixer, Fan:ConstantVolume or Fan:OnOff, and Coil:Cooling:DX:SingleSpeed or CoilSystem:Cooling:DX:HeatExchangerAssisted. The unit is a forward model: its inputs are defined by the state of its inlets: namely its 2 air streams -- recirculated and outdoor air. The outputs of the model are the conditions of the outlet air stream: flow rate, temperature and humidity ratio. The model is also an averaged model: the performance of the unit is averaged over the time step. That is, the unit is assumed to cycle on/off during the time step and this on/off cycling is averaged over the simulation time step. The unit data and simulation are encapsulated in the module WindowAC.
 
 \subsubsection{Inputs and Data}\label{inputs-and-data-5}
 
@@ -1432,7 +1459,7 @@ The input object ZoneHVAC:EvaporativeCoolerUnit provides a zone equipment model 
 
 There are three choices for control methods.
 
-\textbf{ZoneTemperatureDeadbandOnOffCycling}. This control method operates the cooler unit in a manner similar to how a normal, real-world themostat operates.~ The control uses input for throttling temperature range, \(\Delta {T_{throttle}}\), the most recent result for zone air node temperature, \({T_{zone}}\), and the current cooling setpoint temperature, \({T_{set}}\).~ The controller also stores the history of whether or not the unit was operating during the previous timestep to model hysteresis control where the unit retains its mode when it passes through the throttling range (to avoid short cycling).
+\textbf{ZoneTemperatureDeadbandOnOffCycling}. This control method operates the cooler unit in a manner similar to how a normal, real-world thermostat operates.~ The control uses input for throttling temperature range, \(\Delta {T_{throttle}}\), the most recent result for zone air node temperature, \({T_{zone}}\), and the current cooling setpoint temperature, \({T_{set}}\).~ The controller also stores the history of whether or not the unit was operating during the previous timestep to model hysteresis control where the unit retains its mode when it passes through the throttling range (to avoid short cycling).
 
 The following algorithm is used to determine if the unit will operate.
 
@@ -1470,7 +1497,7 @@ ZoneHVAC:HybridUnitaryHVAC is a black-box model designed to allow empirical repr
 \subsubsection{Model}
 ZoneHVAC:HybridUnitaryHVAC will operate to provide cooling, heating, ventilation, humidification, or dehumidification for a zone. A ZoneHVAC:HybridUnitaryHVAC object is assigned to a zone using ZoneHVAC:EquipmentList and ZoneHVAC:EquipmentConnections. The object must be assigned a supply air node (which must be a zone inlet node), a return air node (which must be a zone outlet node), and an outdoor air node. In the case when the hybrid system modeled does not utilize either return air or outdoor air, a return air node and an outdoor air node must still be assigned. The resulting mass flow rate on those nodes will be zero.
 
-The zone sensible cooling or heating load is determined in each time step according to temperature set points specified in a ZoneControl:Thermostat object. The zone humidification or dehumidifaction load is determined in each time step according to relative humidity set points specified in a ZoneControl:Humidistat object (Ref: Zone Controls). The intended zone ventilation rate is specified in a DesignSpecification:OutdoorAir object (Ref: Design Outdoor Air Calculation).
+The zone sensible cooling or heating load is determined in each time step according to temperature set points specified in a ZoneControl:Thermostat object. The zone humidification or dehumidification load is determined in each time step according to relative humidity set points specified in a ZoneControl:Humidistat object (Ref: Zone Controls). The intended zone ventilation rate is specified in a DesignSpecification:OutdoorAir object (Ref: Design Outdoor Air Calculation).
 
 The performance of a hybrid system is not directly given as a result of the loads and the environmental conditions. A hybrid system may have numerous discrete operating modes, within which other variables may be adjusted in fine intervals. There may be many settings in which a hybrid system could feasibly operate at a given time. Therefore, ZoneHVAC:HybridUnitaryHVAC is structured as a constrained optimization problem that is solved in each time step. The feasible settings are the unique combinations of operating mode, outdoor air fraction, and supply air mass flow rate that satisfy constraints. In each time step the hybrid model will choose to operate at one or more settings so as to best satisfy the sensible load, latent load, and scheduled ventilation rate while minimizing resource consumption.
 
@@ -2003,18 +2030,19 @@ Assuming that the water temperature equals to outdoor wet bulb temperature, the 
 
 \subsection{Earthtube}\label{earthtube}
 
-The earth tube model (input object ZoneEarthtube) provides a simple earth tube model that uses a complex ground heat transfer model to establish the temperature of the soil at the depth of the earth tube.~ The following information defines the basis for the model including the assumptions and mathematical equations.~ It supplements the information for the ZoneEarthtube input object given in the Input/Output Reference for EnergyPlus.
+The earth tube model (input object ZoneEarthtube) provides the choice of either a simple earth tube model (Basic model) that uses a complex ground heat transfer model to establish the temperature of the soil at the depth of the earth tube and an enhanced model which applies a finite difference scheme to simulate vertical temperature variations (Vertical model). The following information defines the basis for the model including the assumptions and mathematical equations. It supplements the information for the ZoneEarthtube input object given in the Input/Output Reference for EnergyPlus.
 
 \emph{\textbf{Input Requirements}}
 
 \begin{itemize}
 \tightlist
-\item Pipe : Pipe radius(m), Pipe thickness(m), Pipe length(m)
+\item Pipe : Pipe radius (m), Pipe thickness (m), Pipe length (m)
 \item Distance between the pipe outer surface and undisturbed soil (m),
 \item Pipe thermal conductivity (W/m-\(^{\circ}\)C),
 \item Air velocity inside pipe(m/s), Depth of the radial center of pipe below ground (m)
-\item Soil : Soil density(kg/m\(^{3}\)), Soil specific heat(J/kg-\(^{\circ}\)C),
-\item Soil thermal Conductivity(W/m-\(^{\circ}\)C), Absorption coefficient, Fraction of evaporation rate
+\item Soil : Soil density (kg/m\(^{3}\)), Soil specific heat (J/kg-\(^{\circ}\)C),
+\item Soil thermal Conductivity (W/m-\(^{\circ}\)C), Absorption coefficient, Fraction of evaporation rate
+\item Width of soil domain in the horizontal direction (m), only applies to the Vertical model
 \end{itemize}
 
 \emph{\textbf{Assumption(s)}}
@@ -2023,14 +2051,16 @@ The earth tube model (input object ZoneEarthtube) provides a simple earth tube m
 \item
   Convection flow inside the pipe is hydrodynamically and thermally developed.
 \item
-  Soil temperature in the pipe vicinity is uniform after the particular distance from the center of the pipe(thickness of the annulus), so that pipe surface temperature is uniform after the distance `r' from the center of the pipe, where `r'is the pipe radius.
+  For the Basic model, the soil temperature in the pipe vicinity is uniform after the particular distance from the center of the pipe(thickness of the annulus), so that pipe surface temperature is uniform after the distance `r' from the center of the pipe, where `r'is the pipe radius.  In addition, the temperature profile in the pipe vicinity is not affected by the presence of the pipe, so that pipe surface temperature is uniform at axial direction.
 \item
-  The temperature profile in the pipe vicinity is not affected by the presence of the pipe, so that pipe surface temperature is uniform at axial direction.
+  For the Vertical model, the soil temperature varies in the vertical direction only (not horizontally or axially). The solution domain is bounded at the top and bottom by temperature boundary conditions for soil at those depths for undisturbed conditions. A finite difference modeling technique is used to track horizontal temperature variation as a result of both the boundary conditions at the top and bottom of the solution space as well as the impact of air flowing through the earth tube at the depth of the earth tube.  No heat transfer is modeled either horizontally or axially (adiabatic in those directions).  More information about the Vertical model is provided below.
 \item
   The soil surrounding the pipe has homogeneous thermal conductivity.
 \item
-  Pipe has uniform cross section area at axial direction.
+  Pipe has a uniform cross section area in the axial direction.
 \end{itemize}
+
+\emph{\textbf{Ground Temperature Modeling and Generation of EnergyPlus Ground Inputs}}
 
 Wind velocity (m/s), u, is the annual average value. This is calculated from EnergyPlus weather data by averaging individual wind velocity values of the whole year. The convective heat transfer coefficient at the soil surface (W/m\(^{2}\)-\(^{\circ}\)C), \(h_{s}\), is function of wind speed u. According to McAdams(1954), \(h_{s}\) can be approximated by the following correlation (Krarti, 1995):
 
@@ -2160,6 +2190,8 @@ The symbols \textbar{}\textbar{}~ \textbar{}\textbar{} and Arg denote the modulu
   \end{array}
 \end{equation}
 
+\emph{\textbf{Basic Model--Direct Use of Undisturbed Ground Temperature}}
+
 Assuming a homogeneous soil of constant thermal diffusivity, the temperature at any depth z and time t can be estimated by the following expression:
 
 \begin{equation}
@@ -2168,24 +2200,9 @@ Assuming a homogeneous soil of constant thermal diffusivity, the temperature at 
 
 In this expression, the unit of time, \emph{t}, and phase constant of the soil surface, \(t_{0}\), should be converted into days. Similarly, the unit of soil thermal diffusivity, \({\alpha_{s}}\), should also be converted into m\(^{2}\)/days.
 
-By integrating the expression with respect to depth, the average temperature of a vertical soil profile ranging between depth \(z_{1}\) and \(z_{2}\) (\(^{\circ}\)C) can be determined as follows:
+In the Basic model for earth tubes, the above equation is used to calculate the temperature of the ground at the depth of the earth tube and this value is used to evaluate the heat transfer between the soil around the earth tube and the air passing through the earth tube.  This heat exchange involves determining convective heat transfer coefficient between the air passing through the earth tube and the surface of the tube itself, converting this to a thermal resistance value, and then adding on the thermal resistance for the earth tube pipe itself and the surrounding soil to the user defined distance to the "undisturbed" region.  The equations used to model the thermal resistances are shown in the following paragraphes.
 
-{\scriptsize
-\begin{equation}
-{T_{{z_1},{z_2},t}} = {T_m} + \frac{{{A_s}}}{{\left( {{z_2} - {z_1}} \right)\gamma \sqrt 2 }}\left\{ {{e^{ - \gamma {z_1}}}\cos \left[ {\frac{{2\pi }}{{{\rm{365}}}}\left( {t - {t_0} - {z_1}L - 45.6} \right)} \right] - {e^{ - \gamma {z_2}}}\cos \left[ {\frac{{2\pi }}{{{\rm{365}}}}\left( {t - {t_0} - {z_2}L - 45.6} \right)} \right]} \right\}
-\end{equation}}
-
-where:
-
-\begin{equation}
-\gamma  = {\left( {\pi /{\rm{365}}{\alpha_s}} \right)^{1/2}}
-\end{equation}
-
-\begin{equation}
-L = \frac{1}{2}{\left( {{\rm{365}}/\pi {\alpha_s}} \right)^{1/2}}
-\end{equation}
-
-As the final step with regard to the heat transfer between soil and earth tube system, thermal conductivity of air (W/m-\(^{\circ}\)C), \(k_{air}\), and kinetic viscosity of air (m\(^{2}\)/s), \({\upsilon}\), should calculated first:
+With regard to the heat transfer between soil and earth tube system, thermal conductivity of air (W/m-\(^{\circ}\)C), \(k_{air}\), and kinetic viscosity of air (m\(^{2}\)/s), \({\upsilon}\), should calculated first:
 
 \begin{equation}
 {k_{air}} = 0.02442 + ({10^{ - 4}}(0.6992{T_a}))
@@ -2255,6 +2272,256 @@ where \(U_{t}\) is overall heat transfer coefficient of the whole earth tube sys
 
 Initial condition of inlet air temperature is equal to the ambient air temperature. Outlet air temperature is finally evaluated by solving the heat transfer equation above.
 
+\emph{\textbf{Vertical Model--1-D Solution of Temperature Variation in the Vertical Direction}}
+In EnergyPlus, the Basic model simply calculates the ground temperature at the depth of the earth tube and assumes that the impact of the earth tube is minimal. The Vertical model acknowledges that the soil temperature will be impacted by the presence of the heat transfer associated with the earth tube and looks to evaluate the impact that the earth tube air flow has on soil temperature in the vertical direction.  While there is also an impact on the soil temperatures horizontally and axially along the earth tube, the vertical model focuses on the potential temperature variation in the vertical direction as a result of heat exchange between the ground around the earth tube and the air passing through it.
+
+The mathematical approach used to model vertical temperature variation due to the presence and heat transfer impact of the earth tube is a finite difference scheme.  This finite difference modeling technique looks at various nodes in the vertical direction and uses the following assumptions:
+
+\begin{itemize}
+\item
+The finite difference grid of nodes contains a single row of nodes in the vertical direction only.
+\item
+The finite difference grid is bound at the top and the bottom with a temperature boundary condition.  The temperature at the top and the bottom is variable and based on the undisturbed ground temperature equation used in the Basic model for the depth at the top and bottom of the domain.
+\item
+There is no heat transfer horizontally or axially for the nodes (adiabatic in all directions except vertically).
+\item
+Heat transfer via conduction is modeled between adjacent nodes in the vertical direction.
+\item
+The impact of the air passing through the earth tube is felt at a single node, the earth tube node.
+\item
+The width of the solution horizontally is set by user input.
+\item
+The number of nodes above and below the earth tube node as well as how tall the solution space is above and below the earth tube is controlled by user input.  These parameters will set the thickness of nodes above and below the earth tube node.  The total height of the earth tube node will be set to twice the diameter of the earth tube itself.
+\item
+An implicit finite difference solution scheme is used to promote solution stability.  Nodal equations are based on this implicit scheme.
+\item
+The nodal equations will be arranged as a matrix-based system of equations that will be solved using the description given below.
+\end{itemize}
+
+The solution of the finite difference scheme used for the Vertical model starts with the development of nodal equations throughout the solution space.  The figure below shows a representative nodal diagram for the Vertical earth tube model.  Note that the number of nodes above and below the earth tube are determined by the user and set in the input file.  The minimum number of nodes allowed either above or below the earth tube is 3 while the maximum is 10.  The example shown below has five nodes above the earth tube and four below.
+
+\begin{figure}[hbtp]
+\centering
+\includegraphics[width=0.9\textwidth, height=0.9\textheight, keepaspectratio=true]{media/earth_tube_solution_space_diagram.png}
+\caption{Earth Tube Vertical Model Solution Space \protect \label{fig:earth-tube-solution-space-diagram}}
+\end{figure}
+
+As can be seen in the node diagram, there are seven types of nodes.  One is a node at the top of the solution space that is in contact with the upper temperature boundary and the next node down.  Similarly, there is another node that is at the bottom of the solution space that is contact with the lower temperature boundary and the next node up.  Two of the node types are simply generic "interior" nodes in the upper and lower areas of the solution space.  The equations for these generic nodes are very similar with the only difference being the height of the node (which is based on user input).  Two other nodes types are those adjacent to the earth tube node (one above the earth tube and one below).  Again, these equations will be very similar since they only differ in the size of the node height and the nodes to which they are connected in the grid.  Finally, the earth tube itself is an additional node type that is different than the other nodes due to the fact that it also has a connection with conduction and convection to the air in the earth tube.  The equation for each node type is shown below.  Each node equation will be rearranged so as to fit with the matrix form: Ax = b where x is a vector of node temperatures.
+
+\emph{\textit{Node Type 1: First Node (Below Upper Temperature Boundary)}}
+
+The first node includes conduction between the upper boundary and the node as well as the second node and the first node.  The equation for this node is:
+
+\begin{equation}
+\rho x_t w L c_p \frac{T_{1,new} - T_{1,old}}{\Delta t} = k w L \frac{T_{u,t}-T_{1,new}}{x_t / 2} + k w L \frac{T_{2,new}-T_{1,new}}{x_t}
+\end{equation}
+
+This can be rearranged to:
+
+\begin{equation}
+(1 + \frac{3 k \Delta t}{\rho c_p {x_t}^2}) T_{1,new} + (\frac{-k \Delta t}{\rho c_p {x_t}^2}) T_{2,new} = \frac{2 k \Delta t}{\rho c_p {x_t}^2} T_{u,t} + T_{1,old}
+\end{equation}
+
+or:
+
+\begin{equation}
+(1 + \frac{3 \alpha_s \Delta t}{{x_t}^2}) T_{1,new} + (\frac{-\alpha_s \Delta t}{{x_t}^2}) T_{2,new} = \frac{2 \alpha_s \Delta t}{{x_t}^2} T_{u,t} + T_{1,old}
+\end{equation}
+
+
+\emph{\textit{Node Type 2: Generic Node Upper Region}}
+
+The second through fourth nodes in the above diagram are all "generic" nodes in the upper region.  They all have the same basic equation.  Using "i" as the number for such a generic node, the equation for these nodes can be written as:
+
+\begin{equation}
+\rho x_t w L c_p \frac{T_{i,new} - T_{i,old}}{\Delta t} = k w L \frac{T_{i+1,new}-T_{i,new}}{x_t} + k w L \frac{T_{i-1,new}-T_{i,new}}{x_t}
+\end{equation}
+
+This can be rearranged to:
+
+\begin{equation}
+(\frac{-k \Delta t}{\rho c_p {x_t}^2}) T_{i+1,new} + (1 + \frac{2 k \Delta t}{\rho c_p {x_t}^2}) T_{i,new} + (\frac{-k \Delta t}{\rho c_p {x_t}^2}) T_{i+1,new} = T_{i,old}
+\end{equation}
+
+or:
+
+\begin{equation}
+(\frac{-\alpha_s \Delta t}{{x_t}^2}) T_{i+1,new} + (1 + \frac{2 \alpha_s \Delta t}{{x_t}^2}) T_{i,new} + (\frac{-\alpha_s \Delta t}{{x_t}^2}) T_{i+1,new} = T_{i,old}
+\end{equation}
+
+
+\emph{\textit{Node Type 3: Last Node in Upper Region}}
+The last node in the upper region connects to both the node above this one as well as the node at the earth tube ("et").  Since the thickness of the earth tube node and the nodes in the upper region are not the same, this requires a slight adjustment in the equations for a different thickness in the vertical direction.  Here is the equation for this node:
+
+\begin{equation}
+\rho x_t w L c_p \frac{T_{et-1,new} - T_{et-1,old}}{\Delta t} = k w L \frac{T_{et,new}-T_{et-1,new}}{(x_t + x_{et})/2} + k w L \frac{T_{et-2,new}-T_{et-1,new}}{x_t}
+\end{equation}
+
+This can be rearranged to:
+
+\begin{equation}
+(\frac{-k \Delta t}{\rho c_p {x_t}^2}) T_{et-2,new} + [1 + \frac{k \Delta t}{\rho c_p {x_t}^2} + \frac{k \Delta t}{\rho c_p x_t (x_t+x_{et})/2}] T_{et-1,new} + [\frac{-k \Delta t}{\rho c_p x_t (x_t+x_{et})/2}] T_{et,new} = T_{et-1,old}
+\end{equation}
+
+or:
+
+\begin{equation}
+(\frac{-\alpha_s \Delta t}{{x_t}^2}) T_{et-2,new} + [1 + \frac{\alpha_s \Delta t}{{x_t}^2} + \frac{\alpha_s \Delta t}{x_t (x_t+x_{et})/2}] T_{et-1,new} + [\frac{-\alpha_s \Delta t}{x_t (x_t+x_{et})/2}] T_{et,new} = T_{et-1,old}
+\end{equation}
+
+
+\emph{\textit{Node Type 4: Earth Tube Node}}
+
+The earth tube node is connected to nodes above and below it via conduction and also accounts for the convection between the air flowing through the tube and the conduction through the earth tube pipe material.  The equation for this node, assuming an effectiveness-NTU model for heat exchange between the air and ground (see below), is:
+
+\begin{equation}
+\rho x_{et} w L c_p \frac{T_{et,new} - T_{et,old}}{\Delta t} = k w L \frac{T_{et+1,new}-T_{et,new}}{(x_b + x_{et})/2} + k w L \frac{T_{et-1,new}-T_{et,new}}{(x_t + x_{et})/2} + {\dot m_a}{C_a} \eta (T_{air} - T_{et,new})
+\end{equation}
+
+This can be rearranged to:
+
+\begin{equation}
+\begin{split}
+[ \frac{-2k \Delta t}{\rho c_p x_{et} (x_t + x_{et})} ] T_{et-1,new} \\
+ + [ 1 + \frac{2 k \Delta t}{\rho c_p x_{et} (x_t + x_{et})} + \frac{2 k \Delta t}{\rho c_p x_{et} (x_b+x_{et})} + \frac{\dot m_a {C_a} \eta \Delta t}{\rho c_p x_{et} w L} ] T_{et,new} \\
+ + [ \frac{-2k \Delta t}{\rho c_p x_{et} (x_b + x_{et})} ] T_{et+1,new} \\
+ = T_{et,old} + \frac{\dot m_a {C_a} \eta \Delta t}{\rho c_p x_{et} w L} T_{air,in}
+\end{split}
+\end{equation}
+
+or:
+
+\begin{equation}
+\begin{split}
+[ \frac{-2 \alpha_s \Delta t}{x_{et} (x_t + x_{et})} ] T_{et-1,new} \\
+ + [ 1 + \frac{2 \alpha_s \Delta t}{x_{et} (x_t + x_{et})} + \frac{2 \alpha_s \Delta t}{x_{et} (x_b+x_{et})} + \frac{\dot m_a {C_a} \eta \Delta t}{\rho c_p x_{et} w L} ] T_{et,new} \\
+ + [ \frac{-2 \alpha_s \Delta t}{x_{et} (x_b + x_{et})} ] T_{et+1,new} \\
+ = T_{et,old} + \frac{\dot m_a {C_a} \eta \Delta t}{\rho c_p x_{et} w L} T_{air,in}
+\end{split}
+\end{equation}
+
+\emph{\textit{Node Type 5: First Node in Lower Region}}
+
+The region below the earth tube node is physically very similar to the region above the earth tube (reflected in a sense at the earth tube itself).  The main difference is the number of nodes and the overall thickness of the region can lead to a node height that is different than for the upper region.  Above this first node in the lower region, there is the earth tube node.  Below it is one or more generic lower region nodes (Type 6 below).  The equation for this node is:
+
+\begin{equation}
+\rho x_b w L c_p \frac{T_{et+1,new} - T_{et+1,old}}{\Delta t} = k w L \frac{T_{et,new}-T_{et+1,new}}{(x_b + x_{et})/2} + k w L \frac{T_{et+2,new}-T_{et+1,new}}{x_b}
+\end{equation}
+
+This can be rearranged to:
+
+\begin{equation}
+[\frac{-k \Delta t}{\rho c_p x_b (x_b + x_{et})/2}] T_{et,new} + [1 + \frac{k \Delta t}{\rho c_p {x_b}^2} + \frac{k \Delta t}{\rho c_p x_b (x_b+x_{et})/2}] T_{et+1,new} + [\frac{-k \Delta t}{\rho c_p {x_b}^2}] T_{et+2,new} = T_{et+1,old}
+\end{equation}
+
+or:
+
+\begin{equation}
+[\frac{-\alpha_s \Delta t}{x_b (x_b + x_{et})/2}] T_{et,new} + [1 + \frac{\alpha_s \Delta t}{{x_b}^2} + \frac{\alpha_s \Delta t}{x_b (x_b+x_{et})/2}] T_{et+1,new} + [\frac{-\alpha_s \Delta t}{{x_b}^2}] T_{et+2,new} = T_{et+1,old}
+\end{equation}
+
+\emph{\textit{Node Type 6: Generic Node in Lower Region}}
+
+The generic node equation in the lower region is nearly identical to generic node equation for the upper region except that the lower region node height replaces the upper region node height.  The equation is therefore:
+
+\begin{equation}
+\rho x_b w L c_p \frac{T_{i,new} - T_{i,old}}{\Delta t} = k w L \frac{T_{i+1,new}-T_{i,new}}{x_b} + k w L \frac{T_{i-1,new}-T_{i,new}}{x_b}
+\end{equation}
+
+This can be rearranged to:
+
+\begin{equation}
+(\frac{-k \Delta t}{\rho c_p {x_b}^2}) T_{i+1,new} + (1 + \frac{2 k \Delta t}{\rho c_p {x_b}^2}) T_{i,new} + (\frac{-k \Delta t}{\rho c_p {x_b}^2}) T_{i+1,new} = T_{i,old}
+\end{equation}
+
+or:
+
+\begin{equation}
+(\frac{-\alpha_s \Delta t}{{x_b}^2}) T_{i+1,new} + (1 + \frac{2 \alpha_s \Delta t}{{x_b}^2}) T_{i,new} + (\frac{-\alpha_s \Delta t}{{x_b}^2}) T_{i+1,new} = T_{i,old}
+\end{equation}
+
+\emph{\textit{Node Type 7: Last Node (Above Lower Temperature Boundary)}}
+
+Finally, the last node temperature is in contact with the node above it as well as the temperature at the lower boundary condition.  The actual temperature of the lower boundary condition is set by the undisturbed ground temperature equation used in the basic model for the depth of the lower boundary condition.  The equation is similar to the first node:
+
+\begin{equation}
+\rho x_b w L c_p \frac{T_{n,new} - T_{n,old}}{\Delta t} = k w L \frac{T_{l,t} - T_{n,new}}{x_b / 2} + k w L \frac{T_{n-1,new} - T_{n,new}}{x_t}
+\end{equation}
+
+This can be rearranged to:
+
+\begin{equation}
+(\frac{-k \Delta t}{\rho c_p {x_b}^2}) T_{n-1,new} + (1 + \frac{3 k \Delta t}{\rho c_p {x_b}^2}) T_{n,new} = \frac{2 k \Delta t}{\rho c_p {x_b}^2} T_{l,t} + T_{n,old}
+\end{equation}
+
+or:
+
+\begin{equation}
+(\frac{-\alpha_s \Delta t}{{x_b}^2}) T_{n-1,new} + (1 + \frac{3 \alpha_s \Delta t}{{x_b}^2}) T_{n,new} = \frac{2 \alpha_s \Delta t}{{x_b}^2} T_{l,t} + T_{n,old}
+\end{equation}
+
+\emph{\textit{Calculation of Effectiveness for Heat Transfer Between the Air and Ground}}
+
+Similar to the low temperature radiant system where a fluid of variable temperature is passing through a solid that is assumed to be at a single temperature, the relationship between effectiveness and heat transfer between the air and the ground can be summarized using the following relationship:
+
+\begin{equation}
+q = \dot m_a * C_{p,a} * (T_{air,in} - T_{air,out})
+\end{equation}
+
+where \(T_{air,in}\) is the outside air temperatre and \(T_{air,out}\) is the temperature of the air leaving the earth tube and entering the zone.
+
+\begin{equation}
+q_{max} = \dot m_a * C_{p,a} * (T_{air,in} - T_{et})
+\end{equation}
+
+where \(T_{et}\) is the temperature of the ground at the depth of the earth tube (i.e., at the earth tube node).
+
+The effectiveness (\(\eta\)) is the ratio of these two terms or:
+
+\begin{equation}
+\eta = \frac{q}{q_{max}}
+\end{equation}
+
+For the situation where a fluid of varying temperature flows through a solid of constant temperature, the effectiveness can be related to the number of transfer units (NTU) by:
+
+\begin{equation}
+\eta = 1 - e^{-NTU}
+\end{equation}
+
+NTU is calculated using the following equation:
+
+\begin{equation}
+NTU = U A / (\dot m C_p)_{min}
+\end{equation}
+
+Since the solid is not moving, \((\dot m C_p)_{min}\) is evaluated for the air side.  The U-value for this situation includes the heat conduction through the pipe wall and the convection between the inside surface of the earth tube and the air passing through it.  The relations for both the conduction and convection terms rely on the relationships developed for the Basic model.  With the effectiveness determined for a particular flow rate, the overall matrix equation is set and can be solved for the new node temperatures.
+
+\emph{\textit{Solution Strtegy}}
+
+The node equations above result in a system of equations that can be arranged as a matrix in the form of [A][x] = [b], where the number of node (n) is the index of the matrices.  The A matrix (n by n square matrix) consists primarily of constant terms that relate to the thermo-physical properties of the solution space.  The vector x consists of the new temperatures of the nodes (again, using the implicit formulation for stability) and the algorithm needs to solve for these.  The vector b includes terms such as the old temperatures at the nodes, the impact of boundary conditions at the top and bottom of the solution space, and the impact of the earth tube on the earth tube node.  The values of the vector b will vary with every time step since the temperatures of the nodes, ground, and air will vary with time.  The seven equation types that were rearranged above were done so to fit with the [A][x] = [b] format.
+
+Upon inspection of the terms that make up the A matrix, it is clear that A will be a tridiagonal matrix.  Tridiagonal matrices can be solved more efficiently using what is known as the Thomas algorithm which require operations on the order of the index (n) whereas solution strategies such as matrix inversion require operations on the order of the index (n) cubed.  In addition, there is only one term in the A matrix that might potentially vary--the term associated with the air flow rate and efficiency of heat exchange between the earth tube and the air flow through it at the earth tube node.  Since it is not known ahead of time what this flow rate or efficiency will be, the matrix system will have to go through a full solution at any time step.  The only exception to this when there is no air flow through the earth tube.  Since there will be significant time when the earth tube is dormant (no flow through it), the first step of the Thomas algorithm will be done for the zero flow situation and the values stored to reduce the number of calculations required by the solution.  Note that while in many cases when the earth tube is running that the effectiveness (\(\eta\)) will be unity, the flow rate may still vary based on the user input flow coefficients.  As a result, it does not make sense to store an intermediate step in the solution for when effectiveness is unity.
+
+In general, many of the related calculations (such as air flow rate, thermal properties of air, etc.) are identical to the Basic earth tube model.  The main difference is the calculation of the temperature at the earth tube location--the Basic model uses the undisturbed ground temperature relationship while the Vertical solution uses the implicit finite difference scheme and the Thomas algorithm.
+
+Once the node (ground) temperatures have been determined, the calculation of the air temperature leaving the earth tube can be calculated using the effectiveness-NTU formulation above.  Cancelling out the common flow rate and air specific heat, the equation for effectiveness simplifies to:
+
+\begin{equation}
+\eta = \frac{T_{air,in} - T_{air,out}}{T_{air,in} - T_{et}}
+\end{equation}
+
+Rearranging this equation to find the temperature of the air leaving the earth tube (inlet to the zone):
+
+\begin{equation}
+T_{air,in} - T_{air,out} = \eta * (T_{air,in} - T_{et})
+\end{equation}
+
+or:
+
+\begin{equation}
+T_{air,out} = T_{air,in} - \eta * (T_{air,in} - T_{et})
+\end{equation}
+
 % table 87
 \begin{longtable}[c]{p{1.5in}p{3.0in}p{1.5in}}
 \caption{Nomenclature for Earthtube Model \label{table:nomenclature-for-earthtube-model}} \tabularnewline
@@ -2271,13 +2538,14 @@ Variable & Description & Units \tabularnewline
 
 A\(_{s}\) & amplitude of the soil surface temperature variation & \(^{\circ}\)C \tabularnewline
 C\(_{a}\) & specific heat of air & J/kg-\(^{\circ}\)C \tabularnewline
+c\(_{p}\) & specific heat of soil & J/kg-\(^{\circ}\)C \tabularnewline
 h\(_{c}\) & convective heat transfer coefficient at the inner pipe surface & W/m\(^{2}\)-\(^{\circ}\)C \tabularnewline
 h\(_{s}\) & convective heat transfer coefficient at the soil surface & W/m\(^{2}\)-\(^{\circ}\)C \tabularnewline
 k\(_{air}\) & thermal conductivity of the air & W/m-\(^{\circ}\)C \tabularnewline
 k\(_{p}\) & pipe thermal conductivity & W/m-\(^{\circ}\)C \tabularnewline
-k\(_{s}\) & soil thermal conductivity & W/m-\(^{\circ}\)C \tabularnewline
+k\(_{s}\) or k & soil thermal conductivity & W/m-\(^{\circ}\)C \tabularnewline
 L & pipe length & m \tabularnewline
-m\(_{a}\) & mass flow rate of ambient air through pipe & kg/s \tabularnewline
+\(\dot m_a\) & mass flow rate of ambient air through pipe & kg/s \tabularnewline
 r\(_{a}\) & relative humidity & ~ \tabularnewline
 R\(_{c}\) & thermal resistance due to convection heat transfer between the air in the pipe and the pipe inner surface & m-\(^{\circ}\)C/W \tabularnewline
 R\(_{p}\) & thermal resistance due to conduction heat transfer between the pipe inner and outer surface & m-\(^{\circ}\)C/W \tabularnewline
@@ -2291,6 +2559,10 @@ S\(_{m}\) & average solar radiation & W/m\(^{2}\) \tabularnewline
 S\(_{v}\) & amplitude of the solar radiation & W/m\(^{2}\) \tabularnewline
 t & time elapsed from beginning of calendar year & days \tabularnewline
 T\(_{a}\)(y) & air temperature of the pipe at the distance y from the pipe inlet & \(^{\circ}\)C \tabularnewline
+T\(_{et,new}\)(y) & earth tube node temperature (current) & \(^{\circ}\)C \tabularnewline
+T\(_{et,old}\)(y) & earth tube node temperature (previous) & \(^{\circ}\)C \tabularnewline
+T\(_{i,new}\)(y) & node temperature for node "i" (current) & \(^{\circ}\)C \tabularnewline
+T\(_{i,old}\)(y) & node temperature for node "i" (previous) & \(^{\circ}\)C \tabularnewline
 T\(_{m}\) & average soil surface temperature & \(^{\circ}\)C \tabularnewline
 T\(_{ma}\) & average air temperature & \(^{\circ}\)C \tabularnewline
 t\(_{o}\) & phase constant of the soil surface & sec, days \tabularnewline
@@ -2301,14 +2573,20 @@ T\(_{z1,z2,t}\) & soil profile temperature at time t, averaged over depths betwe
 u & ~wind velocity above the ground surface & m/s \tabularnewline
 U\(_{t}\) & overall heat transfer coefficient of the whole earth tube system & W/m-\(^{\circ}\)C \tabularnewline
 V\(_{a}\) & average pipe air velocity & m/s \tabularnewline
+w & node width (user input) in the vertical solution & m \tabularnewline
+x\(_{t}\) & node thickness in the upper (top) region in the vertical solution & m \tabularnewline
+x\(_{et}\) & node thickness for the earth tube node in the vertical solution & m \tabularnewline
+x\(_{b}\) & node thickness in the lower (bottom) region in the vertical solution & m \tabularnewline
 z & depth of the radial center of pipe below soil surface & m \tabularnewline
 z\(_{1}\) & upper bounds of some vertical profile in soil & m \tabularnewline
 z\(_{2}\) & lower bounds of some vertical profile in soil & m \tabularnewline
-$\alpha$\(_{s}\) & soil thermal diffusivity & m\(^{2}\)/s; m\(^{2}\)/days \tabularnewline
+$\alpha$\(_{s}\) & soil thermal diffusivity & m\(^{2}\)/s; m\(^{2}\)/days; m\(^{2}\)/hr \tabularnewline
 $\beta$ & soil absorption coefficient ( = 1 – soil albedo) & ~ \tabularnewline
+$\Delta$t & time step & hr \tabularnewline
 $\varepsilon$ & hemispherical emittance of the ground surface & ~ \tabularnewline
 $\varphi$\(_{I}\) & phase angle between the insolation and the air temperature & rad \tabularnewline
 $\phi$\(_{s}\) & phase angle difference between the air and soil surface temperature & rad \tabularnewline
+$\rho$ & soil density & kg/m\(^3\) \tabularnewline
 $\upsilon$ & kinetic viscosity of air & m\(^{2}\)/s \tabularnewline
 w & annual angular frequency ( = 1.992 x 10\(^{-7}\)rad/s) & rad/s \tabularnewline
 \bottomrule

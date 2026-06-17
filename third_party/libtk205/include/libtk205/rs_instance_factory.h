@@ -3,9 +3,15 @@
 
 #include <string>
 #include <memory>
-#include "rs_instance_base.h" // definition req'd for unique_ptr
+#include <fstream>
+#include <vector>
+#include <nlohmann/json.hpp>
+
+namespace Courierr { class Courierr; }
 
 namespace tk205 {
+
+class RSInstanceBase;
 
 inline void read_binary_file(const char *filename, std::vector<char> &bytes)
 {
@@ -242,10 +248,12 @@ class RSInstanceFactory {
     // Universal factory interface create(). Factory::create() will, through factory lookup and
     // delegation, actually return the requested object.
     static std::shared_ptr<RSInstanceBase> create(std::string const &RS_ID,
-                                                  const char *RS_instance_file);
+                                                  const char *RS_instance_file,
+                                                  std::shared_ptr<Courierr::Courierr> logger);
 
     // Derived factories override create_instance() for actual resource creation
-    virtual std::shared_ptr<RSInstanceBase> create_instance(const char *RS_instance_file) const = 0;
+    virtual std::shared_ptr<RSInstanceBase> create_instance(const char *RS_instance_file, 
+                                                            std::shared_ptr<Courierr::Courierr> logger) const = 0;
 
     // Rule of five
     RSInstanceFactory(const RSInstanceFactory &other) = delete;

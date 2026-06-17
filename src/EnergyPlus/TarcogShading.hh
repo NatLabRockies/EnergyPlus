@@ -1,7 +1,7 @@
-// EnergyPlus, Copyright (c) 1996-2023, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
-// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other
+// National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
 // contributors. All rights reserved.
 //
 // NOTICE: This Software was developed under funding from the U.S. Department of Energy and the
@@ -71,7 +71,7 @@ namespace TarcogShading {
                  Array1D<Real64> const &gap,
                  Array1D<Real64> &hgas,
                  Array1D<Real64> &hcgas,
-                 Array1D<Real64> &hrgas,
+                 Array1D<Real64> const &hrgas,
                  Array2<Real64> const &frct,
                  Array2_int const &iprop,
                  Array1D<Real64> const &pressure,
@@ -196,16 +196,16 @@ namespace TarcogShading {
     void updateEffectiveMultipliers(int const nlayer,                          // Number of layers
                                     Real64 const width,                        // IGU width [m]
                                     Real64 const height,                       // IGU height [m]
-                                    const Array1D<Real64> &Atop,               // Top openning area [m2]
-                                    const Array1D<Real64> &Abot,               // Bottom openning area [m2]
-                                    const Array1D<Real64> &Al,                 // Left side openning area [m2]
-                                    const Array1D<Real64> &Ar,                 // Right side openning area [m2]
-                                    const Array1D<Real64> &Ah,                 // Front side openning area [m2]
-                                    Array1D<Real64> &Atop_eff,                 // Output - Effective top openning area [m2]
-                                    Array1D<Real64> &Abot_eff,                 // Output - Effective bottom openning area [m2]
-                                    Array1D<Real64> &Al_eff,                   // Output - Effective left side openning area [m2]
-                                    Array1D<Real64> &Ar_eff,                   // Output - Effective right side openning area [m2]
-                                    Array1D<Real64> &Ah_eff,                   // Output - Effective front side openning area [m2]
+                                    const Array1D<Real64> &Atop,               // Top opening area [m2]
+                                    const Array1D<Real64> &Abot,               // Bottom opening area [m2]
+                                    const Array1D<Real64> &Al,                 // Left side opening area [m2]
+                                    const Array1D<Real64> &Ar,                 // Right side opening area [m2]
+                                    const Array1D<Real64> &Ah,                 // Front side opening area [m2]
+                                    Array1D<Real64> &Atop_eff,                 // Output - Effective top opening area [m2]
+                                    Array1D<Real64> &Abot_eff,                 // Output - Effective bottom opening area [m2]
+                                    Array1D<Real64> &Al_eff,                   // Output - Effective left side opening area [m2]
+                                    Array1D<Real64> &Ar_eff,                   // Output - Effective right side opening area [m2]
+                                    Array1D<Real64> &Ah_eff,                   // Output - Effective front side opening area [m2]
                                     const Array1D<TARCOGLayerType> &LayerType, // Layer type
                                     const Array1D<Real64> &SlatAngle           // Venetian layer slat angle [deg]
     );
@@ -219,6 +219,14 @@ struct TarcogShadingData : BaseGlobalStruct
     Array1D<Real64> frct2 = Array1D<Real64>(TARCOGGassesParams::maxgas);
     Array1D_int iprop1 = Array1D_int(TARCOGGassesParams::maxgas);
     Array1D_int iprop2 = Array1D_int(TARCOGGassesParams::maxgas);
+
+    void init_constant_state([[maybe_unused]] EnergyPlusData &state) override
+    {
+    }
+
+    void init_state([[maybe_unused]] EnergyPlusData &state) override
+    {
+    }
 
     void clear_state() override
     {

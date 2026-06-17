@@ -14,14 +14,13 @@
 #
 set(JSONCPP_OLDEST_VALIDATED_POLICIES_VERSION "3.8.0")
 set(JSONCPP_NEWEST_VALIDATED_POLICIES_VERSION "3.13.2")
-cmake_minimum_required(VERSION ${JSONCPP_OLDEST_VALIDATED_POLICIES_VERSION})
 if("${CMAKE_VERSION}" VERSION_LESS "${JSONCPP_NEWEST_VALIDATED_POLICIES_VERSION}")
     #Set and use the newest available cmake policies that are validated to work
     set(JSONCPP_CMAKE_POLICY_VERSION "${CMAKE_VERSION}")
 else()
     set(JSONCPP_CMAKE_POLICY_VERSION "${JSONCPP_NEWEST_VALIDATED_POLICIES_VERSION}")
 endif()
-cmake_policy(VERSION ${JSONCPP_CMAKE_POLICY_VERSION})
+cmake_minimum_required(VERSION ${JSONCPP_OLDEST_VALIDATED_POLICIES_VERSION}...${JSONCPP_CMAKE_POLICY_VERSION})
 #
 # Now enumerate specific policies newer than JSONCPP_NEWEST_VALIDATED_POLICIES_VERSION
 # that may need to be individually set to NEW/OLD
@@ -186,11 +185,16 @@ elseif(CMAKE_CXX_COMPILER_ID STREQUAL "Intel")
     endif()
 endif()
 
-find_program(CCACHE_FOUND ccache)
-if(CCACHE_FOUND)
-    set_property(GLOBAL PROPERTY RULE_LAUNCH_COMPILE ccache)
-    set_property(GLOBAL PROPERTY RULE_LAUNCH_LINK ccache)
-endif(CCACHE_FOUND)
+# Use ccache if available, has to be before "project()"
+find_program(CCACHE_PROGRAM NAMES ccache sccache)
+if(CCACHE_PROGRAM)
+  # Support: Unix Makefiles and Ninja only
+  message(STATUS "Using CCACHE")
+  # RULE_LAUNCH_COMPILE is an internal variable and makes RC compilation fail on windows, hence why we use the C/CXX COMPILER_LAUNCHER instead
+  message(STATUS "${CCACHE_PROGRAM} found and enabled")
+  set(CMAKE_CXX_COMPILER_LAUNCHER ${CCACHE_PROGRAM} CACHE FILEPATH "CXX compiler cache used")
+  set(CMAKE_C_COMPILER_LAUNCHER ${CCACHE_PROGRAM} CACHE FILEPATH "C compiler cache used")
+endif()
 
 if(JSONCPP_WITH_WARNING_AS_ERROR)
     UseCompilationWarningAsError()

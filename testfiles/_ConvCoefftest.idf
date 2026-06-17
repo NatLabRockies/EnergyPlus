@@ -10,7 +10,7 @@
 ! Modified: Conforms with Beta 4 input
 ! 2 design days to facilitate reverse DD testing.
 
-  Version,23.1;
+  Version,26.2;
 
   Site:Location,
     ATLANTA,                 !- Name
@@ -609,7 +609,7 @@
 
   Output:Variable,*,Zone Air System Sensible Cooling Energy,timestep;
 
-  Output:Variable,*,Zone Windows Total Transmitted Solar Radiation Rate,timestep;
+  Output:Variable,*,Enclosure Windows Total Transmitted Solar Radiation Rate,timestep;
 
   Output:Surfaces:Drawing,dxf;
 
@@ -617,11 +617,11 @@
 
   Output:Constructions,Constructions;
 
-  Output:Meter:MeterFileOnly,DistrictHeating:Facility,monthly;
+  Output:Meter:MeterFileOnly,DistrictHeatingWater:Facility,monthly;
 
   Output:Meter:MeterFileOnly,DistrictCooling:Facility,monthly;
 
-  Output:Meter:MeterFileOnly,DistrictHeating:Facility,runperiod;
+  Output:Meter:MeterFileOnly,DistrictHeatingWater:Facility,runperiod;
 
   Output:Meter:MeterFileOnly,DistrictCooling:Facility,runperiod;
 

@@ -1,7 +1,7 @@
-// EnergyPlus, Copyright (c) 1996-2023, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
-// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other
+// National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
 // contributors. All rights reserved.
 //
 // NOTICE: This Software was developed under funding from the U.S. Department of Energy and the
@@ -56,7 +56,7 @@
 // EnergyPlus Headers
 #include <EnergyPlus/Data/EnergyPlusData.hh>
 #include <EnergyPlus/DataEnvironment.hh>
-#include <EnergyPlus/DataGlobals.hh>
+#include <EnergyPlus/DataGlobalConstants.hh>
 #include <EnergyPlus/DataHeatBalance.hh>
 #include <EnergyPlus/DataSurfaces.hh>
 #include <EnergyPlus/HeatBalanceManager.hh>
@@ -178,8 +178,8 @@ TEST_F(EnergyPlusFixture, DataSurfaces_SetSurfaceOutBulbTempAtTest)
     state->dataSurfaceGeometry->CosZoneRelNorth.allocate(1);
     state->dataSurfaceGeometry->SinZoneRelNorth.allocate(1);
 
-    state->dataSurfaceGeometry->CosZoneRelNorth(1) = std::cos(-state->dataHeatBal->Zone(1).RelNorth * DataGlobalConstants::DegToRadians);
-    state->dataSurfaceGeometry->SinZoneRelNorth(1) = std::sin(-state->dataHeatBal->Zone(1).RelNorth * DataGlobalConstants::DegToRadians);
+    state->dataSurfaceGeometry->CosZoneRelNorth(1) = std::cos(-state->dataHeatBal->Zone(1).RelNorth * Constant::DegToRad);
+    state->dataSurfaceGeometry->SinZoneRelNorth(1) = std::sin(-state->dataHeatBal->Zone(1).RelNorth * Constant::DegToRad);
     state->dataSurfaceGeometry->CosBldgRelNorth = 1.0;
     state->dataSurfaceGeometry->SinBldgRelNorth = 0.0;
 
@@ -244,6 +244,154 @@ TEST_F(EnergyPlusFixture, SurfaceTest_Surface2D)
     }
 }
 
+TEST_F(EnergyPlusFixture, SurfaceTest_Surface2D_bigVertices)
+{
+    using Vector2D = Surface2D::Vector2D;
+    state->dataSurface->TotSurfaces = 1;
+    constexpr int surfNum = 1;
+    int nVertices = 22;
+    state->dataSurface->MaxVerticesPerSurface = nVertices;
+    state->dataSurfaceGeometry->SurfaceTmp.allocate(state->dataSurface->TotSurfaces);
+    auto &s = state->dataSurfaceGeometry->SurfaceTmp(surfNum);
+    s.Vertex.dimension(nVertices);
+    s.Sides = nVertices;
+
+    // convex, >nVerticesBig, simple shape
+    s.Vertex = {Vector(0, 0, 0),     Vector(0.1, 1.0, 0), Vector(0.2, 1.9, 0), Vector(0.3, 2.7, 0), Vector(0.4, 3.4, 0), Vector(0.5, 4.0, 0),
+                Vector(0.6, 4.5, 0), Vector(0.7, 4.9, 0), Vector(0.8, 5.2, 0), Vector(0.9, 5.4, 0), Vector(1.0, 5.5, 0), Vector(1.1, 5.4, 0),
+                Vector(1.2, 5.2, 0), Vector(1.3, 4.9, 0), Vector(1.4, 4.5, 0), Vector(1.5, 4.0, 0), Vector(1.6, 3.4, 0), Vector(1.7, 2.7, 0),
+                Vector(1.8, 1.9, 0), Vector(1.9, 1.0, 0), Vector(2.0, 0.0, 0), Vector(2.0, -1, 0)};
+    s.Shape = SurfaceShape::Polygonal;
+    CheckConvexity(*state, 1, s.Sides);
+    EXPECT_TRUE(s.IsConvex);
+    s.set_computed_geometry();
+
+    Surface2D const &s2d(s.surface2d);
+    EXPECT_EQ(2, s2d.axis); // Projection along z axis
+    EXPECT_EQ(Vector2D(0.0, 0.0), s2d.vertices[0]);
+    EXPECT_EQ(Vector2D(2.0, -1.0), s2d.vertices[1]);
+    EXPECT_EQ(Vector2D(2.0, 0.0), s2d.vertices[2]);
+    EXPECT_EQ(Vector2D(1.9, 1.0), s2d.vertices[3]);
+    EXPECT_EQ(Vector2D(1.8, 1.9), s2d.vertices[4]);
+    EXPECT_EQ(Vector2D(1.7, 2.7), s2d.vertices[5]);
+    EXPECT_EQ(Vector2D(1.6, 3.4), s2d.vertices[6]);
+    EXPECT_EQ(Vector2D(1.5, 4.0), s2d.vertices[7]);
+    EXPECT_EQ(Vector2D(1.4, 4.5), s2d.vertices[8]);
+    EXPECT_EQ(Vector2D(1.3, 4.9), s2d.vertices[9]);
+    EXPECT_EQ(Vector2D(1.2, 5.2), s2d.vertices[10]);
+    EXPECT_EQ(Vector2D(1.1, 5.4), s2d.vertices[11]);
+    EXPECT_EQ(Vector2D(1.0, 5.5), s2d.vertices[12]);
+    EXPECT_EQ(Vector2D(0.9, 5.4), s2d.vertices[13]);
+    EXPECT_EQ(Vector2D(0.8, 5.2), s2d.vertices[14]);
+    EXPECT_EQ(Vector2D(0.7, 4.9), s2d.vertices[15]);
+    EXPECT_EQ(Vector2D(0.6, 4.5), s2d.vertices[16]);
+    EXPECT_EQ(Vector2D(0.5, 4.0), s2d.vertices[17]);
+    EXPECT_EQ(Vector2D(0.4, 3.4), s2d.vertices[18]);
+    EXPECT_EQ(Vector2D(0.3, 2.7), s2d.vertices[19]);
+    EXPECT_EQ(Vector2D(0.2, 1.9), s2d.vertices[20]);
+    EXPECT_EQ(Vector2D(0.1, 1.0), s2d.vertices[21]);
+    EXPECT_DOUBLE_EQ(0.0, s2d.vl.x);
+    EXPECT_DOUBLE_EQ(-1.0, s2d.vl.y);
+    EXPECT_DOUBLE_EQ(2.0, s2d.vu.x);
+    EXPECT_DOUBLE_EQ(5.5, s2d.vu.y);
+    EXPECT_EQ(11u, s2d.slabs.size());
+    // Slabs here all have 2 edges
+    EXPECT_EQ(2u, s2d.slabs[0].edges.size());
+    EXPECT_EQ(2u, s2d.slabs[1].edges.size());
+    EXPECT_EQ(2u, s2d.slabs[2].edges.size());
+    EXPECT_EQ(2u, s2d.slabs[3].edges.size());
+    EXPECT_EQ(2u, s2d.slabs[4].edges.size());
+    EXPECT_EQ(2u, s2d.slabs[5].edges.size());
+    EXPECT_EQ(2u, s2d.slabs[6].edges.size());
+    EXPECT_EQ(2u, s2d.slabs[7].edges.size());
+    EXPECT_EQ(2u, s2d.slabs[8].edges.size());
+    EXPECT_EQ(2u, s2d.slabs[9].edges.size());
+    EXPECT_EQ(2u, s2d.slabs[10].edges.size());
+}
+
+TEST_F(EnergyPlusFixture, SurfaceTest_Surface2D_bigVertices2)
+{
+    using Vector2D = Surface2D::Vector2D;
+    state->dataSurface->TotSurfaces = 1;
+    constexpr int surfNum = 1;
+    int nVertices = 24;
+    state->dataSurface->MaxVerticesPerSurface = nVertices;
+    state->dataSurfaceGeometry->SurfaceTmp.allocate(state->dataSurface->TotSurfaces);
+    auto &s = state->dataSurfaceGeometry->SurfaceTmp(surfNum);
+    s.Vertex.dimension(nVertices);
+    s.Sides = nVertices;
+
+    // nonconvex, >nVerticesBig, Issue 10490 defect file failed surface
+    s.Vertex = {Vector(4.5047023, 14.8653133, 35.35), Vector(6.5689151, 13.4862441, 35.35), Vector(6.1242243, 12.8206238, 35.35),
+                Vector(7.8836902, 11.6451513, 35.35), Vector(8.2156112, 12.1419759, 35.35), Vector(8.7993282, 11.7520035, 35.35),
+                Vector(8.9659831, 12.0014552, 35.35), Vector(9.2241656, 11.8289674, 35.35), Vector(9.4352618, 12.1449395, 35.35),
+                Vector(8.5933623, 12.7073998, 35.35), Vector(9.6032909, 14.219077, 35.35),  Vector(9.5550636, 14.251297, 35.35),
+                Vector(8.5268029, 12.71218, 35.35),   Vector(9.1313075, 12.3083197, 35.35), Vector(8.7902205, 11.7977752, 35.35),
+                Vector(8.1857159, 12.2016356, 35.35), Vector(7.8676828, 11.7255986, 35.35), Vector(6.2046715, 12.8366312, 35.35),
+                Vector(6.6740828, 13.5392534, 35.35), Vector(4.646872, 14.8936022, 35.35),  Vector(5.8684524, 16.7220831, 35.35),
+                Vector(7.8474358, 15.3999543, 35.35), Vector(7.8796558, 15.4481816, 35.35), Vector(5.815443, 16.8272508, 35.35)};
+    s.Shape = SurfaceShape::Polygonal;
+    CheckConvexity(*state, 1, s.Sides);
+    EXPECT_FALSE(s.IsConvex);
+    s.set_computed_geometry();
+
+    Surface2D const &s2d(s.surface2d);
+    EXPECT_EQ(2, s2d.axis); // Projection along z axis
+    EXPECT_EQ(Vector2D(4.5047023, 14.8653133), s2d.vertices[0]);
+    EXPECT_EQ(Vector2D(6.5689151, 13.4862441), s2d.vertices[1]);
+    EXPECT_EQ(Vector2D(6.1242243, 12.8206238), s2d.vertices[2]);
+    EXPECT_EQ(Vector2D(7.8836902, 11.6451513), s2d.vertices[3]);
+    EXPECT_EQ(Vector2D(8.2156112, 12.1419759), s2d.vertices[4]);
+    EXPECT_EQ(Vector2D(8.7993282, 11.7520035), s2d.vertices[5]);
+    EXPECT_EQ(Vector2D(8.9659831, 12.0014552), s2d.vertices[6]);
+    EXPECT_EQ(Vector2D(9.2241656, 11.8289674), s2d.vertices[7]);
+    EXPECT_EQ(Vector2D(9.4352618, 12.1449395), s2d.vertices[8]);
+    EXPECT_EQ(Vector2D(8.5933623, 12.7073998), s2d.vertices[9]);
+    EXPECT_EQ(Vector2D(9.6032909, 14.219077), s2d.vertices[10]);
+    EXPECT_EQ(Vector2D(9.5550636, 14.251297), s2d.vertices[11]);
+    EXPECT_EQ(Vector2D(8.5268029, 12.71218), s2d.vertices[12]);
+    EXPECT_EQ(Vector2D(9.1313075, 12.3083197), s2d.vertices[13]);
+    EXPECT_EQ(Vector2D(8.7902205, 11.7977752), s2d.vertices[14]);
+    EXPECT_EQ(Vector2D(8.1857159, 12.2016356), s2d.vertices[15]);
+    EXPECT_EQ(Vector2D(7.8676828, 11.7255986), s2d.vertices[16]);
+    EXPECT_EQ(Vector2D(6.2046715, 12.8366312), s2d.vertices[17]);
+    EXPECT_EQ(Vector2D(6.6740828, 13.5392534), s2d.vertices[18]);
+    EXPECT_EQ(Vector2D(4.646872, 14.8936022), s2d.vertices[19]);
+    EXPECT_EQ(Vector2D(5.8684524, 16.7220831), s2d.vertices[20]);
+    EXPECT_EQ(Vector2D(7.8474358, 15.3999543), s2d.vertices[21]);
+    EXPECT_EQ(Vector2D(7.8796558, 15.4481816), s2d.vertices[22]);
+    EXPECT_EQ(Vector2D(5.815443, 16.8272508), s2d.vertices[23]);
+    EXPECT_DOUBLE_EQ(4.5047023, s2d.vl.x);
+    EXPECT_DOUBLE_EQ(11.6451513, s2d.vl.y);
+    EXPECT_DOUBLE_EQ(9.6032909, s2d.vu.x);
+    EXPECT_DOUBLE_EQ(16.8272508, s2d.vu.y);
+    EXPECT_EQ(23u, s2d.slabs.size());
+    // Slabs here have anywhere from 2 to 10 edges
+    EXPECT_EQ(2u, s2d.slabs[0].edges.size());
+    EXPECT_EQ(4u, s2d.slabs[1].edges.size());
+    EXPECT_EQ(6u, s2d.slabs[2].edges.size());
+    EXPECT_EQ(8u, s2d.slabs[3].edges.size());
+    EXPECT_EQ(10u, s2d.slabs[4].edges.size());
+    EXPECT_EQ(8u, s2d.slabs[5].edges.size());
+    EXPECT_EQ(6u, s2d.slabs[6].edges.size());
+    EXPECT_EQ(6u, s2d.slabs[7].edges.size());
+    EXPECT_EQ(4u, s2d.slabs[8].edges.size());
+    EXPECT_EQ(4u, s2d.slabs[9].edges.size());
+    EXPECT_EQ(4u, s2d.slabs[10].edges.size());
+    EXPECT_EQ(4u, s2d.slabs[11].edges.size());
+    EXPECT_EQ(4u, s2d.slabs[12].edges.size());
+    EXPECT_EQ(4u, s2d.slabs[13].edges.size());
+    EXPECT_EQ(4u, s2d.slabs[14].edges.size());
+    EXPECT_EQ(4u, s2d.slabs[15].edges.size());
+    EXPECT_EQ(4u, s2d.slabs[16].edges.size());
+    EXPECT_EQ(2u, s2d.slabs[17].edges.size());
+    EXPECT_EQ(2u, s2d.slabs[18].edges.size());
+    EXPECT_EQ(2u, s2d.slabs[19].edges.size());
+    EXPECT_EQ(4u, s2d.slabs[20].edges.size());
+    EXPECT_EQ(4u, s2d.slabs[21].edges.size());
+    EXPECT_EQ(2u, s2d.slabs[22].edges.size());
+}
+
 TEST_F(EnergyPlusFixture, SurfaceTest_AverageHeightRectangle)
 {
     {
@@ -253,51 +401,46 @@ TEST_F(EnergyPlusFixture, SurfaceTest_AverageHeightRectangle)
 
         s.Vertex = {Vector(0, 0, 0), Vector(1, 0, 0), Vector(1, 1, 0), Vector(0, 1, 0)};
         Vectors::CreateNewellSurfaceNormalVector(s.Vertex, s.Vertex.size(), s.NewellSurfaceNormalVector);
-        Vectors::DetermineAzimuthAndTilt(
-            s.Vertex, s.Vertex.size(), s.Azimuth, s.Tilt, s.lcsx, s.lcsy, s.lcsz, s.GrossArea, s.NewellSurfaceNormalVector);
-        s.SinAzim = std::sin(s.Azimuth * DataGlobalConstants::DegToRadians);
-        s.CosAzim = std::cos(s.Azimuth * DataGlobalConstants::DegToRadians);
-        s.SinTilt = std::sin(s.Tilt * DataGlobalConstants::DegToRadians);
+        Vectors::DetermineAzimuthAndTilt(s.Vertex, s.Azimuth, s.Tilt, s.lcsx, s.lcsy, s.lcsz, s.NewellSurfaceNormalVector);
+        s.SinAzim = std::sin(s.Azimuth * Constant::DegToRad);
+        s.CosAzim = std::cos(s.Azimuth * Constant::DegToRad);
+        s.SinTilt = std::sin(s.Tilt * Constant::DegToRad);
 
         EXPECT_DOUBLE_EQ(s.get_average_height(*state), 0.0);
 
         s.Vertex = {Vector(0, 0, 0), Vector(1, 1, 0), Vector(1, 1, 1), Vector(0, 0, 1)};
         Vectors::CreateNewellSurfaceNormalVector(s.Vertex, s.Vertex.size(), s.NewellSurfaceNormalVector);
-        Vectors::DetermineAzimuthAndTilt(
-            s.Vertex, s.Vertex.size(), s.Azimuth, s.Tilt, s.lcsx, s.lcsy, s.lcsz, s.GrossArea, s.NewellSurfaceNormalVector);
-        s.SinAzim = std::sin(s.Azimuth * DataGlobalConstants::DegToRadians);
-        s.CosAzim = std::cos(s.Azimuth * DataGlobalConstants::DegToRadians);
-        s.SinTilt = std::sin(s.Tilt * DataGlobalConstants::DegToRadians);
+        Vectors::DetermineAzimuthAndTilt(s.Vertex, s.Azimuth, s.Tilt, s.lcsx, s.lcsy, s.lcsz, s.NewellSurfaceNormalVector);
+        s.SinAzim = std::sin(s.Azimuth * Constant::DegToRad);
+        s.CosAzim = std::cos(s.Azimuth * Constant::DegToRad);
+        s.SinTilt = std::sin(s.Tilt * Constant::DegToRad);
 
         EXPECT_DOUBLE_EQ(s.get_average_height(*state), 1.0);
 
         s.Vertex = {Vector(0, 0, 0), Vector(1, 0, 0), Vector(1, 1, 1), Vector(0, 1, 1)};
         Vectors::CreateNewellSurfaceNormalVector(s.Vertex, s.Vertex.size(), s.NewellSurfaceNormalVector);
-        Vectors::DetermineAzimuthAndTilt(
-            s.Vertex, s.Vertex.size(), s.Azimuth, s.Tilt, s.lcsx, s.lcsy, s.lcsz, s.GrossArea, s.NewellSurfaceNormalVector);
-        s.SinAzim = std::sin(s.Azimuth * DataGlobalConstants::DegToRadians);
-        s.CosAzim = std::cos(s.Azimuth * DataGlobalConstants::DegToRadians);
-        s.SinTilt = std::sin(s.Tilt * DataGlobalConstants::DegToRadians);
+        Vectors::DetermineAzimuthAndTilt(s.Vertex, s.Azimuth, s.Tilt, s.lcsx, s.lcsy, s.lcsz, s.NewellSurfaceNormalVector);
+        s.SinAzim = std::sin(s.Azimuth * Constant::DegToRad);
+        s.CosAzim = std::cos(s.Azimuth * Constant::DegToRad);
+        s.SinTilt = std::sin(s.Tilt * Constant::DegToRad);
 
         EXPECT_DOUBLE_EQ(s.get_average_height(*state), 1.0 / s.SinTilt);
 
         s.Vertex = {Vector(0, 0, 0), Vector(0, 1, 0), Vector(0, 1, 1), Vector(0, 0, 1)};
         Vectors::CreateNewellSurfaceNormalVector(s.Vertex, s.Vertex.size(), s.NewellSurfaceNormalVector);
-        Vectors::DetermineAzimuthAndTilt(
-            s.Vertex, s.Vertex.size(), s.Azimuth, s.Tilt, s.lcsx, s.lcsy, s.lcsz, s.GrossArea, s.NewellSurfaceNormalVector);
-        s.SinAzim = std::sin(s.Azimuth * DataGlobalConstants::DegToRadians);
-        s.CosAzim = std::cos(s.Azimuth * DataGlobalConstants::DegToRadians);
-        s.SinTilt = std::sin(s.Tilt * DataGlobalConstants::DegToRadians);
+        Vectors::DetermineAzimuthAndTilt(s.Vertex, s.Azimuth, s.Tilt, s.lcsx, s.lcsy, s.lcsz, s.NewellSurfaceNormalVector);
+        s.SinAzim = std::sin(s.Azimuth * Constant::DegToRad);
+        s.CosAzim = std::cos(s.Azimuth * Constant::DegToRad);
+        s.SinTilt = std::sin(s.Tilt * Constant::DegToRad);
 
         EXPECT_DOUBLE_EQ(s.get_average_height(*state), 1.0);
 
         s.Vertex = {Vector(1, -1, 0), Vector(1, -1, -1), Vector(0, 0, -1), Vector(0, 0, 0)};
         Vectors::CreateNewellSurfaceNormalVector(s.Vertex, s.Vertex.size(), s.NewellSurfaceNormalVector);
-        Vectors::DetermineAzimuthAndTilt(
-            s.Vertex, s.Vertex.size(), s.Azimuth, s.Tilt, s.lcsx, s.lcsy, s.lcsz, s.GrossArea, s.NewellSurfaceNormalVector);
-        s.SinAzim = std::sin(s.Azimuth * DataGlobalConstants::DegToRadians);
-        s.CosAzim = std::cos(s.Azimuth * DataGlobalConstants::DegToRadians);
-        s.SinTilt = std::sin(s.Tilt * DataGlobalConstants::DegToRadians);
+        Vectors::DetermineAzimuthAndTilt(s.Vertex, s.Azimuth, s.Tilt, s.lcsx, s.lcsy, s.lcsz, s.NewellSurfaceNormalVector);
+        s.SinAzim = std::sin(s.Azimuth * Constant::DegToRad);
+        s.CosAzim = std::cos(s.Azimuth * Constant::DegToRad);
+        s.SinTilt = std::sin(s.Tilt * Constant::DegToRad);
 
         EXPECT_DOUBLE_EQ(s.get_average_height(*state), 1.0);
     }
@@ -312,21 +455,19 @@ TEST_F(EnergyPlusFixture, SurfaceTest_AverageHeightTriangle)
 
         s.Vertex = {Vector(0, 0, 0), Vector(1, 0, 0), Vector(1, 0, 1)};
         Vectors::CreateNewellSurfaceNormalVector(s.Vertex, s.Vertex.size(), s.NewellSurfaceNormalVector);
-        Vectors::DetermineAzimuthAndTilt(
-            s.Vertex, s.Vertex.size(), s.Azimuth, s.Tilt, s.lcsx, s.lcsy, s.lcsz, s.GrossArea, s.NewellSurfaceNormalVector);
-        s.SinAzim = std::sin(s.Azimuth * DataGlobalConstants::DegToRadians);
-        s.CosAzim = std::cos(s.Azimuth * DataGlobalConstants::DegToRadians);
-        s.SinTilt = std::sin(s.Tilt * DataGlobalConstants::DegToRadians);
+        Vectors::DetermineAzimuthAndTilt(s.Vertex, s.Azimuth, s.Tilt, s.lcsx, s.lcsy, s.lcsz, s.NewellSurfaceNormalVector);
+        s.SinAzim = std::sin(s.Azimuth * Constant::DegToRad);
+        s.CosAzim = std::cos(s.Azimuth * Constant::DegToRad);
+        s.SinTilt = std::sin(s.Tilt * Constant::DegToRad);
 
         EXPECT_DOUBLE_EQ(s.get_average_height(*state), 0.5);
 
         s.Vertex = {Vector(0, 0, 0), Vector(0, 0, 1), Vector(1, 0, 0)};
         Vectors::CreateNewellSurfaceNormalVector(s.Vertex, s.Vertex.size(), s.NewellSurfaceNormalVector);
-        Vectors::DetermineAzimuthAndTilt(
-            s.Vertex, s.Vertex.size(), s.Azimuth, s.Tilt, s.lcsx, s.lcsy, s.lcsz, s.GrossArea, s.NewellSurfaceNormalVector);
-        s.SinAzim = std::sin(s.Azimuth * DataGlobalConstants::DegToRadians);
-        s.CosAzim = std::cos(s.Azimuth * DataGlobalConstants::DegToRadians);
-        s.SinTilt = std::sin(s.Tilt * DataGlobalConstants::DegToRadians);
+        Vectors::DetermineAzimuthAndTilt(s.Vertex, s.Azimuth, s.Tilt, s.lcsx, s.lcsy, s.lcsz, s.NewellSurfaceNormalVector);
+        s.SinAzim = std::sin(s.Azimuth * Constant::DegToRad);
+        s.CosAzim = std::cos(s.Azimuth * Constant::DegToRad);
+        s.SinTilt = std::sin(s.Tilt * Constant::DegToRad);
 
         EXPECT_DOUBLE_EQ(s.get_average_height(*state), 0.5);
     }
@@ -341,21 +482,19 @@ TEST_F(EnergyPlusFixture, SurfaceTest_AverageHeightL)
 
         s.Vertex = {Vector(0, 0, 0), Vector(0, 0, 1), Vector(0.5, 0, 1), Vector(0.5, 0, 0.5), Vector(1, 0, 0.5), Vector(1, 0, 0)};
         Vectors::CreateNewellSurfaceNormalVector(s.Vertex, s.Vertex.size(), s.NewellSurfaceNormalVector);
-        Vectors::DetermineAzimuthAndTilt(
-            s.Vertex, s.Vertex.size(), s.Azimuth, s.Tilt, s.lcsx, s.lcsy, s.lcsz, s.GrossArea, s.NewellSurfaceNormalVector);
-        s.SinAzim = std::sin(s.Azimuth * DataGlobalConstants::DegToRadians);
-        s.CosAzim = std::cos(s.Azimuth * DataGlobalConstants::DegToRadians);
-        s.SinTilt = std::sin(s.Tilt * DataGlobalConstants::DegToRadians);
+        Vectors::DetermineAzimuthAndTilt(s.Vertex, s.Azimuth, s.Tilt, s.lcsx, s.lcsy, s.lcsz, s.NewellSurfaceNormalVector);
+        s.SinAzim = std::sin(s.Azimuth * Constant::DegToRad);
+        s.CosAzim = std::cos(s.Azimuth * Constant::DegToRad);
+        s.SinTilt = std::sin(s.Tilt * Constant::DegToRad);
 
         EXPECT_DOUBLE_EQ(s.get_average_height(*state), 0.75);
 
         s.Vertex = {Vector(0, 0, 0), Vector(0, 0, 1), Vector(1, 0, 1), Vector(1, 0, 0.5), Vector(0.5, 0, 0.5), Vector(0.5, 0, 0)};
         Vectors::CreateNewellSurfaceNormalVector(s.Vertex, s.Vertex.size(), s.NewellSurfaceNormalVector);
-        Vectors::DetermineAzimuthAndTilt(
-            s.Vertex, s.Vertex.size(), s.Azimuth, s.Tilt, s.lcsx, s.lcsy, s.lcsz, s.GrossArea, s.NewellSurfaceNormalVector);
-        s.SinAzim = std::sin(s.Azimuth * DataGlobalConstants::DegToRadians);
-        s.CosAzim = std::cos(s.Azimuth * DataGlobalConstants::DegToRadians);
-        s.SinTilt = std::sin(s.Tilt * DataGlobalConstants::DegToRadians);
+        Vectors::DetermineAzimuthAndTilt(s.Vertex, s.Azimuth, s.Tilt, s.lcsx, s.lcsy, s.lcsz, s.NewellSurfaceNormalVector);
+        s.SinAzim = std::sin(s.Azimuth * Constant::DegToRad);
+        s.CosAzim = std::cos(s.Azimuth * Constant::DegToRad);
+        s.SinTilt = std::sin(s.Tilt * Constant::DegToRad);
 
         EXPECT_DOUBLE_EQ(s.get_average_height(*state), 0.75);
     }
@@ -366,13 +505,13 @@ TEST_F(EnergyPlusFixture, SurfaceTest_HashMap)
     int numSurfs = state->dataSurface->TotSurfaces = 4;
     state->dataSurface->Surface.allocate(numSurfs);
     state->dataSurface->SurfTAirRef.dimension(numSurfs, 0);
-    state->dataSurface->SurfIntConvCoeffIndex.dimension(numSurfs, 0);
-    state->dataSurface->SurfExtConvCoeffIndex.dimension(numSurfs, 0);
+    state->dataSurface->surfIntConv.allocate(numSurfs);
+    std::fill(state->dataSurface->surfIntConv.begin(), state->dataSurface->surfIntConv.end(), SurfIntConv());
+    state->dataSurface->surfExtConv.allocate(numSurfs);
+    std::fill(state->dataSurface->surfExtConv.begin(), state->dataSurface->surfExtConv.end(), SurfExtConv());
     state->dataSurface->SurfWinStormWinConstr.dimension(numSurfs, 0);
-    state->dataSurface->SurfMaterialMovInsulExt.dimension(numSurfs, 0);
-    state->dataSurface->SurfMaterialMovInsulInt.dimension(numSurfs, 0);
-    state->dataSurface->SurfSchedMovInsulExt.dimension(numSurfs, 0);
-    state->dataSurface->SurfSchedMovInsulInt.dimension(numSurfs, 0);
+    state->dataSurface->intMovInsuls.allocate(numSurfs);
+    state->dataSurface->extMovInsuls.allocate(numSurfs);
 
     for (int SurfNum = 1; SurfNum <= numSurfs; SurfNum++) {
         state->dataSurface->Surface(SurfNum).set_representative_surface(*state, SurfNum);
@@ -413,4 +552,52 @@ TEST_F(EnergyPlusFixture, SurfaceTest_HashMap)
     EXPECT_EQ(state->dataSurface->Surface(2).RepresentativeCalcSurfNum, 2);
     EXPECT_EQ(state->dataSurface->Surface(3).RepresentativeCalcSurfNum, 3);
     EXPECT_EQ(state->dataSurface->Surface(4).RepresentativeCalcSurfNum, 1);
+}
+
+TEST_F(EnergyPlusFixture, SurfaceTest_Azimuth_non_conv)
+{
+    // Unit test for PR 9907 to fix Issue 9906 incorrect Azimuth angle calculation for some non-convex surfaces
+    {
+        SurfaceData s;
+        s.Vertex.dimension(6);
+        s.Shape = SurfaceShape::Polygonal;
+
+        s.Vertex = {Vector(0, 0, 0), Vector(1, 0, 0), Vector(1, 0, -1), Vector(2, 0, -1), Vector(2, 0, 1), Vector(0, 0, 1)};
+        Vectors::CreateNewellSurfaceNormalVector(s.Vertex, s.Vertex.size(), s.NewellSurfaceNormalVector);
+        Vectors::DetermineAzimuthAndTilt(s.Vertex, s.Azimuth, s.Tilt, s.lcsx, s.lcsy, s.lcsz, s.NewellSurfaceNormalVector);
+
+        EXPECT_DOUBLE_EQ(s.Azimuth, 180.0); // Original code without PR 9907 fix would fail this one by getting an s.Azimuth of 0.0
+        EXPECT_DOUBLE_EQ(s.Tilt, 90.0);
+
+        s.SinAzim = std::sin(s.Azimuth * Constant::DegToRad);
+        s.CosAzim = std::cos(s.Azimuth * Constant::DegToRad);
+        s.SinTilt = std::sin(s.Tilt * Constant::DegToRad);
+
+        EXPECT_NEAR(s.SinAzim, 0.0, 1e-15);
+        EXPECT_DOUBLE_EQ(s.CosAzim, -1.0);
+        EXPECT_DOUBLE_EQ(s.SinTilt, 1.0);
+    }
+
+    // Test an "ordinary" scenario to make sure the new code would not break anything
+    {
+        SurfaceData s;
+        s.Vertex.dimension(5);
+        s.Shape = SurfaceShape::Polygonal;
+
+        s.Vertex = {Vector(0, 0, 0), Vector(1, 0, -1), Vector(2, 0, -1), Vector(2, 0, 1), Vector(0, 0, 1)};
+        Vectors::CreateNewellSurfaceNormalVector(s.Vertex, s.Vertex.size(), s.NewellSurfaceNormalVector);
+        Vectors::DetermineAzimuthAndTilt(s.Vertex, s.Azimuth, s.Tilt, s.lcsx, s.lcsy, s.lcsz, s.NewellSurfaceNormalVector);
+
+        // Original code should get the same result in this case
+        EXPECT_DOUBLE_EQ(s.Azimuth, 180.0);
+        EXPECT_DOUBLE_EQ(s.Tilt, 90.0);
+
+        s.SinAzim = std::sin(s.Azimuth * Constant::DegToRad);
+        s.CosAzim = std::cos(s.Azimuth * Constant::DegToRad);
+        s.SinTilt = std::sin(s.Tilt * Constant::DegToRad);
+
+        EXPECT_NEAR(s.SinAzim, 0.0, 1e-15);
+        EXPECT_DOUBLE_EQ(s.CosAzim, -1.0);
+        EXPECT_DOUBLE_EQ(s.SinTilt, 1.0);
+    }
 }

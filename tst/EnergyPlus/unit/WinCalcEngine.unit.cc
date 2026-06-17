@@ -1,7 +1,7 @@
-// EnergyPlus, Copyright (c) 1996-2023, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
-// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other
+// National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
 // contributors. All rights reserved.
 //
 // NOTICE: This Software was developed under funding from the U.S. Department of Energy and the
@@ -66,7 +66,7 @@
 
 using namespace EnergyPlus;
 
-TEST_F(EnergyPlusFixture, DISABLED_WCEClear)
+TEST_F(EnergyPlusFixture, WCEClear)
 {
 
     state->dataIPShortCut->lAlphaFieldBlanks = true;
@@ -97,11 +97,11 @@ TEST_F(EnergyPlusFixture, DISABLED_WCEClear)
 
     Material::GetMaterialData(*state, ErrorsFound);
     HeatBalanceManager::GetConstructData(*state, ErrorsFound);
-    WindowManager::initWindowModel(*state);
-    WindowManager::InitWindowOpticalCalculations(*state);
+    Window::initWindowModel(*state);
+    Window::InitWindowOpticalCalculations(*state);
     HeatBalanceManager::InitHeatBalance(*state);
 
-    auto aWinConstSimp = WindowManager::CWindowConstructionsSimplified::instance();
+    auto aWinConstSimp = Window::CWindowConstructionsSimplified::instance(*state);
     auto solarLayer = aWinConstSimp.getEquivalentLayer(*state, FenestrationCommon::WavelengthRange::Solar, 1);
 
     constexpr Real64 minLambda{0.3};
@@ -128,7 +128,7 @@ TEST_F(EnergyPlusFixture, DISABLED_WCEClear)
     EXPECT_NEAR(0.074854, Rback, 1e-6);
 }
 
-TEST_F(EnergyPlusFixture, DISABLED_WCEVenetian)
+TEST_F(EnergyPlusFixture, WCEVenetian)
 {
 
     state->dataIPShortCut->lAlphaFieldBlanks = true;
@@ -193,11 +193,11 @@ TEST_F(EnergyPlusFixture, DISABLED_WCEVenetian)
 
     Material::GetMaterialData(*state, ErrorsFound);
     HeatBalanceManager::GetConstructData(*state, ErrorsFound);
-    WindowManager::initWindowModel(*state);
-    WindowManager::InitWindowOpticalCalculations(*state);
+    Window::initWindowModel(*state);
+    Window::InitWindowOpticalCalculations(*state);
     HeatBalanceManager::InitHeatBalance(*state);
 
-    auto aWinConstSimp = WindowManager::CWindowConstructionsSimplified::instance();
+    auto aWinConstSimp = Window::CWindowConstructionsSimplified::instance(*state);
     auto solarLayer = aWinConstSimp.getEquivalentLayer(*state, FenestrationCommon::WavelengthRange::Solar, 1);
 
     constexpr Real64 minLambda{0.3};
@@ -224,7 +224,7 @@ TEST_F(EnergyPlusFixture, DISABLED_WCEVenetian)
     EXPECT_NEAR(0.074853, Rback, 1e-6);
 }
 
-TEST_F(EnergyPlusFixture, DISABLED_WCEShade)
+TEST_F(EnergyPlusFixture, WCEShade)
 {
 
     state->dataIPShortCut->lAlphaFieldBlanks = true;
@@ -272,11 +272,11 @@ TEST_F(EnergyPlusFixture, DISABLED_WCEShade)
 
     Material::GetMaterialData(*state, ErrorsFound);
     HeatBalanceManager::GetConstructData(*state, ErrorsFound);
-    WindowManager::initWindowModel(*state);
-    WindowManager::InitWindowOpticalCalculations(*state);
+    Window::initWindowModel(*state);
+    Window::InitWindowOpticalCalculations(*state);
     HeatBalanceManager::InitHeatBalance(*state);
 
-    auto aWinConstSimp = WindowManager::CWindowConstructionsSimplified::instance();
+    auto aWinConstSimp = Window::CWindowConstructionsSimplified::instance(*state);
     auto solarLayer = aWinConstSimp.getEquivalentLayer(*state, FenestrationCommon::WavelengthRange::Solar, 1);
 
     constexpr Real64 minLambda{0.3};

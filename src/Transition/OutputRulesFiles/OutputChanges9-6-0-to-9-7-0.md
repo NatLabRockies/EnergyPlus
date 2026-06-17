@@ -10,4 +10,4 @@ This will eventually become a more structured file, but currently it isn't clear
 ### WindowConstruction EIO Fields Change
 Two fields are added to the Description of the Windows Report - "WindowConstruction", namely "Construction Report Conductance (Before Adjusted) {W/m2-K}" and "Convection Coefficient Adjustment Ratio". They represent the glazing-only nominal U (nominal conductance in winter) and the adjustment ratio assuming highly conductive frames are applied along with the glazing.
 
-See PR [#8653](https://github.com/NREL/EnergyPlus/pull/8653) and PR [#9117 ](https://github.com/NREL/EnergyPlus/pull/9117).
+See PR [#8653](https://github.com/NatLabRockies/EnergyPlus/pull/8653) and PR [#9117 ](https://github.com/NatLabRockies/EnergyPlus/pull/9117).

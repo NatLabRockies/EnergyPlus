@@ -1,7 +1,7 @@
-// EnergyPlus, Copyright (c) 1996-2023, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
-// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other
+// National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
 // contributors. All rights reserved.
 //
 // NOTICE: This Software was developed under funding from the U.S. Department of Energy and the
@@ -72,10 +72,11 @@
 #include "Fixtures/EnergyPlusFixture.hh"
 
 using namespace EnergyPlus;
-using namespace EnergyPlus::WindowManager;
+using namespace EnergyPlus::Window;
 
 TEST_F(EnergyPlusFixture, test_overallUfactorFromFilmsAndCond)
 {
+    auto &s_mat = state->dataMaterial;
     // set up for using CWCEHeatTransferFactory
     int numSurf = 1;
     state->dataSurface->Surface.allocate(numSurf);
@@ -91,13 +92,10 @@ TEST_F(EnergyPlusFixture, test_overallUfactorFromFilmsAndCond)
     state->dataConstruction->Construct(numCons).LayerPoint(1) = materialOutside;
     state->dataConstruction->Construct(numCons).LayerPoint(numLayers) = materialInside;
     state->dataConstruction->Construct(numCons).AbsDiff.allocate(2);
-    int numMaterials = materialInside;
-    for (int i = 1; i <= numMaterials; i++) {
-        Material::MaterialProperties *p = new Material::MaterialProperties;
-        state->dataMaterial->Material.push_back(p);
-    }
-    state->dataMaterial->Material(materialOutside)->Group = Material::MaterialGroup::WindowGlass;
-    state->dataMaterial->Material(materialInside)->Group = Material::MaterialGroup::WindowGlass;
+
+    s_mat->materials.push_back(new Material::MaterialGlass);
+    s_mat->materials.push_back(new Material::MaterialGlass);
+
     auto aFactory = CWCEHeatTransferFactory(*state, state->dataSurface->Surface(numSurf), numSurf, numCons);
 
     double hIntConvCoeff = 0.;
@@ -132,6 +130,7 @@ TEST_F(EnergyPlusFixture, test_overallUfactorFromFilmsAndCond)
 
 TEST_F(EnergyPlusFixture, test_getOutdoorNfrc)
 {
+    auto &s_mat = state->dataMaterial;
     // set up for using CWCEHeatTransferFactory
     int numSurf = 1;
     state->dataSurface->Surface.allocate(numSurf);
@@ -147,13 +146,12 @@ TEST_F(EnergyPlusFixture, test_getOutdoorNfrc)
     state->dataConstruction->Construct(numCons).LayerPoint(1) = materialOutside;
     state->dataConstruction->Construct(numCons).LayerPoint(numLayers) = materialInside;
     state->dataConstruction->Construct(numCons).AbsDiff.allocate(2);
-    int numMaterials = materialInside;
-    for (int i = 1; i <= numMaterials; i++) {
-        Material::MaterialProperties *p = new Material::MaterialProperties;
-        state->dataMaterial->Material.push_back(p);
-    }
-    state->dataMaterial->Material(materialOutside)->Group = Material::MaterialGroup::WindowGlass;
-    state->dataMaterial->Material(materialInside)->Group = Material::MaterialGroup::WindowGlass;
+
+    auto *matOutside = new Material::MaterialGlass;
+    s_mat->materials.push_back(matOutside);
+    auto *matInside = new Material::MaterialGlass;
+    s_mat->materials.push_back(matInside);
+
     auto aFactory = CWCEHeatTransferFactory(*state, state->dataSurface->Surface(numSurf), numSurf, numCons);
 
     auto indoor = aFactory.getOutdoorNfrc(true);
@@ -167,6 +165,7 @@ TEST_F(EnergyPlusFixture, test_getOutdoorNfrc)
 
 TEST_F(EnergyPlusFixture, test_getIndoorNfrc)
 {
+    auto &s_mat = state->dataMaterial;
     // set up for using CWCEHeatTransferFactory
     int numSurf = 1;
     state->dataSurface->Surface.allocate(numSurf);
@@ -182,13 +181,9 @@ TEST_F(EnergyPlusFixture, test_getIndoorNfrc)
     state->dataConstruction->Construct(numCons).LayerPoint(1) = materialOutside;
     state->dataConstruction->Construct(numCons).LayerPoint(numLayers) = materialInside;
     state->dataConstruction->Construct(numCons).AbsDiff.allocate(2);
-    int numMaterials = materialInside;
-    for (int i = 1; i <= numMaterials; i++) {
-        Material::MaterialProperties *p = new Material::MaterialProperties;
-        state->dataMaterial->Material.push_back(p);
-    }
-    state->dataMaterial->Material(materialOutside)->Group = Material::MaterialGroup::WindowGlass;
-    state->dataMaterial->Material(materialInside)->Group = Material::MaterialGroup::WindowGlass;
+    s_mat->materials.push_back(new Material::MaterialGlass);
+    s_mat->materials.push_back(new Material::MaterialGlass);
+
     auto aFactory = CWCEHeatTransferFactory(*state, state->dataSurface->Surface(numSurf), numSurf, numCons);
 
     auto indoor = aFactory.getIndoorNfrc(true);
@@ -200,6 +195,7 @@ TEST_F(EnergyPlusFixture, test_getIndoorNfrc)
 
 TEST_F(EnergyPlusFixture, test_getShadeType)
 {
+    auto &s_mat = state->dataMaterial;
     // set up for using CWCEHeatTransferFactory
     int numSurf = 1;
     state->dataSurface->Surface.allocate(numSurf);
@@ -217,42 +213,42 @@ TEST_F(EnergyPlusFixture, test_getShadeType)
     state->dataConstruction->Construct(simpleCons).LayerPoint(1) = materialOutside;
     state->dataConstruction->Construct(simpleCons).LayerPoint(numLayers) = materialInside;
     state->dataConstruction->Construct(simpleCons).AbsDiff.allocate(2);
-    int numMaterials = materialInside + 1;
-    for (int i = 1; i <= numMaterials; i++) {
-        Material::MaterialProperties *p = new Material::MaterialProperties;
-        state->dataMaterial->Material.push_back(p);
-    }
-    state->dataMaterial->Material(materialOutside)->Group = Material::MaterialGroup::WindowGlass;
-    state->dataMaterial->Material(materialInside)->Group = Material::MaterialGroup::WindowGlass;
+    s_mat->materials.push_back(new Material::MaterialGlass);
+    s_mat->materials.push_back(new Material::MaterialGlass);
     auto aFactory = CWCEHeatTransferFactory(*state, state->dataSurface->Surface(numSurf), numSurf, simpleCons);
 
     // outside
     auto typeOfShade = aFactory.getShadeType(*state, simpleCons);
-    EXPECT_TRUE(compare_enums(typeOfShade, DataSurfaces::WinShadingType::NoShade));
+    EXPECT_ENUM_EQ(typeOfShade, DataSurfaces::WinShadingType::NoShade);
 
-    state->dataMaterial->Material(materialOutside)->Group = Material::MaterialGroup::Shade;
+    delete s_mat->materials(materialOutside);
+    s_mat->materials(materialOutside) = new Material::MaterialShade;
     typeOfShade = aFactory.getShadeType(*state, simpleCons);
-    EXPECT_TRUE(compare_enums(typeOfShade, DataSurfaces::WinShadingType::ExtShade));
+    EXPECT_ENUM_EQ(typeOfShade, DataSurfaces::WinShadingType::ExtShade);
 
-    state->dataMaterial->Material(materialOutside)->Group = Material::MaterialGroup::WindowBlind;
+    delete s_mat->materials(materialOutside);
+    s_mat->materials(materialOutside) = new Material::MaterialBlind;
     typeOfShade = aFactory.getShadeType(*state, simpleCons);
-    EXPECT_TRUE(compare_enums(typeOfShade, DataSurfaces::WinShadingType::ExtBlind));
+    EXPECT_ENUM_EQ(typeOfShade, DataSurfaces::WinShadingType::ExtBlind);
 
     // reset the outside to glass
-    state->dataMaterial->Material(materialOutside)->Group = Material::MaterialGroup::WindowGlass;
+    delete s_mat->materials(materialOutside);
+    s_mat->materials(materialOutside) = new Material::MaterialGlass;
 
     // inside
-    state->dataMaterial->Material(materialInside)->Group = Material::MaterialGroup::Shade;
+    delete s_mat->materials(materialInside);
+    s_mat->materials(materialInside) = new Material::MaterialShade;
     typeOfShade = aFactory.getShadeType(*state, simpleCons);
-    EXPECT_TRUE(compare_enums(typeOfShade, DataSurfaces::WinShadingType::IntShade));
+    EXPECT_ENUM_EQ(typeOfShade, DataSurfaces::WinShadingType::IntShade);
 
-    state->dataMaterial->Material(materialInside)->Group = Material::MaterialGroup::WindowBlind;
+    delete s_mat->materials(materialInside);
+    s_mat->materials(materialInside) = new Material::MaterialBlind;
     typeOfShade = aFactory.getShadeType(*state, simpleCons);
-    EXPECT_TRUE(compare_enums(typeOfShade, DataSurfaces::WinShadingType::IntBlind));
+    EXPECT_ENUM_EQ(typeOfShade, DataSurfaces::WinShadingType::IntBlind);
 
     // reset the outside to glass
-    state->dataMaterial->Material(materialInside)->Group = Material::MaterialGroup::WindowGlass;
-    state->dataMaterial->Material(materialOutside)->Group = Material::MaterialGroup::WindowGlass;
+    delete s_mat->materials(materialInside);
+    s_mat->materials(materialInside) = new Material::MaterialGlass;
 
     // between glass - double pane
     int betweenCons = 2;
@@ -268,17 +264,19 @@ TEST_F(EnergyPlusFixture, test_getShadeType)
     state->dataConstruction->Construct(betweenCons).LayerPoint(numLayers) = materialInside;
     state->dataConstruction->Construct(betweenCons).AbsDiff.allocate(2);
 
-    state->dataMaterial->Material(materialShade)->Group = Material::MaterialGroup::Shade;
+    s_mat->materials.push_back(new Material::MaterialShade);
     typeOfShade = aFactory.getShadeType(*state, betweenCons);
-    EXPECT_TRUE(compare_enums(typeOfShade, DataSurfaces::WinShadingType::BGShade));
+    EXPECT_ENUM_EQ(typeOfShade, DataSurfaces::WinShadingType::BGShade);
 
-    state->dataMaterial->Material(materialShade)->Group = Material::MaterialGroup::WindowBlind;
+    delete s_mat->materials(materialShade);
+    s_mat->materials(materialShade) = new Material::MaterialBlind;
     typeOfShade = aFactory.getShadeType(*state, betweenCons);
-    EXPECT_TRUE(compare_enums(typeOfShade, DataSurfaces::WinShadingType::BGBlind));
+    EXPECT_ENUM_EQ(typeOfShade, DataSurfaces::WinShadingType::BGBlind);
 }
 
 TEST_F(EnergyPlusFixture, test_getActiveConstructionNumber)
 {
+    auto &s_mat = state->dataMaterial;
     // set up for using CWCEHeatTransferFactory
     int numSurf = 1;
     state->dataSurface->Surface.allocate(numSurf);
@@ -297,13 +295,9 @@ TEST_F(EnergyPlusFixture, test_getActiveConstructionNumber)
     state->dataConstruction->Construct(numCons).LayerPoint(1) = materialOutside;
     state->dataConstruction->Construct(numCons).LayerPoint(numLayers) = materialInside;
     state->dataConstruction->Construct(numCons).AbsDiff.allocate(2);
-    int numMaterials = materialInside;
-    for (int i = 1; i <= numMaterials; i++) {
-        Material::MaterialProperties *p = new Material::MaterialProperties;
-        state->dataMaterial->Material.push_back(p);
-    }
-    state->dataMaterial->Material(materialOutside)->Group = Material::MaterialGroup::WindowGlass;
-    state->dataMaterial->Material(materialInside)->Group = Material::MaterialGroup::WindowGlass;
+
+    s_mat->materials.push_back(new Material::MaterialGlass);
+    s_mat->materials.push_back(new Material::MaterialGlass);
 
     auto aFactory = CWCEHeatTransferFactory(*state, state->dataSurface->Surface(numSurf), numSurf, numCons);
 
@@ -322,6 +316,7 @@ TEST_F(EnergyPlusFixture, test_getActiveConstructionNumber)
 
 TEST_F(EnergyPlusFixture, test_getIGU)
 {
+    auto &s_mat = state->dataMaterial;
     // set up for using CWCEHeatTransferFactory
     int numSurf = 1;
     state->dataSurface->Surface.allocate(numSurf);
@@ -337,13 +332,10 @@ TEST_F(EnergyPlusFixture, test_getIGU)
     state->dataConstruction->Construct(numCons).LayerPoint(1) = materialOutside;
     state->dataConstruction->Construct(numCons).LayerPoint(numLayers) = materialInside;
     state->dataConstruction->Construct(numCons).AbsDiff.allocate(2);
-    int numMaterials = materialInside;
-    for (int i = 1; i <= numMaterials; i++) {
-        Material::MaterialProperties *p = new Material::MaterialProperties;
-        state->dataMaterial->Material.push_back(p);
-    }
-    state->dataMaterial->Material(materialOutside)->Group = Material::MaterialGroup::WindowGlass;
-    state->dataMaterial->Material(materialInside)->Group = Material::MaterialGroup::WindowGlass;
+
+    s_mat->materials.push_back(new Material::MaterialGlass);
+    s_mat->materials.push_back(new Material::MaterialGlass);
+
     auto aFactory = CWCEHeatTransferFactory(*state, state->dataSurface->Surface(numSurf), numSurf, numCons);
 
     double width = 10.;
@@ -677,21 +669,19 @@ TEST_F(EnergyPlusFixture, test_GetWindowAssemblyNfrcForReport_withIDF)
     });
 
     ASSERT_TRUE(process_idf(idf_objects));
+    state->init_state(*state);
 
-    SimulationManager::GetProjectData(*state);
     bool FoundError = false;
 
     HeatBalanceManager::GetProjectControlData(*state, FoundError); // read project control data
     EXPECT_FALSE(FoundError);                                      // expect no errors
 
     HeatBalanceManager::SetPreConstructionInputParameters(*state);
-    ScheduleManager::ProcessScheduleInput(*state); // read schedules
 
     Material::GetMaterialData(*state, FoundError);
     EXPECT_FALSE(FoundError);
 
-    HeatBalanceManager::GetFrameAndDividerData(*state, FoundError);
-    EXPECT_FALSE(FoundError);
+    HeatBalanceManager::GetFrameAndDividerData(*state);
 
     HeatBalanceManager::GetConstructData(*state, FoundError);
     EXPECT_FALSE(FoundError);
@@ -705,8 +695,8 @@ TEST_F(EnergyPlusFixture, test_GetWindowAssemblyNfrcForReport_withIDF)
     state->dataSurfaceGeometry->CosZoneRelNorth.allocate(1);
     state->dataSurfaceGeometry->SinZoneRelNorth.allocate(1);
 
-    state->dataSurfaceGeometry->CosZoneRelNorth(1) = std::cos(-state->dataHeatBal->Zone(1).RelNorth * DataGlobalConstants::DegToRadians);
-    state->dataSurfaceGeometry->SinZoneRelNorth(1) = std::sin(-state->dataHeatBal->Zone(1).RelNorth * DataGlobalConstants::DegToRadians);
+    state->dataSurfaceGeometry->CosZoneRelNorth(1) = std::cos(-state->dataHeatBal->Zone(1).RelNorth * Constant::DegToRad);
+    state->dataSurfaceGeometry->SinZoneRelNorth(1) = std::sin(-state->dataHeatBal->Zone(1).RelNorth * Constant::DegToRad);
     state->dataSurfaceGeometry->CosBldgRelNorth = 1.0;
     state->dataSurfaceGeometry->SinBldgRelNorth = 0.0;
 
@@ -740,9 +730,9 @@ TEST_F(EnergyPlusFixture, test_GetWindowAssemblyNfrcForReport_withIDF)
     double shgcRep{0.};
     double vtRep{0.};
 
-    int windowSurfNum = UtilityRoutines::FindItemInList("ZN001:WALL-SOUTH:WIN001", state->dataSurface->Surface);
+    int windowSurfNum = Util::FindItemInList("ZN001:WALL-SOUTH:WIN001", state->dataSurface->Surface);
     EXPECT_TRUE(windowSurfNum > 0);
-    int constructNum = UtilityRoutines::FindItemInList("DOUBLE PANE HW WINDOW", state->dataConstruction->Construct);
+    int constructNum = Util::FindItemInList("DOUBLE PANE HW WINDOW", state->dataConstruction->Construct);
     EXPECT_TRUE(constructNum > 0);
 
     GetWindowAssemblyNfrcForReport(

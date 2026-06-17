@@ -28,9 +28,9 @@ There was a question about how many test suite diffs would be caused by activati
 
 The current combination of Controller:OutdoorAir plus Controller:MechanicalVentilation can be confusing. Common frustrations that users encounter with these objects include:
 
-  
+
 1. Trying to set the OA flow to zero at night when using Controller:MechanicalVentilation
-[Issue #4633](https://github.com/NREL/EnergyPlus/issues/4633) requires that the Controller:MechanicalVentilation schedule be set to zero as well as the Controller:OutdoorAir Minimum Outdoor Air Schedule (*if* the Controller:OutdoorAir Minimum Outdoor Air Flow Rate is > 0).
+[Issue #4633](https://github.com/NatLabRockies/EnergyPlus/issues/4633) requires that the Controller:MechanicalVentilation schedule be set to zero as well as the Controller:OutdoorAir Minimum Outdoor Air Schedule (*if* the Controller:OutdoorAir Minimum Outdoor Air Flow Rate is > 0).
 
 2. Specifying a schedule in DesignSpecification:OutdoorAir only to find that it is ignored by Controller:MechanicalVentilation.
 
@@ -153,7 +153,7 @@ x 5. Rename `DesignSpecification:OutdoorAir` "Outdoor Air Flow Rate Fraction Sch
     - Controller:MecahnicalVentilation does not store grab either the outdoor air method, but it checks it during init and calc
     - **New July 30, 2016** Add more columns to HVAC Sizing Summary table Demand Controlled Ventilation using Controller:MechanicalVentilation
     - **FIXED** Schedule name was not correct in above report for air distribution effectiveness when not specified, now is blank.
-    
+
 
 6. Change "Time of Day Economizer Control Schedule" to apply to any type of economizer control, and add a new Economizer Control Type = TimeOfDay.
 *Not done, postponed for further review.*

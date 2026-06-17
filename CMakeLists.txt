@@ -1,52 +1,78 @@
-# Use ccache if available, has to be before "project()"
-find_program(CCACHE_PROGRAM ccache)
-if(CCACHE_PROGRAM)
-  # Support both Unix Makefiles and Ninja
-  set_property(GLOBAL PROPERTY RULE_LAUNCH_COMPILE "${CCACHE_PROGRAM}")
-endif()
+cmake_minimum_required(VERSION 3.19...4.0.3)  # policy_max is set, so that will impliclty invoke cmake_policy(VERSION <min>[...<max>])
 
-cmake_policy(SET CMP0048 NEW) # handling project_version_* variables
+# Use ccache if available, has to be before "project()"
+find_program(CCACHE_PROGRAM NAMES ccache sccache)
+if(CCACHE_PROGRAM)
+  # Support: Unix Makefiles and Ninja only
+  message(STATUS "Using CCACHE")
+  # RULE_LAUNCH_COMPILE is an internal variable and makes RC compilation fail on windows, hence why we use the C/CXX COMPILER_LAUNCHER instead
+  message(STATUS "${CCACHE_PROGRAM} found and enabled")
+  set(CMAKE_CXX_COMPILER_LAUNCHER ${CCACHE_PROGRAM} CACHE FILEPATH "CXX compiler cache used")
+  set(CMAKE_C_COMPILER_LAUNCHER ${CCACHE_PROGRAM} CACHE FILEPATH "C compiler cache used")
+endif()
 
 project(EnergyPlus)
 
-cmake_minimum_required(VERSION 3.17)
-
-if(${CMAKE_MAJOR_VERSION}.${CMAKE_MINOR_VERSION} VERSION_GREATER "3.0")
-  cmake_policy(SET CMP0054 NEW) # CMake 3.1 added this policy
+# Raise an error if attempting to compile on macOS older than 13.3 - it does not work
+# 10.15 minimum for std::filesystem, 13.3 minimum for std::format with floating-point (to_chars)
+if (APPLE)
+  if(NOT CMAKE_OSX_DEPLOYMENT_TARGET)
+    message(FATAL_ERROR "CMAKE_OSX_DEPLOYMENT_TARGET not set. Please set CMAKE_OSX_DEPLOYMENT_TARGET to 13.3 or greater and try again.")
+  elseif (CMAKE_OSX_DEPLOYMENT_TARGET VERSION_LESS "13.3")
+    message(FATAL_ERROR "The minimum required version for macOS is 13.3, however CMAKE_OSX_DEPLOYMENT_TARGET is set to ${CMAKE_OSX_DEPLOYMENT_TARGET}.")
+  endif()
 endif()
-
-cmake_policy(SET CMP0012 NEW) # if() recognizes boolean constants
 
 set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake" ${CMAKE_MODULE_PATH})
 
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
+set(CMAKE_CXX_VISIBILITY_PRESET hidden)
+
+# Project-wide default C++ language level (individual third-party targets may lower/raise as needed)
+set(CMAKE_CXX_STANDARD 20 CACHE STRING "C++ standard to build EnergyPlus with (Official: 20)")
+set_property(CACHE CMAKE_CXX_STANDARD PROPERTY STRINGS 20 23 26)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_EXTENSIONS OFF)
+
+# We don't use C++20 modules: disable CMake's dependency scanning to avoid a separate
+# "Scanning ... for CXX dependencies" step (and compiler invocation) for every TU
+set(CMAKE_CXX_SCAN_FOR_MODULES OFF)
 
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 
 add_library(project_options INTERFACE)
-target_compile_features(project_options INTERFACE cxx_std_17)
+target_compile_features(project_options INTERFACE cxx_std_${CMAKE_CXX_STANDARD})
 
-add_library(cpp_pch_files INTERFACE)
 option(ENABLE_PCH "Enable Precompiled Headers" ON)
-if(ENABLE_PCH)
-  # This sets a global PCH parameter, each project will build its own PCH, which is a good idea if any #define's change
-  #
-  # consider breaking this out per project as necessary
-  target_precompile_headers(
-    cpp_pch_files
-    INTERFACE
-    "${PROJECT_SOURCE_DIR}/src/EnergyPlus/DataGlobalConstants.hh"
-    "${PROJECT_SOURCE_DIR}/src/EnergyPlus/DataGlobals.hh"
-    "${PROJECT_SOURCE_DIR}/src/EnergyPlus/Data/EnergyPlusData.hh"
-    "${PROJECT_SOURCE_DIR}/third_party/ObjexxFCL/src/ObjexxFCL/Array.functions.hh"
-    "${PROJECT_SOURCE_DIR}/third_party/ObjexxFCL/src/ObjexxFCL/Array1D.hh"
-    "${PROJECT_SOURCE_DIR}/third_party/nlohmann/json.hpp"
-    )
+# List of headers to precompile: each project will build its own PCH, which is a good idea if any #define's change
+set(EP_CXX_PCH_HEADERS
+    "$<$<COMPILE_LANGUAGE:CXX>:${PROJECT_SOURCE_DIR}/src/EnergyPlus/DataGlobalConstants.hh>"
+    "$<$<COMPILE_LANGUAGE:CXX>:${PROJECT_SOURCE_DIR}/src/EnergyPlus/DataGlobals.hh>"
+    "$<$<COMPILE_LANGUAGE:CXX>:${PROJECT_SOURCE_DIR}/src/EnergyPlus/Data/EnergyPlusData.hh>"
+    "$<$<COMPILE_LANGUAGE:CXX>:${PROJECT_SOURCE_DIR}/third_party/ObjexxFCL/src/ObjexxFCL/Array.functions.hh>"
+    "$<$<COMPILE_LANGUAGE:CXX>:${PROJECT_SOURCE_DIR}/third_party/ObjexxFCL/src/ObjexxFCL/Array1D.hh>"
+    "$<$<COMPILE_LANGUAGE:CXX>:${PROJECT_SOURCE_DIR}/third_party/nlohmann/json.hpp>"
+    "$<$<COMPILE_LANGUAGE:CXX>:${PROJECT_SOURCE_DIR}/src/EnergyPlus/Formatters.hh>")
+set(EP_TEST_CXX_PCH_HEADERS
+    ${EP_CXX_PCH_HEADERS}
+    "$<$<COMPILE_LANGUAGE:CXX>:<gtest/gtest.h>>"
+    "$<$<COMPILE_LANGUAGE:CXX>:${PROJECT_SOURCE_DIR}/tst/EnergyPlus/unit/Fixtures/EnergyPlusFixture.hh>")
+
+if(ENABLE_PCH AND CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+  # Without this, Clang embeds a timestamp in the generated .pch, so its content hash differs
+  # on every build even when sources/headers are unchanged. ccache hashes that .pch content for
+  # both the direct-mode manifest and the preprocessor-mode result key, so every TU using
+  # -include-pch becomes a guaranteed cache miss. See ccache manual, "Precompiled Headers".
+  target_compile_options(project_options INTERFACE "$<$<COMPILE_LANGUAGE:CXX>:SHELL:-Xclang -fno-pch-timestamp>")
 endif()
+
+option(ENABLE_UNITY "Enable Unity Build" OFF)
 
 add_library(project_fp_options INTERFACE)
 
 add_library(project_warnings INTERFACE)
+
+add_library(turn_off_warnings INTERFACE)
 
 set(THREADS_PREFER_PTHREAD_FLAG ON)
 find_package(Threads)
@@ -85,6 +111,11 @@ option(USE_PSYCHROMETRICS_CACHING "Use psychrometrics cashing routines" ON)
 option(USE_GLYCOL_CACHING "Use glycol cashing routines" ON)
 option(USE_PSYCH_STATS "Compute psychrometric stats" OFF)
 option(USE_PSYCH_ERRORS "Report psychrometric errors " ON)
+
+if(APPLE AND CMAKE_GENERATOR STREQUAL "Xcode" AND OPENGL_FOUND)
+  set(OPENGL_FOUND FALSE)
+  message(STATUS "Disabling OpenGL for Xcode-generated builds to avoid Cocoa window creation during build/test execution")
+endif()
 
 mark_as_advanced(BUILD_OBJEXXFCL_TESTING)
 
@@ -144,6 +175,19 @@ option(ENABLE_GTEST_DEBUG_MODE "Enable options to help debug test failures" ON)
 option(ENABLE_GTEST_SHUFFLE "Enable shuffle to eliminate order dependency" ON)
 option(ENABLE_INSTALL_REMOTE "Enable install_remote and install_remote_plist commands to install files from remote resources on the internet" ON)
 
+if(APPLE AND BUILD_PACKAGE)
+  # Define the codesigning variables early, before any calls to add_subdirectory for something with a dedicated project() or cmake_add_fortran_subdirectory
+  # Otherwise, the register_install_codesign_target isn't added until you reconfigure cmake...
+  include(cmake/CodeSigning.cmake)
+
+  # Defines CPACK_CODESIGNING_DEVELOPPER_ID_APPLICATION and CPACK_CODESIGNING_NOTARY_PROFILE_NAME
+  setup_macos_codesigning_variables()
+endif()
+
+if(MSVC AND NOT ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Intel"))
+  option(ENABLE_HARDENED_RUNTIME "Enable Control Flow Guard and Buffer Security Check" OFF)
+endif()
+
 mark_as_advanced(ENABLE_INSTALL_REMOTE)
 
 # Set a default build type if none was specified
@@ -158,7 +202,9 @@ endif()
 
 # we are making *a Python 3.6 Interpreter* a required dependency, so find it here
 # If LINK_WITH_PYTHON, also request the Development (libs) at the same time, to ensure consistent version between interpreter and Development
+# and ask for at least 3.8 (for the PyConfig stuff).
 if(LINK_WITH_PYTHON)
+  option(PYTHON_CLI "Build the Auxiliary CLI to Call Python Utilities" OFF)
   # find_package(Python) has the problem that on github actions in particular it'll pick up the most recent python (eg 3.9) from the tool cache
   # even if you have used the setup-python action and set it to 3.8, so we make the exact version required
   set(Python_REQUIRED_VERSION "" CACHE STRING "The specific Python version you want to link to (Optional)")
@@ -168,7 +214,7 @@ if(LINK_WITH_PYTHON)
   if(Python_REQUIRED_VERSION)
     find_package(Python ${Python_REQUIRED_VERSION} EXACT COMPONENTS Interpreter Development REQUIRED)
   else()
-    find_package(Python 3.6 COMPONENTS Interpreter Development REQUIRED)
+    find_package(Python 3.12 COMPONENTS Interpreter Development REQUIRED)
   endif()
 else()
   find_package(Python 3.6 COMPONENTS Interpreter REQUIRED)
@@ -200,8 +246,23 @@ if(BUILD_TESTING)
         "${CMAKE_SYSTEM_NAME}-${CMAKE_CXX_COMPILER_ID}${ARCH_FLAG}"
         CACHE STRING "Identifier for this device configuration")
   endif()
-
+  set_property(GLOBAL PROPERTY CTEST_TARGETS_ADDED 1)  # This avoids all the CTest Nightly, Continuous, etc. tests.
   enable_testing()
+
+  execute_process(COMMAND ${Python_EXECUTABLE} -m pytest --version
+    RESULT_VARIABLE _Pytest_STATUS
+        OUTPUT_VARIABLE Pytest_Version
+        ERROR_QUIET
+        OUTPUT_STRIP_TRAILING_WHITESPACE
+  )
+  if(_Pytest_STATUS AND NOT _Pytest_STATUS EQUAL 0)
+    message(AUTHOR_WARNING "Pytest isn't installed on your system python, so some tests won't be run. Run `${Python_EXECUTABLE} -m pip install pytest`")
+    set(Pytest_AVAILABLE OFF)
+  else()
+    message(VERBOSE "Found Pytest: ${Pytest_Version}")
+    set(Pytest_AVAILABLE ON)
+  endif()
+
 endif()
 
 if(ENABLE_REGRESSION_TESTING)
@@ -247,8 +308,7 @@ add_subdirectory(third_party)
 
 target_include_directories(project_options INTERFACE ${PROJECT_SOURCE_DIR}/src)
 target_include_directories(project_options INTERFACE ${PROJECT_SOURCE_DIR}/third_party)
-target_include_directories(project_options INTERFACE ${PROJECT_SOURCE_DIR}/third_party/fmt-8.0.1/include)
-target_include_directories(project_options INTERFACE ${PROJECT_SOURCE_DIR}/third_party/btwxt/src)
+target_include_directories(project_options INTERFACE ${PROJECT_SOURCE_DIR}/third_party/btwxt/include)
 target_include_directories(project_options INTERFACE ${PROJECT_SOURCE_DIR}/third_party/re2)
 target_include_directories(project_options INTERFACE ${PROJECT_SOURCE_DIR}/third_party/doj)
 target_include_directories(project_options INTERFACE ${PROJECT_SOURCE_DIR}/third_party/nlohmann)
@@ -258,7 +318,7 @@ target_include_directories(project_options INTERFACE ${PROJECT_SOURCE_DIR}/third
 target_include_directories(project_options SYSTEM INTERFACE ${PROJECT_SOURCE_DIR}/third_party/SQLite/)
 target_include_directories(project_options SYSTEM INTERFACE "${PROJECT_SOURCE_DIR}/third_party/Expat" "${PROJECT_SOURCE_DIR}/third_party/Expat/lib")
 target_include_directories(project_options INTERFACE ${PROJECT_SOURCE_DIR}/third_party/CLI/)
-target_include_directories(project_options INTERFACE ${PROJECT_SOURCE_DIR}/third_party/eigen/)
+target_include_directories(project_options SYSTEM INTERFACE ${PROJECT_SOURCE_DIR}/third_party/eigen/)
 target_include_directories(project_options INTERFACE ${PROJECT_SOURCE_DIR}/third_party/Windows-CalcEngine/src/Chromogenics/include)
 target_include_directories(project_options INTERFACE ${PROJECT_SOURCE_DIR}/third_party/Windows-CalcEngine/src/Common/include)
 target_include_directories(project_options INTERFACE ${PROJECT_SOURCE_DIR}/third_party/Windows-CalcEngine/src/Gases/include)
@@ -274,15 +334,9 @@ set(SAMAPI_EXPORT OFF FORCE)
 if(OPENGL_FOUND)
   target_include_directories(project_options INTERFACE ${PROJECT_SOURCE_DIR}/third_party/penumbra/include)
 endif()
-target_include_directories(project_options INTERFACE ${PROJECT_SOURCE_DIR}/third_party/kiva-ep/src)
+target_include_directories(project_options INTERFACE ${PROJECT_SOURCE_DIR}/third_party/kiva/src)
 target_include_directories(project_options INTERFACE "${kiva_BINARY_DIR}/src/libkiva")
 target_include_directories(project_options SYSTEM INTERFACE "${kiva_SOURCE_DIR}/vendor/boost-1.61.0/")
-
-add_subdirectory(scripts/dev/generate_embeddable_epJSON_schema)
-set_target_properties(generate_embeddedable_epJSON_schema PROPERTIES FOLDER "Internal")
-
-target_include_directories(project_options INTERFACE ${PROJECT_SOURCE_DIR}/third_party/cpgfunctionEP)
-target_include_directories(project_options INTERFACE ${PROJECT_SOURCE_DIR}/third_party/cpgfunctionEP/include)
 
 if(OPENGL_FOUND)
   set(BUILD_PENUMBRA_TESTING
@@ -293,15 +347,6 @@ endif()
 # E+ required libraries
 add_subdirectory(idd)
 
-execute_process(
-  COMMAND ${Python_EXECUTABLE} "${PROJECT_SOURCE_DIR}/scripts/dev/generate_epJSON_schema/generate_epJSON_schema.py" "${PROJECT_SOURCE_DIR}"
-  TIMEOUT 30
-  RESULT_VARIABLE generate_epJSON_schema_result)
-if(${generate_epJSON_schema_result} MATCHES ".*timeout.*")
-  message(FATAL_ERROR "Generating epJSON Schema from IDD failed: ${generate_epJSON_schema_result}")
-endif()
-configure_file(idd/Energy+.idd.in "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/Energy+.idd")
-configure_file(idd/Energy+.schema.epJSON.in "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/Energy+.schema.epJSON")
 configure_file(idd/BasementGHT.idd "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/BasementGHT.idd")
 configure_file(idd/SlabGHT.idd "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/SlabGHT.idd")
 
@@ -317,7 +362,6 @@ configure_file("workflows/transition.py" "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/work
 # of course E+ itself
 add_subdirectory(src/EnergyPlus)
 set_target_properties(airflownetworklib PROPERTIES FOLDER "Internal")
-set_target_properties(GenerateEmbeddedEpJSONSchema PROPERTIES FOLDER "Internal")
 set_target_properties(energyplusparser PROPERTIES FOLDER "Internal")
 
 if(BUILD_TESTING)
@@ -330,6 +374,10 @@ if(BUILD_TESTING)
       if(VALGRIND_ANALYZE_PERFORMANCE_TESTS)
         find_program(VALGRIND NAMES valgrind PATH /usr/bin /usr/local/bin)
       endif()
+      option(PERF_STAT_ANALYZE_PERFORMANCE_TESTS "Analyze performance tests via `perf stat`" OFF)
+      if(PERF_STAT_ANALYZE_PERFORMANCE_TESTS)
+        find_program(PERF NAMES perf PATH /usr/bin /usr/local/bin)
+      endif()
     endif()
     add_subdirectory(performance_tests)
   endif()
@@ -339,6 +387,8 @@ if(BUILD_TESTING)
   set_target_properties(TestAPI_Runtime_C PROPERTIES FOLDER Testing)
   set_target_properties(TestAPI_Functional_C PROPERTIES FOLDER Testing)
   set_target_properties(TestEnergyPlusCallbacks PROPERTIES FOLDER Testing)
+  set_target_properties(TestAPI_RuntimeDeleteState_C PROPERTIES FOLDER Testing)
+  set_target_properties(TestAPI_RuntimeResetState_C PROPERTIES FOLDER Testing)
 endif()
 
 add_subdirectory(src/ConvertInputFormat)
@@ -362,9 +412,9 @@ if(BUILD_FORTRAN)
     PROJECT Transition
     CMAKE_COMMAND_LINE ${TRANSITION_EXTRA_FLAGS}
     NO_EXTERNAL_INSTALL)
-  file(COPY "idd/V22-2-0-Energy+.idd" DESTINATION "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}")
-  configure_file(idd/Energy+.idd.in "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/V23-1-0-Energy+.idd")
-  file(COPY "src/Transition/SupportFiles/Report Variables 22-2-0 to 23-1-0.csv" DESTINATION "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}")
+  file(COPY "${PREVIOUS_IDD}" DESTINATION "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}")
+  configure_file(idd/Energy+.idd.in "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/V${CMAKE_VERSION_MAJOR}-${CMAKE_VERSION_MINOR}-${CMAKE_VERSION_PATCH}-Energy+.idd")
+  file(COPY "src/Transition/SupportFiles/Report Variables ${PREV_RELEASE_MAJOR}-${PREV_RELEASE_MINOR}-${PREV_RELEASE_PATCH} to ${CMAKE_VERSION_MAJOR}-${CMAKE_VERSION_MINOR}-${CMAKE_VERSION_PATCH}.csv" DESTINATION "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}")
   cmake_add_fortran_subdirectory(
     src/Basement
     PROJECT Basement
@@ -414,13 +464,13 @@ mark_as_advanced(ENABLE_GTEST_DEBUG_MODE)
 mark_as_advanced(ENABLE_GTEST_SHUFFLE)
 mark_as_advanced(ENABLE_MEMORY_SANITIZER)
 mark_as_advanced(ENABLE_OPENMP)
-mark_as_advanced(USE_OpenMP)
 mark_as_advanced(KIVA_3D)
 mark_as_advanced(KIVA_COVERAGE)
 mark_as_advanced(KIVA_EXE_BUILD)
 mark_as_advanced(KIVA_GROUND_PLOT)
 mark_as_advanced(KIVA_STATIC_LIB)
 mark_as_advanced(KIVA_TESTING)
+mark_as_advanced(KIVA_WERROR)
 mark_as_advanced(BTWXT_COVERAGE)
 mark_as_advanced(BUILD_BTWXT_TESTING)
 mark_as_advanced(BTWXT_STATIC_LIB)
@@ -442,6 +492,10 @@ mark_as_advanced(FMT_INSTALL)
 mark_as_advanced(FMT_PEDANTIC)
 mark_as_advanced(FMT_TEST)
 mark_as_advanced(FMT_WERROR)
+mark_as_advanced(FMT_DEBUG_POSTFIX)
+mark_as_advanced(FMT_INC_DIR)
+mark_as_advanced(FMT_MODULE)
+mark_as_advanced(FMT_OS)
 mark_as_advanced(GLFW_BUILD_DOCS)
 mark_as_advanced(GLFW_BUILD_EXAMPLES)
 mark_as_advanced(GLFW_BUILD_TESTS)
@@ -460,3 +514,23 @@ mark_as_advanced(USE_PSYCHROMETRICS_CACHING)
 mark_as_advanced(USE_GLYCOL_CACHING)
 mark_as_advanced(USE_PSYCH_STATS)
 mark_as_advanced(USE_PSYCH_ERRORS)
+mark_as_advanced(LSB_RELEASE)
+mark_as_advanced(LIBTK205_BUILD_TESTING)
+mark_as_advanced(libtk205_USE_SUBMODULES)
+mark_as_advanced(ENABLE_SANITIZER_ADDRESS)
+mark_as_advanced(ENABLE_SANITIZER_LEAK)
+mark_as_advanced(ENABLE_SANITIZER_MEMORY)
+mark_as_advanced(ENABLE_SANITIZER_THREAD)
+mark_as_advanced(ENABLE_SANITIZER_UNDEFINED_BEHAVIOR)
+mark_as_advanced(X11_xcb_xkb_INCLUDE_PATH)
+mark_as_advanced(ENABLE_SANITIZER_UNDEFINED_BEHAVIOR)
+mark_as_advanced(JSONCPP_USE_SECURE_MEMORY)
+mark_as_advanced(JSONCPP_WITH_CMAKE_PACKAGE)
+mark_as_advanced(JSONCPP_WITH_PKGCONFIG_SUPPORT)
+mark_as_advanced(JSONCPP_WITH_POST_BUILD_UNITTE)
+mark_as_advanced(JSONCPP_WITH_STRICT_ISO)
+mark_as_advanced(JSONCPP_WITH_TESTS)
+mark_as_advanced(JSONCPP_WITH_WARNING_AS_ERROR)
+mark_as_advanced(CMAKE_CXX_COMPILER_LAUNCHER)
+mark_as_advanced(CMAKE_C_COMPILER_LAUNCHER)
+mark_as_advanced(DEBUG_LIBNAME_SUFFIX)

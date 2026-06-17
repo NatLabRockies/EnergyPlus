@@ -70,7 +70,7 @@
 ! Utility Tariffs:                None
 !
 
-  Version,23.1;
+  Version,26.2;
 
   AirLoopHVAC:UnitaryHeatCool,
     FURNACE_PACU_CAV:1_Unitary_Package,  !- Name
@@ -154,6 +154,7 @@
 
   Coil:Cooling:DX:VariableSpeed,
     FURNACE_PACU_CAV:1_Unitary_Package_CoolCoil,  !- Name
+    ,                        !- Availability Schedule Name
     FURNACE_PACU_CAV:1_Unitary_PackageCoolCoil air inlet,  !- Indoor Air Inlet Node Name
     FURNACE_PACU_CAV:1_Unitary_PackageHeatCoil air inlet,  !- Indoor Air Outlet Node Name
     10.0,                    !- Number of Speeds {dimensionless}
@@ -162,11 +163,15 @@
     AUTOSIZE,                !- Rated Air Flow Rate At Selected Nominal Speed Level {m3/s}
     0.0,                     !- Nominal Time for Condensate to Begin Leaving the Coil {s}
     0.0,                     !- Initial Moisture Evaporation Rate Divided by Steady-State AC Latent Capacity {dimensionless}
+    ,                        !- Maximum Cycling Rate {cycles/hr}
+    ,                        !- Latent Capacity Time Constant {s}
+    ,                        !- Fan Delay Time {s}
     FURNACE_PACU_CAV:1_Unitary_PackagecoolPLR,  !- Energy Part Load Fraction Curve Name
     ,                        !- Condenser Air Inlet Node Name
     AirCooled,               !- Condenser Type
     ,                        !- Evaporative Condenser Pump Rated Power Consumption {W}
     200.0,                   !- Crankcase Heater Capacity {W}
+    ,                        !- Crankcase Heater Capacity Function of Temperature Curve Name
     10.0,                    !- Maximum Outdoor Dry-Bulb Temperature for Crankcase Heater Operation {C}
     ,                        !- Minimum Outdoor Dry-Bulb Temperature for Compressor Operation {C}
     ,                        !- Supply Water Storage Tank Name
@@ -178,6 +183,8 @@
     0.75,                    !- Speed 1 Reference Unit Gross Rated Sensible Heat Ratio {dimensionless}
     4.0,                     !- Speed 1 Reference Unit Gross Rated Cooling COP {W/W}
     0.1359072,               !- Speed 1 Reference Unit Rated Air Flow Rate {m3/s}
+    ,                        !- 2017 Speed 1 Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
+    ,                        !- 2023 Speed 1 Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
     0.26,                    !- Speed 1 Reference Unit Rated Condenser Air Flow Rate {m3/s}
     ,                        !- Speed 1 Reference Unit Rated Pad Effectiveness of Evap Precooling {dimensionless}
     FURNACE_PACU_CAV:1_Unitary_PackagecoolCapFT,  !- Speed 1 Total Cooling Capacity Function of Temperature Curve Name
@@ -188,6 +195,8 @@
     0.75,                    !- Speed 2 Reference Unit Gross Rated Sensible Heat Ratio {dimensionless}
     4.0,                     !- Speed 2 Reference Unit Gross Rated Cooling COP {W/W}
     0.151008,                !- Speed 2 Reference Unit Rated Air Flow Rate {m3/s}
+    ,                        !- 2017 Speed 2 Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
+    ,                        !- 2023 Speed 2 Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
     0.30,                    !- Speed 2 Reference Unit Rated Condenser Air Flow Rate {m3/s}
     ,                        !- Speed 2 Reference Unit Rated Pad Effectiveness of Evap Precooling {dimensionless}
     FURNACE_PACU_CAV:1_Unitary_PackagecoolCapFT,  !- Speed 2 Total Cooling Capacity Function of Temperature Curve Name
@@ -198,6 +207,8 @@
     0.75,                    !- Speed 3 Reference Unit Gross Rated Sensible Heat Ratio {dimensionless}
     4.0,                     !- Speed 3 Reference Unit Gross Rated Cooling COP {W/W}
     0.1661088,               !- Speed 3 Reference Unit Rated Air Flow Rate {m3/s}
+    ,                        !- 2017 Speed 3 Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
+    ,                        !- 2023 Speed 3 Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
     0.33,                    !- Speed 3 Reference Unit Rated Condenser Air Flow Rate {m3/s}
     ,                        !- Speed 3 Reference Unit Rated Pad Effectiveness of Evap Precooling {dimensionless}
     FURNACE_PACU_CAV:1_Unitary_PackagecoolCapFT,  !- Speed 3 Total Cooling Capacity Function of Temperature Curve Name
@@ -208,6 +219,8 @@
     0.75,                    !- Speed 4 Reference Unit Gross Rated Sensible Heat Ratio {dimensionless}
     4.0,                     !- Speed 4 Reference Unit Gross Rated Cooling COP {W/W}
     0.1963104,               !- Speed 4 Reference Unit Rated Air Flow Rate {m3/s}
+    ,                        !- 2017 Speed 4 Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
+    ,                        !- 2023 Speed 4 Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
     0.38,                    !- Speed 4 Reference Unit Rated Condenser Air Flow Rate {m3/s}
     ,                        !- Speed 4 Reference Unit Rated Pad Effectiveness of Evap Precooling {dimensionless}
     FURNACE_PACU_CAV:1_Unitary_PackagecoolCapFT,  !- Speed 4 Total Cooling Capacity Function of Temperature Curve Name
@@ -218,6 +231,8 @@
     0.75,                    !- Speed 5 Reference Unit Gross Rated Sensible Heat Ratio {dimensionless}
     4.0,                     !- Speed 5 Reference Unit Gross Rated Cooling COP {W/W}
     0.226512,                !- Speed 5 Reference Unit Rated Air Flow Rate {m3/s}
+    ,                        !- 2017 Speed 5 Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
+    ,                        !- 2023 Speed 5 Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
     0.44,                    !- Speed 5 Reference Unit Rated Condenser Air Flow Rate {m3/s}
     ,                        !- Speed 5 Reference Unit Rated Pad Effectiveness of Evap Precooling {dimensionless}
     FURNACE_PACU_CAV:1_Unitary_PackagecoolCapFT,  !- Speed 5 Total Cooling Capacity Function of Temperature Curve Name
@@ -228,7 +243,9 @@
     0.75,                    !- Speed 6 Reference Unit Gross Rated Sensible Heat Ratio {dimensionless}
     4.0,                     !- Speed 6 Reference Unit Gross Rated Cooling COP {W/W}
     0.2567136,               !- Speed 6 Reference Unit Rated Air Flow Rate {m3/s}
-    0.50,                    !- Speed 6 Reference Unit Condenser Air Flow Rate {m3/s}
+    ,                        !- 2017 Speed 6 Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
+    ,                        !- 2023 Speed 6 Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
+    0.50,                    !- Speed 6 Reference Unit Rated Condenser Air Flow Rate {m3/s}
     ,                        !- Speed 6 Reference Unit Rated Pad Effectiveness of Evap Precooling {dimensionless}
     FURNACE_PACU_CAV:1_Unitary_PackagecoolCapFT,  !- Speed 6 Total Cooling Capacity Function of Temperature Curve Name
     FURNACE_PACU_CAV:1_Unitary_PackagecoolFFF,  !- Speed 6 Total Cooling Capacity Function of Air Flow Fraction Curve Name
@@ -238,7 +255,9 @@
     0.75,                    !- Speed 7 Reference Unit Gross Rated Sensible Heat Ratio {dimensionless}
     4.0,                     !- Speed 7 Reference Unit Gross Rated Cooling COP {W/W}
     0.2869152,               !- Speed 7 Reference Unit Rated Air Flow Rate {m3/s}
-    0.57,                    !- Speed 7 Reference Unit Condenser Flow Rate {m3/s}
+    ,                        !- 2017 Speed 7 Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
+    ,                        !- 2023 Speed 7 Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
+    0.57,                    !- Speed 7 Reference Unit Rated Condenser Air Flow Rate {m3/s}
     ,                        !- Speed 7 Reference Unit Rated Pad Effectiveness of Evap Precooling {dimensionless}
     FURNACE_PACU_CAV:1_Unitary_PackagecoolCapFT,  !- Speed 7 Total Cooling Capacity Function of Temperature Curve Name
     FURNACE_PACU_CAV:1_Unitary_PackagecoolFFF,  !- Speed 7 Total Cooling Capacity Function of Air Flow Fraction Curve Name
@@ -248,7 +267,9 @@
     0.75,                    !- Speed 8 Reference Unit Gross Rated Sensible Heat Ratio {dimensionless}
     4.0,                     !- Speed 8 Reference Unit Gross Rated Cooling COP {W/W}
     0.3171168,               !- Speed 8 Reference Unit Rated Air Flow Rate {m3/s}
-    0.63,                    !- Speed 8 Reference Unit Condenser Air Flow Rate {m3/s}
+    ,                        !- 2017 Speed 8 Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
+    ,                        !- 2023 Speed 8 Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
+    0.63,                    !- Speed 8 Reference Unit Rated Condenser Air Flow Rate {m3/s}
     ,                        !- Speed 8 Reference Unit Rated Pad Effectiveness of Evap Precooling {dimensionless}
     FURNACE_PACU_CAV:1_Unitary_PackagecoolCapFT,  !- Speed 8 Total Cooling Capacity Function of Temperature Curve Name
     FURNACE_PACU_CAV:1_Unitary_PackagecoolFFF,  !- Speed 8 Total Cooling Capacity Function of Air Flow Fraction Curve Name
@@ -258,7 +279,9 @@
     0.75,                    !- Speed 9 Reference Unit Gross Rated Sensible Heat Ratio {dimensionless}
     4.0,                     !- Speed 9 Reference Unit Gross Rated Cooling COP {W/W}
     0.3473184,               !- Speed 9 Reference Unit Rated Air Flow Rate {m3/s}
-    0.69,                    !- Speed 9 Reference Unit Condenser Air Flow Rate {m3/s}
+    ,                        !- 2017 Speed 9 Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
+    ,                        !- 2023 Speed 9 Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
+    0.69,                    !- Speed 9 Reference Unit Rated Condenser Air Flow Rate {m3/s}
     ,                        !- Speed 9 Reference Unit Rated Pad Effectiveness of Evap Precooling {dimensionless}
     FURNACE_PACU_CAV:1_Unitary_PackagecoolCapFT,  !- Speed 9 Total Cooling Capacity Function of Temperature Curve Name
     FURNACE_PACU_CAV:1_Unitary_PackagecoolFFF,  !- Speed 9 Total Cooling Capacity Function of Air Flow Fraction Curve Name
@@ -268,7 +291,9 @@
     0.75,                    !- Speed 10 Reference Unit Gross Rated Sensible Heat Ratio {dimensionless}
     4.0,                     !- Speed 10 Reference Unit Gross Rated Cooling COP {W/W}
     0.37752,                 !- Speed 10 Reference Unit Rated Air Flow Rate {m3/s}
-    0.74,                    !- Speed 10 Reference Unit Condenser Air Flow Rate {m3/s}
+    ,                        !- 2017 Speed 10 Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
+    ,                        !- 2023 Speed 10 Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
+    0.74,                    !- Speed 10 Reference Unit Rated Condenser Air Flow Rate {m3/s}
     ,                        !- Speed 10 Reference Unit Rated Pad Effectiveness of Evap Precooling {dimensionless}
     FURNACE_PACU_CAV:1_Unitary_PackagecoolCapFT,  !- Speed 10 Total Cooling Capacity Function of Temperature Curve Name
     FURNACE_PACU_CAV:1_Unitary_PackagecoolFFF,  !- Speed 10 Total Cooling Capacity Function of Air Flow Fraction Curve Name
@@ -277,6 +302,7 @@
 
   Coil:Cooling:DX:VariableSpeed,
     FURNACE_PACU_CAV:2_Unitary_Package_CoolCoil,  !- Name
+    ,                        !- Availability Schedule Name
     FURNACE_PACU_CAV:2_Unitary_PackageCoolCoil air inlet,  !- Indoor Air Inlet Node Name
     FURNACE_PACU_CAV:2_Unitary_PackageHeatCoil air inlet,  !- Indoor Air Outlet Node Name
     10.0,                    !- Number of Speeds {dimensionless}
@@ -285,11 +311,15 @@
     AUTOSIZE,                !- Rated Air Flow Rate At Selected Nominal Speed Level {m3/s}
     0.0,                     !- Nominal Time for Condensate to Begin Leaving the Coil {s}
     0.0,                     !- Initial Moisture Evaporation Rate Divided by Steady-State AC Latent Capacity {dimensionless}
+    ,                        !- Maximum Cycling Rate {cycles/hr}
+    ,                        !- Latent Capacity Time Constant {s}
+    ,                        !- Fan Delay Time {s}
     FURNACE_PACU_CAV:2_Unitary_PackagecoolPLR,  !- Energy Part Load Fraction Curve Name
     ,                        !- Condenser Air Inlet Node Name
     AirCooled,               !- Condenser Type
     ,                        !- Evaporative Condenser Pump Rated Power Consumption {W}
     200.0,                   !- Crankcase Heater Capacity {W}
+    ,                        !- Crankcase Heater Capacity Function of Temperature Curve Name
     10.0,                    !- Maximum Outdoor Dry-Bulb Temperature for Crankcase Heater Operation {C}
     ,                        !- Minimum Outdoor Dry-Bulb Temperature for Compressor Operation {C}
     ,                        !- Supply Water Storage Tank Name
@@ -301,6 +331,8 @@
     0.75,                    !- Speed 1 Reference Unit Gross Rated Sensible Heat Ratio {dimensionless}
     4.0,                     !- Speed 1 Reference Unit Gross Rated Cooling COP {W/W}
     0.1359072,               !- Speed 1 Reference Unit Rated Air Flow Rate {m3/s}
+    ,                        !- 2017 Speed 1 Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
+    ,                        !- 2023 Speed 1 Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
     0.26,                    !- Speed 1 Reference Unit Rated Condenser Air Flow Rate {m3/s}
     ,                        !- Speed 1 Reference Unit Rated Pad Effectiveness of Evap Precooling {dimensionless}
     FURNACE_PACU_CAV:2_Unitary_PackagecoolCapFT,  !- Speed 1 Total Cooling Capacity Function of Temperature Curve Name
@@ -311,6 +343,8 @@
     0.75,                    !- Speed 2 Reference Unit Gross Rated Sensible Heat Ratio {dimensionless}
     4.0,                     !- Speed 2 Reference Unit Gross Rated Cooling COP {W/W}
     0.151008,                !- Speed 2 Reference Unit Rated Air Flow Rate {m3/s}
+    ,                        !- 2017 Speed 2 Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
+    ,                        !- 2023 Speed 2 Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
     0.30,                    !- Speed 2 Reference Unit Rated Condenser Air Flow Rate {m3/s}
     ,                        !- Speed 2 Reference Unit Rated Pad Effectiveness of Evap Precooling {dimensionless}
     FURNACE_PACU_CAV:2_Unitary_PackagecoolCapFT,  !- Speed 2 Total Cooling Capacity Function of Temperature Curve Name
@@ -321,6 +355,8 @@
     0.75,                    !- Speed 3 Reference Unit Gross Rated Sensible Heat Ratio {dimensionless}
     4.0,                     !- Speed 3 Reference Unit Gross Rated Cooling COP {W/W}
     0.1661088,               !- Speed 3 Reference Unit Rated Air Flow Rate {m3/s}
+    ,                        !- 2017 Speed 3 Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
+    ,                        !- 2023 Speed 3 Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
     0.33,                    !- Speed 3 Reference Unit Rated Condenser Air Flow Rate {m3/s}
     ,                        !- Speed 3 Reference Unit Rated Pad Effectiveness of Evap Precooling {dimensionless}
     FURNACE_PACU_CAV:2_Unitary_PackagecoolCapFT,  !- Speed 3 Total Cooling Capacity Function of Temperature Curve Name
@@ -331,6 +367,8 @@
     0.75,                    !- Speed 4 Reference Unit Gross Rated Sensible Heat Ratio {dimensionless}
     4.0,                     !- Speed 4 Reference Unit Gross Rated Cooling COP {W/W}
     0.1963104,               !- Speed 4 Reference Unit Rated Air Flow Rate {m3/s}
+    ,                        !- 2017 Speed 4 Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
+    ,                        !- 2023 Speed 4 Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
     0.38,                    !- Speed 4 Reference Unit Rated Condenser Air Flow Rate {m3/s}
     ,                        !- Speed 4 Reference Unit Rated Pad Effectiveness of Evap Precooling {dimensionless}
     FURNACE_PACU_CAV:2_Unitary_PackagecoolCapFT,  !- Speed 4 Total Cooling Capacity Function of Temperature Curve Name
@@ -341,6 +379,8 @@
     0.75,                    !- Speed 5 Reference Unit Gross Rated Sensible Heat Ratio {dimensionless}
     4.0,                     !- Speed 5 Reference Unit Gross Rated Cooling COP {W/W}
     0.226512,                !- Speed 5 Reference Unit Rated Air Flow Rate {m3/s}
+    ,                        !- 2017 Speed 5 Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
+    ,                        !- 2023 Speed 5 Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
     0.44,                    !- Speed 5 Reference Unit Rated Condenser Air Flow Rate {m3/s}
     ,                        !- Speed 5 Reference Unit Rated Pad Effectiveness of Evap Precooling {dimensionless}
     FURNACE_PACU_CAV:2_Unitary_PackagecoolCapFT,  !- Speed 5 Total Cooling Capacity Function of Temperature Curve Name
@@ -351,7 +391,9 @@
     0.75,                    !- Speed 6 Reference Unit Gross Rated Sensible Heat Ratio {dimensionless}
     4.0,                     !- Speed 6 Reference Unit Gross Rated Cooling COP {W/W}
     0.2567136,               !- Speed 6 Reference Unit Rated Air Flow Rate {m3/s}
-    0.50,                    !- Speed 6 Reference Unit Condenser Air Flow Rate {m3/s}
+    ,                        !- 2017 Speed 6 Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
+    ,                        !- 2023 Speed 6 Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
+    0.50,                    !- Speed 6 Reference Unit Rated Condenser Air Flow Rate {m3/s}
     ,                        !- Speed 6 Reference Unit Rated Pad Effectiveness of Evap Precooling {dimensionless}
     FURNACE_PACU_CAV:2_Unitary_PackagecoolCapFT,  !- Speed 6 Total Cooling Capacity Function of Temperature Curve Name
     FURNACE_PACU_CAV:2_Unitary_PackagecoolFFF,  !- Speed 6 Total Cooling Capacity Function of Air Flow Fraction Curve Name
@@ -361,7 +403,9 @@
     0.75,                    !- Speed 7 Reference Unit Gross Rated Sensible Heat Ratio {dimensionless}
     4.0,                     !- Speed 7 Reference Unit Gross Rated Cooling COP {W/W}
     0.2869152,               !- Speed 7 Reference Unit Rated Air Flow Rate {m3/s}
-    0.57,                    !- Speed 7 Reference Unit Condenser Flow Rate {m3/s}
+    ,                        !- 2017 Speed 7 Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
+    ,                        !- 2023 Speed 7 Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
+    0.57,                    !- Speed 7 Reference Unit Rated Condenser Air Flow Rate {m3/s}
     ,                        !- Speed 7 Reference Unit Rated Pad Effectiveness of Evap Precooling {dimensionless}
     FURNACE_PACU_CAV:2_Unitary_PackagecoolCapFT,  !- Speed 7 Total Cooling Capacity Function of Temperature Curve Name
     FURNACE_PACU_CAV:2_Unitary_PackagecoolFFF,  !- Speed 7 Total Cooling Capacity Function of Air Flow Fraction Curve Name
@@ -371,7 +415,9 @@
     0.75,                    !- Speed 8 Reference Unit Gross Rated Sensible Heat Ratio {dimensionless}
     4.0,                     !- Speed 8 Reference Unit Gross Rated Cooling COP {W/W}
     0.3171168,               !- Speed 8 Reference Unit Rated Air Flow Rate {m3/s}
-    0.63,                    !- Speed 8 Reference Unit Condenser Air Flow Rate {m3/s}
+    ,                        !- 2017 Speed 8 Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
+    ,                        !- 2023 Speed 8 Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
+    0.63,                    !- Speed 8 Reference Unit Rated Condenser Air Flow Rate {m3/s}
     ,                        !- Speed 8 Reference Unit Rated Pad Effectiveness of Evap Precooling {dimensionless}
     FURNACE_PACU_CAV:2_Unitary_PackagecoolCapFT,  !- Speed 8 Total Cooling Capacity Function of Temperature Curve Name
     FURNACE_PACU_CAV:2_Unitary_PackagecoolFFF,  !- Speed 8 Total Cooling Capacity Function of Air Flow Fraction Curve Name
@@ -381,7 +427,9 @@
     0.75,                    !- Speed 9 Reference Unit Gross Rated Sensible Heat Ratio {dimensionless}
     4.0,                     !- Speed 9 Reference Unit Gross Rated Cooling COP {W/W}
     0.3473184,               !- Speed 9 Reference Unit Rated Air Flow Rate {m3/s}
-    0.69,                    !- Speed 9 Reference Unit Condenser Air Flow Rate {m3/s}
+    ,                        !- 2017 Speed 9 Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
+    ,                        !- 2023 Speed 9 Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
+    0.69,                    !- Speed 9 Reference Unit Rated Condenser Air Flow Rate {m3/s}
     ,                        !- Speed 9 Reference Unit Rated Pad Effectiveness of Evap Precooling {dimensionless}
     FURNACE_PACU_CAV:2_Unitary_PackagecoolCapFT,  !- Speed 9 Total Cooling Capacity Function of Temperature Curve Name
     FURNACE_PACU_CAV:2_Unitary_PackagecoolFFF,  !- Speed 9 Total Cooling Capacity Function of Air Flow Fraction Curve Name
@@ -391,7 +439,9 @@
     0.75,                    !- Speed 10 Reference Unit Gross Rated Sensible Heat Ratio {dimensionless}
     4.0,                     !- Speed 10 Reference Unit Gross Rated Cooling COP {W/W}
     0.37752,                 !- Speed 10 Reference Unit Rated Air Flow Rate {m3/s}
-    0.74,                    !- Speed 10 Reference Unit Condenser Air Flow Rate {m3/s}
+    ,                        !- 2017 Speed 10 Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
+    ,                        !- 2023 Speed 10 Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
+    0.74,                    !- Speed 10 Reference Unit Rated Condenser Air Flow Rate {m3/s}
     ,                        !- Speed 10 Reference Unit Rated Pad Effectiveness of Evap Precooling {dimensionless}
     FURNACE_PACU_CAV:2_Unitary_PackagecoolCapFT,  !- Speed 10 Total Cooling Capacity Function of Temperature Curve Name
     FURNACE_PACU_CAV:2_Unitary_PackagecoolFFF,  !- Speed 10 Total Cooling Capacity Function of Air Flow Fraction Curve Name
@@ -400,6 +450,7 @@
 
   Coil:Cooling:DX:VariableSpeed,
     FURNACE_PACU_CAV:3_Unitary_Package_CoolCoil,  !- Name
+    ,                        !- Availability Schedule Name
     FURNACE_PACU_CAV:3_Unitary_PackageCoolCoil air inlet,  !- Indoor Air Inlet Node Name
     FURNACE_PACU_CAV:3_Unitary_PackageHeatCoil air inlet,  !- Indoor Air Outlet Node Name
     10.0,                    !- Number of Speeds {dimensionless}
@@ -408,11 +459,15 @@
     AUTOSIZE,                !- Rated Air Flow Rate At Selected Nominal Speed Level {m3/s}
     0.0,                     !- Nominal Time for Condensate to Begin Leaving the Coil {s}
     0.0,                     !- Initial Moisture Evaporation Rate Divided by Steady-State AC Latent Capacity {dimensionless}
+    ,                        !- Maximum Cycling Rate {cycles/hr}
+    ,                        !- Latent Capacity Time Constant {s}
+    ,                        !- Fan Delay Time {s}
     FURNACE_PACU_CAV:3_Unitary_PackagecoolPLR,  !- Energy Part Load Fraction Curve Name
     ,                        !- Condenser Air Inlet Node Name
     AirCooled,               !- Condenser Type
     ,                        !- Evaporative Condenser Pump Rated Power Consumption {W}
     200.0,                   !- Crankcase Heater Capacity {W}
+    ,                        !- Crankcase Heater Capacity Function of Temperature Curve Name
     10.0,                    !- Maximum Outdoor Dry-Bulb Temperature for Crankcase Heater Operation {C}
     ,                        !- Minimum Outdoor Dry-Bulb Temperature for Compressor Operation {C}
     ,                        !- Supply Water Storage Tank Name
@@ -424,6 +479,8 @@
     0.75,                    !- Speed 1 Reference Unit Gross Rated Sensible Heat Ratio {dimensionless}
     4.0,                     !- Speed 1 Reference Unit Gross Rated Cooling COP {W/W}
     0.1359072,               !- Speed 1 Reference Unit Rated Air Flow Rate {m3/s}
+    ,                        !- 2017 Speed 1 Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
+    ,                        !- 2023 Speed 1 Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
     0.26,                    !- Speed 1 Reference Unit Rated Condenser Air Flow Rate {m3/s}
     ,                        !- Speed 1 Reference Unit Rated Pad Effectiveness of Evap Precooling {dimensionless}
     FURNACE_PACU_CAV:3_Unitary_PackagecoolCapFT,  !- Speed 1 Total Cooling Capacity Function of Temperature Curve Name
@@ -434,6 +491,8 @@
     0.75,                    !- Speed 2 Reference Unit Gross Rated Sensible Heat Ratio {dimensionless}
     4.0,                     !- Speed 2 Reference Unit Gross Rated Cooling COP {W/W}
     0.151008,                !- Speed 2 Reference Unit Rated Air Flow Rate {m3/s}
+    ,                        !- 2017 Speed 2 Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
+    ,                        !- 2023 Speed 2 Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
     0.30,                    !- Speed 2 Reference Unit Rated Condenser Air Flow Rate {m3/s}
     ,                        !- Speed 2 Reference Unit Rated Pad Effectiveness of Evap Precooling {dimensionless}
     FURNACE_PACU_CAV:3_Unitary_PackagecoolCapFT,  !- Speed 2 Total Cooling Capacity Function of Temperature Curve Name
@@ -444,6 +503,8 @@
     0.75,                    !- Speed 3 Reference Unit Gross Rated Sensible Heat Ratio {dimensionless}
     4.0,                     !- Speed 3 Reference Unit Gross Rated Cooling COP {W/W}
     0.1661088,               !- Speed 3 Reference Unit Rated Air Flow Rate {m3/s}
+    ,                        !- 2017 Speed 3 Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
+    ,                        !- 2023 Speed 3 Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
     0.33,                    !- Speed 3 Reference Unit Rated Condenser Air Flow Rate {m3/s}
     ,                        !- Speed 3 Reference Unit Rated Pad Effectiveness of Evap Precooling {dimensionless}
     FURNACE_PACU_CAV:3_Unitary_PackagecoolCapFT,  !- Speed 3 Total Cooling Capacity Function of Temperature Curve Name
@@ -454,6 +515,8 @@
     0.75,                    !- Speed 4 Reference Unit Gross Rated Sensible Heat Ratio {dimensionless}
     4.0,                     !- Speed 4 Reference Unit Gross Rated Cooling COP {W/W}
     0.1963104,               !- Speed 4 Reference Unit Rated Air Flow Rate {m3/s}
+    ,                        !- 2017 Speed 4 Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
+    ,                        !- 2023 Speed 4 Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
     0.38,                    !- Speed 4 Reference Unit Rated Condenser Air Flow Rate {m3/s}
     ,                        !- Speed 4 Reference Unit Rated Pad Effectiveness of Evap Precooling {dimensionless}
     FURNACE_PACU_CAV:3_Unitary_PackagecoolCapFT,  !- Speed 4 Total Cooling Capacity Function of Temperature Curve Name
@@ -464,6 +527,8 @@
     0.75,                    !- Speed 5 Reference Unit Gross Rated Sensible Heat Ratio {dimensionless}
     4.0,                     !- Speed 5 Reference Unit Gross Rated Cooling COP {W/W}
     0.226512,                !- Speed 5 Reference Unit Rated Air Flow Rate {m3/s}
+    ,                        !- 2017 Speed 5 Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
+    ,                        !- 2023 Speed 5 Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
     0.44,                    !- Speed 5 Reference Unit Rated Condenser Air Flow Rate {m3/s}
     ,                        !- Speed 5 Reference Unit Rated Pad Effectiveness of Evap Precooling {dimensionless}
     FURNACE_PACU_CAV:3_Unitary_PackagecoolCapFT,  !- Speed 5 Total Cooling Capacity Function of Temperature Curve Name
@@ -474,7 +539,9 @@
     0.75,                    !- Speed 6 Reference Unit Gross Rated Sensible Heat Ratio {dimensionless}
     4.0,                     !- Speed 6 Reference Unit Gross Rated Cooling COP {W/W}
     0.2567136,               !- Speed 6 Reference Unit Rated Air Flow Rate {m3/s}
-    0.50,                    !- Speed 6 Reference Unit Condenser Air Flow Rate {m3/s}
+    ,                        !- 2017 Speed 6 Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
+    ,                        !- 2023 Speed 6 Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
+    0.50,                    !- Speed 6 Reference Unit Rated Condenser Air Flow Rate {m3/s}
     ,                        !- Speed 6 Reference Unit Rated Pad Effectiveness of Evap Precooling {dimensionless}
     FURNACE_PACU_CAV:3_Unitary_PackagecoolCapFT,  !- Speed 6 Total Cooling Capacity Function of Temperature Curve Name
     FURNACE_PACU_CAV:3_Unitary_PackagecoolFFF,  !- Speed 6 Total Cooling Capacity Function of Air Flow Fraction Curve Name
@@ -484,7 +551,9 @@
     0.75,                    !- Speed 7 Reference Unit Gross Rated Sensible Heat Ratio {dimensionless}
     4.0,                     !- Speed 7 Reference Unit Gross Rated Cooling COP {W/W}
     0.2869152,               !- Speed 7 Reference Unit Rated Air Flow Rate {m3/s}
-    0.57,                    !- Speed 7 Reference Unit Condenser Flow Rate {m3/s}
+    ,                        !- 2017 Speed 7 Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
+    ,                        !- 2023 Speed 7 Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
+    0.57,                    !- Speed 7 Reference Unit Rated Condenser Air Flow Rate {m3/s}
     ,                        !- Speed 7 Reference Unit Rated Pad Effectiveness of Evap Precooling {dimensionless}
     FURNACE_PACU_CAV:3_Unitary_PackagecoolCapFT,  !- Speed 7 Total Cooling Capacity Function of Temperature Curve Name
     FURNACE_PACU_CAV:3_Unitary_PackagecoolFFF,  !- Speed 7 Total Cooling Capacity Function of Air Flow Fraction Curve Name
@@ -494,7 +563,9 @@
     0.75,                    !- Speed 8 Reference Unit Gross Rated Sensible Heat Ratio {dimensionless}
     4.0,                     !- Speed 8 Reference Unit Gross Rated Cooling COP {W/W}
     0.3171168,               !- Speed 8 Reference Unit Rated Air Flow Rate {m3/s}
-    0.63,                    !- Speed 8 Reference Unit Condenser Air Flow Rate {m3/s}
+    ,                        !- 2017 Speed 8 Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
+    ,                        !- 2023 Speed 8 Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
+    0.63,                    !- Speed 8 Reference Unit Rated Condenser Air Flow Rate {m3/s}
     ,                        !- Speed 8 Reference Unit Rated Pad Effectiveness of Evap Precooling {dimensionless}
     FURNACE_PACU_CAV:3_Unitary_PackagecoolCapFT,  !- Speed 8 Total Cooling Capacity Function of Temperature Curve Name
     FURNACE_PACU_CAV:3_Unitary_PackagecoolFFF,  !- Speed 8 Total Cooling Capacity Function of Air Flow Fraction Curve Name
@@ -504,7 +575,9 @@
     0.75,                    !- Speed 9 Reference Unit Gross Rated Sensible Heat Ratio {dimensionless}
     4.0,                     !- Speed 9 Reference Unit Gross Rated Cooling COP {W/W}
     0.3473184,               !- Speed 9 Reference Unit Rated Air Flow Rate {m3/s}
-    0.69,                    !- Speed 9 Reference Unit Condenser Air Flow Rate {m3/s}
+    ,                        !- 2017 Speed 9 Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
+    ,                        !- 2023 Speed 9 Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
+    0.69,                    !- Speed 9 Reference Unit Rated Condenser Air Flow Rate {m3/s}
     ,                        !- Speed 9 Reference Unit Rated Pad Effectiveness of Evap Precooling {dimensionless}
     FURNACE_PACU_CAV:3_Unitary_PackagecoolCapFT,  !- Speed 9 Total Cooling Capacity Function of Temperature Curve Name
     FURNACE_PACU_CAV:3_Unitary_PackagecoolFFF,  !- Speed 9 Total Cooling Capacity Function of Air Flow Fraction Curve Name
@@ -514,7 +587,9 @@
     0.75,                    !- Speed 10 Reference Unit Gross Rated Sensible Heat Ratio {dimensionless}
     4.0,                     !- Speed 10 Reference Unit Gross Rated Cooling COP {W/W}
     0.37752,                 !- Speed 10 Reference Unit Rated Air Flow Rate {m3/s}
-    0.74,                    !- Speed 10 Reference Unit Condenser Air Flow Rate {m3/s}
+    ,                        !- 2017 Speed 10 Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
+    ,                        !- 2023 Speed 10 Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
+    0.74,                    !- Speed 10 Reference Unit Rated Condenser Air Flow Rate {m3/s}
     ,                        !- Speed 10 Reference Unit Rated Pad Effectiveness of Evap Precooling {dimensionless}
     FURNACE_PACU_CAV:3_Unitary_PackagecoolCapFT,  !- Speed 10 Total Cooling Capacity Function of Temperature Curve Name
     FURNACE_PACU_CAV:3_Unitary_PackagecoolFFF,  !- Speed 10 Total Cooling Capacity Function of Air Flow Fraction Curve Name
@@ -523,6 +598,7 @@
 
   Coil:Cooling:DX:VariableSpeed,
     FURNACE_PACU_CAV:4_Unitary_Package_CoolCoil,  !- Name
+    ,                        !- Availability Schedule Name
     FURNACE_PACU_CAV:4_Unitary_PackageCoolCoil air inlet,  !- Indoor Air Inlet Node Name
     FURNACE_PACU_CAV:4_Unitary_PackageHeatCoil air inlet,  !- Indoor Air Outlet Node Name
     10.0,                    !- Number of Speeds {dimensionless}
@@ -531,11 +607,15 @@
     AUTOSIZE,                !- Rated Air Flow Rate At Selected Nominal Speed Level {m3/s}
     0.0,                     !- Nominal Time for Condensate to Begin Leaving the Coil {s}
     0.0,                     !- Initial Moisture Evaporation Rate Divided by Steady-State AC Latent Capacity {dimensionless}
+    ,                        !- Maximum Cycling Rate {cycles/hr}
+    ,                        !- Latent Capacity Time Constant {s}
+    ,                        !- Fan Delay Time {s}
     FURNACE_PACU_CAV:4_Unitary_PackagecoolPLR,  !- Energy Part Load Fraction Curve Name
     ,                        !- Condenser Air Inlet Node Name
     AirCooled,               !- Condenser Type
     ,                        !- Evaporative Condenser Pump Rated Power Consumption {W}
     200.0,                   !- Crankcase Heater Capacity {W}
+    ,                        !- Crankcase Heater Capacity Function of Temperature Curve Name
     10.0,                    !- Maximum Outdoor Dry-Bulb Temperature for Crankcase Heater Operation {C}
     ,                        !- Minimum Outdoor Dry-Bulb Temperature for Compressor Operation {C}
     ,                        !- Supply Water Storage Tank Name
@@ -547,6 +627,8 @@
     0.75,                    !- Speed 1 Reference Unit Gross Rated Sensible Heat Ratio {dimensionless}
     4.0,                     !- Speed 1 Reference Unit Gross Rated Cooling COP {W/W}
     0.1359072,               !- Speed 1 Reference Unit Rated Air Flow Rate {m3/s}
+    ,                        !- 2017 Speed 1 Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
+    ,                        !- 2023 Speed 1 Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
     0.26,                    !- Speed 1 Reference Unit Rated Condenser Air Flow Rate {m3/s}
     ,                        !- Speed 1 Reference Unit Rated Pad Effectiveness of Evap Precooling {dimensionless}
     FURNACE_PACU_CAV:4_Unitary_PackagecoolCapFT,  !- Speed 1 Total Cooling Capacity Function of Temperature Curve Name
@@ -557,6 +639,8 @@
     0.75,                    !- Speed 2 Reference Unit Gross Rated Sensible Heat Ratio {dimensionless}
     4.0,                     !- Speed 2 Reference Unit Gross Rated Cooling COP {W/W}
     0.151008,                !- Speed 2 Reference Unit Rated Air Flow Rate {m3/s}
+    ,                        !- 2017 Speed 2 Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
+    ,                        !- 2023 Speed 2 Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
     0.30,                    !- Speed 2 Reference Unit Rated Condenser Air Flow Rate {m3/s}
     ,                        !- Speed 2 Reference Unit Rated Pad Effectiveness of Evap Precooling {dimensionless}
     FURNACE_PACU_CAV:4_Unitary_PackagecoolCapFT,  !- Speed 2 Total Cooling Capacity Function of Temperature Curve Name
@@ -567,6 +651,8 @@
     0.75,                    !- Speed 3 Reference Unit Gross Rated Sensible Heat Ratio {dimensionless}
     4.0,                     !- Speed 3 Reference Unit Gross Rated Cooling COP {W/W}
     0.1661088,               !- Speed 3 Reference Unit Rated Air Flow Rate {m3/s}
+    ,                        !- 2017 Speed 3 Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
+    ,                        !- 2023 Speed 3 Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
     0.33,                    !- Speed 3 Reference Unit Rated Condenser Air Flow Rate {m3/s}
     ,                        !- Speed 3 Reference Unit Rated Pad Effectiveness of Evap Precooling {dimensionless}
     FURNACE_PACU_CAV:4_Unitary_PackagecoolCapFT,  !- Speed 3 Total Cooling Capacity Function of Temperature Curve Name
@@ -577,6 +663,8 @@
     0.75,                    !- Speed 4 Reference Unit Gross Rated Sensible Heat Ratio {dimensionless}
     4.0,                     !- Speed 4 Reference Unit Gross Rated Cooling COP {W/W}
     0.1963104,               !- Speed 4 Reference Unit Rated Air Flow Rate {m3/s}
+    ,                        !- 2017 Speed 4 Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
+    ,                        !- 2023 Speed 4 Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
     0.38,                    !- Speed 4 Reference Unit Rated Condenser Air Flow Rate {m3/s}
     ,                        !- Speed 4 Reference Unit Rated Pad Effectiveness of Evap Precooling {dimensionless}
     FURNACE_PACU_CAV:4_Unitary_PackagecoolCapFT,  !- Speed 4 Total Cooling Capacity Function of Temperature Curve Name
@@ -587,6 +675,8 @@
     0.75,                    !- Speed 5 Reference Unit Gross Rated Sensible Heat Ratio {dimensionless}
     4.0,                     !- Speed 5 Reference Unit Gross Rated Cooling COP {W/W}
     0.226512,                !- Speed 5 Reference Unit Rated Air Flow Rate {m3/s}
+    ,                        !- 2017 Speed 5 Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
+    ,                        !- 2023 Speed 5 Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
     0.44,                    !- Speed 5 Reference Unit Rated Condenser Air Flow Rate {m3/s}
     ,                        !- Speed 5 Reference Unit Rated Pad Effectiveness of Evap Precooling {dimensionless}
     FURNACE_PACU_CAV:4_Unitary_PackagecoolCapFT,  !- Speed 5 Total Cooling Capacity Function of Temperature Curve Name
@@ -597,7 +687,9 @@
     0.75,                    !- Speed 6 Reference Unit Gross Rated Sensible Heat Ratio {dimensionless}
     4.0,                     !- Speed 6 Reference Unit Gross Rated Cooling COP {W/W}
     0.2567136,               !- Speed 6 Reference Unit Rated Air Flow Rate {m3/s}
-    0.50,                    !- Speed 6 Reference Unit Condenser Air Flow Rate {m3/s}
+    ,                        !- 2017 Speed 6 Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
+    ,                        !- 2023 Speed 6 Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
+    0.50,                    !- Speed 6 Reference Unit Rated Condenser Air Flow Rate {m3/s}
     ,                        !- Speed 6 Reference Unit Rated Pad Effectiveness of Evap Precooling {dimensionless}
     FURNACE_PACU_CAV:4_Unitary_PackagecoolCapFT,  !- Speed 6 Total Cooling Capacity Function of Temperature Curve Name
     FURNACE_PACU_CAV:4_Unitary_PackagecoolFFF,  !- Speed 6 Total Cooling Capacity Function of Air Flow Fraction Curve Name
@@ -607,7 +699,9 @@
     0.75,                    !- Speed 7 Reference Unit Gross Rated Sensible Heat Ratio {dimensionless}
     4.0,                     !- Speed 7 Reference Unit Gross Rated Cooling COP {W/W}
     0.2869152,               !- Speed 7 Reference Unit Rated Air Flow Rate {m3/s}
-    0.57,                    !- Speed 7 Reference Unit Condenser Flow Rate {m3/s}
+    ,                        !- 2017 Speed 7 Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
+    ,                        !- 2023 Speed 7 Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
+    0.57,                    !- Speed 7 Reference Unit Rated Condenser Air Flow Rate {m3/s}
     ,                        !- Speed 7 Reference Unit Rated Pad Effectiveness of Evap Precooling {dimensionless}
     FURNACE_PACU_CAV:4_Unitary_PackagecoolCapFT,  !- Speed 7 Total Cooling Capacity Function of Temperature Curve Name
     FURNACE_PACU_CAV:4_Unitary_PackagecoolFFF,  !- Speed 7 Total Cooling Capacity Function of Air Flow Fraction Curve Name
@@ -617,7 +711,9 @@
     0.75,                    !- Speed 8 Reference Unit Gross Rated Sensible Heat Ratio {dimensionless}
     4.0,                     !- Speed 8 Reference Unit Gross Rated Cooling COP {W/W}
     0.3171168,               !- Speed 8 Reference Unit Rated Air Flow Rate {m3/s}
-    0.63,                    !- Speed 8 Reference Unit Condenser Air Flow Rate {m3/s}
+    ,                        !- 2017 Speed 8 Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
+    ,                        !- 2023 Speed 8 Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
+    0.63,                    !- Speed 8 Reference Unit Rated Condenser Air Flow Rate {m3/s}
     ,                        !- Speed 8 Reference Unit Rated Pad Effectiveness of Evap Precooling {dimensionless}
     FURNACE_PACU_CAV:4_Unitary_PackagecoolCapFT,  !- Speed 8 Total Cooling Capacity Function of Temperature Curve Name
     FURNACE_PACU_CAV:4_Unitary_PackagecoolFFF,  !- Speed 8 Total Cooling Capacity Function of Air Flow Fraction Curve Name
@@ -627,7 +723,9 @@
     0.75,                    !- Speed 9 Reference Unit Gross Rated Sensible Heat Ratio {dimensionless}
     4.0,                     !- Speed 9 Reference Unit Gross Rated Cooling COP {W/W}
     0.3473184,               !- Speed 9 Reference Unit Rated Air Flow Rate {m3/s}
-    0.69,                    !- Speed 9 Reference Unit Condenser Air Flow Rate {m3/s}
+    ,                        !- 2017 Speed 9 Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
+    ,                        !- 2023 Speed 9 Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
+    0.69,                    !- Speed 9 Reference Unit Rated Condenser Air Flow Rate {m3/s}
     ,                        !- Speed 9 Reference Unit Rated Pad Effectiveness of Evap Precooling {dimensionless}
     FURNACE_PACU_CAV:4_Unitary_PackagecoolCapFT,  !- Speed 9 Total Cooling Capacity Function of Temperature Curve Name
     FURNACE_PACU_CAV:4_Unitary_PackagecoolFFF,  !- Speed 9 Total Cooling Capacity Function of Air Flow Fraction Curve Name
@@ -637,7 +735,9 @@
     0.75,                    !- Speed 10 Reference Unit Gross Rated Sensible Heat Ratio {dimensionless}
     4.0,                     !- Speed 10 Reference Unit Gross Rated Cooling COP {W/W}
     0.37752,                 !- Speed 10 Reference Unit Rated Air Flow Rate {m3/s}
-    0.74,                    !- Speed 10 Reference Unit Condenser Air Flow Rate {m3/s}
+    ,                        !- 2017 Speed 10 Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
+    ,                        !- 2023 Speed 10 Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
+    0.74,                    !- Speed 10 Reference Unit Rated Condenser Air Flow Rate {m3/s}
     ,                        !- Speed 10 Reference Unit Rated Pad Effectiveness of Evap Precooling {dimensionless}
     FURNACE_PACU_CAV:4_Unitary_PackagecoolCapFT,  !- Speed 10 Total Cooling Capacity Function of Temperature Curve Name
     FURNACE_PACU_CAV:4_Unitary_PackagecoolFFF,  !- Speed 10 Total Cooling Capacity Function of Air Flow Fraction Curve Name
@@ -2986,7 +3086,7 @@
     ACTIVITY_SCH,            !- Activity Level Schedule Name
     3.82E-8,                 !- Carbon Dioxide Generation Rate {m3/s-W}
     No,                      !- Enable ASHRAE 55 Comfort Warnings
-    ZoneAveraged,            !- Mean Radiant Temperature Calculation Type
+    EnclosureAveraged,       !- Mean Radiant Temperature Calculation Type
     ,                        !- Surface Name/Angle Factor List Name
     WORK_EFF_SCH,            !- Work Efficiency Schedule Name
     ClothingInsulationSchedule,  !- Clothing Insulation Calculation Method
@@ -3016,7 +3116,7 @@
     BLDG_LIGHT_SCH,          !- Schedule Name
     LightingLevel,           !- Design Level Calculation Method
     2957.0000,               !- Lighting Level {W}
-    ,                        !- Watts per Zone Floor Area {W/m2}
+    ,                        !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0.0000,                  !- Return Air Fraction
     0.6000,                  !- Fraction Radiant
@@ -3041,7 +3141,7 @@
     BLDG_EQUIP_SCH,          !- Schedule Name
     EquipmentLevel,          !- Design Level Calculation Method
     4032.0000,               !- Design Level {W}
-    ,                        !- Watts per Zone Floor Area {W/m2}
+    ,                        !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0.0000,                  !- Fraction Latent
     0.6000,                  !- Fraction Radiant
@@ -3069,7 +3169,7 @@
     CONSTANT,                !- Schedule Name
     EquipmentLevel,          !- Design Level Calculation Method
     400.0000,                !- Design Level {W}
-    ,                        !- Watts per Zone Floor Area {W/m2}
+    ,                        !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0.0000,                  !- Fraction Latent
     0.6000,                  !- Fraction Radiant
@@ -3120,7 +3220,14 @@
     No,                      !- Account for Dedicated Outdoor Air System
     NeutralSupplyAir,        !- Dedicated Outdoor Air System Control Strategy
     autosize,                !- Dedicated Outdoor Air Low Setpoint Temperature for Design {C}
-    autosize;                !- Dedicated Outdoor Air High Setpoint Temperature for Design {C}
+    autosize,                !- Dedicated Outdoor Air High Setpoint Temperature for Design {C}
+    ,                        !- Zone Load Sizing Method
+    ,                        !- Zone Latent Cooling Design Supply Air Humidity Ratio Input Method
+    ,                        !- Zone Dehumidification Design Supply Air Humidity Ratio {kgWater/kgDryAir}
+    ,                        !- Zone Cooling Design Supply Air Humidity Ratio Difference {kgWater/kgDryAir}
+    ,                        !- Zone Latent Heating Design Supply Air Humidity Ratio Input Method
+    ,                        !- Zone Humidification Design Supply Air Humidity Ratio {kgWater/kgDryAir}
+    ;                        !- Zone Humidification Design Supply Air Humidity Ratio Difference {kgWater/kgDryAir}
 
   DesignSpecification:OutdoorAir,
     SZ DSOA units_gr_lf,     !- Name
@@ -3543,7 +3650,7 @@
     ACTIVITY_SCH,            !- Activity Level Schedule Name
     3.82E-8,                 !- Carbon Dioxide Generation Rate {m3/s-W}
     No,                      !- Enable ASHRAE 55 Comfort Warnings
-    ZoneAveraged,            !- Mean Radiant Temperature Calculation Type
+    EnclosureAveraged,       !- Mean Radiant Temperature Calculation Type
     ,                        !- Surface Name/Angle Factor List Name
     WORK_EFF_SCH,            !- Work Efficiency Schedule Name
     ClothingInsulationSchedule,  !- Clothing Insulation Calculation Method
@@ -3573,7 +3680,7 @@
     BLDG_LIGHT_SCH,          !- Schedule Name
     LightingLevel,           !- Design Level Calculation Method
     4435.0000,               !- Lighting Level {W}
-    ,                        !- Watts per Zone Floor Area {W/m2}
+    ,                        !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0.0000,                  !- Return Air Fraction
     0.6000,                  !- Fraction Radiant
@@ -3598,7 +3705,7 @@
     BLDG_EQUIP_SCH,          !- Schedule Name
     EquipmentLevel,          !- Design Level Calculation Method
     6048.0000,               !- Design Level {W}
-    ,                        !- Watts per Zone Floor Area {W/m2}
+    ,                        !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0.0000,                  !- Fraction Latent
     0.6000,                  !- Fraction Radiant
@@ -3626,7 +3733,7 @@
     CONSTANT,                !- Schedule Name
     EquipmentLevel,          !- Design Level Calculation Method
     600.0000,                !- Design Level {W}
-    ,                        !- Watts per Zone Floor Area {W/m2}
+    ,                        !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0.0000,                  !- Fraction Latent
     0.6000,                  !- Fraction Radiant
@@ -3677,7 +3784,14 @@
     No,                      !- Account for Dedicated Outdoor Air System
     NeutralSupplyAir,        !- Dedicated Outdoor Air System Control Strategy
     autosize,                !- Dedicated Outdoor Air Low Setpoint Temperature for Design {C}
-    autosize;                !- Dedicated Outdoor Air High Setpoint Temperature for Design {C}
+    autosize,                !- Dedicated Outdoor Air High Setpoint Temperature for Design {C}
+    ,                        !- Zone Load Sizing Method
+    ,                        !- Zone Latent Cooling Design Supply Air Humidity Ratio Input Method
+    ,                        !- Zone Dehumidification Design Supply Air Humidity Ratio {kgWater/kgDryAir}
+    ,                        !- Zone Cooling Design Supply Air Humidity Ratio Difference {kgWater/kgDryAir}
+    ,                        !- Zone Latent Heating Design Supply Air Humidity Ratio Input Method
+    ,                        !- Zone Humidification Design Supply Air Humidity Ratio {kgWater/kgDryAir}
+    ;                        !- Zone Humidification Design Supply Air Humidity Ratio Difference {kgWater/kgDryAir}
 
   DesignSpecification:OutdoorAir,
     SZ DSOA units_gr_rt,     !- Name
@@ -3925,7 +4039,7 @@
     ACTIVITY_SCH,            !- Activity Level Schedule Name
     3.82E-8,                 !- Carbon Dioxide Generation Rate {m3/s-W}
     No,                      !- Enable ASHRAE 55 Comfort Warnings
-    ZoneAveraged,            !- Mean Radiant Temperature Calculation Type
+    EnclosureAveraged,       !- Mean Radiant Temperature Calculation Type
     ,                        !- Surface Name/Angle Factor List Name
     WORK_EFF_SCH,            !- Work Efficiency Schedule Name
     ClothingInsulationSchedule,  !- Clothing Insulation Calculation Method
@@ -3955,7 +4069,7 @@
     BLDG_LIGHT_SCH,          !- Schedule Name
     LightingLevel,           !- Design Level Calculation Method
     662.0000,                !- Lighting Level {W}
-    ,                        !- Watts per Zone Floor Area {W/m2}
+    ,                        !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0.0000,                  !- Return Air Fraction
     0.6000,                  !- Fraction Radiant
@@ -3980,7 +4094,7 @@
     BLDG_EQUIP_SCH,          !- Schedule Name
     EquipmentLevel,          !- Design Level Calculation Method
     903.0000,                !- Design Level {W}
-    ,                        !- Watts per Zone Floor Area {W/m2}
+    ,                        !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0.0000,                  !- Fraction Latent
     0.6000,                  !- Fraction Radiant
@@ -4008,7 +4122,7 @@
     CONSTANT,                !- Schedule Name
     EquipmentLevel,          !- Design Level Calculation Method
     100.0000,                !- Design Level {W}
-    ,                        !- Watts per Zone Floor Area {W/m2}
+    ,                        !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0.0000,                  !- Fraction Latent
     0.6000,                  !- Fraction Radiant
@@ -4059,7 +4173,14 @@
     No,                      !- Account for Dedicated Outdoor Air System
     NeutralSupplyAir,        !- Dedicated Outdoor Air System Control Strategy
     autosize,                !- Dedicated Outdoor Air Low Setpoint Temperature for Design {C}
-    autosize;                !- Dedicated Outdoor Air High Setpoint Temperature for Design {C}
+    autosize,                !- Dedicated Outdoor Air High Setpoint Temperature for Design {C}
+    ,                        !- Zone Load Sizing Method
+    ,                        !- Zone Latent Cooling Design Supply Air Humidity Ratio Input Method
+    ,                        !- Zone Dehumidification Design Supply Air Humidity Ratio {kgWater/kgDryAir}
+    ,                        !- Zone Cooling Design Supply Air Humidity Ratio Difference {kgWater/kgDryAir}
+    ,                        !- Zone Latent Heating Design Supply Air Humidity Ratio Input Method
+    ,                        !- Zone Humidification Design Supply Air Humidity Ratio {kgWater/kgDryAir}
+    ;                        !- Zone Humidification Design Supply Air Humidity Ratio Difference {kgWater/kgDryAir}
 
   DesignSpecification:OutdoorAir,
     SZ DSOA unit_s_g,        !- Name
@@ -4307,7 +4428,7 @@
     ACTIVITY_SCH,            !- Activity Level Schedule Name
     3.82E-8,                 !- Carbon Dioxide Generation Rate {m3/s-W}
     No,                      !- Enable ASHRAE 55 Comfort Warnings
-    ZoneAveraged,            !- Mean Radiant Temperature Calculation Type
+    EnclosureAveraged,       !- Mean Radiant Temperature Calculation Type
     ,                        !- Surface Name/Angle Factor List Name
     WORK_EFF_SCH,            !- Work Efficiency Schedule Name
     ClothingInsulationSchedule,  !- Clothing Insulation Calculation Method
@@ -4337,7 +4458,7 @@
     BLDG_LIGHT_SCH,          !- Schedule Name
     LightingLevel,           !- Design Level Calculation Method
     662.0000,                !- Lighting Level {W}
-    ,                        !- Watts per Zone Floor Area {W/m2}
+    ,                        !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0.0000,                  !- Return Air Fraction
     0.6000,                  !- Fraction Radiant
@@ -4362,7 +4483,7 @@
     BLDG_EQUIP_SCH,          !- Schedule Name
     EquipmentLevel,          !- Design Level Calculation Method
     903.0000,                !- Design Level {W}
-    ,                        !- Watts per Zone Floor Area {W/m2}
+    ,                        !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0.0000,                  !- Fraction Latent
     0.6000,                  !- Fraction Radiant
@@ -4390,7 +4511,7 @@
     CONSTANT,                !- Schedule Name
     EquipmentLevel,          !- Design Level Calculation Method
     100.0000,                !- Design Level {W}
-    ,                        !- Watts per Zone Floor Area {W/m2}
+    ,                        !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0.0000,                  !- Fraction Latent
     0.6000,                  !- Fraction Radiant
@@ -4441,7 +4562,14 @@
     No,                      !- Account for Dedicated Outdoor Air System
     NeutralSupplyAir,        !- Dedicated Outdoor Air System Control Strategy
     autosize,                !- Dedicated Outdoor Air Low Setpoint Temperature for Design {C}
-    autosize;                !- Dedicated Outdoor Air High Setpoint Temperature for Design {C}
+    autosize,                !- Dedicated Outdoor Air High Setpoint Temperature for Design {C}
+    ,                        !- Zone Load Sizing Method
+    ,                        !- Zone Latent Cooling Design Supply Air Humidity Ratio Input Method
+    ,                        !- Zone Dehumidification Design Supply Air Humidity Ratio {kgWater/kgDryAir}
+    ,                        !- Zone Cooling Design Supply Air Humidity Ratio Difference {kgWater/kgDryAir}
+    ,                        !- Zone Latent Heating Design Supply Air Humidity Ratio Input Method
+    ,                        !- Zone Humidification Design Supply Air Humidity Ratio {kgWater/kgDryAir}
+    ;                        !- Zone Humidification Design Supply Air Humidity Ratio Difference {kgWater/kgDryAir}
 
   DesignSpecification:OutdoorAir,
     SZ DSOA unit_n_g,        !- Name
@@ -5716,5 +5844,5 @@
 
   Output:Variable,FURNACE_PACU_CAV:1_OADirect Evap Cooler-FURNACE_PACU_CAV:1_OAMixing BoxNode,System Node Setpoint Temperature,hourly;
 
-  Output:Variable,*,Zone Infiltration Air Change Rate,hourly;
+  Output:Variable,*,Zone Infiltration Current Density Air Change Rate,hourly;
 

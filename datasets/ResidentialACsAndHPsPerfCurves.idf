@@ -50,9 +50,6 @@
 !   ACCoolingEIRFFF,         !- Energy Input Ratio Function of Flow Fraction Curve Name
 !   ACCoolingPLFFPLR;        !- Part Load Fraction Correlation Curve Name
 
-!  Version,
-!    9.0;                    !- Version Identifier
-
   Curve:Biquadratic,
     ACCoolingCAPFTemp,       !- Name
     1.5509,                  !- Coefficient1 Constant
@@ -154,10 +151,10 @@
 !    ,                        !- Speed 1 Rated COP {W/W}
 !    ,                        !- Speed 1 Rated Air Flow Rate {m3/s}
 !    ,                        !- Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
-!    ACHighStageCoolingCAPFTemp, !- Speed 1 Total Cooling Capacity Function of Temperature Curve Name
-!    ACHighStageCoolingCAPFFF,   !- Speed 1 Total Cooling Capacity Function of Flow Fraction Curve Name
-!    ACHighStageCoolingEIRFTemp, !- Speed 1 Energy Input Ratio Function of Temperature Curve Name
-!    ACHighStageCoolingEIRFFF,   !- Speed 1 Energy Input Ratio Function of Flow Fraction Curve Name
+!    ACLowStageCoolingCAPFTemp, !- Speed 1 Total Cooling Capacity Function of Temperature Curve Name
+!    ACLowStageCoolingCAPFFF,   !- Speed 1 Total Cooling Capacity Function of Flow Fraction Curve Name
+!    ACLowStageCoolingEIRFTemp, !- Speed 1 Energy Input Ratio Function of Temperature Curve Name
+!    ACLowStageCoolingEIRFFF,   !- Speed 1 Energy Input Ratio Function of Flow Fraction Curve Name
 !    AC2StageCoolingPLFFPLR,     !- Speed 1 Part Load Fraction Correlation Curve Name
 !    ,                        !- Speed 1 Nominal Time for Condensate Removal to Begin {s}
 !    ,                        !- Speed 1 Ratio of Initial Moisture Evaporation Rate and Steady State Latent Capacity {dimensionless}
@@ -173,10 +170,10 @@
 !    ,                        !- Speed 2 Rated COP {W/W}
 !    ,                        !- Speed 2 Rated Air Flow Rate {m3/s}
 !    ,                        !- Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
-!    ACLowStageCoolingCAPFTemp, !- Speed 2 Total Cooling Capacity Function of Temperature Curve Name
-!    ACLowStageCoolingCAPFFF,   !- Speed 2 Total Cooling Capacity Function of Flow Fraction Curve Name
-!    ACLowStageCoolingEIRFTemp, !- Speed 2 Energy Input Ratio Function of Temperature Curve Name
-!    ACLowStageCoolingEIRFFF,   !- Speed 2 Energy Input Ratio Function of Flow Fraction Curve Name
+!    ACHighStageCoolingCAPFTemp, !- Speed 2 Total Cooling Capacity Function of Temperature Curve Name
+!    ACHighStageCoolingCAPFFF,   !- Speed 2 Total Cooling Capacity Function of Flow Fraction Curve Name
+!    ACHighStageCoolingEIRFTemp, !- Speed 2 Energy Input Ratio Function of Temperature Curve Name
+!    ACHighStageCoolingEIRFFF,   !- Speed 2 Energy Input Ratio Function of Flow Fraction Curve Name
 !    AC2StageCoolingPLFFPLR,    !- Speed 2 Part Load Fraction Correlation Curve Name
 !    ,                        !- Speed 2 Nominal Time for Condensate Removal to Begin {s}
 !    ,                        !- Speed 2 Ratio of Initial Moisture Evaporation Rate and steady state Latent Capacity {dimensionless}
@@ -570,10 +567,10 @@
 !    ,                        !- Speed 1 Rated COP {W/W}
 !    ,                        !- Speed 1 Rated Air Flow Rate {m3/s}
 !    ,                        !- Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
-!    HPHighStageCoolingCAPFTemp, !- Speed 1 Total Cooling Capacity Function of Temperature Curve Name
-!    HPHighStageCoolingCAPFFF,   !- Speed 1 Total Cooling Capacity Function of Flow Fraction Curve Name
-!    HPHighStageCoolingEIRFTemp, !- Speed 1 Energy Input Ratio Function of Temperature Curve Name
-!    HPHighStageCoolingEIRFFF,   !- Speed 1 Energy Input Ratio Function of Flow Fraction Curve Name
+!    HPLowStageCoolingCAPFTemp, !- Speed 1 Total Cooling Capacity Function of Temperature Curve Name
+!    HPLowStageCoolingCAPFFF,   !- Speed 1 Total Cooling Capacity Function of Flow Fraction Curve Name
+!    HPLowStageCoolingEIRFTemp, !- Speed 1 Energy Input Ratio Function of Temperature Curve Name
+!    HPLowStageCoolingEIRFFF,   !- Speed 1 Energy Input Ratio Function of Flow Fraction Curve Name
 !    HP2StageCoolingPLFFPLR,     !- Speed 1 Part Load Fraction Correlation Curve Name
 !    ,                        !- Speed 1 Nominal Time for Condensate Removal to Begin {s}
 !    ,                        !- Speed 1 Ratio of Initial Moisture Evaporation Rate and Steady State Latent Capacity {dimensionless}
@@ -589,10 +586,10 @@
 !    ,                        !- Speed 2 Rated COP {W/W}
 !    ,                        !- Speed 2 Rated Air Flow Rate {m3/s}
 !    ,                        !- Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
-!    HPLowStageCoolingCAPFTemp, !- Speed 2 Total Cooling Capacity Function of Temperature Curve Name
-!    HPLowStageCoolingCAPFFF,   !- Speed 2 Total Cooling Capacity Function of Flow Fraction Curve Name
-!    HPLowStageCoolingEIRFTemp, !- Speed 2 Energy Input Ratio Function of Temperature Curve Name
-!    HPLowStageCoolingEIRFFF,   !- Speed 2 Energy Input Ratio Function of Flow Fraction Curve Name
+!    HPHighStageCoolingCAPFTemp, !- Speed 2 Total Cooling Capacity Function of Temperature Curve Name
+!    HPHighStageCoolingCAPFFF,   !- Speed 2 Total Cooling Capacity Function of Flow Fraction Curve Name
+!    HPHighStageCoolingEIRFTemp, !- Speed 2 Energy Input Ratio Function of Temperature Curve Name
+!    HPHighStageCoolingEIRFFF,   !- Speed 2 Energy Input Ratio Function of Flow Fraction Curve Name
 !    HP2StageCoolingPLFFPLR,    !- Speed 2 Part Load Fraction Correlation Curve Name
 !    ,                        !- Speed 2 Nominal Time for Condensate Removal to Begin {s}
 !    ,                        !- Speed 2 Ratio of Initial Moisture Evaporation Rate and steady state Latent Capacity {dimensionless}
@@ -762,10 +759,10 @@
 !    ,                        !- Speed 1 Rated COP {W/W}
 !    ,                        !- Speed 1 Rated Air Flow Rate {m3/s}
 !    ,                        !- Speed 1 Rated Supply Air Fan Power Per Volume Flow Rate {W/(m3/s)}
-!    HPHighStageHeatingCAPFTemp, !- Speed 1 Total Heating Capacity Function of Temperature Curve Name
-!    HPHighStageHeatingCAPFFF,   !- Speed 1 Total Heating Capacity Function of Flow Fraction Curve Name
-!    HPHighStageHeatingEIRFTemp, !- Speed 1 Energy Input Ratio Function of Temperature Curve Name
-!    HPHighStageHeatingEIRFFF,   !- Speed 1 Energy Input Ratio Function of Flow Fraction Curve Name
+!    HPLowStageHeatingCAPFTemp, !- Speed 1 Total Heating Capacity Function of Temperature Curve Name
+!    HPLowStageHeatingCAPFFF,   !- Speed 1 Total Heating Capacity Function of Flow Fraction Curve Name
+!    HPLowStageHeatingEIRFTemp, !- Speed 1 Energy Input Ratio Function of Temperature Curve Name
+!    HPLowStageHeatingEIRFFF,   !- Speed 1 Energy Input Ratio Function of Flow Fraction Curve Name
 !    HP2StageHeatingPLFFPLR,     !- Speed 1 Part Load Fraction Correlation Curve Name
 !    ,                        !- Speed 1 Rated Waste Heat Fraction of Power Input {dimensionless}
 !    ,                        !- Speed 1 Waste Heat Function of Temperature Curve Name
@@ -773,10 +770,10 @@
 !    ,                        !- Speed 2 Rated COP {W/W}
 !    ,                        !- Speed 2 Rated Air Flow Rate {m3/s}
 !    ,                        !- Speed 2 Rated Supply Air Fan Power Per Volume Flow Rate {W/(m3/s)}
-!    HPLowStageHeatingCAPFTemp, !- Speed 2 Total Heating Capacity Function of Temperature Curve Name
-!    HPLowStageHeatingCAPFFF,   !- Speed 2 Total Heating Capacity Function of Flow Fraction Curve Name
-!    HPLowStageHeatingEIRFTemp, !- Speed 2 Energy Input Ratio Function of Temperature Curve Name
-!    HPLowStageHeatingEIRFFF,   !- Speed 2 Energy Input Ratio Function of Flow Fraction Curve Name
+!    HPHighStageHeatingCAPFTemp, !- Speed 2 Total Heating Capacity Function of Temperature Curve Name
+!    HPHighStageHeatingCAPFFF,   !- Speed 2 Total Heating Capacity Function of Flow Fraction Curve Name
+!    HPHighStageHeatingEIRFTemp, !- Speed 2 Energy Input Ratio Function of Temperature Curve Name
+!    HPHighStageHeatingEIRFFF,   !- Speed 2 Energy Input Ratio Function of Flow Fraction Curve Name
 !    HP2StageHeatingPLFFPLR,    !- Speed 2 Part Load Fraction Correlation Curve Name
 !    ,                        !- Speed 2 Rated Waste Heat Fraction of Power Input {dimensionless}
 !    ;                        !- Speed 2 Waste Heat Function of Temperature Curve Name

@@ -1,7 +1,7 @@
-// EnergyPlus, Copyright (c) 1996-2023, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
-// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other
+// National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
 // contributors. All rights reserved.
 //
 // NOTICE: This Software was developed under funding from the U.S. Department of Energy and the
@@ -65,27 +65,38 @@ struct EnergyPlusData;
 
 namespace PlantLoadProfile {
 
+    enum class PlantLoopFluidType
+    {
+        Invalid = -1,
+        Water,
+        Steam,
+        Num
+    };
+
     struct PlantProfileData : public PlantComponent
     {
         virtual ~PlantProfileData() = default;
 
         // Members
-        std::string Name;                   // Name of Plant Load Profile object
-        DataPlant::PlantEquipmentType Type; // Plant Side Connection: 'Type' assigned in DataPlant
-        PlantLocation plantLoc;             // water plant loop component location object
-        bool Init;                          // Flag for initialization:  TRUE means do the init
-        bool InitSizing;                    // Flag for initialization of plant sizing
+        std::string Name;                                           // Name of Plant Load Profile object
+        DataPlant::PlantEquipmentType Type;                         // Plant Side Connection: 'Type' assigned in DataPlant
+        PlantLocation plantLoc;                                     // plant loop component location object
+        PlantLoopFluidType FluidType = PlantLoopFluidType::Invalid; // plant loop fluid type: water or steam
+        bool Init;                                                  // Flag for initialization:  TRUE means do the init
+        bool InitSizing;                                            // Flag for initialization of plant sizing
         int InletNode;
         Real64 InletTemp; // Inlet temperature (C)
         int OutletNode;
-        Real64 OutletTemp;        // Outlet temperature (C)
-        int LoadSchedule;         // Pointer to schedule object
-        bool EMSOverridePower;    // if true, then EMS is calling to override power level
-        Real64 EMSPowerValue;     // value EMS is directing to use for power [W]
-        Real64 PeakVolFlowRate;   // Peak volumetric flow rate, also water consumption rate (m3/s)
-        int FlowRateFracSchedule; // Pointer to schedule object
-        Real64 VolFlowRate;       // Volumetric flow rate (m3/s)
-        Real64 MassFlowRate;      // Mass flow rate (kg/s)
+        Real64 OutletTemp;                            // Outlet temperature (C)
+        Sched::Schedule *loadSched = nullptr;         // load schedule
+        bool EMSOverridePower;                        // if true, then EMS is calling to override power level
+        Real64 EMSPowerValue;                         // value EMS is directing to use for power [W]
+        Real64 PeakVolFlowRate;                       // Peak volumetric flow rate, also water consumption rate (m3/s)
+        Sched::Schedule *flowRateFracSched = nullptr; // flow rate fraction schedule
+        Real64 VolFlowRate;                           // Volumetric flow rate (m3/s)
+        Real64 MassFlowRate;                          // Mass flow rate (kg/s)
+        Real64 DegOfSubcooling = 0.0;                 // Degree of subcooling in steam outlet
+        Real64 LoopSubcoolReturn = 0.0;               // Loop subcooling for steam return
         bool EMSOverrideMassFlow;
         Real64 EMSMassFlowValue;
         // Report variables
@@ -97,9 +108,8 @@ namespace PlantLoadProfile {
         // Default Constructor
         PlantProfileData()
             : Type(DataPlant::PlantEquipmentType::Invalid), plantLoc{}, Init(true), InitSizing(true), InletNode(0), InletTemp(0.0), OutletNode(0),
-              OutletTemp(0.0), LoadSchedule(0), EMSOverridePower(false), EMSPowerValue(0.0), PeakVolFlowRate(0.0), FlowRateFracSchedule(0),
-              VolFlowRate(0.0), MassFlowRate(0.0), EMSOverrideMassFlow(false), EMSMassFlowValue(0.0), Power(0.0), Energy(0.0), HeatingEnergy(0.0),
-              CoolingEnergy(0.0)
+              OutletTemp(0.0), EMSOverridePower(false), EMSPowerValue(0.0), PeakVolFlowRate(0.0), VolFlowRate(0.0), MassFlowRate(0.0),
+              EMSOverrideMassFlow(false), EMSMassFlowValue(0.0), Power(0.0), Energy(0.0), HeatingEnergy(0.0), CoolingEnergy(0.0)
         {
         }
 
@@ -123,6 +133,8 @@ namespace PlantLoadProfile {
         void oneTimeInit(EnergyPlusData &state) override;
 
         void oneTimeInit_new(EnergyPlusData &state) override;
+
+        void getCurrentPower(EnergyPlusData &state, Real64 &power) override;
     };
 
     // This could be static inside the class
@@ -136,6 +148,14 @@ struct PlantLoadProfileData : BaseGlobalStruct
     bool GetPlantLoadProfileInputFlag = true;
     int NumOfPlantProfile = 0;
     Array1D<PlantLoadProfile::PlantProfileData> PlantProfile;
+
+    void init_constant_state([[maybe_unused]] EnergyPlusData &state) override
+    {
+    }
+
+    void init_state([[maybe_unused]] EnergyPlusData &state) override
+    {
+    }
 
     void clear_state() override
     {

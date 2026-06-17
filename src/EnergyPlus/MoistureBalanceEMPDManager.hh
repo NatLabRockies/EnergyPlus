@@ -1,7 +1,7 @@
-// EnergyPlus, Copyright (c) 1996-2023, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
-// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other
+// National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
 // contributors. All rights reserved.
 //
 // NOTICE: This Software was developed under funding from the U.S. Department of Energy and the
@@ -64,6 +64,28 @@ struct EnergyPlusData;
 
 namespace MoistureBalanceEMPDManager {
 
+    struct MaterialEMPD : public Material::MaterialBase
+    {
+        // EMPD
+        Real64 mu = 0.0;               // Water Vapor Diffusion Resistance Factor (dimensionless)
+        Real64 moistACoeff = 0.0;      // Moisture Equation Coefficient a
+        Real64 moistBCoeff = 0.0;      // Moisture Equation Coefficient b
+        Real64 moistCCoeff = 0.0;      // Moisture Equation Coefficient c
+        Real64 moistDCoeff = 0.0;      // Moisture Equation Coefficient d
+        Real64 surfaceDepth = 0.0;     // Surface-layer penetration depth (m)
+        Real64 deepDepth = 0.0;        // Deep-layer penetration depth (m)
+        Real64 coatingThickness = 0.0; // Coating Layer Thickness (m)
+        Real64 muCoating = 0.0;        // Coating Layer water vapor diffusion resistance factor (dimensionless)
+
+        MaterialEMPD() : MaterialBase()
+        {
+            group = Material::Group::Regular;
+        } // Change this to group EMPD?
+        ~MaterialEMPD() = default;
+
+        Real64 calcDepthFromPeriod(EnergyPlusData &state, Real64 period); // in seconds
+    };
+
     struct EMPDReportVarsData
     {
         Real64 rv_surface;
@@ -83,12 +105,6 @@ namespace MoistureBalanceEMPDManager {
         {
         }
     };
-
-    // Functions
-    Real64 CalcDepthFromPeriod(EnergyPlusData &state,
-                               Real64 period,                          // in seconds
-                               Material::MaterialProperties const *mat // material
-    );
 
     void GetMoistureBalanceEMPDInput(EnergyPlusData &state);
 
@@ -115,6 +131,14 @@ struct MoistureBalanceEMPDManagerData : BaseGlobalStruct
     bool InitEnvrnFlag = true;
     int ErrCount = 0;
     bool OneTimeFlag = true;
+
+    void init_constant_state([[maybe_unused]] EnergyPlusData &state) override
+    {
+    }
+
+    void init_state([[maybe_unused]] EnergyPlusData &state) override
+    {
+    }
 
     void clear_state() override
     {

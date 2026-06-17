@@ -103,7 +103,7 @@
 ! Environmental Emissions:        None
 ! Utility Tariffs:                None
 
-  Version,23.1;
+  Version,26.2;
 
   Building,
     Building,                !- Name
@@ -739,8 +739,8 @@
     INFIL-SCH,               !- Schedule Name
     flow/zone,               !- Design Flow Rate Calculation Method
     0.0167,                  !- Design Flow Rate {m3/s}
-    ,                        !- Flow per Zone Floor Area {m3/s-m2}
-    ,                        !- Flow per Exterior Surface Area {m3/s-m2}
+    ,                        !- Flow Rate per Floor Area {m3/s-m2}
+    ,                        !- Flow Rate per Exterior Surface Area {m3/s-m2}
     ,                        !- Air Changes per Hour {1/hr}
     0,                       !- Constant Term Coefficient
     0,                       !- Temperature Term Coefficient
@@ -765,7 +765,7 @@
     LIGHTS-1,                !- Schedule Name
     LightingLevel,           !- Design Level Calculation Method
     1584,                    !- Lighting Level {W}
-    ,                        !- Watts per Zone Floor Area {W/m2}
+    ,                        !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     ,                        !- Return Air Fraction
     0.59,                    !- Fraction Radiant
@@ -779,7 +779,7 @@
     EQUIP-1,                 !- Schedule Name
     EquipmentLevel,          !- Design Level Calculation Method
     1056,                    !- Design Level {W}
-    ,                        !- Watts per Zone Floor Area {W/m2}
+    ,                        !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0,                       !- Fraction Latent
     0.3,                     !- Fraction Radiant
@@ -954,8 +954,8 @@
     INFIL-SCH,               !- Schedule Name
     flow/zone,               !- Design Flow Rate Calculation Method
     0.00717,                 !- Design Flow Rate {m3/s}
-    ,                        !- Flow per Zone Floor Area {m3/s-m2}
-    ,                        !- Flow per Exterior Surface Area {m3/s-m2}
+    ,                        !- Flow Rate per Floor Area {m3/s-m2}
+    ,                        !- Flow Rate per Exterior Surface Area {m3/s-m2}
     ,                        !- Air Changes per Hour {1/hr}
     0,                       !- Constant Term Coefficient
     0,                       !- Temperature Term Coefficient
@@ -980,7 +980,7 @@
     LIGHTS-1,                !- Schedule Name
     LightingLevel,           !- Design Level Calculation Method
     684,                     !- Lighting Level {W}
-    ,                        !- Watts per Zone Floor Area {W/m2}
+    ,                        !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     ,                        !- Return Air Fraction
     0.59,                    !- Fraction Radiant
@@ -994,7 +994,7 @@
     EQUIP-1,                 !- Schedule Name
     EquipmentLevel,          !- Design Level Calculation Method
     456,                     !- Design Level {W}
-    ,                        !- Watts per Zone Floor Area {W/m2}
+    ,                        !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0,                       !- Fraction Latent
     0.3,                     !- Fraction Radiant
@@ -1134,8 +1134,8 @@
     INFIL-SCH,               !- Schedule Name
     flow/zone,               !- Design Flow Rate Calculation Method
     0.0167,                  !- Design Flow Rate {m3/s}
-    ,                        !- Flow per Zone Floor Area {m3/s-m2}
-    ,                        !- Flow per Exterior Surface Area {m3/s-m2}
+    ,                        !- Flow Rate per Floor Area {m3/s-m2}
+    ,                        !- Flow Rate per Exterior Surface Area {m3/s-m2}
     ,                        !- Air Changes per Hour {1/hr}
     0,                       !- Constant Term Coefficient
     0,                       !- Temperature Term Coefficient
@@ -1160,7 +1160,7 @@
     LIGHTS-1,                !- Schedule Name
     LightingLevel,           !- Design Level Calculation Method
     1584,                    !- Lighting Level {W}
-    ,                        !- Watts per Zone Floor Area {W/m2}
+    ,                        !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     ,                        !- Return Air Fraction
     0.59,                    !- Fraction Radiant
@@ -1174,7 +1174,7 @@
     EQUIP-1,                 !- Schedule Name
     EquipmentLevel,          !- Design Level Calculation Method
     1056,                    !- Design Level {W}
-    ,                        !- Watts per Zone Floor Area {W/m2}
+    ,                        !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0,                       !- Fraction Latent
     0.3,                     !- Fraction Radiant
@@ -1329,8 +1329,8 @@
     INFIL-SCH,               !- Schedule Name
     flow/zone,               !- Design Flow Rate Calculation Method
     0.00717,                 !- Design Flow Rate {m3/s}
-    ,                        !- Flow per Zone Floor Area {m3/s-m2}
-    ,                        !- Flow per Exterior Surface Area {m3/s-m2}
+    ,                        !- Flow Rate per Floor Area {m3/s-m2}
+    ,                        !- Flow Rate per Exterior Surface Area {m3/s-m2}
     ,                        !- Air Changes per Hour {1/hr}
     0,                       !- Constant Term Coefficient
     0,                       !- Temperature Term Coefficient
@@ -1355,7 +1355,7 @@
     LIGHTS-1,                !- Schedule Name
     LightingLevel,           !- Design Level Calculation Method
     684,                     !- Lighting Level {W}
-    ,                        !- Watts per Zone Floor Area {W/m2}
+    ,                        !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     ,                        !- Return Air Fraction
     0.59,                    !- Fraction Radiant
@@ -1369,7 +1369,7 @@
     EQUIP-1,                 !- Schedule Name
     EquipmentLevel,          !- Design Level Calculation Method
     456,                     !- Design Level {W}
-    ,                        !- Watts per Zone Floor Area {W/m2}
+    ,                        !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0,                       !- Fraction Latent
     0.3,                     !- Fraction Radiant
@@ -1509,8 +1509,8 @@
     INFIL-SCH,               !- Schedule Name
     flow/zone,               !- Design Flow Rate Calculation Method
     0.031089,                !- Design Flow Rate {m3/s}
-    ,                        !- Flow per Zone Floor Area {m3/s-m2}
-    ,                        !- Flow per Exterior Surface Area {m3/s-m2}
+    ,                        !- Flow Rate per Floor Area {m3/s-m2}
+    ,                        !- Flow Rate per Exterior Surface Area {m3/s-m2}
     ,                        !- Air Changes per Hour {1/hr}
     0,                       !- Constant Term Coefficient
     0,                       !- Temperature Term Coefficient
@@ -1535,7 +1535,7 @@
     LIGHTS-1,                !- Schedule Name
     LightingLevel,           !- Design Level Calculation Method
     2964,                    !- Lighting Level {W}
-    ,                        !- Watts per Zone Floor Area {W/m2}
+    ,                        !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     ,                        !- Return Air Fraction
     0.59,                    !- Fraction Radiant
@@ -1549,7 +1549,7 @@
     EQUIP-1,                 !- Schedule Name
     EquipmentLevel,          !- Design Level Calculation Method
     1976,                    !- Design Level {W}
-    ,                        !- Watts per Zone Floor Area {W/m2}
+    ,                        !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0,                       !- Fraction Latent
     0.3,                     !- Fraction Radiant
@@ -1728,8 +1728,6 @@
     Through: 12/31,          !- Field 1
     For: Alldays,            !- Field 2
     Until: 24:00,117.239997864; !- Field 3
-
-                             !- Field 4
 
   Schedule:Compact,
     SHADETRANSSCH,           !- Name
@@ -2052,10 +2050,6 @@
     Coil:Cooling:WaterToAirHeatPump:ParameterEstimation,  !- Cooling Coil Object Type
     Heat Pump Cooling Mode AHU1,  !- Cooling Coil Name
     0.001,                   !- Cooling Convergence
-    2.5,                     !- Maximum Cycling Rate {cycles/hr}
-    60,                      !- Heat Pump Time Constant {s}
-    0.01,                    !- Fraction of On-Cycle Power Use
-    60,                      !- Heat Pump Fan Delay Time {s}
     Coil:Heating:Fuel,       !- Supplemental Heating Coil Object Type
     Heat Pump DX Supp Heating Coil AHU1,  !- Supplemental Heating Coil Name
     50,                      !- Maximum Supply Air Temperature from Supplemental Heater {C}
@@ -2080,6 +2074,7 @@
 
   Coil:Cooling:WaterToAirHeatPump:ParameterEstimation,
     Heat Pump Cooling Mode AHU1,  !- Name
+    ,                        !- Availability Schedule Name
     Scroll,                  !- Compressor Type
     R22,                     !- Refrigerant Type
     0.0015,                  !- Design Source Side Flow Rate {m3/s}
@@ -2105,10 +2100,15 @@
     2.06530E-02,             !- Leak Rate Coefficient
     1.92757E+03,             !- Source Side Heat Transfer Coefficient {W/K}
     ,                        !- Source Side Heat Transfer Resistance1 {dimensionless}
-    ;                        !- Source Side Heat Transfer Resistance2 {W/K}
+    ,                        !- Source Side Heat Transfer Resistance2 {W/K}
+    HPACCOOLPLFFPLR,         !- Part Load Fraction Correlation Curve Name
+    2.5,                     !- Maximum Cycling Rate {cycles/hr}
+    60,                      !- Latent Capacity Time Constant {s}
+    60;                      !- Fan Delay Time {s}
 
   Coil:Heating:WaterToAirHeatPump:ParameterEstimation,
     Heat Pump HEATING Mode AHU1,  !- Name
+    ,                        !- Availability Schedule Name
     Scroll,                  !- Compressor Type
     R22,                     !- Refrigerant Type
     0.0015,                  !- Design Source Side Flow Rate {m3/s}
@@ -2131,7 +2131,8 @@
     2.07750E-06,             !- Leak Rate Coefficient {dimensionless}
     4.00322E+03,             !- Source Side Heat Transfer Coefficient {W/K}
     ,                        !- Source Side Heat Transfer Resistance1 {dimensionless}
-    ;                        !- Source Side Heat Transfer Resistance2 {W/K}
+    ,                        !- Source Side Heat Transfer Resistance2 {W/K}
+    HPACHEATPLFFPLR;         !- Part Load Fraction Correlation Curve Name
 
   Coil:Heating:Fuel,
     Heat Pump DX Supp Heating Coil AHU1,  !- Name
@@ -2254,10 +2255,6 @@
     Coil:Cooling:WaterToAirHeatPump:ParameterEstimation,  !- Cooling Coil Object Type
     Heat Pump Cooling Mode AHU2,  !- Cooling Coil Name
     0.001,                   !- Cooling Convergence
-    2.5,                     !- Maximum Cycling Rate {cycles/hr}
-    60,                      !- Heat Pump Time Constant {s}
-    0.01,                    !- Fraction of On-Cycle Power Use
-    60,                      !- Heat Pump Fan Delay Time {s}
     Coil:Heating:Fuel,       !- Supplemental Heating Coil Object Type
     Heat Pump DX Supp Heating Coil AHU2,  !- Supplemental Heating Coil Name
     50,                      !- Maximum Supply Air Temperature from Supplemental Heater {C}
@@ -2279,6 +2276,7 @@
 
   Coil:Cooling:WaterToAirHeatPump:ParameterEstimation,
     Heat Pump Cooling Mode AHU2,  !- Name
+    ,                        !- Availability Schedule Name
     Scroll,                  !- Compressor Type
     R22,                     !- Refrigerant Type
     0.0015,                  !- Design Source Side Flow Rate {m3/s}
@@ -2304,10 +2302,15 @@
     2.06530E-02,             !- Leak Rate Coefficient
     1.92757E+03,             !- Source Side Heat Transfer Coefficient {W/K}
     ,                        !- Source Side Heat Transfer Resistance1 {dimensionless}
-    ;                        !- Source Side Heat Transfer Resistance2 {W/K}
+    ,                        !- Source Side Heat Transfer Resistance2 {W/K}
+    HPACCOOLPLFFPLR,         !- Part Load Fraction Correlation Curve Name
+    2.5,                     !- Maximum Cycling Rate {cycles/hr}
+    60,                      !- Latent Capacity Time Constant {s}
+    60;                      !- Fan Delay Time {s}
 
   Coil:Heating:WaterToAirHeatPump:ParameterEstimation,
     Heat Pump HEATING Mode AHU2,  !- Name
+    ,                        !- Availability Schedule Name
     Scroll,                  !- Compressor Type
     R22,                     !- Refrigerant Type
     0.0015,                  !- Design Source Side Flow Rate {m3/s}
@@ -2330,7 +2333,8 @@
     2.07750E-06,             !- Leak Rate Coefficient {dimensionless}
     4.00322E+03,             !- Source Side Heat Transfer Coefficient {W/K}
     ,                        !- Source Side Heat Transfer Resistance1 {dimensionless}
-    ;                        !- Source Side Heat Transfer Resistance2 {W/K}
+    ,                        !- Source Side Heat Transfer Resistance2 {W/K}
+    HPACHEATPLFFPLR;         !- Part Load Fraction Correlation Curve Name
 
   Coil:Heating:Fuel,
     Heat Pump DX Supp Heating Coil AHU2,  !- Name
@@ -2453,10 +2457,6 @@
     Coil:Cooling:WaterToAirHeatPump:ParameterEstimation,  !- Cooling Coil Object Type
     Heat Pump Cooling Mode AHU3,  !- Cooling Coil Name
     0.001,                   !- Cooling Convergence
-    2.5,                     !- Maximum Cycling Rate {cycles/hr}
-    60,                      !- Heat Pump Time Constant {s}
-    0.01,                    !- Fraction of On-Cycle Power Use
-    60,                      !- Heat Pump Fan Delay Time {s}
     Coil:Heating:Fuel,       !- Supplemental Heating Coil Object Type
     Heat Pump DX Supp Heating Coil AHU3,  !- Supplemental Heating Coil Name
     50,                      !- Maximum Supply Air Temperature from Supplemental Heater {C}
@@ -2478,6 +2478,7 @@
 
   Coil:Cooling:WaterToAirHeatPump:ParameterEstimation,
     Heat Pump Cooling Mode AHU3,  !- Name
+    ,                        !- Availability Schedule Name
     Scroll,                  !- Compressor Type
     R22,                     !- Refrigerant Type
     0.0015,                  !- Design Source Side Flow Rate {m3/s}
@@ -2503,10 +2504,15 @@
     2.06530E-02,             !- Leak Rate Coefficient
     1.92757E+03,             !- Source Side Heat Transfer Coefficient {W/K}
     ,                        !- Source Side Heat Transfer Resistance1 {dimensionless}
-    ;                        !- Source Side Heat Transfer Resistance2 {W/K}
+    ,                        !- Source Side Heat Transfer Resistance2 {W/K}
+    HPACCOOLPLFFPLR,         !- Part Load Fraction Correlation Curve Name
+    2.5,                     !- Maximum Cycling Rate {cycles/hr}
+    60,                      !- Latent Capacity Time Constant {s}
+    60;                      !- Fan Delay Time {s}
 
   Coil:Heating:WaterToAirHeatPump:ParameterEstimation,
     Heat Pump HEATING Mode AHU3,  !- Name
+    ,                        !- Availability Schedule Name
     Scroll,                  !- Compressor Type
     R22,                     !- Refrigerant Type
     0.0015,                  !- Design Source Side Flow Rate {m3/s}
@@ -2529,7 +2535,8 @@
     2.07750E-06,             !- Leak Rate Coefficient {dimensionless}
     4.00322E+03,             !- Source Side Heat Transfer Coefficient {W/K}
     ,                        !- Source Side Heat Transfer Resistance1 {dimensionless}
-    ;                        !- Source Side Heat Transfer Resistance2 {W/K}
+    ,                        !- Source Side Heat Transfer Resistance2 {W/K}
+    HPACHEATPLFFPLR;         !- Part Load Fraction Correlation Curve Name
 
   Coil:Heating:Fuel,
     Heat Pump DX Supp Heating Coil AHU3,  !- Name
@@ -2652,10 +2659,6 @@
     Coil:Cooling:WaterToAirHeatPump:ParameterEstimation,  !- Cooling Coil Object Type
     Heat Pump Cooling Mode AHU4,  !- Cooling Coil Name
     0.001,                   !- Cooling Convergence
-    2.5,                     !- Maximum Cycling Rate {cycles/hr}
-    60,                      !- Heat Pump Time Constant {s}
-    0.01,                    !- Fraction of On-Cycle Power Use
-    60,                      !- Heat Pump Fan Delay Time {s}
     Coil:Heating:Fuel,       !- Supplemental Heating Coil Object Type
     Heat Pump DX Supp Heating Coil AHU4,  !- Supplemental Heating Coil Name
     50,                      !- Maximum Supply Air Temperature from Supplemental Heater {C}
@@ -2677,6 +2680,7 @@
 
   Coil:Cooling:WaterToAirHeatPump:ParameterEstimation,
     Heat Pump Cooling Mode AHU4,  !- Name
+    ,                        !- Availability Schedule Name
     Scroll,                  !- Compressor Type
     R22,                     !- Refrigerant Type
     0.0015,                  !- Design Source Side Flow Rate {m3/s}
@@ -2702,10 +2706,15 @@
     2.06530E-02,             !- Leak Rate Coefficient
     1.92757E+03,             !- Source Side Heat Transfer Coefficient {W/K}
     ,                        !- Source Side Heat Transfer Resistance1 {dimensionless}
-    ;                        !- Source Side Heat Transfer Resistance2 {W/K}
+    ,                        !- Source Side Heat Transfer Resistance2 {W/K}
+    HPACCOOLPLFFPLR,         !- Part Load Fraction Correlation Curve Name
+    2.5,                     !- Maximum Cycling Rate {cycles/hr}
+    60,                      !- Latent Capacity Time Constant {s}
+    60;                      !- Fan Delay Time {s}
 
   Coil:Heating:WaterToAirHeatPump:ParameterEstimation,
     Heat Pump HEATING Mode AHU4,  !- Name
+    ,                        !- Availability Schedule Name
     Scroll,                  !- Compressor Type
     R22,                     !- Refrigerant Type
     0.0015,                  !- Design Source Side Flow Rate {m3/s}
@@ -2728,7 +2737,8 @@
     2.07750E-06,             !- Leak Rate Coefficient {dimensionless}
     4.00322E+03,             !- Source Side Heat Transfer Coefficient {W/K}
     ,                        !- Source Side Heat Transfer Resistance1 {dimensionless}
-    ;                        !- Source Side Heat Transfer Resistance2 {W/K}
+    ,                        !- Source Side Heat Transfer Resistance2 {W/K}
+    HPACHEATPLFFPLR;         !- Part Load Fraction Correlation Curve Name
 
   Coil:Heating:Fuel,
     Heat Pump DX Supp Heating Coil AHU4,  !- Name
@@ -2851,10 +2861,6 @@
     Coil:Cooling:WaterToAirHeatPump:ParameterEstimation,  !- Cooling Coil Object Type
     Heat Pump Cooling Mode AHU5,  !- Cooling Coil Name
     0.001,                   !- Cooling Convergence
-    2.5,                     !- Maximum Cycling Rate {cycles/hr}
-    60,                      !- Heat Pump Time Constant {s}
-    0.01,                    !- Fraction of On-Cycle Power Use
-    60,                      !- Heat Pump Fan Delay Time {s}
     Coil:Heating:Fuel,       !- Supplemental Heating Coil Object Type
     Heat Pump DX Supp Heating Coil AHU5,  !- Supplemental Heating Coil Name
     50,                      !- Maximum Supply Air Temperature from Supplemental Heater {C}
@@ -2876,6 +2882,7 @@
 
   Coil:Cooling:WaterToAirHeatPump:ParameterEstimation,
     Heat Pump Cooling Mode AHU5,  !- Name
+    ,                        !- Availability Schedule Name
     Scroll,                  !- Compressor Type
     R22,                     !- Refrigerant Type
     0.0015,                  !- Design Source Side Flow Rate {m3/s}
@@ -2901,10 +2908,15 @@
     2.06530E-02,             !- Leak Rate Coefficient
     1.92757E+03,             !- Source Side Heat Transfer Coefficient {W/K}
     ,                        !- Source Side Heat Transfer Resistance1 {dimensionless}
-    ;                        !- Source Side Heat Transfer Resistance2 {W/K}
+    ,                        !- Source Side Heat Transfer Resistance2 {W/K}
+    HPACCOOLPLFFPLR,         !- Part Load Fraction Correlation Curve Name
+    2.5,                     !- Maximum Cycling Rate {cycles/hr}
+    60,                      !- Latent Capacity Time Constant {s}
+    60;                      !- Fan Delay Time {s}
 
   Coil:Heating:WaterToAirHeatPump:ParameterEstimation,
     Heat Pump HEATING Mode AHU5,  !- Name
+    ,                        !- Availability Schedule Name
     Scroll,                  !- Compressor Type
     R22,                     !- Refrigerant Type
     0.0015,                  !- Design Source Side Flow Rate {m3/s}
@@ -2927,7 +2939,8 @@
     2.07750E-06,             !- Leak Rate Coefficient {dimensionless}
     4.00322E+03,             !- Source Side Heat Transfer Coefficient {W/K}
     ,                        !- Source Side Heat Transfer Resistance1 {dimensionless}
-    ;                        !- Source Side Heat Transfer Resistance2 {W/K}
+    ,                        !- Source Side Heat Transfer Resistance2 {W/K}
+    HPACHEATPLFFPLR;         !- Part Load Fraction Correlation Curve Name
 
   Coil:Heating:Fuel,
     Heat Pump DX Supp Heating Coil AHU5,  !- Name

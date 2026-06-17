@@ -75,7 +75,7 @@
 !
 !
 
-  Version,23.1;
+  Version,26.2;
 
   Building,
     Exercise 1B,             !- Name
@@ -480,7 +480,7 @@
 
   Output:Variable,*,Zone Air Temperature,Hourly;
 
-  Output:Meter,DistrictHeating:Facility,Hourly;
+  Output:Meter,DistrictHeatingWater:Facility,Hourly;
 
   Output:Meter,DistrictCooling:Facility,Hourly;
 

@@ -1,7 +1,7 @@
-// EnergyPlus, Copyright (c) 1996-2023, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
-// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other
+// National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
 // contributors. All rights reserved.
 //
 // NOTICE: This Software was developed under funding from the U.S. Department of Energy and the
@@ -107,6 +107,9 @@ namespace DataWindowEquivalentLayer {
         Vertical,
         Num
     };
+
+    static constexpr std::array<std::string_view, (int)Orientation::Num> orientationNames = {"Horizontal", "Vertical"};
+    static constexpr std::array<std::string_view, (int)Orientation::Num> orientationNamesUC = {"HORIZONTAL", "VERTICAL"};
 
     enum class AngleType
     {
@@ -288,6 +291,14 @@ struct WindowEquivLayerData : BaseGlobalStruct
     Array1D<DataWindowEquivalentLayer::CFSLAYER> CFSLayers;
     Array1D<DataWindowEquivalentLayer::CFSTY> CFS;
     Array1D<DataWindowEquivalentLayer::CFSGAP> CFSGaps;
+
+    void init_constant_state([[maybe_unused]] EnergyPlusData &state) override
+    {
+    }
+
+    void init_state([[maybe_unused]] EnergyPlusData &state) override
+    {
+    }
 
     void clear_state() override
     {

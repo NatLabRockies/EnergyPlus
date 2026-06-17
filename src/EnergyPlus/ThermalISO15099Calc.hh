@@ -1,7 +1,7 @@
-// EnergyPlus, Copyright (c) 1996-2023, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
-// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other
+// National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
 // contributors. All rights reserved.
 //
 // NOTICE: This Software was developed under funding from the U.S. Department of Energy and the
@@ -215,8 +215,8 @@ namespace ThermalISO15099Calc {
                  Real64 &hrin,
                  Real64 &hcout,
                  Real64 &hrout,
-                 Real64 &hin,
-                 Real64 &hout,
+                 Real64 const hin,
+                 Real64 const hout,
                  Array1D<Real64> &hcgas,
                  Array1D<Real64> &hrgas,
                  Real64 &ufactor,
@@ -274,7 +274,7 @@ namespace ThermalISO15099Calc {
                 Real64 tind,
                 const Array1D<Real64> &hcgas,
                 const Array1D<Real64> &hrgas,
-                Array1D<Real64> &Theta,
+                Array1D<Real64> const &Theta,
                 Array1D<Real64> &qlayer,
                 const Array1D<Real64> &qv,
                 const Array1D<TARCOGLayerType> &LayerType,
@@ -294,18 +294,18 @@ namespace ThermalISO15099Calc {
                 Real64 wsi,
                 Real64 VacuumPressure,
                 Real64 VacuumMaxGapThickness,
-                Real64 &ebsky,
+                Real64 const ebsky,
                 Real64 &tamb,
-                Real64 &ebroom,
+                Real64 const ebroom,
                 Real64 &troom,
                 const Array1D<Real64> &gap,
                 Real64 height,
                 Real64 heightt,
                 const Array1D<Real64> &scon,
                 Real64 tilt,
-                Array1D<Real64> &theta,
+                Array1D<Real64> const &theta,
                 const Array1D<Real64> &Tgap,
-                Array1D<Real64> &Radiation,
+                Array1D<Real64> const &Radiation,
                 Real64 trmout,
                 Real64 trmin,
                 Array2_int const &iprop,
@@ -350,7 +350,7 @@ namespace ThermalISO15099Calc {
                             Array2A<Real64> gvis,                      // Gas specific viscosity
                             Array2A<Real64> gcp,                       // Gas specific heat
                             const Array1D<Real64> &EffectiveOpenness,  // Layer effective openneess [m2]
-                            Array1D<Real64> &theta,                    // Layer surface tempeartures [K]
+                            Array1D<Real64> const &theta,              // Layer surface temperatures [K]
                             Array1D<Real64> &sconScaled,               // Layer conductivity divided by thickness
                             int &nperr,                                // Error message flag
                             std::string &ErrorMessage                  // Error message
@@ -543,6 +543,14 @@ struct ThermalISO15099CalcData : BaseGlobalStruct
     int iFP = 0;
     int kFP = 0;
     std::string dynFormat;
+
+    void init_constant_state([[maybe_unused]] EnergyPlusData &state) override
+    {
+    }
+
+    void init_state([[maybe_unused]] EnergyPlusData &state) override
+    {
+    }
 
     void clear_state() override
     {

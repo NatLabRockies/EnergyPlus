@@ -154,6 +154,9 @@ set(INCLUDED_TEX
 # to get the list of inluded images, go to the root of the document folder and:
 # grep -r '\\includegraphics' * | cut -d ':' -f 2 | rev | cut -d '{' -f 1 | rev | cut -d '}' -f 1 | sed 's/^/  /g' | sort -n -t'.' -k 1.14
 set(INCLUDED_IMAGES
+    ${PROJECT_SOURCE_DIR}/engineering-reference/media/DHRU_diag.png
+    ${PROJECT_SOURCE_DIR}/engineering-reference/media/HW_reset.png
+
     ${PROJECT_SOURCE_DIR}/engineering-reference/media/SZVAV_Fan_Control_FanCoil.jpg
     ${PROJECT_SOURCE_DIR}/engineering-reference/media/SetPointManager-ResetForReturnControl1.png
     ${PROJECT_SOURCE_DIR}/engineering-reference/media/SetPointManager-ResetForReturnControl2.png

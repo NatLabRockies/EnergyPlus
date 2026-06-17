@@ -225,16 +225,16 @@ for three independent variables (\texttt{iv1}, \texttt{iv2},
 
 \begin{lstlisting}
 Table:Lookup,
-  HPACCoolCapFT,           !- Name
+  HPACCoolCapFT,              !- Name
   HPACCoolCapFT_IndependentVariableList,  !- Independent Variable List Name
-  AutomaticWithDivisor,    !- Normalization Method
-  ,                        !- Normalization Divisor
-  0,                       !- Minimum Output
-  40000,                   !- Maximum Output
-  Dimensionless,           !- Output Unit Type
-  ,                        !- External File Name
-  ,                        !- External File Column Number
-  ,                        !- External File Starting Row Number
+  AutomaticWithDivisor,       !- Normalization Method
+  ,                           !- Normalization Divisor
+  0,                          !- Minimum Output
+  40000,                      !- Maximum Output
+  Dimensionless,              !- Output Unit Type
+  ,                           !- External File Name
+  ,                           !- External File Column Number
+  ,                           !- External File Starting Row Number
   24421.69383, 22779.73113, 21147.21662, 19794.00525, 19524.15032, 18178.81244, 16810.36004,
   25997.3589,  24352.1562,  22716.4017,  21360.49033, 21090.0954,  19742.05753, 18370.84513,
   28392.31868, 26742.74198, 25102.61348, 23743.0571,  23471.93318, 22120.2503,  20745.3119,
@@ -356,8 +356,8 @@ of an independent variable.
 \begin{lstlisting}
 Table:IndependentVariableList,
   HPACCoolCapFT_IndependentVariableList,  !- Name
-  HPACCoolCapFT_Tewb,                     !- Independent Variable 1 Name
-  HPACCoolCapFT_Todb;                     !- Independent Variable 2 Name
+  HPACCoolCapFT_Tewb,         !- Independent Variable 1 Name
+  HPACCoolCapFT_Todb;         !- Independent Variable 2 Name
 \end{lstlisting}
 
 \subsection{Table:IndependentVariable}\label{tableindependentvariable}
@@ -607,20 +607,20 @@ is not the case).
 
 \begin{lstlisting}
 Table:IndependentVariable,
-  HPACCoolCapFT_Tewb,      !- Name
-  Cubic,                   !- Interpolation Method
-  Constant,                !- Extrapolation Method
-  12.77778,                !- Minimum Value
-  23.88889,                !- Maximum Value
-  19.44449,                !- Normalization Reference Value
-  Temperature,             !- Unit Type
-  ,                        !- External File Name
-  ,                        !- External File Column Number
-  ,                        !- External File Starting Row Number
-  12.77778,                !- Value 1
-  15.00000,                !- Value 2
-  18.00000,                !- Value 3
-  19.44449,                !- Value 4
-  21.00000,                !- Value 5
-  23.88889;                !- Value 6
+  HPACCoolCapFT_Tewb,         !- Name
+  Cubic,                      !- Interpolation Method
+  Constant,                   !- Extrapolation Method
+  12.77778,                   !- Minimum Value
+  23.88889,                   !- Maximum Value
+  19.44449,                   !- Normalization Reference Value
+  Temperature,                !- Unit Type
+  ,                           !- External File Name
+  ,                           !- External File Column Number
+  ,                           !- External File Starting Row Number
+  12.77778,                   !- Value 1
+  15.00000,                   !- Value 2
+  18.00000,                   !- Value 3
+  19.44449,                   !- Value 4
+  21.00000,                   !- Value 5
+  23.88889;                   !- Value 6
 \end{lstlisting}

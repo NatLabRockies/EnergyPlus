@@ -29,9 +29,9 @@
 
 #include <boost/property_tree/ptree.hpp>
 
-#include <valijson/adapters/adapter.hpp>
-#include <valijson/adapters/basic_adapter.hpp>
-#include <valijson/adapters/frozen_value.hpp>
+#include <valijson/internal/adapter.hpp>
+#include <valijson/internal/basic_adapter.hpp>
+#include <valijson/internal/frozen_value.hpp>
 
 namespace valijson {
 namespace adapters {
@@ -213,7 +213,7 @@ public:
     /**
      * @brief  Make a copy of a Boost property tree POD value
      *
-     * @param  source  string containing the POD vlaue
+     * @param  source  string containing the POD value
      */
     explicit PropertyTreeFrozenValue(const boost::property_tree::ptree::data_type &source)
       : m_value(source) { }
@@ -259,7 +259,8 @@ public:
 
     /// Construct a wrapper for an empty property tree
     PropertyTreeValue()
-      : m_object(emptyTree()) { }
+      : m_array(nullptr)
+      , m_object(&emptyTree()) { }
 
     /**
      * @brief  Construct a PropertyTreeValue from a tree object
@@ -275,10 +276,12 @@ public:
      * @param  tree  Tree object to be wrapped
      */
     PropertyTreeValue(const boost::property_tree::ptree &tree)
+      : m_array(nullptr)
+      , m_object(nullptr)
     {
-        if (tree.data().empty()) {    // No string content
-            if (tree.empty()) {   // No children
-                m_array.emplace(tree);         // Treat as empty array
+        if (tree.data().empty()) {       // No string content
+            if (tree.empty()) {          // No children
+                m_array = &tree;         // Treat as empty array
             } else {
                 bool isArray = true;
                 for (const auto &node : tree) {
@@ -289,9 +292,9 @@ public:
                 }
 
                 if (isArray) {
-                    m_array.emplace(tree);
+                    m_array = &tree;
                 } else {
-                    m_object.emplace(tree);
+                    m_object = &tree;
                 }
             }
         } else {
@@ -474,10 +477,12 @@ private:
     }
 
     /// Reference used if the value is known to be an array
-    opt::optional<const boost::property_tree::ptree &> m_array;
+    // opt::optional<const boost::property_tree::ptree &> m_array;
+    const boost::property_tree::ptree *m_array;
 
     /// Reference used if the value is known to be an object
-    opt::optional<const boost::property_tree::ptree &> m_object;
+    // opt::optional<const boost::property_tree::ptree &> m_object;
+    const boost::property_tree::ptree *m_object;
 
     /// Reference used if the value is known to be a POD type
     opt::optional<std::string> m_value;

@@ -1,7 +1,7 @@
-// EnergyPlus, Copyright (c) 1996-2023, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
-// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other
+// National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
 // contributors. All rights reserved.
 //
 // NOTICE: This Software was developed under funding from the U.S. Department of Energy and the
@@ -55,6 +55,7 @@
 #include <EnergyPlus/Data/BaseData.hh>
 #include <EnergyPlus/DataGlobals.hh>
 #include <EnergyPlus/EnergyPlus.hh>
+#include <EnergyPlus/Plant/DataPlant.hh>
 #include <EnergyPlus/PlantComponent.hh>
 
 namespace EnergyPlus {
@@ -71,7 +72,7 @@ namespace OutsideEnergySources {
         std::string Name;                                                                 // user identifier
         Real64 NomCap = 0.0;                                                              // design nominal capacity of district service
         bool NomCapWasAutoSized = false;                                                  // ture if Nominal Capacity was autosize on input
-        int CapFractionSchedNum = 0;                                                      // capacity modifier schedule number
+        Sched::Schedule *capFractionSched = nullptr;                                      // capacity modifier schedule number
         int InletNodeNum = 0;                                                             // Node number on the inlet side of the plant
         int OutletNodeNum = 0;                                                            // Node number on the inlet side of the plant
         Real64 EnergyTransfer = 0.0;                                                      // cooling energy provided in time step
@@ -85,6 +86,7 @@ namespace OutsideEnergySources {
         Real64 MassFlowRate = 0.0;
         Real64 InletTemp = 0.0;
         Real64 OutletTemp = 0.0;
+        Real64 OutletSteamQuality = 0.0;
 
         OutsideEnergySourceSpecs() = default;
 
@@ -127,6 +129,14 @@ struct OutsideEnergySourcesData : BaseGlobalStruct
     bool SimOutsideEnergyGetInputFlag = true;
     Array1D<OutsideEnergySources::OutsideEnergySourceSpecs> EnergySource;
     std::unordered_map<std::string, std::string> EnergySourceUniqueNames;
+
+    void init_constant_state([[maybe_unused]] EnergyPlusData &state) override
+    {
+    }
+
+    void init_state([[maybe_unused]] EnergyPlusData &state) override
+    {
+    }
 
     void clear_state() override
     {

@@ -1,7 +1,7 @@
-// EnergyPlus, Copyright (c) 1996-2023, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
-// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other
+// National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
 // contributors. All rights reserved.
 //
 // NOTICE: This Software was developed under funding from the U.S. Department of Energy and the
@@ -51,100 +51,344 @@
 // EnergyPlus Headers
 #include <EnergyPlus/EnergyPlus.hh>
 
-namespace EnergyPlus::ConvectionConstants {
+namespace EnergyPlus::Convect {
 
 // Data
 // MODULE PARAMETER DEFINITIONS:
-Real64 constexpr AdaptiveHcInsideLowLimit{0.5};  // W/m2-K
-Real64 constexpr AdaptiveHcOutsideLowLimit{1.0}; // W/m2-K
-
-Real64 constexpr OneThird{1.0 / 3.0};   // 1/3 in highest precision
-Real64 constexpr OneFourth{1.0 / 4.0};  // 1/4 in highest precision
-Real64 constexpr OneFifth{1.0 / 5.0};   // 1/5 in highest precision
-Real64 constexpr OneSixth{1.0 / 6.0};   // 1/6 in highest precision
-Real64 constexpr FourFifths{4.0 / 5.0}; // 4/5 in highest precision
+Real64 constexpr AdaptiveHcIntLowLimit = 0.5; // W/m2-K
+Real64 constexpr AdaptiveHcExtLowLimit = 1.0; // W/m2-K
 
 // parameters for identifying more specific hc model equations, inside face
-int constexpr HcInt_Value{-999};
-int constexpr HcInt_Schedule{-998};
-int constexpr HcInt_SetByZone{0};
-int constexpr HcInt_ASHRAESimple{1};
-int constexpr HcInt_ASHRAETARP{2};
-int constexpr HcInt_CeilingDiffuser{3};
-int constexpr HcInt_TrombeWall{4};
-int constexpr HcInt_AdaptiveConvectionAlgorithm{9};
-int constexpr HcInt_ASTMC1340{10};
-int constexpr HcInt_UserValue{200};
-int constexpr HcInt_UserSchedule{201};
-int constexpr HcInt_UserCurve{202};
-int constexpr HcInt_ASHRAEVerticalWall{203};
-int constexpr HcInt_WaltonUnstableHorizontalOrTilt{204};
-int constexpr HcInt_WaltonStableHorizontalOrTilt{205};
-int constexpr HcInt_FisherPedersenCeilDiffuserFloor{206};
-int constexpr HcInt_FisherPedersenCeilDiffuserCeiling{207};
-int constexpr HcInt_FisherPedersenCeilDiffuserWalls{208};
-int constexpr HcInt_AlamdariHammondStableHorizontal{209};
-int constexpr HcInt_AlamdariHammondVerticalWall{210};
-int constexpr HcInt_AlamdariHammondUnstableHorizontal{211};
-int constexpr HcInt_KhalifaEq3WallAwayFromHeat{212};
-int constexpr HcInt_KhalifaEq4CeilingAwayFromHeat{213};
-int constexpr HcInt_KhalifaEq5WallNearHeat{214};
-int constexpr HcInt_KhalifaEq6NonHeatedWalls{215};
-int constexpr HcInt_KhalifaEq7Ceiling{216};
-int constexpr HcInt_AwbiHattonHeatedFloor{217};
-int constexpr HcInt_AwbiHattonHeatedWall{218};
-int constexpr HcInt_BeausoleilMorrisonMixedAssistingWall{219};
-int constexpr HcInt_BeausoleilMorrisonMixedOppossingWall{220};
-int constexpr HcInt_BeausoleilMorrisonMixedStableCeiling{221};
-int constexpr HcInt_BeausoleilMorrisonMixedUnstableCeiling{222};
-int constexpr HcInt_BeausoleilMorrisonMixedStableFloor{223};
-int constexpr HcInt_BeausoleilMorrisonMixedUnstableFloor{224};
-int constexpr HcInt_FohannoPolidoriVerticalWall{225};
-int constexpr HcInt_KaradagChilledCeiling{226};
-int constexpr HcInt_ISO15099Windows{227};
-int constexpr HcInt_GoldsteinNovoselacCeilingDiffuserWindow{228};
-int constexpr HcInt_GoldsteinNovoselacCeilingDiffuserWalls{229};
-int constexpr HcInt_GoldsteinNovoselacCeilingDiffuserFloor{230};
+enum class HcInt
+{
+    Invalid = -1,
+    Value,
+    Schedule,
+    SetByZone,
+    ASHRAESimple,
+    ASHRAETARP,
+    CeilingDiffuser,
+    TrombeWall,
+    AdaptiveConvectionAlgorithm,
+    ASTMC1340,
+    UserValue,
+    UserSchedule,
+    UserCurve,
+    ASHRAEVerticalWall,
+    WaltonUnstableHorizontalOrTilt,
+    WaltonStableHorizontalOrTilt,
+    FisherPedersenCeilDiffuserFloor,
+    FisherPedersenCeilDiffuserCeiling,
+    FisherPedersenCeilDiffuserWalls,
+    AlamdariHammondStableHorizontal,
+    AlamdariHammondVerticalWall,
+    AlamdariHammondUnstableHorizontal,
+    KhalifaEq3WallAwayFromHeat,
+    KhalifaEq4CeilingAwayFromHeat,
+    KhalifaEq5WallNearHeat,
+    KhalifaEq6NonHeatedWalls,
+    KhalifaEq7Ceiling,
+    AwbiHattonHeatedFloor,
+    AwbiHattonHeatedWall,
+    BeausoleilMorrisonMixedAssistingWall,
+    BeausoleilMorrisonMixedOppossingWall,
+    BeausoleilMorrisonMixedStableFloor,
+    BeausoleilMorrisonMixedUnstableFloor,
+    BeausoleilMorrisonMixedStableCeiling,
+    BeausoleilMorrisonMixedUnstableCeiling,
+    FohannoPolidoriVerticalWall,
+    KaradagChilledCeiling,
+    ISO15099Windows,
+    GoldsteinNovoselacCeilingDiffuserWindow,
+    GoldsteinNovoselacCeilingDiffuserWalls,
+    GoldsteinNovoselacCeilingDiffuserFloor,
+    Num
+};
 
-// parameters for identifying more specific hc model equations, outside face
-int constexpr HcExt_Value{-999};
-int constexpr HcExt_Schedule{-998};
-int constexpr HcExt_ASHRAESimple{1};
-int constexpr HcExt_ASHRAETARP{2};
-int constexpr HcExt_TarpHcOutside{5};
-int constexpr HcExt_MoWiTTHcOutside{6};
-int constexpr HcExt_DOE2HcOutside{7};
-int constexpr HcExt_BLASTHcOutside{8};
-int constexpr HcExt_AdaptiveConvectionAlgorithm{9};
-int constexpr HcExt_None{300}; // none is allowed because Hn and Hf are split
-int constexpr HcExt_UserValue{301};
-int constexpr HcExt_UserSchedule{302};
-int constexpr HcExt_UserCurve{303};
-int constexpr HcExt_ASHRAESimpleCombined{304};
-int constexpr HcExt_NaturalASHRAEVerticalWall{305};
-int constexpr HcExt_NaturalWaltonUnstableHorizontalOrTilt{306};
-int constexpr HcExt_NaturalWaltonStableHorizontalOrTilt{307};
-int constexpr HcExt_SparrowWindward{308};
-int constexpr HcExt_SparrowLeeward{309};
-int constexpr HcExt_MoWiTTWindward{310};
-int constexpr HcExt_MoWiTTLeeward{311};
-int constexpr HcExt_DOE2Windward{312};
-int constexpr HcExt_DOE2Leeward{313};
-int constexpr HcExt_NusseltJurges{314};
-int constexpr HcExt_McAdams{315};
-int constexpr HcExt_Mitchell{316};
-int constexpr HcExt_ClearRoof{317};
-int constexpr HcExt_BlockenWindward{318};
-int constexpr HcExt_EmmelVertical{319};
-int constexpr HcExt_EmmelRoof{320};
-int constexpr HcExt_AlamdariHammondVerticalWall{321};
-int constexpr HcExt_FohannoPolidoriVerticalWall{322};
-int constexpr HcExt_ISO15099Windows{323};
-int constexpr HcExt_AlamdariHammondStableHorizontal{324};
-int constexpr HcExt_AlamdariHammondUnstableHorizontal{325};
+constexpr std::array<std::string_view, static_cast<int>(HcInt::Num)> HcIntNames = {
+    "Value",
+    "Schedule",
+    "SetByZone",
+    "Simple",
+    "TARP",
+    "CeilingDiffuser",
+    "TrombeWall",
+    "AdaptiveConvectionAlgorithm",
+    "ASTMC1340",
+    "UserValue",
+    "UserSchedule",
+    "UserCurve",
+    "ASHRAEVerticalWall",
+    "WaltonUnstableHorizontalOrTilt",
+    "WaltonStableHorizontalOrTilt",
+    "FisherPedersenCeilingDiffuserWalls",
+    "FisherPedersenCeilingDiffuserCeling",
+    "FisherPedersenCeilingDiffuserFloor",
+    "AlamdariHammondStableHorizontal",
+    "AlamdariHammondVerticalWall",
+    "AlamdariHammondUnstableHorizontal",
+    "KhalifaEQ3WallAwayFromHeat",
+    "KhalifaEQ4CeilingAwayFromHeat",
+    "KhalifaEQ5WallNearHeat",
+    "KhalifaEQ6NonHeatedWalls",
+    "KhalifaEQ7Ceiling",
+    "AwbiHattonHeatedFloor",
+    "AwbiHattonHeatedWall",
+    "BeausoleilMorrisonMixedAassitedWall",
+    "BeausoleilMorrisonMixedOpposingWall",
+    "BeausoleilMorrisonMixedStableFloor",
+    "BeausoleilMorrisonMixedUnstableFloor",
+    "BeausoleilMorrisonMixedStableCeiling",
+    "BeausoleilMorrisonMixedUnstableCeiling",
+    "FohannoPolidoriVerticalWall",
+    "KaradagChilledCeiling",
+    "ISO15099Windows",
+    "GoldsteinNovoselacCeilingDiffuserWindow",
+    "GoldsteinNovoselacCeilingDiffuserWalls",
+    "GoldsteinNovoselacCeilingDiffuserFloor",
+};
+
+constexpr std::array<std::string_view, static_cast<int>(HcInt::Num)> HcIntNamesUC = {"VALUE",
+                                                                                     "SCHEDULE",
+                                                                                     "SETBYZONE",
+                                                                                     "SIMPLE",
+                                                                                     "TARP",
+                                                                                     "CEILINGDIFFUSER",
+                                                                                     "TROMBEWALL",
+                                                                                     "ADAPTIVECONVECTIONALGORITHM",
+                                                                                     "ASTMC1340",
+                                                                                     "USERVALUE",
+                                                                                     "USERSCHEDULE",
+                                                                                     "USERCURVE",
+                                                                                     "ASHRAEVERTICALWALL",
+                                                                                     "WALTONUNSTABLEHORIZONTALORTILT",
+                                                                                     "WALTONSTABLEHORIZONTALORTILT",
+                                                                                     "FISHERPEDERSENCEILINGDIFFUSERWALLS",
+                                                                                     "FISHERPEDERSENCEILINGDIFFUSERCEILING",
+                                                                                     "FISHERPEDERSENCEILINGDIFFUSERFLOOR",
+                                                                                     "ALAMDARIHAMMONDSTABLEHORIZONTAL",
+                                                                                     "ALAMDARIHAMMONDVERTICALWALL",
+                                                                                     "ALAMDARIHAMMONDUNSTABLEHORIZONTAL",
+                                                                                     "KHALIFAEQ3WALLAWAYFROMHEAT",
+                                                                                     "KHALIFAEQ4CEILINGAWAYFROMHEAT",
+                                                                                     "KHALIFAEQ5WALLNEARHEAT",
+                                                                                     "KHALIFAEQ6NONHEATEDWALLS",
+                                                                                     "KHALIFAEQ7CEILING",
+                                                                                     "AWBIHATTONHEATEDFLOOR",
+                                                                                     "AWBIHATTONHEATEDWALL",
+                                                                                     "BEAUSOLEILMORRISONMIXEDASSISTEDWALL",
+                                                                                     "BEAUSOLEILMORRISONMIXEDOPPOSINGWALL",
+                                                                                     "BEAUSOLEILMORRISONMIXEDSTABLEFLOOR",
+                                                                                     "BEAUSOLEILMORRISONMIXEDUNSTABLEFLOOR",
+                                                                                     "BEAUSOLEILMORRISONMIXEDSTABLECEILING",
+                                                                                     "BEAUSOLEILMORRISONMIXEDUNSTABLECEILING",
+                                                                                     "FOHANNOPOLIDORIVERTICALWALL",
+                                                                                     "KARADAGCHILLEDCEILING",
+                                                                                     "ISO15099WINDOWS",
+                                                                                     "GOLDSTEINNOVOSELACCEILINGDIFFUSERWINDOW",
+                                                                                     "GOLDSTEINNOVOSELACCEILINGDIFFUSERWALLS",
+                                                                                     "GOLDSTEINNOVOSELACCEILINGDIFFUSERFLOOR"};
+
+constexpr std::array<int, static_cast<int>(HcInt::Num)> HcIntReportVals = {
+    -999, // Value
+    -998, // Schedule
+    0,    // SetByZone
+    1,    // ASHRAESimple
+    2,    // ASHRAETARP
+    3,    // CeilingDiffuser
+    4,    // TrombeWall
+    9,    // AdaptiveConvectionAlgorithm
+    10,   // ASTMC1340
+    200,  // UserValue
+    201,  // UesrSchedule
+    202,  // UserCurve
+    203,  // ASHRAEVerticalWall
+    204,  // WaltonUnstableHorizontalOrTilt
+    205,  // WaltonStableHorizontalOrTilt
+    206,  // FisherPedersenCeilDiffuserWalls
+    207,  // FisherPedersenCeilDiffuserCeiling
+    208,  // FisherPedersenCeilDiffuserFloor
+    209,  // AlamdariHammondStableHorizontal
+    210,  // AlamdariHammondUnstableHorizontal
+    211,  // AlamdariHammondVerticalWall
+    212,  // KhalifaEq3WallAwayFromHeat
+    213,  // KhalifaEq4CeilingAwayFromHeat
+    214,  // KhalifaEq5WallNearHeat
+    215,  // KhalifaEq6NonHeatedWalls
+    216,  // KhalifaEq7Ceiling
+    217,  // AwbiHattonHeatedFloor
+    218,  // AwbiHattonHeatedWall
+    219,  // BeausoleilMorrisonMixedAssistingWall
+    220,  // BeausoleilMorrisonMixedOppossingWall
+    221,  // BeausoleilMorrisonMixedStableFloor
+    222,  // BeausoleilMorrisonMixedUnstableFloor
+    223,  // BeausoleilMorrisonMixedStableCeiling
+    224,  // BeausoleilMorrisonMixedUnstableCeiling
+    225,  // FohannoPolidoriVerticalWall
+    226,  // KaradagChilledCeiling
+    227,  // ISO15099Windows
+    228,  // GoldsteinNovoselacCeilingDiffuserWindow
+    229,  // GoldsteinNovoselacCeilingDiffuserWalls
+    230   // GoldsteinNovoselacCeilingDiffuserFloor
+};
+
+enum class HcExt
+{
+    Invalid = -1,
+    Value,
+    Schedule,
+    SetByZone,
+    ASHRAESimple,
+    ASHRAETARP,
+    TarpHcOutside,
+    MoWiTTHcOutside,
+    DOE2HcOutside,
+    BLASTHcOutside,
+    AdaptiveConvectionAlgorithm,
+    None, // none is allowed because Hn and Hf are split
+    UserValue,
+    UserSchedule,
+    UserCurve,
+    ASHRAESimpleCombined,
+    NaturalASHRAEVerticalWall,
+    NaturalWaltonUnstableHorizontalOrTilt,
+    NaturalWaltonStableHorizontalOrTilt,
+    SparrowWindward,
+    SparrowLeeward,
+    MoWiTTWindward,
+    MoWiTTLeeward,
+    DOE2Windward,
+    DOE2Leeward,
+    NusseltJurges,
+    McAdams,
+    Mitchell,
+    ClearRoof,
+    BlockenWindward,
+    EmmelVertical,
+    EmmelRoof,
+    AlamdariHammondVerticalWall,
+    FohannoPolidoriVerticalWall,
+    ISO15099Windows,
+    AlamdariHammondStableHorizontal,
+    AlamdariHammondUnstableHorizontal,
+    Num
+};
+
+constexpr std::array<std::string_view, static_cast<int>(HcExt::Num)> HcExtNames = {"Value",
+                                                                                   "Schedule",
+                                                                                   "SetByZone",
+                                                                                   "SimpleCombined",
+                                                                                   "TARP",
+                                                                                   "TARPOoutside",
+                                                                                   "MoWiTT",
+                                                                                   "DOE-2",
+                                                                                   "BLAST",
+                                                                                   "AdaptiveConvectionAlgorithm",
+                                                                                   "None",
+                                                                                   "UserValue",
+                                                                                   "UserSchedule",
+                                                                                   "UserCurve",
+                                                                                   "SimpleCombined",
+                                                                                   "ASHRAEVerticalWall",
+                                                                                   "WaltonUnstableHorizontalOrTilt",
+                                                                                   "WaltonStableHorizontalOrTilt",
+                                                                                   "TARPWindward",
+                                                                                   "TARPLeeward",
+                                                                                   "MoWiTTWindward",
+                                                                                   "MoWiTTLeeward",
+                                                                                   "DOE2Windward",
+                                                                                   "DOE2Leeward",
+                                                                                   "NussletJurges",
+                                                                                   "McAdams",
+                                                                                   "Mitchell",
+                                                                                   "ClearRoof",
+                                                                                   "BlockenWindward",
+                                                                                   "EmmelVertical",
+                                                                                   "EmmelRoof",
+                                                                                   "AlamdariHammondVerticalWall",
+                                                                                   "FohannoPolidoriVerticalWall",
+                                                                                   "ISO15099Windows",
+                                                                                   "AlamdariHammondStableHorizontal",
+                                                                                   "AlamdariHammondUnstableHorizontal"};
+
+constexpr std::array<std::string_view, static_cast<int>(HcExt::Num)> HcExtNamesUC = {"VALUE",
+                                                                                     "SCHEDULE",
+                                                                                     "SETBYZONE",
+                                                                                     "SIMPLECOMBINED",
+                                                                                     "TARP",
+                                                                                     "TARPOUTSIDE",
+                                                                                     "MOWITT",
+                                                                                     "DOE-2",
+                                                                                     "BLAST",
+                                                                                     "ADAPTIVECONVECTIONALGORITHM",
+                                                                                     "NONE",
+                                                                                     "USERVALUE",
+                                                                                     "USERSCHEDULE",
+                                                                                     "USERCURVE",
+                                                                                     "SIMPLECOMBINED",
+                                                                                     "ASHRAEVERTICALWALL",
+                                                                                     "WALTONUNSTABLEHORIZONTALORTILT",
+                                                                                     "WALTONSTABLEHORIZONTALORTILT",
+                                                                                     "TARPWINDWARD",
+                                                                                     "TARPLEEWARD",
+                                                                                     "MOWITTWINDWARD",
+                                                                                     "MOWITTLEEWARD",
+                                                                                     "DOE2WINDWARD",
+                                                                                     "DOE2LEEWARD",
+                                                                                     "NUSSELTJURGES",
+                                                                                     "MCADAMS",
+                                                                                     "MITCHELL",
+                                                                                     "CLEARROOF",
+                                                                                     "BLOCKENWINDWARD",
+                                                                                     "EMMELVERTICAL",
+                                                                                     "EMMELROOF",
+                                                                                     "ALAMDARIHAMMONDVERTICALWALL",
+                                                                                     "FOHANNOPOLIDORIVERTICALWALL",
+                                                                                     "ISO15099WINDOWS",
+                                                                                     "ALAMDARIHAMMONDSTABLEHORIZONTAL",
+                                                                                     "ALAMDARIHAMMONDUNSTABLEHORIZONTAL"};
+
+constexpr std::array<int, static_cast<int>(HcExt::Num)> HcExtReportVals = {
+    -999, // Value
+    -998, // Schedule
+    0,    // SetByZone
+    1,    // ASHRAESimple
+    2,    // ASHRAETARP
+    5,    // TarpHcOutside
+    6,    // MoWiTTHcOutside
+    7,    // DOE2HcOutside
+    8,    // BLASTHcOutside
+    9,    // AdaptiveConvectionAlgorithm
+    300,  // None
+    301,  // UserValue
+    302,  // UserSchedule
+    303,  // UserCurve
+    304,  // ASHRAESimpleCombined
+    305,  // NaturalASHRAEVerticalWall
+    306,  // NaturalWaltonUnstableHorizontalOrTilt
+    307,  // NaturalWaltonStableHorizontalOrTilt
+    308,  // SparrowWindward
+    309,  // SparrowLeeward
+    310,  // MoWiTTWindward
+    311,  // MoWiTTLeeward
+    312,  // DOE2Windward
+    313,  // DOE2Leeward
+    314,  // NusseltJurges
+    315,  // McAdams
+    316,  // Mitchell
+    317,  // ClearRoof
+    318,  // BlockenWindward
+    319,  // EmmelVertical
+    320,  // EmmelRoof
+    321,  // AlamdariHammondVerticalWall
+    322,  // FohannoPolidoriVerticalWall
+    323,  // ISO15099Windows
+    324,  // AlamdariHammondStableHorizontal
+    325   // AlamdariHammondUnstableHorizontal
+};
 
 // Parameters for classification of outside face of surfaces
-enum class OutConvClass
+enum class ExtConvClass
 {
     Invalid = -1,
     WindwardVertWall,
@@ -154,12 +398,24 @@ enum class OutConvClass
     Num
 };
 
+enum class ExtConvClass2
+{
+    Invalid = -1,
+    WindConvection_WallWindward,
+    WindConvection_WallLeeward,
+    WindConvection_HorizRoof,
+    NaturalConvection_VertWall,
+    NaturalConvection_StableHoriz,
+    NaturalConvection_UnstableHoriz,
+    Num
+};
+
 // Report Values for "Surface Outside Face Convection Classification Index"
 // note that Invalid (-1) is also reported but not included here
 // where used, that should be handled with a static_cast<int>(OutConvClass::Invalid)
-constexpr static std::array<int, static_cast<int>(OutConvClass::Num)> OutConvClassReportVals = {101, 102, 103, 104};
+constexpr static std::array<int, static_cast<int>(ExtConvClass::Num)> ExtConvClassReportVals = {101, 102, 103, 104};
 
-enum class SurfConvOrientation
+enum class SurfOrientation
 {
     Invalid = -1,
     HorizontalDown,
@@ -171,7 +427,7 @@ enum class SurfConvOrientation
 };
 
 // Parameters for fenestration relative location in zone
-enum class InConvWinLoc
+enum class IntConvWinLoc
 {
     Invalid = -1,
     NotSet,
@@ -184,66 +440,112 @@ enum class InConvWinLoc
 };
 
 // Parameters for adaptive convection algorithm's classification of inside face of surfaces
-enum class InConvClass
+enum class IntConvClass
 {
     Invalid = -1,
-    A1_VertWalls,          // flow regime A1, vertical walls
-    A1_StableHoriz,        // flow regime A1
-    A1_UnstableHoriz,      // flow regime A1
-    A1_HeatedFloor,        // flow regime A1
-    A1_ChilledCeil,        // flow regime A1
-    A1_StableTilted,       // flow regime A1
-    A1_UnstableTilted,     // flow regime A1
-    A1_Windows,            // flow regime A1
-    A2_VertWallsNonHeated, // flow regime A2
-    A2_HeatedVerticalWall, // flow regime A2
-    A2_StableHoriz,        // flow regime A2
-    A2_UnstableHoriz,      // flow regime A2
-    A2_StableTilted,       // flow regime A2
-    A2_UnstableTilted,     // flow regime A2
-    A2_Windows,            // flow regime A2
-    A3_VertWalls,          // flow regime A3
-    A3_StableHoriz,        // flow regime A3
-    A3_UnstableHoriz,      // flow regime A3
-    A3_StableTilted,       // flow regime A3
-    A3_UnstableTilted,     // flow regime A3
-    A3_Windows,            // flow regime A3
-    B_VertWalls,           // flow regime B
-    B_VertWallsNearHeat,   // flow regime B
-    B_StableHoriz,         // flow regime B
-    B_UnstableHoriz,       // flow regime B
-    B_StableTilted,        // flow regime B
-    B_UnstableTilted,      // flow regime B
-    B_Windows,             // flow regime B
-    C_Walls,               // flow regime C
-    C_Ceiling,             // flow regime C
-    C_Floor,               // flow regime C
-    C_Windows,             // flow regime C
-    D_Walls,               // flow regime D
-    D_StableHoriz,         // flow regime D
-    D_UnstableHoriz,       // flow regime D
-    D_StableTilted,        // flow regime D
-    D_UnstableTilted,      // flow regime D
-    D_Windows,             // flow regime D
-    E_AssistFlowWalls,     // flow regime E
-    E_OpposFlowWalls,      // flow regime E
-    E_StableFloor,         // flow regime E
-    E_UnstableFloor,       // flow regime E
-    E_StableCeiling,       // flow regime E
-    E_UnstableCeiling,     // flow regime E
-    E_Windows,             // flow regime E
+    // SimpleBuoy goes first in the IDF objects, so has to go first here too, A3 or not.
+    A3_SimpleBuoy_VertWalls,             // flow regime A3
+    A3_SimpleBuoy_StableHoriz,           // flow regime A3
+    A3_SimpleBuoy_UnstableHoriz,         // flow regime A3
+    A3_SimpleBuoy_StableTilted,          // flow regime A3
+    A3_SimpleBuoy_UnstableTilted,        // flow regime A3
+    A3_SimpleBuoy_Windows,               // flow regime A3
+    A1_FloorHeatCeilCool_VertWalls,      // flow regime A1, vertical walls
+    A1_FloorHeatCeilCool_StableHoriz,    // flow regime A1
+    A1_FloorHeatCeilCool_UnstableHoriz,  // flow regime A1
+    A1_FloorHeatCeilCool_HeatedFloor,    // flow regime A1
+    A1_FloorHeatCeilCool_ChilledCeil,    // flow regime A1
+    A1_FloorHeatCeilCool_StableTilted,   // flow regime A1
+    A1_FloorHeatCeilCool_UnstableTilted, // flow regime A1
+    A1_FloorHeatCeilCool_Windows,        // flow regime A1
+    A2_WallPanelHeat_VertWallsNonHeated, // flow regime A2
+    A2_WallPanelHeat_HeatedVerticalWall, // flow regime A2
+    A2_WallPanelHeat_StableHoriz,        // flow regime A2
+    A2_WallPanelHeat_UnstableHoriz,      // flow regime A2
+    A2_WallPanelHeat_StableTilted,       // flow regime A2
+    A2_WallPanelHeat_UnstableTilted,     // flow regime A2
+    A2_WallPanelHeat_Windows,            // flow regime A2
+    B_ConvectiveHeat_VertWalls,          // flow regime B
+    B_ConvectiveHeat_VertWallsNearHeat,  // flow regime B
+    B_ConvectiveHeat_StableHoriz,        // flow regime B
+    B_ConvectiveHeat_UnstableHoriz,      // flow regime B
+    B_ConvectiveHeat_StableTilted,       // flow regime B
+    B_ConvectiveHeat_UnstableTilted,     // flow regime B
+    B_ConvectiveHeat_Windows,            // flow regime B
+    C_CentralAirHeat_Walls,              // flow regime C
+    C_CentralAirHeat_Ceiling,            // flow regime C
+    C_CentralAirHeat_Floor,              // flow regime C
+    C_CentralAirHeat_Windows,            // flow regime C
+    D_ZoneFanCirc_Walls,                 // flow regime D
+    D_ZoneFanCirc_StableHoriz,           // flow regime D
+    D_ZoneFanCirc_UnstableHoriz,         // flow regime D
+    D_ZoneFanCirc_StableTilted,          // flow regime D
+    D_ZoneFanCirc_UnstableTilted,        // flow regime D
+    D_ZoneFanCirc_Windows,               // flow regime D
+    E_MixedBuoy_AssistFlowWalls,         // flow regime E
+    E_MixedBuoy_OpposFlowWalls,          // flow regime E
+    E_MixedBuoy_StableFloor,             // flow regime E
+    E_MixedBuoy_UnstableFloor,           // flow regime E
+    E_MixedBuoy_StableCeiling,           // flow regime E
+    E_MixedBuoy_UnstableCeiling,         // flow regime E
+    E_MixedBuoy_Windows,                 // flow regime E
     Num
 };
 
 // Report values for "Surface Inside Face Convection Classification Index"
 // note that Invalid (-1) is also reported but not included here
 // where used, that should be handled with a static_cast<int>(InConvClass::Invalid)
-constexpr static std::array<int, static_cast<int>(InConvClass::Num)> InConvClassReportVals = {
-    1,  2,  3,  4,  5,  6,  7,  8,  9,  10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23,
-    24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45};
+constexpr static std::array<int, static_cast<int>(IntConvClass::Num)> IntConvClassReportVals = {
+    // SimpleBuoy goes first in the IDF objects, so has to go first here too, A3 or not.
+    16, // A3_SimpleBuoy_VertWalls
+    17, // A3_SimpleBuoy_StableHoriz
+    18, // A3_SimpleBuoy_UnstableHoriz
+    19, // A3_SimpleBuoy_StableTilted
+    20, // A3_SimpleBuoy_UnstableTilted
+    21, // A3_SimpleBuoy_Windows
+    1,  // A1_FloorHeatCeilCool_VertWalls
+    2,  // A1_FloorHeatCeilCool_StableHoriz
+    3,  // A1_FloorHeatCeilCool_UnstableHoriz
+    4,  // A1_FloorHeatCeilCool_HeatedFloor
+    5,  // A1_FloorHeatCeilCool_ChilledCeil
+    6,  // A1_FloorHeatCeilCool_StableTilted
+    7,  // A1_FloorHeatCeilCool_UnstableTilted
+    8,  // A1_FloorHeatCeilCool_Windows
+    9,  // A2_WallPanelHeat_VertWallsNonHeated
+    10, // A2_WallPanelHeat_HeatedVerticalWall
+    11, // A2_WallPanelHeat_StableHoriz
+    12, // A2_WallPanelHeat_UnstableHoriz
+    13, // A2_WallPanelHeat_StableTilted
+    14, // A2_WallPanelHeat_UnstableTilted
+    15, // A2_WallPanelHeat_Windows
+    22, // B_ConvectiveHeat_VertWalls
+    23, // B_ConvectiveHeat_VertWallsNearHeat
+    24, // B_ConvectiveHeat_StableHoriz
+    25, // B_ConvectiveHeat_UnstableHoriz
+    26, // B_ConvectiveHeat_StableTilted
+    27, // B_ConvectiveHeat_UnstableTilted
+    28, // B_ConvectiveHeat_Windows
+    29, // C_CentralAirHeat_Walls
+    30, // C_CentralAirHeat_Ceiling
+    31, // C_CentralAirHeat_Floor
+    32, // C_CentralAirHeat_Windows
+    33, // D_ZoneFanCirc_Walls
+    34, // D_ZoneFanCirc_StableHoriz
+    35, // D_ZoneFanCirc_UnstableHoriz
+    36, // D_ZoneFanCirc_StableTilted
+    37, // D_ZoneFanCirc_UnstableTilted
+    38, // D_ZoneFanCirc_Windows
+    39, // E_MixedBuoy_AssistFlowWalls
+    40, // E_MixedBuoy_OpposFlowWalls
+    41, // E_MixedBuoy_StableFloor
+    42, // E_MixedBuoy_UnstableFloor
+    43, // E_MixedBuoy_StableCeiling
+    44, // E_MixedBuoy_UnstableCeiling
+    45  // E_MixedBuoy_Windows
+};
 
 // Parameters to indicate user specified convection coefficients (for surface)
-enum class ConvCoefOverrideType
+enum class OverrideType
 {
     Invalid = -1,
     Value,          // User specified "value" as the override type
@@ -274,6 +576,6 @@ enum class RefWind
     Num
 };
 
-} // namespace EnergyPlus::ConvectionConstants
+} // namespace EnergyPlus::Convect
 
 #endif

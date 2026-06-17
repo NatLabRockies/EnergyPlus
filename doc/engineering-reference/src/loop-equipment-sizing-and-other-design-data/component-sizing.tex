@@ -64,7 +64,7 @@ and:
   \(e_{motor,des}\) : fan motor efficiency
 \item
   \(f_{motor\ in\ air}\) : motor in air stream fraction
-\end{itemize} 
+\end{itemize}
 
 The design fan temperature rise (\emph{C}) due to fan heat is added to the cooling coil inlet air temperature or subtracted from the cooling coil outlet air temperature during sizing calculations as appropriate for blow-through or draw-through fan configurations, respectively. The calculation uses a straight-forward inversion of the classic \(Q = \dot{m}*Cp*\Delta{T}\) equation as:
 
@@ -205,7 +205,7 @@ To obtain the inlet and outlet enthalpies, we need the inlet and outlet temperat
 
 \paragraph{\textbf{Coil in main air stream, outside air preconditioned} }\label{coil-in-main-air-stream-outside-air-preconditioned}
 
-The oustide air fraction is calculated as (where V\(_{cc,air}\) is calculated as above):
+The outside air fraction is calculated as (where V\(_{cc,air}\) is calculated as above):
 
 \begin{itemize}
 \item
@@ -319,7 +319,7 @@ The inlet air temperature depends on whether the coil is in the outside air stre
 
 \subsubsection{Design Air Inlet Temperature - Zone Coils}\label{design-air-inlet-temperature---zone-coils}
 
-The design inlet temperature depends on whether the coil is in a terminal unit or a zonal unit, and where the coil is positioned within the unit. The design fan temperature rise is added to coil inlet temperature for blow-through or subtracted from the coil outlet air temperature for draw-through. Fan heat in either case results in a higher design coil load - see Section \ref{design-fan-heat}.  
+The design inlet temperature depends on whether the coil is in a terminal unit or a zonal unit, and where the coil is positioned within the unit. The design fan temperature rise is added to coil inlet temperature for blow-through or subtracted from the coil outlet air temperature for draw-through. Fan heat in either case results in a higher design coil load - see Section \ref{design-fan-heat}.
 
 \begin{enumerate}
 \def\labelenumi{\arabic{enumi}.}
@@ -382,7 +382,7 @@ The design inlet humidity ratio depends on whether the coil is in a terminal uni
 \item
   For fan coil units the design inlet humidity ratio is set to the mixed air humidity ratio: \(W_{air,in,des} = f_{oa}W_{oa,coolpeak} + \left(1-f_{oa}\right)W_{z,coolpeak}\) , where \(f_{oa} = \rho_a \dot V_{z,oa,des} / \dot m_{z,cool,des}\)
 \item
-  In all other cases the design inlet humidity ratio is set to the zone design cooling coil inlet hunidity ratio which is calculated in the zone sizing simulation and is basically the same calculation as the fan coil unit.
+  In all other cases the design inlet humidity ratio is set to the zone design cooling coil inlet humidity ratio which is calculated in the zone sizing simulation and is basically the same calculation as the fan coil unit.
 \end{enumerate}
 
 \subsubsection{Design Outlet Air Humidity Ratio - System Coils}\label{design-outlet-air-humidity-ratio---system-coils}
@@ -545,11 +545,30 @@ The sizing is done in subroutine \emph{SizeHVACWaterToAir}.
 
 \subsubsection{Rated Air Flow Rate}\label{rated-air-flow-rate}
 
-The calculation is identical to that done for \emph{Coil:Cooling:Water}.
+The rated air flow rate is determined by taking the maximum of either the design heating or cooling air flow rates. For zonal systems, the heating and cooling design air flow rates are calculated using inputs from the corresponding \emph{Sizing:Zone} objects and for air loop based systems the design air flow rates are calculates using inputs from the corresponding \emph{Sizing:System} objects.
 
 \subsubsection{Rated Water Flow Rate}\label{rated-water-flow-rate}
 
-The calculation is identical to that done for \emph{Coil:Cooling:Water}, which is the coil design load divided by the \emph{Loop Design Temperature Difference} user input from \emph{Sizing:Plant.} If there is a companion heating coil, the heating coil design load is used so that both modes will have the same rated water flow rate. For sizing the plant loop serving this coil, only one half of this flow rate is used since both the cooling and heating coil will save a flow rate but only one of these coils will operate at a time.
+The water flow rate is determined as follows:
+
+\begin{equation}
+  \dot m_{water} = \frac{(1 + \frac{1}{COP{rated}}) \times Q{cooling}}{\Delta T{plant} \times C_p \times \rho}
+\end{equation}
+
+Where:
+
+\begin{itemize}
+  \item
+    ${COP{rated}}$ is the gross rated cooling coil coefficient of performance
+  \item
+    $Q{cooling}$ is the gross rated total cooling coil capacity
+  \item
+    $\Delta T{plant}$ is the plant design fluid temperature difference associated with the coil
+  \item
+    $(1 + \frac{1}{COP{rated}}) \times Q{cooling}$ is the cooling coil condenser capacity
+\end{itemize}
+
+If this coil is modeled along with a \emph{Coil:Heating:WaterToAirHeatPump:EquationFit}, the water flow rate is chosen as the maximum of both coils.
 
 \subsubsection{Rated Total Cooling Capacity}\label{rated-total-cooling-capacity}
 
@@ -739,11 +758,31 @@ The sizing is done in subroutine \emph{SizeHVACWaterToAir.}
 
 \subsubsection{Rated Air Flow Rate}\label{rated-air-flow-rate-2}
 
-The calculation is identical to that done for \emph{Coil:Cooling:Water}.
+The rated air flow rate is determined by taking the maximum of either the design heating or cooling air flow rates. For zonal systems, the heating and cooling design air flow rates are calculated using inputs from the corresponding \emph{Sizing:Zone} objects and for air loop based systems the design air flow rates are calculates using inputs from the corresponding \emph{Sizing:System} objects.
 
 \subsubsection{Rated Water Flow Rate}\label{rated-water-flow-rate-2}
 
-The calculation is identical to that done for \emph{Coil:Cooling:Water} , which is the coil design load divided by the \emph{Loop Design Temperature Difference} user input from \emph{Sizing:Plant.} For sizing the plant loop serving this coil, only one half of this flow rate is used since both the cooling and heating coil will save a flow rate but only one of these coils will operate at a time.
+The water flow rate is determined as follows:
+
+\begin{equation}
+  \dot m_{water} = \frac{(1 - \frac{1}{COP{rated}}) \times Q{heating}}{\Delta T{plant} \times C_p \times \rho}
+\end{equation}
+
+Where:
+
+\begin{itemize}
+  \item
+    ${COP{rated}}$ is the gross rated heating coil coefficient of performance
+  \item
+    $Q{heating}$ is the gross rated heating coil capacity
+  \item
+    $\Delta T{plant}$ is the plant design fluid temperature difference associated with the coil
+  \item
+    $(1 - \frac{1}{COP{rated}}) \times Q{heating}$ is the heating coil evaporator capacity
+\end{itemize}
+
+
+If this coil is modeled along with a \emph{Coil:Cooling:WaterToAirHeatPump:EquationFit}, the water flow rate is chosen as the maximum of both coils.
 
 \subsubsection{Rated Total Heating Capacity}\label{rated-total-heating-capacity}
 
@@ -1182,7 +1221,7 @@ and
 FlowCapRatio_{max} = 0.00006041 m^{3}/s per watt (450 cfm/ton)
 \end{equation}
 
-The sizing calculation for DX cooling coils for 100\% dedicated outdor air system (DOAS) are identical to regular DX cooling coils. However, they operate operate at different flow to capacity ratio ranges and are within the prescribed range below:
+The sizing calculation for DX cooling coils for 100\% dedicated outdoor air system (DOAS) are identical to regular DX cooling coils. However, they operate operate at different flow to capacity ratio ranges and are within the prescribed range below:
 
 \begin{equation}
 FlowCapRatio_{min} = 0.00001677 m^{3}/s per Watt (125 cfm/ton)
@@ -1276,7 +1315,7 @@ and
 \emph{FlowCapRatio\(_{max}\)} = 0.00006041 m^{3}/s per watt (450 cfm/ton)
 \end{equation}
 
-We check the design flow to the total cooling capacity rato for dedicated zone outdoor unit DX cooling coils to be within the limits prescribed below:
+We check the design flow to the total cooling capacity ratio for dedicated zone outdoor unit DX cooling coils to be within the limits prescribed below:
 
 \begin{equation}
 \emph{FlowCapRatio\(_{min}\)} = 0.00001677 m^{3}/s per Watt (125 cfm/ton)
@@ -1383,7 +1422,7 @@ TotCapTempModFra{c_{NominalSpeed}} = {\rm{a}} + {\rm{b*}}W{B_i} + c*WB_i^2 + {\r
 
 where
 
-WB\(_{i}\) = wet-bulb temperature of the air entering thecooling coil, degC
+WB\(_{i}\) = wet-bulb temperature of the air entering the cooling coil, degC
 
 DB\(_{o}\) = condenser entering air temperature, degC
 
@@ -1422,6 +1461,18 @@ The other sizing procedures, e.g.~evaporative condenser pump, etc., are the same
 \subsection{Coil:Heating:DX:VariableSpeed Sizing}\label{coilheatingdxvariablespeed-sizing}
 
 For the variable-speed DX heating coil, we specify a nominal speed level. During the sizing calculation, the Rated Heating Capacity at the Selected Nominal Speed Level should be the same as the total cooling capacity of its corresponding cooling coil, which has to be sized first. The default nominal speed level will be the highest speed. However, the model allows the user to select a nominal speed level rather than the highest. If the user chooses to autosize the Rated Air Volume Flow Rate, the flow rate, as compared to the Rated Heating Capacity, is sized to have the same ratio as the air volume flow rate to the heating capacity at the nominal speed, of the Reference Unit. The other sizing procedures are the same as Coil:Heating:DX:SingleSpeed.
+
+\subsection{Heat Pump ACCA Manual S Sizing}\label{heat-pump-acca-manual-s-sizing}
+
+Heat Pumps consist of DX cooling and heating coils and are conventionally sized to meet a cooling load. Since a heat pump has a single heat exchanger, which provides cooling or heating based on the positiion of a reversing value, the capacity of each operating mode is explicitly linked based on the compressor size and the system efficiency. However, the cooling and heating capacities are usually not the same. In Energy+ the heating coil is typically sized the same as the cooling coil. When using the ACCA Manual S sizing method the heat pump can be sized to meet the cooling load, the heating load, or the greater of the cooling or heating loads. The ACCA Manual S sizing method is envoked when autosizing coil properties and using the inputs in the Sizing:Zone and Sizing:System object. Zone equipment will enter this information in the Sizing:Zone object and system, or airloop, equipment will enter this information in both Sizing:Zone and Sizing:System. The user will select the Heating Coil Sizing Method and enter a Maximum Heating Capacity To Cooling Capacity Sizing Ratio limit. In this case the coil sizes will result in the same capacities but can be sized to be greater than the cooling load in certain climates. To provide a smaller or (usually) larger heating capacity than cooling the user can enter a DX Heating Coil Sizing Ratio in the heat pump parent object (i.e., ZoneHVAC:PackagedTerminalHeatPump, AirLoopHVAC:UnitaryHeatPump:AirToAir, etc.). Note that if the Sizing objects have a blank Heating Coil Sizing Method or that input is missing, the ACCA Manual S sizing method will not be envoked.
+
+When sizing to a heating load, if the heating coil capacity is greater than the cooling coil capacity multiplied by the Maximum Heating Capacity To Cooling Capacity Sizing Ratio limit, the heating capacity is set equal to the cooling coil capacity multiplied by the Maximum Heating Capacity To Cooling Capacity Sizing Ratio limit, otherwise the cooling coil capacity is set equal to the heating coil capcity. In either case the heating capacity will then be multiplied by the DX Heating Coil Sizing Ratio.
+
+When sizing to a cooling load, if the heating coil capacity is greater than the cooling coil capacity multiplied by the Maximum Heating Capacity To Cooling Capacity Sizing Ratio limit, the heating capacity is set equal to the cooling coil capacity multiplied by the Maximum Heating Capacity To Cooling Capacity Sizing Ratio limit. If the heating coil capacity is less than the cooling coil capacity the heating coil capacity is set equal to the cooling coil capacity. Otherwise the cooling and heating coil capacities are not modified. In each case the heating capacity will then be multiplied by the DX Heating Coil Sizing Ratio.
+
+Note that these methods are quite similar and can be adjusted by selecting the appropriate values for Maximum Heating Capacity To Cooling Capacity Sizing Ratio and DX Heating Coil Sizing Ratio. If sizing to the greater of cooling or heating capacities one of the other of the above described methods, depending on loads, will be used.
+
+It is very important when using this method to correctly select the cooling and heating supply air temperature used for sizing (see Sizing:Zone and Sizing:System). A heat pump will typically provide a 10 - 12 C differentlal between the coil entering air temperature and the coil leaving air temperature. Exceeding this recommendation will result in a lower air flow rate per capacity ratio (cfm/ton) than allowed by the DX coil models. Reducing this recommendation will result in a higher air flow per capacity ratio than allowed by the DX coil models. Proper air flow with respect to the coil capacity is key when using this sizing method (and key for most coil types in general).
 
 \subsection{Pump Sizing}\label{pump-sizing}
 
@@ -1587,7 +1638,7 @@ P_{hp,nom} = \dot Q_{hp,nom} / COP_{hp,nom}
 
 Generally boilers will need nominal heating capacity and water volume flow rate. Both quantities can be straightforwardly obtained using the user specified loop sizing data and the loop design flow rates.
 
-All boilers on a loop are sized to meet the full loop load multipled by a component-level sizing factor. If there are multiple boilers on a loop that call for autosizing, they will all be assigned a heating capacity and flow rate using their own sizing factor.
+All boilers on a loop are sized to meet the full loop load multiplied by a component-level sizing factor. If there are multiple boilers on a loop that call for autosizing, they will all be assigned a heating capacity and flow rate using their own sizing factor.
 
 \subsubsection{Nominal Capacity}\label{nominal-capacity}
 
@@ -2500,7 +2551,7 @@ For other VAV terminal units:
 {\dot V_{air,min,terminal}} = Fra{c_{air,\min }}*DesVolFlow_{zone}
 \end{equation}
 
-where \emph{\(Frac_{air,min}\)} corresponds to the minimum flow fraction of the teminal unit. This value is provided as user input, typically as the field ``Zone Minimum Air Flow Fraction.'' For the VAV terminals that allow scheduling minimum flow fraction (e.g., AirTerminal:SingleDuct:VAV:Reheat), there are two ways that \emph{\(Frac_{air,min}\)} can be determined. If a value is entered in the input field Constant Minimum Air Flow Fraction, then it is always used for \emph{\(Frac_{air,min}\)}. If the mimimum air flow fraction method is ``Schedule'' and the Constant Minimum Air Flow Fraction is left blank, then the program uses the average of the minimum and maximum values in the schedule for \emph{\(Frac_{air,min}\)}.
+where \emph{\(Frac_{air,min}\)} corresponds to the minimum flow fraction of the terminal unit. This value is provided as user input, typically as the field ``Zone Minimum Air Flow Fraction.'' For the VAV terminals that allow scheduling minimum flow fraction (e.g., AirTerminal:SingleDuct:VAV:Reheat), there are two ways that \emph{\(Frac_{air,min}\)} can be determined. If a value is entered in the input field Constant Minimum Air Flow Fraction, then it is always used for \emph{\(Frac_{air,min}\)}. If the minimum air flow fraction method is ``Schedule'' and the Constant Minimum Air Flow Fraction is left blank, then the program uses the average of the minimum and maximum values in the schedule for \emph{\(Frac_{air,min}\)}.
 
 \subsubsection{Fan On Flow Fraction}\label{fan-on-flow-fraction}
 
@@ -2558,7 +2609,7 @@ The model for the object called EvaporativeCooler:Indirect:ResearchSpecial has a
 
 \subsubsection{Secondary Fan Flow Rate}\label{secondary-fan-flow-rate}
 
-The secondary fan is not part of an airstream that is directly modeled in EnergyPlus. Because the primary side air flows can be autosized as part of the air system, it is convenent to also scale the size of the secondary flow. If the cooler is part of the main loop of a central air system, then the secondary fan flow rate is sized to equal to the main design flow rate.
+The secondary fan is not part of an airstream that is directly modeled in EnergyPlus. Because the primary side air flows can be autosized as part of the air system, it is convenient to also scale the size of the secondary flow. If the cooler is part of the main loop of a central air system, then the secondary fan flow rate is sized to equal to the main design flow rate.
 
 \begin{equation}
 \dot V_{fan,max} = DesMainVolFlow_{sys}
@@ -2572,7 +2623,7 @@ If the cooler is part of the outdoor air path of a central air system, then the 
 
 \subsection{Secondary DX Coils Sizing}\label{secondary-dx-coils-sizing}
 
-The secondary DX coils model does not have a standalone object and it is models as add-on feature to the DX Coils. When the secondary DX coil is added to a primary DX cooling coil, the heat rejected to secondary zone is sensible only and is treated as tnternal gain, hence secondary air flow rate is not required in the model. Where as when the secondary DX coil is added to a primary DX heating coil, then the heat removed from secondary zone may have sensible and latent components and is treated as tnternal gain. The sensible/latent component split among other parameters requires secondary coil air flow rate. Hence secondary coil air flow rate sizing is added based on the primary DX cooling coil only.
+The secondary DX coils model does not have a standalone object and it is models as add-on feature to the DX Coils. When the secondary DX coil is added to a primary DX cooling coil, the heat rejected to secondary zone is sensible only and is treated as internal gain, hence secondary air flow rate is not required in the model. Where as when the secondary DX coil is added to a primary DX heating coil, then the heat removed from secondary zone may have sensible and latent components and is treated as internal gain. The sensible/latent component split among other parameters requires secondary coil air flow rate. Hence secondary coil air flow rate sizing is added based on the primary DX cooling coil only.
 
 \begin{equation}
   \dot{V}_{\rm{SecCoil}} = \dot{V}_{\rm{PriHeatCoil}} \cdot \text{ScalingFactor}

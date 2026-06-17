@@ -18,7 +18,5 @@
 #include <ObjexxFCL/MArray2.fwd.hh>
 #include <ObjexxFCL/MArray3.fwd.hh>
 #include <ObjexxFCL/MArray4.fwd.hh>
-#include <ObjexxFCL/MArray5.fwd.hh>
-#include <ObjexxFCL/MArray6.fwd.hh>
 
 #endif // ObjexxFCL_MArray_all_fwd_hh_INCLUDED

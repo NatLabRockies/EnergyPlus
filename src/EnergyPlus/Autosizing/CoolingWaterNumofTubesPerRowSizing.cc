@@ -1,7 +1,7 @@
-// EnergyPlus, Copyright (c) 1996-2023, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
-// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other
+// National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
 // contributors. All rights reserved.
 //
 // NOTICE: This Software was developed under funding from the U.S. Department of Energy and the
@@ -45,6 +45,7 @@
 // OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 // POSSIBILITY OF SUCH DAMAGE.
 
+// EnergyPlus Headers
 #include <EnergyPlus/Autosizing/CoolingWaterNumofTubesPerRowSizing.hh>
 
 namespace EnergyPlus {
@@ -56,7 +57,7 @@ Real64 CoolingWaterNumofTubesPerRowSizer::size(EnergyPlusData &state, Real64 _or
     }
     this->preSize(state, _originalValue);
 
-    if (!this->wasAutoSized && (this->dataPltSizCoolNum == 0 || this->plantSizData.size() == 0)) {
+    if (!this->wasAutoSized && (this->dataPltSizCoolNum == 0 || this->plantSizData.empty())) {
         this->autoSizedValue = _originalValue;
     } else if (!this->wasAutoSized && this->dataPltSizCoolNum <= (int)this->plantSizData.size()) {
         // result will be integerized external to this routine , add 0.5 to existing calc to round the result
@@ -68,7 +69,7 @@ Real64 CoolingWaterNumofTubesPerRowSizer::size(EnergyPlusData &state, Real64 _or
         this->errorType = AutoSizingResultType::ErrorType1;
     }
     if (this->overrideSizeString) {
-        if (this->isEpJSON) this->sizingString = "number_of_tubes_per_row";
+        this->sizingString = "Number of Tubes per Row";
     }
     this->selectSizerOutput(state, errorsFound);
     return this->autoSizedValue;

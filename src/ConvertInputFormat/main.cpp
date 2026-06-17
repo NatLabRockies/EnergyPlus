@@ -1,7 +1,7 @@
-// EnergyPlus, Copyright (c) 1996-2023, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
-// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other
+// National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
 // contributors. All rights reserved.
 //
 // NOTICE: This Software was developed under funding from the U.S. Department of Energy and the
@@ -45,37 +45,59 @@
 // OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 // POSSIBILITY OF SUCH DAMAGE.
 
-#include <memory>
-#include <string>
-#ifdef _OPENMP
-#include <omp.h>
-#endif
-
 #include "EnergyPlus/DataStringGlobals.hh"
 #include "EnergyPlus/FileSystem.hh"
-#include "EnergyPlus/InputProcessing/EmbeddedEpJSONSchema.hh"
+#include "EnergyPlus/Formatters.hh"
 #include "EnergyPlus/InputProcessing/IdfParser.hh"
 #include "EnergyPlus/InputProcessing/InputValidation.hh"
-#include <ezOptionParser.hpp>
+#include <embedded/EmbeddedEpJSONSchema.hh>
+
+#include <CLI/CLI11.hpp>
 #include <nlohmann/json.hpp>
+
+#ifdef _OPENMP
+#    include <omp.h>
+#endif
+
+#include <array>
+#include <filesystem>
+#include <format>
+#include <iterator> // for make_move_iterator
+#include <map>
+#include <memory>
+#include <string>
+#include <thread>
+#include <vector>
 
 using json = nlohmann::json;
 
 enum class OutputTypes
 {
-    Default,
+    Default = 0,
     IDF,
     epJSON,
+    // Experimental starting here
     CBOR,
     MsgPack,
     UBJSON,
-    BSON
+    BSON,
+    Num
 };
+static constexpr std::array<std::string_view, static_cast<int>(OutputTypes::Num)> outputTypeStrs = {
+    "default", "IDF", "epJSON", "CBOR", "MsgPack", "UBJSON", "BSON"};
 
-template <typename... Args> void displayMessage(std::string_view str_format, Args &&... args)
+static constexpr auto outputTypeExperimentalStart = OutputTypes::CBOR;
+
+void displayMessage(std::string_view msg)
 {
-    fmt::print(std::cout, str_format, args...);
-    std::cout.write("\n", 1);
+    std::fwrite(msg.data(), 1, msg.size(), stdout);
+    std::fwrite("\n", 1, 1, stdout);
+}
+
+template <typename... Args> void displayMessage(std::format_string<Args...> str_format, Args &&...args)
+{
+    EnergyPlus::print(stdout, str_format, std::forward<Args>(args)...);
+    std::fwrite("\n", 1, 1, stdout);
 }
 
 bool checkVersionMatch(json const &epJSON)
@@ -222,12 +244,14 @@ bool checkForUnsupportedObjects(json const &epJSON, bool convertHVACTemplate)
     return errorsFound;
 }
 
-bool processErrors(std::unique_ptr<IdfParser> const &idf_parser, std::unique_ptr<Validation> const &validation)
+bool processErrors(std::unique_ptr<IdfParser> const &idf_parser, std::unique_ptr<Validation> const &validation, bool isDDY)
 {
     auto const idf_parser_errors = idf_parser->errors();
     auto const idf_parser_warnings = idf_parser->warnings();
 
     auto const validation_errors = validation->errors();
+    bool hasValidationErrors = false;
+
     auto const validation_warnings = validation->warnings();
 
     for (auto const &error : idf_parser_errors) {
@@ -237,15 +261,26 @@ bool processErrors(std::unique_ptr<IdfParser> const &idf_parser, std::unique_ptr
         displayMessage(warning);
     }
     for (auto const &error : validation_errors) {
+        bool const missing_building = error.find("Missing required property 'Building'") != std::string::npos;
+        bool const missing_geometry = error.find("Missing required property 'GlobalGeometryRules'") != std::string::npos;
+        // if we encountered one of the expected missing building/geometry errors, we should handle them special
+        if (missing_building || missing_geometry) {
+            if (isDDY) { // for DDY files just ignore it completely
+                continue;
+            }
+            // for other IDFs, go ahead and emit a message, but don't trigger a failure
+            displayMessage(error);
+            continue;
+        }
+        // and if it wasn't a missing building or missing geometry error, we will emit that as a proper error and fail
+        hasValidationErrors = true;
         displayMessage(error);
     }
     for (auto const &warning : validation_warnings) {
         displayMessage(warning);
     }
 
-    bool has_errors = validation->hasErrors() || idf_parser->hasErrors();
-
-    return has_errors;
+    return hasValidationErrors || idf_parser->hasErrors();
 }
 
 void cleanEPJSON(json &epjson)
@@ -260,7 +295,7 @@ void cleanEPJSON(json &epjson)
     }
 }
 
-bool processInput(std::string const &inputFilePathStr,
+bool processInput(fs::path const &inputFilePath,
                   json const &schema,
                   OutputTypes outputType,
                   fs::path outputDirPath,
@@ -271,7 +306,6 @@ bool processInput(std::string const &inputFilePathStr,
     auto idf_parser(std::make_unique<IdfParser>());
     json epJSON;
 
-    fs::path const inputFilePath{inputFilePathStr};
     auto const inputDirPath = EnergyPlus::FileSystem::getParentDirectoryPath(inputFilePath);
 
     if (outputDirPath.empty()) {
@@ -280,14 +314,16 @@ bool processInput(std::string const &inputFilePathStr,
 
     auto const inputFileType = EnergyPlus::FileSystem::getFileType(inputFilePath);
 
-    bool isEpJSON = EnergyPlus::FileSystem::is_all_json_type(inputFileType);
-    bool isCBOR = (inputFileType == EnergyPlus::FileSystem::FileTypes::CBOR);
-    bool isMsgPack = (inputFileType == EnergyPlus::FileSystem::FileTypes::MsgPack);
-    bool isUBJSON = (inputFileType == EnergyPlus::FileSystem::FileTypes::UBJSON);
-    bool isBSON = (inputFileType == EnergyPlus::FileSystem::FileTypes::BSON);
+    const bool isEpJSON = EnergyPlus::FileSystem::is_all_json_type(inputFileType);
+    const bool isCBOR = (inputFileType == EnergyPlus::FileSystem::FileTypes::CBOR);
+    const bool isMsgPack = (inputFileType == EnergyPlus::FileSystem::FileTypes::MsgPack);
+    const bool isUBJSON = (inputFileType == EnergyPlus::FileSystem::FileTypes::UBJSON);
+    const bool isBSON = (inputFileType == EnergyPlus::FileSystem::FileTypes::BSON);
+    const bool isIDForIMF = EnergyPlus::FileSystem::is_idf_type(inputFileType); // IDF or IMF
+    const bool isDDY = (inputFileType == EnergyPlus::FileSystem::FileTypes::DDY);
 
-    if (!(isEpJSON || EnergyPlus::FileSystem::is_idf_type(inputFileType))) {
-        displayMessage("ERROR: Input file must have IDF, IMF, or epJSON extension.");
+    if (!(isEpJSON || isIDForIMF || isDDY)) {
+        displayMessage("ERROR: Input file must have IDF, IMF, DDY, or epJSON extension.");
         return false;
     }
 
@@ -295,8 +331,7 @@ bool processInput(std::string const &inputFilePathStr,
         (inputFileType == EnergyPlus::FileSystem::FileTypes::EpJSON || inputFileType == EnergyPlus::FileSystem::FileTypes::JSON)) {
         displayMessage("Same output format as input format requested (epJSON). Skipping conversion and moving to next file.");
         return false;
-    } else if (outputType == OutputTypes::IDF &&
-               (inputFileType == EnergyPlus::FileSystem::FileTypes::IDF || inputFileType == EnergyPlus::FileSystem::FileTypes::IMF)) {
+    } else if (outputType == OutputTypes::IDF && (isIDForIMF || isDDY)) {
         displayMessage("Same output format as input format requested (IDF). Skipping conversion and moving to next file.");
         return false;
     } else if (outputType == OutputTypes::CBOR && isCBOR) {
@@ -314,12 +349,7 @@ bool processInput(std::string const &inputFilePathStr,
     }
 
     if (!EnergyPlus::FileSystem::fileExists(inputFilePath)) {
-#ifdef _WIN32
-        displayMessage("Input file path {} not found", inputFilePath.string());
-#else
-        displayMessage("Input file path {} not found", inputFilePath);
-#endif
-
+        displayMessage("Input file path {} not found", inputFilePath.generic_string());
         return false;
     }
 
@@ -340,9 +370,12 @@ bool processInput(std::string const &inputFilePathStr,
     }
 
     bool is_valid = validation->validate(epJSON);
-    bool hasErrors = processErrors(idf_parser, validation);
-    bool versionMatch = checkVersionMatch(epJSON);
-    bool unsupportedFound = checkForUnsupportedObjects(epJSON, convertHVACTemplate);
+    bool const hasErrors = processErrors(idf_parser, validation, isDDY);
+    if (isDDY && !hasErrors) {
+        is_valid = true;
+    }
+    bool const versionMatch = checkVersionMatch(epJSON);
+    bool const unsupportedFound = checkForUnsupportedObjects(epJSON, convertHVACTemplate);
 
     if (!is_valid || hasErrors || unsupportedFound) {
         displayMessage("Errors occurred when validating input file. Preceding condition(s) cause termination.");
@@ -388,202 +421,130 @@ bool processInput(std::string const &inputFilePathStr,
     return true;
 }
 
-std::vector<std::string> parse_input_paths(std::string const &input_paths_file)
+std::vector<fs::path> parse_input_paths(fs::path const &inputFilePath)
 {
-    std::ifstream input_paths_stream(input_paths_file);
+    std::ifstream input_paths_stream(inputFilePath);
     if (!input_paths_stream.is_open()) {
-        displayMessage("Could not open file: {}", input_paths_file);
+        displayMessage("Could not open file: {}", inputFilePath.generic_string());
         return {};
     }
-    std::vector<std::string> input_paths;
+    std::vector<fs::path> input_paths;
     std::string line;
     while (std::getline(input_paths_stream, line)) {
         if (line.empty()) {
             continue;
         }
-        input_paths.emplace_back(line);
+        fs::path input_file{line};
+        if (!fs::is_regular_file(input_file)) {
+            // Fall back on searching in the same directory as the lstfile
+            input_file = inputFilePath.parent_path() / input_file;
+            if (!fs::is_regular_file(input_file)) {
+                displayMessage("Input file does not exist: {}", line);
+                continue;
+            }
+        }
+        input_paths.emplace_back(std::move(input_file));
     }
     return input_paths;
 }
 
-int main(int argc, const char *argv[])
+int main(int argc, char **argv)
 {
 
-    ez::ezOptionParser opt;
+    CLI::App app{"ConvertInputFormat"};
+    argv = app.ensure_utf8(argv);
+    app.description("Run input file conversion tool");
+    app.set_version_flag("-v,--version", EnergyPlus::DataStringGlobals::VerString);
 
-    opt.overview = "Run input file conversion tool";
-    opt.syntax = "ConvertInputFormat [OPTIONS] input_file [input_file ..]";
-    opt.example = "ConvertInputFormat in.idf\n\n";
-
-    opt.add("1",                 // Default.
-            false,               // Required?
-            1,                   // Number of args expected.
-            0,                   // Delimiter if expecting multiple args.
-            "Number of threads", // Help description.
-            "-j"                 // Flag token.
-    );
-
-    opt.add("",                                                                  // Default.
-            false,                                                               // Required?
-            1,                                                                   // Number of args expected.
-            0,                                                                   // Delimiter if expecting multiple args.
-            "Text file with list of input files to convert (newline delimited)", // Help description.
-            "-i",                                                                // Flag token.
-            "--input"                                                            // Flag token.
-    );
-
-    opt.add("",                                                           // Default.
-            false,                                                        // Required?
-            1,                                                            // Number of args expected.
-            0,                                                            // Delimiter if expecting multiple args.
-            "Output directory. Will use input file location by default.", // Help description.
-            "-o",                                                         // Flag token.
-            "--output"                                                    // Flag token.
-    );
-
-    const char *validOptions[] = {"default", "idf", "epjson", "json", "cbor", "msgpack", "ubjson", "bson"};
-    auto *outputTypeValidation = new ez::ezOptionValidator(ez::ezOptionValidator::T, ez::ezOptionValidator::IN, validOptions, 8, true);
-
-    opt.add("default", // Default.
-            0,         // Required?
-            1,         // Number of args expected.
-            0,         // Delimiter if expecting multiple args.
-            "Output format.\nDefault means IDF->epJSON or epJSON->IDF\nSelect one (case "
-            "insensitive):\ndefault,idf,epjson,json,cbor,msgpack,ubjson,bson", // Help description.
-            "-f",                                                              // Flag token.
-            "--format",                                                        // Flag token.
-            outputTypeValidation);
-
-    opt.add("",                                     // Default.
-            0,                                      // Required?
-            0,                                      // Number of args expected.
-            0,                                      // Delimiter if expecting multiple args.
-            "Do not convert HVACTemplate objects.", // Help description.
-            "-n",                                   // Flag token.
-            "--noHVACTemplate"                      // Flag token.
-    );
-
-    opt.add("", 0, 0, 0, "Display version information", "-v", "--version");
-
-    opt.add("",                            // Default.
-            false,                         // Required?
-            0,                             // Number of args expected.
-            0,                             // Delimiter if expecting multiple args.
-            "Display usage instructions.", // Help description.
-            "-h",                          // Flag token.
-            "-help",                       // Flag token.
-            "--help",                      // Flag token.
-            "--usage"                      // Flag token.
-    );
-
-    opt.parse(argc, argv);
-
-    std::string usage;
-    opt.getUsage(usage);
-
-    // Process standard arguments
-    if (opt.isSet("-h")) {
-        displayMessage(usage);
-        exit(EXIT_SUCCESS);
-    }
-
-    if (opt.isSet("-v")) {
-        displayMessage(EnergyPlus::DataStringGlobals::VerString);
-        exit(EXIT_SUCCESS);
-    }
-
+#ifdef _OPENMP
+    int number_of_threads = std::thread::hardware_concurrency();
+#else
     int number_of_threads = 1;
-    if (opt.isSet("-j")) {
-        opt.get("-j")->getInt(number_of_threads);
-#ifndef _OPENMP
-        displayMessage("ConvertInputFormat is not compiled with OpenMP. Only running on 1 thread, not requested {} threads.", number_of_threads);
 #endif
+
+    [[maybe_unused]] CLI::Option *nproc_opt =
+        app.add_option("-j", number_of_threads, std::format("Number of threads [Default: {}]", number_of_threads))->option_text("N");
+
+#ifndef _OPENMP
+    // I don't want to throw if the user passes -j while OpenMP is unavailable, so we hide it by setting an empty group instead
+    nproc_opt->group("");
+#endif
+
+    fs::path inputFilePath;
+    app.add_option("-i,--input", inputFilePath, "Text file with list of input files to convert (newline delimited)")
+        ->required(false)
+        ->option_text("LSTFILE")
+        ->check(CLI::ExistingFile);
+
+    fs::path outputDirectoryPath;
+    app.add_option("-o,--output", outputDirectoryPath, "Output directory. Will use input file location by default")
+        ->option_text("DIR")
+        ->required(false);
+    // ->check(CLI::ExistingDirectory) // We don't require it to exist, we make it if needed
+
+    const std::map<std::string, OutputTypes> outputTypeMap{
+        {"default", OutputTypes::Default},
+        {"idf", OutputTypes::IDF},
+        {"epjson", OutputTypes::epJSON},
+        {"cbor", OutputTypes::CBOR},
+        {"msgpack", OutputTypes::MsgPack},
+        {"ubjson", OutputTypes::UBJSON},
+        {"bson", OutputTypes::BSON},
+    };
+
+    OutputTypes outputType{OutputTypes::Default};
+
+    const std::string help_message = std::format(R"help(Output format.
+Default means IDF->epJSON or epJSON->IDF
+Select one (case insensitive):
+{})help",
+                                                 outputTypeStrs);
+
+    app.add_option("-f,--format", outputType, help_message)
+        ->option_text("FORMAT")
+        ->required(false)
+        ->transform(CLI::CheckedTransformer(outputTypeMap, CLI::ignore_case));
+
+    bool noConvertHVACTemplate = false;
+    app.add_flag("-n,--noHVACTemplate", noConvertHVACTemplate, "Do not convert HVACTemplate objects");
+
+    std::vector<fs::path> files;
+    app.add_option("input_file", files, "Multiple input files to be translated")->required(false)->check(CLI::ExistingFile);
+
+    app.footer("Example: ConvertInputFormat in.idf");
+
+    // We are not modifying argc/argv, so we defer to CLI11 to find the argc/argv instead. It'll use GetCommandLineW & CommandLineToArgvW on windows
+    try {
+        app.parse(argc, argv);
+    } catch (const CLI::ParseError &e) {
+        return app.exit(e);
     }
 
-    std::string output_directory;
-    if (opt.isSet("-o")) {
-        opt.get("-o")->getString(output_directory);
-        if (output_directory.back() != EnergyPlus::DataStringGlobals::pathChar) {
-            output_directory.push_back(EnergyPlus::DataStringGlobals::pathChar);
-        }
-        EnergyPlus::FileSystem::makeDirectory(output_directory);
+    const bool convertHVACTemplate = !noConvertHVACTemplate;
+
+    if (!outputDirectoryPath.empty()) {
+        EnergyPlus::FileSystem::makeDirectory(outputDirectoryPath);
     }
 
-    std::vector<std::string> files;
-    if (opt.isSet("-i")) {
-        std::string input_paths_file;
-        opt.get("-i")->getString(input_paths_file);
-        files = parse_input_paths(input_paths_file);
+    if (!inputFilePath.empty()) {
+        std::vector<fs::path> list_files = parse_input_paths(inputFilePath);
+        files.insert(files.end(), std::make_move_iterator(list_files.begin()), std::make_move_iterator(list_files.end()));
     }
 
-    bool convertHVACTemplate = true;
-    if (opt.isSet("-n")) {
-        convertHVACTemplate = false;
+    std::string outputTypeStr{outputTypeStrs[static_cast<size_t>(outputType)]};
+    if (outputType >= outputTypeExperimentalStart) {
+        displayMessage("{} input format is experimental.", outputTypeStr);
     }
 
-    std::string outputTypeStr;
-    auto outputType = OutputTypes::Default;
-    if (opt.isSet("-f")) {
-        opt.get("-f")->getString(outputTypeStr);
-        std::transform(outputTypeStr.begin(), outputTypeStr.end(), outputTypeStr.begin(), ::toupper);
-        auto const buffer_view = std::string_view(outputTypeStr.data());
-        if (buffer_view.compare(".EPJSON") == 0 || buffer_view.compare(".JSON") == 0) {
-            outputType = OutputTypes::epJSON;
-            outputTypeStr = "EPJSON";
-        } else if (buffer_view.compare(".IDF") == 0 || buffer_view.compare(".IMF") == 0) {
-            outputType = OutputTypes::IDF;
-        } else if (buffer_view.compare(".CBOR") == 0) {
-            outputType = OutputTypes::CBOR;
-            displayMessage("CBOR input format is experimental.");
-        } else if (buffer_view.compare(".MSGPACK") == 0) {
-            outputType = OutputTypes::MsgPack;
-            displayMessage("MsgPack input format is experimental.");
-        } else if (buffer_view.compare(".UBJSON") == 0) {
-            outputType = OutputTypes::UBJSON;
-            displayMessage("UBJSON input format is experimental.");
-        } else if (buffer_view.compare(".BSON") == 0) {
-            outputType = OutputTypes::BSON;
-            displayMessage("BSON input format is experimental.");
-        } else {
-            displayMessage("ERROR: Output type must be IDF, epJSON, CBOR, MsgPack, UBJSON, or BSON.");
-            return 1;
-        }
-    }
-
-    if (!opt.lastArgs.empty()) {
-        for (auto const &lastArg : opt.lastArgs) {
-            files.emplace_back(*lastArg);
-        }
-    } else if (opt.firstArgs.size() > 1) {
-        for (std::size_t i = 1; i < opt.firstArgs.size(); ++i) {
-            files.emplace_back(*opt.firstArgs[i]);
-        }
-    }
-
-    std::vector<std::string> badOptions;
-    if (!opt.gotRequired(badOptions)) {
-        for (auto const &badOption : badOptions) {
-            fmt::print(std::cerr, "ERROR: Missing required option {}.\n\n", badOption);
-        }
-        displayMessage(usage);
+    if (files.empty()) {
+        displayMessage("No valid files found. Either specify --input or pass files as extra arguments");
         return 1;
     }
 
-    if (!opt.gotExpected(badOptions)) {
-        for (auto const &badOption : badOptions) {
-            fmt::print(std::cerr, "ERROR: Got unexpected number of arguments for option {}.\n\n", badOption);
-        }
-        displayMessage(usage);
-        return 1;
-    }
-
-    std::vector<std::string> badArgs;
-    if (!opt.gotValid(badOptions, badArgs)) {
-        for (std::size_t i = 0; i < badOptions.size(); ++i) {
-            fmt::print(std::cerr, "ERROR: Got invalid argument \"{}\" for option {}.\n\n", badArgs[i], badOptions[i]);
-        }
-        return 1;
-    }
+    // Must sort before unique
+    std::sort(files.begin(), files.end());
+    auto it = std::unique(files.begin(), files.end());
+    files.resize(std::distance(files.begin(), it));
 
     auto const embeddedEpJSONSchema = EnergyPlus::EmbeddedEpJSONSchema::embeddedEpJSONSchema();
     auto schema = json::from_cbor(embeddedEpJSONSchema);
@@ -593,31 +554,35 @@ int main(int argc, const char *argv[])
 
 #ifdef _OPENMP
     omp_set_num_threads(number_of_threads);
-#endif
 
-#ifdef _OPENMP
-#pragma omp parallel default(none) shared(files, number_files, fileCount, schema, outputType, outputTypeStr, output_directory, convertHVACTemplate)
+#    pragma omp parallel default(none)                                                                                                               \
+        shared(files, number_files, fileCount, schema, outputType, outputTypeStr, outputDirectoryPath, convertHVACTemplate)
     {
-#pragma omp for
+#    pragma omp for
         for (int i = 0; i < number_files; ++i) {
-            bool successful = processInput(files[i], schema, outputType, output_directory, outputTypeStr, convertHVACTemplate);
-#pragma omp atomic
+            const bool successful = processInput(files[i], schema, outputType, outputDirectoryPath, outputTypeStr, convertHVACTemplate);
+#    pragma omp atomic
             ++fileCount;
             if (successful) {
-                displayMessage("Input file converted to {} successfully | {}/{} | {}", outputTypeStr, fileCount, number_files, files[i]);
+                displayMessage("Input file converted to {} successfully | {}/{} | {:g}", outputTypeStr, fileCount, number_files, files[i]);
             } else {
-                displayMessage("Input file conversion failed: | {}/{} | {}", fileCount, number_files, files[i]);
+                displayMessage("Input file conversion failed: | {}/{} | {:g}", fileCount, number_files, files[i]);
             }
         }
     }
+
 #else
+    if (number_of_threads > 1) {
+        displayMessage("ConvertInputFormat is not compiled with OpenMP. Only running on 1 thread, not requested {} threads.", number_of_threads);
+    }
+
     for (auto const &file : files) {
-        bool successful = processInput(file, schema, outputType, output_directory, outputTypeStr, convertHVACTemplate);
+        bool successful = processInput(file, schema, outputType, outputDirectoryPath, outputTypeStr, convertHVACTemplate);
         ++fileCount;
         if (successful) {
-            displayMessage("Input file converted to {} successfully | {}/{} | {}", outputTypeStr, fileCount, number_files, file);
+            displayMessage("Input file converted to {} successfully | {}/{} | {:g}", outputTypeStr, fileCount, number_files, file);
         } else {
-            displayMessage("Input file conversion failed: | {}/{} | {}", fileCount, number_files, file);
+            displayMessage("Input file conversion failed: | {}/{} | {:g}", fileCount, number_files, file);
         }
     }
 #endif

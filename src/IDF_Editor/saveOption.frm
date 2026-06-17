@@ -1,5 +1,5 @@
 VERSION 5.00
-Begin VB.Form saveOption 
+Begin VB.Form saveOption
    BorderStyle     =   3  'Fixed Dialog
    Caption         =   "Save Options..."
    ClientHeight    =   8415
@@ -14,9 +14,9 @@ Begin VB.Form saveOption
    ScaleWidth      =   9030
    ShowInTaskbar   =   0   'False
    StartUpPosition =   1  'CenterOwner
-   Begin VB.TextBox txtHelp 
+   Begin VB.TextBox txtHelp
       BackColor       =   &H8000000F&
-      BeginProperty Font 
+      BeginProperty Font
          Name            =   "MS Sans Serif"
          Size            =   9.75
          Charset         =   0
@@ -34,7 +34,7 @@ Begin VB.Form saveOption
       Top             =   2040
       Width           =   8775
    End
-   Begin VB.CheckBox chkSetDefault 
+   Begin VB.CheckBox chkSetDefault
       Caption         =   "Set as Default"
       Height          =   255
       Left            =   3600
@@ -42,7 +42,7 @@ Begin VB.Form saveOption
       Top             =   1080
       Width           =   1455
    End
-   Begin VB.CheckBox chkViewHelp 
+   Begin VB.CheckBox chkViewHelp
       Caption         =   "Help"
       Height          =   375
       Left            =   120
@@ -51,7 +51,7 @@ Begin VB.Form saveOption
       Top             =   1440
       Width           =   735
    End
-   Begin VB.ComboBox cmbSpecialFormat 
+   Begin VB.ComboBox cmbSpecialFormat
       Height          =   315
       Left            =   2640
       Style           =   2  'Dropdown List
@@ -59,7 +59,7 @@ Begin VB.Form saveOption
       Top             =   540
       Width           =   2400
    End
-   Begin VB.CommandButton cmdCancel 
+   Begin VB.CommandButton cmdCancel
       Cancel          =   -1  'True
       Caption         =   "Cancel"
       Height          =   375
@@ -68,7 +68,7 @@ Begin VB.Form saveOption
       Top             =   1440
       Width           =   1215
    End
-   Begin VB.CommandButton cmdOK 
+   Begin VB.CommandButton cmdOK
       Caption         =   "OK"
       Default         =   -1  'True
       Height          =   375
@@ -77,7 +77,7 @@ Begin VB.Form saveOption
       Top             =   1440
       Width           =   1215
    End
-   Begin VB.ComboBox cmbSaveOrder 
+   Begin VB.ComboBox cmbSaveOrder
       Height          =   315
       Left            =   2640
       Style           =   2  'Dropdown List
@@ -85,7 +85,7 @@ Begin VB.Form saveOption
       Top             =   60
       Width           =   2400
    End
-   Begin VB.Label Label4 
+   Begin VB.Label Label4
       Caption         =   "Special Format for Some Objects"
       Height          =   255
       Left            =   120
@@ -93,7 +93,7 @@ Begin VB.Form saveOption
       Top             =   600
       Width           =   2415
    End
-   Begin VB.Label Label1 
+   Begin VB.Label Label1
       Caption         =   "Saved Order of Objects"
       Height          =   255
       Left            =   120
@@ -180,15 +180,15 @@ End Sub
 
 '     NOTICE
 '
-'     The contents of this file are subject to the EnergyPlus Open Source License 
-'     Version 1.0 (the "License"); you may not use this file except in compliance 
-'     with the License. You may obtain a copy of the License at 
+'     The contents of this file are subject to the EnergyPlus Open Source License
+'     Version 1.0 (the "License"); you may not use this file except in compliance
+'     with the License. You may obtain a copy of the License at
 '
 '     http://apps1.eere.energy.gov/buildings/energyplus/energyplus_licensing.cfm
 '
-'     Software distributed under the License is distributed on an "AS IS" basis, 
-'     WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License for 
-'     the specific language governing rights and limitations under the License. 
+'     Software distributed under the License is distributed on an "AS IS" basis,
+'     WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License for
+'     the specific language governing rights and limitations under the License.
 '
 '     Copyright © 1996-2014 GARD Analytics.  All rights reserved.
 '

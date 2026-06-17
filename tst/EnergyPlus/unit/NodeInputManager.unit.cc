@@ -1,7 +1,7 @@
-// EnergyPlus, Copyright (c) 1996-2023, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
-// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other
+// National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
 // contributors. All rights reserved.
 //
 // NOTICE: This Software was developed under funding from the U.S. Department of Energy and the
@@ -62,8 +62,6 @@
 #include <EnergyPlus/OutAirNodeManager.hh>
 
 using namespace EnergyPlus;
-using namespace EnergyPlus::NodeInputManager;
-using namespace EnergyPlus::DataLoopNode;
 
 namespace EnergyPlus {
 
@@ -97,7 +95,7 @@ TEST_F(EnergyPlusFixture, NodeMoreInfoEMSsensorCheck1)
 
     OutAirNodeManager::SetOutAirNodes(*state);
 
-    NodeInputManager::SetupNodeVarsForReporting(*state);
+    Node::SetupNodeVarsForReporting(*state);
 
     EMSManager::CheckIfAnyEMS(*state);
 
@@ -109,8 +107,9 @@ TEST_F(EnergyPlusFixture, NodeMoreInfoEMSsensorCheck1)
     state->dataLoopNodes->Node(1).Temp = 20.0;
     state->dataLoopNodes->Node(1).HumRat = 0.01;
     state->dataEnvrn->OutBaroPress = 100000;
+    state->dataEnvrn->StdRhoAir = 1.2;
 
-    NodeInputManager::CalcMoreNodeInfo(*state);
+    Node::CalcMoreNodeInfo(*state);
 
     EXPECT_NEAR(state->dataLoopNodes->MoreNodeInfo(1).RelHumidity, 67.65, 0.01);
     EXPECT_NEAR(state->dataLoopNodes->MoreNodeInfo(1).AirDewPointTemp, 13.84, 0.01);
@@ -122,22 +121,22 @@ TEST_F(EnergyPlusFixture, CheckUniqueNodesTest_Test1)
 {
     bool UniqueNodeError(false);
 
-    InitUniqueNodeCheck(*state, "Context");
+    Node::InitUniqueNodeCheck(*state, "Context");
     // set up initial list using names
-    CheckUniqueNodeNames(*state, "NodeFieldName", UniqueNodeError, "TestInputNode1", "ObjectName");
-    CheckUniqueNodeNames(*state, "NodeFieldName", UniqueNodeError, "TestOutputNode1", "ObjectName");
-    CheckUniqueNodeNames(*state, "NodeFieldName", UniqueNodeError, "TestInputNode2", "ObjectName");
-    CheckUniqueNodeNames(*state, "NodeFieldName", UniqueNodeError, "TestOutputNode2", "ObjectName");
+    Node::CheckUniqueNodeNames(*state, "NodeFieldName", UniqueNodeError, "TestInputNode1", "ObjectName");
+    Node::CheckUniqueNodeNames(*state, "NodeFieldName", UniqueNodeError, "TestOutputNode1", "ObjectName");
+    Node::CheckUniqueNodeNames(*state, "NodeFieldName", UniqueNodeError, "TestInputNode2", "ObjectName");
+    Node::CheckUniqueNodeNames(*state, "NodeFieldName", UniqueNodeError, "TestOutputNode2", "ObjectName");
 
     // now to test if a new node is in the list - should not be an error and should be false
-    CheckUniqueNodeNames(*state, "NodeFieldName", UniqueNodeError, "NonUsedNode", "ObjectName");
+    Node::CheckUniqueNodeNames(*state, "NodeFieldName", UniqueNodeError, "NonUsedNode", "ObjectName");
     EXPECT_FALSE(UniqueNodeError);
 
     // try one that is already in the list - should be an error and show up as true
-    CheckUniqueNodeNames(*state, "NodeFieldName", UniqueNodeError, "TestInputNode2", "ObjectName");
+    Node::CheckUniqueNodeNames(*state, "NodeFieldName", UniqueNodeError, "TestInputNode2", "ObjectName");
     EXPECT_TRUE(UniqueNodeError);
 
-    EndUniqueNodeCheck(*state, "Context");
+    Node::EndUniqueNodeCheck(*state, "Context");
 }
 
 } // namespace EnergyPlus

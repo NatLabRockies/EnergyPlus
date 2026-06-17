@@ -13,7 +13,6 @@ namespace json_reference {
   * @brief   Extract URI from JSON Reference relative to the current schema
   *
   * @param   jsonRef  JSON Reference to extract from
-  * @param   schema   Schema that JSON Reference URI is relative to
   *
   * @return  Optional string containing URI
   */

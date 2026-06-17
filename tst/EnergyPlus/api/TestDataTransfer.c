@@ -1,7 +1,7 @@
-// EnergyPlus, Copyright (c) 1996-2023, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
-// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other
+// National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
 // contributors. All rights reserved.
 //
 // NOTICE: This Software was developed under funding from the U.S. Department of Energy and the
@@ -55,20 +55,80 @@
 int outdoorDewPointActuator = -1;
 int outdoorTempSensor = -1;
 int outdoorDewPointSensor = -1;
+int zone1_wall1Actuator = -1;
+int wallConstruction = -1;
+int floorConstruction = -1;
 int handlesRetrieved = 0;
 
 void afterZoneTimeStepHandler(EnergyPlusState state)
 {
     printf("STARTING A NEW TIME STEP\n");
     if (handlesRetrieved == 0) {
-        if (!apiDataFullyReady(state)) return;
+        if (!apiDataFullyReady(state)) {
+            return;
+        }
+
+        unsigned int arraySize;
+        struct APIDataEntry *data = getAPIData(state, &arraySize); // inspect this to see what's available to exchange
+        // FILE *fp = fopen("/tmp/data.csv", "w");
+        // for (unsigned int a = 0; a < arraySize; a++) {
+        //     const struct APIDataEntry d = *(data + a);
+        //     fprintf(fp, "%s,%s,%s,%s,%s\n", d.what, d.name, d.key, d.type, d.unit);
+        // }
+        // fclose(fp);
+        char **surfaceNames = getObjectNames(state, "BuildingSurface:Detailed", &arraySize);
+
+        if (arraySize == 0) {
+            printf("Encountered a file with no BuildingSurface:Detailed, can't run this script on that file! Aborting!\n");
+            exit(1);
+        }
+
         outdoorDewPointActuator = getActuatorHandle(state, "Weather Data", "Outdoor Dew Point", "Environment");
         outdoorTempSensor = getVariableHandle(state, "SITE OUTDOOR AIR DRYBULB TEMPERATURE", "ENVIRONMENT");
         outdoorDewPointSensor = getVariableHandle(state, "SITE OUTDOOR AIR DEWPOINT TEMPERATURE", "ENVIRONMENT");
-        printf("Got handles %d, %d, %d", outdoorDewPointActuator, outdoorTempSensor, outdoorDewPointSensor);
-        if (outdoorDewPointActuator == -1 || outdoorTempSensor == -1 || outdoorDewPointSensor == -1) {
+
+        zone1_wall1Actuator = getActuatorHandle(state, "Surface", "Construction State", surfaceNames[0]);
+        wallConstruction = getConstructionHandle(state, "R13WALL");
+        floorConstruction = getConstructionHandle(state, "FLOOR");
+
+        // checking for EMS globals
+        int const emsGlobalValid = getEMSGlobalVariableHandle(state, "MaximumEffort");
+        int const emsGlobalInvalid = getEMSGlobalVariableHandle(state, "4or5moments");
+        int const emsGlobalBuiltIn = getEMSGlobalVariableHandle(state, "WARMUPFLAG");
+        if (emsGlobalValid > 0 && emsGlobalInvalid == 0 && emsGlobalBuiltIn == 0) {
+            printf("EMS Global handle lookups worked just fine!\n");
+        } else {
+            printf("EMS Global handle lookup failed.  Make sure to call this with _1ZoneUncontrolled_ForAPITesting.idf\n");
             exit(1);
         }
+        setEMSGlobalVariableValue(state, emsGlobalValid, 2.0);
+        Real64 const val = getEMSGlobalVariableValue(state, emsGlobalValid);
+        if (val < 1.9999 || val > 2.0001) {
+            printf("EMS Global assignment/lookup didn't seem to work, odd\n");
+            exit(1);
+        }
+
+        freeAPIData(data, arraySize);
+        freeObjectNames(surfaceNames, arraySize);
+
+        printf("Got handles %d, %d, %d, %d, %d, %d\n",
+               outdoorDewPointActuator,
+               outdoorTempSensor,
+               outdoorDewPointSensor,
+               zone1_wall1Actuator,
+               wallConstruction,
+               floorConstruction);
+        if (outdoorDewPointActuator == -1 || outdoorTempSensor == -1 || outdoorDewPointSensor == -1 || zone1_wall1Actuator == -1 ||
+            wallConstruction == -1 || floorConstruction == -1) {
+            exit(1);
+        }
+
+        char *idfPath = inputFilePath(state);
+        char *epwPath = epwFilePath(state);
+        printf("Got an input file path of: %s, and weather file path of: %s\n", idfPath, epwPath);
+        free(idfPath);
+        free(epwPath);
+
         handlesRetrieved = 1;
     }
     setActuatorValue(state, outdoorDewPointActuator, -25.0);
@@ -78,6 +138,17 @@ void afterZoneTimeStepHandler(EnergyPlusState state)
     printf("Actuated Dew Point temp value is: %8.4f \n", dp_temp);
     Real64 simTime = currentSimTime(state);
     printf("Current Sim Time: %0.2f \n", simTime);
+    const int epwYear = year(state);
+    const int runPeriodYear = calendarYear(state);
+    printf("year: %i, calendarYear: %i\n", epwYear, runPeriodYear);
+
+    if (oa_temp > 10) {
+        printf("Setting Zn001:Wall001 construction (%d) to R13WALL (%d)", zone1_wall1Actuator, wallConstruction);
+        setActuatorValue(state, zone1_wall1Actuator, wallConstruction);
+    } else {
+        printf("Setting Zn001:Wall001 construction (%d) to FLOOR (%d)", zone1_wall1Actuator, floorConstruction);
+        setActuatorValue(state, zone1_wall1Actuator, floorConstruction);
+    }
 }
 
 int main(int argc, const char *argv[])
@@ -87,5 +158,9 @@ int main(int argc, const char *argv[])
     requestVariable(state, "SITE OUTDOOR AIR DRYBULB TEMPERATURE", "ENVIRONMENT");
     requestVariable(state, "SITE OUTDOOR AIR DEWPOINT TEMPERATURE", "ENVIRONMENT");
     energyplus(state, argc, argv);
+    if (handlesRetrieved == 0) {
+        fprintf(stderr, "We never got ANY handles\n");
+        return 1;
+    }
     return 0;
 }

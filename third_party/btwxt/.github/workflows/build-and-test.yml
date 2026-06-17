@@ -1,0 +1,91 @@
+name: Build and Test
+
+on: push
+
+jobs:
+  build-and-test:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu
+            os_ver: "22.04"
+            config: Release
+            coverage: false
+            cc: gcc-11
+            cxx: g++-11
+          - os: ubuntu
+            os_ver: "20.04"
+            config: Release
+            coverage: false
+            cc: gcc-10
+            cxx: g++-10
+          - os: windows
+            os_ver: "2022"
+            config: Release
+            coverage: false
+            cc: cl
+            cxx: cl
+          - os: macos
+            os_ver: "12"
+            config: Release
+            coverage: false
+            cc: clang
+            cxx: clang++
+          - os: macos
+            os_ver: "11"
+            config: Release
+            coverage: false
+            cc: clang
+            cxx: clang++
+          - os: ubuntu
+            os_ver: "20.04"
+            config: Debug
+            coverage: true
+            cc: gcc-10
+            cxx: g++-10
+    defaults:
+      run:
+        shell: bash
+    name: ${{ matrix.os }}-${{ matrix.os_ver }} ${{ matrix.cxx }} ${{ matrix.config }} coverage=${{ matrix.coverage }}
+    env:
+      CC: ${{ matrix.cc }}
+      CXX: ${{ matrix.cxx }}
+    runs-on: ${{ matrix.os }}-${{ matrix.os_ver }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+      - name: Set Project Name
+        run: echo "REPOSITORY_NAME=$(echo '${{ github.repository }}' | awk -F '/' '{print $2}')" >> $GITHUB_ENV
+      - name: Create Build Directory
+        run: cmake -E make_directory ${{github.workspace}}/build
+      - name: Set coverage variables
+        id: cov
+        run: |
+          if ${{matrix.coverage}}; then
+          echo "COVERAGE=ON" >> $GITHUB_OUTPUT
+          echo "STATIC_LIB=OFF" >> $GITHUB_OUTPUT
+          else
+          echo "COVERAGE=OFF" >> $GITHUB_OUTPUT
+          echo "STATIC_LIB=ON" >> $GITHUB_OUTPUT
+          fi
+      - name: Configure CMake
+        run: cmake -S . -B build -DCMAKE_BUILD_TYPE="${{ matrix.config }}" -D${{ env.REPOSITORY_NAME }}_BUILD_TESTING="ON" -D${{ env.REPOSITORY_NAME }}_STATIC_LIB="${{ steps.cov.outputs.STATIC_LIB }}" -D${{ env.REPOSITORY_NAME }}_COVERAGE="${{ steps.cov.outputs.COVERAGE }}"
+      - name: Build
+        run: cmake --build build --config ${{ matrix.config }}
+      - name: Test
+        run: ctest -C ${{ matrix.config }} --output-on-failure
+        working-directory: build
+      - name: Code Coverage Analysis
+        if: "matrix.coverage"
+        run: make gcov
+        working-directory: build
+      - name: Upload Code Coverage Report
+        if: "matrix.coverage"
+        uses: codecov/codecov-action@v3
+        with:
+          flags: integration
+          functionalities: "gcov"
+          move_coverage_to_trash: true

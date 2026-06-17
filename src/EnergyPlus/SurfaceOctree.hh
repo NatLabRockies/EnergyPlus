@@ -1,7 +1,7 @@
-// EnergyPlus, Copyright (c) 1996-2023, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
-// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other
+// National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
 // contributors. All rights reserved.
 //
 // NOTICE: This Software was developed under funding from the U.S. Department of Energy and the
@@ -97,15 +97,17 @@ public: // Creation
     // Default Constructor
     SurfaceOctreeCube() : d_(0u), n_(0u), l_(Vertex(0.0)), u_(Vertex(0.0)), c_(Vertex(0.0)), w_(0.0), r_(0.0)
     {
-        for (std::uint8_t i = 0; i < 8; ++i)
-            cubes_[i] = nullptr; // VC++ 2013 compatible initialization
+        for (auto &cube : cubes_) {
+            cube = nullptr; // VC++ 2013 compatible initialization
+        }
     }
 
     // Surfaces Outer Cube Constructor
     SurfaceOctreeCube(EPVector<Surface> &surfaces) : d_(0u), n_(0u), l_(Vertex(0.0)), u_(Vertex(0.0)), c_(Vertex(0.0)), w_(0.0), r_(0.0)
     {
-        for (std::uint8_t i = 0; i < 8; ++i)
-            cubes_[i] = nullptr; // VC++ 2013 compatible initialization
+        for (auto &cube : cubes_) {
+            cube = nullptr; // VC++ 2013 compatible initialization
+        }
         init(surfaces);
     }
 
@@ -113,16 +115,18 @@ public: // Creation
     SurfaceOctreeCube(std::uint8_t const d, Vertex const &l, Vertex const &u, Real const w)
         : d_(d), n_(0u), l_(l), u_(u), c_(cen(l, u)), w_(w), r_(0.75 * (w * w))
     {
-        for (std::uint8_t i = 0; i < 8; ++i)
-            cubes_[i] = nullptr; // VC++ 2013 compatible initialization
+        for (auto &cube : cubes_) {
+            cube = nullptr; // VC++ 2013 compatible initialization
+        }
         assert(valid());
     }
 
     // Destructor
     ~SurfaceOctreeCube()
     {
-        for (std::uint8_t i = 0; i < n_; ++i)
+        for (std::uint8_t i = 0; i < n_; ++i) {
             delete cubes_[i];
+        }
     }
 
 public: // Properties
@@ -239,15 +243,13 @@ public: // Methods
         Real const ab_mag_squared(ab.mag_squared());
         if (ab_mag_squared == 0.0) { // Segment is a point
             return ObjexxFCL::distance_squared(a, c_) <= r_;
-        } else { // Might pay to check if a or b in sphere first in some applications
-            Vertex const ac(c_ - a);
-            Real const projection_fac(((ac.x * ab.x) + (ac.y * ab.y) + (ac.z * ab.z)) / ab_mag_squared);
-            if ((0.0 <= projection_fac) && (projection_fac <= 1.0)) { // Projected (closest) point is on ab segment
-                return ObjexxFCL::distance_squared(ac, projection_fac * ab) <= r_;
-            } else { // Projection (closest) point is outside of ab segment: Intersects iff a or b are in sphere
-                return (ObjexxFCL::distance_squared(a, c_) <= r_) || (ObjexxFCL::distance_squared(b, c_) <= r_);
-            }
-        }
+        } // Might pay to check if a or b in sphere first in some applications
+        Vertex const ac(c_ - a);
+        Real const projection_fac(((ac.x * ab.x) + (ac.y * ab.y) + (ac.z * ab.z)) / ab_mag_squared);
+        if ((0.0 <= projection_fac) && (projection_fac <= 1.0)) { // Projected (closest) point is on ab segment
+            return ObjexxFCL::distance_squared(ac, projection_fac * ab) <= r_;
+        } // Projection (closest) point is outside of ab segment: Intersects iff a or b are in sphere
+        return (ObjexxFCL::distance_squared(a, c_) <= r_) || (ObjexxFCL::distance_squared(b, c_) <= r_);
     }
 
     // Ray Intersects Enclosing Sphere?
@@ -259,9 +261,8 @@ public: // Methods
         Real const projection_fac((ac.x * dir.x) + (ac.y * dir.y) + (ac.z * dir.z));
         if (0.0 <= projection_fac) { // Projected (closest) point is on ray
             return ObjexxFCL::distance_squared(ac, projection_fac * dir) <= r_;
-        } else { // Projection (closest) point is outside of ray: Intersects iff a is in sphere
-            return ObjexxFCL::distance_squared(a, c_) <= r_;
-        }
+        } // Projection (closest) point is outside of ray: Intersects iff a is in sphere
+        return ObjexxFCL::distance_squared(a, c_) <= r_;
     }
 
     // Line Intersects Enclosing Sphere?
@@ -276,7 +277,9 @@ public: // Methods
     bool segmentIntersectsCube(Vertex const &a, Vertex const &b) const
     {
         // Check if either segment endpoint is in cube
-        if (contains(a) || contains(b)) return true;
+        if (contains(a) || contains(b)) {
+            return true;
+        }
 
         // Use separating axis theorem (faster variants exist)
         Vertex const m(mid(a, b) - c_);                                 // Mid-point relative to cube center
@@ -284,13 +287,25 @@ public: // Methods
         Vertex const e(std::abs(mb.x), std::abs(mb.y), std::abs(mb.z)); // Extent of half ab segment
         Real const h(0.5 * w_);                                         // Half-width
         // Check if x,y,z axes are separating
-        if (std::abs(m.x) > h + e.x) return false;
-        if (std::abs(m.y) > h + e.y) return false;
-        if (std::abs(m.z) > h + e.z) return false;
+        if (std::abs(m.x) > h + e.x) {
+            return false;
+        }
+        if (std::abs(m.y) > h + e.y) {
+            return false;
+        }
+        if (std::abs(m.z) > h + e.z) {
+            return false;
+        }
         // Check if cross product axes are separating
-        if (std::abs(m.y * mb.z - m.z * mb.y) > h * (e.z + e.y)) return false;
-        if (std::abs(m.x * mb.z - m.z * mb.x) > h * (e.z + e.x)) return false;
-        if (std::abs(m.x * mb.y - m.y * mb.x) > h * (e.y + e.x)) return false;
+        if (std::abs(m.y * mb.z - m.z * mb.y) > h * (e.z + e.y)) {
+            return false;
+        }
+        if (std::abs(m.x * mb.z - m.z * mb.x) > h * (e.z + e.x)) {
+            return false;
+        }
+        if (std::abs(m.x * mb.y - m.y * mb.x) > h * (e.y + e.x)) {
+            return false;
+        }
         return true;
     }
 
@@ -305,7 +320,9 @@ public: // Methods
         assert((dir.z == 0.0) || (std::abs(dir_inv.z - (1.0 / dir.z)) < 2 * std::numeric_limits<Real>::epsilon() * std::abs(dir_inv.z)));
 
         // Check if ray origin is in cube
-        if (contains(a)) return true;
+        if (contains(a)) {
+            return true;
+        }
 
         // Refined Smits' method: Largest distance to 3 visible cube face planes along ray is the candidate entry point
         Real tx, ty, tz; // Ray position parameter for intersections with box face planes
@@ -335,24 +352,35 @@ public: // Methods
         if (tmax >= 0.0) { // Entry point is on ray: See if it is within cube extent
             if (tx == tmax) {
                 Real const y(a.y + (tmax * dir.y));
-                if ((y < l_.y) || (y > u_.y)) return false;
+                if ((y < l_.y) || (y > u_.y)) {
+                    return false;
+                }
                 Real const z(a.z + (tmax * dir.z));
-                if ((z < l_.z) || (z > u_.z)) return false;
+                if ((z < l_.z) || (z > u_.z)) {
+                    return false;
+                }
             } else if (ty == tmax) {
                 Real const x(a.x + (tmax * dir.x));
-                if ((x < l_.x) || (x > u_.x)) return false;
+                if ((x < l_.x) || (x > u_.x)) {
+                    return false;
+                }
                 Real const z(a.z + (tmax * dir.z));
-                if ((z < l_.z) || (z > u_.z)) return false;
+                if ((z < l_.z) || (z > u_.z)) {
+                    return false;
+                }
             } else { // tz == tmax
                 Real const x(a.x + (tmax * dir.x));
-                if ((x < l_.x) || (x > u_.x)) return false;
+                if ((x < l_.x) || (x > u_.x)) {
+                    return false;
+                }
                 Real const y(a.y + (tmax * dir.y));
-                if ((y < l_.y) || (y > u_.y)) return false;
+                if ((y < l_.y) || (y > u_.y)) {
+                    return false;
+                }
             }
             return true;
-        } else { // Entry point is on backwards projection of ray
-            return false;
-        }
+        } // Entry point is on backwards projection of ray
+        return false;
     }
 
     // Ray Intersects Cube?
@@ -401,7 +429,9 @@ public: // Methods
                 return false;
             }
         }
-        if ((txl > tyu) || (tyl > txu)) return false;
+        if ((txl > tyu) || (tyl > txu)) {
+            return false;
+        }
         if (dir.z > 0.0) {
             tzl = (l_.z - a.z) * dir_inv.z;
             tzu = (u_.z - a.z) * dir_inv.z;
@@ -425,15 +455,17 @@ public: // Methods
         return lineIntersectsCube(a, dir, safe_inverse(dir)); // Inefficient if called in loop with same dir
     }
 
-    // Surfaces Outer Cube Initilization
+    // Surfaces Outer Cube Initialization
     void init(EPVector<Surface> &surfaces);
 
     // Surfaces that Line Segment Intersects Cube's Enclosing Sphere
     void surfacesSegmentIntersectsSphere(Vertex const &a, Vertex const &b, Surfaces &surfaces) const
     {
         if (segmentIntersectsSphere(a, b)) {
-            if (!surfaces_.empty()) surfaces.insert(surfaces.end(), surfaces_.begin(), surfaces_.end()); // Add this cube's surfaces
-            for (std::uint8_t i = 0; i < n_; ++i) {                                                      // Recurse
+            if (!surfaces_.empty()) {
+                surfaces.insert(surfaces.end(), surfaces_.begin(), surfaces_.end()); // Add this cube's surfaces
+            }
+            for (std::uint8_t i = 0; i < n_; ++i) { // Recurse
                 cubes_[i]->surfacesSegmentIntersectsSphere(a, b, surfaces);
             }
         }
@@ -443,8 +475,10 @@ public: // Methods
     void surfacesRayIntersectsSphere(Vertex const &a, Vertex const &dir, Surfaces &surfaces) const
     {
         if (rayIntersectsSphere(a, dir)) {
-            if (!surfaces_.empty()) surfaces.insert(surfaces.end(), surfaces_.begin(), surfaces_.end()); // Add this cube's surfaces
-            for (std::uint8_t i = 0; i < n_; ++i) {                                                      // Recurse
+            if (!surfaces_.empty()) {
+                surfaces.insert(surfaces.end(), surfaces_.begin(), surfaces_.end()); // Add this cube's surfaces
+            }
+            for (std::uint8_t i = 0; i < n_; ++i) { // Recurse
                 cubes_[i]->surfacesRayIntersectsSphere(a, dir, surfaces);
             }
         }
@@ -454,8 +488,10 @@ public: // Methods
     void surfacesLineIntersectsSphere(Vertex const &a, Vertex const &dir, Surfaces &surfaces) const
     {
         if (lineIntersectsSphere(a, dir)) {
-            if (!surfaces_.empty()) surfaces.insert(surfaces.end(), surfaces_.begin(), surfaces_.end()); // Add this cube's surfaces
-            for (std::uint8_t i = 0; i < n_; ++i) {                                                      // Recurse
+            if (!surfaces_.empty()) {
+                surfaces.insert(surfaces.end(), surfaces_.begin(), surfaces_.end()); // Add this cube's surfaces
+            }
+            for (std::uint8_t i = 0; i < n_; ++i) { // Recurse
                 cubes_[i]->surfacesLineIntersectsSphere(a, dir, surfaces);
             }
         }
@@ -465,8 +501,10 @@ public: // Methods
     void surfacesSegmentIntersectsCube(Vertex const &a, Vertex const &b, Surfaces &surfaces) const
     {
         if (segmentIntersectsCube(a, b)) {
-            if (!surfaces_.empty()) surfaces.insert(surfaces.end(), surfaces_.begin(), surfaces_.end()); // Add this cube's surfaces
-            for (std::uint8_t i = 0; i < n_; ++i) {                                                      // Recurse
+            if (!surfaces_.empty()) {
+                surfaces.insert(surfaces.end(), surfaces_.begin(), surfaces_.end()); // Add this cube's surfaces
+            }
+            for (std::uint8_t i = 0; i < n_; ++i) { // Recurse
                 cubes_[i]->surfacesSegmentIntersectsCube(a, b, surfaces);
             }
         }
@@ -476,8 +514,10 @@ public: // Methods
     void surfacesRayIntersectsCube(Vertex const &a, Vertex const &dir, Vertex const &dir_inv, Surfaces &surfaces) const
     {
         if (rayIntersectsCube(a, dir, dir_inv)) {
-            if (!surfaces_.empty()) surfaces.insert(surfaces.end(), surfaces_.begin(), surfaces_.end()); // Add this cube's surfaces
-            for (std::uint8_t i = 0; i < n_; ++i) {                                                      // Recurse
+            if (!surfaces_.empty()) {
+                surfaces.insert(surfaces.end(), surfaces_.begin(), surfaces_.end()); // Add this cube's surfaces
+            }
+            for (std::uint8_t i = 0; i < n_; ++i) { // Recurse
                 cubes_[i]->surfacesRayIntersectsCube(a, dir, dir_inv, surfaces);
             }
         }
@@ -493,8 +533,10 @@ public: // Methods
     void surfacesLineIntersectsCube(Vertex const &a, Vertex const &dir, Vertex const &dir_inv, Surfaces &surfaces) const
     {
         if (lineIntersectsCube(a, dir, dir_inv)) {
-            if (!surfaces_.empty()) surfaces.insert(surfaces.end(), surfaces_.begin(), surfaces_.end()); // Add this cube's surfaces
-            for (std::uint8_t i = 0; i < n_; ++i) {                                                      // Recurse
+            if (!surfaces_.empty()) {
+                surfaces.insert(surfaces.end(), surfaces_.begin(), surfaces_.end()); // Add this cube's surfaces
+            }
+            for (std::uint8_t i = 0; i < n_; ++i) { // Recurse
                 cubes_[i]->surfacesLineIntersectsCube(a, dir, dir_inv, surfaces);
             }
         }
@@ -511,10 +553,14 @@ public: // Methods
     {
         if (segmentIntersectsCube(a, b)) {
             for (auto const *surface_p : surfaces_) { // Try this cube's surfaces
-                if (predicate(*surface_p)) return true;
+                if (predicate(*surface_p)) {
+                    return true;
+                }
             }
             for (std::uint8_t i = 0; i < n_; ++i) { // Recurse
-                if (cubes_[i]->hasSurfaceSegmentIntersectsCube(a, b, predicate)) return true;
+                if (cubes_[i]->hasSurfaceSegmentIntersectsCube(a, b, predicate)) {
+                    return true;
+                }
             }
         }
         return false;
@@ -526,10 +572,14 @@ public: // Methods
     {
         if (rayIntersectsCube(a, dir, dir_inv)) {
             for (auto const *surface_p : surfaces_) { // Try this cube's surfaces
-                if (predicate(*surface_p)) return true;
+                if (predicate(*surface_p)) {
+                    return true;
+                }
             }
             for (std::uint8_t i = 0; i < n_; ++i) { // Recurse
-                if (cubes_[i]->hasSurfaceRayIntersectsCube(a, dir, dir_inv, predicate)) return true;
+                if (cubes_[i]->hasSurfaceRayIntersectsCube(a, dir, dir_inv, predicate)) {
+                    return true;
+                }
             }
         }
         return false;
@@ -567,12 +617,15 @@ public: // Methods
         EnergyPlusData &state, Vertex const &a, Vertex const &dir, Vertex const &dir_inv, Predicate const &predicate) const
     {
         if (rayIntersectsCube(a, dir, dir_inv)) {
-            for (auto const *surface_p : surfaces_) {   // Process this cube's surfaces
-                if (predicate(*surface_p)) return true; // Don't need to process more surfaces
+            for (auto const *surface_p : surfaces_) { // Process this cube's surfaces
+                if (predicate(*surface_p)) {
+                    return true; // Don't need to process more surfaces
+                }
             }
             for (std::uint8_t i = 0; i < n_; ++i) { // Recurse
-                if (cubes_[i]->processSomeSurfaceRayIntersectsCube(state, a, dir, dir_inv, predicate))
+                if (cubes_[i]->processSomeSurfaceRayIntersectsCube(state, a, dir, dir_inv, predicate)) {
                     return true; // Don't need to process more surfaces
+                }
             }
         }
         return false;

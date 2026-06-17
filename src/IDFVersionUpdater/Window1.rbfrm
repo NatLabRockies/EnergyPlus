@@ -612,14 +612,14 @@ End
 		  dim mviOrigDate As Date
 		  dim shortVersion as String =  ""
 		  dim origShortVersion as String =""
-		  
+
 		  const notFound = -1 'special meaning because used with IndexOf
-		  
+
 		  s = new Shell
 		  s.TimeOut = -1  'number of millisecond until shell is automatically terminated - a negative one indicates never to time out
 		  inFileNoExt = fileNameWithoutExtension(inFile)
 		  inFileExt = ExtensionOnly(inFile)
-		  
+
 		  if inFile<>"" then
 		    origFile = new FolderItem(inFile)
 		    origVerIndx = AllOldVersions.IndexOf(inOrigVersion)
@@ -685,7 +685,7 @@ End
 		        lblProcessing.Text = "Processing: " + origFile.Name +  "  Into: " + AllNewVersions(iVer)
 		        Window1.Refresh
 		        'msgbox dirOfTransApp.AbsolutePath + EndOfLine + TransitionApps(iVer).AbsolutePath + EndOfLine + origFile.AbsolutePath
-		        
+
 		        'for windows and linux
 		        #if TargetWindows or TargetLinux
 		          cmdLine = TransitionApps(iVer).NativePath + " " + chr(34) + origFile.NativePath + chr(34)
@@ -698,20 +698,20 @@ End
 		          cmdLine = cmdLine + " " ' leave a space before the argument
 		          cmdLine = cmdLine +  origFile.ShellPath  'pass the name of the file to be transitioned as an argument
 		        #endif
-		        
-		        
+
+
 		        ' for debugging
 		        'msgbox cmdLine
 		        'dim clip as new Clipboard
 		        'clip.Text = cmdLine
-		        
+
 		        s.Execute cmdLine
 		        'MsgBox "transition" + EndOfLine + s.ReadAll
-		        
+
 		        if s.ErrorCode <>0 then
 		          MsgBox "Error starting Transition-Vx-x-x Program: " + str(s.ErrorCode) + EndOfLine + EndOfLine + s.Result
 		        end if
-		        
+
 		        'collect audit text
 		        if auditSource.Exists then
 		          SourceStream = TextInputStream.Open(auditSource)
@@ -719,7 +719,7 @@ End
 		          SourceStream.Close
 		          auditSource.Delete 'delete the audit file
 		        end if
-		        
+
 		        'save intermediate file names
 		        if chkIntermediate.Value and iVer<finalVerIndx then
 		          origFileWithNewName = inFileNoExt +shortVersion + "." + inFileExt
@@ -731,7 +731,7 @@ End
 		          origFile.CopyFileTo(origFileInter)
 		        end if
 		      next iVer
-		      
+
 		      'delete .idfnew  .idfold  .imfnew .imfold .VCpErr
 		      call DeleteFileByName(inFileNoExt + "." + inFileExt + "new")
 		      call DeleteFileByName(inFileNoExt + "." + inFileExt + "old")
@@ -740,7 +740,7 @@ End
 		      call DeleteFileByName(inFileNoExt + ".rviold")
 		      call DeleteFileByName(inFileNoExt + ".mvinew")
 		      call DeleteFileByName(inFileNoExt + ".mviold")
-		      
+
 		      'if RVI or MVI file was not touched delete _original version
 		      if rviOrigFile.ModificationDate.TotalSeconds = rviOrigDate.TotalSeconds then
 		        call DeleteFileByName(inFileNoExt + origShortVersion + ".rvi")
@@ -748,8 +748,8 @@ End
 		      if mviOrigFile.ModificationDate.TotalSeconds = mviOrigDate.TotalSeconds then
 		        call DeleteFileByName(inFileNoExt + origShortVersion + ".mvi")
 		      end if
-		      
-		      
+
+
 		      'create audit file
 		      auditOutput = new FolderItem(inFileNoExt + "_transition.audit")
 		      if auditOutput.Exists then
@@ -758,12 +758,12 @@ End
 		      OutStream = TextOutputStream.Create(auditOutput)
 		      OutStream.Write(auditText)
 		      OutStream.Close
-		      
+
 		      'dialog done waiting
 		      lblProcessing.Text = "Processing: "
 		      lblProcessing.Visible = False
 		      cmdConvert.Enabled = False
-		      
+
 		      'show summary message
 		      if showSummary then
 		        MsgBox "Completed transition of:" + EndOfLine + EndOfLine + origFile.NativePath + EndOfLine + EndOfLine + "From " + inOrigVersion + " to " + inFinalVersion
@@ -782,7 +782,7 @@ End
 		    end if
 		  end if
 		  s.Close
-		  
+
 		End Sub
 	#tag EndMethod
 
@@ -803,13 +803,13 @@ End
 		  dim repcsvName as String
 		  dim repcsvFileInTrans as FolderItem
 		  dim repcsvFileInOrig as FolderItem
-		  
+
 		  origVerIndx = AllNewVersions.IndexOf(inOrigVersion)
 		  if origVerIndx = -1 then origVerIndx = AllNewVersions.FirstIndex 'if not found just start at the beginning
-		  
+
 		  finalVerIndx = AllNewVersions.IndexOf(inFinalVersion)
 		  if finalVerIndx = -1 then finalVerIndx = AllNewVersions.LastIndex 'if not found go until the last
-		  
+
 		  if inFile<>"" then
 		    origFile = new FolderItem(inFile)
 		    origFileDirectory = origFile.Parent
@@ -844,7 +844,7 @@ End
 		      end if
 		    next iVer
 		  end if
-		  
+
 		End Sub
 	#tag EndMethod
 
@@ -862,45 +862,49 @@ End
 		  dim nextDashVersion as String
 		  dim repcsvName as String
 		  dim repcsvFileInOrig as FolderItem
-		  
+		  dim dirOfTransApp as FolderItem
+
 		  origVerIndx = AllNewVersions.IndexOf(inOrigVersion)
 		  if origVerIndx = -1 then origVerIndx = AllNewVersions.FirstIndex 'if not found just start at the beginning
-		  
+
 		  finalVerIndx = AllNewVersions.IndexOf(inFinalVersion)
 		  if finalVerIndx = -1 then finalVerIndx = AllNewVersions.LastIndex 'if not found go until the last
-		  
+
 		  if inFile<>"" then
 		    origFile = new FolderItem(inFile)
 		    origFileDirectory = origFile.Parent
 		    for iVer = origVerIndx to finalVerIndx
+		      dirOfTransApp = TransitionApps(iVer).Parent
 		      dashVersion = AllNewVersions(iVer).ReplaceAll(".","-") ' Convert "3.1.0" format to "3-1-0"
 		      ' delete previously copied VXX-X-X-Energy+.idd files
 		      iddName = "V" + dashVersion + "-Energy+.idd"
 		      iddFileInOrig = origFileDirectory.Child(iddName)
-		      if iddFileInOrig.exists then
-		        try
-		          iddFileInOrig.Remove()
-		        exception
-		          MsgBox "Cannot remove copied IDD file from local directory: " + iddFileInOrig.NativePath
-		        end try
-		      end if
-		      ' delete previously copied Report Variables XX-X-X to XX-X-X.csv files
-		      ' don't need to do last iteration
-		      if iVer <> finalVerIndx then
-		        nextDashVersion = AllNewVersions(iVer + 1).ReplaceAll(".","-")
-		        repcsvName = "Report Variables "+ dashVersion + " to " + nextDashVersion + ".csv"
-		        repcsvFileInOrig = origFileDirectory.Child(repcsvName)
-		        if repcsvFileInOrig.exists then
+		      if origFileDirectory.NativePath <> dirOfTransApp.NativePath then
+		        if iddFileInOrig.exists then
 		          try
-		            repcsvFileInOrig.Remove()
+		            iddFileInOrig.Remove()
 		          exception
-		            MsgBox "Cannot remove copied report csv file to local directory: " + repcsvFileInOrig.NativePath
+		            MsgBox "Cannot remove copied IDD file from local directory: " + iddFileInOrig.NativePath
 		          end try
+		        end if
+		        ' delete previously copied Report Variables XX-X-X to XX-X-X.csv files
+		        ' don't need to do last iteration
+		        if iVer <> finalVerIndx then
+		          nextDashVersion = AllNewVersions(iVer + 1).ReplaceAll(".","-")
+		          repcsvName = "Report Variables "+ dashVersion + " to " + nextDashVersion + ".csv"
+		          repcsvFileInOrig = origFileDirectory.Child(repcsvName)
+		          if repcsvFileInOrig.exists then
+		            try
+		              repcsvFileInOrig.Remove()
+		            exception
+		              MsgBox "Cannot remove copied report csv file to local directory: " + repcsvFileInOrig.NativePath
+		            end try
+		          end if
 		        end if
 		      end if
 		    next iVer
 		  end if
-		  
+
 		End Sub
 	#tag EndMethod
 
@@ -955,7 +959,7 @@ End
 		  dim foundOld as Integer
 		  dim foundNew as Integer
 		  const notFound = -1 'special meaning because used with IndexOf
-		  
+
 		  'clear the list
 		  pmnuNewVersion.DeleteAllRows
 		  'first find the version in the list
@@ -973,7 +977,7 @@ End
 		    pmnuNewVersion.ListIndex = 0
 		    cmdConvert.Enabled = False
 		    MsgBox "No appropriate TransitionV-x-x-to-V-x-x.exe files found. They may need to be downloaded from " + EndOfLine + EndOfLine + _
-		    " http://www.energyplus.gov/" + EndOfLine + EndOfLine + "click on Add-Ons and look for the link to download the Transition programs."
+		    " https://energyplushelp.freshdesk.com/" + EndOfLine + EndOfLine + "click on IDF Version Updater under Downloads."
 		  elseif foundOld <= AllOldVersions.Ubound then
 		    'this is the case when it has been found and a transition should be performed
 		    for i = foundOld to AllOldVersions.Ubound 'loop through the old version numbers but add the new version numbers
@@ -990,7 +994,7 @@ End
 		    cmdConvert.Enabled = False
 		    MsgBox "Cannot determine if the file needs to be updated."
 		  end if
-		  
+
 		End Sub
 	#tag EndMethod
 
@@ -1010,7 +1014,7 @@ End
 		  Var strParts() as String
 		  dim sortVersion as String
 		  Var allSortVersions() as String
-		  
+
 		  #if TargetMacOS
 		    transFolder = app.ExecutableFile.Parent.Parent.Parent.Parent
 		  #else
@@ -1031,10 +1035,10 @@ End
 		      '1234567890123456789012345678901
 		      ' this is the original line that did not work well with Linux because of use of the extension
 		      'if fileName.Left(12).Lowercase = "transition-v" and filename.right(4).Lowercase = ".exe" then
-		      
+
 		      ' to fix #9193 which is the lack of support for version numbers in the form 22.1.0
 		      'Transition-V9-6-0-to-V22-1-0.exe
-		      
+
 		      if fileName.Left(12).Lowercase = "transition-v" then
 		        strParts = fileName.Split("V")
 		        oldVersionWithDashes = strParts(1)
@@ -1060,7 +1064,7 @@ End
 		  'sort the arrays (usually sorted already but just in case)
 		  'AllNewVersions.SortWith(TransitionApps,AllOldVersions)
 		  allSortVersions.SortWith(AllNewVersions,TransitionApps,AllOldVersions)
-		  
+
 		  ' THE FOLLOWING IS TO HELP DEBUG THE LIST OF TRANSITION EXE FILES
 		  'display the list
 		  'for i = 0 to AllNewVersions.Ubound
@@ -1074,13 +1078,13 @@ End
 		  'next i
 		  'MsgBox "Application program location:" + EndOfLine + "  " + transFolder.NativePath + EndOfLine + EndOfLine + "Number of files: "  _
 		  '+ str(numFiles) + EndOfLine + EndOfLine + "Versions found: " + EndOfLine + s +  EndOfLine + "Transition Programs:" _
-		  '+ EndOfLine + "AllSortVersions" + EndOfLine + v + EndOfLine 
+		  '+ EndOfLine + "AllSortVersions" + EndOfLine + v + EndOfLine
 		  '+ EndOfLine + t + EndOfline + "All files: " + EndOfLine + u + EndOfLine _
-		  
-		  
-		  
-		  
-		  
+
+
+
+
+
 		End Sub
 	#tag EndMethod
 
@@ -1125,7 +1129,7 @@ End
 		        if strParts.lastIndex = 1 then
 		          returnVersion = strParts(0) + "." + strParts(1) + ".0"
 		        elseif strParts.LastIndex >= 2 then
-		          returnVersion = strParts(0) + "." + strParts(1) + strParts(2)
+		          returnVersion = strParts(0) + "." + strParts(1) + "." + strParts(2)
 		        Else
 		          returnVersion = ""
 		        End If
@@ -1134,7 +1138,7 @@ End
 		    end if
 		  end if
 		  return returnVersion
-		  
+
 		End Function
 	#tag EndMethod
 
@@ -1230,7 +1234,7 @@ End
 		      cmdConvert.Enabled =True
 		    end if
 		  end if
-		  
+
 		End Sub
 	#tag EndEvent
 #tag EndEvents
@@ -1243,7 +1247,7 @@ End
 		  dim curVersion as String =""
 		  dim activeFile as FolderItem
 		  dim activeFileName as String = ""
-		  
+
 		  'Called when the CONVERT button is pressed
 		  me.MouseCursor = system.Cursors.Wait
 		  me.Refresh
@@ -1251,7 +1255,7 @@ End
 		  #if TargetWindows or TargetLinux then
 		    call CopyIDDandCSV(txtFileName.Text, txtCurrentVersion.Text, pmnuNewVersion.Text)
 		  #EndIf
-		  
+
 		  activeFileName = txtFileName.Text
 		  activeFile = new FolderItem(activeFileName)
 		  'on MacOS the file name sometime has an extra extension of .txt
@@ -1262,7 +1266,7 @@ End
 		    end if
 		  #endif
 		  'MsgBox "cmdConvert-Action-2: " + activeFileName + " extension " + ExtensionOnly(activeFileName)
-		  
+
 		  if ExtensionOnly(txtFileName.Text) = "lst" then
 		    IF activeFile.Exists then
 		      SourceStream = TextInputStream.Open(activeFile)
@@ -1296,11 +1300,11 @@ End
 		  #if TargetWindows or TargetLinux then
 		    call DeleteCopiedIDDandCSV(txtFileName.Text, txtCurrentVersion.Text, pmnuNewVersion.Text)
 		  #EndIf
-		  
-		  
-		  
+
+
+
 		  me.MouseCursor = system.Cursors.StandardPointer
-		  
+
 		  Exception
 		    MsgBox "File not found (c): " + curLine
 		End Sub
@@ -1310,7 +1314,7 @@ End
 	#tag Event
 		Sub Action()
 		  close()
-		  
+
 		End Sub
 	#tag EndEvent
 #tag EndEvents
@@ -1319,7 +1323,7 @@ End
 		Sub Action()
 		  dim SourceStream as TextInputStream
 		  dim curFile as FolderItem
-		  
+
 		  curFile = new FolderItem(fileNameWithoutExtension(txtFileName.Text) + "_transition.audit" )
 		  if curFile.Exists then
 		    SourceStream = TextInputStream.Open(curFile)
@@ -1328,9 +1332,9 @@ End
 		    displaytext.Title = "Audit File"
 		    DisplayText.ShowModal
 		  end if
-		  
-		  
-		  
+
+
+
 		End Sub
 	#tag EndEvent
 #tag EndEvents
@@ -1338,8 +1342,8 @@ End
 	#tag Event
 		Sub Action()
 		  dim t as String
-		  t = "IDF Version Updater - Version 0.16" + EndOfLine+ EndOfLine
-		  t = t + "Copyright (c) 2011-2022 GARD Analytics, All rights reserved." + EndOfLine+ EndOfLine
+		  t = "IDF Version Updater - Version 0.17" + EndOfLine+ EndOfLine
+		  t = t + "Copyright (c) 2011-2024 GARD Analytics, All rights reserved." + EndOfLine+ EndOfLine
 		  t = t + "NOTICE: The U.S. Government is granted for itself and others acting on its behalf a paid-up, nonexclusive, irrevocable, worldwide license in this data to reproduce, prepare derivativeworks, and perform publicly and display publicly. Beginning five (5) years after permission to assert copyright is granted, subject to two possible five year renewals, the U.S. Government is granted for itself and others acting on its behalf a paid-up, non-exclusive,irrevocable worldwide license in this data to reproduce, prepare derivative works, distribute copies to the public,perform publicly and display publicly,and to permit others to do so." + EndOfLine+ EndOfLine
 		  t = t + "TRADEMARKS: EnergyPlus, DOE-2.1E, DOE-2, and DOE are trademarks of the US Department of Energy." + EndOfLine+ EndOfLine
 		  t = t + "DISCLAIMER OF WARRANTY AND LIMITATION OF LIABILITY: THIS SOFTWARE IS PROVIDED 'AS IS' WITHOUT WARRANTY OF ANY KIND. NEITHER GARD ANALYTICS, THE DEPARTMENT OF ENERGY, THE US GOVERNMENT, THEIR LICENSORS, OR ANY PERSON OR ORGANIZATION ACTING ON BEHALF OF ANY OF THEM:" + EndOfLine+ EndOfLine
@@ -1350,7 +1354,7 @@ End
 		  DisplayText.TextArea1.Text = t
 		  displaytext.Title = "About.."
 		  DisplayText.ShowModal
-		  
+
 		End Sub
 	#tag EndEvent
 #tag EndEvents

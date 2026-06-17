@@ -1,7 +1,7 @@
-// EnergyPlus, Copyright (c) 1996-2023, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
-// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other
+// National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
 // contributors. All rights reserved.
 //
 // NOTICE: This Software was developed under funding from the U.S. Department of Energy and the
@@ -57,15 +57,18 @@
 #include <EnergyPlus/ChillerAbsorption.hh>
 #include <EnergyPlus/Data/EnergyPlusData.hh>
 #include <EnergyPlus/DataBranchAirLoopPlant.hh>
+#include <EnergyPlus/DataEnvironment.hh>
 #include <EnergyPlus/DataLoopNode.hh>
+#include <EnergyPlus/DataSizing.hh>
+#include <EnergyPlus/FluidProperties.hh>
 #include <EnergyPlus/Plant/DataPlant.hh>
+#include <EnergyPlus/Psychrometrics.hh>
 #include <EnergyPlus/SimulationManager.hh>
 
 #include "Fixtures/EnergyPlusFixture.hh"
 
 using namespace EnergyPlus;
 using namespace EnergyPlus::ChillerAbsorption;
-using namespace EnergyPlus::DataLoopNode;
 using namespace EnergyPlus::DataPlant;
 using namespace EnergyPlus::SimulationManager;
 
@@ -406,7 +409,7 @@ TEST_F(EnergyPlusFixture, ChillerAbsorption_Calc)
         "    Activity Sch,            !- Activity Level Schedule Name",
         "    3.82E-8,                 !- Carbon Dioxide Generation Rate {m3/s-W}",
         "    ,                        !- Enable ASHRAE 55 Comfort Warnings",
-        "    zoneaveraged,            !- Mean Radiant Temperature Calculation Type",
+        "    EnclosureAveraged,            !- Mean Radiant Temperature Calculation Type",
         "    ,                        !- Surface Name/Angle Factor List Name",
         "    Work Eff Sch,            !- Work Efficiency Schedule Name",
         "    ClothingInsulationSchedule,  !- Clothing Insulation Calculation Method",
@@ -1206,7 +1209,7 @@ TEST_F(EnergyPlusFixture, ChillerAbsorption_Calc)
         "  Branch,",
         "    Heating Purchased Hot Water Branch,  !- Name",
         "    ,                        !- Pressure Drop Curve Name",
-        "    DistrictHeating,         !- Component 1 Object Type",
+        "    DistrictHeating:Water,         !- Component 1 Object Type",
         "    Purchased Heating,       !- Component 1 Name",
         "    Purchased Heat Inlet Node,  !- Component 1 Inlet Node Name",
         "    Purchased Heat Outlet Node;  !- Component 1 Outlet Node Name",
@@ -1336,7 +1339,7 @@ TEST_F(EnergyPlusFixture, ChillerAbsorption_Calc)
 
         "  PlantEquipmentList,",
         "    heating plant,           !- Name",
-        "    DistrictHeating,         !- Equipment 1 Object Type",
+        "    DistrictHeating:Water,         !- Equipment 1 Object Type",
         "    Purchased Heating;       !- Equipment 1 Name",
 
         "  Pump:VariableSpeed,",
@@ -1355,7 +1358,7 @@ TEST_F(EnergyPlusFixture, ChillerAbsorption_Calc)
         "    0.0,                     !- Design Minimum Flow Rate {m3/s}",
         "    Intermittent;            !- Pump Control Type",
 
-        "  DistrictHeating,",
+        "  DistrictHeating:Water,",
         "    Purchased Heating,       !- Name",
         "    Purchased Heat Inlet Node,  !- Hot Water Inlet Node Name",
         "    Purchased Heat Outlet Node,  !- Hot Water Outlet Node Name",
@@ -1714,7 +1717,7 @@ TEST_F(EnergyPlusFixture, ChillerAbsorption_Calc)
         "    DH Water Outlet Node,    !- Boiler Water Outlet Node Name",
         "    100.0,                   !- Water Outlet Upper Temperature Limit {C}",
         "    NotModulated,            !- Boiler Flow Mode",
-        "    4770.00,                 !- Parasitic Electric Load {W}",
+        "    4770.00,                 !- On Cycle Parasitic Electric Load {W}",
         "    1.00;                    !- Sizing Factor",
 
         "  Curve:Linear,",
@@ -1780,6 +1783,8 @@ TEST_F(EnergyPlusFixture, ChillerAbsorption_Calc)
 
     ASSERT_TRUE(process_idf(idf_objects));
 
+    state->init_state(*state);
+
     SimulationManager::ManageSimulation(*state); // run the design day
 
     // set conditions for test
@@ -1790,7 +1795,7 @@ TEST_F(EnergyPlusFixture, ChillerAbsorption_Calc)
     // check chiller inputs
     auto &thisChiller = state->dataChillerAbsorber->absorptionChillers(AbsChillNum);
     EXPECT_EQ(thisChiller.NomCap, 100000.0);
-    EXPECT_TRUE(compare_enums(thisChiller.FlowMode, DataPlant::FlowMode::LeavingSetpointModulated));
+    EXPECT_ENUM_EQ(thisChiller.FlowMode, DataPlant::FlowMode::LeavingSetpointModulated);
     // define local var
     int EvapInletNode = thisChiller.EvapInletNodeNum;
     int EvapOutletNode = thisChiller.EvapOutletNodeNum;
@@ -1829,4 +1834,248 @@ TEST_F(EnergyPlusFixture, ChillerAbsorption_Calc)
     // check generator hot water mass flow rate is proportional to the chilled water flow rate
     EXPECT_EQ(state->dataLoopNodes->Node(GeneratorInletNode).MassFlowRate, GenMassFlowRateTestResult);
     EXPECT_EQ(state->dataLoopNodes->Node(GeneratorOutletNode).MassFlowRate, GenMassFlowRateTestResult);
+}
+
+TEST_F(EnergyPlusFixture, ChillerAbsorption_Autosize)
+{
+    state->dataPlnt->TotNumLoops = 3;
+    state->dataEnvrn->OutBaroPress = 101325.0;
+    state->dataEnvrn->StdRhoAir = 1.20;
+    state->dataGlobal->TimeStepsInHour = 4;
+    state->dataGlobal->TimeStep = 1;
+    state->dataGlobal->MinutesInTimeStep = 15;
+    state->dataHVACGlobal->TimeStepSys = 0.25;
+    state->dataHVACGlobal->TimeStepSysSec = state->dataHVACGlobal->TimeStepSys * Constant::rSecsInHour;
+    state->dataGlobal->SysSizingCalc = true;
+
+    std::string const idf_objects = delimited_string({
+        "Chiller:Absorption,",
+        "  Chiller,                 !- Name",
+        "  Autosize,                !- Nominal Capacity {W}",
+        "  Autosize,                !- Nominal Pumping Power {W}",
+        "  Chiller ChW Inlet,       !- Chilled Water Inlet Node Name",
+        "  Chiller ChW Outlet,      !- Chilled Water Outlet Node Name",
+        "  Chiller Cnd Outlet,      !- Condenser Inlet Node Name",
+        "  Chiller Cnd Outlet,      !- Condenser Outlet Node Name",
+        "  0.15,                    !- Minimum Part Load Ratio",
+        "  1.0,                     !- Maximum Part Load Ratio",
+        "  0.65,                    !- Optimum Part Load Ratio",
+        "  35.0,                    !- Design Condenser Inlet Temperature {C}",
+        "  Autosize,                !- Design Chilled Water Flow Rate {m3/s}",
+        "  Autosize,                !- Design Condenser Water Flow Rate {m3/s}",
+        "  0.0,                     !- Coefficient 1 of the Hot Water or Steam Use Part Load Ratio Curve",
+        "  0.8,                     !- Coefficient 2 of the Hot Water or Steam Use Part Load Ratio Curve",
+        "  0.2,                     !- Coefficient 3 of the Hot Water or Steam Use Part Load Ratio Curve",
+        "  0.9,                     !- Coefficient 1 of the Pump Electric Use Part Load Ratio Curve",
+        "  0.1,                     !- Coefficient 2 of the Pump Electric Use Part Load Ratio Curve",
+        "  0.0,                     !- Coefficient 3 of the Pump Electric Use Part Load Ratio Curve",
+        "  5,                       !- Chilled Water Outlet Temperature Lower Limit {C}",
+        "  AbsorberHWInletNode,     !- Generator Inlet Node Name",
+        "  AbsorberHWOutletNode,    !- Generator Outlet Node Name",
+        "  ConstantFlow,            !- Chiller Flow Mode",
+        "  HotWater,                !- Generator Heat Source Type",
+        "  Autosize,                !- Design Generator Fluid Flow Rate {m3/s}",
+        "  2.0,                     !- Degree of Subcooling in Steam Generator",
+        "  1.5;                     !- Sizing Factor",
+    });
+    EXPECT_TRUE(process_idf(idf_objects, false));
+
+    state->init_state(*state);
+
+    state->dataPlnt->PlantLoop.allocate(state->dataPlnt->TotNumLoops);
+    state->dataSize->NumPltSizInput = state->dataPlnt->TotNumLoops;
+    state->dataSize->PlantSizData.allocate(state->dataPlnt->TotNumLoops);
+
+    constexpr int chwLoopNum = 1;
+    auto &chwLoop = state->dataPlnt->PlantLoop(1);
+    auto &chwLoopSizing = state->dataSize->PlantSizData(1);
+
+    constexpr int cndLoopNum = 2;
+    auto &cndLoop = state->dataPlnt->PlantLoop(cndLoopNum);
+    auto &cndLoopSizing = state->dataSize->PlantSizData(cndLoopNum);
+
+    constexpr int genLoopNum = 3;
+    auto &genLoop = state->dataPlnt->PlantLoop(genLoopNum);
+    auto &genLoopSizing = state->dataSize->PlantSizData(genLoopNum);
+
+    ChillerAbsorption::GetBLASTAbsorberInput(*state);
+    ASSERT_EQ(1, state->dataChillerAbsorber->absorptionChillers.size());
+    auto &thisChiller = state->dataChillerAbsorber->absorptionChillers(1);
+
+    EXPECT_EQ(thisChiller.NomCap, DataSizing::AutoSize);
+    EXPECT_EQ(thisChiller.NomPumpPower, DataSizing::AutoSize);
+    EXPECT_EQ(thisChiller.EvapVolFlowRate, DataSizing::AutoSize);
+    EXPECT_EQ(thisChiller.CondVolFlowRate, DataSizing::AutoSize);
+    EXPECT_EQ(thisChiller.GeneratorVolFlowRate, DataSizing::AutoSize);
+
+    EXPECT_TRUE(thisChiller.NomCapWasAutoSized);
+    EXPECT_TRUE(thisChiller.NomPumpPowerWasAutoSized);
+    EXPECT_GT(thisChiller.EvapInletNodeNum, 0);
+    EXPECT_GT(thisChiller.EvapOutletNodeNum, 0);
+    EXPECT_GT(thisChiller.CondInletNodeNum, 0);
+    EXPECT_GT(thisChiller.CondOutletNodeNum, 0);
+
+    EXPECT_DOUBLE_EQ(0.15, thisChiller.MinPartLoadRat);
+    EXPECT_DOUBLE_EQ(1.0, thisChiller.MaxPartLoadRat);
+    EXPECT_DOUBLE_EQ(0.65, thisChiller.OptPartLoadRat);
+    EXPECT_DOUBLE_EQ(35.0, thisChiller.TempDesCondIn);
+
+    EXPECT_TRUE(thisChiller.EvapVolFlowRateWasAutoSized);
+    EXPECT_TRUE(thisChiller.CondVolFlowRateWasAutoSized);
+
+    EXPECT_DOUBLE_EQ(0.0, thisChiller.SteamLoadCoef[0]);
+    EXPECT_DOUBLE_EQ(0.8, thisChiller.SteamLoadCoef[1]);
+    EXPECT_DOUBLE_EQ(0.2, thisChiller.SteamLoadCoef[2]);
+
+    EXPECT_DOUBLE_EQ(0.9, thisChiller.PumpPowerCoef[0]);
+    EXPECT_DOUBLE_EQ(0.1, thisChiller.PumpPowerCoef[1]);
+    EXPECT_DOUBLE_EQ(0.0, thisChiller.PumpPowerCoef[2]);
+
+    EXPECT_DOUBLE_EQ(5.0, thisChiller.TempLowLimitEvapOut);
+
+    EXPECT_ENUM_EQ(thisChiller.FlowMode, DataPlant::FlowMode::Constant);
+    EXPECT_TRUE(thisChiller.GenInputOutputNodesUsed);
+    EXPECT_GT(thisChiller.GeneratorInletNodeNum, 0);
+    EXPECT_GT(thisChiller.GeneratorOutletNodeNum, 0);
+    EXPECT_ENUM_EQ(thisChiller.GenHeatSourceType, Node::FluidType::Water);
+    EXPECT_TRUE(thisChiller.GeneratorVolFlowRateWasAutoSized);
+
+    EXPECT_DOUBLE_EQ(2.0, thisChiller.GeneratorSubcool);
+    EXPECT_DOUBLE_EQ(1.5, thisChiller.SizFac);
+
+    {
+        auto &thisLoop = chwLoop;
+        auto &thisLoopSizing = chwLoopSizing;
+        thisLoop.Name = "ChilledWaterLoop";
+        thisLoop.FluidName = "WATER";
+        thisLoop.glycol = Fluid::GetWater(*state);
+        thisLoop.PlantSizNum = chwLoopNum;
+        auto &loopside = thisLoop.LoopSide(DataPlant::LoopSideLocation::Supply);
+        loopside.TotalBranches = 1;
+        loopside.Branch.allocate(1);
+
+        auto &branch = loopside.Branch(1);
+        branch.TotalComponents = 1;
+        branch.Comp.allocate(1);
+        branch.Comp(1).Name = thisChiller.Name;
+        branch.Comp(1).Type = DataPlant::PlantEquipmentType::Chiller_Absorption;
+        branch.Comp(1).NodeNumIn = thisChiller.EvapInletNodeNum;
+        branch.Comp(1).NodeNumOut = thisChiller.EvapOutletNodeNum;
+
+        thisLoopSizing.PlantLoopName = thisLoop.Name;
+        thisLoopSizing.LoopType = DataSizing::TypeOfPlantLoop::Cooling;
+        thisLoopSizing.ExitTemp = 6.67;
+        thisLoopSizing.DesVolFlowRate = 0.01;
+        thisLoopSizing.DeltaT = 5.0;
+    }
+
+    {
+        auto &thisLoop = cndLoop;
+        auto &thisLoopSizing = cndLoopSizing;
+        thisLoop.Name = "CondenserWaterLoop";
+        thisLoop.FluidName = "WATER";
+        thisLoop.glycol = Fluid::GetWater(*state);
+        thisLoop.PlantSizNum = cndLoopNum;
+        auto &loopside = thisLoop.LoopSide(DataPlant::LoopSideLocation::Demand);
+        loopside.TotalBranches = 1;
+        loopside.Branch.allocate(1);
+
+        auto &branch = loopside.Branch(1);
+        branch.TotalComponents = 1;
+        branch.Comp.allocate(1);
+        branch.Comp(1).Name = thisChiller.Name;
+        branch.Comp(1).Type = DataPlant::PlantEquipmentType::Chiller_Absorption;
+        branch.Comp(1).NodeNumIn = thisChiller.CondInletNodeNum;
+        branch.Comp(1).NodeNumOut = thisChiller.CondOutletNodeNum;
+
+        thisLoopSizing.PlantLoopName = thisLoop.Name;
+        thisLoopSizing.LoopType = DataSizing::TypeOfPlantLoop::Condenser;
+        thisLoopSizing.ExitTemp = 29.4;
+        thisLoopSizing.DesVolFlowRate = 0.01;
+        thisLoopSizing.DeltaT = 5.0;
+    }
+
+    {
+        auto &thisLoop = genLoop;
+        auto &thisLoopSizing = genLoopSizing;
+        thisLoop.Name = "Generator HW Loop";
+        thisLoop.FluidName = "WATER";
+        thisLoop.glycol = Fluid::GetWater(*state);
+        thisLoop.PlantSizNum = genLoopNum;
+        auto &loopside = thisLoop.LoopSide(DataPlant::LoopSideLocation::Demand);
+        loopside.TotalBranches = 1;
+        loopside.Branch.allocate(1);
+
+        auto &branch = loopside.Branch(1);
+        branch.TotalComponents = 1;
+        branch.Comp.allocate(1);
+        branch.Comp(1).Name = thisChiller.Name;
+        branch.Comp(1).Type = DataPlant::PlantEquipmentType::Chiller_Absorption;
+        branch.Comp(1).NodeNumIn = thisChiller.GeneratorInletNodeNum;
+        branch.Comp(1).NodeNumOut = thisChiller.GeneratorOutletNodeNum;
+
+        thisLoopSizing.PlantLoopName = thisLoop.Name;
+        thisLoopSizing.LoopType = DataSizing::TypeOfPlantLoop::Heating;
+        thisLoopSizing.ExitTemp = 80.0;
+        thisLoopSizing.DesVolFlowRate = 0.01;
+        thisLoopSizing.DeltaT = 20.0;
+    }
+
+    state->dataPlnt->PlantFirstSizesOkayToFinalize = true;
+    state->dataPlnt->PlantFinalSizesOkayToReport = true;
+
+    // Calculate expected values
+    Real64 rho_cw = state->dataPlnt->PlantLoop(chwLoopNum).glycol->getDensity(*state, Constant::CWInitConvTemp, "ChillerAbsorption_Autosize_TEST");
+
+    Real64 Cp_evap =
+        state->dataPlnt->PlantLoop(chwLoopNum).glycol->getSpecificHeat(*state, Constant::CWInitConvTemp, "ChillerAbsorption_Autosize_TEST");
+
+    Real64 const expectedEvapVolFlowRate = state->dataSize->PlantSizData(chwLoopNum).DesVolFlowRate * thisChiller.SizFac;
+    Real64 const expectedNomCap = Cp_evap * rho_cw * state->dataSize->PlantSizData(chwLoopNum).DeltaT * expectedEvapVolFlowRate;
+
+    Real64 constexpr nomCapToPumpRatio = 0.0045;
+
+    Real64 const SteamInputRatNom = thisChiller.SteamLoadCoef[0] + thisChiller.SteamLoadCoef[1] + thisChiller.SteamLoadCoef[2];
+    EXPECT_DOUBLE_EQ(1.0, SteamInputRatNom);
+
+    Real64 rho_cond = state->dataPlnt->PlantLoop(cndLoopNum).glycol->getDensity(*state, Constant::CWInitConvTemp, "ChillerAbsorption_Autosize_TEST");
+
+    Real64 Cp_cond =
+        state->dataPlnt->PlantLoop(cndLoopNum).glycol->getSpecificHeat(*state, thisChiller.TempDesCondIn, "ChillerAbsorption_Autosize_TEST");
+
+    Real64 const expectedCondVolFlowRate =
+        expectedNomCap * (1.0 + SteamInputRatNom + nomCapToPumpRatio) / (rho_cond * Cp_cond * state->dataSize->PlantSizData(cndLoopNum).DeltaT);
+
+    Real64 const SteamDeltaT = state->dataSize->PlantSizData(genLoopNum).DeltaT;
+    Real64 const Cp_gen = state->dataPlnt->PlantLoop(genLoopNum)
+                              .glycol->getSpecificHeat(*state, state->dataSize->PlantSizData(genLoopNum).ExitTemp, "ChillerAbsorption_Autosize_TEST");
+
+    Real64 const rho_gen =
+        state->dataPlnt->PlantLoop(genLoopNum)
+            .glycol->getDensity(*state, (state->dataSize->PlantSizData(genLoopNum).ExitTemp - SteamDeltaT), "ChillerAbsorption_Autos");
+    Real64 const expectedGeneratorVolFlowRate = (expectedNomCap * SteamInputRatNom) / (Cp_gen * rho_gen * SteamDeltaT);
+
+    bool RunFlag(true);
+    Real64 MyLoad(-20000.0);
+
+    thisChiller.initialize(*state, RunFlag, MyLoad);
+    thisChiller.sizeChiller(*state);
+
+    EXPECT_NE(thisChiller.NomCap, DataSizing::AutoSize);
+    EXPECT_NE(thisChiller.NomPumpPower, DataSizing::AutoSize);
+    EXPECT_NE(thisChiller.EvapVolFlowRate, DataSizing::AutoSize);
+    EXPECT_NE(thisChiller.CondVolFlowRate, DataSizing::AutoSize);
+    EXPECT_NE(thisChiller.GeneratorVolFlowRate, DataSizing::AutoSize);
+
+    EXPECT_GT(thisChiller.NomCap, 0.0);
+    EXPECT_GT(thisChiller.NomPumpPower, 0.0);
+    EXPECT_GT(thisChiller.EvapVolFlowRate, 0.0);
+    EXPECT_GT(thisChiller.CondVolFlowRate, 0.0);
+    EXPECT_GT(thisChiller.GeneratorVolFlowRate, 0.0);
+
+    EXPECT_DOUBLE_EQ(expectedNomCap, thisChiller.NomCap);
+    EXPECT_DOUBLE_EQ(expectedNomCap * nomCapToPumpRatio, thisChiller.NomPumpPower);
+    EXPECT_DOUBLE_EQ(expectedEvapVolFlowRate, thisChiller.EvapVolFlowRate);
+    EXPECT_DOUBLE_EQ(expectedCondVolFlowRate, thisChiller.CondVolFlowRate);
+    EXPECT_DOUBLE_EQ(expectedGeneratorVolFlowRate, thisChiller.GeneratorVolFlowRate);
 }

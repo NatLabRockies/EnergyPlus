@@ -38,12 +38,12 @@ Currently, each EnergyPlus Zone contains one or more Spaces which are used for:
 
   * assigning and allocating internal gains
   * specifying enclosure boundaries,
-  * reporting inputs grouped by space types, and 
+  * reporting inputs grouped by space types, and
   * reporting select output grouped by space types.
-  
+
 The Zone air heat balance is currently lumped across all Spaces in the Zone. During the initial Space NFP discussions, additional capabilities were requested which would require an air heat balance for each Space:
 
-  * Room-by-room sizing is commonly done to size individual room diffusers or equipment such as PTACs. Zone-level equipment may be sized to either the coincident or non-coincident peak across the rooms (Spaces). 
+  * Room-by-room sizing is commonly done to size individual room diffusers or equipment such as PTACs. Zone-level equipment may be sized to either the coincident or non-coincident peak across the rooms (Spaces).
 
   * Room-by-room HVAC simulation allows modeling the impact of thermostat placement in a specific room which often results in less-than-ideal temperature control for other rooms in the same Zone. For some applications, such as a unitary system with a single thermostat, this can be achieved by modeling each room as a separate Zone and using the "control zone" options. But this is not adequate for VAV systems or unitary systems with zoning controls.
 
@@ -94,7 +94,7 @@ The air heat balance is currently at the zone level only. While some components 
   * During sizing, all Spaces in the Zone will be controlled to the same thermostat temperature, so combining Spaces into Zones will be straightforward, and all surfaces will see the same air temperature.
 
   * During the HVAC simulation, for this task, the Space air masses will be lumped together for the Zone heat balance. This will force all Spaces in the Zone to the same air temperature.
-  
+
   * Future work may add Space-level HVAC distribution and thermostat control options to allow calculation of independent Space air temperatures.
 
 Key aspects of the surface and air heat balances are listed below with italics indicating required changes.
@@ -103,19 +103,19 @@ Key aspects of the surface and air heat balances are listed below with italics i
 * Surfaces are already assigned to a space and an enclosure.
 * Solar and radiant internal gains to surfaces are simulated by enclosure.
 * Radiant exchange between surfaces is simulated by enclosure.
-* Surface convection to the air is currently to the zone air temperature (or suppply air temperature depending on the convection model). 
+* Surface convection to the air is currently to the zone air temperature (or suppply air temperature depending on the convection model).
   * *Change to space air temperature.*
   * *Surfaces which are assigned to an auto-generated space named "ZoneName-Remainder" may need special handling. If a Remainder space exists within a given zone, it may be necessary to lump the spaces in that zone together for the zone heat balance.*
 
 ### Zone/Space Air Heat Balance ##
 
-* Surface convection to the air is currently to the zone air temperature. 
+* Surface convection to the air is currently to the zone air temperature.
   * *Change to space air temperature.*
 * Internal convective gains are already computed by space.
 * Zone airflows for infiltration and mixing are currently by zone (ZoneInfiltration, ZoneMixing, ZoneCrossMixing).
-  * *Modify inputs to specify by zone or space (similar to internal gains, but allocated by volume or floor area depending on the input method).* 
-* Air volume is currently by zone. 
-  * *Add input and calculations for Space volume. See [Issue #9362](https://github.com/NREL/EnergyPlus/issues/9362).*
+  * *Modify inputs to specify by zone or space (similar to internal gains, but allocated by volume or floor area depending on the input method).*
+* Air volume is currently by zone.
+  * *Add input and calculations for Space volume. See [Issue #9362](https://github.com/NatLabRockies/EnergyPlus/issues/9362).*
 * AirflowNetwork inputs and simulation will remain at the zone level.
   * *Allocate the impact on the air heat balance by space. For this phase AFN zones may need to use a lumped air heat balance.*
 * ZoneAirBalance:OutdoorAir will remain a zone-level input, and the same method will be applied to all spaces in the zone.
@@ -341,7 +341,7 @@ void CalcZoneSums(EnergyPlusData &state,
 * Calls to this function may need to be changed to pass in space values rather than zone values.
 
 `PredictSystemLoads`
-* Break apart into multiple functions for 
+* Break apart into multiple functions for
   * Staged thermostat setpoint
   * Setpoint revision for onoff thermostat
   * Update zone/space temperatures
@@ -365,6 +365,3 @@ void CalcZoneSums(EnergyPlusData &state,
 
 `PushSystemTimestepHistories`
 * Refactor to handle zone or space
-
-
-

@@ -14,10 +14,11 @@ The name of the HybridModel:Zone object.
 
 This field is the name of the thermal zone (ref: Zone) and attaches a particular hybrid model input to a thermal zone in the building.
 
-\paragraph{Field: Calculate Zone Internal Thermal Mass}\label{field-calculate-zon-internal-thermal-mass-hm}
+\paragraph{Field: Calculate Zone Internal Thermal Mass}\label{field-calculate-zone-internal-thermal-mass-hm}
 
-This field is used to provide an option to calculate the temperature capacity multiplier (Ref: ZoneCapacitanceMultiplier:ResearchSpecial). The temperature capacity multiplier is represented as internal thermal mass multiplier in the hybrid model.
-When YES is selected, the hybrid model calculates the multiplier based on the inverse heat balance algorithm using the measured zone air temperature.
+This field is used to provide an option to calculate the temperature capacity multiplier required by \hyperref[zonecapacitancemultiplierresearchspecial]{ZoneCapacitanceMultiplier:ResearchSpecial}. The temperature capacity multiplier is represented as internal thermal mass multiplier in the hybrid model. When YES is selected, the hybrid model calculates the multiplier based on the inverse heat balance algorithm using the measured zone air temperature.
+
+Output for this parameter can be found via the output variable listed below.  Additionally, an average for the simulation is also provided in the table report \hyperref[input-verification-and-results-summary-or-ivrs]{Input Verification and Results Summary} subtable \textit{Hybrid Model: Internal Thermal Mass}.
 
 \paragraph{Field: Calculate Zone Air Infiltration Rate}\label{field-calculate-zone-air-infiltration-rate-hm}
 
@@ -59,15 +60,15 @@ When YES is selected for Calculate Zone Internal Thermal Mass or Calculate Zone 
 
 \paragraph{Field: Zone Measured Air Temperature Schedule Name}\label{field-zone-measured-air-temperature-schedule-name-hm}
 
-This field is the name of the schedule object which contains the zone air temperature measurement data. The date range of the schedule should cover the start and end date of the HybridModel. A Schedule:File object is recommended for inputing the time-series measurements. When a schedule:file object is provided, all the rows for a whole year should be in the file, the rows outside of the start and end date range of the HybridModel should be zeros.
+This field is the name of the schedule object which contains the zone air temperature measurement data. The date range of the schedule should cover the start and end date of the HybridModel. A Schedule:File object is recommended for inputting the time-series measurements. When a schedule:file object is provided, all the rows for a whole year should be in the file, the rows outside of the start and end date range of the HybridModel should be zeros.
 
 \paragraph{Field: Zone Measured Air Humidity Ratio Schedule Name}\label{field-zone-measured-air-humidity-ratio-schedule-name-hm}
 
-This field is the name of the schedule object which contains the zone air humidity ration measurement data. The date range of the schedule should cover the start and end date of the HybridModel. A Schedule:File object is recommended for inputing the time-series measurements. When a schedule:file object is provided, all the rows for a whole year should be in the file, the rows outside of the start and end date range of the HybridModel should be zeros.
+This field is the name of the schedule object which contains the zone air humidity ration measurement data. The date range of the schedule should cover the start and end date of the HybridModel. A Schedule:File object is recommended for inputting the time-series measurements. When a schedule:file object is provided, all the rows for a whole year should be in the file, the rows outside of the start and end date range of the HybridModel should be zeros.
 
 \paragraph{Field: Zone Measured Air CO$_2$ concentration Schedule Name}\label{field-zone-measured-air-co2-concentration-schedule-name-hm}
 
-This field is the name of the schedule object which contains the zone air CO$_2$ concentration measurement data. The date range of the schedule should cover the start and end date of the HybridModel. A Schedule:File object is recommended for inputing the time-series measurements. When a schedule:file object is provided, all the rows for a whole year should be in the file, the rows outside of the start and end date range of the HybridModel should be zeros.
+This field is the name of the schedule object which contains the zone air CO$_2$ concentration measurement data. The date range of the schedule should cover the start and end date of the HybridModel. A Schedule:File object is recommended for inputting the time-series measurements. When a schedule:file object is provided, all the rows for a whole year should be in the file, the rows outside of the start and end date range of the HybridModel should be zeros.
 
 \paragraph{Field: Zone Input People Activity Level Schedule Name}\label{field-zone-input-people-activity-schedule-name-hm}
 
@@ -87,19 +88,19 @@ This field is the name of the schedule referenced by a Schedule object which con
 
 \paragraph{Field: Zone Input Supply Air Temperature Schedule Name}\label{field-zone-input-supply-air-temperature-schedule-name-hm}
 
-This field is the name of the schedule object which contains the measured supply air temperature data. The date range of the schedule should cover the start and end date of the HybridModel. A Schedule:File object is recommended for inputing the time-series measurements. When a schedule:file object is provided, all the rows for a whole year should be in the file, the rows outside of the start and end date range of the HybridModel should be zeros.
+This field is the name of the schedule object which contains the measured supply air temperature data. The date range of the schedule should cover the start and end date of the HybridModel. A Schedule:File object is recommended for inputting the time-series measurements. When a schedule:file object is provided, all the rows for a whole year should be in the file, the rows outside of the start and end date range of the HybridModel should be zeros.
 
 \paragraph{Field: Zone Input Supply Air Mass Flow Rate Schedule Name}\label{field-zone-input-supply-air-mass-flow-rate-schedule-name-hm}
 
-This field is the name of the schedule object which contains the measured supply air mass flow rate data. The date range of the schedule should cover the start and end date of the HybridModel. A Schedule:File object is recommended for inputing the time-series measurements. When a schedule:file object is provided, all the rows for a whole year should be in the file, the rows outside of the start and end date range of the HybridModel should be zeros.
+This field is the name of the schedule object which contains the measured supply air mass flow rate data. The date range of the schedule should cover the start and end date of the HybridModel. A Schedule:File object is recommended for inputting the time-series measurements. When a schedule:file object is provided, all the rows for a whole year should be in the file, the rows outside of the start and end date range of the HybridModel should be zeros.
 
 \paragraph{Field: Zone Input Supply Air Humidity Ratio Schedule Name}\label{field-zone-input-supply-air-humidity-ratio-schedule-name-hm}
 
-This field is the name of the schedule object which contains the measured supply air humidity ratio data. The date range of the schedule should cover the start and end date of the HybridModel. A Schedule:File object is recommended for inputing the time-series measurements. When a schedule:file object is provided, all the rows for a whole year should be in the file, the rows outside of the start and end date range of the HybridModel should be zeros.
+This field is the name of the schedule object which contains the measured supply air humidity ratio data. The date range of the schedule should cover the start and end date of the HybridModel. A Schedule:File object is recommended for inputting the time-series measurements. When a schedule:file object is provided, all the rows for a whole year should be in the file, the rows outside of the start and end date range of the HybridModel should be zeros.
 
 \paragraph{Field: Zone Input Supply Air CO$_2$ Concentration Schedule Name}\label{field-zone-input-supply-air-co2-concentration-schedule-name-hm}
 
-This field is the name of the schedule object which contains the measured supply air CO$_2$ concentration data. The date range of the schedule should cover the start and end date of the HybridModel. A Schedule:File object is recommended for inputing the time-series measurements. When a schedule:file object is provided, all the rows for a whole year should be in the file, the rows outside of the start and end date range of the HybridModel should be zeros.
+This field is the name of the schedule object which contains the measured supply air CO$_2$ concentration data. The date range of the schedule should cover the start and end date of the HybridModel. A Schedule:File object is recommended for inputting the time-series measurements. When a schedule:file object is provided, all the rows for a whole year should be in the file, the rows outside of the start and end date range of the HybridModel should be zeros.
 
 \paragraph{Field: Begin Month}\label{field-begin-month-hm}
 
@@ -120,75 +121,71 @@ This numeric field should contain the ending day of the ending month (must be va
 Examples of the object in an IDF are:
 
 \begin{lstlisting}
-    
-    HybridModel:Zone,
-        ZONE 1 HybridModel,      !- Name
-        ZONE 1,                  !- Zone Name
-        Yes,                      !- Calculate Zone Internal Thermal Mass
-        No,                     !- Calculate Zone Air Infiltration Rate
-        No,                      !- Calculate Zone People Count
-        ,                        !- Zone Measured Air Temperature Schedule Name
-        ,                        !- Zone Measured Air Humidity Ratio Schedule Name
-        ZONE 1_MeasuredCO2Concentration,  !- Zone Measured Air CO2 Concentration Schedule Name
-        ,                        !- Zone Input People Activity Schedule Name
-        ,                        !- Zone Input People Sensible Heat Fraction Schedule Name
-        ,                        !- Zone Input People Radiant Heat Fraction Schedule Name
-        ,                        !- Zone Input People CO2 Generation Rate Schedule Name
-        ,                        !- Zone Input Supply Air Temperature Schedule Name
-        ,                        !- Zone Input Supply Air Mass Flow Rate Schedule Name
-        ,                        !- Zone Input Supply Air Humidity Ratio Schedule Name
-        ,                        !- Zone Input Supply Air CO2 Concentration Schedule Name
-        1,                       !- Begin Month
-        1,                       !- Begin Day of Month
-        12,                      !- End Month
-        31;                      !- End Day of Month
+HybridModel:Zone,
+  ZONE 1 HybridModel,         !- Name
+  ZONE 1,                     !- Zone Name
+  Yes,                        !- Calculate Zone Internal Thermal Mass
+  No,                         !- Calculate Zone Air Infiltration Rate
+  No,                         !- Calculate Zone People Count
+  ,                           !- Zone Measured Air Temperature Schedule Name
+  ,                           !- Zone Measured Air Humidity Ratio Schedule Name
+  ZONE 1_MeasuredCO2Concentration,  !- Zone Measured Air CO2 Concentration Schedule Name
+  ,                           !- Zone Input People Activity Schedule Name
+  ,                           !- Zone Input People Sensible Heat Fraction Schedule Name
+  ,                           !- Zone Input People Radiant Heat Fraction Schedule Name
+  ,                           !- Zone Input People CO2 Generation Rate Schedule Name
+  ,                           !- Zone Input Supply Air Temperature Schedule Name
+  ,                           !- Zone Input Supply Air Mass Flow Rate Schedule Name
+  ,                           !- Zone Input Supply Air Humidity Ratio Schedule Name
+  ,                           !- Zone Input Supply Air CO2 Concentration Schedule Name
+  1,                          !- Begin Month
+  1,                          !- Begin Day of Month
+  12,                         !- End Month
+  31;                         !- End Day of Month
 
+HybridModel:Zone,
+  ZONE 1 HybridModel,         !- Name
+  ZONE 1,                     !- Zone Name
+  No,                         !- Calculate Zone Internal Thermal Mass
+  Yes,                        !- Calculate Zone Air Infiltration Rate
+  No,                         !- Calculate Zone People Count
+  ,                           !- Zone Measured Air Temperature Schedule Name
+  ,                           !- Zone Measured Air Humidity Ratio Schedule Name
+  ZONE 1_MeasuredCO2Concentration,  !- Zone Measured Air CO2 Concentration Schedule Name
+  ,                           !- Zone Input People Activity Schedule Name
+  ,                           !- Zone Input People Sensible Heat Fraction Schedule Name
+  ,                           !- Zone Input People Radiant Heat Fraction Schedule Name
+  ,                           !- Zone Input People CO2 Generation Rate Schedule Name
+  ,                           !- Zone Input Supply Air Temperature Schedule Name
+  ,                           !- Zone Input Supply Air Mass Flow Rate Schedule Name
+  ,                           !- Zone Input Supply Air Humidity Ratio Schedule Name
+  ,                           !- Zone Input Supply Air CO2 Concentration Schedule Name
+  1,                          !- Begin Month
+  1,                          !- Begin Day of Month
+  12,                         !- End Month
+  31;                         !- End Day of Month
 
-    HybridModel:Zone,
-        ZONE 1 HybridModel,      !- Name
-        ZONE 1,                  !- Zone Name
-        No,                      !- Calculate Zone Internal Thermal Mass
-        Yes,                     !- Calculate Zone Air Infiltration Rate
-        No,                      !- Calculate Zone People Count
-        ,                        !- Zone Measured Air Temperature Schedule Name
-        ,                        !- Zone Measured Air Humidity Ratio Schedule Name
-        ZONE 1_MeasuredCO2Concentration,  !- Zone Measured Air CO2 Concentration Schedule Name
-        ,                        !- Zone Input People Activity Schedule Name
-        ,                        !- Zone Input People Sensible Heat Fraction Schedule Name
-        ,                        !- Zone Input People Radiant Heat Fraction Schedule Name
-        ,                        !- Zone Input People CO2 Generation Rate Schedule Name
-        ,                        !- Zone Input Supply Air Temperature Schedule Name
-        ,                        !- Zone Input Supply Air Mass Flow Rate Schedule Name
-        ,                        !- Zone Input Supply Air Humidity Ratio Schedule Name
-        ,                        !- Zone Input Supply Air CO2 Concentration Schedule Name
-        1,                       !- Begin Month
-        1,                       !- Begin Day of Month
-        12,                      !- End Month
-        31;                      !- End Day of Month
-
-
-    HybridModel:Zone,
-        ZONE 2 HybridModel,      !- Name
-        ZONE 2,                  !- Zone Name
-        No,                      !- Calculate Zone Internal Thermal Mass
-        No,                      !- Calculate Zone Air Infiltration Rate
-        Yes,                     !- Calculate Zone People Count
-        ,                        !- Zone Measured Air Temperature Schedule Name
-        ,                        !- Zone Measured Air Humidity Ratio Schedule Name
-        ZONE 2_MeasuredCO2Concentration,     !- Zone Measured Air CO2 Concentration Schedule Name
-        OfficeSmall ACTIVITY_SCH,            !- Zone Input People Activity Schedule Name
-        People Sensible Heat Fraction Sch,   !- Zone Input People Sensible Heat Fraction Schedule Name
-        People Radiation Heat Fraction Sch,  !- Zone Input People Radiant Heat Fraction Schedule Name
-        People CO2 Generation Rate Sch,      !- Zone Input People CO2 Generation Rate Schedule Name
-        ,                        !- Zone Input Supply Air Temperature Schedule Name
-        ZONE 2_Inlet_MassFlow,   !- Zone Input Supply Air Mass Flow Rate Schedule Name
-        ,                        !- Zone Input Supply Air Humidity Ratio Schedule Name
-        ZONE 2_Inlet_CO2,        !- Zone Input Supply Air CO2 Concentration Schedule Name
-        1,                       !- Begin Month
-        1,                       !- Begin Day of Month
-        12,                      !- End Month
-        31;                      !- End Day of Month
-
+HybridModel:Zone,
+  ZONE 2 HybridModel,         !- Name
+  ZONE 2,                     !- Zone Name
+  No,                         !- Calculate Zone Internal Thermal Mass
+  No,                         !- Calculate Zone Air Infiltration Rate
+  Yes,                        !- Calculate Zone People Count
+  ,                           !- Zone Measured Air Temperature Schedule Name
+  ,                           !- Zone Measured Air Humidity Ratio Schedule Name
+  ZONE 2_MeasuredCO2Concentration,  !- Zone Measured Air CO2 Concentration Schedule Name
+  OfficeSmall ACTIVITY_SCH,   !- Zone Input People Activity Schedule Name
+  People Sensible Heat Fraction Sch,  !- Zone Input People Sensible Heat Fraction Schedule Name
+  People Radiation Heat Fraction Sch,  !- Zone Input People Radiant Heat Fraction Schedule Name
+  People CO2 Generation Rate Sch,  !- Zone Input People CO2 Generation Rate Schedule Name
+  ,                           !- Zone Input Supply Air Temperature Schedule Name
+  ZONE 2_Inlet_MassFlow,      !- Zone Input Supply Air Mass Flow Rate Schedule Name
+  ,                           !- Zone Input Supply Air Humidity Ratio Schedule Name
+  ZONE 2_Inlet_CO2,           !- Zone Input Supply Air CO2 Concentration Schedule Name
+  1,                          !- Begin Month
+  1,                          !- Begin Day of Month
+  12,                         !- End Month
+  31;                         !- End Day of Month
 \end{lstlisting}
 
 
@@ -198,6 +195,7 @@ Examples of the object in an IDF are:
 Zone,Average,Zone Infiltration Hybrid Model Air Change Rate [ACH]
 Zone,Average,Zone Infiltration Hybrid Model Mass Flow Rate [kg/s]
 Zone,Average,Zone Hybrid Model People Count
+Zone,Average,Zone Hybrid Model Thermal Mass Multiplier
 \end{lstlisting}
 
 \paragraph{Zone Infiltration Hybrid Model Air Change Rate {[}ACH{]}}\label{zone-infiltration-hybrid-model-air-change-rate}
@@ -211,3 +209,7 @@ The zone infiltration air mass flow rate calculated by the hybrid model.
 \paragraph{Zone Hybrid Model People Count}\label{zone-infiltration-hybrid-model-people-count}
 
 The zone people count calculated by the hybrid model.
+
+\paragraph{Zone Hybrid Model Thermal Mass Multiplier}\label{zone-infiltration-hybrid-model-thermal-mass-multiplier}
+
+This is the value of the thermal mass multiplier that is the ratio of the zone air heat capacity calculated for current conditions using a heat balance equation to the heat capacity of the volume of air contained in the zone.  This value is 1.0 when one of the following conditions is met: $|T_z^t - T_z^{t-\delta t}| > 0.05^{\circ}C$, the simulation is not currently during the time period for which hybrid modeling is set to run, or the value calculated for this parameter using the above methodology results in a value less than 1.0.  The first time that the value that is calculated for this parameter is greater than 30.0 for a particular zone a warning message is produced in the EnergyPlus Error File (*.err) to inform the user of this occurrence.  A summary of the times for when this parameter is greater than 30.0 for each zone is produced at the end of the standard error file.  Note: when the value does exceed this warning threshold, the value is NOT reset.

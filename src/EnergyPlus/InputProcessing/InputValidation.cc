@@ -1,7 +1,7 @@
-// EnergyPlus, Copyright (c) 1996-2023, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
-// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other
+// National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
 // contributors. All rights reserved.
 //
 // NOTICE: This Software was developed under funding from the U.S. Department of Energy and the
@@ -45,17 +45,15 @@
 // OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 // POSSIBILITY OF SUCH DAMAGE.
 
-// C++ Headers
-
-// ObjexxFCL Headers
-
-// EnergyPlus Headers
-#include <EnergyPlus/InputProcessing/InputValidation.hh>
+// Third Party Headers
 #include <valijson/adapters/nlohmann_json_adapter.hpp>
 #include <valijson/schema.hpp>
 #include <valijson/schema_parser.hpp>
 #include <valijson/utils/nlohmann_json_utils.hpp>
 #include <valijson/validator.hpp>
+
+// EnergyPlus Headers
+#include <EnergyPlus/InputProcessing/InputValidation.hh>
 
 using json = nlohmann::json;
 
@@ -89,7 +87,7 @@ const valijson::Schema &validation_schema(const json *schema)
     assert(last_schema == schema);
 
     static const std::unique_ptr<valijson::Schema> retval = [&]() {
-        auto vs = std::make_unique<valijson::Schema>();
+        auto vs = std::make_unique<valijson::Schema>(); // (THIS_AUTO_OK)
         valijson::SchemaParser parser;
         valijson::adapters::NlohmannJsonAdapter schema_doc(*schema);
         parser.populateSchema(schema_doc, *vs);
@@ -107,7 +105,8 @@ bool Validation::validate(json const &parsed_input)
     static constexpr std::string_view otherError =
         "Object contains a property that could not be validated using 'properties' or 'additionalProperties' constraints";
 
-    valijson::Validator validator;
+    // valijson::Validator = valijson::ValidatorT<DefaultRegexEngine>, which uses std::regex, and we want RE2 because std::regex is horribly slow
+    valijson::ValidatorT<RE2RegexpEngine> validator;
     valijson::adapters::NlohmannJsonAdapter doc(parsed_input);
     valijson::ValidationResults results;
     if (!validator.validate(validation_schema(schema), doc, &results)) {
@@ -117,8 +116,9 @@ bool Validation::validate(json const &parsed_input)
             if (error.context.size() >= max_context) {
                 max_context = error.context.size();
                 std::string context;
-                for (auto it = error.context.begin(); it != error.context.end(); it++)
+                for (auto it = error.context.begin(); it != error.context.end(); it++) {
                     context += *it;
+                }
 
                 errors_.emplace_back(context + " - " + error.description);
                 if (max_context == 2) {

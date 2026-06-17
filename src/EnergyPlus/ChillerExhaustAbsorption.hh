@@ -1,7 +1,7 @@
-// EnergyPlus, Copyright (c) 1996-2023, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
-// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other
+// National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
 // contributors. All rights reserved.
 //
 // NOTICE: This Software was developed under funding from the U.S. Department of Energy and the
@@ -64,6 +64,10 @@ namespace EnergyPlus {
 // Forward declarations
 struct EnergyPlusData;
 
+namespace Curve {
+    struct Curve;
+}
+
 namespace ChillerExhaustAbsorption {
 
     struct ExhaustAbsorberSpecs : PlantComponent
@@ -105,20 +109,20 @@ namespace ChillerExhaustAbsorption {
         Real64 HeatVolFlowRate = 0.0;             // m**3/s - design nominal water volumetric flow rate through the heater side
         bool HeatVolFlowRateWasAutoSized = false; // true if hot water flow rate was autosize on input
         Real64 SizFac = 0.0;                      // sizing factor
-        int CoolCapFTCurve = 0;                   // cooling capacity as a function of temperature curve (chilled water temp,
+        Curve::Curve *CoolCapFTCurve = nullptr;   // cooling capacity as a function of temperature curve (chilled water temp,
         // condenser water temp)
-        int ThermalEnergyCoolFTCurve = 0; // Thermal Energy-Input-to cooling output Ratio Function of Temperature Curve (chilled
+        Curve::Curve *ThermalEnergyCoolFTCurve = nullptr; // Thermal Energy-Input-to cooling output Ratio Function of Temperature Curve (chilled
         // water temp, condenser water temp)
-        int ThermalEnergyCoolFPLRCurve = 0; // Thermal Energy-Input-to cooling output Ratio Function of Part Load Ratio Curve
-        int ElecCoolFTCurve = 0;            // Electric-Input-to cooling output Ratio Function of Temperature Curve
+        Curve::Curve *ThermalEnergyCoolFPLRCurve = nullptr; // Thermal Energy-Input-to cooling output Ratio Function of Part Load Ratio Curve
+        Curve::Curve *ElecCoolFTCurve = nullptr;            // Electric-Input-to cooling output Ratio Function of Temperature Curve
         // (chilled water temp, condenser water temp)
-        int ElecCoolFPLRCurve = 0;           // Electric-Input-to cooling output Ratio Function of Part Load Ratio Curve
-        int HeatCapFCoolCurve = 0;           // Heating Capacity Function of Cooling Capacity Curve
-        int ThermalEnergyHeatFHPLRCurve = 0; // Thermal Energy Input to heat output ratio during heating only function
-        bool isEnterCondensTemp = false;     // if using entering conderser water temperature is TRUE, exiting is FALSE
-        bool isWaterCooled = false;          // if water cooled it is TRUE
-        Real64 CHWLowLimitTemp = 0.0;        // Chilled Water Lower Limit Temperature
-        int ExhaustAirInletNodeNum = 0;      // Node number on Exhaust input from generator
+        Curve::Curve *ElecCoolFPLRCurve = nullptr;           // Electric-Input-to cooling output Ratio Function of Part Load Ratio Curve
+        Curve::Curve *HeatCapFCoolCurve = nullptr;           // Heating Capacity Function of Cooling Capacity Curve
+        Curve::Curve *ThermalEnergyHeatFHPLRCurve = nullptr; // Thermal Energy Input to heat output ratio during heating only function
+        bool isEnterCondensTemp = false;                     // if using entering conderser water temperature is TRUE, exiting is FALSE
+        bool isWaterCooled = false;                          // if water cooled it is TRUE
+        Real64 CHWLowLimitTemp = 0.0;                        // Chilled Water Lower Limit Temperature
+        int ExhaustAirInletNodeNum = 0;                      // Node number on Exhaust input from generator
         // Calculated design values
         Real64 DesCondMassFlowRate = 0.0; // design nominal mass flow rate of water through the condenser [kg/s]
         Real64 DesHeatMassFlowRate = 0.0; // design nominal mass flow rate of water through the hot water side [kg/s]
@@ -180,7 +184,7 @@ namespace ChillerExhaustAbsorption {
         Real64 ExhHeatRecPotentialHeat = 0.0;  // reporting: Heat Recovery Potential during heating
         Real64 ExhHeatRecPotentialCool = 0.0;  // reporting: Heat Recovery Potential during cooling
 
-        static PlantComponent *factory(EnergyPlusData &state, std::string const &objectName);
+        static ExhaustAbsorberSpecs *factory(EnergyPlusData &state, std::string const &objectName);
 
         void
         simulate(EnergyPlusData &state, const PlantLocation &calledFromLocation, bool FirstHVACIteration, Real64 &CurLoad, bool RunFlag) override;
@@ -222,9 +226,17 @@ struct ChillerExhaustAbsorptionData : BaseGlobalStruct
     bool Sim_GetInput = true;
     Array1D<ChillerExhaustAbsorption::ExhaustAbsorberSpecs> ExhaustAbsorber;
 
+    void init_constant_state([[maybe_unused]] EnergyPlusData &state) override
+    {
+    }
+
+    void init_state([[maybe_unused]] EnergyPlusData &state) override
+    {
+    }
+
     void clear_state() override
     {
-        *this = ChillerExhaustAbsorptionData();
+        new (this) ChillerExhaustAbsorptionData();
     }
 };
 

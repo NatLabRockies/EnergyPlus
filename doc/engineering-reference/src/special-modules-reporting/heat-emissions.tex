@@ -2,9 +2,9 @@
 
 Heat emissions from buildings are a crucial component influencing climate change and urban microclimate, e.g., urban heat island effect. The heat emissions from a building include heat releases from three levels of building systems: building envelope, zone/space, and HVAC systems. Quantifying heat emissions from buildings and its spatiotemporal distribution have significant implications on urban environment and climate studies. Knowing how much heat is released into the atmosphere can help quantify the magnitude of its impact on urban microclimate, e.g., urban heat island effect and climate change. Spatial and temporal distribution of heat emissions can serve to locate hot spots in space and time, therefore useful for prioritizing recourse to mitigate heat emissions from buildings.
 
-This routine calculates heat emissions from buildings and the scope is restricted to report the buildings’ heat directly discharged to the ambient air. As shown in the figure, the emissions include heat releases from three levels of building components: (1) building envelope - exterior surface convection and radiative heat transfer to the ambient air, (2) zone - exhaust air or exfiltration to ambient, (3) HVAC system - relief/exhaust air from AHUs, and (4) HVAC system - heat rejected by air-cooled condensers or central plants, including cooling towers of water-cooled chillers, gas-fired boilers, furnaces and water heaters. It should be noted that any under-ground zone or envelope is excluded, since heat from those spaces is rejected to ground instead of to ambient air. 
+This routine calculates heat emissions from buildings and the scope is restricted to report the buildings’ heat directly discharged to the ambient air. As shown in the figure, the emissions include heat releases from three levels of building components: (1) building envelope - exterior surface convection and radiative heat transfer to the ambient air, (2) zone - exhaust air or exfiltration to ambient, (3) HVAC system - relief/exhaust air from AHUs, and (4) HVAC system - heat rejected by air-cooled condensers or central plants, including cooling towers of water-cooled chillers, gas-fired boilers, furnaces and water heaters. It should be noted that any under-ground zone or envelope is excluded, since heat from those spaces is rejected to ground instead of to ambient air.
 
-\begin{figure}[hbtp] 
+\begin{figure}[hbtp]
 \centering
 \includegraphics[width=0.9\textwidth, height=0.9\textheight, keepaspectratio=true]{media/heatemission.png}
 \caption{Building released heat compositions \protect \label{fig:building-released-heat-compositions}}
@@ -83,12 +83,12 @@ Detailed calculation of HVAC rejected heat varies with different HVAC object gro
 % table 94
 \begin{longtable}[c]{p{1.0in}p{2.0in}p{3in}}
 \caption{Heat Rejection Calculation for Different HVAC Component Types \label{table:emission-from-hvac-components}} \tabularnewline
-\toprule 
+\toprule
 Object Group & Component & Calculation Methods \tabularnewline
 \midrule
 \endfirsthead
 \caption{Heat Rejection Calculation for Different HVAC Component Types} \tabularnewline
-\toprule 
+\toprule
 Object Group & Component & Calculation Methods \tabularnewline
 \midrule
 \endhead
@@ -121,7 +121,7 @@ Zone HVAC Forced Air Units          & Window air conditioner / Packaged terminal
 There are several types of components for which the heat rejection is not clearly defined. The following are not included in the heat emissions report:
 
 \begin{itemize}
-  \item User defined systems have a variety of possible sources of heat emission including outdoor air relief for exhaust or a condenser outlet for heat rejection. These parts can be counted by tracing the condensing unit linked to the air connection inlet and outlet (for user defined zone HVAC and plant component). 
+  \item User defined systems have a variety of possible sources of heat emission including outdoor air relief for exhaust or a condenser outlet for heat rejection. These parts can be counted by tracing the condensing unit linked to the air connection inlet and outlet (for user defined zone HVAC and plant component).
   \item For user defined coil, this part depends on how the coil is designed and equipped. We do not count this in report.
   \item ThermalStorage:Ice:* do not indicate where losses go, so we neglect this.
 \end{itemize}

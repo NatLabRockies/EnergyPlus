@@ -126,7 +126,7 @@
 ! Report Variables:            All available in RDD (442 requested, monthly and annual results)
 !
 
-  Version,23.1;
+  Version,26.2;
 
   Building,
     Small Office 2 Story 4 zone 550 m2,  !- Name
@@ -1963,7 +1963,7 @@
     Office Lighting and Receptacles,  !- Schedule Name
     LightingLevel,           !- Design Level Calculation Method
     3025,                    !- Lighting Level {W}
-    ,                        !- Watts per Zone Floor Area {W/m2}
+    ,                        !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0,                       !- Return Air Fraction
     0.35,                    !- Fraction Radiant
@@ -1977,7 +1977,7 @@
     Office Lighting and Receptacles,  !- Schedule Name
     LightingLevel,           !- Design Level Calculation Method
     3025,                    !- Lighting Level {W}
-    ,                        !- Watts per Zone Floor Area {W/m2}
+    ,                        !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0,                       !- Return Air Fraction
     0.35,                    !- Fraction Radiant
@@ -1991,7 +1991,7 @@
     Office Lighting and Receptacles,  !- Schedule Name
     LightingLevel,           !- Design Level Calculation Method
     3025,                    !- Lighting Level {W}
-    ,                        !- Watts per Zone Floor Area {W/m2}
+    ,                        !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0,                       !- Return Air Fraction
     0.35,                    !- Fraction Radiant
@@ -2005,7 +2005,7 @@
     Office Lighting and Receptacles,  !- Schedule Name
     LightingLevel,           !- Design Level Calculation Method
     3025,                    !- Lighting Level {W}
-    ,                        !- Watts per Zone Floor Area {W/m2}
+    ,                        !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0,                       !- Return Air Fraction
     0.35,                    !- Fraction Radiant
@@ -2019,7 +2019,7 @@
     Office Lighting and Receptacles,  !- Schedule Name
     EquipmentLevel,          !- Design Level Calculation Method
     687.5,                   !- Design Level {W}
-    ,                        !- Watts per Zone Floor Area {W/m2}
+    ,                        !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0,                       !- Fraction Latent
     0.7,                     !- Fraction Radiant
@@ -2031,7 +2031,7 @@
     Office Lighting and Receptacles,  !- Schedule Name
     EquipmentLevel,          !- Design Level Calculation Method
     687.5,                   !- Design Level {W}
-    ,                        !- Watts per Zone Floor Area {W/m2}
+    ,                        !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0,                       !- Fraction Latent
     0.7,                     !- Fraction Radiant
@@ -2043,7 +2043,7 @@
     Office Lighting and Receptacles,  !- Schedule Name
     EquipmentLevel,          !- Design Level Calculation Method
     687.5,                   !- Design Level {W}
-    ,                        !- Watts per Zone Floor Area {W/m2}
+    ,                        !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0,                       !- Fraction Latent
     0.7,                     !- Fraction Radiant
@@ -2055,7 +2055,7 @@
     Office Lighting and Receptacles,  !- Schedule Name
     EquipmentLevel,          !- Design Level Calculation Method
     687.5,                   !- Design Level {W}
-    ,                        !- Watts per Zone Floor Area {W/m2}
+    ,                        !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0,                       !- Fraction Latent
     0.7,                     !- Fraction Radiant
@@ -2067,8 +2067,8 @@
     Infiltration Schedule,   !- Schedule Name
     flow/zone,               !- Design Flow Rate Calculation Method
     0.035,                   !- Design Flow Rate {m3/s}
-    ,                        !- Flow per Zone Floor Area {m3/s-m2}
-    ,                        !- Flow per Exterior Surface Area {m3/s-m2}
+    ,                        !- Flow Rate per Floor Area {m3/s-m2}
+    ,                        !- Flow Rate per Exterior Surface Area {m3/s-m2}
     ,                        !- Air Changes per Hour {1/hr}
     1,                       !- Constant Term Coefficient
     0.025,                   !- Temperature Term Coefficient
@@ -2081,8 +2081,8 @@
     Infiltration Schedule,   !- Schedule Name
     flow/zone,               !- Design Flow Rate Calculation Method
     0.035,                   !- Design Flow Rate {m3/s}
-    ,                        !- Flow per Zone Floor Area {m3/s-m2}
-    ,                        !- Flow per Exterior Surface Area {m3/s-m2}
+    ,                        !- Flow Rate per Floor Area {m3/s-m2}
+    ,                        !- Flow Rate per Exterior Surface Area {m3/s-m2}
     ,                        !- Air Changes per Hour {1/hr}
     1,                       !- Constant Term Coefficient
     0.025,                   !- Temperature Term Coefficient
@@ -2095,8 +2095,8 @@
     Infiltration Schedule,   !- Schedule Name
     flow/zone,               !- Design Flow Rate Calculation Method
     0.035,                   !- Design Flow Rate {m3/s}
-    ,                        !- Flow per Zone Floor Area {m3/s-m2}
-    ,                        !- Flow per Exterior Surface Area {m3/s-m2}
+    ,                        !- Flow Rate per Floor Area {m3/s-m2}
+    ,                        !- Flow Rate per Exterior Surface Area {m3/s-m2}
     ,                        !- Air Changes per Hour {1/hr}
     1,                       !- Constant Term Coefficient
     0.025,                   !- Temperature Term Coefficient
@@ -2109,8 +2109,8 @@
     Infiltration Schedule,   !- Schedule Name
     flow/zone,               !- Design Flow Rate Calculation Method
     0.035,                   !- Design Flow Rate {m3/s}
-    ,                        !- Flow per Zone Floor Area {m3/s-m2}
-    ,                        !- Flow per Exterior Surface Area {m3/s-m2}
+    ,                        !- Flow Rate per Floor Area {m3/s-m2}
+    ,                        !- Flow Rate per Exterior Surface Area {m3/s-m2}
     ,                        !- Air Changes per Hour {1/hr}
     1,                       !- Constant Term Coefficient
     0.025,                   !- Temperature Term Coefficient
@@ -2151,7 +2151,14 @@
     No,                      !- Account for Dedicated Outdoor Air System
     NeutralSupplyAir,        !- Dedicated Outdoor Air System Control Strategy
     autosize,                !- Dedicated Outdoor Air Low Setpoint Temperature for Design {C}
-    autosize;                !- Dedicated Outdoor Air High Setpoint Temperature for Design {C}
+    autosize,                !- Dedicated Outdoor Air High Setpoint Temperature for Design {C}
+    ,                        !- Zone Load Sizing Method
+    ,                        !- Zone Latent Cooling Design Supply Air Humidity Ratio Input Method
+    ,                        !- Zone Dehumidification Design Supply Air Humidity Ratio {kgWater/kgDryAir}
+    ,                        !- Zone Cooling Design Supply Air Humidity Ratio Difference {kgWater/kgDryAir}
+    ,                        !- Zone Latent Heating Design Supply Air Humidity Ratio Input Method
+    ,                        !- Zone Humidification Design Supply Air Humidity Ratio {kgWater/kgDryAir}
+    ;                        !- Zone Humidification Design Supply Air Humidity Ratio Difference {kgWater/kgDryAir}
 
   DesignSpecification:OutdoorAir,
     SZ DSOA SouthZone_1stFloor,  !- Name
@@ -2187,7 +2194,14 @@
     No,                      !- Account for Dedicated Outdoor Air System
     NeutralSupplyAir,        !- Dedicated Outdoor Air System Control Strategy
     autosize,                !- Dedicated Outdoor Air Low Setpoint Temperature for Design {C}
-    autosize;                !- Dedicated Outdoor Air High Setpoint Temperature for Design {C}
+    autosize,                !- Dedicated Outdoor Air High Setpoint Temperature for Design {C}
+    ,                        !- Zone Load Sizing Method
+    ,                        !- Zone Latent Cooling Design Supply Air Humidity Ratio Input Method
+    ,                        !- Zone Dehumidification Design Supply Air Humidity Ratio {kgWater/kgDryAir}
+    ,                        !- Zone Cooling Design Supply Air Humidity Ratio Difference {kgWater/kgDryAir}
+    ,                        !- Zone Latent Heating Design Supply Air Humidity Ratio Input Method
+    ,                        !- Zone Humidification Design Supply Air Humidity Ratio {kgWater/kgDryAir}
+    ;                        !- Zone Humidification Design Supply Air Humidity Ratio Difference {kgWater/kgDryAir}
 
   DesignSpecification:OutdoorAir,
     SZ DSOA NorthZone_1stFloor,  !- Name
@@ -2223,7 +2237,14 @@
     No,                      !- Account for Dedicated Outdoor Air System
     NeutralSupplyAir,        !- Dedicated Outdoor Air System Control Strategy
     autosize,                !- Dedicated Outdoor Air Low Setpoint Temperature for Design {C}
-    autosize;                !- Dedicated Outdoor Air High Setpoint Temperature for Design {C}
+    autosize,                !- Dedicated Outdoor Air High Setpoint Temperature for Design {C}
+    ,                        !- Zone Load Sizing Method
+    ,                        !- Zone Latent Cooling Design Supply Air Humidity Ratio Input Method
+    ,                        !- Zone Dehumidification Design Supply Air Humidity Ratio {kgWater/kgDryAir}
+    ,                        !- Zone Cooling Design Supply Air Humidity Ratio Difference {kgWater/kgDryAir}
+    ,                        !- Zone Latent Heating Design Supply Air Humidity Ratio Input Method
+    ,                        !- Zone Humidification Design Supply Air Humidity Ratio {kgWater/kgDryAir}
+    ;                        !- Zone Humidification Design Supply Air Humidity Ratio Difference {kgWater/kgDryAir}
 
   DesignSpecification:OutdoorAir,
     SZ DSOA SouthZone_2ndFloor,  !- Name
@@ -2259,7 +2280,14 @@
     No,                      !- Account for Dedicated Outdoor Air System
     NeutralSupplyAir,        !- Dedicated Outdoor Air System Control Strategy
     autosize,                !- Dedicated Outdoor Air Low Setpoint Temperature for Design {C}
-    autosize;                !- Dedicated Outdoor Air High Setpoint Temperature for Design {C}
+    autosize,                !- Dedicated Outdoor Air High Setpoint Temperature for Design {C}
+    ,                        !- Zone Load Sizing Method
+    ,                        !- Zone Latent Cooling Design Supply Air Humidity Ratio Input Method
+    ,                        !- Zone Dehumidification Design Supply Air Humidity Ratio {kgWater/kgDryAir}
+    ,                        !- Zone Cooling Design Supply Air Humidity Ratio Difference {kgWater/kgDryAir}
+    ,                        !- Zone Latent Heating Design Supply Air Humidity Ratio Input Method
+    ,                        !- Zone Humidification Design Supply Air Humidity Ratio {kgWater/kgDryAir}
+    ;                        !- Zone Humidification Design Supply Air Humidity Ratio Difference {kgWater/kgDryAir}
 
   DesignSpecification:OutdoorAir,
     SZ DSOA NorthZone_2ndFloor,  !- Name
@@ -3104,22 +3132,22 @@
   ZoneControl:Humidistat,
     ReheatHumidistat_SouthZone_1stFloor,  !- Name
     SouthZone_1stFloor,      !- Zone Name
-    Humidity Setpoint Schedule;  !- Humidifying Relative Humidity Setpoint Schedule Name
+    Humidity Setpoint Schedule;  !- Humidifying Setpoint Schedule Name
 
   ZoneControl:Humidistat,
     ReheatHumidistat_NorthZone_1stFloor,  !- Name
     NorthZone_1stFloor,      !- Zone Name
-    Humidity Setpoint Schedule;  !- Humidifying Relative Humidity Setpoint Schedule Name
+    Humidity Setpoint Schedule;  !- Humidifying Setpoint Schedule Name
 
   ZoneControl:Humidistat,
     ReheatHumidistat_SouthZone_2ndFloor,  !- Name
     SouthZone_2ndFloor,      !- Zone Name
-    Humidity Setpoint Schedule;  !- Humidifying Relative Humidity Setpoint Schedule Name
+    Humidity Setpoint Schedule;  !- Humidifying Setpoint Schedule Name
 
   ZoneControl:Humidistat,
     ReheatHumidistat_NorthZone_2ndFloor,  !- Name
     NorthZone_2ndFloor,      !- Zone Name
-    Humidity Setpoint Schedule;  !- Humidifying Relative Humidity Setpoint Schedule Name
+    Humidity Setpoint Schedule;  !- Humidifying Setpoint Schedule Name
 
   ZoneControl:Thermostat,
     Thermostat_SouthZone_1stFloor,  !- Name
@@ -3265,15 +3293,18 @@
     autosize,                !- Gross Rated Sensible Heat Ratio
     3.0,                     !- Gross Rated Cooling COP {W/W}
     autosize,                !- Rated Air Flow Rate {m3/s}
-    ,                        !- Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
-    934.4,                   !- 2023 Rated Evaporator Fan Power Per Volume Flow {W/(m3/s)}
+    ,                        !- 2017 Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
+    934.4,                   !- 2023 Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
     InletNode_DXCoolingCoil_SouthZone_1stFloor,  !- Air Inlet Node Name
     InletNode_HeatingCoil_SouthZone_1stFloor,  !- Air Outlet Node Name
     DX-Cap-FT-Curve-Default, !- Total Cooling Capacity Function of Temperature Curve Name
     DX-Cap-FF-Curve-Default, !- Total Cooling Capacity Function of Flow Fraction Curve Name
     DX-EIR-FT-Curve-Default, !- Energy Input Ratio Function of Temperature Curve Name
     DX-EIR-FF-Curve-Default, !- Energy Input Ratio Function of Flow Fraction Curve Name
-    DX-PLF-Curve-Default;    !- Part Load Fraction Correlation Curve Name
+    DX-PLF-Curve-Default,    !- Part Load Fraction Correlation Curve Name
+    ,                        !- Minimum Outdoor Dry-Bulb Temperature for Compressor Operation {C}
+    ,                        !- Nominal Time for Condensate Removal to Begin {s}
+    ;                        !- Ratio of Initial Moisture Evaporation Rate and Steady State Latent Capacity {dimensionless}
 
   Coil:Cooling:DX:SingleSpeed,
     DXCoolingCoil_NorthZone_1stFloor,  !- Name
@@ -3282,15 +3313,18 @@
     autosize,                !- Gross Rated Sensible Heat Ratio
     3.0,                     !- Gross Rated Cooling COP {W/W}
     autosize,                !- Rated Air Flow Rate {m3/s}
-    ,                        !- Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
-    934.4,                   !- 2023 Rated Evaporator Fan Power Per Volume Flow {W/(m3/s)}
+    ,                        !- 2017 Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
+    934.4,                   !- 2023 Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
     InletNode_DXCoolingCoil_NorthZone_1stFloor,  !- Air Inlet Node Name
     InletNode_HeatingCoil_NorthZone_1stFloor,  !- Air Outlet Node Name
     DX-Cap-FT-Curve-Default, !- Total Cooling Capacity Function of Temperature Curve Name
     DX-Cap-FF-Curve-Default, !- Total Cooling Capacity Function of Flow Fraction Curve Name
     DX-EIR-FT-Curve-Default, !- Energy Input Ratio Function of Temperature Curve Name
     DX-EIR-FF-Curve-Default, !- Energy Input Ratio Function of Flow Fraction Curve Name
-    DX-PLF-Curve-Default;    !- Part Load Fraction Correlation Curve Name
+    DX-PLF-Curve-Default,    !- Part Load Fraction Correlation Curve Name
+    ,                        !- Minimum Outdoor Dry-Bulb Temperature for Compressor Operation {C}
+    ,                        !- Nominal Time for Condensate Removal to Begin {s}
+    ;                        !- Ratio of Initial Moisture Evaporation Rate and Steady State Latent Capacity {dimensionless}
 
   Coil:Cooling:DX:SingleSpeed,
     DXCoolingCoil_SouthZone_2ndFloor,  !- Name
@@ -3299,15 +3333,18 @@
     autosize,                !- Gross Rated Sensible Heat Ratio
     3.0,                     !- Gross Rated Cooling COP {W/W}
     autosize,                !- Rated Air Flow Rate {m3/s}
-    ,                        !- Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
-    934.4,                   !- 2023 Rated Evaporator Fan Power Per Volume Flow {W/(m3/s)}
+    ,                        !- 2017 Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
+    934.4,                   !- 2023 Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
     InletNode_DXCoolingCoil_SouthZone_2ndFloor,  !- Air Inlet Node Name
     InletNode_HeatingCoil_SouthZone_2ndFloor,  !- Air Outlet Node Name
     DX-Cap-FT-Curve-Default, !- Total Cooling Capacity Function of Temperature Curve Name
     DX-Cap-FF-Curve-Default, !- Total Cooling Capacity Function of Flow Fraction Curve Name
     DX-EIR-FT-Curve-Default, !- Energy Input Ratio Function of Temperature Curve Name
     DX-EIR-FF-Curve-Default, !- Energy Input Ratio Function of Flow Fraction Curve Name
-    DX-PLF-Curve-Default;    !- Part Load Fraction Correlation Curve Name
+    DX-PLF-Curve-Default,    !- Part Load Fraction Correlation Curve Name
+    ,                        !- Minimum Outdoor Dry-Bulb Temperature for Compressor Operation {C}
+    ,                        !- Nominal Time for Condensate Removal to Begin {s}
+    ;                        !- Ratio of Initial Moisture Evaporation Rate and Steady State Latent Capacity {dimensionless}
 
   Coil:Cooling:DX:SingleSpeed,
     DXCoolingCoil_NorthZone_2ndFloor,  !- Name
@@ -3316,15 +3353,18 @@
     autosize,                !- Gross Rated Sensible Heat Ratio
     3.0,                     !- Gross Rated Cooling COP {W/W}
     autosize,                !- Rated Air Flow Rate {m3/s}
-    ,                        !- Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
-    934.4,                   !- 2023 Rated Evaporator Fan Power Per Volume Flow {W/(m3/s)}
+    ,                        !- 2017 Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
+    934.4,                   !- 2023 Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
     InletNode_DXCoolingCoil_NorthZone_2ndFloor,  !- Air Inlet Node Name
     InletNode_HeatingCoil_NorthZone_2ndFloor,  !- Air Outlet Node Name
     DX-Cap-FT-Curve-Default, !- Total Cooling Capacity Function of Temperature Curve Name
     DX-Cap-FF-Curve-Default, !- Total Cooling Capacity Function of Flow Fraction Curve Name
     DX-EIR-FT-Curve-Default, !- Energy Input Ratio Function of Temperature Curve Name
     DX-EIR-FF-Curve-Default, !- Energy Input Ratio Function of Flow Fraction Curve Name
-    DX-PLF-Curve-Default;    !- Part Load Fraction Correlation Curve Name
+    DX-PLF-Curve-Default,    !- Part Load Fraction Correlation Curve Name
+    ,                        !- Minimum Outdoor Dry-Bulb Temperature for Compressor Operation {C}
+    ,                        !- Nominal Time for Condensate Removal to Begin {s}
+    ;                        !- Ratio of Initial Moisture Evaporation Rate and Steady State Latent Capacity {dimensionless}
 
   Fan:ConstantVolume,
     SupplyFan_SouthZone_1stFloor,  !- Name
@@ -3570,13 +3610,13 @@
 
   Output:Variable,*,Surface Window Transmitted Solar Radiation Rate,annual;
 
-  Output:Variable,*,Zone Exterior Windows Total Transmitted Beam Solar Radiation Rate,monthly;
+  Output:Variable,*,Enclosure Exterior Windows Total Transmitted Beam Solar Radiation Rate,monthly;
 
-  Output:Variable,*,Zone Exterior Windows Total Transmitted Beam Solar Radiation Rate,annual;
+  Output:Variable,*,Enclosure Exterior Windows Total Transmitted Beam Solar Radiation Rate,annual;
 
-  Output:Variable,*,Zone Exterior Windows Total Transmitted Diffuse Solar Radiation Rate,monthly;
+  Output:Variable,*,Enclosure Exterior Windows Total Transmitted Diffuse Solar Radiation Rate,monthly;
 
-  Output:Variable,*,Zone Exterior Windows Total Transmitted Diffuse Solar Radiation Rate,annual;
+  Output:Variable,*,Enclosure Exterior Windows Total Transmitted Diffuse Solar Radiation Rate,annual;
 
   Output:Variable,*,Surface Outside Face Incident Sky Diffuse Ground Reflected Solar Radiation Rate per Area,monthly;
 
@@ -3606,9 +3646,9 @@
 
   Output:Variable,*,Surface Window Transmitted Diffuse Solar Radiation Rate,annual;
 
-  Output:Variable,*,Zone Windows Total Transmitted Solar Radiation Rate,monthly;
+  Output:Variable,*,Enclosure Windows Total Transmitted Solar Radiation Rate,monthly;
 
-  Output:Variable,*,Zone Windows Total Transmitted Solar Radiation Rate,annual;
+  Output:Variable,*,Enclosure Windows Total Transmitted Solar Radiation Rate,annual;
 
   Output:Variable,*,Zone Windows Total Heat Gain Rate,monthly;
 
@@ -3678,13 +3718,13 @@
 
   Output:Variable,*,Surface Outside Face Convection Heat Transfer Coefficient,annual;
 
-  Output:Variable,*,Zone Opaque Surface Inside Faces Total Conduction Heat Gain Rate,monthly;
+  Output:Variable,*,Zone Opaque Surface Inside Faces Conduction Heat Gain Rate,monthly;
 
-  Output:Variable,*,Zone Opaque Surface Inside Faces Total Conduction Heat Gain Rate,annual;
+  Output:Variable,*,Zone Opaque Surface Inside Faces Conduction Heat Gain Rate,annual;
 
-  Output:Variable,*,Zone Opaque Surface Inside Faces Total Conduction Heat Loss Rate,monthly;
+  Output:Variable,*,Zone Opaque Surface Inside Faces Conduction Heat Loss Rate,monthly;
 
-  Output:Variable,*,Zone Opaque Surface Inside Faces Total Conduction Heat Loss Rate,annual;
+  Output:Variable,*,Zone Opaque Surface Inside Faces Conduction Heat Loss Rate,annual;
 
   Output:Variable,*,Surface Inside Face Beam Solar Radiation Heat Gain Rate,monthly;
 
@@ -3730,9 +3770,9 @@
 
   Output:Variable,*,Zone People Total Heating Energy,annual;
 
-  Output:Variable,*,Zone Infiltration Air Change Rate,monthly;
+  Output:Variable,*,Zone Infiltration Current Density Air Change Rate,monthly;
 
-  Output:Variable,*,Zone Infiltration Air Change Rate,annual;
+  Output:Variable,*,Zone Infiltration Current Density Air Change Rate,annual;
 
   Output:Variable,*,Zone Infiltration Mass,monthly;
 
@@ -4595,9 +4635,9 @@
     annual;                  !- Reporting Frequency
 
   EnvironmentalImpactFactors,
-    0.3,                     !- District Heating Efficiency
+    0.3,                     !- District Heating Water Efficiency
     3.0,                     !- District Cooling COP {W/W}
-    0.25,                    !- Steam Conversion Efficiency
+    0.25,                    !- District Heating Steam Conversion Efficiency
     80.7272,                 !- Total Carbon Equivalent Emission Factor From N2O {kg/kg}
     6.2727,                  !- Total Carbon Equivalent Emission Factor From CH4 {kg/kg}
     0.2727;                  !- Total Carbon Equivalent Emission Factor From CO2 {kg/kg}
@@ -5055,11 +5095,11 @@
     SumOrAverage,            !- Aggregation Type for Variable or Meter 1
     Zone Windows Total Heat Loss Rate,  !- Variable or Meter 2 Name
     SumOrAverage,            !- Aggregation Type for Variable or Meter 2
-    Zone Windows Total Transmitted Solar Radiation Rate,  !- Variable or Meter 3 Name
+    Enclosure Windows Total Transmitted Solar Radiation Rate,  !- Variable or Meter 3 Name
     SumOrAverage,            !- Aggregation Type for Variable or Meter 3
-    Zone Exterior Windows Total Transmitted Beam Solar Radiation Rate,  !- Variable or Meter 4 Name
+    Enclosure Exterior Windows Total Transmitted Beam Solar Radiation Rate,  !- Variable or Meter 4 Name
     SumOrAverage,            !- Aggregation Type for Variable or Meter 4
-    Zone Exterior Windows Total Transmitted Diffuse Solar Radiation Rate,  !- Variable or Meter 5 Name
+    Enclosure Exterior Windows Total Transmitted Diffuse Solar Radiation Rate,  !- Variable or Meter 5 Name
     SumOrAverage;            !- Aggregation Type for Variable or Meter 5
 
   Output:Table:Monthly,
@@ -5069,15 +5109,15 @@
     SumOrAverage,            !- Aggregation Type for Variable or Meter 1
     Zone Windows Total Heat Loss Energy,  !- Variable or Meter 2 Name
     SumOrAverage,            !- Aggregation Type for Variable or Meter 2
-    Zone Windows Total Transmitted Solar Radiation Energy,  !- Variable or Meter 3 Name
+    Enclosure Windows Total Transmitted Solar Radiation Energy,  !- Variable or Meter 3 Name
     SumOrAverage,            !- Aggregation Type for Variable or Meter 3
-    Zone Exterior Windows Total Transmitted Beam Solar Radiation Energy,  !- Variable or Meter 4 Name
+    Enclosure Exterior Windows Total Transmitted Beam Solar Radiation Energy,  !- Variable or Meter 4 Name
     SumOrAverage,            !- Aggregation Type for Variable or Meter 4
-    Zone Exterior Windows Total Transmitted Diffuse Solar Radiation Energy,  !- Variable or Meter 5 Name
+    Enclosure Exterior Windows Total Transmitted Diffuse Solar Radiation Energy,  !- Variable or Meter 5 Name
     SumOrAverage,            !- Aggregation Type for Variable or Meter 5
-    Zone Interior Windows Total Transmitted Diffuse Solar Radiation Energy,  !- Variable or Meter 6 Name
+    Enclosure Interior Windows Total Transmitted Diffuse Solar Radiation Energy,  !- Variable or Meter 6 Name
     SumOrAverage,            !- Aggregation Type for Variable or Meter 6
-    Zone Interior Windows Total Transmitted Beam Solar Radiation Energy,  !- Variable or Meter 7 Name
+    Enclosure Interior Windows Total Transmitted Beam Solar Radiation Energy,  !- Variable or Meter 7 Name
     SumOrAverage;            !- Aggregation Type for Variable or Meter 7
 
   Output:Table:Monthly,

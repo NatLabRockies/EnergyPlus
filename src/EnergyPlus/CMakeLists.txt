@@ -1,3 +1,4 @@
+
 if(WIN32)
   configure_file(energyplus.rc.in "${CMAKE_CURRENT_BINARY_DIR}/energyplus.rc")
   configure_file(energyplusapi.rc.in "${CMAKE_CURRENT_BINARY_DIR}/energyplusapi.rc")
@@ -14,10 +15,12 @@ set(PYTHON_API_VERSION_MINOR 2)
 set(BUILD_PLATFORM_STRING "${SYSTEM_NICKNAME}_${TARGET_ARCH}")
 configure_file(DataStringGlobals.in.cc "${CMAKE_CURRENT_BINARY_DIR}/DataStringGlobals.cc")
 configure_file(ConfiguredFunctions.in.cc "${CMAKE_CURRENT_BINARY_DIR}/ConfiguredFunctions.cc")
-file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/EmbeddedEpJSONSchema.cc" "Will be filled in later by GenerateEmbeddedEpJSONSchema")
 
 if(LINK_WITH_PYTHON)
   add_compile_definitions(LINK_WITH_PYTHON)
+  if(PYTHON_CLI)
+    add_compile_definitions(PYTHON_CLI)
+  endif()
 endif()
 
 if(USE_PSYCHROMETRICS_CACHING)
@@ -132,6 +135,8 @@ set(SRC
     Coils/CoilCoolingDXCurveFitOperatingMode.hh
     Coils/CoilCoolingDXCurveFitPerformance.cc
     Coils/CoilCoolingDXCurveFitPerformance.hh
+    Coils/CoilCoolingDXAshrae205Performance.cc
+    Coils/CoilCoolingDXAshrae205Performance.hh
     Coils/CoilCoolingDXCurveFitSpeed.cc
     Coils/CoilCoolingDXCurveFitSpeed.hh
     CondenserLoopTowers.cc
@@ -179,7 +184,6 @@ set(SRC
     DataEnvironment.hh
     DataErrorTracking.hh
     DataGenerators.hh
-    DataGlobalConstants.cc
     DataGlobalConstants.hh
     DataGlobals.hh
     DataHVACControllers.hh
@@ -217,7 +221,6 @@ set(SRC
     DataSystemVariables.cc
     DataSystemVariables.hh
     DataTimings.hh
-    DataUCSDSharedData.hh
     DataVectorTypes.hh
     DataViewFactorInformation.hh
     DataWater.hh
@@ -241,6 +244,8 @@ set(SRC
     DisplayRoutines.hh
     DualDuct.cc
     DualDuct.hh
+    DuctLoss.cc
+    DuctLoss.hh
     EMSManager.cc
     EMSManager.hh
     EPVector.hh
@@ -257,12 +262,16 @@ set(SRC
     ElectricPowerServiceManager.cc
     ElectricPowerServiceManager.hh
     EnergyPlus.hh
+    EnergyPlusLogger.cc
+    EnergyPlusLogger.hh
     EvaporativeCoolers.cc
     EvaporativeCoolers.hh
     EvaporativeFluidCoolers.cc
     EvaporativeFluidCoolers.hh
     ExhaustAirSystemManager.cc
     ExhaustAirSystemManager.hh
+    ExtendedHeatIndex.cc
+    ExtendedHeatIndex.hh
     ExteriorEnergyUse.cc
     ExteriorEnergyUse.hh
     ExternalInterface.cc
@@ -294,8 +303,21 @@ set(SRC
     GeneratorFuelSupply.hh
     GlobalNames.cc
     GlobalNames.hh
-    GroundHeatExchangers.cc
-    GroundHeatExchangers.hh
+    GroundHeatExchangers/Base.cc
+    GroundHeatExchangers/Base.hh
+    GroundHeatExchangers/BoreholeArray.cc
+    GroundHeatExchangers/BoreholeArray.hh
+    GroundHeatExchangers/BoreholeSingle.cc
+    GroundHeatExchangers/BoreholeSingle.hh
+    GroundHeatExchangers/Properties.cc
+    GroundHeatExchangers/Properties.hh
+    GroundHeatExchangers/ResponseFactors.cc
+    GroundHeatExchangers/ResponseFactors.hh
+    GroundHeatExchangers/Slinky.cc
+    GroundHeatExchangers/Slinky.hh
+    GroundHeatExchangers/State.hh
+    GroundHeatExchangers/Vertical.cc
+    GroundHeatExchangers/Vertical.hh
     GroundTemperatureModeling/BaseGroundTemperatureModel.hh
     GroundTemperatureModeling/FiniteDifferenceGroundTemperatureModel.cc
     GroundTemperatureModeling/FiniteDifferenceGroundTemperatureModel.hh
@@ -321,8 +343,6 @@ set(SRC
     HVACDXHeatPumpSystem.hh
     HVACDuct.cc
     HVACDuct.hh
-    HVACFan.cc
-    HVACFan.hh
     HVACFourPipeBeam.cc
     HVACFourPipeBeam.hh
     HVACHXAssistedCoolingCoil.cc
@@ -386,11 +406,11 @@ set(SRC
     ICEngineElectricGenerator.hh
     IceThermalStorage.cc
     IceThermalStorage.hh
+    IndoorGreen.cc
+    IndoorGreen.hh
     InputProcessing/CsvParser.cc
     InputProcessing/CsvParser.hh
     InputProcessing/DataStorage.hh
-    InputProcessing/EmbeddedEpJSONSchema.hh
-    "${CMAKE_CURRENT_BINARY_DIR}/EmbeddedEpJSONSchema.cc"
     IOFiles.cc
     IOFiles.hh
     InputProcessing/IdfParser.cc
@@ -447,6 +467,8 @@ set(SRC
     PVWatts.hh
     PackagedThermalStorageCoil.cc
     PackagedThermalStorageCoil.hh
+	PCMThermalStorage.cc
+	PCMThermalStorage.hh
     PhaseChangeModeling/HysteresisModel.cc
     PhaseChangeModeling/HysteresisModel.hh
     PhotovoltaicThermalCollectors.cc
@@ -467,6 +489,7 @@ set(SRC
     Plant/Connection.hh
     Plant/DataPlant.hh
     Plant/Enums.hh
+    Plant/EquipAndOperations.cc
     Plant/EquipAndOperations.hh
     Plant/Loop.cc
     Plant/Loop.hh
@@ -475,7 +498,6 @@ set(SRC
     Plant/LoopSidePumpInformation.hh
     Plant/MeterData.hh
     Plant/MixerData.hh
-    Plant/PlantAvailManager.hh
     Plant/PlantConvergencePoint.hh
     Plant/PlantLocation.hh
     Plant/PlantManager.cc
@@ -524,6 +546,8 @@ set(SRC
     Pumps.hh
     PurchasedAirManager.cc
     PurchasedAirManager.hh
+    PythonEngine.cc
+    PythonEngine.hh
     RefrigeratedCase.cc
     RefrigeratedCase.hh
     ReportCoilSelection.cc
@@ -567,8 +591,6 @@ set(SRC
     SolarReflectionManager.hh
     SolarShading.cc
     SolarShading.hh
-    SortAndStringUtilities.cc
-    SortAndStringUtilities.hh
     SplitterComponent.cc
     SplitterComponent.hh
     StandardRatings.cc
@@ -607,6 +629,8 @@ set(SRC
     TARCOGParams.hh
     TarcogShading.cc
     TarcogShading.hh
+    Timer.cc
+    Timer.hh
     ThermalChimney.cc
     ThermalChimney.hh
     ThermalComfort.cc
@@ -645,7 +669,6 @@ set(SRC
     WaterToAirHeatPump.hh
     WaterToAirHeatPumpSimple.cc
     WaterToAirHeatPumpSimple.hh
-    WaterToWaterHeatPumps.hh
     WaterUse.cc
     WaterUse.hh
     WeatherManager.cc
@@ -692,8 +715,6 @@ set(INPUTPARSING_SRC
     DataStringGlobals.hh
     FileSystem.cc
     FileSystem.hh
-    InputProcessing/EmbeddedEpJSONSchema.hh
-    "${CMAKE_CURRENT_BINARY_DIR}/EmbeddedEpJSONSchema.cc"
     InputProcessing/IdfParser.cc
     InputProcessing/IdfParser.hh
     InputProcessing/InputValidation.cc
@@ -701,17 +722,6 @@ set(INPUTPARSING_SRC
     UtilityRoutines.hh)
 
 create_src_groups("${INPUTPARSING_SRC}")
-
-add_custom_target(
-  GenerateEmbeddedEpJSONSchema
-  COMMAND
-    ${CMAKE_COMMAND} -D "EnergyPlus_SOURCE_DIR:PATH=${CMAKE_CURRENT_SOURCE_DIR}" -D
-    "EnergyPlus_RUNTIME_OUTPUT_DIRECTORY:PATH=${CMAKE_RUNTIME_OUTPUT_DIRECTORY}" -D "EnergyPlus_BINARY_DIR:PATH=${CMAKE_CURRENT_BINARY_DIR}" -D
-    "EnergyPlus_CURRENT_BINARY_DIR:PATH=${CMAKE_CURRENT_BINARY_DIR}" -D
-    "EnergyPlus_embeddable_epJSON_schema:PATH=$<TARGET_FILE:generate_embeddedable_epJSON_schema>" -P
-    "${PROJECT_SOURCE_DIR}/scripts/dev/generate_embeddable_epJSON_schema/generate_embedded_epJSON_schema.cmake"
-  WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
-  DEPENDS generate_embeddedable_epJSON_schema)
 
 add_subdirectory(AirflowNetwork)
 
@@ -747,8 +757,7 @@ if(LINK_WITH_PYTHON)
 endif()
 
 add_library(energyplusparser STATIC ${INPUTPARSING_SRC})
-add_dependencies(energyplusparser GenerateEmbeddedEpJSONSchema)
-target_link_libraries(energyplusparser PUBLIC ModernJSON re2 fmt::fmt ${CMAKE_DL_LIBS})
+target_link_libraries(energyplusparser PUBLIC embedded_epjson_source nlohmann_json re2 ${CMAKE_DL_LIBS})
 target_link_libraries(energyplusparser PRIVATE project_options project_fp_options project_warnings)
 if(WIN32)
   target_link_libraries(energyplusparser PUBLIC Shlwapi)
@@ -758,15 +767,22 @@ if ((CMAKE_COMPILER_IS_GNUCXX AND CMAKE_CXX_COMPILER_VERSION VERSION_LESS 9.1) O
     ( ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang" OR "${CMAKE_CXX_COMPILER_ID}" STREQUAL "AppleClang") AND (CMAKE_CXX_COMPILER_VERSION VERSION_LESS 9.0)))
   target_link_libraries(energyplusparser PRIVATE stdc++fs)
 endif()
+if(ENABLE_UNITY)
+  set_target_properties(energyplusparser PROPERTIES UNITY_BUILD ON)
+endif()
 
 # first we will create a static library of EnergyPlus this will be linked
 # statically to create the DLL and also the unit tests
 add_library(energypluslib STATIC ${SRC})
 
+if(ENABLE_UNITY)
+  set_target_properties(energypluslib PROPERTIES UNITY_BUILD ON)
+endif()
+
 target_link_libraries(
   energypluslib
-  PUBLIC fmt::fmt
-         ModernJSON
+  PUBLIC embedded_epjson_source
+         nlohmann_json
          objexx
          sqlite
          bcvtb
@@ -779,15 +795,16 @@ target_link_libraries(
          Windows-CalcEngine
          airflownetworklib
          ssc
-         cpgfunctionEP
          libtk205)
 
-target_link_libraries(energypluslib PRIVATE project_options project_fp_options project_warnings cpp_pch_files)
+target_link_libraries(energypluslib PRIVATE project_options project_fp_options project_warnings)
+if(ENABLE_PCH)
+  target_precompile_headers(energypluslib PRIVATE ${EP_CXX_PCH_HEADERS})
+endif()
 
 if(OPENGL_FOUND)
   target_link_libraries(energypluslib PUBLIC penumbra)
 endif()
-add_dependencies(energypluslib GenerateEmbeddedEpJSONSchema)
 if(BUILD_GROUND_PLOT)
   set_source_files_properties(HeatBalanceKivaManager.cc PROPERTIES COMPILE_DEFINITIONS GROUND_PLOT)
   target_link_libraries(energypluslib PUBLIC groundplot)
@@ -846,11 +863,10 @@ target_link_libraries(energyplusapi PRIVATE energypluslib)
 target_link_libraries(energyplusapi PRIVATE project_options project_fp_options project_warnings)
 
 set_target_properties(energyplusapi PROPERTIES INSTALL_NAME_DIR "@executable_path")
-install(
-  TARGETS energyplusapi
-  RUNTIME DESTINATION ./
-  LIBRARY DESTINATION ./
-  ARCHIVE DESTINATION ./)
+if(ENABLE_UNITY)
+  set_target_properties(energyplusapi PROPERTIES UNITY_BUILD ON)
+endif()
+
 
 # now the actual E+ executable
 if(APPLE OR UNIX)
@@ -864,26 +880,77 @@ set_target_properties(energyplus PROPERTIES VERSION ${ENERGYPLUS_VERSION})
 set_target_properties(energyplusapi PROPERTIES VERSION ${ENERGYPLUS_VERSION})
 
 # bring in the Python API layer right next to the executable
+# We call the PythonSetupAPIinBuild.cmake whenever the api/*.py change
+file(GLOB PYAPI_SOURCES "api/*.py")
+set(PYAPI_STAMP "${CMAKE_CURRENT_BINARY_DIR}/setup_pyapi_done.stamp")
 add_custom_command(
-  TARGET energyplusapi
-  POST_BUILD
+  OUTPUT "${PYAPI_STAMP}"
   DEPENDS
-  "${PROJECT_SOURCE_DIR}/src/EnergyPlus/api"
-  # TODO: temporary "hack" to depend on a specific file that doesn't exist to
-  # force this to run
-  DEPENDS
-  __ALWAYSRUNME
+    ${PYAPI_SOURCES}
   COMMAND
-    ${CMAKE_COMMAND} -DREPO_ROOT=${PROJECT_SOURCE_DIR} -DEXECUTABLE_PATH=$<TARGET_FILE:energyplusapi> -DCMAKE_VERSION_MAJOR="${CMAKE_VERSION_MAJOR}"
+    ${CMAKE_COMMAND} -DREPO_ROOT=${PROJECT_SOURCE_DIR} -DEPLUS_EXE_DIR=$<TARGET_FILE_DIR:energyplusapi> -DCMAKE_VERSION_MAJOR="${CMAKE_VERSION_MAJOR}"
     -DCMAKE_VERSION_MINOR="${CMAKE_VERSION_MINOR}" -DCMAKE_VERSION_PATCH="${CMAKE_VERSION_PATCH}" -DCMAKE_VERSION_BUILD="${CMAKE_VERSION_BUILD}"
     -DPYTHON_API_VERSION_MAJOR="${PYTHON_API_VERSION_MAJOR}" -DPYTHON_API_VERSION_MINOR="${PYTHON_API_VERSION_MINOR}" -P
-    "${PROJECT_SOURCE_DIR}/cmake/PythonSetupAPIinBuild.cmake")
+    "${PROJECT_SOURCE_DIR}/cmake/PythonSetupAPIinBuild.cmake"
+  COMMAND ${CMAKE_COMMAND} -E touch "${PYAPI_STAMP}"
+  COMMENT "Generating Python API files next to energyplusapi"
+)
 
-install(TARGETS energyplus energyplusapi DESTINATION ./)
+# And a target that calls the above command. It is NOT called by default
+add_custom_target(setup_pyapi
+  DEPENDS "${PYAPI_STAMP}"
+)
+# When you build CLI, we want the api configuration to run, so add it as a dependency
+# which will ensure it's run (beforehand, at **build** not configure time)
+add_dependencies(energyplus setup_pyapi)
+
+if(NOT BUILD_STATIC_ENERGYPLUS_API)
+  install(
+    TARGETS energyplusapi energyplus
+    EXPORT energyplus
+    RUNTIME DESTINATION ./
+    LIBRARY DESTINATION ./
+    ARCHIVE DESTINATION ./
+    INCLUDES DESTINATION include
+                         include/EnergyPlus/api
+  )
+
+  include(CMakePackageConfigHelpers)
+  write_basic_package_version_file(
+    "${PROJECT_BINARY_DIR}/energyplusConfigVersion.cmake"
+    VERSION ${ENERGYPLUS_VERSION}
+    COMPATIBILITY AnyNewerVersion
+  )
+
+  export(
+    EXPORT
+    energyplus
+         NAMESPACE "energyplus::"
+         FILE "${PROJECT_BINARY_DIR}/energyplusConfig.cmake"
+  )
+
+  install(
+    EXPORT energyplus
+          DESTINATION lib/cmake/energyplus
+          NAMESPACE "energyplus::"
+          COMPONENT "CPPAPI"
+    FILE energyplusConfig.cmake
+  )
+
+  install(
+    FILES
+      "${PROJECT_BINARY_DIR}/energyplusConfigVersion.cmake"
+    DESTINATION
+      lib/cmake/energyplus/
+    COMPONENT "CPPAPI"
+  )
+endif()
 
 if(LINK_WITH_PYTHON)
   # link the executable to the dll and bring it in
   get_filename_component(RESOLVED_PYTHON_LIBRARY "${Python_LIBRARIES}" REALPATH)
+  message("Python_LIBRARIES=${Python_LIBRARIES}")
+  message("RESOLVED_PYTHON_LIBRARY=${RESOLVED_PYTHON_LIBRARY}")
   if(WIN32)
 
     # In case you have both release and debug Python libraries on your system, Python_LIBRARIES might be "optimized;C:/.../python38.lib;debug;C:/.../python38_d.lib"
@@ -902,6 +969,7 @@ if(LINK_WITH_PYTHON)
       endforeach()
     # else()
       # No-op, already done above
+      message("RESOLVED_PYTHON_LIBRARY (optimized) =${RESOLVED_PYTHON_LIBRARY}")
     endif()
 
     # Windows is being ugly and linking against the Python DLL but not running
@@ -912,28 +980,51 @@ if(LINK_WITH_PYTHON)
       COMMAND ${CMAKE_COMMAND} -DRESOLVED_PYTHON_LIB=${RESOLVED_PYTHON_LIBRARY} -DEXECUTABLE_PATH=$<TARGET_FILE:energyplusapi> -P
               ${PROJECT_SOURCE_DIR}/cmake/PythonGetLibAndLinkUp.cmake)
   endif()
+
+  # Note for future readers as this gets extremely confusing to write (and read).
+  # The bottom line is that you should inspect the resulting `build/src/cmake_install.cmake` to see what's the resulting command and ensure that is correctly quoted and evaluated
+  # Couple of pointers:
+  # - `${VAR}` evaluates at *configure* time
+  # - `\${VAR}` writes `${VAR}` verbatim, so that will be evaluated at *install* time
+  #     - `\${CMAKE_COMMAND}` writes `${CMAKE_COMMAND}` verbatim, and I'm not doing `\"\${CMAKE_COMMAND}\"` because this is a single list argument and CMake will handle quoting appropriately already
+  #     - We do want `CMAKE_INSTALL_PREFIX` evaluated at install time
+  # - I'm using `\"-DXXX=${VAR}\"` so that this single argument is definitely properly quoted in the resulting cmake_install.cmake even if there is a space in the value after -DXXX
+  #     - eg: if RESOLVED_PYTHON_LIBRARY is `/path/to python/python.lib`, it becomes `"-DRESOLVED_PYTHON_LIB=/path/to python/python.lib"` which will be passed as single argument to the operating system which is what we want
   install(
     CODE "execute_process(
-      COMMAND ${CMAKE_COMMAND}
-      -DRESOLVED_PYTHON_LIB=${RESOLVED_PYTHON_LIBRARY}
-      -DEXECUTABLE_PATH=\${CMAKE_INSTALL_PREFIX}/energyplus${CMAKE_EXECUTABLE_SUFFIX}
-      -P ${PROJECT_SOURCE_DIR}/cmake/PythonGetLibAndLinkUp.cmake
+      COMMAND \${CMAKE_COMMAND}
+      \"-DRESOLVED_PYTHON_LIB=${RESOLVED_PYTHON_LIBRARY}\"
+      \"-DEXECUTABLE_PATH=\${CMAKE_INSTALL_PREFIX}/energyplus${CMAKE_EXECUTABLE_SUFFIX}\"
+      -P \"${PROJECT_SOURCE_DIR}/cmake/PythonGetLibAndLinkUp.cmake\"
     )")
   if(APPLE)
     install(
       CODE "execute_process(
-        COMMAND ${CMAKE_COMMAND}
-        -DRESOLVED_PYTHON_LIB=${RESOLVED_PYTHON_LIBRARY}
+        COMMAND \${CMAKE_COMMAND}
+        \"-DRESOLVED_PYTHON_LIB=${RESOLVED_PYTHON_LIBRARY}\"
         -DEPLUS_DYNAMIC_LIB_NAME=libenergyplusapi.${CMAKE_VERSION_MAJOR}.${CMAKE_VERSION_MINOR}.${CMAKE_VERSION_PATCH}.dylib
-        -DEXECUTABLE_PATH=\${CMAKE_INSTALL_PREFIX}/energyplus${CMAKE_EXECUTABLE_SUFFIX}
-        -P ${PROJECT_SOURCE_DIR}/cmake/PythonFixUpOnMac.cmake
+        \"-DEXECUTABLE_PATH=\${CMAKE_INSTALL_PREFIX}/energyplus${CMAKE_EXECUTABLE_SUFFIX}\"
+        -P \"${PROJECT_SOURCE_DIR}/cmake/PythonFixUpOnMac.cmake\"
       )")
   endif()
   # along with the python standard lib
   add_custom_command(
     TARGET energyplusapi
     POST_BUILD # TODO: I don't think we want to quote the generator expression
-    COMMAND ${Python_EXECUTABLE} "${PROJECT_SOURCE_DIR}/cmake/PythonCopyStandardLib.py" "$<TARGET_FILE:energyplusapi>" "python_standard_lib")
+    COMMAND ${Python_EXECUTABLE} "${PROJECT_SOURCE_DIR}/cmake/PythonCopyStandardLib.py" "$<TARGET_FILE:energyplusapi>" "python_lib"
+  )
+  if (PYTHON_CLI)
+    add_custom_command(
+      TARGET energyplusapi
+      POST_BUILD
+      # TODO: It would be nice to set a BYPRODUCTS sentinel to avoid re-running this every time, but BYPRODUCTS cannot include
+      # TODO:  target-specific generator expressions, as they must be known are evaluated at compile time.
+      # BYPRODUCTS "$<TARGET_FILE_DIR:energyplusapi>/python_lib/LICENSE.txt"
+      COMMAND ${CMAKE_COMMAND} -E env --unset=PIP_REQUIRE_VIRTUALENV
+      ${Python_EXECUTABLE} ${PROJECT_SOURCE_DIR}/cmake/PythonInstallCLITools.py "$<TARGET_FILE_DIR:energyplusapi>/python_lib"
+      COMMAND ${Python_EXECUTABLE} "${PROJECT_SOURCE_DIR}/cmake/PythonFixUpTclTk.py" "$<TARGET_FILE_DIR:energyplusapi>/python_lib"
+    )
+  endif()
 endif()
 
 if(BUILD_PACKAGE)
@@ -941,12 +1032,46 @@ if(BUILD_PACKAGE)
   if(LINK_WITH_PYTHON)
     # we'll want to grab the standard lib for python plugins
     # TODO: I don't think we want to quote the generator expression
-    install(DIRECTORY "$<TARGET_FILE_DIR:energyplus>/python_standard_lib/" DESTINATION "./python_standard_lib")
+    install(DIRECTORY "$<TARGET_FILE_DIR:energyplus>/python_lib/" DESTINATION "./python_lib")
+    if(PYTHON_CLI)
+      install(FILES "${PROJECT_SOURCE_DIR}/release/VersionUpdater-NEWS.txt" DESTINATION "PreProcess/" COMPONENT Auxiliary)
+      if(WIN32)
+        # on Windows, with Build Package, and also Link With Python, we can also drop in shortcuts to the new auxiliary CLI
+        set(APP_ICON "${PROJECT_SOURCE_DIR}/release/ep.ico")
+        set(RESOURCE_FILE "${PROJECT_BINARY_DIR}/resource.rc")
+        file(GENERATE OUTPUT ${RESOURCE_FILE} CONTENT "IDI_ICON1 ICON \"${APP_ICON}\"\n")
+        add_executable(windows_gui_launcher WIN32 WindowsGuiLauncher.cc ${RESOURCE_FILE})
+        install(TARGETS windows_gui_launcher DESTINATION ./ COMPONENT Auxiliary)
+        # NOTE: The install command COMPONENTS should line up so that they are run at the same packaging step
+        # TODO: Just move these shortcut creation steps over to the install_auxiliary_python_shortcuts.qs file?  And remove create_shortcut.ps1?
+        install(CODE "execute_process(COMMAND powershell.exe -ExecutionPolicy Bypass -File ${PROJECT_SOURCE_DIR}/scripts/dev/create_shortcut.ps1 -TargetPath \"$<TARGET_FILE_DIR:energyplus>/windows_gui_launcher.exe\" -ShortcutPath \"$<TARGET_FILE_DIR:energyplus>/EPLaunch_Python.lnk\" -Arguments \"eplaunch\")" COMPONENT Auxiliary)
+        install(CODE "execute_process(COMMAND powershell.exe -ExecutionPolicy Bypass -File ${PROJECT_SOURCE_DIR}/scripts/dev/create_shortcut.ps1 -TargetPath \"$<TARGET_FILE_DIR:energyplus>/windows_gui_launcher.exe\" -ShortcutPath \"$<TARGET_FILE_DIR:energyplus>/VersionUpdater_Python.lnk\" -Arguments \"updater\")" COMPONENT Auxiliary)
+        install(FILES $<TARGET_FILE_DIR:energyplus>/EPLaunch_Python.lnk DESTINATION "./" COMPONENT Auxiliary)
+        install(FILES $<TARGET_FILE_DIR:energyplus>/VersionUpdater_Python.lnk DESTINATION "./" COMPONENT Auxiliary)
+      elseif(APPLE)
+        # Pre-signed and notarized launcher apps
+        install(DIRECTORY "${PROJECT_SOURCE_DIR}/bin/PythonApps/EPLaunch.app" DESTINATION "." COMPONENT Auxiliary USE_SOURCE_PERMISSIONS)
+        install(DIRECTORY "${PROJECT_SOURCE_DIR}/bin/PythonApps/VersionUpdater.app" DESTINATION "." COMPONENT Auxiliary USE_SOURCE_PERMISSIONS)
+      elseif(LINUX)
+        set(ARGUMENT eplaunch)
+        configure_file(${PROJECT_SOURCE_DIR}/cmake/auxiliary.sh.in ${PROJECT_BINARY_DIR}/EPLaunch)
+        install(FILES ${PROJECT_BINARY_DIR}/EPLaunch
+                DESTINATION "."
+                PERMISSIONS OWNER_EXECUTE OWNER_READ OWNER_WRITE)
+        set(ARGUMENT updater)
+        configure_file(${PROJECT_SOURCE_DIR}/cmake/auxiliary.sh.in ${PROJECT_BINARY_DIR}/VersionUpdater)
+        install(FILES ${PROJECT_BINARY_DIR}/VersionUpdater
+                DESTINATION "."
+                PERMISSIONS OWNER_EXECUTE OWNER_READ OWNER_WRITE)
+        install(
+                FILES ${PROJECT_SOURCE_DIR}/cmake/energyplus.desktop.in
+                DESTINATION share/applications
+        )
+      endif()
+    endif()
   endif()
   # we'll want to always provide the C API headers
-  foreach(HEADER ${API_HEADERS})
-    install(FILES "${CMAKE_CURRENT_SOURCE_DIR}/${HEADER}" DESTINATION "./include/EnergyPlus/api")
-  endforeach()
+  install(FILES ${API_HEADERS} DESTINATION "./include/EnergyPlus/api")
   # we'll want to always grab the python API wrapper
   # TODO: I don't think we want to quote the generator expression
   install(DIRECTORY "$<TARGET_FILE_DIR:energyplus>/pyenergyplus/" DESTINATION "./pyenergyplus")
@@ -961,10 +1086,11 @@ if(BUILD_TESTING)
                    -DEPW_FILE=USA_CO_Golden-NREL.724666_TMY3.epw -P ${PROJECT_SOURCE_DIR}/cmake/RunCallbackTest.cmake)
 
   set(EPW_FILE "${PROJECT_SOURCE_DIR}/weather/USA_IL_Chicago-OHare.Intl.AP.725300_TMY3.epw")
-  set(IDF_FILE "${PROJECT_SOURCE_DIR}/testfiles/1ZoneUncontrolled.idf")
+  set(IDF_FILE "${PROJECT_SOURCE_DIR}/testfiles/_1ZoneUncontrolled_ForAPITesting.idf")
 
   add_executable(TestAPI_Functional_C ${PROJECT_SOURCE_DIR}/tst/EnergyPlus/api/TestFunctional.c)
-  target_link_libraries(TestAPI_Functional_C PRIVATE energyplusapi project_options project_fp_options project_warnings)
+  #  project_warnings is essentially a C++ interface, and not included here because this is C, not C++
+  target_link_libraries(TestAPI_Functional_C PRIVATE energyplusapi project_options project_fp_options)
   if(NOT MSVC)
     target_compile_options(TestAPI_Functional_C PRIVATE -Wno-unused -Wno-unused-parameter)
   endif()
@@ -979,14 +1105,14 @@ if(BUILD_TESTING)
   # target_compile_options(TestAPI_Runtime_C PRIVATE -Wall -Wextra -Wno-unused)
   add_test(NAME "API.TestRuntimeC" COMMAND TestAPI_Runtime_C -d "${TEST_DIR}" -w "${EPW_FILE}" -D "${IDF_FILE}")
 
-  set(TEST_DIR "${PROJECT_BINARY_DIR}/tst/api/runtimeresetpython")
+  set(TEST_DIR "${PROJECT_BINARY_DIR}/tst/api/runtime_resetstate")
   file(MAKE_DIRECTORY ${TEST_DIR})
   add_executable(TestAPI_RuntimeResetState_C ${PROJECT_SOURCE_DIR}/tst/EnergyPlus/api/TestRuntimeResetState.c)
   target_link_libraries(TestAPI_RuntimeResetState_C PRIVATE energyplusapi project_options project_fp_options)
   # target_compile_options(TestAPI_RuntimeResetPython_C PRIVATE -Wall -Wextra -Wno-unused)
   add_test(NAME "API.TestRuntimeResetStateC" COMMAND TestAPI_RuntimeResetState_C -d "${TEST_DIR}" -w "${EPW_FILE}" -D "${IDF_FILE}")
 
-  set(TEST_DIR "${PROJECT_BINARY_DIR}/tst/api/runtimedeletepython")
+  set(TEST_DIR "${PROJECT_BINARY_DIR}/tst/api/runtime_deletestate")
   file(MAKE_DIRECTORY ${TEST_DIR})
   add_executable(TestAPI_RuntimeDeleteState_C ${PROJECT_SOURCE_DIR}/tst/EnergyPlus/api/TestRuntimeDeleteState.c)
   target_link_libraries(TestAPI_RuntimeDeleteState_C PRIVATE energyplusapi project_options project_fp_options)
@@ -996,7 +1122,8 @@ if(BUILD_TESTING)
   set(TEST_DIR "${PROJECT_BINARY_DIR}/tst/api/exchange")
   file(MAKE_DIRECTORY ${TEST_DIR})
   add_executable(TestAPI_DataTransfer_C ${PROJECT_SOURCE_DIR}/tst/EnergyPlus/api/TestDataTransfer.c)
-  target_link_libraries(TestAPI_DataTransfer_C PRIVATE energyplusapi project_options project_fp_options project_warnings)
+  #  project_warnings is essentially a C++ interface, and not included here because this is C, not C++
+  target_link_libraries(TestAPI_DataTransfer_C PRIVATE energyplusapi project_options project_fp_options)
   add_test(NAME "API.TestDataTransferC" COMMAND TestAPI_DataTransfer_C -d "${TEST_DIR}" -w "${EPW_FILE}" -D "${IDF_FILE}")
 
   # set(TEST_DIR "${PROJECT_BINARY_DIR}/tst/api/autosizing") file(MAKE_DIRECTORY
@@ -1054,6 +1181,65 @@ if(BUILD_TESTING)
   set_tests_properties("API.test_SysExit" PROPERTIES ENVIRONMENT PYTHONPATH=${DIR_WITH_PY_ENERGYPLUS})
   add_test(NAME "API.test_OutputFiles" COMMAND "${Python_EXECUTABLE}" "${PROJECT_SOURCE_DIR}/tst/EnergyPlus/api/test_OutputFiles.py")
   set_tests_properties("API.test_OutputFiles" PROPERTIES ENVIRONMENT PYTHONPATH=${DIR_WITH_PY_ENERGYPLUS})
+
+  # 9825 - Test some non-ASCII directories
+  set(CLI_TEST_DIR "${PROJECT_BINARY_DIR}/tst/cli")
+  set(EXAMPLES_FILES_DIR "${PROJECT_SOURCE_DIR}/testfiles")
+
+  # This has some accented chars, and also the nice thing about it is that in `C:\path\dir\térmica`, you do have something that could be a `\t` escape sequence
+  set(NON_ASCII_DIRNAME "térmicà")
+  set(INPUT_TEST_DIR "${CLI_TEST_DIR}/${NON_ASCII_DIRNAME}")
+  file(MAKE_DIRECTORY ${INPUT_TEST_DIR})
+
+  set(TEST_CASE "1ZoneUncontrolled")
+  set(IDF_FILE "${EXAMPLES_FILES_DIR}/${TEST_CASE}.idf")
+  configure_file(${IDF_FILE} "${INPUT_TEST_DIR}/${TEST_CASE}.idf" COPYONLY)
+
+  add_test(NAME energyplus.TestNonASCIIDirsAndFiles.NoPlugin.FromWithin
+    COMMAND  energyplus -D -d "${CLI_TEST_DIR}/NoPlugin.FromWithin/out-${NON_ASCII_DIRNAME}" ${TEST_CASE}.idf
+    WORKING_DIRECTORY  "${CLI_TEST_DIR}/${NON_ASCII_DIRNAME}"
+  )
+
+  add_test(NAME energyplus.TestNonASCIIDirsAndFiles.NoPlugin.FromOutside
+    COMMAND  energyplus -D -d "${CLI_TEST_DIR}/NoPlugin.FromOutside/out-${NON_ASCII_DIRNAME}" ${NON_ASCII_DIRNAME}/${TEST_CASE}.idf
+    WORKING_DIRECTORY  "${CLI_TEST_DIR}"
+  )
+
+  set(TEST_CASE "PythonPlugin1ZoneUncontrolledCondFD")
+  set(IDF_FILE "${EXAMPLES_FILES_DIR}/${TEST_CASE}.idf")
+  configure_file(${IDF_FILE} "${INPUT_TEST_DIR}/${TEST_CASE}.idf" COPYONLY)
+  set(PY_FILE "${EXAMPLES_FILES_DIR}/${TEST_CASE}.py")
+  configure_file(${PY_FILE} "${INPUT_TEST_DIR}/${TEST_CASE}.py" COPYONLY)
+
+  if(LINK_WITH_PYTHON)
+    add_test(NAME energyplus.TestNonASCIIDirsAndFiles.PythonPlugin.FromWithin
+      COMMAND  energyplus -D -d "${CLI_TEST_DIR}/PythonPlugin.FromWithin/out-${NON_ASCII_DIRNAME}" ${TEST_CASE}.idf
+      WORKING_DIRECTORY  "${CLI_TEST_DIR}/${NON_ASCII_DIRNAME}"
+    )
+
+    add_test(NAME energyplus.TestNonASCIIDirsAndFiles.PythonPlugin.FromOutside
+      COMMAND  energyplus -D -d "${CLI_TEST_DIR}/PythonPlugin.FromOutside/out-${NON_ASCII_DIRNAME}" ${NON_ASCII_DIRNAME}/${TEST_CASE}.idf
+      WORKING_DIRECTORY  "${CLI_TEST_DIR}"
+    )
+
+    set(TEST_DIR "${PROJECT_BINARY_DIR}/tst/api/TestRuntimeReleasesTheGIL")
+    file(MAKE_DIRECTORY ${TEST_DIR})
+    add_test(NAME "API.Runtime.PythonPlugin.TestRuntimeReleasesTheGIL"
+      COMMAND "${Python_EXECUTABLE}" "${PROJECT_SOURCE_DIR}/tst/EnergyPlus/api/TestRuntimeReleasesTheGIL.py" -d "${TEST_DIR}" -w "${EPW_FILE}" -D "${PROJECT_SOURCE_DIR}/tst/EnergyPlus/api/TestRuntimeReleasesTheGIL/mcve_gil.idf"
+    )
+    set_tests_properties("API.Runtime.PythonPlugin.TestRuntimeReleasesTheGIL"
+      PROPERTIES
+        ENVIRONMENT PYTHONPATH=${DIR_WITH_PY_ENERGYPLUS}
+        TIMEOUT 10  # This used to timeout! and we expect it NOT to
+    )
+  endif()
+
+  if(Pytest_AVAILABLE)
+    add_test(NAME energyplus.TabularXML_IsValid
+      COMMAND ${Python_EXECUTABLE} -m pytest --verbose --ep-cli-path $<TARGET_FILE:energyplus> "${PROJECT_SOURCE_DIR}/scripts/pytests/test_xml_output.py"
+    )
+  endif()
+
 endif()
 
 if(UNIX AND NOT APPLE)
@@ -1062,4 +1248,24 @@ if(UNIX AND NOT APPLE)
     POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E create_symlink energyplus EnergyPlus
     COMMAND ${CMAKE_COMMAND} -E rename EnergyPlus "${PROJECT_BINARY_DIR}/Products/EnergyPlus")
+
+  if (BUILD_PERFORMANCE_TESTS)
+    file(MAKE_DIRECTORY "${PROJECT_BINARY_DIR}/performance_tests")
+    add_custom_command(
+      TARGET energyplus
+      POST_BUILD
+      COMMAND size $<TARGET_FILE:energyplus> > "${PROJECT_BINARY_DIR}/performance_tests/size.energyplus"
+      )
+    add_custom_command(
+      TARGET energyplusapi
+      POST_BUILD
+      COMMAND size $<TARGET_FILE:energyplusapi> > "${PROJECT_BINARY_DIR}/performance_tests/size.energyplusapi"
+      )
+  endif()
+endif()
+
+if(APPLE AND CPACK_CODESIGNING_DEVELOPPER_ID_APPLICATION)
+  include("${CMAKE_CURRENT_SOURCE_DIR}/../../cmake/CodeSigning.cmake")
+  register_install_codesign_target(energyplus "." Unspecified ENTITLEMENTS "${CMAKE_CURRENT_SOURCE_DIR}/../../cmake/python_entitlements.xml")
+  register_install_codesign_target(energyplusapi "." Unspecified)
 endif()

@@ -1,7 +1,7 @@
-// EnergyPlus, Copyright (c) 1996-2023, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
-// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other
+// National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
 // contributors. All rights reserved.
 //
 // NOTICE: This Software was developed under funding from the U.S. Department of Energy and the
@@ -48,9 +48,6 @@
 #ifndef BaseboardRadiator_hh_INCLUDED
 #define BaseboardRadiator_hh_INCLUDED
 
-// ObjexxFCL Headers
-#include <ObjexxFCL/Array1D.hh>
-
 // EnergyPlus Headers
 #include <EnergyPlus/Data/BaseData.hh>
 #include <EnergyPlus/DataGlobals.hh>
@@ -69,7 +66,7 @@ namespace BaseboardRadiator {
         // Members
         std::string EquipID;
         std::string Schedule;
-        int SchedPtr = 0;
+        Sched::Schedule *availSched = nullptr;
         DataPlant::PlantEquipmentType EquipType = DataPlant::PlantEquipmentType::Invalid;
         int ZonePtr = 0;
         int WaterInletNode = 0;
@@ -93,7 +90,7 @@ namespace BaseboardRadiator {
         Real64 Power = 0.0;
         Real64 Energy = 0.0;
         PlantLocation plantLoc;
-        Array1D_string FieldNames;
+        std::vector<std::string> FieldNames;
         int HeatingCapMethod = 0; // - Method for water baseboard Radiator system heating capacity scaledsizing calculation (HeatingDesignCapacity,
                                   // CapacityPerFloorArea, FracOfAutosizedHeatingCapacity)
         Real64 ScaledHeatingCapacity = 0.0; // -  water baseboard Radiator system scaled maximum heating capacity {W} or scalable variable of zone
@@ -107,6 +104,8 @@ namespace BaseboardRadiator {
         void InitBaseboard(EnergyPlusData &state, int baseboardNum);
 
         void SizeBaseboard(EnergyPlusData &state, int baseboardNum);
+
+        void checkForZoneSizing(EnergyPlusData &state);
     };
 
     void SimBaseboard(
@@ -126,9 +125,17 @@ struct BaseboardRadiatorData : BaseGlobalStruct
     bool getInputFlag = true;
     EPVector<BaseboardRadiator::BaseboardParams> baseboards;
 
+    void init_constant_state([[maybe_unused]] EnergyPlusData &state) override
+    {
+    }
+
+    void init_state([[maybe_unused]] EnergyPlusData &state) override
+    {
+    }
+
     void clear_state() override
     {
-        *this = BaseboardRadiatorData();
+        new (this) BaseboardRadiatorData();
     }
 };
 

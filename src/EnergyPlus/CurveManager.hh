@@ -1,7 +1,7 @@
-// EnergyPlus, Copyright (c) 1996-2023, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
-// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other
+// National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
 // contributors. All rights reserved.
 //
 // NOTICE: This Software was developed under funding from the U.S. Department of Energy and the
@@ -60,8 +60,8 @@
 #include <nlohmann/json.hpp>
 
 // Btwxt Headers
-#include <btwxt.h>
-#include <griddeddata.h>
+#include <btwxt/btwxt.h>
+#include <btwxt/grid-axis.h>
 
 // EnergyPlus Headers
 #include <EnergyPlus/Data/BaseData.hh>
@@ -69,7 +69,9 @@
 #include <EnergyPlus/DataGlobals.hh>
 #include <EnergyPlus/EPVector.hh>
 #include <EnergyPlus/EnergyPlus.hh>
+#include <EnergyPlus/EnergyPlusLogger.hh>
 #include <EnergyPlus/FileSystem.hh>
+#include <EnergyPlus/UtilityRoutines.hh>
 
 namespace EnergyPlus {
 
@@ -103,39 +105,31 @@ namespace Curve {
         QuintLinear,
         CubicLinear,
         ChillerPartLoadWithLift,
+        BtwxtTableLookup,
         Num
     };
 
-    constexpr std::array<std::string_view, static_cast<int>(CurveType::Num)> objectNames = {
-        "Curve:Linear",
-        "Curve:Quadratic",
-        "Curve:Biquadratic",
-        "Curve:Cubic",
-        "Curve:QuadLinear",
-        "Curve:Bicubic",
-        "Curve:Triquadratic",
-        "Curve:Exponent",
-        "Curve:Quartic",
-        "Curve:FanPressureRise",
-        "Curve:ExponentialSkewNormal",
-        "Curve:Sigmoid",
-        "Curve:RectangularHyperbola1",
-        "Curve:RectangularHyperbola2",
-        "Curve:ExponentialDecay",
-        "Curve:DoubleExponentialDecay",
-        "Curve:QuadraticLinear",
-        "Curve:QuintLinear",
-        "Curve:CubicLinear",
-        "Curve:ChillerPartLoadWithLift",
-    }; // namespace Curve
-
-    enum class InterpType
-    {
-        Invalid = -1,
-        EvaluateCurveToLimits,
-        BtwxtMethod,
-        Num
-    };
+    constexpr std::array<std::string_view, static_cast<int>(CurveType::Num)> objectNames = {"Curve:Linear",
+                                                                                            "Curve:Quadratic",
+                                                                                            "Curve:Biquadratic",
+                                                                                            "Curve:Cubic",
+                                                                                            "Curve:QuadLinear",
+                                                                                            "Curve:Bicubic",
+                                                                                            "Curve:Triquadratic",
+                                                                                            "Curve:Exponent",
+                                                                                            "Curve:Quartic",
+                                                                                            "Curve:FanPressureRise",
+                                                                                            "Curve:ExponentialSkewNormal",
+                                                                                            "Curve:Sigmoid",
+                                                                                            "Curve:RectangularHyperbola1",
+                                                                                            "Curve:RectangularHyperbola2",
+                                                                                            "Curve:ExponentialDecay",
+                                                                                            "Curve:DoubleExponentialDecay",
+                                                                                            "Curve:QuadraticLinear",
+                                                                                            "Curve:QuintLinear",
+                                                                                            "Curve:CubicLinear",
+                                                                                            "Curve:ChillerPartLoadWithLift",
+                                                                                            "Table:Lookup"}; // namespace Curve
 
     struct Limits
     {
@@ -148,13 +142,16 @@ namespace Curve {
     struct Curve
     {
         // Basic data
-        std::string Name;                         // Curve Name
+        std::string Name; // Curve Name
+        int Num = 0;
+
         CurveType curveType = CurveType::Invalid; // Curve type (see parameter definitions above)
         // Table data stuff
-        InterpType interpolationType = InterpType::Invalid; // Table interpolation method
-        int TableIndex = 0;     // Index to tabular data (0 if a standard curve object) OR Index of RGI for new Table:Lookup
-        int numDims = 0;        // Number of dimensions (AKA, independent variables)
-        int GridValueIndex = 0; // Index of output within RGI for new Table:Lookup
+        int TableIndex = 0;        // Index to tabular data (0 if a standard curve object) OR Index of RGI for new Table:Lookup
+        int numDims = 0;           // Number of dimensions (AKA, independent variables)
+        int GridValueIndex = 0;    // Index of output within RGI for new Table:Lookup
+        std::string contextString; // For passing to callback
+
         // input coefficients
         std::array<Real64, 27> coeff = {0.0}; // curve coefficients
         // independent variables
@@ -166,6 +163,7 @@ namespace Curve {
         // EMS override
         bool EMSOverrideOn = false;         // if TRUE, then EMS is calling to override curve value
         Real64 EMSOverrideCurveValue = 0.0; // Value of curve result EMS is directing to use
+
         Real64 value(EnergyPlusData &state, Real64 V1);
         Real64 value(EnergyPlusData &state, Real64 V1, Real64 V2);
         Real64 value(EnergyPlusData &state, Real64 V1, Real64 V2, Real64 V3);
@@ -227,12 +225,18 @@ namespace Curve {
     {
     public:
         // Map RGI collection to string name of independent variable list
-        int addGrid(const std::string &indVarListName, Btwxt::GriddedData grid)
+        int addGrid(const std::string &indVarListName, const std::vector<Btwxt::GridAxis> grid)
         {
-            grids.emplace_back(grid);
+            grids.emplace_back(grid, btwxt_logger);
             gridMap.emplace(indVarListName, grids.size() - 1);
             return static_cast<int>(grids.size()) - 1;
-        };
+        }
+        void setLoggingContext(void *context)
+        {
+            for (auto &btwxt : grids) {
+                btwxt.get_logger()->set_message_context(context); // TODO: set_context can be its own function
+            }
+        }
         double normalizeGridValues(int gridIndex, int outputIndex, const std::vector<double> &target, double scalar = 1.0);
         int addOutputValues(int gridIndex, std::vector<double> values);
         int getGridIndex(EnergyPlusData &state, std::string &indVarListName, bool &ErrorsFound);
@@ -240,6 +244,7 @@ namespace Curve {
         double getGridValue(int gridIndex, int outputIndex, const std::vector<double> &target);
         std::map<std::string, const nlohmann::json &> independentVarRefs;
         std::map<fs::path, TableFile> tableFiles;
+        static std::shared_ptr<EnergyPlusLogger> btwxt_logger;
         void clear();
 
     private:
@@ -247,9 +252,7 @@ namespace Curve {
         std::vector<Btwxt::RegularGridInterpolator> grids;
     };
 
-    void BtwxtMessageCallback(Btwxt::MsgLevel messageType, std::string message, void *contextPtr);
-
-    void ResetPerformanceCurveOutput(EnergyPlusData &state);
+    void ResetPerformanceCurveOutput(const EnergyPlusData &state);
 
     Real64 CurveValue(EnergyPlusData &state,
                       int CurveIndex, // index of curve in curve array
@@ -306,9 +309,16 @@ namespace Curve {
 
     bool IsCurveOutputTypeValid(std::string const &InOutputType); // index of curve in curve array
 
+    void ShowSevereCurveDims(EnergyPlusData &state,
+                             ErrorObjectHeader const &eoh,
+                             std::string_view const fieldName,
+                             std::string_view const curveName,
+                             std::string_view const validDims,
+                             int dim);
+
     bool CheckCurveDims(EnergyPlusData &state,
                         int CurveIndex,
-                        std::vector<int> validDims,
+                        std::vector<int> const &validDims,
                         std::string_view routineName,
                         std::string_view objectType,
                         std::string_view objectName,
@@ -318,17 +328,14 @@ namespace Curve {
 
     Real64 GetNormalPoint(int CurveIndex);
 
-    int GetCurveIndex(EnergyPlusData &state, std::string const &CurveName); // name of the curve
+    int GetCurveIndex(EnergyPlusData const &state, std::string const &CurveName); // name of the curve
+
+    Curve *GetCurve(EnergyPlusData &state, std::string const &curveName);
+
+    Curve *AddCurve(EnergyPlusData &state, std::string const &curveName);
 
     // This utility function grabs a curve index and performs the
     // error checking
-
-    int GetCurveCheck(EnergyPlusData &state,
-                      std::string const &alph, // curve name
-                      bool &errFlag,
-                      std::string const &ObjName // parent object of curve
-    );
-
     void GetCurveMinMaxValues(EnergyPlusData &state,
                               int const CurveIndex, // index of curve in curve array
                               Real64 &Var1Min,      // Minimum values of 1st independent variable
@@ -439,28 +446,31 @@ namespace Curve {
 
 struct CurveManagerData : BaseGlobalStruct
 {
-    int NumCurves = 0;
-    bool GetCurvesInputFlag = true;
     bool CurveValueMyBeginTimeStepFlag = false;
     bool FrictionFactorErrorHasOccurred = false;
     bool showFallbackMessage = true;
-    EPVector<Curve::Curve *> PerfCurve;
-    Curve::BtwxtManager btwxtManager;
-    std::unordered_map<std::string, std::string> UniqueCurveNames;
+    Array1D<Curve::Curve *> curves;
+    std::map<std::string, int> curveMap;
 
-    void allocateCurveVector(int const count)
+    Curve::BtwxtManager btwxtManager;
+
+    void init_constant_state([[maybe_unused]] EnergyPlusData &state) override
     {
-        this->NumCurves = count;
-        for (int curveIndex = 1; curveIndex <= count; curveIndex++)
-            this->PerfCurve.push_back(new EnergyPlus::Curve::Curve);
+    }
+
+    void init_state(EnergyPlusData &state) override
+    {
+        Curve::GetCurveInput(state);
+        Curve::GetPressureSystemInput(state);
     }
 
     void clear_state() override
     {
-        for (Curve::Curve *p : PerfCurve) {
-            delete p;
+        for (Curve::Curve *c : curves) {
+            delete c;
         }
-        new (this) CurveManagerData();
+        curves.clear();
+        curveMap.clear();
     }
 };
 

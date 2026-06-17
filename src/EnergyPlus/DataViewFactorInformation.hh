@@ -1,7 +1,7 @@
-// EnergyPlus, Copyright (c) 1996-2023, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
-// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other
+// National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
 // contributors. All rights reserved.
 //
 // NOTICE: This Software was developed under funding from the U.S. Department of Energy and the
@@ -90,6 +90,10 @@ namespace DataViewFactorInformation {
         bool solAbsFirstCalc = true;         // for error message
         bool radReCalc = false; // Enclosure solar or thermal radiation properties need recalc due to window/shading status change or envelope EMS
                                 // actuators present
+        Real64 sumAE = 0.0;     // Sum of surface area * emissivity for all surfaces in the enclosure
+        Real64 sumAET = 0.0;    // Sum of surface area * emissivity * temperature for all surfaces in the enclosure
+        Real64 MRT = 0.0;       // Mean radiant temperature of the enclosure
+        bool reCalcMRT = false; // True when MRT needs to be recalculated
     };
 
 } // namespace DataViewFactorInformation
@@ -101,6 +105,14 @@ struct ViewFactorInfoData : BaseGlobalStruct
     int NumOfSolarEnclosures = 0;   // Number of solar enclosures
     EPVector<DataViewFactorInformation::EnclosureViewFactorInformation> EnclRadInfo;
     EPVector<DataViewFactorInformation::EnclosureViewFactorInformation> EnclSolInfo;
+
+    void init_constant_state([[maybe_unused]] EnergyPlusData &state) override
+    {
+    }
+
+    void init_state([[maybe_unused]] EnergyPlusData &state) override
+    {
+    }
 
     void clear_state() override
     {

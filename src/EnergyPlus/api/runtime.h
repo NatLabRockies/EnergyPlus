@@ -1,7 +1,7 @@
-// EnergyPlus, Copyright (c) 1996-2023, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
-// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other
+// National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
 // contributors. All rights reserved.
 //
 // NOTICE: This Software was developed under funding from the U.S. Department of Energy and the
@@ -55,7 +55,8 @@
 #ifdef __cplusplus
 
 // if we are building this with C++ in mind, we can make use of these std::function based callback registration functions
-#include <functional>
+#    include <functional>
+#    include <string>
 ENERGYPLUSLIB_API void callbackBeginNewEnvironment(EnergyPlusState state, std::function<void(EnergyPlusState)> f);
 ENERGYPLUSLIB_API void callbackAfterNewEnvironmentWarmupComplete(EnergyPlusState state, std::function<void(EnergyPlusState)> f);
 ENERGYPLUSLIB_API void callbackBeginZoneTimeStepBeforeInitHeatBalance(EnergyPlusState state, std::function<void(EnergyPlusState)> f);
@@ -74,8 +75,9 @@ ENERGYPLUSLIB_API void callbackEndOfSystemSizing(EnergyPlusState state, std::fun
 ENERGYPLUSLIB_API void callbackEndOfAfterComponentGetInput(EnergyPlusState state, std::function<void(EnergyPlusState)> f);
 ENERGYPLUSLIB_API void callbackUnitarySystemSizing(EnergyPlusState state, const std::function<void(EnergyPlusState)> &f);
 ENERGYPLUSLIB_API void registerStdOutCallback(EnergyPlusState state, std::function<void(const std::string &)>);
+ENERGYPLUSLIB_API void registerProgressCallback(EnergyPlusState state, std::function<void(int const)>);
 ENERGYPLUSLIB_API void registerExternalHVACManager(EnergyPlusState state, std::function<void(EnergyPlusState)> f);
-// ENERGYPLUSLIB_API void callbackUserDefinedComponentModel(EnergyPlusState state, std::function<void (EnergyPlusState)> f);
+ENERGYPLUSLIB_API void callbackUserDefinedComponentModel(EnergyPlusState state, std::function<void(EnergyPlusState)> f, const char *programName);
 
 extern "C" {
 
@@ -386,10 +388,17 @@ ENERGYPLUSLIB_API void callbackEndOfAfterComponentGetInput(EnergyPlusState state
 /// \remark This function is only allowed during API simulations.  For Python Plugin applications, the client will
 ///         create a custom Python class and override specific functions to be called at equivalent points in the simulation.
 ENERGYPLUSLIB_API void callbackUnitarySystemSizing(EnergyPlusState state, void (*f)(EnergyPlusState));
-// The user defined component model won't actually call out to this API endpoint -- it is coupled with a specific
-// plugin instance in the code.
-// ENERGYPLUSLIB_API void callbackUserDefinedComponentModel(EnergyPlusState state, void (*f)());
-
+/// \brief Register a callback function to be called by a specific user-defined model.
+/// \details During an EnergyPlus simulation, a number of predetermined calling points have been established at which
+///          any registered callback functions are "called back".  This API function allows a client to register a function
+///          with no arguments to be called at this specific calling point.  From inside this function, the client can
+///          leverage other API categories to look up property values or exchange data with the simulation as needed.
+/// \param[in] state An active EnergyPlusState instance created with `stateNew`.
+/// \param[in] f The function to be called back at this specific calling point in the simulation.  The function expects one EnergyPlusState argument.
+/// \param[in] programName The name of the program to match up with the user defined equipment object in the input file.
+/// \remark This function is only allowed during API simulations.  For Python Plugin applications, the client will
+///         create a custom Python class and override specific functions to be called at equivalent points in the simulation.
+ENERGYPLUSLIB_API void callbackUserDefinedComponentModel(EnergyPlusState state, void (*f)(EnergyPlusState), const char *programName);
 /// \brief Register a callback function to be used in place of the EnergyPlus ManageHVAC function.
 /// \details This callback is a placeholder for advanced use cases, and will be supported in a future release.
 /// \param[in] state An active EnergyPlusState instance created with `stateNew`.
@@ -398,6 +407,6 @@ ENERGYPLUSLIB_API void registerExternalHVACManager(EnergyPlusState state, void (
 
 #ifdef __cplusplus
 }
-#endif // __cplusplug
+#endif // __cplusplus
 
 #endif // EnergyPlusAPIRuntime_h_INCLUDED

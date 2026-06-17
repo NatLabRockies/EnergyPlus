@@ -1,0 +1,17 @@
+23.1.0,23.2.0,Transition notes - some of these are EMS variable names
+15,15,These numbers should be the number of report variables in the following list (including deletes). Two columns/numbers.
+DistrictHeating:Facility,DistrictHeatingWater:Facility,
+ExteriorEquipment:DistrictHeating,ExteriorEquipment:DistrictHeatingWater,
+Heating:DistrictHeating,Heating:DistrictHeatingWater,
+District Cooling Chilled Water Energy,District Cooling Water Energy,
+District Cooling Chilled Water Rate,District Cooling Water Rate,
+District Cooling Rate,District Cooling Water Rate,
+District Cooling Inlet Temperature,District Cooling Water Inlet Temperature,
+District Cooling Outlet Temperature,District Cooling Water Outlet Temperature,
+District Cooling Mass Flow Rate,District Cooling Water Mass Flow Rate,
+District Heating Hot Water Energy,District Heating Water Energy,
+District Heating Hot Water Rate,District Heating Water Rate,
+District Heating Rate,District Heating Water Rate,
+District Heating Inlet Temperature,District Heating Water Inlet Temperature,
+District Heating Outlet Temperature,District Heating Water Outlet Temperature,
+District Heating Mass Flow Rate,District Heating Water Mass Flow Rate,

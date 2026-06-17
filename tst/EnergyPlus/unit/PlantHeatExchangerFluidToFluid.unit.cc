@@ -1,7 +1,7 @@
-// EnergyPlus, Copyright (c) 1996-2023, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
-// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other
+// National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
 // contributors. All rights reserved.
 //
 // NOTICE: This Software was developed under funding from the U.S. Department of Energy and the
@@ -61,10 +61,12 @@
 #include <EnergyPlus/General.hh>
 #include <EnergyPlus/HeatBalanceManager.hh>
 #include <EnergyPlus/IOFiles.hh>
+#include <EnergyPlus/InputProcessing/InputProcessor.hh>
 #include <EnergyPlus/OutputProcessor.hh>
 #include <EnergyPlus/OutputReportPredefined.hh>
 #include <EnergyPlus/Plant/PlantManager.hh>
 #include <EnergyPlus/PlantHeatExchangerFluidToFluid.hh>
+#include <EnergyPlus/PlantUtilities.hh>
 #include <EnergyPlus/ScheduleManager.hh>
 #include <EnergyPlus/SimulationManager.hh>
 #include <EnergyPlus/WeatherManager.hh>
@@ -809,7 +811,7 @@ TEST_F(EnergyPlusFixture, PlantHXModulatedDualDeadDefectFileHi)
         "    SOURCE Supply Cooling Outlet Node,  !- Setpoint 1 Node Name",
         "    0.003,                   !- Component 1 Flow Rate {m3/s}",
         "    Cooling,                 !- Operation 1 Type",
-        "    DistrictHeating,         !- Equipment 2 Object Type",
+        "    DistrictHeating:Water,         !- Equipment 2 Object Type",
         "    SOURCE Purchased Heating,!- Equipment 2 Name",
         "    SOURCE Supply Heating Inlet Node,  !- Demand Calculation 2 Node Name",
         "    SOURCE Supply Heating Outlet Node,  !- Setpoint 2 Node Name",
@@ -888,12 +890,12 @@ TEST_F(EnergyPlusFixture, PlantHXModulatedDualDeadDefectFileHi)
         "  Branch,",
         "    SOURCE Heating Branch,   !- Name",
         "    ,                        !- Pressure Drop Curve Name",
-        "    DistrictHeating,         !- Component 1 Object Type",
+        "    DistrictHeating:Water,         !- Component 1 Object Type",
         "    SOURCE Purchased Heating,!- Component 1 Name",
         "    SOURCE Supply Heating Inlet Node,  !- Component 1 Inlet Node Name",
         "    SOURCE Supply Heating Outlet Node;  !- Component 1 Outlet Node Name",
 
-        "  DistrictHeating,",
+        "  DistrictHeating:Water,",
         "    SOURCE Purchased Heating,!- Name",
         "    SOURCE Supply Heating Inlet Node,  !- Hot Water Inlet Node Name",
         "    SOURCE Supply Heating Outlet Node,  !- Hot Water Outlet Node Name",
@@ -926,7 +928,7 @@ TEST_F(EnergyPlusFixture, PlantHXModulatedDualDeadDefectFileHi)
         "    SOURCE Demand Mixer;     !- Connector 2 Name",
 
         "  Connector:Splitter,",
-        "    SOURCE Demand Splitter,  !- Nam",
+        "    SOURCE Demand Splitter,  !- Name",
         "    SOURCE Demand Inlet Branch,  !- Inlet Branch Name",
         "    SOURCE Demand HX Branch; !- Outlet Branch 1 Name",
 
@@ -1060,24 +1062,24 @@ TEST_F(EnergyPlusFixture, PlantHXModulatedDualDeadDefectFileHi)
     });
 
     ASSERT_TRUE(process_idf(idf_objects));
+    state->init_state(*state);
+
     bool ErrorsFound = false;
 
     state->dataGlobal->BeginSimFlag = true;
-    SimulationManager::GetProjectData(*state);
 
-    OutputReportPredefined::SetPredefinedTables(*state);
     HeatBalanceManager::SetPreConstructionInputParameters(*state); // establish array bounds for constructions early
     // OutputProcessor::TimeValue.allocate(2);
     OutputProcessor::SetupTimePointers(
-        *state, OutputProcessor::SOVTimeStepType::Zone, state->dataGlobal->TimeStepZone); // Set up Time pointer for HB/Zone Simulation
-    OutputProcessor::SetupTimePointers(*state, OutputProcessor::SOVTimeStepType::HVAC, state->dataHVACGlobal->TimeStepSys);
+        *state, OutputProcessor::TimeStepType::Zone, state->dataGlobal->TimeStepZone); // Set up Time pointer for HB/Zone Simulation
+    OutputProcessor::SetupTimePointers(*state, OutputProcessor::TimeStepType::System, state->dataHVACGlobal->TimeStepSys);
     PlantManager::CheckIfAnyPlant(*state);
     createFacilityElectricPowerServiceObject(*state);
     BranchInputManager::ManageBranchInput(*state); // just gets input and returns.
     state->dataGlobal->DoingSizing = false;
     state->dataGlobal->KickOffSimulation = true;
 
-    WeatherManager::ResetEnvironmentCounter(*state);
+    Weather::ResetEnvironmentCounter(*state);
     SimulationManager::SetupSimulation(*state, ErrorsFound);
     state->dataGlobal->KickOffSimulation = false;
 
@@ -1087,10 +1089,14 @@ TEST_F(EnergyPlusFixture, PlantHXModulatedDualDeadDefectFileHi)
 
     while (Available) {
 
-        WeatherManager::GetNextEnvironment(*state, Available, ErrorsFound);
+        Weather::GetNextEnvironment(*state, Available, ErrorsFound);
 
-        if (!Available) break;
-        if (ErrorsFound) break;
+        if (!Available) {
+            break;
+        }
+        if (ErrorsFound) {
+            break;
+        }
 
         ++EnvCount;
 
@@ -1116,7 +1122,7 @@ TEST_F(EnergyPlusFixture, PlantHXModulatedDualDeadDefectFileHi)
                 state->dataGlobal->BeginHourFlag = true;
                 state->dataGlobal->EndHourFlag = false;
 
-                for (state->dataGlobal->TimeStep = 1; state->dataGlobal->TimeStep <= state->dataGlobal->NumOfTimeStepInHour;
+                for (state->dataGlobal->TimeStep = 1; state->dataGlobal->TimeStep <= state->dataGlobal->TimeStepsInHour;
                      ++state->dataGlobal->TimeStep) {
 
                     state->dataGlobal->BeginTimeStepFlag = true;
@@ -1128,7 +1134,7 @@ TEST_F(EnergyPlusFixture, PlantHXModulatedDualDeadDefectFileHi)
                     // Note also that BeginTimeStepFlag, EndTimeStepFlag, and the
                     // SubTimeStepFlags can/will be set/reset in the HVAC Manager.
 
-                    if (state->dataGlobal->TimeStep == state->dataGlobal->NumOfTimeStepInHour) {
+                    if (state->dataGlobal->TimeStep == state->dataGlobal->TimeStepsInHour) {
                         state->dataGlobal->EndHourFlag = true;
                         if (state->dataGlobal->HourOfDay == 24) {
                             state->dataGlobal->EndDayFlag = true;
@@ -1138,7 +1144,7 @@ TEST_F(EnergyPlusFixture, PlantHXModulatedDualDeadDefectFileHi)
                         }
                     }
 
-                    WeatherManager::ManageWeather(*state);
+                    Weather::ManageWeather(*state);
 
                     HeatBalanceManager::ManageHeatBalance(*state);
 
@@ -1901,7 +1907,7 @@ TEST_F(EnergyPlusFixture, PlantHXModulatedDualDeadDefectFileLo)
         "    SOURCE Supply Cooling Outlet Node,  !- Setpoint 1 Node Name",
         "    0.003,                   !- Component 1 Flow Rate {m3/s}",
         "    Cooling,                 !- Operation 1 Type",
-        "    DistrictHeating,         !- Equipment 2 Object Type",
+        "    DistrictHeating:Water,         !- Equipment 2 Object Type",
         "    SOURCE Purchased Heating,!- Equipment 2 Name",
         "    SOURCE Supply Heating Inlet Node,  !- Demand Calculation 2 Node Name",
         "    SOURCE Supply Heating Outlet Node,  !- Setpoint 2 Node Name",
@@ -1980,12 +1986,12 @@ TEST_F(EnergyPlusFixture, PlantHXModulatedDualDeadDefectFileLo)
         "  Branch,",
         "    SOURCE Heating Branch,   !- Name",
         "    ,                        !- Pressure Drop Curve Name",
-        "    DistrictHeating,         !- Component 1 Object Type",
+        "    DistrictHeating:Water,         !- Component 1 Object Type",
         "    SOURCE Purchased Heating,!- Component 1 Name",
         "    SOURCE Supply Heating Inlet Node,  !- Component 1 Inlet Node Name",
         "    SOURCE Supply Heating Outlet Node;  !- Component 1 Outlet Node Name",
 
-        "  DistrictHeating,",
+        "  DistrictHeating:Water,",
         "    SOURCE Purchased Heating,!- Name",
         "    SOURCE Supply Heating Inlet Node,  !- Hot Water Inlet Node Name",
         "    SOURCE Supply Heating Outlet Node,  !- Hot Water Outlet Node Name",
@@ -2018,7 +2024,7 @@ TEST_F(EnergyPlusFixture, PlantHXModulatedDualDeadDefectFileLo)
         "    SOURCE Demand Mixer;     !- Connector 2 Name",
 
         "  Connector:Splitter,",
-        "    SOURCE Demand Splitter,  !- Nam",
+        "    SOURCE Demand Splitter,  !- Name",
         "    SOURCE Demand Inlet Branch,  !- Inlet Branch Name",
         "    SOURCE Demand HX Branch; !- Outlet Branch 1 Name",
 
@@ -2152,24 +2158,23 @@ TEST_F(EnergyPlusFixture, PlantHXModulatedDualDeadDefectFileLo)
     });
 
     ASSERT_TRUE(process_idf(idf_objects));
+    state->init_state(*state);
     bool ErrorsFound = false;
 
     state->dataGlobal->BeginSimFlag = true;
-    SimulationManager::GetProjectData(*state);
 
-    OutputReportPredefined::SetPredefinedTables(*state);
     HeatBalanceManager::SetPreConstructionInputParameters(*state); // establish array bounds for constructions early
     // OutputProcessor::TimeValue.allocate(2);
     OutputProcessor::SetupTimePointers(
-        *state, OutputProcessor::SOVTimeStepType::Zone, state->dataGlobal->TimeStepZone); // Set up Time pointer for HB/Zone Simulation
-    OutputProcessor::SetupTimePointers(*state, OutputProcessor::SOVTimeStepType::HVAC, state->dataHVACGlobal->TimeStepSys);
+        *state, OutputProcessor::TimeStepType::Zone, state->dataGlobal->TimeStepZone); // Set up Time pointer for HB/Zone Simulation
+    OutputProcessor::SetupTimePointers(*state, OutputProcessor::TimeStepType::System, state->dataHVACGlobal->TimeStepSys);
     PlantManager::CheckIfAnyPlant(*state);
     createFacilityElectricPowerServiceObject(*state);
     BranchInputManager::ManageBranchInput(*state); // just gets input and returns.
     state->dataGlobal->DoingSizing = false;
     state->dataGlobal->KickOffSimulation = true;
 
-    WeatherManager::ResetEnvironmentCounter(*state);
+    Weather::ResetEnvironmentCounter(*state);
     SimulationManager::SetupSimulation(*state, ErrorsFound);
     state->dataGlobal->KickOffSimulation = false;
 
@@ -2179,10 +2184,14 @@ TEST_F(EnergyPlusFixture, PlantHXModulatedDualDeadDefectFileLo)
 
     while (Available) {
 
-        WeatherManager::GetNextEnvironment(*state, Available, ErrorsFound);
+        Weather::GetNextEnvironment(*state, Available, ErrorsFound);
 
-        if (!Available) break;
-        if (ErrorsFound) break;
+        if (!Available) {
+            break;
+        }
+        if (ErrorsFound) {
+            break;
+        }
 
         ++EnvCount;
 
@@ -2208,7 +2217,7 @@ TEST_F(EnergyPlusFixture, PlantHXModulatedDualDeadDefectFileLo)
                 state->dataGlobal->BeginHourFlag = true;
                 state->dataGlobal->EndHourFlag = false;
 
-                for (state->dataGlobal->TimeStep = 1; state->dataGlobal->TimeStep <= state->dataGlobal->NumOfTimeStepInHour;
+                for (state->dataGlobal->TimeStep = 1; state->dataGlobal->TimeStep <= state->dataGlobal->TimeStepsInHour;
                      ++state->dataGlobal->TimeStep) {
 
                     state->dataGlobal->BeginTimeStepFlag = true;
@@ -2220,7 +2229,7 @@ TEST_F(EnergyPlusFixture, PlantHXModulatedDualDeadDefectFileLo)
                     // Note also that BeginTimeStepFlag, EndTimeStepFlag, and the
                     // SubTimeStepFlags can/will be set/reset in the HVAC Manager.
 
-                    if (state->dataGlobal->TimeStep == state->dataGlobal->NumOfTimeStepInHour) {
+                    if (state->dataGlobal->TimeStep == state->dataGlobal->TimeStepsInHour) {
                         state->dataGlobal->EndHourFlag = true;
                         if (state->dataGlobal->HourOfDay == 24) {
                             state->dataGlobal->EndDayFlag = true;
@@ -2230,7 +2239,7 @@ TEST_F(EnergyPlusFixture, PlantHXModulatedDualDeadDefectFileLo)
                         }
                     }
 
-                    WeatherManager::ManageWeather(*state);
+                    Weather::ManageWeather(*state);
 
                     HeatBalanceManager::ManageHeatBalance(*state);
 
@@ -2259,6 +2268,11 @@ TEST_F(EnergyPlusFixture, PlantHXModulatedDualDeadDefectFileLo)
 
 TEST_F(EnergyPlusFixture, PlantHXControlWithFirstHVACIteration)
 {
+    // get availability schedule to work
+    state->dataGlobal->TimeStepsInHour = 1;    // must initialize this to get schedules initialized
+    state->dataGlobal->MinutesInTimeStep = 60; // must initialize this to get schedules initialized
+    state->init_state(*state);
+
     // this unit test is for issue #4959.  Added FirstHVACIteration to simulate and control routines
     // unit test checks that the change to logic for #4959 does work to affect node mass flow rate.  The conditions are set up such that the demand
     // side inlet is too warm to cool the supply side, so previous behavior would shut down flow.  Now if firstHVACIteration is true is should set
@@ -2267,11 +2281,6 @@ TEST_F(EnergyPlusFixture, PlantHXControlWithFirstHVACIteration)
 
     state->dataPlantHXFluidToFluid->FluidHX.allocate(1);
 
-    // get availability schedule to work
-    state->dataGlobal->NumOfTimeStepInHour = 1;    // must initialize this to get schedules initialized
-    state->dataGlobal->MinutesPerTimeStep = 60;    // must initialize this to get schedules initialized
-    ScheduleManager::ProcessScheduleInput(*state); // read schedules
-    state->dataScheduleMgr->ScheduleInputProcessed = true;
     state->dataEnvrn->Month = 1;
     state->dataEnvrn->DayOfMonth = 21;
     state->dataGlobal->HourOfDay = 1;
@@ -2280,8 +2289,8 @@ TEST_F(EnergyPlusFixture, PlantHXControlWithFirstHVACIteration)
     state->dataEnvrn->DayOfWeek = 2;
     state->dataEnvrn->HolidayIndex = 0;
     state->dataEnvrn->DayOfYear_Schedule = General::OrdinalDay(state->dataEnvrn->Month, state->dataEnvrn->DayOfMonth, 1);
-    ScheduleManager::UpdateScheduleValues(*state);
-    state->dataPlantHXFluidToFluid->FluidHX(1).AvailSchedNum = -1;
+    Sched::UpdateScheduleVals(*state);
+    state->dataPlantHXFluidToFluid->FluidHX(1).availSched = Sched::GetScheduleAlwaysOn(*state);
 
     // setup four plant nodes for HX
     state->dataLoopNodes->Node.allocate(4);
@@ -2323,7 +2332,6 @@ TEST_F(EnergyPlusFixture, PlantHXControlWithFirstHVACIteration)
     }
 
     state->dataPlnt->PlantLoop(1).Name = "HX supply side loop ";
-    state->dataPlnt->PlantLoop(1).FluidIndex = 1;
     state->dataPlnt->PlantLoop(1).FluidName = "WATER";
     state->dataPlnt->PlantLoop(1).LoopSide(DataPlant::LoopSideLocation::Demand).Branch(1).Comp(1).Name =
         state->dataPlantHXFluidToFluid->FluidHX(1).Name;
@@ -2331,13 +2339,14 @@ TEST_F(EnergyPlusFixture, PlantHXControlWithFirstHVACIteration)
         DataPlant::PlantEquipmentType::FluidToFluidPlantHtExchg;
     state->dataPlnt->PlantLoop(1).LoopSide(DataPlant::LoopSideLocation::Demand).Branch(1).Comp(1).NodeNumIn =
         state->dataPlantHXFluidToFluid->FluidHX(1).SupplySideLoop.inletNodeNum;
+
     state->dataPlantHXFluidToFluid->FluidHX(1).SupplySideLoop.loopNum = 1;
     state->dataPlantHXFluidToFluid->FluidHX(1).SupplySideLoop.loopSideNum = DataPlant::LoopSideLocation::Demand;
     state->dataPlantHXFluidToFluid->FluidHX(1).SupplySideLoop.branchNum = 1;
     state->dataPlantHXFluidToFluid->FluidHX(1).SupplySideLoop.compNum = 1;
+    PlantUtilities::SetPlantLocationLinks(*state, state->dataPlantHXFluidToFluid->FluidHX(1).SupplySideLoop);
 
     state->dataPlnt->PlantLoop(2).Name = "HX demand side loop ";
-    state->dataPlnt->PlantLoop(2).FluidIndex = 1;
     state->dataPlnt->PlantLoop(2).FluidName = "WATER";
     state->dataPlnt->PlantLoop(2).LoopSide(DataPlant::LoopSideLocation::Demand).Branch(1).Comp(1).Name =
         state->dataPlantHXFluidToFluid->FluidHX(1).Name;
@@ -2350,6 +2359,7 @@ TEST_F(EnergyPlusFixture, PlantHXControlWithFirstHVACIteration)
     state->dataPlantHXFluidToFluid->FluidHX(1).DemandSideLoop.branchNum = 1;
     state->dataPlantHXFluidToFluid->FluidHX(1).DemandSideLoop.compNum = 1;
     state->dataPlantHXFluidToFluid->FluidHX(1).DemandSideLoop.MassFlowRateMax = 2.0;
+    PlantUtilities::SetPlantLocationLinks(*state, state->dataPlantHXFluidToFluid->FluidHX(1).DemandSideLoop);
 
     // when FirstHVACIteration is true, mass flow should match design max
     bool testFirstHVACIteration = true;
@@ -2368,13 +2378,13 @@ TEST_F(EnergyPlusFixture, PlantHXControl_CoolingSetpointOnOffWithComponentOverri
     // this unit test is for issue #5626.  Fixed logic for CoolingSetpointOnOffWithComponentOverride.
     // unit test checks that the change for #5626 adjusts the temperature value used in central plant dispatch routines by the tolerance value.
 
+    // get availability schedule to work
+    state->dataGlobal->TimeStepsInHour = 1;    // must initialize this to get schedules initialized
+    state->dataGlobal->MinutesInTimeStep = 60; // must initialize this to get schedules initialized
+    state->init_state(*state);
+
     state->dataPlantHXFluidToFluid->FluidHX.allocate(1);
 
-    // get availability schedule to work
-    state->dataGlobal->NumOfTimeStepInHour = 1;    // must initialize this to get schedules initialized
-    state->dataGlobal->MinutesPerTimeStep = 60;    // must initialize this to get schedules initialized
-    ScheduleManager::ProcessScheduleInput(*state); // read schedules
-    state->dataScheduleMgr->ScheduleInputProcessed = true;
     state->dataEnvrn->Month = 1;
     state->dataEnvrn->DayOfMonth = 21;
     state->dataGlobal->HourOfDay = 1;
@@ -2383,8 +2393,8 @@ TEST_F(EnergyPlusFixture, PlantHXControl_CoolingSetpointOnOffWithComponentOverri
     state->dataEnvrn->DayOfWeek = 2;
     state->dataEnvrn->HolidayIndex = 0;
     state->dataEnvrn->DayOfYear_Schedule = General::OrdinalDay(state->dataEnvrn->Month, state->dataEnvrn->DayOfMonth, 1);
-    ScheduleManager::UpdateScheduleValues(*state);
-    state->dataPlantHXFluidToFluid->FluidHX(1).AvailSchedNum = -1;
+    Sched::UpdateScheduleVals(*state);
+    state->dataPlantHXFluidToFluid->FluidHX(1).availSched = Sched::GetScheduleAlwaysOn(*state);
 
     // setup four plant nodes for HX
     state->dataLoopNodes->Node.allocate(6);
@@ -2442,7 +2452,6 @@ TEST_F(EnergyPlusFixture, PlantHXControl_CoolingSetpointOnOffWithComponentOverri
     state->dataPlnt->PlantLoop(2).LoopSide(DataPlant::LoopSideLocation::Supply).Branch(1).Comp.allocate(1);
 
     state->dataPlnt->PlantLoop(1).Name = "HX supply side loop ";
-    state->dataPlnt->PlantLoop(1).FluidIndex = 1;
     state->dataPlnt->PlantLoop(1).FluidName = "WATER";
     state->dataPlnt->PlantLoop(1).LoopSide(DataPlant::LoopSideLocation::Supply).Branch(1).Comp(1).Name =
         state->dataPlantHXFluidToFluid->FluidHX(1).Name;
@@ -2452,7 +2461,6 @@ TEST_F(EnergyPlusFixture, PlantHXControl_CoolingSetpointOnOffWithComponentOverri
         state->dataPlantHXFluidToFluid->FluidHX(1).SupplySideLoop.inletNodeNum;
 
     state->dataPlnt->PlantLoop(2).Name = "HX demand side loop ";
-    state->dataPlnt->PlantLoop(2).FluidIndex = 1;
     state->dataPlnt->PlantLoop(2).FluidName = "WATER";
     state->dataPlnt->PlantLoop(2).LoopSide(DataPlant::LoopSideLocation::Demand).Branch(1).Comp(1).Name =
         state->dataPlantHXFluidToFluid->FluidHX(1).Name;
@@ -2468,6 +2476,7 @@ TEST_F(EnergyPlusFixture, PlantHXControl_CoolingSetpointOnOffWithComponentOverri
     state->dataPlantHXFluidToFluid->FluidHX(1).OtherCompSupplySideLoop.loopSideNum = DataPlant::LoopSideLocation::Supply;
     state->dataPlantHXFluidToFluid->FluidHX(1).OtherCompSupplySideLoop.branchNum = 2;
     state->dataPlantHXFluidToFluid->FluidHX(1).OtherCompSupplySideLoop.compNum = 1;
+    PlantUtilities::SetPlantLocationLinks(*state, state->dataPlantHXFluidToFluid->FluidHX(1).OtherCompSupplySideLoop);
 
     state->dataPlantHXFluidToFluid->NumberOfPlantFluidHXs = 1;
 
@@ -2485,6 +2494,50 @@ TEST_F(EnergyPlusFixture, PlantHXControl_CoolingSetpointOnOffWithComponentOverri
     // change the tolerance and check the result, issue 5626 fix subtracts tolerance
     state->dataPlantHXFluidToFluid->FluidHX(1).TempControlTol = 1.5;
     state->dataPlantHXFluidToFluid->FluidHX(1).initialize(*state);
+}
+
+TEST_F(EnergyPlusFixture, PlantHXFluidToFluid_HeatTransferMeteringEndUseType)
+{
+    std::string const idf_objects = R"IDF(
+
+        HeatExchanger:FluidToFluid,
+          Water Side Economizer,                        !- Name
+          ,                                             !- Availability Schedule Name
+          WaterSide Economizer Condenser Inlet Node,    !- Loop Demand Side Inlet Node Name
+          WaterSide Economizer Condenser Outlet Node,   !- Loop Demand Side Outlet Node Name
+          autosize,                                     !- Loop Demand Side Design Flow Rate {m3/s}
+          CW Pump Outlet Node,                          !- Loop Supply Side Inlet Node Name
+          WaterSide Economizer Outlet Node,             !- Loop Supply Side Outlet Node Name
+          autosize,                                     !- Loop Supply Side Design Flow Rate {m3/s}
+          ParallelFlow,                                 !- Heat Exchange Model Type
+          autosize,                                     !- Heat Exchanger U-Factor Times Area Value {W/K}
+          CoolingSetpointModulated,                     !- Control Type
+          WaterSide Economizer Outlet Node,             !- Heat Exchanger Setpoint Node Name
+          1.0,                                          !- Minimum Temperature Difference to Activate Heat Exchanger {deltaC}
+          HeatRecovery;                                 !- Heat Transfer Metering End Use Type
+
+    )IDF";
+
+    EXPECT_FALSE(process_idf(idf_objects, false));
+    std::string const expected_error =
+        "   ** Severe  ** <root>[HeatExchanger:FluidToFluid][Water Side Economizer][heat_transfer_metering_end_use_type] - "
+        "\"HeatRecovery\" - Failed to match against any enum values.\n";
+    compare_err_stream(expected_error, true);
+
+    std::string_view const invalidEndUse = "HeatRecovery";
+    std::array<std::string, 5> const validEndUses = {
+        "FreeCooling", "HeatRejection", "HeatRecoveryForCooling", "HeatRecoveryForHeating", "LoopToLoop"};
+
+    for (std::string validEndUse : validEndUses) {
+        state->dataInputProcessing->clear_state();
+
+        std::string idf_objects_copy(idf_objects);
+        size_t const index = idf_objects_copy.find(invalidEndUse, 0);
+        idf_objects_copy.replace(index, invalidEndUse.length(), validEndUse);
+
+        EXPECT_TRUE(process_idf(idf_objects_copy, false));
+        compare_err_stream("", true);
+    }
 }
 
 } // namespace EnergyPlus

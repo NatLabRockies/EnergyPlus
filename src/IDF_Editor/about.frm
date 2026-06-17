@@ -1,5 +1,5 @@
 VERSION 5.00
-Begin VB.Form About 
+Begin VB.Form About
    BorderStyle     =   3  'Fixed Dialog
    ClientHeight    =   5850
    ClientLeft      =   255
@@ -17,8 +17,8 @@ Begin VB.Form About
    ScaleWidth      =   5280
    ShowInTaskbar   =   0   'False
    StartUpPosition =   1  'CenterOwner
-   Begin VB.TextBox txtNotice 
-      BeginProperty Font 
+   Begin VB.TextBox txtNotice
+      BeginProperty Font
          Name            =   "Courier New"
          Size            =   8.25
          Charset         =   0
@@ -36,7 +36,7 @@ Begin VB.Form About
       Top             =   1560
       Width           =   5055
    End
-   Begin VB.CommandButton cmdSplashClose 
+   Begin VB.CommandButton cmdSplashClose
       Caption         =   "Close"
       Height          =   375
       Left            =   4200
@@ -44,13 +44,13 @@ Begin VB.Form About
       Top             =   5400
       Width           =   975
    End
-   Begin VB.Frame Frame1 
+   Begin VB.Frame Frame1
       Height          =   1380
       Left            =   120
       TabIndex        =   0
       Top             =   0
       Width           =   5025
-      Begin VB.PictureBox Picture1 
+      Begin VB.PictureBox Picture1
          AutoSize        =   -1  'True
          Height          =   540
          Left            =   585
@@ -61,9 +61,9 @@ Begin VB.Form About
          Top             =   465
          Width           =   540
       End
-      Begin VB.Label lblEnableDebugMode 
+      Begin VB.Label lblEnableDebugMode
          AutoSize        =   -1  'True
-         BeginProperty Font 
+         BeginProperty Font
             Name            =   "Arial"
             Size            =   32.25
             Charset         =   0
@@ -78,11 +78,11 @@ Begin VB.Form About
          Top             =   1080
          Width           =   1275
       End
-      Begin VB.Label lblVersion 
+      Begin VB.Label lblVersion
          Alignment       =   1  'Right Justify
          AutoSize        =   -1  'True
-         Caption         =   "Version 1.53"
-         BeginProperty Font 
+         Caption         =   "Version 1.55"
+         BeginProperty Font
             Name            =   "Arial"
             Size            =   12
             Charset         =   0
@@ -92,15 +92,15 @@ Begin VB.Form About
             Strikethrough   =   0   'False
          EndProperty
          Height          =   285
-         Left            =   1710
+         Left            =   1680
          TabIndex        =   1
          Top             =   960
          Width           =   1410
       End
-      Begin VB.Label lblProductName 
+      Begin VB.Label lblProductName
          AutoSize        =   -1  'True
          Caption         =   "IDF Editor"
-         BeginProperty Font 
+         BeginProperty Font
             Name            =   "Arial"
             Size            =   32.25
             Charset         =   0
@@ -116,14 +116,14 @@ Begin VB.Form About
          Width           =   3075
       End
    End
-   Begin VB.Label Label1 
+   Begin VB.Label Label1
       Height          =   615
       Left            =   0
       TabIndex        =   8
       Top             =   0
       Width           =   615
    End
-   Begin VB.Label lblAboutEPVer 
+   Begin VB.Label lblAboutEPVer
       Caption         =   "Label1"
       Height          =   255
       Left            =   120
@@ -151,7 +151,7 @@ End Sub
 
 Private Sub Form_Load()
 lblAboutEPVer.Caption = "EnergyPlus and IDD version number: " & IDDVersion
-txtNotice.Text = "Copyright (c) 2000-2022 GARD Analytics, " & vbCrLf
+txtNotice.Text = "Copyright (c) 2000-2025 GARD Analytics, " & vbCrLf
 txtNotice.Text = txtNotice.Text & "Inc.  All rights reserved." & vbCrLf
 txtNotice.Text = txtNotice.Text & "                                        " & vbCrLf
 txtNotice.Text = txtNotice.Text & "The code for quick select dropdowns     " & vbCrLf

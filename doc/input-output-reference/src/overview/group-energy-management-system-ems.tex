@@ -27,26 +27,25 @@ The name of the output variable or meter that is to be mapped to the Erl variabl
 Examples of this object follow.
 
 \begin{lstlisting}
+EnergyManagementSystem:Sensor,
+  T1,                         !- Name
+  Perimeter_ZN_1,             !- Output:Variable or Output:Meter Index Key Name
+  Zone Mean Air Temperature;  !- Output:Variable or Output:Meter Name
 
 EnergyManagementSystem:Sensor,
-  T1, !Name
-  Perimeter_ZN_1 , ! Output:Variable or Output:Meter Index Key Name
-  Zone Mean Air Temperature ; ! Output:Variable or Output:Meter Name
+  PMV5,                       !- Name
+  Core_ZN,                    !- Output:Variable Index Key Name
+  Zone Thermal Comfort Fanger Model PMV;  !- Output:Variable Name
 
-  EnergyManagementSystem:Sensor,
-  PMV5, !Name
-  Core_ZN , ! Output:Variable Index Key Name
-  Zone Thermal Comfort Fanger Model PMV ; ! Output:Variable Name
+EnergyManagementSystem:Sensor,
+  T_VAV5FanIn,                !- Name
+  VAV_5_HeatC-VAV_5_FanNode,  !- Output:Variable Index Key Name
+  System Node Temperature;    !- Output:Variable Name
 
-  EnergyManagementSystem:Sensor,
-  T_VAV5FanIn, !Name
-  VAV_5_HeatC-VAV_5_FanNode , ! Output:Variable Index Key Name
-  System Node Temperature ; ! Output:Variable Name
-
-  EnergyManagementSystem:Sensor,
-  cooling_setpoint,                                   ! Name
-  CLGSETP_SCH ,                 ! Output:Variable Index Key Name
-  Schedule Value ; ! Output:Variable Name
+EnergyManagementSystem:Sensor,
+  cooling_setpoint,           !- Name
+  CLGSETP_SCH,                !- Output:Variable Index Key Name
+  Schedule Value;             !- Output:Variable Name
 \end{lstlisting}
 
 \subsection{EnergyManagementSystem:Actuator}\label{energymanagementsystemactuator}
@@ -74,24 +73,23 @@ This field defines the type of control to be done on the specific entity being c
 Example input objects.
 
 \begin{lstlisting}
+EnergyManagementSystem:Actuator,
+  VAV_5_NightCycleStatus,     !- Name
+  VAV_5,                      !- Actuated Component Unique Name
+  AirLoopHVAC,                !- Actuated Component Type
+  Availability Status;        !- Actuated Component Control Type
 
 EnergyManagementSystem:Actuator,
-  VAV_5_NightCycleStatus,     ! Name
-  VAV_5,                                       ! Actuated Component Unique Name
-  AirLoopHVAC,                           ! Actuated Component Type
-  Availability Status;           ! Actuated Component Control Type
+  VAV_1_SAT_setpoint,         !- Name
+  VAV_1 Supply Equipment Outlet Node,  !- Actuated Component Unique Name
+  System Node Setpoint,       !- Actuated Component Type
+  Temperature Setpoint;       !- Actuated Component Control Type
 
-  EnergyManagementSystem:Actuator,
-  VAV_1_SAT_setpoint,                                       ! Name
-  VAV_1 Supply Equipment Outlet Node ,     ! Actuated Component Unique Name
-  System Node Setpoint,                                   ! Actuated Component Type
-  Temperature Setpoint;                                   ! Actuated Component Control Type
-
-  EnergyManagementSystem:Actuator,
-  myCLGSETP_SCH_Override,                             ! Name
-  CLGSETP_SCH,                                                   !- Actuated Component Unique Name
-  Schedule:Constant,                                       ! Actuated Component Type
-  Schedule Value;                                             ! Actuated Component Control Type
+EnergyManagementSystem:Actuator,
+  myCLGSETP_SCH_Override,     !- Name
+  CLGSETP_SCH,                !- Actuated Component Unique Name
+  Schedule:Constant,          !- Actuated Component Type
+  Schedule Value;             !- Actuated Component Control Type
 \end{lstlisting}
 
 \subsection{EnergyManagementSystem:ProgramCallingManager}\label{energymanagementsystemprogramcallingmanager}
@@ -114,7 +112,7 @@ This field describes when the Erl programs managed under this object are called 
 \item
   BeginNewEnvironment. This calling point occurs near the beginning of each environment period. Environment periods include sizing periods such as design days and run periods. This calling point will not be useful for control actions but is useful for initialization of Erl program variables and other one-time set up actions for EMS.
 \item
-  BeginZoneTimestepBeforeSetCurrentWeather. This calling point occurs near the beginning of each timestep during weather data setup. It is called from ``ManageWeather'' before ``SetCurrentWeather'' which sets the environment variables for a given timstep. ``SetCurrentWeather'' is where the Weather Data actuators may override certain environment variables. Note that this calling point is not active during sizing.
+  BeginZoneTimestepBeforeSetCurrentWeather. This calling point occurs near the beginning of each timestep during weather data setup. It is called from ``ManageWeather'' before ``SetCurrentWeather'' which sets the environment variables for a given timestep. ``SetCurrentWeather'' is where the Weather Data actuators may override certain environment variables. Note that this calling point is not active during sizing.
 \item
   AfterNewEnvironmentWarmUpIsComplete. This calling point occurs at the beginning of each environment period but after warm up days are complete. Warm up days are used to condition the transient aspects of the model with the first day before proceeding. This calling point will not be useful for control actions but is useful for re-initializing Erl programs with fresh values after warm up is complete. Programs called from this point might be used to reset counters or summed variables that would change during warmup.
 \item
@@ -130,7 +128,7 @@ This field describes when the Erl programs managed under this object are called 
 \item
   AfterPredictorAfterHVACManagers. This calling point happens each timestep after predictor executes and after the SetpointManager and AvailabilityManager models are called. This calling point is useful for a variety of control actions. However, if there are conflicts, SetpointManager or AvailabilityManager actions may be overwritten by EMS control actions.
 \item
-  InsideHVACSystemIterationLoop. This calling point happens each HVAC iteration. The HVAC systems solvers iterate to convergence within each timestep and this calling point is inside this iteration loop. This calling point is useful for a variety of control actions. Being inside the interation loop, this calling point has the advantage that input data need not necessarily be lagged from prior timestep results and can, in some cases, improve the accuracy of controls. The disadvantage is that programs may run an excessive number of times slowing down the execution of the program.
+  InsideHVACSystemIterationLoop. This calling point happens each HVAC iteration. The HVAC systems solvers iterate to convergence within each timestep and this calling point is inside this iteration loop. This calling point is useful for a variety of control actions. Being inside the iteration loop, this calling point has the advantage that input data need not necessarily be lagged from prior timestep results and can, in some cases, improve the accuracy of controls. The disadvantage is that programs may run an excessive number of times slowing down the execution of the program.
 \item
   EndOfZoneTimestepBeforeZoneReporting. This calling point happens each zone timestep just before the output reports are updated for zone-timestep variables and meters. This calling point is useful for custom output variables with Zone frequency because they will be in sync with the rest of the zone output variables.
 \item
@@ -142,7 +140,7 @@ This field describes when the Erl programs managed under this object are called 
 \item
   EndOfZoneSizing. This calling point happens once during each simulation and only if the run is set to do zone sizing. The calling point occurs just after the native zone sizing calculations are completed but before the sizing results are finalized. This calling point is useful for taking the intermediate results of zone sizing calculations and modifying them based on custom calculations.
 \item
-  EndOfSystemSizing. This calling pont happens once during each simulation and only if the run is set to do system sizing. The calling point occurs just after the native air system sizing calculations are completed but before the sizing results are finalized. This calling point is useful for taking the intermediate results of zone and system sizing calculations and modifying them based on custom calculations.
+  EndOfSystemSizing. This calling point happens once during each simulation and only if the run is set to do system sizing. The calling point occurs just after the native air system sizing calculations are completed but before the sizing results are finalized. This calling point is useful for taking the intermediate results of zone and system sizing calculations and modifying them based on custom calculations.
 \item
   AfterComponentInputReadIn. This calling point occurs early in the simulation when HVAC component s input data has been processed but before any component-level calculations for automatic sizing. This calling point occurs once for each of the types of HVAC components that have EMS actuators for autosize overrides. This calling point is not directly useful for control actions but is useful for overriding the results of sizing at the component level.
 \item
@@ -162,17 +160,15 @@ The name of the \hyperref[energymanagementsystemprogram]{EnergyManagementSystem:
 IDF examples:
 
 \begin{lstlisting}
+EnergyManagementSystem:ProgramCallingManager,
+  Initialize EMS for Run,     !- Name
+  BeginNewEnvironment,        !- EnergyPlus Model Calling Point
+  InitializeMyEMS;            !- Program Name 1
 
 EnergyManagementSystem:ProgramCallingManager,
-  Initialize EMS for Run , ! Name
-  BeginNewEnvironment ,       ! EnergyPlus Model Calling Point
-  InitializeMyEMS;                 ! Program Name 1
-
-
-  EnergyManagementSystem:ProgramCallingManager,
-  EMS-based Setpoint Managers , ! Name
-  AfterPredictorAfterHVACManagers , ! EnergyPlus Model Calling Point
-  VAV_5_SchedSetpoint , !Program Name 2
+  EMS-based Setpoint Managers,!- Name
+  AfterPredictorAfterHVACManagers,  !- EnergyPlus Model Calling Point
+  VAV_5_SchedSetpoint,        !- Program Name 2
   VAV5MixedAirManagers,
   VAV_1_SchedSetpoint,
   VAV1MixedAirManagers,
@@ -208,31 +204,29 @@ Each remaining field contains a single line of code for the \emph{EnergyPlus Run
 Example IDF input objects follow.
 
 \begin{lstlisting}
-
 EnergyManagementSystem:Program,
-  RH_OpeningController ,         ! Name
+  RH_OpeningController,       !- Name
   IF ZoneRH < 25,
-  SET MyOpenFactor = 0.0 ,
+  SET MyOpenFactor = 0.0,
   ELSEIF ZoneRH > 60,
-  SET MyOpenFactor = 1.0 ,
+  SET MyOpenFactor = 1.0,
   ELSE,
   SET MyOpenFactor = (ZoneRH - 25) / (60 - 25),
   ENDIF;
 
-  EnergyManagementSystem:Program,
-  AverageZoneTemps , ! Name
-  SET Zn1vol = 346.0225, ! zone air volume
-  SET Zn2vol = 205.2650, ! zone air volume
-  SET Zn3vol = 346.0225, ! zone air volume
-  SET Zn4vol = 205.2650, ! zone air volume
-  SET Zn5vol = 456.4551, ! zone air volume
+EnergyManagementSystem:Program,
+  AverageZoneTemps,           !- Name
+  SET Zn1vol = 346.0225,      !- zone air volume
+  SET Zn2vol = 205.2650,      !- zone air volume
+  SET Zn3vol = 346.0225,      !- zone air volume
+  SET Zn4vol = 205.2650,      !- zone air volume
+  SET Zn5vol = 456.4551,      !- zone air volume
   SET SumNumerator = T1*Zn1vol + T2*Zn2vol + T3*Zn3vol + T4*Zn4vol + T5*Zn5vol,
   SET SumDenominator = Zn1vol + Zn2vol + Zn3vol + Zn4vol + Zn5vol,
   SET AverageBuildingTemp = SumNumerator / SumDenominator;
 
-
-  EnergyManagementSystem:Program,
-  VAV2MixedAirManagers , ! Name
+EnergyManagementSystem:Program,
+  VAV2MixedAirManagers,       !- Name
   SET VAV_2_CoolC_Setpoint = Seasonal_Reset_SAT_Sched - ( T_VAV2FanOut - T_VAV2FanIn),
   SET VAV_2_HeatC_Setpoint = Seasonal_Reset_SAT_Sched - ( T_VAV2FanOut - T_VAV2FanIn),
   SET VAV_2_OA_Setpoint = Seasonal_Reset_SAT_Sched - ( T_VAV2FanOut - T_VAV2FanIn);
@@ -255,22 +249,21 @@ Each remaining field contains a single line of code for the \emph{EnergyPlus Run
 IDF examples:
 
 \begin{lstlisting}
+EnergyManagementSystem:Subroutine,
+  Add4ToN,                    !- Name
+  SET N = N + 4;              !- EnergyPlus Runtime Language
 
 EnergyManagementSystem:Subroutine,
-  Add4ToN,                                                           !- Name
-  SET N = N + 4;                                               !- EnergyPlus Runtime Language
-
-  EnergyManagementSystem:Subroutine,
-  manage_ext_lights,                                       !- Name
-  IF inc_solar > 0,                                         !- EnergyPlus Runtime Language
+  manage_ext_lights,          !- Name
+  IF inc_solar > 0,           !- EnergyPlus Runtime Language
   SET ext_lights_pwr = Off,
   ELSE,
   SET ext_lights_pwr = On,
   ENDIF;
 
-  EnergyManagementSystem:Subroutine,
-  manage_solar_collector,                             !- Name
-  IF Tout_F < 32,                                             !- EnergyPlus Runtime Language
+EnergyManagementSystem:Subroutine,
+  manage_solar_collector,     !- Name
+  IF Tout_F < 32,             !- EnergyPlus Runtime Language
   SET pump_pwr = On,
   EXIT,
   ENDIF,
@@ -295,20 +288,17 @@ The name becomes the global Erl variable name that can be referenced in the \emp
 IDF examples using this object follow:
 
 \begin{lstlisting}
-
 EnergyManagementSystem:GlobalVariable,
-  global_var;                                                                   !- Name
+  global_var;                 !- Name
 
-  EnergyManagementSystem:GlobalVariable, Temp_C;
-
-  EnergyManagementSystem:GlobalVariable, Temp_F;
-
-  EnergyManagementSystem:Subroutine,
-  CalcFahrenheit,                                                           !- Name
+EnergyManagementSystem:GlobalVariable, Temp_C;
+EnergyManagementSystem:GlobalVariable, Temp_F;
+EnergyManagementSystem:Subroutine,
+  CalcFahrenheit,             !- Name
   SET Temp_F = Temp_C * (9/5) + 32;
 
-  EnergyManagementSystem:Program,
-  DummyProgram,                                                               !- Name
+EnergyManagementSystem:Program,
+  DummyProgram,               !- Name
   SET Temp_C = Tout,
   RUN CalcFahrenheit,
   SET Tout_F = Temp_F,
@@ -352,23 +342,21 @@ This field should contain the units for the output variable in standard EnergyPl
 Examples of this object follow.
 
 \begin{lstlisting}
-
 EnergyManagementSystem:OutputVariable,
-  Weighted Average Building Zone Air Temperature, ! Name
-  AverageBuildingTemp, ! EMS Variable Name
-  Averaged, ! Type of Data in Variable
-  ZoneTimeStep , ! Update Frequency
-  ,           ! EMS Program or Subroutine Name
+  Weighted Average Building Zone Air Temperature,  !- Name
+  AverageBuildingTemp,        !- EMS Variable Name
+  Averaged,                   !- Type of Data in Variable
+  ZoneTimeStep,               !- Update Frequency
+  ,                           !- EMS Program or Subroutine Name
   C;
 
-
-  EnergyManagementSystem:OutputVariable,
-  Main CW Coil Total Cooling Rate,   !- Name
-  CWcoil1_tot_cool_Power,   !- EMS Variable Name
-  Averaged,                               !- Type of Data in Variable
-  SystemTimestep,                   !- Update Frequency
-  MainCWCoil1_ModelOuput,   !- EMS Program or Subroutine Name
-  W;                                             !- Units
+EnergyManagementSystem:OutputVariable,
+  Main CW Coil Total Cooling Rate,  !- Name
+  CWcoil1_tot_cool_Power,     !- EMS Variable Name
+  Averaged,                   !- Type of Data in Variable
+  SystemTimestep,             !- Update Frequency
+  MainCWCoil1_Modeloutput,    !- EMS Program or Subroutine Name
+  W;                          !- Units
 \end{lstlisting}
 
 \subsection{EnergyManagementSystem:MeteredOutputVariable}\label{energymanagementsystemmeteredoutputvariable}
@@ -431,7 +419,7 @@ This field is used to specify the type of resource that the output variable cons
 \item
   \textbf{\hyperref[districtcooling]{DistrictCooling}}, this selects the meter for district chilled water energy consumption, in units of Joules {[}J{]},
 \item
-  \textbf{\hyperref[districtheating]{DistrictHeating}}, this selects the meter for district hot water energy consumption, in units of Joules {[}J{]},
+  \textbf{\hyperref[districtheating]{DistrictHeatingWater}}, this selects the meter for district hot water energy consumption, in units of Joules {[}J{]},
 \item
   \textbf{ElectricityProducedOnSite}, this selects the meter for electricity produced on the site, in units of Joules {[}J{]},
 \item
@@ -499,17 +487,16 @@ This field should contain the units for the output variable in standard EnergyPl
 Examples of this object follow.
 
 \begin{lstlisting}
-
 EnergyManagementSystem:MeteredOutputVariable,
-  Zone 1 WinAC Electricity Consumption,   !- Name
-  Zone1WinAC_ElectEnergy,   !- EMS Variable Name
-  SystemTimestep,                   !- Update Frequency
-  Zone1_WinAC_ModelOuput,   !- EMS Program or Subroutine Name
-  Electricity,                         !- Resource Type
-  HVAC,                                       !- Group Type
-  Cooling,                                 !- End-Use Category
-  Window Air Conditioners, !- End-Use Subcategory
-  J;                                             !- Units
+  Zone 1 WinAC Electricity Consumption,  !- Name
+  Zone1WinAC_ElectEnergy,     !- EMS Variable Name
+  SystemTimestep,             !- Update Frequency
+  Zone1_WinAC_Modeloutput,    !- EMS Program or Subroutine Name
+  Electricity,                !- Resource Type
+  HVAC,                       !- Group Type
+  Cooling,                    !- End-Use Category
+  Window Air Conditioners,    !- End-Use Subcategory
+  J;                          !- Units
 \end{lstlisting}
 
 \subsection{EnergyManagementSystem:TrendVariable}\label{energymanagementsystemtrendvariable}
@@ -520,7 +507,7 @@ The EnergyManagementSystem:TrendVariable object declares a global trend EMS vari
 
 \paragraph{Field: Name}\label{field-name-7-005}
 
-The object name becomes the global EMS trend variable name that can be referenced in the \emph{EnergyPlus Runtime Language}. No spaces or any other special characters are allowed in the name. Then name must be unique across all global scope variables including those declared as sensor and actuators and the built-in variables.
+The object name becomes the global EMS trend variable name that can be referenced in the \emph{EnergyPlus Runtime Language}. No spaces or any other special characters are allowed in the name. The name must be unique across all global scope variables including those declared as sensor and actuators and the built-in variables.
 
 \paragraph{Field: EMS Variable Name}\label{field-ems-variable-name-2}
 
@@ -533,17 +520,15 @@ This field describes how much data are to be held in the trend variable. The tre
 Examples of this object follow.
 
 \begin{lstlisting}
+EnergyManagementSystem:TrendVariable,
+  AvgTemptrendLog1,           !- Name
+  AverageBuildingTemp,        !- EMS Variable Name
+  300;                        !- Number of Timesteps to be Logged
 
 EnergyManagementSystem:TrendVariable,
-  AvgTemptrendLog1,                   !- Name
-  AverageBuildingTemp,             !- EMS Variable Name
-  300;                                             !- Number of Timesteps to be Logged
-
-
-  EnergyManagementSystem:TrendVariable,
-  PMVtrendLog1, ,                       !- Name
-  PMV5,                                           !- EMS Variable Name
-  144;                                             !- Number of Timesteps to be Logged
+  PMVtrendLog1,,              !- Name
+  PMV5,                       !- EMS Variable Name
+  144;                        !- Number of Timesteps to be Logged
 \end{lstlisting}
 
 \subsection{EnergyManagementSystem:InternalVariable}\label{energymanagementsysteminternalvariable}
@@ -562,16 +547,15 @@ This field contains the unique identifier for the internal variable. This is usu
 
 \paragraph{Field: Internal Data Type}\label{field-internal-data-type}
 
-This field defines the type of internal data source that is to be mapped to the EMS variable. The types of internal source data that can be used as internal variables are listed in the EIO output file whan an input file has any EMS-related objects.
+This field defines the type of internal data source that is to be mapped to the EMS variable. The types of internal source data that can be used as internal variables are listed in the EIO output file when an input file has any EMS-related objects.
 
 An example of this object follows.
 
 \begin{lstlisting}
-
 EnergyManagementSystem:InternalVariable,
-  Zn1vol,                   !- Name
-  Perimeter_ZN_1,   !- Internal Data Index Key Name
-  Zone Air Volume; !- Internal Data Type
+  Zn1vol,                     !- Name
+  Perimeter_ZN_1,             !- Internal Data Index Key Name
+  Zone Air Volume;            !- Internal Data Type
 \end{lstlisting}
 
 \subsection{EnergyManagementSystem:CurveOrTableIndexVariable}\label{energymanagementsystemcurveortableindexvariable}
@@ -591,10 +575,9 @@ This field contains the unique name of a Curve:* or Table:* object defined elsew
 An example IDF object is:
 
 \begin{lstlisting}
-
 EnergyManagementSystem:CurveOrTableIndexVariable,
-  Curve_Quadratic_Ptr,             !- Name
-  HPACCOOLPLFFPLR_curve;         !- Curve or Table Object Name
+  Curve_Quadratic_Ptr,        !- Name
+  HPACCOOLPLFFPLR_curve;      !- Curve or Table Object Name
 \end{lstlisting}
 
 \subsection{EnergyManagementSystem:ConstructionIndexVariable}\label{energymanagementsystemconstructionindexvariable}
@@ -614,17 +597,15 @@ This field contains the unique name of a Construction object defined elsewhere i
 An example IDF object is:
 
 \begin{lstlisting}
-
 Construction,
-  TCwindow_25,                               !- Name
-  Clear3PPG,                             !- Outside Layer
-  AIR 3MM,                                 !- Layer 2
-  WO18RT25,                           !- Layer 3
-  AIR 8MM,                                 !- Layer 4
-  SB60Clear3PPG;                     !- Layer 5
+  TCwindow_25,                !- Name
+  Clear3PPG,                  !- Outside Layer
+  AIR 3MM,                    !- Layer 2
+  WO18RT25,                   !- Layer 3
+  AIR 8MM,                    !- Layer 4
+  SB60Clear3PPG;              !- Layer 5
 
-
-  EnergyManagementSystem:ConstructionIndexVariable,
+EnergyManagementSystem:ConstructionIndexVariable,
   TCwindow_25,
   TCwindow_25;
 \end{lstlisting}

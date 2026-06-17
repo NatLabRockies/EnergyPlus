@@ -1,7 +1,7 @@
-// EnergyPlus, Copyright (c) 1996-2023, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
-// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other
+// National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
 // contributors. All rights reserved.
 //
 // NOTICE: This Software was developed under funding from the U.S. Department of Energy and the
@@ -88,8 +88,7 @@ namespace PlantComponentTemperatureSources {
         Real64 EMSOverrideValueMassFlowRateMax; // value to use if EMS is overriding max mass flow
         Real64 MassFlowRate;
         TempSpecType tempSpecType; // temperature specification type
-        std::string TempSpecScheduleName;
-        int TempSpecScheduleNum;
+        Sched::Schedule *tempSpecSched = nullptr;
         Real64 BoundaryTemp;
         Real64 OutletTemp; // may be different if the flow is off
         Real64 InletTemp;
@@ -106,8 +105,8 @@ namespace PlantComponentTemperatureSources {
         WaterSourceSpecs()
             : InletNodeNum(0), OutletNodeNum(0), DesVolFlowRate(0.0), DesVolFlowRateWasAutoSized(false), MassFlowRateMax(0.0),
               EMSOverrideOnMassFlowRateMax(false), EMSOverrideValueMassFlowRateMax(0.0), MassFlowRate(0.0), tempSpecType(TempSpecType::Invalid),
-              TempSpecScheduleNum(0), BoundaryTemp(0.0), OutletTemp(0.0), InletTemp(0.0), HeatRate(0.0), HeatEnergy(0.0), plantLoc{}, SizFac(0.0),
-              CheckEquipName(true), MyFlag(true), MyEnvironFlag(true), IsThisSized(false)
+              BoundaryTemp(0.0), OutletTemp(0.0), InletTemp(0.0), HeatRate(0.0), HeatEnergy(0.0), plantLoc{}, SizFac(0.0), CheckEquipName(true),
+              MyFlag(true), MyEnvironFlag(true), IsThisSized(false)
         {
         }
 
@@ -152,6 +151,14 @@ struct PlantCompTempSrcData : BaseGlobalStruct
     int NumSources = 0;
     bool getWaterSourceInput = true;
     EPVector<PlantComponentTemperatureSources::WaterSourceSpecs> WaterSource;
+
+    void init_constant_state([[maybe_unused]] EnergyPlusData &state) override
+    {
+    }
+
+    void init_state([[maybe_unused]] EnergyPlusData &state) override
+    {
+    }
 
     void clear_state() override
     {

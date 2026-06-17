@@ -1,0 +1,4 @@
+#!/bin/bash
+trap '' HUP
+"$(dirname "$0")/energyplus" auxiliary @ARGUMENT@ &
+trap - HUP

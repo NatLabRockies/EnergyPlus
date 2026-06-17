@@ -1,7 +1,7 @@
-// EnergyPlus, Copyright (c) 1996-2023, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
-// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other
+// National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
 // contributors. All rights reserved.
 //
 // NOTICE: This Software was developed under funding from the U.S. Department of Energy and the
@@ -161,7 +161,7 @@ namespace HeatPumpWaterToWaterSimple {
 
         virtual ~GshpSpecs() = default;
 
-        static PlantComponent *factory(EnergyPlusData &state, DataPlant::PlantEquipmentType wwhp_type, std::string eir_wwhp_name);
+        static GshpSpecs *factory(EnergyPlusData &state, DataPlant::PlantEquipmentType wwhp_type, std::string_view eir_wwhp_name);
 
         static void GetWatertoWaterHPInput(EnergyPlusData &state);
 
@@ -209,8 +209,14 @@ struct HeatPumpWaterToWaterSimpleData : BaseGlobalStruct
     bool GetInputFlag = true;
     Array1D<HeatPumpWaterToWaterSimple::GshpSpecs> GSHP;
     std::unordered_map<std::string, std::string> HeatPumpWaterUniqueNames;
-    Real64 CurrentSimTime = 0.0;
-    Real64 PrevSimTime = 0.0;
+
+    void init_constant_state([[maybe_unused]] EnergyPlusData &state) override
+    {
+    }
+
+    void init_state([[maybe_unused]] EnergyPlusData &state) override
+    {
+    }
 
     void clear_state() override
     {
@@ -218,8 +224,6 @@ struct HeatPumpWaterToWaterSimpleData : BaseGlobalStruct
         this->GetInputFlag = true;
         this->GSHP.deallocate();
         this->HeatPumpWaterUniqueNames.clear();
-        this->CurrentSimTime = 0.0;
-        this->PrevSimTime = 0.0;
     }
 };
 

@@ -1,7 +1,7 @@
-// EnergyPlus, Copyright (c) 1996-2023, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
-// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other
+// National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
 // contributors. All rights reserved.
 //
 // NOTICE: This Software was developed under funding from the U.S. Department of Energy and the
@@ -59,6 +59,7 @@
 #include <EnergyPlus/DataHeatBalance.hh>
 #include <EnergyPlus/DataSizing.hh>
 #include <EnergyPlus/DataZoneEnergyDemands.hh>
+#include <EnergyPlus/DataZoneEquipment.hh>
 #include <EnergyPlus/EnergyPlus.hh>
 
 namespace EnergyPlus {
@@ -70,8 +71,8 @@ namespace ZoneEquipmentManager {
 
     struct SimulationOrder
     {
-        std::string EquipType;
-        int EquipTypeEnum = 0;
+        std::string EquipTypeName;
+        DataZoneEquipment::ZoneEquipType equipType = DataZoneEquipment::ZoneEquipType::Invalid;
         std::string EquipName;
         int EquipPtr = 0;
         int CoolingPriority = 0;
@@ -88,13 +89,97 @@ namespace ZoneEquipmentManager {
 
     void InitZoneEquipment(EnergyPlusData &state, bool FirstHVACIteration); // unused 1208
 
+    void sizeZoneSpaceEquipmentPart1(EnergyPlusData &state,
+                                     DataZoneEquipment::EquipConfiguration &ZoneEquipConfig,
+                                     DataSizing::ZoneSizingData &zsCalcSizing,
+                                     DataZoneEnergyDemands::ZoneSystemSensibleDemand &zsEnergyDemand,
+                                     DataZoneEnergyDemands::ZoneSystemMoistureDemand &zsMoistureDemand,
+                                     DataHeatBalance::ZoneData const &zoneOrSpace,
+                                     int zoneNum,
+                                     int spaceNum = 0);
+
+    void sizeZoneSpaceEquipmentPart2(EnergyPlusData &state,
+                                     DataZoneEquipment::EquipConfiguration &zoneEquipConfig,
+                                     DataSizing::ZoneSizingData &zsCalcSizing,
+                                     int zoneNum,
+                                     int spaceNum = 0);
+
     void SizeZoneEquipment(EnergyPlusData &state);
 
     void SetUpZoneSizingArrays(EnergyPlusData &state);
 
+    void calcSizingOA(EnergyPlusData &state,
+                      DataSizing::ZoneSizingData &zsFinalSizing,
+                      DataSizing::ZoneSizingData &zsCalcFinalSizing,
+                      bool &dsoaError,
+                      bool &ErrorsFound,
+                      int const zoneNum,
+                      int const spaceNum = 0);
+
+    void fillZoneSizingFromInput(EnergyPlusData &state,
+                                 DataSizing::ZoneSizingInputData const &zoneSizingInput,
+                                 Array2D<DataSizing::ZoneSizingData> &zsSizing,
+                                 Array2D<DataSizing::ZoneSizingData> &zsCalcSizing,
+                                 DataSizing::ZoneSizingData &zsFinalSizing,
+                                 DataSizing::ZoneSizingData &zsCalcFinalSizing,
+                                 std::string_view const zoneOrSpaceName,
+                                 int const zoneOrSpaceNum);
+
     void RezeroZoneSizingArrays(EnergyPlusData &state);
 
-    void UpdateZoneSizing(EnergyPlusData &state, DataGlobalConstants::CallIndicator CallIndicator);
+    void UpdateZoneSizing(EnergyPlusData &state, Constant::CallIndicator CallIndicator);
+
+    void updateZoneSizingBeginDay(EnergyPlusData const &state, DataSizing::ZoneSizingData &zsCalcSizing);
+
+    void updateZoneSizingDuringDay(DataSizing::ZoneSizingData &zsSizing,
+                                   DataSizing::ZoneSizingData &zsCalcSizing,
+                                   Real64 const tstatHi,
+                                   Real64 const tstatLo,
+                                   Real64 &sizTstatHi,
+                                   Real64 &sizTstatLo,
+                                   int const timeStepInDay,
+                                   Real64 const fracTimeStepZone);
+
+    void updateZoneSizingEndDayMovingAvg(DataSizing::ZoneSizingData &zsCalcSizing, int const numTimeStepsInAvg);
+
+    void updateZoneSizingEndDay(DataSizing::ZoneSizingData &zsCalcSizing,
+                                DataSizing::ZoneSizingData &zsCalcFinalSizing,
+                                int const numTimeStepInDay,
+                                DataSizing::DesDayWeathData const &desDayWeath,
+                                Real64 const stdRhoAir);
+
+    void updateZoneSizingEndZoneSizingCalc1(EnergyPlusData &state, int const zoneNum);
+
+    void updateZoneSizingEndZoneSizingCalc2(EnergyPlusData &state, DataSizing::ZoneSizingData &zsCalcSizing);
+
+    void writeZszSpsz(EnergyPlusData &state,
+                      EnergyPlus::InputOutputFile &outputFile,
+                      int const numSpacesOrZones,
+                      EPVector<DataSizing::ZoneSizingData> const &zsCalcFinalSizing,
+                      Array2D<DataSizing::ZoneSizingData> const &zsCalcSizing,
+                      bool const forSpaces);
+
+    std::string sizingPeakTimeStamp(EnergyPlusData const &state, int timeStepIndex);
+
+    void updateZoneSizingEndZoneSizingCalc3(DataSizing::ZoneSizingData &zsCalcFinalSizing,
+                                            Array2D<DataSizing::ZoneSizingData> &zsCalcSizing,
+                                            bool &anyLatentLoad,
+                                            int const zoneOrSpaceNum);
+
+    void updateZoneSizingEndZoneSizingCalc4(DataSizing::ZoneSizingData &zsSizing, DataSizing::ZoneSizingData const &zsCalcSizing);
+
+    void updateZoneSizingEndZoneSizingCalc5(DataSizing::ZoneSizingData &zsFinalSizing, DataSizing::ZoneSizingData const &zsCalcFinalSizing);
+
+    void updateZoneSizingEndZoneSizingCalc6(DataSizing::ZoneSizingData &zsSizing,
+                                            DataSizing::ZoneSizingData const &zsCalcSizing,
+                                            int const numTimeStepsInDay);
+
+    void updateZoneSizingEndZoneSizingCalc7(EnergyPlusData &state,
+                                            DataSizing::ZoneSizingData &zsFinalSizing,
+                                            DataSizing::ZoneSizingData &zsCalcFinalSizing,
+                                            Array2D<DataSizing::ZoneSizingData> &zsSizing,
+                                            Array2D<DataSizing::ZoneSizingData> &zsCalcSizing,
+                                            int const zoneOrSpaceNum);
 
     void SimZoneEquipment(EnergyPlusData &state, bool FirstHVACIteration, bool &SimAir);
 
@@ -117,24 +202,27 @@ namespace ZoneEquipmentManager {
                                   DataZoneEnergyDemands::ZoneSystemSensibleDemand &energy,
                                   DataZoneEnergyDemands::ZoneSystemMoistureDemand &moisture);
 
-    void UpdateSystemOutputRequired(EnergyPlusData &state,
-                                    int ZoneNum,
-                                    Real64 SysOutputProvided,                          // sensible output provided by zone equipment (W)
-                                    Real64 LatOutputProvided,                          // latent output provided by zone equipment (kg/s)
-                                    ObjexxFCL::Optional_int_const EquipPriorityNum = _ // index in PrioritySimOrder for this update
+    void updateSystemOutputRequired(EnergyPlusData &state,
+                                    int const ZoneNum,
+                                    Real64 const SysOutputProvided, // sensible output provided by zone equipment (W)
+                                    Real64 const LatOutputProvided, // latent output provided by zone equipment (kg/s)
+                                    DataZoneEnergyDemands::ZoneSystemSensibleDemand &energy,
+                                    DataZoneEnergyDemands::ZoneSystemMoistureDemand &moisture,
+                                    int const EquipPriorityNum = -1 // optional index in PrioritySimOrder for this update
+    );
+
+    void adjustSystemOutputRequired(Real64 const sensibleRatio, // sensible load adjustment
+                                    Real64 const latentRatio,   // latent load adjustment
+                                    DataZoneEnergyDemands::ZoneSystemSensibleDemand &energy,
+                                    DataZoneEnergyDemands::ZoneSystemMoistureDemand &moisture,
+                                    int const equipPriorityNum // index in PrioritySimOrder
     );
 
     void CalcZoneMassBalance(EnergyPlusData &state, bool FirstHVACIteration);
 
-    void CalcZoneReturnFlows(EnergyPlusData &state,
-                             int ZoneNum,
-                             Real64 &ExpTotalReturnMassFlow,  // Expected total return air mass flow rate
-                             Real64 &FinalTotalReturnMassFlow // Final total return air mass flow rate
-    );
-
     void CalcZoneInfiltrationFlows(EnergyPlusData &state,
-                                   int ZoneNum,                      // current zone index
-                                   Real64 &ZoneReturnAirMassFlowRate // zone total zone return air mass flow rate
+                                   int const ZoneNum,                      // current zone index
+                                   Real64 const &ZoneReturnAirMassFlowRate // zone total zone return air mass flow rate
     );
 
     void CalcAirFlowSimple(EnergyPlusData &state,
@@ -192,9 +280,17 @@ struct ZoneEquipmentManagerData : BaseGlobalStruct
     bool InitZoneEquipmentEnvrnFlag = true;
     bool FirstPassZoneEquipFlag = true; // indicates first pass through zone equipment, used to reset selected ZoneEqSizing variables
 
+    void init_constant_state([[maybe_unused]] EnergyPlusData &state) override
+    {
+    }
+
+    void init_state([[maybe_unused]] EnergyPlusData &state) override
+    {
+    }
+
     void clear_state() override
     {
-        *this = ZoneEquipmentManagerData();
+        new (this) ZoneEquipmentManagerData();
     }
 };
 

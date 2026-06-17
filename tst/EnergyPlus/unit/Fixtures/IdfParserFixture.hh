@@ -1,7 +1,7 @@
-// EnergyPlus, Copyright (c) 1996-2023, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
-// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other
+// National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
 // contributors. All rights reserved.
 //
 // NOTICE: This Software was developed under funding from the U.S. Department of Energy and the
@@ -54,6 +54,7 @@
 // EnergyPlus Headers
 #include <EnergyPlus/DataStringGlobals.hh>
 
+#include "../TestHelpers/CustomMatchers.hh"
 #include "../TestHelpers/IdfParser.hh"
 
 #include <ostream>
@@ -78,17 +79,8 @@ protected:
     {
     }
 
-    // This will compare two enums and convert them to their underlying_type. Without this function or operator<<
-    // overload, googletest will not properly link since it can't implicitly convert to underlying_type anymore
-    template <typename T, typename = typename std::enable_if_t<std::is_enum_v<T>, T>> constexpr bool compare_enums(T const expected, T const actual)
-    {
-        const bool is_valid = (expected == actual);
-        EXPECT_EQ(static_cast<typename std::underlying_type_t<T>>(expected), static_cast<typename std::underlying_type_t<T>>(actual));
-        return is_valid;
-    }
-
     // This function creates a string based on a vector of string inputs that is delimited by DataStringGlobals::NL by default, but any
-    // delimiter can be passed in to this funciton. This allows for cross platform output string comparisons.
+    // delimiter can be passed in to this function. This allows for cross platform output string comparisons.
     std::string delimited_string(std::vector<std::string> const &strings, std::string const &delimiter = "\n")
     {
         std::ostringstream compare_text;

@@ -15,7 +15,7 @@
 ! Infiltration:
 !   * Infiltration air flow rate is guessed as a small value.
 
-  Version,23.1;
+  Version,26.2;
 
 !-   ===========  ALL OBJECTS IN CLASS: SIMULATIONCONTROL ===========
 
@@ -625,7 +625,7 @@
 
   Output:Variable,Room 102 Window,Surface Inside Face Convection Heat Transfer Coefficient,Timestep;
 
-  Output:Variable,*,Zone Windows Total Transmitted Solar Radiation Rate,Timestep;
+  Output:Variable,*,Enclosure Windows Total Transmitted Solar Radiation Rate,Timestep;
 
   Output:Variable,Room 102 Window,Surface Window Heat Gain Rate,Timestep;
 
@@ -657,9 +657,9 @@
 
   Output:Variable,Room 102 Window,Surface Window BSDF Beam Direction Number,Timestep;
 
-  Output:Variable,*,Zone Opaque Surface Inside Faces Total Conduction Heat Gain Rate,Timestep;
+  Output:Variable,*,Zone Opaque Surface Inside Faces Conduction Heat Gain Rate,Timestep;
 
-  Output:Variable,*,Zone Opaque Surface Inside Faces Total Conduction Heat Loss Rate,Timestep;
+  Output:Variable,*,Zone Opaque Surface Inside Faces Conduction Heat Loss Rate,Timestep;
 
   Output:Variable,*,Zone Mean Air Temperature,Timestep;
 

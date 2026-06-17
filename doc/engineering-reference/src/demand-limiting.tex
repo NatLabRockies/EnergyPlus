@@ -32,20 +32,20 @@ In EnergyPlus the DemandManagerAssignmentList and DemandManager objects are simu
   HVAC system simulation (air and plant loops)
 \end{itemize}
 
-The exterior energy use segment is completely independent of the zone heat balance and HVAC system simulation.~ Exterior energy use handles energy use accounting for exterior lights and exterior equipment that are outside of the building and are not part of the zone heat balance.~ The zone heat balance segment includes all of the surface heat balances, internal heat gains, and air flows.~ The HVAC system simulation includes air and plant loops with their associated HVAC components.~ The behaviour of the HVAC system depends on the results of the zone heat balance.~ The HVAC system simulation operates on a variable ``system'' time step which is automatically shortened if necessary for stability.
+The exterior energy use segment is completely independent of the zone heat balance and HVAC system simulation.~ Exterior energy use handles energy use accounting for exterior lights and exterior equipment that are outside of the building and are not part of the zone heat balance.~ The zone heat balance segment includes all of the surface heat balances, internal heat gains, and air flows.~ The HVAC system simulation includes air and plant loops with their associated HVAC components.~ The behavior of the HVAC system depends on the results of the zone heat balance.~ The HVAC system simulation operates on a variable ``system'' time step which is automatically shortened if necessary for stability.
 
 The Demand Manager is called after the first pass through the HVAC system simulation, before the system time step is shortened.~ After evaluating the DemandManagerAssignmentList object, the Demand Manager decides if demand limiting is required.~ If demand limiting is required, the individual DemandManager objects are surveyed to determine which loads can be limited.~ Based on the \emph{Demand Manager Priority} selected, the Demand Manager then decides which DemandManager objects should be activated.~ In turn, the activated DemandManager objects set the demand limiting hooks on their respective load objects.~ Finally, depending on the type of DemandManager objects that were activated, one or more of the major segments of code must be called to be resimulated because the load conditions have changed.~ The code segments depend on the type of DemandManager and the relationship of its load objects to the overall solution method.~ The table below shows the different DemandManager types and the related code segments that must be resimulated.
 
 % table 42
 \begin{longtable}[c]{p{3.0in}p{1.0in}p{1.0in}p{1.0in}}
 \caption{Demand Manager Types and Resimulation. \label{table:demand-manager-types-and-resimulation.}} \tabularnewline
-\toprule 
+\toprule
 Demand Manager Type & Resimulate Exterior Energy & Resimulate Zone Heat Balance & Resimulate HVAC \hspace{0.3in} System \tabularnewline
 \midrule
 \endfirsthead
 
 \caption[]{Demand Manager Types and Resimulation.} \tabularnewline
-\toprule 
+\toprule
 Demand Manager Type & Resimulate Exterior Energy & Resimulate Zone Heat Balance & Resimulate HVAC System \tabularnewline
 \midrule
 \endhead

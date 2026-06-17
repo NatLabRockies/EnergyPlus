@@ -1,0 +1,55 @@
+name: Build wheels
+
+on:
+  # push:
+  #  branches:
+  #    - develop
+  #    - wheel
+  #  tags:
+  #    - "*"
+
+  workflow_dispatch:
+    inputs:
+      ref:
+        description: 'The branch, tag, or SHA for which to run (eg: v22.1.0 or develop)'
+        required: true
+
+jobs:
+  build_wheel:
+    name: Build Python Wheels
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.9"]
+        os: [ubuntu-22.04]  # , macos-15-intel, macos-15, windows-2022]
+
+    runs-on: ${{ matrix.os }}
+
+    steps:
+    - name: Checkout EnergyPlus
+      uses: actions/checkout@v6
+      with:
+        ref: ${{ github.event.inputs.ref }}
+
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v6
+      with:
+        python-version: ${{ matrix.python-version }}
+
+    - name: build wheels
+      run: |
+        pip install wheel
+        python setup.py bdist_wheel
+
+    - uses: actions/upload-artifact@v7
+      with:
+        name: energyplus-wheel-${{ matrix.os }}
+        path: ./dist
+
+    - name: Deploy on Test PyPi
+      uses: pypa/gh-action-pypi-publish@v1.14.0
+      with:
+        repository-url: https://test.pypi.org/legacy/
+        user: __token__
+        password: ${{ secrets.TESTPYPIPW }}
+        verbose: true

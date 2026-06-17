@@ -5,7 +5,7 @@ System Node Mass Flow Rate
 Plant Load Profile Mass Flow Rate
 Plant Load Profile Heat Transfer Rate
 Plant Load Profile Heat Transfer Energy
-District Heating Hot Water Rate
-District Heating Hot Water Energy
-Heating:DistrictHeating
+District Heating Water Rate
+District Heating Water Energy
+Heating:DistrictHeatingWater
 0

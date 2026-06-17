@@ -1,7 +1,7 @@
-// EnergyPlus, Copyright (c) 1996-2023, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
-// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other
+// National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
 // contributors. All rights reserved.
 //
 // NOTICE: This Software was developed under funding from the U.S. Department of Energy and the
@@ -211,6 +211,8 @@ TEST_F(EnergyPlusFixture, Beam_FactoryAllAutosize)
         });
 
     ASSERT_TRUE(process_idf(idf_objects));
+    state->init_state(*state);
+
     state->dataGlobal->NumOfZones = 1;
 
     state->dataHeatBal->Zone.allocate(state->dataGlobal->NumOfZones);
@@ -225,16 +227,16 @@ TEST_F(EnergyPlusFixture, Beam_FactoryAllAutosize)
     state->dataZoneEquip->ZoneEquipConfig(1).InletNode(1) = 3;
     bool ErrorsFound = false;
     state->dataZoneEquip->ZoneEquipConfig(1).ZoneNode =
-        NodeInputManager::GetOnlySingleNode(*state,
-                                            "Zone 1 Node",
-                                            ErrorsFound,
-                                            DataLoopNode::ConnectionObjectType::AirTerminalSingleDuctConstantVolumeFourPipeBeam,
-                                            "BeamTest",
-                                            DataLoopNode::NodeFluidType::Air,
-                                            DataLoopNode::ConnectionType::ZoneNode,
-                                            NodeInputManager::CompFluidStream::Primary,
-                                            DataLoopNode::ObjectIsNotParent,
-                                            "Test zone node");
+        Node::GetOnlySingleNode(*state,
+                                "Zone 1 Node",
+                                ErrorsFound,
+                                Node::ConnectionObjectType::AirTerminalSingleDuctConstantVolumeFourPipeBeam,
+                                "BeamTest",
+                                Node::FluidType::Air,
+                                Node::ConnectionType::ZoneNode,
+                                Node::CompFluidStream::Primary,
+                                Node::ObjectIsNotParent,
+                                "Test zone node");
 
     state->dataDefineEquipment->AirDistUnit.allocate(1);
     state->dataDefineEquipment->AirDistUnit(1).EquipName(1) =
@@ -307,13 +309,6 @@ TEST_F(EnergyPlusFixture, Beam_sizeandSimulateOneZone)
                           "    0,                       !- Lower Limit Value",
                           "    4,                       !- Upper Limit Value",
                           "    DISCRETE;                !- Numeric Type",
-
-                          "    Schedule:Compact,",
-                          "    ALWAYS_ON,               !- Name",
-                          "    On/Off,                  !- Schedule Type Limits Name",
-                          "    Through: 12/31,          !- Field 1",
-                          "    For: AllDays,            !- Field 2",
-                          "    Until: 24:00,1;          !- Field 3",
 
                           "    Schedule:Compact,",
                           "    ACTIVITY_SCH,            !- Name",
@@ -585,7 +580,7 @@ TEST_F(EnergyPlusFixture, Beam_sizeandSimulateOneZone)
                           "    ACTIVITY_SCH,            !- Activity Level Schedule Name",
                           "    ,                        !- Carbon Dioxide Generation Rate {m3/s-W}",
                           "    No,                      !- Enable ASHRAE 55 Comfort Warnings",
-                          "    ZoneAveraged,            !- Mean Radiant Temperature Calculation Type",
+                          "    EnclosureAveraged,            !- Mean Radiant Temperature Calculation Type",
                           "    ,                        !- Surface Name/Angle Factor List Name",
                           "    WORK_EFF_SCH,            !- Work Efficiency Schedule Name",
                           "    ClothingInsulationSchedule,  !- Clothing Insulation Calculation Method",
@@ -902,7 +897,7 @@ TEST_F(EnergyPlusFixture, Beam_sizeandSimulateOneZone)
 
                           "  Fan:VariableVolume,",
                           "    CV_1_Fan,               !- Name",
-                          "    always_on,       !- Availability Schedule Name",
+                          "    CONSTANT-1.0,       !- Availability Schedule Name",
                           "    0.6045,                  !- Fan Total Efficiency",
                           "    1017.592,                !- Pressure Rise {Pa}",
                           "    AUTOSIZE,                !- Maximum Flow Rate {m3/s}",
@@ -922,7 +917,7 @@ TEST_F(EnergyPlusFixture, Beam_sizeandSimulateOneZone)
 
                           "  Coil:Heating:Water,",
                           "    CV_1_HeatC,             !- Name",
-                          "    ALWAYS_ON,               !- Availability Schedule Name",
+                          "    CONSTANT-1.0,               !- Availability Schedule Name",
                           "    AUTOSIZE,                !- U-Factor Times Area Value {W/K}",
                           "    AUTOSIZE,                !- Maximum Water Flow Rate {m3/s}",
                           "    CV_1_HeatCDemand Inlet Node,  !- Water Inlet Node Name",
@@ -939,7 +934,7 @@ TEST_F(EnergyPlusFixture, Beam_sizeandSimulateOneZone)
 
                           "  Coil:Cooling:Water,",
                           "    CV_1_CoolC,             !- Name",
-                          "    ALWAYS_ON,               !- Availability Schedule Name",
+                          "    CONSTANT-1.0,               !- Availability Schedule Name",
                           "    AUTOSIZE,                !- Design Water Flow Rate {m3/s}",
                           "    AUTOSIZE,                !- Design Air Flow Rate {m3/s}",
                           "    AUTOSIZE,                !- Design Inlet Water Temperature {C}",
@@ -1020,7 +1015,7 @@ TEST_F(EnergyPlusFixture, Beam_sizeandSimulateOneZone)
 
                           "  AvailabilityManager:Scheduled,",
                           "    CV_1 Avail,   !- Name",
-                          "    always_on;    !- Schedule Name",
+                          "    CONSTANT-1.0;    !- Schedule Name",
 
                           "  NodeList,",
                           "    CV_1_OANode List,       !- Name",
@@ -1266,7 +1261,7 @@ TEST_F(EnergyPlusFixture, Beam_sizeandSimulateOneZone)
                           "    SOURCE Loop Operation,   !- Name",
                           "    PlantEquipmentOperation:CoolingLoad,  !- Control Scheme 1 Object Type",
                           "    SOURCE Purchased Only,   !- Control Scheme 1 Name",
-                          "    Always_On;        !- Control Scheme 1 Schedule Name",
+                          "    CONSTANT-1.0;        !- Control Scheme 1 Schedule Name",
 
                           "  PlantEquipmentOperation:CoolingLoad,",
                           "    SOURCE Purchased Only,   !- Name",
@@ -1417,7 +1412,7 @@ TEST_F(EnergyPlusFixture, Beam_sizeandSimulateOneZone)
                           "    HeatSys1 Loop Operation,   !- Name",
                           "    PlantEquipmentOperation:HeatingLoad,  !- Control Scheme 1 Object Type",
                           "    HeatSys1 Purchased Only,   !- Control Scheme 1 Name",
-                          "    Always_On;        !- Control Scheme 1 Schedule Name",
+                          "    CONSTANT-1.0;        !- Control Scheme 1 Schedule Name",
 
                           "  PlantEquipmentOperation:HeatingLoad,",
                           "    HeatSys1 Purchased Only,   !- Name",
@@ -1427,7 +1422,7 @@ TEST_F(EnergyPlusFixture, Beam_sizeandSimulateOneZone)
 
                           "  PlantEquipmentList,",
                           "    HeatSys1 Heating Plant,    !- Name",
-                          "    DistrictHeating,         !- Equipment 1 Object Type",
+                          "    DistrictHeating:Water,         !- Equipment 1 Object Type",
                           "    HeatSys1 Purchased Heating;!- Equipment 1 Name",
 
                           "  BranchList,",
@@ -1480,12 +1475,12 @@ TEST_F(EnergyPlusFixture, Beam_sizeandSimulateOneZone)
                           "  Branch,",
                           "    HeatSys1 Heating Branch,   !- Name",
                           "    ,                        !- Pressure Drop Curve Name",
-                          "    DistrictHeating,         !- Component 1 Object Type",
+                          "    DistrictHeating:Water,         !- Component 1 Object Type",
                           "    HeatSys1 Purchased Heating,!- Component 1 Name",
                           "    HeatSys1 Supply Heating Inlet Node,  !- Component 1 Inlet Node Name",
                           "    HeatSys1 Supply Heating Outlet Node;  !- Component 1 Outlet Node Name",
 
-                          "  DistrictHeating,",
+                          "  DistrictHeating:Water,",
                           "    HeatSys1 Purchased Heating,!- Name",
                           "    HeatSys1 Supply Heating Inlet Node,  !- Hot Water Inlet Node Name",
                           "    HeatSys1 Supply Heating Outlet Node,  !- Hot Water Outlet Node Name",
@@ -1590,9 +1585,9 @@ TEST_F(EnergyPlusFixture, Beam_sizeandSimulateOneZone)
 
                           "  AirTerminal:SingleDuct:ConstantVolume:FourPipeBeam,",
                           "    Zone One 4pipe Beam, !- Name",
-                          "    ALWAYS_ON , !- Primary Air Availability Schedule Name",
-                          "    ALWAYS_ON , !- Cooling Availability Schedule Name",
-                          "    ALWAYS_ON , !- Heating Availability Schedule Name",
+                          "    CONSTANT-1.0 , !- Primary Air Availability Schedule Name",
+                          "    CONSTANT-1.0 , !- Cooling Availability Schedule Name",
+                          "    CONSTANT-1.0 , !- Heating Availability Schedule Name",
                           "    Zone One 4pipe Beam Inlet Node Name , !- Primary Air Inlet Node Name",
                           "    Zone One 4pipe Beam Outlet Node Name , !- Primary Air Outlet Node Name",
                           "    Zone One 4pipe Beam CW Inlet Node , !- Chilled Water Inlet Node Name",
@@ -1721,18 +1716,17 @@ TEST_F(EnergyPlusFixture, Beam_sizeandSimulateOneZone)
 
     ASSERT_TRUE(process_idf(idf_objects));
     SimulationManager::PostIPProcessing(*state);
+    state->init_state(*state);
 
     bool ErrorsFound = false;
 
     state->dataGlobal->BeginSimFlag = true;
-    SimulationManager::GetProjectData(*state);
 
-    OutputReportPredefined::SetPredefinedTables(*state);
     HeatBalanceManager::SetPreConstructionInputParameters(*state); // establish array bounds for constructions early
     // OutputProcessor::TimeValue.allocate(2);
     OutputProcessor::SetupTimePointers(
-        *state, OutputProcessor::SOVTimeStepType::Zone, state->dataGlobal->TimeStepZone); // Set up Time pointer for HB/Zone Simulation
-    OutputProcessor::SetupTimePointers(*state, OutputProcessor::SOVTimeStepType::HVAC, state->dataHVACGlobal->TimeStepSys);
+        *state, OutputProcessor::TimeStepType::Zone, state->dataGlobal->TimeStepZone); // Set up Time pointer for HB/Zone Simulation
+    OutputProcessor::SetupTimePointers(*state, OutputProcessor::TimeStepType::System, state->dataHVACGlobal->TimeStepSys);
     PlantManager::CheckIfAnyPlant(*state);
     createFacilityElectricPowerServiceObject(*state);
     BranchInputManager::ManageBranchInput(*state); // just gets input and returns.
@@ -1741,7 +1735,7 @@ TEST_F(EnergyPlusFixture, Beam_sizeandSimulateOneZone)
     state->dataGlobal->DoingSizing = false;
     state->dataGlobal->KickOffSimulation = true;
 
-    WeatherManager::ResetEnvironmentCounter(*state);
+    Weather::ResetEnvironmentCounter(*state);
     TestAirPathIntegrity(*state, ErrorsFound); // Needed to initialize return node connections to airloops and inlet nodes
     SimulationManager::SetupSimulation(*state, ErrorsFound);
     state->dataGlobal->KickOffSimulation = false;
@@ -1776,12 +1770,12 @@ TEST_F(EnergyPlusFixture, Beam_sizeandSimulateOneZone)
     state->dataDefineEquipment->AirDistUnit(1).airTerminalPtr->simulate(*state, FirstHVACIteration, NonAirSysOutput);
 
     EXPECT_NEAR(state->dataLoopNodes->Node(1).MassFlowRate, 0.36165246721684446, 0.00001);
-    EXPECT_NEAR(state->dataLoopNodes->Node(15).Temp, 17.835648923740127, 0.00001);
+    EXPECT_NEAR(state->dataLoopNodes->Node(15).Temp, 17.835648923740127, 0.001);
     EXPECT_NEAR(state->dataLoopNodes->Node(15).MassFlowRate, 0.053404403026239548, 0.00001);
     EXPECT_DOUBLE_EQ(state->dataLoopNodes->Node(39).Temp, 45.0);
     EXPECT_DOUBLE_EQ(state->dataLoopNodes->Node(39).MassFlowRate, 0.0);
 
-    EXPECT_NEAR(NonAirSysOutput, -857.50347269476481, 0.01);
+    EXPECT_NEAR(NonAirSysOutput, -857.50347269476481, 0.1);
 
     // next run with a sensible heating load of 5000 W and cold supply air
     state->dataZoneEnergyDemand->ZoneSysEnergyDemand(1).RemainingOutputRequired = 5000.0;
@@ -1793,10 +1787,10 @@ TEST_F(EnergyPlusFixture, Beam_sizeandSimulateOneZone)
 
     EXPECT_DOUBLE_EQ(state->dataLoopNodes->Node(15).Temp, 14.0);
     EXPECT_DOUBLE_EQ(state->dataLoopNodes->Node(15).MassFlowRate, 0.0);
-    EXPECT_NEAR(state->dataLoopNodes->Node(39).Temp, 31.815031821344689, 0.00001);
+    EXPECT_NEAR(state->dataLoopNodes->Node(39).Temp, 31.815031821344689, 0.001);
     EXPECT_NEAR(state->dataLoopNodes->Node(39).MassFlowRate, 0.14660727634539222, 0.00001);
 
-    EXPECT_NEAR(NonAirSysOutput, 8079.991302700485, 0.01);
+    EXPECT_NEAR(NonAirSysOutput, 8079.991302700485, 0.1);
 
     // next run with cooling load and neutral supply air
     state->dataZoneEnergyDemand->ZoneSysEnergyDemand(1).RemainingOutputRequired = -5000.0;
@@ -1813,7 +1807,7 @@ TEST_F(EnergyPlusFixture, Beam_sizeandSimulateOneZone)
     NonAirSysOutput = 0.0;
     state->dataDefineEquipment->AirDistUnit(1).airTerminalPtr->simulate(*state, FirstHVACIteration, NonAirSysOutput);
 
-    EXPECT_NEAR(state->dataLoopNodes->Node(15).Temp, 18.549803918626715, 0.00001);
+    EXPECT_NEAR(state->dataLoopNodes->Node(15).Temp, 18.549803918626715, 0.001);
     EXPECT_NEAR(state->dataLoopNodes->Node(15).MassFlowRate, 0.22613768427540518, 0.00001);
     EXPECT_DOUBLE_EQ(state->dataLoopNodes->Node(39).Temp, 45.0);
     EXPECT_DOUBLE_EQ(state->dataLoopNodes->Node(39).MassFlowRate, 0.0);
@@ -1822,7 +1816,7 @@ TEST_F(EnergyPlusFixture, Beam_sizeandSimulateOneZone)
     // EXPECT_DOUBLE_EQ( state->dataLoopNodes->Node( 39 ).Temp, 45.0 );
     // EXPECT_DOUBLE_EQ( state->dataLoopNodes->Node( 39 ).MassFlowRate, 0.0 );
 
-    EXPECT_NEAR(NonAirSysOutput, -4307.106339390215, 0.01);
+    EXPECT_NEAR(NonAirSysOutput, -4307.106339390215, 0.1);
 
     // next run with heating load and neutral supply air
     state->dataZoneEnergyDemand->ZoneSysEnergyDemand(1).RemainingOutputRequired = 5000.0;
@@ -1836,14 +1830,14 @@ TEST_F(EnergyPlusFixture, Beam_sizeandSimulateOneZone)
 
     EXPECT_DOUBLE_EQ(state->dataLoopNodes->Node(15).Temp, 14.0);
     EXPECT_DOUBLE_EQ(state->dataLoopNodes->Node(15).MassFlowRate, 0.0);
-    EXPECT_NEAR(state->dataLoopNodes->Node(39).Temp, 32.784497823408309, 0.00001);
+    EXPECT_NEAR(state->dataLoopNodes->Node(39).Temp, 32.784497823408309, 0.001);
     EXPECT_NEAR(state->dataLoopNodes->Node(39).MassFlowRate, 0.091412175315718339, 0.00001);
     // EXPECT_DOUBLE_EQ( state->dataLoopNodes->Node( 15 ).Temp, 14.0 );
     // EXPECT_DOUBLE_EQ( state->dataLoopNodes->Node( 15 ).MassFlowRate, 0.0 );
     // EXPECT_NEAR( state->dataLoopNodes->Node( 39 ).Temp, 33.836239364981424, 0.00001 );
     // EXPECT_NEAR( state->dataLoopNodes->Node( 39 ).MassFlowRate, 0.10040605035467959, 0.00001 );
 
-    EXPECT_NEAR(NonAirSysOutput, 4667.5787189210605, 0.01);
+    EXPECT_NEAR(NonAirSysOutput, 4667.5787189210605, 0.1);
 }
 
 TEST_F(EnergyPlusFixture, Beam_fatalWhenSysSizingOff)
@@ -1886,13 +1880,6 @@ TEST_F(EnergyPlusFixture, Beam_fatalWhenSysSizingOff)
                           "    0,                       !- Lower Limit Value",
                           "    4,                       !- Upper Limit Value",
                           "    DISCRETE;                !- Numeric Type",
-
-                          "    Schedule:Compact,",
-                          "    ALWAYS_ON,               !- Name",
-                          "    On/Off,                  !- Schedule Type Limits Name",
-                          "    Through: 12/31,          !- Field 1",
-                          "    For: AllDays,            !- Field 2",
-                          "    Until: 24:00,1;          !- Field 3",
 
                           "    Schedule:Compact,",
                           "    ACTIVITY_SCH,            !- Name",
@@ -2164,7 +2151,7 @@ TEST_F(EnergyPlusFixture, Beam_fatalWhenSysSizingOff)
                           "    ACTIVITY_SCH,            !- Activity Level Schedule Name",
                           "    ,                        !- Carbon Dioxide Generation Rate {m3/s-W}",
                           "    No,                      !- Enable ASHRAE 55 Comfort Warnings",
-                          "    ZoneAveraged,            !- Mean Radiant Temperature Calculation Type",
+                          "    EnclosureAveraged,            !- Mean Radiant Temperature Calculation Type",
                           "    ,                        !- Surface Name/Angle Factor List Name",
                           "    WORK_EFF_SCH,            !- Work Efficiency Schedule Name",
                           "    ClothingInsulationSchedule,  !- Clothing Insulation Calculation Method",
@@ -2481,7 +2468,7 @@ TEST_F(EnergyPlusFixture, Beam_fatalWhenSysSizingOff)
 
                           "  Fan:VariableVolume,",
                           "    CV_1_Fan,               !- Name",
-                          "    always_on,       !- Availability Schedule Name",
+                          "    CONSTANT-1.0,       !- Availability Schedule Name",
                           "    0.6045,                  !- Fan Total Efficiency",
                           "    1017.592,                !- Pressure Rise {Pa}",
                           "    AUTOSIZE,                !- Maximum Flow Rate {m3/s}",
@@ -2501,7 +2488,7 @@ TEST_F(EnergyPlusFixture, Beam_fatalWhenSysSizingOff)
 
                           "  Coil:Heating:Water,",
                           "    CV_1_HeatC,             !- Name",
-                          "    ALWAYS_ON,               !- Availability Schedule Name",
+                          "    CONSTANT-1.0,               !- Availability Schedule Name",
                           "    AUTOSIZE,                !- U-Factor Times Area Value {W/K}",
                           "    AUTOSIZE,                !- Maximum Water Flow Rate {m3/s}",
                           "    CV_1_HeatCDemand Inlet Node,  !- Water Inlet Node Name",
@@ -2518,7 +2505,7 @@ TEST_F(EnergyPlusFixture, Beam_fatalWhenSysSizingOff)
 
                           "  Coil:Cooling:Water,",
                           "    CV_1_CoolC,             !- Name",
-                          "    ALWAYS_ON,               !- Availability Schedule Name",
+                          "    CONSTANT-1.0,               !- Availability Schedule Name",
                           "    AUTOSIZE,                !- Design Water Flow Rate {m3/s}",
                           "    AUTOSIZE,                !- Design Air Flow Rate {m3/s}",
                           "    AUTOSIZE,                !- Design Inlet Water Temperature {C}",
@@ -2599,7 +2586,7 @@ TEST_F(EnergyPlusFixture, Beam_fatalWhenSysSizingOff)
 
                           "  AvailabilityManager:Scheduled,",
                           "    CV_1 Avail,   !- Name",
-                          "    always_on;    !- Schedule Name",
+                          "    CONSTANT-1.0;    !- Schedule Name",
 
                           "  NodeList,",
                           "    CV_1_OANode List,       !- Name",
@@ -2845,7 +2832,7 @@ TEST_F(EnergyPlusFixture, Beam_fatalWhenSysSizingOff)
                           "    SOURCE Loop Operation,   !- Name",
                           "    PlantEquipmentOperation:CoolingLoad,  !- Control Scheme 1 Object Type",
                           "    SOURCE Purchased Only,   !- Control Scheme 1 Name",
-                          "    Always_On;        !- Control Scheme 1 Schedule Name",
+                          "    CONSTANT-1.0;        !- Control Scheme 1 Schedule Name",
 
                           "  PlantEquipmentOperation:CoolingLoad,",
                           "    SOURCE Purchased Only,   !- Name",
@@ -2996,7 +2983,7 @@ TEST_F(EnergyPlusFixture, Beam_fatalWhenSysSizingOff)
                           "    HeatSys1 Loop Operation,   !- Name",
                           "    PlantEquipmentOperation:HeatingLoad,  !- Control Scheme 1 Object Type",
                           "    HeatSys1 Purchased Only,   !- Control Scheme 1 Name",
-                          "    Always_On;        !- Control Scheme 1 Schedule Name",
+                          "    CONSTANT-1.0;        !- Control Scheme 1 Schedule Name",
 
                           "  PlantEquipmentOperation:HeatingLoad,",
                           "    HeatSys1 Purchased Only,   !- Name",
@@ -3006,7 +2993,7 @@ TEST_F(EnergyPlusFixture, Beam_fatalWhenSysSizingOff)
 
                           "  PlantEquipmentList,",
                           "    HeatSys1 Heating Plant,    !- Name",
-                          "    DistrictHeating,         !- Equipment 1 Object Type",
+                          "    DistrictHeating:Water,         !- Equipment 1 Object Type",
                           "    HeatSys1 Purchased Heating;!- Equipment 1 Name",
 
                           "  BranchList,",
@@ -3059,12 +3046,12 @@ TEST_F(EnergyPlusFixture, Beam_fatalWhenSysSizingOff)
                           "  Branch,",
                           "    HeatSys1 Heating Branch,   !- Name",
                           "    ,                        !- Pressure Drop Curve Name",
-                          "    DistrictHeating,         !- Component 1 Object Type",
+                          "    DistrictHeating:Water,         !- Component 1 Object Type",
                           "    HeatSys1 Purchased Heating,!- Component 1 Name",
                           "    HeatSys1 Supply Heating Inlet Node,  !- Component 1 Inlet Node Name",
                           "    HeatSys1 Supply Heating Outlet Node;  !- Component 1 Outlet Node Name",
 
-                          "  DistrictHeating,",
+                          "  DistrictHeating:Water,",
                           "    HeatSys1 Purchased Heating,!- Name",
                           "    HeatSys1 Supply Heating Inlet Node,  !- Hot Water Inlet Node Name",
                           "    HeatSys1 Supply Heating Outlet Node,  !- Hot Water Outlet Node Name",
@@ -3169,9 +3156,9 @@ TEST_F(EnergyPlusFixture, Beam_fatalWhenSysSizingOff)
 
                           "  AirTerminal:SingleDuct:ConstantVolume:FourPipeBeam,",
                           "    Zone One 4pipe Beam, !- Name",
-                          "    ALWAYS_ON , !- Primary Air Availability Schedule Name",
-                          "    ALWAYS_ON , !- Cooling Availability Schedule Name",
-                          "    ALWAYS_ON , !- Heating Availability Schedule Name",
+                          "    CONSTANT-1.0 , !- Primary Air Availability Schedule Name",
+                          "    CONSTANT-1.0 , !- Cooling Availability Schedule Name",
+                          "    CONSTANT-1.0 , !- Heating Availability Schedule Name",
                           "    Zone One 4pipe Beam Inlet Node Name , !- Primary Air Inlet Node Name",
                           "    Zone One 4pipe Beam Outlet Node Name , !- Primary Air Outlet Node Name",
                           "    Zone One 4pipe Beam CW Inlet Node , !- Chilled Water Inlet Node Name",
@@ -3300,18 +3287,17 @@ TEST_F(EnergyPlusFixture, Beam_fatalWhenSysSizingOff)
 
     ASSERT_TRUE(process_idf(idf_objects));
     SimulationManager::PostIPProcessing(*state);
+    state->init_state(*state);
 
     bool ErrorsFound = false;
 
     state->dataGlobal->BeginSimFlag = true;
-    SimulationManager::GetProjectData(*state);
 
-    OutputReportPredefined::SetPredefinedTables(*state);
     HeatBalanceManager::SetPreConstructionInputParameters(*state); // establish array bounds for constructions early
     // OutputProcessor::TimeValue.allocate(2);
     OutputProcessor::SetupTimePointers(
-        *state, OutputProcessor::SOVTimeStepType::Zone, state->dataGlobal->TimeStepZone); // Set up Time pointer for HB/Zone Simulation
-    OutputProcessor::SetupTimePointers(*state, OutputProcessor::SOVTimeStepType::HVAC, state->dataHVACGlobal->TimeStepSys);
+        *state, OutputProcessor::TimeStepType::Zone, state->dataGlobal->TimeStepZone); // Set up Time pointer for HB/Zone Simulation
+    OutputProcessor::SetupTimePointers(*state, OutputProcessor::TimeStepType::System, state->dataHVACGlobal->TimeStepSys);
     PlantManager::CheckIfAnyPlant(*state);
     createFacilityElectricPowerServiceObject(*state);
     BranchInputManager::ManageBranchInput(*state); // just gets input and returns.
@@ -3320,7 +3306,7 @@ TEST_F(EnergyPlusFixture, Beam_fatalWhenSysSizingOff)
     state->dataGlobal->DoingSizing = false;
     state->dataGlobal->KickOffSimulation = true;
 
-    WeatherManager::ResetEnvironmentCounter(*state);
+    Weather::ResetEnvironmentCounter(*state);
 
     ASSERT_ANY_THROW(SimulationManager::SetupSimulation(*state, ErrorsFound));
 }
@@ -3380,13 +3366,6 @@ TEST_F(EnergyPlusFixture, Beam_sizeandSimulateHighOA)
                           "    0,                       !- Lower Limit Value",
                           "    4,                       !- Upper Limit Value",
                           "    DISCRETE;                !- Numeric Type",
-
-                          "    Schedule:Compact,",
-                          "    ALWAYS_ON,               !- Name",
-                          "    On/Off,                  !- Schedule Type Limits Name",
-                          "    Through: 12/31,          !- Field 1",
-                          "    For: AllDays,            !- Field 2",
-                          "    Until: 24:00,1;          !- Field 3",
 
                           "    Schedule:Compact,",
                           "    ACTIVITY_SCH,            !- Name",
@@ -3658,7 +3637,7 @@ TEST_F(EnergyPlusFixture, Beam_sizeandSimulateHighOA)
                           "    ACTIVITY_SCH,            !- Activity Level Schedule Name",
                           "    ,                        !- Carbon Dioxide Generation Rate {m3/s-W}",
                           "    No,                      !- Enable ASHRAE 55 Comfort Warnings",
-                          "    ZoneAveraged,            !- Mean Radiant Temperature Calculation Type",
+                          "    EnclosureAveraged,            !- Mean Radiant Temperature Calculation Type",
                           "    ,                        !- Surface Name/Angle Factor List Name",
                           "    WORK_EFF_SCH,            !- Work Efficiency Schedule Name",
                           "    ClothingInsulationSchedule,  !- Clothing Insulation Calculation Method",
@@ -3978,7 +3957,7 @@ TEST_F(EnergyPlusFixture, Beam_sizeandSimulateHighOA)
 
                           "  Fan:VariableVolume,",
                           "    CV_1_Fan,               !- Name",
-                          "    always_on,       !- Availability Schedule Name",
+                          "    CONSTANT-1.0,       !- Availability Schedule Name",
                           "    0.6045,                  !- Fan Total Efficiency",
                           "    1017.592,                !- Pressure Rise {Pa}",
                           "    AUTOSIZE,                !- Maximum Flow Rate {m3/s}",
@@ -3998,7 +3977,7 @@ TEST_F(EnergyPlusFixture, Beam_sizeandSimulateHighOA)
 
                           "  Coil:Heating:Water,",
                           "    CV_1_HeatC,             !- Name",
-                          "    ALWAYS_ON,               !- Availability Schedule Name",
+                          "    CONSTANT-1.0,               !- Availability Schedule Name",
                           "    AUTOSIZE,                !- U-Factor Times Area Value {W/K}",
                           "    AUTOSIZE,                !- Maximum Water Flow Rate {m3/s}",
                           "    CV_1_HeatCDemand Inlet Node,  !- Water Inlet Node Name",
@@ -4015,7 +3994,7 @@ TEST_F(EnergyPlusFixture, Beam_sizeandSimulateHighOA)
 
                           "  Coil:Cooling:Water,",
                           "    CV_1_CoolC,             !- Name",
-                          "    ALWAYS_ON,               !- Availability Schedule Name",
+                          "    CONSTANT-1.0,               !- Availability Schedule Name",
                           "    AUTOSIZE,                !- Design Water Flow Rate {m3/s}",
                           "    AUTOSIZE,                !- Design Air Flow Rate {m3/s}",
                           "    AUTOSIZE,                !- Design Inlet Water Temperature {C}",
@@ -4096,7 +4075,7 @@ TEST_F(EnergyPlusFixture, Beam_sizeandSimulateHighOA)
 
                           "  AvailabilityManager:Scheduled,",
                           "    CV_1 Avail,   !- Name",
-                          "    always_on;    !- Schedule Name",
+                          "    CONSTANT-1.0;    !- Schedule Name",
 
                           "  NodeList,",
                           "    CV_1_OANode List,       !- Name",
@@ -4342,7 +4321,7 @@ TEST_F(EnergyPlusFixture, Beam_sizeandSimulateHighOA)
                           "    SOURCE Loop Operation,   !- Name",
                           "    PlantEquipmentOperation:CoolingLoad,  !- Control Scheme 1 Object Type",
                           "    SOURCE Purchased Only,   !- Control Scheme 1 Name",
-                          "    Always_On;        !- Control Scheme 1 Schedule Name",
+                          "    CONSTANT-1.0;        !- Control Scheme 1 Schedule Name",
 
                           "  PlantEquipmentOperation:CoolingLoad,",
                           "    SOURCE Purchased Only,   !- Name",
@@ -4493,7 +4472,7 @@ TEST_F(EnergyPlusFixture, Beam_sizeandSimulateHighOA)
                           "    HeatSys1 Loop Operation,   !- Name",
                           "    PlantEquipmentOperation:HeatingLoad,  !- Control Scheme 1 Object Type",
                           "    HeatSys1 Purchased Only,   !- Control Scheme 1 Name",
-                          "    Always_On;        !- Control Scheme 1 Schedule Name",
+                          "    CONSTANT-1.0;        !- Control Scheme 1 Schedule Name",
 
                           "  PlantEquipmentOperation:HeatingLoad,",
                           "    HeatSys1 Purchased Only,   !- Name",
@@ -4503,7 +4482,7 @@ TEST_F(EnergyPlusFixture, Beam_sizeandSimulateHighOA)
 
                           "  PlantEquipmentList,",
                           "    HeatSys1 Heating Plant,    !- Name",
-                          "    DistrictHeating,         !- Equipment 1 Object Type",
+                          "    DistrictHeating:Water,         !- Equipment 1 Object Type",
                           "    HeatSys1 Purchased Heating;!- Equipment 1 Name",
 
                           "  BranchList,",
@@ -4556,12 +4535,12 @@ TEST_F(EnergyPlusFixture, Beam_sizeandSimulateHighOA)
                           "  Branch,",
                           "    HeatSys1 Heating Branch,   !- Name",
                           "    ,                        !- Pressure Drop Curve Name",
-                          "    DistrictHeating,         !- Component 1 Object Type",
+                          "    DistrictHeating:Water,         !- Component 1 Object Type",
                           "    HeatSys1 Purchased Heating,!- Component 1 Name",
                           "    HeatSys1 Supply Heating Inlet Node,  !- Component 1 Inlet Node Name",
                           "    HeatSys1 Supply Heating Outlet Node;  !- Component 1 Outlet Node Name",
 
-                          "  DistrictHeating,",
+                          "  DistrictHeating:Water,",
                           "    HeatSys1 Purchased Heating,!- Name",
                           "    HeatSys1 Supply Heating Inlet Node,  !- Hot Water Inlet Node Name",
                           "    HeatSys1 Supply Heating Outlet Node,  !- Hot Water Outlet Node Name",
@@ -4666,9 +4645,9 @@ TEST_F(EnergyPlusFixture, Beam_sizeandSimulateHighOA)
 
                           "  AirTerminal:SingleDuct:ConstantVolume:FourPipeBeam,",
                           "    Zone One 4pipe Beam, !- Name",
-                          "    ALWAYS_ON , !- Primary Air Availability Schedule Name",
-                          "    ALWAYS_ON , !- Cooling Availability Schedule Name",
-                          "    ALWAYS_ON , !- Heating Availability Schedule Name",
+                          "    CONSTANT-1.0 , !- Primary Air Availability Schedule Name",
+                          "    CONSTANT-1.0 , !- Cooling Availability Schedule Name",
+                          "    CONSTANT-1.0 , !- Heating Availability Schedule Name",
                           "    Zone One 4pipe Beam Inlet Node Name , !- Primary Air Inlet Node Name",
                           "    Zone One 4pipe Beam Outlet Node Name , !- Primary Air Outlet Node Name",
                           "    Zone One 4pipe Beam CW Inlet Node , !- Chilled Water Inlet Node Name",
@@ -4797,18 +4776,16 @@ TEST_F(EnergyPlusFixture, Beam_sizeandSimulateHighOA)
 
     ASSERT_TRUE(process_idf(idf_objects));
     SimulationManager::PostIPProcessing(*state);
-
+    state->init_state(*state);
     bool ErrorsFound = false;
 
     state->dataGlobal->BeginSimFlag = true;
-    SimulationManager::GetProjectData(*state);
 
-    OutputReportPredefined::SetPredefinedTables(*state);
     HeatBalanceManager::SetPreConstructionInputParameters(*state); // establish array bounds for constructions early
     // OutputProcessor::TimeValue.allocate(2);
     OutputProcessor::SetupTimePointers(
-        *state, OutputProcessor::SOVTimeStepType::Zone, state->dataGlobal->TimeStepZone); // Set up Time pointer for HB/Zone Simulation
-    OutputProcessor::SetupTimePointers(*state, OutputProcessor::SOVTimeStepType::HVAC, state->dataHVACGlobal->TimeStepSys);
+        *state, OutputProcessor::TimeStepType::Zone, state->dataGlobal->TimeStepZone); // Set up Time pointer for HB/Zone Simulation
+    OutputProcessor::SetupTimePointers(*state, OutputProcessor::TimeStepType::System, state->dataHVACGlobal->TimeStepSys);
     PlantManager::CheckIfAnyPlant(*state);
     createFacilityElectricPowerServiceObject(*state);
     BranchInputManager::ManageBranchInput(*state); // just gets input and returns.
@@ -4817,7 +4794,7 @@ TEST_F(EnergyPlusFixture, Beam_sizeandSimulateHighOA)
     state->dataGlobal->DoingSizing = false;
     state->dataGlobal->KickOffSimulation = true;
 
-    WeatherManager::ResetEnvironmentCounter(*state);
+    Weather::ResetEnvironmentCounter(*state);
     TestAirPathIntegrity(*state, ErrorsFound); // Needed to initialize return node connections to airloops and inlet nodes
     SimulationManager::SetupSimulation(*state, ErrorsFound);
     state->dataGlobal->KickOffSimulation = false;

@@ -1,0 +1,16 @@
+cmake_minimum_required(VERSION 3.10)
+project({TARGET_NAME})
+include_directories("{EPLUS_INSTALL_NO_SLASH}/include")
+add_executable({TARGET_NAME} {SOURCE_FILE})
+set(DLL_PATH "{EPLUS_INSTALL_NO_SLASH}/{LIB_FILE_NAME}")
+target_link_libraries({TARGET_NAME} ${{DLL_PATH}})
+if (APPLE)
+    add_custom_command(
+        TARGET TestCAPIAccess POST_BUILD
+        COMMAND
+            ${{CMAKE_COMMAND}}
+            -DDLL_PATH=${{DLL_PATH}} -DTARGET_PATH=$<TARGET_FILE:{TARGET_NAME}>
+            -P "${{CMAKE_SOURCE_DIR}}/fixup.cmake"
+        DEPENDS "${{CMAKE_SOURCE_DIR}}/fixup.cmake"
+    )
+endif()

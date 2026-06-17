@@ -1,7 +1,7 @@
-// EnergyPlus, Copyright (c) 1996-2023, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
-// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other
+// National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
 // contributors. All rights reserved.
 //
 // NOTICE: This Software was developed under funding from the U.S. Department of Energy and the
@@ -250,33 +250,62 @@ TEST_F(EnergyPlusFixture, General_SolveRootTest)
     General::SolveRoot(*state, ErrorToler, MaxIte, SolFla, Frac, residual, 0.0, 1.0);
     EXPECT_EQ(-1, SolFla);
 
-    state->dataRootFinder->HVACSystemRootFinding.HVACSystemRootSolver = HVACSystemRootSolverAlgorithm::RegulaFalsiThenBisection;
-    state->dataRootFinder->HVACSystemRootFinding.NumOfIter = 10;
+    state->dataRootFinder->rootAlgo = RootAlgo::RegulaFalsiThenBisection;
+    state->dataRootFinder->NumOfIter = 10;
     General::SolveRoot(*state, ErrorToler, MaxIte, SolFla, Frac, residual, 0.0, 1.0);
     EXPECT_EQ(28, SolFla);
     EXPECT_NEAR(0.041420287, Frac, ErrorToler);
 
-    state->dataRootFinder->HVACSystemRootFinding.HVACSystemRootSolver = HVACSystemRootSolverAlgorithm::Bisection;
+    state->dataRootFinder->rootAlgo = RootAlgo::Bisection;
     General::SolveRoot(*state, ErrorToler, 40, SolFla, Frac, residual, 0.0, 1.0);
     EXPECT_EQ(17, SolFla);
     EXPECT_NEAR(0.041420287, Frac, ErrorToler);
 
-    state->dataRootFinder->HVACSystemRootFinding.HVACSystemRootSolver = HVACSystemRootSolverAlgorithm::BisectionThenRegulaFalsi;
+    state->dataRootFinder->rootAlgo = RootAlgo::BisectionThenRegulaFalsi;
     General::SolveRoot(*state, ErrorToler, 40, SolFla, Frac, residual, 0.0, 1.0);
     EXPECT_EQ(12, SolFla);
     EXPECT_NEAR(0.041420287, Frac, ErrorToler);
 
-    state->dataRootFinder->HVACSystemRootFinding.HVACSystemRootSolver = HVACSystemRootSolverAlgorithm::Alternation;
-    state->dataRootFinder->HVACSystemRootFinding.NumOfIter = 3;
+    state->dataRootFinder->rootAlgo = RootAlgo::Alternation;
+    state->dataRootFinder->NumOfIter = 3;
     General::SolveRoot(*state, ErrorToler, 40, SolFla, Frac, residual, 0.0, 1.0);
     EXPECT_EQ(15, SolFla);
     EXPECT_NEAR(0.041420287, Frac, ErrorToler);
 
     // Add a unit test to deal with vary small X value for #6515
-    state->dataRootFinder->HVACSystemRootFinding.HVACSystemRootSolver = HVACSystemRootSolverAlgorithm::RegulaFalsi;
+    state->dataRootFinder->rootAlgo = RootAlgo::RegulaFalsi;
     Real64 small = 1.0e-11;
     General::SolveRoot(*state, ErrorToler, 40, SolFla, Frac, residual_test, 0.0, small);
     EXPECT_EQ(-1, SolFla);
+}
+
+TEST_F(EnergyPlusFixture, General_SolveRoot2)
+{
+    SolveRootStats solveRootStats;
+    int maxIters = 30;
+    int SolFla;
+
+    for (int i = 0; i < 100; ++i) {
+        Real64 Request = (Real64)((i % 13) + 0.172);
+        auto residual = [Request](Real64 const Frac) {
+            Real64 const Actual = 1.0 + 2.0 * Frac + 10.0 * Frac * Frac;
+            return (Actual - Request) / Request;
+        };
+        General::SolveRoot2(*state, 0.001, maxIters, SolFla, residual, 0.0, 1.0, solveRootStats);
+    }
+
+    EXPECT_ENUM_EQ(solveRootStats.algo, RootAlgo::ShortBisectionThenRegulaFalsi);
+
+    for (int i = 0; i < 100; ++i) {
+        Real64 Request = (Real64)(1.00 / (i + 1));
+        auto residual = [Request](Real64 const Frac) {
+            Real64 const Actual = 1.0 + 1.0 / (1.0 + Frac);
+            return (Actual - Request) / Request;
+        };
+        General::SolveRoot2(*state, 0.001, maxIters, SolFla, residual, 0.0, 1.0, solveRootStats);
+    }
+
+    EXPECT_ENUM_EQ(solveRootStats.algo, RootAlgo::ShortBisectionThenRegulaFalsi);
 }
 
 TEST_F(EnergyPlusFixture, nthDayOfWeekOfMonth_test)
@@ -415,19 +444,19 @@ TEST_F(EnergyPlusFixture, General_BetweenDateHoursLeftInclusive)
     int currentMonth = 5;
     int currentDay = 13;
     int currentHour = 8;
-    int currentDate = WeatherManager::computeJulianDate(currentYear, currentMonth, currentDay);
+    int currentDate = Weather::computeJulianDate(currentYear, currentMonth, currentDay);
 
     // neither end inclusive
     int startYear = 2018;
     int startMonth = 3;
     int startDay = 13;
     int startHour = 8;
-    int startDate = WeatherManager::computeJulianDate(startYear, startMonth, startDay);
+    int startDate = Weather::computeJulianDate(startYear, startMonth, startDay);
     int endYear = 2018;
     int endMonth = 5;
     int endDay = 13;
     int endHour = 9;
-    int endDate = WeatherManager::computeJulianDate(endYear, endMonth, endDay);
+    int endDate = Weather::computeJulianDate(endYear, endMonth, endDay);
     EXPECT_TRUE(BetweenDateHoursLeftInclusive(currentDate, currentHour, startDate, startHour, endDate, endHour));
 
     // right inclusive
@@ -435,12 +464,12 @@ TEST_F(EnergyPlusFixture, General_BetweenDateHoursLeftInclusive)
     startMonth = 3;
     startDay = 13;
     startHour = 8;
-    startDate = WeatherManager::computeJulianDate(startYear, startMonth, startDay);
+    startDate = Weather::computeJulianDate(startYear, startMonth, startDay);
     endYear = 2018;
     endMonth = 5;
     endDay = 13;
     endHour = 8;
-    endDate = WeatherManager::computeJulianDate(endYear, endMonth, endDay);
+    endDate = Weather::computeJulianDate(endYear, endMonth, endDay);
     EXPECT_TRUE(BetweenDateHoursLeftInclusive(currentDate, currentHour, startDate, startHour, endDate, endHour));
 
     // not in the range
@@ -448,12 +477,12 @@ TEST_F(EnergyPlusFixture, General_BetweenDateHoursLeftInclusive)
     startMonth = 6;
     startDay = 13;
     startHour = 8;
-    startDate = WeatherManager::computeJulianDate(startYear, startMonth, startDay);
+    startDate = Weather::computeJulianDate(startYear, startMonth, startDay);
     endYear = 2018;
     endMonth = 8;
     endDay = 13;
     endHour = 8;
-    endDate = WeatherManager::computeJulianDate(endYear, endMonth, endDay);
+    endDate = Weather::computeJulianDate(endYear, endMonth, endDay);
     EXPECT_FALSE(BetweenDateHoursLeftInclusive(currentDate, currentHour, startDate, startHour, endDate, endHour));
 
     // left inclusive
@@ -461,12 +490,12 @@ TEST_F(EnergyPlusFixture, General_BetweenDateHoursLeftInclusive)
     startMonth = 5;
     startDay = 13;
     startHour = 8;
-    startDate = WeatherManager::computeJulianDate(startYear, startMonth, startDay);
+    startDate = Weather::computeJulianDate(startYear, startMonth, startDay);
     endYear = 2018;
     endMonth = 7;
     endDay = 15;
     endHour = 2;
-    endDate = WeatherManager::computeJulianDate(endYear, endMonth, endDay);
+    endDate = Weather::computeJulianDate(endYear, endMonth, endDay);
     EXPECT_TRUE(BetweenDateHoursLeftInclusive(currentDate, currentHour, startDate, startHour, endDate, endHour));
 
     // different year
@@ -474,12 +503,12 @@ TEST_F(EnergyPlusFixture, General_BetweenDateHoursLeftInclusive)
     startMonth = 5;
     startDay = 13;
     startHour = 8;
-    startDate = WeatherManager::computeJulianDate(startYear, startMonth, startDay);
+    startDate = Weather::computeJulianDate(startYear, startMonth, startDay);
     endYear = 2019;
     endMonth = 2;
     endDay = 15;
     endHour = 2;
-    endDate = WeatherManager::computeJulianDate(endYear, endMonth, endDay);
+    endDate = Weather::computeJulianDate(endYear, endMonth, endDay);
     EXPECT_TRUE(BetweenDateHoursLeftInclusive(currentDate, currentHour, startDate, startHour, endDate, endHour));
 
     // different year flipping the start and end
@@ -487,38 +516,38 @@ TEST_F(EnergyPlusFixture, General_BetweenDateHoursLeftInclusive)
     startMonth = 2;
     startDay = 15;
     startHour = 2;
-    startDate = WeatherManager::computeJulianDate(startYear, startMonth, startDay);
+    startDate = Weather::computeJulianDate(startYear, startMonth, startDay);
     endYear = 2017;
     endMonth = 5;
     endDay = 13;
     endHour = 8;
-    endDate = WeatherManager::computeJulianDate(endYear, endMonth, endDay);
+    endDate = Weather::computeJulianDate(endYear, endMonth, endDay);
     EXPECT_TRUE(BetweenDateHoursLeftInclusive(currentDate, currentHour, startDate, startHour, endDate, endHour));
 }
 
 TEST_F(EnergyPlusFixture, General_isReportPeriodBeginning)
 {
-    state->dataWeatherManager->TotReportPers = 1;
-    state->dataWeatherManager->ReportPeriodInput.allocate(state->dataWeatherManager->TotReportPers);
+    state->dataWeather->TotReportPers = 1;
+    state->dataWeather->ReportPeriodInput.allocate(state->dataWeather->TotReportPers);
 
     int periodIdx = 1;
 
-    state->dataWeatherManager->ReportPeriodInput(periodIdx).startYear = 0;
-    state->dataWeatherManager->ReportPeriodInput(periodIdx).startMonth = 1;
-    state->dataWeatherManager->ReportPeriodInput(periodIdx).startDay = 1;
-    state->dataWeatherManager->ReportPeriodInput(periodIdx).startHour = 8;
-    state->dataWeatherManager->ReportPeriodInput(periodIdx).startJulianDate =
-        WeatherManager::computeJulianDate(state->dataWeatherManager->ReportPeriodInput(periodIdx).startYear,
-                                          state->dataWeatherManager->ReportPeriodInput(periodIdx).startMonth,
-                                          state->dataWeatherManager->ReportPeriodInput(periodIdx).startDay);
-    state->dataWeatherManager->ReportPeriodInput(periodIdx).endYear = 0;
-    state->dataWeatherManager->ReportPeriodInput(periodIdx).endMonth = 1;
-    state->dataWeatherManager->ReportPeriodInput(periodIdx).endDay = 3;
-    state->dataWeatherManager->ReportPeriodInput(periodIdx).endHour = 18;
-    state->dataWeatherManager->ReportPeriodInput(periodIdx).endJulianDate =
-        WeatherManager::computeJulianDate(state->dataWeatherManager->ReportPeriodInput(periodIdx).endYear,
-                                          state->dataWeatherManager->ReportPeriodInput(periodIdx).endMonth,
-                                          state->dataWeatherManager->ReportPeriodInput(periodIdx).endDay);
+    state->dataWeather->ReportPeriodInput(periodIdx).startYear = 0;
+    state->dataWeather->ReportPeriodInput(periodIdx).startMonth = 1;
+    state->dataWeather->ReportPeriodInput(periodIdx).startDay = 1;
+    state->dataWeather->ReportPeriodInput(periodIdx).startHour = 8;
+    state->dataWeather->ReportPeriodInput(periodIdx).startJulianDate =
+        Weather::computeJulianDate(state->dataWeather->ReportPeriodInput(periodIdx).startYear,
+                                   state->dataWeather->ReportPeriodInput(periodIdx).startMonth,
+                                   state->dataWeather->ReportPeriodInput(periodIdx).startDay);
+    state->dataWeather->ReportPeriodInput(periodIdx).endYear = 0;
+    state->dataWeather->ReportPeriodInput(periodIdx).endMonth = 1;
+    state->dataWeather->ReportPeriodInput(periodIdx).endDay = 3;
+    state->dataWeather->ReportPeriodInput(periodIdx).endHour = 18;
+    state->dataWeather->ReportPeriodInput(periodIdx).endJulianDate =
+        Weather::computeJulianDate(state->dataWeather->ReportPeriodInput(periodIdx).endYear,
+                                   state->dataWeather->ReportPeriodInput(periodIdx).endMonth,
+                                   state->dataWeather->ReportPeriodInput(periodIdx).endDay);
     state->dataEnvrn->Year = 0;
     state->dataEnvrn->Month = 1;
     state->dataEnvrn->DayOfMonth = 1;
@@ -547,45 +576,45 @@ TEST_F(EnergyPlusFixture, General_isReportPeriodBeginning)
 TEST_F(EnergyPlusFixture, General_findReportPeriodIdx)
 {
 
-    state->dataWeatherManager->TotThermalReportPers = 2;
-    state->dataWeatherManager->ThermalReportPeriodInput.allocate(state->dataWeatherManager->TotThermalReportPers);
+    state->dataWeather->TotThermalReportPers = 2;
+    state->dataWeather->ThermalReportPeriodInput.allocate(state->dataWeather->TotThermalReportPers);
 
     // non-overlapping periods: 1/1 8:00:00 -- 1/10 18:00, 2/1 8:00 -- 3/10 18:00
-    state->dataWeatherManager->ThermalReportPeriodInput(1).startYear = 0;
-    state->dataWeatherManager->ThermalReportPeriodInput(1).startMonth = 1;
-    state->dataWeatherManager->ThermalReportPeriodInput(1).startDay = 1;
-    state->dataWeatherManager->ThermalReportPeriodInput(1).startHour = 8;
-    state->dataWeatherManager->ThermalReportPeriodInput(1).startJulianDate =
-        WeatherManager::computeJulianDate(state->dataWeatherManager->ThermalReportPeriodInput(1).startYear,
-                                          state->dataWeatherManager->ThermalReportPeriodInput(1).startMonth,
-                                          state->dataWeatherManager->ThermalReportPeriodInput(1).startDay);
-    state->dataWeatherManager->ThermalReportPeriodInput(1).endYear = 0;
-    state->dataWeatherManager->ThermalReportPeriodInput(1).endMonth = 1;
-    state->dataWeatherManager->ThermalReportPeriodInput(1).endDay = 10;
-    state->dataWeatherManager->ThermalReportPeriodInput(1).endHour = 18;
-    state->dataWeatherManager->ThermalReportPeriodInput(1).endJulianDate =
-        WeatherManager::computeJulianDate(state->dataWeatherManager->ThermalReportPeriodInput(1).endYear,
-                                          state->dataWeatherManager->ThermalReportPeriodInput(1).endMonth,
-                                          state->dataWeatherManager->ThermalReportPeriodInput(1).endDay);
-    state->dataWeatherManager->ThermalReportPeriodInput(2).startYear = 0;
-    state->dataWeatherManager->ThermalReportPeriodInput(2).startMonth = 2;
-    state->dataWeatherManager->ThermalReportPeriodInput(2).startDay = 1;
-    state->dataWeatherManager->ThermalReportPeriodInput(2).startHour = 8;
-    state->dataWeatherManager->ThermalReportPeriodInput(2).startJulianDate =
-        WeatherManager::computeJulianDate(state->dataWeatherManager->ThermalReportPeriodInput(2).startYear,
-                                          state->dataWeatherManager->ThermalReportPeriodInput(2).startMonth,
-                                          state->dataWeatherManager->ThermalReportPeriodInput(2).startDay);
-    state->dataWeatherManager->ThermalReportPeriodInput(2).endYear = 0;
-    state->dataWeatherManager->ThermalReportPeriodInput(2).endMonth = 3;
-    state->dataWeatherManager->ThermalReportPeriodInput(2).endDay = 10;
-    state->dataWeatherManager->ThermalReportPeriodInput(2).endHour = 18;
-    state->dataWeatherManager->ThermalReportPeriodInput(2).endJulianDate =
-        WeatherManager::computeJulianDate(state->dataWeatherManager->ThermalReportPeriodInput(2).endYear,
-                                          state->dataWeatherManager->ThermalReportPeriodInput(2).endMonth,
-                                          state->dataWeatherManager->ThermalReportPeriodInput(2).endDay);
+    state->dataWeather->ThermalReportPeriodInput(1).startYear = 0;
+    state->dataWeather->ThermalReportPeriodInput(1).startMonth = 1;
+    state->dataWeather->ThermalReportPeriodInput(1).startDay = 1;
+    state->dataWeather->ThermalReportPeriodInput(1).startHour = 8;
+    state->dataWeather->ThermalReportPeriodInput(1).startJulianDate =
+        Weather::computeJulianDate(state->dataWeather->ThermalReportPeriodInput(1).startYear,
+                                   state->dataWeather->ThermalReportPeriodInput(1).startMonth,
+                                   state->dataWeather->ThermalReportPeriodInput(1).startDay);
+    state->dataWeather->ThermalReportPeriodInput(1).endYear = 0;
+    state->dataWeather->ThermalReportPeriodInput(1).endMonth = 1;
+    state->dataWeather->ThermalReportPeriodInput(1).endDay = 10;
+    state->dataWeather->ThermalReportPeriodInput(1).endHour = 18;
+    state->dataWeather->ThermalReportPeriodInput(1).endJulianDate =
+        Weather::computeJulianDate(state->dataWeather->ThermalReportPeriodInput(1).endYear,
+                                   state->dataWeather->ThermalReportPeriodInput(1).endMonth,
+                                   state->dataWeather->ThermalReportPeriodInput(1).endDay);
+    state->dataWeather->ThermalReportPeriodInput(2).startYear = 0;
+    state->dataWeather->ThermalReportPeriodInput(2).startMonth = 2;
+    state->dataWeather->ThermalReportPeriodInput(2).startDay = 1;
+    state->dataWeather->ThermalReportPeriodInput(2).startHour = 8;
+    state->dataWeather->ThermalReportPeriodInput(2).startJulianDate =
+        Weather::computeJulianDate(state->dataWeather->ThermalReportPeriodInput(2).startYear,
+                                   state->dataWeather->ThermalReportPeriodInput(2).startMonth,
+                                   state->dataWeather->ThermalReportPeriodInput(2).startDay);
+    state->dataWeather->ThermalReportPeriodInput(2).endYear = 0;
+    state->dataWeather->ThermalReportPeriodInput(2).endMonth = 3;
+    state->dataWeather->ThermalReportPeriodInput(2).endDay = 10;
+    state->dataWeather->ThermalReportPeriodInput(2).endHour = 18;
+    state->dataWeather->ThermalReportPeriodInput(2).endJulianDate =
+        Weather::computeJulianDate(state->dataWeather->ThermalReportPeriodInput(2).endYear,
+                                   state->dataWeather->ThermalReportPeriodInput(2).endMonth,
+                                   state->dataWeather->ThermalReportPeriodInput(2).endDay);
 
     Array1D_bool reportPeriodFlags;
-    reportPeriodFlags.allocate(state->dataWeatherManager->TotThermalReportPers);
+    reportPeriodFlags.allocate(state->dataWeather->TotThermalReportPers);
 
     // before the start of first period
     state->dataEnvrn->Year = 0;
@@ -593,8 +622,7 @@ TEST_F(EnergyPlusFixture, General_findReportPeriodIdx)
     state->dataEnvrn->DayOfMonth = 1;
     state->dataGlobal->HourOfDay = 5;
     reportPeriodFlags = false;
-    findReportPeriodIdx(
-        *state, state->dataWeatherManager->ThermalReportPeriodInput, state->dataWeatherManager->TotThermalReportPers, reportPeriodFlags);
+    findReportPeriodIdx(*state, state->dataWeather->ThermalReportPeriodInput, state->dataWeather->TotThermalReportPers, reportPeriodFlags);
     EXPECT_FALSE(reportPeriodFlags(1));
     EXPECT_FALSE(reportPeriodFlags(2));
 
@@ -604,8 +632,7 @@ TEST_F(EnergyPlusFixture, General_findReportPeriodIdx)
     state->dataEnvrn->DayOfMonth = 8;
     state->dataGlobal->HourOfDay = 6;
     reportPeriodFlags = false;
-    findReportPeriodIdx(
-        *state, state->dataWeatherManager->ThermalReportPeriodInput, state->dataWeatherManager->TotThermalReportPers, reportPeriodFlags);
+    findReportPeriodIdx(*state, state->dataWeather->ThermalReportPeriodInput, state->dataWeather->TotThermalReportPers, reportPeriodFlags);
     EXPECT_TRUE(reportPeriodFlags(1));
     EXPECT_FALSE(reportPeriodFlags(2));
 
@@ -615,8 +642,7 @@ TEST_F(EnergyPlusFixture, General_findReportPeriodIdx)
     state->dataEnvrn->DayOfMonth = 15;
     state->dataGlobal->HourOfDay = 21;
     reportPeriodFlags = false;
-    findReportPeriodIdx(
-        *state, state->dataWeatherManager->ThermalReportPeriodInput, state->dataWeatherManager->TotThermalReportPers, reportPeriodFlags);
+    findReportPeriodIdx(*state, state->dataWeather->ThermalReportPeriodInput, state->dataWeather->TotThermalReportPers, reportPeriodFlags);
     EXPECT_FALSE(reportPeriodFlags(1));
     EXPECT_FALSE(reportPeriodFlags(2));
 
@@ -626,8 +652,7 @@ TEST_F(EnergyPlusFixture, General_findReportPeriodIdx)
     state->dataEnvrn->DayOfMonth = 1;
     state->dataGlobal->HourOfDay = 11;
     reportPeriodFlags = false;
-    findReportPeriodIdx(
-        *state, state->dataWeatherManager->ThermalReportPeriodInput, state->dataWeatherManager->TotThermalReportPers, reportPeriodFlags);
+    findReportPeriodIdx(*state, state->dataWeather->ThermalReportPeriodInput, state->dataWeather->TotThermalReportPers, reportPeriodFlags);
     EXPECT_FALSE(reportPeriodFlags(1));
     EXPECT_TRUE(reportPeriodFlags(2));
 
@@ -637,20 +662,19 @@ TEST_F(EnergyPlusFixture, General_findReportPeriodIdx)
     state->dataEnvrn->DayOfMonth = 1;
     state->dataGlobal->HourOfDay = 11;
     reportPeriodFlags = false;
-    findReportPeriodIdx(
-        *state, state->dataWeatherManager->ThermalReportPeriodInput, state->dataWeatherManager->TotThermalReportPers, reportPeriodFlags);
+    findReportPeriodIdx(*state, state->dataWeather->ThermalReportPeriodInput, state->dataWeather->TotThermalReportPers, reportPeriodFlags);
     EXPECT_FALSE(reportPeriodFlags(1));
     EXPECT_FALSE(reportPeriodFlags(2));
 
     // overlapping periods: 1/1 8:00:00 -- 2/10 18:00, 2/1 8:00 -- 3/10 18:00
-    state->dataWeatherManager->ThermalReportPeriodInput(1).endYear = 0;
-    state->dataWeatherManager->ThermalReportPeriodInput(1).endMonth = 2;
-    state->dataWeatherManager->ThermalReportPeriodInput(1).endDay = 10;
-    state->dataWeatherManager->ThermalReportPeriodInput(1).endHour = 18;
-    state->dataWeatherManager->ThermalReportPeriodInput(1).endJulianDate =
-        WeatherManager::computeJulianDate(state->dataWeatherManager->ThermalReportPeriodInput(1).endYear,
-                                          state->dataWeatherManager->ThermalReportPeriodInput(1).endMonth,
-                                          state->dataWeatherManager->ThermalReportPeriodInput(1).endDay);
+    state->dataWeather->ThermalReportPeriodInput(1).endYear = 0;
+    state->dataWeather->ThermalReportPeriodInput(1).endMonth = 2;
+    state->dataWeather->ThermalReportPeriodInput(1).endDay = 10;
+    state->dataWeather->ThermalReportPeriodInput(1).endHour = 18;
+    state->dataWeather->ThermalReportPeriodInput(1).endJulianDate =
+        Weather::computeJulianDate(state->dataWeather->ThermalReportPeriodInput(1).endYear,
+                                   state->dataWeather->ThermalReportPeriodInput(1).endMonth,
+                                   state->dataWeather->ThermalReportPeriodInput(1).endDay);
 
     // before the start of first period
     state->dataEnvrn->Year = 0;
@@ -658,8 +682,7 @@ TEST_F(EnergyPlusFixture, General_findReportPeriodIdx)
     state->dataEnvrn->DayOfMonth = 1;
     state->dataGlobal->HourOfDay = 5;
     reportPeriodFlags = false;
-    findReportPeriodIdx(
-        *state, state->dataWeatherManager->ThermalReportPeriodInput, state->dataWeatherManager->TotThermalReportPers, reportPeriodFlags);
+    findReportPeriodIdx(*state, state->dataWeather->ThermalReportPeriodInput, state->dataWeather->TotThermalReportPers, reportPeriodFlags);
     EXPECT_FALSE(reportPeriodFlags(1));
     EXPECT_FALSE(reportPeriodFlags(2));
 
@@ -669,8 +692,7 @@ TEST_F(EnergyPlusFixture, General_findReportPeriodIdx)
     state->dataEnvrn->DayOfMonth = 8;
     state->dataGlobal->HourOfDay = 6;
     reportPeriodFlags = false;
-    findReportPeriodIdx(
-        *state, state->dataWeatherManager->ThermalReportPeriodInput, state->dataWeatherManager->TotThermalReportPers, reportPeriodFlags);
+    findReportPeriodIdx(*state, state->dataWeather->ThermalReportPeriodInput, state->dataWeather->TotThermalReportPers, reportPeriodFlags);
     EXPECT_TRUE(reportPeriodFlags(1));
     EXPECT_FALSE(reportPeriodFlags(2));
 
@@ -680,8 +702,7 @@ TEST_F(EnergyPlusFixture, General_findReportPeriodIdx)
     state->dataEnvrn->DayOfMonth = 5;
     state->dataGlobal->HourOfDay = 21;
     reportPeriodFlags = false;
-    findReportPeriodIdx(
-        *state, state->dataWeatherManager->ThermalReportPeriodInput, state->dataWeatherManager->TotThermalReportPers, reportPeriodFlags);
+    findReportPeriodIdx(*state, state->dataWeather->ThermalReportPeriodInput, state->dataWeather->TotThermalReportPers, reportPeriodFlags);
     EXPECT_TRUE(reportPeriodFlags(1));
     EXPECT_TRUE(reportPeriodFlags(2));
 
@@ -691,8 +712,7 @@ TEST_F(EnergyPlusFixture, General_findReportPeriodIdx)
     state->dataEnvrn->DayOfMonth = 1;
     state->dataGlobal->HourOfDay = 11;
     reportPeriodFlags = false;
-    findReportPeriodIdx(
-        *state, state->dataWeatherManager->ThermalReportPeriodInput, state->dataWeatherManager->TotThermalReportPers, reportPeriodFlags);
+    findReportPeriodIdx(*state, state->dataWeather->ThermalReportPeriodInput, state->dataWeather->TotThermalReportPers, reportPeriodFlags);
     EXPECT_FALSE(reportPeriodFlags(1));
     EXPECT_TRUE(reportPeriodFlags(2));
 
@@ -702,9 +722,63 @@ TEST_F(EnergyPlusFixture, General_findReportPeriodIdx)
     state->dataEnvrn->DayOfMonth = 1;
     state->dataGlobal->HourOfDay = 11;
     reportPeriodFlags = false;
-    findReportPeriodIdx(
-        *state, state->dataWeatherManager->ThermalReportPeriodInput, state->dataWeatherManager->TotThermalReportPers, reportPeriodFlags);
+    findReportPeriodIdx(*state, state->dataWeather->ThermalReportPeriodInput, state->dataWeather->TotThermalReportPers, reportPeriodFlags);
     EXPECT_FALSE(reportPeriodFlags(1));
     EXPECT_FALSE(reportPeriodFlags(2));
 }
+
+TEST_F(EnergyPlusFixture, General_CreateSysTimeIntervalString_Test)
+{
+    // Unit test created as part of fix for Issue #10801
+    auto &dHVACG = state->dataHVACGlobal;
+    auto &dGlo = state->dataGlobal;
+    std::string resultingString;
+    std::string expectedString;
+
+    // NOTE: SysTimeElapsed is updated at the END of the HVAC time step (loop), so it's current value is
+    //       the end of the last HVAC time step not the end of the current HVAC time step.  The other
+    //       conditions below are for when we are in the zone heat balance (SysTimeElapsed = 0) or after
+    //       we have finished the last HVAC time step.
+
+    // Test 1: Middle of the day/middle of zone timestep (system time step less than zone timestep)
+    dHVACG->SysTimeElapsed = 0.10;
+    dHVACG->TimeStepSys = 0.05;
+    dGlo->CurrentTime = 10.6;
+    dGlo->TimeStepZone = 0.2;
+    expectedString = "10:30 - 10:33";
+
+    resultingString = CreateSysTimeIntervalString(*state);
+    EXPECT_EQ(resultingString, expectedString);
+
+    // Test 2: Beginning of the day/hour/timestep
+    dHVACG->SysTimeElapsed = 0.10;
+    dHVACG->TimeStepSys = 0.10;
+    dGlo->CurrentTime = 0.10;
+    dGlo->TimeStepZone = 0.10;
+    expectedString = "00:00 - 00:06";
+
+    resultingString = CreateSysTimeIntervalString(*state);
+    EXPECT_EQ(resultingString, expectedString);
+
+    // Test 3: End of the day/hour/timestep
+    dHVACG->SysTimeElapsed = 0.2;
+    dHVACG->TimeStepSys = 0.2;
+    dGlo->CurrentTime = 24.0;
+    dGlo->TimeStepZone = 0.2;
+    expectedString = "23:48 - 24:00";
+
+    resultingString = CreateSysTimeIntervalString(*state);
+    EXPECT_EQ(resultingString, expectedString);
+
+    // Test 4: SysTimeElapsed zero -- before HVAC simulation sets it
+    dHVACG->SysTimeElapsed = 0.0;
+    dHVACG->TimeStepSys = 0.1;
+    dGlo->CurrentTime = 10.9;
+    dGlo->TimeStepZone = 0.1;
+    expectedString = "10:48 - 10:54";
+
+    resultingString = CreateSysTimeIntervalString(*state);
+    EXPECT_EQ(resultingString, expectedString);
+}
+
 } // namespace EnergyPlus

@@ -119,7 +119,7 @@ SUBROUTINE CreateNewIDFUsingRules(EndOfFile,DiffOnly,InLfn,AskForInput,InputFile
   CHARACTER(len=MaxNameLength) :: OutScheduleName
 
   LOGICAL :: ErrFlag
-  
+
   REAL :: IndirectOldFieldFive
   REAL :: IndirectOldFieldSix
   REAL :: IndirectNewFieldThirteen
@@ -365,7 +365,7 @@ SUBROUTINE CreateNewIDFUsingRules(EndOfFile,DiffOnly,InLfn,AskForInput,InputFile
                 ! then we just push the rest of the fields down 1
                 OutArgs(11:CurArgs+1)=InArgs(10:CurArgs)
                 CurArgs = CurArgs + 1
-                
+
               CASE('SITE:GROUNDDOMAIN')
                 ! Object rename
                 nodiff=.false.
@@ -373,13 +373,13 @@ SUBROUTINE CreateNewIDFUsingRules(EndOfFile,DiffOnly,InLfn,AskForInput,InputFile
                 ObjectName = 'Site:GroundDomain:Slab'
                 CALL GetNewObjectDefInIDD(ObjectName,NwNumArgs,NwAorN,NwReqFld,NwObjMinFlds,NwFldNames,NwFldDefaults,NwFldUnits)
                 OutArgs(1:CurArgs)=InArgs(1:CurArgs)
-                
+
               CASE('GROUNDHEATEXCHANGER:VERTICAL')
                 ! Remove Max flow rate field
                 nodiff=.false.
                 CALL GetNewObjectDefInIDD(ObjectName,NwNUmArgs,NwAorN,NwReqFld,NwObjMinFlds,NwFldNames,NwFldDefaults,NwFldUnits)
                 OutArgs(1:3) = InArgs(1:3)
-                OutArgs(4) = InArgs(11) 
+                OutArgs(4) = InArgs(11)
                 OutArgs(5:10) = InArgs(5:10)
                 OutArgs(11:CurArgs-1) = InArgs(12:CurArgs)
                 CurArgs = CurArgs - 1
@@ -426,7 +426,7 @@ SUBROUTINE CreateNewIDFUsingRules(EndOfFile,DiffOnly,InLfn,AskForInput,InputFile
                 OutArgs(21:25) = InArgs(14:18)
                 ! there are some additional new fields, but they are optional and intentionally blank
                 CurArgs = CurArgs + 7
-                
+
               CASE('EVAPORATIVECOOLER:DIRECT:RESEARCHSPECIAL')
                 ! data center hvac changes
                 nodiff = .false.
@@ -443,7 +443,7 @@ SUBROUTINE CreateNewIDFUsingRules(EndOfFile,DiffOnly,InLfn,AskForInput,InputFile
                 OutArgs(8:13) = InArgs(5:10)
                 ! there are some additional new fields, but they are optional and intentionally blank
                 CurArgs = CurArgs + 3
-                
+
     !!!   Changes for report variables, meters, tables -- update names
               CASE('OUTPUT:VARIABLE')
                 CALL GetNewObjectDefInIDD(ObjectName,NwNumArgs,NwAorN,NwReqFld,NwObjMinFlds,NwFldNames,NwFldDefaults,NwFldUnits)

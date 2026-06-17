@@ -1,7 +1,7 @@
-// EnergyPlus, Copyright (c) 1996-2023, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
-// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other
+// National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
 // contributors. All rights reserved.
 //
 // NOTICE: This Software was developed under funding from the U.S. Department of Energy and the
@@ -46,14 +46,12 @@
 // POSSIBILITY OF SUCH DAMAGE.
 
 // C++ Headers
-#include <memory>
+#include <array>
 
 // EnergyPlus Headers
 #include <EnergyPlus/Data/EnergyPlusData.hh>
 #include <EnergyPlus/DataEnvironment.hh>
 #include <EnergyPlus/DataGlobals.hh>
-#include <EnergyPlus/DataIPShortCuts.hh>
-#include <EnergyPlus/GroundTemperatureModeling/GroundTemperatureModelManager.hh>
 #include <EnergyPlus/GroundTemperatureModeling/SiteBuildingSurfaceGroundTemperatures.hh>
 #include <EnergyPlus/InputProcessing/InputProcessor.hh>
 #include <EnergyPlus/UtilityRoutines.hh>
@@ -61,164 +59,154 @@
 
 namespace EnergyPlus {
 
-//******************************************************************************
+namespace GroundTemp {
+    // Site:GroundTemperature:BuildingSurface factory
+    SiteBuildingSurfaceGroundTemps *SiteBuildingSurfaceGroundTemps::BuildingSurfaceGTMFactory(EnergyPlusData &state, const std::string &objectName)
+    {
+        // SUBROUTINE INFORMATION:
+        //       AUTHOR         Matt Mitchell
+        //       DATE WRITTEN   Summer 2015
 
-// Site:GroundTemperature:BuildingSurface factory
-std::shared_ptr<SiteBuildingSurfaceGroundTemps> SiteBuildingSurfaceGroundTemps::BuildingSurfaceGTMFactory(EnergyPlusData &state,
-                                                                                                          std::string objectName)
-{
-    // SUBROUTINE INFORMATION:
-    //       AUTHOR         Matt Mitchell
-    //       DATE WRITTEN   Summer 2015
-    //       MODIFIED       na
-    //       RE-ENGINEERED  na
+        // PURPOSE OF THIS SUBROUTINE:
+        // Reads input and creates instance of Site:GroundTemperature:BuildingSurface object
 
-    // PURPOSE OF THIS SUBROUTINE:
-    // Reads input and creates instance of Site:GroundTemperature:BuildingSurface object
+        // SUBROUTINE LOCAL VARIABLE DECLARATIONS:
+        constexpr int numMonths = 12;
+        bool errorsFound = false;
 
-    // USE STATEMENTS:
-    using namespace GroundTemperatureManager;
+        // New shared pointer for this model object
+        auto *thisModel = new SiteBuildingSurfaceGroundTemps();
 
-    // Locals
-    // SUBROUTINE LOCAL VARIABLE DECLARATIONS:
-    bool genErrorMessage = false;
-    int NumNums;
-    int NumAlphas;
-    int IOStat;
-    bool errorsFound = false;
+        ModelType modelType = GroundTemp::ModelType::SiteBuildingSurface;
 
-    // New shared pointer for this model object
-    std::shared_ptr<SiteBuildingSurfaceGroundTemps> thisModel(new SiteBuildingSurfaceGroundTemps());
+        std::string_view const cCurrentModuleObject = GroundTemp::modelTypeNames[(int)modelType];
+        std::string const currentModuleObject(cCurrentModuleObject);
+        auto *inputProcessor = state.dataInputProcessing->inputProcessor.get();
+        const int numCurrObjects = inputProcessor->getNumObjectsFound(state, cCurrentModuleObject);
 
-    GroundTempObjType objType = GroundTempObjType::SiteBuildingSurfaceGroundTemp;
+        thisModel->modelType = modelType;
+        thisModel->Name = objectName;
 
-    std::string_view const cCurrentModuleObject = GroundTemperatureManager::groundTempModelNamesUC[static_cast<int>(objType)];
-    int numCurrObjects = state.dataInputProcessing->inputProcessor->getNumObjectsFound(state, cCurrentModuleObject);
+        if (numCurrObjects == 1) {
+            bool genErrorMessage = false;
+            auto const &groundTempsInstances = inputProcessor->epJSON.at(currentModuleObject);
+            auto const groundTempsInstance = groundTempsInstances.begin();
+            auto const &groundTempsFields = groundTempsInstance.value();
+            auto const &groundTempsSchemaProps = inputProcessor->getObjectSchemaProps(state, currentModuleObject);
+            inputProcessor->markObjectAsUsed(currentModuleObject, groundTempsInstance.key());
+            static constexpr std::array<std::string_view, numMonths> fieldNames = {"january_ground_temperature",
+                                                                                   "february_ground_temperature",
+                                                                                   "march_ground_temperature",
+                                                                                   "april_ground_temperature",
+                                                                                   "may_ground_temperature",
+                                                                                   "june_ground_temperature",
+                                                                                   "july_ground_temperature",
+                                                                                   "august_ground_temperature",
+                                                                                   "september_ground_temperature",
+                                                                                   "october_ground_temperature",
+                                                                                   "november_ground_temperature",
+                                                                                   "december_ground_temperature"};
 
-    thisModel->objectType = objType;
-    thisModel->objectName = objectName;
+            // Assign the ground temps to the variable
+            for (int i = 0; i < numMonths; ++i) {
+                thisModel->buildingSurfaceGroundTemps[i] =
+                    inputProcessor->getRealFieldValue(groundTempsFields, groundTempsSchemaProps, std::string(fieldNames[i]));
+                if (thisModel->buildingSurfaceGroundTemps[i] < 15.0 || thisModel->buildingSurfaceGroundTemps[i] > 25.0) {
+                    genErrorMessage = true;
+                }
+            }
 
-    if (numCurrObjects == 1) {
+            state.dataEnvrn->GroundTempInputs[static_cast<int>(DataEnvironment::GroundTempType::BuildingSurface)] = true;
 
-        // Get the object names for each construction from the input processor
-        state.dataInputProcessing->inputProcessor->getObjectItem(
-            state, cCurrentModuleObject, 1, state.dataIPShortCut->cAlphaArgs, NumAlphas, state.dataIPShortCut->rNumericArgs, NumNums, IOStat);
+            if (genErrorMessage) {
+                ShowWarningError(state, std::format("{}: Some values fall outside the range of 15-25C.", GroundTemp::modelTypeNames[(int)modelType]));
+                ShowContinueError(state, "These values may be inappropriate.  Please consult the Input Output Reference for more details.");
+            }
 
-        if (NumNums < 12) {
-            ShowSevereError(
-                state, fmt::format("{}: Less than 12 values entered.", GroundTemperatureManager::groundTempModelNames[static_cast<int>(objType)]));
+        } else if (numCurrObjects > 1) {
+            ShowSevereError(state, std::format("{}: Too many objects entered. Only one allowed.", GroundTemp::modelTypeNames[(int)modelType]));
             errorsFound = true;
+        } else {
+            std::fill(thisModel->buildingSurfaceGroundTemps.begin(), thisModel->buildingSurfaceGroundTemps.end(), 18.0);
         }
 
-        // Assign the ground temps to the variable
-        for (int i = 1; i <= 12; ++i) {
-            thisModel->buildingSurfaceGroundTemps(i) = state.dataIPShortCut->rNumericArgs(i);
-            if (thisModel->buildingSurfaceGroundTemps(i) < 15.0 || thisModel->buildingSurfaceGroundTemps(i) > 25.0) genErrorMessage = true;
+        // Write Final Ground Temp Information to the initialization output file
+        write_ground_temps(state.files.eio, "BuildingSurface", thisModel->buildingSurfaceGroundTemps);
+
+        if (!errorsFound) {
+            state.dataGrndTempModelMgr->groundTempModels.push_back(thisModel);
+            return thisModel;
         }
 
-        state.dataEnvrn->GroundTempObjInput = true;
-
-        if (genErrorMessage) {
-            ShowWarningError(state,
-                             fmt::format("{}: Some values fall outside the range of 15-25C.",
-                                         GroundTemperatureManager::groundTempModelNames[static_cast<int>(objType)]));
-            ShowContinueError(state, "These values may be inappropriate.  Please consult the Input Output Reference for more details.");
-        }
-
-    } else if (numCurrObjects > 1) {
-        ShowSevereError(state,
-                        fmt::format("{}: Too many objects entered. Only one allowed.",
-                                    GroundTemperatureManager::groundTempModelNames[static_cast<int>(objType)]));
-        errorsFound = true;
-    } else {
-        thisModel->buildingSurfaceGroundTemps = 18.0;
-    }
-
-    // Write Final Ground Temp Information to the initialization output file
-    write_ground_temps(state.files.eio, "BuildingSurface", thisModel->buildingSurfaceGroundTemps);
-
-    if (!errorsFound) {
-        state.dataGrndTempModelMgr->groundTempModels.push_back(thisModel);
-        return thisModel;
-    } else {
-        ShowFatalError(state,
-                       fmt::format("{}--Errors getting input for ground temperature model",
-                                   GroundTemperatureManager::groundTempModelNames[static_cast<int>(objType)]));
+        ShowFatalError(state, std::format("{}--Errors getting input for ground temperature model", GroundTemp::modelTypeNames[(int)modelType]));
         return nullptr;
     }
-}
 
-//******************************************************************************
+    //******************************************************************************
 
-Real64 SiteBuildingSurfaceGroundTemps::getGroundTemp([[maybe_unused]] EnergyPlusData &state)
-{
-    // SUBROUTINE INFORMATION:
-    //       AUTHOR         Matt Mitchell
-    //       DATE WRITTEN   Summer 2015
-    //       MODIFIED       na
-    //       RE-ENGINEERED  na
+    Real64 SiteBuildingSurfaceGroundTemps::getGroundTemp([[maybe_unused]] EnergyPlusData &state)
+    {
+        // SUBROUTINE INFORMATION:
+        //       AUTHOR         Matt Mitchell
+        //       DATE WRITTEN   Summer 2015
 
-    // PURPOSE OF THIS SUBROUTINE:
-    // Returns the ground temperature for Site:GroundTemperature:BuildingSurface
+        // PURPOSE OF THIS SUBROUTINE:
+        // Returns the ground temperature for Site:GroundTemperature:BuildingSurface
 
-    return buildingSurfaceGroundTemps(timeOfSimInMonths);
-}
-
-//******************************************************************************
-
-Real64
-SiteBuildingSurfaceGroundTemps::getGroundTempAtTimeInSeconds(EnergyPlusData &state, [[maybe_unused]] Real64 const _depth, Real64 const _seconds)
-{
-    // SUBROUTINE INFORMATION:
-    //       AUTHOR         Matt Mitchell
-    //       DATE WRITTEN   Summer 2015
-    //       MODIFIED       na
-    //       RE-ENGINEERED  na
-
-    // PURPOSE OF THIS SUBROUTINE:
-    // Returns the ground temperature when input time is in seconds
-
-    // USE STATEMENTS:
-    // SUBROUTINE LOCAL VARIABLE DECLARATIONS:
-    Real64 secPerMonth = state.dataWeatherManager->NumDaysInYear * DataGlobalConstants::SecsInDay / 12;
-
-    // Convert secs to months
-    int month = ceil(_seconds / secPerMonth);
-
-    if (month >= 1 && month <= 12) {
-        timeOfSimInMonths = month;
-    } else {
-        timeOfSimInMonths = remainder(month, 12);
+        return buildingSurfaceGroundTemps[timeOfSimInMonths - 1];
     }
 
-    // Get and return ground temp
-    return getGroundTemp(state);
-}
+    //******************************************************************************
 
-//******************************************************************************
+    Real64
+    SiteBuildingSurfaceGroundTemps::getGroundTempAtTimeInSeconds(EnergyPlusData &state, [[maybe_unused]] Real64 const _depth, Real64 const _seconds)
+    {
+        // SUBROUTINE INFORMATION:
+        //       AUTHOR         Matt Mitchell
+        //       DATE WRITTEN   Summer 2015
 
-Real64 SiteBuildingSurfaceGroundTemps::getGroundTempAtTimeInMonths(EnergyPlusData &state, [[maybe_unused]] Real64 const _depth, int const _month)
-{
-    // SUBROUTINE INFORMATION:
-    //       AUTHOR         Matt Mitchell
-    //       DATE WRITTEN   Summer 2015
-    //       MODIFIED       na
-    //       RE-ENGINEERED  na
+        // PURPOSE OF THIS SUBROUTINE:
+        // Returns the ground temperature when input time is in seconds
 
-    // PURPOSE OF THIS SUBROUTINE:
-    // Returns the ground temperature when input time is in months
+        // USE STATEMENTS:
+        // SUBROUTINE LOCAL VARIABLE DECLARATIONS:
+        Real64 secPerMonth = state.dataWeather->NumDaysInYear * Constant::rSecsInDay / 12;
 
-    // Set month
-    if (_month >= 1 && _month <= 12) {
-        timeOfSimInMonths = _month;
-    } else {
-        timeOfSimInMonths = remainder(_month, 12);
+        // Convert secs to months
+        const int month = ceil(_seconds / secPerMonth);
+
+        if (month >= 1 && month <= 12) {
+            timeOfSimInMonths = month;
+        } else {
+            timeOfSimInMonths = month % 12;
+        }
+
+        // Get and return ground temp
+        return getGroundTemp(state);
     }
 
-    // Get and return ground temp
-    return getGroundTemp(state);
-}
+    //******************************************************************************
 
-//******************************************************************************
+    Real64 SiteBuildingSurfaceGroundTemps::getGroundTempAtTimeInMonths(EnergyPlusData &state, [[maybe_unused]] Real64 const _depth, int const _month)
+    {
+        // SUBROUTINE INFORMATION:
+        //       AUTHOR         Matt Mitchell
+        //       DATE WRITTEN   Summer 2015
 
+        // PURPOSE OF THIS SUBROUTINE:
+        // Returns the ground temperature when input time is in months
+
+        // Set month
+        if (_month >= 1 && _month <= 12) {
+            timeOfSimInMonths = _month;
+        } else {
+            timeOfSimInMonths = _month % 12;
+        }
+
+        // Get and return ground temp
+        return getGroundTemp(state);
+    }
+
+    //******************************************************************************
+} // namespace GroundTemp
 } // namespace EnergyPlus

@@ -14,7 +14,7 @@ One of the most important outputs for EnergyPlus is the Variable Dictionary repo
 
 \paragraph{Field: Key Field}\label{field-key-field}
 
-For this field there are two choices: \textbf{IDF} and \textbf{regular}. The regular option is the default and produces a listing that shows the type of variable: Zone or HVAC, Average or Sum. ``\textbf{Zone}'' variables are calculated and can be reported after each Zone/Heat Balance timestep (ref: Timesteps input object). ``\textbf{HVAC}'' variables are calculated and can be reported with each variable HVAC timestep. ``\textbf{Average}'' variables will be averaged over the time interval being reported whereas ``\textbf{Sum}'' variables are summed over that time interval. (Meter variables are always summed.) Units for the variable are shown in ``{[}\}''.
+For this field there are two choices: \textbf{IDF} and \textbf{regular}. The regular option is the default and produces a listing that shows the type of variable: Zone or HVAC, Average or Sum. ``\textbf{Zone}'' variables are calculated and can be reported after each Zone/Heat Balance timestep (ref: Timesteps input object). ``\textbf{HVAC}'' variables are calculated and can be reported with each variable HVAC timestep. ``\textbf{Average}'' variables will be averaged over the time interval being reported whereas ``\textbf{Sum}'' variables are summed over that time interval. (Meter variables are always summed.) Units for the variable are shown in ``{[} {]}''.
 
 \paragraph{Field: Sort Option}\label{field-sort-option}
 
@@ -64,7 +64,7 @@ An example input object for this report follows.
 Output:Surfaces:List, Lines;
 \end{lstlisting}
 
-The above IDF line will produce a simple file of line segments that constitute the surfaces in the IDF file. This file is the~ ``lines'' report (\textbf{eplusout.sln}) and is decribed in more detail in the Output Details and Examples document.
+The above IDF line will produce a simple file of line segments that constitute the surfaces in the IDF file. This file is the~ ``lines'' report (\textbf{eplusout.sln}) and is described in more detail in the Output Details and Examples document.
 
 \paragraph{Field: Report Specifications}\label{field-report-specifications}
 
@@ -138,8 +138,8 @@ Examples input objects follow.
 
 \begin{lstlisting}
 Output:Surfaces:Drawing, DXF;
-  Output:Surfaces:Drawing, DXF, RegularPolyline;
-  Output:Surfaces:Drawing, DXF, Triangulate3DFace, mycolorscheme;
+Output:Surfaces:Drawing, DXF, RegularPolyline;
+Output:Surfaces:Drawing, DXF, Triangulate3DFace, mycolorscheme;
 \end{lstlisting}
 
 The above IDF specification will produce a DXF file (\textbf{eplusout.dxf}) of the surfaces in the IDF file.~ Only one DXF report can be produced. More specifics on this report can be found in the Output Details and Examples document.
@@ -179,7 +179,7 @@ Examples input objects for this report follow.
 
 \begin{lstlisting}
 Output:Surfaces:Drawing, VRML;
-  Output:Surfaces:Drawing, VRML, Triangulate3DFace;
+Output:Surfaces:Drawing, VRML, Triangulate3DFace;
 \end{lstlisting}
 
 The above IDF specification produces a VRML (Virtual Reality Modeling Language) file (\textbf{eplusout.wrl}) of the surfaces in the IDF file.~ Only one VRML report can be produced. VRML files can be viewed in many web browsers after adding a ``plug-in'' and there are some stand-alone viewers as well. More specifics on this report can be found in the Output Details and Examples document.
@@ -212,8 +212,8 @@ This is a condensed reporting that illustrates the full range of schedule values
 This field should contain the word \textbf{Hourly} or \textbf{TimeStep} to obtain the respective reports.
 
 \begin{lstlisting}
-Output:Schedules, Hourly;     ! values on hourly increments (day schedule resolution)
-  Output:Schedules, TimeStep; ! will give them at the timestep of the simulation
+Output:Schedules, Hourly;     !- values on hourly increments (day schedule resolution)
+Output:Schedules, TimeStep;   !- will give them at the timestep of the simulation
 \end{lstlisting}
 
 This report is placed on the \textbf{eplusout.eio} file. Details of this reporting are shown in the Output Details and Examples document.~ Schedule values over time can also be obtained in the EnergyPlus Standard Output (in eplusout.eso) using \hyperref[outputvariable]{Output:Variable} objects.
@@ -262,7 +262,7 @@ An example of this object follows.
 
 \begin{lstlisting}
 Output:DaylightFactors,
-  SizingDays;    !- Reporting Days
+  SizingDays;                 !- Reporting Days
 \end{lstlisting}
 
 \subsection{Output:EnergyManagementSystem}\label{outputenergymanagementsystem}
@@ -287,9 +287,9 @@ An example of this object follows.
 
 \begin{lstlisting}
 Output:EnergyManagementSystem,
-  Verbose,    ! Actuator Availability Dictionary Reporting
-  Verbose,    ! Internal Variable Availability Dictionary Reporting
-  ErrorsOnly; ! EnergyPlus Runtime Language Debug Output Level
+  Verbose,                    !- Actuator Availability Dictionary Reporting
+  Verbose,                    !- Internal Variable Availability Dictionary Reporting
+  ErrorsOnly;                 !- EnergyPlus Runtime Language Debug Output Level
 \end{lstlisting}
 
 \subsection{OutputControl:SurfaceColorScheme}\label{outputcontrolsurfacecolorscheme}
@@ -346,9 +346,24 @@ As seen in an IDF:
 OutputControl:ReportingTolerances,.21,.21;
 \end{lstlisting}
 
+\subsection{OutputControl:ResilienceSummaries}\label{OutputControlResilienceSummaries}
+
+This input specifies methods or algorithms used in certain resilience reporting variables.
+
+\subsubsection{Inputs}\label{inputs-OutputControlResilienceSummaries}
+
+\paragraph{Field: Heat Index Algorithm}\label{Heat-Index-Algorithm}
+
+This field has two choices: \textbf{Simplified} and \textbf{Extended}. The
+Simplified option is the default and by choosing this, the heat index will be
+calculated using the method based on regression analysis carried out by Lans P.
+Rothfusz. When Extended is selected, the heat index will be computed using the
+extended heat index method developed by Lu \& Romps. Note that using the
+Extended method is slower to simulate.
+
 \subsection{Output:Variable}\label{outputvariable}
 
-This input object is used request results reporting.~ As shown above in the Variable Dictionary Report section, there are many different output variables available for reporting results from EnergyPlus.~ The Output:Variable object is primarily used for reporting time series data at various frequencys.
+This input object is used request results reporting.~ As shown above in the Variable Dictionary Report section, there are many different output variables available for reporting results from EnergyPlus.~ The Output:Variable object is primarily used for reporting time series data at various frequencies.
 
 Each Output:Variable object causes a specific number assignment for outputs. For example, you could request separate reporting for the outside temperature:
 
@@ -414,7 +429,7 @@ Output:Variable, * , Zone Mean Radiant Temperature, timestep;
 Output:Variable, * , Zone Air System Sensible Heating Energy, hourly;
 Output:Variable, * , Zone Air System Sensible Cooling Energy, hourly;
 Output:Variable, * , Zone Air Temperature, hourly;
-Output:Variable, * , Zone Air Temperature;  ! same as previous line
+Output:Variable, * , Zone Air Temperature;  !- same as previous line
 \end{lstlisting}
 
 
@@ -474,51 +489,98 @@ Current resource types are shown in the table below:
 
 % table 38
 \begin{longtable}[c]{@{}l@{}}
-\caption{Table of Metered Resource  Types \label{table:table-of-metered-resource-types}} \tabularnewline
-\toprule
-Utility/Fuel Types \tabularnewline
-\midrule
-\endfirsthead
+	\caption{Table of Metered Resource Types---Fuels \label{table:table-of-metered-resource-types}} \tabularnewline
+	\toprule
+	Utility/Fuel Resource Types \tabularnewline
+	\midrule
+	\endfirsthead
 
-\caption[]{Table of Metered Resource  Types} \tabularnewline
-\toprule
-Utility/Fuel Types \tabularnewline
-\midrule
-\endhead
+	\caption[]{Table of Metered Resource Types---Fuels \label{table:table-of-metered-resource-types-Fuels}} \tabularnewline
+	\toprule
+	Utility/Fuel Resource Types \tabularnewline
+	\midrule
+	\endhead
 
-Electricity \tabularnewline
-NaturalGas \tabularnewline
-Gasoline \tabularnewline
-Diesel \tabularnewline
-Coal \tabularnewline
-FuelOilNo1 \tabularnewline
-FuelOilNo2 \tabularnewline
-Propane \tabularnewline
-OtherFuel1 \tabularnewline
-OtherFuel2 \tabularnewline
-Water \tabularnewline
-Steam \tabularnewline
-DistrictCooling \tabularnewline
-DistrictHeating \tabularnewline
-ElectricityPurchased \tabularnewline
-ElectricitySurplusSold \tabularnewline
-ElectricityNet \tabularnewline
-\bottomrule
+	Electricity \tabularnewline
+	NaturalGas \tabularnewline
+	Gasoline \tabularnewline
+	Diesel \tabularnewline
+	Coal \tabularnewline
+	FuelOilNo1 \tabularnewline
+	FuelOilNo2 \tabularnewline
+	Propane \tabularnewline
+	OtherFuel1 \tabularnewline
+	OtherFuel2 \tabularnewline
+	DistrictCooling \tabularnewline
+	DistrictHeatingWater \tabularnewline
+	DistrictHeatingSteam \tabularnewline
+	Water \tabularnewline
+	\bottomrule
 \end{longtable}
 
 \begin{longtable}[c]{@{}l@{}}
-\toprule
-Other Resource Types \tabularnewline
-\midrule
-\endfirsthead
+	\caption{Table of Metered Resource Types---Pollutants \label{table:table-of-metered-resource-types-pollutants}} \tabularnewline
+	\toprule
+	Pollutant Resource Types \tabularnewline
+	\midrule
+	\endfirsthead
 
-\toprule
-Other Resource Types \tabularnewline
-\midrule
-\endhead
+	\caption[]{Table of Metered Resource Types---Pollutants} \tabularnewline
+	\toprule
+	Pollutant Resource Types \tabularnewline
+	\midrule
+	\endhead
 
-EnergyTransfer \tabularnewline
-\bottomrule
+	SO2 \tabularnewline
+	NOx \tabularnewline
+	N2O \tabularnewline
+	PM \tabularnewline
+	PM2{\textunderscore}5 \tabularnewline
+	PM10 \tabularnewline
+	CO \tabularnewline
+	CO2 \tabularnewline
+	CH4 \tabularnewline
+	NH3 \tabularnewline
+	NMVOC \tabularnewline
+	Hg \tabularnewline
+	Pb \tabularnewline
+	NuclearHigh \tabularnewline
+	NuclearLow \tabularnewline
+	\bottomrule
+\end{longtable}
+
+\begin{longtable}[c]{@{}l@{}}
+	\caption{Table of Metered Resource Types---Others \label{table:table-of-metered-resource-types-others}} \tabularnewline
+	\toprule
+	Other Resource Types \tabularnewline
+	\midrule
+	\endfirsthead
+
+	\caption[]{Table of Metered Resource Types---Others} \tabularnewline
+	\toprule
+	Other Resource Types \tabularnewline
+	\midrule
+	\endhead
+
+	EnergyTransfer \tabularnewline
+	ElectricityProduced \tabularnewline
+	ElectricityPurchased \tabularnewline
+	ElectricitySurplusSold \tabularnewline
+	ElectricityNet \tabularnewline
+	SolarWater \tabularnewline
+	SolarAir \tabularnewline
+	CarbonEquivalent \tabularnewline
+	PlantLoopHeatingDemand \tabularnewline
+	PlantLoopCoolingDemand \tabularnewline
+	OnSiteWater \tabularnewline
+	MainsWater \tabularnewline
+	RainWater \tabularnewline
+	WellWater \tabularnewline
+	Condensate \tabularnewline
+	WaterEnvironmentalFactors \tabularnewline
+	Source \tabularnewline
+	Generic \tabularnewline
+	\bottomrule
 \end{longtable}
 
 The end use types are shown in the following table (note that certain end use types apply only to the EnergyTransfer resource):
@@ -537,21 +599,20 @@ Utility/Fuel End Use Types \tabularnewline
 \midrule
 \endhead
 
-InteriorLights \tabularnewline
-ExteriorLights \tabularnewline
-InteriorEquipment \tabularnewline
-ExteriorEquipment \tabularnewline
-Fans \tabularnewline
-Pumps \tabularnewline
 Heating \tabularnewline
 Cooling \tabularnewline
-HeatRejection \tabularnewline
-Humidifier \tabularnewline
-HeatRecovery \tabularnewline
-DHW \tabularnewline
-Cogeneration \tabularnewline
-Refrigeration \tabularnewline
+Interior Lights \tabularnewline
+Exterior Lights \tabularnewline
+Interior Equipment \tabularnewline
+Exterior Equipment \tabularnewline
+Fans \tabularnewline
+Pumps \tabularnewline
+Heat Rejection \tabularnewline
+Humidification \tabularnewline
+Heat Recovery \tabularnewline
 WaterSystems \tabularnewline
+Refrigeration \tabularnewline
+Generators \tabularnewline
 \bottomrule
 \end{longtable}
 
@@ -613,7 +674,7 @@ Facility = \sum {\left( {Building + HVAC + Plant + Exterior} \right)}
 Building = \sum\limits_1^{NumberOfZones} {Zone} = \sum\limits_1^{NumberOfSpaceTypes} {SpaceType}
 \end{equation}
 
-There are also some special purpose meters used to describe electricity resource flows in greater detail.~ Electricity metering is tracked in more detail to accommodate the complexities of onsite electricity generation.~ There are three variations on the electricity resource type including:~ (1) ``ElectrictyPurchased'' which is the quantity of electricity purchased and is always positive, (2) ``ElectricitySold'' which is the quantity of electricity exported by the building, that which is typically ``sold'' back to the power company, and is always positive, and (3) ``ElectricityNet'' which is the net electricity demand considering all sources of onsite generation and demand and can be either positive or negative.
+There are also some special purpose meters used to describe electricity resource flows in greater detail.~ Electricity metering is tracked in more detail to accommodate the complexities of onsite electricity generation.~ There are three variations on the electricity resource type including:~ (1) ``ElectrictyProduced'' which is the quantity of electricity generated onsite and is always non-negative (zero or positive), (2) ``ElectrictyPurchased'' which is the quantity of electricity purchased and is always non-negative (zero or positive), (3) ``ElectricitySold'' which is the quantity of electricity exported by the building, that which is typically ``sold'' back to the power company, and is always non-negative (zero or positive), and (4) ``ElectricityNet'' which is the net electricity demand considering all sources of onsite generation and demand and can be either positive or negative (or zero).
 
 \subsubsection{Field: Reporting Frequency}\label{field-reporting-frequency-1}
 
@@ -622,10 +683,9 @@ Similar to the output variables, meters can be reported at different frequencies
 Examples of specifying the object in the IDF follow.
 
 \begin{lstlisting}
-
 Output:Meter,Electricity:*,RunPeriod;
-  Output:Meter,ExteriorEquipment*,RunPeriod;
-  Output:Meter:Cumulative,Electricity:*,Monthly;
+Output:Meter,ExteriorEquipment*,RunPeriod;
+Output:Meter:Cumulative,Electricity:*,Monthly;
 \end{lstlisting}
 
 \subsubsection{Meter Details File (eplusout.mtd)}\label{meter-details-file-eplusout.mtd}
@@ -655,24 +715,28 @@ Users will enter environmental impact factors for each Fuel Type or FuelFactor. 
 The energy is obtained internally from the following facility meters:
 
 \begin{longtable}[c]{@{}ll@{}}
-\toprule
-%Electricity:Facility & Diesel:Facility \tabularnewline
-%\midrule
-%\endfirsthead
-%
-%\toprule
-%Electricity:Facility & Diesel:Facility \tabularnewline
-%\midrule
-%\endhead
-%
-Electricity:Facility & Diesel:Facility \tabularnewline
-DistrictCooling:Facility & DistrictHeating:Facility \tabularnewline
-NaturalGas:Facility & Gasoline:Facility \tabularnewline
-Coal:Facility & FuelOilNo1:Facility \tabularnewline
-FuelOilNo2:Facility & Propane:Facility \tabularnewline
-ElectricityProduced:Facility & Steam:Facility \tabularnewline
-OtherFuel1:Facility & OtherFuel2:Facility \tabularnewline
-\bottomrule
+	\caption{Facility Meters \label{table:facility-meters}} \tabularnewline
+	\toprule
+	%Electricity:Facility & Diesel:Facility \tabularnewline
+	Facility Meters & \tabularnewline
+	\midrule
+	\endfirsthead
+
+	\caption[]{Facility Meters} \tabularnewline
+	\toprule
+	%Electricity:Facility & Diesel:Facility \tabularnewline
+	Facility Meters & \tabularnewline
+	\midrule
+	\endhead
+
+	Electricity:Facility & Diesel:Facility \tabularnewline
+	DistrictCooling:Facility & DistrictHeatingWater:Facility \tabularnewline
+	NaturalGas:Facility & Gasoline:Facility \tabularnewline
+	Coal:Facility & FuelOilNo1:Facility \tabularnewline
+	FuelOilNo2:Facility & Propane:Facility \tabularnewline
+	ElectricityProduced:Facility & DistrictHeatingSteam:Facility \tabularnewline
+	OtherFuel1:Facility & OtherFuel2:Facility \tabularnewline
+	\bottomrule
 \end{longtable}
 
 For the pollutant calculation only the total off-site or purchased electric energy is calculated using Electricity Factors. Off-Site Electricity = Electricity:Facility - ElectricityProduced:Facility, pollutants for the fuel type used by the on-site generator will be calculated, for example Diesel, in these cases.
@@ -689,7 +753,7 @@ An example of specifying in the IDF:
 
 \begin{lstlisting}
 Output:EnvironmentalImpactFactors,
-  Monthly;  !- Reporting_Frequency
+  Monthly;                    !- Reporting_Frequency
 \end{lstlisting}
 
 \subsection{EnvironmentalImpactFactors}\label{environmentalimpactfactors}
@@ -712,7 +776,7 @@ The Steam Conversion Efficiency is used to convert the Steam usage to Natural Ga
 
 \paragraph{Field: Total Carbon Equivalent Emission Factor From N2O}\label{field-total-carbon-equivalent-emission-factor-from-n2o}
 
-The Intergovernmental Panel on Climate Change has studied the effects on the relative radiative forcing effects of various greenhouse gases. This effect, called Global Warming Potential (GWP), is described in terms of the Carbon Equivalent of a particular greenhouse gase. N\(_{2}\)O (nitrous oxide) can be produced by some Fuel Types and has a default of carbon equivalent emission factor of 80.7272 kg C/kg N\(_{2}\)O.
+The Intergovernmental Panel on Climate Change has studied the effects on the relative radiative forcing effects of various greenhouse gases. This effect, called Global Warming Potential (GWP), is described in terms of the Carbon Equivalent of a particular greenhouse gas. N\(_{2}\)O (nitrous oxide) can be produced by some Fuel Types and has a default of carbon equivalent emission factor of 80.7272 kg C/kg N\(_{2}\)O.
 
 \paragraph{Field: Total Carbon Equivalent Emission Factor From CH4}\label{field-total-carbon-equivalent-emission-factor-from-ch4}
 
@@ -726,12 +790,12 @@ An example of specifying in the IDF:
 
 \begin{lstlisting}
 EnvironmentalImpactFactors,
-  0.3,         !- District Heating Efficiency
-  3.0,         !- District Cooling COP
-  0.25,        !- Steam Conversion Efficiency
-  80.7272,     !- Total Carbon Equivalent Emission Factor From N2O
-  6.2727,      !- Total Carbon Equivalent Emission Factor From CH4
-  0.2727;      !- Total Carbon Equivalent Emission Factor From CO2
+  0.3,                        !- District Heating Efficiency
+  3.0,                        !- District Cooling COP
+  0.25,                       !- Steam Conversion Efficiency
+  80.7272,                    !- Total Carbon Equivalent Emission Factor From N2O
+  6.2727,                     !- Total Carbon Equivalent Emission Factor From CH4
+  0.2727;                     !- Total Carbon Equivalent Emission Factor From CO2
 \end{lstlisting}
 
 \subsection{FuelFactors}\label{fuelfactors}
@@ -806,7 +870,7 @@ Similar to the source energy calculation, this field contains the name of a sche
 
 \paragraph{Field: CO Emission Factor}\label{field-co-emission-factor}
 
-The environmental impact coefficient for the Fuel for calculating the mass of carbon monoxide (CO) released into the atmosphere. The units are grams per MegaJoule. Carbon monoxide is a colorless, odorless and poisonous gas produced by incomplete fossil fuel combustion. Carbon monoxide combines with the haemoglobin of human beings, reducing its oxygen carrying capacity, with effects harmful to human beings.
+The environmental impact coefficient for the Fuel for calculating the mass of carbon monoxide (CO) released into the atmosphere. The units are grams per MegaJoule. Carbon monoxide is a colorless, odorless and poisonous gas produced by incomplete fossil fuel combustion. Carbon monoxide combines with the hemoglobin of human beings, reducing its oxygen carrying capacity, with effects harmful to human beings.
 
 \paragraph{Field: CO Emission Factor Schedule Name}\label{field-co-emission-factor-schedule-name}
 
@@ -894,7 +958,7 @@ Similar to the source energy calculation, this field contains the name of a sche
 
 \paragraph{Field: Pb Emission Factor}\label{field-pb-emission-factor}
 
-The Environmental impact coefficient for the Fuel for calculating the masss of lead (Pb) released into the atmosphere. The units are grams per MegaJoule. A heavy metal that is hazardous to health if breathed or swallowed. Its use in gasoline, paints, and plumbing compounds has been sharply restricted or eliminated by federal laws and regulations.
+The Environmental impact coefficient for the Fuel for calculating the mass of lead (Pb) released into the atmosphere. The units are grams per MegaJoule. A heavy metal that is hazardous to health if breathed or swallowed. Its use in gasoline, paints, and plumbing compounds has been sharply restricted or eliminated by federal laws and regulations.
 
 \paragraph{Field: Pb Emission Factor Schedule Name}\label{field-pb-emission-factor-schedule-name}
 
@@ -927,41 +991,41 @@ Similar to the source energy calculation, this field contains the name of a sche
 An example of specifying in the IDF:
 
 \begin{lstlisting}
-FuelFactors,          !  USA national average based on eGRID, EIA 1605
-  Electricity,        !- Existing Fuel Resource Name
-  2.253,              !- Source Energy Factor {J/J}
-  ,                   !- Source Energy Schedule Name
-  168.33317,          !- CO2 Emission Factor {g/MJ}
-  ,                   !- CO2 Emission Factor Schedule Name
-  4.20616E-02,        !- CO Emission Factor {g/MJ}
-  ,                   !- CO Emission Factor Schedule Name
-  1.39858E-03,        !- CH4 Emission Factor {g/MJ}
-  ,                   !- CH4 Emission Factor Schedule Name
-  4.10753E-01,        !- NOx Emission Factor {g/MJ}
-  ,                   !- NOx Emission Factor Schedule Name
-  2.41916E-03,        !- N2O Emission Factor {g/MJ}
-  ,                   !- N2O Emission Factor Schedule Name
-  8.65731E-01,        !- SO2 Emission Factor {g/MJ}
-  ,                   !- SO2 Emission Factor Schedule Name
-  2.95827E-02,        !- PM Emission Factor {g/MJ}
-  ,                   !- PM Emission Factor Schedule Name
-  1.80450E-02,        !- PM10 Emission Factor {g/MJ}
-  ,                   !- PM10 Emission Factor Schedule Name
-  1.15377E-02,        !- PM2.5 Emission Factor {g/MJ}
-  ,                   !- PM2.5 Emission Factor Schedule Name
-  1.10837E-03,        !- NH3 Emission Factor {g/MJ}
-  ,                   !- NH3 Emission Factor Schedule Name
-  3.72332E-03,        !- NMVOC Emission Factor {g/MJ}
-  ,                   !- NMVOC Emission Factor Schedule Name
-  3.36414E-06,        !- Hg Emission Factor {g/MJ}
-  ,                   !- Hg Emission Factor Schedule Name
-  0,                  !- Pb Emission Factor {g/MJ}
-  ,                   !- Pb Emission Factor Schedule Name
-  2.10074,            !- Water Emission Factor {L/MJ}
-  ,                   !- Water Emission Factor Schedule Name
-  0,                  !- Nuclear High Level Emission Factor {g/MJ}
-  ,                   !- Nuclear High Level Emission Factor Schedule Name
-  0;                  !- Nuclear Low Level Emission Factor {m3/MJ}
+FuelFactors,                  !- USA national average based on eGRID, EIA 1605
+  Electricity,                !- Existing Fuel Resource Name
+  2.253,                      !- Source Energy Factor {J/J}
+  ,                           !- Source Energy Schedule Name
+  168.33317,                  !- CO2 Emission Factor {g/MJ}
+  ,                           !- CO2 Emission Factor Schedule Name
+  4.20616E-02,                !- CO Emission Factor {g/MJ}
+  ,                           !- CO Emission Factor Schedule Name
+  1.39858E-03,                !- CH4 Emission Factor {g/MJ}
+  ,                           !- CH4 Emission Factor Schedule Name
+  4.10753E-01,                !- NOx Emission Factor {g/MJ}
+  ,                           !- NOx Emission Factor Schedule Name
+  2.41916E-03,                !- N2O Emission Factor {g/MJ}
+  ,                           !- N2O Emission Factor Schedule Name
+  8.65731E-01,                !- SO2 Emission Factor {g/MJ}
+  ,                           !- SO2 Emission Factor Schedule Name
+  2.95827E-02,                !- PM Emission Factor {g/MJ}
+  ,                           !- PM Emission Factor Schedule Name
+  1.80450E-02,                !- PM10 Emission Factor {g/MJ}
+  ,                           !- PM10 Emission Factor Schedule Name
+  1.15377E-02,                !- PM2.5 Emission Factor {g/MJ}
+  ,                           !- PM2.5 Emission Factor Schedule Name
+  1.10837E-03,                !- NH3 Emission Factor {g/MJ}
+  ,                           !- NH3 Emission Factor Schedule Name
+  3.72332E-03,                !- NMVOC Emission Factor {g/MJ}
+  ,                           !- NMVOC Emission Factor Schedule Name
+  3.36414E-06,                !- Hg Emission Factor {g/MJ}
+  ,                           !- Hg Emission Factor Schedule Name
+  0,                          !- Pb Emission Factor {g/MJ}
+  ,                           !- Pb Emission Factor Schedule Name
+  2.10074,                    !- Water Emission Factor {L/MJ}
+  ,                           !- Water Emission Factor Schedule Name
+  0,                          !- Nuclear High Level Emission Factor {g/MJ}
+  ,                           !- Nuclear High Level Emission Factor Schedule Name
+  0;                          !- Nuclear Low Level Emission Factor {m3/MJ}
 \end{lstlisting}
 
 \subsubsection{Outputs}\label{outputs-029}
@@ -1369,7 +1433,7 @@ These outputs provide results for the source energy embodied in each type of fue
 
 \paragraph{Environmental Impact OtherFuel2 CO2 Emissions Mass {[}kg{]}}\label{environmental-impact-otherfuel2-co2-emissions-mass-kg}
 
-These outputs provide results for the carbon dioxide reelases associated with consumption of each type of fuel that might be used at the site.~ The units are kg.
+These outputs provide results for the carbon dioxide releases associated with consumption of each type of fuel that might be used at the site.~ The units are kg.
 
 \paragraph{Environmental Impact Electricity CO Emissions Mass {[}kg{]}}\label{environmental-impact-electricity-co-emissions-mass-kg}
 
@@ -1479,7 +1543,7 @@ These outputs provide results for the nitrous oxide releases associated with con
 
 \paragraph{Environmental Impact OtherFuel2 SO2 Emissions Mass {[}kg{]}}\label{environmental-impact-otherfuel2-so2-emissions-mass-kg}
 
-These outputs provide results for the sulphur dioxide releases associated with consumption of each type of fuel that might be used at the site.~ The units are kg.
+These outputs provide results for the sulfur dioxide releases associated with consumption of each type of fuel that might be used at the site.~ The units are kg.
 
 \paragraph{Environmental Impact Electricity PM Emissions Mass {[}kg{]}}\label{environmental-impact-electricity-pm-emissions-mass-kg}
 
@@ -2120,6 +2184,48 @@ The option to turn on or off CBOR output. The default is \emph{No}.
 \paragraph{Field: Output MessagePack}
 The option to turn on or off MessagePack output. The default is \emph{No}.
 
+\paragraph{Field: Tabular Unit Conversion}\label{field-tabular-unit-conversion-json}
+
+This field determines if any unit conversions will be performed for the values in the tabular reports when the Option field is set to TimeSeriesAndTabular.
+
+This field is optional and, if not specified, defaults to UseOutputControlTableStyle which uses the same unit conversion that appears in the   \hyperref[outputcontroltablestyle]{OutputControl:Table:Style}
+ object. Five different input options are available:
+
+\begin{itemize}
+\item
+UseOutputControlTableStyle -- use the same unit conversion as in   \hyperref[outputcontroltablestyle]{OutputControl:Table:Style}
+
+\item
+None -- no conversions performed
+\item
+JtoKWH -- Joules converted into kWh (1 / 3,600,000)
+\item
+JtoMJ -- Joules converted into Megajoules (1 / 1,000,000)
+\item
+JtoGJ -- Joules converted into Gigajoules (1 / 1,000,000,000)
+\item
+InchPound -- convert all annual, monthly, economics and timebins tabular values to common InchPound equivalent
+\item
+InchPoundExceptElectricity -- similar to \textbf{InchPound} but using kWh (energy), and W or kW (rate) for electricity usages.
+\end{itemize}
+
+The JtoKWH, JtoMJ and JtoGJ unit conversion input option applies only to the Output:Table:Monthly reports and partially to the ABUPS report. For ABUPS, the JtoKWH option changes the report but the JtoMJ and JtoGJ options do not change the report since it is already in MJ/m2 and GJ. In addition, the JtoKWH option also changes results in the LEED Summary report changing GJ to kWh and MJW/m2 to kWh/m2. The InchPound unit conversion input option applies to all annual, monthly, timebins and economic reports that appear in the JSON file. The InchPoundExceptElectricity unit conversion input option makes conversions similar to what InchPound option does, except for using kWh (energy) or W/kW (rate) for electricity related outputs. This also applies to some lighting and plug load design levels that appears in IP version of Codes and Standards (usually given in W or W/ft$^2$).
+
+\paragraph{Field: Format Numeric Values for Tabular Data}\label{field-format-numeric-values-for-tabular-data-json}
+
+This field determines if any rounding will be performed for the values in the tabular reports when the Option field is set to TimeSeriesAndTabular. If No, all digits are shown after the decimal point without any rounding (23.238769213). If Yes, values are rounded for readability (23.24). The number of digits will vary depending on the type of value. This formatting is only applied to the tabular reports in the JSON file. This field has no effect on the time series data.
+
+An example IDF input object follows.
+\begin{lstlisting}
+Output:JSON,
+   TimeSeriesAndTabular, !- Option Type
+   Yes,                  !- Output JSON
+   No,                   !- Output CBOR
+   No,                   !- Output MessagePack
+   None,                 !- Unit Conversion for Tabular Data
+   Yes;                  !- Format Numeric Values for Tabular Data
+\end{lstlisting}
+
 \subsection{Output:SQLite}\label{outputsqlite}
 
 Output from EnergyPlus can be written to SQLite files for manipulation outside some of the standard (such as spreadsheet) tools.
@@ -2134,27 +2240,31 @@ Currently, there are limited capabilities for specifying SQLite generation.~ The
 
 This field determines if any unit conversions will be performed for the values in the tabular reports when the Option field is set to SimpleAndTabular. These conversions are only applied to the tabular reports in the SQL file. No conversions are applied to the time series data and predefined database tables generated by the Simple option (see the list in Table \ref{table:tabular_unit_conversion_list}).
 
-This field is optional and, if not specified, defaults to UseOutputControlTableStyle which uses the same unit conversion that appears in the OutputControl:Table:Style object. Five different input options are available:
+This field is optional and, if not specified, defaults to UseOutputControlTableStyle which uses the same unit conversion that appears in the   \hyperref[outputcontroltablestyle]{OutputControl:Table:Style}
+ object. Five different input options are available:
 
 \begin{itemize}
-\item 
-UseOutputControlTableStyle -- use the same unit conversion as in OutputControl:Table:Style
-\item 
+\item
+UseOutputControlTableStyle -- use the same unit conversion as in \hyperref[outputcontroltablestyle]{OutputControl:Table:Style}
+
+\item
 None -- no conversions performed
-\item 
+\item
 JtoKWH -- Joules converted into kWh (1 / 3,600,000)
-\item 
+\item
 JtoMJ -- Joules converted into Megajoules (1 / 1,000,000)
 \item
 JtoGJ -- Joules converted into Gigajoules (1 / 1,000,000,000)
-\item 
+\item
 InchPound -- convert all annual, monthly, economics and timebins tabular values to common InchPound equivalent
+\item
+InchPoundExceptElectricity -- similar to \textbf{InchPound} but using kWh (energy), and W or kW (rate) for electricity usages.
 \end{itemize}
 
-The JtoKWH, JtoMJ and JtoGJ unit conversion input option applies only to the Output:Table:Monthly reports and partially to the ABUPS report. For ABUPS, the JtoKWH option changes the report but the JtoMJ and JtoGJ options do not change the report since it is already in MJ/m2 and GJ. In addition, the JtoKWH option also changes results in the LEED Summary report changing GJ to kWh and MJW/m2 to kWh/m2. The InchPound unit conversion input option applies to all annual, monthly, timebins and economic reports that appear in the SQL file. 
+The JtoKWH, JtoMJ and JtoGJ unit conversion input option applies only to the Output:Table:Monthly reports and partially to the ABUPS report. For ABUPS, the JtoKWH option changes the report but the JtoMJ and JtoGJ options do not change the report since it is already in MJ/m2 and GJ. In addition, the JtoKWH option also changes results in the LEED Summary report changing GJ to kWh and MJW/m2 to kWh/m2. The InchPound unit conversion input option applies to all annual, monthly, timebins and economic reports that appear in the SQL file. The InchPoundExceptElectricity unit conversion input option makes conversions similar to what InchPound option does, except for using kWh (energy) or W/kW (rate) for electricity related outputs. This also applies to some lighting and plug load design levels that appears in IP version of Codes and Standards (usually given in W or W/ft$^2$).
 
-Since the Output:SQLite tabular unit conversion setting act on the Tabular reports only, the other SQLite reporting will not affected by this unit conversion setting. The table below lists the affected SQLite tabular tables. 
- 
+Since the Output:SQLite tabular unit conversion setting act on the Tabular reports only, the other SQLite reporting will not affected by this unit conversion setting. The table below lists the affected SQLite tabular tables.
+
 % table X
 {\scriptsize
 \begin{longtable}[c]{p{4in}p{1in}}
@@ -2208,11 +2318,16 @@ Zones & No \tabularnewline
 \end{longtable}
 }
 
+\paragraph{Field: Format Numeric Values for Tabular Data}\label{field-format-numeric-values-for-tabular-data}
+
+This field determines if any rounding will be performed for the values in the tabular reports when the Option field is set to SimpleAndTabular. If No, all digits are shown after the decimal point without any rounding (23.238769213). If Yes, values are rounded for readability (23.24). The number of digits will vary depending on the type of value. This formatting is only applied to the tabular reports in the SQL file. This field has no effect on the time series data and predefined database tables generated by the Simple option (see the list in Table \ref{table:tabular_unit_conversion_list}). This field is optional and, if not specified, defaults to Yes.
+
 An example IDF input object follows.
 \begin{lstlisting}
 Output:SQLite,
    SimpleAndTabular,    !- Option Type
-   InchPound;           !- Unit Conversion
+   InchPound,           !- Unit Conversion for Tabular Data
+   Yes;                 !- Format Numeric Values for Tabular Data
 \end{lstlisting}
 
 \subsection{OutputControl:Files}\label{outputcontrolfiles}
@@ -2223,7 +2338,7 @@ This object controls the output of various files in a central location.~ This ob
 
 \paragraph{Field: CSV}\label{field-csv}
 
-When this field is ``\textbf{Yes}'', EnergyPlus will output the Output:Variables and Output:Meters as CSV files using native EnergyPlus.~ This functionality is equivalent to the external ReadVarsESO program, however, it does not use RVI or MVI files to filter or sort output variables.~ The native EnergyPlus CSV output has significantly higher performance than ReadVarsESO, especially for large number of output variables.~ If the ``-r'' command line flag is used to request ReadVarsESO and ``\textbf{Yes}'' is selected for native CSV, ReadVarsESO will be run instead and a warning message will be given.
+When this field is ``\textbf{Yes}'', EnergyPlus will output the Output:Variables and Output:Meters as CSV files using native EnergyPlus.~ This functionality is equivalent to the external ReadVarsESO program, however, it does not use RVI or MVI files to filter or sort output variables.~ The native EnergyPlus CSV output has significantly higher performance than ReadVarsESO, especially for large number of output variables. If the ``-r'' command line flag is used to request ReadVarsESO and ``\textbf{Yes}'' is selected for native CSV, ReadVarsESO will overwrite the native CSV output and a warning message will be given.
 
 \paragraph{Field: MTR}\label{field-mtr}
 
@@ -2349,35 +2464,97 @@ An example of this object follows.
 
 \begin{lstlisting}
 OutputControl:Files,
-  Yes, ! CSV
-  Yes, ! MTR
-  Yes, ! ESO
-  No , ! EIO
-  No , ! Tabular
-  No , ! SQLite
-  No , ! JSON
-  No , ! AUDIT
-  No , ! Zone Sizing
-  No , ! System Sizing
-  No , ! DXF
-  No , ! BND
-  No , ! RDD
-  No , ! MDD
-  No , ! MTD
-  Yes, ! END
-  No , ! SHD
-  No , ! DFS
-  No , ! GLHE
-  No , ! DelightIn
-  No , ! DelightELdmp
-  No , ! DelightDFdmp
-  No , ! EDD
-  No , ! DBG
-  No , ! PerfLog
-  No , ! SLN
-  No , ! SCI
-  No , ! WRL
-  No , ! Screen
-  No , ! ExtShd
-  No ; ! Tarcog
+  Yes,                        !- CSV
+  Yes,                        !- MTR
+  Yes,                        !- ESO
+  No,                         !- EIO
+  No,                         !- Tabular
+  No,                         !- SQLite
+  No,                         !- JSON
+  No,                         !- AUDIT
+  No,                         !- Zone Sizing
+  No,                         !- System Sizing
+  No,                         !- DXF
+  No,                         !- BND
+  No,                         !- RDD
+  No,                         !- MDD
+  No,                         !- MTD
+  Yes,                        !- END
+  No,                         !- SHD
+  No,                         !- DFS
+  No,                         !- GLHE
+  No,                         !- DelightIn
+  No,                         !- DelightELdmp
+  No,                         !- DelightDFdmp
+  No,                         !- EDD
+  No,                         !- DBG
+  No,                         !- PerfLog
+  No,                         !- SLN
+  No,                         !- SCI
+  No,                         !- WRL
+  No,                         !- Screen
+  No,                         !- ExtShd
+  No,                         !- Tarcog
+  No;                         !- Output Plant Component Sizing
+\end{lstlisting}
+
+\subsection{OutputControl:Timestamp}\label{outputcontrol_timestamp}
+
+Controls the format of the timestamp used in the native CSV and JSON outputs when requested using \hyperref[outputcontrolfiles]{OutputControl:Files}. The default timestamp is formatted
+as ``$MM$/$DD$ $hh$:$mm$:$ss$'', where
+
+\begin{wherelist}
+\item[MM] the two-digit month,
+\item[DD] the two-digit day of the month,
+\item[hh] the two-digit hours since the beginning of the day,
+\item[mm] the two-digit minutes since the beginning of the last hour, and
+\item[ss] the two-digit seconds (which is always ``00'').
+\end{wherelist}
+%
+The time portion of this timestamp has traditionally been the elapsed time since the beginning of the day and associates values
+with the elapsed time at the end of the interval of interest.  For example, the timestamp for the interval from 1~AM to 2~AM on
+December 7 is written as ``12/07 02:00:00''. Unfortunately, some common software used to postprocess results has trouble
+interpreting the last timestamp for each day, which will include ``24:00:00''. An alternative that avoids this problem is to
+associate values with the elapsed time at the beginning of the interval of interest. In this case, the interval from 1~AM to
+2~AM on December 7 is written as ``12/07 01:00:00'' and 24 will never appear as the hours value (but 00 will). The ISO 8601
+timestamp format is ``$YYYY$-$MM$-$DD$T$hh$:$mm$:$ss$'' where
+
+\begin{wherelist}
+\item[YYYY] the four-digit year,
+\item[MM] the two-digit month,
+\item[DD] the two-digit day of the month,
+\item[hh] the two-digit hours since the beginning of the day,
+\item[mm] the two-digit minutes since the beginning of the last hour,
+\item[ss] the two-digit seconds (which is always ``00''),
+\end{wherelist}
+%
+and a capital letter ``T'' separates the time portion of the timestamp from the date portion. The timestamp for the interval from
+1~AM to 2~AM on December 7, 2022 is written either as
+
+\begin{itemize}
+\item ``2022-12-07T02:00:00'' at the end of the interval or
+\item ``2022-12-07T01:00:00'' at the beginning of the interval.
+\end{itemize}
+%
+Output workflows using the ReadVarsESO postprocessing program will not be impacted by the selections made here, because ReadVarsESO will overwrite the native CSV outputs. EP-Launch will skip ReadVarsESO if native CSV output is present. The command-line option `--readvars` will run ReadVarsESO and throw a warning.
+
+\subsubsection{Inputs}\label{inputs-for-timestamp}
+
+\paragraph{Field: ISO 8601 Format}\label{field-timestamp-iso8601format}
+
+This field determines whether the ISO 8601 or traditional format is used. If the field is ``\textbf{No}'', the traditional format is
+used. If the field is ``\textbf{Yes}'', the ISO 8601 format is used. The default is ``\textbf{No}''.
+
+\paragraph{Field: Timestamp at Beginning of Interval}\label{field-timestamp-beginning}
+
+This field determines whether the timestamp is placed at the beginning of the interval (``\textbf{Yes}'') or at the end of the
+interval (``\textbf{No}''). The default is ``\textbf{No}''.
+
+\subsubsection{Example}\label{example-for-timestamp}
+
+An example IDF input object that uses the ISO 8601 format and places the timestamp at beginning of the interval is shown below.
+\begin{lstlisting}
+OutputControl:Timestamp,
+  Yes,                        !- ISO 8601 Format
+  Yes;                        !- Timestamp at Beginning of Interval
 \end{lstlisting}

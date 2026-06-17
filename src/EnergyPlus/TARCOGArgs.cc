@@ -1,7 +1,7 @@
-// EnergyPlus, Copyright (c) 1996-2023, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
-// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other
+// National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
 // contributors. All rights reserved.
 //
 // NOTICE: This Software was developed under funding from the U.S. Department of Energy and the
@@ -45,9 +45,8 @@
 // OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 // POSSIBILITY OF SUCH DAMAGE.
 
-#include <EnergyPlus/DataGlobals.hh>
-
 // EnergyPlus Headers
+#include <EnergyPlus/DataGlobals.hh>
 #include <EnergyPlus/TARCOGArgs.hh>
 #include <EnergyPlus/TARCOGCommon.hh>
 #include <EnergyPlus/TARCOGGassesParams.hh>
@@ -368,7 +367,7 @@ int ArgCheck(EnergyPlusData &state,
     for (int i = 1; i <= nlayer - 1; ++i) {
         if (gap(i) <= 0.0) {
             ArgCheck = 20;
-            ErrorMessage = format("Gap width is less than (or equal to) zero. Gap #{:3}", i);
+            ErrorMessage = std::format("Gap width is less than (or equal to) zero. Gap #{:3}", i);
             return ArgCheck;
         }
     }
@@ -376,7 +375,7 @@ int ArgCheck(EnergyPlusData &state,
     for (int i = 1; i <= nlayer; ++i) {
         if (thick(i) <= 0.0) {
             ArgCheck = 21;
-            ErrorMessage = format("Layer width is less than (or equal to) zero. Layer #{:3}", i);
+            ErrorMessage = std::format("Layer width is less than (or equal to) zero. Layer #{:3}", i);
             return ArgCheck;
         }
         if ((i < nlayer) && IsShadingLayer(LayerType(i)) && IsShadingLayer(LayerType(i + 1))) {
@@ -421,21 +420,21 @@ int ArgCheck(EnergyPlusData &state,
     for (int i = 1; i <= nlayer; ++i) {
         if (scon(i) <= 0.0) {
             ArgCheck = 26;
-            ErrorMessage = format("Layer {:3} has conductivity whcih is less or equal to zero.", i);
+            ErrorMessage = std::format("Layer {:3} has conductivity which is less or equal to zero.", i);
             return ArgCheck;
         }
 
-        if (BITF_TEST_NONE(BITF(LayerType(i)),
-                           BITF(TARCOGLayerType::SPECULAR) | BITF(TARCOGLayerType::WOVSHADE) | BITF(TARCOGLayerType::VENETBLIND_HORIZ) |
-                               BITF(TARCOGLayerType::PERFORATED) | BITF(TARCOGLayerType::DIFFSHADE) | BITF(TARCOGLayerType::BSDF) |
-                               BITF(TARCOGLayerType::VENETBLIND_VERT)))
+        if (LayerType(i) != TARCOGLayerType::SPECULAR && LayerType(i) != TARCOGLayerType::WOVSHADE &&
+            LayerType(i) != TARCOGLayerType::VENETBLIND_HORIZ && LayerType(i) != TARCOGLayerType::PERFORATED &&
+            LayerType(i) != TARCOGLayerType::DIFFSHADE && LayerType(i) != TARCOGLayerType::BSDF && LayerType(i) != TARCOGLayerType::VENETBLIND_VERT)
 
         {
             ArgCheck = 22;
-            ErrorMessage = format("Incorrect layer type for layer #{:3}"
-                                  ".  Layer type can either be 0 (glazing layer), 1 (Venetian blind), 2 (woven shade), 3 (perforated), 4 (diffuse "
-                                  "shade) or 5 (bsdf).",
-                                  i);
+            ErrorMessage =
+                std::format("Incorrect layer type for layer #{:3}"
+                            ".  Layer type can either be 0 (glazing layer), 1 (Venetian blind), 2 (woven shade), 3 (perforated), 4 (diffuse "
+                            "shade) or 5 (bsdf).",
+                            i);
             return ArgCheck;
         }
 
@@ -455,32 +454,32 @@ int ArgCheck(EnergyPlusData &state,
             LayerType(i) == TARCOGParams::TARCOGLayerType::VENETBLIND_VERT) { // Venetian blind specific:
             if (SlatThick(i) <= 0) {
                 ArgCheck = 31;
-                ErrorMessage = format("Invalid slat thickness (must be >0). Layer #{:3}", i);
+                ErrorMessage = std::format("Invalid slat thickness (must be >0). Layer #{:3}", i);
                 return ArgCheck;
             }
             if (SlatWidth(i) <= 0.0) {
                 ArgCheck = 32;
-                ErrorMessage = format("Invalid slat width (must be >0). Layer #{:3}", i);
+                ErrorMessage = std::format("Invalid slat width (must be >0). Layer #{:3}", i);
                 return ArgCheck;
             }
             if ((SlatAngle(i) < -90.0) || (SlatAngle(i) > 90.0)) {
                 ArgCheck = 33;
-                ErrorMessage = format("Invalid slat angle (must be between -90 and 90). Layer #{:3}", i);
+                ErrorMessage = std::format("Invalid slat angle (must be between -90 and 90). Layer #{:3}", i);
                 return ArgCheck;
             }
             if (SlatCond(i) <= 0.0) {
                 ArgCheck = 34;
-                ErrorMessage = format("Invalid conductivity of slat material (must be >0). Layer #{:3}", i);
+                ErrorMessage = std::format("Invalid conductivity of slat material (must be >0). Layer #{:3}", i);
                 return ArgCheck;
             }
             if (SlatSpacing(i) <= 0.0) {
                 ArgCheck = 35;
-                ErrorMessage = format("Invalid slat spacing (must be >0). Layer #{:3}", i);
+                ErrorMessage = std::format("Invalid slat spacing (must be >0). Layer #{:3}", i);
                 return ArgCheck;
             }
             if ((SlatCurve(i) != 0.0) && (std::abs(SlatCurve(i)) <= (SlatWidth(i) / 2.0))) {
                 ArgCheck = 36;
-                ErrorMessage = format("Invalid curvature radius (absolute value must be >SlatWidth/2, or 0 for flat slats). Layer #{:3}", i);
+                ErrorMessage = std::format("Invalid curvature radius (absolute value must be >SlatWidth/2, or 0 for flat slats). Layer #{:3}", i);
                 return ArgCheck;
             }
 
@@ -492,9 +491,9 @@ int ArgCheck(EnergyPlusData &state,
         if (presure(i) < 0.0) {
             ArgCheck = 27;
             if ((i == 1) || (i == (nlayer + 1))) {
-                ErrorMessage = "One of enviroments (inside or outside) has pressure which is less than zero.";
+                ErrorMessage = "One of environments (inside or outside) has pressure which is less than zero.";
             } else {
-                ErrorMessage = format("One of gaps has pressure which is less than zero. Gap #{:3}", i);
+                ErrorMessage = std::format("One of gaps has pressure which is less than zero. Gap #{:3}", i);
             }
             return ArgCheck;
         }
@@ -519,8 +518,8 @@ void PrepVariablesISO15099(int const nlayer,
                            const Array1D<Real64> &tir,
                            const Array1D<Real64> &emis,
                            Real64 const tilt,
-                           Real64 &hin,
-                           Real64 &hout,
+                           Real64 const &hin,
+                           Real64 const &hout,
                            const Array1D_int &ibc,
                            const Array1D<Real64> &SlatThick,
                            const Array1D<Real64> &SlatWidth,
@@ -575,13 +574,11 @@ void PrepVariablesISO15099(int const nlayer,
     EP_SIZE_CHECK(rir, maxlay2);
     EP_SIZE_CHECK(vfreevent, maxlay1);
 
-    int k1;
     Real64 tiltr;
     Real64 Rsky;
     Real64 Fsky;
     Real64 Fground;
     Real64 e0;
-    std::string a;
 
     //! Scalars:
     ShadeEmisRatioOut = 1.0;
@@ -612,14 +609,18 @@ void PrepVariablesISO15099(int const nlayer,
             if (ThermalMod == TARCOGThermalModel::SCW) {
                 // bi...the idea here is to have glass-to-glass width the same as before scaling
                 // bi...TODO: check for outdoor and indoor blinds! SCW model is only applicable to in-between SDs!!!
-                thick(i) = SlatWidth(i) * std::cos(SlatAngle(i) * DataGlobalConstants::Pi / 180.0);
-                if (i > 1) gap(i - 1) += (1.0 - SDScalar) / 2.0 * thick(i); // Autodesk:BoundsViolation gap(i-1) @ i=1: Added if condition
+                thick(i) = SlatWidth(i) * std::cos(SlatAngle(i) * Constant::Pi / 180.0);
+                if (i > 1) {
+                    gap(i - 1) += (1.0 - SDScalar) / 2.0 * thick(i); // Autodesk:BoundsViolation gap(i-1) @ i=1: Added if condition
+                }
                 gap(i) += (1.0 - SDScalar) / 2.0 * thick(i);
                 thick(i) *= SDScalar;
-                if (thick(i) < SlatThick(i)) thick(i) = SlatThick(i);
+                if (thick(i) < SlatThick(i)) {
+                    thick(i) = SlatThick(i);
+                }
             } else if ((ThermalMod == TARCOGThermalModel::ISO15099) || (ThermalMod == TARCOGThermalModel::CSM)) {
                 thick(i) = SlatThick(i);
-                const Real64 slatAngRad = SlatAngle(i) * 2.0 * DataGlobalConstants::Pi / 360.0;
+                const Real64 slatAngRad = SlatAngle(i) * 2.0 * Constant::Pi / 360.0;
                 Real64 C4_VENET(0);
                 if ((TARCOGLayerType)LayerType(i) == TARCOGParams::TARCOGLayerType::VENETBLIND_HORIZ) {
                     C4_VENET = C4_VENET_HORIZONTAL;
@@ -634,17 +635,17 @@ void PrepVariablesISO15099(int const nlayer,
 
     hint = hin;
     houtt = hout;
-    tiltr = tilt * 2.0 * DataGlobalConstants::Pi / 360.0; // convert tilt in degrees to radians
+    tiltr = tilt * 2.0 * Constant::Pi / 360.0; // convert tilt in degrees to radians
 
     // external radiation term
     switch (isky) {
     case 3:
         Gout = outir;
-        trmout = root_4(Gout / DataGlobalConstants::StefanBoltzmann);
+        trmout = root_4(Gout / Constant::StefanBoltzmann);
         break;
     case 2: // effective clear sky emittance from swinbank (SPC142/ISO15099 equations 131, 132, ...)
         Rsky = 5.31e-13 * pow_6(tout);
-        esky = Rsky / (DataGlobalConstants::StefanBoltzmann * pow_4(tout)); // check esky const, also check what esky to use when tsky input...
+        esky = Rsky / (Constant::StefanBoltzmann * pow_4(tout)); // check esky const, also check what esky to use when tsky input...
         break;
     case 1:
         esky = pow_4(tsky) / pow_4(tout);
@@ -672,7 +673,7 @@ void PrepVariablesISO15099(int const nlayer,
             trmout = tout * root_4(e0);
         }
 
-        Gout = DataGlobalConstants::StefanBoltzmann * pow_4(trmout);
+        Gout = Constant::StefanBoltzmann * pow_4(trmout);
     } // if (isky.ne.3) then
 
     ebsky = Gout;
@@ -681,27 +682,27 @@ void PrepVariablesISO15099(int const nlayer,
         trmin = tind;
     }
 
-    Gin = DataGlobalConstants::StefanBoltzmann * pow_4(trmin);
+    Gin = Constant::StefanBoltzmann * pow_4(trmin);
     ebroom = Gin;
 
     // calculate ir reflectance:
     for (int k = 1; k <= nlayer; ++k) {
-        k1 = 2 * k - 1;
+        int k1 = 2 * k - 1;
         rir(k1) = 1 - tir(k1) - emis(k1);
         rir(k1 + 1) = 1 - tir(k1) - emis(k1 + 1);
         if ((tir(k1) < 0.0) || (tir(k1) > 1.0) || (tir(k1 + 1) < 0.0) || (tir(k1 + 1) > 1.0)) {
             nperr = 4;
-            ErrorMessage = format("Layer transmissivity is our of range (<0 or >1). Layer #{:3}", k);
+            ErrorMessage = std::format("Layer transmissivity is our of range (<0 or >1). Layer #{:3}", k);
             return;
         }
         if ((emis(k1) < 0.0) || (emis(k1) > 1.0) || (emis(k1 + 1) < 0.0) || (emis(k1 + 1) > 1.0)) {
             nperr = 14;
-            ErrorMessage = format("Layer emissivity is our of range (<0 or >1). Layer #{:3}", k);
+            ErrorMessage = std::format("Layer emissivity is our of range (<0 or >1). Layer #{:3}", k);
             return;
         }
         if ((rir(k1) < 0.0) || (rir(k1) > 1.0) || (rir(k1 + 1) < 0.0) || (rir(k1 + 1) > 1.0)) {
             nperr = 3;
-            ErrorMessage = format("Layer reflectivity is our of range (<0 or >1). Layer #{:3}", k);
+            ErrorMessage = std::format("Layer reflectivity is our of range (<0 or >1). Layer #{:3}", k);
             return;
         }
     }

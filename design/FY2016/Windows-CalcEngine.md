@@ -3,9 +3,9 @@
  **Simon Vidanovic, Charlie Curcija**
 
  **Lawrence Berkeley National Laboratory**
- 
+
  - Original Date: April 15, 2016
- 
+
 ## Justification for New Feature
 There are three different calculation modules for the detailed calculation of thermal, solar and daylighting properties for fenestration systems:
 
@@ -74,10 +74,10 @@ int const MaxLayersInConstruct( 11 ); // Maximum number of layers allowed in a s
 
 I suggest a change to your IDD object:
 
-New - 
+New -
 ```
 WindowsCalculationEngine,
-      \memo This object is used to switch algorithms between built in windows engine 
+      \memo This object is used to switch algorithms between built in windows engine
       \memo and windows engine as exterior component
   A1; \field Windows engine
       \type choice
@@ -86,10 +86,10 @@ WindowsCalculationEngine,
       \default BuiltInWindowsModel
 ```
 
-Currently proposed - 
+Currently proposed -
 ```
 WindowsCalculationEngine,
-      \memo This object is used to switch algorithms between built in windows engine 
+      \memo This object is used to switch algorithms between built in windows engine
       \memo and windows engine as exterior component
   A1; \field Windows engine
       \type choice
@@ -106,7 +106,7 @@ There can be a default method without requiring the object to be present.  And I
 
 ####Simon's reply (May/31/2016)
 
-Making it explicit is better. Here is what I see how it works: if there is no WindowsCalculationEngine object, use the built-in window code as currently in EnergyPlus; if there is the WindowsCalculationEngine object, use the user setting (if not specified default applies). 
+Making it explicit is better. Here is what I see how it works: if there is no WindowsCalculationEngine object, use the built-in window code as currently in EnergyPlus; if there is the WindowsCalculationEngine object, use the user setting (if not specified default applies).
 
 Until we prove results between two approaches are close enough, we should keep existing built-in code as default for compatibility purpose.
 
@@ -176,7 +176,7 @@ Changes to IDF in this stage will be minimal because we want to avoid additional
 ### Linking to WCE library
 First step of implementation is to create link of WCE with EnergyPlus. One way of doing that can be accomplished by manually copying and merging source code from WCE into EnergyPlus third\_party directory and use it from there. This approach is possible, however, in practice it means that any future development and bug fixing is harder to apply back to EnergyPlus code.
 
-Another approach is to link WCE library directly from GitHub. EnergyPlus would not contain WCE code directly, but through GitHub link as external project. 
+Another approach is to link WCE library directly from GitHub. EnergyPlus would not contain WCE code directly, but through GitHub link as external project.
 This connection can simply be established in CMake files with following command:
 
 ```
@@ -274,7 +274,7 @@ Optical properties of shading layer are calculated for three different cases:
   <li> Diffuse-diffuse (sky and ground)
 </ul>
 
-WCE is currently supporting following types of shading devices: 
+WCE is currently supporting following types of shading devices:
 
 <ul>
   <li> Venetian Blind
@@ -310,11 +310,11 @@ There are several limitations in current EnergyPlus model that are removed in WC
   <li> For triple glazing the between-glass shade/blind must be between the two inner glass layers.
 </ul>
 
-While optical calculation for single shading layer are relatively simple, optical calculations for IGU with shading layer are divided into different systems of equations that depend on shading layer type. That again leads to code repetition. 
+While optical calculation for single shading layer are relatively simple, optical calculations for IGU with shading layer are divided into different systems of equations that depend on shading layer type. That again leads to code repetition.
 While this model can be transferred to WCE it would be better to do general re-factoring of multilayer equations so that it uses single setup for system of equations for any type of shading device.
 
 #### BSDF approach
-Second approach is to use BSDF properties of shading layer. In this case user supplies (through IDF) program with BSDF matrices which then will be used in solar optical calculations. 
+Second approach is to use BSDF properties of shading layer. In this case user supplies (through IDF) program with BSDF matrices which then will be used in solar optical calculations.
 Creation of BSDF matrices is currently not supported inside the EnergyPlus. It would be nice addition to the program that would require some additional changes to IDF and it is not planned for this stage of integration. Once WCE interface is connected to the EnergyPlus, BSDF creation can be easily enabled with additional IDF object(s) that will simply instruct EnergyPlus whether to use simple or complex solar/optical distribution from a windows.
 This distribution is now determined by type of objects that are used in IDF. When using construction object to define IGU, that distribution is simple, while using Construction:ComplexFenestrationState that distribution is BSDF. As for current stage of integration, WCE will take over hemispherical integration over sky and ground that will produce corresponding optical properties and then in the next stage it will implement creation of BSDF.
 
@@ -325,7 +325,7 @@ We propose to create a new IDD object named WindowsCalculationEngine that will b
 
 ```
 WindowsCalculationEngine,
-      \memo This object is used to switch algorithms between built in windows engine 
+      \memo This object is used to switch algorithms between built in windows engine
       \memo and windows engine as exterior component
   A1; \field Windows engine
       \type choice

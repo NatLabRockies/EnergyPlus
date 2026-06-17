@@ -1,7 +1,7 @@
-// EnergyPlus, Copyright (c) 1996-2023, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
-// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other
+// National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
 // contributors. All rights reserved.
 //
 // NOTICE: This Software was developed under funding from the U.S. Department of Energy and the
@@ -89,6 +89,25 @@ namespace DataHeatBalFanSys {
         int DualPMVErrIndex = 0; // Dual PMV setpoint error index
     };
 
+    struct SurfQRadFromHVACData
+    {
+        Real64 HTRadSys;       // Current radiant heat flux to surface from high temperature radiant heaters
+        Real64 HWBaseboard;    // Current radiant heat flux to surface from hot water baseboard heaters
+        Real64 SteamBaseboard; // Current radiant heat flux to surface from steam baseboard heaters
+        Real64 ElecBaseboard;  // Current radiant heat flux to surface from electric baseboard heaters
+        Real64 CoolingPanel;   // Current radiant heat flux to surface from simple cooling panels
+    };
+
+    struct ZoneTstatSetpt
+    {
+        Real64 setpt = 0.0;
+        Real64 setptAdapComfortCool = 0.0;
+        Real64 setptHi = 0.0;
+        Real64 setptLo = 0.0;
+        Real64 setptHiAver = 0.0;
+        Real64 setptLoAver = 0.0;
+    };
+
 } // namespace DataHeatBalFanSys
 
 struct HeatBalFanSysData : BaseGlobalStruct
@@ -121,17 +140,8 @@ struct HeatBalFanSysData : BaseGlobalStruct
     // temperature at source
     Array1D<Real64> CTFTuserConstPart; // Constant Outside Portion of the CTF calculation of
     // temperature at the user specified location
-    Array1D<Real64> SurfQHTRadSys; // Current radiant heat flux at a surface due to the presence
-    // of high temperature radiant heaters
-    Array1D<Real64> SurfQHWBaseboard; // Current radiant heat flux at a surface due to the presence
-    // of hot water baseboard heaters
-    Array1D<Real64> SurfQSteamBaseboard; // Current radiant heat flux at a surface due to the presence
-    // of steam baseboard heaters
-    Array1D<Real64> SurfQElecBaseboard; // Current radiant heat flux at a surface due to the presence
-    // of electric baseboard heaters
-    Array1D<Real64> SurfQCoolingPanel; // Current radiant heat flux at a surface due to the presence
-    // of simple cooling panels
-    Array1D<Real64> QRadSurfAFNDuct;     // Current radiant heat flux at a surface due to radiation from AFN ducts
+    EPVector<DataHeatBalFanSys::SurfQRadFromHVACData> surfQRadFromHVAC; // Radiant heat flux to surface from radiant HVAC equipment
+    Array1D<Real64> QRadSurfAFNDuct;                                    // Current radiant heat flux at a surface due to radiation from AFN ducts
     Array1D<Real64> QPoolSurfNumerator;  // Current pool heat flux impact at the surface (numerator of surface heat balance)
     Array1D<Real64> PoolHeatTransCoefs;  // Current pool heat transfer coefficients (denominator of surface heat balance)
     Array1D<Real64> RadSysTiHBConstCoef; // Inside heat balance coefficient that is constant
@@ -141,12 +151,7 @@ struct HeatBalFanSysData : BaseGlobalStruct
     Array1D<Real64> RadSysToHBTinCoef;   // Outside heat balance coefficient that modifies Toutside
     Array1D<Real64> RadSysToHBQsrcCoef;  // Outside heat balance coefficient that modifies source/sink
 
-    Array1D<Real64> TempZoneThermostatSetPoint;
-    Array1D<Real64> AdapComfortCoolingSetPoint;
-    Array1D<Real64> ZoneThermostatSetPointHi;
-    Array1D<Real64> ZoneThermostatSetPointLo;
-    Array1D<Real64> ZoneThermostatSetPointHiAver;
-    Array1D<Real64> ZoneThermostatSetPointLoAver;
+    Array1D<DataHeatBalFanSys::ZoneTstatSetpt> zoneTstatSetpts;
 
     EPVector<Real64> LoadCorrectionFactor; // PH 3/3/04
 
@@ -157,9 +162,9 @@ struct HeatBalFanSysData : BaseGlobalStruct
     Array1D<Real64> PreviousMeasuredHumRat1; // Hybrid model zone humidity ratio at previous timestep
     Array1D<Real64> PreviousMeasuredHumRat2; // Hybrid model zone humidity ratio at previous timestep
     Array1D<Real64> PreviousMeasuredHumRat3; // Hybrid model zone humidity ratio at previous timestep
-    EPVector<DataHVACGlobals::ThermostatType> TempControlType;
+    EPVector<HVAC::SetptType> TempControlType;
     EPVector<int> TempControlTypeRpt;
-    EPVector<DataHVACGlobals::ThermostatType> ComfortControlType;
+    EPVector<HVAC::SetptType> ComfortControlType;
     EPVector<int> ComfortControlTypeRpt;
 
     Array2D<bool> CrossedColdThreshRepPeriod;
@@ -195,9 +200,17 @@ struct HeatBalFanSysData : BaseGlobalStruct
 
     EPVector<DataHeatBalFanSys::ZoneComfortControlsFangerData> ZoneComfortControlsFanger;
 
+    void init_constant_state([[maybe_unused]] EnergyPlusData &state) override
+    {
+    }
+
+    void init_state([[maybe_unused]] EnergyPlusData &state) override
+    {
+    }
+
     void clear_state() override
     {
-        *this = HeatBalFanSysData();
+        new (this) HeatBalFanSysData();
     }
 };
 

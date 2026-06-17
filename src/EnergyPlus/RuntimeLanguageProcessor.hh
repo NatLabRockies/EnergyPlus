@@ -1,7 +1,7 @@
-// EnergyPlus, Copyright (c) 1996-2023, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
-// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other
+// National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
 // contributors. All rights reserved.
 //
 // NOTICE: This Software was developed under funding from the U.S. Department of Energy and the
@@ -91,9 +91,9 @@ namespace RuntimeLanguageProcessor {
         Token Type;         // token type, eg. TokenNumber
         Real64 Number;      // May want to store all literals as a variable?
         std::string String; // Serves double duty, also saves string version of token for easy debugging
-        ErlFunc Operator;   // indentifies operator or function 1..64
+        ErlFunc Operator;   // identifies operator or function 1..64
         int Variable;       // points to a variable in ErlVariable structure
-        Token Parenthesis;  // identifes if token is left or right parenthesis
+        Token Parenthesis;  // identifies if token is left or right parenthesis
         int Expression;     // points to an expression in ErlExpression structure
         std::string Error;  // holds token processing error message content
 
@@ -152,24 +152,6 @@ namespace RuntimeLanguageProcessor {
 
     ErlValueType EvaluateExpression(EnergyPlusData &state, int ExpressionNum, bool &seriousErrorFound);
 
-    void TodayTomorrowWeather(EnergyPlusData &state,
-                              ErlFunc FunctionCode,
-                              Real64 Operand1,
-                              Real64 Operand2,
-                              Array2D<Real64> &TodayTomorrowWeatherSource,
-                              ErlValueType &ReturnVal);
-
-    void TodayTomorrowWeather(EnergyPlusData &state,
-                              ErlFunc FunctionCode,
-                              Real64 Operand1,
-                              Real64 Operand2,
-                              Array2D_bool &TodayTomorrowWeatherSource,
-                              ErlValueType &ReturnVal);
-
-    int TodayTomorrowWeather(EnergyPlusData &state, int hour, int timestep, Array2D<Real64> &TodayTomorrowWeatherSource, Real64 &value);
-
-    int TodayTomorrowWeather(EnergyPlusData &state, int hour, int timestep, Array2D<bool> &TodayTomorrowWeatherSource, int &value);
-
     void GetRuntimeLanguageUserInput(EnergyPlusData &state);
 
     void ReportRuntimeLanguage(EnergyPlusData &state);
@@ -186,11 +168,9 @@ namespace RuntimeLanguageProcessor {
 
     int NewEMSVariable(EnergyPlusData &state, std::string const &VariableName, int StackNum, ObjexxFCL::Optional<ErlValueType const> Value = _);
 
-    void SetupPossibleOperators(EnergyPlusData &state);
-
     void ExternalInterfaceSetErlVariable(EnergyPlusData &state,
                                          int varNum,  // The variable index to be written during run time
-                                         Real64 value // The real time value of the vairable to be set
+                                         Real64 value // The real time value of the variable to be set
     );
 
     void ExternalInterfaceInitializeErlVariable(EnergyPlusData &state,
@@ -218,6 +198,7 @@ struct RuntimeLanguageProcessorData : BaseGlobalStruct
     Array1D_int CurveIndexVariableNums;
     Array1D_int ConstructionIndexVariableNums;
     int YearVariableNum = 0;
+    int CalendarYearVariableNum = 0;
     int MonthVariableNum = 0;
     int DayOfMonthVariableNum = 0;
     int DayOfWeekVariableNum = 0;
@@ -244,6 +225,14 @@ struct RuntimeLanguageProcessorData : BaseGlobalStruct
     Array1D<RuntimeLanguageProcessor::TokenType> Token;
     Array1D<RuntimeLanguageProcessor::TokenType> PEToken;
 
+    void init_constant_state([[maybe_unused]] EnergyPlusData &state) override
+    {
+    }
+
+    void init_state([[maybe_unused]] EnergyPlusData &state) override
+    {
+    }
+
     void clear_state() override
     {
         this->AlreadyDidOnce = false;
@@ -259,6 +248,7 @@ struct RuntimeLanguageProcessorData : BaseGlobalStruct
         this->CurveIndexVariableNums.clear();
         this->ConstructionIndexVariableNums.clear();
         this->YearVariableNum = 0;
+        this->CalendarYearVariableNum = 0;
         this->MonthVariableNum = 0;
         this->DayOfMonthVariableNum = 0;
         this->DayOfWeekVariableNum = 0;

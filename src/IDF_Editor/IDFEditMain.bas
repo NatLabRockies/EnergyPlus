@@ -34,7 +34,7 @@ Attribute VB_Name = "IDFMain"
 ' command line argument /idd:iddfilename
 '
 
-Public Const ver = "1.53" 'current version of IDFEditor - less than 1 is a beta
+Public Const ver = "1.55" 'current version of IDFEditor - less than 1 is a beta
 Option Explicit
 Option Base 1
 
@@ -325,7 +325,7 @@ Public maxNodeNameDialog As Long
 Public sizeNodeNameDialog As Long
 
 Public htmlViewFileName As String
- 
+
 
 Private Declare Function FindExecutable Lib "shell32.dll" Alias "FindExecutableA" (ByVal lpFile As String, ByVal lpDirectory As String, ByVal lpresults As String) As Long
 Private Declare Function GetShortPathName Lib "kernel32.dll" Alias "GetShortPathNameA" (ByVal lpszLongPath As String, ByVal lpszShortPath As String, ByVal cchBuffer As Long) As Long
@@ -392,7 +392,7 @@ Private Const CB_SHOWDROPDOWN = &H14F
 ' to store Show Quick select combos or not
 Public ShowQuickSelectCombos As Boolean
 '------------CEPTChange over----------------------------------------------------
-   
+
    Public Function ExecCmd(cmdline$)
       Dim proc As PROCESS_INFORMATION
       Dim Start As STARTUPINFO
@@ -628,7 +628,7 @@ End Sub
 '-----------------------------------------------------------------------------
 Sub setUnits()
 Dim i As Long
-maxUsedConvUnits = 155
+maxUsedConvUnits = 156
 unitsDimensionless = 56
 ReDim convUnits(maxUsedConvUnits)
 ' the following is pasted in from the unitsIPandSI.xls file
@@ -787,6 +787,7 @@ convUnits(152).siName = "m3/hr-m2"
 convUnits(153).siName = "m3/hr"
 convUnits(154).siName = "W/((m3/s)-Pa)"
 convUnits(155).siName = "W/m2, deg C or cd/m2"
+convUnits(156).siName = "umol/m2-s"
 
 convUnits(1).ipName = "ft"
 convUnits(2).ipName = "in"
@@ -943,6 +944,7 @@ convUnits(152).ipName = "gal/hr-ft2"
 convUnits(153).ipName = "gal/hr"
 convUnits(154).ipName = "W/((ft3/min)-inH2O)"
 convUnits(155).ipName = "unknown"
+convUnits(156).ipName = "umol/ft2-s"
 
 convUnits(1).mult = 3.28083989501312
 convUnits(2).mult = 39.3700787401575
@@ -1099,6 +1101,7 @@ convUnits(152).mult = 24.5423853466941
 convUnits(153).mult = 264.172037284185
 convUnits(154).mult = 0.117556910599482
 convUnits(155).mult = 1
+convUnits(156).mult = 0.09290304
 
 convUnits(7).offset = 32
 convUnits(19).offset = 7.686
@@ -2325,8 +2328,8 @@ End Function
 ' CEPTChange: Added To add Autocomplete feature to comboboxes in IDFEdit form
 '-----------------------------------------------------------------------------
 Public Function AutoCompleteCombo(ByRef cbBox As ComboBox, ByVal KeyAscii As Integer) As Integer
-    
-        
+
+
     Dim strFindThis As String, bContinueSearch As Boolean
     Dim lResult As Long, lStart As Long, lLength As Long
     AutoCompleteCombo = 0 ' block cbBox since we handle everything
@@ -2335,7 +2338,7 @@ Public Function AutoCompleteCombo(ByRef cbBox As ComboBox, ByVal KeyAscii As Int
     lLength = cbBox.SelLength
 
     On Error GoTo ErrHandle
-        
+
     If KeyAscii < 32 Then 'control char
         bContinueSearch = False
         cbBox.SelLength = 0 'select nothing since we will delete/enter
@@ -2363,7 +2366,7 @@ Public Function AutoCompleteCombo(ByRef cbBox As ComboBox, ByVal KeyAscii As Int
             strFindThis = Left(cbBox.Text, lStart) & Chr(KeyAscii)
         End If
     End If
-    
+
     If bContinueSearch Then 'need to search
         Call AutoDropDownComboBox(cbBox)  'open dropdown list
         lResult = SendMessage(cbBox.hwnd, CB_SELECTSTRING, -1, ByVal strFindThis)
@@ -2379,7 +2382,7 @@ Public Function AutoCompleteCombo(ByRef cbBox As ComboBox, ByVal KeyAscii As Int
     End If
     On Error GoTo 0
     Exit Function
-    
+
 ErrHandle:
     'got problem, simply return whatever pass in
     Debug.Print "Failed: AutoCompleteComboBox due to : " & Err.Description

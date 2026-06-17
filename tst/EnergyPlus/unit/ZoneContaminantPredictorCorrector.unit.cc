@@ -1,7 +1,7 @@
-// EnergyPlus, Copyright (c) 1996-2023, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
-// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other
+// National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
 // contributors. All rights reserved.
 //
 // NOTICE: This Software was developed under funding from the U.S. Department of Energy and the
@@ -85,8 +85,6 @@ using namespace EnergyPlus::HeatBalanceManager;
 using namespace EnergyPlus::HybridModel;
 using namespace EnergyPlus::ZonePlenum;
 using namespace EnergyPlus::ZoneTempPredictorCorrector;
-using namespace EnergyPlus::DataLoopNode;
-using namespace EnergyPlus::DataHVACGlobals;
 using namespace EnergyPlus::DataSurfaces;
 using namespace EnergyPlus::DataEnvironment;
 using namespace EnergyPlus::Psychrometrics;
@@ -95,6 +93,7 @@ using namespace EnergyPlus::ZoneContaminantPredictorCorrector;
 
 TEST_F(EnergyPlusFixture, ZoneContaminantPredictorCorrector_AddMDotOATest)
 {
+    state->init_state(*state);
 
     state->dataHVACGlobal->ShortenTimeStepSys = false;
     state->dataHVACGlobal->UseZoneTimeStepHistory = false;
@@ -164,6 +163,7 @@ TEST_F(EnergyPlusFixture, ZoneContaminantPredictorCorrector_AddMDotOATest)
     Real64 PriorTimeStep;
 
     state->dataHVACGlobal->TimeStepSys = 15.0 / 60.0; // System timestep in hours
+    state->dataHVACGlobal->TimeStepSysSec = state->dataHVACGlobal->TimeStepSys * Constant::rSecsInHour;
     PriorTimeStep = state->dataHVACGlobal->TimeStepSys;
 
     state->dataZoneEquip->ZoneEquipConfig.allocate(1);
@@ -198,9 +198,6 @@ TEST_F(EnergyPlusFixture, ZoneContaminantPredictorCorrector_AddMDotOATest)
 
     state->dataZoneTempPredictorCorrector->zoneHeatBalance.allocate(1);
     state->dataZoneTempPredictorCorrector->zoneHeatBalance(1).MDotOA = 0.001;
-    state->dataScheduleMgr->Schedule.allocate(1);
-
-    state->dataScheduleMgr->Schedule(1).CurrentValue = 1.0;
 
     state->dataHeatBal->ZoneAirSolutionAlgo = DataHeatBalance::SolutionAlgo::EulerMethod;
 
@@ -215,7 +212,7 @@ TEST_F(EnergyPlusFixture, ZoneContaminantPredictorCorrector_AddMDotOATest)
     state->dataLoopNodes->Node(4).MassFlowRate = 0.03; // Zone return node
     state->dataLoopNodes->Node(4).HumRat = 0.000;
     state->dataLoopNodes->Node(5).HumRat = 0.000;
-    state->dataZoneTempPredictorCorrector->zoneHeatBalance(1).ZoneAirHumRat = 0.008;
+    state->dataZoneTempPredictorCorrector->zoneHeatBalance(1).airHumRat = 0.008;
     state->dataZoneTempPredictorCorrector->zoneHeatBalance(1).ZT = 24.0;
     state->dataZoneTempPredictorCorrector->zoneHeatBalance(1).MixingMassFlowZone = 0.0;
 
@@ -224,7 +221,8 @@ TEST_F(EnergyPlusFixture, ZoneContaminantPredictorCorrector_AddMDotOATest)
 
     state->dataContaminantBalance->ContaminantControlledZone.allocate(1);
 
-    state->dataContaminantBalance->ContaminantControlledZone(1).AvaiSchedPtr = 1;
+    state->dataContaminantBalance->ContaminantControlledZone(1).availSched = Sched::GetScheduleAlwaysOn(*state);
+    state->dataContaminantBalance->ContaminantControlledZone(1).genericContamAvailSched = Sched::GetScheduleAlwaysOn(*state);
     state->dataContaminantBalance->ContaminantControlledZone(1).ActualZoneNum = 1;
     state->dataContaminantBalance->ContaminantControlledZone(1).NumOfZones = 1;
     state->dataContaminantBalance->ZoneGCSetPoint(1) = 0.0025;
@@ -240,6 +238,7 @@ TEST_F(EnergyPlusFixture, ZoneContaminantPredictorCorrector_AddMDotOATest)
 
 TEST_F(EnergyPlusFixture, ZoneContaminantPredictorCorrector_CorrectZoneContaminantsTest)
 {
+    state->init_state(*state);
 
     state->dataHVACGlobal->ShortenTimeStepSys = false;
     state->dataHVACGlobal->UseZoneTimeStepHistory = false;
@@ -284,6 +283,7 @@ TEST_F(EnergyPlusFixture, ZoneContaminantPredictorCorrector_CorrectZoneContamina
     state->dataContaminantBalance->ZoneCO2GainExceptPeople.allocate(1);
     state->dataContaminantBalance->ZoneGCGain.allocate(1);
     state->dataContaminantBalance->ZoneCO2Gain(1) = 0.0001;
+    state->dataContaminantBalance->ZoneCO2GainExceptPeople(1) = 0.0001;
     state->dataContaminantBalance->ZoneGCGain(1) = 0.0001;
     state->dataContaminantBalance->MixingMassFlowCO2(1) = 0.0;
     state->dataContaminantBalance->MixingMassFlowGC(1) = 0.0;
@@ -297,6 +297,7 @@ TEST_F(EnergyPlusFixture, ZoneContaminantPredictorCorrector_CorrectZoneContamina
     state->dataContaminantBalance->ZoneGC1(1) = state->dataContaminantBalance->OutdoorGC;
 
     state->dataHVACGlobal->TimeStepSys = 15.0 / 60.0; // System timestep in hours
+    state->dataHVACGlobal->TimeStepSysSec = state->dataHVACGlobal->TimeStepSys * Constant::rSecsInHour;
 
     state->dataZoneEquip->ZoneEquipConfig.allocate(1);
     state->dataZoneEquip->ZoneEquipConfig(1).ZoneName = "Zone 1";
@@ -343,7 +344,7 @@ TEST_F(EnergyPlusFixture, ZoneContaminantPredictorCorrector_CorrectZoneContamina
     state->dataLoopNodes->Node(4).MassFlowRate = 0.03; // Zone return node
     state->dataLoopNodes->Node(4).HumRat = 0.000;
     state->dataLoopNodes->Node(5).HumRat = 0.000;
-    state->dataZoneTempPredictorCorrector->zoneHeatBalance(1).ZoneAirHumRat = 0.008;
+    state->dataZoneTempPredictorCorrector->zoneHeatBalance(1).airHumRat = 0.008;
     state->dataZoneTempPredictorCorrector->zoneHeatBalance(1).ZT = 24.0;
     state->dataZoneTempPredictorCorrector->zoneHeatBalance(1).MixingMassFlowZone = 0.0;
 
@@ -354,6 +355,7 @@ TEST_F(EnergyPlusFixture, ZoneContaminantPredictorCorrector_CorrectZoneContamina
 
 TEST_F(EnergyPlusFixture, ZoneContaminantPredictorCorrector_MultiZoneCO2ControlTest)
 {
+    state->init_state(*state);
 
     state->dataHVACGlobal->ShortenTimeStepSys = false;
     state->dataHVACGlobal->UseZoneTimeStepHistory = false;
@@ -425,6 +427,7 @@ TEST_F(EnergyPlusFixture, ZoneContaminantPredictorCorrector_MultiZoneCO2ControlT
     Real64 PriorTimeStep;
 
     state->dataHVACGlobal->TimeStepSys = 15.0 / 60.0; // System timestep in hours
+    state->dataHVACGlobal->TimeStepSysSec = state->dataHVACGlobal->TimeStepSys * Constant::rSecsInHour;
     PriorTimeStep = state->dataHVACGlobal->TimeStepSys;
 
     state->dataZoneEquip->ZoneEquipConfig.allocate(3);
@@ -494,9 +497,6 @@ TEST_F(EnergyPlusFixture, ZoneContaminantPredictorCorrector_MultiZoneCO2ControlT
     state->dataZoneTempPredictorCorrector->zoneHeatBalance(1).MDotOA = 0.001;
     state->dataZoneTempPredictorCorrector->zoneHeatBalance(2).MDotOA = 0.001;
     state->dataZoneTempPredictorCorrector->zoneHeatBalance(3).MDotOA = 0.001;
-    state->dataScheduleMgr->Schedule.allocate(1);
-
-    state->dataScheduleMgr->Schedule(1).CurrentValue = 1.0;
 
     state->dataHeatBal->ZoneAirSolutionAlgo = DataHeatBalance::SolutionAlgo::EulerMethod;
 
@@ -511,11 +511,11 @@ TEST_F(EnergyPlusFixture, ZoneContaminantPredictorCorrector_MultiZoneCO2ControlT
     state->dataLoopNodes->Node(4).MassFlowRate = 0.03; // Zone return node
     state->dataLoopNodes->Node(4).HumRat = 0.000;
     state->dataLoopNodes->Node(5).HumRat = 0.000;
-    state->dataZoneTempPredictorCorrector->zoneHeatBalance(1).ZoneAirHumRat = 0.008;
+    state->dataZoneTempPredictorCorrector->zoneHeatBalance(1).airHumRat = 0.008;
     state->dataZoneTempPredictorCorrector->zoneHeatBalance(1).ZT = 24.0;
-    state->dataZoneTempPredictorCorrector->zoneHeatBalance(2).ZoneAirHumRat = 0.008;
+    state->dataZoneTempPredictorCorrector->zoneHeatBalance(2).airHumRat = 0.008;
     state->dataZoneTempPredictorCorrector->zoneHeatBalance(2).ZT = 23.5;
-    state->dataZoneTempPredictorCorrector->zoneHeatBalance(3).ZoneAirHumRat = 0.008;
+    state->dataZoneTempPredictorCorrector->zoneHeatBalance(3).airHumRat = 0.008;
     state->dataZoneTempPredictorCorrector->zoneHeatBalance(3).ZT = 24.5;
     state->dataZoneTempPredictorCorrector->zoneHeatBalance(1).MixingMassFlowZone = 0.0;
     state->dataZoneTempPredictorCorrector->zoneHeatBalance(2).MixingMassFlowZone = 0.0;
@@ -531,13 +531,16 @@ TEST_F(EnergyPlusFixture, ZoneContaminantPredictorCorrector_MultiZoneCO2ControlT
 
     state->dataContaminantBalance->ContaminantControlledZone.allocate(3);
 
-    state->dataContaminantBalance->ContaminantControlledZone(1).AvaiSchedPtr = 1;
+    state->dataContaminantBalance->ContaminantControlledZone(1).availSched = Sched::GetScheduleAlwaysOn(*state);
+    state->dataContaminantBalance->ContaminantControlledZone(1).genericContamAvailSched = Sched::GetScheduleAlwaysOn(*state);
     state->dataContaminantBalance->ContaminantControlledZone(1).ActualZoneNum = 1;
     state->dataContaminantBalance->ContaminantControlledZone(1).NumOfZones = 1;
-    state->dataContaminantBalance->ContaminantControlledZone(2).AvaiSchedPtr = 1;
+    state->dataContaminantBalance->ContaminantControlledZone(2).availSched = Sched::GetScheduleAlwaysOn(*state);
+    state->dataContaminantBalance->ContaminantControlledZone(2).genericContamAvailSched = Sched::GetScheduleAlwaysOn(*state);
     state->dataContaminantBalance->ContaminantControlledZone(2).ActualZoneNum = 2;
     state->dataContaminantBalance->ContaminantControlledZone(2).NumOfZones = 1;
-    state->dataContaminantBalance->ContaminantControlledZone(3).AvaiSchedPtr = 1;
+    state->dataContaminantBalance->ContaminantControlledZone(3).availSched = Sched::GetScheduleAlwaysOn(*state);
+    state->dataContaminantBalance->ContaminantControlledZone(3).genericContamAvailSched = Sched::GetScheduleAlwaysOn(*state);
     state->dataContaminantBalance->ContaminantControlledZone(3).ActualZoneNum = 3;
     state->dataContaminantBalance->ContaminantControlledZone(3).NumOfZones = 1;
 
@@ -549,6 +552,7 @@ TEST_F(EnergyPlusFixture, ZoneContaminantPredictorCorrector_MultiZoneCO2ControlT
 
 TEST_F(EnergyPlusFixture, ZoneContaminantPredictorCorrector_MultiZoneGCControlTest)
 {
+    state->init_state(*state);
 
     state->dataHVACGlobal->ShortenTimeStepSys = false;
     state->dataHVACGlobal->UseZoneTimeStepHistory = false;
@@ -610,6 +614,7 @@ TEST_F(EnergyPlusFixture, ZoneContaminantPredictorCorrector_MultiZoneGCControlTe
     Real64 PriorTimeStep;
 
     state->dataHVACGlobal->TimeStepSys = 15.0 / 60.0; // System timestep in hours
+    state->dataHVACGlobal->TimeStepSysSec = state->dataHVACGlobal->TimeStepSys * Constant::rSecsInHour;
     PriorTimeStep = state->dataHVACGlobal->TimeStepSys;
 
     state->dataZoneEquip->ZoneEquipConfig.allocate(3);
@@ -679,9 +684,6 @@ TEST_F(EnergyPlusFixture, ZoneContaminantPredictorCorrector_MultiZoneGCControlTe
     state->dataZoneTempPredictorCorrector->zoneHeatBalance(1).MDotOA = 0.001;
     state->dataZoneTempPredictorCorrector->zoneHeatBalance(2).MDotOA = 0.001;
     state->dataZoneTempPredictorCorrector->zoneHeatBalance(3).MDotOA = 0.001;
-    state->dataScheduleMgr->Schedule.allocate(1);
-
-    state->dataScheduleMgr->Schedule(1).CurrentValue = 1.0;
 
     state->dataHeatBal->ZoneAirSolutionAlgo = DataHeatBalance::SolutionAlgo::EulerMethod;
 
@@ -696,11 +698,11 @@ TEST_F(EnergyPlusFixture, ZoneContaminantPredictorCorrector_MultiZoneGCControlTe
     state->dataLoopNodes->Node(4).MassFlowRate = 0.03; // Zone return node
     state->dataLoopNodes->Node(4).HumRat = 0.000;
     state->dataLoopNodes->Node(5).HumRat = 0.000;
-    state->dataZoneTempPredictorCorrector->zoneHeatBalance(1).ZoneAirHumRat = 0.008;
+    state->dataZoneTempPredictorCorrector->zoneHeatBalance(1).airHumRat = 0.008;
     state->dataZoneTempPredictorCorrector->zoneHeatBalance(1).ZT = 24.0;
-    state->dataZoneTempPredictorCorrector->zoneHeatBalance(2).ZoneAirHumRat = 0.008;
+    state->dataZoneTempPredictorCorrector->zoneHeatBalance(2).airHumRat = 0.008;
     state->dataZoneTempPredictorCorrector->zoneHeatBalance(2).ZT = 23.5;
-    state->dataZoneTempPredictorCorrector->zoneHeatBalance(3).ZoneAirHumRat = 0.008;
+    state->dataZoneTempPredictorCorrector->zoneHeatBalance(3).airHumRat = 0.008;
     state->dataZoneTempPredictorCorrector->zoneHeatBalance(3).ZT = 24.5;
     state->dataZoneTempPredictorCorrector->zoneHeatBalance(1).MixingMassFlowZone = 0.0;
     state->dataZoneTempPredictorCorrector->zoneHeatBalance(2).MixingMassFlowZone = 0.0;
@@ -718,13 +720,16 @@ TEST_F(EnergyPlusFixture, ZoneContaminantPredictorCorrector_MultiZoneGCControlTe
 
     state->dataContaminantBalance->ContaminantControlledZone.allocate(3);
 
-    state->dataContaminantBalance->ContaminantControlledZone(1).AvaiSchedPtr = 1;
+    state->dataContaminantBalance->ContaminantControlledZone(1).availSched = Sched::GetScheduleAlwaysOn(*state);
+    state->dataContaminantBalance->ContaminantControlledZone(1).genericContamAvailSched = Sched::GetScheduleAlwaysOn(*state);
     state->dataContaminantBalance->ContaminantControlledZone(1).ActualZoneNum = 1;
     state->dataContaminantBalance->ContaminantControlledZone(1).NumOfZones = 1;
-    state->dataContaminantBalance->ContaminantControlledZone(2).AvaiSchedPtr = 1;
+    state->dataContaminantBalance->ContaminantControlledZone(2).availSched = Sched::GetScheduleAlwaysOn(*state);
+    state->dataContaminantBalance->ContaminantControlledZone(2).genericContamAvailSched = Sched::GetScheduleAlwaysOn(*state);
     state->dataContaminantBalance->ContaminantControlledZone(2).ActualZoneNum = 2;
     state->dataContaminantBalance->ContaminantControlledZone(2).NumOfZones = 1;
-    state->dataContaminantBalance->ContaminantControlledZone(3).AvaiSchedPtr = 1;
+    state->dataContaminantBalance->ContaminantControlledZone(3).availSched = Sched::GetScheduleAlwaysOn(*state);
+    state->dataContaminantBalance->ContaminantControlledZone(3).genericContamAvailSched = Sched::GetScheduleAlwaysOn(*state);
     state->dataContaminantBalance->ContaminantControlledZone(3).ActualZoneNum = 3;
     state->dataContaminantBalance->ContaminantControlledZone(3).NumOfZones = 1;
 

@@ -4,7 +4,7 @@
 !-      Use '!' comments if they need to be retained when using the IDFEditor.
 !-   ===========  ALL OBJECTS IN CLASS: VERSION ===========
 
-  Version,23.1;
+  Version,26.2;
 
 !-   ===========  ALL OBJECTS IN CLASS: SIMULATIONCONTROL ===========
 
@@ -1609,14 +1609,6 @@
     31;                      !- End Day 1
 
 !-   ===========  ALL OBJECTS IN CLASS: SCHEDULE:COMPACT ===========
-                             !- Field 10
-                             !- Field 12
-                             !- Field 14
-                             !- Field 16
-                             !- Field 18
-                             !- Field 20
-                             !- Field 22
-                             !- Field 24
 
   Schedule:Compact,
     Office_Plug_SCH,         !- Name
@@ -1637,8 +1629,6 @@
     Until: 24:00,0.2456865339, !- Field 23
     For: AllOtherDays,       !- Field 25
     Until: 24:00,0.2456865339; !- Field 26
-
-                             !- Field 27
 
   Schedule:Compact,
     BLDG_LIGHT_OFFICE_SCH,   !- Name
@@ -1678,9 +1668,6 @@
     Until: 24:00,0,          !- Field 21
     For: Sunday Holidays AllOtherDays, !- Field 23
     Until: 24:00,0.1;        !- Field 24
-
-                             !- Field 21
-                             !- Field 35
 
   Schedule:Compact,
     BLDG_OCC_SCH,            !- Name
@@ -2950,9 +2937,6 @@
     0,100.579094839222,0;  !- X,Y,Z ==> Vertex 4 {m}
 
 !-   ===========  ALL OBJECTS IN CLASS: FENESTRATIONSURFACE:DETAILED ===========
-                                        !- X,Y,Z  1 {m}
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
 
   FenestrationSurface:Detailed,
     Office Front Wall Window 1,  !- Name
@@ -2969,11 +2953,6 @@
     7.31484326103434,0,0.914355407629293,  !- X,Y,Z ==> Vertex 3 {m}
     7.31484326103434,0,2.43929602151392;  !- X,Y,Z ==> Vertex 4 {m}
 
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
-
   FenestrationSurface:Detailed,
     Office Front Wall Window2,  !- Name
     Window,                  !- Surface Type
@@ -2988,11 +2967,6 @@
     18.5918932884623,0,0.914355407629293,  !- X,Y,Z ==> Vertex 2 {m}
     22.2493149189795,0,0.914355407629293,  !- X,Y,Z ==> Vertex 3 {m}
     22.2493149189795,0,2.43929602151392;  !- X,Y,Z ==> Vertex 4 {m}
-
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
 
   FenestrationSurface:Detailed,
     Office Front Door,       !- Name
@@ -3009,11 +2983,6 @@
     12.953323682378,0.000000000000,0.000000000000,  !- X,Y,Z ==> Vertex 3 {m}
     12.953323682378,0.000000000000,2.133495951135;  !- X,Y,Z ==> Vertex 4 {m}
 
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
-
   FenestrationSurface:Detailed,
     Office Left Wall Window1,!- Name
     Window,                  !- Surface Type
@@ -3028,11 +2997,6 @@
     0,7.51904930207155,0.914355407629293,  !- X,Y,Z ==> Vertex 2 {m}
     0,5.38555335093654,0.914355407629293,  !- X,Y,Z ==> Vertex 3 {m}
     0,5.38555335093654,2.43929602151392;  !- X,Y,Z ==> Vertex 4 {m}
-
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
 
   FenestrationSurface:Detailed,
     Office Left Wall Window2,!- Name
@@ -3049,9 +3013,6 @@
     0,1.62450477422138,0.914355407629293,  !- X,Y,Z ==> Vertex 3 {m}
     0,1.62450477422138,2.43929602151392;  !- X,Y,Z ==> Vertex 4 {m}
 
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-
   FenestrationSurface:Detailed,
     Office Left Wall Door,   !- Name
     Door,                    !- Surface Type
@@ -3066,11 +3027,6 @@
     0,5.02895474196111,0,  !- X,Y,Z ==> Vertex 2 {m}
     0,4.11459933433182,0,  !- X,Y,Z ==> Vertex 3 {m}
     0,4.11459933433182,2.13349595113502;  !- X,Y,Z ==> Vertex 4 {m}
-
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
 
   FenestrationSurface:Detailed,
     Fine Storage Overhead Door1,  !- Name
@@ -3087,11 +3043,6 @@
     36.527540398794,0.000000000000,0.000000000000,  !- X,Y,Z ==> Vertex 3 {m}
     36.527540398794,0.000000000000,2.438251358764;  !- X,Y,Z ==> Vertex 4 {m}
 
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
-
   FenestrationSurface:Detailed,
     Fine Storage Overhead Door2,  !- Name
     Door,                    !- Surface Type
@@ -3106,11 +3057,6 @@
     45.717770381465,4.941667349700,0.000000000000,  !- X,Y,Z ==> Vertex 2 {m}
     45.717770381465,7.989548436712,0.000000000000,  !- X,Y,Z ==> Vertex 3 {m}
     45.717770381465,7.989548436712,2.438251358764;  !- X,Y,Z ==> Vertex 4 {m}
-
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
 
   FenestrationSurface:Detailed,
     Fine Storage Overhead Door3,  !- Name
@@ -3127,11 +3073,6 @@
     45.717770381465,26.135355129652,0.000000000000,  !- X,Y,Z ==> Vertex 3 {m}
     45.717770381465,26.135355129652,2.438251358764;  !- X,Y,Z ==> Vertex 4 {m}
 
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
-
   FenestrationSurface:Detailed,
     Fine Storage Overhead Door4,  !- Name
     Door,                    !- Surface Type
@@ -3146,11 +3087,6 @@
     0.000000000000,28.015580613846,0.000000000000,  !- X,Y,Z ==> Vertex 2 {m}
     0.000000000000,24.967699526834,0.000000000000,  !- X,Y,Z ==> Vertex 3 {m}
     0.000000000000,24.967699526834,2.438251358764;  !- X,Y,Z ==> Vertex 4 {m}
-
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
 
   FenestrationSurface:Detailed,
     Bulk Storage Overhead Door1,  !- Name
@@ -3167,11 +3103,6 @@
     0.000000000000,90.902137046898,0.000000000000,  !- X,Y,Z ==> Vertex 3 {m}
     0.000000000000,90.902137046898,2.438251358764;  !- X,Y,Z ==> Vertex 4 {m}
 
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
-
   FenestrationSurface:Detailed,
     Bulk Storage Overhead Door2,  !- Name
     Door,                    !- Surface Type
@@ -3186,11 +3117,6 @@
     0.000000000000,84.882660341586,0.000000000000,  !- X,Y,Z ==> Vertex 2 {m}
     0.000000000000,81.834779254575,0.000000000000,  !- X,Y,Z ==> Vertex 3 {m}
     0.000000000000,81.834779254575,2.438251358764;  !- X,Y,Z ==> Vertex 4 {m}
-
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
 
   FenestrationSurface:Detailed,
     Bulk Storage Overhead Door3,  !- Name
@@ -3207,11 +3133,6 @@
     0.000000000000,72.767421462251,0.000000000000,  !- X,Y,Z ==> Vertex 3 {m}
     0.000000000000,72.767421462251,2.438251358764;  !- X,Y,Z ==> Vertex 4 {m}
 
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
-
   FenestrationSurface:Detailed,
     Bulk Storage Overhead Door4,  !- Name
     Door,                    !- Surface Type
@@ -3226,11 +3147,6 @@
     0.000000000000,66.747944756938,0.000000000000,  !- X,Y,Z ==> Vertex 2 {m}
     0.000000000000,63.700063669927,0.000000000000,  !- X,Y,Z ==> Vertex 3 {m}
     0.000000000000,63.700063669927,2.438251358764;  !- X,Y,Z ==> Vertex 4 {m}
-
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
 
   FenestrationSurface:Detailed,
     Bulk Storage Overhead Door5,  !- Name
@@ -3247,11 +3163,6 @@
     0.000000000000,54.632705877603,0.000000000000,  !- X,Y,Z ==> Vertex 3 {m}
     0.000000000000,54.632705877603,2.438251358764;  !- X,Y,Z ==> Vertex 4 {m}
 
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
-
   FenestrationSurface:Detailed,
     Bulk Storage Overhead Door6,  !- Name
     Door,                    !- Surface Type
@@ -3266,11 +3177,6 @@
     0.000000000000,48.613229172291,0.000000000000,  !- X,Y,Z ==> Vertex 2 {m}
     0.000000000000,45.565348085279,0.000000000000,  !- X,Y,Z ==> Vertex 3 {m}
     0.000000000000,45.565348085279,2.438251358764;  !- X,Y,Z ==> Vertex 4 {m}
-
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
 
   FenestrationSurface:Detailed,
     Bulk Storage Overhead Door7,  !- Name
@@ -3287,11 +3193,6 @@
     0.000000000000,36.497990292956,0.000000000000,  !- X,Y,Z ==> Vertex 3 {m}
     0.000000000000,36.497990292956,2.438251358764;  !- X,Y,Z ==> Vertex 4 {m}
 
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
-
   FenestrationSurface:Detailed,
     Bulk Storage Overhead Door8,  !- Name
     Door,                    !- Surface Type
@@ -3306,11 +3207,6 @@
     45.717770381465,37.093047145699,0.000000000000,  !- X,Y,Z ==> Vertex 2 {m}
     45.717770381465,39.531328232711,0.000000000000,  !- X,Y,Z ==> Vertex 3 {m}
     45.717770381465,39.531328232711,2.438251358764;  !- X,Y,Z ==> Vertex 4 {m}
-
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
 
   FenestrationSurface:Detailed,
     Bulk Storage Overhead Door9,  !- Name
@@ -3327,11 +3223,6 @@
     45.717770381465,57.712040532863,0.000000000000,  !- X,Y,Z ==> Vertex 3 {m}
     45.717770381465,57.712040532863,2.438251358764;  !- X,Y,Z ==> Vertex 4 {m}
 
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
-
   FenestrationSurface:Detailed,
     Bulk Storage Overhead Door10,  !- Name
     Door,                    !- Surface Type
@@ -3346,11 +3237,6 @@
     45.717770381465,73.315058536411,0.000000000000,  !- X,Y,Z ==> Vertex 2 {m}
     45.717770381465,75.753339623423,0.000000000000,  !- X,Y,Z ==> Vertex 3 {m}
     45.717770381465,75.753339623423,2.438251358764;  !- X,Y,Z ==> Vertex 4 {m}
-
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
 
   FenestrationSurface:Detailed,
     Bulk Storage Overhead Door11,  !- Name
@@ -3367,11 +3253,6 @@
     45.717770381465,92.326045659193,0.000000000000,  !- X,Y,Z ==> Vertex 3 {m}
     45.717770381465,92.326045659193,2.438251358764;  !- X,Y,Z ==> Vertex 4 {m}
 
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
-
   FenestrationSurface:Detailed,
     Bulk Storage Overhead Door12,  !- Name
     Door,                    !- Surface Type
@@ -3386,11 +3267,6 @@
     40.439074862717,100.579094839222,0.000000000000,  !- X,Y,Z ==> Vertex 2 {m}
     37.391193775705,100.579094839222,0.000000000000,  !- X,Y,Z ==> Vertex 3 {m}
     37.391193775705,100.579094839222,2.438251358764;  !- X,Y,Z ==> Vertex 4 {m}
-
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
 
   FenestrationSurface:Detailed,
     Bulk Storage Overhead Door13,  !- Name
@@ -3407,11 +3283,6 @@
     27.723558056466,100.579094839222,0.000000000000,  !- X,Y,Z ==> Vertex 3 {m}
     27.723558056466,100.579094839222,2.438251358764;  !- X,Y,Z ==> Vertex 4 {m}
 
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
-
   FenestrationSurface:Detailed,
     Bulk Storage Overhead Door14,  !- Name
     Door,                    !- Surface Type
@@ -3426,11 +3297,6 @@
     16.687766818731,100.579094839222,0.000000000000,  !- X,Y,Z ==> Vertex 2 {m}
     13.639885731719,100.579094839222,0.000000000000,  !- X,Y,Z ==> Vertex 3 {m}
     13.639885731719,100.579094839222,2.438251358764;  !- X,Y,Z ==> Vertex 4 {m}
-
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
 
   FenestrationSurface:Detailed,
     Bulk Storage Overhead Door15,  !- Name
@@ -3447,11 +3313,6 @@
     4.274503431524,100.579094839222,0.000000000000,  !- X,Y,Z ==> Vertex 3 {m}
     4.274503431524,100.579094839222,2.438251358764;  !- X,Y,Z ==> Vertex 4 {m}
 
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
-
   FenestrationSurface:Detailed,
     Bulk Storage Door1,      !- Name
     Door,                    !- Surface Type
@@ -3466,11 +3327,6 @@
     45.7177703814647,47.5464811967232,0,  !- X,Y,Z ==> Vertex 2 {m}
     45.7177703814647,48.4608366043525,0,  !- X,Y,Z ==> Vertex 3 {m}
     45.7177703814647,48.4608366043525,2.13349595113502;  !- X,Y,Z ==> Vertex 4 {m}
-
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
 
   FenestrationSurface:Detailed,
     Bulk Storage Door2,      !- Name
@@ -3487,11 +3343,6 @@
     45.7177703814647,65.9859819172473,0,  !- X,Y,Z ==> Vertex 3 {m}
     45.7177703814647,65.9859819172473,2.13349595113502;  !- X,Y,Z ==> Vertex 4 {m}
 
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
-
   FenestrationSurface:Detailed,
     Bulk Storage Door3,      !- Name
     Door,                    !- Surface Type
@@ -3506,11 +3357,6 @@
     45.7177703814647,82.5967718225128,0,  !- X,Y,Z ==> Vertex 2 {m}
     45.7177703814647,83.5111272301421,0,  !- X,Y,Z ==> Vertex 3 {m}
     45.7177703814647,83.5111272301421,2.13349595113502;  !- X,Y,Z ==> Vertex 4 {m}
-
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
 
   FenestrationSurface:Detailed,
     Bulk Storage Door4,      !- Name
@@ -3527,11 +3373,6 @@
     22.437825726850,100.579094839222,0.000000000000,  !- X,Y,Z ==> Vertex 3 {m}
     22.437825726850,100.579094839222,2.133495951135;  !- X,Y,Z ==> Vertex 4 {m}
 
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
-
   FenestrationSurface:Detailed,
     Bulk Storage Door5,      !- Name
     Door,                    !- Surface Type
@@ -3546,10 +3387,6 @@
     0.000000000000,70.345058109595,0.000000000000,  !- X,Y,Z ==> Vertex 2 {m}
     0.000000000000,69.430702701966,0.000000000000,  !- X,Y,Z ==> Vertex 3 {m}
     0.000000000000,69.430702701966,2.133495951135;  !- X,Y,Z ==> Vertex 4 {m}
-
-                                        !- X,Y,Z  4 {m}
-                                        !- X,Y,Z  1 {m}
-                                        !- X,Y,Z  2 {m}
 
   FenestrationSurface:Detailed,
     Fine Storage Left Door,  !- Name
@@ -3566,10 +3403,6 @@
     0,20.2682115357827,0,  !- X,Y,Z ==> Vertex 3 {m}
     0,19.3538561281534,0;  !- X,Y,Z ==> Vertex 4 {m}
 
-                                        !- X,Y,Z  1 {m}
-                                        !- X,Y,Z  2 {m}
-                                        !- X,Y,Z  3 {m}
-
   FenestrationSurface:Detailed,
     Fine Storage Right Door, !- Name
     Door,                    !- Surface Type
@@ -3584,8 +3417,6 @@
     45.7177703814647,14.7820790900069,0,  !- X,Y,Z ==> Vertex 2 {m}
     45.7177703814647,15.6964344976362,0,  !- X,Y,Z ==> Vertex 3 {m}
     45.7177703814647,15.6964344976362,2.13349595113502;  !- X,Y,Z ==> Vertex 4 {m}
-
-                                        !- X,Y,Z  4 {m}
 
   FenestrationSurface:Detailed,
     Skylight_r8c1,           !- Name
@@ -4359,7 +4190,7 @@
     Office Activity Schedule,!- Activity Level Schedule Name
     ,                        !- Carbon Dioxide Generation Rate {m3/s-W}
     ,                        !- Enable ASHRAE 55 Comfort Warnings
-    ZoneAveraged;            !- Mean Radiant Temperature Calculation Type
+    EnclosureAveraged;       !- Mean Radiant Temperature Calculation Type
 
 !-   ===========  ALL OBJECTS IN CLASS: LIGHTS ===========
 
@@ -4369,7 +4200,7 @@
     BLDG_LIGHT_OFFICE_SCH,   !- Schedule Name
     Watts/Area,              !- Design Level Calculation Method
     ,                        !- Lighting Level {W}
-    6.888902667,             !- Watts per Zone Floor Area {W/m2}
+    6.888902667,             !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0,                       !- Return Air Fraction
     0.37,                    !- Fraction Radiant
@@ -4384,7 +4215,7 @@
     BLDG_LIGHT_STORAGE_SCH,  !- Schedule Name
     Watts/Area,              !- Design Level Calculation Method
     ,                        !- Lighting Level {W}
-    7.427098188,             !- Watts per Zone Floor Area {W/m2}
+    7.427098188,             !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0,                       !- Return Air Fraction
     0.42,                    !- Fraction Radiant
@@ -4399,7 +4230,7 @@
     BLDG_LIGHT_STORAGE_SCH,  !- Schedule Name
     Watts/Area,              !- Design Level Calculation Method
     ,                        !- Lighting Level {W}
-    3.552090438,             !- Watts per Zone Floor Area {W/m2}
+    3.552090438,             !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0,                       !- Return Air Fraction
     0.42,                    !- Fraction Radiant
@@ -4416,7 +4247,7 @@
     Office_Plug_SCH,         !- Schedule Name
     EquipmentLevel,          !- Design Level Calculation Method
     1912.5,                  !- Design Level {W}
-    ,                        !- Watts per Zone Floor Area {W/m2}
+    ,                        !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     ,                        !- Fraction Latent
     ,                        !- Fraction Radiant
@@ -4429,7 +4260,7 @@
     Bulk Storage Plug Schedule,  !- Schedule Name
     EquipmentLevel,          !- Design Level Calculation Method
     8200.12,                 !- Design Level {W}
-    ,                        !- Watts per Zone Floor Area {W/m2}
+    ,                        !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     ,                        !- Fraction Latent
     ,                        !- Fraction Radiant
@@ -4553,8 +4384,8 @@
     Office Infil Schedule,   !- Schedule Name
     Flow/ExteriorArea,       !- Design Flow Rate Calculation Method
     ,                        !- Design Flow Rate {m3/s}
-    ,                        !- Flow per Zone Floor Area {m3/s-m2}
-    0.000220198,             !- Flow per Exterior Surface Area {m3/s-m2}
+    ,                        !- Flow Rate per Floor Area {m3/s-m2}
+    0.000220198,             !- Flow Rate per Exterior Surface Area {m3/s-m2}
     ,                        !- Air Changes per Hour {1/hr}
     0,                       !- Constant Term Coefficient
     0,                       !- Temperature Term Coefficient
@@ -4567,8 +4398,8 @@
     INFIL_Door_Opening_SCH,  !- Schedule Name
     Flow/Zone,               !- Design Flow Rate Calculation Method
     0.176508178,             !- Design Flow Rate {m3/s}
-    ,                        !- Flow per Zone Floor Area {m3/s-m2}
-    ,                        !- Flow per Exterior Surface Area {m3/s-m2}
+    ,                        !- Flow Rate per Floor Area {m3/s-m2}
+    ,                        !- Flow Rate per Exterior Surface Area {m3/s-m2}
     ,                        !- Air Changes per Hour {1/hr}
     1,                       !- Constant Term Coefficient
     0.0000,                  !- Temperature Term Coefficient
@@ -4581,8 +4412,8 @@
     Fine Sorage Infil Schedule,  !- Schedule Name
     Flow/ExteriorArea,       !- Design Flow Rate Calculation Method
     ,                        !- Design Flow Rate {m3/s}
-    ,                        !- Flow per Zone Floor Area {m3/s-m2}
-    0.000225765,             !- Flow per Exterior Surface Area {m3/s-m2}
+    ,                        !- Flow Rate per Floor Area {m3/s-m2}
+    0.000225765,             !- Flow Rate per Exterior Surface Area {m3/s-m2}
     ,                        !- Air Changes per Hour {1/hr}
     0,                       !- Constant Term Coefficient
     0,                       !- Temperature Term Coefficient
@@ -4595,8 +4426,8 @@
     Bulk Storage Infil_Base Schedule,  !- Schedule Name
     Flow/Zone,               !- Design Flow Rate Calculation Method
     2.330231241,             !- Design Flow Rate {m3/s}
-    ,                        !- Flow per Zone Floor Area {m3/s-m2}
-    ,                        !- Flow per Exterior Surface Area {m3/s-m2}
+    ,                        !- Flow Rate per Floor Area {m3/s-m2}
+    ,                        !- Flow Rate per Exterior Surface Area {m3/s-m2}
     ,                        !- Air Changes per Hour {1/hr}
     0,                       !- Constant Term Coefficient
     0,                       !- Temperature Term Coefficient
@@ -4611,7 +4442,7 @@
     Always On Schedule,      !- Schedule Name
     Flow/Zone,               !- Design Flow Rate Calculation Method
     37.7600047937506,        !- Design Flow Rate {m3/s}
-    ,                        !- Flow Rate per Zone Floor Area {m3/s-m2}
+    ,                        !- Flow Rate per Floor Area {m3/s-m2}
     ,                        !- Flow Rate per Person {m3/s-person}
     ,                        !- Air Changes per Hour {1/hr}
     Exhaust,                 !- Ventilation Type
@@ -4639,7 +4470,7 @@
     Always On Schedule,      !- Schedule Name
     Flow/Zone,               !- Design Flow Rate Calculation Method
     0.943841435,             !- Design Flow Rate {m3/s}
-    ,                        !- Flow Rate per Zone Floor Area {m3/s-m2}
+    ,                        !- Flow Rate per Floor Area {m3/s-m2}
     ,                        !- Flow Rate per Person {m3/s-person}
     ,                        !- Air Changes per Hour {1/hr}
     Natural,                 !- Ventilation Type
@@ -4743,7 +4574,14 @@
     No,                      !- Account for Dedicated Outdoor Air System
     NeutralSupplyAir,        !- Dedicated Outdoor Air System Control Strategy
     autosize,                !- Dedicated Outdoor Air Low Setpoint Temperature for Design {C}
-    autosize;                !- Dedicated Outdoor Air High Setpoint Temperature for Design {C}
+    autosize,                !- Dedicated Outdoor Air High Setpoint Temperature for Design {C}
+    ,                        !- Zone Load Sizing Method
+    ,                        !- Zone Latent Cooling Design Supply Air Humidity Ratio Input Method
+    ,                        !- Zone Dehumidification Design Supply Air Humidity Ratio {kgWater/kgDryAir}
+    ,                        !- Zone Cooling Design Supply Air Humidity Ratio Difference {kgWater/kgDryAir}
+    ,                        !- Zone Latent Heating Design Supply Air Humidity Ratio Input Method
+    ,                        !- Zone Humidification Design Supply Air Humidity Ratio {kgWater/kgDryAir}
+    ;                        !- Zone Humidification Design Supply Air Humidity Ratio Difference {kgWater/kgDryAir}
 
   Sizing:Zone,
     Zone2 Fine Storage,      !- Zone or ZoneList Name
@@ -4772,7 +4610,14 @@
     No,                      !- Account for Dedicated Outdoor Air System
     NeutralSupplyAir,        !- Dedicated Outdoor Air System Control Strategy
     autosize,                !- Dedicated Outdoor Air Low Setpoint Temperature for Design {C}
-    autosize;                !- Dedicated Outdoor Air High Setpoint Temperature for Design {C}
+    autosize,                !- Dedicated Outdoor Air High Setpoint Temperature for Design {C}
+    ,                        !- Zone Load Sizing Method
+    ,                        !- Zone Latent Cooling Design Supply Air Humidity Ratio Input Method
+    ,                        !- Zone Dehumidification Design Supply Air Humidity Ratio {kgWater/kgDryAir}
+    ,                        !- Zone Cooling Design Supply Air Humidity Ratio Difference {kgWater/kgDryAir}
+    ,                        !- Zone Latent Heating Design Supply Air Humidity Ratio Input Method
+    ,                        !- Zone Humidification Design Supply Air Humidity Ratio {kgWater/kgDryAir}
+    ;                        !- Zone Humidification Design Supply Air Humidity Ratio Difference {kgWater/kgDryAir}
 
   Sizing:Zone,
     Zone3 Bulk Storage,      !- Zone or ZoneList Name
@@ -4801,7 +4646,14 @@
     No,                      !- Account for Dedicated Outdoor Air System
     NeutralSupplyAir,        !- Dedicated Outdoor Air System Control Strategy
     autosize,                !- Dedicated Outdoor Air Low Setpoint Temperature for Design {C}
-    autosize;                !- Dedicated Outdoor Air High Setpoint Temperature for Design {C}
+    autosize,                !- Dedicated Outdoor Air High Setpoint Temperature for Design {C}
+    ,                        !- Zone Load Sizing Method
+    ,                        !- Zone Latent Cooling Design Supply Air Humidity Ratio Input Method
+    ,                        !- Zone Dehumidification Design Supply Air Humidity Ratio {kgWater/kgDryAir}
+    ,                        !- Zone Cooling Design Supply Air Humidity Ratio Difference {kgWater/kgDryAir}
+    ,                        !- Zone Latent Heating Design Supply Air Humidity Ratio Input Method
+    ,                        !- Zone Humidification Design Supply Air Humidity Ratio {kgWater/kgDryAir}
+    ;                        !- Zone Humidification Design Supply Air Humidity Ratio Difference {kgWater/kgDryAir}
 
 !-   ===========  ALL OBJECTS IN CLASS: SIZING:SYSTEM ===========
 
@@ -5145,6 +4997,7 @@
     No,                      !- Apply Part Load Fraction to Speeds Greater than 1
     No,                      !- Apply Latent Degradation to Speeds Greater than 1
     ,                        !- Crankcase Heater Capacity {W}
+    ,                        !- Crankcase Heater Capacity Function of Temperature Curve Name
     10,                      !- Maximum Outdoor Dry-Bulb Temperature for Crankcase Heater Operation {C}
     ,                        !- Basin Heater Capacity {W/K}
     2,                       !- Basin Heater Setpoint Temperature {C}
@@ -5155,8 +5008,8 @@
     0.79866,                 !- Speed 1 Gross Rated Sensible Heat Ratio
     4.11713235489972,        !- Speed 1 Gross Rated Cooling COP {W/W}
     0.653026666666667,       !- Speed 1 Rated Air Flow Rate {m3/s}
-    0,                       !- Speed 1 Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
-    934.4,                   !- 2023 Rated Evaporator Fan Power Per Volume Flow {W/(m3/s)}
+    0,                       !- 2017 Speed 1 Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
+    934.4,                   !- 2023 Speed 1 Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
     PSZ-AC_Unitary_PackagecoolCapFT,  !- Speed 1 Total Cooling Capacity Function of Temperature Curve Name
     PSZ-AC_Unitary_PackagecoolFFF,  !- Speed 1 Total Cooling Capacity Function of Flow Fraction Curve Name
     PSZ-AC_Unitary_PackagecoolEIRFT,  !- Speed 1 Energy Input Ratio Function of Temperature Curve Name
@@ -5175,8 +5028,8 @@
     0.79866,                 !- Speed 2 Gross Rated Sensible Heat Ratio
     4.11713235489972,        !- Speed 2 Gross Rated Cooling COP {W/W}
     0.97954,                 !- Speed 2 Rated Air Flow Rate {m3/s}
-    0,                       !- Speed 2 Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
-    934.4,                   !- 2023 Rated Evaporator Fan Power Per Volume Flow {W/(m3/s)}
+    0,                       !- 2017 Speed 2 Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
+    934.4,                   !- 2023 Speed 2 Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
     PSZ-AC_Unitary_PackagecoolCapFT,  !- Speed 2 Total Cooling Capacity Function of Temperature Curve Name
     PSZ-AC_Unitary_PackagecoolFFF,  !- Speed 2 Total Cooling Capacity Function of Flow Fraction Curve Name
     PSZ-AC_Unitary_PackagecoolEIRFT,  !- Speed 2 Energy Input Ratio Function of Temperature Curve Name
@@ -5205,6 +5058,7 @@
     No,                      !- Apply Part Load Fraction to Speeds Greater than 1
     No,                      !- Apply Latent Degradation to Speeds Greater than 1
     ,                        !- Crankcase Heater Capacity {W}
+    ,                        !- Crankcase Heater Capacity Function of Temperature Curve Name
     10,                      !- Maximum Outdoor Dry-Bulb Temperature for Crankcase Heater Operation {C}
     ,                        !- Basin Heater Capacity {W/K}
     2,                       !- Basin Heater Setpoint Temperature {C}
@@ -5215,8 +5069,8 @@
     0.74570,                 !- Speed 1 Gross Rated Sensible Heat Ratio
     3.7988306741603,         !- Speed 1 Gross Rated Cooling COP {W/W}
     1.33200666666667,        !- Speed 1 Rated Air Flow Rate {m3/s}
-    0,                       !- Speed 1 Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
-    934.4,                   !- 2023 Rated Evaporator Fan Power Per Volume Flow {W/(m3/s)}
+    0,                       !- 2017 Speed 1 Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
+    934.4,                   !- 2023 Speed 1 Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
     PSZ-AC_Unitary_PackagecoolCapFT,  !- Speed 1 Total Cooling Capacity Function of Temperature Curve Name
     PSZ-AC_Unitary_PackagecoolFFF,  !- Speed 1 Total Cooling Capacity Function of Flow Fraction Curve Name
     PSZ-AC_Unitary_PackagecoolEIRFT,  !- Speed 1 Energy Input Ratio Function of Temperature Curve Name
@@ -5235,8 +5089,8 @@
     0.74570,                 !- Speed 2 Gross Rated Sensible Heat Ratio
     3.7988306741603,         !- Speed 2 Gross Rated Cooling COP {W/W}
     1.99801,                 !- Speed 2 Rated Air Flow Rate {m3/s}
-    0,                       !- Speed 2 Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
-    934.4,                   !- 2023 Rated Evaporator Fan Power Per Volume Flow {W/(m3/s)}
+    0,                       !- 2017 Speed 2 Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
+    934.4,                   !- 2023 Speed 2 Rated Evaporator Fan Power Per Volume Flow Rate {W/(m3/s)}
     PSZ-AC_Unitary_PackagecoolCapFT,  !- Speed 2 Total Cooling Capacity Function of Temperature Curve Name
     PSZ-AC_Unitary_PackagecoolFFF,  !- Speed 2 Total Cooling Capacity Function of Flow Fraction Curve Name
     PSZ-AC_Unitary_PackagecoolEIRFT,  !- Speed 2 Energy Input Ratio Function of Temperature Curve Name
@@ -5263,9 +5117,9 @@
     PSZ-Office Supply Fan Outlet,  !- Air Inlet Node Name
     PSZ-Office Heating Coil Outlet,  !- Air Outlet Node Name
     ,                        !- Temperature Setpoint Node Name
-    0.0,                     !- Parasitic Electric Load {W}
+    0.0,                     !- On Cycle Parasitic Electric Load {W}
     PSZ-Office Heating Coil PLF-FPLR,  !- Part Load Fraction Correlation Curve Name
-    0.0;                     !- Parasitic Fuel Load {W}
+    0.0;                     !- Off Cycle Parasitic Fuel Load {W}
 
   Coil:Heating:Fuel,
     PSZ-Fine Storage Heating Coil,  !- Name
@@ -5276,9 +5130,9 @@
     PSZ-Fine Storage Supply Fan Outlet,  !- Air Inlet Node Name
     PSZ-Fine Storage Heating Coil Outlet,  !- Air Outlet Node Name
     ,                        !- Temperature Setpoint Node Name
-    0.0,                     !- Parasitic Electric Load {W}
+    0.0,                     !- On Cycle Parasitic Electric Load {W}
     PSZ-Fine Storage Heating Coil PLF-FPLR,  !- Part Load Fraction Correlation Curve Name
-    0.0;                     !- Parasitic Fuel Load {W}
+    0.0;                     !- Off Cycle Parasitic Fuel Load {W}
 
   Coil:Heating:Fuel,
     Zone3UnitHeaterHeatingCoil,  !- Name
@@ -5289,9 +5143,9 @@
     Zone3UnitHeaterFanOutletNode,  !- Air Inlet Node Name
     Zone3UnitHeaterAirOutletNode,  !- Air Outlet Node Name
     ,                        !- Temperature Setpoint Node Name
-    0.0,                     !- Parasitic Electric Load {W}
+    0.0,                     !- On Cycle Parasitic Electric Load {W}
     ,                        !- Part Load Fraction Correlation Curve Name
-    0;                       !- Parasitic Fuel Load {W}
+    0;                       !- Off Cycle Parasitic Fuel Load {W}
 
 !-   ===========  ALL OBJECTS IN CLASS: AIRLOOPHVAC:UNITARYSYSTEM ===========
 
@@ -5334,13 +5188,10 @@
     ,                        !- No Load Fraction of Autosized Heating Supply Air Flow Rate
     ,                        !- No Load Supply Air Flow Rate Per Unit of Capacity During Cooling Operation {m3/s-W}
     ,                        !- No Load Supply Air Flow Rate Per Unit of Capacity During Heating Operation {m3/s-W}
+    No,                      !- No Load Supply Air Flow Rate Control Set To Low Speed
     AUTOSIZE,                !- Maximum Supply Air Temperature {C}
     ,                        !- Maximum Outdoor Dry-Bulb Temperature for Supplemental Heater Operation {C}
     ,                        !- Outdoor Dry-Bulb Temperature Sensor Node Name
-    ,                        !- Maximum Cycling Rate {cycles/hr}
-    ,                        !- Heat Pump Time Constant {s}
-    ,                        !- Fraction of On-Cycle Power Use
-    ,                        !- Heat Pump Fan Delay Time {s}
     ,                        !- Ancillary On-Cycle Electric Power {W}
     ,                        !- Ancillary Off-Cycle Electric Power {W}
     ,                        !- Design Heat Recovery Water Flow Rate {m3/s}
@@ -5389,13 +5240,10 @@
     ,                        !- No Load Fraction of Autosized Heating Supply Air Flow Rate
     ,                        !- No Load Supply Air Flow Rate Per Unit of Capacity During Cooling Operation {m3/s-W}
     ,                        !- No Load Supply Air Flow Rate Per Unit of Capacity During Heating Operation {m3/s-W}
+    No,                      !- No Load Supply Air Flow Rate Control Set To Low Speed
     AUTOSIZE,                !- Maximum Supply Air Temperature {C}
     ,                        !- Maximum Outdoor Dry-Bulb Temperature for Supplemental Heater Operation {C}
     ,                        !- Outdoor Dry-Bulb Temperature Sensor Node Name
-    ,                        !- Maximum Cycling Rate {cycles/hr}
-    ,                        !- Heat Pump Time Constant {s}
-    ,                        !- Fraction of On-Cycle Power Use
-    ,                        !- Heat Pump Fan Delay Time {s}
     ,                        !- Ancillary On-Cycle Electric Power {W}
     ,                        !- Ancillary Off-Cycle Electric Power {W}
     ,                        !- Design Heat Recovery Water Flow Rate {m3/s}

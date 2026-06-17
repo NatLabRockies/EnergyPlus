@@ -1,0 +1,8 @@
+include(GetPrerequisites)
+get_prerequisites(${TARGET_PATH} PR 0 0 "" "")
+foreach(P IN LISTS PR)
+    string(FIND ${P} "energyplus" EPFOUND)
+    if (NOT EPFOUND EQUAL -1)
+        execute_process(COMMAND install_name_tool -change ${P} "${DLL_PATH}" ${TARGET_PATH})
+    endif()
+endforeach()

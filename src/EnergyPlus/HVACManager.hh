@@ -1,7 +1,7 @@
-// EnergyPlus, Copyright (c) 1996-2023, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
-// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other
+// National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
 // contributors. All rights reserved.
 //
 // NOTICE: This Software was developed under funding from the U.S. Department of Energy and the
@@ -54,6 +54,7 @@
 // EnergyPlus Headers
 #include <EnergyPlus/Data/BaseData.hh>
 #include <EnergyPlus/EnergyPlus.hh>
+#include <EnergyPlus/ZoneTempPredictorCorrector.hh>
 
 namespace EnergyPlus {
 
@@ -65,6 +66,18 @@ namespace HVACManager {
     // SUBROUTINE SPECIFICATIONS FOR MODULE PrimaryPlantLoops
     // and zone equipment simulations
 
+    enum class ConvErrorCallType
+    {
+        Invalid = -1,
+        MassFlow,
+        HumidityRatio,
+        Temperature,
+        Energy,
+        CO2,
+        Generic,
+        Num
+    };
+
     // Functions
     void ManageHVAC(EnergyPlusData &state);
 
@@ -75,9 +88,9 @@ namespace HVACManager {
                               bool &SimZoneEquipment,    // True when zone equipment components need to be (re)simulated
                               bool &SimNonZoneEquipment, // True when non-zone equipment components need to be (re)simulated
                               bool &SimPlantLoops,       // True when the main plant loops need to be (re)simulated
-                              bool &SimElecCircuits,     // True when electic circuits need to be (re)simulated
+                              bool &SimElecCircuits,     // True when electric circuits need to be (re)simulated
                               bool &FirstHVACIteration,  // True when solution technique on first iteration
-                              bool const LockPlantFlows);
+                              bool LockPlantFlows);
 
     void ResetTerminalUnitFlowLimits(EnergyPlusData &state);
 
@@ -85,7 +98,7 @@ namespace HVACManager {
 
     void ResolveLockoutFlags(EnergyPlusData &state, bool &SimAir); // TRUE means air loops must be (re)simulated
 
-    void ResetHVACControl(EnergyPlusData &state);
+    void ResetHVACControl(EnergyPlusData const &state);
 
     void ResetNodeData(EnergyPlusData &state);
 
@@ -93,11 +106,32 @@ namespace HVACManager {
 
     void ReportAirHeatBalance(EnergyPlusData &state);
 
+    void reportAirHeatBal1(EnergyPlusData &state,
+                           DataHeatBalance::AirReportVars &szAirRpt,
+                           DataZoneEquipment::EquipConfiguration const &szEquipConfig,
+                           int const zoneNum,
+                           int const spaceNum = 0);
+
+    void reportAirHeatBal2(EnergyPlusData &state,
+                           DataHeatBalance::AirReportVars &szAirRpt,
+                           DataZoneEquipment::EquipConfiguration const &szEquipConfig,
+                           ZoneTempPredictorCorrector::ZoneSpaceHeatBalanceData const &szHeatBal,
+                           int const zoneNum,
+                           int const spaceNum = 0);
+
     void SetHeatToReturnAirFlag(EnergyPlusData &state);
 
     void UpdateZoneInletConvergenceLog(EnergyPlusData &state);
 
     void CheckAirLoopFlowBalance(EnergyPlusData &state);
+
+    void ConvergenceErrors(EnergyPlusData &state,
+                           std::array<bool, 3> &HVACNotConverged,
+                           std::array<Real64, 10> &DemandToSupply,
+                           std::array<Real64, 10> &SupplyDeck1ToDemand,
+                           std::array<Real64, 10> &SupplyDeck2ToDemand,
+                           int AirSysNum,
+                           ConvErrorCallType index);
 
 } // namespace HVACManager
 
@@ -108,7 +142,6 @@ struct HVACManagerData : BaseGlobalStruct
     int RepIterAir = 0;
     bool SimHVACIterSetup = false;
     bool TriggerGetAFN = true;
-    bool ReportAirHeatBalanceFirstTimeFlag = true;
     bool MyOneTimeFlag = true;
     bool PrintedWarmup = false;
     bool MyEnvrnFlag = true;
@@ -120,28 +153,18 @@ struct HVACManagerData : BaseGlobalStruct
     int ErrCount = 0; // Number of times that the maximum iterations was exceeded
     int MaxErrCount = 0;
     std::string ErrEnvironmentName;
-    Array1D<Real64> MixSenLoad; // Mixing sensible loss or gain
-    Array1D<Real64> MixLatLoad; // Mixing latent loss or gain
+
+    void init_constant_state([[maybe_unused]] EnergyPlusData &state) override
+    {
+    }
+
+    void init_state([[maybe_unused]] EnergyPlusData &state) override
+    {
+    }
 
     void clear_state() override
     {
-        HVACManageIteration = 0;
-        RepIterAir = 0;
-        SimHVACIterSetup = false;
-        TriggerGetAFN = true;
-        ReportAirHeatBalanceFirstTimeFlag = true;
-        MyOneTimeFlag = true;
-        PrintedWarmup = false;
-        MyEnvrnFlag = true;
-        DebugNamesReported = false;
-        MySetPointInit = true;
-        MyEnvrnFlag2 = true;
-        FlowMaxAvailAlreadyReset = false;
-        FlowResolutionNeeded = false;
-        this->ErrCount = 0;
-        this->MaxErrCount = 0;
-        this->MixSenLoad.clear();
-        this->MixLatLoad.clear();
+        new (this) HVACManagerData();
     }
 };
 

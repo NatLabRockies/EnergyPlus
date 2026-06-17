@@ -1,6 +1,6 @@
 \section{Basis for the Zone and Air System Integration}\label{basis-for-the-zone-and-air-system-integration}
 
-The basis for the zone and air system integration is to formulate energy and moisture balances for the zone air and solve the resulting ordinary differential equations using a predictor-corrector approach. The formulation of the solution scheme starts with a heat balance on the zone air.
+The basis for the zone and air system integration is to formulate energy and moisture balances for the zone air and solve the resulting ordinary differential equations using a predictor-corrector approach. The formulation of the solution scheme starts with a heat balance on the zone air. If space heat balance is active, the same method applies to the space air.
 
 \begin{equation}
 {C_z}\frac{{d{T_z}}}{{dt}} = \sum\limits_{i = 1}^{{N_{sl}}} {{{\dot Q}_i}}  + \sum\limits_{i = 1}^{{N_{surfaces}}} {{h_i}} {A_i}\left( {{T_{si}} - {T_z}} \right) + \sum\limits_{i = 1}^{{N_{zones}}} {{{\dot m}_i}} {C_p}\left( {{T_{zi}} - {T_z}} \right)\, + {\dot m_{\inf }}{C_p}\left( {{T_\infty } - {T_z}} \right) + {\dot Q_{sys}}
@@ -21,7 +21,9 @@ where:
 
 ${C_z}\frac{dT_z}{dt} =$ energy stored in zone air
 
-C\(_{z}\) = $\rho$\(_{air}\)C\(_{p}\)C\(_{T}\)
+C\(_{z}\) = $V_{z}$$\rho$\(_{air}\)C\(_{p}\)C\(_{T}\)
+
+\(V_{z}\) = zone air volume
 
 $\rho$\(_{air}\) = zone air density
 

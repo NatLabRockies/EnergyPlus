@@ -1,7 +1,7 @@
-// EnergyPlus, Copyright (c) 1996-2023, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
-// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other
+// National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
 // contributors. All rights reserved.
 //
 // NOTICE: This Software was developed under funding from the U.S. Department of Energy and the
@@ -50,9 +50,9 @@
 
 // EnergyPlus Headers
 #include <EnergyPlus/Data/BaseData.hh>
+#include <EnergyPlus/DataHVACGlobals.hh>
 #include <EnergyPlus/EnergyPlus.hh>
-
-#include <ObjexxFCL/Optional.hh>
+#include <EnergyPlus/ScheduleManager.hh>
 
 namespace EnergyPlus {
 
@@ -64,13 +64,13 @@ namespace ExhaustAirSystemManager {
     struct ExhaustAir
     {
         // Members
-        std::string Name = "";
+        std::string Name;
 
-        int AvailScheduleNum = DataGlobalConstants::ScheduleAlwaysOn;
-        std::string ZoneMixerName = "";
+        Sched::Schedule *availSched = nullptr;
+        std::string ZoneMixerName;
         int ZoneMixerIndex = 0;
-        int CentralFanTypeNum = 0;
-        std::string CentralFanName = "";
+        HVAC::FanType centralFanType = HVAC::FanType::Invalid;
+        std::string CentralFanName;
         int CentralFanIndex = 0;
 
         bool SizingFlag = true;
@@ -96,11 +96,11 @@ namespace ExhaustAirSystemManager {
             Num
         };
 
-        std::string Name = "";
+        std::string Name;
 
-        int AvailScheduleNum = DataGlobalConstants::ScheduleAlwaysOn;
+        Sched::Schedule *availSched = nullptr;
 
-        std::string ZoneName = "";
+        std::string ZoneName;
         int ZoneNum = 0;
         int ControlledZoneNum = 0;
 
@@ -109,12 +109,12 @@ namespace ExhaustAirSystemManager {
 
         Real64 DesignExhaustFlowRate = 0.0;
         FlowControlType FlowControlOption = FlowControlType::Scheduled;
-        int ExhaustFlowFractionScheduleNum = 0;
-        std::string SupplyNodeOrNodelistName = "";
+        Sched::Schedule *exhaustFlowFractionSched = nullptr;
+        std::string SupplyNodeOrNodelistName;
         int SupplyNodeOrNodelistNum = 0; // may not need this one
-        int MinZoneTempLimitScheduleNum = 0;
-        int MinExhFlowFracScheduleNum = 0;
-        int BalancedExhFracScheduleNum = 0;
+        Sched::Schedule *minZoneTempLimitSched = nullptr;
+        Sched::Schedule *minExhFlowFracSched = nullptr;
+        Sched::Schedule *balancedExhFracSched = nullptr;
         Real64 BalancedFlow = 0.0;
         Real64 UnbalancedFlow = 0.0;
 
@@ -125,17 +125,13 @@ namespace ExhaustAirSystemManager {
 
     void GetExhaustAirSystemInput(EnergyPlusData &state);
 
-    void InitExhaustAirSystem(int &ExhaustAirSystemNum); // maybe unused
-
     void CalcExhaustAirSystem(EnergyPlusData &state, int const ExhaustAirSystemNum, bool FirstHVACIteration);
-
-    void ReportExhaustAirSystem(int &ExhaustAirSystemNum); // may condiser reactivate this for the exhaust system
 
     void GetZoneExhaustControlInput(EnergyPlusData &state);
 
     void SimZoneHVACExhaustControls(EnergyPlusData &state);
 
-    void CalcZoneHVACExhaustControl(EnergyPlusData &state, int const ZoneHVACExhaustControlNum, ObjexxFCL::Optional<bool const> FlowRatio);
+    void CalcZoneHVACExhaustControl(EnergyPlusData &state, int const ZoneHVACExhaustControlNum, Real64 const FlowRatio = -1.0);
 
     void SizeExhaustSystem(EnergyPlusData &state, int const exhSysNum);
 
@@ -150,12 +146,21 @@ namespace ExhaustAirSystemManager {
 
 struct ExhaustAirSystemMgr : BaseGlobalStruct
 {
-
     bool GetInputFlag = true;
+    std::map<int, int> mixerIndexMap;
+    bool mappingDone = false;
+
+    void init_constant_state([[maybe_unused]] EnergyPlusData &state) override
+    {
+    }
+
+    void init_state([[maybe_unused]] EnergyPlusData &state) override
+    {
+    }
 
     void clear_state() override
     {
-        this->GetInputFlag = true;
+        new (this) ExhaustAirSystemMgr();
     }
 };
 
@@ -164,9 +169,17 @@ struct ExhaustControlSystemMgr : BaseGlobalStruct
 
     bool GetInputFlag = true;
 
+    void init_constant_state([[maybe_unused]] EnergyPlusData &state) override
+    {
+    }
+
+    void init_state([[maybe_unused]] EnergyPlusData &state) override
+    {
+    }
+
     void clear_state() override
     {
-        this->GetInputFlag = true;
+        new (this) ExhaustControlSystemMgr();
     }
 };
 

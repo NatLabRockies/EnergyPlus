@@ -1,0 +1,252 @@
+name: Windows Releases
+
+on:
+  push:
+    tags:
+      - '*'
+  workflow_dispatch:
+
+env:
+  CMAKE_Fortran_COMPILER: "/c/msys64/mingw64/bin/x86_64-w64-mingw32-gfortran.exe"
+  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  BUILD_TYPE: Release
+
+jobs:
+  build_installer_artifact:
+    name: Build Packages for ${{ matrix.pretty }}
+    runs-on: ${{ matrix.os }}
+    # to move to windows-2022, just make sure to set the Visual Studio generator build to "17 2022"
+    continue-on-error: ${{ matrix.allow_failure }}
+    strategy:
+      # fail-fast: Default is true, switch to false to allow one platform to fail and still run others
+      fail-fast: false
+
+      # ** NOTE ** If build names/archs/platforms are changed, make sure to update the release job below
+      matrix:
+        name: [x64, x64_hardened, arm64]  # removed x86 because it won't build packages now
+        include:
+        - name: x64
+          os: windows-2022
+          arch: x86_64
+          python-arch: x64
+          vs-generator: x64
+          package-arch: x86_64
+          enable_hardened_runtime: OFF
+          pretty: "Windows x64"
+          python-version: 3.12.2
+          allow_failure: false
+        # - name: x86
+        #   arch: x86
+        #   os: windows-2022
+        #   allow_failure: false
+        #   vs-generator: Win32
+        #   package-arch: i386
+        #   enable_hardened_runtime: OFF
+        - name: x64_hardened
+          os: windows-2022
+          arch: x86_64
+          python-arch: x64
+          vs-generator: x64
+          package-arch: x86_64-HardenedRuntime
+          enable_hardened_runtime: ON
+          pretty: "Windows x64 Hardened"
+          python-version: 3.12.2
+          allow_failure: false
+
+        - name: arm64
+          os: windows-11-arm
+          arch: arm64
+          python-arch: arm64
+          vs-generator: ARM64
+          package-arch: arm64
+          enable_hardened_runtime: OFF
+          pretty: "Windows arm64"
+          python-version: 3.12.10
+          allow_failure: true
+
+    permissions:
+      # Needed permission to upload the release asset
+      contents: write
+
+    steps:
+    - uses: actions/checkout@v6
+
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v6
+      id: setup-python
+      with:
+        python-version: ${{ matrix.python-version }}
+        architecture: ${{ matrix.python-arch }}
+
+    - name: Setup QtIFW 4.x
+      uses: jmarrec/setup-qtifw@v1
+      with:
+        qtifw-version: '4.8.1'
+
+    - name: Install Python dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install aqtinstall
+
+    - name: Install System dependencies and LaTeX
+      shell: bash
+      run: |
+        set -x
+        echo "Downloading MiKTeX CLI installer"
+        # We download from a specific mirror already # TODO: Should store this setup package somewhere ourselves
+        curl -L -O https://ctan.math.illinois.edu/systems/win32/miktex/setup/windows-x64/miktexsetup-5.5.0%2B1763023-x64.zip
+        unzip miktexsetup-5.5.0%2B1763023-x64.zip
+
+        echo "Setting up the local package directory via download"
+        ./miktexsetup_standalone --verbose \
+            --local-package-repository=C:/ProgramData/MiKTeX-Repo \
+            --remote-package-repository="https://ctan.math.illinois.edu/systems/win32/miktex/tm/packages/" \
+            --package-set=essential \
+            download
+
+        echo "Installing from the local package directory previously set up"
+        ./miktexsetup_standalone --verbose \
+            --local-package-repository=C:/ProgramData/MiKTeX-Repo \
+            --package-set=essential \
+            --shared \
+            install
+
+        echo "Adding MiKTeX bin folder to PATH and to GITHUB_PATH"
+        echo "C:/Program Files/MiKTeX/miktex/bin/x64/" >> $GITHUB_PATH
+        export PATH="/c/Program Files/MiKTeX/miktex/bin/x64/:$PATH"
+
+        echo "Configuring MiKTeX to install missing packages on the fly"
+        initexmf --admin --verbose --set-config-value='[MPM]AutoInstall=1'
+
+        echo "Configure default mirror for packages"
+        mpm --admin --set-repository="https://ctan.math.illinois.edu/systems/win32/miktex/tm/packages/"
+        # Avoid annoying warning: "xelatex: major issue: So far, you have not checked for updates as a MiKTeX user."
+        mpm --find-updates
+        mpm --admin --find-updates
+
+    - name: Check cmake
+      run: |
+        cmake --version
+
+    # This will install all required packages and does that in a single thread. So later in cmake we can safely run in parallel
+    - name: Install required packages by building the Test document
+      shell: bash
+      working-directory: ./doc/
+      run: |
+        # It shaves about 1min40s to preinstall from the .lst so do it first
+        mpm --verbose --admin --require=@energyplus_packages_windows.lst
+        cd test/
+        xelatex dependencies.tex
+
+    - name: Create Build Directory
+      run: cmake -E make_directory ./build/
+
+    - name: Configure CMake
+      working-directory: ./build
+      shell: bash
+      run: |
+        set -x
+        Python_EXECUTABLE="${{ steps.setup-python.outputs.python-path }}"
+        Python_EXECUTABLE="${Python_EXECUTABLE//\\//}"
+        cmake -G "Visual Studio 17 2022" -A ${{ matrix.vs-generator }} \
+              -DLINK_WITH_PYTHON:BOOL=ON -DPYTHON_CLI:BOOL=ON \
+              -DPython_REQUIRED_VERSION:STRING=${{ steps.setup-python.outputs.python-version }} \
+              -DPython_EXECUTABLE:FILEPATH="$Python_EXECUTABLE" \
+              -DPython_ROOT_DIR:PATH="$(dirname "$Python_EXECUTABLE")" \
+              -DBUILD_FORTRAN:BOOL=ON -DBUILD_PACKAGE:BOOL=ON \
+              -DENABLE_HARDENED_RUNTIME:BOOL=${{ matrix.enable_hardened_runtime }} \
+              -DDOCUMENTATION_BUILD:STRING="BuildWithAll" -DTEX_INTERACTION:STRING="batchmode" \
+              ../
+
+    - name: Build Package
+      working-directory: ./build
+      shell: bash
+      run: cmake --build . --target package -j 4 --config $BUILD_TYPE
+
+    - name: Upload Zip as artifact for testing
+      uses: actions/upload-artifact@v7
+      with:
+        name: energyplus-${{ matrix.package-arch }}
+        path: build/EnergyPlus-*-Windows-${{ matrix.package-arch }}.zip
+        if-no-files-found: error
+        retention-days: 7
+        overwrite: false
+
+    - name: Upload Zip to release
+      uses: svenstaro/upload-release-action@v2
+      with:
+        repo_token: ${{ secrets.GITHUB_TOKEN }}
+        file: build/EnergyPlus-*-Windows-${{ matrix.package-arch }}.zip
+        tag: ${{ github.ref }}
+        overwrite: true
+        file_glob: true
+
+    - name: Upload IFW to release
+      uses: svenstaro/upload-release-action@v2
+      with:
+        repo_token: ${{ secrets.GITHUB_TOKEN }}
+        file: build/EnergyPlus-*-Windows-${{ matrix.package-arch }}.exe
+        tag: ${{ github.ref }}
+        overwrite: true
+        file_glob: true
+
+  test_package:
+    name: Test Built Package for ${{ matrix.pretty }}
+    needs: build_installer_artifact
+    runs-on: ${{ matrix.os }}
+    continue-on-error: ${{ matrix.allow_failure }}
+    strategy:
+      # fail-fast: Default is true, switch to false to allow one platform to fail and still run others
+      fail-fast: false
+
+      # ** NOTE ** If build names/archs/platforms are changed, make sure to update the release job below
+      matrix:
+        name: [x64, arm64]
+        include:
+        - name: x64
+          os: windows-2022
+          test_config: win64
+          package-arch: x86_64
+          pretty: "Windows x64"
+          python-version: 3.12.2
+          python-arch: x64
+          allow_failure: false
+
+        - name: arm64
+          os: windows-11-arm
+          test_config: win-arm64
+          package-arch: arm64
+          pretty: "Windows arm64"
+          python-version: 3.12.10
+          python-arch: arm64
+          allow_failure: true
+
+    steps:
+      - uses: actions/checkout@v6  # Still need E+ checked out to get testing scripts
+        with:
+          path: checkout
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v6
+        id: setup-python
+        with:
+          python-version: ${{ matrix.python-version }}
+          architecture: ${{ matrix.python-arch }}
+
+      - name: Gather Test Package from Artifacts
+        uses: actions/download-artifact@v8
+        with:
+          name: energyplus-${{ matrix.package-arch }}
+          path: package
+
+      - name: Check Contents
+        shell: bash
+        run: ls
+
+      - name: Check Package contents
+        shell: bash
+        working-directory: package
+        run: ls
+
+      - name: Run Package Tests
+        run: python checkout/scripts/package_tests/runner.py --verbose --msvc 2022 ${{ matrix.test_config }} package/

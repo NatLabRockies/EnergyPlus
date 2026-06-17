@@ -1,0 +1,651 @@
+! PlantLoopHeatPump_EIR_AirSource_Parallel.idf
+!
+! Basic file description:
+! The EIR formulated air-to-water heat pump is demonstrated using a simple collection of plant loops.  Building loads
+!  are represented using Plant Load Profile objects. The main difference with PlantLoopHeatPump_EIR_AirSource is that
+!  this file uses two air-to-water heat pumps in parallel.
+!
+! Run:      1 design day.
+! Building: None.
+! System:   None.
+! Plant:    PLANT LOAD PROFILE with District Heating and Cooling as necessary.
+
+  Version,26.2;
+
+  Building,
+    Plant Load Profile Example,  !- Name
+    0.0,                     !- North Axis {deg}
+    Suburbs,                 !- Terrain
+    0.04,                    !- Loads Convergence Tolerance Value {W}
+    0.04,                    !- Temperature Convergence Tolerance Value {deltaC}
+    FullInteriorAndExterior, !- Solar Distribution
+    25,                      !- Maximum Number of Warmup Days
+    6;                       !- Minimum Number of Warmup Days
+
+  Timestep,1;
+
+  GlobalGeometryRules,
+    UpperLeftCorner,         !- Starting Vertex Position
+    CounterClockWise,        !- Vertex Entry Direction
+    Relative;                !- Coordinate System
+
+  Site:Location,
+    Chicago,                 !- Name
+    42.00,                   !- Latitude {deg}
+    -87.88,                  !- Longitude {deg}
+    -6.00,                   !- Time Zone {hr}
+    190.00;                  !- Elevation {m}
+
+  SizingPeriod:DesignDay,
+    Chicago Summer 1%,       !- Name
+    7,                       !- Month
+    21,                      !- Day of Month
+    SummerDesignDay,         !- Day Type
+    31.5,                    !- Maximum Dry-Bulb Temperature {C}
+    10.7,                    !- Daily Dry-Bulb Temperature Range {deltaC}
+    ,                        !- Dry-Bulb Temperature Range Modifier Type
+    ,                        !- Dry-Bulb Temperature Range Modifier Day Schedule Name
+    Wetbulb,                 !- Humidity Condition Type
+    23,                      !- Wetbulb or DewPoint at Maximum Dry-Bulb {C}
+    ,                        !- Humidity Condition Day Schedule Name
+    ,                        !- Humidity Ratio at Maximum Dry-Bulb {kgWater/kgDryAir}
+    ,                        !- Enthalpy at Maximum Dry-Bulb {J/kg}
+    ,                        !- Daily Wet-Bulb Temperature Range {deltaC}
+    99063.,                  !- Barometric Pressure {Pa}
+    5.3,                     !- Wind Speed {m/s}
+    230,                     !- Wind Direction {deg}
+    ,                        !- Rain Indicator
+    ,                        !- Snow Indicator
+    ,                        !- Daylight Saving Time Indicator
+    ,                        !- Solar Model Indicator
+    ,                        !- Beam Solar Day Schedule Name
+    ,                        !- Diffuse Solar Day Schedule Name
+    ,                        !- ASHRAE Clear Sky Optical Depth for Beam Irradiance (taub) {dimensionless}
+    ,                        !- ASHRAE Clear Sky Optical Depth for Diffuse Irradiance (taud) {dimensionless}
+    1.0;                     !- Sky Clearness
+
+  SizingPeriod:DesignDay,
+    Chicago Ohare Intl Ap Ann Htg 99.6% Condns DB,  !- Name
+    1,                       !- Month
+    21,                      !- Day of Month
+    WinterDesignDay,         !- Day Type
+    -20,                     !- Maximum Dry-Bulb Temperature {C}
+    0.0,                     !- Daily Dry-Bulb Temperature Range {deltaC}
+    DefaultMultipliers,      !- Dry-Bulb Temperature Range Modifier Type
+    ,                        !- Dry-Bulb Temperature Range Modifier Day Schedule Name
+    Wetbulb,                 !- Humidity Condition Type
+    -20,                     !- Wetbulb or DewPoint at Maximum Dry-Bulb {C}
+    ,                        !- Humidity Condition Day Schedule Name
+    ,                        !- Humidity Ratio at Maximum Dry-Bulb {kgWater/kgDryAir}
+    ,                        !- Enthalpy at Maximum Dry-Bulb {J/kg}
+    ,                        !- Daily Wet-Bulb Temperature Range {deltaC}
+    98934.,                  !- Barometric Pressure {Pa}
+    4.9,                     !- Wind Speed {m/s}
+    270,                     !- Wind Direction {deg}
+    ,                        !- Rain Indicator
+    ,                        !- Snow Indicator
+    ,                        !- Daylight Saving Time Indicator
+    ,                        !- Solar Model Indicator
+    ,                        !- Beam Solar Day Schedule Name
+    ,                        !- Diffuse Solar Day Schedule Name
+    ,                        !- ASHRAE Clear Sky Optical Depth for Beam Irradiance (taub) {dimensionless}
+    ,                        !- ASHRAE Clear Sky Optical Depth for Diffuse Irradiance (taud) {dimensionless}
+    1.0;                     !- Sky Clearness
+
+  SimulationControl,
+    No,                      !- Do Zone Sizing Calculation
+    No,                      !- Do System Sizing Calculation
+    No,                      !- Do Plant Sizing Calculation
+    Yes,                     !- Run Simulation for Sizing Periods
+    No,                      !- Run Simulation for Weather File Run Periods
+    No,                      !- Do HVAC Sizing Simulation for Sizing Periods
+    1;                       !- Maximum Number of HVAC Sizing Simulation Passes
+
+  ScheduleTypeLimits,
+    Any Number;              !- Name
+
+  ScheduleTypeLimits,
+    On/Off,                  !- Name
+    0,                       !- Lower Limit Value
+    1,                       !- Upper Limit Value
+    Discrete;                !- Numeric Type
+
+  Schedule:Constant,Heating Coil Load Loop Setpoint Temperature Schedule,Any Number,65.0;
+
+  Schedule:Constant,Cooling Coil Load Loop Setpoint Temperature Schedule,Any Number,20;
+
+  Schedule:Constant,AlwaysOnSchedule,On/Off,1;
+
+  ! Simulate a winter time, overnight hours load, but the pump is always running in that season
+
+  Schedule:Compact,
+    Heating Coil Load Profile Load Schedule,  !- Name
+    Any Number,              !- Schedule Type Limits Name
+    THROUGH: 03/31,          !- Field 1
+    FOR: AllDays,            !- Field 2
+    UNTIL:  4:00,62000,      !- Field 3
+    UNTIL:  8:00,25000,      !- Field 5
+    UNTIL:  9:00,15000,      !- Field 7
+    UNTIL: 17:00,9000,       !- Field 9
+    UNTIL: 24:00,36000,      !- Field 11
+    THROUGH: 09/30,          !- Field 13
+    FOR: AllDays,            !- Field 14
+    UNTIL: 24:00,0.0,        !- Field 15
+    THROUGH: 12/31,          !- Field 17
+    FOR: AllDays,            !- Field 18
+    UNTIL:  4:00,62000,      !- Field 19
+    UNTIL:  8:00,25000,      !- Field 21
+    UNTIL:  9:00,15000,      !- Field 23
+    UNTIL: 17:00,9000,       !- Field 25
+    UNTIL: 24:00,36000;      !- Field 27
+
+  Schedule:Compact,
+    Heating Coil Load Profile Flow Frac Schedule,  !- Name
+    Any Number,              !- Schedule Type Limits Name
+    THROUGH: 03/31,          !- Field 1
+    FOR: AllDays,            !- Field 2
+    UNTIL: 24:00,1.0,        !- Field 3
+    THROUGH: 09/30,          !- Field 5
+    FOR: AllDays,            !- Field 6
+    UNTIL: 24:00,0.0,        !- Field 7
+    THROUGH: 12/31,          !- Field 9
+    FOR: AllDays,            !- Field 10
+    UNTIL: 24:00,1.0;        !- Field 11
+
+  ! Simulate a summer time, daytime hours load, but the pump is always running in that season
+
+  Schedule:Compact,
+    Cooling Coil Load Profile Load Schedule,  !- Name
+    Any Number,              !- Schedule Type Limits Name
+    THROUGH: 03/31,          !- Field 1
+    FOR: AllDays,            !- Field 2
+    UNTIL: 24:00,0.0,        !- Field 3
+    THROUGH: 09/30,          !- Field 5
+    FOR: AllDays,            !- Field 6
+    UNTIL:  9:00,-200000,    !- Field 7
+    UNTIL: 17:00,-410000,    !- Field 9
+    UNTIL: 24:00,-250000,    !- Field 11
+    THROUGH: 12/31,          !- Field 13
+    FOR: AllDays,            !- Field 14
+    UNTIL: 24:00,0.0;        !- Field 15
+
+  Schedule:Compact,
+    Cooling Coil Load Profile Flow Frac Schedule,  !- Name
+    Any Number,              !- Schedule Type Limits Name
+    THROUGH: 03/31,          !- Field 1
+    FOR: AllDays,            !- Field 2
+    UNTIL: 24:00,0.0,        !- Field 3
+    THROUGH: 09/30,          !- Field 5
+    FOR: AllDays,            !- Field 6
+    UNTIL: 24:00,1.0,        !- Field 7
+    THROUGH: 12/31,          !- Field 9
+    FOR: AllDays,            !- Field 10
+    UNTIL: 24:00,0.0;        !- Field 11
+
+! *** Heating Coil Loop
+
+  PlantLoop,
+    Heating Coil Load Loop,  !- Name
+    WATER,                   !- Fluid Type
+    ,                        !- User Defined Fluid Type
+    Heating Coil Load Loop Operation,  !- Plant Equipment Operation Scheme Name
+    Heating Coil Load Loop Supply Outlet Pipe Outlet Node,  !- Loop Temperature Setpoint Node Name
+    100,                     !- Maximum Loop Temperature {C}
+    3,                       !- Minimum Loop Temperature {C}
+    0.005,                   !- Maximum Loop Flow Rate {m3/s}
+    0,                       !- Minimum Loop Flow Rate {m3/s}
+    1,                       !- Plant Loop Volume {m3}
+    Heating Coil Load Loop Supply Inlet Node,   !- Plant Side Inlet Node Name
+    Heating Coil Load Loop Supply Outlet Pipe Outlet Node,  !- Plant Side Outlet Node Name
+    Heating Coil Load Loop Supply Branches,     !- Plant Side Branch List Name
+    Heating Coil Load Loop Supply Connectors,   !- Plant Side Connector List Name
+    Heating Coil Load Loop Demand Inlet Node,   !- Demand Side Inlet Node Name
+    Heating Coil Load Loop Demand Outlet Node,  !- Demand Side Outlet Node Name
+    Heating Coil Load Loop Demand Branches,     !- Demand Side Branch List Name
+    ,                        !- Demand Side Connector List Name
+    Optimal;                 !- Load Distribution Scheme
+
+  SetpointManager:Scheduled,
+    Heating Coil Load Loop Setpoint Manager,  !- Name
+    Temperature,             !- Control Variable
+    Heating Coil Load Loop Setpoint Temperature Schedule,  !- Schedule Name
+    Heating Coil Load Loop Supply Outlet Pipe Outlet Node;  !- Setpoint Node or NodeList Name
+
+  PlantEquipmentOperationSchemes,
+    Heating Coil Load Loop Operation,  !- Name
+    PlantEquipmentOperation:HeatingLoad,  !- Control Scheme 1 Object Type
+    Heating Coil Load Loop Heating Operation,  !- Control Scheme 1 Name
+    AlwaysOnSchedule;        !- Control Scheme 1 Schedule Name
+
+  PlantEquipmentOperation:HeatingLoad,
+    Heating Coil Load Loop Heating Operation,  !- Name
+    0,                       !- Load Range 1 Lower Limit {W}
+    26000,                !- Load Range 1 Upper Limit {W}
+    Heating Coil Load Loop Heating Equipment 1,  !- Range 1 Equipment List Name
+    26000,                       !- Load Range 2 Lower Limit {W}
+    10000000,                !- Load Range 2 Upper Limit {W}
+    Heating Coil Load Loop Heating Equipment 2;  !- Range 2 Equipment List Name
+
+  PlantEquipmentList,
+    Heating Coil Load Loop Heating Equipment 1,  !- Name
+    HeatPump:PlantLoop:EIR:Heating,  !- Equipment 1 Object Type
+    Heating Coil 1;            !- Equipment 1 Name
+
+  PlantEquipmentList,
+    Heating Coil Load Loop Heating Equipment 2,  !- Name
+    HeatPump:PlantLoop:EIR:Heating,  !- Equipment 1 Object Type
+    Heating Coil 1,            !- Equipment 1 Name
+    HeatPump:PlantLoop:EIR:Heating,  !- Equipment 2 Object Type
+    Heating Coil 2;            !- Equipment 2 Name
+
+  BranchList,
+    Heating Coil Load Loop Supply Branches,      !- Name
+    Heating Coil Load Loop Supply Inlet Branch,  !- Branch 1 Name
+    Heating Coil 1 Branch,                       !- Branch 2 Name
+    Heating Coil 2 Branch,                       !- Branch 3 Name
+    Heating Coil Bypass Branch,                  !- Branch 4 Name
+    Heating Coil Load Loop Supply Outlet Branch; !- Branch 5 Name
+
+  Branch,
+    Heating Coil Load Loop Supply Inlet Branch,  !- Name
+    ,                        !- Pressure Drop Curve Name
+    Pump:VariableSpeed,      !- Component 1 Object Type
+    Heating Coil Load Loop Pump,  !- Component 1 Name
+    Heating Coil Load Loop Supply Inlet Node,  !- Component 1 Inlet Node Name
+    Heating Coil Load Loop Intermediate Node;  !- Component 1 Outlet Node Name
+
+  Branch,
+    Heating Coil 1 Branch,           !- Name
+    ,                                !- Pressure Drop Curve Name
+    HeatPump:PlantLoop:EIR:Heating,  !- Component 1 Object Type
+    Heating Coil 1,                  !- Component 1 Name
+    Heating Coil 1 Inlet Node,            !- Component 1 Inlet Node Name
+    Heating Coil 1 Outlet Node;           !- Component 1 Outlet Node Name
+
+  Branch,
+    Heating Coil 2 Branch,           !- Name
+    ,                                !- Pressure Drop Curve Name
+    HeatPump:PlantLoop:EIR:Heating,  !- Component 1 Object Type
+    Heating Coil 2,                  !- Component 1 Name
+    Heating Coil 2 Inlet Node,            !- Component 1 Inlet Node Name
+    Heating Coil 2 Outlet Node;           !- Component 1 Outlet Node Name
+
+  Connector:Splitter,
+    Heating Coil Load Loop Splitter,      !- Name
+    Heating Coil Load Loop Supply Inlet Branch, !- Inlet Branch Name
+    Heating Coil 1 Branch,                !- Outlet Branch 1 Name
+    Heating Coil 2 Branch,                !- Outlet Branch 2 Name
+    Heating Coil Bypass Branch;           !- Outlet Branch 3 Name
+
+  Connector:Mixer,
+    Heating Coil Load Loop Mixer,      !- Name
+    Heating Coil Load Loop Supply Outlet Branch, !- Inlet Branch Name
+    Heating Coil 1 Branch,                !- Outlet Branch 1 Name
+    Heating Coil 2 Branch,                !- Outlet Branch 2 Name
+    Heating Coil Bypass Branch;           !- Outlet Branch 3 Name
+
+  ConnectorList,
+    Heating Coil Load Loop Supply Connectors,
+    Connector:Splitter,      !- Connector 1 Object Type
+    Heating Coil Load Loop Splitter,  !- Connector 1 Name
+    Connector:Mixer,         !- Connector 2 Object Type
+    Heating Coil Load Loop Mixer;  !- Connector 2 Name
+
+  Pipe:Adiabatic,
+    Heating Coil Bypass,  !- Name
+    Heating Coil Bypass Inlet Node,  !- Inlet Node Name
+    Heating Coil Bypass Outlet Node;  !- Outlet Node Name
+
+  Branch,
+    Heating Coil Bypass Branch, !- Name
+    ,                           !- Pressure Drop Curve Name
+    Pipe:Adiabatic,             !- Component 1 Object Type
+    Heating Coil Bypass,        !- Component 1 Name
+    Heating Coil Bypass Inlet Node,  !- Component 1 Inlet Node Name
+    Heating Coil Bypass Outlet Node;  !- Component 1 Outlet Node Name
+
+  Branch,
+    Heating Coil Load Loop Supply Outlet Branch, !- Name
+    ,                           !- Pressure Drop Curve Name
+    Pipe:Adiabatic,             !- Component 1 Object Type
+    Heating Coil Load Loop Supply Outlet Pipe,        !- Component 1 Name
+    Heating Coil Load Loop Supply Outlet Pipe Inlet Node,  !- Component 1 Inlet Node Name
+    Heating Coil Load Loop Supply Outlet Pipe Outlet Node;  !- Component 1 Outlet Node Name
+
+  Pipe:Adiabatic,
+    Heating Coil Load Loop Supply Outlet Pipe,  !- Name
+    Heating Coil Load Loop Supply Outlet Pipe Inlet Node,  !- Inlet Node Name
+    Heating Coil Load Loop Supply Outlet Pipe Outlet Node;  !- Outlet Node Name
+
+  Pump:VariableSpeed,
+    Heating Coil Load Loop Pump,  !- Name
+    Heating Coil Load Loop Supply Inlet Node,  !- Inlet Node Name
+    Heating Coil Load Loop Intermediate Node,  !- Outlet Node Name
+    0.005,                   !- Design Maximum Flow Rate {m3/s}
+    3000,                    !- Design Pump Head {Pa}
+    22,                      !- Design Power Consumption {W}
+    0.87,                    !- Motor Efficiency
+    0.0,                     !- Fraction of Motor Inefficiencies to Fluid Stream
+    0,                       !- Coefficient 1 of the Part Load Performance Curve
+    1,                       !- Coefficient 2 of the Part Load Performance Curve
+    0,                       !- Coefficient 3 of the Part Load Performance Curve
+    0,                       !- Coefficient 4 of the Part Load Performance Curve
+    0,                       !- Design Minimum Flow Rate {m3/s}
+    INTERMITTENT;            !- Pump Control Type
+
+  HeatPump:PlantLoop:EIR:Heating,
+    Heating Coil 1,            !- Name
+    Heating Coil 1 Inlet Node,  !- Load Side Inlet Node Name
+    Heating Coil 1 Outlet Node,  !- Load Side Outlet Node Name
+    AirSource,               !- Condenser Type
+    Outdoor Air Inlet Node,  !- Source Side Inlet Node Name
+    Outdoor Air Outlet Node, !- Source Side Outlet Node Name
+    ,                        !- Heat Recovery Inlet Node Name
+    ,                        !- Heat Recovery Outlet Node Name
+    Cooling Coil,            !- Companion Heat Pump Name
+    0.005,                   !- Load Side Reference Flow Rate {m3/s}
+    2,                       !- Source Side Reference Flow Rate {m3/s}
+    ,                        !- Heat Recovery Reference Flow Rate {m3/s}
+    10000,                   !- Reference Capacity {W}
+    3.5,                     !- Reference Coefficient of Performance {W/W}
+    ,                        !- Sizing Factor
+    CapCurveFuncTemp,        !- Capacity Modifier Function of Temperature Curve Name
+    EIRCurveFuncTemp,        !- Electric Input to Output Ratio Modifier Function of Temperature Curve Name
+    EIRCurveFuncPLR;         !- Electric Input to Output Ratio Modifier Function of Part Load Ratio Curve Name
+
+  HeatPump:PlantLoop:EIR:Heating,
+    Heating Coil 2,            !- Name
+    Heating Coil 2 Inlet Node,  !- Load Side Inlet Node Name
+    Heating Coil 2 Outlet Node,  !- Load Side Outlet Node Name
+    AirSource,               !- Condenser Type
+    Outdoor Air 2 Inlet Node,  !- Source Side Inlet Node Name
+    Outdoor Air 2 Outlet Node, !- Source Side Outlet Node Name
+    ,                        !- Heat Recovery Inlet Node Name
+    ,                        !- Heat Recovery Outlet Node Name
+    ,                        !- Companion Heat Pump Name
+    0.005,                   !- Load Side Reference Flow Rate {m3/s}
+    2,                       !- Source Side Reference Flow Rate {m3/s}
+    ,                        !- Heat Recovery Reference Flow Rate {m3/s}
+    80000,                   !- Reference Capacity {W}
+    3.5,                     !- Reference Coefficient of Performance {W/W}
+    0.5,                     !- Sizing Factor
+    CapCurveFuncTemp,        !- Capacity Modifier Function of Temperature Curve Name
+    EIRCurveFuncTemp,        !- Electric Input to Output Ratio Modifier Function of Temperature Curve Name
+    EIRCurveFuncPLR;         !- Electric Input to Output Ratio Modifier Function of Part Load Ratio Curve Name
+
+  Curve:Biquadratic,
+    CapCurveFuncTemp,        !- Name
+    1.0,                     !- Coefficient1 Constant
+    0.0,                     !- Coefficient2 x
+    0.0,                     !- Coefficient3 x**2
+    0.0,                     !- Coefficient4 y
+    0.0,                     !- Coefficient5 y**2
+    0.0,                     !- Coefficient6 x*y
+    5.0,                     !- Minimum Value of x
+    10.0,                    !- Maximum Value of x
+    24.0,                    !- Minimum Value of y
+    35.0,                    !- Maximum Value of y
+    ,                        !- Minimum Curve Output
+    ,                        !- Maximum Curve Output
+    Temperature,             !- Input Unit Type for X
+    Temperature,             !- Input Unit Type for Y
+    Dimensionless;           !- Output Unit Type
+
+  Curve:Biquadratic,
+    EIRCurveFuncTemp,        !- Name
+    1.0,                     !- Coefficient1 Constant
+    0.0,                     !- Coefficient2 x
+    0.0,                     !- Coefficient3 x**2
+    0.0,                     !- Coefficient4 y
+    0.0,                     !- Coefficient5 y**2
+    0.0,                     !- Coefficient6 x*y
+    5.0,                     !- Minimum Value of x
+    10.0,                    !- Maximum Value of x
+    24.0,                    !- Minimum Value of y
+    35.0,                    !- Maximum Value of y
+    ,                        !- Minimum Curve Output
+    ,                        !- Maximum Curve Output
+    Temperature,             !- Input Unit Type for X
+    Temperature,             !- Input Unit Type for Y
+    Dimensionless;           !- Output Unit Type
+
+  Curve:Quadratic,
+    EIRCurveFuncPLR,         !- Name
+    1.0,                     !- Coefficient1 Constant
+    0.0,                     !- Coefficient2 x
+    0.0,                     !- Coefficient3 x**2
+    0.0,                     !- Minimum Value of x
+    1.0;                     !- Maximum Value of x
+
+  BranchList,
+    Heating Coil Load Loop Demand Branches,  !- Name
+    Heating Coil Load Loop Demand Branch;  !- Branch 1 Name
+
+  Branch,
+    Heating Coil Load Loop Demand Branch,  !- Name
+    ,                        !- Pressure Drop Curve Name
+    LoadProfile:Plant,       !- Component 1 Object Type
+    Heating Coil Load Profile,  !- Component 1 Name
+    Heating Coil Load Loop Demand Inlet Node,  !- Component 1 Inlet Node Name
+    Heating Coil Load Loop Demand Outlet Node;  !- Component 1 Outlet Node Name
+
+  LoadProfile:Plant,
+    Heating Coil Load Profile,  !- Name
+    Heating Coil Load Loop Demand Inlet Node,  !- Inlet Node Name
+    Heating Coil Load Loop Demand Outlet Node,  !- Outlet Node Name
+    Heating Coil Load Profile Load Schedule,  !- Load Schedule Name
+    0.005,                   !- Peak Flow Rate {m3/s}
+    Heating Coil Load Profile Flow Frac Schedule,  !- Flow Rate Fraction Schedule Name
+    ;                        !- Plant Loop Fluid Type
+
+! *** Cooling coil loop
+
+  PlantLoop,
+    Cooling Coil Load Loop,  !- Name
+    WATER,                   !- Fluid Type
+    ,                        !- User Defined Fluid Type
+    Cooling Coil Load Loop Operation,  !- Plant Equipment Operation Scheme Name
+    Cooling Coil Load Loop Supply Outlet Node,  !- Loop Temperature Setpoint Node Name
+    100,                     !- Maximum Loop Temperature {C}
+    3,                       !- Minimum Loop Temperature {C}
+    0.005,                   !- Maximum Loop Flow Rate {m3/s}
+    0,                       !- Minimum Loop Flow Rate {m3/s}
+    1,                       !- Plant Loop Volume {m3}
+    Cooling Coil Load Loop Supply Inlet Node,  !- Plant Side Inlet Node Name
+    Cooling Coil Load Loop Supply Outlet Node,  !- Plant Side Outlet Node Name
+    Cooling Coil Load Loop Supply Branches,  !- Plant Side Branch List Name
+    ,                        !- Plant Side Connector List Name
+    Cooling Coil Load Loop Demand Inlet Node,  !- Demand Side Inlet Node Name
+    Cooling Coil Load Loop Demand Outlet Node,  !- Demand Side Outlet Node Name
+    Cooling Coil Load Loop Demand Branches,  !- Demand Side Branch List Name
+    ,                        !- Demand Side Connector List Name
+    Optimal;                 !- Load Distribution Scheme
+
+  SetpointManager:Scheduled,
+    Cooling Coil Load Loop Setpoint Manager,  !- Name
+    Temperature,             !- Control Variable
+    Cooling Coil Load Loop Setpoint Temperature Schedule,  !- Schedule Name
+    Cooling Coil Load Loop Supply Outlet Node;  !- Setpoint Node or NodeList Name
+
+  PlantEquipmentOperationSchemes,
+    Cooling Coil Load Loop Operation,  !- Name
+    PlantEquipmentOperation:CoolingLoad,  !- Control Scheme 1 Object Type
+    Cooling Coil Load Loop Cooling Operation,  !- Control Scheme 1 Name
+    AlwaysOnSchedule;        !- Control Scheme 1 Schedule Name
+
+  PlantEquipmentOperation:CoolingLoad,
+    Cooling Coil Load Loop Cooling Operation,  !- Name
+    0,                       !- Load Range 1 Lower Limit {W}
+    10000000,                !- Load Range 1 Upper Limit {W}
+    Cooling Coil Load Loop Cooling Equipment;  !- Range 1 Equipment List Name
+
+  PlantEquipmentList,
+    Cooling Coil Load Loop Cooling Equipment,  !- Name
+    HeatPump:PlantLoop:EIR:Cooling,  !- Equipment 1 Object Type
+    Cooling Coil;            !- Equipment 1 Name
+
+  BranchList,
+    Cooling Coil Load Loop Supply Branches,  !- Name
+    Cooling Coil Load Loop Supply Branch;  !- Branch 1 Name
+
+  Branch,
+    Cooling Coil Load Loop Supply Branch,  !- Name
+    ,                        !- Pressure Drop Curve Name
+    Pump:VariableSpeed,      !- Component 1 Object Type
+    Cooling Coil Load Loop Pump,  !- Component 1 Name
+    Cooling Coil Load Loop Supply Inlet Node,  !- Component 1 Inlet Node Name
+    Cooling Coil Load Loop Intermediate Node,  !- Component 1 Outlet Node Name
+    HeatPump:PlantLoop:EIR:Cooling,  !- Component 2 Object Type
+    Cooling Coil,            !- Component 2 Name
+    Cooling Coil Load Loop Intermediate Node,  !- Component 2 Inlet Node Name
+    Cooling Coil Load Loop Supply Outlet Node;  !- Component 2 Outlet Node Name
+
+  Pump:VariableSpeed,
+    Cooling Coil Load Loop Pump,  !- Name
+    Cooling Coil Load Loop Supply Inlet Node,  !- Inlet Node Name
+    Cooling Coil Load Loop Intermediate Node,  !- Outlet Node Name
+    0.005,                   !- Design Maximum Flow Rate {m3/s}
+    3000,                    !- Design Pump Head {Pa}
+    22,                      !- Design Power Consumption {W}
+    0.87,                    !- Motor Efficiency
+    0.0,                     !- Fraction of Motor Inefficiencies to Fluid Stream
+    0,                       !- Coefficient 1 of the Part Load Performance Curve
+    1,                       !- Coefficient 2 of the Part Load Performance Curve
+    0,                       !- Coefficient 3 of the Part Load Performance Curve
+    0,                       !- Coefficient 4 of the Part Load Performance Curve
+    0,                       !- Design Minimum Flow Rate {m3/s}
+    INTERMITTENT;            !- Pump Control Type
+
+  HeatPump:PlantLoop:EIR:Cooling,
+    Cooling Coil,            !- Name
+    Cooling Coil Load Loop Intermediate Node,  !- Load Side Inlet Node Name
+    Cooling Coil Load Loop Supply Outlet Node,  !- Load Side Outlet Node Name
+    AirSource,               !- Condenser Type
+    Outdoor Air 3 Inlet Node,  !- Source Side Inlet Node Name
+    Outdoor Air 3 Outlet Node, !- Source Side Outlet Node Name
+    ,                        !- Heat Recovery Inlet Node Name
+    ,                        !- Heat Recovery Outlet Node Name
+    Heating Coil 1,          !- Companion Heat Pump Name
+    0.005,                   !- Load Side Reference Flow Rate {m3/s}
+    20,                      !- Source Side Reference Flow Rate {m3/s}
+    ,                        !- Heat Recovery Reference Flow Rate {m3/s}
+    400000,                  !- Reference Capacity {W}
+    3.5,                     !- Reference Coefficient of Performance {W/W}
+    ,                        !- Sizing Factor
+    CapCurveFuncTemp2,       !- Capacity Modifier Function of Temperature Curve Name
+    EIRCurveFuncTemp2,       !- Electric Input to Output Ratio Modifier Function of Temperature Curve Name
+    EIRCurveFuncPLR2;        !- Electric Input to Output Ratio Modifier Function of Part Load Ratio Curve Name
+
+  Curve:Biquadratic,
+    CapCurveFuncTemp2,       !- Name
+    1.0,                     !- Coefficient1 Constant
+    0.0,                     !- Coefficient2 x
+    0.0,                     !- Coefficient3 x**2
+    0.0,                     !- Coefficient4 y
+    0.0,                     !- Coefficient5 y**2
+    0.0,                     !- Coefficient6 x*y
+    5.0,                     !- Minimum Value of x
+    10.0,                    !- Maximum Value of x
+    24.0,                    !- Minimum Value of y
+    35.0,                    !- Maximum Value of y
+    ,                        !- Minimum Curve Output
+    ,                        !- Maximum Curve Output
+    Temperature,             !- Input Unit Type for X
+    Temperature,             !- Input Unit Type for Y
+    Dimensionless;           !- Output Unit Type
+
+  Curve:Biquadratic,
+    EIRCurveFuncTemp2,       !- Name
+    1.0,                     !- Coefficient1 Constant
+    0.0,                     !- Coefficient2 x
+    0.0,                     !- Coefficient3 x**2
+    0.0,                     !- Coefficient4 y
+    0.0,                     !- Coefficient5 y**2
+    0.0,                     !- Coefficient6 x*y
+    5.0,                     !- Minimum Value of x
+    10.0,                    !- Maximum Value of x
+    24.0,                    !- Minimum Value of y
+    35.0,                    !- Maximum Value of y
+    ,                        !- Minimum Curve Output
+    ,                        !- Maximum Curve Output
+    Temperature,             !- Input Unit Type for X
+    Temperature,             !- Input Unit Type for Y
+    Dimensionless;           !- Output Unit Type
+
+  Curve:Quadratic,
+    EIRCurveFuncPLR2,        !- Name
+    1.0,                     !- Coefficient1 Constant
+    0.0,                     !- Coefficient2 x
+    0.0,                     !- Coefficient3 x**2
+    0.0,                     !- Minimum Value of x
+    1.0;                     !- Maximum Value of x
+
+  BranchList,
+    Cooling Coil Load Loop Demand Branches,  !- Name
+    Cooling Coil Load Loop Demand Branch;  !- Branch 1 Name
+
+  Branch,
+    Cooling Coil Load Loop Demand Branch,  !- Name
+    ,                        !- Pressure Drop Curve Name
+    LoadProfile:Plant,       !- Component 1 Object Type
+    Cooling Coil Load Profile,  !- Component 1 Name
+    Cooling Coil Load Loop Demand Inlet Node,  !- Component 1 Inlet Node Name
+    Cooling Coil Load Loop Demand Outlet Node;  !- Component 1 Outlet Node Name
+
+  LoadProfile:Plant,
+    Cooling Coil Load Profile,  !- Name
+    Cooling Coil Load Loop Demand Inlet Node,  !- Inlet Node Name
+    Cooling Coil Load Loop Demand Outlet Node,  !- Outlet Node Name
+    Cooling Coil Load Profile Load Schedule,  !- Load Schedule Name
+    0.005,                   !- Peak Flow Rate {m3/s}
+    Cooling Coil Load Profile Flow Frac Schedule,  !- Flow Rate Fraction Schedule Name
+    ;                        !- Plant Loop Fluid Type
+
+  OutdoorAir:Node,
+    Outdoor Air Inlet Node;  !- Name
+
+  OutdoorAir:Node,
+    Outdoor Air 3 Inlet Node;  !- Name
+
+  OutdoorAir:Node,
+    Outdoor Air 2 Inlet Node;  !- Name
+
+  OutdoorAir:Node,
+    Outdoor Air Outlet Node;  !- Name
+
+  OutdoorAir:Node,
+    Outdoor Air 3 Outlet Node;  !- Name
+
+  OutdoorAir:Node,
+    Outdoor Air 2 Outlet Node;  !- Name
+
+  Output:VariableDictionary,IDF;
+
+  Output:Variable,*,Plant Load Profile Mass Flow Rate,Hourly;
+
+  Output:Variable,*,Plant Load Profile Heat Transfer Rate,Hourly;
+
+  Output:Variable,*,Heat Pump Load Side Heat Transfer Rate,Hourly;
+
+  Output:Variable,*,Heat Pump Load Side Heat Transfer Energy,Hourly;
+
+  Output:Variable,*,Heat Pump Source Side Heat Transfer Rate,Hourly;
+
+  Output:Variable,*,Heat Pump Source Side Heat Transfer Energy,Hourly;
+
+  Output:Variable,*,Heat Pump Load Side Inlet Temperature,Hourly;
+
+  Output:Variable,*,Heat Pump Load Side Outlet Temperature,Hourly;
+
+  Output:Variable,*,Heat Pump Source Side Inlet Temperature,Hourly;
+
+  Output:Variable,*,Heat Pump Source Side Outlet Temperature,Hourly;
+
+  Output:Variable,*,Heat Pump Electricity Rate,Hourly;
+
+  Output:Variable,*,Heat Pump Electricity Energy,Hourly;
+
+  Output:Variable,*,Heat Pump Load Side Mass Flow Rate,Hourly;
+
+  Output:Variable,*,Heat Pump Source Side Mass Flow Rate,Hourly;
+

@@ -83,8 +83,8 @@ static void ComputeNormal( TESStesselator *tess, TESSreal norm[3] )
 {
 	TESSvertex *v, *v1, *v2;
 	TESSreal c, tLen2, maxLen2;
-	TESSreal maxVal[3], minVal[3], d1[3], d2[3], tNorm[3];
-	TESSvertex *maxVert[3], *minVert[3];
+	TESSreal maxVal[3] = {0}, minVal[3] = {0}, d1[3] = {0}, d2[3] = {0}, tNorm[3] = {0};
+	TESSvertex *maxVert[3] = {NULL}, *minVert[3] = {NULL};
 	TESSvertex *vHead = &tess->mesh->vHead;
 	int i;
 
@@ -210,7 +210,7 @@ extern int RandomSweep;
 void tessProjectPolygon( TESStesselator *tess )
 {
 	TESSvertex *v, *vHead = &tess->mesh->vHead;
-	TESSreal norm[3];
+	TESSreal norm[3] = {0};
 	TESSreal *sUnit, *tUnit;
 	int i, first, computedNormal = FALSE;
 
@@ -380,7 +380,7 @@ int tessMeshTessellateMonoRegion( TESSmesh *mesh, TESSface *face )
 */
 int tessMeshTessellateInterior( TESSmesh *mesh )
 {
-	TESSface *f, *next;
+	TESSface *f, *next = {NULL};
 
 	/*LINTED*/
 	for( f = mesh->fHead.next; f != &mesh->fHead; f = next ) {
@@ -487,9 +487,9 @@ void tessMeshRefineDelaunay( TESSmesh *mesh, TESSalloc *alloc )
 		e = stackPop(&stack);
 		e->mark = e->Sym->mark = 0;
 		if (!tesedgeIsLocallyDelaunay(e)) {
-			TESShalfEdge *edges[4];
+			TESShalfEdge *edges[4] = {NULL};
 			int i;
-			tessMeshFlipEdge(mesh, e);
+			tessMeshFlipEdge(e);
 			// for each opposite edge
 			edges[0] = e->Lnext;
 			edges[1] = e->Lprev;
@@ -516,7 +516,7 @@ void tessMeshRefineDelaunay( TESSmesh *mesh, TESSalloc *alloc )
 */
 void tessMeshDiscardExterior( TESSmesh *mesh )
 {
-	TESSface *f, *next;
+	TESSface *f, *next = {NULL};
 
 	/*LINTED*/
 	for( f = mesh->fHead.next; f != &mesh->fHead; f = next ) {
@@ -539,7 +539,7 @@ void tessMeshDiscardExterior( TESSmesh *mesh )
 int tessMeshSetWindingNumber( TESSmesh *mesh, int value,
 							 int keepOnlyBoundary )
 {
-	TESShalfEdge *e, *eNext;
+	TESShalfEdge *e, *eNext = {NULL};
 
 	for( e = mesh->eHead.next; e != &mesh->eHead; e = eNext ) {
 		eNext = e->next;

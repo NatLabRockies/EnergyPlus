@@ -1,7 +1,7 @@
-// EnergyPlus, Copyright (c) 1996-2023, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
-// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other
+// National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
 // contributors. All rights reserved.
 //
 // NOTICE: This Software was developed under funding from the U.S. Department of Energy and the
@@ -51,7 +51,8 @@
 #include <EnergyPlus/Data/BaseData.hh>
 
 namespace EnergyPlus {
-enum class HVACSystemRootSolverAlgorithm : int
+
+enum class RootAlgo : int
 {
     Invalid = -1,
     RegulaFalsi,
@@ -59,20 +60,30 @@ enum class HVACSystemRootSolverAlgorithm : int
     RegulaFalsiThenBisection,
     BisectionThenRegulaFalsi,
     Alternation,
+    ShortBisectionThenRegulaFalsi,
     Num
 };
-struct HVACSystemRootFindingAlgorithm
-{
-    std::string Algorithm = {}; // Choice of algorithm
-    int NumOfIter = 5;          // Number of Iteration Before Algorith Switch
-    HVACSystemRootSolverAlgorithm HVACSystemRootSolver = HVACSystemRootSolverAlgorithm::RegulaFalsi;
-};
+
+static constexpr std::array<std::string_view, (int)RootAlgo::Num> rootAlgoNamesUC = {
+    "REGULAFALSI", "BISECTION", "REGULAFALSITHENBISECTION", "BISECTIONTHENREGULAFALSI", "ALTERNATION", "SHORTBISECTIONTHENREGULAFALSI"};
+
 struct RootFindingData : BaseGlobalStruct
 {
-    HVACSystemRootFindingAlgorithm HVACSystemRootFinding;
+    std::string Algorithm = {}; // Choice of algorithm
+
+    int NumOfIter = 5; // Number of Iteration Before Algorith Switch
+    RootAlgo rootAlgo = RootAlgo::RegulaFalsi;
+
+    void init_constant_state([[maybe_unused]] EnergyPlusData &state) override
+    {
+    }
+
+    void init_state([[maybe_unused]] EnergyPlusData &state) override
+    {
+    }
+
     void clear_state() override
     {
-        this->HVACSystemRootFinding = {};
     }
 };
 

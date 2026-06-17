@@ -74,6 +74,10 @@ namespace doj {
 
 #endif
 
+#ifdef _MSC_VER
+#pragma warning(push)
+#pragma warning(disable:4706) // assignment within conditional expression
+#endif
     /**
       compare l and r with strcmp() semantics, but using
       the "Alphanum Algorithm". This function is designed to read
@@ -180,6 +184,10 @@ namespace doj {
         if ( *l ) return +1;
         return 0;
       }
+
+#ifdef _MSC_VER
+#pragma warning(pop)
+#endif
 
   }
 

@@ -10,7 +10,7 @@ Modeling Dynamic Coating for Opaque Surfaces
 
 ## Justification for Feature Update
 
-Currently, EnergyPlus assumes constant thermal and solar absorptance for exterior wall and roof materials. In order to model dynamic coatings with changing solar or thermal absorptance, users need to use the EnergyManagementSystem (EMS) feature to write code to overwrite these properties. Although this can be done by advanced users, it can be a challenge for normal EnergyPlus users as learning and debugging EMS code is not an easy task. 
+Currently, EnergyPlus assumes constant thermal and solar absorptance for exterior wall and roof materials. In order to model dynamic coatings with changing solar or thermal absorptance, users need to use the EnergyManagementSystem (EMS) feature to write code to overwrite these properties. Although this can be done by advanced users, it can be a challenge for normal EnergyPlus users as learning and debugging EMS code is not an easy task.
 
 The proposed new feature will enable user input of the stimulus-absorptance relationship in the form of a table or curve. The variables triggering solar or thermal absorptance change can be surface temperature, solar radiation, space heating/cooling status, a schedule, etc. An idd object will be added to capture detailed input of solar and thermal absorptance as a function of different triggers.
 
@@ -33,7 +33,7 @@ Based on the above brief review of dynamic coating material, we propose to enabl
 
 ## Approach
 
-Two new idd object, *MaterialProperty:VariableThermalAbsorptance* and *MaterialProperty:VariableSolarAbsorptance*, will be added to host user input data on the trigger-coating property relationship.
+A new idd object, *MaterialProperty:VariableAbsorptance*, will be added to host user input data on the trigger-coating property relationship.
 
 ## Testing/Validation/Data Source(s)
 
@@ -44,15 +44,15 @@ The feature will be tested and demonstrated with a test file derived from *"RefB
 
 ## IDD Object changes
 
-There could be two potential idd designs as follows. The first design creates a material object with the full set of properties users can specify, including roughness, thickness, conductivity, etc. The second approach will add the specification of the trigger-solar/thermal absorption alone. The first approach has the flexibility of specifying the roughness, thickness, conductivity, etc. for the new material itself, but on the other hand, could be challenging for users when some of this information is not readily available. The second approach only requires the trigger-solar/thermal absorptance information, which could be handy for users to test out the performance of the coating while assuming the coating itself is thin enough and the conductivity difference between the coating and the opaque layer beneath it is negligible. When the "coating" is a thick structure, where such differences are not negligible, users can first create a *Material* layer with the roughness, thickness, conductivity, etc. of the thick dynamic coating layer, then add the *MaterialProperty:VariableThermalAbsorptance* on top of it to hold the trigger-solar/thermal absorptance data.
+There could be two potential idd designs as follows. The first design creates a material object with the full set of properties users can specify, including roughness, thickness, conductivity, etc. The second approach will add the specification of the trigger-solar/thermal absorption alone. The first approach has the flexibility of specifying the roughness, thickness, conductivity, etc. for the new material itself, but on the other hand, could be challenging for users when some of this information is not readily available. The second approach only requires the trigger-solar/thermal absorptance information, which could be handy for users to test out the performance of the coating while assuming the coating itself is thin enough and the conductivity difference between the coating and the opaque layer beneath it is negligible. When the "coating" is a thick structure, where such differences are not negligible, users can first create a *Material* layer with the roughness, thickness, conductivity, etc. of the thick dynamic coating layer, then add the *MaterialProperty:VariableAbsorptance* on top of it to hold the trigger-solar/thermal absorptance data.
 
-Based on the reasoning above, two material add-on objects will be added, *MaterialProperty:VariableThermalAbsorptance* and *MaterialProperty:VariableSolarAbsorptance*.
+Based on the reasoning above, two material add-on objects will be added, *MaterialProperty:VariableAbsorptance*.
 
-    MaterialProperty:VariableThermalAbsorptance,
+    MaterialProperty:VariableAbsorptance,
       A1 , \field Name
            \required-field
            \type alpha
-           \note The name of the dynamic coating material with variable thermal absorptance.
+           \note The name of the dynamic coating material with variable thermal or solar absorptance.
       A2 , \field Reference Material Name
            \required-field
            \type object-list
@@ -67,43 +67,27 @@ Based on the reasoning above, two material add-on objects will be added, *Materi
            \key SpaceHeatingCoolingMode
            \key Scheduled
            \default SurfaceTemperature
-      A4 , \field Trigger Thermal Absorptance Function Name
-          \note A Curve:* or Table:Lookup object encoding the relationship between the trigger and surface thermal absorptance. For longwave radiation.
-      A5 ; \field Thermal Absorptance Schedule Name
-           \note only used when Control Signal = “Scheduled”
+           \note the variable that drives the change in thermal/solar absorptance
+      A4 , \field Thermal Absorptance Function Name
+           \note A Curve:* or Table:Lookup object encoding the relationship between
+           \note the control signal value and the surface thermal absorptance.
+      A5 , \field Thermal Absorptance Schedule Name
+           \note only used when Control Signal = "Scheduled"
+      A6 , \field Solar Absorptance Function Name
+           \note A Curve:* or Table:Lookup object encoding the relationship between
+           \note the control signal value and the surface solar absorptance.
+      A7 ; \field Solar Absorptance Schedule Name
+           \note only used when Control Signal = "Scheduled"
 
-    MaterialProperty:VariableSolarAbsorptance,
-      A1 , \field Name
-           \required-field
-           \type alpha
-           \note The name of the dynamic coating material with variable solar absorptance.
-      A2 , \field Reference Material Name
-           \required-field
-           \type object-list
-           \object-list MaterialName
-           \note Regular Material Name to which the additional properties will be added.
-           \note this the material name for the basic material properties.
-      A3 , \field Control Signal
-           \required-field
-           \type choice
-           \key SurfaceTemperature
-           \key SurfaceReceivedSolarRadiation
-           \key SpaceHeatingCoolingMode
-           \key Scheduled
-           \default SurfaceTemperature
-      A4 , \field Trigger Solar Absorptance Function Name
-          \note A Curve:* or Table:Lookup object encoding the relationship between the trigger and surface solar absorptance. For longwave radiation.
-      A5 ; \field Solar Absorptance Schedule Name
-           \note only used when Control Signal = “Scheduled”
 
 ## Proposed additions to Meters:
 
 N/A
- 
+
 ## Proposed Report Variables:
 
 N/A
- 
+
 ## References
 
 [1]	T. Karlessi, M. Santamouris, K. Apostolakis, A. Synnefa, and I. Livada, “Development and testing of thermochromic coatings for buildings and urban structures,” Sol. Energy, vol. 83, no. 4, pp. 538–551, 2009.<br>

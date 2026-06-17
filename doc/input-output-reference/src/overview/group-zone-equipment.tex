@@ -59,6 +59,8 @@ The ZoneHVAC:AirDistributionUnit object gives further information on what air lo
 \item
   \hyperref[airterminalsingleductconstantvolumereheat]{AirTerminal:SingleDuct:ConstantVolume:Reheat}
 \item
+  \hyperref[airterminalsingleductconstantvolumenoreheat]{AirTerminal:SingleDuct:ConstantVolume:NoReheat}
+\item
   \hyperref[airterminalsingleductvavreheat]{AirTerminal:SingleDuct:VAV:Reheat}
 \item
   \hyperref[airterminalsingleductvavnoreheat]{AirTerminal:SingleDuct:VAV:NoReheat}
@@ -68,6 +70,8 @@ The ZoneHVAC:AirDistributionUnit object gives further information on what air lo
   \hyperref[airterminalsingleductparallelpiureheat]{AirTerminal:SingleDuct:ParallelPIU:Reheat}
 \item
   \hyperref[airterminalsingleductconstantvolumefourpipeinduction]{AirTerminal:SingleDuct:ConstantVolume:FourPipeInduction}
+\item
+  \hyperref[airterminalsingleductconstantvolumefourpipebeam]{AirTerminal:SingleDuct:ConstantVolume:FourPipeBeam}
 \item
   \hyperref[airterminalsingleductvavreheatvariablespeedfan]{AirTerminal:SingleDuct:VAV:Reheat:VariableSpeedFan}
 \item
@@ -85,7 +89,25 @@ The ZoneHVAC:AirDistributionUnit object gives further information on what air lo
 
 Connections between the air distribution unit, the supply air duct, and the zone are specified in the input syntax for the air distribution unit and the \hyperref[airloophvaczonesplitter]{AirLoopHVAC:ZoneSplitter}. The input syntax also explicitly defines an outlet identifier. This implies a connection to a zone through a \hyperref[nodelist]{NodeList} for zone inlets (see the \hyperref[zonehvacequipmentconnections]{ZoneHVAC:EquipmentConnections} statement). Each air distribution unit is essentially a combined component-controller. Since controls are normally based on the zone thermostat, they can work in parallel or series in complex fashion. Each air distribution unit operates to meet all or part of the remaining thermostat load as specified in \hyperref[zonehvacequipmentlist]{ZoneHVAC:EquipmentList}.
 
-The Air Distribution unit also allows the user to specify leaks in the supply air duct system. These inputs are used in the EnergyPlus Simplified Duct Leakage Model (SDLM). This model simulates a specific configuration: supply leaks to a return plenum in a commercial VAV or CV system. The system must have a constant static pressure setpoint. Within these limitations SDLM allows the user to easily evaluate the energy penalty due to duct leakage.
+The Air Distribution unit also allows the user to specify leaks in the supply air duct system. These inputs are used in the EnergyPlus Simplified Duct Leakage Model (SDLM). This model simulates a specific configuration: supply leaks to a return plenum in a commercial VAV or CV system. The VAV system must have a constant static pressure setpoint, and a constant upstream air leakage flow rate is calculated using the upstream leakage fraction and design flow rate of the VAV box. For the CV system, a proportional leakage amount is calculated using the upstream leakage fraction and the maximum available air flow rate of the air terminal box. The downstream leakages are always calculated as a fraction of the current flow rate through the air terminal. Within these limitations SDLM allows the user to easily evaluate the energy penalty due to duct leakage.
+
+The Simplified Duct Leakage Model (SDLM) is currently supported for the following air terminals:
+
+\begin{itemize}
+\item
+  \hyperref[airterminalsingleductvavreheat]{AirTerminal:SingleDuct:VAV:Reheat}
+\item
+  \hyperref[airterminalsingleductvavnoreheat]{AirTerminal:SingleDuct:VAV:NoReheat}
+\item
+  \hyperref[airterminalsingleductvavheatandcoolreheat]{AirTerminal:SingleDuct:VAV:HeatAndCool:Reheat}
+\item
+  \hyperref[airterminalsingleductvavheatandcoolnoreheat]{AirTerminal:SingleDuct:VAV:HeatAndCool:NoReheat}
+\item
+  \hyperref[airterminalsingleductconstantvolumereheat]{AirTerminal:SingleDuct:ConstantVolume:Reheat}
+\item
+  \hyperref[airterminalsingleductconstantvolumenoreheat]{AirTerminal:SingleDuct:ConstantVolume:NoReheat}
+
+\end{itemize}
 
 \subsubsection{Inputs}\label{inputs-055}
 
@@ -107,11 +129,11 @@ The unique identifying component name.
 
 \paragraph{Field: Nominal Upstream Leakage Fraction}\label{field-nominal-upstream-leakage-fraction}
 
-This is the leakage upstream of the terminal unit as a fraction of the design flow rate through the unit. It is the leakage fraction at the design flow rate. It is used to calculate a leakage flow rate which is then held constant while the system air flow varies. This input is optional; the default is zero.
+This is the leakage upstream of the terminal unit as a fraction of the design flow rate or maximum available flow rate through the unit. It is the leakage fraction at the design flow rate for the VAV air terminal and at the current maximum available flow rate for the CV air terminals. For the VAV air terminal, it is used to calculate a leakage flow rate, which is then held constant while the system airflow varies. The calculated leakage rate for the CV air terminal proportionally varies with the current maximum available flow rate. This input is optional; the default is zero.
 
 \paragraph{Field: Constant Downstream Leakage Fraction}\label{field-constant-downstream-leakage-fraction}
 
-This is the leakage downstream of the terminal unit as a fraction of the current flow rate through the terminal unit. This fraction is held constant, so the leakage flow rate will vary proportinally with the supply air flow rate. This input is optional; the default is zero.
+This is the leakage downstream of the terminal unit as a fraction of the current flow rate through the terminal unit. This fraction is held constant, so the leakage flow rate will vary proportionally with the supply air flow rate. This input is optional; the default is zero.
 
 \paragraph{Field: Design Specification Air Terminal Sizing Name}\label{design-specification-air-terminal-sizing-name2}
 
@@ -151,20 +173,19 @@ This output is the amount of outdoor air entering the zone. This is the average 
 Two example IDF excerpts (one with duct leakage, one without):
 
 \begin{lstlisting}
+ZoneHVAC:AirDistributionUnit,
+  SPACE1-1 ATU,               !- Air Distribution Unit Name
+  SPACE1-1 In Node,           !- Air Dist Unit Outlet Node Name
+  AIRTERMINAL:SINGLEDUCT:VAV:REHEAT,  !- KEY--System Component Type 1
+  SPACE1-1 VAV Reheat;        !- Component Name 1
 
 ZoneHVAC:AirDistributionUnit,
-      SPACE1-1 ATU,            !- Air Distribution Unit Name
-      SPACE1-1 In Node,        !- Air Dist Unit Outlet Node Name
-      AIRTERMINAL:SINGLEDUCT:VAV:REHEAT,  !- KEY--System Component Type 1
-      SPACE1-1 VAV Reheat;     !- Component Name 1
-
-  ZoneHVAC:AirDistributionUnit,
-      SPACE4-1 ATU,            !- Air Distribution Unit Name
-      SPACE4-1 In Node,        !- Air Dist Unit Outlet Node Name
-      AIRTERMINAL:SINGLEDUCT:VAV:REHEAT,  !- KEY--System Component Type 1
-      SPACE4-1 VAV Reheat,     !- Component Name 1
-      0.05,                    !- upstream nominal leakage fraction
-      0.07;                    !- downstream constant leakage fraction
+  SPACE4-1 ATU,               !- Air Distribution Unit Name
+  SPACE4-1 In Node,           !- Air Dist Unit Outlet Node Name
+  AIRTERMINAL:SINGLEDUCT:VAV:REHEAT,  !- KEY--System Component Type 1
+  SPACE4-1 VAV Reheat,        !- Component Name 1
+  0.05,                       !- upstream nominal leakage fraction
+  0.07;                       !- downstream constant leakage fraction
 \end{lstlisting}
 
 \subsection{ZoneHVAC:EquipmentConnections}\label{zonehvacequipmentconnections}
@@ -210,15 +231,18 @@ The name of a node or list of nodes (\hyperref[nodelist]{NodeList}) that is used
 An example of this statement in an IDF is:
 
 \begin{lstlisting}
-
 ZoneHVAC:EquipmentConnections,
-      SPACE3-1,              !- Zone Name
-      SPACE3-1 Eq,           !- List Name: Zone Equipment
-      SPACE3-1 In Nodes,     !- List Name: Zone Air Inlet Nodes
-      ,                      !- List Name: Zone Air Exhaust Nodes
-      SPACE3-1 Node,         !- Zone Air Node Name
-      SPACE3-1 Out Node;     !- Zone Return Air Node or NodeList Name
+  ZONE3-1,                    !- Zone Name
+  ZONE3-1 Eq,                 !- Zone Conditioning Equipment List Name
+  ZONE3-1 In Nodes,           !- Zone Air Inlet Node or NodeList Name
+  ,                           !- Zone Air Exhaust Node or NodeList Name
+  ZONE3-1 Node,               !- Zone Air Node Name
+  ZONE3-1 Out Node,           !- Zone Return Air Node or NodeList Name
+  ,                           !- Zone Return Air Node or NodeList Name
+  ,                           !- Zone Return Air Node 1 Flow Rate Fraction Schedule Name
+  ;                           !- Zone Return Air Node 1 Flow Rate Basis Node or NodeList Name
 \end{lstlisting}
+
 
 The following HVAC equipment types are allowed as zone equipment. The component matrix shows which coils and fans are allowed with which equipment models.
 
@@ -242,7 +266,7 @@ Unique identifying name.
 
 \paragraph{Field: Load Distribution Scheme}
 
-The Load Distribution Scheme selects the algorithm used to allocate the current zone load across the zone equipment. There are four choices: SequentialLoad, UniformLoad, UniformPLR, and SequentialUniformPLR. The default is SequentialLoad. In all cases, the equipment operates in the order specifed by the Zone Equipment Cooling Sequence and Heating or No-Load Sequence fields.
+The Load Distribution Scheme selects the algorithm used to allocate the current zone load across the zone equipment. There are four choices: SequentialLoad, UniformLoad, UniformPLR, and SequentialUniformPLR. The default is SequentialLoad. In all cases, the equipment operates in the order specified by the Zone Equipment Cooling Sequence and Heating or No-Load Sequence fields.
 
 \begin{itemize}
 \item
@@ -330,31 +354,263 @@ References a schedule that specifies the fraction of the remaining heating load 
 Examples of this statement in an IDF are:
 
 \begin{lstlisting}
+ZoneHVAC:EquipmentList,
+  Zone1Equipment,             !- Name
+  SequentialLoad,             !- Load Distribution Scheme
+  ZoneHVAC:AirDistributionUnit,  !- Zone Equipment 1 Object Type
+  Zone1TermReheat,            !- Zone Equipment 1 Name
+  1,                          !- Zone Equipment 1 Cooling Sequence
+  1,                          !- Zone Equipment 1 Heating or No-Load Sequence
+  ,                           !- Zone Equipment 1 Sequential Cooling Fraction Schedule Name
+  ;                           !- Zone Equipment 1 Sequential Heating Fraction Schedule Name
 
-    ZoneHVAC:EquipmentList,
-      Zone1Equipment,                !- Name
-      SequentialLoad,                !- Load Distribution Scheme
-      ZoneHVAC:AirDistributionUnit,  !- Zone Equipment 1 Object Type
-      Zone1TermReheat,               !- Zone Equipment 1 Name
-      1,                             !- Zone Equipment 1 Cooling Sequence
-      1,                             !- Zone Equipment 1 Heating or No-Load Sequence
-      ,                              !- Zone Equipment 1 Sequential Cooling Fraction Schedule Name
-      ;                              !- Zone Equipment 1 Sequential Heating Fraction Schedule Name
+ZoneHVAC:EquipmentList,
+  Zone1Equipment,             !- Name
+  SequentialLoad,             !- Load Distribution Scheme
+  ZoneHVAC:AirDistributionUnit,  !- Zone Equipment 1 Object Type
+  Zone1TermReheat,            !- Zone Equipment 1 Name
+  1,                          !- Zone Equipment 1 Cooling Sequence
+  1,                          !- Zone Equipment 1 Heating or No-Load Sequence
+  0.5,                        !- Zone Equipment 1 Sequential Cooling Fraction
+  0.5,                        !- Zone Equipment 1 Sequential Heating Fraction
+  ZoneHVAC:WaterToAirHeatPump,!- Zone Equipment 2 Object Type
+  Zone1WTAHP,                 !- Zone Equipment 2 Name
+  2,                          !- Zone Equipment 2 Cooling Sequence
+  2,                          !- Zone Equipment 2 Heating or No-Load Sequence
+  0.5,                        !- Zone Equipment 2 Sequential Cooling Fraction
+  0.5;                        !- Zone Equipment 2 Sequential Heating Fraction
+\end{lstlisting}
+
+\subsection{SpaceHVAC:EquipmentConnections}\label{spacehvacequipmentconnections}
+
+If HVAC equipment is modeled at the Space level for one or more zones, the SpaceHVAC:EquipmentConnections statement defines the node connections to a space. Any space modeled with SpaceHVAC:EquipmentConnections will have its own air temperature and humidity ratio, and surfaces and internal gains in the zone will interact with the space conditions.
+Note that all nodes mentioned in the SpaceHVAC:EquipmentConnections input must be unique. That is, all nodes in all the SpaceHVAC:EquipmentConnections statements referenced by the ``Space Air Inlet Nodes'', ``Space Air Exhaust Nodes'', ``Space Air Node Name'' and ``Space Return Air Node Name'' cannot have any node name appearing more than once. Unlike ZoneHVAC:EquipmentConnections, there is no equipment list. Equipment is connected to spaces using \hyperref[spacehvaczoneequipmentsplitter]{SpaceHVAC:ZoneEquipmentSplitter}, \hyperref[spacehvaczoneequipmentmixer]{SpaceHVAC:ZoneEquipmentMixer} and \hyperref[spacehvaczonereturnmixer]{SpaceHVAC:ZoneReturnMixer} as shown in Figure \ref{fig:space-hvac-equipment-connections}. If any space in a zone has a SpaceHVAC:EquipmentConnections object, then all spaces in that zone must have one, even if they are not served by any HVAC equipment. SpaceHVAC is only used when \hyperref[zoneairheatbalancealgorithm]{ZoneAirHeatBalanceAlgorithm} ``Do Space Heat Balance for Simulation'' is Yes.
+
+\begin{figure}[hbtp]
+\centering
+\includegraphics[width=0.9\textwidth, height=0.9\textheight, keepaspectratio=true]{media/SpaceHVACSchematic2.png}
+\caption{Space HVAC Equipment Connections \protect \label{fig:space-hvac-equipment-connections}}
+\end{figure}
 
 
-    ZoneHVAC:EquipmentList,
-      Zone1Equipment,                !- Name
-      SequentialLoad,                !- Load Distribution Scheme
-      ZoneHVAC:AirDistributionUnit,  !- Zone Equipment 1 Object Type
-      Zone1TermReheat,               !- Zone Equipment 1 Name
-      1,                             !- Zone Equipment 1 Cooling Sequence
-      1,                             !- Zone Equipment 1 Heating or No-Load Sequence
-      0.5,                           !- Zone Equipment 1 Sequential Cooling Fraction
-      0.5,                           !- Zone Equipment 1 Sequential Heating Fraction
-      ZoneHVAC:WaterToAirHeatPump,   !- Zone Equipment 2 Object Type
-      Zone1WTAHP,                    !- Zone Equipment 2 Name
-      2,                             !- Zone Equipment 2 Cooling Sequence
-      2,                             !- Zone Equipment 2 Heating or No-Load Sequence
-      0.5,                           !- Zone Equipment 2 Sequential Cooling Fraction
-      0.5;                           !- Zone Equipment 2 Sequential Heating Fraction
+\subsubsection{Inputs}\label{inputs-space-1-052}
+
+\paragraph{Field: Space Name}\label{field-space-name-015}
+
+Name links this equipment list back to the heat balance for the space.
+
+\paragraph{Field: Space Air Inlet Node or NodeList Name}\label{field-space-air-inlet-node-or-nodelist-name}
+
+There can be more than one air inlet node depending on how many pieces of equipment are connected to the space with a \hyperref[spacehvaczoneequipmentsplitter]{SpaceHVAC:ZoneEquipmentSplitter}. Generally there will be one air inlet node for each piece of space equipment that delivers conditioned air to the space. Components such as electric or hot water baseboards and radiant systems do not require space air inlet nodes. If there is only one node -- its name can be put in this field. If there is more than one node, this must be the name of a node list object (a node list object can also contain only one node name). If this field is not required (as in the baseboard system), it should be blank.
+
+\paragraph{Field: Space Air Exhaust Node or NodeList Name}\label{field-space-air-exhaust-node-or-nodelist-name}
+
+List of exhaust nodes leaving the space for exhaust fans, space energy recovery, etc. However these nodes are also used as sources of space air for space components such as fan coil units, unit heaters and ventilators, and window air conditioners. For each such component attached to a space there should be a unique space exhaust node acting as the inlet node to the component. If there is only one node -- its name can be put in this field. If there is more than one node, this must be the name of a node list object (a node list object can also contain only one node name). If there are no air exhaust nodes, this field should be blank.
+
+\paragraph{Field: Space Air Node Name}\label{field-space-air-node-name}
+
+The conditions at this node represent the average state of the air in the space. For spaces modeled as fully mixed the conditions at this node are assumed to represent the air in the entire space. This field is required for all SpaceHVAC:EquipmentConnections statements.
+
+\paragraph{Field: Space Return Air Node or NodeList Name}\label{field-space-return-air-node-or-nodelist-name}
+
+The name of one or more return air nodes which attach the space to an air loop return air path. The conditions at each return node represent the state of the air leaving the space including any heat gain assigned to that return node from \hyperref[lights-000]{Lights}, refrigeration equipment or airflow windows.
+
+\paragraph{Field: Space Return Air Node 1 Flow Rate Fraction Schedule Name}\label{field-space-return-air-flow-rate-fraction-schedule-name}
+
+The name of a schedule to specify the return air flow rate for the first return air node as a fraction of the base return air. If the next field is blank, then the return air flow rate is the total supply inlet flow rate to the space less the total exhaust node flow rate from the space multiplied by this schedule name. If this field is left blank, the schedule defaults to 1.0 at all times.
+
+\paragraph{Field: Space Return Air Node 1 Flow Rate Basis Node or NodeList Name}\label{field-space-return-air-flow-rate-basis-node-or-nodelist-name}
+
+The name of a node or list of nodes (\hyperref[nodelist]{NodeList}) that is used to calculate the return air flow rate for the first return air node in this space. The sum of the current flow rates for this node(s) multiplied by the Space Return Air Node 1 Flow Rate Fraction Schedule determines the return air flow rate. If this field is blank, then the base return air flow rate is the total supply inlet flow rate to the space less the total exhaust node flow rate from the space in the case of a single air loop serving this space. If there are multiple air loops serving this space, the base return air flow rate is governed by the corresponding supply inlet flow rate and the AirloopHVAC Design Return Air Flow Fraction of Supply Air Flow.
+
+An example of this statement in an IDF is:
+
+\begin{lstlisting}
+SpaceHVAC:EquipmentConnections,
+  SPACE3-1,                   !- Space Name
+  SPACE3-1 In Nodes,          !- Space Air Inlet Node or NodeList Name
+  ,                           !- Space Air Exhaust Node or NodeList Name
+  SPACE3-1 Node,              !- Space Air Node Name
+  SPACE3-1 Out Node,          !- Space Return Air Node or NodeList Name
+  ,                           !- Space Return Air Node 1 Flow Rate Fraction Schedule Name
+  ;                           !- Space Return Air Node 1 Flow Rate Basis Node or NodeList Name
+\end{lstlisting}
+
+\subsection{SpaceHVAC:ZoneEquipmentSplitter}\label{spacehvaczoneequipmentsplitter}
+
+The SpaceHVAC:ZoneEquipmentSplitter object distributes the output from a piece of zone equipment to one or more Spaces in the Zone.
+If any equipment in a zone has a SpaceHVAC:ZoneEquipmentSplitter, then all equipment in the Zone must have one.
+
+\subsubsection{Inputs}\label{inputs-1-052-seqsplitter}
+
+\paragraph{Field: Name}\label{field-seqsplitter-name-015}
+
+Name of the splitter object.
+
+\paragraph{Field: Zone Name}\label{field-seqsplitter-zone-name}
+
+Name of the zone served by the zone HVAC equipment.
+
+\paragraph{Field: Zone Equipment Object Type}\label{field-seqsplitter-zone-equipment-object-type}
+
+Type of zone equipment such as air distribution unit, baseboard, window air conditioner, etc. Must be a type of equipment
+that is included in the \hyperref[zonehvacequipmentlist]{ZoneHVAC:EquipmentList} for Zone Name.
+
+\paragraph{Field: Zone Equipment Name}\label{field-seqsplitter-zone-equipment-name}
+
+Name of zone equipment such as air distribution unit, baseboard, window air conditioner, etc. Must be a name of equipment
+that is included in the \hyperref[zonehvacequipmentlist]{ZoneHVAC:EquipmentList} for Zone Name.
+
+\paragraph{Field: Zone Equipment Outlet Node Name}\label{field-seqsplitter-zone-equipment-outlet-node-name}
+
+Name of the zone equipment outlet node that is split to the Space Supply Nodes. Ignored for non-airflow zone HVAC equipment.
+
+\paragraph{Field: Thermostat Control Method}\label{field-seqsplitter-thermostat-control-method}
+
+The method used to control this piece of zone equipment.
+
+\begin{description}
+       \item[SingleSpace] satisfies the thermostat in the Control Space Name
+       \item[Maximum] satisfies the thermostat in the connected spaces with the highest deviation from setpoint
+       \item[Ideal] ignores the Space Output Fractions and distributes the output to match the current space sensible loads.
+\end{description}
+
+\paragraph{Field: Control Space Name}\label{field-seqsplitter-control-space-name}
+
+Name of the space which controls this piece of zone equipment (i.e. the space where the thermostat is located). Only used with SingleSpace thermostat control method.
+
+\paragraph{Field: Space Fraction Method}\label{field-seqsplitter-space-sizing-basis}
+
+The method used to autosize the space fractions. The choices are: DesignCoolingLoad, DesignHeatingLoad, FloorArea, Volume, and PerimeterLength. The default is DesignCoolingLoad.
+For example, if there are 3 Spaces listed below, the Space 1 Output Fraction will be sized to Space1DesignCoolingLoad / Sum(Space1thru3DesignCoolingLoad). PerimeterLength sums the width of exterior walls in each space.
+
+\paragraph{Field: Space \textless{}x\textgreater{} Name}\label{field-seqsplitter-space-name}
+
+Name of a space to receive a portion of the output from this piece of zone equipment.
+
+\paragraph{Field: Space \textless{}x\textgreater{} Fraction}\label{field-seqsplitter-space-output-fraction}
+
+Fraction of this zone equipment output or airflow distributed to this space. May be autosized using the Space Fraction Method. The default is autosize.
+
+\paragraph{Field: Space \textless{}x\textgreater{} Supply Node Name}\label{field-seqsplitter-space-supply-node-name}
+
+The name of a \hyperref[spacehvacequipmentconnections]{SpaceHVAC:EquipmentConnections} Inlet Node Name that takes a fraction of the airflow from the Zone Equipment Outlet Node.
+Not used for non-airflow zone equipment.
+
+An example of this statement in an IDF is:
+
+\begin{lstlisting}
+SpaceHVAC:ZoneEquipmentSplitter,
+  Zone 5 ATU Space Splitter,  !- Name
+  Zone 5,                     !- Zone Name
+  ZoneHVAC:AirDistributionUnit,  !- Zone Equipment Object Type
+  Zone 5 ATU,                 !- Zone Equipment Name
+  Zone 5 In Node,             !- Zone Equipment Outlet Node Name
+  Ideal,                      !- Thermostat Control Method
+  ,                           !- Control Space Name
+  ,                           !- Space Fraction Method
+  Space 5 Office,             !- Space 1 Name
+  0.6,                        !- Space 1 Fraction {dimensionless}
+  Space 5 Office In Node,     !- Space 1 Supply Node Name
+  Space 5 Conference,         !- Space 2 Name
+  0.2,                        !- Space 2 Fraction {dimensionless}
+  Space 5 Conference In Node, !- Space 2 Supply Node Name
+  Zone 5-Remainder,           !- Space 3 Name
+  0.2,                        !- Space 3 Fraction {dimensionless}
+  Zone 5-Remainder In Node;   !- Space 3 Supply Node Name
+\end{lstlisting}
+
+\subsection{SpaceHVAC:ZoneEquipmentMixer}\label{spacehvaczoneequipmentmixer}
+
+The SpaceHVAC:ZoneEquipmentMixer object mixes the airflow from one or more Spaces into a piece of zone equipment.
+
+\subsubsection{Inputs}\label{inputs-1-052-seqmixer}
+
+\paragraph{Field: Name}\label{field-seqmixer-name-015}
+
+Name of the mixer object.
+
+\paragraph{Field: Zone Name}\label{field-seqmixer-zone-name}
+
+Name of the zone served by the zone HVAC equipment.
+
+\paragraph{Field: Zone Equipment Inlet Node Name}\label{field-seqmixer-zone-equipment-inlet-node-name}
+
+Name of the zone equipment inlet node that is supplied by the Space Nodes.
+
+\paragraph{Field: Space Fraction Method}\label{field-seqmixer-space-sizing-basis}
+
+The method used to autosize the space fractions. The choices are: DesignCoolingLoad, DesignHeatingLoad, FloorArea, Volume, and PerimeterLength. The default is DesignCoolingLoad.
+For example, if there are 3 Spaces listed below, the Space 1 Output Fraction will be sized to Space1DesignCoolingLoad / Sum(Space1thru3DesignCoolingLoad). PerimeterLength sums the width of exterior walls in each space.
+
+\paragraph{Field: Space \textless{}x\textgreater{} Name}\label{field-seqmixer-space-name}
+
+Name of a space to supply air to this piece of zone equipment.
+
+\paragraph{Field: Space \textless{}x\textgreater{} Fraction}\label{field-seqmixer-space-output-fraction}
+
+Fraction of this zone equipment output or airflow distributed to this space. May be autosized using the Space Fraction Method. The default is autosize.
+
+\paragraph{Field: Space \textless{}x\textgreater{} Node Name}\label{field-seqmixer-space-node-name}
+
+The name of a \hyperref[spacehvacequipmentconnections]{SpaceHVAC:EquipmentConnections} Exhaust Node Name that sends a fraction of the airflow to the Zone Equipment Inlst Node.
+
+An example of this statement in an IDF is:
+
+\begin{lstlisting}
+SpaceHVAC:ZoneEquipmentMixer,
+  Zone 5 ATU Space Mixer,     !- Name
+  Zone 5,                     !- Zone Name
+  Zone 5 In Node,             !- Zone Equipment Inlet Node Name
+  ,                           !- Space Fraction Method
+  Space 5 Office,             !- Space 1 Name
+  0.6,                        !- Space 1 Fraction {dimensionless}
+  Space 5 Office In Node,     !- Space 1 Node Name
+  Space 5 Conference,         !- Space 2 Name
+  0.2,                        !- Space 2 Fraction {dimensionless}
+  Space 5 Conference In Node, !- Space 2 Node Name
+  Zone 5-Remainder,           !- Space 3 Name
+  0.2,                        !- Space 3 Fraction {dimensionless}
+  Zone 5-Remainder In Node;   !- Space 3 Node Name
+\end{lstlisting}
+
+\subsection{SpaceHVAC:ZoneReturnMixer}\label{spacehvaczonereturnmixer}
+
+The SpaceHVAC:ZoneReturnMixer object mixes the airflow from one or more space return air nodes to a zone return air node.
+
+\subsubsection{Inputs}\label{inputs-1-052-sretmixer}
+
+\paragraph{Field: Name}\label{field-sretmixer-name-015}
+
+Name of the mixer object.
+
+\paragraph{Field: Zone Name}\label{field-sretmixer-zone-name}
+
+Name of the zone which contains the return air node.
+
+\paragraph{Field: Zone Return Air Node Name}\label{field-sretmixer-zone-return-air-node-name}
+
+Name of the zone return air node that is supplied by the Space Return Air Nodes.
+
+\paragraph{Field: Space \textless{}x\textgreater{} Name}\label{field-sretmixer-space-name}
+
+Name of a space to supply air to this zone return air node.
+
+\paragraph{Field: Space \textless{}x\textgreater{} Return Air Node Name}\label{field-sretmixer-space-node-name}
+
+The name of a \hyperref[spacehvacequipmentconnections]{SpaceHVAC:EquipmentConnections} Return Air Node Name that sends airflow to the Zone Return Air Node.
+
+An example of this statement in an IDF is:
+
+\begin{lstlisting}
+SpaceHVAC:ZoneReturnMixer,
+  Zone 5 Return Mixer,        !- Name
+  Zone 5,                     !- Zone Name
+  Zone 5 Out Node,            !- Zone Return Air Node Name
+  Space 5 Office,             !- Space 1 Name
+  Space 5 Office Return Node, !- Space 1 Return Air Node Name
+  Space 5 Conference,         !- Space 2 Name
+  Space 5 Conference Return Node,  !- Space 2 Return Air Node Name
+  Zone 5-Remainder,           !- Space 3 Name
+  Zone 5-Remainder Return Node;  !- Space 3 Return Air Node Name
 \end{lstlisting}

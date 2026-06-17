@@ -1,7 +1,7 @@
-// EnergyPlus, Copyright (c) 1996-2023, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
-// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other
+// National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
 // contributors. All rights reserved.
 //
 // NOTICE: This Software was developed under funding from the U.S. Department of Energy and the
@@ -45,6 +45,7 @@
 // OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 // POSSIBILITY OF SUCH DAMAGE.
 
+// EnergyPlus Headers
 #include <EnergyPlus/Data/EnergyPlusData.hh>
 #include <EnergyPlus/DataIPShortCuts.hh>
 #include <EnergyPlus/InputProcessing/InputProcessor.hh>
@@ -52,13 +53,15 @@
 
 namespace EnergyPlus {
 
-template <> EnumParser<WindowManager::WindowsModel>::EnumParser()
-{
-    m_Map["BUILTINWINDOWSMODEL"] = WindowManager::WindowsModel::BuiltIn;
-    m_Map["EXTERNALWINDOWSMODEL"] = WindowManager::WindowsModel::External;
-}
+namespace Window {
 
-namespace WindowManager {
+    constexpr std::array<std::string_view, (int)OpticalDataModel::Num> opticalDataModelNames = {
+        "SpectralAverage", "Spectral", "BSDF", "SpectralAndAngle"};
+
+    constexpr std::array<std::string_view, (int)OpticalDataModel::Num> opticalDataModelNamesUC = {
+        "SPECTRALAVERAGE", "SPECTRAL", "BSDF", "SPECTRALANDANGLE"};
+
+    constexpr std::array<std::string_view, (int)WindowsModel::Num> windowsModelNamesUC = {"BUILTINWINDOWSMODEL", "EXTERNALWINDOWSMODEL"};
 
     /////////////////////////////////////////////////////////////////////////////////////////
     //  CWindowModel
@@ -78,17 +81,20 @@ namespace WindowManager {
 
         // PURPOSE OF THIS SUBROUTINE:
         // Reads input and creates instance of WindowModel object
-        int NumNums;
-        int NumAlphas;
-        int IOStat;
 
-        auto aModel = std::make_unique<CWindowModel>();
+        auto aModel = std::make_unique<CWindowModel>(); // (AUTO_OK)
         int numCurrModels = state.dataInputProcessing->inputProcessor->getNumObjectsFound(state, objectName);
         if (numCurrModels > 0) {
+            int NumNums;
+            int NumAlphas;
+            int IOStat;
             state.dataInputProcessing->inputProcessor->getObjectItem(
                 state, objectName, 1, state.dataIPShortCut->cAlphaArgs, NumAlphas, state.dataIPShortCut->rNumericArgs, NumNums, IOStat);
-            EnumParser<WindowsModel> aParser;
-            aModel->m_Model = aParser.StringToEnum(state, state.dataIPShortCut->cAlphaArgs(1));
+            // Please consider using getEnumValue pattern here.
+            // Consider that you are creating an entire map for the
+            // sole purpose of looking up a single element
+
+            aModel->m_Model = static_cast<WindowsModel>(getEnumValue(windowsModelNamesUC, state.dataIPShortCut->cAlphaArgs(1)));
         }
 
         return aModel;
@@ -121,7 +127,7 @@ namespace WindowManager {
     {
         // Process input data and counts if number of complex fenestration objects is greater
         // than zero in which case it will use BSDF window model
-        auto aModel = std::make_unique<CWindowOpticalModel>();
+        auto aModel = std::make_unique<CWindowOpticalModel>(); // (AUTO_OK)
         int numCurrModels = state.dataInputProcessing->inputProcessor->getNumObjectsFound(state, "Construction:ComplexFenestrationState");
 
         if (numCurrModels > 0) {
@@ -141,6 +147,6 @@ namespace WindowManager {
         return (m_Model == WindowsOpticalModel::Simplified);
     }
 
-} // namespace WindowManager
+} // namespace Window
 
 } // namespace EnergyPlus

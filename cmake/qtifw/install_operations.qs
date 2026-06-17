@@ -15,7 +15,6 @@ function Component()
       component.addOperation("Execute", "chmod", "+x", "@TargetDir@/PreProcess/IDFVersionUpdater/IDFVersionUpdater.app/Contents/MacOS/IDFVersionUpdater");
       component.addOperation("Execute", "chmod", "+x", "@TargetDir@/PreProcess/EP-Launch-Lite.app/Contents/MacOS/EP-Launch-Lite");
       component.addOperation("Execute", "chmod", "+x", "@TargetDir@/PreProcess/EP-Launch-Lite.app/Contents/MacOS/python");
-      component.addOperation("Execute", "chmod", "+x", "@TargetDir@/PostProcess/EP-Compare/EP-Compare.app/Contents/MacOS/EP-Compare");
 
       // Not sure necessary so not doing it yet
       // component.addOperation("Execute", "chmod", "-R", "a+w", "@TargetDir@");
@@ -70,11 +69,3 @@ function Component()
     }
   }
 }
-
-
-
-
-
-
-
-

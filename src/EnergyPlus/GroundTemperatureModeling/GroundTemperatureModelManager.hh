@@ -1,7 +1,7 @@
-// EnergyPlus, Copyright (c) 1996-2023, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
-// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other
+// National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
 // contributors. All rights reserved.
 //
 // NOTICE: This Software was developed under funding from the U.S. Department of Energy and the
@@ -47,45 +47,4 @@
 
 #ifndef GroundTemperatureModelManager_hh_INCLUDED
 #define GroundTemperatureModelManager_hh_INCLUDED
-
-// C++ Headers
-#include <memory>
-
-// ObjexxFCL Headers
-#include <ObjexxFCL/Array1D.hh>
-
-// EnergyPlus Headers
-#include <EnergyPlus/Data/BaseData.hh>
-#include <EnergyPlus/DataGlobals.hh>
-#include <EnergyPlus/EnergyPlus.hh>
-#include <EnergyPlus/GroundTemperatureModeling/BaseGroundTemperatureModel.hh>
-
-namespace EnergyPlus {
-
-// Forward declarations
-struct EnergyPlusData;
-class BaseGroundTempsModel;
-
-namespace GroundTemperatureManager {
-
-    extern const std::array<std::string_view, static_cast<int>(GroundTempObjType::Num)> groundTempModelNamesUC;
-
-    extern const std::array<std::string_view, static_cast<int>(GroundTempObjType::Num)> groundTempModelNames;
-
-    std::shared_ptr<BaseGroundTempsModel> GetGroundTempModelAndInit(EnergyPlusData &state, std::string_view const type, std::string const &name);
-
-} // namespace GroundTemperatureManager
-
-struct GroundTemperatureManagerData : BaseGlobalStruct
-{
-    std::vector<std::shared_ptr<BaseGroundTempsModel>> groundTempModels;
-
-    void clear_state() override
-    {
-        new (this) GroundTemperatureManagerData();
-    }
-};
-
-} // namespace EnergyPlus
-
 #endif

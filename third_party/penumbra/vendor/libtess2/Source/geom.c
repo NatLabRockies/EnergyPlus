@@ -216,9 +216,9 @@ void tesedgeIntersect( TESSvertex *o1, TESSvertex *d1,
 	* using the TransLeq ordering to find the intersection t-value.
 	*/
 
-	if( ! VertLeq( o1, d1 )) { Swap( o1, d1 ); }
-	if( ! VertLeq( o2, d2 )) { Swap( o2, d2 ); }
-	if( ! VertLeq( o1, o2 )) { Swap( o1, o2 ); Swap( d1, d2 ); }
+	if( ! VertLeq( o1, d1 )) { Swap( o1, d1 ) {}; }
+	if( ! VertLeq( o2, d2 )) { Swap( o2, d2 ) {}; }
+	if( ! VertLeq( o1, o2 )) { Swap( o1, o2 ) {}; Swap( d1, d2 ) {}; }
 
 	if( ! VertLeq( o2, d1 )) {
 		/* Technically, no intersection -- do our best */
@@ -239,9 +239,9 @@ void tesedgeIntersect( TESSvertex *o1, TESSvertex *d1,
 
 	/* Now repeat the process for t */
 
-	if( ! TransLeq( o1, d1 )) { Swap( o1, d1 ); }
-	if( ! TransLeq( o2, d2 )) { Swap( o2, d2 ); }
-	if( ! TransLeq( o1, o2 )) { Swap( o1, o2 ); Swap( d1, d2 ); }
+	if( ! TransLeq( o1, d1 )) { Swap( o1, d1 ) {}; }
+	if( ! TransLeq( o2, d2 )) { Swap( o2, d2 ) {}; }
+	if( ! TransLeq( o1, o2 )) { Swap( o1, o2 ) {}; Swap( d1, d2 ) {}; }
 
 	if( ! TransLeq( o2, d1 )) {
 		/* Technically, no intersection -- do our best */

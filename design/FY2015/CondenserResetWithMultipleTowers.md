@@ -5,7 +5,7 @@ This will add implementation for using multiple cooling towers into the followin
 
  - SetpointManager:CondenserEnteringReset
  - SetpointManager:CondenserEnteringReset:Ideal
- 
+
 These setpoint managers are intended to minimize plant energy use by adjusting the condenser setpoint temperature.  The first uses user-defined curve fit expressions to determine a reset temperature.  The second uses a search technique to re-simulate the plant and find the minimum energy point.
 
 # Justification
@@ -41,7 +41,7 @@ Some refactoring will be performed in SetPointManager:
 ### Core Code Changes
 
 Code changes for this new feature:
- 
+
  - With the SetpointManager:CondenserEnteringReset implementation, it isn't clear why it doesn't support multiple towers, so long as the effect of multiple towers are included in the user-defined curves
  - With the SetpointManager:CondenserEnteringReset:Ideal implementation, at a minimum the tower energy variables will need to be transformed into vectors, possibly additional work revealed during implementation and testing
  - Unit tests will be added
@@ -86,7 +86,7 @@ Code changes for this new feature:
   - calculate setpoint based on conditions
 ### Simulation output
   - (use this section for determining outputs for testing/evaluation, and also trying out multiple towers)
- 
+
 ## SetpointManager:CondenserEnteringReset:Ideal
 ### Purpose
   - determines near-optimal condenser water entering setpoint resulting in minimum net energy consumption
@@ -121,7 +121,7 @@ Code changes for this new feature:
     - set RunOptCondEntTemp to true
 ### Source code outside of SetPointManager:
   - DataGlobals::RunOptCondEntTemp
-  - in HVACManager, after SimHVAC call, if any ideal cond resets: while(RunOptCondEntTemp) {SimHVAC();}  
+  - in HVACManager, after SimHVAC call, if any ideal cond resets: while(RunOptCondEntTemp) {SimHVAC();}
 ### Simulation output
   - (use this section for determining outputs for testing/evaluation, and also trying out multiple towers)
 
@@ -135,7 +135,7 @@ The two files differ in only three ways:
  - Comments in the header
  - The actual SetPointManager change
  - Additional output variables in the "ideal" example
- 
+
 The "ideal" file includes the same curves that are required in the non-"ideal" file even though they are not used.  Since the files are identical, the plant topology can be described once.
 
 ## Chilled water loop
@@ -165,17 +165,17 @@ I modified the ConEntTempReset file to include a second cooling tower.  I encoun
 - Report out the setpoint on the outlet node of the condenser supply side.  The value should be identical, or close.  The difference is that there are two towers contributing to meeting this setpoint, but the overall loop behavior should be fine.
 
   - Results, DD-only: The setpoint is identical between the single and multiple tower versions.  On the winter design day, the setpoint stays at 30 degrees.  On the summer design day, the setpoint is pegged at 32 degrees.  I checked the inputs, and this is the value of the ```Maximum Condenser Entering Water Temperature {C}``` field.  It appears that the input file doesn't demonstrate the setpoint reset very well on the design day itself, so I'll re-run annual next.  As for functionality, adding the second tower doesn't cause much difference in results, here is the tower heat transfer rate for the single tower in the base case, and the summation of two towers in the two tower case:
-  
+
 ![](CondenserResetWithMultipleTowers-FigureTowerHeatTransferTest.png)
 
   Although the total heat transfer varies slightly through the day, the overall behavior is nearly equivalent.
 
   - Results, Annual: To check the annual operation of the setpoint manager, I re-ran the input file and plotted the setpoint temperature:
-  
+
 ![](CondenserResetWithMultipleTowers-FigureAnnualCondenserSetpoint.png)
-  
-  The loop behaves pretty much identically throughout the entire year.  The small deviation could be that the loop was out of capacity with only a single tower, I might investigate further, but not right now.  
-  
+
+  The loop behaves pretty much identically throughout the entire year.  The small deviation could be that the loop was out of capacity with only a single tower, I might investigate further, but not right now.
+
 I am moving forward assuming the non-ideal condenser setpoint is working fine for multiple towers.  The optimality of the setpoint when using two towers is similar for a single tower configuration in that it is determined solely on how well the curves are defined for optimality.
 
 ## Modifications and testing of the ideal condenser setpoint manager

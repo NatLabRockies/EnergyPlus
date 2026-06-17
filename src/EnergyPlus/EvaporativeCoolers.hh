@@ -1,7 +1,7 @@
-// EnergyPlus, Copyright (c) 1996-2023, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
-// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other
+// National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
 // contributors. All rights reserved.
 //
 // NOTICE: This Software was developed under funding from the U.S. Department of Energy and the
@@ -54,6 +54,7 @@
 // EnergyPlus Headers
 #include <EnergyPlus/Data/BaseData.hh>
 #include <EnergyPlus/DataGlobals.hh>
+#include <EnergyPlus/DataHVACGlobals.hh>
 #include <EnergyPlus/DataZoneEquipment.hh>
 #include <EnergyPlus/EnergyPlus.hh>
 
@@ -61,6 +62,10 @@ namespace EnergyPlus {
 
 // Forward declarations
 struct EnergyPlusData;
+
+namespace Curve {
+    struct Curve;
+}
 
 namespace EvaporativeCoolers {
 
@@ -70,14 +75,6 @@ namespace EvaporativeCoolers {
         Invalid = -1,
         FromMains,
         FromTank,
-        Num
-    };
-
-    enum class FanPlacement
-    {
-        Invalid = -1,
-        BlowThruFan,
-        DrawThruFan,
         Num
     };
 
@@ -117,12 +114,12 @@ namespace EvaporativeCoolers {
     {
         std::string Name; // Name of the EvapCooler
         int EquipIndex;
-        EvapCoolerType evapCoolerType; // Type of the EvapCooler
-        std::string EvapControlType;   // Type of Control for the EvapCooler
-        std::string Schedule;          // HeatingCoil Operation Schedule
-        int SchedPtr;                  // Pointer to the correct schedule
-        Real64 VolFlowRate;            // Volume Flow Rate in Evap Cooler needed for calculating SatEff
-        Real64 DesVolFlowRate;         // Design volume flow rate (autosize or user input) - this is only used to compute design pump power
+        EvapCoolerType evapCoolerType;         // Type of the EvapCooler
+        std::string EvapControlType;           // Type of Control for the EvapCooler
+        std::string Schedule;                  // HeatingCoil Operation Schedule
+        Sched::Schedule *availSched = nullptr; // Pointer to the correct schedule
+        Real64 VolFlowRate;                    // Volume Flow Rate in Evap Cooler needed for calculating SatEff
+        Real64 DesVolFlowRate;                 // Design volume flow rate (autosize or user input) - this is only used to compute design pump power
         Real64 OutletTemp;
         Real64 OuletWetBulbTemp;
         Real64 OutletHumRat;
@@ -177,35 +174,35 @@ namespace EvaporativeCoolers {
         std::string EvapWaterSupplyName; // name of water source e.g. water storage tank
         int EvapWaterSupTankID;
         int EvapWaterTankDemandARRID;
-        Real64 DriftFraction;                // excess water from drift as fraction of Evap Water Consumption rate
-        Real64 BlowDownRatio;                // excess water use for blowdown as solids ratio to be maintained
-        Real64 EvapWaterConsumpRate;         // Evap Water Consumption rate in m3/sec
-        Real64 EvapWaterConsump;             // Evap Water Consumption in m3
-        Real64 EvapWaterStarvMakupRate;      // Evap water consumed but not really available from tank m3/s
-        Real64 EvapWaterStarvMakup;          // Evap water consumed but not really available from tank m3
-        Real64 SatEff;                       // Reporting for Direct Stage and Ind Dry Saturation Efficiency
-        Real64 StageEff;                     // Reporting for Indirect Total Stage Efficiency
-        Real64 DPBoundFactor;                // in RDDSpecial efficency w.r.t. dewpoint
-        int EvapControlNodeNum;              // need to control to avoid over cooling
-        Real64 DesiredOutletTemp;            // setpoint manager should set this
-        Real64 PartLoadFract;                // reduces cooling performance and associated fan power
-        int DewPointBoundFlag;               // report when indirect research special cooler is bound by dewpoint
-        Real64 MinOATDBEvapCooler;           // Minimum outdoor air operating dry-bulb temperature for evaporative cooler
-        Real64 MaxOATDBEvapCooler;           // Maximum outdoor air operating dry-bulb temperature for evaporative cooler
-        bool EvapCoolerOperationControlFlag; // turns the evap cooler on/off depending on the outdoor air temperature min and max limits
-        Real64 MaxOATWBEvapCooler;           // Evaporative Operation Maximum Limit Outdoor Wetbulb Temperature
-        Real64 DryCoilMaxEfficiency;         // Cooler Drybulb Design Effectiveness
-        Real64 IndirectFanPower;             // Secondary Fan Design Power
-        Real64 FanSizingSpecificPower;       // secondary fan sizing specific power in W/(m3/s)
-        Real64 RecircPumpSizingFactor;       // water pump power sizing factor W/(m3/s) air
-        Real64 IndirectVolFlowScalingFactor; // secondary air flow sizing Factor
-        int WetbulbEffecCurveIndex;          // wetbulb effectiveness modifier curve name as a function of flow fraction
-        int DrybulbEffecCurveIndex;          // drybulb effectiveness modifier curve name as a function of flow fraction
-        int FanPowerModifierCurveIndex;      // secondary fan power modifier curve name as a function of flow fraction
-        int PumpPowerModifierCurveIndex;     // recirculating pump power modifier curve name as a function of flow fraction
-        int IECOperatingStatus;              // operating mode status of indirect evaporative cooler research special (0: Off, 1: Dry, 2: Wet)
-        int IterationLimit;                  // used for Used for RegulaFalsi recurring error message error -1
-        int IterationFailed;                 // Used for RegulaFalsi recurring error message error -2
+        Real64 DriftFraction;                           // excess water from drift as fraction of Evap Water Consumption rate
+        Real64 BlowDownRatio;                           // excess water use for blowdown as solids ratio to be maintained
+        Real64 EvapWaterConsumpRate;                    // Evap Water Consumption rate in m3/sec
+        Real64 EvapWaterConsump;                        // Evap Water Consumption in m3
+        Real64 EvapWaterStarvMakupRate;                 // Evap water consumed but not really available from tank m3/s
+        Real64 EvapWaterStarvMakup;                     // Evap water consumed but not really available from tank m3
+        Real64 SatEff;                                  // Reporting for Direct Stage and Ind Dry Saturation Efficiency
+        Real64 StageEff;                                // Reporting for Indirect Total Stage Efficiency
+        Real64 DPBoundFactor;                           // in RDDSpecial efficiency w.r.t. dewpoint
+        int EvapControlNodeNum;                         // need to control to avoid over cooling
+        Real64 DesiredOutletTemp;                       // setpoint manager should set this
+        Real64 PartLoadFract;                           // reduces cooling performance and associated fan power
+        int DewPointBoundFlag;                          // report when indirect research special cooler is bound by dewpoint
+        Real64 MinOATDBEvapCooler;                      // Minimum outdoor air operating dry-bulb temperature for evaporative cooler
+        Real64 MaxOATDBEvapCooler;                      // Maximum outdoor air operating dry-bulb temperature for evaporative cooler
+        bool EvapCoolerOperationControlFlag;            // turns the evap cooler on/off depending on the outdoor air temperature min and max limits
+        Real64 MaxOATWBEvapCooler;                      // Evaporative Operation Maximum Limit Outdoor Wetbulb Temperature
+        Real64 DryCoilMaxEfficiency;                    // Cooler Drybulb Design Effectiveness
+        Real64 IndirectFanPower;                        // Secondary Fan Design Power
+        Real64 FanSizingSpecificPower;                  // secondary fan sizing specific power in W/(m3/s)
+        Real64 RecircPumpSizingFactor;                  // water pump power sizing factor W/(m3/s) air
+        Real64 IndirectVolFlowScalingFactor;            // secondary air flow sizing Factor
+        Curve::Curve *WetbulbEffecCurve = nullptr;      // wetbulb effectiveness modifier curve name as a function of flow fraction
+        Curve::Curve *DrybulbEffecCurve = nullptr;      // drybulb effectiveness modifier curve name as a function of flow fraction
+        Curve::Curve *FanPowerModifierCurve = nullptr;  // secondary fan power modifier curve name as a function of flow fraction
+        Curve::Curve *PumpPowerModifierCurve = nullptr; // recirculating pump power modifier curve name as a function of flow fraction
+        int IECOperatingStatus; // operating mode status of indirect evaporative cooler research special (0: Off, 1: Dry, 2: Wet)
+        int IterationLimit;     // used for Used for RegulaFalsi recurring error message error -1
+        int IterationFailed;    // Used for RegulaFalsi recurring error message error -2
         // rather than wetbulb-depression approach
         OperatingMode EvapCoolerRDDOperatingMode; // the indirect evaporative cooler Research Special operating mode variable
         // Operational fault parameters
@@ -216,11 +213,11 @@ namespace EvaporativeCoolers {
 
         // Default Constructor
         EvapConditions()
-            : EquipIndex(0), evapCoolerType(EvapCoolerType::Invalid), SchedPtr(0), VolFlowRate(0.0), DesVolFlowRate(0.0), OutletTemp(0.0),
-              OuletWetBulbTemp(0.0), OutletHumRat(0.0), OutletEnthalpy(0.0), OutletPressure(0.0), OutletMassFlowRate(0.0),
-              OutletMassFlowRateMaxAvail(0.0), OutletMassFlowRateMinAvail(0.0), InitFlag(false), InletNode(0), OutletNode(0), SecondaryInletNode(0),
-              SecondaryOutletNode(0), TertiaryInletNode(0), InletMassFlowRate(0.0), InletMassFlowRateMaxAvail(0.0), InletMassFlowRateMinAvail(0.0),
-              InletTemp(0.0), InletWetBulbTemp(0.0), InletHumRat(0.0), InletEnthalpy(0.0), InletPressure(0.0), SecInletMassFlowRate(0.0),
+            : EquipIndex(0), evapCoolerType(EvapCoolerType::Invalid), VolFlowRate(0.0), DesVolFlowRate(0.0), OutletTemp(0.0), OuletWetBulbTemp(0.0),
+              OutletHumRat(0.0), OutletEnthalpy(0.0), OutletPressure(0.0), OutletMassFlowRate(0.0), OutletMassFlowRateMaxAvail(0.0),
+              OutletMassFlowRateMinAvail(0.0), InitFlag(false), InletNode(0), OutletNode(0), SecondaryInletNode(0), SecondaryOutletNode(0),
+              TertiaryInletNode(0), InletMassFlowRate(0.0), InletMassFlowRateMaxAvail(0.0), InletMassFlowRateMinAvail(0.0), InletTemp(0.0),
+              InletWetBulbTemp(0.0), InletHumRat(0.0), InletEnthalpy(0.0), InletPressure(0.0), SecInletMassFlowRate(0.0),
               SecInletMassFlowRateMaxAvail(0.0), SecInletMassFlowRateMinAvail(0.0), SecInletTemp(0.0), SecInletWetBulbTemp(0.0), SecInletHumRat(0.0),
               SecInletEnthalpy(0.0), SecInletPressure(0.0), SecOutletTemp(0.0), SecOuletWetBulbTemp(0.0), SecOutletHumRat(0.0),
               SecOutletEnthalpy(0.0), SecOutletMassFlowRate(0.0), PadDepth(0.0), PadArea(0.0), RecircPumpPower(0.0), IndirectRecircPumpPower(0.0),
@@ -231,8 +228,7 @@ namespace EvaporativeCoolers {
               SatEff(0.0), StageEff(0.0), DPBoundFactor(0.0), EvapControlNodeNum(0), DesiredOutletTemp(0.0), PartLoadFract(0.0), DewPointBoundFlag(0),
               MinOATDBEvapCooler(0.0), MaxOATDBEvapCooler(0.0), EvapCoolerOperationControlFlag(false), MaxOATWBEvapCooler(0.0),
               DryCoilMaxEfficiency(0.0), IndirectFanPower(0.0), FanSizingSpecificPower(0.0), RecircPumpSizingFactor(0.0),
-              IndirectVolFlowScalingFactor(0.0), WetbulbEffecCurveIndex(0), DrybulbEffecCurveIndex(0), FanPowerModifierCurveIndex(0),
-              PumpPowerModifierCurveIndex(0), IECOperatingStatus(0), IterationLimit(0), IterationFailed(0),
+              IndirectVolFlowScalingFactor(0.0), IECOperatingStatus(0), IterationLimit(0), IterationFailed(0),
               EvapCoolerRDDOperatingMode(OperatingMode::Invalid), FaultyEvapCoolerFoulingFlag(false), FaultyEvapCoolerFoulingIndex(0),
               FaultyEvapCoolerFoulingFactor(1.0), MySizeFlag(true)
         {
@@ -243,30 +239,29 @@ namespace EvaporativeCoolers {
     {
         std::string Name; // user identifier
         int ZoneNodeNum;
-        int AvailSchedIndex;              // pointer to local availability schedule
-        std::string AvailManagerListName; // Name of an availability manager list object
+        Sched::Schedule *availSched = nullptr; // local availability schedule
+        std::string AvailManagerListName;      // Name of an availability manager list object
         bool UnitIsAvailable;
-        int FanAvailStatus;
+        Avail::Status FanAvailStatus = Avail::Status::NoAction;
         int OAInletNodeNum;    // outdoor air inlet node index
         int UnitOutletNodeNum; // Unit air outlet (to zone) node index
         int UnitReliefNodeNum; // Unit relief air (from zone) node index (optional)
-        std::string FanObjectClassName;
-        int FanType_Num;
+        HVAC::FanType fanType;
         std::string FanName;
         int FanIndex;
         Real64 ActualFanVolFlowRate;
-        int FanAvailSchedPtr;
+        Sched::Schedule *fanAvailSched = nullptr;
         int FanInletNodeNum;
         int FanOutletNodeNum;
-        int OpMode; // mode of operation; 1=cycling fan, 2=continuous fan
+        HVAC::FanOp fanOp = HVAC::FanOp::Invalid;
         Real64 DesignAirVolumeFlowRate;
         Real64 DesignAirMassFlowRate;
         Real64 DesignFanSpeedRatio;
         Real64 FanSpeedRatio;
-        FanPlacement FanLocation;
+        HVAC::FanPlace fanPlace;
         ControlType ControlSchemeType;
         Real64 TimeElapsed;
-        Real64 ThrottlingRange; // temperature range for hystersis type tstat contorl [Delta C]
+        Real64 ThrottlingRange; // temperature range for hystersis type tstat control [Delta C]
         bool IsOnThisTimestep;
         bool WasOnLastTimestep;
         Real64 ThresholdCoolingLoad;
@@ -307,6 +302,7 @@ namespace EvaporativeCoolers {
         int UnitLoadControlLimitsErrorIndex;  // root solver errors, art load ratio limits exceeded.
         int ZonePtr;                          // pointer to a zone served by an evaportive cooler unit
         int HVACSizingIndex;                  // index of a HVACSizing object for an evaportive cooler unit
+        Real64 ShutOffRelativeHumidity;       // Zone relative humidity above which the evap cooler is shut off.
         bool MySize;                          // sizing logic flag
         bool MyEnvrn;                         // sim environmental logic flag
         bool MyFan;                           // fan sizing logic flag
@@ -314,19 +310,19 @@ namespace EvaporativeCoolers {
 
         // Default Constructor
         ZoneEvapCoolerUnitStruct()
-            : ZoneNodeNum(0), AvailSchedIndex(0), UnitIsAvailable(false), FanAvailStatus(0), OAInletNodeNum(0), UnitOutletNodeNum(0),
-              UnitReliefNodeNum(0), FanType_Num(0), FanIndex(0), ActualFanVolFlowRate(0.0), FanAvailSchedPtr(0), FanInletNodeNum(0),
-              FanOutletNodeNum(0), OpMode(0), DesignAirVolumeFlowRate(0.0), DesignAirMassFlowRate(0.0), DesignFanSpeedRatio(0.0), FanSpeedRatio(0.0),
-              FanLocation(FanPlacement::Invalid), ControlSchemeType(ControlType::Invalid), TimeElapsed(0.0), ThrottlingRange(0.0),
-              IsOnThisTimestep(false), WasOnLastTimestep(false), ThresholdCoolingLoad(0.0), EvapCooler_1_Type_Num(EvapCoolerType::Invalid),
-              EvapCooler_1_Index(0), EvapCooler_1_AvailStatus(false), EvapCooler_2_Type_Num(EvapCoolerType::Invalid), EvapCooler_2_Index(0),
-              EvapCooler_2_AvailStatus(false), OAInletRho(0.0), OAInletCp(0.0), OAInletTemp(0.0), OAInletHumRat(0.0), OAInletMassFlowRate(0.0),
-              UnitOutletTemp(0.0), UnitOutletHumRat(0.0), UnitOutletMassFlowRate(0.0), UnitReliefTemp(0.0), UnitReliefHumRat(0.0),
-              UnitReliefMassFlowRate(0.0), UnitTotalCoolingRate(0.0), UnitTotalCoolingEnergy(0.0), UnitSensibleCoolingRate(0.0),
-              UnitSensibleCoolingEnergy(0.0), UnitLatentHeatingRate(0.0), UnitLatentHeatingEnergy(0.0), UnitLatentCoolingRate(0.0),
-              UnitLatentCoolingEnergy(0.0), UnitFanSpeedRatio(0.0), UnitPartLoadRatio(0.0), UnitVSControlMaxIterErrorIndex(0),
-              UnitVSControlLimitsErrorIndex(0), UnitLoadControlMaxIterErrorIndex(0), UnitLoadControlLimitsErrorIndex(0), ZonePtr(0),
-              HVACSizingIndex(0), MySize(true), MyEnvrn(true), MyFan(true), MyZoneEq(true)
+            : ZoneNodeNum(0), UnitIsAvailable(false), OAInletNodeNum(0), UnitOutletNodeNum(0), UnitReliefNodeNum(0), fanType(HVAC::FanType::Invalid),
+              FanIndex(0), ActualFanVolFlowRate(0.0), FanInletNodeNum(0), FanOutletNodeNum(0), DesignAirVolumeFlowRate(0.0),
+              DesignAirMassFlowRate(0.0), DesignFanSpeedRatio(0.0), FanSpeedRatio(0.0), fanPlace(HVAC::FanPlace::Invalid),
+              ControlSchemeType(ControlType::Invalid), TimeElapsed(0.0), ThrottlingRange(0.0), IsOnThisTimestep(false), WasOnLastTimestep(false),
+              ThresholdCoolingLoad(0.0), EvapCooler_1_Type_Num(EvapCoolerType::Invalid), EvapCooler_1_Index(0), EvapCooler_1_AvailStatus(false),
+              EvapCooler_2_Type_Num(EvapCoolerType::Invalid), EvapCooler_2_Index(0), EvapCooler_2_AvailStatus(false), OAInletRho(0.0), OAInletCp(0.0),
+              OAInletTemp(0.0), OAInletHumRat(0.0), OAInletMassFlowRate(0.0), UnitOutletTemp(0.0), UnitOutletHumRat(0.0), UnitOutletMassFlowRate(0.0),
+              UnitReliefTemp(0.0), UnitReliefHumRat(0.0), UnitReliefMassFlowRate(0.0), UnitTotalCoolingRate(0.0), UnitTotalCoolingEnergy(0.0),
+              UnitSensibleCoolingRate(0.0), UnitSensibleCoolingEnergy(0.0), UnitLatentHeatingRate(0.0), UnitLatentHeatingEnergy(0.0),
+              UnitLatentCoolingRate(0.0), UnitLatentCoolingEnergy(0.0), UnitFanSpeedRatio(0.0), UnitPartLoadRatio(0.0),
+              UnitVSControlMaxIterErrorIndex(0), UnitVSControlLimitsErrorIndex(0), UnitLoadControlMaxIterErrorIndex(0),
+              UnitLoadControlLimitsErrorIndex(0), ZonePtr(0), HVACSizingIndex(0), ShutOffRelativeHumidity(100.0), MySize(true), MyEnvrn(true),
+              MyFan(true), MyZoneEq(true)
         {
         }
     };
@@ -457,9 +453,17 @@ struct EvaporativeCoolersData : BaseGlobalStruct
     bool MySetPointCheckFlag = true;
     bool ZoneEquipmentListChecked = false;
 
+    void init_constant_state([[maybe_unused]] EnergyPlusData &state) override
+    {
+    }
+
+    void init_state([[maybe_unused]] EnergyPlusData &state) override
+    {
+    }
+
     void clear_state() override
     {
-        *this = EvaporativeCoolersData();
+        new (this) EvaporativeCoolersData();
     }
 };
 

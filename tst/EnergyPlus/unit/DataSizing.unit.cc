@@ -1,7 +1,7 @@
-// EnergyPlus, Copyright (c) 1996-2023, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
-// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other
+// National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
 // contributors. All rights reserved.
 //
 // NOTICE: This Software was developed under funding from the U.S. Department of Energy and the
@@ -63,9 +63,10 @@
 #include <EnergyPlus/ZoneEquipmentManager.hh>
 
 #include "Fixtures/EnergyPlusFixture.hh"
-#include <nlohmann/json_literals.hpp>
+#include <nlohmann/json.hpp>
 
 using namespace EnergyPlus;
+using namespace nlohmann::literals;
 
 TEST_F(EnergyPlusFixture, DataSizingTest_resetHVACSizingGlobals)
 {
@@ -79,7 +80,7 @@ TEST_F(EnergyPlusFixture, DataSizingTest_resetHVACSizingGlobals)
     state->dataSize->DataPltSizHeatNum = 1;
     state->dataSize->DataWaterLoopNum = 1;
     state->dataSize->DataCoilNum = 1;
-    state->dataSize->DataFanOpMode = 1;
+    state->dataSize->DataFanOp = HVAC::FanOp::Cycling;
     state->dataSize->DataCoilIsSuppHeater = true;
     state->dataSize->DataIsDXCoil = true;
     state->dataSize->DataAutosizable = false;
@@ -114,8 +115,8 @@ TEST_F(EnergyPlusFixture, DataSizingTest_resetHVACSizingGlobals)
     state->dataSize->DataFractionUsedForSizing = 1.0;
     state->dataSize->DataNonZoneNonAirloopValue = 1.0;
     state->dataSize->DataZoneNumber = 1;
-    state->dataSize->DataFanEnumType = 1;
-    state->dataSize->DataFanIndex = 1;
+    state->dataSize->DataFanType = HVAC::FanType::Constant;
+    state->dataSize->DataFanIndex = 0;
     state->dataSize->DataWaterCoilSizCoolDeltaT = 1.0;
     state->dataSize->DataWaterCoilSizHeatDeltaT = 1.0;
     state->dataSize->DataNomCapInpMeth = true;
@@ -141,7 +142,7 @@ TEST_F(EnergyPlusFixture, DataSizingTest_resetHVACSizingGlobals)
     EXPECT_NE(state->dataSize->DataTotCapCurveIndex, 0);
     EXPECT_NE(state->dataSize->DataDesInletWaterTemp, 0.0);
     EXPECT_NE(state->dataSize->DataHeatSizeRatio, 1.0);
-    EXPECT_NE(state->dataSize->DataFanEnumType, -1);
+    EXPECT_NE((int)state->dataSize->DataFanType, (int)HVAC::FanType::Invalid);
     EXPECT_TRUE(state->dataSize->ZoneEqSizing(state->dataSize->CurZoneEqNum).AirFlow);
     EXPECT_FALSE(state->dataSize->DataAutosizable);
 
@@ -160,7 +161,7 @@ TEST_F(EnergyPlusFixture, DataSizingTest_resetHVACSizingGlobals)
     EXPECT_EQ(state->dataSize->DataPltSizHeatNum, 0);
     EXPECT_EQ(state->dataSize->DataWaterLoopNum, 0);
     EXPECT_EQ(state->dataSize->DataCoilNum, 0);
-    EXPECT_EQ(state->dataSize->DataFanOpMode, 0);
+    EXPECT_EQ((int)state->dataSize->DataFanOp, (int)HVAC::FanOp::Invalid);
     EXPECT_FALSE(state->dataSize->DataCoilIsSuppHeater);
     EXPECT_FALSE(state->dataSize->DataIsDXCoil);
     EXPECT_TRUE(state->dataSize->DataAutosizable);
@@ -195,8 +196,8 @@ TEST_F(EnergyPlusFixture, DataSizingTest_resetHVACSizingGlobals)
     EXPECT_EQ(state->dataSize->DataFractionUsedForSizing, 0.0);
     EXPECT_EQ(state->dataSize->DataNonZoneNonAirloopValue, 0.0);
     EXPECT_EQ(state->dataSize->DataZoneNumber, 0);
-    EXPECT_EQ(state->dataSize->DataFanEnumType, -1);
-    EXPECT_EQ(state->dataSize->DataFanIndex, -1);
+    EXPECT_EQ((int)state->dataSize->DataFanType, (int)HVAC::FanType::Invalid);
+    EXPECT_EQ(state->dataSize->DataFanIndex, 0);
     EXPECT_EQ(state->dataSize->DataWaterCoilSizCoolDeltaT, 0.0);
     EXPECT_EQ(state->dataSize->DataWaterCoilSizHeatDeltaT, 0.0);
     EXPECT_FALSE(state->dataSize->DataNomCapInpMeth);
@@ -288,7 +289,8 @@ TEST_F(EnergyPlusFixture, OARequirements_calcDesignSpecificationOutdoorAir)
             },
             "Space 1d" : {
                  "zone_name": "Zone 1",
-                 "floor_area": 100.0
+                 "floor_area": 100.0,
+                 "volume": 300.0
             }
         },
         "DesignSpecification:OutdoorAir": {
@@ -344,9 +346,16 @@ TEST_F(EnergyPlusFixture, OARequirements_calcDesignSpecificationOutdoorAir)
     state->dataGlobal->isEpJSON = true;
     state->dataInputProcessing->inputProcessor->initializeMaps();
 
+    state->init_state(*state);
+
     bool ErrorsFound = false;
     HeatBalanceManager::GetZoneData(*state, ErrorsFound);
-    compare_err_stream("");
+
+    std::string const error_string = delimited_string(
+        {std::format("   ** Warning ** Version: missing in IDF, processing for EnergyPlus version=\"{}\"", DataStringGlobals::MatchVersion),
+         "   ** Warning ** No Timestep object found.  Number of TimeSteps in Hour defaulted to 4."});
+
+    EXPECT_TRUE(compare_err_stream(error_string, true));
     EXPECT_FALSE(ErrorsFound);
 
     int zoneNum = 1;
@@ -367,7 +376,7 @@ TEST_F(EnergyPlusFixture, OARequirements_calcDesignSpecificationOutdoorAir)
     compare_err_stream("");
 
     std::string thisOAReqName = "DSOA ZONE 1 SPACES";
-    int oaNum = UtilityRoutines::FindItemInList(thisOAReqName, state->dataSize->OARequirements);
+    int oaNum = Util::FindItemInList(thisOAReqName, state->dataSize->OARequirements);
     EXPECT_TRUE(oaNum > 0);
     EXPECT_EQ(4, state->dataSize->OARequirements(oaNum).dsoaIndexes.size());
 
@@ -375,26 +384,27 @@ TEST_F(EnergyPlusFixture, OARequirements_calcDesignSpecificationOutdoorAir)
     state->dataHeatBal->spaceIntGain.allocate(state->dataGlobal->numSpaces);
     state->dataHeatBal->ZoneIntGain.allocate(state->dataGlobal->NumOfZones);
     std::string thisSpaceName = "SPACE 1A";
-    int spaceNum = UtilityRoutines::FindItemInList(thisSpaceName, state->dataHeatBal->space);
-    state->dataHeatBal->space(spaceNum).floorArea = 100.0;
-    state->dataHeatBal->space(spaceNum).totOccupants = 10;
+    int spaceNum = Util::FindItemInList(thisSpaceName, state->dataHeatBal->space);
+    state->dataHeatBal->space(spaceNum).FloorArea = 100.0;
+    state->dataHeatBal->space(spaceNum).TotOccupants = 10;
     state->dataHeatBal->spaceIntGain(spaceNum).NOFOCC = 1;
     state->dataHeatBal->space(spaceNum).maxOccupants = 12;
 
     thisSpaceName = "SPACE 1B";
-    spaceNum = UtilityRoutines::FindItemInList(thisSpaceName, state->dataHeatBal->space);
-    state->dataHeatBal->space(spaceNum).floorArea = 100.0;
+    spaceNum = Util::FindItemInList(thisSpaceName, state->dataHeatBal->space);
+    state->dataHeatBal->space(spaceNum).FloorArea = 100.0;
 
     thisSpaceName = "SPACE 1C";
-    spaceNum = UtilityRoutines::FindItemInList(thisSpaceName, state->dataHeatBal->space);
-    state->dataHeatBal->space(spaceNum).floorArea = 100.0;
+    spaceNum = Util::FindItemInList(thisSpaceName, state->dataHeatBal->space);
+    state->dataHeatBal->space(spaceNum).FloorArea = 100.0;
 
     thisSpaceName = "SPACE 1D";
-    spaceNum = UtilityRoutines::FindItemInList(thisSpaceName, state->dataHeatBal->space);
-    state->dataHeatBal->space(spaceNum).floorArea = 100.0;
+    spaceNum = Util::FindItemInList(thisSpaceName, state->dataHeatBal->space);
+    state->dataHeatBal->space(spaceNum).FloorArea = 100.0;
+    state->dataHeatBal->space(spaceNum).Volume = 300.0;
 
     std::string thisZoneName = "ZONE 2";
-    zoneNum = UtilityRoutines::FindItemInList(thisZoneName, state->dataHeatBal->Zone);
+    zoneNum = Util::FindItemInList(thisZoneName, state->dataHeatBal->Zone);
     state->dataHeatBal->Zone(zoneNum).FloorArea = 400.0;
     state->dataHeatBal->Zone(zoneNum).TotOccupants = 10;
     state->dataHeatBal->ZoneIntGain(zoneNum).NOFOCC = 1;
@@ -404,26 +414,27 @@ TEST_F(EnergyPlusFixture, OARequirements_calcDesignSpecificationOutdoorAir)
     bool UseMinOASchFlag = false;
 
     thisZoneName = "ZONE 1";
-    zoneNum = UtilityRoutines::FindItemInList(thisZoneName, state->dataHeatBal->Zone);
+    zoneNum = Util::FindItemInList(thisZoneName, state->dataHeatBal->Zone);
     state->dataHeatBal->Zone(zoneNum).FloorArea = 400.0;
     thisOAReqName = "DSOA ZONE 1 SPACES";
-    oaNum = UtilityRoutines::FindItemInList(thisOAReqName, state->dataSize->OARequirements);
+    oaNum = Util::FindItemInList(thisOAReqName, state->dataSize->OARequirements);
     Real64 zone1OA = DataSizing::calcDesignSpecificationOutdoorAir(*state, oaNum, zoneNum, UseOccSchFlag, UseMinOASchFlag);
     // 0.0125/person * 10.0 + 0.001/area * 100.0 + 1.0/zone + 0.1ACH * 300.0 / 3600.0;
     Real64 expectedOA = 0.0125 * 10.0 + 0.001 * 100.0 + 1.0 + 0.1 * 300.0 / 3600.0;
     EXPECT_EQ(expectedOA, zone1OA);
 
     thisZoneName = "ZONE 2";
-    zoneNum = UtilityRoutines::FindItemInList(thisZoneName, state->dataHeatBal->Zone);
+    zoneNum = Util::FindItemInList(thisZoneName, state->dataHeatBal->Zone);
     state->dataHeatBal->Zone(zoneNum).FloorArea = 400.0;
     thisOAReqName = "DSOA SUM";
-    oaNum = UtilityRoutines::FindItemInList(thisOAReqName, state->dataSize->OARequirements);
+    oaNum = Util::FindItemInList(thisOAReqName, state->dataSize->OARequirements);
     Real64 zone2OA = DataSizing::calcDesignSpecificationOutdoorAir(*state, oaNum, zoneNum, UseOccSchFlag, UseMinOASchFlag);
     EXPECT_EQ(expectedOA, zone2OA);
 }
 
 TEST_F(EnergyPlusFixture, GetCoilDesFlowT_Test)
 {
+    state->init_state(*state);
     state->dataEnvrn->StdRhoAir = 1.1;
     state->dataSize->SysSizInput.allocate(1);
     state->dataSize->FinalSysSizing.allocate(1);

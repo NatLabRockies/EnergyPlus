@@ -1,0 +1,68 @@
+name: Compute checksums
+
+on:
+  push:
+    branches: [ checksums ]
+
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'The tag name for which to run it (eg: v22.1.0). If not specified, defaults to the latest release'
+        required: false
+
+jobs:
+  build:
+    name: Compute and Post Checksums
+    runs-on: ubuntu-latest
+    permissions:
+      # Needed permission to upload the release asset
+      contents: write
+
+    steps:
+
+    - name: Download binaries
+      shell: bash
+      run: |
+        set -x
+        TAG_NAME=${{ github.event.inputs.tag }}
+        if [ -z "$TAG_NAME" ]; then
+          url=https://api.github.com/repos/$GITHUB_REPOSITORY_OWNER/EnergyPlus/releases/latest
+        else
+          url=https://api.github.com/repos/$GITHUB_REPOSITORY_OWNER/EnergyPlus/releases/tags/$TAG_NAME
+        fi;
+
+        echo "Querying url=$url"
+        release_info=$(curl -sL $url)
+
+        # Get the tag name, and use jq -e to throw if can't find
+        TAG_NAME=$(echo $release_info | jq -r -e '.tag_name')
+        echo "TAG_NAME=$TAG_NAME" >> $GITHUB_ENV
+
+        echo $release_info | jq -r '.assets[].browser_download_url | select(. | contains("EnergyPlus-"))' > download_lists.txt
+        echo "Found the following assets"
+        cat download_lists.txt
+        echo "Downloading all via aria"
+        aria2c --input-file download_lists.txt -j $(nproc)
+        echo "Files in current directory:"
+        ls
+
+    - name: Compute md5 sums
+      shell: bash
+      run: |
+        md5sum EnergyPlus-* > md5sums.txt
+        cat md5sums.txt
+
+    - name: Compute sha256 sums
+      shell: bash
+      run: |
+        sha256sum EnergyPlus-* > sha256sums.txt
+        cat sha256sums.txt
+
+    - name: Upload Sums to release
+      uses: svenstaro/upload-release-action@v2
+      with:
+        repo_token: ${{ secrets.GITHUB_TOKEN }}
+        file: '*.txt'
+        tag: ${{ env.TAG_NAME }}
+        overwrite: true
+        file_glob: true

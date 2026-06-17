@@ -1,7 +1,7 @@
-// EnergyPlus, Copyright (c) 1996-2023, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
-// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other
+// National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
 // contributors. All rights reserved.
 //
 // NOTICE: This Software was developed under funding from the U.S. Department of Energy and the
@@ -56,6 +56,7 @@
 #include <EnergyPlus/CurveManager.hh>
 #include <EnergyPlus/Data/EnergyPlusData.hh>
 #include <EnergyPlus/DataEnvironment.hh>
+#include <EnergyPlus/DataGlobalConstants.hh>
 #include <EnergyPlus/DataGlobals.hh>
 #include <EnergyPlus/DataHeatBalance.hh>
 #include <EnergyPlus/DataLoopNode.hh>
@@ -64,6 +65,7 @@
 #include <EnergyPlus/DisplacementVentMgr.hh>
 #include <EnergyPlus/ElectricPowerServiceManager.hh>
 #include <EnergyPlus/ExteriorEnergyUse.hh>
+#include <EnergyPlus/GeneralRoutines.hh>
 #include <EnergyPlus/HVACManager.hh>
 #include <EnergyPlus/HeatBalanceInternalHeatGains.hh>
 #include <EnergyPlus/HeatBalanceManager.hh>
@@ -71,6 +73,8 @@
 #include <EnergyPlus/InternalHeatGains.hh>
 #include <EnergyPlus/OutputReportTabular.hh>
 #include <EnergyPlus/ScheduleManager.hh>
+#include <EnergyPlus/SurfaceGeometry.hh>
+#include <EnergyPlus/ZoneEquipmentManager.hh>
 #include <EnergyPlus/ZoneTempPredictorCorrector.hh>
 
 using namespace EnergyPlus;
@@ -112,11 +116,11 @@ TEST_F(EnergyPlusFixture, InternalHeatGains_OtherEquipment_CheckFuelType)
     ASSERT_TRUE(process_idf(idf_objects));
     EXPECT_FALSE(has_err_output());
 
-    bool ErrorsFound(false);
+    state->dataGlobal->TimeStepsInHour = 1;    // must initialize this to get schedules initialized
+    state->dataGlobal->MinutesInTimeStep = 60; // must initialize this to get schedules initialized
+    state->init_state(*state);
 
-    state->dataGlobal->NumOfTimeStepInHour = 1;    // must initialize this to get schedules initialized
-    state->dataGlobal->MinutesPerTimeStep = 60;    // must initialize this to get schedules initialized
-    ScheduleManager::ProcessScheduleInput(*state); // read schedules
+    bool ErrorsFound(false);
 
     HeatBalanceManager::GetZoneData(*state, ErrorsFound);
     ASSERT_FALSE(ErrorsFound);
@@ -128,9 +132,9 @@ TEST_F(EnergyPlusFixture, InternalHeatGains_OtherEquipment_CheckFuelType)
     for (unsigned long i = 1; i <= state->dataHeatBal->ZoneOtherEq.size(); ++i) {
         const DataHeatBalance::ZoneEquipData &equip = state->dataHeatBal->ZoneOtherEq(i);
         if (equip.Name == "OTHEREQ1") {
-            ASSERT_TRUE(compare_enums(equip.OtherEquipFuelType, ExteriorEnergyUse::ExteriorFuelUsage::Invalid));
+            ASSERT_ENUM_EQ(equip.OtherEquipFuelType, Constant::eFuel::None);
         } else if (equip.Name == "OTHEREQ2") {
-            ASSERT_TRUE(compare_enums(equip.OtherEquipFuelType, ExteriorEnergyUse::ExteriorFuelUsage::PropaneUse));
+            ASSERT_ENUM_EQ(equip.OtherEquipFuelType, Constant::eFuel::Propane);
         }
     }
 }
@@ -161,11 +165,11 @@ TEST_F(EnergyPlusFixture, InternalHeatGains_OtherEquipment_NegativeDesignLevel)
     ASSERT_TRUE(process_idf(idf_objects));
     EXPECT_FALSE(has_err_output());
 
-    bool ErrorsFound(false);
+    state->dataGlobal->TimeStepsInHour = 1;    // must initialize this to get schedules initialized
+    state->dataGlobal->MinutesInTimeStep = 60; // must initialize this to get schedules initialized
+    state->init_state(*state);
 
-    state->dataGlobal->NumOfTimeStepInHour = 1;    // must initialize this to get schedules initialized
-    state->dataGlobal->MinutesPerTimeStep = 60;    // must initialize this to get schedules initialized
-    ScheduleManager::ProcessScheduleInput(*state); // read schedules
+    bool ErrorsFound(false);
 
     HeatBalanceManager::GetZoneData(*state, ErrorsFound);
     ASSERT_FALSE(ErrorsFound);
@@ -173,7 +177,9 @@ TEST_F(EnergyPlusFixture, InternalHeatGains_OtherEquipment_NegativeDesignLevel)
     ASSERT_THROW(InternalHeatGains::GetInternalHeatGainsInput(*state), std::runtime_error);
 
     std::string const error_string = delimited_string(
-        {"   ** Warning ** ProcessScheduleInput: Schedule:Constant=\"SCHEDULE1\", Blank Schedule Type Limits Name input -- will not be validated.",
+        {"   ** Warning ** ProcessScheduleInput: Schedule:Constant = SCHEDULE1",
+         "   **   ~~~   ** Schedule Type Limits Name is empty.",
+         "   **   ~~~   ** Schedule will not be validated.",
          "   ** Severe  ** GetInternalHeatGains: OtherEquipment=\"OTHEREQ1\", Design Level is not allowed to be negative",
          "   **   ~~~   ** ... when a fuel type of FuelOilNo1 is specified.",
          "   **  Fatal  ** GetInternalHeatGains: Errors found in Getting Internal Gains Input, Program Stopped",
@@ -207,31 +213,33 @@ TEST_F(EnergyPlusFixture, InternalHeatGains_OtherEquipment_BadFuelType)
 
     });
 
-    ASSERT_FALSE(process_idf(idf_objects, false)); // add false to supress error assertions
+    ASSERT_FALSE(process_idf(idf_objects, false)); // add false to suppress error assertions
     EXPECT_TRUE(has_err_output(false));
 
+    state->dataGlobal->TimeStepsInHour = 1;    // must initialize this to get schedules initialized
+    state->dataGlobal->MinutesInTimeStep = 60; // must initialize this to get schedules initialized
+    state->init_state(*state);
+
     std::string error_string =
-        delimited_string({"   ** Severe  ** <root>[OtherEquipment][OtherEq1][fuel_type] - \"Water\" - Failed to match against any enum values."});
+        delimited_string({"   ** Severe  ** <root>[OtherEquipment][OtherEq1][fuel_type] - \"Water\" - Failed to match against any enum values.",
+                          "   ** Warning ** ProcessScheduleInput: Schedule:Constant = SCHEDULE1",
+                          "   **   ~~~   ** Schedule Type Limits Name is empty.",
+                          "   **   ~~~   ** Schedule will not be validated."});
     EXPECT_TRUE(compare_err_stream(error_string, true));
 
     bool ErrorsFound(false);
-
-    state->dataGlobal->NumOfTimeStepInHour = 1;    // must initialize this to get schedules initialized
-    state->dataGlobal->MinutesPerTimeStep = 60;    // must initialize this to get schedules initialized
-    ScheduleManager::ProcessScheduleInput(*state); // read schedules
 
     HeatBalanceManager::GetZoneData(*state, ErrorsFound);
     ASSERT_FALSE(ErrorsFound);
 
     ASSERT_THROW(InternalHeatGains::GetInternalHeatGainsInput(*state), std::runtime_error);
 
-    error_string = delimited_string(
-        {"   ** Warning ** ProcessScheduleInput: Schedule:Constant=\"SCHEDULE1\", Blank Schedule Type Limits Name input -- will not be validated.",
-         "   ** Severe  ** GetInternalHeatGains: OtherEquipment: invalid Fuel Type entered=WATER for Name=OTHEREQ1",
-         "   **  Fatal  ** GetInternalHeatGains: Errors found in Getting Internal Gains Input, Program Stopped",
-         "   ...Summary of Errors that led to program termination:",
-         "   ..... Reference severe error count=2",
-         "   ..... Last severe error=GetInternalHeatGains: OtherEquipment: invalid Fuel Type entered=WATER for Name=OTHEREQ1"});
+    error_string =
+        delimited_string({"   ** Severe  ** GetInternalHeatGains: OtherEquipment: invalid Fuel Type entered=WATER for Name=OTHEREQ1",
+                          "   **  Fatal  ** GetInternalHeatGains: Errors found in Getting Internal Gains Input, Program Stopped",
+                          "   ...Summary of Errors that led to program termination:",
+                          "   ..... Reference severe error count=2",
+                          "   ..... Last severe error=GetInternalHeatGains: OtherEquipment: invalid Fuel Type entered=WATER for Name=OTHEREQ1"});
 
     EXPECT_TRUE(compare_err_stream(error_string, true));
 }
@@ -272,7 +280,7 @@ TEST_F(EnergyPlusFixture, InternalHeatGains_AllowBlankFieldsForAdaptiveComfortMo
         "Activity Sch, !- Activity Level Schedule Name",
         "3.82E-8, !- Carbon Dioxide Generation Rate{ m3 / s - W }",
         ", !- Enable ASHRAE 55 Comfort Warnings",
-        "zoneaveraged, !- Mean Radiant Temperature Calculation Type",
+        "EnclosureAveraged, !- Mean Radiant Temperature Calculation Type",
         ", !- Surface Name / Angle Factor List Name",
         ", !- Work Efficiency Schedule Name",
         ", !- Clothing Insulation Calculation Method",
@@ -285,25 +293,27 @@ TEST_F(EnergyPlusFixture, InternalHeatGains_AllowBlankFieldsForAdaptiveComfortMo
 
     ASSERT_TRUE(process_idf(idf_objects));
 
+    state->init_state(*state);
+
     bool ErrorsFound1(false);
 
-    ScheduleManager::ProcessScheduleInput(*state); // read schedules
     HeatBalanceManager::GetZoneData(*state, ErrorsFound1);
     ASSERT_FALSE(ErrorsFound1);
 
-    state->dataScheduleMgr->ScheduleInputProcessed = true;
-    state->dataScheduleMgr->Schedule(1).Used = true;
+    auto *occSched = Sched::GetSchedule(*state, "HOUSE OCCUPANCY");
+    occSched->isUsed = true;
+    occSched->currentVal = 1.0;
+    occSched->minVal = 1.0;
+    occSched->maxVal = 1.0;
+    occSched->isMinMaxSet = true;
 
-    state->dataScheduleMgr->Schedule(1).CurrentValue = 1.0;
-    state->dataScheduleMgr->Schedule(1).MinValue = 1.0;
-    state->dataScheduleMgr->Schedule(1).MaxValue = 1.0;
-    state->dataScheduleMgr->Schedule(1).MaxMinSet = true;
-    state->dataScheduleMgr->Schedule(2).Used = true;
+    auto *actSched = Sched::GetSchedule(*state, "ACTIVITY SCH");
+    actSched->isUsed = true;
+    actSched->currentVal = 131.8;
+    actSched->minVal = 131.8;
+    actSched->maxVal = 131.8;
+    actSched->isMinMaxSet = true;
 
-    state->dataScheduleMgr->Schedule(2).CurrentValue = 131.8;
-    state->dataScheduleMgr->Schedule(2).MinValue = 131.8;
-    state->dataScheduleMgr->Schedule(2).MaxValue = 131.8;
-    state->dataScheduleMgr->Schedule(2).MaxMinSet = true;
     InternalHeatGains::GetInternalHeatGainsInput(*state);
 
     EXPECT_FALSE(state->dataInternalHeatGains->ErrorsFound);
@@ -469,15 +479,16 @@ TEST_F(EnergyPlusFixture, InternalHeatGains_ElectricEquipITE_BeginEnvironmentRes
     EXPECT_FALSE(has_err_output());
 
     bool ErrorsFound(false);
-    state->dataGlobal->NumOfTimeStepInHour = 1;
-    state->dataGlobal->MinutesPerTimeStep = 60;
+    state->dataGlobal->TimeStepsInHour = 1;
+    state->dataGlobal->MinutesInTimeStep = 60;
+    state->init_state(*state);
 
     HeatBalanceManager::GetZoneData(*state, ErrorsFound);
     ASSERT_FALSE(ErrorsFound);
     state->dataZoneTempPredictorCorrector->zoneHeatBalance.allocate(1);
 
     state->dataZoneTempPredictorCorrector->zoneHeatBalance(1).MAT = 24.0;
-    state->dataZoneTempPredictorCorrector->zoneHeatBalance(1).ZoneAirHumRat = 0.008;
+    state->dataZoneTempPredictorCorrector->zoneHeatBalance(1).airHumRat = 0.008;
 
     InternalHeatGains::GetInternalHeatGainsInput(*state);
     InternalHeatGains::CalcZoneITEq(*state);
@@ -654,6 +665,7 @@ TEST_F(EnergyPlusFixture, InternalHeatGains_CheckZoneComponentLoadSubtotals)
 
     ASSERT_TRUE(process_idf(idf_objects));
     EXPECT_FALSE(has_err_output());
+    state->init_state(*state);
 
     bool ErrorsFound(false);
     HeatBalanceManager::GetZoneData(*state, ErrorsFound);
@@ -685,21 +697,18 @@ TEST_F(EnergyPlusFixture, InternalHeatGains_CheckZoneComponentLoadSubtotals)
     state->dataEnvrn->TotRunDesPersDays = 0;
     state->dataSize->CurOverallSimDay = 1;
     state->dataGlobal->HourOfDay = 1;
-    state->dataGlobal->NumOfTimeStepInHour = 10;
+    state->dataGlobal->TimeStepsInHour = 10;
     state->dataGlobal->TimeStep = 1;
     OutputReportTabular::AllocateLoadComponentArrays(*state);
-    int timeStepInDay = (state->dataGlobal->HourOfDay - 1) * state->dataGlobal->NumOfTimeStepInHour + state->dataGlobal->TimeStep;
+    int timeStepInDay = (state->dataGlobal->HourOfDay - 1) * state->dataGlobal->TimeStepsInHour + state->dataGlobal->TimeStep;
 
     state->dataGlobal->CompLoadReportIsReq = true;
     state->dataGlobal->isPulseZoneSizing = false;
     InternalHeatGains::GatherComponentLoadsIntGain(*state);
-    totConvGains = state->dataOutRptTab->peopleInstantSeq(state->dataSize->CurOverallSimDay, timeStepInDay, zoneNum) +
-                   state->dataOutRptTab->lightInstantSeq(state->dataSize->CurOverallSimDay, timeStepInDay, zoneNum) +
-                   state->dataOutRptTab->equipInstantSeq(state->dataSize->CurOverallSimDay, timeStepInDay, zoneNum) +
-                   state->dataOutRptTab->refrigInstantSeq(state->dataSize->CurOverallSimDay, timeStepInDay, zoneNum) +
-                   state->dataOutRptTab->waterUseInstantSeq(state->dataSize->CurOverallSimDay, timeStepInDay, zoneNum) +
-                   state->dataOutRptTab->hvacLossInstantSeq(state->dataSize->CurOverallSimDay, timeStepInDay, zoneNum) +
-                   state->dataOutRptTab->powerGenInstantSeq(state->dataSize->CurOverallSimDay, timeStepInDay, zoneNum);
+    auto &znCompLoadDayTS = state->dataOutRptTab->znCompLoads[state->dataSize->CurOverallSimDay - 1].ts[timeStepInDay - 1].spacezone[zoneNum - 1];
+    totConvGains = znCompLoadDayTS.peopleInstantSeq + znCompLoadDayTS.lightInstantSeq + znCompLoadDayTS.equipInstantSeq +
+                   znCompLoadDayTS.refrigInstantSeq + znCompLoadDayTS.waterUseInstantSeq + znCompLoadDayTS.hvacLossInstantSeq +
+                   znCompLoadDayTS.powerGenInstantSeq;
 
     // Legitimate gain types excluded from this total
     expectedTotConvGains -=
@@ -711,8 +720,8 @@ TEST_F(EnergyPlusFixture, InternalHeatGains_CheckZoneComponentLoadSubtotals)
 
     // ** NOTE: If this unit test fails, the likely cause is that a new internal gain type was added, but it was not added to one of the subtotal
     // types in InternalHeatGains::GatherComponentLoadsIntGain() this also means that the new type may be missing from other places that collect
-    // internal gains by subgroups, such as the room air models and output reporting for zone-level gains search for IntGainTypeOf_Lights for places
-    // where these types of subtotals occur and add the new type as appropriate
+    // internal gains by subgroups, such as the room air models and output reporting for zone-level gains search for
+    // "DataHeatBalance::IntGainType::Lights" for places where these types of subtotals occur and add the new type as appropriate
     EXPECT_EQ(totConvGains, expectedTotConvGains);
 
     // cleanup
@@ -883,8 +892,9 @@ TEST_F(EnergyPlusFixture, InternalHeatGains_ElectricEquipITE_ApproachTemperature
     EXPECT_FALSE(has_err_output());
 
     bool ErrorsFound(false);
-    state->dataGlobal->NumOfTimeStepInHour = 1;
-    state->dataGlobal->MinutesPerTimeStep = 60;
+    state->dataGlobal->TimeStepsInHour = 1;
+    state->dataGlobal->MinutesInTimeStep = 60;
+    state->init_state(*state);
 
     HeatBalanceManager::GetZoneData(*state, ErrorsFound);
     ASSERT_FALSE(ErrorsFound);
@@ -893,7 +903,7 @@ TEST_F(EnergyPlusFixture, InternalHeatGains_ElectricEquipITE_ApproachTemperature
     state->dataZoneEquip->ZoneEquipConfig.allocate(1);
 
     state->dataZoneTempPredictorCorrector->zoneHeatBalance(1).MAT = 24.0;
-    state->dataZoneTempPredictorCorrector->zoneHeatBalance(1).ZoneAirHumRat = 0.008;
+    state->dataZoneTempPredictorCorrector->zoneHeatBalance(1).airHumRat = 0.008;
 
     InternalHeatGains::GetInternalHeatGainsInput(*state);
 
@@ -1038,6 +1048,7 @@ TEST_F(EnergyPlusFixture, InternalHeatGains_ElectricEquipITE_DefaultCurves)
     ASSERT_TRUE(process_idf(idf_objects));
     EXPECT_FALSE(has_err_output());
 
+    state->init_state(*state);
     bool ErrorsFound(false);
 
     HeatBalanceManager::GetZoneData(*state, ErrorsFound);
@@ -1045,7 +1056,7 @@ TEST_F(EnergyPlusFixture, InternalHeatGains_ElectricEquipITE_DefaultCurves)
     state->dataZoneTempPredictorCorrector->zoneHeatBalance.allocate(1);
 
     state->dataZoneTempPredictorCorrector->zoneHeatBalance(1).MAT = 24.0;
-    state->dataZoneTempPredictorCorrector->zoneHeatBalance(1).ZoneAirHumRat = 0.008;
+    state->dataZoneTempPredictorCorrector->zoneHeatBalance(1).airHumRat = 0.008;
 
     InternalHeatGains::GetInternalHeatGainsInput(*state);
     InternalHeatGains::CalcZoneITEq(*state);
@@ -1130,6 +1141,21 @@ TEST_F(EnergyPlusFixture, InternalHeatGains_ZnRpt_Outputs)
 
     std::string const idf_objects = delimited_string({
         "Zone,Main Zone;",
+
+        "Space,",
+        "Space 1,            !- Name",
+        "Main Zone,             !- Zone Name",
+        ",                   !- Ceiling Height {m}",
+        ",                   !- Volume {m3}",
+        "5.0;                !- Floor Area {m2}",
+
+        "Space,",
+        "Space 2,            !- Name",
+        "Main Zone,             !- Zone Name",
+        ",                   !- Ceiling Height {m}",
+        ",                   !- Volume {m3}",
+        "15.0;                !- Floor Area {m2}",
+        "SpaceList, All Spaces, Space 1, Space 2;"
 
         "ZoneHVAC:EquipmentConnections,",
         "  Main Zone,                   !- Zone Name",
@@ -1274,6 +1300,20 @@ TEST_F(EnergyPlusFixture, InternalHeatGains_ZnRpt_Outputs)
         "    0.0000,                  !- Fraction Lost",
         "    2.0E-7;                  !- Carbon Dioxide Generation Rate {m3/s-W}",
 
+        "  OtherEquipment,",
+        "    Main Zone Other Equipment2,  !- Name",
+        "    FuelOilNo2,              !- Fuel Type",
+        "    Main Zone,               !- Zone or ZoneList Name",
+        "    Schedule1,               !- Schedule Name",
+        "    EquipmentLevel,          !- Design Level Calculation Method",
+        "    375.0,                   !- Design Level {W}",
+        "    ,                        !- Watts per Zone Floor Area {W/m2}",
+        "    ,                        !- Watts per Person {W/person}",
+        "    0.0000,                  !- Fraction Latent",
+        "    0.5000,                  !- Fraction Radiant",
+        "    0.0000,                  !- Fraction Lost",
+        "    2.0E-7;                  !- Carbon Dioxide Generation Rate {m3/s-W}",
+
         "  ZoneBaseboard:OutdoorTemperatureControlled,",
         "    Main Zone BBHeat,           !- Name",
         "    Main Zone,                  !- Zone Name",
@@ -1295,58 +1335,329 @@ TEST_F(EnergyPlusFixture, InternalHeatGains_ZnRpt_Outputs)
     ASSERT_TRUE(process_idf(idf_objects));
     EXPECT_FALSE(has_err_output());
 
+    state->dataGlobal->TimeStepsInHour = 1;    // must initialize this to get schedules initialized
+    state->dataGlobal->MinutesInTimeStep = 60; // must initialize this to get schedules initialized
+    state->init_state(*state);
+
     bool ErrorsFound(false);
 
-    state->dataGlobal->NumOfTimeStepInHour = 1;    // must initialize this to get schedules initialized
-    state->dataGlobal->MinutesPerTimeStep = 60;    // must initialize this to get schedules initialized
-    ScheduleManager::ProcessScheduleInput(*state); // read schedules
     state->dataEnvrn->DayOfYear_Schedule = 1;
     state->dataEnvrn->DayOfMonth = 1;
     state->dataEnvrn->DayOfWeek = 1;
     state->dataGlobal->HourOfDay = 1;
     state->dataGlobal->TimeStep = 1;
-    ScheduleManager::UpdateScheduleValues(*state);
+    Sched::UpdateScheduleVals(*state);
 
     HeatBalanceManager::GetZoneData(*state, ErrorsFound);
     ASSERT_FALSE(ErrorsFound);
+    ZoneEquipmentManager::GetZoneEquipment(*state);
     HeatBalanceManager::AllocateHeatBalArrays(*state);
+    state->dataHeatBal->Zone(1).FloorArea = 20.0;
+    state->dataHeatBal->space(1).FloorArea = 5.0;
+    state->dataHeatBal->space(2).FloorArea = 15.0;
 
     InternalHeatGains::GetInternalHeatGainsInput(*state);
 
-    EXPECT_EQ(state->dataHeatBal->TotPeople, 1);
-    EXPECT_EQ(state->dataHeatBal->TotLights, 1);
-    EXPECT_EQ(state->dataHeatBal->TotElecEquip, 1);
-    EXPECT_EQ(state->dataHeatBal->TotGasEquip, 1);
-    EXPECT_EQ(state->dataHeatBal->TotHWEquip, 1);
-    EXPECT_EQ(state->dataHeatBal->TotStmEquip, 1);
-    EXPECT_EQ(state->dataHeatBal->TotOthEquip, 1);
-    EXPECT_EQ(state->dataHeatBal->TotBBHeat, 1);
+    EXPECT_EQ(state->dataHeatBal->TotPeople, 2);
+    EXPECT_EQ(state->dataHeatBal->TotLights, 2);
+    EXPECT_EQ(state->dataHeatBal->TotElecEquip, 2);
+    EXPECT_EQ(state->dataHeatBal->TotGasEquip, 2);
+    EXPECT_EQ(state->dataHeatBal->TotHWEquip, 2);
+    EXPECT_EQ(state->dataHeatBal->TotStmEquip, 2);
+    EXPECT_EQ(state->dataHeatBal->TotOthEquip, 4);
+    EXPECT_EQ(state->dataHeatBal->TotBBHeat, 2);
 
     EnergyPlus::createFacilityElectricPowerServiceObject(*state); // Needs to happen before InitInternalHeatGains
 
-    // First time should be all good, because ZoneRpt values initialize to zero
-    InternalHeatGains::InitInternalHeatGains(*state);
+    state->dataSize->FinalZoneSizing.allocate(1);
+    state->dataSize->ZoneEqSizing.allocate(1);
 
-    EXPECT_EQ(state->dataHeatBal->ZoneRpt(1).LtsPower, 100.0);
-    EXPECT_EQ(state->dataHeatBal->ZoneRpt(1).ElecPower, 150.0);
-    EXPECT_EQ(state->dataHeatBal->ZoneRpt(1).GasPower, 200.0);
-    EXPECT_EQ(state->dataHeatBal->ZoneRpt(1).HWPower, 250.0);
-    EXPECT_EQ(state->dataHeatBal->ZoneRpt(1).SteamPower, 300.0);
-    EXPECT_EQ(state->dataHeatBal->ZoneRpt(1).BaseHeatPower, 1500.0);
-    EXPECT_EQ(state->dataHeatBal->ZoneRpt(1).CO2Rate, 0.0001125);
-    EXPECT_EQ(state->dataHeatBal->ZoneRpt(1).ITEqSHI, 0);
+    // First time should be all good, because ZoneRpt/spaceRpt values initialize to zero
+    InternalHeatGains::InitInternalHeatGains(*state);
+    InternalHeatGains::ReportInternalHeatGains(*state);
+
+    auto &zoneRpt1 = state->dataHeatBal->ZoneRpt(1);
+    EXPECT_NEAR(zoneRpt1.LtsPower, 100.0, 0.01);
+    EXPECT_NEAR(zoneRpt1.ElecPower, 150.0, 0.01);
+    EXPECT_NEAR(zoneRpt1.OtherPower[(int)Constant::eFuel::OtherFuel1], 350.0, 0.01);
+    EXPECT_NEAR(zoneRpt1.OtherPower[(int)Constant::eFuel::FuelOilNo2], 375.0, 0.01);
+    EXPECT_NEAR(zoneRpt1.GasPower, 200.0, 0.01);
+    EXPECT_NEAR(zoneRpt1.HWPower, 250.0, 0.01);
+    EXPECT_NEAR(zoneRpt1.SteamPower, 300.0, 0.01);
+    EXPECT_NEAR(zoneRpt1.BaseHeatPower, 1500.0, 0.01);
+    EXPECT_NEAR(zoneRpt1.CO2Rate, 0.0001125, 0.01);
+    EXPECT_NEAR(zoneRpt1.ITEqSHI, 0, 0.01);
+
+    auto &spaceRpt1 = state->dataHeatBal->spaceRpt(1);
+    EXPECT_NEAR(spaceRpt1.LtsPower, 100.0 * 0.25, 0.01);
+    EXPECT_NEAR(spaceRpt1.ElecPower, 150.0 * 0.25, 0.01);
+    EXPECT_NEAR(spaceRpt1.OtherPower[(int)Constant::eFuel::OtherFuel1], 350.0 * 0.25, 0.01);
+    EXPECT_NEAR(spaceRpt1.OtherPower[(int)Constant::eFuel::FuelOilNo2], 375.0 * 0.25, 0.01);
+    EXPECT_NEAR(spaceRpt1.GasPower, 200.0 * 0.25, 0.01);
+    EXPECT_NEAR(spaceRpt1.HWPower, 250.0 * 0.25, 0.01);
+    EXPECT_NEAR(spaceRpt1.SteamPower, 300.0 * 0.25, 0.01);
+    EXPECT_NEAR(spaceRpt1.BaseHeatPower, 1500.0 * 0.25, 0.01);
+    EXPECT_NEAR(spaceRpt1.CO2Rate, 0.0001125 * 0.25, 0.01);
+    EXPECT_NEAR(spaceRpt1.ITEqSHI, 0, 0.01);
+
+    auto &spaceRpt2 = state->dataHeatBal->spaceRpt(2);
+    EXPECT_NEAR(spaceRpt2.LtsPower, 100.0 * 0.75, 0.01);
+    EXPECT_NEAR(spaceRpt2.ElecPower, 150.0 * 0.75, 0.01);
+    EXPECT_NEAR(spaceRpt2.OtherPower[(int)Constant::eFuel::OtherFuel1], 350.0 * 0.75, 0.01);
+    EXPECT_NEAR(spaceRpt2.OtherPower[(int)Constant::eFuel::FuelOilNo2], 375.0 * 0.75, 0.01);
+    EXPECT_NEAR(spaceRpt2.GasPower, 200.0 * 0.75, 0.01);
+    EXPECT_NEAR(spaceRpt2.HWPower, 250.0 * 0.75, 0.01);
+    EXPECT_NEAR(spaceRpt2.SteamPower, 300.0 * 0.75, 0.01);
+    EXPECT_NEAR(spaceRpt2.BaseHeatPower, 1500.0 * 0.75, 0.01);
+    EXPECT_NEAR(spaceRpt2.CO2Rate, 0.0001125 * 0.75, 0.01);
+    EXPECT_NEAR(spaceRpt2.ITEqSHI, 0, 0.01);
+
+    // Not implemented yet EXPECT_EQ(spaceRpt1.CO2Rate, 0.0001125);
+    EXPECT_EQ(spaceRpt1.ITEqSHI, 0);
 
     // Second time should should give the same answers, because everything should reset before accumulating
     InternalHeatGains::InitInternalHeatGains(*state);
+    InternalHeatGains::ReportInternalHeatGains(*state);
 
-    EXPECT_EQ(state->dataHeatBal->ZoneRpt(1).LtsPower, 100.0);
-    EXPECT_EQ(state->dataHeatBal->ZoneRpt(1).ElecPower, 150.0);
-    EXPECT_EQ(state->dataHeatBal->ZoneRpt(1).GasPower, 200.0);
-    EXPECT_EQ(state->dataHeatBal->ZoneRpt(1).HWPower, 250.0);
-    EXPECT_EQ(state->dataHeatBal->ZoneRpt(1).SteamPower, 300.0);
-    EXPECT_EQ(state->dataHeatBal->ZoneRpt(1).BaseHeatPower, 1500.0);
-    EXPECT_EQ(state->dataHeatBal->ZoneRpt(1).CO2Rate, 0.0001125);
-    EXPECT_EQ(state->dataHeatBal->ZoneRpt(1).ITEqSHI, 0);
+    EXPECT_EQ(zoneRpt1.LtsPower, 100.0);
+    EXPECT_EQ(zoneRpt1.ElecPower, 150.0);
+    EXPECT_EQ(zoneRpt1.OtherPower[(int)Constant::eFuel::OtherFuel1], 350.0);
+    EXPECT_EQ(zoneRpt1.OtherPower[(int)Constant::eFuel::FuelOilNo2], 375.0);
+    EXPECT_EQ(zoneRpt1.GasPower, 200.0);
+    EXPECT_EQ(zoneRpt1.HWPower, 250.0);
+    EXPECT_EQ(zoneRpt1.SteamPower, 300.0);
+    EXPECT_EQ(zoneRpt1.BaseHeatPower, 1500.0);
+    EXPECT_EQ(zoneRpt1.CO2Rate, 0.0001125);
+    EXPECT_EQ(zoneRpt1.ITEqSHI, 0);
+
+    EXPECT_NEAR(spaceRpt1.LtsPower, 100.0 * 0.25, 0.01);
+    EXPECT_NEAR(spaceRpt1.ElecPower, 150.0 * 0.25, 0.01);
+    EXPECT_NEAR(spaceRpt1.OtherPower[(int)Constant::eFuel::OtherFuel1], 350.0 * 0.25, 0.01);
+    EXPECT_NEAR(spaceRpt1.OtherPower[(int)Constant::eFuel::FuelOilNo2], 375.0 * 0.25, 0.01);
+    EXPECT_NEAR(spaceRpt1.GasPower, 200.0 * 0.25, 0.01);
+    EXPECT_NEAR(spaceRpt1.HWPower, 250.0 * 0.25, 0.01);
+    EXPECT_NEAR(spaceRpt1.SteamPower, 300.0 * 0.25, 0.01);
+    EXPECT_NEAR(spaceRpt1.BaseHeatPower, 1500.0 * 0.25, 0.01);
+    // space CO2 not implemented yet - EXPECT_NEAR(spaceRpt1.CO2Rate, 0.0001125 * 0.25, 0.01);
+    EXPECT_NEAR(spaceRpt1.ITEqSHI, 0, 0.01);
+
+    EXPECT_NEAR(spaceRpt2.LtsPower, 100.0 * 0.75, 0.01);
+    EXPECT_NEAR(spaceRpt2.ElecPower, 150.0 * 0.75, 0.01);
+    EXPECT_NEAR(spaceRpt2.OtherPower[(int)Constant::eFuel::OtherFuel1], 350.0 * 0.75, 0.01);
+    EXPECT_NEAR(spaceRpt2.OtherPower[(int)Constant::eFuel::FuelOilNo2], 375.0 * 0.75, 0.01);
+    EXPECT_NEAR(spaceRpt2.GasPower, 200.0 * 0.75, 0.01);
+    EXPECT_NEAR(spaceRpt2.HWPower, 250.0 * 0.75, 0.01);
+    EXPECT_NEAR(spaceRpt2.SteamPower, 300.0 * 0.75, 0.01);
+    EXPECT_NEAR(spaceRpt2.BaseHeatPower, 1500.0 * 0.75, 0.01);
+    // space CO2 not implemented yet - EXPECT_NEAR(spaceRpt2.CO2Rate, 0.0001125 * 0.75, 0.01);
+    EXPECT_NEAR(spaceRpt2.ITEqSHI, 0, 0.01);
+}
+
+TEST_F(EnergyPlusFixture, InternalHeatGains_ZoneBaseboardOutdoorTemperatureControlled)
+{
+
+    std::string const idf_objects = delimited_string({
+        "  Zone,",
+        "    Main Zone;",
+
+        "  Zone,",
+        "    Second Zone;",
+
+        "  Space,",
+        "    Space 1,            !- Name",
+        "    Main Zone,          !- Zone Name",
+        "    ,                   !- Ceiling Height {m}",
+        "    ,                   !- Volume {m3}",
+        "    5.0;                !- Floor Area {m2}",
+
+        "  Space,",
+        "    Space 2,            !- Name",
+        "    Main Zone,          !- Zone Name",
+        "    ,                   !- Ceiling Height {m}",
+        "    ,                   !- Volume {m3}",
+        "    15.0;               !- Floor Area {m2}",
+
+        "  SpaceList,",
+        "    All Spaces,",
+        "    Space 1,",
+        "    Space 2;",
+
+        "  ScheduleTypeLimits,",
+        "    SchType1,",
+        "    0.0,",
+        "    1.0,",
+        "    Continuous,",
+        "    Dimensionless;",
+
+        "  Schedule:Constant,",
+        "    Schedule1,",
+        "    SchType1,",
+        "    1.0;",
+
+        "  ZoneBaseboard:OutdoorTemperatureControlled,",
+        "    Main Zone BBHeat,   !- Name",
+        "    Main Zone,          !- Zone Name",
+        "    Schedule1,          !- Schedule Name",
+        "    autosize,           !- Capacity at Low Temperature {W}",
+        "    autosize,           !- Low Temperature {C}",
+        "    autosize,           !- Capacity at High Temperature {W}",
+        "    autosize,           !- High Temperature {C}",
+        "    0.5,                !- Fraction Radiant",
+        "    Baseboard Heat,     !- End - Use Subcategory",
+        "    25.0;               !- Design Zone Heating Setpoint",
+
+        "  ZoneBaseboard:OutdoorTemperatureControlled,",
+        "    Second Zone BBHeat, !- Name",
+        "    Second Zone,        !- Zone Name",
+        "    Schedule1,          !- Schedule Name",
+        "    1500,               !- Capacity at Low Temperature {W}",
+        "    -5,                 !- Low Temperature {C}",
+        "    1000,               !- Capacity at High Temperature {W}",
+        "    5,                  !- High Temperature {C}",
+        "    0.5,                !- Fraction Radiant",
+        "    Baseboard Heat;     !- End - Use Subcategory",
+    });
+
+    ASSERT_TRUE(process_idf(idf_objects));
+    EXPECT_FALSE(has_err_output());
+
+    state->dataGlobal->TimeStepsInHour = 1;    // must initialize this to get schedules initialized
+    state->dataGlobal->MinutesInTimeStep = 60; // must initialize this to get schedules initialized
+    state->init_state(*state);
+
+    bool ErrorsFound(false);
+
+    state->dataEnvrn->DayOfYear_Schedule = 1;
+    state->dataEnvrn->DayOfMonth = 1;
+    state->dataEnvrn->DayOfWeek = 1;
+    state->dataGlobal->HourOfDay = 1;
+    state->dataGlobal->TimeStep = 1;
+    Sched::UpdateScheduleVals(*state);
+
+    HeatBalanceManager::GetZoneData(*state, ErrorsFound);
+    ASSERT_FALSE(ErrorsFound);
+    ZoneEquipmentManager::GetZoneEquipment(*state);
+    HeatBalanceManager::AllocateHeatBalArrays(*state);
+    state->dataHeatBal->Zone(1).FloorArea = 20.0;
+    state->dataHeatBal->space(1).FloorArea = 5.0;
+    state->dataHeatBal->space(2).FloorArea = 15.0;
+    state->dataHeatBal->Zone(2).FloorArea = 30.0;
+    state->dataHeatBal->space(3).FloorArea = 30.0;
+
+    InternalHeatGains::GetInternalHeatGainsInput(*state);
+
+    EXPECT_EQ(state->dataHeatBal->TotBBHeat, 3);
+
+    EnergyPlus::createFacilityElectricPowerServiceObject(*state); // Needs to happen before InitInternalHeatGains
+
+    EXPECT_FALSE(state->dataGlobal->ZoneSizingCalc);
+    auto &thisBBHeat1 = state->dataHeatBal->ZoneBBHeat(1);
+    auto &thisBBHeat2 = state->dataHeatBal->ZoneBBHeat(2);
+    auto &thisBBHeat3 = state->dataHeatBal->ZoneBBHeat(3);
+
+    int NZ1 = thisBBHeat1.ZonePtr;
+    int NZ2 = thisBBHeat2.ZonePtr;
+    int NZ3 = thisBBHeat3.ZonePtr;
+    EXPECT_EQ(NZ1, NZ2);
+
+    state->dataSize->ZoneSizingRunDone = true;
+    state->dataSize->NumZoneSizingInput = 2;
+    state->dataSize->ZoneSizingInput.allocate(state->dataSize->NumZoneSizingInput);
+    state->dataSize->ZoneSizingInput(1).ZoneNum = NZ1;
+    state->dataSize->ZoneSizingInput(2).ZoneNum = NZ3;
+    state->dataSize->FinalZoneSizing.allocate(state->dataSize->NumZoneSizingInput);
+    state->dataSize->FinalZoneSizing(NZ1).OutTempAtHeatPeak = -17.3;
+    state->dataSize->FinalZoneSizing(NZ1).MCPIAtHeatPeak = 10.0;
+    state->dataSize->FinalZoneSizing(NZ1).MCPVAtHeatPeak = 20.0;
+    state->dataSize->FinalZoneSizing(NZ3).OutTempAtHeatPeak = -17.3;
+    state->dataSize->FinalZoneSizing(NZ3).MCPIAtHeatPeak = 10.0;
+    state->dataSize->FinalZoneSizing(NZ3).MCPVAtHeatPeak = 20.0;
+    state->dataSize->ZoneEqSizing.allocate(state->dataSize->NumZoneSizingInput);
+
+    bool SizingDesRunThisZone = false;
+    std::string ZoneName = state->dataHeatBal->Zone(NZ1).Name;
+    state->dataSize->CurZoneEqNum = Util::FindItemInList(ZoneName, state->dataHeatBal->Zone);
+    CheckThisZoneForSizing(*state, state->dataSize->CurZoneEqNum, SizingDesRunThisZone);
+    EXPECT_TRUE(SizingDesRunThisZone);
+    SizingDesRunThisZone = false;
+    ZoneName = state->dataHeatBal->Zone(NZ2).Name;
+    state->dataSize->CurZoneEqNum = Util::FindItemInList(ZoneName, state->dataHeatBal->Zone);
+    CheckThisZoneForSizing(*state, state->dataSize->CurZoneEqNum, SizingDesRunThisZone);
+    EXPECT_TRUE(SizingDesRunThisZone);
+
+    state->dataGlobal->DisplayExtraWarnings = true;
+    InternalHeatGains::InitInternalHeatGains(*state);
+
+    EXPECT_EQ(0.0, thisBBHeat1.ExtSurfCondLoad);
+    EXPECT_EQ(0.0, thisBBHeat2.ExtSurfCondLoad);
+    EXPECT_EQ(0.0, thisBBHeat3.ExtSurfCondLoad);
+
+    EXPECT_EQ(25.0, thisBBHeat1.ZnHtgSetTemp);
+    EXPECT_EQ(-17.3, thisBBHeat1.LowTemperature);
+    EXPECT_EQ(25.0, thisBBHeat1.HighTemperature);
+    EXPECT_EQ(1269.0 * 0.25, thisBBHeat1.CapatLowTemperature);
+    EXPECT_EQ(0.0, thisBBHeat1.CapatHighTemperature);
+
+    EXPECT_EQ(25.0, thisBBHeat2.ZnHtgSetTemp);
+    EXPECT_EQ(-17.3, thisBBHeat2.LowTemperature);
+    EXPECT_EQ(25.0, thisBBHeat2.HighTemperature);
+    EXPECT_EQ(1269.0 * 0.75, thisBBHeat2.CapatLowTemperature);
+    EXPECT_EQ(0.0, thisBBHeat2.CapatHighTemperature);
+
+    EXPECT_EQ(20.0, thisBBHeat3.ZnHtgSetTemp);
+    EXPECT_EQ(-5.0, thisBBHeat3.LowTemperature);
+    EXPECT_EQ(5.0, thisBBHeat3.HighTemperature);
+    EXPECT_EQ(1500.0, thisBBHeat3.CapatLowTemperature);
+    EXPECT_EQ(1000.0, thisBBHeat3.CapatHighTemperature);
+
+    InternalHeatGains::ReportInternalHeatGains(*state);
+
+    auto &zoneRpt1 = state->dataHeatBal->ZoneRpt(1);
+    EXPECT_NEAR(zoneRpt1.BaseHeatPower, (0.0 + 17.3) * (0.0 - 1269.0) / (25.0 + 17.3) + 1269.0, 0.01);
+
+    auto &spaceRpt1 = state->dataHeatBal->spaceRpt(1);
+    EXPECT_NEAR(spaceRpt1.BaseHeatPower, (0.0 + 17.3) * (0.0 - 1269.0 * 0.25) / (25.0 + 17.3) + 1269.0 * 0.25, 0.01);
+
+    auto &spaceRpt2 = state->dataHeatBal->spaceRpt(2);
+    EXPECT_NEAR(spaceRpt2.BaseHeatPower, (0.0 + 17.3) * (0.0 - 1269.0 * 0.75) / (25.0 + 17.3) + 1269.0 * 0.75, 0.01);
+
+    auto &zoneRpt2 = state->dataHeatBal->ZoneRpt(2);
+    EXPECT_NEAR(zoneRpt2.BaseHeatPower, (0.0 + 5.0) * (1000.0 - 1500.0) / (5.0 + 5.0) + 1500.0, 0.01);
+
+    std::string error_string =
+        delimited_string({"   ** Warning ** SizeOaControlledBaseboard: Potential issue with equipment sizing for "
+                          "ZoneBaseboard:OutdoorTemperatureControlled SPACE 1 MAIN ZONE BBHEAT",
+                          "   **   ~~~   ** ...Rated Total Heating Capacity = 0.00 [W]",
+                          "   **   ~~~   ** ...Capacity passed by parent object to size child component = 0.00 [W]",
+                          "   ** Warning ** SizeOaControlledBaseboard: Potential issue with equipment sizing for "
+                          "ZoneBaseboard:OutdoorTemperatureControlled SPACE 2 MAIN ZONE BBHEAT",
+                          "   **   ~~~   ** ...Rated Total Heating Capacity = 0.00 [W]",
+                          "   **   ~~~   ** ...Capacity passed by parent object to size child component = 0.00 [W]",
+                          "   ************* SizeOaControlledBaseboard: Potential issue with equipment sizing for "
+                          "ZoneBaseboard:OutdoorTemperatureControlled SECOND ZONE BBHEAT",
+                          "   **   ~~~   ** User-Specified Low Temperature [C] = -5.00",
+                          "   **   ~~~   ** differs from Design Size Low Temperature [C] = -17.30",
+                          "   **   ~~~   ** This may, or may not, indicate mismatched component sizes.",
+                          "   **   ~~~   ** Verify that the value entered is intended and is consistent with other components.",
+                          "   ************* SizeOaControlledBaseboard: Potential issue with equipment sizing for "
+                          "ZoneBaseboard:OutdoorTemperatureControlled SECOND ZONE BBHEAT",
+                          "   **   ~~~   ** User-Specified High Temperature [C] = 5.00",
+                          "   **   ~~~   ** differs from Design Size High Temperature [C] = 20.00",
+                          "   **   ~~~   ** This may, or may not, indicate mismatched component sizes.",
+                          "   **   ~~~   ** Verify that the value entered is intended and is consistent with other components.",
+                          "   ************* SizeOaControlledBaseboard: Potential issue with equipment sizing for "
+                          "ZoneBaseboard:OutdoorTemperatureControlled SECOND ZONE BBHEAT",
+                          "   **   ~~~   ** User-Specified Capacity at Low Temperature [W] = 1500.00",
+                          "   **   ~~~   ** differs from Design Size Capacity at Low Temperature [W] = 1119.00",
+                          "   **   ~~~   ** This may, or may not, indicate mismatched component sizes.",
+                          "   **   ~~~   ** Verify that the value entered is intended and is consistent with other components.",
+                          "   ************* SizeOaControlledBaseboard: Potential issue with equipment sizing for "
+                          "ZoneBaseboard:OutdoorTemperatureControlled SECOND ZONE BBHEAT",
+                          "   **   ~~~   ** User-Specified Capacity at High Temperature [W] = 1000.00",
+                          "   **   ~~~   ** differs from Design Size Capacity at High Temperature [W] = 603.217",
+                          "   **   ~~~   ** This may, or may not, indicate mismatched component sizes.",
+                          "   **   ~~~   ** Verify that the value entered is intended and is consistent with other components."});
+    EXPECT_TRUE(compare_err_stream(error_string, true));
 }
 
 TEST_F(EnergyPlusFixture, InternalHeatGains_AdjustedSupplyGoodInletNode)
@@ -1557,15 +1868,16 @@ TEST_F(EnergyPlusFixture, InternalHeatGains_AdjustedSupplyGoodInletNode)
     ASSERT_TRUE(process_idf(idf_objects));
 
     bool ErrorsFound(false);
-    state->dataGlobal->NumOfTimeStepInHour = 1;
-    state->dataGlobal->MinutesPerTimeStep = 60;
+    state->dataGlobal->TimeStepsInHour = 1;
+    state->dataGlobal->MinutesInTimeStep = 60;
+    state->init_state(*state);
 
     HeatBalanceManager::GetZoneData(*state, ErrorsFound);
     ASSERT_FALSE(ErrorsFound);
     state->dataZoneTempPredictorCorrector->zoneHeatBalance.allocate(1);
 
     state->dataZoneTempPredictorCorrector->zoneHeatBalance(1).MAT = 24.0;
-    state->dataZoneTempPredictorCorrector->zoneHeatBalance(1).ZoneAirHumRat = 0.008;
+    state->dataZoneTempPredictorCorrector->zoneHeatBalance(1).airHumRat = 0.008;
 
     InternalHeatGains::GetInternalHeatGainsInput(*state);
     ASSERT_FALSE(ErrorsFound);
@@ -1779,15 +2091,17 @@ TEST_F(EnergyPlusFixture, InternalHeatGains_AdjustedSupplyBadInletNode)
     ASSERT_TRUE(process_idf(idf_objects));
 
     bool ErrorsFound(false);
-    state->dataGlobal->NumOfTimeStepInHour = 1;
-    state->dataGlobal->MinutesPerTimeStep = 60;
+    state->dataGlobal->TimeStepsInHour = 1;
+    state->dataGlobal->MinutesInTimeStep = 60;
+    state->init_state(*state);
 
     HeatBalanceManager::GetZoneData(*state, ErrorsFound);
     ASSERT_FALSE(ErrorsFound);
+    ZoneEquipmentManager::GetZoneEquipment(*state);
     state->dataZoneTempPredictorCorrector->zoneHeatBalance.allocate(1);
 
     state->dataZoneTempPredictorCorrector->zoneHeatBalance(1).MAT = 24.0;
-    state->dataZoneTempPredictorCorrector->zoneHeatBalance(1).ZoneAirHumRat = 0.008;
+    state->dataZoneTempPredictorCorrector->zoneHeatBalance(1).airHumRat = 0.008;
 
     EXPECT_ANY_THROW(InternalHeatGains::GetInternalHeatGainsInput(*state));
 }
@@ -2004,15 +2318,16 @@ TEST_F(EnergyPlusFixture, InternalHeatGains_FlowControlWithApproachTemperaturesG
     ASSERT_TRUE(process_idf(idf_objects));
 
     bool ErrorsFound(false);
-    state->dataGlobal->NumOfTimeStepInHour = 1;
-    state->dataGlobal->MinutesPerTimeStep = 60;
+    state->dataGlobal->TimeStepsInHour = 1;
+    state->dataGlobal->MinutesInTimeStep = 60;
+    state->init_state(*state);
 
     HeatBalanceManager::GetZoneData(*state, ErrorsFound);
     ASSERT_FALSE(ErrorsFound);
     state->dataZoneTempPredictorCorrector->zoneHeatBalance.allocate(1);
 
     state->dataZoneTempPredictorCorrector->zoneHeatBalance(1).MAT = 24.0;
-    state->dataZoneTempPredictorCorrector->zoneHeatBalance(1).ZoneAirHumRat = 0.008;
+    state->dataZoneTempPredictorCorrector->zoneHeatBalance(1).airHumRat = 0.008;
 
     InternalHeatGains::GetInternalHeatGainsInput(*state);
     ASSERT_FALSE(ErrorsFound);
@@ -2230,15 +2545,17 @@ TEST_F(EnergyPlusFixture, InternalHeatGains_FlowControlWithApproachTemperaturesB
     ASSERT_TRUE(process_idf(idf_objects));
 
     bool ErrorsFound(false);
-    state->dataGlobal->NumOfTimeStepInHour = 1;
-    state->dataGlobal->MinutesPerTimeStep = 60;
+    state->dataGlobal->TimeStepsInHour = 1;
+    state->dataGlobal->MinutesInTimeStep = 60;
+    state->init_state(*state);
 
     HeatBalanceManager::GetZoneData(*state, ErrorsFound);
     ASSERT_FALSE(ErrorsFound);
+    ZoneEquipmentManager::GetZoneEquipment(*state);
     state->dataZoneTempPredictorCorrector->zoneHeatBalance.allocate(1);
 
     state->dataZoneTempPredictorCorrector->zoneHeatBalance(1).MAT = 24.0;
-    state->dataZoneTempPredictorCorrector->zoneHeatBalance(1).ZoneAirHumRat = 0.008;
+    state->dataZoneTempPredictorCorrector->zoneHeatBalance(1).airHumRat = 0.008;
 
     ASSERT_ANY_THROW(InternalHeatGains::GetInternalHeatGainsInput(*state));
 }
@@ -2455,15 +2772,16 @@ TEST_F(EnergyPlusFixture, InternalHeatGains_WarnMissingInletNode)
     ASSERT_TRUE(process_idf(idf_objects));
 
     bool ErrorsFound(false);
-    state->dataGlobal->NumOfTimeStepInHour = 1;
-    state->dataGlobal->MinutesPerTimeStep = 60;
+    state->dataGlobal->TimeStepsInHour = 1;
+    state->dataGlobal->MinutesInTimeStep = 60;
+    state->init_state(*state);
 
     HeatBalanceManager::GetZoneData(*state, ErrorsFound);
     ASSERT_FALSE(ErrorsFound);
     state->dataZoneTempPredictorCorrector->zoneHeatBalance.allocate(1);
 
     state->dataZoneTempPredictorCorrector->zoneHeatBalance(1).MAT = 24.0;
-    state->dataZoneTempPredictorCorrector->zoneHeatBalance(1).ZoneAirHumRat = 0.008;
+    state->dataZoneTempPredictorCorrector->zoneHeatBalance(1).airHumRat = 0.008;
 
     InternalHeatGains::GetInternalHeatGainsInput(*state);
     ASSERT_FALSE(ErrorsFound);
@@ -2490,7 +2808,7 @@ TEST_F(EnergyPlusFixture, InternalHeatGains_GetHeatColdStressTemp)
         "  Schedule1,               !- Activity Level Schedule Name",
         "  3.82E-8,                 !- Carbon Dioxide Generation Rate{ m3 / s - W }",
         "  No,                      !- Enable ASHRAE 55 Comfort Warnings",
-        "  ZoneAveraged,            !- Mean Radiant Temperature Calculation Type",
+        "  EnclosureAveraged,            !- Mean Radiant Temperature Calculation Type",
         "  ,                        !- Surface Name/Angle Factor List Name",
         "  ,                        !- Work Efficiency Schedule Name",
         "  ,                        !- Clothing Insulation Calculation Method",
@@ -2521,11 +2839,11 @@ TEST_F(EnergyPlusFixture, InternalHeatGains_GetHeatColdStressTemp)
     });
 
     ASSERT_TRUE(process_idf(idf_objects));
+    state->dataGlobal->TimeStepsInHour = 1;
+    state->dataGlobal->MinutesInTimeStep = 60;
+    state->init_state(*state);
 
     bool ErrorsFound(false);
-    state->dataGlobal->NumOfTimeStepInHour = 1;
-    state->dataGlobal->MinutesPerTimeStep = 60;
-    ScheduleManager::ProcessScheduleInput(*state); // read schedules
     HeatBalanceManager::GetZoneData(*state, ErrorsFound);
     ASSERT_FALSE(ErrorsFound);
 
@@ -2633,15 +2951,16 @@ TEST_F(EnergyPlusFixture, ITEwithUncontrolledZoneTest)
     ASSERT_TRUE(process_idf(idf_objects));
 
     bool ErrorsFound(false);
-    state->dataGlobal->NumOfTimeStepInHour = 1;
-    state->dataGlobal->MinutesPerTimeStep = 60;
+    state->dataGlobal->TimeStepsInHour = 1;
+    state->dataGlobal->MinutesInTimeStep = 60;
+    state->init_state(*state);
 
     HeatBalanceManager::GetZoneData(*state, ErrorsFound);
     ASSERT_FALSE(ErrorsFound);
     state->dataZoneTempPredictorCorrector->zoneHeatBalance.allocate(1);
 
     state->dataZoneTempPredictorCorrector->zoneHeatBalance(1).MAT = 24.0;
-    state->dataZoneTempPredictorCorrector->zoneHeatBalance(1).ZoneAirHumRat = 0.008;
+    state->dataZoneTempPredictorCorrector->zoneHeatBalance(1).airHumRat = 0.008;
 
     InternalHeatGains::GetInternalHeatGainsInput(*state);
     ASSERT_FALSE(ErrorsFound);
@@ -2771,8 +3090,9 @@ TEST_F(EnergyPlusFixture, ITE_Env_Class_Fix_41C)
     ASSERT_TRUE(process_idf(idf_objects));
 
     bool ErrorsFound(false);
-    state->dataGlobal->NumOfTimeStepInHour = 1;
-    state->dataGlobal->MinutesPerTimeStep = 60;
+    state->dataGlobal->TimeStepsInHour = 1;
+    state->dataGlobal->MinutesInTimeStep = 60;
+    state->init_state(*state);
 
     state->dataGlobal->TimeStepZone = 1.0;
 
@@ -2782,7 +3102,7 @@ TEST_F(EnergyPlusFixture, ITE_Env_Class_Fix_41C)
 
     // Test 1: 41C;
     state->dataZoneTempPredictorCorrector->zoneHeatBalance(1).MAT = 41.0;
-    state->dataZoneTempPredictorCorrector->zoneHeatBalance(1).ZoneAirHumRat = 0.015;
+    state->dataZoneTempPredictorCorrector->zoneHeatBalance(1).airHumRat = 0.015;
 
     InternalHeatGains::GetInternalHeatGainsInput(*state);
     ASSERT_FALSE(ErrorsFound);
@@ -2972,8 +3292,9 @@ TEST_F(EnergyPlusFixture, ITE_Env_Class_Fix_39C)
     ASSERT_TRUE(process_idf(idf_objects));
 
     bool ErrorsFound(false);
-    state->dataGlobal->NumOfTimeStepInHour = 1;
-    state->dataGlobal->MinutesPerTimeStep = 60;
+    state->dataGlobal->TimeStepsInHour = 1;
+    state->dataGlobal->MinutesInTimeStep = 60;
+    state->init_state(*state);
 
     state->dataGlobal->TimeStepZone = 1.0;
 
@@ -2983,7 +3304,7 @@ TEST_F(EnergyPlusFixture, ITE_Env_Class_Fix_39C)
 
     // Test 2: 39C;
     state->dataZoneTempPredictorCorrector->zoneHeatBalance(1).MAT = 39.0;
-    state->dataZoneTempPredictorCorrector->zoneHeatBalance(1).ZoneAirHumRat = 0.015;
+    state->dataZoneTempPredictorCorrector->zoneHeatBalance(1).airHumRat = 0.015;
 
     InternalHeatGains::GetInternalHeatGainsInput(*state);
     ASSERT_FALSE(ErrorsFound);
@@ -3006,7 +3327,7 @@ TEST_F(EnergyPlusFixture, ITE_Env_Class_Fix_39C)
     EXPECT_NEAR(state->dataGlobal->TimeStepZone, 1.0, 1e-6);
 
     // Test 2: The following test should pass in with the fix (PR9541);
-    // Witout the fix, some of the following items would fail if tested in the original develop branch
+    // Without the fix, some of the following items would fail if tested in the original develop branch
     // if (TAirIn > DBMax[EnvClass])
     EXPECT_NE(state->dataHeatBal->ZoneITEq(Loop).TimeAboveDryBulbT, state->dataGlobal->TimeStepZone);
     EXPECT_NE(state->dataHeatBal->ZoneITEq(Loop).TimeOutOfOperRange, state->dataGlobal->TimeStepZone);
@@ -3180,8 +3501,9 @@ TEST_F(EnergyPlusFixture, ITE_Env_Class_Update_Class_H1)
     ASSERT_TRUE(process_idf(idf_objects));
 
     bool ErrorsFound(false);
-    state->dataGlobal->NumOfTimeStepInHour = 1;
-    state->dataGlobal->MinutesPerTimeStep = 60;
+    state->dataGlobal->TimeStepsInHour = 1;
+    state->dataGlobal->MinutesInTimeStep = 60;
+    state->init_state(*state);
 
     state->dataGlobal->TimeStepZone = 1.0;
 
@@ -3193,7 +3515,7 @@ TEST_F(EnergyPlusFixture, ITE_Env_Class_Update_Class_H1)
 
     // Test: 41C
     state->dataZoneTempPredictorCorrector->zoneHeatBalance(1).MAT = 41.0;
-    state->dataZoneTempPredictorCorrector->zoneHeatBalance(1).ZoneAirHumRat = 0.015;
+    state->dataZoneTempPredictorCorrector->zoneHeatBalance(1).airHumRat = 0.015;
 
     InternalHeatGains::GetInternalHeatGainsInput(*state);
     ASSERT_FALSE(ErrorsFound);
@@ -3203,7 +3525,10 @@ TEST_F(EnergyPlusFixture, ITE_Env_Class_Update_Class_H1)
     // Test the processing results of the Environmental Class H1 input
     EXPECT_TRUE(thisZoneITEq.Class == DataHeatBalance::ITEClass::H1);
 
+    state->dataEnvrn->StdRhoAir = 0.8;
     InternalHeatGains::CalcZoneITEq(*state);
+    // add a test to verify the standard density air volume flow rate calculation
+    EXPECT_NEAR(state->dataHeatBal->ZoneITEq(1).AirVolFlowStdDensity, 0.2469055, 1e-6);
 
     int NZ = 1;
     int spaceNum = 1;
@@ -3250,7 +3575,7 @@ TEST_F(EnergyPlusFixture, ITE_Env_Class_Update_Class_H1)
     // if (TDPAirIn > DPMax[EnvClass])
     EXPECT_EQ(thisZoneITEq.TimeAboveDewpointT, state->dataGlobal->TimeStepZone);
     EXPECT_EQ(thisZoneITEq.TimeOutOfOperRange, state->dataGlobal->TimeStepZone);
-    EXPECT_EQ(thisZoneITEq.DewpointTAboveDeltaT, TDPAirIn - DPMax[EnvClass]);
+    EXPECT_NEAR(thisZoneITEq.DewpointTAboveDeltaT, TDPAirIn - DPMax[EnvClass], 0.000000000001);
     EXPECT_EQ(thisZnRpt.ITEqTimeAboveDewpointT, state->dataGlobal->TimeStepZone);
     EXPECT_EQ(thisZnRpt.ITEqTimeOutOfOperRange, state->dataGlobal->TimeStepZone);
     EXPECT_EQ(thisspaceRpt.ITEqTimeAboveDewpointT, state->dataGlobal->TimeStepZone);
@@ -3331,15 +3656,14 @@ TEST_F(EnergyPlusFixture, ITE_Env_Class_Update_Class_H1)
     // if (TDPAirIn > DPMax[EnvClass])
     EXPECT_EQ(thisZoneITEq.TimeAboveDewpointT, state->dataGlobal->TimeStepZone);
     EXPECT_EQ(thisZoneITEq.TimeOutOfOperRange, state->dataGlobal->TimeStepZone);
-    EXPECT_EQ(thisZoneITEq.DewpointTAboveDeltaT, TDPAirIn - DPMax[EnvClass]);
-    EXPECT_EQ(thisZnRpt.ITEqTimeAboveDewpointT, state->dataGlobal->TimeStepZone);
+    EXPECT_NEAR(thisZoneITEq.DewpointTAboveDeltaT, TDPAirIn - DPMax[EnvClass], 0.000000000001);
     EXPECT_EQ(thisZnRpt.ITEqTimeOutOfOperRange, state->dataGlobal->TimeStepZone);
     EXPECT_EQ(thisspaceRpt.ITEqTimeAboveDewpointT, state->dataGlobal->TimeStepZone);
     EXPECT_EQ(thisspaceRpt.ITEqTimeOutOfOperRange, state->dataGlobal->TimeStepZone);
 
     EXPECT_EQ(thisZoneITEq.TimeAboveDewpointT, 1.0);
     EXPECT_EQ(thisZoneITEq.TimeOutOfOperRange, 1.0);
-    EXPECT_EQ(thisZoneITEq.DewpointTAboveDeltaT, TDPAirIn - DPMax[EnvClass]);
+    EXPECT_NEAR(thisZoneITEq.DewpointTAboveDeltaT, TDPAirIn - DPMax[EnvClass], 0.000000000001);
     EXPECT_EQ(thisZnRpt.ITEqTimeAboveDewpointT, 1.0);
     EXPECT_EQ(thisZnRpt.ITEqTimeOutOfOperRange, 1.0);
     EXPECT_EQ(thisspaceRpt.ITEqTimeAboveDewpointT, 1.0);
@@ -3371,4 +3695,160 @@ TEST_F(EnergyPlusFixture, ITE_Env_Class_Update_Class_H1)
     EXPECT_EQ(thisZnRpt.ITEqTimeOutOfOperRange, state->dataGlobal->TimeStepZone);
     EXPECT_NE(thisspaceRpt.ITEqTimeBelowRH, state->dataGlobal->TimeStepZone);
     EXPECT_EQ(thisspaceRpt.ITEqTimeOutOfOperRange, state->dataGlobal->TimeStepZone);
+}
+TEST_F(EnergyPlusFixture, InternalHeatGains_SpaceAllocation)
+{
+
+    std::string const idf_objects = delimited_string({
+        " Zone,",
+        "  Zone 1,                  !- Name",
+        "  0,                       !- Direction of Relative North {deg}",
+        "  0,                       !- X Origin {m}",
+        "  0,                       !- Y Origin {m}",
+        "  0,                       !- Z Origin {m}",
+        "  1,                       !- Type",
+        "  1,                       !- Multiplier",
+        "  autocalculate,           !- Ceiling Height {m}",
+        "  autocalculate,           !- Volume {m3}",
+        "  20.0;           !- Area {m2}",
+
+        "Space,",
+        "Space 1A,            !- Name",
+        "Zone 1,             !- Zone Name",
+        ",                   !- Ceiling Height {m}",
+        ",                   !- Volume {m3}",
+        "5.0;                !- Floor Area {m2}",
+
+        "Space,",
+        "Space 1B,            !- Name",
+        "Zone 1,             !- Zone Name",
+        ",                   !- Ceiling Height {m}",
+        ",                   !- Volume {m3}",
+        "15.0;                !- Floor Area {m2}",
+
+        " Zone,",
+        "  Zone 2,                  !- Name",
+        "  0,                       !- Direction of Relative North {deg}",
+        "  0,                       !- X Origin {m}",
+        "  0,                       !- Y Origin {m}",
+        "  0,                       !- Z Origin {m}",
+        "  1,                       !- Type",
+        "  1,                       !- Multiplier",
+        "  autocalculate,           !- Ceiling Height {m}",
+        "  autocalculate,           !- Volume {m3}",
+        "  0.0;           !- Area {m2}",
+
+        "Space,",
+        "Space 2A,            !- Name",
+        "Zone 2,             !- Zone Name",
+        ",                   !- Ceiling Height {m}",
+        ",                   !- Volume {m3}",
+        "0.0;                !- Floor Area {m2}",
+
+        "SpaceList, All Spaces, Space 1A, Space 1B, Space 2A;",
+
+        "ZoneList, All Zones, Zone 1, Zone 2;",
+
+        "ScheduleTypeLimits,SchType1,0.0,1.0,Continuous,Dimensionless;",
+
+        "Schedule:Constant,Schedule1,,1.0;",
+
+        "  Lights,",
+        "    Zone 1 Lights,        !- Name",
+        "    Zone 1,               !- Zone or ZoneList Name",
+        "    Schedule1,               !- Schedule Name",
+        "    LightingLevel,           !- Design Level Calculation Method",
+        "    100.0,                   !- Lighting Level {W}",
+        "    ,                        !- Watts per Zone Floor Area {W/m2}",
+        "    ,                        !- Watts per Person {W/person}",
+        "    0.0000,                  !- Return Air Fraction",
+        "    0.7000,                  !- Fraction Radiant",
+        "    0.2000,                  !- Fraction Visible",
+        "    1.0000,                  !- Fraction Replaceable",
+        "    General,                 !- End-Use Subcategory",
+        "    No;                      !- Return Air Fraction Calculated from Plenum Temperature",
+
+        "  Lights,",
+        "    Zone 2 Lights,        !- Name",
+        "    Zone 2,               !- Zone or ZoneList Name",
+        "    Schedule1,               !- Schedule Name",
+        "    LightingLevel,           !- Design Level Calculation Method",
+        "    100.0,                   !- Lighting Level {W}",
+        "    ,                        !- Watts per Zone Floor Area {W/m2}",
+        "    ,                        !- Watts per Person {W/person}",
+        "    0.0000,                  !- Return Air Fraction",
+        "    0.7000,                  !- Fraction Radiant",
+        "    0.2000,                  !- Fraction Visible",
+        "    1.0000,                  !- Fraction Replaceable",
+        "    General,                 !- End-Use Subcategory",
+        "    No;                      !- Return Air Fraction Calculated from Plenum Temperature",
+
+        "  Lights,",
+        "    Space 1A Lights,        !- Name",
+        "    Space 1A,               !- Zone or ZoneList Name",
+        "    Schedule1,               !- Schedule Name",
+        "    LightingLevel,           !- Design Level Calculation Method",
+        "    100.0,                   !- Lighting Level {W}",
+        "    ,                        !- Watts per Zone Floor Area {W/m2}",
+        "    ,                        !- Watts per Person {W/person}",
+        "    0.0000,                  !- Return Air Fraction",
+        "    0.7000,                  !- Fraction Radiant",
+        "    0.2000,                  !- Fraction Visible",
+        "    1.0000,                  !- Fraction Replaceable",
+        "    General,                 !- End-Use Subcategory",
+        "    No;                      !- Return Air Fraction Calculated from Plenum Temperature",
+
+        "  Lights,",
+        "    All Space Lights,        !- Name",
+        "    All Spaces,               !- Zone or ZoneList Name",
+        "    Schedule1,               !- Schedule Name",
+        "    LightingLevel,           !- Design Level Calculation Method",
+        "    100.0,                   !- Lighting Level {W}",
+        "    ,                        !- Watts per Zone Floor Area {W/m2}",
+        "    ,                        !- Watts per Person {W/person}",
+        "    0.0000,                  !- Return Air Fraction",
+        "    0.7000,                  !- Fraction Radiant",
+        "    0.2000,                  !- Fraction Visible",
+        "    1.0000,                  !- Fraction Replaceable",
+        "    General,                 !- End-Use Subcategory",
+        "    No;                      !- Return Air Fraction Calculated from Plenum Temperature",
+
+        "  Lights,",
+        "    All Zone Lights,        !- Name",
+        "    All Zones,               !- Zone or ZoneList Name",
+        "    Schedule1,               !- Schedule Name",
+        "    LightingLevel,           !- Design Level Calculation Method",
+        "    100.0,                   !- Lighting Level {W}",
+        "    ,                        !- Watts per Zone Floor Area {W/m2}",
+        "    ,                        !- Watts per Person {W/person}",
+        "    0.0000,                  !- Return Air Fraction",
+        "    0.7000,                  !- Fraction Radiant",
+        "    0.2000,                  !- Fraction Visible",
+        "    1.0000,                  !- Fraction Replaceable",
+        "    General,                 !- End-Use Subcategory",
+        "    No;                      !- Return Air Fraction Calculated from Plenum Temperature",
+    });
+
+    ASSERT_TRUE(process_idf(idf_objects));
+    EXPECT_FALSE(has_err_output());
+
+    state->dataGlobal->TimeStepsInHour = 1;    // must initialize this to get schedules initialized
+    state->dataGlobal->MinutesInTimeStep = 60; // must initialize this to get schedules initialized
+    state->init_state(*state);
+
+    bool ErrorsFound(false);
+
+    HeatBalanceManager::GetZoneData(*state, ErrorsFound);
+    SurfaceGeometry::SetupZoneGeometry(*state, ErrorsFound);
+    ASSERT_FALSE(ErrorsFound);
+
+    InternalHeatGains::GetInternalHeatGainsInput(*state);
+
+    // Zone 1 Lights: 2 spaces
+    // Zone 2 Lights: 1 space
+    // Space 1A lights: 1 space
+    // All Space Lights: 3 spaces
+    // All Zone Lights: 3 spaces
+    // 2+1+1+3+3 = 10
+    EXPECT_EQ(state->dataHeatBal->TotLights, 10);
 }

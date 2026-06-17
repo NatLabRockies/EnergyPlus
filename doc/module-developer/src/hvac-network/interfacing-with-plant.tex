@@ -1,6 +1,6 @@
 \section{Interfacing with Plant}\label{interfacing-with-plant}
 
-Beginning with Version 7.0, EnergyPlus's plant routines were reengineered and this section discusses protocols for how component models should interact with plant loop modeling.~ Component models that reject or obtain heat from a liquid fluid stream, such as hot or chilled water, condenser water, and steam (but not refrigeration), are ``plant components'' that will need to interface with the central plant solver routines.~ This section describes a number of utility routines and concepts for developers of plant component models.
+Beginning with Version 7.0, EnergyPlus's plant routines were re-engineered and this section discusses protocols for how component models should interact with plant loop modeling.~ Component models that reject or obtain heat from a liquid fluid stream, such as hot or chilled water, condenser water, and steam (but not refrigeration), are ``plant components'' that will need to interface with the central plant solver routines.~ This section describes a number of utility routines and concepts for developers of plant component models.
 
 The node structure discussed above is reused for plant.~ Each component model related to plant has inlet and outlet nodes that describe how it is connected to the loop.~ Many of the routines pass in node indexes as arguments as well as other indexes into the main plant data structure.
 
@@ -20,7 +20,7 @@ Branch is the third level and will be sized to the total number of branches on t
 
 Comp is the fourth level and will be sized to the total number of components on the branch.
 
-There are four indices that indentify each component's location for each of the plant loops it is connected with: : loop number, loop side number, branch number, and component number.~ A water cooled chiller will be connected to two loops and so the component itself will appear twice in the data structure and one set of indices will identify its location on the chilled water loop while a second set of indices will locate it on the condenser loop.~~
+There are four indices that identify each component's location for each of the plant loops it is connected with: : loop number, loop side number, branch number, and component number.~ A water cooled chiller will be connected to two loops and so the component itself will appear twice in the data structure and one set of indices will identify its location on the chilled water loop while a second set of indices will locate it on the condenser loop.~~
 
 \subsection{Initialization}\label{initialization}
 
@@ -38,9 +38,9 @@ The following variables are used to help control plant sizing:
 
 \begin{itemize}
 \item
-  PlantFirstSizesOkayToFinalizePlantSizeNotComplete This public logical boolean flag is declared in DataPlant. It starts out FALSE TRUEfalse and is set to TRUE FALSEtrue only after all some intial plant sizing actions iterations have been completed and the first set of sizes can be finalized. Component models should delay first filling autosized values until this flag is true. The -9999 values that indicate an autosized variable are not filled until this is TRUE.
+  PlantFirstSizesOkayToFinalizePlantSizeNotComplete This public logical boolean flag is declared in DataPlant. It starts out FALSE TRUEfalse and is set to TRUE FALSEtrue only after all some initial plant sizing actions iterations have been completed and the first set of sizes can be finalized. Component models should delay first filling autosized values until this flag is true. The -9999 values that indicate an autosized variable are not filled until this is TRUE.
 \item
-  PlantFirstSizesOkayToReportPlantSizesOkayToFinalize This public logical boolean flag is declared in DataPlant. It starts out false FALSE and is set to TRUE true after the main iterative phase of sizing is completed but before the final finishing passes are made. This flag is only used for advanced sizing methods based on HVAC Sizing Simulations, where the program should report both the ``Initial'' sizes and the final sizes. Component models should delay final reporting first sizes and filling of autosized values until this is set to TRUEtrue. The -9999 values that indicate an autosized variable are not filled until this is TRUE. The first, or intial, cCalls to report the outcome of sizing are not made until this is TRUEtrue.
+  PlantFirstSizesOkayToReportPlantSizesOkayToFinalize This public logical boolean flag is declared in DataPlant. It starts out false FALSE and is set to TRUE true after the main iterative phase of sizing is completed but before the final finishing passes are made. This flag is only used for advanced sizing methods based on HVAC Sizing Simulations, where the program should report both the ``Initial'' sizes and the final sizes. Component models should delay final reporting first sizes and filling of autosized values until this is set to TRUEtrue. The -9999 values that indicate an autosized variable are not filled until this is TRUE. The first, or initial, cCalls to report the outcome of sizing are not made until this is TRUEtrue.
 \item
   PlantFinalSizesOkayToReport This public boolean flag is declared in DataPlant. It starts out false and is set to true when all the sizing is done and it is okay to report the final size values. Component models should delay reporting final sizes until this is set to true.
 \item
@@ -67,7 +67,7 @@ Plant sizing routines use the approach outlined in the following steps.~ These s
 
 6.~~~~Sizing finished and PlantSizeNotCompleteset FALSE
 
-In earlier versions, component sizing routines were only called once and one had to take care not call them repeatedly (or else their flow request would get doubled each time). However, now plant component models should be designed for multiple executions of their component-level sizing routine. This allows for an iterative approach to plant sizing that is used to solve complex problems raised by inter-connected loops and the interdependence of sizing information. As of version 8.3, the addition of HVAC Sizing Simulation method makes it very explicit that not only do sizing routines need to be able to rerun, the autosized values need to be set to useable values and then changed. It is therefore now necessary to store whether or not the original input was set to autosize and so autosizable input now needs to add a boolean ``*WasAutoSized'' version of the variable to keep track of the user input.
+In earlier versions, component sizing routines were only called once and one had to take care not call them repeatedly (or else their flow request would get doubled each time). However, now plant component models should be designed for multiple executions of their component-level sizing routine. This allows for an iterative approach to plant sizing that is used to solve complex problems raised by inter-connected loops and the interdependence of sizing information. As of version 8.3, the addition of HVAC Sizing Simulation method makes it very explicit that not only do sizing routines need to be able to rerun, the autosized values need to be set to usable values and then changed. It is therefore now necessary to store whether or not the original input was set to autosize and so autosizable input now needs to add a boolean ``*WasAutoSized'' version of the variable to keep track of the user input.
 
 After the component model has determined a design value for the flow rate, this flow rate needs to be registered with the larger plant routines by calling RegisterPlantCompDesignFlow.~This is a volume flow rate in m\(^{3}\)/s.~ The flow rate is associated with the inlet node.~ This call can be repeated and the design flow will be updated with the latest request.
 
@@ -113,7 +113,7 @@ c.~~~~Array PlantEquipTypeNames.Add array element with new object's class name i
 
 d.~~~Array ValidLoopEquipTypes.~ Add array element with classification for what type of loop this component is intended for, primarily with respect to the type of loop it is intended to meet loads.
 
-e.~~~~Parameter TypeOf\_xxxx .~ Add an integer parameter to identify ``TypeOf'' number for subsequent use to identify component type without having to do string comparisions.
+e.~~~~Parameter TypeOf\_xxxx .~ Add an integer parameter to identify ``TypeOf'' number for subsequent use to identify component type without having to do string comparisons.
 
 2.~~~~PlantManager.f90
 

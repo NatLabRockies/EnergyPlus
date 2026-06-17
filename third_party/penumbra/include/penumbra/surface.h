@@ -8,28 +8,27 @@
 #include <vector>
 #include <array>
 #include <memory>
+#include <string>
 
-namespace Pumbra {
+namespace Penumbra {
 
 typedef std::vector<float> Polygon; // Implicit list of 3D coordinates
 
-class SurfacePrivate;
+class SurfaceImplementation;
 
 class Surface {
-  friend class PenumbraPrivate;
+  friend class PenumbraImplementation;
 
 public:
   Surface();
-  Surface(const Polygon &polygon);
-  Surface(const Surface &srf);
+  explicit Surface(const Polygon &polygon, const std::string &name = "");
+  Surface(const Surface &surface);
   ~Surface();
-  int setOuterPolygon(
-      const Polygon &polygon);      // Defined in counter-clockwise order when facing front
-  int addHole(const Polygon &hole); // Defined in counter-clockwise order when facing front
+  void add_hole(const Polygon &hole); // Defined in counter-clockwise order when facing front
 
 private:
-  std::shared_ptr<SurfacePrivate> surface;
+  std::shared_ptr<SurfaceImplementation> surface;
 };
 
-} // namespace Pumbra
+} // namespace Penumbra
 #endif // SURFACE_H_

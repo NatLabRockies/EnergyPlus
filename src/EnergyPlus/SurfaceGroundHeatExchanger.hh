@@ -1,7 +1,7 @@
-// EnergyPlus, Copyright (c) 1996-2023, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
-// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other
+// National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
 // contributors. All rights reserved.
 //
 // NOTICE: This Software was developed under funding from the U.S. Department of Energy and the
@@ -52,9 +52,12 @@
 #include <ObjexxFCL/Array1D.hh>
 
 // EnergyPlus Headers
+#include <EnergyPlus/Construction.hh>
 #include <EnergyPlus/DataGlobalConstants.hh>
 #include <EnergyPlus/DataGlobals.hh>
 #include <EnergyPlus/EnergyPlus.hh>
+#include <EnergyPlus/Material.hh>
+#include <EnergyPlus/Plant/PlantLocation.hh>
 #include <EnergyPlus/PlantComponent.hh>
 
 namespace EnergyPlus {
@@ -73,26 +76,26 @@ namespace SurfaceGroundHeatExchanger {
         std::string InletNode;        // surface GHE inlet fluid node
         std::string OutletNode;       // surface GHE outlet fluid node
         Real64 DesignMassFlowRate;
-        Real64 TubeDiameter;                         // hydronic tube inside diameter
-        Real64 TubeSpacing;                          // tube spacing
-        Real64 SurfaceLength;                        // active length of surface GHE
-        Real64 SurfaceWidth;                         // active width of surface GHE
-        Real64 TopThermAbs;                          // Thermal absortivity of top layer
-        Real64 TopSolarAbs;                          // solar absortivity of top layer
-        Real64 BtmThermAbs;                          // Thermal absortivity of bottom layer
-        int LowerSurfCond;                           // Type of lower surf. boundary condition
-        int TubeCircuits;                            // number of circuits in total
-        int ConstructionNum;                         // construction index number
-        int InletNodeNum;                            // inlet node number
-        int OutletNodeNum;                           // oulet node number
-        DataSurfaces::SurfaceRoughness TopRoughness; // roughness of top layer
-        DataSurfaces::SurfaceRoughness BtmRoughness; // roughness of bottom layer
-        int FrozenErrIndex1;                         // recurring error index
-        int FrozenErrIndex2;                         // recurring error index
-        int ConvErrIndex1;                           // recurring error index
-        int ConvErrIndex2;                           // recurring error index
-        int ConvErrIndex3;                           // recurring error index
-                                                     // loop topology variables
+        Real64 TubeDiameter;                     // hydronic tube inside diameter
+        Real64 TubeSpacing;                      // tube spacing
+        Real64 SurfaceLength;                    // active length of surface GHE
+        Real64 SurfaceWidth;                     // active width of surface GHE
+        Real64 TopThermAbs;                      // Thermal absortivity of top layer
+        Real64 TopSolarAbs;                      // solar absortivity of top layer
+        Real64 BtmThermAbs;                      // Thermal absortivity of bottom layer
+        int LowerSurfCond;                       // Type of lower surf. boundary condition
+        int TubeCircuits;                        // number of circuits in total
+        int ConstructionNum;                     // construction index number
+        int InletNodeNum;                        // inlet node number
+        int OutletNodeNum;                       // oulet node number
+        Material::SurfaceRoughness TopRoughness; // roughness of top layer
+        Material::SurfaceRoughness BtmRoughness; // roughness of bottom layer
+        int FrozenErrIndex1;                     // recurring error index
+        int FrozenErrIndex2;                     // recurring error index
+        int ConvErrIndex1;                       // recurring error index
+        int ConvErrIndex2;                       // recurring error index
+        int ConvErrIndex3;                       // recurring error index
+                                                 // loop topology variables
         PlantLocation plantLoc;
 
         // QTF Constants
@@ -105,23 +108,23 @@ namespace SurfaceGroundHeatExchanger {
         // conventional CTF terms
         int NumCTFTerms; // number of terms for surface
         // could be allocated rather than hard dimensioning.
-        Array1D<Real64> CTFin;    // surf flux in ctf - X
-        Array1D<Real64> CTFout;   // surf flux in ctf - Z
-        Array1D<Real64> CTFcross; // surf flux in ctf - Y
-        Array1D<Real64> CTFflux;  // surf flux in ctf - F
+        std::array<Real64, Construction::MaxCTFTerms> CTFin{};    // surf flux in ctf - X
+        std::array<Real64, Construction::MaxCTFTerms> CTFout{};   // surf flux in ctf - Z
+        std::array<Real64, Construction::MaxCTFTerms> CTFcross{}; // surf flux in ctf - Y
+        std::array<Real64, Construction::MaxCTFTerms> CTFflux{};  // surf flux in ctf - F
         // QTF coefficients
-        Array1D<Real64> CTFSourceIn;   // surf flux in ctf - Wi
-        Array1D<Real64> CTFSourceOut;  // surf flux out ctf - Wo
-        Array1D<Real64> CTFTSourceOut; // surf flux in qtf - x
-        Array1D<Real64> CTFTSourceIn;  // surf flux in qtf - y
-        Array1D<Real64> CTFTSourceQ;   // surf flux in qtf - f
+        std::array<Real64, Construction::MaxCTFTerms> CTFSourceIn{};   // surf flux in ctf - Wi
+        std::array<Real64, Construction::MaxCTFTerms> CTFSourceOut{};  // surf flux out ctf - Wo
+        std::array<Real64, Construction::MaxCTFTerms> CTFTSourceOut{}; // surf flux in qtf - x
+        std::array<Real64, Construction::MaxCTFTerms> CTFTSourceIn{};  // surf flux in qtf - y
+        std::array<Real64, Construction::MaxCTFTerms> CTFTSourceQ{};   // surf flux in qtf - f
         // History data
-        Array1D<Real64> TbtmHistory;
-        Array1D<Real64> TtopHistory;
-        Array1D<Real64> TsrcHistory;
-        Array1D<Real64> QbtmHistory;
-        Array1D<Real64> QtopHistory;
-        Array1D<Real64> QsrcHistory;
+        std::array<Real64, Construction::MaxCTFTerms> TbtmHistory{};
+        std::array<Real64, Construction::MaxCTFTerms> TtopHistory{};
+        std::array<Real64, Construction::MaxCTFTerms> TsrcHistory{};
+        std::array<Real64, Construction::MaxCTFTerms> QbtmHistory{};
+        std::array<Real64, Construction::MaxCTFTerms> QtopHistory{};
+        std::array<Real64, Construction::MaxCTFTerms> QsrcHistory{};
         Real64 QSrc;
         Real64 QSrcAvg;
         Real64 LastQSrc;
@@ -152,18 +155,10 @@ namespace SurfaceGroundHeatExchanger {
         SurfaceGroundHeatExchangerData()
             : DesignMassFlowRate(0.0), TubeDiameter(0.0), TubeSpacing(0.0), SurfaceLength(0.0), SurfaceWidth(0.0), TopThermAbs(0.0), TopSolarAbs(0.0),
               BtmThermAbs(0.0), LowerSurfCond(0), TubeCircuits(0), ConstructionNum(0), InletNodeNum(0), OutletNodeNum(0),
-              TopRoughness(DataSurfaces::SurfaceRoughness::Invalid), BtmRoughness(DataSurfaces::SurfaceRoughness::Invalid), FrozenErrIndex1(0),
+              TopRoughness(Material::SurfaceRoughness::Invalid), BtmRoughness(Material::SurfaceRoughness::Invalid), FrozenErrIndex1(0),
               FrozenErrIndex2(0), ConvErrIndex1(0), ConvErrIndex2(0), ConvErrIndex3(0), plantLoc{}, TsrcConstCoef(0.0), TsrcVarCoef(0.0),
-              QbtmConstCoef(0.0), QbtmVarCoef(0.0), QtopConstCoef(0.0), QtopVarCoef(0.0), NumCTFTerms(0),
-              CTFin({0, DataGlobalConstants::MaxCTFTerms - 1}, 0.0), CTFout({0, DataGlobalConstants::MaxCTFTerms - 1}, 0.0),
-              CTFcross({0, DataGlobalConstants::MaxCTFTerms - 1}, 0.0), CTFflux({0, DataGlobalConstants::MaxCTFTerms - 1}, 0.0),
-              CTFSourceIn({0, DataGlobalConstants::MaxCTFTerms - 1}, 0.0), CTFSourceOut({0, DataGlobalConstants::MaxCTFTerms - 1}, 0.0),
-              CTFTSourceOut({0, DataGlobalConstants::MaxCTFTerms - 1}, 0.0), CTFTSourceIn({0, DataGlobalConstants::MaxCTFTerms - 1}, 0.0),
-              CTFTSourceQ({0, DataGlobalConstants::MaxCTFTerms - 1}, 0.0), TbtmHistory({0, DataGlobalConstants::MaxCTFTerms - 1}, 0.0),
-              TtopHistory({0, DataGlobalConstants::MaxCTFTerms - 1}, 0.0), TsrcHistory({0, DataGlobalConstants::MaxCTFTerms - 1}, 0.0),
-              QbtmHistory({0, DataGlobalConstants::MaxCTFTerms - 1}, 0.0), QtopHistory({0, DataGlobalConstants::MaxCTFTerms - 1}, 0.0),
-              QsrcHistory({0, DataGlobalConstants::MaxCTFTerms - 1}, 0.0), QSrc(0.0), QSrcAvg(0.0), LastQSrc(0.0), LastSysTimeElapsed(0.0),
-              LastTimeStepSys(0.0),
+              QbtmConstCoef(0.0), QbtmVarCoef(0.0), QtopConstCoef(0.0), QtopVarCoef(0.0), NumCTFTerms(0), QSrc(0.0), QSrcAvg(0.0), LastQSrc(0.0),
+              LastSysTimeElapsed(0.0), LastTimeStepSys(0.0),
 
               InletTemp(0.0), OutletTemp(0.0), MassFlowRate(0.0), TopSurfaceTemp(0.0), BtmSurfaceTemp(0.0), TopSurfaceFlux(0.0), BtmSurfaceFlux(0.0),
               HeatTransferRate(0.0), SurfHeatTransferRate(0.0), Energy(0.0), SurfEnergy(0.0), SourceTemp(0.0),
@@ -265,6 +260,16 @@ namespace SurfaceGroundHeatExchanger {
 
     void GetSurfaceGroundHeatExchanger(EnergyPlusData &state);
 
+    inline std::array<Real64, Construction::MaxCTFTerms>
+    eoshiftArray(std::array<Real64, Construction::MaxCTFTerms> const &a, int const shift, Real64 const initialValue)
+    {
+        std::array<Real64, Construction::MaxCTFTerms> o = {initialValue};
+        int const b(0 + std::max(shift, 0)), e(a.size() - 1 + std::min(shift, 0));
+        for (int i = b, j = std::max(0 - shift, 0); i <= e; ++i, ++j) {
+            o[j] = a[i];
+        }
+        return o;
+    }
     //==============================================================================
 
 } // namespace SurfaceGroundHeatExchanger
@@ -307,6 +312,14 @@ struct SurfaceGroundHeatExchangersData : BaseGlobalStruct
     Real64 FluxBtm; // bottom surface flux
     Real64 TempBtm; // bottom surface temp
     Real64 TempTop; // top surface temp
+
+    void init_constant_state([[maybe_unused]] EnergyPlusData &state) override
+    {
+    }
+
+    void init_state([[maybe_unused]] EnergyPlusData &state) override
+    {
+    }
 
     void clear_state() override
     {

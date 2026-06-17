@@ -1,7 +1,7 @@
-// EnergyPlus, Copyright (c) 1996-2023, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
-// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other
+// National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
 // contributors. All rights reserved.
 //
 // NOTICE: This Software was developed under funding from the U.S. Department of Energy and the
@@ -60,21 +60,25 @@
 
 namespace EnergyPlus {
 
+using namespace OutputProcessor;
+
 TEST_F(SQLiteFixture, SQLiteProcedures_sqliteWriteMessage)
 {
-    state->dataSQLiteProcedures->sqlite->sqliteWriteMessage("");
+    auto &sql = state->dataSQLiteProcedures->sqlite;
+    sql->sqliteWriteMessage("");
     EXPECT_EQ("SQLite3 message, \n", ss->str());
     ss->str(std::string());
-    state->dataSQLiteProcedures->sqlite->sqliteWriteMessage("test message");
+    sql->sqliteWriteMessage("test message");
     EXPECT_EQ("SQLite3 message, test message\n", ss->str());
     ss->str(std::string());
 }
 
 TEST_F(SQLiteFixture, SQLiteProcedures_initializeIndexes)
 {
-    state->dataSQLiteProcedures->sqlite->sqliteBegin();
-    state->dataSQLiteProcedures->sqlite->initializeIndexes();
-    state->dataSQLiteProcedures->sqlite->sqliteCommit();
+    auto &sql = state->dataSQLiteProcedures->sqlite;
+    sql->sqliteBegin();
+    sql->initializeIndexes();
+    sql->sqliteCommit();
 
     EXPECT_TRUE(indexExists("rddMTR"));
     EXPECT_TRUE(indexExists("redRD"));
@@ -85,16 +89,17 @@ TEST_F(SQLiteFixture, SQLiteProcedures_initializeIndexes)
 
 TEST_F(SQLiteFixture, SQLiteProcedures_simulationRecords)
 {
-    state->dataSQLiteProcedures->sqlite->sqliteBegin();
+    auto &sql = state->dataSQLiteProcedures->sqlite;
+    sql->sqliteBegin();
     // There needs to be a simulation record otherwise updateSQLiteSimulationRecord will fail
-    state->dataSQLiteProcedures->sqlite->createSQLiteSimulationsRecord(1, "EnergyPlus Version", "Current Time");
-    state->dataSQLiteProcedures->sqlite->createSQLiteSimulationsRecord(2, "EnergyPlus Version", "Current Time");
-    state->dataSQLiteProcedures->sqlite->createSQLiteSimulationsRecord(3, "EnergyPlus Version", "Current Time");
-    state->dataSQLiteProcedures->sqlite->updateSQLiteSimulationRecord(1, 6);
-    state->dataSQLiteProcedures->sqlite->updateSQLiteSimulationRecord(true, false, 2);
-    state->dataSQLiteProcedures->sqlite->updateSQLiteSimulationRecord(true, true, 3);
+    sql->createSQLiteSimulationsRecord(1, "EnergyPlus Version", "Current Time");
+    sql->createSQLiteSimulationsRecord(2, "EnergyPlus Version", "Current Time");
+    sql->createSQLiteSimulationsRecord(3, "EnergyPlus Version", "Current Time");
+    sql->updateSQLiteSimulationRecord(1, 6);
+    sql->updateSQLiteSimulationRecord(true, false, 2);
+    sql->updateSQLiteSimulationRecord(true, true, 3);
     auto result = queryResult("SELECT * FROM Simulations;", "Simulations");
-    state->dataSQLiteProcedures->sqlite->sqliteCommit();
+    sql->sqliteCommit();
 
     ASSERT_EQ(3ul, result.size());
     std::vector<std::string> testResult0{"1", "EnergyPlus Version", "Current Time", "6", "FALSE", "FALSE"};
@@ -104,10 +109,10 @@ TEST_F(SQLiteFixture, SQLiteProcedures_simulationRecords)
     EXPECT_EQ(testResult1, result[1]);
     EXPECT_EQ(testResult2, result[2]);
 
-    state->dataSQLiteProcedures->sqlite->sqliteBegin();
-    state->dataSQLiteProcedures->sqlite->updateSQLiteSimulationRecord(true, true);
+    sql->sqliteBegin();
+    sql->updateSQLiteSimulationRecord(true, true);
     result = queryResult("SELECT * FROM Simulations;", "Simulations");
-    state->dataSQLiteProcedures->sqlite->sqliteCommit();
+    sql->sqliteCommit();
 
     ASSERT_EQ(3ul, result.size());
     std::vector<std::string> testResult3{"1", "EnergyPlus Version", "Current Time", "6", "1", "1"};
@@ -116,19 +121,16 @@ TEST_F(SQLiteFixture, SQLiteProcedures_simulationRecords)
 
 TEST_F(SQLiteFixture, SQLiteProcedures_createSQLiteEnvironmentPeriodRecord)
 {
-    state->dataSQLiteProcedures->sqlite->sqliteBegin();
+    auto &sql = state->dataSQLiteProcedures->sqlite;
+    sql->sqliteBegin();
     // There needs to be a simulation record otherwise the foreign key constraint will fail
-    state->dataSQLiteProcedures->sqlite->createSQLiteSimulationsRecord(1, "EnergyPlus Version", "Current Time");
-    state->dataSQLiteProcedures->sqlite->createSQLiteEnvironmentPeriodRecord(
-        1, "CHICAGO ANN HTG 99.6% CONDNS DB", DataGlobalConstants::KindOfSim::DesignDay);
-    state->dataSQLiteProcedures->sqlite->createSQLiteEnvironmentPeriodRecord(
-        2, "CHICAGO ANN CLG .4% CONDNS WB=>MDB", DataGlobalConstants::KindOfSim::DesignDay, 1);
-    state->dataSQLiteProcedures->sqlite->createSQLiteEnvironmentPeriodRecord(
-        3, "CHICAGO ANN HTG 99.6% CONDNS DB", DataGlobalConstants::KindOfSim::RunPeriodDesign);
-    state->dataSQLiteProcedures->sqlite->createSQLiteEnvironmentPeriodRecord(
-        4, "CHICAGO ANN CLG .4% CONDNS WB=>MDB", DataGlobalConstants::KindOfSim::RunPeriodWeather, 1);
+    sql->createSQLiteSimulationsRecord(1, "EnergyPlus Version", "Current Time");
+    sql->createSQLiteEnvironmentPeriodRecord(1, "CHICAGO ANN HTG 99.6% CONDNS DB", Constant::KindOfSim::DesignDay);
+    sql->createSQLiteEnvironmentPeriodRecord(2, "CHICAGO ANN CLG .4% CONDNS WB=>MDB", Constant::KindOfSim::DesignDay, 1);
+    sql->createSQLiteEnvironmentPeriodRecord(3, "CHICAGO ANN HTG 99.6% CONDNS DB", Constant::KindOfSim::RunPeriodDesign);
+    sql->createSQLiteEnvironmentPeriodRecord(4, "CHICAGO ANN CLG .4% CONDNS WB=>MDB", Constant::KindOfSim::RunPeriodWeather, 1);
     auto result = queryResult("SELECT * FROM EnvironmentPeriods;", "EnvironmentPeriods");
-    state->dataSQLiteProcedures->sqlite->sqliteCommit();
+    sql->sqliteCommit();
 
     ASSERT_EQ(4ul, result.size());
     std::vector<std::string> testResult0{"1", "1", "CHICAGO ANN HTG 99.6% CONDNS DB", "1"};
@@ -140,51 +142,48 @@ TEST_F(SQLiteFixture, SQLiteProcedures_createSQLiteEnvironmentPeriodRecord)
     EXPECT_EQ(testResult2, result[2]);
     EXPECT_EQ(testResult3, result[3]);
 
-    state->dataSQLiteProcedures->sqlite->sqliteBegin();
+    sql->sqliteBegin();
     // This should fail to insert due to foreign key constraint
-    state->dataSQLiteProcedures->sqlite->createSQLiteEnvironmentPeriodRecord(
-        5, "CHICAGO ANN HTG 99.6% CONDNS DB", DataGlobalConstants::KindOfSim::DesignDay, 100);
+    sql->createSQLiteEnvironmentPeriodRecord(5, "CHICAGO ANN HTG 99.6% CONDNS DB", Constant::KindOfSim::DesignDay, 100);
     // This should fail to insert due to duplicate primary key
-    state->dataSQLiteProcedures->sqlite->createSQLiteEnvironmentPeriodRecord(
-        4, "CHICAGO ANN CLG .4% CONDNS WB=>MDB", DataGlobalConstants::KindOfSim::DesignDay, 1);
+    sql->createSQLiteEnvironmentPeriodRecord(4, "CHICAGO ANN CLG .4% CONDNS WB=>MDB", Constant::KindOfSim::DesignDay, 1);
     result = queryResult("SELECT * FROM EnvironmentPeriods;", "EnvironmentPeriods");
-    state->dataSQLiteProcedures->sqlite->sqliteCommit();
+    sql->sqliteCommit();
 
     EXPECT_EQ(4ul, result.size());
 }
 
 TEST_F(SQLiteFixture, SQLiteProcedures_errorRecords)
 {
-    state->dataSQLiteProcedures->sqlite->sqliteBegin();
+    auto &sql = state->dataSQLiteProcedures->sqlite;
+    sql->sqliteBegin();
     // There needs to be a simulation record otherwise the foreign key constraint will fail
-    state->dataSQLiteProcedures->sqlite->createSQLiteSimulationsRecord(1, "EnergyPlus Version", "Current Time");
-    state->dataSQLiteProcedures->sqlite->createSQLiteErrorRecord(
-        1, 0, "CheckUsedConstructions: There are 2 nominally unused constructions in input.", 1);
+    sql->createSQLiteSimulationsRecord(1, "EnergyPlus Version", "Current Time");
+    sql->createSQLiteErrorRecord(1, 0, "CheckUsedConstructions: There are 2 nominally unused constructions in input.", 1);
     auto result = queryResult("SELECT * FROM Errors;", "Errors");
-    state->dataSQLiteProcedures->sqlite->sqliteCommit();
+    sql->sqliteCommit();
 
     ASSERT_EQ(1ul, result.size());
     std::vector<std::string> testResult0{"1", "1", "0", "CheckUsedConstructions: There are 2 nominally unused constructions in input.", "1"};
     EXPECT_EQ(testResult0, result[0]);
 
-    state->dataSQLiteProcedures->sqlite->sqliteBegin();
+    sql->sqliteBegin();
     // updateSQLiteErrorRecord appends the message to the current error message of the last error in the table
-    state->dataSQLiteProcedures->sqlite->updateSQLiteErrorRecord("New error message");
+    sql->updateSQLiteErrorRecord("New error message");
     result = queryResult("SELECT * FROM Errors;", "Errors");
-    state->dataSQLiteProcedures->sqlite->sqliteCommit();
+    sql->sqliteCommit();
 
     ASSERT_EQ(1ul, result.size());
     std::vector<std::string> testResult1{
         "1", "1", "0", "CheckUsedConstructions: There are 2 nominally unused constructions in input.  New error message", "1"};
     EXPECT_EQ(testResult1, result[0]);
 
-    state->dataSQLiteProcedures->sqlite->sqliteBegin();
-    state->dataSQLiteProcedures->sqlite->createSQLiteErrorRecord(
-        1, 0, "CheckUsedConstructions: There are 2 nominally unused constructions in input.", 1);
-    state->dataSQLiteProcedures->sqlite->createSQLiteErrorRecord(1, 0, "This should be changed.", 1);
-    state->dataSQLiteProcedures->sqlite->updateSQLiteErrorRecord("Changed error message.");
+    sql->sqliteBegin();
+    sql->createSQLiteErrorRecord(1, 0, "CheckUsedConstructions: There are 2 nominally unused constructions in input.", 1);
+    sql->createSQLiteErrorRecord(1, 0, "This should be changed.", 1);
+    sql->updateSQLiteErrorRecord("Changed error message.");
     result = queryResult("SELECT * FROM Errors;", "Errors");
-    state->dataSQLiteProcedures->sqlite->sqliteCommit();
+    sql->sqliteCommit();
 
     ASSERT_EQ(3ul, result.size());
     std::vector<std::string> testResult2{
@@ -195,35 +194,36 @@ TEST_F(SQLiteFixture, SQLiteProcedures_errorRecords)
     EXPECT_EQ(testResult3, result[1]);
     EXPECT_EQ(testResult4, result[2]);
 
-    state->dataSQLiteProcedures->sqlite->sqliteBegin();
+    sql->sqliteBegin();
     // This should fail to insert due to foreign key constraint
-    state->dataSQLiteProcedures->sqlite->createSQLiteErrorRecord(
-        100, 0, "CheckUsedConstructions: There are 2 nominally unused constructions in input.", 1);
+    sql->createSQLiteErrorRecord(100, 0, "CheckUsedConstructions: There are 2 nominally unused constructions in input.", 1);
     result = queryResult("SELECT * FROM Errors;", "Errors");
-    state->dataSQLiteProcedures->sqlite->sqliteCommit();
+    sql->sqliteCommit();
 
     EXPECT_EQ(3ul, result.size());
 }
 
 TEST_F(SQLiteFixture, SQLiteProcedures_sqliteWithinTransaction)
 {
-    EXPECT_FALSE(state->dataSQLiteProcedures->sqlite->sqliteWithinTransaction());
-    state->dataSQLiteProcedures->sqlite->sqliteBegin();
-    EXPECT_TRUE(state->dataSQLiteProcedures->sqlite->sqliteWithinTransaction());
-    state->dataSQLiteProcedures->sqlite->sqliteCommit();
-    EXPECT_FALSE(state->dataSQLiteProcedures->sqlite->sqliteWithinTransaction());
+    auto &sql = state->dataSQLiteProcedures->sqlite;
+    EXPECT_FALSE(sql->sqliteWithinTransaction());
+    sql->sqliteBegin();
+    EXPECT_TRUE(sql->sqliteWithinTransaction());
+    sql->sqliteCommit();
+    EXPECT_FALSE(sql->sqliteWithinTransaction());
 }
 
 TEST_F(SQLiteFixture, SQLiteProcedures_informationalErrorRecords)
 {
-    state->dataSQLiteProcedures->sqlite->sqliteBegin();
+    auto &sql = state->dataSQLiteProcedures->sqlite;
+    sql->sqliteBegin();
     // There needs to be a simulation record otherwise the foreign key constraint will fail
-    state->dataSQLiteProcedures->sqlite->createSQLiteSimulationsRecord(1, "EnergyPlus Version", "Current Time");
+    sql->createSQLiteSimulationsRecord(1, "EnergyPlus Version", "Current Time");
 
     ShowMessage(*state, "This is an informational message");
 
     auto result = queryResult("SELECT * FROM Errors;", "Errors");
-    state->dataSQLiteProcedures->sqlite->sqliteCommit();
+    sql->sqliteCommit();
 
     ASSERT_EQ(1ul, result.size());
     std::vector<std::string> testResult0{"1", "1", "-1", "This is an informational message", "0"};
@@ -236,17 +236,19 @@ TEST_F(SQLiteFixture, SQLiteProcedures_informationalErrorRecords)
 
 TEST_F(SQLiteFixture, SQLiteProcedures_createSQLiteReportDictionaryRecord)
 {
-    state->dataSQLiteProcedures->sqlite->sqliteBegin();
-    state->dataSQLiteProcedures->sqlite->createSQLiteReportDictionaryRecord(
-        1, 1, "Zone", "Environment", "Site Outdoor Air Drybulb Temperature", 1, "C", 1, false);
-    state->dataSQLiteProcedures->sqlite->createSQLiteReportDictionaryRecord(
-        2, 2, "Facility:Electricity", "", "Facility:Electricity", 1, "J", 1, true);
-    state->dataSQLiteProcedures->sqlite->createSQLiteReportDictionaryRecord(
-        3, 2, "Facility:Electricity", "", "Facility:Electricity", 1, "J", 3, true);
-    state->dataSQLiteProcedures->sqlite->createSQLiteReportDictionaryRecord(4, 1, "HVAC", "", "AHU-1", 2, "", 1, false);
-    state->dataSQLiteProcedures->sqlite->createSQLiteReportDictionaryRecord(5, 1, "HVAC", "", "AHU-1", 2, "", 1, false, "test schedule");
+    auto &sql = state->dataSQLiteProcedures->sqlite;
+    sql->sqliteBegin();
+    sql->createSQLiteReportDictionaryRecord(
+        1, StoreType::Average, "Zone", "Environment", "Site Outdoor Air Drybulb Temperature", TimeStepType::Zone, "C", ReportFreq::Hour, false);
+    sql->createSQLiteReportDictionaryRecord(
+        2, StoreType::Sum, "Facility:Electricity", "", "Facility:Electricity", TimeStepType::Zone, "J", ReportFreq::Hour, true);
+    sql->createSQLiteReportDictionaryRecord(
+        3, StoreType::Sum, "Facility:Electricity", "", "Facility:Electricity", TimeStepType::Zone, "J", ReportFreq::Month, true);
+    sql->createSQLiteReportDictionaryRecord(4, StoreType::Average, "HVAC", "", "AHU-1", TimeStepType::System, "", ReportFreq::Hour, false);
+    sql->createSQLiteReportDictionaryRecord(
+        5, StoreType::Average, "HVAC", "", "AHU-1", TimeStepType::System, "", ReportFreq::Hour, false, "test schedule");
     auto result = queryResult("SELECT * FROM ReportDataDictionary;", "ReportDataDictionary");
-    state->dataSQLiteProcedures->sqlite->sqliteCommit();
+    sql->sqliteCommit();
 
     ASSERT_EQ(5ul, result.size());
     std::vector<std::string> testResult0{"1", "0", "Avg", "Zone", "Zone", "Environment", "Site Outdoor Air Drybulb Temperature", "Hourly", "", "C"};
@@ -260,16 +262,17 @@ TEST_F(SQLiteFixture, SQLiteProcedures_createSQLiteReportDictionaryRecord)
     EXPECT_EQ(testResult3, result[3]);
     EXPECT_EQ(testResult4, result[4]);
 
-    state->dataSQLiteProcedures->sqlite->sqliteBegin();
-    state->dataSQLiteProcedures->sqlite->createSQLiteReportDictionaryRecord(
-        6, 3, "Zone", "Environment", "Site Outdoor Air Drybulb Temperature", 1, "C", 1, false);
-    state->dataSQLiteProcedures->sqlite->createSQLiteReportDictionaryRecord(
-        7, 2, "Facility:Electricity", "", "Facility:Electricity", 3, "J", 1, true);
-    state->dataSQLiteProcedures->sqlite->createSQLiteReportDictionaryRecord(
-        8, 2, "Facility:Electricity", "", "Facility:Electricity", 1, "J", 7, true);
-    state->dataSQLiteProcedures->sqlite->createSQLiteReportDictionaryRecord(9, 1, "HVAC", "", "AHU-1", 2, "", -2, false);
+    // Do we still need to do these tests now that ReportFreq, StoreType, and TimeStep type are enums?
+    sql->sqliteBegin();
+    sql->createSQLiteReportDictionaryRecord(
+        6, StoreType::Invalid, "Zone", "Environment", "Site Outdoor Air Drybulb Temperature", TimeStepType::Zone, "C", ReportFreq::Hour, false);
+    sql->createSQLiteReportDictionaryRecord(
+        7, StoreType::Sum, "Facility:Electricity", "", "Facility:Electricity", TimeStepType::Invalid, "J", ReportFreq::Hour, true);
+    sql->createSQLiteReportDictionaryRecord(
+        8, StoreType::Sum, "Facility:Electricity", "", "Facility:Electricity", TimeStepType::Zone, "J", ReportFreq::Invalid, true);
+    sql->createSQLiteReportDictionaryRecord(9, StoreType::Average, "HVAC", "", "AHU-1", TimeStepType::System, "", ReportFreq::Invalid, false);
     result = queryResult("SELECT * FROM ReportDataDictionary;", "ReportDataDictionary");
-    state->dataSQLiteProcedures->sqlite->sqliteCommit();
+    sql->sqliteCommit();
 
     ASSERT_EQ(9ul, result.size());
     std::vector<std::string> testResult5{
@@ -282,27 +285,28 @@ TEST_F(SQLiteFixture, SQLiteProcedures_createSQLiteReportDictionaryRecord)
     EXPECT_EQ(testResult7, result[7]);
     EXPECT_EQ(testResult8, result[8]);
 
-    state->dataSQLiteProcedures->sqlite->sqliteBegin();
+    sql->sqliteBegin();
     // This should fail to insert due to duplicate primary key
-    state->dataSQLiteProcedures->sqlite->createSQLiteReportDictionaryRecord(
-        9, 3, "Zone", "Environment", "Site Outdoor Air Drybulb Temperature", 1, "C", 1, false);
+    sql->createSQLiteReportDictionaryRecord(
+        9, StoreType::Invalid, "Zone", "Environment", "Site Outdoor Air Drybulb Temperature", TimeStepType::Zone, "C", ReportFreq::Hour, false);
     result = queryResult("SELECT * FROM ReportDataDictionary;", "ReportDataDictionary");
-    state->dataSQLiteProcedures->sqlite->sqliteCommit();
+    sql->sqliteCommit();
     EXPECT_EQ(9ul, result.size());
 }
 
 TEST_F(SQLiteFixture, SQLiteProcedures_createSQLiteTimeIndexRecord)
 {
-    state->dataSQLiteProcedures->sqlite->sqliteBegin();
-    state->dataSQLiteProcedures->sqlite->createSQLiteTimeIndexRecord(4, 1, 1, 0, 2017);
-    state->dataSQLiteProcedures->sqlite->createSQLiteTimeIndexRecord(3, 1, 1, 0, 2017, 1);
-    state->dataSQLiteProcedures->sqlite->createSQLiteTimeIndexRecord(2, 1, 1, 0, 2017, 1, 1, 1, _, _, 0, "WinterDesignDay");
-    state->dataSQLiteProcedures->sqlite->createSQLiteTimeIndexRecord(1, 1, 1, 0, 2017, 1, 2, 2, _, _, 0, "SummerDesignDay");
-    state->dataSQLiteProcedures->sqlite->createSQLiteTimeIndexRecord(0, 1, 1, 0, 2017, 1, 1, 1, 60, 0, 0, "WinterDesignDay");
-    state->dataSQLiteProcedures->sqlite->createSQLiteTimeIndexRecord(-1, 1, 1, 0, 2017, 1, 2, 2, 60, 0, 0, "SummerDesignDay");
-    state->dataSQLiteProcedures->sqlite->createSQLiteTimeIndexRecord(-1, 1, 1, 1, 2017, 1, 3, 3, 60, 0, 0, "SummerDesignDay", true);
+    auto &sql = state->dataSQLiteProcedures->sqlite;
+    sql->sqliteBegin();
+    sql->createSQLiteTimeIndexRecord(ReportFreq::Simulation, 1, 1, 0, 2017, false);
+    sql->createSQLiteTimeIndexRecord(ReportFreq::Month, 1, 1, 0, 2017, false, 1);
+    sql->createSQLiteTimeIndexRecord(ReportFreq::Day, 1, 1, 0, 2017, false, 1, 1, 1, -1, -1, 0, "WinterDesignDay");
+    sql->createSQLiteTimeIndexRecord(ReportFreq::Hour, 1, 1, 0, 2017, false, 1, 2, 2, -1, -1, 0, "SummerDesignDay");
+    sql->createSQLiteTimeIndexRecord(ReportFreq::TimeStep, 1, 1, 0, 2017, false, 1, 1, 1, 60, 0, 0, "WinterDesignDay");
+    sql->createSQLiteTimeIndexRecord(ReportFreq::EachCall, 1, 1, 0, 2017, false, 1, 2, 2, 60, 0, 0, "SummerDesignDay");
+    sql->createSQLiteTimeIndexRecord(ReportFreq::EachCall, 1, 1, 1, 2017, false, 1, 3, 3, 60, 0, 0, "SummerDesignDay", true);
     auto result = queryResult("SELECT * FROM Time;", "Time");
-    state->dataSQLiteProcedures->sqlite->sqliteCommit();
+    sql->sqliteCommit();
 
     ASSERT_EQ(7ul, result.size());
     // some of these are odd.........
@@ -321,49 +325,102 @@ TEST_F(SQLiteFixture, SQLiteProcedures_createSQLiteTimeIndexRecord)
     EXPECT_EQ(testResult5, result[5]);
     EXPECT_EQ(testResult6, result[6]);
 
-    state->dataSQLiteProcedures->sqlite->sqliteBegin();
-    state->dataSQLiteProcedures->sqlite->createSQLiteTimeIndexRecord(-999, 1, 1, 0, 2017);
-    state->dataSQLiteProcedures->sqlite->sqliteCommit();
-    EXPECT_EQ("SQLite3 message, Illegal reportingInterval passed to CreateSQLiteTimeIndexRecord: -999\n", ss->str());
+    sql->sqliteBegin();
+    sql->createSQLiteTimeIndexRecord(ReportFreq::Invalid, 1, 1, 0, 2017, false);
+    sql->sqliteCommit();
+    EXPECT_EQ("SQLite3 message, Illegal reportingInterval passed to CreateSQLiteTimeIndexRecord: -1\n", ss->str());
     ss->str(std::string());
 
     EXPECT_EQ(7ul, result.size());
 
-    state->dataSQLiteProcedures->sqlite->sqliteBegin();
-    state->dataSQLiteProcedures->sqlite->createSQLiteTimeIndexRecord(0, 1, 1, 1, 2017, 1, 3, 3, 60, 0, 0, _, true);
-    state->dataSQLiteProcedures->sqlite->createSQLiteTimeIndexRecord(0, 1, 1, 1, 2017, 1, 3, 3, 60, 0, _, "SummerDesignDay", true);
-    state->dataSQLiteProcedures->sqlite->createSQLiteTimeIndexRecord(0, 1, 1, 1, 2017, 1, 3, 3, 60, _, 0, "SummerDesignDay", true);
-    state->dataSQLiteProcedures->sqlite->createSQLiteTimeIndexRecord(0, 1, 1, 1, 2017, 1, 3, 3, _, 0, 0, "SummerDesignDay", true);
-    state->dataSQLiteProcedures->sqlite->createSQLiteTimeIndexRecord(0, 1, 1, 1, 2017, 1, 3, _, 60, 0, 0, "SummerDesignDay", true);
-    state->dataSQLiteProcedures->sqlite->createSQLiteTimeIndexRecord(0, 1, 1, 1, 2017, 1, _, 3, 60, 0, 0, "SummerDesignDay", true);
-    state->dataSQLiteProcedures->sqlite->createSQLiteTimeIndexRecord(0, 1, 1, 1, 2017, _, 3, 3, 60, 0, 0, "SummerDesignDay", true);
-    state->dataSQLiteProcedures->sqlite->createSQLiteTimeIndexRecord(1, 1, 1, 1, 2017, 1, 3, 3, 60, 0, 0, _, true);
-    state->dataSQLiteProcedures->sqlite->createSQLiteTimeIndexRecord(1, 1, 1, 1, 2017, 1, 3, 3, 60, 0, _, "SummerDesignDay", true);
-    state->dataSQLiteProcedures->sqlite->createSQLiteTimeIndexRecord(1, 1, 1, 1, 2017, 1, 3, _, 60, 0, 0, "SummerDesignDay", true);
-    state->dataSQLiteProcedures->sqlite->createSQLiteTimeIndexRecord(1, 1, 1, 1, 2017, 1, _, 3, 60, 0, 0, "SummerDesignDay", true);
-    state->dataSQLiteProcedures->sqlite->createSQLiteTimeIndexRecord(1, 1, 1, 1, 2017, _, 3, 3, 60, 0, 0, "SummerDesignDay", true);
-    state->dataSQLiteProcedures->sqlite->createSQLiteTimeIndexRecord(2, 1, 1, 1, 2017, 1, 3, 3, 60, 0, 0, _, true);
-    state->dataSQLiteProcedures->sqlite->createSQLiteTimeIndexRecord(2, 1, 1, 1, 2017, 1, 3, 3, 60, 0, _, "SummerDesignDay", true);
-    state->dataSQLiteProcedures->sqlite->createSQLiteTimeIndexRecord(2, 1, 1, 1, 2017, 1, 3, _, 60, 0, 0, "SummerDesignDay", true);
-    state->dataSQLiteProcedures->sqlite->createSQLiteTimeIndexRecord(2, 1, 1, 1, 2017, 1, _, 3, 60, 0, 0, "SummerDesignDay", true);
-    state->dataSQLiteProcedures->sqlite->createSQLiteTimeIndexRecord(2, 1, 1, 1, 2017, _, 3, 3, 60, 0, 0, "SummerDesignDay", true);
-    state->dataSQLiteProcedures->sqlite->createSQLiteTimeIndexRecord(3, 1, 1, 1, 2017, _, 3, 3, 60, 0, 0, "SummerDesignDay", true);
-    state->dataSQLiteProcedures->sqlite->sqliteCommit();
+    sql->sqliteBegin();
+    sql->createSQLiteTimeIndexRecord(ReportFreq::TimeStep, 1, 1, 1, 2017, false, 1, 3, 3, 60, 0, 0, "", true);
+    sql->createSQLiteTimeIndexRecord(ReportFreq::TimeStep, 1, 1, 1, 2017, false, 1, 3, 3, 60, 0, -1, "SummerDesignDay", true);
+    sql->createSQLiteTimeIndexRecord(ReportFreq::TimeStep, 1, 1, 1, 2017, false, 1, 3, 3, 60, -1, 0, "SummerDesignDay", true);
+    sql->createSQLiteTimeIndexRecord(ReportFreq::TimeStep, 1, 1, 1, 2017, false, 1, 3, 3, -1, 0, 0, "SummerDesignDay", true);
+    sql->createSQLiteTimeIndexRecord(ReportFreq::TimeStep, 1, 1, 1, 2017, false, 1, 3, -1, 60, 0, 0, "SummerDesignDay", true);
+    sql->createSQLiteTimeIndexRecord(ReportFreq::TimeStep, 1, 1, 1, 2017, false, 1, -1, 3, 60, 0, 0, "SummerDesignDay", true);
+    sql->createSQLiteTimeIndexRecord(ReportFreq::TimeStep, 1, 1, 1, 2017, false, -1, 3, 3, 60, 0, 0, "SummerDesignDay", true);
+    sql->createSQLiteTimeIndexRecord(ReportFreq::Hour, 1, 1, 1, 2017, false, 1, 3, 3, 60, 0, 0, "", true);
+    sql->createSQLiteTimeIndexRecord(ReportFreq::Hour, 1, 1, 1, 2017, false, 1, 3, 3, 60, 0, -1, "SummerDesignDay", true);
+    sql->createSQLiteTimeIndexRecord(ReportFreq::Hour, 1, 1, 1, 2017, false, 1, 3, -1, 60, 0, 0, "SummerDesignDay", true);
+    sql->createSQLiteTimeIndexRecord(ReportFreq::Hour, 1, 1, 1, 2017, false, 1, -1, 3, 60, 0, 0, "SummerDesignDay", true);
+    sql->createSQLiteTimeIndexRecord(ReportFreq::Hour, 1, 1, 1, 2017, false, -1, 3, 3, 60, 0, 0, "SummerDesignDay", true);
+    sql->createSQLiteTimeIndexRecord(ReportFreq::Day, 1, 1, 1, 2017, false, 1, 3, 3, 60, 0, 0, "", true);
+    sql->createSQLiteTimeIndexRecord(ReportFreq::Day, 1, 1, 1, 2017, false, 1, 3, 3, 60, 0, -1, "SummerDesignDay", true);
+    sql->createSQLiteTimeIndexRecord(ReportFreq::Day, 1, 1, 1, 2017, false, 1, 3, -1, 60, 0, 0, "SummerDesignDay", true);
+    sql->createSQLiteTimeIndexRecord(ReportFreq::Day, 1, 1, 1, 2017, false, 1, -1, 3, 60, 0, 0, "SummerDesignDay", true);
+    sql->createSQLiteTimeIndexRecord(ReportFreq::Day, 1, 1, 1, 2017, false, -1, 3, 3, 60, 0, 0, "SummerDesignDay", true);
+    sql->createSQLiteTimeIndexRecord(ReportFreq::Month, 1, 1, 1, 2017, false, -1, 3, 3, 60, 0, 0, "SummerDesignDay", true);
+    sql->sqliteCommit();
+}
+
+TEST_F(SQLiteFixture, SQLiteProcedures_createSQLiteTimeIndexRecord_NonLeapDay)
+{
+    auto &sql = state->dataSQLiteProcedures->sqlite;
+    // set the leap year flag to false (6th argument) and expect the last day of february to be the 28th
+    sql->sqliteBegin();
+    sql->createSQLiteTimeIndexRecord(ReportFreq::Simulation, 1, 1, 0, 2012, false);
+    sql->createSQLiteTimeIndexRecord(ReportFreq::Month, 1, 1, 0, 2012, false, 1);
+    sql->createSQLiteTimeIndexRecord(ReportFreq::Month, 1, 1, 0, 2012, false, 2); // February
+    sql->createSQLiteTimeIndexRecord(ReportFreq::Month, 1, 1, 0, 2012, false, 3);
+    sql->createSQLiteTimeIndexRecord(ReportFreq::Month, 1, 1, 0, 2012, false, 4);
+    auto result = queryResult("SELECT * FROM Time;", "Time");
+    sql->sqliteCommit();
+
+    ASSERT_EQ(5ul, result.size());
+    std::vector<std::string> testResult0{"1", "", "", "", "", "", "", "1440", "4", "1", "", "0", ""};
+    std::vector<std::string> testResult1{"2", "2012", "1", "31", "24", "0", "", "44640", "3", "1", "", "0", ""};
+    std::vector<std::string> testResult2{"3", "2012", "2", "28", "24", "0", "", "40320", "3", "1", "", "0", ""}; // February
+    std::vector<std::string> testResult3{"4", "2012", "3", "31", "24", "0", "", "44640", "3", "1", "", "0", ""};
+    std::vector<std::string> testResult4{"5", "2012", "4", "30", "24", "0", "", "43200", "3", "1", "", "0", ""};
+    EXPECT_EQ(testResult0, result[0]);
+    EXPECT_EQ(testResult1, result[1]);
+    EXPECT_EQ(testResult2, result[2]);
+    EXPECT_EQ(testResult3, result[3]);
+    EXPECT_EQ(testResult4, result[4]);
+}
+
+TEST_F(SQLiteFixture, SQLiteProcedures_createSQLiteTimeIndexRecord_LeapDay)
+{
+    auto &sql = state->dataSQLiteProcedures->sqlite;
+    // set the leap year flag to true (6th argument) and expect the last day of february to be the 29th
+    sql->sqliteBegin();
+    sql->createSQLiteTimeIndexRecord(ReportFreq::Simulation, 1, 1, 0, 2012, true);
+    sql->createSQLiteTimeIndexRecord(ReportFreq::Month, 1, 1, 0, 2012, true, 1);
+    sql->createSQLiteTimeIndexRecord(ReportFreq::Month, 1, 1, 0, 2012, true, 2); // February
+    sql->createSQLiteTimeIndexRecord(ReportFreq::Month, 1, 1, 0, 2012, true, 3);
+    sql->createSQLiteTimeIndexRecord(ReportFreq::Month, 1, 1, 0, 2012, true, 4);
+    auto result = queryResult("SELECT * FROM Time;", "Time");
+    sql->sqliteCommit();
+
+    ASSERT_EQ(5ul, result.size());
+    std::vector<std::string> testResult0{"1", "", "", "", "", "", "", "1440", "4", "1", "", "0", ""};
+    std::vector<std::string> testResult1{"2", "2012", "1", "31", "24", "0", "", "44640", "3", "1", "", "0", ""};
+    std::vector<std::string> testResult2{"3", "2012", "2", "29", "24", "0", "", "41760", "3", "1", "", "0", ""}; // February
+    std::vector<std::string> testResult3{"4", "2012", "3", "31", "24", "0", "", "44640", "3", "1", "", "0", ""};
+    std::vector<std::string> testResult4{"5", "2012", "4", "30", "24", "0", "", "43200", "3", "1", "", "0", ""};
+    EXPECT_EQ(testResult0, result[0]);
+    EXPECT_EQ(testResult1, result[1]);
+    EXPECT_EQ(testResult2, result[2]);
+    EXPECT_EQ(testResult3, result[3]);
+    EXPECT_EQ(testResult4, result[4]);
 }
 
 TEST_F(SQLiteFixture, SQLiteProcedures_createSQLiteReportDataRecord)
 {
-    state->dataSQLiteProcedures->sqlite->sqliteBegin();
-    state->dataSQLiteProcedures->sqlite->createSQLiteTimeIndexRecord(4, 1, 1, 0, 2017);
-    state->dataSQLiteProcedures->sqlite->createSQLiteReportDictionaryRecord(
-        1, 1, "Zone", "Environment", "Site Outdoor Air Drybulb Temperature", 1, "C", 1, false);
-    state->dataSQLiteProcedures->sqlite->createSQLiteReportDataRecord(1, 999.9);
-    state->dataSQLiteProcedures->sqlite->createSQLiteReportDataRecord(1, 999.9, 2, 0, 1310459, 100, 7031530, 15);
-    state->dataSQLiteProcedures->sqlite->createSQLiteReportDataRecord(1, 999.9, 0, 0, 1310459, 100, 7031530, 15);
-    state->dataSQLiteProcedures->sqlite->createSQLiteReportDataRecord(1, 999.9, 2, 100, 1310459, 999, 7031530, _);
+    auto &sql = state->dataSQLiteProcedures->sqlite;
+    sql->sqliteBegin();
+    sql->createSQLiteTimeIndexRecord(ReportFreq::Simulation, 1, 1, 0, 2017, false);
+    sql->createSQLiteReportDictionaryRecord(
+        1, StoreType::Average, "Zone", "Environment", "Site Outdoor Air Drybulb Temperature", TimeStepType::Zone, "C", ReportFreq::Hour, false);
+    sql->createSQLiteReportDataRecord(1, 999.9);
+    sql->createSQLiteReportDataRecord(1, 999.9, ReportFreq::Day, 0, 1310459, 100, 7031530, 15);
+    sql->createSQLiteReportDataRecord(1, 999.9, ReportFreq::TimeStep, 0, 1310459, 100, 7031530, 15);
+    sql->createSQLiteReportDataRecord(1, 999.9, ReportFreq::Day, 100, 1310459, 999, 7031530, -1);
     auto reportData = queryResult("SELECT * FROM ReportData;", "ReportData");
     auto reportExtendedData = queryResult("SELECT * FROM ReportExtendedData;", "ReportExtendedData");
-    state->dataSQLiteProcedures->sqlite->sqliteCommit();
+    sql->sqliteCommit();
 
     ASSERT_EQ(4ul, reportData.size());
     std::vector<std::string> reportData0{"1", "1", "1", "999.9"};
@@ -381,16 +438,16 @@ TEST_F(SQLiteFixture, SQLiteProcedures_createSQLiteReportDataRecord)
     EXPECT_EQ(reportExtendedData0, reportExtendedData[0]);
     EXPECT_EQ(reportExtendedData1, reportExtendedData[1]);
 
-    state->dataSQLiteProcedures->sqlite->sqliteBegin();
-    state->dataSQLiteProcedures->sqlite->createSQLiteReportDataRecord(1, 999.9, -999, 0, 1310459, 100, 7031530, 15);
-    state->dataSQLiteProcedures->sqlite->sqliteCommit();
-    EXPECT_EQ("SQLite3 message, Illegal reportingInterval passed to CreateSQLiteMeterRecord: -999\n", ss->str());
+    sql->sqliteBegin();
+    sql->createSQLiteReportDataRecord(1, 999.9, ReportFreq::Invalid, 0, 1310459, 100, 7031530, 15);
+    sql->sqliteCommit();
+    EXPECT_EQ("SQLite3 message, Illegal reportingInterval passed to CreateSQLiteMeterRecord: -1\n", ss->str());
     ss->str(std::string());
 
-    state->dataSQLiteProcedures->sqlite->sqliteBegin();
-    state->dataSQLiteProcedures->sqlite->createSQLiteReportDataRecord(1, 999.9, -100, 0, 1310459, 100, 7031530, _);
-    state->dataSQLiteProcedures->sqlite->sqliteCommit();
-    EXPECT_EQ("SQLite3 message, Illegal reportingInterval passed to CreateSQLiteMeterRecord: -100\n", ss->str());
+    sql->sqliteBegin();
+    sql->createSQLiteReportDataRecord(1, 999.9, ReportFreq::Invalid, 0, 1310459, 100, 7031530, -1);
+    sql->sqliteCommit();
+    EXPECT_EQ("SQLite3 message, Illegal reportingInterval passed to CreateSQLiteMeterRecord: -1\n", ss->str());
     ss->str(std::string());
 
     EXPECT_EQ(4ul, reportData.size());
@@ -399,11 +456,12 @@ TEST_F(SQLiteFixture, SQLiteProcedures_createSQLiteReportDataRecord)
 
 TEST_F(SQLiteFixture, SQLiteProcedures_addSQLiteZoneSizingRecord)
 {
-    state->dataSQLiteProcedures->sqlite->sqliteBegin();
-    state->dataSQLiteProcedures->sqlite->addSQLiteZoneSizingRecord(
+    auto &sql = state->dataSQLiteProcedures->sqlite;
+    sql->sqliteBegin();
+    sql->addSQLiteZoneSizingRecord(
         "FLOOR 1 IT HALL", "Cooling", 175, 262, 0.013, 0.019, "CHICAGO ANN CLG .4% CONDNS WB=>MDB", "7/21 06:00:00", 20.7, 0.0157, 0.0033, 416.7);
     auto result = queryResult("SELECT * FROM ZoneSizes;", "ZoneSizes");
-    state->dataSQLiteProcedures->sqlite->sqliteCommit();
+    sql->sqliteCommit();
 
     ASSERT_EQ(1ul, result.size());
     std::vector<std::string> testResult0{"1",
@@ -424,11 +482,11 @@ TEST_F(SQLiteFixture, SQLiteProcedures_addSQLiteZoneSizingRecord)
 
 TEST_F(SQLiteFixture, SQLiteProcedures_addSQLiteSystemSizingRecord)
 {
-    state->dataSQLiteProcedures->sqlite->sqliteBegin();
-    state->dataSQLiteProcedures->sqlite->addSQLiteSystemSizingRecord(
-        "VAV_1", "Cooling", "Sensible", 23.3, 6.3, 6.03, "CHICAGO ANN CLG .4% CONDNS WB=>MDB", "7/21 06:00:00");
+    auto &sql = state->dataSQLiteProcedures->sqlite;
+    sql->sqliteBegin();
+    sql->addSQLiteSystemSizingRecord("VAV_1", "Cooling", "Sensible", 23.3, 6.3, 6.03, "CHICAGO ANN CLG .4% CONDNS WB=>MDB", "7/21 06:00:00");
     auto result = queryResult("SELECT * FROM SystemSizes;", "SystemSizes");
-    state->dataSQLiteProcedures->sqlite->sqliteCommit();
+    sql->sqliteCommit();
 
     ASSERT_EQ(1ul, result.size());
     std::vector<std::string> testResult0{
@@ -438,25 +496,27 @@ TEST_F(SQLiteFixture, SQLiteProcedures_addSQLiteSystemSizingRecord)
 
 TEST_F(SQLiteFixture, SQLiteProcedures_addSQLiteComponentSizingRecord)
 {
-    state->dataSQLiteProcedures->sqlite->sqliteBegin();
-    state->dataSQLiteProcedures->sqlite->addSQLiteComponentSizingRecord(
+    auto &sql = state->dataSQLiteProcedures->sqlite;
+    sql->sqliteBegin();
+    sql->addSQLiteComponentSizingRecord(
         "AirTerminal:SingleDuct:VAV:Reheat", "CORE_BOTTOM VAV BOX COMPONENT", "Design Size Maximum Air Flow Rate [m3/s]", 3.23);
-    state->dataSQLiteProcedures->sqlite->addSQLiteComponentSizingRecord(
-        "Coil:Heating:Electric", "CORE_BOTTOM VAV BOX REHEAT COIL", "Design Size Nominal Capacity", 38689.18);
+    sql->addSQLiteComponentSizingRecord("Coil:Heating:Electric", "CORE_BOTTOM VAV BOX REHEAT COIL", "Design Size Nominal Capacity", 38689.18);
     auto result = queryResult("SELECT * FROM ComponentSizes;", "ComponentSizes");
-    state->dataSQLiteProcedures->sqlite->sqliteCommit();
+    sql->sqliteCommit();
 
     ASSERT_EQ(2ul, result.size());
     std::vector<std::string> testResult0{
-        "1", "AirTerminal:SingleDuct:VAV:Reheat", "CORE_BOTTOM VAV BOX COMPONENT", "Design Size Maximum Air Flow Rate", "3.23", "m3/s"};
+        "1", "AirTerminal:SingleDuct:VAV:Reheat", "CORE_BOTTOM VAV BOX COMPONENT", "Design Size Maximum Air Flow Rate", "3.23", "m3/s", ""};
     std::vector<std::string> testResult1{
-        "2", "Coil:Heating:Electric", "CORE_BOTTOM VAV BOX REHEAT COIL", "Design Size Nominal Capacity", "38689.18", ""};
+        "2", "Coil:Heating:Electric", "CORE_BOTTOM VAV BOX REHEAT COIL", "Design Size Nominal Capacity", "38689.18", "", ""};
     EXPECT_EQ(testResult0, result[0]);
     EXPECT_EQ(testResult1, result[1]);
 }
 
 TEST_F(SQLiteFixture, SQLiteProcedures_privateMethods)
 {
+#ifdef GET_OUT
+    // Don't need this test anymore we are using Enums
     // test storageType
     EXPECT_EQ("Avg", storageType(1));
     EXPECT_EQ("Sum", storageType(2));
@@ -482,6 +542,7 @@ TEST_F(SQLiteFixture, SQLiteProcedures_privateMethods)
     EXPECT_EQ("Annual", reportingFreqName(5));
     EXPECT_EQ("Unknown!!!", reportingFreqName(6));
     EXPECT_EQ("Unknown!!!", reportingFreqName(-2));
+#endif // GET_OUT
 
     EXPECT_EQ(1, logicalToInteger(true));
     EXPECT_EQ(0, logicalToInteger(false));
@@ -511,18 +572,18 @@ TEST_F(SQLiteFixture, SQLiteProcedures_DaylightMaping)
     Array1D<Real64> YValue({50.1, 52.1});
     Array2D<Real64> IllumValue(2, 2, {1, 3, 2, 4});
 
-    state->dataSQLiteProcedures->sqlite->sqliteBegin();
-    state->dataSQLiteProcedures->sqlite->addZoneData(1, *zone);
-    state->dataSQLiteProcedures->sqlite->createZoneExtendedOutput();
-    state->dataSQLiteProcedures->sqlite->createSQLiteDaylightMapTitle(
-        1, "DAYLIT ZONE:CHICAGO", "CHICAGO ANN CLG", 1, " RefPt1=(2.50:2.00:0.80), RefPt2=(2.50:18.00:0.80)", 0.8);
-    state->dataSQLiteProcedures->sqlite->createSQLiteDaylightMap(1, 2005, 7, 21, 5, XValue.size(), XValue, YValue.size(), YValue, IllumValue);
+    auto &sql = state->dataSQLiteProcedures->sqlite;
+    sql->sqliteBegin();
+    sql->addZoneData(1, *zone);
+    sql->createZoneExtendedOutput();
+    sql->createSQLiteDaylightMapTitle(1, "DAYLIT ZONE:CHICAGO", "CHICAGO ANN CLG", 1, " RefPt1=(2.50:2.00:0.80), RefPt2=(2.50:18.00:0.80)", 0.8);
+    sql->createSQLiteDaylightMap(1, 2005, 7, 21, 5, XValue.size(), XValue, YValue.size(), YValue, IllumValue);
 
     auto zones = queryResult("SELECT * FROM Zones;", "Zones");
     auto daylightMaps = queryResult("SELECT * FROM DaylightMaps;", "DaylightMaps");
     auto daylightMapHourlyData = queryResult("SELECT * FROM DaylightMapHourlyData;", "DaylightMapHourlyData");
     auto daylightMapHourlyReports = queryResult("SELECT * FROM DaylightMapHourlyReports;", "DaylightMapHourlyReports");
-    state->dataSQLiteProcedures->sqlite->sqliteCommit();
+    sql->sqliteCommit();
 
     ASSERT_EQ(1ul, zones.size());
     std::vector<std::string> zone0{"1",   "DAYLIT ZONE", "0.0", "0.0", "0.0", "0.0",   "0.0", "0.0", "0.0", "1",   "1.0", "1.0", "0.0", "0.0",
@@ -548,17 +609,17 @@ TEST_F(SQLiteFixture, SQLiteProcedures_DaylightMaping)
     EXPECT_EQ(daylightMapHourlyData2, daylightMapHourlyData[2]);
     EXPECT_EQ(daylightMapHourlyData3, daylightMapHourlyData[3]);
 
-    state->dataSQLiteProcedures->sqlite->sqliteBegin();
+    sql->sqliteBegin();
     // this should fail due to missing foreign key
-    state->dataSQLiteProcedures->sqlite->createSQLiteDaylightMapTitle(2, "test", "test", 2, "test,test", 0.8);
+    sql->createSQLiteDaylightMapTitle(2, "test", "test", 2, "test,test", 0.8);
     // this should fail due to duplicate primary key
-    state->dataSQLiteProcedures->sqlite->createSQLiteDaylightMapTitle(1, "test", "test", 1, "test,test", 0.8);
+    sql->createSQLiteDaylightMapTitle(1, "test", "test", 1, "test,test", 0.8);
     // this should fail due to missing foreign key
-    state->dataSQLiteProcedures->sqlite->createSQLiteDaylightMap(2, 2005, 7, 21, 5, XValue.size(), XValue, YValue.size(), YValue, IllumValue);
+    sql->createSQLiteDaylightMap(2, 2005, 7, 21, 5, XValue.size(), XValue, YValue.size(), YValue, IllumValue);
     daylightMaps = queryResult("SELECT * FROM DaylightMaps;", "DaylightMaps");
     daylightMapHourlyData = queryResult("SELECT * FROM DaylightMapHourlyData;", "DaylightMapHourlyData");
     daylightMapHourlyReports = queryResult("SELECT * FROM DaylightMapHourlyReports;", "DaylightMapHourlyReports");
-    state->dataSQLiteProcedures->sqlite->sqliteCommit();
+    sql->sqliteCommit();
 
     ASSERT_EQ(1ul, daylightMaps.size());
     ASSERT_EQ(1ul, daylightMapHourlyReports.size());
@@ -567,7 +628,9 @@ TEST_F(SQLiteFixture, SQLiteProcedures_DaylightMaping)
 
 TEST_F(SQLiteFixture, SQLiteProcedures_createZoneExtendedOutput)
 {
-    auto const &zoneData0 = std::make_unique<DataHeatBalance::ZoneData>();
+    state->init_state(*state);
+
+    auto const &zoneData0 = std::make_unique<DataHeatBalance::ZoneData>(); // Why make_unique here? And why is this a reference?
     zoneData0->Name = "test zone 1";
     zoneData0->CeilingHeight = 1;
     zoneData0->Volume = 1;
@@ -591,52 +654,52 @@ TEST_F(SQLiteFixture, SQLiteProcedures_createZoneExtendedOutput)
     zoneData1->MaximumZ = 2;
     zoneData1->CeilingHeight = 2;
     zoneData1->Volume = 2;
-    zoneData1->InsideConvectionAlgo = 2;
-    zoneData1->OutsideConvectionAlgo = 2;
+    zoneData1->IntConvAlgo = Convect::HcInt::ASHRAETARP;
+    zoneData1->ExtConvAlgo = Convect::HcExt::ASHRAETARP;
     zoneData1->FloorArea = 2;
     zoneData1->ExtGrossWallArea = 2;
     zoneData1->ExtNetWallArea = 2;
     zoneData1->ExtWindowArea = 2;
     zoneData1->isPartOfTotalArea = false;
 
-    auto const &zoneListData0 = std::make_unique<DataHeatBalance::ZoneListData>();
+    auto const zoneListData0 = std::make_unique<DataHeatBalance::ZoneListData>();
     zoneListData0->Name = "test zoneList 1";
     zoneListData0->Zone.allocate(1);
     zoneListData0->Zone(1) = 1;
-    auto const &zoneListData1 = std::make_unique<DataHeatBalance::ZoneListData>();
+    auto const zoneListData1 = std::make_unique<DataHeatBalance::ZoneListData>();
     zoneListData1->Name = "test zoneList 2";
     zoneListData1->Zone.allocate(2);
     zoneListData1->Zone(1) = 1;
     zoneListData1->Zone(2) = 2;
 
-    auto const &zoneGroupData0 = std::make_unique<DataHeatBalance::ZoneGroupData>();
+    auto const zoneGroupData0 = std::make_unique<DataHeatBalance::ZoneGroupData>();
     zoneGroupData0->Name = "test zoneGroup 1";
-    auto const &zoneGroupData1 = std::make_unique<DataHeatBalance::ZoneGroupData>();
+    auto const zoneGroupData1 = std::make_unique<DataHeatBalance::ZoneGroupData>();
     zoneGroupData1->Name = "test zoneGroup 2";
     zoneGroupData1->ZoneList = 2;
     zoneGroupData1->Multiplier = 99;
 
-    auto const &materialData0 = std::make_unique<Material::MaterialProperties>();
+    auto const materialData0 = std::make_unique<Material::MaterialBase>();
     materialData0->Name = "test material 1";
-    materialData0->Group = Material::MaterialGroup::Air;
-    auto const &materialData1 = std::make_unique<Material::MaterialProperties>();
+    materialData0->group = Material::Group::AirGap;
+    auto const materialData1 = std::make_unique<Material::MaterialShade>();
     materialData1->Name = "test material 2";
-    materialData1->Group = Material::MaterialGroup::Shade;
-    materialData1->Roughness = DataSurfaces::SurfaceRoughness::Rough; // 1
+    materialData1->group = Material::Group::Shade;
+    materialData1->Roughness = Material::SurfaceRoughness::Rough; // 1
     materialData1->Conductivity = 2;
     materialData1->Density = 2;
-    materialData1->IsoMoistCap = 2;
+    // materialData1->IsoMoistCap = 2;
     materialData1->Porosity = 2;
     materialData1->Resistance = 2;
     materialData1->ROnly = true;
     materialData1->SpecHeat = 2;
-    materialData1->ThermGradCoef = 2;
+    // materialData1->ThermGradCoef = 2;
     materialData1->Thickness = 2;
     materialData1->VaporDiffus = 2;
 
-    auto const &constructData0 = std::make_unique<Construction::ConstructionProps>();
+    auto const constructData0 = std::make_unique<Construction::ConstructionProps>();
     constructData0->Name = "test construction 1";
-    auto const &constructData1 = std::make_unique<Construction::ConstructionProps>();
+    auto const constructData1 = std::make_unique<Construction::ConstructionProps>();
     constructData1->Name = "test construction 2";
     constructData1->TotLayers = 2;
     constructData1->TotSolidLayers = 2;
@@ -647,15 +710,15 @@ TEST_F(SQLiteFixture, SQLiteProcedures_createZoneExtendedOutput)
     constructData1->OutsideAbsorpSolar = 2;
     constructData1->InsideAbsorpThermal = 2;
     constructData1->OutsideAbsorpThermal = 2;
-    constructData1->OutsideRoughness = DataSurfaces::SurfaceRoughness::Rough; // 1
+    constructData1->OutsideRoughness = Material::SurfaceRoughness::Rough; // 1
     constructData1->TypeIsWindow = true;
     constructData1->LayerPoint.allocate(2);
     constructData1->LayerPoint(1) = 2;
     constructData1->LayerPoint(2) = 1;
 
-    auto const &surfaceData0 = std::make_unique<DataSurfaces::SurfaceData>();
+    auto const surfaceData0 = std::make_unique<DataSurfaces::SurfaceData>();
     surfaceData0->Name = "test surface 1";
-    auto const &surfaceData1 = std::make_unique<DataSurfaces::SurfaceData>();
+    auto const surfaceData1 = std::make_unique<DataSurfaces::SurfaceData>();
     surfaceData1->Name = "test surface 2";
     surfaceData1->Construction = 2;
     surfaceData1->Area = 2;
@@ -675,12 +738,14 @@ TEST_F(SQLiteFixture, SQLiteProcedures_createZoneExtendedOutput)
     surfaceData1->ExtSolar = true;
     surfaceData1->ExtWind = true;
 
-    auto const &lightingData0 = std::make_unique<DataHeatBalance::LightsData>();
+    auto const lightingData0 = std::make_unique<DataHeatBalance::LightsData>();
     lightingData0->Name = "test lighting 1";
-    auto const &lightingData1 = std::make_unique<DataHeatBalance::LightsData>();
+    lightingData0->sched = Sched::GetScheduleAlwaysOff(*state);
+
+    auto const lightingData1 = std::make_unique<DataHeatBalance::LightsData>();
     lightingData1->Name = "test lighting 2";
     lightingData1->ZonePtr = 1;
-    lightingData1->SchedPtr = 1;
+    lightingData1->sched = Sched::AddScheduleConstant(*state, "SCHED-1");
     lightingData1->DesignLevel = 2;
     lightingData1->FractionReturnAir = 2;
     lightingData1->FractionRadiant = 2;
@@ -689,19 +754,25 @@ TEST_F(SQLiteFixture, SQLiteProcedures_createZoneExtendedOutput)
     lightingData1->FractionConvected = 2;
     lightingData1->EndUseSubcategory = "test";
 
-    auto const &peopleData0 = std::make_unique<DataHeatBalance::PeopleData>();
+    auto const peopleData0 = std::make_unique<DataHeatBalance::PeopleData>();
     peopleData0->Name = "test people 1";
-    auto const &peopleData1 = std::make_unique<DataHeatBalance::PeopleData>();
+    peopleData0->sched = Sched::GetScheduleAlwaysOff(*state);
+    peopleData0->activityLevelSched = Sched::GetScheduleAlwaysOff(*state);
+    peopleData0->workEffSched = Sched::GetScheduleAlwaysOff(*state);
+    peopleData0->clothingSched = Sched::GetScheduleAlwaysOff(*state);
+    peopleData0->airVelocitySched = Sched::GetScheduleAlwaysOff(*state);
+
+    auto const peopleData1 = std::make_unique<DataHeatBalance::PeopleData>();
     peopleData1->Name = "test people 2";
     peopleData1->ZonePtr = 1;
     peopleData1->NumberOfPeople = 2;
-    peopleData1->NumberOfPeoplePtr = 1;
-    peopleData1->ActivityLevelPtr = 1;
+    peopleData1->sched = Sched::GetSchedule(*state, "SCHED-1");
+    peopleData1->activityLevelSched = Sched::GetSchedule(*state, "SCHED-1");
     peopleData1->FractionRadiant = 2;
     peopleData1->FractionConvected = 2;
-    peopleData1->WorkEffPtr = 1;
-    peopleData1->ClothingPtr = 1;
-    peopleData1->AirVelocityPtr = 1;
+    peopleData1->workEffSched = Sched::GetSchedule(*state, "SCHED-1");
+    peopleData1->clothingSched = Sched::GetSchedule(*state, "SCHED-1");
+    peopleData1->airVelocitySched = Sched::GetSchedule(*state, "SCHED-1");
     peopleData1->Fanger = true;
     peopleData1->Pierce = true;
     peopleData1->KSU = true;
@@ -712,12 +783,14 @@ TEST_F(SQLiteFixture, SQLiteProcedures_createZoneExtendedOutput)
     peopleData1->UserSpecSensFrac = 2;
     peopleData1->Show55Warning = true;
 
-    auto const &elecEquipData0 = std::make_unique<DataHeatBalance::ZoneEquipData>();
+    auto const elecEquipData0 = std::make_unique<DataHeatBalance::ZoneEquipData>();
     elecEquipData0->Name = "test elecEquip 1";
-    auto const &elecEquipData1 = std::make_unique<DataHeatBalance::ZoneEquipData>();
+    elecEquipData0->sched = Sched::GetScheduleAlwaysOff(*state);
+
+    auto const elecEquipData1 = std::make_unique<DataHeatBalance::ZoneEquipData>();
     elecEquipData1->Name = "test elecEquip 2";
     elecEquipData1->ZonePtr = 1;
-    elecEquipData1->SchedPtr = 1;
+    elecEquipData1->sched = Sched::GetSchedule(*state, "SCHED-1");
     elecEquipData1->DesignLevel = 2;
     elecEquipData1->FractionLatent = 2;
     elecEquipData1->FractionRadiant = 2;
@@ -725,12 +798,13 @@ TEST_F(SQLiteFixture, SQLiteProcedures_createZoneExtendedOutput)
     elecEquipData1->FractionConvected = 2;
     elecEquipData1->EndUseSubcategory = "test";
 
-    auto const &gasEquipData0 = std::make_unique<DataHeatBalance::ZoneEquipData>();
+    auto const gasEquipData0 = std::make_unique<DataHeatBalance::ZoneEquipData>();
     gasEquipData0->Name = "test gasEquip 1";
-    auto const &gasEquipData1 = std::make_unique<DataHeatBalance::ZoneEquipData>();
+    gasEquipData0->sched = Sched::GetScheduleAlwaysOff(*state);
+    auto const gasEquipData1 = std::make_unique<DataHeatBalance::ZoneEquipData>();
     gasEquipData1->Name = "test gasEquip 2";
     gasEquipData1->ZonePtr = 1;
-    gasEquipData1->SchedPtr = 1;
+    gasEquipData1->sched = Sched::GetSchedule(*state, "SCHED-1");
     gasEquipData1->DesignLevel = 2;
     gasEquipData1->FractionLatent = 2;
     gasEquipData1->FractionRadiant = 2;
@@ -738,12 +812,13 @@ TEST_F(SQLiteFixture, SQLiteProcedures_createZoneExtendedOutput)
     gasEquipData1->FractionConvected = 2;
     gasEquipData1->EndUseSubcategory = "test";
 
-    auto const &steamEquipData0 = std::make_unique<DataHeatBalance::ZoneEquipData>();
+    auto const steamEquipData0 = std::make_unique<DataHeatBalance::ZoneEquipData>();
     steamEquipData0->Name = "test steamEquip 1";
-    auto const &steamEquipData1 = std::make_unique<DataHeatBalance::ZoneEquipData>();
+    steamEquipData0->sched = Sched::GetScheduleAlwaysOff(*state);
+    auto const steamEquipData1 = std::make_unique<DataHeatBalance::ZoneEquipData>();
     steamEquipData1->Name = "test steamEquip 2";
     steamEquipData1->ZonePtr = 1;
-    steamEquipData1->SchedPtr = 1;
+    steamEquipData1->sched = Sched::GetSchedule(*state, "SCHED-1");
     steamEquipData1->DesignLevel = 2;
     steamEquipData1->FractionLatent = 2;
     steamEquipData1->FractionRadiant = 2;
@@ -751,12 +826,13 @@ TEST_F(SQLiteFixture, SQLiteProcedures_createZoneExtendedOutput)
     steamEquipData1->FractionConvected = 2;
     steamEquipData1->EndUseSubcategory = "test";
 
-    auto const &hwEquipData0 = std::make_unique<DataHeatBalance::ZoneEquipData>();
+    auto const hwEquipData0 = std::make_unique<DataHeatBalance::ZoneEquipData>();
     hwEquipData0->Name = "test hwEquip 1";
-    auto const &hwEquipData1 = std::make_unique<DataHeatBalance::ZoneEquipData>();
+    hwEquipData0->sched = Sched::GetScheduleAlwaysOff(*state);
+    auto const hwEquipData1 = std::make_unique<DataHeatBalance::ZoneEquipData>();
     hwEquipData1->Name = "test hwEquip 2";
     hwEquipData1->ZonePtr = 1;
-    hwEquipData1->SchedPtr = 1;
+    hwEquipData1->sched = Sched::GetSchedule(*state, "SCHED-1");
     hwEquipData1->DesignLevel = 2;
     hwEquipData1->FractionLatent = 2;
     hwEquipData1->FractionRadiant = 2;
@@ -764,12 +840,13 @@ TEST_F(SQLiteFixture, SQLiteProcedures_createZoneExtendedOutput)
     hwEquipData1->FractionConvected = 2;
     hwEquipData1->EndUseSubcategory = "test";
 
-    auto const &otherEquipData0 = std::make_unique<DataHeatBalance::ZoneEquipData>();
+    auto const otherEquipData0 = std::make_unique<DataHeatBalance::ZoneEquipData>();
     otherEquipData0->Name = "test otherEquip 1";
-    auto const &otherEquipData1 = std::make_unique<DataHeatBalance::ZoneEquipData>();
+    otherEquipData0->sched = Sched::GetScheduleAlwaysOff(*state);
+    auto const otherEquipData1 = std::make_unique<DataHeatBalance::ZoneEquipData>();
     otherEquipData1->Name = "test otherEquip 2";
     otherEquipData1->ZonePtr = 1;
-    otherEquipData1->SchedPtr = 1;
+    otherEquipData1->sched = Sched::GetSchedule(*state, "SCHED-1");
     otherEquipData1->DesignLevel = 2;
     otherEquipData1->FractionLatent = 2;
     otherEquipData1->FractionRadiant = 2;
@@ -777,12 +854,13 @@ TEST_F(SQLiteFixture, SQLiteProcedures_createZoneExtendedOutput)
     otherEquipData1->FractionConvected = 2;
     otherEquipData1->EndUseSubcategory = "test";
 
-    auto const &baseboardData0 = std::make_unique<DataHeatBalance::BBHeatData>();
+    auto const baseboardData0 = std::make_unique<DataHeatBalance::BBHeatData>();
     baseboardData0->Name = "test baseboard 1";
-    auto const &baseboardData1 = std::make_unique<DataHeatBalance::BBHeatData>();
+    baseboardData0->sched = Sched::GetScheduleAlwaysOff(*state);
+    auto const baseboardData1 = std::make_unique<DataHeatBalance::BBHeatData>();
     baseboardData1->Name = "test baseboard 2";
     baseboardData1->ZonePtr = 1;
-    baseboardData1->SchedPtr = 1;
+    baseboardData1->sched = Sched::GetSchedule(*state, "SCHED-1");
     baseboardData1->CapatLowTemperature = 2;
     baseboardData1->LowTemperature = 2;
     baseboardData1->CapatHighTemperature = 2;
@@ -791,28 +869,30 @@ TEST_F(SQLiteFixture, SQLiteProcedures_createZoneExtendedOutput)
     baseboardData1->FractionConvected = 2;
     baseboardData1->EndUseSubcategory = "test";
 
-    auto const &infiltrationData0 = std::make_unique<DataHeatBalance::InfiltrationData>();
+    auto const infiltrationData0 = std::make_unique<DataHeatBalance::InfiltrationData>();
     infiltrationData0->Name = "test infiltration 1";
-    auto const &infiltrationData1 = std::make_unique<DataHeatBalance::InfiltrationData>();
+    infiltrationData0->sched = Sched::GetScheduleAlwaysOff(*state);
+    auto const infiltrationData1 = std::make_unique<DataHeatBalance::InfiltrationData>();
     infiltrationData1->Name = "test infiltration 2";
     infiltrationData1->ZonePtr = 1;
-    infiltrationData1->SchedPtr = 1;
+    infiltrationData1->sched = Sched::GetSchedule(*state, "SCHED-1");
     infiltrationData1->DesignLevel = 2;
 
-    auto const &ventilationData0 = std::make_unique<DataHeatBalance::VentilationData>();
+    auto const ventilationData0 = std::make_unique<DataHeatBalance::VentilationData>();
     ventilationData0->Name = "test ventilation 1";
-    auto const &ventilationData1 = std::make_unique<DataHeatBalance::VentilationData>();
+    ventilationData0->availSched = Sched::GetScheduleAlwaysOff(*state);
+    auto const ventilationData1 = std::make_unique<DataHeatBalance::VentilationData>();
     ventilationData1->Name = "test ventilation 2";
     ventilationData1->ZonePtr = 1;
-    ventilationData1->SchedPtr = 1;
+    ventilationData1->availSched = Sched::GetSchedule(*state, "SCHED-1");
     ventilationData1->DesignLevel = 2;
 
-    auto const &roomAirModelData0 = std::make_unique<DataRoomAirModel::AirModelData>();
-    roomAirModelData0->AirModelName = "test roomAirModel 1";
-    auto const &roomAirModelData1 = std::make_unique<DataRoomAirModel::AirModelData>();
-    roomAirModelData1->AirModelName = "test roomAirModel 2";
-    roomAirModelData1->AirModelType = DataRoomAirModel::RoomAirModel::Mundt;
-    roomAirModelData1->TempCoupleScheme = DataRoomAirModel::CouplingScheme::Direct; // hmm this was set to 3 which wasn't a valid option
+    auto const roomAirModelData0 = std::make_unique<RoomAir::AirModelData>();
+    roomAirModelData0->Name = "test roomAirModel 1";
+    auto const roomAirModelData1 = std::make_unique<RoomAir::AirModelData>();
+    roomAirModelData1->Name = "test roomAirModel 2";
+    roomAirModelData1->AirModel = RoomAir::RoomAirModel::DispVent1Node;
+    roomAirModelData1->TempCoupleScheme = RoomAir::CouplingScheme::Direct; // hmm this was set to 3 which wasn't a valid option
     roomAirModelData1->SimAirModel = true;
 
     std::string const alwaysOn("always on");
@@ -824,45 +904,46 @@ TEST_F(SQLiteFixture, SQLiteProcedures_createZoneExtendedOutput)
     double constexpr zero = 0.0;
     double constexpr two = 2.0;
 
-    state->dataSQLiteProcedures->sqlite->addScheduleData(1, alwaysOn, onOff, one, one);
-    state->dataSQLiteProcedures->sqlite->addScheduleData(2, alwaysOff, onOff, zero, zero);
-    state->dataSQLiteProcedures->sqlite->addZoneData(1, *zoneData0);
-    state->dataSQLiteProcedures->sqlite->addZoneData(2, *zoneData1);
-    state->dataSQLiteProcedures->sqlite->addZoneListData(1, *zoneListData0);
-    state->dataSQLiteProcedures->sqlite->addZoneListData(2, *zoneListData1);
-    state->dataSQLiteProcedures->sqlite->addZoneGroupData(1, *zoneGroupData0);
-    state->dataSQLiteProcedures->sqlite->addZoneGroupData(2, *zoneGroupData1);
-    state->dataSQLiteProcedures->sqlite->addMaterialData(1, &*materialData0);
-    state->dataSQLiteProcedures->sqlite->addMaterialData(2, &*materialData1);
-    state->dataSQLiteProcedures->sqlite->addConstructionData(1, *constructData0, zero);
-    state->dataSQLiteProcedures->sqlite->addConstructionData(2, *constructData1, two);
-    state->dataSQLiteProcedures->sqlite->addSurfaceData(1, *surfaceData0, window);
-    state->dataSQLiteProcedures->sqlite->addSurfaceData(2, *surfaceData1, wall);
-    state->dataSQLiteProcedures->sqlite->addNominalLightingData(1, *lightingData0);
-    state->dataSQLiteProcedures->sqlite->addNominalLightingData(2, *lightingData1);
-    state->dataSQLiteProcedures->sqlite->addNominalPeopleData(1, *peopleData0);
-    state->dataSQLiteProcedures->sqlite->addNominalPeopleData(2, *peopleData1);
-    state->dataSQLiteProcedures->sqlite->addNominalElectricEquipmentData(1, *elecEquipData0);
-    state->dataSQLiteProcedures->sqlite->addNominalElectricEquipmentData(2, *elecEquipData1);
-    state->dataSQLiteProcedures->sqlite->addNominalGasEquipmentData(1, *gasEquipData0);
-    state->dataSQLiteProcedures->sqlite->addNominalGasEquipmentData(2, *gasEquipData1);
-    state->dataSQLiteProcedures->sqlite->addNominalSteamEquipmentData(1, *steamEquipData0);
-    state->dataSQLiteProcedures->sqlite->addNominalSteamEquipmentData(2, *steamEquipData1);
-    state->dataSQLiteProcedures->sqlite->addNominalHotWaterEquipmentData(1, *hwEquipData0);
-    state->dataSQLiteProcedures->sqlite->addNominalHotWaterEquipmentData(2, *hwEquipData1);
-    state->dataSQLiteProcedures->sqlite->addNominalOtherEquipmentData(1, *otherEquipData0);
-    state->dataSQLiteProcedures->sqlite->addNominalOtherEquipmentData(2, *otherEquipData1);
-    state->dataSQLiteProcedures->sqlite->addNominalBaseboardData(1, *baseboardData0);
-    state->dataSQLiteProcedures->sqlite->addNominalBaseboardData(2, *baseboardData1);
-    state->dataSQLiteProcedures->sqlite->addInfiltrationData(1, *infiltrationData0);
-    state->dataSQLiteProcedures->sqlite->addInfiltrationData(2, *infiltrationData1);
-    state->dataSQLiteProcedures->sqlite->addVentilationData(1, *ventilationData0);
-    state->dataSQLiteProcedures->sqlite->addVentilationData(2, *ventilationData1);
-    state->dataSQLiteProcedures->sqlite->addRoomAirModelData(1, *roomAirModelData0);
-    state->dataSQLiteProcedures->sqlite->addRoomAirModelData(2, *roomAirModelData1);
+    auto &sql = state->dataSQLiteProcedures->sqlite;
+    sql->addScheduleData(1, alwaysOn, onOff, one, one);
+    sql->addScheduleData(2, alwaysOff, onOff, zero, zero);
+    sql->addZoneData(1, *zoneData0);
+    sql->addZoneData(2, *zoneData1);
+    sql->addZoneListData(1, *zoneListData0);
+    sql->addZoneListData(2, *zoneListData1);
+    sql->addZoneGroupData(1, *zoneGroupData0);
+    sql->addZoneGroupData(2, *zoneGroupData1);
+    sql->addMaterialData(1, &*materialData0);
+    sql->addMaterialData(2, &*materialData1);
+    sql->addConstructionData(1, *constructData0, zero);
+    sql->addConstructionData(2, *constructData1, two);
+    sql->addSurfaceData(1, *surfaceData0, window);
+    sql->addSurfaceData(2, *surfaceData1, wall);
+    sql->addNominalLightingData(1, *lightingData0);
+    sql->addNominalLightingData(2, *lightingData1);
+    sql->addNominalPeopleData(1, *peopleData0);
+    sql->addNominalPeopleData(2, *peopleData1);
+    sql->addNominalElectricEquipmentData(1, *elecEquipData0);
+    sql->addNominalElectricEquipmentData(2, *elecEquipData1);
+    sql->addNominalGasEquipmentData(1, *gasEquipData0);
+    sql->addNominalGasEquipmentData(2, *gasEquipData1);
+    sql->addNominalSteamEquipmentData(1, *steamEquipData0);
+    sql->addNominalSteamEquipmentData(2, *steamEquipData1);
+    sql->addNominalHotWaterEquipmentData(1, *hwEquipData0);
+    sql->addNominalHotWaterEquipmentData(2, *hwEquipData1);
+    sql->addNominalOtherEquipmentData(1, *otherEquipData0);
+    sql->addNominalOtherEquipmentData(2, *otherEquipData1);
+    sql->addNominalBaseboardData(1, *baseboardData0);
+    sql->addNominalBaseboardData(2, *baseboardData1);
+    sql->addInfiltrationData(1, *infiltrationData0);
+    sql->addInfiltrationData(2, *infiltrationData1);
+    sql->addVentilationData(1, *ventilationData0);
+    sql->addVentilationData(2, *ventilationData1);
+    sql->addRoomAirModelData(1, *roomAirModelData0);
+    sql->addRoomAirModelData(2, *roomAirModelData1);
 
-    state->dataSQLiteProcedures->sqlite->sqliteBegin();
-    state->dataSQLiteProcedures->sqlite->createZoneExtendedOutput();
+    sql->sqliteBegin();
+    sql->createZoneExtendedOutput();
     auto zones = queryResult("SELECT * FROM Zones;", "Zones");
     auto zoneLists = queryResult("SELECT * FROM ZoneLists;", "ZoneLists");
     auto zoneGroups = queryResult("SELECT * FROM ZoneGroups;", "ZoneGroups");
@@ -883,7 +964,7 @@ TEST_F(SQLiteFixture, SQLiteProcedures_createZoneExtendedOutput)
     auto infiltrations = queryResult("SELECT * FROM NominalInfiltration;", "NominalInfiltration");
     auto ventilations = queryResult("SELECT * FROM NominalVentilation;", "NominalVentilation");
     auto roomAirModels = queryResult("SELECT * FROM RoomAirModels;", "RoomAirModels");
-    state->dataSQLiteProcedures->sqlite->sqliteCommit();
+    sql->sqliteCommit();
 
     ASSERT_EQ(2ul, zones.size());
     std::vector<std::string> zone0{"1",   "test zone 1", "0.0", "0.0", "0.0", "0.0", "0.0", "0.0", "0.0", "1",   "1.0", "1.0", "0.0", "0.0",
@@ -921,7 +1002,7 @@ TEST_F(SQLiteFixture, SQLiteProcedures_createZoneExtendedOutput)
 
     ASSERT_EQ(2ul, materials.size());
     std::vector<std::string> material0{"1", "test material 1", "1", "-1", "0.0", "0.0", "0.0", "0.0", "0.0", "0", "0.0", "0.0", "0.0", "0.0"};
-    std::vector<std::string> material1{"2", "test material 2", "2", "1", "2.0", "2.0", "2.0", "2.0", "2.0", "1", "2.0", "2.0", "2.0", "2.0"};
+    std::vector<std::string> material1{"2", "test material 2", "2", "1", "2.0", "2.0", "0.0", "2.0", "2.0", "1", "2.0", "0.0", "2.0", "2.0"};
     EXPECT_EQ(material0, materials[0]);
     EXPECT_EQ(material1, materials[1]);
 
@@ -947,62 +1028,62 @@ TEST_F(SQLiteFixture, SQLiteProcedures_createZoneExtendedOutput)
 
     ASSERT_EQ(2ul, lightings.size());
     std::vector<std::string> lighting0{"1", "test lighting 1", "", "", "0.0", "0.0", "0.0", "0.0", "0.0", "0.0", ""};
-    std::vector<std::string> lighting1{"2", "test lighting 2", "1", "1", "2.0", "2.0", "2.0", "2.0", "2.0", "2.0", "test"};
+    std::vector<std::string> lighting1{"2", "test lighting 2", "1", "2", "2.0", "2.0", "2.0", "2.0", "2.0", "2.0", "test"};
     EXPECT_EQ(lighting0, lightings[0]);
     EXPECT_EQ(lighting1, lightings[1]);
 
     ASSERT_EQ(2ul, peoples.size());
     std::vector<std::string> people0{"1", "test people 1", "", "0", "", "", "0.0", "0.0", "", "", "", "0", "0", "0", "-1", "", "", "-1", "0.0", "0"};
-    std::vector<std::string> people1{"2", "test people 2", "1", "2",   "1", "1", "2.0", "2.0", "1", "1", "1", "1", "1", "1", "1",
+    std::vector<std::string> people1{"2", "test people 2", "1", "2",   "2", "2", "2.0", "2.0", "2", "2", "2", "1", "1", "1", "1",
                                      "1", "test",          "1", "2.0", "1"};
     EXPECT_EQ(people0, peoples[0]);
     EXPECT_EQ(people1, peoples[1]);
 
     ASSERT_EQ(2ul, elecEquips.size());
     std::vector<std::string> elecEquip0{"1", "test elecEquip 1", "", "", "0.0", "0.0", "0.0", "0.0", "0.0", ""};
-    std::vector<std::string> elecEquip1{"2", "test elecEquip 2", "1", "1", "2.0", "2.0", "2.0", "2.0", "2.0", "test"};
+    std::vector<std::string> elecEquip1{"2", "test elecEquip 2", "1", "2", "2.0", "2.0", "2.0", "2.0", "2.0", "test"};
     EXPECT_EQ(elecEquip0, elecEquips[0]);
     EXPECT_EQ(elecEquip1, elecEquips[1]);
 
     ASSERT_EQ(2ul, gasEquips.size());
     std::vector<std::string> gasEquip0{"1", "test gasEquip 1", "", "", "0.0", "0.0", "0.0", "0.0", "0.0", ""};
-    std::vector<std::string> gasEquip1{"2", "test gasEquip 2", "1", "1", "2.0", "2.0", "2.0", "2.0", "2.0", "test"};
+    std::vector<std::string> gasEquip1{"2", "test gasEquip 2", "1", "2", "2.0", "2.0", "2.0", "2.0", "2.0", "test"};
     EXPECT_EQ(gasEquip0, gasEquips[0]);
     EXPECT_EQ(gasEquip1, gasEquips[1]);
 
     ASSERT_EQ(2ul, steamEquips.size());
     std::vector<std::string> steamEquip0{"1", "test steamEquip 1", "", "", "0.0", "0.0", "0.0", "0.0", "0.0", ""};
-    std::vector<std::string> steamEquip1{"2", "test steamEquip 2", "1", "1", "2.0", "2.0", "2.0", "2.0", "2.0", "test"};
+    std::vector<std::string> steamEquip1{"2", "test steamEquip 2", "1", "2", "2.0", "2.0", "2.0", "2.0", "2.0", "test"};
     EXPECT_EQ(steamEquip0, steamEquips[0]);
     EXPECT_EQ(steamEquip1, steamEquips[1]);
 
     ASSERT_EQ(2ul, hwEquips.size());
     std::vector<std::string> hwEquip0{"1", "test hwEquip 1", "", "", "0.0", "0.0", "0.0", "0.0", "0.0", ""};
-    std::vector<std::string> hwEquip1{"2", "test hwEquip 2", "1", "1", "2.0", "2.0", "2.0", "2.0", "2.0", "test"};
+    std::vector<std::string> hwEquip1{"2", "test hwEquip 2", "1", "2", "2.0", "2.0", "2.0", "2.0", "2.0", "test"};
     EXPECT_EQ(hwEquip0, hwEquips[0]);
     EXPECT_EQ(hwEquip1, hwEquips[1]);
 
     ASSERT_EQ(2ul, otherEquips.size());
     std::vector<std::string> otherEquip0{"1", "test otherEquip 1", "", "", "0.0", "0.0", "0.0", "0.0", "0.0", ""};
-    std::vector<std::string> otherEquip1{"2", "test otherEquip 2", "1", "1", "2.0", "2.0", "2.0", "2.0", "2.0", "test"};
+    std::vector<std::string> otherEquip1{"2", "test otherEquip 2", "1", "2", "2.0", "2.0", "2.0", "2.0", "2.0", "test"};
     EXPECT_EQ(otherEquip0, otherEquips[0]);
     EXPECT_EQ(otherEquip1, otherEquips[1]);
 
     ASSERT_EQ(2ul, baseboards.size());
     std::vector<std::string> baseboard0{"1", "test baseboard 1", "", "", "0.0", "0.0", "0.0", "0.0", "0.0", "0.0", ""};
-    std::vector<std::string> baseboard1{"2", "test baseboard 2", "1", "1", "2.0", "2.0", "2.0", "2.0", "2.0", "2.0", "test"};
+    std::vector<std::string> baseboard1{"2", "test baseboard 2", "1", "2", "2.0", "2.0", "2.0", "2.0", "2.0", "2.0", "test"};
     EXPECT_EQ(baseboard0, baseboards[0]);
     EXPECT_EQ(baseboard1, baseboards[1]);
 
     ASSERT_EQ(2ul, infiltrations.size());
     std::vector<std::string> infiltration0{"1", "test infiltration 1", "", "", "0.0"};
-    std::vector<std::string> infiltration1{"2", "test infiltration 2", "1", "1", "2.0"};
+    std::vector<std::string> infiltration1{"2", "test infiltration 2", "1", "2", "2.0"};
     EXPECT_EQ(infiltration0, infiltrations[0]);
     EXPECT_EQ(infiltration1, infiltrations[1]);
 
     ASSERT_EQ(2ul, ventilations.size());
     std::vector<std::string> ventilation0{"1", "test ventilation 1", "", "", "0.0"};
-    std::vector<std::string> ventilation1{"2", "test ventilation 2", "1", "1", "2.0"};
+    std::vector<std::string> ventilation1{"2", "test ventilation 2", "1", "2", "2.0"};
     EXPECT_EQ(ventilation0, ventilations[0]);
     EXPECT_EQ(ventilation1, ventilations[1]);
 
@@ -1022,17 +1103,17 @@ TEST_F(SQLiteFixture, SQLiteProcedures_createSQLiteTabularDataRecords)
     Array1D_string const columnLabels2({"Electricity", "Natural Gas"});
     Array2D_string const body2(1, 2, {"815.19", "256.72"});
 
-    state->dataSQLiteProcedures->sqlite->sqliteBegin();
+    auto &sql = state->dataSQLiteProcedures->sqlite;
+    sql->sqliteBegin();
     // tabular data references simulation record... always checks for first simulation record only.
-    state->dataSQLiteProcedures->sqlite->createSQLiteSimulationsRecord(1, "EnergyPlus Version", "Current Time");
-    state->dataSQLiteProcedures->sqlite->createSQLiteTabularDataRecords(
-        body, rowLabels, columnLabels, "AnnualBuildingUtilityPerformanceSummary", "Entire Facility", "End Uses");
-    state->dataSQLiteProcedures->sqlite->createSQLiteTabularDataRecords(
+    sql->createSQLiteSimulationsRecord(1, "EnergyPlus Version", "Current Time");
+    sql->createSQLiteTabularDataRecords(body, rowLabels, columnLabels, "AnnualBuildingUtilityPerformanceSummary", "Entire Facility", "End Uses");
+    sql->createSQLiteTabularDataRecords(
         body2, rowLabels2, columnLabels2, "AnnualBuildingUtilityPerformanceSummary", "Entire Facility", "End Uses By Subcategory");
     auto tabularData = queryResult("SELECT * FROM TabularData;", "TabularData");
     auto strings = queryResult("SELECT * FROM Strings;", "Strings");
     auto stringTypes = queryResult("SELECT * FROM StringTypes;", "StringTypes");
-    state->dataSQLiteProcedures->sqlite->sqliteCommit();
+    sql->sqliteCommit();
 
     ASSERT_EQ(6ul, tabularData.size());
     // tabularDataIndex, reportNameIndex, reportForStringIndex, tableNameIndex, rowLabelIndex, columnLabelIndex, unitsIndex, simulationIndex, rowId,

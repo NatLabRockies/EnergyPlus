@@ -1,7 +1,7 @@
-// EnergyPlus, Copyright (c) 1996-2023, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
-// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other
+// National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
 // contributors. All rights reserved.
 //
 // NOTICE: This Software was developed under funding from the U.S. Department of Energy and the
@@ -58,7 +58,9 @@ std::vector<std::vector<std::string>> IdfParser::decode(std::string const &idf)
 std::vector<std::vector<std::string>> IdfParser::decode(std::string const &idf, bool &success)
 {
     success = true;
-    if (idf.empty()) return std::vector<std::vector<std::string>>();
+    if (idf.empty()) {
+        return std::vector<std::vector<std::string>>();
+    }
 
     size_t index = 0;
     return parse_idf(idf, index, success);
@@ -87,15 +89,19 @@ std::vector<std::vector<std::string>> IdfParser::parse_idf(std::string const &id
         token = look_ahead(idf, index);
         if (token == Token::END) {
             break;
-        } else if (token == Token::NONE) {
+        }
+        if (token == Token::NONE) {
             success = false;
             return std::vector<std::vector<std::string>>();
-        } else if (token == Token::EXCLAMATION) {
+        }
+        if (token == Token::EXCLAMATION) {
             eat_comment(idf, index);
         } else {
 
             auto const array = parse_object(idf, index, success);
-            if (!array.empty()) obj.push_back(array);
+            if (!array.empty()) {
+                obj.push_back(array);
+            }
         }
     }
 
@@ -113,7 +119,8 @@ std::vector<std::string> IdfParser::parse_object(std::string const &idf, size_t 
         if (token == Token::NONE) {
             success = false;
             return std::vector<std::string>();
-        } else if (token == Token::COMMA) {
+        }
+        if (token == Token::COMMA) {
             next_token(idf, index);
             token = look_ahead(idf, index);
             if (Token::EXCLAMATION == token) {
@@ -121,9 +128,9 @@ std::vector<std::string> IdfParser::parse_object(std::string const &idf, size_t 
             }
             token = look_ahead(idf, index);
             if (Token::COMMA == token) {
-                array.push_back("");
+                array.emplace_back("");
             } else if (Token::SEMICOLON == token) {
-                array.push_back("");
+                array.emplace_back("");
                 break;
             }
         } else if (token == Token::SEMICOLON) {
@@ -185,16 +192,21 @@ std::string IdfParser::parse_string(std::string const &idf, size_t &index, bool 
             complete = true;
             index--;
             break;
-        } else if (c == ';') {
+        }
+        if (c == ';') {
             complete = true;
             index--;
             break;
-        } else if (c == '!') {
+        }
+        if (c == '!') {
             complete = true;
             index--;
             break;
-        } else if (c == '\\') {
-            if (index == idf_size) break;
+        }
+        if (c == '\\') {
+            if (index == idf_size) {
+                break;
+            }
             c = idf[index++];
             if (c == '"') {
                 s += '"';
@@ -245,8 +257,12 @@ void IdfParser::eat_comment(std::string const &idf, size_t &index)
 {
     auto const idf_size = idf.size();
     while (true) {
-        if (index == idf_size) break;
-        if (idf[index++] == '\n') break;
+        if (index == idf_size) {
+            break;
+        }
+        if (idf[index++] == '\n') {
+            break;
+        }
     }
 }
 
@@ -275,7 +291,7 @@ IdfParser::Token IdfParser::next_token(std::string const &idf, size_t &index)
         return Token::SEMICOLON;
     default:
         static constexpr std::string_view search_chars("-:.#/\\[]{}_@$%^&*()|+=<>?'\"~");
-        if (isalnum(c) || (std::string::npos != search_chars.find_first_of(c))) {
+        if ((isalnum(c) != 0) || (std::string::npos != search_chars.find_first_of(c))) {
             return Token::STRING;
         }
         break;

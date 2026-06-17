@@ -1,7 +1,7 @@
-// EnergyPlus, Copyright (c) 1996-2023, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
-// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other
+// National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
 // contributors. All rights reserved.
 //
 // NOTICE: This Software was developed under funding from the U.S. Department of Energy and the
@@ -55,8 +55,10 @@
 
 // EnergyPlus Headers
 #include <EnergyPlus/Data/BaseData.hh>
+#include <EnergyPlus/DataGlobalConstants.hh>
 #include <EnergyPlus/DataGlobals.hh>
 #include <EnergyPlus/EnergyPlus.hh>
+#include <EnergyPlus/ScheduleManager.hh>
 
 namespace EnergyPlus {
 
@@ -64,26 +66,6 @@ namespace EnergyPlus {
 struct EnergyPlusData;
 
 namespace ExteriorEnergyUse {
-
-    enum class ExteriorFuelUsage
-    {
-        Invalid = -1,
-        ElecUse,
-        GasUse,
-        WaterUse,
-        CoalUse,
-        FuelOil1Use,
-        FuelOil2Use,
-        PropaneUse,
-        GasolineUse,
-        DieselUse,
-        SteamUse,
-        DistrictCoolUse,
-        DistrictHeatUse,
-        OtherFuel1Use,
-        OtherFuel2Use,
-        Num
-    };
 
     enum class LightControlType
     {
@@ -96,23 +78,23 @@ namespace ExteriorEnergyUse {
     struct ExteriorLightUsage
     {
         // Members
-        std::string Name;             // Descriptive name -- will show on reporting
-        int SchedPtr;                 // Can be scheduled
-        Real64 DesignLevel;           // Consumption in Watts
-        Real64 Power;                 // Power = DesignLevel * ScheduleValue
-        Real64 CurrentUse;            // Use for this time step
-        LightControlType ControlMode; // Control mode Schedule Only or Astronomical Clock plus schedule
-        bool ManageDemand;            // Flag to indicate whether to use demand limiting
-        Real64 DemandLimit;           // Demand limit set by demand manager [W]
-        bool PowerActuatorOn;         // EMS flag
-        Real64 PowerActuatorValue;    // EMS value
-        Real64 SumConsumption;        // sum of electric consumption [J] for reporting
-        Real64 SumTimeNotZeroCons;    // sum of time of positive electric consumption [hr]
+        std::string Name;                 // Descriptive name -- will show on reporting
+        Sched::Schedule *sched = nullptr; // Can be scheduled
+        Real64 DesignLevel;               // Consumption in Watts
+        Real64 Power;                     // Power = DesignLevel * ScheduleValue
+        Real64 CurrentUse;                // Use for this time step
+        LightControlType ControlMode;     // Control mode Schedule Only or Astronomical Clock plus schedule
+        bool ManageDemand;                // Flag to indicate whether to use demand limiting
+        Real64 DemandLimit;               // Demand limit set by demand manager [W]
+        bool PowerActuatorOn;             // EMS flag
+        Real64 PowerActuatorValue;        // EMS value
+        Real64 SumConsumption;            // sum of electric consumption [J] for reporting
+        Real64 SumTimeNotZeroCons;        // sum of time of positive electric consumption [hr]
 
         // Default Constructor
         ExteriorLightUsage()
-            : SchedPtr(0), DesignLevel(0.0), Power(0.0), CurrentUse(0.0), ControlMode(LightControlType::ScheduleOnly), ManageDemand(false),
-              DemandLimit(0.0), PowerActuatorOn(false), PowerActuatorValue(0.0), SumConsumption(0.0), SumTimeNotZeroCons(0.0)
+            : DesignLevel(0.0), Power(0.0), CurrentUse(0.0), ControlMode(LightControlType::ScheduleOnly), ManageDemand(false), DemandLimit(0.0),
+              PowerActuatorOn(false), PowerActuatorValue(0.0), SumConsumption(0.0), SumTimeNotZeroCons(0.0)
         {
         }
     };
@@ -121,17 +103,17 @@ namespace ExteriorEnergyUse {
     {
         // Members
         std::string Name; // Descriptive name -- will show on reporting
-        ExteriorFuelUsage FuelType;
-        int SchedPtr;       // Can be scheduled
-        Real64 DesignLevel; // Design Consumption (Watts, except for Water Equipment)
-        Real64 Power;       // Power = DesignLevel * ScheduleValue
-        Real64 CurrentUse;  // Use for this time step
-        bool ManageDemand;  // Flag to indicate whether to use demand limiting
-        Real64 DemandLimit; // Demand limit set by demand manager [W]
+        Constant::eFuel FuelType;
+        Sched::Schedule *sched = nullptr; // Can be scheduled
+        Real64 DesignLevel;               // Design Consumption (Watts, except for Water Equipment)
+        Real64 Power;                     // Power = DesignLevel * ScheduleValue
+        Real64 CurrentUse;                // Use for this time step
+        bool ManageDemand;                // Flag to indicate whether to use demand limiting
+        Real64 DemandLimit;               // Demand limit set by demand manager [W]
 
         // Default Constructor
         ExteriorEquipmentUsage()
-            : FuelType(ExteriorFuelUsage::Invalid), SchedPtr(0), DesignLevel(0.0), Power(0.0), CurrentUse(0.0), ManageDemand(false), DemandLimit(0.0)
+            : FuelType(Constant::eFuel::Invalid), DesignLevel(0.0), Power(0.0), CurrentUse(0.0), ManageDemand(false), DemandLimit(0.0)
         {
         }
     };
@@ -139,15 +121,6 @@ namespace ExteriorEnergyUse {
     void ManageExteriorEnergyUse(EnergyPlusData &state);
 
     void GetExteriorEnergyUseInput(EnergyPlusData &state);
-
-    void ValidateFuelType(EnergyPlusData &state,
-                          ExteriorEnergyUse::ExteriorFuelUsage &FuelTypeNumber, // Fuel Type to be set in structure.
-                          std::string const &FuelTypeAlpha,                     // Fuel Type String
-                          std::string &FuelTypeString,                          // Standardized Fuel Type String (for variable naming)
-                          std::string_view CurrentModuleObject,                 // object being parsed
-                          std::string const &CurrentField,                      // current field being parsed
-                          std::string const &CurrentName                        // current object name being parsed
-    );
 
     void ReportExteriorEnergyUse(EnergyPlusData &state);
 
@@ -163,6 +136,14 @@ struct ExteriorEnergyUseData : BaseGlobalStruct
     std::unordered_map<std::string, std::string> UniqueExteriorEquipNames;
     bool GetExteriorEnergyInputFlag = true; // First time, input is "gotten"
     Real64 sumDesignLevel = 0.0;            // for predefined report of design level total
+
+    void init_constant_state([[maybe_unused]] EnergyPlusData &state) override
+    {
+    }
+
+    void init_state([[maybe_unused]] EnergyPlusData &state) override
+    {
+    }
 
     void clear_state() override
     {

@@ -8,7 +8,7 @@ Daylighting can be invoked in EnergyPlus primarily by the use of the objects: \t
 
 \subsection{Daylighting:Controls}\label{daylightingcontrols-000}
 
-When this object is used, daylighting illuminance levels are calculated and then used to determine how much the electric lighting can be reduced. The daylight illuminance level in a zone depends on many factors, including sky condition; sun position; calculation point; location, size, and glass transmittance of windows; window shading devices; and reflectance of interior surfaces. Reduction of electric lighting depends on daylight illuminance level, illuminance set point, fraction of zone controlled and type of lighting control. Two different methods of computing the daylighitng illuminance and subsequent lighting reduction called SplitFlux and DElight. After the object description below is are sections that describe the two methodologies in more detail.
+When this object is used, daylighting illuminance levels are calculated and then used to determine how much the electric lighting can be reduced. The daylight illuminance level in a zone depends on many factors, including sky condition; sun position; calculation point; location, size, and glass transmittance of windows; window shading devices; and reflectance of interior surfaces. Reduction of electric lighting depends on daylight illuminance level, illuminance set point, fraction of zone controlled and type of lighting control. Two different methods of computing the daylighting illuminance and subsequent lighting reduction called SplitFlux and DElight. After the object description below is are sections that describe the two methodologies in more detail.
 
 \subsubsection{Inputs}\label{inputs-009}
 
@@ -20,7 +20,7 @@ The name of the Daylighting:Controls object.
 
 The name of the \hyperref[zone]{Zone} or \hyperref[space]{Space} to which the following daylighting-related input applies. If a zone name is specified, the zone must lie completely within a single solar enclosure.
 
-\paragraph{Field: Daylighting Method}\label{field-Daylighting Method}
+\paragraph{Field: Daylighting Method}\label{field-daylighting-method}
 
 The Daylighting Method field can be set to either of the following: SplitFlux or DElight. Different Zones can have different settings in the same file but in a single zone only one method should be used at a time. Guidelines for using the SplitFlux method and additional details on the DElight method are shown in following sections.
 
@@ -89,7 +89,7 @@ The number of steps, excluding off, in a stepped lighting control system (see fi
 
 May be specified if a stepped lighting control system (Lighting Control Type set to Stepped) is manually operated, such as in a simple, one-step (on-off) system. Gives the probability the occupants of a daylit zone will set the electric lights to the correct level to obtain the required illuminance. The rest of the time the lights are assumed to be set one step too high. For example, consider an on-off lighting system (Number of Steps = 1) with a set point of 600 lux and 0.7 reset probability. Then, when daylighting exceeds 600 lux, the electric lights will be off 70\% of the time and on 30\% of the time.
 
-\paragraph{Field: Glare Calculation Daylighting Reference Point Name}\label{field-glare calculation-daylighting-reference-point-name}
+\paragraph{Field: Glare Calculation Daylighting Reference Point Name}\label{field-glare-calculation-daylighting-reference-point-name}
 
 The \hyperref[daylightingreferencepoint-000]{Daylighting:ReferencePoint} name should be specified that is used for determining the glare. Only one reference point is used to calculate the glare. This input is only used in when the Daylighting Method is set to SplitFlux. This input is ignored when Daylighting Method is set to DElight.
 
@@ -158,6 +158,8 @@ This object is referenced by \hyperref[daylightingcontrols-000]{Daylighting:Cont
 
 When the DElight Daylighting Method is used, there may be up to a maximum of 100 reference points for each zone. Each Reference Point that is input does NOT need to be included in the control of the electric lighting system within the zone. This is determined by the fraction of the zone controlled by each Reference Point, which can be input as 0. Note when the DElight Daylighting Method is used, that the sum of all Reference Point control fractions must equal 1 to obtain correct overall results.
 
+It should also be noted that daylighting factors cannot be accurately calculated for reference points that are very close to a wall or window (less than 0.15 m or 6 inches). While an error is reported for a reference point that is too close to a window, no error message is generated when the user defines a point that is too close to a wall.
+
 \subsubsection{Inputs}\label{inputs-010}
 
 \paragraph{Field: Name}\label{field-name-002}
@@ -184,32 +186,30 @@ These three fields are the X, Y and Z values of the reference point in the coord
 An IDF example:
 
 \begin{lstlisting}
+Daylighting:Controls,
+  West Zone_DaylCtrl,         !- Name
+  West Zone,                  !- Zone or Space Name
+  SplitFlux,                  !- Daylighting Method
+  ,                           !- Availability Schedule Name
+  Continuous,                 !- Lighting Control Type
+  0.3,                        !- Minimum Input Power Fraction for Continuous or ContinuousOff Dimming Control
+  0.2,                        !- Minimum Light Output Fraction for Continuous or ContinuousOff Dimming Control
+  ,                           !- Number of Stepped Control Steps
+  1.0,                        !- Probability Lighting will be Reset When Needed in Manual Stepped Control
+  West Zone_DaylRefPt1,       !- Glare Calculation Daylighting Reference Point Name
+  180.0,                      !- Glare Calculation Azimuth Angle of View Direction Clockwise from Zone y-Axis {deg}
+  20.0,                       !- Maximum Allowable Discomfort Glare Index
+  ,                           !- DElight Gridding Resolution {m2}
+  West Zone_DaylRefPt1,       !- Daylighting Reference Point 1 Name
+  1.0,                        !- Fraction of Lights Controlled by Reference Point 1
+  500.;                       !- Illuminance Setpoint at Reference Point 1 {lux}
 
-  Daylighting:Controls,
-    West Zone_DaylCtrl,      !- Name
-    West Zone,               !- Zone or Space Name
-    SplitFlux,               !- Daylighting Method
-    ,                        !- Availability Schedule Name
-    Continuous,              !- Lighting Control Type
-    0.3,                     !- Minimum Input Power Fraction for Continuous or ContinuousOff Dimming Control
-    0.2,                     !- Minimum Light Output Fraction for Continuous or ContinuousOff Dimming Control
-    ,                        !- Number of Stepped Control Steps
-    1.0,                     !- Probability Lighting will be Reset When Needed in Manual Stepped Control
-    West Zone_DaylRefPt1,    !- Glare Calculation Daylighting Reference Point Name
-    180.0,                   !- Glare Calculation Azimuth Angle of View Direction Clockwise from Zone y-Axis {deg}
-    20.0,                    !- Maximum Allowable Discomfort Glare Index
-    ,                        !- DElight Gridding Resolution {m2}
-    West Zone_DaylRefPt1,    !- Daylighting Reference Point 1 Name
-    1.0,                     !- Fraction of Lights Controlled by Reference Point 1
-    500.;                    !- Illuminance Setpoint at Reference Point 1 {lux}
-
-  Daylighting:ReferencePoint,
-    West Zone_DaylRefPt1,    !- Name
-    West Zone,               !- Zone or Space Name
-    3.048,                   !- X-Coordinate of Reference Point {m}
-    3.048,                   !- Y-Coordinate of Reference Point {m}
-    0.9;                     !- Z-Coordinate of Reference Point {m}
-
+Daylighting:ReferencePoint,
+  West Zone_DaylRefPt1,       !- Name
+  West Zone,                  !- Zone or Space Name
+  3.048,                      !- X-Coordinate of Reference Point {m}
+  3.048,                      !- Y-Coordinate of Reference Point {m}
+  0.9;                        !- Z-Coordinate of Reference Point {m}
 \end{lstlisting}
 
 \subsection{Guidelines for Daylighting Modeling Using the SplitFlux Method)}\label{guidelines-for-daylighting-modeling-splitflux-method}
@@ -375,7 +375,6 @@ Type name of the DElight daylighting Complex Fenestration system to be analyzed.
 
 
 \begin{lstlisting}
-
 BTDF^GEN^Analytical Type^Normal Visible Transmittance^Dispersion Angle
 
 BTDF^FILE^Filename
@@ -403,13 +402,12 @@ The in-plane counter-clockwise rotation angle between the Complex Fenestration o
 An IDF example for an analytical WINDOW type CFS:
 
 \begin{lstlisting}
-
 Daylighting:DELight:ComplexFenestration,
-      Window CFS,       !- DElight Complex Fenestration User Name
-      BTDF^GEN^WINDOW^1.0^20.0,     !- Complex Fenestration Type
-      ZN003:WALL001,  !- Complex Fenestration Host Surface
-      Zn003:Wall001:Doppel001, !- Doppelganger Surface Name
-      0.0;            !- Fenestration Rotation {deg}
+  Window CFS,                 !- DElight Complex Fenestration User Name
+  BTDF^GEN^WINDOW^1.0^20.0,   !- Complex Fenestration Type
+  ZN003:WALL001,              !- Complex Fenestration Host Surface
+  Zn003:Wall001:Doppel001,    !- Doppelganger Surface Name
+  0.0;                        !- Fenestration Rotation {deg}
 \end{lstlisting}
 
 \subsubsection{Outputs}\label{outputs-1-004}
@@ -505,7 +503,14 @@ The amount by which the overhead electric lighting power in a space or zone is m
 
 \subsection{Output:IlluminanceMap}\label{outputilluminancemap}
 
-The Output:IlluminanceMap object expands on the reporting capabilities of the daylighting simulation. For any zone simulated with \hyperref[daylightingcontrols-000]{Daylighting:Controls}, the illuminance map can generate up to 2,500 points of additional daylighting illuminance values. The resulting map is output as a comma delimited text file that can be imported into a spreadsheet program for rapid visualization of the daylighting illuminance patterns in a zone. The values are produced on an hourly basis. The Z height of the map is constant (parallel to a flat floor). More than one illuminance map can be created for a zone. IlluminanceMap output is available only when SplitFlux daylighting method is selected in \hyperref[daylightingcontrols-000]{Daylighting:Controls} object.
+The Output:IlluminanceMap object expands on the reporting capabilities of the daylighting simulation. For any space or zone simulated with \hyperref[daylightingcontrols-000]{Daylighting:Controls}, the illuminance map can generate up to 2,500 points of additional daylighting illuminance values. The resulting map is output as a comma delimited text file that can be imported into a spreadsheet program for rapid visualization of the daylighting illuminance patterns in a space or zone. The values are produced on an hourly basis. The Z height of the map is constant (parallel to a flat floor). More than one illuminance map can be created for a space or zone. IlluminanceMap output is available only when SplitFlux daylighting method is selected in \hyperref[daylightingcontrols-000]{Daylighting:Controls} object.
+
+When using the Output:IlluminanceMap object, the user should note the following:
+
+\begin{itemize}
+\item Daylighting factors cannot be accurately calculated for reference points that are very close to a wall or window (less than 0.15 m or 6 inches). An error is reported for a reference point that is too close to a window, but no error is reported for a point that is too close to a wall.
+\item Since not all zones are rectangular, it is possible to have map points that are outside the zone. Any illuminance registered at these points is inaccurate and, additionally, a ``*'' marks these values for easy observance.
+\end{itemize}
 
 \subsubsection{Inputs}\label{inputs-4-006}
 
@@ -513,13 +518,13 @@ The Output:IlluminanceMap object expands on the reporting capabilities of the da
 
 The name of the map object.
 
-\paragraph{Field: Zone Name}\label{field-zone-name-2-000}
+\paragraph{Field: Zone or Space Name}\label{field-zone-name-2-000}
 
-Reference to a zone with \hyperref[daylightingcontrols-000]{Daylighting:Controls}. The zone must lie completely within a single solar enclosure.
+Reference to a zone or space with \hyperref[daylightingcontrols-000]{Daylighting:Controls}. If a zone name is specified, all spaces in the zone must be within the same solar enclosure.
 
 \paragraph{Field: Z Height}\label{field-z-height}
 
-The height or elevation of the grid of daylighting points.
+The height or elevation of the grid of daylighting points.  Coordinates may be world or relative as specified in the \hyperref[globalgeometryrules]{GlobalGeometryRules} object Daylighting Reference Point CoordinateSystem field. If a space name is specifice for this map, relative coodinates are relative to the origin of the zone that contains the space  (spaces do not have a separate origin).
 
 \paragraph{Field: X Minimum Coordinate}\label{field-x-minimum-coordinate}
 
@@ -545,23 +550,18 @@ The maximum Y coordinate boundary for the map.
 
 The number of daylighting reference points in the Y direction from the minimum to the maximum boundaries. The maximum number of points that can be generated is 2500 (Number of X Grid Points X Number of Y Grid Points).
 
-Note:~ Daylighting factors cannot be accurately calculated for reference points that are very close to a wall or window (less than 0.15 m or 6 inches). An error is reported for a reference point that is too close to a window, but no error is reported for a point that is too close to a wall.
-
 \begin{lstlisting}
-
 Output:IlluminanceMap,
-    Daylit Map,      ! Map Name
-    Daylit Zone,     ! Zone Name
-    0,               ! Z Height [m]
-    0.1,             ! X Minimum Coordinate [m]
-    4.9,             ! X Maximum Coordinate [m]
-    10,              ! Number of X Grid Points
-    0.1,             ! Y Minimum Coordinate [m]
-    9.9,             ! Y Maximum Coordinate [m]
-    10;              ! Number of Y grid Points
+  Daylit Map,                 !- Map Name
+  Daylit Zone,                !- Zone or Space Name
+  0,                          !- Z Height [m]
+  0.1,                        !- X Minimum Coordinate [m]
+  4.9,                        !- X Maximum Coordinate [m]
+  10,                         !- Number of X Grid Points
+  0.1,                        !- Y Minimum Coordinate [m]
+  9.9,                        !- Y Maximum Coordinate [m]
+  10;                         !- Number of Y grid Points
 \end{lstlisting}
-
-Since not all zones are rectangular, it is possible to have map points that are outside the zone. Any illuminance registered at these points is inaccurate and, additionally, a ``*'' marks these values for easy observance.
 
 \subsection{OutputControl:IlluminanceMap:Style}\label{outputcontrolilluminancemapstyle}
 
@@ -676,43 +676,43 @@ The \emph{Transition Zone Name} and \emph{Transition Zone Length} fields can be 
 
 \begin{lstlisting}
 DaylightingDevice:Tubular,
-  Pipe1,                    !- Object Name
-  Dome1,                    !- Dome Name
-  Diffuser1,                !- Diffuser Name
-  Reflective Aluminum,      !- Construction Name
-  0.3556,                   !- Diameter [m] (approximately 14", a standard size)
-  1.4,                      !- Total Length [m] (subtract zone lengths to get outdoor exposed length)
-  0.28,                     !- Effective Thermal Resistance [m2-K/W] between TubularDaylightDome and TubularDaylightDiffuser
-  Attic Zone,               !- Transition Zone 1 Name
-  1.1;                      !- Transition Zone 1 Length [m]
+  Pipe1,                      !- Object Name
+  Dome1,                      !- Dome Name
+  Diffuser1,                  !- Diffuser Name
+  Reflective Aluminum,        !- Construction Name
+  0.3556,                     !- Diameter [m] (approximately 14", a standard size)
+  1.4,                        !- Total Length [m] (subtract zone lengths to get outdoor exposed length)
+  0.28,                       !- Effective Thermal Resistance [m2-K/W] between TubularDaylightDome and TubularDaylightDiffuser
+  Attic Zone,                 !- Transition Zone 1 Name
+  1.1;                        !- Transition Zone 1 Length [m]
 
 FenestrationSurface:Detailed,
-  Dome1,  !- Subsurface Name
-  TubularDaylightDome,  !- Surface Type
-  Clear Acrylic Dome,  !- Construction Name (only 1 layer allowed in construction)
-  Attic Roof,  !- Base Surface Name
-  ,  !- Outside Face Environment (not allowed for TubularDaylightDome)
-  0.0,  !- VF to Ground
-  ,  !- Window Shading Control (not allowed for TubularDaylightDome)
-  ,  !- Frame/Divider Name (not allowed for TubularDaylightDome)
-  1.0,  !- Multiplier (must be 1.0 for TubularDaylightDome)
-  4,  !- Number of Vertices
+  Dome1,                      !- Subsurface Name
+  TubularDaylightDome,        !- Surface Type
+  Clear Acrylic Dome,         !- Construction Name (only 1 layer allowed in construction)
+  Attic Roof,                 !- Base Surface Name
+  ,                           !- Outside Face Environment (not allowed for TubularDaylightDome)
+  0.0,                        !- VF to Ground
+  ,                           !- Window Shading Control (not allowed for TubularDaylightDome)
+  ,                           !- Frame/Divider Name (not allowed for TubularDaylightDome)
+  1.0,                        !- Multiplier (must be 1.0 for TubularDaylightDome)
+  4,                          !- Number of Vertices
   2.3425,  3.1575,  3.9,
   2.3425,  2.8425,  3.9,
   2.6575,  2.8425,  3.9,
   2.6575,  3.1575,  3.9;
 
 FenestrationSurface:Detailed,
-  Diffuser1,  !- Subsurface Name
-  TubularDaylightDiffuser,  !- Surface Type
-  Frosted Acrylic Diffuser,  !- Construction Name (only 1 layer allowed in construction)
-  Daylit Zone Ceiling,  !- Base Surface Name
-  ,  !- Outside Face Environment (not allowed for TubularDaylightDiffuser)
-  0.0,  !- VF to Ground
-  ,  !- Window Shading Control (not allowed for TubularDaylightDiffuser)
-  ,  !- Frame/Divider Name (not allowed for TubularDaylightDiffuser)
-  1.0,  !- Multiplier (must be 1.0 for TubularDaylightDiffuser)
-  4,  !- Number of Vertices
+  Diffuser1,                  !- Subsurface Name
+  TubularDaylightDiffuser,    !- Surface Type
+  Frosted Acrylic Diffuser,   !- Construction Name (only 1 layer allowed in construction)
+  Daylit Zone Ceiling,        !- Base Surface Name
+  ,                           !- Outside Face Environment (not allowed for TubularDaylightDiffuser)
+  0.0,                        !- VF to Ground
+  ,                           !- Window Shading Control (not allowed for TubularDaylightDiffuser)
+  ,                           !- Frame/Divider Name (not allowed for TubularDaylightDiffuser)
+  1.0,                        !- Multiplier (must be 1.0 for TubularDaylightDiffuser)
+  4,                          !- Number of Vertices
   2.3425,  3.1575,  2.5,
   2.3425,  2.8425,  2.5,
   2.6575,  2.8425,  2.5,
@@ -872,54 +872,54 @@ User defined value for the view factor from the window to the outside shelf. Thi
 
 \begin{lstlisting}
 DaylightingDevice:Shelf,
-    Shelf,  !- Name
-    Daylit Upper Window,  !- Window Name
-    Inside Shelf,  !- Inside Shelf Name
-    Outside Shelf,  !- Outside Shelf Name
-    Shelf Construction;  !- Outside Shelf Construction Name (required if outside shelf specified)
-    ! 0.29;  !- View Factor To Outside Shelf (optional)
+  Shelf,                      !- Name
+  Daylit Upper Window,        !- Window Name
+  Inside Shelf,               !- Inside Shelf Name
+  Outside Shelf,              !- Outside Shelf Name
+  Shelf Construction;         !- Outside Shelf Construction Name (required if outside shelf specified)
 
-FenestrationSurface:Detailed,
-    Daylit Upper Window,  !- Subsurface Name
-    Window,  !- Surface Type
-    Standard Window,  !- Construction Name
-    Daylit South Wall,  !- Base Surface Name
-    ,  !- Outside Face Environment
-    0.211,  !- VF to Ground (user must adjust to account for view factor to outside shelf)
-    ,  !- Window Shading Control (not allowed)
-    ,  !- Frame/Divider Name (not allowed)
-    1.0,  !- Multiplier (must be 1.0)
-    4,  !- Number of Vertices
-    1.0,  0.0,  2.8,
-    1.0,  0.0,  2.0,
-    4.0,  0.0,  2.0,
-    4.0,  0.0,  2.8;
+! 0.29;  !- View Factor To Outside Shelf (optional)
+  FenestrationSurface:Detailed,
+  Daylit Upper Window,        !- Subsurface Name
+  Window,                     !- Surface Type
+  Standard Window,            !- Construction Name
+  Daylit South Wall,          !- Base Surface Name
+  ,                           !- Outside Face Environment
+  0.211,                      !- VF to Ground (user must adjust to account for view factor to outside shelf)
+  ,                           !- Window Shading Control (not allowed)
+  ,                           !- Frame/Divider Name (not allowed)
+  1.0,                        !- Multiplier (must be 1.0)
+  4,                          !- Number of Vertices
+  1.0,  0.0,  2.8,
+  1.0,  0.0,  2.0,
+  4.0,  0.0,  2.0,
+  4.0,  0.0,  2.8;
 
 BuildingSurface:Detailed,
-    Inside Shelf,  !- Surface Name
-    Wall,  !- Surface Type
-    Shelf Construction,  !- Construction Name
-    Daylit Zone,  !- Zone Name
-    OtherZoneSurface,  !- Exterior Conditions (must be OtherZoneSurface)
-    Inside Shelf,  !- Target (must be itself)
-    NoSun,  !- Solar Exposure
-    NoWind,  !- Wind Exposure
-    0.0,  !- VF to Ground
-    4,  !- Number of Vertices
-    1.0,  0.0,  2.0,
-    4.0,  0.0,  2.0,
-    4.0,  1.0,  2.0,
-    1.0,  1.0,  2.0;
+  Inside Shelf,               !- Surface Name
+  Wall,                       !- Surface Type
+  Shelf Construction,         !- Construction Name
+  Daylit Zone,                !- Zone Name
+  OtherZoneSurface,           !- Exterior Conditions (must be OtherZoneSurface)
+  Inside Shelf,               !- Target (must be itself)
+  NoSun,                      !- Solar Exposure
+  NoWind,                     !- Wind Exposure
+  0.0,                        !- VF to Ground
+  4,                          !- Number of Vertices
+  1.0,  0.0,  2.0,
+  4.0,  0.0,  2.0,
+  4.0,  1.0,  2.0,
+  1.0,  1.0,  2.0;
 
 Shading:Zone:Detailed,
-    Outside Shelf,  !- Surface Name
-    Daylit South Wall,  !- Base Surface Name
-    ,  !- Shading Transmittance Schedule (default is always opaque)
-    4,  !- Number of Vertices
-    1.0,  0.0,  2.0,  !- Outward normal vector must point up toward the upper window
-    1.0, -1.0,  2.0,
-    4.0, -1.0,  2.0,
-    4.0,  0.0,  2.0;
+  Outside Shelf,              !- Surface Name
+  Daylit South Wall,          !- Base Surface Name
+  ,                           !- Shading Transmittance Schedule (default is always opaque)
+  4,                          !- Number of Vertices
+  1.0,  0.0,  2.0,            !- Outward normal vector must point up toward the upper window
+  1.0, -1.0,  2.0,
+  4.0, -1.0,  2.0,
+  4.0,  0.0,  2.0;
 \end{lstlisting}
 
 \subsubsection{Outputs}\label{outputs-3-002}
@@ -1015,12 +1015,12 @@ The visible reflectance of the side walls of the well. If the walls do not all h
 An IDF example:
 
 \begin{lstlisting}
-DaylightingDevice:LightWell,  ! The well is 60% reflecting, is 1.2m high and has a 2.5m x 5.5m bottom opening.
-   Skylight-1, !- Name of Exterior Window that this Light Well Applies To
-   1.2,        !- Height of Well(m)
-   16.0,       !- Perimeter of Bottom of Well (m)
-   13.75,      !- Area of Bottom of Well (m2)
-   0.60;       !- Visible Reflectance of Well Walls
+DaylightingDevice:LightWell,  !- The well is 60% reflecting, is 1.2m high and has a 2.5m x 5.5m bottom opening.
+  Skylight-1,                 !- Name of Exterior Window that this Light Well Applies To
+  1.2,                        !- Height of Well(m)
+  16.0,                       !- Perimeter of Bottom of Well (m)
+  13.75,                      !- Area of Bottom of Well (m2)
+  0.60;                       !- Visible Reflectance of Well Walls
 \end{lstlisting}
 
 \subsection{Daylighting Modeling Options}\label{daylighting-modeling-options}

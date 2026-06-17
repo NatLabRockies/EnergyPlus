@@ -1,7 +1,7 @@
-// EnergyPlus, Copyright (c) 1996-2023, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
-// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other
+// National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
 // contributors. All rights reserved.
 //
 // NOTICE: This Software was developed under funding from the U.S. Department of Energy and the
@@ -57,18 +57,18 @@
 
 // Clang-Specific
 #ifndef __has_attribute
-#define __has_attribute(x) 0
+#    define __has_attribute(x) 0
 #endif
 
 // Force inlining
 #ifndef ALWAYS_INLINE
-#if defined(__GNUC__) || (defined(__clang__) && __has_attribute(always_inline))
-#define ALWAYS_INLINE inline __attribute__((__always_inline__))
-#elif defined(_MSC_VER) || defined(__INTEL_COMPILER)
-#define ALWAYS_INLINE __forceinline
-#else
-#define ALWAYS_INLINE inline
-#endif
+#    if defined(__GNUC__) || (defined(__clang__) && __has_attribute(always_inline))
+#        define ALWAYS_INLINE inline __attribute__((__always_inline__))
+#    elif defined(_MSC_VER) || defined(__INTEL_COMPILER)
+#        define ALWAYS_INLINE __forceinline
+#    else
+#        define ALWAYS_INLINE inline
+#    endif
 #endif
 
 #endif

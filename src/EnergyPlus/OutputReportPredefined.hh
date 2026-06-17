@@ -1,7 +1,7 @@
-// EnergyPlus, Copyright (c) 1996-2023, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
-// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other
+// National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
 // contributors. All rights reserved.
 //
 // NOTICE: This Software was developed under funding from the U.S. Department of Energy and the
@@ -74,6 +74,8 @@ namespace OutputReportPredefined {
     int constexpr recKindSurface(1);
     int constexpr recKindSubsurface(2);
 
+    inline std::string_view standard62RptSummaryName = "Standard62.1Summary";
+
     // Types
 
     struct reportNameType
@@ -86,19 +88,6 @@ namespace OutputReportPredefined {
 
         // Default Constructor
         reportNameType() : show(false)
-        {
-        }
-    };
-
-    struct SubTableType
-    {
-        // Members
-        std::string name;
-        int indexReportName;
-        std::string footnote;
-
-        // Default Constructor
-        SubTableType() : indexReportName(0)
         {
         }
     };
@@ -121,14 +110,31 @@ namespace OutputReportPredefined {
         std::string charEntry;
         std::string objectName;
         int indexColumn;
-        int subTableIndex;
+        int indexTable;
         int uniqueObjName;
         Real64 origRealEntry;
         int significantDigits;
         bool origEntryIsReal;
 
         // Default Constructor
-        TableEntryType() : indexColumn(0), subTableIndex(0), uniqueObjName(0), origRealEntry(0.0), significantDigits(0), origEntryIsReal(false)
+        TableEntryType() : indexColumn(0), indexTable(0), uniqueObjName(0), origRealEntry(0.0), significantDigits(0), origEntryIsReal(false)
+        {
+        }
+    };
+
+    struct SubTableType
+    {
+        // Members
+        std::string name;
+        int indexReportName;
+        std::string footnote;
+
+        int numEntries;
+        int sizeEntries;
+
+        Array1D<TableEntryType> entries;
+        // Default Constructor
+        SubTableType() : indexReportName(0), numEntries(0), sizeEntries(0)
         {
         }
     };
@@ -139,14 +145,10 @@ namespace OutputReportPredefined {
         std::string typeField;
         std::string nameField;
         std::string description;
-        Real64 valField;
-        bool active;
-        bool written;
-
-        // Default Constructor
-        CompSizeTableEntryType() : valField(0.0), active(false), written(false)
-        {
-        }
+        Real64 valField = 0.0;
+        std::string strField;
+        bool active = false;
+        bool written = false;
     };
 
     struct ShadowRelateType
@@ -179,10 +181,16 @@ namespace OutputReportPredefined {
 
     std::string RetrievePreDefTableEntry(EnergyPlusData &state, int const columnIndex, std::string_view objName);
 
-    void incrementTableEntry(EnergyPlusData &state);
+    void incrementTableEntry(EnergyPlusData &state, int subTableNum);
 
     void AddCompSizeTableEntry(
         EnergyPlusData &state, std::string_view FieldType, std::string_view FieldName, std::string_view FieldDescription, Real64 const FieldValue);
+
+    void AddCompSizeTableStrEntry(EnergyPlusData &state,
+                                  std::string_view FieldType,
+                                  std::string_view FieldName,
+                                  std::string_view FieldDescription,
+                                  std::string_view FieldValue);
 
     void AddShadowRelateTableEntry(EnergyPlusData &state, int const castingField, int const receivingField, int const receivingKind);
 
@@ -242,6 +250,29 @@ struct OutputReportPredefinedData : BaseGlobalStruct
     int pdchFanPwrPerFlow = 0;
     int pdchFanDesDay = 0;
     int pdchFanPkTime = 0;
+    // Standard 229 Predef outputs for Fans
+    int pdchFanPurpose = 0;
+    int pdchFanAutosized = 0;
+    int pdchFanMotorEff = 0;
+    int pdchFanMotorHeatToZoneFrac = 0; // Motor Heat to Zone Fraction
+    int pdchFanMotorHeatZone = 0;       // Motor Loss Zone Name
+    int pdchFanSpeedCtrlMethod = 0;
+    int pdchFanNumSpeeds = 0;
+    int pdchFanAirLoopName = 0;
+
+    int pdstFanPower = 0;
+    int pdchFanPowerType = 0;
+    int pdchFanPower00 = 0;
+    int pdchFanPower01 = 0;
+    int pdchFanPower02 = 0;
+    int pdchFanPower03 = 0;
+    int pdchFanPower04 = 0;
+    int pdchFanPower05 = 0;
+    int pdchFanPower06 = 0;
+    int pdchFanPower07 = 0;
+    int pdchFanPower08 = 0;
+    int pdchFanPower09 = 0;
+    int pdchFanPower10 = 0;
 
     // Pump subtable
     int pdstPump = 0;
@@ -253,6 +284,10 @@ struct OutputReportPredefinedData : BaseGlobalStruct
     int pdchPumpPwrPerFlow = 0;
     int pdchPumpEndUse = 0;
     int pdchMotEff = 0;
+    // Standard 229 Predef outputs for Pumps
+    int pdchPumpAutosized = 0;
+    int pdchPumpPlantloopName = 0;
+    int pdchPumpPlantloopBranchName = 0;
 
     // Cooling coil subtable
     int pdstCoolCoil = 0;
@@ -289,6 +324,7 @@ struct OutputReportPredefinedData : BaseGlobalStruct
 
     // DX Cooling Coil subtable per ANSI/ASHRAE Std 127 for Tests A, B, C and D
     int pdstDXCoolCoil2 = 0;
+    int pdchDXCoolCoilType2 = 0;      // DX cooling coil type
     int pdchDXCoolCoilNetCapSIA = 0;  // Standard Rated (Net) Cooling Capacity [W], Test A
     int pdchDXCoolCoilElecPowerA = 0; // Standard Rated Electric Power [W], Test A
     int pdchDXCoolCoilNetCapSIB = 0;  // Standard Rated (Net) Cooling Capacity [W], Test B
@@ -297,6 +333,20 @@ struct OutputReportPredefinedData : BaseGlobalStruct
     int pdchDXCoolCoilElecPowerC = 0; // Standard Rated Electric Power [W], Test C
     int pdchDXCoolCoilNetCapSID = 0;  // Standard Rated (Net) Cooling Capacity [W], Test D
     int pdchDXCoolCoilElecPowerD = 0; // Standard Rated Electric Power [W], Test D
+
+    // ACCA Manual S report
+    int pdstACCAMS = 0;
+    int pdchMSHPName = 0;
+    int pdchMSHPType = 0;
+    int pdchMSCoilType = 0;
+    int pdchMSSizMethod = 0;
+    int pdchMSTotLoad = 0;
+    int pdchMSSensLoad = 0;
+    int pdchMSTotCapacity = 0;
+    int pdchMSSensCapacity = 0;
+    int pdchMSTotRatio = 0;
+    int pdchMSSensRatio = 0;
+    int pdchMSLatRatio = 0;
 
     // Water-to-Air HP report
     int pdstWAHP = 0;
@@ -329,25 +379,30 @@ struct OutputReportPredefinedData : BaseGlobalStruct
     int pdchVAVDXCoolCoilEER_D_IP = 0;
     int pdchVAVDXCoolCoilMdotD = 0;
 
-    // TODO: As not inlcuded in clearState() , Confirm and update
     // DX Heating Coil subtable
-    int pdstDXHeatCoil;
-    int pdchDXHeatCoilType; // DX Heating coil type
-    int pdchDXHeatCoilHighCap;
-    int pdchDXHeatCoilLowCap;
-    int pdchDXHeatCoilHSPFSI;    // HSPF value in SI unit at AHRI std. 340/360 conditions [W/W]
-    int pdchDXHeatCoilHSPFIP;    // HSPF value in IP unit at AHRI std. 340/360 conditions [Btu/W-hr]
-    int pdchDXHeatCoilRegionNum; // Region number for which HSPF is calculated
+    int pdstDXHeatCoil = 0;
+    int pdchDXHeatCoilType = 0; // DX Heating coil type
+    int pdchDXHeatCoilSizingRatio = 0;
+    int pdchDXHeatCoilHighCap = 0;
+    int pdchDXHeatCoilLowCap = 0;
+    int pdchDXHeatCoilHSPFSI = 0;    // HSPF value in SI unit at AHRI std. 340/360 conditions [W/W]
+    int pdchDXHeatCoilHSPFIP = 0;    // HSPF value in IP unit at AHRI std. 340/360 conditions [Btu/W-hr]
+    int pdchDXHeatCoilRegionNum = 0; // Region number for which HSPF is calculated
+    // Standard 229 Predef outputs for DX Heating Coils
+    int pdchDXHeatCoilMinOADBTforCompOp = 0;
+    int pdchDXHeatCoilSuppHiT = 0; // Supplemental Heat High Shutoff Temperature
+    int pdchDXHeatCoilAirloopName = 0;
 
-    // TODO: As not inlcuded in clearState() , Confirm and update
     // DX Heating Coil subtable| AHRI std. 210/240 2023 conditions
-    int pdstDXHeatCoil_2023;
-    int pdchDXHeatCoilType_2023; // DX Heating coil type
-    int pdchDXHeatCoilHighCap_2023;
-    int pdchDXHeatCoilLowCap_2023;
-    int pdchDXHeatCoilHSPF2SI_2023;   // HSPF2 value in SI unit at AHRI std. 340/360 conditions [W/W]
-    int pdchDXHeatCoilHSPF2IP_2023;   // HSPF2 value in IP unit at AHRI std. 340/360 conditions [Btu/W-hr]
-    int pdchDXHeatCoilRegionNum_2023; // Region number for which HSPF is calculated
+    int pdstDXHeatCoil_2023 = 0;
+    int pdchDXHeatCoilType_2023 = 0; // DX Heating coil type
+    int pdchDXHeatCoilHighCap_2023 = 0;
+    int pdchDXHeatCoilLowCap_2023 = 0;
+    int pdchDXHeatCoilHSPF2SI_2023 = 0;   // HSPF2 value in SI unit at AHRI std. 340/360 conditions [W/W]
+    int pdchDXHeatCoilHSPF2IP_2023 = 0;   // HSPF2 value in IP unit at AHRI std. 340/360 conditions [Btu/W-hr]
+    int pdchDXHeatCoilRegionNum_2023 = 0; // Region number for which HSPF is calculated
+    int pdchDXHeatCoilMinOADBTforCompOp_2023 = 0;
+    int pdchDXHeatCoilAirloopName_2023 = 0;
 
     // Heating Coil subtable
     int pdstHeatCoil = 0;
@@ -355,6 +410,10 @@ struct OutputReportPredefinedData : BaseGlobalStruct
     int pdchHeatCoilDesCap = 0;
     int pdchHeatCoilNomCap = 0;
     int pdchHeatCoilNomEff = 0;
+    // Standard 229 Predef outputs for Heating Coils
+    int pdchHeatCoilUsedAsSupHeat = 0;
+    int pdchHeatCoilAirloopName = 0;
+    int pdchHeatCoilPlantloopName = 0;
 
     // SWH subtable
     int pdstSWH = 0;
@@ -364,11 +423,178 @@ struct OutputReportPredefinedData : BaseGlobalStruct
     int pdchSWHThEff = 0;
     int pdchSWHRecEff = 0;
     int pdchSWHEnFac = 0;
+    int pdchSWHFuelType = 0;
+    int pdchSWHSchHt1StptName = 0;
+    int pdchSWHSchHt1Stpt11amWedVal = 0;
+    int pdchSWHSchHt1Stpt11amWedCnt = 0;
+    int pdchSWHSchHt1StptMonthUsed = 0;
+    int pdchSWHSchHt2StptName = 0;
+    int pdchSWHSchHt2Stpt11amWedVal = 0;
+    int pdchSWHSchHt2Stpt11amWedCnt = 0;
+    int pdchSWHSchHt2StptMonthUsed = 0;
+    int pdchSWHPkUseFlwRt = 0;
+    int pdchSWHUseSch = 0;
+    int pdchSWHAmbZoneNm = 0;
+
+    // wateruse:equipment table
+    int pdstWtEq = 0;
+    int pdchWtEqZone = 0;
+    int pdchWtEqEndUse = 0;
+    int pdchWtEqPkFlw = 0;
+    int pdchWtEqFlwFractSch = 0;
+    int pdchWtEqFlwFractMax = 0;
+    int pdchWtEqTargTempSch = 0;
+    int pdchWtEqTargTempMax = 0;
+    int pdchWtEqConnNm = 0;
+    int pdchWtEqHotTempSch = 0;
+    int pdchWtEqHotTempMax = 0;
+    int pdchWtEqColdTempSch = 0;
+    int pdchWtEqColdTempMin = 0;
+    int pdchWtEqSensFracSch = 0;
+    int pdchWtEqsensFracMax = 0;
+    int pdchWtEqLatFracSch = 0;
+    int pdchWtEqLatFracMax = 0;
+
+    // WaterUse:Connections table
+    int pdstWtCn = 0;
+    int pdchWtCnDrnHxType = 0;
+    int pdchWtCnDrnHxDest = 0;
+    int pdchWtCnDrnHxUA = 0;
+    int pdchWtCnDrnHxEff = 0;
+    int pdchWtCnHotTempSch = 0;
+    int pdchWtCnHotTempMax = 0;
+    int pdchWtCnColdTempSch = 0;
+    int pdchWtCnColdTempMin = 0;
+    int pdchWtCnPltLpNm = 0;
+    int pdchWtCnBrchNm = 0;
+    int pdchWtCnSupTnk = 0;
+    int pdchWtCnRecTnk = 0;
+
+    // Std 229 Chiller Table in Equipment Summary
+    int pdstChiller = 0;
+    int pdchChillerType = 0;                        // Type
+    int pdchChillerRefCap = 0;                      // Reference Capacity[W]
+    int pdchChillerRefEff = 0;                      // Reference Efficiency [W/W]
+    int pdchChillerRatedCap = 0;                    // Rated Capacity [W]
+    int pdchChillerRatedEff = 0;                    // Rated Efficiency [W/W]
+    int pdchChillerIPLVinSI = 0;                    // IPLV in SI Units [W/W]
+    int pdchChillerIPLVinIP = 0;                    // IPLV in IP Units [Btu/W-h]
+    int pdchChillerPlantloopName = 0;               // Plantloop name
+    int pdchChillerPlantloopBranchName = 0;         // Plantloop branch name
+    int pdchChillerCondLoopName = 0;                // Condenser loop name
+    int pdchChillerCondLoopBranchName = 0;          // Condenser loop branch name
+    int pdchChillerMinPLR = 0;                      // Minimum part load ratio
+    int pdchChillerFuelType = 0;                    // Fuel type
+    int pdchChillerRatedEntCondTemp = 0;            // Rated entering condenser temperature
+    int pdchChillerRatedLevEvapTemp = 0;            // Rated leaving evaporator temperature
+    int pdchChillerRefEntCondTemp = 0;              // Reference entering condenser temperature
+    int pdchChillerRefLevEvapTemp = 0;              // Reference leaving evaporator temperature
+    int pdchChillerDesSizeRefCHWFlowRate = 0;       // Design Size Reference Chilled Water Flow Rate
+    int pdchChillerDesSizeRefCondFluidFlowRate = 0; // Design Size Reference Condenser Fluid Flow Rate
+    int pdchChillerHeatRecPlantloopName = 0;        // Heat recovery Plantloop name
+    int pdchChillerHeatRecPlantloopBranchName = 0;  // Heat recovery Plantloop branch name
+    int pdchChillerRecRelCapFrac = 0;               // Recovery Relative Capacity Fraction
+
+    // Std 229 Boiler Table in Equipment Summary
+    int pdstBoiler = 0;
+    int pdchBoilerType = 0;                // Type
+    int pdchBoilerRefCap = 0;              // Reference Capacity [W]
+    int pdchBoilerRefEff = 0;              // Reference Efficiency [W/W]
+    int pdchBoilerRatedCap = 0;            // Rated Capacity [W]
+    int pdchBoilerRatedEff = 0;            // Rated Efficiency [W/W]
+    int pdchBoilerPlantloopName = 0;       // Plantloop name
+    int pdchBoilerPlantloopBranchName = 0; // Plantloop branch name
+    int pdchBoilerMinPLR = 0;              // Minimum part load ratio
+    int pdchBoilerFuelType = 0;            // Fuel type
+    int pdchBoilerParaElecLoad = 0;        // Parasitic electric load
+
+    // AWHP Table in Equipment Summary
+    int pdstAWHP = 0;
+    int pdchAWHPType = 0;                    // Type
+    int pdchAWHPRefCap = 0;                  // Reference Capacity[W]
+    int pdchAWHPRefCOP = 0;                  // Reference COP
+    int pdchAWHPRefEff = 0;                  // Reference Efficiency [W/W]
+    int pdchAWHPRatedCap = 0;                // Rated Capacity [W]
+    int pdchAWHPRatedEff = 0;                // Rated Efficiency [W/W]
+    int pdchAWHPSEER = 0;                    // SEER
+    int pdchAWHPHSPF = 0;                    // HSPF
+    int pdchAWHPMinPLR = 0;                  // Minimum part load ratio
+    int pdchAWHPDesSizeRefAirTemp;           // Design Size Reference Air Temperature [C]"
+    int pdchAWHPDesEnterWaterTemp;           // Entering Water Temperature [C]"
+    int pdchAWHPDesLeaveWaterTemp;           // Leaving Water Temperature [C]"
+    int pdchAWHPDesSizeRefWaterFlowRate = 0; // "Design Size Reference Water Flow Rate [kg/s]");
+    int pdchAWHPDesSizeRefAirFlowRate = 0;   // "Design Size Reference Air Flow Rate [kg/s]");
+    int pdchAWHPPlantloopName = 0;           // Plantloop name
+    int pdchAWHPPlantloopBranchName = 0;     // Plantloop branch name
+
+    // Std 229 cooling towers and fluid coolers Table in Equipment Summary
+    int pdstCTFC = 0;
+    int pdchCTFCType = 0;               // Type
+    int pdchCTFCCondLoopName = 0;       // Condenser loop name
+    int pdchCTFCCondLoopBranchName = 0; // Condenser loop branch name
+    int pdchCTFCFluidType = 0;          // Fluid type
+    int pdchCTFCRange = 0;              // Range
+    int pdchCTFCApproach = 0;           // Approach
+    int pdchCTFCDesFanPwr = 0;          // Design Fan Power
+    int pdchCTFCDesInletAirWBT = 0;     // Design inlet air wet-bulb temperature
+    int pdchCTFCDesWaterFlowRate = 0;   // Design Water Flow Rate
+    int pdchCTFCLevWaterSPTemp = 0;     // Leaving water setpoint temperature
+
+    // Std 229 Plantloop and CondenserLoop Table in Equipment Summary
+    int pdstPLCL = 0;
+    int pdchPLCLType = 0;            // type (PlantLoop or CondenserLoop)
+    int pdchPLCLProvHeat = 0;        // provides heating
+    int pdchPLCLProvCool = 0;        // provides cooling
+    int pdchPLCLMaxLoopFlowRate = 0; // Maximum Loop Flow Rate
+    int pdchPLCLMinLoopFlowRate = 0; // Minimum Loop Flow Rate
+    int pdchPLCLSupTemp = 0;         // "Design Supply Temperature [C]");
+    int pdchPLCLRetTemp = 0;         // "Design Return Temperature [C]");
+    int pdchPLCLDesCap = 0;          // "Design Capacity [W]");
+
+    // Std 229 Air Terminal Table in Equipment Summary
+    int pdstAirTerm = 0;
+    int pdchAirTermZoneName = 0;        // Zone Name
+    int pdchAirTermMinFlow = 0;         // Minimum Flow
+    int pdchAirTermMinOutdoorFlow = 0;  // Minimum Outdoor Flow
+    int pdchAirTermSupCoolingSP = 0;    // Supply cooling setpoint
+    int pdchAirTermSupHeatingSP = 0;    // Supply heating setpoint
+    int pdchAirTermHeatingCap = 0;      // Heating capacity
+    int pdchAirTermCoolingCap = 0;      // Cooling capacity
+    int pdchAirTermTypeInp = 0;         // Type of Input Object
+    int pdchAirTermHeatCoilType = 0;    // Heat/Reheat Coil Object Type
+    int pdchAirTermCoolCoilType = 0;    // Chilled Water Coil Object Type
+    int pdchAirTermFanType = 0;         // Fan Object Type
+    int pdchAirTermFanName = 0;         // Fan Name
+    int pdchAirTermFanCtrlType = 0;     // Fan Control Type
+    int pdchAirTermPrimFlow = 0;        // Primary Air Flow Rate
+    int pdchAirTermSecdFlow = 0;        // Secondary Air Flow Rate
+    int pdchAirTermMinFlowSch = 0;      // Minimum Flow Schedule Name
+    int pdchAirTermMaxFlowReh = 0;      // Maximum Flow During Reheat
+    int pdchAirTermMinOAflowSch = 0;    // Minimum Outdoor Flow Schedule Name
+    int pdchAirTermPIUHeatCtrlType = 0; // PIU Heating Control Type
+
+    // Std 229 Air Heat Recovery
+    int pdstAirHR = 0;
+    int pdchAirHRInputObjType = 0;              // input object type
+    int pdchAirHRPlateOrRotary = 0;             // plate/rotary
+    int pdchAirHROperation = 0;                 // operation control
+    int pdchAirHRSenEffAt100PerHeatAirFlow = 0; // Sensible Effectiveness at 100% Heating Air Flow
+    int pdchAirHRSenEffAt100PerCoolAirFlow = 0; // Sensible Effectiveness at 100% Cooling Air Flow
+    int pdchAirHRLatEffAt100PerHeatAirFlow = 0; // Latent Effectiveness at 100% Heating Air Flow
+    int pdchAirHRLatEffAt100PerCoolAirFlow = 0; // Latent Effectiveness at 100% Cooling Air Flow
+    int pdchAirHRExhaustAirflow = 0;            // Exhaust (Secondary) airflow
+    int pdchAirHRSupplyAirflow = 0;             // Supply (Outdoor) airflow
+    int pdchAirHRZoneHVACName = 0;              // Zone ERV name
+    int pdchAirHRAirloopName = 0;               // Airloop name
+    int pdchAirHROASysName = 0;                 // OA system name
+    int pdchAirHROAControllerName = 0;          // OA controller name
 
     // Envelope Report
     int pdrEnvelope = 0;
     int pdstOpaque = 0;
     int pdchOpCons = 0;
+    int pdchOpZone = 0;
+    int pdchOpSpace = 0;
     int pdchOpRefl = 0;
     int pdchOpUfactFilm = 0;
     int pdchOpUfactNoFilm = 0;
@@ -379,6 +605,9 @@ struct OutputReportPredefinedData : BaseGlobalStruct
     int pdchOpDir = 0;
     int pdstIntOpaque = 0;
     int pdchIntOpCons = 0;
+    int pdchIntOpZone = 0;
+    int pdchIntOpSpace = 0;
+    int pdchIntOpAdjSurf = 0;
     int pdchIntOpRefl = 0;
     int pdchIntOpUfactFilm = 0;
     int pdchIntOpUfactNoFilm = 0;
@@ -389,6 +618,8 @@ struct OutputReportPredefinedData : BaseGlobalStruct
     int pdchIntOpDir = 0;
     int pdstFen = 0;
     int pdchFenCons = 0;
+    int pdchFenZone = 0;
+    int pdchFenSpace = 0;
     int pdchFenFrameDivName = 0;
     int pdchFenAreaOf1 = 0;
     int pdchFenGlassAreaOf1 = 0;
@@ -422,24 +653,33 @@ struct OutputReportPredefinedData : BaseGlobalStruct
 
     int pdstDoor = 0;
     int pdchDrCons = 0;
+    int pdchDrZone = 0;
+    int pdchDrSpace = 0;
     int pdchDrUfactFilm = 0;
     int pdchDrUfactNoFilm = 0;
     int pdchDrGrArea = 0;
     int pdchDrParent = 0;
     int pdstIntDoor = 0;
     int pdchIntDrCons = 0;
+    int pdchIntDrZone = 0;
+    int pdchIntDrSpace = 0;
     int pdchIntDrUfactFilm = 0;
     int pdchIntDrUfactNoFilm = 0;
     int pdchIntDrGrArea = 0;
     int pdchIntDrParent = 0;
     int pdstIntFen = 0;
     int pdchIntFenCons = 0;
+    int pdchIntFenZone = 0;
+    int pdchIntFenSpace = 0;
     int pdchIntFenAreaOf1 = 0;
     int pdchIntFenArea = 0;
     int pdchIntFenUfact = 0;
     int pdchIntFenSHGC = 0;
     int pdchIntFenVisTr = 0;
     int pdchIntFenParent = 0;
+
+    int pdstOpqConsLayers = 0;
+    std::vector<int> pdchOpqConsLayCol;
 
     // Shading Report
     int pdrShading = 0;
@@ -496,6 +736,21 @@ struct OutputReportPredefinedData : BaseGlobalStruct
 
     // Sizing Report
     int pdrSizing = 0;
+    int pdstSpaceClSize = 0;
+    int pdchSpClCalcDesLd = 0;
+    int pdchSpClUserDesLd = 0;
+    int pdchSpClUserDesLdPerArea = 0;
+    int pdchSpClCalcDesAirFlow = 0;
+    int pdchSpClUserDesAirFlow = 0;
+    int pdchSpClDesDay = 0;
+    int pdchSpClPkTime = 0;
+    int pdchSpClPkTstatTemp = 0;
+    int pdchSpClPkIndTemp = 0;
+    int pdchSpClPkIndHum = 0;
+    int pdchSpClPkOATemp = 0;
+    int pdchSpClPkOAHum = 0;
+    int pdchSpClPkOAMinFlow = 0;
+    int pdchSpClPkDOASHeatGain = 0;
     int pdstZoneClSize = 0;
     int pdchZnClCalcDesLd = 0;
     int pdchZnClUserDesLd = 0;
@@ -511,6 +766,21 @@ struct OutputReportPredefinedData : BaseGlobalStruct
     int pdchZnClPkOAHum = 0;
     int pdchZnClPkOAMinFlow = 0;
     int pdchZnClPkDOASHeatGain = 0;
+    int pdstSpaceHtSize = 0;
+    int pdchSpHtCalcDesLd = 0;
+    int pdchSpHtUserDesLd = 0;
+    int pdchSpHtUserDesLdPerArea = 0;
+    int pdchSpHtCalcDesAirFlow = 0;
+    int pdchSpHtUserDesAirFlow = 0;
+    int pdchSpHtDesDay = 0;
+    int pdchSpHtPkTime = 0;
+    int pdchSpHtPkTstatTemp = 0;
+    int pdchSpHtPkIndTemp = 0;
+    int pdchSpHtPkIndHum = 0;
+    int pdchSpHtPkOATemp = 0;
+    int pdchSpHtPkOAHum = 0;
+    int pdchSpHtPkOAMinFlow = 0;
+    int pdchSpHtPkDOASHeatGain = 0;
     int pdstZoneHtSize = 0;
     int pdchZnHtCalcDesLd = 0;
     int pdchZnHtUserDesLd = 0;
@@ -651,6 +921,20 @@ struct OutputReportPredefinedData : BaseGlobalStruct
     int pdchDryAirSpecificHeat = 0;
     int pdchStandRhoAir = 0;
 
+    // Std 229 Coil Connections
+    int pdstCoilConnections = 0;
+    int pdchCoilName_CCs = 0;
+    int pdchCoilType_CCs = 0;
+    int pdchCoilLoc_CCs = 0;
+    int pdchCoilHVACType_CCs = 0;
+    int pdchCoilHVACName_CCs = 0;
+    int pdchCoilZoneNames_CCs = 0;
+    int pdchCoilSupFanName_CCs = 0;
+    int pdchCoilSupFanType_CCs = 0;
+    int pdchCoilPlantName_CCs = 0;     // Plant Name for Coil*
+    int pdchCoilAirloopName_CCs = 0;   // Airloop Name
+    int pdchCoilPlantloopName_CCs = 0; // Plant Loop Name
+
     // Coil Sizing Summary (subset of Coil Selection Table)
     int pdst2CoilSummaryCoilSelection = 0;
     int pdch2CoilName = 0;
@@ -700,6 +984,7 @@ struct OutputReportPredefinedData : BaseGlobalStruct
     int pdchEcoRetEnth = 0;
     int pdchEcoOATempLim = 0;
     int pdchEcoOAEnthLim = 0;
+    int pdchEcoOAsysNm = 0;
     int pdstDemCntlVent = 0;
     int pdchDCVventMechName = 0;
     int pdchDCVperPerson = 0;
@@ -713,6 +998,7 @@ struct OutputReportPredefinedData : BaseGlobalStruct
     int pdchDCVZoneADEffCooling = 0;
     int pdchDCVZoneADEffHeating = 0;
     int pdchDCVZoneADEffSchName = 0;
+    int pdchDCVType = 0;
 
     int pdstSimpleComfort = 0;
     int pdchSCwinterClothes = 0;
@@ -723,6 +1009,117 @@ struct OutputReportPredefinedData : BaseGlobalStruct
     int pdchULnotMetCool = 0;
     int pdchULnotMetHeatOcc = 0;
     int pdchULnotMetCoolOcc = 0;
+
+    int pdstStatSchd = 0;
+    int pdchStatName = 0;
+    int pdchStatCtrlTypeSchd = 0;
+    int pdchStatSchdType1 = 0;
+    int pdchStatSchdTypeName1 = 0;
+    int pdchStatSchdHeatName = 0;
+    int pdchStatSchdCoolName = 0;
+
+    int pdstFanOper = 0.0;
+    int pdchFanOpOccHrs = 0.0;
+    int pdchFanOpOccCont = 0.0;
+    int pdchFanOpOccCyc = 0.0;
+    int pdchFanOpOccOff = 0.0;
+    int pdchFanOpUnoccHrs = 0.0;
+    int pdchFanOpUnoccCont = 0.0;
+    int pdchFanOpUnoccCyc = 0.0;
+    int pdchFanOpUnoccOff = 0.0;
+
+    // Controls Summary
+
+    int pdrCtrl = 0;
+
+    int pdstStPtOAR = 0;
+    int pdchSPMOArStPtNd = 0;
+    int pdchSPMOArStPtLp = 0;
+    int pdchSPMOArType = 0;
+    int pdchSPMOArStLo1 = 0;
+    int pdchSPMOArStHi1 = 0;
+    int pdchSPMOArOutLo1 = 0;
+    int pdchSPMOArOutHi1 = 0;
+    int pdchSPMOArSchNm = 0;
+    int pdchSPMOArStLo2 = 0;
+    int pdchSPMOArStHi2 = 0;
+    int pdchSPMOArOutLo2 = 0;
+    int pdchSPMOArOutHi2 = 0;
+
+    int pdstStPtRetT = 0;
+    int pdchSPMRetType = 0;
+    int pdchSPMRetOutNd = 0;
+    int pdchSPMRetInNd = 0;
+    int pdchSPMRetPltLp = 0;
+    int pdchSPMRetMinT = 0;
+    int pdchSPMRetMaxT = 0;
+    int pdchSPMRetRetType = 0;
+    int pdchSPMRetRetT = 0;
+    int pdchSPMRetRetSch = 0;
+
+    int pdstAvlMgrSch = 0;
+    int pdchAvlMgrSchAvailNm = 0;
+    int pdchAvlMgrSchType = 0;
+    int pdchAvlMgrSchSchNm = 0;
+
+    int pdstPLtEqOpLb = 0;
+    int pdchPLtEqOpLbPltLpNm = 0;
+    int pdchPLtEqOpLbNm = 0;
+    int pdchPLtEqOpLbType = 0;
+    int pdchPLtEqOpLbSchNm = 0;
+    int pdchPLtEqOpLbIndex = 0;
+    int pdchPLtEqOpLbLow = 0;
+    int pdchPLtEqOpLbUp = 0;
+    int pdchPLtEqOpLbEqLstNm = 0;
+    int pdchPLtEqOpLbEquip = 0;
+
+    // HVAC Topology
+    int pdrTopology = 0;
+
+    int pdstTopAirLoop = 0;
+    int pdchTopAirLoopName = 0;
+    int pdchTopAirSplitName = 0;
+    int pdchTopAirBranchName = 0;
+    int pdchTopAirSupplyBranchType = 0;
+    int pdchTopAirCompType = 0;
+    int pdchTopAirCompName = 0;
+    int pdchTopAirSubCompType = 0;
+    int pdchTopAirSubCompName = 0;
+    int pdchTopAirSubSubCompType = 0;
+    int pdchTopAirSubSubCompName = 0;
+    int pdchTopAirDownSplitMixName = 0;
+    int pdchTopAirMixName = 0;
+
+    int pdstTopAirDemand = 0;
+    int pdchTopAirDemandName = 0;
+    int pdchTopAirSupplyBranchName = 0;
+    int pdchTopAirSupplyDuctType = 0;
+    int pdchTopAirSupplyPCompType = 0;
+    int pdchTopAirSupplyPCompName = 0;
+    int pdchTopAirTermUnitType = 0;
+    int pdchTopAirTermUnitName = 0;
+    int pdchTopAirZoneName = 0;
+    int pdchTopAirReturnPCompType = 0;
+    int pdchTopAirReturnPCompName = 0;
+
+    int pdstTopZnEqp = 0;
+    int pdchTopZnEqpName = 0;
+    int pdchTopZnEqpCompType = 0;
+    int pdchTopZnEqpCompName = 0;
+    int pdchTopZnEqpSubCompType = 0;
+    int pdchTopZnEqpSubCompName = 0;
+    int pdchTopZnEqpSubSubCompType = 0;
+    int pdchTopZnEqpSubSubCompName = 0;
+
+    int pdstTopPlantLoop2 = 0;
+    int pdchTopPlantLoopType2 = 0;
+    int pdchTopPlantLoopName2 = 0;
+    int pdchTopPlantSide2 = 0;
+    int pdchTopPlantSplitName2 = 0;
+    int pdchTopPlantBranchName2 = 0;
+    int pdchTopPlantCompType2 = 0;
+    int pdchTopPlantCompName2 = 0;
+    int pdchTopPlantMixName2 = 0;
 
     // Outdoor Air Report
     int pdrOutsideAir = 0;
@@ -756,6 +1153,7 @@ struct OutputReportPredefinedData : BaseGlobalStruct
     int pdchOaMvZoneArea = 0;
     int pdchOaMvDesZnOa = 0;
     int pdchOaMvMinDynTrgVent = 0;
+    int pdchOaMvZoneMult = 0;
 
     int pdstOAtotAirByZone = 0;
     int pdchOaTaBzMechVent = 0;
@@ -768,6 +1166,7 @@ struct OutputReportPredefinedData : BaseGlobalStruct
     int pdchOaTaBzTmAt = 0;
     int pdchOaTaBzTmAbove = 0;
     int pdchOaTaBzTmAboveUnocc = 0;
+    int pdchOaTaBzZoneMult = 0;
 
     int pdstOAavgOccByZone = 0;
     int pdchOaOccBzMechVent = 0;
@@ -779,6 +1178,7 @@ struct OutputReportPredefinedData : BaseGlobalStruct
     int pdchOaOccBzTmBelow = 0;
     int pdchOaOccBzTmAt = 0;
     int pdchOaOccBzTmAbove = 0;
+    int pdchOaOccBzZoneMult = 0;
 
     int pdstOAtotAirByLoop = 0;
     int pdchOaTaAlMechVent = 0;
@@ -1111,8 +1511,10 @@ struct OutputReportPredefinedData : BaseGlobalStruct
     int pdchLeedPerfOtherFuel2Dem = 0;
     int pdchLeedPerfDisClEneUse = 0;
     int pdchLeedPerfDisClDem = 0;
-    int pdchLeedPerfDisHtEneUse = 0;
-    int pdchLeedPerfDisHtDem = 0;
+    int pdchLeedPerfDisHtWtrEneUse = 0;
+    int pdchLeedPerfDisHtWtrDem = 0;
+    int pdchLeedPerfDisHtStEneUse = 0;
+    int pdchLeedPerfDisHtStDem = 0;
 
     int pdstLeedEneUseSum = 0;
     int pdchLeedEusUnt = 0;
@@ -1276,9 +1678,6 @@ struct OutputReportPredefinedData : BaseGlobalStruct
     int sizeColumnTag = 0;
     int numColumnTag = 0;
 
-    int sizeTableEntry = 0;
-    int numTableEntry = 0;
-
     int sizeCompSizeTableEntry = 0;
     int numCompSizeTableEntry = 0;
 
@@ -1312,929 +1711,21 @@ struct OutputReportPredefinedData : BaseGlobalStruct
     Array1D<OutputReportPredefined::reportNameType> reportName;
     Array1D<OutputReportPredefined::SubTableType> subTable;
     Array1D<OutputReportPredefined::ColumnTagType> columnTag;
-    Array1D<OutputReportPredefined::TableEntryType> tableEntry;
     Array1D<OutputReportPredefined::CompSizeTableEntryType> CompSizeTableEntry;
     Array1D<OutputReportPredefined::ShadowRelateType> ShadowRelate;
 
+    void init_constant_state([[maybe_unused]] EnergyPlusData &state) override
+    {
+        OutputReportPredefined::SetPredefinedTables(state);
+    }
+
+    void init_state([[maybe_unused]] EnergyPlusData &state) override
+    {
+    }
+
     void clear_state() override
     {
-        this->pdrClim = 0;
-        this->pdstDesDay = 0;
-        this->pdchDDmaxDB = 0;
-        this->pdchDDrange = 0;
-        this->pdchDDhumid = 0;
-        this->pdchDDhumTyp = 0;
-        this->pdchDDwindSp = 0;
-        this->pdchDDwindDr = 0;
-        this->pdchMonthlyTotalPrecInWeather = 0;
-        this->pdchMonthlyTotalHrRain = 0;
-        this->pdchMonthlyTotalPrecInSitePrec = 0;
-        this->pdchMonthlyTotalIrrDep = 0;
-        this->pdchMonthlyTotalRainCol = 0;
-        this->pdstWthr = 0;
-        this->pdchWthrVal = 0;
-        this->pdrEquip = 0;
-        this->pdstMech = 0;
-        this->pdchMechType = 0;
-        this->pdchMechNomCap = 0;
-        this->pdchMechNomEff = 0;
-        this->pdchMechIPLVSI = 0;
-        this->pdchMechIPLVIP = 0;
-        this->pdstFan = 0;
-        this->pdchFanType = 0;
-        this->pdchFanTotEff = 0;
-        this->pdchFanDeltaP = 0;
-        this->pdchFanVolFlow = 0;
-        this->pdchFanMotorIn = 0;
-        this->pdchFanEnergyIndex = 0;
-        this->pdchFanEndUse = 0;
-        this->pdchFanPwr = 0;
-        this->pdchFanPwrPerFlow = 0;
-        this->pdchFanDesDay = 0;
-        this->pdchFanPkTime = 0;
-        this->pdstPump = 0;
-        this->pdchPumpType = 0;
-        this->pdchPumpControl = 0;
-        this->pdchPumpHead = 0;
-        this->pdchPumpFlow = 0;
-        this->pdchPumpPower = 0;
-        this->pdchPumpPwrPerFlow = 0;
-        this->pdchPumpEndUse = 0;
-        this->pdchMotEff = 0;
-        this->pdstCoolCoil = 0;
-        this->pdchCoolCoilType = 0;
-        this->pdchCoolCoilDesCap = 0;
-        this->pdchCoolCoilTotCap = 0;
-        this->pdchCoolCoilSensCap = 0;
-        this->pdchCoolCoilLatCap = 0;
-        this->pdchCoolCoilSHR = 0;
-        this->pdchCoolCoilNomEff = 0;
-        this->pdchCoolCoilUATotal = 0;
-        this->pdchCoolCoilArea = 0;
-        this->pdstDXCoolCoil = 0;
-        this->pdchDXCoolCoilType = 0;
-        this->pdchDXCoolCoilNetCapSI = 0;
-        this->pdchDXCoolCoilCOP = 0;
-        this->pdchDXCoolCoilSEERUserIP = 0;
-        this->pdchDXCoolCoilSEERStandardIP = 0;
-        this->pdchDXCoolCoilEERIP = 0;
-        this->pdchDXCoolCoilIEERIP = 0;
-        // Start : SEER2 ANSI/AHRI 210/240 Standard 2023
-        this->pdstDXCoolCoil_2023 = 0;
-        this->pdchDXCoolCoilType_2023 = 0;
-        this->pdchDXCoolCoilNetCapSI_2023 = 0;
-        this->pdchDXCoolCoilCOP_2023 = 0;
-        this->pdchDXCoolCoilSEER2UserIP_2023 = 0;
-        this->pdchDXCoolCoilSEER2StandardIP_2023 = 0;
-        this->pdchDXCoolCoilEERIP_2023 = 0;
-        this->pdchDXCoolCoilIEERIP_2023 = 0;
-        // End
-        this->pdstDXCoolCoil2 = 0;
-        this->pdchDXCoolCoilNetCapSIA = 0;
-        this->pdchDXCoolCoilElecPowerA = 0;
-        this->pdchDXCoolCoilNetCapSIB = 0;
-        this->pdchDXCoolCoilElecPowerB = 0;
-        this->pdchDXCoolCoilNetCapSIC = 0;
-        this->pdchDXCoolCoilElecPowerC = 0;
-        this->pdchDXCoolCoilNetCapSID = 0;
-        this->pdchDXCoolCoilElecPowerD = 0;
-        this->pdstVAVDXCoolCoil = 0;
-        this->pdchVAVDXCoolCoilType = 0;
-        this->pdchVAVDXFanName = 0;
-        this->pdchVAVDXCoolCoilNetCapSI = 0;
-        this->pdchVAVDXCoolCoilCOP = 0;
-        this->pdchVAVDXCoolCoilIEERIP = 0;
-        this->pdchVAVDXCoolCoilEERIP = 0;
-        this->pdchVAVDXCoolCoilMdotA = 0;
-        this->pdchVAVDXCoolCoilCOP_B = 0;
-        this->pdchVAVDXCoolCoilEER_B_IP = 0;
-        this->pdchVAVDXCoolCoilMdotB = 0;
-        this->pdchVAVDXCoolCoilCOP_C = 0;
-        this->pdchVAVDXCoolCoilEER_C_IP = 0;
-        this->pdchVAVDXCoolCoilMdotC = 0;
-        this->pdchVAVDXCoolCoilCOP_D = 0;
-        this->pdchVAVDXCoolCoilEER_D_IP = 0;
-        this->pdchVAVDXCoolCoilMdotD = 0;
-        this->pdstHeatCoil = 0;
-        this->pdchHeatCoilType = 0;
-        this->pdchHeatCoilDesCap = 0;
-        this->pdchHeatCoilNomCap = 0;
-        this->pdchHeatCoilNomEff = 0;
-        this->pdstSWH = 0;
-        this->pdchSWHType = 0;
-        this->pdchSWHVol = 0;
-        this->pdchSWHHeatIn = 0;
-        this->pdchSWHThEff = 0;
-        this->pdchSWHRecEff = 0;
-        this->pdchSWHEnFac = 0;
-        this->pdrEnvelope = 0;
-        this->pdstOpaque = 0;
-        this->pdchOpCons = 0;
-        this->pdchOpRefl = 0;
-        this->pdchOpUfactFilm = 0;
-        this->pdchOpUfactNoFilm = 0;
-        this->pdchOpGrArea = 0;
-        this->pdchOpNetArea = 0;
-        this->pdchOpAzimuth = 0;
-        this->pdchOpTilt = 0;
-        this->pdchOpDir = 0;
-        this->pdstIntOpaque = 0;
-        this->pdchIntOpCons = 0;
-        this->pdchIntOpRefl = 0;
-        this->pdchIntOpUfactFilm = 0;
-        this->pdchIntOpUfactNoFilm = 0;
-        this->pdchIntOpGrArea = 0;
-        this->pdchIntOpNetArea = 0;
-        this->pdchIntOpAzimuth = 0;
-        this->pdchIntOpTilt = 0;
-        this->pdchIntOpDir = 0;
-        this->pdstFen = 0;
-        this->pdchFenCons = 0;
-        this->pdchFenFrameDivName = 0;
-        this->pdchFenAreaOf1 = 0;
-        this->pdchFenGlassAreaOf1 = 0;
-        this->pdchFenFrameAreaOf1 = 0;
-        this->pdchFenDividerAreaOf1 = 0;
-        this->pdchFenArea = 0;
-        this->pdchFenUfact = 0;
-        this->pdchFenSHGC = 0;
-        this->pdchFenVisTr = 0;
-        this->pdchFenAssemNfrcType = 0;
-        this->pdchFenAssemUfact = 0;
-        this->pdchFenAssemSHGC = 0;
-        this->pdchFenAssemVisTr = 0;
-        this->pdchFenFrameConductance = 0;
-        this->pdchFenDividerConductance = 0;
-        this->pdchFenSwitchable = 0;
-        this->pdchFenParent = 0;
-        this->pdchFenAzimuth = 0;
-        this->pdchFenTilt = 0;
-        this->pdchFenDir = 0;
-        this->pdstFenShd = 0;
-        this->pdchFenShdFrameDiv = 0;
-        this->pdchFenShdUfact = 0;
-        this->pdchFenShdSHGC = 0;
-        this->pdchFenShdVisTr = 0;
-        this->pdchFenShdAssemNfrcType = 0;
-        this->pdchFenShdAssemUfact = 0;
-        this->pdchFenShdAssemSHGC = 0;
-        this->pdchFenShdAssemVisTr = 0;
-        this->pdstDoor = 0;
-        this->pdchDrCons = 0;
-        this->pdchDrUfactFilm = 0;
-        this->pdchDrUfactNoFilm = 0;
-        this->pdchDrGrArea = 0;
-        this->pdchDrParent = 0;
-        this->pdstIntDoor = 0;
-        this->pdchIntDrCons = 0;
-        this->pdchIntDrUfactFilm = 0;
-        this->pdchIntDrUfactNoFilm = 0;
-        this->pdchIntDrGrArea = 0;
-        this->pdchIntDrParent = 0;
-        this->pdstIntFen = 0;
-        this->pdchIntFenCons = 0;
-        this->pdchIntFenAreaOf1 = 0;
-        this->pdchIntFenArea = 0;
-        this->pdchIntFenUfact = 0;
-        this->pdchIntFenSHGC = 0;
-        this->pdchIntFenVisTr = 0;
-        this->pdchIntFenParent = 0;
-        this->pdrShading = 0;
-        this->pdstSunlitFrac = 0;
-        this->pdchSlfMar21_9 = 0;
-        this->pdchSlfMar21_12 = 0;
-        this->pdchSlfMar21_15 = 0;
-        this->pdchSlfJun21_9 = 0;
-        this->pdchSlfJun21_12 = 0;
-        this->pdchSlfJun21_15 = 0;
-        this->pdchSlfDec21_9 = 0;
-        this->pdchSlfDec21_12 = 0;
-        this->pdchSlfDec21_15 = 0;
-        this->pdstWindowControl = 0;
-        this->pdchWscName = 0;
-        this->pdchWscShading = 0;
-        this->pdchWscShadCons = 0;
-        this->pdchWscControl = 0;
-        this->pdchWscGlare = 0;
-        this->pdrLighting = 0;
-        this->pdstInLite = 0;
-        this->pdchInLtZone = 0;
-        this->pdchInLtSpace = 0;
-        this->pdchInLtSpaceType = 0;
-        this->pdchInLtDens = 0;
-        this->pdchInLtArea = 0;
-        this->pdchInLtPower = 0;
-        this->pdchInLtEndUse = 0;
-        this->pdchInLtSchd = 0;
-        this->pdchInLtAvgHrSchd = 0;
-        this->pdchInLtAvgHrOper = 0;
-        this->pdchInLtFullLoadHrs = 0;
-        this->pdchInLtRetAir = 0;
-        this->pdchInLtCond = 0;
-        this->pdchInLtConsump = 0;
-        this->pdstExtLite = 0;
-        this->pdchExLtPower = 0;
-        this->pdchExLtClock = 0;
-        this->pdchExLtSchd = 0;
-        this->pdchExLtAvgHrSchd = 0;
-        this->pdchExLtAvgHrOper = 0;
-        this->pdchExLtFullLoadHrs = 0;
-        this->pdchExLtConsump = 0;
-        this->pdstDaylight = 0;
-        this->pdchDyLtZone = 0;
-        this->pdchDyLtCtrlName = 0;
-        this->pdchDyLtKind = 0;
-        this->pdchDyLtCtrlType = 0;
-        this->pdchDyLtFrac = 0;
-        this->pdchDyLtWInst = 0;
-        this->pdchDyLtWCtrl = 0;
-        this->pdrSizing = 0;
-        this->pdstZoneClSize = 0;
-        this->pdchZnClCalcDesLd = 0;
-        this->pdchZnClUserDesLd = 0;
-        this->pdchZnClUserDesLdPerArea = 0;
-        this->pdchZnClCalcDesAirFlow = 0;
-        this->pdchZnClUserDesAirFlow = 0;
-        this->pdchZnClDesDay = 0;
-        this->pdchZnClPkTime = 0;
-        this->pdchZnClPkTstatTemp = 0;
-        this->pdchZnClPkIndTemp = 0;
-        this->pdchZnClPkIndHum = 0;
-        this->pdchZnClPkOATemp = 0;
-        this->pdchZnClPkOAHum = 0;
-        this->pdchZnClPkOAMinFlow = 0;
-        this->pdchZnClPkDOASHeatGain = 0;
-        this->pdstZoneHtSize = 0;
-        this->pdchZnHtCalcDesLd = 0;
-        this->pdchZnHtUserDesLd = 0;
-        this->pdchZnHtUserDesLdPerArea = 0;
-        this->pdchZnHtCalcDesAirFlow = 0;
-        this->pdchZnHtUserDesAirFlow = 0;
-        this->pdchZnHtDesDay = 0;
-        this->pdchZnHtPkTime = 0;
-        this->pdchZnHtPkTstatTemp = 0;
-        this->pdchZnHtPkIndTemp = 0;
-        this->pdchZnHtPkIndHum = 0;
-        this->pdchZnHtPkOATemp = 0;
-        this->pdchZnHtPkOAHum = 0;
-        this->pdchZnHtPkOAMinFlow = 0;
-        this->pdchZnHtPkDOASHeatGain = 0;
-        this->pdstSystemSize = 0;
-        this->pdchSysSizCalcClAir = 0;
-        this->pdchSysSizUserClAir = 0;
-        this->pdchSysSizCalcHtAir = 0;
-        this->pdchSysSizUserHtAir = 0;
-        this->pdchSysSizAdjustedClAir = 0;
-        this->pdchSysSizAdjustedHtAir = 0;
-        this->pdchSysSizAdjustedMainAir = 0;
-        this->pdchSysSizCalcHeatFlowRatio = 0;
-        this->pdchSysSizUserHeatFlowRatio = 0;
-        this->pdstPlantSize = 0;
-        this->pdchPlantSizCalcVdot = 0;
-        this->pdchPlantSizMeasVdot = 0;
-        this->pdchPlantSizPrevVdot = 0;
-        this->pdchPlantSizCoincYesNo = 0;
-        this->pdchPlantSizDesDay = 0;
-        this->pdchPlantSizPkTimeHour = 0;
-        this->pdchPlantSizPkTimeDayOfSim = 0;
-        this->pdchPlantSizPkTimeMin = 0;
-        this->pdrCoilSizingDetailsTable = 0;
-        this->pdstCoilSummaryCoilSelection = 0;
-        this->pdchCoilLocation = 0;
-        this->pdchCoilHVACType = 0;
-        this->pdchCoilHVACName = 0;
-        this->pdchCoilZoneName = 0;
-        this->pdchCoilName = 0;
-        this->pdchCoilType = 0;
-        this->pdchSysSizingMethCoinc = 0;
-        this->pdchSysSizingMethCap = 0;
-        this->pdchSysSizingMethAir = 0;
-        this->pdchCoilIsCapAutosized = 0;
-        this->pdchCoilIsAirFlowAutosized = 0;
-        this->pdchCoilIsWaterFlowAutosized = 0;
-        this->pdchCoilIsOATreated = 0;
-        this->pdchCoilFinalTotalCap = 0;
-        this->pdchCoilFinalSensCap = 0;
-        this->pdchCoilFinalAirVolFlowRate = 0;
-        this->pdchCoilFinalPlantVolFlowRate = 0;
-        this->pdchCoilDDnameSensIdealPeak = 0;
-        this->pdchCoilDateTimeSensIdealPeak = 0;
-        this->pdchCoilDDnameTotIdealPeak = 0;
-        this->pdchCoilDateTimeTotIdealPeak = 0;
-        this->pdchCoilDDnameAirFlowIdealPeak = 0;
-        this->pdchCoilDateTimeAirFlowIdealPeak = 0;
-        this->pdchCoilPeakLoadTypeToSizeOn = 0;
-        this->pdchCoilTotalCapIdealPeak = 0;
-        this->pdchCoilSensCapIdealPeak = 0;
-        this->pdchCoilAirMassFlowIdealPeak = 0;
-        this->pdchCoilAirVolumeFlowIdealPeak = 0;
-        this->pdchCoilEntDryBulbIdealPeak = 0;
-        this->pdchCoilEntWetBulbIdealPeak = 0;
-        this->pdchCoilEntHumRatIdealPeak = 0;
-        this->pdchCoilEntEnthalpyIdealPeak = 0;
-        this->pdchCoilLvgDryBulbIdealPeak = 0;
-        this->pdchCoilLvgWetBulbIdealPeak = 0;
-        this->pdchCoilLvgHumRatIdealPeak = 0;
-        this->pdchCoilLvgEnthalpyIdealPeak = 0;
-        this->pdchCoilWaterMassFlowIdealPeak = 0;
-        this->pdchCoilEntWaterTempIdealPeak = 0;
-        this->pdchCoilLvgWaterTempIdealPeak = 0;
-        this->pdchCoilWaterDeltaTempIdealPeak = 0;
-        this->pdchCoilRatedTotalCap = 0;
-        this->pdchCoilRatedSensCap = 0;
-        this->pdchCoilOffRatingCapacityModifierIdealPeak = 0;
-        this->pdchCoilOffRatingCapacityModifierSimPeak = 0;
-        this->pdchCoilRatedAirMass = 0;
-        this->pdchCoilRatedEntDryBulb = 0;
-        this->pdchCoilRatedEntWetBulb = 0;
-        this->pdchCoilRatedEntHumRat = 0;
-        this->pdchCoilRatedEntEnthalpy = 0;
-        this->pdchCoilRatedLvgDryBulb = 0;
-        this->pdchCoilRatedLvgWetBulb = 0;
-        this->pdchCoilRatedLvgHumRat = 0;
-        this->pdchCoilRatedLvgEnthalpy = 0;
-        this->pdchCoilRatedWaterMass = 0;
-        this->pdchCoilRatedEntWaterTemp = 0;
-        this->pdchCoilRatedLvgWaterTemp = 0;
-        this->pdchCoilRatedWaterDeltaTemp = 0;
-        this->pdchFanAssociatedWithCoilName = 0;
-        this->pdchFanAssociatedWithCoilType = 0;
-        this->pdchFanAssociatedVdotSize = 0;
-        this->pdchFanAssociatedMdotSize = 0;
-        this->pdchFanHeatGainIdealPeak = 0;
-        this->pdchCoilNetTotalCapacityIdealPeak = 0;
-        this->pdchCoilPlantLoopName = 0;
-        this->pdchPlantMassFlowMaximum = 0;
-        this->pdchPlantRetTempDesign = 0;
-        this->pdchPlantSupTempDesign = 0;
-        this->pdchPlantDeltaTempDesign = 0;
-        this->pdchPlantCapacity = 0;
-        this->pdchCoilCapPrcntPlantCapacity = 0;
-        this->pdchCoilFlowPrcntPlantFlow = 0;
-        this->pdchOADryBulbIdealPeak = 0;
-        this->pdchOAHumRatIdealPeak = 0;
-        this->pdchOAWetBulbatIdealPeak = 0;
-        this->pdchOAVolFlowIdealPeak = 0;
-        this->pdchOAFlowPrcntIdealPeak = 0;
-        this->pdchOABarometricPressureIdealPeak = 0;
-        this->pdchAirSysRADryBulbIdealPeak = 0;
-        this->pdchAirSysRAHumRatIdealPeak = 0;
-        this->pdchZoneAirDryBulbIdealPeak = 0;
-        this->pdchZoneAirHumRatIdealPeak = 0;
-        this->pdchZoneAirRelHumIdealPeak = 0;
-        this->pdchCoilUA = 0;
-        this->pdchZoneSensibleLoadIdealPeak = 0;
-        this->pdchZoneLatentLoadIdealPeak = 0;
-        this->pdchCoilIdealSizCapOverSimPeak = 0;
-        this->pdchCoilIdealSizCapUnderSimPeak = 0;
-        this->pdchReheatCoilMultiplier = 0;
-        this->pdchFlowCapRatioLowCapIncreaseRatio = 0;
-        this->pdchFlowCapRatioHiCapDecreaseRatio = 0;
-        this->pdchPlantFluidSpecificHeat = 0;
-        this->pdchPlantFluidDensity = 0;
-        this->pdchMoistAirSpecificHeat = 0;
-        this->pdchDryAirSpecificHeat = 0;
-        this->pdchStandRhoAir = 0;
-        this->pdst2CoilSummaryCoilSelection = 0;
-        this->pdch2CoilName = 0;
-        this->pdch2CoilType = 0;
-        this->pdch2CoilHVACType = 0;
-        this->pdch2CoilHVACName = 0;
-        this->pdch2CoilFinalTotalCap = 0;
-        this->pdch2CoilFinalSensCap = 0;
-        this->pdch2CoilFinalAirVolFlowRate = 0;
-        this->pdch2CoilFinalPlantVolFlowRate = 0;
-        this->pdch2CoilUA = 0;
-        this->pdch2CoilDDnameSensIdealPeak = 0;
-        this->pdch2CoilDateTimeSensIdealPeak = 0;
-        this->pdch2CoilDDnameAirFlowIdealPeak = 0;
-        this->pdch2CoilDateTimeAirFlowIdealPeak = 0;
-        this->pdch2CoilTotalCapIdealPeak = 0;
-        this->pdch2CoilSensCapIdealPeak = 0;
-        this->pdch2CoilAirVolumeFlowIdealPeak = 0;
-        this->pdch2CoilEntDryBulbIdealPeak = 0;
-        this->pdch2CoilEntWetBulbIdealPeak = 0;
-        this->pdch2CoilEntHumRatIdealPeak = 0;
-        this->pdch2CoilLvgDryBulbIdealPeak = 0;
-        this->pdch2CoilLvgWetBulbIdealPeak = 0;
-        this->pdch2CoilLvgHumRatIdealPeak = 0;
-        this->pdch2CoilRatedTotalCap = 0;
-        this->pdch2CoilRatedSensCap = 0;
-        this->pdch2OADryBulbIdealPeak = 0;
-        this->pdch2OAHumRatIdealPeak = 0;
-        this->pdch2OAWetBulbatIdealPeak = 0;
-        this->pdch2OAFlowPrcntIdealPeak = 0;
-        this->pdch2ZoneAirDryBulbIdealPeak = 0;
-        this->pdch2ZoneAirHumRatIdealPeak = 0;
-        this->pdch2ZoneAirRelHumIdealPeak = 0;
-        this->pdch2ZoneSensibleLoadIdealPeak = 0;
-        this->pdch2ZoneLatentLoadIdealPeak = 0;
-        this->pdrSystem = 0;
-        this->pdstEconomizer = 0;
-        this->pdchEcoKind = 0;
-        this->pdchEcoMinOA = 0;
-        this->pdchEcoMaxOA = 0;
-        this->pdchEcoRetTemp = 0;
-        this->pdchEcoRetEnth = 0;
-        this->pdchEcoOATempLim = 0;
-        this->pdchEcoOAEnthLim = 0;
-        this->pdstDemCntlVent = 0;
-        this->pdchDCVventMechName = 0;
-        this->pdchDCVperPerson = 0;
-        this->pdchDCVperArea = 0;
-        this->pdchDCVperZone = 0;
-        this->pdchDCVperACH = 0;
-        this->pdchDCVMethod = 0;
-        this->pdchDCVOASchName = 0;
-        this->pdchDCVZoneADEffCooling = 0;
-        this->pdchDCVZoneADEffHeating = 0;
-        this->pdchDCVZoneADEffSchName = 0;
-        this->pdstSimpleComfort = 0;
-        this->pdchSCwinterClothes = 0;
-        this->pdchSCsummerClothes = 0;
-        this->pdchSCeitherClothes = 0;
-        this->pdstUnmetLoads = 0;
-        this->pdchULnotMetHeat = 0;
-        this->pdchULnotMetCool = 0;
-        this->pdchULnotMetHeatOcc = 0;
-        this->pdchULnotMetCoolOcc = 0;
-
-        this->pdrOutsideAir = 0;
-        this->pdstOAavgOcc = 0;
-        this->pdchOaoAvgNumOcc1 = 0;
-        this->pdchOaoNomNumOcc1 = 0;
-        this->pdchOaoZoneVol1 = 0;
-        this->pdchOaoAvgMechVent = 0;
-        this->pdchOaoAvgInfil = 0;
-        this->pdchOaoAvgAFNInfil = 0;
-        this->pdchOaoAvgSimpVent = 0;
-        this->pdchOaoAvgTotVent = 0;
-        this->pdstOAminOcc = 0;
-        this->pdchOaoAvgNumOcc2 = 0;
-        this->pdchOaoNomNumOcc2 = 0;
-        this->pdchOaoZoneVol2 = 0;
-        this->pdchOaoMinMechVent = 0;
-        this->pdchOaoMinInfil = 0;
-        this->pdchOaoMinAFNInfil = 0;
-        this->pdchOaoMinSimpVent = 0;
-        this->pdchOaoMinTotVent = 0;
-
-        this->pdrOutsideAirDetails = 0;
-        this->pdstOAmechVentParByZone = 0;
-        this->pdchOaMvAirLpNm = 0;
-        this->pdchOaMvAvgNumOcc = 0;
-        this->pdchOaMvNomNumOcc = 0;
-        this->pdchOaMvZoneVol = 0;
-        this->pdchOaMvZoneArea = 0;
-        this->pdchOaMvDesZnOa = 0;
-        this->pdchOaMvMinDynTrgVent = 0;
-
-        this->pdstOAtotAirByZone = 0;
-        this->pdchOaTaBzMechVent = 0;
-        this->pdchOaTaBzNatVent = 0;
-        this->pdchOaTaBzTotVent = 0;
-        this->pdchOaTaBzInfil = 0;
-        this->pdchOaTaBzTotVentInfil = 0;
-        this->pdchOaTaBzDynTrgVent = 0;
-        this->pdchOaTaBzTmBelow = 0;
-        this->pdchOaTaBzTmAt = 0;
-        this->pdchOaTaBzTmAbove = 0;
-        this->pdchOaTaBzTmAboveUnocc = 0;
-
-        this->pdstOAavgOccByZone = 0;
-        this->pdchOaOccBzMechVent = 0;
-        this->pdchOaOccBzNatVent = 0;
-        this->pdchOaOccBzTotVent = 0;
-        this->pdchOaOccBzInfil = 0;
-        this->pdchOaOccBzTotVentInfil = 0;
-        this->pdchOaOccBzDynTrgVent = 0;
-        this->pdchOaOccBzTmBelow = 0;
-        this->pdchOaOccBzTmAt = 0;
-        this->pdchOaOccBzTmAbove = 0;
-
-        this->pdstOAtotAirByLoop = 0;
-        this->pdchOaTaAlMechVent = 0;
-        this->pdchOaTaAlNatVent = 0;
-        this->pdchOaTaAlTotVent = 0;
-        this->pdchOaTaAlSumDynTrgVent = 0;
-        this->pdchOaTaAlTmBelow = 0;
-        this->pdchOaTaAlTmAt = 0;
-        this->pdchOaTaAlTmAbove = 0;
-        this->pdchOaTaAlTmAboveUnocc = 0;
-
-        this->pdstOAavgOccByLoop = 0;
-        this->pdchOaOccAlMechVent = 0;
-        this->pdchOaOccAlNatVent = 0;
-        this->pdchOaOccAlTotVent = 0;
-        this->pdchOaOccAlSumDynTrgVent = 0;
-        this->pdchOaOccAlTmBelow = 0;
-        this->pdchOaOccAlTmAt = 0;
-        this->pdchOaOccAlTmAbove = 0;
-
-        this->pdstOAtimeFactorsDurOcc = 0;
-        this->pdchOaTmFctNoLimit = 0;
-        this->pdchOaTmFctHiHumid = 0;
-        this->pdchOaTmFctNiteVent = 0;
-        this->pdchOaTmFctEcono = 0;
-        this->pdchOaTmFctDCV = 0;
-        this->pdchOaTmFctExhaust = 0;
-        this->pdchOaTmFctLimit = 0;
-        this->pdchOaTmFctDemand = 0;
-        this->pdchOaTmFctEMS = 0;
-
-        this->pdstOAavgFactorsDurOcc = 0;
-        this->pdchOaAvFctNoLimit = 0;
-        this->pdchOaAvFctHiHumid = 0;
-        this->pdchOaAvFctNiteVent = 0;
-        this->pdchOaAvFctEcono = 0;
-        this->pdchOaAvFctDCV = 0;
-        this->pdchOaAvFctExhaust = 0;
-        this->pdchOaAvFctLimit = 0;
-        this->pdchOaAvFctDemand = 0;
-        this->pdchOaAvFctEMS = 0;
-
-        this->pdrObjCnt = 0;
-        this->pdstSurfCnt = 0;
-        this->pdchSurfCntTot = 0;
-        this->pdchSurfCntExt = 0;
-        this->pdstHVACcnt = 0;
-        this->pdchHVACcntVal = 0;
-        this->pdstFieldCnt = 0;
-        this->pdchFieldCntVal = 0;
-        this->pdrEnergyMeters = 0;
-        this->pdstEMelecvalues = 0;
-        this->pdchEMelecannual = 0;
-        this->pdchEMelecminvalue = 0;
-        this->pdchEMelecminvaluetime = 0;
-        this->pdchEMelecmaxvalue = 0;
-        this->pdchEMelecmaxvaluetime = 0;
-        this->pdstEMgasvalues = 0;
-        this->pdchEMgasannual = 0;
-        this->pdchEMgasminvalue = 0;
-        this->pdchEMgasminvaluetime = 0;
-        this->pdchEMgasmaxvalue = 0;
-        this->pdchEMgasmaxvaluetime = 0;
-        this->pdstEMcoolvalues = 0;
-        this->pdchEMcoolannual = 0;
-        this->pdchEMcoolminvalue = 0;
-        this->pdchEMcoolminvaluetime = 0;
-        this->pdchEMcoolmaxvalue = 0;
-        this->pdchEMcoolmaxvaluetime = 0;
-        this->pdstEMwatervalues = 0;
-        this->pdchEMwaterannual = 0;
-        this->pdchEMwaterminvalue = 0;
-        this->pdchEMwaterminvaluetime = 0;
-        this->pdchEMwatermaxvalue = 0;
-        this->pdchEMwatermaxvaluetime = 0;
-        this->pdstEMotherJvalues = 0;
-        this->pdchEMotherJannual = 0;
-        this->pdchEMotherJminvalue = 0;
-        this->pdchEMotherJminvaluetime = 0;
-        this->pdchEMotherJmaxvalue = 0;
-        this->pdchEMotherJmaxvaluetime = 0;
-        this->pdstEMotherKGvalues = 0;
-        this->pdchEMotherKGannual = 0;
-        this->pdchEMotherKGminvalue = 0;
-        this->pdchEMotherKGminvaluetime = 0;
-        this->pdchEMotherKGmaxvalue = 0;
-        this->pdchEMotherKGmaxvaluetime = 0;
-        this->pdstEMotherM3values = 0;
-        this->pdchEMotherM3annual = 0;
-        this->pdchEMotherM3minvalue = 0;
-        this->pdchEMotherM3minvaluetime = 0;
-        this->pdchEMotherM3maxvalue = 0;
-        this->pdchEMotherM3maxvaluetime = 0;
-        this->pdstEMotherLvalues = 0;
-        this->pdchEMotherLannual = 0;
-        this->pdchEMotherLminvalue = 0;
-        this->pdchEMotherLminvaluetime = 0;
-        this->pdchEMotherLmaxvalue = 0;
-        this->pdchEMotherLmaxvaluetime = 0;
-        this->pdrSensibleGain = 0;
-        this->pdstSHGSannual = 0;
-        this->pdchSHGSAnZoneEqHt = 0;
-        this->pdchSHGSAnZoneEqCl = 0;
-        this->pdchSHGSAnHvacATUHt = 0;
-        this->pdchSHGSAnHvacATUCl = 0;
-        this->pdchSHGSAnSurfHt = 0;
-        this->pdchSHGSAnSurfCl = 0;
-        this->pdchSHGSAnPeoplAdd = 0;
-        this->pdchSHGSAnLiteAdd = 0;
-        this->pdchSHGSAnEquipAdd = 0;
-        this->pdchSHGSAnWindAdd = 0;
-        this->pdchSHGSAnIzaAdd = 0;
-        this->pdchSHGSAnInfilAdd = 0;
-        this->pdchSHGSAnOtherAdd = 0;
-        this->pdchSHGSAnEquipRem = 0;
-        this->pdchSHGSAnWindRem = 0;
-        this->pdchSHGSAnIzaRem = 0;
-        this->pdchSHGSAnInfilRem = 0;
-        this->pdchSHGSAnOtherRem = 0;
-        this->pdstSHGSpkCl = 0;
-        this->pdchSHGSClTimePeak = 0;
-        this->pdchSHGSClHvacHt = 0;
-        this->pdchSHGSClHvacCl = 0;
-        this->pdchSHGSClHvacATUHt = 0;
-        this->pdchSHGSClHvacATUCl = 0;
-        this->pdchSHGSClSurfHt = 0;
-        this->pdchSHGSClSurfCl = 0;
-        this->pdchSHGSClPeoplAdd = 0;
-        this->pdchSHGSClLiteAdd = 0;
-        this->pdchSHGSClEquipAdd = 0;
-        this->pdchSHGSClWindAdd = 0;
-        this->pdchSHGSClIzaAdd = 0;
-        this->pdchSHGSClInfilAdd = 0;
-        this->pdchSHGSClOtherAdd = 0;
-        this->pdchSHGSClEquipRem = 0;
-        this->pdchSHGSClWindRem = 0;
-        this->pdchSHGSClIzaRem = 0;
-        this->pdchSHGSClInfilRem = 0;
-        this->pdchSHGSClOtherRem = 0;
-        this->pdstSHGSpkHt = 0;
-        this->pdchSHGSHtTimePeak = 0;
-        this->pdchSHGSHtHvacHt = 0;
-        this->pdchSHGSHtHvacCl = 0;
-        this->pdchSHGSHtHvacATUHt = 0;
-        this->pdchSHGSHtHvacATUCl = 0;
-        this->pdchSHGSHtSurfHt = 0;
-        this->pdchSHGSHtSurfCl = 0;
-        this->pdchSHGSHtPeoplAdd = 0;
-        this->pdchSHGSHtLiteAdd = 0;
-        this->pdchSHGSHtEquipAdd = 0;
-        this->pdchSHGSHtWindAdd = 0;
-        this->pdchSHGSHtIzaAdd = 0;
-        this->pdchSHGSHtInfilAdd = 0;
-        this->pdchSHGSHtOtherAdd = 0;
-        this->pdchSHGSHtEquipRem = 0;
-        this->pdchSHGSHtWindRem = 0;
-        this->pdchSHGSHtIzaRem = 0;
-        this->pdchSHGSHtInfilRem = 0;
-        this->pdchSHGSHtOtherRem = 0;
-        this->pdrStd62 = 0;
-        this->pdstS62sysVentReqCool = 0;
-        this->pdchS62svrClSumVpz = 0;
-        this->pdchS62svrClPs = 0;
-        this->pdchS62svrClSumPz = 0;
-        this->pdchS62svrClD = 0;
-        this->pdchS62svrClDorg = 0;
-        this->pdchS62svrClVou = 0;
-        this->pdchS62svrClVps = 0;
-        this->pdchS62svrClXs = 0;
-        this->pdchS62svrClEv = 0;
-        this->pdchS62svrClVot = 0;
-        this->pdchS62svrClPercOA = 0;
-        this->pdchS62svrClEnvironmentOfPs = 0;
-        this->pdchS62svrClTimeOfPs = 0;
-        this->pdstS62sysVentReqHeat = 0;
-        this->pdchS62svrHtSumVpz = 0;
-        this->pdchS62svrHtPs = 0;
-        this->pdchS62svrHtSumPz = 0;
-        this->pdchS62svrHtD = 0;
-        this->pdchS62svrHtDorg = 0;
-        this->pdchS62svrHtVou = 0;
-        this->pdchS62svrHtVps = 0;
-        this->pdchS62svrHtXs = 0;
-        this->pdchS62svrHtEv = 0;
-        this->pdchS62svrHtVot = 0;
-        this->pdchS62svrHtPercOA = 0;
-        this->pdchS62svrHtEnvironmentOfPs = 0;
-        this->pdchS62svrHtTimeOfPs = 0;
-        this->pdstS62znVentPar = 0;
-        this->pdchS62zvpAlN = 0;
-        this->pdchS62zvpRp = 0;
-        this->pdchS62zvpPz = 0;
-        this->pdchS62zvpRa = 0;
-        this->pdchS62zvpAz = 0;
-        this->pdchS62zvpVbz = 0;
-        this->pdchS62zvpClEz = 0;
-        this->pdchS62zvpClVoz = 0;
-        this->pdchS62zvpHtEz = 0;
-        this->pdchS62zvpHtVoz = 0;
-        this->pdstS62sysVentPar = 0;
-        this->pdchS62svpRp = 0;
-        this->pdchS62svpPz = 0;
-        this->pdchS62svpRa = 0;
-        this->pdchS62svpAz = 0;
-        this->pdchS62svpVbz = 0;
-        this->pdchS62svpClVoz = 0;
-        this->pdchS62svpHtVoz = 0;
-        this->pdstS62znCoolDes = 0;
-        this->pdchS62zcdAlN = 0;
-        this->pdchS62zcdBox = 0;
-        this->pdchS62zcdVpz = 0;
-        this->pdchS62zcdVps = 0;
-        this->pdchS62zcdVsec = 0;
-        this->pdchS62zcdVdz = 0;
-        this->pdchS62zcdVpzmin = 0;
-        this->pdchS62zcdVpzminSPSize = 0;
-        this->pdchS62zcdVozclg = 0;
-        this->pdchS62zcdZpz = 0;
-        this->pdchS62zcdEp = 0;
-        this->pdchS62zcdEr = 0;
-        this->pdchS62zcdFa = 0;
-        this->pdchS62zcdFb = 0;
-        this->pdchS62zcdFc = 0;
-        this->pdchS62zcdEvz = 0;
-        this->pdstS62sysCoolDes = 0;
-        this->pdchS62scdVpz = 0;
-        this->pdchS62scdVps = 0;
-        this->pdchS62scdVsec = 0;
-        this->pdchS62scdVdz = 0;
-        this->pdchS62scdVpzmin = 0;
-        this->pdchS62scdVozclg = 0;
-        this->pdchS62scdEvz = 0;
-        this->pdstS62znHeatDes = 0;
-        this->pdchS62zhdAlN = 0;
-        this->pdchS62zhdBox = 0;
-        this->pdchS62zhdVpz = 0;
-        this->pdchS62zhdVps = 0;
-        this->pdchS62zhdVsec = 0;
-        this->pdchS62zhdVdz = 0;
-        this->pdchS62zhdVpzmin = 0;
-        this->pdchS62zhdVpzminSPSize = 0;
-        this->pdchS62zhdVozhtg = 0;
-        this->pdchS62zhdZpz = 0;
-        this->pdchS62zhdEp = 0;
-        this->pdchS62zhdEr = 0;
-        this->pdchS62zhdFa = 0;
-        this->pdchS62zhdFb = 0;
-        this->pdchS62zhdFc = 0;
-        this->pdchS62zhdEvz = 0;
-        this->pdstS62sysHeatDes = 0;
-        this->pdchS62shdVpz = 0;
-        this->pdchS62shdVps = 0;
-        this->pdchS62shdVsec = 0;
-        this->pdchS62shdVdz = 0;
-        this->pdchS62shdVpzmin = 0;
-        this->pdchS62shdVozhtg = 0;
-        this->pdchS62shdEvz = 0;
-        this->pdrLeed = 0;
-        this->pdstLeedGenInfo = 0;
-        this->pdchLeedGenData = 0;
-        this->pdstLeedSpaceUsageType = 0;
-        this->pdchLeedSutName = 0;
-        this->pdchLeedSutSpArea = 0;
-        this->pdchLeedSutOcArea = 0;
-        this->pdchLeedSutUnArea = 0;
-        this->pdchLeedSutHrsWeek = 0;
-        this->pdstLeedAdvsMsg = 0;
-        this->pdchLeedAmData = 0;
-        this->pdstLeedEneTypSum = 0;
-        this->pdchLeedEtsType = 0;
-        this->pdchLeedEtsRtNm = 0;
-        this->pdchLeedEtsVirt = 0;
-        this->pdchLeedEtsEneUnt = 0;
-        this->pdchLeedEtsDemUnt = 0;
-        this->pdstLeedPerf = 0;
-        this->pdchLeedPerfRot = 0;
-        this->pdchLeedPerfElEneUse = 0;
-        this->pdchLeedPerfElDem = 0;
-        this->pdchLeedPerfGasEneUse = 0;
-        this->pdchLeedPerfGasDem = 0;
-        this->pdchLeedPerfGasolineEneUse = 0;
-        this->pdchLeedPerfGasolineDem = 0;
-        this->pdchLeedPerfDieselEneUse = 0;
-        this->pdchLeedPerfDieselDem = 0;
-        this->pdchLeedPerfCoalEneUse = 0;
-        this->pdchLeedPerfCoalDem = 0;
-        this->pdchLeedPerfFuelOil1EneUse = 0;
-        this->pdchLeedPerfFuelOil1Dem = 0;
-        this->pdchLeedPerfFuelOil2EneUse = 0;
-        this->pdchLeedPerfFuelOil2Dem = 0;
-        this->pdchLeedPerfPropaneEneUse = 0;
-        this->pdchLeedPerfPropaneDem = 0;
-        this->pdchLeedPerfOtherFuel1EneUse = 0;
-        this->pdchLeedPerfOtherFuel1Dem = 0;
-        this->pdchLeedPerfOtherFuel2EneUse = 0;
-        this->pdchLeedPerfOtherFuel2Dem = 0;
-        this->pdchLeedPerfDisClEneUse = 0;
-        this->pdchLeedPerfDisClDem = 0;
-        this->pdchLeedPerfDisHtEneUse = 0;
-        this->pdchLeedPerfDisHtDem = 0;
-        this->pdstLeedEneUseSum = 0;
-        this->pdchLeedEusUnt = 0;
-        this->pdchLeedEusProc = 0;
-        this->pdchLeedEusTotal = 0;
-        this->pdstLeedEneCostSum = 0;
-        this->pdchLeedEcUnt = 0;
-        this->pdchLeedEcsProc = 0;
-        this->pdchLeedEcsTotal = 0;
-        this->LEEDelecCostTotal = 0;
-        this->LEEDgasCostTotal = 0;
-        this->LEEDothrCostTotal = 0;
-        this->pdstLeedRenewSum = 0;
-        this->pdchLeedRenRatCap = 0;
-        this->pdchLeedRenAnGen = 0;
-        this->pdstLeedEneUseIntEl = 0;
-        this->pdchLeedEuiElec = 0;
-        this->pdstLeedEneUseIntNatG = 0;
-        this->pdchLeedEuiNatG = 0;
-        this->pdstLeedEneUseIntOthr = 0;
-        this->pdchLeedEuiOthr = 0;
-        this->pdstLeedEneUsePerc = 0;
-        this->pdchLeedEupPerc = 0;
-        this->pdstLeedEqFlLdHrs = 0;
-        this->pdchLeedEflhEflh = 0;
-        this->pdchLeedEflhNonZerHrs = 0;
-        this->pdstLeedSchedSetPts = 0;
-        this->pdChLeedSchStPtFirstObjUsed = 0;
-        this->pdChLeedSchStPtMonthUsed = 0;
-        this->pdchLeedSchStPt11amWednesday = 0;
-        this->pdchLeedSchStPt11amWedCnt = 0;
-        this->pdchLeedSchStPt11pmWednesday = 0;
-        this->pdchLeedSchStPt11pmWedCnt = 0;
-        this->pdrThermalResilience = 0;
-        this->pdstHIHours = 0;
-        this->pdchHIHourSafe = 0;
-        this->pdchHIHourCaution = 0;
-        this->pdchHIHourExtremeCaution = 0;
-        this->pdchHIHourDanger = 0;
-        this->pdchHIHourExtremeDanger = 0;
-        this->pdstHIOccuHours = 0;
-        this->pdchHIOccuHourSafe = 0;
-        this->pdchHIOccuHourCaution = 0;
-        this->pdchHIOccuHourExtremeCaution = 0;
-        this->pdchHIOccuHourDanger = 0;
-        this->pdchHIOccuHourExtremeDanger = 0;
-        this->pdstHumidexHours = 0;
-        this->pdchHumidexHourLittle = 0;
-        this->pdchHumidexHourSome = 0;
-        this->pdchHumidexHourGreat = 0;
-        this->pdchHumidexHourDanger = 0;
-        this->pdchHumidexHourStroke = 0;
-        this->pdstHumidexOccuHours = 0;
-        this->pdchHumidexOccuHourLittle = 0;
-        this->pdchHumidexOccuHourSome = 0;
-        this->pdchHumidexOccuHourGreat = 0;
-        this->pdchHumidexOccuHourDanger = 0;
-        this->pdchHumidexOccuHourStroke = 0;
-        this->pdstHeatingSETHours = 0;
-        this->pdchHeatingSETHours = 0;
-        this->pdchHeatingSETOccuHours = 0;
-        this->pdchHeatingSETUnmetDuration = 0;
-        this->pdchHeatingSETUnmetTime = 0;
-        this->pdstCoolingSETHours = 0;
-        this->pdchCoolingSETHours = 0;
-        this->pdchCoolingSETOccuHours = 0;
-        this->pdchCoolingSETUnmetDuration = 0;
-        this->pdchCoolingSETUnmetTime = 0;
-        this->pdrCO2Resilience = 0;
-        this->pdstCO2Hours = 0;
-        this->pdchCO2HourSafe = 0;
-        this->pdchCO2HourCaution = 0;
-        this->pdchCO2HourHazard = 0;
-        this->pdstCO2OccuHours = 0;
-        this->pdchCO2OccuHourSafe = 0;
-        this->pdchCO2OccuHourCaution = 0;
-        this->pdchCO2OccuHourHazard = 0;
-        this->pdrVisualResilience = 0;
-        this->pdstIllumHours = 0;
-        this->pdchIllumHourDark = 0;
-        this->pdchIllumHourDim = 0;
-        this->pdchIllumHourAdequate = 0;
-        this->pdchIllumHourBright = 0;
-        this->pdstIllumOccuHours = 0;
-        this->pdchIllumOccuHourDark = 0;
-        this->pdchIllumOccuHourDim = 0;
-        this->pdchIllumOccuHourAdequate = 0;
-        this->pdchIllumOccuHourBright = 0;
-        this->sizeReportName = 0;
-        this->numReportName = 0;
-        this->sizeSubTable = 0;
-        this->numSubTable = 0;
-        this->sizeColumnTag = 0;
-        this->numColumnTag = 0;
-        this->sizeTableEntry = 0;
-        this->numTableEntry = 0;
-        this->sizeCompSizeTableEntry = 0;
-        this->numCompSizeTableEntry = 0;
-        this->sizeShadowRelate = 0;
-        this->numShadowRelate = 0;
-        this->TotalNotMetHeatingOccupiedForABUPS = 0.0;
-        this->TotalNotMetCoolingOccupiedForABUPS = 0.0;
-        this->TotalNotMetOccupiedForABUPS = 0.0;
-        this->TotalTimeNotSimpleASH55EitherForABUPS = 0.0;
-        this->TotalVozMax = 0.0;
-        this->TotalAnyZoneBelowVozDynForOA = 0.0;
-        this->TotalAllZonesAtVozDynForOA = 0.0;
-        this->TotalAnyZoneAboveVozDynForOA = 0.0;
-        this->TotalAnyZoneBelowVozDynOccForOA = 0.0;
-        this->TotalAllZonesAtVozDynOccForOA = 0.0;
-        this->TotalAnyZoneAboveVozDynOccForOA = 0.0;
-        this->TotalAnyZoneVentUnoccForOA = 0.0;
-        this->TotalAnyAirLoopBelowVozDynForOA = 0.0;
-        this->TotalAllAirLoopsAtVozDynForOA = 0.0;
-        this->TotalAnyAirLoopAboveVozDynForOA = 0.0;
-        this->TotalAnyAirLoopBelowVozDynOccForOA = 0.0;
-        this->TotalAllAirLoopsAtVozDynOccForOA = 0.0;
-        this->TotalAnyAirLoopAboveVozDynOccForOA = 0.0;
-        this->TotalAnyAirLoopVentUnoccForOA = 0.0;
-        this->reportName.deallocate();
-        this->subTable.deallocate();
-        this->columnTag.deallocate();
-        this->tableEntry.deallocate();
-        this->CompSizeTableEntry.deallocate();
-        this->ShadowRelate.deallocate();
+        new (this) OutputReportPredefinedData();
     }
 };
 

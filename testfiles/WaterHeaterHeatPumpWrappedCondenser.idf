@@ -14,7 +14,7 @@
 ! System:   None.
 ! Plant:    Plant loop with one WaterHeater:Stratified object with heat pump water heating connected to two water use equipment
 
-  Version,23.1;
+  Version,26.2;
 
   Building,
     Water Heater DHW Plant Loop Example,  !- Name
@@ -372,6 +372,7 @@
 
   Coil:WaterHeating:AirToWaterHeatPump:Wrapped,
     HPWHPlantDXCoil,         !- Name
+    ,                        !- Availability Schedule Name
     2349.6,                  !- Rated Heating Capacity {W}
     2.4,                     !- Rated COP {W/W}
     0.981,                   !- Rated Sensible Heat Ratio
@@ -383,6 +384,7 @@
     HPPlantAirInletNode,     !- Evaporator Air Inlet Node Name
     HPPlantAirOutletNode,    !- Evaporator Air Outlet Node Name
     0,                       !- Crankcase Heater Capacity {W}
+    ,                        !- Crankcase Heater Capacity Function of Temperature Curve Name
     10,                      !- Maximum Ambient Temperature for Crankcase Heater Operation {C}
     WetBulbTemperature,      !- Evaporator Air Temperature Type for Curve Objects
     HPWH-Htg-Cap-fT,         !- Heating Capacity Function of Temperature Curve Name

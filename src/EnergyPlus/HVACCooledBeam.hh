@@ -1,7 +1,7 @@
-// EnergyPlus, Copyright (c) 1996-2023, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
-// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other
+// National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
 // contributors. All rights reserved.
 //
 // NOTICE: This Software was developed under funding from the U.S. Department of Energy and the
@@ -55,6 +55,8 @@
 #include <EnergyPlus/Data/BaseData.hh>
 #include <EnergyPlus/DataGlobals.hh>
 #include <EnergyPlus/EnergyPlus.hh>
+#include <EnergyPlus/Plant/PlantLocation.hh>
+#include <EnergyPlus/ScheduleManager.hh>
 
 namespace EnergyPlus {
 
@@ -76,36 +78,35 @@ namespace HVACCooledBeam {
     {
         // Members
         // input data
-        std::string Name;            // name of unit
-        std::string UnitType;        // type of unit = AirTerminal:SingleDuct:ConstantVolume:CooledBeam
-        int UnitType_Num;            // index to type of unit = 1 (there's only 1 type so far)
-        std::string CBTypeString;    // type of cooled beam: active | passive
-        CooledBeamType CBType;       // index to type of cooled beam
-        std::string Sched;           // availability schedule
-        int SchedPtr;                // index to schedule
-        Real64 MaxAirVolFlow;        // m3/s (autosizable)
-        Real64 MaxAirMassFlow;       // kg/s
-        Real64 MaxCoolWaterVolFlow;  // m3/s
-        Real64 MaxCoolWaterMassFlow; // kg/s
-        int AirInNode;               // unit air inlet node number
-        int AirOutNode;              // unit air outlet node number
-        int CWInNode;                // chilled water inlet node
-        int CWOutNode;               // chilled water outlet node
-        int ADUNum;                  // index of corresponding air distribution unit
-        Real64 NumBeams;             // number of beams in the zone
-        Real64 BeamLength;           // length of individual beam [m]
-        Real64 DesInletWaterTemp;    // design inlet water temperature [C]
-        Real64 DesOutletWaterTemp;   // design outlet water Temperature [c]
-        Real64 CoilArea;             // coil surface area per coil length [m2/m]
-        Real64 a;                    // model parameter a
-        Real64 n1;                   // model parameter n0
-        Real64 n2;                   // model parameter n1
-        Real64 n3;                   // model parameter n2
-        Real64 a0;                   // model parameter a0
-        Real64 K1;                   // model parameter K1
-        Real64 n;                    // model parameter n
-        Real64 Kin;                  // Coefficient of Induction Kin
-        Real64 InDiam;               // Leaving Pipe Inside Diameter
+        std::string Name;                      // name of unit
+        std::string UnitType;                  // type of unit = AirTerminal:SingleDuct:ConstantVolume:CooledBeam
+        int UnitType_Num;                      // index to type of unit = 1 (there's only 1 type so far)
+        std::string CBTypeString;              // type of cooled beam: active | passive
+        CooledBeamType CBType;                 // index to type of cooled beam
+        Sched::Schedule *availSched = nullptr; // availability schedule
+        Real64 MaxAirVolFlow;                  // m3/s (autosizable)
+        Real64 MaxAirMassFlow;                 // kg/s
+        Real64 MaxCoolWaterVolFlow;            // m3/s
+        Real64 MaxCoolWaterMassFlow;           // kg/s
+        int AirInNode;                         // unit air inlet node number
+        int AirOutNode;                        // unit air outlet node number
+        int CWInNode;                          // chilled water inlet node
+        int CWOutNode;                         // chilled water outlet node
+        int ADUNum;                            // index of corresponding air distribution unit
+        Real64 NumBeams;                       // number of beams in the zone
+        Real64 BeamLength;                     // length of individual beam [m]
+        Real64 DesInletWaterTemp;              // design inlet water temperature [C]
+        Real64 DesOutletWaterTemp;             // design outlet water Temperature [c]
+        Real64 CoilArea;                       // coil surface area per coil length [m2/m]
+        Real64 a;                              // model parameter a
+        Real64 n1;                             // model parameter n0
+        Real64 n2;                             // model parameter n1
+        Real64 n3;                             // model parameter n2
+        Real64 a0;                             // model parameter a0
+        Real64 K1;                             // model parameter K1
+        Real64 n;                              // model parameter n
+        Real64 Kin;                            // Coefficient of Induction Kin
+        Real64 InDiam;                         // Leaving Pipe Inside Diameter
         // time step variables
         Real64 TWIn;                // current inlet water temperature [C]
         Real64 TWOut;               // current outlet water temperature [C]
@@ -132,7 +133,7 @@ namespace HVACCooledBeam {
 
         // Default Constructor
         CoolBeamData()
-            : UnitType_Num(0), CBType(CooledBeamType::Invalid), SchedPtr(0), MaxAirVolFlow(0.0), MaxAirMassFlow(0.0), MaxCoolWaterVolFlow(0.0),
+            : UnitType_Num(0), CBType(CooledBeamType::Invalid), MaxAirVolFlow(0.0), MaxAirMassFlow(0.0), MaxCoolWaterVolFlow(0.0),
               MaxCoolWaterMassFlow(0.0), AirInNode(0), AirOutNode(0), CWInNode(0), CWOutNode(0), ADUNum(0), NumBeams(0.0), BeamLength(0.0),
               DesInletWaterTemp(0.0), DesOutletWaterTemp(0.0), CoilArea(0.0), a(0.0), n1(0.0), n2(0.0), n3(0.0), a0(0.0), K1(0.0), n(0.0), Kin(0.0),
               InDiam(0.0), TWIn(0.0), TWOut(0.0), EnthWaterOut(0.0), BeamFlow(0.0), CoolWaterMassFlow(0.0), BeamCoolingEnergy(0.0),
@@ -143,6 +144,7 @@ namespace HVACCooledBeam {
         }
 
         void CalcOutdoorAirVolumeFlowRate(EnergyPlusData &state);
+        void reportTerminalUnit(EnergyPlusData &state);
     };
 
     void SimCoolBeam(EnergyPlusData &state,
@@ -192,6 +194,14 @@ struct HVACCooledBeamData : BaseGlobalStruct
     Array1D<HVACCooledBeam::CoolBeamData> CoolBeam;
     bool GetInputFlag = true;              // First time, input is "gotten"
     bool ZoneEquipmentListChecked = false; // True after the Zone Equipment List has been checked for items
+
+    void init_constant_state([[maybe_unused]] EnergyPlusData &state) override
+    {
+    }
+
+    void init_state([[maybe_unused]] EnergyPlusData &state) override
+    {
+    }
 
     void clear_state() override
     {

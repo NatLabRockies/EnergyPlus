@@ -101,7 +101,7 @@
 ! Environmental Emissions:        None
 ! Utility Tariffs:                None
 
-  Version,23.1;
+  Version,26.2;
 
 ! HVAC SYSTEM 1
 
@@ -120,10 +120,6 @@
     Coil:Cooling:WaterToAirHeatPump:VariableSpeedEquationFit,  !- Cooling Coil Object Type
     Sys 1 Heat Pump Cooling Mode,  !- Cooling Coil Name
     0.001,                   !- Cooling Convergence
-    2.5,                     !- Maximum Cycling Rate {cycles/hr}
-    60,                      !- Heat Pump Time Constant {s}
-    0.01,                    !- Fraction of On-Cycle Power Use
-    60,                      !- Heat Pump Fan Delay Time {s}
     Coil:Heating:Fuel,       !- Supplemental Heating Coil Object Type
     Heat Pump DX Supp Heating Coil 1,  !- Supplemental Heating Coil Name
     50,                      !- Maximum Supply Air Temperature from Supplemental Heater {C}
@@ -134,6 +130,7 @@
 
   Coil:Cooling:WaterToAirHeatPump:VariableSpeedEquationFit,
     Sys 1 Heat Pump Cooling Mode,  !- Name
+    ,                        !- Availability Schedule Name
     Sys 1 Water to Air Heat Pump Source Side1 Inlet Node,  !- Water-to-Refrigerant HX Water Inlet Node Name
     Sys 1 Water to Air Heat Pump Source Side1 Outlet Node,  !- Water-to-Refrigerant HX Water Outlet Node Name
     Sys 1 Cooling Coil Air Inlet Node,  !- Indoor Air Inlet Node Name
@@ -145,6 +142,9 @@
     0.00165,                 !- Rated Water Flow Rate At Selected Nominal Speed Level {m3/s}
     0.0,                     !- Nominal Time for Condensate to Begin Leaving the Coil {s}
     0.0,                     !- Initial Moisture Evaporation Rate Divided by Steady-State AC Latent Capacity {dimensionless}
+    2.5,                     !- Maximum Cycling Rate {cycles/hr}
+    60,                      !- Latent Capacity Time Constant {s}
+    60,                      !- Fan Delay Time {s}
     0,                       !- Flag for Using Hot Gas Reheat, 0 or 1 {dimensionless}
     VS Energy Part Load Fraction 1,  !- Energy Part Load Fraction Curve Name
     1524.1,                  !- Speed 1 Reference Unit Gross Rated Total Cooling Capacity {W}
@@ -280,6 +280,7 @@
 
   Coil:Heating:WaterToAirHeatPump:VariableSpeedEquationFit,
     Sys 1 Heat Pump Heating Mode,  !- Name
+    ,                        !- Availability Schedule Name
     Sys 1 Water to Air Heat Pump Source Side2 Inlet Node,  !- Water-to-Refrigerant HX Water Inlet Node Name
     Sys 1 Water to Air Heat Pump Source Side2 Outlet Node,  !- Water-to-Refrigerant HX Water Outlet Node Name
     Sys 1 Heating Coil Air Inlet Node,  !- Indoor Air Inlet Node Name
@@ -292,10 +293,10 @@
     VS Energy Part Load Fraction 1,  !- Energy Part Load Fraction Curve Name
     1838.7,                  !- Speed 1 Reference Unit Gross Rated Heating Capacity {W}
     5.0,                     !- Speed 1 Reference Unit Gross Rated Heating COP {W/W}
-    0.1661088,               !- Speed 1 Reference Unit Rated Air Flow {m3/s}
+    0.1661088,               !- Speed 1 Reference Unit Rated Air Flow Rate {m3/s}
     0.000381695,             !- Speed 1 Reference Unit Rated Water Flow Rate {m3/s}
     Heating VS Temp1 Test,   !- Speed 1 Heating Capacity Function of Temperature Curve Name
-    Heating VS AirFrac Test, !- Speed 1 Total  Heating Capacity Function of Air Flow Fraction Curve Name
+    Heating VS AirFrac Test, !- Speed 1 Total Heating Capacity Function of Air Flow Fraction Curve Name
     Heating VS WaterFrac Test,  !- Speed 1 Heating Capacity Function of Water Flow Fraction Curve Name
     EIRH VS Temp1 Test,      !- Speed 1 Energy Input Ratio Function of Temperature Curve Name
     EIRH VS AirFrac Test,    !- Speed 1 Energy Input Ratio Function of Air Flow Fraction Curve Name
@@ -307,7 +308,7 @@
     0.179322,                !- Speed 2 Reference Unit Rated Air Flow Rate {m3/s}
     0.000381695,             !- Speed 2 Reference Unit Rated Water Flow Rate {m3/s}
     Heating VS Temp1 Test,   !- Speed 2 Heating Capacity Function of Temperature Curve Name
-    Heating VS AirFrac Test, !- Speed 2 Total  Heating Capacity Function of Air Flow Fraction Curve Name
+    Heating VS AirFrac Test, !- Speed 2 Total Heating Capacity Function of Air Flow Fraction Curve Name
     Heating VS WaterFrac Test,  !- Speed 2 Heating Capacity Function of Water Flow Fraction Curve Name
     EIRH VS Temp1 Test,      !- Speed 2 Energy Input Ratio Function of Temperature Curve Name
     EIRH VS AirFrac Test,    !- Speed 2 Energy Input Ratio Function of Air Flow Fraction Curve Name
@@ -319,7 +320,7 @@
     0.1925352,               !- Speed 3 Reference Unit Rated Air Flow Rate {m3/s}
     0.000381695,             !- Speed 3 Reference Unit Rated Water Flow Rate {m3/s}
     Heating VS Temp1 Test,   !- Speed 3 Heating Capacity Function of Temperature Curve Name
-    Heating VS AirFrac Test, !- Speed 3 Total  Heating Capacity Function of Air Flow Fraction Curve Name
+    Heating VS AirFrac Test, !- Speed 3 Total Heating Capacity Function of Air Flow Fraction Curve Name
     Heating VS WaterFrac Test,  !- Speed 3 Heating Capacity Function of Water Flow Fraction Curve Name
     EIRH VS Temp1 Test,      !- Speed 3 Energy Input Ratio Function of Temperature Curve Name
     EIRH VS AirFrac Test,    !- Speed 3 Energy Input Ratio Function of Air Flow Fraction Curve Name
@@ -331,7 +332,7 @@
     0.2189616,               !- Speed 4 Reference Unit Rated Air Flow Rate {m3/s}
     0.000381695,             !- Speed 4 Reference Unit Rated Water Flow Rate {m3/s}
     Heating VS Temp1 Test,   !- Speed 4 Heating Capacity Function of Temperature Curve Name
-    Heating VS AirFrac Test, !- Speed 4 Total  Heating Capacity Function of Air Flow Fraction Curve Name
+    Heating VS AirFrac Test, !- Speed 4 Total Heating Capacity Function of Air Flow Fraction Curve Name
     Heating VS WaterFrac Test,  !- Speed 4 Heating Capacity Function of Water Flow Fraction Curve Name
     EIRH VS Temp1 Test,      !- Speed 4 Energy Input Ratio Function of Temperature Curve Name
     EIRH VS AirFrac Test,    !- Speed 4 Energy Input Ratio Function of Air Flow Fraction Curve Name
@@ -343,7 +344,7 @@
     0.245388,                !- Speed 5 Reference Unit Rated Air Flow Rate {m3/s}
     0.000381695,             !- Speed 5 Reference Unit Rated Water Flow Rate {m3/s}
     Heating VS Temp1 Test,   !- Speed 5 Heating Capacity Function of Temperature Curve Name
-    Heating VS AirFrac Test, !- Speed 5 Total  Heating Capacity Function of Air Flow Fraction Curve Name
+    Heating VS AirFrac Test, !- Speed 5 Total Heating Capacity Function of Air Flow Fraction Curve Name
     Heating VS WaterFrac Test,  !- Speed 5 Heating Capacity Function of Water Flow Fraction Curve Name
     EIRH VS Temp1 Test,      !- Speed 5 Energy Input Ratio Function of Temperature Curve Name
     EIRH VS AirFrac Test,    !- Speed 5 Energy Input Ratio Function of Air Flow Fraction Curve Name
@@ -355,7 +356,7 @@
     0.2718144,               !- Speed 6 Reference Unit Rated Air Flow Rate {m3/s}
     0.000381695,             !- Speed 6 Reference Unit Rated Water Flow Rate {m3/s}
     Heating VS Temp1 Test,   !- Speed 6 Heating Capacity Function of Temperature Curve Name
-    Heating VS AirFrac Test, !- Speed 6 Total  Heating Capacity Function of Air Flow Fraction Curve Name
+    Heating VS AirFrac Test, !- Speed 6 Total Heating Capacity Function of Air Flow Fraction Curve Name
     Heating VS WaterFrac Test,  !- Speed 6 Heating Capacity Function of Water Flow Fraction Curve Name
     EIRH VS Temp1 Test,      !- Speed 6 Energy Input Ratio Function of Temperature Curve Name
     EIRH VS AirFrac Test,    !- Speed 6 Energy Input Ratio Function of Air Flow Fraction Curve Name
@@ -367,7 +368,7 @@
     0.2982408,               !- Speed 7 Reference Unit Rated Air Flow Rate {m3/s}
     0.000381695,             !- Speed 7 Reference Unit Rated Water Flow Rate {m3/s}
     Heating VS Temp1 Test,   !- Speed 7 Heating Capacity Function of Temperature Curve Name
-    Heating VS AirFrac Test, !- Speed 7 Total  Heating Capacity Function of Air Flow Fraction Curve Name
+    Heating VS AirFrac Test, !- Speed 7 Total Heating Capacity Function of Air Flow Fraction Curve Name
     Heating VS WaterFrac Test,  !- Speed 7 Heating Capacity Function of Water Flow Fraction Curve Name
     EIRH VS Temp1 Test,      !- Speed 7 Energy Input Ratio Function of Temperature Curve Name
     EIRH VS AirFrac Test,    !- Speed 7 Energy Input Ratio Function of Air Flow Fraction Curve Name
@@ -379,7 +380,7 @@
     0.3246672,               !- Speed 8 Reference Unit Rated Air Flow Rate {m3/s}
     0.000381695,             !- Speed 8 Reference Unit Rated Water Flow Rate {m3/s}
     Heating VS Temp1 Test,   !- Speed 8 Heating Capacity Function of Temperature Curve Name
-    Heating VS AirFrac Test, !- Speed 8 Total  Heating Capacity Function of Air Flow Fraction Curve Name
+    Heating VS AirFrac Test, !- Speed 8 Total Heating Capacity Function of Air Flow Fraction Curve Name
     Heating VS WaterFrac Test,  !- Speed 8 Heating Capacity Function of Water Flow Fraction Curve Name
     EIRH VS Temp1 Test,      !- Speed 8 Energy Input Ratio Function of Temperature Curve Name
     EIRH VS AirFrac Test,    !- Speed 8 Energy Input Ratio Function of Air Flow Fraction Curve Name
@@ -391,7 +392,7 @@
     0.3510936,               !- Speed 9 Reference Unit Rated Air Flow Rate {m3/s}
     0.000381695,             !- Speed 9 Reference Unit Rated Water Flow Rate {m3/s}
     Heating VS Temp1 Test,   !- Speed 9 Heating Capacity Function of Temperature Curve Name
-    Heating VS AirFrac Test, !- Speed 9 Total  Heating Capacity Function of Air Flow Fraction Curve Name
+    Heating VS AirFrac Test, !- Speed 9 Total Heating Capacity Function of Air Flow Fraction Curve Name
     Heating VS WaterFrac Test,  !- Speed 9 Heating Capacity Function of Water Flow Fraction Curve Name
     EIRH VS Temp1 Test,      !- Speed 9 Energy Input Ratio Function of Temperature Curve Name
     EIRH VS AirFrac Test,    !- Speed 9 Energy Input Ratio Function of Air Flow Fraction Curve Name
@@ -403,7 +404,7 @@
     0.37752,                 !- Speed 10 Reference Unit Rated Air Flow Rate {m3/s}
     0.000381695,             !- Speed 10 Reference Unit Rated Water Flow Rate {m3/s}
     Heating VS Temp1 Test,   !- Speed 10 Heating Capacity Function of Temperature Curve Name
-    Heating VS AirFrac Test, !- Speed 10 Total  Heating Capacity Function of Air Flow Fraction Curve Name
+    Heating VS AirFrac Test, !- Speed 10 Total Heating Capacity Function of Air Flow Fraction Curve Name
     Heating VS WaterFrac Test,  !- Speed 10 Heating Capacity Function of Water Flow Fraction Curve Name
     EIRH VS Temp1 Test,      !- Speed 10 Energy Input Ratio Function of Temperature Curve Name
     EIRH VS AirFrac Test,    !- Speed 10 Energy Input Ratio Function of Air Flow Fraction Curve Name
@@ -428,10 +429,6 @@
     Coil:Cooling:WaterToAirHeatPump:VariableSpeedEquationFit,  !- Cooling Coil Object Type
     Sys 2 Heat Pump Cooling Mode,  !- Cooling Coil Name
     0.001,                   !- Cooling Convergence
-    2.5,                     !- Maximum Cycling Rate {cycles/hr}
-    60,                      !- Heat Pump Time Constant {s}
-    0.01,                    !- Fraction of On-Cycle Power Use
-    60,                      !- Heat Pump Fan Delay Time {s}
     Coil:Heating:Fuel,       !- Supplemental Heating Coil Object Type
     Heat Pump DX Supp Heating Coil 2,  !- Supplemental Heating Coil Name
     50,                      !- Maximum Supply Air Temperature from Supplemental Heater {C}
@@ -442,6 +439,7 @@
 
   Coil:Cooling:WaterToAirHeatPump:VariableSpeedEquationFit,
     Sys 2 Heat Pump Cooling Mode,  !- Name
+    ,                        !- Availability Schedule Name
     Sys 2 Water to Air Heat Pump Source Side1 Inlet Node,  !- Water-to-Refrigerant HX Water Inlet Node Name
     Sys 2 Water to Air Heat Pump Source Side1 Outlet Node,  !- Water-to-Refrigerant HX Water Outlet Node Name
     Sys 2 Cooling Coil Air Inlet Node,  !- Indoor Air Inlet Node Name
@@ -453,6 +451,9 @@
     0.00165,                 !- Rated Water Flow Rate At Selected Nominal Speed Level {m3/s}
     0.0,                     !- Nominal Time for Condensate to Begin Leaving the Coil {s}
     0.0,                     !- Initial Moisture Evaporation Rate Divided by Steady-State AC Latent Capacity {dimensionless}
+    2.5,                     !- Maximum Cycling Rate {cycles/hr}
+    60,                      !- Latent Capacity Time Constant {s}
+    60,                      !- Fan Delay Time {s}
     0,                       !- Flag for Using Hot Gas Reheat, 0 or 1 {dimensionless}
     VS Energy Part Load Fraction 1,  !- Energy Part Load Fraction Curve Name
     1524.1,                  !- Speed 1 Reference Unit Gross Rated Total Cooling Capacity {W}
@@ -588,6 +589,7 @@
 
   Coil:Heating:WaterToAirHeatPump:VariableSpeedEquationFit,
     Sys 2 Heat Pump Heating Mode,  !- Name
+    ,                        !- Availability Schedule Name
     Sys 2 Water to Air Heat Pump Source Side2 Inlet Node,  !- Water-to-Refrigerant HX Water Inlet Node Name
     Sys 2 Water to Air Heat Pump Source Side2 Outlet Node,  !- Water-to-Refrigerant HX Water Outlet Node Name
     Sys 2 Heating Coil Air Inlet Node,  !- Indoor Air Inlet Node Name
@@ -600,10 +602,10 @@
     VS Energy Part Load Fraction 1,  !- Energy Part Load Fraction Curve Name
     1838.7,                  !- Speed 1 Reference Unit Gross Rated Heating Capacity {W}
     5.0,                     !- Speed 1 Reference Unit Gross Rated Heating COP {W/W}
-    0.1661088,               !- Speed 1 Reference Unit Rated Air Flow {m3/s}
+    0.1661088,               !- Speed 1 Reference Unit Rated Air Flow Rate {m3/s}
     0.000381695,             !- Speed 1 Reference Unit Rated Water Flow Rate {m3/s}
     Heating VS Temp1 Test,   !- Speed 1 Heating Capacity Function of Temperature Curve Name
-    Heating VS AirFrac Test, !- Speed 1 Total  Heating Capacity Function of Air Flow Fraction Curve Name
+    Heating VS AirFrac Test, !- Speed 1 Total Heating Capacity Function of Air Flow Fraction Curve Name
     Heating VS WaterFrac Test,  !- Speed 1 Heating Capacity Function of Water Flow Fraction Curve Name
     EIRH VS Temp1 Test,      !- Speed 1 Energy Input Ratio Function of Temperature Curve Name
     EIRH VS AirFrac Test,    !- Speed 1 Energy Input Ratio Function of Air Flow Fraction Curve Name
@@ -615,7 +617,7 @@
     0.179322,                !- Speed 2 Reference Unit Rated Air Flow Rate {m3/s}
     0.000381695,             !- Speed 2 Reference Unit Rated Water Flow Rate {m3/s}
     Heating VS Temp1 Test,   !- Speed 2 Heating Capacity Function of Temperature Curve Name
-    Heating VS AirFrac Test, !- Speed 2 Total  Heating Capacity Function of Air Flow Fraction Curve Name
+    Heating VS AirFrac Test, !- Speed 2 Total Heating Capacity Function of Air Flow Fraction Curve Name
     Heating VS WaterFrac Test,  !- Speed 2 Heating Capacity Function of Water Flow Fraction Curve Name
     EIRH VS Temp1 Test,      !- Speed 2 Energy Input Ratio Function of Temperature Curve Name
     EIRH VS AirFrac Test,    !- Speed 2 Energy Input Ratio Function of Air Flow Fraction Curve Name
@@ -627,7 +629,7 @@
     0.1925352,               !- Speed 3 Reference Unit Rated Air Flow Rate {m3/s}
     0.000381695,             !- Speed 3 Reference Unit Rated Water Flow Rate {m3/s}
     Heating VS Temp1 Test,   !- Speed 3 Heating Capacity Function of Temperature Curve Name
-    Heating VS AirFrac Test, !- Speed 3 Total  Heating Capacity Function of Air Flow Fraction Curve Name
+    Heating VS AirFrac Test, !- Speed 3 Total Heating Capacity Function of Air Flow Fraction Curve Name
     Heating VS WaterFrac Test,  !- Speed 3 Heating Capacity Function of Water Flow Fraction Curve Name
     EIRH VS Temp1 Test,      !- Speed 3 Energy Input Ratio Function of Temperature Curve Name
     EIRH VS AirFrac Test,    !- Speed 3 Energy Input Ratio Function of Air Flow Fraction Curve Name
@@ -639,7 +641,7 @@
     0.2189616,               !- Speed 4 Reference Unit Rated Air Flow Rate {m3/s}
     0.000381695,             !- Speed 4 Reference Unit Rated Water Flow Rate {m3/s}
     Heating VS Temp1 Test,   !- Speed 4 Heating Capacity Function of Temperature Curve Name
-    Heating VS AirFrac Test, !- Speed 4 Total  Heating Capacity Function of Air Flow Fraction Curve Name
+    Heating VS AirFrac Test, !- Speed 4 Total Heating Capacity Function of Air Flow Fraction Curve Name
     Heating VS WaterFrac Test,  !- Speed 4 Heating Capacity Function of Water Flow Fraction Curve Name
     EIRH VS Temp1 Test,      !- Speed 4 Energy Input Ratio Function of Temperature Curve Name
     EIRH VS AirFrac Test,    !- Speed 4 Energy Input Ratio Function of Air Flow Fraction Curve Name
@@ -651,7 +653,7 @@
     0.245388,                !- Speed 5 Reference Unit Rated Air Flow Rate {m3/s}
     0.000381695,             !- Speed 5 Reference Unit Rated Water Flow Rate {m3/s}
     Heating VS Temp1 Test,   !- Speed 5 Heating Capacity Function of Temperature Curve Name
-    Heating VS AirFrac Test, !- Speed 5 Total  Heating Capacity Function of Air Flow Fraction Curve Name
+    Heating VS AirFrac Test, !- Speed 5 Total Heating Capacity Function of Air Flow Fraction Curve Name
     Heating VS WaterFrac Test,  !- Speed 5 Heating Capacity Function of Water Flow Fraction Curve Name
     EIRH VS Temp1 Test,      !- Speed 5 Energy Input Ratio Function of Temperature Curve Name
     EIRH VS AirFrac Test,    !- Speed 5 Energy Input Ratio Function of Air Flow Fraction Curve Name
@@ -663,7 +665,7 @@
     0.2718144,               !- Speed 6 Reference Unit Rated Air Flow Rate {m3/s}
     0.000381695,             !- Speed 6 Reference Unit Rated Water Flow Rate {m3/s}
     Heating VS Temp1 Test,   !- Speed 6 Heating Capacity Function of Temperature Curve Name
-    Heating VS AirFrac Test, !- Speed 6 Total  Heating Capacity Function of Air Flow Fraction Curve Name
+    Heating VS AirFrac Test, !- Speed 6 Total Heating Capacity Function of Air Flow Fraction Curve Name
     Heating VS WaterFrac Test,  !- Speed 6 Heating Capacity Function of Water Flow Fraction Curve Name
     EIRH VS Temp1 Test,      !- Speed 6 Energy Input Ratio Function of Temperature Curve Name
     EIRH VS AirFrac Test,    !- Speed 6 Energy Input Ratio Function of Air Flow Fraction Curve Name
@@ -675,7 +677,7 @@
     0.2982408,               !- Speed 7 Reference Unit Rated Air Flow Rate {m3/s}
     0.000381695,             !- Speed 7 Reference Unit Rated Water Flow Rate {m3/s}
     Heating VS Temp1 Test,   !- Speed 7 Heating Capacity Function of Temperature Curve Name
-    Heating VS AirFrac Test, !- Speed 7 Total  Heating Capacity Function of Air Flow Fraction Curve Name
+    Heating VS AirFrac Test, !- Speed 7 Total Heating Capacity Function of Air Flow Fraction Curve Name
     Heating VS WaterFrac Test,  !- Speed 7 Heating Capacity Function of Water Flow Fraction Curve Name
     EIRH VS Temp1 Test,      !- Speed 7 Energy Input Ratio Function of Temperature Curve Name
     EIRH VS AirFrac Test,    !- Speed 7 Energy Input Ratio Function of Air Flow Fraction Curve Name
@@ -687,7 +689,7 @@
     0.3246672,               !- Speed 8 Reference Unit Rated Air Flow Rate {m3/s}
     0.000381695,             !- Speed 8 Reference Unit Rated Water Flow Rate {m3/s}
     Heating VS Temp1 Test,   !- Speed 8 Heating Capacity Function of Temperature Curve Name
-    Heating VS AirFrac Test, !- Speed 8 Total  Heating Capacity Function of Air Flow Fraction Curve Name
+    Heating VS AirFrac Test, !- Speed 8 Total Heating Capacity Function of Air Flow Fraction Curve Name
     Heating VS WaterFrac Test,  !- Speed 8 Heating Capacity Function of Water Flow Fraction Curve Name
     EIRH VS Temp1 Test,      !- Speed 8 Energy Input Ratio Function of Temperature Curve Name
     EIRH VS AirFrac Test,    !- Speed 8 Energy Input Ratio Function of Air Flow Fraction Curve Name
@@ -699,7 +701,7 @@
     0.3510936,               !- Speed 9 Reference Unit Rated Air Flow Rate {m3/s}
     0.000381695,             !- Speed 9 Reference Unit Rated Water Flow Rate {m3/s}
     Heating VS Temp1 Test,   !- Speed 9 Heating Capacity Function of Temperature Curve Name
-    Heating VS AirFrac Test, !- Speed 9 Total  Heating Capacity Function of Air Flow Fraction Curve Name
+    Heating VS AirFrac Test, !- Speed 9 Total Heating Capacity Function of Air Flow Fraction Curve Name
     Heating VS WaterFrac Test,  !- Speed 9 Heating Capacity Function of Water Flow Fraction Curve Name
     EIRH VS Temp1 Test,      !- Speed 9 Energy Input Ratio Function of Temperature Curve Name
     EIRH VS AirFrac Test,    !- Speed 9 Energy Input Ratio Function of Air Flow Fraction Curve Name
@@ -711,7 +713,7 @@
     0.37752,                 !- Speed 10 Reference Unit Rated Air Flow Rate {m3/s}
     0.000381695,             !- Speed 10 Reference Unit Rated Water Flow Rate {m3/s}
     Heating VS Temp1 Test,   !- Speed 10 Heating Capacity Function of Temperature Curve Name
-    Heating VS AirFrac Test, !- Speed 10 Total  Heating Capacity Function of Air Flow Fraction Curve Name
+    Heating VS AirFrac Test, !- Speed 10 Total Heating Capacity Function of Air Flow Fraction Curve Name
     Heating VS WaterFrac Test,  !- Speed 10 Heating Capacity Function of Water Flow Fraction Curve Name
     EIRH VS Temp1 Test,      !- Speed 10 Energy Input Ratio Function of Temperature Curve Name
     EIRH VS AirFrac Test,    !- Speed 10 Energy Input Ratio Function of Air Flow Fraction Curve Name
@@ -736,10 +738,6 @@
     Coil:Cooling:WaterToAirHeatPump:VariableSpeedEquationFit,  !- Cooling Coil Object Type
     Sys 3 Heat Pump Cooling Mode,  !- Cooling Coil Name
     0.001,                   !- Cooling Convergence
-    2.5,                     !- Maximum Cycling Rate {cycles/hr}
-    60,                      !- Heat Pump Time Constant {s}
-    0.01,                    !- Fraction of On-Cycle Power Use
-    60,                      !- Heat Pump Fan Delay Time {s}
     Coil:Heating:Fuel,       !- Supplemental Heating Coil Object Type
     Heat Pump DX Supp Heating Coil 3,  !- Supplemental Heating Coil Name
     50,                      !- Maximum Supply Air Temperature from Supplemental Heater {C}
@@ -750,6 +748,7 @@
 
   Coil:Cooling:WaterToAirHeatPump:VariableSpeedEquationFit,
     Sys 3 Heat Pump Cooling Mode,  !- Name
+    ,                        !- Availability Schedule Name
     Sys 3 Water to Air Heat Pump Source Side1 Inlet Node,  !- Water-to-Refrigerant HX Water Inlet Node Name
     Sys 3 Water to Air Heat Pump Source Side1 Outlet Node,  !- Water-to-Refrigerant HX Water Outlet Node Name
     Sys 3 Cooling Coil Air Inlet Node,  !- Indoor Air Inlet Node Name
@@ -761,6 +760,9 @@
     0.00165,                 !- Rated Water Flow Rate At Selected Nominal Speed Level {m3/s}
     0.0,                     !- Nominal Time for Condensate to Begin Leaving the Coil {s}
     0.0,                     !- Initial Moisture Evaporation Rate Divided by Steady-State AC Latent Capacity {dimensionless}
+    2.5,                     !- Maximum Cycling Rate {cycles/hr}
+    60,                      !- Latent Capacity Time Constant {s}
+    60,                      !- Fan Delay Time {s}
     0,                       !- Flag for Using Hot Gas Reheat, 0 or 1 {dimensionless}
     VS Energy Part Load Fraction 1,  !- Energy Part Load Fraction Curve Name
     1524.1,                  !- Speed 1 Reference Unit Gross Rated Total Cooling Capacity {W}
@@ -896,6 +898,7 @@
 
   Coil:Heating:WaterToAirHeatPump:VariableSpeedEquationFit,
     Sys 3 Heat Pump Heating Mode,  !- Name
+    ,                        !- Availability Schedule Name
     Sys 3 Water to Air Heat Pump Source Side2 Inlet Node,  !- Water-to-Refrigerant HX Water Inlet Node Name
     Sys 3 Water to Air Heat Pump Source Side2 Outlet Node,  !- Water-to-Refrigerant HX Water Outlet Node Name
     Sys 3 Heating Coil Air Inlet Node,  !- Indoor Air Inlet Node Name
@@ -908,10 +911,10 @@
     VS Energy Part Load Fraction 1,  !- Energy Part Load Fraction Curve Name
     1838.7,                  !- Speed 1 Reference Unit Gross Rated Heating Capacity {W}
     5.0,                     !- Speed 1 Reference Unit Gross Rated Heating COP {W/W}
-    0.1661088,               !- Speed 1 Reference Unit Rated Air Flow {m3/s}
+    0.1661088,               !- Speed 1 Reference Unit Rated Air Flow Rate {m3/s}
     0.000381695,             !- Speed 1 Reference Unit Rated Water Flow Rate {m3/s}
     Heating VS Temp1 Test,   !- Speed 1 Heating Capacity Function of Temperature Curve Name
-    Heating VS AirFrac Test, !- Speed 1 Total  Heating Capacity Function of Air Flow Fraction Curve Name
+    Heating VS AirFrac Test, !- Speed 1 Total Heating Capacity Function of Air Flow Fraction Curve Name
     Heating VS WaterFrac Test,  !- Speed 1 Heating Capacity Function of Water Flow Fraction Curve Name
     EIRH VS Temp1 Test,      !- Speed 1 Energy Input Ratio Function of Temperature Curve Name
     EIRH VS AirFrac Test,    !- Speed 1 Energy Input Ratio Function of Air Flow Fraction Curve Name
@@ -923,7 +926,7 @@
     0.179322,                !- Speed 2 Reference Unit Rated Air Flow Rate {m3/s}
     0.000381695,             !- Speed 2 Reference Unit Rated Water Flow Rate {m3/s}
     Heating VS Temp1 Test,   !- Speed 2 Heating Capacity Function of Temperature Curve Name
-    Heating VS AirFrac Test, !- Speed 2 Total  Heating Capacity Function of Air Flow Fraction Curve Name
+    Heating VS AirFrac Test, !- Speed 2 Total Heating Capacity Function of Air Flow Fraction Curve Name
     Heating VS WaterFrac Test,  !- Speed 2 Heating Capacity Function of Water Flow Fraction Curve Name
     EIRH VS Temp1 Test,      !- Speed 2 Energy Input Ratio Function of Temperature Curve Name
     EIRH VS AirFrac Test,    !- Speed 2 Energy Input Ratio Function of Air Flow Fraction Curve Name
@@ -935,7 +938,7 @@
     0.1925352,               !- Speed 3 Reference Unit Rated Air Flow Rate {m3/s}
     0.000381695,             !- Speed 3 Reference Unit Rated Water Flow Rate {m3/s}
     Heating VS Temp1 Test,   !- Speed 3 Heating Capacity Function of Temperature Curve Name
-    Heating VS AirFrac Test, !- Speed 3 Total  Heating Capacity Function of Air Flow Fraction Curve Name
+    Heating VS AirFrac Test, !- Speed 3 Total Heating Capacity Function of Air Flow Fraction Curve Name
     Heating VS WaterFrac Test,  !- Speed 3 Heating Capacity Function of Water Flow Fraction Curve Name
     EIRH VS Temp1 Test,      !- Speed 3 Energy Input Ratio Function of Temperature Curve Name
     EIRH VS AirFrac Test,    !- Speed 3 Energy Input Ratio Function of Air Flow Fraction Curve Name
@@ -947,7 +950,7 @@
     0.2189616,               !- Speed 4 Reference Unit Rated Air Flow Rate {m3/s}
     0.000381695,             !- Speed 4 Reference Unit Rated Water Flow Rate {m3/s}
     Heating VS Temp1 Test,   !- Speed 4 Heating Capacity Function of Temperature Curve Name
-    Heating VS AirFrac Test, !- Speed 4 Total  Heating Capacity Function of Air Flow Fraction Curve Name
+    Heating VS AirFrac Test, !- Speed 4 Total Heating Capacity Function of Air Flow Fraction Curve Name
     Heating VS WaterFrac Test,  !- Speed 4 Heating Capacity Function of Water Flow Fraction Curve Name
     EIRH VS Temp1 Test,      !- Speed 4 Energy Input Ratio Function of Temperature Curve Name
     EIRH VS AirFrac Test,    !- Speed 4 Energy Input Ratio Function of Air Flow Fraction Curve Name
@@ -959,7 +962,7 @@
     0.245388,                !- Speed 5 Reference Unit Rated Air Flow Rate {m3/s}
     0.000381695,             !- Speed 5 Reference Unit Rated Water Flow Rate {m3/s}
     Heating VS Temp1 Test,   !- Speed 5 Heating Capacity Function of Temperature Curve Name
-    Heating VS AirFrac Test, !- Speed 5 Total  Heating Capacity Function of Air Flow Fraction Curve Name
+    Heating VS AirFrac Test, !- Speed 5 Total Heating Capacity Function of Air Flow Fraction Curve Name
     Heating VS WaterFrac Test,  !- Speed 5 Heating Capacity Function of Water Flow Fraction Curve Name
     EIRH VS Temp1 Test,      !- Speed 5 Energy Input Ratio Function of Temperature Curve Name
     EIRH VS AirFrac Test,    !- Speed 5 Energy Input Ratio Function of Air Flow Fraction Curve Name
@@ -971,7 +974,7 @@
     0.2718144,               !- Speed 6 Reference Unit Rated Air Flow Rate {m3/s}
     0.000381695,             !- Speed 6 Reference Unit Rated Water Flow Rate {m3/s}
     Heating VS Temp1 Test,   !- Speed 6 Heating Capacity Function of Temperature Curve Name
-    Heating VS AirFrac Test, !- Speed 6 Total  Heating Capacity Function of Air Flow Fraction Curve Name
+    Heating VS AirFrac Test, !- Speed 6 Total Heating Capacity Function of Air Flow Fraction Curve Name
     Heating VS WaterFrac Test,  !- Speed 6 Heating Capacity Function of Water Flow Fraction Curve Name
     EIRH VS Temp1 Test,      !- Speed 6 Energy Input Ratio Function of Temperature Curve Name
     EIRH VS AirFrac Test,    !- Speed 6 Energy Input Ratio Function of Air Flow Fraction Curve Name
@@ -983,7 +986,7 @@
     0.2982408,               !- Speed 7 Reference Unit Rated Air Flow Rate {m3/s}
     0.000381695,             !- Speed 7 Reference Unit Rated Water Flow Rate {m3/s}
     Heating VS Temp1 Test,   !- Speed 7 Heating Capacity Function of Temperature Curve Name
-    Heating VS AirFrac Test, !- Speed 7 Total  Heating Capacity Function of Air Flow Fraction Curve Name
+    Heating VS AirFrac Test, !- Speed 7 Total Heating Capacity Function of Air Flow Fraction Curve Name
     Heating VS WaterFrac Test,  !- Speed 7 Heating Capacity Function of Water Flow Fraction Curve Name
     EIRH VS Temp1 Test,      !- Speed 7 Energy Input Ratio Function of Temperature Curve Name
     EIRH VS AirFrac Test,    !- Speed 7 Energy Input Ratio Function of Air Flow Fraction Curve Name
@@ -995,7 +998,7 @@
     0.3246672,               !- Speed 8 Reference Unit Rated Air Flow Rate {m3/s}
     0.000381695,             !- Speed 8 Reference Unit Rated Water Flow Rate {m3/s}
     Heating VS Temp1 Test,   !- Speed 8 Heating Capacity Function of Temperature Curve Name
-    Heating VS AirFrac Test, !- Speed 8 Total  Heating Capacity Function of Air Flow Fraction Curve Name
+    Heating VS AirFrac Test, !- Speed 8 Total Heating Capacity Function of Air Flow Fraction Curve Name
     Heating VS WaterFrac Test,  !- Speed 8 Heating Capacity Function of Water Flow Fraction Curve Name
     EIRH VS Temp1 Test,      !- Speed 8 Energy Input Ratio Function of Temperature Curve Name
     EIRH VS AirFrac Test,    !- Speed 8 Energy Input Ratio Function of Air Flow Fraction Curve Name
@@ -1007,7 +1010,7 @@
     0.3510936,               !- Speed 9 Reference Unit Rated Air Flow Rate {m3/s}
     0.000381695,             !- Speed 9 Reference Unit Rated Water Flow Rate {m3/s}
     Heating VS Temp1 Test,   !- Speed 9 Heating Capacity Function of Temperature Curve Name
-    Heating VS AirFrac Test, !- Speed 9 Total  Heating Capacity Function of Air Flow Fraction Curve Name
+    Heating VS AirFrac Test, !- Speed 9 Total Heating Capacity Function of Air Flow Fraction Curve Name
     Heating VS WaterFrac Test,  !- Speed 9 Heating Capacity Function of Water Flow Fraction Curve Name
     EIRH VS Temp1 Test,      !- Speed 9 Energy Input Ratio Function of Temperature Curve Name
     EIRH VS AirFrac Test,    !- Speed 9 Energy Input Ratio Function of Air Flow Fraction Curve Name
@@ -1019,7 +1022,7 @@
     0.37752,                 !- Speed 10 Reference Unit Rated Air Flow Rate {m3/s}
     0.000381695,             !- Speed 10 Reference Unit Rated Water Flow Rate {m3/s}
     Heating VS Temp1 Test,   !- Speed 10 Heating Capacity Function of Temperature Curve Name
-    Heating VS AirFrac Test, !- Speed 10 Total  Heating Capacity Function of Air Flow Fraction Curve Name
+    Heating VS AirFrac Test, !- Speed 10 Total Heating Capacity Function of Air Flow Fraction Curve Name
     Heating VS WaterFrac Test,  !- Speed 10 Heating Capacity Function of Water Flow Fraction Curve Name
     EIRH VS Temp1 Test,      !- Speed 10 Energy Input Ratio Function of Temperature Curve Name
     EIRH VS AirFrac Test,    !- Speed 10 Energy Input Ratio Function of Air Flow Fraction Curve Name
@@ -1044,10 +1047,6 @@
     Coil:Cooling:WaterToAirHeatPump:VariableSpeedEquationFit,  !- Cooling Coil Object Type
     Sys 4 Heat Pump Cooling Mode,  !- Cooling Coil Name
     0.001,                   !- Cooling Convergence
-    2.5,                     !- Maximum Cycling Rate {cycles/hr}
-    60,                      !- Heat Pump Time Constant {s}
-    0.01,                    !- Fraction of On-Cycle Power Use
-    60,                      !- Heat Pump Fan Delay Time {s}
     Coil:Heating:Fuel,       !- Supplemental Heating Coil Object Type
     Heat Pump DX Supp Heating Coil 4,  !- Supplemental Heating Coil Name
     50,                      !- Maximum Supply Air Temperature from Supplemental Heater {C}
@@ -1058,6 +1057,7 @@
 
   Coil:Cooling:WaterToAirHeatPump:VariableSpeedEquationFit,
     Sys 4 Heat Pump Cooling Mode,  !- Name
+    ,                        !- Availability Schedule Name
     Sys 4 Water to Air Heat Pump Source Side1 Inlet Node,  !- Water-to-Refrigerant HX Water Inlet Node Name
     Sys 4 Water to Air Heat Pump Source Side1 Outlet Node,  !- Water-to-Refrigerant HX Water Outlet Node Name
     Sys 4 Cooling Coil Air Inlet Node,  !- Indoor Air Inlet Node Name
@@ -1069,6 +1069,9 @@
     0.00165,                 !- Rated Water Flow Rate At Selected Nominal Speed Level {m3/s}
     0.0,                     !- Nominal Time for Condensate to Begin Leaving the Coil {s}
     0.0,                     !- Initial Moisture Evaporation Rate Divided by Steady-State AC Latent Capacity {dimensionless}
+    2.5,                     !- Maximum Cycling Rate {cycles/hr}
+    60,                      !- Latent Capacity Time Constant {s}
+    60,                      !- Fan Delay Time {s}
     0,                       !- Flag for Using Hot Gas Reheat, 0 or 1 {dimensionless}
     VS Energy Part Load Fraction 1,  !- Energy Part Load Fraction Curve Name
     1524.1,                  !- Speed 1 Reference Unit Gross Rated Total Cooling Capacity {W}
@@ -1204,6 +1207,7 @@
 
   Coil:Heating:WaterToAirHeatPump:VariableSpeedEquationFit,
     Sys 4 Heat Pump Heating Mode,  !- Name
+    ,                        !- Availability Schedule Name
     Sys 4 Water to Air Heat Pump Source Side2 Inlet Node,  !- Water-to-Refrigerant HX Water Inlet Node Name
     Sys 4 Water to Air Heat Pump Source Side2 Outlet Node,  !- Water-to-Refrigerant HX Water Outlet Node Name
     Sys 4 Heating Coil Air Inlet Node,  !- Indoor Air Inlet Node Name
@@ -1216,10 +1220,10 @@
     VS Energy Part Load Fraction 1,  !- Energy Part Load Fraction Curve Name
     1838.7,                  !- Speed 1 Reference Unit Gross Rated Heating Capacity {W}
     5.0,                     !- Speed 1 Reference Unit Gross Rated Heating COP {W/W}
-    0.1661088,               !- Speed 1 Reference Unit Rated Air Flow {m3/s}
+    0.1661088,               !- Speed 1 Reference Unit Rated Air Flow Rate {m3/s}
     0.000381695,             !- Speed 1 Reference Unit Rated Water Flow Rate {m3/s}
     Heating VS Temp1 Test,   !- Speed 1 Heating Capacity Function of Temperature Curve Name
-    Heating VS AirFrac Test, !- Speed 1 Total  Heating Capacity Function of Air Flow Fraction Curve Name
+    Heating VS AirFrac Test, !- Speed 1 Total Heating Capacity Function of Air Flow Fraction Curve Name
     Heating VS WaterFrac Test,  !- Speed 1 Heating Capacity Function of Water Flow Fraction Curve Name
     EIRH VS Temp1 Test,      !- Speed 1 Energy Input Ratio Function of Temperature Curve Name
     EIRH VS AirFrac Test,    !- Speed 1 Energy Input Ratio Function of Air Flow Fraction Curve Name
@@ -1231,7 +1235,7 @@
     0.179322,                !- Speed 2 Reference Unit Rated Air Flow Rate {m3/s}
     0.000381695,             !- Speed 2 Reference Unit Rated Water Flow Rate {m3/s}
     Heating VS Temp1 Test,   !- Speed 2 Heating Capacity Function of Temperature Curve Name
-    Heating VS AirFrac Test, !- Speed 2 Total  Heating Capacity Function of Air Flow Fraction Curve Name
+    Heating VS AirFrac Test, !- Speed 2 Total Heating Capacity Function of Air Flow Fraction Curve Name
     Heating VS WaterFrac Test,  !- Speed 2 Heating Capacity Function of Water Flow Fraction Curve Name
     EIRH VS Temp1 Test,      !- Speed 2 Energy Input Ratio Function of Temperature Curve Name
     EIRH VS AirFrac Test,    !- Speed 2 Energy Input Ratio Function of Air Flow Fraction Curve Name
@@ -1243,7 +1247,7 @@
     0.1925352,               !- Speed 3 Reference Unit Rated Air Flow Rate {m3/s}
     0.000381695,             !- Speed 3 Reference Unit Rated Water Flow Rate {m3/s}
     Heating VS Temp1 Test,   !- Speed 3 Heating Capacity Function of Temperature Curve Name
-    Heating VS AirFrac Test, !- Speed 3 Total  Heating Capacity Function of Air Flow Fraction Curve Name
+    Heating VS AirFrac Test, !- Speed 3 Total Heating Capacity Function of Air Flow Fraction Curve Name
     Heating VS WaterFrac Test,  !- Speed 3 Heating Capacity Function of Water Flow Fraction Curve Name
     EIRH VS Temp1 Test,      !- Speed 3 Energy Input Ratio Function of Temperature Curve Name
     EIRH VS AirFrac Test,    !- Speed 3 Energy Input Ratio Function of Air Flow Fraction Curve Name
@@ -1255,7 +1259,7 @@
     0.2189616,               !- Speed 4 Reference Unit Rated Air Flow Rate {m3/s}
     0.000381695,             !- Speed 4 Reference Unit Rated Water Flow Rate {m3/s}
     Heating VS Temp1 Test,   !- Speed 4 Heating Capacity Function of Temperature Curve Name
-    Heating VS AirFrac Test, !- Speed 4 Total  Heating Capacity Function of Air Flow Fraction Curve Name
+    Heating VS AirFrac Test, !- Speed 4 Total Heating Capacity Function of Air Flow Fraction Curve Name
     Heating VS WaterFrac Test,  !- Speed 4 Heating Capacity Function of Water Flow Fraction Curve Name
     EIRH VS Temp1 Test,      !- Speed 4 Energy Input Ratio Function of Temperature Curve Name
     EIRH VS AirFrac Test,    !- Speed 4 Energy Input Ratio Function of Air Flow Fraction Curve Name
@@ -1267,7 +1271,7 @@
     0.245388,                !- Speed 5 Reference Unit Rated Air Flow Rate {m3/s}
     0.000381695,             !- Speed 5 Reference Unit Rated Water Flow Rate {m3/s}
     Heating VS Temp1 Test,   !- Speed 5 Heating Capacity Function of Temperature Curve Name
-    Heating VS AirFrac Test, !- Speed 5 Total  Heating Capacity Function of Air Flow Fraction Curve Name
+    Heating VS AirFrac Test, !- Speed 5 Total Heating Capacity Function of Air Flow Fraction Curve Name
     Heating VS WaterFrac Test,  !- Speed 5 Heating Capacity Function of Water Flow Fraction Curve Name
     EIRH VS Temp1 Test,      !- Speed 5 Energy Input Ratio Function of Temperature Curve Name
     EIRH VS AirFrac Test,    !- Speed 5 Energy Input Ratio Function of Air Flow Fraction Curve Name
@@ -1279,7 +1283,7 @@
     0.2718144,               !- Speed 6 Reference Unit Rated Air Flow Rate {m3/s}
     0.000381695,             !- Speed 6 Reference Unit Rated Water Flow Rate {m3/s}
     Heating VS Temp1 Test,   !- Speed 6 Heating Capacity Function of Temperature Curve Name
-    Heating VS AirFrac Test, !- Speed 6 Total  Heating Capacity Function of Air Flow Fraction Curve Name
+    Heating VS AirFrac Test, !- Speed 6 Total Heating Capacity Function of Air Flow Fraction Curve Name
     Heating VS WaterFrac Test,  !- Speed 6 Heating Capacity Function of Water Flow Fraction Curve Name
     EIRH VS Temp1 Test,      !- Speed 6 Energy Input Ratio Function of Temperature Curve Name
     EIRH VS AirFrac Test,    !- Speed 6 Energy Input Ratio Function of Air Flow Fraction Curve Name
@@ -1291,7 +1295,7 @@
     0.2982408,               !- Speed 7 Reference Unit Rated Air Flow Rate {m3/s}
     0.000381695,             !- Speed 7 Reference Unit Rated Water Flow Rate {m3/s}
     Heating VS Temp1 Test,   !- Speed 7 Heating Capacity Function of Temperature Curve Name
-    Heating VS AirFrac Test, !- Speed 7 Total  Heating Capacity Function of Air Flow Fraction Curve Name
+    Heating VS AirFrac Test, !- Speed 7 Total Heating Capacity Function of Air Flow Fraction Curve Name
     Heating VS WaterFrac Test,  !- Speed 7 Heating Capacity Function of Water Flow Fraction Curve Name
     EIRH VS Temp1 Test,      !- Speed 7 Energy Input Ratio Function of Temperature Curve Name
     EIRH VS AirFrac Test,    !- Speed 7 Energy Input Ratio Function of Air Flow Fraction Curve Name
@@ -1303,7 +1307,7 @@
     0.3246672,               !- Speed 8 Reference Unit Rated Air Flow Rate {m3/s}
     0.000381695,             !- Speed 8 Reference Unit Rated Water Flow Rate {m3/s}
     Heating VS Temp1 Test,   !- Speed 8 Heating Capacity Function of Temperature Curve Name
-    Heating VS AirFrac Test, !- Speed 8 Total  Heating Capacity Function of Air Flow Fraction Curve Name
+    Heating VS AirFrac Test, !- Speed 8 Total Heating Capacity Function of Air Flow Fraction Curve Name
     Heating VS WaterFrac Test,  !- Speed 8 Heating Capacity Function of Water Flow Fraction Curve Name
     EIRH VS Temp1 Test,      !- Speed 8 Energy Input Ratio Function of Temperature Curve Name
     EIRH VS AirFrac Test,    !- Speed 8 Energy Input Ratio Function of Air Flow Fraction Curve Name
@@ -1315,7 +1319,7 @@
     0.3510936,               !- Speed 9 Reference Unit Rated Air Flow Rate {m3/s}
     0.000381695,             !- Speed 9 Reference Unit Rated Water Flow Rate {m3/s}
     Heating VS Temp1 Test,   !- Speed 9 Heating Capacity Function of Temperature Curve Name
-    Heating VS AirFrac Test, !- Speed 9 Total  Heating Capacity Function of Air Flow Fraction Curve Name
+    Heating VS AirFrac Test, !- Speed 9 Total Heating Capacity Function of Air Flow Fraction Curve Name
     Heating VS WaterFrac Test,  !- Speed 9 Heating Capacity Function of Water Flow Fraction Curve Name
     EIRH VS Temp1 Test,      !- Speed 9 Energy Input Ratio Function of Temperature Curve Name
     EIRH VS AirFrac Test,    !- Speed 9 Energy Input Ratio Function of Air Flow Fraction Curve Name
@@ -1327,7 +1331,7 @@
     0.37752,                 !- Speed 10 Reference Unit Rated Air Flow Rate {m3/s}
     0.000381695,             !- Speed 10 Reference Unit Rated Water Flow Rate {m3/s}
     Heating VS Temp1 Test,   !- Speed 10 Heating Capacity Function of Temperature Curve Name
-    Heating VS AirFrac Test, !- Speed 10 Total  Heating Capacity Function of Air Flow Fraction Curve Name
+    Heating VS AirFrac Test, !- Speed 10 Total Heating Capacity Function of Air Flow Fraction Curve Name
     Heating VS WaterFrac Test,  !- Speed 10 Heating Capacity Function of Water Flow Fraction Curve Name
     EIRH VS Temp1 Test,      !- Speed 10 Energy Input Ratio Function of Temperature Curve Name
     EIRH VS AirFrac Test,    !- Speed 10 Energy Input Ratio Function of Air Flow Fraction Curve Name
@@ -1352,10 +1356,6 @@
     Coil:Cooling:WaterToAirHeatPump:VariableSpeedEquationFit,  !- Cooling Coil Object Type
     Sys 5 Heat Pump Cooling Mode,  !- Cooling Coil Name
     0.001,                   !- Cooling Convergence
-    2.5,                     !- Maximum Cycling Rate {cycles/hr}
-    60,                      !- Heat Pump Time Constant {s}
-    0.01,                    !- Fraction of On-Cycle Power Use
-    60,                      !- Heat Pump Fan Delay Time {s}
     Coil:Heating:Fuel,       !- Supplemental Heating Coil Object Type
     Heat Pump DX Supp Heating Coil 5,  !- Supplemental Heating Coil Name
     50,                      !- Maximum Supply Air Temperature from Supplemental Heater {C}
@@ -1366,6 +1366,7 @@
 
   Coil:Cooling:WaterToAirHeatPump:VariableSpeedEquationFit,
     Sys 5 Heat Pump Cooling Mode,  !- Name
+    ,                        !- Availability Schedule Name
     Sys 5 Water to Air Heat Pump Source Side1 Inlet Node,  !- Water-to-Refrigerant HX Water Inlet Node Name
     Sys 5 Water to Air Heat Pump Source Side1 Outlet Node,  !- Water-to-Refrigerant HX Water Outlet Node Name
     Sys 5 Cooling Coil Air Inlet Node,  !- Indoor Air Inlet Node Name
@@ -1377,6 +1378,9 @@
     0.00165,                 !- Rated Water Flow Rate At Selected Nominal Speed Level {m3/s}
     0.0,                     !- Nominal Time for Condensate to Begin Leaving the Coil {s}
     0.0,                     !- Initial Moisture Evaporation Rate Divided by Steady-State AC Latent Capacity {dimensionless}
+    2.5,                     !- Maximum Cycling Rate {cycles/hr}
+    60,                      !- Latent Capacity Time Constant {s}
+    60,                      !- Fan Delay Time {s}
     0,                       !- Flag for Using Hot Gas Reheat, 0 or 1 {dimensionless}
     VS Energy Part Load Fraction 1,  !- Energy Part Load Fraction Curve Name
     1524.1,                  !- Speed 1 Reference Unit Gross Rated Total Cooling Capacity {W}
@@ -1512,6 +1516,7 @@
 
   Coil:Heating:WaterToAirHeatPump:VariableSpeedEquationFit,
     Sys 5 Heat Pump Heating Mode,  !- Name
+    ,                        !- Availability Schedule Name
     Sys 5 Water to Air Heat Pump Source Side2 Inlet Node,  !- Water-to-Refrigerant HX Water Inlet Node Name
     Sys 5 Water to Air Heat Pump Source Side2 Outlet Node,  !- Water-to-Refrigerant HX Water Outlet Node Name
     Sys 5 Heating Coil Air Inlet Node,  !- Indoor Air Inlet Node Name
@@ -1524,10 +1529,10 @@
     VS Energy Part Load Fraction 1,  !- Energy Part Load Fraction Curve Name
     1838.7,                  !- Speed 1 Reference Unit Gross Rated Heating Capacity {W}
     5.0,                     !- Speed 1 Reference Unit Gross Rated Heating COP {W/W}
-    0.1661088,               !- Speed 1 Reference Unit Rated Air Flow {m3/s}
+    0.1661088,               !- Speed 1 Reference Unit Rated Air Flow Rate {m3/s}
     0.000381695,             !- Speed 1 Reference Unit Rated Water Flow Rate {m3/s}
     Heating VS Temp1 Test,   !- Speed 1 Heating Capacity Function of Temperature Curve Name
-    Heating VS AirFrac Test, !- Speed 1 Total  Heating Capacity Function of Air Flow Fraction Curve Name
+    Heating VS AirFrac Test, !- Speed 1 Total Heating Capacity Function of Air Flow Fraction Curve Name
     Heating VS WaterFrac Test,  !- Speed 1 Heating Capacity Function of Water Flow Fraction Curve Name
     EIRH VS Temp1 Test,      !- Speed 1 Energy Input Ratio Function of Temperature Curve Name
     EIRH VS AirFrac Test,    !- Speed 1 Energy Input Ratio Function of Air Flow Fraction Curve Name
@@ -1539,7 +1544,7 @@
     0.179322,                !- Speed 2 Reference Unit Rated Air Flow Rate {m3/s}
     0.000381695,             !- Speed 2 Reference Unit Rated Water Flow Rate {m3/s}
     Heating VS Temp1 Test,   !- Speed 2 Heating Capacity Function of Temperature Curve Name
-    Heating VS AirFrac Test, !- Speed 2 Total  Heating Capacity Function of Air Flow Fraction Curve Name
+    Heating VS AirFrac Test, !- Speed 2 Total Heating Capacity Function of Air Flow Fraction Curve Name
     Heating VS WaterFrac Test,  !- Speed 2 Heating Capacity Function of Water Flow Fraction Curve Name
     EIRH VS Temp1 Test,      !- Speed 2 Energy Input Ratio Function of Temperature Curve Name
     EIRH VS AirFrac Test,    !- Speed 2 Energy Input Ratio Function of Air Flow Fraction Curve Name
@@ -1551,7 +1556,7 @@
     0.1925352,               !- Speed 3 Reference Unit Rated Air Flow Rate {m3/s}
     0.000381695,             !- Speed 3 Reference Unit Rated Water Flow Rate {m3/s}
     Heating VS Temp1 Test,   !- Speed 3 Heating Capacity Function of Temperature Curve Name
-    Heating VS AirFrac Test, !- Speed 3 Total  Heating Capacity Function of Air Flow Fraction Curve Name
+    Heating VS AirFrac Test, !- Speed 3 Total Heating Capacity Function of Air Flow Fraction Curve Name
     Heating VS WaterFrac Test,  !- Speed 3 Heating Capacity Function of Water Flow Fraction Curve Name
     EIRH VS Temp1 Test,      !- Speed 3 Energy Input Ratio Function of Temperature Curve Name
     EIRH VS AirFrac Test,    !- Speed 3 Energy Input Ratio Function of Air Flow Fraction Curve Name
@@ -1563,7 +1568,7 @@
     0.2189616,               !- Speed 4 Reference Unit Rated Air Flow Rate {m3/s}
     0.000381695,             !- Speed 4 Reference Unit Rated Water Flow Rate {m3/s}
     Heating VS Temp1 Test,   !- Speed 4 Heating Capacity Function of Temperature Curve Name
-    Heating VS AirFrac Test, !- Speed 4 Total  Heating Capacity Function of Air Flow Fraction Curve Name
+    Heating VS AirFrac Test, !- Speed 4 Total Heating Capacity Function of Air Flow Fraction Curve Name
     Heating VS WaterFrac Test,  !- Speed 4 Heating Capacity Function of Water Flow Fraction Curve Name
     EIRH VS Temp1 Test,      !- Speed 4 Energy Input Ratio Function of Temperature Curve Name
     EIRH VS AirFrac Test,    !- Speed 4 Energy Input Ratio Function of Air Flow Fraction Curve Name
@@ -1575,7 +1580,7 @@
     0.245388,                !- Speed 5 Reference Unit Rated Air Flow Rate {m3/s}
     0.000381695,             !- Speed 5 Reference Unit Rated Water Flow Rate {m3/s}
     Heating VS Temp1 Test,   !- Speed 5 Heating Capacity Function of Temperature Curve Name
-    Heating VS AirFrac Test, !- Speed 5 Total  Heating Capacity Function of Air Flow Fraction Curve Name
+    Heating VS AirFrac Test, !- Speed 5 Total Heating Capacity Function of Air Flow Fraction Curve Name
     Heating VS WaterFrac Test,  !- Speed 5 Heating Capacity Function of Water Flow Fraction Curve Name
     EIRH VS Temp1 Test,      !- Speed 5 Energy Input Ratio Function of Temperature Curve Name
     EIRH VS AirFrac Test,    !- Speed 5 Energy Input Ratio Function of Air Flow Fraction Curve Name
@@ -1587,7 +1592,7 @@
     0.2718144,               !- Speed 6 Reference Unit Rated Air Flow Rate {m3/s}
     0.000381695,             !- Speed 6 Reference Unit Rated Water Flow Rate {m3/s}
     Heating VS Temp1 Test,   !- Speed 6 Heating Capacity Function of Temperature Curve Name
-    Heating VS AirFrac Test, !- Speed 6 Total  Heating Capacity Function of Air Flow Fraction Curve Name
+    Heating VS AirFrac Test, !- Speed 6 Total Heating Capacity Function of Air Flow Fraction Curve Name
     Heating VS WaterFrac Test,  !- Speed 6 Heating Capacity Function of Water Flow Fraction Curve Name
     EIRH VS Temp1 Test,      !- Speed 6 Energy Input Ratio Function of Temperature Curve Name
     EIRH VS AirFrac Test,    !- Speed 6 Energy Input Ratio Function of Air Flow Fraction Curve Name
@@ -1599,7 +1604,7 @@
     0.2982408,               !- Speed 7 Reference Unit Rated Air Flow Rate {m3/s}
     0.000381695,             !- Speed 7 Reference Unit Rated Water Flow Rate {m3/s}
     Heating VS Temp1 Test,   !- Speed 7 Heating Capacity Function of Temperature Curve Name
-    Heating VS AirFrac Test, !- Speed 7 Total  Heating Capacity Function of Air Flow Fraction Curve Name
+    Heating VS AirFrac Test, !- Speed 7 Total Heating Capacity Function of Air Flow Fraction Curve Name
     Heating VS WaterFrac Test,  !- Speed 7 Heating Capacity Function of Water Flow Fraction Curve Name
     EIRH VS Temp1 Test,      !- Speed 7 Energy Input Ratio Function of Temperature Curve Name
     EIRH VS AirFrac Test,    !- Speed 7 Energy Input Ratio Function of Air Flow Fraction Curve Name
@@ -1611,7 +1616,7 @@
     0.3246672,               !- Speed 8 Reference Unit Rated Air Flow Rate {m3/s}
     0.000381695,             !- Speed 8 Reference Unit Rated Water Flow Rate {m3/s}
     Heating VS Temp1 Test,   !- Speed 8 Heating Capacity Function of Temperature Curve Name
-    Heating VS AirFrac Test, !- Speed 8 Total  Heating Capacity Function of Air Flow Fraction Curve Name
+    Heating VS AirFrac Test, !- Speed 8 Total Heating Capacity Function of Air Flow Fraction Curve Name
     Heating VS WaterFrac Test,  !- Speed 8 Heating Capacity Function of Water Flow Fraction Curve Name
     EIRH VS Temp1 Test,      !- Speed 8 Energy Input Ratio Function of Temperature Curve Name
     EIRH VS AirFrac Test,    !- Speed 8 Energy Input Ratio Function of Air Flow Fraction Curve Name
@@ -1623,7 +1628,7 @@
     0.3510936,               !- Speed 9 Reference Unit Rated Air Flow Rate {m3/s}
     0.000381695,             !- Speed 9 Reference Unit Rated Water Flow Rate {m3/s}
     Heating VS Temp1 Test,   !- Speed 9 Heating Capacity Function of Temperature Curve Name
-    Heating VS AirFrac Test, !- Speed 9 Total  Heating Capacity Function of Air Flow Fraction Curve Name
+    Heating VS AirFrac Test, !- Speed 9 Total Heating Capacity Function of Air Flow Fraction Curve Name
     Heating VS WaterFrac Test,  !- Speed 9 Heating Capacity Function of Water Flow Fraction Curve Name
     EIRH VS Temp1 Test,      !- Speed 9 Energy Input Ratio Function of Temperature Curve Name
     EIRH VS AirFrac Test,    !- Speed 9 Energy Input Ratio Function of Air Flow Fraction Curve Name
@@ -1635,7 +1640,7 @@
     0.37752,                 !- Speed 10 Reference Unit Rated Air Flow Rate {m3/s}
     0.000381695,             !- Speed 10 Reference Unit Rated Water Flow Rate {m3/s}
     Heating VS Temp1 Test,   !- Speed 10 Heating Capacity Function of Temperature Curve Name
-    Heating VS AirFrac Test, !- Speed 10 Total  Heating Capacity Function of Air Flow Fraction Curve Name
+    Heating VS AirFrac Test, !- Speed 10 Total Heating Capacity Function of Air Flow Fraction Curve Name
     Heating VS WaterFrac Test,  !- Speed 10 Heating Capacity Function of Water Flow Fraction Curve Name
     EIRH VS Temp1 Test,      !- Speed 10 Energy Input Ratio Function of Temperature Curve Name
     EIRH VS AirFrac Test,    !- Speed 10 Energy Input Ratio Function of Air Flow Fraction Curve Name
@@ -2542,8 +2547,8 @@
     INFIL-SCH,               !- Schedule Name
     flow/zone,               !- Design Flow Rate Calculation Method
     0.167,                   !- Design Flow Rate {m3/s}
-    ,                        !- Flow per Zone Floor Area {m3/s-m2}
-    ,                        !- Flow per Exterior Surface Area {m3/s-m2}
+    ,                        !- Flow Rate per Floor Area {m3/s-m2}
+    ,                        !- Flow Rate per Exterior Surface Area {m3/s-m2}
     ,                        !- Air Changes per Hour {1/hr}
     0,                       !- Constant Term Coefficient
     0,                       !- Temperature Term Coefficient
@@ -2568,7 +2573,7 @@
     LIGHTS-1,                !- Schedule Name
     LightingLevel,           !- Design Level Calculation Method
     1584,                    !- Lighting Level {W}
-    ,                        !- Watts per Zone Floor Area {W/m2}
+    ,                        !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0.2,                     !- Return Air Fraction
     0.59,                    !- Fraction Radiant
@@ -2582,7 +2587,7 @@
     EQUIP-1,                 !- Schedule Name
     EquipmentLevel,          !- Design Level Calculation Method
     1056,                    !- Design Level {W}
-    ,                        !- Watts per Zone Floor Area {W/m2}
+    ,                        !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0,                       !- Fraction Latent
     0.3,                     !- Fraction Radiant
@@ -2757,8 +2762,8 @@
     INFIL-SCH,               !- Schedule Name
     flow/zone,               !- Design Flow Rate Calculation Method
     .0717,                   !- Design Flow Rate {m3/s}
-    ,                        !- Flow per Zone Floor Area {m3/s-m2}
-    ,                        !- Flow per Exterior Surface Area {m3/s-m2}
+    ,                        !- Flow Rate per Floor Area {m3/s-m2}
+    ,                        !- Flow Rate per Exterior Surface Area {m3/s-m2}
     ,                        !- Air Changes per Hour {1/hr}
     0,                       !- Constant Term Coefficient
     0,                       !- Temperature Term Coefficient
@@ -2783,7 +2788,7 @@
     LIGHTS-1,                !- Schedule Name
     LightingLevel,           !- Design Level Calculation Method
     684,                     !- Lighting Level {W}
-    ,                        !- Watts per Zone Floor Area {W/m2}
+    ,                        !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0.2,                     !- Return Air Fraction
     0.59,                    !- Fraction Radiant
@@ -2797,7 +2802,7 @@
     EQUIP-1,                 !- Schedule Name
     EquipmentLevel,          !- Design Level Calculation Method
     456,                     !- Design Level {W}
-    ,                        !- Watts per Zone Floor Area {W/m2}
+    ,                        !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0,                       !- Fraction Latent
     0.3,                     !- Fraction Radiant
@@ -2937,8 +2942,8 @@
     INFIL-SCH,               !- Schedule Name
     flow/zone,               !- Design Flow Rate Calculation Method
     0.167,                   !- Design Flow Rate {m3/s}
-    ,                        !- Flow per Zone Floor Area {m3/s-m2}
-    ,                        !- Flow per Exterior Surface Area {m3/s-m2}
+    ,                        !- Flow Rate per Floor Area {m3/s-m2}
+    ,                        !- Flow Rate per Exterior Surface Area {m3/s-m2}
     ,                        !- Air Changes per Hour {1/hr}
     0,                       !- Constant Term Coefficient
     0,                       !- Temperature Term Coefficient
@@ -2963,7 +2968,7 @@
     LIGHTS-1,                !- Schedule Name
     LightingLevel,           !- Design Level Calculation Method
     1584,                    !- Lighting Level {W}
-    ,                        !- Watts per Zone Floor Area {W/m2}
+    ,                        !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0.2,                     !- Return Air Fraction
     0.59,                    !- Fraction Radiant
@@ -2977,7 +2982,7 @@
     EQUIP-1,                 !- Schedule Name
     EquipmentLevel,          !- Design Level Calculation Method
     1056,                    !- Design Level {W}
-    ,                        !- Watts per Zone Floor Area {W/m2}
+    ,                        !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0,                       !- Fraction Latent
     0.3,                     !- Fraction Radiant
@@ -3132,8 +3137,8 @@
     INFIL-SCH,               !- Schedule Name
     flow/zone,               !- Design Flow Rate Calculation Method
     .0717,                   !- Design Flow Rate {m3/s}
-    ,                        !- Flow per Zone Floor Area {m3/s-m2}
-    ,                        !- Flow per Exterior Surface Area {m3/s-m2}
+    ,                        !- Flow Rate per Floor Area {m3/s-m2}
+    ,                        !- Flow Rate per Exterior Surface Area {m3/s-m2}
     ,                        !- Air Changes per Hour {1/hr}
     0,                       !- Constant Term Coefficient
     0,                       !- Temperature Term Coefficient
@@ -3158,7 +3163,7 @@
     LIGHTS-1,                !- Schedule Name
     LightingLevel,           !- Design Level Calculation Method
     684,                     !- Lighting Level {W}
-    ,                        !- Watts per Zone Floor Area {W/m2}
+    ,                        !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0.2,                     !- Return Air Fraction
     0.59,                    !- Fraction Radiant
@@ -3172,7 +3177,7 @@
     EQUIP-1,                 !- Schedule Name
     EquipmentLevel,          !- Design Level Calculation Method
     456,                     !- Design Level {W}
-    ,                        !- Watts per Zone Floor Area {W/m2}
+    ,                        !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0,                       !- Fraction Latent
     0.3,                     !- Fraction Radiant
@@ -3312,8 +3317,8 @@
     INFIL-SCH,               !- Schedule Name
     flow/zone,               !- Design Flow Rate Calculation Method
     .31089,                  !- Design Flow Rate {m3/s}
-    ,                        !- Flow per Zone Floor Area {m3/s-m2}
-    ,                        !- Flow per Exterior Surface Area {m3/s-m2}
+    ,                        !- Flow Rate per Floor Area {m3/s-m2}
+    ,                        !- Flow Rate per Exterior Surface Area {m3/s-m2}
     ,                        !- Air Changes per Hour {1/hr}
     0,                       !- Constant Term Coefficient
     0,                       !- Temperature Term Coefficient
@@ -3338,7 +3343,7 @@
     LIGHTS-1,                !- Schedule Name
     LightingLevel,           !- Design Level Calculation Method
     2964,                    !- Lighting Level {W}
-    ,                        !- Watts per Zone Floor Area {W/m2}
+    ,                        !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0.2,                     !- Return Air Fraction
     0.59,                    !- Fraction Radiant
@@ -3352,7 +3357,7 @@
     EQUIP-1,                 !- Schedule Name
     EquipmentLevel,          !- Design Level Calculation Method
     1976,                    !- Design Level {W}
-    ,                        !- Watts per Zone Floor Area {W/m2}
+    ,                        !- Watts per Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0,                       !- Fraction Latent
     0.3,                     !- Fraction Radiant
@@ -3492,7 +3497,14 @@
     No,                      !- Account for Dedicated Outdoor Air System
     NeutralSupplyAir,        !- Dedicated Outdoor Air System Control Strategy
     autosize,                !- Dedicated Outdoor Air Low Setpoint Temperature for Design {C}
-    autosize;                !- Dedicated Outdoor Air High Setpoint Temperature for Design {C}
+    autosize,                !- Dedicated Outdoor Air High Setpoint Temperature for Design {C}
+    ,                        !- Zone Load Sizing Method
+    ,                        !- Zone Latent Cooling Design Supply Air Humidity Ratio Input Method
+    ,                        !- Zone Dehumidification Design Supply Air Humidity Ratio {kgWater/kgDryAir}
+    ,                        !- Zone Cooling Design Supply Air Humidity Ratio Difference {kgWater/kgDryAir}
+    ,                        !- Zone Latent Heating Design Supply Air Humidity Ratio Input Method
+    ,                        !- Zone Humidification Design Supply Air Humidity Ratio {kgWater/kgDryAir}
+    ;                        !- Zone Humidification Design Supply Air Humidity Ratio Difference {kgWater/kgDryAir}
 
   DesignSpecification:OutdoorAir,
     SZ DSOA SPACE1-1,        !- Name
@@ -3528,7 +3540,14 @@
     No,                      !- Account for Dedicated Outdoor Air System
     NeutralSupplyAir,        !- Dedicated Outdoor Air System Control Strategy
     autosize,                !- Dedicated Outdoor Air Low Setpoint Temperature for Design {C}
-    autosize;                !- Dedicated Outdoor Air High Setpoint Temperature for Design {C}
+    autosize,                !- Dedicated Outdoor Air High Setpoint Temperature for Design {C}
+    ,                        !- Zone Load Sizing Method
+    ,                        !- Zone Latent Cooling Design Supply Air Humidity Ratio Input Method
+    ,                        !- Zone Dehumidification Design Supply Air Humidity Ratio {kgWater/kgDryAir}
+    ,                        !- Zone Cooling Design Supply Air Humidity Ratio Difference {kgWater/kgDryAir}
+    ,                        !- Zone Latent Heating Design Supply Air Humidity Ratio Input Method
+    ,                        !- Zone Humidification Design Supply Air Humidity Ratio {kgWater/kgDryAir}
+    ;                        !- Zone Humidification Design Supply Air Humidity Ratio Difference {kgWater/kgDryAir}
 
   DesignSpecification:OutdoorAir,
     SZ DSOA SPACE2-1,        !- Name
@@ -3564,7 +3583,14 @@
     No,                      !- Account for Dedicated Outdoor Air System
     NeutralSupplyAir,        !- Dedicated Outdoor Air System Control Strategy
     autosize,                !- Dedicated Outdoor Air Low Setpoint Temperature for Design {C}
-    autosize;                !- Dedicated Outdoor Air High Setpoint Temperature for Design {C}
+    autosize,                !- Dedicated Outdoor Air High Setpoint Temperature for Design {C}
+    ,                        !- Zone Load Sizing Method
+    ,                        !- Zone Latent Cooling Design Supply Air Humidity Ratio Input Method
+    ,                        !- Zone Dehumidification Design Supply Air Humidity Ratio {kgWater/kgDryAir}
+    ,                        !- Zone Cooling Design Supply Air Humidity Ratio Difference {kgWater/kgDryAir}
+    ,                        !- Zone Latent Heating Design Supply Air Humidity Ratio Input Method
+    ,                        !- Zone Humidification Design Supply Air Humidity Ratio {kgWater/kgDryAir}
+    ;                        !- Zone Humidification Design Supply Air Humidity Ratio Difference {kgWater/kgDryAir}
 
   DesignSpecification:OutdoorAir,
     SZ DSOA SPACE3-1,        !- Name
@@ -3600,7 +3626,14 @@
     No,                      !- Account for Dedicated Outdoor Air System
     NeutralSupplyAir,        !- Dedicated Outdoor Air System Control Strategy
     autosize,                !- Dedicated Outdoor Air Low Setpoint Temperature for Design {C}
-    autosize;                !- Dedicated Outdoor Air High Setpoint Temperature for Design {C}
+    autosize,                !- Dedicated Outdoor Air High Setpoint Temperature for Design {C}
+    ,                        !- Zone Load Sizing Method
+    ,                        !- Zone Latent Cooling Design Supply Air Humidity Ratio Input Method
+    ,                        !- Zone Dehumidification Design Supply Air Humidity Ratio {kgWater/kgDryAir}
+    ,                        !- Zone Cooling Design Supply Air Humidity Ratio Difference {kgWater/kgDryAir}
+    ,                        !- Zone Latent Heating Design Supply Air Humidity Ratio Input Method
+    ,                        !- Zone Humidification Design Supply Air Humidity Ratio {kgWater/kgDryAir}
+    ;                        !- Zone Humidification Design Supply Air Humidity Ratio Difference {kgWater/kgDryAir}
 
   DesignSpecification:OutdoorAir,
     SZ DSOA SPACE4-1,        !- Name
@@ -3636,7 +3669,14 @@
     No,                      !- Account for Dedicated Outdoor Air System
     NeutralSupplyAir,        !- Dedicated Outdoor Air System Control Strategy
     autosize,                !- Dedicated Outdoor Air Low Setpoint Temperature for Design {C}
-    autosize;                !- Dedicated Outdoor Air High Setpoint Temperature for Design {C}
+    autosize,                !- Dedicated Outdoor Air High Setpoint Temperature for Design {C}
+    ,                        !- Zone Load Sizing Method
+    ,                        !- Zone Latent Cooling Design Supply Air Humidity Ratio Input Method
+    ,                        !- Zone Dehumidification Design Supply Air Humidity Ratio {kgWater/kgDryAir}
+    ,                        !- Zone Cooling Design Supply Air Humidity Ratio Difference {kgWater/kgDryAir}
+    ,                        !- Zone Latent Heating Design Supply Air Humidity Ratio Input Method
+    ,                        !- Zone Humidification Design Supply Air Humidity Ratio {kgWater/kgDryAir}
+    ;                        !- Zone Humidification Design Supply Air Humidity Ratio Difference {kgWater/kgDryAir}
 
   DesignSpecification:OutdoorAir,
     SZ DSOA SPACE5-1,        !- Name

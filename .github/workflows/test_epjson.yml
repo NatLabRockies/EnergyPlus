@@ -1,0 +1,106 @@
+name: epJSON dependency
+
+on:
+  push:
+    branches: [ develop ]
+  pull_request:
+    branches: [ develop ]
+
+env:
+  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  BUILD_TYPE: Release
+
+jobs:
+  release:
+    name: Testing on Windows
+    runs-on: windows-2022
+
+    steps:
+    - uses: actions/checkout@v6
+
+    - name: Set up Python 3.12
+      uses: actions/setup-python@v6
+      with:
+        python-version: '3.12'
+
+    - name: Install Pip Stuff
+      shell: bash
+      run: pip install pytest pytest-timeout
+
+    - name: Create Build Directory
+      run: cmake -E make_directory ./build/
+
+    - name: Configure CMake
+      working-directory: ./build
+      run: cmake -G "Visual Studio 17 2022" -A x64 ../
+
+    - name: Test epjson
+      shell: python
+      run: |
+        from pathlib import Path
+        import subprocess
+
+        EP_ROOT = Path(".").resolve()
+        EP_BUILD_DIR = Path('./build').resolve()
+        EXPECTED_MSGS = ["Generating the epJSON schema!", "Generating the **embedded** epJSON schema"]
+
+        def build():
+            lines = subprocess.check_output(
+                [
+                    "cmake",
+                    "--build",
+                    str(EP_BUILD_DIR),
+                    "--config",
+                    "Release",
+                    "--target",
+                    "embedded_epjson_source",
+                ],
+                encoding="utf-8",
+                stderr=subprocess.STDOUT,
+            ).splitlines()
+            return lines
+
+
+        IDD_IN = EP_ROOT / "idd/Energy+.idd.in"
+        assert IDD_IN.exists()
+
+
+        def ensure_target_built(lines, msg):
+            lines = [x.strip() for x in lines if "epJSON schema" in x]
+            errors = []
+            for expected_msg in EXPECTED_MSGS:
+                n = lines.count(expected_msg)
+                if n != 1:
+                    errors.append(f"Expected 1 occurrence of '{expected_msg}', got {n}")
+            assert not errors, "\n -" + "\n -".join(errors)
+
+        # Build: first time: we get both
+        lines = build()
+        ensure_target_built(lines, "Failed on first build")
+
+        # Insert a fake IDD change, we should also get both
+        with open(IDD_IN, "r") as f:
+            lines = f.read().splitlines()
+        ori_lines = lines.copy()
+
+        for i, line in enumerate(lines):
+            if line.startswith(r"\group"):
+                lines.insert(i + 1, "")
+                lines.insert(i + 2, "FakeObject,")
+                lines.insert(i + 3, r" A1; \field Name")
+                break
+        with open(IDD_IN, "w") as f:
+            f.write("\n".join(lines) + "\n")
+
+        lines = build()
+        ensure_target_built(lines, "Failed after IDD change")
+
+        with open(IDD_IN, "w") as f:
+            f.write("\n".join(ori_lines) + "\n")
+
+        lines = build()
+        ensure_target_built(lines, "Failed after IDD change revert")
+
+    - name: Run idd_schema pytests
+      working-directory: ./build
+      run: pytest --verbose ../idd

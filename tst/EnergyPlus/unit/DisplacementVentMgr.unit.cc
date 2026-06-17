@@ -1,7 +1,7 @@
-// EnergyPlus, Copyright (c) 1996-2023, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
-// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other
+// National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
 // contributors. All rights reserved.
 //
 // NOTICE: This Software was developed under funding from the U.S. Department of Energy and the
@@ -57,15 +57,13 @@
 #include <EnergyPlus/DataHeatBalance.hh>
 #include <EnergyPlus/DataRoomAirModel.hh>
 #include <EnergyPlus/DataSurfaces.hh>
-#include <EnergyPlus/DataUCSDSharedData.hh>
 #include <EnergyPlus/DisplacementVentMgr.hh>
 #include <EnergyPlus/HeatBalanceAirManager.hh>
 
 using namespace EnergyPlus;
 using namespace EnergyPlus::DataSurfaces;
 using namespace EnergyPlus::DataHeatBalance;
-using namespace EnergyPlus::DisplacementVentMgr;
-using namespace EnergyPlus::DataRoomAirModel;
+using namespace EnergyPlus::RoomAir;
 
 TEST_F(EnergyPlusFixture, DisplacementVentMgr_HcUCSDDV_Door_Test)
 {
@@ -75,14 +73,14 @@ TEST_F(EnergyPlusFixture, DisplacementVentMgr_HcUCSDDV_Door_Test)
     state->dataGlobal->NumOfZones = 1;
     int TotSurfaces = 3;
 
-    state->dataRoomAirMod->IsZoneDV.allocate(state->dataGlobal->NumOfZones);
-    state->dataRoomAirMod->IsZoneDV(1) = true;
+    state->dataRoomAir->IsZoneDispVent3Node.allocate(state->dataGlobal->NumOfZones);
+    state->dataRoomAir->IsZoneDispVent3Node(1) = true;
     state->dataSurface->Surface.allocate(TotSurfaces);
     state->dataHeatBal->SurfTempEffBulkAir.allocate(TotSurfaces);
     state->dataHeatBalSurf->SurfTempIn.allocate(TotSurfaces);
-    state->dataRoomAirMod->DVHcIn.allocate(TotSurfaces);
-    state->dataRoomAirMod->ZTMX.allocate(state->dataGlobal->NumOfZones);
-    state->dataRoomAirMod->ZTOC.allocate(state->dataGlobal->NumOfZones);
+    state->dataRoomAir->DispVent3NodeHcIn.allocate(TotSurfaces);
+    state->dataRoomAir->ZTMX.allocate(state->dataGlobal->NumOfZones);
+    state->dataRoomAir->ZTOC.allocate(state->dataGlobal->NumOfZones);
 
     // Surface 1 Vertical wall
     state->dataSurface->Surface(1).Name = "Class1_Wall_6_0_0_0_0_0_Subsurface";
@@ -159,117 +157,118 @@ TEST_F(EnergyPlusFixture, DisplacementVentMgr_HcUCSDDV_Door_Test)
     state->dataSurface->Surface(3).Vertex(4).y = -1.48693002;
     state->dataSurface->Surface(3).Vertex(4).z = 8.5343999852;
 
-    state->dataSurface->SurfIntConvCoeffIndex.allocate(TotSurfaces);
-    state->dataSurface->SurfTAirRef.allocate(TotSurfaces);
-    state->dataSurface->SurfTAirRefRpt.allocate(TotSurfaces);
-    state->dataSurface->SurfIntConvCoeffIndex = 0.0;
-    state->dataSurface->SurfTAirRef = 0;
+    state->dataSurface->surfIntConv.allocate(TotSurfaces);
+    std::fill(state->dataSurface->surfIntConv.begin(), state->dataSurface->surfIntConv.end(), SurfIntConv());
+    state->dataSurface->SurfTAirRef.dimension(TotSurfaces, 0);
+    state->dataSurface->SurfTAirRefRpt.dimension(TotSurfaces, 0);
 
-    state->dataRoomAirMod->AirModel.allocate(state->dataGlobal->NumOfZones);
-    state->dataRoomAirMod->AirModel(1).AirModelType = DataRoomAirModel::RoomAirModel::UCSDDV;
+    state->dataRoomAir->AirModel.allocate(state->dataGlobal->NumOfZones);
+    state->dataRoomAir->AirModel(1).AirModel = RoomAir::RoomAirModel::DispVent3Node;
 
-    state->dataUCSDShared->APos_Wall.allocate(TotSurfaces);
-    state->dataUCSDShared->APos_Floor.allocate(TotSurfaces);
-    state->dataUCSDShared->APos_Ceiling.allocate(TotSurfaces);
-    state->dataUCSDShared->PosZ_Wall.allocate(state->dataGlobal->NumOfZones * 2);
-    state->dataUCSDShared->PosZ_Floor.allocate(state->dataGlobal->NumOfZones * 2);
-    state->dataUCSDShared->PosZ_Ceiling.allocate(state->dataGlobal->NumOfZones * 2);
-    state->dataUCSDShared->APos_Window.allocate(TotSurfaces);
-    state->dataUCSDShared->APos_Door.allocate(TotSurfaces);
-    state->dataUCSDShared->APos_Internal.allocate(TotSurfaces);
-    state->dataUCSDShared->PosZ_Window.allocate(state->dataGlobal->NumOfZones * 2);
-    state->dataUCSDShared->PosZ_Door.allocate(state->dataGlobal->NumOfZones * 2);
-    state->dataUCSDShared->PosZ_Internal.allocate(state->dataGlobal->NumOfZones * 2);
-    state->dataUCSDShared->HCeiling.allocate(TotSurfaces);
-    state->dataUCSDShared->HWall.allocate(TotSurfaces);
-    state->dataUCSDShared->HFloor.allocate(TotSurfaces);
-    state->dataUCSDShared->HInternal.allocate(TotSurfaces);
-    state->dataUCSDShared->HWindow.allocate(TotSurfaces);
-    state->dataUCSDShared->HDoor.allocate(TotSurfaces);
+    state->dataRoomAir->APos_Wall.allocate(TotSurfaces);
+    state->dataRoomAir->APos_Floor.allocate(TotSurfaces);
+    state->dataRoomAir->APos_Ceiling.allocate(TotSurfaces);
+    state->dataRoomAir->PosZ_Wall.allocate(state->dataGlobal->NumOfZones);
+    state->dataRoomAir->PosZ_Floor.allocate(state->dataGlobal->NumOfZones);
+    state->dataRoomAir->PosZ_Ceiling.allocate(state->dataGlobal->NumOfZones);
+    state->dataRoomAir->APos_Window.allocate(TotSurfaces);
+    state->dataRoomAir->APos_Door.allocate(TotSurfaces);
+    state->dataRoomAir->APos_Internal.allocate(TotSurfaces);
+    state->dataRoomAir->PosZ_Window.allocate(state->dataGlobal->NumOfZones);
+    state->dataRoomAir->PosZ_Door.allocate(state->dataGlobal->NumOfZones);
+    state->dataRoomAir->PosZ_Internal.allocate(state->dataGlobal->NumOfZones);
+    state->dataRoomAir->HCeiling.allocate(TotSurfaces);
+    state->dataRoomAir->HWall.allocate(TotSurfaces);
+    state->dataRoomAir->HFloor.allocate(TotSurfaces);
+    state->dataRoomAir->HInternal.allocate(TotSurfaces);
+    state->dataRoomAir->HWindow.allocate(TotSurfaces);
+    state->dataRoomAir->HDoor.allocate(TotSurfaces);
 
-    state->dataRoomAirMod->ZoneCeilingHeight.allocate(state->dataGlobal->NumOfZones * 2);
-    state->dataRoomAirMod->ZoneCeilingHeight(1) = 4.9784;
-    state->dataRoomAirMod->ZoneCeilingHeight(2) = 4.9784;
+    state->dataRoomAir->ZoneCeilingHeight1.allocate(state->dataGlobal->NumOfZones);
+    state->dataRoomAir->ZoneCeilingHeight2.allocate(state->dataGlobal->NumOfZones);
+    state->dataRoomAir->ZoneCeilingHeight1(1) = 4.9784;
+    state->dataRoomAir->ZoneCeilingHeight2(1) = 4.9784;
 
     // Arrays initializations
-    state->dataUCSDShared->APos_Wall = 0;
-    state->dataUCSDShared->APos_Floor = 0;
-    state->dataUCSDShared->APos_Ceiling = 0;
-    state->dataUCSDShared->PosZ_Wall(1) = 1;
-    state->dataUCSDShared->PosZ_Wall(2) = 0;
-    state->dataUCSDShared->PosZ_Floor(1) = 1;
-    state->dataUCSDShared->PosZ_Floor(2) = 0;
-    state->dataUCSDShared->PosZ_Ceiling(1) = 1;
-    state->dataUCSDShared->PosZ_Ceiling(2) = 0;
-    state->dataUCSDShared->APos_Window = 0;
-    state->dataUCSDShared->APos_Door = 0;
-    state->dataUCSDShared->APos_Internal = 0;
-    state->dataUCSDShared->PosZ_Window(1) = 1;
-    state->dataUCSDShared->PosZ_Window(2) = 0;
-    state->dataUCSDShared->PosZ_Door(1) = 1;
-    state->dataUCSDShared->PosZ_Door(2) = 3;
-    state->dataUCSDShared->PosZ_Internal(1) = 1;
-    state->dataUCSDShared->PosZ_Internal(2) = 0;
-    state->dataUCSDShared->HCeiling = 0.0;
-    state->dataUCSDShared->HWall = 0.0;
-    state->dataUCSDShared->HFloor = 0.0;
-    state->dataUCSDShared->HInternal = 0.0;
-    state->dataUCSDShared->HWindow = 0.0;
-    state->dataUCSDShared->HDoor = 0.0;
+    state->dataRoomAir->APos_Wall = 0;
+    state->dataRoomAir->APos_Floor = 0;
+    state->dataRoomAir->APos_Ceiling = 0;
+    state->dataRoomAir->PosZ_Wall(1).beg = 1;
+    state->dataRoomAir->PosZ_Wall(1).end = 0;
+    state->dataRoomAir->PosZ_Floor(1).beg = 1;
+    state->dataRoomAir->PosZ_Floor(1).end = 0;
+    state->dataRoomAir->PosZ_Ceiling(1).beg = 1;
+    state->dataRoomAir->PosZ_Ceiling(1).end = 0;
+    state->dataRoomAir->APos_Window = 0;
+    state->dataRoomAir->APos_Door = 0;
+    state->dataRoomAir->APos_Internal = 0;
+    state->dataRoomAir->PosZ_Window(1).beg = 1;
+    state->dataRoomAir->PosZ_Window(1).end = 0;
+    state->dataRoomAir->PosZ_Door(1).beg = 1;
+    state->dataRoomAir->PosZ_Door(1).end = 3;
+    state->dataRoomAir->PosZ_Internal(1).beg = 1;
+    state->dataRoomAir->PosZ_Internal(1).end = 0;
+    state->dataRoomAir->HCeiling = 0.0;
+    state->dataRoomAir->HWall = 0.0;
+    state->dataRoomAir->HFloor = 0.0;
+    state->dataRoomAir->HInternal = 0.0;
+    state->dataRoomAir->HWindow = 0.0;
+    state->dataRoomAir->HDoor = 0.0;
 
-    state->dataRoomAirMod->ZoneUCSDCV.allocate(state->dataGlobal->NumOfZones);
-    state->dataRoomAirMod->ZoneUCSDCV(1).ZonePtr = 1;
-    state->dataUCSDShared->PosZ_Door(1) = 1;
-    state->dataUCSDShared->PosZ_Door(2) = 3;
-    state->dataUCSDShared->APos_Door(1) = 1;
-    state->dataUCSDShared->APos_Door(2) = 2;
-    state->dataUCSDShared->APos_Door(3) = 3;
+    state->dataRoomAir->ZoneCrossVent.allocate(state->dataGlobal->NumOfZones);
+    state->dataRoomAir->ZoneCrossVent(1).ZonePtr = 1;
+    state->dataRoomAir->PosZ_Door(1).beg = 1;
+    state->dataRoomAir->PosZ_Door(1).end = 3;
+    state->dataRoomAir->APos_Door(1) = 1;
+    state->dataRoomAir->APos_Door(2) = 2;
+    state->dataRoomAir->APos_Door(3) = 3;
 
-    state->dataRoomAirMod->ZTMX(1) = 20.0;
-    state->dataRoomAirMod->ZTOC(1) = 21.0;
+    state->dataRoomAir->ZTMX(1) = 20.0;
+    state->dataRoomAir->ZTOC(1) = 21.0;
     state->dataHeatBalSurf->SurfTempIn(1) = 23.0;
     state->dataHeatBalSurf->SurfTempIn(2) = 23.0;
     state->dataHeatBalSurf->SurfTempIn(3) = 23.0;
 
-    HcUCSDDV(*state, 1, 0.5);
+    HcDispVent3Node(*state, 1, 0.5);
 
-    EXPECT_NEAR(1.889346, state->dataRoomAirMod->DVHcIn(1), 0.0001);
-    EXPECT_NEAR(1.650496, state->dataRoomAirMod->DVHcIn(2), 0.0001);
-    EXPECT_NEAR(1.889346, state->dataRoomAirMod->DVHcIn(3), 0.0001);
+    EXPECT_NEAR(1.889346, state->dataRoomAir->DispVent3NodeHcIn(1), 0.0001);
+    EXPECT_NEAR(1.650496, state->dataRoomAir->DispVent3NodeHcIn(2), 0.0001);
+    EXPECT_NEAR(1.889346, state->dataRoomAir->DispVent3NodeHcIn(3), 0.0001);
     EXPECT_NEAR(379.614212, state->dataDispVentMgr->HAT_OC, 0.0001);
     EXPECT_NEAR(16.504965, state->dataDispVentMgr->HA_OC, 0.0001);
     EXPECT_NEAR(869.099591, state->dataDispVentMgr->HAT_MX, 0.0001);
     EXPECT_NEAR(37.786938, state->dataDispVentMgr->HA_MX, 0.0001);
 
-    state->dataRoomAirMod->IsZoneDV.deallocate();
+    state->dataRoomAir->IsZoneDispVent3Node.deallocate();
     state->dataSurface->Surface.deallocate();
     state->dataHeatBal->SurfTempEffBulkAir.deallocate();
     state->dataHeatBalSurf->SurfTempIn.deallocate();
-    state->dataRoomAirMod->DVHcIn.deallocate();
-    state->dataRoomAirMod->ZTMX.deallocate();
-    state->dataRoomAirMod->ZTOC.deallocate();
-    state->dataRoomAirMod->AirModel.deallocate();
+    state->dataRoomAir->DispVent3NodeHcIn.deallocate();
+    state->dataRoomAir->ZTMX.deallocate();
+    state->dataRoomAir->ZTOC.deallocate();
+    state->dataRoomAir->AirModel.deallocate();
 
-    state->dataUCSDShared->APos_Wall.deallocate();
-    state->dataUCSDShared->APos_Floor.deallocate();
-    state->dataUCSDShared->APos_Ceiling.deallocate();
-    state->dataUCSDShared->PosZ_Wall.deallocate();
-    state->dataUCSDShared->PosZ_Floor.deallocate();
-    state->dataUCSDShared->PosZ_Ceiling.deallocate();
-    state->dataUCSDShared->APos_Window.deallocate();
-    state->dataUCSDShared->APos_Door.deallocate();
-    state->dataUCSDShared->APos_Internal.deallocate();
-    state->dataUCSDShared->PosZ_Window.deallocate();
-    state->dataUCSDShared->PosZ_Door.deallocate();
-    state->dataUCSDShared->PosZ_Internal.deallocate();
-    state->dataUCSDShared->HCeiling.deallocate();
-    state->dataUCSDShared->HWall.deallocate();
-    state->dataUCSDShared->HFloor.deallocate();
-    state->dataUCSDShared->HInternal.deallocate();
-    state->dataUCSDShared->HWindow.deallocate();
-    state->dataUCSDShared->HDoor.deallocate();
-    state->dataRoomAirMod->ZoneCeilingHeight.deallocate();
-    state->dataRoomAirMod->ZoneUCSDCV.deallocate();
+    state->dataRoomAir->APos_Wall.deallocate();
+    state->dataRoomAir->APos_Floor.deallocate();
+    state->dataRoomAir->APos_Ceiling.deallocate();
+    state->dataRoomAir->PosZ_Wall.deallocate();
+    state->dataRoomAir->PosZ_Floor.deallocate();
+    state->dataRoomAir->PosZ_Ceiling.deallocate();
+    state->dataRoomAir->APos_Window.deallocate();
+    state->dataRoomAir->APos_Door.deallocate();
+    state->dataRoomAir->APos_Internal.deallocate();
+    state->dataRoomAir->PosZ_Window.deallocate();
+    state->dataRoomAir->PosZ_Door.deallocate();
+    state->dataRoomAir->PosZ_Internal.deallocate();
+    state->dataRoomAir->HCeiling.deallocate();
+    state->dataRoomAir->HWall.deallocate();
+    state->dataRoomAir->HFloor.deallocate();
+    state->dataRoomAir->HInternal.deallocate();
+    state->dataRoomAir->HWindow.deallocate();
+    state->dataRoomAir->HDoor.deallocate();
+    state->dataRoomAir->ZoneCeilingHeight1.deallocate();
+    state->dataRoomAir->ZoneCeilingHeight2.deallocate();
+    state->dataRoomAir->ZoneCrossVent.deallocate();
 }
 
 TEST_F(EnergyPlusFixture, DVThirdOrderFloorTempCalculation)

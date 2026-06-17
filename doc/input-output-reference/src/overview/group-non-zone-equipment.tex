@@ -28,7 +28,7 @@ The name of the outlet node connection to the plant loop.
 
 \paragraph{Field: Load Schedule Name}\label{field-load-schedule-name}
 
-Reference to the schedule object specifying the load profile {[}W{]}.  The value of load can be positive or negative.  Negative values here are for imposing a cooling load on the loop (with a chiller on the supply side, e.g.), while psoitive values are impose a heating load (with a boiler on the supply side).
+Reference to the schedule object specifying the load profile {[}W{]}.  The value of load can be positive or negative.  Negative values here are for imposing a cooling load on the loop (with a chiller on the supply side, e.g.), while positive values are impose a heating load (with a boiler on the supply side).
 
 \paragraph{Field: Peak Flow Rate}\label{field-peak-flow-rate}
 
@@ -38,17 +38,29 @@ The peak demanded water flow rate {[}m\(^{3}\)/s{]}. This value is multiplied by
 
 Reference to the schedule object specifying the flow rate fraction relative to the value in the field Peak Flow Rate (above).
 
+\paragraph{Field: Plant Loop Fluid Type}\label{field-plant-loop-fluid-type}
+
+The fluid type of the plant loop; water or steam.
+
+\paragraph{Field: Degree of SubCooling}\label{field-degree-of-subcooling-load-profile}
+
+This field is used only when Plant Loop Fluid Type=Steam. The minimum value is 1$^\circ$ Celsius and default is 5$^\circ$ Celsius.
+
+\paragraph{Field: Degree of Loop SubCooling}\label{field-degree-of-loop-subcooling-load-profile}
+
+This field is used only when Plant Loop Fluid Type=Steam. The minimum value is 2$^\circ$ Celsius and default is 5$^\circ$ Celsius.
+
 An example of this object follows.
 
 \begin{lstlisting}
-
 LoadProfile:Plant,
-  Load Profile 1,                                         !- Name
-  Demand Load Profile 1 Inlet Node,     !- Inlet Node Name
-  Demand Load Profile 1 Outlet Node,   !- Outlet Node Name
-  Load Profile 1 Load Schedule,             !- Load Schedule Name {W}
-  0.003,                                                           !- Peak Flow Rate {m3/s}
-  Load Profile 1 Flow Frac Schedule;   !- Flow Rate Fraction Schedule Name
+  Load Profile 1,             !- Name
+  Demand Load Profile 1 Inlet Node,  !- Inlet Node Name
+  Demand Load Profile 1 Outlet Node,  !- Outlet Node Name
+  Load Profile 1 Load Schedule,  !- Load Schedule Name {W}
+  0.003,                      !- Peak Flow Rate {m3/s}
+  Load Profile 1 Flow Frac Schedule,  !- Flow Rate Fraction Schedule Name
+  Water;                      !- Plant Loop Fluid Type
 \end{lstlisting}
 
 \subsubsection{Outputs}\label{outputs-020}
@@ -66,6 +78,8 @@ The following output variables and meters are reported for the LoadProfile:Plant
   HVAC,Sum,Plant Load Profile Heating Energy {[}J{]}
 \item
   HVAC,Sum,Plant Load Profile Cooling Energy {[}J{]}
+\item
+  HVAC,Average,Plant Load Profile Steam Outlet Temperature {[}J{]}
 \end{itemize}
 
 \paragraph{Plant Load Profile Mass Flow Rate {[}kg/s{]}}\label{plant-load-profile-mass-flow-rate-kgs}
@@ -81,6 +95,8 @@ These report the overall heat transfer rate and energy for the load profile obje
 \paragraph{Plant Load Profile Cooling Energy {[}J{]}Plant Load Profile Heating Energy {[}J{]}}\label{plant-load-profile-cooling-energy-jplant-load-profile-heating-energy-j}
 
 These report the overall cooling or heating energy that the load profile object places on the plant loop, in Joules.
+
+\paragraph{Plant Load Profile Steam Outlet Temperature {[}C{]}}\label{plant-load-profile-steam-outlet-temperature-c}
 
 The inlet and outlet node temperatures and mass flow rates can be monitored using the system node output variables:
 

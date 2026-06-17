@@ -1,7 +1,7 @@
-// EnergyPlus, Copyright (c) 1996-2023, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
-// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other
+// National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
 // contributors. All rights reserved.
 //
 // NOTICE: This Software was developed under funding from the U.S. Department of Energy and the
@@ -72,15 +72,15 @@ namespace ChillerElectricASHRAE205 {
         Num,
     };
 
-    void tk205ErrCallback(tk205::MsgSeverity message_type, const std::string &message, void *context_ptr);
-
     void getChillerASHRAE205Input(EnergyPlusData &state);
 
     struct ASHRAE205ChillerSpecs : ChillerElectricEIR::ElectricEIRChillerSpecs
     {
         static constexpr std::string_view ObjectType{"Chiller:Electric:ASHRAE205"};
         std::shared_ptr<tk205::rs0001_ns::RS0001> Representation; // ASHRAE205 representation instance
-        Btwxt::Method InterpolationType{Btwxt::Method::LINEAR};
+        std::pair<EnergyPlusData *, std::string> LoggerContext;
+
+        Btwxt::InterpolationMethod InterpolationType{Btwxt::InterpolationMethod::linear};
         int MinSequenceNumber{1};
         int MaxSequenceNumber{1};
 
@@ -100,13 +100,13 @@ namespace ChillerElectricASHRAE205 {
         Real64 AuxiliaryEnergy{0};
 
         AmbientTempIndicator AmbientTempType{AmbientTempIndicator::Invalid};
-        int AmbientTempSchedule{0};       // Schedule index pointer
+        Sched::Schedule *ambientTempSched = nullptr;
         int AmbientTempZone{0};           // Number of ambient zone around tank
         int AmbientTempOutsideAirNode{0}; // Number of outside air node
         Real64 AmbientTemp{0};
-        Real64 AmbientZoneGain{0};         // Internal gain to zone from losses (W)
-        Real64 AmbientZoneGainEnergy{0};   // Internal gain to zone from losses (J)
-        std::string EndUseSubcategory{""}; // identifier use for the end use subcategory
+        Real64 AmbientZoneGain{0};       // Internal gain to zone from losses (W)
+        Real64 AmbientZoneGainEnergy{0}; // Internal gain to zone from losses (J)
+        std::string EndUseSubcategory;   // identifier use for the end use subcategory
 
         // Default Constructor
         ASHRAE205ChillerSpecs() = default;
@@ -150,9 +150,17 @@ struct ChillerElectricASHRAE205Data : BaseGlobalStruct
     bool getInputFlag = true;
     Array1D<ChillerElectricASHRAE205::ASHRAE205ChillerSpecs> Electric205Chiller;
 
+    void init_constant_state([[maybe_unused]] EnergyPlusData &state) override
+    {
+    }
+
+    void init_state([[maybe_unused]] EnergyPlusData &state) override
+    {
+    }
+
     void clear_state() override
     {
-        *this = ChillerElectricASHRAE205Data();
+        new (this) ChillerElectricASHRAE205Data();
     }
 };
 

@@ -1,7 +1,7 @@
-// EnergyPlus, Copyright (c) 1996-2023, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
-// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other
+// National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
 // contributors. All rights reserved.
 //
 // NOTICE: This Software was developed under funding from the U.S. Department of Energy and the
@@ -52,13 +52,26 @@
 
 namespace EnergyPlus {
 
+// Forward declarations
+namespace DataPlant {
+    struct PlantLoopData;
+    struct HalfLoopData;
+    struct BranchData;
+    struct CompData;
+} // namespace DataPlant
+
 struct PlantLocation
 {
     // Members
-    int loopNum;
+    int loopNum = -1;
     DataPlant::LoopSideLocation loopSideNum;
-    int branchNum;
-    int compNum;
+    int branchNum = -1;
+    int compNum = -1;
+
+    DataPlant::PlantLoopData *loop = nullptr;
+    DataPlant::HalfLoopData *side = nullptr;
+    DataPlant::BranchData *branch = nullptr;
+    DataPlant::CompData *comp = nullptr;
 
     // Overload operator== for PlantLocation
     friend bool operator==(PlantLocation const &lhsPlantLoc, PlantLocation const &rhsPlantLoc)
@@ -73,7 +86,6 @@ struct PlantLocation
         return !operator==(lhsPlantLoc, rhsPlantLoc);
     }
 
-    // Default Constructor
     PlantLocation() : loopNum(0), loopSideNum(DataPlant::LoopSideLocation::Invalid), branchNum(0), compNum(0)
     {
     }

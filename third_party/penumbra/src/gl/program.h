@@ -7,19 +7,20 @@
 // Vendor
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
+#include <courierr/courierr.h>
 
-namespace Pumbra {
+namespace Penumbra {
 
 class GLProgram {
 public:
-  GLProgram(const char *vertexSource, const char *fragmentSource);
+  GLProgram(const char *vertex_source, const char *fragment_source, Courierr::Courierr *logger);
   ~GLProgram();
-  GLuint getInt();
+  [[nodiscard]] GLuint get() const;
 
 private:
   GLuint program;
 };
 
-} // namespace Pumbra
+} // namespace Penumbra
 
 #endif // PROGRAM_H_

@@ -1,7 +1,7 @@
-// EnergyPlus, Copyright (c) 1996-2023, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
-// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other
+// National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
 // contributors. All rights reserved.
 //
 // NOTICE: This Software was developed under funding from the U.S. Department of Energy and the
@@ -52,12 +52,11 @@
 
 // EnergyPlus Headers
 #include "EnergyPlus/DataIPShortCuts.hh"
-#include "EnergyPlus/GroundTemperatureModeling/GroundTemperatureModelManager.hh"
+#include "EnergyPlus/GroundTemperatureModeling/BaseGroundTemperatureModel.hh"
 #include "Fixtures/EnergyPlusFixture.hh"
 #include <EnergyPlus/Data/EnergyPlusData.hh>
 
 using namespace EnergyPlus;
-using namespace EnergyPlus::GroundTemperatureManager;
 
 TEST_F(EnergyPlusFixture, SiteFCFactorMethodGroundTempTest)
 {
@@ -79,10 +78,7 @@ TEST_F(EnergyPlusFixture, SiteFCFactorMethodGroundTempTest)
 
     ASSERT_TRUE(process_idf(idf_objects));
 
-    std::string const CurrentModuleObject =
-        static_cast<std::string>(groundTempModelNamesUC[static_cast<int>(GroundTempObjType::SiteFCFactorMethodGroundTemp)]);
-
-    auto thisModel = GetGroundTempModelAndInit(*state, CurrentModuleObject, "TEST");
+    auto *thisModel = GroundTemp::GetGroundTempModelAndInit(*state, GroundTemp::ModelType::SiteFCFactorMethod, "TEST");
 
     EXPECT_NEAR(21.0, thisModel->getGroundTempAtTimeInMonths(*state, 0.0, 1), 0.1);  // January
     EXPECT_NEAR(32.0, thisModel->getGroundTempAtTimeInMonths(*state, 0.0, 12), 0.1); // December

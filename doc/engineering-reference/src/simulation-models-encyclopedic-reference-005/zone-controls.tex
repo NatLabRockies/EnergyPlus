@@ -28,12 +28,12 @@ The control type schedule and the list of control type/name pairs are directly r
 
 \begin{longtable}[c]{p{1.5in}p{4.5in}}
 \caption{Zone Thermostat Control Types \label{table:zone-thermostat-control-types}} \tabularnewline
-\toprule 
+\toprule
 Control Type Value & Control Type Name \tabularnewline
 \midrule
 \endfirsthead
 
-\toprule 
+\toprule
 Control Type Value & Control Type Name \tabularnewline
 \midrule
 \endhead
@@ -229,13 +229,13 @@ The radiative fraction \(\gamma\) is selected by the user and can be scheduled t
 % table 86
 \begin{longtable}[c]{@{}llll@{}}
 \caption{Operative Temperature - Radiative Fraction vs Air Velocity \label{table:operative-temperature-radiative-fraction-vs}} \tabularnewline
-\toprule 
+\toprule
 Air Velocity (m/s) & < 0.2 & 0.2 to 0.6 & 0.6 to 1.0 \tabularnewline
 \midrule
 \endfirsthead
 
 \caption[]{Operative Temperature - Radiative Fraction vs Air Velocity} \tabularnewline
-\toprule 
+\toprule
 Air Velocity (m/s) & < 0.2 & 0.2 to 0.6 & 0.6 to 1.0 \tabularnewline
 \midrule
 \endhead
@@ -324,7 +324,7 @@ This adjusted cooling setpoint temperature is made every timestep for every zone
 
 The input object ZoneControl:Humidistat provides a way for the zone to be controlled to a single relative humidity setpoint schedule, or dual humidity schedules (humidifying and dehumidifying with deadband). The schedules consist of relative humidities, expressed as a percentage (0-100), to be used for the zone moisture prediction calculation. Only one control statement can be specified for each zone.~ Individual relative humidity values can be defined for every time step, thus giving the user a full range of flexibility. For a single setpoint humidistat, if the control relative humidity is below the calculated load and the equipment specified can humidify then that equipment will try and meet the requirement.~ The opposite is true if the calculated value is above the setpoint and the equipment can dehumidify. For a dual setpoint humidistat, if the zone relative humidity is below the \textbf{humidifying} relative humidity setpoint and the equipment specified can humidify then that equipment will try and meet the zone's humidification load. The opposite is true if the zone relative humidity is above the \textbf{dehumidifying} relative humidity setpoint and the equipment can dehumidify.
 
-If the ZoneControl:Humidistat is used by a furnace or unitary system then no other objects are required. The signal from the humidistat is used directly by that component. If the Zone Control:Humidistat is used to control a Humidifier or used in conjunction with the Controller:Simple object with control variable ``TemperatureAndHumidityRatio'', then either the ``SetpointManager:SingleZone:Humidity:Minimum'', ``SetpointManager:MultiZone:Humidity:Minimum'',~ ``SetpointManager:SingleZone:Humidity:Maximum'' or ``SetpointManager:MultiZone:Humidity:Maximum'' objects are required to determine a setpoint for those components to meet for the single setpoint humidistat. For a dual setpoint humidistat, a minimum humidity setpoint manager object~ (``SetpointManager:SingleZone:Humidity:Minimum'' or ``SetpointManager:MultiZone:Humidity:Minimum'') and a maximum humidity setpoint manager object (``SetpointManager:SingleZone:Humidity:Maximum'' or ``SetpointManager:MultiZone:Hu-midity:Maximum'') are required to determine the setpoints for the corresponding humidification and dehumidification components. Note that the ``SetpointManager:Scheduled'' object can also be used to directly set humidity ratio setpoints on the exit node of the humidifier component.
+If the ZoneControl:Humidistat is used by a furnace or unitary system then no other objects are required. The signal from the humidistat is used directly by that component. If the Zone Control:Humidistat is used to control a Humidifier or used in conjunction with the Controller:Simple object with control variable ``TemperatureAndHumidityRatio'', then either the ``SetpointManager:SingleZone:Humidity:Minimum'', ``SetpointManager:MultiZone:Humidity:Minimum'',~ ``SetpointManager:SingleZone:Humidity:Maximum'' or ``SetpointManager:MultiZone:Humidity:Maximum'' objects are required to determine a setpoint for those components to meet for the single setpoint humidistat. For a dual setpoint humidistat, a minimum humidity setpoint manager object~ (``SetpointManager:SingleZone:Humidity:Minimum'' or ``SetpointManager:MultiZone:Humidity:Minimum'') and a maximum humidity setpoint manager object (``SetpointManager:SingleZone:Humidity:Maximum'' or ``SetpointManager:MultiZone:Humidity:Maximum'') are required to determine the setpoints for the corresponding humidification and dehumidification components. Note that the ``SetpointManager:Scheduled'' object can also be used to directly set humidity ratio setpoints on the exit node of the humidifier component.
 
 For the single setpoint humidistat case, the model takes into account all of the moisture gains and/or losses from sources except the HVAC system contribution, and then calculates a moisture removal or addition rate based on the provided setpoint value, like the temperature predictor. The algorithm uses a 3rd Order derivative to predict zone moisture addition or removal to smooth the changes using the zone air capacitance. Positive values of moisture load mean that this amount of moisture must be added to the zone to reach the setpoint. Negative values represent the amount of moisture that must be removed by the system.
 
@@ -344,12 +344,12 @@ The thermal comfort control type schedule and the list of thermal comfort contro
 
 \begin{longtable}[c]{p{1.0in}p{5.0in}}
 \caption{Thermal Comfort Zone Control Types \label{table:thermal-comfort-zone-control-types}} \tabularnewline
-\toprule 
+\toprule
 Control Type & Control Type Name/Object \tabularnewline
 \midrule
 \endfirsthead
 
-\toprule 
+\toprule
 Control Type & Control Type Name/Object \tabularnewline
 \midrule
 \endhead
@@ -374,12 +374,12 @@ The control type schedule and the list of control type/name pairs are directly r
 
 \begin{longtable}[c]{p{1.0in}p{5.0in}}
 \caption{Types of Fanger Thermal Comfort Zone Control \label{table:types-fanger-thermal-comfort-zone-control}} \tabularnewline
-\toprule 
+\toprule
 Control Type & Control Type Name/Object \tabularnewline
 \midrule
 \endfirsthead
 
-\toprule 
+\toprule
 Control Type & Control Type Name/Object \tabularnewline
 \midrule
 \endhead

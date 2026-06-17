@@ -1,7 +1,7 @@
-// EnergyPlus, Copyright (c) 1996-2023, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
-// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other
+// National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
 // contributors. All rights reserved.
 //
 // NOTICE: This Software was developed under funding from the U.S. Department of Energy and the
@@ -76,10 +76,11 @@ TEST_F(EnergyPlusFixture, HeatingCoils_FuelTypeInput)
                                                       "  Air Loop Outlet Node;    !- Air Outlet Node Name"});
 
     ASSERT_TRUE(process_idf(idf_objects));
+    state->init_state(*state);
 
     ASSERT_NO_THROW(HeatingCoils::GetHeatingCoilInput(*state));
 
-    EXPECT_TRUE(compare_enums(state->dataHeatingCoils->HeatingCoil(1).FuelType_Num, DataGlobalConstants::ResourceType::OtherFuel1));
+    EXPECT_ENUM_EQ(state->dataHeatingCoils->HeatingCoil(1).FuelType, Constant::eFuel::OtherFuel1);
 }
 
 TEST_F(EnergyPlusFixture, HeatingCoils_FuelTypeInputError)
@@ -94,6 +95,7 @@ TEST_F(EnergyPlusFixture, HeatingCoils_FuelTypeInputError)
                                                       "  Air Loop Outlet Node;    !- Air Outlet Node Name"});
 
     EXPECT_FALSE(process_idf(idf_objects, false));
+    state->init_state(*state);
     ASSERT_THROW(HeatingCoils::GetHeatingCoilInput(*state), std::runtime_error);
 
     std::string const error_string = delimited_string({
@@ -120,10 +122,10 @@ TEST_F(EnergyPlusFixture, HeatingCoils_FuelTypeCoal)
                                                       "  Air Loop Outlet Node;    !- Air Outlet Node Name"});
 
     ASSERT_TRUE(process_idf(idf_objects));
-
+    state->init_state(*state);
     ASSERT_NO_THROW(HeatingCoils::GetHeatingCoilInput(*state));
 
-    EXPECT_TRUE(compare_enums(state->dataHeatingCoils->HeatingCoil(1).FuelType_Num, DataGlobalConstants::ResourceType::Coal));
+    EXPECT_ENUM_EQ(state->dataHeatingCoils->HeatingCoil(1).FuelType, Constant::eFuel::Coal);
 }
 
 TEST_F(EnergyPlusFixture, HeatingCoils_FuelTypePropaneGas)
@@ -138,15 +140,18 @@ TEST_F(EnergyPlusFixture, HeatingCoils_FuelTypePropaneGas)
                                                       "  Air Loop Outlet Node;    !- Air Outlet Node Name"});
 
     ASSERT_TRUE(process_idf(idf_objects));
+    state->init_state(*state);
 
     ASSERT_NO_THROW(HeatingCoils::GetHeatingCoilInput(*state));
 
-    EXPECT_TRUE(compare_enums(state->dataHeatingCoils->HeatingCoil(1).FuelType_Num, DataGlobalConstants::ResourceType::Propane));
+    EXPECT_ENUM_EQ(state->dataHeatingCoils->HeatingCoil(1).FuelType, Constant::eFuel::Propane);
 }
 
 TEST_F(EnergyPlusFixture, HeatingCoils_OutletAirPropertiesTest)
 {
     // 7391 Test outlet air properties for MultiStageGasHeatingCoil
+    state->init_state(*state);
+
     int CoilNum = 1;
     Real64 OffMassFlowrate = 0.2;
     Real64 OnMassFlowrate = 0.6;
@@ -157,9 +162,7 @@ TEST_F(EnergyPlusFixture, HeatingCoils_OutletAirPropertiesTest)
     state->dataHeatingCoils->HeatingCoil(CoilNum).InletAirEnthalpy = Psychrometrics::PsyHFnTdbW(
         state->dataHeatingCoils->HeatingCoil(CoilNum).InletAirTemp, state->dataHeatingCoils->HeatingCoil(CoilNum).InletAirHumRat);
     state->dataEnvrn->OutBaroPress = 101325.0;
-    state->dataHeatingCoils->HeatingCoil(CoilNum).SchedPtr = 1;
-    state->dataScheduleMgr->Schedule.allocate(1);
-    state->dataScheduleMgr->Schedule(1).CurrentValue = 1.0;
+    state->dataHeatingCoils->HeatingCoil(CoilNum).availSched = Sched::GetScheduleAlwaysOn(*state);
     state->dataHVACGlobal->MSHPMassFlowRateLow = OnMassFlowrate;
     state->dataHeatingCoils->HeatingCoil(CoilNum).MSNominalCapacity.allocate(1);
     state->dataHeatingCoils->HeatingCoil(CoilNum).MSNominalCapacity(1) = 10000;
@@ -172,7 +175,7 @@ TEST_F(EnergyPlusFixture, HeatingCoils_OutletAirPropertiesTest)
     state->dataHeatingCoils->HeatingCoil(CoilNum).MSParasiticElecLoad(1) = 0.0;
 
     state->dataHeatingCoils->HeatingCoil(CoilNum).InletAirMassFlowRate = OffMassFlowrate;
-    HeatingCoils::CalcMultiStageGasHeatingCoil(*state, CoilNum, 0.0, 0.0, 1, 2);
+    HeatingCoils::CalcMultiStageGasHeatingCoil(*state, CoilNum, 0.0, 0.0, 1, HVAC::FanOp::Continuous);
     Real64 HeatLoad00 = state->dataHeatingCoils->HeatingCoil(CoilNum).InletAirMassFlowRate *
                         (Psychrometrics::PsyHFnTdbW(state->dataHeatingCoils->HeatingCoil(CoilNum).OutletAirTemp,
                                                     state->dataHeatingCoils->HeatingCoil(CoilNum).OutletAirHumRat) -
@@ -180,7 +183,7 @@ TEST_F(EnergyPlusFixture, HeatingCoils_OutletAirPropertiesTest)
     EXPECT_NEAR(HeatLoad00, state->dataHeatingCoils->HeatingCoil(CoilNum).HeatingCoilLoad, 0.0001);
 
     state->dataHeatingCoils->HeatingCoil(CoilNum).InletAirMassFlowRate = 0.5 * OnMassFlowrate + (1.0 - 0.5) * OffMassFlowrate;
-    HeatingCoils::CalcMultiStageGasHeatingCoil(*state, CoilNum, 0.0, 0.5, 1, 2);
+    HeatingCoils::CalcMultiStageGasHeatingCoil(*state, CoilNum, 0.0, 0.5, 1, HVAC::FanOp::Continuous);
     Real64 HeatLoad05 = state->dataHeatingCoils->HeatingCoil(CoilNum).InletAirMassFlowRate *
                         (Psychrometrics::PsyHFnTdbW(state->dataHeatingCoils->HeatingCoil(CoilNum).OutletAirTemp,
                                                     state->dataHeatingCoils->HeatingCoil(CoilNum).OutletAirHumRat) -
@@ -188,7 +191,7 @@ TEST_F(EnergyPlusFixture, HeatingCoils_OutletAirPropertiesTest)
     EXPECT_NEAR(HeatLoad05, state->dataHeatingCoils->HeatingCoil(CoilNum).HeatingCoilLoad, 0.0001);
 
     state->dataHeatingCoils->HeatingCoil(CoilNum).InletAirMassFlowRate = OnMassFlowrate;
-    HeatingCoils::CalcMultiStageGasHeatingCoil(*state, CoilNum, 0.0, 1.0, 1, 2);
+    HeatingCoils::CalcMultiStageGasHeatingCoil(*state, CoilNum, 0.0, 1.0, 1, HVAC::FanOp::Continuous);
     Real64 HeatLoad10 = state->dataHeatingCoils->HeatingCoil(CoilNum).InletAirMassFlowRate *
                         (Psychrometrics::PsyHFnTdbW(state->dataHeatingCoils->HeatingCoil(CoilNum).OutletAirTemp,
                                                     state->dataHeatingCoils->HeatingCoil(CoilNum).OutletAirHumRat) -

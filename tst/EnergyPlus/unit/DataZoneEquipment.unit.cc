@@ -1,7 +1,7 @@
-// EnergyPlus, Copyright (c) 1996-2023, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
-// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other
+// National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
 // contributors. All rights reserved.
 //
 // NOTICE: This Software was developed under funding from the U.S. Department of Energy and the
@@ -55,18 +55,24 @@
 #include <EnergyPlus/DataContaminantBalance.hh>
 #include <EnergyPlus/DataEnvironment.hh>
 #include <EnergyPlus/DataHeatBalance.hh>
+#include <EnergyPlus/DataIPShortCuts.hh>
 #include <EnergyPlus/DataSizing.hh>
 #include <EnergyPlus/DataZoneEquipment.hh>
+#include <EnergyPlus/HeatBalanceManager.hh>
+#include <EnergyPlus/InputProcessing/InputProcessor.hh>
 #include <EnergyPlus/ScheduleManager.hh>
 
 #include "Fixtures/EnergyPlusFixture.hh"
 
+#include <nlohmann/json.hpp>
+
 using namespace EnergyPlus;
 using namespace EnergyPlus::DataZoneEquipment;
+using namespace nlohmann::literals;
 
 TEST_F(EnergyPlusFixture, DataZoneEquipment_TestGetSystemNodeNumberForZone)
 {
-
+    state->init_state(*state);
     state->dataGlobal->NumOfZones = 2;
     state->dataZoneEquip->ZoneEquipConfig.allocate(state->dataGlobal->NumOfZones);
 
@@ -89,12 +95,11 @@ TEST_F(EnergyPlusFixture, DataZoneEquipment_TestGetSystemNodeNumberForZone)
 TEST_F(EnergyPlusFixture, DataZoneEquipment_TestCalcDesignSpecificationOutdoorAir)
 {
     // #6225
-
+    state->init_state(*state);
     state->dataHeatBal->Zone.allocate(1);
     state->dataSize->OARequirements.allocate(1);
     state->dataHeatBal->ZoneIntGain.allocate(1);
     state->dataHeatBal->People.allocate(1);
-    state->dataScheduleMgr->Schedule.allocate(2);
     state->dataContaminantBalance->ZoneCO2GainFromPeople.allocate(1);
     state->dataContaminantBalance->ZoneAirCO2.allocate(1);
     state->dataContaminantBalance->ZoneSysContDemand.allocate(1);
@@ -103,10 +108,10 @@ TEST_F(EnergyPlusFixture, DataZoneEquipment_TestCalcDesignSpecificationOutdoorAi
 
     state->dataHeatBal->Zone(1).FloorArea = 10.0;
     state->dataHeatBal->Zone(1).TotOccupants = 5.0;
-    state->dataHeatBal->Zone(1).ZoneContamControllerSchedIndex = 1;
+    state->dataHeatBal->Zone(1).zoneContamControllerSched = Sched::AddScheduleConstant(*state, "ZONE CONTAM CONTROLLER");
     state->dataHeatBal->People(1).ZonePtr = 1;
     state->dataHeatBal->TotPeople = 1;
-    state->dataHeatBal->People(1).ActivityLevelPtr = 2;
+    state->dataHeatBal->People(1).activityLevelSched = Sched::AddScheduleConstant(*state, "ACTIVITY LEVEL SCHED");
     state->dataHeatBal->People(1).CO2RateFactor = 3.82e-8;
     state->dataHeatBal->People(1).NumberOfPeople = state->dataHeatBal->Zone(1).TotOccupants;
 
@@ -120,8 +125,8 @@ TEST_F(EnergyPlusFixture, DataZoneEquipment_TestCalcDesignSpecificationOutdoorAi
     state->dataSize->OARequirements(1).OAFlowPerPerson = 0.002;
     state->dataSize->OARequirements(1).OAFlowPerArea = 0.003;
     state->dataHeatBal->ZoneIntGain(1).NOFOCC = 0.5;
-    state->dataScheduleMgr->Schedule(1).CurrentValue = 1.0;
-    state->dataScheduleMgr->Schedule(2).CurrentValue = 131.881995;
+    state->dataHeatBal->Zone(1).zoneContamControllerSched->currentVal = 1.0;
+    state->dataHeatBal->People(1).activityLevelSched->currentVal = 131.881995;
 
     Real64 OAVolumeFlowRate;
     // Test ZOAM_ProportionalControlSchOcc
@@ -149,9 +154,274 @@ TEST_F(EnergyPlusFixture, DataZoneEquipment_TestCalcDesignSpecificationOutdoorAi
     state->dataHeatBal->Zone.deallocate();
     state->dataSize->OARequirements.deallocate();
     state->dataHeatBal->ZoneIntGain.deallocate();
-    state->dataScheduleMgr->Schedule.deallocate();
     state->dataHeatBal->People.deallocate();
     state->dataContaminantBalance->ZoneCO2GainFromPeople.deallocate();
     state->dataContaminantBalance->ZoneAirCO2.deallocate();
     state->dataContaminantBalance->ZoneSysContDemand.deallocate();
+}
+
+TEST_F(EnergyPlusFixture, GetZoneEquipmentData_epJSON)
+{
+
+    state->dataInputProcessing->inputProcessor->epJSON = R"(
+{
+  "ZoneHVAC:EquipmentList": {
+    "Zone1 Equipment List": {
+      "equipment": [
+        {
+          "zone_equipment_cooling_sequence": 1,
+          "zone_equipment_heating_or_no_load_sequence": 1,
+          "zone_equipment_name": "Fan Zone Exhaust 1",
+          "zone_equipment_object_type": "Fan:ZoneExhaust"
+        },
+        {
+          "zone_equipment_cooling_sequence": 3,
+          "zone_equipment_heating_or_no_load_sequence": 2,
+          "zone_equipment_name": "ADU Air Terminal Single Duct Constant Volume No Reheat 1",
+          "zone_equipment_object_type": "ZoneHVAC:AirDistributionUnit"
+        },
+        {
+          "zone_equipment_cooling_sequence": 2,
+          "zone_equipment_heating_or_no_load_sequence": 3,
+          "zone_equipment_name": "ADU Air Terminal Single Duct VAV Reheat 1",
+          "zone_equipment_object_type": "ZoneHVAC:AirDistributionUnit"
+        }
+      ],
+      "load_distribution_scheme": "SequentialLoad"
+    }
+  },
+  "Zone": {
+    "Zone1": {
+      "direction_of_relative_north": 0.0,
+      "multiplier": 1,
+      "part_of_total_floor_area": "Yes",
+      "x_origin": 0.0,
+      "y_origin": 0.0,
+      "z_origin": 0.0
+    }
+  },
+  "NodeList": {
+    "Packaged Rooftop Air Conditioner Demand Inlet Nodes": {
+      "nodes": [
+        {
+          "node_name": "Node 6"
+        }
+      ]
+    },
+    "Packaged Rooftop Air Conditioner Supply Outlet Nodes": {
+      "nodes": [
+        {
+          "node_name": "Node 5"
+        }
+      ]
+    },
+    "VAV with Reheat Demand Inlet Nodes": {
+      "nodes": [
+        {
+          "node_name": "Node 18"
+        }
+      ]
+    },
+    "VAV with Reheat Supply Outlet Nodes": {
+      "nodes": [
+        {
+          "node_name": "Node 17"
+        }
+      ]
+    },
+    "Zone1 Exhaust Node List": {
+      "nodes": [
+        {
+          "node_name": "Node 2"
+        }
+      ]
+    },
+    "Zone1 Inlet Node List": {
+      "nodes": [
+        {
+          "node_name": "Node 8"
+        },
+        {
+          "node_name": "Node 20"
+        }
+      ]
+    },
+    "Zone1 Return Node List": {
+      "nodes": [
+        {
+          "node_name": "Node 15"
+        },
+        {
+          "node_name": "Node 77"
+        }
+      ]
+    }
+  },
+
+  "ZoneHVAC:EquipmentConnections": {
+    "ZoneHVAC:EquipmentConnections 1": {
+      "zone_air_exhaust_node_or_nodelist_name": "Zone1 Exhaust Node List",
+      "zone_air_inlet_node_or_nodelist_name": "Zone1 Inlet Node List",
+      "zone_air_node_name": "Node 1",
+      "zone_conditioning_equipment_list_name": "Zone1 Equipment List",
+      "zone_name": "Zone1",
+      "zone_return_air_node_or_nodelist_name": "Zone1 Return Node List"
+    }
+  },
+  "AirLoopHVAC:SupplyPath": {
+    "Packaged Rooftop Air Conditioner Node 6 Supply Path": {
+      "components": [
+        {
+          "component_name": "Air Loop HVAC Zone Splitter 1",
+          "component_object_type": "AirLoopHVAC:ZoneSplitter"
+        }
+      ],
+      "supply_air_path_inlet_node_name": "Node 6"
+    },
+    "VAV with Reheat Node 18 Supply Path": {
+      "components": [
+        {
+          "component_name": "Air Loop HVAC Zone Splitter 2",
+          "component_object_type": "AirLoopHVAC:ZoneSplitter"
+        }
+      ],
+      "supply_air_path_inlet_node_name": "Node 18"
+    }
+  },
+  "AirLoopHVAC:ReturnPath": {
+    "Packaged Rooftop Air Conditioner Return Path": {
+      "components": [
+        {
+          "component_name": "Air Loop HVAC Zone Mixer 1",
+          "component_object_type": "AirLoopHVAC:ZoneMixer"
+        }
+      ],
+      "return_air_path_outlet_node_name": "Node 7"
+    },
+    "VAV with Reheat Return Path": {
+      "components": [
+        {
+          "component_name": "Air Loop HVAC Zone Mixer 2",
+          "component_object_type": "AirLoopHVAC:ZoneMixer"
+        }
+      ],
+      "return_air_path_outlet_node_name": "Node 19"
+    }
+  },
+  "Fan:ZoneExhaust": {
+    "Fan Zone Exhaust 1": {
+      "air_inlet_node_name": "Node 2",
+      "air_outlet_node_name": "Node 3",
+      "end_use_subcategory": "General",
+      "fan_total_efficiency": 0.6,
+      "pressure_rise": 0.0,
+      "system_availability_manager_coupling_mode": "Decoupled"
+    }
+  },
+  "ZoneHVAC:AirDistributionUnit": {
+    "ADU Air Terminal Single Duct Constant Volume No Reheat 1": {
+      "air_distribution_unit_outlet_node_name": "Node 8",
+      "air_terminal_name": "Air Terminal Single Duct Constant Volume No Reheat 1",
+      "air_terminal_object_type": "AirTerminal:SingleDuct:ConstantVolume:NoReheat"
+    },
+    "ADU Air Terminal Single Duct VAV Reheat 1": {
+      "air_distribution_unit_outlet_node_name": "Node 20",
+      "air_terminal_name": "Air Terminal Single Duct VAV Reheat 1",
+      "air_terminal_object_type": "AirTerminal:SingleDuct:VAV:Reheat"
+    }
+  },
+  "AirLoopHVAC:ZoneMixer": {
+    "Air Loop HVAC Zone Mixer 1": {
+      "nodes": [
+        {
+          "inlet_node_name": "Node 15"
+        }
+      ],
+      "outlet_node_name": "Node 7"
+    },
+    "Air Loop HVAC Zone Mixer 2": {
+      "nodes": [
+        {
+          "inlet_node_name": "Node 77"
+        }
+      ],
+      "outlet_node_name": "Node 19"
+    }
+  },
+  "AirLoopHVAC:ZoneSplitter": {
+    "Air Loop HVAC Zone Splitter 1": {
+      "inlet_node_name": "Node 6",
+      "nodes": [
+        {
+          "outlet_node_name": "Node 14"
+        }
+      ]
+    },
+    "Air Loop HVAC Zone Splitter 2": {
+      "inlet_node_name": "Node 18",
+      "nodes": [
+        {
+          "outlet_node_name": "Node 54"
+        }
+      ]
+    }
+  }
+}
+    )"_json;
+
+    state->dataGlobal->isEpJSON = true;
+    state->dataInputProcessing->inputProcessor->initializeMaps();
+
+    // GetZoneData and others use GetObjectItem with ipshortcuts so these need to be allocated
+    int MaxArgs = 0;
+    int MaxAlpha = 0;
+    int MaxNumeric = 0;
+    state->dataInputProcessing->inputProcessor->getMaxSchemaArgs(MaxArgs, MaxAlpha, MaxNumeric);
+
+    state->dataIPShortCut->cAlphaFieldNames.allocate(MaxAlpha);
+    state->dataIPShortCut->cAlphaArgs.allocate(MaxAlpha);
+    state->dataIPShortCut->lAlphaFieldBlanks.dimension(MaxAlpha, false);
+    state->dataIPShortCut->cNumericFieldNames.allocate(MaxNumeric);
+    state->dataIPShortCut->rNumericArgs.dimension(MaxNumeric, 0.0);
+    state->dataIPShortCut->lNumericFieldBlanks.dimension(MaxNumeric, false);
+
+    state->dataGlobal->TimeStepsInHour = 1;    // must initialize this to get schedules initialized
+    state->dataGlobal->MinutesInTimeStep = 60; // must initialize this to get schedules initialized
+    state->init_state(*state);
+
+    bool ErrorsFound = false;
+    HeatBalanceManager::GetZoneData(*state, ErrorsFound);
+    ASSERT_FALSE(ErrorsFound);
+
+    DataZoneEquipment::GetZoneEquipmentData(*state);
+
+    ASSERT_EQ(1, state->dataZoneEquip->ZoneEquipList.size());
+    auto &thisZoneEquipList = state->dataZoneEquip->ZoneEquipList(1);
+    EXPECT_EQ(3, thisZoneEquipList.NumOfEquipTypes);
+
+    EXPECT_ENUM_EQ(DataZoneEquipment::LoadDist::Sequential, thisZoneEquipList.LoadDistScheme);
+
+    EXPECT_EQ("FAN ZONE EXHAUST 1", thisZoneEquipList.EquipName(1));
+    EXPECT_EQ("FAN:ZONEEXHAUST", thisZoneEquipList.EquipTypeName(1));
+    EXPECT_ENUM_EQ(DataZoneEquipment::ZoneEquipType::ExhaustFan, thisZoneEquipList.EquipType(1));
+    EXPECT_EQ(1, thisZoneEquipList.CoolingPriority(1));
+    EXPECT_EQ(1, thisZoneEquipList.HeatingPriority(1));
+    EXPECT_EQ(Sched::GetScheduleAlwaysOn(*state), thisZoneEquipList.sequentialCoolingFractionScheds(1));
+    EXPECT_EQ(Sched::GetScheduleAlwaysOn(*state), thisZoneEquipList.sequentialHeatingFractionScheds(1));
+
+    EXPECT_EQ("ADU AIR TERMINAL SINGLE DUCT CONSTANT VOLUME NO REHEAT 1", thisZoneEquipList.EquipName(2));
+    EXPECT_EQ("ZONEHVAC:AIRDISTRIBUTIONUNIT", thisZoneEquipList.EquipTypeName(2));
+    EXPECT_ENUM_EQ(DataZoneEquipment::ZoneEquipType::AirDistributionUnit, thisZoneEquipList.EquipType(2));
+    EXPECT_EQ(3, thisZoneEquipList.CoolingPriority(2));
+    EXPECT_EQ(2, thisZoneEquipList.HeatingPriority(2));
+    EXPECT_EQ(Sched::GetScheduleAlwaysOn(*state), thisZoneEquipList.sequentialCoolingFractionScheds(2));
+    EXPECT_EQ(Sched::GetScheduleAlwaysOn(*state), thisZoneEquipList.sequentialHeatingFractionScheds(2));
+
+    EXPECT_EQ("ADU AIR TERMINAL SINGLE DUCT VAV REHEAT 1", thisZoneEquipList.EquipName(3));
+    EXPECT_EQ("ZONEHVAC:AIRDISTRIBUTIONUNIT", thisZoneEquipList.EquipTypeName(3));
+    EXPECT_ENUM_EQ(DataZoneEquipment::ZoneEquipType::AirDistributionUnit, thisZoneEquipList.EquipType(3));
+    EXPECT_EQ(2, thisZoneEquipList.CoolingPriority(3));
+    EXPECT_EQ(3, thisZoneEquipList.HeatingPriority(3));
+    EXPECT_EQ(Sched::GetScheduleAlwaysOn(*state), thisZoneEquipList.sequentialCoolingFractionScheds(3));
+    EXPECT_EQ(Sched::GetScheduleAlwaysOn(*state), thisZoneEquipList.sequentialHeatingFractionScheds(3));
 }

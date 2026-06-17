@@ -1,7 +1,7 @@
-// EnergyPlus, Copyright (c) 1996-2023, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
-// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other
+// National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
 // contributors. All rights reserved.
 //
 // NOTICE: This Software was developed under funding from the U.S. Department of Energy and the
@@ -47,6 +47,7 @@
 
 // C++ Headers
 #include <cmath>
+#include <format>
 
 // ObjexxFCL Headers
 #include <ObjexxFCL/Fmath.hh>
@@ -67,8 +68,6 @@ namespace MatrixDataManager {
     // MODULE INFORMATION:
     //       AUTHOR         B. Griffith
     //       DATE WRITTEN   June 2010
-    //       MODIFIED       na
-    //       RE-ENGINEERED  na
 
     // PURPOSE OF THIS MODULE:
     // Process user input for Matrix: input data objects
@@ -126,9 +125,6 @@ namespace MatrixDataManager {
         int NumNumbers;          // Number of Numbers for each GetObjectItem call
         int IOStatus;            // Used in GetObjectItem
         bool ErrorsFound(false); // Set to true if errors in input, fatal at end of routine
-        int NumRows;
-        int NumCols;
-        int NumElements;
         auto &cCurrentModuleObject = state.dataIPShortCut->cCurrentModuleObject;
 
         cCurrentModuleObject = "Matrix:TwoDimension";
@@ -153,28 +149,27 @@ namespace MatrixDataManager {
                                                                      state.dataIPShortCut->cAlphaFieldNames,
                                                                      state.dataIPShortCut->cNumericFieldNames);
             ++MatNum;
-            UtilityRoutines::IsNameEmpty(state, state.dataIPShortCut->cAlphaArgs(1), cCurrentModuleObject, ErrorsFound);
 
             state.dataMatrixDataManager->MatData(MatNum).Name = state.dataIPShortCut->cAlphaArgs(1);
-            NumRows = std::floor(state.dataIPShortCut->rNumericArgs(1));
-            NumCols = std::floor(state.dataIPShortCut->rNumericArgs(2));
-            NumElements = NumRows * NumCols;
+            int NumRows = std::floor(state.dataIPShortCut->rNumericArgs(1));
+            int NumCols = std::floor(state.dataIPShortCut->rNumericArgs(2));
+            int NumElements = NumRows * NumCols;
 
             // test
             if (NumElements < 1) {
-                ShowSevereError(state, format("GetMatrixInput: for {}: {}", cCurrentModuleObject, state.dataIPShortCut->cAlphaArgs(1)));
+                ShowSevereError(state, std::format("GetMatrixInput: for {}: {}", cCurrentModuleObject, state.dataIPShortCut->cAlphaArgs(1)));
                 ShowContinueError(state,
-                                  format("Check {} and {} total number of elements in matrix must be 1 or more",
-                                         state.dataIPShortCut->cNumericFieldNames(1),
-                                         state.dataIPShortCut->cNumericFieldNames(2)));
+                                  std::format("Check {} and {} total number of elements in matrix must be 1 or more",
+                                              state.dataIPShortCut->cNumericFieldNames(1),
+                                              state.dataIPShortCut->cNumericFieldNames(2)));
                 ErrorsFound = true;
             }
             if ((NumNumbers - 2) < NumElements) {
-                ShowSevereError(state, format("GetMatrixInput: for {}: {}", cCurrentModuleObject, state.dataIPShortCut->cAlphaArgs(1)));
+                ShowSevereError(state, std::format("GetMatrixInput: for {}: {}", cCurrentModuleObject, state.dataIPShortCut->cAlphaArgs(1)));
                 ShowContinueError(state,
-                                  format("Check input, total number of elements does not agree with {} and {}",
-                                         state.dataIPShortCut->cNumericFieldNames(1),
-                                         state.dataIPShortCut->cNumericFieldNames(2)));
+                                  std::format("Check input, total number of elements does not agree with {} and {}",
+                                              state.dataIPShortCut->cNumericFieldNames(1),
+                                              state.dataIPShortCut->cNumericFieldNames(2)));
                 ErrorsFound = true;
             }
             state.dataMatrixDataManager->MatData(MatNum).MatrixType = TwoDimensional;
@@ -209,21 +204,20 @@ namespace MatrixDataManager {
 
         // METHODOLOGY EMPLOYED:
         // inputs name of matrix and returns integer index
-        // currently uses UtilityRoutines::FindItemInList( which is case sensitive
+        // currently uses Util::FindItemInList( which is case sensitive
 
         // Return value
         int MatrixIndexPtr; // Function result
 
         // FUNCTION LOCAL VARIABLE DECLARATIONS:
-        auto &GetMatrixInputFlag = state.dataUtilityRoutines->GetMatrixInputFlag;
 
-        if (GetMatrixInputFlag) {
+        if (state.dataUtilityRoutines->GetMatrixInputFlag) {
             GetMatrixInput(state);
-            GetMatrixInputFlag = false;
+            state.dataUtilityRoutines->GetMatrixInputFlag = false;
         }
 
         if (state.dataMatrixDataManager->NumMats > 0) {
-            MatrixIndexPtr = UtilityRoutines::FindItemInList(MatrixName, state.dataMatrixDataManager->MatData);
+            MatrixIndexPtr = Util::FindItemInList(MatrixName, state.dataMatrixDataManager->MatData);
         } else {
             MatrixIndexPtr = 0;
         }

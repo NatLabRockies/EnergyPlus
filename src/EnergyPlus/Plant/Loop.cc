@@ -1,7 +1,7 @@
-// EnergyPlus, Copyright (c) 1996-2023, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
-// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other
+// National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
 // contributors. All rights reserved.
 //
 // NOTICE: This Software was developed under funding from the U.S. Department of Energy and the
@@ -45,6 +45,10 @@
 // OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 // POSSIBILITY OF SUCH DAMAGE.
 
+// C++ Headers
+#include <format>
+
+// EnergyPlus Headers
 #include <EnergyPlus/Data/EnergyPlusData.hh>
 #include <EnergyPlus/DataBranchAirLoopPlant.hh>
 #include <EnergyPlus/FluidProperties.hh>
@@ -104,8 +108,6 @@ void PlantLoopData::CalcUnmetPlantDemand(EnergyPlusData &state)
 
     // Using/Aliasing
     using DataPlant::LoopDemandTol;
-    using FluidProperties::GetSatEnthalpyRefrig;
-    using FluidProperties::GetSpecificHeatGlycol;
 
     // SUBROUTINE PARAMETER DEFINITIONS:
     static constexpr std::string_view RoutineName("PlantLoopSolver::EvaluateLoopSetPointLoad");
@@ -133,9 +135,9 @@ void PlantLoopData::CalcUnmetPlantDemand(EnergyPlusData &state)
     TargetTemp = state.dataLoopNodes->Node(this->TempSetPointNodeNum).Temp;
     MassFlowRate = state.dataLoopNodes->Node(this->TempSetPointNodeNum).MassFlowRate;
 
-    if (this->FluidType == DataLoopNode::NodeFluidType::Water) {
+    if (this->FluidType == Node::FluidType::Water) {
 
-        Cp = GetSpecificHeatGlycol(state, this->FluidName, TargetTemp, this->FluidIndex, RoutineName);
+        Cp = this->glycol->getSpecificHeat(state, TargetTemp, RoutineName);
 
         switch (this->LoopDemandCalcScheme) {
         case DataPlant::LoopDemandCalcScheme::SingleSetPoint: {
@@ -177,9 +179,9 @@ void PlantLoopData::CalcUnmetPlantDemand(EnergyPlusData &state)
             break;
         }
 
-    } else if (this->FluidType == DataLoopNode::NodeFluidType::Steam) {
+    } else if (this->FluidType == Node::FluidType::Steam) {
 
-        Cp = GetSpecificHeatGlycol(state, this->FluidName, TargetTemp, this->FluidIndex, RoutineName);
+        Cp = this->glycol->getSpecificHeat(state, TargetTemp, RoutineName);
 
         switch (this->LoopDemandCalcScheme) {
         case DataPlant::LoopDemandCalcScheme::SingleSetPoint: {
@@ -190,8 +192,8 @@ void PlantLoopData::CalcUnmetPlantDemand(EnergyPlusData &state)
             // Calculate the delta temperature
             DeltaTemp = LoopSetPointTemperature - TargetTemp;
 
-            EnthalpySteamSatVapor = GetSatEnthalpyRefrig(state, this->FluidName, LoopSetPointTemperature, 1.0, this->FluidIndex, RoutineNameAlt);
-            EnthalpySteamSatLiquid = GetSatEnthalpyRefrig(state, this->FluidName, LoopSetPointTemperature, 0.0, this->FluidIndex, RoutineNameAlt);
+            EnthalpySteamSatVapor = this->steam->getSatEnthalpy(state, LoopSetPointTemperature, 1.0, RoutineNameAlt);
+            EnthalpySteamSatLiquid = this->steam->getSatEnthalpy(state, LoopSetPointTemperature, 0.0, RoutineNameAlt);
 
             LatentHeatSteam = EnthalpySteamSatVapor - EnthalpySteamSatLiquid;
 
@@ -206,7 +208,9 @@ void PlantLoopData::CalcUnmetPlantDemand(EnergyPlusData &state)
     }
 
     // Trim the demand to zero if it is very small
-    if (std::abs(LoadToLoopSetPoint) < LoopDemandTol) LoadToLoopSetPoint = 0.0;
+    if (std::abs(LoadToLoopSetPoint) < LoopDemandTol) {
+        LoadToLoopSetPoint = 0.0;
+    }
 
     this->UnmetDemand = LoadToLoopSetPoint;
 }
@@ -249,13 +253,13 @@ void PlantLoopData::CheckLoopExitNode(EnergyPlusData &state, bool const FirstHVA
                                      "\", Error (CheckLoopExitNode) -- Mass Flow Rate Calculation. Outlet and Inlet differ by more than tolerance.");
                 ShowContinueErrorTimeStamp(state, "");
                 ShowContinueError(state,
-                                  format("Loop inlet node={}, flowrate={:.4R} kg/s",
-                                         state.dataLoopNodes->NodeID(LoopInlet),
-                                         state.dataLoopNodes->Node(LoopInlet).MassFlowRate));
+                                  std::format("Loop inlet node={}, flowrate={:.4f} kg/s",
+                                              state.dataLoopNodes->NodeID(LoopInlet),
+                                              state.dataLoopNodes->Node(LoopInlet).MassFlowRate));
                 ShowContinueError(state,
-                                  format("Loop outlet node={}, flowrate={:.4R} kg/s",
-                                         state.dataLoopNodes->NodeID(LoopOutlet),
-                                         state.dataLoopNodes->Node(LoopOutlet).MassFlowRate));
+                                  std::format("Loop outlet node={}, flowrate={:.4f} kg/s",
+                                              state.dataLoopNodes->NodeID(LoopOutlet),
+                                              state.dataLoopNodes->Node(LoopOutlet).MassFlowRate));
                 ShowContinueError(state, "This loop might be helped by a bypass.");
             }
             ShowRecurringWarningErrorAtEnd(

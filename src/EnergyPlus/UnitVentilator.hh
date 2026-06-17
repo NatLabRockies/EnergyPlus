@@ -1,7 +1,7 @@
-// EnergyPlus, Copyright (c) 1996-2023, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
-// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other
+// National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
 // contributors. All rights reserved.
 //
 // NOTICE: This Software was developed under funding from the U.S. Department of Energy and the
@@ -57,8 +57,11 @@
 #include <EnergyPlus/DataGlobals.hh>
 #include <EnergyPlus/EPVector.hh>
 #include <EnergyPlus/EnergyPlus.hh>
+#include <EnergyPlus/FluidProperties.hh>
+#include <EnergyPlus/General.hh>
 #include <EnergyPlus/Plant/Enums.hh>
 #include <EnergyPlus/Plant/PlantLocation.hh>
+#include <EnergyPlus/SystemAvailabilityManager.hh>
 
 namespace EnergyPlus {
 
@@ -76,23 +79,7 @@ namespace UnitVentilator {
         Cooling,
         Num
     };
-    enum class HeatCoilType
-    {
-        Invalid = -1,
-        Electric,
-        Gas,
-        Water,
-        Steam,
-        Num
-    };
-    enum class CoolCoilType
-    {
-        Invalid = -1,
-        Water,
-        Detailed,
-        HXAssisted,
-        Num
-    };
+
     enum class OAControl
     {
         Invalid = -1,
@@ -104,42 +91,44 @@ namespace UnitVentilator {
 
     struct UnitVentilatorData
     {
-        std::string Name;      // name of unit
-        int SchedPtr = 0;      // index to schedule
+        std::string Name; // name of unit
+        Sched::Schedule *availSched = nullptr;
         int AirInNode = 0;     // inlet air node number
         int AirOutNode = 0;    // outlet air node number
         int FanOutletNode = 0; // outlet node number for fan exit
         // (assumes fan is upstream of heating coil)
-        int FanType_Num = 0; // Fan type number (see DataHVACGlobals)
-        std::string FanName; // name of fan
+        HVAC::FanType fanType = HVAC::FanType::Invalid; // Fan type number (see DataHVACGlobals)
+        std::string FanName;                            // name of fan
         int Fan_Index = 0;
-        int FanSchedPtr = 0;      // index to fan operating mode schedule
-        int FanAvailSchedPtr = 0; // index to fan availability schedule
-        int OpMode = 0;           // mode of operation; 1=cycling fan, cycling coil, 2=continuous fan, cycling coil
+        Sched::Schedule *fanOpModeSched = nullptr; // index to fan operating mode schedule
+        Sched::Schedule *fanAvailSched = nullptr;
+        HVAC::FanOp fanOp = HVAC::FanOp::Invalid; // mode of operation; 1=cycling fan, cycling coil, 2=continuous fan, cycling coil
         int ControlCompTypeNum = 0;
         int CompErrIndex = 0;
-        Real64 MaxAirVolFlow = 0.0;                     // m3/s
-        Real64 MaxAirMassFlow = 0.0;                    // kg/s
-        OAControl OAControlType = OAControl::Invalid;   // type of control; options are VARIABLE PERCENT and FIXED TEMPERATURE
-        int MinOASchedPtr = 0;                          // index to schedule
-        int MaxOASchedPtr = 0;                          // index to schedule
-        int TempSchedPtr = 0;                           // index to schedule
-        int OutsideAirNode = 0;                         // outside air node number
-        int AirReliefNode = 0;                          // relief air node number
-        int OAMixerOutNode = 0;                         // outlet node after the outside air mixer (inlet to coils if present)
-        Real64 OutAirVolFlow = 0.0;                     // m3/s
-        Real64 OutAirMassFlow = 0.0;                    // kg/s
-        Real64 MinOutAirVolFlow = 0.0;                  // m3/s
-        Real64 MinOutAirMassFlow = 0.0;                 // kg/s
-        CoilsUsed CoilOption = CoilsUsed::Invalid;      // type of coil option; options are BOTH, HEATING, COOLING, AND NONE
-        bool HCoilPresent = false;                      // .TRUE. if unit ventilator has a heating coil
-        HeatCoilType HCoilType = HeatCoilType::Invalid; // type of heating coil (water, gas, electric, etc.)
-        std::string HCoilName;                          // name of heating coil
-        std::string HCoilTypeCh;                        // type of heating coil character string (same as type on idf file).
+        Real64 MaxAirVolFlow = 0.0;                   // m3/s
+        Real64 MaxAirMassFlow = 0.0;                  // kg/s
+        OAControl OAControlType = OAControl::Invalid; // type of control; options are VARIABLE PERCENT and FIXED TEMPERATURE
+        Sched::Schedule *minOASched = nullptr;
+        Sched::Schedule *maxOASched = nullptr;
+        Sched::Schedule *tempSched = nullptr;
+        int OutsideAirNode = 0;                                // outside air node number
+        int AirReliefNode = 0;                                 // relief air node number
+        int OAMixerOutNode = 0;                                // outlet node after the outside air mixer (inlet to coils if present)
+        Real64 OutAirVolFlow = 0.0;                            // m3/s
+        Real64 OutAirMassFlow = 0.0;                           // kg/s
+        Real64 MinOutAirVolFlow = 0.0;                         // m3/s
+        Real64 MinOutAirMassFlow = 0.0;                        // kg/s
+        CoilsUsed CoilOption = CoilsUsed::Invalid;             // type of coil option; options are BOTH, HEATING, COOLING, AND NONE
+        bool HCoilPresent = false;                             // .TRUE. if unit ventilator has a heating coil
+        HVAC::CoilType heatCoilType = HVAC::CoilType::Invalid; // type of heating coil (water, gas, electric, etc.)
+        std::string HCoilName;                                 // name of heating coil
+        std::string HCoilTypeCh;                               // type of heating coil character string (same as type on idf file).
         int HCoil_Index = 0;
         DataPlant::PlantEquipmentType HeatingCoilType = DataPlant::PlantEquipmentType::Invalid;
-        int HCoil_FluidIndex = 0;
-        int HCoilSchedPtr = 0; // index to schedule
+
+        Fluid::RefrigProps *HCoil_fluid = nullptr;
+        Sched::Schedule *hCoilSched = nullptr;
+
         Real64 HCoilSchedValue = 0.0;
         Real64 MaxVolHotWaterFlow = 0.0; // m3/s
         Real64 MaxVolHotSteamFlow = 0.0; // m3/s
@@ -160,8 +149,8 @@ namespace UnitVentilator {
         std::string CCoilPlantName; // name of cooling coil for plant
         std::string CCoilPlantType; // type of cooling coil for plant
         DataPlant::PlantEquipmentType CoolingCoilType = DataPlant::PlantEquipmentType::Invalid;
-        CoolCoilType CCoilType = CoolCoilType::Invalid;
-        int CCoilSchedPtr = 0; // index to schedule
+        HVAC::CoilType coolCoilType = HVAC::CoilType::Invalid;
+        Sched::Schedule *cCoilSched = nullptr;
         Real64 CCoilSchedValue = 0.0;
         Real64 MaxVolColdWaterFlow = 0.0; // m3/s
         Real64 MaxColdWaterFlow = 0.0;    // kg/s
@@ -181,19 +170,21 @@ namespace UnitVentilator {
         Real64 ElecPower = 0.0;
         Real64 ElecEnergy = 0.0;
         std::string AvailManagerListName; // Name of an availability manager list object
-        int AvailStatus = 0;
-        Real64 FanPartLoadRatio = 0.0; // fan part-load ratio for time step
-        Real64 PartLoadFrac = 0.0;     // unit ventilator part-load ratio for time step
-        int ZonePtr = 0;               // pointer to a zone served by a unit ventilator
-        int HVACSizingIndex = 0;       // index of a HVACSizing object for a unit ventilator
-        bool ATMixerExists = false;    // True if there is an ATMixer
-        std::string ATMixerName;       // name of air mixer
-        int ATMixerIndex = 0;          // index to the air mixer
-        int ATMixerType = 0;           // 1 = inlet side mixer, 2 = supply side mixer
-        int ATMixerPriNode = 0;        // primary inlet air node number for the mixer
-        int ATMixerSecNode = 0;        // secondary air inlet node number for the mixer
-        int ATMixerOutNode = 0;        // outlet air node number for the mixer
-        bool FirstPass = true;         // detects first time through for resetting sizing data
+        Avail::Status availStatus = Avail::Status::NoAction;
+        Real64 FanPartLoadRatio = 0.0;                          // fan part-load ratio for time step
+        Real64 PartLoadFrac = 0.0;                              // unit ventilator part-load ratio for time step
+        int ZonePtr = 0;                                        // pointer to a zone served by a unit ventilator
+        int HVACSizingIndex = 0;                                // index of a HVACSizing object for a unit ventilator
+        bool ATMixerExists = false;                             // True if there is an ATMixer
+        std::string ATMixerName;                                // name of air mixer
+        int ATMixerIndex = 0;                                   // index to the air mixer
+        HVAC::MixerType ATMixerType = HVAC::MixerType::Invalid; // 1 = inlet side mixer, 2 = supply side mixer
+        int ATMixerPriNode = 0;                                 // primary inlet air node number for the mixer
+        int ATMixerSecNode = 0;                                 // secondary air inlet node number for the mixer
+        int ATMixerOutNode = 0;                                 // outlet air node number for the mixer
+        bool FirstPass = true;                                  // detects first time through for resetting sizing data
+
+        General::SolveRootStats solveRootStats{};
 
         UnitVentilatorData() = default;
         ~UnitVentilatorData()
@@ -242,13 +233,13 @@ namespace UnitVentilator {
                                       int const UnitVentNum,         // Unit index in unit ventilator array
                                       bool const FirstHVACIteration, // flag for 1st HVAV iteration in the time step
                                       Real64 &LoadMet,               // load met by unit (watts)
-                                      ObjexxFCL::Optional_int_const OpMode = DataHVACGlobals::ContFanCycCoil, // Fan Type
+                                      ObjexxFCL::Optional<HVAC::FanOp const> fanOp = HVAC::FanOp::Continuous, // Fan Type
                                       ObjexxFCL::Optional<Real64 const> PartLoadFrac = 1.0                    // Part Load Ratio of coil and fan
     );
 
     void SimUnitVentOAMixer(EnergyPlusData &state,
-                            int const UnitVentNum, // Unit index in unit ventilator array
-                            int const FanOpMode    // unit ventilator fan operating mode
+                            int const UnitVentNum,  // Unit index in unit ventilator array
+                            HVAC::FanOp const fanOp // unit ventilator fan operating mode
     );
 
     void ReportUnitVentilator(EnergyPlusData &state, int const UnitVentNum); // Unit index in unit ventilator array
@@ -260,6 +251,8 @@ namespace UnitVentilator {
     int GetUnitVentilatorMixedAirNode(EnergyPlusData &state, int const UnitVentNum);
 
     int GetUnitVentilatorReturnAirNode(EnergyPlusData &state, int const UnitVentNum);
+
+    int getUnitVentilatorIndex(EnergyPlusData &state, std::string_view CompName);
 
     Real64 SetOAMassFlowRateForCoolingVariablePercent(EnergyPlusData &state,
                                                       int const UnitVentNum,     // Unit Ventilator index number
@@ -304,12 +297,17 @@ struct UnitVentilatorsData : BaseGlobalStruct
     Array1D_bool MyPlantScanFlag;
     Array1D_bool MyZoneEqFlag;
 
-    int RefrigIndex = 0;
-    int DummyWaterIndex = 1;
-
     int ATMixOutNode = 0;   // outlet node of ATM Mixer
     int ATMixerPriNode = 0; // primary air node of ATM Mixer
     int ZoneNode = 0;       // zone node
+
+    void init_constant_state([[maybe_unused]] EnergyPlusData &state) override
+    {
+    }
+
+    void init_state([[maybe_unused]] EnergyPlusData &state) override
+    {
+    }
 
     void clear_state() override
     {
@@ -327,8 +325,6 @@ struct UnitVentilatorsData : BaseGlobalStruct
         this->MyEnvrnFlag.deallocate();
         this->MyPlantScanFlag.deallocate();
         this->MyZoneEqFlag.deallocate();
-        this->RefrigIndex = 0;
-        this->DummyWaterIndex = 1;
         this->ATMixOutNode = 0;
         this->ATMixerPriNode = 0;
         this->ZoneNode = 0;

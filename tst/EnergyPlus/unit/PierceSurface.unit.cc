@@ -1,7 +1,7 @@
-// EnergyPlus, Copyright (c) 1996-2023, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
-// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other
+// National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
 // contributors. All rights reserved.
 //
 // NOTICE: This Software was developed under funding from the U.S. Department of Energy and the
@@ -72,7 +72,7 @@ TEST_F(EnergyPlusFixture, PierceSurfaceTest_Rectangular)
     floor.Shape = SurfaceShape::Rectangle;
     floor.set_computed_geometry();
     DataSurfaces::Surface2D const &floor2d(floor.surface2d);
-    EXPECT_TRUE(compare_enums(ShapeCat::Rectangular, floor.shapeCat));
+    EXPECT_ENUM_EQ(ShapeCat::Rectangular, floor.shapeCat);
     EXPECT_EQ(2, floor2d.axis);
     EXPECT_EQ(Vector2D(0, 0), floor2d.vl);
     EXPECT_EQ(Vector2D(1, 1), floor2d.vu);
@@ -84,18 +84,18 @@ TEST_F(EnergyPlusFixture, PierceSurfaceTest_Rectangular)
         Vector const rayDir(0.0, 0.0, -1.0);
         bool hit(false);
         Vector hitPt(0.0);
-        PierceSurface(floor, rayOri, rayDir, hitPt, hit);
+        hit = PierceSurface(floor, rayOri, rayDir, hitPt);
         EXPECT_TRUE(hit);
         EXPECT_DOUBLE_EQ(0.5, hitPt.x);
         EXPECT_DOUBLE_EQ(0.5, hitPt.y);
         EXPECT_DOUBLE_EQ(0.0, hitPt.z);
-        PierceSurface(floor, rayOri, rayDir, 1.1, hitPt, hit); // Distance limit > 1.0 => Still hits
+        hit = PierceSurface(floor, rayOri, rayDir, 1.1, hitPt); // Distance limit > 1.0 => Still hits
         EXPECT_TRUE(hit);
         EXPECT_DOUBLE_EQ(0.5, hitPt.x);
         EXPECT_DOUBLE_EQ(0.5, hitPt.y);
         EXPECT_DOUBLE_EQ(0.0, hitPt.z);
         hitPt = 0.0;
-        PierceSurface(floor, rayOri, rayDir, 0.9, hitPt, hit); // Distance limit < 1.0 => Doesn't hit
+        hit = PierceSurface(floor, rayOri, rayDir, 0.9, hitPt); // Distance limit < 1.0 => Doesn't hit
         EXPECT_FALSE(hit);
         EXPECT_DOUBLE_EQ(0.0, hitPt.x);
         EXPECT_DOUBLE_EQ(0.0, hitPt.y);
@@ -107,7 +107,7 @@ TEST_F(EnergyPlusFixture, PierceSurfaceTest_Rectangular)
         Vector const rayDir(0.0, 0.0, 1.0);
         bool hit(false);
         Vector hitPt(0.0);
-        PierceSurface(floor, rayOri, rayDir, hitPt, hit);
+        hit = PierceSurface(floor, rayOri, rayDir, hitPt);
         EXPECT_FALSE(hit); // No plane intersection so hitPt is undefined
     }
 
@@ -116,7 +116,7 @@ TEST_F(EnergyPlusFixture, PierceSurfaceTest_Rectangular)
         Vector const rayDir(Vector(0.25, 0.0, -1.0));
         bool hit(false);
         Vector hitPt(0.0);
-        PierceSurface(floor, rayOri, rayDir, hitPt, hit);
+        hit = PierceSurface(floor, rayOri, rayDir, hitPt);
         EXPECT_TRUE(hit);
         EXPECT_DOUBLE_EQ(0.75, hitPt.x);
         EXPECT_DOUBLE_EQ(0.5, hitPt.y);
@@ -128,7 +128,7 @@ TEST_F(EnergyPlusFixture, PierceSurfaceTest_Rectangular)
         Vector const rayDir(Vector(2.0, 0.0, -1.0));
         bool hit(false);
         Vector hitPt(0.0);
-        PierceSurface(floor, rayOri, rayDir, hitPt, hit);
+        hit = PierceSurface(floor, rayOri, rayDir, hitPt);
         EXPECT_FALSE(hit); // Misses surface but intersects plane
         EXPECT_DOUBLE_EQ(2.5, hitPt.x);
         EXPECT_DOUBLE_EQ(0.5, hitPt.y);
@@ -144,7 +144,7 @@ TEST_F(EnergyPlusFixture, PierceSurfaceTest_Triangular)
     floor.Shape = SurfaceShape::Triangle;
     floor.set_computed_geometry();
     DataSurfaces::Surface2D const &floor2d(floor.surface2d);
-    EXPECT_TRUE(compare_enums(ShapeCat::Triangular, floor.shapeCat));
+    EXPECT_ENUM_EQ(ShapeCat::Triangular, floor.shapeCat);
     EXPECT_EQ(2, floor2d.axis);
     EXPECT_EQ(Vector2D(0, 0), floor2d.vl);
     EXPECT_EQ(Vector2D(1, 1), floor2d.vu);
@@ -154,7 +154,7 @@ TEST_F(EnergyPlusFixture, PierceSurfaceTest_Triangular)
         Vector const rayDir(0.0, 0.0, -1.0);
         bool hit(false);
         Vector hitPt(0.0);
-        PierceSurface(floor, rayOri, rayDir, hitPt, hit);
+        hit = PierceSurface(floor, rayOri, rayDir, hitPt);
         EXPECT_TRUE(hit);
         EXPECT_DOUBLE_EQ(0.9, hitPt.x);
         EXPECT_DOUBLE_EQ(0.1, hitPt.y);
@@ -166,7 +166,7 @@ TEST_F(EnergyPlusFixture, PierceSurfaceTest_Triangular)
         Vector const rayDir(0.0, 0.0, 1.0);
         bool hit(false);
         Vector hitPt(0.0);
-        PierceSurface(floor, rayOri, rayDir, hitPt, hit);
+        hit = PierceSurface(floor, rayOri, rayDir, hitPt);
         EXPECT_FALSE(hit); // No plane intersection so hitPt is undefined
     }
 
@@ -175,7 +175,7 @@ TEST_F(EnergyPlusFixture, PierceSurfaceTest_Triangular)
         Vector const rayDir(Vector(-0.25, 0.0, -1.0));
         bool hit(false);
         Vector hitPt(0.0);
-        PierceSurface(floor, rayOri, rayDir, hitPt, hit);
+        hit = PierceSurface(floor, rayOri, rayDir, hitPt);
         EXPECT_TRUE(hit);
         EXPECT_DOUBLE_EQ(0.65, hitPt.x);
         EXPECT_DOUBLE_EQ(0.1, hitPt.y);
@@ -187,7 +187,7 @@ TEST_F(EnergyPlusFixture, PierceSurfaceTest_Triangular)
         Vector const rayDir(Vector(2.0, 0.0, -1.0));
         bool hit(false);
         Vector hitPt(0.0);
-        PierceSurface(floor, rayOri, rayDir, hitPt, hit);
+        hit = PierceSurface(floor, rayOri, rayDir, hitPt);
         EXPECT_FALSE(hit); // Misses surface but intersects plane
         EXPECT_DOUBLE_EQ(2.9, hitPt.x);
         EXPECT_DOUBLE_EQ(0.1, hitPt.y);
@@ -209,7 +209,7 @@ TEST_F(EnergyPlusFixture, PierceSurfaceTest_ConvexOctagonal)
     floor.IsConvex = true;
     floor.set_computed_geometry();
     DataSurfaces::Surface2D const &floor2d(floor.surface2d);
-    EXPECT_TRUE(compare_enums(ShapeCat::Convex, floor.shapeCat));
+    EXPECT_ENUM_EQ(ShapeCat::Convex, floor.shapeCat);
     EXPECT_EQ(2, floor2d.axis);
 
     { // Ray straight down into center of floor
@@ -217,7 +217,7 @@ TEST_F(EnergyPlusFixture, PierceSurfaceTest_ConvexOctagonal)
         Vector const rayDir(0.0, 0.0, -1.0);
         bool hit(false);
         Vector hitPt(0.0);
-        PierceSurface(floor, rayOri, rayDir, hitPt, hit);
+        hit = PierceSurface(floor, rayOri, rayDir, hitPt);
         EXPECT_TRUE(hit);
     }
 
@@ -226,7 +226,7 @@ TEST_F(EnergyPlusFixture, PierceSurfaceTest_ConvexOctagonal)
         Vector const rayDir(0.0, 0.0, 1.0);
         bool hit(false);
         Vector hitPt(0.0);
-        PierceSurface(floor, rayOri, rayDir, hitPt, hit);
+        hit = PierceSurface(floor, rayOri, rayDir, hitPt);
         EXPECT_FALSE(hit); // No plane intersection so hitPt is undefined
     }
 
@@ -235,7 +235,7 @@ TEST_F(EnergyPlusFixture, PierceSurfaceTest_ConvexOctagonal)
         Vector const rayDir(Vector(0.25, 0.0, -1.0));
         bool hit(false);
         Vector hitPt(0.0);
-        PierceSurface(floor, rayOri, rayDir, hitPt, hit);
+        hit = PierceSurface(floor, rayOri, rayDir, hitPt);
         EXPECT_TRUE(hit);
     }
 
@@ -244,7 +244,7 @@ TEST_F(EnergyPlusFixture, PierceSurfaceTest_ConvexOctagonal)
         Vector const rayDir(Vector(2.0, 0.0, -1.0));
         bool hit(false);
         Vector hitPt(0.0);
-        PierceSurface(floor, rayOri, rayDir, hitPt, hit);
+        hit = PierceSurface(floor, rayOri, rayDir, hitPt);
         EXPECT_FALSE(hit); // Misses surface but intersects plane
     }
 
@@ -253,7 +253,7 @@ TEST_F(EnergyPlusFixture, PierceSurfaceTest_ConvexOctagonal)
         Vector const rayDir(0.0, 0.0, -1.0);
         bool hit(false);
         Vector hitPt(0.0);
-        PierceSurface(floor, rayOri, rayDir, hitPt, hit);
+        hit = PierceSurface(floor, rayOri, rayDir, hitPt);
         EXPECT_TRUE(hit);
     }
 }
@@ -273,7 +273,7 @@ TEST_F(EnergyPlusFixture, PierceSurfaceTest_Convex8Sides)
     floor.IsConvex = true;
     floor.set_computed_geometry();
     DataSurfaces::Surface2D const &floor2d(floor.surface2d);
-    EXPECT_TRUE(compare_enums(ShapeCat::Convex, floor.shapeCat));
+    EXPECT_ENUM_EQ(ShapeCat::Convex, floor.shapeCat);
     EXPECT_EQ(2, floor2d.axis);
     EXPECT_EQ(Vector2D(-0.25, -0.25), floor2d.vl);
     EXPECT_EQ(Vector2D(1.25, 1.25), floor2d.vu);
@@ -283,7 +283,7 @@ TEST_F(EnergyPlusFixture, PierceSurfaceTest_Convex8Sides)
         Vector const rayDir(0.0, 0.0, -1.0);
         bool hit(false);
         Vector hitPt(0.0);
-        PierceSurface(floor, rayOri, rayDir, hitPt, hit);
+        hit = PierceSurface(floor, rayOri, rayDir, hitPt);
         EXPECT_TRUE(hit);
         EXPECT_DOUBLE_EQ(0.5, hitPt.x);
         EXPECT_DOUBLE_EQ(0.5, hitPt.y);
@@ -295,7 +295,7 @@ TEST_F(EnergyPlusFixture, PierceSurfaceTest_Convex8Sides)
         Vector const rayDir(0.0, 0.0, 1.0);
         bool hit(false);
         Vector hitPt(0.0);
-        PierceSurface(floor, rayOri, rayDir, hitPt, hit);
+        hit = PierceSurface(floor, rayOri, rayDir, hitPt);
         EXPECT_FALSE(hit); // No plane intersection so hitPt is undefined
     }
 
@@ -304,7 +304,7 @@ TEST_F(EnergyPlusFixture, PierceSurfaceTest_Convex8Sides)
         Vector const rayDir(Vector(0.25, 0.0, -1.0));
         bool hit(false);
         Vector hitPt(0.0);
-        PierceSurface(floor, rayOri, rayDir, hitPt, hit);
+        hit = PierceSurface(floor, rayOri, rayDir, hitPt);
         EXPECT_TRUE(hit);
         EXPECT_DOUBLE_EQ(0.75, hitPt.x);
         EXPECT_DOUBLE_EQ(0.5, hitPt.y);
@@ -316,7 +316,7 @@ TEST_F(EnergyPlusFixture, PierceSurfaceTest_Convex8Sides)
         Vector const rayDir(Vector(2.0, 0.0, -1.0));
         bool hit(false);
         Vector hitPt(0.0);
-        PierceSurface(floor, rayOri, rayDir, hitPt, hit);
+        hit = PierceSurface(floor, rayOri, rayDir, hitPt);
         EXPECT_FALSE(hit); // Misses surface but intersects plane
         EXPECT_DOUBLE_EQ(2.5, hitPt.x);
         EXPECT_DOUBLE_EQ(0.5, hitPt.y);
@@ -338,7 +338,7 @@ TEST_F(EnergyPlusFixture, PierceSurfaceTest_ConvexNGon)
     floor.IsConvex = true;
     floor.set_computed_geometry();
     DataSurfaces::Surface2D const &floor2d(floor.surface2d);
-    EXPECT_TRUE(compare_enums(ShapeCat::Convex, floor.shapeCat));
+    EXPECT_ENUM_EQ(ShapeCat::Convex, floor.shapeCat);
     EXPECT_EQ(2, floor2d.axis);
     EXPECT_EQ(Vector2D(-1.0, -1.0), floor2d.vl);
     EXPECT_EQ(Vector2D(1.0, 1.0), floor2d.vu);
@@ -348,7 +348,7 @@ TEST_F(EnergyPlusFixture, PierceSurfaceTest_ConvexNGon)
         Vector const rayDir(0.0, 0.0, -1.0);
         bool hit(false);
         Vector hitPt(0.0);
-        PierceSurface(floor, rayOri, rayDir, hitPt, hit);
+        hit = PierceSurface(floor, rayOri, rayDir, hitPt);
         EXPECT_TRUE(hit);
         EXPECT_DOUBLE_EQ(0.0, hitPt.x);
         EXPECT_DOUBLE_EQ(0.0, hitPt.y);
@@ -360,7 +360,7 @@ TEST_F(EnergyPlusFixture, PierceSurfaceTest_ConvexNGon)
         Vector const rayDir(0.0, 0.0, 1.0);
         bool hit(false);
         Vector hitPt(0.0);
-        PierceSurface(floor, rayOri, rayDir, hitPt, hit);
+        hit = PierceSurface(floor, rayOri, rayDir, hitPt);
         EXPECT_FALSE(hit); // No plane intersection so hitPt is undefined
     }
 
@@ -369,7 +369,7 @@ TEST_F(EnergyPlusFixture, PierceSurfaceTest_ConvexNGon)
         Vector const rayDir(Vector(0.25, 0.0, -1.0));
         bool hit(false);
         Vector hitPt(0.0);
-        PierceSurface(floor, rayOri, rayDir, hitPt, hit);
+        hit = PierceSurface(floor, rayOri, rayDir, hitPt);
         EXPECT_TRUE(hit);
         EXPECT_DOUBLE_EQ(0.25, hitPt.x);
         EXPECT_DOUBLE_EQ(0.0, hitPt.y);
@@ -381,7 +381,7 @@ TEST_F(EnergyPlusFixture, PierceSurfaceTest_ConvexNGon)
         Vector const rayDir(Vector(2.0, 0.0, -1.0));
         bool hit(false);
         Vector hitPt(0.0);
-        PierceSurface(floor, rayOri, rayDir, hitPt, hit);
+        hit = PierceSurface(floor, rayOri, rayDir, hitPt);
         EXPECT_FALSE(hit); // Misses surface but intersects plane
         EXPECT_DOUBLE_EQ(2.0, hitPt.x);
         EXPECT_DOUBLE_EQ(0.0, hitPt.y);
@@ -397,7 +397,7 @@ TEST_F(EnergyPlusFixture, PierceSurfaceTest_NonconvexBoomerang)
     boomerang.IsConvex = false;
     boomerang.set_computed_geometry();
     DataSurfaces::Surface2D const &boomerang2d(boomerang.surface2d);
-    EXPECT_TRUE(compare_enums(ShapeCat::Nonconvex, boomerang.shapeCat));
+    EXPECT_ENUM_EQ(ShapeCat::Nonconvex, boomerang.shapeCat);
     EXPECT_EQ(2, boomerang2d.axis);
 
     { // Ray straight down into a "wing" of boomerang
@@ -405,7 +405,7 @@ TEST_F(EnergyPlusFixture, PierceSurfaceTest_NonconvexBoomerang)
         Vector const rayDir(0.0, 0.0, -1.0);
         bool hit(false);
         Vector hitPt(0.0);
-        PierceSurface(boomerang, rayOri, rayDir, hitPt, hit);
+        hit = PierceSurface(boomerang, rayOri, rayDir, hitPt);
         EXPECT_TRUE(hit);
         EXPECT_DOUBLE_EQ(0.3, hitPt.x);
         EXPECT_DOUBLE_EQ(0.1, hitPt.y);
@@ -417,7 +417,7 @@ TEST_F(EnergyPlusFixture, PierceSurfaceTest_NonconvexBoomerang)
         Vector const rayDir(0.0, 0.0, -1.0);
         bool hit(false);
         Vector hitPt(0.0);
-        PierceSurface(boomerang, rayOri, rayDir, hitPt, hit);
+        hit = PierceSurface(boomerang, rayOri, rayDir, hitPt);
         EXPECT_FALSE(hit);
         EXPECT_DOUBLE_EQ(0.21, hitPt.x);
         EXPECT_DOUBLE_EQ(0.21, hitPt.y);
@@ -434,7 +434,7 @@ TEST_F(EnergyPlusFixture, PierceSurfaceTest_NonconvexUShape)
     ushape.IsConvex = false;
     ushape.set_computed_geometry();
     DataSurfaces::Surface2D const &ushape2d(ushape.surface2d);
-    EXPECT_TRUE(compare_enums(ShapeCat::Nonconvex, ushape.shapeCat));
+    EXPECT_ENUM_EQ(ShapeCat::Nonconvex, ushape.shapeCat);
     EXPECT_EQ(2, ushape2d.axis);
 
     { // Ray straight down into middle of base
@@ -442,7 +442,7 @@ TEST_F(EnergyPlusFixture, PierceSurfaceTest_NonconvexUShape)
         Vector const rayDir(0.0, 0.0, -1.0);
         bool hit(false);
         Vector hitPt(0.0);
-        PierceSurface(ushape, rayOri, rayDir, hitPt, hit);
+        hit = PierceSurface(ushape, rayOri, rayDir, hitPt);
         EXPECT_TRUE(hit);
         EXPECT_DOUBLE_EQ(1.5, hitPt.x);
         EXPECT_DOUBLE_EQ(0.5, hitPt.y);
@@ -454,7 +454,7 @@ TEST_F(EnergyPlusFixture, PierceSurfaceTest_NonconvexUShape)
         Vector const rayDir(0.0, 0.0, -1.0);
         bool hit(false);
         Vector hitPt(0.0);
-        PierceSurface(ushape, rayOri, rayDir, hitPt, hit);
+        hit = PierceSurface(ushape, rayOri, rayDir, hitPt);
         EXPECT_FALSE(hit);
         EXPECT_DOUBLE_EQ(1.5, hitPt.x);
         EXPECT_DOUBLE_EQ(-0.5, hitPt.y);
@@ -466,7 +466,7 @@ TEST_F(EnergyPlusFixture, PierceSurfaceTest_NonconvexUShape)
         Vector const rayDir(0.0, 0.0, -1.0);
         bool hit(false);
         Vector hitPt(0.0);
-        PierceSurface(ushape, rayOri, rayDir, hitPt, hit);
+        hit = PierceSurface(ushape, rayOri, rayDir, hitPt);
         EXPECT_TRUE(hit);
         EXPECT_DOUBLE_EQ(0.5, hitPt.x);
         EXPECT_DOUBLE_EQ(1.5, hitPt.y);
@@ -478,7 +478,7 @@ TEST_F(EnergyPlusFixture, PierceSurfaceTest_NonconvexUShape)
         Vector const rayDir(0.0, 0.0, -1.0);
         bool hit(false);
         Vector hitPt(0.0);
-        PierceSurface(ushape, rayOri, rayDir, hitPt, hit);
+        hit = PierceSurface(ushape, rayOri, rayDir, hitPt);
         EXPECT_TRUE(hit);
         EXPECT_DOUBLE_EQ(2.5, hitPt.x);
         EXPECT_DOUBLE_EQ(1.5, hitPt.y);
@@ -490,7 +490,7 @@ TEST_F(EnergyPlusFixture, PierceSurfaceTest_NonconvexUShape)
         Vector const rayDir(0.0, 0.0, -1.0);
         bool hit(false);
         Vector hitPt(0.0);
-        PierceSurface(ushape, rayOri, rayDir, hitPt, hit);
+        hit = PierceSurface(ushape, rayOri, rayDir, hitPt);
         EXPECT_FALSE(hit);
         EXPECT_DOUBLE_EQ(1.5, hitPt.x);
         EXPECT_DOUBLE_EQ(1.5, hitPt.y);
@@ -513,7 +513,7 @@ TEST_F(EnergyPlusFixture, PierceSurfaceTest_NonconvexStar4)
     star.IsConvex = false;
     star.set_computed_geometry();
     DataSurfaces::Surface2D const &star2d(star.surface2d);
-    EXPECT_TRUE(compare_enums(ShapeCat::Nonconvex, star.shapeCat));
+    EXPECT_ENUM_EQ(ShapeCat::Nonconvex, star.shapeCat);
     EXPECT_EQ(2, star2d.axis);
 
     { // Ray straight down into middle of star
@@ -521,7 +521,7 @@ TEST_F(EnergyPlusFixture, PierceSurfaceTest_NonconvexStar4)
         Vector const rayDir(0.0, 0.0, -1.0);
         bool hit(false);
         Vector hitPt(0.0);
-        PierceSurface(star, rayOri, rayDir, hitPt, hit);
+        hit = PierceSurface(star, rayOri, rayDir, hitPt);
         EXPECT_TRUE(hit);
         EXPECT_DOUBLE_EQ(2.0, hitPt.x);
         EXPECT_DOUBLE_EQ(2.0, hitPt.y);
@@ -533,7 +533,7 @@ TEST_F(EnergyPlusFixture, PierceSurfaceTest_NonconvexStar4)
         Vector const rayDir(0.0, 0.0, -1.0);
         bool hit(false);
         Vector hitPt(0.0);
-        PierceSurface(star, rayOri, rayDir, hitPt, hit);
+        hit = PierceSurface(star, rayOri, rayDir, hitPt);
         EXPECT_FALSE(hit);
         EXPECT_DOUBLE_EQ(2.0, hitPt.x);
         EXPECT_DOUBLE_EQ(0.5, hitPt.y);
@@ -545,7 +545,7 @@ TEST_F(EnergyPlusFixture, PierceSurfaceTest_NonconvexStar4)
         Vector const rayDir(0.0, 0.0, -1.0);
         bool hit(false);
         Vector hitPt(0.0);
-        PierceSurface(star, rayOri, rayDir, hitPt, hit);
+        hit = PierceSurface(star, rayOri, rayDir, hitPt);
         EXPECT_FALSE(hit);
         EXPECT_DOUBLE_EQ(2.0, hitPt.x);
         EXPECT_DOUBLE_EQ(3.5, hitPt.y);
@@ -557,7 +557,7 @@ TEST_F(EnergyPlusFixture, PierceSurfaceTest_NonconvexStar4)
         Vector const rayDir(0.0, 0.0, -1.0);
         bool hit(false);
         Vector hitPt(0.0);
-        PierceSurface(star, rayOri, rayDir, hitPt, hit);
+        hit = PierceSurface(star, rayOri, rayDir, hitPt);
         EXPECT_FALSE(hit);
         EXPECT_DOUBLE_EQ(0.5, hitPt.x);
         EXPECT_DOUBLE_EQ(2.0, hitPt.y);
@@ -569,7 +569,7 @@ TEST_F(EnergyPlusFixture, PierceSurfaceTest_NonconvexStar4)
         Vector const rayDir(0.0, 0.0, -1.0);
         bool hit(false);
         Vector hitPt(0.0);
-        PierceSurface(star, rayOri, rayDir, hitPt, hit);
+        hit = PierceSurface(star, rayOri, rayDir, hitPt);
         EXPECT_FALSE(hit);
         EXPECT_DOUBLE_EQ(3.5, hitPt.x);
         EXPECT_DOUBLE_EQ(2.0, hitPt.y);
@@ -581,7 +581,7 @@ TEST_F(EnergyPlusFixture, PierceSurfaceTest_NonconvexStar4)
         Vector const rayDir(0.0, 0.0, -1.0);
         bool hit(false);
         Vector hitPt(0.0);
-        PierceSurface(star, rayOri, rayDir, hitPt, hit);
+        hit = PierceSurface(star, rayOri, rayDir, hitPt);
         EXPECT_TRUE(hit);
         EXPECT_DOUBLE_EQ(0.5, hitPt.x);
         EXPECT_DOUBLE_EQ(0.5, hitPt.y);
@@ -593,7 +593,7 @@ TEST_F(EnergyPlusFixture, PierceSurfaceTest_NonconvexStar4)
         Vector const rayDir(0.0, 0.0, -1.0);
         bool hit(false);
         Vector hitPt(0.0);
-        PierceSurface(star, rayOri, rayDir, hitPt, hit);
+        hit = PierceSurface(star, rayOri, rayDir, hitPt);
         EXPECT_TRUE(hit);
         EXPECT_DOUBLE_EQ(3.5, hitPt.x);
         EXPECT_DOUBLE_EQ(0.5, hitPt.y);
@@ -605,7 +605,7 @@ TEST_F(EnergyPlusFixture, PierceSurfaceTest_NonconvexStar4)
         Vector const rayDir(0.0, 0.0, -1.0);
         bool hit(false);
         Vector hitPt(0.0);
-        PierceSurface(star, rayOri, rayDir, hitPt, hit);
+        hit = PierceSurface(star, rayOri, rayDir, hitPt);
         EXPECT_TRUE(hit);
         EXPECT_DOUBLE_EQ(0.5, hitPt.x);
         EXPECT_DOUBLE_EQ(3.5, hitPt.y);
@@ -617,7 +617,7 @@ TEST_F(EnergyPlusFixture, PierceSurfaceTest_NonconvexStar4)
         Vector const rayDir(0.0, 0.0, -1.0);
         bool hit(false);
         Vector hitPt(0.0);
-        PierceSurface(star, rayOri, rayDir, hitPt, hit);
+        hit = PierceSurface(star, rayOri, rayDir, hitPt);
         EXPECT_TRUE(hit);
         EXPECT_DOUBLE_EQ(3.5, hitPt.x);
         EXPECT_DOUBLE_EQ(3.5, hitPt.y);

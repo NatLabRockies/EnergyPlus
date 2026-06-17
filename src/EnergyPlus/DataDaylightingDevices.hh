@@ -1,7 +1,7 @@
-// EnergyPlus, Copyright (c) 1996-2023, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
-// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other
+// National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
 // contributors. All rights reserved.
 //
 // NOTICE: This Software was developed under funding from the U.S. Department of Energy and the
@@ -58,7 +58,7 @@
 
 namespace EnergyPlus {
 
-namespace DataDaylightingDevices {
+namespace Dayltg {
 
     constexpr int MaxTZones(10);   // Maximum number of transition zones
     constexpr int NumOfAngles(19); // Number of data points on transmittance vs. angle curve
@@ -108,7 +108,7 @@ namespace DataDaylightingDevices {
         Real64 TransSolDiff = 0.0;      // TDD diffuse solar transmittance
 
         // Default Constructor
-        TDDPipeData() : PipeTransVisBeam(DataDaylightingDevices::NumOfAngles, 0.0), PipeTransSolBeam(DataDaylightingDevices::NumOfAngles, 0.0)
+        TDDPipeData() : PipeTransVisBeam(Dayltg::NumOfAngles, 0.0), PipeTransSolBeam(Dayltg::NumOfAngles, 0.0)
         {
         }
     };
@@ -129,16 +129,24 @@ namespace DataDaylightingDevices {
         // Report variables
     };
 
-} // namespace DataDaylightingDevices
+} // namespace Dayltg
 
 struct DataDaylightingDevicesData : BaseGlobalStruct
 {
-    Array1D<DataDaylightingDevices::TDDPipeData> TDDPipe;
-    Array1D<DataDaylightingDevices::ShelfData> Shelf;
+    Array1D<Dayltg::TDDPipeData> TDDPipe;
+    Array1D<Dayltg::ShelfData> Shelf;
+
+    void init_constant_state([[maybe_unused]] EnergyPlusData &state) override
+    {
+    }
+
+    void init_state([[maybe_unused]] EnergyPlusData &state) override
+    {
+    }
 
     void clear_state() override
     {
-        *this = DataDaylightingDevicesData();
+        new (this) DataDaylightingDevicesData();
     }
 };
 

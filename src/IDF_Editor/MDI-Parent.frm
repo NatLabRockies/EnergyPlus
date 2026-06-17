@@ -1,22 +1,22 @@
 VERSION 5.00
 Object = "{F9043C88-F6F2-101A-A3C9-08002B2F49FB}#1.2#0"; "ComDlg32.OCX"
 Object = "{831FDD16-0C5C-11D2-A9FC-0000F8754DA1}#2.1#0"; "MSCOMCTL.OCX"
-Begin VB.MDIForm parentMDI 
+Begin VB.MDIForm parentMDI
    BackColor       =   &H8000000C&
    Caption         =   "IDF Editor"
    ClientHeight    =   8460
-   ClientLeft      =   165
-   ClientTop       =   810
+   ClientLeft      =   225
+   ClientTop       =   870
    ClientWidth     =   13065
    Icon            =   "MDI-Parent.frx":0000
    LinkTopic       =   "MDIForm1"
    StartUpPosition =   3  'Windows Default
-   Begin VB.Timer fileUpdateTimer 
+   Begin VB.Timer fileUpdateTimer
       Interval        =   200
       Left            =   480
       Top             =   2280
    End
-   Begin MSComctlLib.StatusBar sbStatusBar 
+   Begin MSComctlLib.StatusBar sbStatusBar
       Align           =   2  'Align Bottom
       Height          =   360
       Left            =   0
@@ -26,30 +26,30 @@ Begin VB.MDIForm parentMDI
       _ExtentX        =   23045
       _ExtentY        =   635
       _Version        =   393216
-      BeginProperty Panels {8E3867A5-8586-11D1-B16A-00C0F0283628} 
+      BeginProperty Panels {8E3867A5-8586-11D1-B16A-00C0F0283628}
          NumPanels       =   5
-         BeginProperty Panel1 {8E3867AB-8586-11D1-B16A-00C0F0283628} 
+         BeginProperty Panel1 {8E3867AB-8586-11D1-B16A-00C0F0283628}
             AutoSize        =   2
             Object.Width           =   1773
             MinWidth        =   1764
          EndProperty
-         BeginProperty Panel2 {8E3867AB-8586-11D1-B16A-00C0F0283628} 
+         BeginProperty Panel2 {8E3867AB-8586-11D1-B16A-00C0F0283628}
             AutoSize        =   2
             Object.Width           =   1773
             MinWidth        =   1764
          EndProperty
-         BeginProperty Panel3 {8E3867AB-8586-11D1-B16A-00C0F0283628} 
+         BeginProperty Panel3 {8E3867AB-8586-11D1-B16A-00C0F0283628}
             AutoSize        =   2
          EndProperty
-         BeginProperty Panel4 {8E3867AB-8586-11D1-B16A-00C0F0283628} 
+         BeginProperty Panel4 {8E3867AB-8586-11D1-B16A-00C0F0283628}
             AutoSize        =   1
             Object.Width           =   13785
          EndProperty
-         BeginProperty Panel5 {8E3867AB-8586-11D1-B16A-00C0F0283628} 
+         BeginProperty Panel5 {8E3867AB-8586-11D1-B16A-00C0F0283628}
             AutoSize        =   2
          EndProperty
       EndProperty
-      BeginProperty Font {0BE35203-8F91-11CE-9DE3-00AA004BB851} 
+      BeginProperty Font {0BE35203-8F91-11CE-9DE3-00AA004BB851}
          Name            =   "MS Sans Serif"
          Size            =   9.75
          Charset         =   0
@@ -59,123 +59,129 @@ Begin VB.MDIForm parentMDI
          Strikethrough   =   0   'False
       EndProperty
    End
-   Begin MSComDlg.CommonDialog openDialog 
+   Begin MSComDlg.CommonDialog openDialog
       Left            =   3840
       Top             =   2880
       _ExtentX        =   847
       _ExtentY        =   847
       _Version        =   393216
    End
-   Begin VB.Menu mnuFileTop 
+   Begin VB.Menu mnuFileTop
       Caption         =   "&File"
-      Begin VB.Menu mnuFileNew 
+      Begin VB.Menu mnuFileNew
          Caption         =   "&New"
          Shortcut        =   ^N
       End
-      Begin VB.Menu mnuFileOpen 
+      Begin VB.Menu mnuFileOpen
          Caption         =   "&Open..."
          Shortcut        =   ^O
       End
-      Begin VB.Menu mnuFileSpace3 
+      Begin VB.Menu mnuFileSpace3
          Caption         =   "-"
       End
-      Begin VB.Menu mnuFileRecent 
+      Begin VB.Menu mnuFileRecent
          Caption         =   "mru1"
          Index           =   1
       End
-      Begin VB.Menu mnuFileRecent 
+      Begin VB.Menu mnuFileRecent
          Caption         =   "mru2"
          Index           =   2
       End
-      Begin VB.Menu mnuFileRecent 
+      Begin VB.Menu mnuFileRecent
          Caption         =   "mru3"
          Index           =   3
       End
-      Begin VB.Menu mnuFileRecent 
+      Begin VB.Menu mnuFileRecent
          Caption         =   "mru4"
          Index           =   4
       End
-      Begin VB.Menu mnuFileRecent 
+      Begin VB.Menu mnuFileRecent
          Caption         =   "mru5"
          Index           =   5
       End
-      Begin VB.Menu mnuFileRecent 
+      Begin VB.Menu mnuFileRecent
          Caption         =   "mru6"
          Index           =   6
       End
-      Begin VB.Menu mnuFileSpacer2 
+      Begin VB.Menu mnuFileSpacer2
          Caption         =   "-"
       End
-      Begin VB.Menu mnuFileExit 
+      Begin VB.Menu mnuFileExit
          Caption         =   "E&xit"
       End
    End
-   Begin VB.Menu mnuHelp 
+   Begin VB.Menu mnuHelp
       Caption         =   "&Help"
-      Begin VB.Menu mnuHelpWhatsNew 
+      Begin VB.Menu mnuHelpWhatsNew
          Caption         =   "&Whats New"
       End
-      Begin VB.Menu mnuHelpDiv0 
+      Begin VB.Menu mnuHelpDiv0
          Caption         =   "-"
       End
-      Begin VB.Menu mnuHelpContents 
+      Begin VB.Menu mnuHelpContents
          Caption         =   "&Contents"
          Enabled         =   0   'False
       End
-      Begin VB.Menu mnuHelpIndex 
+      Begin VB.Menu mnuHelpIndex
          Caption         =   "&Index"
          Enabled         =   0   'False
       End
-      Begin VB.Menu mnuHelpDocs 
+      Begin VB.Menu mnuHelpDocs
          Caption         =   "&Documentation"
          Enabled         =   0   'False
       End
-      Begin VB.Menu mnuHelpDiv1 
+      Begin VB.Menu mnuHelpDiv1
          Caption         =   "-"
       End
-      Begin VB.Menu mnuHelpEPDocs 
+      Begin VB.Menu mnuHelpEPDocs
          Caption         =   "EnergyPlus Documentation Menu"
       End
-      Begin VB.Menu mnuHelpDiv2 
+      Begin VB.Menu mnuHelpDiv2
          Caption         =   "-"
       End
-      Begin VB.Menu mnuHelpGettingStarted 
+      Begin VB.Menu mnuHelpQuickStart
+         Caption         =   "EnergyPlus QuickStart"
+      End
+      Begin VB.Menu mnuHelpEssentials
+         Caption         =   "EnergyPlus Essentials"
+      End
+      Begin VB.Menu mnuHelpGettingStarted
          Caption         =   "EnergyPlus Getting Started"
       End
-      Begin VB.Menu mnuHelpIORef 
+      Begin VB.Menu mnuHelpIORef
          Caption         =   "EnergyPlus I/O Reference"
       End
-      Begin VB.Menu mnuHelpOutDetails 
+      Begin VB.Menu mnuHelpOutDetails
          Caption         =   "EnergyPlus Output Details and Examples"
       End
-      Begin VB.Menu mnuHelpEngRef 
+      Begin VB.Menu mnuHelpEngRef
          Caption         =   "EnergyPlus Engineering Reference"
       End
-      Begin VB.Menu mnuHelpAuxProgs 
+      Begin VB.Menu mnuHelpAuxProgs
          Caption         =   "EnergyPlus Auxiliary Programs"
       End
-      Begin VB.Menu mnuHelpEMSguide 
+      Begin VB.Menu mnuHelpEMSguide
          Caption         =   "EnergyPlus EMS Application Guide"
       End
-      Begin VB.Menu mnuHelpCompliance 
+      Begin VB.Menu mnuHelpCompliance
          Caption         =   "Using EnergyPlus for Compliance"
       End
-      Begin VB.Menu mnuHelpExtInterface 
+      Begin VB.Menu mnuHelpExtInterface
          Caption         =   "External Interface Application Guide "
       End
-      Begin VB.Menu mnuHelpTips 
+      Begin VB.Menu mnuHelpTips
          Caption         =   "Tips and Tricks Using EnergyPlus"
       End
-      Begin VB.Menu mnuHelpAcknowledge 
+      Begin VB.Menu mnuHelpAcknowledge
          Caption         =   "EnergyPlus Acknowledgments"
       End
-      Begin VB.Menu mnuHelpDiv3 
+      Begin VB.Menu mnuHelpDiv3
          Caption         =   "-"
       End
-      Begin VB.Menu mnuHelpAbout 
+      Begin VB.Menu mnuHelpAbout
          Caption         =   "About IDF Editor"
       End
-      Begin VB.Menu mnuCreateRangeTestFiles 
+      Begin VB.Menu mnuCreateRangeTestFiles
          Caption         =   "Run Range Tests"
          Visible         =   0   'False
       End
@@ -547,10 +553,12 @@ End Sub
 
 ' References to EnergyPlus Documentation
 Private Sub mnuHelpAcknowledge_Click()
-Call startAcrobat("Acknowledgments.pdf")
+' Call startAcrobat("Acknowledgments.pdf")
+Call viewWebPage("https://energyplus.readthedocs.io/en/latest/acknowledgments/acknowledgments.html")
 End Sub
 Private Sub mnuHelpAuxProgs_Click()
-Call startAcrobat("AuxiliaryPrograms.pdf")
+'Call startAcrobat("AuxiliaryPrograms.pdf")
+Call viewWebPage("https://energyplus.readthedocs.io/en/latest/auxiliary-programs/auxiliary-programs.html")
 End Sub
 Private Sub mnuHelpEngRef_Click()
 Call startAcrobat("EngineeringReference.pdf")
@@ -559,6 +567,8 @@ Private Sub mnuHelpEPDocs_Click()
 'Call startAcrobat("EPlusMainMenu.pdf")
 Call viewWebPage(documentationPath + "index.html")
 End Sub
+
+
 Private Sub mnuHelpGettingStarted_Click()
 Call startAcrobat("GettingStarted.pdf")
 End Sub
@@ -572,13 +582,22 @@ Private Sub mnuHelpCompliance_Click()
 Call startAcrobat("Using_EnergyPlus_for_Compliance.pdf")
 End Sub
 Private Sub mnuHelpEMSguide_Click()
-Call startAcrobat("EMS_Application_Guide.pdf")
+'Call startAcrobat("EMS_Application_Guide.pdf")
+Call viewWebPage("https://energyplus.readthedocs.io/en/latest/ems-application-guide/ems-application-guide.html")
 End Sub
 Private Sub mnuHelpExtInterface_Click()
 Call startAcrobat("ExternalInterfaces_Application_Guide.pdf")
 End Sub
+Private Sub mnuHelpQuickStart_Click()
+Call viewWebPage("https://energyplus.readthedocs.io/en/latest/quick_start/quick_start.html")
+End Sub
+Private Sub mnuHelpEssentials_Click()
+Call viewWebPage("https://energyplus.readthedocs.io/en/latest/essentials/essentials.html")
+End Sub
+
 Private Sub mnuHelpTips_Click()
-Call startAcrobat("Tips_and_Tricks_Using_EnergyPlus.pdf")
+'Call startAcrobat("Tips_and_Tricks_Using_EnergyPlus.pdf")
+Call viewWebPage("https://energyplus.readthedocs.io/en/latest/tips_and_tricks/tips_and_tricks.html")
 End Sub
 Private Sub mnuHelpWhatsNew_Click()
 frmWhatsNew.Show

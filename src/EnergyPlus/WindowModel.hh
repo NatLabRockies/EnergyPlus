@@ -1,7 +1,7 @@
-// EnergyPlus, Copyright (c) 1996-2023, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
-// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other
+// National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
 // contributors. All rights reserved.
 //
 // NOTICE: This Software was developed under funding from the U.S. Department of Energy and the
@@ -60,24 +60,20 @@ namespace EnergyPlus {
 // Forward declarations
 struct EnergyPlusData;
 
-template <typename T> class EnumParser
-{
-    std::map<std::string, T> m_Map;
+namespace Window {
 
-public:
-    EnumParser(){};
-
-    T StringToEnum(EnergyPlusData &state, const std::string &value)
+    enum class OpticalDataModel
     {
-        auto iValue = m_Map.find(value);
-        if (iValue == m_Map.end()) {
-            ShowFatalError(state, "Incorrect enumerator assigned.");
-        }
-        return iValue->second;
-    }
-};
+        Invalid = -1,
+        SpectralAverage,
+        Spectral,
+        BSDF,
+        SpectralAndAngle,
+        Num
+    };
 
-namespace WindowManager {
+    extern const std::array<std::string_view, (int)OpticalDataModel::Num> opticalDataModelNames;
+    extern const std::array<std::string_view, (int)OpticalDataModel::Num> opticalDataModelNamesUC;
 
     enum class WindowsModel
     {
@@ -86,6 +82,8 @@ namespace WindowManager {
         External,
         Num
     };
+
+    extern const std::array<std::string_view, (int)WindowsModel::Num> windowsModelNamesUC;
 
     // Class that reads IDF object and decides if interior or exterior window models
     // will be used.
@@ -125,7 +123,7 @@ namespace WindowManager {
     private:
         WindowsOpticalModel m_Model;
     };
-} // namespace WindowManager
+} // namespace Window
 
 } // namespace EnergyPlus
 

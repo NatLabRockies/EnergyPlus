@@ -1,7 +1,7 @@
-// EnergyPlus, Copyright (c) 1996-2023, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
-// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other
+// National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
 // contributors. All rights reserved.
 //
 // NOTICE: This Software was developed under funding from the U.S. Department of Energy and the
@@ -58,7 +58,7 @@
 
 // Penumbra Headers
 #ifndef EP_NO_OPENGL
-#include <penumbra/penumbra.h>
+#    include <penumbra/penumbra.h>
 #endif
 
 // EnergyPlus Headers
@@ -95,7 +95,13 @@ namespace SolarShading {
 
     void InitSolarCalculations(EnergyPlusData &state);
 
+    void checkShadingSurfaceSchedules(EnergyPlusData &state);
+
     void GetShadowingInput(EnergyPlusData &state);
+
+    void processShadowingInput(EnergyPlusData &state);
+
+    void checkSurfaceExternalShadingSchedules(EnergyPlusData &state);
 
     void AllocateModuleArrays(EnergyPlusData &state);
 
@@ -129,6 +135,8 @@ namespace SolarShading {
     void ComputeIntSolarAbsorpFactors(EnergyPlusData &state);
 
     void CLIP(EnergyPlusData &state, int const NVT, Array1D<Real64> &XVT, Array1D<Real64> &YVT, Array1D<Real64> &ZVT);
+
+    void CLIPLINE(Real64 &x0, Real64 &x1, Real64 &y0, Real64 &y1, Real64 maxX, Real64 minX, Real64 maxY, Real64 minY, bool &visible);
 
     void CTRANS(EnergyPlusData &state,
                 int const NS,         // Surface number whose vertex coordinates are being transformed
@@ -369,18 +377,18 @@ struct SolarShadingData : BaseGlobalStruct
     Array1D<Real64> SurfMultCircumSolar;        // Contribution to eff sky view factor from circumsolar brightening
     Array1D<Real64> SurfMultHorizonZenith;      // Contribution to eff sky view factor from horizon or zenith brightening
 
-    int FBKSHC;                     // HC location of first back surface
-    int FGSSHC;                     // HC location of first general shadowing surface
-    int FINSHC;                     // HC location of first back surface overlap
-    int FRVLHC;                     // HC location of first reveal surface
-    int FSBSHC;                     // HC location of first subsurface
+    int FBKSHC = 0;                 // HC location of first back surface
+    int FGSSHC = 0;                 // HC location of first general shadowing surface
+    int FINSHC = 0;                 // HC location of first back surface overlap
+    int FRVLHC = 0;                 // HC location of first reveal surface
+    int FSBSHC = 0;                 // HC location of first subsurface
     int LOCHCA = 0;                 // Location of highest data in the HC arrays
-    int NBKSHC;                     // Number of back surfaces in the HC arrays
-    int NGSSHC;                     // Number of general shadowing surfaces in the HC arrays
-    int NINSHC;                     // Number of back surface overlaps in the HC arrays
-    int NRVLHC;                     // Number of reveal surfaces in HC array
-    int NSBSHC;                     // Number of subsurfaces in the HC arrays
-    bool CalcSkyDifShading;         // True when sky diffuse solar shading is
+    int NBKSHC = 0;                 // Number of back surfaces in the HC arrays
+    int NGSSHC = 0;                 // Number of general shadowing surfaces in the HC arrays
+    int NINSHC = 0;                 // Number of back surface overlaps in the HC arrays
+    int NRVLHC = 0;                 // Number of reveal surfaces in HC array
+    int NSBSHC = 0;                 // Number of subsurfaces in the HC arrays
+    bool CalcSkyDifShading = false; // True when sky diffuse solar shading is
     int ShadowingCalcFrequency = 0; // Frequency for Shadowing Calculations
     int ShadowingDaysLeft = 0;      // Days left in current shadowing period
 
@@ -426,7 +434,8 @@ struct SolarShadingData : BaseGlobalStruct
 #ifdef EP_NO_OPENGL
     bool penumbra = false;
 #else
-    std::unique_ptr<Pumbra::Penumbra> penumbra = nullptr;
+    std::unique_ptr<Penumbra::Penumbra> penumbra = nullptr;
+    std::pair<EnergyPlusData *, std::string> LoggerContext;
 #endif
 
     bool GetInputFlag = true;
@@ -468,7 +477,7 @@ struct SolarShadingData : BaseGlobalStruct
     Array1D<Real64> ZVert;
     Array1D<Real64> SurfWinAbsBeam;                                                               // Glass layer beam solar absorptance of a window
     Array1D<Real64> SurfWinAbsBeamEQL = Array1D<Real64>(DataWindowEquivalentLayer::CFSMAXNL + 1); // layers beam solar absorptance of a window
-    Array1D<Real64> SurfWinExtBeamAbsByShadFac; // Factor for exterior beam radiation absorbed by shade (1/m2) (absorbed radation = beam incident *
+    Array1D<Real64> SurfWinExtBeamAbsByShadFac; // Factor for exterior beam radiation absorbed by shade (1/m2) (absorbed radiation = beam incident *
                                                 // ExtBeamAbsByShad
     Array1D<Real64> SurfWinIntBeamAbsByShadFac; // Like SurfWinExtBeamAbsByShadFac, but for interior beam radiation.
     Array1D<Real64>
@@ -501,6 +510,14 @@ struct SolarShadingData : BaseGlobalStruct
     std::vector<Real64> sin_Theta;
     std::vector<Real64> cos_Theta;
     std::unique_ptr<std::iostream> shd_stream; // Shading file stream
+
+    void init_constant_state([[maybe_unused]] EnergyPlusData &state) override
+    {
+    }
+
+    void init_state([[maybe_unused]] EnergyPlusData &state) override
+    {
+    }
 
     void clear_state() override
     {
@@ -638,6 +655,6 @@ struct SolarShadingData : BaseGlobalStruct
     {
     }
 };
-} // namespace EnergyPlus
 
+} // namespace EnergyPlus
 #endif

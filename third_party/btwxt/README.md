@@ -1,91 +1,75 @@
-[![Build Status](https://travis-ci.org/bigladder/btwxt.svg?branch=master)](https://travis-ci.org/bigladder/btwxt)
+[![Build and Test](https://github.com/bigladder/btwxt/actions/workflows/build-and-test.yml/badge.svg)](https://github.com/bigladder/btwxt/actions/workflows/build-and-test.yml)
 [![codecov](https://codecov.io/gh/bigladder/btwxt/branch/master/graph/badge.svg)](https://codecov.io/gh/bigladder/btwxt)
 
 # Btwxt
 
 ## General-purpose, N-dimensional interpolation library...
 
-Btwxt is a free and open source c++ library to perform numerical interpolation on a gridded data set. The general architecture is that it creates a RegularGridInterpolator object from a) a collection of grid axes and b) a collection of values that fit that axis system. That RegularGridInterpolator object can then be queried repeatedly for values that fall inside its grid.
+Btwxt is a free and open source C++ library to perform numerical interpolation on a regular grid data set. The primary
+class is a RegularGridInterpolator constructed from:
 
-Btwxt supports linear and cubic spline (Catmull-Rom) interpolation methods, and those methods can be specified independently for each axis. The API also allows specification of preferred extrapolation methods (constant or linear)--again independently for each axis--and extrapolation limits.
+1. a set of N grid axes representing the values of the independent variables, and
+2. a collection of one or more grid point data sets aligned to the grid axes.
 
-The input grid is required to be regular (rectilinear) but the axes are not required to have uniform spacing. Each axis need only be strictly increasing.
+A RegularGridInterpolator object can then be queried repeatedly for interpolated values that
+fall inside its grid points, or extrapolated values beyond the grid points (up to a limit defined by the user).
 
-The values are imported as a long vector: a flattened array. It is your responsibility to ensure that you load the grid vectors in the same order as they are defined for the values. Btwxt ensures that the number of values aligns with the grid space, but it does not attempt to verify that the grid axis order is consistent with the values.
+Btwxt supports linear and cubic spline (Catmull-Rom) interpolation methods. Different methods can be specified for each 
+axis. The API also allows specification of preferred extrapolation methods (constant or linear)--again independently for
+each axis--and extrapolation limits.
 
-Btwxt accepts:
-*   a collection of N vectors representing the input variables,
-*   attributes of each of the input vectors describing preferred interpolation and extrapolation methods, and
-*   an array of (or collection of arrays of) values that map onto the grid defined by the input vectors.
+The grid is required to be regular (rectilinear), but the axes are not required to have uniform spacing. Each axis need
+only be strictly increasing.
+
+The grid point data sets are imported as a single long vector (i.e., a flattened array). It is the user's responsibility
+to ensure that the grid point data is ordered according to the order of grid axes. Btwxt ensures that the number of 
+grid points aligns with the total combined points of the grid axes.
 
 ## How to Use
 
-### How to install/include
-Need to complete this section
-
 ### API
-An individual axis can be instantiated with
+
+An individual axis can be instantiated with:
+
 ```c++
 std::vector<double> one_axis{6, 10, 15};
-GridAxis(one_axis);
-GridAxis(one_axis, interpolation_method = Method::CUBIC);
-// interpolation method defaults to LINEAR
-GridAxis(one_axis, extrapolation_method = Method::LINEAR);
-// extrapolation method defaults to CONSTANT
-std::pair<double, double> extrap_bounds{0, 20};
-GridAxis(one_axis, Method::LINEAR, Method::CUBIC, extrap_bounds);
-// extrapolation bounds default to {-DBL_MAX, DBL_MAX}
+GridAxis(one_axis, "x");  // Construct a new axis named "x"
+// interpolation method defaults to linear
+// extrapolation method defaults to constant
+// extrapolation limits default to {-DBL_MAX, DBL_MAX}
+Method extrapolation_method = Method::linear;
+Method interpolation_method = Method::cubic;
+std::pair<double, double> extrapolation_limits{0, 20};
+GridAxis(one_axis, "x", interpolation_method, extrapolation_method, extrapolation_limits);
 ```
 
-A collection of axes can be tied together into a GriddedData object
-```c++
-std::vector<GridAxis> my_grid{first_axis, second_axis, third_axis};
-std::vector< std::vector<double> > values = {...};
-GriddedData(my_grid, values);
-```
+A RegularGridInterpolator holds a collection of axes and the corresponding grid point data at all permutations of the grid axes' values. 
 
-Or you can feed a vector of vectors straight into GriddedData and let it construct the GridAxis objects:
 ```c++
-std::vector<std::vector<double> > vector_grid = {{6, 10, 15},
+std::vector<std::vector<double>> vector_grid = {{6, 10, 15},
                                                  {4, 6, 9}};
-std::vector< std::vector<double> > values = {...};
-GriddedData gridded_data(vector_grid, values);
-gridded_data.set_axis_interp_method(0, Method::CUBIC);
-gridded_data.set_axis_extrap_method(1, Method::LINEAR);
-gridded_data.set_axis_extrap_limits(1, {2, 10});
+std::vector<std::vector<double>> values = {...};
+RegularGridInterpolator my_interpolator(vector_grid, values);
 ```
 
-RegularGridInterpolator holds a GriddedData object and adds capabilities for interpolation. If specified straight from vectors, it will build the GriddedData and GridAxis objects appropriately.
-```c++
-RegularGridInterpolator my_interpolator(gridded_data);
-// or
-std::vector<std::vector<double> > vector_grid = {{6, 10, 15},
-                                                 {4, 6, 9}};
-std::vector< std::vector<double> > values = {...};
-my_interpolator(vector_grid, values);
-```
+Once you have an RegularGridInterpolator object, you can set a point to interpolate to:
 
-Once you have an RGI object, you can set a point to interpolate to:
 ```c++
 std::vector<double> target{12.5, 5.1};
-my_interpolator.set_new_grid_point(target);
-std::vector<double> result = my_interpolator.calculate_all_values_at_target();
-my_interpolator.clear_current_grid_point();
-// or set the point within the calculate:
+my_interpolator.set_target(target);
+std::vector<double> result = my_interpolator.get_values_at_target();
+
+// or set the target when requesting values:
 std::vector<double> new_target{11.7, 6.1};
-result = my_interpolator.calculate_all_values_at_target(new_target);
+result = my_interpolator.get_values_at_target(new_target);
 ```
 
-We have overloaded the () operator on the RGI to perform the interpolation, enabling the following:
+We have overloaded the () operator on the RegularGridInterpolator to perform the interpolation, enabling the following:
+
 ```c++
 std::vector<double> target{12.5, 5.1};
-my_interpolator.set_new_grid_point(target);
+my_interpolator.set_target(target);
 std::vector<double> result = my_interpolator();
 std::vector<double> new_target{11.7, 6.1};
-std::vector<double> result = my_interpolator(new_target);
+result = my_interpolator(new_target);
 ```
-
-
-## Dependencies
-Btwxt uses
-*  [Googletest](https://github.com/google/googletest), both gtest and gmock for unittests.

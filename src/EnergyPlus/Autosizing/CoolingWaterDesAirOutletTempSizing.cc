@@ -1,7 +1,7 @@
-// EnergyPlus, Copyright (c) 1996-2023, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
-// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other
+// National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
 // contributors. All rights reserved.
 //
 // NOTICE: This Software was developed under funding from the U.S. Department of Energy and the
@@ -45,6 +45,7 @@
 // OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 // POSSIBILITY OF SUCH DAMAGE.
 
+// EnergyPlus Headers
 #include <EnergyPlus/Autosizing/CoolingWaterDesAirOutletTempSizing.hh>
 #include <EnergyPlus/Data/EnergyPlusData.hh>
 #include <EnergyPlus/DataEnvironment.hh>
@@ -66,16 +67,10 @@ Real64 CoolingWaterDesAirOutletTempSizer::size(EnergyPlusData &state, Real64 _or
             this->autoSizedValue = _originalValue;
         } else {
             if (this->termUnitIU) {
-                Real64 Cp = FluidProperties::GetSpecificHeatGlycol(state,
-                                                                   state.dataPlnt->PlantLoop(this->dataWaterLoopNum).FluidName,
-                                                                   DataGlobalConstants::CWInitConvTemp,
-                                                                   state.dataPlnt->PlantLoop(this->dataWaterLoopNum).FluidIndex,
-                                                                   this->callingRoutine);
-                Real64 rho = FluidProperties::GetDensityGlycol(state,
-                                                               state.dataPlnt->PlantLoop(this->dataWaterLoopNum).FluidName,
-                                                               DataGlobalConstants::CWInitConvTemp,
-                                                               state.dataPlnt->PlantLoop(this->dataWaterLoopNum).FluidIndex,
-                                                               this->callingRoutine);
+                Real64 Cp =
+                    state.dataPlnt->PlantLoop(this->dataWaterLoopNum).glycol->getSpecificHeat(state, Constant::CWInitConvTemp, this->callingRoutine);
+                Real64 rho =
+                    state.dataPlnt->PlantLoop(this->dataWaterLoopNum).glycol->getDensity(state, Constant::CWInitConvTemp, this->callingRoutine);
                 Real64 DesCoilLoad = this->dataWaterFlowUsedForSizing * this->dataWaterCoilSizCoolDeltaT * Cp * rho;
                 Real64 T1Out =
                     this->dataDesInletAirTemp - DesCoilLoad / (state.dataEnvrn->StdRhoAir * Psychrometrics::PsyCpAirFnW(this->dataDesInletAirHumRat) *
@@ -86,7 +81,7 @@ Real64 CoolingWaterDesAirOutletTempSizer::size(EnergyPlusData &state, Real64 _or
                 this->autoSizedValue = this->finalZoneSizing(this->curZoneEqNum).CoolDesTemp;
             }
             Real64 fanDeltaT = 0.0;
-            if (this->dataFanPlacement == DataSizing::ZoneFanPlacement::DrawThru) {
+            if (this->dataFanPlacement == HVAC::FanPlace::DrawThru) {
                 // calculate fan heat to get fan air-side delta T
                 Real64 FanCoolLoad = this->calcFanDesHeatGain(this->dataAirFlowUsedForSizing);
                 if (this->dataDesInletAirHumRat > 0.0 && this->dataAirFlowUsedForSizing > 0.0) {
@@ -102,17 +97,17 @@ Real64 CoolingWaterDesAirOutletTempSizer::size(EnergyPlusData &state, Real64 _or
                                   "\", Cooling Coil has leaving air temperature < entering water temperature.";
                 this->addErrorMessage(msg);
                 ShowWarningError(state, msg);
-                msg = format("    Tair,out  =  {:.3R}", this->autoSizedValue);
+                msg = std::format("    Tair,out  =  {:.3f}", this->autoSizedValue);
                 this->addErrorMessage(msg);
                 ShowContinueError(state, msg);
-                msg = format("    Twater,in = {:.3R}", this->dataDesInletWaterTemp);
+                msg = std::format("    Twater,in = {:.3f}", this->dataDesInletWaterTemp);
                 this->addErrorMessage(msg);
                 ShowContinueError(state, msg);
                 this->autoSizedValue = this->dataDesInletWaterTemp + 0.5;
                 msg = "....coil leaving air temperature will be reset to:";
                 this->addErrorMessage(msg);
                 ShowContinueError(state, msg);
-                msg = format("    Tair,out = {:.3R}", this->autoSizedValue);
+                msg = std::format("    Tair,out = {:.3f}", this->autoSizedValue);
                 this->addErrorMessage(msg);
                 ShowContinueError(state, msg);
             }
@@ -130,7 +125,7 @@ Real64 CoolingWaterDesAirOutletTempSizer::size(EnergyPlusData &state, Real64 _or
             } else if (this->dataDesOutletAirTemp > 0.0) {
                 this->autoSizedValue = this->dataDesOutletAirTemp;
                 Real64 fanDeltaT = 0.0;
-                if (this->primaryAirSystem(this->curSysNum).supFanLocation == DataAirSystems::FanPlacement::DrawThru) {
+                if (this->primaryAirSystem(this->curSysNum).supFanPlace == HVAC::FanPlace::DrawThru) {
                     // calculate fan heat to get fan air-side delta T
                     Real64 FanCoolLoad = this->calcFanDesHeatGain(this->dataAirFlowUsedForSizing);
                     if (this->dataDesInletAirHumRat > 0.0 && this->dataAirFlowUsedForSizing > 0.0) {
@@ -144,7 +139,7 @@ Real64 CoolingWaterDesAirOutletTempSizer::size(EnergyPlusData &state, Real64 _or
             } else {
                 this->autoSizedValue = this->finalSysSizing(this->curSysNum).CoolSupTemp;
                 Real64 fanDeltaT = 0.0;
-                if (this->primaryAirSystem(this->curSysNum).supFanLocation == DataAirSystems::FanPlacement::DrawThru) {
+                if (this->primaryAirSystem(this->curSysNum).supFanPlace == HVAC::FanPlace::DrawThru) {
                     // calculate fan heat to get fan air-side delta T
                     Real64 FanCoolLoad = this->calcFanDesHeatGain(this->dataAirFlowUsedForSizing);
                     if (this->dataDesInletAirHumRat > 0.0 && this->dataAirFlowUsedForSizing > 0.0) {
@@ -161,25 +156,25 @@ Real64 CoolingWaterDesAirOutletTempSizer::size(EnergyPlusData &state, Real64 _or
                                   "\", Cooling Coil has leaving air temperature < entering water temperature.";
                 this->addErrorMessage(msg);
                 ShowWarningError(state, msg);
-                msg = format("    Tair,out  =  {:.3R}", this->autoSizedValue);
+                msg = std::format("    Tair,out  =  {:.3f}", this->autoSizedValue);
                 ShowContinueError(state, msg);
-                msg = format("    Twater,in = {:.3R}", this->dataDesInletWaterTemp);
+                msg = std::format("    Twater,in = {:.3f}", this->dataDesInletWaterTemp);
                 ShowContinueError(state, msg);
                 this->autoSizedValue = this->dataDesInletWaterTemp + 0.5;
                 msg = "....coil leaving air temperature will be reset to:";
                 ShowContinueError(state, msg);
-                msg = format("    Tair,out = {:.3R}", this->autoSizedValue);
+                msg = std::format("    Tair,out = {:.3f}", this->autoSizedValue);
                 ShowContinueError(state, msg);
             }
         }
     }
     // override sizing string
     if (this->overrideSizeString) {
-        if (this->isEpJSON) this->sizingString = "design_outlet_air_temperature [C]";
+        this->sizingString = "Design Outlet Air Temperature [C]";
     }
     this->selectSizerOutput(state, errorsFound);
     if (this->isCoilReportObject) {
-        state.dataRptCoilSelection->coilSelectionReportObj->setCoilLvgAirTemp(state, this->compName, this->compType, this->autoSizedValue);
+        ReportCoilSelection::setCoilLvgAirTemp(state, this->coilReportNum, this->autoSizedValue);
     }
     return this->autoSizedValue;
 }

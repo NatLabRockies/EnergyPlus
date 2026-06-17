@@ -1,8 +1,6 @@
 project(HVAC-Diagram Fortran)
 
-cmake_minimum_required(VERSION 3.5.1)
-
-cmake_policy(SET CMP0012 NEW) # if() recognizes boolean constants
+cmake_minimum_required(VERSION 3.5.1...4.0.3)
 
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/../../Products")
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/../../Products")
@@ -31,4 +29,9 @@ install(TARGETS HVAC-Diagram DESTINATION PostProcess)
 if(NOT ${FORTRAN_STATIC_EXE})
   include("${CMAKE_CURRENT_SOURCE_DIR}/../../cmake/ProjectMacros.cmake")
   install_target_prereqs(HVAC-Diagram PostProcess)
+endif()
+
+if(APPLE AND CPACK_CODESIGNING_DEVELOPPER_ID_APPLICATION)
+  include("${CMAKE_CURRENT_SOURCE_DIR}/../../cmake/CodeSigning.cmake")
+  register_install_codesign_target(HVAC-Diagram PostProcess Unspecified)
 endif()

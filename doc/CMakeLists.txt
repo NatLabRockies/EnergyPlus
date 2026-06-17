@@ -51,11 +51,7 @@ if(EXISTS ${XELATEX})
   include(cmake/doc-targets.cmake)
 
   # add each of the documents, they have their own CMakeLists.txt files
-  add_subdirectory(acknowledgments)
-  add_subdirectory(auxiliary-programs)
-  add_subdirectory(ems-application-guide)
   add_subdirectory(engineering-reference)
-  add_subdirectory(essentials)
   add_subdirectory(external-interfaces-application-guide)
   add_subdirectory(getting-started)
   add_subdirectory(input-output-reference)
@@ -63,8 +59,25 @@ if(EXISTS ${XELATEX})
   add_subdirectory(module-developer)
   add_subdirectory(output-details-and-examples)
   add_subdirectory(plant-application-guide)
-  add_subdirectory(tips-and-tricks-using-energyplus)
   add_subdirectory(using-energyplus-for-compliance)
+
+  if(NOT hasParent)
+    # Standalone build of the doc/ folder: package the generated PDFs into a TGZ/ZIP archive
+    if(WIN32)
+      set(CPACK_GENERATOR "ZIP")
+    else()
+      set(CPACK_GENERATOR "TGZ")
+    endif()
+
+    set(CPACK_PACKAGE_FILE_NAME
+      "EnergyPlus-PDFDocumentation-${CMAKE_VERSION_MAJOR}.${CMAKE_VERSION_MINOR}.${CMAKE_VERSION_PATCH}-${CMAKE_VERSION_BUILD}")
+
+    message("Installer name is set to '${CPACK_PACKAGE_FILE_NAME}'")
+
+    install(DIRECTORY "${PROJECT_BINARY_DIR}/pdf/" DESTINATION ".")
+
+    include(CPack)
+  endif()
 
 else()
   # and if it doesn't, clearly state why it fails

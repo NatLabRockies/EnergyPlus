@@ -31,7 +31,7 @@ All terms are positive for net flux to the face except the conduction term, whic
 
 \subsection{External Longwave Radiation}\label{external-longwave-radiation}
 
-\({q''_{LWR}}\) is a standard radiation exchange formulation between the surface, the sky, and the ground. The radiation heat flux is calculated from the surface absorptivity, surface temperature, sky and ground temperatures, and sky and ground view factors.
+\({q''_{LWR}}\) is a standard radiation exchange formulation between the surface, the sky, the ground, and the surrounding surfaces. The radiation heat flux is calculated from the surface absorptivity, surface temperature, sky, ground and surrounding surfaces temperatures, and sky, ground and surrounding surfaces view factors.
 
 The longwave radiation heat exchange between surfaces is dependent on surface temperatures, spatial relationships between surfaces and surroundings, and material properties of the surfaces. The relevant material properties of the surface, emissivity e and absorptivity a, are complex functions of temperature, angle, and wavelength for each participating surface. However, it is generally agreed that reasonable assumptions for building loads calculations are (Chapman 1984; Lienhard 1981):
 
@@ -43,7 +43,11 @@ The longwave radiation heat exchange between surfaces is dependent on surface te
 \item
   energy flux leaving a surface is evenly distributed across the surface,
 \item
-  the medium within the enclosure is non-participating.
+  the medium within the enclosure is non-participating,
+\item
+  the long-wave emissivity of the surrounding surfaces is assumed to be the same as that of the exterior surface viewing them,
+\item
+  the sum of view factors from an exterior surface to the ground, the sky and the surrounding surfaces must be equal to 1.
 \end{itemize}
 
 These assumptions are frequently used in all but the most critical engineering applications.
@@ -51,13 +55,13 @@ These assumptions are frequently used in all but the most critical engineering a
 \begin{longtable}[c]{p{1.0in}p{3.0in}p{1.0in}p{1.0in}}
 
 \caption{Nomenclature List of Variables \label{table:nomenclature-list-of-variables}} \tabularnewline
-\toprule 
+\toprule
 Mathematical variable & Description & Units & Range \tabularnewline
 \midrule
 \endfirsthead
 
 \caption[]{Nomenclature List of Variables} \tabularnewline
-\toprule 
+\toprule
 Mathematical variable & Description & Units & Range \tabularnewline
 \midrule
 \endhead
@@ -68,24 +72,26 @@ $T_{surf}$ & Surface Outside face temperatures & $K$ & --- \tabularnewline
 $T_{air}$ & Outside air temperature & $K$ & --- \tabularnewline
 $T_{gnd}$ & Environmental ground surface temperature & $K$ & --- \tabularnewline
 $T_{sky}$ & Sky Effective temperature & $K$ & --- \tabularnewline
+$T_{srd}$ & Surrounding surfaces average temperature & $K$ & --- \tabularnewline
 $F_{gnd}$ & view factor of wall surface to ground surface & --- & 0--1 \tabularnewline
 $F_{sky}$ & View factor of wall surface to sky & --- & 0--1 \tabularnewline
 $F_{air}$ & View factor of wall surface to air & --- & 0--1 \tabularnewline
+$F_{srd}$ & View factor of wall surface to surrounding surfaces & --- & 0--1 \tabularnewline
 $\varepsilon$ & Surface long-wave emissivity & --- & 0--1 \tabularnewline
 $\sigma$ & Stefan-Boltzmann constant & $W/m^2.K^4$ & $5.67 \times 10^{-8}$ \tabularnewline
 \bottomrule
 \end{longtable}
 
-Consider an enclosure consisting of building exterior surface, surrounding ground surface, and sky.~ Using the assumptions above, we can determine the longwave radiative heat flux at the building exterior surface (Walton 1983; McClellan and Pedersen 1997).~ The total longwave radiative heat flux is the sum of components due to radiation exchange with the ground, sky, and air.
+Consider an enclosure consisting of building exterior surface, surrounding ground surface, and sky.~ Using the assumptions above, we can determine the longwave radiative heat flux at the building exterior surface (Walton 1983; McClellan and Pedersen 1997).~ The total longwave radiative heat flux is the sum of components due to radiation exchange with the ground, sky, air, and surrounding surfaces.
 
 \begin{equation}
-{q''_{LWR}} = {q''_{gnd}} + {q''_{sky}} + {q''_{air}}
+{q''_{LWR}} = {q''_{gnd}} + {q''_{sky}} + {q''_{air}} + {q''_{srd}}
 \end{equation}
 
 Applying the Stefan-Boltzmann Law to each component yields:
 
 \begin{equation}
-{q''_{LWR}} = \varepsilon \sigma {F_{gnd}}(T_{gnd}^4 - T_{surf}^4) + \varepsilon \sigma {F_{sky}}(T_{sky}^4 - T_{surf}^4) + \varepsilon \sigma {F_{air}}(T_{air}^4 - T_{surf}^4)
+{q''_{LWR}} = \varepsilon \sigma {F_{gnd}}(T_{gnd}^4 - T_{surf}^4) + \varepsilon \sigma {F_{sky}}(T_{sky}^4 - T_{surf}^4) + \varepsilon \sigma {F_{air}}(T_{air}^4 - T_{surf}^4)  + \varepsilon \sigma {F_{srd}}(T_{srd}^4 - T_{surf}^4)
 \end{equation}
 
 where
@@ -100,6 +106,8 @@ F\(_{sky}\) = view factor of wall surface to sky temperature
 
 F\(_{air}\) = view factor of wall surface to air temperature
 
+F\(_{srd}\) = view factor of wall surface to surrounding surfaces
+
 T\(_{surf}\) = outside surface temperature
 
 T\(_{gnd}\) = ground surface temperature
@@ -108,10 +116,12 @@ T\(_{sky}\) = sky temperature
 
 T\(_{air}\) = air temperature
 
+T\(_{srd}\) = average temperature of the surrounding surfaces
+
 Linearized radiative heat transfer coefficients are introduced to render the above equation more compatible with the heat balance formulation,
 
 \begin{equation}
-{q''_{LWR}} = {h_{r,gnd}}({T_{gnd}} - {T_{surf}}) + {h_{r,sky}}({T_{sky}} - {T_{surf}}) + {h_{r,air}}({T_{air}} - {T_{surf}})
+{q''_{LWR}} = {h_{r,gnd}}({T_{gnd}} - {T_{surf}}) + {h_{r,sky}}({T_{sky}} - {T_{surf}}) + {h_{r,air}}({T_{air}} - {T_{surf}}) + {h_{r,srd}}({T_{srd}} - {T_{surf}})
 \end{equation}
 
 where
@@ -126,6 +136,10 @@ where
 
 \begin{equation}
 {h_{r,air}} = \frac{{\varepsilon \sigma {F_{air}}(T_{surf}^4 - T_{air}^4)}}{{{T_{surf}} - {T_{air}}}}
+\end{equation}
+
+\begin{equation}
+{h_{r,srd}} = \frac{{\varepsilon \sigma {F_{srd}}(T_{surf}^4 - T_{srd}^4)}}{{{T_{surf}} - {T_{srd}}}}
 \end{equation}
 
 The longwave view factors to ground and sky are calculated with the following expressions (Walton 1983):
@@ -177,7 +191,7 @@ Long-wave radiation exchange of an exterior surface with multiple ground surface
 {q''_{gnd}} = \varepsilon \sigma \sum\limits_{j = 1}^{{N_{gnd}}} {F_{gnd,j}} \left(T_{gnd,j}^4 - T_{surf}^4 \right)
 \end{equation}
 
-The above equation can be recast using average temperature of multiple ground surfaces viewed by an exterior surface as follows:
+The above equation assumes that the building exterior surface and the ground surfaces it views have the same long-wave emissivity and can be recast using average temperature of multiple ground surfaces viewed by an exterior surface as follows:
 
 \begin{equation}
 {q''_{gnd}} = \varepsilon \sigma {F_{gnd,sum}} (T_{gnd,avg}^4 - T_{surf}^4)
@@ -211,9 +225,56 @@ N\(_{gnd}\) = number ground surfaces viewed by an exterior surface
 
 T\(_{gnd,avg}\) = view factor weighted average surface temperature of multiple ground surfaces seen by an exterior surface
 
-F\(_{gnd,sum}\) = sum of the view factors of an exterior surfaces to multiple ground surfaces 
+F\(_{gnd,sum}\) = sum of the view factors of an exterior surfaces to multiple ground surfaces
 
 h\(_{r,gnd,avg}\) = linearized average radiative heat transfer coefficient between an exterior surface and multiple ground surfaces
+
+
+\subsubsection{External Longwave Radiation With Multiple Surrounding Surfaces}\label{external-longwave-radiation-with-multiple-surrounding-surfaces}
+
+Long-wave radiation exchange of an exterior surface with multiple surrounding surfaces is given by:
+
+\begin{equation}
+{q''_{srd}} = \varepsilon \sigma \sum\limits_{j = 1}^{{N_{srd}}} {F_{srd,j}} \left(T_{srd,j}^4 - T_{surf}^4 \right)
+\end{equation}
+
+The above equation assumes that the building exterior surface and the surrounding surfaces it views have the same long-wave emissivity and can be recast using average temperature of multiple surrounding surfaces viewed by an exterior surface as follows:
+
+\begin{equation}
+{q''_{srd}} = \varepsilon \sigma {F_{srd,sum}} (T_{srd,avg}^4 - T_{surf}^4)
+\end{equation}
+
+\begin{equation}
+{F_{srd,sum}} = \sum\limits_{j = 1}^{{N_{srd}}} {F_{srd,j}}
+\end{equation}
+
+\begin{equation}
+{T_{srd,avg}} = ((\sum\limits_{j = 1}^{{N_{srd}}} {F_{srd,j}} {T_{srd,j}^4}) / {F_{srd,sum}})^{1/4}
+\end{equation}
+
+\begin{equation}
+{h_{r,srd,avg}} = \frac{{\varepsilon \sigma {F_{srd, sum}}(T_{surf}^4 - T_{srd,avg}^4)}}{{{T_{surf}} - {T_{srd,avg}}}}
+\end{equation}
+
+where
+
+$\varepsilon$ = long-wave emittance of an exterior surface
+
+$\sigma$ = Stefan-Boltzmann constant
+
+F\(_{srd,j}\) = view factor of an exterior surface to surrounding surface j
+
+T\(_{srd,j}\) = temperature of surrounding surface j
+
+T\(_{surf}\) = outside temperature of an exterior surface
+
+N\(_{srd}\) = number surrounding surfaces viewed by an exterior surface
+
+T\(_{srd,avg}\) = view factor weighted average surface temperature of multiple surrounding surfaces seen by an exterior surface
+
+F\(_{srd,sum}\) = sum of the view factors of an exterior surfaces to multiple surrounding surfaces
+
+h\(_{r,srd,avg}\) = linearized average radiative heat transfer coefficient between an exterior surface and multiple surrounding surfaces
 
 
 \subsection{References}\label{references-034}
@@ -239,7 +300,7 @@ Impetus for using this modeling is illustrated in the next table.~ Using a 70 st
 % table 4
 \begin{longtable}[c]{@{}lllll@{}}
 \caption{Atmospheric Variables at Two Different Altitudes above Ground Level \label{table:atmospheric-variables-at-two-different}} \tabularnewline
-\toprule 
+\toprule
 Variable & 1.5 Meters & 284 meters & Absolute Diff & Percent Diff \tabularnewline \midrule
 \endhead
 
@@ -427,13 +488,13 @@ The roughness correlation is taken from Figure 1, Page 22.4, ASHRAE Handbook of 
 % table 6
 \begin{longtable}[c]{@{}lllll@{}}
 \caption{Roughness Coefficients D, E, and F. \label{table:roughness-coefficients-d-e-and-f.}} \tabularnewline
-\toprule 
+\toprule
 Roughness Index & D & E & F & Example Material \tabularnewline
 \midrule
 \endfirsthead
 
 \caption[]{Roughness Coefficients D, E, and F.} \tabularnewline
-\toprule 
+\toprule
 Roughness Index & D & E & F & Example Material \tabularnewline
 \midrule
 \endhead
@@ -459,13 +520,13 @@ TARP, or Thermal Analysis Research Program, is an important predecessor of Energ
 \begin{longtable}[c]{p{1.5in}p{2.5in}p{1.0in}p{1.0in}}
 
 \caption{Nomenclature List of Variables. \label{table:nomenclature-list-of-variables.-001}} \tabularnewline
-\toprule 
+\toprule
 Variable & Description & Units & Range \tabularnewline
 \midrule
 \endfirsthead
 
 \caption[]{Nomenclature List of Variables.} \tabularnewline
-\toprule 
+\toprule
 Variable & Description & Units & Range \tabularnewline
 \midrule
 \endhead
@@ -513,13 +574,13 @@ The surface roughness multiplier Rf~is based on the ASHRAE graph of surface cond
 % table 8
 \begin{longtable}[c]{@{}lll@{}}
 \caption{Surface Roughness Multipliers (Walton 1981). \label{table:surface-roughness-multipliers-walton-1981.}} \tabularnewline
-\toprule 
+\toprule
 Roughness Index & Rf & Example Material \tabularnewline
 \midrule
 \endfirsthead
 
 \caption[]{Surface Roughness Multipliers (Walton 1981).} \tabularnewline
-\toprule 
+\toprule
 Roughness Index & Rf & Example Material \tabularnewline
 \midrule
 \endhead
@@ -566,13 +627,13 @@ where $\Sigma$ is the surface tilt angle.
 \begin{longtable}[c]{p{0.5in}p{3.0in}p{1.5in}p{1.0in}}
 
 \caption{Nomenclature List of Variables. \label{table:nomenclature-list-of-variables.-002}} \tabularnewline
-\toprule 
+\toprule
 Variable & Description & Units & Range \tabularnewline
 \midrule
 \endfirsthead
 
 \caption[]{Nomenclature List of Variables.} \tabularnewline
-\toprule 
+\toprule
 Variable & Description & Units & Range \tabularnewline
 \midrule
 \endhead
@@ -592,21 +653,21 @@ The MoWiTT model is based on measurements taken at the Mobile Window Thermal Tes
 {h_c} = \sqrt {{{\left[ {{C_t}{{\left( {\Delta T} \right)}^{\frac{1}{3}}}} \right]}^2} + {{\left[ {aV_z^b} \right]}^2}}
 \end{equation}
 
-Constants a, b and turbulent natural convection constant C\(_{t}\) are given in Table~\ref{table:mowitt-coefficients-yazdanian-and-klems-1994}.~ The original MoWiTT model has been modified for use in EnergyPlus so that it is sensitive to the local suface's wind speed which varies with the height above ground.~ The original MoWiTT model was formulated for use with the air velocity at the location of the weather station.~ As of Version 7.2, EnergyPlus uses the ``a'' model coefficients derived by Booten et al. (2012) rather than the original values from Yazdanian and Klems (1994).
+Constants a, b and turbulent natural convection constant C\(_{t}\) are given in Table~\ref{table:mowitt-coefficients-yazdanian-and-klems-1994}.~ The original MoWiTT model has been modified for use in EnergyPlus so that it is sensitive to the local surface's wind speed which varies with the height above ground.~ The original MoWiTT model was formulated for use with the air velocity at the location of the weather station.~ As of Version 7.2, EnergyPlus uses the ``a'' model coefficients derived by Booten et al. (2012) rather than the original values from Yazdanian and Klems (1994).
 
 NOTE:~ The MoWiTT algorithm may not be appropriate for rough surfaces, high-rise surfaces, or surfaces that employ movable insulation.
 
 % table 10
 \begin{longtable}[c]{@{}llll@{}}
 \caption{MoWiTT Coefficients (Yazdanian and Klems 1994, Booten et al. 2012) \label{table:mowitt-coefficients-yazdanian-and-klems-1994}} \tabularnewline
-\toprule 
+\toprule
 Wind Direction & C\(_t\) & a & b \tabularnewline
 (Units) & W/(m\(^{2}\)K\(^{4/3}\)) & W/(m\(^{2}\)K(m/s)\(^{b}\) & - \tabularnewline
 \midrule
 \endfirsthead
 
 \caption[]{MoWiTT Coefficients (Yazdanian and Klems 1994, Booten et al. 2012)} \tabularnewline
-\toprule 
+\toprule
 Wind Direction & C\(_t\)t & a & b \tabularnewline
 (Units) & W/(m\(^{2}\)K\(^{4/3}\)) & W/(m\(^{2}\)K(m/s)\(^{b}\) & - \tabularnewline
 \midrule
@@ -623,13 +684,13 @@ Leeward & 0.84 & 3.55 & 0.617 \tabularnewline
 \begin{longtable}[c]{p{0.5in}p{3.0in}p{1.5in}p{1.0in}}
 
 \caption{Nomenclature List of Variables. \label{table:nomenclature-list-of-variables.-003}} \tabularnewline
-\toprule 
+\toprule
 Variable & Description & Units & Range \tabularnewline
 \midrule
 \endfirsthead
 
 \caption[]{Nomenclature List of Variables.} \tabularnewline
-\toprule 
+\toprule
 Variable & Description & Units & Range \tabularnewline
 \midrule
 \endhead
@@ -674,13 +735,13 @@ The adaptive convection algorithm implemented in EnergyPlus for the outside face
 \begin{longtable}[c]{p{0.25in}p{0.75in}p{0.5in}p{0.5in}p{1.75in}p{1.75in}}
 
 \caption{Adaptive Convection Algorithm Details \label{table:adaptive-convection-algorithm-details}} \tabularnewline
-\toprule 
+\toprule
 \# & Surface Classification & Heat Flow Direction & Wind Direction & h\(_f\) Models & h\(_n\) Models \tabularnewline
 \midrule
 \endfirsthead
 
 \caption[]{Adaptive Convection Algorithm Details} \tabularnewline
-\toprule 
+\toprule
 \# & Surface Classification & Heat Flow Direction & Wind Direction & h\(_f\) Models & h\(_n\) Models \tabularnewline
 \midrule
 \endhead

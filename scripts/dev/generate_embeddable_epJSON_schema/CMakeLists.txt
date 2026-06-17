@@ -1,5 +1,0 @@
-set(generate_embeddedable_epJSON_schema_src generate_embeddable_epJSON_schema.cpp)
-
-add_executable(generate_embeddedable_epJSON_schema ${generate_embeddedable_epJSON_schema_src})
-target_link_libraries(generate_embeddedable_epJSON_schema PRIVATE project_options project_fp_options project_warnings)
-set_target_properties(generate_embeddedable_epJSON_schema PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/scripts")

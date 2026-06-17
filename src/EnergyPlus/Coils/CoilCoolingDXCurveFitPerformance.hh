@@ -1,7 +1,7 @@
-// EnergyPlus, Copyright (c) 1996-2023, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
-// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other
+// National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
 // contributors. All rights reserved.
 //
 // NOTICE: This Software was developed under funding from the U.S. Department of Energy and the
@@ -52,9 +52,11 @@
 #include <vector>
 
 #include <EnergyPlus/Coils/CoilCoolingDXCurveFitOperatingMode.hh>
+#include <EnergyPlus/Coils/CoilCoolingDXPerformanceBase.hh>
 #include <EnergyPlus/DataGlobalConstants.hh>
-#include <EnergyPlus/DataLoopNode.hh>
 #include <EnergyPlus/EnergyPlus.hh>
+#include <EnergyPlus/ScheduleManager.hh>
+#include <EnergyPlus/StandardRatings.hh>
 
 namespace EnergyPlus {
 
@@ -75,95 +77,184 @@ struct CoilCoolingDXCurveFitPerformanceInputSpecification
     std::string base_operating_mode_name;
     std::string alternate_operating_mode_name;
     std::string alternate_operating_mode2_name;
+    std::string outdoor_temperature_dependent_crankcase_heater_capacity_curve_name;
     std::string capacity_control;
 };
 
-struct CoilCoolingDXCurveFitPerformance
+struct CoilCoolingDXCurveFitPerformance : public CoilCoolingDXPerformanceBase
 {
-    std::string object_name = "Coil:Cooling:DX:CurveFit:Performance";
+    static constexpr std::string_view object_name = "Coil:Cooling:DX:CurveFit:Performance";
     std::string parentName;
+
     void instantiateFromInputSpec(EnergyPlusData &state, const CoilCoolingDXCurveFitPerformanceInputSpecification &input_data);
+
     void simulate(EnergyPlusData &state,
-                  const DataLoopNode::NodeData &inletNode,
-                  DataLoopNode::NodeData &outletNode,
-                  int useAlternateMode,
-                  Real64 &PLR,
-                  int &speedNum,
-                  Real64 &speedRatio,
-                  int const fanOpMode,
-                  DataLoopNode::NodeData &condInletNode,
-                  DataLoopNode::NodeData &condOutletNode,
+                  const Node::NodeData &inletNode,
+                  Node::NodeData &outletNode,
+                  HVAC::CoilMode currentCoilMode,
+                  int speedNum,
+                  Real64 speedRatio,
+                  HVAC::FanOp const fanOp,
+                  Node::NodeData &condInletNode,
+                  Node::NodeData &condOutletNode,
                   bool const singleMode,
-                  Real64 LoadSHR = 0.0);
+                  Real64 LoadSHR = 0.0) override;
 
     void calculate(EnergyPlusData &state,
                    CoilCoolingDXCurveFitOperatingMode &currentMode,
-                   const DataLoopNode::NodeData &inletNode,
-                   DataLoopNode::NodeData &outletNode,
-                   Real64 &PLR,
-                   int &speedNum,
-                   Real64 &speedRatio,
-                   int const fanOpMode,
-                   DataLoopNode::NodeData &condInletNode,
-                   DataLoopNode::NodeData &condOutletNode,
+                   const Node::NodeData &inletNode,
+                   Node::NodeData &outletNode,
+                   int speedNum,
+                   Real64 speedRatio,
+                   HVAC::FanOp const fanOp,
+                   Node::NodeData &condInletNode,
+                   Node::NodeData &condOutletNode,
                    bool const singleMode);
-    void calcStandardRatings210240(EnergyPlusData &state);
+
+    void calcStandardRatings210240(EnergyPlusData &state) override;
+
     CoilCoolingDXCurveFitPerformanceInputSpecification original_input_specs;
+
     CoilCoolingDXCurveFitPerformance() = default;
+
     explicit CoilCoolingDXCurveFitPerformance(EnergyPlusData &state, const std::string &name);
-    void size(EnergyPlusData &state);
+
+    void size(EnergyPlusData &state) override;
+
     void setOperMode(EnergyPlusData &state, CoilCoolingDXCurveFitOperatingMode &currentMode, int const mode);
 
-    std::string name;
-    Real64 crankcaseHeaterCap = 0.0;
-    Real64 crankcaseHeaterPower = 0.0;
-    Real64 crankcaseHeaterElectricityConsumption = 0.0;
-    Real64 minOutdoorDrybulb = 0.0;
+    void oneTimeAvailSchedSetup();
+    void oneTimeMinOATSetup();
+    Real64 ratedCBF(EnergyPlusData &) override
+    {
+        return normalMode.speeds[normalMode.nominalSpeedIndex].RatedCBF;
+    }
+
+    Real64 grossRatedSHR(EnergyPlusData &) override
+    {
+        return normalMode.speeds[normalMode.nominalSpeedIndex].grossRatedSHR;
+    }
+
+    Real64 grossRatedCoolingCOPAtMaxSpeed(EnergyPlusData &) override
+    {
+        return normalMode.speeds.back().original_input_specs.gross_rated_cooling_COP;
+    }
+
+    const std::string_view nameAtSpeed(int speed) override
+    {
+        return normalMode.speeds[speed].name;
+    }
+
+    Real64 ratedAirMassFlowRateMaxSpeed(EnergyPlusData &, HVAC::CoilMode const mode) override
+    {
+        if (mode != HVAC::CoilMode::Normal) {
+            return alternateMode.speeds.back().RatedAirMassFlowRate;
+        }
+        return normalMode.speeds.back().RatedAirMassFlowRate;
+    }
+
+    Real64 ratedAirMassFlowRateMinSpeed(EnergyPlusData &, HVAC::CoilMode const mode) override
+    {
+        if (mode != HVAC::CoilMode::Normal) {
+            return alternateMode.speeds.front().RatedAirMassFlowRate;
+        }
+        return normalMode.speeds.front().RatedAirMassFlowRate;
+    }
+
+    Real64 ratedCondAirMassFlowRateNomSpeed(EnergyPlusData &, HVAC::CoilMode const mode) override
+    {
+        if (mode != HVAC::CoilMode::Normal) {
+            return alternateMode.speeds[alternateMode.nominalSpeedIndex].RatedCondAirMassFlowRate;
+        }
+        return normalMode.speeds[normalMode.nominalSpeedIndex].RatedCondAirMassFlowRate;
+    }
+
+    Real64 ratedEvapAirMassFlowRate(EnergyPlusData &) override
+    {
+        return normalMode.ratedEvapAirMassFlowRate;
+    }
+
+    Real64 ratedEvapAirFlowRate(EnergyPlusData &) override
+    {
+        return normalMode.ratedEvapAirFlowRate;
+    }
+
+    Real64 ratedGrossTotalCap() override
+    {
+        return normalMode.ratedGrossTotalCap;
+    }
+
+    int indexCapFT(HVAC::CoilMode const mode) override
+    {
+        if (mode != HVAC::CoilMode::Normal) {
+            return alternateMode.speeds[alternateMode.nominalSpeedIndex].indexCapFT;
+        }
+        return normalMode.speeds[normalMode.nominalSpeedIndex].indexCapFT;
+    }
+
+    bool subcoolReheatFlag() override
+    {
+        return (!original_input_specs.base_operating_mode_name.empty() && !original_input_specs.alternate_operating_mode_name.empty() &&
+                !original_input_specs.alternate_operating_mode2_name.empty());
+    }
+
+    int numSpeeds() override
+    {
+        return static_cast<int>(normalMode.speeds.size());
+    }
+
+    virtual void setToHundredPercentDOAS() override
+    {
+        for (auto &speed : normalMode.speeds) {
+            speed.minRatedVolFlowPerRatedTotCap = HVAC::MinRatedVolFlowPerRatedTotCap2;
+            speed.maxRatedVolFlowPerRatedTotCap = HVAC::MaxRatedVolFlowPerRatedTotCap2;
+        }
+        if (maxAvailCoilMode != HVAC::CoilMode::Normal) {
+            for (auto &speed : alternateMode.speeds) {
+                speed.minRatedVolFlowPerRatedTotCap = HVAC::MinRatedVolFlowPerRatedTotCap2;
+                speed.maxRatedVolFlowPerRatedTotCap = HVAC::MaxRatedVolFlowPerRatedTotCap2;
+            }
+        }
+    }
+
+    Real64 evapAirFlowRateAtSpeedIndex(EnergyPlusData &, int index) override
+    {
+        return normalMode.speeds[index].evap_air_flow_rate;
+    }
+
+    Real64 ratedTotalCapacityAtSpeedIndex(EnergyPlusData &, int index) override
+    {
+        return normalMode.speeds[index].rated_total_capacity;
+    }
+
+    Real64 currentEvapCondPumpPowerAtSpeed(EnergyPlusData &, int speed) override
+    {
+        return normalMode.getCurrentEvapCondPumpPower(speed);
+    }
+
+    Real64 evapCondenserEffectivenessAtSpeedIndex(EnergyPlusData &, int index) override
+    {
+        return normalMode.speeds[index].evap_condenser_effectiveness;
+    }
+
+    Real64 evapAirFlowFraction(EnergyPlusData &) override
+    {
+        return normalMode.speeds.front().original_input_specs.evaporator_air_flow_fraction;
+    }
+
     Real64 maxOutdoorDrybulbForBasin = 0.0;
     bool mySizeFlag = true;
-    DataGlobalConstants::ResourceType compressorFuelType = DataGlobalConstants::ResourceType::None;
-    std::string compressorFuelTypeForOutput;
-    Real64 compressorFuelRate = 0.0;
-    Real64 compressorFuelConsumption = 0.0;
 
-    enum CapControlMethod
-    {
-        CONTINUOUS,
-        DISCRETE
-    };
-    CapControlMethod capControlMethod = CapControlMethod::DISCRETE;
-
-    Real64 evapCondBasinHeatCap = 0.0;
     Real64 evapCondBasinHeatSetpoint = 0.0;
-    int evapCondBasinHeatSchedulIndex = 0;
-    Real64 basinHeaterElectricityConsumption = 0.0;
-    Real64 basinHeaterPower = 0.0;
-    Real64 powerUse = 0.0;
-    Real64 electricityConsumption = 0.0;
-    Real64 RTF = 0.0;
+    Sched::Schedule *evapCondBasinHeatSched = nullptr;
     bool oneTimeEIOHeaderWrite = true;
     Real64 wasteHeatRate = 0.0;
-    int OperatingMode = 0;
-    Real64 ModeRatio = 0.0;
-    Real64 recoveredEnergyRate = 0.0;
-    Real64 NormalSHR = 0.0;
-
-    // standard rating stuff -- for now just 210/240
-    Real64 standardRatingCoolingCapacity = 0.0; // net cooling capacity of single speed DX cooling coil
-    Real64 standardRatingSEER = 0.0;            // seasonal energy efficiency ratio of single speed DX cooling coil
-    Real64 standardRatingEER = 0.0;             // energy efficiency ratio of single speed DX cooling coil
-    Real64 standardRatingIEER = 0.0;            // Integrated energy efficiency ratio of single speed DX cooling coil
-
-    // standard rating stuff -- for now just 210/240 2023
-    Real64 standardRatingCoolingCapacity2023 = 0.0; // net cooling capacity of single speed DX cooling coil
-    Real64 standardRatingSEER2_User = 0.0;          // seasonal energy efficiency ratio of single speed DX cooling coil
-    Real64 standardRatingSEER2_Standard = 0.0;
-    Real64 standardRatingEER2 = 0.0; // energy efficiency ratio of single speed DX cooling coil
 
     CoilCoolingDXCurveFitOperatingMode normalMode;
-    int hasAlternateMode = 0;                          // 0 Normal, 1 Enhanced, 2 SubcoolReheat
     CoilCoolingDXCurveFitOperatingMode alternateMode;  // enhanced dehumidifcation or Subcool mode
     CoilCoolingDXCurveFitOperatingMode alternateMode2; // Reheat mode
+    bool myOneTimeAvailSchedInitFlag = true;
+    bool myOneTimeMinOATFlag = true;
 };
 
 } // namespace EnergyPlus

@@ -1,7 +1,7 @@
-// EnergyPlus, Copyright (c) 1996-2023, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
-// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other
+// National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
 // contributors. All rights reserved.
 //
 // NOTICE: This Software was developed under funding from the U.S. Department of Energy and the
@@ -68,21 +68,13 @@ public:
 
     // Skipping 1 row is assumed to be the header row and will be recorded as such.
     // Otherwise, if rows_to_skip == 0 or >1 then there will be no header
-    json decode(std::string_view csv, char delimiter = ',', int rows_to_skip = 0);
+    json decode(std::string_view csv, char t_delimiter = ',', int t_rows_to_skip = 0);
 
-    json decode(std::string_view csv, bool &success, char delimiter = ',', int rows_to_skip = 0);
-
-    json decode(std::string_view csv, size_t csv_size, char delimiter = ',', int rows_to_skip = 0);
-
-    json decode(std::string_view csv, size_t csv_size, bool &success, char delimiter = ',', int rows_to_skip = 0);
-
-    std::string encode(json const &root);
-
-    std::vector<std::string> const &errors();
-
-    std::vector<std::string> const &warnings();
+    std::vector<std::pair<std::string, bool>> const &errors();
+    std::vector<std::pair<std::string, bool>> const &warnings();
 
     bool hasErrors();
+    bool hasWarnings();
 
     enum class Token : size_t
     {
@@ -95,6 +87,7 @@ public:
     };
 
 private:
+    bool success = false;
     size_t cur_line_num = 1;
     size_t index_into_cur_line = 0;
     size_t beginning_of_line_index = 0;
@@ -102,8 +95,8 @@ private:
     char delimiter = ',';
     int rows_to_skip = 0;
     char s[129] = {};
-    std::vector<std::string> errors_;
-    std::vector<std::string> warnings_;
+    std::vector<std::pair<std::string, bool>> errors_;   // the boolean is for continuing lines
+    std::vector<std::pair<std::string, bool>> warnings_; // the boolean is for continuing lines
 
     static void increment_both_index(size_t &index, size_t &line_index);
 
@@ -113,9 +106,9 @@ private:
 
     int find_number_columns(std::string_view csv, size_t &index);
 
-    json parse_csv(std::string_view csv, size_t &index, bool &success);
+    json parse_csv(std::string_view csv, size_t &index);
 
-    void parse_header(std::string_view csv, size_t &index, bool &success, json &header);
+    void parse_header(std::string_view csv, size_t &index, json &header);
 
     void parse_line(std::string_view csv, size_t &index, json &columns);
 

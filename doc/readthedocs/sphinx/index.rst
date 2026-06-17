@@ -6,14 +6,18 @@ For now that is primarily the documentation of our growing API.
 Over time, that scope may grow much further.
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 1
    :caption: Contents:
 
-   faq
-   python
+   quick_start/quick_start
+   tips_and_tricks/tips_and_tricks
+   essentials/essentials
+   schema
    c
    api
-   schema
+   auxiliary-programs/auxiliary-programs
+   ems-application-guide/ems-application-guide
+   acknowledgments/acknowledgments
 
 Indices and tables
 ==================

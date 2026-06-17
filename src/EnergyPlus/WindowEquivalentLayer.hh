@@ -1,7 +1,7 @@
-// EnergyPlus, Copyright (c) 1996-2023, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
-// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other
+// National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
 // contributors. All rights reserved.
 //
 // NOTICE: This Software was developed under funding from the U.S. Department of Energy and the
@@ -60,6 +60,7 @@
 
 // EnergyPlus Headers
 #include <EnergyPlus/Data/BaseData.hh>
+#include <EnergyPlus/DataBSDFWindow.hh>
 #include <EnergyPlus/DataWindowEquivalentLayer.hh>
 #include <EnergyPlus/EnergyPlus.hh>
 
@@ -99,11 +100,11 @@ namespace WindowEquivalentLayer {
 
     void EQLWindowSurfaceHeatBalance(EnergyPlusData &state,
                                      int const SurfNum,       // Surface number
-                                     Real64 const HcOut,      // outside convection coeficient at this timestep, W/m2K
+                                     Real64 const HcOut,      // outside convection coefficient at this timestep, W/m2K
                                      Real64 &SurfInsideTemp,  // Inside window surface temperature (innermost face) [C]
                                      Real64 &SurfOutsideTemp, // Outside surface temperature (C)
                                      Real64 &SurfOutsideEmiss,
-                                     DataBSDFWindow::Condition const CalcCondition // Calucation condition (summer, winter or no condition)
+                                     DataBSDFWindow::Condition const CalcCondition // Calculation condition (summer, winter or no condition)
     );
 
     void OPENNESS_LW(Real64 const OPENNESS, // shade openness (=tausbb at normal incidence)
@@ -409,7 +410,7 @@ namespace WindowEquivalentLayer {
                                 Real64 const C  // slat crown height (any units, same units as W) must be >= 0
     );
 
-    void VB_SOL46_CURVE(EnergyPlusData &state,
+    void VB_SOL46_CURVE(EnergyPlusData const &state,
                         Real64 const S,           // slat spacing (any length units; same units as W)
                         Real64 const W,           // slat tip-to-tip (chord) width (any length units; same units as S)
                         Real64 const SL_WR,       // slat curvature radius ratio (= W/R)
@@ -423,7 +424,7 @@ namespace WindowEquivalentLayer {
                         Real64 &TAU_BD            // returned: effective SW (solar) beam-to-diffuse transmittance front side
     );
 
-    void VB_SOL4(EnergyPlusData &state,
+    void VB_SOL4(EnergyPlusData const &state,
                  Real64 const S,           // slat spacing (any length units; same units as W)
                  Real64 const W,           // slat tip-to-tip width (any length units; same units as S)
                  Real64 const OMEGA,       // incident beam profile angle (radians)
@@ -436,7 +437,7 @@ namespace WindowEquivalentLayer {
                  Real64 &TAU_BD            // returned: solar beam-to-diffuse transmittance of the venetian blind (front side)
     );
 
-    void VB_SOL6(EnergyPlusData &state,
+    void VB_SOL6(EnergyPlusData const &state,
                  Real64 const S,           // slat spacing (any length units; same units as W)
                  Real64 const W,           // slat tip-to-tip width (any length units; same units as S)
                  Real64 const OMEGA,       // incident beam profile angle (radians)
@@ -542,14 +543,14 @@ namespace WindowEquivalentLayer {
                       Real64 const TI  // inside air temp, C or K
     );
 
-    void SLtoGL(EnergyPlusData &state,
+    void SLtoGL(EnergyPlusData const &state,
                 Real64 const breal, // distance from shade to glass (m)
                 Real64 const Ts,    // shade temperature (K)
                 Real64 const Tg,    // glass temperature (K)
                 Real64 &hsg,        // the heat transfer coefficient, shade-to-glass, {W/m2K}
                 int const scheme);
 
-    Real64 SLtoAMB(EnergyPlusData &state,
+    Real64 SLtoAMB(EnergyPlusData const &state,
                    Real64 const b,     // distance from shade to glass (m) where air flow takes place
                    Real64 const L,     // window height, m (usually taken as 1 m)
                    Real64 const Ts,    // shade temperature, K
@@ -558,7 +559,7 @@ namespace WindowEquivalentLayer {
                    int const scheme    // flag to select model, scheme=2 has problems
     );
 
-    void GLtoAMB(EnergyPlusData &state,
+    void GLtoAMB(EnergyPlusData const &state,
                  Real64 const b,     // distance from shade to glass {m}
                  Real64 const L,     // window height {m}, usually taken as 1 meter
                  Real64 const Tg,    // glass temperature {K}
@@ -628,7 +629,7 @@ namespace WindowEquivalentLayer {
 
     void Specular_RATDiff(EnergyPlusData &state, Real64 &RAT_1MRDiff, Real64 &RAT_TAUDiff);
 
-    Real64 Specular_F(EnergyPlusData &state,
+    Real64 Specular_F(EnergyPlusData const &state,
                       Real64 const THETA,      // incidence angle, radians
                       int const OPT,           // options (unused)
                       const Array1D<Real64> &P // parameters (none defined)
@@ -690,7 +691,7 @@ namespace WindowEquivalentLayer {
                 CFSLWP &LLWP       // returned: equivalent layer long wave properties
     );
 
-    bool VB_SWP(EnergyPlusData &state,
+    bool VB_SWP(EnergyPlusData const &state,
                 CFSLAYER const &L, // VB layer
                 CFSSWP &LSWP,      // returned: equivalent off-normal properties
                 const Real64 OMEGA // incident profile angle (radians)
@@ -702,7 +703,7 @@ namespace WindowEquivalentLayer {
 
     );
 
-    bool VB_ShadeControl(EnergyPlusData &state,
+    bool VB_ShadeControl(EnergyPlusData const &state,
                          CFSLAYER &L,           // VB layer
                          Real64 const OMEGA_DEG // incident profile angle (degrees)
     );
@@ -723,7 +724,7 @@ namespace WindowEquivalentLayer {
 
     bool IsGlazeLayerX(CFSLAYER const &L);
 
-    bool IsControlledShade(EnergyPlusData &state, CFSLAYER const &L);
+    bool IsControlledShade(EnergyPlusData const &state, CFSLAYER const &L);
 
     bool IsVBLayer(CFSLAYER const &L);
 
@@ -744,7 +745,7 @@ namespace WindowEquivalentLayer {
 
     int CFSNGlz(CFSTY const &FS); // CFS
 
-    int CFSHasControlledShade(EnergyPlusData &state, CFSTY const &FS);
+    int CFSHasControlledShade(EnergyPlusData const &state, CFSTY const &FS);
 
     void CheckAndFixCFSLayer(EnergyPlusData &state, CFSLAYER &Layer);
 
@@ -793,7 +794,7 @@ struct WindowEquivalentLayerData : BaseGlobalStruct
 {
 
     // Data
-    Real64 const RadiansToDeg; // Conversion for Radians to Degrees: Not using DataGlobalConstants::Pi() to avoid initialization order bug
+    Real64 const RadiansToDeg; // Conversion for Radians to Degrees: Not using Constant::Pi() to avoid initialization order bug
     Real64 const PAtmSeaLevel; // Standard atmospheric pressure at sea level (Pa)
     int const hipRHO;          // return reflectance
     int const hipTAU;          // return transmittance
@@ -818,7 +819,15 @@ struct WindowEquivalentLayerData : BaseGlobalStruct
     Real64 X1MRDiff = -1.0;
     Real64 XTAUDiff = -1.0;
 
-    void clear_state()
+    void init_constant_state([[maybe_unused]] EnergyPlusData &state) override
+    {
+    }
+
+    void init_state([[maybe_unused]] EnergyPlusData &state) override
+    {
+    }
+
+    void clear_state() override
     {
         this->CFSDiffAbsTrans.deallocate();
         this->EQLDiffPropFlag.deallocate();

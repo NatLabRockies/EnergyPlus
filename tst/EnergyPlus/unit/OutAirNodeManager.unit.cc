@@ -1,7 +1,7 @@
-// EnergyPlus, Copyright (c) 1996-2023, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
-// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other
+// National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
 // contributors. All rights reserved.
 //
 // NOTICE: This Software was developed under funding from the U.S. Department of Energy and the
@@ -67,7 +67,6 @@ TEST_F(EnergyPlusFixture, OutAirNodeManager_OATdbTwbOverrideTest)
     state->dataOutAirNodeMgr->NumOutsideAirNodes = 3;
     state->dataOutAirNodeMgr->OutsideAirNodeList.allocate(3);
     state->dataLoopNodes->Node.allocate(3);
-    state->dataScheduleMgr->Schedule.allocate(2);
 
     state->dataEnvrn->OutDryBulbTemp = 25.0;
     state->dataEnvrn->OutWetBulbTemp = 15.0;
@@ -77,13 +76,14 @@ TEST_F(EnergyPlusFixture, OutAirNodeManager_OATdbTwbOverrideTest)
     state->dataEnvrn->OutHumRat =
         Psychrometrics::PsyWFnTdbTwbPb(*state, state->dataEnvrn->OutDryBulbTemp, state->dataEnvrn->OutWetBulbTemp, state->dataEnvrn->OutBaroPress);
 
-    state->dataScheduleMgr->Schedule(1).CurrentValue = 24.0;
     state->dataOutAirNodeMgr->OutsideAirNodeList(1) = 1;
     state->dataOutAirNodeMgr->OutsideAirNodeList(2) = 2;
     state->dataOutAirNodeMgr->OutsideAirNodeList(3) = 3;
     // Scheduled value
     state->dataLoopNodes->Node(1).IsLocalNode = true;
-    state->dataLoopNodes->Node(1).OutAirDryBulbSchedNum = 1;
+    state->dataLoopNodes->Node(1).outAirDryBulbSched = Sched::AddScheduleConstant(*state, "Out Air Dry Bulb");
+    state->dataLoopNodes->Node(1).outAirDryBulbSched->currentVal = 24.0;
+
     state->dataLoopNodes->Node(1).OutAirDryBulb = state->dataEnvrn->OutDryBulbTemp;
     state->dataLoopNodes->Node(1).OutAirWetBulb = state->dataEnvrn->OutWetBulbTemp;
     // EMS override value
@@ -103,4 +103,54 @@ TEST_F(EnergyPlusFixture, OutAirNodeManager_OATdbTwbOverrideTest)
     EXPECT_NEAR(14.6467, state->dataLoopNodes->Node(1).OutAirWetBulb, 0.0001);
     EXPECT_NEAR(0.007253013, state->dataLoopNodes->Node(2).HumRat, 0.000001);
     EXPECT_NEAR(0.006543816, state->dataLoopNodes->Node(3).HumRat, 0.000001);
+}
+
+// Reproduces GitHub issue #8904: EMS wetbulb override on OA node without
+// IsLocalNode=true does not recalculate HumRat.
+TEST_F(EnergyPlusFixture, OutAirNodeManager_EMSWetbulbOverride_NoIsLocalNode)
+{
+    state->dataOutAirNodeMgr->NumOutsideAirNodes = 2;
+    state->dataOutAirNodeMgr->OutsideAirNodeList.allocate(2);
+    state->dataLoopNodes->Node.allocate(2);
+
+    state->dataEnvrn->OutDryBulbTemp = 25.0;
+    state->dataEnvrn->OutWetBulbTemp = 15.0;
+    state->dataEnvrn->WindSpeed = 2.0;
+    state->dataEnvrn->WindDir = 0.0;
+    state->dataEnvrn->OutBaroPress = 101325;
+    state->dataEnvrn->OutHumRat =
+        Psychrometrics::PsyWFnTdbTwbPb(*state, state->dataEnvrn->OutDryBulbTemp, state->dataEnvrn->OutWetBulbTemp, state->dataEnvrn->OutBaroPress);
+
+    state->dataOutAirNodeMgr->OutsideAirNodeList(1) = 1;
+    state->dataOutAirNodeMgr->OutsideAirNodeList(2) = 2;
+
+    // Node 1: EMS overrides drybulb + wetbulb, but IsLocalNode is FALSE
+    // (simulates Python plugin API path — getActuatorHandle never sets IsLocalNode)
+    state->dataLoopNodes->Node(1).IsLocalNode = false;
+    state->dataLoopNodes->Node(1).EMSOverrideOutAirDryBulb = true;
+    state->dataLoopNodes->Node(1).EMSOverrideOutAirWetBulb = true;
+    state->dataLoopNodes->Node(1).EMSValueForOutAirDryBulb = 26.7;
+    state->dataLoopNodes->Node(1).EMSValueForOutAirWetBulb = 19.4;
+    state->dataLoopNodes->Node(1).OutAirDryBulb = state->dataEnvrn->OutDryBulbTemp;
+    state->dataLoopNodes->Node(1).OutAirWetBulb = state->dataEnvrn->OutWetBulbTemp;
+
+    // Node 2: EMS overrides only wetbulb, IsLocalNode is FALSE
+    state->dataLoopNodes->Node(2).IsLocalNode = false;
+    state->dataLoopNodes->Node(2).EMSOverrideOutAirWetBulb = true;
+    state->dataLoopNodes->Node(2).EMSValueForOutAirWetBulb = 19.4;
+    state->dataLoopNodes->Node(2).OutAirDryBulb = state->dataEnvrn->OutDryBulbTemp;
+    state->dataLoopNodes->Node(2).OutAirWetBulb = state->dataEnvrn->OutWetBulbTemp;
+
+    InitOutAirNodes(*state);
+
+    // Expected: HumRat recalculated from overridden Tdb=26.7 + Twb=19.4
+    Real64 expectedHumRat1 = Psychrometrics::PsyWFnTdbTwbPb(*state, 26.7, 19.4, state->dataEnvrn->OutBaroPress);
+    EXPECT_NEAR(expectedHumRat1, state->dataLoopNodes->Node(1).HumRat, 0.000001);
+    EXPECT_NEAR(26.7, state->dataLoopNodes->Node(1).Temp, 0.001);
+    EXPECT_NEAR(19.4, state->dataLoopNodes->Node(1).OutAirWetBulb, 0.001);
+
+    // Expected: HumRat recalculated from environment Tdb=25.0 + overridden Twb=19.4
+    Real64 expectedHumRat2 = Psychrometrics::PsyWFnTdbTwbPb(*state, 25.0, 19.4, state->dataEnvrn->OutBaroPress);
+    EXPECT_NEAR(expectedHumRat2, state->dataLoopNodes->Node(2).HumRat, 0.000001);
+    EXPECT_NEAR(19.4, state->dataLoopNodes->Node(2).OutAirWetBulb, 0.001);
 }

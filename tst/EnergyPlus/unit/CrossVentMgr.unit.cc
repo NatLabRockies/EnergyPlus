@@ -1,7 +1,7 @@
-// EnergyPlus, Copyright (c) 1996-2023, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
-// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other
+// National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
 // contributors. All rights reserved.
 //
 // NOTICE: This Software was developed under funding from the U.S. Department of Energy and the
@@ -60,15 +60,13 @@
 #include <EnergyPlus/DataHeatBalance.hh>
 #include <EnergyPlus/DataRoomAirModel.hh>
 #include <EnergyPlus/DataSurfaces.hh>
-#include <EnergyPlus/DataUCSDSharedData.hh>
 #include <EnergyPlus/HeatBalanceAirManager.hh>
 #include <EnergyPlus/OutputProcessor.hh>
 #include <EnergyPlus/SimulationManager.hh>
 #include <EnergyPlus/ZoneTempPredictorCorrector.hh>
 
 using namespace EnergyPlus;
-using namespace CrossVentMgr;
-using namespace DataRoomAirModel;
+using namespace RoomAir;
 
 TEST_F(EnergyPlusFixture, CrossVentMgr_EvolveParaUCSDCV_Test)
 {
@@ -77,13 +75,13 @@ TEST_F(EnergyPlusFixture, CrossVentMgr_EvolveParaUCSDCV_Test)
     state->dataGlobal->NumOfZones = 2;
     int MaxSurf = 2;
 
-    state->dataRoomAirMod->RecInflowRatio.allocate(state->dataGlobal->NumOfZones);
+    state->dataRoomAir->RecInflowRatio.allocate(state->dataGlobal->NumOfZones);
     state->dataZoneTempPredictorCorrector->zoneHeatBalance.allocate(state->dataGlobal->NumOfZones);
 
-    state->dataRoomAirMod->AirflowNetworkSurfaceUCSDCV.allocate({0, MaxSurf}, state->dataGlobal->NumOfZones);
-    state->dataRoomAirMod->AirflowNetworkSurfaceUCSDCV(1, 1) = 1;
-    state->dataRoomAirMod->AirflowNetworkSurfaceUCSDCV(0, 1) = 1;
-    state->dataRoomAirMod->AirflowNetworkSurfaceUCSDCV(0, 2) = 2;
+    state->dataRoomAir->AFNSurfaceCrossVent.allocate({0, MaxSurf}, state->dataGlobal->NumOfZones);
+    state->dataRoomAir->AFNSurfaceCrossVent(1, 1) = 1;
+    state->dataRoomAir->AFNSurfaceCrossVent(0, 1) = 1;
+    state->dataRoomAir->AFNSurfaceCrossVent(0, 2) = 2;
 
     state->afn->MultizoneSurfaceData.allocate(MaxSurf);
     state->afn->MultizoneSurfaceData(1).SurfNum = 6;
@@ -125,7 +123,7 @@ TEST_F(EnergyPlusFixture, CrossVentMgr_EvolveParaUCSDCV_Test)
 
     state->dataEnvrn->WindDir = 271.66666666666669;
 
-    state->dataRoomAirMod->AirModel.allocate(state->dataGlobal->NumOfZones);
+    state->dataRoomAir->AirModel.allocate(state->dataGlobal->NumOfZones);
 
     state->afn->AirflowNetworkLinkageData.allocate(2);
     state->afn->AirflowNetworkLinkageData(1).CompNum = 1;
@@ -139,46 +137,46 @@ TEST_F(EnergyPlusFixture, CrossVentMgr_EvolveParaUCSDCV_Test)
     state->afn->AirflowNetworkCompData(3).TypeNum = 2;
     state->afn->AirflowNetworkCompData(3).CompTypeNum = AirflowNetwork::iComponentTypeNum::SOP;
 
-    state->dataRoomAirMod->SurfParametersCVDV.allocate(2);
-    state->dataRoomAirMod->SurfParametersCVDV(1).Width = 22.715219999999999;
-    state->dataRoomAirMod->SurfParametersCVDV(1).Height = 1.3715999999999999;
-    state->dataRoomAirMod->SurfParametersCVDV(2).Width = 22.869143999999999;
-    state->dataRoomAirMod->SurfParametersCVDV(2).Height = 1.3715999999999999;
+    state->dataRoomAir->SurfParametersCrossDispVent.allocate(2);
+    state->dataRoomAir->SurfParametersCrossDispVent(1).Width = 22.715219999999999;
+    state->dataRoomAir->SurfParametersCrossDispVent(1).Height = 1.3715999999999999;
+    state->dataRoomAir->SurfParametersCrossDispVent(2).Width = 22.869143999999999;
+    state->dataRoomAir->SurfParametersCrossDispVent(2).Height = 1.3715999999999999;
 
-    state->dataRoomAirMod->CVJetRecFlows.allocate({0, MaxSurf}, 1);
+    state->dataRoomAir->CrossVentJetRecFlows.allocate({0, MaxSurf}, 1);
 
-    state->dataUCSDShared->PosZ_Wall.allocate(2);
-    state->dataUCSDShared->PosZ_Wall(1) = 1;
-    state->dataUCSDShared->PosZ_Wall(2) = 4;
+    state->dataRoomAir->PosZ_Wall.allocate(1);
+    state->dataRoomAir->PosZ_Wall(1).beg = 1;
+    state->dataRoomAir->PosZ_Wall(1).end = 4;
 
-    state->dataUCSDShared->APos_Wall.allocate(12);
-    state->dataUCSDShared->APos_Wall(1) = 5;
-    state->dataUCSDShared->APos_Wall(2) = 7;
-    state->dataUCSDShared->APos_Wall(3) = 8;
-    state->dataUCSDShared->APos_Wall(4) = 10;
+    state->dataRoomAir->APos_Wall.allocate(12);
+    state->dataRoomAir->APos_Wall(1) = 5;
+    state->dataRoomAir->APos_Wall(2) = 7;
+    state->dataRoomAir->APos_Wall(3) = 8;
+    state->dataRoomAir->APos_Wall(4) = 10;
 
-    state->dataRoomAirMod->Droom.allocate(state->dataGlobal->NumOfZones);
-    state->dataRoomAirMod->Droom(1) = 13.631070390838719;
-    state->dataRoomAirMod->Dstar.allocate(state->dataGlobal->NumOfZones);
-    state->dataRoomAirMod->Ain.allocate(state->dataGlobal->NumOfZones);
-    state->dataRoomAirMod->ZoneUCSDCV.allocate(state->dataGlobal->NumOfZones);
-    state->dataRoomAirMod->ZoneUCSDCV(1).ZonePtr = 1;
-    state->dataRoomAirMod->JetRecAreaRatio.allocate(state->dataGlobal->NumOfZones);
-    state->dataRoomAirMod->Ujet.allocate(state->dataGlobal->NumOfZones);
-    state->dataRoomAirMod->Urec.allocate(state->dataGlobal->NumOfZones);
-    state->dataRoomAirMod->Qrec.allocate(state->dataGlobal->NumOfZones);
-    state->dataRoomAirMod->Qtot.allocate(state->dataGlobal->NumOfZones);
-    state->dataRoomAirMod->Tin.allocate(state->dataGlobal->NumOfZones);
+    state->dataRoomAir->Droom.allocate(state->dataGlobal->NumOfZones);
+    state->dataRoomAir->Droom(1) = 13.631070390838719;
+    state->dataRoomAir->Dstar.allocate(state->dataGlobal->NumOfZones);
+    state->dataRoomAir->Ain.allocate(state->dataGlobal->NumOfZones);
+    state->dataRoomAir->ZoneCrossVent.allocate(state->dataGlobal->NumOfZones);
+    state->dataRoomAir->ZoneCrossVent(1).ZonePtr = 1;
+    state->dataRoomAir->JetRecAreaRatio.allocate(state->dataGlobal->NumOfZones);
+    state->dataRoomAir->Ujet.allocate(state->dataGlobal->NumOfZones);
+    state->dataRoomAir->Urec.allocate(state->dataGlobal->NumOfZones);
+    state->dataRoomAir->Qrec.allocate(state->dataGlobal->NumOfZones);
+    state->dataRoomAir->Qtot.allocate(state->dataGlobal->NumOfZones);
+    state->dataRoomAir->Tin.allocate(state->dataGlobal->NumOfZones);
 
-    EvolveParaUCSDCV(*state, 1);
+    EvolveParaCrossVent(*state, 1);
 
-    EXPECT_NEAR(27.14, state->dataRoomAirMod->CVJetRecFlows(1, 1).Fin, 0.01);
-    EXPECT_NEAR(0.871, state->dataRoomAirMod->CVJetRecFlows(1, 1).Uin, 0.001);
-    EXPECT_NEAR(0.000, state->dataRoomAirMod->CVJetRecFlows(1, 1).Vjet, 0.001);
-    EXPECT_NEAR(0.243, state->dataRoomAirMod->CVJetRecFlows(1, 1).Yjet, 0.001);
-    EXPECT_NEAR(0.279, state->dataRoomAirMod->CVJetRecFlows(1, 1).Ujet, 0.001);
-    EXPECT_NEAR(0.070, state->dataRoomAirMod->CVJetRecFlows(1, 1).Yrec, 0.001);
-    EXPECT_NEAR(0.080, state->dataRoomAirMod->CVJetRecFlows(1, 1).Urec, 0.001);
-    EXPECT_NEAR(0.466, state->dataRoomAirMod->CVJetRecFlows(1, 1).YQrec, 0.001);
-    EXPECT_NEAR(0.535, state->dataRoomAirMod->CVJetRecFlows(1, 1).Qrec, 0.001);
+    EXPECT_NEAR(27.14, state->dataRoomAir->CrossVentJetRecFlows(1, 1).Fin, 0.01);
+    EXPECT_NEAR(0.871, state->dataRoomAir->CrossVentJetRecFlows(1, 1).Uin, 0.001);
+    EXPECT_NEAR(0.000, state->dataRoomAir->CrossVentJetRecFlows(1, 1).Vjet, 0.001);
+    EXPECT_NEAR(0.243, state->dataRoomAir->CrossVentJetRecFlows(1, 1).Yjet, 0.001);
+    EXPECT_NEAR(0.279, state->dataRoomAir->CrossVentJetRecFlows(1, 1).Ujet, 0.001);
+    EXPECT_NEAR(0.070, state->dataRoomAir->CrossVentJetRecFlows(1, 1).Yrec, 0.001);
+    EXPECT_NEAR(0.080, state->dataRoomAir->CrossVentJetRecFlows(1, 1).Urec, 0.001);
+    EXPECT_NEAR(0.466, state->dataRoomAir->CrossVentJetRecFlows(1, 1).YQrec, 0.001);
+    EXPECT_NEAR(0.535, state->dataRoomAir->CrossVentJetRecFlows(1, 1).Qrec, 0.001);
 }

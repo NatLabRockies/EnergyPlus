@@ -1,5 +1,0 @@
-\section{Schedules off by 1 hour}\label{schedules-off-by-1-hour}
-
-When active, DaylightSavingTime will shift all scheduled items by one hour. Reporting is always in standard time and uses the same day (scheduled values wrap). In short, the Daylight Saving Time flag uses the schedule value from the \emph{next hour} in the simulation. This can be confusing if your schedules are not symmetric around the midnight hours. Because\ldots{} the new schedule value will show up on the \emph{same day}, not the next day as it might in real life. EnergyPlus does not currently to look ahead/back for next hour schedules (particularly at day boundaries).
-
-More information on Daylight Saving Periods can be seen on the web \href{http://www.webexhibits.org/daylightsaving/}{here}.

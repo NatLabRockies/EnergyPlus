@@ -1,7 +1,7 @@
-// EnergyPlus, Copyright (c) 1996-2023, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
-// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other
+// National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
 // contributors. All rights reserved.
 //
 // NOTICE: This Software was developed under funding from the U.S. Department of Energy and the
@@ -88,7 +88,6 @@ typedef std::int64_t Int64;
 #include <ObjexxFCL/Array2S.fwd.hh>
 #include <ObjexxFCL/Array3D.fwd.hh>
 #include <ObjexxFCL/Array4D.fwd.hh>
-#include <ObjexxFCL/Array5D.fwd.hh>
 #include <ObjexxFCL/MArray1.fwd.hh>
 #include <ObjexxFCL/Omit.hh>
 #include <ObjexxFCL/Reference.fwd.hh>
@@ -130,7 +129,6 @@ using ObjexxFCL::Array3D_bool;
 using ObjexxFCL::Array3D_int;
 using ObjexxFCL::Array4D;
 using ObjexxFCL::Array4D_int;
-using ObjexxFCL::Array5D;
 using ObjexxFCL::MArray1;
 using ObjexxFCL::Reference;
 using ObjexxFCL::Vector2;
@@ -139,7 +137,6 @@ using ObjexxFCL::Vector4;
 
 // ObjexxFCL Functions
 #include <ObjexxFCL/Array.functions.hh>
-#include <ObjexxFCL/Fmath.hh>
 #include <ObjexxFCL/environment.hh>
 #include <ObjexxFCL/floops.hh>
 #include <ObjexxFCL/numeric.hh>

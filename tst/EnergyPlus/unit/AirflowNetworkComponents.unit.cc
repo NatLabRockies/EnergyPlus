@@ -1,7 +1,7 @@
-// EnergyPlus, Copyright (c) 1996-2023, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
-// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other
+// National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
 // contributors. All rights reserved.
 //
 // NOTICE: This Software was developed under funding from the U.S. Department of Energy and the
@@ -98,8 +98,9 @@ TEST_F(EnergyPlusFixture, AirflowNetwork_SolverTest_HorizontalOpening)
     state->afn->MultizoneSurfaceData(i).OpenFactor = 1.0;
 
     state->afn->node_states.clear();
-    for (int it = 0; it < 2; ++it)
-        state->afn->node_states.emplace_back(AirState(AIRDENSITY_CONSTEXPR(20.0, 101325.0, 0.0)));
+    for (int it = 0; it < 2; ++it) {
+        state->afn->node_states.emplace_back(AIRDENSITY_CONSTEXPR(20.0, 101325.0, 0.0));
+    }
     state->afn->node_states[0].density = 1.2;
     state->afn->node_states[1].density = 1.18;
 
@@ -117,14 +118,14 @@ TEST_F(EnergyPlusFixture, AirflowNetwork_SolverTest_HorizontalOpening)
     Real64 control = 1.0;
 
     NF = state->afn->MultizoneCompHorOpeningData(1).calculate(
-        *state, 1, 0.05, 1, multiplier, control, state->afn->node_states[0], state->afn->node_states[1], F, DF);
+        *state, true, 0.05, 1, multiplier, control, state->afn->node_states[0], state->afn->node_states[1], F, DF);
     EXPECT_NEAR(3.47863, F[0], 0.00001);
     EXPECT_NEAR(34.7863, DF[0], 0.0001);
     EXPECT_NEAR(2.96657, F[1], 0.00001);
     EXPECT_EQ(0.0, DF[1]);
 
     NF = state->afn->MultizoneCompHorOpeningData(1).calculate(
-        *state, 1, -0.05, 1, multiplier, control, state->afn->node_states[0], state->afn->node_states[1], F, DF);
+        *state, true, -0.05, 1, multiplier, control, state->afn->node_states[0], state->afn->node_states[1], F, DF);
     EXPECT_NEAR(-3.42065, F[0], 0.00001);
     EXPECT_NEAR(34.20649, DF[0], 0.0001);
     EXPECT_NEAR(2.96657, F[1], 0.00001);
@@ -152,8 +153,9 @@ TEST_F(EnergyPlusFixture, AirflowNetwork_SolverTest_Coil)
     state->afn->DisSysCompCoilData[0].L = 1.0;
 
     state->afn->node_states.clear();
-    for (int it = 0; it < 2; ++it)
-        state->afn->node_states.emplace_back(AirState(AIRDENSITY_CONSTEXPR(20.0, 101325.0, 0.0)));
+    for (int it = 0; it < 2; ++it) {
+        state->afn->node_states.emplace_back(AIRDENSITY_CONSTEXPR(20.0, 101325.0, 0.0));
+    }
     state->afn->node_states[0].density = 1.2;
     state->afn->node_states[1].density = 1.2;
 
@@ -166,14 +168,14 @@ TEST_F(EnergyPlusFixture, AirflowNetwork_SolverTest_Coil)
     Real64 control = 1.0;
 
     NF = state->afn->DisSysCompCoilData[0].calculate(
-        *state, 1, 0.05, 1, multiplier, control, state->afn->node_states[0], state->afn->node_states[1], F, DF);
+        *state, true, 0.05, 1, multiplier, control, state->afn->node_states[0], state->afn->node_states[1], F, DF);
     EXPECT_NEAR(-294.5243112740431, F[0], 0.00001);
     EXPECT_NEAR(5890.4862254808613, DF[0], 0.0001);
     EXPECT_EQ(0.0, F[1]);
     EXPECT_EQ(0.0, DF[1]);
 
     NF = state->afn->DisSysCompCoilData[0].calculate(
-        *state, 1, -0.05, 1, multiplier, control, state->afn->node_states[0], state->afn->node_states[1], F, DF);
+        *state, true, -0.05, 1, multiplier, control, state->afn->node_states[0], state->afn->node_states[1], F, DF);
     EXPECT_NEAR(294.5243112740431, F[0], 0.00001);
     EXPECT_NEAR(5890.4862254808613, DF[0], 0.0001);
     EXPECT_EQ(0.0, F[1]);
@@ -411,9 +413,9 @@ TEST_F(EnergyPlusFixture, AirflowNetwork_TestTriangularWindowWarning)
     state->dataSurface->Surface(3).Vertex(3).z = 1.0;
 
     SurfaceGeometry::AllocateSurfaceWindows(*state, 3);
-    state->dataSurface->SurfWinOriginalClass(1) = DataSurfaces::SurfaceClass::Window;
-    state->dataSurface->SurfWinOriginalClass(2) = DataSurfaces::SurfaceClass::Window;
-    state->dataSurface->SurfWinOriginalClass(3) = DataSurfaces::SurfaceClass::Window;
+    state->dataSurface->Surface(1).OriginalClass = DataSurfaces::SurfaceClass::Window;
+    state->dataSurface->Surface(2).OriginalClass = DataSurfaces::SurfaceClass::Window;
+    state->dataSurface->Surface(3).OriginalClass = DataSurfaces::SurfaceClass::Window;
     state->dataGlobal->NumOfZones = 1;
 
     std::string const idf_objects = delimited_string({
@@ -478,8 +480,18 @@ TEST_F(EnergyPlusFixture, AirflowNetwork_TestTriangularWindowWarning)
     });
 
     ASSERT_TRUE(process_idf(idf_objects));
+    state->init_state(*state);
     state->afn->get_input();
     std::string const error_string = delimited_string({
+        "   ** Warning ** ProcessScheduleInput: Schedule:Constant = ONSCH",
+        "   **   ~~~   ** Schedule Type Limits Name is empty.",
+        "   **   ~~~   ** Schedule will not be validated.",
+        "   ** Warning ** ProcessScheduleInput: Schedule:Constant = AULA PEOPLE SCHED",
+        "   **   ~~~   ** Schedule Type Limits Name is empty.",
+        "   **   ~~~   ** Schedule will not be validated.",
+        "   ** Warning ** ProcessScheduleInput: Schedule:Constant = SEMPRE 21",
+        "   **   ~~~   ** Schedule Type Limits Name is empty.",
+        "   **   ~~~   ** Schedule will not be validated.",
         "   ** Warning ** AirflowNetwork::Solver::get_input: AirflowNetwork:MultiZone:Surface=\"WINDOW1\".",
         "   **   ~~~   ** The opening is a Triangular subsurface. A rectangular subsurface will be used with equivalent width and height.",
     });
@@ -528,7 +540,7 @@ TEST_F(EnergyPlusFixture, AirflowNetwork_UserDefinedDuctViewFactors)
         "    4;                       !- Number of Timesteps per Hour",
 
         "  Site:Location,",
-        "    Pheonix,                 !- Name",
+        "    Phoenix,                 !- Name",
         "    33.43,                   !- Latitude {deg}",
         "    -112.02,                 !- Longitude {deg}",
         "    -7.0,                    !- Time Zone {hr}",
@@ -1859,12 +1871,14 @@ TEST_F(EnergyPlusFixture, AirflowNetwork_UserDefinedDuctViewFactors)
     });
 
     ASSERT_TRUE(process_idf(idf_objects));
+    state->init_state(*state);
 
     // Read objects
     HeatBalanceManager::GetHeatBalanceInput(*state);
     HeatBalanceManager::AllocateHeatBalArrays(*state);
     state->dataEnvrn->OutBaroPress = 101000;
     state->dataHVACGlobal->TimeStepSys = state->dataGlobal->TimeStepZone;
+    state->dataHVACGlobal->TimeStepSysSec = state->dataHVACGlobal->TimeStepSys * Constant::rSecsInHour;
 
     // Read AirflowNetwork inputs
     state->afn->get_input();
@@ -2256,15 +2270,15 @@ TEST_F(EnergyPlusFixture, AirflowNetwork_TestPolygonalWindows)
     state->dataSurface->Surface(11).Vertex(3).z = 2.4384;
 
     SurfaceGeometry::AllocateSurfaceWindows(*state, 14);
-    state->dataSurface->SurfWinOriginalClass(4) = DataSurfaces::SurfaceClass::Window;
-    state->dataSurface->SurfWinOriginalClass(5) = DataSurfaces::SurfaceClass::Window;
-    state->dataSurface->SurfWinOriginalClass(6) = DataSurfaces::SurfaceClass::Window;
-    state->dataSurface->SurfWinOriginalClass(9) = DataSurfaces::SurfaceClass::Window;
-    state->dataSurface->SurfWinOriginalClass(10) = DataSurfaces::SurfaceClass::Window;
-    state->dataSurface->SurfWinOriginalClass(11) = DataSurfaces::SurfaceClass::Window;
-    state->dataSurface->SurfWinOriginalClass(12) = DataSurfaces::SurfaceClass::Window;
-    state->dataSurface->SurfWinOriginalClass(13) = DataSurfaces::SurfaceClass::Window;
-    state->dataSurface->SurfWinOriginalClass(14) = DataSurfaces::SurfaceClass::Window;
+    state->dataSurface->Surface(4).OriginalClass = DataSurfaces::SurfaceClass::Window;
+    state->dataSurface->Surface(5).OriginalClass = DataSurfaces::SurfaceClass::Window;
+    state->dataSurface->Surface(6).OriginalClass = DataSurfaces::SurfaceClass::Window;
+    state->dataSurface->Surface(9).OriginalClass = DataSurfaces::SurfaceClass::Window;
+    state->dataSurface->Surface(10).OriginalClass = DataSurfaces::SurfaceClass::Window;
+    state->dataSurface->Surface(11).OriginalClass = DataSurfaces::SurfaceClass::Window;
+    state->dataSurface->Surface(12).OriginalClass = DataSurfaces::SurfaceClass::Window;
+    state->dataSurface->Surface(13).OriginalClass = DataSurfaces::SurfaceClass::Window;
+    state->dataSurface->Surface(14).OriginalClass = DataSurfaces::SurfaceClass::Window;
     state->dataGlobal->NumOfZones = 1;
 
     std::string const idf_objects = delimited_string({
@@ -2440,6 +2454,7 @@ TEST_F(EnergyPlusFixture, AirflowNetwork_TestPolygonalWindows)
     });
 
     ASSERT_TRUE(process_idf(idf_objects));
+    state->init_state(*state);
 
     state->afn->get_input();
 
@@ -3483,7 +3498,7 @@ TEST_F(EnergyPlusFixture, AirflowNetwork_TestFanModel)
         "    Activity Sch,            !- Activity Level Schedule Name",
         "    3.82E-8,                 !- Carbon Dioxide Generation Rate {m3/s-W}",
         "    ,                        !- Enable ASHRAE 55 Comfort Warnings",
-        "    zoneaveraged,            !- Mean Radiant Temperature Calculation Type",
+        "    EnclosureAveraged,            !- Mean Radiant Temperature Calculation Type",
         "    ,                        !- Surface Name/Angle Factor List Name",
         "    Work Eff Sch,            !- Work Efficiency Schedule Name",
         "    ClothingInsulationSchedule,  !- Clothing Insulation Calculation Method",
@@ -4340,6 +4355,7 @@ TEST_F(EnergyPlusFixture, AirflowNetwork_TestFanModel)
         "    ,                        !- Outdoor Dry-Bulb Temperature to Turn On Compressor {C}",
         "    5.0,                     !- Maximum Outdoor Dry-Bulb Temperature for Defrost Operation {C}",
         "    200.0,                   !- Crankcase Heater Capacity {W}",
+        "    ,                        !- Crankcase Heater Capacity Function of Temperature Curve Name",
         "    10.0,                    !- Maximum Outdoor Dry-Bulb Temperature for Crankcase Heater Operation {C}",
         "    Resistive,               !- Defrost Strategy",
         "    TIMED,                   !- Defrost Control",
@@ -4371,6 +4387,7 @@ TEST_F(EnergyPlusFixture, AirflowNetwork_TestFanModel)
     });
 
     ASSERT_TRUE(process_idf(idf_objects));
+    state->init_state(*state);
 
     state->dataIPShortCut->lNumericFieldBlanks.allocate(1000);
     state->dataIPShortCut->lAlphaFieldBlanks.allocate(1000);
@@ -4391,7 +4408,7 @@ TEST_F(EnergyPlusFixture, AirflowNetwork_TestFanModel)
     EXPECT_FALSE(ErrorsFound);
     HeatBalanceManager::GetZoneData(*state, ErrorsFound);
     EXPECT_FALSE(ErrorsFound);
-    HeatBalanceManager::GetWindowGlassSpectralData(*state, ErrorsFound);
+    Material::GetWindowGlassSpectralData(*state, ErrorsFound);
     EXPECT_FALSE(ErrorsFound);
     Material::GetMaterialData(*state, ErrorsFound);
     EXPECT_FALSE(ErrorsFound);
@@ -4408,20 +4425,20 @@ TEST_F(EnergyPlusFixture, AirflowNetwork_TestFanModel)
     // Read AirflowNetwork inputs
     state->afn->get_input();
 
-    state->dataScheduleMgr->Schedule(1).CurrentValue = 1.0;
-    state->dataScheduleMgr->Schedule(2).CurrentValue = 100.0;
-    state->dataScheduleMgr->Schedule(3).CurrentValue = 1.0;
-    state->dataScheduleMgr->Schedule(4).CurrentValue = 1.0;
-    state->dataScheduleMgr->Schedule(5).CurrentValue = 0.1;
-    state->dataScheduleMgr->Schedule(6).CurrentValue = 1.0;
-    state->dataScheduleMgr->Schedule(7).CurrentValue = 1.0;
-    state->dataScheduleMgr->Schedule(8).CurrentValue = 1.0;
-    state->dataScheduleMgr->Schedule(9).CurrentValue = 1.0;
-    state->dataScheduleMgr->Schedule(10).CurrentValue = 1.0;
-    state->dataScheduleMgr->Schedule(11).CurrentValue = 21.0;
-    state->dataScheduleMgr->Schedule(12).CurrentValue = 25.0;
-    state->dataScheduleMgr->Schedule(13).CurrentValue = 1.0;
-    state->dataScheduleMgr->Schedule(14).CurrentValue = 1.0;
+    Sched::GetSchedule(*state, "WINDOWVENTSCHED")->currentVal = 1.0;
+    Sched::GetSchedule(*state, "ACTIVITY SCH")->currentVal = 100.0;
+    Sched::GetSchedule(*state, "WORK EFF SCH")->currentVal = 1.0;
+    Sched::GetSchedule(*state, "CLOTHING SCH")->currentVal = 1.0;
+    Sched::GetSchedule(*state, "AIR VELO SCH")->currentVal = 0.1;
+    Sched::GetSchedule(*state, "HOUSE OCCUPANCY")->currentVal = 1.0;
+    Sched::GetSchedule(*state, "INTERMITTENT")->currentVal = 1.0;
+    Sched::GetSchedule(*state, "HOUSE LIGHTING")->currentVal = 1.0;
+    Sched::GetSchedule(*state, "REPORTSCH")->currentVal = 1.0;
+    Sched::GetSchedule(*state, "HVACAVAILSCHED")->currentVal = 1.0;
+    Sched::GetSchedule(*state, "DUAL HEATING SETPOINTS")->currentVal = 21.0;
+    Sched::GetSchedule(*state, "DUAL COOLING SETPOINTS")->currentVal = 25.0;
+    Sched::GetSchedule(*state, "DUAL ZONE CONTROL TYPE SCHED")->currentVal = 1.0;
+    Sched::GetSchedule(*state, "CYCLINGFANSCHEDULE")->currentVal = 1.0;
 
     state->afn->AirflowNetworkFanActivated = true;
     state->dataEnvrn->OutDryBulbTemp = -17.29025;
@@ -4440,15 +4457,16 @@ TEST_F(EnergyPlusFixture, AirflowNetwork_TestFanModel)
         }
     }
     state->dataAirLoop->AirLoopAFNInfo.allocate(1);
-    state->dataAirLoop->AirLoopAFNInfo(1).LoopFanOperationMode = 1;
+    state->dataAirLoop->AirLoopAFNInfo(1).LoopFanOperationMode = HVAC::FanOp::Cycling;
     state->dataAirLoop->AirLoopAFNInfo(1).LoopOnOffFanPartLoadRatio = 0.0;
     state->dataAirLoop->AirLoopAFNInfo(1).LoopSystemOnMassFlowrate = 1.23;
     state->afn->AirflowNetworkLinkageData(17).AirLoopNum = 1;
     state->dataLoopNodes->Node(4).MassFlowRate = 1.23;
+    state->afn->AirflowNetworkLinkageData(13).AirLoopNum = 1;
 
     state->afn->calculate_balance();
     // Fan:SystemModel
-    EXPECT_NEAR(1.23, state->afn->AirflowNetworkLinkSimu(20).FLOW, 0.0001);
+    EXPECT_NEAR(1.06274, state->afn->AirflowNetworkLinkSimu(20).FLOW, 0.0001);
     EXPECT_TRUE(state->afn->DisSysCompCVFData(1).FanModelFlag);
 
     for (i = 1; i <= 21; ++i) {
@@ -4463,9 +4481,269 @@ TEST_F(EnergyPlusFixture, AirflowNetwork_TestFanModel)
     // Fan:OnOff
     state->afn->DisSysCompCVFData(1).FanModelFlag = false;
     state->afn->calculate_balance();
-    EXPECT_NEAR(1.23, state->afn->AirflowNetworkLinkSimu(20).FLOW, 0.0001);
+    EXPECT_NEAR(1.06274, state->afn->AirflowNetworkLinkSimu(20).FLOW, 0.0001);
 
     state->dataAirLoop->AirLoopAFNInfo.deallocate();
+}
+
+TEST_F(EnergyPlusFixture, AirflowNetwork_resolveAirLoopNumTest)
+{
+    // Unit test for Defect #10652 (order dependence of input issue)
+    state->afn->AirflowNetworkNumOfLinks = 17;
+    state->afn->AirflowNetworkNumOfSurfaces = 11;
+    state->afn->AirflowNetworkLinkageData.allocate(state->afn->AirflowNetworkNumOfLinks);
+    state->afn->AirflowNetworkNodeData.allocate(state->afn->AirflowNetworkNumOfLinks - state->afn->AirflowNetworkNumOfSurfaces + 2);
+    bool gotErrors = false;
+    int expectedAirLoopNum;
+
+    // Test 1: "worse" case--last linkage has an AirLoopNum but nothing else does
+    state->afn->AirflowNetworkLinkageData(12).NodeNums[0] = 1;
+    state->afn->AirflowNetworkLinkageData(12).NodeNums[1] = 2;
+    state->afn->AirflowNetworkLinkageData(13).NodeNums[0] = 2;
+    state->afn->AirflowNetworkLinkageData(13).NodeNums[1] = 3;
+    state->afn->AirflowNetworkLinkageData(14).NodeNums[0] = 3;
+    state->afn->AirflowNetworkLinkageData(14).NodeNums[1] = 4;
+    state->afn->AirflowNetworkLinkageData(15).NodeNums[0] = 4;
+    state->afn->AirflowNetworkLinkageData(15).NodeNums[1] = 5;
+    state->afn->AirflowNetworkLinkageData(16).NodeNums[0] = 5;
+    state->afn->AirflowNetworkLinkageData(16).NodeNums[1] = 6;
+    state->afn->AirflowNetworkLinkageData(17).NodeNums[0] = 6;
+    state->afn->AirflowNetworkLinkageData(17).NodeNums[1] = 7;
+    state->afn->AirflowNetworkLinkageData(12).AirLoopNum = 0;
+    state->afn->AirflowNetworkLinkageData(13).AirLoopNum = 0;
+    state->afn->AirflowNetworkLinkageData(14).AirLoopNum = 0;
+    state->afn->AirflowNetworkLinkageData(15).AirLoopNum = 0;
+    state->afn->AirflowNetworkLinkageData(16).AirLoopNum = 0;
+    state->afn->AirflowNetworkLinkageData(17).AirLoopNum = 0;
+    state->afn->AirflowNetworkNodeData(1).AirLoopNum = 0;
+    state->afn->AirflowNetworkNodeData(2).AirLoopNum = 0;
+    state->afn->AirflowNetworkNodeData(3).AirLoopNum = 0;
+    state->afn->AirflowNetworkNodeData(4).AirLoopNum = 0;
+    state->afn->AirflowNetworkNodeData(5).AirLoopNum = 0;
+    state->afn->AirflowNetworkNodeData(6).AirLoopNum = 0;
+    state->afn->AirflowNetworkNodeData(7).AirLoopNum = 2;
+    state->afn->AirflowNetworkNodeData(8).AirLoopNum = 0;
+    expectedAirLoopNum = 2;
+
+    state->afn->resolveAirLoopNum(gotErrors);
+    EXPECT_FALSE(gotErrors);
+    EXPECT_EQ(expectedAirLoopNum, state->afn->AirflowNetworkLinkageData(12).AirLoopNum);
+    EXPECT_EQ(expectedAirLoopNum, state->afn->AirflowNetworkLinkageData(13).AirLoopNum);
+    EXPECT_EQ(expectedAirLoopNum, state->afn->AirflowNetworkLinkageData(14).AirLoopNum);
+    EXPECT_EQ(expectedAirLoopNum, state->afn->AirflowNetworkLinkageData(15).AirLoopNum);
+    EXPECT_EQ(expectedAirLoopNum, state->afn->AirflowNetworkLinkageData(16).AirLoopNum);
+    EXPECT_EQ(expectedAirLoopNum, state->afn->AirflowNetworkLinkageData(17).AirLoopNum);
+    EXPECT_EQ(expectedAirLoopNum, state->afn->AirflowNetworkNodeData(1).AirLoopNum);
+    EXPECT_EQ(expectedAirLoopNum, state->afn->AirflowNetworkNodeData(2).AirLoopNum);
+    EXPECT_EQ(expectedAirLoopNum, state->afn->AirflowNetworkNodeData(3).AirLoopNum);
+    EXPECT_EQ(expectedAirLoopNum, state->afn->AirflowNetworkNodeData(4).AirLoopNum);
+    EXPECT_EQ(expectedAirLoopNum, state->afn->AirflowNetworkNodeData(5).AirLoopNum);
+    EXPECT_EQ(expectedAirLoopNum, state->afn->AirflowNetworkNodeData(6).AirLoopNum);
+    EXPECT_EQ(expectedAirLoopNum, state->afn->AirflowNetworkNodeData(7).AirLoopNum);
+
+    // Test 2: "random" case--things are read in/set up in a more random way
+    state->afn->AirflowNetworkLinkageData(12).NodeNums[0] = 2;
+    state->afn->AirflowNetworkLinkageData(12).NodeNums[1] = 7;
+    state->afn->AirflowNetworkLinkageData(13).NodeNums[0] = 5;
+    state->afn->AirflowNetworkLinkageData(13).NodeNums[1] = 3;
+    state->afn->AirflowNetworkLinkageData(14).NodeNums[0] = 3;
+    state->afn->AirflowNetworkLinkageData(14).NodeNums[1] = 1;
+    state->afn->AirflowNetworkLinkageData(15).NodeNums[0] = 7;
+    state->afn->AirflowNetworkLinkageData(15).NodeNums[1] = 5;
+    state->afn->AirflowNetworkLinkageData(16).NodeNums[0] = 4;
+    state->afn->AirflowNetworkLinkageData(16).NodeNums[1] = 6;
+    state->afn->AirflowNetworkLinkageData(17).NodeNums[0] = 1;
+    state->afn->AirflowNetworkLinkageData(17).NodeNums[1] = 4;
+    state->afn->AirflowNetworkLinkageData(12).AirLoopNum = 0;
+    state->afn->AirflowNetworkLinkageData(13).AirLoopNum = 0;
+    state->afn->AirflowNetworkLinkageData(14).AirLoopNum = 0;
+    state->afn->AirflowNetworkLinkageData(15).AirLoopNum = 0;
+    state->afn->AirflowNetworkLinkageData(16).AirLoopNum = 0;
+    state->afn->AirflowNetworkLinkageData(17).AirLoopNum = 0;
+    state->afn->AirflowNetworkNodeData(1).AirLoopNum = 0;
+    state->afn->AirflowNetworkNodeData(2).AirLoopNum = 0;
+    state->afn->AirflowNetworkNodeData(3).AirLoopNum = 0;
+    state->afn->AirflowNetworkNodeData(4).AirLoopNum = 7;
+    state->afn->AirflowNetworkNodeData(5).AirLoopNum = 0;
+    state->afn->AirflowNetworkNodeData(6).AirLoopNum = 0;
+    state->afn->AirflowNetworkNodeData(7).AirLoopNum = 0;
+    state->afn->AirflowNetworkNodeData(8).AirLoopNum = 0;
+    expectedAirLoopNum = 7;
+
+    state->afn->resolveAirLoopNum(gotErrors);
+    EXPECT_FALSE(gotErrors);
+    EXPECT_EQ(expectedAirLoopNum, state->afn->AirflowNetworkLinkageData(12).AirLoopNum);
+    EXPECT_EQ(expectedAirLoopNum, state->afn->AirflowNetworkLinkageData(13).AirLoopNum);
+    EXPECT_EQ(expectedAirLoopNum, state->afn->AirflowNetworkLinkageData(14).AirLoopNum);
+    EXPECT_EQ(expectedAirLoopNum, state->afn->AirflowNetworkLinkageData(15).AirLoopNum);
+    EXPECT_EQ(expectedAirLoopNum, state->afn->AirflowNetworkLinkageData(16).AirLoopNum);
+    EXPECT_EQ(expectedAirLoopNum, state->afn->AirflowNetworkLinkageData(17).AirLoopNum);
+    EXPECT_EQ(expectedAirLoopNum, state->afn->AirflowNetworkNodeData(1).AirLoopNum);
+    EXPECT_EQ(expectedAirLoopNum, state->afn->AirflowNetworkNodeData(2).AirLoopNum);
+    EXPECT_EQ(expectedAirLoopNum, state->afn->AirflowNetworkNodeData(3).AirLoopNum);
+    EXPECT_EQ(expectedAirLoopNum, state->afn->AirflowNetworkNodeData(4).AirLoopNum);
+    EXPECT_EQ(expectedAirLoopNum, state->afn->AirflowNetworkNodeData(5).AirLoopNum);
+    EXPECT_EQ(expectedAirLoopNum, state->afn->AirflowNetworkNodeData(6).AirLoopNum);
+    EXPECT_EQ(expectedAirLoopNum, state->afn->AirflowNetworkNodeData(7).AirLoopNum);
+
+    // Test 3: "bad" case--things are read in/set up in a more random way, no AirLoopNum
+    state->afn->AirflowNetworkLinkageData(12).NodeNums[0] = 1;
+    state->afn->AirflowNetworkLinkageData(12).NodeNums[1] = 6;
+    state->afn->AirflowNetworkLinkageData(13).NodeNums[0] = 5;
+    state->afn->AirflowNetworkLinkageData(13).NodeNums[1] = 2;
+    state->afn->AirflowNetworkLinkageData(14).NodeNums[0] = 7;
+    state->afn->AirflowNetworkLinkageData(14).NodeNums[1] = 3;
+    state->afn->AirflowNetworkLinkageData(15).NodeNums[0] = 6;
+    state->afn->AirflowNetworkLinkageData(15).NodeNums[1] = 5;
+    state->afn->AirflowNetworkLinkageData(16).NodeNums[0] = 3;
+    state->afn->AirflowNetworkLinkageData(16).NodeNums[1] = 4;
+    state->afn->AirflowNetworkLinkageData(17).NodeNums[0] = 2;
+    state->afn->AirflowNetworkLinkageData(17).NodeNums[1] = 7;
+    state->afn->AirflowNetworkLinkageData(12).AirLoopNum = 0;
+    state->afn->AirflowNetworkLinkageData(13).AirLoopNum = 0;
+    state->afn->AirflowNetworkLinkageData(14).AirLoopNum = 0;
+    state->afn->AirflowNetworkLinkageData(15).AirLoopNum = 0;
+    state->afn->AirflowNetworkLinkageData(16).AirLoopNum = 0;
+    state->afn->AirflowNetworkLinkageData(17).AirLoopNum = 0;
+    state->afn->AirflowNetworkNodeData(1).AirLoopNum = 0;
+    state->afn->AirflowNetworkNodeData(2).AirLoopNum = 0;
+    state->afn->AirflowNetworkNodeData(3).AirLoopNum = 0;
+    state->afn->AirflowNetworkNodeData(4).AirLoopNum = 0;
+    state->afn->AirflowNetworkNodeData(5).AirLoopNum = 0;
+    state->afn->AirflowNetworkNodeData(6).AirLoopNum = 0;
+    state->afn->AirflowNetworkNodeData(7).AirLoopNum = 0;
+    state->afn->AirflowNetworkNodeData(8).AirLoopNum = 3;
+    expectedAirLoopNum = 0;
+
+    state->afn->resolveAirLoopNum(gotErrors);
+    EXPECT_TRUE(gotErrors);
+    EXPECT_EQ(expectedAirLoopNum, state->afn->AirflowNetworkLinkageData(12).AirLoopNum);
+    EXPECT_EQ(expectedAirLoopNum, state->afn->AirflowNetworkLinkageData(13).AirLoopNum);
+    EXPECT_EQ(expectedAirLoopNum, state->afn->AirflowNetworkLinkageData(14).AirLoopNum);
+    EXPECT_EQ(expectedAirLoopNum, state->afn->AirflowNetworkLinkageData(15).AirLoopNum);
+    EXPECT_EQ(expectedAirLoopNum, state->afn->AirflowNetworkLinkageData(16).AirLoopNum);
+    EXPECT_EQ(expectedAirLoopNum, state->afn->AirflowNetworkLinkageData(17).AirLoopNum);
+    EXPECT_EQ(expectedAirLoopNum, state->afn->AirflowNetworkNodeData(1).AirLoopNum);
+    EXPECT_EQ(expectedAirLoopNum, state->afn->AirflowNetworkNodeData(2).AirLoopNum);
+    EXPECT_EQ(expectedAirLoopNum, state->afn->AirflowNetworkNodeData(3).AirLoopNum);
+    EXPECT_EQ(expectedAirLoopNum, state->afn->AirflowNetworkNodeData(4).AirLoopNum);
+    EXPECT_EQ(expectedAirLoopNum, state->afn->AirflowNetworkNodeData(5).AirLoopNum);
+    EXPECT_EQ(expectedAirLoopNum, state->afn->AirflowNetworkNodeData(6).AirLoopNum);
+    EXPECT_EQ(expectedAirLoopNum, state->afn->AirflowNetworkNodeData(7).AirLoopNum);
+}
+
+TEST_F(EnergyPlusFixture, AirflowNetwork_get_people_indexTest)
+{
+    // Unit test added for fix to Defect #11027
+    int expectedIndexResult;
+    int actualIndexResult;
+    bool errFlag = false;
+
+    state->afn->MultizoneSurfaceData.allocate(10);
+    state->afn->MultizoneZoneData.allocate(3);
+    state->dataHeatBal->TotPeople = 3;
+    state->dataHeatBal->People.allocate(state->dataHeatBal->TotPeople);
+    state->dataSurface->Surface.allocate(10);
+    state->afn->AirflowNetworkNumOfZones = 3;
+
+    state->dataHeatBal->People(1).ZonePtr = 2;
+    state->dataHeatBal->People(1).AdaptiveASH55 = true;
+    state->dataHeatBal->People(1).AdaptiveCEN15251 = false;
+    state->dataHeatBal->People(2).ZonePtr = 3;
+    state->dataHeatBal->People(2).AdaptiveASH55 = false;
+    state->dataHeatBal->People(2).AdaptiveCEN15251 = true;
+    state->dataHeatBal->People(3).ZonePtr = 1;
+    state->dataHeatBal->People(3).AdaptiveASH55 = false;
+    state->dataHeatBal->People(3).AdaptiveCEN15251 = false;
+
+    state->afn->MultizoneZoneData(1).ZoneNum = 3;
+    state->afn->MultizoneZoneData(2).ZoneNum = 1;
+    state->afn->MultizoneZoneData(3).ZoneNum = 2;
+
+    state->afn->MultizoneSurfaceData(1).ZonePtr = 1;
+    state->afn->MultizoneSurfaceData(2).ZonePtr = 2;
+    state->afn->MultizoneSurfaceData(3).ZonePtr = 3;
+    state->afn->MultizoneSurfaceData(4).ZonePtr = 1;
+    state->afn->MultizoneSurfaceData(5).ZonePtr = 2;
+    state->afn->MultizoneSurfaceData(6).ZonePtr = 3;
+    state->afn->MultizoneSurfaceData(7).ZonePtr = 1;
+    state->afn->MultizoneSurfaceData(8).ZonePtr = 2;
+    state->afn->MultizoneSurfaceData(9).ZonePtr = 3;
+    state->afn->MultizoneSurfaceData(10).ZonePtr = 1;
+
+    // Tests S1A/C: Surface--AFN Surface 1 (points to Zone 1 which is People 3 which does not use ASH55 or CEN15251)
+    expectedIndexResult = 0;
+    actualIndexResult = state->afn->get_people_index(state->afn->MultizoneSurfaceData(1).ZonePtr, VentControlType::ASH55, errFlag);
+    EXPECT_EQ(expectedIndexResult, actualIndexResult);
+    EXPECT_TRUE(errFlag);
+    errFlag = false; // reset
+    expectedIndexResult = 0;
+    actualIndexResult = state->afn->get_people_index(state->afn->MultizoneSurfaceData(1).ZonePtr, VentControlType::CEN15251, errFlag);
+    EXPECT_EQ(expectedIndexResult, actualIndexResult);
+    EXPECT_TRUE(errFlag);
+    errFlag = false; // reset
+
+    // Tests S2A/C: Surface--AFN Surface 2 (points to Zone 2 which is People 1 which uses ASH55)
+    expectedIndexResult = 1;
+    actualIndexResult = state->afn->get_people_index(state->afn->MultizoneSurfaceData(2).ZonePtr, VentControlType::ASH55, errFlag);
+    EXPECT_EQ(expectedIndexResult, actualIndexResult);
+    EXPECT_FALSE(errFlag);
+    expectedIndexResult = 0;
+    actualIndexResult = state->afn->get_people_index(state->afn->MultizoneSurfaceData(2).ZonePtr, VentControlType::CEN15251, errFlag);
+    EXPECT_EQ(expectedIndexResult, actualIndexResult);
+    EXPECT_TRUE(errFlag);
+    errFlag = false; // reset
+
+    // Tests S3A/C: Surface--AFN Surface 3 (points to Zone 3 which is People 2 which uses CEN15251)    expectedIndexResult = 0;
+    actualIndexResult = state->afn->get_people_index(state->afn->MultizoneSurfaceData(3).ZonePtr, VentControlType::ASH55, errFlag);
+    EXPECT_EQ(expectedIndexResult, actualIndexResult);
+    EXPECT_TRUE(errFlag);
+    errFlag = false; // reset
+    expectedIndexResult = 2;
+    actualIndexResult = state->afn->get_people_index(state->afn->MultizoneSurfaceData(3).ZonePtr, VentControlType::CEN15251, errFlag);
+    EXPECT_EQ(expectedIndexResult, actualIndexResult);
+    EXPECT_FALSE(errFlag);
+
+    // Tests S10C: Surface--AFN Surface 10 (points to Zone 2 but RAFN is set so this goes to Zone 1 which is People 3 which is rest to use CEN15251)
+    state->dataHeatBal->People(3).AdaptiveCEN15251 = true;
+    expectedIndexResult = 3;
+    actualIndexResult = state->afn->get_people_index(state->afn->MultizoneSurfaceData(10).ZonePtr, VentControlType::CEN15251, errFlag);
+    EXPECT_EQ(expectedIndexResult, actualIndexResult);
+    EXPECT_FALSE(errFlag);
+    state->dataHeatBal->People(3).AdaptiveCEN15251 = false;
+
+    // Tests Z1A/C: Zone--Array 1 (points to Zone 3 which is People 2 which uses CEN15251)
+    expectedIndexResult = 0;
+    actualIndexResult = state->afn->get_people_index(state->afn->MultizoneZoneData(1).ZoneNum, VentControlType::ASH55, errFlag);
+    EXPECT_EQ(expectedIndexResult, actualIndexResult);
+    EXPECT_TRUE(errFlag);
+    errFlag = false; // reset
+    expectedIndexResult = 2;
+    actualIndexResult = state->afn->get_people_index(state->afn->MultizoneZoneData(1).ZoneNum, VentControlType::CEN15251, errFlag);
+    EXPECT_EQ(expectedIndexResult, actualIndexResult);
+    EXPECT_FALSE(errFlag);
+
+    // Tests Z2A/C: Zone--Array 2 (points to Zone 1 which is People 3 which uses neither ASH55 nor CEN15251)
+    expectedIndexResult = 0;
+    actualIndexResult = state->afn->get_people_index(state->afn->MultizoneZoneData(2).ZoneNum, VentControlType::ASH55, errFlag);
+    EXPECT_EQ(expectedIndexResult, actualIndexResult);
+    EXPECT_TRUE(errFlag);
+    errFlag = false; // reset
+    actualIndexResult = state->afn->get_people_index(state->afn->MultizoneZoneData(2).ZoneNum, VentControlType::CEN15251, errFlag);
+    EXPECT_EQ(expectedIndexResult, actualIndexResult);
+    EXPECT_TRUE(errFlag);
+    errFlag = false; // reset
+
+    // Tests Z3A/C: Zone--Array 3 (points to Zone 2 which is People 1 which uses ASH55)
+    expectedIndexResult = 1;
+    actualIndexResult = state->afn->get_people_index(state->afn->MultizoneZoneData(3).ZoneNum, VentControlType::ASH55, errFlag);
+    EXPECT_EQ(expectedIndexResult, actualIndexResult);
+    EXPECT_FALSE(errFlag);
+    expectedIndexResult = 0;
+    actualIndexResult = state->afn->get_people_index(state->afn->MultizoneZoneData(3).ZoneNum, VentControlType::CEN15251, errFlag);
+    EXPECT_EQ(expectedIndexResult, actualIndexResult);
+    EXPECT_TRUE(errFlag);
+    errFlag = false; // reset (not really necessary unless more tests are added)
 }
 
 } // namespace EnergyPlus

@@ -1,7 +1,7 @@
-// EnergyPlus, Copyright (c) 1996-2023, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
-// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other
+// National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
 // contributors. All rights reserved.
 //
 // NOTICE: This Software was developed under funding from the U.S. Department of Energy and the
@@ -58,6 +58,7 @@
 #include <EnergyPlus/Data/BaseData.hh>
 #include <EnergyPlus/DataGlobals.hh>
 #include <EnergyPlus/EnergyPlus.hh>
+#include <EnergyPlus/ScheduleManager.hh>
 
 namespace EnergyPlus {
 
@@ -119,32 +120,31 @@ namespace DemandManager {
     struct DemandManagerListData
     {
         // Members
-        std::string Name;                   // Name of DEMAND MANAGER LIST
-        int Meter;                          // Index to meter to demand limit
-        int LimitSchedule;                  // Schedule index for demand limit
-        Real64 SafetyFraction;              // Multiplier applied to demand limit schedule
-        int BillingSchedule;                // Schedule index for billing month periods
-        Real64 BillingPeriod;               // Current billing period value
-        int PeakSchedule;                   // Schedule index for billing month periods
-        int AveragingWindow;                // Number of timesteps for averaging demand window
-        Array1D<Real64> History;            // Demand window history
-        ManagePriorityType ManagerPriority; // Indicator for priority (SEQUENTIAL, OPTIMAL, ALL)
-        int NumOfManager = 0;               // Number of DEMAND MANAGERs
-        Array1D_int Manager;                // Indexes for DEMAND MANAGERs
-        Real64 MeterDemand;                 // Meter demand at this timestep
-        Real64 AverageDemand;               // Current demand over the demand window
-        Real64 PeakDemand;                  // Peak demand in the billing month so far
-        Real64 ScheduledLimit;              // Scheduled demand limit
-        Real64 DemandLimit;                 // Scheduled demand limit * Safety Fraction
-        Real64 AvoidedDemand;               // Demand avoided by active DEMAND MANAGERs
-        Real64 OverLimit;                   // Amount that demand limit is exceeded
-        Real64 OverLimitDuration;           // Number of hours that demand limit is exceeded
+        std::string Name;                        // Name of DEMAND MANAGER LIST
+        int Meter;                               // Index to meter to demand limit
+        Sched::Schedule *limitSched = nullptr;   // Schedule for demand limit
+        Real64 SafetyFraction;                   // Multiplier applied to demand limit schedule
+        Sched::Schedule *billingSched = nullptr; // Schedule for billing month periods
+        Real64 BillingPeriod;                    // Current billing period value
+        Sched::Schedule *peakSched = nullptr;    // Schedule index for billing month periods
+        int AveragingWindow;                     // Number of timesteps for averaging demand window
+        Array1D<Real64> History;                 // Demand window history
+        ManagePriorityType ManagerPriority;      // Indicator for priority (SEQUENTIAL, OPTIMAL, ALL)
+        int NumOfManager = 0;                    // Number of DEMAND MANAGERs
+        Array1D_int Manager;                     // Indexes for DEMAND MANAGERs
+        Real64 MeterDemand;                      // Meter demand at this timestep
+        Real64 AverageDemand;                    // Current demand over the demand window
+        Real64 PeakDemand;                       // Peak demand in the billing month so far
+        Real64 ScheduledLimit;                   // Scheduled demand limit
+        Real64 DemandLimit;                      // Scheduled demand limit * Safety Fraction
+        Real64 AvoidedDemand;                    // Demand avoided by active DEMAND MANAGERs
+        Real64 OverLimit;                        // Amount that demand limit is exceeded
+        Real64 OverLimitDuration;                // Number of hours that demand limit is exceeded
 
         // Default Constructor
         DemandManagerListData()
-            : Meter(0), LimitSchedule(0), SafetyFraction(1.0), BillingSchedule(0), BillingPeriod(0.0), PeakSchedule(0), AveragingWindow(1),
-              ManagerPriority(ManagePriorityType::Invalid), MeterDemand(0.0), AverageDemand(0.0), PeakDemand(0.0), ScheduledLimit(0.0),
-              DemandLimit(0.0), AvoidedDemand(0.0), OverLimit(0.0), OverLimitDuration(0.0)
+            : Meter(0), SafetyFraction(1.0), BillingPeriod(0.0), AveragingWindow(1), ManagerPriority(ManagePriorityType::Invalid), MeterDemand(0.0),
+              AverageDemand(0.0), PeakDemand(0.0), ScheduledLimit(0.0), DemandLimit(0.0), AvoidedDemand(0.0), OverLimit(0.0), OverLimitDuration(0.0)
         {
         }
     };
@@ -152,14 +152,14 @@ namespace DemandManager {
     struct DemandManagerData
     {
         // Members
-        std::string Name;      // Name of DEMAND MANAGER
-        ManagerType Type;      // Type of DEMAND MANAGER (:LIGHTS, :ELECTRICEQUIPMENT, etc.)
-        int DemandManagerList; // Reference to parent DEMAND MANAGER LIST for error checking
-        bool CanReduceDemand;  // Flag to indicate whether manager can reduce demand
-        int AvailSchedule;     // Schedule index pointer for Availability Schedule
-        bool Available;        // Availability flag
-        bool Activate;         // Flag to activate the manager
-        bool Active;           // Flag to indicate that the manager is active
+        std::string Name;                      // Name of DEMAND MANAGER
+        ManagerType Type;                      // Type of DEMAND MANAGER (:LIGHTS, :ELECTRICEQUIPMENT, etc.)
+        int DemandManagerList;                 // Reference to parent DEMAND MANAGER LIST for error checking
+        bool CanReduceDemand;                  // Flag to indicate whether manager can reduce demand
+        Sched::Schedule *availSched = nullptr; // Availability Schedule
+        bool Available;                        // Availability flag
+        bool Activate;                         // Flag to activate the manager
+        bool Active;                           // Flag to indicate that the manager is active
         ManagerLimit LimitControl;
         ManagerSelection SelectionControl;
         int LimitDuration;       // Minimum duration of demand manager activity (min)
@@ -180,10 +180,9 @@ namespace DemandManager {
 
         // Default Constructor
         DemandManagerData()
-            : Type(ManagerType::Invalid), DemandManagerList(0), CanReduceDemand(false), AvailSchedule(0), Available(false), Activate(false),
-              Active(false), LimitControl(ManagerLimit::Invalid), SelectionControl(ManagerSelection::Invalid), LimitDuration(0), ElapsedTime(0),
-              RotationDuration(0), ElapsedRotationTime(0), RotatedLoadNum(0), LowerLimit(0.0), UpperLimit(0.0), NumOfLoads(0), FixedRate(0.0),
-              ReductionRatio(0.0)
+            : Type(ManagerType::Invalid), DemandManagerList(0), CanReduceDemand(false), Available(false), Activate(false), Active(false),
+              LimitControl(ManagerLimit::Invalid), SelectionControl(ManagerSelection::Invalid), LimitDuration(0), ElapsedTime(0), RotationDuration(0),
+              ElapsedRotationTime(0), RotatedLoadNum(0), LowerLimit(0.0), UpperLimit(0.0), NumOfLoads(0), FixedRate(0.0), ReductionRatio(0.0)
         {
         }
     };
@@ -232,6 +231,14 @@ struct DemandManagerData : BaseGlobalStruct
     bool ResimHB = true;
     bool ResimExt = true;
     bool firstTime = true;
+
+    void init_constant_state([[maybe_unused]] EnergyPlusData &state) override
+    {
+    }
+
+    void init_state([[maybe_unused]] EnergyPlusData &state) override
+    {
+    }
 
     void clear_state() override
     {

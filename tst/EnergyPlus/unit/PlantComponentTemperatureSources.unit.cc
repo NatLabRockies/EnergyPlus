@@ -1,7 +1,7 @@
-// EnergyPlus, Copyright (c) 1996-2023, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
-// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other
+// National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
 // contributors. All rights reserved.
 //
 // NOTICE: This Software was developed under funding from the U.S. Department of Energy and the
@@ -72,10 +72,14 @@ TEST_F(EnergyPlusFixture, TestPlantComponentTemperatureSource)
                                                       " ;                        !- Source Temperature Schedule Name"});
     ASSERT_TRUE(process_idf(idf_objects));
 
+    state->init_state(*state);
+
     // Setup the plant itself manually
     state->dataPlnt->TotNumLoops = 1;
     state->dataPlnt->PlantLoop.allocate(1);
 
+    state->dataPlnt->PlantLoop(1).FluidName = "WATER";
+    state->dataPlnt->PlantLoop(1).glycol = Fluid::GetWater(*state);
     state->dataPlnt->PlantLoop(1).LoopSide(DataPlant::LoopSideLocation::Demand).TotalBranches = 1;
     state->dataPlnt->PlantLoop(1).LoopSide(DataPlant::LoopSideLocation::Demand).Branch.allocate(1);
     state->dataPlnt->PlantLoop(1).LoopSide(DataPlant::LoopSideLocation::Demand).Branch(1).TotalComponents = 1;
@@ -101,7 +105,7 @@ TEST_F(EnergyPlusFixture, TestPlantComponentTemperatureSource)
     // We can check that GetInput happened properly here
     EXPECT_EQ(1u, state->dataPlantCompTempSrc->WaterSource.size());
     auto &waterSource1 = state->dataPlantCompTempSrc->WaterSource(1);
-    EXPECT_TRUE(compare_enums(PlantComponentTemperatureSources::TempSpecType::Constant, waterSource1.tempSpecType));
+    EXPECT_ENUM_EQ(PlantComponentTemperatureSources::TempSpecType::Constant, waterSource1.tempSpecType);
     EXPECT_EQ(1, waterSource1.InletNodeNum);
     EXPECT_EQ(2, waterSource1.OutletNodeNum);
 
@@ -116,10 +120,5 @@ TEST_F(EnergyPlusFixture, TestPlantComponentTemperatureSource)
     myLoad = 1696.55;
     waterSource1.simulate(*state, loc, firstHVACIteration, myLoad, runFlag);
     EXPECT_NEAR(0.05, waterSource1.MassFlowRate, 0.001);
-
-    // Do this for scheduled temperature
-    // NumOfTimeStepInHour = 1; // must initialize this to get schedules initialized
-    // MinutesPerTimeStep = 60; // must initialize this to get schedules initialized
-    // ProcessScheduleInput(); // read schedules
 }
 } // namespace EnergyPlus

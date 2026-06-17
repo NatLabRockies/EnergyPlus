@@ -2,31 +2,27 @@
  * See the LICENSE file for additional terms and conditions. */
 
 // Penumbra
-#include <sun.h>
-#include "error.h"
+#include "sun.h"
 
-namespace Pumbra {
+namespace Penumbra {
 
-Sun::Sun() : azimuth(0.f), altitude(0.f), posSet(false) {}
+Sun::Sun() : azimuth(0.f), altitude(0.f) {}
 
-Sun::Sun(float azm, float alt) : azimuth(azm), altitude(alt), posSet(true) { setView(); }
-
-void Sun::setAzimuth(float azm) { azimuth = azm; }
-
-void Sun::setAltitude(float alt) { altitude = alt; }
-
-void Sun::setView(float azm, float alt) {
-  setAzimuth(azm);
-  setAltitude(alt);
-  posSet = true;
-  setView();
+void Sun::set_azimuth(float azimuth_in) {
+  azimuth = azimuth_in;
 }
 
-void Sun::setView() {
+void Sun::set_altitude(float altitude_in) {
+  altitude = altitude_in;
+}
 
-  if (!posSet) {
-    showMessage(MSG_WARN, "setView() called, but azimuth and altitude have not yet been set.");
-  }
+void Sun::set_view(float azimuth_in, float altitude_in) {
+  set_azimuth(azimuth_in);
+  set_altitude(altitude_in);
+  set_view();
+}
+
+void Sun::set_view() {
 
   float cosAlt = std::cos(altitude);
 
@@ -37,9 +33,15 @@ void Sun::setView() {
   mat4x4_look_at(view, eye, center, up);
 }
 
-mat4x4_ptr Sun::getView() { return view; }
+mat4x4_ptr Sun::get_view() {
+  return view;
+}
 
-float Sun::getAzimuth() { return azimuth; }
+float Sun::get_azimuth() const {
+  return azimuth;
+}
 
-float Sun::getAltitude() { return altitude; }
-} // namespace Pumbra
+float Sun::get_altitude() const {
+  return altitude;
+}
+} // namespace Penumbra

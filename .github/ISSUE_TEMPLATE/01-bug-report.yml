@@ -1,0 +1,74 @@
+name: Bug Report
+description: Use this template for reporting an issue.
+labels: Triage, UnconfirmedDefect
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to submit a report.
+        Include all applicable information to help us reproduce.
+
+  - type: textarea
+    id: description
+    attributes:
+      label: Issue overview
+      description: |
+        Please change this line to a description of the defect, with useful supporting information including how the issue was found,
+        conditions that trigger this defect, workarounds for users of the current version,
+        and a clear description of how to validate that a fix is complete for this defect.
+
+        You **can supply a link to your IDF if applicable**, or rename it to in.idf.txt and upload it directly here by drag and drop
+      placeholder: Include all applicable information with details to help us reproduce your problem.
+    validations:
+      required: true
+
+  - type: dropdown
+    id: operating_system_multiple
+    attributes:
+      label: Operating System (Multiple choices)
+      multiple: true
+      description: What Operating System are you encountering issues on?
+      options:
+        - Windows
+        - Ubuntu
+        - MacOS
+        - Any
+        - Other
+    validations:
+      required: true
+
+  - type: input
+    id: operating_system_version
+    attributes:
+      label: Operating System Version
+      placeholder: ex. 24.04
+    validations:
+      required: true
+
+  - type: input
+    id: eplus_version
+    attributes:
+      label: Version of EnergyPlus
+      description: if using an intermediate build, include SHA
+      placeholder: ex. 24.2.0
+    validations:
+      required: true
+
+  - type: input
+    id: uh_helpdesk_link
+    attributes:
+      label: Unmethours link or helpdesk ticket number
+      placeholder: ex. 24.2.0
+      value: N/A
+    validations:
+      required: false
+
+  - type: textarea
+    id: defect_file
+    attributes:
+      label: Defect file
+      description: |
+          You **can supply a link to your IDF if applicable**, or rename it to in.idf.txt and upload it directly here by drag and drop.
+
+          Ideally, make it a _Minimum, Complete, Verifiable, Example (MCVE)_ by including the smallest possible number of input objects to reproduce the defect.
+          A good start might be to try to reproduce your issue with one of the EnergyPlus [ExampleFiles](https://github.com/NatLabRockies/EnergyPlus/tree/develop/testfiles).

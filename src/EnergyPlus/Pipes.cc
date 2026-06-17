@@ -1,7 +1,7 @@
-// EnergyPlus, Copyright (c) 1996-2023, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
-// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other
+// National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
 // contributors. All rights reserved.
 //
 // NOTICE: This Software was developed under funding from the U.S. Department of Energy and the
@@ -46,6 +46,7 @@
 // POSSIBILITY OF SUCH DAMAGE.
 
 // C++ Headers
+#include <format>
 #include <string>
 
 // EnergyPlus Headers
@@ -89,7 +90,7 @@ PlantComponent *LocalPipeData::factory(EnergyPlusData &state, DataPlant::PlantEq
         }
     }
     // If we didn't find it, fatal
-    ShowFatalError(state, format("LocalPipeDataFactory: Error getting inputs for pipe named: {}", objectName)); // LCOV_EXCL_LINE
+    ShowFatalError(state, std::format("LocalPipeDataFactory: Error getting inputs for pipe named: {}", objectName)); // LCOV_EXCL_LINE
     // Shut up the compiler
     return nullptr; // LCOV_EXCL_LINE
 }
@@ -106,7 +107,9 @@ void LocalPipeData::simulate(EnergyPlusData &state,
         this->EnvrnFlag = false;
     }
 
-    if (!state.dataGlobal->BeginEnvrnFlag) this->EnvrnFlag = true;
+    if (!state.dataGlobal->BeginEnvrnFlag) {
+        this->EnvrnFlag = true;
+    }
 
     PlantUtilities::SafeCopyPlantNode(state, this->InletNodeNum, this->OutletNodeNum, this->plantLoc.loopNum);
 }
@@ -120,7 +123,7 @@ void LocalPipeData::oneTimeInit_new(EnergyPlusData &state)
 #pragma clang diagnostic push
 #pragma ide diagnostic ignored "ConstantConditionsOC"
     if (FoundOnLoop == 0) {
-        ShowFatalError(state, format("SimPipes: Pipe=\"{}\" not found on a Plant Loop.", this->Name)); // LCOV_EXCL_LINE
+        ShowFatalError(state, std::format("SimPipes: Pipe=\"{}\" not found on a Plant Loop.", this->Name)); // LCOV_EXCL_LINE
     }
 #pragma clang diagnostic pop
     if (errFlag) {
@@ -130,9 +133,9 @@ void LocalPipeData::oneTimeInit_new(EnergyPlusData &state)
 
 void LocalPipeData::initEachEnvironment(EnergyPlusData &state) const
 {
-    PlantUtilities::InitComponentNodes(
-        state, 0.0, state.dataPlnt->PlantLoop(this->plantLoc.loopNum).MaxMassFlowRate, this->InletNodeNum, this->OutletNodeNum);
+    PlantUtilities::InitComponentNodes(state, 0.0, this->plantLoc.loop->MaxMassFlowRate, this->InletNodeNum, this->OutletNodeNum);
 }
+
 void LocalPipeData::oneTimeInit([[maybe_unused]] EnergyPlusData &state)
 {
 }
@@ -146,8 +149,8 @@ void GetPipeInput(EnergyPlusData &state)
     //       RE-ENGINEERED  na
 
     // Using/Aliasing
-    using BranchNodeConnections::TestCompSet;
-    using NodeInputManager::GetOnlySingleNode;
+    using Node::GetOnlySingleNode;
+    using Node::TestCompSet;
 
     // SUBROUTINE LOCAL VARIABLE DECLARATIONS:
     int PipeNum = 0;
@@ -182,21 +185,21 @@ void GetPipeInput(EnergyPlusData &state)
         state.dataPipes->LocalPipe(PipeNum).InletNodeNum = GetOnlySingleNode(state,
                                                                              state.dataIPShortCut->cAlphaArgs(2),
                                                                              ErrorsFound,
-                                                                             DataLoopNode::ConnectionObjectType::PipeAdiabatic,
+                                                                             Node::ConnectionObjectType::PipeAdiabatic,
                                                                              state.dataIPShortCut->cAlphaArgs(1),
-                                                                             DataLoopNode::NodeFluidType::Water,
-                                                                             DataLoopNode::ConnectionType::Inlet,
-                                                                             NodeInputManager::CompFluidStream::Primary,
-                                                                             DataLoopNode::ObjectIsNotParent);
+                                                                             Node::FluidType::Water,
+                                                                             Node::ConnectionType::Inlet,
+                                                                             Node::CompFluidStream::Primary,
+                                                                             Node::ObjectIsNotParent);
         state.dataPipes->LocalPipe(PipeNum).OutletNodeNum = GetOnlySingleNode(state,
                                                                               state.dataIPShortCut->cAlphaArgs(3),
                                                                               ErrorsFound,
-                                                                              DataLoopNode::ConnectionObjectType::PipeAdiabatic,
+                                                                              Node::ConnectionObjectType::PipeAdiabatic,
                                                                               state.dataIPShortCut->cAlphaArgs(1),
-                                                                              DataLoopNode::NodeFluidType::Water,
-                                                                              DataLoopNode::ConnectionType::Outlet,
-                                                                              NodeInputManager::CompFluidStream::Primary,
-                                                                              DataLoopNode::ObjectIsNotParent);
+                                                                              Node::FluidType::Water,
+                                                                              Node::ConnectionType::Outlet,
+                                                                              Node::CompFluidStream::Primary,
+                                                                              Node::ObjectIsNotParent);
         TestCompSet(state,
                     cCurrentModuleObject,
                     state.dataIPShortCut->cAlphaArgs(1),
@@ -225,21 +228,21 @@ void GetPipeInput(EnergyPlusData &state)
         state.dataPipes->LocalPipe(PipeNum).InletNodeNum = GetOnlySingleNode(state,
                                                                              state.dataIPShortCut->cAlphaArgs(2),
                                                                              ErrorsFound,
-                                                                             DataLoopNode::ConnectionObjectType::PipeAdiabaticSteam,
+                                                                             Node::ConnectionObjectType::PipeAdiabaticSteam,
                                                                              state.dataIPShortCut->cAlphaArgs(1),
-                                                                             DataLoopNode::NodeFluidType::Steam,
-                                                                             DataLoopNode::ConnectionType::Inlet,
-                                                                             NodeInputManager::CompFluidStream::Primary,
-                                                                             DataLoopNode::ObjectIsNotParent);
+                                                                             Node::FluidType::Steam,
+                                                                             Node::ConnectionType::Inlet,
+                                                                             Node::CompFluidStream::Primary,
+                                                                             Node::ObjectIsNotParent);
         state.dataPipes->LocalPipe(PipeNum).OutletNodeNum = GetOnlySingleNode(state,
                                                                               state.dataIPShortCut->cAlphaArgs(3),
                                                                               ErrorsFound,
-                                                                              DataLoopNode::ConnectionObjectType::PipeAdiabaticSteam,
+                                                                              Node::ConnectionObjectType::PipeAdiabaticSteam,
                                                                               state.dataIPShortCut->cAlphaArgs(1),
-                                                                              DataLoopNode::NodeFluidType::Steam,
-                                                                              DataLoopNode::ConnectionType::Outlet,
-                                                                              NodeInputManager::CompFluidStream::Primary,
-                                                                              DataLoopNode::ObjectIsNotParent);
+                                                                              Node::FluidType::Steam,
+                                                                              Node::ConnectionType::Outlet,
+                                                                              Node::CompFluidStream::Primary,
+                                                                              Node::ObjectIsNotParent);
         TestCompSet(state,
                     cCurrentModuleObject,
                     state.dataIPShortCut->cAlphaArgs(1),

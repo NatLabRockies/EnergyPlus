@@ -1,0 +1,224 @@
+name: Documentation
+
+on:
+  push:
+    branches: [ develop ]
+  pull_request:
+    branches: [ develop ]
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  build:
+    name: Build PDFs on ${{ matrix.pretty }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-24.04
+            generator: "Unix Makefiles"
+            pretty: 'Ubuntu 24.04'
+          - os: windows-2022
+            generator: "Visual Studio 17 2022"
+            pretty: "Windows"
+#         - os: macos-15
+#           generator: "Unix Makefiles"
+#           pretty: 'Mac arm64'
+
+    runs-on: ${{ matrix.os }}
+
+    steps:
+    - name: Checkout EnergyPlus
+      uses: actions/checkout@v6
+
+    - name: Set up Python 3.12
+      uses: actions/setup-python@v6
+      with:
+        python-version: '3.12'
+
+    - name: Set up LaTeX on Linux
+      if: runner.os == 'Linux'
+      run: sudo apt update && sudo apt install -y texlive texlive-xetex texlive-science poppler-utils
+
+    - name: Setup up LaTeX on Mac
+      if: runner.os == 'macOS'
+      run: |
+        echo "Using brew to install basictex and adding it to PATH"
+        brew install --cask basictex
+        echo "/Library/TeX/texbin" >> $GITHUB_PATH
+        brew install poppler
+
+    - name: Set up LaTeX on Windows
+      if: runner.os == 'Windows'
+      run: |
+        set -x
+        echo "Downloading MiKTeX CLI installer"
+        # We download from a specific miror already # TODO: Should store this setup package somewhere ourselves
+        curl -L -O https://ctan.math.illinois.edu/systems/win32/miktex/setup/windows-x64/miktexsetup-5.5.0%2B1763023-x64.zip
+        unzip miktexsetup-5.5.0%2B1763023-x64.zip
+
+        echo "Setting up the local package directory via download"
+        ./miktexsetup_standalone --verbose \
+            --local-package-repository=C:/MiKTeX-Repo \
+            --remote-package-repository="https://ctan.math.illinois.edu/systems/win32/miktex/tm/packages/" \
+            --package-set=essential \
+            download
+
+        echo "Installing from the local package directory previously set up"
+        ./miktexsetup_standalone --verbose \
+            --local-package-repository=C:/MiKTeX-Repo \
+            --package-set=essential \
+            --shared=yes \
+            install
+
+        echo "Adding MiKTeX bin folder to PATH and to GITHUB_PATH"
+        echo "C:/Program Files/MiKTeX/miktex/bin/x64/" >> $GITHUB_PATH
+        export PATH="/c/Program Files/MiKTeX/miktex/bin/x64/:$PATH"
+
+        echo "Configuring MiKTeX to install missing packages on the fly"
+        initexmf --admin --verbose --set-config-value='[MPM]AutoInstall=1'
+
+        echo "Configure default mirror for packages"
+        mpm --admin --set-repository="https://ctan.math.illinois.edu/systems/win32/miktex/tm/packages/"
+        # If later we pre-package into a zip/tar.gz all the packages we need, we can preinstall them via
+        # mpm --admin --set-repository=C:/MiKTeX-Repo
+        # mpm --verbose --admin --repository=C:\MiKTeX-Repo --require=@C:\MiKTeX-Repo\energyplus_packages.lst
+        # Avoid annoying warning: "xelatex: major issue: So far, you have not checked for updates as a MiKTeX user."
+        mpm --find-updates
+        mpm --admin --find-updates
+        # initexmf --enable-installer --update-fndb
+        # initexmf --admin --enable-installer --update-fndb
+        # initexmf --enable-installer --dump-by-name=xelatex --engine=xetex
+
+      # This will install all required packages and does that in a single thread. So later in cmake we can safely run in parallel
+    - name: Preinstall Packages on Windows
+      if: runner.os == 'Windows'
+      working-directory: ./doc/
+      run: |
+        # It shaves about 1min40s to preinstall from the .lst so do it first
+        mpm --verbose --admin --require=@energyplus_packages_windows.lst
+        cd test/
+        xelatex dependencies.tex
+        nwords=$(pdftotext -f 2 -l 2 dependencies.pdf - | wc -w)
+        [ "$nwords" -lt "10" ] && echo "TOC isn't available for pass NO. 1 (as expected)" || echo "TOC IS available for pass NO. 1"
+        xelatex dependencies.tex
+        nwords=$(pdftotext -f 2 -l 2 dependencies.pdf - | wc -w)
+        if [ "$nwords" -lt "10" ]; then
+          echo "TOC isn't available for pass NO. 2"
+          exit 1
+        fi;
+        echo "TOC is available for pass NO.2"
+
+    - name: Preinstall Packages on macOS
+      if: runner.os == 'macOS'
+      working-directory: ./doc/test
+      run: |
+        sudo tlmgr update --self
+        # Just install these, since I now know what we need
+        sudo tlmgr install enumitem framed multirow siunitx
+        # sudo tlmgr list --only-installed --data name > ori_installed.lst
+        # sudo tlmgr install texliveonfly
+        # sudo texliveonfly --compiler=xelatex dependencies.tex
+        # sudo tlmgr list --only-installed --data name > new_installed.lst
+        # python -c "from pathlib import Path; ori_lines = set(Path('./ori_installed.lst').read_text().splitlines()); new_lines = set(Path('./new_installed.lst').read_text().splitlines()); new_pkgs = new_lines - ori_lines; print([x for x in new_pkgs if not x.startswith('texliveonfly')])"
+
+    - name: Create Build Environment
+      run: cmake -E make_directory ./doc/build
+
+    - name: Configure CMake
+      working-directory: ./doc/build
+      run: cmake -G "${{ matrix.generator }}" -DTEX_INTERACTION=batchmode -DDOCS_TESTING=ON ..
+
+    - name: Add problem matcher
+      run: echo "::add-matcher::.github/workflows/doc-problem-match.json"
+
+    - name: Build Docs
+      working-directory: ./doc/build
+      run: cmake --build . -j 4
+
+    - name: Upload EngineeringReference
+      uses: actions/upload-artifact@v7
+      if: matrix.os == 'ubuntu-24.04'
+      with:
+        name: EngineeringReference
+        path: ${{ github.workspace }}/doc/build/pdf/EngineeringReference.pdf
+
+    - name: Upload ExternalInterfacesApplicationGuide
+      uses: actions/upload-artifact@v7
+      if: matrix.os == 'ubuntu-24.04'
+      with:
+        name: ExternalInterfacesApplicationGuide
+        path: ${{ github.workspace }}/doc/build/pdf/ExternalInterfacesApplicationGuide.pdf
+
+    - name: Upload GettingStarted
+      uses: actions/upload-artifact@v7
+      if: matrix.os == 'ubuntu-24.04'
+      with:
+        name: GettingStarted
+        path: ${{ github.workspace }}/doc/build/pdf/GettingStarted.pdf
+
+    - name: Upload InputOutputReference
+      uses: actions/upload-artifact@v7
+      if: matrix.os == 'ubuntu-24.04'
+      with:
+        name: InputOutputReference
+        path: ${{ github.workspace }}/doc/build/pdf/InputOutputReference.pdf
+
+    - name: Upload InterfaceDeveloper
+      uses: actions/upload-artifact@v7
+      if: matrix.os == 'ubuntu-24.04'
+      with:
+        name: InterfaceDeveloper
+        path: ${{ github.workspace }}/doc/build/pdf/InterfaceDeveloper.pdf
+
+    - name: Upload ModuleDeveloper
+      uses: actions/upload-artifact@v7
+      if: matrix.os == 'ubuntu-24.04'
+      with:
+        name: ModuleDeveloper
+        path: ${{ github.workspace }}/doc/build/pdf/ModuleDeveloper.pdf
+
+    - name: Upload OutputDetailsAndExamples
+      uses: actions/upload-artifact@v7
+      if: matrix.os == 'ubuntu-24.04'
+      with:
+        name: OutputDetailsAndExamples
+        path: ${{ github.workspace }}/doc/build/pdf/OutputDetailsAndExamples.pdf
+
+    - name: Upload PlantApplicationGuide
+      uses: actions/upload-artifact@v7
+      if: matrix.os == 'ubuntu-24.04'
+      with:
+        name: PlantApplicationGuide
+        path: ${{ github.workspace }}/doc/build/pdf/PlantApplicationGuide.pdf
+
+    - name: Upload UsingEnergyPlusForCompliance
+      uses: actions/upload-artifact@v7
+      if: matrix.os == 'ubuntu-24.04'
+      with:
+        name: UsingEnergyPlusForCompliance
+        path: ${{ github.workspace }}/doc/build/pdf/UsingEnergyPlusForCompliance.pdf
+
+    - name: Upload entire pdf folder
+      uses: actions/upload-artifact@v7
+      if: always()
+      with:
+        name: "AllDocumentation-${{ matrix.os }}-${{ github.event.pull_request.head.sha }}"
+        path: ${{ github.workspace }}/doc/build/pdf/
+
+    - name: Upload log folder upon failure
+      if: failure() && runner.os == 'Windows'
+      uses: actions/upload-artifact@v7
+      with:
+        name: Xelatex_Logs_after_all
+        path: C:\Users\runneradmin\AppData\Local\MiKTeX\miktex\log\
+
+#    - name: Test
+#      working-directory: ${{runner.workspace}}/build
+#      shell: bash
+#      # Execute tests defined by the CMake configuration.
+#      # See https://cmake.org/cmake/help/latest/manual/ctest.1.html for more detail
+#      # run: ctest -C $BUILD_TYPE
+#      run: ls

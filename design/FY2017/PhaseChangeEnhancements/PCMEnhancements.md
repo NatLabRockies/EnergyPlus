@@ -81,7 +81,7 @@ Eliminating them is a small step toward further improved readability with very l
 
 #### Arrays and structs re-do
 
-The structs in this module contain a whole lot of arrays that are then allocated individually.  For example, [these array member variables](https://github.com/NREL/EnergyPlus/blob/5e3508db490490a804132e81e1e309f042cc4b51/src/EnergyPlus/HeatBalFiniteDiffManager.hh#L104-L106) in the `ConstructionDataFD` struct, which are then allocated individually, but [all to the same size](https://github.com/NREL/EnergyPlus/blob/5e3508db490490a804132e81e1e309f042cc4b51/src/EnergyPlus/HeatBalFiniteDiffManager.cc#L810-L812).
+The structs in this module contain a whole lot of arrays that are then allocated individually.  For example, [these array member variables](https://github.com/NatLabRockies/EnergyPlus/blob/5e3508db490490a804132e81e1e309f042cc4b51/src/EnergyPlus/HeatBalFiniteDiffManager.hh#L104-L106) in the `ConstructionDataFD` struct, which are then allocated individually, but [all to the same size](https://github.com/NatLabRockies/EnergyPlus/blob/5e3508db490490a804132e81e1e309f042cc4b51/src/EnergyPlus/HeatBalFiniteDiffManager.cc#L810-L812).
 This results in then having to maintain array indeces much more than if the entire list of variables was one single struct, allocated once, and retrieved once.  I also believe there is the possiblity of performance gains here, because in the calculation code, the object could be retrieved once and used by reference much easier than in the current code, allowing better compiler optimization.  This hasn't been tested, but just an observation.  At a minimum, this will improve code readability.
 
 #### Create class with member worker functions

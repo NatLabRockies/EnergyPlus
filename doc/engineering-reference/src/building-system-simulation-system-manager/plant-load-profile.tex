@@ -6,7 +6,9 @@ The LoadProfile:Plant object must be connected on the demand side of the plant l
 
 \subsection{Calculation Model}\label{calculation-model}
 
-The LoadProfile:Plant object calculates the outlet water temperature based on the inlet water temperature from the plant loop and user inputs for the scheduled plant load and the requested flow rate.~ The calculation can be expressed with the equation:
+\subsubsection{Plant Load Profile in the Water Loop}\label{plant-load-profile-in-the-water-loop}
+
+The LoadProfile:Plant object in the water loop calculates the outlet water temperature based on the inlet water temperature from the plant loop and user inputs for the scheduled plant load and the requested flow rate.~ The calculation can be expressed with the equation:
 
 \begin{equation}
 {T_{out}} = {T_{in}} - \frac{{{Q_{load}}}}{{\dot m{c_p}}}
@@ -41,3 +43,24 @@ where
 \({Q_{load}}\) ~ = the scheduled plant load
 
 \(\Delta t\) ~ = the time step interval
+
+
+\subsubsection{Plant Load Profile in the Steam Loop}\label{plant-load-profile-in-the-steam-loop}
+
+The LoadProfile:Plant object in the steam loop calculates the outlet steam flow rate based on the inlet condensate temperature from the plant loop and user inputs for the scheduled plant load.~ This model accounts for the latent heat transfer and sensible cooling of water.~ Steam enters the load profile component at quality equal to 1.0, at saturation temperature and leaves the load profile component with desired degree of sub cooling.~ The user inputs the desired degree of subcooling, which determines the condensate outlet condition from the load profile component.~ The calculation can be expressed with the equation:
+
+\begin{equation}
+{\dot m_{out}}\,\,\,\, = \,\,\,\,\,\frac{{{Q_{load}}}}{{{h_{fg}} + {c_{p,condensate}} \times \Delta {T_{sc}}}}
+\end{equation}
+
+where
+
+\({\dot m_{out}}\) ~ = the outlet steam mass flow rate
+
+\({Q_{load}}\) ~ = the scheduled plant load
+
+\({h_{fg}}\) ~ = the steam latent heat of vaporization
+
+\({ \Delta {T_{sc}}}\) ~ = the temperature difference between saturation temperature and condensate temperature
+
+\({c_{p,condensate}}\) ~ = the condensate heat capacity

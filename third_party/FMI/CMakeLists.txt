@@ -1,9 +1,8 @@
+include_directories("${PROJECT_SOURCE_DIR}/third_party/Expat/lib")
+include_directories("${PROJECT_SOURCE_DIR}/third_party/")
+include_directories(${PROJECT_SOURCE_DIR}/third_party/zlib)
 
-INCLUDE_DIRECTORIES( "${PROJECT_SOURCE_DIR}/third_party/Expat/lib")
-INCLUDE_DIRECTORIES( "${PROJECT_SOURCE_DIR}/third_party/")
-INCLUDE_DIRECTORIES( ${PROJECT_SOURCE_DIR}/third_party/zlib )
-
-SET(SRC
+set(SRC
   main.h
   main.c
   fmiFunctions.h
@@ -22,18 +21,14 @@ SET(SRC
   fmiModelTypes.h
 )
 
-ADD_LIBRARY( epfmiimport STATIC ${SRC} )
+add_library(epfmiimport STATIC ${SRC})
 
-IF (UNIX)
-  ADD_DEFINITIONS("-fPIC")
-ENDIF()
+if(UNIX)
+  set_property(TARGET epfmiimport PROPERTY POSITION_INDEPENDENT_CODE ON)
+endif()
 
-TARGET_LINK_LIBRARIES( epfmiimport epexpat miniziplib )
+target_link_libraries(epfmiimport PRIVATE epexpat miniziplib)
 
-if( UNIX )
-set_target_properties(
-  epfmiimport
-  PROPERTIES
-  INSTALL_NAME_DIR "@executable_path"
-)
+if(UNIX)
+  set_target_properties(epfmiimport PROPERTIES INSTALL_NAME_DIR "@executable_path")
 endif()

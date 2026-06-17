@@ -1,7 +1,7 @@
-// EnergyPlus, Copyright (c) 1996-2023, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
-// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other
+// National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
 // contributors. All rights reserved.
 //
 // NOTICE: This Software was developed under funding from the U.S. Department of Energy and the
@@ -58,7 +58,6 @@
 #include <EnergyPlus/DataHVACSystems.hh>
 #include <EnergyPlus/EPVector.hh>
 #include <EnergyPlus/EnergyPlus.hh>
-#include <EnergyPlus/Plant/PlantAvailManager.hh>
 #include <EnergyPlus/SimAirServingZones.hh>
 
 namespace EnergyPlus {
@@ -68,24 +67,27 @@ namespace DataAirLoop {
     struct AirLoopZoneEquipConnectData
     {
         // Members
-        std::string AirLoopName;                              // Name of Primary Air System
-        int NumReturnNodes = 0;                               // Number of return nodes entering primary air system (currently limited to 1 node)
-        int NumSupplyNodes = 0;                               // number of supply nodes exiting primary air system
-        int NumZonesCooled = 0;                               // number of zones cooled by this primary air system
-        int NumZonesHeated = 0;                               // number of zones heated by this primary air system
-        Array1D_int ZoneEquipReturnNodeNum;                   // Zone Equip side return air node numbers (currently limited to 1 node)
-        Array1D_int ZoneEquipSupplyNodeNum;                   // Zone equip side supply air node numbers
-        Array1D_int AirLoopReturnNodeNum;                     // Air loop side return air node numbers
-        Array1D_int AirLoopSupplyNodeNum;                     // Air loop side supply air node numbers
-        Array1D_int CoolCtrlZoneNums;                         // Controlled zone numbers of zones cooled by this air loop
-        Array1D_int HeatCtrlZoneNums;                         // Controlled zone numbers of zones heated by this air loop
-        Array1D_int CoolZoneInletNodes;                       // Zone inlet node numbers of zones cooled by this air loop
-        Array1D_int HeatZoneInletNodes;                       // Zone inlet node numbers of zones heated by this air loop
-        Array1D_int TermUnitCoolInletNodes;                   // Air terminal unit cooling inlet node numbers for this air loop
-        Array1D_int TermUnitHeatInletNodes;                   // Air terminal unit heating inlet node numbers for this air loop
-        Array1D_int TermUnitCoolSizingIndex;                  // Air terminal sizing numbers for zones cooled by this air loop
-        Array1D_int TermUnitHeatSizingIndex;                  // Air terminal sizing numbers for zones heated by this air loop
-        Array1D<DataHVACGlobals::AirDuctType> SupplyDuctType; // 1=main, 2=cooling, 3=heating, 4=other
+        std::string AirLoopName;                   // Name of Primary Air System
+        int NumReturnNodes = 0;                    // Number of return nodes entering primary air system (currently limited to 1 node)
+        int NumSupplyNodes = 0;                    // number of supply nodes exiting primary air system
+        int NumZonesCooled = 0;                    // number of zones cooled by this primary air system
+        int NumZonesHeated = 0;                    // number of zones heated by this primary air system
+        Array1D_int ZoneEquipReturnNodeNum;        // Zone Equip side return air node numbers (currently limited to 1 node)
+        Array1D_int ZoneEquipSupplyNodeNum;        // Zone equip side supply air node numbers
+        Array1D_int AirLoopReturnNodeNum;          // Air loop side return air node numbers
+        Array1D_int AirLoopSupplyNodeNum;          // Air loop side supply air node numbers
+        Array1D_int CoolCtrlZoneNums;              // Controlled zone numbers of zones cooled by this air loop
+        Array1D_int HeatCtrlZoneNums;              // Controlled zone numbers of zones heated by this air loop
+        Array1D_int CoolZoneInletNodes;            // Zone inlet node numbers of zones cooled by this air loop
+        Array1D_int HeatZoneInletNodes;            // Zone inlet node numbers of zones heated by this air loop
+        Array1D_int TermUnitCoolInletNodes;        // Air terminal unit cooling inlet node numbers for this air loop
+        Array1D_int TermUnitHeatInletNodes;        // Air terminal unit heating inlet node numbers for this air loop
+        Array1D_int TermUnitCoolSizingIndex;       // Air terminal sizing numbers for zones cooled by this air loop
+        Array1D_int TermUnitHeatSizingIndex;       // Air terminal sizing numbers for zones heated by this air loop
+        Array1D<HVAC::AirDuctType> SupplyDuctType; // 1=main, 2=cooling, 3=heating, 4=other
+        EPVector<int> SupplyDuctBranchNum;         // Supply duct branch number (airloop branchnum, not the actual branch index)
+        EPVector<int> SupplyAirPathNum;            // Supply air path indexes
+        EPVector<int> ReturnAirPathNum;            // Return air path indexes
     };
 
     struct AirLoopOutsideAirConnectData
@@ -99,14 +101,12 @@ namespace DataAirLoop {
     struct DefinePriAirSysAvailMgrs
     {
         // Members
-        int NumAvailManagers = 0;                                    // number of availability managers for this system
-        int AvailStatus = 0;                                         // system availability status
-        int StartTime = 0;                                           // cycle on time (in SimTimeSteps)
-        int StopTime = 0;                                            // cycle off time (in SimTimeSteps)
-        Real64 ReqSupplyFrac = 0.0;                                  // required system flow rate (as a fraction)
-        Array1D_string AvailManagerName;                             // name of each availability manager
-        Array1D<DataPlant::SystemAvailabilityType> AvailManagerType; // type of availability manager
-        Array1D_int AvailManagerNum;                                 // index for availability manager
+        int NumAvailManagers = 0;                            // number of availability managers for this system
+        Avail::Status availStatus = Avail::Status::NoAction; // system availability status
+        int StartTime = 0;                                   // cycle on time (in SimTimeSteps)
+        int StopTime = 0;                                    // cycle off time (in SimTimeSteps)
+        Real64 ReqSupplyFrac = 0.0;                          // required system flow rate (as a fraction)
+        Array1D<Avail::AvailManagerNTN> availManagers;       // type of availability manager
     };
 
     struct AirLooptoZoneData // Derived type for air loop connection to zones on air loop
@@ -125,8 +125,8 @@ namespace DataAirLoop {
         int OASysNum = 0;                           // index of OA System
         bool CyclingFan = false;                    // TRUE if currently the air loop supply fan is cycling
         bool AnyContFan = false;                    // TRUE if at any time supply fan is continuous
-        int CycFanSchedPtr = 0;                     // index of schedule indicating whether fan is cycling or continuous in a unitary system
-        int FanOpMode = 0;                          // 1=cycling fan cycling compressor; 2=constant fan cycling comptressor
+        Sched::Schedule *cycFanSched = nullptr;     // schedule indicating whether fan is cycling or continuous in a unitary system
+        HVAC::FanOp fanOp = HVAC::FanOp::Invalid;   // 1=cycling fan cycling compressor; 2=constant fan cycling comptressor
         bool UnitarySys = false;                    // TRUE if a unitary system
         bool UnitarySysSimulating = true;           // set FALSE for AirloopUnitarySystem after simulating to downstream coils can size independently
         bool Simple = false;                        // TRUE if system has 1 branch and 1 component
@@ -141,7 +141,7 @@ namespace DataAirLoop {
         bool HeatRecoveryResimFlag = true;            // Used to trigger new air loop sim when HX is used in OA system
         bool HeatRecoveryResimFlag2 = false;          // Used to trigger new air loop sim when HX is used in OA system
         bool CheckHeatRecoveryBypassStatus = false;   // determines when heat recovery bypass is set
-        bool EconomizerFlowLocked = false;            // locks economizer flow for custon ERV operation
+        bool EconomizerFlowLocked = false;            // locks economizer flow for custom ERV operation
         bool HighHumCtrlActive = false;               // if true high humidity control is active
         bool EconoLockout = false;                    // if true the economizer will be locked out (OA flow set to minimum)
         bool LoopFlowRateSet = false;                 // if true then the air loop flow rate should be set using ReqSupplyFrac
@@ -222,14 +222,14 @@ namespace DataAirLoop {
     struct AirLoopAFNData
     {
         // Members
-        int LoopFanOperationMode = 0;           // OnOff fan operation mode
-        Real64 LoopSystemOnMassFlowrate = 0.0;  // Loop mass flow rate during on cycle using an OnOff fan
-        Real64 LoopSystemOffMassFlowrate = 0.0; // Loop mass flow rate during off cycle using an OnOff fan
-        Real64 LoopOnOffFanPartLoadRatio = 0.0; // OnOff fan part load ratio
-        Real64 LoopCompCycRatio = 0.0;          // Loop compressor cycling ratio for multispeed heat pump
-        Real64 AFNLoopHeatingCoilMaxRTF = 0.0;  // Maximum run time fraction for electric or gas heating coil in an HVAC Air Loop
-        Real64 AFNLoopOnOffFanRTF = 0.0;        // OnOff fan run time fraction in an HVAC Air Loop
-        Real64 AFNLoopDXCoilRTF = 0.0;          // OnOff fan run time fraction in an HVAC Air Loop
+        HVAC::FanOp LoopFanOperationMode = HVAC::FanOp::Invalid; // OnOff fan operation mode
+        Real64 LoopSystemOnMassFlowrate = 0.0;                   // Loop mass flow rate during on cycle using an OnOff fan
+        Real64 LoopSystemOffMassFlowrate = 0.0;                  // Loop mass flow rate during off cycle using an OnOff fan
+        Real64 LoopOnOffFanPartLoadRatio = 0.0;                  // OnOff fan part load ratio
+        Real64 LoopCompCycRatio = 0.0;                           // Loop compressor cycling ratio for multispeed heat pump
+        Real64 AFNLoopHeatingCoilMaxRTF = 0.0;                   // Maximum run time fraction for electric or gas heating coil in an HVAC Air Loop
+        Real64 AFNLoopOnOffFanRTF = 0.0;                         // OnOff fan run time fraction in an HVAC Air Loop
+        Real64 AFNLoopDXCoilRTF = 0.0;                           // OnOff fan run time fraction in an HVAC Air Loop
     };
 
 } // namespace DataAirLoop
@@ -250,9 +250,17 @@ struct DataAirLoopData : BaseGlobalStruct
     EPVector<DataAirLoop::OutsideAirSysProps> OutsideAirSys;
     EPVector<DataAirLoop::AirLoopAFNData> AirLoopAFNInfo;
 
+    void init_constant_state([[maybe_unused]] EnergyPlusData &state) override
+    {
+    }
+
+    void init_state([[maybe_unused]] EnergyPlusData &state) override
+    {
+    }
+
     void clear_state() override
     {
-        *this = DataAirLoopData();
+        new (this) DataAirLoopData();
     }
 };
 

@@ -1,7 +1,7 @@
-// EnergyPlus, Copyright (c) 1996-2023, The Board of Trustees of the University of Illinois,
+// EnergyPlus, Copyright (c) 1996-present, The Board of Trustees of the University of Illinois,
 // The Regents of the University of California, through Lawrence Berkeley National Laboratory
 // (subject to receipt of any required approvals from the U.S. Dept. of Energy), Oak Ridge
-// National Laboratory, managed by UT-Battelle, Alliance for Sustainable Energy, LLC, and other
+// National Laboratory, managed by UT-Battelle, Alliance for Energy Innovation, LLC, and other
 // contributors. All rights reserved.
 //
 // NOTICE: This Software was developed under funding from the U.S. Department of Energy and the
@@ -90,7 +90,9 @@ namespace SurfaceGeometry {
 
     void CreateMissingSpaces(EnergyPlusData &state, Array1D<SurfaceGeometry::SurfaceData> &Surfaces);
 
-    void createSpaceSurfaceLists(EnergyPlusData &state, bool &ErrorsFound);
+    void createSpaceSurfaceLists(EnergyPlusData &state);
+
+    void setSurfaceFirstLast(EnergyPlusData &state);
 
     void checkSubSurfAzTiltNorm(EnergyPlusData &state,
                                 SurfaceData &baseSurface, // Base surface data (in)
@@ -238,6 +240,28 @@ namespace SurfaceGeometry {
 
     void GetSurfaceGroundSurfsData(EnergyPlusData &state, bool &ErrorsFound); // Error flag indicator (true if errors found)
 
+    // Roof perimeter, Area, weighted-by-area average height azimuth
+    struct GeoSummary
+    {
+        // Members
+        Real64 Area = 0.0;      // Sum of all roof surface areas
+        Real64 Perimeter = 0.0; // Actual perimeter of all roof surfaces, after removing all edges that are used twice (and inserting vertices
+                                // to split surfaces as needed)
+        Real64 Height = 0.0;    // Weighted average mean vertical height: for each surface, take max - Zmin value,
+                                // then do a weighted average by surface area
+        Real64 Azimuth = 0.0;   // Weighted average azimuth
+        Real64 Tilt = 0.0;      // Weighted average tilt
+
+        Real64 Zmax = 0;
+        Real64 Zmin = 0;
+        Real64 Ymax = 0;
+        Real64 Ymin = 0;
+        Real64 Xmax = 0;
+        Real64 Xmin = 0;
+    };
+
+    void GetGeoSummaryRoof(EnergyPlusData const &state, GeoSummary &geoSumRoof);
+
     class ExposedFoundationPerimeter
     {
     public:
@@ -268,7 +292,7 @@ namespace SurfaceGeometry {
 
     void GetWindowShadingControlData(EnergyPlusData &state, bool &ErrorsFound); // If errors found in input
 
-    void InitialAssociateWindowShadingControlFenestration(EnergyPlusData &state, bool &ErrorsFound, int &SurfNum);
+    void InitialAssociateWindowShadingControlFenestration(EnergyPlusData &state, bool &ErrorsFound, int SurfNum);
 
     void FinalAssociateWindowShadingControlFenestration(EnergyPlusData &state, bool &ErrorsFound);
 
@@ -282,13 +306,13 @@ namespace SurfaceGeometry {
 
     void GetOSCData(EnergyPlusData &state, bool &ErrorsFound);
 
-    void GetOSCMData(EnergyPlusData &state, bool &ErrorsFound);
+    void GetOSCMData(EnergyPlusData &state);
 
     void GetFoundationData(EnergyPlusData &state, bool &ErrorsFound);
 
     void GetMovableInsulationData(EnergyPlusData &state, bool &ErrorsFound); // If errors found in input
 
-    void CalculateZoneVolume(EnergyPlusData &state, const Array1D_bool &CeilingHeightEntered);
+    void CalculateZoneVolume(EnergyPlusData &state);
 
     struct EdgeOfSurf
     {
@@ -309,7 +333,7 @@ namespace SurfaceGeometry {
 
     bool isEnclosedVolume(DataVectorTypes::Polyhedron const &zonePoly, std::vector<EdgeOfSurf> &edgeNot2);
 
-    std::vector<EdgeOfSurf> edgesInBoth(std::vector<EdgeOfSurf> edges1, std::vector<EdgeOfSurf> edges2);
+    std::vector<EdgeOfSurf> edgesInBoth(std::vector<EdgeOfSurf> const &edges1, std::vector<EdgeOfSurf> const &edges2);
 
     bool edgesEqualOnSameSurface(EdgeOfSurf a, EdgeOfSurf b);
 
@@ -341,7 +365,7 @@ namespace SurfaceGeometry {
 
     bool isAlmostEqual2dPt(DataVectorTypes::Vector_2d v1, DataVectorTypes::Vector_2d v2);
 
-    int findIndexOfVertex(DataVectorTypes::Vector vertexToFind, std::vector<DataVectorTypes::Vector> listOfVertices);
+    int findIndexOfVertex(DataVectorTypes::Vector vertexToFind, std::vector<DataVectorTypes::Vector> const &listOfVertices);
 
     Real64 distance(DataVectorTypes::Vector v1, DataVectorTypes::Vector v2);
 
@@ -473,6 +497,14 @@ struct SurfaceGeometryData : BaseGlobalStruct
     Array1D<Real64> A; // containers for convexity test
     Array1D<Real64> B;
     int VertSize = 0; // size of X,Y,Z,A,B arrays
+
+    void init_constant_state([[maybe_unused]] EnergyPlusData &state) override
+    {
+    }
+
+    void init_state([[maybe_unused]] EnergyPlusData &state) override
+    {
+    }
 
     void clear_state() override
     {

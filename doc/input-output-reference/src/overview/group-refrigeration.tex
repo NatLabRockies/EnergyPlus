@@ -180,33 +180,32 @@ If the Heat Rejection Location is ``Zone'' and any walk-in coolers are connected
 The following is an example input for a~ Refrigeration Compressor Rack with water cooled condenser.
 
 \begin{lstlisting}
-
 Refrigeration:CompressorRack,
-      MediumTempRack,          !- Name
-      Outdoors,                !- Heat Rejection Location
-      1.7,                     !- Design Compressor Rack COP {W/W}
-      RackCOPfTCurve,          !- Compressor Rack COP as a Function of Temperature Curve Name
-      1025.0,                  !- Design Condenser Fan Power {W}
-      RackCondFanCurve,        !- Condenser Fan Power as a Function of Temperature Curve Name
-      WaterCooled,             !- Condenser Type
-      Condenser Inlet Node,    !- Water-cooled Condenser Inlet Node Name
-      Condenser Outlet Node,   !- Water-cooled Condenser Outlet Node Name
-      VariableFlow,            !- Water-cooled Loop Flow Type
-      Cond Outlet Temp Sch,    !- Water-cooled Condenser Outlet Temperature Schedule Name
-      ,                        !- Water-cooled Condenser Design Flow Rate {m3/s}
-      0.003,                   !- Water-cooled Condenser Maximum Flow Rate {m3/s}
-      55,                      !- Water-cooled Condenser Maximum Water Outlet Temperature {C}
-      ,                        !- Water-cooled Condenser Minimum Water Inlet Temperature {C}
-      ,                        !- Evaporative Condenser Availability Schedule Name
-      ,                        !- Evaporative Condenser Effectiveness {dimensionless}
-      ,                        !- Evaporative Condenser Air Volume Flow Rate {m3/s}
-      ,                        !- Basin Heater Capacity {W/K}
-      ,                        !- Basin Heater Set Point Temperature {C}
-      ,                        !- Design Evaporative Condenser Water Pump Power {W}
-      ,                        !- Evaporative Water Supply Tank Name
-      ,                        !- Condenser Air Inlet Node Name
-      ,                        !- End-Use Subcategory
-      MediumTempCaseList;      !- Refrigeration Case Name or WalkIn Name or CaseAndWalkInList Name
+  MediumTempRack,             !- Name
+  Outdoors,                   !- Heat Rejection Location
+  1.7,                        !- Design Compressor Rack COP {W/W}
+  RackCOPfTCurve,             !- Compressor Rack COP as a Function of Temperature Curve Name
+  1025.0,                     !- Design Condenser Fan Power {W}
+  RackCondFanCurve,           !- Condenser Fan Power as a Function of Temperature Curve Name
+  WaterCooled,                !- Condenser Type
+  Condenser Inlet Node,       !- Water-cooled Condenser Inlet Node Name
+  Condenser Outlet Node,      !- Water-cooled Condenser Outlet Node Name
+  VariableFlow,               !- Water-cooled Loop Flow Type
+  Cond Outlet Temp Sch,       !- Water-cooled Condenser Outlet Temperature Schedule Name
+  ,                           !- Water-cooled Condenser Design Flow Rate {m3/s}
+  0.003,                      !- Water-cooled Condenser Maximum Flow Rate {m3/s}
+  55,                         !- Water-cooled Condenser Maximum Water Outlet Temperature {C}
+  ,                           !- Water-cooled Condenser Minimum Water Inlet Temperature {C}
+  ,                           !- Evaporative Condenser Availability Schedule Name
+  ,                           !- Evaporative Condenser Effectiveness {dimensionless}
+  ,                           !- Evaporative Condenser Air Volume Flow Rate {m3/s}
+  ,                           !- Basin Heater Capacity {W/K}
+  ,                           !- Basin Heater Set Point Temperature {C}
+  ,                           !- Design Evaporative Condenser Water Pump Power {W}
+  ,                           !- Evaporative Water Supply Tank Name
+  ,                           !- Condenser Air Inlet Node Name
+  ,                           !- End-Use Subcategory
+  MediumTempCaseList;         !- Refrigeration Case Name or WalkIn Name or CaseAndWalkInList Name
 \end{lstlisting}
 
 \subsubsection{Outputs}\label{outputs-028}
@@ -548,7 +547,7 @@ This alpha field defines the form of the curve used to modify the latent case cr
   CaseTemperatureMethod
 \end{itemize}
 
-This method defines the variation in latent case credits as a cubic function of Case Operating Temperature. The result from the cubic curve is multiplied by the difference between the rated ambient relative humidity and the actual zone relative humidity, and one minus this value is multiplied by the Rated LHR to give the operating LHR at the actual zone humidity condition. (Representative cooefficient values for single-shelf horizontal and multi-shelf vertical display cases are given in the EnergyPlus Engineering Reference.)
+This method defines the variation in latent case credits as a cubic function of Case Operating Temperature. The result from the cubic curve is multiplied by the difference between the rated ambient relative humidity and the actual zone relative humidity, and one minus this value is multiplied by the Rated LHR to give the operating LHR at the actual zone humidity condition. (Representative coefficient values for single-shelf horizontal and multi-shelf vertical display cases are given in the EnergyPlus Engineering Reference.)
 
 \begin{itemize}
 \tightlist
@@ -656,7 +655,7 @@ This choice specifies that a defrost energy correction curve will not be used.
   CaseTemperatureMethod
 \end{itemize}
 
-This method defines the variation in defrost energy as a cubic function of Case Operating Temperature. The result from the cubic curve is multiplied by the difference between the rated ambient relative humidity and the actual zone relative humidity, and one minus this value is multiplied by the Case Defrost Power to give the (average) operating defrost power at the actual zone humidity condition. (Representative cooefficient values for single-shelf horizontal and multi-shelf vertical display cases are given in the EnergyPlus Engineering Reference.)
+This method defines the variation in defrost energy as a cubic function of Case Operating Temperature. The result from the cubic curve is multiplied by the difference between the rated ambient relative humidity and the actual zone relative humidity, and one minus this value is multiplied by the Case Defrost Power to give the (average) operating defrost power at the actual zone humidity condition. (Representative coefficient values for single-shelf horizontal and multi-shelf vertical display cases are given in the EnergyPlus Engineering Reference.)
 
 \begin{itemize}
 \tightlist
@@ -707,43 +706,42 @@ Name of the return air node for this case. If left blank, it defaults to the fir
 The following is an example input for a refrigerated case.
 
 \begin{lstlisting}
-
- Refrigeration:Case,
-    Multi-Deck Dairy/Deli Merchandiser with Synergy-E,  !- Name [Based on Hill Phoenix 6DMLH-NRG]
-    ,   !- Availability Schedule [Used to turn case on/off including all power draws (ie fans, lights, etc)]
-    UserProvideZoneName,    !- Zone Name [Location of Fixture]
-    23.89,                  !- Rated Ambient Temperature {C}  [75øF]
-    55,                     !- Rated Ambient Relative Humidity {percent}
-    1394,         !- Rated Total Cooling Capacity per Unit length {W/m}  [1,450 Btu/hr/ft = 11,600 Btu/hr]
-    0.30,                   !- Rated Latent Heat Ratio  [ Rated Latent Capacity]
-    0.85,                   !- Rated Runtime Fraction
-    2.4,                    !- Case Length {m}  [8 ft]
-    3.33,                   !- Case Operating Temperature {C}  [38øF]
-    CaseTemperatureMethod,  !- Latent Case Credit Curve Type
-    Multi_Shelf_Vertical_Latent_Case_Credit_Curve,            !- Latent Case Credit Curve Name
-    27.3,                   !- Standard Case Fan Power per Unit Length {W/m}  [8.3 W/ft]
-    27.3,                   !- Operating Case Fan Power per Unit Length {W/m}  [8.3 W/ft = 67 W]
-    0.0,                    !- Standard Case Lighting Power per Unit Length {W/m}  [0.0 W/ft]
-    114.8,                  !- Installed Case Lighting Power per Unit Length {W/m}  [35.0 W/ft = 280 W]
-    ,                       !- Case Lighting Schedule Name
-    1.0,                    !- Fraction Of Lighting Energy To Case
-    0.0,                    !- Case Anti-Sweat Heater Power per Unit Length {W/m}  [0.0 W/ft = 0 W]
-    ,                       !- Minimum Anti-Sweat Heater Power per Unit Length {W/m}  []
-    None,                   !- Anti-Sweat Heater Control Type
-    ,                       !- Humidity At Zero Anti-Sweat Heater Energy {%}
-    ,                       !- Case Height {m}  []
-    1.0,                    !- Fraction of Anti-Sweat Heater Energy To Case
-    0.0,                    !- Case Defrost Power per Unit Length {W/m}  [0.0 W/ft  0 W]
-    Off Cycle,              !- Case Defrost Type
-    UserProvideDefSched6PerDay45MinEa,                        !- Case Defrost Schedule Name
-    UserProvideDefSched4PerDay42MinEa,                        !- Case Defrost Drip-Down Schedule
-    CaseTemperatureMethod,  !- Defrost Energy Correction Curve Type
-    Multi Shelf Vertical,   !- Defrost Energy Correction Curve Name
-    0.00,                   !- Under Case HVAC Return Air Fraction
-    ,                       !- Refrigerated Case Restocking Schedule Name  [Not modeling any restocking]
-    ,                       !- Case Credit Fraction Schedule Name
-    -3.33,                  !- Design Evaporator Temperature or Brine Inlet Temperature {C}  [26øF]
-    ;                       !- Average Refrigerant Charge Inventory {kg/m}  [ = ]
+Refrigeration:Case,
+  Multi-Deck Dairy/Deli Merchandiser with Synergy-E,  !- Name [Based on Hill Phoenix 6DMLH-NRG]
+  ,                           !- Availability Schedule [Used to turn case on/off including all power draws (ie fans, lights, etc)]
+  UserProvideZoneName,        !- Zone Name [Location of Fixture]
+  23.89,                      !- Rated Ambient Temperature {C}  [75øF]
+  55,                         !- Rated Ambient Relative Humidity {percent}
+  1394,                       !- Rated Total Cooling Capacity per Unit length {W/m}  [1,450 Btu/hr/ft = 11,600 Btu/hr]
+  0.30,                       !- Rated Latent Heat Ratio  [ Rated Latent Capacity]
+  0.85,                       !- Rated Runtime Fraction
+  2.4,                        !- Case Length {m}  [8 ft]
+  3.33,                       !- Case Operating Temperature {C}  [38øF]
+  CaseTemperatureMethod,      !- Latent Case Credit Curve Type
+  Multi_Shelf_Vertical_Latent_Case_Credit_Curve,  !- Latent Case Credit Curve Name
+  27.3,                       !- Standard Case Fan Power per Unit Length {W/m}  [8.3 W/ft]
+  27.3,                       !- Operating Case Fan Power per Unit Length {W/m}  [8.3 W/ft = 67 W]
+  0.0,                        !- Standard Case Lighting Power per Unit Length {W/m}  [0.0 W/ft]
+  114.8,                      !- Installed Case Lighting Power per Unit Length {W/m}  [35.0 W/ft = 280 W]
+  ,                           !- Case Lighting Schedule Name
+  1.0,                        !- Fraction Of Lighting Energy To Case
+  0.0,                        !- Case Anti-Sweat Heater Power per Unit Length {W/m}  [0.0 W/ft = 0 W]
+  ,                           !- Minimum Anti-Sweat Heater Power per Unit Length {W/m}  []
+  None,                       !- Anti-Sweat Heater Control Type
+  ,                           !- Humidity At Zero Anti-Sweat Heater Energy {%}
+  ,                           !- Case Height {m}  []
+  1.0,                        !- Fraction of Anti-Sweat Heater Energy To Case
+  0.0,                        !- Case Defrost Power per Unit Length {W/m}  [0.0 W/ft  0 W]
+  Off Cycle,                  !- Case Defrost Type
+  UserProvideDefSched6PerDay45MinEa,  !- Case Defrost Schedule Name
+  UserProvideDefSched4PerDay42MinEa,  !- Case Defrost Drip-Down Schedule
+  CaseTemperatureMethod,      !- Defrost Energy Correction Curve Type
+  Multi Shelf Vertical,       !- Defrost Energy Correction Curve Name
+  0.00,                       !- Under Case HVAC Return Air Fraction
+  ,                           !- Refrigerated Case Restocking Schedule Name  [Not modeling any restocking]
+  ,                           !- Case Credit Fraction Schedule Name
+  -3.33,                      !- Design Evaporator Temperature or Brine Inlet Temperature {C}  [26øF]
+  ;                           !- Average Refrigerant Charge Inventory {kg/m}  [ = ]
 \end{lstlisting}
 
 \subsubsection{Outputs}\label{outputs-1-022}
@@ -935,7 +933,7 @@ This field is the total electricity consumption of the refrigerated case electri
 
 \subsection{Refrigeration:CaseAndWalkInList}\label{refrigerationcaseandwalkinlist}
 
-This object provides a list of all the refrigerated cases and/or walk in coolers cooled by a single refrigeration system (ref: Refrigeraion:CompressorRack and \hyperref[refrigerationsystem]{Refrigeration:System}). This list is extensible. Note that the names of all cases, walk-ins,air chillers, and caseandwalkinlists must be unique.~ That is, you cannot give a list the same name as one of the cases.~ Similarly, a walkin cannot have the same name as a case.This list may contain a combination of case and walk-in names OR a list of air chiller names.~ Air chillers may not be included in any list that also includes cases or walk-ins.
+This object provides a list of all the refrigerated cases and/or walk in coolers cooled by a single refrigeration system (ref: Refrigeration:CompressorRack and \hyperref[refrigerationsystem]{Refrigeration:System}). This list is extensible. Note that the names of all cases, walk-ins,air chillers, and caseandwalkinlists must be unique.~ That is, you cannot give a list the same name as one of the cases.~ Similarly, a walkin cannot have the same name as a case.This list may contain a combination of case and walk-in names OR a list of air chiller names.~ Air chillers may not be included in any list that also includes cases or walk-ins.
 
 \subsubsection{Inputs}\label{inputs-2-033}
 
@@ -950,13 +948,12 @@ Identifies a particular refrigerated case or walk-in. The name will be validated
 The following is an example input for a CaseAndWalkInList.
 
 \begin{lstlisting}
-
 Refrigeration:CaseAndWalkInList,
-      MediumTempCaselist,      !- Name
-      UprightDairyCase,        !- Refrigeration Case or WalkIn Name \#1
-      LunchmeatCase,           !- Refrigeration Case or WalkIn Name \#2
-      MeatWalkIn,              !- Refrigeration Case or WalkIn Name \#3
-      DeliCaseOne;             !- Refrigeration Case or WalkIn Name \#4
+  MediumTempCaselist,         !- Name
+  UprightDairyCase,           !- Refrigeration Case or WalkIn Name \#1
+  LunchmeatCase,              !- Refrigeration Case or WalkIn Name \#2
+  MeatWalkIn,                 !- Refrigeration Case or WalkIn Name \#3
+  DeliCaseOne;                !- Refrigeration Case or WalkIn Name \#4
 \end{lstlisting}
 
 \subsection{Refrigeration:WalkIn}\label{refrigerationwalkin}
@@ -1053,7 +1050,7 @@ The floor area in square meters. This value is required and has no default value
 
 \subsubsection{Field: Insulated Floor U-Value}\label{field-insulated-floor-u-value}
 
-The floor themal transmittance (in W/m\(^{2}\)-K). This value has a default value of 0.3154. (This corresponds to R18 in Archaic American Insulation Units.~ To convert other R-values to thermal transmittance, divide 5.678 by the R-value.~ For example, R15 is 0.3785 W/m\(^{2}\)-K and R5 is 1.136 W/m\(^{2}\)-K.)
+The floor thermal transmittance (in W/m\(^{2}\)-K). This value has a default value of 0.3154. (This corresponds to R18 in Archaic American Insulation Units.~ To convert other R-values to thermal transmittance, divide 5.678 by the R-value.~ For example, R15 is 0.3785 W/m\(^{2}\)-K and R5 is 1.136 W/m\(^{2}\)-K.)
 
 \textbf{\emph{THE REMAINING 12 FIELDS FOR THE WALK-IN COOLER MUST BE REPEATED FOR EACH ZONE WHICH IS IN CONTACT WITH A WALK-IN WALL, CEILING, OR DOOR.  This object is extensible, so additional fields of this type can be added to the end of this object by repeating the last 12 fields in the object.}}
 
@@ -1067,7 +1064,7 @@ The total surface area (walls and ceilings) facing this particular zone in squar
 
 \subsubsection{Field: Insulated Surface U-Value Facing Zone \textless{}x\textgreater{}}\label{field-insulated-surface-u-value-facing-zone-x}
 
-The surface (walls and ceilings) themal transmittance (in W/m\(^{2}\)-K). This value has a default value of 0.3154. (This corresponds to R18 in Archaic American Insulation Units.~ To convert other R-values to thermal transmittance, divide 5.678 by the R-value.~ For example, R15 is 0.3785 W/m\(^{2}\)-K and R5 is 1.136 W/m\(^{2}\)-K.)
+The surface (walls and ceilings) thermal transmittance (in W/m\(^{2}\)-K). This value has a default value of 0.3154. (This corresponds to R18 in Archaic American Insulation Units.~ To convert other R-values to thermal transmittance, divide 5.678 by the R-value.~ For example, R15 is 0.3785 W/m\(^{2}\)-K and R5 is 1.136 W/m\(^{2}\)-K.)
 
 \subsubsection{Field: Area of Glass Reach In Doors Facing Zone \textless{}x\textgreater{}}\label{field-area-of-glass-reach-in-doors-facing-zone-x}
 
@@ -1079,7 +1076,7 @@ The glass reach in door height in meters. The default is 1.5.
 
 \subsubsection{Field: Glass Reach In Door U-Value Facing Zone \textless{}x\textgreater{}}\label{field-glass-reach-in-door-u-value-facing-zone-x}
 
-The glass door themal transmittance (in W/m\(^{2}\)-K). This field has a default value of 1.136. (This corresponds to R5 in Archaic American Insulation Units.)
+The glass door thermal transmittance (in W/m\(^{2}\)-K). This field has a default value of 1.136. (This corresponds to R5 in Archaic American Insulation Units.)
 
 \subsubsection{Field: Glass Reach In Door Opening Schedule Name Facing Zone \textless{}x\textgreater{}}\label{field-glass-reach-in-door-opening-schedule-name-facing-zone-x}
 
@@ -1095,7 +1092,7 @@ The stocking door height in meters. The default is 2.0.
 
 \subsubsection{Field: Stocking Door U-Value Facing Zone \textless{}x\textgreater{}}\label{field-stocking-door-u-value-facing-zone-x}
 
-The stocking door themal transmittance (in W/m\(^{2}\)-K). This value has a default value of 0.3785. (This corresponds to R15 in Archaic American Insulation Units.)
+The stocking door thermal transmittance (in W/m\(^{2}\)-K). This value has a default value of 0.3785. (This corresponds to R15 in Archaic American Insulation Units.)
 
 \subsubsection{Field: Stocking Door Opening Schedule Name Facing Zone \textless{}x\textgreater{}}\label{field-stocking-door-opening-schedule-name-facing-zone-x}
 
@@ -1108,41 +1105,40 @@ The type of stocking door opening protection used for this walkin. Valid choices
 The following is an example input for a refrigeration walkin.
 
 \begin{lstlisting}
-
-   Refrigeration:WalkIn,
-      WalkInFreezer,           !- Name
-      CaseOperatingSched,      !- Availability Schedule Name
-      4690.,                   !- Rated Coil Cooling Capacity {W}
-      -2.22,                   !- Operating Temperature {C}
-      -6.67,                   !- Rated Cooling Source Temperature {C}
-      0.0,                     !- Rated Total Heating Power {W}
-      CaseOperatingSched,      !- Heating Power Schedule Name
-      735.,                    !- Rated Cooling Coil Fan Power {W}
-      0.0,                     !- Rated Circulation Fan Power {W}
-      120.,                    !- Rated Total Lighting Power {W}
-      CaseLightingSched2,      !- Lighting Schedule Name
-      Electric,                !- Defrost Type
-      TimeSchedule,            !- Defrost Control Type
-      CaseDefrostSched3,       !- Defrost Schedule Name
-      CaseDripDownSched3,      !- Defrost Drip-Down Schedule Name
-      5512.,                   !- Defrost Power {W}
-      ,                        !- Temperature Termination Defrost Fraction to Ice {dimensionless}
-      WalkInStockingSched,     !- Restocking Schedule Name
-      ,                        !- Average Refrigerant Charge Inventory {kg}
-      13.0,                    !- Insulated Floor Surface Area {m2}
-      0.207,                   !- Insulated Floor U-Value {W/m2-C}
-      BackRoom,                !- Zone Name
-      43.4,                    !- Total Insulated Surface Area Facing this Zone {m2}
-      .235,                    !- Insulated Surface U-Value Facing this Zone {W/m2-C}
-      ,                        !- Area of Glass Reach In Doors Facing this Zone {m2}
-      ,                        !- Height of Glass Reach In Doors Facing this Zone {m}
-      ,                        !- Glass Reach In Door U Value Facing this Zone {W/m2-C}
-      ,                        !- Glass Reach In Door Opening Schedule Name Facing this Zone
-      2.0,                     !- Area of Stocking Doors Facing this Zone {m2}
-      2.0,                     !- Height of Stocking Doors Facing this Zone {m}
-      ,                        !- Stocking Door U Value Facing this Zone {W/m2-C}
-      WIStockDoorOpenSch,      !- Stocking Door Opening Schedule Name Facing this Zone
-      StripCurtain;            !- Stocking Door Opening Protection Type Facing this Zone
+Refrigeration:WalkIn,
+  WalkInFreezer,              !- Name
+  CaseOperatingSched,         !- Availability Schedule Name
+  4690.,                      !- Rated Coil Cooling Capacity {W}
+  -2.22,                      !- Operating Temperature {C}
+  -6.67,                      !- Rated Cooling Source Temperature {C}
+  0.0,                        !- Rated Total Heating Power {W}
+  CaseOperatingSched,         !- Heating Power Schedule Name
+  735.,                       !- Rated Cooling Coil Fan Power {W}
+  0.0,                        !- Rated Circulation Fan Power {W}
+  120.,                       !- Rated Total Lighting Power {W}
+  CaseLightingSched2,         !- Lighting Schedule Name
+  Electric,                   !- Defrost Type
+  TimeSchedule,               !- Defrost Control Type
+  CaseDefrostSched3,          !- Defrost Schedule Name
+  CaseDripDownSched3,         !- Defrost Drip-Down Schedule Name
+  5512.,                      !- Defrost Power {W}
+  ,                           !- Temperature Termination Defrost Fraction to Ice {dimensionless}
+  WalkInStockingSched,        !- Restocking Schedule Name
+  ,                           !- Average Refrigerant Charge Inventory {kg}
+  13.0,                       !- Insulated Floor Surface Area {m2}
+  0.207,                      !- Insulated Floor U-Value {W/m2-C}
+  BackRoom,                   !- Zone Name
+  43.4,                       !- Total Insulated Surface Area Facing this Zone {m2}
+  .235,                       !- Insulated Surface U-Value Facing this Zone {W/m2-C}
+  ,                           !- Area of Glass Reach In Doors Facing this Zone {m2}
+  ,                           !- Height of Glass Reach In Doors Facing this Zone {m}
+  ,                           !- Glass Reach In Door U Value Facing this Zone {W/m2-C}
+  ,                           !- Glass Reach In Door Opening Schedule Name Facing this Zone
+  2.0,                        !- Area of Stocking Doors Facing this Zone {m2}
+  2.0,                        !- Height of Stocking Doors Facing this Zone {m}
+  ,                           !- Stocking Door U Value Facing this Zone {W/m2-C}
+  WIStockDoorOpenSch,         !- Stocking Door Opening Schedule Name Facing this Zone
+  StripCurtain;               !- Stocking Door Opening Protection Type Facing this Zone
 \end{lstlisting}
 
 \subsection{Refrigeration Case and WalkIn Outputs}\label{refrigeration-case-and-walkin-outputs}
@@ -1338,7 +1334,7 @@ This numeric field specifies the minimum condensing temperature (C), which is us
 
 \paragraph{Field: Refrigeration System Working Fluid Type}\label{field-refrigeration-system-working-fluid-type}
 
-The type of refrigerant used by the system.~ Valid choices are R11, R123, R134A, R12, R22, R404A, R507A, or R410A. This name will be validated against Fluid Names (ref: Fluid Properties section) in the input file. Note that the corresponding property data, available in FluidPropertiesRefData.idf, must by supplied in the input file.
+The type of refrigerant used by the system.~ Some potential examples of refrigerants that might be used in these systems include R11, R123, R134A, R12, R22, R404A, R507A, or R410A. The name entered in this field will be validated against the occurrences of \hyperref[fluidpropertiesname] {FluidProperties:Name} (ref: Fluid Properties section) in the input file. Note that the corresponding property data for many commonly used refrigerants is available in FluidPropertiesRefData.idf. This data must be included in the input file in which this system is defined.
 
 \paragraph{Field: Suction Temperature Control Type}\label{field-suction-temperature-control-type}
 
@@ -1383,45 +1379,43 @@ Identifies a single compressor, or a particular list of compressors, that compri
 The following is an example input for a single-stage compression refrigeration system.
 
 \begin{lstlisting}
-
- Refrigeration:System,
-      MediumTempSystem,        !- Refrigeration System Name
-      MediumTempCaselist,      !-  Refrigeration Case or Walkin or CaseAndWalkInList Name
-      ,                        !- Refrigeration Transfer Load or TransferLoad List Name
-      AirCooledCondenserA,     !- Refrigeration Condenser Name
-      MediumTempCompressorlist, !- Refrigeration Compressor or CompressorList Name
-      25.0,                    !- Minimum Condensing Temperture {C}
-      R134a,                   !- Refrigeration System Working Fluid
-      ConstantSuctionTemperature,  !- Suction Temperature Control Type
-      ,                        !- Optional mechanical subcooler name
-      ,                        !- Optional LSHX subcooler name
-      ,                        !- Sum UA Distribution Piping {W/K}
-      ,                        !- Distribution Piping Zone Name
-      MedTempRefrig;           !- End-Use Subcategory
+Refrigeration:System,
+  MediumTempSystem,           !- Refrigeration System Name
+  MediumTempCaselist,         !- Refrigeration Case or Walkin or CaseAndWalkInList Name
+  ,                           !- Refrigeration Transfer Load or TransferLoad List Name
+  AirCooledCondenserA,        !- Refrigeration Condenser Name
+  MediumTempCompressorlist,   !- Refrigeration Compressor or CompressorList Name
+  25.0,                       !- Minimum Condensing Temperature {C}
+  R134a,                      !- Refrigeration System Working Fluid
+  ConstantSuctionTemperature, !- Suction Temperature Control Type
+  ,                           !- Optional mechanical subcooler name
+  ,                           !- Optional LSHX subcooler name
+  ,                           !- Sum UA Distribution Piping {W/K}
+  ,                           !- Distribution Piping Zone Name
+  MedTempRefrig;              !- End-Use Subcategory
 \end{lstlisting}
 
 The following is an example input for a two-stage compression refrigeration system.
 
 \begin{lstlisting}
-
- Refrigeration:System,
-      LowTempSystem,           !- Refrigeration System Name
-      LowTempCaselist,         !-  Refrigeration Case or Walkin or CaseAndWalkInList Name
-      ,                        !- Refrigeration Transfer Load or TransferLoad List Name
-      AirCooledCondenserB,     !- Refrigeration Condenser Name
-      LowStageCompressorList,  !- Refrigeration Compressor or CompressorList Name
-      25.0,                    !- Minimum Condensing Temperture {C}
-      R404A,                   !- Refrigeration System Working Fluid
-      ConstantSuctionTemperature,  !- Suction Temperature Control
-      ,                        !- Optional mechanical subcooler name
-      ,                        !- Optional LSHX subcooler name
-      ,                        !- Sum UA Distribution Piping {W/K}
-      ,                        !- Distribution Piping Zone Name
-      LowTempRefrig,           !- End-Use Subcategory
-      2,                       !- Number of Compressor Stages
-      Shell-and-Coil Intercooler,  !- Intercooler Type
-      0.7,                     !- Shell-and-Coil Intercooler Effectiveness
-      HiStageCompressorList    !- High-Stage Compressor or CompressorList Name
+Refrigeration:System,
+  LowTempSystem,              !- Refrigeration System Name
+  LowTempCaselist,            !- Refrigeration Case or Walkin or CaseAndWalkInList Name
+  ,                           !- Refrigeration Transfer Load or TransferLoad List Name
+  AirCooledCondenserB,        !- Refrigeration Condenser Name
+  LowStageCompressorList,     !- Refrigeration Compressor or CompressorList Name
+  25.0,                       !- Minimum Condensing Temperature {C}
+  R404A,                      !- Refrigeration System Working Fluid
+  ConstantSuctionTemperature, !- Suction Temperature Control
+  ,                           !- Optional mechanical subcooler name
+  ,                           !- Optional LSHX subcooler name
+  ,                           !- Sum UA Distribution Piping {W/K}
+  ,                           !- Distribution Piping Zone Name
+  LowTempRefrig,              !- End-Use Subcategory
+  2,                          !- Number of Compressor Stages
+  Shell-and-Coil Intercooler, !- Intercooler Type
+  0.7,                        !- Shell-and-Coil Intercooler Effectiveness
+  HiStageCompressorList       !- High-Stage Compressor or CompressorList Name
 \end{lstlisting}
 
 \subsubsection{Outputs}\label{outputs-2-018}
@@ -1634,7 +1628,7 @@ This output is the total heat transfer rate from the refrigerated cases and walk
 
 \paragraph{Refrigeration System Total Cases and Walk Ins Heat Transfer Energy {[}J{]}}\label{refrigeration-system-total-cases-and-walk-ins-heat-transfer-energy-j}
 
-This output is the total heat transfer energy from the refrigerated cases and walk-ins served directly by this system in Joules. It is the sum of all of the heat transfered for the refrigerated cases and walk-ins that are connected directly to this system. This value does not include compressor or condenser fan heat or the heat transfer for cases and walk-ins served by any connected secondary systems.
+This output is the total heat transfer energy from the refrigerated cases and walk-ins served directly by this system in Joules. It is the sum of all of the heat transferred for the refrigerated cases and walk-ins that are connected directly to this system. This value does not include compressor or condenser fan heat or the heat transfer for cases and walk-ins served by any connected secondary systems.
 
 \paragraph{Refrigeration System Total Transferred Load Heat Transfer Rate {[}W{]}}\label{refrigeration-system-total-transferred-load-heat-transfer-rate-w}
 
@@ -1642,7 +1636,7 @@ This output is the sum of the heat transfer rates for any secondary loops, casca
 
 \paragraph{Refrigeration System Total Transferred Load Heat Transfer Energy {[}J{]}}\label{refrigeration-system-total-transferred-load-heat-transfer-energy-j}
 
-This output is the sum of the heat transfered for any secondary loops, cascade condensers, and mechanical subcoolers cooled by this system, minus the benefit of any mechanical subcooler providing cooling to this system in Joules. Therefore, if the only transfer load between two systems is a mechanical subcooler, the same amount will show as a negative value for the system receiving the cooling effect and as a positive number for the system serving that cooling load. It also includes the pump energy for any secondary loops and the compressor energy for any cascade condenser systems that are cooled by this system. (See the Engineering Reference for more details about the loads placed by secondary systems upon the primary system.)
+This output is the sum of the heat transferred for any secondary loops, cascade condensers, and mechanical subcoolers cooled by this system, minus the benefit of any mechanical subcooler providing cooling to this system in Joules. Therefore, if the only transfer load between two systems is a mechanical subcooler, the same amount will show as a negative value for the system receiving the cooling effect and as a positive number for the system serving that cooling load. It also includes the pump energy for any secondary loops and the compressor energy for any cascade condenser systems that are cooled by this system. (See the Engineering Reference for more details about the loads placed by secondary systems upon the primary system.)
 
 \paragraph{Refrigeration System Total Suction Pipe Heat Gain Rate {[}W{]}}\label{refrigeration-system-total-suction-pipe-heat-gain-rate-w}
 
@@ -1772,7 +1766,7 @@ This output is the total heat transfer rate from the refrigerated cases and walk
 
 \paragraph{Refrigeration Air Chiller System Total Case and Walk In Heat Transfer Energy {[}J{]}}\label{refrigeration-air-chiller-system-total-case-and-walk-in-heat-transfer-energy-j}
 
-This output is the total heat transfer energy from the refrigerated cases and walk-ins served directly by this system in Joules. It is the sum of all of the heat transfered for the refrigerated cases and walk-ins that are connected directly to this system. This value does not include compressor or condenser fan heat or the heat transfer for cases and walk-ins served by any connected secondary systems.
+This output is the total heat transfer energy from the refrigerated cases and walk-ins served directly by this system in Joules. It is the sum of all of the heat transferred for the refrigerated cases and walk-ins that are connected directly to this system. This value does not include compressor or condenser fan heat or the heat transfer for cases and walk-ins served by any connected secondary systems.
 
 \paragraph{Refrigeration Air Chiller System Total Transferred Load Heat Transfer Rate {[}W{]}}\label{refrigeration-air-chiller-system-total-transferred-load-heat-transfer-rate-w}
 
@@ -1780,7 +1774,7 @@ This output is the sum of the heat transfer rates for any secondary loops, casca
 
 \paragraph{Refrigeration Air Chiller System Total Transferred Load Heat Transfer Energy {[}J{]}}\label{refrigeration-air-chiller-system-total-transferred-load-heat-transfer-energy-j}
 
-This output is the sum of the heat transfered for any secondary loops, cascade condensers, and mechanical subcoolers cooled by this system, minus the benefit of any mechanical subcooler providing cooling to this system in Joules. Therefore, if the only transfer load between two systems is a mechanical subcooler, the same amount will show as a negative value for the system receiving the cooling effect and as a positive number for the system serving that cooling load. It also includes the pump energy for any secondary loops and the compressor energy for any cascade condenser systems that are cooled by this system. (See the Engineering Reference for more details about the loads placed by secondary systems upon the primary system.)
+This output is the sum of the heat transferred for any secondary loops, cascade condensers, and mechanical subcoolers cooled by this system, minus the benefit of any mechanical subcooler providing cooling to this system in Joules. Therefore, if the only transfer load between two systems is a mechanical subcooler, the same amount will show as a negative value for the system receiving the cooling effect and as a positive number for the system serving that cooling load. It also includes the pump energy for any secondary loops and the compressor energy for any cascade condenser systems that are cooled by this system. (See the Engineering Reference for more details about the loads placed by secondary systems upon the primary system.)
 
 \paragraph{Refrigeration Air Chiller System Total Suction Pipe Heat Gain Rate {[}W{]}}\label{refrigeration-air-chiller-system-total-suction-pipe-heat-gain-rate-w}
 
@@ -1950,23 +1944,22 @@ This field allows the specification of a user-defined end-use subcategory (e.g.,
 The following is an example input for a transcritical CO\(_{2}\) refrigeration system.
 
 \begin{lstlisting}
-
 Refrigeration:TranscriticalSystem,
-      TransRefrigSys,          !- Name
-      TwoStage,                !- System Type
-      MTLoads,                 !- Medium Temperature Refrigerated Case or Walkin or CaseAndWalkInList Name
-      LTLoads,                 !- Low Temperature Refrigerated Case or Walkin or CaseAndWalkInList Name
-      RefrigGasCooler,         !- Refrigeration Gas Cooler Name
-      HPCompressors,           !- High Pressure Compressor or CompressorList Name
-      LPCompressors,           !- Low Pressure Compressor or CompressorList Name
-      4000000,                 !- Receiver Pressure
-      0.4,                     !- Subcooler Effectiveness
-      R744,                    !- Refrigeration System Working Fluid Type
-      ,                        !- Sum UA Suction Piping for Medium Temperature Loads
-      ,                        !- Medium Temperature Suction Piping Zone Name
-      ,                        !- Sum UA Suction Piping for Low Temperature Loads
-      ,                        !- Low Temperature Suction Piping Zone Name
-      TransRefrigSys;          !- End-Use Subcategory
+  TransRefrigSys,             !- Name
+  TwoStage,                   !- System Type
+  MTLoads,                    !- Medium Temperature Refrigerated Case or Walkin or CaseAndWalkInList Name
+  LTLoads,                    !- Low Temperature Refrigerated Case or Walkin or CaseAndWalkInList Name
+  RefrigGasCooler,            !- Refrigeration Gas Cooler Name
+  HPCompressors,              !- High Pressure Compressor or CompressorList Name
+  LPCompressors,              !- Low Pressure Compressor or CompressorList Name
+  4000000,                    !- Receiver Pressure
+  0.4,                        !- Subcooler Effectiveness
+  R744,                       !- Refrigeration System Working Fluid Type
+  ,                           !- Sum UA Suction Piping for Medium Temperature Loads
+  ,                           !- Medium Temperature Suction Piping Zone Name
+  ,                           !- Sum UA Suction Piping for Low Temperature Loads
+  ,                           !- Low Temperature Suction Piping Zone Name
+  TransRefrigSys;             !- End-Use Subcategory
 \end{lstlisting}
 
 \subsubsection{Outputs}\label{outputs-3-016}
@@ -2255,16 +2248,15 @@ If \textbf{Transcritical} is selected as \textit{Mode of Operation}, then this i
 The following is an example input for a refrigeration compressor.
 
 \begin{lstlisting}
-
 Refrigeration:Compressor,
-      CompressorA,             !- Name
-      PowerCurveCompA,         !- Refrigeration Compressor Power Curve Name
-      CapCurveCompA,           !- Refrigeration Compressor Capacity Curve Name
-      10.0,                    ! – Rated Superheat {delta C}
-      ,                        !- Rated Return Gas Temperature {C}
-      ,                        ! – Rated Liquid Temperature{C}
-      15.0,                    !- Rated Subcooling {delta C}
-      MedTempRefrig;           !- End-Use Subcategory
+  CompressorA,                !- Name
+  PowerCurveCompA,            !- Refrigeration Compressor Power Curve Name
+  CapCurveCompA,              !- Refrigeration Compressor Capacity Curve Name
+  10.0,                       !- – Rated Superheat {delta C}
+  ,                           !- Rated Return Gas Temperature {C}
+  ,                           !- – Rated Liquid Temperature{C}
+  15.0,                       !- Rated Subcooling {delta C}
+  MedTempRefrig;              !- End-Use Subcategory
 \end{lstlisting}
 
 \subsubsection{Outputs}\label{outputs-4-013}
@@ -2360,12 +2352,11 @@ Identifies a particular compressor that works in conjunction with the other comp
 The following is an example input for a compressor list.
 
 \begin{lstlisting}
-
 Refrigeration:CompressorList,
-      MediumTempCompressorlist, !- Refrigeration Compressor List Name
-      CompressorA,             !- Refrigeration Compressor Name \#1
-      CompressorB,             !- Refrigeration Compressor Name \#2
-      CompressorC;             !- Refrigeration Compressor Name \#3
+  MediumTempCompressorlist,   !- Refrigeration Compressor List Name
+  CompressorA,                !- Refrigeration Compressor Name \#1
+  CompressorB,                !- Refrigeration Compressor Name \#2
+  CompressorC;                !- Refrigeration Compressor Name \#3
 \end{lstlisting}
 
 \subsection{Refrigeration:Subcooler}\label{refrigerationsubcooler}
@@ -2405,29 +2396,27 @@ This numeric field is the controlled outlet temperature (C) for subcooled liquid
 The following is example input for both liquid suction and mechanical subcoolers.
 
 \begin{lstlisting}
-
 REFRIGERATION:SUBCOOLER,
-         SampleLSHx,          !Subcooler Name
-         LiquidSuction,             !subcooler type
-         6,                   !design liquid suction subcooling {deltaC}
-         16,                  !design inlet temperature on liquid side {C}
-         0,                   !design inlet temperature on vapor side {C}
-         ,                    !Refrigeration System Detailed Name providing cooling capacity
-         ;                    !Control Temperature Out for subcooled liquid {C}
+  SampleLSHx,                 !- Subcooler Name
+  LiquidSuction,              !- subcooler type
+  6,                          !- design liquid suction subcooling {deltaC}
+  16,                         !- design inlet temperature on liquid side {C}
+  0,                          !- design inlet temperature on vapor side {C}
+  ,                           !- Refrigeration System Detailed Name providing cooling capacity
+  ;                           !- Control Temperature Out for subcooled liquid {C}
 \end{lstlisting}
 
 ! Mechanical Subcooler (uses Med Temp System to cool low temp liquid to 10C)
 
 \begin{lstlisting}
-
-  REFRIGERATION:SUBCOOLER,
-         SampleMSC,           !Subcooler Name
-         Mechanical,          !subcooler type
-         ,                    !design liquid suction subcooling {C}
-         ,                    !design inlet temperature on liquid side {C}
-         ,                    !design inlet temperature on vapor side {C}
-         MediumTempSystem,    !Refrigeration System Detailed Name providing cooling capacity
-         10;                  !Control Temperature Out for subcooled liquid {C}
+REFRIGERATION:SUBCOOLER,
+  SampleMSC,                  !- Subcooler Name
+  Mechanical,                 !- subcooler type
+  ,                           !- design liquid suction subcooling {C}
+  ,                           !- design inlet temperature on liquid side {C}
+  ,                           !- design inlet temperature on vapor side {C}
+  MediumTempSystem,           !- Refrigeration System Detailed Name providing cooling capacity
+  10;                         !- Control Temperature Out for subcooled liquid {C}
 \end{lstlisting}
 
 \subsubsection{Outputs}\label{outputs-5-008}
@@ -2523,16 +2512,15 @@ This numeric field specifies the amount of refrigerant present within the conden
 The following is an example input for an air-cooled condenser.
 
 \begin{lstlisting}
-
 Refrigeration:Condenser:AirCooled,
-      MediumTempCondenser,     !- Name of condenser
-      MediumTempCondenserHRCurve, !-name of condenser heat of rejection curve, linear
-      0.,                      ! Rated subcooling {deltaC}
-      VariableSpeed,           ! Fan speed control type
-      4000.,                   ! Design condenser fan power {W}
-      0.25,                    !Minimum air flow fraction through condenser fan {dimensionless}
-      Refrigeration MediumTempSystem CondenserNode,  !- Condenser Air Inlet Node Name or Zone Name
-      MediumTempRefrig;        !- End-Use Subcategory
+  MediumTempCondenser,        !- Name of condenser
+  MediumTempCondenserHRCurve, !- name of condenser heat of rejection curve, linear
+  0.,                         !- Rated subcooling {deltaC}
+  VariableSpeed,              !- Fan speed control type
+  4000.,                      !- Design condenser fan power {W}
+  0.25,                       !- Minimum air flow fraction through condenser fan {dimensionless}
+  Refrigeration MediumTempSystem CondenserNode,  !- Condenser Air Inlet Node Name or Zone Name
+  MediumTempRefrig;           !- End-Use Subcategory
 \end{lstlisting}
 
 \subsubsection{Outputs}\label{outputs-6-008}
@@ -2786,31 +2774,30 @@ This numeric field specifies the amount of refrigerant present within the conden
 The following is an example input for an evaporative condenser
 
 \begin{lstlisting}
-
 Refrigeration:Condenser:EvaporativeCooled,
-      MedTempEvapCooledCondenser ,  !- Refrigeration Condenser Name
-      64800. ,                    !- Rated Total Heat Rejection Effect, {W}
-      0. ,                        !- Rated Subcooling
-      VariableSpeed ,             !- Condenser Fan Speed Control
-      746.,                       !- Rated Condenser Fan Power
-      0.25,                       !- Minimum air flow fraction through condenser fan {dimensionless}
-      6.63  ,                     !- Evaporative Condenser Approach Temp Const, {C}
-      0.468 ,                     !- Evaporative Condenser Approach Temp HRCF Cooefficient
-      17.93 ,                     !- Evaporative Condenser Approach Temp 1/hrcf coefficient
-      -0.322,                     !- Evaporative Condenser Approach Temp Twb coefficient {1/C}
-      0.6  ,                      !- Minimum Condenser Capacity Factor
-      4.8  ,                      !- Maximum Condenser Capacity Factor
-      Outside Air Inlet Node,     !- Condenser Air Inlet Node Name
-      1.79 ,                      !- Rated Air Flow Rate {m3/s}
-      66.7 ,                      !- Basin Heater Capacity {W/C}
-      1.0  ,                      !- Basin Heater Set Point Temperature {C}
-      250. ,                      !- Rated Water Pump Power {W}
-      EvapWaterStorageTank,       !- Evaporative Water Supply Tank Name
-      EvapCondAvail,              !- Evaporative Condenser Availability Schedule Name
-      ,                           !- End-UseSubcategory
-      21.9 ,                      !- Condenser Refrigerant Operating Charge {kg}
-      10.  ,                      !- Condensate Receiver Refrigerant Inventory
-      25. ;                       !- Condensate Piping Refrigerant Inventory
+  MedTempEvapCooledCondenser, !- Refrigeration Condenser Name
+  64800.,                     !- Rated Total Heat Rejection Effect, {W}
+  0.,                         !- Rated Subcooling
+  VariableSpeed,              !- Condenser Fan Speed Control
+  746.,                       !- Rated Condenser Fan Power
+  0.25,                       !- Minimum air flow fraction through condenser fan {dimensionless}
+  6.63,                       !- Evaporative Condenser Approach Temp Const, {C}
+  0.468,                      !- Evaporative Condenser Approach Temp HRCF Coefficient
+  17.93,                      !- Evaporative Condenser Approach Temp 1/hrcf coefficient
+  -0.322,                     !- Evaporative Condenser Approach Temp Twb coefficient {1/C}
+  0.6,                        !- Minimum Condenser Capacity Factor
+  4.8,                        !- Maximum Condenser Capacity Factor
+  Outside Air Inlet Node,     !- Condenser Air Inlet Node Name
+  1.79,                       !- Rated Air Flow Rate {m3/s}
+  66.7,                       !- Basin Heater Capacity {W/C}
+  1.0,                        !- Basin Heater Set Point Temperature {C}
+  250.,                       !- Rated Water Pump Power {W}
+  EvapWaterStorageTank,       !- Evaporative Water Supply Tank Name
+  EvapCondAvail,              !- Evaporative Condenser Availability Schedule Name
+  ,                           !- End-UseSubcategory
+  21.9,                       !- Condenser Refrigerant Operating Charge {kg}
+  10.,                        !- Condensate Receiver Refrigerant Inventory
+  25.;                        !- Condensate Piping Refrigerant Inventory
 \end{lstlisting}
 
 \subsubsection{Outputs}\label{outputs-7-008}
@@ -3097,25 +3084,24 @@ This numeric field specifies the amount of refrigerant present within the conden
 The following is an example input for a water cooled condenser.
 
 \begin{lstlisting}
-
 Refrigeration:Condenser:WaterCooled,
-      MediumTempCondenser ,    !- Name
-      58000. ,                 !- Rated Effective Total Heat Rejection Rate {W}
-      29.4 ,                   !- Rated Condensing Temperature {C}
-      0.0 ,                    !- Rated Subcooling Temperature Difference{deltaC}
-      10.0,                    !- Rated Water Inlet Temperature {C}
-      Condenser Inlet Node,    !- Water Inlet Node Name
-      Condenser Outlet Node,   !- Water- Outlet Node Name
-      Variable Flow,           !- Water-cooled Loop Flow Type
-      Cond Outlet Temp Sch,    !- Water Outlet Temperature Schedule Name
-      ,                        !- Water Design Flow Rate {m3/s}
-      0.003,                   !- Water Maximum Flow Rate {m3/s}
-      55.,                     !- Maximum Water Outlet Temperature {C}
-      ,                        !- Minimum Water Inlet Temperature {C}
-      ,                        !- End-Use Subcategory
-      30. ,                    !- Condenser Refrigerant Operating Charge {kg}
-      65. ,                    !- Condensate Receiver Refrigerant Inventory {kg}
-      20. ;                    !- Condensate Piping Refrigerant Inventory {kg}
+  MediumTempCondenser,        !- Name
+  58000.,                     !- Rated Effective Total Heat Rejection Rate {W}
+  29.4,                       !- Rated Condensing Temperature {C}
+  0.0,                        !- Rated Subcooling Temperature Difference{deltaC}
+  10.0,                       !- Rated Water Inlet Temperature {C}
+  Condenser Inlet Node,       !- Water Inlet Node Name
+  Condenser Outlet Node,      !- Water- Outlet Node Name
+  Variable Flow,              !- Water-cooled Loop Flow Type
+  Cond Outlet Temp Sch,       !- Water Outlet Temperature Schedule Name
+  ,                           !- Water Design Flow Rate {m3/s}
+  0.003,                      !- Water Maximum Flow Rate {m3/s}
+  55.,                        !- Maximum Water Outlet Temperature {C}
+  ,                           !- Minimum Water Inlet Temperature {C}
+  ,                           !- End-Use Subcategory
+  30.,                        !- Condenser Refrigerant Operating Charge {kg}
+  65.,                        !- Condensate Receiver Refrigerant Inventory {kg}
+  20.;                        !- Condensate Piping Refrigerant Inventory {kg}
 \end{lstlisting}
 
 \subsubsection{Outputs}\label{outputs-8-007}
@@ -3283,13 +3269,12 @@ This numeric field specifies the amount of refrigerant present within the conden
 The following is an example input for a cascade condenser.
 
 \begin{lstlisting}
-
 Refrigeration:Condenser:Cascade,
-      CascadeCondenser1 ,      !- Name
-      -4. ,                    !- Rated Condensing Temperature {C}
-      3. ,                     !- Rated Approach Temperature Difference {DeltaC}
-      20000.0 ,                !- Rated Effective Total Heat Rejection Rate {W}
-      Fixed;                   !- Condensing Temperature Control Type
+  CascadeCondenser1,          !- Name
+  -4.,                        !- Rated Condensing Temperature {C}
+  3.,                         !- Rated Approach Temperature Difference {DeltaC}
+  20000.0,                    !- Rated Effective Total Heat Rejection Rate {W}
+  Fixed;                      !- Condensing Temperature Control Type
 \end{lstlisting}
 
 \subsubsection{Outputs}\label{outputs-9-007}
@@ -3397,22 +3382,21 @@ This numeric field specifies the amount of refrigerant present within the gas co
 The following is an example input for an air-cooled gas cooler.
 
 \begin{lstlisting}
-
 Refrigeration:GasCooler:AirCooled,
-      RefrigGasCooler,         !- Name
-      GasCoolerHRCurve,        !- Rated Total Heat Rejection Rate Curve Name
-      Fixed,                   !- Gas Cooler Fan Speed Control Type
-      6400,                    !- Rated Fan Power
-      0.2,                     !- Minimum Fan Air Flow Ratio
-      27.0,                    !- Transition Temperature
-      3.0,                     !- Transcritical Approach Temperature
-      10.0,                    !- Subcritical Temperature Difference
-      10.0,                    !- Minimum Condensing Temperature
-      ,                        !- Air Inlet Node Name
-      RefrigGasCooler,         !- End-Use Subcategory
-      ,                        !- Gas Cooler Refrigerant Operating Charge Inventory
-      ,                        !- Gas Cooler Receiver Refrigerant Inventory
-      ;                        !- Gas Cooler Outlet Piping Refrigerant Inventory
+  RefrigGasCooler,            !- Name
+  GasCoolerHRCurve,           !- Rated Total Heat Rejection Rate Curve Name
+  Fixed,                      !- Gas Cooler Fan Speed Control Type
+  6400,                       !- Rated Fan Power
+  0.2,                        !- Minimum Fan Air Flow Ratio
+  27.0,                       !- Transition Temperature
+  3.0,                        !- Transcritical Approach Temperature
+  10.0,                       !- Subcritical Temperature Difference
+  10.0,                       !- Minimum Condensing Temperature
+  ,                           !- Air Inlet Node Name
+  RefrigGasCooler,            !- End-Use Subcategory
+  ,                           !- Gas Cooler Refrigerant Operating Charge Inventory
+  ,                           !- Gas Cooler Receiver Refrigerant Inventory
+  ;                           !- Gas Cooler Outlet Piping Refrigerant Inventory
 \end{lstlisting}
 
 \subsubsection{Outputs}\label{outputs-10-006}
@@ -3485,11 +3469,10 @@ Identifies a cascade condenser or secondary loop that is cooled, along with the 
 The following is an example input for a transfer load list.
 
 \begin{lstlisting}
-
 Refrigeration:TransferLoadList,
-      MedTempTransferLoads ,   !- Name
-      CascadeCondFrozen,       !- Cascade Condenser Name or Secondary System Name
-      SecondLoopDairy;         !- Cascade Condenser Name or Secondary System Name
+  MedTempTransferLoads,       !- Name
+  CascadeCondFrozen,          !- Cascade Condenser Name or Secondary System Name
+  SecondLoopDairy;            !- Cascade Condenser Name or Secondary System Name
 \end{lstlisting}
 
 \subsection{Refrigeration:SecondarySystem}\label{refrigerationsecondarysystem}
@@ -3524,7 +3507,7 @@ The name of the secondary circulating fluid.
 
 For ``FluidAlwaysLiquid'', this name must correspond to either an ethylene or propylene glycol (ref: \hyperref[fluidpropertiesglycolconcentration]{FluidProperties:GlycolConcentration}) or to a user-defined glycol (ref: \hyperref[fluidpropertiesname]{FluidProperties:Name} and FluidProperties: GlycolConcentration) in the input file. Note that the corresponding property data, including \hyperref[fluidpropertiesconcentration]{FluidProperties:Concentration}, \hyperref[fluidpropertiestemperatures]{FluidProperties:Temperatures}, and \hyperref[fluidpropertiesglycolconcentration]{FluidProperties:GlycolConcentration} must also be included in the input file and are provided in GlycolPropertiesRefData.idf for typical ethylene and propylene glycols.
 
-For ``FluidPhaseChange'', the refrigerant used by the secondary system must be listed in the \hyperref[fluidpropertiesname]{FluidProperties:Name} object.~ The corresponding property data must also be supplied in the input file. Property data for many refrigererants, including R11, R123, R134A, R12, R22, R404A, R507A, R410A, and R744, are available in FluidPropertiesRefData.idf.
+For ``FluidPhaseChange'', the refrigerant used by the secondary system must be listed in the \hyperref[fluidpropertiesname]{FluidProperties:Name} object.~ The corresponding property data must also be supplied in the input file. Property data for many refrigerants, including R11, R123, R134A, R12, R22, R404A, R507A, R410A, and R744, are available in FluidPropertiesRefData.idf.
 
 \paragraph{Field: Evaporator Capacity}\label{field-evaporator-capacity}
 
@@ -3536,7 +3519,7 @@ For ``FluidPhaseChange'', this numeric field should be the evaporator capacity (
 
 For ``FluidAlwaysLiquid'' systems, this is the rated evaporator secondary fluid flow rate in m\(^{3}\)/s.~ If this variable is specified and the rated evaporator capacity in watts is not, then the rated capacity will be calculated. At least one of these two input variables is required.
 
-For ``FluidPhaseChange'', this field is not used (see ``Phase Cange Circulating Rate'').
+For ``FluidPhaseChange'', this field is not used (see ``Phase Change Circulating Rate'').
 
 \paragraph{Field:Evaporator Evaporating Temperature}\label{fieldevaporator-evaporating-temperature}
 
@@ -3596,7 +3579,7 @@ This optional field is used when trying to determine the impact of pipe heat gai
 
 \paragraph{Field: Sum UA Receiver/Separator Shell}\label{field-sum-ua-receiverseparator-shell}
 
-This optional field is typically used when trying to compare the impact of refrigeration component heat gains on system performance, particularly in comparing a conventional primary DX system to a secondary system. Enter the value for receiver/separator heat gain (in W/C).~ That is, sum up the product of the tank insulaton conductance times the outer tank insulation surface area. Please see the Engineering Reference for guidance in calculating this value.
+This optional field is typically used when trying to compare the impact of refrigeration component heat gains on system performance, particularly in comparing a conventional primary DX system to a secondary system. Enter the value for receiver/separator heat gain (in W/C).~ That is, sum up the product of the tank insulation conductance times the outer tank insulation surface area. Please see the Engineering Reference for guidance in calculating this value.
 
 \paragraph{Field: Receiver/Separator Zone Name}\label{field-receiverseparator-zone-name}
 
@@ -3613,61 +3596,59 @@ This field allows the specification of a user-defined end-use subcategory (e.g.,
 The following is an example input for a brine-type (``FluidAlwaysLiquid'')refrigeration secondary system.
 
 \begin{lstlisting}
-
-  Refrigeration:SecondarySystem,
-      SecondaryMedLoop,        !- Name
-      MedTempCaseList,         !- Refrigerated Case or Walkin or CaseAndWalkInList Name
-      FluidAlwaysLiquid,       !- Circulating Fluid Type
-      ProGly30Percent,         !- Circulating Fluid Name
-      3.5E4,                   !- Evaporator Capacity {W}
-      0.0021,                  !- Evaporator Flow Rate for Secondary Fluid {M3/s}
-      -12.6,                   !- Evaporator Evaporating Temperature {C}
-      2.7,                     !- Evaporator Approach Temperature Difference {DeltaC}
-      4.,                      !- Evaporator Range Temperature Difference {DeltaC}
-      3,                       !- Number of Pumps in Loop
-      .0023,                   !- Total Pump Flow Rate {M3/s}
-      ,                        !- Total Pump Power {W}
-      2.09E5,                  !- Total Pump Head {Pa}
-      ,                        !- PhaseChange Circulating Rate
-      ,                        !- Pump Drive Type
-      ,                        !- Variable Speed Pump Cubic Curve Name
-      1.0,                     !- Pump Motor Heat to Fluid
-      21.,                     !- Sum UA Distribution Piping {W/C}
-      SalesFloor,              !- Distribution Piping Zone Name
-      ,                        !- Sum UA Receiver/Separator Shell
-      ,                        !- Receiver/Separator Zone Name
-      ,                        !- Evaporator Refrigerant Inventory {kg}
-      ;                        !- End-Use Subcategory
+Refrigeration:SecondarySystem,
+  SecondaryMedLoop,           !- Name
+  MedTempCaseList,            !- Refrigerated Case or Walkin or CaseAndWalkInList Name
+  FluidAlwaysLiquid,          !- Circulating Fluid Type
+  ProGly30Percent,            !- Circulating Fluid Name
+  3.5E4,                      !- Evaporator Capacity {W}
+  0.0021,                     !- Evaporator Flow Rate for Secondary Fluid {M3/s}
+  -12.6,                      !- Evaporator Evaporating Temperature {C}
+  2.7,                        !- Evaporator Approach Temperature Difference {DeltaC}
+  4.,                         !- Evaporator Range Temperature Difference {DeltaC}
+  3,                          !- Number of Pumps in Loop
+  .0023,                      !- Total Pump Flow Rate {M3/s}
+  ,                           !- Total Pump Power {W}
+  2.09E5,                     !- Total Pump Head {Pa}
+  ,                           !- PhaseChange Circulating Rate
+  ,                           !- Pump Drive Type
+  ,                           !- Variable Speed Pump Cubic Curve Name
+  1.0,                        !- Pump Motor Heat to Fluid
+  21.,                        !- Sum UA Distribution Piping {W/C}
+  SalesFloor,                 !- Distribution Piping Zone Name
+  ,                           !- Sum UA Receiver/Separator Shell
+  ,                           !- Receiver/Separator Zone Name
+  ,                           !- Evaporator Refrigerant Inventory {kg}
+  ;                           !- End-Use Subcategory
 \end{lstlisting}
 
 The following is an example input for a liquid-overfeed-type (``FluidPhaseChange'') refrigeration secondary system.
 
 \begin{lstlisting}
-
-  Refrigeration:SecondarySystem,
-      SecondaryLowLoop,        !- Name
-      LowTempCaseList,         !- Refrigerated Case or Walkin or CaseAndWalkInList Name
-      FluidPhaseChange,        !- Circulating Fluid Type
-      R744,                    !- Circulating Fluid Name
-      ,                        !- Evaporator Capacity {W}
-      ,                        !- Evaporator Flow Rate for Secondary Fluid {M3/s}
-      -39.2,                   !- Evaporator Evaporating Temperature {C}
-      2.,                      !- Evaporator Approach Temperature Difference {DeltaC}
-      ,                        !- Evaporator Range Temperature Difference {DeltaC}
-      3,                       !- Number of Pumps in Loop
-      ,                        !- Total Pump Flow Rate {M3/s}
-      ,                        !- Total Pump Power {W}
-      2.09E5,                  !- Total Pump Head {Pa}
-      2.5,                     !- PhaseChange Circulating Rate
-      Variable,                !- Pump Drive Type
-      SecondaryVarSpeedPump,   !- Variable Speed Pump Cubic Curve Name
-      1.0,                     !- Pump Motor Heat to Fluid
-      10.4,                    !- Sum UA Distribution Piping {W/C}
-      SalesFloor,              !- Distribution Piping Zone Name
-      1.4,                     !- Sum UA Receiver/Separator Shell
-      BackRoom,                !- Receiver/Separator Zone Name
-      ,                        !- Evaporator Refrigerant Inventory {kg}
-      ;                        !- End-Use Subcategory
+Refrigeration:SecondarySystem,
+  SecondaryLowLoop,           !- Name
+  LowTempCaseList,            !- Refrigerated Case or Walkin or CaseAndWalkInList Name
+  FluidPhaseChange,           !- Circulating Fluid Type
+  R744,                       !- Circulating Fluid Name
+  ,                           !- Evaporator Capacity {W}
+  ,                           !- Evaporator Flow Rate for Secondary Fluid {M3/s}
+  -39.2,                      !- Evaporator Evaporating Temperature {C}
+  2.,                         !- Evaporator Approach Temperature Difference {DeltaC}
+  ,                           !- Evaporator Range Temperature Difference {DeltaC}
+  3,                          !- Number of Pumps in Loop
+  ,                           !- Total Pump Flow Rate {M3/s}
+  ,                           !- Total Pump Power {W}
+  2.09E5,                     !- Total Pump Head {Pa}
+  2.5,                        !- PhaseChange Circulating Rate
+  Variable,                   !- Pump Drive Type
+  SecondaryVarSpeedPump,      !- Variable Speed Pump Cubic Curve Name
+  1.0,                        !- Pump Motor Heat to Fluid
+  10.4,                       !- Sum UA Distribution Piping {W/C}
+  SalesFloor,                 !- Distribution Piping Zone Name
+  1.4,                        !- Sum UA Receiver/Separator Shell
+  BackRoom,                   !- Receiver/Separator Zone Name
+  ,                           !- Evaporator Refrigerant Inventory {kg}
+  ;                           !- End-Use Subcategory
 \end{lstlisting}
 
 \subsubsection{Outputs}\label{outputs-11-005}
@@ -3980,7 +3961,7 @@ This is the total cooling (sensible plus latent) from all air chillers located i
 
 The Refrigeration:AirChiller object works in conjunction with a refrigeration chiller set, compressor rack, a refrigeration system, or a refrigeration secondary system object (Ref. ZoneHvac:RefrigerationChillerSet, and a \hyperref[refrigerationcompressorrack]{Refrigeration:CompressorRack}, \hyperref[refrigerationsystem]{Refrigeration:System}, or \hyperref[refrigerationsecondarysystem]{Refrigeration:SecondarySystem}) to simulate the performance of an air chiller, similar to one found in a refrigerated warehouse. The air chiller model uses information at rated conditions along with the zone conditions to determine performance. Energy use for fans and heaters is modeled based on inputs for nominal power, schedules, and control type. The refrigeration chiller model accounts for the sensible and latent heat exchange with the surrounding environment.
 
-The refrigeration chiller cooler object inputs include a name, an availability schedule name, the rated cooling capacity, the rated operating temperature, the rated cooling source temperature, the rated total heating power and heating power schedule, the rated fan power and schedules, defrost type, defrost control type, defrost schedule name, drip-down schedule name, defrost power, the portion of the defrost energy used to melt ice (only for temperature termination control type), and refrigerant inventory.
+The refrigeration chiller cooler object inputs include a name, an availability schedule name, the rated cooling capacity, the rated cooling source temperature, the rated total heating power and heating power schedule, the rated fan power and schedules, defrost type, defrost control type, defrost schedule name, drip-down schedule name, defrost power, the portion of the defrost energy used to melt ice (only for temperature termination control type), and refrigerant inventory.
 
 Chiller coils are rated under multiple conventions. Each rating is typically based upon a selected fin material and refrigerant cycle, with correction factors for other materials or refrigerants. Fields are provided here for those correction factors. The performance of all chiller coils depends upon the inlet air temperature, relative humidity, and flow rate. Multiple methods of expressing this relationship are provided here to accommodate the way information is provided by different manufacturers.
 
@@ -3996,9 +3977,9 @@ The name of the schedule (ref: Schedule) that denotes whether the refrigeration 
 
 \paragraph{Field: Capacity Rating Type}\label{field-capacity-rating-type}
 
-The type of capacity rating used for this refrigeration chiller. Valid choices are UnitLoadFactorSensibleOnly, CapacityTotalSpecificConditions, EuropeanSC1Standard, EuropeanSC1NominalWet, EuropeanSC2Standard, EuropeanSC2NominalWet, EuropeanSC3Standard, EuropeanSC3NominalWet, EuropeanSC4Standard, EuropeanSC4NominalWet, EuropeanSC5Standard, and EuropeanSC5NominalWet. In each case, select the rating option that corresponds to the expected service conditions.~ For example, U.S. manufacturers quote a separate Unit Load Factor for wet or frosted coils.~ If the evaporating temperature is less than 0C, input the frosted coil value. Within the European convention, select SC1, 2, 3, 4, or 5 depending upon the expected evaporating temperature. This field is required and there is no default value. Refer to the Engineering Reference for further information on these rating types. NOTE: If the CapacityTotalSpecificConditions rating type is specified, the input file must include the manufacturer's coil capacity correction curve in tabular form using the \hyperref[tablelookup]{Table:Lookup} object. An example of this may be found in the RefrigeratedWarehouse.idf example file.
+The type of capacity rating used for this refrigeration chiller. Valid choices are UnitLoadFactorSensibleOnly, CapacityTotalSpecificConditions, EuropeanSC1Standard, EuropeanSC1NominalWet, EuropeanSC2Standard, EuropeanSC2NominalWet, EuropeanSC3Standard, EuropeanSC3NominalWet, EuropeanSC4Standard, EuropeanSC4NominalWet, EuropeanSC5Standard, and EuropeanSC5NominalWet. In each case, select the rating option that corresponds to the expected service conditions.~ For example, U.S. manufacturers quote a separate Unit Load Factor for wet or frosted coils.~ If the evaporating temperature is less than 0C, input the frosted coil value. Within the European convention, select SC1, 2, 3, 4, or 5 depending upon the expected evaporating temperature. This field is required and there is no default value. Refer to the Engineering Reference for further information on these rating types. NOTE: If the CapacityTotalSpecificConditions rating type is specified, the input file must include the manufacturer's coil capacity correction curve in tabular form using the \hyperref[tablelookup]{Table:Lookup} object. An example of this may be found in the RefrigeratedWarehouse.idf example file. Based on this field, only one of the next two fields should be entered.
 
-\paragraph{NOTE -- ONLY ONE OF THE FOLLOWING TWO FIELDS IS USED}\label{note-only-one-of-the-following-two-fields-is-used}
+\textbf{\emph{NOTE: only one of the following two fields is used and which field is required is dependent on the value given to the Capacity Rating Type field.}}
 
 \paragraph{Field: Rated Unit Load Factor}\label{field-rated-unit-load-factor}
 
@@ -4105,71 +4086,69 @@ The value of this optional field is the refrigerant inventory present in the ref
 The following is an example input for a refrigeration air chiller.
 
 \begin{lstlisting}
-
-   Refrigeration:AirChiller,
-      Freezer_1AirChiller_1,    !- Name
-      AvailAllYear,             !- Availability Schedule Name
-      UnitLoadFactorSensibleOnly, !- Capacity Rating Type
-      10900.,                   !- Rated Unit Load Factor {W/deltaC}
-      ,                         !- Rated Capacity {W}
-      ,                         !- Rated Relative Humidity
-      -26.,                     !- Rated Cooling Source Temperature {C}
-      8.,                       !- Rated Temperature Difference DT1 {DeltaC}
-      11.,                      !- Maximum Temperature Difference DT1 {DeltaC}
-      ,                         !- Material Correction Factor
-      ,                         !- Refrigerant Correction Factor
-      LinearSHR60,              !- Capacity Correction Curve Type
-      ,                         !- Capacity Correction Curve Name
-      1.5,                      !- SHR60 Correction Factor {dimensionless}
-      200.,                     !- Rated Total Heating Power {W}
-      AirChillerDripDownSched1,    !- Heating Power Schedule Name
-      ,                         !- Fan Speed Control Type
-      375.,                     !- Rated Fan Power {W}
-      12.4,                     !- Rated Air Flow {m3/s}
-      ,                         !- Minimum Fan Air Flow Ratio
-      Electric,                 !- Defrost Type
-      TimeSchedule,             !- Defrost Control Type
-      AirChillerDefrostSched1,  !- Defrost Schedule Name
-      AirChillerDripDownSched1, !- Defrost Drip-Down Schedule Name
-      55066.,                  !- Defrost Power {W}
-      ,                         !- Temperature Termination Defrost Fraction to Ice
-      ,                         !- Vertical Location
-      ;                         !- Average Refrigerant Charge Inventory {kg}
+Refrigeration:AirChiller,
+  Freezer_1AirChiller_1,      !- Name
+  AvailAllYear,               !- Availability Schedule Name
+  UnitLoadFactorSensibleOnly, !- Capacity Rating Type
+  10900.,                     !- Rated Unit Load Factor {W/deltaC}
+  ,                           !- Rated Capacity {W}
+  ,                           !- Rated Relative Humidity
+  -26.,                       !- Rated Cooling Source Temperature {C}
+  8.,                         !- Rated Temperature Difference DT1 {DeltaC}
+  11.,                        !- Maximum Temperature Difference DT1 {DeltaC}
+  ,                           !- Material Correction Factor
+  ,                           !- Refrigerant Correction Factor
+  LinearSHR60,                !- Capacity Correction Curve Type
+  ,                           !- Capacity Correction Curve Name
+  1.5,                        !- SHR60 Correction Factor {dimensionless}
+  200.,                       !- Rated Total Heating Power {W}
+  AirChillerDripDownSched1,   !- Heating Power Schedule Name
+  ,                           !- Fan Speed Control Type
+  375.,                       !- Rated Fan Power {W}
+  12.4,                       !- Rated Air Flow {m3/s}
+  ,                           !- Minimum Fan Air Flow Ratio
+  Electric,                   !- Defrost Type
+  TimeSchedule,               !- Defrost Control Type
+  AirChillerDefrostSched1,    !- Defrost Schedule Name
+  AirChillerDripDownSched1,   !- Defrost Drip-Down Schedule Name
+  55066.,                     !- Defrost Power {W}
+  ,                           !- Temperature Termination Defrost Fraction to Ice
+  ,                           !- Vertical Location
+  ;                           !- Average Refrigerant Charge Inventory {kg}
 \end{lstlisting}
 
 The following is an example input for a refrigeration air chiller.
 
 \begin{lstlisting}
-
-   Refrigeration:AirChiller,
-      Freezer_1AirChiller_1,    !- Name
-      AvailAllYear,             !- Availability Schedule Name
-      UnitLoadFactorSensibleOnly, !- Capacity Rating Type
-      10900.,                   !- Rated Unit Load Factor {W/deltaC}
-      ,                         !- Rated Capacity {W}
-      ,                         !- Rated Relative Humidity
-      -26.,                     !- Rated Cooling Source Temperature {C}
-      8.,                       !- Rated Temperature Difference DT1 {DeltaC}
-      11.,                      !- Maximum Temperature Difference DT1 {DeltaC}
-      ,                         !- Material Correction Factor
-      ,                         !- Refrigerant Correction Factor
-      LinearSHR60,              !- Capacity Correction Curve Type
-      ,                         !- Capacity Correction Curve Name
-      1.5,                      !- SHR60 Correction Factor {dimensionless}
-      200.,                     !- Rated Total Heating Power {W}
-      AirChillerDripDownSched1,    !- Heating Power Schedule Name
-      ,                         !- Fan Speed Control Type
-      375.,                     !- Rated Fan Power {W}
-      12.4,                     !- Rated Air Flow {m3/s}
-      ,                         !- Minimum Fan Air Flow Ratio
-      Electric,                 !- Defrost Type
-      TimeSchedule,             !- Defrost Control Type
-      AirChillerDefrostSched1,  !- Defrost Schedule Name
-      AirChillerDripDownSched1, !- Defrost Drip-Down Schedule Name
-      55066.,                  !- Defrost Power {W}
-      ,                         !- Temperature Termination Defrost Fraction to Ice
-      ,                         !- Vertical Location
-      ;                         !- Average Refrigerant Charge Inventory {kg}
+Refrigeration:AirChiller,
+  Freezer_1AirChiller_1,      !- Name
+  AvailAllYear,               !- Availability Schedule Name
+  UnitLoadFactorSensibleOnly, !- Capacity Rating Type
+  10900.,                     !- Rated Unit Load Factor {W/deltaC}
+  ,                           !- Rated Capacity {W}
+  ,                           !- Rated Relative Humidity
+  -26.,                       !- Rated Cooling Source Temperature {C}
+  8.,                         !- Rated Temperature Difference DT1 {DeltaC}
+  11.,                        !- Maximum Temperature Difference DT1 {DeltaC}
+  ,                           !- Material Correction Factor
+  ,                           !- Refrigerant Correction Factor
+  LinearSHR60,                !- Capacity Correction Curve Type
+  ,                           !- Capacity Correction Curve Name
+  1.5,                        !- SHR60 Correction Factor {dimensionless}
+  200.,                       !- Rated Total Heating Power {W}
+  AirChillerDripDownSched1,   !- Heating Power Schedule Name
+  ,                           !- Fan Speed Control Type
+  375.,                       !- Rated Fan Power {W}
+  12.4,                       !- Rated Air Flow {m3/s}
+  ,                           !- Minimum Fan Air Flow Ratio
+  Electric,                   !- Defrost Type
+  TimeSchedule,               !- Defrost Control Type
+  AirChillerDefrostSched1,    !- Defrost Schedule Name
+  AirChillerDripDownSched1,   !- Defrost Drip-Down Schedule Name
+  55066.,                     !- Defrost Power {W}
+  ,                           !- Temperature Termination Defrost Fraction to Ice
+  ,                           !- Vertical Location
+  ;                           !- Average Refrigerant Charge Inventory {kg}
 \end{lstlisting}
 
 \subsubsection{Outputs}\label{outputs-12-005}

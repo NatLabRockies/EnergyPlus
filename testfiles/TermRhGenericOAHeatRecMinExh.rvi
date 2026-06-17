@@ -30,6 +30,6 @@ Relief Air Outlet Node,System Node Humidity Ratio
 Outside Air Inlet Node,System Node Humidity Ratio
 Heat Recovery Secondary Outlet Node,System Node Humidity Ratio
 Heat Recovery Outlet Node,System Node Humidity Ratio
-District Heating Rate
+District Heating Water Rate
 Heat Exchanger Defrost Time Fraction
 0
