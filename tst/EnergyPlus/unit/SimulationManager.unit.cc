@@ -233,7 +233,7 @@ TEST_F(EnergyPlusFixture, SimulationManager_OutputDebuggingData)
 
         state->clear_state();
         state->init_state_called = false;
-        compare_err_stream_substring("", true);
+        // EXPECT_TRUE(compare_err_stream("", true)); // why can't this be called after init_state? state.files.err_stream is nullptr?
         // Input processor with throw a severe, so do not use assertions
         EXPECT_FALSE(process_idf(idf_objects, false));
         state->init_state(*state);

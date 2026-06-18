@@ -518,6 +518,13 @@ namespace Sched {
             MaxNums = max(MaxNums, NumNumbers);
             MaxAlps = max(MaxAlps, NumAlphas);
         }
+        CurrentModuleObject = "Schedule:File:Shading";
+        int NumCommaFileShading = s_ip->getNumObjectsFound(state, CurrentModuleObject);
+        if (NumCommaFileShading > 0) {
+            s_ip->getObjectDefMaxArgs(state, CurrentModuleObject, Count, NumAlphas, NumNumbers);
+            MaxNums = max(MaxNums, NumNumbers);
+            MaxAlps = max(MaxAlps, NumAlphas);
+        }
 
         Alphas.allocate(MaxAlps); // Maximum Alphas possible
         cAlphaFields.allocate(MaxAlps);
@@ -553,7 +560,6 @@ namespace Sched {
         // add week and day schedules for each FILE:COMMA schedule
 
         CurrentModuleObject = "Schedule:File:Shading";
-        int NumCommaFileShading = s_ip->getNumObjectsFound(state, CurrentModuleObject);
         NumAlphas = 0;
         NumNumbers = 0;
         if (NumCommaFileShading > 1) {

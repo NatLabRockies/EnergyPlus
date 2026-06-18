@@ -128,7 +128,6 @@ CoilCoolingDX205Performance::CoilCoolingDX205Performance(EnergyPlus::EnergyPlusD
                                                                reference_pressure_sea_level);
         rating_indoor_coil_entering_relative_humidity = Psychrometrics::PsyRhFnTdbWPb(
             state, indoor_coil_entering_dry_bulb_temperature_K - Constant::Kelvin, rating_humidity_ratio, reference_pressure_sea_level);
-        rating_rho_air = state.dataEnvrn->StdRhoAir;
 
         speeds.resize(representation->performance.performance_map_cooling.grid_variables.compressor_sequence_number.size());
         nominal_speed_index = speeds.size() - 1;
@@ -170,6 +169,7 @@ void CoilCoolingDX205Performance::calculate_air_mass_flow(EnergyPlus::EnergyPlus
     const auto min_available_flow{representation->performance.performance_map_cooling.grid_variables.indoor_coil_air_mass_flow_rate.front()};
     const auto max_available_flow{representation->performance.performance_map_cooling.grid_variables.indoor_coil_air_mass_flow_rate.back()};
     auto iterated_mass_flow_rate = 1.0;
+    rating_rho_air = state.dataEnvrn->StdRhoAir;
 
     auto f = [speed_index, this](Real64 available_mass_flow) {
         // Which mass flow gives us a capacity closest to the rating capacity?
