@@ -373,9 +373,7 @@ namespace ResultsFramework {
             std::swap(hourOfDay, lastHour);
             std::swap(curMin, lastMinute);
         }
-        // future start of ISO 8601 datetime output
-        // std::format("YYYY-{:02d}/{:02d}T{:02d}:{:02d}:00", month, dayOfMonth, hourOfDay, curMin);
-        // std::format("{:02d}/{:02d} {:02d}:{:02d}:00", month, dayOfMonth, hourOfDay, curMin);
+
         if (iso8601) {
             TS.emplace_back(std::format("{:04d}-{:02d}-{:02d}T{:02d}:{:02d}:00", calendarYear, month, dayOfMonth, hourOfDay, curMin));
         } else {
@@ -587,8 +585,8 @@ namespace ResultsFramework {
             }
         }
     }
-    // class Table
 
+    // class Table
     Table::Table(Array2D_string const &body,
                  Array1D_string const &rowLabels,
                  Array1D_string const &columnLabels,
@@ -643,7 +641,6 @@ namespace ResultsFramework {
     }
 
     // class Report
-
     json Report::getJSON() const
     {
 
