@@ -47,6 +47,7 @@
 
 // C++ Headers
 #include <cmath>
+#include <format>
 
 // ObjexxFCL Headers
 #include <ObjexxFCL/Array.functions.hh>
@@ -205,84 +206,84 @@ void ZoneData::SetWindDirAt(Real64 const fac)
 void AirReportVars::setUpOutputVars(EnergyPlusData &state, std::string_view prefix, std::string const &name)
 {
     SetupOutputVariable(state,
-                        EnergyPlus::format("{} Mean Air Temperature", prefix),
+                        std::format("{} Mean Air Temperature", prefix),
                         Constant::Units::C,
                         this->MeanAirTemp,
                         OutputProcessor::TimeStepType::Zone,
                         OutputProcessor::StoreType::Average,
                         name);
     SetupOutputVariable(state,
-                        EnergyPlus::format("{} Wetbulb Globe Temperature", prefix),
+                        std::format("{} Wetbulb Globe Temperature", prefix),
                         Constant::Units::C,
                         this->WetbulbGlobeTemp,
                         OutputProcessor::TimeStepType::Zone,
                         OutputProcessor::StoreType::Average,
                         name);
     SetupOutputVariable(state,
-                        EnergyPlus::format("{} Operative Temperature", prefix),
+                        std::format("{} Operative Temperature", prefix),
                         Constant::Units::C,
                         this->OperativeTemp,
                         OutputProcessor::TimeStepType::Zone,
                         OutputProcessor::StoreType::Average,
                         name);
     SetupOutputVariable(state,
-                        EnergyPlus::format("{} Mean Air Dewpoint Temperature", prefix),
+                        std::format("{} Mean Air Dewpoint Temperature", prefix),
                         Constant::Units::C,
                         this->MeanAirDewPointTemp,
                         OutputProcessor::TimeStepType::Zone,
                         OutputProcessor::StoreType::Average,
                         name);
     SetupOutputVariable(state,
-                        EnergyPlus::format("{} Mean Air Humidity Ratio", prefix),
+                        std::format("{} Mean Air Humidity Ratio", prefix),
                         Constant::Units::kgWater_kgDryAir,
                         this->MeanAirHumRat,
                         OutputProcessor::TimeStepType::Zone,
                         OutputProcessor::StoreType::Average,
                         name);
     SetupOutputVariable(state,
-                        EnergyPlus::format("{} Air Heat Balance Internal Convective Heat Gain Rate", prefix),
+                        std::format("{} Air Heat Balance Internal Convective Heat Gain Rate", prefix),
                         Constant::Units::W,
                         this->SumIntGains,
                         OutputProcessor::TimeStepType::System,
                         OutputProcessor::StoreType::Average,
                         name);
     SetupOutputVariable(state,
-                        EnergyPlus::format("{} Air Heat Balance Surface Convection Rate", prefix),
+                        std::format("{} Air Heat Balance Surface Convection Rate", prefix),
                         Constant::Units::W,
                         this->SumHADTsurfs,
                         OutputProcessor::TimeStepType::System,
                         OutputProcessor::StoreType::Average,
                         name);
     SetupOutputVariable(state,
-                        EnergyPlus::format("{} Air Heat Balance Interzone Air Transfer Rate", prefix),
+                        std::format("{} Air Heat Balance Interzone Air Transfer Rate", prefix),
                         Constant::Units::W,
                         this->SumMCpDTzones,
                         OutputProcessor::TimeStepType::System,
                         OutputProcessor::StoreType::Average,
                         name);
     SetupOutputVariable(state,
-                        EnergyPlus::format("{} Air Heat Balance Outdoor Air Transfer Rate", prefix),
+                        std::format("{} Air Heat Balance Outdoor Air Transfer Rate", prefix),
                         Constant::Units::W,
                         this->SumMCpDtInfil,
                         OutputProcessor::TimeStepType::System,
                         OutputProcessor::StoreType::Average,
                         name);
     SetupOutputVariable(state,
-                        EnergyPlus::format("{} Air Heat Balance System Air Transfer Rate", prefix),
+                        std::format("{} Air Heat Balance System Air Transfer Rate", prefix),
                         Constant::Units::W,
                         this->SumMCpDTsystem,
                         OutputProcessor::TimeStepType::System,
                         OutputProcessor::StoreType::Average,
                         name);
     SetupOutputVariable(state,
-                        EnergyPlus::format("{} Air Heat Balance System Convective Heat Gain Rate", prefix),
+                        std::format("{} Air Heat Balance System Convective Heat Gain Rate", prefix),
                         Constant::Units::W,
                         this->SumNonAirSystem,
                         OutputProcessor::TimeStepType::System,
                         OutputProcessor::StoreType::Average,
                         name);
     SetupOutputVariable(state,
-                        EnergyPlus::format("{} Air Heat Balance Air Energy Storage Rate", prefix),
+                        std::format("{} Air Heat Balance Air Energy Storage Rate", prefix),
                         Constant::Units::W,
                         this->CzdTdt,
                         OutputProcessor::TimeStepType::System,
@@ -290,7 +291,7 @@ void AirReportVars::setUpOutputVars(EnergyPlusData &state, std::string_view pref
                         name);
     if (state.dataGlobal->DisplayAdvancedReportVariables) {
         SetupOutputVariable(state,
-                            EnergyPlus::format("{} Air Heat Balance Deviation Rate", prefix),
+                            std::format("{} Air Heat Balance Deviation Rate", prefix),
                             Constant::Units::W,
                             this->imBalance,
                             OutputProcessor::TimeStepType::System,
@@ -442,20 +443,19 @@ void CheckAndSetConstructionProperties(EnergyPlusData &state,
         }
 
         if (WrongMaterialsMix) { // Illegal material for a window construction
-            ShowSevereError(
-                state,
-                EnergyPlus::format("Error: Window construction={} has materials other than glass, gas, shade, screen, blind, complex shading, "
-                                   "complex gap, or simple system.",
-                                   thisConstruct.Name));
+            ShowSevereError(state,
+                            std::format("Error: Window construction={} has materials other than glass, gas, shade, screen, blind, complex shading, "
+                                        "complex gap, or simple system.",
+                                        thisConstruct.Name));
             ErrorsFound = true;
             // Do not check number of layers for BSDF type of window since that can be handled
         } else if ((TotLayers > 8) && (!thisConstruct.WindowTypeBSDF) &&
                    (!thisConstruct.WindowTypeEQL)) { // Too many layers for a window construction
             ShowSevereError(
                 state,
-                EnergyPlus::format("CheckAndSetConstructionProperties: Window construction={} has too many layers (max of 8 allowed -- 4 glass + 3 "
-                                   "gap + 1 shading device).",
-                                   thisConstruct.Name));
+                std::format("CheckAndSetConstructionProperties: Window construction={} has too many layers (max of 8 allowed -- 4 glass + 3 "
+                            "gap + 1 shading device).",
+                            thisConstruct.Name));
             ErrorsFound = true;
 
         } else if (TotLayers == 1) {
@@ -466,9 +466,9 @@ void CheckAndSetConstructionProperties(EnergyPlusData &state,
                 (matGroup == Material::Group::ComplexWindowGap)) {
                 ShowSevereError(
                     state,
-                    EnergyPlus::format("CheckAndSetConstructionProperties: The single-layer window construction={} has a gas, complex gap, shade, "
-                                       "complex shade, screen or blind material; it should be glass of simple glazing system.",
-                                       thisConstruct.Name));
+                    std::format("CheckAndSetConstructionProperties: The single-layer window construction={} has a gas, complex gap, shade, "
+                                "complex shade, screen or blind material; it should be glass of simple glazing system.",
+                                thisConstruct.Name));
                 ErrorsFound = true;
             }
         }
@@ -548,8 +548,8 @@ void CheckAndSetConstructionProperties(EnergyPlusData &state,
             assert(matGlass != nullptr);
             if (matGlass->SolarDiffusing && TotShadeLayers > 0) {
                 ErrorsFound = true;
-                ShowSevereError(state, EnergyPlus::format("CheckAndSetConstructionProperties: Window construction={}", thisConstruct.Name));
-                ShowContinueError(state, EnergyPlus::format("has diffusing glass={} and a shade, screen or blind layer.", matGlass->Name));
+                ShowSevereError(state, std::format("CheckAndSetConstructionProperties: Window construction={}", thisConstruct.Name));
+                ShowContinueError(state, std::format("has diffusing glass={} and a shade, screen or blind layer.", matGlass->Name));
                 break;
             }
         }
@@ -572,8 +572,8 @@ void CheckAndSetConstructionProperties(EnergyPlusData &state,
                 ++GlassLayNum;
                 if (GlassLayNum < TotGlassLayers && matGlass->SolarDiffusing) {
                     ErrorsFound = true;
-                    ShowSevereError(state, EnergyPlus::format("CheckAndSetConstructionProperties: Window construction={}", thisConstruct.Name));
-                    ShowContinueError(state, EnergyPlus::format("has diffusing glass={} that is not the innermost glass layer.", matGlass->Name));
+                    ShowSevereError(state, std::format("CheckAndSetConstructionProperties: Window construction={}", thisConstruct.Name));
+                    ShowContinueError(state, std::format("has diffusing glass={} that is not the innermost glass layer.", matGlass->Name));
                 }
             }
         }
@@ -667,8 +667,8 @@ void CheckAndSetConstructionProperties(EnergyPlusData &state,
                             assert(matBlind != nullptr);
                             if ((matGapL->Thickness + matGapR->Thickness) < matBlind->SlatWidth) {
                                 ErrorsFound = true;
-                                ShowSevereError(
-                                    state, EnergyPlus::format("CheckAndSetConstructionProperties: For window construction {}", thisConstruct.Name));
+                                ShowSevereError(state,
+                                                std::format("CheckAndSetConstructionProperties: For window construction {}", thisConstruct.Name));
                                 ShowContinueError(state, "the slat width of the between-glass blind is greater than");
                                 ShowContinueError(state, "the sum of the widths of the gas layers adjacent to the blind.");
                             }
@@ -690,14 +690,14 @@ void CheckAndSetConstructionProperties(EnergyPlusData &state,
                     auto const *mat = s_mat->materials(MaterNum);
                     if (mat->group == Material::Group::Glass) {
                         ErrorsFound = true;
-                        ShowSevereError(
-                            state, EnergyPlus::format("CheckAndSetConstructionProperties: Error in window construction {}--", thisConstruct.Name));
+                        ShowSevereError(state,
+                                        std::format("CheckAndSetConstructionProperties: Error in window construction {}--", thisConstruct.Name));
                         ShowContinueError(state, "For simple window constructions, no other glazing layers are allowed.");
                     }
                     if (mat->group == Material::Group::Gas) {
                         ErrorsFound = true;
-                        ShowSevereError(
-                            state, EnergyPlus::format("CheckAndSetConstructionProperties: Error in window construction {}--", thisConstruct.Name));
+                        ShowSevereError(state,
+                                        std::format("CheckAndSetConstructionProperties: Error in window construction {}--", thisConstruct.Name));
                         ShowContinueError(state, "For simple window constructions, no other gas layers are allowed.");
                     }
                 }
@@ -705,7 +705,7 @@ void CheckAndSetConstructionProperties(EnergyPlusData &state,
         }
 
         if (WrongWindowLayering) {
-            ShowSevereError(state, EnergyPlus::format("CheckAndSetConstructionProperties: Error in window construction {}--", thisConstruct.Name));
+            ShowSevereError(state, std::format("CheckAndSetConstructionProperties: Error in window construction {}--", thisConstruct.Name));
             ShowContinueError(state, "  For multi-layer window constructions the following rules apply:");
             ShowContinueError(state, "    --The first and last layer must be a solid layer (glass or shade/screen/blind),");
             ShowContinueError(state, "    --Adjacent glass layers must be separated by one and only one gas layer,");
@@ -758,15 +758,14 @@ void CheckAndSetConstructionProperties(EnergyPlusData &state,
     thisConstruct.OutsideRoughness = matOutside->Roughness;
 
     if (matOutside->group == Material::Group::AirGap) {
-        ShowSevereError(state, EnergyPlus::format("CheckAndSetConstructionProperties: Outside Layer is Air for construction {}", thisConstruct.Name));
-        ShowContinueError(state, EnergyPlus::format("  Error in material {}", matOutside->Name));
+        ShowSevereError(state, std::format("CheckAndSetConstructionProperties: Outside Layer is Air for construction {}", thisConstruct.Name));
+        ShowContinueError(state, std::format("  Error in material {}", matOutside->Name));
         ErrorsFound = true;
     }
     if (InsideLayer > 0) {
         if (matInside->group == Material::Group::AirGap) {
-            ShowSevereError(state,
-                            EnergyPlus::format("CheckAndSetConstructionProperties: Inside Layer is Air for construction {}", thisConstruct.Name));
-            ShowContinueError(state, EnergyPlus::format("  Error in material {}", matInside->Name));
+            ShowSevereError(state, std::format("CheckAndSetConstructionProperties: Inside Layer is Air for construction {}", thisConstruct.Name));
+            ShowContinueError(state, std::format("  Error in material {}", matInside->Name));
             ErrorsFound = true;
         }
     }
@@ -776,10 +775,9 @@ void CheckAndSetConstructionProperties(EnergyPlusData &state,
         // need to check EcoRoof is not non-outside layer
         for (int Layer = 2; Layer <= TotLayers; ++Layer) {
             if (s_mat->materials(thisConstruct.LayerPoint(Layer))->group == Material::Group::EcoRoof) {
-                ShowSevereError(
-                    state,
-                    EnergyPlus::format("CheckAndSetConstructionProperties: Interior Layer is EcoRoof for construction {}", thisConstruct.Name));
-                ShowContinueError(state, EnergyPlus::format("  Error in material {}", s_mat->materials(thisConstruct.LayerPoint(Layer))->Name));
+                ShowSevereError(state,
+                                std::format("CheckAndSetConstructionProperties: Interior Layer is EcoRoof for construction {}", thisConstruct.Name));
+                ShowContinueError(state, std::format("  Error in material {}", s_mat->materials(thisConstruct.LayerPoint(Layer))->Name));
                 ErrorsFound = true;
             }
         }
@@ -789,8 +787,8 @@ void CheckAndSetConstructionProperties(EnergyPlusData &state,
         thisConstruct.TypeIsIRT = true;
         if (thisConstruct.TotLayers != 1) {
             ShowSevereError(state,
-                            EnergyPlus::format("CheckAndSetConstructionProperties: Infrared Transparent (IRT) Construction is limited to 1 layer {}",
-                                               thisConstruct.Name));
+                            std::format("CheckAndSetConstructionProperties: Infrared Transparent (IRT) Construction is limited to 1 layer {}",
+                                        thisConstruct.Name));
             ShowContinueError(state, "  Too many layers in referenced construction.");
             ErrorsFound = true;
         }

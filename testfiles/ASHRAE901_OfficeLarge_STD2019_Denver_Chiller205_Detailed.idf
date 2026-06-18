@@ -8602,7 +8602,7 @@
   ZoneControl:Humidistat,
     DataCenter Basement Humidistat,  !- Name
     DataCenter_basement_ZN_6,!- Zone Name
-    DC_MinRelHumSetSch;      !- Humidifying Relative Humidity Setpoint Schedule Name
+    DC_MinRelHumSetSch;      !- Humidifying Setpoint Schedule Name
 
 !-   ===========  ALL OBJECTS IN CLASS: ZONECONTROL:THERMOSTAT ===========
 

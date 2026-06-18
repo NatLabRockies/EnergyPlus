@@ -17,6 +17,7 @@ IF (UNIX)
 ENDIF()
 
 ADD_LIBRARY( bcvtb STATIC ${SRC} )
+target_compile_options(bcvtb PRIVATE $<$<COMPILE_LANG_AND_ID:C,AppleClang>:-Wno-shorten-64-to-32>)
 
 IF( WIN32 )
   TARGET_LINK_LIBRARIES( bcvtb wsock32 )
@@ -27,5 +28,4 @@ set_target_properties(
   PROPERTIES
   INSTALL_NAME_DIR "@executable_path"
 )
-
 

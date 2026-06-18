@@ -1722,7 +1722,6 @@ TEST_F(EnergyPlusFixture, Beam_sizeandSimulateOneZone)
 
     state->dataGlobal->BeginSimFlag = true;
 
-    OutputReportPredefined::SetPredefinedTables(*state);
     HeatBalanceManager::SetPreConstructionInputParameters(*state); // establish array bounds for constructions early
     // OutputProcessor::TimeValue.allocate(2);
     OutputProcessor::SetupTimePointers(
@@ -1757,23 +1756,28 @@ TEST_F(EnergyPlusFixture, Beam_sizeandSimulateOneZone)
 
     // indexes values has been changed according to new input_processor output
     // node indexes may be viewed in NodeID array
-    state->dataLoopNodes->Node(Node::GetNodeIndex(*state, "ZONE ONE 4PIPE BEAM CW INLET NODE")).Temp = 14.0;    // chilled water inlet node // was 14
-    state->dataLoopNodes->Node(Node::GetNodeIndex(*state, "ZONE ONE AIR NODE")).HumRat = 0.008; // zone node // was 40
-    state->dataLoopNodes->Node(Node::GetNodeIndex(*state, "ZONE ONE AIR NODE")).Temp = 24.0;    // zone node // was 40
+    state->dataLoopNodes->Node(Node::GetNodeIndex(*state, "ZONE ONE 4PIPE BEAM CW INLET NODE")).Temp = 14.0; // chilled water inlet node // was 14
+    state->dataLoopNodes->Node(Node::GetNodeIndex(*state, "ZONE ONE AIR NODE")).HumRat = 0.008;              // zone node // was 40
+    state->dataLoopNodes->Node(Node::GetNodeIndex(*state, "ZONE ONE AIR NODE")).Temp = 24.0;                 // zone node // was 40
     state->dataLoopNodes->Node(Node::GetNodeIndex(*state, "ZONE ONE 4PIPE BEAM INLET NODE NAME")).HumRat = 0.008; // primary air inlet node // was 44
 
     state->dataLoopNodes->Node(Node::GetNodeIndex(*state, "ZONE ONE 4PIPE BEAM INLET NODE NAME")).Temp = 12.8; // primary air inlet node // was 44
-    state->dataLoopNodes->Node(Node::GetNodeIndex(*state, "ZONE ONE 4PIPE BEAM HW INLET NODE")).Temp = 45.0; // hot water inlet node // was 38
+    state->dataLoopNodes->Node(Node::GetNodeIndex(*state, "ZONE ONE 4PIPE BEAM HW INLET NODE")).Temp = 45.0;   // hot water inlet node // was 38
     // state->dataLoopNodes->Node( 44 ).Temp = 12.8; // primary air inlet node
     // state->dataLoopNodes->Node( 38 ).Temp = 45.0; // hot water inlet node
 
     Real64 NonAirSysOutput = 0.0;
     state->dataDefineEquipment->AirDistUnit(1).airTerminalPtr->simulate(*state, FirstHVACIteration, NonAirSysOutput);
 
-    EXPECT_NEAR(state->dataLoopNodes->Node(Node::GetNodeIndex(*state, "ZONE ONE 4PIPE BEAM OUTLET NODE NAME")).MassFlowRate, 0.36165246721684446, 0.00001);  // was 1
-    EXPECT_NEAR(state->dataLoopNodes->Node(Node::GetNodeIndex(*state, "ZONE ONE 4PIPE BEAM CW OUTLET NODE")).Temp, 17.835648923740127, 0.001); // was 15
-    EXPECT_NEAR(state->dataLoopNodes->Node(Node::GetNodeIndex(*state, "ZONE ONE 4PIPE BEAM CW OUTLET NODE")).MassFlowRate, 0.053404403026239548, 0.00001); // was 15
-    EXPECT_DOUBLE_EQ(state->dataLoopNodes->Node(Node::GetNodeIndex(*state, "ZONE ONE 4PIPE BEAM HW OUTLET NODE")).Temp, 45.0); // was 39
+    EXPECT_NEAR(state->dataLoopNodes->Node(Node::GetNodeIndex(*state, "ZONE ONE 4PIPE BEAM OUTLET NODE NAME")).MassFlowRate,
+                0.36165246721684446,
+                0.00001); // was 1
+    EXPECT_NEAR(
+        state->dataLoopNodes->Node(Node::GetNodeIndex(*state, "ZONE ONE 4PIPE BEAM CW OUTLET NODE")).Temp, 17.835648923740127, 0.001); // was 15
+    EXPECT_NEAR(state->dataLoopNodes->Node(Node::GetNodeIndex(*state, "ZONE ONE 4PIPE BEAM CW OUTLET NODE")).MassFlowRate,
+                0.053404403026239548,
+                0.00001);                                                                                                             // was 15
+    EXPECT_DOUBLE_EQ(state->dataLoopNodes->Node(Node::GetNodeIndex(*state, "ZONE ONE 4PIPE BEAM HW OUTLET NODE")).Temp, 45.0);        // was 39
     EXPECT_DOUBLE_EQ(state->dataLoopNodes->Node(Node::GetNodeIndex(*state, "ZONE ONE 4PIPE BEAM HW OUTLET NODE")).MassFlowRate, 0.0); // was 39
 
     EXPECT_NEAR(NonAirSysOutput, -857.50347269476481, 0.1);
@@ -1786,10 +1790,13 @@ TEST_F(EnergyPlusFixture, Beam_sizeandSimulateOneZone)
     state->dataLoopNodes->Node(Node::GetNodeIndex(*state, "ZONE ONE AIR NODE")).Temp = 21.0; // zone node // was 40
     state->dataDefineEquipment->AirDistUnit(1).airTerminalPtr->simulate(*state, FirstHVACIteration, NonAirSysOutput);
 
-    EXPECT_DOUBLE_EQ(state->dataLoopNodes->Node(Node::GetNodeIndex(*state, "ZONE ONE 4PIPE BEAM CW OUTLET NODE")).Temp, 14.0); // was 15
+    EXPECT_DOUBLE_EQ(state->dataLoopNodes->Node(Node::GetNodeIndex(*state, "ZONE ONE 4PIPE BEAM CW OUTLET NODE")).Temp, 14.0);        // was 15
     EXPECT_DOUBLE_EQ(state->dataLoopNodes->Node(Node::GetNodeIndex(*state, "ZONE ONE 4PIPE BEAM CW OUTLET NODE")).MassFlowRate, 0.0); // was 15
-    EXPECT_NEAR(state->dataLoopNodes->Node(Node::GetNodeIndex(*state, "ZONE ONE 4PIPE BEAM HW OUTLET NODE")).Temp, 31.815031821344689, 0.001); // was 39
-    EXPECT_NEAR(state->dataLoopNodes->Node(Node::GetNodeIndex(*state, "ZONE ONE 4PIPE BEAM HW OUTLET NODE")).MassFlowRate, 0.14660727634539222, 0.00001); // was 39
+    EXPECT_NEAR(
+        state->dataLoopNodes->Node(Node::GetNodeIndex(*state, "ZONE ONE 4PIPE BEAM HW OUTLET NODE")).Temp, 31.815031821344689, 0.001); // was 39
+    EXPECT_NEAR(state->dataLoopNodes->Node(Node::GetNodeIndex(*state, "ZONE ONE 4PIPE BEAM HW OUTLET NODE")).MassFlowRate,
+                0.14660727634539222,
+                0.00001); // was 39
 
     EXPECT_NEAR(NonAirSysOutput, 8079.991302700485, 0.1);
 
@@ -1798,19 +1805,22 @@ TEST_F(EnergyPlusFixture, Beam_sizeandSimulateOneZone)
     state->dataZoneEnergyDemand->ZoneSysEnergyDemand(1).RemainingOutputReqToHeatSP = -4000.0;
     state->dataZoneEnergyDemand->ZoneSysEnergyDemand(1).RemainingOutputReqToCoolSP = -5000.0;
 
-    state->dataLoopNodes->Node(Node::GetNodeIndex(*state, "ZONE ONE 4PIPE BEAM CW INLET NODE")).Temp = 14.0;    // chilled water inlet node // was 14
-    state->dataLoopNodes->Node(Node::GetNodeIndex(*state, "ZONE ONE AIR NODE")).HumRat = 0.008; // zone node // was 40
-    state->dataLoopNodes->Node(Node::GetNodeIndex(*state, "ZONE ONE AIR NODE")).Temp = 24.0;    // zone node // was 40
+    state->dataLoopNodes->Node(Node::GetNodeIndex(*state, "ZONE ONE 4PIPE BEAM CW INLET NODE")).Temp = 14.0; // chilled water inlet node // was 14
+    state->dataLoopNodes->Node(Node::GetNodeIndex(*state, "ZONE ONE AIR NODE")).HumRat = 0.008;              // zone node // was 40
+    state->dataLoopNodes->Node(Node::GetNodeIndex(*state, "ZONE ONE AIR NODE")).Temp = 24.0;                 // zone node // was 40
     state->dataLoopNodes->Node(Node::GetNodeIndex(*state, "ZONE ONE 4PIPE BEAM INLET NODE NAME")).HumRat = 0.008; // primary air inlet node // was 44
     state->dataLoopNodes->Node(Node::GetNodeIndex(*state, "ZONE ONE 4PIPE BEAM INLET NODE NAME")).Temp = 22.0;    // primary air inlet node // was 44
-    state->dataLoopNodes->Node(Node::GetNodeIndex(*state, "ZONE ONE 4PIPE BEAM HW INLET NODE")).Temp = 45.0;    // hot water inlet node // was 38
+    state->dataLoopNodes->Node(Node::GetNodeIndex(*state, "ZONE ONE 4PIPE BEAM HW INLET NODE")).Temp = 45.0;      // hot water inlet node // was 38
 
     NonAirSysOutput = 0.0;
     state->dataDefineEquipment->AirDistUnit(1).airTerminalPtr->simulate(*state, FirstHVACIteration, NonAirSysOutput);
 
-    EXPECT_NEAR(state->dataLoopNodes->Node(Node::GetNodeIndex(*state, "ZONE ONE 4PIPE BEAM CW OUTLET NODE")).Temp, 18.549803918626715, 0.001); // was 15
-    EXPECT_NEAR(state->dataLoopNodes->Node(Node::GetNodeIndex(*state, "ZONE ONE 4PIPE BEAM CW OUTLET NODE")).MassFlowRate, 0.22613768427540518, 0.00001); // was 15
-    EXPECT_DOUBLE_EQ(state->dataLoopNodes->Node(Node::GetNodeIndex(*state, "ZONE ONE 4PIPE BEAM HW OUTLET NODE")).Temp, 45.0); // was 39
+    EXPECT_NEAR(
+        state->dataLoopNodes->Node(Node::GetNodeIndex(*state, "ZONE ONE 4PIPE BEAM CW OUTLET NODE")).Temp, 18.549803918626715, 0.001); // was 15
+    EXPECT_NEAR(state->dataLoopNodes->Node(Node::GetNodeIndex(*state, "ZONE ONE 4PIPE BEAM CW OUTLET NODE")).MassFlowRate,
+                0.22613768427540518,
+                0.00001);                                                                                                             // was 15
+    EXPECT_DOUBLE_EQ(state->dataLoopNodes->Node(Node::GetNodeIndex(*state, "ZONE ONE 4PIPE BEAM HW OUTLET NODE")).Temp, 45.0);        // was 39
     EXPECT_DOUBLE_EQ(state->dataLoopNodes->Node(Node::GetNodeIndex(*state, "ZONE ONE 4PIPE BEAM HW OUTLET NODE")).MassFlowRate, 0.0); // was 39
     // EXPECT_NEAR( state->dataLoopNodes->Node( 15 ).Temp, 18.027306264618733, 0.00001 );
     // EXPECT_NEAR( state->dataLoopNodes->Node( 15 ).MassFlowRate, 0.25614844309380103, 0.00001 );
@@ -1829,10 +1839,13 @@ TEST_F(EnergyPlusFixture, Beam_sizeandSimulateOneZone)
     NonAirSysOutput = 0.0;
     state->dataDefineEquipment->AirDistUnit(1).airTerminalPtr->simulate(*state, FirstHVACIteration, NonAirSysOutput);
 
-    EXPECT_DOUBLE_EQ(state->dataLoopNodes->Node(Node::GetNodeIndex(*state, "ZONE ONE 4PIPE BEAM CW OUTLET NODE")).Temp, 14.0); // was 15
+    EXPECT_DOUBLE_EQ(state->dataLoopNodes->Node(Node::GetNodeIndex(*state, "ZONE ONE 4PIPE BEAM CW OUTLET NODE")).Temp, 14.0);        // was 15
     EXPECT_DOUBLE_EQ(state->dataLoopNodes->Node(Node::GetNodeIndex(*state, "ZONE ONE 4PIPE BEAM CW OUTLET NODE")).MassFlowRate, 0.0); // was 15
-    EXPECT_NEAR(state->dataLoopNodes->Node(Node::GetNodeIndex(*state, "ZONE ONE 4PIPE BEAM HW OUTLET NODE")).Temp, 32.784497823408309, 0.001); // was 39
-    EXPECT_NEAR(state->dataLoopNodes->Node(Node::GetNodeIndex(*state, "ZONE ONE 4PIPE BEAM HW OUTLET NODE")).MassFlowRate, 0.091412175315718339, 0.00001); // was 39
+    EXPECT_NEAR(
+        state->dataLoopNodes->Node(Node::GetNodeIndex(*state, "ZONE ONE 4PIPE BEAM HW OUTLET NODE")).Temp, 32.784497823408309, 0.001); // was 39
+    EXPECT_NEAR(state->dataLoopNodes->Node(Node::GetNodeIndex(*state, "ZONE ONE 4PIPE BEAM HW OUTLET NODE")).MassFlowRate,
+                0.091412175315718339,
+                0.00001); // was 39
     // EXPECT_DOUBLE_EQ( state->dataLoopNodes->Node( 15 ).Temp, 14.0 );
     // EXPECT_DOUBLE_EQ( state->dataLoopNodes->Node( 15 ).MassFlowRate, 0.0 );
     // EXPECT_NEAR( state->dataLoopNodes->Node( 39 ).Temp, 33.836239364981424, 0.00001 );
@@ -3294,7 +3307,6 @@ TEST_F(EnergyPlusFixture, Beam_fatalWhenSysSizingOff)
 
     state->dataGlobal->BeginSimFlag = true;
 
-    OutputReportPredefined::SetPredefinedTables(*state);
     HeatBalanceManager::SetPreConstructionInputParameters(*state); // establish array bounds for constructions early
     // OutputProcessor::TimeValue.allocate(2);
     OutputProcessor::SetupTimePointers(
@@ -4783,7 +4795,6 @@ TEST_F(EnergyPlusFixture, Beam_sizeandSimulateHighOA)
 
     state->dataGlobal->BeginSimFlag = true;
 
-    OutputReportPredefined::SetPredefinedTables(*state);
     HeatBalanceManager::SetPreConstructionInputParameters(*state); // establish array bounds for constructions early
     // OutputProcessor::TimeValue.allocate(2);
     OutputProcessor::SetupTimePointers(

@@ -57,7 +57,6 @@
 #include <EnergyPlus/DataEnvironment.hh>
 #include <EnergyPlus/DataHVACGlobals.hh>
 #include <EnergyPlus/DataHeatBalance.hh>
-#include <EnergyPlus/DataIPShortCuts.hh>
 #include <EnergyPlus/EarthTube.hh>
 #include <EnergyPlus/InputProcessing/InputProcessor.hh>
 #include <EnergyPlus/OutputProcessor.hh>
@@ -148,11 +147,31 @@ void GetEarthTube(EnergyPlusData &state, bool &ErrorsFound) // If errors found i
 
     // SUBROUTINE PARAMETER DEFINITIONS:
     Real64 constexpr EarthTubeTempLimit(100.0); // degrees Celsius
+    std::string const earthTubeParametersModuleObject = "ZoneEarthtube:Parameters";
+    std::string const earthTubeModuleObject = "ZoneEarthtube";
+    std::string_view constexpr earthTubeModelParametersNameFieldName = "Earth Tube Model Parameters Name";
+    std::string_view constexpr zoneNameFieldName = "Zone Name";
+    std::string_view constexpr scheduleNameFieldName = "Schedule Name";
+    std::array<std::string_view, 18> constexpr numericFieldNames = {"Design Flow Rate",
+                                                                    "Minimum Zone Temperature when Cooling",
+                                                                    "Maximum Zone Temperature when Heating",
+                                                                    "Delta Temperature",
+                                                                    "Fan Pressure Rise",
+                                                                    "Fan Total Efficiency",
+                                                                    "Pipe Radius",
+                                                                    "Pipe Thickness",
+                                                                    "Pipe Length",
+                                                                    "Pipe Thermal Conductivity",
+                                                                    "Pipe Depth Under Ground Surface",
+                                                                    "Average Soil Surface Temperature",
+                                                                    "Amplitude of Soil Surface Temperature",
+                                                                    "Phase Constant of Soil Surface Temperature",
+                                                                    "Constant Term Flow Coefficient",
+                                                                    "Temperature Term Flow Coefficient",
+                                                                    "Velocity Term Flow Coefficient",
+                                                                    "Velocity Squared Term Flow Coefficient"};
 
     // SUBROUTINE LOCAL VARIABLE DECLARATIONS:
-    int NumAlpha;
-    int NumNumber;
-    int IOStat;
     int Loop;
     Array1D_bool RepVarSet;
 
@@ -161,420 +180,433 @@ void GetEarthTube(EnergyPlusData &state, bool &ErrorsFound) // If errors found i
     // Following used for reporting
     state.dataEarthTube->ZnRptET.allocate(state.dataGlobal->NumOfZones);
 
-    auto &s_ipsc = state.dataIPShortCut;
+    auto *inputProcessor = state.dataInputProcessing->inputProcessor.get();
 
-    s_ipsc->cCurrentModuleObject = "ZoneEarthtube:Parameters";
-
-    int totEarthTubePars = state.dataInputProcessing->inputProcessor->getNumObjectsFound(state, s_ipsc->cCurrentModuleObject);
+    int totEarthTubePars = inputProcessor->getNumObjectsFound(state, earthTubeParametersModuleObject);
 
     state.dataEarthTube->EarthTubePars.allocate(totEarthTubePars);
+    auto const &earthTubeParametersSchemaProps = inputProcessor->getObjectSchemaProps(state, earthTubeParametersModuleObject);
+    auto const earthTubeParameterObjects = inputProcessor->epJSON.find(earthTubeParametersModuleObject);
 
-    for (Loop = 1; Loop <= totEarthTubePars; ++Loop) {
-        auto &thisEarthTubePars = state.dataEarthTube->EarthTubePars(Loop);
-        state.dataInputProcessing->inputProcessor->getObjectItem(state,
-                                                                 s_ipsc->cCurrentModuleObject,
-                                                                 Loop,
-                                                                 s_ipsc->cAlphaArgs,
-                                                                 NumAlpha,
-                                                                 s_ipsc->rNumericArgs,
-                                                                 NumNumber,
-                                                                 IOStat,
-                                                                 s_ipsc->lNumericFieldBlanks,
-                                                                 s_ipsc->lAlphaFieldBlanks,
-                                                                 s_ipsc->cAlphaFieldNames,
-                                                                 s_ipsc->cNumericFieldNames);
+    Loop = 0;
+    if (earthTubeParameterObjects != inputProcessor->epJSON.end()) {
+        for (auto const &earthTubeParameterInstance : earthTubeParameterObjects.value().items()) {
+            auto &thisEarthTubePars = state.dataEarthTube->EarthTubePars(++Loop);
+            auto const &earthTubeParameterFields = earthTubeParameterInstance.value();
+            thisEarthTubePars.nameParameters =
+                inputProcessor->getAlphaFieldValue(earthTubeParameterFields, earthTubeParametersSchemaProps, "earth_tube_model_parameters_name");
+            inputProcessor->markObjectAsUsed(earthTubeParametersModuleObject, earthTubeParameterInstance.key());
 
-        thisEarthTubePars.nameParameters = s_ipsc->cAlphaArgs(1);
-        // Check to make sure name is unique
-        for (int otherParams = 1; otherParams < Loop; ++otherParams) {
-            if (Util::SameString(thisEarthTubePars.nameParameters, state.dataEarthTube->EarthTubePars(otherParams).nameParameters)) {
-                ShowSevereError(
-                    state,
-                    EnergyPlus::format(
-                        "{}: {} = {} is not a unique name.", s_ipsc->cCurrentModuleObject, s_ipsc->cAlphaFieldNames(1), s_ipsc->cAlphaArgs(1)));
-                ShowContinueError(state, EnergyPlus::format("Check the other {} names for a duplicate.", s_ipsc->cCurrentModuleObject));
-                ErrorsFound = true;
+            for (int otherParams = 1; otherParams < Loop; ++otherParams) {
+                if (Util::SameString(thisEarthTubePars.nameParameters, state.dataEarthTube->EarthTubePars(otherParams).nameParameters)) {
+                    ShowSevereError(state,
+                                    std::format("{}: {} = {} is not a unique name.",
+                                                earthTubeParametersModuleObject,
+                                                earthTubeModelParametersNameFieldName,
+                                                thisEarthTubePars.nameParameters));
+                    ShowContinueError(state, std::format("Check the other {} names for a duplicate.", earthTubeParametersModuleObject));
+                    ErrorsFound = true;
+                }
             }
-        }
 
-        thisEarthTubePars.numNodesAbove = s_ipsc->rNumericArgs(1);
-        thisEarthTubePars.numNodesBelow = s_ipsc->rNumericArgs(2);
-        thisEarthTubePars.dimBoundAbove = s_ipsc->rNumericArgs(3);
-        thisEarthTubePars.dimBoundBelow = s_ipsc->rNumericArgs(4);
-        thisEarthTubePars.width = s_ipsc->rNumericArgs(5);
+            thisEarthTubePars.numNodesAbove =
+                inputProcessor->getIntFieldValue(earthTubeParameterFields, earthTubeParametersSchemaProps, "nodes_above_earth_tube");
+            thisEarthTubePars.numNodesBelow =
+                inputProcessor->getIntFieldValue(earthTubeParameterFields, earthTubeParametersSchemaProps, "nodes_below_earth_tube");
+            thisEarthTubePars.dimBoundAbove = inputProcessor->getRealFieldValue(
+                earthTubeParameterFields, earthTubeParametersSchemaProps, "earth_tube_dimensionless_boundary_above");
+            thisEarthTubePars.dimBoundBelow = inputProcessor->getRealFieldValue(
+                earthTubeParameterFields, earthTubeParametersSchemaProps, "earth_tube_dimensionless_boundary_below");
+            thisEarthTubePars.width =
+                inputProcessor->getRealFieldValue(earthTubeParameterFields, earthTubeParametersSchemaProps, "earth_tube_solution_space_width");
+        }
     }
 
-    s_ipsc->cCurrentModuleObject = "ZoneEarthtube";
-    totEarthTube = state.dataInputProcessing->inputProcessor->getNumObjectsFound(state, s_ipsc->cCurrentModuleObject);
+    totEarthTube = inputProcessor->getNumObjectsFound(state, earthTubeModuleObject);
 
     state.dataEarthTube->EarthTubeSys.allocate(totEarthTube);
 
-    for (Loop = 1; Loop <= totEarthTube; ++Loop) {
-        auto &thisEarthTube = state.dataEarthTube->EarthTubeSys(Loop);
-        state.dataInputProcessing->inputProcessor->getObjectItem(state,
-                                                                 s_ipsc->cCurrentModuleObject,
-                                                                 Loop,
-                                                                 s_ipsc->cAlphaArgs,
-                                                                 NumAlpha,
-                                                                 s_ipsc->rNumericArgs,
-                                                                 NumNumber,
-                                                                 IOStat,
-                                                                 s_ipsc->lNumericFieldBlanks,
-                                                                 s_ipsc->lAlphaFieldBlanks,
-                                                                 s_ipsc->cAlphaFieldNames,
-                                                                 s_ipsc->cNumericFieldNames);
+    auto const &earthTubeSchemaProps = inputProcessor->getObjectSchemaProps(state, earthTubeModuleObject);
+    auto const earthTubeObjects = inputProcessor->epJSON.find(earthTubeModuleObject);
+    std::string lastZoneName;
 
-        ErrorObjectHeader eoh{routineName, s_ipsc->cCurrentModuleObject, s_ipsc->cAlphaArgs(1)};
+    Loop = 0;
+    if (earthTubeObjects != inputProcessor->epJSON.end()) {
+        for (auto const &earthTubeInstance : earthTubeObjects.value().items()) {
+            auto &thisEarthTube = state.dataEarthTube->EarthTubeSys(++Loop);
+            auto const &earthTubeFields = earthTubeInstance.value();
+            auto const zoneName = inputProcessor->getAlphaFieldValue(earthTubeFields, earthTubeSchemaProps, "zone_name");
+            auto const scheduleName = inputProcessor->getAlphaFieldValue(earthTubeFields, earthTubeSchemaProps, "schedule_name");
+            auto const earthTubeType = inputProcessor->getAlphaFieldValue(earthTubeFields, earthTubeSchemaProps, "earthtube_type");
+            auto const soilCondition = inputProcessor->getAlphaFieldValue(earthTubeFields, earthTubeSchemaProps, "soil_condition");
+            auto const earthTubeModelType = inputProcessor->getAlphaFieldValue(earthTubeFields, earthTubeSchemaProps, "earth_tube_model_type");
+            auto const earthTubeModelParameters =
+                inputProcessor->getAlphaFieldValue(earthTubeFields, earthTubeSchemaProps, "earth_tube_model_parameters");
 
-        // First Alpha is Zone Name
-        thisEarthTube.ZonePtr = Util::FindItemInList(s_ipsc->cAlphaArgs(1), state.dataHeatBal->Zone);
-        if (thisEarthTube.ZonePtr == 0) {
-            ShowSevereError(
-                state, EnergyPlus::format("{}: {} not found={}", s_ipsc->cCurrentModuleObject, s_ipsc->cAlphaFieldNames(1), s_ipsc->cAlphaArgs(1)));
-            ErrorsFound = true;
-        }
+            inputProcessor->markObjectAsUsed(earthTubeModuleObject, earthTubeInstance.key());
 
-        // Second Alpha is Schedule Name
-        if (s_ipsc->lAlphaFieldBlanks(2)) {
-            ShowSevereEmptyField(state, eoh, s_ipsc->cAlphaFieldNames(2));
-            ErrorsFound = true;
-        } else if ((thisEarthTube.availSched = Sched::GetSchedule(state, s_ipsc->cAlphaArgs(2))) == nullptr) {
-            ShowSevereItemNotFound(state, eoh, s_ipsc->cAlphaFieldNames(2), s_ipsc->cAlphaArgs(2));
-            ErrorsFound = true;
-        }
+            ErrorObjectHeader eoh{routineName, earthTubeModuleObject, zoneName};
+            lastZoneName = zoneName;
 
-        // Overall parameters and their limits
-        thisEarthTube.DesignLevel = s_ipsc->rNumericArgs(1);
-
-        thisEarthTube.MinTemperature = s_ipsc->rNumericArgs(2);
-        if ((thisEarthTube.MinTemperature < -EarthTubeTempLimit) || (thisEarthTube.MinTemperature > EarthTubeTempLimit)) {
-            ShowSevereError(state,
-                            EnergyPlus::format("{}: {}={} must have a minimum temperature between -{:.0R}C and {:.0R}C",
-                                               s_ipsc->cCurrentModuleObject,
-                                               s_ipsc->cAlphaFieldNames(1),
-                                               s_ipsc->cAlphaArgs(1),
-                                               EarthTubeTempLimit,
-                                               EarthTubeTempLimit));
-            ShowContinueError(state, EnergyPlus::format("Entered value={:.0R}", thisEarthTube.MinTemperature));
-            ErrorsFound = true;
-        }
-
-        thisEarthTube.MaxTemperature = s_ipsc->rNumericArgs(3);
-        if ((thisEarthTube.MaxTemperature < -EarthTubeTempLimit) || (thisEarthTube.MaxTemperature > EarthTubeTempLimit)) {
-            ShowSevereError(state,
-                            EnergyPlus::format("{}: {}={} must have a maximum temperature between -{:.0R}C and {:.0R}C",
-                                               s_ipsc->cCurrentModuleObject,
-                                               s_ipsc->cAlphaFieldNames(1),
-                                               s_ipsc->cAlphaArgs(1),
-                                               EarthTubeTempLimit,
-                                               EarthTubeTempLimit));
-            ShowContinueError(state, EnergyPlus::format("Entered value={:.0R}", thisEarthTube.MaxTemperature));
-            ErrorsFound = true;
-        }
-
-        thisEarthTube.DelTemperature = s_ipsc->rNumericArgs(4); //  3/12/03  Negative del temp now allowed COP
-
-        // if we have a blank, then just set it to the Natural type, otherwise, search on it
-        if (s_ipsc->cAlphaArgs(3).empty()) {
-            thisEarthTube.FanType = Ventilation::Natural;
-        } else {
-            thisEarthTube.FanType = static_cast<Ventilation>(getEnumValue(ventilationNamesUC, s_ipsc->cAlphaArgs(3)));
-            if (thisEarthTube.FanType == Ventilation::Invalid) {
-                ShowSevereInvalidKey(state, eoh, s_ipsc->cAlphaFieldNames(3), s_ipsc->cAlphaArgs(3));
+            // First Alpha is Zone Name
+            thisEarthTube.ZonePtr = Util::FindItemInList(zoneName, state.dataHeatBal->Zone);
+            if (thisEarthTube.ZonePtr == 0) {
+                ShowSevereError(state, std::format("{}: {} not found={}", earthTubeModuleObject, zoneNameFieldName, zoneName));
                 ErrorsFound = true;
             }
-        }
 
-        thisEarthTube.FanPressure = s_ipsc->rNumericArgs(5);
-        if (thisEarthTube.FanPressure < 0.0) {
-            ShowSevereError(state,
-                            EnergyPlus::format("{}: {}={}, {} must be positive, entered value={:.2R}",
-                                               s_ipsc->cCurrentModuleObject,
-                                               s_ipsc->cAlphaFieldNames(1),
-                                               s_ipsc->cAlphaArgs(1),
-                                               s_ipsc->cNumericFieldNames(5),
-                                               thisEarthTube.FanPressure));
-            ErrorsFound = true;
-        }
-
-        thisEarthTube.FanEfficiency = s_ipsc->rNumericArgs(6);
-        if ((thisEarthTube.FanEfficiency <= 0.0) || (thisEarthTube.FanEfficiency > 1.0)) {
-            ShowSevereError(state,
-                            EnergyPlus::format("{}: {}={}, {} must be greater than zero and less than or equal to one, entered value={:.2R}",
-                                               s_ipsc->cCurrentModuleObject,
-                                               s_ipsc->cAlphaFieldNames(1),
-                                               s_ipsc->cAlphaArgs(1),
-                                               s_ipsc->cNumericFieldNames(6),
-                                               thisEarthTube.FanEfficiency));
-            ErrorsFound = true;
-        }
-
-        thisEarthTube.r1 = s_ipsc->rNumericArgs(7);
-        if (thisEarthTube.r1 <= 0.0) {
-            ShowSevereError(state,
-                            EnergyPlus::format("{}: {}={}, {} must be positive, entered value={:.2R}",
-                                               s_ipsc->cCurrentModuleObject,
-                                               s_ipsc->cAlphaFieldNames(1),
-                                               s_ipsc->cAlphaArgs(1),
-                                               s_ipsc->cNumericFieldNames(7),
-                                               thisEarthTube.r1));
-            ErrorsFound = true;
-        }
-
-        thisEarthTube.r2 = s_ipsc->rNumericArgs(8);
-        if (thisEarthTube.r2 <= 0.0) {
-            ShowSevereError(state,
-                            EnergyPlus::format("{}: {}={}, {} must be positive, entered value={:.2R}",
-                                               s_ipsc->cCurrentModuleObject,
-                                               s_ipsc->cAlphaFieldNames(1),
-                                               s_ipsc->cAlphaArgs(1),
-                                               s_ipsc->cNumericFieldNames(8),
-                                               thisEarthTube.r2));
-            ErrorsFound = true;
-        }
-
-        thisEarthTube.r3 = 2.0 * thisEarthTube.r1;
-
-        thisEarthTube.PipeLength = s_ipsc->rNumericArgs(9);
-        if (thisEarthTube.PipeLength <= 0.0) {
-            ShowSevereError(state,
-                            EnergyPlus::format("{}: {}={}, {} must be positive, entered value={:.2R}",
-                                               s_ipsc->cCurrentModuleObject,
-                                               s_ipsc->cAlphaFieldNames(1),
-                                               s_ipsc->cAlphaArgs(1),
-                                               s_ipsc->cNumericFieldNames(9),
-                                               thisEarthTube.PipeLength));
-            ErrorsFound = true;
-        }
-
-        thisEarthTube.PipeThermCond = s_ipsc->rNumericArgs(10);
-        if (thisEarthTube.PipeThermCond <= 0.0) {
-            ShowSevereError(state,
-                            EnergyPlus::format("{}: {}={}, {} must be positive, entered value={:.2R}",
-                                               s_ipsc->cCurrentModuleObject,
-                                               s_ipsc->cAlphaFieldNames(1),
-                                               s_ipsc->cAlphaArgs(1),
-                                               s_ipsc->cNumericFieldNames(10),
-                                               thisEarthTube.PipeThermCond));
-            ErrorsFound = true;
-        }
-
-        thisEarthTube.z = s_ipsc->rNumericArgs(11);
-        if (thisEarthTube.z <= 0.0) {
-            ShowSevereError(state,
-                            EnergyPlus::format("{}: {}={}, {} must be positive, entered value={:.2R}",
-                                               s_ipsc->cCurrentModuleObject,
-                                               s_ipsc->cAlphaFieldNames(1),
-                                               s_ipsc->cAlphaArgs(1),
-                                               s_ipsc->cNumericFieldNames(11),
-                                               thisEarthTube.z));
-            ErrorsFound = true;
-        }
-        if (thisEarthTube.z <= (thisEarthTube.r1 + thisEarthTube.r2 + thisEarthTube.r3)) {
-            // Note that code in initEarthTubeVertical assumes that this check remains in place--if this ever gets changed,
-            // code in initEarthTubeVertical must be modified
-            ShowSevereError(state,
-                            EnergyPlus::format("{}: {}={}, {} must be greater than 3*{} + {} entered value={:.2R} ref sum={:.2R}",
-                                               s_ipsc->cCurrentModuleObject,
-                                               s_ipsc->cAlphaFieldNames(1),
-                                               s_ipsc->cAlphaArgs(1),
-                                               s_ipsc->cNumericFieldNames(11),
-                                               s_ipsc->cNumericFieldNames(7),
-                                               s_ipsc->cNumericFieldNames(8),
-                                               thisEarthTube.z,
-                                               thisEarthTube.r1 + thisEarthTube.r2 + thisEarthTube.r3));
-            ErrorsFound = true;
-        }
-
-        SoilType soilType = static_cast<SoilType>(getEnumValue(soilTypeNamesUC, s_ipsc->cAlphaArgs(4)));
-        constexpr std::array<Real64, static_cast<int>(SoilType::Num)> thermalDiffusivity = {0.0781056, 0.055728, 0.0445824, 0.024192};
-        constexpr std::array<Real64, static_cast<int>(SoilType::Num)> thermalConductivity = {2.42, 1.3, 0.865, 0.346};
-        if (soilType == SoilType::Invalid) {
-            ShowSevereInvalidKey(state, eoh, s_ipsc->cAlphaFieldNames(4), s_ipsc->cAlphaArgs(4));
-            ErrorsFound = true;
-        } else {
-            thisEarthTube.SoilThermDiff = thermalDiffusivity[static_cast<int>(soilType)];
-            thisEarthTube.SoilThermCond = thermalConductivity[static_cast<int>(soilType)];
-        }
-
-        thisEarthTube.AverSoilSurTemp = s_ipsc->rNumericArgs(12);
-        thisEarthTube.ApmlSoilSurTemp = s_ipsc->rNumericArgs(13);
-        thisEarthTube.SoilSurPhaseConst = int(s_ipsc->rNumericArgs(14));
-
-        // Override any user input for cases where natural ventilation is being used
-        if (thisEarthTube.FanType == Ventilation::Natural) {
-            thisEarthTube.FanPressure = 0.0;
-            thisEarthTube.FanEfficiency = 1.0;
-        }
-
-        thisEarthTube.ConstantTermCoef = s_ipsc->rNumericArgs(15);
-        thisEarthTube.TemperatureTermCoef = s_ipsc->rNumericArgs(16);
-        thisEarthTube.VelocityTermCoef = s_ipsc->rNumericArgs(17);
-        thisEarthTube.VelocitySQTermCoef = s_ipsc->rNumericArgs(18);
-
-        // cAlphaArgs(5)--Model type: basic or vertical
-        // only process cAlphaArgs(6) if cAlphaArgs(5) is "Vertical"
-        if (s_ipsc->cAlphaArgs(5).empty()) {
-            thisEarthTube.ModelType = EarthTubeModelType::Basic;
-        } else {
-            thisEarthTube.ModelType = static_cast<EarthTubeModelType>(getEnumValue(solutionTypeNamesUC, s_ipsc->cAlphaArgs(5)));
-            if (thisEarthTube.ModelType == EarthTubeModelType::Invalid) {
-                ShowSevereInvalidKey(state, eoh, s_ipsc->cAlphaFieldNames(5), s_ipsc->cAlphaArgs(5));
+            // Second Alpha is Schedule Name
+            if (scheduleName.empty()) {
+                ShowSevereEmptyField(state, eoh, scheduleNameFieldName);
+                ErrorsFound = true;
+            } else if ((thisEarthTube.availSched = Sched::GetSchedule(state, scheduleName)) == nullptr) {
+                ShowSevereItemNotFound(state, eoh, scheduleNameFieldName, scheduleName);
                 ErrorsFound = true;
             }
-        }
 
-        if (thisEarthTube.ModelType == EarthTubeModelType::Vertical) {
-            thisEarthTube.r3 = 0.0; // Vertical model does not use this parameter--reset to zero (keep because r3=0 necessary so Rs=0 in calc routine)
-            // Process the parameters based on the name (link via index)
-            thisEarthTube.vertParametersPtr = 0;
-            for (int parIndex = 1; parIndex <= totEarthTubePars; ++parIndex) {
-                if (Util::SameString(s_ipsc->cAlphaArgs(6), state.dataEarthTube->EarthTubePars(parIndex).nameParameters)) {
-                    thisEarthTube.vertParametersPtr = parIndex;
-                    break;
+            // Overall parameters and their limits
+            thisEarthTube.DesignLevel = inputProcessor->getRealFieldValue(earthTubeFields, earthTubeSchemaProps, "design_flow_rate");
+
+            thisEarthTube.MinTemperature =
+                inputProcessor->getRealFieldValue(earthTubeFields, earthTubeSchemaProps, "minimum_zone_temperature_when_cooling");
+            if ((thisEarthTube.MinTemperature < -EarthTubeTempLimit) || (thisEarthTube.MinTemperature > EarthTubeTempLimit)) {
+                ShowSevereError(state,
+                                std::format("{}: {}={} must have a minimum temperature between -{:.2f}C and {:.2f}C",
+                                            earthTubeModuleObject,
+                                            zoneNameFieldName,
+                                            zoneName,
+                                            EarthTubeTempLimit,
+                                            EarthTubeTempLimit));
+                ShowContinueError(state, std::format("Entered value={:#G}", thisEarthTube.MinTemperature));
+                ErrorsFound = true;
+            }
+
+            thisEarthTube.MaxTemperature =
+                inputProcessor->getRealFieldValue(earthTubeFields, earthTubeSchemaProps, "maximum_zone_temperature_when_heating");
+            if ((thisEarthTube.MaxTemperature < -EarthTubeTempLimit) || (thisEarthTube.MaxTemperature > EarthTubeTempLimit)) {
+                ShowSevereError(state,
+                                std::format("{}: {}={} must have a maximum temperature between -{:.2f}C and {:.2f}C",
+                                            earthTubeModuleObject,
+                                            zoneNameFieldName,
+                                            zoneName,
+                                            EarthTubeTempLimit,
+                                            EarthTubeTempLimit));
+                ShowContinueError(state, std::format("Entered value={:#G}", thisEarthTube.MaxTemperature));
+                ErrorsFound = true;
+            }
+
+            thisEarthTube.DelTemperature = inputProcessor->getRealFieldValue(earthTubeFields, earthTubeSchemaProps, "delta_temperature");
+
+            // if we have a blank, then just set it to the Natural type, otherwise, search on it
+            if (earthTubeType.empty()) {
+                thisEarthTube.FanType = Ventilation::Natural;
+            } else {
+                thisEarthTube.FanType = static_cast<Ventilation>(getEnumValue(ventilationNamesUC, earthTubeType));
+                if (thisEarthTube.FanType == Ventilation::Invalid) {
+                    ShowSevereInvalidKey(state, eoh, "Earthtube Type", earthTubeType);
+                    ErrorsFound = true;
                 }
             }
-            if (thisEarthTube.vertParametersPtr == 0) { // didn't find a match
-                ShowSevereItemNotFound(state, eoh, s_ipsc->cAlphaFieldNames(6), s_ipsc->cAlphaArgs(6));
+
+            thisEarthTube.FanPressure = inputProcessor->getRealFieldValue(earthTubeFields, earthTubeSchemaProps, "fan_pressure_rise");
+            if (thisEarthTube.FanPressure < 0.0) {
+                ShowSevereError(state,
+                                std::format("{}: {}={}, {} must be positive, entered value={:#G}",
+                                            earthTubeModuleObject,
+                                            zoneNameFieldName,
+                                            zoneName,
+                                            numericFieldNames[4],
+                                            thisEarthTube.FanPressure));
                 ErrorsFound = true;
             }
-        }
 
-        if (thisEarthTube.ZonePtr > 0) {
-            if (RepVarSet(thisEarthTube.ZonePtr)) {
-                RepVarSet(thisEarthTube.ZonePtr) = false;
-                auto &zone = state.dataHeatBal->Zone(thisEarthTube.ZonePtr);
-                auto &thisZnRptET = state.dataEarthTube->ZnRptET(thisEarthTube.ZonePtr);
+            thisEarthTube.FanEfficiency = inputProcessor->getRealFieldValue(earthTubeFields, earthTubeSchemaProps, "fan_total_efficiency");
+            if ((thisEarthTube.FanEfficiency <= 0.0) || (thisEarthTube.FanEfficiency > 1.0)) {
+                ShowSevereError(state,
+                                std::format("{}: {}={}, {} must be greater than zero and less than or equal to one, entered value={:#G}",
+                                            earthTubeModuleObject,
+                                            zoneNameFieldName,
+                                            zoneName,
+                                            numericFieldNames[5],
+                                            thisEarthTube.FanEfficiency));
+                ErrorsFound = true;
+            }
 
-                SetupOutputVariable(state,
-                                    "Earth Tube Zone Sensible Cooling Energy",
-                                    Constant::Units::J,
-                                    thisZnRptET.EarthTubeHeatLoss,
-                                    OutputProcessor::TimeStepType::System,
-                                    OutputProcessor::StoreType::Sum,
-                                    zone.Name);
-                SetupOutputVariable(state,
-                                    "Earth Tube Zone Sensible Cooling Rate",
-                                    Constant::Units::W,
-                                    thisZnRptET.EarthTubeHeatLossRate,
-                                    OutputProcessor::TimeStepType::System,
-                                    OutputProcessor::StoreType::Average,
-                                    zone.Name);
-                SetupOutputVariable(state,
-                                    "Earth Tube Zone Sensible Heating Energy",
-                                    Constant::Units::J,
-                                    thisZnRptET.EarthTubeHeatGain,
-                                    OutputProcessor::TimeStepType::System,
-                                    OutputProcessor::StoreType::Sum,
-                                    zone.Name);
-                SetupOutputVariable(state,
-                                    "Earth Tube Zone Sensible Heating Rate",
-                                    Constant::Units::W,
-                                    thisZnRptET.EarthTubeHeatGainRate,
-                                    OutputProcessor::TimeStepType::System,
-                                    OutputProcessor::StoreType::Average,
-                                    zone.Name);
-                SetupOutputVariable(state,
-                                    "Earth Tube Air Flow Volume",
-                                    Constant::Units::m3,
-                                    thisZnRptET.EarthTubeVolume,
-                                    OutputProcessor::TimeStepType::System,
-                                    OutputProcessor::StoreType::Sum,
-                                    zone.Name);
-                SetupOutputVariable(state,
-                                    "Earth Tube Current Density Air Volume Flow Rate",
-                                    Constant::Units::m3_s,
-                                    thisZnRptET.EarthTubeVolFlowRate,
-                                    OutputProcessor::TimeStepType::System,
-                                    OutputProcessor::StoreType::Average,
-                                    zone.Name);
-                SetupOutputVariable(state,
-                                    "Earth Tube Standard Density Air Volume Flow Rate",
-                                    Constant::Units::m3_s,
-                                    thisZnRptET.EarthTubeVolFlowRateStd,
-                                    OutputProcessor::TimeStepType::System,
-                                    OutputProcessor::StoreType::Average,
-                                    zone.Name);
-                SetupOutputVariable(state,
-                                    "Earth Tube Air Flow Mass",
-                                    Constant::Units::kg,
-                                    thisZnRptET.EarthTubeMass,
-                                    OutputProcessor::TimeStepType::System,
-                                    OutputProcessor::StoreType::Sum,
-                                    zone.Name);
-                SetupOutputVariable(state,
-                                    "Earth Tube Air Mass Flow Rate",
-                                    Constant::Units::kg_s,
-                                    thisZnRptET.EarthTubeMassFlowRate,
-                                    OutputProcessor::TimeStepType::System,
-                                    OutputProcessor::StoreType::Average,
-                                    zone.Name);
-                SetupOutputVariable(state,
-                                    "Earth Tube Water Mass Flow Rate",
-                                    Constant::Units::kg_s,
-                                    thisZnRptET.EarthTubeWaterMassFlowRate,
-                                    OutputProcessor::TimeStepType::System,
-                                    OutputProcessor::StoreType::Average,
-                                    zone.Name);
-                SetupOutputVariable(state,
-                                    "Earth Tube Fan Electricity Energy",
-                                    Constant::Units::J,
-                                    thisZnRptET.EarthTubeFanElec,
-                                    OutputProcessor::TimeStepType::System,
-                                    OutputProcessor::StoreType::Sum,
-                                    zone.Name,
-                                    Constant::eResource::Electricity,
-                                    OutputProcessor::Group::Building);
-                SetupOutputVariable(state,
-                                    "Earth Tube Fan Electricity Rate",
-                                    Constant::Units::W,
-                                    thisZnRptET.EarthTubeFanElecPower,
-                                    OutputProcessor::TimeStepType::System,
-                                    OutputProcessor::StoreType::Average,
-                                    zone.Name);
-                SetupOutputVariable(state,
-                                    "Earth Tube Zone Inlet Air Temperature",
-                                    Constant::Units::C,
-                                    thisZnRptET.EarthTubeAirTemp,
-                                    OutputProcessor::TimeStepType::System,
-                                    OutputProcessor::StoreType::Average,
-                                    zone.Name);
-                SetupOutputVariable(state,
-                                    "Earth Tube Ground Interface Temperature",
-                                    Constant::Units::C,
-                                    thisEarthTube.GroundTempt,
-                                    OutputProcessor::TimeStepType::System,
-                                    OutputProcessor::StoreType::Average,
-                                    zone.Name);
-                SetupOutputVariable(state,
-                                    "Earth Tube Outdoor Air Heat Transfer Rate",
-                                    Constant::Units::W,
-                                    thisZnRptET.EarthTubeOATreatmentPower,
-                                    OutputProcessor::TimeStepType::System,
-                                    OutputProcessor::StoreType::Average,
-                                    zone.Name);
-                SetupOutputVariable(state,
-                                    "Earth Tube Zone Inlet Wet Bulb Temperature",
-                                    Constant::Units::C,
-                                    thisZnRptET.EarthTubeWetBulbTemp,
-                                    OutputProcessor::TimeStepType::System,
-                                    OutputProcessor::StoreType::Average,
-                                    zone.Name);
-                SetupOutputVariable(state,
-                                    "Earth Tube Zone Inlet Humidity Ratio",
-                                    Constant::Units::kgWater_kgDryAir,
-                                    thisZnRptET.EarthTubeHumRat,
-                                    OutputProcessor::TimeStepType::System,
-                                    OutputProcessor::StoreType::Average,
-                                    zone.Name);
+            thisEarthTube.r1 = inputProcessor->getRealFieldValue(earthTubeFields, earthTubeSchemaProps, "pipe_radius");
+            if (thisEarthTube.r1 <= 0.0) {
+                ShowSevereError(state,
+                                std::format("{}: {}={}, {} must be positive, entered value={:#G}",
+                                            earthTubeModuleObject,
+                                            zoneNameFieldName,
+                                            zoneName,
+                                            numericFieldNames[6],
+                                            thisEarthTube.r1));
+                ErrorsFound = true;
+            }
+
+            thisEarthTube.r2 = inputProcessor->getRealFieldValue(earthTubeFields, earthTubeSchemaProps, "pipe_thickness");
+            if (thisEarthTube.r2 <= 0.0) {
+                ShowSevereError(state,
+                                std::format("{}: {}={}, {} must be positive, entered value={:#G}",
+                                            earthTubeModuleObject,
+                                            zoneNameFieldName,
+                                            zoneName,
+                                            numericFieldNames[7],
+                                            thisEarthTube.r2));
+                ErrorsFound = true;
+            }
+
+            thisEarthTube.r3 = 2.0 * thisEarthTube.r1;
+
+            thisEarthTube.PipeLength = inputProcessor->getRealFieldValue(earthTubeFields, earthTubeSchemaProps, "pipe_length");
+            if (thisEarthTube.PipeLength <= 0.0) {
+                ShowSevereError(state,
+                                std::format("{}: {}={}, {} must be positive, entered value={:#G}",
+                                            earthTubeModuleObject,
+                                            zoneNameFieldName,
+                                            zoneName,
+                                            numericFieldNames[8],
+                                            thisEarthTube.PipeLength));
+                ErrorsFound = true;
+            }
+
+            thisEarthTube.PipeThermCond = inputProcessor->getRealFieldValue(earthTubeFields, earthTubeSchemaProps, "pipe_thermal_conductivity");
+            if (thisEarthTube.PipeThermCond <= 0.0) {
+                ShowSevereError(state,
+                                std::format("{}: {}={}, {} must be positive, entered value={:#G}",
+                                            earthTubeModuleObject,
+                                            zoneNameFieldName,
+                                            zoneName,
+                                            numericFieldNames[9],
+                                            thisEarthTube.PipeThermCond));
+                ErrorsFound = true;
+            }
+
+            thisEarthTube.z = inputProcessor->getRealFieldValue(earthTubeFields, earthTubeSchemaProps, "pipe_depth_under_ground_surface");
+            if (thisEarthTube.z <= 0.0) {
+                ShowSevereError(state,
+                                std::format("{}: {}={}, {} must be positive, entered value={:#G}",
+                                            earthTubeModuleObject,
+                                            zoneNameFieldName,
+                                            zoneName,
+                                            numericFieldNames[10],
+                                            thisEarthTube.z));
+                ErrorsFound = true;
+            }
+            if (thisEarthTube.z <= (thisEarthTube.r1 + thisEarthTube.r2 + thisEarthTube.r3)) {
+                // Note that code in initEarthTubeVertical assumes that this check remains in place--if this ever gets changed,
+                // code in initEarthTubeVertical must be modified
+                ShowSevereError(state,
+                                std::format("{}: {}={}, {} must be greater than 3*{} + {} entered value={:#G} ref sum={:#G}",
+                                            earthTubeModuleObject,
+                                            zoneNameFieldName,
+                                            zoneName,
+                                            numericFieldNames[10],
+                                            numericFieldNames[6],
+                                            numericFieldNames[7],
+                                            thisEarthTube.z,
+                                            thisEarthTube.r1 + thisEarthTube.r2 + thisEarthTube.r3));
+                ErrorsFound = true;
+            }
+
+            SoilType soilType = static_cast<SoilType>(getEnumValue(soilTypeNamesUC, soilCondition));
+            constexpr std::array<Real64, static_cast<int>(SoilType::Num)> thermalDiffusivity = {0.0781056, 0.055728, 0.0445824, 0.024192};
+            constexpr std::array<Real64, static_cast<int>(SoilType::Num)> thermalConductivity = {2.42, 1.3, 0.865, 0.346};
+            if (soilType == SoilType::Invalid) {
+                ShowSevereInvalidKey(state, eoh, "Soil Condition", soilCondition);
+                ErrorsFound = true;
+            } else {
+                thisEarthTube.SoilThermDiff = thermalDiffusivity[static_cast<int>(soilType)];
+                thisEarthTube.SoilThermCond = thermalConductivity[static_cast<int>(soilType)];
+            }
+
+            thisEarthTube.AverSoilSurTemp =
+                inputProcessor->getRealFieldValue(earthTubeFields, earthTubeSchemaProps, "average_soil_surface_temperature");
+            thisEarthTube.ApmlSoilSurTemp =
+                inputProcessor->getRealFieldValue(earthTubeFields, earthTubeSchemaProps, "amplitude_of_soil_surface_temperature");
+            thisEarthTube.SoilSurPhaseConst =
+                int(inputProcessor->getRealFieldValue(earthTubeFields, earthTubeSchemaProps, "phase_constant_of_soil_surface_temperature"));
+
+            // Override any user input for cases where natural ventilation is being used
+            if (thisEarthTube.FanType == Ventilation::Natural) {
+                thisEarthTube.FanPressure = 0.0;
+                thisEarthTube.FanEfficiency = 1.0;
+            }
+
+            thisEarthTube.ConstantTermCoef =
+                inputProcessor->getRealFieldValue(earthTubeFields, earthTubeSchemaProps, "constant_term_flow_coefficient");
+            thisEarthTube.TemperatureTermCoef =
+                inputProcessor->getRealFieldValue(earthTubeFields, earthTubeSchemaProps, "temperature_term_flow_coefficient");
+            thisEarthTube.VelocityTermCoef =
+                inputProcessor->getRealFieldValue(earthTubeFields, earthTubeSchemaProps, "velocity_term_flow_coefficient");
+            thisEarthTube.VelocitySQTermCoef =
+                inputProcessor->getRealFieldValue(earthTubeFields, earthTubeSchemaProps, "velocity_squared_term_flow_coefficient");
+
+            // Model type: basic or vertical
+            // only process the parameter link if model type is Vertical
+            if (earthTubeModelType.empty()) {
+                thisEarthTube.ModelType = EarthTubeModelType::Basic;
+            } else {
+                thisEarthTube.ModelType = static_cast<EarthTubeModelType>(getEnumValue(solutionTypeNamesUC, earthTubeModelType));
+                if (thisEarthTube.ModelType == EarthTubeModelType::Invalid) {
+                    ShowSevereInvalidKey(state, eoh, "Earth Tube Model Type", earthTubeModelType);
+                    ErrorsFound = true;
+                }
+            }
+
+            if (thisEarthTube.ModelType == EarthTubeModelType::Vertical) {
+                thisEarthTube.r3 =
+                    0.0; // Vertical model does not use this parameter--reset to zero (keep because r3=0 necessary so Rs=0 in calc routine)
+                // Process the parameters based on the name (link via index)
+                thisEarthTube.vertParametersPtr = 0;
+                for (int parIndex = 1; parIndex <= totEarthTubePars; ++parIndex) {
+                    if (Util::SameString(earthTubeModelParameters, state.dataEarthTube->EarthTubePars(parIndex).nameParameters)) {
+                        thisEarthTube.vertParametersPtr = parIndex;
+                        break;
+                    }
+                }
+                if (thisEarthTube.vertParametersPtr == 0) { // didn't find a match
+                    ShowSevereItemNotFound(state, eoh, "Earth Tube Model Parameters", earthTubeModelParameters);
+                    ErrorsFound = true;
+                }
+            }
+
+            if (thisEarthTube.ZonePtr > 0) {
+                if (RepVarSet(thisEarthTube.ZonePtr)) {
+                    RepVarSet(thisEarthTube.ZonePtr) = false;
+                    auto &zone = state.dataHeatBal->Zone(thisEarthTube.ZonePtr);
+                    auto &thisZnRptET = state.dataEarthTube->ZnRptET(thisEarthTube.ZonePtr);
+
+                    SetupOutputVariable(state,
+                                        "Earth Tube Zone Sensible Cooling Energy",
+                                        Constant::Units::J,
+                                        thisZnRptET.EarthTubeHeatLoss,
+                                        OutputProcessor::TimeStepType::System,
+                                        OutputProcessor::StoreType::Sum,
+                                        zone.Name);
+                    SetupOutputVariable(state,
+                                        "Earth Tube Zone Sensible Cooling Rate",
+                                        Constant::Units::W,
+                                        thisZnRptET.EarthTubeHeatLossRate,
+                                        OutputProcessor::TimeStepType::System,
+                                        OutputProcessor::StoreType::Average,
+                                        zone.Name);
+                    SetupOutputVariable(state,
+                                        "Earth Tube Zone Sensible Heating Energy",
+                                        Constant::Units::J,
+                                        thisZnRptET.EarthTubeHeatGain,
+                                        OutputProcessor::TimeStepType::System,
+                                        OutputProcessor::StoreType::Sum,
+                                        zone.Name);
+                    SetupOutputVariable(state,
+                                        "Earth Tube Zone Sensible Heating Rate",
+                                        Constant::Units::W,
+                                        thisZnRptET.EarthTubeHeatGainRate,
+                                        OutputProcessor::TimeStepType::System,
+                                        OutputProcessor::StoreType::Average,
+                                        zone.Name);
+                    SetupOutputVariable(state,
+                                        "Earth Tube Air Flow Volume",
+                                        Constant::Units::m3,
+                                        thisZnRptET.EarthTubeVolume,
+                                        OutputProcessor::TimeStepType::System,
+                                        OutputProcessor::StoreType::Sum,
+                                        zone.Name);
+                    SetupOutputVariable(state,
+                                        "Earth Tube Current Density Air Volume Flow Rate",
+                                        Constant::Units::m3_s,
+                                        thisZnRptET.EarthTubeVolFlowRate,
+                                        OutputProcessor::TimeStepType::System,
+                                        OutputProcessor::StoreType::Average,
+                                        zone.Name);
+                    SetupOutputVariable(state,
+                                        "Earth Tube Standard Density Air Volume Flow Rate",
+                                        Constant::Units::m3_s,
+                                        thisZnRptET.EarthTubeVolFlowRateStd,
+                                        OutputProcessor::TimeStepType::System,
+                                        OutputProcessor::StoreType::Average,
+                                        zone.Name);
+                    SetupOutputVariable(state,
+                                        "Earth Tube Air Flow Mass",
+                                        Constant::Units::kg,
+                                        thisZnRptET.EarthTubeMass,
+                                        OutputProcessor::TimeStepType::System,
+                                        OutputProcessor::StoreType::Sum,
+                                        zone.Name);
+                    SetupOutputVariable(state,
+                                        "Earth Tube Air Mass Flow Rate",
+                                        Constant::Units::kg_s,
+                                        thisZnRptET.EarthTubeMassFlowRate,
+                                        OutputProcessor::TimeStepType::System,
+                                        OutputProcessor::StoreType::Average,
+                                        zone.Name);
+                    SetupOutputVariable(state,
+                                        "Earth Tube Water Mass Flow Rate",
+                                        Constant::Units::kg_s,
+                                        thisZnRptET.EarthTubeWaterMassFlowRate,
+                                        OutputProcessor::TimeStepType::System,
+                                        OutputProcessor::StoreType::Average,
+                                        zone.Name);
+                    SetupOutputVariable(state,
+                                        "Earth Tube Fan Electricity Energy",
+                                        Constant::Units::J,
+                                        thisZnRptET.EarthTubeFanElec,
+                                        OutputProcessor::TimeStepType::System,
+                                        OutputProcessor::StoreType::Sum,
+                                        zone.Name,
+                                        Constant::eResource::Electricity,
+                                        OutputProcessor::Group::Building);
+                    SetupOutputVariable(state,
+                                        "Earth Tube Fan Electricity Rate",
+                                        Constant::Units::W,
+                                        thisZnRptET.EarthTubeFanElecPower,
+                                        OutputProcessor::TimeStepType::System,
+                                        OutputProcessor::StoreType::Average,
+                                        zone.Name);
+                    SetupOutputVariable(state,
+                                        "Earth Tube Zone Inlet Air Temperature",
+                                        Constant::Units::C,
+                                        thisZnRptET.EarthTubeAirTemp,
+                                        OutputProcessor::TimeStepType::System,
+                                        OutputProcessor::StoreType::Average,
+                                        zone.Name);
+                    SetupOutputVariable(state,
+                                        "Earth Tube Ground Interface Temperature",
+                                        Constant::Units::C,
+                                        thisEarthTube.GroundTempt,
+                                        OutputProcessor::TimeStepType::System,
+                                        OutputProcessor::StoreType::Average,
+                                        zone.Name);
+                    SetupOutputVariable(state,
+                                        "Earth Tube Outdoor Air Heat Transfer Rate",
+                                        Constant::Units::W,
+                                        thisZnRptET.EarthTubeOATreatmentPower,
+                                        OutputProcessor::TimeStepType::System,
+                                        OutputProcessor::StoreType::Average,
+                                        zone.Name);
+                    SetupOutputVariable(state,
+                                        "Earth Tube Zone Inlet Wet Bulb Temperature",
+                                        Constant::Units::C,
+                                        thisZnRptET.EarthTubeWetBulbTemp,
+                                        OutputProcessor::TimeStepType::System,
+                                        OutputProcessor::StoreType::Average,
+                                        zone.Name);
+                    SetupOutputVariable(state,
+                                        "Earth Tube Zone Inlet Humidity Ratio",
+                                        Constant::Units::kgWater_kgDryAir,
+                                        thisZnRptET.EarthTubeHumRat,
+                                        OutputProcessor::TimeStepType::System,
+                                        OutputProcessor::StoreType::Average,
+                                        zone.Name);
+                }
             }
         }
     }
 
-    CheckEarthTubesInZones(state, s_ipsc->cAlphaArgs(1), s_ipsc->cCurrentModuleObject, ErrorsFound);
+    CheckEarthTubesInZones(state, lastZoneName, earthTubeModuleObject, ErrorsFound);
 
     if (ErrorsFound) {
-        ShowFatalError(state, EnergyPlus::format("{}: Errors getting input.  Program terminates.", s_ipsc->cCurrentModuleObject));
+        ShowFatalError(state, std::format("{}: Errors getting input.  Program terminates.", earthTubeModuleObject));
     }
 }
 
@@ -589,8 +621,8 @@ void CheckEarthTubesInZones(EnergyPlusData &state,
     for (int Loop = 1; Loop <= numEarthTubes - 1; ++Loop) {
         for (int Loop1 = Loop + 1; Loop1 <= numEarthTubes; ++Loop1) {
             if (state.dataEarthTube->EarthTubeSys(Loop).ZonePtr == state.dataEarthTube->EarthTubeSys(Loop1).ZonePtr) {
-                ShowSevereError(state, EnergyPlus::format("{} has more than one {} associated with it.", ZoneName, FieldName));
-                ShowContinueError(state, EnergyPlus::format("Only one {} is allowed per zone.  Check the definitions of {}", FieldName, FieldName));
+                ShowSevereError(state, std::format("{} has more than one {} associated with it.", ZoneName, FieldName));
+                ShowContinueError(state, std::format("Only one {} is allowed per zone.  Check the definitions of {}", FieldName, FieldName));
                 ShowContinueError(state, "in your input file and make sure that there is only one defined for each zone.");
                 ErrorsFound = true;
             }
@@ -707,14 +739,14 @@ void initEarthTubeVertical(EnergyPlusData &state)
             auto &zone = state.dataHeatBal->Zone(thisEarthTube.ZonePtr);
             for (int nodeNum = 1; nodeNum <= thisEarthTube.totNodes; ++nodeNum) {
                 SetupOutputVariable(state,
-                                    EnergyPlus::format("Earth Tube Node Temperature {}", nodeNum),
+                                    std::format("Earth Tube Node Temperature {}", nodeNum),
                                     Constant::Units::C,
                                     thisEarthTube.tCurrent[nodeNum - 1],
                                     OutputProcessor::TimeStepType::Zone,
                                     OutputProcessor::StoreType::Average,
                                     zone.Name);
                 SetupOutputVariable(state,
-                                    EnergyPlus::format("Earth Tube Undisturbed Ground Temperature {}", nodeNum),
+                                    std::format("Earth Tube Undisturbed Ground Temperature {}", nodeNum),
                                     Constant::Units::C,
                                     thisEarthTube.tUndist[nodeNum - 1],
                                     OutputProcessor::TimeStepType::Zone,

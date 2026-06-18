@@ -2040,7 +2040,7 @@ TEST_F(EnergyPlusFixture, DaylightingManager_GetInputDaylightingControls_Roundin
         sum += frac;
         auto const &refPt = thisDaylightControl.refPts(i);
         EXPECT_EQ(i, refPt.num);
-        EXPECT_EQ(format("WEST ZONE_DAYLREFPT{}", i), dl->DaylRefPt(refPt.num).Name);
+        EXPECT_EQ(std::format("WEST ZONE_DAYLREFPT{}", i), dl->DaylRefPt(refPt.num).Name);
         EXPECT_EQ(frac, refPt.fracZoneDaylit);
         EXPECT_EQ(200., refPt.illumSetPoint);
         ++i;

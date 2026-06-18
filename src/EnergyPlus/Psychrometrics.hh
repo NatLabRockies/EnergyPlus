@@ -54,7 +54,6 @@
 
 // ObjexxFCL Headers
 #include <ObjexxFCL/Array1D.hh>
-// #include <ObjexxFCL/Fmath.hh>
 
 // EnergyPlus Headers
 #include <EnergyPlus/Data/BaseData.hh>
@@ -62,7 +61,6 @@
 #include <EnergyPlus/DataGlobals.hh>
 #include <EnergyPlus/EnergyPlus.hh>
 #include <EnergyPlus/PsychCacheData.hh>
-#include <EnergyPlus/UtilityRoutines.hh>
 
 namespace EnergyPlus {
 

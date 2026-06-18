@@ -449,7 +449,6 @@ TEST_F(EnergyPlusFixture, WindowAC_VStest1)
     state->dataGlobal->DDOnlySimulation = true;
 
     SimulationManager::GetProjectData(*state);
-    OutputReportPredefined::SetPredefinedTables(*state);
     HeatBalanceManager::SetPreConstructionInputParameters(*state); // establish array bounds for constructions early
 
     state->dataGlobal->BeginSimFlag = true;
@@ -924,7 +923,6 @@ TEST_F(EnergyPlusFixture, WindowAC_DesignSpecificationZoneHVACSizing)
     state->dataGlobal->DDOnlySimulation = true;
 
     SimulationManager::GetProjectData(*state);
-    OutputReportPredefined::SetPredefinedTables(*state);
     HeatBalanceManager::SetPreConstructionInputParameters(*state); // establish array bounds for constructions early
 
     state->dataGlobal->BeginSimFlag = true;

@@ -55,6 +55,8 @@
 #include <EnergyPlus/Data/EnergyPlusData.hh>
 #include <EnergyPlus/DataEnvironment.hh>
 #include <EnergyPlus/DataHeatBalSurface.hh>
+#include <EnergyPlus/DataMoistureBalance.hh>
+#include <EnergyPlus/DataSurfaces.hh>
 #include <EnergyPlus/HeatBalFiniteDiffManager.hh>
 #include <EnergyPlus/HeatBalanceManager.hh>
 #include <EnergyPlus/Material.hh>
@@ -480,8 +482,8 @@ TEST_F(EnergyPlusFixture, HeatBalFiniteDiffManager_findAnySurfacesUsingConstruct
     std::string const error_string = delimited_string({"   ** Severe  ** InitialInitHeatBalFiniteDiff: Found Material that is too thin and/or too "
                                                        "highly conductive, material name = Reg Mat F05 Ceiling air space resistance",
                                                        "   **   ~~~   ** High conductivity Material layers are not well supported by Conduction "
-                                                       "Finite Difference, material conductivity = 2.000 [W/m-K]",
-                                                       "   **   ~~~   ** Material thermal diffusivity = 1.626E-003 [m2/s]",
+                                                       "Finite Difference, material conductivity = 2.00000 [W/m-K]",
+                                                       "   **   ~~~   ** Material thermal diffusivity = 0.00162602 [m2/s]",
                                                        "   **   ~~~   ** Material with this thermal diffusivity should have thickness > 1.71080 [m]",
                                                        "   **  Fatal  ** Preceding conditions cause termination.",
                                                        "   ...Summary of Errors that led to program termination:",
@@ -895,6 +897,680 @@ TEST_F(EnergyPlusFixture, HeatBalFiniteDiffManager_setSizeMaxPropertiesTest)
 
     // Check answer vs. expected
     EXPECT_EQ(functionAnswer, expectedAnswer);
+}
+
+TEST_F(EnergyPlusFixture, HeatBalFiniteDiffManager_EnetActuatorOverride)
+{
+    // Test that the sky LW radiation EMS actuator correctly modifies ExteriorBCEqns behavior.
+    // Uses FullyImplicitFirstOrder scheme with a single-layer concrete surface.
+    // Compares: actuator OFF (baseline), ON with Enet=0 (no sky cooling), ON with Enet=-200 (strong sky cooling).
+
+    int constexpr SurfNum = 1;
+    int constexpr TotNodes = 3;
+    int constexpr TotLayers = 1;
+
+    // Allocate surfaces
+    state->dataSurface->TotSurfaces = 1;
+    state->dataSurface->Surface.allocate(1);
+    auto &surf = state->dataSurface->Surface(SurfNum);
+    surf.Name = "ZN001:ROOF001";
+    surf.HeatTransSurf = true;
+    surf.HeatTransferAlgorithm = DataSurfaces::HeatTransferModel::CondFD;
+    surf.ExtBoundCond = DataSurfaces::ExternalEnvironment;
+    surf.Construction = 1;
+    surf.Area = 10.0;
+    surf.Class = DataSurfaces::SurfaceClass::Roof;
+
+    // Construct with one concrete layer
+    state->dataHeatBal->TotConstructs = 1;
+    state->dataConstruction->Construct.allocate(1);
+    auto &constr = state->dataConstruction->Construct(1);
+    constr.TotLayers = TotLayers;
+    constr.LayerPoint.allocate(TotLayers);
+    constr.LayerPoint(1) = 1;
+
+    // Material: HW concrete
+    auto *mat = new Material::MaterialBase;
+    mat->Name = "C5 - 4 IN HW CONCRETE";
+    mat->group = Material::Group::Regular;
+    mat->Roughness = Material::SurfaceRoughness::MediumRough;
+    mat->Thickness = 0.1016;
+    mat->Conductivity = 1.311;
+    mat->Density = 2240.0;
+    mat->SpecHeat = 836.8;
+    mat->AbsorpThermal = 0.9;
+    mat->AbsorpSolar = 0.85;
+    mat->AbsorpVisible = 0.85;
+    mat->ROnly = false;
+    mat->hasPCM = false;
+    state->dataMaterial->materials.push_back(mat);
+    mat->Num = state->dataMaterial->materials.isize();
+
+    // CondFD data
+    auto &s_hbfd = state->dataHeatBalFiniteDiffMgr;
+    s_hbfd->CondFDSchemeType = CondFDScheme::FullyImplicitFirstOrder;
+
+    // ConstructFD
+    s_hbfd->ConstructFD.allocate(1);
+    s_hbfd->ConstructFD(1).TotNodes = TotNodes;
+    s_hbfd->ConstructFD(1).DelX.allocate(TotLayers);
+    s_hbfd->ConstructFD(1).DelX(1) = 0.0254; // ~1 inch per node
+    s_hbfd->ConstructFD(1).NodeNumPoint.allocate(TotLayers);
+    s_hbfd->ConstructFD(1).NodeNumPoint(1) = TotNodes;
+
+    // MaterialFD
+    s_hbfd->MaterialFD.allocate(1);
+    s_hbfd->MaterialFD(1).tk1 = 0.0;
+    s_hbfd->MaterialFD(1).numTempEnth = 0;
+    s_hbfd->MaterialFD(1).numTempCond = 0;
+    // TempCond and TempEnth: 2D arrays with negative sentinel values to skip variable property branches
+    s_hbfd->MaterialFD(1).TempCond.allocate(2, 3);
+    s_hbfd->MaterialFD(1).TempCond = -1.0;
+    s_hbfd->MaterialFD(1).TempEnth.allocate(2, 3);
+    s_hbfd->MaterialFD(1).TempEnth = -1.0;
+
+    // SurfaceFD
+    s_hbfd->SurfaceFD.allocate(1);
+    auto &surfFD = s_hbfd->SurfaceFD(SurfNum);
+    int const numNodes = TotNodes + 1; // include inside face node
+    surfFD.T.allocate(numNodes);
+    surfFD.TOld.allocate(numNodes);
+    surfFD.TT.allocate(numNodes);
+    surfFD.Rhov.allocate(numNodes);
+    surfFD.RhovOld.allocate(numNodes);
+    surfFD.RhoT.allocate(numNodes);
+    surfFD.TD.allocate(numNodes);
+    surfFD.TDT.allocate(numNodes);
+    surfFD.TDTLast.allocate(numNodes);
+    surfFD.TDOld.allocate(numNodes);
+    surfFD.TDreport.allocate(numNodes);
+    surfFD.RH.allocate(numNodes);
+    surfFD.RHreport.allocate(numNodes);
+    surfFD.EnthOld.allocate(numNodes);
+    surfFD.EnthNew.allocate(numNodes);
+    surfFD.EnthLast.allocate(numNodes);
+    surfFD.QDreport.allocate(numNodes);
+    surfFD.CpDelXRhoS1.allocate(numNodes);
+    surfFD.CpDelXRhoS2.allocate(numNodes);
+    surfFD.TDpriortimestep.allocate(numNodes);
+    surfFD.PhaseChangeState.allocate(numNodes);
+    surfFD.PhaseChangeStateOld.allocate(numNodes);
+    surfFD.PhaseChangeStateOldOld.allocate(numNodes);
+    surfFD.PhaseChangeStateRep.allocate(numNodes);
+    surfFD.PhaseChangeStateOldRep.allocate(numNodes);
+    surfFD.PhaseChangeStateOldOldRep.allocate(numNodes);
+    surfFD.PhaseChangeTemperatureReverse.allocate(numNodes);
+    surfFD.condMaterialActuators.allocate(TotLayers);
+    surfFD.specHeatMaterialActuators.allocate(TotLayers);
+    surfFD.condNodeReport.allocate(numNodes);
+    surfFD.specHeatNodeReport.allocate(numNodes);
+    surfFD.heatSourceFluxMaterialActuators.allocate(1);
+    surfFD.heatSourceInternalFluxLayerReport.allocate(1);
+    surfFD.heatSourceInternalFluxEnergyLayerReport.allocate(1);
+    surfFD.heatSourceEMSFluxLayerReport.allocate(1);
+    surfFD.heatSourceEMSFluxEnergyLayerReport.allocate(1);
+
+    // Initialize arrays
+    surfFD.T = 20.0;
+    surfFD.TOld = 20.0;
+    surfFD.TT = 20.0;
+    surfFD.Rhov = 0.0;
+    surfFD.RhovOld = 0.0;
+    surfFD.RhoT = 0.0;
+    surfFD.TD = 20.0;
+    surfFD.TDT = 20.0;
+    surfFD.TDTLast = 20.0;
+    surfFD.TDOld = 20.0;
+    surfFD.TDreport = 20.0;
+    surfFD.RH = 0.0;
+    surfFD.RHreport = 0.0;
+    surfFD.EnthOld = 100.0;
+    surfFD.EnthNew = 100.0;
+    surfFD.EnthLast = 100.0;
+    surfFD.QDreport = 0.0;
+    surfFD.CpDelXRhoS1 = 0.0;
+    surfFD.CpDelXRhoS2 = 0.0;
+    surfFD.TDpriortimestep = 20.0;
+    surfFD.PhaseChangeState = Material::Phase::Transition;
+    surfFD.PhaseChangeStateOld = Material::Phase::Transition;
+    surfFD.PhaseChangeStateOldOld = Material::Phase::Transition;
+    surfFD.PhaseChangeTemperatureReverse = 50.0;
+    surfFD.condNodeReport = 0.0;
+    surfFD.specHeatNodeReport = 0.0;
+
+    // Allocate heat balance surface arrays
+    state->dataHeatBalSurf->SurfOpaqInsFaceCondFlux.allocate(1);
+    state->dataHeatBalSurf->SurfOpaqOutFaceCondFlux.allocate(1);
+    state->dataHeatBalSurf->SurfQdotRadOutRepPerArea.allocate(1);
+    state->dataHeatBalSurf->SurfQdotRadOutRep.allocate(1);
+    state->dataHeatBalSurf->SurfQRadOutReport.allocate(1);
+    state->dataHeatBalSurf->SurfOpaqQRadSWOutAbs.allocate(1);
+    state->dataHeatBalSurf->SurfQRadSWOutMvIns.allocate(1);
+    state->dataHeatBalSurf->SurfOpaqInsFaceCondFlux(1) = 0.0;
+    state->dataHeatBalSurf->SurfOpaqOutFaceCondFlux(1) = 0.0;
+    state->dataHeatBalSurf->SurfQdotRadOutRepPerArea(1) = 0.0;
+    state->dataHeatBalSurf->SurfQdotRadOutRep(1) = 0.0;
+    state->dataHeatBalSurf->SurfQRadOutReport(1) = 0.0;
+    state->dataHeatBalSurf->SurfOpaqQRadSWOutAbs(1) = 0.0;
+    state->dataHeatBalSurf->SurfQRadSWOutMvIns(1) = 0.0;
+
+    // Allocate moisture balance arrays
+    state->dataMstBal->TempOutsideAirFD.allocate(1);
+    state->dataMstBal->RhoVaporAirOut.allocate(1);
+    state->dataMstBal->HConvExtFD.allocate(1);
+    state->dataMstBal->HSkyFD.allocate(1);
+    state->dataMstBal->HGrndFD.allocate(1);
+    state->dataMstBal->HAirFD.allocate(1);
+    state->dataMstBal->HSurrFD.allocate(1);
+
+    // Set exterior boundary conditions
+    constexpr Real64 Toa = 10.0;   // outdoor air temp, C
+    constexpr Real64 Tsky = -20.0; // sky temp, C
+    state->dataMstBal->TempOutsideAirFD(1) = Toa;
+    state->dataMstBal->RhoVaporAirOut(1) = 0.005;
+    state->dataMstBal->HConvExtFD(1) = 10.0; // convection coefficient
+    state->dataMstBal->HSkyFD(1) = 5.0;      // sky radiation coefficient
+    state->dataMstBal->HGrndFD(1) = 3.0;     // ground radiation coefficient
+    state->dataMstBal->HAirFD(1) = 1.0;      // air radiation coefficient
+    state->dataMstBal->HSurrFD(1) = 0.0;     // surrounding surfaces coefficient
+
+    state->dataEnvrn->SkyTemp = Tsky;
+    state->dataEnvrn->IsRain = false;
+    state->dataGlobal->TimeStepZoneSec = 600.0;
+
+    // Surface ground temp
+    surf.UseSurfPropertyGndSurfTemp = false;
+    surf.SurfHasSurroundingSurfProperty = false;
+
+    // QHeatOutFlux
+    s_hbfd->QHeatOutFlux.allocate(1);
+    s_hbfd->QHeatOutFlux(1) = 0.0;
+
+    // ExteriorBCEqns parameters
+    constexpr int Delt = 600;
+    constexpr int nodeIdx = 1; // outside face node
+    constexpr int Lay = 1;     // first layer
+    constexpr Real64 HMovInsul = 0.0;
+
+    // Create local arrays for function call
+    Array1D<Real64> T_arr(numNodes, 20.0);
+    Array1D<Real64> TT_arr(numNodes, 20.0);
+    Array1D<Real64> Rhov_arr(numNodes, 0.0);
+    Array1D<Real64> RhoT_arr(numNodes, 0.0);
+    Array1D<Real64> RH_arr(numNodes, 0.0);
+    Array1D<Real64> TD_arr(numNodes, 20.0);
+    Array1D<Real64> TDT_arr(numNodes, 20.0);
+    Array1D<Real64> EnthOld_arr(numNodes, 100.0);
+    Array1D<Real64> EnthNew_arr(numNodes, 100.0);
+
+    // --- Sub-case 1: Actuator OFF (baseline with sky radiation) ---
+    surfFD.enetActuator.isActuated = false;
+    surfFD.enetActuator.actuatedValue = 0.0;
+    TDT_arr = 20.0; // reset
+
+    ExteriorBCEqns(*state,
+                   Delt,
+                   nodeIdx,
+                   Lay,
+                   SurfNum,
+                   T_arr,
+                   TT_arr,
+                   Rhov_arr,
+                   RhoT_arr,
+                   RH_arr,
+                   TD_arr,
+                   TDT_arr,
+                   EnthOld_arr,
+                   EnthNew_arr,
+                   TotNodes,
+                   HMovInsul);
+
+    Real64 const TDT_baseline = TDT_arr(nodeIdx);
+    Real64 const QRad_baseline = state->dataHeatBalSurf->SurfQdotRadOutRepPerArea(1);
+    Real64 const CondFlux_baseline = state->dataHeatBalSurf->SurfOpaqOutFaceCondFlux(1);
+
+    EXPECT_EQ(surfFD.enetActuatorReport, 0.0);
+    // With sky at -20C and surface at 20C, baseline has large net outgoing radiation → QRad negative
+    EXPECT_LT(QRad_baseline, 0.0);
+
+    // --- Sub-case 2: Actuator ON, Enet=0 (no sky LW exchange) ---
+    surfFD.enetActuator.isActuated = true;
+    surfFD.enetActuator.actuatedValue = 0.0;
+    TDT_arr = 20.0; // reset
+
+    ExteriorBCEqns(*state,
+                   Delt,
+                   nodeIdx,
+                   Lay,
+                   SurfNum,
+                   T_arr,
+                   TT_arr,
+                   Rhov_arr,
+                   RhoT_arr,
+                   RH_arr,
+                   TD_arr,
+                   TDT_arr,
+                   EnthOld_arr,
+                   EnthNew_arr,
+                   TotNodes,
+                   HMovInsul);
+
+    Real64 const TDT_enet0 = TDT_arr(nodeIdx);
+    Real64 const QRad_enet0 = state->dataHeatBalSurf->SurfQdotRadOutRepPerArea(1);
+    Real64 const CondFlux_enet0 = state->dataHeatBalSurf->SurfOpaqOutFaceCondFlux(1);
+
+    EXPECT_EQ(surfFD.enetActuatorReport, 0.0);
+    // With Enet=0, no sky cooling, so surface should be warmer than baseline (where sky cools it)
+    EXPECT_GT(TDT_enet0, TDT_baseline);
+    // Sky at -20C vs surface at 20C → baseline has large outgoing radiation; Enet=0 removes that sky term
+    EXPECT_GT(QRad_enet0, QRad_baseline);
+    // Less radiation out → less heat pulled through wall → smaller outward conduction flux
+    EXPECT_LT(CondFlux_enet0, CondFlux_baseline);
+
+    // --- Sub-case 3: Actuator ON, Enet=-200 (strong sky cooling) ---
+    surfFD.enetActuator.isActuated = true;
+    surfFD.enetActuator.actuatedValue = -200.0;
+    TDT_arr = 20.0; // reset
+
+    ExteriorBCEqns(*state,
+                   Delt,
+                   nodeIdx,
+                   Lay,
+                   SurfNum,
+                   T_arr,
+                   TT_arr,
+                   Rhov_arr,
+                   RhoT_arr,
+                   RH_arr,
+                   TD_arr,
+                   TDT_arr,
+                   EnthOld_arr,
+                   EnthNew_arr,
+                   TotNodes,
+                   HMovInsul);
+
+    Real64 const TDT_enetNeg200 = TDT_arr(nodeIdx);
+    Real64 const QRad_enetNeg200 = state->dataHeatBalSurf->SurfQdotRadOutRepPerArea(1);
+    Real64 const CondFlux_enetNeg200 = state->dataHeatBalSurf->SurfOpaqOutFaceCondFlux(1);
+
+    EXPECT_EQ(surfFD.enetActuatorReport, -200.0);
+    // Enet=-200 is much stronger cooling than the default sky term, so surface should be colder
+    EXPECT_LT(TDT_enetNeg200, TDT_baseline);
+
+    // --- Sub-case 4: Actuator ON, Enet=+200 (sky heats surface) ---
+    surfFD.enetActuator.isActuated = true;
+    surfFD.enetActuator.actuatedValue = 200.0;
+    TDT_arr = 20.0; // reset
+
+    ExteriorBCEqns(*state,
+                   Delt,
+                   nodeIdx,
+                   Lay,
+                   SurfNum,
+                   T_arr,
+                   TT_arr,
+                   Rhov_arr,
+                   RhoT_arr,
+                   RH_arr,
+                   TD_arr,
+                   TDT_arr,
+                   EnthOld_arr,
+                   EnthNew_arr,
+                   TotNodes,
+                   HMovInsul);
+
+    Real64 const TDT_enetPos200 = TDT_arr(nodeIdx);
+    Real64 const QRad_enetPos200 = state->dataHeatBalSurf->SurfQdotRadOutRepPerArea(1);
+    Real64 const CondFlux_enetPos200 = state->dataHeatBalSurf->SurfOpaqOutFaceCondFlux(1);
+
+    EXPECT_EQ(surfFD.enetActuatorReport, 200.0);
+    // Enet=+200 W/m² net incoming → QRad sign flips positive (surface gains radiation)
+    EXPECT_GT(QRad_enetPos200, 0.0);
+
+    // Ordering: Enet=-200 < baseline < Enet=0 < Enet=+200
+    EXPECT_LT(TDT_enetNeg200, TDT_baseline);
+    EXPECT_LT(TDT_baseline, TDT_enet0);
+    EXPECT_LT(TDT_enet0, TDT_enetPos200);
+
+    // QRad and CondFlux have matching monotonic ordering: stronger cooling → more negative QRad, larger outward CondFlux
+    EXPECT_LT(QRad_enetNeg200, QRad_baseline);
+    EXPECT_LT(QRad_baseline, QRad_enet0);
+    EXPECT_LT(QRad_enet0, QRad_enetPos200);
+    EXPECT_GT(CondFlux_enetNeg200, CondFlux_baseline);
+    EXPECT_GT(CondFlux_baseline, CondFlux_enet0);
+    EXPECT_GT(CondFlux_enet0, CondFlux_enetPos200);
+
+    // --- Sub-case 5: Actuator toggled back OFF → recovers baseline ---
+    surfFD.enetActuator.isActuated = false;
+    // EMS Null clears the actuation flag but leaves the last numeric value in place.
+    surfFD.enetActuator.actuatedValue = 200.0;
+    TDT_arr = 20.0; // reset
+
+    ExteriorBCEqns(*state,
+                   Delt,
+                   nodeIdx,
+                   Lay,
+                   SurfNum,
+                   T_arr,
+                   TT_arr,
+                   Rhov_arr,
+                   RhoT_arr,
+                   RH_arr,
+                   TD_arr,
+                   TDT_arr,
+                   EnthOld_arr,
+                   EnthNew_arr,
+                   TotNodes,
+                   HMovInsul);
+
+    EXPECT_NEAR(TDT_arr(nodeIdx), TDT_baseline, 1e-10);
+    EXPECT_NEAR(state->dataHeatBalSurf->SurfQdotRadOutRepPerArea(1), QRad_baseline, 1e-10);
+    EXPECT_NEAR(state->dataHeatBalSurf->SurfOpaqOutFaceCondFlux(1), CondFlux_baseline, 1e-10);
+    EXPECT_EQ(surfFD.enetActuatorReport, 0.0);
+}
+
+TEST_F(EnergyPlusFixture, HeatBalFiniteDiffManager_EnetActuatorOverride_CrankNicolson)
+{
+    // Same as EnetActuatorOverride but with CrankNicholsonSecondOrder scheme.
+    // Verifies the CN code path produces the same temperature ordering.
+
+    int constexpr SurfNum = 1;
+    int constexpr TotNodes = 3;
+    int constexpr TotLayers = 1;
+
+    // Allocate surfaces
+    state->dataSurface->TotSurfaces = 1;
+    state->dataSurface->Surface.allocate(1);
+    auto &surf = state->dataSurface->Surface(SurfNum);
+    surf.Name = "ZN001:ROOF001";
+    surf.HeatTransSurf = true;
+    surf.HeatTransferAlgorithm = DataSurfaces::HeatTransferModel::CondFD;
+    surf.ExtBoundCond = DataSurfaces::ExternalEnvironment;
+    surf.Construction = 1;
+    surf.Area = 10.0;
+    surf.Class = DataSurfaces::SurfaceClass::Roof;
+
+    // Construct with one concrete layer
+    state->dataHeatBal->TotConstructs = 1;
+    state->dataConstruction->Construct.allocate(1);
+    auto &constr = state->dataConstruction->Construct(1);
+    constr.TotLayers = TotLayers;
+    constr.LayerPoint.allocate(TotLayers);
+    constr.LayerPoint(1) = 1;
+
+    // Material: HW concrete
+    auto *mat = new Material::MaterialBase;
+    mat->Name = "C5 - 4 IN HW CONCRETE";
+    mat->group = Material::Group::Regular;
+    mat->Roughness = Material::SurfaceRoughness::MediumRough;
+    mat->Thickness = 0.1016;
+    mat->Conductivity = 1.311;
+    mat->Density = 2240.0;
+    mat->SpecHeat = 836.8;
+    mat->AbsorpThermal = 0.9;
+    mat->AbsorpSolar = 0.85;
+    mat->AbsorpVisible = 0.85;
+    mat->ROnly = false;
+    mat->hasPCM = false;
+    state->dataMaterial->materials.push_back(mat);
+    mat->Num = state->dataMaterial->materials.isize();
+
+    // CondFD data — CrankNicholsonSecondOrder
+    auto &s_hbfd = state->dataHeatBalFiniteDiffMgr;
+    s_hbfd->CondFDSchemeType = CondFDScheme::CrankNicholsonSecondOrder;
+
+    // ConstructFD
+    s_hbfd->ConstructFD.allocate(1);
+    s_hbfd->ConstructFD(1).TotNodes = TotNodes;
+    s_hbfd->ConstructFD(1).DelX.allocate(TotLayers);
+    s_hbfd->ConstructFD(1).DelX(1) = 0.0254;
+    s_hbfd->ConstructFD(1).NodeNumPoint.allocate(TotLayers);
+    s_hbfd->ConstructFD(1).NodeNumPoint(1) = TotNodes;
+
+    // MaterialFD
+    s_hbfd->MaterialFD.allocate(1);
+    s_hbfd->MaterialFD(1).tk1 = 0.0;
+    s_hbfd->MaterialFD(1).numTempEnth = 0;
+    s_hbfd->MaterialFD(1).numTempCond = 0;
+    s_hbfd->MaterialFD(1).TempCond.allocate(2, 3);
+    s_hbfd->MaterialFD(1).TempCond = -1.0;
+    s_hbfd->MaterialFD(1).TempEnth.allocate(2, 3);
+    s_hbfd->MaterialFD(1).TempEnth = -1.0;
+
+    // SurfaceFD
+    s_hbfd->SurfaceFD.allocate(1);
+    auto &surfFD = s_hbfd->SurfaceFD(SurfNum);
+    int const numNodes = TotNodes + 1;
+    surfFD.T.allocate(numNodes);
+    surfFD.TOld.allocate(numNodes);
+    surfFD.TT.allocate(numNodes);
+    surfFD.Rhov.allocate(numNodes);
+    surfFD.RhovOld.allocate(numNodes);
+    surfFD.RhoT.allocate(numNodes);
+    surfFD.TD.allocate(numNodes);
+    surfFD.TDT.allocate(numNodes);
+    surfFD.TDTLast.allocate(numNodes);
+    surfFD.TDOld.allocate(numNodes);
+    surfFD.TDreport.allocate(numNodes);
+    surfFD.RH.allocate(numNodes);
+    surfFD.RHreport.allocate(numNodes);
+    surfFD.EnthOld.allocate(numNodes);
+    surfFD.EnthNew.allocate(numNodes);
+    surfFD.EnthLast.allocate(numNodes);
+    surfFD.QDreport.allocate(numNodes);
+    surfFD.CpDelXRhoS1.allocate(numNodes);
+    surfFD.CpDelXRhoS2.allocate(numNodes);
+    surfFD.TDpriortimestep.allocate(numNodes);
+    surfFD.PhaseChangeState.allocate(numNodes);
+    surfFD.PhaseChangeStateOld.allocate(numNodes);
+    surfFD.PhaseChangeStateOldOld.allocate(numNodes);
+    surfFD.PhaseChangeStateRep.allocate(numNodes);
+    surfFD.PhaseChangeStateOldRep.allocate(numNodes);
+    surfFD.PhaseChangeStateOldOldRep.allocate(numNodes);
+    surfFD.PhaseChangeTemperatureReverse.allocate(numNodes);
+    surfFD.condMaterialActuators.allocate(TotLayers);
+    surfFD.specHeatMaterialActuators.allocate(TotLayers);
+    surfFD.condNodeReport.allocate(numNodes);
+    surfFD.specHeatNodeReport.allocate(numNodes);
+    surfFD.heatSourceFluxMaterialActuators.allocate(1);
+    surfFD.heatSourceInternalFluxLayerReport.allocate(1);
+    surfFD.heatSourceInternalFluxEnergyLayerReport.allocate(1);
+    surfFD.heatSourceEMSFluxLayerReport.allocate(1);
+    surfFD.heatSourceEMSFluxEnergyLayerReport.allocate(1);
+
+    // Initialize arrays
+    surfFD.T = 20.0;
+    surfFD.TOld = 20.0;
+    surfFD.TT = 20.0;
+    surfFD.Rhov = 0.0;
+    surfFD.RhovOld = 0.0;
+    surfFD.RhoT = 0.0;
+    surfFD.TD = 20.0;
+    surfFD.TDT = 20.0;
+    surfFD.TDTLast = 20.0;
+    surfFD.TDOld = 20.0;
+    surfFD.TDreport = 20.0;
+    surfFD.RH = 0.0;
+    surfFD.RHreport = 0.0;
+    surfFD.EnthOld = 100.0;
+    surfFD.EnthNew = 100.0;
+    surfFD.EnthLast = 100.0;
+    surfFD.QDreport = 0.0;
+    surfFD.CpDelXRhoS1 = 0.0;
+    surfFD.CpDelXRhoS2 = 0.0;
+    surfFD.TDpriortimestep = 20.0;
+    surfFD.PhaseChangeState = Material::Phase::Transition;
+    surfFD.PhaseChangeStateOld = Material::Phase::Transition;
+    surfFD.PhaseChangeStateOldOld = Material::Phase::Transition;
+    surfFD.PhaseChangeTemperatureReverse = 50.0;
+    surfFD.condNodeReport = 0.0;
+    surfFD.specHeatNodeReport = 0.0;
+
+    // Allocate heat balance surface arrays
+    state->dataHeatBalSurf->SurfOpaqInsFaceCondFlux.allocate(1);
+    state->dataHeatBalSurf->SurfOpaqOutFaceCondFlux.allocate(1);
+    state->dataHeatBalSurf->SurfQdotRadOutRepPerArea.allocate(1);
+    state->dataHeatBalSurf->SurfQdotRadOutRep.allocate(1);
+    state->dataHeatBalSurf->SurfQRadOutReport.allocate(1);
+    state->dataHeatBalSurf->SurfOpaqQRadSWOutAbs.allocate(1);
+    state->dataHeatBalSurf->SurfQRadSWOutMvIns.allocate(1);
+    state->dataHeatBalSurf->SurfOpaqInsFaceCondFlux(1) = 0.0;
+    state->dataHeatBalSurf->SurfOpaqOutFaceCondFlux(1) = 0.0;
+    state->dataHeatBalSurf->SurfQdotRadOutRepPerArea(1) = 0.0;
+    state->dataHeatBalSurf->SurfQdotRadOutRep(1) = 0.0;
+    state->dataHeatBalSurf->SurfQRadOutReport(1) = 0.0;
+    state->dataHeatBalSurf->SurfOpaqQRadSWOutAbs(1) = 0.0;
+    state->dataHeatBalSurf->SurfQRadSWOutMvIns(1) = 0.0;
+
+    // Allocate moisture balance arrays
+    state->dataMstBal->TempOutsideAirFD.allocate(1);
+    state->dataMstBal->RhoVaporAirOut.allocate(1);
+    state->dataMstBal->HConvExtFD.allocate(1);
+    state->dataMstBal->HSkyFD.allocate(1);
+    state->dataMstBal->HGrndFD.allocate(1);
+    state->dataMstBal->HAirFD.allocate(1);
+    state->dataMstBal->HSurrFD.allocate(1);
+
+    // Set exterior boundary conditions
+    constexpr Real64 Toa = 10.0;
+    constexpr Real64 Tsky = -20.0;
+    state->dataMstBal->TempOutsideAirFD(1) = Toa;
+    state->dataMstBal->RhoVaporAirOut(1) = 0.005;
+    state->dataMstBal->HConvExtFD(1) = 10.0;
+    state->dataMstBal->HSkyFD(1) = 5.0;
+    state->dataMstBal->HGrndFD(1) = 3.0;
+    state->dataMstBal->HAirFD(1) = 1.0;
+    state->dataMstBal->HSurrFD(1) = 0.0;
+
+    state->dataEnvrn->SkyTemp = Tsky;
+    state->dataEnvrn->IsRain = false;
+    state->dataGlobal->TimeStepZoneSec = 600.0;
+
+    surf.UseSurfPropertyGndSurfTemp = false;
+    surf.SurfHasSurroundingSurfProperty = false;
+
+    s_hbfd->QHeatOutFlux.allocate(1);
+    s_hbfd->QHeatOutFlux(1) = 0.0;
+
+    constexpr int Delt = 600;
+    constexpr int nodeIdx = 1;
+    constexpr int Lay = 1;
+    constexpr Real64 HMovInsul = 0.0;
+
+    int const numNodesArr = numNodes;
+    Array1D<Real64> T_arr(numNodesArr, 20.0);
+    Array1D<Real64> TT_arr(numNodesArr, 20.0);
+    Array1D<Real64> Rhov_arr(numNodesArr, 0.0);
+    Array1D<Real64> RhoT_arr(numNodesArr, 0.0);
+    Array1D<Real64> RH_arr(numNodesArr, 0.0);
+    Array1D<Real64> TD_arr(numNodesArr, 20.0);
+    Array1D<Real64> TDT_arr(numNodesArr, 20.0);
+    Array1D<Real64> EnthOld_arr(numNodesArr, 100.0);
+    Array1D<Real64> EnthNew_arr(numNodesArr, 100.0);
+
+    // --- Sub-case 1: Actuator OFF (baseline) ---
+    surfFD.enetActuator.isActuated = false;
+    surfFD.enetActuator.actuatedValue = 0.0;
+    TDT_arr = 20.0;
+
+    ExteriorBCEqns(*state,
+                   Delt,
+                   nodeIdx,
+                   Lay,
+                   SurfNum,
+                   T_arr,
+                   TT_arr,
+                   Rhov_arr,
+                   RhoT_arr,
+                   RH_arr,
+                   TD_arr,
+                   TDT_arr,
+                   EnthOld_arr,
+                   EnthNew_arr,
+                   TotNodes,
+                   HMovInsul);
+
+    Real64 const TDT_baseline = TDT_arr(nodeIdx);
+    Real64 const QRad_baseline = state->dataHeatBalSurf->SurfQdotRadOutRepPerArea(1);
+
+    EXPECT_LT(QRad_baseline, 0.0);
+
+    // --- Sub-case 2: Actuator ON, Enet=0 ---
+    surfFD.enetActuator.isActuated = true;
+    surfFD.enetActuator.actuatedValue = 0.0;
+    TDT_arr = 20.0;
+
+    ExteriorBCEqns(*state,
+                   Delt,
+                   nodeIdx,
+                   Lay,
+                   SurfNum,
+                   T_arr,
+                   TT_arr,
+                   Rhov_arr,
+                   RhoT_arr,
+                   RH_arr,
+                   TD_arr,
+                   TDT_arr,
+                   EnthOld_arr,
+                   EnthNew_arr,
+                   TotNodes,
+                   HMovInsul);
+
+    Real64 const TDT_enet0 = TDT_arr(nodeIdx);
+
+    // --- Sub-case 3: Actuator ON, Enet=-200 ---
+    surfFD.enetActuator.isActuated = true;
+    surfFD.enetActuator.actuatedValue = -200.0;
+    TDT_arr = 20.0;
+
+    ExteriorBCEqns(*state,
+                   Delt,
+                   nodeIdx,
+                   Lay,
+                   SurfNum,
+                   T_arr,
+                   TT_arr,
+                   Rhov_arr,
+                   RhoT_arr,
+                   RH_arr,
+                   TD_arr,
+                   TDT_arr,
+                   EnthOld_arr,
+                   EnthNew_arr,
+                   TotNodes,
+                   HMovInsul);
+
+    Real64 const TDT_enetNeg200 = TDT_arr(nodeIdx);
+
+    // --- Sub-case 4: Actuator ON, Enet=+200 ---
+    surfFD.enetActuator.isActuated = true;
+    surfFD.enetActuator.actuatedValue = 200.0;
+    TDT_arr = 20.0;
+
+    ExteriorBCEqns(*state,
+                   Delt,
+                   nodeIdx,
+                   Lay,
+                   SurfNum,
+                   T_arr,
+                   TT_arr,
+                   Rhov_arr,
+                   RhoT_arr,
+                   RH_arr,
+                   TD_arr,
+                   TDT_arr,
+                   EnthOld_arr,
+                   EnthNew_arr,
+                   TotNodes,
+                   HMovInsul);
+
+    Real64 const TDT_enetPos200 = TDT_arr(nodeIdx);
+
+    // Same ordering: Enet=-200 < baseline < Enet=0 < Enet=+200
+    EXPECT_LT(TDT_enetNeg200, TDT_baseline);
+    EXPECT_LT(TDT_baseline, TDT_enet0);
+    EXPECT_LT(TDT_enet0, TDT_enetPos200);
 }
 
 } // namespace EnergyPlus

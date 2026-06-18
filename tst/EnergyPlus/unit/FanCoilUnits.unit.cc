@@ -1074,7 +1074,8 @@ TEST_F(EnergyPlusFixture, ConstantFanVariableFlowFanCoilHeatingTest)
     // Simulate with flow lock on and locked flow > demand flow; bypass extra flow
     Sim4PipeFanCoil(*state, FanCoilNum, ZoneNum, FirstHVACIteration, QUnitOut, LatOutputProvided);
     EXPECT_NEAR(QZnReq, QUnitOut, 5.0);
-    EXPECT_NEAR(55.31, state->dataLoopNodes->Node(Node::GetNodeIndex(*state, "ZONE1FANCOILHWOUTLETNODE")).Temp, 0.1); // Was node-10, should be a node name
+    EXPECT_NEAR(
+        55.31, state->dataLoopNodes->Node(Node::GetNodeIndex(*state, "ZONE1FANCOILHWOUTLETNODE")).Temp, 0.1); // Was node-10, should be a node name
     // expect inlet and outlet node air mass flow rates are equal
     EXPECT_EQ(state->dataLoopNodes->Node(state->dataFanCoilUnits->FanCoil(1).AirInNode).MassFlowRate,
               state->dataLoopNodes->Node(state->dataFanCoilUnits->FanCoil(1).AirOutNode).MassFlowRate);
@@ -2312,7 +2313,6 @@ TEST_F(EnergyPlusFixture, Test_TightenWaterFlowLimits)
 
     GetZoneData(*state, ErrorsFound);
     GetZoneEquipmentData(*state);
-    SetPredefinedTables(*state);
     GetFanInput(*state);
     GetFanCoilUnits(*state);
 

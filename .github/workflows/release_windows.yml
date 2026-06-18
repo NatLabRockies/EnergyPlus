@@ -146,10 +146,13 @@ jobs:
       shell: bash
       run: |
         set -x
+        Python_EXECUTABLE="${{ steps.setup-python.outputs.python-path }}"
+        Python_EXECUTABLE="${Python_EXECUTABLE//\\//}"
         cmake -G "Visual Studio 17 2022" -A ${{ matrix.vs-generator }} \
               -DLINK_WITH_PYTHON:BOOL=ON -DPYTHON_CLI:BOOL=ON \
               -DPython_REQUIRED_VERSION:STRING=${{ steps.setup-python.outputs.python-version }} \
-              -DPython_ROOT_DIR:PATH=$RUNNER_TOOL_CACHE/Python/${{ steps.setup-python.outputs.python-version }}/${{ matrix.python-arch }}/ \
+              -DPython_EXECUTABLE:FILEPATH="$Python_EXECUTABLE" \
+              -DPython_ROOT_DIR:PATH="$(dirname "$Python_EXECUTABLE")" \
               -DBUILD_FORTRAN:BOOL=ON -DBUILD_PACKAGE:BOOL=ON \
               -DENABLE_HARDENED_RUNTIME:BOOL=${{ matrix.enable_hardened_runtime }} \
               -DDOCUMENTATION_BUILD:STRING="BuildWithAll" -DTEX_INTERACTION:STRING="batchmode" \

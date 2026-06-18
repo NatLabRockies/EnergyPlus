@@ -18,6 +18,7 @@ jobs:
       matrix:
         runner:
           - [self-hosted, linux, x64, ubuntu-24.04]
+          - [self-hosted, linux, x64, ubuntu-26.04]
     runs-on: ${{ matrix.runner }}
     steps:
       - name: Checkout EnergyPlus

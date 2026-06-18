@@ -3083,8 +3083,6 @@ TEST_F(EnergyPlusFixture, SingleDuctAirTerminal_reportTerminalUnit)
     using namespace EnergyPlus::OutputReportPredefined;
     auto &orp = *state->dataOutRptPredefined;
 
-    SetPredefinedTables(*state);
-
     auto *schA = Sched::AddScheduleConstant(*state, "schA");
     [[maybe_unused]] auto *schB = Sched::AddScheduleConstant(*state, "schB");
 

@@ -102,6 +102,9 @@ CONFIGURATIONS = {
     'mac13-arm64': {
         'os': OS.Mac, 'bitness': Bitness.ARM64, 'asset_pattern': 'Darwin-macOS13-arm64.tar.gz', 'os_version': '13'
     },
+    'mac14-arm64': {
+        'os': OS.Mac, 'bitness': Bitness.ARM64, 'asset_pattern': 'Darwin-macOS14.0-arm64.tar.gz', 'os_version': '14.0'
+    },
     'win32': {
         'os': OS.Windows, 'bitness': Bitness.X86, 'asset_pattern': 'Windows-i386.zip', 'os_version': '2022'
     },

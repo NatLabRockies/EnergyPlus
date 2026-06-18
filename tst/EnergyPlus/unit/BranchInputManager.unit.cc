@@ -611,4 +611,54 @@ TEST_F(EnergyPlusFixture, BranchInputManager_OrphanObjects)
     compare_err_stream(expected_error, true);
 }
 
+TEST_F(EnergyPlusFixture, BranchInputManager_OrphanBaseboard)
+{
+    // Branch
+    state->dataBranchInputManager->clear_state();
+    state->dataErrTracking->TotalSevereErrors = 0;
+    std::string idf_objects = delimited_string({
+        "BranchList,",
+        "   Baseboard Heating Branches,          !- Name",
+        "   Baseboard Heating Branch;            !- Branch 1 Name",
+
+        "Branch,",
+        "   Baseboard Heating Branch,            !- Name",
+        "   ,                                    !- Pressure Drop Curve Name",
+        "   ZoneHVAC:Baseboard:Convective:Water, !- Component 1 Object Type",
+        "   Baseboard Heater,                    !- Component 1 Name",
+        "   Baseboard Water Inlet Node,          !- Component 1 Inlet Node Name",
+        "   Baseboard Water Outlet Node;         !- Component 1 Outlet Node Name",
+
+        "ZoneHVAC:Baseboard:Convective:Water,",
+        "   Baseboard Heater,                    !-Name",
+        "   ,                                    !-Availability Schedule Name",
+        "   Baseboard Water Inlet Node,          !-Inlet Node Name",
+        "   Baseboard Water Outlet Node,         !-Outlet Node Name",
+        "   HeatingDesignCapacity,               !-Heating Design Capacity Method",
+        "   Autosize,                            !-Heating Design Capacity{W}",
+        "   ,                                    !-Heating Design Capacity Per Floor Area{W/m2}",
+        "   ,                                    !-Fraction of Autosized Heating Design Capacity",
+        "   Autosize,                            !-U - Factor Times Area Value{W/K}",
+        "   Autosize;                            !-Maximum Water Flow Rate {m3/s}",
+
+    });
+    ASSERT_TRUE(process_idf(idf_objects));
+    EXPECT_NO_THROW(ManageBranchInput(*state));
+
+    std::string expected_error = "";
+    compare_err_stream(expected_error, true);
+
+    bool ErrFound = false;
+    BranchInputManager::TestBranchIntegrity(*state, ErrFound);
+
+    expected_error = delimited_string({
+        "   ************* Testing Individual Branch Integrity",
+        "   ** Severe  ** CheckBranchEquipInZoneHVACEquipList: Branch = BASEBOARD HEATING BRANCH, contains a component of type "
+        "ZONEHVAC:BASEBOARD:CONVECTIVE:WATER with name = BASEBOARD HEATER",
+        "   **   ~~~   ** but that component is not listed in any ZoneHVAC:EquipmentList.",
+        "   ** Severe  ** Branch(es) did not pass integrity testing",
+    });
+    compare_err_stream(expected_error, true);
+}
+
 } // namespace EnergyPlus

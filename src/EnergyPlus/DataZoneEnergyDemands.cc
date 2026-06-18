@@ -45,6 +45,9 @@
 // OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 // POSSIBILITY OF SUCH DAMAGE.
 
+// C++ Headers
+#include <format>
+
 // EnergyPlus Headers
 #include <EnergyPlus/Data/EnergyPlusData.hh>
 #include <EnergyPlus/DataHeatBalFanSys.hh>
@@ -105,7 +108,7 @@ void ZoneSystemSensibleDemand::setUpOutputVars(EnergyPlusData &state,
 {
     if (attachMeters) {
         SetupOutputVariable(state,
-                            EnergyPlus::format("{} Air System Sensible Heating Energy", prefix),
+                            std::format("{} Air System Sensible Heating Energy", prefix),
                             Constant::Units::J,
                             this->airSysHeatEnergy,
                             OutputProcessor::TimeStepType::System,
@@ -119,7 +122,7 @@ void ZoneSystemSensibleDemand::setUpOutputVars(EnergyPlusData &state,
                             zoneMult,
                             listMult);
         SetupOutputVariable(state,
-                            EnergyPlus::format("{} Air System Sensible Cooling Energy", prefix),
+                            std::format("{} Air System Sensible Cooling Energy", prefix),
                             Constant::Units::J,
                             this->airSysCoolEnergy,
                             OutputProcessor::TimeStepType::System,
@@ -134,14 +137,14 @@ void ZoneSystemSensibleDemand::setUpOutputVars(EnergyPlusData &state,
                             listMult);
     } else {
         SetupOutputVariable(state,
-                            EnergyPlus::format("{} Air System Sensible Heating Energy", prefix),
+                            std::format("{} Air System Sensible Heating Energy", prefix),
                             Constant::Units::J,
                             this->airSysHeatEnergy,
                             OutputProcessor::TimeStepType::System,
                             OutputProcessor::StoreType::Sum,
                             name);
         SetupOutputVariable(state,
-                            EnergyPlus::format("{} Air System Sensible Cooling Energy", prefix),
+                            std::format("{} Air System Sensible Cooling Energy", prefix),
                             Constant::Units::J,
                             this->airSysCoolEnergy,
                             OutputProcessor::TimeStepType::System,
@@ -149,14 +152,14 @@ void ZoneSystemSensibleDemand::setUpOutputVars(EnergyPlusData &state,
                             name);
     }
     SetupOutputVariable(state,
-                        EnergyPlus::format("{} Air System Sensible Heating Rate", prefix),
+                        std::format("{} Air System Sensible Heating Rate", prefix),
                         Constant::Units::W,
                         this->airSysHeatRate,
                         OutputProcessor::TimeStepType::System,
                         OutputProcessor::StoreType::Average,
                         name);
     SetupOutputVariable(state,
-                        EnergyPlus::format("{} Air System Sensible Cooling Rate", prefix),
+                        std::format("{} Air System Sensible Cooling Rate", prefix),
                         Constant::Units::W,
                         this->airSysCoolRate,
                         OutputProcessor::TimeStepType::System,
@@ -166,21 +169,21 @@ void ZoneSystemSensibleDemand::setUpOutputVars(EnergyPlusData &state,
     // There are two sets of data available: one where zone and group multipliers have been applied and another where the multipliers have
     // not. First, these report variables are NOT multiplied by zone and group multipliers
     SetupOutputVariable(state,
-                        EnergyPlus::format("{} Predicted Sensible Load to Setpoint Heat Transfer Rate", prefix),
+                        std::format("{} Predicted Sensible Load to Setpoint Heat Transfer Rate", prefix),
                         Constant::Units::W,
                         this->predictedRate,
                         OutputProcessor::TimeStepType::System,
                         OutputProcessor::StoreType::Average,
                         name);
     SetupOutputVariable(state,
-                        EnergyPlus::format("{} Predicted Sensible Load to Heating Setpoint Heat Transfer Rate", prefix),
+                        std::format("{} Predicted Sensible Load to Heating Setpoint Heat Transfer Rate", prefix),
                         Constant::Units::W,
                         this->predictedHSPRate,
                         OutputProcessor::TimeStepType::System,
                         OutputProcessor::StoreType::Average,
                         name);
     SetupOutputVariable(state,
-                        EnergyPlus::format("{} Predicted Sensible Load to Cooling Setpoint Heat Transfer Rate", prefix),
+                        std::format("{} Predicted Sensible Load to Cooling Setpoint Heat Transfer Rate", prefix),
                         Constant::Units::W,
                         this->predictedCSPRate,
                         OutputProcessor::TimeStepType::System,
@@ -188,21 +191,21 @@ void ZoneSystemSensibleDemand::setUpOutputVars(EnergyPlusData &state,
                         name);
     // Second, these report variable ARE multiplied by zone and group multipliers
     SetupOutputVariable(state,
-                        EnergyPlus::format("{} System Predicted Sensible Load to Setpoint Heat Transfer Rate", prefix),
+                        std::format("{} System Predicted Sensible Load to Setpoint Heat Transfer Rate", prefix),
                         Constant::Units::W,
                         this->TotalOutputRequired,
                         OutputProcessor::TimeStepType::System,
                         OutputProcessor::StoreType::Average,
                         name);
     SetupOutputVariable(state,
-                        EnergyPlus::format("{} System Predicted Sensible Load to Heating Setpoint Heat Transfer Rate", prefix),
+                        std::format("{} System Predicted Sensible Load to Heating Setpoint Heat Transfer Rate", prefix),
                         Constant::Units::W,
                         this->OutputRequiredToHeatingSP,
                         OutputProcessor::TimeStepType::System,
                         OutputProcessor::StoreType::Average,
                         name);
     SetupOutputVariable(state,
-                        EnergyPlus::format("{} System Predicted Sensible Load to Cooling Setpoint Heat Transfer Rate", prefix),
+                        std::format("{} System Predicted Sensible Load to Cooling Setpoint Heat Transfer Rate", prefix),
                         Constant::Units::W,
                         this->OutputRequiredToCoolingSP,
                         OutputProcessor::TimeStepType::System,
@@ -210,7 +213,7 @@ void ZoneSystemSensibleDemand::setUpOutputVars(EnergyPlusData &state,
                         name);
     if (staged) {
         SetupOutputVariable(state,
-                            EnergyPlus::format("{} Thermostat Staged Number", prefix),
+                            std::format("{} Thermostat Staged Number", prefix),
                             Constant::Units::None,
                             this->StageNum,
                             OutputProcessor::TimeStepType::System,
@@ -229,28 +232,28 @@ void ZoneSystemMoistureDemand::setUpOutputVars(EnergyPlusData &state,
 {
     if (state.dataHeatBal->DoLatentSizing) {
         SetupOutputVariable(state,
-                            EnergyPlus::format("{} Air System Latent Heating Energy", prefix),
+                            std::format("{} Air System Latent Heating Energy", prefix),
                             Constant::Units::J,
                             this->airSysHeatEnergy,
                             OutputProcessor::TimeStepType::System,
                             OutputProcessor::StoreType::Sum,
                             name);
         SetupOutputVariable(state,
-                            EnergyPlus::format("{} Air System Latent Cooling Energy", prefix),
+                            std::format("{} Air System Latent Cooling Energy", prefix),
                             Constant::Units::J,
                             this->airSysCoolEnergy,
                             OutputProcessor::TimeStepType::System,
                             OutputProcessor::StoreType::Sum,
                             name);
         SetupOutputVariable(state,
-                            EnergyPlus::format("{} Air System Latent Heating Rate", prefix),
+                            std::format("{} Air System Latent Heating Rate", prefix),
                             Constant::Units::W,
                             this->airSysHeatRate,
                             OutputProcessor::TimeStepType::System,
                             OutputProcessor::StoreType::Average,
                             name);
         SetupOutputVariable(state,
-                            EnergyPlus::format("{} Air System Latent Cooling Rate", prefix),
+                            std::format("{} Air System Latent Cooling Rate", prefix),
                             Constant::Units::W,
                             this->airSysCoolRate,
                             OutputProcessor::TimeStepType::System,
@@ -258,14 +261,14 @@ void ZoneSystemMoistureDemand::setUpOutputVars(EnergyPlusData &state,
                             name);
         // temporarily hide these behind DoLatentSizing flag
         SetupOutputVariable(state,
-                            EnergyPlus::format("{} Air System Sensible Heat Ratio", prefix),
+                            std::format("{} Air System Sensible Heat Ratio", prefix),
                             Constant::Units::None,
                             this->airSysSensibleHeatRatio,
                             OutputProcessor::TimeStepType::System,
                             OutputProcessor::StoreType::Average,
                             name);
         SetupOutputVariable(state,
-                            EnergyPlus::format("{} Air Vapor Pressure Difference", prefix),
+                            std::format("{} Air Vapor Pressure Difference", prefix),
                             Constant::Units::Pa,
                             this->vaporPressureDifference,
                             OutputProcessor::TimeStepType::System,
@@ -276,21 +279,21 @@ void ZoneSystemMoistureDemand::setUpOutputVars(EnergyPlusData &state,
     // There are two sets of data available: one where zone and group multipliers have been applied and another where the multipliers have
     // not. First, these report variables are NOT multiplied by zone and group multipliers
     SetupOutputVariable(state,
-                        EnergyPlus::format("{} Predicted Moisture Load Moisture Transfer Rate", prefix),
+                        std::format("{} Predicted Moisture Load Moisture Transfer Rate", prefix),
                         Constant::Units::kgWater_s,
                         this->predictedRate,
                         OutputProcessor::TimeStepType::System,
                         OutputProcessor::StoreType::Average,
                         name);
     SetupOutputVariable(state,
-                        EnergyPlus::format("{} Predicted Moisture Load to Humidifying Setpoint Moisture Transfer Rate", prefix),
+                        std::format("{} Predicted Moisture Load to Humidifying Setpoint Moisture Transfer Rate", prefix),
                         Constant::Units::kgWater_s,
                         this->predictedHumSPRate,
                         OutputProcessor::TimeStepType::System,
                         OutputProcessor::StoreType::Average,
                         name);
     SetupOutputVariable(state,
-                        EnergyPlus::format("{} Predicted Moisture Load to Dehumidifying Setpoint Moisture Transfer Rate", prefix),
+                        std::format("{} Predicted Moisture Load to Dehumidifying Setpoint Moisture Transfer Rate", prefix),
                         Constant::Units::kgWater_s,
                         this->predictedDehumSPRate,
                         OutputProcessor::TimeStepType::System,
@@ -298,21 +301,21 @@ void ZoneSystemMoistureDemand::setUpOutputVars(EnergyPlusData &state,
                         name);
     // Second, these report variable ARE multiplied by zone and group multipliers
     SetupOutputVariable(state,
-                        EnergyPlus::format("{} System Predicted Moisture Load Moisture Transfer Rate", prefix),
+                        std::format("{} System Predicted Moisture Load Moisture Transfer Rate", prefix),
                         Constant::Units::kgWater_s,
                         this->TotalOutputRequired,
                         OutputProcessor::TimeStepType::System,
                         OutputProcessor::StoreType::Average,
                         name);
     SetupOutputVariable(state,
-                        EnergyPlus::format("{} System Predicted Moisture Load to Humidifying Setpoint Moisture Transfer Rate", prefix),
+                        std::format("{} System Predicted Moisture Load to Humidifying Setpoint Moisture Transfer Rate", prefix),
                         Constant::Units::kgWater_s,
                         this->OutputRequiredToHumidifyingSP,
                         OutputProcessor::TimeStepType::System,
                         OutputProcessor::StoreType::Average,
                         name);
     SetupOutputVariable(state,
-                        EnergyPlus::format("{} System Predicted Moisture Load to Dehumidifying Setpoint Moisture Transfer Rate", prefix),
+                        std::format("{} System Predicted Moisture Load to Dehumidifying Setpoint Moisture Transfer Rate", prefix),
                         Constant::Units::kgWater_s,
                         this->OutputRequiredToDehumidifyingSP,
                         OutputProcessor::TimeStepType::System,

@@ -47,6 +47,7 @@
 
 // C++ Headers
 #include <cmath>
+#include <format>
 
 // ObjexxFCL Headers
 #include <ObjexxFCL/Array.functions.hh>
@@ -138,7 +139,7 @@ PlantComponent *PondGroundHeatExchangerData::factory(EnergyPlusData &state, std:
         }
     }
     // If we didn't find it, fatal
-    ShowFatalError(state, EnergyPlus::format("Pond Heat Exchanger Factory: Error getting inputs for GHX named: {}", objectName));
+    ShowFatalError(state, std::format("Pond Heat Exchanger Factory: Error getting inputs for GHX named: {}", objectName));
     // Shut up the compiler
     return nullptr;
 }
@@ -228,10 +229,9 @@ void GetPondGroundHeatExchanger(EnergyPlusData &state)
                                                                                 Node::CompFluidStream::Primary,
                                                                                 Node::ObjectIsNotParent);
         if (state.dataPondGHE->PondGHE(Item).InletNodeNum == 0) {
-            ShowSevereError(state,
-                            EnergyPlus::format("Invalid {}={}", state.dataIPShortCut->cAlphaFieldNames(2), state.dataIPShortCut->cAlphaArgs(2)));
-            ShowContinueError(
-                state, EnergyPlus::format("Entered in {}={}", state.dataIPShortCut->cCurrentModuleObject, state.dataIPShortCut->cAlphaArgs(1)));
+            ShowSevereError(state, std::format("Invalid {}={}", state.dataIPShortCut->cAlphaFieldNames(2), state.dataIPShortCut->cAlphaArgs(2)));
+            ShowContinueError(state,
+                              std::format("Entered in {}={}", state.dataIPShortCut->cCurrentModuleObject, state.dataIPShortCut->cAlphaArgs(1)));
             ErrorsFound = true;
         }
 
@@ -247,10 +247,9 @@ void GetPondGroundHeatExchanger(EnergyPlusData &state)
                                                                                  Node::CompFluidStream::Primary,
                                                                                  Node::ObjectIsNotParent);
         if (state.dataPondGHE->PondGHE(Item).OutletNodeNum == 0) {
-            ShowSevereError(state,
-                            EnergyPlus::format("Invalid {}={}", state.dataIPShortCut->cAlphaFieldNames(3), state.dataIPShortCut->cAlphaArgs(3)));
-            ShowContinueError(
-                state, EnergyPlus::format("Entered in {}={}", state.dataIPShortCut->cCurrentModuleObject, state.dataIPShortCut->cAlphaArgs(1)));
+            ShowSevereError(state, std::format("Invalid {}={}", state.dataIPShortCut->cAlphaFieldNames(3), state.dataIPShortCut->cAlphaArgs(3)));
+            ShowContinueError(state,
+                              std::format("Entered in {}={}", state.dataIPShortCut->cCurrentModuleObject, state.dataIPShortCut->cAlphaArgs(1)));
             ErrorsFound = true;
         }
 
@@ -265,18 +264,18 @@ void GetPondGroundHeatExchanger(EnergyPlusData &state)
         state.dataPondGHE->PondGHE(Item).Depth = state.dataIPShortCut->rNumericArgs(1);
         state.dataPondGHE->PondGHE(Item).Area = state.dataIPShortCut->rNumericArgs(2);
         if (state.dataIPShortCut->rNumericArgs(1) <= 0.0) {
-            ShowSevereError(
-                state, EnergyPlus::format("Invalid {}={:.2R}", state.dataIPShortCut->cNumericFieldNames(1), state.dataIPShortCut->rNumericArgs(1)));
-            ShowContinueError(
-                state, EnergyPlus::format("Entered in {}={}", state.dataIPShortCut->cCurrentModuleObject, state.dataIPShortCut->cAlphaArgs(1)));
+            ShowSevereError(state,
+                            std::format("Invalid {}={:.2f}", state.dataIPShortCut->cNumericFieldNames(1), state.dataIPShortCut->rNumericArgs(1)));
+            ShowContinueError(state,
+                              std::format("Entered in {}={}", state.dataIPShortCut->cCurrentModuleObject, state.dataIPShortCut->cAlphaArgs(1)));
             ShowContinueError(state, "Value must be greater than 0.0");
             ErrorsFound = true;
         }
         if (state.dataIPShortCut->rNumericArgs(2) <= 0.0) {
-            ShowSevereError(
-                state, EnergyPlus::format("Invalid {}={:.2R}", state.dataIPShortCut->cNumericFieldNames(2), state.dataIPShortCut->rNumericArgs(2)));
-            ShowContinueError(
-                state, EnergyPlus::format("Entered in {}={}", state.dataIPShortCut->cCurrentModuleObject, state.dataIPShortCut->cAlphaArgs(1)));
+            ShowSevereError(state,
+                            std::format("Invalid {}={:.2f}", state.dataIPShortCut->cNumericFieldNames(2), state.dataIPShortCut->rNumericArgs(2)));
+            ShowContinueError(state,
+                              std::format("Entered in {}={}", state.dataIPShortCut->cCurrentModuleObject, state.dataIPShortCut->cAlphaArgs(1)));
             ShowContinueError(state, "Value must be greater than 0.0");
             ErrorsFound = true;
         }
@@ -286,29 +285,29 @@ void GetPondGroundHeatExchanger(EnergyPlusData &state)
         state.dataPondGHE->PondGHE(Item).TubeOutDiameter = state.dataIPShortCut->rNumericArgs(4);
 
         if (state.dataIPShortCut->rNumericArgs(3) <= 0.0) {
-            ShowSevereError(
-                state, EnergyPlus::format("Invalid {}={:.2R}", state.dataIPShortCut->cNumericFieldNames(3), state.dataIPShortCut->rNumericArgs(3)));
-            ShowContinueError(
-                state, EnergyPlus::format("Entered in {}={}", state.dataIPShortCut->cCurrentModuleObject, state.dataIPShortCut->cAlphaArgs(1)));
+            ShowSevereError(state,
+                            std::format("Invalid {}={:.2f}", state.dataIPShortCut->cNumericFieldNames(3), state.dataIPShortCut->rNumericArgs(3)));
+            ShowContinueError(state,
+                              std::format("Entered in {}={}", state.dataIPShortCut->cCurrentModuleObject, state.dataIPShortCut->cAlphaArgs(1)));
             ShowContinueError(state, "Value must be greater than 0.0");
             ErrorsFound = true;
         }
         if (state.dataIPShortCut->rNumericArgs(4) <= 0.0) {
-            ShowSevereError(
-                state, EnergyPlus::format("Invalid {}={:.2R}", state.dataIPShortCut->cNumericFieldNames(4), state.dataIPShortCut->rNumericArgs(4)));
-            ShowContinueError(
-                state, EnergyPlus::format("Entered in {}={}", state.dataIPShortCut->cCurrentModuleObject, state.dataIPShortCut->cAlphaArgs(1)));
+            ShowSevereError(state,
+                            std::format("Invalid {}={:.2f}", state.dataIPShortCut->cNumericFieldNames(4), state.dataIPShortCut->rNumericArgs(4)));
+            ShowContinueError(state,
+                              std::format("Entered in {}={}", state.dataIPShortCut->cCurrentModuleObject, state.dataIPShortCut->cAlphaArgs(1)));
             ShowContinueError(state, "Value must be greater than 0.0");
             ErrorsFound = true;
         }
         if (state.dataIPShortCut->rNumericArgs(3) > state.dataIPShortCut->rNumericArgs(4)) { // error
-            ShowSevereError(state, EnergyPlus::format("For {}: {}", state.dataIPShortCut->cCurrentModuleObject, state.dataIPShortCut->cAlphaArgs(1)));
+            ShowSevereError(state, std::format("For {}: {}", state.dataIPShortCut->cCurrentModuleObject, state.dataIPShortCut->cAlphaArgs(1)));
             ShowContinueError(state,
-                              EnergyPlus::format("{} [{:.2R}] > {} [{:.2R}]",
-                                                 state.dataIPShortCut->cNumericFieldNames(3),
-                                                 state.dataIPShortCut->rNumericArgs(3),
-                                                 state.dataIPShortCut->cNumericFieldNames(4),
-                                                 state.dataIPShortCut->rNumericArgs(4)));
+                              std::format("{} [{:.2f}] > {} [{:.2f}]",
+                                          state.dataIPShortCut->cNumericFieldNames(3),
+                                          state.dataIPShortCut->rNumericArgs(3),
+                                          state.dataIPShortCut->cNumericFieldNames(4),
+                                          state.dataIPShortCut->rNumericArgs(4)));
             ErrorsFound = true;
         }
 
@@ -317,18 +316,18 @@ void GetPondGroundHeatExchanger(EnergyPlusData &state)
         state.dataPondGHE->PondGHE(Item).GrndConductivity = state.dataIPShortCut->rNumericArgs(6);
 
         if (state.dataIPShortCut->rNumericArgs(5) <= 0.0) {
-            ShowSevereError(
-                state, EnergyPlus::format("Invalid {}={:.4R}", state.dataIPShortCut->cNumericFieldNames(5), state.dataIPShortCut->rNumericArgs(5)));
-            ShowContinueError(
-                state, EnergyPlus::format("Entered in {}={}", state.dataIPShortCut->cCurrentModuleObject, state.dataIPShortCut->cAlphaArgs(1)));
+            ShowSevereError(state,
+                            std::format("Invalid {}={:.4f}", state.dataIPShortCut->cNumericFieldNames(5), state.dataIPShortCut->rNumericArgs(5)));
+            ShowContinueError(state,
+                              std::format("Entered in {}={}", state.dataIPShortCut->cCurrentModuleObject, state.dataIPShortCut->cAlphaArgs(1)));
             ShowContinueError(state, "Value must be greater than 0.0");
             ErrorsFound = true;
         }
         if (state.dataIPShortCut->rNumericArgs(6) <= 0.0) {
-            ShowSevereError(
-                state, EnergyPlus::format("Invalid {}={:.4R}", state.dataIPShortCut->cNumericFieldNames(6), state.dataIPShortCut->rNumericArgs(6)));
-            ShowContinueError(
-                state, EnergyPlus::format("Entered in {}={}", state.dataIPShortCut->cCurrentModuleObject, state.dataIPShortCut->cAlphaArgs(1)));
+            ShowSevereError(state,
+                            std::format("Invalid {}={:.4f}", state.dataIPShortCut->cNumericFieldNames(6), state.dataIPShortCut->rNumericArgs(6)));
+            ShowContinueError(state,
+                              std::format("Entered in {}={}", state.dataIPShortCut->cCurrentModuleObject, state.dataIPShortCut->cAlphaArgs(1)));
             ShowContinueError(state, "Value must be greater than 0.0");
             ErrorsFound = true;
         }
@@ -337,19 +336,19 @@ void GetPondGroundHeatExchanger(EnergyPlusData &state)
         state.dataPondGHE->PondGHE(Item).NumCircuits = state.dataIPShortCut->rNumericArgs(7);
 
         if (state.dataIPShortCut->rNumericArgs(7) <= 0) {
-            ShowSevereError(
-                state, EnergyPlus::format("Invalid {}={:.2R}", state.dataIPShortCut->cNumericFieldNames(7), state.dataIPShortCut->rNumericArgs(7)));
-            ShowContinueError(
-                state, EnergyPlus::format("Entered in {}={}", state.dataIPShortCut->cCurrentModuleObject, state.dataIPShortCut->cAlphaArgs(1)));
+            ShowSevereError(state,
+                            std::format("Invalid {}={:.2f}", state.dataIPShortCut->cNumericFieldNames(7), state.dataIPShortCut->rNumericArgs(7)));
+            ShowContinueError(state,
+                              std::format("Entered in {}={}", state.dataIPShortCut->cCurrentModuleObject, state.dataIPShortCut->cAlphaArgs(1)));
             ShowContinueError(state, "Value must be greater than 0.0");
             ErrorsFound = true;
         }
         state.dataPondGHE->PondGHE(Item).CircuitLength = state.dataIPShortCut->rNumericArgs(8);
         if (state.dataIPShortCut->rNumericArgs(8) <= 0) {
-            ShowSevereError(
-                state, EnergyPlus::format("Invalid {}={:.2R}", state.dataIPShortCut->cNumericFieldNames(8), state.dataIPShortCut->rNumericArgs(8)));
-            ShowContinueError(
-                state, EnergyPlus::format("Entered in {}={}", state.dataIPShortCut->cCurrentModuleObject, state.dataIPShortCut->cAlphaArgs(1)));
+            ShowSevereError(state,
+                            std::format("Invalid {}={:.2f}", state.dataIPShortCut->cNumericFieldNames(8), state.dataIPShortCut->rNumericArgs(8)));
+            ShowContinueError(state,
+                              std::format("Entered in {}={}", state.dataIPShortCut->cCurrentModuleObject, state.dataIPShortCut->cAlphaArgs(1)));
             ShowContinueError(state, "Value must be greater than 0.0");
             ErrorsFound = true;
         }
@@ -358,14 +357,14 @@ void GetPondGroundHeatExchanger(EnergyPlusData &state)
 
     // final error check
     if (ErrorsFound) {
-        ShowFatalError(state, EnergyPlus::format("Errors found in processing input for {}", state.dataIPShortCut->cCurrentModuleObject));
+        ShowFatalError(state, std::format("Errors found in processing input for {}", state.dataIPShortCut->cCurrentModuleObject));
     }
 
     if (!state.dataEnvrn->GroundTempInputs[(int)DataEnvironment::GroundTempType::Deep]) {
         ShowWarningError(state, "GetPondGroundHeatExchanger:  No \"Site:GroundTemperature:Deep\" were input.");
         ShowContinueError(state,
-                          EnergyPlus::format("Defaults, constant throughout the year of ({:.1R}) will be used.",
-                                             state.dataEnvrn->GroundTemp[(int)DataEnvironment::GroundTempType::Deep]));
+                          std::format("Defaults, constant throughout the year of ({:.1f}) will be used.",
+                                      state.dataEnvrn->GroundTemp[(int)DataEnvironment::GroundTempType::Deep]));
     }
 }
 
@@ -800,11 +799,10 @@ Real64 PondGroundHeatExchangerData::CalcEffectiveness(EnergyPlusData &state,
     if (PondTemperature < 0.0) {
         ++this->ConsecutiveFrozen;
         if (this->FrozenErrIndex == 0) {
-            ShowWarningMessage(
-                state,
-                EnergyPlus::format("GroundHeatExchanger:Pond=\"{}\", is frozen; Pond model not valid. Calculated Pond Temperature=[{:.2R}] C",
-                                   this->Name,
-                                   PondTemperature));
+            ShowWarningMessage(state,
+                               std::format("GroundHeatExchanger:Pond=\"{}\", is frozen; Pond model not valid. Calculated Pond Temperature=[{:.2f}] C",
+                                           this->Name,
+                                           PondTemperature));
             ShowContinueErrorTimeStamp(state, "");
         }
         ShowRecurringWarningErrorAtEnd(state,
@@ -816,9 +814,8 @@ Real64 PondGroundHeatExchangerData::CalcEffectiveness(EnergyPlusData &state,
                                        "[C]",
                                        "[C]");
         if (this->ConsecutiveFrozen >= state.dataGlobal->TimeStepsInHour * 30) {
-            ShowFatalError(
-                state,
-                EnergyPlus::format("GroundHeatExchanger:Pond=\"{}\" has been frozen for 30 consecutive hours.  Program terminates.", this->Name));
+            ShowFatalError(state,
+                           std::format("GroundHeatExchanger:Pond=\"{}\" has been frozen for 30 consecutive hours.  Program terminates.", this->Name));
         }
     } else {
         this->ConsecutiveFrozen = 0;

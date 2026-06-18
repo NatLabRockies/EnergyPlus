@@ -1933,7 +1933,7 @@ TEST_F(EnergyPlusFixture, HybridModel_processInverseModelMultpHMTest)
     EXPECT_NE(state->dataZoneTempPredictorCorrector->zoneHeatBalance(numZones).hmThermalMassMultErrIndex,
               0); // This is now set, won't be zero anymore
     std::string const error_string = delimited_string(
-        {EnergyPlus::format("   ** Warning ** Version: missing in IDF, processing for EnergyPlus version=\"{}\"", DataStringGlobals::MatchVersion),
+        {std::format("   ** Warning ** Version: missing in IDF, processing for EnergyPlus version=\"{}\"", DataStringGlobals::MatchVersion),
          "   ** Warning ** Hybrid model thermal mass multiplier higher than the limit for Hybrid Zone",
          "   **   ~~~   ** This means that the ratio of the zone air heat capacity for the current time step to the",
          "   **   ~~~   ** zone air heat storage is higher than the maximum limit of 30.0."});
@@ -1960,8 +1960,6 @@ TEST_F(EnergyPlusFixture, FillPredefinedTableOnThermostatSchedules_Test)
 
     auto &orp = *state->dataOutRptPredefined;
     auto &dzc = *state->dataZoneCtrls;
-
-    SetPredefinedTables(*state);
 
     dzc.NumTempControlledZones = 4;
     dzc.TempControlledZone.allocate(dzc.NumTempControlledZones);
@@ -2147,8 +2145,6 @@ TEST_F(EnergyPlusFixture, FillPredefinedTableOnThermostatSchedules_MultipleContr
     auto &orp = *state->dataOutRptPredefined;
     auto &dzc = *state->dataZoneCtrls;
 
-    SetPredefinedTables(*state);
-
     constexpr int NumControlTypes = 4;
     dzc.NumTempControlledZones = NumControlTypes;
     dzc.TempControlledZone.allocate(dzc.NumTempControlledZones);
@@ -2162,9 +2158,9 @@ TEST_F(EnergyPlusFixture, FillPredefinedTableOnThermostatSchedules_MultipleContr
         std::rotate(order.begin(), std::next(order.begin()), order.end());
         auto &tcz = dzc.TempControlledZone(i + 1);
 
-        const std::string ZoneName = fmt::format("ZONE {}", zoneLetter);
+        const std::string ZoneName = std::format("ZONE {}", zoneLetter);
         tcz.ZoneName = ZoneName;
-        tcz.Name = fmt::format("TSTAT {}", zoneLetter);
+        tcz.Name = std::format("TSTAT {}", zoneLetter);
         tcz.ControlTypeSchedName = state->dataScheduleMgr->Schedule(CTSchedIndex).Name;
         tcz.CTSchedIndex = CTSchedIndex;
         tcz.NumControlTypes = NumControlTypes;
@@ -2193,8 +2189,8 @@ TEST_F(EnergyPlusFixture, FillPredefinedTableOnThermostatSchedules_MultipleContr
 
     for (size_t i = 0; i < order.size(); ++i) {
         char zoneLetter = char(int('A') + i);
-        const std::string ZoneName = fmt::format("ZONE {}", zoneLetter);
-        EXPECT_EQ(fmt::format("TSTAT {}", zoneLetter), RetrievePreDefTableEntry(*state, orp.pdchStatName, ZoneName)) << "Failed for " << ZoneName;
+        const std::string ZoneName = std::format("ZONE {}", zoneLetter);
+        EXPECT_EQ(std::format("TSTAT {}", zoneLetter), RetrievePreDefTableEntry(*state, orp.pdchStatName, ZoneName)) << "Failed for " << ZoneName;
         EXPECT_EQ("CONTROL SCHEDULE", RetrievePreDefTableEntry(*state, orp.pdchStatCtrlTypeSchd, ZoneName)) << "Failed for " << ZoneName;
         EXPECT_EQ("DualSetPointWithDeadBand, SingleCooling, SingleHeatCool, SingleHeating",
                   RetrievePreDefTableEntry(*state, orp.pdchStatSchdType1, ZoneName))

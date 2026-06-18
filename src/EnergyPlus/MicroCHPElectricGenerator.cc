@@ -47,6 +47,7 @@
 
 // C++ Headers
 #include <cmath>
+#include <format>
 
 // ObjexxFCL Headers
 #include <ObjexxFCL/Array.functions.hh>
@@ -117,8 +118,7 @@ PlantComponent *MicroCHPDataStruct::factory(EnergyPlusData &state, std::string c
         }
     }
     // If we didn't find it, fatal
-    ShowFatalError(state,
-                   EnergyPlus::format("LocalMicroCHPGenFactory: Error getting inputs for micro-CHP gen named: {}", objectName)); // LCOV_EXCL_LINE
+    ShowFatalError(state, std::format("LocalMicroCHPGenFactory: Error getting inputs for micro-CHP gen named: {}", objectName)); // LCOV_EXCL_LINE
     // Shut up the compiler
     return nullptr; // LCOV_EXCL_LINE
 }
@@ -155,7 +155,7 @@ void GetMicroCHPGeneratorInput(EnergyPlusData &state)
         state.dataCHPElectGen->NumMicroCHPParams = state.dataInputProcessing->inputProcessor->getNumObjectsFound(state, s_ipsc->cCurrentModuleObject);
 
         if (state.dataCHPElectGen->NumMicroCHPParams <= 0) {
-            ShowSevereError(state, EnergyPlus::format("No {} equipment specified in input file", s_ipsc->cCurrentModuleObject));
+            ShowSevereError(state, std::format("No {} equipment specified in input file", s_ipsc->cCurrentModuleObject));
             ErrorsFound = true;
         }
 
@@ -206,8 +206,8 @@ void GetMicroCHPGeneratorInput(EnergyPlusData &state)
                 microCHPParams.PlantFlowControl = false;
             }
             if ((!(Util::SameString(AlphArray(4), "InternalControl"))) && (!(Util::SameString(AlphArray(4), "PlantControl")))) {
-                ShowSevereError(state, EnergyPlus::format("Invalid, {} = {}", s_ipsc->cAlphaFieldNames(4), AlphArray(4)));
-                ShowContinueError(state, EnergyPlus::format("Entered in {}={}", s_ipsc->cCurrentModuleObject, AlphArray(1)));
+                ShowSevereError(state, std::format("Invalid, {} = {}", s_ipsc->cAlphaFieldNames(4), AlphArray(4)));
+                ShowContinueError(state, std::format("Entered in {}={}", s_ipsc->cCurrentModuleObject, AlphArray(1)));
                 ErrorsFound = true;
             }
             if (microCHPParams.InternalFlowControl) { // get the curve
@@ -236,15 +236,15 @@ void GetMicroCHPGeneratorInput(EnergyPlusData &state)
             microCHPParams.RadiativeFraction = NumArray(9); // N9 radiative fraction for skin losses
             microCHPParams.MCeng = NumArray(10);            // N10 Aggregated Thermal Mass of Generator MC_eng
             if (microCHPParams.MCeng <= 0.0) {
-                ShowSevereError(state, EnergyPlus::format("Invalid, {} = {:.5R}", s_ipsc->cNumericFieldNames(10), NumArray(10)));
-                ShowContinueError(state, EnergyPlus::format("Entered in {}={}", s_ipsc->cCurrentModuleObject, AlphArray(1)));
+                ShowSevereError(state, std::format("Invalid, {} = {:.5f}", s_ipsc->cNumericFieldNames(10), NumArray(10)));
+                ShowContinueError(state, std::format("Entered in {}={}", s_ipsc->cCurrentModuleObject, AlphArray(1)));
                 ShowContinueError(state, "Thermal mass must be greater than zero");
                 ErrorsFound = true;
             }
             microCHPParams.MCcw = NumArray(11); // Aggregated Thermal Mass of Heat Recovery MC_cw
             if (microCHPParams.MCcw <= 0.0) {
-                ShowSevereError(state, EnergyPlus::format("Invalid, {} = {:.5R}", s_ipsc->cNumericFieldNames(11), NumArray(11)));
-                ShowContinueError(state, EnergyPlus::format("Entered in {}={}", s_ipsc->cCurrentModuleObject, AlphArray(1)));
+                ShowSevereError(state, std::format("Invalid, {} = {:.5f}", s_ipsc->cNumericFieldNames(11), NumArray(11)));
+                ShowContinueError(state, std::format("Entered in {}={}", s_ipsc->cCurrentModuleObject, AlphArray(1)));
                 ShowContinueError(state, "Thermal mass must be greater than zero");
                 ErrorsFound = true;
             }
@@ -255,8 +255,8 @@ void GetMicroCHPGeneratorInput(EnergyPlusData &state)
                 microCHPParams.WarmUpByEngineTemp = false;
             }
             if ((!(Util::SameString(AlphArray(7), "NominalEngineTemperature"))) && (!(Util::SameString(AlphArray(7), "TimeDelay")))) {
-                ShowSevereError(state, EnergyPlus::format("Invalid, {} = {}", s_ipsc->cAlphaFieldNames(7), AlphArray(7)));
-                ShowContinueError(state, EnergyPlus::format("Entered in {}={}", s_ipsc->cCurrentModuleObject, AlphArray(1)));
+                ShowSevereError(state, std::format("Invalid, {} = {}", s_ipsc->cAlphaFieldNames(7), AlphArray(7)));
+                ShowContinueError(state, std::format("Entered in {}={}", s_ipsc->cCurrentModuleObject, AlphArray(1)));
                 ErrorsFound = true;
             }
             microCHPParams.kf = NumArray(13);          // N13 Warmup Fuel Flow Rate Coefficient k_f
@@ -274,8 +274,8 @@ void GetMicroCHPGeneratorInput(EnergyPlusData &state)
                 microCHPParams.WarmRestartOkay = false;
             }
             if ((!(Util::SameString(AlphArray(8), "MandatoryCoolDown"))) && (!(Util::SameString(AlphArray(8), "OptionalCoolDown")))) {
-                ShowSevereError(state, EnergyPlus::format("Invalid, {} = {}", s_ipsc->cAlphaFieldNames(8), AlphArray(8)));
-                ShowContinueError(state, EnergyPlus::format("Entered in {}={}", s_ipsc->cCurrentModuleObject, AlphArray(1)));
+                ShowSevereError(state, std::format("Invalid, {} = {}", s_ipsc->cAlphaFieldNames(8), AlphArray(8)));
+                ShowContinueError(state, std::format("Entered in {}={}", s_ipsc->cCurrentModuleObject, AlphArray(1)));
                 ErrorsFound = true;
             }
         }
@@ -285,7 +285,7 @@ void GetMicroCHPGeneratorInput(EnergyPlusData &state)
 
         if (state.dataCHPElectGen->NumMicroCHPs <= 0) {
             // shouldn't ever come here?
-            ShowSevereError(state, EnergyPlus::format("No {} equipment specified in input file", s_ipsc->cCurrentModuleObject));
+            ShowSevereError(state, std::format("No {} equipment specified in input file", s_ipsc->cCurrentModuleObject));
             ErrorsFound = true;
         }
 
@@ -320,8 +320,8 @@ void GetMicroCHPGeneratorInput(EnergyPlusData &state)
             if (thisParamID != 0) {
                 microCHP.A42Model = state.dataCHPElectGen->MicroCHPParamInput(thisParamID); // entire structure of input data assigned here!
             } else {
-                ShowSevereError(state, EnergyPlus::format("Invalid, {} = {}", s_ipsc->cAlphaFieldNames(2), AlphArray(2)));
-                ShowContinueError(state, EnergyPlus::format("Entered in {}={}", s_ipsc->cCurrentModuleObject, AlphArray(1)));
+                ShowSevereError(state, std::format("Invalid, {} = {}", s_ipsc->cAlphaFieldNames(2), AlphArray(2)));
+                ShowContinueError(state, std::format("Entered in {}={}", s_ipsc->cCurrentModuleObject, AlphArray(1)));
                 ErrorsFound = true;
             }
 
@@ -329,8 +329,8 @@ void GetMicroCHPGeneratorInput(EnergyPlusData &state)
                 microCHP.ZoneName = AlphArray(3); //  A3 Zone Name
                 microCHP.ZoneID = Util::FindItemInList(microCHP.ZoneName, state.dataHeatBal->Zone);
                 if (microCHP.ZoneID == 0) {
-                    ShowSevereError(state, EnergyPlus::format("Invalid, {} = {}", s_ipsc->cAlphaFieldNames(3), AlphArray(3)));
-                    ShowContinueError(state, EnergyPlus::format("Entered in {}={}", s_ipsc->cCurrentModuleObject, AlphArray(1)));
+                    ShowSevereError(state, std::format("Invalid, {} = {}", s_ipsc->cAlphaFieldNames(3), AlphArray(3)));
+                    ShowContinueError(state, std::format("Entered in {}={}", s_ipsc->cCurrentModuleObject, AlphArray(1)));
                     ErrorsFound = true;
                 }
             } else {
@@ -384,8 +384,8 @@ void GetMicroCHPGeneratorInput(EnergyPlusData &state)
 
             microCHP.FuelSupplyID = Util::FindItemInList(AlphArray(8), state.dataGenerator->FuelSupply); // Fuel Supply ID
             if (microCHP.FuelSupplyID == 0) {
-                ShowSevereError(state, EnergyPlus::format("Invalid, {} = {}", s_ipsc->cAlphaFieldNames(8), AlphArray(8)));
-                ShowContinueError(state, EnergyPlus::format("Entered in {}={}", s_ipsc->cCurrentModuleObject, AlphArray(1)));
+                ShowSevereError(state, std::format("Invalid, {} = {}", s_ipsc->cAlphaFieldNames(8), AlphArray(8)));
+                ShowContinueError(state, std::format("Entered in {}={}", s_ipsc->cCurrentModuleObject, AlphArray(1)));
                 ErrorsFound = true;
             }
 
@@ -400,7 +400,7 @@ void GetMicroCHPGeneratorInput(EnergyPlusData &state)
         }
 
         if (ErrorsFound) {
-            ShowFatalError(state, EnergyPlus::format("Errors found in processing input for {}", s_ipsc->cCurrentModuleObject));
+            ShowFatalError(state, std::format("Errors found in processing input for {}", s_ipsc->cCurrentModuleObject));
         }
 
         // setup report variables

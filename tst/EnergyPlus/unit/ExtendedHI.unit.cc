@@ -345,15 +345,15 @@ TEST_F(EnergyPlusFixture, extendedHI_heatindex_compare)
     //    uncomment the following to write out outputs comparing the old HI and the extended HI
     //    for (int T = 80; T < 112; T += 2) {
     //        for (int RH_percent = 40; RH_percent < 105; RH_percent += 5) {
-    //            fmt::print("{},{},{},{}\n", T, Fahrenheit2Celsius(T) + 273.15, RH_percent, calcHI(T * 1.0, RH_percent) + 273.15);
+    //            EnergyPlus::print("{},{},{},{}\n", T, Fahrenheit2Celsius(T) + 273.15, RH_percent, calcHI(T * 1.0, RH_percent) + 273.15);
     //        }
     //    }
     //
-    //    fmt::print("--------------------------extended HI------------------------------\n");
+    //    EnergyPlus::print("--------------------------extended HI------------------------------\n");
     //
     //    for (int T = 80; T < 112; T += 2) {
     //        for (int RH_percent = 40; RH_percent < 105; RH_percent += 5) {
-    //            fmt::print("{},{},{},{}\n",
+    //            EnergyPlus::print("{},{},{},{}\n",
     //                       T,
     //                       Fahrenheit2Celsius(T) + 273.15,
     //                       RH_percent,

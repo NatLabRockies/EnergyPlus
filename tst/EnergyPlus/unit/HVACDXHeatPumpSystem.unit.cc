@@ -112,7 +112,6 @@ TEST_F(EnergyPlusFixture, ExerciseHVACDXHeatPumpSystem)
     state->init_state(*state);
 
     // setup some outputs
-    OutputReportPredefined::SetPredefinedTables(*state);
 
     state->dataSize->CurZoneEqNum = 1;
 

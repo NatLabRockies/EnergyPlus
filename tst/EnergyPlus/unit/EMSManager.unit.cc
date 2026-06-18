@@ -970,6 +970,8 @@ TEST_F(EnergyPlusFixture, TestEMSVariableInitAfterRef1)
 
     ASSERT_TRUE(process_idf(idf_objects));
     state->init_state(*state);
+    state->dataGlobal->SetupFlag = true;
+    state->dataGlobal->WarmupFlag = true;
 
     int internalVarNum = RuntimeLanguageProcessor::FindEMSVariable(*state, "site_temp_adj", 1);
     EXPECT_EQ(internalVarNum, 0);
@@ -1012,7 +1014,7 @@ TEST_F(EnergyPlusFixture, TestEMSVariableInitAfterRef1)
         "   **   ~~~   ** Erl program line text: SET POWER_MULT = SITE_TEMP_ADJ",
         "   **   ~~~   ** Error message:  *** Error: EvaluateExpression: Variable = 'SITE_TEMP_ADJ' used in expression has not been initialized! "
         "*** ",
-        "   **   ~~~   **  Environment=, at Simulation time= 00:-15 - 00:00",
+        "   **   ~~~   **  During Setup, Environment=, at Simulation time= 00:-15 - 00:00",
         "   **  Fatal  ** Previous EMS error caused program termination.",
         "   ...Summary of Errors that led to program termination:",
         "   ..... Reference severe error count=1",
@@ -3018,6 +3020,352 @@ TEST_F(EnergyPlusFixture, EMSManager_Sensor_On_ScheduleConstant)
     EXPECT_EQ(45.0, schedDirect->getCurrentVal());
     EXPECT_FALSE(schedDirect->EMSActuatedOn);
     EXPECT_EQ(0.0, schedDirect->EMSVal);
+}
+
+// ============================================================================
+// Issue #7563 regression harness: EMS:Sensor on a meter lags one step.
+// ============================================================================
+// UpdateSensors (EMSManager.cc:449-464, inside InitEMS) reads a meter-typed
+// Sensor via GetInternalVariableValue -> GetCurrentMeterValue, which returns
+// meter->CurTSValue. CurTSValue is only refreshed inside ReportTSMeters, which
+// runs from UpdateDataandReport(System) at HVACManager.cc:465 -- AFTER the
+// ManageEMS(EndSystemTimestepBeforeHVACReporting) call at HVACManager.cc:446.
+//
+// Consequence: at every EMS calling point EXCEPT EndSystemTimestepAfterHVACReporting
+// (HVACManager.cc:563, after UpdateDataandReport), meter sensors read the
+// PREVIOUS step's value. Sensors on Output:Variable read *var->Which directly
+// and are NOT affected.
+//
+// These tests exercise the defect directly so a future fix can be validated.
+
+TEST_F(EnergyPlusFixture, EMSManager_MeterSensor_ReadsLiveSourceSum_Issue7563)
+{
+    // Fail-first: asserts the POST-FIX behavior. Meter sensor must reflect
+    // the current step's live source-var sum, bypassing the stale CurTSValue
+    // cache. We seed CurTSValue with a sentinel (-999) between iterations so
+    // the pre-fix code (GetCurrentMeterValue path) would report that sentinel
+    // while the post-fix code (GetInstantMeterValue-based sum) reports the
+    // live source-var value.
+    //   Pre-fix:  sensor == CurTSValue == -999  -> test FAILS
+    //   Post-fix: sensor == lightsEnergy        -> test PASSES
+    std::string const idf_objects = delimited_string({
+        "Output:Meter,Electricity:Facility,Timestep;",
+        "EnergyManagementSystem:Sensor,MeterSensor,,Electricity:Facility;",
+        "EnergyManagementSystem:Program,NoOp,SET Dummy = 1;",
+        "EnergyManagementSystem:ProgramCallingManager,Mgr,"
+        "EndOfSystemTimestepBeforeHVACReporting,NoOp;",
+    });
+    ASSERT_TRUE(process_idf(idf_objects));
+
+    state->dataGlobal->TimeStepsInHour = 1;
+    state->dataGlobal->MinutesInTimeStep = 60;
+    state->dataGlobal->TimeStepZone = 1.0;
+    state->dataHVACGlobal->TimeStepSys = 1.0;
+    state->dataGlobal->TimeStepZoneSec = state->dataGlobal->TimeStepZone * Constant::rSecsInHour;
+
+    EMSManager::CheckIfAnyEMS(*state);
+    state->init_state(*state);
+    OutputProcessor::SetupTimePointers(*state, OutputProcessor::TimeStepType::Zone, state->dataGlobal->TimeStepZone);
+    OutputProcessor::SetupTimePointers(*state, OutputProcessor::TimeStepType::System, state->dataHVACGlobal->TimeStepSys);
+
+    Real64 lightsEnergy = 0.0;
+    SetupOutputVariable(*state,
+                        "Lights Electricity Energy",
+                        Constant::Units::J,
+                        lightsEnergy,
+                        OutputProcessor::TimeStepType::Zone,
+                        OutputProcessor::StoreType::Sum,
+                        "TEST LIGHTS",
+                        Constant::eResource::Electricity,
+                        OutputProcessor::Group::Building,
+                        OutputProcessor::EndUseCat::InteriorLights,
+                        "GeneralLights",
+                        "ZONE 1",
+                        1,
+                        1);
+
+    state->dataEMSMgr->FinishProcessingUserInput = true;
+    bool anyRan = false;
+    EMSManager::ManageEMS(*state, EMSManager::EMSCallFrom::BeginZoneTimestepBeforeInitHeatBalance, anyRan, ObjexxFCL::Optional_int_const());
+
+    ASSERT_EQ(1, state->dataRuntimeLang->NumSensors);
+    auto const &sensor = state->dataRuntimeLang->Sensor(1);
+    EXPECT_EQ("METERSENSOR", sensor.Name);
+    EXPECT_ENUM_EQ(OutputProcessor::VariableType::Meter, sensor.VariableType);
+    int const meterIdx = sensor.Index;
+    ASSERT_GE(meterIdx, 0);
+    auto *meter = state->dataOutputProcessor->meters[meterIdx];
+    EXPECT_EQ("Electricity:Facility", meter->Name);
+    state->dataGlobal->WarmupFlag = false;
+
+    int const erlIdx = sensor.VariableNum;
+    for (Real64 v : {0.0, 123.456, 9.87654e6, 42.0}) {
+        lightsEnergy = v;         // live source var drives the meter sum
+        meter->CurTSValue = -999; // stale sentinel the post-fix sensor must ignore
+        EMSManager::ManageEMS(*state, EMSManager::EMSCallFrom::EndSystemTimestepBeforeHVACReporting, anyRan, ObjexxFCL::Optional_int_const());
+        EXPECT_DOUBLE_EQ(v, state->dataRuntimeLang->ErlVariable(erlIdx).Value.Number)
+            << "Post-fix for #7563: meter sensor must sum live source vars, not read stale CurTSValue";
+    }
+}
+
+TEST_F(EnergyPlusFixture, EMSManager_SensorOnMeter_FreshAtAllHVACManagerCallPoints_Issue7563)
+{
+    // Phase 1 populates meter->CurTSValue via UpdateDataandReport. Phase 2
+    // sets the live source var to a new value but does NOT call
+    // UpdateDataandReport (so CurTSValue stays at phase 1's value). Meter
+    // sensor is sampled at every EMS calling point inside HVACManager and
+    // must read the current value via live source sum. Variable sensor is
+    // the control. At each calling point, we also assert CurTSValue is
+    // still stale -- this is the pre-fix evidence, since pre-fix code
+    // returned CurTSValue via GetCurrentMeterValue.
+    std::string const idf_objects = delimited_string({
+        "Output:Meter,Electricity:Facility,Timestep;",
+        "EnergyManagementSystem:Sensor,MeterSensor,,Electricity:Facility;",
+        "EnergyManagementSystem:Sensor,VarSensor,TEST LIGHTS,Lights Electricity Energy;",
+        "EnergyManagementSystem:Program,NoOp,SET Dummy = 1;",
+        "EnergyManagementSystem:ProgramCallingManager,Mgr,"
+        "BeginTimestepBeforePredictor,NoOp;",
+    });
+    ASSERT_TRUE(process_idf(idf_objects));
+
+    state->dataGlobal->TimeStepsInHour = 1;
+    state->dataGlobal->MinutesInTimeStep = 60;
+    state->dataGlobal->TimeStepZone = 1.0;
+    state->dataHVACGlobal->TimeStepSys = 1.0;
+    state->dataGlobal->TimeStepZoneSec = state->dataGlobal->TimeStepZone * Constant::rSecsInHour;
+    state->dataGlobal->HourOfDay = 1;
+    state->dataGlobal->TimeStep = 1;
+    state->dataEnvrn->Month = 1;
+    state->dataEnvrn->DayOfMonth = 1;
+    state->dataEnvrn->DayOfWeek = 1;
+    state->dataGlobal->DayOfSim = 1;
+    state->dataGlobal->NumOfDayInEnvrn = 1;
+
+    EMSManager::CheckIfAnyEMS(*state);
+    state->init_state(*state);
+    OutputProcessor::SetupTimePointers(*state, OutputProcessor::TimeStepType::Zone, state->dataGlobal->TimeStepZone);
+    OutputProcessor::SetupTimePointers(*state, OutputProcessor::TimeStepType::System, state->dataHVACGlobal->TimeStepSys);
+    state->dataOutputProcessor->TimeValue[(int)OutputProcessor::TimeStepType::Zone].CurMinute = 60;
+    state->dataOutputProcessor->TimeValue[(int)OutputProcessor::TimeStepType::System].CurMinute = 60;
+
+    OutputProcessor::GetReportVariableInput(*state);
+    Real64 lightsEnergy = 0.0;
+    SetupOutputVariable(*state,
+                        "Lights Electricity Energy",
+                        Constant::Units::J,
+                        lightsEnergy,
+                        OutputProcessor::TimeStepType::Zone,
+                        OutputProcessor::StoreType::Sum,
+                        "TEST LIGHTS",
+                        Constant::eResource::Electricity,
+                        OutputProcessor::Group::Building,
+                        OutputProcessor::EndUseCat::InteriorLights,
+                        "GeneralLights",
+                        "ZONE 1",
+                        1,
+                        1);
+
+    state->dataEMSMgr->FinishProcessingUserInput = true;
+    bool anyRan = false;
+    EMSManager::ManageEMS(*state, EMSManager::EMSCallFrom::BeginZoneTimestepBeforeInitHeatBalance, anyRan, ObjexxFCL::Optional_int_const());
+
+    ASSERT_EQ(2, state->dataRuntimeLang->NumSensors);
+    int meterSensorIdx = 0, varSensorIdx = 0;
+    for (int i = 1; i <= state->dataRuntimeLang->NumSensors; ++i) {
+        auto const &s = state->dataRuntimeLang->Sensor(i);
+        if (s.Name == "METERSENSOR") {
+            meterSensorIdx = i;
+        } else if (s.Name == "VARSENSOR") {
+            varSensorIdx = i;
+        }
+    }
+    ASSERT_GT(meterSensorIdx, 0);
+    ASSERT_GT(varSensorIdx, 0);
+    int const meterIdx = state->dataRuntimeLang->Sensor(meterSensorIdx).Index;
+    ASSERT_GE(meterIdx, 0);
+    auto *meter = state->dataOutputProcessor->meters[meterIdx];
+    int const meterErl = state->dataRuntimeLang->Sensor(meterSensorIdx).VariableNum;
+    int const varErl = state->dataRuntimeLang->Sensor(varSensorIdx).VariableNum;
+    state->dataGlobal->WarmupFlag = false;
+    state->dataGlobal->DoOutputReporting = true;
+
+    // Phase 1: populate CurTSValue via the reporting pipeline.
+    lightsEnergy = 1000.0;
+    UpdateMeterReporting(*state);
+    UpdateDataandReport(*state, OutputProcessor::TimeStepType::Zone);
+    ASSERT_DOUBLE_EQ(1000.0, meter->CurTSValue) << "Phase 1 UpdateDataandReport did not update CurTSValue";
+
+    // Phase 2: drive source to 2000. Do not call UpdateDataandReport yet.
+    lightsEnergy = 2000.0;
+
+    struct CallSite
+    {
+        EMSManager::EMSCallFrom cf;
+        char const *label;
+    };
+    std::array<CallSite, 6> const hvacManagerCalls = {{
+        {EMSManager::EMSCallFrom::BeginTimestepBeforePredictor, "BeginTimestepBeforePredictor"},
+        {EMSManager::EMSCallFrom::BeforeHVACManagers, "BeforeHVACManagers"},
+        {EMSManager::EMSCallFrom::AfterHVACManagers, "AfterHVACManagers"},
+        {EMSManager::EMSCallFrom::HVACIterationLoop, "HVACIterationLoop"},
+        {EMSManager::EMSCallFrom::EndSystemTimestepBeforeHVACReporting, "EndSystemTimestepBeforeHVACReporting"},
+        {EMSManager::EMSCallFrom::EndSystemTimestepAfterHVACReporting, "EndSystemTimestepAfterHVACReporting"},
+    }};
+
+    // At every EMS calling point inside HVACManager, CurTSValue remains stale
+    // (1000 from phase 1) because UpdateDataandReport(Zone) -- the only path
+    // that refreshes it -- runs later from HeatBalanceManager at zone-timestep
+    // boundary. Pre-fix code returned CurTSValue and saw the stale 1000;
+    // post-fix reads live source sum via GetInstantMeterValue and sees 2000.
+    for (auto const &cs : hvacManagerCalls) {
+        EMSManager::ManageEMS(*state, cs.cf, anyRan, ObjexxFCL::Optional_int_const());
+        Real64 preFixValue = meter->CurTSValue; // what GetCurrentMeterValue would return
+        Real64 postFixValue = state->dataRuntimeLang->ErlVariable(meterErl).Value.Number;
+        Real64 varValue = state->dataRuntimeLang->ErlVariable(varErl).Value.Number;
+        EXPECT_DOUBLE_EQ(1000.0, preFixValue) << "Pre-fix evidence: at " << cs.label
+                                              << ", CurTSValue stays stale (what GetCurrentMeterValue would return)";
+        EXPECT_DOUBLE_EQ(2000.0, postFixValue) << "Post-fix for #7563: at " << cs.label << ", meter sensor reads live source sum";
+        EXPECT_DOUBLE_EQ(2000.0, varValue) << "Control: at " << cs.label << ", sensor on Output:Variable reads current step via *var->Which";
+    }
+}
+
+// Note: a unit test for an "Averaged-type source on a meter" was considered
+// but found to be unreachable -- OutputProcessor.cc:810 enforces that
+// Meter:Custom source vars must be StoreType::Sum (pre-check emits a Severe
+// and drops the source). Built-in meters (Electricity:Facility etc.) are
+// always Sum. So the fix only has to handle Sum-source meters in practice.
+
+TEST_F(EnergyPlusFixture, EMSManager_MeterSensor_MixedTypeEndToEnd_Issue7563)
+{
+    // End-to-end proof that the Zone+System sum is correct for a mixed-type
+    // meter. Uses both a meter sensor and individual var sensors as controls.
+    // Two timesteps: step 1 establishes CurTSValue via UpdateDataandReport,
+    // step 2 changes source values without calling UpdateDataandReport. At the
+    // pre-reporting calling point in step 2, asserts:
+    //   - meter sensor reads the new (not stale) values
+    //   - meter sensor == lights var sensor + fan var sensor
+    //   - after UpdateDataandReport, CurTSValue matches the sensor value
+    std::string const idf_objects = delimited_string({
+        "Output:Meter,Electricity:Facility,Timestep;",
+        "EnergyManagementSystem:Sensor,MeterSensor,,Electricity:Facility;",
+        "EnergyManagementSystem:Sensor,LightsSensor,TEST LIGHTS,Lights Electricity Energy;",
+        "EnergyManagementSystem:Sensor,FanSensor,TEST FAN,Fan Electricity Energy;",
+        "EnergyManagementSystem:Program,NoOp,SET Dummy = 1;",
+        "EnergyManagementSystem:ProgramCallingManager,Mgr,"
+        "EndOfSystemTimestepBeforeHVACReporting,NoOp;",
+    });
+    ASSERT_TRUE(process_idf(idf_objects));
+
+    state->dataGlobal->TimeStepsInHour = 1;
+    state->dataGlobal->MinutesInTimeStep = 60;
+    state->dataGlobal->TimeStepZone = 1.0;
+    state->dataHVACGlobal->TimeStepSys = 1.0;
+    state->dataGlobal->TimeStepZoneSec = state->dataGlobal->TimeStepZone * Constant::rSecsInHour;
+    state->dataGlobal->HourOfDay = 1;
+    state->dataGlobal->TimeStep = 1;
+    state->dataEnvrn->Month = 1;
+    state->dataEnvrn->DayOfMonth = 1;
+    state->dataEnvrn->DayOfWeek = 1;
+    state->dataGlobal->DayOfSim = 1;
+    state->dataGlobal->NumOfDayInEnvrn = 1;
+
+    EMSManager::CheckIfAnyEMS(*state);
+    state->init_state(*state);
+    OutputProcessor::SetupTimePointers(*state, OutputProcessor::TimeStepType::Zone, state->dataGlobal->TimeStepZone);
+    OutputProcessor::SetupTimePointers(*state, OutputProcessor::TimeStepType::System, state->dataHVACGlobal->TimeStepSys);
+    state->dataOutputProcessor->TimeValue[(int)OutputProcessor::TimeStepType::Zone].CurMinute = 60;
+    state->dataOutputProcessor->TimeValue[(int)OutputProcessor::TimeStepType::System].CurMinute = 60;
+
+    OutputProcessor::GetReportVariableInput(*state);
+
+    Real64 lightsEnergy = 0.0;
+    Real64 fanEnergy = 0.0;
+
+    SetupOutputVariable(*state,
+                        "Lights Electricity Energy",
+                        Constant::Units::J,
+                        lightsEnergy,
+                        OutputProcessor::TimeStepType::Zone,
+                        OutputProcessor::StoreType::Sum,
+                        "TEST LIGHTS",
+                        Constant::eResource::Electricity,
+                        OutputProcessor::Group::Building,
+                        OutputProcessor::EndUseCat::InteriorLights,
+                        "GeneralLights",
+                        "ZONE 1",
+                        1,
+                        1);
+
+    SetupOutputVariable(*state,
+                        "Fan Electricity Energy",
+                        Constant::Units::J,
+                        fanEnergy,
+                        OutputProcessor::TimeStepType::System,
+                        OutputProcessor::StoreType::Sum,
+                        "TEST FAN",
+                        Constant::eResource::Electricity,
+                        OutputProcessor::Group::HVAC,
+                        OutputProcessor::EndUseCat::Fans,
+                        "GeneralFans",
+                        "ZONE 1",
+                        1,
+                        1);
+
+    state->dataEMSMgr->FinishProcessingUserInput = true;
+    bool anyRan = false;
+    EMSManager::ManageEMS(*state, EMSManager::EMSCallFrom::BeginZoneTimestepBeforeInitHeatBalance, anyRan, ObjexxFCL::Optional_int_const());
+
+    ASSERT_EQ(3, state->dataRuntimeLang->NumSensors);
+    int meterErl = 0, lightsErl = 0, fanErl = 0, meterIdx = -1;
+    for (int i = 1; i <= state->dataRuntimeLang->NumSensors; ++i) {
+        auto const &s = state->dataRuntimeLang->Sensor(i);
+        if (s.Name == "METERSENSOR") {
+            meterErl = s.VariableNum;
+            meterIdx = s.Index;
+        } else if (s.Name == "LIGHTSSENSOR") {
+            lightsErl = s.VariableNum;
+        } else if (s.Name == "FANSENSOR") {
+            fanErl = s.VariableNum;
+        }
+    }
+    ASSERT_GE(meterIdx, 0);
+    ASSERT_GT(meterErl, 0);
+    ASSERT_GT(lightsErl, 0);
+    ASSERT_GT(fanErl, 0);
+    auto *meter = state->dataOutputProcessor->meters[meterIdx];
+    state->dataGlobal->WarmupFlag = false;
+    state->dataGlobal->DoOutputReporting = true;
+
+    // --- Step 1: establish CurTSValue via the reporting pipeline ---
+    lightsEnergy = 100.0;
+    fanEnergy = 300.0;
+    UpdateMeterReporting(*state);
+    UpdateDataandReport(*state, OutputProcessor::TimeStepType::System);
+    UpdateDataandReport(*state, OutputProcessor::TimeStepType::Zone);
+    ASSERT_DOUBLE_EQ(400.0, meter->CurTSValue) << "Step 1: reporting pipeline must produce 400";
+
+    // --- Step 2: change values, do NOT call UpdateDataandReport ---
+    lightsEnergy = 500.0;
+    fanEnergy = 700.0;
+
+    EXPECT_DOUBLE_EQ(400.0, meter->CurTSValue) << "CurTSValue still 400 (stale) — this is what pre-fix code returned";
+
+    EMSManager::ManageEMS(*state, EMSManager::EMSCallFrom::EndSystemTimestepBeforeHVACReporting, anyRan, ObjexxFCL::Optional_int_const());
+
+    Real64 meterVal = state->dataRuntimeLang->ErlVariable(meterErl).Value.Number;
+    Real64 lightsVal = state->dataRuntimeLang->ErlVariable(lightsErl).Value.Number;
+    Real64 fanVal = state->dataRuntimeLang->ErlVariable(fanErl).Value.Number;
+
+    EXPECT_DOUBLE_EQ(500.0, lightsVal) << "Lights var sensor reads live value";
+    EXPECT_DOUBLE_EQ(700.0, fanVal) << "Fan var sensor reads live value";
+    EXPECT_DOUBLE_EQ(1200.0, meterVal) << "Post-fix: meter sensor reads live source sum, not stale CurTSValue (400)";
+    EXPECT_DOUBLE_EQ(lightsVal + fanVal, meterVal) << "Meter sensor == sum of component var sensors";
+
+    // --- Confirm reporting pipeline agrees ---
+    UpdateMeterReporting(*state);
+    UpdateDataandReport(*state, OutputProcessor::TimeStepType::System);
+    UpdateDataandReport(*state, OutputProcessor::TimeStepType::Zone);
+    EXPECT_DOUBLE_EQ(1200.0, meter->CurTSValue) << "CurTSValue after reporting matches sensor";
 }
 
 TEST_F(EnergyPlusFixture, UnusedActuatorWarning)

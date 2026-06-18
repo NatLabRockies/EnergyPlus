@@ -3137,7 +3137,7 @@
   ZoneControl:Humidistat,
     Zone 3 Humidistat,       !- Name
     NORTH ZONE,              !- Zone Name
-    Seasonal Relative Humidity Sch;  !- Humidifying Relative Humidity Setpoint Schedule Name
+    Seasonal Relative Humidity Sch;  !- Humidifying Setpoint Schedule Name
 
   ThermostatSetpoint:DualSetpoint,
     Setpoints,               !- Name

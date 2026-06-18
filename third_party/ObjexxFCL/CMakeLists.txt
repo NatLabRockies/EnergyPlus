@@ -157,6 +157,6 @@ set( test_src
 add_library( ${target_name} ${src} )
 
 if (BUILD_TESTING AND BUILD_OBJEXXFCL_TESTING)
-  CREATE_TEST_TARGETS( ${target_name} "${test_src}" "" False)
+  create_test_targets(${target_name} "${test_src}" "")
 endif()
 

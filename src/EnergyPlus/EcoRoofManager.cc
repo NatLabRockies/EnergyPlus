@@ -528,7 +528,7 @@ namespace EcoRoofManager {
             ShowSevereError(state,
                             "initEcoRoofFirstTime: EcoRoof simulation but HeatBalanceAlgorithm is not ConductionTransferFunction(CTF). EcoRoof model "
                             "currently works only with CTF heat balance solution algorithm.");
-            ShowContinueError(state, EnergyPlus::format("Occurs for surface named {}", state.dataSurface->Surface(SurfNum).Name));
+            ShowContinueError(state, std::format("Occurs for surface named {}", state.dataSurface->Surface(SurfNum).Name));
             ShowContinueError(state, "Check input syntax for HeatBalanceAlgorithm, SurfaceProperty:HeatTransferAlgorithm,");
             ShowContinueError(state, "SurfaceProperty:HeatTransferAlgorithm:MultipleSurface, and SurfaceProperty:HeatTransferAlgorithm:SurfaceList ");
             ShowContinueError(state, "to verify that the solution method is set to CTF for the surface that is an EcoRoof.");
@@ -826,7 +826,7 @@ namespace EcoRoofManager {
                     if (ceil(60 * index1 / state.dataGlobal->MinutesInTimeStep) <= 60) {
                         ShowContinueError(
                             state,
-                            EnergyPlus::format(
+                            std::format(
                                 "...Entered Timesteps per hour=[{}], Change to some value greater than or equal to [{}] for assured stability.",
                                 state.dataGlobal->TimeStepsInHour,
                                 60 * index1 / state.dataGlobal->MinutesInTimeStep));
@@ -837,10 +837,10 @@ namespace EcoRoofManager {
                     } else {
                         ShowContinueError(
                             state,
-                            EnergyPlus::format("...Entered Timesteps per hour=[{}], however the required frequency for stability [{}] is over the "
-                                               "EnergyPlus maximum of 60.",
-                                               state.dataGlobal->TimeStepsInHour,
-                                               60 * index1 / state.dataGlobal->MinutesInTimeStep));
+                            std::format("...Entered Timesteps per hour=[{}], however the required frequency for stability [{}] is over the "
+                                        "EnergyPlus maximum of 60.",
+                                        state.dataGlobal->TimeStepsInHour,
+                                        60 * index1 / state.dataGlobal->MinutesInTimeStep));
                         ShowContinueError(state, "...Consider using the simple moisture diffusion calculation method for this application");
                         ShowContinueError(state,
                                           "...The program will continue, but if the simulation fails due to too low/high temperatures, instability "
@@ -988,10 +988,9 @@ namespace EcoRoofManager {
             state.dataEcoRoofMgr->RelativeSoilSaturationTop = (Moisture - MoistureResidual) / (MoistureMax - MoistureResidual);
             if (state.dataEcoRoofMgr->RelativeSoilSaturationTop < 0.0001) {
                 if (state.dataEcoRoofMgr->ErrIndex == 0) {
-                    ShowWarningMessage(
-                        state,
-                        EnergyPlus::format("EcoRoof: UpdateSoilProps: Relative Soil Saturation Top Moisture <= 0.0001, Value=[{:.5R}].",
-                                           state.dataEcoRoofMgr->RelativeSoilSaturationTop));
+                    ShowWarningMessage(state,
+                                       std::format("EcoRoof: UpdateSoilProps: Relative Soil Saturation Top Moisture <= 0.0001, Value=[{:#G}].",
+                                                   state.dataEcoRoofMgr->RelativeSoilSaturationTop));
                     ShowContinueError(state, "Value is set to 0.0001 and simulation continues.");
                     ShowContinueError(state, "You may wish to increase the number of timesteps to attempt to alleviate the problem.");
                 }

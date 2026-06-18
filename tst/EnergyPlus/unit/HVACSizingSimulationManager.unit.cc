@@ -112,8 +112,6 @@ protected:
 
         state->dataPlnt->PlantLoop(1).LoopSide(LoopSideLocation::Supply).NodeNumIn = 1;
 
-        SetPredefinedTables(*state);
-
         // need a node to log mass flow rate from
         state->dataLoopNodes->Node.allocate(1);
         // OutputProcessor::TimeValue.allocate(2);

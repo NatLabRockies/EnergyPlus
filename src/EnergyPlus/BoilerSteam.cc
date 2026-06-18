@@ -50,7 +50,6 @@
 
 // ObjexxFCL Headers
 #include <ObjexxFCL/Array.functions.hh>
-// #include <ObjexxFCL/Fmath.hh>
 
 // EnergyPlus Headers
 #include <EnergyPlus/Autosizing/Base.hh>
@@ -104,8 +103,7 @@ namespace BoilerSteam {
         }
 
         // If we didn't find it, fatal
-        ShowFatalError(state,
-                       EnergyPlus::format("LocalBoilerSteamFactory: Error getting inputs for steam boiler named: {}", objectName)); // LCOV_EXCL_LINE
+        ShowFatalError(state, std::format("LocalBoilerSteamFactory: Error getting inputs for steam boiler named: {}", objectName)); // LCOV_EXCL_LINE
         // Shut up the compiler
         return nullptr; // LCOV_EXCL_LINE
     }
@@ -151,17 +149,14 @@ namespace BoilerSteam {
         static constexpr std::string_view RoutineName("GetBoilerInput: ");
 
         // LOCAL VARIABLES
-        int BoilerNum; // boiler identifier
-        int NumAlphas; // Number of elements in the alpha array
-        int NumNums;   // Number of elements in the numeric array
-        int IOStat;    // IO Status when calling get input subroutine
         bool ErrorsFound(false);
 
         state.dataIPShortCut->cCurrentModuleObject = "Boiler:Steam";
-        int numBoilers = state.dataInputProcessing->inputProcessor->getNumObjectsFound(state, state.dataIPShortCut->cCurrentModuleObject);
+        auto *inputProcessor = state.dataInputProcessing->inputProcessor.get();
+        int numBoilers = inputProcessor->getNumObjectsFound(state, state.dataIPShortCut->cCurrentModuleObject);
 
         if (numBoilers <= 0) {
-            ShowSevereError(state, EnergyPlus::format("No {} equipment specified in input file", state.dataIPShortCut->cCurrentModuleObject));
+            ShowSevereError(state, std::format("No {} equipment specified in input file", state.dataIPShortCut->cCurrentModuleObject));
             ErrorsFound = true;
         }
 
@@ -172,126 +167,111 @@ namespace BoilerSteam {
 
         // Boiler will have fuel input to it , that is it !
         state.dataBoilerSteam->Boiler.allocate(numBoilers);
+        auto const &boilerSchemaProps = inputProcessor->getObjectSchemaProps(state, state.dataIPShortCut->cCurrentModuleObject);
+        auto const boilerObjects = inputProcessor->epJSON.find(state.dataIPShortCut->cCurrentModuleObject);
 
-        // LOAD ARRAYS WITH CURVE FIT Boiler DATA
-        for (BoilerNum = 1; BoilerNum <= numBoilers; ++BoilerNum) {
-            state.dataInputProcessing->inputProcessor->getObjectItem(state,
-                                                                     state.dataIPShortCut->cCurrentModuleObject,
-                                                                     BoilerNum,
-                                                                     state.dataIPShortCut->cAlphaArgs,
-                                                                     NumAlphas,
-                                                                     state.dataIPShortCut->rNumericArgs,
-                                                                     NumNums,
-                                                                     IOStat,
-                                                                     _,
-                                                                     _,
-                                                                     state.dataIPShortCut->cAlphaFieldNames,
-                                                                     state.dataIPShortCut->cNumericFieldNames);
+        if (boilerObjects != inputProcessor->epJSON.end()) {
+            int BoilerNum = 1;
+            for (auto const &boilerInstance : boilerObjects.value().items()) {
+                auto const &boilerFields = boilerInstance.value();
+                auto const boilerName = Util::makeUPPER(boilerInstance.key());
+                auto const fuelType = inputProcessor->getAlphaFieldValue(boilerFields, boilerSchemaProps, "fuel_type");
+                auto const waterInletNodeName = inputProcessor->getAlphaFieldValue(boilerFields, boilerSchemaProps, "water_inlet_node_name");
+                auto const steamOutletNodeName = inputProcessor->getAlphaFieldValue(boilerFields, boilerSchemaProps, "steam_outlet_node_name");
 
-            // ErrorsFound will be set to True if problem was found, left untouched otherwise
-            GlobalNames::VerifyUniqueBoilerName(state,
-                                                state.dataIPShortCut->cCurrentModuleObject,
-                                                state.dataIPShortCut->cAlphaArgs(1),
-                                                ErrorsFound,
-                                                state.dataIPShortCut->cCurrentModuleObject + " Name");
-            auto &thisBoiler = state.dataBoilerSteam->Boiler(BoilerNum);
-            thisBoiler.Name = state.dataIPShortCut->cAlphaArgs(1);
+                inputProcessor->markObjectAsUsed(state.dataIPShortCut->cCurrentModuleObject, boilerInstance.key());
 
-            // Validate fuel type input
-            thisBoiler.FuelType = static_cast<Constant::eFuel>(getEnumValue(Constant::eFuelNamesUC, state.dataIPShortCut->cAlphaArgs(2)));
+                // ErrorsFound will be set to True if problem was found, left untouched otherwise
+                GlobalNames::VerifyUniqueBoilerName(
+                    state, state.dataIPShortCut->cCurrentModuleObject, boilerName, ErrorsFound, state.dataIPShortCut->cCurrentModuleObject + " Name");
+                auto &thisBoiler = state.dataBoilerSteam->Boiler(BoilerNum);
+                thisBoiler.Name = boilerName;
 
-            // INPUTS from the IDF file
-            thisBoiler.BoilerMaxOperPress = state.dataIPShortCut->rNumericArgs(1);
-            if (thisBoiler.BoilerMaxOperPress < 1e5) {
-                ShowWarningMessage(state,
-                                   EnergyPlus::format("{}=\"{}\"", state.dataIPShortCut->cCurrentModuleObject, state.dataIPShortCut->cAlphaArgs(1)));
-                ShowContinueError(state, "Field: Maximum Operation Pressure units are Pa. Verify units.");
-            }
-            thisBoiler.NomEffic = state.dataIPShortCut->rNumericArgs(2);
-            thisBoiler.TempUpLimitBoilerOut = state.dataIPShortCut->rNumericArgs(3);
-            thisBoiler.NomCap = state.dataIPShortCut->rNumericArgs(4);
-            if (thisBoiler.NomCap == DataSizing::AutoSize) {
-                thisBoiler.NomCapWasAutoSized = true;
-            }
-            thisBoiler.MinPartLoadRat = state.dataIPShortCut->rNumericArgs(5);
-            thisBoiler.MaxPartLoadRat = state.dataIPShortCut->rNumericArgs(6);
-            thisBoiler.OptPartLoadRat = state.dataIPShortCut->rNumericArgs(7);
-            thisBoiler.FullLoadCoef[0] = state.dataIPShortCut->rNumericArgs(8);
-            thisBoiler.FullLoadCoef[1] = state.dataIPShortCut->rNumericArgs(9);
-            thisBoiler.FullLoadCoef[2] = state.dataIPShortCut->rNumericArgs(10);
-            thisBoiler.SizFac = state.dataIPShortCut->rNumericArgs(11);
-            if (thisBoiler.SizFac <= 0.0) {
-                thisBoiler.SizFac = 1.0;
-            }
+                // Validate fuel type input
+                thisBoiler.FuelType = static_cast<Constant::eFuel>(getEnumValue(Constant::eFuelNamesUC, fuelType));
 
-            if ((state.dataIPShortCut->rNumericArgs(8) + state.dataIPShortCut->rNumericArgs(9) + state.dataIPShortCut->rNumericArgs(10)) == 0.0) {
-                ShowSevereError(
-                    state,
-                    EnergyPlus::format("{}{}=\"{}\",", RoutineName, state.dataIPShortCut->cCurrentModuleObject, state.dataIPShortCut->cAlphaArgs(1)));
-                ShowContinueError(state, " Sum of fuel use curve coefficients = 0.0");
-                ErrorsFound = true;
-            }
+                // INPUTS from the IDF file
+                thisBoiler.BoilerMaxOperPress = inputProcessor->getRealFieldValue(boilerFields, boilerSchemaProps, "maximum_operating_pressure");
+                if (thisBoiler.BoilerMaxOperPress < 1e5) {
+                    ShowWarningMessage(state, std::format("{}=\"{}\"", state.dataIPShortCut->cCurrentModuleObject, boilerName));
+                    ShowContinueError(state, "Field: Maximum Operation Pressure units are Pa. Verify units.");
+                }
+                thisBoiler.NomEffic = inputProcessor->getRealFieldValue(boilerFields, boilerSchemaProps, "theoretical_efficiency");
+                thisBoiler.TempUpLimitBoilerOut =
+                    inputProcessor->getRealFieldValue(boilerFields, boilerSchemaProps, "design_outlet_steam_temperature");
+                thisBoiler.NomCap = inputProcessor->getRealFieldValue(boilerFields, boilerSchemaProps, "nominal_capacity");
+                if (thisBoiler.NomCap == DataSizing::AutoSize) {
+                    thisBoiler.NomCapWasAutoSized = true;
+                }
+                thisBoiler.MinPartLoadRat = inputProcessor->getRealFieldValue(boilerFields, boilerSchemaProps, "minimum_part_load_ratio");
+                thisBoiler.MaxPartLoadRat = inputProcessor->getRealFieldValue(boilerFields, boilerSchemaProps, "maximum_part_load_ratio");
+                thisBoiler.OptPartLoadRat = inputProcessor->getRealFieldValue(boilerFields, boilerSchemaProps, "optimum_part_load_ratio");
+                thisBoiler.FullLoadCoef[0] =
+                    inputProcessor->getRealFieldValue(boilerFields, boilerSchemaProps, "coefficient_1_of_fuel_use_function_of_part_load_ratio_curve");
+                thisBoiler.FullLoadCoef[1] =
+                    inputProcessor->getRealFieldValue(boilerFields, boilerSchemaProps, "coefficient_2_of_fuel_use_function_of_part_load_ratio_curve");
+                thisBoiler.FullLoadCoef[2] =
+                    inputProcessor->getRealFieldValue(boilerFields, boilerSchemaProps, "coefficient_3_of_fuel_use_function_of_part_load_ratio_curve");
+                thisBoiler.SizFac = inputProcessor->getRealFieldValue(boilerFields, boilerSchemaProps, "sizing_factor");
+                if (thisBoiler.SizFac <= 0.0) {
+                    thisBoiler.SizFac = 1.0;
+                }
 
-            if (state.dataIPShortCut->rNumericArgs(5) < 0.0) {
-                ShowSevereError(
-                    state,
-                    EnergyPlus::format("{}{}=\"{}\",", RoutineName, state.dataIPShortCut->cCurrentModuleObject, state.dataIPShortCut->cAlphaArgs(1)));
-                ShowContinueError(
-                    state,
-                    EnergyPlus::format("Invalid {}={:.3R}", state.dataIPShortCut->cNumericFieldNames(5), state.dataIPShortCut->rNumericArgs(5)));
-                ErrorsFound = true;
-            }
+                if ((thisBoiler.FullLoadCoef[0] + thisBoiler.FullLoadCoef[1] + thisBoiler.FullLoadCoef[2]) == 0.0) {
+                    ShowSevereError(state, std::format("{}{}=\"{}\",", RoutineName, state.dataIPShortCut->cCurrentModuleObject, boilerName));
+                    ShowContinueError(state, " Sum of fuel use curve coefficients = 0.0");
+                    ErrorsFound = true;
+                }
 
-            if (state.dataIPShortCut->rNumericArgs(3) == 0.0) {
-                ShowSevereError(
-                    state,
-                    EnergyPlus::format("{}{}=\"{}\",", RoutineName, state.dataIPShortCut->cCurrentModuleObject, state.dataIPShortCut->cAlphaArgs(1)));
-                ShowContinueError(
-                    state,
-                    EnergyPlus::format("Invalid {}={:.3R}", state.dataIPShortCut->cNumericFieldNames(3), state.dataIPShortCut->rNumericArgs(3)));
-                ErrorsFound = true;
-            }
-            thisBoiler.BoilerInletNodeNum = Node::GetOnlySingleNode(state,
-                                                                    state.dataIPShortCut->cAlphaArgs(3),
-                                                                    ErrorsFound,
-                                                                    Node::ConnectionObjectType::BoilerSteam,
-                                                                    state.dataIPShortCut->cAlphaArgs(1),
-                                                                    Node::FluidType::Steam,
-                                                                    Node::ConnectionType::Inlet,
-                                                                    Node::CompFluidStream::Primary,
-                                                                    Node::ObjectIsNotParent);
-            thisBoiler.BoilerOutletNodeNum = Node::GetOnlySingleNode(state,
-                                                                     state.dataIPShortCut->cAlphaArgs(4),
-                                                                     ErrorsFound,
-                                                                     Node::ConnectionObjectType::BoilerSteam,
-                                                                     state.dataIPShortCut->cAlphaArgs(1),
-                                                                     Node::FluidType::Steam,
-                                                                     Node::ConnectionType::Outlet,
-                                                                     Node::CompFluidStream::Primary,
-                                                                     Node::ObjectIsNotParent);
-            Node::TestCompSet(state,
-                              state.dataIPShortCut->cCurrentModuleObject,
-                              state.dataIPShortCut->cAlphaArgs(1),
-                              state.dataIPShortCut->cAlphaArgs(3),
-                              state.dataIPShortCut->cAlphaArgs(4),
-                              "Hot Steam Nodes");
+                if (thisBoiler.MinPartLoadRat < 0.0) {
+                    ShowSevereError(state, std::format("{}{}=\"{}\",", RoutineName, state.dataIPShortCut->cCurrentModuleObject, boilerName));
+                    ShowContinueError(state, std::format("Invalid {}={:.3f}", "Minimum Part Load Ratio", thisBoiler.MinPartLoadRat));
+                    ErrorsFound = true;
+                }
 
-            thisBoiler.fluid = Fluid::GetSteam(state);
-            if (thisBoiler.fluid == nullptr && BoilerNum == 1) {
-                ShowSevereError(state, "Fluid Properties for STEAM not found.");
-                ErrorsFound = true;
-            }
+                if (thisBoiler.TempUpLimitBoilerOut == 0.0) {
+                    ShowSevereError(state, std::format("{}{}=\"{}\",", RoutineName, state.dataIPShortCut->cCurrentModuleObject, boilerName));
+                    ShowContinueError(state, std::format("Invalid {}={:.3f}", "Design Outlet Steam Temperature", thisBoiler.TempUpLimitBoilerOut));
+                    ErrorsFound = true;
+                }
+                thisBoiler.BoilerInletNodeNum = Node::GetOnlySingleNode(state,
+                                                                        waterInletNodeName,
+                                                                        ErrorsFound,
+                                                                        Node::ConnectionObjectType::BoilerSteam,
+                                                                        boilerName,
+                                                                        Node::FluidType::Steam,
+                                                                        Node::ConnectionType::Inlet,
+                                                                        Node::CompFluidStream::Primary,
+                                                                        Node::ObjectIsNotParent);
+                thisBoiler.BoilerOutletNodeNum = Node::GetOnlySingleNode(state,
+                                                                         steamOutletNodeName,
+                                                                         ErrorsFound,
+                                                                         Node::ConnectionObjectType::BoilerSteam,
+                                                                         boilerName,
+                                                                         Node::FluidType::Steam,
+                                                                         Node::ConnectionType::Outlet,
+                                                                         Node::CompFluidStream::Primary,
+                                                                         Node::ObjectIsNotParent);
+                Node::TestCompSet(
+                    state, state.dataIPShortCut->cCurrentModuleObject, boilerName, waterInletNodeName, steamOutletNodeName, "Hot Steam Nodes");
 
-            if (NumAlphas > 4) {
-                thisBoiler.EndUseSubcategory = state.dataIPShortCut->cAlphaArgs(5);
-            } else {
-                thisBoiler.EndUseSubcategory = "General";
+                thisBoiler.fluid = Fluid::GetSteam(state);
+                if (thisBoiler.fluid == nullptr && BoilerNum == 1) {
+                    ShowSevereError(state, "Fluid Properties for STEAM not found.");
+                    ErrorsFound = true;
+                }
+
+                if (boilerFields.find("end_use_subcategory") != boilerFields.end()) {
+                    thisBoiler.EndUseSubcategory = inputProcessor->getAlphaFieldValue(boilerFields, boilerSchemaProps, "end_use_subcategory");
+                } else {
+                    thisBoiler.EndUseSubcategory = "General";
+                }
+                ++BoilerNum;
             }
         }
 
         if (ErrorsFound) {
-            ShowFatalError(state,
-                           EnergyPlus::format("{}Errors found in processing {} input.", RoutineName, state.dataIPShortCut->cCurrentModuleObject));
+            ShowFatalError(state, std::format("{}Errors found in processing {} input.", RoutineName, state.dataIPShortCut->cCurrentModuleObject));
         }
     }
 
@@ -332,7 +312,7 @@ namespace BoilerSteam {
             (state.dataLoopNodes->Node(this->BoilerOutletNodeNum).TempSetPointLo == Node::SensedNodeFlagValue)) {
             if (!state.dataGlobal->AnyEnergyManagementSystemInModel) {
                 if (!this->MissingSetPointErrDone) {
-                    ShowWarningError(state, EnergyPlus::format("Missing temperature setpoint for Boiler:Steam = {}", this->Name));
+                    ShowWarningError(state, std::format("Missing temperature setpoint for Boiler:Steam = {}", this->Name));
                     ShowContinueError(state, " A temperature setpoint is needed at the outlet node of the boiler, use a SetpointManager");
                     ShowContinueError(state, " The overall loop setpoint will be assumed for this boiler. The simulation continues ...");
                     this->MissingSetPointErrDone = true;
@@ -344,8 +324,8 @@ namespace BoilerSteam {
                 state.dataLoopNodes->NodeSetpointCheck(this->BoilerOutletNodeNum).needsSetpointChecking = false;
                 if (FatalError) {
                     if (!this->MissingSetPointErrDone) {
-                        ShowWarningError(
-                            state, EnergyPlus::format("Missing temperature setpoint for LeavingSetpointModulated mode Boiler named {}", this->Name));
+                        ShowWarningError(state,
+                                         std::format("Missing temperature setpoint for LeavingSetpointModulated mode Boiler named {}", this->Name));
                         ShowContinueError(state, " A temperature setpoint is needed at the outlet node of the boiler.");
                         ShowContinueError(state, " Use a Setpoint Manager to establish a setpoint at the boiler outlet node ");
                         ShowContinueError(state, " or use an EMS actuator to establish a setpoint at the boiler outlet node.");
@@ -429,14 +409,14 @@ namespace BoilerSteam {
                             OutputProcessor::Group::Plant,
                             OutputProcessor::EndUseCat::Boilers);
         SetupOutputVariable(state,
-                            EnergyPlus::format("Boiler {} Rate", sFuelType),
+                            std::format("Boiler {} Rate", sFuelType),
                             Constant::Units::W,
                             this->FuelUsed,
                             OutputProcessor::TimeStepType::System,
                             OutputProcessor::StoreType::Average,
                             this->Name);
         SetupOutputVariable(state,
-                            EnergyPlus::format("Boiler {} Energy", sFuelType),
+                            std::format("Boiler {} Energy", sFuelType),
                             Constant::Units::J,
                             this->FuelConsumed,
                             OutputProcessor::TimeStepType::System,
@@ -586,10 +566,9 @@ namespace BoilerSteam {
 
                             if (state.dataGlobal->DisplayExtraWarnings) {
                                 if ((std::abs(tmpNomCap - NomCapUser) / NomCapUser) > state.dataSize->AutoVsHardSizingThreshold) {
-                                    ShowMessage(state, EnergyPlus::format("SizePump: Potential issue with equipment sizing for {}", this->Name));
-                                    ShowContinueError(state, EnergyPlus::format("User-Specified Nominal Capacity of {:.2R} [W]", NomCapUser));
-                                    ShowContinueError(state,
-                                                      EnergyPlus::format("differs from Design Size Nominal Capacity of {:.2R} [W]", tmpNomCap));
+                                    ShowMessage(state, std::format("SizePump: Potential issue with equipment sizing for {}", this->Name));
+                                    ShowContinueError(state, std::format("User-Specified Nominal Capacity of {:.2f} [W]", NomCapUser));
+                                    ShowContinueError(state, std::format("differs from Design Size Nominal Capacity of {:.2f} [W]", tmpNomCap));
                                     ShowContinueError(state, "This may, or may not, indicate mismatched component sizes.");
                                     ShowContinueError(state, "Verify that the value entered is intended and is consistent with other components.");
                                 }
@@ -601,7 +580,7 @@ namespace BoilerSteam {
         } else {
             if (this->NomCapWasAutoSized && state.dataPlnt->PlantFirstSizesOkayToFinalize) {
                 ShowSevereError(state, "Autosizing of Boiler nominal capacity requires a loop Sizing:Plant object");
-                ShowContinueError(state, EnergyPlus::format("Occurs in Boiler:Steam object={}", this->Name));
+                ShowContinueError(state, std::format("Occurs in Boiler:Steam object={}", this->Name));
                 ErrorsFound = true;
             }
             if (!this->NomCapWasAutoSized && this->NomCap > 0.0 && state.dataPlnt->PlantFinalSizesOkayToReport) {
@@ -678,11 +657,11 @@ namespace BoilerSteam {
 
         if ((this->BoilerPressCheck) > this->BoilerMaxOperPress) {
             if (this->PressErrIndex == 0) {
-                ShowSevereError(
-                    state, EnergyPlus::format("Boiler:Steam=\"{}\", Saturation Pressure is greater than Maximum Operating Pressure,", this->Name));
+                ShowSevereError(state,
+                                std::format("Boiler:Steam=\"{}\", Saturation Pressure is greater than Maximum Operating Pressure,", this->Name));
                 ShowContinueError(state, "Lower Input Temperature");
-                ShowContinueError(state, EnergyPlus::format("Steam temperature=[{:.2R}] C", this->BoilerOutletTemp));
-                ShowContinueError(state, EnergyPlus::format("Refrigerant Saturation Pressure =[{:.0R}] Pa", this->BoilerPressCheck));
+                ShowContinueError(state, std::format("Steam temperature=[{:.2f}] C", this->BoilerOutletTemp));
+                ShowContinueError(state, std::format("Refrigerant Saturation Pressure =[{:.0f}] Pa", this->BoilerPressCheck));
             }
             ShowRecurringSevereErrorAtEnd(state,
                                           "Boiler:Steam=\"" + this->Name +

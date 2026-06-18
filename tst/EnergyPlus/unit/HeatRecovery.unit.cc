@@ -3990,8 +3990,6 @@ TEST_F(EnergyPlusFixture, SizeHeatRecovery)
     state->dataSize->UnitarySysEqSizing(state->dataSize->CurSysNum).CoolingCapacity = false;
     state->dataSize->UnitarySysEqSizing(state->dataSize->CurSysNum).HeatingCapacity = false;
 
-    OutputReportPredefined::SetPredefinedTables(*state);
-
     // calc heat recovery sizing
     state->dataHeatRecovery->ExchCond(ExchNum).size(*state);
 
@@ -4050,7 +4048,6 @@ TEST_F(EnergyPlusFixture, HeatRecovery_AirFlowSizing)
 
     ASSERT_TRUE(process_idf(idf_objects));
     state->init_state(*state);
-    OutputReportPredefined::SetPredefinedTables(*state);
 
     // get heat recovery heat exchanger generic
     GetHeatRecoveryInput(*state);

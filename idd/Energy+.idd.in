@@ -13086,7 +13086,7 @@ WindowProperty:FrameAndDivider,
          \memo Specifies the dimensions of a window frame, dividers, and inside reveal surfaces.
          \memo Referenced by the surface objects for exterior windows and glass doors
          \memo (ref: FenestrationSurface:Detailed, Window, and GlazedDoor).
-      \min-fields 26
+         \min-fields 26
     A1 , \field Name
          \required-field
          \type alpha
@@ -13119,6 +13119,7 @@ WindowProperty:FrameAndDivider,
          \units W/m2-K
          \type real
          \minimum 0.0
+         \default 0.0
          \note Effective conductance of frame
          \note Excludes air films
          \note Obtained from WINDOW 5 or other 2-D calculation
@@ -13160,12 +13161,12 @@ WindowProperty:FrameAndDivider,
          \note Width of dividers in plane of window
          \note Width assumed the same for all dividers
     N10, \field Number of Horizontal Dividers
-         \type real
+         \type integer
          \minimum 0
          \default 0
          \note "Horizontal" means parallel to local window X-axis
     N11, \field Number of Vertical Dividers
-         \type real
+         \type integer
          \minimum 0
          \default 0
          \note "Vertical" means parallel to local window Y-axis
@@ -23144,34 +23145,41 @@ ZoneBaseboard:OutdoorTemperatureControlled,
        \object-list ScheduleNames
        \note units in Schedule should be fraction applied to capacity of the baseboard heat equipment, generally (0.0 - 1.0)
   N1 , \field Capacity at Low Temperature
-       \required-field
        \type real
        \units W
        \minimum> 0
+       \autosizable
+       \default autosize
   N2 , \field Low Temperature
-       \required-field
        \units C
        \type real
+       \autosizable
+       \default autosize
   N3 , \field Capacity at High Temperature
-       \required-field
        \type real
        \units W
        \minimum 0
+       \autosizable
+       \default autosize
   N4 , \field High Temperature
-       \required-field
        \units C
        \type real
+       \autosizable
+       \default autosize
   N5 , \field Fraction Radiant
        \type real
        \minimum 0.0
        \maximum 1.0
        \default 0
-  A4 ; \field End-Use Subcategory
+  A4 , \field End-Use Subcategory
        \note Any text may be used here to categorize the end-uses in the ABUPS End Uses by Subcategory table.
        \type alpha
        \retaincase
        \default General
-
+  N6 ; \field Design Zone Heating Setpoint
+       \type real
+       \units C
+       \default 20.0
 
 SwimmingPool:Indoor,
        \memo Specifies an indoor swimming pools linked to a floor surface.
@@ -35256,7 +35264,7 @@ OutputControl:Sizing:Style,
 \group Zone HVAC Controls and Thermostats
 
 ZoneControl:Humidistat,
-       \memo Specifies zone relative humidity setpoint schedules for humidifying and dehumidifying.
+  \memo Specifies zone relative humidity setpoint schedules for humidifying and dehumidifying.
   \min-fields 3
   A1 , \field Name
        \required-field
@@ -51481,15 +51489,16 @@ Fan:ZoneExhaust,
 FanPerformance:NightVentilation,
        \memo Specifies an alternate set of performance parameters for a fan. These alternate
        \memo parameters are used when a system manager (such as AvailabilityManager:NightVentilation)
-       \memo sets a specified flow rate. May be used with Fan:ConstantVolume, Fan:VariableVolume and
-       \memo Fan:ComponentModel. If the fan model senses that a fixed flow rate has been set, it
+       \memo sets a specified flow rate. May be used with Fan:ConstantVolume, Fan:VariableVolume,
+       \memo Fan:ZoneExhaust, and Fan:OnOff (not Fan:ComponentModel). Fan:SystemModel has its own
+       \memo night ventilation settings. If the fan model senses that a fixed flow rate has been set, it
        \memo will use these alternate performance parameters. It is assumed that the fan will
        \memo run at a fixed speed in the alternate mode.
   A1 , \field Fan Name
        \required-field
        \type object-list
-       \object-list FansCVandVAV
-       \object-list FansComponentModel
+       \object-list FansCVandOnOffandVAV
+       \object-list FansZoneExhaust
   N1 , \field Fan Total Efficiency
        \type real
        \required-field

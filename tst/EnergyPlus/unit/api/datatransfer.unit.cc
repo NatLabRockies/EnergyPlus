@@ -64,6 +64,8 @@
 #include <EnergyPlus/PluginManager.hh>
 #include <EnergyPlus/api/datatransfer.h>
 
+#include "EnergyPlus/DataEnvironment.hh"
+
 using namespace EnergyPlus;
 
 class DataExchangeAPIUnitTestFixture : public EnergyPlusFixture
@@ -145,11 +147,10 @@ class DataExchangeAPIUnitTestFixture : public EnergyPlusFixture
     void SetUp() override
     {
         EnergyPlusFixture::SetUp();
-        Real64 timeStep = 1.0;
-        OutputProcessor::SetupTimePointers(*state, OutputProcessor::SOVTimeStepType::Zone, timeStep);
-        OutputProcessor::SetupTimePointers(*state, OutputProcessor::SOVTimeStepType::HVAC, timeStep);
-        *state->dataOutputProcessor->TimeValue.at(OutputProcessor::TimeStepType::Zone).TimeStep = 60;
-        *state->dataOutputProcessor->TimeValue.at(OutputProcessor::TimeStepType::System).TimeStep = 60;
+        state->dataGlobal->TimeStepZone = 1.0 / 60.0;
+        state->dataHVACGlobal->TimeStepSys = state->dataGlobal->TimeStepZone;
+        OutputProcessor::SetupTimePointers(*state, OutputProcessor::TimeStepType::Zone, state->dataGlobal->TimeStepZone);
+        OutputProcessor::SetupTimePointers(*state, OutputProcessor::TimeStepType::System, state->dataHVACGlobal->TimeStepSys);
         state->dataPluginManager->pluginManager = std::make_unique<EnergyPlus::PluginManagement::PluginManager>(*state);
     }
 
@@ -180,33 +181,31 @@ public:
             if (val.meterType) {
                 SetupOutputVariable(*state,
                                     val.varName,
-                                    OutputProcessor::Unit::kg_s,
+                                    Constant::Units::J,
                                     val.value,
-                                    OutputProcessor::SOVTimeStepType::Zone,
-                                    OutputProcessor::SOVStoreType::Summed,
+                                    OutputProcessor::TimeStepType::Zone,
+                                    OutputProcessor::StoreType::Sum,
                                     val.varKey,
-                                    _,
-                                    "ELECTRICITY",
-                                    "HEATING",
-                                    _,
-                                    "System");
+                                    Constant::eResource::Electricity,
+                                    OutputProcessor::Group::HVAC,
+                                    OutputProcessor::EndUseCat::Heating);
             } else {
                 SetupOutputVariable(*state,
                                     val.varName,
-                                    OutputProcessor::Unit::kg_s,
+                                    Constant::Units::kg_s,
                                     val.value,
-                                    OutputProcessor::SOVTimeStepType::Zone,
-                                    OutputProcessor::SOVStoreType::Average,
+                                    OutputProcessor::TimeStepType::Zone,
+                                    OutputProcessor::StoreType::Average,
                                     val.varKey);
             }
         }
         for (auto &val : this->intVariablePlaceholders) {
             SetupOutputVariable(*state,
                                 val.varName,
-                                OutputProcessor::Unit::kg_s,
+                                Constant::Units::kg_s,
                                 val.value,
-                                OutputProcessor::SOVTimeStepType::Zone,
-                                OutputProcessor::SOVStoreType::Average,
+                                OutputProcessor::TimeStepType::Zone,
+                                OutputProcessor::StoreType::Average,
                                 val.varKey);
         }
     }
@@ -257,19 +256,19 @@ public:
         }
     }
 
-    void addPluginGlobal(EnergyPlus::EnergyPlusData &state, std::string const &varName)
+    static void addPluginGlobal(EnergyPlus::EnergyPlusData &state, std::string const &varName)
     {
         state.dataPluginManager->pluginManager->addGlobalVariable(state, varName);
     }
 
-    void addTrendWithNewGlobal(std::string const &newGlobalVarName, std::string const &trendName, int numTrendValues)
+    void addTrendWithNewGlobal(std::string const &newGlobalVarName, std::string const &trendName, int numTrendValues) const
     {
         state->dataPluginManager->pluginManager->addGlobalVariable(*state, newGlobalVarName);
         int i = EnergyPlus::PluginManagement::PluginManager::getGlobalVariableHandle(*state, newGlobalVarName, true);
         state->dataPluginManager->trends.emplace_back(*state, trendName, numTrendValues, i);
     }
 
-    void simulateTimeStepAndReport()
+    void simulateTimeStepAndReport() const
     {
         UpdateMeterReporting(*state);
         UpdateDataandReport(*state, OutputProcessor::TimeStepType::Zone);
@@ -373,6 +372,11 @@ TEST_F(DataExchangeAPIUnitTestFixture, DataTransfer_TestGetVariableValuesRealTyp
     int hChillerHT = getVariableHandle((void *)this->state, "Chiller Heat Transfer", "Chiller 1");
     int hZoneTemp = getVariableHandle((void *)this->state, "Zone Mean Temperature", "Zone 1");
 
+    this->state->dataGlobal->HourOfDay = 1;
+    this->state->dataGlobal->MinutesInTimeStep = 1;
+    this->state->dataEnvrn->Month = 1;
+    this->state->dataEnvrn->DayOfMonth = 1;
+
     // pretend like E+ ran a time step
     this->simulateTimeStepAndReport();
 
@@ -408,6 +412,12 @@ TEST_F(DataExchangeAPIUnitTestFixture, DataTransfer_TestGetMeterValues)
     this->setupVariablesOnceAllAreRequested();
     int hFacilityElectricity = getMeterHandle((void *)this->state, "Electricity:Facility");
     EXPECT_GT(hFacilityElectricity, -1);
+
+    this->state->dataGlobal->HourOfDay = 1;
+    this->state->dataGlobal->MinutesInTimeStep = 1;
+    this->state->dataEnvrn->Month = 1;
+    this->state->dataEnvrn->DayOfMonth = 1;
+
     // pretend like E+ ran a time step
     this->simulateTimeStepAndReport();
     // get the value for a valid meter

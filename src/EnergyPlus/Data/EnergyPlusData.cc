@@ -45,10 +45,12 @@
 // OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 // POSSIBILITY OF SUCH DAMAGE.
 
+// C++ Headers
+#include <memory>
+
+// EnergyPlus Headers
 #include <EnergyPlus/Data/CommonIncludes.hh>
 #include <EnergyPlus/Data/EnergyPlusData.hh>
-
-#include <memory>
 
 namespace EnergyPlus {
 
@@ -591,6 +593,7 @@ void EnergyPlusData::init_constant_state(EnergyPlusData &state)
     this->dataFluid->init_constant_state(state);
     this->dataSched->init_constant_state(state);
     this->dataCurveManager->init_constant_state(state);
+    this->dataOutRptPredefined->init_constant_state(state);
 
     // Init weather
     this->dataWeather->init_constant_state(state);
@@ -603,7 +606,7 @@ void EnergyPlusData::init_constant_state(EnergyPlusData &state)
     this->dataVariableSpeedCoils->init_constant_state(state);
     this->dataHVACAssistedCC->init_constant_state(state);
     this->dataCoilCoolingDX->init_constant_state(state);
-    
+
     this->dataAirLoop->init_constant_state(state);
     this->dataAirLoopHVACDOAS->init_constant_state(state);
     this->dataAirSystemsData->init_constant_state(state);
@@ -729,7 +732,6 @@ void EnergyPlusData::init_constant_state(EnergyPlusData &state)
     this->dataMundtSimMgr->init_constant_state(state);
     this->dataNodeInputMgr->init_constant_state(state);
     this->dataOutAirNodeMgr->init_constant_state(state);
-    this->dataOutRptPredefined->init_constant_state(state);
     this->dataOutRptTab->init_constant_state(state);
     this->dataOutdoorAirUnit->init_constant_state(state);
     this->dataOutput->init_constant_state(state);
@@ -859,17 +861,18 @@ void EnergyPlusData::init_state(EnergyPlusData &state)
     this->dataFluid->init_state(state);             // GetFluidPropertiesData
     this->dataSched->init_state(state);             // GetScheduleData
     this->dataCurveManager->init_state(state);      // GetCurveInput
+    this->dataOutRptPredefined->init_state(state);
 
-    this->dataWeather->init_state(state);           // ReportOutputFileHeaders
+    this->dataWeather->init_state(state); // ReportOutputFileHeaders
 
     // Read coils
-    this->dataHeatingCoils->init_state(state);      // GetHeatingCoilInput
-    this->dataSteamCoils->init_state(state);        // GetSteamCoilInput
-    this->dataWaterCoils->init_state(state);        // GetWaterCoilInput
-    this->dataDXCoils->init_state(state);           // GetDXCoilInput
-    this->dataVariableSpeedCoils->init_state(state);// GetVariableSpeedCoilInput
-    this->dataHVACAssistedCC->init_state(state);    // GetHXAssistedCoolingCoilInput
-    this->dataCoilCoolingDX->init_state(state);     // CoolingCoilDX::getInput
+    this->dataHeatingCoils->init_state(state);       // GetHeatingCoilInput
+    this->dataSteamCoils->init_state(state);         // GetSteamCoilInput
+    this->dataWaterCoils->init_state(state);         // GetWaterCoilInput
+    this->dataDXCoils->init_state(state);            // GetDXCoilInput
+    this->dataVariableSpeedCoils->init_state(state); // GetVariableSpeedCoilInput
+    this->dataHVACAssistedCC->init_state(state);     // GetHXAssistedCoolingCoilInput
+    this->dataCoilCoolingDX->init_state(state);      // CoolingCoilDX::getInput
 
     this->dataAirLoop->init_state(state);
     this->dataAirLoopHVACDOAS->init_state(state);
@@ -996,7 +999,6 @@ void EnergyPlusData::init_state(EnergyPlusData &state)
     this->dataMundtSimMgr->init_state(state);
     this->dataNodeInputMgr->init_state(state);
     this->dataOutAirNodeMgr->init_state(state);
-    this->dataOutRptPredefined->init_state(state);
     this->dataOutRptTab->init_state(state);
     this->dataOutdoorAirUnit->init_state(state);
     this->dataOutput->init_state(state);

@@ -47,13 +47,20 @@
 
 // C++ Headers
 #include <algorithm>
+#include <format>
 #include <fstream>
 #include <iostream>
 #include <istream>
 #include <memory>
 #include <unordered_set>
 
+// ObjexxFCL Headers
 #include <ObjexxFCL/Array1S.hh>
+
+// Third Party Headers
+#include <embedded/EmbeddedEpJSONSchema.hh>
+#include <milo/dtoa.h>
+#include <milo/itoa.h>
 
 // EnergyPlus Headers
 #include <EnergyPlus/Data/EnergyPlusData.hh>
@@ -70,11 +77,6 @@
 #include <EnergyPlus/InputProcessing/InputValidation.hh>
 #include <EnergyPlus/OutputProcessor.hh>
 #include <EnergyPlus/UtilityRoutines.hh>
-#include <embedded/EmbeddedEpJSONSchema.hh>
-
-#include <fmt/os.h>
-#include <milo/dtoa.h>
-#include <milo/itoa.h>
 
 namespace EnergyPlus {
 // Module containing the input processor routines
@@ -259,7 +261,7 @@ void cleanEPJSON(json &epjson)
 void InputProcessor::processInput(EnergyPlusData &state)
 {
     if (!FileSystem::fileExists(state.dataStrGlobals->inputFilePath)) {
-        ShowFatalError(state, fmt::format("Input file path {} not found", state.dataStrGlobals->inputFilePath));
+        ShowFatalError(state, std::format("Input file path {} not found", state.dataStrGlobals->inputFilePath));
         return;
     }
 
@@ -534,7 +536,7 @@ int InputProcessor::getNumObjectsFound(EnergyPlusData &state, std::string_view c
     if (schema()["properties"].find(std::string(ObjectWord)) == schema()["properties"].end()) {
         auto tmp_umit = caseInsensitiveObjectMap.find(convertToUpper(ObjectWord));
         if (tmp_umit == caseInsensitiveObjectMap.end()) {
-            ShowWarningError(state, fmt::format("Requested Object not found in Definitions: {}", ObjectWord));
+            ShowWarningError(state, std::format("Requested Object not found in Definitions: {}", ObjectWord));
         }
     }
     return 0;
@@ -913,7 +915,7 @@ const json &InputProcessor::getJSONObjectItem(EnergyPlusData &state, std::string
         auto tmp_umit = caseInsensitiveObjectMap.find(convertToUpper(objectInfo.objectType));
         if (tmp_umit == caseInsensitiveObjectMap.end()) {
             // indicates object type not found, see function GeneralRoutines::ValidateComponent
-            ShowFatalError(state, EnergyPlus::format(R"(ObjectType of type "{}" requested was not found in input)", objectInfo.objectType));
+            ShowFatalError(state, std::format(R"(ObjectType of type "{}" requested was not found in input)", objectInfo.objectType));
         }
         objectInfo.objectType = tmp_umit->second;
         obj_iter = epJSON.find(objectInfo.objectType);
@@ -933,8 +935,8 @@ const json &InputProcessor::getJSONObjectItem(EnergyPlusData &state, std::string
         }
     }
 
-    ShowFatalError(
-        state, EnergyPlus::format(R"(Name "{}" requested was not found in input for ObjectType "{}")", objectInfo.objectType, objectInfo.objectName));
+    ShowFatalError(state,
+                   std::format(R"(Name "{}" requested was not found in input for ObjectType "{}")", objectInfo.objectType, objectInfo.objectName));
     throw;
 }
 
@@ -1042,7 +1044,7 @@ void InputProcessor::getObjectItem(EnergyPlusData &state,
         auto const field_info = legacy_idd_field_info.find(field);
         auto const &field_info_val = field_info.value();
         if (field_info == legacy_idd_field_info.end()) {
-            ShowFatalError(state, fmt::format(R"(Could not find field = "{}" in "{}" in epJSON Schema.)", field, Object));
+            ShowFatalError(state, std::format(R"(Could not find field = "{}" in "{}" in epJSON Schema.)", field, Object));
         }
 
         bool within_idf_fields = (i < maxFields.max_fields);
@@ -1099,7 +1101,7 @@ void InputProcessor::getObjectItem(EnergyPlusData &state,
                     auto const &field_info_val = field_info.value();
 
                     if (field_info == legacy_idd_field_info.end()) {
-                        ShowFatalError(state, fmt::format(R"(Could not find field = "{}" in "{}" in epJSON Schema.)", field_name, Object));
+                        ShowFatalError(state, std::format(R"(Could not find field = "{}" in "{}" in epJSON Schema.)", field_name, Object));
                     }
 
                     bool within_idf_extensible_fields = (extensible_count < maxFields.max_extensible_fields);
@@ -1426,7 +1428,7 @@ void InputProcessor::getObjectDefMaxArgs(EnergyPlusData &state,
     if (auto found = props.find(std::string(ObjectWord)); found == props.end()) {
         auto tmp_umit = caseInsensitiveObjectMap.find(convertToUpper(ObjectWord));
         if (tmp_umit == caseInsensitiveObjectMap.end()) {
-            ShowSevereError(state, fmt::format(R"(getObjectDefMaxArgs: Did not find object="{}" in list of objects.)", ObjectWord));
+            ShowSevereError(state, std::format(R"(getObjectDefMaxArgs: Did not find object="{}" in list of objects.)", ObjectWord));
             return;
         }
         object = &props[tmp_umit->second];
@@ -1439,7 +1441,7 @@ void InputProcessor::getObjectDefMaxArgs(EnergyPlusData &state,
     if (auto found = epJSON.find(std::string(ObjectWord)); found == epJSON.end()) {
         auto tmp_umit = caseInsensitiveObjectMap.find(convertToUpper(ObjectWord));
         if (tmp_umit == caseInsensitiveObjectMap.end()) {
-            ShowSevereError(state, fmt::format(R"(getObjectDefMaxArgs: Did not find object="{}" in list of objects.)", ObjectWord));
+            ShowSevereError(state, std::format(R"(getObjectDefMaxArgs: Did not find object="{}" in list of objects.)", ObjectWord));
             return;
         }
         objects = &epJSON[tmp_umit->second];
@@ -1728,8 +1730,7 @@ void InputProcessor::reportOrphanRecordObjects(EnergyPlusData &state)
     }
 
     if ((!unusedInputs.empty()) && !state.dataGlobal->DisplayUnusedObjects) {
-        u64toa(unusedInputs.size(), s);
-        ShowMessage(state, "There are " + std::string(s) + " unused objects in input.");
+        ShowMessage(state, std::format("There are {} unused objects in input.", unusedInputs.size()));
         ShowMessage(state, "Use Output:Diagnostics,DisplayUnusedObjects; to see them.");
     }
 }

@@ -54,7 +54,7 @@
 #include <EnergyPlus/Data/EnergyPlusData.hh>
 #include <EnergyPlus/FluidProperties.hh>
 
-#include <ctgmath>
+#include <cmath>
 
 #include "Fixtures/EnergyPlusFixture.hh"
 
@@ -114,6 +114,28 @@ TEST_F(EnergyPlusFixture, FluidProperties_GetSpecificHeatGlycol)
     EXPECT_NEAR(4027, fluid->getSpecificHeat(*state, 85.0, "UnitTest"), 0.01);
     EXPECT_NEAR(4082, fluid->getSpecificHeat(*state, 105.0, "UnitTest"), 0.01);
     EXPECT_NEAR(4137, fluid->getSpecificHeat(*state, 125.0, "UnitTest"), 0.01);
+}
+
+TEST_F(EnergyPlusFixture, FluidProperties_GetViscosityGlycolOutOfRangeWarnings)
+{
+    std::string const idf_objects = delimited_string({"FluidProperties:GlycolConcentration,",
+                                                      "  GLHXFluid,       !- Name",
+                                                      "  PropyleneGlycol, !- Glycol Type",
+                                                      "  ,                !- User Defined Glycol Name",
+                                                      "  0.3;             !- Glycol Concentration",
+                                                      " "});
+
+    ASSERT_TRUE(process_idf(idf_objects));
+    EXPECT_FALSE(has_err_output());
+
+    state->init_state(*state);
+    auto *fluid = Fluid::GetGlycol(*state, "GLHXFLUID");
+
+    fluid->getViscosity(*state, -100.0, "UnitTest");
+    EXPECT_TRUE(compare_err_stream_substring("Temperature is out of range (too low) for fluid [GLHXFLUID] viscosity **", true));
+
+    fluid->getViscosity(*state, 200.0, "UnitTest");
+    EXPECT_TRUE(compare_err_stream_substring("Temperature is out of range (too high) for fluid [GLHXFLUID] viscosity **", true));
 }
 
 TEST_F(EnergyPlusFixture, FluidProperties_InterpValuesForGlycolConc)

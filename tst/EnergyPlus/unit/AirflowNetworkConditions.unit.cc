@@ -5581,14 +5581,14 @@ TEST_F(EnergyPlusFixture, AirflowNetwork_BasicAdvancedSingleSided)
     for (unsigned i = 0; i <= 36; i++) {
         Real64 angle = i * 10.0;
         Real64 value = Curve::CurveValue(*state, 7, angle);
-        EXPECT_NEAR(valsForLeftWindow[i], value, 1.0e-12) << (format("Issue at index: {}", i));
+        EXPECT_NEAR(valsForLeftWindow[i], value, 1.0e-12) << std::format("Issue at index: {}", i);
     }
 
     // Check the curve values for the left window, taken from v8.6.0 on Windows
     for (unsigned i = 0; i <= 36; i++) {
         Real64 angle = i * 10.0;
         Real64 value = Curve::CurveValue(*state, 6, angle);
-        EXPECT_NEAR(valsForRightWindow[i], value, 1.0e-12) << (format("Issue at index: {}", i));
+        EXPECT_NEAR(valsForRightWindow[i], value, 1.0e-12) << std::format("Issue at index: {}", i);
     }
 }
 

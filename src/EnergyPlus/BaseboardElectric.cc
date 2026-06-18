@@ -46,6 +46,7 @@
 // POSSIBILITY OF SUCH DAMAGE.
 
 // C++ Headers
+#include <format>
 
 // EnergyPlus Headers
 #include <EnergyPlus/Autosizing/HeatingCapacitySizing.hh>
@@ -106,7 +107,7 @@ namespace BaseboardElectric {
         if (CompIndex == 0) {
             BaseboardNum = Util::FindItemInList(EquipName, baseboard->baseboards, &BaseboardParams::EquipName);
             if (BaseboardNum == 0) {
-                ShowFatalError(state, EnergyPlus::format("SimElectricBaseboard: Unit not found={}", EquipName));
+                ShowFatalError(state, std::format("SimElectricBaseboard: Unit not found={}", EquipName));
             }
             CompIndex = BaseboardNum;
         } else {
@@ -114,19 +115,18 @@ namespace BaseboardElectric {
             int numBaseboards = (int)baseboard->baseboards.size();
             if (BaseboardNum > numBaseboards || BaseboardNum < 1) {
                 ShowFatalError(state,
-                               EnergyPlus::format("SimElectricBaseboard:  Invalid CompIndex passed={}, Number of Units={}, Entered Unit name={}",
-                                                  BaseboardNum,
-                                                  numBaseboards,
-                                                  EquipName));
+                               std::format("SimElectricBaseboard:  Invalid CompIndex passed={}, Number of Units={}, Entered Unit name={}",
+                                           BaseboardNum,
+                                           numBaseboards,
+                                           EquipName));
             }
             if (baseboard->baseboards(BaseboardNum).CheckEquipName) {
                 if (EquipName != baseboard->baseboards(BaseboardNum).EquipName) {
-                    ShowFatalError(
-                        state,
-                        EnergyPlus::format("SimElectricBaseboard: Invalid CompIndex passed={}, Unit name={}, stored Unit Name for that index={}",
-                                           BaseboardNum,
-                                           EquipName,
-                                           baseboard->baseboards(BaseboardNum).EquipName));
+                    ShowFatalError(state,
+                                   std::format("SimElectricBaseboard: Invalid CompIndex passed={}, Unit name={}, stored Unit Name for that index={}",
+                                               BaseboardNum,
+                                               EquipName,
+                                               baseboard->baseboards(BaseboardNum).EquipName));
                 }
                 baseboard->baseboards(BaseboardNum).CheckEquipName = false;
             }
@@ -210,7 +210,7 @@ namespace BaseboardElectric {
 
                 // ErrorsFound will be set to True if problem was found, left untouched otherwise
                 VerifyUniqueBaseboardName(
-                    state, cCurrentModuleObject, s_ipsc->cAlphaArgs(1), ErrorsFound, EnergyPlus::format("{} Name", cCurrentModuleObject));
+                    state, cCurrentModuleObject, s_ipsc->cAlphaArgs(1), ErrorsFound, std::format("{} Name", cCurrentModuleObject));
 
                 ++BaseboardNum;
                 auto &thisBaseboard = baseboard->baseboards(BaseboardNum);
@@ -232,21 +232,20 @@ namespace BaseboardElectric {
                     if (!s_ipsc->lNumericFieldBlanks(iHeatDesignCapacityNumericNum)) {
                         thisBaseboard.ScaledHeatingCapacity = s_ipsc->rNumericArgs(iHeatDesignCapacityNumericNum);
                         if (thisBaseboard.ScaledHeatingCapacity < 0.0 && thisBaseboard.ScaledHeatingCapacity != AutoSize) {
-                            ShowSevereError(state, EnergyPlus::format("{} = {}", cCurrentModuleObject, thisBaseboard.EquipName));
+                            ShowSevereError(state, std::format("{} = {}", cCurrentModuleObject, thisBaseboard.EquipName));
                             ShowContinueError(state,
-                                              EnergyPlus::format("Illegal {} = {:.7T}",
-                                                                 s_ipsc->cNumericFieldNames(iHeatDesignCapacityNumericNum),
-                                                                 s_ipsc->rNumericArgs(iHeatDesignCapacityNumericNum)));
+                                              std::format("Illegal {} = {:.7f}",
+                                                          s_ipsc->cNumericFieldNames(iHeatDesignCapacityNumericNum),
+                                                          s_ipsc->rNumericArgs(iHeatDesignCapacityNumericNum)));
                             ErrorsFound = true;
                         }
                     } else {
-                        ShowSevereError(state, EnergyPlus::format("{} = {}", cCurrentModuleObject, thisBaseboard.EquipName));
-                        ShowContinueError(state,
-                                          EnergyPlus::format("Input for {} = {}",
-                                                             s_ipsc->cAlphaFieldNames(iHeatCAPMAlphaNum),
-                                                             s_ipsc->cAlphaArgs(iHeatCAPMAlphaNum)));
+                        ShowSevereError(state, std::format("{} = {}", cCurrentModuleObject, thisBaseboard.EquipName));
                         ShowContinueError(
-                            state, EnergyPlus::format("Blank field not allowed for {}", s_ipsc->cNumericFieldNames(iHeatDesignCapacityNumericNum)));
+                            state,
+                            std::format("Input for {} = {}", s_ipsc->cAlphaFieldNames(iHeatCAPMAlphaNum), s_ipsc->cAlphaArgs(iHeatCAPMAlphaNum)));
+                        ShowContinueError(state,
+                                          std::format("Blank field not allowed for {}", s_ipsc->cNumericFieldNames(iHeatDesignCapacityNumericNum)));
                         ErrorsFound = true;
                     }
                 } else if (Util::SameString(s_ipsc->cAlphaArgs(iHeatCAPMAlphaNum), "CapacityPerFloorArea")) {
@@ -254,35 +253,31 @@ namespace BaseboardElectric {
                     if (!s_ipsc->lNumericFieldBlanks(iHeatCapacityPerFloorAreaNumericNum)) {
                         thisBaseboard.ScaledHeatingCapacity = s_ipsc->rNumericArgs(iHeatCapacityPerFloorAreaNumericNum);
                         if (thisBaseboard.ScaledHeatingCapacity <= 0.0) {
-                            ShowSevereError(state, EnergyPlus::format("{} = {}", cCurrentModuleObject, thisBaseboard.EquipName));
+                            ShowSevereError(state, std::format("{} = {}", cCurrentModuleObject, thisBaseboard.EquipName));
+                            ShowContinueError(
+                                state,
+                                std::format("Input for {} = {}", s_ipsc->cAlphaFieldNames(iHeatCAPMAlphaNum), s_ipsc->cAlphaArgs(iHeatCAPMAlphaNum)));
                             ShowContinueError(state,
-                                              EnergyPlus::format("Input for {} = {}",
-                                                                 s_ipsc->cAlphaFieldNames(iHeatCAPMAlphaNum),
-                                                                 s_ipsc->cAlphaArgs(iHeatCAPMAlphaNum)));
-                            ShowContinueError(state,
-                                              EnergyPlus::format("Illegal {} = {:.7T}",
-                                                                 s_ipsc->cNumericFieldNames(iHeatCapacityPerFloorAreaNumericNum),
-                                                                 s_ipsc->rNumericArgs(iHeatCapacityPerFloorAreaNumericNum)));
+                                              std::format("Illegal {} = {:.7f}",
+                                                          s_ipsc->cNumericFieldNames(iHeatCapacityPerFloorAreaNumericNum),
+                                                          s_ipsc->rNumericArgs(iHeatCapacityPerFloorAreaNumericNum)));
                             ErrorsFound = true;
                         } else if (thisBaseboard.ScaledHeatingCapacity == AutoSize) {
-                            ShowSevereError(state, EnergyPlus::format("{} = {}", cCurrentModuleObject, thisBaseboard.EquipName));
-                            ShowContinueError(state,
-                                              EnergyPlus::format("Input for {} = {}",
-                                                                 s_ipsc->cAlphaFieldNames(iHeatCAPMAlphaNum),
-                                                                 s_ipsc->cAlphaArgs(iHeatCAPMAlphaNum)));
+                            ShowSevereError(state, std::format("{} = {}", cCurrentModuleObject, thisBaseboard.EquipName));
                             ShowContinueError(
-                                state, EnergyPlus::format("Illegal {} = AutoSize", s_ipsc->cNumericFieldNames(iHeatCapacityPerFloorAreaNumericNum)));
+                                state,
+                                std::format("Input for {} = {}", s_ipsc->cAlphaFieldNames(iHeatCAPMAlphaNum), s_ipsc->cAlphaArgs(iHeatCAPMAlphaNum)));
+                            ShowContinueError(state,
+                                              std::format("Illegal {} = AutoSize", s_ipsc->cNumericFieldNames(iHeatCapacityPerFloorAreaNumericNum)));
                             ErrorsFound = true;
                         }
                     } else {
-                        ShowSevereError(state, EnergyPlus::format("{} = {}", cCurrentModuleObject, thisBaseboard.EquipName));
-                        ShowContinueError(state,
-                                          EnergyPlus::format("Input for {} = {}",
-                                                             s_ipsc->cAlphaFieldNames(iHeatCAPMAlphaNum),
-                                                             s_ipsc->cAlphaArgs(iHeatCAPMAlphaNum)));
+                        ShowSevereError(state, std::format("{} = {}", cCurrentModuleObject, thisBaseboard.EquipName));
                         ShowContinueError(
                             state,
-                            EnergyPlus::format("Blank field not allowed for {}", s_ipsc->cNumericFieldNames(iHeatCapacityPerFloorAreaNumericNum)));
+                            std::format("Input for {} = {}", s_ipsc->cAlphaFieldNames(iHeatCAPMAlphaNum), s_ipsc->cAlphaArgs(iHeatCAPMAlphaNum)));
+                        ShowContinueError(
+                            state, std::format("Blank field not allowed for {}", s_ipsc->cNumericFieldNames(iHeatCapacityPerFloorAreaNumericNum)));
                         ErrorsFound = true;
                     }
                 } else if (Util::SameString(s_ipsc->cAlphaArgs(iHeatCAPMAlphaNum), "FractionOfAutosizedHeatingCapacity")) {
@@ -290,29 +285,26 @@ namespace BaseboardElectric {
                     if (!s_ipsc->lNumericFieldBlanks(iHeatFracOfAutosizedCapacityNumericNum)) {
                         thisBaseboard.ScaledHeatingCapacity = s_ipsc->rNumericArgs(iHeatFracOfAutosizedCapacityNumericNum);
                         if (thisBaseboard.ScaledHeatingCapacity < 0.0) {
-                            ShowSevereError(state, EnergyPlus::format("{} = {}", cCurrentModuleObject, thisBaseboard.EquipName));
+                            ShowSevereError(state, std::format("{} = {}", cCurrentModuleObject, thisBaseboard.EquipName));
                             ShowContinueError(state,
-                                              EnergyPlus::format("Illegal {} = {:.7T}",
-                                                                 s_ipsc->cNumericFieldNames(iHeatFracOfAutosizedCapacityNumericNum),
-                                                                 s_ipsc->rNumericArgs(iHeatFracOfAutosizedCapacityNumericNum)));
+                                              std::format("Illegal {} = {:.7f}",
+                                                          s_ipsc->cNumericFieldNames(iHeatFracOfAutosizedCapacityNumericNum),
+                                                          s_ipsc->rNumericArgs(iHeatFracOfAutosizedCapacityNumericNum)));
                             ErrorsFound = true;
                         }
                     } else {
-                        ShowSevereError(state, EnergyPlus::format("{} = {}", cCurrentModuleObject, thisBaseboard.EquipName));
-                        ShowContinueError(state,
-                                          EnergyPlus::format("Input for {} = {}",
-                                                             s_ipsc->cAlphaFieldNames(iHeatCAPMAlphaNum),
-                                                             s_ipsc->cAlphaArgs(iHeatCAPMAlphaNum)));
+                        ShowSevereError(state, std::format("{} = {}", cCurrentModuleObject, thisBaseboard.EquipName));
                         ShowContinueError(
                             state,
-                            EnergyPlus::format("Blank field not allowed for {}", s_ipsc->cNumericFieldNames(iHeatFracOfAutosizedCapacityNumericNum)));
+                            std::format("Input for {} = {}", s_ipsc->cAlphaFieldNames(iHeatCAPMAlphaNum), s_ipsc->cAlphaArgs(iHeatCAPMAlphaNum)));
+                        ShowContinueError(
+                            state, std::format("Blank field not allowed for {}", s_ipsc->cNumericFieldNames(iHeatFracOfAutosizedCapacityNumericNum)));
                         ErrorsFound = true;
                     }
                 } else {
-                    ShowSevereError(state, EnergyPlus::format("{} = {}", cCurrentModuleObject, thisBaseboard.EquipName));
+                    ShowSevereError(state, std::format("{} = {}", cCurrentModuleObject, thisBaseboard.EquipName));
                     ShowContinueError(
-                        state,
-                        EnergyPlus::format("Illegal {} = {}", s_ipsc->cAlphaFieldNames(iHeatCAPMAlphaNum), s_ipsc->cAlphaArgs(iHeatCAPMAlphaNum)));
+                        state, std::format("Illegal {} = {}", s_ipsc->cAlphaFieldNames(iHeatCAPMAlphaNum), s_ipsc->cAlphaArgs(iHeatCAPMAlphaNum)));
                     ErrorsFound = true;
                 }
 
@@ -321,8 +313,7 @@ namespace BaseboardElectric {
             }
 
             if (ErrorsFound) {
-                ShowFatalError(state,
-                               EnergyPlus::format("{} Errors found in getting input.  Preceding condition(s) cause termination.", RoutineName));
+                ShowFatalError(state, std::format("{} Errors found in getting input.  Preceding condition(s) cause termination.", RoutineName));
             }
         }
 
@@ -436,7 +427,7 @@ namespace BaseboardElectric {
             state.dataSize->DataZoneNumber = baseboard.ZonePtr;
             int SizingMethod = HVAC::HeatingCapacitySizing;
             int FieldNum = 1;
-            std::string const SizingString = EnergyPlus::format("{} [W]", baseboard.FieldNames[FieldNum - 1]);
+            std::string const SizingString = std::format("{} [W]", baseboard.FieldNames[FieldNum - 1]);
             int CapSizingMethod = baseboard.HeatingCapMethod;
             ZoneEqSizing.SizingMethod(SizingMethod) = CapSizingMethod;
             if (CapSizingMethod == DataSizing::HeatingDesignCapacity || CapSizingMethod == DataSizing::CapacityPerFloorArea ||

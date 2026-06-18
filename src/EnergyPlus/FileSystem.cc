@@ -45,33 +45,33 @@
 // OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 // POSSIBILITY OF SUCH DAMAGE.
 
-// Standard C++ library
-#include <cerrno>
-#include <cstdio>
-#include <cstdlib>
-#include <fstream>
-#include <iostream>
-#include <sys/stat.h>
-#include <sys/types.h>
-#include <type_traits>
-
+// C++ Headers
 #ifdef _WIN32
 #    include <Shlwapi.h>
 #    include <windows.h>
 #else
 #    include <unistd.h>
 #endif
-
+#include <cerrno>
+#include <cstdio>
+#include <cstdlib>
+#include <format>
+#include <fstream>
+#include <iostream>
 #ifdef __APPLE__
 #    include <mach-o/dyld.h>
 #endif
+#include <sys/stat.h>
+#include <sys/types.h>
+#include <type_traits>
+
+// Third Party Headers
+#include <CLI/CLI11.hpp>
 
 // EnergyPlus Headers
 #include <EnergyPlus/DataStringGlobals.hh>
 #include <EnergyPlus/FileSystem.hh>
 #include <EnergyPlus/UtilityRoutines.hh>
-
-#include <CLI/CLI11.hpp>
 
 namespace EnergyPlus {
 
@@ -207,7 +207,7 @@ namespace FileSystem {
         // *
         // * To resolve symlinks, wrap this call in getAbsolutePath().
         // */
-        char executableRelativePath[1024];
+        char executableRelativePath[1024] = {'\0'};
 
 #ifdef __APPLE__
         uint32_t pathSize = sizeof(executableRelativePath);
@@ -346,9 +346,8 @@ namespace FileSystem {
 
     std::string readFile(fs::path const &filePath, std::ios_base::openmode mode)
     {
-        // Shenanigans would not be needed with fmt 10+ (maybe earlier), because fmt has native fs::path support
         if (!fileExists(filePath)) {
-            throw FatalError(fmt::format("File does not exists: {}", filePath));
+            throw FatalError(std::format("File does not exists: {}", filePath));
         }
 
         // Can only be 'r', 'b' or 'rb'
@@ -359,7 +358,7 @@ namespace FileSystem {
         const std::uintmax_t file_size = fs::file_size(filePath);
         std::ifstream file(filePath, mode);
         if (!file.is_open()) {
-            throw FatalError(fmt::format("Could not open file: {}", filePath));
+            throw FatalError(std::format("Could not open file: {}", filePath));
         }
         std::string result(file_size, '\0');
         file.read(result.data(), file_size);
@@ -368,10 +367,8 @@ namespace FileSystem {
 
     nlohmann::json readJSON(fs::path const &filePath, std::ios_base::openmode mode)
     {
-
-        // Shenanigans would not be needed with fmt 10+ (maybe earlier), because fmt has native fs::path support
         if (!fileExists(filePath)) {
-            throw FatalError(fmt::format("File does not exists: {}", filePath));
+            throw FatalError(std::format("File does not exists: {}", filePath));
         }
 
         // Can only be 'r', 'b' or 'rb'
@@ -381,7 +378,7 @@ namespace FileSystem {
 
         std::ifstream file(filePath, mode);
         if (!file.is_open()) {
-            throw FatalError(fmt::format("Could not open file: {}", filePath));
+            throw FatalError(std::format("Could not open file: {}", filePath));
         }
 
         FileTypes const ext = getFileType(filePath);

@@ -55,7 +55,7 @@ if(BUILD_TESTING)
   add_test(NAME ConvertInputFormat.RegularFile_RelativePath
     COMMAND  "${Python_EXECUTABLE}" "${PROJECT_SOURCE_DIR}/test_convert_input_format.py"
              --convertinputformat-exe $<TARGET_FILE:ConvertInputFormat>
-             --out-dir "RegularFile_AbsolutePath"
+             --out-dir "RegularFile_RelativePath"
              --expected-filename 1ZoneUncontrolled.epJSON
              --input-file "1ZoneUncontrolled.idf"
     WORKING_DIRECTORY ${TEST_DIR}

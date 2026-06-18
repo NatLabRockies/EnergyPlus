@@ -75,8 +75,6 @@ namespace SimulationManager {
     std::unique_ptr<std::ostream>
     OpenStreamFile(EnergyPlusData &state, const fs::path &fileName, std::ios_base::openmode mode = (std::ios_base::out | std::ios_base::trunc));
 
-    std::unique_ptr<fmt::ostream> OpenFmtStreamFile(EnergyPlusData &state, const fs::path &filePath);
-
     void OpenOutputFiles(EnergyPlusData &state);
 
     void CloseOutputFiles(EnergyPlusData &state);

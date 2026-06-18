@@ -1982,7 +1982,6 @@ TEST_F(EnergyPlusFixture, PIU_InducedAir_Plenums)
     state->dataGlobal->BeginSimFlag = true;
     SimulationManager::GetProjectData(*state);
 
-    OutputReportPredefined::SetPredefinedTables(*state);
     HeatBalanceManager::SetPreConstructionInputParameters(*state); // establish array bounds for constructions early
     // OutputProcessor::TimeValue.allocate(2);
     OutputProcessor::SetupTimePointers(
@@ -3096,8 +3095,6 @@ TEST_F(EnergyPlusFixture, PIU_reportTerminalUnit)
 {
     using namespace EnergyPlus::OutputReportPredefined;
     auto &orp = *state->dataOutRptPredefined;
-
-    SetPredefinedTables(*state);
 
     Sched::AddScheduleConstant(*state, "SCHA");
     Sched::AddScheduleConstant(*state, "SCHB");

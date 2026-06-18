@@ -1110,7 +1110,6 @@ TEST_F(EnergyPlusFixture, UnitHeater_HWHeatingCoilUAAutoSizingTest)
     state->dataGlobal->DDOnlySimulation = true;
 
     GetProjectData(*state);
-    OutputReportPredefined::SetPredefinedTables(*state);
     SetPreConstructionInputParameters(*state); // establish array bounds for constructions early
 
     state->dataGlobal->BeginSimFlag = true;
@@ -1118,7 +1117,8 @@ TEST_F(EnergyPlusFixture, UnitHeater_HWHeatingCoilUAAutoSizingTest)
     state->dataGlobal->ZoneSizingCalc = true;
     createFacilityElectricPowerServiceObject(*state);
 
-    state->dataLoopNodes->MoreNodeInfo.allocate(21); // Was 20, not sure why, this should really be set to NumOfNodes once all nodes have been allocated
+    state->dataLoopNodes->MoreNodeInfo.allocate(
+        21); // Was 20, not sure why, this should really be set to NumOfNodes once all nodes have been allocated
     state->dataHVACGlobal->TimeStepSys = state->dataGlobal->TimeStepZone;
     state->dataHVACGlobal->TimeStepSysSec = state->dataHVACGlobal->TimeStepSys * Constant::rSecsInHour;
     SetupTimePointers(*state, OutputProcessor::TimeStepType::Zone, state->dataGlobal->TimeStepZone);

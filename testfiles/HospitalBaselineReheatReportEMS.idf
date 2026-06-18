@@ -21843,8 +21843,8 @@
   ZoneControl:Humidistat,
     Floor 2 Lab 1 Humidistat,!- Name
     Floor 2 Lab 1,           !- Zone Name
-    MinRelHumSetSch,         !- Humidifying Relative Humidity Setpoint Schedule Name
-    MaxRelHumSetSch;         !- Dehumidifying Relative Humidity Setpoint Schedule Name
+    MinRelHumSetSch,         !- Humidifying Setpoint Schedule Name
+    MaxRelHumSetSch;         !- Dehumidifying Setpoint Schedule Name
 
   ThermostatSetpoint:DualSetpoint,
     Floor 2 Lab 1 DualSPSched,  !- Name
@@ -26806,8 +26806,8 @@
   ZoneControl:Humidistat,
     Floor 2 Operating Humidistat,  !- Name
     Floor 2 Operating,       !- Zone Name
-    MinRelHumSetSch,         !- Humidifying Relative Humidity Setpoint Schedule Name
-    MaxRelHumSetSch;         !- Dehumidifying Relative Humidity Setpoint Schedule Name
+    MinRelHumSetSch,         !- Humidifying Setpoint Schedule Name
+    MaxRelHumSetSch;         !- Dehumidifying Setpoint Schedule Name
 
   ThermostatSetpoint:DualSetpoint,
     Floor 2 Operating DualSPSched,  !- Name
@@ -33300,8 +33300,8 @@
   ZoneControl:Humidistat,
     Floor 2 Triage Humidistat,  !- Name
     Floor 2 Triage,          !- Zone Name
-    MinRelHumSetSch,         !- Humidifying Relative Humidity Setpoint Schedule Name
-    MaxRelHumSetSch;         !- Dehumidifying Relative Humidity Setpoint Schedule Name
+    MinRelHumSetSch,         !- Humidifying Setpoint Schedule Name
+    MaxRelHumSetSch;         !- Dehumidifying Setpoint Schedule Name
 
   ThermostatSetpoint:DualSetpoint,
     Floor 2 Triage DualSPSched,  !- Name
@@ -35581,8 +35581,8 @@
   ZoneControl:Humidistat,
     Floor 3 ICU Humidistat,  !- Name
     Floor 3 ICU,             !- Zone Name
-    MinRelHumSetSch,         !- Humidifying Relative Humidity Setpoint Schedule Name
-    MaxRelHumSetSch;         !- Dehumidifying Relative Humidity Setpoint Schedule Name
+    MinRelHumSetSch,         !- Humidifying Setpoint Schedule Name
+    MaxRelHumSetSch;         !- Dehumidifying Setpoint Schedule Name
 
   ThermostatSetpoint:DualSetpoint,
     Floor 3 ICU DualSPSched, !- Name
@@ -42423,8 +42423,8 @@
   ZoneControl:Humidistat,
     Floor 3 Triage Humidistat,  !- Name
     Floor 3 Triage,          !- Zone Name
-    MinRelHumSetSch,         !- Humidifying Relative Humidity Setpoint Schedule Name
-    MaxRelHumSetSch;         !- Dehumidifying Relative Humidity Setpoint Schedule Name
+    MinRelHumSetSch,         !- Humidifying Setpoint Schedule Name
+    MaxRelHumSetSch;         !- Dehumidifying Setpoint Schedule Name
 
   ThermostatSetpoint:DualSetpoint,
     Floor 3 Triage DualSPSched,  !- Name
@@ -77654,43 +77654,6 @@
     Flr_1_Soil_DT2,          !- <none>
     Flr_1_Stor_DT2,          !- <none>
     Flr_1_Waiting_DT2;       !- <none>
-
-  EnergyManagementSystem:GlobalVariable,
-    A,                       !- Erl Variable 1 Name
-    B,                       !- Erl Variable 2 Name
-    C,                       !- Erl Variable 3 Name
-    D,                       !- <none>
-    E,                       !- <none>
-    F,                       !- <none>
-    G,                       !- <none>
-    H,                       !- <none>
-    I,                       !- <none>
-    J,                       !- <none>
-    K,                       !- <none>
-    L,                       !- <none>
-    M,                       !- <none>
-    N,                       !- <none>
-    O,                       !- <none>
-    P,                       !- <none>
-    Q,                       !- <none>
-    R,                       !- <none>
-    S,                       !- <none>
-    T,                       !- <none>
-    U,                       !- <none>
-    V,                       !- <none>
-    W,                       !- <none>
-    X,                       !- <none>
-    Y,                       !- <none>
-    Z,                       !- <none>
-    AA,                      !- <none>
-    BB,                      !- <none>
-    CC,                      !- <none>
-    DD,                      !- <none>
-    EE,                      !- <none>
-    FF,                      !- <none>
-    GG,                      !- <none>
-    HH,                      !- <none>
-    II;                      !- <none>
 
 !-   ===========  ALL OBJECTS IN CLASS: ENERGYMANAGEMENTSYSTEM:OUTPUTVARIABLE ===========
 

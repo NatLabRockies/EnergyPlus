@@ -2974,18 +2974,18 @@ namespace OutputProcessor {
         auto reportDataResults = queryResult("SELECT * FROM ReportData;", "ReportData");
         auto reportExtendedDataResults = queryResult("SELECT * FROM ReportExtendedData;", "ReportExtendedData");
 
-        compare_eso_stream(
-            delimited_string({"Program Version,",
-                "1,5,Environment Title[],Latitude[deg],Longitude[deg],Time Zone[],Elevation[m]",
-                "2,8,Day of Simulation[],Month[],Day of Month[],DST Indicator[1=yes 0=no],Hour[],StartMinute[],EndMinute[],DayType",
-                "3,5,Cumulative Day of Simulation[],Month[],Day of Month[],DST Indicator[1=yes 0=no],DayType  ! When Daily Report Variables Requested",
-                "4,2,Cumulative Days of Simulation[],Month[]  ! When Monthly Report Variables Requested",
-                "5,1,Cumulative Days of Simulation[] ! When Run Period Report Variables Requested",
-                "6,1,Calendar Year of Simulation[] ! When Annual Report Variables Requested",
-                "7,11,Boiler1,Boiler NaturalGas Rate [W] !RunPeriod [Value,Min,Month,Day,Hour,Minute,Max,Month,Day,Hour,Minute]",
-                "8,11,Boiler2,Boiler NaturalGas Rate [W] !RunPeriod [Value,Min,Month,Day,Hour,Minute,Max,Month,Day,Hour,Minute]",
-                "9,11,Boiler3,Boiler NaturalGas Rate [W] !RunPeriod [Value,Min,Month,Day,Hour,Minute,Max,Month,Day,Hour,Minute]"},
-              "\n"));
+        compare_eso_stream(delimited_string(
+            {"Program Version,",
+             "1,5,Environment Title[],Latitude[deg],Longitude[deg],Time Zone[],Elevation[m]",
+             "2,8,Day of Simulation[],Month[],Day of Month[],DST Indicator[1=yes 0=no],Hour[],StartMinute[],EndMinute[],DayType",
+             "3,5,Cumulative Day of Simulation[],Month[],Day of Month[],DST Indicator[1=yes 0=no],DayType  ! When Daily Report Variables Requested",
+             "4,2,Cumulative Days of Simulation[],Month[]  ! When Monthly Report Variables Requested",
+             "5,1,Cumulative Days of Simulation[] ! When Run Period Report Variables Requested",
+             "6,1,Calendar Year of Simulation[] ! When Annual Report Variables Requested",
+             "7,11,Boiler1,Boiler NaturalGas Rate [W] !RunPeriod [Value,Min,Month,Day,Hour,Minute,Max,Month,Day,Hour,Minute]",
+             "8,11,Boiler2,Boiler NaturalGas Rate [W] !RunPeriod [Value,Min,Month,Day,Hour,Minute,Max,Month,Day,Hour,Minute]",
+             "9,11,Boiler3,Boiler NaturalGas Rate [W] !RunPeriod [Value,Min,Month,Day,Hour,Minute,Max,Month,Day,Hour,Minute]"},
+            "\n"));
     }
 
     TEST_F(SQLiteFixture, OutputProcessor_setupOutputVariable_regex)
@@ -3013,17 +3013,17 @@ namespace OutputProcessor {
         auto reportDataResults = queryResult("SELECT * FROM ReportData;", "ReportData");
         auto reportExtendedDataResults = queryResult("SELECT * FROM ReportExtendedData;", "ReportExtendedData");
 
-        compare_eso_stream(
-            delimited_string({"Program Version,",
-                "1,5,Environment Title[],Latitude[deg],Longitude[deg],Time Zone[],Elevation[m]",
-                "2,8,Day of Simulation[],Month[],Day of Month[],DST Indicator[1=yes 0=no],Hour[],StartMinute[],EndMinute[],DayType",
-                "3,5,Cumulative Day of Simulation[],Month[],Day of Month[],DST Indicator[1=yes 0=no],DayType  ! When Daily Report Variables Requested",
-                "4,2,Cumulative Days of Simulation[],Month[]  ! When Monthly Report Variables Requested",
-                "5,1,Cumulative Days of Simulation[] ! When Run Period Report Variables Requested",
-                "6,1,Calendar Year of Simulation[] ! When Annual Report Variables Requested",
-                "7,11,Boiler1,Boiler NaturalGas Rate [W] !RunPeriod [Value,Min,Month,Day,Hour,Minute,Max,Month,Day,Hour,Minute]",
-                "8,11,Boiler3,Boiler NaturalGas Rate [W] !RunPeriod [Value,Min,Month,Day,Hour,Minute,Max,Month,Day,Hour,Minute]"},
-              "\n"));
+        compare_eso_stream(delimited_string(
+            {"Program Version,",
+             "1,5,Environment Title[],Latitude[deg],Longitude[deg],Time Zone[],Elevation[m]",
+             "2,8,Day of Simulation[],Month[],Day of Month[],DST Indicator[1=yes 0=no],Hour[],StartMinute[],EndMinute[],DayType",
+             "3,5,Cumulative Day of Simulation[],Month[],Day of Month[],DST Indicator[1=yes 0=no],DayType  ! When Daily Report Variables Requested",
+             "4,2,Cumulative Days of Simulation[],Month[]  ! When Monthly Report Variables Requested",
+             "5,1,Cumulative Days of Simulation[] ! When Run Period Report Variables Requested",
+             "6,1,Calendar Year of Simulation[] ! When Annual Report Variables Requested",
+             "7,11,Boiler1,Boiler NaturalGas Rate [W] !RunPeriod [Value,Min,Month,Day,Hour,Minute,Max,Month,Day,Hour,Minute]",
+             "8,11,Boiler3,Boiler NaturalGas Rate [W] !RunPeriod [Value,Min,Month,Day,Hour,Minute,Max,Month,Day,Hour,Minute]"},
+            "\n"));
     }
 
     TEST_F(SQLiteFixture, OutputProcessor_setupOutputVariable_regex_2)
@@ -3052,18 +3052,18 @@ namespace OutputProcessor {
         auto reportDataResults = queryResult("SELECT * FROM ReportData;", "ReportData");
         auto reportExtendedDataResults = queryResult("SELECT * FROM ReportExtendedData;", "ReportExtendedData");
 
-        compare_eso_stream(
-            delimited_string({"Program Version,",
-                "1,5,Environment Title[],Latitude[deg],Longitude[deg],Time Zone[],Elevation[m]",
-                "2,8,Day of Simulation[],Month[],Day of Month[],DST Indicator[1=yes 0=no],Hour[],StartMinute[],EndMinute[],DayType",
-                "3,5,Cumulative Day of Simulation[],Month[],Day of Month[],DST Indicator[1=yes 0=no],DayType  ! When Daily Report Variables Requested",
-                "4,2,Cumulative Days of Simulation[],Month[]  ! When Monthly Report Variables Requested",
-                "5,1,Cumulative Days of Simulation[] ! When Run Period Report Variables Requested",
-                "6,1,Calendar Year of Simulation[] ! When Annual Report Variables Requested",
-                "7,11,Boiler1,Boiler NaturalGas Rate [W] !RunPeriod [Value,Min,Month,Day,Hour,Minute,Max,Month,Day,Hour,Minute]",
-                "8,11,Boiler2,Boiler NaturalGas Rate [W] !RunPeriod [Value,Min,Month,Day,Hour,Minute,Max,Month,Day,Hour,Minute]",
-                "9,11,Boiler3,Boiler NaturalGas Rate [W] !RunPeriod [Value,Min,Month,Day,Hour,Minute,Max,Month,Day,Hour,Minute]"},
-              "\n"));
+        compare_eso_stream(delimited_string(
+            {"Program Version,",
+             "1,5,Environment Title[],Latitude[deg],Longitude[deg],Time Zone[],Elevation[m]",
+             "2,8,Day of Simulation[],Month[],Day of Month[],DST Indicator[1=yes 0=no],Hour[],StartMinute[],EndMinute[],DayType",
+             "3,5,Cumulative Day of Simulation[],Month[],Day of Month[],DST Indicator[1=yes 0=no],DayType  ! When Daily Report Variables Requested",
+             "4,2,Cumulative Days of Simulation[],Month[]  ! When Monthly Report Variables Requested",
+             "5,1,Cumulative Days of Simulation[] ! When Run Period Report Variables Requested",
+             "6,1,Calendar Year of Simulation[] ! When Annual Report Variables Requested",
+             "7,11,Boiler1,Boiler NaturalGas Rate [W] !RunPeriod [Value,Min,Month,Day,Hour,Minute,Max,Month,Day,Hour,Minute]",
+             "8,11,Boiler2,Boiler NaturalGas Rate [W] !RunPeriod [Value,Min,Month,Day,Hour,Minute,Max,Month,Day,Hour,Minute]",
+             "9,11,Boiler3,Boiler NaturalGas Rate [W] !RunPeriod [Value,Min,Month,Day,Hour,Minute,Max,Month,Day,Hour,Minute]"},
+            "\n"));
     }
 
     TEST_F(SQLiteFixture, OutputProcessor_setupOutputVariable_regex_3)
@@ -3119,7 +3119,16 @@ namespace OutputProcessor {
              "Zone Timestep",
              "",
              "m3/s"},
-            {"10", "0", "Avg", "System", "HVAC System", "Zn003:Wall003", "AFN Linkage Node 1 to Node 2 Volume Flow Rate", "Zone Timestep", "", "m3/s"},
+            {"10",
+             "0",
+             "Avg",
+             "System",
+             "HVAC System",
+             "Zn003:Wall003",
+             "AFN Linkage Node 1 to Node 2 Volume Flow Rate",
+             "Zone Timestep",
+             "",
+             "m3/s"},
         });
 
         EXPECT_EQ(reportDataDictionary, reportDataDictionaryResults);
@@ -3132,7 +3141,8 @@ namespace OutputProcessor {
                 "Program Version,",
                 "1,5,Environment Title[],Latitude[deg],Longitude[deg],Time Zone[],Elevation[m]",
                 "2,8,Day of Simulation[],Month[],Day of Month[],DST Indicator[1=yes 0=no],Hour[],StartMinute[],EndMinute[],DayType",
-                "3,5,Cumulative Day of Simulation[],Month[],Day of Month[],DST Indicator[1=yes 0=no],DayType  ! When Daily Report Variables Requested",
+                "3,5,Cumulative Day of Simulation[],Month[],Day of Month[],DST Indicator[1=yes 0=no],DayType  ! When Daily Report Variables "
+                "Requested",
                 "4,2,Cumulative Days of Simulation[],Month[]  ! When Monthly Report Variables Requested",
                 "5,1,Cumulative Days of Simulation[] ! When Run Period Report Variables Requested",
                 "6,1,Calendar Year of Simulation[] ! When Annual Report Variables Requested",
@@ -3199,7 +3209,16 @@ namespace OutputProcessor {
              "Zone Timestep",
              "",
              "m3/s"},
-            {"10", "0", "Avg", "System", "HVAC System", "ZN003:WALL003", "AFN Linkage Node 1 to Node 2 Volume Flow Rate", "Zone Timestep", "", "m3/s"},
+            {"10",
+             "0",
+             "Avg",
+             "System",
+             "HVAC System",
+             "ZN003:WALL003",
+             "AFN Linkage Node 1 to Node 2 Volume Flow Rate",
+             "Zone Timestep",
+             "",
+             "m3/s"},
         });
 
         EXPECT_EQ(reportDataDictionary, reportDataDictionaryResults);
@@ -3212,7 +3231,8 @@ namespace OutputProcessor {
                 "Program Version,",
                 "1,5,Environment Title[],Latitude[deg],Longitude[deg],Time Zone[],Elevation[m]",
                 "2,8,Day of Simulation[],Month[],Day of Month[],DST Indicator[1=yes 0=no],Hour[],StartMinute[],EndMinute[],DayType",
-                "3,5,Cumulative Day of Simulation[],Month[],Day of Month[],DST Indicator[1=yes 0=no],DayType  ! When Daily Report Variables Requested",
+                "3,5,Cumulative Day of Simulation[],Month[],Day of Month[],DST Indicator[1=yes 0=no],DayType  ! When Daily Report Variables "
+                "Requested",
                 "4,2,Cumulative Days of Simulation[],Month[]  ! When Monthly Report Variables Requested",
                 "5,1,Cumulative Days of Simulation[] ! When Run Period Report Variables Requested",
                 "6,1,Calendar Year of Simulation[] ! When Annual Report Variables Requested",
@@ -3297,7 +3317,7 @@ namespace OutputProcessor {
                                 light_consumption,
                                 TimeStepType::Zone,
                                 StoreType::Sum,
-                                format("SPACE {} LIGHTS", i),
+                                std::format("SPACE {} LIGHTS", i),
                                 Constant::eResource::Electricity,
                                 Group::Building,
                                 EndUseCat::InteriorLights,
@@ -3309,20 +3329,20 @@ namespace OutputProcessor {
 
         UpdateMeterReporting(*state);
 
-        compare_mtr_stream(
-            delimited_string({"Program Version,",
-                "1,5,Environment Title[],Latitude[deg],Longitude[deg],Time Zone[],Elevation[m]",
-                "2,8,Day of Simulation[],Month[],Day of Month[],DST Indicator[1=yes 0=no],Hour[],StartMinute[],EndMinute[],DayType",
-                "3,5,Cumulative Day of Simulation[],Month[],Day of Month[],DST Indicator[1=yes 0=no],DayType  ! When Daily Meters Requested",
-                "4,2,Cumulative Days of Simulation[],Month[]  ! When Monthly Meters Requested",
-                "5,1,Cumulative Days of Simulation[] ! When Run Period Meters Requested",
-                "6,1,Calendar Year of Simulation[] ! When Annual Meters Requested",
-                "59,9,InteriorLights:Electricity:Zone:SPACE1 [J] !Monthly [Value,Min,Day,Hour,Minute,Max,Day,Hour,Minute]",
-                "108,9,InteriorLights:Electricity:Zone:SPACE2 [J] !Monthly [Value,Min,Day,Hour,Minute,Max,Day,Hour,Minute]",
-                "145,9,InteriorLights:Electricity:Zone:SPACE3 [J] !Monthly [Value,Min,Day,Hour,Minute,Max,Day,Hour,Minute]",
-                "182,9,InteriorLights:Electricity:Zone:SPACE4 [J] !Monthly [Value,Min,Day,Hour,Minute,Max,Day,Hour,Minute]",
-                "219,9,InteriorLights:Electricity:Zone:SPACE5 [J] !Monthly [Value,Min,Day,Hour,Minute,Max,Day,Hour,Minute]"},
-              "\n"));
+        compare_mtr_stream(delimited_string(
+            {"Program Version,",
+             "1,5,Environment Title[],Latitude[deg],Longitude[deg],Time Zone[],Elevation[m]",
+             "2,8,Day of Simulation[],Month[],Day of Month[],DST Indicator[1=yes 0=no],Hour[],StartMinute[],EndMinute[],DayType",
+             "3,5,Cumulative Day of Simulation[],Month[],Day of Month[],DST Indicator[1=yes 0=no],DayType  ! When Daily Meters Requested",
+             "4,2,Cumulative Days of Simulation[],Month[]  ! When Monthly Meters Requested",
+             "5,1,Cumulative Days of Simulation[] ! When Run Period Meters Requested",
+             "6,1,Calendar Year of Simulation[] ! When Annual Meters Requested",
+             "59,9,InteriorLights:Electricity:Zone:SPACE1 [J] !Monthly [Value,Min,Day,Hour,Minute,Max,Day,Hour,Minute]",
+             "108,9,InteriorLights:Electricity:Zone:SPACE2 [J] !Monthly [Value,Min,Day,Hour,Minute,Max,Day,Hour,Minute]",
+             "145,9,InteriorLights:Electricity:Zone:SPACE3 [J] !Monthly [Value,Min,Day,Hour,Minute,Max,Day,Hour,Minute]",
+             "182,9,InteriorLights:Electricity:Zone:SPACE4 [J] !Monthly [Value,Min,Day,Hour,Minute,Max,Day,Hour,Minute]",
+             "219,9,InteriorLights:Electricity:Zone:SPACE5 [J] !Monthly [Value,Min,Day,Hour,Minute,Max,Day,Hour,Minute]"},
+            "\n"));
     }
 
     TEST_F(SQLiteFixture, OutputProcessor_getCustomMeterInput)
@@ -3997,7 +4017,8 @@ namespace OutputProcessor {
                 "Program Version,",
                 "1,5,Environment Title[],Latitude[deg],Longitude[deg],Time Zone[],Elevation[m]",
                 "2,8,Day of Simulation[],Month[],Day of Month[],DST Indicator[1=yes 0=no],Hour[],StartMinute[],EndMinute[],DayType",
-                "3,5,Cumulative Day of Simulation[],Month[],Day of Month[],DST Indicator[1=yes 0=no],DayType  ! When Daily Report Variables Requested",
+                "3,5,Cumulative Day of Simulation[],Month[],Day of Month[],DST Indicator[1=yes 0=no],DayType  ! When Daily Report Variables "
+                "Requested",
                 "4,2,Cumulative Days of Simulation[],Month[]  ! When Monthly Report Variables Requested",
                 "5,1,Cumulative Days of Simulation[] ! When Run Period Report Variables Requested",
                 "6,1,Calendar Year of Simulation[] ! When Annual Report Variables Requested",
@@ -4313,7 +4334,8 @@ namespace OutputProcessor {
                 "Program Version,",
                 "1,5,Environment Title[],Latitude[deg],Longitude[deg],Time Zone[],Elevation[m]",
                 "2,8,Day of Simulation[],Month[],Day of Month[],DST Indicator[1=yes 0=no],Hour[],StartMinute[],EndMinute[],DayType",
-                "3,5,Cumulative Day of Simulation[],Month[],Day of Month[],DST Indicator[1=yes 0=no],DayType  ! When Daily Report Variables Requested",
+                "3,5,Cumulative Day of Simulation[],Month[],Day of Month[],DST Indicator[1=yes 0=no],DayType  ! When Daily Report Variables "
+                "Requested",
                 "4,2,Cumulative Days of Simulation[],Month[]  ! When Monthly Report Variables Requested",
                 "5,1,Cumulative Days of Simulation[] ! When Run Period Report Variables Requested",
                 "6,1,Calendar Year of Simulation[] ! When Annual Report Variables Requested",
@@ -4605,7 +4627,8 @@ namespace OutputProcessor {
                 "Program Version,",
                 "1,5,Environment Title[],Latitude[deg],Longitude[deg],Time Zone[],Elevation[m]",
                 "2,8,Day of Simulation[],Month[],Day of Month[],DST Indicator[1=yes 0=no],Hour[],StartMinute[],EndMinute[],DayType",
-                "3,5,Cumulative Day of Simulation[],Month[],Day of Month[],DST Indicator[1=yes 0=no],DayType  ! When Daily Report Variables Requested",
+                "3,5,Cumulative Day of Simulation[],Month[],Day of Month[],DST Indicator[1=yes 0=no],DayType  ! When Daily Report Variables "
+                "Requested",
                 "4,2,Cumulative Days of Simulation[],Month[]  ! When Monthly Report Variables Requested",
                 "5,1,Cumulative Days of Simulation[] ! When Run Period Report Variables Requested",
                 "6,1,Calendar Year of Simulation[] ! When Annual Report Variables Requested",
@@ -4723,20 +4746,18 @@ namespace OutputProcessor {
 #endif // GET_OUT
 
         compare_eso_stream(delimited_string(
-            {
-                "Program Version,",
-                "1,5,Environment Title[],Latitude[deg],Longitude[deg],Time Zone[],Elevation[m]",
-                "2,8,Day of Simulation[],Month[],Day of Month[],DST Indicator[1=yes 0=no],Hour[],StartMinute[],EndMinute[],DayType",
-                "3,5,Cumulative Day of Simulation[],Month[],Day of Month[],DST Indicator[1=yes 0=no],DayType  ! When Daily Report Variables Requested",
-                "4,2,Cumulative Days of Simulation[],Month[]  ! When Monthly Report Variables Requested",
-                "5,1,Cumulative Days of Simulation[] ! When Run Period Report Variables Requested",
-                "6,1,Calendar Year of Simulation[] ! When Annual Report Variables Requested",
-                "8,1,Electricity:Facility [J] !TimeStep",
-                "2,365,12,31, 0,24,50.00,60.00,Tuesday",
-                "8,0.0"
-            },
+            {"Program Version,",
+             "1,5,Environment Title[],Latitude[deg],Longitude[deg],Time Zone[],Elevation[m]",
+             "2,8,Day of Simulation[],Month[],Day of Month[],DST Indicator[1=yes 0=no],Hour[],StartMinute[],EndMinute[],DayType",
+             "3,5,Cumulative Day of Simulation[],Month[],Day of Month[],DST Indicator[1=yes 0=no],DayType  ! When Daily Report Variables Requested",
+             "4,2,Cumulative Days of Simulation[],Month[]  ! When Monthly Report Variables Requested",
+             "5,1,Cumulative Days of Simulation[] ! When Run Period Report Variables Requested",
+             "6,1,Calendar Year of Simulation[] ! When Annual Report Variables Requested",
+             "8,1,Electricity:Facility [J] !TimeStep",
+             "2,365,12,31, 0,24,50.00,60.00,Tuesday",
+             "8,0.0"},
             "\n"));
-        
+
         state->dataGlobal->WarmupFlag = false;
         UpdateMeterReporting(*state);
         UpdateDataandReport(*state, TimeStepType::Zone);
@@ -5502,7 +5523,7 @@ namespace OutputProcessor {
                                 light_consumption,
                                 TimeStepType::Zone,
                                 StoreType::Sum,
-                                fmt::format("LIGHTS {}", i + 1),
+                                std::format("LIGHTS {}", i + 1),
                                 Constant::eResource::Electricity,
                                 Group::Building,
                                 EndUseCat::InteriorLights,
@@ -5528,7 +5549,7 @@ namespace OutputProcessor {
                  ++state->dataEnvrn->DayOfMonth) {
 
                 ++state->dataGlobal->DayOfSim;
-                state->dataGlobal->DayOfSimChr = fmt::to_string(state->dataGlobal->DayOfSim);
+                state->dataGlobal->DayOfSimChr = std::to_string(state->dataGlobal->DayOfSim);
 
                 ++state->dataEnvrn->DayOfWeek;
                 if (state->dataEnvrn->DayOfWeek > 7) {
@@ -5555,7 +5576,7 @@ namespace OutputProcessor {
                         records_written += numOutputVariables;
                         if (records_written > (INT_MAX_AS_SIZE_T - numOutputVariables)) {
                             EXPECT_EQ("2005-12-22 02:45",
-                                      fmt::format("{:04d}-{:02d}-{:02d} {:02d}:{:02d}",
+                                      std::format("{:04d}-{:02d}-{:02d} {:02d}:{:02d}",
                                                   state->dataGlobal->CalendarYear,
                                                   state->dataEnvrn->Month,
                                                   state->dataEnvrn->DayOfMonth,

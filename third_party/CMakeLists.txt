@@ -11,13 +11,14 @@ target_compile_definitions(
 if(NOT MSVC)  # This is really only needed with newer Clang, but gcc is fine with it
   target_compile_options(nlohmann_json INTERFACE -Wno-deprecated-declarations)
 endif()
+target_compile_options(nlohmann_json INTERFACE $<$<COMPILE_LANG_AND_ID:CXX,AppleClang>:-Wno-shorten-64-to-32>)
 target_include_directories(
         nlohmann_json
         SYSTEM INTERFACE
-        $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/nlohmann>
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
 )
 set_source_files_properties(
-  $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/nlohmann>/json.hpp
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>/nlohmann/json.hpp
   TARGET_DIRECTORY nlohmann_json
   PROPERTIES COMPILE_FLAGS -Wno-deprecated-declarations
 )
@@ -86,6 +87,9 @@ set(CMAKE_CXX_STANDARD 20)
 
 if(NOT MSVC)
   add_compile_options(-Wno-pedantic -Wno-unused-parameter -Wno-unknown-pragmas)
+  if(CMAKE_COMPILER_IS_GNUCXX AND CMAKE_CXX_COMPILER_VERSION VERSION_GREATER_EQUAL 15.0)
+    add_compile_options($<$<COMPILE_LANGUAGE:CXX>:-Wno-dangling-reference> $<$<COMPILE_LANGUAGE:CXX>:-Wno-restrict>)
+  endif()
 else()
   add_compile_options(/wd4267 /wd4996 /wd4068 /wd4244 /wd4589)
 endif()
@@ -130,6 +134,19 @@ if(BUILD_TESTING)
   set_target_properties(gtest_main PROPERTIES FOLDER ThirdParty/gtest)
   set_target_properties(gmock PROPERTIES FOLDER ThirdParty/gtest)
   set_target_properties(gmock_main PROPERTIES FOLDER ThirdParty/gtest)
+
+  set(is_clang "$<CXX_COMPILER_ID:Clang>")
+  set(v21_or_later "$<VERSION_GREATER_EQUAL:$<CXX_COMPILER_VERSION>,21>")
+  set(is_clang_v21_or_later "$<AND:${is_clang},${v21_or_later}>")
+  foreach(_gtest_target gtest gtest_main gmock gmock_main)
+    if(TARGET ${_gtest_target})
+      target_compile_options(${_gtest_target}
+        PRIVATE
+          "$<${is_clang_v21_or_later}:-Wno-character-conversion>"
+          $<$<COMPILE_LANG_AND_ID:CXX,Clang,AppleClang>:-Wno-deprecated-declarations>
+      )
+    endif()
+  endforeach()
 endif()
 
 add_subdirectory(ObjexxFCL)
@@ -155,11 +172,6 @@ target_link_libraries(DElight PRIVATE turn_off_warnings)
 
 add_subdirectory(re2)
 set_target_properties(re2 PROPERTIES FOLDER ThirdParty/re2)
-
-add_subdirectory(fmt-8.0.1)
-target_compile_definitions(fmt PRIVATE FMT_USE_FULL_CACHE_DRAGONBOX=1)
-set_target_properties(fmt PROPERTIES FOLDER ThirdParty/fmt)
-mark_as_advanced(FORCE FMT_SYSTEM_HEADERS)
 
 # Kiva
 option(BUILD_GROUND_PLOT "Build ground plotting library (for Kiva debugging only)" OFF)
@@ -221,4 +233,3 @@ add_subdirectory(libtk205)
 mark_as_advanced(FORCE libtk205_STATIC_LIB)
 mark_as_advanced(FORCE libtk205_COVERAGE)
 mark_as_advanced(FORCE libtk205_BUILD_TESTING)
-

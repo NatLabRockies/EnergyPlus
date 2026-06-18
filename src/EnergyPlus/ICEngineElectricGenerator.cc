@@ -47,6 +47,7 @@
 
 // C++ Headers
 #include <cmath>
+#include <format>
 
 // ObjexxFCL Headers
 #include <ObjexxFCL/Array.functions.hh>
@@ -104,8 +105,8 @@ namespace ICEngineElectricGenerator {
         }
         // If we didn't find it, fatal
         ShowFatalError(state,
-                       EnergyPlus::format("LocalICEngineGeneratorFactory: Error getting inputs for internal combustion engine generator named: {}",
-                                          objectName)); // LCOV_EXCL_LINE
+                       std::format("LocalICEngineGeneratorFactory: Error getting inputs for internal combustion engine generator named: {}",
+                                   objectName)); // LCOV_EXCL_LINE
         // Shut up the compiler
         return nullptr; // LCOV_EXCL_LINE
     }
@@ -138,7 +139,7 @@ namespace ICEngineElectricGenerator {
             state.dataInputProcessing->inputProcessor->getNumObjectsFound(state, s_ipsc->cCurrentModuleObject);
 
         if (state.dataICEngElectGen->NumICEngineGenerators <= 0) {
-            ShowSevereError(state, EnergyPlus::format("No {} equipment specified in input file", s_ipsc->cCurrentModuleObject));
+            ShowSevereError(state, std::format("No {} equipment specified in input file", s_ipsc->cCurrentModuleObject));
             ErrorsFound = true;
         }
 
@@ -168,8 +169,8 @@ namespace ICEngineElectricGenerator {
 
             iceGen.RatedPowerOutput = NumArray(1);
             if (NumArray(1) == 0.0) {
-                ShowSevereError(state, EnergyPlus::format("Invalid {}={:.2R}", s_ipsc->cNumericFieldNames(1), NumArray(1)));
-                ShowContinueError(state, EnergyPlus::format("Entered in {}={}", s_ipsc->cCurrentModuleObject, AlphArray(1)));
+                ShowSevereError(state, std::format("Invalid {}={:.2f}", s_ipsc->cNumericFieldNames(1), NumArray(1)));
+                ShowContinueError(state, std::format("Entered in {}={}", s_ipsc->cCurrentModuleObject, AlphArray(1)));
                 ErrorsFound = true;
             }
 
@@ -230,11 +231,10 @@ namespace ICEngineElectricGenerator {
             } else {
                 Real64 xValue = iceGen.ExhaustTempCurve->value(state, 1.0);
                 if (xValue < ReferenceTemp) {
-                    ShowSevereError(state,
-                                    EnergyPlus::format("GetICEngineGeneratorInput: {} output has very low value.", s_ipsc->cAlphaFieldNames(7)));
-                    ShowContinueError(state, EnergyPlus::format("...curve generates [{:.3R} C] at PLR=1.0", xValue));
-                    ShowContinueError(
-                        state, EnergyPlus::format("...this is less than the Reference Temperature [{:.2R} C] and may cause errors.", ReferenceTemp));
+                    ShowSevereError(state, std::format("GetICEngineGeneratorInput: {} output has very low value.", s_ipsc->cAlphaFieldNames(7)));
+                    ShowContinueError(state, std::format("...curve generates [{:.3f} C] at PLR=1.0", xValue));
+                    ShowContinueError(state,
+                                      std::format("...this is less than the Reference Temperature [{:.2f} C] and may cause errors.", ReferenceTemp));
                 }
             }
 
@@ -257,8 +257,8 @@ namespace ICEngineElectricGenerator {
                                                                      Node::CompFluidStream::Primary,
                                                                      Node::ObjectIsNotParent);
                 if (iceGen.HeatRecInletNodeNum == 0) {
-                    ShowSevereError(state, EnergyPlus::format("Invalid {}={}", s_ipsc->cAlphaFieldNames(8), AlphArray(8)));
-                    ShowContinueError(state, EnergyPlus::format("Entered in {}={}", s_ipsc->cCurrentModuleObject, AlphArray(1)));
+                    ShowSevereError(state, std::format("Invalid {}={}", s_ipsc->cAlphaFieldNames(8), AlphArray(8)));
+                    ShowContinueError(state, std::format("Entered in {}={}", s_ipsc->cCurrentModuleObject, AlphArray(1)));
                     ErrorsFound = true;
                 }
                 iceGen.HeatRecOutletNodeNum = Node::GetOnlySingleNode(state,
@@ -271,8 +271,8 @@ namespace ICEngineElectricGenerator {
                                                                       Node::CompFluidStream::Primary,
                                                                       Node::ObjectIsNotParent);
                 if (iceGen.HeatRecOutletNodeNum == 0) {
-                    ShowSevereError(state, EnergyPlus::format("Invalid {}={}", s_ipsc->cAlphaFieldNames(9), AlphArray(9)));
-                    ShowContinueError(state, EnergyPlus::format("Entered in {}={}", s_ipsc->cCurrentModuleObject, AlphArray(1)));
+                    ShowSevereError(state, std::format("Invalid {}={}", s_ipsc->cAlphaFieldNames(9), AlphArray(9)));
+                    ShowContinueError(state, std::format("Entered in {}={}", s_ipsc->cCurrentModuleObject, AlphArray(1)));
                     ErrorsFound = true;
                 }
                 Node::TestCompSet(state, s_ipsc->cCurrentModuleObject, AlphArray(1), AlphArray(8), AlphArray(9), "Heat Recovery Nodes");
@@ -283,9 +283,9 @@ namespace ICEngineElectricGenerator {
                 iceGen.HeatRecOutletNodeNum = 0;
                 if (!s_ipsc->lAlphaFieldBlanks(8) || !s_ipsc->lAlphaFieldBlanks(9)) {
                     ShowWarningError(state,
-                                     EnergyPlus::format("Since Design Heat Flow Rate = 0.0, Heat Recovery inactive for {}={}",
-                                                        s_ipsc->cCurrentModuleObject,
-                                                        AlphArray(1)));
+                                     std::format("Since Design Heat Flow Rate = 0.0, Heat Recovery inactive for {}={}",
+                                                 s_ipsc->cCurrentModuleObject,
+                                                 AlphArray(1)));
                     ShowContinueError(state, "However, Node names were specified for Heat Recovery inlet or outlet nodes");
                 }
             }
@@ -293,8 +293,8 @@ namespace ICEngineElectricGenerator {
             // Validate fuel type input
             iceGen.FuelType = static_cast<Constant::eFuel>(getEnumValue(Constant::eFuelNamesUC, AlphArray(10)));
             if (iceGen.FuelType == Constant::eFuel::Invalid) {
-                ShowSevereError(state, EnergyPlus::format("Invalid {}={}", s_ipsc->cAlphaFieldNames(10), AlphArray(10)));
-                ShowContinueError(state, EnergyPlus::format("Entered in {}={}", s_ipsc->cCurrentModuleObject, AlphArray(1)));
+                ShowSevereError(state, std::format("Invalid {}={}", s_ipsc->cAlphaFieldNames(10), AlphArray(10)));
+                ShowContinueError(state, std::format("Entered in {}={}", s_ipsc->cCurrentModuleObject, AlphArray(1)));
                 ErrorsFound = true;
             }
 
@@ -302,7 +302,7 @@ namespace ICEngineElectricGenerator {
         }
 
         if (ErrorsFound) {
-            ShowFatalError(state, EnergyPlus::format("Errors found in processing input for {}", s_ipsc->cCurrentModuleObject));
+            ShowFatalError(state, std::format("Errors found in processing input for {}", s_ipsc->cCurrentModuleObject));
         }
     }
 
@@ -329,7 +329,7 @@ namespace ICEngineElectricGenerator {
                             OutputProcessor::EndUseCat::Cogeneration);
 
         SetupOutputVariable(state,
-                            EnergyPlus::format("Generator {} Rate", sFuelType),
+                            std::format("Generator {} Rate", sFuelType),
                             Constant::Units::W,
                             this->FuelEnergyUseRate,
                             OutputProcessor::TimeStepType::System,
@@ -337,7 +337,7 @@ namespace ICEngineElectricGenerator {
                             this->Name);
 
         SetupOutputVariable(state,
-                            EnergyPlus::format("Generator {} Energy", sFuelType),
+                            std::format("Generator {} Energy", sFuelType),
                             Constant::Units::J,
                             this->FuelEnergy,
                             OutputProcessor::TimeStepType::System,
@@ -365,7 +365,7 @@ namespace ICEngineElectricGenerator {
                             this->Name);
 
         SetupOutputVariable(state,
-                            EnergyPlus::format("Generator {} Mass Flow Rate", sFuelType),
+                            std::format("Generator {} Mass Flow Rate", sFuelType),
                             Constant::Units::kg_s,
                             this->FuelMdot,
                             OutputProcessor::TimeStepType::System,
@@ -649,11 +649,10 @@ namespace ICEngineElectricGenerator {
                 QExhaustRec = max(ExhaustGasFlow * ExhaustCP * (exhaustTemp - exhaustStackTemp), 0.0);
             } else {
                 if (this->ErrExhaustTempIndex == 0) {
-                    ShowWarningMessage(state,
-                                       EnergyPlus::format("CalcICEngineGeneratorModel: {}=\"{}\" low Exhaust Temperature from Curve Value",
-                                                          this->TypeOf,
-                                                          this->Name));
-                    ShowContinueError(state, EnergyPlus::format("...curve generated temperature=[{:.3R} C], PLR=[{:.3R}].", exhaustTemp, PLR));
+                    ShowWarningMessage(
+                        state,
+                        std::format("CalcICEngineGeneratorModel: {}=\"{}\" low Exhaust Temperature from Curve Value", this->TypeOf, this->Name));
+                    ShowContinueError(state, std::format("...curve generated temperature=[{:.3f} C], PLR=[{:.3f}].", exhaustTemp, PLR));
                     ShowContinueError(state, "...simulation will continue with exhaust heat reclaim set to 0.");
                 }
                 ShowRecurringWarningErrorAtEnd(state,

@@ -311,16 +311,16 @@ TEST_F(EnergyPlusFixture, SolarShadingTest_CalcPerSolarBeamTestResetsFrac)
 
     // Check that the fraction Sunlit is properly set to 1.0 when the sun is Up and ZERO otherwise: it does NOT remember previously set values
     for (int surfNum = 1; surfNum <= state->dataSurface->TotSurfaces; ++surfNum) {
-        SCOPED_TRACE(fmt::format("Surface {}='{}'", surfNum, state->dataSurface->Surface(surfNum).Name));
+        SCOPED_TRACE(std::format("Surface {}='{}'", surfNum, state->dataSurface->Surface(surfNum).Name));
         for (int hour = 1; hour <= Constant::iHoursInDay; ++hour) {
-            SCOPED_TRACE(fmt::format("Hour={}", hour));
+            SCOPED_TRACE(std::format("Hour={}", hour));
             if (isSunUp(hour, state->dataGlobal->TimeStepsInHour)) {
                 EXPECT_DOUBLE_EQ(1.0, state->dataHeatBal->SurfSunlitFracHR(hour, surfNum)) << "Failed when Sun is Up";
             } else {
                 EXPECT_DOUBLE_EQ(0.0, state->dataHeatBal->SurfSunlitFracHR(hour, surfNum)) << "Failed when Sun is Down";
             }
             for (int timestep = 1; timestep <= state->dataGlobal->TimeStepsInHour; ++timestep) {
-                SCOPED_TRACE(fmt::format("Timestep={}", timestep));
+                SCOPED_TRACE(std::format("Timestep={}", timestep));
                 if (isSunUp(hour, timestep)) {
                     EXPECT_DOUBLE_EQ(1.0, state->dataHeatBal->SurfSunlitFrac(hour, timestep, surfNum)) << "Failed when Sun is Up";
                 } else {
@@ -350,9 +350,9 @@ TEST_F(EnergyPlusFixture, SolarShadingTest_CalcPerSolarBeamTestResetsFrac)
     CalcPerSolarBeam(*state, AvgEqOfTime, AvgSinSolarDeclin, AvgCosSolarDeclin);
 
     for (int surfNum = 1; surfNum <= state->dataSurface->TotSurfaces; ++surfNum) {
-        SCOPED_TRACE(fmt::format("Surface {}='{}'", surfNum, state->dataSurface->Surface(surfNum).Name));
+        SCOPED_TRACE(std::format("Surface {}='{}'", surfNum, state->dataSurface->Surface(surfNum).Name));
         for (int hour = 1; hour <= Constant::iHoursInDay; ++hour) {
-            SCOPED_TRACE(fmt::format("Hour={}", hour));
+            SCOPED_TRACE(std::format("Hour={}", hour));
             if (hour == state->dataGlobal->HourOfDay) {
                 EXPECT_EQ(1.0, state->dataSurface->SurfaceWindow(surfNum).OutProjSLFracMult[hour]);
                 EXPECT_EQ(1.0, state->dataSurface->SurfaceWindow(surfNum).InOutProjSLFracMult[hour]);
@@ -363,7 +363,7 @@ TEST_F(EnergyPlusFixture, SolarShadingTest_CalcPerSolarBeamTestResetsFrac)
                 EXPECT_DOUBLE_EQ(0.5, state->dataHeatBal->SurfSunlitFracHR(hour, surfNum));
             }
             for (int timestep = 1; timestep <= state->dataGlobal->TimeStepsInHour; ++timestep) {
-                SCOPED_TRACE(fmt::format("Timestep={}", timestep));
+                SCOPED_TRACE(std::format("Timestep={}", timestep));
                 if (hour == state->dataGlobal->HourOfDay && timestep == state->dataGlobal->TimeStep) {
                     EXPECT_DOUBLE_EQ(0.0, state->dataHeatBal->SurfSunlitFrac(hour, timestep, surfNum));
                 } else {
@@ -2500,6 +2500,8 @@ WindowMaterial:SimpleGlazingSystem,
 }
 
 TEST_F(EnergyPlusFixture, SolarShadingTest_GetBuildingDataUsesShadowCalculationSettingsDuringGeometrySetup)
+// Tests that GetShadowingInput must be called before SetupZoneGeometry to get the CheckConvexity warning -- related to issue #9275
+// Also provides coverage for Polygon Clipping Algorithm = ConvexWeilerAtherton -- issue #5558
 {
     std::string const idf_objects = R"IDF(
 RunPeriod,
@@ -2785,7 +2787,28 @@ WindowMaterial:SimpleGlazingSystem,
 
     HeatBalanceManager::GetBuildingData(*state, FoundError);
     ASSERT_FALSE(FoundError);
-    ASSERT_TRUE(match_err_stream("CheckConvexity: Zone=\"ZONE A\", Surface=\"69C03D\" is non-convex."));
+    state->dataGlobal->BeginSimFlag = true;
+    EXPECT_TRUE(state->dataSolarShading->GetInputFlag);
+    SolarShading::InitSolarCalculations(*state);
+    EXPECT_FALSE(state->dataSysVars->SutherlandHodgman);
+    EXPECT_FALSE(state->dataSysVars->SlaterBarsky);
+
+    std::string const error_string =
+        delimited_string({"   ** Warning ** CheckConvexity: Zone=\"ZONE A\", Surface=\"69C03D\" is non-convex.",
+                          "   **   ~~~   ** ...vertex 4 to vertex 5 to vertex 6",
+                          "   **   ~~~   ** ...vertex 4=[0.00,0.00,3.05]",
+                          "   **   ~~~   ** ...vertex 5=[0.00,3.05,3.05]",
+                          "   **   ~~~   ** ...vertex 6=[0.00,3.05,6.10]",
+                          "   ** Warning ** CheckConvexity: Zone=\"ZONE A\", Surface=\"5BB552\" is non-convex.",
+                          "   **   ~~~   ** ...vertex 2 to vertex 3 to vertex 4",
+                          "   **   ~~~   ** ...vertex 2=[6.10,3.05,3.05]",
+                          "   **   ~~~   ** ...vertex 3=[6.10,0.00,3.05]",
+                          "   **   ~~~   ** ...vertex 4=[6.10,0.00,0.00]",
+                          "   ** Warning ** DetermineShadowingCombinations: Surface=\"5BB552\" is a receiving surface and is non-convex.",
+                          "   **   ~~~   ** ...Shadowing values may be inaccurate. Check .shd report file for more surface shading details",
+                          "   ** Severe  ** DetermineShadowingCombinations: Surface=\"5BB552\" is a casting surface and is non-convex.",
+                          "   **   ~~~   ** ...Shadowing values may be inaccurate. Check .shd report file for more surface shading details"});
+    EXPECT_TRUE(compare_err_stream(error_string, true));
 }
 
 TEST_F(EnergyPlusFixture, SolarShadingTest_GPUNonConvexErrors)
@@ -4467,13 +4490,13 @@ TEST_F(EnergyPlusFixture, ShadowCalculation_CSV)
     for (int iHour = 1; iHour <= 24; ++iHour) { // Do for all hours.
         for (int TS = 1; TS <= state->dataGlobal->TimeStepsInHour; ++TS) {
             if (TS == state->dataGlobal->TimeStepsInHour) {
-                expected_values += fmt::format(" 01/25 {:02}:00,", iHour);
+                expected_values += std::format(" 01/25 {:02}:00,", iHour);
             } else {
-                expected_values += fmt::format(" 01/25 {:02}:30,", iHour - 1);
+                expected_values += std::format(" 01/25 {:02}:30,", iHour - 1);
             }
 
             for (int SurfNum = 1; SurfNum <= state->dataSurface->TotSurfaces; ++SurfNum) {
-                expected_values += fmt::format("{:10.8F},", 0.0);
+                expected_values += std::format("{:10.8F},", 0.0);
             }
             expected_values += "\n";
         }
@@ -5549,7 +5572,7 @@ TEST_F(EnergyPlusFixture, SolarShadingTest_PolygonOverlap3)
 }
 
 TEST_F(EnergyPlusFixture, SolarShadingTest_checkSurfaceExternalShadingSchedules_Scheduled)
-// Test of check to see if all surfaces have a sunlit schedule when shadow calculations are set to "Scheduled"
+// Test of check to see if all surfaces have a sunlit schedule when shadow calculations are set to "Scheduled" -- related to issue #9275
 {
     // Set up data for test. Shading surfaces are skipped so they should not report any errors.
     // Some surfaces will be correctly defined while two other surfaces will not be correctly defined and will generate errors.
@@ -5920,7 +5943,7 @@ WindowMaterial:SimpleGlazingSystem,
 }
 
 TEST_F(EnergyPlusFixture, SolarShadingTest_checkSurfaceExternalShadingSchedules_Imported)
-// Test of check to see if all surfaces have a sunlit schedule when shadow calculations are set to "Imported"
+// Test of check to see if all surfaces have a sunlit schedule when shadow calculations are set to "Imported" -- related to issue #9275
 {
     // Set up data for test. Shading surfaces are skipped so they should not report any errors.
     // Some surfaces will be correctly defined while two other surfaces will not be correctly defined and will generate errors.
@@ -6269,7 +6292,8 @@ WindowMaterial:SimpleGlazingSystem,
 }
 
 TEST_F(EnergyPlusFixture, SolarShadingTest_checkSurfaceExternalShadingSchedules_PolygonClipping)
-// Test of check to see if all surfaces do not have a sunlit schedule when shadow calculations are not set to "Scheduled" or "Imported"
+// Test of check to see if all surfaces do not have a sunlit schedule when shadow calculations are not set to "Scheduled" or "Imported" -- related to
+// issue #9275
 {
     // Set up data for test. Shading surfaces are skipped so they should not report any errors.
     // Some surfaces will be correctly defined while two other surfaces will not be correctly defined and will generate errors.
@@ -6778,6 +6802,132 @@ TEST_F(EnergyPlusFixture, SolarShadingTest_CalcBeamSolarOnWinRevealSurface)
     EXPECT_NEAR(state->dataSurface->SurfWinBmSolAbsdInsReveal(1), 0.0326, 0.001);
     EXPECT_NEAR(state->dataSurface->SurfWinBmSolAbsdInsReveal(2), 0.0225, 0.001);
 }
+
+TEST_F(EnergyPlusFixture, SolarShadingTest_HorAndVertDividersAreAlwaysIntegers)
+{
+    state->dataGlobal->TimeStepsInHour = 6;
+
+    state->dataSurface->FrameDivider.allocate(3);
+    auto &frameDivider1 = state->dataSurface->FrameDivider(1);
+    frameDivider1.Name = "FrameDivider1";
+    frameDivider1.DividerWidth = 0.2;
+    frameDivider1.HorDividers = 2;
+    frameDivider1.VertDividers = 2;
+
+    auto &frameDivider2 = state->dataSurface->FrameDivider(2);
+    frameDivider2.Name = "FrameDivider2";
+    frameDivider2.DividerWidth = 0.2;
+    frameDivider2.HorDividers = static_cast<int>(2.25);
+    frameDivider2.VertDividers = static_cast<int>(2.99);
+
+    auto &frameDivider3 = state->dataSurface->FrameDivider(3);
+    frameDivider3.Name = "FrameDivider3";
+    frameDivider3.DividerWidth = 0.2;
+    frameDivider3.HorDividers = 3;
+    frameDivider3.VertDividers = 3;
+
+    int NumSurf = 3;
+    state->dataSurface->TotSurfaces = NumSurf;
+    state->dataSurface->Surface.allocate(NumSurf);
+    state->dataSurface->SurfaceWindow.allocate(NumSurf);
+    EnergyPlus::SurfaceGeometry::AllocateSurfaceWindows(*state, NumSurf);
+    Window::initWindowModel(*state);
+    SolarShading::AllocateModuleArrays(*state);
+
+    auto &surf1 = state->dataSurface->Surface(1);
+    auto &surf2 = state->dataSurface->Surface(2);
+    auto &surf3 = state->dataSurface->Surface(3);
+    surf1.Name = "Surface1";
+    surf2.Name = "Surface2";
+    surf3.Name = "Surface3";
+    surf1.Zone = 1;
+    surf2.Zone = 1;
+    surf3.Zone = 1;
+    surf1.spaceNum = 1;
+    surf2.spaceNum = 1;
+    surf3.spaceNum = 1;
+    surf1.Class = DataSurfaces::SurfaceClass::Window;
+    surf2.Class = DataSurfaces::SurfaceClass::Window;
+    surf3.Class = DataSurfaces::SurfaceClass::Window;
+    surf1.ExtBoundCond = DataSurfaces::ExternalEnvironment;
+    surf2.ExtBoundCond = DataSurfaces::ExternalEnvironment;
+    surf3.ExtBoundCond = DataSurfaces::ExternalEnvironment;
+    surf1.HasShadeControl = false;
+    surf2.HasShadeControl = false;
+    surf3.HasShadeControl = false;
+    surf1.Construction = 1;
+    surf2.Construction = 1;
+    surf3.Construction = 1;
+    surf1.FrameDivider = 1;
+    surf2.FrameDivider = 2;
+    surf3.FrameDivider = 3;
+    surf1.Sides = 4;
+    surf2.Sides = 4;
+    surf3.Sides = 4;
+    surf1.Height = 2.0;
+    surf2.Height = 2.0;
+    surf3.Height = 2.0;
+    surf1.Width = 1.0;
+    surf2.Width = 1.0;
+    surf3.Width = 1.0;
+    surf1.SinAzim = 0.0;
+    surf2.SinAzim = 0.0;
+    surf3.SinAzim = 0.0;
+    surf1.CosAzim = 1.0;
+    surf2.CosAzim = 1.0;
+    surf3.CosAzim = 1.0;
+    surf1.SinTilt = 1.0;
+    surf2.SinTilt = 1.0;
+    surf3.SinTilt = 1.0;
+    surf1.CosTilt = 0.0;
+    surf2.CosTilt = 0.0;
+    surf3.CosTilt = 0.0;
+    surf1.Area = 2.0;
+    surf2.Area = 2.0;
+    surf3.Area = 2.0;
+    state->dataSurface->SurfWinFrameArea(1) = 0.64;
+    state->dataSurface->SurfWinFrameArea(2) = 0.64;
+    state->dataSurface->SurfWinFrameArea(3) = 0.64;
+
+    state->dataSurface->SurfActiveConstruction(1) = 1;
+    state->dataSurface->SurfActiveConstruction(2) = 1;
+    state->dataSurface->SurfActiveConstruction(3) = 1;
+
+    state->dataHeatBal->TotConstructs = 1;
+    state->dataConstruction->Construct.allocate(state->dataHeatBal->TotConstructs);
+    auto &construct1 = state->dataConstruction->Construct(1);
+    construct1.TotLayers = 1;
+    construct1.LayerPoint.allocate(1);
+    construct1.LayerPoint(1) = 1;
+    construct1.Name = "Construction1";
+    construct1.TotGlassLayers = 1;
+    construct1.TransSolBeamCoef[0] = 0.9;
+
+    auto &s_mat = state->dataMaterial;
+
+    auto *mat1 = new Material::MaterialGlass;
+    mat1->Name = "GLASS";
+    mat1->group = Material::Group::Glass;
+    s_mat->materials.push_back(mat1);
+    mat1->Num = s_mat->materials.isize();
+    s_mat->materialMap.insert_or_assign(mat1->Name, mat1->Num);
+
+    state->dataGlobal->NumOfZones = 1;
+    state->dataHeatBal->Zone.allocate(1);
+    state->dataHeatBal->Zone(1).spaceIndexes.allocate(1);
+    state->dataHeatBal->Zone(1).spaceIndexes[0] = 1;
+    state->dataHeatBal->space.allocate(1);
+    state->dataHeatBal->space(1).WindowSurfaceFirst = 1;
+    state->dataHeatBal->space(1).WindowSurfaceLast = 3;
+
+    Window::W5InitGlassParameters(*state);
+
+    // fractional parts of HorDividers and VertDividers are truncated
+    EXPECT_EQ(state->dataSurface->SurfWinFrameEdgeArea(1), state->dataSurface->SurfWinFrameEdgeArea(2));
+    EXPECT_NE(state->dataSurface->SurfWinFrameEdgeArea(1), state->dataSurface->SurfWinFrameEdgeArea(3));
+    EXPECT_NE(state->dataSurface->SurfWinFrameEdgeArea(2), state->dataSurface->SurfWinFrameEdgeArea(3));
+}
+
 TEST_F(EnergyPlusFixture, SolarShadingTest_CalcInteriorSolarDistribution_Detailed)
 {
     // Test for detailed window model
@@ -7778,7 +7928,7 @@ TEST_F(EnergyPlusFixture, CLIPLINE_Full)
         Real64 y1 = t.line_ori.p1.y;
         bool is_rev = x0 > x1;
 
-        std::string const msg = fmt::format("From ({}, {}) to ({}, {})", t.line_ori.p0.x, t.line_ori.p0.y, t.line_ori.p1.x, t.line_ori.p1.y);
+        std::string const msg = std::format("From ({}, {}) to ({}, {})", t.line_ori.p0.x, t.line_ori.p0.y, t.line_ori.p1.x, t.line_ori.p1.y);
 
         bool visible = false;
         CLIPLINE(x0, x1, y0, y1, maxX, minX, maxY, minY, visible);
@@ -7956,7 +8106,7 @@ TEST_F(EnergyPlusFixture, CLIPLINE_Full)
     for (const auto &t : test_cases) {
         ++i;
         std::string const msg =
-            fmt::format("test_case {}: From ({}, {}) to ({}, {})", i, t.line_ori.p0.x, t.line_ori.p0.y, t.line_ori.p1.x, t.line_ori.p1.y);
+            std::format("test_case {}: From ({}, {}) to ({}, {})", i, t.line_ori.p0.x, t.line_ori.p0.y, t.line_ori.p1.x, t.line_ori.p1.y);
         SCOPED_TRACE(msg);
         testclipline(t);
     }
@@ -7991,7 +8141,7 @@ TEST_F(EnergyPlusFixture, CLIPLINE_Full)
     for (const auto &t : boundary_lines) {
         ++i;
         std::string const msg =
-            fmt::format("Boundary Line {}: From ({}, {}) to ({}, {})", i, t.line_ori.p0.x, t.line_ori.p0.y, t.line_ori.p1.x, t.line_ori.p1.y);
+            std::format("Boundary Line {}: From ({}, {}) to ({}, {})", i, t.line_ori.p0.x, t.line_ori.p0.y, t.line_ori.p1.x, t.line_ori.p1.y);
         SCOPED_TRACE(msg);
         testclipline(t);
     }

@@ -338,7 +338,6 @@ TEST_F(EnergyPlusFixture, OutdoorAirUnit_AutoSize)
     state->dataLoopNodes->Node(EAFanInletNode).MassFlowRate = 0.60215437;         // zone exhaust flow rate
     state->dataLoopNodes->Node(EAFanInletNode).MassFlowRateMaxAvail = 0.60215437; // exhaust fan will not turn on unless max avail is set
 
-    SetPredefinedTables(*state);
     OutdoorAirUnit::SimOutdoorAirUnit(*state,
                                       "ZONE1OUTAIR",
                                       CurZoneNum,

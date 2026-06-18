@@ -1068,7 +1068,6 @@ TEST_F(EnergyPlusFixture, PlantHXModulatedDualDeadDefectFileHi)
 
     state->dataGlobal->BeginSimFlag = true;
 
-    OutputReportPredefined::SetPredefinedTables(*state);
     HeatBalanceManager::SetPreConstructionInputParameters(*state); // establish array bounds for constructions early
     // OutputProcessor::TimeValue.allocate(2);
     OutputProcessor::SetupTimePointers(
@@ -2164,7 +2163,6 @@ TEST_F(EnergyPlusFixture, PlantHXModulatedDualDeadDefectFileLo)
 
     state->dataGlobal->BeginSimFlag = true;
 
-    OutputReportPredefined::SetPredefinedTables(*state);
     HeatBalanceManager::SetPreConstructionInputParameters(*state); // establish array bounds for constructions early
     // OutputProcessor::TimeValue.allocate(2);
     OutputProcessor::SetupTimePointers(

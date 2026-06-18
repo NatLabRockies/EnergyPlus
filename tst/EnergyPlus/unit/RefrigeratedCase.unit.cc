@@ -65,7 +65,6 @@
 #include <EnergyPlus/RefrigeratedCase.hh>
 
 // Standard headers
-#include <fmt/format.h>
 #include <string>
 #include <string_view>
 
@@ -383,7 +382,7 @@ Schedule:Compact,
   Until: 24:00,0.0;        !- Field 21
 )IDF";
 
-    ASSERT_TRUE(process_idf(fmt::format("{}\n{}", oneZoneBuildingWithIdealLoads, idf_objects))); // read idf objects
+    ASSERT_TRUE(process_idf(std::format("{}\n{}", oneZoneBuildingWithIdealLoads, idf_objects))); // read idf objects
     state->init_state(*state);
 
     state->dataZoneEquip->ZoneEquipInputsFilled = true;
@@ -479,7 +478,7 @@ Refrigeration:WalkIn,
   None;                    !- Stocking Door Opening Protection Type Facing Zone 1
 )IDF";
 
-    ASSERT_TRUE(process_idf(fmt::format("{}\n{}", oneZoneBuildingWithIdealLoads, idf_objects))); // read idf objects
+    ASSERT_TRUE(process_idf(std::format("{}\n{}", oneZoneBuildingWithIdealLoads, idf_objects))); // read idf objects
     state->init_state(*state);
 
     state->dataZoneEquip->ZoneEquipInputsFilled = true;
@@ -577,7 +576,7 @@ Refrigeration:WalkIn,
   None;                    !- Stocking Door Opening Protection Type Facing Zone 1
 )IDF";
 
-    ASSERT_TRUE(process_idf(fmt::format("{}\n{}", oneZoneBuildingWithIdealLoads, idf_objects))); // read idf objects
+    ASSERT_TRUE(process_idf(std::format("{}\n{}", oneZoneBuildingWithIdealLoads, idf_objects))); // read idf objects
     state->init_state(*state);
 
     state->dataZoneEquip->ZoneEquipInputsFilled = true;
@@ -735,7 +734,7 @@ Schedule:Compact,
   Until: 24:00,0.0;        !- Field 21
 )IDF";
 
-    ASSERT_TRUE(process_idf(fmt::format("{}\n{}", oneZoneBuildingWithIdealLoads, idf_objects))); // read idf objects
+    ASSERT_TRUE(process_idf(std::format("{}\n{}", oneZoneBuildingWithIdealLoads, idf_objects))); // read idf objects
     state->init_state(*state);
 
     state->dataZoneEquip->ZoneEquipInputsFilled = true;

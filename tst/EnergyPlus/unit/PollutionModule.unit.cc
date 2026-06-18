@@ -474,39 +474,39 @@ TEST_F(EnergyPlusFixture, PollutionModule_TestOutputVariables)
     // Test get output variables for Total Sky Cover and Opaque Sky Cover
     std::string fuelTypeNames[9] = {"NaturalGas", "Diesel", "Gasoline", "Propane", "FuelOilNo1", "FuelOilNo2", "OtherFuel1", "Coal", "Electricity"};
     for (unsigned long i = 0; i < size(fuelTypeNames); i++) {
-        EXPECT_EQ(EnergyPlus::format("Site:Environmental Impact {} Source Energy", fuelTypeNames[i]),
+        EXPECT_EQ(std::format("Site:Environmental Impact {} Source Energy", fuelTypeNames[i]),
                   state->dataOutputProcessor->outVars[i * 17 + 0]->keyColonName);
-        EXPECT_EQ(EnergyPlus::format("Site:Environmental Impact {} CO2 Emissions Mass", fuelTypeNames[i]),
+        EXPECT_EQ(std::format("Site:Environmental Impact {} CO2 Emissions Mass", fuelTypeNames[i]),
                   state->dataOutputProcessor->outVars[i * 17 + 1]->keyColonName);
-        EXPECT_EQ(EnergyPlus::format("Site:Environmental Impact {} CO Emissions Mass", fuelTypeNames[i]),
+        EXPECT_EQ(std::format("Site:Environmental Impact {} CO Emissions Mass", fuelTypeNames[i]),
                   state->dataOutputProcessor->outVars[i * 17 + 2]->keyColonName);
-        EXPECT_EQ(EnergyPlus::format("Site:Environmental Impact {} CH4 Emissions Mass", fuelTypeNames[i]),
+        EXPECT_EQ(std::format("Site:Environmental Impact {} CH4 Emissions Mass", fuelTypeNames[i]),
                   state->dataOutputProcessor->outVars[i * 17 + 3]->keyColonName);
-        EXPECT_EQ(EnergyPlus::format("Site:Environmental Impact {} NOx Emissions Mass", fuelTypeNames[i]),
+        EXPECT_EQ(std::format("Site:Environmental Impact {} NOx Emissions Mass", fuelTypeNames[i]),
                   state->dataOutputProcessor->outVars[i * 17 + 4]->keyColonName);
-        EXPECT_EQ(EnergyPlus::format("Site:Environmental Impact {} N2O Emissions Mass", fuelTypeNames[i]),
+        EXPECT_EQ(std::format("Site:Environmental Impact {} N2O Emissions Mass", fuelTypeNames[i]),
                   state->dataOutputProcessor->outVars[i * 17 + 5]->keyColonName);
-        EXPECT_EQ(EnergyPlus::format("Site:Environmental Impact {} SO2 Emissions Mass", fuelTypeNames[i]),
+        EXPECT_EQ(std::format("Site:Environmental Impact {} SO2 Emissions Mass", fuelTypeNames[i]),
                   state->dataOutputProcessor->outVars[i * 17 + 6]->keyColonName);
-        EXPECT_EQ(EnergyPlus::format("Site:Environmental Impact {} PM Emissions Mass", fuelTypeNames[i]),
+        EXPECT_EQ(std::format("Site:Environmental Impact {} PM Emissions Mass", fuelTypeNames[i]),
                   state->dataOutputProcessor->outVars[i * 17 + 7]->keyColonName);
-        EXPECT_EQ(EnergyPlus::format("Site:Environmental Impact {} PM10 Emissions Mass", fuelTypeNames[i]),
+        EXPECT_EQ(std::format("Site:Environmental Impact {} PM10 Emissions Mass", fuelTypeNames[i]),
                   state->dataOutputProcessor->outVars[i * 17 + 8]->keyColonName);
-        EXPECT_EQ(EnergyPlus::format("Site:Environmental Impact {} PM2.5 Emissions Mass", fuelTypeNames[i]),
+        EXPECT_EQ(std::format("Site:Environmental Impact {} PM2.5 Emissions Mass", fuelTypeNames[i]),
                   state->dataOutputProcessor->outVars[i * 17 + 9]->keyColonName);
-        EXPECT_EQ(EnergyPlus::format("Site:Environmental Impact {} NH3 Emissions Mass", fuelTypeNames[i]),
+        EXPECT_EQ(std::format("Site:Environmental Impact {} NH3 Emissions Mass", fuelTypeNames[i]),
                   state->dataOutputProcessor->outVars[i * 17 + 10]->keyColonName);
-        EXPECT_EQ(EnergyPlus::format("Site:Environmental Impact {} NMVOC Emissions Mass", fuelTypeNames[i]),
+        EXPECT_EQ(std::format("Site:Environmental Impact {} NMVOC Emissions Mass", fuelTypeNames[i]),
                   state->dataOutputProcessor->outVars[i * 17 + 11]->keyColonName);
-        EXPECT_EQ(EnergyPlus::format("Site:Environmental Impact {} Hg Emissions Mass", fuelTypeNames[i]),
+        EXPECT_EQ(std::format("Site:Environmental Impact {} Hg Emissions Mass", fuelTypeNames[i]),
                   state->dataOutputProcessor->outVars[i * 17 + 12]->keyColonName);
-        EXPECT_EQ(EnergyPlus::format("Site:Environmental Impact {} Pb Emissions Mass", fuelTypeNames[i]),
+        EXPECT_EQ(std::format("Site:Environmental Impact {} Pb Emissions Mass", fuelTypeNames[i]),
                   state->dataOutputProcessor->outVars[i * 17 + 13]->keyColonName);
-        EXPECT_EQ(EnergyPlus::format("Site:Environmental Impact {} Water Consumption Volume", fuelTypeNames[i]),
+        EXPECT_EQ(std::format("Site:Environmental Impact {} Water Consumption Volume", fuelTypeNames[i]),
                   state->dataOutputProcessor->outVars[i * 17 + 14]->keyColonName);
-        EXPECT_EQ(EnergyPlus::format("Site:Environmental Impact {} Nuclear High Level Waste Mass", fuelTypeNames[i]),
+        EXPECT_EQ(std::format("Site:Environmental Impact {} Nuclear High Level Waste Mass", fuelTypeNames[i]),
                   state->dataOutputProcessor->outVars[i * 17 + 15]->keyColonName);
-        EXPECT_EQ(EnergyPlus::format("Site:Environmental Impact {} Nuclear Low Level Waste Volume", fuelTypeNames[i]),
+        EXPECT_EQ(std::format("Site:Environmental Impact {} Nuclear Low Level Waste Volume", fuelTypeNames[i]),
                   state->dataOutputProcessor->outVars[i * 17 + 16]->keyColonName);
     }
 

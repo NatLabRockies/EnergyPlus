@@ -45,23 +45,27 @@
 // OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 // POSSIBILITY OF SUCH DAMAGE.
 
+// C++ Headers
 #include <cmath>
+#include <format>
 
+// ObjexxFCL Headers
 #include <ObjexxFCL/ArrayS.functions.hh>
 #include <ObjexxFCL/time.hh>
 
+// EnergyPlus Headers
 #include <EnergyPlus/Construction.hh>
 #include <EnergyPlus/Data/EnergyPlusData.hh>
 #include <EnergyPlus/DataEnvironment.hh>
 #include <EnergyPlus/DataGlobalConstants.hh>
 #include <EnergyPlus/DataHVACGlobals.hh>
+#include <EnergyPlus/DataLoopNode.hh>
 #include <EnergyPlus/DataRuntimeLanguage.hh>
 #include <EnergyPlus/DataStringGlobals.hh>
 #include <EnergyPlus/HeatBalFiniteDiffManager.hh>
 #include <EnergyPlus/InputProcessing/InputProcessor.hh>
 #include <EnergyPlus/OutputProcessor.hh>
 #include <EnergyPlus/PluginManager.hh>
-#include <EnergyPlus/UtilityRoutines.hh>
 #include <EnergyPlus/WeatherManager.hh>
 #include <EnergyPlus/api/datatransfer.h>
 #include <EnergyPlus/api/runtime.h>
@@ -108,8 +112,7 @@ APIDataEntry *getAPIData(EnergyPlusState state, unsigned int *resultingSize)
         if (meter->Name.empty()) {
             break;
         }
-        localDataEntries.emplace_back(
-            "OutputMeter", "", "", meter->Name, EnergyPlus::format("{}", EnergyPlus::Constant::unitNames[(int)meter->units]));
+        localDataEntries.emplace_back("OutputMeter", "", "", meter->Name, std::format("{}", EnergyPlus::Constant::unitNames[(int)meter->units]));
     }
     for (auto const *variable : thisState->dataOutputProcessor->outVars) {
         if (variable->varType != EnergyPlus::OutputProcessor::VariableType::Real) {
@@ -124,7 +127,7 @@ APIDataEntry *getAPIData(EnergyPlusState state, unsigned int *resultingSize)
                                       variable->keyUC,
                                       variable->units == EnergyPlus::Constant::Units::customEMS
                                           ? variable->unitNameCustomEMS
-                                          : EnergyPlus::format("{}", EnergyPlus::Constant::unitNames[(int)variable->units]));
+                                          : std::format("{}", EnergyPlus::Constant::unitNames[(int)variable->units]));
     }
     *resultingSize = localDataEntries.size();
     auto *data = new APIDataEntry[*resultingSize];
@@ -196,7 +199,7 @@ char *listAllAPIDataCSV(EnergyPlusState state)
         }
         output.append("OutputMeter").append(","); // This multiple append thing is not good
         output.append(meter->Name).append(",");
-        output.append(EnergyPlus::format("{}\n", EnergyPlus::Constant::unitNames[(int)meter->units]));
+        output.append(std::format("{}\n", EnergyPlus::Constant::unitNames[(int)meter->units]));
     }
     output.append("**VARIABLES**\n");
     for (auto const *variable : thisState->dataOutputProcessor->outVars) {
@@ -209,10 +212,9 @@ char *listAllAPIDataCSV(EnergyPlusState state)
         output.append("OutputVariable,");
         output.append(variable->name).append(",");
         output.append(variable->keyUC).append(",");
-        output.append(EnergyPlus::format("{}\n",
-                                         variable->units == EnergyPlus::Constant::Units::customEMS
-                                             ? variable->unitNameCustomEMS
-                                             : EnergyPlus::Constant::unitNames[(int)variable->units]));
+        output.append(std::format("{}\n",
+                                  variable->units == EnergyPlus::Constant::Units::customEMS ? variable->unitNameCustomEMS
+                                                                                            : EnergyPlus::Constant::unitNames[(int)variable->units]));
     }
     // note that we cannot just return a c_str to the local string, as the string will be destructed upon leaving
     // this function, and undefined behavior will occur.
@@ -361,7 +363,7 @@ Real64 getVariableValue(EnergyPlusState state, const int handle)
         } else {
             // must be running from python plugin, need to fatal out once the plugin is done
             // throw an error, set the fatal flag, and then return zero
-            ShowSevereError(*thisState, fmt::format("Data Exchange API: Error in getVariableValue; received handle: {}", handle));
+            ShowSevereError(*thisState, std::format("Data Exchange API: Error in getVariableValue; received handle: {}", handle));
             ShowContinueError(*thisState,
                               "The getVariableValue function will return 0 for now to allow the plugin to finish, then EnergyPlus will abort");
         }
@@ -374,7 +376,7 @@ Real64 getVariableValue(EnergyPlusState state, const int handle)
     } else {
         // must be running from python plugin, need to fatal out once the plugin is done
         // throw an error, set the fatal flag, and then return zero
-        ShowSevereError(*thisState, fmt::format("Data Exchange API: Index error in getVariableValue; received handle: {}", handle));
+        ShowSevereError(*thisState, std::format("Data Exchange API: Index error in getVariableValue; received handle: {}", handle));
         ShowContinueError(*thisState,
                           "The getVariableValue function will return 0 for now to allow the plugin to finish, then EnergyPlus will abort");
     }
@@ -400,7 +402,7 @@ Real64 getMeterValue(EnergyPlusState state, int handle)
     } else {
         // must be running from python plugin, need to fatal out once the plugin is done
         // throw an error, set the fatal flag, and then return zero
-        ShowSevereError(*thisState, fmt::format("Data Exchange API: Index error in getMeterValue; received handle: {}", handle));
+        ShowSevereError(*thisState, std::format("Data Exchange API: Index error in getMeterValue; received handle: {}", handle));
         ShowContinueError(*thisState, "The getMeterValue function will return 0 for now to allow the plugin to finish, then EnergyPlus will abort");
     }
     thisState->dataPluginManager->apiErrorFlag = true;
@@ -439,9 +441,9 @@ int getActuatorHandle(EnergyPlusState state, const char *componentType, const ch
                             "Data Exchange API: An EnergyManagementSystem:Actuator seems to be already defined in the EnergyPlus File and named '" +
                                 usedActuator.Name + "'.");
                         ShowContinueError(
-                            *thisState, fmt::format("Occurred for componentType='{}', controlType='{}', uniqueKey='{}'.", typeUC, controlUC, keyUC));
+                            *thisState, std::format("Occurred for componentType='{}', controlType='{}', uniqueKey='{}'.", typeUC, controlUC, keyUC));
                         ShowContinueError(*thisState,
-                                          fmt::format("The getActuatorHandle function will still return the handle (= {}) but caller "
+                                          std::format("The getActuatorHandle function will still return the handle (= {}) but caller "
                                                       "should take note that there is a risk of overwriting.",
                                                       handle));
                         foundActuator = true;
@@ -451,9 +453,9 @@ int getActuatorHandle(EnergyPlusState state, const char *componentType, const ch
                 if (!foundActuator) {
                     ShowWarningError(*thisState, "Data Exchange API: You seem to already have tried to get an Actuator Handle on this one.");
                     ShowContinueError(*thisState,
-                                      fmt::format("Occurred for componentType='{}', controlType='{}', uniqueKey='{}'.", typeUC, controlUC, keyUC));
+                                      std::format("Occurred for componentType='{}', controlType='{}', uniqueKey='{}'.", typeUC, controlUC, keyUC));
                     ShowContinueError(*thisState,
-                                      fmt::format("The getActuatorHandle function will still return the handle (= {}) but caller should "
+                                      std::format("The getActuatorHandle function will still return the handle (= {}) but caller should "
                                                   "take note that there is a risk of overwriting.",
                                                   handle));
                 }
@@ -479,7 +481,7 @@ void resetActuator(EnergyPlusState state, int handle)
         } else {
             // must be running from python plugin, need to fatal out once the plugin is done
             // throw an error, set the fatal flag, and then return
-            ShowSevereError(*thisState, fmt::format("Data Exchange API: index error in resetActuator; received handle: {}", handle));
+            ShowSevereError(*thisState, std::format("Data Exchange API: index error in resetActuator; received handle: {}", handle));
             ShowContinueError(*thisState, "The resetActuator function will return to allow the plugin to finish, then EnergyPlus will abort");
         }
         thisState->dataPluginManager->apiErrorFlag = true;
@@ -508,7 +510,7 @@ void setActuatorValue(EnergyPlusState state, const int handle, const Real64 valu
         } else {
             // must be running from python plugin, need to fatal out once the plugin is done
             // throw an error, set the fatal flag, and then return
-            ShowSevereError(*thisState, fmt::format("Data Exchange API: index error in setActuatorValue; received handle: {}", handle));
+            ShowSevereError(*thisState, std::format("Data Exchange API: index error in setActuatorValue; received handle: {}", handle));
             ShowContinueError(*thisState, "The setActuatorValue function will return to allow the plugin to finish, then EnergyPlus will abort");
         }
         thisState->dataPluginManager->apiErrorFlag = true;
@@ -538,7 +540,7 @@ Real64 getActuatorValue(EnergyPlusState state, const int handle)
     } else {
         // must be running from python plugin, need to fatal out once the plugin is done
         // throw an error, set the fatal flag, and then return 0
-        ShowSevereError(*thisState, fmt::format("Data Exchange API: index error in getActuatorValue; received handle: {}", handle));
+        ShowSevereError(*thisState, std::format("Data Exchange API: index error in getActuatorValue; received handle: {}", handle));
         ShowContinueError(*thisState,
                           "The getActuatorValue function will return 0 for now to allow the plugin to finish, then EnergyPlus will abort");
     }
@@ -588,7 +590,7 @@ Real64 getInternalVariableValue(EnergyPlusState state, int handle)
     } else {
         // must be running from python plugin, need to fatal out once the plugin is done
         // throw an error, set the fatal flag, and then return 0
-        ShowSevereError(*thisState, fmt::format("Data Exchange API: index error in getInternalVariableValue; received handle: {}", handle));
+        ShowSevereError(*thisState, std::format("Data Exchange API: index error in getInternalVariableValue; received handle: {}", handle));
         ShowContinueError(*thisState,
                           "The getInternalVariableValue function will return 0 for now to allow the plugin to finish, then EnergyPlus will abort");
     }
@@ -598,7 +600,7 @@ Real64 getInternalVariableValue(EnergyPlusState state, int handle)
 
 int getEMSGlobalVariableHandle(EnergyPlusState state, const char *name)
 {
-    auto *thisState = static_cast<EnergyPlus::EnergyPlusData *>(state);
+    auto const *thisState = static_cast<EnergyPlus::EnergyPlusData *>(state);
     int index = 0;
     for (auto const &erlVar : thisState->dataRuntimeLang->ErlVariable) {
         index++;
@@ -621,7 +623,7 @@ Real64 getEMSGlobalVariableValue(EnergyPlusState state, int handle)
         // need to fatal out once the process is done
         // throw an error, set the fatal flag, and then return 0
         EnergyPlus::ShowSevereError(
-            *thisState, fmt::format("Data Exchange API: Problem -- index error in getEMSGlobalVariableValue; received handle: {}", handle));
+            *thisState, std::format("Data Exchange API: Problem -- index error in getEMSGlobalVariableValue; received handle: {}", handle));
         EnergyPlus::ShowContinueError(
             *thisState, "The getEMSGlobalVariableValue function will return 0 for now to allow the process to finish, then EnergyPlus will abort");
         thisState->dataPluginManager->apiErrorFlag = true;
@@ -639,7 +641,7 @@ void setEMSGlobalVariableValue(EnergyPlusState state, int handle, Real64 value)
         // need to fatal out once the plugin is done
         // throw an error, set the fatal flag, and then return
         EnergyPlus::ShowSevereError(
-            *thisState, fmt::format("Data Exchange API: Problem -- index error in setEMSGlobalVariableValue; received handle: {}", handle));
+            *thisState, std::format("Data Exchange API: Problem -- index error in setEMSGlobalVariableValue; received handle: {}", handle));
         EnergyPlus::ShowContinueError(*thisState,
                                       "The setEMSGlobalVariableValue function will return to allow the plugin to finish, then EnergyPlus will abort");
         thisState->dataPluginManager->apiErrorFlag = true;
@@ -660,7 +662,7 @@ Real64 getPluginGlobalVariableValue(EnergyPlusState state, int handle)
         // need to fatal out once the plugin is done
         // throw an error, set the fatal flag, and then return 0
         ShowSevereError(*thisState,
-                        fmt::format("Data Exchange API: Problem -- index error in getPluginGlobalVariableValue; received handle: {}", handle));
+                        std::format("Data Exchange API: Problem -- index error in getPluginGlobalVariableValue; received handle: {}", handle));
         ShowContinueError(
             *thisState, "The getPluginGlobalVariableValue function will return 0 for now to allow the plugin to finish, then EnergyPlus will abort");
         thisState->dataPluginManager->apiErrorFlag = true;
@@ -676,7 +678,7 @@ void setPluginGlobalVariableValue(EnergyPlusState state, int handle, Real64 valu
         // need to fatal out once the plugin is done
         // throw an error, set the fatal flag, and then return
         ShowSevereError(*thisState,
-                        fmt::format("Data Exchange API: Problem -- index error in setPluginGlobalVariableValue; received handle: {}", handle));
+                        std::format("Data Exchange API: Problem -- index error in setPluginGlobalVariableValue; received handle: {}", handle));
         ShowContinueError(*thisState,
                           "The getPluginGlobalVariableValue function will return to allow the plugin to finish, then EnergyPlus will abort");
         thisState->dataPluginManager->apiErrorFlag = true;
@@ -697,7 +699,7 @@ Real64 getPluginTrendVariableValue(EnergyPlusState state, int handle, int timeIn
         // need to fatal out once the plugin is done
         // throw an error, set the fatal flag, and then return
         ShowSevereError(*thisState,
-                        fmt::format("Data Exchange API: Problem -- index error in getPluginTrendVariableValue; received handle: {}", handle));
+                        std::format("Data Exchange API: Problem -- index error in getPluginTrendVariableValue; received handle: {}", handle));
         ShowContinueError(*thisState,
                           "The getPluginTrendVariableValue function will return 0 to allow the plugin to finish, then EnergyPlus will abort");
         thisState->dataPluginManager->apiErrorFlag = true;
@@ -708,7 +710,7 @@ Real64 getPluginTrendVariableValue(EnergyPlusState state, int handle, int timeIn
         // throw an error, set the fatal flag, and then return
         ShowSevereError(
             *thisState,
-            fmt::format("Data Exchange API: Problem -- trend history count argument out of range in getPluginTrendVariableValue; received value: {}",
+            std::format("Data Exchange API: Problem -- trend history count argument out of range in getPluginTrendVariableValue; received value: {}",
                         timeIndex));
         ShowContinueError(*thisState,
                           "The getPluginTrendVariableValue function will return 0 to allow the plugin to finish, then EnergyPlus will abort");
@@ -725,7 +727,7 @@ Real64 getPluginTrendVariableAverage(EnergyPlusState state, int handle, int coun
         // need to fatal out once the plugin is done
         // throw an error, set the fatal flag, and then return
         ShowSevereError(*thisState,
-                        fmt::format("Data Exchange API: Problem -- index error in getPluginTrendVariableAverage; received handle: {}", handle));
+                        std::format("Data Exchange API: Problem -- index error in getPluginTrendVariableAverage; received handle: {}", handle));
         ShowContinueError(*thisState,
                           "The getPluginTrendVariableAverage function will return 0 to allow the plugin to finish, then EnergyPlus will abort");
         thisState->dataPluginManager->apiErrorFlag = true;
@@ -736,7 +738,7 @@ Real64 getPluginTrendVariableAverage(EnergyPlusState state, int handle, int coun
         // throw an error, set the fatal flag, and then return
         ShowSevereError(
             *thisState,
-            fmt::format(
+            std::format(
                 "Data Exchange API: Problem -- trend history count argument out of range in getPluginTrendVariableAverage; received value: {}",
                 count));
         ShowContinueError(*thisState,
@@ -754,7 +756,7 @@ Real64 getPluginTrendVariableMin(EnergyPlusState state, int handle, int count)
         // need to fatal out once the plugin is done
         // throw an error, set the fatal flag, and then return
         ShowSevereError(*thisState,
-                        fmt::format("Data Exchange API: Problem -- index error in getPluginTrendVariableMin; received handle: {}", handle));
+                        std::format("Data Exchange API: Problem -- index error in getPluginTrendVariableMin; received handle: {}", handle));
         ShowContinueError(*thisState,
                           "The getPluginTrendVariableMin function will return 0 to allow the plugin to finish, then EnergyPlus will abort");
         thisState->dataPluginManager->apiErrorFlag = true;
@@ -765,7 +767,7 @@ Real64 getPluginTrendVariableMin(EnergyPlusState state, int handle, int count)
         // throw an error, set the fatal flag, and then return
         ShowSevereError(
             *thisState,
-            fmt::format("Data Exchange API: Problem -- trend history count argument out of range in getPluginTrendVariableMin; received value: {}",
+            std::format("Data Exchange API: Problem -- trend history count argument out of range in getPluginTrendVariableMin; received value: {}",
                         count));
         ShowContinueError(*thisState,
                           "The getPluginTrendVariableMin function will return 0 to allow the plugin to finish, then EnergyPlus will abort");
@@ -782,7 +784,7 @@ Real64 getPluginTrendVariableMax(EnergyPlusState state, int handle, int count)
         // need to fatal out once the plugin is done
         // throw an error, set the fatal flag, and then return
         ShowSevereError(*thisState,
-                        fmt::format("Data Exchange API: Problem -- index error in getPluginTrendVariableMax; received handle: {}", handle));
+                        std::format("Data Exchange API: Problem -- index error in getPluginTrendVariableMax; received handle: {}", handle));
         ShowContinueError(*thisState,
                           "The getPluginTrendVariableMax function will return 0 to allow the plugin to finish, then EnergyPlus will abort");
         thisState->dataPluginManager->apiErrorFlag = true;
@@ -793,7 +795,7 @@ Real64 getPluginTrendVariableMax(EnergyPlusState state, int handle, int count)
         // throw an error, set the fatal flag, and then return
         ShowSevereError(
             *thisState,
-            fmt::format("Data Exchange API: Problem -- trend history count argument out of range in getPluginTrendVariableMax; received value: {}",
+            std::format("Data Exchange API: Problem -- trend history count argument out of range in getPluginTrendVariableMax; received value: {}",
                         count));
         ShowContinueError(*thisState,
                           "The getPluginTrendVariableMax function will return 0 to allow the plugin to finish, then EnergyPlus will abort");
@@ -810,7 +812,7 @@ Real64 getPluginTrendVariableSum(EnergyPlusState state, int handle, int count)
         // need to fatal out once the plugin is done
         // throw an error, set the fatal flag, and then return
         ShowSevereError(*thisState,
-                        fmt::format("Data Exchange API: Problem -- index error in getPluginTrendVariableSum; received handle: {}", handle));
+                        std::format("Data Exchange API: Problem -- index error in getPluginTrendVariableSum; received handle: {}", handle));
         ShowContinueError(*thisState,
                           "The getPluginTrendVariableSum function will return 0 to allow the plugin to finish, then EnergyPlus will abort");
         thisState->dataPluginManager->apiErrorFlag = true;
@@ -821,7 +823,7 @@ Real64 getPluginTrendVariableSum(EnergyPlusState state, int handle, int count)
         // throw an error, set the fatal flag, and then return
         ShowSevereError(
             *thisState,
-            fmt::format("Data Exchange API: Problem -- trend history count argument out of range in getPluginTrendVariableSum; received value: {}",
+            std::format("Data Exchange API: Problem -- trend history count argument out of range in getPluginTrendVariableSum; received value: {}",
                         count));
         ShowContinueError(*thisState,
                           "The getPluginTrendVariableSum function will return 0 to allow the plugin to finish, then EnergyPlus will abort");
@@ -838,7 +840,7 @@ Real64 getPluginTrendVariableDirection(EnergyPlusState state, int handle, int co
         // need to fatal out once the plugin is done
         // throw an error, set the fatal flag, and then return
         ShowSevereError(*thisState,
-                        fmt::format("Data Exchange API: Problem -- index error in getPluginTrendVariableDirection; received handle: {}", handle));
+                        std::format("Data Exchange API: Problem -- index error in getPluginTrendVariableDirection; received handle: {}", handle));
         ShowContinueError(*thisState,
                           "The getPluginTrendVariableDirection function will return 0 to allow the plugin to finish, then EnergyPlus will abort");
         thisState->dataPluginManager->apiErrorFlag = true;
@@ -849,7 +851,7 @@ Real64 getPluginTrendVariableDirection(EnergyPlusState state, int handle, int co
         // throw an error, set the fatal flag, and then return
         ShowSevereError(
             *thisState,
-            fmt::format(
+            std::format(
                 "Data Exchange API: Problem -- trend history count argument out of range in getPluginTrendVariableDirection; received value: {}",
                 count));
         ShowContinueError(*thisState,

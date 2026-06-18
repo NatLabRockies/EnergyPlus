@@ -233,8 +233,8 @@ Real64 SurfaceData::getInsideAirTemperature(EnergyPlusData &state, const int t_S
         // check whether this zone is a controlled zone or not
         if (!state.dataHeatBal->Zone(Zone).IsControlled) {
             ShowFatalError(state,
-                           EnergyPlus::format("Zones must be controlled for Ceiling-Diffuser Convection model. No system serves zone {}",
-                                              state.dataHeatBal->Zone(Zone).Name));
+                           std::format("Zones must be controlled for Ceiling-Diffuser Convection model. No system serves zone {}",
+                                       state.dataHeatBal->Zone(Zone).Name));
             // return;
         }
         // determine supply air conditions
@@ -505,14 +505,14 @@ Real64 SurfaceData::get_average_height(EnergyPlusData &state) const
     if (totalWidth == 0.0) {
         // This should never happen, but if it does, print a somewhat meaningful fatal error
         // (instead of allowing a divide by zero).
-        ShowFatalError(state, EnergyPlus::format("Calculated projected surface width is zero for surface=\"{}\"", Name));
+        ShowFatalError(state, std::format("Calculated projected surface width is zero for surface=\"{}\"", Name));
     }
 
     Real64 averageHeight = 0.0;
     for (Vertices::size_type i = 0; i < n; ++i) {
         Vertex2D const &v(v2d[i]);
 
-        Vertex2D *v2;
+        Vertex2D const *v2;
         if (i == n - 1) {
             v2 = &v2d[0];
         } else {
@@ -770,9 +770,9 @@ void GetVariableAbsorptanceSurfaceList(EnergyPlusData &state)
             if (thisSurface.ExtBoundCond != ExternalEnvironment) {
                 ShowWarningError(
                     state,
-                    EnergyPlus::format("MaterialProperty:VariableAbsorptance defined on an interior surface, {}. This VariableAbsorptance property "
-                                       "will be ignored here",
-                                       thisSurface.Name));
+                    std::format("MaterialProperty:VariableAbsorptance defined on an interior surface, {}. This VariableAbsorptance property "
+                                "will be ignored here",
+                                thisSurface.Name));
             } else {
                 state.dataSurface->AllVaryAbsOpaqSurfaceList.push_back(surfNum);
             }
@@ -787,11 +787,10 @@ void GetVariableAbsorptanceSurfaceList(EnergyPlusData &state)
                 continue;
             }
             if (mat->absorpVarCtrlSignal != Material::VariableAbsCtrlSignal::Invalid) {
-                ShowWarningError(
-                    state,
-                    EnergyPlus::format("MaterialProperty:VariableAbsorptance defined on a inside-layer materials, {}. This VariableAbsorptance "
-                                       "property will be ignored here",
-                                       mat->Name));
+                ShowWarningError(state,
+                                 std::format("MaterialProperty:VariableAbsorptance defined on a inside-layer materials, {}. This VariableAbsorptance "
+                                             "property will be ignored here",
+                                             mat->Name));
             }
         }
     }

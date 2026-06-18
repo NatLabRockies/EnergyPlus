@@ -39672,8 +39672,8 @@
   ZoneControl:Humidistat,
     Floor 1 Operating Room 1 Humidistat,  !- Name
     Floor 1 Operating Room 1,!- Zone Name
-    MinRelHumSetSch_addDI,   !- Humidifying Relative Humidity Setpoint Schedule Name
-    MaxRelHumSetSch;         !- Dehumidifying Relative Humidity Setpoint Schedule Name
+    MinRelHumSetSch_addDI,   !- Humidifying Setpoint Schedule Name
+    MaxRelHumSetSch;         !- Dehumidifying Setpoint Schedule Name
 
 !-   ===========  ALL OBJECTS IN CLASS: ZONECONTROL:THERMOSTAT ===========
 

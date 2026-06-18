@@ -1047,7 +1047,7 @@ TEST_F(EnergyPlusFixture, DataHeatBalance_setThicknessPerpendicularTest)
     thisConstruct.Name = "TestThisConstruction";
 
     std::string const error_string0 = delimited_string(
-        {EnergyPlus::format("   ** Warning ** Version: missing in IDF, processing for EnergyPlus version=\"{}\"", DataStringGlobals::MatchVersion),
+        {std::format("   ** Warning ** Version: missing in IDF, processing for EnergyPlus version=\"{}\"", DataStringGlobals::MatchVersion),
          "   ** Warning ** ConstructionProperty:InternalHeatSource has a tube spacing that is less than 2 mm.  This is not allowed.",
          "   **   ~~~   ** Construction=TestThisConstruction has this problem.  The tube spacing has been reset to 0.15m (~6 "
          "inches) for this construction.",

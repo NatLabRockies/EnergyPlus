@@ -308,7 +308,6 @@ protected:
         state->dataAirLoop->AirLoopFlow.allocate(1);
         state->dataAirSystemsData->PrimaryAirSystems.allocate(1);
         state->dataAirLoop->AirLoopControlInfo.allocate(1);
-        OutputReportPredefined::SetPredefinedTables(*state);
     }
 
     virtual void TearDown()

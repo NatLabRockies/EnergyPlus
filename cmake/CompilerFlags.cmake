@@ -120,8 +120,13 @@ elseif(CMAKE_COMPILER_IS_GNUCXX OR "${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang" O
     # depending on the level of overflow check selected, the stringop-overflow can also emit false positives
     # https://gcc.gnu.org/onlinedocs/gcc/Warning-Options.html#index-Wstringop-overflow
     target_compile_options(project_warnings INTERFACE -Wno-stringop-overflow)
+    if(CMAKE_CXX_COMPILER_VERSION VERSION_GREATER_EQUAL 15.0)
+      # GCC 15 emits false positives through libstdc++ when compiling bundled fmt 8.0.1 with -Werror
+      target_compile_options(project_warnings INTERFACE -Wno-restrict)
+    endif()
     # for RelWithDebInfo builds, lets turn OFF NDEBUG, which will re-enable assert statements
     target_compile_options(project_options INTERFACE $<$<CONFIG:RelWithDebInfo>:-UNDEBUG>)
+    target_compile_options(project_fp_options INTERFACE -ffp-contract=off) # Disable fused-floating point operations (default is fast)
   elseif("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang" OR "${CMAKE_CXX_COMPILER_ID}" STREQUAL "AppleClang")
     if(CMAKE_CXX_COMPILER_VERSION VERSION_GREATER_EQUAL 13.0)
       # Suppress unused-but-set warnings until more serious ones are addressed
@@ -129,7 +134,7 @@ elseif(CMAKE_COMPILER_IS_GNUCXX OR "${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang" O
     endif()
     target_compile_options(project_warnings INTERFACE -Wno-vexing-parse)
     target_compile_options(project_warnings INTERFACE -Wno-invalid-source-encoding)
-    target_compile_options(project_fp_options INTERFACE -ffp-contract=off)
+    target_compile_options(project_fp_options INTERFACE -ffp-contract=off) # Disable fused-floating point operations (default is on)
   endif()
 
   set(need_arithm_debug_genex "$<OR:$<BOOL:${FORCE_DEBUG_ARITHM_GCC_OR_CLANG}>,$<CONFIG:Debug>>")

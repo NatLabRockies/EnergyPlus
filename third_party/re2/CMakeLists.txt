@@ -85,6 +85,7 @@ set(RE2_SOURCES
 
 add_library(re2 ${RE2_SOURCES})
 target_include_directories(re2 PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>)
+target_compile_options(re2 PRIVATE $<$<COMPILE_LANG_AND_ID:CXX,AppleClang>:-Wno-shorten-64-to-32>)
 set_target_properties(re2 PROPERTIES SOVERSION ${SONAME} VERSION ${SONAME}.0.0)
 add_library(re2::re2 ALIAS re2)
 

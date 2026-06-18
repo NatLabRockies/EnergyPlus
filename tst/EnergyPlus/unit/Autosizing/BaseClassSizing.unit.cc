@@ -916,9 +916,6 @@ TEST_F(EnergyPlusFixture, BaseSizer_FanPeak)
     state->dataGlobal->TimeStepsInHour = 4;
     state->dataGlobal->MinutesInTimeStep = 15;
 
-    // Setup the predefined tables, because that's where the info is written.
-    EnergyPlus::OutputReportPredefined::SetPredefinedTables(*state);
-
     // If you wanted to check SQL, you also need this:
     // We enable the report we care about, making sure it's the right one
     // EXPECT_EQ("EquipmentSummary", OutputReportPredefined::reportName(5).name);

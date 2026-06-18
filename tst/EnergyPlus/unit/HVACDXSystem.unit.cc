@@ -580,7 +580,6 @@ TEST_F(EnergyPlusFixture, VariableSpeedCoils_RHControl)
     state->dataAirSystemsData->PrimaryAirSystems(1).Branch(1).Comp.allocate(1);
     state->dataAirSystemsData->PrimaryAirSystems(1).Branch(1).Comp(1).Name = compName;
     state->dataAirSystemsData->PrimaryAirSystems(1).Branch(1).Comp(1).CompType_Num = SimAirServingZones::CompType::DXSystem;
-    OutputReportPredefined::SetPredefinedTables(*state);
     Sched::GetSchedule(*state, "AVAILSCHED")->currentVal = 1.0; // Enable schedule without calling schedule manager
 
     bool FirstHVACIteration = true;
@@ -797,7 +796,6 @@ TEST_F(EnergyPlusFixture, VariableSpeedCoils_LatentDegradation_Test)
     state->dataAirSystemsData->PrimaryAirSystems(1).Branch(1).Comp.allocate(1);
     state->dataAirSystemsData->PrimaryAirSystems(1).Branch(1).Comp(1).Name = compName;
     state->dataAirSystemsData->PrimaryAirSystems(1).Branch(1).Comp(1).CompType_Num = SimAirServingZones::CompType::DXSystem;
-    OutputReportPredefined::SetPredefinedTables(*state);
     Sched::GetSchedule(*state, "AVAILSCHED")->currentVal = 1.0; // Enable schedule without calling schedule manager
 
     bool FirstHVACIteration = true;
@@ -1074,7 +1072,6 @@ TEST_F(EnergyPlusFixture, NewDXCoilModel_RHControl)
     state->dataAirSystemsData->PrimaryAirSystems(1).Branch(1).Comp.allocate(1);
     state->dataAirSystemsData->PrimaryAirSystems(1).Branch(1).Comp(1).Name = compName;
     state->dataAirSystemsData->PrimaryAirSystems(1).Branch(1).Comp(1).CompType_Num = SimAirServingZones::CompType::DXSystem;
-    OutputReportPredefined::SetPredefinedTables(*state);
     Sched::GetSchedule(*state, "AVAILSCHED")->currentVal = 1.0; // Enable schedule without calling schedule manager
 
     bool FirstHVACIteration = true;

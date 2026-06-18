@@ -384,7 +384,7 @@ TEST_F(EnergyPlusFixture, HeatBalanceAirManager_GetInfiltrationAndVentilation)
 
     HeatBalanceManager::GetHeatBalanceInput(*state);
     std::string const error_string = delimited_string(
-        {EnergyPlus::format("   ** Warning ** Version: missing in IDF, processing for EnergyPlus version=\"{}\"", DataStringGlobals::MatchVersion),
+        {std::format("   ** Warning ** Version: missing in IDF, processing for EnergyPlus version=\"{}\"", DataStringGlobals::MatchVersion),
          "   ** Warning ** No Timestep object found.  Number of TimeSteps in Hour defaulted to 4.",
          "   ** Warning ** GetSurfaceData: Entered Space Floor Area(s) differ more than 5% from calculated Space Floor Area(s).",
          "   **   ~~~   ** ...use Output:Diagnostics,DisplayExtraWarnings; to show more details on individual Spaces.",
@@ -830,7 +830,7 @@ TEST_F(EnergyPlusFixture, HeatBalanceAirManager_GetMixingAndCrossMixing)
 
     // HeatBalanceManager::GetHeatBalanceInput(*state);
     std::string const error_string = delimited_string(
-        {EnergyPlus::format("   ** Warning ** Version: missing in IDF, processing for EnergyPlus version=\"{}\"", DataStringGlobals::MatchVersion),
+        {std::format("   ** Warning ** Version: missing in IDF, processing for EnergyPlus version=\"{}\"", DataStringGlobals::MatchVersion),
          "   ** Warning ** No Timestep object found.  Number of TimeSteps in Hour defaulted to 4.",
          "   ** Warning ** No reporting elements have been requested. No simulation results produced.",
          "   **   ~~~   ** ...Review requirements such as \"Output:Table:SummaryReports\", \"Output:Table:Monthly\", \"Output:Variable\", "

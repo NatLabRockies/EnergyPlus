@@ -760,6 +760,54 @@ TEST_F(AirLoopFixture, VRF_SysModel_inAirloop)
     EXPECT_TRUE(ErrorsFound); // nodes are not connected correctly
 }
 
+TEST_F(EnergyPlusFixture, VRF_ScheduledThermostatPriority)
+{
+    EXPECT_EQ(static_cast<int>(ThermostatCtrlType::Scheduled), getEnumValue(ThermostatCtrlTypeUC, Util::makeUPPER("Scheduled")));
+
+    int constexpr VRFCond = 1;
+    int constexpr TUListNum = 1;
+    Real64 onOffAirFlowRatio = 0.0;
+
+    auto *prioritySched = new Sched::ScheduleConstant();
+    state->dataSched->schedules.push_back(prioritySched);
+
+    state->dataHVACVarRefFlow->VRF.allocate(1);
+    state->dataHVACVarRefFlow->VRF(VRFCond).ThermostatPriority = ThermostatCtrlType::Scheduled;
+    state->dataHVACVarRefFlow->VRF(VRFCond).prioritySched = prioritySched;
+
+    state->dataHVACVarRefFlow->MaxDeltaT.allocate(1);
+    state->dataHVACVarRefFlow->MinDeltaT.allocate(1);
+    state->dataHVACVarRefFlow->NumCoolingLoads.allocate(1);
+    state->dataHVACVarRefFlow->SumCoolingLoads.allocate(1);
+    state->dataHVACVarRefFlow->NumHeatingLoads.allocate(1);
+    state->dataHVACVarRefFlow->SumHeatingLoads.allocate(1);
+    state->dataHVACVarRefFlow->HeatingLoad.allocate(1);
+    state->dataHVACVarRefFlow->CoolingLoad.allocate(1);
+
+    state->dataHVACVarRefFlow->TerminalUnitList.allocate(1);
+    auto &terminalUnitList = state->dataHVACVarRefFlow->TerminalUnitList(TUListNum);
+    terminalUnitList.NumTUInList = 1;
+    terminalUnitList.TerminalUnitNotSizedYet.allocate(1);
+    terminalUnitList.TerminalUnitNotSizedYet(1) = true;
+    terminalUnitList.CoolingCoilAvailable.allocate(1);
+    terminalUnitList.HeatingCoilAvailable.allocate(1);
+
+    prioritySched->currentVal = 0.0;
+    InitializeOperatingMode(*state, true, VRFCond, TUListNum, onOffAirFlowRatio);
+    EXPECT_TRUE(state->dataHVACVarRefFlow->CoolingLoad(VRFCond));
+    EXPECT_FALSE(state->dataHVACVarRefFlow->HeatingLoad(VRFCond));
+
+    prioritySched->currentVal = 1.0;
+    InitializeOperatingMode(*state, true, VRFCond, TUListNum, onOffAirFlowRatio);
+    EXPECT_FALSE(state->dataHVACVarRefFlow->CoolingLoad(VRFCond));
+    EXPECT_TRUE(state->dataHVACVarRefFlow->HeatingLoad(VRFCond));
+
+    prioritySched->currentVal = 2.0;
+    InitializeOperatingMode(*state, true, VRFCond, TUListNum, onOffAirFlowRatio);
+    EXPECT_FALSE(state->dataHVACVarRefFlow->CoolingLoad(VRFCond));
+    EXPECT_FALSE(state->dataHVACVarRefFlow->HeatingLoad(VRFCond));
+}
+
 //*****************VRF-FluidTCtrl Model
 TEST_F(EnergyPlusFixture, VRF_FluidTCtrl_VRFOU_Compressor)
 {

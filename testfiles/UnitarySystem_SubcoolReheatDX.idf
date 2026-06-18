@@ -2383,8 +2383,8 @@
   ZoneControl:Humidistat,
     SPACE1-1 Humidistat,     !- Name
     SPACE1-1,                !- Zone Name
-    HVACTemplate-Always 4,   !- Humidifying Relative Humidity Setpoint Schedule Name
-    HVACTemplate-Always 60;  !- Dehumidifying Relative Humidity Setpoint Schedule Name
+    HVACTemplate-Always 4,   !- Humidifying Setpoint Schedule Name
+    HVACTemplate-Always 60;  !- Dehumidifying Setpoint Schedule Name
 
   DesignSpecification:OutdoorAir,
     SZ DSOA SPACE1-1,        !- Name

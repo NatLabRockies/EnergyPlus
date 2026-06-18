@@ -1167,7 +1167,6 @@ TEST_F(EnergyPlusFixture, BranchNodeConnections_ReturnPlenumNodeCheckFailure)
 
     state->init_state(*state);
 
-    OutputReportPredefined::SetPredefinedTables(*state);
     SetPreConstructionInputParameters(*state); // establish array bounds for constructions early
     createFacilityElectricPowerServiceObject(*state);
     BranchInputManager::ManageBranchInput(*state);
@@ -1941,7 +1940,7 @@ TEST_F(EnergyPlusFixture, BranchNodeConnections_ReturnPlenumNodeCheck)
         "	0.0,                   !- Crankcase Heater Capacity",
         "	10.0;                  !- Maximum Outdoor DryBulb Temperature for Crankcase Heater Operation",
 #endif // GET_OUT
-        
+
         "Coil:Heating:Fuel,",
         "  DOAS Heating Coil,       !- Name",
         "  AvailSched,              !- Availability Schedule Name",
@@ -2190,7 +2189,6 @@ TEST_F(EnergyPlusFixture, BranchNodeConnections_ReturnPlenumNodeCheck)
 
     state->init_state(*state);
 
-    OutputReportPredefined::SetPredefinedTables(*state);
     SetPreConstructionInputParameters(*state); // establish array bounds for constructions early
     createFacilityElectricPowerServiceObject(*state);
     BranchInputManager::ManageBranchInput(*state);

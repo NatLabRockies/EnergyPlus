@@ -13,15 +13,15 @@ env:
 jobs:
   release:
     name: Testing on Windows
-    runs-on: windows-latest
+    runs-on: windows-2022
 
     steps:
     - uses: actions/checkout@v6
 
-    - name: Set up Python 3.10
+    - name: Set up Python 3.12
       uses: actions/setup-python@v6
       with:
-        python-version: '3.10'
+        python-version: '3.12'
 
     - name: Install Pip Stuff
       shell: bash
@@ -66,7 +66,6 @@ jobs:
 
 
         def ensure_target_built(lines, msg):
-            breakpoint
             lines = [x.strip() for x in lines if "epJSON schema" in x]
             errors = []
             for expected_msg in EXPECTED_MSGS:

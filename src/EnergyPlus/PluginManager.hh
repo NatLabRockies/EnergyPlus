@@ -49,13 +49,10 @@
 #define EPLUS_PLUGIN_MANAGER_HH
 
 // C++ Headers
-#include <iomanip>
 #include <queue>
-#include <utility>
 #include <vector>
 
 // EnergyPlus Headers
-#include <EnergyPlus/DataGlobals.hh>
 #include <EnergyPlus/EMSManager.hh>
 #include <EnergyPlus/EnergyPlus.hh>
 

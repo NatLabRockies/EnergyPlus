@@ -450,8 +450,6 @@ TEST_F(EnergyPlusFixture, EconomicTariff_LEEDtariffReporting_Test)
         tariff.demandWindow = EconomicTariff::DemandWindow::Hour;
     }
 
-    SetPredefinedTables(*state); // need to setup the predefined table entry numbers
-
     LEEDtariffReporting(*state);
 
     EXPECT_EQ("SecondaryGeneralUnit", RetrievePreDefTableEntry(*state, state->dataOutRptPredefined->pdchLeedEtsRtNm, "Electricity"));
@@ -1753,8 +1751,6 @@ TEST_F(EnergyPlusFixture, EconomicTariff_LEEDtariff_with_Custom_Meter)
     state->dataEconTariff->tariff(7).totalAnnualEnergy = 3000.0;
     state->dataEconTariff->tariff(7).kindMtr = EconomicTariff::MeterType::Gas;
     state->dataEconTariff->tariff(7).reportMeterIndx = GetMeterIndex(*state, "BUILDING NATURAL GAS");
-
-    SetPredefinedTables(*state); // setup the predefined table entry numbers first
 
     LEEDtariffReporting(*state);
 

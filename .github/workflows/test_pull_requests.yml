@@ -58,7 +58,7 @@ jobs:
 
         CURRENT_HEAD_SHA=${{ github.event.pull_request.head.sha }}
         echo "Current Branch HEAD SHA is '${CURRENT_HEAD_SHA}'"
-        echo "CURRENT_HEAD_SHA=$DEVELOP_SHA" >> $GITHUB_ENV
+        echo "CURRENT_HEAD_SHA=$CURRENT_HEAD_SHA" >> $GITHUB_ENV
 
         echo "Current merge commit SHA is '${GITHUB_SHA}'"
         echo "::endgroup::"
@@ -79,21 +79,21 @@ jobs:
       shell: bash
       run: |
         echo "Found the regression tests!"
-        # We turn off the PCH in that case, since that's how develop builds it
-        echo "ENABLE_PCH=OFF" >> $GITHUB_ENV
+        # We adjust the ENABLE_PCH to match what is on develop
+        # IMPORTANT: keep this in sync with the ENABLE_PCH from run_and_cache_regressions_develop.yml
+        echo "ENABLE_PCH=ON" >> $GITHUB_ENV
 
+    # Note: should you want to include a hash of PCH files in the cache keys for windows, revert a9a9da32a5d51bd00fddc6e273f4059ffae5f735
     - name: Restore Cache CCACHE
       uses: actions/cache/restore@v5
       id: cacheccache-restore
       with:
         path: |
           ${{ steps.setup-runner.outputs.ccache-dir }}
-        key: ccache-${{ matrix.os }}-${{ steps.setup-runner.outputs.compiler-id }}-${{ github.head_ref }}-pch=${{ env.ENABLE_PCH }}
+        key: ccache-${{ matrix.os }}-${{ steps.setup-runner.outputs.compiler-id }}-pch=${{ env.ENABLE_PCH }}-${{ github.head_ref }}
         restore-keys: |
-          ccache-${{ matrix.os }}-${{ steps.setup-runner.outputs.compiler-id }}-${{ github.head_ref }}
-          ccache-${{ matrix.os }}-${{ steps.setup-runner.outputs.compiler-id }}-${{ env.DEVELOP_SHA }}
-          ccache-${{ matrix.os }}-${{ steps.setup-runner.outputs.compiler-id }}-
-          ccache-${{ matrix.os }}-
+          ccache-${{ matrix.os }}-${{ steps.setup-runner.outputs.compiler-id }}-pch=${{ env.ENABLE_PCH }}-${{ env.DEVELOP_SHA }}
+          ccache-${{ matrix.os }}-${{ steps.setup-runner.outputs.compiler-id }}-pch=${{ env.ENABLE_PCH }}-
 
     - name: Did restoring the CCache-cache work?
       shell: bash
@@ -153,6 +153,7 @@ jobs:
         nproc: ${{ steps.setup-runner.outputs.nproc }}
         python-version: ${{ env.Python_REQUIRED_VERSION }}
         python-root-dir: ${{ steps.setup-runner.outputs.python-root-dir }}
+        python-executable: ${{ steps.setup-runner.outputs.python-executable }}
 
     - name: Baseline Test
       if: matrix.run_regressions && steps.cachebaselineregression.outputs.cache-hit != 'true'
@@ -200,10 +201,20 @@ jobs:
         nproc: ${{ steps.setup-runner.outputs.nproc }}
         python-version: ${{ env.Python_REQUIRED_VERSION }}
         python-root-dir: ${{ steps.setup-runner.outputs.python-root-dir }}
+        python-executable: ${{ steps.setup-runner.outputs.python-executable }}
 
     - name: Remove problem matcher
       shell: bash
       run: echo "::remove-matcher owner=gcc-problem-matcher::"
+
+    - name: Upload CCache debug logs
+      if: always() && env.CCACHE_DEBUG == '1'
+      uses: actions/upload-artifact@v4
+      with:
+        name: ccache-debug-${{ matrix.os }}
+        path: .ccache-debug
+        include-hidden-files: true
+        retention-days: 7
 
     - name: Save CCache cache
       if: always() && steps.cacheccache-restore.outputs.cache-hit != 'true'
@@ -279,5 +290,5 @@ jobs:
     - name: Fail on Regressions from Forked Repository
       if: always() && matrix.run_regressions && steps.regressions.outcome == 'failure' && github.event.pull_request.head.repo.full_name != 'NatLabRockies/EnergyPlus'
       run: |
-        echo "::error::Regressions detected in pull request from forked repository, check job summary for details and to download regression results"
+        echo "::error::Regressions detected in pull request from forked repository. Download regression results: ${{ steps.upload_regressions.outputs.artifact-url }}"
         exit 1

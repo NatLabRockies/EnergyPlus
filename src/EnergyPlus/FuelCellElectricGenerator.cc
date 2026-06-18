@@ -48,6 +48,7 @@
 // C++ Headers
 #include <cassert>
 #include <cmath>
+#include <format>
 
 // ObjexxFCL Headers
 #include <ObjexxFCL/Array.functions.hh>
@@ -159,7 +160,7 @@ namespace FuelCellElectricGenerator {
         }
 
         // If we didn't find it, fatal
-        ShowFatalError(state, EnergyPlus::format("LocalFuelCellGenFactory: Error getting inputs for object named: {}", objectName)); // LCOV_EXCL_LINE
+        ShowFatalError(state, std::format("LocalFuelCellGenFactory: Error getting inputs for object named: {}", objectName)); // LCOV_EXCL_LINE
         // Shut up the compiler
         return nullptr; // LCOV_EXCL_LINE
     }
@@ -179,7 +180,7 @@ namespace FuelCellElectricGenerator {
             }
         }
         // If we didn't find it, fatal
-        ShowFatalError(state, EnergyPlus::format("LocalFuelCellGenFactory: Error getting inputs for object named: {}", objectName)); // LCOV_EXCL_LINE
+        ShowFatalError(state, std::format("LocalFuelCellGenFactory: Error getting inputs for object named: {}", objectName)); // LCOV_EXCL_LINE
         // Shut up the compiler
         return nullptr; // LCOV_EXCL_LINE
     }
@@ -231,7 +232,7 @@ namespace FuelCellElectricGenerator {
             state.dataInputProcessing->inputProcessor->getNumObjectsFound(state, s_ipsc->cCurrentModuleObject);
 
         if (state.dataFuelCellElectGen->NumFuelCellGenerators <= 0) {
-            ShowSevereError(state, EnergyPlus::format("No {} equipment specified in input file", s_ipsc->cCurrentModuleObject));
+            ShowSevereError(state, std::format("No {} equipment specified in input file", s_ipsc->cCurrentModuleObject));
             ErrorsFound = true;
         }
 
@@ -271,7 +272,7 @@ namespace FuelCellElectricGenerator {
         int NumFuelCellPMs = state.dataInputProcessing->inputProcessor->getNumObjectsFound(state, s_ipsc->cCurrentModuleObject);
 
         if (NumFuelCellPMs <= 0) {
-            ShowSevereError(state, EnergyPlus::format("No {} equipment specified in input file", s_ipsc->cCurrentModuleObject));
+            ShowSevereError(state, std::format("No {} equipment specified in input file", s_ipsc->cCurrentModuleObject));
             ErrorsFound = true;
         }
 
@@ -339,8 +340,8 @@ namespace FuelCellElectricGenerator {
                 fuelCell.FCPM.ZoneName = AlphArray(5);
                 fuelCell.FCPM.ZoneID = Util::FindItemInList(fuelCell.FCPM.ZoneName, state.dataHeatBal->Zone);
                 if (fuelCell.FCPM.ZoneID == 0 && !s_ipsc->lAlphaFieldBlanks(5)) {
-                    ShowSevereError(state, EnergyPlus::format("Invalid, {} = {}", s_ipsc->cAlphaFieldNames(5), AlphArray(5)));
-                    ShowContinueError(state, EnergyPlus::format("Entered in {}={}", s_ipsc->cCurrentModuleObject, AlphArray(1)));
+                    ShowSevereError(state, std::format("Invalid, {} = {}", s_ipsc->cAlphaFieldNames(5), AlphArray(5)));
+                    ShowContinueError(state, std::format("Entered in {}={}", s_ipsc->cCurrentModuleObject, AlphArray(1)));
                     ShowContinueError(state, "Zone Name was not found ");
                     ErrorsFound = true;
                 }
@@ -394,8 +395,8 @@ namespace FuelCellElectricGenerator {
                     }
                 }
             } else { // throw warning, did not find power module input
-                ShowSevereError(state, EnergyPlus::format("Invalid, {} = {}", s_ipsc->cAlphaFieldNames(1), AlphArray(1)));
-                ShowContinueError(state, EnergyPlus::format("Entered in {}={}", s_ipsc->cCurrentModuleObject, AlphArray(1)));
+                ShowSevereError(state, std::format("Invalid, {} = {}", s_ipsc->cAlphaFieldNames(1), AlphArray(1)));
+                ShowContinueError(state, std::format("Entered in {}={}", s_ipsc->cCurrentModuleObject, AlphArray(1)));
                 ErrorsFound = true;
             }
         } // loop over NumFuelCellPMs
@@ -412,9 +413,9 @@ namespace FuelCellElectricGenerator {
                 state.dataFuelCellElectGen->FuelCell(GeneratorNum).NameFCFuelSup, state.dataGenerator->FuelSupply); // Fuel Supply ID
             if (state.dataFuelCellElectGen->FuelCell(GeneratorNum).FuelSupNum == 0) {
                 ShowSevereError(state,
-                                EnergyPlus::format("Fuel Supply Name: {} not found in {}",
-                                                   state.dataFuelCellElectGen->FuelCell(GeneratorNum).NameFCFuelSup,
-                                                   state.dataFuelCellElectGen->FuelCell(GeneratorNum).Name));
+                                std::format("Fuel Supply Name: {} not found in {}",
+                                            state.dataFuelCellElectGen->FuelCell(GeneratorNum).NameFCFuelSup,
+                                            state.dataFuelCellElectGen->FuelCell(GeneratorNum).Name));
                 ErrorsFound = true;
             }
         }
@@ -423,7 +424,7 @@ namespace FuelCellElectricGenerator {
         int NumFuelCellAirSups = state.dataInputProcessing->inputProcessor->getNumObjectsFound(state, s_ipsc->cCurrentModuleObject);
 
         if (NumFuelCellAirSups <= 0) { // Autodesk:Uninit thisFuelCell was possibly uninitialized past this condition
-            ShowSevereError(state, EnergyPlus::format("No {} equipment specified in input file", s_ipsc->cCurrentModuleObject));
+            ShowSevereError(state, std::format("No {} equipment specified in input file", s_ipsc->cCurrentModuleObject));
             ErrorsFound = true;
         }
 
@@ -524,8 +525,8 @@ namespace FuelCellElectricGenerator {
                     fuelCell.AirSup.NumConstituents = NumAirConstit;
 
                     if (NumAirConstit > 5) {
-                        ShowSevereError(state, EnergyPlus::format("Invalid {}={:.2R}", s_ipsc->cNumericFieldNames(4), NumArray(4)));
-                        ShowContinueError(state, EnergyPlus::format("Entered in {}={}", s_ipsc->cCurrentModuleObject, AlphArray(1)));
+                        ShowSevereError(state, std::format("Invalid {}={:.2f}", s_ipsc->cNumericFieldNames(4), NumArray(4)));
+                        ShowContinueError(state, std::format("Entered in {}={}", s_ipsc->cCurrentModuleObject, AlphArray(1)));
                         ShowContinueError(state, "Fuel Cell model not set up for more than 5 air constituents");
                         ErrorsFound = true;
                     }
@@ -559,9 +560,9 @@ namespace FuelCellElectricGenerator {
                 // check for molar fractions summing to 1.0.
                 if (std::abs(sum(fuelCell.AirSup.ConstitMolalFract) - 1.0) > 0.0001) {
 
-                    ShowSevereError(state, EnergyPlus::format("{} molar fractions do not sum to 1.0", s_ipsc->cCurrentModuleObject));
-                    ShowContinueError(state, EnergyPlus::format("..Sum was={:.1R}", sum(fuelCell.AirSup.ConstitMolalFract)));
-                    ShowContinueError(state, EnergyPlus::format("Entered in {} = {}", s_ipsc->cCurrentModuleObject, AlphArray(1)));
+                    ShowSevereError(state, std::format("{} molar fractions do not sum to 1.0", s_ipsc->cCurrentModuleObject));
+                    ShowContinueError(state, std::format("..Sum was={:.1f}", sum(fuelCell.AirSup.ConstitMolalFract)));
+                    ShowContinueError(state, std::format("Entered in {} = {}", s_ipsc->cCurrentModuleObject, AlphArray(1)));
                     ErrorsFound = true;
                 }
 
@@ -572,8 +573,8 @@ namespace FuelCellElectricGenerator {
                     }
                 }
             } else {
-                ShowSevereError(state, EnergyPlus::format("Invalid, {} = {}", s_ipsc->cAlphaFieldNames(1), AlphArray(1)));
-                ShowContinueError(state, EnergyPlus::format("Entered in {}={}", s_ipsc->cCurrentModuleObject, AlphArray(1)));
+                ShowSevereError(state, std::format("Invalid, {} = {}", s_ipsc->cAlphaFieldNames(1), AlphArray(1)));
+                ShowContinueError(state, std::format("Entered in {}={}", s_ipsc->cCurrentModuleObject, AlphArray(1)));
                 ErrorsFound = true;
             }
         }
@@ -611,7 +612,7 @@ namespace FuelCellElectricGenerator {
         int NumFCWaterSups = state.dataInputProcessing->inputProcessor->getNumObjectsFound(state, s_ipsc->cCurrentModuleObject);
 
         if (NumFCWaterSups <= 0) {
-            ShowSevereError(state, EnergyPlus::format("No {} equipment specified in input file", s_ipsc->cCurrentModuleObject));
+            ShowSevereError(state, std::format("No {} equipment specified in input file", s_ipsc->cCurrentModuleObject));
             ErrorsFound = true;
         }
 
@@ -701,8 +702,8 @@ namespace FuelCellElectricGenerator {
                     }
                 }
             } else {
-                ShowSevereError(state, EnergyPlus::format("Invalid, {} = {}", s_ipsc->cAlphaFieldNames(1), AlphArray(1)));
-                ShowContinueError(state, EnergyPlus::format("Entered in {}={}", s_ipsc->cCurrentModuleObject, AlphArray(1)));
+                ShowSevereError(state, std::format("Invalid, {} = {}", s_ipsc->cAlphaFieldNames(1), AlphArray(1)));
+                ShowContinueError(state, std::format("Entered in {}={}", s_ipsc->cCurrentModuleObject, AlphArray(1)));
                 ErrorsFound = true;
             }
         }
@@ -711,7 +712,7 @@ namespace FuelCellElectricGenerator {
         int NumFuelCellAuxilHeaters = state.dataInputProcessing->inputProcessor->getNumObjectsFound(state, s_ipsc->cCurrentModuleObject);
 
         if (NumFuelCellAuxilHeaters <= 0) {
-            ShowSevereError(state, EnergyPlus::format("No {} equipment specified in input file", s_ipsc->cCurrentModuleObject));
+            ShowSevereError(state, std::format("No {} equipment specified in input file", s_ipsc->cCurrentModuleObject));
             ErrorsFound = true;
         }
 
@@ -770,8 +771,8 @@ namespace FuelCellElectricGenerator {
                     }
                 }
             } else {
-                ShowSevereError(state, EnergyPlus::format("Invalid, {} = {}", s_ipsc->cAlphaFieldNames(1), AlphArray(1)));
-                ShowContinueError(state, EnergyPlus::format("Entered in {}={}", s_ipsc->cCurrentModuleObject, AlphArray(1)));
+                ShowSevereError(state, std::format("Invalid, {} = {}", s_ipsc->cAlphaFieldNames(1), AlphArray(1)));
+                ShowContinueError(state, std::format("Entered in {}={}", s_ipsc->cCurrentModuleObject, AlphArray(1)));
                 ErrorsFound = true;
             }
         }
@@ -780,8 +781,8 @@ namespace FuelCellElectricGenerator {
         s_ipsc->cCurrentModuleObject = "Generator:FuelCell:ExhaustGasToWaterHeatExchanger";
         int NumFCExhaustGasHXs = state.dataInputProcessing->inputProcessor->getNumObjectsFound(state, s_ipsc->cCurrentModuleObject);
         if (NumFCExhaustGasHXs <= 0) {
-            ShowWarningError(state, EnergyPlus::format("No {} equipment specified in input file", s_ipsc->cCurrentModuleObject));
-            ShowContinueError(state, EnergyPlus::format("Fuel Cell model requires an {} object", s_ipsc->cCurrentModuleObject));
+            ShowWarningError(state, std::format("No {} equipment specified in input file", s_ipsc->cCurrentModuleObject));
+            ShowContinueError(state, std::format("Fuel Cell model requires an {} object", s_ipsc->cCurrentModuleObject));
             ErrorsFound = true;
         }
 
@@ -871,8 +872,8 @@ namespace FuelCellElectricGenerator {
                 // store cooling water volume flow rate for autosizing system
                 PlantUtilities::RegisterPlantCompDesignFlow(state, fuelCell.ExhaustHX.WaterInNode, fuelCell.ExhaustHX.WaterVolumeFlowMax);
             } else {
-                ShowSevereError(state, EnergyPlus::format("Invalid, {} = {}", s_ipsc->cAlphaFieldNames(1), AlphArray(1)));
-                ShowContinueError(state, EnergyPlus::format("Entered in {}={}", s_ipsc->cCurrentModuleObject, AlphArray(1)));
+                ShowSevereError(state, std::format("Invalid, {} = {}", s_ipsc->cAlphaFieldNames(1), AlphArray(1)));
+                ShowContinueError(state, std::format("Entered in {}={}", s_ipsc->cCurrentModuleObject, AlphArray(1)));
                 ErrorsFound = true;
             }
         }
@@ -881,8 +882,8 @@ namespace FuelCellElectricGenerator {
         int NumFCElecStorageUnits = state.dataInputProcessing->inputProcessor->getNumObjectsFound(state, s_ipsc->cCurrentModuleObject);
 
         if (NumFCElecStorageUnits <= 0) {
-            ShowWarningError(state, EnergyPlus::format("No {} equipment specified in input file", s_ipsc->cCurrentModuleObject));
-            ShowContinueError(state, EnergyPlus::format("Fuel Cell model requires an {} object", s_ipsc->cCurrentModuleObject));
+            ShowWarningError(state, std::format("No {} equipment specified in input file", s_ipsc->cCurrentModuleObject));
+            ShowContinueError(state, std::format("Fuel Cell model requires an {} object", s_ipsc->cCurrentModuleObject));
             ErrorsFound = true;
         }
 
@@ -909,8 +910,8 @@ namespace FuelCellElectricGenerator {
                 if (Util::SameString(AlphArray(2), "SimpleEfficiencyWithConstraints")) {
                     fuelCell.ElecStorage.StorageModelMode = DataGenerators::ElectricalStorage::SimpleEffConstraints;
                 } else {
-                    ShowSevereError(state, EnergyPlus::format("Invalid, {} = {}", s_ipsc->cAlphaFieldNames(2), AlphArray(2)));
-                    ShowContinueError(state, EnergyPlus::format("Entered in {}={}", s_ipsc->cCurrentModuleObject, AlphArray(1)));
+                    ShowSevereError(state, std::format("Invalid, {} = {}", s_ipsc->cAlphaFieldNames(2), AlphArray(2)));
+                    ShowContinueError(state, std::format("Entered in {}={}", s_ipsc->cCurrentModuleObject, AlphArray(1)));
                     ErrorsFound = true;
                 }
 
@@ -928,8 +929,8 @@ namespace FuelCellElectricGenerator {
                     }
                 }
             } else {
-                ShowSevereError(state, EnergyPlus::format("Invalid, {} = {}", s_ipsc->cAlphaFieldNames(1), AlphArray(1)));
-                ShowContinueError(state, EnergyPlus::format("Entered in {}={}", s_ipsc->cCurrentModuleObject, AlphArray(1)));
+                ShowSevereError(state, std::format("Invalid, {} = {}", s_ipsc->cAlphaFieldNames(1), AlphArray(1)));
+                ShowContinueError(state, std::format("Entered in {}={}", s_ipsc->cCurrentModuleObject, AlphArray(1)));
                 ErrorsFound = true;
             }
         }
@@ -938,8 +939,8 @@ namespace FuelCellElectricGenerator {
         int NumFCPowerCondUnits = state.dataInputProcessing->inputProcessor->getNumObjectsFound(state, s_ipsc->cCurrentModuleObject);
 
         if (NumFCPowerCondUnits <= 0) {
-            ShowWarningError(state, EnergyPlus::format("No {} equipment specified in input file", s_ipsc->cCurrentModuleObject));
-            ShowContinueError(state, EnergyPlus::format("Fuel Cell model requires a {} object", s_ipsc->cCurrentModuleObject));
+            ShowWarningError(state, std::format("No {} equipment specified in input file", s_ipsc->cCurrentModuleObject));
+            ShowContinueError(state, std::format("Fuel Cell model requires a {} object", s_ipsc->cCurrentModuleObject));
 
             ErrorsFound = true;
         }
@@ -994,8 +995,8 @@ namespace FuelCellElectricGenerator {
                     }
                 }
             } else {
-                ShowSevereError(state, EnergyPlus::format("Invalid, {} = {}", s_ipsc->cAlphaFieldNames(1), AlphArray(1)));
-                ShowContinueError(state, EnergyPlus::format("Entered in {}={}", s_ipsc->cCurrentModuleObject, AlphArray(1)));
+                ShowSevereError(state, std::format("Invalid, {} = {}", s_ipsc->cAlphaFieldNames(1), AlphArray(1)));
+                ShowContinueError(state, std::format("Entered in {}={}", s_ipsc->cCurrentModuleObject, AlphArray(1)));
                 ErrorsFound = true;
             }
         }
@@ -1070,8 +1071,8 @@ namespace FuelCellElectricGenerator {
                     fuelCell.StackCooler.StackCoolerPresent = true;
 
                 } else {
-                    ShowSevereError(state, EnergyPlus::format("Invalid, {} = {}", s_ipsc->cAlphaFieldNames(1), AlphArray(1)));
-                    ShowContinueError(state, EnergyPlus::format("Entered in {}={}", s_ipsc->cCurrentModuleObject, AlphArray(1)));
+                    ShowSevereError(state, std::format("Invalid, {} = {}", s_ipsc->cAlphaFieldNames(1), AlphArray(1)));
+                    ShowContinueError(state, std::format("Entered in {}={}", s_ipsc->cCurrentModuleObject, AlphArray(1)));
                     ErrorsFound = true;
                 }
             }
@@ -1780,8 +1781,8 @@ namespace FuelCellElectricGenerator {
                 state.dataGenerator->FuelSupply(this->FuelSupNum).CompPowerLossFactor * state.dataGenerator->FuelSupply(this->FuelSupNum).PfuelCompEl;
 
             if (state.dataGenerator->FuelSupply(this->FuelSupNum).QskinLoss < 0.0) {
-                ShowWarningError(
-                    state, EnergyPlus::format("problem in FuelSupply.QskinLoss {:.3R}", state.dataGenerator->FuelSupply(this->FuelSupNum).QskinLoss));
+                ShowWarningError(state,
+                                 std::format("problem in FuelSupply.QskinLoss {:.3f}", state.dataGenerator->FuelSupply(this->FuelSupNum).QskinLoss));
                 state.dataGenerator->FuelSupply(this->FuelSupNum).QskinLoss = 0.0;
             }
 
@@ -1901,7 +1902,7 @@ namespace FuelCellElectricGenerator {
             this->AirSup.QskinLoss = this->AirSup.BlowerHeatLossFactor * this->AirSup.PairCompEl;
 
             if (this->AirSup.QskinLoss < 0.0) {
-                ShowWarningError(state, EnergyPlus::format("problem in AirSup.QskinLoss {:.3R}", this->AirSup.QskinLoss));
+                ShowWarningError(state, std::format("problem in AirSup.QskinLoss {:.3f}", this->AirSup.QskinLoss));
                 this->AirSup.QskinLoss = 0.0;
             }
 
@@ -1928,7 +1929,7 @@ namespace FuelCellElectricGenerator {
             if (NdotExcessAir < 0) { // can't meet stoichiometric fuel reaction
 
                 ShowWarningError(state, "Air flow rate into fuel cell is too low for stoichiometric fuel reaction");
-                ShowContinueError(state, EnergyPlus::format("Increase air flow in GENERATOR:FC:AIR SUPPLY object:{}", this->AirSup.Name));
+                ShowContinueError(state, std::format("Increase air flow in GENERATOR:FC:AIR SUPPLY object:{}", this->AirSup.Name));
             }
 
             // figure CO2 and Water rate from products (coefs setup during one-time processing in gas phase library )

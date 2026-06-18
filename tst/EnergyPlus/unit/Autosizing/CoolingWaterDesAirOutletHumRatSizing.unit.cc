@@ -105,7 +105,7 @@ TEST_F(AutoSizingFixture, CoolingWaterDesAirOutletHumRatSizingGauntlet)
 
     eiooutput = std::string("! <Component Sizing Information>, Component Type, Component Name, Input Field Description, Value\n"
                             " Component Sizing Information, Coil:Cooling:Water, MyWaterCoil, User-Specified Design Outlet Air Humidity Ratio "
-                            "[kgWater/kgDryAir], 6.00000E-003\n");
+                            "[kgWater/kgDryAir], 6.000E-03\n");
 
     EXPECT_TRUE(compare_eio_stream(eiooutput, true));
 
@@ -137,7 +137,7 @@ TEST_F(AutoSizingFixture, CoolingWaterDesAirOutletHumRatSizingGauntlet)
     EXPECT_NEAR(0.008, sizedValue, 0.0001);
 
     eiooutput = std::string(" Component Sizing Information, Coil:Cooling:Water, MyWaterCoil, Design Size Design Outlet Air Humidity Ratio "
-                            "[kgWater/kgDryAir], 8.00000E-003\n");
+                            "[kgWater/kgDryAir], 8.000E-03\n");
 
     EXPECT_TRUE(compare_eio_stream(eiooutput, true));
 
@@ -244,7 +244,7 @@ TEST_F(AutoSizingFixture, CoolingWaterDesAirOutletHumRatSizingGauntlet)
 
     // <Component Sizing Information> header already reported above (and flag set false). Only coil sizing information reported here.
     eiooutput = std::string(" Component Sizing Information, Coil:Cooling:Water, MyWaterCoil, Design Size Design Outlet Air Humidity Ratio "
-                            "[kgWater/kgDryAir], 9.00000E-003\n");
+                            "[kgWater/kgDryAir], 9.000E-03\n");
 
     EXPECT_TRUE(compare_eio_stream(eiooutput, true));
 
@@ -337,9 +337,9 @@ TEST_F(AutoSizingFixture, CoolingWaterDesAirOutletHumRatSizingGauntlet)
 
     // <Component Sizing Information> header already reported above (and flag set false). Only coil sizing information reported here.
     eiooutput = std::string(" Component Sizing Information, Coil:Cooling:Water, MyWaterCoil, Design Size Design Outlet Air Humidity Ratio "
-                            "[kgWater/kgDryAir], 3.60000E-003\n"
+                            "[kgWater/kgDryAir], 3.600E-03\n"
                             " Component Sizing Information, Coil:Cooling:Water, MyWaterCoil, User-Specified Design Outlet Air Humidity Ratio "
-                            "[kgWater/kgDryAir], 6.65000E-003\n");
+                            "[kgWater/kgDryAir], 6.650E-03\n");
     EXPECT_TRUE(compare_eio_stream(eiooutput, true));
 
     // reset eio stream
@@ -364,7 +364,7 @@ TEST_F(AutoSizingFixture, CoolingWaterDesAirOutletHumRatSizingGauntlet)
 
     // <Component Sizing Information> header already reported above (and flag set false). Only coil sizing information reported here.
     eiooutput = std::string(" Component Sizing Information, Coil:Cooling:Water, MyWaterCoil, Design Size Design Outlet Air Humidity Ratio "
-                            "[kgWater/kgDryAir], 3.00000E-003\n");
+                            "[kgWater/kgDryAir], 3.000E-03\n");
     EXPECT_TRUE(compare_eio_stream(eiooutput, true));
 
     // Test 17 - Repeat w/ dry coil and high water temp, Outdoor Air System Equipment with DOAS system, autosized humidity ratio

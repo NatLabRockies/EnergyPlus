@@ -18190,32 +18190,32 @@
   ZoneControl:Humidistat,
     ER_Exam3_Mult4_Flr_1 Humidistat,  !- Name
     ER_Exam3_Mult4_Flr_1,    !- Zone Name
-    MinRelHumSetSch_addDI,   !- Humidifying Relative Humidity Setpoint Schedule Name
-    MaxRelHumSetSch;         !- Dehumidifying Relative Humidity Setpoint Schedule Name
+    MinRelHumSetSch_addDI,   !- Humidifying Setpoint Schedule Name
+    MaxRelHumSetSch;         !- Dehumidifying Setpoint Schedule Name
 
   ZoneControl:Humidistat,
     OR2_Mult5_Flr_2 Humidistat,  !- Name
     OR2_Mult5_Flr_2,         !- Zone Name
-    MinRelHumSetSch_addDI,   !- Humidifying Relative Humidity Setpoint Schedule Name
-    MaxRelHumSetSch;         !- Dehumidifying Relative Humidity Setpoint Schedule Name
+    MinRelHumSetSch_addDI,   !- Humidifying Setpoint Schedule Name
+    MaxRelHumSetSch;         !- Dehumidifying Setpoint Schedule Name
 
   ZoneControl:Humidistat,
     ICU_Flr_2 Humidistat,    !- Name
     ICU_Flr_2,               !- Zone Name
-    MinRelHumSetSch_addDI_ICU,  !- Humidifying Relative Humidity Setpoint Schedule Name
-    MaxRelHumSetSch;         !- Dehumidifying Relative Humidity Setpoint Schedule Name
+    MinRelHumSetSch_addDI_ICU,  !- Humidifying Setpoint Schedule Name
+    MaxRelHumSetSch;         !- Dehumidifying Setpoint Schedule Name
 
   ZoneControl:Humidistat,
     Lab_Flr_3 Humidistat,    !- Name
     Lab_Flr_3,               !- Zone Name
-    MinRelHumSetSch_addDI,   !- Humidifying Relative Humidity Setpoint Schedule Name
-    MaxRelHumSetSch;         !- Dehumidifying Relative Humidity Setpoint Schedule Name
+    MinRelHumSetSch_addDI,   !- Humidifying Setpoint Schedule Name
+    MaxRelHumSetSch;         !- Dehumidifying Setpoint Schedule Name
 
   ZoneControl:Humidistat,
     PatRoom5_Mult10_Flr_4 Humidistat,  !- Name
     PatRoom5_Mult10_Flr_4,   !- Zone Name
-    MinRelHumSetSch_addDI,   !- Humidifying Relative Humidity Setpoint Schedule Name
-    MaxRelHumSetSch;         !- Dehumidifying Relative Humidity Setpoint Schedule Name
+    MinRelHumSetSch_addDI,   !- Humidifying Setpoint Schedule Name
+    MaxRelHumSetSch;         !- Dehumidifying Setpoint Schedule Name
 
 !-   ===========  ALL OBJECTS IN CLASS: ZONECONTROL:THERMOSTAT ===========
 

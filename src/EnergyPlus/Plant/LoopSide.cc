@@ -45,8 +45,13 @@
 // OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 // POSSIBILITY OF SUCH DAMAGE.
 
+// C++ Headers
+#include <format>
+
+// ObjexxFCL Headers
 #include <ObjexxFCL/member.functions.hh>
 
+// EnergyPlus Headers
 #include <EnergyPlus/Data/EnergyPlusData.hh>
 #include <EnergyPlus/DataBranchAirLoopPlant.hh>
 #include <EnergyPlus/DataConvergParams.hh>
@@ -778,11 +783,11 @@ namespace DataPlant {
                                               "below the high setpoint.");
                             ShowContinueError(state, "Occurs in PlantLoop=" + thisPlantLoop.Name);
                             ShowContinueError(state,
-                                              EnergyPlus::format("LoadToHeatingSetPoint={:.3R}, LoadToCoolingSetPoint={:.3R}",
-                                                                 LoadToHeatingSetPoint,
-                                                                 LoadToCoolingSetPoint));
-                            ShowContinueError(state, EnergyPlus::format("Loop Heating Low Setpoint={:.2R}", LoopSetPointTemperatureLo));
-                            ShowContinueError(state, EnergyPlus::format("Loop Cooling High Setpoint={:.2R}", LoopSetPointTemperatureHi));
+                                              std::format("LoadToHeatingSetPoint={:.3f}, LoadToCoolingSetPoint={:.3f}",
+                                                          LoadToHeatingSetPoint,
+                                                          LoadToCoolingSetPoint));
+                            ShowContinueError(state, std::format("Loop Heating Low Setpoint={:.2f}", LoopSetPointTemperatureLo));
+                            ShowContinueError(state, std::format("Loop Cooling High Setpoint={:.2f}", LoopSetPointTemperatureHi));
 
                             ShowFatalError(state, "Program terminates due to above conditions.");
                         }
@@ -798,11 +803,11 @@ namespace DataPlant {
                                             "Development Team");
                             ShowContinueError(state, "occurs in PlantLoop=" + thisPlantLoop.Name);
                             ShowContinueError(state,
-                                              EnergyPlus::format("LoadToHeatingSetPoint={:.3R}, LoadToCoolingSetPoint={:.3R}",
-                                                                 LoadToHeatingSetPoint,
-                                                                 LoadToCoolingSetPoint));
-                            ShowContinueError(state, EnergyPlus::format("Loop Heating Setpoint={:.2R}", LoopSetPointTemperatureLo));
-                            ShowContinueError(state, EnergyPlus::format("Loop Cooling Setpoint={:.2R}", LoopSetPointTemperatureHi));
+                                              std::format("LoadToHeatingSetPoint={:.3f}, LoadToCoolingSetPoint={:.3f}",
+                                                          LoadToHeatingSetPoint,
+                                                          LoadToCoolingSetPoint));
+                            ShowContinueError(state, std::format("Loop Heating Setpoint={:.2f}", LoopSetPointTemperatureLo));
+                            ShowContinueError(state, std::format("Loop Cooling Setpoint={:.2f}", LoopSetPointTemperatureHi));
                             ShowFatalError(state, "Program terminates due to above conditions.");
                         }
                     } else {
@@ -1662,9 +1667,9 @@ namespace DataPlant {
                 // Call fatal diagnostic error. !The math should work out!
                 ShowSevereError(state, "ResolveParallelFlows: Dev note, failed to redistribute restricted flow");
                 ShowContinueErrorTimeStamp(state, "");
-                ShowContinueError(state, EnergyPlus::format("Loop side flow = {:.8R} (kg/s)", ThisLoopSideFlow));
-                ShowContinueError(state, EnergyPlus::format("Flow Remaining = {:.8R} (kg/s)", FlowRemaining));
-                ShowContinueError(state, EnergyPlus::format("Parallel Branch requests  = {:.8R} (kg/s)", TotParallelBranchFlowReq));
+                ShowContinueError(state, std::format("Loop side flow = {:.8f} (kg/s)", ThisLoopSideFlow));
+                ShowContinueError(state, std::format("Flow Remaining = {:.8f} (kg/s)", FlowRemaining));
+                ShowContinueError(state, std::format("Parallel Branch requests  = {:.8f} (kg/s)", TotParallelBranchFlowReq));
             }
 
             // 2)  ! Reset the flow on the Mixer outlet branch

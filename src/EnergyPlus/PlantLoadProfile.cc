@@ -48,6 +48,9 @@
 // C++ Headers
 #include <cmath>
 
+// C++ Headers
+#include <format>
+
 // ObjexxFCL Headers
 #include <ObjexxFCL/Array.functions.hh>
 
@@ -104,7 +107,7 @@ PlantComponent *PlantProfileData::factory(EnergyPlusData &state, std::string con
         return thisObj;
     }
     // If we didn't find it, fatal
-    ShowFatalError(state, EnergyPlus::format("PlantLoadProfile::factory: Error getting inputs for pipe named: {}", objectName));
+    ShowFatalError(state, std::format("PlantLoadProfile::factory: Error getting inputs for pipe named: {}", objectName));
     // Shut up the compiler
     return nullptr;
 }
@@ -593,7 +596,7 @@ void GetPlantProfileInput(EnergyPlusData &state)
             }
 
             if (ErrorsFound) {
-                ShowFatalError(state, EnergyPlus::format("Errors in {} input.", cCurrentModuleObject));
+                ShowFatalError(state, std::format("Errors in {} input.", cCurrentModuleObject));
             }
 
         } // ProfileNum

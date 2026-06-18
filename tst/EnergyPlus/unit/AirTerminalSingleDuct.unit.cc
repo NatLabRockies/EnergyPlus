@@ -1846,8 +1846,6 @@ TEST_F(EnergyPlusFixture, SingleDuctInduction_reportTerminalUnit)
     using namespace EnergyPlus::OutputReportPredefined;
     auto &orp = *state->dataOutRptPredefined;
 
-    SetPredefinedTables(*state);
-
     auto &adu = state->dataDefineEquipment->AirDistUnit;
     adu.allocate(2);
     adu(1).Name = "ADU a";

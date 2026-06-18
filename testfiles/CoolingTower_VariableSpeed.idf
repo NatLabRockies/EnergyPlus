@@ -2368,7 +2368,7 @@
   ZoneControl:Humidistat,
     Zone 5 Humidistat,       !- Name
     SPACE5-1,                !- Zone Name
-    Min RH Set Sch;          !- Humidifying Relative Humidity Setpoint Schedule Name
+    Min RH Set Sch;          !- Humidifying Setpoint Schedule Name
 
   ThermostatSetpoint:SingleHeating,
     HeatingSetpoint,         !- Name

@@ -49,6 +49,7 @@
 
 // C++ Headers
 #include <algorithm>
+#include <format>
 
 // EnergyPlus Headers
 #include <EnergyPlus/BranchNodeConnections.hh>
@@ -507,10 +508,9 @@ namespace PCMStorage {
 
         int matNum = Material::GetMaterialNum(state, state.dataIPShortCut->cAlphaArgs(7));
         if (matNum == 0) {
-            ShowSevereError(state,
-                            EnergyPlus::format("{}: Invalid PCM material name: {}",
-                                               state.dataIPShortCut->cCurrentModuleObject,
-                                               state.dataIPShortCut->cAlphaArgs(7)));
+            ShowSevereError(
+                state,
+                std::format("{}: Invalid PCM material name: {}", state.dataIPShortCut->cCurrentModuleObject, state.dataIPShortCut->cAlphaArgs(7)));
             ErrorsFound = true;
         } else {
             // Obtains conduction FD related parameters from input file
@@ -523,8 +523,7 @@ namespace PCMStorage {
 
             if (!mat->hasPCM) {
                 ShowSevereError(
-                    state,
-                    EnergyPlus::format("{}: Material {} is not a phase change material.", state.dataIPShortCut->cCurrentModuleObject, mat->Name));
+                    state, std::format("{}: Material {} is not a phase change material.", state.dataIPShortCut->cCurrentModuleObject, mat->Name));
                 ErrorsFound = true;
             } else {
                 PCM.PCMMaterialNum = matNum;
@@ -544,18 +543,18 @@ namespace PCMStorage {
                 if (PCM.UseSideDesignFlowRate < 0.0) {
                     ShowWarningError(
                         state,
-                        EnergyPlus::format("{}={}, Use Side Design Flow Rate was entered as {:.6R}.  This will be autosized during initialization.",
-                                           state.dataIPShortCut->cCurrentModuleObject,
-                                           PCM.Name,
-                                           PCM.UseSideDesignFlowRate));
+                        std::format("{}={}, Use Side Design Flow Rate was entered as {:.6f}.  This will be autosized during initialization.",
+                                    state.dataIPShortCut->cCurrentModuleObject,
+                                    PCM.Name,
+                                    PCM.UseSideDesignFlowRate));
                 }
                 if (PCM.PlantSideDesignFlowRate < 0.0) {
                     ShowWarningError(
                         state,
-                        EnergyPlus::format("{}={}, Plant Side Design Flow Rate was entered as {:.6R}.  This will be autosized during initialization.",
-                                           state.dataIPShortCut->cCurrentModuleObject,
-                                           PCM.Name,
-                                           PCM.PlantSideDesignFlowRate));
+                        std::format("{}={}, Plant Side Design Flow Rate was entered as {:.6f}.  This will be autosized during initialization.",
+                                    state.dataIPShortCut->cCurrentModuleObject,
+                                    PCM.Name,
+                                    PCM.PlantSideDesignFlowRate));
                 }
 
                 PCM.MeltingTemp = PCM.PCMmat->peakTempMelting;
@@ -624,14 +623,14 @@ namespace PCMStorage {
         // Issue a warning to let the user know that autosizing will occur but do not halt execution.
         if (PCM.TankCapacity <= 0.0) {
             ShowWarningError(state,
-                             EnergyPlus::format("{}={}, Tank Capacity was entered as {:.6R} and will be autosized during initialization.",
-                                                state.dataIPShortCut->cCurrentModuleObject,
-                                                PCM.Name,
-                                                PCM.TankCapacity));
+                             std::format("{}={}, Tank Capacity was entered as {:.6f} and will be autosized during initialization.",
+                                         state.dataIPShortCut->cCurrentModuleObject,
+                                         PCM.Name,
+                                         PCM.TankCapacity));
         }
 
         if (ErrorsFound) {
-            ShowFatalError(state, EnergyPlus::format("Errors found in processing input for {}", state.dataIPShortCut->cCurrentModuleObject));
+            ShowFatalError(state, std::format("Errors found in processing input for {}", state.dataIPShortCut->cCurrentModuleObject));
         }
     }
 } // namespace PCMStorage

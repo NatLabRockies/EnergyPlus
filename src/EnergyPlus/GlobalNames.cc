@@ -73,7 +73,7 @@ void IntraObjUniquenessCheck(EnergyPlusData &state,
                              bool &ErrorsFound)
 {
     if (NameToVerify.empty()) {
-        ShowSevereError(state, EnergyPlus::format("E+ object type {} cannot have a blank {} field", CurrentModuleObject, FieldName));
+        ShowSevereError(state, std::format("E+ object type {} cannot have a blank {} field", CurrentModuleObject, FieldName));
         ErrorsFound = true;
         // NameToVerify = "xxxxx";
         return;
@@ -84,7 +84,7 @@ void IntraObjUniquenessCheck(EnergyPlusData &state,
         UniqueStrings.emplace(NameToVerify);
     } else {
         ErrorsFound = true;
-        ShowSevereError(state, EnergyPlus::format("{} has a duplicate field {}", CurrentModuleObject, NameToVerify));
+        ShowSevereError(state, std::format("{} has a duplicate field {}", CurrentModuleObject, NameToVerify));
     }
 }
 
@@ -96,7 +96,7 @@ bool VerifyUniqueInterObjectName(EnergyPlusData &state,
                                  bool &ErrorsFound)
 {
     if (object_name.empty()) {
-        ShowSevereError(state, EnergyPlus::format("E+ object type {} cannot have blank {} field", object_name, field_name));
+        ShowSevereError(state, std::format("E+ object type {} cannot have blank {} field", object_name, field_name));
         ErrorsFound = true;
         // object_name = "xxxxx";
         return true;
@@ -106,8 +106,8 @@ bool VerifyUniqueInterObjectName(EnergyPlusData &state,
         names.emplace(object_name, object_type);
     } else {
         ErrorsFound = true;
-        ShowSevereError(
-            state, EnergyPlus::format("{} with object type {} duplicates a name in object type {}", object_name, object_type, names_iter->second));
+        ShowSevereError(state,
+                        std::format("{} with object type {} duplicates a name in object type {}", object_name, object_type, names_iter->second));
         return true;
     }
     return false;
@@ -120,7 +120,7 @@ bool VerifyUniqueInterObjectName(EnergyPlusData &state,
                                  bool &ErrorsFound)
 {
     if (object_name.empty()) {
-        ShowSevereError(state, EnergyPlus::format("E+ object type {} has a blank field", object_name));
+        ShowSevereError(state, std::format("E+ object type {} has a blank field", object_name));
         ErrorsFound = true;
         // object_name = "xxxxx";
         return true;
@@ -130,8 +130,8 @@ bool VerifyUniqueInterObjectName(EnergyPlusData &state,
         names.emplace(object_name, object_type);
     } else {
         ErrorsFound = true;
-        ShowSevereError(
-            state, EnergyPlus::format("{} with object type {} duplicates a name in object type {}", object_name, object_type, names_iter->second));
+        ShowSevereError(state,
+                        std::format("{} with object type {} duplicates a name in object type {}", object_name, object_type, names_iter->second));
         return true;
     }
     return false;
@@ -153,8 +153,8 @@ void VerifyUniqueChillerName(
 
     auto const iter = state.dataGlobalNames->ChillerNames.find(NameToVerify);
     if (iter != state.dataGlobalNames->ChillerNames.end()) {
-        ShowSevereError(state, EnergyPlus::format("{}, duplicate name={}, Chiller Type=\"{}\".", StringToDisplay, NameToVerify, iter->second));
-        ShowContinueError(state, EnergyPlus::format("...Current entry is Chiller Type=\"{}\".", TypeToVerify));
+        ShowSevereError(state, std::format("{}, duplicate name={}, Chiller Type=\"{}\".", StringToDisplay, NameToVerify, iter->second));
+        ShowContinueError(state, std::format("...Current entry is Chiller Type=\"{}\".", TypeToVerify));
         ErrorsFound = true;
     } else {
         state.dataGlobalNames->ChillerNames.emplace(NameToVerify, Util::makeUPPER(TypeToVerify));
@@ -181,8 +181,8 @@ void VerifyUniqueBaseboardName(EnergyPlusData &state,
 
     auto const iter = state.dataGlobalNames->BaseboardNames.find(NameToVerify);
     if (iter != state.dataGlobalNames->BaseboardNames.end()) {
-        ShowSevereError(state, EnergyPlus::format("{}, duplicate name={}, Baseboard Type=\"{}\".", StringToDisplay, NameToVerify, iter->second));
-        ShowContinueError(state, EnergyPlus::format("...Current entry is Baseboard Type=\"{}\".", TypeToVerify));
+        ShowSevereError(state, std::format("{}, duplicate name={}, Baseboard Type=\"{}\".", StringToDisplay, NameToVerify, iter->second));
+        ShowContinueError(state, std::format("...Current entry is Baseboard Type=\"{}\".", TypeToVerify));
         ErrorsFound = true;
     } else {
         state.dataGlobalNames->BaseboardNames.emplace(NameToVerify, Util::makeUPPER(TypeToVerify));
@@ -206,8 +206,8 @@ void VerifyUniqueBoilerName(
 
     auto const iter = state.dataGlobalNames->BoilerNames.find(NameToVerify);
     if (iter != state.dataGlobalNames->BoilerNames.end()) {
-        ShowSevereError(state, EnergyPlus::format("{}, duplicate name={}, Boiler Type=\"{}\".", StringToDisplay, NameToVerify, iter->second));
-        ShowContinueError(state, EnergyPlus::format("...Current entry is Boiler Type=\"{}\".", TypeToVerify));
+        ShowSevereError(state, std::format("{}, duplicate name={}, Boiler Type=\"{}\".", StringToDisplay, NameToVerify, iter->second));
+        ShowContinueError(state, std::format("...Current entry is Boiler Type=\"{}\".", TypeToVerify));
         ErrorsFound = true;
     } else {
         state.dataGlobalNames->BoilerNames.emplace(NameToVerify, Util::makeUPPER(TypeToVerify));
@@ -230,7 +230,7 @@ void VerifyUniqueCoilName(
     // Coils.  If not found in the list, it is added before returning.
 
     if (NameToVerify.empty()) {
-        ShowSevereError(state, EnergyPlus::format("\"{}\" cannot have a blank field", TypeToVerify));
+        ShowSevereError(state, std::format("\"{}\" cannot have a blank field", TypeToVerify));
         ErrorsFound = true;
         NameToVerify = "xxxxx";
         return;
@@ -238,8 +238,8 @@ void VerifyUniqueCoilName(
 
     auto const iter = state.dataGlobalNames->CoilNames.find(NameToVerify);
     if (iter != state.dataGlobalNames->CoilNames.end()) {
-        ShowSevereError(state, EnergyPlus::format("{}, duplicate name={}, Coil Type=\"{}\".", StringToDisplay, NameToVerify, iter->second));
-        ShowContinueError(state, EnergyPlus::format("...Current entry is Coil Type=\"{}\".", TypeToVerify));
+        ShowSevereError(state, std::format("{}, duplicate name={}, Coil Type=\"{}\".", StringToDisplay, NameToVerify, iter->second));
+        ShowContinueError(state, std::format("...Current entry is Coil Type=\"{}\".", TypeToVerify));
         ErrorsFound = true;
     } else {
         state.dataGlobalNames->CoilNames.emplace(NameToVerify, Util::makeUPPER(TypeToVerify));
@@ -252,8 +252,8 @@ void VerifyUniqueADUName(
 {
     auto const iter = state.dataGlobalNames->aDUNames.find(NameToVerify);
     if (iter != state.dataGlobalNames->aDUNames.end()) {
-        ShowSevereError(state, EnergyPlus::format("{}, duplicate name={}, ADU Type=\"{}\".", StringToDisplay, NameToVerify, iter->second));
-        ShowContinueError(state, EnergyPlus::format("...Current entry is Air Distribution Unit Type=\"{}\".", TypeToVerify));
+        ShowSevereError(state, std::format("{}, duplicate name={}, ADU Type=\"{}\".", StringToDisplay, NameToVerify, iter->second));
+        ShowContinueError(state, std::format("...Current entry is Air Distribution Unit Type=\"{}\".", TypeToVerify));
         ErrorsFound = true;
     } else {
         state.dataGlobalNames->aDUNames.emplace(NameToVerify, Util::makeUPPER(TypeToVerify));

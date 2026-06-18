@@ -1075,6 +1075,8 @@ namespace DataHeatBalance {
         bool EMSZoneBaseboardOverrideOn = false; // EMS actuating equipment power if .TRUE.
         Real64 EMSZoneBaseboardPower = 0.0;      // Value EMS is directing to use for override
         Real64 FractionRadiant = 0.0;
+        Real64 ZnHtgSetTemp = 0.0;    // Design zone heating setpoint temperature
+        Real64 ExtSurfCondLoad = 0.0; // Conductional load through exterior surfaces by max temp diff
         Real64 FractionConvected = 0.0;
         bool ManageDemand = false; // Flag to indicate whether to use demand limiting
         Real64 DemandLimit = 0.0;  // Demand limit set by demand manager [W]
@@ -1088,6 +1090,8 @@ namespace DataHeatBalance {
         Real64 ConGainEnergy = 0.0;    // Convective heat gain [J]
         Real64 TotGainEnergy = 0.0;    // Total heat gain [J]
         std::string EndUseSubcategory; // user defined name for the end use category
+        std::vector<std::string> FieldNames;
+        bool MySizeFlag = true;
     };
 
     struct InfiltrationData

@@ -47,6 +47,7 @@
 
 // C++ Headers
 #include <cassert>
+#include <format>
 
 // EnergyPlus Headers
 #include <EnergyPlus/Data/EnergyPlusData.hh>
@@ -2956,15 +2957,15 @@ void storeIterationResults(EnergyPlusData &state,
             dynFormat = "";
         }
         if (mod(i, 2) == 1) {
-            dynFormat += fmt::format("Ebf({:3})", (i + 1) / 2);
+            dynFormat += std::format("Ebf({:3})", (i + 1) / 2);
         } else {
-            dynFormat += fmt::format("Ebb({:3})", (i + 1) / 2);
+            dynFormat += std::format("Ebb({:3})", (i + 1) / 2);
         }
         if (i != 2 * nlayer) {
             dynFormat += "===";
         }
     }
-    print(files.TarcogIterationsFile, dynFormat);
+    print(files.TarcogIterationsFile, "{}", dynFormat);
     print(files.TarcogIterationsFile, "\n");
 
     // write Ebb and Ebf
@@ -2976,7 +2977,7 @@ void storeIterationResults(EnergyPlusData &state,
 
     // Write headers for Rb and Rf
     for (i = 1; i <= 2 * nlayer; ++i) {
-        const std::string a = fmt::format("{:3}", (i + 1) / 2); // this is just to simulate correct integer in brackets
+        const std::string a = std::format("{:3}", (i + 1) / 2); // this is just to simulate correct integer in brackets
         if (i == 1) {
             dynFormat = "";
         }
@@ -2989,7 +2990,7 @@ void storeIterationResults(EnergyPlusData &state,
             dynFormat += "===";
         }
     }
-    print(files.TarcogIterationsFile, dynFormat);
+    print(files.TarcogIterationsFile, "{}", dynFormat);
     print(files.TarcogIterationsFile, "\n");
     // write Rb and Rf
     print(files.TarcogIterationsFile, "{:16.8F}   {:16.8F}", Rf(1), Rb(1));
@@ -3000,7 +3001,7 @@ void storeIterationResults(EnergyPlusData &state,
 
     // Write header for temperatures
     for (i = 1; i <= 2 * nlayer; ++i) {
-        const std::string a = fmt::format("{:3}", i);
+        const std::string a = std::format("{:3}", i);
         if (i == 1) {
             dynFormat = "";
         }
@@ -3009,7 +3010,7 @@ void storeIterationResults(EnergyPlusData &state,
             dynFormat += "==";
         }
     }
-    print(files.TarcogIterationsFile, dynFormat);
+    print(files.TarcogIterationsFile, "{}", dynFormat);
     print(files.TarcogIterationsFile, "\n");
 
     // write temperatures
@@ -3025,14 +3026,14 @@ void storeIterationResults(EnergyPlusData &state,
     if (index == 0) {
         dynFormat = "  ";
         for (i = 1; i <= 2 * nlayer; ++i) {
-            const std::string a = fmt::format("{:3}", i);
+            const std::string a = std::format("{:3}", i);
             if (i != 2 * nlayer) {
                 dynFormat += "theta(" + a + "),";
             } else {
                 dynFormat += "theta(" + a + ')';
             }
         }
-        print(files.IterationCSVFile, dynFormat);
+        print(files.IterationCSVFile, "{}", dynFormat);
         print(files.IterationCSVFile, "\n");
     }
     print(files.IterationCSVFile, "{:16.8F}   \n", theta(1) - Constant::Kelvin);

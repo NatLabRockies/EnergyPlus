@@ -74,6 +74,8 @@ namespace OutputReportPredefined {
     int constexpr recKindSurface(1);
     int constexpr recKindSubsurface(2);
 
+    inline std::string_view standard62RptSummaryName = "Standard62.1Summary";
+
     // Types
 
     struct reportNameType
@@ -86,19 +88,6 @@ namespace OutputReportPredefined {
 
         // Default Constructor
         reportNameType() : show(false)
-        {
-        }
-    };
-
-    struct SubTableType
-    {
-        // Members
-        std::string name;
-        int indexReportName;
-        std::string footnote;
-
-        // Default Constructor
-        SubTableType() : indexReportName(0)
         {
         }
     };
@@ -121,14 +110,31 @@ namespace OutputReportPredefined {
         std::string charEntry;
         std::string objectName;
         int indexColumn;
-        int subTableIndex;
+        int indexTable;
         int uniqueObjName;
         Real64 origRealEntry;
         int significantDigits;
         bool origEntryIsReal;
 
         // Default Constructor
-        TableEntryType() : indexColumn(0), subTableIndex(0), uniqueObjName(0), origRealEntry(0.0), significantDigits(0), origEntryIsReal(false)
+        TableEntryType() : indexColumn(0), indexTable(0), uniqueObjName(0), origRealEntry(0.0), significantDigits(0), origEntryIsReal(false)
+        {
+        }
+    };
+
+    struct SubTableType
+    {
+        // Members
+        std::string name;
+        int indexReportName;
+        std::string footnote;
+
+        int numEntries;
+        int sizeEntries;
+
+        Array1D<TableEntryType> entries;
+        // Default Constructor
+        SubTableType() : indexReportName(0), numEntries(0), sizeEntries(0)
         {
         }
     };
@@ -175,7 +181,7 @@ namespace OutputReportPredefined {
 
     std::string RetrievePreDefTableEntry(EnergyPlusData &state, int const columnIndex, std::string_view objName);
 
-    void incrementTableEntry(EnergyPlusData &state);
+    void incrementTableEntry(EnergyPlusData &state, int subTableNum);
 
     void AddCompSizeTableEntry(
         EnergyPlusData &state, std::string_view FieldType, std::string_view FieldName, std::string_view FieldDescription, Real64 const FieldValue);
@@ -1672,9 +1678,6 @@ struct OutputReportPredefinedData : BaseGlobalStruct
     int sizeColumnTag = 0;
     int numColumnTag = 0;
 
-    int sizeTableEntry = 0;
-    int numTableEntry = 0;
-
     int sizeCompSizeTableEntry = 0;
     int numCompSizeTableEntry = 0;
 
@@ -1708,12 +1711,12 @@ struct OutputReportPredefinedData : BaseGlobalStruct
     Array1D<OutputReportPredefined::reportNameType> reportName;
     Array1D<OutputReportPredefined::SubTableType> subTable;
     Array1D<OutputReportPredefined::ColumnTagType> columnTag;
-    Array1D<OutputReportPredefined::TableEntryType> tableEntry;
     Array1D<OutputReportPredefined::CompSizeTableEntryType> CompSizeTableEntry;
     Array1D<OutputReportPredefined::ShadowRelateType> ShadowRelate;
 
     void init_constant_state([[maybe_unused]] EnergyPlusData &state) override
     {
+        OutputReportPredefined::SetPredefinedTables(state);
     }
 
     void init_state([[maybe_unused]] EnergyPlusData &state) override

@@ -7,6 +7,8 @@ on:
 env:
   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
   FC: gfortran-13
+  # IMPORTANT: If you change this: modify test_pull_requests.yml in accordance for the ENABLE_PCH value when we found regression tests
+  ENABLE_PCH: ON
 
 jobs:
   build_and_test:
@@ -76,10 +78,9 @@ jobs:
       with:
         path: |
           ${{ steps.setup-runner.outputs.ccache-dir }}
-        key: ccache-${{ matrix.os }}-${{ steps.setup-runner.outputs.compiler-id }}-${{ env.CURRENT_SHA }}
+        key: ccache-${{ matrix.os }}-${{ steps.setup-runner.outputs.compiler-id }}-pch=${{ env.ENABLE_PCH }}-${{ env.CURRENT_SHA }}
         restore-keys: |
-          ccache-${{ matrix.os }}-${{ steps.setup-runner.outputs.compiler-id }}-
-          ccache-${{ matrix.os }}-
+          ccache-${{ matrix.os }}-${{ steps.setup-runner.outputs.compiler-id }}-pch=${{ env.ENABLE_PCH }}-
 
     - name: Did restoring the CCache-cache work?
       shell: bash
@@ -128,16 +129,26 @@ jobs:
     - name: Configure and Build
       uses: ./.github/actions/configure-and-build
       with:
-        enable-pch: OFF
+        enable-pch: ${{ env.ENABLE_PCH }}
         minimal-targets: false
         build-directory: ./build
         nproc: ${{ steps.setup-runner.outputs.nproc }}
         python-version: ${{ matrix.python-version }}
         python-root-dir: ${{ steps.setup-runner.outputs.python-root-dir }}
+        python-executable: ${{ steps.setup-runner.outputs.python-executable }}
 
     - name: Remove problem matcher
       shell: bash
       run: echo "::remove-matcher owner=gcc-problem-matcher::"
+
+    - name: Upload CCache debug logs
+      if: always() && env.CCACHE_DEBUG == '1'
+      uses: actions/upload-artifact@v4
+      with:
+        name: ccache-debug-${{ matrix.os }}
+        path: .ccache-debug
+        include-hidden-files: true
+        retention-days: 7
 
     - name: Save CCache cache
       if: always() && steps.cacheccache-restore.outputs.cache-hit != 'true'

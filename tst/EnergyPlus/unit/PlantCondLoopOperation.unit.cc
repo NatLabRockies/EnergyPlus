@@ -1185,3 +1185,263 @@ TEST_F(EnergyPlusFixture, FindRangeBasedOrUncontrolledInputTest)
     EXPECT_TRUE(
         compare_err_stream_substring("found a lower limit that is higher than an upper limit in PlantEquipmentOperation:OutdoorDryBulb", true));
 }
+
+TEST_F(EnergyPlusFixture, OperationSchemePriority)
+{
+    std::string const idf_objects = delimited_string(
+        {"PlantLoop,",
+         "    Condenser Loop,                       !- Name",
+         "    Water,                                !- Fluid Type",
+         "    ,                                     !- User Defined Fluid Type",
+         "    Condenser Loop Operation,             !- Plant Equipment Operation Scheme Name",
+         "    Condenser Supply Outlet Node,         !- Loop Demand Calculation Scheme Node Name",
+         "    80.0,                                 !- Maximum Loop Temperature {C}",
+         "    5.0,                                  !- Minimum Loop Temperature {C}",
+         "    0.005,                                !- Maximum Loop Flow Rate {m3/s}",
+         "    0.0,                                  !- Minimum Loop Flow Rate {m3/s}",
+         "    Autocalculate,                        !- Plant Loop Volume {m3}",
+         "    Condenser Supply Inlet Node,          !- Plant Side Inlet Node Name",
+         "    Condenser Supply Outlet Node,         !- Plant Side Outlet Node Name",
+         "    Condenser Supply Branches,            !- Plant Side Branch List Name",
+         "    ,                                     !- Plant Side Connector List Name",
+         "    Condenser Demand Inlet Node,          !- Demand Side Inlet Node Name",
+         "    Condenser Demand Outlet Node,         !- Demand Side Outlet Node Name",
+         "    Condenser Demand Branches,            !- Demand Side Branch List Name",
+         "    ,                                     !- Demand Side Connector List Name",
+         "    Optimal,                              !- Load Distribution Scheme",
+         "    ,                                     !- Availability Manager List Name",
+         "    ;                                     !- Plant Loop Flow Resolution Method",
+
+         "Pump:VariableSpeed,",
+         "    Condenser Pump,                       !- Name",
+         "    Condenser Supply Inlet Node,          !- Inlet Node Name",
+         "    Condenser Pump Outlet Node,           !- Outlet Node Name",
+         "    0.005,                                !- Design Maximum Flow Rate {m3/s}",
+         "    179352,                               !- Design Pump Head {Pa}",
+         "    1100,                                 !- Design Power Consumption {W}",
+         "    0.9,                                  !- Motor Efficiency",
+         "    0.0,                                  !- Fraction of Motor Heat to Fluid",
+         "    0,                                    !- Coefficient 1 of Part Load Performance Curve",
+         "    1,                                    !- Coefficient 2 of Part Load Performance Curve",
+         "    0,                                    !- Coefficient 3 of Part Load Performance Curve",
+         "    0,                                    !- Coefficient 4 of Part Load Performance Curve",
+         "    0,                                    !- Design Minimum Flow Rate{m3 / s}",
+         "    Intermittent;                         !- Pump Control Type",
+
+         "CoolingTower:SingleSpeed,",
+         "    Main Cooling Tower,                   !- Name",
+         "    Condenser Tower Inlet Node,           !- Water Inlet Node Name",
+         "    Condenser Supply Outlet Node,         !- Water Outlet Node Name",
+         "    autosize,                             !- Design Water Flow Rate {m3/s}",
+         "    autosize,                             !- Design Air Flow Rate {m3/s}",
+         "    autosize,                             !- Design Fan Power {W}",
+         "    autosize,                             !- Design U-Factor Times Area Value {W/K}",
+         "    0.0,                                  !- Free Convection Regime Air Flow Rate{m3 / s}",
+         "    ,                                     !- Free Convection Regime Air Flow Rate Sizing Factor",
+         "    0.0,                                  !- Free Convection Regime U-Factor Times Area Value {W/K}",
+         "    ;                                     !- Free Convection U-Factor Times Area Value Sizing Factor",
+
+         "Pipe:Adiabatic,",
+         "    Condenser Supply Outlet Pipe,         !- Name",
+         "    Condenser Supply Bypass Inlet Node,   !- Inlet Node Name",
+         "    Condenser Supply Bypass Outlet Node;  !- Outlet Node Name",
+
+         "BranchList,",
+         "    Condenser Supply Branches,            !- Name",
+         "    Condenser Supply Inlet Branch,        !- Branch 1 Name",
+         "    Condenser Tower Branch,               !- Branch 2 Name",
+         "    Condenser Supply Outlet Branch;       !- Branch 3 Name",
+
+         "Branch,",
+         "    Condenser Supply Inlet Branch,        !- Name",
+         "    ,                                     !- Pressure Drop Curve Name",
+         "    Pump:VariableSpeed,                   !- Component 1 Object Type",
+         "    Condenser Pump,                       !- Component 1 Name",
+         "    Condenser Supply Inlet Node,          !- Component 1 Inlet Node Name",
+         "    Condenser Pump Outlet Node;           !- Component 1 Outlet Node Name",
+
+         "Branch,",
+         "    Condenser Tower Branch,               !- Name",
+         "    ,                                     !- Pressure Drop Curve Name",
+         "    CoolingTower:SingleSpeed,             !- Component 1 Object Type",
+         "    Main Cooling Tower,                   !- Component 1 Name",
+         "    Condenser Tower Inlet Node,           !- Component 1 Inlet Node Name",
+         "    Condenser Supply Outlet Node;         !- Component 1 Outlet Node Name",
+
+         "Branch,",
+         "    Condenser Supply Outlet Branch,",
+         "    ,                                     !- Pressure Drop Curve Name",
+         "    Pipe:Adiabatic,                       !- Component 1 Object Type",
+         "    Condenser Supply Outlet Pipe,         !- Component 1 Name",
+         "    Condenser Supply Bypass Inlet Node,   !- Component 1 Inlet Node Name",
+         "    Condenser Supply Outlet Node;         !- Component 1 Outlet Node Name",
+
+         "Chiller:Electric:EIR,",
+         "    Main Chiller,                         !- Name",
+         "    90000.0,                              !- Reference Capacity {W}",
+         "    5.5,                                  !- Reference COP {W/W}",
+         "    6.67,                                 !- Reference Leaving Chilled Water Temperature {C}",
+         "    29.4,                                 !- Reference Entering Condenser Fluid Temperature {C}",
+         "    0.003,                                !- Reference Chilled Water Flow Rate {m3/s}",
+         "    0.005,                                !- Reference Condenser Fluid Flow Rate {m3/s}",
+         "    ChillerCapFT,                         !- Cooling Capacity Function of Temperature Curve Name",
+         "    ChillerEIRFT,                         !- Electric Input to Cooling Output Ratio Function of Temperature Curve Name",
+         "    ChillerEIRFPLR,                       !- Electric Input to Cooling Output Ratio Function of Part Load Ratio Curve Name",
+         "    0.1,                                  !- Minimum Part Load Ratio",
+         "    1.0,                                  !- Maximum Part Load Ratio",
+         "    1.0,                                  !- Optimum Part Load Ratio",
+         "    0.2,                                  !- Minimum Unloading Ratio",
+         "    Chilled Water Chiller Inlet Node,     !- Chilled Water Inlet Node Name",
+         "    Chilled Water Chiller Outlet Node,    !- Chilled Water Outlet Node Name",
+         "    Condenser Chiller Inlet Node,         !- Condenser Inlet Node Name",
+         "    Condenser Chiller Outlet Node,        !- Condenser Outlet Node Name",
+         "    WaterCooled,                          !- Condenser Type,",
+         "    ,                                     !- Condenser Fan Power Ratio {W/W},",
+         "    1,                                    !- Fraction of Compressor Electric Consumption Rejected by Condenser,",
+         "    5.0,                                  !- Leaving Chilled Water Lower Temperature Limit {C},",
+         "    ConstantFlow,                         !- Chiller Flow Mode,",
+         "    0,                                    !- Design Heat Recovery Water Flow Rate {m3/s},",
+         "    ,                                     !- Heat Recovery Inlet Node Name,",
+         "    ,                                     !- Heat Recovery Outlet Node Name,",
+         "    1.0;                                  !- Sizing Factor,",
+
+         "Pipe:Adiabatic,",
+         "    Condenser Demand Inlet Pipe,          !- Name",
+         "    Condenser Demand Inlet Node,          !- Inlet Node Name",
+         "    Condenser Demand Intermediate Node;   !- Outlet Node Name",
+
+         "Pipe:Adiabatic,",
+         "    Condenser Demand Outlet Pipe,         !- Name",
+         "    Condenser Demand Bypass Inlet Node,   !- Inlet Node Name",
+         "    Condenser Demand Outlet Node;         !- Outlet Node Name",
+
+         "BranchList,",
+         "    Condenser Demand Branches,            !- Name",
+         "    Condenser Demand Inlet Branch,        !- Branch 1 Name",
+         "    Condenser Chiller Branch,             !- Branch 2 Name",
+         "    Condenser Demand Outlet Branch;       !- Branch 3 Name",
+
+         "Branch,",
+         "    Condenser Demand Inlet Branch,        !- Name",
+         "    ,                                     !- Pressure Drop Curve Name",
+         "    Pipe:Adiabatic,                       !- Component 1 Object Type",
+         "    Condenser Demand Inlet Pipe,          !- Component 1 Name",
+         "    Condenser Demand Inlet Node,          !- Component 1 Inlet Node Name",
+         "    Condenser Demand Intermediate Node;   !- Component 1 Outlet Node Name",
+
+         "Branch,",
+         "    Condenser Chiller Branch,             !- Name",
+         "    ,                                     !- Pressure Drop Curve Name",
+         "    Chiller:Electric:EIR,                 !- Component 1 Object Type",
+         "    Main Chiller,                         !- Component 1 Name",
+         "    Condenser Chiller Inlet Node,         !- Component 1 Inlet Node Name",
+         "    Condenser Chiller Outlet Node;        !- Component 1 Outlet Node Name",
+
+         "Branch,",
+         "    Condenser Demand Outlet Branch,       !- Name",
+         "    ,                                     !- Pressure Drop Curve Name",
+         "    Pipe:Adiabatic,                       !- Component 1 Object Type",
+         "    Condenser Demand Outlet Pipe,         !- Component 1 Name",
+         "    Condenser Demand Bypass Inlet Node,   !- Component 1 Inlet Node Name",
+         "    Condenser Demand Outlet Node;         !- Component 1 Outlet Node Name",
+
+         "Curve:Biquadratic,",
+         "    ChillerCapFT,                         !- Name",
+         "    0.93,                                 !- Coefficient1 Constant",
+         "    0.04,                                 !- Coefficient2 x",
+         "    0.0002,                               !- Coefficient3 x**2",
+         "    -0.009,                               !- Coefficient4 y",
+         "    -0.0001,                              !- Coefficient5 y**2",
+         "    -0.0004,                              !- Coefficient6 x*y",
+         "    5.0,                                  !- Minimum Value of x",
+         "    10.0,                                 !- Maximum Value of x",
+         "    24.0,                                 !- Minimum Value of y",
+         "    35.0;                                 !- Maximum Value of y",
+
+         "Curve:Biquadratic,",
+         "    ChillerEIRFT,                         !- Name",
+         "    0.50,                                 !- Coefficient1 Constant",
+         "    -0.01,                                !- Coefficient2 x",
+         "    0.0003,                               !- Coefficient3 x**2",
+         "    0.012,                                !- Coefficient4 y",
+         "    0.0002,                               !- Coefficient5 y**2",
+         "    -0.0002,                              !- Coefficient6 x*y",
+         "    5.0,                                  !- Minimum Value of x",
+         "    10.0,                                 !- Maximum Value of x",
+         "    24.0,                                 !- Minimum Value of y",
+         "    35.0;                                 !- Maximum Value of y",
+
+         "Curve:Quadratic,",
+         "    ChillerEIRFPLR,                       !- Name",
+         "    0.11,                                 !- Coefficient1 Constant",
+         "    0.62,                                 !- Coefficient2 x",
+         "    0.27,                                 !- Coefficient3 x**2",
+         "    0.0,                                  !- Minimum Value of x",
+         "    1.0;                                  !- Maximum Value of x",
+
+         "ScheduleTypeLimits,",
+         "    OnOff,                                !- Name",
+         "    0,                                    !- Lower Limit Value",
+         "    1,                                    !- Upper Limit Value",
+         "    Discrete;                             !- Numeric Type",
+
+         "Schedule:Constant,",
+         "    AlwaysOn,                             !- Name",
+         "    OnOff,                                !- Schedule Type Limits Name",
+         "    1;                                    !- Hourly Value",
+
+         "PlantEquipmentOperationSchemes,",
+         "    Condenser Loop Operation,             !- Name",
+         "    PlantEquipmentOperation:Uncontrolled, !- Control Scheme 1 Object Type",
+         "    Tower Operation Scheme 1,             !- Control Scheme 1 Name",
+         "    AlwaysOn,                             !- Control Scheme 1 Schedule Name",
+         "    PlantEquipmentOperation:CoolingLoad,  !- Control Scheme 2 Object Type",
+         "    Tower Operation Scheme 2,             !- Control Scheme 2 Name",
+         "    AlwaysOn;                             !- Control Scheme 2 Schedule Name",
+
+         "PlantEquipmentOperation:Uncontrolled,",
+         "    Tower Operation Scheme 1,             !- Name",
+         "    Tower List;                           !- Equipment List Name",
+
+         "PlantEquipmentOperation:CoolingLoad,",
+         "    Tower Operation Scheme 2,             !- Name",
+         "    0,                                    !- Load Range 1 Lower Limit {W}",
+         "    99999999,                             !- Load Range 1 Upper Limit {W}",
+         "    Tower List;                           !- Equipment List Name",
+
+         "PlantEquipmentList,",
+         "    Tower List,                           !- Name",
+         "    CoolingTower:SingleSpeed,             !- Equipment 1 Object Type",
+         "    Main Cooling Tower;                   !- Equipment 1 Name"});
+
+    EXPECT_TRUE(process_idf(idf_objects, false));
+
+    state->init_state(*state);
+
+    Sched::UpdateScheduleVals(*state);
+    PlantManager::GetPlantLoopData(*state);
+    PlantManager::GetPlantInput(*state);
+
+    bool GetInputOK = false;
+    PlantCondLoopOperation::GetPlantOperationInput(*state, GetInputOK);
+    PlantCondLoopOperation::InitLoadDistribution(*state, true);
+
+    auto &plantLoop = state->dataPlnt->PlantLoop(1);
+    EXPECT_EQ(plantLoop.OperationScheme, "CONDENSER LOOP OPERATION");
+
+    auto &opScheme = plantLoop.OpScheme;
+    EXPECT_EQ(opScheme.size(), 2);
+    EXPECT_EQ(opScheme(1).Name, "TOWER OPERATION SCHEME 1");
+    EXPECT_EQ(opScheme(1).Type, DataPlant::OpScheme::Uncontrolled);
+    EXPECT_TRUE(opScheme(1).Available);
+    EXPECT_EQ(opScheme(2).Name, "TOWER OPERATION SCHEME 2");
+    EXPECT_EQ(opScheme(2).Type, DataPlant::OpScheme::CoolingRB);
+    EXPECT_TRUE(opScheme(2).Available);
+
+    auto &coolingTower = plantLoop.LoopSide(DataPlant::LoopSideLocation::Supply).Branch(2).Comp;
+    EXPECT_EQ(coolingTower.size(), 1);
+    EXPECT_EQ(coolingTower(1).Name, "MAIN COOLING TOWER");
+    EXPECT_EQ(coolingTower(1).NumOpSchemes, 2);
+    EXPECT_EQ(coolingTower(1).CurCompLevelOpNum, 1);
+    EXPECT_EQ(coolingTower(1).CurOpSchemeType, DataPlant::OpScheme::Uncontrolled);
+}

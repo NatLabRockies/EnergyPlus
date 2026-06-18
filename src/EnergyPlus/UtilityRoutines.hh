@@ -412,13 +412,13 @@ namespace Util {
     inline int FindIntInList(Array1_int &list, int item)
     {
         auto it = std::find(list.begin(), list.end(), item);
-        return (it == list.end()) ? -1 : (it - list.begin());
+        return (it == list.end()) ? -1 : static_cast<int>(it - list.begin());
     }
 
     inline int FindIntInList(std::vector<int> &list, int item)
     {
         auto it = std::find(list.begin(), list.end(), item);
-        return (it == list.end()) ? -1 : (it - list.begin());
+        return (it == list.end()) ? -1 : static_cast<int>(it - list.begin());
     }
 
     int FindItemInList(std::string_view const String, Array1S_string const ListOfItems, int NumItems);
@@ -473,8 +473,10 @@ namespace Util {
 
     template <typename Container, class = typename std::enable_if<!std::is_same<typename Container::value_type, std::string>::value>::type>
     // Container needs operator[i] and value_type
-    inline int
-    FindItemInList(std::string_view const String, Container const &ListOfItems, std::string Container::value_type::*name_p, int const NumItems)
+    inline int FindItemInList(std::string_view const String,
+                              Container const &ListOfItems,
+                              const std::string Container::value_type::*const name_p,
+                              int const NumItems)
     {
         for (typename Container::size_type i = 0, e = NumItems; i < e; ++i) {
             if (String == ListOfItems[i].*name_p) {

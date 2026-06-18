@@ -45,10 +45,13 @@
 // OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 // POSSIBILITY OF SUCH DAMAGE.
 
+// C++ Headers
 #include <memory>
 
+// ObjexxFCL Headers
 #include <ObjexxFCL/Array1D.hh> // needs to be in BranchNodeConnections.hh
 
+// EnergyPlus Headers
 #include <EnergyPlus/BranchNodeConnections.hh>
 #include <EnergyPlus/Coils/CoilCoolingDX.hh>
 #include <EnergyPlus/Coils/CoilCoolingDXAshrae205Performance.hh>
@@ -91,7 +94,7 @@ std::shared_ptr<CoilCoolingDXPerformanceBase> CoilCoolingDX::makePerformanceSubc
         return std::make_shared<CoilCoolingDXCurveFitPerformance>(state, performance_object_name);
     }
 
-    ShowFatalError(state, EnergyPlus::format("Could not find Coil:Cooling:DX:Performance object with name: {}", performance_object_name));
+    ShowFatalError(state, std::format("Could not find Coil:Cooling:DX:Performance object with name: {}", performance_object_name));
     return nullptr;
 }
 
@@ -321,14 +324,14 @@ void CoilCoolingDX::oneTimeInit(EnergyPlusData &state)
     if (this->performance->compressorFuelType != Constant::eFuel::Electricity) {
         std::string_view const sFuelType = Constant::eFuelNames[static_cast<int>(this->performance->compressorFuelType)];
         SetupOutputVariable(state,
-                            EnergyPlus::format("Cooling Coil {} Rate", sFuelType),
+                            std::format("Cooling Coil {} Rate", sFuelType),
                             Constant::Units::W,
                             this->performance->compressorFuelRate,
                             OutputProcessor::TimeStepType::System,
                             OutputProcessor::StoreType::Average,
                             this->name);
         SetupOutputVariable(state,
-                            EnergyPlus::format("Cooling Coil {} Energy", sFuelType),
+                            std::format("Cooling Coil {} Energy", sFuelType),
                             Constant::Units::J,
                             this->performance->compressorFuelConsumption,
                             OutputProcessor::TimeStepType::System,
@@ -949,14 +952,9 @@ void PopulateCoolingCoilStandardRatingInformation(InputOutputFile &eio,
     // TODO: TOO BIG |Capacity from 135K (39565 W) to 250K Btu/hr (73268 W) - calculated as per AHRI Standard 365-2009 -
     // Ratings not yet supported in EnergyPlus
     // Define the format string based on the condition
-    std::string_view Format_991;
-    if (!AHRI2023StandardRatings) {
-        Format_991 = " DX Cooling Coil Standard Rating Information, {}, {}, {:.1f}, {:.2f}, {:.2f}, {:.2f}, {:.2f}, {:.1f}\n";
-    } else {
-        Format_991 = " DX Cooling Coil AHRI 2023 Standard Rating Information, {}, {}, {:.1f}, {:.2f}, {:.2f}, {:.2f}, {:.2f}, {:.1f}\n";
-    }
     print(eio,
-          Format_991,
+          " {}, {}, {}, {:.1f}, {:.2f}, {:.2f}, {:.2f}, {:.2f}, {:.1f}\n",
+          AHRI2023StandardRatings ? "DX Cooling Coil AHRI 2023 Standard Rating Information" : "DX Cooling Coil Standard Rating Information",
           "Coil:Cooling:DX",
           coilName,
           capacity,

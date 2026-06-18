@@ -2092,8 +2092,8 @@
   ZoneControl:Humidistat,
     EAST ZONE Humidistat,    !- Name
     EAST ZONE,               !- Zone Name
-    Humidifying Relative Humidity Sched,  !- Humidifying Relative Humidity Setpoint Schedule Name
-    Dehumidifying Relative Humidity Sched;  !- Dehumidifying Relative Humidity Setpoint Schedule Name
+    Humidifying Relative Humidity Sched,  !- Humidifying Setpoint Schedule Name
+    Dehumidifying Relative Humidity Sched;  !- Dehumidifying Setpoint Schedule Name
 
   ZoneControl:Thermostat,
     Zone 1 Thermostat,       !- Name

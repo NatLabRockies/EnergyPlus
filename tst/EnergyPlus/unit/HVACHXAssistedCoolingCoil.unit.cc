@@ -75,10 +75,10 @@ TEST_F(EnergyPlusFixture, HXAssistCCUnitarySystem_VStest1)
 
     bool ErrorsFound(false);
     bool FirstHVACIteration(false);
-    Real64 Qsens_sys(0.0); // UnitarySystem delivered sensible capacity wrt zone
-    Real64 ZoneTemp(0.0);  // control zone temperature
-    int InletNode(0);      // UnitarySystem inlet node number
-    int OutletNode(0);     // UnitarySystem outlet node number
+    Real64 Qsens_sys(0.0);  // UnitarySystem delivered sensible capacity wrt zone
+    Real64 ZoneTemp(0.0);   // control zone temperature
+    int InletNode(0);       // UnitarySystem inlet node number
+    int OutletNode(0);      // UnitarySystem outlet node number
     int ControlZoneNode(0); // index to control zone
 
     std::string const idf_objects = delimited_string({
@@ -477,7 +477,7 @@ TEST_F(EnergyPlusFixture, HXAssistCCUnitarySystem_VStest1)
 
     // set zone temperature
     state->dataLoopNodes->Node(ControlZoneNode).Temp = 20.0; // set zone temperature during heating season used to determine system delivered capacity
-    state->dataEnvrn->OutDryBulbTemp = 35.0;                // initialize weather
+    state->dataEnvrn->OutDryBulbTemp = 35.0;                 // initialize weather
     state->dataEnvrn->OutHumRat = 0.1;
     state->dataEnvrn->OutBaroPress = 101325.0;
     state->dataEnvrn->OutWetBulbTemp = 30.0;
@@ -513,7 +513,6 @@ TEST_F(EnergyPlusFixture, HXAssistCCUnitarySystem_VStest1)
     state->dataEnvrn->StdRhoAir = Psychrometrics::PsyRhoAirFnPbTdbW(*state, 101325.0, 20.0, 0.0); // initialize RhoAir
     state->dataLoopNodes->Node(InletNode).MassFlowRateMaxAvail = thisSys->m_MaxCoolAirVolFlow * state->dataEnvrn->StdRhoAir;
 
-    OutputReportPredefined::SetPredefinedTables(*state);
     thisSys->simulate(*state,
                       compName,
                       FirstHVACIteration,
@@ -548,7 +547,7 @@ TEST_F(EnergyPlusFixture, HXAssistCCUnitarySystem_VStest1)
 
     // set zone temperature
     state->dataLoopNodes->Node(ControlZoneNode).Temp = 24.0; // set zone temperature during cooling season used to determine system delivered capacity
-    state->dataEnvrn->OutDryBulbTemp = 35.0;                // initialize weather
+    state->dataEnvrn->OutDryBulbTemp = 35.0;                 // initialize weather
     state->dataEnvrn->OutHumRat = 0.1;
     state->dataEnvrn->OutBaroPress = 101325.0;
     state->dataEnvrn->OutWetBulbTemp = 30.0;

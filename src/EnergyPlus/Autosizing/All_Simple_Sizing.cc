@@ -45,6 +45,7 @@
 // OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 // POSSIBILITY OF SUCH DAMAGE.
 
+// EnergyPlus Headers
 #include <EnergyPlus/Autosizing/All_Simple_Sizing.hh>
 #include <EnergyPlus/Data/EnergyPlusData.hh>
 #include <EnergyPlus/DataEnvironment.hh>
@@ -167,11 +168,10 @@ Real64 ASHRAEMinSATCoolingSizer::size(EnergyPlusData &state, Real64 _originalVal
                     this->callingRoutine + ' ' + this->compType + ' ' + this->compName + ", Developer Error: Component sizing incomplete.";
                 this->addErrorMessage(msg);
                 ShowSevereError(state, msg);
-                msg =
-                    EnergyPlus::format("SizingString = {}, DataCapacityUsedForSizing = {:.1T}", this->sizingString, this->dataCapacityUsedForSizing);
+                msg = std::format("SizingString = {}, DataCapacityUsedForSizing = {:.1f}", this->sizingString, this->dataCapacityUsedForSizing);
                 this->addErrorMessage(msg);
                 ShowContinueError(state, msg);
-                msg = EnergyPlus::format("SizingString = {}, DataFlowUsedForSizing = {:.1T}", this->sizingString, this->dataFlowUsedForSizing);
+                msg = std::format("SizingString = {}, DataFlowUsedForSizing = {:.1f}", this->sizingString, this->dataFlowUsedForSizing);
                 this->addErrorMessage(msg);
                 ShowContinueError(state, msg);
             }
@@ -191,15 +191,13 @@ Real64 ASHRAEMinSATCoolingSizer::size(EnergyPlusData &state, Real64 _originalVal
                     this->callingRoutine + ' ' + this->compType + ' ' + this->compName + ", Developer Error: Component sizing incomplete.";
                 this->addErrorMessage(msg);
                 ShowSevereError(state, msg);
-                msg =
-                    EnergyPlus::format("SizingString = {}, DataCapacityUsedForSizing = {:.1T}", this->sizingString, this->dataCapacityUsedForSizing);
+                msg = std::format("SizingString = {}, DataCapacityUsedForSizing = {:.1f}", this->sizingString, this->dataCapacityUsedForSizing);
                 this->addErrorMessage(msg);
                 ShowContinueError(state, msg);
-                msg = EnergyPlus::format("SizingString = {}, DataFlowUsedForSizing = {:.1T}", this->sizingString, this->dataFlowUsedForSizing);
+                msg = std::format("SizingString = {}, DataFlowUsedForSizing = {:.1f}", this->sizingString, this->dataFlowUsedForSizing);
                 this->addErrorMessage(msg);
                 ShowContinueError(state, msg);
-                msg =
-                    EnergyPlus::format("SizingString = {}, DataZoneUsedForSizing = {:.0T}", this->sizingString, Real64(this->dataZoneUsedForSizing));
+                msg = std::format("SizingString = {}, DataZoneUsedForSizing = {:.0f}", this->sizingString, Real64(this->dataZoneUsedForSizing));
                 ShowContinueError(state, msg);
             }
         }
@@ -229,11 +227,10 @@ Real64 ASHRAEMaxSATHeatingSizer::size(EnergyPlusData &state, Real64 _originalVal
                     this->callingRoutine + ' ' + this->compType + ' ' + this->compName + ", Developer Error: Component sizing incomplete.";
                 this->addErrorMessage(msg);
                 ShowSevereError(state, msg);
-                msg =
-                    EnergyPlus::format("SizingString = {}, DataCapacityUsedForSizing = {:.1T}", this->sizingString, this->dataCapacityUsedForSizing);
+                msg = std::format("SizingString = {}, DataCapacityUsedForSizing = {:.1f}", this->sizingString, this->dataCapacityUsedForSizing);
                 this->addErrorMessage(msg);
                 ShowContinueError(state, msg);
-                msg = EnergyPlus::format("SizingString = {}, DataFlowUsedForSizing = {:.1T}", this->sizingString, this->dataFlowUsedForSizing);
+                msg = std::format("SizingString = {}, DataFlowUsedForSizing = {:.1f}", this->sizingString, this->dataFlowUsedForSizing);
                 this->addErrorMessage(msg);
                 ShowContinueError(state, msg);
             }
@@ -253,15 +250,13 @@ Real64 ASHRAEMaxSATHeatingSizer::size(EnergyPlusData &state, Real64 _originalVal
                     this->callingRoutine + ' ' + this->compType + ' ' + this->compName + ", Developer Error: Component sizing incomplete.";
                 this->addErrorMessage(msg);
                 ShowSevereError(state, msg);
-                msg =
-                    EnergyPlus::format("SizingString = {}, DataCapacityUsedForSizing = {:.1T}", this->sizingString, this->dataCapacityUsedForSizing);
+                msg = std::format("SizingString = {}, DataCapacityUsedForSizing = {:.1f}", this->sizingString, this->dataCapacityUsedForSizing);
                 this->addErrorMessage(msg);
                 ShowContinueError(state, msg);
-                msg = EnergyPlus::format("SizingString = {}, DataFlowUsedForSizing = {:.1T}", this->sizingString, this->dataFlowUsedForSizing);
+                msg = std::format("SizingString = {}, DataFlowUsedForSizing = {:.1f}", this->sizingString, this->dataFlowUsedForSizing);
                 this->addErrorMessage(msg);
                 ShowContinueError(state, msg);
-                msg =
-                    EnergyPlus::format("SizingString = {}, DataZoneUsedForSizing = {:.0T}", this->sizingString, Real64(this->dataZoneUsedForSizing));
+                msg = std::format("SizingString = {}, DataZoneUsedForSizing = {:.0f}", this->sizingString, Real64(this->dataZoneUsedForSizing));
                 ShowContinueError(state, msg);
             }
         }

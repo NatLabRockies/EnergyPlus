@@ -45,6 +45,7 @@
 // OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 // POSSIBILITY OF SUCH DAMAGE.
 
+// EnergyPlus Headers
 #include <EnergyPlus/Autosizing/All_Simple_Sizing.hh>
 #include <EnergyPlus/Autosizing/Base.hh>
 #include <EnergyPlus/Data/EnergyPlusData.hh>
@@ -312,7 +313,8 @@ void BaseSizer::reportSizerOutput(EnergyPlusData &state,
 
     static constexpr std::string_view Format_990(
         "! <Component Sizing Information>, Component Type, Component Name, Input Field Description, Value\n");
-    static constexpr std::string_view Format_991(" Component Sizing Information, {}, {}, {}, {:.5R}\n");
+    static constexpr std::string_view Format_991(" Component Sizing Information, {}, {}, {}, {:.6G}\n");
+    static constexpr std::string_view Format_991_HumRat(" Component Sizing Information, {}, {}, {}, {:.3E}\n");
 
     // to do, make this a parameter. Unfortunately this function is used in MANY
     // places so it involves touching most of E+
@@ -321,12 +323,20 @@ void BaseSizer::reportSizerOutput(EnergyPlusData &state,
         state.dataEnvrn->oneTimeCompRptHeaderFlag = false;
     }
 
-    print(state.files.eio, Format_991, CompType, CompName, VarDesc, VarValue);
+    if (VarDesc.find("Humidity Ratio") != std::string_view::npos) {
+        print(state.files.eio, Format_991_HumRat, CompType, CompName, VarDesc, VarValue);
+    } else {
+        print(state.files.eio, Format_991, CompType, CompName, VarDesc, VarValue);
+    }
     // add to tabular output reports
     OutputReportPredefined::AddCompSizeTableEntry(state, CompType, CompName, VarDesc, VarValue);
 
     if (present(UsrDesc) && present(UsrValue)) {
-        print(state.files.eio, Format_991, CompType, CompName, UsrDesc(), UsrValue());
+        if (UsrDesc().find("Humidity Ratio") != std::string_view::npos) {
+            print(state.files.eio, Format_991_HumRat, CompType, CompName, UsrDesc(), UsrValue());
+        } else {
+            print(state.files.eio, Format_991, CompType, CompName, UsrDesc(), UsrValue());
+        }
         OutputReportPredefined::AddCompSizeTableEntry(state, CompType, CompName, UsrDesc(), UsrValue);
     } else if (present(UsrDesc) || present(UsrValue)) {
         ShowFatalError(state, "ReportSizingOutput: (Developer Error) - called with user-specified description or value but not both.");
@@ -426,10 +436,10 @@ void BaseSizer::selectSizerOutput(EnergyPlusData &state, bool &errorsFound)
                     std::string msg = this->callingRoutine + ": Potential issue with equipment sizing for " + this->compType + ' ' + this->compName;
                     this->addErrorMessage(msg);
                     ShowMessage(state, msg);
-                    msg = EnergyPlus::format("User-Specified {}{} = {:.5R}", this->sizingStringScalable, this->sizingString, this->originalValue);
+                    msg = std::format("User-Specified {}{} = {:#G}", this->sizingStringScalable, this->sizingString, this->originalValue);
                     this->addErrorMessage(msg);
                     ShowContinueError(state, msg);
-                    msg = EnergyPlus::format("differs from Design Size {} = {:.5R}", this->sizingString, this->autoSizedValue);
+                    msg = std::format("differs from Design Size {} = {:#G}", this->sizingString, this->autoSizedValue);
                     this->addErrorMessage(msg);
                     ShowContinueError(state, msg);
                     msg = "This may, or may not, indicate mismatched component sizes.";
@@ -450,7 +460,7 @@ void BaseSizer::selectSizerOutput(EnergyPlusData &state, bool &errorsFound)
             std::string msg = this->callingRoutine + ' ' + this->compType + ' ' + this->compName + ", Developer Error: Component sizing incomplete.";
             this->addErrorMessage(msg);
             ShowSevereError(state, msg);
-            msg = EnergyPlus::format("SizingString = {}, SizingResult = {:.1T}", this->sizingString, this->originalValue);
+            msg = std::format("SizingString = {}, SizingResult = {:.1f}", this->sizingString, this->originalValue);
             this->addErrorMessage(msg);
             ShowContinueError(state, msg);
             this->errorType = AutoSizingResultType::ErrorType1;
@@ -562,10 +572,10 @@ void BaseSizer::select2StgDXHumCtrlSizerOutput(EnergyPlusData &state, bool &erro
                     std::string msg = this->callingRoutine + ": Potential issue with equipment sizing for " + this->compType + ' ' + this->compName;
                     this->addErrorMessage(msg);
                     ShowMessage(state, msg);
-                    msg = EnergyPlus::format("User-Specified {}{} = {:.5R}", this->sizingStringScalable, this->sizingString, this->originalValue);
+                    msg = std::format("User-Specified {}{} = {:#G}", this->sizingStringScalable, this->sizingString, this->originalValue);
                     this->addErrorMessage(msg);
                     ShowContinueError(state, msg);
-                    msg = EnergyPlus::format("differs from Design Size {} = {:.5R}", this->sizingString, this->autoSizedValue);
+                    msg = std::format("differs from Design Size {} = {:#G}", this->sizingString, this->autoSizedValue);
                     this->addErrorMessage(msg);
                     ShowContinueError(state, msg);
                     msg = "This may, or may not, indicate mismatched component sizes.";
@@ -586,7 +596,7 @@ void BaseSizer::select2StgDXHumCtrlSizerOutput(EnergyPlusData &state, bool &erro
             std::string msg = this->callingRoutine + ' ' + this->compType + ' ' + this->compName + ", Developer Error: Component sizing incomplete.";
             this->addErrorMessage(msg);
             ShowSevereError(state, msg);
-            msg = EnergyPlus::format("SizingString = {}, SizingResult = {:.1T}", this->sizingString, this->originalValue);
+            msg = std::format("SizingString = {}, SizingResult = {:.1f}", this->sizingString, this->originalValue);
             this->addErrorMessage(msg);
             ShowContinueError(state, msg);
             this->errorType = AutoSizingResultType::ErrorType1;

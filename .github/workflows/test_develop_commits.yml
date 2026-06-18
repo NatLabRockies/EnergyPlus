@@ -30,7 +30,7 @@ jobs:
 #          pretty: "Standard Build on Mac x64"
 #          alternate: false
         - os: macos-14
-          macos_dev_target: 13.0
+          macos_dev_target: 14.0
           arch: arm64
           python-arch: arm64
           generator: "Unix Makefiles"
@@ -70,9 +70,6 @@ jobs:
     - name: Install Dependencies for Mac
       if: ${{ runner.os == 'macOS' }}
       run: |
-        brew update
-        brew install gcc@13
-        echo "FC=$(brew --prefix gcc@13)/bin/gfortran-13" >> $GITHUB_ENV
         echo MACOSX_DEPLOYMENT_TARGET=${{ matrix.macos_dev_target }} >> $GITHUB_ENV
 
     - name: Install Dependencies for Linux
