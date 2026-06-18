@@ -519,7 +519,6 @@ void IOFiles::OutputControl::getInput(EnergyPlusData &state)
             }
         }
     }
-
 }
 
 void IOFiles::flushAll()

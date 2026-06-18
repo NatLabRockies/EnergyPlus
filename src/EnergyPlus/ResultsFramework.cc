@@ -741,10 +741,8 @@ namespace ResultsFramework {
             }
 
             std::string lowerKeyName = keyName;
-            std::transform(lowerKeyName.begin(),
-                           lowerKeyName.end(),
-                           lowerKeyName.begin(),
-                           [](unsigned char c) { return static_cast<char>(std::tolower(c)); });
+            std::transform(
+                lowerKeyName.begin(), lowerKeyName.end(), lowerKeyName.begin(), [](unsigned char c) { return static_cast<char>(std::tolower(c)); });
             auto it = outputVariableKeyNames.find(lowerKeyName);
             if (it != outputVariableKeyNames.end()) {
                 for (auto const &outputVariableName : it->second) {
@@ -1284,10 +1282,9 @@ namespace ResultsFramework {
         outputVariables.emplace_back(reportVariable);
 
         std::string outputVariableKeyName(variableName.begin(), variableName.end());
-        std::transform(outputVariableKeyName.begin(),
-                       outputVariableKeyName.end(),
-                       outputVariableKeyName.begin(),
-                       [](unsigned char c) { return static_cast<char>(std::tolower(c)); });
+        std::transform(outputVariableKeyName.begin(), outputVariableKeyName.end(), outputVariableKeyName.begin(), [](unsigned char c) {
+            return static_cast<char>(std::tolower(c));
+        });
         outputVariableKeyNames[outputVariableKeyName].emplace_back(reportVariable);
     }
 
@@ -1297,10 +1294,9 @@ namespace ResultsFramework {
         outputVariables.emplace_back(meterVariable);
 
         std::string outputVariableKeyName(meter.begin(), meter.end());
-        std::transform(outputVariableKeyName.begin(),
-                       outputVariableKeyName.end(),
-                       outputVariableKeyName.begin(),
-                       [](unsigned char c) { return static_cast<char>(std::tolower(c)); });
+        std::transform(outputVariableKeyName.begin(), outputVariableKeyName.end(), outputVariableKeyName.begin(), [](unsigned char c) {
+            return static_cast<char>(std::tolower(c));
+        });
         outputVariableKeyNames[outputVariableKeyName].emplace_back(meterVariable);
     }
 
