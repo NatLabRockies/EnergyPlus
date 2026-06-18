@@ -512,9 +512,12 @@ namespace Sched {
             MaxAlps = max(MaxAlps, NumAlphas + 1);
         }
         CurrentModuleObject = "Output:Schedules";
-        s_ip->getObjectDefMaxArgs(state, CurrentModuleObject, Count, NumAlphas, NumNumbers);
-        MaxNums = max(MaxNums, NumNumbers);
-        MaxAlps = max(MaxAlps, NumAlphas);
+        int NumOutputSchedules = s_ip->getNumObjectsFound(state, CurrentModuleObject);
+        if (NumOutputSchedules > 0) {
+            s_ip->getObjectDefMaxArgs(state, CurrentModuleObject, Count, NumAlphas, NumNumbers);
+            MaxNums = max(MaxNums, NumNumbers);
+            MaxAlps = max(MaxAlps, NumAlphas);
+        }
 
         Alphas.allocate(MaxAlps); // Maximum Alphas possible
         cAlphaFields.allocate(MaxAlps);
@@ -1266,6 +1269,10 @@ namespace Sched {
         //  A5 , \field Complex Field #3
 
         // When InitConstantScheduleData is called, TimeStepsInHour is 0, so we delay it here
+        if (s_sched->daySchedules.empty()) {
+            InitConstantScheduleData(
+                state); // why this was added: init_state crashed on the next line from call in unit test = SimulationManager_OutputDebuggingData
+        }
         static_cast<DaySchedule *>(s_sched->daySchedules[SchedNum_AlwaysOff])->tsVals.assign(Constant::iHoursInDay * s_glob->TimeStepsInHour, 0.0);
 
         SchNum = NumRegSchedules;
