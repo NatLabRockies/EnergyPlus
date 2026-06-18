@@ -74,9 +74,9 @@ TEST_F(EnergyPlusFixture, ExerciseHVACDXHeatPumpSystem)
                           "Coil:Heating:DX:SingleSpeed,",
                           "    Heat Pump DX Heating Coil 1,  !- Name",
                           "    Constant-1.0,    !- Availability Schedule Name",
-                          "    autosize,                !- Gross Rated Heating Capacity {W}",
+                          "    10000.0,                 !- Gross Rated Heating Capacity {W}",
                           "    2.75,                    !- Gross Rated Heating COP {W/W}",
-                          "    autosize,                !- Rated Air Flow Rate {m3/s}",
+                          "    0.5,                     !- Rated Air Flow Rate {m3/s}",
                           "    ,                        !- 2017 Rated Supply Fan Power Per Volume Flow Rate {W/(m3/s)}",
                           "    ,                        !- 2023 Rated Supply Fan Power Per Volume Flow Rate {W/(m3/s)}",
                           "    Heating Coil Air Inlet Node,  !- Air Inlet Node Name",
@@ -111,46 +111,10 @@ TEST_F(EnergyPlusFixture, ExerciseHVACDXHeatPumpSystem)
     ASSERT_TRUE(process_idf(idf_objects));
     state->init_state(*state);
 
-    state->dataLoopNodes->NodeID.allocate(2);
-    state->dataLoopNodes->Node.allocate(2);
-
-    // manually add a dx coil
-    state->dataDXCoils->NumDXCoils = 1;
-    state->dataDXCoils->DXCoil.allocate(1);
-    state->dataDXCoils->DXCoil(1).Name = "HEAT PUMP DX HEATING COIL 1";
-    state->dataDXCoils->DXCoil(1).availSched = Sched::GetScheduleAlwaysOn(*state);
-    state->dataDXCoils->DXCoil(1).AirInNode = 1; // This is not ideal, but these are unnamed
-    state->dataDXCoils->DXCoil(1).AirOutNode = 2; // This is not ideal, but these are unnamed
-    state->dataDXCoils->DXCoil(1).coilType = HVAC::CoilType::HeatingDXSingleSpeed;
-    state->dataDXCoils->DXCoil(1).coilReportNum =
-        ReportCoilSelection::getReportIndex(*state, state->dataDXCoils->DXCoil(1).Name, state->dataDXCoils->DXCoil(1).coilType);
-    state->dataDXCoils->DXCoil(1).RatedTotCap(1) = 1;
-    state->dataDXCoils->DXCoil(1).RatedCOP(1) = 1;
-    state->dataDXCoils->DXCoil(1).CCapFFlow(1) = 1;
-    state->dataDXCoils->DXCoil(1).CCapFTemp(1) = 1;
-    state->dataDXCoils->DXCoil(1).EIRFFlow(1) = 1;
-    state->dataDXCoils->DXCoil(1).EIRFTemp(1) = 1;
-    state->dataDXCoils->DXCoil(1).PLFFPLR(1) = 1;
-    state->dataDXCoils->DXCoil(1).RatedAirVolFlowRate(1) = 1.0;
-    state->dataDXCoils->DXCoil(1).FanPowerPerEvapAirFlowRate(1) = 0.0;
-    state->dataDXCoils->DXCoil(1).FanPowerPerEvapAirFlowRate_2023(1) = 0.0;
-    state->dataDXCoils->DXCoil(1).RegionNum = 1;
-    state->dataDXCoils->DXCoilOutletTemp.allocate(1);
-    state->dataDXCoils->DXCoilOutletHumRat.allocate(1);
-    state->dataDXCoils->DXCoilFanOp.allocate(1);
-    state->dataDXCoils->DXCoilPartLoadRatio.allocate(1);
-    state->dataDXCoils->DXCoilTotalHeating.allocate(1);
-    state->dataDXCoils->DXCoilHeatInletAirDBTemp.allocate(1);
-    state->dataDXCoils->DXCoilHeatInletAirWBTemp.allocate(1);
-    state->dataDXCoils->DXCoilNumericFields.allocate(1);
-    state->dataDXCoils->DXCoilNumericFields(1).PerfMode.allocate(1);
-    state->dataDXCoils->DXCoilNumericFields(1).PerfMode(1).FieldNames.allocate(4);
-
-    // manually add a curve
-    [[maybe_unused]] auto *curve = Curve::AddCurve(*state, "Curve1");
-
     // setup some outputs
     OutputReportPredefined::SetPredefinedTables(*state);
+
+    state->dataSize->CurZoneEqNum = 1;
 
     int compIndex = 0;
     HVACDXHeatPumpSystem::SimDXHeatPumpSystem(*state, "HEATPUMP DX COIL 1", true, -1, compIndex, -1, 0.0);
