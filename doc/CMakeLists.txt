@@ -16,6 +16,15 @@ endif()
 
 find_package(LATEX COMPONENTS XELATEX)
 
+option(BUILD_HTML_DOCS "Also build paginated HTML documentation (requires pandoc)" OFF)
+
+if(BUILD_HTML_DOCS)
+  find_program(PANDOC NAMES pandoc)
+  if(NOT PANDOC)
+    message(FATAL_ERROR "BUILD_HTML_DOCS is ON but pandoc was not found in PATH")
+  endif()
+endif()
+
 set(TEX_INTERACTION
     "batchmode"
     CACHE STRING "Choose the interaction mode for TeX.")
@@ -41,6 +50,17 @@ if(EXISTS "${XELATEX_COMPILER}")
   endif()
 
   set_target_properties(docs PROPERTIES FOLDER Documentation)
+
+  if(BUILD_HTML_DOCS)
+    file(MAKE_DIRECTORY ${PROJECT_BINARY_DIR}/html)
+    file(COPY ${PROJECT_SOURCE_DIR}/html/index.html ${PROJECT_SOURCE_DIR}/html/style.css ${PROJECT_SOURCE_DIR}/html/media
+      DESTINATION ${PROJECT_BINARY_DIR}/html)
+
+    # Aggregate target: depends on each individual zHTML_<doc> target added via create_html_doc_target
+    add_custom_target(html_docs)
+    set_target_properties(html_docs PROPERTIES FOLDER Documentation)
+    add_dependencies(docs html_docs)
+  endif()
 
   include(cmake/doc-targets.cmake)
 
