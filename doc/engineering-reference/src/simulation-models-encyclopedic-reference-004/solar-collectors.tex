@@ -343,17 +343,17 @@ Ignoring the thermal mass of the collector cover, a steady state heat balance eq
 The steady state cover heat balance equation is given by:
 
 \begin{equation}
-{q_{LWR,{\kern 1pt} 1}} + {q_{CONV,{\kern 1pt} 1}} + {q_{solar,{\kern 1pt} abs}} + {q_{LWR,{\kern 1pt} 2}} + {q_{CONV,{\kern 1pt} 2}} = 0
+{q_{LWR, 1}} + {q_{CONV, 1}} + {q_{solar, abs}} + {q_{LWR, 2}} + {q_{CONV, 2}} = 0
 \end{equation}
 
 Linearizing the longwave radiation exchange and representing the convection terms using the classical equation for Newton's law of cooling, the equations for the temperatures of covers 1 and 2 are given by:
 
 \begin{equation}
-{T_{c{\mathrm{1}}}} = \frac{{{\alpha_{c1}}{I_t} + {h_{r,{\kern 1pt} c1 - a}}{T_a} + {h_{c,{\kern 1pt} c1 - a}}{T_a} + {h_{r,{\kern 1pt} c2 - c1}}{T_{c2}} + {h_{c,{\kern 1pt} c2 - c1}}{T_{c2}}}}{{{h_{r,{\kern 1pt} c1 - a}} + {h_{c,{\kern 1pt} c1 - a}} + {h_{r,{\kern 1pt} c2 - c1}} + {h_{c,{\kern 1pt} c2 - c1}}}}
+{T_{c{\mathrm{1}}}} = \frac{{{\alpha_{c1}}{I_t} + {h_{r, c1 - a}}{T_a} + {h_{c, c1 - a}}{T_a} + {h_{r, c2 - c1}}{T_{c2}} + {h_{c, c2 - c1}}{T_{c2}}}}{{{h_{r, c1 - a}} + {h_{c, c1 - a}} + {h_{r, c2 - c1}} + {h_{c, c2 - c1}}}}
 \end{equation}
 
 \begin{equation}
-{T_{c2}} = \frac{{{\alpha_{c2}}{I_t} + {h_{r,{\kern 1pt} c2 - c1}}{T_{c1}} + {h_{c,{\kern 1pt} c2 - c1}}{T_{c1}} + {h_{r,{\kern 1pt} p - c2}}{T_p} + {h_{c,{\kern 1pt} p - c2}}{T_p}}}{{{h_{r,{\kern 1pt} c2 - c1}} + {h_{c,{\kern 1pt} c2 - c1}} + {h_{r,{\kern 1pt} p - c2}} + {h_{c,{\kern 1pt} p - c2}}}}
+{T_{c2}} = \frac{{{\alpha_{c2}}{I_t} + {h_{r, c2 - c1}}{T_{c1}} + {h_{c, c2 - c1}}{T_{c1}} + {h_{r, p - c2}}{T_p} + {h_{c, p - c2}}{T_p}}}{{{h_{r, c2 - c1}} + {h_{c, c2 - c1}} + {h_{r, p - c2}} + {h_{c, p - c2}}}}
 \end{equation}
 
 where:
@@ -397,25 +397,25 @@ ICS Solar Collectors are commonly mounted on building heat transfer surfaces hen
 Ignoring thermal mass of the collector bottom insulation, steady state surface heat balance can be formulated on the outer plane of the collector bottom surface facing the cavity as shown in Figure~\ref{fig:illustration-for-other-side-condition-model}.~ The heat balance equation on the outer plane of the collector bottom surface is given by:
 
 \begin{equation}
-{q_{cond}} + {q_{conv,{\kern 1pt} cav}} + {q_{rad,{\kern 1pt} cav}} = 0
+{q_{cond}} + {q_{conv, cav}} + {q_{rad, cav}} = 0
 \end{equation}
 
 Substituting the equations for each term in the above equation yields:
 
 \begin{equation}
-U_L \left( T_w - T_{osc} \right) + h_{c,{\kern 1pt} cav} \left( T_{a,{\kern 1pt} cav} - T_{osc} \right) + h_{r,{\kern 1pt} cav} \left( T_{so} - T_{osc} \right) = 0
+U_L \left( T_w - T_{osc} \right) + h_{c, cav} \left( T_{a, cav} - T_{osc} \right) + h_{r, cav} \left( T_{so} - T_{osc} \right) = 0
 \end{equation}
 
 Simplifying yields the bottom insulation other side condition temperature:
 
 \begin{equation}
-{T_{osc}} = \frac{{{U_L}{T_w} + {h_{c,{\kern 1pt} cav}}{T_{a,{\kern 1pt} cav}} + {h_{r,{\kern 1pt} cav}}{T_{so}}}}{{{U_L} + {h_{c,{\kern 1pt} cav}} + {h_{r,{\kern 1pt} cav}}}}
+{T_{osc}} = \frac{{{U_L}{T_w} + {h_{c, cav}}{T_{a, cav}} + {h_{r, cav}}{T_{so}}}}{{{U_L} + {h_{c, cav}} + {h_{r, cav}}}}
 \end{equation}
 
 The cavity air temperature is determined from cavity air heat balance as follows:
 
 \begin{equation}
-{T_{a,{\kern 1pt} cav}} = \frac{{{h_{c,{\kern 1pt} cav}}A{T_{osc}} + {{\dot m}_{vent}}Cp{T_a} + {h_{c,{\kern 1pt} cav}}A{T_{so}}}}{{{h_{c,{\kern 1pt} cav}}A + {{\dot m}_{vent}}Cp + {h_{c,{\kern 1pt} cav}}A}}
+{T_{a, cav}} = \frac{{{h_{c, cav}}A{T_{osc}} + {{\dot m}_{vent}}Cp{T_a} + {h_{c, cav}}A{T_{so}}}}{{{h_{c, cav}}A + {{\dot m}_{vent}}Cp + {h_{c, cav}}A}}
 \end{equation}
 
 where:
@@ -441,7 +441,7 @@ The cavity air temperature is determined from the cavity air energy balance.~ Th
 The equations used to determine for the various heat transfer coefficients in the absorber and water heat balance equations are given below. The absorbed solar energy is transferred to the water by convection.~ Assuming natural convection dominated heat transfer for a hot surface facing down and a clod surface facing down the following correlation for Nusselt number by Fujii and Imura (1972).~ The Nusselt number for hot surface facing down ward is given by:
 
 \begin{equation}
-Nu = 0.56{\left( {Gr \cdot \Pr  \cdot cos{\kern 1pt} \theta } \right)^{1/5}}\quad {10^5} < Gr \cdot Pr < {10^{11}}
+Nu = 0.56{\left( {Gr \cdot \Pr  \cdot cos \theta } \right)^{1/5}}\quad {10^5} < Gr \cdot Pr < {10^{11}}
 \end{equation}
 
 The Nusselt number for hot surface upward and cold surface facing down is given by:
@@ -1094,25 +1094,25 @@ where \({\dot m_{vent}}\) is the air mass flow from natural forces (kg/s).
 The literature on UTSC does not appear to address the passive mode of operation and no models for \({\dot m_{vent}}\) have been identified.~ Nevertheless, natural buoyancy and wind forces are expected to drive air exchange between the plenum and ambient and some method of modeling \({\dot m_{vent}}\) is needed.~ Reasoning that the configuration is similar to single-side natural ventilation, we elect to use correlations for natural ventilation presented in Chapter 26 of the ASHRAE Handbook of Fundamentals (2001).
 
 \begin{equation}
-{\dot m_{vent}} = \rho {{\mathrm{\rlap{--} \dot V}}_{{\mathrm{tot}}}}
+{\dot m_{vent}} = \rho {{\overline{\dot V}}_{{\mathrm{tot}}}}
 \end{equation}
 
 where:
 
 \(\rho\) is the density of air (kg/m\(^{3}\))
 
-\({{\mathrm{\rlap{--} \dot V}}_{{\mathrm{tot}}}} = {{\mathrm{\rlap{--} \dot V}}_{{\mathrm{wind}}}} + \,{{\mathrm{\rlap{--} \dot V}}_{{\mathrm{thermal}}}}\) is the total volumetric flow rate of air ventilating in and out of the plenum (m\(^{3}\)/s)
+\({{\overline{\dot V}}_{{\mathrm{tot}}}} = {{\overline{\dot V}}_{{\mathrm{wind}}}} + \,{{\overline{\dot V}}_{{\mathrm{thermal}}}}\) is the total volumetric flow rate of air ventilating in and out of the plenum (m\(^{3}\)/s)
 
 \begin{equation}
-{{\mathrm{\rlap{--} \dot V}}_{{\mathrm{wind}}}} = {C_v}{A_{in}}{U_\infty }
+{{\overline{\dot V}}_{{\mathrm{wind}}}} = {C_v}{A_{in}}{U_\infty }
 \end{equation}
 
 \begin{equation}
-{{\mathrm{\rlap{--} \dot V}}_{{\mathrm{thermal}}}} = {C_D}{A_{in}}\sqrt {2g\Delta {H_{NPL}}\left( {{T_{a,plen}} - {T_{amb}}} \right)/{T_{a,plen}}} ~ (if~{T_{a,plen}} > {T_{amb}} )
+{{\overline{\dot V}}_{{\mathrm{thermal}}}} = {C_D}{A_{in}}\sqrt {2g\Delta {H_{NPL}}\left( {{T_{a,plen}} - {T_{amb}}} \right)/{T_{a,plen}}} ~ (if~{T_{a,plen}} > {T_{amb}} )
 \end{equation}
 
 \begin{equation}
-{{\mathrm{\rlap{--} \dot V}}_{{\mathrm{thermal}}}} = {C_D}{A_{in}}\sqrt {2g\Delta {H_{NPL}}\left( {{T_{amb}} - {T_{a,plen}}} \right)/{T_{amb}}} ~ (if~{T_{amb}} > {T_{a,plen}} ~ and~UTSC~vertical)
+{{\overline{\dot V}}_{{\mathrm{thermal}}}} = {C_D}{A_{in}}\sqrt {2g\Delta {H_{NPL}}\left( {{T_{amb}} - {T_{a,plen}}} \right)/{T_{amb}}} ~ (if~{T_{amb}} > {T_{a,plen}} ~ and~UTSC~vertical)
 \end{equation}
 
 where:
@@ -1131,7 +1131,7 @@ Mass continuity arguments lead to modeling the area of the openings as one half 
 
 \(\Delta {H_{NPL}}\) is the height from midpoint of lower opening to the Neutral Pressure Level.~ This is taken as one-fourth the overall height of the UTSC if it is mounted vertically.~ For tilted collectors, the nominal height is modified by the sine of the tilt.~ If the UTSC is mounted horizontally (e.g.~on the roof) then the \(\Delta {H_{NPL}}\) is taken as the gap thickness of the plenum.
 
-If the UTSC is horizontal and \({T_{amb}} > {T_{a,plen}}\), then \({{\mathrm{\rlap{--} \dot V}}_{{\mathrm{thermal}}}}{\mathrm{ = 0}}\) because this is a stable situation.
+If the UTSC is horizontal and \({T_{amb}} > {T_{a,plen}}\), then \({{\overline{\dot V}}_{{\mathrm{thermal}}}}{\mathrm{ = 0}}\) because this is a stable situation.
 
 \subsubsection{Underlying Heat Transfer Surface}\label{underlying-heat-transfer-surface-000}
 

@@ -2076,13 +2076,13 @@ Deflection of each pane can be positive or negative and is done solely to establ
 The important part of calculating deflection of the IGU is to determine mean deflection value for each glazing pane. Mean deflection value is used to calculate gap volume in deflected state (see Equation~\ref{eq:IGUGapVolume}). Mean deflection of glazing pane can be calculated by integrating Equation~\ref{eq:IGUDeflection}:
 
 \begin{equation}
-\overline {{L_{D\left( i \right)}}}  = \mathop \smallint \limits_{x = 0}^W \mathop \smallint \limits_{y = 0}^H \frac{{16\cdot \Delta {P_{\left( i \right)}}}}{{{\pi ^6}\cdot {D_{\left( i \right)}}}}\mathop \sum \limits_{m = 1,3,5 \ldots }^\infty  \mathop \sum \limits_{n = 1,3,5 \ldots }^\infty  \frac{{\sin \frac{{m\pi x}}{W}\sin \frac{{n\pi y}}{H}}}{{mn{{\left( {{{\left( {\frac{m}{W}} \right)}^2} + {{\left( {\frac{n}{H}} \right)}^2}} \right)}^2}}}
+\overline {{L_{D\left( i \right)}}}  = \mathop \int \limits_{x = 0}^W \mathop \int \limits_{y = 0}^H \frac{{16\cdot \Delta {P_{\left( i \right)}}}}{{{\pi ^6}\cdot {D_{\left( i \right)}}}}\mathop \sum \limits_{m = 1,3,5 \ldots }^\infty  \mathop \sum \limits_{n = 1,3,5 \ldots }^\infty  \frac{{\sin \frac{{m\pi x}}{W}\sin \frac{{n\pi y}}{H}}}{{mn{{\left( {{{\left( {\frac{m}{W}} \right)}^2} + {{\left( {\frac{n}{H}} \right)}^2}} \right)}^2}}}
 \end{equation}
 
 This is identical to the following expression:
 
 \begin{equation}
-\overline {{L_{D\left( i \right)}}}  = \frac{{16\cdot \Delta {P_{\left( i \right)}}}}{{{\pi ^6}\cdot {D_{\left( i \right)}}}}\mathop \sum \limits_{m = 1,3,5 \ldots }^\infty  \mathop \sum \limits_{n = 1,3,5 \ldots }^\infty  \frac{{\mathop \smallint \nolimits_{x = 0}^W \mathop \smallint \nolimits_{y = 0}^H \sin \frac{{m\pi x}}{W}\sin \frac{{n\pi y}}{H}}}{{mn{{\left( {{{\left( {\frac{m}{W}} \right)}^2} + {{\left( {\frac{n}{H}} \right)}^2}} \right)}^2}}}
+\overline {{L_{D\left( i \right)}}}  = \frac{{16\cdot \Delta {P_{\left( i \right)}}}}{{{\pi ^6}\cdot {D_{\left( i \right)}}}}\mathop \sum \limits_{m = 1,3,5 \ldots }^\infty  \mathop \sum \limits_{n = 1,3,5 \ldots }^\infty  \frac{{\mathop \int \nolimits_{x = 0}^W \mathop \int \nolimits_{y = 0}^H \sin \frac{{m\pi x}}{W}\sin \frac{{n\pi y}}{H}}}{{mn{{\left( {{{\left( {\frac{m}{W}} \right)}^2} + {{\left( {\frac{n}{H}} \right)}^2}} \right)}^2}}}
 \end{equation}
 
 and because the integral of sin(x) is equal to --cos(x), the above equation will become:
@@ -2485,7 +2485,7 @@ The model assumes that venetian blind slats reflect and transmit solar radiation
 The off-normal properties of roller-blind are determined from solar properties of roller blind fabric measured at normal incidence ($\theta = 0$) using correlations (Kotey, et. al., 2009b). The off-normal properties for roller blind shades are calculated using the set equations given below:
 
 \begin{equation}
-{{\mathrm{\tau }}_{bb}}\left( {\mathrm{\theta }} \right) = \left\{ \begin{array}{l}{{\mathrm{\tau }}_{bb}}{\mathrm{(\theta }} = {\mathrm{0)}} \cdot {\mathrm{co}}{{\mathrm{s}}^{\mathrm{b}}}{\kern 1pt} \left( {\frac{{\mathrm{\theta }}}{{{{\mathrm{\theta }}_{{\mathrm{cutoff}}}}}} \cdot \frac{\pi }{2}} \right)\quad \theta  < {\theta_{CutOff}}\\0\quad \quad \quad \theta  \ge {\theta_{CutOff}}\end{array} \right.
+{{\mathrm{\tau }}_{bb}}\left( {\mathrm{\theta }} \right) = \left\{ \begin{array}{l}{{\mathrm{\tau }}_{bb}}{\mathrm{(\theta }} = {\mathrm{0)}} \cdot {\mathrm{co}}{{\mathrm{s}}^{\mathrm{b}}} \left( {\frac{{\mathrm{\theta }}}{{{{\mathrm{\theta }}_{{\mathrm{cutoff}}}}}} \cdot \frac{\pi }{2}} \right)\quad \theta  < {\theta_{CutOff}}\\0\quad \quad \quad \theta  \ge {\theta_{CutOff}}\end{array} \right.
 \end{equation}
 
 \begin{equation}
@@ -2497,7 +2497,7 @@ The off-normal properties of roller-blind are determined from solar properties o
 \end{equation}
 
 \begin{equation}
-{\mathrm{\tau }}_{{\mathrm{bt}}}^{}\left( {\mathrm{\theta }} \right) = {\mathrm{\tau }}_{{\mathrm{bt}}}^{}{\mathrm{(\theta }} = {\mathrm{0)}} \cdot {\mathrm{co}}{{\mathrm{s}}^{\mathrm{b}}}{\kern 1pt} \left( {\mathrm{\theta }} \right)
+{\mathrm{\tau }}_{{\mathrm{bt}}}^{}\left( {\mathrm{\theta }} \right) = {\mathrm{\tau }}_{{\mathrm{bt}}}^{}{\mathrm{(\theta }} = {\mathrm{0)}} \cdot {\mathrm{co}}{{\mathrm{s}}^{\mathrm{b}}} \left( {\mathrm{\theta }} \right)
 \end{equation}
 
 \begin{equation}

@@ -1791,11 +1791,11 @@ where,
 \(EE{R_D}\) is the \emph{EER} at 25\% net capacity and reduced outdoor air temperature.
 
 \begin{equation}
-EE{R_{B - D}} = \frac{{LF \cdot {{\dot Q}_{Total,Net,PartLoad}}}}{{Powe{r_{Total,{\kern 1pt} PartLoad}}}}
+EE{R_{B - D}} = \frac{{LF \cdot {{\dot Q}_{Total,Net,PartLoad}}}}{{Powe{r_{Total, PartLoad}}}}
 \end{equation}
 
 \begin{equation}
-Powe{r_{Total,{\kern 1pt} PartLoad}} = LF\left( {{C_D} \cdot Powe{r_{CompCondFan,{\kern 1pt} PartLoad}}} \right) + \,\left( {FanPowerPerVolFlowRate \cdot {{\dot V}_{Rated}}} \right)
+Powe{r_{Total, PartLoad}} = LF\left( {{C_D} \cdot Powe{r_{CompCondFan, PartLoad}}} \right) + \,\left( {FanPowerPerVolFlowRate \cdot {{\dot V}_{Rated}}} \right)
 \end{equation}
 
 \begin{equation}
@@ -1815,7 +1815,7 @@ where:
 
 \(Powe{r_{Total,PartLoad}}\) is the total electric power (compressors, condenser fans and evaporator fan) with 19.44\(^{\circ}\)C wet-bulb temperature air entering the cooling coil and air flow rate across the evaporator at the Rated Air Volume Flow Rate (W). The dry-bulb temperature of air entering the air-cooled condenser varies (B = 27.5\(^{\circ}\)C, C = 20.0\(^{\circ}\)C, D = 18.3\(^{\circ}\)C).
 
-\(Powe{r_{CompCondFan,{\kern 1pt} PartLoad}}\) is the electric power of the compressor and condenser fan at the various part-load ratios, with 19.44\(^{\circ}\)C wet-bulb temperature air entering the cooling coil and rated supply air volume flow rate (W). The dry-bulb temperature of air entering the air-cooled condenser varies per the part-load ratio (B = 27.5\(^{\circ}\)C, C = 20.0\(^{\circ}\)C, D = 18.3\(^{\circ}\)C).
+\(Powe{r_{CompCondFan, PartLoad}}\) is the electric power of the compressor and condenser fan at the various part-load ratios, with 19.44\(^{\circ}\)C wet-bulb temperature air entering the cooling coil and rated supply air volume flow rate (W). The dry-bulb temperature of air entering the air-cooled condenser varies per the part-load ratio (B = 27.5\(^{\circ}\)C, C = 20.0\(^{\circ}\)C, D = 18.3\(^{\circ}\)C).
 
 \(EIRTempModFa{c_{PartLoad}}\) is the Energy Input Ratio function of temperature curve evaluated with 19.44\(^{\circ}\)C wet-bulb temperature air entering the cooling coil and dry-bulb temperature of air entering the air-cooled condenser corresponding to the reduced part-load ratio (B = 27.5\(^{\circ}\)C, C = 20.0\(^{\circ}\)C, D = 18.3\(^{\circ}\)C) (dimensionless).
 
