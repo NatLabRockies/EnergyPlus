@@ -631,7 +631,7 @@ CFIRfPLR = a + b \cdot CPLR + c \cdot CPL{R^2}
 The fraction of the time step during which the chiller heater is operating is computed as a function of the cooling and heating part-load ratios and the user-input minimum part-load ratio:
 
 \begin{equation}
-RunFrac = {\mathop{\rm MIN}\nolimits} \left( {1.0,{\mathop{\rm MAX}\nolimits} \left( {HPLR,CPLR} \right)/MinPLR} \right)
+RunFrac = \operatorname{MIN} \left( {1.0,\operatorname{MAX} \left( {HPLR,CPLR} \right)/MinPLR} \right)
 \end{equation}
 
 The cooling fuel input to the chiller is then computed as follows:
@@ -737,7 +737,7 @@ HeatFuelInput = AvailHeatCap \cdot HFIR \cdot HFIRfHPLR(HPLR)
 The fraction of the time step during which the chiller is operating is computed as a function of the cooling and heating part-load ratios and the user-input minimum part-load ratio:
 
 \begin{equation}
-RunFrac = {\mathop{\rm MIN}\nolimits} \left( {1.0,{\mathop{\rm MAX}\nolimits} \left( {HPLR,CPLRh} \right)/MinPLR} \right)
+RunFrac = \operatorname{MIN} \left( {1.0,\operatorname{MAX} \left( {HPLR,CPLRh} \right)/MinPLR} \right)
 \end{equation}
 
 The heating electric input to the chiller is computed as follows:
@@ -1116,17 +1116,17 @@ A heat recovery chiller may control the temperature of heat recovery fluid leavi
 If no control setpoint node was named, then the model developed by Liesen and Chillar (2004) is used to approximate the relative distribution of refrigerant flow and condenser heat transfer between the bundles.~ This model approximates the heat transfer situation by using average temperatures in and out of the condenser section.
 
 \begin{equation}
-{Q_{Tot}} = ({\dot m_{Heat{\mathop{\rm Re}\nolimits} c}}*{C_{p,Heat{\mathop{\rm Re}\nolimits} c}} + {\dot m_{Cond}}*{C_{p,Cond}})*({T_{AvgOut}} - {T_{AvgIn}})
+{Q_{Tot}} = ({\dot m_{Heat\operatorname{Re} c}}*{C_{p,Heat\operatorname{Re} c}} + {\dot m_{Cond}}*{C_{p,Cond}})*({T_{AvgOut}} - {T_{AvgIn}})
 \end{equation}
 
 Then the inlet temperature is flow-weighted to determine lumped inlet and outlet conditions.
 
 \begin{equation}
-{T_{AvgIn}} = \frac{{({{\dot m}_{Heat{\mathop{\rm Re}\nolimits} c}}*{C_{p,Heat{\mathop{\rm Re}\nolimits} c}}*{T_{Heat{\mathop{\rm Re}\nolimits} cIn}} + {{\dot m}_{Cond}}*{C_{p,Cond}}*{T_{CondIn}})}}{{({{\dot m}_{Heat{\mathop{\rm Re}\nolimits} c}}*{C_{p,Heat{\mathop{\rm Re}\nolimits} c}} + {{\dot m}_{Cond}}*{C_{p,Cond}})}}
+{T_{AvgIn}} = \frac{{({{\dot m}_{Heat\operatorname{Re} c}}*{C_{p,Heat\operatorname{Re} c}}*{T_{Heat\operatorname{Re} cIn}} + {{\dot m}_{Cond}}*{C_{p,Cond}}*{T_{CondIn}})}}{{({{\dot m}_{Heat\operatorname{Re} c}}*{C_{p,Heat\operatorname{Re} c}} + {{\dot m}_{Cond}}*{C_{p,Cond}})}}
 \end{equation}
 
 \begin{equation}
-{T_{AvgOut}} = \frac{{{Q_{Tot}}}}{{({{\dot m}_{Heat{\mathop{\rm Re}\nolimits} c}}*{C_{p,Heat{\mathop{\rm Re}\nolimits} c}} + {{\dot m}_{Cond}}*{C_{p,Cond}})}} + {T_{AvgIn}}
+{T_{AvgOut}} = \frac{{{Q_{Tot}}}}{{({{\dot m}_{Heat\operatorname{Re} c}}*{C_{p,Heat\operatorname{Re} c}} + {{\dot m}_{Cond}}*{C_{p,Cond}})}} + {T_{AvgIn}}
 \end{equation}
 
 The lumped outlet temperature is then used for an approximate method of determining the heat recovery rate

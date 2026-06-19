@@ -52,11 +52,11 @@ The final CTF solution form reveals why it is so elegant and powerful.~ With a s
 The basic method used in EnergyPlus for CTF calculations is known as the state space method (Ceylan and Myers 1980; Seem 1987; Ouyang and Haghighat 1991).~ Another common, older method used Laplace transformations to reach the solution;~ the Laplace method was~ used in BLAST (Hittle, 1979; Hittle \& Bishop, 1983).~ The basic state space system is defined by the following linear matrix equations:
 
 \begin{equation}
-\frac{{d\left[ {\bf{x}} \right]}}{{dt}} = \left[ {\bf{A}} \right]\left[ {\bf{x}} \right] + \left[ {\bf{B}} \right]\left[ {\bf{u}} \right]
+\frac{{d\left[ {\mathbf{x}} \right]}}{{dt}} = \left[ {\mathbf{A}} \right]\left[ {\mathbf{x}} \right] + \left[ {\mathbf{B}} \right]\left[ {\mathbf{u}} \right]
 \end{equation}
 
 \begin{equation}
-\left[ {\bf{y}} \right] = \left[ {\bf{C}} \right]\left[ {\bf{x}} \right] + \left[ {\bf{D}} \right]\left[ {\bf{u}} \right]
+\left[ {\mathbf{y}} \right] = \left[ {\mathbf{C}} \right]\left[ {\mathbf{x}} \right] + \left[ {\mathbf{D}} \right]\left[ {\mathbf{u}} \right]
 \end{equation}
 
 where x is a vector of state variables, u is a vector of inputs, y is the output vector, t is time, and A, B, C, and D are coefficient matrices.~ Through the use of matrix algebra, the vector of state variables (x) can be eliminated from the system of equations, and the output vector (y) can be related directly to the input vector (u) and time histories of the input and output vectors.
@@ -84,11 +84,11 @@ where \(||A \delta||_\infty\) is the matrix row norm.  Seem, as part of his algo
 As shown in Seem (1987), the above formulation can be used to solve the transient heat conduction equation by enforcing a finite difference grid over the various layers in the building element being analyzed.~ In this case, the state variables are the nodal temperatures, the environmental temperatures (interior and exterior) are the inputs, and the resulting heat fluxes at both surfaces are the outputs.~ Thus, the state space representation with finite difference variables would take the following form:
 
 \begin{equation}
-\frac{d\left[\begin{array}{c}T_1 \\ \vdots \\ T_n\end{array}\right]}{dt} = \left[\bf{A}\right]\left[\begin{array}{c}T_1 \\ \vdots \\ T_n\end{array}\right]+\left[\bf{B}\right]\left[\begin{array}{c}T_i \\ T_o\end{array}\right]
+\frac{d\left[\begin{array}{c}T_1 \\ \vdots \\ T_n\end{array}\right]}{dt} = \left[\mathbf{A}\right]\left[\begin{array}{c}T_1 \\ \vdots \\ T_n\end{array}\right]+\left[\mathbf{B}\right]\left[\begin{array}{c}T_i \\ T_o\end{array}\right]
 \end{equation}
 
 \begin{equation}
-\left[\begin{array}{c}{q''}_i \\ {q''}_o\end{array}\right] = \left[\bf{C}\right]\left[\begin{array}{c}T_1 \\ \vdots \\ T_n\end{array}\right]+\left[\bf{D}\right]\left[\begin{array}{c}T_i \\ T_o\end{array}\right]
+\left[\begin{array}{c}{q''}_i \\ {q''}_o\end{array}\right] = \left[\mathbf{C}\right]\left[\begin{array}{c}T_1 \\ \vdots \\ T_n\end{array}\right]+\left[\mathbf{D}\right]\left[\begin{array}{c}T_i \\ T_o\end{array}\right]
 \end{equation}
 
 where T1, T2, \ldots{}, Tn-1, Tn~are the finite difference nodal temperatures, n is the number of nodes, Ti~and To~are the interior and exterior environmental temperatures, and q``i~and q''o~are the heat fluxes (desired output).

@@ -815,7 +815,7 @@ Where \emph{V\(_{10m}\)} is the air velocity at the location of the weather stat
 Clear et al. (2003) developed correlations from measurements for horizontal roofs on two commercial buildings. In EnergyPlus the implementation uses the model for natural convection plus turbulent forced convection (eq. 8A in the reference) and applies it to the center point of each surface section that makes up the roof.
 
 \begin{equation}
-{h_c} = \eta \frac{k}{{{L_n}}}0.15Ra_{{L_n}}^{{\raise0.7ex\hbox{1} \!\mathord{\left/ {\vphantom {1 3}}\right.}\!\lower0.7ex\hbox{3}}} + \frac{k}{x}{R_f}0.0296{\mathop{\rm Re}\nolimits}_x^{{\raise0.7ex\hbox{4} \!\mathord{\left/ {\vphantom {4 5}}\right.}\!\lower0.7ex\hbox{5}}}{\Pr ^{{\raise0.7ex\hbox{1} \!\mathord{\left/ {\vphantom {1 3}}\right.}\!\lower0.7ex\hbox{3}}}}
+{h_c} = \eta \frac{k}{{{L_n}}}0.15Ra_{{L_n}}^{{\raise0.7ex\hbox{1} \!\mathord{\left/ {\vphantom {1 3}}\right.}\!\lower0.7ex\hbox{3}}} + \frac{k}{x}{R_f}0.0296\operatorname{Re}_x^{{\raise0.7ex\hbox{4} \!\mathord{\left/ {\vphantom {4 5}}\right.}\!\lower0.7ex\hbox{5}}}{\Pr ^{{\raise0.7ex\hbox{1} \!\mathord{\left/ {\vphantom {1 3}}\right.}\!\lower0.7ex\hbox{3}}}}
 \end{equation}
 
 Where
@@ -834,7 +834,7 @@ Where
 \item
   \(G{r_{{L_n}}} = \frac{{g{\rho ^2}{L_n}^3\Delta T}}{{{T_f}{\mu ^2}}}\) is the Grashof number
 \item
-  \({{\mathop{\rm Re}\nolimits}_x} = \frac{{{V_z}\rho x}}{\mu }\) is the Reynolds number at x
+  \({\operatorname{Re}_x} = \frac{{{V_z}\rho x}}{\mu }\) is the Reynolds number at x
 \item
   Pr is the Prandtl number
 \end{itemize}

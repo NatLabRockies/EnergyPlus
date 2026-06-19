@@ -62,7 +62,7 @@ EnergyPlus provides three different solution algorithms to solve the zone air en
 In order to calculate the derivative term with respect to time, a finite difference approximation may be used, such as:
 
 \begin{equation}
-\frac{{dT}}{{dt}} = {\left( {\delta t} \right)^{ - 1}}\left( {{T_z}^t - {T_z}^{t - \delta t}} \right) + {\rm O}\left( {\delta t} \right)
+\frac{{dT}}{{dt}} = {\left( {\delta t} \right)^{ - 1}}\left( {{T_z}^t - {T_z}^{t - \delta t}} \right) + \mathrm{O}\left( {\delta t} \right)
 \label{eq:AirHeatBalFinDiffApprox}
 \end{equation}
 
@@ -97,15 +97,11 @@ When this form for the derivative is used, Equation~\ref{eq:ZoneMeanAirTempUpdat
 
 and the zone temperature update equation becomes:
 
+{\medmuskip=0mu\thinmuskip=0mu\thickmuskip=0mu\nulldelimiterspace=0pt\scriptspace=0pt
 \begin{equation}
-\medmuskip=0mu
-\thinmuskip=0mu
-\thickmuskip=0mu
-\nulldelimiterspace=0pt
-\scriptspace=0pt
 T_z^t = \frac{{\sum\limits_{i = 1}^{{N_{sl}}} {{{\dot Q}_i}}  + \sum\limits_{i = 1}^{{N_{surfaces}}} {{h_i}} {A_i}{T_{si}} + \sum\limits_{i = 1}^{{N_{zones}}} {{{\dot m}_i}} {C_p}{T_{zi}}\, + {{\dot m}_{\inf }}{C_p}{T_\infty } + {{\dot m}_{sys}}{C_p}{T_{{\mathrm{supply}}}} - \left( {\frac{{{C_z}}}{{\delta t}}} \right)\left( { - 3T_z^{t - \delta t} + \frac{3}{2}T_z^{t - 2\delta t} - \frac{1}{3}T_z^{t - 3\delta t}} \right)}}{{\left( {\frac{{11}}{6}} \right)\frac{{{C_z}}}{{\delta t}} + \sum\limits_{i = 1}^{{N_{surfaces}}} {{h_i}} A + \sum\limits_{i = 1}^{{N_{zones}}} {{{\dot m}_i}} {C_p} + {{\dot m}_{\inf }}{C_p} + {{\dot m}_{sys}}C}}
 \label{eq:ZoneTemperatureUpdateEquation}
-\end{equation}
+\end{equation}}
 
 This is the form historically used in EnergyPlus and is the current default referred to as 3rdOrderBackwardDifference in the ZoneAirHeatBalanceAlgorithm object. This algorithm requires zone air temperatures at three previous time steps and uses constant temperature coefficients. The assumption is that three previous time steps lengths are the same.
 

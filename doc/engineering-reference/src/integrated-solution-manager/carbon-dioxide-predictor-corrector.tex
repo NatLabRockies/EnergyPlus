@@ -102,14 +102,10 @@ For this solution algorithm, the air mass balance for the predicted system load 
 
 For this solution algorithm, the air mass balance for the predicted air system load or response is given below:
 
+{\medmuskip=0mu\thinmuskip=0mu\thickmuskip=0mu\nulldelimiterspace=0pt\scriptspace=0pt
 \begin{equation}
-\medmuskip=0mu
-\thinmuskip=0mu
-\thickmuskip=0mu
-\nulldelimiterspace=0pt
-\scriptspace=0pt
 \begin{array}{l}{\mathrm{PredictedSystemLoad}}\;[kg/\sec ] = \left[ {\sum\limits_{i = 1}^{{N_{zones}}} {{{\dot m}_i}} \; + {{\dot m}_{\inf }}} \right]*\;\left[ {C_{{\mathrm{setpoint}}}^t - C_z^{t - \delta t}*\exp \left( { - \frac{{\sum\limits_{i = 1}^{{N_{zones}}} {{{\dot m}_i}}  + {{\dot m}_{\inf }}}}{{{\rho_{air}}{V_Z}{C_{CO2}}}}\delta t} \right)} \right]*\\\;\;\;{\left[ {1 - \exp \left( { - \frac{{\sum\limits_{i = 1}^{{N_{zones}}} {{{\dot m}_i}} \; + {{\dot m}_{\inf }}}}{{{\rho_{air}}{V_Z}{C_{CO2}}}}\delta t} \right)} \right]^{ - 1}} - \;\left( {\sum\limits_{i = 1}^{{N_{sl}}} {k{g_{mas{s_{sched\;load}}}}*{{10}^6}}  + \sum\limits_{i = 1}^{{N_{zones}}} {{{\dot m}_i}} {C_{zi}}\; + {{\dot m}_{\inf }}{C_\infty }} \right)\end{array}
-\end{equation}
+\end{equation}}
 
 At the prediction point in the simulation, the system air mass flows are not known; therefore, the system response is approximated. The predicted air system carbon dioxide load is then used in the system simulation to achieve the best results possible. If a central HVAC system provides the outdoor flow rate from a Controller:MechanicalVentilation object, the outdoor airflow rate may be approximated as:
 
@@ -137,14 +133,10 @@ C_z^t = \frac{{\sum\limits_{i = 1}^{{N_{sl}}} {k{g_{mas{s_{sched\;load}}}}*{{10}
 
 \subsubsection{ThirdOrderBackwardDifference}\label{thirdorderbackwarddifference-1}
 
+{\medmuskip=0mu\thinmuskip=0mu\thickmuskip=0mu\nulldelimiterspace=0pt\scriptspace=0pt
 \begin{equation}
-\medmuskip=0mu
-\thinmuskip=0mu
-\thickmuskip=0mu
-\nulldelimiterspace=0pt
-\scriptspace=0pt
 C_z^t = \frac{{\sum\limits_{i = 1}^{{N_{sl}}} {k{g_{mas{s_{sched\;load}}}}*{{10}^6}}  + \sum\limits_{i = 1}^{{N_{zones}}} {{{\dot m}_i}} {C_{zi}} + {{\dot m}_{\inf }}{C_\infty } + {{\dot m}_{sys}}{C_{\sup }} + \frac{{{\rho_{air}}{V_Z}{C_{CO2}}}}{{\delta t}}(3C_z^{t - \delta t} - \frac{3}{2}C_z^{t - 2\delta t} + \frac{1}{3}C_z^{t - 3\delta t})}}{{\frac{{{\rho_{air}}{V_Z}{C_{CO2}}}}{{\delta t}}\left( {\frac{{11}}{6}} \right) + \sum\limits_{i = 1}^{{N_{zones}}} {{{\dot m}_i}}  + {{\dot m}_{\inf }} + {{\dot m}_{sys}}}}
-\end{equation}
+\end{equation}}
 
 \subsubsection{AnalyticalSolution}\label{analyticalsolution-1}
 

@@ -105,19 +105,19 @@ The user defined room air models used indirect coupling so that the patterns pro
 
 The patterns defined by the object `RoomAir:TemperaturePattern:SurfaceMapping' are fairly straightforward.~ The user directly inputs values for \(\Delta {T_{ai}}\) for each surface.~ The pattern ``maps'' specific surfaces, identified by name, to \(\Delta {T_{ai}}\) values.~ This provides completely general control (but in practice may be cumbersome to use).~ The other patterns focus on temperature changes in the vertical direction.~ Surfaces do not need to be identified, but all the surfaces with the same height will be assigned the same \(\Delta {T_{ai}}\) values.
 
-The patterns defined by the object `RoomAir:TemperaturePattern:NondimensonalHeight' apply a temperature profile based on a non-dimensionalized height, \({\rm Z}\).~ The height of each surface is defined to be the z-coordinate of the surface's centroid relative to the average z-coordinate of the floor surfaces.~ The zone ceiling height is used as the length scale to non-dimensionalize each surface's height so that,
+The patterns defined by the object `RoomAir:TemperaturePattern:NondimensonalHeight' apply a temperature profile based on a non-dimensionalized height, \(\mathrm{Z}\).~ The height of each surface is defined to be the z-coordinate of the surface's centroid relative to the average z-coordinate of the floor surfaces.~ The zone ceiling height is used as the length scale to non-dimensionalize each surface's height so that,
 
 \begin{equation}
-{{\rm Z}_i} = ({z_{i,centroid}} - {z_{floorAvg}})/Ceiling\;Height
+{\mathrm{Z}_i} = ({z_{i,centroid}} - {z_{floorAvg}})/Ceiling\;Height
 \end{equation}
 
 (where ``\emph{i's''} represents each surface in the zone that is affected by the model)
 
 The values for \({Z_i}\) are constrained to be between 0.01 and 0.99 because the value is meant to describe the air layer near the surface (say approximate 0.1 m from the surface) rather than the surface itself.
 
-The user-defined profile is treated as a look up table or piecewise linear model.~ The values for \(\Delta {T_{ai}}\) are determined by searching the \({\rm Z}\) values in the user-defined profile and performing linear interpolation on the associated \(\Delta {T_a}\) values.
+The user-defined profile is treated as a look up table or piecewise linear model.~ The values for \(\Delta {T_{ai}}\) are determined by searching the \(\mathrm{Z}\) values in the user-defined profile and performing linear interpolation on the associated \(\Delta {T_a}\) values.
 
-The patterns defined by the object `RoomAir:TemperaturePattern:ConstantGradient' apply a constant temperature gradient in the vertical direction.~ The model assumes that \({T_{MAT}}\) occurs at the mid-plane so that \({{\rm Z}_{{T_{MAT}}}} = 0.5\) (by definition).~ The surface \({Z_i}\) values are compared to \({Z_{{T_{MAT}}}}\) and then scaled with zone ceiling height to obtain values for the change in height (in units of meters), \(\Delta z\).~ The user defined gradient, \(grad\), (units of \(^{\circ}\)C/m) is then used to determine \(\Delta {T_{ai}}\) values using:
+The patterns defined by the object `RoomAir:TemperaturePattern:ConstantGradient' apply a constant temperature gradient in the vertical direction.~ The model assumes that \({T_{MAT}}\) occurs at the mid-plane so that \({\mathrm{Z}_{{T_{MAT}}}} = 0.5\) (by definition).~ The surface \({Z_i}\) values are compared to \({Z_{{T_{MAT}}}}\) and then scaled with zone ceiling height to obtain values for the change in height (in units of meters), \(\Delta z\).~ The user defined gradient, \(grad\), (units of \(^{\circ}\)C/m) is then used to determine \(\Delta {T_{ai}}\) values using:
 
 \begin{equation}
 \Delta {T_{ai}} = \Delta z * grad
@@ -234,7 +234,7 @@ C = \frac{6}{5}\alpha {(\frac{9}{{10}}\alpha )^{1/3}}{\pi ^{2/3}}
 For an ideal gas:
 
 \begin{equation}
-\Delta \rho /\rho  = \Delta {\rm T}/{\rm T}
+\Delta \rho /\rho  = \Delta \mathrm{T}/\mathrm{T}
 \end{equation}
 
 resulting in the following relation between heat input rate and buoyancy flux:
@@ -600,7 +600,7 @@ Grad{T_{\max }} = \max (Grad{T_{\max ,1}},Grad{T_{\max ,2}})
 
 For reporting purposes, if the zone is deemed to be mixed, the displacement ventilation report variables are set to flag values.
 
-If \({T_{mx}} < {T_{oc}}\) ~or \(MC{P_{tot}} \le 0\) ~or \({H_{fr}} \cdot {H_{ceil}} < {H_{fl,top}} + \Delta {z_{occ,\min }}\) ~or \({T_{mx}} - {T_{oc}} < \Delta {T_{Crit{\mathop{\rm Re}\nolimits} p}}\)
+If \({T_{mx}} < {T_{oc}}\) ~or \(MC{P_{tot}} \le 0\) ~or \({H_{fr}} \cdot {H_{ceil}} < {H_{fl,top}} + \Delta {z_{occ,\min }}\) ~or \({T_{mx}} - {T_{oc}} < \Delta {T_{Crit\operatorname{Re} p}}\)
 
 \begin{equation}
 Grad{T_{avg}} =  - 9.999

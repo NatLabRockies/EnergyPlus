@@ -65,29 +65,21 @@ Since the program provides three solution algorithms, the moisture prediction fr
 For this solution algorithm, the air mass balance for the predicted air system load or response is:
 
 {\scriptsize
+{\medmuskip=0mu\thinmuskip=0mu\thickmuskip=0mu\nulldelimiterspace=0pt\scriptspace=0pt
 \begin{equation}
-\medmuskip=0mu
-\thinmuskip=0mu
-\thickmuskip=0mu
-\nulldelimiterspace=0pt
-\scriptspace=0pt
 \begin{array}{l}{\mathrm{PredictedSystemLoad}}\;[k{g_{Water}}/\sec ] = {\rho_{air}}{V_z}{C_W}{\left( {\delta t} \right)^{ - 1}}\left( {W_{{\mathrm{setpoint}}}^t - W_z^{t - \delta t}} \right) \\
 - \left[ {\sum\limits_{i = 1}^{{N_{sl}}} {k{g_{mas{s_{sched\;load}}}}}  + \sum\limits_{i = 1}^{{N_{surfaces}}} {{A_i}{h_{mi}}} {\rho_{ai{r_z}}}\left( {{W_{surf{s_i}}} - W_{{\mathrm{setpoint}}}^t} \right) + \sum\limits_{i = 1}^{{N_{zones}}} {{{\dot m}_i}} \left( {{W_{zi}} - W_{{\mathrm{setpoint}}}^t} \right) + {{\dot m}_{\inf }}\left( {{W_\infty } - W_{{\mathrm{setpoint}}}^t} \right)} \right]\\\;\;\;\;\;\;\;\;\;\;\;\;\;\;\;\;\;\;\;\;\;\;\;\;\;\;\;\;\;\;\;\;\;\;\;\end{array}
-\end{equation}}
+\end{equation}}}
 
 \subsubsection{ThirdOrderBackwardDifference}\label{thirdorderbackwarddifference-001}
 
 For this solution algorithm, the air mass balance for the predicted system load or response is given below:
 
 {\scriptsize
+{\medmuskip=0mu\thinmuskip=0mu\thickmuskip=0mu\nulldelimiterspace=0pt\scriptspace=0pt
 \begin{equation}
-\medmuskip=0mu
-\thinmuskip=0mu
-\thickmuskip=0mu
-\nulldelimiterspace=0pt
-\scriptspace=0pt
 \begin{array}{l}{\mathrm{PredictedSystemLoad}}\;[k{g_{Water}}/\sec ] = \left( {\frac{{{\rho_{air}}{V_z}{C_W}}}{{\delta t}}\left( {\frac{{11}}{6}} \right) + \sum\limits_{i = 1}^{{N_{surfaces}}} {{A_i}{h_{mi}}} {\rho_{ai{r_z}}} + \sum\limits_{i = 1}^{{N_{zones}}} {{{\dot m}_i}}  + {{\dot m}_{\inf }}} \right)W_z^t - \\\;\;\;\left[ {\sum\limits_{i = 1}^{{N_{sl}}} {k{g_{mas{s_{sched\;load}}}}}  + \sum\limits_{i = 1}^{{N_{surfaces}}} {{A_i}{h_{mi}}} {\rho_{ai{r_z}}}{W_{surf{s_i}}} + \sum\limits_{i = 1}^{{N_{zones}}} {{{\dot m}_i}} {W_{zi}} + {{\dot m}_{\inf }}{W_\infty } + \frac{{{\rho_{air}}{V_z}{C_W}}}{{\delta t}}\left( {3W_z^{t - \delta t} - \frac{3}{2}W_z^{t - 2\delta t} + \frac{1}{3}W_z^{t - 3\delta t}} \right)} \right]\;\;\end{array}
-\end{equation}}
+\end{equation}}}
 
 Then, using the following substitutions, the air mass balance equation becomes:
 
@@ -104,7 +96,7 @@ C = \frac{{{\rho_{air}}{V_z}{C_W}}}{{\delta t}}\;
 \end{equation}
 
 \begin{equation}
-\begin{array}{l}{\mathrm{PredictedSystemLoad}}\;[k{g_{Water}}/\sec ] = \left[ {\frac{{11}}{6}*C + A} \right]\;*{W_{SetPo{\mathop{\rm int}} }} - \\\;\;\;\;\;\;\;\;\;\left[ {B + C*\left( {3W_z^{t - \delta t} - \frac{3}{2}W_z^{t - 2\delta t} + \frac{1}{3}W_z^{t - 3\delta t}} \right)} \right]\end{array}
+\begin{array}{l}{\mathrm{PredictedSystemLoad}}\;[k{g_{Water}}/\sec ] = \left[ {\frac{{11}}{6}*C + A} \right]\;*{W_{SetPo{\mathop\mathrm{int}} }} - \\\;\;\;\;\;\;\;\;\;\left[ {B + C*\left( {3W_z^{t - \delta t} - \frac{3}{2}W_z^{t - 2\delta t} + \frac{1}{3}W_z^{t - 3\delta t}} \right)} \right]\end{array}
 \end{equation}
 
 \subsubsection{AnalyticalSolution}\label{analyticalsolution-001}
@@ -127,26 +119,18 @@ In the same manner as described above for predicting the moisture load to be met
 
 \subsubsection{EulerMethod}\label{eulermethod-1-001}
 
+{\medmuskip=0mu\thinmuskip=0mu\thickmuskip=0mu\nulldelimiterspace=0pt\scriptspace=0pt
 \begin{equation}
-\medmuskip=0mu
-\thinmuskip=0mu
-\thickmuskip=0mu
-\nulldelimiterspace=0pt
-\scriptspace=0pt
 W_z^t = \frac{{\sum\limits_{i = 1}^{{N_{sl}}} {k{g_{mas{s_{sched\;load}}}}}  + \sum\limits_{i = 1}^{{N_{surfaces}}} {{A_i}{h_{mi}}} {\rho_{ai{r_z}}}{W_{surf{s_i}}} + \sum\limits_{i = 1}^{{N_{zones}}} {{{\dot m}_i}} {W_{zi}} + {{\dot m}_{\inf }}{W_\infty } + {{\dot m}_{sys}}{W_{\sup }} + {\rho_{air}}{V_z}{C_W}\frac{{W_z^{t - \delta t}}}{{\delta t}}}}{{\frac{{{\rho_{air}}{V_z}{C_W}}}{{\delta t}} + \sum\limits_{i = 1}^{{N_{surfaces}}} {{A_i}{h_{mi}}{\rho_{ai{r_z}}}}  + \sum\limits_{i = 1}^{{N_{zones}}} {{{\dot m}_i}}  + {{\dot m}_{\inf }} + {{\dot m}_{sys}}}}
-\end{equation}
+\end{equation}}
 
 \subsubsection{ThirdOrderBackwardDifference}\label{thirdorderbackwarddifference-1-001}
 
 {\scriptsize
+{\medmuskip=0mu\thinmuskip=0mu\thickmuskip=0mu\nulldelimiterspace=0pt\scriptspace=0pt
 \begin{equation}
-\medmuskip=0mu
-\thinmuskip=0mu
-\thickmuskip=0mu
-\nulldelimiterspace=0pt
-\scriptspace=0pt
 W_z^t = \frac{{\sum\limits_{i = 1}^{{N_{sl}}} {k{g_{mas{s_{sched\;load}}}}}  + \sum\limits_{i = 1}^{{N_{surfaces}}} {{A_i}{h_{mi}}} {\rho_{ai{r_z}}}{W_{surf{s_i}}} + \sum\limits_{i = 1}^{{N_{zones}}} {{{\dot m}_i}} {W_{zi}} + {{\dot m}_{\inf }}{W_\infty } + {{\dot m}_{sys}}{W_{\sup }} + \frac{{{\rho_{air}}{V_z}{C_W}}}{{\delta t}}(3W_z^{t - \delta t} - \frac{3}{2}W_z^{t - 2\delta t} + \frac{1}{3}W_z^{t - 3\delta t})}}{{\frac{{{\rho_{air}}{V_z}{C_W}}}{{\delta t}}\left( {\frac{{11}}{6}} \right) + \sum\limits_{i = 1}^{{N_{surfaces}}} {{A_i}{h_{mi}}{\rho_{ai{r_z}}}}  + \sum\limits_{i = 1}^{{N_{zones}}} {{{\dot m}_i}}  + {{\dot m}_{\inf }} + {{\dot m}_{sys}}}}
-\end{equation}}
+\end{equation}}}
 
 Using the same A, B, and C parameters from the prediction step modified with actual zone mass flows with the air system ON and OFF result in:
 
