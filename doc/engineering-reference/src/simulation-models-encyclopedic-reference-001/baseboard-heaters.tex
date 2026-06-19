@@ -43,7 +43,7 @@ Each system time step, the baseboard attempts to meet any remaining heating requ
 \end{equation}
 
 \begin{equation}
-{C_{ratio}} = {{{C_{\min }}} \mathord{\left/ {\vphantom {{{C_{\min }}} {{C_{\max }}}}} \right. } {{C_{\max }}}}
+{C_{ratio}} = {\frac{{{C_{\min }}}}{{C_{\max }}}}
 \end{equation}
 
 \begin{equation}
@@ -53,11 +53,11 @@ Each system time step, the baseboard attempts to meet any remaining heating requ
 Once the effectiveness is determined, the outlet conditions for the baseboard unit are determined using the following equations:
 
 \begin{equation}
-{T_{air,outlet}} = {T_{air,inlet}} + \varepsilon {{\left( {{T_{water,inlet}} - {T_{air,inlet}}} \right){C_{\min }}} \mathord{\left/ {\vphantom {{\left( {{T_{water,inlet}} - {T_{air,inlet}}} \right){C_{\min }}} {{C_{air}}}}} \right. } {{C_{air}}}}
+{T_{air,outlet}} = {T_{air,inlet}} + \varepsilon {\frac{{\left( {{T_{water,inlet}} - {T_{air,inlet}}} \right){C_{\min }}}}{{C_{air}}}}
 \end{equation}
 
 \begin{equation}
-{T_{water,outlet}} = {T_{water,inlet}} - \left( {{T_{air,outlet}} - {T_{air,inlet}}} \right){{{C_{air}}} \mathord{\left/ {\vphantom {{{C_{air}}} {{C_{water}}}}} \right. } {{C_{water}}}}
+{T_{water,outlet}} = {T_{water,inlet}} - \left( {{T_{air,outlet}} - {T_{air,inlet}}} \right){\frac{{{C_{air}}}}{{C_{water}}}}
 \end{equation}
 
 Now that the outlet conditions have been determined, the output of the baseboard unit (all convective) is calculated from:
@@ -87,7 +87,7 @@ Like many other HVAC components, the convective-only electric baseboard model re
 When the unit is available and there is a heating load within a space, the electric baseboard unit will meet the entire remaining provided that it has enough capacity to do so. The energy consumption of the baseboard heat is calculated using the user-supplied efficiency and the current load on the baseboard unit as follows:
 
 \begin{equation}
-Energ{y_{electric}} = {{Heatin{g_{baseboard}}} \mathord{\left/ {\vphantom {{Heatin{g_{baseboard}}} {Efficiency}}} \right. } {Efficiency}}
+Energ{y_{electric}} = {\frac{{Heatin{g_{baseboard}}}}{Efficiency}}
 \end{equation}
 
 If the unit was scheduled off or there is no heating load for the zone, then there will be no convective heat transfer to the zone from the baseboard unit. The model assumes no heat storage in the baseboard system itself and thus no residual heat transfer in future system time steps due to heat storage in the metal of the baseboard unit.

@@ -794,7 +794,7 @@ U{A_{dry}} = \frac{{{A_{dry}}}}{{{A_{s,total}}}}\left[ {\frac{1}{{{R_i} + {R_{mf
 \end{equation}
 
 \begin{equation}
-{U_c}{A_w} = \frac{{{A_w}}}{{{A_{s,total}}}}\left[ {\frac{{{1 \mathord{\left/ {\vphantom {1 {bb}}} \right. } {bb}}}}{{{R_i} + {R_{mf}} + {R_{o,w}}}}} \right]
+{U_c}{A_w} = \frac{{{A_w}}}{{{A_{s,total}}}}\left[ {\frac{{{\frac{1}{bb}}}}{{{R_i} + {R_{mf}} + {R_{o,w}}}}} \right]
 \label{eq:CoilUcAw}
 \end{equation}
 
@@ -1170,7 +1170,7 @@ where:
 The coil bypass factor is analogous to the ``ineffectiveness'' (1-\(\varepsilon\)) of a heat exchanger, and can be described in terms of the number of transfer of unit (NTU).
 
 \begin{equation}
-BF = \,{e^{ - NTU}}\, = \,\,{e^{ - \,{{\left( {\frac{{UA}}{{cp}}} \right)} \mathord{\left/ {\vphantom {{\left( {\frac{{UA}}{{cp}}} \right)} {\dot m}}} \right. } {\dot m}}}}\, = \,{e^{ - \,\,{{Ao} \mathord{\left/ {\vphantom {{Ao} {\dot m}}} \right. } {\dot m}}}}
+BF = \,{e^{ - NTU}}\, = \,\,{e^{ - \,{\frac{{\left( {\frac{{UA}}{{cp}}} \right)}}{\dot m}}}}\, = \,{e^{ - \,\,{\frac{{Ao}}{\dot m}}}}
 \label{eq:CoilBypassFactor}
 \end{equation}
 
@@ -5225,7 +5225,7 @@ Limit is 0.3 for most sources or 0.9 for detailed condensers
 The heating capacity of the desuperheater coil is then calculated based on the product of total amount of condenser waste heat rejected by the heating source, the desuperheater coil's rated heat reclaim recovery efficiency, and the heat reclaim efficiency modifier.
 
 \begin{equation}
-{\dot Q_{coil}} = {{\left( {{{\dot Q}_{cond}}} \right)\left( {{\varepsilon_{reclaim,rated}}} \right)HEffFTemp} \mathord{\left/ {\vphantom {{\left( {{{\dot Q}_{cond}}} \right)\left( {{\varepsilon_{reclaim,rated}}} \right)HEffFTemp} {DXSystemPLR}}} \right. } {DXSystemPLR}}
+{\dot Q_{coil}} = {\frac{{\left( {{{\dot Q}_{cond}}} \right)\left( {{\varepsilon_{reclaim,rated}}} \right)HEffFTemp}}{DXSystemPLR}}
 \end{equation}
 
 where:
@@ -6009,7 +6009,7 @@ where:
 The coil bypass factor is analogous to the ``ineffectiveness'' (1-\(\varepsilon\)) of a heat exchanger, and can be described in terms of the number of transfer of unit (NTU).
 
 \begin{equation}
-BF = {e^{ - NTU}} = {e^{{{ - \left( {\frac{{UA}}{{{c_p}}}} \right)} \mathord{\left/ {\vphantom {{ - \left( {\frac{{UA}}{{{c_p}}}} \right)} {\dot m}}} \right. } {\dot m}}}} = {e^{ - Ao/\dot m}}
+BF = {e^{ - NTU}} = {e^{{\frac{{ - \left( {\frac{{UA}}{{{c_p}}}} \right)}}{\dot m}}}} = {e^{ - Ao/\dot m}}
 \end{equation}
 
 For a given coil geometry, the bypass factor is only a function of air mass flow rate. The model calculates the parameter A\(_{o}\) in the equation above based on BF\(_{rated}\) and the rated air mass flow rate. With A\(_{o}\) known, the coil BF can be determined for non-rated air flow rates.

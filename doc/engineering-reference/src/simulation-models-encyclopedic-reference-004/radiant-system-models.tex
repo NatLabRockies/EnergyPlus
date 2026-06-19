@@ -115,19 +115,19 @@ where:
 \(T_1(s)\), \(T_2(s)\), \(q_1(s)\), and \(q_2(s)\) are the temperature and flux terms in the Laplace domain
 
 \begin{equation}
-{A_1}\left( s \right) = \cosh \left( {{\ell_1}\sqrt {{s \mathord{\left/ {\vphantom {s {{\alpha_1}}}} \right. } {{\alpha_1}}}} } \right)
+{A_1}\left( s \right) = \cosh \left( {{\ell_1}\sqrt {{\frac{s}{{\alpha_1}}}} } \right)
 \end{equation}
 
 \begin{equation}
-{B_1}\left( s \right) = \left( {{1 \mathord{\left/ {\vphantom {1 {{k_1}\sqrt {{s \mathord{\left/ {\vphantom {s {{\alpha_1}}}} \right. } {{\alpha_1}}}} }}} \right. } {{k_1}\sqrt {{s \mathord{\left/ {\vphantom {s {{\alpha_1}}}} \right. } {{\alpha_1}}}} }}} \right)\sinh \left( {{\ell_1}\sqrt {{s \mathord{\left/ {\vphantom {s {{\alpha_1}}}} \right. } {{\alpha_1}}}} } \right)
+{B_1}\left( s \right) = \left( {{\frac{1}{{k_1}\sqrt {{\frac{s}{{\alpha_1}}}} }}} \right)\sinh \left( {{\ell_1}\sqrt {{\frac{s}{{\alpha_1}}}} } \right)
 \end{equation}
 
 \begin{equation}
-{C_1}\left( s \right) = {k_1}\sqrt {{s \mathord{\left/ {\vphantom {s {{\alpha_1}}}} \right. } {{\alpha_1}}}} \sinh \left( {{\ell_1}\sqrt {{s \mathord{\left/ {\vphantom {s {{\alpha_1}}}} \right. } {{\alpha_1}}}} } \right)
+{C_1}\left( s \right) = {k_1}\sqrt {{\frac{s}{{\alpha_1}}}} \sinh \left( {{\ell_1}\sqrt {{\frac{s}{{\alpha_1}}}} } \right)
 \end{equation}
 
 \begin{equation}
-{D_1}\left( s \right) = \cosh \left( {{\ell_1}\sqrt {{s \mathord{\left/ {\vphantom {s {{\alpha_1}}}} \right. } {{\alpha_1}}}} } \right)
+{D_1}\left( s \right) = \cosh \left( {{\ell_1}\sqrt {{\frac{s}{{\alpha_1}}}} } \right)
 \end{equation}
 
 \(k_1\) is the thermal conductivity of the layer
@@ -349,7 +349,7 @@ where:
 \left[ {\begin{array}{*{20}{c}}{\bar a\left( s \right)}&{\bar b\left( s \right)}\\ {\bar c\left( s \right)}&{\bar d\left( s \right)}\end{array}} \right] = \prod\limits_{i = m + 1}^n {\left[ {\begin{array}{*{20}{c}}{{A_i}\left( s \right)}&{{B_i}\left( s \right)}\\ {{C_i}\left( s \right)}&{{D_i}\left( s \right)}\end{array}} \right]}
 \end{equation}
 
-At first glance, the terms in the heat source transmission matrix may appear to be reversed.~ It is expected that only the layers to the left of the source will affect \(q_1(s)\), but the presence of \(\bar b\left( s \right)\) ~in the element multiplied by \(q_{source}(s)\) to obtain \(q_1(s)\) seems to be contradictory.~ In fact, the entire term, \({{\bar b\left( s \right)} \mathord{\left/ {\vphantom {{\bar b\left( s \right)} {B\left( s \right)}}} \right. } {B\left( s \right)}}\) , must be analyzed to determine the effect of \(q_{source}(s)\) on \(q_1(s)\).~ In essence, the appearance of \(\bar b\left( s \right)\) ~removes the effects of the layers to the right of the source from B(s) leaving only the influence of the layers to the left of the source.~ The form displayed by Equation~\ref{eq:LaplaceTransformDeriv652} is, however, extremely convenient because the terms in the heat source transmission matrix have the same denominators, and thus roots, as the terms in the temperature transmission matrix.~ Thus, the same roots that are calculated for the CTFs can be used for the QTFs, saving a considerable amount of computer time during the calculation of the transfer functions.
+At first glance, the terms in the heat source transmission matrix may appear to be reversed.~ It is expected that only the layers to the left of the source will affect \(q_1(s)\), but the presence of \(\bar b\left( s \right)\) ~in the element multiplied by \(q_{source}(s)\) to obtain \(q_1(s)\) seems to be contradictory.~ In fact, the entire term, \({\frac{{\bar b\left( s \right)}}{B\left( s \right)}}\) , must be analyzed to determine the effect of \(q_{source}(s)\) on \(q_1(s)\).~ In essence, the appearance of \(\bar b\left( s \right)\) ~removes the effects of the layers to the right of the source from B(s) leaving only the influence of the layers to the left of the source.~ The form displayed by Equation~\ref{eq:LaplaceTransformDeriv652} is, however, extremely convenient because the terms in the heat source transmission matrix have the same denominators, and thus roots, as the terms in the temperature transmission matrix.~ Thus, the same roots that are calculated for the CTFs can be used for the QTFs, saving a considerable amount of computer time during the calculation of the transfer functions.
 
 Once Equation~\ref{eq:LaplaceTransformDeriv652} is inverted from the Laplace domain back into the time domain, the combined CTF--QTF solution takes the following form:
 

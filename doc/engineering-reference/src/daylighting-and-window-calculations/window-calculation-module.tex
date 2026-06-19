@@ -1514,7 +1514,7 @@ If the required screen material dimensions are not available from the manufactur
 The screen material diameter and spacing are then used to determine the screen material aspect ratio for use in the screen model.
 
 \begin{equation}
-\gamma  = {D \mathord{\left/ {\vphantom {D S}} \right. } S}
+\gamma  = {\frac{D}{S}}
 \end{equation}
 
 where
@@ -1614,7 +1614,7 @@ The second component of the window screen transmittance model is an empirical al
 \end{equation}
 
 \begin{equation}
-{\delta_{max}} = 89.7 - {{10\gamma } \mathord{\left/ {\vphantom {{10\gamma } {0.16}}} \right. } {0.16}}
+{\delta_{max}} = 89.7 - {\frac{{10\gamma }}{0.16}}
 \end{equation}
 
 \begin{equation}
@@ -1794,7 +1794,7 @@ Similarly, the reflectance of the screen to diffuse radiation is given by
 R_{sc}^{dif,dif}(\gamma ,{\rho_{sc}}) = \frac{{\sum\limits_{j = 1}^N {\sum\limits_{i = 1}^M {R_{sc}^{dir,dif}(\gamma ,{\rho_{sc}},{\theta_j},{\phi_i})\sin ({\theta_j})\cos ({\theta_j})} } }}{{\sum\limits_{j = 1}^N {\sum\limits_{i = 1}^M {\sin ({\theta_j})\cos ({\theta_j})} } }}
 \end{equation}
 
-There is an assumption in both of these formulas that the brightness of the sky (or ground) diffuse radiation is the same for all directions. For this reason, the solar azimuth angle \(\phi\) and solar altitude angle \(\theta\) have a range of 0 to \({\pi \mathord{\left/ {\vphantom {\pi 2}} \right. } 2}\) ~(instead of \({{ - \pi } \mathord{\left/ {\vphantom {{ - \pi } 2}} \right. } 2}\) ~to \({{ + \pi } \mathord{\left/ {\vphantom {{ + \pi } 2}} \right. } 2}\) ) because the screen is assumed to have identical optical properties for radiation incident at the same angles on either side of a vertical or horizontal plane perpendicular to the screen.
+There is an assumption in both of these formulas that the brightness of the sky (or ground) diffuse radiation is the same for all directions. For this reason, the solar azimuth angle \(\phi\) and solar altitude angle \(\theta\) have a range of 0 to \({\frac{\pi}{2}}\) ~(instead of \({\frac{{ - \pi }}{2}}\) ~to \({\frac{{ + \pi }}{2}}\) ) because the screen is assumed to have identical optical properties for radiation incident at the same angles on either side of a vertical or horizontal plane perpendicular to the screen.
 
 Since the screen direct transmittance model is derived with respect to a different coordinate axis labeling, a coordinate transform is needed in order to calculate the diffuse optical properties. In these calculations, for each spherical solar coordinates (\(\theta\), \(\phi\)) we need the corresponding screen relative solar coordinates (\(\alpha\)', \(\varphi\)') to evaluate the screen transmittance model for that direction.
 
@@ -2028,7 +2028,7 @@ This expression, however, contains a number of new quantities, such as \(d{\Omeg
 \caption{Radiation exchange between two surface elements \protect \label{fig:radiation-exchange-between-two-surface}}
 \end{figure}
 
-In this figure, we consider that surface 1 is the back side of the fenestration system, and surface 2 is some other surface in the room that receives the transmitted solar radiation through the fenestration system.~ We consider infinitesimal elements \emph{dA}\(^{(1)}\) and \emph{dA}\(^{(2)}\) of the two surfaces, and define vector surface elements by \emph{d\textbf{A}}\textbf{\(^{(}\)}\(^{1)}\) = \emph{dA}\(^{(1)}\)\textbf{\emph{n}}\(^{(1)}\) and \emph{d\textbf{A}}\textbf{\(^{(}\)}\(^{1)}\) = \emph{dA}\(^{(1)}\)\textbf{\emph{n}}\(^{(1)}\).~ The quantity \textbf{\emph{r}} in the figure denotes a vector pointing from surface 1 to surface 2, the magnitude of which is the distance \emph{r} between the two surface elements.~ This is used to define two unit vectors: \({{\mathbf{\hat r}}^{{\mathrm{(1)}}}} = {{\mathbf{r}} \mathord{\left/ {\vphantom {{\mathbf{r}} r}} \right. } r}\) ~is a unit vector pointing from surface element 1 to surface element 2, and \({{\mathbf{\hat r}}^{{\mathrm{(2)}}}} = - {{\mathbf{r}} \mathord{\left/ {\vphantom {{\mathbf{r}} r}} \right. } r}\) ~is a unit vector pointing from surface element 2 back to surface element 1.~ The unit vector \textbf{\emph{p}}\(^{(T)}\) in Equation~\ref{eq:SofPtotheTEquation} is in fact \({{\mathbf{\hat r}}^{{\mathrm{(1)}}}}\) .~ The shaded quadrilaterals in the figure are the projected area elements normal to \textbf{\emph{r}}.~ Since the areas are infinitesimal, all the radiation leaving one surface element and arriving at the other will be in the direction \textbf{\emph{r}}, so that all radiation will be contained within the parallelepiped defined by the dashed lines (parallel to \textbf{\emph{r}}) joining the corners of the two surface elements.~ It follows that the area \emph{dA}\(^{(2)}\)~ is not independent of \emph{dA}\(^{(1)}\).~ The figure also shows the solid angle that has been denoted \emph{d}\(\Omega\)\(^{(I,2)}\) above, which is the solid angle subtended by \emph{dA}\(^{(1)}\) as seen from \emph{dA}\(^{(2)}\) and is given by:
+In this figure, we consider that surface 1 is the back side of the fenestration system, and surface 2 is some other surface in the room that receives the transmitted solar radiation through the fenestration system.~ We consider infinitesimal elements \emph{dA}\(^{(1)}\) and \emph{dA}\(^{(2)}\) of the two surfaces, and define vector surface elements by \emph{d\textbf{A}}\textbf{\(^{(}\)}\(^{1)}\) = \emph{dA}\(^{(1)}\)\textbf{\emph{n}}\(^{(1)}\) and \emph{d\textbf{A}}\textbf{\(^{(}\)}\(^{1)}\) = \emph{dA}\(^{(1)}\)\textbf{\emph{n}}\(^{(1)}\).~ The quantity \textbf{\emph{r}} in the figure denotes a vector pointing from surface 1 to surface 2, the magnitude of which is the distance \emph{r} between the two surface elements.~ This is used to define two unit vectors: \({{\mathbf{\hat r}}^{{\mathrm{(1)}}}} = {\frac{{\mathbf{r}}}{r}}\) ~is a unit vector pointing from surface element 1 to surface element 2, and \({{\mathbf{\hat r}}^{{\mathrm{(2)}}}} = - {\frac{{\mathbf{r}}}{r}}\) ~is a unit vector pointing from surface element 2 back to surface element 1.~ The unit vector \textbf{\emph{p}}\(^{(T)}\) in Equation~\ref{eq:SofPtotheTEquation} is in fact \({{\mathbf{\hat r}}^{{\mathrm{(1)}}}}\) .~ The shaded quadrilaterals in the figure are the projected area elements normal to \textbf{\emph{r}}.~ Since the areas are infinitesimal, all the radiation leaving one surface element and arriving at the other will be in the direction \textbf{\emph{r}}, so that all radiation will be contained within the parallelepiped defined by the dashed lines (parallel to \textbf{\emph{r}}) joining the corners of the two surface elements.~ It follows that the area \emph{dA}\(^{(2)}\)~ is not independent of \emph{dA}\(^{(1)}\).~ The figure also shows the solid angle that has been denoted \emph{d}\(\Omega\)\(^{(I,2)}\) above, which is the solid angle subtended by \emph{dA}\(^{(1)}\) as seen from \emph{dA}\(^{(2)}\) and is given by:
 
 \begin{equation}
 d{\Omega ^{{\mathrm{(I,2)}}}} = \frac{{d{{\mathbf{A}}^{{\mathrm{(1)}}}} \cdot {{\mathbf{r}}^{{\mathrm{(1)}}}}}}{{{r^2}}}
