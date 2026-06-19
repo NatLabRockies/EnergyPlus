@@ -2,7 +2,7 @@ name: Documentation
 
 on:
   push:
-    branches: [ develop ]
+    branches: [ develop, html_doc ]
   pull_request:
     branches: [ develop ]
 
@@ -18,11 +18,13 @@ jobs:
       matrix:
         include:
           - os: ubuntu-24.04
-            generator: "Unix Makefiles"
+            generator: "Ninja"
             pretty: 'Ubuntu 24.04'
+            build_html: true
           - os: windows-2022
             generator: "Visual Studio 17 2022"
             pretty: "Windows"
+            build_html: false
 #         - os: macos-15
 #           generator: "Unix Makefiles"
 #           pretty: 'Mac arm64'
@@ -40,7 +42,11 @@ jobs:
 
     - name: Set up LaTeX on Linux
       if: runner.os == 'Linux'
-      run: sudo apt update && sudo apt install -y texlive texlive-xetex texlive-science poppler-utils
+      run: sudo apt update && sudo apt install -y texlive texlive-xetex texlive-science poppler-utils ninja-build
+
+    - name: Set up Pandoc on Linux
+      if: runner.os == 'Linux' && matrix.build_html
+      run: sudo apt install -y pandoc
 
     - name: Setup up LaTeX on Mac
       if: runner.os == 'macOS'
@@ -49,6 +55,10 @@ jobs:
         brew install --cask basictex
         echo "/Library/TeX/texbin" >> $GITHUB_PATH
         brew install poppler
+
+    - name: Set up Pandoc on Mac
+      if: runner.os == 'macOS' && matrix.build_html
+      run: brew install pandoc
 
     - name: Set up LaTeX on Windows
       if: runner.os == 'Windows'
@@ -111,6 +121,10 @@ jobs:
         fi;
         echo "TOC is available for pass NO.2"
 
+    - name: Set up Pandoc on Windows
+      if: runner.os == 'Windows' && matrix.build_html
+      run: choco install pandoc
+
     - name: Preinstall Packages on macOS
       if: runner.os == 'macOS'
       working-directory: ./doc/test
@@ -129,7 +143,9 @@ jobs:
 
     - name: Configure CMake
       working-directory: ./doc/build
-      run: cmake -G "${{ matrix.generator }}" -DTEX_INTERACTION=batchmode -DDOCS_TESTING=ON ..
+      run: |
+        cmake -G "${{ matrix.generator }}" -DTEX_INTERACTION=batchmode -DDOCS_TESTING=ON \
+          ${{ matrix.build_html && '-DBUILD_HTML_DOCS:BOOL=ON' || '' }} ..
 
     - name: Add problem matcher
       run: echo "::add-matcher::.github/workflows/doc-problem-match.json"
@@ -207,6 +223,18 @@ jobs:
       with:
         name: "AllDocumentation-${{ matrix.os }}-${{ github.event.pull_request.head.sha }}"
         path: ${{ github.workspace }}/doc/build/pdf/
+
+    - name: Build HTML Docs
+      if: matrix.build_html
+      working-directory: ./doc/build
+      run: ninja html_docs
+
+    - name: Upload HTML documentation
+      uses: actions/upload-artifact@v7
+      if: matrix.build_html
+      with:
+        name: "HtmlDocumentation-${{ matrix.os }}-${{ github.event.pull_request.head.sha }}"
+        path: ${{ github.workspace }}/doc/build/html/
 
     - name: Upload log folder upon failure
       if: failure() && runner.os == 'Windows'
