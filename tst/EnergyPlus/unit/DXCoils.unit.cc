@@ -8282,12 +8282,14 @@ TEST_F(EnergyPlusFixture, CoilHeatingDXSingleSpeed_GrossCapacityActuator)
         "    0.166667,                !- Defrost Time Period Fraction",
         "    Autosize;                !- Resistive Defrost Heater Capacity {W}",
 
+        "  EnergyManagementSystem:Sensor,",
+        "    HCoil_OutNode_mdot,             !- Name",
+        "    SPACE1-1 Heating Coil Outlet,   !- Output:Variable or Output:Meter Index Key Name",
+        "    System Node Mass Flow Rate;     !- Output:Variable or Output:Meter Name",
     });
 
     ASSERT_TRUE(process_idf(idf_objects));
     state->init_state(*state);
-    state->dataGlobal->AnyEnergyManagementSystemInModel = true;
-    GetDXCoils(*state);
     ASSERT_EQ(1, state->dataDXCoils->NumDXHeatingCoils);
 
     bool found = false;
@@ -8423,12 +8425,16 @@ TEST_F(EnergyPlusFixture, CoilHeatingDXSingleSpeed_GrossCapacityActuator_MultiCo
         "  , -8, , 5, 0, , 10,",
         "  Resistive, Timed, 0.166667, 2000, , , , , , , ;",
 
+        "  EnergyManagementSystem:Sensor,",
+        "    HCoil_OutNode_mdot,             !- Name",
+        "    HeatC Outlet,                   !- Output:Variable or Output:Meter Index Key Name",
+        "    System Node Mass Flow Rate;     !- Output:Variable or Output:Meter Name",
+
     });
 
     ASSERT_TRUE(process_idf(idf_objects));
     state->init_state(*state);
-    state->dataGlobal->AnyEnergyManagementSystemInModel = true;
-    GetDXCoils(*state);
+    GetDXCoils(*state); // check that random call to GetDXCoils after init_state doesn't break anything (should return early)
 
     ASSERT_EQ(4, state->dataDXCoils->NumDoe2DXCoils);
     ASSERT_EQ(3, state->dataDXCoils->NumDXHeatingCoils);

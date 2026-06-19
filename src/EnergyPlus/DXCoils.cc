@@ -754,6 +754,9 @@ void GetDXCoils(EnergyPlusData &state)
     Real64 MaxCurvePLR; // used for testing PLF curve output
     Real64 CurveInput;  // index used for testing PLF curve output
 
+    if (!state.dataDXCoils->DXCoil.empty()) {
+        return; // DX coils have already been gotten, VerifyUniqueCoilName would fail on 2nd pass
+    }
     auto &s_ip = state.dataInputProcessing->inputProcessor;
 
     // find number of each type of DX coil and calculate the total number

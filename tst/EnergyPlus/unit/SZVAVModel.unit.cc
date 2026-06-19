@@ -368,7 +368,7 @@ TEST_F(EnergyPlusFixture, SZVAV_PTUnit_Testing)
     Real64 SensibleOutput, LatentOutput, TotalOutput;
     CalcZoneSensibleLatentOutput(SZVAVModel.MaxCoolAirMassFlow,
                                  OutletTemp,
-                                 state->dataLoopNodes->Node(4).HumRat,
+                                 state->dataLoopNodes->Node(coilOutNode).HumRat,
                                  state->dataLoopNodes->Node(zoneNodeNum).Temp,
                                  state->dataLoopNodes->Node(zoneNodeNum).HumRat,
                                  SensibleOutput,
