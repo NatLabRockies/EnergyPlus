@@ -764,7 +764,7 @@ During an initial setup phase, all the heat transfer surfaces in the input file 
 As discussed above for the TARP algorithm, a Sparrow et al. (1979) conducted flat plate measurements and develop the following correlation for finite-size flat plates oriented to windward.
 
 \begin{equation}
-{h_f} = 2.53{R_f}{\left( {\frac{{P{V_z}}}{A}} \right)^{{\raise0.7ex\hbox{1} \!\mathord{\left/ {\vphantom {1 2}}\right.}\!\lower0.7ex\hbox{2}}}}
+{h_f} = 2.53{R_f}{\left( {\frac{{P{V_z}}}{A}} \right)^{{\frac{1}{2}}}}
 \end{equation}
 
 \paragraph{Sparrow Leeward}\label{sparrow-leeward}
@@ -772,7 +772,7 @@ As discussed above for the TARP algorithm, a Sparrow et al. (1979) conducted fla
 Sparrow et al. (1979) conducted flat plate measurements and develop the following correlation for finite-size flat plates oriented to leeward.
 
 \begin{equation}
-{h_f} = \frac{{2.53}}{2}{R_f}{\left( {\frac{{P{V_z}}}{A}} \right)^{{\raise0.7ex\hbox{1} \!\mathord{\left/ {\vphantom {1 2}}\right.}\!\lower0.7ex\hbox{2}}}}
+{h_f} = \frac{{2.53}}{2}{R_f}{\left( {\frac{{P{V_z}}}{A}} \right)^{{\frac{1}{2}}}}
 \end{equation}
 
 \paragraph{MoWITT Windward}\label{mowitt-windward}
@@ -780,7 +780,7 @@ Sparrow et al. (1979) conducted flat plate measurements and develop the followin
 As discussed above, Yazdanian and Klems (1994) used outdoor laboratory measurements to develop the following correlation for smooth surfaces oriented to windward. Booten et al. (2012) developed revised coefficients for use with local surface wind speeds.
 
 \begin{equation}
-{h_c} = \sqrt {{{\left[ {0.84{{\left| {\Delta T} \right|}^{{\raise0.7ex\hbox{1} \!\mathord{\left/ {\vphantom {1 3}}\right.}\!\lower0.7ex\hbox{3}}}}} \right]}^2} + {{\left[ {2.38{\kern 1pt} {\kern 1pt} V_z^{0.89}} \right]}^2}}
+{h_c} = \sqrt {{{\left[ {0.84{{\left| {\Delta T} \right|}^{{\frac{1}{3}}}}} \right]}^2} + {{\left[ {2.38{\kern 1pt} {\kern 1pt} V_z^{0.89}} \right]}^2}}
 \end{equation}
 
 This model equation is for the total film coefficient and includes the natural convection portion. Therefore it should not be used in conjunction with a second natural convection model equation.
@@ -790,7 +790,7 @@ This model equation is for the total film coefficient and includes the natural c
 Yazdanian and Klems (1994) used outdoor laboratory measurements to develop the following correlation for smooth surfaces oriented to leeward. Booten et al. (2012) developed revised coefficients for use with local surface wind speeds.
 
 \begin{equation}
-{h_c} = \sqrt {{{\left[ {0.84{{\left| {\Delta T} \right|}^{{\raise0.7ex\hbox{1} \!\mathord{\left/ {\vphantom {1 3}}\right.}\!\lower0.7ex\hbox{3}}}}} \right]}^2} + {{\left[ {2.86{\kern 1pt} {\kern 1pt} V_z^{0.617}} \right]}^2}}
+{h_c} = \sqrt {{{\left[ {0.84{{\left| {\Delta T} \right|}^{{\frac{1}{3}}}}} \right]}^2} + {{\left[ {2.86{\kern 1pt} {\kern 1pt} V_z^{0.617}} \right]}^2}}
 \end{equation}
 
 This model equation is for the total film coefficient and includes the natural convection portion. Therefore it should not be used in conjunction with a second natural convection model equation.
@@ -815,7 +815,7 @@ Where \emph{V\(_{10m}\)} is the air velocity at the location of the weather stat
 Clear et al. (2003) developed correlations from measurements for horizontal roofs on two commercial buildings. In EnergyPlus the implementation uses the model for natural convection plus turbulent forced convection (eq. 8A in the reference) and applies it to the center point of each surface section that makes up the roof.
 
 \begin{equation}
-{h_c} = \eta \frac{k}{{{L_n}}}0.15Ra_{{L_n}}^{{\raise0.7ex\hbox{1} \!\mathord{\left/ {\vphantom {1 3}}\right.}\!\lower0.7ex\hbox{3}}} + \frac{k}{x}{R_f}0.0296\operatorname{Re}_x^{{\raise0.7ex\hbox{4} \!\mathord{\left/ {\vphantom {4 5}}\right.}\!\lower0.7ex\hbox{5}}}{\Pr ^{{\raise0.7ex\hbox{1} \!\mathord{\left/ {\vphantom {1 3}}\right.}\!\lower0.7ex\hbox{3}}}}
+{h_c} = \eta \frac{k}{{{L_n}}}0.15Ra_{{L_n}}^{{\frac{1}{3}}} + \frac{k}{x}{R_f}0.0296\operatorname{Re}_x^{{\frac{4}{5}}}{\Pr ^{{\frac{1}{3}}}}
 \end{equation}
 
 Where

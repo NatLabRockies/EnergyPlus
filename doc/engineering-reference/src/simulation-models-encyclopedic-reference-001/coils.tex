@@ -1112,7 +1112,7 @@ EIR = \,Energy\,input\,ratio\, = \,\left( {\frac{1}{{CO{P_{rated}}}}} \right)\le
 \(CO{P_{rated}}\) is the coefficient of performance at rated conditions (user input)
 
 \begin{equation}
-RTF{\mathrm{ }} = {\mathrm{ }}\left( {{\raise0.7ex\hbox{{PLR}} \!\mathord{\left/ {\vphantom {{PLR} {PartLoadFrac}}}\right.}\!\lower0.7ex\hbox{{PartLoadFrac}}}} \right)\,\, = \,\,runtime~fraction~of~the~cooling~coil
+RTF{\mathrm{ }} = {\mathrm{ }}\left( {{\frac{{PLR}}{{PartLoadFrac}}}} \right)\,\, = \,\,runtime~fraction~of~the~cooling~coil
 \end{equation}
 
 The total amount of heat rejected by the condenser is then calculated and stored for use by other waste heat recovery models (e.g., Coil:Heating:Desuperheater).
@@ -1826,7 +1826,7 @@ where:
 The load factor (\emph{LF}) is the fractional ``on'' time for the desired reduced load points (75\%, 50\%, or 25\%) calculated from the following equation:
 
 \begin{equation}
-LF = \frac{{\left( {{\raise0.7ex\hbox{{\% Load}} \!\mathord{\left/ {\vphantom {{\% Load} {100}}}\right.}\!\lower0.7ex\hbox{{100}}}} \right) \cdot {{\dot Q}_{StandardRating}}}}{{{{\dot Q}_{Total,Net,PartLoad}}}}
+LF = \frac{{\left( {{\frac{{\% Load}}{{100}}}} \right) \cdot {{\dot Q}_{StandardRating}}}}{{{{\dot Q}_{Total,Net,PartLoad}}}}
 \end{equation}
 
 where \(\% Load\) is the part-load operating points, i.e., 75\% (B), 50\% (C), 25\% (D).

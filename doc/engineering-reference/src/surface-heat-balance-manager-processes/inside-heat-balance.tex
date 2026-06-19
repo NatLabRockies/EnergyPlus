@@ -420,7 +420,7 @@ This is a component of the CeilingDiffuser overall algorithm described below.
 Alamdari and Hammond (1983) developed the following correlation for horizontal surfaces in stable thermal situation.
 
 \begin{equation}
-h = 0.6{\left( {\frac{{\left| {\Delta T} \right|}}{{D_h^2}}} \right)^{{\raise0.7ex\hbox{1} \!\mathord{\left/ {\vphantom {1 5}}\right.}\!\lower0.7ex\hbox{5}}}}
+h = 0.6{\left( {\frac{{\left| {\Delta T} \right|}}{{D_h^2}}} \right)^{{\frac{1}{5}}}}
 \end{equation}
 
 where,
@@ -432,7 +432,7 @@ where,
 Alamdari and Hammond (1983) developed the following correlation for horizontal surfaces in a buoyant thermal situation.
 
 \begin{equation}
-h = {\left\{ {{{\left[ {1.4{{\left( {\frac{{\left| {\Delta T} \right|}}{{{D_h}}}} \right)}^{^{{\raise0.7ex\hbox{1} \!\mathord{\left/ {\vphantom {1 4}}\right.}\!\lower0.7ex\hbox{4}}}}}} \right]}^6} + {{\left[ {1.63{{\left| {\Delta T} \right|}^{{\raise0.7ex\hbox{1} \!\mathord{\left/ {\vphantom {1 3}}\right.}\!\lower0.7ex\hbox{3}}}}} \right]}^6}} \right\}^{{\raise0.7ex\hbox{1} \!\mathord{\left/ {\vphantom {1 6}}\right.}\!\lower0.7ex\hbox{6}}}}
+h = {\left\{ {{{\left[ {1.4{{\left( {\frac{{\left| {\Delta T} \right|}}{{{D_h}}}} \right)}^{^{{\frac{1}{4}}}}}} \right]}^6} + {{\left[ {1.63{{\left| {\Delta T} \right|}^{{\frac{1}{3}}}}} \right]}^6}} \right\}^{{\frac{1}{6}}}}
 \end{equation}
 
 \subsubsection{Alamdari Hammond Vertical Wall}\label{alamdari-hammond-vertical-wall}
@@ -440,7 +440,7 @@ h = {\left\{ {{{\left[ {1.4{{\left( {\frac{{\left| {\Delta T} \right|}}{{{D_h}}}
 Alamdari and Hammond (1983) developed the following correlation for vertical surfaces.
 
 \begin{equation}
-h = {\left\{ {{{\left[ {1.5{{\left( {\frac{{\left| {\Delta T} \right|}}{H}} \right)}^{^{{\raise0.7ex\hbox{1} \!\mathord{\left/ {\vphantom {1 4}}\right.}\!\lower0.7ex\hbox{4}}}}}} \right]}^6} + {{\left[ {1.23{{\left| {\Delta T} \right|}^{{\raise0.7ex\hbox{1} \!\mathord{\left/ {\vphantom {1 3}}\right.}\!\lower0.7ex\hbox{3}}}}} \right]}^6}} \right\}^{{\raise0.7ex\hbox{1} \!\mathord{\left/ {\vphantom {1 6}}\right.}\!\lower0.7ex\hbox{6}}}}
+h = {\left\{ {{{\left[ {1.5{{\left( {\frac{{\left| {\Delta T} \right|}}{H}} \right)}^{^{{\frac{1}{4}}}}}} \right]}^6} + {{\left[ {1.23{{\left| {\Delta T} \right|}^{{\frac{1}{3}}}}} \right]}^6}} \right\}^{{\frac{1}{6}}}}
 \end{equation}
 
 where,
@@ -555,7 +555,7 @@ h = \max \left\{
 Beausoleil-Morrison (2000) used blending techniques to combine correlations originally developed by Alamdari and Hammond (1983) and Fisher and Pedersen (1997) to create the following correlation is for floors where the flow driving forces include both mechanical forces and thermally stable buoyancy.
 
 \begin{equation}
-h = {\left( {{{\left\{ {0.6 \cdot {{\left( {\frac{{\left| {\Delta T} \right|}}{{{D_H}}}} \right)}^{{\raise0.7ex\hbox{1} \!\mathord{\left/ {\vphantom {1 5}}\right.}\!\lower0.7ex\hbox{5}}}}} \right\}}^3} + {{\left\{ {\left[ {\frac{{{T_{surf}} - {T_{SAT}}}}{{\left| {\Delta T} \right|}}} \right]\cdot\left[ {0.159 + 0.116AC{H^{0.8}}} \right]} \right\}}^3}} \right)^{{\raise0.7ex\hbox{1} \!\mathord{\left/ {\vphantom {1 3}}\right.}\!\lower0.7ex\hbox{3}}}}
+h = {\left( {{{\left\{ {0.6 \cdot {{\left( {\frac{{\left| {\Delta T} \right|}}{{{D_H}}}} \right)}^{{\frac{1}{5}}}}} \right\}}^3} + {{\left\{ {\left[ {\frac{{{T_{surf}} - {T_{SAT}}}}{{\left| {\Delta T} \right|}}} \right]\cdot\left[ {0.159 + 0.116AC{H^{0.8}}} \right]} \right\}}^3}} \right)^{{\frac{1}{3}}}}
 \end{equation}
 
 \subsubsection{Beausoleil Morrison Mixed Unstable Floor}\label{beausoleil-morrison-mixed-unstable-floor}
@@ -564,7 +564,7 @@ Beausoleil-Morrison (2000) used blending techniques to combine correlations orig
 
 {\medmuskip=0mu\thinmuskip=0mu\thickmuskip=0mu\nulldelimiterspace=0pt\scriptspace=0pt
 \begin{equation}
-h = {\left( {{{\left\{ {{{\left[ {1.4{{\left( {\frac{{\left| {\Delta T} \right|}}{{{D_h}}}} \right)}^{^{{\raise0.7ex\hbox{1} \!\mathord{\left/ {\vphantom {1 4}}\right.}\!\lower0.7ex\hbox{4}}}}}} \right]}^6} + {{\left[ {1.63{{\left| {\Delta T} \right|}^{{\raise0.7ex\hbox{1} \!\mathord{\left/ {\vphantom {1 3}}\right.}\!\lower0.7ex\hbox{3}}}}} \right]}^6}} \right\}}^{{\raise0.7ex\hbox{3} \!\mathord{\left/ {\vphantom {3 6}}\right.}\!\lower0.7ex\hbox{6}}}} + {{\left\{ {\left[ {\frac{{{T_{surf}} - {T_{SAT}}}}{{\left| {\Delta T} \right|}}} \right]\cdot\left[ {0.159 + 0.116AC{H^{0.8}}} \right]} \right\}}^3}} \right)^{{\raise0.7ex\hbox{1} \!\mathord{\left/ {\vphantom {1 3}}\right.}\!\lower0.7ex\hbox{3}}}}
+h = {\left( {{{\left\{ {{{\left[ {1.4{{\left( {\frac{{\left| {\Delta T} \right|}}{{{D_h}}}} \right)}^{^{{\frac{1}{4}}}}}} \right]}^6} + {{\left[ {1.63{{\left| {\Delta T} \right|}^{{\frac{1}{3}}}}} \right]}^6}} \right\}}^{{\frac{3}{6}}}} + {{\left\{ {\left[ {\frac{{{T_{surf}} - {T_{SAT}}}}{{\left| {\Delta T} \right|}}} \right]\cdot\left[ {0.159 + 0.116AC{H^{0.8}}} \right]} \right\}}^3}} \right)^{{\frac{1}{3}}}}
 \end{equation}}
 
 \subsubsection{Beausoleil Morrison Mixed Stable Ceiling}\label{beausoleil-morrison-mixed-stable-ceiling}
@@ -572,7 +572,7 @@ h = {\left( {{{\left\{ {{{\left[ {1.4{{\left( {\frac{{\left| {\Delta T} \right|}
 Beausoleil-Morrison (2000) used blending techniques to combine correlations originally developed by Alamdari and Hammond (1983) and Fisher and Pedersen (1997) to create the following correlation is for ceilings where the flow driving forces include both mechanical forces and thermally Stable buoyancy.
 
 \begin{equation}
-h = {\left( {{{\left\{ {0.6 \cdot {{\left( {\frac{{\left| {\Delta T} \right|}}{{{D_H}}}} \right)}^{{\raise0.7ex\hbox{1} \!\mathord{\left/ {\vphantom {1 5}}\right.}\!\lower0.7ex\hbox{5}}}}} \right\}}^3} + {{\left\{ {\left[ {\frac{{{T_{surf}} - {T_{SAT}}}}{{\left| {\Delta T} \right|}}} \right]\cdot\left[ { - 0.166 + 0.484AC{H^{0.8}}} \right]} \right\}}^3}} \right)^{{\raise0.7ex\hbox{1} \!\mathord{\left/ {\vphantom {1 3}}\right.}\!\lower0.7ex\hbox{3}}}}
+h = {\left( {{{\left\{ {0.6 \cdot {{\left( {\frac{{\left| {\Delta T} \right|}}{{{D_H}}}} \right)}^{{\frac{1}{5}}}}} \right\}}^3} + {{\left\{ {\left[ {\frac{{{T_{surf}} - {T_{SAT}}}}{{\left| {\Delta T} \right|}}} \right]\cdot\left[ { - 0.166 + 0.484AC{H^{0.8}}} \right]} \right\}}^3}} \right)^{{\frac{1}{3}}}}
 \end{equation}
 
 \subsubsection{Beausoleil Morrison Mixed Unstable Ceiling}\label{beausoleil-morrison-mixed-unstable-ceiling}
@@ -619,7 +619,7 @@ h = \left(
 Fohanno and Polidori (2006) developed the following equation for \emph{h\(_{c}\)} for vertical walls under simple buoyancy flow conditions.
 
 \begin{equation}
-h = \left\{ \begin{array}{l}1.332{\left( {\frac{{\left| {\Delta T} \right|}}{H}} \right)^{{\raise0.7ex\hbox{1} \!\mathord{\left/ {\vphantom {1 4}}\right.}\!\lower0.7ex\hbox{4}}}}\quad ,\quad Ra_H^* \le 6.3 \times {10^9}\\1.235{e^{\left( {0.0467H} \right)}}{\left| {\Delta T} \right|^{0.316}}\quad ,\quad Ra_H^* > 6.3 \times {10^9}\end{array} \right.
+h = \left\{ \begin{array}{l}1.332{\left( {\frac{{\left| {\Delta T} \right|}}{H}} \right)^{{\frac{1}{4}}}}\quad ,\quad Ra_H^* \le 6.3 \times {10^9}\\1.235{e^{\left( {0.0467H} \right)}}{\left| {\Delta T} \right|^{0.316}}\quad ,\quad Ra_H^* > 6.3 \times {10^9}\end{array} \right.
 \end{equation}
 
 where,
@@ -677,33 +677,33 @@ There are four cases for the Nusselt correlation that vary by the tilt angle in 
 Case A. \({0^o } \leq \gamma < 15^o\)
 
 \begin{equation}
-Nu = 0.13Ra_H^{{\raise0.7ex\hbox{1} \!\mathord{\left/ {\vphantom {1 3}}\right.}\!\lower0.7ex\hbox{3}}}
+Nu = 0.13Ra_H^{{\frac{1}{3}}}
 \end{equation}
 
 Case B. \(15^o \leq \gamma \leq 90^o\)
 
 \begin{equation}
-R{a_{cv}} = 2.5 \times {10^5}{\left( {\frac{{{e^{0.72\gamma }}}}{{\sin \lambda }}} \right)^{{\raise0.7ex\hbox{1} \!\mathord{\left/ {\vphantom {1 5}}\right.}\!\lower0.7ex\hbox{5}}}}
+R{a_{cv}} = 2.5 \times {10^5}{\left( {\frac{{{e^{0.72\gamma }}}}{{\sin \lambda }}} \right)^{{\frac{1}{5}}}}
 \end{equation}
 
 \begin{equation}
-Nu = 0.56{\left( {R{a_H}\sin \gamma } \right)^{{\raise0.7ex\hbox{1} \!\mathord{\left/ {\vphantom {1 4}}\right.}\!\lower0.7ex\hbox{4}}}};\;for\;R{a_H} \le R{a_{CV}}
+Nu = 0.56{\left( {R{a_H}\sin \gamma } \right)^{{\frac{1}{4}}}};\;for\;R{a_H} \le R{a_{CV}}
 \end{equation}
 
 \begin{equation}
-Nu = 0.13\left( {Ra_H^{{\raise0.7ex\hbox{1} \!\mathord{\left/ {\vphantom {1 3}}\right.}\!\lower0.7ex\hbox{3}}} - Ra_{CV}^{{\raise0.7ex\hbox{1} \!\mathord{\left/ {\vphantom {1 3}}\right.}\!\lower0.7ex\hbox{3}}}} \right) + 0.56{\left( {R{a_{CV}}\sin \gamma } \right)^{{\raise0.7ex\hbox{1} \!\mathord{\left/ {\vphantom {1 4}}\right.}\!\lower0.7ex\hbox{4}}}};\;R{a_H} > R{a_{CV}}
+Nu = 0.13\left( {Ra_H^{{\frac{1}{3}}} - Ra_{CV}^{{\frac{1}{3}}}} \right) + 0.56{\left( {R{a_{CV}}\sin \gamma } \right)^{{\frac{1}{4}}}};\;R{a_H} > R{a_{CV}}
 \end{equation}
 
 Case C. \(90^o < \gamma \leq 179^o\)
 
 \begin{equation}
-Nu = 0.56{\left( {R{a_H}\sin \gamma } \right)^{{\raise0.7ex\hbox{1} \!\mathord{\left/ {\vphantom {1 4}}\right.}\!\lower0.7ex\hbox{4}}}};\;{10^5} \le R{a_H}\sin \gamma  < {10^{11}}
+Nu = 0.56{\left( {R{a_H}\sin \gamma } \right)^{{\frac{1}{4}}}};\;{10^5} \le R{a_H}\sin \gamma  < {10^{11}}
 \end{equation}
 
 Case D. \(179^o < \gamma \leq 180^o\)
 
 \begin{equation}
-Nu = 0.58Ra_H^{{\raise0.7ex\hbox{1} \!\mathord{\left/ {\vphantom {1 5}}\right.}\!\lower0.7ex\hbox{5}}};\;R{a_H} \le {10^{11}}
+Nu = 0.58Ra_H^{{\frac{1}{5}}};\;R{a_H} \le {10^{11}}
 \end{equation}
 
 The material properties are evaluated at the mean film temperature.~ Standard EnergyPlus psychrometric functions are used for \(\rho\) ~and \({c_p}\) .~ Thermal conductivity is calculated using:
@@ -902,7 +902,7 @@ For a vertical cavity, the correlation from ISO 15099 is:
 \end{equation}
 
 \begin{equation}
-{\mathrm{NU2}} = 0.242{\left( {{\raise0.7ex\hbox{{{\mathrm{Ra}}}} \!\mathord{\left/ {\vphantom {{{\mathrm{Ra}}} {\mathrm{A}}}}\right.}\!\lower0.7ex\hbox{{\mathrm{A}}}}} \right)^{0.272}}
+{\mathrm{NU2}} = 0.242{\left( {{\frac{{{\mathrm{Ra}}}}{{\mathrm{A}}}}} \right)^{0.272}}
 \end{equation}
 
 \begin{equation}
@@ -922,7 +922,7 @@ This is then used in EnergyPlus as follows:
 Net convection coefficient from glazing to wall is:
 
 \begin{equation}
-{h_{net}} = {\mathrm{k}}\left( {{\raise0.7ex\hbox{{{\mathrm{NU}}}} \!\mathord{\left/ {\vphantom {{{\mathrm{NU}}} {\mathrm{L}}}}\right.}\!\lower0.7ex\hbox{{\mathrm{L}}}}} \right)
+{h_{net}} = {\mathrm{k}}\left( {{\frac{{{\mathrm{NU}}}}{{\mathrm{L}}}}} \right)
 \end{equation}
 
 where

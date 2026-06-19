@@ -105,7 +105,7 @@ Here
 
 \subsection{Room-Side Convection}\label{room-side-convection}
 
-The correlation for room-side convection coefficient, \({h_i}\) , is from ISO 15099 section 8.3.2.2.~ (Prior to EnergyPlus version 3.1, the value for \({h_i}\) ~was modeled using the ``Detailed'' algorithm for opaque surface heat transfer, e.g.~for a vertical surface \({h_i} = 1.31{\left| {\Delta T} \right|^{{\raise0.7ex\hbox{1} \!\mathord{\left/ {\vphantom {1 3}}\right.}\!\lower0.7ex\hbox{3}}}}\) ; see section Detailed Natural Convection Algorithm).~ The ISO 15099 correlation is for still room air and is determined in terms of the Nusselt number, \(Nu\), is:
+The correlation for room-side convection coefficient, \({h_i}\) , is from ISO 15099 section 8.3.2.2.~ (Prior to EnergyPlus version 3.1, the value for \({h_i}\) ~was modeled using the ``Detailed'' algorithm for opaque surface heat transfer, e.g.~for a vertical surface \({h_i} = 1.31{\left| {\Delta T} \right|^{{\frac{1}{3}}}}\) ; see section Detailed Natural Convection Algorithm).~ The ISO 15099 correlation is for still room air and is determined in terms of the Nusselt number, \(Nu\), is:
 
 \begin{equation}
 {h_i} = Nu\left( {\frac{\lambda }{H}} \right)
@@ -144,33 +144,33 @@ There are four cases for the Nusselt correlation that vary by the tilt angle in 
 Case A. \({0^\circ } \le \gamma < 15^\circ\)
 
 \begin{equation}
-Nu = 0.13Ra_H^{{\raise0.7ex\hbox{1} \!\mathord{\left/ {\vphantom {1 3}}\right.}\!\lower0.7ex\hbox{3}}}
+Nu = 0.13Ra_H^{{\frac{1}{3}}}
 \end{equation}
 
 Case B. \(15^\circ \le \gamma \le 90^\circ\)
 
 \begin{equation}
-R{a_{cv}} = 2.5 \times {10^5}{\left( {\frac{{{e^{0.72\gamma }}}}{{\sin \lambda }}} \right)^{{\raise0.7ex\hbox{1} \!\mathord{\left/ {\vphantom {1 5}}\right.}\!\lower0.7ex\hbox{5}}}}
+R{a_{cv}} = 2.5 \times {10^5}{\left( {\frac{{{e^{0.72\gamma }}}}{{\sin \lambda }}} \right)^{{\frac{1}{5}}}}
 \end{equation}
 
 \begin{equation}
-Nu = 0.56{\left( {R{a_H}\sin \gamma } \right)^{{\raise0.7ex\hbox{1} \!\mathord{\left/ {\vphantom {1 4}}\right.}\!\lower0.7ex\hbox{4}}}};\;for\;R{a_H} \le R{a_{CV}}
+Nu = 0.56{\left( {R{a_H}\sin \gamma } \right)^{{\frac{1}{4}}}};\;for\;R{a_H} \le R{a_{CV}}
 \end{equation}
 
 \begin{equation}
-Nu = 0.13\left( {Ra_H^{{\raise0.7ex\hbox{1} \!\mathord{\left/ {\vphantom {1 3}}\right.}\!\lower0.7ex\hbox{3}}} - Ra_{CV}^{{\raise0.7ex\hbox{1} \!\mathord{\left/ {\vphantom {1 3}}\right.}\!\lower0.7ex\hbox{3}}}} \right) + 0.56{\left( {R{a_{CV}}\sin \gamma } \right)^{{\raise0.7ex\hbox{1} \!\mathord{\left/ {\vphantom {1 4}}\right.}\!\lower0.7ex\hbox{4}}}};\;R{a_H} > R{a_{CV}}
+Nu = 0.13\left( {Ra_H^{{\frac{1}{3}}} - Ra_{CV}^{{\frac{1}{3}}}} \right) + 0.56{\left( {R{a_{CV}}\sin \gamma } \right)^{{\frac{1}{4}}}};\;R{a_H} > R{a_{CV}}
 \end{equation}
 
 Case C. \(90^\circ < \gamma \le 179^\circ\)
 
 \begin{equation}
-Nu = 0.56{\left( {R{a_H}\sin \gamma } \right)^{{\raise0.7ex\hbox{1} \!\mathord{\left/ {\vphantom {1 4}}\right.}\!\lower0.7ex\hbox{4}}}};\;{10^5} \le R{a_H}\sin \gamma  < {10^{11}}
+Nu = 0.56{\left( {R{a_H}\sin \gamma } \right)^{{\frac{1}{4}}}};\;{10^5} \le R{a_H}\sin \gamma  < {10^{11}}
 \end{equation}
 
 Case D. \(179^\circ < \gamma \le 180^\circ\)
 
 \begin{equation}
-Nu = 0.58Ra_H^{{\raise0.7ex\hbox{1} \!\mathord{\left/ {\vphantom {1 5}}\right.}\!\lower0.7ex\hbox{5}}};\;R{a_H} \le {10^{11}}
+Nu = 0.58Ra_H^{{\frac{1}{5}}};\;R{a_H} \le {10^{11}}
 \end{equation}
 
 The material properties are evaluated at the mean film temperature.~ Standard EnergyPlus psychrometric functions are used for \(\rho\) ~and \({c_p}\).~ Thermal conductivity is calculated using:

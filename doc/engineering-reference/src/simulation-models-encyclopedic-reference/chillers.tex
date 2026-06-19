@@ -663,7 +663,7 @@ All five of these cooling performance curves are accessed through EnergyPlus' bu
 The condenser load is computed as follows:
 
 \begin{equation}
-CondenserLoad = CoolingLoad + {\raise0.7ex\hbox{{CoolFuelInput}} \!\mathord{\left/ {\vphantom {{CoolFuelInput} {HFIR}}}\right.}\!\lower0.7ex\hbox{{HFIR}}} + CoolElectricPower
+CondenserLoad = CoolingLoad + {\frac{{CoolFuelInput}}{{HFIR}}} + CoolElectricPower
 \end{equation}
 
 \subsubsection{Heating}\label{heating}
