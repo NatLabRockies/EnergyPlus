@@ -515,7 +515,7 @@ A_{FinSurf} = 78.5 \cdot \dot m_{air,des}
 \subsubsection{Total Tube Inside Area}\label{total-tube-inside-area}
 
 \begin{equation}
-\emph{A\(_{tube,total\, inside}\)} = 4.4 *\emph{D\(_{tube,inside}\)} *\emph{N\(_{tube\, rows}\)} *\emph{N\(_{tubes/row}\)}
+\textit{A\(_{tube,total\, inside}\)} = 4.4 *\textit{D\(_{tube,inside}\)} *\textit{N\(_{tube\, rows}\)} *\textit{N\(_{tubes/row}\)}
 \end{equation}
 
 Where \emph{D\(_{tube,inside}\)} is the tube inside diameter.
@@ -523,7 +523,7 @@ Where \emph{D\(_{tube,inside}\)} is the tube inside diameter.
 \subsubsection{Tube Outside Surf Area}\label{tube-outside-surf-area}
 
 \begin{equation}
-\emph{A\(_{tube,outside}\)} = 4.1 *\emph{D\(_{tube,outside}\)} *\emph{N\(_{tube\, rows}\)} *\emph{N\(_{tubes/row}\)}
+\textit{A\(_{tube,outside}\)} = 4.1 *\textit{D\(_{tube,outside}\)} *\textit{N\(_{tube\, rows}\)} *\textit{N\(_{tubes/row}\)}
 \end{equation}
 
 Where \emph{D\(_{tube,outside}\)} is the tube outside diameter.
@@ -531,7 +531,7 @@ Where \emph{D\(_{tube,outside}\)} is the tube outside diameter.
 \subsubsection{Coil Depth}\label{coil-depth}
 
 \begin{equation}
-\emph{Depth\(_{coil}\)} = \emph{Depth\(_{tube\, spacing}\)} * \emph{N\(_{tube\, rows}\)}
+\textit{Depth\(_{coil}\)} = \textit{Depth\(_{tube\, spacing}\)} * \textit{N\(_{tube\, rows}\)}
 \end{equation}
 
 
@@ -877,21 +877,21 @@ To obtain the UA of the coil, we specify the model inputs (other than the UA) at
 The design coil load is the system design sensible cooling capacity:
 
 \begin{equation}
-\emph{Q\(_{coil,des}\)} = \emph{HeatCap\(_{sys}\)}
+\textit{Q\(_{coil,des}\)} = \textit{HeatCap\(_{sys}\)}
 \end{equation}
 
 The required inputs for the simple coil model are:
 
 \begin{equation}
-\emph{T\(_{in,air}\)} = \emph{HeatMixTemp\(_{sys}\)}
+\textit{T\(_{in,air}\)} = \textit{HeatMixTemp\(_{sys}\)}
 \end{equation}
 
 \begin{equation}
-\emph{W\(_{in,air}\)} = \emph{HeatMixHumRat\(_{sys}\)}
+\textit{W\(_{in,air}\)} = \textit{HeatMixHumRat\(_{sys}\)}
 \end{equation}
 
 \begin{equation}
-\emph{T\(_{in,water}\)} = \emph{ExitTemp\(_{plt,hw,des}\)}
+\textit{T\(_{in,water}\)} = \textit{ExitTemp\(_{plt,hw,des}\)}
 \end{equation}
 
 \begin{equation}
@@ -903,13 +903,13 @@ Depending on the duct type, get the coil design air flow rate.
 For duct type = \emph{main, other} or default
 
 \begin{equation}
-\emph{\(\dot m_{in,air} = \rho{air} \cdot DesMainVolFlow_{sys}\)}
+\textit{\(\dot m_{in,air} = \rho{air} \cdot DesMainVolFlow_{sys}\)}
 \end{equation}
 
 for duct type = \emph{cooling}
 
 \begin{equation}
-\emph{\(\dot m_{in,air} = \rho_{air} \cdot DesCoolVolFlowsys\)}
+\textit{\(\dot m_{in,air} = \rho_{air} \cdot DesCoolVolFlowsys\)}
 \end{equation}
 
 for duct type = \emph{heating}
@@ -1062,7 +1062,7 @@ The sizing calculation is done in subroutine \emph{SizeHeatingCoil} in module \e
 The value is obtained from the system design array.
 
 \begin{equation}
-\emph{Cap\(_{nom}\)} = \emph{HeatCap\(_{sys}\)}
+\textit{Cap\(_{nom}\)} = \textit{HeatCap\(_{sys}\)}
 \end{equation}
 
 \paragraph{Zone Coils}\label{zone-coils-3}
@@ -1072,33 +1072,33 @@ The capacity is calculated from the design coil inlet and outlet conditions.
 If the coil is not part of an induction unit then obtain the coil inlet temperature from the zone design data array;
 
 \begin{equation}
-\emph{T\(_{in,air}\) = DesHeatCoilInTemp\(_{zone}\)}
+\textit{T\(_{in,air}\) = DesHeatCoilInTemp\(_{zone}\)}
 \end{equation}
 
 If the coil is part of an induction unit take into account the induced air:
 
 \begin{equation}
-\emph{Frac\(_{minflow}\)} = \emph{MinFlowFrac\(_{zone}\)}
+\textit{Frac\(_{minflow}\)} = \textit{MinFlowFrac\(_{zone}\)}
 \end{equation}
 
 \begin{equation}
-\emph{T\(_{in,air}\)} = \emph{DesHeatCoilInTemp\(_{zone}\)} * \emph{Frac\(_{minflow}\)} +
+\textit{T\(_{in,air}\)} = \textit{DesHeatCoilInTemp\(_{zone}\)} * \textit{Frac\(_{minflow}\)} +
 \end{equation}
 
 \begin{equation}
-\emph{ZoneTempAtHeatPeak\(_{zone}\)} *(1- \emph{Frac\(_{minflow}\)})
+\textit{ZoneTempAtHeatPeak\(_{zone}\)} *(1- \textit{Frac\(_{minflow}\)})
 \end{equation}
 
 \begin{equation}
-\emph{T\(_{out,air}\) = HeatDesTemp\(_{zone}\)}
+\textit{T\(_{out,air}\) = HeatDesTemp\(_{zone}\)}
 \end{equation}
 
 \begin{equation}
-W\emph{\(_{out,air}\) = HeatDesHumRat\(_{zone}\)}
+W\textit{\(_{out,air}\) = HeatDesHumRat\(_{zone}\)}
 \end{equation}
 
 \begin{equation}
-\emph{Q\(_{coil,des}\)} = \emph{C\(_{p,air}\)} * \emph{DesHeatMassFlow\(_{zone}\)} *(\emph{T\(_{out,air}\)}-\emph{T\(_{in,air}\)})
+\textit{Q\(_{coil,des}\)} = \textit{C\(_{p,air}\)} * \textit{DesHeatMassFlow\(_{zone}\)} *(\textit{T\(_{out,air}\)}-\textit{T\(_{in,air}\)})
 \end{equation}
 
 Here \emph{c\(_{p,air}\)} is calculated at the outlet humidity and the average of the inlet and outlet temperatures.
@@ -1142,43 +1142,43 @@ The rated air flow rate is the maximum of the heating and cooling design flow ra
 The rated cooling capacity is obtained by dividing the peak cooling capacity by the \emph{Cooling Capacity Modifier Curve} evaluated at peak mixed wetbulb and outdoor drybulb temperatures.
 
 \begin{equation}
-\emph{T\(_{mix}\)} = \emph{CoolMixTemp\(_{sys}\)}
+\textit{T\(_{mix}\)} = \textit{CoolMixTemp\(_{sys}\)}
 \end{equation}
 
 \begin{equation}
-\emph{W\(_{mix}\)} = \emph{CoolMixHumRat\(_{sys}\)}
+\textit{W\(_{mix}\)} = \textit{CoolMixHumRat\(_{sys}\)}
 \end{equation}
 
 \begin{equation}
-\emph{T\(_{sup}\)} = \emph{CoolSupTemp\(_{sys}\)}
+\textit{T\(_{sup}\)} = \textit{CoolSupTemp\(_{sys}\)}
 \end{equation}
 
 \begin{equation}
-\emph{W\(_{sup}\)} = \emph{CoolSupHumRat\(_{sys}\)}
+\textit{W\(_{sup}\)} = \textit{CoolSupHumRat\(_{sys}\)}
 \end{equation}
 
 \begin{equation}
-\emph{T\(_{outside}\)} = \emph{CoolOutTemp\(_{sys}\)}
+\textit{T\(_{outside}\)} = \textit{CoolOutTemp\(_{sys}\)}
 \end{equation}
 
 \begin{equation}
-\emph{r\(_{air}\)} = \emph{PsyRhoAirFnPbTdbW}(\emph{p\(_{air,std}\)}, \emph{T\(_{mix}\)},\emph{W\(_{mix}\)})
+\textit{r\(_{air}\)} = \textit{PsyRhoAirFnPbTdbW}(\textit{p\(_{air,std}\)}, \textit{T\(_{mix}\)},\textit{W\(_{mix}\)})
 \end{equation}
 
 \begin{equation}
-\emph{h\(_{mix}\)} = \emph{PsyHFnTdbW}(\emph{T\(_{mix}\)},\emph{W\(_{mix}\)})
+\textit{h\(_{mix}\)} = \textit{PsyHFnTdbW}(\textit{T\(_{mix}\)},\textit{W\(_{mix}\)})
 \end{equation}
 
 \begin{equation}
-\emph{h\(_{sup}\)} = \emph{PsyHFnTdbW}(\emph{T\(_{sup}\)},\emph{W\(_{sup}\)})
+\textit{h\(_{sup}\)} = \textit{PsyHFnTdbW}(\textit{T\(_{sup}\)},\textit{W\(_{sup}\)})
 \end{equation}
 
 \begin{equation}
-\emph{T\(_{mix,wb}\)} = \emph{PsyTwbFnTdbWPb}(\emph{T\(_{mix}\)},\emph{W\(_{mix}\)}, \emph{p\(_{air,std}\)})
+\textit{T\(_{mix,wb}\)} = \textit{PsyTwbFnTdbWPb}(\textit{T\(_{mix}\)},\textit{W\(_{mix}\)}, \textit{p\(_{air,std}\)})
 \end{equation}
 
 \begin{equation}
-\emph{CapModFac} = \emph{CurveValue}(CCapFTemp,\emph{T\(_{mix,wb}\)},\emph{T\(_{outside}\)})
+\textit{CapModFac} = \textit{CurveValue}(CCapFTemp,\textit{T\(_{mix,wb}\)},\textit{T\(_{outside}\)})
 \end{equation}
 
 \emph{Q\(_{fan,heat,des}\)} = design fan heat (W) - see Section \ref{design-fan-heat}
@@ -1188,7 +1188,7 @@ CCap_{peak} = \rho_{air} \cdot \dot V_{air,rated} \cdot (h_{mix} - h_{sup}) + \d
 \end{equation}
 
 \begin{equation}
-\emph{CCap\(_{rated}\)} = \emph{CCap\(_{peak}\)}/ \emph{CapModFac}
+\textit{CCap\(_{rated}\)} = \textit{CCap\(_{peak}\)}/ \textit{CapModFac}
 \end{equation}
 
 We check that the design volume flow per total capacity is within the prescribed range:
@@ -1238,43 +1238,43 @@ FlowCapRatio_{max} = 0.00003355 m^{3}/s per Watt (250 cfm/ton)
 The rated cooling capacity for zone coils is calculated in the same manner as for system coils.
 
 \begin{equation}
-\emph{T\(_{mix}\)} = \emph{DesCoolCoilInTemp\(_{zone}\)}
+\textit{T\(_{mix}\)} = \textit{DesCoolCoilInTemp\(_{zone}\)}
 \end{equation}
 
 \begin{equation}
-\emph{W\(_{mix}\)} = \emph{DesCoolCoilInHumRat\(_{zone}\)}
+\textit{W\(_{mix}\)} = \textit{DesCoolCoilInHumRat\(_{zone}\)}
 \end{equation}
 
 \begin{equation}
-\emph{T\(_{sup}\)} = \emph{CoolDesTemp\(_{zone}\)}
+\textit{T\(_{sup}\)} = \textit{CoolDesTemp\(_{zone}\)}
 \end{equation}
 
 \begin{equation}
-\emph{W\(_{sup}\)} = \emph{CoolDesHumRat\(_{zone}\)}
+\textit{W\(_{sup}\)} = \textit{CoolDesHumRat\(_{zone}\)}
 \end{equation}
 
 \begin{equation}
-\emph{T\(_{outside}\)} = \emph{T\(_{outside}\),\(_{desday,peak}\)}
+\textit{T\(_{outside}\)} = \textit{T\(_{outside}\),\(_{desday,peak}\)}
 \end{equation}
 
 \begin{equation}
-\emph{r\(_{air}\)} = \emph{PsyRhoAirFnPbTdbW}(\emph{p\(_{air,std}\)}, \emph{T\(_{mix}\)},\emph{W\(_{mix}\)})
+\textit{r\(_{air}\)} = \textit{PsyRhoAirFnPbTdbW}(\textit{p\(_{air,std}\)}, \textit{T\(_{mix}\)},\textit{W\(_{mix}\)})
 \end{equation}
 
 \begin{equation}
-\emph{h\(_{mix}\)} = \emph{PsyHFnTdbW}(\emph{T\(_{mix}\)},\emph{W\(_{mix}\)})
+\textit{h\(_{mix}\)} = \textit{PsyHFnTdbW}(\textit{T\(_{mix}\)},\textit{W\(_{mix}\)})
 \end{equation}
 
 \begin{equation}
-\emph{h\(_{sup}\)} = \emph{PsyHFnTdbW}(\emph{T\(_{sup}\)},\emph{W\(_{sup}\)})
+\textit{h\(_{sup}\)} = \textit{PsyHFnTdbW}(\textit{T\(_{sup}\)},\textit{W\(_{sup}\)})
 \end{equation}
 
 \begin{equation}
-\emph{T\(_{mix,wb}\)} = \emph{PsyTwbFnTdbWPb}(\emph{T\(_{mix}\)},\emph{W\(_{mix}\)}, \emph{p\(_{air,std}\)})
+\textit{T\(_{mix,wb}\)} = \textit{PsyTwbFnTdbWPb}(\textit{T\(_{mix}\)},\textit{W\(_{mix}\)}, \textit{p\(_{air,std}\)})
 \end{equation}
 
 \begin{equation}
-\emph{CapModFac} = \emph{CurveValue}(CCapFTemp,\emph{T\(_{mix,wb}\)},\emph{T\(_{outside}\)})
+\textit{CapModFac} = \textit{CurveValue}(CCapFTemp,\textit{T\(_{mix,wb}\)},\textit{T\(_{outside}\)})
 \end{equation}
 
 \begin{equation}
@@ -1282,7 +1282,7 @@ CCap_{peak} = \rho_{air} \cdot \dot V_{air,rated} \cdot (h_{mix} - h_{sup})
 \end{equation}
 
 \begin{equation}
-\emph{CCap\(_{rated}\)} = \emph{CCap\(_{peak}\)}/ \emph{CapModFac}
+\textit{CCap\(_{rated}\)} = \textit{CCap\(_{peak}\)}/ \textit{CapModFac}
 \end{equation}
 
 We check that the design volume flow per total capacity is within the prescribed range:
@@ -1306,25 +1306,25 @@ CCap_{rated} = \dot V_{air,rated} /FlowCapRatio_{max}
 where
 
 \begin{equation}
-\emph{FlowCapRatio\(_{min}\)} = 0.00004027 m^{3}/s per watt (300 cfm/ton)
+\textit{FlowCapRatio\(_{min}\)} = 0.00004027 m^{3}/s per watt (300 cfm/ton)
 \end{equation}
 
 and
 
 \begin{equation}
-\emph{FlowCapRatio\(_{max}\)} = 0.00006041 m^{3}/s per watt (450 cfm/ton)
+\textit{FlowCapRatio\(_{max}\)} = 0.00006041 m^{3}/s per watt (450 cfm/ton)
 \end{equation}
 
 We check the design flow to the total cooling capacity ratio for dedicated zone outdoor unit DX cooling coils to be within the limits prescribed below:
 
 \begin{equation}
-\emph{FlowCapRatio\(_{min}\)} = 0.00001677 m^{3}/s per Watt (125 cfm/ton)
+\textit{FlowCapRatio\(_{min}\)} = 0.00001677 m^{3}/s per Watt (125 cfm/ton)
 \end{equation}
 
 and
 
 \begin{equation}
-\emph{FlowCapRatio\(_{max}\)} = 0.00003355 m^{3}/s per Watt (250 cfm/ton)
+\textit{FlowCapRatio\(_{max}\)} = 0.00003355 m^{3}/s per Watt (250 cfm/ton)
 \end{equation}
 
 \subsubsection{Rated Total Heating Capacity}\label{rated-total-heating-capacity-2}
@@ -2326,27 +2326,27 @@ where:
 \subsubsection{Maximum Cold Water Flow}\label{maximum-cold-water-flow}
 
 \begin{equation}
-\emph{T\(_{coil,in}\)} = \emph{DesColdCoilInTemp\(_{zone}\)}
+\textit{T\(_{coil,in}\)} = \textit{DesColdCoilInTemp\(_{zone}\)}
 \end{equation}
 
 \begin{equation}
-\emph{T\(_{coil,out}\)} = \emph{ColdDesTemp\(_{zone}\)}
+\textit{T\(_{coil,out}\)} = \textit{ColdDesTemp\(_{zone}\)}
 \end{equation}
 
 \begin{equation}
-\emph{W\(_{coil,in}\)} = \emph{DesCoolCoilInHumRat\(_{zone}\)}
+\textit{W\(_{coil,in}\)} = \textit{DesCoolCoilInHumRat\(_{zone}\)}
 \end{equation}
 
 \begin{equation}
-\emph{W\(_{coil,out}\)} = \emph{CoolDesHumRat\(_{zone}\)}
+\textit{W\(_{coil,out}\)} = \textit{CoolDesHumRat\(_{zone}\)}
 \end{equation}
 
 \begin{equation}
-\emph{H\(_{coil,in}\)} = \emph{PsyHFnTdbW}(\emph{T\(_{coil,in}\)}, \emph{W\(_{coil,in}\)})
+\textit{H\(_{coil,in}\)} = \textit{PsyHFnTdbW}(\textit{T\(_{coil,in}\)}, \textit{W\(_{coil,in}\)})
 \end{equation}
 
 \begin{equation}
-\emph{H\(_{coil,out}\)} = \emph{PsyHFnTdbW}(\emph{T\(_{coil,out}\)}, \emph{W\(_{coil,out}\)})
+\textit{H\(_{coil,out}\)} = \textit{PsyHFnTdbW}(\textit{T\(_{coil,out}\)}, \textit{W\(_{coil,out}\)})
 \end{equation}
 
 \begin{equation}

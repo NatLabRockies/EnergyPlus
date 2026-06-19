@@ -424,7 +424,7 @@ The Lithium-Ion NMC Model (object: ElectricLoadCenter:Storage:LithiumIonNMC) com
 The expression $\int{Idt}$ is the amount of capacity removed and can be calculated from the following equation.
 
 \begin{equation}
-\int{Idt} = q_{max} - q
+\int{Idt} = q_{max} - {q}
 \label{Equation: charge_removed}
 \end{equation}
 The parameters $V_o$, $K$,$a$, and $B$ are dependent on battery chemistry and can be obtained from the manufacturer's voltage vs charge-removed curves. Default values are included in the Lithium-Ion NMC model with the parameter values obtained from   (Tremblay 2007). The voltage model does not incorporate temperature effects, but the impact of temperature is indirectly implemented through battery capacity which is coupled with the thermal model.
@@ -448,14 +448,14 @@ The model outputs the bulk average temperature of the battery which is used in t
 \subsubsection{Capacity Model}
 The lithium ion capacity model updates the charge of the battery depending on the charging and discharging current. A positive value indicates charging and negative value of current indicates discharging. The updated capacity at each time-step is computed using the following equation.
 \begin{equation}
-q = q - I\Delta t
+q = q - I\Delta {t}
 \label{Equation: capacity_update_nmc}
 \end{equation}
 
 The battery is only allowed to charge and discharge to the user defined maximum and minimum state of charge. Capacity relates to the battery energy through voltage as shown below.
 
 \begin{equation}
-E = qV
+E = q{V}
 \label{Equation: energy_nmc}
 \end{equation}
 

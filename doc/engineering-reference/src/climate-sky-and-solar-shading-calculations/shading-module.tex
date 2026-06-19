@@ -725,11 +725,11 @@ For more information on the diffuse entering the zone from beam reflected, see `
 
 \emph{InOutProjSLFracMult} = shadowing factor due to inside and outside projections of window frame and/or divider ( = 1.0 if there is no frame or divider).
 
-\emph{BABSZone} is given by the following sum (see Figure~\ref{fig:vertical-section-through-a-two-zone-building}):
+\emph{BABSZone} is given by the following sum\footnote{If Solar Distribution = FullInteriorAndExterior in the Building object, the program calculates where beam solar from exterior windows falls inside the zone. Otherwise, all beam solar is assumed to fall on the floor.} (see Figure~\ref{fig:vertical-section-through-a-two-zone-building}):
 
 \begin{equation}
 \begin{array}{rl}
-BABSZone = & {Beam~absorbed~by~opaque~inside~surfaces}\footnote{If Solar Distribution = FullInteriorAndExterior in the Building object, the program calculates where beam solar from exterior windows falls inside the zone. Otherwise, all beam solar is assumed to fall on the floor.} \\
+BABSZone = & {Beam~absorbed~by~opaque~inside~surfaces} \\
            & + {Beam~transmitted~through~the~zone's~interior~windows} \\
            & + {Beam~transmitted~back~out~of~the~zone's~exterior~windows} \\
            & + {Beam~absorbed~by~the~zone's~exterior~and~interior~windows} \\
