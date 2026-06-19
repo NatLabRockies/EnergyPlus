@@ -58,7 +58,6 @@ MODERN_FREQUENCY_ALIASES = {
 
 MODERN_COMMAND_ALIASES = {
     "--list": "list",
-    "--variables": "list",
     "--read": "read",
 }
 
@@ -178,7 +177,7 @@ def is_modern_cli(argv: list[str]) -> bool:
         return False
 
     first = argv[0].lower()
-    return first in {"list", "variables", "read", "-h", "--help"} or first in MODERN_COMMAND_ALIASES
+    return first in {"list", "read", "-h", "--help"} or first in MODERN_COMMAND_ALIASES
 
 
 def normalized_modern_args(argv: list[str]) -> list[str]:
@@ -207,7 +206,7 @@ def build_modern_parser() -> argparse.ArgumentParser:
     )
     subparsers = parser.add_subparsers(dest="command")
 
-    list_parser = subparsers.add_parser("list", aliases=["variables"], help="List variables in an ESO/MTR data dictionary.")
+    list_parser = subparsers.add_parser("list", help="List variables in an ESO/MTR data dictionary.")
     list_parser.add_argument("input_file", nargs="?", default="eplusout.eso", help="ESO/MTR file to inspect.")
     list_parser.add_argument(
         "-f",
@@ -923,7 +922,7 @@ def run_modern_cli(argv: list[str]) -> int:
         return 0
 
     try:
-        if args.command in {"list", "variables"}:
+        if args.command == "list":
             records = filter_modern_records(records_for_modern_cli(args.input_file), args.frequency, args.search)
             write_records(records, args.format)
             return 0
