@@ -57,9 +57,15 @@ if(EXISTS "${XELATEX_COMPILER}")
       DESTINATION ${PROJECT_BINARY_DIR}/html)
 
     # Aggregate target: depends on each individual zHTML_<doc> target added via create_html_doc_target
-    add_custom_target(html_docs)
+    if(hasParent AND BUILD_DOCS_ONLY_WITH_PACKAGE)
+      # Because we don't want to rebuild doc automatically, we do not add it to the 'ALL' rule
+      message(STATUS "The target `html_docs` was added, but not to the default build rule. It will be triggered by `make html_docs` or `make package`")
+      add_custom_target(html_docs)
+    else()
+      # Building standalone, so add to ALL
+      add_custom_target(html_docs ALL)
+    endif()
     set_target_properties(html_docs PROPERTIES FOLDER Documentation)
-    add_dependencies(docs html_docs)
   endif()
 
   include(cmake/doc-targets.cmake)

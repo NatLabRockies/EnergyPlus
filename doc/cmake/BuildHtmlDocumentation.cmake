@@ -17,13 +17,12 @@ execute_process(
   COMMAND "${PANDOC}"
           --to=chunkedhtml
           --mathml
-          --standalone=true
-          --table-of-contents=true
+          --standalone
+          --table-of-contents
           --split-level=2
           --output=${HTML_OUT_DIR}
           --template=${HTML_ASSETS_DIR}/template_chunked.html
           --css=style.css
-          --number-sections=false
           --include-in-header=${HTML_ASSETS_DIR}/header.html
           --include-after-body=${HTML_ASSETS_DIR}/footer.html
           --lua-filter=${HTML_ASSETS_DIR}/bootstrap-tables.lua

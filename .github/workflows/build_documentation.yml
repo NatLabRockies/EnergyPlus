@@ -152,7 +152,7 @@ jobs:
 
     - name: Build Docs
       working-directory: ./doc/build
-      run: cmake --build . -j 4
+      run: cmake --build . --target docs -j 4
 
     - name: Upload EngineeringReference
       uses: actions/upload-artifact@v7
