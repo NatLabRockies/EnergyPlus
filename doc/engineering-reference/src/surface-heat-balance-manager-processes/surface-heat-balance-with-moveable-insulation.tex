@@ -89,27 +89,27 @@ In contrast to the internal surface heat balance that treats all surfaces simult
 TARP includes four possible representations for the basic outside surface heat balance. The first two depend on which of the optimal surface conductance algorithms the user selects. The simple outside surface conductance that includes both the convective and thermal interchange between the surface and the environment in a single coefficient, is represented by the thermal network in Figure~\ref{fig:thermal-network-for-simple-outside-surface}. Equation~\ref{eq:BasicSteadyStateHeatBalanceEquation} can also be expressed as:
 
 \begin{equation}
-\left[ {{\rm{KO}}{{\rm{P}}_{\rm{t}}} + {{\rm{Y}}_{\rm{0}}}\cdot {\rm{T}}{{\rm{I}}_t} - {{\rm{X}}_{\rm{0}}}\cdot {\rm{T}}{{\rm{O}}_{\rm{t}}}} \right]{\rm{ + }}\left[ {{\rm{HO}}\cdot \left( {{{\rm{T}}_{\rm{a}}} - {\rm{T}}{{\rm{O}}_t}} \right)} \right]{\rm{  + QSO  =  0}}
+\left[ {{\mathrm{KO}}{{\mathrm{P}}_{\mathrm{t}}} + {{\mathrm{Y}}_{\mathrm{0}}}\cdot {\mathrm{T}}{{\mathrm{I}}_t} - {{\mathrm{X}}_{\mathrm{0}}}\cdot {\mathrm{T}}{{\mathrm{O}}_{\mathrm{t}}}} \right]{\mathrm{ + }}\left[ {{\mathrm{HO}}\cdot \left( {{{\mathrm{T}}_{\mathrm{a}}} - {\mathrm{T}}{{\mathrm{O}}_t}} \right)} \right]{\mathrm{  + QSO  =  0}}
 \end{equation}
 
 This can be solved for the outside surface temperature.
 
 \begin{equation}
-{\rm{T}}{{\rm{O}}_{\rm{t}}}{\rm{ = }}\left[ {\frac{{{\rm{KO}}{{\rm{P}}_{\rm{t}}} + {\rm{QSO}} + {{\rm{Y}}_0}\cdot {\rm{T}}{{\rm{I}}_{\rm{t}}}{\rm{ + HO}}\cdot {{\rm{T}}_{\rm{a}}}}}{{{{\rm{X}}_{\rm{0}}}{\rm{ + HO}}}}} \right]{\rm{  }}
+{\mathrm{T}}{{\mathrm{O}}_{\mathrm{t}}}{\mathrm{ = }}\left[ {\frac{{{\mathrm{KO}}{{\mathrm{P}}_{\mathrm{t}}} + {\mathrm{QSO}} + {{\mathrm{Y}}_0}\cdot {\mathrm{T}}{{\mathrm{I}}_{\mathrm{t}}}{\mathrm{ + HO}}\cdot {{\mathrm{T}}_{\mathrm{a}}}}}{{{{\mathrm{X}}_{\mathrm{0}}}{\mathrm{ + HO}}}}} \right]{\mathrm{  }}
 \label{eq:OutsideSurfTempHeatBalEq}
 \end{equation}
 
 The detailed outside surface conductance model considers convection and radiant interchange with the sky and with the ground as separate factors. Its use in the outside thermal balance is shown in Figure~\ref{fig:thermal-network-for-detailed-outside-surface}. In this case, Equation~\ref{eq:BasicSteadyStateHeatBalanceEquation} can be expanded to give:
 
 \begin{equation}
-\left[ {{\rm{KO}}{{\rm{P}}_{\rm{t}}}{\rm{ + }}{{\rm{Y}}_{\rm{0}}}\cdot {\rm{T}}{{\rm{I}}_{\rm{t}}}{\rm{ - }}{{\rm{X}}_{\rm{0}}}\cdot {\rm{T}}{{\rm{O}}_{\rm{t}}}} \right]{\rm{ + }}\left[ {{\rm{HA}}\cdot \left( {{{\rm{T}}_{\rm{a}}}{\rm{ - T}}{{\rm{O}}_{\rm{t}}}} \right){\rm{ + HS}}\cdot \left( {{{\rm{T}}_{\rm{s}}}{\rm{ - T}}{{\rm{O}}_{\rm{t}}}} \right){\rm{ + HG}}\cdot \left( {{{\rm{T}}_{\rm{g}}}{\rm{ - T}}{{\rm{O}}_{\rm{t}}}} \right)} \right]{\rm{  + QSO  =  0  }}
+\left[ {{\mathrm{KO}}{{\mathrm{P}}_{\mathrm{t}}}{\mathrm{ + }}{{\mathrm{Y}}_{\mathrm{0}}}\cdot {\mathrm{T}}{{\mathrm{I}}_{\mathrm{t}}}{\mathrm{ - }}{{\mathrm{X}}_{\mathrm{0}}}\cdot {\mathrm{T}}{{\mathrm{O}}_{\mathrm{t}}}} \right]{\mathrm{ + }}\left[ {{\mathrm{HA}}\cdot \left( {{{\mathrm{T}}_{\mathrm{a}}}{\mathrm{ - T}}{{\mathrm{O}}_{\mathrm{t}}}} \right){\mathrm{ + HS}}\cdot \left( {{{\mathrm{T}}_{\mathrm{s}}}{\mathrm{ - T}}{{\mathrm{O}}_{\mathrm{t}}}} \right){\mathrm{ + HG}}\cdot \left( {{{\mathrm{T}}_{\mathrm{g}}}{\mathrm{ - T}}{{\mathrm{O}}_{\mathrm{t}}}} \right)} \right]{\mathrm{  + QSO  =  0  }}
 \label{eq:MoreDetailedOutsideSurfHeatBalEq}
 \end{equation}
 
 This can be solved for the outside surface temperature:
 
 \begin{equation}
-{\rm{T}}{{\rm{O}}_{\rm{t}}}{\rm{ = }}\left[ {\frac{{{\rm{KO}}{{\rm{P}}_{\rm{t}}} + {\rm{QSO}} + {{\rm{Y}}_0}\cdot {\rm{T}}{{\rm{I}}_{\rm{t}}}{\rm{ + HA}}\cdot {{\rm{T}}_{\rm{a}}}{\rm{ + HS}}\cdot {{\rm{T}}_{\rm{s}}}{\rm{ + HG}}\cdot {{\rm{T}}_{\rm{g}}}}}{{{{\rm{X}}_{\rm{0}}}{\rm{ + HA + HS + HG}}}}} \right]{\rm{  }}
+{\mathrm{T}}{{\mathrm{O}}_{\mathrm{t}}}{\mathrm{ = }}\left[ {\frac{{{\mathrm{KO}}{{\mathrm{P}}_{\mathrm{t}}} + {\mathrm{QSO}} + {{\mathrm{Y}}_0}\cdot {\mathrm{T}}{{\mathrm{I}}_{\mathrm{t}}}{\mathrm{ + HA}}\cdot {{\mathrm{T}}_{\mathrm{a}}}{\mathrm{ + HS}}\cdot {{\mathrm{T}}_{\mathrm{s}}}{\mathrm{ + HG}}\cdot {{\mathrm{T}}_{\mathrm{g}}}}}{{{{\mathrm{X}}_{\mathrm{0}}}{\mathrm{ + HA + HS + HG}}}}} \right]{\mathrm{  }}
 \end{equation}
 
 The third and fourth representations occur when the outside surface has been covered with movable insulation. The insulation has a conductance of UM. The thermal network in Figure~\ref{fig:thermal-network-for-outside-moveable} represents this case.The insulation must be mass-less because it is not generally possible to perform a correct thermal balance at the juncture of two surfaces each modeled by CTF.
@@ -117,27 +117,27 @@ The third and fourth representations occur when the outside surface has been cov
 The equation for the thermal balance between the surface and the insulation is:
 
 \begin{equation}
-\left[ {{\rm{KO}}{{\rm{P}}_{\rm{t}}} + {{\rm{Y}}_{\rm{0}}}\cdot {\rm{T}}{{\rm{I}}_t} - {{\rm{X}}_{\rm{0}}}\cdot {\rm{T}}{{\rm{O}}_{\rm{t}}} + {\rm{UM}}\cdot \left( {{\rm{TM - T}}{{\rm{O}}_{\rm{t}}}} \right)} \right]{\rm{ + QSO  =  0}}
+\left[ {{\mathrm{KO}}{{\mathrm{P}}_{\mathrm{t}}} + {{\mathrm{Y}}_{\mathrm{0}}}\cdot {\mathrm{T}}{{\mathrm{I}}_t} - {{\mathrm{X}}_{\mathrm{0}}}\cdot {\mathrm{T}}{{\mathrm{O}}_{\mathrm{t}}} + {\mathrm{UM}}\cdot \left( {{\mathrm{TM - T}}{{\mathrm{O}}_{\mathrm{t}}}} \right)} \right]{\mathrm{ + QSO  =  0}}
 \end{equation}
 
 Which can be rewritten to solve for TO:
 
 \begin{equation}
-{\rm{T}}{{\rm{O}}_{\rm{t}}}{\rm{ = }}\left[ {\frac{{{\rm{KO}}{{\rm{P}}_{\rm{t}}} + {\rm{QSO}} + {{\rm{Y}}_0}\cdot {\rm{T}}{{\rm{I}}_{\rm{t}}}{\rm{ + UM}}\cdot {\rm{TM}}}}{{{{\rm{X}}_{\rm{0}}}{\rm{ + UM}}}}} \right]{\rm{  }}
+{\mathrm{T}}{{\mathrm{O}}_{\mathrm{t}}}{\mathrm{ = }}\left[ {\frac{{{\mathrm{KO}}{{\mathrm{P}}_{\mathrm{t}}} + {\mathrm{QSO}} + {{\mathrm{Y}}_0}\cdot {\mathrm{T}}{{\mathrm{I}}_{\mathrm{t}}}{\mathrm{ + UM}}\cdot {\mathrm{TM}}}}{{{{\mathrm{X}}_{\mathrm{0}}}{\mathrm{ + UM}}}}} \right]{\mathrm{  }}
 \label{eq:HeatBalEqforTo}
 \end{equation}
 
 Depending on whether or not the detailed or simple algorithm for surface conductance is being used, there are two expressions for TM, the outside temperature of the insulation. For the simple conductance:
 
 \begin{equation}
-{\rm{TM}} = \left[ {\frac{{{\rm{QSM + UM}}\cdot {\rm{T}}{{\rm{O}}_{\rm{t}}}{\rm{ + HO}}\cdot {{\rm{T}}_{\rm{a}}}}}{{{\rm{UM + HO}}}}} \right]
+{\mathrm{TM}} = \left[ {\frac{{{\mathrm{QSM + UM}}\cdot {\mathrm{T}}{{\mathrm{O}}_{\mathrm{t}}}{\mathrm{ + HO}}\cdot {{\mathrm{T}}_{\mathrm{a}}}}}{{{\mathrm{UM + HO}}}}} \right]
 \label{eq:OutTempMovableInsulation}
 \end{equation}
 
 For the detailed conductance:
 
 \begin{equation}
-{\rm{T}}{{\rm{O}}_{\rm{t}}}{\rm{ = }}\left[ {\frac{{{\rm{QSM}} + {\rm{UM}}\cdot {\rm{T}}{{\rm{O}}_{\rm{t}}}{\rm{ + HA}}\cdot {{\rm{T}}_{\rm{a}}}{\rm{ + HS}}\cdot {{\rm{T}}_{\rm{s}}}{\rm{ + HG}}\cdot {{\rm{T}}_{\rm{g}}}}}{{{\rm{UM + HA + HS + HG}}}}} \right]{\rm{  }}
+{\mathrm{T}}{{\mathrm{O}}_{\mathrm{t}}}{\mathrm{ = }}\left[ {\frac{{{\mathrm{QSM}} + {\mathrm{UM}}\cdot {\mathrm{T}}{{\mathrm{O}}_{\mathrm{t}}}{\mathrm{ + HA}}\cdot {{\mathrm{T}}_{\mathrm{a}}}{\mathrm{ + HS}}\cdot {{\mathrm{T}}_{\mathrm{s}}}{\mathrm{ + HG}}\cdot {{\mathrm{T}}_{\mathrm{g}}}}}{{{\mathrm{UM + HA + HS + HG}}}}} \right]{\mathrm{  }}
 \label{eq:TOtEquationDetailedConductance}
 \end{equation}
 
@@ -166,7 +166,7 @@ In this case the values of HA, HS and HG must be found by using an estimated val
 TO\(_{t}\) and TI\(_{t}\) are related through the Y\(_{0}\)CTF. However TI\(_{t}\) is also unknown. While it is possible to combine the outside and the inside surface heat balances to compute TO\(_{t}\) and TI\(_{t}\) simultaneously, TARP uses a simpler procedure where TO\(_{t}\) is based on a previous value of TI. When Y\(_{0}\) is small, as occurs in well insulated or very massive surfaces, TI\(_{t}\) can be replaced by TI\(_{t-1}\) (which is known for the previous hour's heat balance) without significantly effecting the value of TO\(_{t}\) When Y\(_{0}\) is large, TO and TI can so strongly be coupled that separate outside and inside heat balances do not work because the environment and zone temperatures have negligible influence on the heat balances. The TARP uses the inside surface heat balance to couple TO\(_{t}\) with TZ and TR. These two temperatures are less strongly influenced by TO and allow a reasonable heat balance. On the first heat balance iteration, TZ and TR are the values at time t-1. The user may optionally require that TO\(_{t}\) be recomputed with every iteration of TI\(_{t}\). ~In this case TZ and TR have values from the previous iteration and a true simultaneous solution is achieved. In most conventional constructions, recomputing TO\(_{t}\) does not significantly change the computed zone loads and temperatures. The inside surface heat balance is given by:
 
 \begin{equation}
-{\rm{T}}{{\rm{I}}_{\rm{t}}} = \left[ {\frac{{KI{P_t} + QSI + HC\cdot TZ + HR\cdot TR + {Y_0}\cdot TO}}{{{Z_0} + HC + HR}}} \right]
+{\mathrm{T}}{{\mathrm{I}}_{\mathrm{t}}} = \left[ {\frac{{KI{P_t} + QSI + HC\cdot TZ + HR\cdot TR + {Y_0}\cdot TO}}{{{Z_0} + HC + HR}}} \right]
 \label{eq:InsideSurfTempHeatBalEq}
 \end{equation}
 
@@ -189,7 +189,7 @@ The surface heat balances can be combined in eight ways according to conditions 
 From Equation~\ref{eq:OutsideSurfTempHeatBalEq},
 
 \begin{equation}
-{\rm{T}}{{\rm{O}}_{\rm{t}}}{\rm{ = }}\left[ {\frac{{{\rm{KO}}{{\rm{P}}_{\rm{t}}} + {\rm{QSO}} + {{\rm{Y}}_0}\cdot {\rm{T}}{{\rm{I}}_{{\rm{t - 1}}}}{\rm{ + HO}}\cdot {{\rm{T}}_{\rm{a}}}}}{{{{\rm{X}}_{\rm{0}}}{\rm{ + HO}}}}} \right]{\rm{  }}
+{\mathrm{T}}{{\mathrm{O}}_{\mathrm{t}}}{\mathrm{ = }}\left[ {\frac{{{\mathrm{KO}}{{\mathrm{P}}_{\mathrm{t}}} + {\mathrm{QSO}} + {{\mathrm{Y}}_0}\cdot {\mathrm{T}}{{\mathrm{I}}_{{\mathrm{t - 1}}}}{\mathrm{ + HO}}\cdot {{\mathrm{T}}_{\mathrm{a}}}}}{{{{\mathrm{X}}_{\mathrm{0}}}{\mathrm{ + HO}}}}} \right]{\mathrm{  }}
 \end{equation}
 
 \subsubsection{Case2: Y\(_{0}\) not small, simple conductance, no movable insulation:}\label{case2-yux5f0-not-small-simple-conductance-no-movable-insulation}
@@ -197,7 +197,7 @@ From Equation~\ref{eq:OutsideSurfTempHeatBalEq},
 From Equations~\ref{eq:OutsideSurfTempHeatBalEq} and~\ref{eq:InsideSurfTempHeatBalEq}:
 
 \begin{equation}
-{\rm{T}}{{\rm{O}}_{\rm{t}}}{\rm{ = }}\left[ {\frac{{{\rm{KO}}{{\rm{P}}_{\rm{t}}} + {\rm{QSO}} + {\rm{HO}}\cdot {{\rm{T}}_{\rm{a}}} + {{\rm{F}}_1}\cdot \left( {{\rm{KI}}{{\rm{P}}_{\rm{t}}}{\rm{ + QSI + HI}}\cdot {\rm{TZ + HR}}\cdot {\rm{TR}}} \right)}}{{{{\rm{X}}_{\rm{0}}}{\rm{ + HO - }}{{\rm{F}}_{\rm{1}}}\cdot {{\rm{Y}}_0}}}} \right]{\rm{  }}
+{\mathrm{T}}{{\mathrm{O}}_{\mathrm{t}}}{\mathrm{ = }}\left[ {\frac{{{\mathrm{KO}}{{\mathrm{P}}_{\mathrm{t}}} + {\mathrm{QSO}} + {\mathrm{HO}}\cdot {{\mathrm{T}}_{\mathrm{a}}} + {{\mathrm{F}}_1}\cdot \left( {{\mathrm{KI}}{{\mathrm{P}}_{\mathrm{t}}}{\mathrm{ + QSI + HI}}\cdot {\mathrm{TZ + HR}}\cdot {\mathrm{TR}}} \right)}}{{{{\mathrm{X}}_{\mathrm{0}}}{\mathrm{ + HO - }}{{\mathrm{F}}_{\mathrm{1}}}\cdot {{\mathrm{Y}}_0}}}} \right]{\mathrm{  }}
 \end{equation}
 
 \subsubsection{Case3: Y\(_{0}\)~ small, detailed conductance, no movable insulation:}\label{case3-yux5f0-small-detailed-conductance-no-movable-insulation}
@@ -205,7 +205,7 @@ From Equations~\ref{eq:OutsideSurfTempHeatBalEq} and~\ref{eq:InsideSurfTempHeatB
 From Equation~\ref{eq:MoreDetailedOutsideSurfHeatBalEq}:
 
 \begin{equation}
-{\rm{T}}{{\rm{O}}_{\rm{t}}}{\rm{ = }}\left[ {\frac{{{\rm{KO}}{{\rm{P}}_{\rm{t}}} + {\rm{QSO}} + {{\rm{Y}}_0}\cdot {\rm{T}}{{\rm{I}}_{{\rm{t - 1}}}}{\rm{ + HA}}\cdot {{\rm{T}}_{\rm{a}}} + {\rm{HS}}\cdot {{\rm{T}}_{\rm{s}}} + {\rm{HG}}\cdot {{\rm{T}}_{\rm{g}}}}}{{{{\rm{X}}_{\rm{0}}}{\rm{ + HA + HS + HG}}}}} \right]{\rm{  }}
+{\mathrm{T}}{{\mathrm{O}}_{\mathrm{t}}}{\mathrm{ = }}\left[ {\frac{{{\mathrm{KO}}{{\mathrm{P}}_{\mathrm{t}}} + {\mathrm{QSO}} + {{\mathrm{Y}}_0}\cdot {\mathrm{T}}{{\mathrm{I}}_{{\mathrm{t - 1}}}}{\mathrm{ + HA}}\cdot {{\mathrm{T}}_{\mathrm{a}}} + {\mathrm{HS}}\cdot {{\mathrm{T}}_{\mathrm{s}}} + {\mathrm{HG}}\cdot {{\mathrm{T}}_{\mathrm{g}}}}}{{{{\mathrm{X}}_{\mathrm{0}}}{\mathrm{ + HA + HS + HG}}}}} \right]{\mathrm{  }}
 \end{equation}
 
 \subsubsection{Case4: Y\(_{0}\) not small, detailed conductance, no movable insulation:}\label{case4-yux5f0-not-small-detailed-conductance-no-movable-insulation}
@@ -213,7 +213,7 @@ From Equation~\ref{eq:MoreDetailedOutsideSurfHeatBalEq}:
 From Equations~\ref{eq:MoreDetailedOutsideSurfHeatBalEq} and~\ref{eq:InsideSurfTempHeatBalEq}:
 
 \begin{equation}
-{\rm{T}}{{\rm{O}}_{\rm{t}}}{\rm{ = }}\left[ {\frac{{{\rm{KO}}{{\rm{P}}_{\rm{t}}} + {\rm{QSO}} + {\rm{HA}}\cdot {{\rm{T}}_{\rm{a}}} + {\rm{HS}}\cdot {{\rm{T}}_{\rm{s}}} + {\rm{HG}}\cdot {{\rm{T}}_{\rm{g}}} + {{\rm{F}}_{\rm{1}}}\cdot \left( {{\rm{KI}}{{\rm{P}}_{\rm{t}}}{\rm{ + QSI + HI}}\cdot {\rm{TZ + HR}}\cdot {\rm{TR}}} \right)}}{{{{\rm{X}}_{\rm{0}}}{\rm{ + HA + HS + HG - }}{{\rm{F}}_1}\cdot {{\rm{Y}}_0}}}} \right]{\rm{  }}
+{\mathrm{T}}{{\mathrm{O}}_{\mathrm{t}}}{\mathrm{ = }}\left[ {\frac{{{\mathrm{KO}}{{\mathrm{P}}_{\mathrm{t}}} + {\mathrm{QSO}} + {\mathrm{HA}}\cdot {{\mathrm{T}}_{\mathrm{a}}} + {\mathrm{HS}}\cdot {{\mathrm{T}}_{\mathrm{s}}} + {\mathrm{HG}}\cdot {{\mathrm{T}}_{\mathrm{g}}} + {{\mathrm{F}}_{\mathrm{1}}}\cdot \left( {{\mathrm{KI}}{{\mathrm{P}}_{\mathrm{t}}}{\mathrm{ + QSI + HI}}\cdot {\mathrm{TZ + HR}}\cdot {\mathrm{TR}}} \right)}}{{{{\mathrm{X}}_{\mathrm{0}}}{\mathrm{ + HA + HS + HG - }}{{\mathrm{F}}_1}\cdot {{\mathrm{Y}}_0}}}} \right]{\mathrm{  }}
 \end{equation}
 
 \subsubsection{Case5: Y\(_{0}\)~ small, simple conductance, with movable insulation:}\label{case5-yux5f0-small-simple-conductance-with-movable-insulation}
@@ -230,7 +230,7 @@ TO_t = \left[ \frac{ KOP_t + QSO + Y_0 \cdot {TI_{t-1}} + F_2 \cdot \left( QSM +
 From Equations~\ref{eq:HeatBalEqforTo}, ~\ref{eq:OutTempMovableInsulation} and~\ref{eq:InsideSurfTempHeatBalEq}:
 
 \begin{equation}
-{\rm{T}}{{\rm{O}}_{\rm{t}}}{\rm{ = }}\left[ {\frac{{{\rm{KO}}{{\rm{P}}_{\rm{t}}} + {\rm{QSO}} + {{\rm{F}}_2}\cdot \left( {{\rm{QSM + HO}}\cdot {{\rm{T}}_{\rm{a}}}} \right) + {{\rm{F}}_1}\cdot \left( {{\rm{KI}}{{\rm{P}}_{\rm{t}}}{\rm{ + QSI + HI}}\cdot {\rm{TZ + HR}}\cdot {\rm{TR}}} \right)}}{{{{\rm{X}}_{\rm{0}}} + {\rm{UM - }}{{\rm{F}}_{\rm{2}}}\cdot {\rm{UM - }}{{\rm{F}}_{\rm{1}}}\cdot {{\rm{Y}}_{\rm{0}}}}}} \right]{\rm{  }}
+{\mathrm{T}}{{\mathrm{O}}_{\mathrm{t}}}{\mathrm{ = }}\left[ {\frac{{{\mathrm{KO}}{{\mathrm{P}}_{\mathrm{t}}} + {\mathrm{QSO}} + {{\mathrm{F}}_2}\cdot \left( {{\mathrm{QSM + HO}}\cdot {{\mathrm{T}}_{\mathrm{a}}}} \right) + {{\mathrm{F}}_1}\cdot \left( {{\mathrm{KI}}{{\mathrm{P}}_{\mathrm{t}}}{\mathrm{ + QSI + HI}}\cdot {\mathrm{TZ + HR}}\cdot {\mathrm{TR}}} \right)}}{{{{\mathrm{X}}_{\mathrm{0}}} + {\mathrm{UM - }}{{\mathrm{F}}_{\mathrm{2}}}\cdot {\mathrm{UM - }}{{\mathrm{F}}_{\mathrm{1}}}\cdot {{\mathrm{Y}}_{\mathrm{0}}}}}} \right]{\mathrm{  }}
 \label{eq:HeatBalanceEquationCase6}
 \end{equation}
 
@@ -239,7 +239,7 @@ From Equations~\ref{eq:HeatBalEqforTo}, ~\ref{eq:OutTempMovableInsulation} and~\
 From Equations~\ref{eq:HeatBalEqforTo} and~\ref{eq:TOtEquationDetailedConductance}:
 
 \begin{equation}
-{\rm{T}}{{\rm{O}}_{\rm{t}}}{\rm{ = }}\left[ {\frac{{{\rm{KO}}{{\rm{P}}_{\rm{t}}} + {\rm{QSO}} + {{\rm{Y}}_0}\cdot {\rm{T}}{{\rm{I}}_{{\rm{t - 1}}}}{\rm{ + }}{{\rm{F}}_{\rm{3}}}\left( {{\rm{QSM + HA}}\cdot {{\rm{T}}_{\rm{a}}}{\rm{ + HS}}\cdot {{\rm{T}}_{\rm{s}}}{\rm{ + HG}}\cdot {{\rm{T}}_{\rm{g}}}} \right)}}{{{{\rm{X}}_{\rm{0}}}{\rm{ + UM - }}{{\rm{F}}_{\rm{3}}}\cdot {\rm{UM}}}}} \right]{\rm{  }}
+{\mathrm{T}}{{\mathrm{O}}_{\mathrm{t}}}{\mathrm{ = }}\left[ {\frac{{{\mathrm{KO}}{{\mathrm{P}}_{\mathrm{t}}} + {\mathrm{QSO}} + {{\mathrm{Y}}_0}\cdot {\mathrm{T}}{{\mathrm{I}}_{{\mathrm{t - 1}}}}{\mathrm{ + }}{{\mathrm{F}}_{\mathrm{3}}}\left( {{\mathrm{QSM + HA}}\cdot {{\mathrm{T}}_{\mathrm{a}}}{\mathrm{ + HS}}\cdot {{\mathrm{T}}_{\mathrm{s}}}{\mathrm{ + HG}}\cdot {{\mathrm{T}}_{\mathrm{g}}}} \right)}}{{{{\mathrm{X}}_{\mathrm{0}}}{\mathrm{ + UM - }}{{\mathrm{F}}_{\mathrm{3}}}\cdot {\mathrm{UM}}}}} \right]{\mathrm{  }}
 \label{eq:HeatBalanceEquationCase7}
 \end{equation}
 
@@ -253,7 +253,7 @@ From Equations~\ref{eq:HeatBalEqforTo}, ~\ref{eq:TOtEquationDetailedConductance}
 \thickmuskip=0mu
 \nulldelimiterspace=0pt
 \scriptspace=0pt
-{\rm{T}}{{\rm{O}}_{\rm{t}}}{\rm{ = }}\left[ {\frac{{{\rm{KO}}{{\rm{P}}_{\rm{t}}} + {\rm{QSO}} + {{\rm{F}}_1}\cdot \left( {{\rm{KI}}{{\rm{P}}_{\rm{t}}}{\rm{ + QSI + HI}}\cdot {\rm{TZ + HR}}\cdot {\rm{TR}}} \right){\rm{ + }}{{\rm{F}}_{\rm{3}}}\left( {{\rm{QSM + HA}}\cdot {{\rm{T}}_{\rm{a}}}{\rm{ + HS}}\cdot {{\rm{T}}_{\rm{s}}}{\rm{ + HG}}\cdot {{\rm{T}}_{\rm{g}}}} \right)}}{{{{\rm{X}}_{\rm{0}}}{\rm{ + UM - }}{{\rm{F}}_{\rm{3}}}\cdot {\rm{UM - }}{{\rm{F}}_{\rm{1}}}\cdot {{\rm{Y}}_{\rm{0}}}}}} \right]{\rm{  }}
+{\mathrm{T}}{{\mathrm{O}}_{\mathrm{t}}}{\mathrm{ = }}\left[ {\frac{{{\mathrm{KO}}{{\mathrm{P}}_{\mathrm{t}}} + {\mathrm{QSO}} + {{\mathrm{F}}_1}\cdot \left( {{\mathrm{KI}}{{\mathrm{P}}_{\mathrm{t}}}{\mathrm{ + QSI + HI}}\cdot {\mathrm{TZ + HR}}\cdot {\mathrm{TR}}} \right){\mathrm{ + }}{{\mathrm{F}}_{\mathrm{3}}}\left( {{\mathrm{QSM + HA}}\cdot {{\mathrm{T}}_{\mathrm{a}}}{\mathrm{ + HS}}\cdot {{\mathrm{T}}_{\mathrm{s}}}{\mathrm{ + HG}}\cdot {{\mathrm{T}}_{\mathrm{g}}}} \right)}}{{{{\mathrm{X}}_{\mathrm{0}}}{\mathrm{ + UM - }}{{\mathrm{F}}_{\mathrm{3}}}\cdot {\mathrm{UM - }}{{\mathrm{F}}_{\mathrm{1}}}\cdot {{\mathrm{Y}}_{\mathrm{0}}}}}} \right]{\mathrm{  }}
 \label{eq:HeatBalanceEquationCase8}
 \end{equation}
 

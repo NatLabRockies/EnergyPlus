@@ -275,7 +275,7 @@ The two energy balance equation can be written as non-homogeneous first order DE
 \end{equation}
 
 \begin{equation}
-{{\rm{b}}_{\rm{3}}} = {\rm{ }}\left( {A \cdot {U_b}{T_{osc}} + A \cdot {U_s}{T_a} + {{\dot m}_w}{C_w}{T_{wi}}} \right)
+{{\mathrm{b}}_{\mathrm{3}}} = {\mathrm{ }}\left( {A \cdot {U_b}{T_{osc}} + A \cdot {U_s}{T_a} + {{\dot m}_w}{C_w}{T_{wi}}} \right)
 \end{equation}
 
 The two coupled first order differential equation are solved analytically.~ Auxiliary equation of the the coupled homogeneous differential equation is given by:
@@ -349,7 +349,7 @@ The steady state cover heat balance equation is given by:
 Linearizing the longwave radiation exchange and representing the convection terms using the classical equation for Newton's law of cooling, the equations for the temperatures of covers 1 and 2 are given by:
 
 \begin{equation}
-{T_{c{\rm{1}}}} = \frac{{{\alpha_{c1}}{I_t} + {h_{r,{\kern 1pt} c1 - a}}{T_a} + {h_{c,{\kern 1pt} c1 - a}}{T_a} + {h_{r,{\kern 1pt} c2 - c1}}{T_{c2}} + {h_{c,{\kern 1pt} c2 - c1}}{T_{c2}}}}{{{h_{r,{\kern 1pt} c1 - a}} + {h_{c,{\kern 1pt} c1 - a}} + {h_{r,{\kern 1pt} c2 - c1}} + {h_{c,{\kern 1pt} c2 - c1}}}}
+{T_{c{\mathrm{1}}}} = \frac{{{\alpha_{c1}}{I_t} + {h_{r,{\kern 1pt} c1 - a}}{T_a} + {h_{c,{\kern 1pt} c1 - a}}{T_a} + {h_{r,{\kern 1pt} c2 - c1}}{T_{c2}} + {h_{c,{\kern 1pt} c2 - c1}}{T_{c2}}}}{{{h_{r,{\kern 1pt} c1 - a}} + {h_{c,{\kern 1pt} c1 - a}} + {h_{r,{\kern 1pt} c2 - c1}} + {h_{c,{\kern 1pt} c2 - c1}}}}
 \end{equation}
 
 \begin{equation}
@@ -455,7 +455,7 @@ Nu = 0.16{\left( {Gr \cdot \Pr } \right)^{1/3}}\quad Gr \cdot Pr > 5.0 \times {1
 \end{equation}
 
 \begin{equation}
-Gr = {{g{\beta_{\rm{v}}}\left( {{T_p} - {T_w}} \right)L_c^3} \mathord{\left/ {\vphantom {{g{\beta_{\rm{v}}}\left( {{T_p} - {T_w}} \right)L_c^3} {{\nu ^2}}}} \right. } {{\nu ^2}}}
+Gr = {{g{\beta_{\mathrm{v}}}\left( {{T_p} - {T_w}} \right)L_c^3} \mathord{\left/ {\vphantom {{g{\beta_{\mathrm{v}}}\left( {{T_p} - {T_w}} \right)L_c^3} {{\nu ^2}}}} \right. } {{\nu ^2}}}
 \end{equation}
 
 \begin{equation}
@@ -892,13 +892,13 @@ Using either of the correlations above allows determining the heat exchanger eff
 
 where:
 
-\({T_{{\rm{a,HX}}}}\) is the temperature of the air leaving the collector and entering the plenum (\(^{\circ}\)C)
+\({T_{{\mathrm{a,HX}}}}\) is the temperature of the air leaving the collector and entering the plenum (\(^{\circ}\)C)
 
 \({T_{s,coll}}\) is the temperature of the collector's absorber plate (\(^{\circ}\)C)
 
 \({T_{amb}}\) is the temperature of the ambient outdoor air (\(^{\circ}\)C).
 
-By rewriting Equation~\ref{eq:SolarCollectorHXEffect716} to solve for \({T_{{\rm{a,HX}}}}\), we see that the temperature of the heated outdoor air entering the plenum can be determined once the collector surface temperature is known:
+By rewriting Equation~\ref{eq:SolarCollectorHXEffect716} to solve for \({T_{{\mathrm{a,HX}}}}\), we see that the temperature of the heated outdoor air entering the plenum can be determined once the collector surface temperature is known:
 
 \begin{equation}
 {T_{a,HX}} = {\varepsilon_{HX}}{T_{s,coll}} + \left( {1 - {\varepsilon_{HX}}} \right){T_{amb}}
@@ -977,7 +977,7 @@ where h\(_{co}\) is the convection coefficient.~ This coefficient will differ de
 {q''_{HX}} = \frac{{\dot m{c_p}({T_{a,HX}} - {T_{amb}})}}{A}
 \end{equation}
 
-where \({T_{{\rm{a,HX}}}}\) is determined using correlations described above.~ When the UTSC is active, the air mass flow is determined from the operation of the outdoor air mixer component.~ When the UTSC is off, this term is zero.
+where \({T_{{\mathrm{a,HX}}}}\) is determined using correlations described above.~ When the UTSC is active, the air mass flow is determined from the operation of the outdoor air mixer component.~ When the UTSC is off, this term is zero.
 
 \subsubsection{Plenum LW Radiation}\label{plenum-lw-radation}
 
@@ -1094,25 +1094,25 @@ where \({\dot m_{vent}}\) is the air mass flow from natural forces (kg/s).
 The literature on UTSC does not appear to address the passive mode of operation and no models for \({\dot m_{vent}}\) have been identified.~ Nevertheless, natural buoyancy and wind forces are expected to drive air exchange between the plenum and ambient and some method of modeling \({\dot m_{vent}}\) is needed.~ Reasoning that the configuration is similar to single-side natural ventilation, we elect to use correlations for natural ventilation presented in Chapter 26 of the ASHRAE Handbook of Fundamentals (2001).
 
 \begin{equation}
-{\dot m_{vent}} = \rho {{\rm{\rlap{--} \dot V}}_{{\rm{tot}}}}
+{\dot m_{vent}} = \rho {{\mathrm{\rlap{--} \dot V}}_{{\mathrm{tot}}}}
 \end{equation}
 
 where:
 
 \(\rho\) is the density of air (kg/m\(^{3}\))
 
-\({{\rm{\rlap{--} \dot V}}_{{\rm{tot}}}} = {{\rm{\rlap{--} \dot V}}_{{\rm{wind}}}} + \,{{\rm{\rlap{--} \dot V}}_{{\rm{thermal}}}}\) is the total volumetric flow rate of air ventilating in and out of the plenum (m\(^{3}\)/s)
+\({{\mathrm{\rlap{--} \dot V}}_{{\mathrm{tot}}}} = {{\mathrm{\rlap{--} \dot V}}_{{\mathrm{wind}}}} + \,{{\mathrm{\rlap{--} \dot V}}_{{\mathrm{thermal}}}}\) is the total volumetric flow rate of air ventilating in and out of the plenum (m\(^{3}\)/s)
 
 \begin{equation}
-{{\rm{\rlap{--} \dot V}}_{{\rm{wind}}}} = {C_v}{A_{in}}{U_\infty }
+{{\mathrm{\rlap{--} \dot V}}_{{\mathrm{wind}}}} = {C_v}{A_{in}}{U_\infty }
 \end{equation}
 
 \begin{equation}
-{{\rm{\rlap{--} \dot V}}_{{\rm{thermal}}}} = {C_D}{A_{in}}\sqrt {2g\Delta {H_{NPL}}\left( {{T_{a,plen}} - {T_{amb}}} \right)/{T_{a,plen}}} ~ (if~{T_{a,plen}} > {T_{amb}} )
+{{\mathrm{\rlap{--} \dot V}}_{{\mathrm{thermal}}}} = {C_D}{A_{in}}\sqrt {2g\Delta {H_{NPL}}\left( {{T_{a,plen}} - {T_{amb}}} \right)/{T_{a,plen}}} ~ (if~{T_{a,plen}} > {T_{amb}} )
 \end{equation}
 
 \begin{equation}
-{{\rm{\rlap{--} \dot V}}_{{\rm{thermal}}}} = {C_D}{A_{in}}\sqrt {2g\Delta {H_{NPL}}\left( {{T_{amb}} - {T_{a,plen}}} \right)/{T_{amb}}} ~ (if~{T_{amb}} > {T_{a,plen}} ~ and~UTSC~vertical)
+{{\mathrm{\rlap{--} \dot V}}_{{\mathrm{thermal}}}} = {C_D}{A_{in}}\sqrt {2g\Delta {H_{NPL}}\left( {{T_{amb}} - {T_{a,plen}}} \right)/{T_{amb}}} ~ (if~{T_{amb}} > {T_{a,plen}} ~ and~UTSC~vertical)
 \end{equation}
 
 where:
@@ -1131,7 +1131,7 @@ Mass continuity arguments lead to modeling the area of the openings as one half 
 
 \(\Delta {H_{NPL}}\) is the height from midpoint of lower opening to the Neutral Pressure Level.~ This is taken as one-fourth the overall height of the UTSC if it is mounted vertically.~ For tilted collectors, the nominal height is modified by the sine of the tilt.~ If the UTSC is mounted horizontally (e.g.~on the roof) then the \(\Delta {H_{NPL}}\) is taken as the gap thickness of the plenum.
 
-If the UTSC is horizontal and \({T_{amb}} > {T_{a,plen}}\), then \({{\rm{\rlap{--} \dot V}}_{{\rm{thermal}}}}{\rm{ = 0}}\) because this is a stable situation.
+If the UTSC is horizontal and \({T_{amb}} > {T_{a,plen}}\), then \({{\mathrm{\rlap{--} \dot V}}_{{\mathrm{thermal}}}}{\mathrm{ = 0}}\) because this is a stable situation.
 
 \subsubsection{Underlying Heat Transfer Surface}\label{underlying-heat-transfer-surface-000}
 

@@ -129,13 +129,13 @@ If there is not enough flow to meet all active branch requests (i.e., a ``flow d
 
 where:
 
-\( \dot m_{br} \) = \rm{ final~resolved~branch~flow~rate}
+\( \dot m_{br} \) = \textrm{ final~resolved~branch~flow~rate}
 
-\( \dot m_{br\_request} \) = \rm{ requested~branch~flow~rate }
+\( \dot m_{br\_request} \) = \textrm{ requested~branch~flow~rate }
 
-\( \dot m_{tot\_request} \) = \rm{ total~loop~mass~flow~rate~request}
+\( \dot m_{tot\_request} \) = \textrm{ total~loop~mass~flow~rate~request}
 
-\( \dot m_{tot\_available} \) = \rm{ total~loop~mass~flow~rate~available}
+\( \dot m_{tot\_available} \) = \textrm{ total~loop~mass~flow~rate~available}
 
 It is also necessary to monitor the flow constraints at the branches and components since once the flow rates are changed, the components must be resimulated by the controlling loop (air loop, zone equipment, or plant supply side). The controllers for these components must know if the constraints have been modified so that the simulation does not toggle between a component requesting a flow that the pump cannot meet and the pump then resetting the flow to what it can provide. Note that once a flow rate for any component has changed that this signals the need to resimulate any sub-loop to which it might have an indirect connection. Currently, this means that if a flow rate on the plant demand side changes, the simulation must recalculate the conditions on both the air loop and zone equipment sub-loops since coils and other equipment could be on either side of the main air loop. Similarly, if the condenser demand side simulation results in a change in flow rate through a chiller condenser, then the plant supply side must be triggered to perform its calculations again. Care has been taken to avoid cases where the various half-loops might simply keep triggering the resimulation of their indirect connections in an infinite loop.
 

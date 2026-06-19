@@ -125,7 +125,7 @@ where,
 Modeling natural ventilation air exchanges in a general way is challenging.~ Simplistic engineering models are used to model \({\dot m_{vent}}\) ~resulting from natural buoyancy and wind forces.~ Reasoning that the configuration is similar to single-side natural ventilation, we elect to use correlations for natural ventilation presented as equations (29) and (30) in Chapter 26 of ASHRAE Handbook of Fundamentals (2001).
 
 \begin{equation}
-{\dot m_{vent}} = \rho \,{{\rm{\rlap{--} \dot V}}_{{\rm{tot}}}}
+{\dot m_{vent}} = \rho \,{{\mathrm{\rlap{--} \dot V}}_{{\mathrm{tot}}}}
 \end{equation}
 
 where,
@@ -136,9 +136,9 @@ where,
 
 \(\rlap{--} \dot{V}_{wind} = C_{v}A_{in}U_{\infty}\)
 
-\({{\rm{\rlap{--} \dot V}}_{{\rm{thermal}}}} = {C_D}{A_{in}}\sqrt {2g\Delta {H_{NPL}}\left( {{T_{a,cav}} - {T_{amb}}} \right)/{T_{a,cav}}}\) ~ (if \(T_{a,cav} > T_{amb}\) )
+\({{\mathrm{\rlap{--} \dot V}}_{{\mathrm{thermal}}}} = {C_D}{A_{in}}\sqrt {2g\Delta {H_{NPL}}\left( {{T_{a,cav}} - {T_{amb}}} \right)/{T_{a,cav}}}\) ~ (if \(T_{a,cav} > T_{amb}\) )
 
-\({{\rm{\rlap{--} \dot V}}_{{\rm{thermal}}}} = {C_D}{A_{in}}\sqrt {2g\Delta {H_{NPL}}\left( {{T_{amb}} - {T_{a,cav}}} \right)/{T_{amb}}}\) ~ (if \(T_{amb} > T_{a,cav}\) ~and baffle is vertical)
+\({{\mathrm{\rlap{--} \dot V}}_{{\mathrm{thermal}}}} = {C_D}{A_{in}}\sqrt {2g\Delta {H_{NPL}}\left( {{T_{amb}} - {T_{a,cav}}} \right)/{T_{amb}}}\) ~ (if \(T_{amb} > T_{a,cav}\) ~and baffle is vertical)
 
 \({C_v}\) ~is the effectiveness of the openings that depends on opening geometry and the orientation with respect to the wind.~ ASHRAE HoF (2001) indicates values ranging from 0.25 to 0.6.~ This value is available for user input.
 
@@ -154,7 +154,7 @@ Mass continuity arguments lead to modeling the area of the openings as one half 
 
 \(\Delta {H_{NPL}}\) ~is the height from midpoint of lower opening to the Neutral Pressure Level.~ This is value is available for user input.
 
-If the cavity is horizontal and \(T_{amb} > T_{a,cav}\) ~then \({{\rm{\rlap{--} \dot V}}_{{\rm{thermal}}}}{\rm{ = 0}}\) ~because this is a stable situation.
+If the cavity is horizontal and \(T_{amb} > T_{a,cav}\) ~then \({{\mathrm{\rlap{--} \dot V}}_{{\mathrm{thermal}}}}{\mathrm{ = 0}}\) ~because this is a stable situation.
 
 \subsection{Underlying Heat Transfer Surface}\label{underlying-heat-transfer-surface}
 

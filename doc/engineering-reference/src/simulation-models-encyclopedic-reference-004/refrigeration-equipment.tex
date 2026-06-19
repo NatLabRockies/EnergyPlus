@@ -99,7 +99,7 @@ If the condenser is water cooled, the effective temperature experienced by the c
 The electric power input to the rack compressor(s) is calculated for each simulation time step as the sum of the connected refrigerated case evaporator loads divided by the operating COP:
 
 \begin{equation}
-{P_{{\rm{rack}}}} = \frac{{\sum {{{\dot Q}_{case}} + \sum {{{\dot Q}_{walkin}}} } }}{{CO{P_{operating}}}}
+{P_{{\mathrm{rack}}}} = \frac{{\sum {{{\dot Q}_{case}} + \sum {{{\dot Q}_{walkin}}} } }}{{CO{P_{operating}}}}
 \end{equation}
 
 where:
@@ -617,7 +617,7 @@ where \({\dot Q_{def}}\) is the defrost heat load (W).
 
 \subsubsection{Sensible Case Credits}\label{sensible-case-credits}
 
-Refrigerated cases remove sensible energy from the surrounding environment (termed ``sensible case credits''). In this model, the sensible case credits are composed of wall heat conduction, radiation heat transfer, and sensible heat transfer by air infiltration (\({\dot Q_{walls}}\) + \({\dot Q_{rad}}\) + \({\dot Q_{{\rm{inf,sens}}}}\) in Equation~\ref{eq:TotalLoadRefCaseEvaporator}). To quantify this energy transfer, the model first calculates the rated sensible case credits by subtracting the known loads at rated conditions (fan, lighting, and anti-sweat heater) from the rated sensible cooling capacity of the case. It should be noted that the lighting and fan heat discussed here are for standard-efficiency equipment. Manufacturers typically provide ratings for both standard and high-efficiency fan and lighting equipment; however, the standard equipment is used to determine rated sensible case credits. (Some manufacturers no longer include any lighting in their rated capacity values. For these cases, P'\(_{lights,std}\) will equal zero.)
+Refrigerated cases remove sensible energy from the surrounding environment (termed ``sensible case credits''). In this model, the sensible case credits are composed of wall heat conduction, radiation heat transfer, and sensible heat transfer by air infiltration (\({\dot Q_{walls}}\) + \({\dot Q_{rad}}\) + \({\dot Q_{{\mathrm{inf,sens}}}}\) in Equation~\ref{eq:TotalLoadRefCaseEvaporator}). To quantify this energy transfer, the model first calculates the rated sensible case credits by subtracting the known loads at rated conditions (fan, lighting, and anti-sweat heater) from the rated sensible cooling capacity of the case. It should be noted that the lighting and fan heat discussed here are for standard-efficiency equipment. Manufacturers typically provide ratings for both standard and high-efficiency fan and lighting equipment; however, the standard equipment is used to determine rated sensible case credits. (Some manufacturers no longer include any lighting in their rated capacity values. For these cases, P'\(_{lights,std}\) will equal zero.)
 
 \begin{equation}
 \dot Qc{c_{sens,rated}} = \left[ {{{\dot Q}_{case,rated}}\left( {RT{F_{rated}}} \right)\left( {1 - LH{R_{rated}}} \right) - {P'}_{lights,std}\left( {{F_l}} \right) - {P'}_{as}\left( {{F_{as}}} \right) - {P'}_{fan,std}} \right]{L_{case}}
@@ -1171,7 +1171,7 @@ The ``Correction'' function must be obtained from the chiller manufacturer. Some
 Five standard rating conditions have been defined in a European rating system. The capacity is reported at the rating condition as either the ``Nominal'' or ``Standard'' capacity. The ``Nominal'' capacity includes both latent and sensible loads and the ``Standard'' capacity includes sensible loads only. ``Wet Coil Factors'' are provided with the ratings to translate between the two, along with a chart giving the impact of Air Inlet Temperature on the Wet Coil Factor. The user identifies the rating condition used and whether the capacity input is ``Nominal'' or ``Standard''. These rating factors, along with the air inlet temperature and evaporating temperature are used to calculate the actual cooling capacity.
 
 \begin{equation}
-{Q_{{\rm{Total}}}} = {Q_{{\rm{Nominal}}}} \times \frac{{WetCoilFactor({T_{{\rm{Coil,inlet}}}})}}{{WetCoilFactor({\rm{Standard Condition}})}} \times \frac{{\Delta T}}{{\Delta {T_{{\rm{Rated}}}}}}
+{Q_{{\mathrm{Total}}}} = {Q_{{\mathrm{Nominal}}}} \times \frac{{WetCoilFactor({T_{{\mathrm{Coil,inlet}}}})}}{{WetCoilFactor({\mathrm{Standard Condition}})}} \times \frac{{\Delta T}}{{\Delta {T_{{\mathrm{Rated}}}}}}
 \end{equation}
 
 \subsubsection{Total Capacity Map}\label{total-capacity-map}
@@ -1229,11 +1229,11 @@ The detailed refrigeration system object (Refrigeration:System) is an alternativ
 The refrigeration loads for refrigerated cases and walk-ins are added to provide the first value for the refrigeration load on a detailed system, as well as the evaporating temperature. (If there are no cases or walk-ins served directly by a system, that system is not solved until the energy transfer loads are available.) The user can also choose to include suction pipe heat gain as a load on the system. The performance of refrigeration compressors is dependent upon the condensing and evaporating temperatures. The calculation starts with an estimated condensing temperature, which is used to calculate the compressor power use.
 
 \begin{equation}
-{\dot Q_{{\rm{Refrigeration}}}} = \sum {{{\dot Q}_{case}}}  + \sum {{{\dot Q}_{walkin}}} ( + \sum {{{\dot Q}_{PipeHeatGain}}} )
+{\dot Q_{{\mathrm{Refrigeration}}}} = \sum {{{\dot Q}_{case}}}  + \sum {{{\dot Q}_{walkin}}} ( + \sum {{{\dot Q}_{PipeHeatGain}}} )
 \end{equation}
 
 \begin{equation}
-{\dot Q_{System,Estimated}} = {\dot Q_{{\rm{Refrigeration}}}} + {P_{Compressors,Estimated}}
+{\dot Q_{System,Estimated}} = {\dot Q_{{\mathrm{Refrigeration}}}} + {P_{Compressors,Estimated}}
 \end{equation}
 
 These values are in turn used to determine the total heat rejection load on the condenser, which produces a new estimate for the condensing temperature. A few iterations are usually necessary to converge upon the final condensing temperature and compressor power for each time step for each system.
@@ -1454,7 +1454,7 @@ For a fixed-speed fan, the air flow is reduced through either the use of dampers
 For a cycling fan, the power variation with air flow volume is approximately linear above the minimum air volume ratio as shown in the following equation for the option ``FixedLinear'':
 
 \begin{equation}
-{P_{CondFan}} = ({\rm{Air~Volume~Ratio}}){P_{CondFan,design}}
+{P_{CondFan}} = ({\mathrm{Air~Volume~Ratio}}){P_{CondFan,design}}
 \end{equation}
 
 where:
@@ -1656,7 +1656,7 @@ The approach temperature difference (the difference between the condensing and e
 For cases and walk-ins served by cascade condensers, energy needed for hot brine or hot gas defrost is reclaimed from the primary system.~ The refrigeration load the cascade condenser places upon the primary system is classified as a `transfer load', because it transfers load from one system to another. This load is the sum of all case and walk-in loads served by the secondary system, any suction piping heat gains on the secondary loop, plus the secondary loop's compressor power. The same name (Ref. Refrigeration:Condenser:Cascade, field ``Name'') used to identify the condenser in the secondary loop is used to identify the transfer load on the primary system.
 
 \begin{equation}
-{\dot Q_{{\rm{Cascade}}}} = {\sum {\dot Q}_{{\rm{Case}}}} + \sum {{{\dot Q}_{{\rm{Walkin}}}} + } \sum {{{\dot Q}_{{\rm{Compressor}}}}} \left( { + \sum {{{\dot Q}_{{\rm{PipeHeatGain}}}}} } \right)
+{\dot Q_{{\mathrm{Cascade}}}} = {\sum {\dot Q}_{{\mathrm{Case}}}} + \sum {{{\dot Q}_{{\mathrm{Walkin}}}} + } \sum {{{\dot Q}_{{\mathrm{Compressor}}}}} \left( { + \sum {{{\dot Q}_{{\mathrm{PipeHeatGain}}}}} } \right)
 \end{equation}
 
 where:
@@ -1880,7 +1880,7 @@ For a two-phase system, the secondary evaporator effectiveness is not calculated
 If the flow rate through the evaporator is not input, it will be calculated based upon the input value for the Circulating Rate.
 
 \begin{equation}
-Flo{w_{{\rm{RatedVol}}}} = \frac{{\sum {{{\dot Q}_{{\rm{Case}}}} + \sum {{{\dot Q}_{{\rm{WalkIn}}}} + Powe{r_{{\rm{Pump}}}}} } }}{{{\rho_{Liquid}}\Delta {h_{fg}}}}
+Flo{w_{{\mathrm{RatedVol}}}} = \frac{{\sum {{{\dot Q}_{{\mathrm{Case}}}} + \sum {{{\dot Q}_{{\mathrm{WalkIn}}}} + Powe{r_{{\mathrm{Pump}}}}} } }}{{{\rho_{Liquid}}\Delta {h_{fg}}}}
 \end{equation}
 
 Where:
@@ -1938,7 +1938,7 @@ where:
 A variable speed pump can be modeled by providing a cubic curve for pump power as a function of the ratio of total flow needed to the total flow specified at full load design conditions.
 
 \begin{equation}
-{\dot Q_{Pump}} = \left[ {A{{\left( {L{F_{Pump}}} \right)}^3} + B{{\left( {L{F_{Pump}}} \right)}^2} + C\left( {L{F_{Pump}}} \right) + D} \right] \times {\rm{Powe}}{{\rm{r}}_{{\rm{PumpRated}}}} \times {\rm{Rati}}{{\rm{o}}_{{\rm{PowertoHeat}}}}
+{\dot Q_{Pump}} = \left[ {A{{\left( {L{F_{Pump}}} \right)}^3} + B{{\left( {L{F_{Pump}}} \right)}^2} + C\left( {L{F_{Pump}}} \right) + D} \right] \times {\mathrm{Powe}}{{\mathrm{r}}_{{\mathrm{PumpRated}}}} \times {\mathrm{Rati}}{{\mathrm{o}}_{{\mathrm{PowertoHeat}}}}
 \end{equation}
 
 where \(LF_{Pump}\) is the ratio of total flow needed to the total flow specified at full load design conditions.
@@ -1955,11 +1955,11 @@ The user may also specify multiple constant-speed pumps.~ Multiple pumps, or pum
 
 where:
 
-\({\dot Q_{{\rm{Refrigeration}}}}\) is the output variable ``Refrigeration Secondary Loop Load Heat Transfer Rate'' (W)
+\({\dot Q_{{\mathrm{Refrigeration}}}}\) is the output variable ``Refrigeration Secondary Loop Load Heat Transfer Rate'' (W)
 
-\({\dot Q_{{\rm{TotalSecondary}}}}\) is the total load the secondary loop transfers to the primary system, output variable ``Refrigeration Secondary Loop Total Heat Transfer Rate'' (W)
+\({\dot Q_{{\mathrm{TotalSecondary}}}}\) is the total load the secondary loop transfers to the primary system, output variable ``Refrigeration Secondary Loop Total Heat Transfer Rate'' (W)
 
-\({\dot Q_{{\rm{Pump}}}}\) is the pump power, function of Flow\(_{Needed}\), output variable ``Refrigeration Secondary Loop Pump Electric Power'' (W)
+\({\dot Q_{{\mathrm{Pump}}}}\) is the pump power, function of Flow\(_{Needed}\), output variable ``Refrigeration Secondary Loop Pump Electric Power'' (W)
 
 \(Flow_{Needed}\) is the flow rate needed to meet the loop refrigeration load, , output variable ``Refrigeration Secondary Loop Volume Flow Rate'' (m\(^3\)/s).
 

@@ -418,7 +418,7 @@ $C_{Shape}$ &= Shape factor [dimensionless]\\
 \end{tabular}
 
 \begin{equation}
-C_{Shape} = \left\{ \begin{array}{l}0.754\;\;\;{\rm{for}}\;{\rm{a}}\;{\rm{circle}}\;{\rm{opening}}\\0.942(w/D)\;{\rm{for}}\;{\rm{a}}\;{\rm{rectangle}}\;{\rm{opening}}\end{array} \right\}
+C_{Shape} = \left\{ \begin{array}{l}0.754\;\;\;{\mathrm{for}}\;{\mathrm{a}}\;{\mathrm{circle}}\;{\mathrm{opening}}\\0.942(w/D)\;{\mathrm{for}}\;{\mathrm{a}}\;{\mathrm{rectangle}}\;{\mathrm{opening}}\end{array} \right\}
 \end{equation}
 
 where:
@@ -1319,7 +1319,7 @@ Step 4: Thermal comfort temperature calculation
 The thermal comfort check requires the thermal comfort temperature and the comfort band. The comfort temperature of Tcomf is calculated as a function of the outdoor dry-bulb temperature Tout. The comfort temperature calculation may be based on two curves and a boundary temperature point.
 
 \begin{equation}
-T_{comf} = \left\{ \begin{array}{ll} \rm{Low Temp Curve,} & \min T_{out} < x \leq \rm{Boundary Point} \\ \rm{High Temp Curve,} & \rm{Boundary Point} \leq x < \max T_{out}  \end{array}\right.
+T_{comf} = \left\{ \begin{array}{ll} \mathrm{Low Temp Curve,} & \min T_{out} < x \leq \mathrm{Boundary Point} \\ \mathrm{High Temp Curve,} & \mathrm{Boundary Point} \leq x < \max T_{out}  \end{array}\right.
 \end{equation}
 
 Step 5: Thermal band calculation
@@ -1327,7 +1327,7 @@ Step 5: Thermal band calculation
 The comfort band is calculated as a function of the design personal dissatisfaction PPD.
 
 \begin{equation}
-\theta = -0.0028 \left(100-\rm{PPD}\right)^2 + 0.3419 \left(100-\rm{PPD}\right) - 6.6275
+\theta = -0.0028 \left(100-\mathrm{PPD}\right)^2 + 0.3419 \left(100-\mathrm{PPD}\right) - 6.6275
 \end{equation}
 
 This equation is valid for PPD 0\% to 35\%
@@ -1349,7 +1349,7 @@ If the above logic check is false, no action is needed.
 If the opening probability check is true and upper boundary check is satisfied, a window will be opened, regardless of open/closed status at the previous time step. If the opening probability check is false and upper boundary check is satisfied, a window will remain at the status from the previous time step.
 
 \begin{equation}
-T_g > \left(T_{comf} + \theta\right)~~\&~~\rm{OpeningProbability}
+T_g > \left(T_{comf} + \theta\right)~~\&~~\mathrm{OpeningProbability}
 \end{equation}
 
 Step 7: Lower boundary check of thermal comfort
@@ -1367,7 +1367,7 @@ If the above logic check is false, no action is needed.
 If the closing probability check is true and lower boundary check is satisfied, a window will be closed, regardless of open/closed status at the previous time step. If the closing probability check is false and lower boundary check is satisfied, a window will remain at the status from the previous time step.
 
 \begin{equation}
-T_g < \left(T_{comf} - \theta\right)~~\&~~\rm{ClosingProbability}
+T_g < \left(T_{comf} - \theta\right)~~\&~~\mathrm{ClosingProbability}
 \end{equation}
 
 The output variables from the model are open status, opening probability status, and closing probability status. The detailed description of opening status is given in the Airflow Network Outputs section in the Input Output Reference.

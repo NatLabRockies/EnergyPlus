@@ -130,7 +130,7 @@ We need the following quantities for our design calculations. The \emph{Psy} fun
 \end{equation}
 
 \begin{equation}
-{h_{w,sat,in}} = {\rm{PsyHFnTdbW}}({T_{w,in}},{\rm{PsyWFnTdpPb}}({T_{w,in}},{P_{atm}}))
+{h_{w,sat,in}} = {\mathrm{PsyHFnTdbW}}({T_{w,in}},{\mathrm{PsyWFnTdpPb}}({T_{w,in}},{P_{atm}}))
 \end{equation}
 
 \begin{equation}
@@ -142,13 +142,13 @@ We need the following quantities for our design calculations. The \emph{Psy} fun
 \end{equation}
 
 \begin{equation}
-{h_{w,sat,out}} = {\rm{PsyHFnTdbW}}({T_{w,out}},{\rm{PsyWFnTdpPb}}({T_{w,out}},{P_{atm}}))
+{h_{w,sat,out}} = {\mathrm{PsyHFnTdbW}}({T_{w,out}},{\mathrm{PsyWFnTdpPb}}({T_{w,out}},{P_{atm}}))
 \end{equation}
 
 We now calculate the design coil bypass factor. The bypass factor is not used in subsequent calculations. It is calculated solely to use as check on the reasonableness of the user-input design inlet and outlet conditions. First we make an initial estimate of the apparatus dew point temperature:
 
 \begin{equation}
-{T_{air,dp,app}} = {\rm{PsyTdpFnWPb}}({w_{air,out}},{P_{atm}})
+{T_{air,dp,app}} = {\mathrm{PsyTdpFnWPb}}({w_{air,out}},{P_{atm}})
 \end{equation}
 
 We also need the ``slope'' of temperature versus humidity ratio on the psych chart between the inlet and outlet air conditions:
@@ -160,7 +160,7 @@ We also need the ``slope'' of temperature versus humidity ratio on the psych cha
 We now obtain the actual design apparatus dewpoint temperature by iterating over the following two equations:
 
 \begin{equation}
-{w_{air,dp,app}} = {\rm{PsyWFnTdpPb}}({T_{air,dp,app}},{P_{atm}})
+{w_{air,dp,app}} = {\mathrm{PsyWFnTdpPb}}({T_{air,dp,app}},{P_{atm}})
 \end{equation}
 
 \begin{equation}
@@ -170,7 +170,7 @@ We now obtain the actual design apparatus dewpoint temperature by iterating over
 The apparatus dewpoint enthalpy is then:
 
 \begin{equation}
-{h_{air,dp,app}} = {\rm{PsyHFnTdbW}}({T_{air,dp,app}},{w_{air,dp,app}})
+{h_{air,dp,app}} = {\mathrm{PsyHFnTdbW}}({T_{air,dp,app}},{w_{air,dp,app}})
 \end{equation}
 
 and the coil bypass factor is:
@@ -204,7 +204,7 @@ We set the internal UA to 3.3 times the external UA (as a typical value for a co
 The next step is to estimate the coil external heat transfer surface area. This is done in the function \emph{EstimateHEXSurfaceArea}:
 
 \begin{equation}
-Are{a_{coil,ext}} = {\rm{EstimateHEXSurfaceArea}}
+Are{a_{coil,ext}} = {\mathrm{EstimateHEXSurfaceArea}}
 \end{equation}
 
 using the following assumptions:
@@ -419,7 +419,7 @@ Effectiveness \(\eta\) used in Equation~\ref{eq:AirTempOutWithCondensation} is d
 \end{equation}
 
 \begin{equation}
-Condensatio{n_{Temp}} = {\rm{PsyTsatFnHPb(Ent}}{{\rm{h}}_{{\rm{AirCondensateTemp}}}}{\rm{,P_{atm}) }}
+Condensatio{n_{Temp}} = {\mathrm{PsyTsatFnHPb(Ent}}{{\mathrm{h}}_{{\mathrm{AirCondensateTemp}}}}{\mathrm{,P_{atm}) }}
 \label{eq:CondensationTemp}
 \end{equation}
 
@@ -443,7 +443,7 @@ This problem is solved utilizing the fact that the Exit conditions from the Dry 
 First, iterate between the Dry Coil and the Wet Coil. First calculate Coil Completely Dry performance by estimating the wet dry interface water temperature using equation and inputting this variable as the water inlet temperature to dry Coil.
 
 \begin{equation}
-  WetDryInterfac{e_{WaterTemp}} = {\rm{WaterTem}}{{\rm{p}}_{{\rm{Inlet}}}}{\rm{ + Are}}{{\rm{a}}_{{\rm{WetFraction}}}}{\rm{*(WaterTem}}{{\rm{p}}_{{\rm{Outlet}}}}{\rm{ - WaterTem}}{{\rm{p}}_{{\rm{Inlet}}}}{\rm{)}}
+  WetDryInterfac{e_{WaterTemp}} = {\mathrm{WaterTem}}{{\mathrm{p}}_{{\mathrm{Inlet}}}}{\mathrm{ + Are}}{{\mathrm{a}}_{{\mathrm{WetFraction}}}}{\mathrm{*(WaterTem}}{{\mathrm{p}}_{{\mathrm{Outlet}}}}{\mathrm{ - WaterTem}}{{\mathrm{p}}_{{\mathrm{Inlet}}}}{\mathrm{)}}
 \end{equation}
 
 The value of Surface Area Wet fraction is estimated initially as follows:
@@ -828,7 +828,7 @@ where the coil effectiveness is given by:
 The parameter NTU is the number of transfer units and is defined as a function of the UA value of the coil as follows:
 
 \begin{equation}
-{\rm{NTU}} = \frac{{{\rm{UA}}}}{{{\rm{min}}\left( {{{\rm{C}}_{{\rm{p,a}}}}{{{\rm{\dot m}}}_{\rm{a}}}{\rm{,}}{{\rm{C}}_{{\rm{p,w}}}}{{{\rm{\dot m}}}_{\rm{w}}}} \right)}}
+{\mathrm{NTU}} = \frac{{{\mathrm{UA}}}}{{{\mathrm{min}}\left( {{{\mathrm{C}}_{{\mathrm{p,a}}}}{{{\mathrm{\dot m}}}_{\mathrm{a}}}{\mathrm{,}}{{\mathrm{C}}_{{\mathrm{p,w}}}}{{{\mathrm{\dot m}}}_{\mathrm{w}}}} \right)}}
 \end{equation}
 
 \subsection{Hot-Water-Based Air Heating Coil}\label{hot-water-based-air-heating-coil}
@@ -1112,7 +1112,7 @@ EIR = \,Energy\,input\,ratio\, = \,\left( {\frac{1}{{CO{P_{rated}}}}} \right)\le
 \(CO{P_{rated}}\) is the coefficient of performance at rated conditions (user input)
 
 \begin{equation}
-RTF{\rm{ }} = {\rm{ }}\left( {{\raise0.7ex\hbox{{PLR}} \!\mathord{\left/ {\vphantom {{PLR} {PartLoadFrac}}}\right.}\!\lower0.7ex\hbox{{PartLoadFrac}}}} \right)\,\, = \,\,runtime~fraction~of~the~cooling~coil
+RTF{\mathrm{ }} = {\mathrm{ }}\left( {{\raise0.7ex\hbox{{PLR}} \!\mathord{\left/ {\vphantom {{PLR} {PartLoadFrac}}}\right.}\!\lower0.7ex\hbox{{PartLoadFrac}}}} \right)\,\, = \,\,runtime~fraction~of~the~cooling~coil
 \end{equation}
 
 The total amount of heat rejected by the condenser is then calculated and stored for use by other waste heat recovery models (e.g., Coil:Heating:Desuperheater).
@@ -1880,28 +1880,28 @@ The standard rating net total cooling electric power input is calculated as foll
 
 \begin{equation}
 \begin{array}{rl}
-  \rm{Power}_{Total} =& \left[ \dot{Q}_{Total,Rated} \left( \rm{TotCapTempModFac} \right) \left( \rm{TotCapFlowModFac}_{Rated} \right) \right] \\
-& \cdot \rm{EIR} + \left( \rm{FanPowerPerVolFlowRate} \cdot \dot{V}_{Rated} \right)
+  \mathrm{Power}_{Total} =& \left[ \dot{Q}_{Total,Rated} \left( \mathrm{TotCapTempModFac} \right) \left( \mathrm{TotCapFlowModFac}_{Rated} \right) \right] \\
+& \cdot \mathrm{EIR} + \left( \mathrm{FanPowerPerVolFlowRate} \cdot \dot{V}_{Rated} \right)
 \end{array}
 \end{equation}
 
 \begin{equation}
-  \frac{\rm{EIRTempModFac} \rm{EIRFlowModFac_{Rated}}}{COP_{Rated}}
+  \frac{\mathrm{EIRTempModFac} \mathrm{EIRFlowModFac_{Rated}}}{COP_{Rated}}
 \end{equation}
 
 where:
 
 \(EER\) is the Energy efficiency ratio at wet-bulb temperature of air entering the cooling coil, dry-bulb temperature of air entering the air-cooled (outdoor) condenser, and rated air volume flow through the cooling coil (W/W)
 
-\(\rm{TotCapTempModFac}\) is the total cooling capacity function of temperature curve evaluated at the test condition of wet-bulb temperature of air entering the cooling coil and dry-bulb temperature of air entering the air-cooled (outdoor) condenser (dimensionless)
+\(\mathrm{TotCapTempModFac}\) is the total cooling capacity function of temperature curve evaluated at the test condition of wet-bulb temperature of air entering the cooling coil and dry-bulb temperature of air entering the air-cooled (outdoor) condenser (dimensionless)
 
-\(\rm{Power}_{Total}\) is the total electric power (compressors, condenser fans and evaporator fan) at the test conditions of wet-bulb temperature of air entering the cooling coil, and dry-bulb temperature of air entering the air-cooled (outdoor) condenser, and rated air volume flow through the cooling coil (W)
+\(\mathrm{Power}_{Total}\) is the total electric power (compressors, condenser fans and evaporator fan) at the test conditions of wet-bulb temperature of air entering the cooling coil, and dry-bulb temperature of air entering the air-cooled (outdoor) condenser, and rated air volume flow through the cooling coil (W)
 
 \(COP_{Rated}\) is the Coefficient of Performance at rated conditions, user input (W/W)
 
-\(\rm{EIRTempModFac}\) is the Energy Input Ratio function of temperature curve evaluated at the test condition of wet-bulb temperature of air entering the cooling coil and dry-bulb temperature of air entering the air-cooled (outdoor) condenser (dimensionless)
+\(\mathrm{EIRTempModFac}\) is the Energy Input Ratio function of temperature curve evaluated at the test condition of wet-bulb temperature of air entering the cooling coil and dry-bulb temperature of air entering the air-cooled (outdoor) condenser (dimensionless)
 
-\(\rm{EIRFlowModFac}_{Rated}\) is the Energy Input Ratio function of flow fraction curve evaluated at a flow fraction of 1.0 (dimensionless).
+\(\mathrm{EIRFlowModFac}_{Rated}\) is the Energy Input Ratio function of flow fraction curve evaluated at a flow fraction of 1.0 (dimensionless).
 
 Reference:
 
@@ -2399,7 +2399,7 @@ The steady-state cooling capacities and electric power inputs at the minimum spe
 \end{equation}
 
 \begin{equation}
-FanPower_{CRated}^{k = 1} = FanPowerPerVolFlowRat{e^{k = 1}} \cdot {\rm{\dot V}}_{CRated}^{k = 1}
+FanPower_{CRated}^{k = 1} = FanPowerPerVolFlowRat{e^{k = 1}} \cdot {\mathrm{\dot V}}_{CRated}^{k = 1}
 \end{equation}
 
 where:
@@ -2459,7 +2459,7 @@ The steady-state cooling capacities and electric power input at the maximum spee
 \end{equation}
 
 \begin{equation}
-  FanPower_{CRated}^{k = 2} = FanPowerPerVolFlowRat{e^{k = 2}} \cdot {\rm{\dot V}}_{CRated}^{k = 2}
+  FanPower_{CRated}^{k = 2} = FanPowerPerVolFlowRat{e^{k = 2}} \cdot {\mathrm{\dot V}}_{CRated}^{k = 2}
 \end{equation}
 
 where:
@@ -2828,43 +2828,43 @@ It shall be noted for the total cooling capacity and flow rate inputs, two field
 The Rated Total Cooling Capacity at Selected Nominal Speed Level contains the rated total cooling capacity to match the building sensible or latent cooling load.~ The rated cooling capacity is used to determine a capacity scaling factor, as compared to the Reference Unit catalog capacity at the nominal speed level.
 
 \begin{equation}
-{\rm{Capacity~Scale~Factor}} = \frac{{{\rm{Rated~Total~Cooling~Capacity}}}}{{{\rm{Reference~Unit~Total~Cooling~Capacity}}@{\rm{Nominal~Speed~Level}}}}
+{\mathrm{Capacity~Scale~Factor}} = \frac{{{\mathrm{Rated~Total~Cooling~Capacity}}}}{{{\mathrm{Reference~Unit~Total~Cooling~Capacity}}@{\mathrm{Nominal~Speed~Level}}}}
 \end{equation}
 
 And then, this scaling factor is used to determine capacities at rated condition for other speed levels, as below,
 
 \begin{equation}
 \begin{array}{l}
-{\rm{Rated~Total~Cooling~Capacity}}@{\rm{Speed~Level}}\left( {\rm{x}} \right) = \\
-{\rm{Capacity~Scale~Factor}} \times {\rm{Reference~Unit~Total~Cooling~Capacity}}@{\rm{Speed~Level}}({\rm{x}})
+{\mathrm{Rated~Total~Cooling~Capacity}}@{\mathrm{Speed~Level}}\left( {\mathrm{x}} \right) = \\
+{\mathrm{Capacity~Scale~Factor}} \times {\mathrm{Reference~Unit~Total~Cooling~Capacity}}@{\mathrm{Speed~Level}}({\mathrm{x}})
 \end{array}
 \end{equation}
 
 The Rated Volumetric Air Flow Rate is used to determine an internal scaling factor, and calculate the air flow rates in the parent objects, as follows:
 
 \begin{equation}
-{\rm{Air~Flow~Scale~Factor}} = \frac{{{\rm{Rated~Volumetric~Air~Flow~Rate}}}}{{{\rm{Reference~Unit~Vol~Air~Flow~Rate}}@{\rm{Nominal~Speed~Level}} \times {\rm{CapacityScaleFactor}}}}
+{\mathrm{Air~Flow~Scale~Factor}} = \frac{{{\mathrm{Rated~Volumetric~Air~Flow~Rate}}}}{{{\mathrm{Reference~Unit~Vol~Air~Flow~Rate}}@{\mathrm{Nominal~Speed~Level}} \times {\mathrm{CapacityScaleFactor}}}}
 \end{equation}
 
 And the loop volumetric air flow rates in the parent objects are calculated as below:
 
 \begin{equation}
 \begin{array}{l}
-{\rm{Loop~Volumetric~Air~Flow~Rate}}@{\rm{Speed~Level}}\left( {\rm{x}} \right) = \\ {\rm{Air~Flow~Scale~Factor}} \times {\rm{Reference~Unit~Vol~Air~Flow~Rate}}@{\rm{Speed~Level}}({\rm{x}}) \times {\rm{Capacity~Scale~Factor}}
+{\mathrm{Loop~Volumetric~Air~Flow~Rate}}@{\mathrm{Speed~Level}}\left( {\mathrm{x}} \right) = \\ {\mathrm{Air~Flow~Scale~Factor}} \times {\mathrm{Reference~Unit~Vol~Air~Flow~Rate}}@{\mathrm{Speed~Level}}({\mathrm{x}}) \times {\mathrm{Capacity~Scale~Factor}}
 \end{array}
 \end{equation}
 
 If the volumetric air flow rate at one speed level is higher than the flow rate allowed by the fan in the parent object, the flow rate will be set back to the fan flow rate.
 
-If \({\rm{Air~Flow~Scale~Factor}}\) equals to unity, the loop air flow rate become the design flow rates of the original unit (after scaled by the rated total cooling capacity). The Rated Volumetric Air Flow Rate is introduced here to correlate with the actual flow rate in the air loop, in case that these differ from the design specifications. Certainly, it is recommended that the Rated Volumetric Air Flow Rate is selected in the way that \({\rm{Air~Flow~Scale~Factor}}\) is unity, so as to get more accurate results from the performance curves.
+If \({\mathrm{Air~Flow~Scale~Factor}}\) equals to unity, the loop air flow rate become the design flow rates of the original unit (after scaled by the rated total cooling capacity). The Rated Volumetric Air Flow Rate is introduced here to correlate with the actual flow rate in the air loop, in case that these differ from the design specifications. Certainly, it is recommended that the Rated Volumetric Air Flow Rate is selected in the way that \({\mathrm{Air~Flow~Scale~Factor}}\) is unity, so as to get more accurate results from the performance curves.
 
 If the condenser is evaporatively cooled, it is necessary to know the condenser air flow rate, so as to calculate the water evaporation rate. We will have fields for specifying the Reference Unit condenser volumetric air flow rates at individual speed levels, and these inputs are optional. If the condenser air flow rates are not inputted by the user, default values of condenser volumetric air flow rate as a function of the rated total cooling capacity will be used. Condenser air flow rates of the simulated unit are calculated as below,
 
 \begin{equation}
   \begin{array}{l}
-    \rm{Condenser~Volumetric~Air~Flow~Rate} @ \rm{Speed~Level} \left( {\rm{x}} \right) = \\
-    \quad \quad \rm{Reference~Unit~Condenser~Vol~Air~Flow~Rate} @ \rm{Speed~Level} (\rm{x}) \times \\
-    \quad \quad \quad \rm{Capacity~Scale~Factor}
+    \mathrm{Condenser~Volumetric~Air~Flow~Rate} @ \mathrm{Speed~Level} \left( {\mathrm{x}} \right) = \\
+    \quad \quad \mathrm{Reference~Unit~Condenser~Vol~Air~Flow~Rate} @ \mathrm{Speed~Level} (\mathrm{x}) \times \\
+    \quad \quad \quad \mathrm{Capacity~Scale~Factor}
   \end{array}
 \end{equation}
 
@@ -2905,7 +2905,7 @@ The total cooling capacity modifier as a function of temperature curve (CAP-FT) 
 Note: The data used to develop the total cooling capacity modifier curve (function of temperature) should represent performance when the cooling coil is `wet' (i.e., coil providing sensible cooling and at least some dehumidification). Performance data when the cooling coil is `dry' (i.e., not providing any dehumidification) should not be included when developing this modifier curve. This model automatically detects and adjusts for `dry coil' conditions.
 
 \begin{equation}
-{\rm{TotCapTempModFac}} = {\rm{a}} + {\rm{b*W}}{{\rm{B}}_{\rm{i}}} + {\rm{c*WB}}_{\rm{i}}^2 + {\rm{d*D}}{{\rm{B}}_{\rm{o}}} + {\rm{e*D}}{{\rm{B}}_{\rm{o}}}^2 + {\rm{f*W}}{{\rm{B}}_{\rm{i}}}{\rm{*D}}{{\rm{B}}_{\rm{o}}}
+{\mathrm{TotCapTempModFac}} = {\mathrm{a}} + {\mathrm{b*W}}{{\mathrm{B}}_{\mathrm{i}}} + {\mathrm{c*WB}}_{\mathrm{i}}^2 + {\mathrm{d*D}}{{\mathrm{B}}_{\mathrm{o}}} + {\mathrm{e*D}}{{\mathrm{B}}_{\mathrm{o}}}^2 + {\mathrm{f*W}}{{\mathrm{B}}_{\mathrm{i}}}{\mathrm{*D}}{{\mathrm{B}}_{\mathrm{o}}}
 \end{equation}
 
 where:
@@ -2925,7 +2925,7 @@ a-f is the regression curve-fit coefficients.
 The total cooling capacity modifier curve (function of air flow fraction) is a cubic curve with the independent variable being the ratio of the actual air flow rate across the cooling coil to the design air flow rate (i.e., fraction of design flow at the speed).
 
 \begin{equation}
-{\rm{TotCapAirFlowModFac}} = {\rm{a}} + {\rm{b*f}}{{\rm{f}}_{\rm{a}}} + {\rm{c*ff}}_{\rm{a}}^2 + {\rm{d*ff}}_{\rm{a}}^3
+{\mathrm{TotCapAirFlowModFac}} = {\mathrm{a}} + {\mathrm{b*f}}{{\mathrm{f}}_{\mathrm{a}}} + {\mathrm{c*ff}}_{\mathrm{a}}^2 + {\mathrm{d*ff}}_{\mathrm{a}}^3
 \end{equation}
 
 where:
@@ -2936,7 +2936,7 @@ a-d are the regression curve fit coefficients.  If no data for correction is ava
 
 \begin{equation}
   \begin{array}{l}
-    {\rm{DesignAirMassFlowRate}}@{\rm{SpeedLevel}}({\rm{x}}) = {\rm{}}\\\quad \quad \quad {\rm{ReferenceUnitAirMassFlowRate}}@{\rm{SpeedLevel}}({\rm{x}}) \times {\rm{CapacityScaleFactor}}
+    {\mathrm{DesignAirMassFlowRate}}@{\mathrm{SpeedLevel}}({\mathrm{x}}) = {\mathrm{}}\\\quad \quad \quad {\mathrm{ReferenceUnitAirMassFlowRate}}@{\mathrm{SpeedLevel}}({\mathrm{x}}) \times {\mathrm{CapacityScaleFactor}}
   \end{array}
 \end{equation}
 
@@ -2951,7 +2951,7 @@ a-d are the regression curve fit coefficients.  If no data for correction is ava
 The energy input ratio modifier curve as a function of temperature (EIR-FT) is a biquadratic curve with two independent variables: wet-bulb temperature of the air entering the cooling coil and the condenser entering air temperature. The output of this curve is multiplied by the rated EIR (inverse of the rated COP) at the speed level, to give the EIR at the specific entering air temperatures at which the DX unit is operating (i.e., at temperatures different from the rating point temperatures).
 
 \begin{equation}
-{\rm{EIRTempModFac}} = {\rm{a}} + {\rm{b*W}}{{\rm{B}}_{\rm{i}}} + {\rm{c*WB}}_{\rm{i}}^2 + {\rm{d*D}}{{\rm{B}}_{\rm{o}}} + {\rm{e*D}}{{\rm{B}}_{\rm{o}}}^2 + {\rm{f*W}}{{\rm{B}}_{\rm{i}}}{\rm{*D}}{{\rm{B}}_{\rm{o}}}
+{\mathrm{EIRTempModFac}} = {\mathrm{a}} + {\mathrm{b*W}}{{\mathrm{B}}_{\mathrm{i}}} + {\mathrm{c*WB}}_{\mathrm{i}}^2 + {\mathrm{d*D}}{{\mathrm{B}}_{\mathrm{o}}} + {\mathrm{e*D}}{{\mathrm{B}}_{\mathrm{o}}}^2 + {\mathrm{f*W}}{{\mathrm{B}}_{\mathrm{i}}}{\mathrm{*D}}{{\mathrm{B}}_{\mathrm{o}}}
 \end{equation}
 
 where a-f are regression curve fit coefficients.
@@ -2965,7 +2965,7 @@ where a-f are regression curve fit coefficients.
 \end{enumerate}
 
 \begin{equation}
-{\rm{EIRAirFlowModFac}} = {\rm{a}} + {\rm{b*f}}{{\rm{f}}_{\rm{a}}} + {\rm{c*ff}}_{\rm{a}}^2 + {\rm{d*ff}}_{\rm{a}}^3
+{\mathrm{EIRAirFlowModFac}} = {\mathrm{a}} + {\mathrm{b*f}}{{\mathrm{f}}_{\mathrm{a}}} + {\mathrm{c*ff}}_{\mathrm{a}}^2 + {\mathrm{d*ff}}_{\mathrm{a}}^3
 \end{equation}
 
 where a-d are regression curve fit coefficients.  If no data is available for correction, the user can simply use a = 1.0 and set the other coefficients to 0.0.
@@ -2986,21 +2986,21 @@ The lowest speed operation of the variable-speed DX cooling coil is similar to t
 
 \begin{equation}
   \begin{array}{l}
-    \rm{Q}_{\rm{total},1} = \rm{Rated~Total~Cooling~Capacity} @ \rm{Speed~Level} \left( 1 \right) \rm{*} \\
-    \quad \quad \rm{TotCapTempModFa} \rm{c}_1 \rm{*TotCapAirFlowModFa} \rm{c}_1
+    \mathrm{Q}_{\mathrm{total},1} = \mathrm{Rated~Total~Cooling~Capacity} @ \mathrm{Speed~Level} \left( 1 \right) \mathrm{*} \\
+    \quad \quad \mathrm{TotCapTempModFa} \mathrm{c}_1 \mathrm{*TotCapAirFlowModFa} \mathrm{c}_1
   \end{array}
 \end{equation}
 
 And the EIR is calculated as:
 
 \begin{equation}
-\rm{EI} \rm{R}_1 = \frac{1.0}{\rm{Reference~Unit~COP} @ \rm{Speed}(1)}{\rm{EIRTempModFa}}{\rm{c}_1}{\rm{*EIRAirFlowModFa}}{\rm{c}_1}
+\mathrm{EI} \mathrm{R}_1 = \frac{1.0}{\mathrm{Reference~Unit~COP} @ \mathrm{Speed}(1)}{\mathrm{EIRTempModFa}}{\mathrm{c}_1}{\mathrm{*EIRAirFlowModFa}}{\mathrm{c}_1}
 \end{equation}
 
 And the power consumption excluding the indoor fan is:
 
 \begin{equation}
-{\rm{Powe}}{{\rm{r}}_1} = {{\rm{Q}}_{{\rm{total}},1}}{\rm{*EI}}{{\rm{R}}_1}{\rm{*RTF}}
+{\mathrm{Powe}}{{\mathrm{r}}_1} = {{\mathrm{Q}}_{{\mathrm{total}},1}}{\mathrm{*EI}}{{\mathrm{R}}_1}{\mathrm{*RTF}}
 \end{equation}
 
 At the lowest speed, the dehumidification calculation is exactly the same as the single speed DX coil. That is to use the rated SHR and the design air flow rate at the lowest speed to calculate rated bypass factor of BF\(_{rated,1}\), and the corresponding effective surface area of A\(_{o,1}\). With A\(_{o,1}\) known, the coil BF can be adjusted for non-rated air flow rates.
@@ -3008,13 +3008,13 @@ At the lowest speed, the dehumidification calculation is exactly the same as the
 The part load ratio for sensible cooling is:
 
 \begin{equation}
-{\rm{PLR}} = {\rm{SensibleCoolingLoad}}/({{\rm{Q}}_{{\rm{total}},1}}{\rm{*SH}}{{\rm{R}}_1})
+{\mathrm{PLR}} = {\mathrm{SensibleCoolingLoad}}/({{\mathrm{Q}}_{{\mathrm{total}},1}}{\mathrm{*SH}}{{\mathrm{R}}_1})
 \end{equation}
 
 For latent cooling:
 
 \begin{equation}
-{\rm{PLR}} = {\rm{LatentCoolingLoad}}/[{{\rm{Q}}_{{\rm{total}},1}}{\rm{*}}(1.0 - {\rm{SH}}{{\rm{R}}_1})]
+{\mathrm{PLR}} = {\mathrm{LatentCoolingLoad}}/[{{\mathrm{Q}}_{{\mathrm{total}},1}}{\mathrm{*}}(1.0 - {\mathrm{SH}}{{\mathrm{R}}_1})]
 \end{equation}
 
 \subsubsection{Higher Speed Operation}\label{higher-speed-operation-1-000}
@@ -3025,79 +3025,79 @@ The design air flow rate at the speed ratio are given as following:
 
 \begin{equation}
   \begin{array}{l}
-    \rm{DesignAirFlowRateSpeedRatio} = \rm{Reference~Unit~Air~Mass~Flow~Rate} @ \rm{Speed~Level} \left( \rm{x} - 1 \right) \rm{*} \\
-    \quad \quad \quad \rm{CapacityScaleFactor*} \left( 1 - \rm{SpeedRatio} \right) + \\
-    \quad \quad \rm{Reference~Unit~Air~Mass~Flow~Rate} @ \rm{Speed~Level} \left( \rm{x} \right) \rm{*} \\
-    \quad \quad \quad \rm{CapacityScaleFactor*SpeedRatio}
+    \mathrm{DesignAirFlowRateSpeedRatio} = \mathrm{Reference~Unit~Air~Mass~Flow~Rate} @ \mathrm{Speed~Level} \left( \mathrm{x} - 1 \right) \mathrm{*} \\
+    \quad \quad \quad \mathrm{CapacityScaleFactor*} \left( 1 - \mathrm{SpeedRatio} \right) + \\
+    \quad \quad \mathrm{Reference~Unit~Air~Mass~Flow~Rate} @ \mathrm{Speed~Level} \left( \mathrm{x} \right) \mathrm{*} \\
+    \quad \quad \quad \mathrm{CapacityScaleFactor*SpeedRatio}
   \end{array}
 \end{equation}
 
-The fraction of air flow is given by \({\rm{f}}{{\rm{f}}_{{\rm{a}},{\rm{x}} - 1}}\) = \({\rm{f}}{{\rm{f}}_{{\rm{a}},{\rm{x}}}}\) = actual air mass flow rate/DesignAirFlowRateSpeedRatio.
+The fraction of air flow is given by \({\mathrm{f}}{{\mathrm{f}}_{{\mathrm{a}},{\mathrm{x}} - 1}}\) = \({\mathrm{f}}{{\mathrm{f}}_{{\mathrm{a}},{\mathrm{x}}}}\) = actual air mass flow rate/DesignAirFlowRateSpeedRatio.
 
 The total cooling capacities and EIRs at Speed x-1 and Speed x are calculated:
 
 \begin{equation}
   \begin{array}{l}
-    \rm{Q}_{\rm{total},\rm{x} - 1} = \rm{Rated~Total~Cooling~Capacity} @ \rm{Speed~Level} \left( \rm{x} - 1 \right) \rm{*} \\
-    \quad \quad \quad \rm{TotCapTempModFa} \rm{c}_{\rm{x} - 1} \rm{*TotCapAirFlowModFa} \rm{c}_{\rm{x} - 1}
+    \mathrm{Q}_{\mathrm{total},\mathrm{x} - 1} = \mathrm{Rated~Total~Cooling~Capacity} @ \mathrm{Speed~Level} \left( \mathrm{x} - 1 \right) \mathrm{*} \\
+    \quad \quad \quad \mathrm{TotCapTempModFa} \mathrm{c}_{\mathrm{x} - 1} \mathrm{*TotCapAirFlowModFa} \mathrm{c}_{\mathrm{x} - 1}
   \end{array}
 \end{equation}
 
 \begin{equation}
   \begin{array}{l}
-    \rm{Q}_{\rm{total},\rm{x}} = \rm{Rated~Total~Cooling~Capacity} @ \rm{Speed~Level} \left( \rm{x} \right) \rm{*} \\
-    \quad \quad \quad \rm{TotCapTempModFa} \rm{c}_{\rm{x}} \rm{*TotCapAirFlowModFa} \rm{c}_{\rm{x}}
+    \mathrm{Q}_{\mathrm{total},\mathrm{x}} = \mathrm{Rated~Total~Cooling~Capacity} @ \mathrm{Speed~Level} \left( \mathrm{x} \right) \mathrm{*} \\
+    \quad \quad \quad \mathrm{TotCapTempModFa} \mathrm{c}_{\mathrm{x}} \mathrm{*TotCapAirFlowModFa} \mathrm{c}_{\mathrm{x}}
   \end{array}
 \end{equation}
 
 \begin{equation}
-{\rm{EI}}{{\rm{R}}_{{\rm{x}} - 1}} = \frac{{1.0}}{{{\rm{Reference~Unit~COP}}@{\rm{Speed}}({\rm{x}} - 1)}}{\rm{EIRTempModFa}}{{\rm{c}}_{{\rm{x}} - 1}}{\rm{*EIRAirFlowModFa}}{{\rm{c}}_{{\rm{x}} - 1}}
+{\mathrm{EI}}{{\mathrm{R}}_{{\mathrm{x}} - 1}} = \frac{{1.0}}{{{\mathrm{Reference~Unit~COP}}@{\mathrm{Speed}}({\mathrm{x}} - 1)}}{\mathrm{EIRTempModFa}}{{\mathrm{c}}_{{\mathrm{x}} - 1}}{\mathrm{*EIRAirFlowModFa}}{{\mathrm{c}}_{{\mathrm{x}} - 1}}
 \end{equation}
 
 \begin{equation}
-{\rm{EI}}{{\rm{R}}_{\rm{x}}} = \frac{{1.0}}{{{\rm{Reference~Unit~COP}}@{\rm{Speed}}\left( {\rm{x}} \right)}}{\rm{EIRTempModFa}}{{\rm{c}}_{\rm{x}}}{\rm{*EIRAirFlowModFa}}{{\rm{c}}_{\rm{x}}}
+{\mathrm{EI}}{{\mathrm{R}}_{\mathrm{x}}} = \frac{{1.0}}{{{\mathrm{Reference~Unit~COP}}@{\mathrm{Speed}}\left( {\mathrm{x}} \right)}}{\mathrm{EIRTempModFa}}{{\mathrm{c}}_{\mathrm{x}}}{\mathrm{*EIRAirFlowModFa}}{{\mathrm{c}}_{\mathrm{x}}}
 \end{equation}
 
 The total cooling capacity at the corresponding speed ratio is:
 
 \begin{equation}
-{{\rm{Q}}_{{\rm{total}},{\rm{SpeedRatio}}}} = \left( {1.0 - {\rm{SpeedRatio}}} \right){\rm{*}}{{\rm{Q}}_{{\rm{total}},{\rm{x}} - 1}} + {\rm{SpeedRatio*}}{{\rm{Q}}_{{\rm{total}},{\rm{x}}}}
+{{\mathrm{Q}}_{{\mathrm{total}},{\mathrm{SpeedRatio}}}} = \left( {1.0 - {\mathrm{SpeedRatio}}} \right){\mathrm{*}}{{\mathrm{Q}}_{{\mathrm{total}},{\mathrm{x}} - 1}} + {\mathrm{SpeedRatio*}}{{\mathrm{Q}}_{{\mathrm{total}},{\mathrm{x}}}}
 \end{equation}
 
 and the power consumption, excluding the indoor fan, is:
 
 \begin{equation}
-{\rm{Powe}}{{\rm{r}}_{{\rm{SpeedRatio}}}} = \left( {1.0 - {\rm{SpeedRatio}}} \right){\rm{*}}{{\rm{Q}}_{{\rm{total}},{\rm{x}} - 1}}{\rm{*EI}}{{\rm{R}}_{{\rm{x}} - 1}} + {\rm{SpeedRatio*}}{{\rm{Q}}_{{\rm{total}},{\rm{x}}}}{\rm{*EI}}{{\rm{R}}_{\rm{x}}}
+{\mathrm{Powe}}{{\mathrm{r}}_{{\mathrm{SpeedRatio}}}} = \left( {1.0 - {\mathrm{SpeedRatio}}} \right){\mathrm{*}}{{\mathrm{Q}}_{{\mathrm{total}},{\mathrm{x}} - 1}}{\mathrm{*EI}}{{\mathrm{R}}_{{\mathrm{x}} - 1}} + {\mathrm{SpeedRatio*}}{{\mathrm{Q}}_{{\mathrm{total}},{\mathrm{x}}}}{\mathrm{*EI}}{{\mathrm{R}}_{\mathrm{x}}}
 \end{equation}
 
 The net heat discharged from the condenser is:
 
 \begin{equation}
-{{\rm{Q}}_{{\rm{cond}},{\rm{SpeedRatio}}}} = {\rm{Powe}}{{\rm{r}}_{{\rm{SpeedRatio}}}} + {{\rm{Q}}_{{\rm{total}},{\rm{SpeedRatio}}}}
+{{\mathrm{Q}}_{{\mathrm{cond}},{\mathrm{SpeedRatio}}}} = {\mathrm{Powe}}{{\mathrm{r}}_{{\mathrm{SpeedRatio}}}} + {{\mathrm{Q}}_{{\mathrm{total}},{\mathrm{SpeedRatio}}}}
 \end{equation}
 
 and the effective surface area in the correlations of BF factor is calculated as below:
 
 \begin{equation}
-{{\rm{A}}_{{\rm{o}},{\rm{SpeedRatio}}}} = \left( {1 - {\rm{SpeedRatio}}} \right){\rm{*}}{{\rm{A}}_{{\rm{o}},{\rm{x}} - 1}} + {\rm{SpeedRatio*}}{{\rm{A}}_{{\rm{o}},{\rm{x}}}}
+{{\mathrm{A}}_{{\mathrm{o}},{\mathrm{SpeedRatio}}}} = \left( {1 - {\mathrm{SpeedRatio}}} \right){\mathrm{*}}{{\mathrm{A}}_{{\mathrm{o}},{\mathrm{x}} - 1}} + {\mathrm{SpeedRatio*}}{{\mathrm{A}}_{{\mathrm{o}},{\mathrm{x}}}}
 \end{equation}
 
 Using A\(_{o,SpeedRatio}\) in the same BF and SHR calculation procedure as the single speed DX cooling coil, we can get BF\(_{SpeedRatio}\) and SHR\(_{SpeedRatio}\).  The sensible cooling capacity is calculated using:
 
 \begin{equation}
-{{\rm{Q}}_{{\rm{sensible}},{\rm{SpeedRatio}}}} = {{\rm{Q}}_{{\rm{total}},{\rm{SpeedRatio}}}}{\rm{*SH}}{{\rm{R}}_{{\rm{SpeedRatio}}}}
+{{\mathrm{Q}}_{{\mathrm{sensible}},{\mathrm{SpeedRatio}}}} = {{\mathrm{Q}}_{{\mathrm{total}},{\mathrm{SpeedRatio}}}}{\mathrm{*SH}}{{\mathrm{R}}_{{\mathrm{SpeedRatio}}}}
 \end{equation}
 
 If the variable-speed DX cooling coil used to match the sensible cooling load, then:
 
 \begin{equation}
-{{\rm{Q}}_{{\rm{sensible}},{\rm{SpeedRatio}}}} = {\rm{SensibleLoad}}
+{{\mathrm{Q}}_{{\mathrm{sensible}},{\mathrm{SpeedRatio}}}} = {\mathrm{SensibleLoad}}
 \end{equation}
 
 If it intends to match the latent cooling load, then:
 
 \begin{equation}
-{{\rm{Q}}_{{\rm{total}},{\rm{SpeedRatio}}}}{\rm{*}}\left( {1.0 - {\rm{SH}}{{\rm{R}}_{{\rm{SpeedRatio}}}}} \right) = {\rm{LatentLoad}}
+{{\mathrm{Q}}_{{\mathrm{total}},{\mathrm{SpeedRatio}}}}{\mathrm{*}}\left( {1.0 - {\mathrm{SH}}{{\mathrm{R}}_{{\mathrm{SpeedRatio}}}}} \right) = {\mathrm{LatentLoad}}
 \end{equation}
 
 If the speed reaches the highest level, the speed ratio becomes 1.0, and Speed n represents the highest speed.
@@ -3107,27 +3107,27 @@ If the speed reaches the highest level, the speed ratio becomes 1.0, and Speed n
 If using evaporative pre-cooling pad upstream of the condenser, the user must also enter the appropriate evaporative effectiveness for the media at each compressor speed, so as to correlate variation of the effectiveness as a function of compressor speed, i.e.~the variation of condenser air flow rate. The evaporative effectiveness is interpolated between speed levels as:
 
 \begin{equation}
-{\rm{Effectivenes}}{{\rm{s}}_{{\rm{SpeedRatio}}}} = \left( {1.0 - {\rm{SpeedRatio}}} \right){\rm{*Effectivenes}}{{\rm{s}}_{{\rm{x}} - 1}} + {\rm{SpeedRatio*Effectivenes}}{{\rm{s}}_{\rm{x}}}
+{\mathrm{Effectivenes}}{{\mathrm{s}}_{{\mathrm{SpeedRatio}}}} = \left( {1.0 - {\mathrm{SpeedRatio}}} \right){\mathrm{*Effectivenes}}{{\mathrm{s}}_{{\mathrm{x}} - 1}} + {\mathrm{SpeedRatio*Effectivenes}}{{\mathrm{s}}_{\mathrm{x}}}
 \end{equation}
 
 The interpolated effectiveness at the speed ratio is used to calculate the air temperature reduction across the evaporative cooling pad, and the decreased air temperature entering the condenser coil is used in place of the ambient temperature as:
 
 \begin{equation}
-{{\rm{T}}_{{\rm{c}},{\rm{i}}}} = {{\rm{T}}_{{\rm{wb}},{\rm{o}}}} + (1.0 - {\rm{Effectivenes}}{{\rm{s}}_{{\rm{SpeedRatio}}}}){\rm{*}}({{\rm{T}}_{{\rm{db}},{\rm{o}}}} - {{\rm{T}}_{{\rm{wb}},{\rm{o}}}})
+{{\mathrm{T}}_{{\mathrm{c}},{\mathrm{i}}}} = {{\mathrm{T}}_{{\mathrm{wb}},{\mathrm{o}}}} + (1.0 - {\mathrm{Effectivenes}}{{\mathrm{s}}_{{\mathrm{SpeedRatio}}}}){\mathrm{*}}({{\mathrm{T}}_{{\mathrm{db}},{\mathrm{o}}}} - {{\mathrm{T}}_{{\mathrm{wb}},{\mathrm{o}}}})
 \end{equation}
 
 where:
 
-\({{\rm{T}}_{{\rm{c}},{\rm{i}}}}\) is the condenser entering air temperature (\(^{\circ}\)C)
+\({{\mathrm{T}}_{{\mathrm{c}},{\mathrm{i}}}}\) is the condenser entering air temperature (\(^{\circ}\)C)
 
-\({{\rm{T}}_{{\rm{wb}},{\rm{o}}}}\) is the outdoor air wet bulb temperature (\(^{\circ}\)C)
+\({{\mathrm{T}}_{{\mathrm{wb}},{\mathrm{o}}}}\) is the outdoor air wet bulb temperature (\(^{\circ}\)C)
 
-\({{\rm{T}}_{{\rm{db}},{\rm{o}}}}\) is the outdoor air dry bulb temperature (\(^{\circ}\)C).
+\({{\mathrm{T}}_{{\mathrm{db}},{\mathrm{o}}}}\) is the outdoor air dry bulb temperature (\(^{\circ}\)C).
 
 The water consumption rate is calculated based on the interpolated condenser air flow rate at the speed ratio, i.e.~the condenser flow rate at the speed ratio is:
 
 \begin{equation}
-{\dot m_{condair,{\rm{}}SpeedRatio}} = \left( {1.0 - SpeedRatio} \right){\rm{*}}{\dot m_{condair,{\rm{}}x - 1}} + SpeedRatio{\rm{*}}{\dot m_{condair,{\rm{}}x}}
+{\dot m_{condair,{\mathrm{}}SpeedRatio}} = \left( {1.0 - SpeedRatio} \right){\mathrm{*}}{\dot m_{condair,{\mathrm{}}x - 1}} + SpeedRatio{\mathrm{*}}{\dot m_{condair,{\mathrm{}}x}}
 \end{equation}
 
 \subsubsection{Standard Rating of Variable Speed DX Cooling Coils}\label{standard-rating-of-variable-speed-dx-cooling-coils}
@@ -3593,7 +3593,7 @@ The model first estimates the outdoor coil temperature according to a linear emp
 The difference between the outdoor air humidity ratio (from the weather file) and the saturated air humidity ratio at the estimated outdoor coil temperature is then calculated, and this value is used as an indication of frost formation on the outdoor coil.
 
 \begin{equation}
-\Delta {\omega_{\,coil,out}}\, = \,MAX\left[ {1.0E - 6,\,\,\,{\omega_{outdoor}}\, - \,\,{\omega_{sat}}\left( {{T_{coil,out}}\,,{\rm{OutBaroPress}}} \right)} \right]
+\Delta {\omega_{\,coil,out}}\, = \,MAX\left[ {1.0E - 6,\,\,\,{\omega_{outdoor}}\, - \,\,{\omega_{sat}}\left( {{T_{coil,out}}\,,{\mathrm{OutBaroPress}}} \right)} \right]
 \end{equation}
 
 Frost formation on the outdoor coil must be periodically removed. The fraction of compressor runtime when the coil is being defrosted is either entered by the user (for timed defrost) or is calculated by the model (for on-demand defrost) using an empirical equation and \(\Delta {\omega_{\,coil,out}}\) . Adjustment factors to total heating coil capacity and input power due to frost formation on the outdoor coil are also calculated by empirical models with \(\Delta {\omega_{\,coil,out}}\) ~or fractional defrost time period as the independent variable. The defrost time period fraction and adjustment factors due to frost formation on the outdoor coil vary depending on the defrost control type as shown below.
@@ -3939,7 +3939,7 @@ Where,
 X({T_j}) = \left\{
     \begin{array}{l}
       BL({T_J})/\mathop {{Q_h}}\limits^ \cdot  ({T_j}) \\
-      {\rm{or}} \\
+      {\mathrm{or}} \\
       1
     \end{array}
   \right\}
@@ -3968,9 +3968,9 @@ The low temperature cut-out factor \(\delta ({T_j})\) is determined as follows:
 \begin{equation}
 \delta ({T_j}) = \left\{
     \begin{array}{l}
-      {\rm{0,~if~}}{T_j} \le {T_{off}}{\rm{~or~}}\frac{{\mathop {{Q_h}}\limits^ \cdot  ({T_j})}}{{\mathop {{E_h}}\limits^ \cdot  ({T_j})}} < 1 \\
-      {\rm{1/2,~if~}}{T_{off}} < {T_j} \le {T_{on}}{\rm{~and~}}\frac{{\mathop {{Q_h}}\limits^ \cdot  ({T_j})}}{{\mathop {{E_h}}\limits^ \cdot  ({T_j})}} \ge 1 \\
-      {\rm{1,~if~}}{T_j} > {T_{on}}{\rm{~and~}}\frac{{\mathop {{Q_h}}\limits^ \cdot  ({T_j})}}{{\mathop {{E_h}}\limits^ \cdot  ({T_j})}} \ge 1
+      {\mathrm{0,~if~}}{T_j} \le {T_{off}}{\mathrm{~or~}}\frac{{\mathop {{Q_h}}\limits^ \cdot  ({T_j})}}{{\mathop {{E_h}}\limits^ \cdot  ({T_j})}} < 1 \\
+      {\mathrm{1/2,~if~}}{T_{off}} < {T_j} \le {T_{on}}{\mathrm{~and~}}\frac{{\mathop {{Q_h}}\limits^ \cdot  ({T_j})}}{{\mathop {{E_h}}\limits^ \cdot  ({T_j})}} \ge 1 \\
+      {\mathrm{1,~if~}}{T_j} > {T_{on}}{\mathrm{~and~}}\frac{{\mathop {{Q_h}}\limits^ \cdot  ({T_j})}}{{\mathop {{E_h}}\limits^ \cdot  ({T_j})}} \ge 1
     \end{array}
   \right.
 \end{equation}
@@ -3984,13 +3984,13 @@ where:
 Calculate \(\dot{Q}_{h} \cdot ({T_j})\) and \(\dot{E}_{h} \cdot ({T_j})\) using:
 
 \begin{equation}
-\dot{Q}_{h}({T_j}) = \left\{ \begin{array}{l}\dot{Q}_{h}(-8.33) + \frac{{\left[ {\dot{{Q}_{h}}(8.33) - \dot{{Q_h}}(-8.33)} \right] \cdot \left( {{T_j} + 8.33} \right)}}{{16.67}}{\rm{,~if~}}{T_j} \ge 7.22^{\circ}C {\rm{~or~}}{T_j} \le  -8.33^{\circ}C \\
-\dot{Q}_{h}(-8.33) + \frac{{\left[ {\dot{Q}_{h}(1.67) - \dot{Q}_{h}(-8.33)} \right] \cdot \left( {{T_j} + 8.33} \right)}}{{10}}{\rm{,~if~}} -8.33^{\circ}C < {T_j} < 7.22^{\circ}C\end{array} \right.
+\dot{Q}_{h}({T_j}) = \left\{ \begin{array}{l}\dot{Q}_{h}(-8.33) + \frac{{\left[ {\dot{{Q}_{h}}(8.33) - \dot{{Q_h}}(-8.33)} \right] \cdot \left( {{T_j} + 8.33} \right)}}{{16.67}}{\mathrm{,~if~}}{T_j} \ge 7.22^{\circ}C {\mathrm{~or~}}{T_j} \le  -8.33^{\circ}C \\
+\dot{Q}_{h}(-8.33) + \frac{{\left[ {\dot{Q}_{h}(1.67) - \dot{Q}_{h}(-8.33)} \right] \cdot \left( {{T_j} + 8.33} \right)}}{{10}}{\mathrm{,~if~}} -8.33^{\circ}C < {T_j} < 7.22^{\circ}C\end{array} \right.
 \end{equation}
 
 \begin{equation}
-\dot{E}_{h}({T_j}) = \left\{ \begin{array}{l}\dot{E}_{h}(-8.33) + \frac{{\left[ {\dot{{E}_{h}}(8.33) - \dot{{E_h}}(-8.33)} \right] \cdot \left( {{T_j} + 8.33} \right)}}{{16.67}}{\rm{,~if~}}{T_j} \ge 7.22^{\circ}C {\rm{~or~}}{T_j} \le  -8.33^{\circ}C \\
-\dot{E}_{h}(-8.33) + \frac{{\left[ {\dot{E}_{h}(1.67) - \dot{E}_{h}(-8.33)} \right] \cdot \left( {{T_j} + 8.33} \right)}}{{10}}{\rm{,~if~}} -8.33^{\circ}C < {T_j} < 7.22^{\circ}C\end{array} \right.
+\dot{E}_{h}({T_j}) = \left\{ \begin{array}{l}\dot{E}_{h}(-8.33) + \frac{{\left[ {\dot{{E}_{h}}(8.33) - \dot{{E_h}}(-8.33)} \right] \cdot \left( {{T_j} + 8.33} \right)}}{{16.67}}{\mathrm{,~if~}}{T_j} \ge 7.22^{\circ}C {\mathrm{~or~}}{T_j} \le  -8.33^{\circ}C \\
+\dot{E}_{h}(-8.33) + \frac{{\left[ {\dot{E}_{h}(1.67) - \dot{E}_{h}(-8.33)} \right] \cdot \left( {{T_j} + 8.33} \right)}}{{10}}{\mathrm{,~if~}} -8.33^{\circ}C < {T_j} < 7.22^{\circ}C\end{array} \right.
 \end{equation}
 
 \(\dot{Q_h}(-8.33),~\dot{Q_h}(1.67),~\dot{Q_h}(8.33),~\dot{E_h}(-8.33),~\dot{E_h}(1.67)\) and \(\dot{E_h}(8.33)\) are the \textbf{(net)} values calculated using performance curves entered by the user and supply fan power per rated air flow rate.
@@ -4403,7 +4403,7 @@ The Rated Supply Fan Power Per Volume Flow Rate is a user-entered value, with a 
 The following section describes the test condition for heating mode tests for Air-Source Heat Pumps, including heating-only heat pumps, and the equations required to calculate the HSPF. The HSPF for multi-speed compressor heat pumps in Btu/W-h is given by:
 
 \begin{equation}
-HSPF{\rm{ = }}\frac{{\sum\limits_{\rm{j}}^{\rm{M}} {\frac{{{n_j}}}{N} \cdot BL\left( {{T_j}} \right)} }}{{\sum\limits_{\rm{j}}^{\rm{M}} {\frac{{{e_h}\left( {{T_j}} \right)}}{N}{\rm{ + }}} \sum\limits_{\rm{j}}^{\rm{M}} {\frac{{RH\left( {{T_j}} \right)}}{N}} }} \cdot {F_{def}}
+HSPF{\mathrm{ = }}\frac{{\sum\limits_{\mathrm{j}}^{\mathrm{M}} {\frac{{{n_j}}}{N} \cdot BL\left( {{T_j}} \right)} }}{{\sum\limits_{\mathrm{j}}^{\mathrm{M}} {\frac{{{e_h}\left( {{T_j}} \right)}}{N}{\mathrm{ + }}} \sum\limits_{\mathrm{j}}^{\mathrm{M}} {\frac{{RH\left( {{T_j}} \right)}}{N}} }} \cdot {F_{def}}
 \end{equation}
 
 where:
@@ -4427,7 +4427,7 @@ M is for each generalized climatic region, the total number of temperature bins,
 The building heating load is calculated as follows:
 
 \begin{equation}
-BL\left( {{T_j}} \right){\rm{ = }}\frac{{{\rm{18}}{\rm{.33 - }}{T_j}}}{{{\rm{18}}{\rm{.33 - }}{T_{OD}}}} \cdot C \cdot DHR
+BL\left( {{T_j}} \right){\mathrm{ = }}\frac{{{\mathrm{18}}{\mathrm{.33 - }}{T_j}}}{{{\mathrm{18}}{\mathrm{.33 - }}{T_{OD}}}} \cdot C \cdot DHR
 \end{equation}
 
 The minimum and maximum design heating requirements for each generalized climate regions are given by:
@@ -4461,43 +4461,43 @@ DHR is the design heating requirement for each generalized climate region (Btu/h
 The heating capacity delivered and electric power input of the heat pump when operating at minimum (low) compressor capacity and outdoor air temperature of \emph{T\(_{j}\)} is given by:
 
 \begin{equation}
-{\rm{\dot Q}}_h^{k = 1}{\rm{(}}{{\rm{T}}_{\rm{j}}}{\rm{) = }}\left\{
+{\mathrm{\dot Q}}_h^{k = 1}{\mathrm{(}}{{\mathrm{T}}_{\mathrm{j}}}{\mathrm{) = }}\left\{
     \begin{array}{l}
-      {\rm{\dot Q}}_h^{k = 1}(8.33) + \;\frac{{\left[ {{\rm{\dot Q}}_h^{k = 1}{\rm{(16}}{\rm{.67) - \dot Q}}_h^{k = 1}{\rm{(8}}{\rm{.33)}}} \right] \cdot \left( {{{\rm{T}}_{\rm{j}}} - 8.33} \right)}}{{\left( {16.67 - 8.33} \right)}}\,{\rm{,~if }}\,{{\rm{T}}_{\rm{j}}} \ge 4.44{\rm{^\circ C}} \\
-      {\rm{\dot Q}}_h^{k = 1}( - 8.33) + \;\frac{{\left[ {{\rm{\dot Q}}_h^{k = 1}{\rm{(1}}{\rm{.67) - \dot Q}}_h^{k = 1}{\rm{( - 8}}{\rm{.33)}}} \right] \cdot \left( {{{\rm{T}}_{\rm{j}}} + 8.33} \right)}}{{\left( {1.67 + 8.33} \right)}}\,{\rm{,~if }}\, - 8.33{\rm{^\circ C}} \le {{\rm{T}}_{\rm{j}}} < 4.44{\rm{^\circ C}} \\
-      {\rm{\dot Q}}_h^{k = 1}( - 8.33) + \;\frac{{\left[ {{\rm{\dot Q}}_h^{k = 1}{\rm{(8}}{\rm{.33) - \dot Q}}_h^{k = 1}{\rm{( - 8}}{\rm{.33)}}} \right] \cdot \left( {{{\rm{T}}_{\rm{j}}} + 8.33} \right)}}{{\left( {8.33 + 8.33} \right)}}\,{\rm{,~if }}{{\rm{T}}_{\rm{j}}} <  - 8.33{\rm{^\circ C}}\,
+      {\mathrm{\dot Q}}_h^{k = 1}(8.33) + \;\frac{{\left[ {{\mathrm{\dot Q}}_h^{k = 1}{\mathrm{(16}}{\mathrm{.67) - \dot Q}}_h^{k = 1}{\mathrm{(8}}{\mathrm{.33)}}} \right] \cdot \left( {{{\mathrm{T}}_{\mathrm{j}}} - 8.33} \right)}}{{\left( {16.67 - 8.33} \right)}}\,{\mathrm{,~if }}\,{{\mathrm{T}}_{\mathrm{j}}} \ge 4.44{\mathrm{^\circ C}} \\
+      {\mathrm{\dot Q}}_h^{k = 1}( - 8.33) + \;\frac{{\left[ {{\mathrm{\dot Q}}_h^{k = 1}{\mathrm{(1}}{\mathrm{.67) - \dot Q}}_h^{k = 1}{\mathrm{( - 8}}{\mathrm{.33)}}} \right] \cdot \left( {{{\mathrm{T}}_{\mathrm{j}}} + 8.33} \right)}}{{\left( {1.67 + 8.33} \right)}}\,{\mathrm{,~if }}\, - 8.33{\mathrm{^\circ C}} \le {{\mathrm{T}}_{\mathrm{j}}} < 4.44{\mathrm{^\circ C}} \\
+      {\mathrm{\dot Q}}_h^{k = 1}( - 8.33) + \;\frac{{\left[ {{\mathrm{\dot Q}}_h^{k = 1}{\mathrm{(8}}{\mathrm{.33) - \dot Q}}_h^{k = 1}{\mathrm{( - 8}}{\mathrm{.33)}}} \right] \cdot \left( {{{\mathrm{T}}_{\mathrm{j}}} + 8.33} \right)}}{{\left( {8.33 + 8.33} \right)}}\,{\mathrm{,~if }}{{\mathrm{T}}_{\mathrm{j}}} <  - 8.33{\mathrm{^\circ C}}\,
     \end{array}
   \right\}
 \end{equation}
 
 \begin{equation}
-{\rm{\dot E}}_h^{k = 1}{\rm{(}}{{\rm{T}}_{\rm{j}}}{\rm{) = }}\left\{
+{\mathrm{\dot E}}_h^{k = 1}{\mathrm{(}}{{\mathrm{T}}_{\mathrm{j}}}{\mathrm{) = }}\left\{
     \begin{array}{l}
-      {\rm{\dot E}}_h^{k = 1}(8.33) + \;\frac{{\left[ {{\rm{\dot E}}_h^{k = 1}{\rm{(16}}{\rm{.67) - \dot E}}_h^{k = 1}{\rm{(8}}{\rm{.33)}}} \right] \cdot \left( {{{\rm{T}}_{\rm{j}}} - 8.33} \right)}}{{\left( {16.67 - 8.33} \right)}}\,{\rm{,~if }}\,{{\rm{T}}_{\rm{j}}} \ge 4.44{\rm{^\circ C}} \\
-      {\rm{\dot E}}_h^{k = 1}( - 8.33) + \;\frac{{\left[ {{\rm{\dot E}}_h^{k = 1}{\rm{(1}}{\rm{.67) - \dot E}}_h^{k = 1}{\rm{( - 8}}{\rm{.33)}}} \right] \cdot \left( {{{\rm{T}}_{\rm{j}}} + 8.33} \right)}}{{\left( {1.67 + 8.33} \right)}}\,{\rm{,~if }}\, - 8.33{\rm{^\circ C}} \le {{\rm{T}}_{\rm{j}}} < 4.44{\rm{^\circ C}} \\
-      {\rm{\dot E}}_h^{k = 1}( - 8.33) + \;\frac{{\left[ {{\rm{\dot E}}_h^{k = 1}{\rm{(8}}{\rm{.33) - \dot E}}_h^{k = 1}{\rm{( - 8}}{\rm{.33)}}} \right] \cdot \left( {{{\rm{T}}_{\rm{j}}} + 8.33} \right)}}{{\left( {8.33 + 8.33} \right)}}\,{\rm{,~if }}{{\rm{T}}_{\rm{j}}} <  - 8.33{\rm{^\circ C}}\,
+      {\mathrm{\dot E}}_h^{k = 1}(8.33) + \;\frac{{\left[ {{\mathrm{\dot E}}_h^{k = 1}{\mathrm{(16}}{\mathrm{.67) - \dot E}}_h^{k = 1}{\mathrm{(8}}{\mathrm{.33)}}} \right] \cdot \left( {{{\mathrm{T}}_{\mathrm{j}}} - 8.33} \right)}}{{\left( {16.67 - 8.33} \right)}}\,{\mathrm{,~if }}\,{{\mathrm{T}}_{\mathrm{j}}} \ge 4.44{\mathrm{^\circ C}} \\
+      {\mathrm{\dot E}}_h^{k = 1}( - 8.33) + \;\frac{{\left[ {{\mathrm{\dot E}}_h^{k = 1}{\mathrm{(1}}{\mathrm{.67) - \dot E}}_h^{k = 1}{\mathrm{( - 8}}{\mathrm{.33)}}} \right] \cdot \left( {{{\mathrm{T}}_{\mathrm{j}}} + 8.33} \right)}}{{\left( {1.67 + 8.33} \right)}}\,{\mathrm{,~if }}\, - 8.33{\mathrm{^\circ C}} \le {{\mathrm{T}}_{\mathrm{j}}} < 4.44{\mathrm{^\circ C}} \\
+      {\mathrm{\dot E}}_h^{k = 1}( - 8.33) + \;\frac{{\left[ {{\mathrm{\dot E}}_h^{k = 1}{\mathrm{(8}}{\mathrm{.33) - \dot E}}_h^{k = 1}{\mathrm{( - 8}}{\mathrm{.33)}}} \right] \cdot \left( {{{\mathrm{T}}_{\mathrm{j}}} + 8.33} \right)}}{{\left( {8.33 + 8.33} \right)}}\,{\mathrm{,~if }}{{\mathrm{T}}_{\mathrm{j}}} <  - 8.33{\mathrm{^\circ C}}\,
     \end{array}
   \right\}
 \end{equation}
 
 where:
 
-\({\rm{\dot Q}}_h^{k = 1}\left( {{\rm{16}}{\rm{.67}}} \right){\rm{~and~}}\,{\rm{\dot E}}_h^{k = 1}\left( {{\rm{16}}{\rm{.67}}} \right)\) are determined from the H0\(_{1}\) test
+\({\mathrm{\dot Q}}_h^{k = 1}\left( {{\mathrm{16}}{\mathrm{.67}}} \right){\mathrm{~and~}}\,{\mathrm{\dot E}}_h^{k = 1}\left( {{\mathrm{16}}{\mathrm{.67}}} \right)\) are determined from the H0\(_{1}\) test
 
-\({\rm{\dot Q}}_h^{k = 1}\left( {{\rm{8}}{\rm{.33}}} \right) {\rm{~and~}} {\rm{\dot E}}_h^{k = 1}\left( {{\rm{8}}{\rm{.33}}} \right)\) are determined from the H1\(_{1}\) test
+\({\mathrm{\dot Q}}_h^{k = 1}\left( {{\mathrm{8}}{\mathrm{.33}}} \right) {\mathrm{~and~}} {\mathrm{\dot E}}_h^{k = 1}\left( {{\mathrm{8}}{\mathrm{.33}}} \right)\) are determined from the H1\(_{1}\) test
 
-\({\rm{\dot Q}}_h^{k = 1}\left( {{\rm{1}}{\rm{.67}}} \right) {\rm{~and~}} {\rm{\dot E}}_h^{k = 1}\left( {{\rm{1}}{\rm{.67}}} \right)\) are determined from the H2\(_{1}\) test
+\({\mathrm{\dot Q}}_h^{k = 1}\left( {{\mathrm{1}}{\mathrm{.67}}} \right) {\mathrm{~and~}} {\mathrm{\dot E}}_h^{k = 1}\left( {{\mathrm{1}}{\mathrm{.67}}} \right)\) are determined from the H2\(_{1}\) test
 
-\({\rm{\dot Q}}_h^{k = 1}\left( {{\rm{ - 8}}{\rm{.33}}} \right) {\rm{~and~}} {\rm{\dot E}}_h^{k = 1}\left( {{\rm{ - 8}}{\rm{.33}}} \right)\) are determined from the H3\(_{1}\) test.
+\({\mathrm{\dot Q}}_h^{k = 1}\left( {{\mathrm{ - 8}}{\mathrm{.33}}} \right) {\mathrm{~and~}} {\mathrm{\dot E}}_h^{k = 1}\left( {{\mathrm{ - 8}}{\mathrm{.33}}} \right)\) are determined from the H3\(_{1}\) test.
 
 An alternative to conducting or evaluating the performance at the H2\(_{1}\) test is to approximate the capacity and electric power inputs as follows:
 
 \begin{equation}
-{\rm{\dot Q}}_h^{k = 1}\left( {{\rm{1}}{\rm{.67}}} \right) = 0.9 \cdot \left\{ {{\rm{\dot Q}}_h^{k = 1}\left( {{\rm{ - 8}}{\rm{.33}}} \right) + 0.6\left[ {{\rm{\dot Q}}_h^{k = 1}\left( {{\rm{8}}{\rm{.33}}} \right) - {\rm{\dot Q}}_h^{k = 1}\left( {{\rm{ - 8}}{\rm{.33}}} \right)} \right]} \right\}
+{\mathrm{\dot Q}}_h^{k = 1}\left( {{\mathrm{1}}{\mathrm{.67}}} \right) = 0.9 \cdot \left\{ {{\mathrm{\dot Q}}_h^{k = 1}\left( {{\mathrm{ - 8}}{\mathrm{.33}}} \right) + 0.6\left[ {{\mathrm{\dot Q}}_h^{k = 1}\left( {{\mathrm{8}}{\mathrm{.33}}} \right) - {\mathrm{\dot Q}}_h^{k = 1}\left( {{\mathrm{ - 8}}{\mathrm{.33}}} \right)} \right]} \right\}
 \end{equation}
 
 \begin{equation}
-{\rm{\dot E}}_h^{k = 1}\left( {{\rm{1}}{\rm{.67}}} \right) = 0.985 \cdot \left\{ {{\rm{\dot E}}_h^{k = 1}\left( {{\rm{ - 8}}{\rm{.33}}} \right) + 0.6\left[ {{\rm{\dot E}}_h^{k = 1}\left( {{\rm{8}}{\rm{.33}}} \right) - {\rm{\dot E}}_h^{k = 1}\left( {{\rm{ - 8}}{\rm{.33}}} \right)} \right]} \right\}
+{\mathrm{\dot E}}_h^{k = 1}\left( {{\mathrm{1}}{\mathrm{.67}}} \right) = 0.985 \cdot \left\{ {{\mathrm{\dot E}}_h^{k = 1}\left( {{\mathrm{ - 8}}{\mathrm{.33}}} \right) + 0.6\left[ {{\mathrm{\dot E}}_h^{k = 1}\left( {{\mathrm{8}}{\mathrm{.33}}} \right) - {\mathrm{\dot E}}_h^{k = 1}\left( {{\mathrm{ - 8}}{\mathrm{.33}}} \right)} \right]} \right\}
 \end{equation}
 
 The heating capacity delivered and electric power input of the heat pump when operating at maximum (high) compressor speed and outdoor air temperature of \emph{T\(_{j}\)} is given by:
@@ -4512,11 +4512,11 @@ The heating capacity delivered and electric power input of the heat pump when op
 
 where:
 
-\(\dot Q_h^{k = 2}\left( {{\rm{8}}{\rm{.33}}} \right) {\rm{~and~}} \dot E_h^{k = 2}\left( {{\rm{8}}{\rm{.33}}} \right)\) are determined from the H1\(_{2}\) test
+\(\dot Q_h^{k = 2}\left( {{\mathrm{8}}{\mathrm{.33}}} \right) {\mathrm{~and~}} \dot E_h^{k = 2}\left( {{\mathrm{8}}{\mathrm{.33}}} \right)\) are determined from the H1\(_{2}\) test
 
-\(\dot Q_h^{k = 2}\left( {{\rm{1}}{\rm{.67}}} \right) {\rm{~and~}} \dot E_h^{k = 2}\left( {{\rm{1}}{\rm{.67}}} \right)\) are determined from the H2\(_{2}\) test
+\(\dot Q_h^{k = 2}\left( {{\mathrm{1}}{\mathrm{.67}}} \right) {\mathrm{~and~}} \dot E_h^{k = 2}\left( {{\mathrm{1}}{\mathrm{.67}}} \right)\) are determined from the H2\(_{2}\) test
 
-\(\dot Q_h^{k = 2}\left( {{\rm{ - 8}}{\rm{.33}}} \right) {\rm{~and~}} \dot E_h^{k = 2}\left( {{\rm{ - 8}}{\rm{.33}}} \right)\) are determined from the H3\(_{2}\) test.
+\(\dot Q_h^{k = 2}\left( {{\mathrm{ - 8}}{\mathrm{.33}}} \right) {\mathrm{~and~}} \dot E_h^{k = 2}\left( {{\mathrm{ - 8}}{\mathrm{.33}}} \right)\) are determined from the H3\(_{2}\) test.
 
 The electric energy used by the heat pumps differs depending up on whether the heat pump would operate at low (minimum) capacity, cycle between successive lower and higher speed capacities, or operate at high speed capacity in responding to the building load.~ The procedure for each operation cases is described next.
 
@@ -4527,23 +4527,23 @@ The electric energy used by the heat pumps differs depending up on whether the h
 \end{equation}
 
 \begin{equation}
-\frac{{{{\rm{e}}_h}\left( {{{\rm{T}}_{\rm{j}}}} \right)}}{{\rm{N}}}{\rm{ = }}\frac{{{{\rm{X}}^{k = 1}}\left( {{{\rm{T}}_{\rm{j}}}} \right) \cdot {\rm{\dot E}}_h^{k = 1}\left( {{{\rm{T}}_{\rm{j}}}} \right) \cdot {\rm{\delta }}\left( {{{\rm{T}}_{\rm{j}}}} \right)}}{{PL{F_j}}} \cdot \frac{{{{\rm{n}}_{\rm{j}}}}}{{\rm{N}}}
+\frac{{{{\mathrm{e}}_h}\left( {{{\mathrm{T}}_{\mathrm{j}}}} \right)}}{{\mathrm{N}}}{\mathrm{ = }}\frac{{{{\mathrm{X}}^{k = 1}}\left( {{{\mathrm{T}}_{\mathrm{j}}}} \right) \cdot {\mathrm{\dot E}}_h^{k = 1}\left( {{{\mathrm{T}}_{\mathrm{j}}}} \right) \cdot {\mathrm{\delta }}\left( {{{\mathrm{T}}_{\mathrm{j}}}} \right)}}{{PL{F_j}}} \cdot \frac{{{{\mathrm{n}}_{\mathrm{j}}}}}{{\mathrm{N}}}
 \end{equation}
 
 \begin{equation}
-\frac{{RH\left( {{{\rm{T}}_{\rm{j}}}} \right)}}{{\rm{N}}}{\rm{ = }}BL\left( {{{\rm{T}}_{\rm{j}}}} \right) \cdot \left[ {{\rm{1 - }}{{\rm{\delta }}^\prime}\left( {{{\rm{T}}_{\rm{j}}}} \right)} \right] \cdot \frac{{{{\rm{n}}_{\rm{j}}}}}{{\rm{N}}}
+\frac{{RH\left( {{{\mathrm{T}}_{\mathrm{j}}}} \right)}}{{\mathrm{N}}}{\mathrm{ = }}BL\left( {{{\mathrm{T}}_{\mathrm{j}}}} \right) \cdot \left[ {{\mathrm{1 - }}{{\mathrm{\delta }}^\prime}\left( {{{\mathrm{T}}_{\mathrm{j}}}} \right)} \right] \cdot \frac{{{{\mathrm{n}}_{\mathrm{j}}}}}{{\mathrm{N}}}
 \end{equation}
 
 \begin{equation}
-{{\rm{X}}^{k = 1}}\left( {{{\rm{T}}_{\rm{j}}}} \right){\rm{ = MIN}}\left\{ \begin{array}{l}BL\left( {{{\rm{T}}_{\rm{j}}}} \right){\rm{/\dot Q}}_h^{k = 1}\left( {{{\rm{T}}_{\rm{j}}}} \right)\\1.0\end{array} \right\}
+{{\mathrm{X}}^{k = 1}}\left( {{{\mathrm{T}}_{\mathrm{j}}}} \right){\mathrm{ = MIN}}\left\{ \begin{array}{l}BL\left( {{{\mathrm{T}}_{\mathrm{j}}}} \right){\mathrm{/\dot Q}}_h^{k = 1}\left( {{{\mathrm{T}}_{\mathrm{j}}}} \right)\\1.0\end{array} \right\}
 \end{equation}
 
 \begin{equation}
-{\delta ^\prime}{\rm{(}}{{\rm{T}}_{\rm{j}}}{\rm{) = }}\left\{ \begin{array}{l}0,\quad {\rm{if}}\,{{\rm{T}}_{\rm{j}}}\, \le \,{{\rm{T}}_{{\rm{off}}}}\,\\1/2,\quad {\rm{if}}\,{{\rm{T}}_{{\rm{off}}}} < {{\rm{T}}_{\rm{j}}}\, \le \,{{\rm{T}}_{{\rm{on}}}}\\1,\quad {\rm{if}}\,{{\rm{T}}_{\rm{j}}}\, > \,{{\rm{T}}_{{\rm{on}}}}\end{array} \right\}
+{\delta ^\prime}{\mathrm{(}}{{\mathrm{T}}_{\mathrm{j}}}{\mathrm{) = }}\left\{ \begin{array}{l}0,\quad {\mathrm{if}}\,{{\mathrm{T}}_{\mathrm{j}}}\, \le \,{{\mathrm{T}}_{{\mathrm{off}}}}\,\\1/2,\quad {\mathrm{if}}\,{{\mathrm{T}}_{{\mathrm{off}}}} < {{\mathrm{T}}_{\mathrm{j}}}\, \le \,{{\mathrm{T}}_{{\mathrm{on}}}}\\1,\quad {\mathrm{if}}\,{{\mathrm{T}}_{\mathrm{j}}}\, > \,{{\mathrm{T}}_{{\mathrm{on}}}}\end{array} \right\}
 \end{equation}
 
 \begin{equation}
-PL{F_{\rm{j}}}{\rm{ = 1 - }}C_D^h \cdot \left[ {{\rm{1 - }}{{\rm{X}}^{k = 1}}{\rm{(}}{T_j}{\rm{)}}} \right]
+PL{F_{\mathrm{j}}}{\mathrm{ = 1 - }}C_D^h \cdot \left[ {{\mathrm{1 - }}{{\mathrm{X}}^{k = 1}}{\mathrm{(}}{T_j}{\mathrm{)}}} \right]
 \end{equation}
 
 where \(C_D^h\) is the degradation coefficient which has a minimum value of 0.25.
@@ -4559,11 +4559,11 @@ where \(C_D^h\) is the degradation coefficient which has a minimum value of 0.25
 \end{equation}
 
 \begin{equation}
-\frac{{RH\left( {{{\rm{T}}_{\rm{j}}}} \right)}}{{\rm{N}}}{\rm{ = BL}}\left( {{{\rm{T}}_{\rm{j}}}} \right) \cdot \left[ {{\rm{1 - }}{{\rm{\delta }}^\prime}\left( {{{\rm{T}}_{\rm{j}}}} \right)} \right] \cdot \frac{{{n_j}}}{N}
+\frac{{RH\left( {{{\mathrm{T}}_{\mathrm{j}}}} \right)}}{{\mathrm{N}}}{\mathrm{ = BL}}\left( {{{\mathrm{T}}_{\mathrm{j}}}} \right) \cdot \left[ {{\mathrm{1 - }}{{\mathrm{\delta }}^\prime}\left( {{{\mathrm{T}}_{\mathrm{j}}}} \right)} \right] \cdot \frac{{{n_j}}}{N}
 \end{equation}
 
 \begin{equation}
-{\delta ^\prime}{\rm{(}}{{\rm{T}}_{\rm{j}}}{\rm{) = }}\left\{ \begin{array}{l}0,\quad {\rm{if}}\,{{\rm{T}}_{\rm{j}}}\, \le \,{{\rm{T}}_{{\rm{off}}}}\,\\ {\frac{1}{2}},\quad {\rm{if}}\,{{\rm{T}}_{{\rm{off}}}} < {{\rm{T}}_{\rm{j}}}\, \le \,{{\rm{T}}_{{\rm{on}}}}\\ 1,\quad {\rm{if}}\,{{\rm{T}}_{\rm{j}}}\, > \,{{\rm{T}}_{{\rm{on}}}}\end{array} \right\}
+{\delta ^\prime}{\mathrm{(}}{{\mathrm{T}}_{\mathrm{j}}}{\mathrm{) = }}\left\{ \begin{array}{l}0,\quad {\mathrm{if}}\,{{\mathrm{T}}_{\mathrm{j}}}\, \le \,{{\mathrm{T}}_{{\mathrm{off}}}}\,\\ {\frac{1}{2}},\quad {\mathrm{if}}\,{{\mathrm{T}}_{{\mathrm{off}}}} < {{\mathrm{T}}_{\mathrm{j}}}\, \le \,{{\mathrm{T}}_{{\mathrm{on}}}}\\ 1,\quad {\mathrm{if}}\,{{\mathrm{T}}_{\mathrm{j}}}\, > \,{{\mathrm{T}}_{{\mathrm{on}}}}\end{array} \right\}
 \end{equation}
 
 \begin{equation}
@@ -4603,11 +4603,11 @@ where:
 
 X(T\(_{j}\)) is the heating mode load factor for temperature bin j (-)
 
-\({{\rm{\dot Q}}_{\rm{h}}}\left( {{{\rm{T}}_{\rm{j}}}} \right)\) is the space heating capacity of the heat pump when operating at outdoor temperature T\(_{j}\) (W)
+\({{\mathrm{\dot Q}}_{\mathrm{h}}}\left( {{{\mathrm{T}}_{\mathrm{j}}}} \right)\) is the space heating capacity of the heat pump when operating at outdoor temperature T\(_{j}\) (W)
 
-\({{\rm{\dot E}}_{\rm{h}}}\left( {{{\rm{T}}_{\rm{j}}}} \right)\) is the electrical power consumption of the heat pump when operating at outdoor temperature T\(_{j}\) (W)
+\({{\mathrm{\dot E}}_{\mathrm{h}}}\left( {{{\mathrm{T}}_{\mathrm{j}}}} \right)\) is the electrical power consumption of the heat pump when operating at outdoor temperature T\(_{j}\) (W)
 
-\({\rm{\delta }}\left( {{{\rm{T}}_{\rm{j}}}} \right)\) is the heat pump low temperature cut-off factor (-)
+\({\mathrm{\delta }}\left( {{{\mathrm{T}}_{\mathrm{j}}}} \right)\) is the heat pump low temperature cut-off factor (-)
 
 \(T_{off}\) is the outdoor temperature when the compressor is automatically shut off (\(^{\circ}\)C). (If no such temperature exists, Tj is always greater than T\(_{off}\) and T\(_{on}\)).
 
@@ -4665,7 +4665,7 @@ It shall be noted for the capacity and flow rate inputs, two fields are autosiza
 The Rated Heating Capacity at Selected Nominal Speed Level contains the rated capacity to match the building heating load at the design day.~ The rated heating capacity is used to determine a capacity scaling factor, as compared to the Reference Unit capacity at the nominal speed level.
 
 \begin{equation}
-{\rm{CapacityScaleFactor}} = \frac{{{\rm{RatedTotalHeatingCapacity}}}}{{{\rm{ReferenceUnitTotalHeatingCapacity}}@{\rm{NominalSpeedLevel}}}}
+{\mathrm{CapacityScaleFactor}} = \frac{{{\mathrm{RatedTotalHeatingCapacity}}}}{{{\mathrm{ReferenceUnitTotalHeatingCapacity}}@{\mathrm{NominalSpeedLevel}}}}
 \end{equation}
 
 And then, this scaling factor is used to determine capacities at rated conditions for other speed levels, RatedTotalHeatingCapacity@SpeedLevel(x) = CapacityScaleFactor times ReferenceUnitTotalHeatingCapacity@SpeedLevel (x)
@@ -4673,14 +4673,14 @@ And then, this scaling factor is used to determine capacities at rated condition
 The Rated Volumetric Air Flow Rate is used to determine an internal scaling factor, and calculate the air flow rates in the parent objects, as follows:
 
 \begin{equation}
-{\rm{AirFlowScaleFactor}} = \frac{{{\rm{RatedVolumetricAirFlowRate}}}}{{{\rm{ReferenceUnitVolAirFlowRate}}@{\rm{NominalSpeedLevel}} \times {\rm{CapacityScaleFactor}}}}
+{\mathrm{AirFlowScaleFactor}} = \frac{{{\mathrm{RatedVolumetricAirFlowRate}}}}{{{\mathrm{ReferenceUnitVolAirFlowRate}}@{\mathrm{NominalSpeedLevel}} \times {\mathrm{CapacityScaleFactor}}}}
 \end{equation}
 
 where the loop volumetric air flow rates at various speed levels in the parent objects are calculated as LoopVolumetricAirFlowRate @ SpeedLevel (x) = AirFlowScaleFactor times ReferenceUnitVolAirFlowRate @ SpeedLevel (x) times CapacityScaleFactor.
 
 If the volumetric air flow rate at one speed level is higher than the flow rate allowed by the fan in the parent object, the flow rate will be set back to the fan flow rate.
 
-If \({\rm{AirFlowScaleFactor}}\) equals unity, the loop air flow rate becomes the design flow rate of the Reference Unit (after scaled by the rated heating capacity). The Rated Volumetric Air Flow Rate is introduced here to correlate with the actual flow rate in the air loop, in case that it differs from the design specification. Certainly, it is recommended that the Rated Volumetric Air Flow Rate is selected in the way that \({\rm{AirFlowScaleFactor}}\) ~is unity, so as to get more accurate results from the performance curves.
+If \({\mathrm{AirFlowScaleFactor}}\) equals unity, the loop air flow rate becomes the design flow rate of the Reference Unit (after scaled by the rated heating capacity). The Rated Volumetric Air Flow Rate is introduced here to correlate with the actual flow rate in the air loop, in case that it differs from the design specification. Certainly, it is recommended that the Rated Volumetric Air Flow Rate is selected in the way that \({\mathrm{AirFlowScaleFactor}}\) ~is unity, so as to get more accurate results from the performance curves.
 
 \subsubsection{Performance curves:}\label{performance-curves-201605050922}
 
@@ -4715,7 +4715,7 @@ Additional details on each of the above five curves are provided in the followin
 The total heating capacity modifier as a function of temperature curve (CAP-FT) is a biquadratic curve with two independent variables: dry-bulb temperature of the air entering the heating coil and the air DB temperature entering the evaporator coil. The output of this curve is multiplied by the rated total heating capacity at the speed, to give the total heating capacity at the specific entering air temperatures at which the ASHP unit is operating (i.e., at temperatures different from the rating point temperatures).
 
 \begin{equation}
-{\rm{TotCapTempModFac}} = {\rm{a}} + {\rm{b*D}}{{\rm{B}}_{\rm{i}}} + {\rm{c*DB}}_{\rm{i}}^2 + {\rm{d*D}}{{\rm{B}}_{\rm{o}}} + {\rm{e*D}}{{\rm{B}}_{\rm{o}}}^2 + {\rm{f*D}}{{\rm{B}}_{\rm{i}}}{\rm{*D}}{{\rm{B}}_{\rm{o}}}
+{\mathrm{TotCapTempModFac}} = {\mathrm{a}} + {\mathrm{b*D}}{{\mathrm{B}}_{\mathrm{i}}} + {\mathrm{c*DB}}_{\mathrm{i}}^2 + {\mathrm{d*D}}{{\mathrm{B}}_{\mathrm{o}}} + {\mathrm{e*D}}{{\mathrm{B}}_{\mathrm{o}}}^2 + {\mathrm{f*D}}{{\mathrm{B}}_{\mathrm{i}}}{\mathrm{*D}}{{\mathrm{B}}_{\mathrm{o}}}
 \end{equation}
 
 where:
@@ -4735,7 +4735,7 @@ a-f are regression curve-fit coefficients.
 \end{enumerate}
 
 \begin{equation}
-{\rm{TotCapAirFlowModFac}} = {\rm{a}} + {\rm{b*f}}{{\rm{f}}_{\rm{a}}} + {\rm{c*ff}}_{\rm{a}}^2 + {\rm{d*ff}}_{\rm{a}}^3
+{\mathrm{TotCapAirFlowModFac}} = {\mathrm{a}} + {\mathrm{b*f}}{{\mathrm{f}}_{\mathrm{a}}} + {\mathrm{c*ff}}_{\mathrm{a}}^2 + {\mathrm{d*ff}}_{\mathrm{a}}^3
 \end{equation}
 
 where:
@@ -4757,7 +4757,7 @@ a-d are regression curve-fit coefficients.  If no data are available for the cor
 The energy input ratio modifier curve as a function of temperature (EIR-FT) is a biquadratic curve with two independent variables DB\(_{i}\)~ and DB\(_{o}\). The output of this curve is multiplied by the rated EIR at the speed (inverse of the rated COP), to give the EIR at the specific entering air temperatures at which the ASHP coil unit is operating (i.e., at temperatures different from the rating point temperatures).
 
 \begin{equation}
-{\rm{EIRTempModFac}} = {\rm{a}} + {\rm{b*D}}{{\rm{B}}_{\rm{i}}} + {\rm{c*DB}}_{\rm{i}}^2 + {\rm{d*D}}{{\rm{B}}_{\rm{o}}} + {\rm{e*D}}{{\rm{B}}_{\rm{o}}}^2 + {\rm{f*D}}{{\rm{B}}_{\rm{i}}}{\rm{*D}}{{\rm{B}}_{\rm{o}}}
+{\mathrm{EIRTempModFac}} = {\mathrm{a}} + {\mathrm{b*D}}{{\mathrm{B}}_{\mathrm{i}}} + {\mathrm{c*DB}}_{\mathrm{i}}^2 + {\mathrm{d*D}}{{\mathrm{B}}_{\mathrm{o}}} + {\mathrm{e*D}}{{\mathrm{B}}_{\mathrm{o}}}^2 + {\mathrm{f*D}}{{\mathrm{B}}_{\mathrm{i}}}{\mathrm{*D}}{{\mathrm{B}}_{\mathrm{o}}}
 \end{equation}
 
 where a-f are regression curve fit coefficients.
@@ -4771,7 +4771,7 @@ where a-f are regression curve fit coefficients.
 \end{enumerate}
 
 \begin{equation}
-{\rm{EIRAirFlowModFac}} = {\rm{a}} + {\rm{b*f}}{{\rm{f}}_{\rm{a}}} + {\rm{c*ff}}_{\rm{a}}^2 + {\rm{d*ff}}_{\rm{a}}^3
+{\mathrm{EIRAirFlowModFac}} = {\mathrm{a}} + {\mathrm{b*f}}{{\mathrm{f}}_{\mathrm{a}}} + {\mathrm{c*ff}}_{\mathrm{a}}^2 + {\mathrm{d*ff}}_{\mathrm{a}}^3
 \end{equation}
 
 where a-d are regression curve-fit coefficients.  If no data are available for the correction, the user can simply set a = 1.0 and the other coefficients to 0.0.
@@ -4787,7 +4787,7 @@ where a-d are regression curve-fit coefficients.  If no data are available for t
 This field defines the name of a quadratic or cubic performance curve (Ref: Performance Curves) that parameterizes the variation of electrical power input to the unit as a function of the part load ratio (PLR, heating load/steady-state heating capacity for Speed 1):
 
 \begin{equation}
-{\rm{PartLoadFrac}} = {\rm{a}} + {\rm{b*PLR}} + {\rm{c*PL}}{{\rm{R}}^2} + {\rm{d*PL}}{{\rm{R}}^3}
+{\mathrm{PartLoadFrac}} = {\mathrm{a}} + {\mathrm{b*PLR}} + {\mathrm{c*PL}}{{\mathrm{R}}^2} + {\mathrm{d*PL}}{{\mathrm{R}}^3}
 \end{equation}
 
 and
@@ -4801,13 +4801,13 @@ The part load fraction (PLF) correlation accounts for efficiency losses due to c
 If PLF \textless{} 0.7, the program resets the PLF value to 0.7, and the simulation proceeds. The runtime fraction of the coil is defined as PLR/PLF. If PLF \textless{} PLR, the runtime fraction of the coil is limited to 1.0. A typical part load fraction correlation would be:
 
 \begin{equation}
-{\rm{PLF}} = 0.85 + 0.15 \times {\rm{PLR}}
+{\mathrm{PLF}} = 0.85 + 0.15 \times {\mathrm{PLR}}
 \end{equation}
 
 If the user wishes to model no efficiency degradation due to compressor cycling, the part load fraction correlation should be defined as follows:
 
 \begin{equation}
-{\rm{PLF}} = 0.85 + 0.0 \times {\rm{PLR}}
+{\mathrm{PLF}} = 0.85 + 0.0 \times {\mathrm{PLR}}
 \end{equation}
 
 \subsubsection{Lowest Speed Operation}\label{lowest-speed-operation-201605050922}
@@ -4816,27 +4816,27 @@ The lowest speed operation of the variable-speed DX heating coil is similar to t
 
 \begin{equation}
   \begin{array}{rl}
-    Q_{total,1} &= \rm{RatedTotalHeatingCapacity @ SpeedLevel 1} \\
-                &* \rm{TotCapTemModFac}_1 \rm{* TotCapAirFlowModFac}_1
+    Q_{total,1} &= \mathrm{RatedTotalHeatingCapacity @ SpeedLevel 1} \\
+                &* \mathrm{TotCapTemModFac}_1 \mathrm{* TotCapAirFlowModFac}_1
   \end{array}
 \end{equation}
 
 And the EIR is calculated as:
 
 \begin{equation}
-{\rm{EI}}{{\rm{R}}_1} = \frac{{1.0}}{{{\rm{ReferenceUnitCOP}}@{\rm{Speed}}(1)}}{\rm{*EIRTempModFa}}{{\rm{c}}_1}{\rm{*EIRAirFlowModFa}}{{\rm{c}}_1}
+{\mathrm{EI}}{{\mathrm{R}}_1} = \frac{{1.0}}{{{\mathrm{ReferenceUnitCOP}}@{\mathrm{Speed}}(1)}}{\mathrm{*EIRTempModFa}}{{\mathrm{c}}_1}{\mathrm{*EIRAirFlowModFa}}{{\mathrm{c}}_1}
 \end{equation}
 
 And the power consumption including the compressor, outdoor fan and accessories (not including indoor fan power) is,
 
 \begin{equation}
-{\rm{Powe}}{{\rm{r}}_1} = {{\rm{Q}}_{{\rm{total}},1}}{\rm{*EI}}{{\rm{R}}_1}{\rm{*RTF}}
+{\mathrm{Powe}}{{\mathrm{r}}_1} = {{\mathrm{Q}}_{{\mathrm{total}},1}}{\mathrm{*EI}}{{\mathrm{R}}_1}{\mathrm{*RTF}}
 \end{equation}
 
 The fraction of the actual air mass flow to the design air mass flow rate is calculated:
 
 \begin{equation}
-{\rm{f}}{{\rm{f}}_{{\rm{a}},1}} = \frac{{{\rm{actual~air~mass~flow~rate}}}}{{({\rm{ReferenceUnitAirMassFlowRate}}@{\rm{SpeedLevel}}(1) \times {\rm{CapacityScaleFactor}})}}{\rm{}}
+{\mathrm{f}}{{\mathrm{f}}_{{\mathrm{a}},1}} = \frac{{{\mathrm{actual~air~mass~flow~rate}}}}{{({\mathrm{ReferenceUnitAirMassFlowRate}}@{\mathrm{SpeedLevel}}(1) \times {\mathrm{CapacityScaleFactor}})}}{\mathrm{}}
 \end{equation}
 
 \subsubsection{Higher Speed Operation}\label{higher-speed-operation-1-001}
@@ -4847,10 +4847,10 @@ The design air flow rate at the speed ratio are given as following:
 
 \begin{equation}
   \begin{array}{rl}
-    \rm{DesignAirFlowRateSpeedRatio} &= \rm{ReferenceUnitAirMassFlowRate @ SpeedLevel} \PB{x-1} \\
-                                     &* \rm{CapacityScaleFactor} * \PB{1 - SpeedRatio} \\
-                                     &+ \rm{ReferenceUnitAirMassFlowRate @ SpeedLevel} \PB{x} \\
-                                     &* \rm{CapacityScaleFactor*SpeedRatio}
+    \mathrm{DesignAirFlowRateSpeedRatio} &= \mathrm{ReferenceUnitAirMassFlowRate @ SpeedLevel} \PB{x-1} \\
+                                     &* \mathrm{CapacityScaleFactor} * \PB{1 - SpeedRatio} \\
+                                     &+ \mathrm{ReferenceUnitAirMassFlowRate @ SpeedLevel} \PB{x} \\
+                                     &* \mathrm{CapacityScaleFactor*SpeedRatio}
   \end{array}
 \end{equation}
 
@@ -4864,48 +4864,48 @@ The total heating capacities and EIRs at Speed x-1 and Speed x are given:
 
 \begin{equation}
 \begin{split}
-{{\rm{Q}}_{{\rm{total}},{\rm{x}} - 1}} = {\rm{RatedTotalHeatingCapacity}}@{\rm{SpeedLevel}}\left( {{\rm{x}} - 1} \right) \\
-{\rm{*TotCapTempModFa}}{{\rm{c}}_{{\rm{x}} - 1}} {\rm{*TotCapAirFlowModFa}}{{\rm{c}}_{{\rm{x}} - 1}}
+{{\mathrm{Q}}_{{\mathrm{total}},{\mathrm{x}} - 1}} = {\mathrm{RatedTotalHeatingCapacity}}@{\mathrm{SpeedLevel}}\left( {{\mathrm{x}} - 1} \right) \\
+{\mathrm{*TotCapTempModFa}}{{\mathrm{c}}_{{\mathrm{x}} - 1}} {\mathrm{*TotCapAirFlowModFa}}{{\mathrm{c}}_{{\mathrm{x}} - 1}}
 \end{split}
 \end{equation}
 
 \begin{equation}
 \begin{split}
-{{\rm{Q}}_{{\rm{total}},{\rm{x}}}} = {\rm{RatedTotalHeatingCapacity}}@{\rm{SpeedLevel}}\left( {\rm{x}} \right) \\
-{\rm{*TotCapTempModFa}}{{\rm{c}}_{\rm{x}}} {\rm{*TotCapAirFlowModFa}}{{\rm{c}}_{\rm{x}}}
+{{\mathrm{Q}}_{{\mathrm{total}},{\mathrm{x}}}} = {\mathrm{RatedTotalHeatingCapacity}}@{\mathrm{SpeedLevel}}\left( {\mathrm{x}} \right) \\
+{\mathrm{*TotCapTempModFa}}{{\mathrm{c}}_{\mathrm{x}}} {\mathrm{*TotCapAirFlowModFa}}{{\mathrm{c}}_{\mathrm{x}}}
 \end{split}
 \end{equation}
 
 \begin{equation}
-{\rm{EI}}{{\rm{R}}_{{\rm{x}} - 1}} = \frac{{1.0}}{{{\rm{ReferenceUnitCOP}}@{\rm{Speed}}({\rm{x}} - 1)}}{\rm{EIRTempModFa}}{{\rm{c}}_{{\rm{x}} - 1}}{\rm{*EIRAirFlowModFa}}{{\rm{c}}_{{\rm{x}} - 1}}
+{\mathrm{EI}}{{\mathrm{R}}_{{\mathrm{x}} - 1}} = \frac{{1.0}}{{{\mathrm{ReferenceUnitCOP}}@{\mathrm{Speed}}({\mathrm{x}} - 1)}}{\mathrm{EIRTempModFa}}{{\mathrm{c}}_{{\mathrm{x}} - 1}}{\mathrm{*EIRAirFlowModFa}}{{\mathrm{c}}_{{\mathrm{x}} - 1}}
 \end{equation}
 
 \begin{equation}
-{\rm{EI}}{{\rm{R}}_{\rm{x}}} = \frac{{1.0}}{{{\rm{ReferenceUnitCOP}}@{\rm{Speed}}({\rm{x}})}}{\rm{EIRTempModFa}}{{\rm{c}}_{\rm{x}}}{\rm{*EIRAirFlowModFa}}{{\rm{c}}_{\rm{x}}}
+{\mathrm{EI}}{{\mathrm{R}}_{\mathrm{x}}} = \frac{{1.0}}{{{\mathrm{ReferenceUnitCOP}}@{\mathrm{Speed}}({\mathrm{x}})}}{\mathrm{EIRTempModFa}}{{\mathrm{c}}_{\mathrm{x}}}{\mathrm{*EIRAirFlowModFa}}{{\mathrm{c}}_{\mathrm{x}}}
 \end{equation}
 
 The total heating capacity at the corresponding speed ratio is:
 
 \begin{equation}
-{{\rm{Q}}_{{\rm{total}},{\rm{SpeedRatio}}}} = \left( {1.0 - {\rm{SpeedRatio}}} \right){\rm{*}}{{\rm{Q}}_{{\rm{total}},{\rm{x}} - 1}} + {\rm{SpeedRatio*}}{{\rm{Q}}_{{\rm{total}},{\rm{x}}}}
+{{\mathrm{Q}}_{{\mathrm{total}},{\mathrm{SpeedRatio}}}} = \left( {1.0 - {\mathrm{SpeedRatio}}} \right){\mathrm{*}}{{\mathrm{Q}}_{{\mathrm{total}},{\mathrm{x}} - 1}} + {\mathrm{SpeedRatio*}}{{\mathrm{Q}}_{{\mathrm{total}},{\mathrm{x}}}}
 \end{equation}
 
 and the power consumption is:
 
 \begin{equation}
-{\rm{Powe}}{{\rm{r}}_{{\rm{SpeedRatio}}}} = \left( {1.0 - {\rm{SpeedRatio}}} \right){\rm{*}}{{\rm{Q}}_{{\rm{total}},{\rm{x}} - 1}}{\rm{*EI}}{{\rm{R}}_{{\rm{x}} - 1}} + {\rm{SpeedRatio*}}{{\rm{Q}}_{{\rm{total}},{\rm{x}}}}{\rm{*EI}}{{\rm{R}}_{\rm{x}}}
+{\mathrm{Powe}}{{\mathrm{r}}_{{\mathrm{SpeedRatio}}}} = \left( {1.0 - {\mathrm{SpeedRatio}}} \right){\mathrm{*}}{{\mathrm{Q}}_{{\mathrm{total}},{\mathrm{x}} - 1}}{\mathrm{*EI}}{{\mathrm{R}}_{{\mathrm{x}} - 1}} + {\mathrm{SpeedRatio*}}{{\mathrm{Q}}_{{\mathrm{total}},{\mathrm{x}}}}{\mathrm{*EI}}{{\mathrm{R}}_{\mathrm{x}}}
 \end{equation}
 
 The total amount of heat absorbed by the outdoor evaporator is calculated as:
 
 \begin{equation}
-{{\rm{Q}}_{{\rm{evap}},{\rm{SpeedRatio}}}} = {{\rm{Q}}_{{\rm{total}},{\rm{SpeedRatio}}}} - {\rm{Powe}}{{\rm{r}}_{{\rm{SpeedRatio}}}}
+{{\mathrm{Q}}_{{\mathrm{evap}},{\mathrm{SpeedRatio}}}} = {{\mathrm{Q}}_{{\mathrm{total}},{\mathrm{SpeedRatio}}}} - {\mathrm{Powe}}{{\mathrm{r}}_{{\mathrm{SpeedRatio}}}}
 \end{equation}
 
 Finally:
 
 \begin{equation}
-{{\rm{Q}}_{{\rm{total}},{\rm{SpeedRatio}}}} = {\rm{HeatingLoad}}
+{{\mathrm{Q}}_{{\mathrm{total}},{\mathrm{SpeedRatio}}}} = {\mathrm{HeatingLoad}}
 \end{equation}
 
 If the speed reaches the highest level, the speed ratio becomes 1.0, and Speed x represents the highest speed.
@@ -4917,7 +4917,7 @@ The defrost operation of a variable-speed DX heating coil is treated the same as
 The defrost energy input ratio (EIR) curve (function of temperature) is the same as the single speed DX heating coil. It is a biquadratic curve with two independent variables: outdoor air dry-bulb temperature and the heating coil entering air wet-bulb temperature. The output of this curve represents the defrost power divided by the rated heating capacity (i.e., an energy input ratio, not a modifier applied to a rated EIR). It is multiplied by the heating coil capacity, the fractional defrost time period and the runtime fraction of the heating coil to give the defrost power at the specific temperatures at which the coil is operating. This curve is only required when a reverse-cycle defrost strategy is specified.
 
 \begin{equation}
-{\rm{DefrostEIRTempModFac}} = {\rm{a}} + {\rm{b*W}}{{\rm{B}}_{\rm{i}}} + {\rm{c*WB}}_{\rm{i}}^2 + {\rm{d*D}}{{\rm{B}}_{\rm{o}}} + {\rm{e*D}}{{\rm{B}}_{\rm{o}}}^2 + {\rm{f*W}}{{\rm{B}}_{\rm{i}}}{\rm{*D}}{{\rm{B}}_{\rm{o}}}
+{\mathrm{DefrostEIRTempModFac}} = {\mathrm{a}} + {\mathrm{b*W}}{{\mathrm{B}}_{\mathrm{i}}} + {\mathrm{c*WB}}_{\mathrm{i}}^2 + {\mathrm{d*D}}{{\mathrm{B}}_{\mathrm{o}}} + {\mathrm{e*D}}{{\mathrm{B}}_{\mathrm{o}}}^2 + {\mathrm{f*W}}{{\mathrm{B}}_{\mathrm{i}}}{\mathrm{*D}}{{\mathrm{B}}_{\mathrm{o}}}
 \end{equation}
 
 where:
@@ -5077,7 +5077,7 @@ A comparison is then made to determine if the desuperheater heating coil should 
 \end{equation}
 
 \begin{equation}
-{T_{out}}{\rm{ }} = {\rm{ }}{T_{in}}
+{T_{out}}{\mathrm{ }} = {\mathrm{ }}{T_{in}}
 \end{equation}
 
 If the amount of heat required to meet the setpoint is larger than the desuperheater coil's heating capacity, then the amount of reclaimed heat is set equal to the coil heating capacity and the outlet air dry-bulb temperature is calculated.
@@ -5213,7 +5213,7 @@ where:
 Except for the detailed condenser source, heat reclaim recovery efficiencies higher than 30\% may cause the refrigerant gas to condense which in turn impacts the performance of the refrigeration system. The model is unable to account for this refrigeration system impact, so the product of the rated heat reclaim recovery efficiency and heat reclaim efficiency modifier is not allowed to exceed 0.3.~ For the detailed refrigeration condenser, the limit for the heat reclaim efficiency has been set at 0.9 as follows:
 
 \begin{equation}
-{\rm{IF~}}\left( {{\varepsilon_{{\rm{reclaim,rated}}}}} \right)\left( {HEfFTemp} \right) > Limit,{\rm{~THEN~}}HeffFTemp = \frac{{Limit}}{{{\varepsilon_{{\rm{reclaim,rated}}}}}}
+{\mathrm{IF~}}\left( {{\varepsilon_{{\mathrm{reclaim,rated}}}}} \right)\left( {HEfFTemp} \right) > Limit,{\mathrm{~THEN~}}HeffFTemp = \frac{{Limit}}{{{\varepsilon_{{\mathrm{reclaim,rated}}}}}}
 \end{equation}
 
 where:
@@ -5325,22 +5325,22 @@ Desuperheater~Heat~Reclaim~Efficiency~Modifier~Curve~Output = HEffFTemp
 \end{equation}
 
 \begin{equation}
-Desuperheater~On{\rm{ - }}Cycle~Parasitic~Electric~Power~(W) = {P_{parasiticload,on}}\left( {PLR} \right)
+Desuperheater~On{\mathrm{ - }}Cycle~Parasitic~Electric~Power~(W) = {P_{parasiticload,on}}\left( {PLR} \right)
 \end{equation}
 
 \begin{equation}
 \begin{split}
-Desuperheater~On{\rm{ - }}Cycle~Parasitic~Electric~,Consumption~(J) = \\{P_{parasiticload,on}}\left( {PLR} \right)\left( {3600} \right){t_{sys}}
+Desuperheater~On{\mathrm{ - }}Cycle~Parasitic~Electric~,Consumption~(J) = \\{P_{parasiticload,on}}\left( {PLR} \right)\left( {3600} \right){t_{sys}}
 \end{split}
 \end{equation}
 
 \begin{equation}
-Desuperheater~Off{\rm{ - }}Cycle~Parasitic~Electric~Power~(W) = {P_{parasiticload,off}}\left( {1 - PLR} \right)
+Desuperheater~Off{\mathrm{ - }}Cycle~Parasitic~Electric~Power~(W) = {P_{parasiticload,off}}\left( {1 - PLR} \right)
 \end{equation}
 
 \begin{equation}
 \begin{split}
-Desuperheater~Off{\rm{ - }}Cycle~Parasitic~Electric~Consumption~(J) = \\{P_{parasiticload,off}}\left( {1 - PLR} \right)\left( {3600} \right)\left( {{t_{sys}}} \right)
+Desuperheater~Off{\mathrm{ - }}Cycle~Parasitic~Electric~Consumption~(J) = \\{P_{parasiticload,off}}\left( {1 - PLR} \right)\left( {3600} \right)\left( {{t_{sys}}} \right)
 \end{split}
 \end{equation}
 
@@ -5691,7 +5691,7 @@ PartLoadFrac = a + b\left( {PLR} \right) + c{\left( {PLR} \right)^2} + d{\left( 
 where:
 
 \begin{equation}
-PLR = part~load~ratio = \left( {\frac{{water~heating~delivered}}{{steady{\rm{ - }}state~water~heating~capacity}}} \right)
+PLR = part~load~ratio = \left( {\frac{{water~heating~delivered}}{{steady{\mathrm{ - }}state~water~heating~capacity}}} \right)
 \end{equation}
 
 The part load fraction correlation should be normalized to a value of 1.0 when the part load ratio equals 1.0 (i.e., no efficiency losses when the compressor runs continuously for the simulation time step). For PLR values between 0 and 1 (0 \textless{} = PLR \textless{} 1), the following rules apply:  PLF \textgreater{} = 0.7 and PLF \textgreater{} = PLR.
@@ -6397,13 +6397,13 @@ The part load fraction (PLF) correlation accounts for efficiency losses due to c
 If PLF \textless{} 0.7, the program resets the PLF value to 0.7, and the simulation proceeds. The runtime fraction of the coil is defined as PLR/PLF. If PLF \textless{} PLR, the runtime fraction of the coil is limited to 1.0. A typical part load fraction correlation would be:
 
 \begin{equation}
-{\rm{PLF}} = 0.85 + 0.15 \times {\rm{PLR}}
+{\mathrm{PLF}} = 0.85 + 0.15 \times {\mathrm{PLR}}
 \end{equation}
 
 If the user wishes to model no efficiency degradation due to compressor cycling, the part load fraction correlation should be defined as follows:
 
 \begin{equation}
-{\rm{PLF}} = 0.85 + 0.0 \times {\rm{PLR}}
+{\mathrm{PLF}} = 0.85 + 0.0 \times {\mathrm{PLR}}
 \end{equation}
 
 Lowest Speed Operation:
@@ -6423,7 +6423,7 @@ The EIR is calculated as:
 
 \begin{equation}
   \begin{array}{rl}
-    EIR_1 =& \frac{1.0}{\rm{ReferenceUnitCOP@Speed(1)}} * EIRTempModFac_1 \\
+    EIR_1 =& \frac{1.0}{\mathrm{ReferenceUnitCOP@Speed(1)}} * EIRTempModFac_1 \\
           &* EIRAirFlowModFac_1 \\
           &* EIRWaterFlowModFac_1
   \end{array}
@@ -6439,7 +6439,7 @@ The waste heat generated by this coil object is calculated as:
 
 \begin{equation}
   \begin{array}{rl}
-    Q_{RecoverHeat,1} =& \rm{ReferenceUnitWasteHeatFractionofEnergyInput@SpeedLevel(1)} \\
+    Q_{RecoverHeat,1} =& \mathrm{ReferenceUnitWasteHeatFractionofEnergyInput@SpeedLevel(1)} \\
                        &* Power_1 * WasteHeatTempModFac_1
   \end{array}
 \end{equation}
@@ -6575,7 +6575,7 @@ The waste heat generated by this coil object is calculated as:
 The total amount of heat absorbed by the evaporator is calculated as:
 
 \begin{equation}
-{Q_{evap,SpeedRatio}} = {Q_{total,SpeedRatio}} + {\rm{}}{Q_{RecoverHeat,SpeedRatio}} - Powe{r_{SpeedRatio}}
+{Q_{evap,SpeedRatio}} = {Q_{total,SpeedRatio}} + {\mathrm{}}{Q_{RecoverHeat,SpeedRatio}} - Powe{r_{SpeedRatio}}
 \end{equation}
 
 Finally:
@@ -6923,8 +6923,8 @@ The design air and water flow rate at the speed ratio are given as following:
 
 \begin{equation}
   \begin{array}{rl}
-    {\rm{DesignAirFlowRateSpeedRatio}} =& ReferenceUnitAirMassFlowRate@SpeedLevel\left( {x - 1} \right) \\
-                                       &* CapacityScaleFactor * \left( {1-\rm{SpeedRatio}} \right) \\
+    {\mathrm{DesignAirFlowRateSpeedRatio}} =& ReferenceUnitAirMassFlowRate@SpeedLevel\left( {x - 1} \right) \\
+                                       &* CapacityScaleFactor * \left( {1-\mathrm{SpeedRatio}} \right) \\
                                        &+ ReferenceUnitAirMassFlowRate@SpeedLevel\left( x \right) \\
                                        &* CapacityScaleFactor * SpeedRatio
   \end{array}
@@ -6932,8 +6932,8 @@ The design air and water flow rate at the speed ratio are given as following:
 
 \begin{equation}
   \begin{array}{rl}
-    \rm{DesignWaterFlowRateSpeedRatio} =& ReferenceUnitWaterMassFlowRate@SpeedLevel\left( {x - 1} \right) \\
-                                        &* CapacityScaleFactor * \left( {1-\rm{SpeedRatio}} \right) \\
+    \mathrm{DesignWaterFlowRateSpeedRatio} =& ReferenceUnitWaterMassFlowRate@SpeedLevel\left( {x - 1} \right) \\
+                                        &* CapacityScaleFactor * \left( {1-\mathrm{SpeedRatio}} \right) \\
                                         &+ ReferenceUnitWaterMassFlowRate@SpeedLevel\left( x \right) \\
                                         &* CapacityScaleFactor * SpeedRatio
   \end{array}
@@ -6995,10 +6995,10 @@ The recoverable waste heat is:
   \begin{array}{rl}
     Q_{RecoverHeat,SpeedRatio} =& \left( {1.0 - SpeedRatio} \right) \\
                                &* ReferenceUnitWasteHeatFractionofEnergyInput@SpeedLevel\left( {x - 1} \right) \\
-                               &* \rm{WasteHeatTempModFac}_{x - 1} * {Q_{total,x - 1}} * EIR_{x - 1} \\
+                               &* \mathrm{WasteHeatTempModFac}_{x - 1} * {Q_{total,x - 1}} * EIR_{x - 1} \\
                                &+ SpeedRatio \\
                                &* ReferenceUnitWasteHeatFractionofEnergyInput@SpeedLevel\left( x \right) \\
-                               &* \rm{WasteHeatTempModFac}_x \\
+                               &* \mathrm{WasteHeatTempModFac}_x \\
                                &* Q_{total,x} * EIR_x
   \end{array}
 \end{equation}
@@ -7272,7 +7272,7 @@ The input correlations are used in the following manner to determine cooling cap
 One total evaporator cooling capacity modifier curve is a function of evaporator inlet wetbulb temperature and condenser inlet drybulb temperature.
 
 \begin{equation}
-EvapCapTempModFac = {f_{}}\left( {{T_{evap,wb}},{\rm{}}{T_{cond,db}}} \right)
+EvapCapTempModFac = {f_{}}\left( {{T_{evap,wb}},{\mathrm{}}{T_{cond,db}}} \right)
 \end{equation}
 
 Another total evaporator cooling capacity modifier curve is a function of air flow fraction through the evaporator section where air flow fraction is the ratio of current air mass flow rate to the rated air mass flow rate.
@@ -7284,7 +7284,7 @@ Another total evaporator cooling capacity modifier curve is a function of air fl
 One energy input ratio modifier curve is a function of evaporator inlet wetbulb temperature and condenser inlet drybulb temperature.
 
 \begin{equation}
-EIRTempModFac = f\left( {{T_{evap,wb}},{\rm{}}{T_{cond,db}}} \right)
+EIRTempModFac = f\left( {{T_{evap,wb}},{\mathrm{}}{T_{cond,db}}} \right)
 \end{equation}
 
 Another energy input ratio modifier curve is a function of flow fraction.
@@ -7306,7 +7306,7 @@ The results of the performance curves are applied as follows to determine coolin
 \end{equation}
 
 \begin{equation}
-{\dot W_{elec}} = \frac{{{{\dot Q}_{evap}}\left( {EIRTempModFac} \right)\left( {EIRFlowModFac} \right)\left( {PLR} \right)}}{{\left( {CO{P_{Rated,{\rm{}}CoolOnly}}} \right)\left( {EvapPartLoadFac} \right)}}
+{\dot W_{elec}} = \frac{{{{\dot Q}_{evap}}\left( {EIRTempModFac} \right)\left( {EIRFlowModFac} \right)\left( {PLR} \right)}}{{\left( {CO{P_{Rated,{\mathrm{}}CoolOnly}}} \right)\left( {EvapPartLoadFac} \right)}}
 \end{equation}
 
 The sensible heat ratio (SHR) is determined by a rated SHR and two performance curves. The SHR temperature modifying factor is a function of evaporator entering wetbulb and evaporator entering drybulb temperature.

@@ -84,7 +84,7 @@ The four equations for double-glazing are as follows. The equations for single g
 \emph{S\(_{i}\)} in Equations~\ref{eq:GlazingFace1HeatBalEquation} to~\ref{eq:GlazingFace4HeatBalEquation} is the radiation (short-wave and long-wave from zone lights and equipment) absorbed on the \emph{i}\(^{th}\) face. Short-wave radiation (solar and short-wave from lights) is assumed to be absorbed uniformly along a glass layer, so for the purposes of the heat balance calculation it is split equally between the two faces of a layer. Glass layers are assumed to be opaque to IR so that the thermal radiation from lights and equipment is assigned only to the inside (room-side) face of the inside glass layer. For \emph{N} glass layers \emph{S\(_{i}\)} is given by
 
 \begin{equation}
-{S_{2j - 1}} = {S_{2j}} = \frac{1}{2}\left( {I_{bm}^{ext}\cos \phi A_j^f(\phi ) + I_{dif}^{ext}A_j^{f,dif} + I_{sw}^{{\mathop{\rm int}} }A_j^{b,dif}} \right),{\rm{    ~}}j = 1{\rm{~to~}}N
+{S_{2j - 1}} = {S_{2j}} = \frac{1}{2}\left( {I_{bm}^{ext}\cos \phi A_j^f(\phi ) + I_{dif}^{ext}A_j^{f,dif} + I_{sw}^{{\mathop{\rm int}} }A_j^{b,dif}} \right),{\mathrm{    ~}}j = 1{\mathrm{~to~}}N
 \end{equation}
 
 \begin{equation}
@@ -216,7 +216,7 @@ The equations are solved as follows:
 Repeat steps 4 to 9 until the difference, \(\Delta {\theta_i}\), between values of the \({\theta_i}\)~in successive iterations is less than some tolerance value. Currently, the test is:
 
 \begin{equation}
-\frac{1}{{2N}}\sum\limits_{i = 1}^{2N} {|\Delta {\theta_i}|{\rm{ }} < 0.02K}
+\frac{1}{{2N}}\sum\limits_{i = 1}^{2N} {|\Delta {\theta_i}|{\mathrm{ }} < 0.02K}
 \end{equation}
 
 If this test does not pass after 100 iterations, the tolerance is increased to 0.2K. If the test still fails the program stops and an error message is issued.
@@ -371,7 +371,7 @@ This is the expression used by EnergyPlus for the gap convective conductance whe
 If a shading device has a non-zero short-wave transmittance then absorption takes place throughout the shading device layer. The following algorithm is used to apportion the absorbed short-wave radiation to the two faces of the layer. Here \emph{f\(_{1}\)} is the fraction assigned to the face closest to the incident radiation and \emph{f\(_{2}\)} is the fraction assigned to the face furthest from the incident radiation.
 
 \begin{equation}
-{f_1} = 1,~{\rm{ }}{f_2} = 0{\rm{~if~}}{\tau_{sh}} = 0
+{f_1} = 1,~{\mathrm{ }}{f_2} = 0{\mathrm{~if~}}{\tau_{sh}} = 0
 \end{equation}
 
 Otherwise:
@@ -885,7 +885,7 @@ L2 = average distance to frame of illuminated area of inside reveal (used to cal
 The beam solar reflected from a sunlit region of area \(A\) is given by:
 
 \begin{equation}
-R = {I_B}A\cos \beta (1 - a){\rm{ }}
+R = {I_B}A\cos \beta (1 - a){\mathrm{ }}
 \end{equation}
 
 where
@@ -1090,7 +1090,7 @@ where
 The \emph{Δp\(_{B}\)} term is due to the acceleration of air to velocity \emph{v} (Bernoulli's law). It is given by:
 
 \begin{equation}
-\Delta {p_B} = \frac{\rho }{2}{v^2}{\rm{    (Pa)}}
+\Delta {p_B} = \frac{\rho }{2}{v^2}{\mathrm{    (Pa)}}
 \end{equation}
 
 where \emph{$\rho$}~is the gap air density evaluated at \emph{T\(_{gap}\)} (kg/m\(^{3}\)).
@@ -1098,7 +1098,7 @@ where \emph{$\rho$}~is the gap air density evaluated at \emph{T\(_{gap}\)} (kg/m
 The \emph{Δp\(_{HP}\)} term represents the pressure drop due to friction with the shading layer and glass surfaces as the air moves through the gap. Assuming steady laminar flow, it is given by the Hagen-Poiseuille law for flow between parallel plates {[}Munson et al. 1998{]}:
 
 \begin{equation}
-\Delta {p_{HP}} = 12\mu \frac{H}{{{s^2}}}{v^{}}{\rm{    (Pa)}}
+\Delta {p_{HP}} = 12\mu \frac{H}{{{s^2}}}{v^{}}{\mathrm{    (Pa)}}
 \end{equation}
 
 where \emph{$\mu$} is the viscosity of air at temperature \emph{T\(_{gap}\)} (Pa-s).
@@ -1106,7 +1106,7 @@ where \emph{$\mu$} is the viscosity of air at temperature \emph{T\(_{gap}\)} (Pa
 The \emph{Δp\(_{Z}\)} term is the sum of the pressure drops at the inlet and outlet openings:
 
 \begin{equation}
-\Delta {p_Z} = \frac{{\rho {v^2}}}{2}\left( {{Z_{in}} + {Z_{out}}} \right){\rm{    (Pa)}}
+\Delta {p_Z} = \frac{{\rho {v^2}}}{2}\left( {{Z_{in}} + {Z_{out}}} \right){\mathrm{    (Pa)}}
 \end{equation}
 
 Here, the inlet pressure drop factor, Z\(_{in}\), and the outlet pressure drop factor, Z\(_{out}\), are given by:
@@ -1251,19 +1251,19 @@ Convective Heat Gain to Zone from Gap Airflow
 The heat added (or removed) from the air as it passes through the gap produces a convective gain (or loss) to the zone air given by:
 
 \begin{equation}
-{q_v} = LW\left[ {{h_{cv}}\left( {{T_{gl}} - {T_{gap}}} \right) + {h_{cv}}\left( {{T_{sh}} - {T_{gap}}} \right)} \right] = 2{h_{cv}}LW\left( {{T_{ave}} - {T_{gap}}} \right){\rm{    (W)}}
+{q_v} = LW\left[ {{h_{cv}}\left( {{T_{gl}} - {T_{gap}}} \right) + {h_{cv}}\left( {{T_{sh}} - {T_{gap}}} \right)} \right] = 2{h_{cv}}LW\left( {{T_{ave}} - {T_{gap}}} \right){\mathrm{    (W)}}
 \end{equation}
 
 This can also be expressed as:
 
 \begin{equation}
-{q_v} = \dot m{C_p}\left( {{T_{gap,out}} - {T_{gap,in}}} \right){\rm{    (W)}}
+{q_v} = \dot m{C_p}\left( {{T_{gap,out}} - {T_{gap,in}}} \right){\mathrm{    (W)}}
 \end{equation}
 
 where the air mass flow rate in the gap is given by:
 
 \begin{equation}
-\dot m = \rho {A_{gap}}v{\rm{    (kg/s)}}
+\dot m = \rho {A_{gap}}v{\mathrm{    (kg/s)}}
 \end{equation}
 
 \subsection{Improved Airflow Equations for Window Screens and Horizontal Louvered Blind Systems}
@@ -1468,7 +1468,7 @@ In analogy to the interior or exterior shading device case, the air velocity is 
 where the driving pressure difference between gap \#1 and \#2 is:
 
 \begin{equation}
-\Delta {p_{T,1,2}} = {\rho_0}{T_0}gH\sin \phi \frac{{\left| {{T_{gap,1}} - {T_{gap,2}}} \right|}}{{{T_{gap,1}}{T_{gap,2}}}}{\rm{~~~~~(Pa)}}
+\Delta {p_{T,1,2}} = {\rho_0}{T_0}gH\sin \phi \frac{{\left| {{T_{gap,1}} - {T_{gap,2}}} \right|}}{{{T_{gap,1}}{T_{gap,2}}}}{\mathrm{~~~~~(Pa)}}
 \label{eq:DeltapT12Equation}
 \end{equation}
 
@@ -1568,7 +1568,7 @@ The overall solution sequence is as follows.~ At start of the iteration process,
 
 7)~~~~Get \({T_{gap,1}}\) ,\({T_{gap,2}}\) from Equations~\ref{eq:Tgap1Equation} and~\ref{eq:Tgap2Equation}.
 
-The values \({h_{cv,1}}{\rm{,~}}{h_{cv,2}}{\rm{,~}}{T_{gap,1}}\)~and \({T_{gap,2}}\) are then used in the face heat balance equations to find new values of the face temperatures \({\theta_2}{\rm{,~}}{\theta_3},{\rm{~}}{\theta_5}\) and \({\theta_6}\). These are used in turn to get new values of \({h_{cv,1}}{\rm{,~}}{h_{cv,2}}{\rm{,~}}{T_{gap,1}}\)~and \({T_{gap,2}}\) until the whole iterative process converges.
+The values \({h_{cv,1}}{\mathrm{,~}}{h_{cv,2}}{\mathrm{,~}}{T_{gap,1}}\)~and \({T_{gap,2}}\) are then used in the face heat balance equations to find new values of the face temperatures \({\theta_2}{\mathrm{,~}}{\theta_3},{\mathrm{~}}{\theta_5}\) and \({\theta_6}\). These are used in turn to get new values of \({h_{cv,1}}{\mathrm{,~}}{h_{cv,2}}{\mathrm{,~}}{T_{gap,1}}\)~and \({T_{gap,2}}\) until the whole iterative process converges.
 
 \subsection{Airflow Windows}\label{airflow-windows}
 
@@ -1635,7 +1635,7 @@ where
 The air velocity is determined by the gap cross-sectional area in the flow direction and the air flow rate, which is an input value that is constant or can vary according to a user-specified schedule:
 
 \begin{equation}
-v = \frac{F}{{{A_{gap}}}}{\rm{~~~~~~(m/s)}}
+v = \frac{F}{{{A_{gap}}}}{\mathrm{~~~~~~(m/s)}}
 \end{equation}
 
 where
@@ -1677,7 +1677,7 @@ The equations for glass face \#1 and \#4 are the same as those for no airflow in
 The convective heat gain to the zone air due to the gap airflow when the airflow destination is indoor air is:
 
 \begin{equation}
-{q_v} = \dot m({C_{p,out}}{T_{gap,out}} - {C_{p,i}}{T_i}){\rm{~~~~~~(W)}}
+{q_v} = \dot m({C_{p,out}}{T_{gap,out}} - {C_{p,i}}{T_i}){\mathrm{~~~~~~(W)}}
 \end{equation}
 
 where
@@ -1689,7 +1689,7 @@ where
 and where the air mass flow rate in the gap is:
 
 \begin{equation}
-\dot m = \rho F{\rm{~~~~~~(kg/s)}}
+\dot m = \rho F{\mathrm{~~~~~~(kg/s)}}
 \end{equation}
 
 \subsubsection{Fan Energy}\label{fan-energy}
@@ -1701,7 +1701,7 @@ The fan energy used to move air through the gap is very small and is ignored.
 Figure~\ref{fig:airflow-window-with-between-glass-shading} shows the case of a double-glazed airflow window with a between glass shading device. The heat balance equations in this case are the same as those for the between-glass shading device with natural convection (Figure~\ref{fig:glazing-system-with-two-glass-layers-and-a} and following equations) except that now:
 
 \begin{equation}
-v = \frac{{F/2}}{{{A_{gap}}}}{\rm{~~~~~~(m/s)}}
+v = \frac{{F/2}}{{{A_{gap}}}}{\mathrm{~~~~~~(m/s)}}
 \end{equation}
 
 where \emph{A\(_{gap}\)} = \emph{sW} is the cross-sectional area of the gap on either side of the shading device. It is assumed that the shading device is centered between the two panes of glass so that the airflow, \emph{F}, is divided equally between the two gaps.
@@ -1709,13 +1709,13 @@ where \emph{A\(_{gap}\)} = \emph{sW} is the cross-sectional area of the gap on e
 The convective heat gain to the zone air due to the airflow through the two gaps when the airflow destination is indoor air is:
 
 \begin{equation}
-{q_v} = \dot m({C_{p,ave,out}}{T_{gap,ave,out}} - {C_{p,i}}{T_i}{\rm{)      (W)}}
+{q_v} = \dot m({C_{p,ave,out}}{T_{gap,ave,out}} - {C_{p,i}}{T_i}{\mathrm{)      (W)}}
 \end{equation}
 
 where the average temperature of the two outlet air streams is:
 
 \begin{equation}
-{T_{gap,ave,out}}{\rm{ =  }}({T_{gap,1,out}} + {T_{gap,2,out}})/2
+{T_{gap,ave,out}}{\mathrm{ =  }}({T_{gap,1,out}} + {T_{gap,2,out}})/2
 \end{equation}
 
 and
@@ -2403,39 +2403,39 @@ The off-normal optical properties of drapery fabric is determined from user spec
 Off-normal Transmittance:
 
 \begin{equation}
-{\rm{\tau }}_{{\rm{bb}}}^{\rm{m}}\left( {\rm{\theta }} \right) = {\rm{\tau }}_{{\rm{bb}}}^{\rm{m}}{\rm{(\theta }} = {\rm{0)}} \cdot {\rm{co}}{{\rm{s}}^{\rm{b}}}\left( {\rm{\theta }} \right)
+{\mathrm{\tau }}_{{\mathrm{bb}}}^{\mathrm{m}}\left( {\mathrm{\theta }} \right) = {\mathrm{\tau }}_{{\mathrm{bb}}}^{\mathrm{m}}{\mathrm{(\theta }} = {\mathrm{0)}} \cdot {\mathrm{co}}{{\mathrm{s}}^{\mathrm{b}}}\left( {\mathrm{\theta }} \right)
 \end{equation}
 
 \begin{equation}
-{\rm{\tau }}_{{\rm{bt}}}^{\rm{m}}\left( {\rm{\theta }} \right) = {\rm{\tau }}_{{\rm{bt}}}^{\rm{m}}{\rm{(\theta }} = {\rm{0)}} \cdot {\rm{co}}{{\rm{s}}^{\rm{b}}}\left( {\rm{\theta }} \right)
+{\mathrm{\tau }}_{{\mathrm{bt}}}^{\mathrm{m}}\left( {\mathrm{\theta }} \right) = {\mathrm{\tau }}_{{\mathrm{bt}}}^{\mathrm{m}}{\mathrm{(\theta }} = {\mathrm{0)}} \cdot {\mathrm{co}}{{\mathrm{s}}^{\mathrm{b}}}\left( {\mathrm{\theta }} \right)
 \end{equation}
 
 \begin{equation}
-{\rm{b}} = {\left[ {\; - 0.5 \cdot \ln \;\left( {\;{{\left[ {{\rm{\tau }}_{{\rm{bb}}}^{\rm{m}}{\rm{(\theta }} = {\rm{0)}}\;{\rm{,}}\;\;{\rm{0}}{\rm{.01}}} \right]}^{\;\max }}\;} \right)\;\;,\;\;0.35\;} \right]^{\;\max }}
+{\mathrm{b}} = {\left[ {\; - 0.5 \cdot \ln \;\left( {\;{{\left[ {{\mathrm{\tau }}_{{\mathrm{bb}}}^{\mathrm{m}}{\mathrm{(\theta }} = {\mathrm{0)}}\;{\mathrm{,}}\;\;{\mathrm{0}}{\mathrm{.01}}} \right]}^{\;\max }}\;} \right)\;\;,\;\;0.35\;} \right]^{\;\max }}
 \end{equation}
 
 \begin{equation}
-{\rm{b}} = {\left[ {\; - 0.5 \cdot \ln \;\left( {\;{{\left[ {{\rm{\tau }}_{{\rm{bt}}}^{\rm{m}}{\rm{(\theta }} = {\rm{0)}}\;{\rm{,}}\;\;{\rm{0}}{\rm{.01}}} \right]}^{\;\max }}\;} \right)\;\;,\;\;0.35\;} \right]^{\;\max }}
+{\mathrm{b}} = {\left[ {\; - 0.5 \cdot \ln \;\left( {\;{{\left[ {{\mathrm{\tau }}_{{\mathrm{bt}}}^{\mathrm{m}}{\mathrm{(\theta }} = {\mathrm{0)}}\;{\mathrm{,}}\;\;{\mathrm{0}}{\mathrm{.01}}} \right]}^{\;\max }}\;} \right)\;\;,\;\;0.35\;} \right]^{\;\max }}
 \end{equation}
 
 \begin{equation}
-{\rm{\tau }}_{{\rm{bt}}}^{\rm{m}}\left( {\rm{\theta }} \right) = {\rm{\tau }}_{{\rm{bd}}}^{\rm{m}}\left( {\rm{\theta }} \right) + {\rm{\tau }}_{{\rm{bb}}}^{\rm{m}}\left( {\rm{\theta }} \right)
+{\mathrm{\tau }}_{{\mathrm{bt}}}^{\mathrm{m}}\left( {\mathrm{\theta }} \right) = {\mathrm{\tau }}_{{\mathrm{bd}}}^{\mathrm{m}}\left( {\mathrm{\theta }} \right) + {\mathrm{\tau }}_{{\mathrm{bb}}}^{\mathrm{m}}\left( {\mathrm{\theta }} \right)
 \end{equation}
 
 The off-normal reflectance:
 
 \begin{equation}
-{\rm{\rho }}_{{\rm{bt}}}^{\rm{m}}\left( {\rm{\theta }} \right) = {\rm{\rho }}_{{\rm{bd}}}^{\rm{m}}\left( {\rm{\theta }} \right) = {\rm{\rho }}_{{\rm{bt}}}^{\rm{m}}\left( {{\rm{\theta }} = {\rm{0}}} \right) + \left( {{\rm{\rho }}_{{\rm{bt}}}^{\rm{m}}\left( {{\rm{\theta }} = 9{\rm{0}}^\circ } \right) - {\rm{\rho }}_{{\rm{bt}}}^{\rm{m}}\left( {{\rm{\theta }} = {\rm{0}}} \right)} \right) \cdot \left( {1 - {\rm{co}}{{\rm{s}}^{{\rm{0}}{\rm{.6}}}}\left( {\rm{\theta }} \right)} \right)
+{\mathrm{\rho }}_{{\mathrm{bt}}}^{\mathrm{m}}\left( {\mathrm{\theta }} \right) = {\mathrm{\rho }}_{{\mathrm{bd}}}^{\mathrm{m}}\left( {\mathrm{\theta }} \right) = {\mathrm{\rho }}_{{\mathrm{bt}}}^{\mathrm{m}}\left( {{\mathrm{\theta }} = {\mathrm{0}}} \right) + \left( {{\mathrm{\rho }}_{{\mathrm{bt}}}^{\mathrm{m}}\left( {{\mathrm{\theta }} = 9{\mathrm{0}}^\circ } \right) - {\mathrm{\rho }}_{{\mathrm{bt}}}^{\mathrm{m}}\left( {{\mathrm{\theta }} = {\mathrm{0}}} \right)} \right) \cdot \left( {1 - {\mathrm{co}}{{\mathrm{s}}^{{\mathrm{0}}{\mathrm{.6}}}}\left( {\mathrm{\theta }} \right)} \right)
 \end{equation}
 
 \begin{equation}
-{\rm{\rho }}_{{\rm{bt}}}^{\rm{m}}\left( {{\rm{\theta }} = {\rm{90}}^\circ } \right) = {\rm{\rho }}_{{\rm{bt}}}^{\rm{m}}\left( {{\rm{\theta }} = {\rm{0}}} \right) + \left( {{\rm{1}} - {\rm{\rho }}_{{\rm{bt}}}^{\rm{m}}\left( {{\rm{\theta }} = {\rm{0}}} \right)} \right)\;\left( {\,0.7{{\left( {\;{\rm{\rho }}_{}^{\rm{y}}} \right)}^{\;0.7}}} \right)
+{\mathrm{\rho }}_{{\mathrm{bt}}}^{\mathrm{m}}\left( {{\mathrm{\theta }} = {\mathrm{90}}^\circ } \right) = {\mathrm{\rho }}_{{\mathrm{bt}}}^{\mathrm{m}}\left( {{\mathrm{\theta }} = {\mathrm{0}}} \right) + \left( {{\mathrm{1}} - {\mathrm{\rho }}_{{\mathrm{bt}}}^{\mathrm{m}}\left( {{\mathrm{\theta }} = {\mathrm{0}}} \right)} \right)\;\left( {\,0.7{{\left( {\;{\mathrm{\rho }}_{}^{\mathrm{y}}} \right)}^{\;0.7}}} \right)
 \end{equation}
 
 The apparent yarn reflectance is given by:
 
 \begin{equation}
-{\rho ^y} = \frac{{\rho_{{\rm{bt}}}^{\rm{m}}\left( {{\rm{\theta }} = {\rm{0}}} \right)}}{{{\rm{1}} - \tau_{{\rm{bb}}}^{\rm{m}}\left( {{\rm{\theta }} = {\rm{0}}} \right)}} = \frac{{\rho_{{\rm{bt}}}^{\rm{m}}\left( {{\rm{\theta }} = {\rm{0}}} \right)}}{{{\rm{1}} - {{\rm{A}}_{\rm{o}}}}}
+{\rho ^y} = \frac{{\rho_{{\mathrm{bt}}}^{\mathrm{m}}\left( {{\mathrm{\theta }} = {\mathrm{0}}} \right)}}{{{\mathrm{1}} - \tau_{{\mathrm{bb}}}^{\mathrm{m}}\left( {{\mathrm{\theta }} = {\mathrm{0}}} \right)}} = \frac{{\rho_{{\mathrm{bt}}}^{\mathrm{m}}\left( {{\mathrm{\theta }} = {\mathrm{0}}} \right)}}{{{\mathrm{1}} - {{\mathrm{A}}_{\mathrm{o}}}}}
 \end{equation}
 
 The above set of equations for drapery fabrics are used subject to the condition that the solar absorptance of the fabric, at normal incidence, is not less than 1\% (ASHRE 1311-RP). The diffuse-diffuse material properties, for Equivalent layer window model, are determined using Rhomberg integration with 32 panels covering the range from $\theta = 0$ to $\theta = 90^{o}$ (ASHRAE 1311-RP). The subscript ``X'' stands for either front or back side of the layer.
@@ -2451,11 +2451,11 @@ The above set of equations for drapery fabrics are used subject to the condition
 The above set of equations for drapery fabrics apply to the full range of A\(_{o}\), fabric transmittance and fabric reflectance including that falls within the bounds of Keyes' (1967) fabric chart plus sheer fabrics (ASHRAE 1311-RP). The longwave thermal emissivity and thermal transmittances of drapery fabric are calculated using the following correlations and fabric openness fraction (Kotey et al. 2008).
 
 \begin{equation}
-{\varepsilon ^{\rm{m}}} = {\rm{0}}{\rm{.87}} \cdot \left( {{\rm{1 - }}{{\rm{A}}_{\rm{o}}}} \right)
+{\varepsilon ^{\mathrm{m}}} = {\mathrm{0}}{\mathrm{.87}} \cdot \left( {{\mathrm{1 - }}{{\mathrm{A}}_{\mathrm{o}}}} \right)
 \end{equation}
 
 \begin{equation}
-{\tau ^{\rm{m}}} = {\rm{1}} - {\rm{0}}{\rm{.95}} \cdot \left( {{\rm{1}} - {{\rm{A}}_{\rm{o}}}} \right)
+{\tau ^{\mathrm{m}}} = {\mathrm{1}} - {\mathrm{0}}{\mathrm{.95}} \cdot \left( {{\mathrm{1}} - {{\mathrm{A}}_{\mathrm{o}}}} \right)
 \end{equation}
 
 The optical and thermal properties determined using the above same sets of equations are equally valid for pleated drape shades (Kotey, et. al., 2009a). For pleated drape, the effective beam-beam and beam-diffuse solar properties are determined by tracking both radiation components, for a given incident angle, and interaction with a fabric pleated rectangular geometry shown in Figure~\ref{fig:geometry-used-for-pleated-drape-analysis}. The solar optical properties of the two different pleat planes are evaluated on the basis of the local solar incidence angle. Therefore, the effective layer properties are influenced not just by horizontal solar profile angle, {$\Omega$\(_{H}\), but also by incidence angle (ASHRAE 1311-RP).
@@ -2485,52 +2485,52 @@ The model assumes that venetian blind slats reflect and transmit solar radiation
 The off-normal properties of roller-blind are determined from solar properties of roller blind fabric measured at normal incidence ($\theta = 0$) using correlations (Kotey, et. al., 2009b). The off-normal properties for roller blind shades are calculated using the set equations given below:
 
 \begin{equation}
-{{\rm{\tau }}_{bb}}\left( {\rm{\theta }} \right) = \left\{ \begin{array}{l}{{\rm{\tau }}_{bb}}{\rm{(\theta }} = {\rm{0)}} \cdot {\rm{co}}{{\rm{s}}^{\rm{b}}}{\kern 1pt} \left( {\frac{{\rm{\theta }}}{{{{\rm{\theta }}_{{\rm{cutoff}}}}}} \cdot \frac{\pi }{2}} \right)\quad \theta  < {\theta_{CutOff}}\\0\quad \quad \quad \theta  \ge {\theta_{CutOff}}\end{array} \right.
+{{\mathrm{\tau }}_{bb}}\left( {\mathrm{\theta }} \right) = \left\{ \begin{array}{l}{{\mathrm{\tau }}_{bb}}{\mathrm{(\theta }} = {\mathrm{0)}} \cdot {\mathrm{co}}{{\mathrm{s}}^{\mathrm{b}}}{\kern 1pt} \left( {\frac{{\mathrm{\theta }}}{{{{\mathrm{\theta }}_{{\mathrm{cutoff}}}}}} \cdot \frac{\pi }{2}} \right)\quad \theta  < {\theta_{CutOff}}\\0\quad \quad \quad \theta  \ge {\theta_{CutOff}}\end{array} \right.
 \end{equation}
 
 \begin{equation}
-{\rm{b}} = {\rm{0}}{\rm{.6}} \cdot {\rm{co}}{{\rm{s}}^{{\rm{0}}{\rm{.3}}}}\left( {{{\rm{A}}_{\rm{o}}} \cdot \frac{{\rm{\pi }}}{{\rm{2}}}} \right)
+{\mathrm{b}} = {\mathrm{0}}{\mathrm{.6}} \cdot {\mathrm{co}}{{\mathrm{s}}^{{\mathrm{0}}{\mathrm{.3}}}}\left( {{{\mathrm{A}}_{\mathrm{o}}} \cdot \frac{{\mathrm{\pi }}}{{\mathrm{2}}}} \right)
 \end{equation}
 
 \begin{equation}
-{{\rm{\theta }}_{{\rm{cutoff}}}} = {\rm{65}}^\circ  + \;\left( {{\rm{90}}^\circ  - {\rm{65}}^\circ } \right) \cdot \left( {{\rm{1}} - {\rm{cos}}\left( {{{\rm{A}}_{\rm{o}}} \cdot \frac{{\rm{\pi }}}{{\rm{2}}}} \right)} \right)
+{{\mathrm{\theta }}_{{\mathrm{cutoff}}}} = {\mathrm{65}}^\circ  + \;\left( {{\mathrm{90}}^\circ  - {\mathrm{65}}^\circ } \right) \cdot \left( {{\mathrm{1}} - {\mathrm{cos}}\left( {{{\mathrm{A}}_{\mathrm{o}}} \cdot \frac{{\mathrm{\pi }}}{{\mathrm{2}}}} \right)} \right)
 \end{equation}
 
 \begin{equation}
-{\rm{\tau }}_{{\rm{bt}}}^{}\left( {\rm{\theta }} \right) = {\rm{\tau }}_{{\rm{bt}}}^{}{\rm{(\theta }} = {\rm{0)}} \cdot {\rm{co}}{{\rm{s}}^{\rm{b}}}{\kern 1pt} \left( {\rm{\theta }} \right)
+{\mathrm{\tau }}_{{\mathrm{bt}}}^{}\left( {\mathrm{\theta }} \right) = {\mathrm{\tau }}_{{\mathrm{bt}}}^{}{\mathrm{(\theta }} = {\mathrm{0)}} \cdot {\mathrm{co}}{{\mathrm{s}}^{\mathrm{b}}}{\kern 1pt} \left( {\mathrm{\theta }} \right)
 \end{equation}
 
 \begin{equation}
 b = \left\{
     \begin{array}{lc}
-      0.133 \cdot \left( \rm{\tau}^{str} + 0.003 \right)^{-0.467} &\text{if} \left( 0 \le \rm{\tau}^{str} \le 0.33 \right) \\
-      0.33 \cdot \left( 1 - \rm{\tau}^{str} \right)               &\text{if} \left( 0.33 < \rm{\tau}^{str} \le 1 \right)
+      0.133 \cdot \left( \mathrm{\tau}^{str} + 0.003 \right)^{-0.467} &\text{if} \left( 0 \le \mathrm{\tau}^{str} \le 0.33 \right) \\
+      0.33 \cdot \left( 1 - \mathrm{\tau}^{str} \right)               &\text{if} \left( 0.33 < \mathrm{\tau}^{str} \le 1 \right)
     \end{array}
   \right.
 \end{equation}
 
 \begin{equation}
-{\rm{\tau }}_{}^{{\rm{str}}} = \frac{{{\rm{\tau }}_{{\rm{bt}}}^{}\left( {{\rm{\theta }} = {\rm{0}}} \right) - {{\rm{\tau }}_{{\rm{bb}}}}\left( {{\rm{\theta }} = {\rm{0}}} \right)}}{{{\rm{1}} - {{\rm{\tau }}_{{\rm{bb}}}}\left( {{\rm{\theta }} = {\rm{0}}} \right)}}
+{\mathrm{\tau }}_{}^{{\mathrm{str}}} = \frac{{{\mathrm{\tau }}_{{\mathrm{bt}}}^{}\left( {{\mathrm{\theta }} = {\mathrm{0}}} \right) - {{\mathrm{\tau }}_{{\mathrm{bb}}}}\left( {{\mathrm{\theta }} = {\mathrm{0}}} \right)}}{{{\mathrm{1}} - {{\mathrm{\tau }}_{{\mathrm{bb}}}}\left( {{\mathrm{\theta }} = {\mathrm{0}}} \right)}}
 \end{equation}
 
 \begin{equation}
-{\rm{\tau_{bt}}}\left( {\rm{\theta }} \right) = {\rm{\tau_{bd}}}\left( {\rm{\theta }} \right) + {\rm{\tau_{bb}}}\left( {\rm{\theta }} \right)
+{\mathrm{\tau_{bt}}}\left( {\mathrm{\theta }} \right) = {\mathrm{\tau_{bd}}}\left( {\mathrm{\theta }} \right) + {\mathrm{\tau_{bb}}}\left( {\mathrm{\theta }} \right)
 \end{equation}
 
 The off-normal solar property calculation of roller blind is based on a set of correlations developed from measurement data using samples of commonly used commercially produced roller blind material openness range of 0.0 -- 0.14. Thus, these correlations are not applicable for shades with materials openness fraction exceeding 0.20. The mean solar reflectance of a roller blind material was found to be purely diffuse and unaffected by incidence angle and is given by:
 
 \begin{equation}
-{\rm{\rho }}_{{\rm{bt}}}^{}\left( {{\rm{\theta }} = {\rm{0}}} \right) = {\rm{\rho }}_{{\rm{bd}}}^{}\left( {{\rm{\theta }} = {\rm{0}}} \right) = {\rm{\rho }}_{{\rm{bt}}}^{}\left( {\rm{\theta }} \right) = {\rm{\rho }}_{{\rm{bd}}}^{}\left( {\rm{\theta }} \right)
+{\mathrm{\rho }}_{{\mathrm{bt}}}^{}\left( {{\mathrm{\theta }} = {\mathrm{0}}} \right) = {\mathrm{\rho }}_{{\mathrm{bd}}}^{}\left( {{\mathrm{\theta }} = {\mathrm{0}}} \right) = {\mathrm{\rho }}_{{\mathrm{bt}}}^{}\left( {\mathrm{\theta }} \right) = {\mathrm{\rho }}_{{\mathrm{bd}}}^{}\left( {\mathrm{\theta }} \right)
 \end{equation}
 
 The diffuse-diffuse transmittance and reflectance are obtained by Rhomberg numerical integration. The longwave properties of roller blind material determined using the material property and the openness fraction (Kotey et al. 2008) as shown below:
 
 \begin{equation}
-{\varepsilon ^{{\rm{rb}}}} = {\rm{0}}{\rm{.91}} \cdot \left( {{\rm{1 - }}{{\rm{A}}_{\rm{o}}}} \right)
+{\varepsilon ^{{\mathrm{rb}}}} = {\mathrm{0}}{\mathrm{.91}} \cdot \left( {{\mathrm{1 - }}{{\mathrm{A}}_{\mathrm{o}}}} \right)
 \end{equation}
 
 \begin{equation}
-{\tau ^{{\rm{rb}}}} = {\rm{1}} - {\rm{0}}{\rm{.95}} \cdot \left( {{\rm{1}} - {{\rm{A}}_{\rm{o}}}} \right)
+{\tau ^{{\mathrm{rb}}}} = {\mathrm{1}} - {\mathrm{0}}{\mathrm{.95}} \cdot \left( {{\mathrm{1}} - {{\mathrm{A}}_{\mathrm{o}}}} \right)
 \end{equation}
 
 \subsubsection{Insect Screens}\label{insect-screens}
@@ -2558,49 +2558,49 @@ The incidence angle beyond which direct beam transmission is cut off, {$\theta$}
 The off-normal properties are calculated as follows.
 
 \begin{equation}
-{\tau_{bb}}\left( {\rm{\theta }} \right) = \left\{ \begin{array}{l}{\tau_{bb}}{\rm{(\theta }} = {\rm{0)}} \cdot {\rm{co}}{{\rm{s}}^{\rm{b}}}\left( {\frac{{\rm{\theta }}}{{{{\rm{\theta }}_{{\rm{cutoff}}}}}} \cdot \frac{\pi }{{\rm{2}}}} \right)\quad {\rm{\theta }} < {{\rm{\theta }}_{{\rm{cutoff}}}}\\0\quad \quad \quad \quad \quad \quad \quad \quad \quad \quad \quad \;\,{\rm{\theta }} \ge {{\rm{\theta }}_{{\rm{cutoff}}}}\end{array} \right.
+{\tau_{bb}}\left( {\mathrm{\theta }} \right) = \left\{ \begin{array}{l}{\tau_{bb}}{\mathrm{(\theta }} = {\mathrm{0)}} \cdot {\mathrm{co}}{{\mathrm{s}}^{\mathrm{b}}}\left( {\frac{{\mathrm{\theta }}}{{{{\mathrm{\theta }}_{{\mathrm{cutoff}}}}}} \cdot \frac{\pi }{{\mathrm{2}}}} \right)\quad {\mathrm{\theta }} < {{\mathrm{\theta }}_{{\mathrm{cutoff}}}}\\0\quad \quad \quad \quad \quad \quad \quad \quad \quad \quad \quad \;\,{\mathrm{\theta }} \ge {{\mathrm{\theta }}_{{\mathrm{cutoff}}}}\end{array} \right.
 \end{equation}
 
 \begin{equation}
-{\rm{b}} =  - {\rm{0}}{\rm{.45}}\;{\rm{ln}}\;\left( {{\rm{MAX}}\left( {{{\rm{\tau }}_{{\rm{bb}}}}\left( {{\rm{\theta }} = {\rm{0}}} \right){\rm{,}}\;{\rm{0}}{\rm{.01}}} \right)} \right)\; + \;{\rm{0}}{\rm{.1}}
+{\mathrm{b}} =  - {\mathrm{0}}{\mathrm{.45}}\;{\mathrm{ln}}\;\left( {{\mathrm{MAX}}\left( {{{\mathrm{\tau }}_{{\mathrm{bb}}}}\left( {{\mathrm{\theta }} = {\mathrm{0}}} \right){\mathrm{,}}\;{\mathrm{0}}{\mathrm{.01}}} \right)} \right)\; + \;{\mathrm{0}}{\mathrm{.1}}
 \end{equation}
 
 \begin{equation}
-{\rm{\tau }}_{{\rm{bt}}}^{}\left( {\rm{\theta }} \right) = {\rm{\tau }}_{{\rm{bt}}}^{}{\rm{(\theta }} = {\rm{0)}} \cdot {\rm{co}}{{\rm{s}}^{\rm{b}}}\left( {\rm{\theta }} \right)
+{\mathrm{\tau }}_{{\mathrm{bt}}}^{}\left( {\mathrm{\theta }} \right) = {\mathrm{\tau }}_{{\mathrm{bt}}}^{}{\mathrm{(\theta }} = {\mathrm{0)}} \cdot {\mathrm{co}}{{\mathrm{s}}^{\mathrm{b}}}\left( {\mathrm{\theta }} \right)
 \end{equation}
 
 \begin{equation}
-{\rm{b}} =  - {\rm{0}}{\rm{.65}}\;{\rm{ln}}\;\left( {{\rm{MAX}}\left( {{{\rm{\tau }}_{{\rm{bt}}}}\left( {{\rm{\theta }} = {\rm{0}}} \right){\rm{,}}\;{\rm{0}}{\rm{.01}}} \right)} \right)\; + \;{\rm{0}}{\rm{.1}}
+{\mathrm{b}} =  - {\mathrm{0}}{\mathrm{.65}}\;{\mathrm{ln}}\;\left( {{\mathrm{MAX}}\left( {{{\mathrm{\tau }}_{{\mathrm{bt}}}}\left( {{\mathrm{\theta }} = {\mathrm{0}}} \right){\mathrm{,}}\;{\mathrm{0}}{\mathrm{.01}}} \right)} \right)\; + \;{\mathrm{0}}{\mathrm{.1}}
 \end{equation}
 
 \begin{equation}
-{\rm{\tau }}_{{\rm{bd}}}^{}\left( {\rm{\theta }} \right) = {\rm{\tau }}_{{\rm{bt}}}^{}\left( {\rm{\theta }} \right) - {\rm{\tau }}_{{\rm{bb}}}^{}\left( {\rm{\theta }} \right)
+{\mathrm{\tau }}_{{\mathrm{bd}}}^{}\left( {\mathrm{\theta }} \right) = {\mathrm{\tau }}_{{\mathrm{bt}}}^{}\left( {\mathrm{\theta }} \right) - {\mathrm{\tau }}_{{\mathrm{bb}}}^{}\left( {\mathrm{\theta }} \right)
 \end{equation}
 
 \begin{equation}
-{\rm{\rho }}_{{\rm{bt}}}^{}\left( {\rm{\theta }} \right) = {\rm{\rho }}_{{\rm{bt}}}^{}\left( {{\rm{\theta }} = {\rm{0}}} \right) + \left( {{\rm{\rho }}_{{\rm{bt}}}^{}\left( {{\rm{\theta }} = 9{\rm{0}}^\circ } \right) - {\rm{\rho }}_{{\rm{bt}}}^{}\left( {{\rm{\theta }} = {\rm{0}}} \right)} \right) \cdot \left( {1 - {\rm{co}}{{\rm{s}}^{\rm{b}}}\left( {\rm{\theta }} \right)} \right)
+{\mathrm{\rho }}_{{\mathrm{bt}}}^{}\left( {\mathrm{\theta }} \right) = {\mathrm{\rho }}_{{\mathrm{bt}}}^{}\left( {{\mathrm{\theta }} = {\mathrm{0}}} \right) + \left( {{\mathrm{\rho }}_{{\mathrm{bt}}}^{}\left( {{\mathrm{\theta }} = 9{\mathrm{0}}^\circ } \right) - {\mathrm{\rho }}_{{\mathrm{bt}}}^{}\left( {{\mathrm{\theta }} = {\mathrm{0}}} \right)} \right) \cdot \left( {1 - {\mathrm{co}}{{\mathrm{s}}^{\mathrm{b}}}\left( {\mathrm{\theta }} \right)} \right)
 \end{equation}
 
 \begin{equation}
-{\rm{b}} =  - {\rm{0}}{\rm{.45}}\;{\rm{ln}}\;{\left( {{{\rm{\rho }}^{\rm{w}}}} \right)^{}}
+{\mathrm{b}} =  - {\mathrm{0}}{\mathrm{.45}}\;{\mathrm{ln}}\;{\left( {{{\mathrm{\rho }}^{\mathrm{w}}}} \right)^{}}
 \end{equation}
 
 \begin{equation}
-{\rm{\rho }}_{}^{\rm{w}} = \frac{{{\rm{\rho }}_{{\rm{bt}}}^{}\left( {{\rm{\theta }} = {\rm{0}}} \right)}}{{{\rm{1}} - {\rm{\tau }}_{{\rm{bb}}}^{}\left( {{\rm{\theta }} = {\rm{0}}} \right)}}
+{\mathrm{\rho }}_{}^{\mathrm{w}} = \frac{{{\mathrm{\rho }}_{{\mathrm{bt}}}^{}\left( {{\mathrm{\theta }} = {\mathrm{0}}} \right)}}{{{\mathrm{1}} - {\mathrm{\tau }}_{{\mathrm{bb}}}^{}\left( {{\mathrm{\theta }} = {\mathrm{0}}} \right)}}
 \end{equation}
 
 \begin{equation}
-{\rho_{{\rm{bt}}}}\left( {{\rm{\theta }} = {\rm{90}}^\circ } \right) = {\rho_{{\rm{bt}}}}\left( {{\rm{\theta }} = {\rm{0}}} \right) + \left( {1 - {\rho_{{\rm{bt}}}}\left( {{\rm{\theta }} = {\rm{0}}} \right)} \right)\;\left( {{\rm{0}}{\rm{.35}}{\rho ^{\rm{w}}}} \right)
+{\rho_{{\mathrm{bt}}}}\left( {{\mathrm{\theta }} = {\mathrm{90}}^\circ } \right) = {\rho_{{\mathrm{bt}}}}\left( {{\mathrm{\theta }} = {\mathrm{0}}} \right) + \left( {1 - {\rho_{{\mathrm{bt}}}}\left( {{\mathrm{\theta }} = {\mathrm{0}}} \right)} \right)\;\left( {{\mathrm{0}}{\mathrm{.35}}{\rho ^{\mathrm{w}}}} \right)
 \end{equation}
 
 The diffuse-diffuse material properties are obtained by Rhomberg numerical integration. The longwave properties of insect screen are given by expressions similar those formulated for drapery fabrics, and roller blinds (Kotey et al. 2008) is given by:
 
 \begin{equation}
-{\varepsilon ^{screen}} = {\varepsilon ^{\rm{w}}} \cdot \left( {{\rm{1  -  }}{{\rm{A}}_{\rm{o}}}} \right)
+{\varepsilon ^{screen}} = {\varepsilon ^{\mathrm{w}}} \cdot \left( {{\mathrm{1  -  }}{{\mathrm{A}}_{\mathrm{o}}}} \right)
 \end{equation}
 
 \begin{equation}
-{\tau ^{{\rm{screen}}}} = {\rm{1 - }}{\tau ^{\rm{w}}} \cdot \left( {{\rm{1  -  }}{{\rm{A}}_{\rm{o}}}} \right)
+{\tau ^{{\mathrm{screen}}}} = {\mathrm{1 - }}{\tau ^{\mathrm{w}}} \cdot \left( {{\mathrm{1  -  }}{{\mathrm{A}}_{\mathrm{o}}}} \right)
 \end{equation}
 
 The apparent wire material emissivity can be taken as $\varepsilon^w = 0.93$\ for common insect screens - screens with dark, rough, non-metallic wire surfaces. The corresponding infrared wire material transmittance is $\tau^w = 0.98$. A lower infrared emissivity can be used for screens constructed with shiny metallic wire. For example, to model stainless-steel wire mesh use $\varepsilon^w = 0.32$\ and $\tau^w = 0.81$.

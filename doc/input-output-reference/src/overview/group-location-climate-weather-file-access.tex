@@ -1672,7 +1672,7 @@ Site:GroundTemperature:FCfactorMethod,  9.5, 3.5, -0.7, -1.7, -0.6, 3.6, 9.3, 14
 Ground reflectance values are used to calculate the ground reflected solar amount. This fractional amount (entered monthly) is used in this equation:
 
 \begin{equation}
-\rm{GroundReflectedSolar} = \left( \rm{BeamSolar} \cdot cos \left( \rm{SunZenithAngle} \right) + \rm{DiffuseSolar} \right) \cdot \rm{GroundReflectance}
+\mathrm{GroundReflectedSolar} = \left( \mathrm{BeamSolar} \cdot cos \left( \mathrm{SunZenithAngle} \right) + \mathrm{DiffuseSolar} \right) \cdot \mathrm{GroundReflectance}
 \end{equation}
 
 Of course, the Ground Reflected Solar is never allowed to be negative. The ground reflectance can be further modified when snow is on the ground by the Snow Ground Reflectance Modifier. To use no ground reflected solar in your simulation, enter 0.0 for each month.
@@ -1712,7 +1712,7 @@ It is generally accepted that snow resident on the ground increases the basic gr
 This field is a decimal number which is used to modified the basic monthly ground reflectance when snow is on the ground (from design day input or weather data values).
 
 \begin{equation}
-\rm{GroundReflectance}_{\rm{used}} = \rm{GroundReflectance} \cdot \rm{Modifier}_{\rm{Snow}}
+\mathrm{GroundReflectance}_{\mathrm{used}} = \mathrm{GroundReflectance} \cdot \mathrm{Modifier}_{\mathrm{Snow}}
 \end{equation}
 
 The actual Ground Reflectance is limited to {[}0.0,1.0{]}.
@@ -1722,7 +1722,7 @@ The actual Ground Reflectance is limited to {[}0.0,1.0{]}.
 This field is a decimal number which is used to modified the basic monthly ground reflectance when snow is on the ground (from design day input or weather data values).
 
 \begin{equation}
-\rm{DaylightingGroundReflectance}_{\rm{used}} = \rm{GroundReflectance} \cdot \rm{Modifier}_{\rm{Snow}}
+\mathrm{DaylightingGroundReflectance}_{\mathrm{used}} = \mathrm{GroundReflectance} \cdot \mathrm{Modifier}_{\mathrm{Snow}}
 \end{equation}
 
 The actual Ground Reflectance is limited to {[}0.0,1.0{]}.
@@ -1817,11 +1817,11 @@ SizingPeriod:WeatherFileConditionType will be used instead.
 A set of schedules for site precipitation have been developed for USA weather locations and are provided with EnergyPlus in the data set called PrecipitationSchedulesUSA.idf. The user can develop schedules however they want. The schedules in the data set were developed using EnergyPlus' weather file (EPW) observations and the average monthly precipitation for the closest weather site provided by NOAA. EPW files for the USA that were based on TMY or TMY2 include weather observations for Light/Moderate/Heavy rainfall, however most international locations do not include these observations. The values were modeled by taking the middle of the ranges quoted in the EPW data dictionary. The assumed piecewise function is shown below.
 
 \begin{equation}
-\rm{Amount} \, (m/hour) = \, \left\{
+\mathrm{Amount} \, (m/hour) = \, \left\{
   \begin{array}{*{20}{c}}
-    \rm{Light} = 0.0125 \\
-    \rm{Moderate} = 0.052 \\
-    \rm{Heavy} = 0.1
+    \mathrm{Light} = 0.0125 \\
+    \mathrm{Moderate} = 0.052 \\
+    \mathrm{Heavy} = 0.1
   \end{array}
 \right.
 \end{equation}
@@ -2144,9 +2144,9 @@ If the weather file does not have a liquid precipitation field but does have the
 The ground reflected solar amount (\si{W/m^2}) is derived from the Beam Solar, Diffuse Solar, User specified Ground Reflectance (for month) and Solar Altitude Angle:
 
 \begin{multline}
-  \rm{Groundreflectedsolar}
+  \mathrm{Groundreflectedsolar}
   \\
-  = \left( \rm{Beamsolar} \cdot cos \left( \rm{SolarAltitudeAngle} \right) + \rm{Diffusesolar} \right) \cdot \rm{Groundreflectance}_{\rm{month}}
+  = \left( \mathrm{Beamsolar} \cdot cos \left( \mathrm{SolarAltitudeAngle} \right) + \mathrm{Diffusesolar} \right) \cdot \mathrm{Groundreflectance}_{\mathrm{month}}
 \end{multline}
 
 where if the calculation returns a value \textless{} 0.0, then 0.0 will be reported.

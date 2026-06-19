@@ -457,7 +457,7 @@ AvailToNominalCapacityRatio = {C_1} + {C_2}{\Delta_{temp}} + {C_3}\Delta_{temp}^
 where the Delta Temperature is defined as:
 
 \begin{equation}
-{\Delta_{{\rm{Temp}}}} = \frac{{{\rm{TempCondIn  -  TempCondInDesign }}}}{{{\rm{TempRiseCoefficient}}}} - ({\rm{TempEvapOut  -  TempEvapOutDesign)}}
+{\Delta_{{\mathrm{Temp}}}} = \frac{{{\mathrm{TempCondIn  -  TempCondInDesign }}}}{{{\mathrm{TempRiseCoefficient}}}} - ({\mathrm{TempEvapOut  -  TempEvapOutDesign)}}
 \end{equation}
 
 where:
@@ -886,7 +886,7 @@ CoolThermalEnergyInput =& AvailCoolCap \cdot RunFrac \cdot TeFIR \\
 To make sure that the exhaust mass flow rate and temperature from microturbine are sufficient to drive the chiller, the heat recovery potential is compared with the cooling thermal energy input to the chiller (CoolThermalEergyInput). The heat recovery potential should be greater than the CoolThermalEnergyInput. Heat recovery potential is calculated as:
 
 \begin{equation}
-{Q_{Recovery}} = {\dot m_{ExhAir}} \cdot {\rm{}}C{p_{Air}} \cdot {\rm{}}({T_{a,o}} - {T_{Abs,gen,o}})
+{Q_{Recovery}} = {\dot m_{ExhAir}} \cdot {\mathrm{}}C{p_{Air}} \cdot {\mathrm{}}({T_{a,o}} - {T_{Abs,gen,o}})
 \end{equation}
 
 T\(_{abs,gen,o}\) is the minimum temperature required for the proper operation of the double-effect chiller. It will be defaulted to 176\(^{\circ}\)C.
@@ -1509,15 +1509,15 @@ The Coefficient of Performance (\emph{COP}) at the various load capacity points 
 EER at desired reduced capacity (75\%, 50\%, and 25\%) is calculated as follows
 
 \begin{equation}
-COP = \frac{{\rm{1}}}{{EIR}}
+COP = \frac{{\mathrm{1}}}{{EIR}}
 \end{equation}
 
 \begin{equation}
-EIR = EnergyInputRatio = \left( {\frac{{{\rm{Power }}}}{{{\rm{PartLoadRatio * AvailChillerCap}}}}} \right)
+EIR = EnergyInputRatio = \left( {\frac{{{\mathrm{Power }}}}{{{\mathrm{PartLoadRatio * AvailChillerCap}}}}} \right)
 \end{equation}
 
 \begin{equation}
-Power = \left( {\frac{{{\rm{AvailChillerCap}}}}{{CO{P_{reference}}}}} \right)(EIRTempModFa{c_{ReducedTemp}})(EIRPLRModFa{c_{ReducedPLR}})
+Power = \left( {\frac{{{\mathrm{AvailChillerCap}}}}{{CO{P_{reference}}}}} \right)(EIRTempModFa{c_{ReducedTemp}})(EIRPLRModFa{c_{ReducedPLR}})
 \end{equation}
 
 \begin{equation}
@@ -1539,7 +1539,7 @@ where:
 If the equipment cannot be unloaded to the desired reduced capacity (75\%, 50\%, and 25\%) i.e.~if the minimum unloading ratio of the chiller is greater than desired reduced capacity, then the model is run at the minimum unloading PLR of the equipment at the condenser entering conditions defined in Table~\ref{table:standard-rating-integrated-part-load-value} and the efficiency is adjusted for cyclic performance.
 
 \begin{equation}
-COP = \frac{{\rm{1}}}{{{C_D} \cdot EIRatMinPLR}}
+COP = \frac{{\mathrm{1}}}{{{C_D} \cdot EIRatMinPLR}}
 \end{equation}
 
 where:
@@ -1944,7 +1944,7 @@ The exhaust flow rate is then calculated as:
 where T\(_{reference}\) is the reference temperature for the fuel lower heating value, and is given as 25\(^{\circ}\)C in manufacturer's data, and
 
 \begin{equation}
-{T_{stack}} = {T_{DesignMinExhaust}} + {\frac{{\left( {{T_{exhaust}} - {T_{DesignMinExhaust}}} \right)}}{{{\rm{exp}}\left( {\frac{{{\rm{UA}}}}{{{{{\rm{\dot m}}}_{{\rm{exhaust}}}}C{p_{exhaust}}}}} \right)}}^2}
+{T_{stack}} = {T_{DesignMinExhaust}} + {\frac{{\left( {{T_{exhaust}} - {T_{DesignMinExhaust}}} \right)}}{{{\mathrm{exp}}\left( {\frac{{{\mathrm{UA}}}}{{{{{\mathrm{\dot m}}}_{{\mathrm{exhaust}}}}C{p_{exhaust}}}}} \right)}}^2}
 \end{equation}
 
 Finally, heat recovered from the lube oil and the water jacket are accounted for as follows:

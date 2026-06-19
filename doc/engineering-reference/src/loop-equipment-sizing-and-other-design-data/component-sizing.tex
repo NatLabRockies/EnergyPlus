@@ -427,7 +427,7 @@ The calculation is identical to that done for \emph{Coil:Cooling:Water}.
 \subsubsection{Number of Tubes per Row}\label{number-of-tubes-per-row}
 
 \begin{equation}
-N_{tube/row} = {\mathop{\rm Int}\nolimits} ({\rm{13750}}\cdot \dot Vcoil,water,max)
+N_{tube/row} = {\mathop{\rm Int}\nolimits} ({\mathrm{13750}}\cdot \dot Vcoil,water,max)
 \end{equation}
 
 \begin{equation}
@@ -714,7 +714,7 @@ The calculation is identical to that done for \emph{Coil:Cooling:WaterToAirHeatP
 The calculation for coil operating temperatures (inlet and outlet) are identical to that done for \emph{Coil:Cooling:WaterToAirHeatPump:EquationFit}. The calculations for air enthalpy are similar to that done for \emph{Coil:Cooling:WaterToAirHeatPump:EquationFit.} The difference is in calculating the total cooling capacity temperature modifier function at the selected nominal speed level, as below:
 
 \begin{equation}
-TotCapTempModFra{c_{NominalSpeed}} = {\rm{a}} + {\rm{b*}}W{B_i} + c*WB_i^2 + {\rm{d*EWT}} + e*EW{T^2} + f*W{B_i}*EWT
+TotCapTempModFra{c_{NominalSpeed}} = {\mathrm{a}} + {\mathrm{b*}}W{B_i} + c*WB_i^2 + {\mathrm{d*EWT}} + e*EW{T^2} + f*W{B_i}*EWT
 \end{equation}
 
 where:
@@ -1417,7 +1417,7 @@ For the variable-speed DX cooling coil, we specify a nominal speed level. During
 The calculation for coil operating temperatures (inlet and outlet) are identical to that done for Coil:Cooling:DX:SingleSpeed. The calculations for air enthalpy are similar to that done for Coil:Cooling:DX:SingleSpeed\emph{.} The difference is in calculating the total cooling capacity temperature modifier function at the selected nominal speed level, as below:
 
 \begin{equation}
-TotCapTempModFra{c_{NominalSpeed}} = {\rm{a}} + {\rm{b*}}W{B_i} + c*WB_i^2 + {\rm{d*}}D{B_o} + e*D{B_o}{T^2} + f*W{B_i}*D{B_o}
+TotCapTempModFra{c_{NominalSpeed}} = {\mathrm{a}} + {\mathrm{b*}}W{B_i} + c*WB_i^2 + {\mathrm{d*}}D{B_o} + e*D{B_o}{T^2} + f*W{B_i}*D{B_o}
 \end{equation}
 
 where
@@ -2454,19 +2454,19 @@ Packaged terminal heat pumps are compound components: each unit contains a suppl
 \subsubsection{Outside air volumetric flow rate during cooling operation}\label{outside-air-volumetric-flow-rate-during-cooling-operation}
 
 \begin{equation}
-\dot V_{OA,cooling} = {\rm{MIN}}(MinO{A_{zone}},\dot V_{SA,cooling})
+\dot V_{OA,cooling} = {\mathrm{MIN}}(MinO{A_{zone}},\dot V_{SA,cooling})
 \end{equation}
 
 \subsubsection{Outside air volumetric flow rate during heating operation}\label{outside-air-volumetric-flow-rate-during-heating-operation}
 
 \begin{equation}
-\dot V_{OA,heating} = {\rm{MIN}}(MinO{A_{zone}},\dot V_{SA,heating})
+\dot V_{OA,heating} = {\mathrm{MIN}}(MinO{A_{zone}},\dot V_{SA,heating})
 \end{equation}
 
 \subsubsection{Outside air volumetric flow rate when no cooling or heating is needed}\label{outside-air-volumetric-flow-rate-when-no-cooling-or-heating-is-needed}
 
 \begin{equation}
-\dot V_{OA,~no~cool~or~heat} = {\rm{MIN}}(MinO{A_{zone}},\dot V_{SA,~no~cool~or~heat})
+\dot V_{OA,~no~cool~or~heat} = {\mathrm{MIN}}(MinO{A_{zone}},\dot V_{SA,~no~cool~or~heat})
 \end{equation}
 
 \subsubsection{Maximum supply air temperature from supplemental heater}\label{maximum-supply-air-temperature-from-supplemental-heater}
@@ -2526,7 +2526,7 @@ These are all the EnergyPlus components whose names begin with ``\emph{AirTermin
 \subsubsection{Maximum Air Flow Rate}\label{maximum-air-flow-rate-3}
 
 \begin{equation}
-{\dot V_{air,\max ,{\rm{terminal}}}} = Max(DesCoolVolFlow_{zone},DesHeatVolFlow_{zone})
+{\dot V_{air,\max ,{\mathrm{terminal}}}} = Max(DesCoolVolFlow_{zone},DesHeatVolFlow_{zone})
 \end{equation}
 
 \subsubsection{Maximum Heating Air Flow Rate}\label{maximum-heating-air-flow-rate}
@@ -2622,7 +2622,7 @@ The secondary fan is not part of an airstream that is directly modeled in Energy
 If the cooler is part of the outdoor air path of a central air system, then the secondary fan flow rate is sized to be the maximum of either the design minimum outdoor air flow rate or one-half of the main design flow rate.
 
 \begin{equation}
-{\dot V_{fan,\max }} = MAX({\rm{DesOutAirVolFlow, 0}}{\rm{.5*DesMainVolFlow)}}
+{\dot V_{fan,\max }} = MAX({\mathrm{DesOutAirVolFlow, 0}}{\mathrm{.5*DesMainVolFlow)}}
 \end{equation}
 
 \subsection{Secondary DX Coils Sizing}\label{secondary-dx-coils-sizing}
@@ -2630,7 +2630,7 @@ If the cooler is part of the outdoor air path of a central air system, then the 
 The secondary DX coils model does not have a standalone object and it is models as add-on feature to the DX Coils. When the secondary DX coil is added to a primary DX cooling coil, the heat rejected to secondary zone is sensible only and is treated as internal gain, hence secondary air flow rate is not required in the model. Where as when the secondary DX coil is added to a primary DX heating coil, then the heat removed from secondary zone may have sensible and latent components and is treated as internal gain. The sensible/latent component split among other parameters requires secondary coil air flow rate. Hence secondary coil air flow rate sizing is added based on the primary DX cooling coil only.
 
 \begin{equation}
-  \dot{V}_{\rm{SecCoil}} = \dot{V}_{\rm{PriHeatCoil}} \cdot \text{ScalingFactor}
+  \dot{V}_{\mathrm{SecCoil}} = \dot{V}_{\mathrm{PriHeatCoil}} \cdot \text{ScalingFactor}
 \end{equation}
 
 where:

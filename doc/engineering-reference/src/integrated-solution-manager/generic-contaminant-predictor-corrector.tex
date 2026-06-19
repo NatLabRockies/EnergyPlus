@@ -3,7 +3,7 @@
 The transient air mass balance equation for the change in zone air generic contaminant concentration may be expressed as follows:
 
 \begin{equation}
-\begin{array}{l}{\rho_{air}}{V_z}{M_{for}}\frac{{dC_{f,z}^t}}{{dt}} = \sum\limits_{i = 1}^{{N_{source}}} {{\rho_{air}}{G_{f,i}}*{{10}^6} - } {\rho_{air}}\sum\limits_i^{N{\rm{sink}}} {{R_{f,i}}{C_{f,z}}}  + \sum\limits_{i = 1}^{{N_{zones}}} {{{\dot m}_i}} \left( {{C_{f,z,i}} - C_{f,z}^t} \right) \\
+\begin{array}{l}{\rho_{air}}{V_z}{M_{for}}\frac{{dC_{f,z}^t}}{{dt}} = \sum\limits_{i = 1}^{{N_{source}}} {{\rho_{air}}{G_{f,i}}*{{10}^6} - } {\rho_{air}}\sum\limits_i^{N{\mathrm{sink}}} {{R_{f,i}}{C_{f,z}}}  + \sum\limits_{i = 1}^{{N_{zones}}} {{{\dot m}_i}} \left( {{C_{f,z,i}} - C_{f,z}^t} \right) \\
 \quad \quad \quad + {{\dot m}_{\inf }}\left( {{C_{f,\infty }} - C_{f,z}^t} \right) + {{\dot m}_{sys}}\left( {{C_{f,\sup }} - C_{f,z}^t} \right) + \sum\limits_j {{h_j}\rho {A_j}(\frac{{{C_{s,j}}}}{{{k_j}}} - {C_{f,z}})}  + {S_f}(C_{f,z}^{t - \delta t})\end{array}
 \end{equation}
 
@@ -13,7 +13,7 @@ where:
 
 The zone air density is used to convert the volumetric rate of generic contaminant generation from user input into mass generation rate {[}kg/s{]}.The coefficient of 10\(^{6}\) is used to make the units of generic contaminant as ppm.
 
-\({\rho_{air}}\sum\limits_i^{N{\rm{sink}}} {{R_{f,i}}{C_{f,z}}}\) = Sum of removal rate from sinks in a zone or interior surfaces {[}ppm-kg/s{]}
+\({\rho_{air}}\sum\limits_i^{N{\mathrm{sink}}} {{R_{f,i}}{C_{f,z}}}\) = Sum of removal rate from sinks in a zone or interior surfaces {[}ppm-kg/s{]}
 
 \(\sum_{i = 1}^{N_{zones}} \dot m_i \left( C_{f,z,i} - C_{f,z}^t \right)\) = Generic contaminant transfer due to interzone air mixing {[}ppm-kg/s{]}
 
@@ -59,7 +59,7 @@ The zone air generic contaminant concentration update at the current time step u
 \thickmuskip=0mu
 \nulldelimiterspace=0pt
 \scriptspace=0pt
-\begin{array}{l}{\rho_{air}}{V_z}{M_{for}}{\left( {\delta t} \right)^{ - 1}}\left( {C_{f,z}^t - C_{f,z}^{t - \delta t}} \right) = \sum\limits_{i = 1}^{{N_{source}}} {{\rho_{air}}{G_{f,i}}*{{1.0}^6} - } {\rho_{air}}\sum\limits_i^{N{\rm{sink}}} {{R_{f,i}}{C_{f,z}}}  + \sum\limits_{i = 1}^{{N_{zones}}} {{{\dot m}_i}} \left( {{C_{f,z,i}} - C_{f,z}^t} \right)\;\\\;\;\;\;\;\;\;\;\;\;\;\;\;\;\;\; + {{\dot m}_{\inf }}\left( {{C_{f,\infty }} - C_{f,z}^t} \right) + {{\dot m}_{sys}}\left( {{C_{f,\sup }} - C_{f,z}^t} \right) + \sum\limits_j {{h_j}\rho {A_j}(\frac{{{C_{s,j}}}}{{{k_j}}} - {C_{f,z}})}  + {S_f}\end{array}
+\begin{array}{l}{\rho_{air}}{V_z}{M_{for}}{\left( {\delta t} \right)^{ - 1}}\left( {C_{f,z}^t - C_{f,z}^{t - \delta t}} \right) = \sum\limits_{i = 1}^{{N_{source}}} {{\rho_{air}}{G_{f,i}}*{{1.0}^6} - } {\rho_{air}}\sum\limits_i^{N{\mathrm{sink}}} {{R_{f,i}}{C_{f,z}}}  + \sum\limits_{i = 1}^{{N_{zones}}} {{{\dot m}_i}} \left( {{C_{f,z,i}} - C_{f,z}^t} \right)\;\\\;\;\;\;\;\;\;\;\;\;\;\;\;\;\;\; + {{\dot m}_{\inf }}\left( {{C_{f,\infty }} - C_{f,z}^t} \right) + {{\dot m}_{sys}}\left( {{C_{f,\sup }} - C_{f,z}^t} \right) + \sum\limits_j {{h_j}\rho {A_j}(\frac{{{C_{s,j}}}}{{{k_j}}} - {C_{f,z}})}  + {S_f}\end{array}
 \end{equation}
 
 To preserve the stability of the calculation of the zone generic contaminant concentration, the third order differential approximation, derived by a Taylor Series and used in the calculation of the next time step's zone air temperature, is also applied to the zone air carbon dioxide calculations. This algorithm is the default choice and is defined as ThirdOrderBackwardDifference in the ZoneAirHeatBalanceAlgorithm object.
@@ -73,7 +73,7 @@ The third order derivative resulting from a Taylor Series expansion is defined a
 The coefficients of the approximated derivative are very close to the coefficients of the analogous Adams-Bashforth algorithm. Then the approximated derivative is substituted into the mass balance, and the terms with the carbon dioxide concentration at past time steps are all put on the right-hand side of the equation. This third order derivative zone carbon dioxide update increases the number of previous time steps that are used in calculating the new zone generic contaminant concentration and decreases the dependence on the most recent. The higher order derivative approximations have the potential to allow the use of larger time steps by smoothing transitions through sudden changes in zone operating conditions.
 
 \begin{equation}
-\begin{array}{l}\frac{{{\rho_{air}}{V_z}{M_{for}}}}{{\delta t}}\left( {\frac{{11}}{6}} \right)C_{f,z}^t + {\rho_{air}}\sum\limits_i^{N{\rm{sink}}} {{R_{f,i}}C_{f,z}^t}  + \sum\limits_{i = 1}^{{N_{zones}}} {{{\dot m}_i}} C_{f,z}^t + {{\dot m}_{\inf }}C_{f,z}^t + {{\dot m}_{sys}}C_{f,z}^t + \sum\limits_j {{h_j}\rho {A_j}C_{f,z}^t} \\\;\;\;\;\;\;\;\;\;\;\;\;\;\;\; = \sum\limits_{i = 1}^{{N_{source}}} {{\rho_{air}}{G_{f,i}}*{{1.0}^6}}  + \sum\limits_{i = 1}^{{N_{zones}}} {{{\dot m}_i}} {C_{f,z,i}} + {{\dot m}_{\inf }}{C_{f,\infty }} + {{\dot m}_{sys}}{C_{f,\sup }} + \sum\limits_j {{h_j}\rho {A_j}\frac{{{C_{s,j}}}}{{{k_j}}}}  + {S_f}\\\;\;\;\;\;\;\;\;\;\;\;\;\;\;\; - \frac{{{\rho_{air}}{V_z}{M_{for}}}}{{\delta t}}\left( { - 3C_{f,z}^{t - \delta t} + \frac{3}{2}C_{f,z}^{t - 2\delta t} - \frac{1}{3}C_{f,z}^{t - 3\delta t}} \right)\end{array}
+\begin{array}{l}\frac{{{\rho_{air}}{V_z}{M_{for}}}}{{\delta t}}\left( {\frac{{11}}{6}} \right)C_{f,z}^t + {\rho_{air}}\sum\limits_i^{N{\mathrm{sink}}} {{R_{f,i}}C_{f,z}^t}  + \sum\limits_{i = 1}^{{N_{zones}}} {{{\dot m}_i}} C_{f,z}^t + {{\dot m}_{\inf }}C_{f,z}^t + {{\dot m}_{sys}}C_{f,z}^t + \sum\limits_j {{h_j}\rho {A_j}C_{f,z}^t} \\\;\;\;\;\;\;\;\;\;\;\;\;\;\;\; = \sum\limits_{i = 1}^{{N_{source}}} {{\rho_{air}}{G_{f,i}}*{{1.0}^6}}  + \sum\limits_{i = 1}^{{N_{zones}}} {{{\dot m}_i}} {C_{f,z,i}} + {{\dot m}_{\inf }}{C_{f,\infty }} + {{\dot m}_{sys}}{C_{f,\sup }} + \sum\limits_j {{h_j}\rho {A_j}\frac{{{C_{s,j}}}}{{{k_j}}}}  + {S_f}\\\;\;\;\;\;\;\;\;\;\;\;\;\;\;\; - \frac{{{\rho_{air}}{V_z}{M_{for}}}}{{\delta t}}\left( { - 3C_{f,z}^{t - \delta t} + \frac{3}{2}C_{f,z}^{t - 2\delta t} - \frac{1}{3}C_{f,z}^{t - 3\delta t}} \right)\end{array}
 \end{equation}
 
 This gives us the basic air mass balance equation that will be solved in two different ways, one way for the predict step and one way for the correct step.
@@ -85,7 +85,7 @@ Since the third choice of solution algorithms uses an integration approach, defi
 For the generic contaminant concentration prediction case, the equation is solved for the anticipated system response as shown below.
 
 \begin{equation}
-{\rm{PredictedSystemLoad}} = {\dot m_{sys}}\left( {{C_{f,\sup }} - C_{f,z}^t} \right)
+{\mathrm{PredictedSystemLoad}} = {\dot m_{sys}}\left( {{C_{f,\sup }} - C_{f,z}^t} \right)
 \end{equation}
 
 Since the program provides three solution algorithms, the generic contaminant prediction from each solution algorithm is given below.
@@ -95,7 +95,7 @@ Since the program provides three solution algorithms, the generic contaminant pr
 For this solution algorithm, the air mass balance for the predicted air system load or response is:
 
 \begin{equation}
-\begin{array}{l}{\rm{PredictedSystemLoad}}\;[kg/\sec ] = {\rho_{air}}{V_z}{M_{for}}{\left( {\delta t} \right)^{ - 1}}\left( {{C_{{\rm{setpoint}}}} - C_{f,z}^{t - \delta t}} \right)\\\;\;\;\;\;\;\; - \left[ {\sum\limits_{i = 1}^{{N_{source}}} {{\rho_{air}}{G_{f,i}}*{{1.0}^6} - } {\rho_{air}}\sum\limits_i^{N{\rm{sink}}} {{R_{f,i}}{C_{{\rm{setpoint}}}}}  + \sum\limits_{i = 1}^{{N_{zones}}} {{{\dot m}_i}} \left( {{C_{f,z,i}} - {C_{{\rm{setpoint}}}}} \right) + {S_f}} \right]\\\;\;\;\;\;\; - \left[ {{{\dot m}_{\inf }}\left( {{C_{f,\infty }} - {C_{{\rm{setpoint}}}}} \right) + \sum\limits_j {{h_j}\rho {A_j}(\frac{{{C_{s,j}}}}{{{k_j}}} - {C_{{\rm{setpoint}}}})} } \right]\;\\\;\;\;\;\;\;\;\;\;\;\;\;\;\;\;\;\end{array}
+\begin{array}{l}{\mathrm{PredictedSystemLoad}}\;[kg/\sec ] = {\rho_{air}}{V_z}{M_{for}}{\left( {\delta t} \right)^{ - 1}}\left( {{C_{{\mathrm{setpoint}}}} - C_{f,z}^{t - \delta t}} \right)\\\;\;\;\;\;\;\; - \left[ {\sum\limits_{i = 1}^{{N_{source}}} {{\rho_{air}}{G_{f,i}}*{{1.0}^6} - } {\rho_{air}}\sum\limits_i^{N{\mathrm{sink}}} {{R_{f,i}}{C_{{\mathrm{setpoint}}}}}  + \sum\limits_{i = 1}^{{N_{zones}}} {{{\dot m}_i}} \left( {{C_{f,z,i}} - {C_{{\mathrm{setpoint}}}}} \right) + {S_f}} \right]\\\;\;\;\;\;\; - \left[ {{{\dot m}_{\inf }}\left( {{C_{f,\infty }} - {C_{{\mathrm{setpoint}}}}} \right) + \sum\limits_j {{h_j}\rho {A_j}(\frac{{{C_{s,j}}}}{{{k_j}}} - {C_{{\mathrm{setpoint}}}})} } \right]\;\\\;\;\;\;\;\;\;\;\;\;\;\;\;\;\;\;\end{array}
 \end{equation}
 
 \subsubsection{ThirdOrderBackwardDifference}\label{thirdorderbackwarddifference-000}
@@ -109,7 +109,7 @@ For this solution algorithm, the air mass balance for the predicted system load 
 \thickmuskip=0mu
 \nulldelimiterspace=0pt
 \scriptspace=0pt
-\begin{array}{l}{\rm{PredictedSystemLoad}}\;[kg/\sec ] = \frac{{{\rho_{air}}{V_z}{M_{for}}}}{{\delta t}}\left( {\frac{{11}}{6}} \right){C_{{\rm{setpoint}}}} - \left[ {{\rho_{air}}\sum\limits_i^{N{\rm{sink}}} {{R_{f,i}}{C_{{\rm{setpoint}}}}}  + \sum\limits_{i = 1}^{{N_{zones}}} {{{\dot m}_i}} {C_{{\rm{setpoint}}}} + {{\dot m}_{\inf }}{C_{{\rm{setpoint}}}}} \right]\\\;\;\;\;\;\;\;\;\;\;\;\;\;\;\; - \left[ {\sum\limits_j {{h_j}\rho {A_j}{C_{{\rm{setpoint}}}}}  + \sum\limits_{i = 1}^{{N_{source}}} {{\rho_{air}}{G_{f,i}}*{{1.0}^6}}  + \sum\limits_{i = 1}^{{N_{zones}}} {{{\dot m}_i}} {C_{f,z,i}} + {{\dot m}_{\inf }}{C_{f,\infty }} + \sum\limits_j {{h_j}\rho {A_j}\frac{{{C_{s,j}}}}{{{k_j}}} + {S_f}} } \right]\\\;\;\;\;\;\;\;\;\;\;\;\;\;\;\; + \frac{{{\rho_{air}}{V_z}{M_{for}}}}{{\delta t}}\left( { - 3C_{f,z}^{t - \delta t} + \frac{3}{2}C_{f,z}^{t - 2\delta t} - \frac{1}{3}C_{f,z}^{t - 3\delta t}} \right)\end{array}
+\begin{array}{l}{\mathrm{PredictedSystemLoad}}\;[kg/\sec ] = \frac{{{\rho_{air}}{V_z}{M_{for}}}}{{\delta t}}\left( {\frac{{11}}{6}} \right){C_{{\mathrm{setpoint}}}} - \left[ {{\rho_{air}}\sum\limits_i^{N{\mathrm{sink}}} {{R_{f,i}}{C_{{\mathrm{setpoint}}}}}  + \sum\limits_{i = 1}^{{N_{zones}}} {{{\dot m}_i}} {C_{{\mathrm{setpoint}}}} + {{\dot m}_{\inf }}{C_{{\mathrm{setpoint}}}}} \right]\\\;\;\;\;\;\;\;\;\;\;\;\;\;\;\; - \left[ {\sum\limits_j {{h_j}\rho {A_j}{C_{{\mathrm{setpoint}}}}}  + \sum\limits_{i = 1}^{{N_{source}}} {{\rho_{air}}{G_{f,i}}*{{1.0}^6}}  + \sum\limits_{i = 1}^{{N_{zones}}} {{{\dot m}_i}} {C_{f,z,i}} + {{\dot m}_{\inf }}{C_{f,\infty }} + \sum\limits_j {{h_j}\rho {A_j}\frac{{{C_{s,j}}}}{{{k_j}}} + {S_f}} } \right]\\\;\;\;\;\;\;\;\;\;\;\;\;\;\;\; + \frac{{{\rho_{air}}{V_z}{M_{for}}}}{{\delta t}}\left( { - 3C_{f,z}^{t - \delta t} + \frac{3}{2}C_{f,z}^{t - 2\delta t} - \frac{1}{3}C_{f,z}^{t - 3\delta t}} \right)\end{array}
 \end{equation}}
 
 \subsubsection{AnalyticalSolution}\label{analyticalsolution-000}
@@ -117,13 +117,13 @@ For this solution algorithm, the air mass balance for the predicted system load 
 For this solution algorithm, the air mass balance for the predicted air system load or response is given below:
 
 \begin{equation}
-\begin{array}{l}{\rm{PredictedSystemLoad}}\;[kg/\sec ] = \left[ {\sum\limits_{i = 1}^{{N_{zones}}} {{{\dot m}_i}} \; + {{\dot m}_{\inf }} + {\rho_{air}}\sum\limits_i^{{N_{{\rm{sink}}}}} {{R_{f,i}} + \sum\limits_j {{h_j}\rho {A_j}} } } \right]*\\\;\;\;\;\;\;\;\;\;\;\;\left[ {C_{{\rm{setpoint}}}^t - C_z^{t - \delta t}*\exp \left( { - \frac{{\sum\limits_{i = 1}^{{N_{zones}}} {{{\dot m}_i}}  + {{\dot m}_{\inf }} + {\rho_{air}}\sum\limits_i^{{N_{{\rm{sink}}}}} {{R_{f,i}} + \sum\limits_j {{h_j}\rho {A_j}} } }}{{{\rho_{air}}{V_Z}{M_{FOR}}}}\delta t} \right)} \right]*\\\;\;\;\;\;\;\;\;\;\;\;{\left[ {1 - \exp \left( { - \frac{{\sum\limits_{i = 1}^{{N_{zones}}} {{{\dot m}_i}} \; + {{\dot m}_{\inf }} + {\rho_{air}}\sum\limits_i^{{N_{{\rm{sink}}}}} {{R_{f,i}} + \sum\limits_j {{h_j}\rho {A_j}} } }}{{{\rho_{air}}{V_Z}{M_{FOR}}}}\delta t} \right)} \right]^{ - 1}} - \\\;\;\;\;\;\;\;\;\;\;\;\left( {\sum\limits_{i = 1}^{{N_{source}}} {{\rho_{air}}{G_{f,i}}*{{1.0}^6}}  + \sum\limits_{i = 1}^{{N_{zones}}} {{{\dot m}_i}} {C_{f,z,i}}\; + {{\dot m}_{\inf }}{C_{f,\infty }} + \sum\limits_j {{h_j}\rho {A_j}} \frac{{{C_{s,j}}}}{{{k_j}}} + {S_f}} \right)\end{array}
+\begin{array}{l}{\mathrm{PredictedSystemLoad}}\;[kg/\sec ] = \left[ {\sum\limits_{i = 1}^{{N_{zones}}} {{{\dot m}_i}} \; + {{\dot m}_{\inf }} + {\rho_{air}}\sum\limits_i^{{N_{{\mathrm{sink}}}}} {{R_{f,i}} + \sum\limits_j {{h_j}\rho {A_j}} } } \right]*\\\;\;\;\;\;\;\;\;\;\;\;\left[ {C_{{\mathrm{setpoint}}}^t - C_z^{t - \delta t}*\exp \left( { - \frac{{\sum\limits_{i = 1}^{{N_{zones}}} {{{\dot m}_i}}  + {{\dot m}_{\inf }} + {\rho_{air}}\sum\limits_i^{{N_{{\mathrm{sink}}}}} {{R_{f,i}} + \sum\limits_j {{h_j}\rho {A_j}} } }}{{{\rho_{air}}{V_Z}{M_{FOR}}}}\delta t} \right)} \right]*\\\;\;\;\;\;\;\;\;\;\;\;{\left[ {1 - \exp \left( { - \frac{{\sum\limits_{i = 1}^{{N_{zones}}} {{{\dot m}_i}} \; + {{\dot m}_{\inf }} + {\rho_{air}}\sum\limits_i^{{N_{{\mathrm{sink}}}}} {{R_{f,i}} + \sum\limits_j {{h_j}\rho {A_j}} } }}{{{\rho_{air}}{V_Z}{M_{FOR}}}}\delta t} \right)} \right]^{ - 1}} - \\\;\;\;\;\;\;\;\;\;\;\;\left( {\sum\limits_{i = 1}^{{N_{source}}} {{\rho_{air}}{G_{f,i}}*{{1.0}^6}}  + \sum\limits_{i = 1}^{{N_{zones}}} {{{\dot m}_i}} {C_{f,z,i}}\; + {{\dot m}_{\inf }}{C_{f,\infty }} + \sum\limits_j {{h_j}\rho {A_j}} \frac{{{C_{s,j}}}}{{{k_j}}} + {S_f}} \right)\end{array}
 \end{equation}
 
 At the prediction point in the simulation, the system air mass flows are not known; therefore, the system response is approximated. The predicted air system generic contaminant load is then used in the system simulation to achieve the best results possible. If a central HVAC system provides the outdoor flow rate from a Controller:MechanicalVentilation object, the outdoor airflow rate may be approximated as:
 
 \begin{equation}
-{\rm{PredictedSystemLoad}} = {\dot m_{sys}}\left( {{C_{f,\sup }} - C_{f,z}^t} \right) \approx {\dot m_{OA,z}}\left( {{C_{f,\infty }} - C_{{\rm{setpoint}}}^t} \right)
+{\mathrm{PredictedSystemLoad}} = {\dot m_{sys}}\left( {{C_{f,\sup }} - C_{f,z}^t} \right) \approx {\dot m_{OA,z}}\left( {{C_{f,\infty }} - C_{{\mathrm{setpoint}}}^t} \right)
 \end{equation}
 
 where:
@@ -141,19 +141,19 @@ For the correct step, the expanded air mass balance equation is solved for the f
 \subsubsection{EulerMethod}\label{eulermethod-1-000}
 
 \begin{equation}
-\begin{array}{l}C_{f,z}^t = \frac{{\sum\limits_{i = 1}^{{N_{source}}} {{\rho_{air}}{G_{f,i}}*{{1.0}^6}}  + \sum\limits_{i = 1}^{{N_{zones}}} {{{\dot m}_i}{C_{f,z,i}}}  + {{\dot m}_{\inf }}{C_{f,\infty }} + {{\dot m}_{sys}}{C_{f,\sup }} + \sum\limits_j {{h_j}\rho {A_j}\frac{{{C_{s,j}}}}{{{k_j}}} + {\rho_{air}}{V_Z}{M_{FOR}}\frac{{C_{f,z}^{t - \delta t}}}{{\delta t}} + {S_f}} }}{{{\rho_{air}}{V_z}{M_{for}}{{\left( {\delta t} \right)}^{ - 1}} + {\rho_{air}}\sum\limits_i^{N{\rm{sink}}} {{R_{f,i}}}  + \sum\limits_{i = 1}^{{N_{zones}}} {{{\dot m}_i}}  + {{\dot m}_{\inf }} + {{\dot m}_{sys}} + \sum\limits_j {{h_j}\rho {A_j}} }}\\\end{array}
+\begin{array}{l}C_{f,z}^t = \frac{{\sum\limits_{i = 1}^{{N_{source}}} {{\rho_{air}}{G_{f,i}}*{{1.0}^6}}  + \sum\limits_{i = 1}^{{N_{zones}}} {{{\dot m}_i}{C_{f,z,i}}}  + {{\dot m}_{\inf }}{C_{f,\infty }} + {{\dot m}_{sys}}{C_{f,\sup }} + \sum\limits_j {{h_j}\rho {A_j}\frac{{{C_{s,j}}}}{{{k_j}}} + {\rho_{air}}{V_Z}{M_{FOR}}\frac{{C_{f,z}^{t - \delta t}}}{{\delta t}} + {S_f}} }}{{{\rho_{air}}{V_z}{M_{for}}{{\left( {\delta t} \right)}^{ - 1}} + {\rho_{air}}\sum\limits_i^{N{\mathrm{sink}}} {{R_{f,i}}}  + \sum\limits_{i = 1}^{{N_{zones}}} {{{\dot m}_i}}  + {{\dot m}_{\inf }} + {{\dot m}_{sys}} + \sum\limits_j {{h_j}\rho {A_j}} }}\\\end{array}
 \end{equation}
 
 \subsubsection{ThirdOrderBackwardDifference}\label{thirdorderbackwarddifference-1-000}
 
 \begin{equation}
-\begin{array}{l}C_{f,z}^t = \frac{\begin{array}{l}\sum\limits_{i = 1}^{{N_{source}}} {{\rho_{air}}{G_{f,i}}*{{1.0}^6}}  + \sum\limits_{i = 1}^{{N_{zones}}} {{{\dot m}_i}{C_{f,z,i}}}  + {{\dot m}_{\inf }}{C_{f,\infty }} + {{\dot m}_{sys}}{C_{f,\sup }}\\ + \sum\limits_j {{h_j}\rho {A_j}\frac{{{C_{s,j}}}}{{{k_j}}} + \frac{{{\rho_{air}}{V_Z}{M_{FOR}}}}{{\delta t}}(3C_{f,z}^{t - \delta t} - \frac{3}{2}C_{f,z}^{t - 2\delta t} + \frac{1}{3}C_{f,z}^{t - 3\delta t}) + {S_f}} \end{array}}{{{\rho_{air}}{V_z}{M_{for}}{{\left( {\delta t} \right)}^{ - 1}}\left( {\frac{{11}}{6}} \right) + {\rho_{air}}\sum\limits_i^{N{\rm{sink}}} {{R_{f,i}}}  + \sum\limits_{i = 1}^{{N_{zones}}} {{{\dot m}_i}}  + {{\dot m}_{\inf }} + {{\dot m}_{sys}} + \sum\limits_j {{h_j}\rho {A_j}} }}\\\end{array}
+\begin{array}{l}C_{f,z}^t = \frac{\begin{array}{l}\sum\limits_{i = 1}^{{N_{source}}} {{\rho_{air}}{G_{f,i}}*{{1.0}^6}}  + \sum\limits_{i = 1}^{{N_{zones}}} {{{\dot m}_i}{C_{f,z,i}}}  + {{\dot m}_{\inf }}{C_{f,\infty }} + {{\dot m}_{sys}}{C_{f,\sup }}\\ + \sum\limits_j {{h_j}\rho {A_j}\frac{{{C_{s,j}}}}{{{k_j}}} + \frac{{{\rho_{air}}{V_Z}{M_{FOR}}}}{{\delta t}}(3C_{f,z}^{t - \delta t} - \frac{3}{2}C_{f,z}^{t - 2\delta t} + \frac{1}{3}C_{f,z}^{t - 3\delta t}) + {S_f}} \end{array}}{{{\rho_{air}}{V_z}{M_{for}}{{\left( {\delta t} \right)}^{ - 1}}\left( {\frac{{11}}{6}} \right) + {\rho_{air}}\sum\limits_i^{N{\mathrm{sink}}} {{R_{f,i}}}  + \sum\limits_{i = 1}^{{N_{zones}}} {{{\dot m}_i}}  + {{\dot m}_{\inf }} + {{\dot m}_{sys}} + \sum\limits_j {{h_j}\rho {A_j}} }}\\\end{array}
 \end{equation}
 
 \subsubsection{AnalyticalSolution}\label{analyticalsolution-1-000}
 
 \begin{equation}
-\begin{array}{l}C_{f,z}^t = \left[ {C_{f,z}^{t - \delta t} - \frac{{\sum\limits_{i = 1}^{{N_{source}}} {{\rho_{air}}{G_{f,i}}*{{1.0}^6}}  + \sum\limits_{i = 1}^{{N_{zones}}} {{{\dot m}_i}} {C_{f,z,i}}\; + {{\dot m}_{\inf }}{C_{f,\infty }} + {{\dot m}_{sys}}{C_{f,sys}} + \sum\limits_j {{h_j}\rho {A_j}} \frac{{{C_{s,j}}}}{{{k_j}}}}}{{\sum\limits_{i = 1}^{{N_{zones}}} {{{\dot m}_i}} \; + {{\dot m}_{\inf }} + {{\dot m}_{sys}} + {\rho_{air}}\sum\limits_i^{{N_{{\rm{sink}}}}} {{R_{f,i}} + \sum\limits_j {{h_j}\rho {A_j}} } }}} \right]*\\\;\;\;\;\;\;\;\;\;\exp \left[ { - \frac{{\sum\limits_{i = 1}^{{N_{zones}}} {{{\dot m}_i}}  + {{\dot m}_{\inf }} + {{\dot m}_{sys}} + {\rho_{air}}\sum\limits_i^{{N_{{\rm{sink}}}}} {{R_{f,i}} + \sum\limits_j {{h_j}\rho {A_j}} } }}{{{\rho_{air}}{V_Z}{M_{FOR}}}}\delta t} \right] + \\\;\;\;\;\;\;\;\;\frac{{\sum\limits_{i = 1}^{{N_{source}}} {{\rho_{air}}{G_{f,i}}*{{1.0}^6}}  + \sum\limits_{i = 1}^{{N_{zones}}} {{{\dot m}_i}} {C_{f,z,i}}\; + {{\dot m}_{\inf }}{C_{f,\infty }} + {{\dot m}_{sys}}{C_{f,sys}} + \sum\limits_j {{h_j}\rho {A_j}} \frac{{{C_{s,j}}}}{{{k_j}}} + {S_f}}}{{\sum\limits_{i = 1}^{{N_{zones}}} {{{\dot m}_i}}  + {{\dot m}_{\inf }} + {{\dot m}_{sys}} + {\rho_{air}}\sum\limits_i^{{N_{{\rm{sink}}}}} {{R_{f,i}} + \sum\limits_j {{h_j}\rho {A_j}} } }}\end{array}
+\begin{array}{l}C_{f,z}^t = \left[ {C_{f,z}^{t - \delta t} - \frac{{\sum\limits_{i = 1}^{{N_{source}}} {{\rho_{air}}{G_{f,i}}*{{1.0}^6}}  + \sum\limits_{i = 1}^{{N_{zones}}} {{{\dot m}_i}} {C_{f,z,i}}\; + {{\dot m}_{\inf }}{C_{f,\infty }} + {{\dot m}_{sys}}{C_{f,sys}} + \sum\limits_j {{h_j}\rho {A_j}} \frac{{{C_{s,j}}}}{{{k_j}}}}}{{\sum\limits_{i = 1}^{{N_{zones}}} {{{\dot m}_i}} \; + {{\dot m}_{\inf }} + {{\dot m}_{sys}} + {\rho_{air}}\sum\limits_i^{{N_{{\mathrm{sink}}}}} {{R_{f,i}} + \sum\limits_j {{h_j}\rho {A_j}} } }}} \right]*\\\;\;\;\;\;\;\;\;\;\exp \left[ { - \frac{{\sum\limits_{i = 1}^{{N_{zones}}} {{{\dot m}_i}}  + {{\dot m}_{\inf }} + {{\dot m}_{sys}} + {\rho_{air}}\sum\limits_i^{{N_{{\mathrm{sink}}}}} {{R_{f,i}} + \sum\limits_j {{h_j}\rho {A_j}} } }}{{{\rho_{air}}{V_Z}{M_{FOR}}}}\delta t} \right] + \\\;\;\;\;\;\;\;\;\frac{{\sum\limits_{i = 1}^{{N_{source}}} {{\rho_{air}}{G_{f,i}}*{{1.0}^6}}  + \sum\limits_{i = 1}^{{N_{zones}}} {{{\dot m}_i}} {C_{f,z,i}}\; + {{\dot m}_{\inf }}{C_{f,\infty }} + {{\dot m}_{sys}}{C_{f,sys}} + \sum\limits_j {{h_j}\rho {A_j}} \frac{{{C_{s,j}}}}{{{k_j}}} + {S_f}}}{{\sum\limits_{i = 1}^{{N_{zones}}} {{{\dot m}_i}}  + {{\dot m}_{\inf }} + {{\dot m}_{sys}} + {\rho_{air}}\sum\limits_i^{{N_{{\mathrm{sink}}}}} {{R_{f,i}} + \sum\limits_j {{h_j}\rho {A_j}} } }}\end{array}
 \end{equation}
 
 The above solutions are implemented in the Correct Zone Air Generic Contaminant step in the Zone Contaminant Predictor Corrector module of EnergyPlus.

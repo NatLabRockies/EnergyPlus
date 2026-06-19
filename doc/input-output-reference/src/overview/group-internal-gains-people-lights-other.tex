@@ -1232,7 +1232,7 @@ Fixture No. & Luminaire Feature & Return Air Fraction & Fraction Radiant & Fract
 
 \caption[]{Approximate values of Return Air Fraction, Fraction Radiant and Fraction Visible for overhead fluorescent lighting for different luminaire configurations.} \tabularnewline
 \toprule
-Fixture No. & Luminaire Feature & Return Air Fraction & Fraction Radiant & Fraction Visible & \(f_{\rm{convected}}\) \tabularnewline
+Fixture No. & Luminaire Feature & Return Air Fraction & Fraction Radiant & Fraction Visible & \(f_{\mathrm{convected}}\) \tabularnewline
 \midrule
 \endhead
 
@@ -1284,17 +1284,17 @@ This feature requires that the coefficients described below be determined from m
 If ``Return Air Fraction Is Calculated from Plenum Temperature'' = Yes, the return air fraction is calculated \emph{each timestep} from the following empirical correlation:
 
 \begin{equation}
-  (\rm{Return Air Fraction})_{\rm{calculated}} = C_{1} - C_{2} \times T_{\rm{plenum}}
+  (\mathrm{Return Air Fraction})_{\mathrm{calculated}} = C_{1} - C_{2} \times T_{\mathrm{plenum}}
 \end{equation}
 
-where T\(_{\rm{plenum}}\) is the previous-time-step value of the return plenum air temperature (C),
+where T\(_{\mathrm{plenum}}\) is the previous-time-step value of the return plenum air temperature (C),
 
 and C\(_{1}\) and C\(_{2}\) are the values of the coefficients entered in the next two fields.
 
-To compensate for the change in the return air fraction relative to its input value, the program modifies Fraction Radiant and \(f_{\rm{convected}}\) by a scale factor such that
+To compensate for the change in the return air fraction relative to its input value, the program modifies Fraction Radiant and \(f_{\mathrm{convected}}\) by a scale factor such that
 
 \begin{equation}
-  (\rm{Return Air Fraction})_{\rm{calculated}} + (\rm{Fraction Radiant})_{\rm{modified}} + (f_{\rm{convected}})_{\rm{modified}} + (\rm{Fraction Visible})_{\rm{input}} = 1.0
+  (\mathrm{Return Air Fraction})_{\mathrm{calculated}} + (\mathrm{Fraction Radiant})_{\mathrm{modified}} + (f_{\mathrm{convected}})_{\mathrm{modified}} + (\mathrm{Fraction Visible})_{\mathrm{input}} = 1.0
 \end{equation}
 
 It is assumed that Fraction Visible is a constant equal to its input value.
@@ -1795,7 +1795,7 @@ This factor (watts/person) is used, along with the number of occupants (people) 
 The electrical input to the equipment ultimately appears as heat that contributes to zone loads. In EnergyPlus this heat is divided into four different fractions. Three of these are given by the input fields Fraction Latent, Fraction Radiant and Fraction Lost. A fourth, defined as the fraction of the heat from electric equipment convected to the zone air, is calculated by the program as:
 
 \begin{equation}
-  f_{\rm{convected}} = 1.0 - (\rm{Fraction Latent} + \rm{Fraction Radiant} + \rm{Fraction Lost})
+  f_{\mathrm{convected}} = 1.0 - (\mathrm{Fraction Latent} + \mathrm{Fraction Radiant} + \mathrm{Fraction Lost})
 \end{equation}
 
 You will get an error message if Fraction Latent + Fraction Radiant + Fraction Lost exceeds 1.0.
@@ -2055,7 +2055,7 @@ This factor (watts/person) is used, along with the number of occupants (people) 
 The fuel input to the equipment ultimately appears as heat that contributes to zone loads. In EnergyPlus this heat is divided into four different fractions. Three of these are given by the input fields Fraction Latent, Fraction Radiant and Fraction Lost. A fourth, defined as the fraction of the heat from gas equipment convected to the zone air, is calculated by the program as:
 
 \begin{equation}
-  f_{convected} = 1.0 - (\rm{Fraction Latent} + \rm{Fraction Radiant} + \rm{Fraction Lost})
+  f_{convected} = 1.0 - (\mathrm{Fraction Latent} + \mathrm{Fraction Radiant} + \mathrm{Fraction Lost})
 \end{equation}
 
 You will get an error message if Fraction Latent + Fraction Radiant + Fraction Lost exceeds 1.0.
@@ -2324,7 +2324,7 @@ This factor (watts/person) is used, along with the number of occupants (people) 
 The fuel input to the equipment ultimately appears as heat that contributes to zone loads. In EnergyPlus this heat is divided into four different fractions. Three of these are given by the input fields Fraction Latent, Fraction Radiant and Fraction Lost. A fourth, defined as the fraction of the heat from hot water equipment convected to the zone air, is calculated by the program as:
 
 \begin{equation}
-  f_{\rm{convected}} = 1.0 - (\rm{Fraction Latent} + \rm{Fraction Radiant} + \rm{Fraction Lost})
+  f_{\mathrm{convected}} = 1.0 - (\mathrm{Fraction Latent} + \mathrm{Fraction Radiant} + \mathrm{Fraction Lost})
 \end{equation}
 
 You will get an error message if Fraction Latent + Fraction Radiant + Fraction Lost exceeds 1.0.
@@ -2583,7 +2583,7 @@ This factor (watts/person) is used, along with the number of occupants (people) 
 The fuel input to the equipment ultimately appears as heat that contributes to zone loads. In EnergyPlus this heat is divided into four different fractions. Three of these are given by the input fields Fraction Latent, Fraction Radiant and Fraction Lost. A fourth, defined as the fraction of the heat from steam equipment convected to the zone air, is calculated by the program as:
 
 \begin{equation}
-  f_{\rm{convected}} = 1.0 - (\rm{Fraction Latent} + \rm{Fraction Radiant} + \rm{Fraction Lost})
+  f_{\mathrm{convected}} = 1.0 - (\mathrm{Fraction Latent} + \mathrm{Fraction Radiant} + \mathrm{Fraction Lost})
 \end{equation}
 
 You will get an error message if Fraction Latent + Fraction Radiant + Fraction Lost exceeds 1.0.
@@ -2807,10 +2807,10 @@ This factor (watts/person) is used, along with the number of occupants (people) 
 The fuel input to the equipment ultimately appears as heat that contributes to zone loads. In EnergyPlus this heat is divided into four different fractions. Three of these are given by the input fields Fraction Latent, Fraction Radiant and Fraction Lost. A fourth, defined as the fraction of the heat from other equipment convected to the zone air, is calculated by the program as:
 
 \begin{equation}
-  f_{\rm{convected}} = 1.0 - (\rm{Fraction Latent} + \rm{Fraction Radiant} + \rm{Fraction Lost})
+  f_{\mathrm{convected}} = 1.0 - (\mathrm{Fraction Latent} + \mathrm{Fraction Radiant} + \mathrm{Fraction Lost})
 \end{equation}
 
-You will get an error message if \(\rm{Fraction Latent} + \rm{Fraction Radiant} + \rm{Fraction Lost}\) exceeds 1.0.
+You will get an error message if \(\mathrm{Fraction Latent} + \mathrm{Fraction Radiant} + \mathrm{Fraction Lost}\) exceeds 1.0.
 
 \paragraph{Field: Fraction Latent}\label{field-fraction-latent-4}
 
@@ -5227,7 +5227,7 @@ where
 
 \(F_{G}\) = Fraction value from the source fraction schedule at a given time {[}dimensionless{]}
 
-\(C_{\rm{cutoff}}\) = Cutoff concentration at which emission ceases {[}ppm{]}
+\(C_{\mathrm{cutoff}}\) = Cutoff concentration at which emission ceases {[}ppm{]}
 
 \(C_{f}\) = Generic contaminant concentration value at a given previous time step {[}ppm{]}
 
@@ -5452,7 +5452,7 @@ where
 
 \(C_f (t)\) = Concentration of contaminant generic contaminant at the previous time step {[}ppm{]}
 
-\(\rm{F}_{R}\) = Schedule or control signal value at time \(t\) {[}-{]}
+\(\mathrm{F}_{R}\) = Schedule or control signal value at time \(t\) {[}-{]}
 
 \subsubsection{Inputs}\label{inputs-16-005}
 

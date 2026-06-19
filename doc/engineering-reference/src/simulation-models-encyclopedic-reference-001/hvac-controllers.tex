@@ -30,7 +30,7 @@ When the control variable TemperatureAndHumidityRatio is used, the controller mo
 The model first calculates the approach temperature using the dry-bulb temperature and dewpoint temperature of the air leaving the water coil:
 
 \begin{equation}
-{T_{dp}} = {\rm{PsyTdpFnWPb}}\left( {{\omega_{SA}},P} \right)
+{T_{dp}} = {\mathrm{PsyTdpFnWPb}}\left( {{\omega_{SA}},P} \right)
 \end{equation}
 
 \begin{equation}
@@ -49,12 +49,12 @@ where:
 
 \({T_{SA}}\) is the supply (outlet) air dry-bulb temperature (\(^{\circ}\)C)
 
-\({\rm{PsyTdpFnWPb}}\) is the EnergyPlus psychrometric function, returns dewpoint temperature given humidity ratio and barometric pressure.
+\({\mathrm{PsyTdpFnWPb}}\) is the EnergyPlus psychrometric function, returns dewpoint temperature given humidity ratio and barometric pressure.
 
 The supply air dewpoint temperature required to meet the humidity ratio setpoint (placed on the control node by SetpointManager:SingleZone:Humidity:Maximum, SetpointManager:MultiZone:MaximumHumidity:Average~ or SetpointManager:MultiZone:Humidity:Maximum) is then calculated as a function of the humidity ratio setpoint and barometric pressure as follows:
 
 \begin{equation}
-{T_{dp,SP}} = {\rm{PsyTdpFnWPb}}\left( {{\omega_{SP}},P} \right)
+{T_{dp,SP}} = {\mathrm{PsyTdpFnWPb}}\left( {{\omega_{SP}},P} \right)
 \end{equation}
 
 where:

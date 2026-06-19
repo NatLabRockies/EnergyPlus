@@ -653,7 +653,7 @@ QS(ZoneNum) = \frac{{{Q_{SW}}(ZoneNum)}}{{\sum\limits_{i = 1}^{{N_{surf}}} {AbsI
 where
 
 \begin{equation}
-VMULT(ZoneNum) = \frac{1}{{\sum\limits_{i = 1}^{{N_{surf}}} {AbsIntSur{f_i}*{A_i}} }}{\rm{    [}}{{\rm{m}}^{{\rm{ - 2}}}}]
+VMULT(ZoneNum) = \frac{1}{{\sum\limits_{i = 1}^{{N_{surf}}} {AbsIntSur{f_i}*{A_i}} }}{\mathrm{    [}}{{\mathrm{m}}^{{\mathrm{ - 2}}}}]
 \end{equation}
 
 and \emph{Q\(_{sw}\)} is given by:
@@ -693,7 +693,7 @@ where
 \emph{EnclSolDB(ZoneNum)} is calculated as:
 
 \begin{equation}
-EnclSolDB(ZoneNum) = BTOTZone - BABSZone{\rm{    [}}{{\rm{m}}^{\rm{2}}}]
+EnclSolDB(ZoneNum) = BTOTZone - BABSZone{\mathrm{    [}}{{\mathrm{m}}^{\mathrm{2}}}]
 \end{equation}
 
 where
@@ -787,7 +787,7 @@ where
 The interior short-wave radiation absorbed by layer \emph{l} (glass, shade or blind) of a window is equal to:
 
 \begin{equation}
-\begin{array}{l}QS(ZoneNum)*\alpha_{l,back}^{dif}(SurfNum) + \\BeamSolarRad*\frac{{\alpha_{l,back}^{beam}(SurfNum)}}{{A(SurfNum)}}\sum\limits_{i = 1}^{{N_{extwin}}} {TB{m_i}*Aoverla{p_i}(SurfNum)} *CosIn{c_i}{\rm{ [W/}}{{\rm{m}}^{\rm{2}}}]\end{array}
+\begin{array}{l}QS(ZoneNum)*\alpha_{l,back}^{dif}(SurfNum) + \\BeamSolarRad*\frac{{\alpha_{l,back}^{beam}(SurfNum)}}{{A(SurfNum)}}\sum\limits_{i = 1}^{{N_{extwin}}} {TB{m_i}*Aoverla{p_i}(SurfNum)} *CosIn{c_i}{\mathrm{ [W/}}{{\mathrm{m}}^{\mathrm{2}}}]\end{array}
 \end{equation}
 
 where
@@ -807,7 +807,7 @@ Note that as of Version 2.1, the initially distributed diffuse solar absorbed by
 The interior diffuse short-wave radiation transmitted by an interior window to the adjacent zone is given by
 
 \begin{equation}
-QS(ZoneNum)*{\tau ^{dif}}(SurfNum)*A(SurfNum){\rm{    [W]}}
+QS(ZoneNum)*{\tau ^{dif}}(SurfNum)*A(SurfNum){\mathrm{    [W]}}
 \end{equation}
 
 where
@@ -819,13 +819,13 @@ where
 The interior beam solar radiation transmitted by an interior window to the adjacent zone is
 
 \begin{equation}
-BeamSolarRad*{\tau ^{beam}}(SurfNum)\sum\limits_{i = 1}^{{N_{extwin}}} {TB{m_i}*Aoverla{p_i}(SurfNum)*CosIn{c_i}{\rm{    [W}}]}
+BeamSolarRad*{\tau ^{beam}}(SurfNum)\sum\limits_{i = 1}^{{N_{extwin}}} {TB{m_i}*Aoverla{p_i}(SurfNum)*CosIn{c_i}{\mathrm{    [W}}]}
 \end{equation}
 
 where \({\tau ^{beam}}(SurfNum)\) is the beam-to-beam transmittance of the interior window at the angle of incidence of beam solar from the exterior window on the interior window. The program does not track where this radiation falls in the adjacent zone: it is counted as diffuse radiation in that zone. Therefore,
 
 \begin{equation}
-QS(ZoneNum) \to QS(ZoneNum) + [{\rm{beam solar from adjacent zones]}}*VMULT(ZoneNum)
+QS(ZoneNum) \to QS(ZoneNum) + [{\mathrm{beam solar from adjacent zones]}}*VMULT(ZoneNum)
 \end{equation}
 
 \subsection{Ground Reflectances}\label{ground-reflectances}
@@ -833,7 +833,7 @@ QS(ZoneNum) \to QS(ZoneNum) + [{\rm{beam solar from adjacent zones]}}*VMULT(Zone
 Ground reflectance values (Ref Object: Site:GroundReflectance) are used to calculate the ground reflected solar amount.~ This fractional amount (entered monthly) is used in the following equation:
 
 \begin{equation}
-{\rm{GroundReflectedSolar = (BeamSolar}} \bullet {\rm{COS(SunZenithAngle) + DiffuseSolar)}} \bullet {\rm{GroundReflectance}}
+{\mathrm{GroundReflectedSolar = (BeamSolar}} \bullet {\mathrm{COS(SunZenithAngle) + DiffuseSolar)}} \bullet {\mathrm{GroundReflectance}}
 \end{equation}
 
 Of course, the Ground Reflected Solar is never allowed to be negative.~ The Snow Ground Reflectance Modifier can further modify the ground reflectance when snow is on the ground.~ If the user enters 0.0 for each month, no ground reflected solar is used.
@@ -845,13 +845,13 @@ When snow is on the ground, ground reflectances may change. (Ref Object: Site:\-
 Ground Reflected Solar Modifier is used to modified the basic monthly ground reflectance when snow is on the ground (from design day input or weather data values). Values can range from 0.0 to 1.0.
 
 \begin{equation}
-{\rm{GroundReflectanc}}{{\rm{e}}_{{\rm{used}}}} = {\rm{GroundReflectance}} \bullet SolarModifie{r_{Snow}}
+{\mathrm{GroundReflectanc}}{{\mathrm{e}}_{{\mathrm{used}}}} = {\mathrm{GroundReflectance}} \bullet SolarModifie{r_{Snow}}
 \end{equation}
 
 Daylighting Ground Reflected Solar Modifier is used to modified the basic monthly ground reflectance when snow is on the ground (from design day input or weather data values). Values can range from 0.0 to 1.0.
 
 \begin{equation}
-{\rm{DaylightingGroundReflectanc}}{{\rm{e}}_{{\rm{used}}}} = {\rm{GroundReflectance}} \bullet DaylightingModifie{r_{Snow}}
+{\mathrm{DaylightingGroundReflectanc}}{{\mathrm{e}}_{{\mathrm{used}}}} = {\mathrm{GroundReflectance}} \bullet DaylightingModifie{r_{Snow}}
 \end{equation}
 
 \subsection{References}\label{references-041}

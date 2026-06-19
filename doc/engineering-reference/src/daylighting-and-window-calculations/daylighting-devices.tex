@@ -481,7 +481,7 @@ The attenuation is characterized by the \textbf{well efficiency}, which is the r
 The well efficiency depends on the visible reflectance of well's side walls and on the well cavity ratio, \textbf{\emph{WCR}}, which is given by:
 
 \begin{equation}
-WCR = \frac{{{\rm{2}}{\rm{.5 x Well~Height x Well~Perimeter}}}}{{{\rm{Well~Area}}}}
+WCR = \frac{{{\mathrm{2}}{\mathrm{.5 x Well~Height x Well~Perimeter}}}}{{{\mathrm{Well~Area}}}}
 \end{equation}
 
 Well Height, Well Perimeter and Well Area are inputs to the model and are discussed in the figure caption above.
@@ -489,7 +489,7 @@ Well Height, Well Perimeter and Well Area are inputs to the model and are discus
 The model in EnergyPlus was implemented by fitting a curve to the data presented as Figure~8-21, ``Efficiency factors for various depths of light wells based on well-interreflectance values,'' found in the Lighting Handbook (IES 1993).~ The figure below reproduces that reference data and shows well efficiency vs.~WCR for different side wall reflectances. For use in the EnergyPlus calculation, a fit has been made to this graph that gives the following mathematical expression, where ``Reflectance'' is the user input value of the well-wall reflectance expressed as a fraction:
 
 \begin{equation}
-{\rm{Well~efficiency}} = {e^{ - WCR*(0.16368 - 0.144678*{\rm{Reflectance}})}}
+{\mathrm{Well~efficiency}} = {e^{ - WCR*(0.16368 - 0.144678*{\mathrm{Reflectance}})}}
 \end{equation}
 
 \begin{figure}[hbtp] % fig 73

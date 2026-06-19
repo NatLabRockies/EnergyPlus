@@ -677,17 +677,17 @@ The wetbulb temperature of air leaving a direct cooler is the same as the wetbul
 The direct cooler sometimes has the ability to overcool the air and therefore some form of modulation is useful for analysis.~ The special research model includes a Part Load Fraction, PLF, used to model the implications of controlling the amount of cooling.~ It is assumed that through some sort of on/off cycling or wetness control that the cooling electric power can be varied to exactly meet the desired temperature when PLF is less than unity.~ The auxiliary water pump power is then derated using user specified pump power modifier curve or linearly using a Part Load Fraction and a fan flow fraction when the pump power modifier curve is not specified.
 
 \begin{equation}
-{\rm{FullOutput}} = {T_{db,out}} - {T_{db,in}}
+{\mathrm{FullOutput}} = {T_{db,out}} - {T_{db,in}}
 \label{eq:IECFullOutput}
 \end{equation}
 
 \begin{equation}
-{\rm{RequiredOutput}} = {T_{db,desired}} - {T_{db,in}}
+{\mathrm{RequiredOutput}} = {T_{db,desired}} - {T_{db,in}}
 \label{eq:IECRequiredOutput}
 \end{equation}
 
 \begin{equation}
-PLF = \frac{{{\rm{RequiredOutput}}}}{{{\rm{FullOutput}}}}
+PLF = \frac{{{\mathrm{RequiredOutput}}}}{{{\mathrm{FullOutput}}}}
 \label{eq:IECPLF}
 \end{equation}
 

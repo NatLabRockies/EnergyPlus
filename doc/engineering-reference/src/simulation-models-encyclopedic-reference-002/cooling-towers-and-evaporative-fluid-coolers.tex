@@ -604,7 +604,7 @@ If the outlet water temperature at minimum fan speed is below the setpoint tempe
 FanPLR = \left( {\frac{{{T_{water,outlet,fanOFF}} - {T_{setpoint}}}}{{{T_{water,outlet,fanOFF}} - {T_{water,outlet,fanMIN}}}}} \right)
 \end{equation}
 
-where \({T_{{\rm{setpoint}}}}\) is the outlet water setpoint temperature (\(^{\circ}\)C).
+where \({T_{{\mathrm{setpoint}}}}\) is the outlet water setpoint temperature (\(^{\circ}\)C).
 
 If the outlet water temperature at minimum fan speed is above the outlet water temperature setpoint, then the cooling tower fan speed (\emph{FR\(_{air}\)}) is increased until the calculated approach temperature produces the required outlet water temperature to meet the setpoint.
 
@@ -613,7 +613,7 @@ If the outlet water temperature at minimum fan speed is above the outlet water t
 \end{equation}
 
 \begin{equation}
-{T_{water,outlet}} = {T_{{\rm{setpoint}}}} = {T_{wb,air}} + {T_{approach}}
+{T_{water,outlet}} = {T_{{\mathrm{setpoint}}}} = {T_{wb,air}} + {T_{approach}}
 \end{equation}
 
 \begin{equation}
@@ -633,7 +633,7 @@ If FanPowerCurveObject is defined, then:
 Else:
 
 \begin{equation}
-  P_{fan} = \left( {{P_{fan,design}}} \right)\left( {FanPLR} \right){\left( {F{R_{air}}} \right)^{\rm{3}}}
+  P_{fan} = \left( {{P_{fan,design}}} \right)\left( {FanPLR} \right){\left( {F{R_{air}}} \right)^{\mathrm{3}}}
 \end{equation}
 
 In addition:
@@ -681,9 +681,9 @@ ENDIF
 
 where:
 
-\({P_{{\rm{heater,basin}}}}\) is the tower basin heater electric power (W)
+\({P_{{\mathrm{heater,basin}}}}\) is the tower basin heater electric power (W)
 
-\({E_{{\rm{heater,basin}}}}\) is the tower basin heater electric consumption (J)
+\({E_{{\mathrm{heater,basin}}}}\) is the tower basin heater electric consumption (J)
 
 \emph{T\(_{setpoint,basin}\)} is the basin heater setpoint temperature (\(^{\circ}\)C)
 
@@ -774,7 +774,7 @@ If the cells operating do not meet the loads, we increase the number of cells if
 Makeup water use for all types of cooling towers is made up of three components: evaporation, drift, and blowdown. ~The first is the amount of water evaporated to reduce the water's temperature as it passes through the cooling tower. There are two methods that evaporation makeup water can be modeled in EnergyPlus.~ The first method assumes that the tower outlet air conditions are saturated (which may not always be the case for certain operating conditions). ~For this ``Saturated Exit'' mode, the enthalpy of the tower's outlet air is calculated as the inlet air enthalpy plus the water side heat transfer divided by the air mass flow rate through the tower.
 
 \begin{equation}
-{\dot Q_{water}} = {\dot m_{_{water}}}{C_p}\left( {{T_{{\rm{water,inlet}}}} - {T_{{\rm{water,outlet}}}}} \right)
+{\dot Q_{water}} = {\dot m_{_{water}}}{C_p}\left( {{T_{{\mathrm{water,inlet}}}} - {T_{{\mathrm{water,outlet}}}}} \right)
 \end{equation}
 
 \begin{equation}
@@ -798,7 +798,7 @@ where:
 The saturation temperature and humidity ratio are then calculated for the tower's outlet air.
 
 \begin{equation}
-{T_{sat\,air,outlet}} = PsyTsatFnHPb\left( {{h_{sat\,air,outlet}},{\rm{OutBaroPress}}} \right)
+{T_{sat\,air,outlet}} = PsyTsatFnHPb\left( {{h_{sat\,air,outlet}},{\mathrm{OutBaroPress}}} \right)
 \end{equation}
 
 \begin{equation}
@@ -811,7 +811,7 @@ where:
 
 \(PsyTsatFnHPb\) is an EnergyPlus psychrometric function, returns saturation temperature given enthalpy and barometric pressure
 
-\({\rm{OutBaroPress}}\) is the outdoor barometric pressure (Pa)
+\({\mathrm{OutBaroPress}}\) is the outdoor barometric pressure (Pa)
 
 \({\omega_{sat\,air,outlet}}\) is the saturated outlet air humidity ratio (kg\(_{water}\)/kg\(_{dry~air}\))
 

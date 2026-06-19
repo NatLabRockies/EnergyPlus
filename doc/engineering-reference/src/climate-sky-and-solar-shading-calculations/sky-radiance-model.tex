@@ -97,9 +97,9 @@ where
 
 \begin{equation}
 \begin{array}{rcl}
-    I_{horizon} & = \rm{irradiance~on~surface~from~sky~horizon} & = I_h F_2\sin S \\
-    I_{dome}    & = \rm{irradiance~on~surface~from~sky~dome}    & = I_h (1 - F_1)(1 + \cos S)/2 \\
-    I_{circumsolar} & = \rm{irradiance~on~surface~from~circumsolar~region} & = I_h F_1 a/b
+    I_{horizon} & = \mathrm{irradiance~on~surface~from~sky~horizon} & = I_h F_2\sin S \\
+    I_{dome}    & = \mathrm{irradiance~on~surface~from~sky~dome}    & = I_h (1 - F_1)(1 + \cos S)/2 \\
+    I_{circumsolar} & = \mathrm{irradiance~on~surface~from~circumsolar~region} & = I_h F_1 a/b
 \end{array}
 \end{equation}
 
@@ -189,7 +189,7 @@ Sky diffuse solar shadowing on an exterior surface is calculated as follows in s
 For the horizon source the following ratio is calculated by dividing the horizon line into 24 intervals of equal length:
 
 \begin{equation}
-{R_{horiz}} = \frac{{{\rm{Irradiance~from~horizon~with~obstructions}}}}{{{\rm{Irradiance~from~horizon~without~obstructions}}}} = \frac{{\sum\limits_{i = 1}^{24} {{I_i}S{F_i}} }}{{\sum\limits_{i = 1}^{24} {{I_i}} }}
+{R_{horiz}} = \frac{{{\mathrm{Irradiance~from~horizon~with~obstructions}}}}{{{\mathrm{Irradiance~from~horizon~without~obstructions}}}} = \frac{{\sum\limits_{i = 1}^{24} {{I_i}S{F_i}} }}{{\sum\limits_{i = 1}^{24} {{I_i}} }}
 \end{equation}
 
 where I\(_{i}\) is the unobstructed irradiance on the surface from the i\(^{th}\) interval, SF\(_{i}\) is the sunlit fraction from radiation coming from the \emph{i}\(^{th}\) interval, and the sums are over intervals whose center lies in front of the surface. \emph{SF\(_{i}\)} is calculated using the beam solar shadowing method as though the sun were located at the \emph{i}\(^{th}\) horizon point. Here:
@@ -211,7 +211,7 @@ $\alpha$\(_{i}\) = incidence angle on surface of radiation from \emph{$\theta$\(
 The corresponding ratio for the isotropic sky dome is given by:
 
 \begin{equation}
-{R_{dome}} = \frac{{{\rm{Irradiance~from~dome~with~obstructions}}}}{{{\rm{Irradiance~from~dome~without~obstructions}}}} = \frac{{\sum\limits_{i = 1}^{24} {\sum\limits_{j = 1}^6 {{I_{ij}}S{F_{ij}}} } }}{{\sum\limits_{i = 1}^{24} {\sum\limits_{j = 1}^6 {{I_{ij}}} } }}
+{R_{dome}} = \frac{{{\mathrm{Irradiance~from~dome~with~obstructions}}}}{{{\mathrm{Irradiance~from~dome~without~obstructions}}}} = \frac{{\sum\limits_{i = 1}^{24} {\sum\limits_{j = 1}^6 {{I_{ij}}S{F_{ij}}} } }}{{\sum\limits_{i = 1}^{24} {\sum\limits_{j = 1}^6 {{I_{ij}}} } }}
 \end{equation}
 
 where (\emph{i,j}) is a grid of 144 points (6 in altitude by 24 in azimuth) covering the sky dome, \emph{I\(_{ij}\)} is the unobstructed irradiance on the surface from the sky element at the \emph{ij}\(^{th}\) point, \emph{SF\(_{ij}\)} is the sunlit fraction for radiation coming from the \emph{ij}\(^{th}\) element, and the sum is over points lying in front of the surface. Here:
@@ -237,7 +237,7 @@ $\alpha$\(_{j}\) = incidence angle on surface of radiation from (\emph{$\theta$\
 Because the circumsolar region is assumed to be concentrated at the solar disk, the circumsolar ratio is:
 
 \begin{equation}
-{R_{circumsolar}} = \frac{{{\rm{Irradiance~from~circumsolar~region~with~obstructions}}}}{{{\rm{Irradiance~from~circumsolar~without~obstructions}}}} = S{F_{sun}}
+{R_{circumsolar}} = \frac{{{\mathrm{Irradiance~from~circumsolar~region~with~obstructions}}}}{{{\mathrm{Irradiance~from~circumsolar~without~obstructions}}}} = S{F_{sun}}
 \end{equation}
 
 where \emph{SF\(_{sun}\)} is the beam sunlit fraction. The total sky diffuse irradiance on the surface with shadowing is then:

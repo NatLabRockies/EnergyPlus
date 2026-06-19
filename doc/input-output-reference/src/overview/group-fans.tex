@@ -1007,95 +1007,95 @@ If no duct static pressure reset scheme is used and the duct static pressure set
 
 \paragraph{Field: Normalized Fan Static Efficiency Curve Name Non-Stall Region}\label{field-normalized-fan-static-efficiency-curve-name-non-stall-region}
 
-The required alpha name of the exponential-modified skew normal performance curve (ref: \hyperref[curveexponentialskewnormal]{Curve:ExponentialSkewNormal} in Performance Curves) that parameterizes the normalized fan static efficiency (\(\eta_{\rm{fan}}(x_{\rm{fan}}) / \eta_{\rm{fan, max}}\)) at each time step for the normal operating (non-stall) region of the fan performance map as a function of \(x_{\rm{fan}}\), which is defined as log-base-10 of Eu at the fan flow and pressure rise operating point divided by Eu at maximum fan static efficiency \([log_{10}(Eu / Eu_{\rm{max}})]\). In this region, \(x_{\rm{fan}} \le 0\).
+The required alpha name of the exponential-modified skew normal performance curve (ref: \hyperref[curveexponentialskewnormal]{Curve:ExponentialSkewNormal} in Performance Curves) that parameterizes the normalized fan static efficiency (\(\eta_{\mathrm{fan}}(x_{\mathrm{fan}}) / \eta_{\mathrm{fan, max}}\)) at each time step for the normal operating (non-stall) region of the fan performance map as a function of \(x_{\mathrm{fan}}\), which is defined as log-base-10 of Eu at the fan flow and pressure rise operating point divided by Eu at maximum fan static efficiency \([log_{10}(Eu / Eu_{\mathrm{max}})]\). In this region, \(x_{\mathrm{fan}} \le 0\).
 
-The output of this curve is used to calculate the fan efficiency \(\eta_{\rm{fan}} (x_{\rm{fan}})\) at each time step by modifying \(\eta_{\rm{fan, max}}\) (see \emph{Maximum Fan Static Efficiency} field). This curve should have a maximum of 1.0 and should be valid for the range of volumetric flows and fan pressure rises anticipated for the simulation period.
+The output of this curve is used to calculate the fan efficiency \(\eta_{\mathrm{fan}} (x_{\mathrm{fan}})\) at each time step by modifying \(\eta_{\mathrm{fan, max}}\) (see \emph{Maximum Fan Static Efficiency} field). This curve should have a maximum of 1.0 and should be valid for the range of volumetric flows and fan pressure rises anticipated for the simulation period.
 
 \paragraph{Field: Normalized Fan Static Efficiency Curve Name Stall Region}\label{field-normalized-fan-static-efficiency-curve-name-stall-region}
 
-The required alpha name of the exponential-modified skew normal performance curve (ref: \hyperref[curveexponentialskewnormal]{Curve:ExponentialSkewNormal} in Performance Curves) that parameterizes the normalized fan static efficiency (\(\eta_{\rm{fan}} (x_{\rm{fan}}) / \eta_{\rm{fan, max}}\)) at each time step for the stall region of the fan performance map as a function of \(x_{\rm{fan}}\) (see \emph{Normalized Fan Static Efficiency Curve Name Non-Stall Region} field). In this region, \(x_{\rm{fan}} > 0\).
+The required alpha name of the exponential-modified skew normal performance curve (ref: \hyperref[curveexponentialskewnormal]{Curve:ExponentialSkewNormal} in Performance Curves) that parameterizes the normalized fan static efficiency (\(\eta_{\mathrm{fan}} (x_{\mathrm{fan}}) / \eta_{\mathrm{fan, max}}\)) at each time step for the stall region of the fan performance map as a function of \(x_{\mathrm{fan}}\) (see \emph{Normalized Fan Static Efficiency Curve Name Non-Stall Region} field). In this region, \(x_{\mathrm{fan}} > 0\).
 
-The output of this curve is used to calculate the fan efficiency \(\eta_{\rm{fan}} ( x_{\rm{fan}} )\) at each time step by modifying \(\eta_{\rm{fan, max}}\) (see \emph{Maximum Fan Static Efficiency} field). This curve should have a maximum of 1.0 and should be valid for the range of volumetric flows and fan pressure rises anticipated for the simulation period.
+The output of this curve is used to calculate the fan efficiency \(\eta_{\mathrm{fan}} ( x_{\mathrm{fan}} )\) at each time step by modifying \(\eta_{\mathrm{fan, max}}\) (see \emph{Maximum Fan Static Efficiency} field). This curve should have a maximum of 1.0 and should be valid for the range of volumetric flows and fan pressure rises anticipated for the simulation period.
 
 \paragraph{Field: Normalized Dimensionless Airflow Curve Name Non-Stall Region}\label{field-normalized-dimensionless-airflow-curve-name-non-stall-region}
 
-The required alpha name of the sigmoid performance curve (ref: \hyperref[curvesigmoid]{Curve:Sigmoid} in Performance Curves) that parameterizes the normalized dimensionless airflow through the fan (\(\varphi (x_{\rm{fan}}) / \varphi_{\rm{max}}\)) at each time step for the normal operating (non-stall) region of the fan performance map as a function of \(x_{\rm{fan}}\), which is defined as log-base-10 of Eu at the fan flow and pressure rise operating point divided by Eu at maximum fan static efficiency \([log_{10}(Eu / Eu_{\rm{max}})]\). In this region, \(x_{\rm{fan}} \le 0\).
+The required alpha name of the sigmoid performance curve (ref: \hyperref[curvesigmoid]{Curve:Sigmoid} in Performance Curves) that parameterizes the normalized dimensionless airflow through the fan (\(\varphi (x_{\mathrm{fan}}) / \varphi_{\mathrm{max}}\)) at each time step for the normal operating (non-stall) region of the fan performance map as a function of \(x_{\mathrm{fan}}\), which is defined as log-base-10 of Eu at the fan flow and pressure rise operating point divided by Eu at maximum fan static efficiency \([log_{10}(Eu / Eu_{\mathrm{max}})]\). In this region, \(x_{\mathrm{fan}} \le 0\).
 
-The output of this curve is used to calculate the dimensionless airflow \(\varphi (x_{\rm{fan}})\) at each time step by modifying \(\varphi_{\rm{max}}\) (see \emph{Maximum Dimensionless Fan Airflow} field). This curve should have a maximum of 1.0 and should be valid for the range of volumetric flows and fan pressure rises anticipated for the simulation period.
+The output of this curve is used to calculate the dimensionless airflow \(\varphi (x_{\mathrm{fan}})\) at each time step by modifying \(\varphi_{\mathrm{max}}\) (see \emph{Maximum Dimensionless Fan Airflow} field). This curve should have a maximum of 1.0 and should be valid for the range of volumetric flows and fan pressure rises anticipated for the simulation period.
 
 \paragraph{Field: Normalized Dimensionless Airflow Curve Name Stall Region}\label{field-normalized-dimensionless-airflow-curve-name-stall-region}
 
-The required alpha name of the sigmoid performance curve (ref: \hyperref[curvesigmoid]{Curve:Sigmoid} in Performance Curves) that parameterizes the normalized dimensionless airflow through the fan (\(\varphi (x_{\rm{fan}}) / \varphi_{\rm{max}}\)) at each time step for the stall region of the fan performance map as a function of \(x_{\rm{fan}}\) (see \emph{Normalized Dimensionless Airflow Curve Name Non-Stall Region} field). In this region, \(x_{\rm{fan}} > 0\).
+The required alpha name of the sigmoid performance curve (ref: \hyperref[curvesigmoid]{Curve:Sigmoid} in Performance Curves) that parameterizes the normalized dimensionless airflow through the fan (\(\varphi (x_{\mathrm{fan}}) / \varphi_{\mathrm{max}}\)) at each time step for the stall region of the fan performance map as a function of \(x_{\mathrm{fan}}\) (see \emph{Normalized Dimensionless Airflow Curve Name Non-Stall Region} field). In this region, \(x_{\mathrm{fan}} > 0\).
 
-The output of this curve is used to calculate the dimensionless airflow \(\varphi (x_{\rm{fan}})\) at each time step by modifying \(\varphi_{\rm{max}}\) (see \emph{Maximum Dimensionless Fan Airflow} field). This curve should have a maximum of 1.0 and should be valid for the range of volumetric flows and fan pressure rises anticipated for the simulation period.
+The output of this curve is used to calculate the dimensionless airflow \(\varphi (x_{\mathrm{fan}})\) at each time step by modifying \(\varphi_{\mathrm{max}}\) (see \emph{Maximum Dimensionless Fan Airflow} field). This curve should have a maximum of 1.0 and should be valid for the range of volumetric flows and fan pressure rises anticipated for the simulation period.
 
 \paragraph{Field: Maximum Belt Efficiency Curve Name}\label{field-maximum-belt-efficiency-curve-name}
 
-The alpha name of the quartic polynomial performance curve (ref: \hyperref[curvequartic]{Curve:Quartic} in Performance Curves) that determines the maximum fan drive belt efficiency in logarithmic space (\(\eta_{\rm{belt, max, ln}}\)) as a function of \(x_{\rm{belt, max}}\). The curve is:
+The alpha name of the quartic polynomial performance curve (ref: \hyperref[curvequartic]{Curve:Quartic} in Performance Curves) that determines the maximum fan drive belt efficiency in logarithmic space (\(\eta_{\mathrm{belt, max, ln}}\)) as a function of \(x_{\mathrm{belt, max}}\). The curve is:
 
 \begin{equation}
-\eta_{\rm{belt, max, ln}} = C_1 + C_2 \cdot x_{\rm{belt, max}} + C_3 \cdot x_{\rm{belt, max}}^2 + C_4 \cdot x_{\rm{belt, max}}^3 + C_5 \cdot x_{\rm{belt, max}}^4
+\eta_{\mathrm{belt, max, ln}} = C_1 + C_2 \cdot x_{\mathrm{belt, max}} + C_3 \cdot x_{\mathrm{belt, max}}^2 + C_4 \cdot x_{\mathrm{belt, max}}^3 + C_5 \cdot x_{\mathrm{belt, max}}^4
 \end{equation}
 
-where \(x_{\rm{belt, max}} = ln(F_{\rm{belt}} \cdot H_{\rm{fan, max}})\) with \(H_{\rm{fan, max}}\) expressed in terms of hp.
+where \(x_{\mathrm{belt, max}} = ln(F_{\mathrm{belt}} \cdot H_{\mathrm{fan, max}})\) with \(H_{\mathrm{fan, max}}\) expressed in terms of hp.
 
-Note that \(\eta_{\rm{belt, max}} = exp(\eta_{\rm{belt, max, ln}})\).
+Note that \(\eta_{\mathrm{belt, max}} = exp(\eta_{\mathrm{belt, max, ln}})\).
 
-The output of this curve must be greater than zero and less than or equal to 1.0. If \(\eta_{\rm{belt, max}}\) is known, it is represented by coefficient \(C_1\) (\(= ln(\eta_{\rm{belt, max}})\)). In this case, coefficients \(C_2\) through \(C_5\) are set to zero. If this field is left blank (e.g., there is no belt), the model assumes that the output of the modifier curve is 1.0 for the entire simulation (maximum belt efficiency = 1.0).
+The output of this curve must be greater than zero and less than or equal to 1.0. If \(\eta_{\mathrm{belt, max}}\) is known, it is represented by coefficient \(C_1\) (\(= ln(\eta_{\mathrm{belt, max}})\)). In this case, coefficients \(C_2\) through \(C_5\) are set to zero. If this field is left blank (e.g., there is no belt), the model assumes that the output of the modifier curve is 1.0 for the entire simulation (maximum belt efficiency = 1.0).
 
 \paragraph{Field: Normalized Belt Efficiency Curve Name Region 1}\label{field-normalized-belt-efficiency-curve-name-region-1}
 
-The alpha name of the single rectangular hyperbola type 2 performance curve (ref: \hyperref[curverectangularhyperbola2]{Curve:RectangularHyperbola2} in Performance Curves) that determines the normalized (par-load) fan drive belt efficiency (\(\eta_{\rm{belt}}(x_{\rm{belt}}) / \eta_{\rm{belt, max}}\)) as a function of \(x_{\rm{belt}}\). Normalized belt efficiency is represented by a segmented curve with three different regions. The curve for Region 1 (\(0 \le x_{\rm{belt}} < x_{\rm{belt, trans}}\)) is:
+The alpha name of the single rectangular hyperbola type 2 performance curve (ref: \hyperref[curverectangularhyperbola2]{Curve:RectangularHyperbola2} in Performance Curves) that determines the normalized (par-load) fan drive belt efficiency (\(\eta_{\mathrm{belt}}(x_{\mathrm{belt}}) / \eta_{\mathrm{belt, max}}\)) as a function of \(x_{\mathrm{belt}}\). Normalized belt efficiency is represented by a segmented curve with three different regions. The curve for Region 1 (\(0 \le x_{\mathrm{belt}} < x_{\mathrm{belt, trans}}\)) is:
 
 \begin{equation}
-  \frac{\eta_{\rm{belt}} ( x_{\rm{belt}} )}{\eta_{\rm{belt, max}}} = \frac{(C_1 \cdot x_{\rm{belt}})}{(C_2 + x_{\rm{belt}})} + C_3 \cdot x_{\rm{belt}}
+  \frac{\eta_{\mathrm{belt}} ( x_{\mathrm{belt}} )}{\eta_{\mathrm{belt, max}}} = \frac{(C_1 \cdot x_{\mathrm{belt}})}{(C_2 + x_{\mathrm{belt}})} + C_3 \cdot x_{\mathrm{belt}}
 \end{equation}
 
-where \(x_{\rm{belt}}\) = \(\tau_{\rm{belt}} / \tau_{\rm{belt, max}}\); \(\tau_{\rm{belt}}\) is the belt output torque that corresponds to the calculated power input to the fan shaft (\(H_{\rm{fan}}\), W) by the drive belt and the calculated fan shaft speed (\(\omega_{\rm{fan}}\), rpm).
+where \(x_{\mathrm{belt}}\) = \(\tau_{\mathrm{belt}} / \tau_{\mathrm{belt, max}}\); \(\tau_{\mathrm{belt}}\) is the belt output torque that corresponds to the calculated power input to the fan shaft (\(H_{\mathrm{fan}}\), W) by the drive belt and the calculated fan shaft speed (\(\omega_{\mathrm{fan}}\), rpm).
 
-The output of this curve is used to calculate the belt efficiency \(\eta_{\rm{belt}} (x_{\rm{belt}})\) in Region 1 at each time step by modifying \(\eta_{\rm{belt, max}}\) (see \emph{Maximum Belt Efficiency Curve Name} field). The output of this curve must be greater than zero and less than or equal to 1.0 and should be valid for the range of volumetric flows and fan pressure rises anticipated for the simulation period.
+The output of this curve is used to calculate the belt efficiency \(\eta_{\mathrm{belt}} (x_{\mathrm{belt}})\) in Region 1 at each time step by modifying \(\eta_{\mathrm{belt, max}}\) (see \emph{Maximum Belt Efficiency Curve Name} field). The output of this curve must be greater than zero and less than or equal to 1.0 and should be valid for the range of volumetric flows and fan pressure rises anticipated for the simulation period.
 
-If this field is left blank, the model assumes that the output of the modifier curve is 1.0 for the entire simulation (i.e., constant belt efficiency at \(\eta_{\rm{belt, max}}\) in Region 1).
+If this field is left blank, the model assumes that the output of the modifier curve is 1.0 for the entire simulation (i.e., constant belt efficiency at \(\eta_{\mathrm{belt, max}}\) in Region 1).
 
 \paragraph{Field: Normalized Belt Efficiency Curve Name Region 2}\label{field-normalized-belt-efficiency-curve-name-region-2}
 
-The alpha name of the exponential decay performance curve (ref: \hyperref[curveexponentialdecay]{Curve:ExponentialDecay} in Performance Curves) that determines the normalized (part-load) fan drive belt efficiency (\(\eta_{\rm{belt}} (x_{\rm{belt}}) / \eta_{\rm{belt, max}}\)) as a function of \(x_{\rm{belt}}\). Normalized belt efficiency is represented by a segmented curve with three different regions. The curve for Region 2 (\(x_{\rm{belt, trans}} \le x_{\rm{belt}} \le 1\)) is:
+The alpha name of the exponential decay performance curve (ref: \hyperref[curveexponentialdecay]{Curve:ExponentialDecay} in Performance Curves) that determines the normalized (part-load) fan drive belt efficiency (\(\eta_{\mathrm{belt}} (x_{\mathrm{belt}}) / \eta_{\mathrm{belt, max}}\)) as a function of \(x_{\mathrm{belt}}\). Normalized belt efficiency is represented by a segmented curve with three different regions. The curve for Region 2 (\(x_{\mathrm{belt, trans}} \le x_{\mathrm{belt}} \le 1\)) is:
 
 \begin{equation}
-  \eta_{\rm{belt}} (x_{\rm{belt}}) / \eta_{\rm{belt, max}} = C_1 + C_2 \cdot exp(C_3 \cdot x_{\rm{belt}})
+  \eta_{\mathrm{belt}} (x_{\mathrm{belt}}) / \eta_{\mathrm{belt, max}} = C_1 + C_2 \cdot exp(C_3 \cdot x_{\mathrm{belt}})
 \end{equation}
 
-where \(x_{\rm{belt}} = \tau_{\rm{belt}} / \tau_{\rm{belt, max}}\); \(\tau_{\rm{belt}}\) is the belt output torque that corresponds to the calculated power input to the fan shaft (\(H_{\rm{fan}}\), W) by the drive belt and the calculated fan shaft speed (\(\omega_{\rm{fan}}\), rpm).
+where \(x_{\mathrm{belt}} = \tau_{\mathrm{belt}} / \tau_{\mathrm{belt, max}}\); \(\tau_{\mathrm{belt}}\) is the belt output torque that corresponds to the calculated power input to the fan shaft (\(H_{\mathrm{fan}}\), W) by the drive belt and the calculated fan shaft speed (\(\omega_{\mathrm{fan}}\), rpm).
 
-The output of this curve is used to calculate the belt efficiency \(\eta_{\rm{belt}} (x_{\rm{belt}}\) in Region 2 at each time step by modifying \(\eta_{\rm{belt, max}}\) (see \emph{Maximum Belt Efficiency Curve Name} field). The output of this curve must be greater than zero and less than or equal to 1.0 and should be valid for the range of volumetric flows and fan pressure rises anticipated for the simulation period.
+The output of this curve is used to calculate the belt efficiency \(\eta_{\mathrm{belt}} (x_{\mathrm{belt}}\) in Region 2 at each time step by modifying \(\eta_{\mathrm{belt, max}}\) (see \emph{Maximum Belt Efficiency Curve Name} field). The output of this curve must be greater than zero and less than or equal to 1.0 and should be valid for the range of volumetric flows and fan pressure rises anticipated for the simulation period.
 
-If this field is left blank, the model assumes that the output of the modifier curve is 1.0 for the entire simulation (i.e., constant belt efficiency at \(\eta_{\rm{belt, max}}\) in Region 2).
+If this field is left blank, the model assumes that the output of the modifier curve is 1.0 for the entire simulation (i.e., constant belt efficiency at \(\eta_{\mathrm{belt, max}}\) in Region 2).
 
 \paragraph{Field: Normalized Belt Efficiency Curve Name Region 3}\label{field-normalized-belt-efficiency-curve-name-region-3}
 
-The alpha name of the single rectangular hyperbola type 2 performance curve (ref: \hyperref[curverectangularhyperbola2]{Curve:RectangularHyperbola2} in Performance Curves) that determines the normalized (part-load) fan drive belt efficiency (\(\eta_{\rm{belt}} (x_{\rm{belt}}) / \eta_{\rm{belt, max}}\)) as a function of \(x_{\rm{belt}}\). Normalized belt efficiency is represented by a segmented curve with three different regions. The curve for Region 3 (\(x_{\rm{belt}} > 1\)) is:
+The alpha name of the single rectangular hyperbola type 2 performance curve (ref: \hyperref[curverectangularhyperbola2]{Curve:RectangularHyperbola2} in Performance Curves) that determines the normalized (part-load) fan drive belt efficiency (\(\eta_{\mathrm{belt}} (x_{\mathrm{belt}}) / \eta_{\mathrm{belt, max}}\)) as a function of \(x_{\mathrm{belt}}\). Normalized belt efficiency is represented by a segmented curve with three different regions. The curve for Region 3 (\(x_{\mathrm{belt}} > 1\)) is:
 
 \begin{equation}
-  \eta_{\rm{belt}} ( x_{\rm{belt}} ) / \eta_{\rm{belt, max}} = ( C_1 \cdot x_{\rm{belt}} ) / ( C_2 + x_{\rm{belt}} ) + C_3 \cdot x_{\rm{belt}}
+  \eta_{\mathrm{belt}} ( x_{\mathrm{belt}} ) / \eta_{\mathrm{belt, max}} = ( C_1 \cdot x_{\mathrm{belt}} ) / ( C_2 + x_{\mathrm{belt}} ) + C_3 \cdot x_{\mathrm{belt}}
 \end{equation}
 
-where \(x_{\rm{belt}} = \tau_{\rm{belt}} / \tau_{\rm{belt, max}}\); \(\tau_{\rm{belt}}\) is the belt output torque that corresponds to the calculated power input to the fan shaft (\(H_{\rm{fan}}\), W) by the drive belt and the calculated fan shaft speed (\(\omega_{\rm{fan}}\), rpm).
+where \(x_{\mathrm{belt}} = \tau_{\mathrm{belt}} / \tau_{\mathrm{belt, max}}\); \(\tau_{\mathrm{belt}}\) is the belt output torque that corresponds to the calculated power input to the fan shaft (\(H_{\mathrm{fan}}\), W) by the drive belt and the calculated fan shaft speed (\(\omega_{\mathrm{fan}}\), rpm).
 
-The output of this curve is used to calculate the belt efficiency \(\eta_{\rm{belt}} (x_{\rm{belt}})\) in Region 3 at each time step by modifying \(\eta_{\rm{belt, max}}\) (see \emph{Maximum Belt Efficiency Curve Name} field). The output of this curve must be greater than zero and less than or equal to 1.0 and should be valid for the range of volumetric flows and fan pressure rises anticipated for the simulation period.
+The output of this curve is used to calculate the belt efficiency \(\eta_{\mathrm{belt}} (x_{\mathrm{belt}})\) in Region 3 at each time step by modifying \(\eta_{\mathrm{belt, max}}\) (see \emph{Maximum Belt Efficiency Curve Name} field). The output of this curve must be greater than zero and less than or equal to 1.0 and should be valid for the range of volumetric flows and fan pressure rises anticipated for the simulation period.
 
-If this field is left blank, the model assumes that the output of the modifier curve is 1.0 for the entire simulation (i.e., constant belt efficiency at \(\eta_{\rm{belt, max}}\) in Region 3).
+If this field is left blank, the model assumes that the output of the modifier curve is 1.0 for the entire simulation (i.e., constant belt efficiency at \(\eta_{\mathrm{belt, max}}\) in Region 3).
 
 \paragraph{Field: Maximum Motor Efficiency Curve Name}\label{field-maximum-motor-efficiency-curve-name}
 
-The alpha name of the single rectangular hyperbola type 1 performance curve (ref: Curve: RectangularHyperbola1 in Performance Curves) that determines the maximum fan motor efficiency (\(\eta_{\rm{motor, max}}\)) as a function of \(x_{\rm{motor, max}}\). The curve is:
+The alpha name of the single rectangular hyperbola type 1 performance curve (ref: Curve: RectangularHyperbola1 in Performance Curves) that determines the maximum fan motor efficiency (\(\eta_{\mathrm{motor, max}}\)) as a function of \(x_{\mathrm{motor, max}}\). The curve is:
 
 \begin{equation}
-  \eta_{\rm{motor, max}} = (C_1 \cdot x_{\rm{motor, max}}) / (C_2 + x_{\rm{motor, max}}) + C_3
+  \eta_{\mathrm{motor, max}} = (C_1 \cdot x_{\mathrm{motor, max}}) / (C_2 + x_{\mathrm{motor, max}}) + C_3
 \end{equation}
 
-where \(x_{\rm{motor, max}} = ln(F_{\rm{motor}} \cdot H_{\rm{belt, max}})\) with \(H_{\rm{belt, max}}\) expressed in terms of hp. \(H_{\rm{belt, max}}\) is the maximum output power from the motor to the belt, which corresponds to the calculated maximum power input to the fan shaft (\(H_{\rm{fan, max}}\), W).
+where \(x_{\mathrm{motor, max}} = ln(F_{\mathrm{motor}} \cdot H_{\mathrm{belt, max}})\) with \(H_{\mathrm{belt, max}}\) expressed in terms of hp. \(H_{\mathrm{belt, max}}\) is the maximum output power from the motor to the belt, which corresponds to the calculated maximum power input to the fan shaft (\(H_{\mathrm{fan, max}}\), W).
 
-The output of this curve must be greater than zero and less than or equal to 1.0. If \(\eta_{\rm{motor, max}}\) is known, it is represented by coefficient \(C_3\). In this case, coefficients \(C_1\) and \(C_2\) are set to zero.
+The output of this curve must be greater than zero and less than or equal to 1.0. If \(\eta_{\mathrm{motor, max}}\) is known, it is represented by coefficient \(C_3\). In this case, coefficients \(C_1\) and \(C_2\) are set to zero.
 
 If this field is left blank, the model assumes that the output of the modifier curve is 1.0 for the entire simulation (maximum motor efficiency = 1.0).
 
@@ -1103,17 +1103,17 @@ If this field is left blank, the model assumes that the output of the modifier c
 
 The name of the HVAC system node to which the fan sends its outlet air.
 
-The alpha name of the single rectangular hyperbola type 2 performance curve (ref: \hyperref[curverectangularhyperbola2]{Curve:RectangularHyperbola2} in Performance Curves) that determines the normalized (part-load) fan motor efficiency (\(\eta_{\rm{motor}} (x_{\rm{motor}}) /  \eta_{\rm{motor, max}}\)) as a function of the motor load fraction \(x_{\rm{motor}}\). The curve is:
+The alpha name of the single rectangular hyperbola type 2 performance curve (ref: \hyperref[curverectangularhyperbola2]{Curve:RectangularHyperbola2} in Performance Curves) that determines the normalized (part-load) fan motor efficiency (\(\eta_{\mathrm{motor}} (x_{\mathrm{motor}}) /  \eta_{\mathrm{motor, max}}\)) as a function of the motor load fraction \(x_{\mathrm{motor}}\). The curve is:
 
 \begin{equation}
-  \eta_{\rm{motor}} (x_{\rm{motor}}) / \eta_{\rm{motor, max}} = (C_1 \cdot x_{\rm{motor}}) / (C_2 + x_{\rm{motor}}) + (C_3 \cdot x_{\rm{motor}}
+  \eta_{\mathrm{motor}} (x_{\mathrm{motor}}) / \eta_{\mathrm{motor, max}} = (C_1 \cdot x_{\mathrm{motor}}) / (C_2 + x_{\mathrm{motor}}) + (C_3 \cdot x_{\mathrm{motor}}
 \end{equation}
 
-where \(x_{\rm{motor}} = H_{\rm{belt}} / H_{\rm{belt, max}}\). \(H_{\rm{belt}}\) is the calculated output power from the motor to the belt (W), which corresponds to the calculated power input to the fan shaft (\(H_{\rm{fan}}\), W).
+where \(x_{\mathrm{motor}} = H_{\mathrm{belt}} / H_{\mathrm{belt, max}}\). \(H_{\mathrm{belt}}\) is the calculated output power from the motor to the belt (W), which corresponds to the calculated power input to the fan shaft (\(H_{\mathrm{fan}}\), W).
 
-  The output of this curve is used to calculate the motor efficiency (\(\eta_{\rm{motor}} (x_{\rm{motor}})\)) at each time step by modifying \(\eta_{\rm{motor, max}}\) (see \emph{Maximum Motor Efficiency Curve Name} field). The output of this curve must be greater than zero and less than or equal to 1.0 and should be valid for the range of volumetric flows and fan pressure rises anticipated for the simulation period.
+  The output of this curve is used to calculate the motor efficiency (\(\eta_{\mathrm{motor}} (x_{\mathrm{motor}})\)) at each time step by modifying \(\eta_{\mathrm{motor, max}}\) (see \emph{Maximum Motor Efficiency Curve Name} field). The output of this curve must be greater than zero and less than or equal to 1.0 and should be valid for the range of volumetric flows and fan pressure rises anticipated for the simulation period.
 
-If this field is left blank, the model assumes that the output of the modifier curve is 1.0 for the entire simulation (i.e., constant motor efficiency at \(\eta_{\rm{motor, max}}\)).
+If this field is left blank, the model assumes that the output of the modifier curve is 1.0 for the entire simulation (i.e., constant motor efficiency at \(\eta_{\mathrm{motor, max}}\)).
 
 \paragraph{Field: VFD Efficiency Curve Name}\label{field-vfd-efficiency-curve-name}
 
@@ -1123,7 +1123,7 @@ The alpha name of the single rectangular hyperbola type 2 performance curve (e.g
   \eta_{VFD}(x_{VFD}) = (C_1 \cdot x_{VFD}) / (C_2 + x_{VFD}) + C_3 \cdot x_{VFD}
 \end{equation}
 
-where \(x_{VFD} = H_{\rm{motor}} / H_{\rm{motor, max}}\) or \(\omega_{\rm{motor}} / \omega_{\rm{motor, max}}\).
+where \(x_{VFD} = H_{\mathrm{motor}} / H_{\mathrm{motor, max}}\) or \(\omega_{\mathrm{motor}} / \omega_{\mathrm{motor, max}}\).
 
 The output of this curve is used to calculate the VFD efficiency \(\eta_{VFD}(x_{VFD})\) at each time step. The output of this curve must be greater than zero and less than or equal to 1.0 and should be valid for the range of volumetric flows and fan pressure rises anticipated for the simulation period.
 

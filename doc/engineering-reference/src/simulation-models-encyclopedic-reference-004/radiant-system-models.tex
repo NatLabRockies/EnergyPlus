@@ -877,31 +877,31 @@ Note that the above development is valid for both the hydronic (variable flow) l
 The previous equation combines with the following equation which is valid for an surface in the current radiant system:
 
 \begin{equation}
-{{\rm{q}}_{\rm{j}}}{\rm{  =  }}{{\rm{\dot m}}_{\rm{j}}}{{\rm{c}}_{\rm{p}}}{\rm{(}}{{\rm{T}}_{{\rm{water,in}}}}{\rm{  -  }}{{\rm{T}}_{{\rm{water,out,j}}}}{\rm{)}}
+{{\mathrm{q}}_{\mathrm{j}}}{\mathrm{  =  }}{{\mathrm{\dot m}}_{\mathrm{j}}}{{\mathrm{c}}_{\mathrm{p}}}{\mathrm{(}}{{\mathrm{T}}_{{\mathrm{water,in}}}}{\mathrm{  -  }}{{\mathrm{T}}_{{\mathrm{water,out,j}}}}{\mathrm{)}}
 \end{equation}
 
 where q\(_{j}\) is the heat transfer to the jth surface in the radiant system, \(\dot{m}_{j}\) is the mass flow rate only to this surface, and T\(_{water,out,j}\) is the outlet temperature for the jth surface.~ Combining the previous two equations results in:
 
 \begin{equation}
-{\rm{(}}{{\rm{T}}_{{\rm{water,in}}}}{\rm{  -  }}{{\rm{T}}_{{\rm{water,out,j}}}}{\rm{)}} = \frac{{{\varepsilon_j}\left( {{{\rm{T}}_{{\rm{water,in}}}} - {C_{k,j}}} \right)}}{{1 + \frac{{{\varepsilon_j}{{\dot m}_j}{c_p}{C_{l,j}}}}{A}}}
+{\mathrm{(}}{{\mathrm{T}}_{{\mathrm{water,in}}}}{\mathrm{  -  }}{{\mathrm{T}}_{{\mathrm{water,out,j}}}}{\mathrm{)}} = \frac{{{\varepsilon_j}\left( {{{\mathrm{T}}_{{\mathrm{water,in}}}} - {C_{k,j}}} \right)}}{{1 + \frac{{{\varepsilon_j}{{\dot m}_j}{c_p}{C_{l,j}}}}{A}}}
 \end{equation}
 
 If for each surface in the radiant system, we let:
 
 \begin{equation}
-{{\rm{C}}_{m,j}} = \frac{{{\varepsilon_j}}}{{1 + \frac{{{\varepsilon_j}{{\dot m}_j}{c_p}{C_{l,j}}}}{A}}}
+{{\mathrm{C}}_{m,j}} = \frac{{{\varepsilon_j}}}{{1 + \frac{{{\varepsilon_j}{{\dot m}_j}{c_p}{C_{l,j}}}}{A}}}
 \end{equation}
 
 then the previous equations because the slightly less complex:
 
 \begin{equation}
-{\rm{(}}{{\rm{T}}_{{\rm{water,in}}}}{\rm{  -  }}{{\rm{T}}_{{\rm{water,out,j}}}}{\rm{)}} = {C_{m,j}}\left( {{{\rm{T}}_{{\rm{water,in}}}} - {C_{k,j}}} \right)
+{\mathrm{(}}{{\mathrm{T}}_{{\mathrm{water,in}}}}{\mathrm{  -  }}{{\mathrm{T}}_{{\mathrm{water,out,j}}}}{\mathrm{)}} = {C_{m,j}}\left( {{{\mathrm{T}}_{{\mathrm{water,in}}}} - {C_{k,j}}} \right)
 \end{equation}
 
 Rearranging to obtain the outlet temperature for the jth surface:
 
 \begin{equation}
-{{\rm{T}}_{{\rm{water,out,j}}}} = \left( {1 - {C_{m,j}}} \right){{\rm{T}}_{{\rm{water,in}}}} + {C_{m,j}}{C_{k,j}}
+{{\mathrm{T}}_{{\mathrm{water,out,j}}}} = \left( {1 - {C_{m,j}}} \right){{\mathrm{T}}_{{\mathrm{water,in}}}} + {C_{m,j}}{C_{k,j}}
 \end{equation}
 
 The overall outlet temperature from the radiant system is just a simple mixing of all of the surface outlet temperatures based on flow fraction and results in T\(_{water,out}\).
@@ -909,27 +909,27 @@ The overall outlet temperature from the radiant system is just a simple mixing o
 An energy balance on the mixing valve-pump group results in the following equation that relates the radiant system inlet temperature (T\(_{water,in}\)) to the loop inlet water temperature (T\(_{loop,in}\)), the radiant system outlet temperature (T\(_{water,out}\)), and the pump heat addition:
 
 \begin{equation}
-{{\rm{T}}_{{\rm{water,in}}}} = \frac{{{{\dot m}_{loop}}}}{{{{\dot m}_{system}}}}{{\rm{T}}_{{\rm{loop,in}}}} + \frac{{{{\dot m}_{recirc}}}}{{{{\dot m}_{system}}}}{{\rm{T}}_{{\rm{water,out}}}} + \frac{{PumpHeat}}{{{{\dot m}_{system}}{c_p}}}
+{{\mathrm{T}}_{{\mathrm{water,in}}}} = \frac{{{{\dot m}_{loop}}}}{{{{\dot m}_{system}}}}{{\mathrm{T}}_{{\mathrm{loop,in}}}} + \frac{{{{\dot m}_{recirc}}}}{{{{\dot m}_{system}}}}{{\mathrm{T}}_{{\mathrm{water,out}}}} + \frac{{PumpHeat}}{{{{\dot m}_{system}}{c_p}}}
 \end{equation}
 
 Plugging in the definition of T\(_{water,out}\) based on the summation of T\(_{water,out,j}\) equations results in:
 
 \begin{equation}
-{{\rm{T}}_{{\rm{water,in}}}} = \frac{{LoopTerm + RecircTerm}}{{TwiCoeff}}
+{{\mathrm{T}}_{{\mathrm{water,in}}}} = \frac{{LoopTerm + RecircTerm}}{{TwiCoeff}}
 \end{equation}
 
 where:
 
 \begin{equation}
-LoopTerm = \frac{{{{\dot m}_{loop}}}}{{{{\dot m}_{system}}}}{{\rm{T}}_{{\rm{loop,in}}}} + \frac{{PumpHeat}}{{{{\dot m}_{system}}{c_p}}}
+LoopTerm = \frac{{{{\dot m}_{loop}}}}{{{{\dot m}_{system}}}}{{\mathrm{T}}_{{\mathrm{loop,in}}}} + \frac{{PumpHeat}}{{{{\dot m}_{system}}{c_p}}}
 \end{equation}
 
 \begin{equation}
-RecircTerm = \frac{{{{\dot m}_{recirc}}}}{{{{\dot m}_{system}}}}\sum\limits_{\rm{j}} {{\rm{FlowFractio}}{{\rm{n}}_{\rm{j}}}{{\rm{T}}_{{\rm{water,out,j}}}}}
+RecircTerm = \frac{{{{\dot m}_{recirc}}}}{{{{\dot m}_{system}}}}\sum\limits_{\mathrm{j}} {{\mathrm{FlowFractio}}{{\mathrm{n}}_{\mathrm{j}}}{{\mathrm{T}}_{{\mathrm{water,out,j}}}}}
 \end{equation}
 
 \begin{equation}
-TwiCoeff = \left( {1 - \frac{{{{\dot m}_{recirc}}}}{{{{\dot m}_{system}}}}} \right)\sum\limits_{\rm{j}} {\left[ {{\rm{FlowFractio}}{{\rm{n}}_{\rm{j}}}\left( {1 - {C_{m,j}}} \right)} \right]}
+TwiCoeff = \left( {1 - \frac{{{{\dot m}_{recirc}}}}{{{{\dot m}_{system}}}}} \right)\sum\limits_{\mathrm{j}} {\left[ {{\mathrm{FlowFractio}}{{\mathrm{n}}_{\mathrm{j}}}\left( {1 - {C_{m,j}}} \right)} \right]}
 \end{equation}
 
 Once the actual water inlet temperature is calculated with this equation, it is then possible to calculate individual outlet temperatures for each surface, the overall outlet temperature, and finally all of the necessary flow and loop quantities.~ This procedure avoids iteration but is somewhat complex to follow.~ However, this second mathematical process is only needed for select cases of the constant flow radiant system when the inlet temperature is not known explicitly.~ With the proper establishment of input data, it can be avoided.

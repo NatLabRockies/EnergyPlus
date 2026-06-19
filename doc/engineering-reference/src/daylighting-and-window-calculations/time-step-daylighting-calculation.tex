@@ -196,7 +196,7 @@ Similarly, the window source luminance, \emph{S\(_{win}\)}, and window backgroun
 The total illuminance at a reference point from all of the exterior windows in a zone is
 
 \begin{equation}
-  {I_{tot}}({i_L}) = \sum\limits_{\genfrac{}{}{0pt}{2}{\rm{windows}}{\rm{in~zone}}} {{I_{win}}({i_s},{i_L})}
+  {I_{tot}}({i_L}) = \sum\limits_{\genfrac{}{}{0pt}{2}{\mathrm{windows}}{\mathrm{in~zone}}} {{I_{win}}({i_s},{i_L})}
 \end{equation}
 
 where i\(_{S}\) = 1 if the window is unshaded and \emph{i\(_{S}\)} = 2 if the window is shaded that time step. (Before the illuminance calculation is done the window shading control will have been simulated to determine whether or not the window is shaded.)
@@ -204,7 +204,7 @@ where i\(_{S}\) = 1 if the window is unshaded and \emph{i\(_{S}\)} = 2 if the wi
 Similarly, the total background luminance is calculated:
 
 \begin{equation}
-  {B_{tot}}({i_L}) = \sum\limits_{\genfrac{}{}{0pt}{2}{\rm{windows}}{\rm{in~zone}}} {{B_{win}}({i_s},{i_L})}
+  {B_{tot}}({i_L}) = \sum\limits_{\genfrac{}{}{0pt}{2}{\mathrm{windows}}{\mathrm{in~zone}}} {{B_{win}}({i_s},{i_L})}
 \end{equation}
 
 \subsection{Glare Index}\label{glare-index-000}
@@ -212,7 +212,7 @@ Similarly, the total background luminance is calculated:
 The net glare index at each reference point is calculated as:
 
 \begin{equation}
-  {G_I}({i_L}) = 10{\log_{10}}\sum\limits_{\genfrac{}{}{0pt}{2}{\rm{windows}}{\rm{in~zone}}} {\frac{{{S_{win}}{{({i_L},{i_S})}^{1.6}}\Omega {{({i_L})}^{0.8}}}}{{B({i_L}) + 0.07\omega {{({i_L})}^{0.5}}{S_{win}}({i_L},{i_S})}}}
+  {G_I}({i_L}) = 10{\log_{10}}\sum\limits_{\genfrac{}{}{0pt}{2}{\mathrm{windows}}{\mathrm{in~zone}}} {\frac{{{S_{win}}{{({i_L},{i_S})}^{1.6}}\Omega {{({i_L})}^{0.8}}}}{{B({i_L}) + 0.07\omega {{({i_L})}^{0.5}}{S_{win}}({i_L},{i_S})}}}
 \end{equation}
 
 where
@@ -254,7 +254,7 @@ If glare control has been specified and the glare index at either reference poin
 Once the final daylight illuminance value at each reference point has been determined, the electric lighting control is simulated. The fractional electric lighting output, \emph{f\(_{L}\)}, required to meet the setpoint at reference point \emph{i\(_{L}\)} is given by
 
 \begin{equation}
-{f_L}({i_L}) = {\rm{max}}\left[ {0,\frac{{{I_{set}}({i_L}) - {I_{tot}}({i_L})}}{{{I_{set}}({i_L})}}} \right]
+{f_L}({i_L}) = {\mathrm{max}}\left[ {0,\frac{{{I_{set}}({i_L}) - {I_{tot}}({i_L})}}{{{I_{set}}({i_L})}}} \right]
 \end{equation}
 
 Here, \emph{I\(_{set}\)} is the illuminance setpoint and \emph{I\(_{tot}\)} is the daylight illuminance at the reference point. This relationship assumes that the electric lights at full power produce an illuminance equal to \emph{I\(_{set}\)} at the reference point.

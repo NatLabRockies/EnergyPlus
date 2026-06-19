@@ -126,7 +126,7 @@ where \({\rho_{std}}\) is the density of air at 20 degrees C, humidity ratio = 0
 For each branch, loop over all the nodes on the branch and set the node data to the following values:
 
 \begin{equation}
-{T_{node}} = {20^{\rm{o}}}C
+{T_{node}} = {20^{\mathrm{o}}}C
 \end{equation}
 
 \begin{equation}
@@ -134,7 +134,7 @@ For each branch, loop over all the nodes on the branch and set the node data to 
 \end{equation}
 
 \begin{equation}
-{h_{node}} = {\mathop{\rm PsyHFnTdbW}\nolimits} {\rm{(}}20.0,{W_{oa}}{\rm{)}}
+{h_{node}} = {\mathop{\rm PsyHFnTdbW}\nolimits} {\mathrm{(}}20.0,{W_{oa}}{\mathrm{)}}
 \end{equation}
 
 \begin{equation}
@@ -169,13 +169,13 @@ For each branch, loop over all the nodes on the branch and set the node data to 
 Q{u_{node}} = 0.0
 \end{equation}
 
-where \({W_{oa}}\) is the humidity ratio of the outside air; \({\rm{PsyHFnTdbW}}\) is the EnergyPlus psychrometric function for enthalpy \emph{h}, given temperature and humidity ratio; and \emph{Qu} is quality.
+where \({W_{oa}}\) is the humidity ratio of the outside air; \({\mathrm{PsyHFnTdbW}}\) is the EnergyPlus psychrometric function for enthalpy \emph{h}, given temperature and humidity ratio; and \emph{Qu} is quality.
 
 \subsubsection{System Time Step Initializations}\label{system-time-step-initializations}
 
 For each branch in each air loop, loop over all the nodes on the branch and set \({\dot m_{setpt,node}} = 0.0\) ; if it is the start of an HVAC solution sequence set \({\dot m_{\max avail,node}} = {\dot m_{\max ,node}}\) . Then set the mass flow rate setpoints for the air loop nodes.
 
-1)~~~~On each air loop, loop over the outlet branches and find the loop outlet nodes. If it is the start of an HVAC solution sequence, set \({\dot m_{setpt,outletnode}} = {\dot m_{outletbr,\max }}\) . This will insure that during the first pass through the full loop that the mass flow rate will be at the maximum. Otherwise, set \({\dot m_{setpt,outletnode}} = {\dot m_{zone{\rm{ }}eq{\rm{ }}inletnode}}\) . This sets the air loop flow rate to the total zone requirement.
+1)~~~~On each air loop, loop over the outlet branches and find the loop outlet nodes. If it is the start of an HVAC solution sequence, set \({\dot m_{setpt,outletnode}} = {\dot m_{outletbr,\max }}\) . This will insure that during the first pass through the full loop that the mass flow rate will be at the maximum. Otherwise, set \({\dot m_{setpt,outletnode}} = {\dot m_{zone{\mathrm{ }}eq{\mathrm{ }}inletnode}}\) . This sets the air loop flow rate to the total zone requirement.
 
 2)~~~~Pass the mass flow rate setpoint upstream to the start of the outlet branches; through the splitter, if one exists; and upstream to the beginning node of the splitter inlet branch.
 

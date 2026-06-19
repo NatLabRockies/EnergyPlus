@@ -33,7 +33,7 @@ The exhaust flow rate is then calculated as:
 where T\(_{reference}\) is the reference temperature for the fuel lower heating value (given as 25\(^{\circ}\)C in manufacturer's data) and:
 
 \begin{equation}
-{T_{stack}} = {T_{DesignMinExhaust}} + {\frac{{\left( {{T_{exhaust}} - {T_{DesignMinExhaust}}} \right)}}{{{\rm{exp}}\left( {\frac{{{\rm{UA}}}}{{{{{\rm{\dot m}}}_{{\rm{exhaust}}}}C{p_{exhaust}}}}} \right)}}^2}
+{T_{stack}} = {T_{DesignMinExhaust}} + {\frac{{\left( {{T_{exhaust}} - {T_{DesignMinExhaust}}} \right)}}{{{\mathrm{exp}}\left( {\frac{{{\mathrm{UA}}}}{{{{{\mathrm{\dot m}}}_{{\mathrm{exhaust}}}}C{p_{exhaust}}}}} \right)}}^2}
 \end{equation}
 
 Finally heat recovered from the lube oil and the water jacket are accounted for as follows:
@@ -53,13 +53,13 @@ The manufacturer must supply the recoverable water jacket heat, lube oil heat an
 The combustion turbine generator model was originally developed for the BLAST program and was subsequently adapted for use in EnergyPlus. The model uses the following set of equations all of which are equation fits to the PLR (Part Load Ratio) of the generator and the entering air temperature. The coefficients must be derived from manufacturers data. For electric power generated in Watts, the fuel input rate is calculated in J/s.
 
 \begin{equation}
-\frac{{{\rm{fuel~energy~input~rate}}}}{{{\rm{electric~power~output}}}} = \left[ {{a_1} + {a_2}PLR + {a_3}PL{R^2}} \right] * \left[ {{b_1} + {b_2}\Delta T + {b_3}\Delta {T^2}} \right]
+\frac{{{\mathrm{fuel~energy~input~rate}}}}{{{\mathrm{electric~power~output}}}} = \left[ {{a_1} + {a_2}PLR + {a_3}PL{R^2}} \right] * \left[ {{b_1} + {b_2}\Delta T + {b_3}\Delta {T^2}} \right]
 \end{equation}
 
 The electrical load and engine generator nominal load capacity are used to compute the part load ratio.
 
 \begin{equation}
-PLR = \frac{{{\rm{Electric~energy~output}}}}{{{\rm{nominal~generating~capacity}}}}
+PLR = \frac{{{\mathrm{Electric~energy~output}}}}{{{\mathrm{nominal~generating~capacity}}}}
 \end{equation}
 
 The temperature difference shows the deviation of ambient air temperature from the manufacturers design air temperature.
@@ -71,13 +71,13 @@ The temperature difference shows the deviation of ambient air temperature from t
 A second curve fit calculates the exhaust temperature (C) by multiplying the exhaust temperature (C) for a particular part load by a correction factor based on the deviation from design temperature.
 
 \begin{equation}
-{{\rm{T}}_{exhaust}} = \left[ {{c_1} + {c_2}PLR + {c_3}PL{R^2}} \right] * \left[ {{d_1} + {d_2}\Delta T + {d_3}\Delta {T^2}} \right]
+{{\mathrm{T}}_{exhaust}} = \left[ {{c_1} + {c_2}PLR + {c_3}PL{R^2}} \right] * \left[ {{d_1} + {d_2}\Delta T + {d_3}\Delta {T^2}} \right]
 \end{equation}
 
 The exhaust gas temp is used if a stack heat exchanger is used to recover waste heat from the exhaust.~ This temperature is the inlet temperature to the heat exchanger which is modeled in a UA-effectiveness form:
 
 \begin{equation}
-{T_{stack}} = {T_{DesignMinExhaust}} + {\frac{{\left( {{T_{exhaust}} - {T_{DesignMinExhaust}}} \right)}}{{{\rm{exp}}\left( {\frac{{{\rm{UA}}}}{{{{{\rm{\dot m}}}_{{\rm{exhaust}}}}C{p_{exhaust}}}}} \right)}}^2}
+{T_{stack}} = {T_{DesignMinExhaust}} + {\frac{{\left( {{T_{exhaust}} - {T_{DesignMinExhaust}}} \right)}}{{{\mathrm{exp}}\left( {\frac{{{\mathrm{UA}}}}{{{{{\mathrm{\dot m}}}_{{\mathrm{exhaust}}}}C{p_{exhaust}}}}} \right)}}^2}
 \end{equation}
 
 Where the design minimum exhaust temperature is a user input to the model and the exhaust mass flow rate and the UA are fit from manufacturers data as follows:
@@ -87,13 +87,13 @@ UA = {e_3}{{(Nominal~Generating~Capacity)}^{e4}}
 \end{equation}
 
 \begin{equation}
-\frac{{{\rm{exhaust~gas~flow~rate}}}}{{{\rm{Nominal~Generating~Capacity}}}} = \left[ {{f_1} + {f_2}\Delta T + {f_3}\Delta {T^2}} \right]
+\frac{{{\mathrm{exhaust~gas~flow~rate}}}}{{{\mathrm{Nominal~Generating~Capacity}}}} = \left[ {{f_1} + {f_2}\Delta T + {f_3}\Delta {T^2}} \right]
 \end{equation}
 
 Finally, heat recovered from the lube oil is accounted for as follows:
 
 \begin{equation}
-\frac{{{\rm{Recoverable~lube~oil~heat}}}}{{{\rm{electric~power~generated}}}} = {g_1} + {g_2}PLR + {g_3}PL{R^2}
+\frac{{{\mathrm{Recoverable~lube~oil~heat}}}}{{{\mathrm{electric~power~generated}}}} = {g_1} + {g_2}PLR + {g_3}PL{R^2}
 \end{equation}
 
 \subsection{Microturbine Generator}\label{microturbine-generator}

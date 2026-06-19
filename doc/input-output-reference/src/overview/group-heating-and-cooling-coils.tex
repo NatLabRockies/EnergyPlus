@@ -3268,16 +3268,16 @@ This numeric field contains the gross rated total cooling capacity at the nomina
 The gross rated total cooling capacity is used to determine a capacity scaling factor, as compared to the Reference Unit capacity at the nominal speed level.
 
 \begin{equation}
-{\rm{CapacityScaleFactor}} = \frac{{{\rm{Gross RatedTotalCoolingCapacity}}}}{{{\rm{ReferenceUnitCapacity}}@{\rm{NominalSpeedLevel}}}}
+{\mathrm{CapacityScaleFactor}} = \frac{{{\mathrm{Gross RatedTotalCoolingCapacity}}}}{{{\mathrm{ReferenceUnitCapacity}}@{\mathrm{NominalSpeedLevel}}}}
 \end{equation}
 
 And then, this scaling factor is used to determine capacities at rated conditions for other speed levels, as below,
 
 \begin{equation}
   \begin{array}{l}
-    \rm{Gross RatedCapacity} @ \rm{SpeedLevel} \left( {\rm{x}} \right) = \\
-    \quad \quad \quad \rm{CapacityScaleFactor} \times \\
-    \quad \quad \quad \rm{ReferenceUnitCapacity} @ {\rm{SpeedLevel}}(\rm{x})
+    \mathrm{Gross RatedCapacity} @ \mathrm{SpeedLevel} \left( {\mathrm{x}} \right) = \\
+    \quad \quad \quad \mathrm{CapacityScaleFactor} \times \\
+    \quad \quad \quad \mathrm{ReferenceUnitCapacity} @ {\mathrm{SpeedLevel}}(\mathrm{x})
   \end{array}
 \end{equation}
 
@@ -3286,17 +3286,17 @@ And then, this scaling factor is used to determine capacities at rated condition
 This numeric field contains the rated volumetric air flow rate on the load side of the DX unit, corresponding to the nominal speed level. This field is autosizable. The value is used to determine an internal scaling factor, and calculate the air flow rates in the parent objects. It is recommended that the ratio of the rated volumetric air flow rate to the rated capacity is the same as the unit performance from the Reference Unit data.
 
 \begin{equation}
-\rm{AirFlowScaleFactor} = \frac{\rm{RatedVolumetricAirFlowRate}}{\rm{ReferenceUnitVolAirFlowRate} @ \rm{NominalSpeedLevel} \times \rm{CapacityScaleFactor}}
+\mathrm{AirFlowScaleFactor} = \frac{\mathrm{RatedVolumetricAirFlowRate}}{\mathrm{ReferenceUnitVolAirFlowRate} @ \mathrm{NominalSpeedLevel} \times \mathrm{CapacityScaleFactor}}
 \end{equation}
 
 And the volumetric air flow rates in the parent objects are calculated as below,
 
 \begin{equation}
   \begin{array}{l}
-    \rm{LoopVolumetricAirFlowRate} @ \rm{SpeedLevel} \left( \rm{x} \right) = \\
-    \quad \quad \quad \rm{AirFlowScaleFactor} \times \\
-    \quad \quad \quad \rm{ReferenceUnitVolAirFlowRate} @ \rm{SpeedLevel}(\rm{x}) \times \\
-    \quad \quad \quad \rm{CapacityScaleFactor}
+    \mathrm{LoopVolumetricAirFlowRate} @ \mathrm{SpeedLevel} \left( \mathrm{x} \right) = \\
+    \quad \quad \quad \mathrm{AirFlowScaleFactor} \times \\
+    \quad \quad \quad \mathrm{ReferenceUnitVolAirFlowRate} @ \mathrm{SpeedLevel}(\mathrm{x}) \times \\
+    \quad \quad \quad \mathrm{CapacityScaleFactor}
   \end{array}
 \end{equation}
 
@@ -4723,16 +4723,16 @@ This numeric field defines the nominal speed level, at which the rated capacity,
 This numeric field contains the rated capacity at the nominal speed level. This field is autosizable. The gross rated heating capacity is used to determine a capacity scaling factor, as compared to the Reference Unit capacity at the nominal speed level.
 
 \begin{equation}
-\rm{CapacityScaleFactor} = \frac{{{\rm{Gross RatedTotalHeatingCapacity}}}}{{{\rm{ReferenceUnitCapacity}}@{\rm{NominalSpeedLevel}}}}
+\mathrm{CapacityScaleFactor} = \frac{{{\mathrm{Gross RatedTotalHeatingCapacity}}}}{{{\mathrm{ReferenceUnitCapacity}}@{\mathrm{NominalSpeedLevel}}}}
 \end{equation}
 
 And then, this scaling factor is used to determine capacities at rated conditions for other speed levels, as below,
 
 \begin{equation}
   \begin{array}{l}
-    \rm{Gross RatedCapacity} @ \rm{SpeedLevel} \left( \rm{x} \right) = \\
-    \quad \quad \quad \rm{CapacityScaleFactor} \times \\
-    \quad \quad \quad \rm{ReferenceUnitCapacity} @ \rm{SpeedLevel}(\rm{x})
+    \mathrm{Gross RatedCapacity} @ \mathrm{SpeedLevel} \left( \mathrm{x} \right) = \\
+    \quad \quad \quad \mathrm{CapacityScaleFactor} \times \\
+    \quad \quad \quad \mathrm{ReferenceUnitCapacity} @ \mathrm{SpeedLevel}(\mathrm{x})
   \end{array}
 \end{equation}
 
@@ -4741,17 +4741,17 @@ And then, this scaling factor is used to determine capacities at rated condition
 This numeric field contains the rated volumetric air flow rate on the load side of the heat pump corresponding to the nominal speed level. This field is autosizable. The value is used to determine an internal scaling factor, and calculate the air flow rates in the parent objects. It is recommended that the ratio of the rated volumetric air flow rate to the rated capacity is the same as the unit performance from the Reference Unit data.
 
 \begin{equation}
-{\rm{AirFlowScaleFactor}} = \frac{{{\rm{RatedVolumetricAirFlowRate}}}}{{{\rm{ReferenceUnitVolAirFlowRate}}@{\rm{NominalSpeedLevel}} \times {\rm{CapacityScaleFactor}}}}
+{\mathrm{AirFlowScaleFactor}} = \frac{{{\mathrm{RatedVolumetricAirFlowRate}}}}{{{\mathrm{ReferenceUnitVolAirFlowRate}}@{\mathrm{NominalSpeedLevel}} \times {\mathrm{CapacityScaleFactor}}}}
 \end{equation}
 
 And the volumetric air flow rates in the parent objects are calculated as below,
 
 \begin{equation}
   \begin{array}{l}
-    {\rm{LoopVolumetricAirFlowRate}}@{\rm{SpeedLevel}}\left( {\rm{x}} \right) = \\
-    \quad \quad \quad {\rm{AirFlowScaleFactor}} \times \\
-    \quad \quad \quad {\rm{ReferenceUnitVolAirFlowRate}}@{\rm{SpeedLevel}}({\rm{x}}) \times \\
-    \quad {\kern 1pt} {\kern 1pt} \quad \quad {\rm{CapacityScaleFactor}}
+    {\mathrm{LoopVolumetricAirFlowRate}}@{\mathrm{SpeedLevel}}\left( {\mathrm{x}} \right) = \\
+    \quad \quad \quad {\mathrm{AirFlowScaleFactor}} \times \\
+    \quad \quad \quad {\mathrm{ReferenceUnitVolAirFlowRate}}@{\mathrm{SpeedLevel}}({\mathrm{x}}) \times \\
+    \quad {\kern 1pt} {\kern 1pt} \quad \quad {\mathrm{CapacityScaleFactor}}
   \end{array}
 \end{equation}
 
@@ -7514,8 +7514,8 @@ And then, this scaling factor is used to determine capacities at rated condition
 
 \begin{equation}
   \begin{array}{l}
-    \rm{GrossRatedCapacity} @ \rm{SpeedLevel} \left( x \right) = \rm{CapacityScaleFactor} \\
-    \quad \quad \quad \quad \times \rm{ReferenceUnitCapacity} @ \rm{SpeedLevel}( x )
+    \mathrm{GrossRatedCapacity} @ \mathrm{SpeedLevel} \left( x \right) = \mathrm{CapacityScaleFactor} \\
+    \quad \quad \quad \quad \times \mathrm{ReferenceUnitCapacity} @ \mathrm{SpeedLevel}( x )
   \end{array}
 \end{equation}
 
@@ -7533,9 +7533,9 @@ And the volumetric air flow rates in the parent objects are calculated as below,
 
 \begin{equation}
   \begin{array}{l}
-    \rm{LoopVolumetricAirFlowRate} @ \rm{SpeedLevel} \left( x \right) = \rm{AirFlowScaleFactor} \\
-    \quad \quad \quad \times \rm{ReferenceUnitVolAirFlowRate} @ \rm{SpeedLevel}(x) \\
-    \quad \quad \quad \times \rm{CapacityScaleFactor}
+    \mathrm{LoopVolumetricAirFlowRate} @ \mathrm{SpeedLevel} \left( x \right) = \mathrm{AirFlowScaleFactor} \\
+    \quad \quad \quad \times \mathrm{ReferenceUnitVolAirFlowRate} @ \mathrm{SpeedLevel}(x) \\
+    \quad \quad \quad \times \mathrm{CapacityScaleFactor}
   \end{array}
 \end{equation}
 
@@ -7556,9 +7556,9 @@ And the required volumetric water flow rates at the speed levels in the parent o
 
 \begin{equation}
   \begin{array}{l}
-    \rm{LoopVolumetricWaterFlowRate} @ \rm{SpeedLevel} \left( x \right) = \rm{WaterFlowScaleFactor} \\
-    \quad \quad \quad \times \rm{ReferenceUnitVolWaterFlowRate} @ \rm{SpeedLevel}(x) \\
-    \quad \quad \quad  \times \rm{CapacityScaleFactor}
+    \mathrm{LoopVolumetricWaterFlowRate} @ \mathrm{SpeedLevel} \left( x \right) = \mathrm{WaterFlowScaleFactor} \\
+    \quad \quad \quad \times \mathrm{ReferenceUnitVolWaterFlowRate} @ \mathrm{SpeedLevel}(x) \\
+    \quad \quad \quad  \times \mathrm{CapacityScaleFactor}
   \end{array}
 \end{equation}
 
@@ -7656,11 +7656,11 @@ The actual total cooling capacity at Speed \textless{}x\textgreater{}, consideri
 
 \begin{equation}
   \begin{array}{l}
-    \rm{ActualCapacity} @ \rm{SpeedLevel} \left( x \right) = \rm{CapacityScaleFactor} \\
-    \quad \quad \quad \times \rm{ReferenceUnitCapacity} @ \rm{SpeedLevel}(x) \\
-    \quad \quad \quad \times \rm{TotCapTempModFac} @ \rm{SpeedLevel}(x) \\
-    \quad \quad \quad \times \rm{TotCapAirFlowModFac} @ \rm{SpeedLevel}(x) \\
-    \quad \quad \quad \times \rm{TotCapWaterFlowModFac} @ \rm{SpeedLevel}(x)
+    \mathrm{ActualCapacity} @ \mathrm{SpeedLevel} \left( x \right) = \mathrm{CapacityScaleFactor} \\
+    \quad \quad \quad \times \mathrm{ReferenceUnitCapacity} @ \mathrm{SpeedLevel}(x) \\
+    \quad \quad \quad \times \mathrm{TotCapTempModFac} @ \mathrm{SpeedLevel}(x) \\
+    \quad \quad \quad \times \mathrm{TotCapAirFlowModFac} @ \mathrm{SpeedLevel}(x) \\
+    \quad \quad \quad \times \mathrm{TotCapWaterFlowModFac} @ \mathrm{SpeedLevel}(x)
   \end{array}
 \end{equation}
 

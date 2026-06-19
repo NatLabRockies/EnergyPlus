@@ -113,27 +113,27 @@ For fixed sun position, sky condition (clear or overcast) and room geometry, the
 The following daylight factors are calculated:
 
 \begin{equation}
-{d_{sky}} = \frac{{{\rm{Illuminance~at~reference~point~due~to~sky-related~light}}}}{{{E_{h,sky}}}}
+{d_{sky}} = \frac{{{\mathrm{Illuminance~at~reference~point~due~to~sky-related~light}}}}{{{E_{h,sky}}}}
 \end{equation}
 
 \begin{equation}
-{d_{sun}} = \frac{{{\rm{Illuminance~at~reference~point~due~to~sun-related~light}}}}{{{E_{h,sun}}}}
+{d_{sun}} = \frac{{{\mathrm{Illuminance~at~reference~point~due~to~sun-related~light}}}}{{{E_{h,sun}}}}
 \end{equation}
 
 \begin{equation}
-{w_{sky}} = \frac{{{\rm{Average~window~luminance~due~to~sky-related~light}}}}{{{E_{h,sky}}}}
+{w_{sky}} = \frac{{{\mathrm{Average~window~luminance~due~to~sky-related~light}}}}{{{E_{h,sky}}}}
 \end{equation}
 
 \begin{equation}
-{w_{sun}} = \frac{{{\rm{Average~window~luminance~due~to~sun-related~light}}}}{{{E_{h,sun}}}}
+{w_{sun}} = \frac{{{\mathrm{Average~window~luminance~due~to~sun-related~light}}}}{{{E_{h,sun}}}}
 \end{equation}
 
 \begin{equation}
-{b_{sky}} = \frac{{{\rm{Window~background~luminance~due~to~sky-related~light}}}}{{{E_{h,sky}}}}
+{b_{sky}} = \frac{{{\mathrm{Window~background~luminance~due~to~sky-related~light}}}}{{{E_{h,sky}}}}
 \end{equation}
 
 \begin{equation}
-{b_{sun}} = \frac{{{\rm{Window~background~luminance~due~to~sun-related~light}}}}{{{E_{h,sun}}}}
+{b_{sun}} = \frac{{{\mathrm{Window~background~luminance~due~to~sun-related~light}}}}{{{E_{h,sun}}}}
 \end{equation}
 
 For a daylit zone with \emph{N} windows these six daylight factors are calculated for each of the following combinations of reference point, window, sky-condition/sun-position and shading device:
@@ -184,7 +184,7 @@ The luminance distribution of the sky is represented as a superposition of four 
 The clear sky luminance distribution has the form (Kittler, 1965; CIE, 1973)
 
 \begin{equation}
-{\psi_{cs}}({\theta_{sky}},{\phi_{sky}}) = {L_z}\frac{{(0.91 + 10{e^{ - 3\gamma }} + 0.45{{\cos }^2}\gamma )(1 - {e^{ - 0.32{\rm{cosec}}{\phi_{sky}}}})}}{{0.27385(0.91 + 10{e^{ - 3(\frac{\pi }{2} - {\phi_{sun}})}} + 0.45{{\sin }^2}{\phi_{sun}})}}
+{\psi_{cs}}({\theta_{sky}},{\phi_{sky}}) = {L_z}\frac{{(0.91 + 10{e^{ - 3\gamma }} + 0.45{{\cos }^2}\gamma )(1 - {e^{ - 0.32{\mathrm{cosec}}{\phi_{sky}}}})}}{{0.27385(0.91 + 10{e^{ - 3(\frac{\pi }{2} - {\phi_{sun}})}} + 0.45{{\sin }^2}{\phi_{sun}})}}
 \end{equation}
 
 Here, \emph{L\(_{z}\)} is the zenith luminance (i.e., the luminance of the sky at a point directly overhead). In the calculation of daylight factors, which are ratios of interior and exterior illumination quantities that are both proportional to \emph{L\(_{z}\)}, the zenith luminance cancels out. For this reason we will use \emph{L\(_{z}\)} = 1.0 for all sky luminance distributions.
@@ -202,7 +202,7 @@ The general characteristics of the clear-sky luminance distribution are a large 
 The clear turbid sky luminance distribution has the form {[}Matsuura, 1987{]}:
 
 \begin{equation}
-{\psi_{ts}}({\theta_{sky}},{\phi_{sky}}) = {L_z}\frac{{(0.856 + 16{e^{ - 3\gamma }} + 0.3{{\cos }^2}\gamma )(1 - {e^{ - 0.32{\rm{cosec}}{\phi_{sky}}}})}}{{0.27385(0.856 + 10{e^{ - 3(\frac{\pi }{2} - {\phi_{sun}})}} + 0.3{{\sin }^2}{\phi_{sun}})}}
+{\psi_{ts}}({\theta_{sky}},{\phi_{sky}}) = {L_z}\frac{{(0.856 + 16{e^{ - 3\gamma }} + 0.3{{\cos }^2}\gamma )(1 - {e^{ - 0.32{\mathrm{cosec}}{\phi_{sky}}}})}}{{0.27385(0.856 + 10{e^{ - 3(\frac{\pi }{2} - {\phi_{sun}})}} + 0.3{{\sin }^2}{\phi_{sun}})}}
 \end{equation}
 
 \subsubsection{Intermediate Sky}\label{intermediate-sky}
@@ -314,7 +314,7 @@ where
 \end{equation}
 
 \begin{equation}
-{\hat W_n} = {\rm{ window~outward~normal }} = {\hat W_{21}} \times {\hat W_{23}} = \frac{{{{\vec W}_1} - {{\vec W}_2}}}{{\left| {{{\vec W}_1} - {{\vec W}_2}} \right|}} \times \frac{{{{\vec W}_3} - {{\vec W}_2}}}{{\left| {{{\vec W}_3} - {{\vec W}_2}} \right|}}
+{\hat W_n} = {\mathrm{ window~outward~normal }} = {\hat W_{21}} \times {\hat W_{23}} = \frac{{{{\vec W}_1} - {{\vec W}_2}}}{{\left| {{{\vec W}_1} - {{\vec W}_2}} \right|}} \times \frac{{{{\vec W}_3} - {{\vec W}_2}}}{{\left| {{{\vec W}_3} - {{\vec W}_2}} \right|}}
 \end{equation}
 
 Equation~\ref{eq:SubtendedSolidAngle} becomes exact as \(dx/D\) and \(dy/D \to 0\) and is accurate to better than about 1\% for \(dx \le D/4\) and \(dy \le D/4\) .
@@ -607,7 +607,7 @@ where \emph{E\(_{r}\)} is the total internally-reflected component of daylight i
 The net daylight glare at a reference point due to all of the windows in a room is expressed in terms of a \emph{glare index} given by
 
 \begin{equation}
-{G_I} = 10{\log_{10}}\sum\limits_{i = 1}^{\scriptstyle \substack{number~of \\ windows}} {{{\rm{G}}_{\rm{i}}}}
+{G_I} = 10{\log_{10}}\sum\limits_{i = 1}^{\scriptstyle \substack{number~of \\ windows}} {{{\mathrm{G}}_{\mathrm{i}}}}
 \end{equation}
 
 where \emph{G\(_{i}\)} is the glare constant at the reference point due to the \emph{i\(^{th}\)} window.
