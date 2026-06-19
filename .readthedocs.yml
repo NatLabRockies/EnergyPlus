@@ -10,6 +10,17 @@ build:
     python: "3.11"
   apt_packages:
     - doxygen
+    - cmake
+    - pandoc
+    - texlive-xetex
+  jobs:
+    post_build:
+      # Build the pandoc-based chunked HTML guides (Engineering Reference, I/O Reference, etc.)
+      # and publish them alongside the Sphinx runtime/API docs.
+      - cmake -S doc -B doc/build -DBUILD_HTML_DOCS:BOOL=ON
+      - cmake --build doc/build --target html_docs -j 4
+      - mkdir -p "$READTHEDOCS_OUTPUT/html/guides"
+      - cp -r doc/build/html/. "$READTHEDOCS_OUTPUT/html/guides/"
 
 python:
   install:
