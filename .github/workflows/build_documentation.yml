@@ -227,14 +227,16 @@ jobs:
     - name: Build HTML Docs
       if: matrix.build_html
       working-directory: ./doc/build
-      run: ninja html_docs
+      run: |
+        ninja html_docs
+        tar -czf html.tar.gz -C html .
 
     - name: Upload HTML documentation
       uses: actions/upload-artifact@v7
       if: matrix.build_html
       with:
         name: "HtmlDocumentation-${{ matrix.os }}-${{ github.event.pull_request.head.sha }}"
-        path: ${{ github.workspace }}/doc/build/html/
+        path: ${{ github.workspace }}/doc/build/html.tar.gz
 
     - name: Upload log folder upon failure
       if: failure() && runner.os == 'Windows'
