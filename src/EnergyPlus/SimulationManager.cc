@@ -2839,12 +2839,9 @@ namespace SimulationManager {
         // using SQLiteProcedures::CreateSQLiteDatabase;
         state.dataGlobal->DoingInputProcessing = false;
 
-        state.dataInputProcessing->inputProcessor->preProcessorCheck(
-            state, state.dataSimulationManager->PreP_Fatal); // Check Preprocessor objects for warning, severe, etc errors.
-
-        if (state.dataSimulationManager->PreP_Fatal) {
-            ShowFatalError(state, "Preprocessor condition(s) cause termination.");
-        }
+        // Preprocessor objects (Output:PreprocessorMessage) are now checked in InputProcessor::processInput(),
+        // before epJSON schema validation can abort the run, so that a Fatal preprocessor message is not hidden
+        // behind unrelated schema errors caused by the preprocessor's malformed output.
 
         state.dataInputProcessing->inputProcessor->preScanReportingVariables(state);
     }

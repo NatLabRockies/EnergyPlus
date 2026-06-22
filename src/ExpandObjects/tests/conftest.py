@@ -86,8 +86,9 @@ def who_called_me():
 
 
 class ExpandObjectsResult:
-    def __init__(self, run_dir: Path):
+    def __init__(self, run_dir: Path, returncode: int):
         self.run_dir = run_dir
+        self.returncode = returncode
 
         self.idf_text: str = (run_dir / "expanded.idf").read_text()
 
@@ -137,8 +138,8 @@ def prepare_and_run_expandobjects(expandobjectsclipath: Path) -> Callable[[str],
         target_ep_idd_path = run_dir / ep_idd.name
         shutil.copy(ep_idd, run_dir / target_ep_idd_path)
 
-        subprocess.check_call([str(expandobjectsclipath), idf_file_path], cwd=run_dir)
+        completed_process = subprocess.run([str(expandobjectsclipath), idf_file_path], cwd=run_dir, check=False)
 
-        return ExpandObjectsResult(run_dir=run_dir)
+        return ExpandObjectsResult(run_dir=run_dir, returncode=completed_process.returncode)
 
     return _run

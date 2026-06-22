@@ -92,6 +92,7 @@ HVACTemplate:Zone:IdealLoadsAirSystem,
     """
 
     result: ExpandObjectsResult = prepare_and_run_expandobjects(ori_idf_text=ori_idf_text)
+    assert result.returncode == 0
     assert result.err_text is None, f"ExpandObjects failed with error: {result.err_text}"
     assert (
         "! HVACTemplate:Zone:IdealLoadsAirSystem," in result.idf_text
@@ -228,6 +229,7 @@ Schedule:Constant,
   60.0;                                   !- Hourly Value
 """
     result: ExpandObjectsResult = prepare_and_run_expandobjects(ori_idf_text=ori_idf_text)
+    assert result.returncode == 0
     assert result.err_text is not None
     assert (
         'ExpandObjects: Warning: In HVACTemplate:Zone:IdealLoadsAirSystem "Zone 1" a ZoneControl:Humidistat named '
@@ -356,6 +358,7 @@ Schedule:Constant,
   30.0;                                   !- Hourly Value
 """
     result: ExpandObjectsResult = prepare_and_run_expandobjects(ori_idf_text=ori_idf_text)
+    assert result.returncode == 1
     assert result.err_text is not None
     assert (
         'ExpandObjects: Warning: In HVACTemplate:Zone:IdealLoadsAirSystem "Zone 1" a ZoneControl:Humidistat named '
@@ -438,6 +441,7 @@ Schedule:Constant,
   60.0;                                   !- Hourly Value
 """
     result: ExpandObjectsResult = prepare_and_run_expandobjects(ori_idf_text=ori_idf_text)
+    assert result.returncode == 1
     assert result.err_text is not None
     assert (
         'ExpandObjects: Warning: In HVACTemplate:Zone:IdealLoadsAirSystem "Zone 1" a ZoneControl:Humidistat named '

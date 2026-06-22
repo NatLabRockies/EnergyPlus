@@ -271,6 +271,7 @@ TEST_F(EnergyPlusFixture, EMPDRcoating)
     EXPECT_DOUBLE_EQ(0.0051469229632164605, state->dataMstBalEMPD->RVDeepLayer(1));
     EXPECT_DOUBLE_EQ(-0.45295492522779346, state->dataMstBalEMPD->HeatFluxLatent(1));
 }
+
 TEST_F(EnergyPlusFixture, CheckEMPDCalc_Slope)
 {
     std::string const idf_objects =
@@ -376,4 +377,187 @@ TEST_F(EnergyPlusFixture, CheckEMPDCalc_Slope)
     MoistureBalanceEMPDManager::CalcMoistureBalanceEMPD(*state, 1, Taver, Taver, Tsat);
     auto const &report_vars = state->dataMoistureBalEMPD->EMPDReportVars(surfNum);
     EXPECT_DOUBLE_EQ(mass_flux_surf_deep_result, report_vars.mass_flux_deep);
+}
+
+TEST_F(EnergyPlusFixture, CheckEMPDWarningMissingOnInsideLayer)
+{
+    std::string const idf_objects =
+        delimited_string({"  Material,",
+                          "    000_G01a 19mm gypsum board,  !- Name",
+                          "    MediumSmooth,            !- Roughness",
+                          "    0.019,                   !- Thickness {m}",
+                          "    0.16,                    !- Conductivity {W/m-K}",
+                          "    800,                     !- Density {kg/m3}",
+                          "    1090,                    !- Specific Heat {J/kg-K}",
+                          "    0.9,                     !- Thermal Absorptance",
+                          "    0.7,                     !- Solar Absorptance",
+                          "    0.7;                     !- Visible Absorptance",
+
+                          "!-  MaterialProperty:MoisturePenetrationDepth:Settings,",
+                          "!-    000_G01a 19mm gypsum board,  !- Name",
+                          "!-    8.9,                     !- Water Vapor Diffusion Resistance Factor {dimensionless}",
+                          "!-    0.0069,                  !- Moisture Equation Coefficient a {dimensionless}",
+                          "!-    0.9066,                  !- Moisture Equation Coefficient b {dimensionless}",
+                          "!-    0.0404,                  !- Moisture Equation Coefficient c {dimensionless}",
+                          "!-    22.1121,                 !- Moisture Equation Coefficient d {dimensionless}",
+                          "!-    Autocalculate,           !- Surface Layer Penetration Depth {m}",
+                          "!-    Autocalculate,           !- Deep Layer Penetration Depth {m}",
+                          "!-    0.005,                   !- Coating Layer Thickness {m}",
+                          "!-    140;                     !- Coating Layer Water Vapor Diffusion Resistance Factor {dimensionless}",
+
+                          "  Material,",
+                          "    1/2IN Gypsum,            !- Name",
+                          "    Smooth,                  !- Roughness",
+                          "    0.0127,                  !- Thickness {m}",
+                          "    0.16,                    !- Conductivity {W/m-K}",
+                          "    784.9,                   !- Density {kg/m3}",
+                          "    830,                     !- Specific Heat {J/kg-K}",
+                          "    0.9,                     !- Thermal Absorptance",
+                          "    0.92,                    !- Solar Absorptance",
+                          "    0.92;                    !- Visible Absorptance",
+
+                          "  MaterialProperty:MoisturePenetrationDepth:Settings,",
+                          "    1/2IN Gypsum,            !- Name",
+                          "    8.9,                     !- Water Vapor Diffusion Resistance Factor {dimensionless}",
+                          "    0.0069,                  !- Moisture Equation Coefficient a {dimensionless}",
+                          "    0.9066,                  !- Moisture Equation Coefficient b {dimensionless}",
+                          "    0.0404,                  !- Moisture Equation Coefficient c {dimensionless}",
+                          "    22.1121,                 !- Moisture Equation Coefficient d {dimensionless}",
+                          "    Autocalculate,           !- Surface Layer Penetration Depth {m}",
+                          "    Autocalculate,           !- Deep Layer Penetration Depth {m}",
+                          "    0.005,                   !- Coating Layer Thickness {m}",
+                          "    140;                     !- Coating Layer Water Vapor Diffusion Resistance Factor {dimensionless}"});
+
+    ASSERT_TRUE(process_idf(idf_objects));
+
+    bool errors_found(false);
+    Material::GetMaterialData(*state, errors_found);
+    ASSERT_FALSE(errors_found) << "Errors in GetMaterialData";
+
+    // Surface
+    state->dataSurface->TotSurfaces = 1;
+    state->dataSurface->Surface.allocate(state->dataSurface->TotSurfaces);
+    DataSurfaces::SurfaceData &surface = state->dataSurface->Surface(1);
+    surface.Name = "Surface 26";
+    surface.Area = 1.0;
+    surface.HeatTransSurf = true;
+    surface.HeatTransferAlgorithm = DataSurfaces::HeatTransferModel::EMPD;
+
+    // Zone
+    surface.Zone = 1;
+    state->dataMstBal->RhoVaporAirIn.allocate(1);
+    state->dataMstBal->HMassConvInFD.allocate(1);
+    state->dataZoneTempPredictorCorrector->zoneHeatBalance.allocate(1);
+    state->dataZoneTempPredictorCorrector->zoneHeatBalance(1).MAT = 20.0;
+    state->dataZoneTempPredictorCorrector->zoneHeatBalance(1).airHumRat = 0.0061285406810457849;
+
+    // Construction
+    surface.Construction = 1;
+    state->dataConstruction->Construct.allocate(1);
+    Construction::ConstructionProps &construction = state->dataConstruction->Construct(1);
+    construction.Name = "000_Interior Wall";
+    construction.TotLayers = 1;
+    construction.LayerPoint(construction.TotLayers) = Material::GetMaterialNum(*state, "000_G01A 19MM GYPSUM BOARD");
+
+    // Initialize and get inputs
+    state->dataGlobal->DisplayExtraWarnings = true;
+    MoistureBalanceEMPDManager::InitMoistureBalanceEMPD(*state);
+
+    EXPECT_TRUE(compare_err_stream_substring(
+        delimited_string({"   ************* GetMoistureBalanceEMPDInput: EMPD properties are not assigned to the inside layer in Surface=Surface 26",
+                          "   **   ~~~   ** with Construction=000_Interior Wall"})));
+}
+
+TEST_F(EnergyPlusFixture, CheckEMPDNoSegFault)
+{
+    // Regression test for #10777: CalcMoistureBalanceEMPD should not segfault when an EMPD surface's
+    // inside-layer material lacks EMPD properties (dynamic_cast returns nullptr), so the routine bails out cleanly.
+    std::string const idf_objects =
+        delimited_string({"  Material,",
+                          "    1/2IN Gypsum,            !- Name",
+                          "    Smooth,                  !- Roughness",
+                          "    0.0127,                  !- Thickness {m}",
+                          "    0.16,                    !- Conductivity {W/m-K}",
+                          "    784.9,                   !- Density {kg/m3}",
+                          "    830,                     !- Specific Heat {J/kg-K}",
+                          "    0.9,                     !- Thermal Absorptance",
+                          "    0.92,                    !- Solar Absorptance",
+                          "    0.92;                    !- Visible Absorptance",
+
+                          "  MaterialProperty:MoisturePenetrationDepth:Settings,",
+                          "    1/2IN Gypsum,            !- Name",
+                          "    8.9,                     !- Water Vapor Diffusion Resistance Factor {dimensionless}",
+                          "    0.0069,                  !- Moisture Equation Coefficient a {dimensionless}",
+                          "    0.9066,                  !- Moisture Equation Coefficient b {dimensionless}",
+                          "    0.0404,                  !- Moisture Equation Coefficient c {dimensionless}",
+                          "    22.1121,                 !- Moisture Equation Coefficient d {dimensionless}",
+                          "    Autocalculate,           !- Surface Layer Penetration Depth {m}",
+                          "    Autocalculate,           !- Deep Layer Penetration Depth {m}",
+                          "    0.005,                   !- Coating Layer Thickness {m}",
+                          "    140;                     !- Coating Layer Water Vapor Diffusion Resistance Factor {dimensionless}",
+
+                          "  Material:NoMass,",
+                          "    CP02 CARPET PAD,         !- Name",
+                          "    VeryRough,               !- Roughness",
+                          "    0.2165,                  !- Thermal Resistance {m2-K/W}",
+                          "    0.9,                     !- Thermal Absorptance",
+                          "    0.7,                     !- Solar Absorptance",
+                          "    0.8;                     !- Visible Absorptance"});
+
+    ASSERT_TRUE(process_idf(idf_objects));
+
+    bool errors_found(false);
+    Material::GetMaterialData(*state, errors_found);
+    ASSERT_FALSE(errors_found) << "Errors in GetMaterialData";
+
+    // Surface
+    int surfNum = 1;
+    state->dataSurface->TotSurfaces = 1;
+    state->dataSurface->Surface.allocate(state->dataSurface->TotSurfaces);
+    DataSurfaces::SurfaceData &surface = state->dataSurface->Surface(surfNum);
+    surface.Name = "Surface 25";
+    surface.Area = 1.0;
+    surface.HeatTransSurf = true;
+    surface.HeatTransferAlgorithm = DataSurfaces::HeatTransferModel::EMPD;
+
+    // Zone
+    surface.Zone = 1;
+    state->dataMstBal->RhoVaporAirIn.allocate(1);
+    state->dataMstBal->HMassConvInFD.allocate(1);
+    state->dataZoneTempPredictorCorrector->zoneHeatBalance.allocate(1);
+    state->dataZoneTempPredictorCorrector->zoneHeatBalance(1).MAT = 20.0;
+    state->dataZoneTempPredictorCorrector->zoneHeatBalance(1).airHumRat = 0.0061285406810457849;
+
+    // Construction
+    surface.Construction = 1;
+    state->dataConstruction->Construct.allocate(1);
+    Construction::ConstructionProps &construction = state->dataConstruction->Construct(1);
+    construction.Name = "000_ExtSlabCarpet_4in_ClimateZone 1-8";
+    construction.TotLayers = 1;
+    construction.LayerPoint(construction.TotLayers) = Material::GetMaterialNum(*state, "CP02 CARPET PAD");
+
+    // Initialize and get inputs
+    MoistureBalanceEMPDManager::InitMoistureBalanceEMPD(*state);
+
+    // Set up conditions
+    state->dataGlobal->TimeStepZone = 0.25;
+    state->dataEnvrn->OutBaroPress = 101325.;
+    state->dataMstBalEMPD->RVSurface(surfNum) = 0.0070277983586713262;
+    state->dataMstBalEMPD->RVSurfaceOld(surfNum) = state->dataMstBalEMPD->RVSurface(surfNum);
+    state->dataMstBal->HMassConvInFD(surfNum) = 0.0016826898264131584;
+    state->dataMstBal->RhoVaporAirIn(surfNum) = 0.0073097913062508896;
+    state->dataMstBalEMPD->RVSurfLayer(surfNum) = 0.0070277983586713262;
+    state->dataMstBalEMPD->RVDeepLayer(surfNum) = 0.0051402944814058216;
+    state->dataMstBalEMPD->RVdeepOld(surfNum) = 0.0051402944814058216;
+    state->dataMstBalEMPD->RVSurfLayerOld(surfNum) = 0.0070277983586713262;
+
+    Real64 Tsat(0.0);
+    state->dataHeatBalSurf->SurfTempIn.allocate(surfNum);
+    state->dataHeatBalSurf->SurfTempIn(surfNum) = 20.0;
+    Real64 Taver = state->dataHeatBalSurf->SurfTempIn(surfNum);
+    MoistureBalanceEMPDManager::CalcMoistureBalanceEMPD(*state, 1, Taver, Taver, Tsat);
+
+    EXPECT_TRUE(compare_err_stream_substring(
+        delimited_string({"   ************* GetMoistureBalanceEMPDInput: EMPD properties are not assigned to the inside layer of Surfaces",
+                          "   **   ~~~   ** ...use Output:Diagnostics,DisplayExtraWarnings; to show more details on individual surfaces."})));
 }

@@ -194,7 +194,8 @@ INTEGER,PARAMETER :: IddFH  = 4 !Energy+.IDD file handle
 INTEGER,PARAMETER :: IniFH  = 5 !Energy+.INI file handle
 
 LOGICAL :: isChillerWithWaterCooled = .FALSE.
-LOGICAL :: errorCondition = .FALSE.
+INTEGER :: numErrors = 0   !count of non-Warning messages issued; drives the process exit code
+INTEGER :: numWarnings = 0 !count of Warning messages issued
 LOGICAL :: foundCompactObject = .FALSE.
 LOGICAL :: iddCanBeRead =.FALSE.
 
@@ -2023,7 +2024,7 @@ else
     call AddToErrMsg('error opening expanded.idf= runtime error#'//trim(ADJUSTL(IntToStr(ios)))//' '//trim(IOErrorMsg))
     PRINT "(A)",'error opening expanded.idf= runtime error#'//trim(IOErrorMsg)
   endif
-  errorCondition=.true.
+  numErrors = numErrors + 1
 endif
 !*The following lines allows seeing main array values when debugging (needs a reference to show them as local?)
 !IF (ALLOCATED(FldVal)) THEN
@@ -2036,7 +2037,7 @@ endif
 !CALL WriteError('TEST-ERROR-MESSAGE-REMOVE-BEFORE-RELEASE-The-quick-brown-fox-jumped-over-the-lazy-dog-The-quick-brown-fox jumped over the lazy dog The quick brown fox jumped over the lazy dog.')
 !if no compact objects found then delete the output file and exit
 IF (foundCompactObject .or. fileerrorsexist) THEN
-  IF (errorCondition) THEN
+  IF (numErrors > 0 .OR. numWarnings > 0) THEN
     CALL writeErrorObjects
   END IF
   CLOSE(OutFH)
@@ -2045,14 +2046,21 @@ ELSE
   CLOSE(OutFH,STATUS='DELETE') !get rid of file if no changes are made
 END IF
 !if errors were found keep the file and report errors otherwise just delete the file
-IF (errorCondition) THEN
+IF (numErrors > 0 .OR. numWarnings > 0) THEN
   CLOSE(ErrFH)
-  CALL CPU_TIME(endTime)
-  PRINT "(A,F10.3)", "ExpandObjects Finished with Error(s). Time:", endTime - startTime
 ELSE
   CLOSE(ErrFH,STATUS='DELETE')  !get rid of error file if no errors found
-  CALL CPU_TIME(endTime)
-  PRINT "(A,F10.3)", "ExpandObjects Finished. Time:", endTime - startTime
+END IF
+CALL CPU_TIME(endTime)
+IF (numErrors > 0) THEN
+  PRINT "(A,I0,A,I0,A,F10.3)", "ExpandObjects Terminated--Error(s) Detected. ", numWarnings, " Warning; ", numErrors, &
+    " Severe Errors; Time:", endTime - startTime
+ELSE
+  PRINT "(A,I0,A,F10.3)", "ExpandObjects Completed Successfully-- ", numWarnings, " Warning; 0 Severe Errors; Time:", &
+    endTime - startTime
+END IF
+IF (numErrors > 0) THEN
+  CALL EXIT(1)
 END IF
 
 CONTAINS
@@ -4580,10 +4588,15 @@ WRITE(UNIT=OutFH, FMT="(A)") '! ' // TRIM(ErrorString)
 WRITE(UNIT=ErrFH, FMT="(A)") 'ExpandObjects: ' // TRIM(ErrorString)
 IF (PRESENT (warningOrError)) THEN
   CALL AddToErrMsg(ErrorString,warningOrError)
+  IF (warningOrError .EQ. msgWarning) THEN
+    numWarnings = numWarnings + 1
+  ELSE
+    numErrors = numErrors + 1
+  END IF
 ELSE
   CALL AddToErrMsg(ErrorString)
+  numErrors = numErrors + 1
 END IF
-errorCondition = .TRUE.
 END SUBROUTINE
 
 !----------------------------------------------------------------------------------

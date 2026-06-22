@@ -1388,6 +1388,44 @@ namespace UnitarySystems {
                 }
             }
         }
+        // Check that control nodes match coil outlet nodes for proper control of unit.
+        if (this->m_ControlType == UnitarySysCtrlType::Setpoint) {
+            if (CoilType == CoolingCoil && this->CoolCtrlNode != this->CoolCoilOutletNodeNum) {
+                ShowWarningError(state, std::format("Occurs in {} = {}", this->UnitType, this->Name));
+                ShowContinueError(state, "Cooling coil control/sensor node is not the same as the cooling coil outlet node.");
+                ShowContinueError(state,
+                                  std::format("Coil control/sensor node name = {}, coil outlet node name = {}",
+                                              state.dataLoopNodes->NodeID(this->CoolCtrlNode),
+                                              state.dataLoopNodes->NodeID(this->CoolCoilOutletNodeNum)));
+                ShowContinueError(state,
+                                  "This may result in poor performance when other components exist between the coil's control and outlet nodes.");
+                ShowContinueError(state, "Consider revising inputs to place the control/sensor node at the cooling coil outlet node.");
+            }
+            if (CoilType == HeatingCoil && this->HeatCtrlNode != this->HeatCoilOutletNodeNum) {
+                ShowWarningError(state, std::format("Occurs in {} = {}", this->UnitType, this->Name));
+                ShowContinueError(state, "Heating coil control/sensor node is not the same as the heating coil outlet node.");
+                ShowContinueError(state,
+                                  std::format("Coil control/sensor node name = {}, coil outlet node name = {}",
+                                              state.dataLoopNodes->NodeID(this->HeatCtrlNode),
+                                              state.dataLoopNodes->NodeID(this->HeatCoilOutletNodeNum)));
+                ShowContinueError(state,
+                                  "This may result in poor performance when other components exist between the coil's control and outlet nodes.");
+                ShowContinueError(state, "Consider revising inputs to place the control/sensor node at the heating coil outlet node.");
+            }
+            if (CoilType == SuppHeatCoil && this->SuppCtrlNode != this->SuppCoilOutletNodeNum) {
+                ShowWarningError(state, std::format("Occurs in {} = {}", this->UnitType, this->Name));
+                ShowContinueError(state,
+                                  "Supplemental heating coil control/sensor node is not the same as the supplemental heating coil outlet node.");
+                ShowContinueError(state,
+                                  std::format("Coil control/sensor node name = {}, coil outlet node name = {}",
+                                              state.dataLoopNodes->NodeID(this->SuppCtrlNode),
+                                              state.dataLoopNodes->NodeID(this->SuppCoilOutletNodeNum)));
+                ShowContinueError(state,
+                                  "This may result in poor performance when other components exist between the coil's control and outlet nodes.");
+                ShowContinueError(state, "Consider revising inputs to place the control/sensor node at the supplemental heating coil outlet node.");
+            }
+        }
+
         return SetPointErrorFlag; // these later errors will also cause a fatal error
     }
 

@@ -753,7 +753,7 @@ state.dataStrGlobals->inputFilePath='{:g}',
                 FileSystem::linkFile(state.dataStrGlobals->inputIddFilePath, "Energy+.idd");
             }
 
-            FileSystem::systemCall(expandObjectsCommand);
+            int const expandObjectsExitCode = FileSystem::systemCall(expandObjectsCommand);
             if (!inputFilePathdIn) {
                 FileSystem::removeFile("in.idf");
             }
@@ -765,6 +765,15 @@ state.dataStrGlobals->inputFilePath='{:g}',
             if (FileSystem::fileExists("expanded.idf")) {
                 FileSystem::moveFile("expanded.idf", outputExpidfFilePath);
                 state.dataStrGlobals->inputFilePath = outputExpidfFilePath;
+            }
+
+            if (expandObjectsExitCode != 0) {
+                DisplayString(state, "ERROR: ExpandObjects failed to expand the HVACTemplate:* or GroundHeatTransfer:* objects in this input file.");
+                DisplayString(state, std::format("See {} for details.", FileSystem::getAbsolutePath(outputExperrFilePath)));
+                if (eplusRunningViaAPI) {
+                    return static_cast<int>(ReturnCodes::Failure);
+                }
+                exit(EXIT_FAILURE);
             }
         }
 

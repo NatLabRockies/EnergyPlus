@@ -182,7 +182,7 @@ public:
                              int &NumNumeric                    // How many Numeric arguments (max) this Object can have
     );
 
-    void preProcessorCheck(EnergyPlusData &state, bool &PreP_Fatal); // True if a preprocessor flags a fatal error
+    bool preProcessorCheck(EnergyPlusData &state); // Returns true if a preprocessor flags a fatal error
 
     void preScanReportingVariables(EnergyPlusData &state);
 

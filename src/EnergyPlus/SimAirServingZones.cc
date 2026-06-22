@@ -6398,6 +6398,7 @@ void UpdateSysSizing(EnergyPlusData &state, Constant::CallIndicator const CallIn
                     state.dataSize->SensCoolCapTemp(AirLoopNum) = sysSizing.SensCoolCap;
                     if (sysSizing.coolingPeakLoad == DataSizing::PeakLoad::SensibleCooling) {
                         state.dataSize->CalcSysSizing(AirLoopNum).DesCoolVolFlow = sysSizing.DesCoolVolFlow;
+                        state.dataSize->CalcSysSizing(AirLoopNum).CoolDDNum = DDNum;
                         state.dataSize->CalcSysSizing(AirLoopNum).CoolDesDay = sysSizing.CoolDesDay;
                         // state.dataSize->CalcSysSizing( AirLoopNum ).CoinCoolMassFlow = SysSizing( DDNum, AirLoopNum ).CoinCoolMassFlow;
                         state.dataSize->CalcSysSizing(AirLoopNum).MassFlowAtCoolPeak = sysSizing.MassFlowAtCoolPeak;
@@ -6432,6 +6433,7 @@ void UpdateSysSizing(EnergyPlusData &state, Constant::CallIndicator const CallIn
                     state.dataSize->TotCoolCapTemp(AirLoopNum) = sysSizing.TotCoolCap;
                     if (sysSizing.coolingPeakLoad == DataSizing::PeakLoad::TotalCooling) {
                         state.dataSize->CalcSysSizing(AirLoopNum).DesCoolVolFlow = sysSizing.DesCoolVolFlow;
+                        state.dataSize->CalcSysSizing(AirLoopNum).CoolDDNum = DDNum;
                         state.dataSize->CalcSysSizing(AirLoopNum).CoolDesDay = sysSizing.CoolDesDay;
                         // state.dataSize->CalcSysSizing( AirLoopNum ).CoinCoolMassFlow = SysSizing( DDNum, AirLoopNum ).CoinCoolMassFlow;
                         state.dataSize->CalcSysSizing(AirLoopNum).MassFlowAtCoolPeak = sysSizing.MassFlowAtCoolPeak;
@@ -6770,6 +6772,7 @@ void UpdateSysSizing(EnergyPlusData &state, Constant::CallIndicator const CallIn
         for (std::size_t i = 0; i < state.dataSize->FinalSysSizing.size(); ++i) {
             auto &z = state.dataSize->FinalSysSizing[i];
             auto &c = state.dataSize->CalcSysSizing[i];
+            z.CoolDDNum = c.CoolDDNum;
             z.CoolDesDay = c.CoolDesDay;
             z.HeatDesDay = c.HeatDesDay;
             z.CoinCoolMassFlow = c.CoinCoolMassFlow;

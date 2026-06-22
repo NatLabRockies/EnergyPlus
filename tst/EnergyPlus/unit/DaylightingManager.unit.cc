@@ -3783,3 +3783,58 @@ TEST_F(EnergyPlusFixture, DaylightingManager_SteppedControl_LowDaylightCondition
     DayltgElecLightingControl(*state);
     EXPECT_DOUBLE_EQ(1.0, thisDaylightControl.PowerReductionFactor);
 }
+
+TEST_F(EnergyPlusFixture, DaylightingManager_GlareWithIntWins_GTOTAccumulation)
+{
+    // Test for bug where GTOT is not reset between reference points in DayltgGlareWithIntWins.
+    // With identical inputs, both ref points should receive the same glare index.
+    // With the bug, ref point 2's index is higher because GTOT accumulates from ref point 1.
+
+    state->init_state(*state);
+    auto &dl = state->dataDayltg;
+
+    constexpr int daylightCtrlNum = 1;
+    constexpr int enclNum = 1;
+    constexpr int nRefPts = 2;
+    constexpr int nExtWins = 1;
+    constexpr int winSurfNum = 1;
+
+    dl->daylightControl.allocate(daylightCtrlNum);
+    auto &ctrl = dl->daylightControl(daylightCtrlNum);
+    ctrl.enclIndex = enclNum;
+    ctrl.TotalDaylRefPoints = nRefPts;
+    ctrl.refPts.allocate(nRefPts);
+
+    dl->enclDaylight.allocate(enclNum);
+    auto &encl = dl->enclDaylight(enclNum);
+    encl.NumOfDayltgExtWins = nExtWins;
+    encl.DayltgExtWinSurfNums.allocate(nExtWins);
+    encl.DayltgExtWinSurfNums(1) = winSurfNum;
+    encl.InterReflIllFrIntWins = 0.0;
+    encl.aveVisDiffReflect = 0.5;
+
+    // Bare/unshaded window with default WindowModel::Detailed
+    state->dataSurface->SurfWinShadingFlag.allocate(winSurfNum);
+    state->dataSurface->SurfWinShadingFlag(winSurfNum) = DataSurfaces::WinShadingType::NoShade;
+    state->dataSurface->SurfWinWindowModelType.allocate(winSurfNum);
+    state->dataSurface->SurfWinWindowModelType(winSurfNum) = DataSurfaces::WindowModel::Detailed;
+    state->dataSurface->SurfWinSolarDiffusing.allocate(winSurfNum);
+    state->dataSurface->SurfWinSolarDiffusing(winSurfNum) = false;
+
+    // Both ref points get identical inputs
+    for (int IL = 1; IL <= nRefPts; ++IL) {
+        auto &refPt = ctrl.refPts(IL);
+        refPt.lums[iLum_Back] = 50.0;
+        refPt.illumSetPoint = 500.0;
+        refPt.extWins.allocate(nExtWins);
+        auto &extWin = refPt.extWins(1);
+        extWin.solidAng = 0.005;
+        extWin.solidAngWtd = 0.01;
+        extWin.lums[iLum_Source][(int)DataSurfaces::WinCover::Bare] = 1000.0;
+    }
+
+    Dayltg::DayltgGlareWithIntWins(*state, daylightCtrlNum);
+
+    EXPECT_GT(ctrl.refPts(1).glareIndex, 0.0);
+    EXPECT_NEAR(ctrl.refPts(1).glareIndex, ctrl.refPts(2).glareIndex, 1e-6);
+}
