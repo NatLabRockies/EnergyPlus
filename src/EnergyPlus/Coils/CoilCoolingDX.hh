@@ -191,7 +191,7 @@ struct CoilCoolingDXData : BaseGlobalStruct
     HVAC::CoilType coilType = HVAC::CoilType::CoolingDX;
     bool stillNeedToReportStandardRatings = true; // standard ratings flag for all coils to report at the same time
     bool GetInputFlag = true;
-  
+
     void init_constant_state([[maybe_unused]] EnergyPlusData &state) override
     {
     }

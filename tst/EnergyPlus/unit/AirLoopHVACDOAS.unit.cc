@@ -10101,7 +10101,8 @@ TEST_F(EnergyPlusFixture, AirLoopHVACDOAS_TestFanHeatAddeToCoolingCoilSize)
 
     // Check meter accumulation
     // Lights are 1W so the meter should be 3600 [J] * 24 hours
-    EXPECT_TRUE(state->dataOutputProcessor->meters[GetMeterIndex(*state, "GENERAL:INTERIORLIGHTS:ELECTRICITY")]->periodFinYrSM.Value == 3600 * 24); // Meter number was hardcoded to 4
+    EXPECT_TRUE(state->dataOutputProcessor->meters[GetMeterIndex(*state, "GENERAL:INTERIORLIGHTS:ELECTRICITY")]->periodFinYrSM.Value ==
+                3600 * 24); // Meter number was hardcoded to 4
 }
 
 TEST_F(EnergyPlusFixture, AirLoopHVACDOAS_TestOACompConnectionError)

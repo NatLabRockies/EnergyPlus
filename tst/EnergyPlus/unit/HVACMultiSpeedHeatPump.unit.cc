@@ -1354,16 +1354,20 @@ TEST_F(EnergyPlusFixture, HVACMultiSpeedHeatPump_ReportVariableInitTest)
     EXPECT_EQ(state->dataHVACMultiSpdHP->MSHeatPump(2).MinOATCompressorCooling, -25.0);
     EXPECT_EQ(state->dataHVACMultiSpdHP->MSHeatPump(2).MinOATCompressorHeating, -8.0);
 
-    state->dataLoopNodes->Node(Node::GetNodeIndex(*state, "Z401 SPLITTER INLET")).Temp = 24.0; // was 9
-    state->dataLoopNodes->Node(Node::GetNodeIndex(*state, "Z401 SPLITTER INLET")).HumRat = 0.008; // was 9
-    state->dataLoopNodes->Node(Node::GetNodeIndex(*state, "Z402 AIR NODE")).Temp = 24.0; // was 6
-    state->dataLoopNodes->Node(Node::GetNodeIndex(*state, "Z402 AIR NODE")).HumRat = 0.008; // was 6
-    state->dataLoopNodes->Node(Node::GetNodeIndex(*state, "AC-25 SF INLET AIR NODE")).Temp = 24.0; // was 16
+    state->dataLoopNodes->Node(Node::GetNodeIndex(*state, "Z401 SPLITTER INLET")).Temp = 24.0;        // was 9
+    state->dataLoopNodes->Node(Node::GetNodeIndex(*state, "Z401 SPLITTER INLET")).HumRat = 0.008;     // was 9
+    state->dataLoopNodes->Node(Node::GetNodeIndex(*state, "Z402 AIR NODE")).Temp = 24.0;              // was 6
+    state->dataLoopNodes->Node(Node::GetNodeIndex(*state, "Z402 AIR NODE")).HumRat = 0.008;           // was 6
+    state->dataLoopNodes->Node(Node::GetNodeIndex(*state, "AC-25 SF INLET AIR NODE")).Temp = 24.0;    // was 16
     state->dataLoopNodes->Node(Node::GetNodeIndex(*state, "AC-25 SF INLET AIR NODE")).HumRat = 0.008; // was 16
-    state->dataLoopNodes->Node(Node::GetNodeIndex(*state, "AC-25 SF INLET AIR NODE")).Enthalpy = Psychrometrics::PsyHFnTdbW(state->dataLoopNodes->Node(Node::GetNodeIndex(*state, "AC-25 SF INLET AIR NODE")).Temp, state->dataLoopNodes->Node(Node::GetNodeIndex(*state, "AC-25 SF INLET AIR NODE")).HumRat); // was 16
-    state->dataLoopNodes->Node(Node::GetNodeIndex(*state, "AC-25 SF OUTLET AIR NODE")).MassFlowRateMax = state->dataLoopNodes->Node(Node::GetNodeIndex(*state, "AC-25 SF INLET AIR NODE")).MassFlowRateMaxAvail;
+    state->dataLoopNodes->Node(Node::GetNodeIndex(*state, "AC-25 SF INLET AIR NODE")).Enthalpy =
+        Psychrometrics::PsyHFnTdbW(state->dataLoopNodes->Node(Node::GetNodeIndex(*state, "AC-25 SF INLET AIR NODE")).Temp,
+                                   state->dataLoopNodes->Node(Node::GetNodeIndex(*state, "AC-25 SF INLET AIR NODE")).HumRat); // was 16
+    state->dataLoopNodes->Node(Node::GetNodeIndex(*state, "AC-25 SF OUTLET AIR NODE")).MassFlowRateMax =
+        state->dataLoopNodes->Node(Node::GetNodeIndex(*state, "AC-25 SF INLET AIR NODE")).MassFlowRateMaxAvail;
 
-    state->dataFans->fans(2)->maxAirMassFlowRate = state->dataLoopNodes->Node(Node::GetNodeIndex(*state, "AC-25 SF INLET AIR NODE")).MassFlowRateMaxAvail;
+    state->dataFans->fans(2)->maxAirMassFlowRate =
+        state->dataLoopNodes->Node(Node::GetNodeIndex(*state, "AC-25 SF INLET AIR NODE")).MassFlowRateMaxAvail;
     state->dataFans->fans(2)->rhoAirStdInit = state->dataEnvrn->StdRhoAir;
     state->dataDXCoils->DXCoil(2).MSRatedAirMassFlowRate(1) = state->dataDXCoils->DXCoil(2).MSRatedAirVolFlowRate(1) * state->dataEnvrn->StdRhoAir;
     state->dataDXCoils->DXCoil(2).MSRatedAirMassFlowRate(2) = state->dataDXCoils->DXCoil(2).MSRatedAirVolFlowRate(2) * state->dataEnvrn->StdRhoAir;

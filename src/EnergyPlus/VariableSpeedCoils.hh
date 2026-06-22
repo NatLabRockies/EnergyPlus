@@ -552,9 +552,9 @@ namespace VariableSpeedCoils {
 
 struct VariableSpeedCoilsData : BaseGlobalStruct
 {
-    int NumVarSpeedCoils = 0;      // The Number of Water to Air Heat Pumps found in the Input
-    bool MyOneTimeFlag = true;     // one time allocation flag
-                                   // LOGICAL, ALLOCATABLE, DIMENSION(:) :: MySizeFlag
+    int NumVarSpeedCoils = 0;  // The Number of Water to Air Heat Pumps found in the Input
+    bool MyOneTimeFlag = true; // one time allocation flag
+                               // LOGICAL, ALLOCATABLE, DIMENSION(:) :: MySizeFlag
     bool CrankcaseHeaterReportVarFlag = true;
 
     Real64 SourceSideMassFlowRate = 0.0; // Source Side Mass flow rate [Kg/s]

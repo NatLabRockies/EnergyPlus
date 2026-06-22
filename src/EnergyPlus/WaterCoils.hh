@@ -648,8 +648,7 @@ struct WaterCoilsData : BaseGlobalStruct
     // Default Constructor
     WaterCoilsData()
         : CounterFlow(1), CrossFlow(2), SimpleAnalysis(1), DetailedAnalysis(2), CondensateDiscarded(1001), CondensateToTank(1002), UAandFlow(1),
-          NomCap(2), DesignCalc(1), SimCalc(2), NumWaterCoils(0), WaterCoilControllerCheckOneTimeFlag(true),
-          InitWaterCoilOneTimeFlag(true)
+          NomCap(2), DesignCalc(1), SimCalc(2), NumWaterCoils(0), WaterCoilControllerCheckOneTimeFlag(true), InitWaterCoilOneTimeFlag(true)
     {
     }
 };
