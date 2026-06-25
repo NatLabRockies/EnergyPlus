@@ -18,10 +18,10 @@ The rapid expansion of datacenter projects across the US has driven industry sta
 
 ## Approach ##
 
-One new plant object will be implemented as part of the new feature proposal. This new object will be used to model either D2C or RDHx cooling.
+The new feature proposal includes a single plant object designed to model either D2C or RDHx cooling. Although both [[1]][Datacenter Liquid Cooling Market Characterization, Final Report, 12/12/2025, CalNEXT] and [[11]][Fernandes et al.] indicate that D2C and RDHx can operate simultaneously, the current plant object implementation supports only one approach at a time. Future work could extend this capability to simulate hybrid configurations.
 
 ### D2C
-The new object will simulate D2C devices as a cold plate (liquid-to-solid) heat exchanger. The heat transfer through the cold plate can be characterized by the interface's case-to-fluid thermal resistance. As documented in [[2]][Wang et. al], [[3]][Cheng et. al], [[4]][Shaeri et. al], and [[6]][Martinez et. al], the case-to-fluid thermal resistance of a cold plate, $R_{th}$, is expressed as follows: 
+The new object will simulate D2C devices as a cold plate (liquid-to-solid) heat exchanger. The heat transfer through the cold plate can be characterized by the interface's case-to-fluid thermal resistance. As documented in [[2]][Wang et al.], [[3]][Cheng et al.], [[4]][Shaeri et al.], and [[6]][Martinez et al.], the case-to-fluid thermal resistance of a cold plate, $R_{th}$, is expressed as follows: 
 
 $R_{th} = \frac{T_{case} - T_f}{\dot{q}}$
 
@@ -30,7 +30,7 @@ Where:
 - $T_{f}$ is the liquid coolant temperature
 - $\dot{q}$ is the heat transfer rate
 
-As mentioned in [[2]][Wang et. al], $T_{f}$ corresponds to the inlet fluid temperature for single-phase coolant, while for two-phase coolant $T_{f}$ is taken as the saturation temperature inside the cold plate.
+As mentioned in [[2]][Wang et al.], $T_{f}$ corresponds to the inlet fluid temperature for single-phase coolant, while for two-phase coolant $T_{f}$ is taken as the saturation temperature inside the cold plate.
 
 The enthalpy of the fluid leaving the cold plate will be calculated as follows:
 
@@ -40,16 +40,16 @@ Temperature and other properties will subsequently be calculated based on the fl
 
 <img src="./cold_plate.jpg" alt="Project Screenshot" width="400">
 
-_Figure 1 - Cross Section of a Cold Plate_ (source: [[6]][Martinez et. al])
+_Figure 1 - Cross Section of a Cold Plate_ (source: [[6]][Martinez et al.])
 
 
 [[5]][Eaton] shows that cold plate designs are selected based on a maximum allowable cold plate temperature. Since $R_{th}$ is a function of $T_{case}$, a user-defined maximum case temperature will be used to estimate the maximum heat transfer rate at nominal conditions. As mentioned in [[0]][Issue #11408], D2C systems are not always able to address all IT-generated loads, and air systems are used to meet the remainder. When the maximum $T_{case}$ is reached, the rest of the heat generated will be added to the zone heat balance.
 
-[[2]][Wang et. al], [[3]][Cheng et. al], and [[4]][Shaeri et. al] show that the thermal resistance varies as a function of coolant flow rate and heat flux (for two-phase flow), so the nominal thermal resistance will be adjusted using a user-defined empirical curve.
+[[2]][Wang et al.], [[3]][Cheng et al.], and [[4]][Shaeri et al.] show that the thermal resistance varies as a function of coolant flow rate and heat flux (for two-phase flow), so the nominal thermal resistance will be adjusted using a user-defined empirical curve.
 
-The proposed object will be added by users to the demand side of a `PlantLoop` and, together with a `HeatExchanger:FluidToFluid` object and a pump (on the supply side of the same `PlantLoop`), will represent a coolant distribution unit (CDU). As requested by [[0]][Issue #11408], this approach allows D2C to "_be connected to existing EnergyPlus PlantLoop architecture_" and "_support for liquids with other heat transfer properties would be handled at the loop level with the fluid_type and user_defined_fluid_type fields_". Coolant properties can be specified using the `FluidProperties` family of objects. Note that PG25, which according to the literature (see [[2]][Wang et. al]) is a widely used single-phase coolant (a mixture of 25% propylene glycol and water), is natively supported by EnergyPlus when using the `FluidProperties:GlycolConcentration` object. Two-phase heat transfer is not currently handled in EnergyPlus, so we propose to focus on single-phase D2C this FY and add capabilities for two-phase D2C in the next FY.
+The proposed object will be added by users to the demand side of a `PlantLoop` and, together with a `HeatExchanger:FluidToFluid` object and a pump (on the supply side of the same `PlantLoop`), will represent a coolant distribution unit (CDU). As requested by [[0]][Issue #11408], this approach allows D2C to "_be connected to existing EnergyPlus PlantLoop architecture_" and "_support for liquids with other heat transfer properties would be handled at the loop level with the fluid_type and user_defined_fluid_type fields_". Coolant properties can be specified using the `FluidProperties` family of objects. Note that PG25, which according to the literature (see [[2]][Wang et al.]) is a widely used single-phase coolant (a mixture of 25% propylene glycol and water), is natively supported by EnergyPlus when using the `FluidProperties:GlycolConcentration` object. Two-phase heat transfer is not currently handled in EnergyPlus, so we propose to focus on single-phase D2C this FY and add capabilities for two-phase D2C in the next FY.
 
-Moreover, [[6]][Martinez et. al] proposes an LMTD-based thermal resistance definition for single-phase liquid-cooled cold plates, which could be considered an alternative approach to the traditional thermal resistance. We propose to focus on the $R_{th}$ approach for now, since it appears to be the current standard practice.
+Moreover, [[6]][Martinez et al.] proposes an LMTD-based thermal resistance definition for single-phase liquid-cooled cold plates, which could be considered an alternative approach to the traditional thermal resistance. We propose to focus on the $R_{th}$ approach for now, since it appears to be the current standard practice.
 
 ### RDHx
 
@@ -185,17 +185,17 @@ No transition will be required.
 
 [Datacenter Liquid Cooling Market Characterization, Final Report, 12/12/2025, CalNEXT]: https://calnext.com/wp-content/uploads/2025/12/ET24SWE0065_Datacenter-Liquid-Cooling-Market-Characterization_Final-Report.pdf
 
-- [2] Universal Direct-to-Chip Cold Plates for Single- and Two-Phase Cooling, Wang et. al
+- [2] Universal Direct-to-Chip Cold Plates for Single- and Two-Phase Cooling, Wang et al.
 
-[Wang et. al]: https://accelsius.com/wp-content/uploads/Universal-Direct-to-Chip-Cold-Plate-2.pdf
+[Wang et al.]: https://accelsius.com/wp-content/uploads/Universal-Direct-to-Chip-Cold-Plate-2.pdf
 
-- [3] OCP OAI System Liquid Cooling Guidelines, Cheng et. al
+- [3] OCP OAI System Liquid Cooling Guidelines, Cheng et al.
 
-[Cheng et. al]: https://www.opencompute.org/documents/oai-system-liquid-cooling-guidelines-in-ocp-template-mar-3-2023-update-pdf
+[Cheng et al.]: https://www.opencompute.org/documents/oai-system-liquid-cooling-guidelines-in-ocp-template-mar-3-2023-update-pdf
 
-- [4] Demonstration of CTE-Matched Two-Phase Minichannel Heat Sink, Shaeri et. al
+- [4] Demonstration of CTE-Matched Two-Phase Minichannel Heat Sink, Shaeri et al.
 
-[Shaeri et. al]: https://ieeexplore.ieee.org/stamp/stamp.jsp?tp=&arnumber=10177605&utm_source=sciencedirect_contenthosting&getft_integrator=sciencedirect_contenthosting
+[Shaeri et al.]: https://ieeexplore.ieee.org/stamp/stamp.jsp?tp=&arnumber=10177605&utm_source=sciencedirect_contenthosting&getft_integrator=sciencedirect_contenthosting
 
 - [5] Selecting a Liquid Cold Plate Technology
 
@@ -203,11 +203,11 @@ No transition will be required.
 
 - [6] Experimental validation of the effectiveness-NTU approach for single-phase liquid cold plates and a consistent definition of thermal resistance
 
-[Martinez et. al]: https://www.sciencedirect.com/science/article/pii/S0017931025004673
+[Martinez et al.]: https://www.sciencedirect.com/science/article/pii/S0017931025004673
 
 - [7] Performance Comparison of R1233zd(E) and R515B for Two-Phase Direct-to-Chip Cooling
 
-[Wang et. al 2]: https://ieeexplore.ieee.org/stamp/stamp.jsp?arnumber=11235787
+[Wang et al. 2]: https://ieeexplore.ieee.org/stamp/stamp.jsp?arnumber=11235787
 
 - [8] Rear-Door Heat Exchangers Smart Cooling at the Rack Level
 
@@ -215,8 +215,16 @@ No transition will be required.
 
 - [9] A Practical Metric for Cold Plate Thermal Performance in Two-Phase Direct-to-Chip Cooling
 
-[Wang et. al 3]: https://accelsius.com/wp-content/uploads/A-Practical-Metric-for-Cold-Plate-Thermal-Performance-in-Two-Phase-Direct-to-Chip-Cooling.pdf
+[Wang et al. 3]: https://accelsius.com/wp-content/uploads/A-Practical-Metric-for-Cold-Plate-Thermal-Performance-in-Two-Phase-Direct-to-Chip-Cooling.pdf
 
 - [10] Experimental evaluation of direct-to-chip cold plate liquid cooling for high-heat-density data centers
 
-[Heydari et. al]: https://www.sciencedirect.com/science/article/pii/S1359431123021518?casa_token=yMz4c59NaAoAAAAA:njacRyk_Tos7PSyigDx1yWpRixkV3-Vbiqv1IR7vkgFqLkSTbfue6P6pvFMKMt6bWbwFj4f9aQ
+[Heydari et al.]: https://www.sciencedirect.com/science/article/pii/S1359431123021518?casa_token=yMz4c59NaAoAAAAA:njacRyk_Tos7PSyigDx1yWpRixkV3-Vbiqv1IR7vkgFqLkSTbfue6P6pvFMKMt6bWbwFj4f9aQ
+
+- [11] Liquid to Liquid CDU Test Methodology and Performance Rating
+
+[Wondium et al.]: https://www.opencompute.org/documents/ocp-wp-l-lcdu-test-methodology-performance-rating-r1-pdf
+
+- [12] ACS Door Heat Exchanger Requirements for Open Rack
+
+[Fernandes et al.]: https://www.opencompute.org/documents/acs-door-hx-open-compute-requirements-for-open-rack-rev1-0-1-pdf
