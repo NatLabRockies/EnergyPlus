@@ -4991,7 +4991,6 @@ void CalcPerSolarBeam(EnergyPlusData &state,
     // Initialize/update the Complex Fenestration geometry and optical properties
     UpdateComplexWindows(state);
 
-    // ESL edit start
     using DataSystemVariables::ShadingMethod;
     bool loadedHourlySched = false;
 
@@ -5049,7 +5048,6 @@ void CalcPerSolarBeam(EnergyPlusData &state,
     } else {
         FigureSolarBeamAtTimestep(state, state.dataGlobal->HourOfDay, state.dataGlobal->TimeStep);
     }
-    // ESL edit end
 }
 
 void FigureSunCosines(EnergyPlusData &state,
@@ -5177,7 +5175,6 @@ void FigureSolarBeamAtTimestep(EnergyPlusData &state, int const iHour, int const
             }
         }
     }
-    // ESL edit start
     //   Note -- if not the below, values are set in SkyDifSolarShading routine (constant for simulation)
     if (state.dataSysVars->DetailedSkyDiffuseAlgorithm && s_surf->ShadingTransmittanceVaries &&
         state.dataHeatBal->SolarDistribution != DataHeatBalance::Shadowing::Minimal) {
@@ -5208,7 +5205,6 @@ void FigureSolarBeamAtTimestep(EnergyPlusData &state, int const iHour, int const
             }
         } else {
             std::cout << "FigureSolarBeamAtTimestep not using import" << std::endl;
-            // ESL edit end
 
             for (int IPhi = 0; IPhi < NPhi; ++IPhi) { // Loop over patch altitude values
                 state.dataSolarShading->SUNCOS(3) = state.dataSolarShading->sin_Phi[IPhi];
@@ -5273,7 +5269,6 @@ void FigureSolarBeamAtTimestep(EnergyPlusData &state, int const iHour, int const
                 }
             }
 
-            // ESL edit start
             if (state.dataSysVars->ReportExtShadingSunlitFrac) {
                 std::cout << "Dumping computed surface attributes to CSV file" << std::endl;
                 std::ofstream csvOut("computed_surface_attributes_hourly.csv");
@@ -5316,7 +5311,6 @@ void FigureSolarBeamAtTimestep(EnergyPlusData &state, int const iHour, int const
                 }
             }
         }
-        // ESL edit end
 
         //  ! Get IR view factors. An exterior surface can receive IR radiation from
         //  ! sky, ground or shadowing surfaces. Assume shadowing surfaces have same
@@ -10687,7 +10681,6 @@ void SkyDifSolarShading(EnergyPlusData &state)
 
     bool loadedImportedSched = false;
 
-    // ESL edit start vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
     using DataSystemVariables::ShadingMethod;
     // ----------------------------------------------------
     // 1) Only attempt CSV import in Scheduled/Imported mode
@@ -10871,7 +10864,6 @@ void SkyDifSolarShading(EnergyPlusData &state)
     // CSV dump (extended)
     // (keep existing dump block, but make sure it is OUTSIDE the !loadedImportedSched block)
 
-    // ESL edit start - Add CSV output for computed surface attributes (extended)
     if (!loadedImportedSched && state.dataSysVars->ReportExtShadingSunlitFrac) {
         std::cout << "Dumping computed surface attributes to CSV file" << std::endl;
         std::ofstream csvOut("eplusshading_diffuse.csv");
@@ -10925,7 +10917,6 @@ void SkyDifSolarShading(EnergyPlusData &state)
             std::cout << "Successfully wrote eplusshading_diffuse.csv" << std::endl;
         }
     }
-    // ESL edit end
 }
 
 void CalcWindowProfileAngles(EnergyPlusData &state)
