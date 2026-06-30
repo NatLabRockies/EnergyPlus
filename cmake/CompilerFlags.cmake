@@ -1,3 +1,10 @@
+option(ENABLE_NATIVE_OPTIMIZATION "Enable native architecture optimizations (e.g. -march=native). Produces non-portable binaries." OFF)
+mark_as_advanced(ENABLE_NATIVE_OPTIMIZATION)
+# MSVC has no compiler-time CPU auto-detection equivalent to -march=native; the user must pick the level.
+set(MSVC_NATIVE_ARCH "AVX2" CACHE STRING "MSVC /arch: level used when ENABLE_NATIVE_OPTIMIZATION=ON (SSE2, SSE4.2, AVX, AVX2, AVX512, AVX10.1, AVX10.2)")
+set_property(CACHE MSVC_NATIVE_ARCH PROPERTY STRINGS "SSE2" "SSE4.2" "AVX" "AVX2" "AVX512" "AVX10.1" "AVX10.2")
+mark_as_advanced(MSVC_NATIVE_ARCH)
+
 # Compiler-agnostic compiler flags first
 target_compile_definitions(project_options INTERFACE -DOBJEXXFCL_ALIGN=64) # Align ObjexxFCL arrays to 64B
 target_compile_options(project_options INTERFACE $<$<CONFIG:Debug>:-DOBJEXXFCL_ARRAY_INIT_DEBUG>) # Initialize ObjexxFCL arrays to aid debugging
@@ -58,6 +65,11 @@ if(MSVC AND NOT ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Intel")) # Visual C++ (VS 
   target_compile_definitions(project_options INTERFACE WIN32_LEAN_AND_MEAN) # Excludes rarely used services and headers from compilation
   #    ADD_CXX_DEFINITIONS("-d2SSAOptimizer-") # this disables this optimizer which has known major issues
 
+  if(ENABLE_NATIVE_OPTIMIZATION)
+    message(STATUS "ENABLE_NATIVE_OPTIMIZATION: enabling /arch:${MSVC_NATIVE_ARCH}")
+    target_compile_options(project_options INTERFACE /arch:${MSVC_NATIVE_ARCH})
+  endif()
+
   # ADDITIONAL RELEASE-MODE-SPECIFIC FLAGS
   if (ENABLE_HARDENED_RUNTIME)
     message(AUTHOR_WARNING "Enabling /GS and /guard:cf for hardened runtime")
@@ -94,6 +106,11 @@ elseif(CMAKE_COMPILER_IS_GNUCXX OR "${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang" O
 
   option(FORCE_DEBUG_ARITHM_GCC_OR_CLANG "Enable trapping floating point exceptions in non Debug mode" OFF)
   mark_as_advanced(FORCE_DEBUG_ARITHM_GCC_OR_CLANG)
+
+  if(ENABLE_NATIVE_OPTIMIZATION)
+    message(STATUS "ENABLE_NATIVE_OPTIMIZATION: enabling -march=native")
+    target_compile_options(project_options INTERFACE -march=native)
+  endif()
 
   # COMPILER FLAGS
   target_compile_options(project_options INTERFACE -pipe) # Faster compiler processing
@@ -174,6 +191,11 @@ elseif(CMAKE_COMPILER_IS_GNUCXX OR "${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang" O
 
 elseif(WIN32 AND "${CMAKE_CXX_COMPILER_ID}" STREQUAL "Intel")
 
+  if(ENABLE_NATIVE_OPTIMIZATION)
+    message(STATUS "ENABLE_NATIVE_OPTIMIZATION: enabling /QxHost")
+    target_compile_options(project_options INTERFACE /QxHost)
+  endif()
+
   # Disabled Warnings: Enable some of these as more serious warnings are addressed
   #   161 Unrecognized pragma
   #   177 Variable declared but never referenced
@@ -228,6 +250,11 @@ elseif(WIN32 AND "${CMAKE_CXX_COMPILER_ID}" STREQUAL "Intel")
   target_compile_options(turn_off_warnings INTERFACE /w)
 
 elseif(UNIX AND "${CMAKE_CXX_COMPILER_ID}" STREQUAL "Intel")
+
+  if(ENABLE_NATIVE_OPTIMIZATION)
+    message(STATUS "ENABLE_NATIVE_OPTIMIZATION: enabling -xHost")
+    target_compile_options(project_options INTERFACE -xHost)
+  endif()
 
   # Disabled Warnings: Enable some of these as more serious warnings are addressed
   #   161 Unrecognized pragma
