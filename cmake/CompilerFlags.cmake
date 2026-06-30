@@ -108,8 +108,15 @@ elseif(CMAKE_COMPILER_IS_GNUCXX OR "${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang" O
   mark_as_advanced(FORCE_DEBUG_ARITHM_GCC_OR_CLANG)
 
   if(ENABLE_NATIVE_OPTIMIZATION)
-    message(STATUS "ENABLE_NATIVE_OPTIMIZATION: enabling -march=native")
-    target_compile_options(project_options INTERFACE -march=native)
+    if(CMAKE_SYSTEM_PROCESSOR MATCHES "aarch64|arm64")
+      # -mcpu=native sets both arch and tune; -march=native alone doesn't tune on AArch64 in Clang
+      # (GCC 13+ maps -march=native to -mcpu=native automatically, but -mcpu=native is correct for all versions)
+      message(STATUS "ENABLE_NATIVE_OPTIMIZATION: enabling -mcpu=native (AArch64)")
+      target_compile_options(project_options INTERFACE -mcpu=native)
+    else()
+      message(STATUS "ENABLE_NATIVE_OPTIMIZATION: enabling -march=native")
+      target_compile_options(project_options INTERFACE -march=native)
+    endif()
   endif()
 
   # COMPILER FLAGS
