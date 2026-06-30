@@ -123,6 +123,10 @@ elseif(CMAKE_COMPILER_IS_GNUCXX OR "${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang" O
       message(STATUS "ENABLE_NATIVE_OPTIMIZATION: enabling -march=native")
       target_compile_options(project_options INTERFACE -march=native)
     endif()
+    # Enable fast-math for vectorization; keep -fno-finite-math-only so NaN/Inf remain valid.
+    # -ffp-contract=off is intentionally skipped below when this option is ON.
+    message(STATUS "ENABLE_NATIVE_OPTIMIZATION: enabling -ffast-math -fno-finite-math-only")
+    target_compile_options(project_options INTERFACE -ffast-math -fno-finite-math-only)
   endif()
 
   # COMPILER FLAGS
@@ -167,7 +171,9 @@ elseif(CMAKE_COMPILER_IS_GNUCXX OR "${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang" O
       # GCC 15 emits false positives through libstdc++ when compiling bundled fmt 8.0.1 with -Werror
       target_compile_options(project_warnings INTERFACE -Wno-restrict)
     endif()
-    target_compile_options(project_fp_options INTERFACE -ffp-contract=off) # Disable fused-floating point operations (default is fast)
+    if(NOT ENABLE_NATIVE_OPTIMIZATION)
+      target_compile_options(project_fp_options INTERFACE -ffp-contract=off) # Disable fused-floating point operations (default is fast)
+    endif()
   elseif("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang" OR "${CMAKE_CXX_COMPILER_ID}" STREQUAL "AppleClang")
     target_compile_options(project_warnings INTERFACE -Wshadow-field) # Equivalent to MSVC's C4458 (declaration of 'identifier' hides class member); narrower than -Wshadow
     if(CMAKE_CXX_COMPILER_VERSION VERSION_GREATER_EQUAL 13.0)
@@ -176,7 +182,9 @@ elseif(CMAKE_COMPILER_IS_GNUCXX OR "${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang" O
     endif()
     target_compile_options(project_warnings INTERFACE -Wno-vexing-parse)
     target_compile_options(project_warnings INTERFACE -Wno-invalid-source-encoding)
-    target_compile_options(project_fp_options INTERFACE -ffp-contract=off) # Disable fused-floating point operations (default is on)
+    if(NOT ENABLE_NATIVE_OPTIMIZATION)
+      target_compile_options(project_fp_options INTERFACE -ffp-contract=off) # Disable fused-floating point operations (default is on)
+    endif()
   endif()
 
   set(need_arithm_debug_genex "$<OR:$<BOOL:${FORCE_DEBUG_ARITHM_GCC_OR_CLANG}>,$<CONFIG:Debug>>")
