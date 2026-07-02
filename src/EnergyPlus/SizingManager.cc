@@ -70,6 +70,7 @@
 #include <EnergyPlus/HVACSingleDuctInduc.hh>
 #include <EnergyPlus/HeatBalanceManager.hh>
 #include <EnergyPlus/InputProcessing/InputProcessor.hh>
+#include <EnergyPlus/OutputProcessor.hh>
 #include <EnergyPlus/OutputReportPredefined.hh>
 #include <EnergyPlus/OutputReportTabular.hh>
 #include <EnergyPlus/PoweredInductionUnits.hh>
@@ -225,8 +226,8 @@ void ManageSizing(EnergyPlusData &state)
 
         Weather::ResetEnvironmentCounter(state);
         state.dataGlobal->KickOffSizing = true;
-        SetupZoneSizing(state, ErrorsFound);                                                          // Should only be done ONCE
-        state.dataOutputProcessor->meterValues.resize(state.dataOutputProcessor->meters.size(), 0.0); // better way to do this for unit tests?
+        SetupZoneSizing(state, ErrorsFound); // Should only be done ONCE
+        OutputProcessor::resizeMeterValues(state);
         state.dataGlobal->KickOffSizing = false;
 
         for (int iZoneCalcIter = 1; iZoneCalcIter <= numZoneSizeIter; ++iZoneCalcIter) { // normally this is performed once but if load component
