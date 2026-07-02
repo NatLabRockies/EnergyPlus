@@ -14661,10 +14661,6 @@ void ReportDXCoil(EnergyPlusData &state, int const DXCoilNum) // number of the c
     }
 
     state.dataAirLoop->LoopDXCoilRTF = max(thisDXCoil.CoolingCoilRuntimeFraction, thisDXCoil.HeatingCoilRuntimeFraction);
-    if (thisDXCoil.AirLoopNum > 0) {
-        state.dataAirLoop->AirLoopAFNInfo(thisDXCoil.AirLoopNum).AFNLoopDXCoilRTF =
-            max(thisDXCoil.CoolingCoilRuntimeFraction, thisDXCoil.HeatingCoilRuntimeFraction);
-    }
 }
 
 void CalcTwoSpeedDXCoilStandardRating(EnergyPlusData &state, int const DXCoilNum)

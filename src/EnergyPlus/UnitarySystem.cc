@@ -12704,13 +12704,6 @@ namespace UnitarySystems {
         int InletNode = this->CoolCoilInletNodeNum;
         Real64 DesOutTemp = this->m_DesiredOutletTemp;
         Real64 DesOutHumRat = this->m_DesiredOutletHumRat;
-        Real64 LoopDXCoilMaxRTFSave = 0.0;
-        if (state.afn->distribution_simulated && this->m_sysType != SysType::PackagedAC && this->m_sysType != SysType::PackagedHP &&
-            this->m_sysType != SysType::PackagedWSHP) {
-            LoopDXCoilMaxRTFSave = state.dataAirLoop->AirLoopAFNInfo(AirLoopNum).AFNLoopDXCoilRTF;
-            state.dataAirLoop->AirLoopAFNInfo(AirLoopNum).AFNLoopDXCoilRTF = 0.0;
-        }
-
         std::string CompName = this->m_CoolingCoilName;
         HVAC::FanOp fanOp = this->m_FanOpMode;
         Real64 SpeedRatio = 0.0;
@@ -14498,12 +14491,6 @@ namespace UnitarySystems {
         this->m_CoolingCycRatio = CycRatio;
         this->m_DehumidificationMode = DehumidMode;
 
-        if (state.afn->distribution_simulated && this->m_sysType != SysType::PackagedAC && this->m_sysType != SysType::PackagedHP &&
-            this->m_sysType != SysType::PackagedWSHP) {
-            state.dataAirLoop->AirLoopAFNInfo(AirLoopNum).AFNLoopDXCoilRTF =
-                max(state.dataAirLoop->AirLoopAFNInfo(AirLoopNum).AFNLoopDXCoilRTF, LoopDXCoilMaxRTFSave);
-        }
-
         if (this->m_coolCoilType == HVAC::CoilType::CoolingWater || this->m_coolCoilType == HVAC::CoilType::CoolingWaterDetailed) {
             mdot = PartLoadFrac * this->MaxCoolCoilFluidFlow;
             PlantUtilities::SetComponentFlowRate(state, mdot, this->CoolCoilFluidInletNode, this->CoolCoilFluidOutletNodeNum, this->CoolCoilPlantLoc);
@@ -14551,17 +14538,6 @@ namespace UnitarySystems {
         int CompIndex = this->m_HeatingCoilIndex;
         HVAC::FanOp fanOp = this->m_FanOpMode;
         Real64 DesOutTemp = this->m_DesiredOutletTemp;
-
-        Real64 LoopHeatingCoilMaxRTFSave = 0.0;
-        Real64 LoopDXCoilMaxRTFSave = 0.0;
-        if (state.afn->distribution_simulated && this->m_sysType != SysType::PackagedAC && this->m_sysType != SysType::PackagedHP &&
-            this->m_sysType != SysType::PackagedWSHP) {
-            LoopHeatingCoilMaxRTFSave = state.dataAirLoop->AirLoopAFNInfo(AirLoopNum).AFNLoopHeatingCoilMaxRTF;
-            state.dataAirLoop->AirLoopAFNInfo(AirLoopNum).AFNLoopHeatingCoilMaxRTF = 0.0;
-            LoopDXCoilMaxRTFSave = state.dataAirLoop->AirLoopAFNInfo(AirLoopNum).AFNLoopDXCoilRTF;
-            state.dataAirLoop->AirLoopAFNInfo(AirLoopNum).AFNLoopDXCoilRTF = 0.0;
-        }
-
         Real64 PartLoadFrac = 0.0;
         Real64 SpeedRatio = 0.0;
         Real64 CycRatio = 0.0;
@@ -15189,14 +15165,6 @@ namespace UnitarySystems {
         this->m_HeatingCycRatio = CycRatio;
         HeatCoilLoad = ReqOutput;
 
-        if (state.afn->distribution_simulated && this->m_sysType != SysType::PackagedAC && this->m_sysType != SysType::PackagedHP &&
-            this->m_sysType != SysType::PackagedWSHP) {
-            state.dataAirLoop->AirLoopAFNInfo(AirLoopNum).AFNLoopHeatingCoilMaxRTF =
-                max(state.dataAirLoop->AirLoopAFNInfo(AirLoopNum).AFNLoopHeatingCoilMaxRTF, LoopHeatingCoilMaxRTFSave);
-            state.dataAirLoop->AirLoopAFNInfo(AirLoopNum).AFNLoopDXCoilRTF =
-                max(state.dataAirLoop->AirLoopAFNInfo(AirLoopNum).AFNLoopDXCoilRTF, LoopDXCoilMaxRTFSave);
-        }
-
         if (this->m_heatCoilType == HVAC::CoilType::HeatingWater || this->m_heatCoilType == HVAC::CoilType::HeatingSteam) {
             mdot = PartLoadFrac * this->MaxHeatCoilFluidFlow;
             PlantUtilities::SetComponentFlowRate(state, mdot, this->HeatCoilFluidInletNode, this->HeatCoilFluidOutletNodeNum, this->HeatCoilPlantLoc);
@@ -15238,17 +15206,6 @@ namespace UnitarySystems {
         auto &outletNode = state.dataLoopNodes->Node(this->SuppCoilOutletNodeNum);
         Real64 DesOutTemp = this->m_DesiredOutletTemp;
         std::string_view CompName = this->m_SuppHeatCoilName;
-
-        Real64 LoopHeatingCoilMaxRTFSave = 0.0;
-        Real64 LoopDXCoilMaxRTFSave = 0.0;
-        if (state.afn->distribution_simulated && this->m_sysType != SysType::PackagedAC && this->m_sysType != SysType::PackagedHP &&
-            this->m_sysType != SysType::PackagedWSHP) {
-            auto &afnInfo = state.dataAirLoop->AirLoopAFNInfo(AirLoopNum);
-            LoopHeatingCoilMaxRTFSave = afnInfo.AFNLoopHeatingCoilMaxRTF;
-            afnInfo.AFNLoopHeatingCoilMaxRTF = 0.0;
-            LoopDXCoilMaxRTFSave = afnInfo.AFNLoopDXCoilRTF;
-            afnInfo.AFNLoopDXCoilRTF = 0.0;
-        }
 
         // IF there is a fault of coil SAT Sensor
         if (this->m_FaultyCoilSATFlag) {
@@ -15600,14 +15557,6 @@ namespace UnitarySystems {
                 } // IF (NOT EMS OVERRIDE) THEN
 
             } // IF SENSIBLE LOAD
-        } // IF((GetCurrentScheduleValue(state, UnitarySystem(UnitarySysNum)%m_SysAvailSchedPtr) > 0.0d0) .AND. &
-
-        // LoopHeatingCoilMaxRTF used for AirflowNetwork gets set in child components (gas and fuel)
-        if (state.afn->distribution_simulated && this->m_sysType != SysType::PackagedAC && this->m_sysType != SysType::PackagedHP &&
-            this->m_sysType != SysType::PackagedWSHP) {
-            auto &afnInfo = state.dataAirLoop->AirLoopAFNInfo(AirLoopNum);
-            afnInfo.AFNLoopHeatingCoilMaxRTF = max(afnInfo.AFNLoopHeatingCoilMaxRTF, LoopHeatingCoilMaxRTFSave);
-            afnInfo.AFNLoopDXCoilRTF = max(afnInfo.AFNLoopDXCoilRTF, LoopDXCoilMaxRTFSave);
         }
 
         if (this->m_suppHeatCoilType == HVAC::CoilType::HeatingWater || this->m_suppHeatCoilType == HVAC::CoilType::HeatingSteam) {

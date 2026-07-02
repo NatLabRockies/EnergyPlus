@@ -199,9 +199,7 @@ namespace AirflowNetwork {
             if (FirstHVACIteration) {
                 if (allocated(m_state.dataAirLoop->AirLoopAFNInfo)) {
                     for (i = 1; i <= DisSysNumOfCVFs; i++) {
-                        m_state.dataAirLoop->AirLoopAFNInfo(i).AFNLoopHeatingCoilMaxRTF = 0.0;
                         m_state.dataAirLoop->AirLoopAFNInfo(i).AFNLoopOnOffFanRTF = 0.0;
-                        m_state.dataAirLoop->AirLoopAFNInfo(i).AFNLoopDXCoilRTF = 0.0;
                         m_state.dataAirLoop->AirLoopAFNInfo(i).LoopOnOffFanPartLoadRatio = 0.0;
                     }
                 }
@@ -9480,6 +9478,59 @@ namespace AirflowNetwork {
         }
     }
 
+    void Solver::update_onoff_fan_runtime_fractions()
+    {
+        auto &NumPrimaryAirSys = m_state.dataHVACGlobal->NumPrimaryAirSys;
+        auto &Node(m_state.dataLoopNodes->Node);
+        using HVAC::VerySmallMassFlow;
+
+        int AirLoopNum;
+        int FanNum;
+        Real64 MaxPartLoadRatio = 0.0;
+        MaxOnOffFanRunTimeFraction = 0.0;
+        for (AirLoopNum = 1; AirLoopNum <= NumPrimaryAirSys; ++AirLoopNum) {
+            MaxPartLoadRatio = max(MaxPartLoadRatio, m_state.dataAirLoop->AirLoopAFNInfo(AirLoopNum).LoopOnOffFanPartLoadRatio);
+            MaxOnOffFanRunTimeFraction = max(MaxOnOffFanRunTimeFraction, LoopOnOffFanRunTimeFraction(AirLoopNum));
+        }
+        for (AirLoopNum = 1; AirLoopNum <= NumPrimaryAirSys; ++AirLoopNum) {
+            for (FanNum = 1; FanNum <= DisSysNumOfCVFs; ++FanNum) {
+                if (DisSysCompCVFData(FanNum).AirLoopNum == AirLoopNum) {
+                    break;
+                }
+            }
+            LoopPartLoadRatio(AirLoopNum) = 1.0;
+            LoopOnOffFanRunTimeFraction(AirLoopNum) = 1.0;
+            // Calculate the part load ratio, can't be greater than 1 for a simple ONOFF fan
+            if (DisSysCompCVFData(FanNum).fanType == HVAC::FanType::OnOff &&
+                Node(DisSysCompCVFData(FanNum).InletNode).MassFlowRate > VerySmallMassFlow &&
+                m_state.dataAirLoop->AirLoopAFNInfo(AirLoopNum).LoopFanOperationMode == HVAC::FanOp::Cycling) {
+                // Hard code here
+                LoopPartLoadRatio(AirLoopNum) = m_state.dataAirLoop->AirLoopAFNInfo(AirLoopNum).LoopOnOffFanPartLoadRatio;
+                LoopOnOffFanRunTimeFraction(AirLoopNum) = m_state.dataAirLoop->AirLoopAFNInfo(AirLoopNum).AFNLoopOnOffFanRTF;
+            }
+
+            if (DisSysCompCVFData(FanNum).fanType == HVAC::FanType::OnOff && LoopPartLoadRatio(AirLoopNum) < 1.0) {
+                for (std::size_t i = 0; i < linkReport.size(); ++i) {
+                    auto &r(linkReport[i]);
+                    auto const &s(AirflowNetworkLinkSimu[i]);
+                    auto const &t(AirflowNetworkLinkageData[i]);
+                    if (t.AirLoopNum == AirLoopNum) {
+                        r.FLOW = s.FLOW * LoopPartLoadRatio(AirLoopNum);
+                        r.FLOW2 = s.FLOW2 * LoopPartLoadRatio(AirLoopNum);
+                        r.VolFLOW = s.VolFLOW * LoopPartLoadRatio(AirLoopNum);
+                        r.VolFLOW2 = s.VolFLOW2 * LoopPartLoadRatio(AirLoopNum);
+                    }
+                    if (t.AirLoopNum == 0) {
+                        r.FLOW = s.FLOW * MaxPartLoadRatio;
+                        r.FLOW2 = s.FLOW2 * MaxPartLoadRatio;
+                        r.VolFLOW = s.VolFLOW * MaxPartLoadRatio;
+                        r.VolFLOW2 = s.VolFLOW2 * MaxPartLoadRatio;
+                    }
+                }
+            }
+        }
+    }
+
     void Solver::update(ObjexxFCL::Optional_bool_const FirstHVACIteration) // True when solution technique on first iteration
     {
 
@@ -9508,7 +9559,6 @@ namespace AirflowNetwork {
         Real64 Qlat;
         Real64 AirDensity;
         Real64 Tamb;
-        Real64 PartLoadRatio;
         Real64 OnOffRatio;
         Real64 NodeMass;
         Real64 AFNMass;
@@ -9734,61 +9784,16 @@ namespace AirflowNetwork {
             }
         }
 
+        update_onoff_fan_runtime_fractions();
+
         int AirLoopNum;
         int FanNum;
         Real64 MaxPartLoadRatio = 0.0;
-        Real64 OnOffFanRunTimeFraction = 0.0;
-        MaxOnOffFanRunTimeFraction = 0.0;
         for (AirLoopNum = 1; AirLoopNum <= NumPrimaryAirSys; ++AirLoopNum) {
             MaxPartLoadRatio = max(MaxPartLoadRatio, m_state.dataAirLoop->AirLoopAFNInfo(AirLoopNum).LoopOnOffFanPartLoadRatio);
-            MaxOnOffFanRunTimeFraction = max(MaxOnOffFanRunTimeFraction, LoopOnOffFanRunTimeFraction(AirLoopNum));
         }
-        for (AirLoopNum = 1; AirLoopNum <= NumPrimaryAirSys; ++AirLoopNum) {
-            for (FanNum = 1; FanNum <= DisSysNumOfCVFs; ++FanNum) {
-                if (DisSysCompCVFData(FanNum).AirLoopNum == AirLoopNum) {
-                    break;
-                }
-            }
-            PartLoadRatio = 1.0;
-            LoopPartLoadRatio(AirLoopNum) = 1.0;
-            OnOffFanRunTimeFraction = 1.0;
-            LoopOnOffFanRunTimeFraction(AirLoopNum) = 1.0;
-            // Calculate the part load ratio, can't be greater than 1 for a simple ONOFF fan
-            if (DisSysCompCVFData(FanNum).fanType == HVAC::FanType::OnOff &&
-                Node(DisSysCompCVFData(FanNum).InletNode).MassFlowRate > VerySmallMassFlow &&
-                m_state.dataAirLoop->AirLoopAFNInfo(AirLoopNum).LoopFanOperationMode == HVAC::FanOp::Cycling) {
-                // Hard code here
-                PartLoadRatio = m_state.dataAirLoop->AirLoopAFNInfo(AirLoopNum).LoopOnOffFanPartLoadRatio;
-                LoopPartLoadRatio(AirLoopNum) = m_state.dataAirLoop->AirLoopAFNInfo(AirLoopNum).LoopOnOffFanPartLoadRatio;
-                OnOffFanRunTimeFraction = max(m_state.dataAirLoop->AirLoopAFNInfo(AirLoopNum).AFNLoopHeatingCoilMaxRTF,
-                                              m_state.dataAirLoop->AirLoopAFNInfo(AirLoopNum).AFNLoopOnOffFanRTF,
-                                              m_state.dataAirLoop->AirLoopAFNInfo(AirLoopNum).AFNLoopDXCoilRTF);
-                LoopOnOffFanRunTimeFraction(AirLoopNum) = max(m_state.dataAirLoop->AirLoopAFNInfo(AirLoopNum).AFNLoopHeatingCoilMaxRTF,
-                                                              m_state.dataAirLoop->AirLoopAFNInfo(AirLoopNum).AFNLoopOnOffFanRTF,
-                                                              m_state.dataAirLoop->AirLoopAFNInfo(AirLoopNum).AFNLoopDXCoilRTF);
-            }
-            m_state.dataAirLoop->AirLoopAFNInfo(AirLoopNum).AFNLoopHeatingCoilMaxRTF = 0.0;
-
-            if (DisSysCompCVFData(FanNum).fanType == HVAC::FanType::OnOff && LoopPartLoadRatio(AirLoopNum) < 1.0) {
-                for (std::size_t i = 0; i < linkReport.size(); ++i) {
-                    auto &r(linkReport[i]);
-                    auto const &s(AirflowNetworkLinkSimu[i]);
-                    auto const &t(AirflowNetworkLinkageData[i]);
-                    if (t.AirLoopNum == AirLoopNum) {
-                        r.FLOW = s.FLOW * LoopPartLoadRatio(AirLoopNum);
-                        r.FLOW2 = s.FLOW2 * LoopPartLoadRatio(AirLoopNum);
-                        r.VolFLOW = s.VolFLOW * LoopPartLoadRatio(AirLoopNum);
-                        r.VolFLOW2 = s.VolFLOW2 * LoopPartLoadRatio(AirLoopNum);
-                    }
-                    if (t.AirLoopNum == 0) {
-                        r.FLOW = s.FLOW * MaxPartLoadRatio;
-                        r.FLOW2 = s.FLOW2 * MaxPartLoadRatio;
-                        r.VolFLOW = s.VolFLOW * MaxPartLoadRatio;
-                        r.VolFLOW2 = s.VolFLOW2 * MaxPartLoadRatio;
-                    }
-                }
-            }
-        }
+        Real64 OnOffFanRunTimeFraction = (NumPrimaryAirSys > 0) ? LoopOnOffFanRunTimeFraction(NumPrimaryAirSys) : 1.0;
+        Real64 PartLoadRatio = 1.0;
 
         // One time warning
         if (UpdateAirflowNetworkMyOneTimeFlag) {
