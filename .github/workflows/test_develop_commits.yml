@@ -82,7 +82,7 @@ jobs:
           echo "FC=gfortran-13" >> $GITHUB_ENV
         fi
 
-    - uses: actions/checkout@v6
+    - uses: actions/checkout@v7
 
     - name: Create Build Directory
       run: cmake -E make_directory ./build/

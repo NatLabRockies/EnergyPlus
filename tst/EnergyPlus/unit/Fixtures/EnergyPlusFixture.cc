@@ -358,9 +358,30 @@ bool EnergyPlusFixture::match_err_stream(std::string const &expected_match, bool
 
 bool EnergyPlusFixture::process_idf(std::string_view const idf_snippet, bool use_assertions)
 {
-    bool success = true;
     auto &inputProcessor = state->dataInputProcessing->inputProcessor;
+
+    state->dataGlobal->isEpJSON = false;
+    bool success = true;
     inputProcessor->epJSON = inputProcessor->idf_parser->decode(idf_snippet, inputProcessor->schema(), success);
+    bool const successful_processing = success && common_process_json(false);
+    if (!successful_processing && use_assertions) {
+        EXPECT_TRUE(compare_err_stream(""));
+    }
+    return successful_processing;
+}
+
+bool EnergyPlusFixture::process_json(nlohmann::json const &epJSON, bool use_assertions)
+{
+    auto &inputProcessor = state->dataInputProcessing->inputProcessor;
+
+    state->dataGlobal->isEpJSON = true;
+    inputProcessor->epJSON = epJSON;
+    return common_process_json(use_assertions);
+}
+
+bool EnergyPlusFixture::common_process_json(bool use_assertions)
+{
+    auto &inputProcessor = state->dataInputProcessing->inputProcessor;
 
     // Add common objects that will trigger a warning if not present
     if (inputProcessor->epJSON.find("Timestep") == inputProcessor->epJSON.end()) {
@@ -422,7 +443,7 @@ bool EnergyPlusFixture::process_idf(std::string_view const idf_snippet, bool use
 
     // inputProcessor->state->printErrors();
 
-    bool successful_processing = success && is_valid && !hasErrors;
+    bool successful_processing = is_valid && !hasErrors;
 
     if (!successful_processing && use_assertions) {
         EXPECT_TRUE(compare_err_stream(""));

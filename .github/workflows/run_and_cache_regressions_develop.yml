@@ -55,7 +55,7 @@ jobs:
 
     steps:
 
-    - uses: actions/checkout@v6
+    - uses: actions/checkout@v7
 
     - name: Setup System
       id: setup-runner
@@ -143,7 +143,7 @@ jobs:
 
     - name: Upload CCache debug logs
       if: always() && env.CCACHE_DEBUG == '1'
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v7
       with:
         name: ccache-debug-${{ matrix.os }}
         path: .ccache-debug

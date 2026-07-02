@@ -49,7 +49,7 @@ jobs:
       contents: write
 
     steps:
-    - uses: actions/checkout@v6
+    - uses: actions/checkout@v7
 
 #    - name: Setup QtIFW 4.x
 #      uses: jmarrec/setup-qtifw@v1
@@ -298,7 +298,7 @@ jobs:
             test_key: mac14-arm64
 
     steps:
-    - uses: actions/checkout@v6  # Still need E+ checked out to get testing scripts
+    - uses: actions/checkout@v7  # Still need E+ checked out to get testing scripts
       with:
         path: checkout
 

@@ -267,6 +267,19 @@ main_gui(True)
             EnergyPlus::Python::PythonEngine engine(state);
             // There's probably better to be done, like instantiating the pythonEngine with the argc/argv then calling PyRun_SimpleFile but whatever
             std::string cmd = Python::PythonEngine::getTclPreppedPreamble(python_fwd_args);
+#        if DEBUG_PYTHON_CONFIG
+            cmd += R"python(
+import sys, sysconfig, pprint
+print(f"sys.executable={sys.executable}")
+print(f"sys.version={sys.version}")
+pprint.pprint({"sys.path": sys.path,
+             "sys.prefix": sys.prefix,
+             "sys.base_prefix": sys.base_prefix,
+             "sys.exec_prefix": sys.exec_prefix,
+             "sys.base_exec_prefix": sys.base_exec_prefix})
+pprint.pprint(sysconfig.get_paths())
+)python";
+#        endif
             cmd += R"python(
 from energyplus_transition.runner import main_gui
 main_gui(True)

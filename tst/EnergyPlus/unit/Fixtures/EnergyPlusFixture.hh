@@ -271,6 +271,8 @@ protected:
     // Will return false if no errors found and true if errors found
     bool process_idf(std::string_view const idf_snippet, bool use_assertions = true);
 
+    bool process_json(nlohmann::json const &epJSON, bool use_assertions = true);
+
     // Opens output files as stringstreams
     void openOutputFiles(EnergyPlusData &state);
 
@@ -294,6 +296,8 @@ public:
     EnergyPlusData *state;
 
 private:
+    bool common_process_json(bool use_assertions);
+
     friend class InputProcessorFixture;
 
     // Function to process the Energy+.schema.epJSON, should not normally be called.

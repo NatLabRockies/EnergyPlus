@@ -288,6 +288,7 @@ set(SRC
     FluidCoolers.hh
     FluidProperties.cc
     FluidProperties.hh
+    Formatters.hh
     FromChars.hh
     FuelCellElectricGenerator.cc
     FuelCellElectricGenerator.hh
@@ -548,6 +549,8 @@ set(SRC
     PurchasedAirManager.hh
     PythonEngine.cc
     PythonEngine.hh
+    PythonHelpers.cc
+    PythonHelpers.hh
     RefrigeratedCase.cc
     RefrigeratedCase.hh
     ReportCoilSelection.cc
@@ -774,6 +777,14 @@ endif()
 # first we will create a static library of EnergyPlus this will be linked
 # statically to create the DLL and also the unit tests
 add_library(energypluslib STATIC ${SRC})
+
+# Debug Python Config
+option(DEBUG_PYTHON_CONFIG "Debug Python PyPreConfig and PyConfig initialization" OFF)
+mark_as_advanced(DEBUG_PYTHON_CONFIG)
+if(DEBUG_PYTHON_CONFIG)
+  # Linking PUBLIC so it reaches energyplusapi too
+  target_compile_definitions(energypluslib PUBLIC DEBUG_PYTHON_CONFIG=1)
+endif()
 
 if(ENABLE_UNITY)
   set_target_properties(energypluslib PROPERTIES UNITY_BUILD ON)
