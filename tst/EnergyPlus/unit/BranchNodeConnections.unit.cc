@@ -159,35 +159,6 @@ TEST_F(EnergyPlusFixture, BranchNodeErrorCheck11Test)
     EXPECT_TRUE(ErrorsFound); // Node check will fail on Check 11 -- zone node name must be unique
 }
 
-TEST_F(EnergyPlusFixture, BranchNodeConnections_TestInletOutletNodes_ParentChildOutletDuplicate)
-{
-    Node::TestCompSet(*state, "Coil:Heating:Fuel", "SUPP HEATING COIL", "HEATING COIL OUTLET NODE", "SYSTEM OUTLET NODE", "Air Nodes");
-
-    Node::SetUpCompSets(*state,
-                        "Branch",
-                        "MAIN BRANCH",
-                        "AirLoopHVAC:UnitaryHeatPump:WaterToAir",
-                        "UNITARY HEAT PUMP",
-                        "SYSTEM INLET NODE",
-                        "SYSTEM OUTLET NODE",
-                        "Air Nodes");
-
-    Node::TestInletOutletNodes(*state);
-    EXPECT_TRUE(compare_err_stream("", true));
-
-    Node::SetUpCompSets(*state,
-                        "AirLoopHVAC:UnitaryHeatPump:WaterToAir",
-                        "UNITARY HEAT PUMP",
-                        "Coil:Heating:Fuel",
-                        "SUPP HEATING COIL",
-                        "HEATING COIL OUTLET NODE",
-                        "SYSTEM OUTLET NODE",
-                        "Air Nodes");
-
-    Node::TestInletOutletNodes(*state);
-    EXPECT_TRUE(compare_err_stream("", true));
-}
-
 TEST_F(EnergyPlusFixture, BranchNodeConnections_ReturnPlenumNodeCheckFailure)
 {
 

@@ -2243,29 +2243,11 @@ void TestInletOutletNodes(EnergyPlusData &state)
 
     Array1D_bool AlreadyNoted;
 
-    auto const hasUndefinedParent = [](Node::ComponentListData const &compSet) {
-        return compSet.ParentObjectType == Node::ConnectionObjectType::Undefined;
-    };
-
-    auto const isParentChildCompSet = [](Node::ComponentListData const &compSet1, Node::ComponentListData const &compSet2) {
-        return (compSet1.ComponentObjectType == compSet2.ParentObjectType && compSet1.CName == compSet2.ParentCName) ||
-               (compSet2.ComponentObjectType == compSet1.ParentObjectType && compSet2.CName == compSet1.ParentCName);
-    };
-
-    auto const shouldSkipDuplicateCompSetWarning = [&hasUndefinedParent, &isParentChildCompSet](Node::ComponentListData const &compSet1,
-                                                                                                Node::ComponentListData const &compSet2) {
-        return hasUndefinedParent(compSet1) || hasUndefinedParent(compSet2) || isParentChildCompSet(compSet1, compSet2);
-    };
-
     // Test component sets created by branches
     AlreadyNoted.dimension(state.dataBranchNodeConnections->NumCompSets, false);
     for (int Count = 1; Count <= state.dataBranchNodeConnections->NumCompSets; ++Count) {
         for (int Other = 1; Other <= state.dataBranchNodeConnections->NumCompSets; ++Other) {
             if (Count == Other) {
-                continue;
-            }
-            if (shouldSkipDuplicateCompSetWarning(state.dataBranchNodeConnections->CompSets(Count),
-                                                  state.dataBranchNodeConnections->CompSets(Other))) {
                 continue;
             }
             if (state.dataBranchNodeConnections->CompSets(Count).InletNodeName != state.dataBranchNodeConnections->CompSets(Other).InletNodeName) {
@@ -2310,10 +2292,6 @@ void TestInletOutletNodes(EnergyPlusData &state)
     for (int Count = 1; Count <= state.dataBranchNodeConnections->NumCompSets; ++Count) {
         for (int Other = 1; Other <= state.dataBranchNodeConnections->NumCompSets; ++Other) {
             if (Count == Other) {
-                continue;
-            }
-            if (shouldSkipDuplicateCompSetWarning(state.dataBranchNodeConnections->CompSets(Count),
-                                                  state.dataBranchNodeConnections->CompSets(Other))) {
                 continue;
             }
             if (state.dataBranchNodeConnections->CompSets(Count).OutletNodeName != state.dataBranchNodeConnections->CompSets(Other).OutletNodeName) {
