@@ -1085,7 +1085,6 @@ namespace BranchInputManager {
                 cNumericFields.deallocate();
                 lAlphaBlanks.deallocate();
                 lNumericBlanks.deallocate();
-                Node::TestInletOutletNodes(state);
                 state.dataBranchInputManager->GetBranchInputOneTimeFlag = false;
             }
         }

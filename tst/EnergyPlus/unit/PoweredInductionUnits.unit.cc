@@ -1993,9 +1993,6 @@ TEST_F(EnergyPlusFixture, PIU_InducedAir_Plenums)
     state->dataGlobal->DoingSizing = true;
     state->dataGlobal->BeginEnvrnFlag = true;
     state->dataGlobal->ZoneSizingCalc = true;
-
-    EXPECT_TRUE(has_err_output(true)); // Some init_state() warnings
-
     EXPECT_NO_THROW(SizingManager::ManageSizing(*state));
 
     std::string const expectedError = delimited_string({
