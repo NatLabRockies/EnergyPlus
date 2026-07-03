@@ -49,7 +49,7 @@ _Figure 1 - Cross Section of a Cold Plate_ (source: [[6]][Martinez et al.])
 
 The proposed object will be added by users to the demand side of a `PlantLoop` and, together with a `HeatExchanger:FluidToFluid` object and a pump (on the supply side of the same `PlantLoop`), will represent a coolant distribution unit (CDU). As requested by [[0]][Issue #11408], this approach allows D2C to "_be connected to existing EnergyPlus PlantLoop architecture_" and "_support for liquids with other heat transfer properties would be handled at the loop level with the fluid_type and user_defined_fluid_type fields_". Coolant properties can be specified using the `FluidProperties` family of objects. Note that PG25, which according to the literature (see [[2]][Wang et al.]) is a widely used single-phase coolant (a mixture of 25% propylene glycol and water), is natively supported by EnergyPlus when using the `FluidProperties:GlycolConcentration` object. Two-phase heat transfer is not currently handled in EnergyPlus, so we propose to focus on single-phase D2C this FY and add capabilities for two-phase D2C in the next FY.
 
-Moreover, [[6]][Martinez et al.] proposes an LMTD-based thermal resistance definition for single-phase liquid-cooled cold plates. We focus on the $R_{th}$ approach while offering users the option to apply the correction factor established in this publication.
+Moreover, [[6]][Martinez et al.] propose an LMTD-based thermal resistance ($R_{LMTD}$) definition for single-phase liquid-cooled cold plates. The default implementation uses the $R_{th}$ approach, though users may optionally apply the $R_{LMTD}$ approach instead.
 
 ## Testing/Validation/Data Sources ##
 
@@ -81,12 +81,7 @@ Coil:Cooling:ITE:ColdPlate
         \required-field
         \type node
     N1, \field Nominal Thermal Resistance
-        \note This is the cold plate thermal resistance at the nominal flow rate where:
-        \note R = (Tc - Tf) / q_dot 
-        \note Where R is the Nominal Thermal Resistance
-        \note Tc is the case temperature
-        \note Tf is the liquid inlet temperature 
-        \note q_dot is the heat flow to the cold plate
+        \note This is the cold plate thermal resistance at the nominal flow rate
         \default 0.025
         \minimum> 0.0
         \units K/W
@@ -99,8 +94,15 @@ Coil:Cooling:ITE:ColdPlate
         \object-list BivariateFunctions
         \note Flow rate ratio (Flow rate / Nominal Flow Rate) is used as the first independent variable
         \note Heat transfer rate ratio (Heat transfer rate / Nominal Transfer Rate) is used as the second independent variable
-    A6, \field Apply LMTD Correction Factor
-        \note Apply a correction factor to the Nominal Thermal Resistance input for consistency with the effectiveness-NTU cold plate modeling approach
+    A6, \field Use LMTD Thermal Resistance
+        \note If No, the thermal resistance is defined as follows:
+        \note R = (Tc - Tf) / q_dot 
+        \note Where R is the Nominal Thermal Resistance
+        \note Tc is the case temperature
+        \note Tf is the liquid inlet temperature 
+        \note q_dot is the heat flow to the cold plate
+        \note If Yes, a LMTD-based thermal resistance is considered
+        \note R = LMTD / q_dot
         \type choice
         \key Yes
         \key No
