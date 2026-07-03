@@ -83,6 +83,7 @@ struct CoilCoolingDX
                                                                                  const std::string &performance_object_name);
     static int factory(EnergyPlusData &state, std::string const &coilName);
     static void getInput(EnergyPlusData &state);
+    static void registerComponentSets(EnergyPlusData &state);
     static void clear_state();
     static void reportAllStandardRatings(EnergyPlusData &state);
     void instantiateFromInputSpec(EnergyPlusData &state, const CoilCoolingDXInputSpecification &input_data);
@@ -198,10 +199,7 @@ struct CoilCoolingDXData : BaseGlobalStruct
 
     void init_state([[maybe_unused]] EnergyPlusData &state) override
     {
-        if (this->GetInputFlag) {
-            CoilCoolingDX::getInput(state);
-            this->GetInputFlag = false;
-        }
+        CoilCoolingDX::registerComponentSets(state);
     }
 
     void clear_state() override

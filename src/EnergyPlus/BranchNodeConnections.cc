@@ -2039,6 +2039,16 @@ void SetUpCompSets(EnergyPlusData &state,
     Node::ConnectionObjectType ComponentTypeEnum = static_cast<Node::ConnectionObjectType>(getEnumValue(ConnectionObjectTypeNamesUC, CompTypeUC));
     assert(ComponentTypeEnum != Node::ConnectionObjectType::Invalid);
 
+    auto const compSetSource = [&]() {
+        if (ParentTypeEnum == Node::ConnectionObjectType::Undefined) {
+            return Node::CompSetSource::ComponentRegistration;
+        }
+        if (ParentTypeEnum == Node::ConnectionObjectType::Branch) {
+            return Node::CompSetSource::BranchTopology;
+        }
+        return Node::CompSetSource::ParentChild;
+    }();
+
     int Found = 0;
 
     // See if Component-Nodes set is already there - should be unique
@@ -2080,123 +2090,21 @@ void SetUpCompSets(EnergyPlusData &state,
             if (!Description.empty()) {
                 state.dataBranchNodeConnections->CompSets(Count).Description = Description;
             }
+            state.dataBranchNodeConnections->CompSets(Count).Source = compSetSource;
             Found = Count;
             break;
         }
     }
     if (Found == 0) {
         for (int Count = 1; Count <= state.dataBranchNodeConnections->NumCompSets; ++Count) {
-            Found = 0;
-            // Test if inlet node has been used before as an inlet node
-            // If the matching node name does not belong to the parent object, then error
-            // For example a fan may share the same inlet node as the furnace object which is its parent
             if (InletNode != state.dataBranchNodeConnections->CompSets(Count).InletNodeName) {
                 continue;
-                // If parent type is undefined then no error
             }
-            if ((ParentTypeEnum == Node::ConnectionObjectType::Undefined) ||
-                (state.dataBranchNodeConnections->CompSets(Count).ParentObjectType == Node::ConnectionObjectType::Undefined)) {
-                // If node name is undefined then no error
-            } else if (InletNode != undefined) {
-                // If the matching node name does not belong to the parent or child object, then error
-                // For example a fan may share the same inlet node as the furnace object which is its parent
-                if ((ParentTypeEnum == state.dataBranchNodeConnections->CompSets(Count).ComponentObjectType) &&
-                    (ParentName == state.dataBranchNodeConnections->CompSets(Count).CName)) {
-                    // OK - The duplicate inlet node belongs to this component's parent
-                } else if ((ComponentTypeEnum == state.dataBranchNodeConnections->CompSets(Count).ParentObjectType) &&
-                           (CompName == state.dataBranchNodeConnections->CompSets(Count).ParentCName)) {
-                    // OK - The duplicate inlet node belongs to a child of this component
-                } else {
-                    // Due to possibility of grandparents or more, if the matching node name
-                    // belongs to a component that appears as a parent, then OK
-                    int Found2 = 0;
-                    for (int Count2 = 1; Count2 <= state.dataBranchNodeConnections->NumCompSets; ++Count2) {
-                        if ((state.dataBranchNodeConnections->CompSets(Count).ComponentObjectType ==
-                             state.dataBranchNodeConnections->CompSets(Count2).ParentObjectType) &&
-                            (state.dataBranchNodeConnections->CompSets(Count).CName ==
-                             state.dataBranchNodeConnections->CompSets(Count2).ParentCName)) {
-                            Found2 = 1;
-                        }
-                        if ((ComponentTypeEnum == state.dataBranchNodeConnections->CompSets(Count2).ParentObjectType) &&
-                            (CompName == state.dataBranchNodeConnections->CompSets(Count2).ParentCName)) {
-                            Found2 = 1;
-                        }
-                    }
-                    if (Found2 == 0) {
-                        ShowWarningError(state, std::format("Node used as an inlet more than once: {}", InletNode));
-                        ShowContinueError(
-                            state,
-                            std::format(
-                                "  Used by: {}, name={}",
-                                ConnectionObjectTypeNames[static_cast<int>(state.dataBranchNodeConnections->CompSets(Count).ParentObjectType)],
-                                state.dataBranchNodeConnections->CompSets(Count).ParentCName));
-                        ShowContinueError(
-                            state,
-                            std::format(
-                                "  as inlet for: {}, name={}",
-                                ConnectionObjectTypeNames[static_cast<int>(state.dataBranchNodeConnections->CompSets(Count).ComponentObjectType)],
-                                state.dataBranchNodeConnections->CompSets(Count).CName));
-                        ShowContinueError(state, std::format("{}{}{}", "  and  by     : ", ParentTypeUC + ", name=", ParentName));
-                        ShowContinueError(state, std::format("{}{}{}", "  as inlet for: ", CompTypeUC + ", name=", CompName));
-                    }
-                }
-            }
-            // Test if outlet node has been used before as an outlet node
-            // If the matching node name does not belong to the parent or child object, then error
-            // For example a fan may share the same outlet node as the furnace object which is its parent
             if (OutletNode != state.dataBranchNodeConnections->CompSets(Count).OutletNodeName) {
                 continue;
-                // If parent type is undefined then no error
             }
-            if ((ParentTypeEnum == Node::ConnectionObjectType::Undefined) ||
-                (state.dataBranchNodeConnections->CompSets(Count).ParentObjectType == Node::ConnectionObjectType::Undefined)) {
-                // If node name is undefined then no error
-            } else if (OutletNode != undefined) {
-                if ((ParentTypeEnum == state.dataBranchNodeConnections->CompSets(Count).ComponentObjectType) &&
-                    (ParentName == state.dataBranchNodeConnections->CompSets(Count).CName)) {
-                    // OK - The duplicate outlet node belongs to this component's parent
-                } else if ((ComponentTypeEnum == state.dataBranchNodeConnections->CompSets(Count).ParentObjectType) &&
-                           (CompName == state.dataBranchNodeConnections->CompSets(Count).ParentCName)) {
-                    // OK - The duplicate outlet node belongs to a child of this component
-                } else {
-                    // Due to possibility of grandparents or more, if the matching node name
-                    // belongs to a component that appears as a parent, then OK
-                    int Found2 = 0;
-                    for (int Count2 = 1; Count2 <= state.dataBranchNodeConnections->NumCompSets; ++Count2) {
-                        if ((state.dataBranchNodeConnections->CompSets(Count).ComponentObjectType ==
-                             state.dataBranchNodeConnections->CompSets(Count2).ParentObjectType) &&
-                            (state.dataBranchNodeConnections->CompSets(Count).CName ==
-                             state.dataBranchNodeConnections->CompSets(Count2).ParentCName)) {
-                            Found2 = 1;
-                        }
-                        if ((ComponentTypeEnum == state.dataBranchNodeConnections->CompSets(Count2).ParentObjectType) &&
-                            (CompName == state.dataBranchNodeConnections->CompSets(Count2).ParentCName)) {
-                            Found2 = 1;
-                        }
-                    }
-                    // This rule is violated by dual duct units, so let it pass
-                    if (Found2 == 0) {
-                        std::string_view const CType =
-                            ConnectionObjectTypeNames[static_cast<int>(state.dataBranchNodeConnections->CompSets(Count).ComponentObjectType)];
-                        if ((!has_prefixi(CType, "AirTerminal:DualDuct:")) && (!has_prefixi(CompTypeUC, "AirTerminal:DualDuct:"))) {
-                            ShowWarningError(state, std::format("Node used as an outlet more than once: {}", OutletNode));
-                            ShowContinueError(
-                                state,
-                                std::format(
-                                    "  Used by: {}, name={}",
-                                    ConnectionObjectTypeNames[static_cast<int>(state.dataBranchNodeConnections->CompSets(Count).ParentObjectType)],
-                                    state.dataBranchNodeConnections->CompSets(Count).ParentCName));
-                            ShowContinueError(
-                                state,
-                                std::format(
-                                    "  as outlet for: {}, name={}",
-                                    ConnectionObjectTypeNames[static_cast<int>(state.dataBranchNodeConnections->CompSets(Count).ComponentObjectType)],
-                                    state.dataBranchNodeConnections->CompSets(Count).CName));
-                            ShowContinueError(state, std::format("{}{}{}", "  and  by     : ", ParentTypeUC + ", name=", ParentName));
-                            ShowContinueError(state, std::format("{}{}{}", "  as outlet for: ", CompTypeUC + ", name=", CompName));
-                        }
-                    }
-                }
+            if (compSetSource != state.dataBranchNodeConnections->CompSets(Count).Source) {
+                continue;
             }
             if (ComponentTypeEnum != state.dataBranchNodeConnections->CompSets(Count).ComponentObjectType &&
                 ComponentTypeEnum != Node::ConnectionObjectType::Undefined) {
@@ -2227,6 +2135,7 @@ void SetUpCompSets(EnergyPlusData &state,
         } else {
             state.dataBranchNodeConnections->CompSets(state.dataBranchNodeConnections->NumCompSets).Description = undefined;
         }
+        state.dataBranchNodeConnections->CompSets(state.dataBranchNodeConnections->NumCompSets).Source = compSetSource;
     }
 }
 
@@ -2243,19 +2152,14 @@ void TestInletOutletNodes(EnergyPlusData &state)
 
     Array1D_bool AlreadyNoted;
 
-    auto const isParentChildCompSet = [](Node::ComponentListData const &compSet1, Node::ComponentListData const &compSet2) {
-        return (compSet1.ComponentObjectType == compSet2.ParentObjectType && compSet1.CName == compSet2.ParentCName) ||
-               (compSet2.ComponentObjectType == compSet1.ParentObjectType && compSet2.CName == compSet1.ParentCName);
-    };
-
-    // Test component sets created by branches
+    // Test component sets created by branch input only.
     AlreadyNoted.dimension(state.dataBranchNodeConnections->NumCompSets, false);
     for (int Count = 1; Count <= state.dataBranchNodeConnections->NumCompSets; ++Count) {
+        if (state.dataBranchNodeConnections->CompSets(Count).Source != Node::CompSetSource::BranchTopology) {
+            continue;
+        }
         for (int Other = 1; Other <= state.dataBranchNodeConnections->NumCompSets; ++Other) {
-            if (Count == Other) {
-                continue;
-            }
-            if (isParentChildCompSet(state.dataBranchNodeConnections->CompSets(Count), state.dataBranchNodeConnections->CompSets(Other))) {
+            if (Count == Other || state.dataBranchNodeConnections->CompSets(Other).Source != Node::CompSetSource::BranchTopology) {
                 continue;
             }
             if (state.dataBranchNodeConnections->CompSets(Count).InletNodeName != state.dataBranchNodeConnections->CompSets(Other).InletNodeName) {
@@ -2298,11 +2202,11 @@ void TestInletOutletNodes(EnergyPlusData &state)
 
     AlreadyNoted = false;
     for (int Count = 1; Count <= state.dataBranchNodeConnections->NumCompSets; ++Count) {
+        if (state.dataBranchNodeConnections->CompSets(Count).Source != Node::CompSetSource::BranchTopology) {
+            continue;
+        }
         for (int Other = 1; Other <= state.dataBranchNodeConnections->NumCompSets; ++Other) {
-            if (Count == Other) {
-                continue;
-            }
-            if (isParentChildCompSet(state.dataBranchNodeConnections->CompSets(Count), state.dataBranchNodeConnections->CompSets(Other))) {
+            if (Count == Other || state.dataBranchNodeConnections->CompSets(Other).Source != Node::CompSetSource::BranchTopology) {
                 continue;
             }
             if (state.dataBranchNodeConnections->CompSets(Count).OutletNodeName != state.dataBranchNodeConnections->CompSets(Other).OutletNodeName) {

@@ -62,6 +62,8 @@
 #include <EnergyPlus/CurveManager.hh>
 #include <EnergyPlus/DXCoils.hh>
 #include <EnergyPlus/DataAirSystems.hh>
+#include <EnergyPlus/DataBranchNodeConnections.hh>
+#include <EnergyPlus/DataErrorTracking.hh>
 #include <EnergyPlus/DataHVACGlobals.hh>
 #include <EnergyPlus/DataSizing.hh>
 #include <EnergyPlus/General.hh>
@@ -77,6 +79,67 @@ TEST_F(CoilCoolingDXTest, CoilCoolingDXInput)
     auto const &thisCoil(state->dataCoilCoolingDX->coilCoolingDXs[coilIndex]);
     EXPECT_EQ("COOLINGCOIL", thisCoil.name);
     EXPECT_EQ("PERFORMANCEOBJECTNAME", thisCoil.performance->name);
+}
+
+TEST_F(CoilCoolingDXTest, CoilCoolingDXInitStateRegistersComponentSetsOnly)
+{
+    std::string idf_objects = delimited_string({"  Coil:Cooling:DX,",
+                                                "    Coil,",
+                                                "    EvapInletNode,",
+                                                "    EvapOutletNode,",
+                                                "    ,",
+                                                "    ,",
+                                                "    CondenserInletNode,",
+                                                "    CondenserOutletNode,",
+                                                "    PerformanceObjectName,",
+                                                "    ,",
+                                                "    ;",
+
+                                                "  Coil:Cooling:DX:CurveFit:Performance,",
+                                                "    PerformanceObjectName,",
+                                                "    100,",
+                                                "    ,",
+                                                "    0,",
+                                                "    1,",
+                                                "    100,",
+                                                "    Continuous,",
+                                                "    100,",
+                                                "    400,",
+                                                "    ,",
+                                                "    Electricity,",
+                                                "    BaseOperatingMode;",
+
+                                                "  Coil:Cooling:DX:CurveFit:OperatingMode,",
+                                                "    BaseOperatingMode,",
+                                                "    12000,",
+                                                "    1.0,",
+                                                "    2.0,",
+                                                "    2.5,",
+                                                "    0.5,",
+                                                "    0.0,",
+                                                "    300.0,",
+                                                "    Yes,",
+                                                "    Yes,",
+                                                "    AirCooled,",
+                                                "    0.0,",
+                                                "    1,",
+                                                "    BaseOperatingModeSpeed1;"});
+    idf_objects += this->getSpeedObjectString("BaseOperatingModeSpeed1");
+
+    ASSERT_TRUE(process_idf(idf_objects, false));
+
+    state->init_state(*state);
+
+    EXPECT_TRUE(compare_err_stream("", true));
+    EXPECT_TRUE(state->dataCoilCoolingDX->GetInputFlag);
+    EXPECT_TRUE(state->dataCoilCoolingDX->coilCoolingDXs.empty());
+    EXPECT_EQ(1, state->dataBranchNodeConnections->NumCompSets);
+
+    state->dataGlobal->DoingSizing = true;
+    int coilIndex = CoilCoolingDX::factory(*state, "Coil");
+
+    EXPECT_EQ(0, coilIndex);
+    EXPECT_EQ(1, state->dataErrTracking->TotalWarningErrorsDuringSizing);
 }
 
 TEST_F(CoilCoolingDXTest, CoilCoolingDXAlternateModePerformance)

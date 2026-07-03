@@ -62,6 +62,15 @@ namespace EnergyPlus {
 
 namespace Node {
 
+    enum class CompSetSource
+    {
+        Invalid = -1,
+        ComponentRegistration,
+        BranchTopology,
+        ParentChild,
+        Num
+    };
+
     struct ComponentListData
     {
         // Members
@@ -74,6 +83,7 @@ namespace Node {
         std::string InletNodeName;  // Inlet Node ID
         std::string OutletNodeName; // Outlet Node ID
         std::string Description;    // Description of Component List Type
+        Node::CompSetSource Source = Node::CompSetSource::Invalid;
     };
 
     struct NodeConnectionDef

@@ -116,6 +116,27 @@ int CoilCoolingDX::factory(EnergyPlus::EnergyPlusData &state, std::string const 
     return -1;
 }
 
+void CoilCoolingDX::registerComponentSets(EnergyPlusData &state)
+{
+    auto *inputProcessor = state.dataInputProcessing->inputProcessor.get();
+    auto const coilInstances = inputProcessor->epJSON.find(state.dataCoilCoolingDX->coilCoolingDXObjectName);
+    if (coilInstances == inputProcessor->epJSON.end() || coilInstances->empty()) {
+        return;
+    }
+
+    auto const &coilSchemaProps = inputProcessor->getObjectSchemaProps(state, state.dataCoilCoolingDX->coilCoolingDXObjectName);
+
+    for (auto const &coilInstance : coilInstances.value().items()) {
+        auto const &coilFields = coilInstance.value();
+        std::string const coilName = Util::makeUPPER(coilInstance.key());
+        std::string const evapInletNodeName = inputProcessor->getAlphaFieldValue(coilFields, coilSchemaProps, "evaporator_inlet_node_name");
+        std::string const evapOutletNodeName = inputProcessor->getAlphaFieldValue(coilFields, coilSchemaProps, "evaporator_outlet_node_name");
+
+        Node::TestCompSet(state, state.dataCoilCoolingDX->coilCoolingDXObjectName, coilName, evapInletNodeName, evapOutletNodeName, "Air Nodes");
+        inputProcessor->markObjectAsUsed(state.dataCoilCoolingDX->coilCoolingDXObjectName, coilInstance.key());
+    }
+}
+
 void CoilCoolingDX::getInput(EnergyPlusData &state)
 {
 
