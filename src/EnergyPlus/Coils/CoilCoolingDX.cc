@@ -100,9 +100,9 @@ std::shared_ptr<CoilCoolingDXPerformanceBase> CoilCoolingDX::makePerformanceSubc
 
 int CoilCoolingDX::factory(EnergyPlus::EnergyPlusData &state, std::string const &coilName)
 {
-    if (state.dataCoilCoolingDX->coilCoolingDXGetInputFlag) {
+    if (state.dataCoilCoolingDX->GetInputFlag) {
         CoilCoolingDX::getInput(state);
-        state.dataCoilCoolingDX->coilCoolingDXGetInputFlag = false;
+        state.dataCoilCoolingDX->GetInputFlag = false;
     }
     int handle = -1;
     std::string coilNameUpper = Util::makeUPPER(coilName);
@@ -116,12 +116,34 @@ int CoilCoolingDX::factory(EnergyPlus::EnergyPlusData &state, std::string const 
     return -1;
 }
 
-void CoilCoolingDX::getInput(EnergyPlusData &state)
+void CoilCoolingDX::registerComponentSets(EnergyPlusData &state)
 {
     auto *inputProcessor = state.dataInputProcessing->inputProcessor.get();
     auto const coilInstances = inputProcessor->epJSON.find(state.dataCoilCoolingDX->coilCoolingDXObjectName);
     if (coilInstances == inputProcessor->epJSON.end() || coilInstances->empty()) {
-        ShowFatalError(state, R"(No "Coil:Cooling:DX" objects in input file)");
+        return;
+    }
+
+    auto const &coilSchemaProps = inputProcessor->getObjectSchemaProps(state, state.dataCoilCoolingDX->coilCoolingDXObjectName);
+
+    for (auto const &coilInstance : coilInstances.value().items()) {
+        auto const &coilFields = coilInstance.value();
+        std::string const coilName = Util::makeUPPER(coilInstance.key());
+        std::string const evapInletNodeName = inputProcessor->getAlphaFieldValue(coilFields, coilSchemaProps, "evaporator_inlet_node_name");
+        std::string const evapOutletNodeName = inputProcessor->getAlphaFieldValue(coilFields, coilSchemaProps, "evaporator_outlet_node_name");
+
+        Node::TestCompSet(state, state.dataCoilCoolingDX->coilCoolingDXObjectName, coilName, evapInletNodeName, evapOutletNodeName, "Air Nodes");
+        inputProcessor->markObjectAsUsed(state.dataCoilCoolingDX->coilCoolingDXObjectName, coilInstance.key());
+    }
+}
+
+void CoilCoolingDX::getInput(EnergyPlusData &state)
+{
+
+    auto *inputProcessor = state.dataInputProcessing->inputProcessor.get();
+    auto const coilInstances = inputProcessor->epJSON.find(state.dataCoilCoolingDX->coilCoolingDXObjectName);
+    if (coilInstances == inputProcessor->epJSON.end() || coilInstances->empty()) {
+        return; // Was fatal error
     }
     auto const &coilSchemaProps = inputProcessor->getObjectSchemaProps(state, state.dataCoilCoolingDX->coilCoolingDXObjectName);
 

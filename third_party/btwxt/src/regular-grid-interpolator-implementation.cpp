@@ -523,7 +523,7 @@ void RegularGridInterpolatorImplementation::calculate_interpolation_coefficients
             cubic_slope_coefficients[axis_index][ceiling]; // floor (0)
         weighting_factors[axis_index][2] =
             interpolation_coefficients[axis_index][ceiling] +
-            cubic_slope_coefficients[axis_index][floor];   // ceiling (1)
+            cubic_slope_coefficients[axis_index][floor]; // ceiling (1)
         weighting_factors[axis_index][3] =
             cubic_slope_coefficients[axis_index][ceiling]; // point above ceiling (2)
     }

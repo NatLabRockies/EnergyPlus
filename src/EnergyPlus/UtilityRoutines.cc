@@ -397,6 +397,7 @@ int AbortEnergyPlus(EnergyPlusData &state)
         if (ErrFound) {
             TerminalError = true;
         }
+        Node::TestInletOutletNodes(state);
         Node::TestCompSetInletOutletNodes(state, ErrFound);
         if (ErrFound) {
             TerminalError = true;

@@ -152,12 +152,6 @@ void SimulateWaterCoilComponents(EnergyPlusData &state,
     HVAC::FanOp fanOp;   // fan operating mode
     Real64 PartLoadFrac; // part-load fraction of heating coil
 
-    // Obtains and Allocates WaterCoil related parameters from input file
-    if (state.dataWaterCoils->GetWaterCoilsInputFlag) { // First time subroutine has been entered
-        GetWaterCoilInput(state);
-        state.dataWaterCoils->GetWaterCoilsInputFlag = false;
-    }
-
     // Find the correct WaterCoilNumber with the Coil Name
     if (CompIndex == 0) {
         CoilNum = Util::FindItemInList(CompName, state.dataWaterCoils->WaterCoil);
@@ -5332,12 +5326,6 @@ void CheckWaterCoilSchedule(EnergyPlusData &state, std::string_view CompName, Re
     //       AUTHOR         Linda Lawrie
     //       DATE WRITTEN   October 2005
 
-    // Obtains and Allocates WaterCoil related parameters from input file
-    if (state.dataWaterCoils->GetWaterCoilsInputFlag) { // First time subroutine has been entered
-        GetWaterCoilInput(state);
-        state.dataWaterCoils->GetWaterCoilsInputFlag = false;
-    }
-
     int CoilNum = 0;
     // Find the correct Coil number
     if (CompIndex == 0) {
@@ -5389,12 +5377,6 @@ Real64 GetCoilMaxWaterFlowRate(EnergyPlusData &state,
 
     // FUNCTION LOCAL VARIABLE DECLARATIONS:
 
-    // Obtains and Allocates WaterCoil related parameters from input file
-    if (state.dataWaterCoils->GetWaterCoilsInputFlag) { // First time subroutine has been entered
-        GetWaterCoilInput(state);
-        state.dataWaterCoils->GetWaterCoilsInputFlag = false;
-    }
-
     int WhichCoil = 0;
     if (Util::SameString(CoilType, "Coil:Heating:Water") || Util::SameString(CoilType, "Coil:Cooling:Water:DetailedGeometry") ||
         Util::SameString(CoilType, "Coil:Cooling:Water")) {
@@ -5433,12 +5415,6 @@ int GetCoilInletNode(EnergyPlusData &state,
     // incorrect coil type or name is given, ErrorsFound is returned as true and node number is returned
     // as zero.
 
-    // Obtains and Allocates DXCoils
-    if (state.dataWaterCoils->GetWaterCoilsInputFlag) {
-        GetWaterCoilInput(state);
-        state.dataWaterCoils->GetWaterCoilsInputFlag = false;
-    }
-
     int NodeNumber = 0;
     int WhichCoil = 0;
     if (Util::SameString(CoilType, "Coil:Heating:Water") || Util::SameString(CoilType, "Coil:Cooling:Water:DetailedGeometry") ||
@@ -5475,12 +5451,6 @@ int GetCoilOutletNode(EnergyPlusData &state,
     // This function looks up the given coil and returns the inlet node number.  If
     // incorrect coil type or name is given, ErrorsFound is returned as true and node number is returned
     // as zero.
-
-    // Obtains and Allocates DXCoils
-    if (state.dataWaterCoils->GetWaterCoilsInputFlag) {
-        GetWaterCoilInput(state);
-        state.dataWaterCoils->GetWaterCoilsInputFlag = false;
-    }
 
     int WhichCoil = 0;
     int NodeNumber = 0; // returned node number of matched coil
@@ -5522,12 +5492,6 @@ int GetCoilWaterInletNode(EnergyPlusData &state,
     // incorrect coil type or name is given, ErrorsFound is returned as true and node number is returned
     // as zero.
 
-    // Obtains and Allocates DXCoils
-    if (state.dataWaterCoils->GetWaterCoilsInputFlag) {
-        GetWaterCoilInput(state);
-        state.dataWaterCoils->GetWaterCoilsInputFlag = false;
-    }
-
     int NodeNumber = 0; // returned node number of matched coil
     int WhichCoil = 0;
     if (Util::SameString(CoilType, "Coil:Heating:Water") || Util::SameString(CoilType, "Coil:Cooling:Water:DetailedGeometry") ||
@@ -5564,12 +5528,6 @@ int GetCoilWaterOutletNode(EnergyPlusData &state,
     // This function looks up the given coil and returns the outlet water node number.  If
     // incorrect coil type or name is given, ErrorsFound is returned as true and node number is returned
     // as zero.
-
-    // Obtains and Allocates DXCoils
-    if (state.dataWaterCoils->GetWaterCoilsInputFlag) {
-        GetWaterCoilInput(state);
-        state.dataWaterCoils->GetWaterCoilsInputFlag = false;
-    }
 
     int NodeNumber = 0; // returned node number of matched coil
     int WhichCoil = 0;
@@ -5609,11 +5567,6 @@ void SetCoilDesFlow(EnergyPlusData &state,
     // water coil data structure. Some of the coil types do not have this datum as
     // an input parameter and it is needed for calculating capacity for output reporting.
 
-    if (state.dataWaterCoils->GetWaterCoilsInputFlag) { // First time subroutine has been entered
-        GetWaterCoilInput(state);
-        state.dataWaterCoils->GetWaterCoilsInputFlag = false;
-    }
-
     if (Util::SameString(CoilType, "Coil:Heating:Water") || Util::SameString(CoilType, "Coil:Cooling:Water:DetailedGeometry") ||
         Util::SameString(CoilType, "Coil:Cooling:Water")) {
         int WhichCoil = Util::FindItem(CoilName, state.dataWaterCoils->WaterCoil);
@@ -5648,11 +5601,6 @@ Real64 GetWaterCoilDesAirFlow(EnergyPlusData &state,
 
     Real64 CoilDesAirFlow = 0.0;
 
-    if (state.dataWaterCoils->GetWaterCoilsInputFlag) { // First time subroutine has been entered
-        GetWaterCoilInput(state);
-        state.dataWaterCoils->GetWaterCoilsInputFlag = false;
-    }
-
     if (Util::SameString(CoilType, "Coil:Cooling:Water")) {
         int WhichCoil = Util::FindItem(CoilName, state.dataWaterCoils->WaterCoil);
         if (WhichCoil != 0) {
@@ -5684,12 +5632,6 @@ void CheckActuatorNode(EnergyPlusData &state,
     // This subroutine checks that the input actuator node number is matched by
     // the water inlet node number of some water coil
 
-    // Obtains and Allocates DXCoils
-    if (state.dataWaterCoils->GetWaterCoilsInputFlag) {
-        GetWaterCoilInput(state);
-        state.dataWaterCoils->GetWaterCoilsInputFlag = false;
-    }
-
     WaterCoilType = DataPlant::PlantEquipmentType::Invalid;
     NodeNotFound = true;
     for (int CoilNum = 1; CoilNum <= state.dataWaterCoils->NumWaterCoils; ++CoilNum) {
@@ -5719,12 +5661,6 @@ void CheckForSensorAndSetPointNode(EnergyPlusData &state,
 
     // SUBROUTINE PARAMETER DEFINITIONS:
     static constexpr std::string_view RoutineName("CheckForSensorAndSetpointNode: ");
-
-    // Obtains and Allocates DXCoils
-    if (state.dataWaterCoils->GetWaterCoilsInputFlag) {
-        GetWaterCoilInput(state);
-        state.dataWaterCoils->GetWaterCoilsInputFlag = false;
-    }
 
     int WhichCoil = 0;
     NodeNotFound = true;
@@ -5930,12 +5866,6 @@ int GetWaterCoilIndex(EnergyPlusData &state,
     // Return value
     int IndexNum; // returned coil index if matched coil
 
-    // Obtains and allocates WaterCoil related parameters from input file
-    if (state.dataWaterCoils->GetWaterCoilsInputFlag) {
-        GetWaterCoilInput(state);
-        state.dataWaterCoils->GetWaterCoilsInputFlag = false;
-    }
-
     IndexNum = 0;
     if (CoilType == "COIL:HEATING:WATER") {
         IndexNum = Util::FindItemInList(CoilName, state.dataWaterCoils->WaterCoil);
@@ -5958,11 +5888,6 @@ int GetCompIndex(EnergyPlusData &state, CoilModel compType, std::string_view con
 {
     static constexpr std::array<std::string_view, (int)WaterCoils::CoilModel::Num> CoilModelNamesUC = {
         "COIL:HEATING:WATER", "COIL:COOLING:WATER", "COIL:COOLING:WATER:DETAILED"};
-
-    if (state.dataWaterCoils->GetWaterCoilsInputFlag) {
-        GetWaterCoilInput(state);
-        state.dataWaterCoils->GetWaterCoilsInputFlag = false;
-    }
 
     int index = Util::FindItemInList(coilName, state.dataWaterCoils->WaterCoil);
 
@@ -5988,12 +5913,6 @@ Real64 GetWaterCoilCapacity(EnergyPlusData &state,
     // This function looks up the capacity for the given coil and returns it.  If incorrect coil
     // type or name is given, ErrorsFound is returned as true and capacity is returned
     // as zero.
-
-    // Obtains and allocates WaterCoil related parameters from input file
-    if (state.dataWaterCoils->GetWaterCoilsInputFlag) {
-        GetWaterCoilInput(state);
-        state.dataWaterCoils->GetWaterCoilsInputFlag = false;
-    }
 
     int IndexNum;           // index to water coil
     Real64 Capacity = -1.0; // returned coil capacity if matched coil
@@ -6138,13 +6057,6 @@ Sched::Schedule *GetWaterCoilAvailSched(EnergyPlusData &state,
     // incorrect coil type or name is given, ErrorsFound is returned as true and index is returned
     // as zero.
 
-    // Obtains and Allocates HeatingCoil related parameters from input file
-    // Obtains and Allocates DXCoils
-    if (state.dataWaterCoils->GetWaterCoilsInputFlag) {
-        GetWaterCoilInput(state);
-        state.dataWaterCoils->GetWaterCoilsInputFlag = false;
-    }
-
     int WhichCoil = 0;
 
     if (Util::SameString(CoilType, "Coil:Heating:Water") || Util::SameString(CoilType, "Coil:Cooling:Water") ||
@@ -6180,11 +6092,6 @@ void SetWaterCoilData(EnergyPlusData &state,
 
     // PURPOSE OF THIS FUNCTION:
     // This function sets data to water Heating Coil using the coil index and arguments passed
-
-    if (state.dataWaterCoils->GetWaterCoilsInputFlag) {
-        GetWaterCoilInput(state);
-        state.dataWaterCoils->GetWaterCoilsInputFlag = false;
-    }
 
     if (CoilNum <= 0 || CoilNum > state.dataWaterCoils->NumWaterCoils) {
         ShowSevereError(state,

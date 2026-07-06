@@ -552,10 +552,9 @@ namespace VariableSpeedCoils {
 
 struct VariableSpeedCoilsData : BaseGlobalStruct
 {
-    int NumVarSpeedCoils = 0;      // The Number of Water to Air Heat Pumps found in the Input
-    bool MyOneTimeFlag = true;     // one time allocation flag
-    bool GetCoilsInputFlag = true; // Flag set to make sure you get input once
-                                   // LOGICAL, ALLOCATABLE, DIMENSION(:) :: MySizeFlag
+    int NumVarSpeedCoils = 0;  // The Number of Water to Air Heat Pumps found in the Input
+    bool MyOneTimeFlag = true; // one time allocation flag
+                               // LOGICAL, ALLOCATABLE, DIMENSION(:) :: MySizeFlag
     bool CrankcaseHeaterReportVarFlag = true;
 
     Real64 SourceSideMassFlowRate = 0.0; // Source Side Mass flow rate [Kg/s]
@@ -619,13 +618,13 @@ struct VariableSpeedCoilsData : BaseGlobalStruct
 
     void init_state([[maybe_unused]] EnergyPlusData &state) override
     {
+        VariableSpeedCoils::GetVarSpeedCoilInput(state);
     }
 
     void clear_state() override
     {
         this->NumVarSpeedCoils = 0;
         this->MyOneTimeFlag = true;
-        this->GetCoilsInputFlag = true;
         this->SourceSideMassFlowRate = 0.0;
         this->SourceSideInletTemp = 0.0;
         this->SourceSideInletEnth = 0.0;

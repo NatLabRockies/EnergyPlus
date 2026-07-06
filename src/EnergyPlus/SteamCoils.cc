@@ -128,12 +128,6 @@ namespace SteamCoils {
         Real64 PartLoadFrac;    // part-load fraction of heating coil
         Real64 QCoilReqLocal;   // local required heating load optional
 
-        // Obtains and Allocates SteamCoil related parameters from input file
-        if (state.dataSteamCoils->GetSteamCoilsInputFlag) { // First time subroutine has been entered
-            GetSteamCoilInput(state);
-            state.dataSteamCoils->GetSteamCoilsInputFlag = false;
-        }
-
         // Find the correct SteamCoilNumber with the Coil Name
         if (CompIndex == 0) {
             CoilNum = Util::FindItemInList(CompName, state.dataSteamCoils->SteamCoil);
@@ -1414,12 +1408,6 @@ namespace SteamCoils {
         // Return value
         int IndexNum; // returned air inlet node number of matched coil
 
-        // Obtains and Allocates SteamCoil related parameters from input file
-        if (state.dataSteamCoils->GetSteamCoilsInputFlag) { // First time subroutine has been entered
-            GetSteamCoilInput(state);
-            state.dataSteamCoils->GetSteamCoilsInputFlag = false;
-        }
-
         if (CoilType == "COIL:HEATING:STEAM") {
             IndexNum = Util::FindItemInList(CoilName, state.dataSteamCoils->SteamCoil);
         } else {
@@ -1436,11 +1424,6 @@ namespace SteamCoils {
 
     int GetCompIndex(EnergyPlusData &state, std::string_view const coilName)
     {
-        if (state.dataSteamCoils->GetSteamCoilsInputFlag) { // First time subroutine has been entered
-            GetSteamCoilInput(state);
-            state.dataSteamCoils->GetSteamCoilsInputFlag = false;
-        }
-
         int indexNum = Util::FindItemInList(coilName, state.dataSteamCoils->SteamCoil);
 
         if (indexNum == 0) { // may not find coil name
@@ -1465,12 +1448,6 @@ namespace SteamCoils {
 
         // SUBROUTINE LOCAL VARIABLE DECLARATIONS:
         int CoilNum;
-
-        // Obtains and Allocates SteamCoil related parameters from input file
-        if (state.dataSteamCoils->GetSteamCoilsInputFlag) { // First time subroutine has been entered
-            GetSteamCoilInput(state);
-            state.dataSteamCoils->GetSteamCoilsInputFlag = false;
-        }
 
         // Find the correct Coil number
         if (CompIndex == 0) {
@@ -1527,12 +1504,6 @@ namespace SteamCoils {
         // FUNCTION LOCAL VARIABLE DECLARATIONS:
         int WhichCoil;
 
-        // Obtains and Allocates SteamCoil related parameters from input file
-        if (state.dataSteamCoils->GetSteamCoilsInputFlag) { // First time subroutine has been entered
-            GetSteamCoilInput(state);
-            state.dataSteamCoils->GetSteamCoilsInputFlag = false;
-        }
-
         if (Util::SameString(CoilType, "Coil:Heating:Steam")) {
             WhichCoil = Util::FindItem(CoilName, state.dataSteamCoils->SteamCoil);
             if (WhichCoil != 0) {
@@ -1573,12 +1544,6 @@ namespace SteamCoils {
         // Return value
         Real64 MaxSteamFlowRate; // returned max steam flow rate of matched coil
 
-        // Obtains and Allocates SteamCoil related parameters from input file
-        if (state.dataSteamCoils->GetSteamCoilsInputFlag) { // First time subroutine has been entered
-            GetSteamCoilInput(state);
-            state.dataSteamCoils->GetSteamCoilsInputFlag = false;
-        }
-
         if (CoilIndex == 0) {
             ShowSevereError(state, "GetCoilMaxSteamFlowRate: Could not find CoilType = \"Coil:Heating:Steam\"");
             ErrorsFound = true;
@@ -1610,12 +1575,6 @@ namespace SteamCoils {
 
         // Return value
         int NodeNumber; // returned air inlet node number of matched coil
-
-        // Obtains and Allocates SteamCoil related parameters from input file
-        if (state.dataSteamCoils->GetSteamCoilsInputFlag) { // First time subroutine has been entered
-            GetSteamCoilInput(state);
-            state.dataSteamCoils->GetSteamCoilsInputFlag = false;
-        }
 
         if (CoilIndex == 0) {
             ShowSevereError(state, std::format("GetCoilAirInletNode: Could not find CoilType = \"Coil:Heating:Steam\" with Name = {}", CoilName));
@@ -1658,12 +1617,6 @@ namespace SteamCoils {
         // Return value
         int NodeNumber; // returned air inlet node number of matched coil
 
-        // Obtains and Allocates SteamCoil related parameters from input file
-        if (state.dataSteamCoils->GetSteamCoilsInputFlag) { // First time subroutine has been entered
-            GetSteamCoilInput(state);
-            state.dataSteamCoils->GetSteamCoilsInputFlag = false;
-        }
-
         if (CoilIndex == 0) {
             ShowSevereError(state, std::format("GetCoilAirOutletNode: Could not find CoilType = \"Coil:Heating:Steam\" with Name = {}", CoilName));
             ErrorsFound = true;
@@ -1698,12 +1651,6 @@ namespace SteamCoils {
 
         // FUNCTION LOCAL VARIABLE DECLARATIONS:
         int IndexNum; // returned air inlet node number of matched coil
-
-        // Obtains and Allocates SteamCoil related parameters from input file
-        if (state.dataSteamCoils->GetSteamCoilsInputFlag) { // First time subroutine has been entered
-            GetSteamCoilInput(state);
-            state.dataSteamCoils->GetSteamCoilsInputFlag = false;
-        }
 
         if (Util::SameString(CoilType, "Coil:Heating:Steam")) {
             IndexNum = Util::FindItem(CoilName, state.dataSteamCoils->SteamCoil);
@@ -1741,12 +1688,6 @@ namespace SteamCoils {
         // Return value
         int NodeNumber; // returned air inlet node number of matched coil
 
-        // Obtains and Allocates SteamCoil related parameters from input file
-        if (state.dataSteamCoils->GetSteamCoilsInputFlag) { // First time subroutine has been entered
-            GetSteamCoilInput(state);
-            state.dataSteamCoils->GetSteamCoilsInputFlag = false;
-        }
-
         if (CoilIndex == 0) {
             ShowSevereError(state, std::format("GetCoilSteamInletNode: Could not find CoilType = \"Coil:Heating:Steam\" with Name = {}", CoilName));
             ErrorsFound = true;
@@ -1781,12 +1722,6 @@ namespace SteamCoils {
 
         // FUNCTION LOCAL VARIABLE DECLARATIONS:
         int IndexNum; // returned air inlet node number of matched coil
-
-        // Obtains and Allocates SteamCoil related parameters from input file
-        if (state.dataSteamCoils->GetSteamCoilsInputFlag) { // First time subroutine has been entered
-            GetSteamCoilInput(state);
-            state.dataSteamCoils->GetSteamCoilsInputFlag = false;
-        }
 
         if (Util::SameString(CoilType, "Coil:Heating:Steam")) {
             IndexNum = Util::FindItem(CoilName, state.dataSteamCoils->SteamCoil);
@@ -1826,12 +1761,6 @@ namespace SteamCoils {
         // Return value
         int NodeNumber; // returned air inlet node number of matched coil
 
-        // Obtains and Allocates SteamCoil related parameters from input file
-        if (state.dataSteamCoils->GetSteamCoilsInputFlag) { // First time subroutine has been entered
-            GetSteamCoilInput(state);
-            state.dataSteamCoils->GetSteamCoilsInputFlag = false;
-        }
-
         if (CoilIndex == 0) {
             ShowSevereError(state, std::format("GetCoilSteamInletNode: Could not find CoilType = \"Coil:Heating:Steam\" with Name = {}", CoilName));
             ErrorsFound = true;
@@ -1866,12 +1795,6 @@ namespace SteamCoils {
 
         // FUNCTION LOCAL VARIABLE DECLARATIONS:
         int IndexNum; // returned air inlet node number of matched coil
-
-        // Obtains and Allocates SteamCoil related parameters from input file
-        if (state.dataSteamCoils->GetSteamCoilsInputFlag) { // First time subroutine has been entered
-            GetSteamCoilInput(state);
-            state.dataSteamCoils->GetSteamCoilsInputFlag = false;
-        }
 
         if (Util::SameString(CoilType, "Coil:Heating:Steam")) {
             IndexNum = Util::FindItem(CoilName, state.dataSteamCoils->SteamCoil);
@@ -1914,12 +1837,6 @@ namespace SteamCoils {
         // FUNCTION LOCAL VARIABLE DECLARATIONS:
         int WhichCoil;
 
-        // Obtains and Allocates SteamCoil related parameters from input file
-        if (state.dataSteamCoils->GetSteamCoilsInputFlag) { // First time subroutine has been entered
-            GetSteamCoilInput(state);
-            state.dataSteamCoils->GetSteamCoilsInputFlag = false;
-        }
-
         if (Util::SameString(CoilType, "Coil:Heating:Steam")) {
             WhichCoil = Util::FindItem(CoilName, state.dataSteamCoils->SteamCoil);
             if (WhichCoil != 0) {
@@ -1957,12 +1874,6 @@ namespace SteamCoils {
         // incorrect coil type or name is given, ErrorsFound is returned as true and node number is returned
         // as zero.
 
-        // Obtains and Allocates SteamCoil related parameters from input file
-        if (state.dataSteamCoils->GetSteamCoilsInputFlag) { // First time subroutine has been entered
-            GetSteamCoilInput(state);
-            state.dataSteamCoils->GetSteamCoilsInputFlag = false;
-        }
-
         if (CoilIndex == 0) {
             ShowSevereError(state, std::format("GetCoilSteamInletNode: Could not find CoilType = \"Coil:Heating:Steam\" with Name = {}", CoilName));
             ErrorsFound = true;
@@ -1994,12 +1905,6 @@ namespace SteamCoils {
 
         // FUNCTION LOCAL VARIABLE DECLARATIONS:
         int WhichCoil;
-
-        // Obtains and Allocates SteamCoil related parameters from input file
-        if (state.dataSteamCoils->GetSteamCoilsInputFlag) { // First time subroutine has been entered
-            GetSteamCoilInput(state);
-            state.dataSteamCoils->GetSteamCoilsInputFlag = false;
-        }
 
         WhichCoil = 0;
         NodeNumber = 0;
@@ -2045,12 +1950,6 @@ namespace SteamCoils {
         // FUNCTION LOCAL VARIABLE DECLARATIONS:
         int WhichCoil;
 
-        // Obtains and Allocates HeatingCoil related parameters from input file
-        if (state.dataSteamCoils->GetSteamCoilsInputFlag) { // First time subroutine has been entered
-            GetSteamCoilInput(state);
-            state.dataSteamCoils->GetSteamCoilsInputFlag = false;
-        }
-
         WhichCoil = 0;
         AvailSchIndex = 0;
 
@@ -2088,11 +1987,6 @@ namespace SteamCoils {
 
         // PURPOSE OF THIS FUNCTION:
         // This function sets data to water Heating Coil using the coil index and arguments passed
-
-        if (state.dataSteamCoils->GetSteamCoilsInputFlag) {
-            GetSteamCoilInput(state);
-            state.dataSteamCoils->GetSteamCoilsInputFlag = false;
-        }
 
         if (CoilNum <= 0 || CoilNum > state.dataSteamCoils->NumSteamCoils) {
             ShowSevereError(state,

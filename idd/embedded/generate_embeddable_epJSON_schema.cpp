@@ -1,22 +1,22 @@
-#include <cstdint>  // std::uint8_t
-#include <fstream>  // std::ifstream
+#include <cstdint> // std::uint8_t
+#include <fstream> // std::ifstream
 #include <stdexcept>
-#include <vector>  // std::vector
+#include <vector> // std::vector
 #ifndef __cppcheck__
-#  if __has_include(<filesystem>)
-#    include <filesystem>
+#if __has_include(<filesystem>)
+#include <filesystem>
 namespace fs = std::filesystem;
-#  elif __has_include(<experimental/filesystem>)
-#    include <experimental/filesystem>
+#elif __has_include(<experimental/filesystem>)
+#include <experimental/filesystem>
 namespace fs = std::experimental::filesystem;
-#  else
+#else
 // cppcheck-suppress preprocessorErrorDirective
-#    error "no filesystem support"
-#  endif
+#error "no filesystem support"
+#endif
 #endif
 
-#include <nlohmann/json.hpp>  // json
 #include <EnergyPlus/Formatters.hh>
+#include <nlohmann/json.hpp> // json
 
 using json = nlohmann::json;
 
@@ -98,9 +98,12 @@ static constexpr auto footer = R"cpp(
 } // namespace EnergyPlus
 )cpp";
 
-int main(int argc, char const* argv[]) {
+int main(int argc, char const *argv[]) {
   if (argc != 3) {
-    EnergyPlus::print(stderr, "usage: ./generate_embeddable_schema path/to/Energy+.schema.epJSON path/to/EmbeddedEpJSONSchema.cc\n");
+    EnergyPlus::print(
+        stderr,
+        "usage: ./generate_embeddable_schema path/to/Energy+.schema.epJSON "
+        "path/to/EmbeddedEpJSONSchema.cc\n");
     return 1;
   }
 
@@ -117,11 +120,12 @@ int main(int argc, char const* argv[]) {
   const fs::path outFilePath(argv[2]);
   const auto outFileDir = outFilePath.parent_path();
   if (!fs::is_directory(outFileDir)) {
-    EnergyPlus::print(stderr, "Output Directory does not exist: {}\n", outFileDir.generic_string());
+    EnergyPlus::print(stderr, "Output Directory does not exist: {}\n",
+                      outFileDir.generic_string());
     fs::create_directory(outFileDir);
   }
 
-  std::FILE* outfile = std::fopen(argv[2], "w");
+  std::FILE *outfile = std::fopen(argv[2], "w");
   if (outfile == nullptr) {
     EnergyPlus::print(stderr, "Could not open output file: {}\n", argv[2]);
     return 1;
@@ -129,10 +133,14 @@ int main(int argc, char const* argv[]) {
 
   EnergyPlus::print(outfile, "{}", header);
 
-  EnergyPlus::print(outfile, "    static constexpr std::array< std::uint8_t, {} > embeddedSchema = {{{{\n", v_cbor.size());
+  EnergyPlus::print(outfile,
+                    "    static constexpr std::array< std::uint8_t, {} > "
+                    "embeddedSchema = {{{{\n",
+                    v_cbor.size());
 
   for (size_t i = 0; i < v_cbor.size(); ++i) {
-    EnergyPlus::print(outfile, "{:#04x},", v_cbor[i]);  // Format the std::uint8_t as hex
+    EnergyPlus::print(outfile, "{:#04x},",
+                      v_cbor[i]); // Format the std::uint8_t as hex
     if (i % 40 == 0 && i != 0) {
       EnergyPlus::print(outfile, "\n");
     }

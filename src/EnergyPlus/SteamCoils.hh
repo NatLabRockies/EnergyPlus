@@ -281,8 +281,7 @@ struct SteamCoilsData : BaseGlobalStruct
     Array1D_bool MySizeFlag;
     Array1D_bool CoilWarningOnceFlag;
     Array1D_bool CheckEquipName;
-    bool GetSteamCoilsInputFlag = true; // Flag set to make sure you get input once
-    bool MyOneTimeFlag = true;          // one time initialization flag
+    bool MyOneTimeFlag = true; // one time initialization flag
     Array1D_bool MyEnvrnFlag;
     Array1D_bool MyPlantScanFlag;
     int ErrCount = 0;
@@ -294,6 +293,7 @@ struct SteamCoilsData : BaseGlobalStruct
 
     void init_state([[maybe_unused]] EnergyPlusData &state) override
     {
+        SteamCoils::GetSteamCoilInput(state);
     }
 
     void clear_state() override

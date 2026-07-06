@@ -94,6 +94,17 @@ void EnergyPlusFixture::openOutputFiles(EnergyPlusData &state)
     state.files.ssz.open_as_stringstream();
 }
 
+void EnergyPlusFixture::clear_state_and_reset_err_stream()
+{
+    state->clear_state();
+    openOutputFiles(*state);
+
+    this->err_stream = new std::ostringstream;
+    state->files.err_stream = std::unique_ptr<std::ostream>(this->err_stream);
+
+    state->dataUtilityRoutines->outputErrorHeader = false;
+}
+
 void EnergyPlusFixture::SetUp()
 {
     //    if (this->state) {

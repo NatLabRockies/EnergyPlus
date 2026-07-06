@@ -124,6 +124,12 @@ namespace OutputProcessor {
 
     // Functions
 
+    void resizeMeterValues(EnergyPlusData &state)
+    {
+        auto &op = state.dataOutputProcessor;
+        op->meterValues.resize(op->meters.size(), 0.0);
+    }
+
     int DetermineMinuteForReporting(EnergyPlusData const &state)
     {
 
@@ -907,6 +913,9 @@ namespace OutputProcessor {
             // This meter is good
             int meterNum = op->meters.size();
             op->meters.push_back(meter);
+            if (op->meterValues.capacity() > 0) {
+                resizeMeterValues(state);
+            }
             op->meterMap.insert_or_assign(meterNameUC, meterNum);
 
             for (ReportFreq reportFreq :
@@ -1240,6 +1249,9 @@ namespace OutputProcessor {
             // This meter is good
             int meterNum = op->meters.size();
             op->meters.push_back(meter);
+            if (op->meterValues.capacity() > 0) {
+                resizeMeterValues(state);
+            }
             op->meterMap.insert_or_assign(meterNameUC, meterNum);
 
             for (ReportFreq reportFreq :
@@ -1387,6 +1399,9 @@ namespace OutputProcessor {
             meterNum = op->meters.size();
             meter = new Meter(Name);
             op->meters.push_back(meter);
+            if (op->meterValues.capacity() > 0) {
+                resizeMeterValues(state);
+            }
             op->meterMap.insert_or_assign(nameUC, meterNum);
 
             meter->type = MeterType::Normal;
@@ -4034,7 +4049,7 @@ void UpdateMeterReporting(EnergyPlusData &state)
         ShowFatalError(state, "UpdateMeterReporting: Previous Meter Specification errors cause program termination.");
     }
 
-    op->meterValues.resize(op->meters.size(), 0.0);
+    resizeMeterValues(state);
     std::fill(op->meterValues.begin(), op->meterValues.end(), 0.0);
 } // UpdateMeterReporting()
 

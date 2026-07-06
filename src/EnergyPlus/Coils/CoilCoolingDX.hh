@@ -83,6 +83,7 @@ struct CoilCoolingDX
                                                                                  const std::string &performance_object_name);
     static int factory(EnergyPlusData &state, std::string const &coilName);
     static void getInput(EnergyPlusData &state);
+    static void registerComponentSets(EnergyPlusData &state);
     static void clear_state();
     static void reportAllStandardRatings(EnergyPlusData &state);
     void instantiateFromInputSpec(EnergyPlusData &state, const CoilCoolingDXInputSpecification &input_data);
@@ -187,10 +188,10 @@ private:
 struct CoilCoolingDXData : BaseGlobalStruct
 {
     std::vector<CoilCoolingDX> coilCoolingDXs;
-    bool coilCoolingDXGetInputFlag = true;
     std::string const coilCoolingDXObjectName = "Coil:Cooling:DX";
     HVAC::CoilType coilType = HVAC::CoilType::CoolingDX;
     bool stillNeedToReportStandardRatings = true; // standard ratings flag for all coils to report at the same time
+    bool GetInputFlag = true;
 
     void init_constant_state([[maybe_unused]] EnergyPlusData &state) override
     {
@@ -198,13 +199,14 @@ struct CoilCoolingDXData : BaseGlobalStruct
 
     void init_state([[maybe_unused]] EnergyPlusData &state) override
     {
+        CoilCoolingDX::registerComponentSets(state);
     }
 
     void clear_state() override
     {
         coilCoolingDXs.clear();
-        coilCoolingDXGetInputFlag = true;
         stillNeedToReportStandardRatings = true;
+        GetInputFlag = true;
     }
 };
 

@@ -2964,9 +2964,9 @@ namespace OutputProcessor {
         auto reportDataDictionaryResults = queryResult("SELECT * FROM ReportDataDictionary;", "ReportDataDictionary");
 
         std::vector<std::vector<std::string>> reportDataDictionary({
-            {"1", "0", "Avg", "System", "HVAC System", "Boiler1", "Boiler NaturalGas Rate", "Run Period", "", "W"},
-            {"2", "0", "Avg", "System", "HVAC System", "Boiler2", "Boiler NaturalGas Rate", "Run Period", "", "W"},
-            {"3", "0", "Avg", "System", "HVAC System", "Boiler3", "Boiler NaturalGas Rate", "Run Period", "", "W"},
+            {"7", "0", "Avg", "System", "HVAC System", "Boiler1", "Boiler NaturalGas Rate", "Run Period", "", "W"},
+            {"8", "0", "Avg", "System", "HVAC System", "Boiler2", "Boiler NaturalGas Rate", "Run Period", "", "W"},
+            {"9", "0", "Avg", "System", "HVAC System", "Boiler3", "Boiler NaturalGas Rate", "Run Period", "", "W"},
         });
 
         EXPECT_EQ(reportDataDictionary, reportDataDictionaryResults);
@@ -2974,12 +2974,18 @@ namespace OutputProcessor {
         auto reportDataResults = queryResult("SELECT * FROM ReportData;", "ReportData");
         auto reportExtendedDataResults = queryResult("SELECT * FROM ReportExtendedData;", "ReportExtendedData");
 
-        compare_eso_stream(
-            delimited_string({"Program Version,",
-                              "1,11,Boiler1,Boiler NaturalGas Rate [W] !RunPeriod [Value,Min,Month,Day,Hour,Minute,Max,Month,Day,Hour,Minute]",
-                              "2,11,Boiler2,Boiler NaturalGas Rate [W] !RunPeriod [Value,Min,Month,Day,Hour,Minute,Max,Month,Day,Hour,Minute]",
-                              "3,11,Boiler3,Boiler NaturalGas Rate [W] !RunPeriod [Value,Min,Month,Day,Hour,Minute,Max,Month,Day,Hour,Minute]"},
-                             "\n"));
+        compare_eso_stream(delimited_string(
+            {"Program Version,",
+             "1,5,Environment Title[],Latitude[deg],Longitude[deg],Time Zone[],Elevation[m]",
+             "2,8,Day of Simulation[],Month[],Day of Month[],DST Indicator[1=yes 0=no],Hour[],StartMinute[],EndMinute[],DayType",
+             "3,5,Cumulative Day of Simulation[],Month[],Day of Month[],DST Indicator[1=yes 0=no],DayType  ! When Daily Report Variables Requested",
+             "4,2,Cumulative Days of Simulation[],Month[]  ! When Monthly Report Variables Requested",
+             "5,1,Cumulative Days of Simulation[] ! When Run Period Report Variables Requested",
+             "6,1,Calendar Year of Simulation[] ! When Annual Report Variables Requested",
+             "7,11,Boiler1,Boiler NaturalGas Rate [W] !RunPeriod [Value,Min,Month,Day,Hour,Minute,Max,Month,Day,Hour,Minute]",
+             "8,11,Boiler2,Boiler NaturalGas Rate [W] !RunPeriod [Value,Min,Month,Day,Hour,Minute,Max,Month,Day,Hour,Minute]",
+             "9,11,Boiler3,Boiler NaturalGas Rate [W] !RunPeriod [Value,Min,Month,Day,Hour,Minute,Max,Month,Day,Hour,Minute]"},
+            "\n"));
     }
 
     TEST_F(SQLiteFixture, OutputProcessor_setupOutputVariable_regex)
@@ -2998,8 +3004,8 @@ namespace OutputProcessor {
         auto reportDataDictionaryResults = queryResult("SELECT * FROM ReportDataDictionary;", "ReportDataDictionary");
 
         std::vector<std::vector<std::string>> reportDataDictionary({
-            {"1", "0", "Avg", "System", "HVAC System", "Boiler1", "Boiler NaturalGas Rate", "Run Period", "", "W"},
-            {"2", "0", "Avg", "System", "HVAC System", "Boiler3", "Boiler NaturalGas Rate", "Run Period", "", "W"},
+            {"7", "0", "Avg", "System", "HVAC System", "Boiler1", "Boiler NaturalGas Rate", "Run Period", "", "W"},
+            {"8", "0", "Avg", "System", "HVAC System", "Boiler3", "Boiler NaturalGas Rate", "Run Period", "", "W"},
         });
 
         EXPECT_EQ(reportDataDictionary, reportDataDictionaryResults);
@@ -3007,11 +3013,17 @@ namespace OutputProcessor {
         auto reportDataResults = queryResult("SELECT * FROM ReportData;", "ReportData");
         auto reportExtendedDataResults = queryResult("SELECT * FROM ReportExtendedData;", "ReportExtendedData");
 
-        compare_eso_stream(
-            delimited_string({"Program Version,",
-                              "1,11,Boiler1,Boiler NaturalGas Rate [W] !RunPeriod [Value,Min,Month,Day,Hour,Minute,Max,Month,Day,Hour,Minute]",
-                              "2,11,Boiler3,Boiler NaturalGas Rate [W] !RunPeriod [Value,Min,Month,Day,Hour,Minute,Max,Month,Day,Hour,Minute]"},
-                             "\n"));
+        compare_eso_stream(delimited_string(
+            {"Program Version,",
+             "1,5,Environment Title[],Latitude[deg],Longitude[deg],Time Zone[],Elevation[m]",
+             "2,8,Day of Simulation[],Month[],Day of Month[],DST Indicator[1=yes 0=no],Hour[],StartMinute[],EndMinute[],DayType",
+             "3,5,Cumulative Day of Simulation[],Month[],Day of Month[],DST Indicator[1=yes 0=no],DayType  ! When Daily Report Variables Requested",
+             "4,2,Cumulative Days of Simulation[],Month[]  ! When Monthly Report Variables Requested",
+             "5,1,Cumulative Days of Simulation[] ! When Run Period Report Variables Requested",
+             "6,1,Calendar Year of Simulation[] ! When Annual Report Variables Requested",
+             "7,11,Boiler1,Boiler NaturalGas Rate [W] !RunPeriod [Value,Min,Month,Day,Hour,Minute,Max,Month,Day,Hour,Minute]",
+             "8,11,Boiler3,Boiler NaturalGas Rate [W] !RunPeriod [Value,Min,Month,Day,Hour,Minute,Max,Month,Day,Hour,Minute]"},
+            "\n"));
     }
 
     TEST_F(SQLiteFixture, OutputProcessor_setupOutputVariable_regex_2)
@@ -3030,9 +3042,9 @@ namespace OutputProcessor {
         auto reportDataDictionaryResults = queryResult("SELECT * FROM ReportDataDictionary;", "ReportDataDictionary");
 
         std::vector<std::vector<std::string>> reportDataDictionary({
-            {"1", "0", "Avg", "System", "HVAC System", "Boiler1", "Boiler NaturalGas Rate", "Run Period", "", "W"},
-            {"2", "0", "Avg", "System", "HVAC System", "Boiler2", "Boiler NaturalGas Rate", "Run Period", "", "W"},
-            {"3", "0", "Avg", "System", "HVAC System", "Boiler3", "Boiler NaturalGas Rate", "Run Period", "", "W"},
+            {"7", "0", "Avg", "System", "HVAC System", "Boiler1", "Boiler NaturalGas Rate", "Run Period", "", "W"},
+            {"8", "0", "Avg", "System", "HVAC System", "Boiler2", "Boiler NaturalGas Rate", "Run Period", "", "W"},
+            {"9", "0", "Avg", "System", "HVAC System", "Boiler3", "Boiler NaturalGas Rate", "Run Period", "", "W"},
         });
 
         EXPECT_EQ(reportDataDictionary, reportDataDictionaryResults);
@@ -3040,12 +3052,18 @@ namespace OutputProcessor {
         auto reportDataResults = queryResult("SELECT * FROM ReportData;", "ReportData");
         auto reportExtendedDataResults = queryResult("SELECT * FROM ReportExtendedData;", "ReportExtendedData");
 
-        compare_eso_stream(
-            delimited_string({"Program Version,",
-                              "1,11,Boiler1,Boiler NaturalGas Rate [W] !RunPeriod [Value,Min,Month,Day,Hour,Minute,Max,Month,Day,Hour,Minute]",
-                              "2,11,Boiler2,Boiler NaturalGas Rate [W] !RunPeriod [Value,Min,Month,Day,Hour,Minute,Max,Month,Day,Hour,Minute]",
-                              "3,11,Boiler3,Boiler NaturalGas Rate [W] !RunPeriod [Value,Min,Month,Day,Hour,Minute,Max,Month,Day,Hour,Minute]"},
-                             "\n"));
+        compare_eso_stream(delimited_string(
+            {"Program Version,",
+             "1,5,Environment Title[],Latitude[deg],Longitude[deg],Time Zone[],Elevation[m]",
+             "2,8,Day of Simulation[],Month[],Day of Month[],DST Indicator[1=yes 0=no],Hour[],StartMinute[],EndMinute[],DayType",
+             "3,5,Cumulative Day of Simulation[],Month[],Day of Month[],DST Indicator[1=yes 0=no],DayType  ! When Daily Report Variables Requested",
+             "4,2,Cumulative Days of Simulation[],Month[]  ! When Monthly Report Variables Requested",
+             "5,1,Cumulative Days of Simulation[] ! When Run Period Report Variables Requested",
+             "6,1,Calendar Year of Simulation[] ! When Annual Report Variables Requested",
+             "7,11,Boiler1,Boiler NaturalGas Rate [W] !RunPeriod [Value,Min,Month,Day,Hour,Minute,Max,Month,Day,Hour,Minute]",
+             "8,11,Boiler2,Boiler NaturalGas Rate [W] !RunPeriod [Value,Min,Month,Day,Hour,Minute,Max,Month,Day,Hour,Minute]",
+             "9,11,Boiler3,Boiler NaturalGas Rate [W] !RunPeriod [Value,Min,Month,Day,Hour,Minute,Max,Month,Day,Hour,Minute]"},
+            "\n"));
     }
 
     TEST_F(SQLiteFixture, OutputProcessor_setupOutputVariable_regex_3)
@@ -3089,9 +3107,9 @@ namespace OutputProcessor {
         auto reportDataDictionaryResults = queryResult("SELECT * FROM ReportDataDictionary;", "ReportDataDictionary");
 
         std::vector<std::vector<std::string>> reportDataDictionary({
-            {"1", "0", "Avg", "System", "HVAC System", "Zn003:Wall001", "AFN Linkage Node 1 to Node 2 Volume Flow Rate", "Zone Timestep", "", "m3/s"},
-            {"2", "0", "Avg", "System", "HVAC System", "Zn003:Wall002", "AFN Linkage Node 1 to Node 2 Volume Flow Rate", "Zone Timestep", "", "m3/s"},
-            {"3",
+            {"7", "0", "Avg", "System", "HVAC System", "Zn003:Wall001", "AFN Linkage Node 1 to Node 2 Volume Flow Rate", "Zone Timestep", "", "m3/s"},
+            {"8", "0", "Avg", "System", "HVAC System", "Zn003:Wall002", "AFN Linkage Node 1 to Node 2 Volume Flow Rate", "Zone Timestep", "", "m3/s"},
+            {"9",
              "0",
              "Avg",
              "System",
@@ -3101,7 +3119,16 @@ namespace OutputProcessor {
              "Zone Timestep",
              "",
              "m3/s"},
-            {"4", "0", "Avg", "System", "HVAC System", "Zn003:Wall003", "AFN Linkage Node 1 to Node 2 Volume Flow Rate", "Zone Timestep", "", "m3/s"},
+            {"10",
+             "0",
+             "Avg",
+             "System",
+             "HVAC System",
+             "Zn003:Wall003",
+             "AFN Linkage Node 1 to Node 2 Volume Flow Rate",
+             "Zone Timestep",
+             "",
+             "m3/s"},
         });
 
         EXPECT_EQ(reportDataDictionary, reportDataDictionaryResults);
@@ -3112,10 +3139,17 @@ namespace OutputProcessor {
         compare_eso_stream(delimited_string(
             {
                 "Program Version,",
-                "1,1,Zn003:Wall001,AFN Linkage Node 1 to Node 2 Volume Flow Rate [m3/s] !TimeStep",
-                "2,1,Zn003:Wall002,AFN Linkage Node 1 to Node 2 Volume Flow Rate [m3/s] !TimeStep",
-                "3,1,Zn003:Wall002:Win001,AFN Linkage Node 1 to Node 2 Volume Flow Rate [m3/s] !TimeStep",
-                "4,1,Zn003:Wall003,AFN Linkage Node 1 to Node 2 Volume Flow Rate [m3/s] !TimeStep",
+                "1,5,Environment Title[],Latitude[deg],Longitude[deg],Time Zone[],Elevation[m]",
+                "2,8,Day of Simulation[],Month[],Day of Month[],DST Indicator[1=yes 0=no],Hour[],StartMinute[],EndMinute[],DayType",
+                "3,5,Cumulative Day of Simulation[],Month[],Day of Month[],DST Indicator[1=yes 0=no],DayType  ! When Daily Report Variables "
+                "Requested",
+                "4,2,Cumulative Days of Simulation[],Month[]  ! When Monthly Report Variables Requested",
+                "5,1,Cumulative Days of Simulation[] ! When Run Period Report Variables Requested",
+                "6,1,Calendar Year of Simulation[] ! When Annual Report Variables Requested",
+                "7,1,Zn003:Wall001,AFN Linkage Node 1 to Node 2 Volume Flow Rate [m3/s] !TimeStep",
+                "8,1,Zn003:Wall002,AFN Linkage Node 1 to Node 2 Volume Flow Rate [m3/s] !TimeStep",
+                "9,1,Zn003:Wall002:Win001,AFN Linkage Node 1 to Node 2 Volume Flow Rate [m3/s] !TimeStep",
+                "10,1,Zn003:Wall003,AFN Linkage Node 1 to Node 2 Volume Flow Rate [m3/s] !TimeStep",
             },
             "\n"));
     }
@@ -3163,9 +3197,9 @@ namespace OutputProcessor {
         auto reportDataDictionaryResults = queryResult("SELECT * FROM ReportDataDictionary;", "ReportDataDictionary");
 
         std::vector<std::vector<std::string>> reportDataDictionary({
-            {"1", "0", "Avg", "System", "HVAC System", "ZN003:WALL001", "AFN Linkage Node 1 to Node 2 Volume Flow Rate", "Zone Timestep", "", "m3/s"},
-            {"2", "0", "Avg", "System", "HVAC System", "ZN003:WALL002", "AFN Linkage Node 1 to Node 2 Volume Flow Rate", "Zone Timestep", "", "m3/s"},
-            {"3",
+            {"7", "0", "Avg", "System", "HVAC System", "ZN003:WALL001", "AFN Linkage Node 1 to Node 2 Volume Flow Rate", "Zone Timestep", "", "m3/s"},
+            {"8", "0", "Avg", "System", "HVAC System", "ZN003:WALL002", "AFN Linkage Node 1 to Node 2 Volume Flow Rate", "Zone Timestep", "", "m3/s"},
+            {"9",
              "0",
              "Avg",
              "System",
@@ -3175,7 +3209,16 @@ namespace OutputProcessor {
              "Zone Timestep",
              "",
              "m3/s"},
-            {"4", "0", "Avg", "System", "HVAC System", "ZN003:WALL003", "AFN Linkage Node 1 to Node 2 Volume Flow Rate", "Zone Timestep", "", "m3/s"},
+            {"10",
+             "0",
+             "Avg",
+             "System",
+             "HVAC System",
+             "ZN003:WALL003",
+             "AFN Linkage Node 1 to Node 2 Volume Flow Rate",
+             "Zone Timestep",
+             "",
+             "m3/s"},
         });
 
         EXPECT_EQ(reportDataDictionary, reportDataDictionaryResults);
@@ -3186,10 +3229,17 @@ namespace OutputProcessor {
         compare_eso_stream(delimited_string(
             {
                 "Program Version,",
-                "1,1,ZN003:WALL001,AFN Linkage Node 1 to Node 2 Volume Flow Rate [m3/s] !TimeStep",
-                "2,1,ZN003:WALL002,AFN Linkage Node 1 to Node 2 Volume Flow Rate [m3/s] !TimeStep",
-                "3,1,ZN003:WALL002:WIN001,AFN Linkage Node 1 to Node 2 Volume Flow Rate [m3/s] !TimeStep",
-                "4,1,ZN003:WALL003,AFN Linkage Node 1 to Node 2 Volume Flow Rate [m3/s] !TimeStep",
+                "1,5,Environment Title[],Latitude[deg],Longitude[deg],Time Zone[],Elevation[m]",
+                "2,8,Day of Simulation[],Month[],Day of Month[],DST Indicator[1=yes 0=no],Hour[],StartMinute[],EndMinute[],DayType",
+                "3,5,Cumulative Day of Simulation[],Month[],Day of Month[],DST Indicator[1=yes 0=no],DayType  ! When Daily Report Variables "
+                "Requested",
+                "4,2,Cumulative Days of Simulation[],Month[]  ! When Monthly Report Variables Requested",
+                "5,1,Cumulative Days of Simulation[] ! When Run Period Report Variables Requested",
+                "6,1,Calendar Year of Simulation[] ! When Annual Report Variables Requested",
+                "7,1,ZN003:WALL001,AFN Linkage Node 1 to Node 2 Volume Flow Rate [m3/s] !TimeStep",
+                "8,1,ZN003:WALL002,AFN Linkage Node 1 to Node 2 Volume Flow Rate [m3/s] !TimeStep",
+                "9,1,ZN003:WALL002:WIN001,AFN Linkage Node 1 to Node 2 Volume Flow Rate [m3/s] !TimeStep",
+                "10,1,ZN003:WALL003,AFN Linkage Node 1 to Node 2 Volume Flow Rate [m3/s] !TimeStep",
             },
             "\n"));
     }
@@ -3279,14 +3329,20 @@ namespace OutputProcessor {
 
         UpdateMeterReporting(*state);
 
-        compare_mtr_stream(
-            delimited_string({"Program Version,",
-                              "53,9,InteriorLights:Electricity:Zone:SPACE1 [J] !Monthly [Value,Min,Day,Hour,Minute,Max,Day,Hour,Minute]",
-                              "102,9,InteriorLights:Electricity:Zone:SPACE2 [J] !Monthly [Value,Min,Day,Hour,Minute,Max,Day,Hour,Minute]",
-                              "139,9,InteriorLights:Electricity:Zone:SPACE3 [J] !Monthly [Value,Min,Day,Hour,Minute,Max,Day,Hour,Minute]",
-                              "176,9,InteriorLights:Electricity:Zone:SPACE4 [J] !Monthly [Value,Min,Day,Hour,Minute,Max,Day,Hour,Minute]",
-                              "213,9,InteriorLights:Electricity:Zone:SPACE5 [J] !Monthly [Value,Min,Day,Hour,Minute,Max,Day,Hour,Minute]"},
-                             "\n"));
+        compare_mtr_stream(delimited_string(
+            {"Program Version,",
+             "1,5,Environment Title[],Latitude[deg],Longitude[deg],Time Zone[],Elevation[m]",
+             "2,8,Day of Simulation[],Month[],Day of Month[],DST Indicator[1=yes 0=no],Hour[],StartMinute[],EndMinute[],DayType",
+             "3,5,Cumulative Day of Simulation[],Month[],Day of Month[],DST Indicator[1=yes 0=no],DayType  ! When Daily Meters Requested",
+             "4,2,Cumulative Days of Simulation[],Month[]  ! When Monthly Meters Requested",
+             "5,1,Cumulative Days of Simulation[] ! When Run Period Meters Requested",
+             "6,1,Calendar Year of Simulation[] ! When Annual Meters Requested",
+             "59,9,InteriorLights:Electricity:Zone:SPACE1 [J] !Monthly [Value,Min,Day,Hour,Minute,Max,Day,Hour,Minute]",
+             "108,9,InteriorLights:Electricity:Zone:SPACE2 [J] !Monthly [Value,Min,Day,Hour,Minute,Max,Day,Hour,Minute]",
+             "145,9,InteriorLights:Electricity:Zone:SPACE3 [J] !Monthly [Value,Min,Day,Hour,Minute,Max,Day,Hour,Minute]",
+             "182,9,InteriorLights:Electricity:Zone:SPACE4 [J] !Monthly [Value,Min,Day,Hour,Minute,Max,Day,Hour,Minute]",
+             "219,9,InteriorLights:Electricity:Zone:SPACE5 [J] !Monthly [Value,Min,Day,Hour,Minute,Max,Day,Hour,Minute]"},
+            "\n"));
     }
 
     TEST_F(SQLiteFixture, OutputProcessor_getCustomMeterInput)
@@ -3908,16 +3964,16 @@ namespace OutputProcessor {
         auto reportDataDictionaryResults = queryResult("SELECT * FROM ReportDataDictionary;", "ReportDataDictionary");
 
         std::vector<std::vector<std::string>> reportDataDictionary({
-            {"1", "0", "Avg", "Zone", "Zone", "Environment", "Site Outdoor Air Drybulb Temperature", "Zone Timestep", "", "C"},
-            {"2", "0", "Avg", "Zone", "Zone", "Environment", "Site Outdoor Air Drybulb Temperature", "Hourly", "", "C"},
-            {"3", "0", "Avg", "Zone", "Zone", "Environment", "Site Outdoor Air Drybulb Temperature", "Daily", "", "C"},
-            {"4", "0", "Avg", "Zone", "Zone", "Environment", "Site Outdoor Air Drybulb Temperature", "Monthly", "", "C"},
-            {"5", "0", "Avg", "Zone", "Zone", "Environment", "Site Outdoor Air Drybulb Temperature", "Run Period", "", "C"},
-            {"7", "1", "Sum", "Facility:Electricity", "Zone", "", "Electricity:Facility", "Zone Timestep", "", "J"},
-            {"8", "1", "Sum", "Facility:Electricity", "Zone", "", "Electricity:Facility", "Hourly", "", "J"},
-            {"9", "1", "Sum", "Facility:Electricity", "Zone", "", "Electricity:Facility", "Daily", "", "J"},
-            {"10", "1", "Sum", "Facility:Electricity", "Zone", "", "Electricity:Facility", "Monthly", "", "J"},
-            {"12", "1", "Sum", "Facility:Electricity", "Zone", "", "Electricity:Facility", "Run Period", "", "J"},
+            {"7", "0", "Avg", "Zone", "Zone", "Environment", "Site Outdoor Air Drybulb Temperature", "Zone Timestep", "", "C"},
+            {"8", "0", "Avg", "Zone", "Zone", "Environment", "Site Outdoor Air Drybulb Temperature", "Hourly", "", "C"},
+            {"9", "0", "Avg", "Zone", "Zone", "Environment", "Site Outdoor Air Drybulb Temperature", "Daily", "", "C"},
+            {"10", "0", "Avg", "Zone", "Zone", "Environment", "Site Outdoor Air Drybulb Temperature", "Monthly", "", "C"},
+            {"11", "0", "Avg", "Zone", "Zone", "Environment", "Site Outdoor Air Drybulb Temperature", "Run Period", "", "C"},
+            {"13", "1", "Sum", "Facility:Electricity", "Zone", "", "Electricity:Facility", "Zone Timestep", "", "J"},
+            {"14", "1", "Sum", "Facility:Electricity", "Zone", "", "Electricity:Facility", "Hourly", "", "J"},
+            {"15", "1", "Sum", "Facility:Electricity", "Zone", "", "Electricity:Facility", "Daily", "", "J"},
+            {"16", "1", "Sum", "Facility:Electricity", "Zone", "", "Electricity:Facility", "Monthly", "", "J"},
+            {"18", "1", "Sum", "Facility:Electricity", "Zone", "", "Electricity:Facility", "Run Period", "", "J"},
         });
 
         for (int i = 0; i < (int)reportDataDictionary.size(); ++i) {
@@ -3928,16 +3984,16 @@ namespace OutputProcessor {
         auto reportExtendedDataResults = queryResult("SELECT * FROM ReportExtendedData;", "ReportExtendedData");
 
         std::vector<std::vector<std::string>> reportData({
-            {"1", "1", "1", "0.0"},
-            {"2", "1", "7", "4995.0"},
-            {"3", "2", "2", "0.0"},
-            {"4", "2", "8", "4995.0"},
-            {"5", "3", "3", "0.0"},
-            {"6", "3", "9", "4995.0"},
-            {"7", "4", "4", "0.0"},
-            {"8", "4", "10", "4995.0"},
-            {"9", "5", "5", "0.0"},
-            {"10", "5", "12", "4995.0"},
+            {"1", "1", "7", "0.0"},
+            {"2", "1", "13", "4995.0"},
+            {"3", "2", "8", "0.0"},
+            {"4", "2", "14", "4995.0"},
+            {"5", "3", "9", "0.0"},
+            {"6", "3", "15", "4995.0"},
+            {"7", "4", "10", "0.0"},
+            {"8", "4", "16", "4995.0"},
+            {"9", "5", "11", "0.0"},
+            {"10", "5", "18", "4995.0"},
         });
 
         std::vector<std::vector<std::string>> reportExtendedData(
@@ -3959,52 +4015,65 @@ namespace OutputProcessor {
         compare_eso_stream(delimited_string(
             {
                 "Program Version,",
-                "1,1,Environment,Site Outdoor Air Drybulb Temperature [C] !TimeStep",
-                "2,1,Environment,Site Outdoor Air Drybulb Temperature [C] !Hourly",
-                "3,7,Environment,Site Outdoor Air Drybulb Temperature [C] !Daily [Value,Min,Hour,Minute,Max,Hour,Minute]",
-                "4,9,Environment,Site Outdoor Air Drybulb Temperature [C] !Monthly [Value,Min,Day,Hour,Minute,Max,Day,Hour,Minute]",
-                "5,11,Environment,Site Outdoor Air Drybulb Temperature [C] !RunPeriod [Value,Min,Month,Day,Hour,Minute,Max,Month,Day,Hour,Minute]",
-                "7,1,Electricity:Facility [J] !TimeStep",
-                "8,1,Electricity:Facility [J] !Hourly",
-                "9,7,Electricity:Facility [J] !Daily [Value,Min,Hour,Minute,Max,Hour,Minute]",
-                "10,9,Electricity:Facility [J] !Monthly [Value,Min,Day,Hour,Minute,Max,Day,Hour,Minute]",
-                "12,11,Electricity:Facility [J] !RunPeriod [Value,Min,Month,Day,Hour,Minute,Max,Month,Day,Hour,Minute]",
-                ",365,12,31, 0,24,50.00,60.00,Tuesday",
-                "1,0.0",
-                "7,4995.0",
-                ",365,12,31, 0,24, 0.00,60.00,Tuesday",
-                "2,0.0",
-                "8,4995.0",
-                ",365,12,31, 0,Tuesday",
-                "3,0.0,0.0,24,60,0.0,24,60",
-                "9,4995.0,4995.0,24,60,4995.0,24,60",
-                ",365,12",
-                "4,0.0,0.0,31,24,60,0.0,31,24,60",
-                "10,4995.0,4995.0,31,24,60,4995.0,31,24,60",
-                ",365",
-                "5,0.0,0.0,12,31,24,60,0.0,12,31,24,60",
-                "12,4995.0,4995.0,12,31,24,60,4995.0,12,31,24,60",
+                "1,5,Environment Title[],Latitude[deg],Longitude[deg],Time Zone[],Elevation[m]",
+                "2,8,Day of Simulation[],Month[],Day of Month[],DST Indicator[1=yes 0=no],Hour[],StartMinute[],EndMinute[],DayType",
+                "3,5,Cumulative Day of Simulation[],Month[],Day of Month[],DST Indicator[1=yes 0=no],DayType  ! When Daily Report Variables "
+                "Requested",
+                "4,2,Cumulative Days of Simulation[],Month[]  ! When Monthly Report Variables Requested",
+                "5,1,Cumulative Days of Simulation[] ! When Run Period Report Variables Requested",
+                "6,1,Calendar Year of Simulation[] ! When Annual Report Variables Requested",
+                "7,1,Environment,Site Outdoor Air Drybulb Temperature [C] !TimeStep",
+                "8,1,Environment,Site Outdoor Air Drybulb Temperature [C] !Hourly",
+                "9,7,Environment,Site Outdoor Air Drybulb Temperature [C] !Daily [Value,Min,Hour,Minute,Max,Hour,Minute]",
+                "10,9,Environment,Site Outdoor Air Drybulb Temperature [C] !Monthly [Value,Min,Day,Hour,Minute,Max,Day,Hour,Minute]",
+                "11,11,Environment,Site Outdoor Air Drybulb Temperature [C] !RunPeriod [Value,Min,Month,Day,Hour,Minute,Max,Month,Day,Hour,Minute]",
+                "13,1,Electricity:Facility [J] !TimeStep",
+                "14,1,Electricity:Facility [J] !Hourly",
+                "15,7,Electricity:Facility [J] !Daily [Value,Min,Hour,Minute,Max,Hour,Minute]",
+                "16,9,Electricity:Facility [J] !Monthly [Value,Min,Day,Hour,Minute,Max,Day,Hour,Minute]",
+                "18,11,Electricity:Facility [J] !RunPeriod [Value,Min,Month,Day,Hour,Minute,Max,Month,Day,Hour,Minute]",
+                "2,365,12,31, 0,24,50.00,60.00,Tuesday",
+                "7,0.0",
+                "13,4995.0",
+                "2,365,12,31, 0,24, 0.00,60.00,Tuesday",
+                "8,0.0",
+                "14,4995.0",
+                "3,365,12,31, 0,Tuesday",
+                "9,0.0,0.0,24,60,0.0,24,60",
+                "15,4995.0,4995.0,24,60,4995.0,24,60",
+                "4,365,12",
+                "10,0.0,0.0,31,24,60,0.0,31,24,60",
+                "16,4995.0,4995.0,31,24,60,4995.0,31,24,60",
+                "5,365",
+                "11,0.0,0.0,12,31,24,60,0.0,12,31,24,60",
+                "18,4995.0,4995.0,12,31,24,60,4995.0,12,31,24,60",
             },
             "\n"));
 
         compare_mtr_stream(delimited_string(
             {
                 "Program Version,",
-                "7,1,Electricity:Facility [J] !TimeStep",
-                "8,1,Electricity:Facility [J] !Hourly",
-                "9,7,Electricity:Facility [J] !Daily [Value,Min,Hour,Minute,Max,Hour,Minute]",
-                "10,9,Electricity:Facility [J] !Monthly [Value,Min,Day,Hour,Minute,Max,Day,Hour,Minute]",
-                "12,11,Electricity:Facility [J] !RunPeriod [Value,Min,Month,Day,Hour,Minute,Max,Month,Day,Hour,Minute]",
-                ",365,12,31, 0,24,50.00,60.00,Tuesday",
-                "7,4995.0",
-                ",365,12,31, 0,24, 0.00,60.00,Tuesday",
-                "8,4995.0",
-                ",365,12,31, 0,Tuesday",
-                "9,4995.0,4995.0,24,60,4995.0,24,60",
-                ",365,12",
-                "10,4995.0,4995.0,31,24,60,4995.0,31,24,60",
-                ",365",
-                "12,4995.0,4995.0,12,31,24,60,4995.0,12,31,24,60",
+                "1,5,Environment Title[],Latitude[deg],Longitude[deg],Time Zone[],Elevation[m]",
+                "2,8,Day of Simulation[],Month[],Day of Month[],DST Indicator[1=yes 0=no],Hour[],StartMinute[],EndMinute[],DayType",
+                "3,5,Cumulative Day of Simulation[],Month[],Day of Month[],DST Indicator[1=yes 0=no],DayType  ! When Daily Meters Requested",
+                "4,2,Cumulative Days of Simulation[],Month[]  ! When Monthly Meters Requested",
+                "5,1,Cumulative Days of Simulation[] ! When Run Period Meters Requested",
+                "6,1,Calendar Year of Simulation[] ! When Annual Meters Requested",
+                "13,1,Electricity:Facility [J] !TimeStep",
+                "14,1,Electricity:Facility [J] !Hourly",
+                "15,7,Electricity:Facility [J] !Daily [Value,Min,Hour,Minute,Max,Hour,Minute]",
+                "16,9,Electricity:Facility [J] !Monthly [Value,Min,Day,Hour,Minute,Max,Day,Hour,Minute]",
+                "18,11,Electricity:Facility [J] !RunPeriod [Value,Min,Month,Day,Hour,Minute,Max,Month,Day,Hour,Minute]",
+                "2,365,12,31, 0,24,50.00,60.00,Tuesday",
+                "13,4995.0",
+                "2,365,12,31, 0,24, 0.00,60.00,Tuesday",
+                "14,4995.0",
+                "3,365,12,31, 0,Tuesday",
+                "15,4995.0,4995.0,24,60,4995.0,24,60",
+                "4,365,12",
+                "16,4995.0,4995.0,31,24,60,4995.0,31,24,60",
+                "5,365",
+                "18,4995.0,4995.0,12,31,24,60,4995.0,12,31,24,60",
             },
             "\n"));
     }
@@ -4207,19 +4276,19 @@ namespace OutputProcessor {
         auto reportDataDictionaryResults = queryResult("SELECT * FROM ReportDataDictionary;", "ReportDataDictionary");
 
         std::vector<std::vector<std::string>> reportDataDictionary({
-            {"1", "0", "Avg", "Zone", "Zone", "Environment", "Site Outdoor Air Drybulb Temperature", "HVAC System Timestep", "", "C"},
-            {"2", "0", "Avg", "Zone", "Zone", "Environment", "Site Outdoor Air Drybulb Temperature", "Zone Timestep", "", "C"},
-            {"3", "0", "Avg", "Zone", "Zone", "Environment", "Site Outdoor Air Drybulb Temperature", "Hourly", "", "C"},
-            {"4", "0", "Avg", "Zone", "Zone", "Environment", "Site Outdoor Air Drybulb Temperature", "Daily", "", "C"},
-            {"5", "0", "Avg", "Zone", "Zone", "Environment", "Site Outdoor Air Drybulb Temperature", "Monthly", "", "C"},
-            {"6", "0", "Avg", "Zone", "Zone", "Environment", "Site Outdoor Air Drybulb Temperature", "Run Period", "", "C"},
-            {"8", "1", "Sum", "Facility:Electricity", "Zone", "", "Electricity:Facility", "HVAC System Timestep", "", "J"},
-            {"9", "1", "Sum", "Facility:Electricity", "Zone", "", "Electricity:Facility", "Hourly", "", "J"},
-            {"10", "1", "Sum", "Facility:Electricity", "Zone", "", "Electricity:Facility", "Daily", "", "J"},
-            {"11", "1", "Sum", "Facility:Electricity", "Zone", "", "Electricity:Facility", "Monthly", "", "J"},
-            {"13", "1", "Sum", "Facility:Electricity", "Zone", "", "Electricity:Facility", "Run Period", "", "J"},
-            {"240", "0", "Avg", "System", "HVAC System", "Boiler1", "Boiler Heating Rate", "HVAC System Timestep", "", "W"},
-            {"241", "0", "Avg", "System", "HVAC System", "Boiler1", "Boiler NaturalGas Rate", "HVAC System Timestep", "", "W"},
+            {"7", "0", "Avg", "Zone", "Zone", "Environment", "Site Outdoor Air Drybulb Temperature", "HVAC System Timestep", "", "C"},
+            {"8", "0", "Avg", "Zone", "Zone", "Environment", "Site Outdoor Air Drybulb Temperature", "Zone Timestep", "", "C"},
+            {"9", "0", "Avg", "Zone", "Zone", "Environment", "Site Outdoor Air Drybulb Temperature", "Hourly", "", "C"},
+            {"10", "0", "Avg", "Zone", "Zone", "Environment", "Site Outdoor Air Drybulb Temperature", "Daily", "", "C"},
+            {"11", "0", "Avg", "Zone", "Zone", "Environment", "Site Outdoor Air Drybulb Temperature", "Monthly", "", "C"},
+            {"12", "0", "Avg", "Zone", "Zone", "Environment", "Site Outdoor Air Drybulb Temperature", "Run Period", "", "C"},
+            {"14", "1", "Sum", "Facility:Electricity", "Zone", "", "Electricity:Facility", "HVAC System Timestep", "", "J"},
+            {"15", "1", "Sum", "Facility:Electricity", "Zone", "", "Electricity:Facility", "Hourly", "", "J"},
+            {"16", "1", "Sum", "Facility:Electricity", "Zone", "", "Electricity:Facility", "Daily", "", "J"},
+            {"17", "1", "Sum", "Facility:Electricity", "Zone", "", "Electricity:Facility", "Monthly", "", "J"},
+            {"19", "1", "Sum", "Facility:Electricity", "Zone", "", "Electricity:Facility", "Run Period", "", "J"},
+            {"246", "0", "Avg", "System", "HVAC System", "Boiler1", "Boiler Heating Rate", "HVAC System Timestep", "", "W"},
+            {"247", "0", "Avg", "System", "HVAC System", "Boiler1", "Boiler NaturalGas Rate", "HVAC System Timestep", "", "W"},
         });
 
         for (int i = 0; i < (int)reportDataDictionary.size(); ++i) {
@@ -4230,17 +4299,17 @@ namespace OutputProcessor {
         auto reportExtendedDataResults = queryResult("SELECT * FROM ReportExtendedData;", "ReportExtendedData");
 
         std::vector<std::vector<std::string>> reportData({
-            {"1", "1", "1", "0.0"},
-            {"2", "1", "2", "0.0"},
-            {"3", "1", "8", "4995.0"},
-            {"4", "2", "3", "0.0"},
-            {"5", "2", "9", "4995.0"},
-            {"6", "3", "4", "0.0"},
-            {"7", "3", "10", "4995.0"},
-            {"8", "4", "5", "0.0"},
-            {"9", "4", "11", "4995.0"},
-            {"10", "5", "6", "0.0"},
-            {"11", "5", "13", "4995.0"},
+            {"1", "1", "7", "0.0"},
+            {"2", "1", "8", "0.0"},
+            {"3", "1", "14", "4995.0"},
+            {"4", "2", "9", "0.0"},
+            {"5", "2", "15", "4995.0"},
+            {"6", "3", "10", "0.0"},
+            {"7", "3", "16", "4995.0"},
+            {"8", "4", "11", "0.0"},
+            {"9", "4", "17", "4995.0"},
+            {"10", "5", "12", "0.0"},
+            {"11", "5", "19", "4995.0"},
         });
 
         std::vector<std::vector<std::string>> reportExtendedData({
@@ -4263,56 +4332,69 @@ namespace OutputProcessor {
         compare_eso_stream(delimited_string(
             {
                 "Program Version,",
-                "1,1,Environment,Site Outdoor Air Drybulb Temperature [C] !Each Call",
-                "2,1,Environment,Site Outdoor Air Drybulb Temperature [C] !TimeStep",
-                "3,1,Environment,Site Outdoor Air Drybulb Temperature [C] !Hourly",
-                "4,7,Environment,Site Outdoor Air Drybulb Temperature [C] !Daily [Value,Min,Hour,Minute,Max,Hour,Minute]",
-                "5,9,Environment,Site Outdoor Air Drybulb Temperature [C] !Monthly [Value,Min,Day,Hour,Minute,Max,Day,Hour,Minute]",
-                "6,11,Environment,Site Outdoor Air Drybulb Temperature [C] !RunPeriod [Value,Min,Month,Day,Hour,Minute,Max,Month,Day,Hour,Minute]",
-                "240,1,Boiler1,Boiler Heating Rate [W] !Each Call",
-                "241,1,Boiler1,Boiler NaturalGas Rate [W] !Each Call",
-                "8,1,Electricity:Facility [J] !Each Call",
-                "9,1,Electricity:Facility [J] !Hourly",
-                "10,7,Electricity:Facility [J] !Daily [Value,Min,Hour,Minute,Max,Hour,Minute]",
-                "11,9,Electricity:Facility [J] !Monthly [Value,Min,Day,Hour,Minute,Max,Day,Hour,Minute]",
-                "13,11,Electricity:Facility [J] !RunPeriod [Value,Min,Month,Day,Hour,Minute,Max,Month,Day,Hour,Minute]",
-                ",365,12,31, 0,24,50.00,60.00,Tuesday",
-                "1,0.0",
-                "2,0.0",
-                "8,4995.0",
-                ",365,12,31, 0,24, 0.00,60.00,Tuesday",
-                "3,0.0",
-                "9,4995.0",
-                ",365,12,31, 0,Tuesday",
-                "4,0.0,0.0,24,60,0.0,24,60",
-                "10,4995.0,4995.0,24,60,4995.0,24,60",
-                ",365,12",
-                "5,0.0,0.0,31,24,60,0.0,31,24,60",
-                "11,4995.0,4995.0,31,24,60,4995.0,31,24,60",
-                ",365",
-                "6,0.0,0.0,12,31,24,60,0.0,12,31,24,60",
-                "13,4995.0,4995.0,12,31,24,60,4995.0,12,31,24,60",
+                "1,5,Environment Title[],Latitude[deg],Longitude[deg],Time Zone[],Elevation[m]",
+                "2,8,Day of Simulation[],Month[],Day of Month[],DST Indicator[1=yes 0=no],Hour[],StartMinute[],EndMinute[],DayType",
+                "3,5,Cumulative Day of Simulation[],Month[],Day of Month[],DST Indicator[1=yes 0=no],DayType  ! When Daily Report Variables "
+                "Requested",
+                "4,2,Cumulative Days of Simulation[],Month[]  ! When Monthly Report Variables Requested",
+                "5,1,Cumulative Days of Simulation[] ! When Run Period Report Variables Requested",
+                "6,1,Calendar Year of Simulation[] ! When Annual Report Variables Requested",
+                "7,1,Environment,Site Outdoor Air Drybulb Temperature [C] !Each Call",
+                "8,1,Environment,Site Outdoor Air Drybulb Temperature [C] !TimeStep",
+                "9,1,Environment,Site Outdoor Air Drybulb Temperature [C] !Hourly",
+                "10,7,Environment,Site Outdoor Air Drybulb Temperature [C] !Daily [Value,Min,Hour,Minute,Max,Hour,Minute]",
+                "11,9,Environment,Site Outdoor Air Drybulb Temperature [C] !Monthly [Value,Min,Day,Hour,Minute,Max,Day,Hour,Minute]",
+                "12,11,Environment,Site Outdoor Air Drybulb Temperature [C] !RunPeriod [Value,Min,Month,Day,Hour,Minute,Max,Month,Day,Hour,Minute]",
+                "246,1,Boiler1,Boiler Heating Rate [W] !Each Call",
+                "247,1,Boiler1,Boiler NaturalGas Rate [W] !Each Call",
+                "14,1,Electricity:Facility [J] !Each Call",
+                "15,1,Electricity:Facility [J] !Hourly",
+                "16,7,Electricity:Facility [J] !Daily [Value,Min,Hour,Minute,Max,Hour,Minute]",
+                "17,9,Electricity:Facility [J] !Monthly [Value,Min,Day,Hour,Minute,Max,Day,Hour,Minute]",
+                "19,11,Electricity:Facility [J] !RunPeriod [Value,Min,Month,Day,Hour,Minute,Max,Month,Day,Hour,Minute]",
+                "2,365,12,31, 0,24,50.00,60.00,Tuesday",
+                "7,0.0",
+                "8,0.0",
+                "14,4995.0",
+                "2,365,12,31, 0,24, 0.00,60.00,Tuesday",
+                "9,0.0",
+                "15,4995.0",
+                "3,365,12,31, 0,Tuesday",
+                "10,0.0,0.0,24,60,0.0,24,60",
+                "16,4995.0,4995.0,24,60,4995.0,24,60",
+                "4,365,12",
+                "11,0.0,0.0,31,24,60,0.0,31,24,60",
+                "17,4995.0,4995.0,31,24,60,4995.0,31,24,60",
+                "5,365",
+                "12,0.0,0.0,12,31,24,60,0.0,12,31,24,60",
+                "19,4995.0,4995.0,12,31,24,60,4995.0,12,31,24,60",
             },
             "\n"));
 
         compare_mtr_stream(delimited_string(
             {
                 "Program Version,",
-                "8,1,Electricity:Facility [J] !Each Call",
-                "9,1,Electricity:Facility [J] !Hourly",
-                "10,7,Electricity:Facility [J] !Daily [Value,Min,Hour,Minute,Max,Hour,Minute]",
-                "11,9,Electricity:Facility [J] !Monthly [Value,Min,Day,Hour,Minute,Max,Day,Hour,Minute]",
-                "13,11,Electricity:Facility [J] !RunPeriod [Value,Min,Month,Day,Hour,Minute,Max,Month,Day,Hour,Minute]",
-                ",365,12,31, 0,24,50.00,60.00,Tuesday",
-                "8,4995.0",
-                ",365,12,31, 0,24, 0.00,60.00,Tuesday",
-                "9,4995.0",
-                ",365,12,31, 0,Tuesday",
-                "10,4995.0,4995.0,24,60,4995.0,24,60",
-                ",365,12",
-                "11,4995.0,4995.0,31,24,60,4995.0,31,24,60",
-                ",365",
-                "13,4995.0,4995.0,12,31,24,60,4995.0,12,31,24,60",
+                "1,5,Environment Title[],Latitude[deg],Longitude[deg],Time Zone[],Elevation[m]",
+                "2,8,Day of Simulation[],Month[],Day of Month[],DST Indicator[1=yes 0=no],Hour[],StartMinute[],EndMinute[],DayType",
+                "3,5,Cumulative Day of Simulation[],Month[],Day of Month[],DST Indicator[1=yes 0=no],DayType  ! When Daily Meters Requested",
+                "4,2,Cumulative Days of Simulation[],Month[]  ! When Monthly Meters Requested",
+                "5,1,Cumulative Days of Simulation[] ! When Run Period Meters Requested",
+                "6,1,Calendar Year of Simulation[] ! When Annual Meters Requested",
+                "14,1,Electricity:Facility [J] !Each Call",
+                "15,1,Electricity:Facility [J] !Hourly",
+                "16,7,Electricity:Facility [J] !Daily [Value,Min,Hour,Minute,Max,Hour,Minute]",
+                "17,9,Electricity:Facility [J] !Monthly [Value,Min,Day,Hour,Minute,Max,Day,Hour,Minute]",
+                "19,11,Electricity:Facility [J] !RunPeriod [Value,Min,Month,Day,Hour,Minute,Max,Month,Day,Hour,Minute]",
+                "2,365,12,31, 0,24,50.00,60.00,Tuesday",
+                "14,4995.0",
+                "2,365,12,31, 0,24, 0.00,60.00,Tuesday",
+                "15,4995.0",
+                "3,365,12,31, 0,Tuesday",
+                "16,4995.0,4995.0,24,60,4995.0,24,60",
+                "4,365,12",
+                "17,4995.0,4995.0,31,24,60,4995.0,31,24,60",
+                "5,365",
+                "19,4995.0,4995.0,12,31,24,60,4995.0,12,31,24,60",
             },
             "\n"));
     }
@@ -4510,19 +4592,19 @@ namespace OutputProcessor {
         auto reportDataDictionaryResults = queryResult("SELECT * FROM ReportDataDictionary;", "ReportDataDictionary");
 
         std::vector<std::vector<std::string>> reportDataDictionary({
-            {"1", "0", "Avg", "Zone", "Zone", "Environment", "Site Outdoor Air Drybulb Temperature", "HVAC System Timestep", "", "C"},
-            {"2", "0", "Avg", "Zone", "Zone", "Environment", "Site Outdoor Air Drybulb Temperature", "Zone Timestep", "", "C"},
-            {"3", "0", "Avg", "Zone", "Zone", "Environment", "Site Outdoor Air Drybulb Temperature", "Hourly", "", "C"},
-            {"4", "0", "Avg", "Zone", "Zone", "Environment", "Site Outdoor Air Drybulb Temperature", "Daily", "", "C"},
-            {"5", "0", "Avg", "Zone", "Zone", "Environment", "Site Outdoor Air Drybulb Temperature", "Monthly", "", "C"},
-            {"6", "0", "Avg", "Zone", "Zone", "Environment", "Site Outdoor Air Drybulb Temperature", "Run Period", "", "C"},
-            {"8", "1", "Sum", "Facility:Electricity", "Zone", "", "Electricity:Facility", "HVAC System Timestep", "", "J"},
-            {"9", "1", "Sum", "Facility:Electricity", "Zone", "", "Electricity:Facility", "Hourly", "", "J"},
-            {"10", "1", "Sum", "Facility:Electricity", "Zone", "", "Electricity:Facility", "Daily", "", "J"},
-            {"11", "1", "Sum", "Facility:Electricity", "Zone", "", "Electricity:Facility", "Monthly", "", "J"},
-            {"13", "1", "Sum", "Facility:Electricity", "Zone", "", "Electricity:Facility", "Run Period", "", "J"},
-            {"240", "0", "Avg", "System", "HVAC System", "Boiler1", "Boiler Heating Rate", "HVAC System Timestep", "", "W"},
-            {"241", "0", "Avg", "System", "HVAC System", "Boiler1", "Boiler NaturalGas Rate", "HVAC System Timestep", "", "W"},
+            {"7", "0", "Avg", "Zone", "Zone", "Environment", "Site Outdoor Air Drybulb Temperature", "HVAC System Timestep", "", "C"},
+            {"8", "0", "Avg", "Zone", "Zone", "Environment", "Site Outdoor Air Drybulb Temperature", "Zone Timestep", "", "C"},
+            {"9", "0", "Avg", "Zone", "Zone", "Environment", "Site Outdoor Air Drybulb Temperature", "Hourly", "", "C"},
+            {"10", "0", "Avg", "Zone", "Zone", "Environment", "Site Outdoor Air Drybulb Temperature", "Daily", "", "C"},
+            {"11", "0", "Avg", "Zone", "Zone", "Environment", "Site Outdoor Air Drybulb Temperature", "Monthly", "", "C"},
+            {"12", "0", "Avg", "Zone", "Zone", "Environment", "Site Outdoor Air Drybulb Temperature", "Run Period", "", "C"},
+            {"14", "1", "Sum", "Facility:Electricity", "Zone", "", "Electricity:Facility", "HVAC System Timestep", "", "J"},
+            {"15", "1", "Sum", "Facility:Electricity", "Zone", "", "Electricity:Facility", "Hourly", "", "J"},
+            {"16", "1", "Sum", "Facility:Electricity", "Zone", "", "Electricity:Facility", "Daily", "", "J"},
+            {"17", "1", "Sum", "Facility:Electricity", "Zone", "", "Electricity:Facility", "Monthly", "", "J"},
+            {"19", "1", "Sum", "Facility:Electricity", "Zone", "", "Electricity:Facility", "Run Period", "", "J"},
+            {"246", "0", "Avg", "System", "HVAC System", "Boiler1", "Boiler Heating Rate", "HVAC System Timestep", "", "W"},
+            {"247", "0", "Avg", "System", "HVAC System", "Boiler1", "Boiler NaturalGas Rate", "HVAC System Timestep", "", "W"},
         });
 
         EXPECT_EQ(reportDataDictionary, reportDataDictionaryResults);
@@ -4531,8 +4613,8 @@ namespace OutputProcessor {
         auto reportExtendedDataResults = queryResult("SELECT * FROM ReportExtendedData;", "ReportExtendedData");
 
         std::vector<std::vector<std::string>> reportData({
-            {"1", "1", "240", "999.0"},
-            {"2", "1", "241", "999.0"},
+            {"1", "1", "246", "999.0"},
+            {"2", "1", "247", "999.0"},
         });
 
         std::vector<std::vector<std::string>> reportExtendedData({});
@@ -4543,33 +4625,46 @@ namespace OutputProcessor {
         compare_eso_stream(delimited_string(
             {
                 "Program Version,",
-                "1,1,Environment,Site Outdoor Air Drybulb Temperature [C] !Each Call",
-                "2,1,Environment,Site Outdoor Air Drybulb Temperature [C] !TimeStep",
-                "3,1,Environment,Site Outdoor Air Drybulb Temperature [C] !Hourly",
-                "4,7,Environment,Site Outdoor Air Drybulb Temperature [C] !Daily [Value,Min,Hour,Minute,Max,Hour,Minute]",
-                "5,9,Environment,Site Outdoor Air Drybulb Temperature [C] !Monthly [Value,Min,Day,Hour,Minute,Max,Day,Hour,Minute]",
-                "6,11,Environment,Site Outdoor Air Drybulb Temperature [C] !RunPeriod [Value,Min,Month,Day,Hour,Minute,Max,Month,Day,Hour,Minute]",
-                "240,1,Boiler1,Boiler Heating Rate [W] !Each Call",
-                "241,1,Boiler1,Boiler NaturalGas Rate [W] !Each Call",
-                "8,1,Electricity:Facility [J] !Each Call",
-                "9,1,Electricity:Facility [J] !Hourly",
-                "10,7,Electricity:Facility [J] !Daily [Value,Min,Hour,Minute,Max,Hour,Minute]",
-                "11,9,Electricity:Facility [J] !Monthly [Value,Min,Day,Hour,Minute,Max,Day,Hour,Minute]",
-                "13,11,Electricity:Facility [J] !RunPeriod [Value,Min,Month,Day,Hour,Minute,Max,Month,Day,Hour,Minute]",
-                ",365,12,31, 0,24,50.00,60.00,Tuesday",
-                "240,999.0",
-                "241,999.0",
+                "1,5,Environment Title[],Latitude[deg],Longitude[deg],Time Zone[],Elevation[m]",
+                "2,8,Day of Simulation[],Month[],Day of Month[],DST Indicator[1=yes 0=no],Hour[],StartMinute[],EndMinute[],DayType",
+                "3,5,Cumulative Day of Simulation[],Month[],Day of Month[],DST Indicator[1=yes 0=no],DayType  ! When Daily Report Variables "
+                "Requested",
+                "4,2,Cumulative Days of Simulation[],Month[]  ! When Monthly Report Variables Requested",
+                "5,1,Cumulative Days of Simulation[] ! When Run Period Report Variables Requested",
+                "6,1,Calendar Year of Simulation[] ! When Annual Report Variables Requested",
+                "7,1,Environment,Site Outdoor Air Drybulb Temperature [C] !Each Call",
+                "8,1,Environment,Site Outdoor Air Drybulb Temperature [C] !TimeStep",
+                "9,1,Environment,Site Outdoor Air Drybulb Temperature [C] !Hourly",
+                "10,7,Environment,Site Outdoor Air Drybulb Temperature [C] !Daily [Value,Min,Hour,Minute,Max,Hour,Minute]",
+                "11,9,Environment,Site Outdoor Air Drybulb Temperature [C] !Monthly [Value,Min,Day,Hour,Minute,Max,Day,Hour,Minute]",
+                "12,11,Environment,Site Outdoor Air Drybulb Temperature [C] !RunPeriod [Value,Min,Month,Day,Hour,Minute,Max,Month,Day,Hour,Minute]",
+                "246,1,Boiler1,Boiler Heating Rate [W] !Each Call",
+                "247,1,Boiler1,Boiler NaturalGas Rate [W] !Each Call",
+                "14,1,Electricity:Facility [J] !Each Call",
+                "15,1,Electricity:Facility [J] !Hourly",
+                "16,7,Electricity:Facility [J] !Daily [Value,Min,Hour,Minute,Max,Hour,Minute]",
+                "17,9,Electricity:Facility [J] !Monthly [Value,Min,Day,Hour,Minute,Max,Day,Hour,Minute]",
+                "19,11,Electricity:Facility [J] !RunPeriod [Value,Min,Month,Day,Hour,Minute,Max,Month,Day,Hour,Minute]",
+                "2,365,12,31, 0,24,50.00,60.00,Tuesday",
+                "246,999.0",
+                "247,999.0",
             },
             "\n"));
 
         compare_mtr_stream(delimited_string(
             {
                 "Program Version,",
-                "8,1,Electricity:Facility [J] !Each Call",
-                "9,1,Electricity:Facility [J] !Hourly",
-                "10,7,Electricity:Facility [J] !Daily [Value,Min,Hour,Minute,Max,Hour,Minute]",
-                "11,9,Electricity:Facility [J] !Monthly [Value,Min,Day,Hour,Minute,Max,Day,Hour,Minute]",
-                "13,11,Electricity:Facility [J] !RunPeriod [Value,Min,Month,Day,Hour,Minute,Max,Month,Day,Hour,Minute]",
+                "1,5,Environment Title[],Latitude[deg],Longitude[deg],Time Zone[],Elevation[m]",
+                "2,8,Day of Simulation[],Month[],Day of Month[],DST Indicator[1=yes 0=no],Hour[],StartMinute[],EndMinute[],DayType",
+                "3,5,Cumulative Day of Simulation[],Month[],Day of Month[],DST Indicator[1=yes 0=no],DayType  ! When Daily Meters Requested",
+                "4,2,Cumulative Days of Simulation[],Month[]  ! When Monthly Meters Requested",
+                "5,1,Cumulative Days of Simulation[] ! When Run Period Meters Requested",
+                "6,1,Calendar Year of Simulation[] ! When Annual Meters Requested",
+                "14,1,Electricity:Facility [J] !Each Call",
+                "15,1,Electricity:Facility [J] !Hourly",
+                "16,7,Electricity:Facility [J] !Daily [Value,Min,Hour,Minute,Max,Hour,Minute]",
+                "17,9,Electricity:Facility [J] !Monthly [Value,Min,Day,Hour,Minute,Max,Day,Hour,Minute]",
+                "19,11,Electricity:Facility [J] !RunPeriod [Value,Min,Month,Day,Hour,Minute,Max,Month,Day,Hour,Minute]",
             },
             "\n"));
     }
@@ -4639,7 +4734,7 @@ namespace OutputProcessor {
         state->dataGlobal->WarmupFlag = true;
         UpdateMeterReporting(*state);
         UpdateDataandReport(*state, TimeStepType::Zone);
-
+#ifdef GET_OUT
         compare_eso_stream(delimited_string(
             {
                 "Program Version,",
@@ -4648,6 +4743,20 @@ namespace OutputProcessor {
                 "2,0.0",
             },
             "\n"));
+#endif // GET_OUT
+
+        compare_eso_stream(delimited_string(
+            {"Program Version,",
+             "1,5,Environment Title[],Latitude[deg],Longitude[deg],Time Zone[],Elevation[m]",
+             "2,8,Day of Simulation[],Month[],Day of Month[],DST Indicator[1=yes 0=no],Hour[],StartMinute[],EndMinute[],DayType",
+             "3,5,Cumulative Day of Simulation[],Month[],Day of Month[],DST Indicator[1=yes 0=no],DayType  ! When Daily Report Variables Requested",
+             "4,2,Cumulative Days of Simulation[],Month[]  ! When Monthly Report Variables Requested",
+             "5,1,Cumulative Days of Simulation[] ! When Run Period Report Variables Requested",
+             "6,1,Calendar Year of Simulation[] ! When Annual Report Variables Requested",
+             "8,1,Electricity:Facility [J] !TimeStep",
+             "2,365,12,31, 0,24,50.00,60.00,Tuesday",
+             "8,0.0"},
+            "\n"));
 
         state->dataGlobal->WarmupFlag = false;
         UpdateMeterReporting(*state);
@@ -4655,8 +4764,8 @@ namespace OutputProcessor {
 
         compare_eso_stream(delimited_string(
             {
-                ",365,12,31, 0,24, 0.00,10.00,Tuesday",
-                "2,999.0",
+                "2,365,12,31, 0,24, 0.00,10.00,Tuesday",
+                "8,999.0",
             },
             "\n"));
     }
@@ -5362,12 +5471,12 @@ namespace OutputProcessor {
         EXPECT_EQ("", op->meters[found]->EndUseSub);
 
         std::vector<std::vector<std::string>> reportDataDictionary(
-            {{"1", "0", "Avg", "Zone", "Zone", "Environment", "Site Outdoor Air Drybulb Temperature", "Run Period", "", "C"},
-             {"2", "0", "Sum", "System", "HVAC System", "Cool-1", "Chiller Electricity Energy", "Run Period", "", "J"},
-             {"51", "0", "Sum", "System", "HVAC System", "Cool-1", "Chiller Electricity Energy", "Hourly", "", "J"},
-             {"52", "0", "Sum", "Zone", "Zone", "LIGHTS 1", "Lights Electricity Energy", "Run Period", "", "J"},
-             {"125", "0", "Sum", "Zone", "Zone", "LIGHTS 1", "Lights Electricity Energy", "Zone Timestep", "", "J"},
-             {"126", "0", "Sum", "System", "HVAC System", "Site", "Environmental Impact Fuel Oil No 2 CO2 Emissions Mass", "Run Period", "", "kg"}});
+            {{"7", "0", "Avg", "Zone", "Zone", "Environment", "Site Outdoor Air Drybulb Temperature", "Run Period", "", "C"},
+             {"8", "0", "Sum", "System", "HVAC System", "Cool-1", "Chiller Electricity Energy", "Run Period", "", "J"},
+             {"57", "0", "Sum", "System", "HVAC System", "Cool-1", "Chiller Electricity Energy", "Hourly", "", "J"},
+             {"58", "0", "Sum", "Zone", "Zone", "LIGHTS 1", "Lights Electricity Energy", "Run Period", "", "J"},
+             {"131", "0", "Sum", "Zone", "Zone", "LIGHTS 1", "Lights Electricity Energy", "Zone Timestep", "", "J"},
+             {"132", "0", "Sum", "System", "HVAC System", "Site", "Environmental Impact Fuel Oil No 2 CO2 Emissions Mass", "Run Period", "", "kg"}});
 
         for (int i = 0; i < (int)reportDataDictionary.size(); ++i) {
             EXPECT_EQ(reportDataDictionary[i], reportDataDictionaryResults[i]);

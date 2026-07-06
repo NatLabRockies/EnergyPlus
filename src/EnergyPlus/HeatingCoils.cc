@@ -126,12 +126,6 @@ namespace HeatingCoils {
         Real64 PartLoadFrac;  // part-load fraction of heating coil
         Real64 QCoilRequired; // local variable for optional argument
 
-        // Obtains and Allocates HeatingCoil related parameters from input file
-        if (state.dataHeatingCoils->GetCoilsInputFlag) { // First time subroutine has been entered
-            GetHeatingCoilInput(state);
-            state.dataHeatingCoils->GetCoilsInputFlag = false;
-        }
-
         // Find the correct HeatingCoilNumber with the Coil Name
         if (present(CompIndex)) {
             if (CompIndex == 0) {
@@ -2825,12 +2819,6 @@ namespace HeatingCoils {
         // This subroutine sets an index for a given DX Coil -- issues error message if that
         // DX Coil is not a legal DX Coil.
 
-        // Obtains and Allocates HeatingCoil related parameters from input file
-        if (state.dataHeatingCoils->GetCoilsInputFlag) { // First time subroutine has been entered
-            GetHeatingCoilInput(state);
-            state.dataHeatingCoils->GetCoilsInputFlag = false;
-        }
-
         HeatingCoilIndex = Util::FindItem(HeatingCoilName, state.dataHeatingCoils->HeatingCoil);
         if (HeatingCoilIndex == 0) {
             ShowSevereError(state, std::format("GetCoilIndex: Heating coil not found={}", HeatingCoilName));
@@ -2852,12 +2840,6 @@ namespace HeatingCoils {
         // PURPOSE OF THIS SUBROUTINE:
         // This routine provides a method for outside routines to check if
         // the heating coil is scheduled to be on.
-
-        // Obtains and Allocates HeatingCoil related parameters from input file
-        if (state.dataHeatingCoils->GetCoilsInputFlag) { // First time subroutine has been entered
-            GetHeatingCoilInput(state);
-            state.dataHeatingCoils->GetCoilsInputFlag = false;
-        }
 
         // Find the correct Coil number
         if (CompIndex == 0) {
@@ -2922,12 +2904,6 @@ namespace HeatingCoils {
         // FUNCTION LOCAL VARIABLE DECLARATIONS:
         int WhichCoil;
 
-        // Obtains and Allocates HeatingCoil related parameters from input file
-        if (state.dataHeatingCoils->GetCoilsInputFlag) { // First time subroutine has been entered
-            GetHeatingCoilInput(state);
-            state.dataHeatingCoils->GetCoilsInputFlag = false;
-        }
-
         HVAC::CoilType FoundType = static_cast<HVAC::CoilType>(getEnumValue(HVAC::coilTypeNamesUC, Util::makeUPPER(CoilType)));
         if (FoundType == HVAC::CoilType::HeatingElectric || FoundType == HVAC::CoilType::HeatingGasOrOtherFuel ||
             FoundType == HVAC::CoilType::HeatingDesuperheater) {
@@ -2980,12 +2956,6 @@ namespace HeatingCoils {
         // incorrect coil type or name is given, ErrorsFound is returned as true and index is returned
         // as zero.
 
-        // Obtains and Allocates HeatingCoil related parameters from input file
-        if (state.dataHeatingCoils->GetCoilsInputFlag) { // First time subroutine has been entered
-            GetHeatingCoilInput(state);
-            state.dataHeatingCoils->GetCoilsInputFlag = false;
-        }
-
         int WhichCoil = 0;
 
         HVAC::CoilType FoundType = static_cast<HVAC::CoilType>(getEnumValue(HVAC::coilTypeNamesUC, Util::makeUPPER(CoilType)));
@@ -3023,12 +2993,6 @@ namespace HeatingCoils {
         // This function looks up the given coil and returns the inlet node number.  If
         // incorrect coil type or name is given, ErrorsFound is returned as true and node number is returned
         // as zero.
-
-        // Obtains and Allocates HeatingCoil related parameters from input file
-        if (state.dataHeatingCoils->GetCoilsInputFlag) { // First time subroutine has been entered
-            GetHeatingCoilInput(state);
-            state.dataHeatingCoils->GetCoilsInputFlag = false;
-        }
 
         int WhichCoil = 0;
         int NodeNumber = 0;
@@ -3068,12 +3032,6 @@ namespace HeatingCoils {
         // This function looks up the given coil and returns the outlet node number.  If
         // incorrect coil type or name is given, ErrorsFound is returned as true and node number is returned
         // as zero.
-
-        // Obtains and Allocates HeatingCoil related parameters from input file
-        if (state.dataHeatingCoils->GetCoilsInputFlag) { // First time subroutine has been entered
-            GetHeatingCoilInput(state);
-            state.dataHeatingCoils->GetCoilsInputFlag = false;
-        }
 
         int WhichCoil = 0;
         int NodeNumber = 0;
@@ -3118,12 +3076,6 @@ namespace HeatingCoils {
         bool GetCoilErrFlag;
         int NumCoil;
         int CoilNum(0);
-
-        // Obtains and Allocates HeatingCoil related parameters from input file
-        if (state.dataHeatingCoils->GetCoilsInputFlag) { // First time subroutine has been entered
-            GetHeatingCoilInput(state);
-            state.dataHeatingCoils->GetCoilsInputFlag = false;
-        }
 
         int CoilFound = 0;
 
@@ -3177,12 +3129,6 @@ namespace HeatingCoils {
         // incorrect coil type or name is given, ErrorsFound is returned as true and node number is returned
         // as zero.
 
-        // Obtains and Allocates HeatingCoil related parameters from input file
-        if (state.dataHeatingCoils->GetCoilsInputFlag) { // First time subroutine has been entered
-            GetHeatingCoilInput(state);
-            state.dataHeatingCoils->GetCoilsInputFlag = false;
-        }
-
         HVAC::CoilType FoundType = static_cast<HVAC::CoilType>(getEnumValue(HVAC::coilTypeNamesUC, Util::makeUPPER(CoilType)));
         if (FoundType == HVAC::CoilType::HeatingElectric || FoundType == HVAC::CoilType::HeatingElectricMultiStage ||
             FoundType == HVAC::CoilType::HeatingGasOrOtherFuel || FoundType == HVAC::CoilType::HeatingGasMultiStage ||
@@ -3214,12 +3160,6 @@ namespace HeatingCoils {
         // incorrect coil type or name is given, ErrorsFound is returned as true and type number is returned
         // as zero.
 
-        // Obtains and Allocates HeatingCoil related parameters from input file
-        if (state.dataHeatingCoils->GetCoilsInputFlag) { // First time subroutine has been entered
-            GetHeatingCoilInput(state);
-            state.dataHeatingCoils->GetCoilsInputFlag = false;
-        }
-
         HVAC::CoilType FoundType = static_cast<HVAC::CoilType>(getEnumValue(HVAC::coilTypeNamesUC, Util::makeUPPER(CoilType)));
         if (FoundType == HVAC::CoilType::HeatingElectric || FoundType == HVAC::CoilType::HeatingElectricMultiStage ||
             FoundType == HVAC::CoilType::HeatingGasOrOtherFuel || FoundType == HVAC::CoilType::HeatingGasMultiStage ||
@@ -3250,12 +3190,6 @@ namespace HeatingCoils {
         // This function looks up the given coil and returns the index into the structure.  If
         // incorrect coil type or name is given, ErrorsFound is returned as true and index is returned
         // as zero.
-
-        // Obtains and Allocates HeatingCoil related parameters from input file
-        if (state.dataHeatingCoils->GetCoilsInputFlag) { // First time subroutine has been entered
-            GetHeatingCoilInput(state);
-            state.dataHeatingCoils->GetCoilsInputFlag = false;
-        }
 
         int WhichCoil = 0;
         HVAC::CoilType FoundType = static_cast<HVAC::CoilType>(getEnumValue(HVAC::coilTypeNamesUC, Util::makeUPPER(CoilType)));
@@ -3290,12 +3224,6 @@ namespace HeatingCoils {
         // is returned as true and curve index is returned as zero.
         // If not a gas or electric heating coil, ErrorsFound is unchanged and index is 0.
 
-        // Obtains and Allocates HeatingCoil related parameters from input file
-        if (state.dataHeatingCoils->GetCoilsInputFlag) { // First time subroutine has been entered
-            GetHeatingCoilInput(state);
-            state.dataHeatingCoils->GetCoilsInputFlag = false;
-        }
-
         HVAC::CoilType FoundType = static_cast<HVAC::CoilType>(getEnumValue(HVAC::coilTypeNamesUC, Util::makeUPPER(CoilType)));
         if (FoundType == HVAC::CoilType::HeatingElectric || FoundType == HVAC::CoilType::HeatingElectricMultiStage ||
             FoundType == HVAC::CoilType::HeatingGasOrOtherFuel || FoundType == HVAC::CoilType::HeatingGasMultiStage ||
@@ -3326,12 +3254,6 @@ namespace HeatingCoils {
         // This function looks up the given coil and returns the number of speeds for multistage coils.
         // If incorrect coil type or name is given, ErrorsFound is returned as true.
 
-        // Obtains and Allocates HeatingCoils
-        if (state.dataHeatingCoils->GetCoilsInputFlag) { // First time subroutine has been entered
-            GetHeatingCoilInput(state);
-            state.dataHeatingCoils->GetCoilsInputFlag = false;
-        }
-
         int WhichCoil = Util::FindItemInList(CoilName, state.dataHeatingCoils->HeatingCoil);
         if (WhichCoil != 0) {
             return state.dataHeatingCoils->HeatingCoil(WhichCoil).NumOfStages;
@@ -3357,10 +3279,6 @@ namespace HeatingCoils {
         // This function sets data to Heating Coil using the coil index and arguments passed
 
         auto &heatingCoil = state.dataHeatingCoils->HeatingCoil(CoilNum);
-        if (state.dataHeatingCoils->GetCoilsInputFlag) {
-            GetHeatingCoilInput(state);
-            state.dataHeatingCoils->GetCoilsInputFlag = false;
-        }
 
         if (CoilNum <= 0 || CoilNum > state.dataHeatingCoils->NumHeatingCoils) {
             ShowSevereError(state,
@@ -3390,11 +3308,6 @@ namespace HeatingCoils {
         // This subroutine sets an AirLoopNum for a given heating Coil
 
         int HeatingCoilIndex;
-
-        if (state.dataHeatingCoils->GetCoilsInputFlag) { // First time subroutine has been entered
-            GetHeatingCoilInput(state);
-            state.dataHeatingCoils->GetCoilsInputFlag = false;
-        }
 
         HeatingCoilIndex = Util::FindItem(HeatingCoilName, state.dataHeatingCoils->HeatingCoil);
         if (HeatingCoilIndex == 0) {

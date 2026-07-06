@@ -83,7 +83,7 @@ TEST_F(CoilCoolingDXTest, CoilCoolingDXCurveFitOperatingMode_Sizing)
         "  Coil Cooling DX 1,                      !- Name",
         "  Air Loop HVAC Unitary System 5 Fan - Cooling Coil Node, !- Evaporator Inlet Node Name",
         "  Air Loop HVAC Unitary System 5 Cooling Coil - Heating Coil Node, !- Evaporator Outlet Node Name",
-        "  Always On Discrete,                     !- Availability Schedule Name",
+        "  Constant-1.0,                     !- Availability Schedule Name",
         "  ,                                       !- Condenser Zone Name",
         "  Coil Cooling DX 1 Condenser Inlet Node, !- Condenser Inlet Node Name",
         "  Coil Cooling DX 1 Condenser Outlet Node, !- Condenser Outlet Node Name",
@@ -99,7 +99,7 @@ TEST_F(CoilCoolingDXTest, CoilCoolingDXCurveFitOperatingMode_Sizing)
         "  Discrete,                               !- Capacity Control Method",
         "  0,                                      !- Evaporative Condenser Basin Heater Capacity {W/K}",
         "  2,                                      !- Evaporative Condenser Basin Heater Setpoint Temperature {C}",
-        "  Always On Discrete,                     !- Evaporative Condenser Basin Heater Operating Schedule Name",
+        "  Constant-1.0,                     !- Evaporative Condenser Basin Heater Operating Schedule Name",
         "  Electricity,                            !- Compressor Fuel Type",
         "  Coil Cooling DX Curve Fit Operating Mode 1; !- Base Operating Mode",
 

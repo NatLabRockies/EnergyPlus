@@ -73,19 +73,19 @@ TEST_F(EnergyPlusFixture, ExerciseHVACDXHeatPumpSystem)
                           "    Heat Pump DX Heating Coil 1;  !- Heating Coil Name",
                           "Coil:Heating:DX:SingleSpeed,",
                           "    Heat Pump DX Heating Coil 1,  !- Name",
-                          "    FanAndCoilAvailSched,    !- Availability Schedule Name",
-                          "    autosize,                !- Gross Rated Heating Capacity {W}",
+                          "    Constant-1.0,    !- Availability Schedule Name",
+                          "    10000.0,                 !- Gross Rated Heating Capacity {W}",
                           "    2.75,                    !- Gross Rated Heating COP {W/W}",
-                          "    autosize,                !- Rated Air Flow Rate {m3/s}",
+                          "    0.5,                     !- Rated Air Flow Rate {m3/s}",
                           "    ,                        !- 2017 Rated Supply Fan Power Per Volume Flow Rate {W/(m3/s)}",
                           "    ,                        !- 2023 Rated Supply Fan Power Per Volume Flow Rate {W/(m3/s)}",
                           "    Heating Coil Air Inlet Node,  !- Air Inlet Node Name",
                           "    SuppHeating Coil Air Inlet Node,  !- Air Outlet Node Name",
-                          "    HPACHeatCapFT,           !- Heating Capacity Function of Temperature Curve Name",
-                          "    HPACHeatCapFFF,          !- Heating Capacity Function of Flow Fraction Curve Name",
-                          "    HPACHeatEIRFT,           !- Energy Input Ratio Function of Temperature Curve Name",
-                          "    HPACHeatEIRFFF,          !- Energy Input Ratio Function of Flow Fraction Curve Name",
-                          "    HPACCOOLPLFFPLR,         !- Part Load Fraction Correlation Curve Name",
+                          "    Dummy Curve 1,           !- Heating Capacity Function of Temperature Curve Name",
+                          "    Dummy Curve 1,           !- Heating Capacity Function of Flow Fraction Curve Name",
+                          "    Dummy Curve 1,           !- Energy Input Ratio Function of Temperature Curve Name",
+                          "    Dummy Curve 1,           !- Energy Input Ratio Function of Flow Fraction Curve Name",
+                          "    Dummy Curve 1,           !- Part Load Fraction Correlation Curve Name",
                           "    ,                        !- Defrost Energy Input Ratio Function of Temperature Curve Name",
                           "    -8.0,                    !- Minimum Outdoor Dry-Bulb Temperature for Compressor Operation {C}",
                           "    ,                        !- Outdoor Dry-Bulb Temperature to Turn On Compressor {C}",
@@ -98,51 +98,22 @@ TEST_F(EnergyPlusFixture, ExerciseHVACDXHeatPumpSystem)
                           "    0.166667,                !- Defrost Time Period Fraction",
                           "    autosize,                !- Resistive Defrost Heater Capacity {W}",
                           "    ,                        !- Region number for calculating HSPF",
-                          "    Heat Pump 1 Evaporator Node;  !- Evaporator Air Inlet Node Name"});
+                          "    Heat Pump 1 Evaporator Node;  !- Evaporator Air Inlet Node Name",
+                          "",
+                          "Curve:Quadratic,",
+                          "    Dummy Curve 1,",
+                          "    0.8,",
+                          "    0.2,",
+                          "    0.0,",
+                          "    0.5,",
+                          "    1.5;"});
 
     ASSERT_TRUE(process_idf(idf_objects));
     state->init_state(*state);
 
-    state->dataLoopNodes->NodeID.allocate(2);
-    state->dataLoopNodes->Node.allocate(2);
-
-    // manually add a dx coil
-    state->dataDXCoils->NumDXCoils = 1;
-    state->dataDXCoils->GetCoilsInputFlag = false;
-    state->dataDXCoils->DXCoil.allocate(1);
-    state->dataDXCoils->DXCoil(1).Name = "HEAT PUMP DX HEATING COIL 1";
-    state->dataDXCoils->DXCoil(1).availSched = Sched::GetScheduleAlwaysOn(*state);
-    state->dataDXCoils->DXCoil(1).AirInNode = 1;
-    state->dataDXCoils->DXCoil(1).AirOutNode = 2;
-    state->dataDXCoils->DXCoil(1).coilType = HVAC::CoilType::HeatingDXSingleSpeed;
-    state->dataDXCoils->DXCoil(1).coilReportNum =
-        ReportCoilSelection::getReportIndex(*state, state->dataDXCoils->DXCoil(1).Name, state->dataDXCoils->DXCoil(1).coilType);
-    state->dataDXCoils->DXCoil(1).RatedTotCap(1) = 1;
-    state->dataDXCoils->DXCoil(1).RatedCOP(1) = 1;
-    state->dataDXCoils->DXCoil(1).CCapFFlow(1) = 1;
-    state->dataDXCoils->DXCoil(1).CCapFTemp(1) = 1;
-    state->dataDXCoils->DXCoil(1).EIRFFlow(1) = 1;
-    state->dataDXCoils->DXCoil(1).EIRFTemp(1) = 1;
-    state->dataDXCoils->DXCoil(1).PLFFPLR(1) = 1;
-    state->dataDXCoils->DXCoil(1).RatedAirVolFlowRate(1) = 1.0;
-    state->dataDXCoils->DXCoil(1).FanPowerPerEvapAirFlowRate(1) = 0.0;
-    state->dataDXCoils->DXCoil(1).FanPowerPerEvapAirFlowRate_2023(1) = 0.0;
-    state->dataDXCoils->DXCoil(1).RegionNum = 1;
-    state->dataDXCoils->DXCoilOutletTemp.allocate(1);
-    state->dataDXCoils->DXCoilOutletHumRat.allocate(1);
-    state->dataDXCoils->DXCoilFanOp.allocate(1);
-    state->dataDXCoils->DXCoilPartLoadRatio.allocate(1);
-    state->dataDXCoils->DXCoilTotalHeating.allocate(1);
-    state->dataDXCoils->DXCoilHeatInletAirDBTemp.allocate(1);
-    state->dataDXCoils->DXCoilHeatInletAirWBTemp.allocate(1);
-    state->dataDXCoils->DXCoilNumericFields.allocate(1);
-    state->dataDXCoils->DXCoilNumericFields(1).PerfMode.allocate(1);
-    state->dataDXCoils->DXCoilNumericFields(1).PerfMode(1).FieldNames.allocate(4);
-
-    // manually add a curve
-    [[maybe_unused]] auto *curve = Curve::AddCurve(*state, "Curve1");
-
     // setup some outputs
+
+    state->dataSize->CurZoneEqNum = 1;
 
     int compIndex = 0;
     HVACDXHeatPumpSystem::SimDXHeatPumpSystem(*state, "HEATPUMP DX COIL 1", true, -1, compIndex, -1, 0.0);

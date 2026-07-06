@@ -6540,7 +6540,6 @@ TEST_F(EnergyPlusFixture, AirflowNetwork_ValidateDistCoils)
     state->afn->DisSysCompCoilData(2).EPlusType = "COIL:HEATING:DX:VARIABLESPEED";
     state->afn->DisSysCompCoilData(2).name = "Super Heating Coil";
 
-    state->dataVariableSpeedCoils->GetCoilsInputFlag = false;
     state->dataVariableSpeedCoils->VarSpeedCoil.allocate(2);
     state->dataVariableSpeedCoils->VarSpeedCoil(1).Name = "Super Coil";
     state->dataVariableSpeedCoils->VarSpeedCoil(2).Name = "Super Heating Coil";
@@ -8068,6 +8067,66 @@ TEST_F(EnergyPlusFixture, AirflowNetwork_DuplicatedNodeNameTest)
         "    Supply Air Temp Nodes,   !- Name",
         "    Heating Coil Air Inlet Node,  !- Node 1 Name",
         "    Air Loop Outlet Node;    !- Node 2 Name",
+
+        "  Curve:Biquadratic,",
+        "    WindACCoolCapFT,         !- Name",
+        "    0.942587793,             !- Coefficient1 Constant",
+        "    0.009543347,             !- Coefficient2 x",
+        "    0.000683770,             !- Coefficient3 x**2",
+        "    -0.011042676,            !- Coefficient4 y",
+        "    0.000005249,             !- Coefficient5 y**2",
+        "    -0.000009720,            !- Coefficient6 x*y",
+        "    12.77778,                !- Minimum Value of x",
+        "    23.88889,                !- Maximum Value of x",
+        "    18.0,                    !- Minimum Value of y",
+        "    46.11111,                !- Maximum Value of y",
+        "    ,                        !- Minimum Curve Output",
+        "    ,                        !- Maximum Curve Output",
+        "    Temperature,             !- Input Unit Type for X",
+        "    Temperature,             !- Input Unit Type for Y",
+        "    Dimensionless;           !- Output Unit Type",
+
+        "  Curve:Biquadratic,",
+        "    WindACEIRFT,             !- Name",
+        "    0.342414409,             !- Coefficient1 Constant",
+        "    0.034885008,             !- Coefficient2 x",
+        "    -0.000623700,            !- Coefficient3 x**2",
+        "    0.004977216,             !- Coefficient4 y",
+        "    0.000437951,             !- Coefficient5 y**2",
+        "    -0.000728028,            !- Coefficient6 x*y",
+        "    12.77778,                !- Minimum Value of x",
+        "    23.88889,                !- Maximum Value of x",
+        "    18.0,                    !- Minimum Value of y",
+        "    46.11111,                !- Maximum Value of y",
+        "    ,                        !- Minimum Curve Output",
+        "    ,                        !- Maximum Curve Output",
+        "    Temperature,             !- Input Unit Type for X",
+        "    Temperature,             !- Input Unit Type for Y",
+        "    Dimensionless;           !- Output Unit Type",
+
+        "  Curve:Quadratic,",
+        "    WindACCoolCapFFF,        !- Name",
+        "    0.8,                     !- Coefficient1 Constant",
+        "    0.2,                     !- Coefficient2 x",
+        "    0.0,                     !- Coefficient3 x**2",
+        "    0.5,                     !- Minimum Value of x",
+        "    1.5;                     !- Maximum Value of x",
+
+        "  Curve:Quadratic,",
+        "    WindACEIRFFF,            !- Name",
+        "    1.1552,                  !- Coefficient1 Constant",
+        "    -0.1808,                 !- Coefficient2 x",
+        "    0.0256,                  !- Coefficient3 x**2",
+        "    0.5,                     !- Minimum Value of x",
+        "    1.5;                     !- Maximum Value of x",
+
+        "  Curve:Quadratic,",
+        "    WindACPLFFPLR,           !- Name",
+        "    0.85,                    !- Coefficient1 Constant",
+        "    0.15,                    !- Coefficient2 x",
+        "    0.0,                     !- Coefficient3 x**2",
+        "    0.0,                     !- Minimum Value of x",
+        "    1.0;                     !- Maximum Value of x",
 
     });
 
@@ -16738,8 +16797,6 @@ TEST_F(EnergyPlusFixture, AirflowNetwork_DuctSizingTest)
     state->dataAirLoop->AirLoopAFNInfo(1).LoopFanOperationMode = HVAC::FanOp::Cycling;
     state->dataAirLoop->AirLoopAFNInfo(1).LoopOnOffFanPartLoadRatio = 0.0;
     state->dataAirLoop->AirLoopAFNInfo(1).LoopSystemOnMassFlowrate = 1.23;
-    state->afn->AirflowNetworkLinkageData(17).AirLoopNum = 1;
-    state->dataLoopNodes->Node(4).MassFlowRate = 1.23;
 
     // Duct sizing test
     state->afn->simulation_control.autosize_ducts = true;
@@ -16758,19 +16815,31 @@ TEST_F(EnergyPlusFixture, AirflowNetwork_DuctSizingTest)
         thisZoneHB.airHumRat = 0.0008400;
     }
 
+    auto findAFNNodeNum = [&](std::string const &nodeName) {
+        for (int nodeNum = 1; nodeNum <= state->afn->AirflowNetworkNumOfNodes; ++nodeNum) {
+            if (Util::SameString(state->afn->AirflowNetworkNodeData(nodeNum).Name, nodeName)) {
+                return nodeNum;
+            }
+        }
+        return 0;
+    };
+
+    // SizeDucts only needs the supply/return loop nodes and the active zone inlet/outlet markers.
+    int const equipmentInletNodeNum = findAFNNodeNum("EquipmentInletNode");
+    int const mainReturnNodeNum = findAFNNodeNum("MainReturnNode");
+    int const zoneSupplyRegisterNodeNum = findAFNNodeNum("ZoneSupplyRegisterNode");
+    int const zoneOutletNodeNum = findAFNNodeNum("ZoneOutletNode");
+    ASSERT_NE(0, equipmentInletNodeNum);
+    ASSERT_NE(0, mainReturnNodeNum);
+    ASSERT_NE(0, zoneSupplyRegisterNodeNum);
+    ASSERT_NE(0, zoneOutletNodeNum);
+
     state->dataZoneEquip->ZoneEquipList(1).EquipIndex(1) = 1;
     state->dataDefineEquipment->AirDistUnit(1).MassFlowRateTU = 1.23;
-    state->afn->AirflowNetworkNodeData(8).EPlusNodeNum = 8;
-    state->afn->AirflowNetworkNodeData(11).EPlusNodeNum = 1;
-    state->afn->AirflowNetworkNodeData(12).EPlusNodeNum = 7;
-    state->afn->AirflowNetworkNodeData(15).EPlusNodeNum = 9;
-    state->afn->AirflowNetworkNodeData(17).EPlusNodeNum = 4;
-    state->afn->AirflowNetworkNodeData(18).EPlusNodeNum = 5;
-    state->afn->AirflowNetworkNodeData(19).EPlusNodeNum = 2;
-    state->afn->AirflowNetworkNodeData(20).EPlusNodeNum = 11;
-    state->afn->AirflowNetworkNodeData(21).EPlusNodeNum = 3;
-    state->afn->AirflowNetworkNodeData(11).EPlusTypeNum = AirflowNetwork::iEPlusNodeType::ZIN;
-    state->afn->AirflowNetworkNodeData(12).EPlusTypeNum = AirflowNetwork::iEPlusNodeType::ZOU;
+    state->afn->AirflowNetworkNodeData(equipmentInletNodeNum).EPlusNodeNum = state->dataAirLoop->AirToZoneNodeInfo(1).ZoneEquipSupplyNodeNum(1);
+    state->afn->AirflowNetworkNodeData(mainReturnNodeNum).EPlusNodeNum = state->dataAirLoop->AirToZoneNodeInfo(1).ZoneEquipReturnNodeNum(1);
+    state->afn->AirflowNetworkNodeData(zoneSupplyRegisterNodeNum).EPlusTypeNum = AirflowNetwork::iEPlusNodeType::ZIN;
+    state->afn->AirflowNetworkNodeData(zoneOutletNodeNum).EPlusTypeNum = AirflowNetwork::iEPlusNodeType::ZOU;
     state->dataEnvrn->StdRhoAir = 1.2;
     state->afn->DisSysCompCVFData(1).FlowRate = 1.23;
     state->afn->SizeDucts();
@@ -16829,10 +16898,10 @@ TEST_F(EnergyPlusFixture, AirflowNetwork_CheckMultistageHeatingCoil)
     std::string const idf_objects = delimited_string({
         "Coil:Heating:Electric:MultiStage,",
         " ElectricCoil, !-Name",
-        " always_avail, !-Availability Schedule Name",
+        " Constant-1.0, !-Availability Schedule Name",
         " heating coil air inlet node_unit1, !-Air Inlet Node Name",
         " Supp Heating Coil Air Inlet Node_unit1, !-Air Outlet Node Name,",
-        " !-Temperature Setpoint Node Name",
+        " , !-Temperature Setpoint Node Name",
         " 2, !-Number of Stages ",
         " 1.00, !-Stage 1 Efficiency{W / W}",
         " 4000.0, !-Stage 1 Nominal Capacity {W}",
@@ -16841,7 +16910,7 @@ TEST_F(EnergyPlusFixture, AirflowNetwork_CheckMultistageHeatingCoil)
 
         "Coil:Heating:Gas:MultiStage,",
         " GasCoil, !-Name",
-        " always_avail, !-Availability Schedule Name",
+        " Constant-1.0, !-Availability Schedule Name",
         " heating coil air inlet node_unit1-1, !-Air Inlet Node Name",
         " Supp Heating Coil Air Inlet Node_unit1-1, !-Air Outlet Node Name,",
         " , !-Temperature Setpoint Node Name",
@@ -16857,8 +16926,6 @@ TEST_F(EnergyPlusFixture, AirflowNetwork_CheckMultistageHeatingCoil)
     });
 
     ASSERT_TRUE(process_idf(idf_objects));
-
-    state->init_state(*state);
 
     state->dataGlobal->NumOfZones = 1;
     state->dataHeatBal->Zone.allocate(1);
@@ -16891,14 +16958,14 @@ TEST_F(EnergyPlusFixture, AirflowNetwork_CheckMultistageHeatingCoil)
     state->dataAirSystemsData->PrimaryAirSystems(1).Branch(1).Comp.allocate(1);
     state->dataAirSystemsData->PrimaryAirSystems(1).Branch(1).Comp(1).TypeOf = "Fan:ConstantVolume";
 
-    state->dataLoopNodes->NumOfNodes = 1;
-    state->dataLoopNodes->Node.allocate(2);
-    state->dataLoopNodes->Node(1).fluidType = Node::FluidType::Air;
-    state->dataLoopNodes->NodeID.allocate(1);
-    state->dataLoopNodes->NodeID(1) = "ATTIC ZONE AIR NODE";
+    state->dataLoopNodes->NumOfNodes++;
+    state->dataLoopNodes->Node.redimension(state->dataLoopNodes->NumOfNodes);
+    state->dataLoopNodes->Node(state->dataLoopNodes->NumOfNodes).fluidType = Node::FluidType::Air;
+    state->dataLoopNodes->NodeID.redimension(state->dataLoopNodes->NumOfNodes);
+    state->dataLoopNodes->NodeID(state->dataLoopNodes->NumOfNodes) = "ATTIC ZONE AIR NODE";
     bool errFlag{false};
     Node::RegisterNodeConnection(*state,
-                                 1,
+                                 state->dataLoopNodes->NumOfNodes,
                                  "ATTIC ZONE AIR NODE",
                                  Node::ConnectionObjectType::FanOnOff,
                                  "Object1",
@@ -16911,7 +16978,7 @@ TEST_F(EnergyPlusFixture, AirflowNetwork_CheckMultistageHeatingCoil)
     state->dataZoneEquip->ZoneEquipConfig.allocate(1);
     state->dataZoneEquip->ZoneEquipConfig(1).IsControlled = true;
     state->dataZoneEquip->ZoneEquipConfig(1).ZoneName = "ATTIC ZONE";
-    state->dataZoneEquip->ZoneEquipConfig(1).ZoneNode = 1;
+    state->dataZoneEquip->ZoneEquipConfig(1).ZoneNode = state->dataLoopNodes->NumOfNodes;
     state->dataZoneEquip->ZoneEquipConfig(1).NumInletNodes = 0;
     state->dataZoneEquip->ZoneEquipConfig(1).NumReturnNodes = 0;
     state->dataZoneEquip->ZoneEquipConfig(1).IsControlled = true;
@@ -16923,10 +16990,10 @@ TEST_F(EnergyPlusFixture, AirflowNetwork_CheckMultistageHeatingCoil)
     state->afn->MultizoneZoneData(1).ZoneName = "ATTIC ZONE";
 
     // Assume only one AirflowNetwork:Distribution:Node object is set for the Zone Air Node
-    state->afn->AirflowNetworkNumOfNodes = 1;
-    state->afn->AirflowNetworkNodeData.allocate(1);
-    state->afn->AirflowNetworkNodeData(1).Name = "ATTIC ZONE";
-    state->afn->AirflowNetworkNodeData(1).EPlusZoneNum = 1;
+    state->afn->AirflowNetworkNumOfNodes = state->dataLoopNodes->NumOfNodes;
+    state->afn->AirflowNetworkNodeData.allocate(state->dataLoopNodes->NumOfNodes);
+    state->afn->AirflowNetworkNodeData(state->dataLoopNodes->NumOfNodes).Name = "ATTIC ZONE";
+    state->afn->AirflowNetworkNodeData(state->dataLoopNodes->NumOfNodes).EPlusZoneNum = 1;
 
     state->afn->SplitterNodeNumbers.allocate(2);
     state->afn->SplitterNodeNumbers(1) = 0;
@@ -16941,7 +17008,6 @@ TEST_F(EnergyPlusFixture, AirflowNetwork_CheckMultistageHeatingCoil)
     state->afn->DisSysCompCoilData(1).AirLoopNum = 1;
     state->afn->DisSysCompCoilData(2).AirLoopNum = 2;
 
-    state->dataHeatingCoils->GetCoilsInputFlag = false;
     state->dataHeatingCoils->HeatingCoil.allocate(2);
     state->dataHeatingCoils->HeatingCoil(1).Name = "ElectricCoil";
     state->dataHeatingCoils->HeatingCoil(2).Name = "GasCoil";

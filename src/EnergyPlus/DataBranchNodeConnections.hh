@@ -62,6 +62,18 @@ namespace EnergyPlus {
 
 namespace Node {
 
+    // Identifies why a component set exists. These names describe the
+    // origin of the component/node relationship, not just the literal
+    // parent object type used when SetUpCompSets is called.
+    enum class CompSetSource
+    {
+        Invalid = -1,
+        ComponentRegistration, // Component registered its own inlet/outlet nodes before a parent relationship was known
+        BranchTopology,        // Component set came from Branch input and participates in branch topology validation
+        ParentChild,           // Component set came from a non-branch parent/child relationship
+        Num
+    };
+
     struct ComponentListData
     {
         // Members
@@ -74,6 +86,7 @@ namespace Node {
         std::string InletNodeName;  // Inlet Node ID
         std::string OutletNodeName; // Outlet Node ID
         std::string Description;    // Description of Component List Type
+        Node::CompSetSource Source = Node::CompSetSource::Invalid;
     };
 
     struct NodeConnectionDef

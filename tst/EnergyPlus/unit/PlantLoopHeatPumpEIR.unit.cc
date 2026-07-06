@@ -3930,7 +3930,7 @@ TEST_F(EnergyPlusFixture, ClearState)
     EXPECT_EQ(state->dataEIRPlantLoopHeatPump->heatPumps.size(), 1u);
 
     // test that vector is cleared
-    state->dataEIRPlantLoopHeatPump->clear_state();
+    clear_state_and_reset_err_stream();
     EXPECT_EQ(state->dataEIRPlantLoopHeatPump->heatPumps.size(), 0u);
 }
 

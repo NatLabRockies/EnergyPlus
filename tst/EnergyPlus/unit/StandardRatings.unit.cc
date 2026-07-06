@@ -692,8 +692,6 @@ TEST_F(EnergyPlusFixture, SingleSpeedHeatingCurveTest2023_II)
 
     state->init_state(*state);
 
-    GetDXCoils(*state);
-
     auto &Coil(state->dataDXCoils->DXCoil(1));
 
     Real64 NetHeatingCapRatedHighTemp;
@@ -922,8 +920,6 @@ TEST_F(EnergyPlusFixture, MultiSpeedHeatingCoil_HSPFValueTest_2Speed)
     ASSERT_TRUE(process_idf(idf_objects1));
 
     state->init_state(*state);
-
-    GetDXCoils(*state);
 
     auto &Coil(state->dataDXCoils->DXCoil(1));
 
@@ -1363,8 +1359,6 @@ TEST_F(EnergyPlusFixture, SingleSpeedCoolingCoil_15000W_SameFanPower_SEER2_2023_
 
     state->init_state(*state);
 
-    GetDXCoils(*state);
-
     auto &thisCoil(state->dataDXCoils->DXCoil(1));
     auto &thisCoolPLFfPLR(state->dataCurveManager->curves(thisCoil.PLFFPLR(1)));
     // check user PLF curve coefficients
@@ -1632,8 +1626,6 @@ TEST_F(EnergyPlusFixture, SingleSpeedCoolingCoil_9000W_SEER2_2023_ValueTest)
 
     state->init_state(*state);
 
-    GetDXCoils(*state);
-
     auto &thisCoil(state->dataDXCoils->DXCoil(1));
     auto &thisCoolPLFfPLR(state->dataCurveManager->curves(thisCoil.PLFFPLR(1)));
     // check user PLF curve coefficients
@@ -1900,8 +1892,6 @@ TEST_F(EnergyPlusFixture, SingleSpeedCoolingCoil_18000W_SEER2_2023_ValueTest)
 
     state->init_state(*state);
 
-    GetDXCoils(*state);
-
     auto &thisCoil(state->dataDXCoils->DXCoil(1));
     auto &thisCoolPLFfPLR(state->dataCurveManager->curves(thisCoil.PLFFPLR(1)));
     // check user PLF curve coefficients
@@ -2158,8 +2148,6 @@ TEST_F(EnergyPlusFixture, SingleSpeedCoolingCoilAir_25000W_IEER_2022_ValueTest)
 
     state->init_state(*state);
 
-    GetDXCoils(*state);
-
     auto &thisCoil(state->dataDXCoils->DXCoil(1));
     auto &thisCoolPLFfPLR(state->dataCurveManager->curves(thisCoil.PLFFPLR(1)));
     // check user PLF curve coefficients
@@ -2310,8 +2298,6 @@ TEST_F(EnergyPlusFixture, SingleSpeedCoolingCoilEvap_32000W_IEER_2022_ValueTest)
 
     state->init_state(*state);
 
-    GetDXCoils(*state);
-
     auto &thisCoil(state->dataDXCoils->DXCoil(1));
     auto &thisCoolPLFfPLR(state->dataCurveManager->curves(thisCoil.PLFFPLR(1)));
 
@@ -2448,8 +2434,6 @@ TEST_F(EnergyPlusFixture, SingleSpeedCoolingCoilAir_AHRIExample_IEER_2022_ValueT
     ASSERT_TRUE(process_idf(idf_objects));
 
     state->init_state(*state);
-
-    GetDXCoils(*state);
 
     auto &thisCoil(state->dataDXCoils->DXCoil(1));
     auto &thisCoolPLFfPLR(state->dataCurveManager->curves(thisCoil.PLFFPLR(1)));
@@ -2928,8 +2912,6 @@ TEST_F(EnergyPlusFixture, MultiSpeedCoolingCoil_02_Speed_4400W_SEER2_2023_ValueT
     ASSERT_TRUE(process_idf(idf_objects));
 
     state->init_state(*state);
-
-    GetDXCoils(*state);
 
     auto &thisCoil(state->dataDXCoils->DXCoil(1));
     auto &thisCoolPLFfPLR(state->dataCurveManager->curves(thisCoil.MSPLFFPLR(1)));
@@ -3525,8 +3507,6 @@ TEST_F(EnergyPlusFixture, MultiSpeedCoolingCoil_03_Speed_12000W_SEER2_2023_Value
 
     state->init_state(*state);
 
-    GetDXCoils(*state);
-
     auto &thisCoil(state->dataDXCoils->DXCoil(1));
     auto &thisCoolPLFfPLR(state->dataCurveManager->curves(thisCoil.MSPLFFPLR(1)));
 
@@ -4076,8 +4056,6 @@ TEST_F(EnergyPlusFixture, MultiSpeedCoolingCoil_04_Speed_17750W_SEER2_2023_Value
     ASSERT_TRUE(process_idf(idf_objects));
     state->init_state(*state);
 
-    GetDXCoils(*state);
-
     auto &thisCoil(state->dataDXCoils->DXCoil(1));
     auto &thisCoolPLFfPLR(state->dataCurveManager->curves(thisCoil.MSPLFFPLR(1)));
 
@@ -4264,7 +4242,6 @@ TEST_F(EnergyPlusFixture, MultiSpeedCoolingCoil_02_Speeds_27717W_IEER_2022_Value
 
     state->init_state(*state);
 
-    GetDXCoils(*state);
     auto &thisCoil(state->dataDXCoils->DXCoil(1));
     auto &thisCoolPLFfPLR(state->dataCurveManager->curves(thisCoil.MSPLFFPLR(1)));
     // check user PLF curve coefficients | HPACCOOLPLFFPLR Speed 1
@@ -4735,7 +4712,6 @@ TEST_F(EnergyPlusFixture, MultiSpeedCoolingCoil_03_Speeds_27717W_IEER_2022_Value
 
     state->init_state(*state);
 
-    GetDXCoils(*state);
     auto &thisCoil(state->dataDXCoils->DXCoil(1));
     auto &thisCoolPLFfPLR(state->dataCurveManager->curves(thisCoil.MSPLFFPLR(1)));
     // check user PLF curve coefficients | HPACCOOLPLFFPLR Speed 1
@@ -5241,7 +5217,6 @@ TEST_F(EnergyPlusFixture, MultiSpeedCoolingCoil_04_Speeds_35500W_COP3_IEER_2022_
 
     state->init_state(*state);
 
-    GetDXCoils(*state);
     auto &thisCoil(state->dataDXCoils->DXCoil(1));
     auto &thisCoolPLFfPLR(state->dataCurveManager->curves(thisCoil.MSPLFFPLR(1)));
     // check user PLF curve coefficients | HPACCOOLPLFFPLR Speed 1
@@ -5497,8 +5472,6 @@ TEST_F(EnergyPlusFixture, MultiSpeedCoolingCoil_04_Speed_35500W_COP4_IEER_2022_V
 
     state->init_state(*state);
 
-    GetDXCoils(*state);
-
     auto &thisCoil(state->dataDXCoils->DXCoil(1));
     auto &thisCoolPLFfPLR(state->dataCurveManager->curves(thisCoil.MSPLFFPLR(1)));
     // check user PLF curve coefficients
@@ -5650,8 +5623,6 @@ TEST_F(EnergyPlusFixture, VariableSpeedCooling_01_Speed_7200W_SEER2_2023_ValueTe
 
     state->init_state(*state);
 
-    // get coil inputs
-    EnergyPlus::VariableSpeedCoils::GetVarSpeedCoilInput(*state);
     EXPECT_EQ(state->dataVariableSpeedCoils->VarSpeedCoil(1).Name, "ZONE1PTHPDXCOOLCOIL");
     auto &thisCoil(state->dataVariableSpeedCoils->VarSpeedCoil(1));
     auto condenserType = thisCoil.CondenserType; // Air(0)
@@ -5884,8 +5855,6 @@ TEST_F(EnergyPlusFixture, VariableSpeedCooling_02_Speed_7200W_SEER2_2023_ValueTe
 
     state->init_state(*state);
 
-    // get coil inputs
-    EnergyPlus::VariableSpeedCoils::GetVarSpeedCoilInput(*state);
     EXPECT_EQ(state->dataVariableSpeedCoils->VarSpeedCoil(1).Name, "ZONE1PTHPDXCOOLCOIL");
     auto &thisCoil(state->dataVariableSpeedCoils->VarSpeedCoil(1));
     auto condenserType = thisCoil.CondenserType; // Air(0)
@@ -6126,8 +6095,7 @@ TEST_F(EnergyPlusFixture, VariableSpeedCooling_03_Speed_7200W_SEER2_2023_ValueTe
 
     ASSERT_TRUE(process_idf(idf_objects));
     state->init_state(*state);
-    // get coil inputs
-    EnergyPlus::VariableSpeedCoils::GetVarSpeedCoilInput(*state);
+
     EXPECT_EQ(state->dataVariableSpeedCoils->VarSpeedCoil(1).Name, "ZONE1PTHPDXCOOLCOIL");
     auto &thisCoil(state->dataVariableSpeedCoils->VarSpeedCoil(1));
     auto condenserType = thisCoil.CondenserType; // Air(0)
@@ -6381,8 +6349,7 @@ TEST_F(EnergyPlusFixture, VariableSpeedCooling_04_Speed_7200W_SEER2_2023_ValueTe
     ASSERT_TRUE(process_idf(idf_objects));
 
     state->init_state(*state);
-    // get coil inputs
-    EnergyPlus::VariableSpeedCoils::GetVarSpeedCoilInput(*state);
+
     EXPECT_EQ(state->dataVariableSpeedCoils->VarSpeedCoil(1).Name, "ZONE1PTHPDXCOOLCOIL");
     auto &thisCoil(state->dataVariableSpeedCoils->VarSpeedCoil(1));
     auto condenserType = thisCoil.CondenserType; // Air(0)
@@ -6674,8 +6641,6 @@ TEST_F(EnergyPlusFixture, VariableSpeedCooling_07_Speed_7200W_SEER2_2023_ValueTe
 
     state->init_state(*state);
 
-    // get coil inputs
-    EnergyPlus::VariableSpeedCoils::GetVarSpeedCoilInput(*state);
     EXPECT_EQ(state->dataVariableSpeedCoils->VarSpeedCoil(1).Name, "ZONE1PTHPDXCOOLCOIL");
     auto &thisCoil(state->dataVariableSpeedCoils->VarSpeedCoil(1));
     auto condenserType = thisCoil.CondenserType; // Air(0)
@@ -6968,8 +6933,7 @@ TEST_F(EnergyPlusFixture, VariableSpeedCooling_07_Speed_14400W_SEER2_2023_ValueT
     ASSERT_TRUE(process_idf(idf_objects));
 
     state->init_state(*state);
-    // get coil inputs
-    EnergyPlus::VariableSpeedCoils::GetVarSpeedCoilInput(*state);
+
     EXPECT_EQ(state->dataVariableSpeedCoils->VarSpeedCoil(1).Name, "ZONE1PTHPDXCOOLCOIL");
     auto &thisCoil(state->dataVariableSpeedCoils->VarSpeedCoil(1));
     auto condenserType = thisCoil.CondenserType; // Air(0)
@@ -7298,8 +7262,6 @@ TEST_F(EnergyPlusFixture, VariableSpeedCooling_10_Speed_7200W_SEER2_2023_ValueTe
 
     state->init_state(*state);
 
-    // get coil inputs
-    EnergyPlus::VariableSpeedCoils::GetVarSpeedCoilInput(*state);
     EXPECT_EQ(state->dataVariableSpeedCoils->VarSpeedCoil(1).Name, "ZONE1PTHPDXCOOLCOIL");
     auto &thisCoil(state->dataVariableSpeedCoils->VarSpeedCoil(1));
     auto condenserType = thisCoil.CondenserType; // Air(0)
@@ -7628,8 +7590,6 @@ TEST_F(EnergyPlusFixture, VariableSpeedCooling_10_Speed_14400W_SEER2_2023_ValueT
 
     state->init_state(*state);
 
-    // get coil inputs
-    EnergyPlus::VariableSpeedCoils::GetVarSpeedCoilInput(*state);
     EXPECT_EQ(state->dataVariableSpeedCoils->VarSpeedCoil(1).Name, "ZONE1PTHPDXCOOLCOIL");
     auto &thisCoil(state->dataVariableSpeedCoils->VarSpeedCoil(1));
     auto condenserType = thisCoil.CondenserType; // Air(0)
@@ -7840,8 +7800,6 @@ TEST_F(EnergyPlusFixture, VariableSpeedCooling_01_Speed_22000W_IEER_2022_ValueTe
 
     state->init_state(*state);
 
-    // get coil inputs
-    EnergyPlus::VariableSpeedCoils::GetVarSpeedCoilInput(*state);
     EXPECT_EQ(state->dataVariableSpeedCoils->VarSpeedCoil(1).Name, "DESICCANT DXSYSTEM VS COOLING COIL");
     auto &thisCoil(state->dataVariableSpeedCoils->VarSpeedCoil(1));
     auto condenserType = thisCoil.CondenserType; // Air(0)
@@ -8096,8 +8054,6 @@ TEST_F(EnergyPlusFixture, VariableSpeedCooling_02_Speed_36000W_IEER_2022_ValueTe
 
     state->init_state(*state);
 
-    // get coil inputs
-    EnergyPlus::VariableSpeedCoils::GetVarSpeedCoilInput(*state);
     EXPECT_EQ(state->dataVariableSpeedCoils->VarSpeedCoil(1).Name, "HEAT PUMP ACDXCOIL 1");
     auto &thisCoil(state->dataVariableSpeedCoils->VarSpeedCoil(1));
     auto condenserType = thisCoil.CondenserType; // Air(0)
@@ -8403,8 +8359,6 @@ TEST_F(EnergyPlusFixture, VariableSpeedCooling_03_Speed_36000W_IEER_2022_ValueTe
 
     state->init_state(*state);
 
-    // get coil inputs
-    EnergyPlus::VariableSpeedCoils::GetVarSpeedCoilInput(*state);
     EXPECT_EQ(state->dataVariableSpeedCoils->VarSpeedCoil(1).Name, "HEAT PUMP ACDXCOIL 1");
     auto &thisCoil(state->dataVariableSpeedCoils->VarSpeedCoil(1));
     auto condenserType = thisCoil.CondenserType; // Air(0)
@@ -8672,8 +8626,6 @@ TEST_F(EnergyPlusFixture, VariableSpeedCooling_04_Speed_36000W_IEER_2022_ValueTe
 
     state->init_state(*state);
 
-    // get coil inputs
-    EnergyPlus::VariableSpeedCoils::GetVarSpeedCoilInput(*state);
     EXPECT_EQ(state->dataVariableSpeedCoils->VarSpeedCoil(1).Name, "SYS 4 HEAT PUMP AIR SOURCE COOLING COIL");
     auto &thisCoil(state->dataVariableSpeedCoils->VarSpeedCoil(1));
     auto condenserType = thisCoil.CondenserType; // Air(0)
@@ -8966,8 +8918,6 @@ TEST_F(EnergyPlusFixture, VariableSpeedCooling_07_Speed_25001W_IEER_2022_ValueTe
 
     state->init_state(*state);
 
-    // get coil inputs
-    EnergyPlus::VariableSpeedCoils::GetVarSpeedCoilInput(*state);
     EXPECT_EQ(state->dataVariableSpeedCoils->VarSpeedCoil(1).Name, "ZONE1PTHPDXCOOLCOIL");
     auto &thisCoil(state->dataVariableSpeedCoils->VarSpeedCoil(1));
     auto condenserType = thisCoil.CondenserType; // Air(0)
@@ -9300,8 +9250,7 @@ TEST_F(EnergyPlusFixture, VariableSpeedCooling_10_Speed_34582W_IEER_2022_ValueTe
     ASSERT_TRUE(process_idf(idf_objects));
 
     state->init_state(*state);
-    // get coil inputs
-    EnergyPlus::VariableSpeedCoils::GetVarSpeedCoilInput(*state);
+
     EXPECT_EQ(state->dataVariableSpeedCoils->VarSpeedCoil(1).Name, "ZONE1PTHPDXCOOLCOIL");
     auto &thisCoil(state->dataVariableSpeedCoils->VarSpeedCoil(1));
     auto condenserType = thisCoil.CondenserType; // Air(0)
@@ -9638,8 +9587,7 @@ TEST_F(EnergyPlusFixture, VariableSpeedCooling_10_Speed_32000W_IEER_2022_ValueTe
     ASSERT_TRUE(process_idf(idf_objects));
 
     state->init_state(*state);
-    // get coil inputs
-    EnergyPlus::VariableSpeedCoils::GetVarSpeedCoilInput(*state);
+
     EXPECT_EQ(state->dataVariableSpeedCoils->VarSpeedCoil(1).Name, "ZONE1PTHPDXCOOLCOIL");
     auto &thisCoil(state->dataVariableSpeedCoils->VarSpeedCoil(1));
     auto condenserType = thisCoil.CondenserType;
@@ -9989,8 +9937,7 @@ TEST_F(EnergyPlusFixture, VariableSpeedCooling_04_Speed_AutoSize_IEER_2022_Value
     ASSERT_TRUE(process_idf(idf_objects));
 
     state->init_state(*state);
-    // get coil inputs
-    EnergyPlus::VariableSpeedCoils::GetVarSpeedCoilInput(*state);
+
     EXPECT_EQ(state->dataVariableSpeedCoils->VarSpeedCoil(1).Name, "HEAT PUMP ACDXCOIL 1");
     auto &thisCoil(state->dataVariableSpeedCoils->VarSpeedCoil(1));
     auto condenserType = thisCoil.CondenserType; // Air(0)
@@ -10253,7 +10200,6 @@ TEST_F(EnergyPlusFixture, TwoSpeedCoolingCoilAir_18000W_SEER2_2023_ValueTest)
     ASSERT_TRUE(process_idf(idf_objects));
 
     state->init_state(*state);
-    GetDXCoils(*state);
 
     auto &thisCoil(state->dataDXCoils->DXCoil(1));
     auto &thisCoolPLFfPLR(state->dataCurveManager->curves(thisCoil.PLFFPLR(1)));
@@ -10540,8 +10486,6 @@ TEST_F(EnergyPlusFixture, TwoSpeedCoolingCoilAir_12000W_SEER2_2023_ValueTest)
 
     state->init_state(*state);
 
-    GetDXCoils(*state);
-
     auto &thisCoil(state->dataDXCoils->DXCoil(1));
     auto &thisCoolPLFfPLR(state->dataCurveManager->curves(thisCoil.PLFFPLR(1)));
     // check user PLF curve coefficients
@@ -10819,7 +10763,6 @@ TEST_F(EnergyPlusFixture, TwoSpeedCoolingCoilAir_39000W_IEER_2022_ValueTest)
     ASSERT_TRUE(process_idf(idf_objects));
 
     state->init_state(*state);
-    GetDXCoils(*state);
 
     auto &thisCoil(state->dataDXCoils->DXCoil(1));
     auto &thisCoolPLFfPLR(state->dataCurveManager->curves(thisCoil.PLFFPLR(1)));
@@ -11097,7 +11040,6 @@ TEST_F(EnergyPlusFixture, TwoSpeedCoolingCoilAir_54000W_IEER_2022_ValueTest)
     ASSERT_TRUE(process_idf(idf_objects));
 
     state->init_state(*state);
-    GetDXCoils(*state);
 
     auto &thisCoil(state->dataDXCoils->DXCoil(1));
     auto &thisCoolPLFfPLR(state->dataCurveManager->curves(thisCoil.PLFFPLR(1)));
@@ -11383,7 +11325,6 @@ TEST_F(EnergyPlusFixture, TwoSpeedCoolingCoilAir_33000W_IEER_2022_ValueTest)
     ASSERT_TRUE(process_idf(idf_objects));
 
     state->init_state(*state);
-    GetDXCoils(*state);
 
     auto &thisCoil(state->dataDXCoils->DXCoil(1));
     auto &thisCoolPLFfPLR(state->dataCurveManager->curves(thisCoil.PLFFPLR(1)));

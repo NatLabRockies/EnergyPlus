@@ -397,6 +397,7 @@ namespace SimulationManager {
             if (ErrFound) {
                 TerminalError = true;
             }
+            Node::TestInletOutletNodes(state);
             Node::TestCompSetInletOutletNodes(state, ErrFound);
             if (ErrFound) {
                 TerminalError = true;

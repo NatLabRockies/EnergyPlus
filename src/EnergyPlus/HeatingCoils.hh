@@ -301,7 +301,6 @@ struct HeatingCoilsData : BaseGlobalStruct
     int NumHeatingCoils = 0; // The Number of HeatingCoils found in the Input
     Array1D_bool MySizeFlag;
     Array1D_bool ValidSourceType;  // Used to determine if a source for a desuperheater heating coil is valid
-    bool GetCoilsInputFlag = true; // Flag set to make sure you get input once
     bool CoilIsSuppHeater = false; // Flag set to indicate the heating coil is a supplemental heater
     Array1D_bool CheckEquipName;
     Array1D<HeatingCoils::HeatingCoilEquipConditions> HeatingCoil;
@@ -324,6 +323,7 @@ struct HeatingCoilsData : BaseGlobalStruct
 
     void init_state([[maybe_unused]] EnergyPlusData &state) override
     {
+        HeatingCoils::GetHeatingCoilInput(state);
     }
 
     void clear_state() override
@@ -336,7 +336,6 @@ struct HeatingCoilsData : BaseGlobalStruct
         this->NumHeatingCoils = 0;
         this->MySizeFlag.deallocate();
         this->ValidSourceType.deallocate();
-        this->GetCoilsInputFlag = true;
         this->CoilIsSuppHeater = false;
         this->CheckEquipName.deallocate();
         this->HeatingCoil.deallocate();

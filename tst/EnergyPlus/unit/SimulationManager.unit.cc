@@ -169,11 +169,11 @@ TEST_F(EnergyPlusFixture, SimulationManager_OutputDebuggingData)
     {
         std::string const idf_objects = delimited_string({
             "  Output:DebuggingData,",
-            "    No;                      !- Report Debugging Data",
+            "    No,                      !- Report Debugging Data",
+            "    ;                        !- Report During Warmup",
         });
 
         EXPECT_TRUE(process_idf(idf_objects));
-
         EXPECT_FALSE(state->dataReportFlag->DebugOutput);
         EXPECT_FALSE(state->dataReportFlag->EvenDuringWarmup);
 
@@ -188,7 +188,7 @@ TEST_F(EnergyPlusFixture, SimulationManager_OutputDebuggingData)
             "    ;                        !- Report During Warmup",
         });
 
-        state->init_state_called = false;
+        clear_state_and_reset_err_stream();
         EXPECT_TRUE(process_idf(idf_objects));
         state->init_state(*state);
 
@@ -206,7 +206,7 @@ TEST_F(EnergyPlusFixture, SimulationManager_OutputDebuggingData)
             "    Yes;                     !- Report During Warmup",
         });
 
-        state->init_state_called = false;
+        clear_state_and_reset_err_stream();
         EXPECT_TRUE(process_idf(idf_objects));
         state->init_state(*state);
 
@@ -229,21 +229,12 @@ TEST_F(EnergyPlusFixture, SimulationManager_OutputDebuggingData)
             "    No;                      !- Report During Warmup",
         });
 
+        clear_state_and_reset_err_stream();
         state->init_state_called = false;
-        compare_err_stream_substring("", true);
+        EXPECT_TRUE(compare_err_stream("", true));
         // Input processor with throw a severe, so do not use assertions
         EXPECT_FALSE(process_idf(idf_objects, false));
         state->init_state(*state);
-
-        // Instead do it here, making sure to reset the stream
-        {
-            std::string const expectedError = delimited_string({
-                "   ** Severe  ** <root>[Output:DebuggingData] - Object should have no more than 1 properties.",
-                "   ** Warning ** Output:DebuggingData: More than 1 occurrence of this object found, only first will be used.",
-            });
-            EXPECT_TRUE(compare_err_stream(expectedError, true));
-        }
-
         EXPECT_FALSE(state->dataReportFlag->DebugOutput);
         EXPECT_TRUE(state->dataReportFlag->EvenDuringWarmup);
     }

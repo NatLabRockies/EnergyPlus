@@ -43,20 +43,18 @@ class SimpleCourierr : public Courierr {
 
 class CourierrException : public std::exception {
   public:
-    explicit CourierrException(const char* message, Courierr& courierr)
-     : message(message)
+    explicit CourierrException(const char* message, Courierr& courierr) : message(message)
     {
-      write_error(courierr);
+        write_error(courierr);
     }
-    explicit CourierrException(const std::string& message, Courierr& courierr)
-     : message(message)
+    explicit CourierrException(const std::string& message, Courierr& courierr) : message(message)
     {
-      write_error(courierr);
+        write_error(courierr);
     }
     explicit CourierrException(const std::string_view message, Courierr& courierr)
-     : message(message)
+        : message(message)
     {
-      write_error(courierr);
+        write_error(courierr);
     }
 
     virtual ~CourierrException() noexcept = default;

@@ -12640,6 +12640,7 @@ namespace AirflowNetwork {
                         DuctSizingSBFlag = true;
                     }
                     while (NodeNum1 != NodeSplitter) {
+                        bool foundNextDuct = false;
                         for (AFNLinkNum1 = 1; AFNLinkNum1 <= AirflowNetworkNumOfLinks; AFNLinkNum1++) {
                             if (NodeNum1 != AirflowNetworkLinkageData(AFNLinkNum1).NodeNums[0]) {
                                 continue;
@@ -12659,9 +12660,13 @@ namespace AirflowNetwork {
                                     DynamicLoss += disSysCompDuct.TurDynCoef;
                                     NodeNum1 = AirflowNetworkLinkageData(AFNLinkNum1).NodeNums[1];
                                     DuctSizingSTFlag = true;
+                                    foundNextDuct = true;
                                     break;
                                 }
                             }
+                        }
+                        if (!foundNextDuct) {
+                            break;
                         }
                     }
                 }
@@ -12761,6 +12766,7 @@ namespace AirflowNetwork {
                         DuctSizingSBFlag = true;
                     }
                     while (NodeNum1 != NodeSplitter) {
+                        bool foundNextDuct = false;
                         for (AFNLinkNum1 = 1; AFNLinkNum1 <= AirflowNetworkNumOfLinks; AFNLinkNum1++) {
                             if (NodeNum1 != AirflowNetworkLinkageData(AFNLinkNum1).NodeNums[1]) {
                                 continue;
@@ -12780,9 +12786,13 @@ namespace AirflowNetwork {
                                     DynamicLoss += disSysCompDuct.TurDynCoef;
                                     NodeNum1 = AirflowNetworkLinkageData(AFNLinkNum1).NodeNums[0];
                                     DuctSizingSBFlag = true;
+                                    foundNextDuct = true;
                                     break;
                                 }
                             }
+                        }
+                        if (!foundNextDuct) {
+                            break;
                         }
                     }
                 }
@@ -12886,6 +12896,7 @@ namespace AirflowNetwork {
                         DuctSizingRTFlag = true;
                     }
                     while (NodeNum1 != NodeMixer) {
+                        bool foundNextDuct = false;
                         for (AFNLinkNum1 = 1; AFNLinkNum1 <= AirflowNetworkNumOfLinks; AFNLinkNum1++) {
                             if (NodeNum1 != AirflowNetworkLinkageData(AFNLinkNum1).NodeNums[1]) {
                                 continue;
@@ -12905,9 +12916,13 @@ namespace AirflowNetwork {
                                     DynamicLoss += disSysCompDuct.TurDynCoef;
                                     NodeNum1 = AirflowNetworkLinkageData(AFNLinkNum1).NodeNums[0];
                                     DuctSizingRTFlag = true;
+                                    foundNextDuct = true;
                                     break;
                                 }
                             }
+                        }
+                        if (!foundNextDuct) {
+                            break;
                         }
                     }
                 }
@@ -13009,6 +13024,7 @@ namespace AirflowNetwork {
                         DuctSizingRBFlag = true;
                     }
                     while (NodeNum1 != NodeMixer) {
+                        bool foundNextDuct = false;
                         for (AFNLinkNum1 = 1; AFNLinkNum1 <= AirflowNetworkNumOfLinks; AFNLinkNum1++) {
                             if (NodeNum1 != AirflowNetworkLinkageData(AFNLinkNum1).NodeNums[0]) {
                                 continue;
@@ -13028,9 +13044,13 @@ namespace AirflowNetwork {
                                     DynamicLoss += disSysCompDuct.TurDynCoef;
                                     NodeNum1 = AirflowNetworkLinkageData(AFNLinkNum1).NodeNums[1];
                                     DuctSizingRBFlag = true;
+                                    foundNextDuct = true;
                                     break;
                                 }
                             }
+                        }
+                        if (!foundNextDuct) {
+                            break;
                         }
                     }
                 }

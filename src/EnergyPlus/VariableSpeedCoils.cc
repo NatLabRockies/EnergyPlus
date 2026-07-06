@@ -132,12 +132,6 @@ namespace VariableSpeedCoils {
         int DXCoilNum; // The WatertoAirHP that you are currently loading input into
         int SpeedCal;  // variable for error proof speed input
 
-        // Obtains and Allocates WatertoAirHP related parameters from input file
-        if (state.dataVariableSpeedCoils->GetCoilsInputFlag) { // First time subroutine has been entered
-            GetVarSpeedCoilInput(state);
-            state.dataVariableSpeedCoils->GetCoilsInputFlag = false;
-        }
-
         if (CompIndex == 0) {
             DXCoilNum = Util::FindItemInList(CompName, state.dataVariableSpeedCoils->VarSpeedCoil);
             if (DXCoilNum == 0) {
@@ -238,8 +232,7 @@ namespace VariableSpeedCoils {
         int DXCoilNum = 0;
 
         if (state.dataVariableSpeedCoils->NumVarSpeedCoils <= 0) {
-            ShowSevereError(state, "No Equipment found in GetVarSpeedCoilInput");
-            ErrorsFound = true;
+            return;
         }
 
         // Allocate Arrays
@@ -6928,12 +6921,6 @@ namespace VariableSpeedCoils {
         // FUNCTION LOCAL VARIABLE DECLARATIONS:
         int WhichCoil;
 
-        // Obtains and Allocates WatertoAirHP related parameters from input file
-        if (state.dataVariableSpeedCoils->GetCoilsInputFlag) { // First time subroutine has been entered
-            GetVarSpeedCoilInput(state);
-            state.dataVariableSpeedCoils->GetCoilsInputFlag = false;
-        }
-
         if (Util::SameString(CoilType, "COIL:COOLING:WATERTOAIRHEATPUMP:VARIABLESPEEDEQUATIONFIT") ||
             Util::SameString(CoilType, "COIL:HEATING:WATERTOAIRHEATPUMP:VARIABLESPEEDEQUATIONFIT") ||
             Util::SameString(CoilType, "COIL:COOLING:DX:VARIABLESPEED") || Util::SameString(CoilType, "COIL:HEATING:DX:VARIABLESPEED") ||
@@ -6980,12 +6967,6 @@ namespace VariableSpeedCoils {
         // Return value
         int IndexNum; // returned index of matched coil
 
-        // Obtains and Allocates WatertoAirHP related parameters from input file
-        if (state.dataVariableSpeedCoils->GetCoilsInputFlag) { // First time subroutine has been entered
-            GetVarSpeedCoilInput(state);
-            state.dataVariableSpeedCoils->GetCoilsInputFlag = false;
-        }
-
         IndexNum = Util::FindItemInList(CoilName, state.dataVariableSpeedCoils->VarSpeedCoil);
 
         if (IndexNum == 0) {
@@ -7016,12 +6997,6 @@ namespace VariableSpeedCoils {
 
         // FUNCTION LOCAL VARIABLE DECLARATIONS:
         int WhichCoil;
-
-        // Obtains and Allocates WatertoAirHP related parameters from input file
-        if (state.dataVariableSpeedCoils->GetCoilsInputFlag) { // First time subroutine has been entered
-            GetVarSpeedCoilInput(state);
-            state.dataVariableSpeedCoils->GetCoilsInputFlag = false;
-        }
 
         if (Util::SameString(CoilType, "COIL:COOLING:WATERTOAIRHEATPUMP:VARIABLESPEEDEQUATIONFIT") ||
             Util::SameString(CoilType, "COIL:HEATING:WATERTOAIRHEATPUMP:VARIABLESPEEDEQUATIONFIT") ||
@@ -7074,12 +7049,6 @@ namespace VariableSpeedCoils {
         // FUNCTION LOCAL VARIABLE DECLARATIONS:
         int WhichCoil;
 
-        // Obtains and Allocates WatertoAirHP related parameters from input file
-        if (state.dataVariableSpeedCoils->GetCoilsInputFlag) { // First time subroutine has been entered
-            GetVarSpeedCoilInput(state);
-            state.dataVariableSpeedCoils->GetCoilsInputFlag = false;
-        }
-
         WhichCoil = Util::FindItemInList(CoilName, state.dataVariableSpeedCoils->VarSpeedCoil);
         if (WhichCoil != 0) {
             PLRNumber = state.dataVariableSpeedCoils->VarSpeedCoil(WhichCoil).PLFFPLR;
@@ -7110,12 +7079,6 @@ namespace VariableSpeedCoils {
 
         // Return value
         int CapFTIndex; // returned CapFT curve index of matched coil
-
-        // Obtains and Allocates WatertoAirHP related parameters from input file
-        if (state.dataVariableSpeedCoils->GetCoilsInputFlag) { // First time subroutine has been entered
-            GetVarSpeedCoilInput(state);
-            state.dataVariableSpeedCoils->GetCoilsInputFlag = false;
-        }
 
         if (CoilIndex == 0) {
             ShowSevereError(state, "GetVSCoilCapFTCurveIndex: Could not find Coil");
@@ -7149,12 +7112,6 @@ namespace VariableSpeedCoils {
 
         // FUNCTION LOCAL VARIABLE DECLARATIONS:
         int WhichCoil;
-
-        // Obtains and Allocates WatertoAirHP related parameters from input file
-        if (state.dataVariableSpeedCoils->GetCoilsInputFlag) { // First time subroutine has been entered
-            GetVarSpeedCoilInput(state);
-            state.dataVariableSpeedCoils->GetCoilsInputFlag = false;
-        }
 
         WhichCoil = Util::FindItemInList(CoilName, state.dataVariableSpeedCoils->VarSpeedCoil);
         if (WhichCoil != 0) {
@@ -7191,12 +7148,6 @@ namespace VariableSpeedCoils {
         // FUNCTION LOCAL VARIABLE DECLARATIONS:
         int WhichCoil;
 
-        // Obtains and Allocates WatertoAirHP related parameters from input file
-        if (state.dataVariableSpeedCoils->GetCoilsInputFlag) { // First time subroutine has been entered
-            GetVarSpeedCoilInput(state);
-            state.dataVariableSpeedCoils->GetCoilsInputFlag = false;
-        }
-
         WhichCoil = Util::FindItemInList(CoilName, state.dataVariableSpeedCoils->VarSpeedCoil);
         if (WhichCoil != 0) {
             NodeNumber = state.dataVariableSpeedCoils->VarSpeedCoil(WhichCoil).AirOutletNodeNum;
@@ -7232,12 +7183,6 @@ namespace VariableSpeedCoils {
         // FUNCTION LOCAL VARIABLE DECLARATIONS:
         int WhichCoil;
 
-        // Obtains and Allocates WatertoAirHP related parameters from input file
-        if (state.dataVariableSpeedCoils->GetCoilsInputFlag) { // First time subroutine has been entered
-            GetVarSpeedCoilInput(state);
-            state.dataVariableSpeedCoils->GetCoilsInputFlag = false;
-        }
-
         WhichCoil = Util::FindItemInList(CoilName, state.dataVariableSpeedCoils->VarSpeedCoil);
         if (WhichCoil != 0) {
             CondNode = state.dataVariableSpeedCoils->VarSpeedCoil(WhichCoil).CondenserInletNodeNum;
@@ -7255,12 +7200,6 @@ namespace VariableSpeedCoils {
                                      bool &ErrorsFound    // set to true if problem
     )
     {
-        // Obtains and Allocates WatertoAirHP related parameters from input file
-        if (state.dataVariableSpeedCoils->GetCoilsInputFlag) { // First time subroutine has been entered
-            GetVarSpeedCoilInput(state);
-            state.dataVariableSpeedCoils->GetCoilsInputFlag = false;
-        }
-
         if (CoilIndex == 0) {
             ShowSevereError(state, "GetVSCoilMinOATCompressor: Index passed = 0");
             ShowContinueError(state, "... returning Min OAT as -1000.");
@@ -7377,12 +7316,6 @@ namespace VariableSpeedCoils {
         // SUBROUTINE LOCAL VARIABLE DECLARATIONS:
         int WhichCoil;
 
-        // Obtains and Allocates DXCoils
-        if (state.dataVariableSpeedCoils->GetCoilsInputFlag) {
-            GetVarSpeedCoilInput(state);
-            state.dataVariableSpeedCoils->GetCoilsInputFlag = false;
-        }
-
         WhichCoil = Util::FindItemInList(CoilName, state.dataVariableSpeedCoils->VarSpeedCoil);
         if (WhichCoil != 0) {
             state.dataVariableSpeedCoils->VarSpeedCoil(WhichCoil).FindCompanionUpStreamCoil = false;
@@ -7407,13 +7340,6 @@ namespace VariableSpeedCoils {
 
         // Return value
         int Speeds; // returned number of speeds
-
-        // Obtains and Allocates WatertoAirHP related parameters from input file
-        if (state.dataVariableSpeedCoils->GetCoilsInputFlag) { // First time subroutine has been entered
-            GetVarSpeedCoilInput(state);
-            state.dataVariableSpeedCoils->GetCoilsInputFlag = false;
-        }
-
         int WhichCoil = Util::FindItemInList(CoilName, state.dataVariableSpeedCoils->VarSpeedCoil);
         if (WhichCoil != 0) {
             Speeds = state.dataVariableSpeedCoils->VarSpeedCoil(WhichCoil).NumOfSpeeds;
@@ -7467,12 +7393,6 @@ namespace VariableSpeedCoils {
 
         // PURPOSE OF THIS SUBROUTINE:
         // This routine was designed to "push" information from a parent object to this WSHP coil object.
-
-        // Obtains and Allocates WatertoAirHP related parameters from input file
-        if (state.dataVariableSpeedCoils->GetCoilsInputFlag) { // First time subroutine has been entered
-            GetVarSpeedCoilInput(state);
-            state.dataVariableSpeedCoils->GetCoilsInputFlag = false;
-        }
 
         if (WSHPNum <= 0 || WSHPNum > state.dataVariableSpeedCoils->NumVarSpeedCoils) {
             ShowSevereError(state,
@@ -7912,11 +7832,6 @@ namespace VariableSpeedCoils {
     void SetVarSpeedDXCoilAirLoopNumber(EnergyPlusData &state, std::string const &CoilName, int const AirLoopNum)
     {
         int WhichCoil;
-
-        if (state.dataVariableSpeedCoils->GetCoilsInputFlag) {
-            GetVarSpeedCoilInput(state);
-            state.dataVariableSpeedCoils->GetCoilsInputFlag = false;
-        }
 
         WhichCoil = Util::FindItemInList(CoilName, state.dataVariableSpeedCoils->VarSpeedCoil);
         if (WhichCoil != 0) {

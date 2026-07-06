@@ -237,7 +237,6 @@ struct HVACHXAssistedCoolingCoilData : BaseGlobalStruct
     int TotalNumHXAssistedCoils = 0;            // The total number of HXAssistedCoolingCoil compound objects
     Array1D<Real64> HXAssistedCoilOutletTemp;   // Outlet temperature from this compound object
     Array1D<Real64> HXAssistedCoilOutletHumRat; // Outlet humidity ratio from this compound object
-    bool GetCoilsInputFlag = true;              // Flag to allow input data to be retrieved from idf on first call to this subroutine
     Array1D_bool CheckEquipName;
     Array1D<HVACHXAssistedCoolingCoil::HXAssistedCoilParameters> HXAssistedCoil;
     std::unordered_map<std::string, std::string> UniqueHXAssistedCoilNames;
@@ -251,6 +250,7 @@ struct HVACHXAssistedCoolingCoilData : BaseGlobalStruct
 
     void init_state([[maybe_unused]] EnergyPlusData &state) override
     {
+        HVACHXAssistedCoolingCoil::GetHXAssistedCoolingCoilInput(state);
     }
 
     void clear_state() override
@@ -258,7 +258,6 @@ struct HVACHXAssistedCoolingCoilData : BaseGlobalStruct
         this->TotalNumHXAssistedCoils = 0;
         this->HXAssistedCoilOutletTemp.clear();
         this->HXAssistedCoilOutletHumRat.clear();
-        this->GetCoilsInputFlag = true;
         this->CheckEquipName.clear();
         this->HXAssistedCoil.clear();
         this->UniqueHXAssistedCoilNames.clear();

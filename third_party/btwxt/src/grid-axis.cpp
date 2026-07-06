@@ -97,8 +97,9 @@ void GridAxis::check_grid_sorted()
 {
     bool grid_is_sorted = vector_is_valid(values);
     if (!grid_is_sorted) {
-        throw BtwxtException(std::format("Grid axis (name=\"{}\") values are not sorted, or have duplicates.", name),
-                             *logger);
+        throw BtwxtException(
+            std::format("Grid axis (name=\"{}\") values are not sorted, or have duplicates.", name),
+            *logger);
     }
 }
 

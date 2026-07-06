@@ -772,6 +772,7 @@ namespace OutputProcessor {
     std::string standardizeEndUseSub(EndUseCat endUseCat, std::string_view const endUseSubCat);
     void addEndUseSubcategory(EnergyPlusData &state, EndUseCat endUseCat, std::string_view const endUseSubCat);
     void addEndUseSpaceType(EnergyPlusData &state, EndUseCat endUseCat, std::string_view const endUseSpTypeName);
+    void resizeMeterValues(EnergyPlusData &state);
 } // namespace OutputProcessor
 
 //==============================================================================================

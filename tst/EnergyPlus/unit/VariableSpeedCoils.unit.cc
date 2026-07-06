@@ -476,7 +476,7 @@ TEST_F(EnergyPlusFixture, VariableSpeedCoils_mixedCoilTypesInput)
 
          "  Coil:Heating:Electric,",
          "    Lobby_ZN_1_FLR_2 WSHP Supp Heating Coil,  !- Name",
-         "    ALWAYS_ON,    !- Availability Schedule Name",
+         "    Constant-1.0,    !- Availability Schedule Name",
          "    1.0,                     !- Gas Burner Efficiency",
          "    Autosize,                   !- Nominal Capacity {W}",
          "    Lobby_ZN_1_FLR_2 WSHP SuppHeating Coil Air Inlet Node,  !- Air Inlet Node Name",
@@ -2511,8 +2511,6 @@ TEST_F(EnergyPlusFixture, VariableSpeedCoils_mixedCoilTypesInput)
     ASSERT_TRUE(process_idf(idf_objects));
     state->init_state(*state);
 
-    VariableSpeedCoils::GetVarSpeedCoilInput(*state);
-
     EXPECT_EQ(state->dataVariableSpeedCoils->VarSpeedCoil(1).Name, "LOBBY_ZN_1_FLR_2 WSHP COOLING MODE");
 
     EXPECT_EQ(state->dataVariableSpeedCoils->VarSpeedCoil(2).Name, "PSZ-AC_1:5_COOLC STANDARD 4-COMPRESSOR IPAK");
@@ -2703,8 +2701,6 @@ TEST_F(EnergyPlusFixture, CoilHeatingDXVariableSpeed_MinOADBTempCompOperLimit)
     ASSERT_TRUE(process_idf(idf_objects));
     state->init_state(*state);
 
-    VariableSpeedCoils::GetVarSpeedCoilInput(*state);
-
     ASSERT_EQ("HEATING COIL VARIABLESPEED", state->dataVariableSpeedCoils->VarSpeedCoil(1).Name); // Heating Coil Variable Speed
     ASSERT_EQ(-60.0, state->dataVariableSpeedCoils->VarSpeedCoil(1).MinOATCompressor);            // removed the minimum limit of -50.0C
 }
@@ -2815,8 +2811,6 @@ TEST_F(EnergyPlusFixture, VariableSpeedCoils_Test_CalcTotCap_VSWSHP)
 
     ASSERT_TRUE(process_idf(idf_objects));
     state->init_state(*state);
-
-    VariableSpeedCoils::GetVarSpeedCoilInput(*state);
 
     Real64 LSInletDBTemp = 24.0; // conditions at 24 DB / 20 Wb found at http://www.sugartech.co.za/psychro/index.php
     Real64 LSInletHumRat = 0.013019367;
@@ -2999,8 +2993,6 @@ TEST_F(EnergyPlusFixture, VariableSpeedCoils_ContFanCycCoil_Test)
     ASSERT_TRUE(process_idf(idf_objects));
     state->init_state(*state);
 
-    // get coil inputs
-    VariableSpeedCoils::GetVarSpeedCoilInput(*state);
     // Setting predefined tables is needed though
     // Set up some environmental parameters
     state->dataEnvrn->OutDryBulbTemp = 5.0;
@@ -3200,7 +3192,6 @@ TEST_F(EnergyPlusFixture, VariableSpeedCoils_RatedSource_Temp_ASHP_Cooling)
     ASSERT_TRUE(process_idf(idf_objects));
     state->init_state(*state);
 
-    VariableSpeedCoils::GetVarSpeedCoilInput(*state);
     EXPECT_EQ(VariableSpeedCoils::GetVSCoilRatedSourceTemp(*state, 1.0), 35.0);
 }
 
@@ -3333,7 +3324,6 @@ TEST_F(EnergyPlusFixture, VariableSpeedCoils_RatedSource_Temp_ASHP_Heating)
     ASSERT_TRUE(process_idf(idf_objects));
     state->init_state(*state);
 
-    VariableSpeedCoils::GetVarSpeedCoilInput(*state);
     EXPECT_EQ(VariableSpeedCoils::GetVSCoilRatedSourceTemp(*state, 1.0), 8.3333);
 }
 
@@ -3538,7 +3528,6 @@ TEST_F(EnergyPlusFixture, VariableSpeedCoils_RatedSource_Temp_AWHP)
     ASSERT_TRUE(process_idf(idf_objects));
     state->init_state(*state);
 
-    VariableSpeedCoils::GetVarSpeedCoilInput(*state);
     EXPECT_EQ(VariableSpeedCoils::GetVSCoilRatedSourceTemp(*state, 1.0), 55.72);
 }
 
@@ -3770,7 +3759,6 @@ TEST_F(EnergyPlusFixture, VariableSpeedCoils_RatedSource_Temp_WSHP_Cooling)
     ASSERT_TRUE(process_idf(idf_objects));
     state->init_state(*state);
 
-    VariableSpeedCoils::GetVarSpeedCoilInput(*state);
     EXPECT_EQ(VariableSpeedCoils::GetVSCoilRatedSourceTemp(*state, 1.0), 29.4444);
 }
 
@@ -3986,7 +3974,6 @@ TEST_F(EnergyPlusFixture, VariableSpeedCoils_RatedSource_Temp_WSHP_Heating)
     ASSERT_TRUE(process_idf(idf_objects));
     state->init_state(*state);
 
-    VariableSpeedCoils::GetVarSpeedCoilInput(*state);
     EXPECT_EQ(VariableSpeedCoils::GetVSCoilRatedSourceTemp(*state, 1.0), 21.1111);
 }
 
@@ -4214,8 +4201,7 @@ TEST_F(EnergyPlusFixture, VariableSpeedCooling_Initialization)
     EXPECT_EQ(TotalArgs, 146);
     EXPECT_EQ(NumAlphas, 51);
     EXPECT_EQ(NumNumbers, 95);
-    // get coil inputs
-    EnergyPlus::VariableSpeedCoils::GetVarSpeedCoilInput(*state);
+
     auto _name = state->dataVariableSpeedCoils->VarSpeedCoil(1).Name;
     EXPECT_EQ(state->dataVariableSpeedCoils->VarSpeedCoil(1).MSRatedEvaporatorFanPowerPerVolumeFlowRate2017(1), 773.3);
     EXPECT_EQ(state->dataVariableSpeedCoils->VarSpeedCoil(1).MSRatedEvaporatorFanPowerPerVolumeFlowRate2023(1), 934.4);
@@ -4404,8 +4390,6 @@ TEST_F(EnergyPlusFixture, VariableSpeedHeating_Initialization)
     ASSERT_TRUE(process_idf(idf_objects));
     state->init_state(*state);
 
-    // get coil inputs
-    EnergyPlus::VariableSpeedCoils::GetVarSpeedCoilInput(*state);
     auto _name = state->dataVariableSpeedCoils->VarSpeedCoil(1).Name;
     EXPECT_EQ(_name, "ZONE1PTHPDXHEATCOIL");
     EXPECT_EQ(state->dataVariableSpeedCoils->VarSpeedCoil(1).MSRatedEvaporatorFanPowerPerVolumeFlowRate2017(1), 773.3);
@@ -4709,7 +4693,7 @@ TEST_F(EnergyPlusFixture, CoolingVariableSpeedEquationFit_Initialization)
 
         "  Coil:Heating:Electric,",
         "    Lobby_ZN_1_FLR_2 WSHP Supp Heating Coil,  !- Name",
-        "    ALWAYS_ON,    !- Availability Schedule Name",
+        "    Constant-1.0,    !- Availability Schedule Name",
         "    1.0,                     !- Gas Burner Efficiency",
         "    Autosize,                   !- Nominal Capacity {W}",
         "    Lobby_ZN_1_FLR_2 WSHP SuppHeating Coil Air Inlet Node,  !- Air Inlet Node Name",
@@ -6757,8 +6741,7 @@ TEST_F(EnergyPlusFixture, CoolingVariableSpeedEquationFit_Initialization)
     EXPECT_EQ(TotalArgs, 148);
     EXPECT_EQ(NumAlphas, 77);
     EXPECT_EQ(NumNumbers, 71);
-    // get coil inputs
-    EnergyPlus::VariableSpeedCoils::GetVarSpeedCoilInput(*state);
+
     auto _name = state->dataVariableSpeedCoils->VarSpeedCoil(1).Name;
     EXPECT_EQ(_name, "LOBBY_ZN_1_FLR_2 WSHP COOLING MODE");
     EXPECT_EQ(state->dataVariableSpeedCoils->VarSpeedCoil(1).MSRatedAirVolFlowRate(2), 0.449293966);
@@ -6951,12 +6934,6 @@ TEST_F(EnergyPlusFixture, VariableSpeedCoils_Coil_Defrost_Power_Fix_Test)
 
     ASSERT_TRUE(process_idf(idf_objects));
     state->init_state(*state);
-
-    // Get coil inputs
-    VariableSpeedCoils::GetVarSpeedCoilInput(*state);
-
-    // Set input processing flag
-    state->dataVariableSpeedCoils->GetCoilsInputFlag = false;
 
     // Setting predefined tables is needed though
     // Set up some environmental parameters
@@ -7242,8 +7219,6 @@ TEST_F(EnergyPlusFixture, VariableSpeedCoils_ZeroRatedCoolingCapacity_Test)
     ASSERT_TRUE(process_idf(idf_objects));
     state->init_state(*state);
 
-    // get coil inputs
-    VariableSpeedCoils::GetVarSpeedCoilInput(*state);
     // Setting predefined tables is needed though
     // Set up some environmental parameters
     state->dataEnvrn->OutDryBulbTemp = 5.0;
@@ -7391,9 +7366,6 @@ TEST_F(EnergyPlusFixture, VariableSpeedCoolingCoils_AutosizePumpPower)
 
     ASSERT_TRUE(process_idf(idf_objects));
     state->init_state(*state);
-
-    // Get coil inputs
-    VariableSpeedCoils::GetVarSpeedCoilInput(*state);
 
     auto DXCoilNum = 1;
 

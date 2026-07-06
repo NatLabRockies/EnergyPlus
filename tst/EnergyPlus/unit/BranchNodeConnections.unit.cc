@@ -159,6 +159,126 @@ TEST_F(EnergyPlusFixture, BranchNodeErrorCheck11Test)
     EXPECT_TRUE(ErrorsFound); // Node check will fail on Check 11 -- zone node name must be unique
 }
 
+TEST_F(EnergyPlusFixture, BranchNodeConnections_TestInletOutletNodes_ParentChildOutletDuplicate)
+{
+    Node::TestCompSet(*state, "Coil:Heating:Fuel", "SUPP HEATING COIL", "HEATING COIL OUTLET NODE", "SYSTEM OUTLET NODE", "Air Nodes");
+
+    Node::SetUpCompSets(*state,
+                        "Branch",
+                        "MAIN BRANCH",
+                        "AirLoopHVAC:UnitaryHeatPump:WaterToAir",
+                        "UNITARY HEAT PUMP",
+                        "SYSTEM INLET NODE",
+                        "SYSTEM OUTLET NODE",
+                        "Air Nodes");
+
+    Node::SetUpCompSets(*state,
+                        "AirLoopHVAC:UnitaryHeatPump:WaterToAir",
+                        "UNITARY HEAT PUMP",
+                        "Coil:Heating:Fuel",
+                        "SUPP HEATING COIL",
+                        "HEATING COIL OUTLET NODE",
+                        "SYSTEM OUTLET NODE",
+                        "Air Nodes");
+
+    Node::TestInletOutletNodes(*state);
+    EXPECT_TRUE(compare_err_stream("", true));
+}
+
+TEST_F(EnergyPlusFixture, BranchNodeConnections_TestInletOutletNodes_BranchOutletDuplicate)
+{
+    Node::SetUpCompSets(*state, "Branch", "MAIN BRANCH 1", "Fan:OnOff", "SUPPLY FAN", "FAN INLET NODE", "DUPLICATE OUTLET NODE");
+
+    Node::SetUpCompSets(*state, "Branch", "MAIN BRANCH 2", "Coil:Heating:Fuel", "SUPP HEATING COIL", "COIL INLET NODE", "DUPLICATE OUTLET NODE");
+
+    Node::TestInletOutletNodes(*state);
+
+    std::string const error_string = delimited_string({
+        "   ** Warning ** Node used as an outlet more than once: DUPLICATE OUTLET NODE",
+        "   **   ~~~   **   Used by: Branch, name=MAIN BRANCH 1",
+        "   **   ~~~   **   as outlet for: Coil:Heating:Fuel, name=SUPP HEATING COIL",
+        "   **   ~~~   **   and by: Branch, name=MAIN BRANCH 2",
+        "   **   ~~~   **   as outlet for: Fan:OnOff, name=SUPPLY FAN",
+    });
+    EXPECT_TRUE(compare_err_stream(error_string, true));
+}
+
+TEST_F(EnergyPlusFixture, BranchNodeConnections_SetUpCompSets_DuplicateInletValidationDelayed)
+{
+    Node::SetUpCompSets(*state, "Branch", "MAIN BRANCH 1", "Fan:OnOff", "SUPPLY FAN", "DUPLICATE INLET NODE", "FAN OUTLET NODE");
+
+    Node::SetUpCompSets(*state, "Branch", "MAIN BRANCH 2", "Coil:Heating:Fuel", "SUPP HEATING COIL", "DUPLICATE INLET NODE", "COIL OUTLET NODE");
+
+    EXPECT_TRUE(compare_err_stream("", true));
+
+    Node::TestInletOutletNodes(*state);
+
+    std::string const error_string = delimited_string({
+        "   ** Warning ** Node used as an inlet more than once: DUPLICATE INLET NODE",
+        "   **   ~~~   **   Used by: Branch, name=MAIN BRANCH 1",
+        "   **   ~~~   **   as inlet for: Coil:Heating:Fuel, name=SUPP HEATING COIL",
+        "   **   ~~~   **   and by: Branch, name=MAIN BRANCH 2",
+        "   **   ~~~   **   as inlet for: Fan:OnOff, name=SUPPLY FAN",
+    });
+    EXPECT_TRUE(compare_err_stream(error_string, true));
+}
+
+TEST_F(EnergyPlusFixture, BranchNodeConnections_SetUpCompSets_SameComponentDifferentNodePairsRemainSeparate)
+{
+    Node::SetUpCompSets(
+        *state, "Branch", "REHEAT BRANCH", "Coil:Heating:Water", "ZONE COIL", "ZONE COIL WATER INLET NODE", "ZONE COIL WATER OUTLET NODE");
+
+    Node::SetUpCompSets(*state,
+                        "AirTerminal:SingleDuct:VAV:Reheat",
+                        "VAV REHEAT",
+                        "Coil:Heating:Water",
+                        "ZONE COIL",
+                        "ZONE COIL AIR INLET NODE",
+                        "ZONE AIR INLET NODE");
+
+    EXPECT_EQ(2, state->dataBranchNodeConnections->NumCompSets);
+    Node::TestInletOutletNodes(*state);
+    EXPECT_TRUE(compare_err_stream("", true));
+}
+
+TEST_F(EnergyPlusFixture, BranchNodeConnections_TestInletOutletNodes_RegistrationOutletDuplicateIgnored)
+{
+    Node::TestCompSet(*state, "Coil:Heating:Fuel", "SUPP HEATING COIL", "COIL INLET NODE", "DUPLICATE OUTLET NODE", "Air Nodes");
+
+    Node::SetUpCompSets(*state, "Branch", "MAIN BRANCH", "Fan:OnOff", "SUPPLY FAN", "FAN INLET NODE", "DUPLICATE OUTLET NODE");
+
+    Node::TestInletOutletNodes(*state);
+    EXPECT_TRUE(compare_err_stream("", true));
+}
+
+TEST_F(EnergyPlusFixture, BranchNodeConnections_SetUpCompSets_BranchTopologyDoesNotCollapseIntoParentChild)
+{
+    Node::SetUpCompSets(*state,
+                        "AirLoopHVAC:UnitaryHeatPump:WaterToAir",
+                        "UNITARY HEAT PUMP",
+                        "Fan:OnOff",
+                        "SUPPLY FAN",
+                        "FAN INLET NODE",
+                        "DUPLICATE OUTLET NODE",
+                        "Air Nodes");
+
+    Node::SetUpCompSets(*state, "Branch", "MAIN BRANCH 1", "Fan:OnOff", "SUPPLY FAN", "FAN INLET NODE", "DUPLICATE OUTLET NODE");
+
+    Node::SetUpCompSets(*state, "Branch", "MAIN BRANCH 2", "Coil:Heating:Fuel", "SUPP HEATING COIL", "COIL INLET NODE", "DUPLICATE OUTLET NODE");
+
+    EXPECT_EQ(3, state->dataBranchNodeConnections->NumCompSets);
+    Node::TestInletOutletNodes(*state);
+
+    std::string const error_string = delimited_string({
+        "   ** Warning ** Node used as an outlet more than once: DUPLICATE OUTLET NODE",
+        "   **   ~~~   **   Used by: Branch, name=MAIN BRANCH 1",
+        "   **   ~~~   **   as outlet for: Coil:Heating:Fuel, name=SUPP HEATING COIL",
+        "   **   ~~~   **   and by: Branch, name=MAIN BRANCH 2",
+        "   **   ~~~   **   as outlet for: Fan:OnOff, name=SUPPLY FAN",
+    });
+    EXPECT_TRUE(compare_err_stream(error_string, true));
+}
+
 TEST_F(EnergyPlusFixture, BranchNodeConnections_ReturnPlenumNodeCheckFailure)
 {
 
@@ -917,6 +1037,7 @@ TEST_F(EnergyPlusFixture, BranchNodeConnections_ReturnPlenumNodeCheckFailure)
         "	,                      !- Evaporative Condenser Air Flow Rate",
         "	autosize,              !- Evaporative Condenser Pump Rated Power Consumption",
         "	0.0,                   !- Crankcase Heater Capacity",
+        "    ,                      !- Crankcase Heater Capacity Function of Temperature Curve Name",
         "	10.0;                  !- Maximum Outdoor DryBulb Temperature for Crankcase Heater Operation",
 
         "Coil:Heating:Fuel,",
@@ -1938,6 +2059,7 @@ TEST_F(EnergyPlusFixture, BranchNodeConnections_ReturnPlenumNodeCheck)
         "	,                      !- Evaporative Condenser Air Flow Rate",
         "	autosize,              !- Evaporative Condenser Pump Rated Power Consumption",
         "	0.0,                   !- Crankcase Heater Capacity",
+        "    ,                      !- Crankcase Heater Capacity Function of Temperature Curve Name",
         "	10.0;                  !- Maximum Outdoor DryBulb Temperature for Crankcase Heater Operation",
 
         "Coil:Heating:Fuel,",

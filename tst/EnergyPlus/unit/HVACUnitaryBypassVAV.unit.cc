@@ -209,7 +209,6 @@ protected:
         dxCoil1.coilReportNum = ReportCoilSelection::getReportIndex(*state, dxCoil1.Name, dxCoil1.coilType);
         state->dataDXCoils->NumDXCoils = 1;
         state->dataDXCoils->CheckEquipName.dimension(1, true);
-        state->dataDXCoils->GetCoilsInputFlag = false;
         dxCoil1.CCapFFlow.allocate(1);
         dxCoil1.CCapFFlow(1) = 1;
         dxCoil1.CCapFTemp.allocate(1);
@@ -220,6 +219,7 @@ protected:
         dxCoil1.EIRFTemp(1) = 1;
         dxCoil1.PLFFPLR.allocate(1);
         dxCoil1.PLFFPLR(1) = 1;
+
         state->dataDXCoils->DXCoilFullLoadOutAirTemp.allocate(1);
         state->dataDXCoils->DXCoilFullLoadOutAirHumRat.allocate(1);
         dxCoil1.RatedAirVolFlowRate.allocate(1);
@@ -251,7 +251,6 @@ protected:
         heatingCoil1.coilReportNum = ReportCoilSelection::getReportIndex(*state, heatingCoil1.Name, heatingCoil1.coilType);
         state->dataHeatingCoils->NumHeatingCoils = 1;
         state->dataHeatingCoils->ValidSourceType.dimension(state->dataHeatingCoils->NumHeatingCoils, false);
-        state->dataHeatingCoils->GetCoilsInputFlag = false;
         state->dataSize->UnitarySysEqSizing.allocate(1);
         cbvav.HeatCoilName = "MyHeatingCoil";
         cbvav.coolCoilType = HVAC::CoilType::CoolingDXSingleSpeed;

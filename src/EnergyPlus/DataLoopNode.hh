@@ -527,6 +527,8 @@ namespace Node {
         bool needsSetpointChecking = false;
         std::array<bool, (int)HVAC::CtrlVarType::Num> checkSetPoint = {false, false, false, false, false, false, false, false, false};
     };
+
+    int GetNodeIndex(EnergyPlusData &state, std::string const &name);
 } // namespace Node
 
 struct LoopNodeData : BaseGlobalStruct

@@ -3947,7 +3947,7 @@ TEST_F(EnergyPlusFixture, PTACDrawAirfromReturnNodeAndPlenum_Test)
     int mixerReturnNode = state->dataMixedAir->OAMixer(1).RetNode;
     int mixerMixedNode = state->dataMixedAir->OAMixer(1).MixNode;
     // if this EXPECT_EQ fails, node numbers have changed, change OA node number above to match mixerInletNode
-    EXPECT_EQ(36, mixerInletNode);
+    EXPECT_EQ(Node::GetNodeIndex(*state, "DOAS OUTDOOR AIR INLET"), mixerInletNode);
     state->dataLoopNodes->Node(mixerInletNode).MassFlowRate = 0.26908 * 1.2;
     state->dataLoopNodes->Node(mixerInletNode).Temp = state->dataEnvrn->OutDryBulbTemp;
     state->dataLoopNodes->Node(mixerInletNode).HumRat = state->dataEnvrn->OutHumRat;
@@ -4039,7 +4039,8 @@ TEST_F(EnergyPlusFixture, PTACDrawAirfromReturnNodeAndPlenum_Test)
     Real64 mixedEnthalpy =
         ((ATMixerPriEnthlapy * ATMixerPriMassFlow) + (ATMixerSecEnthlapy * ATMixerSecMassFlow)) / (ATMixerSecMassFlow + ATMixerPriMassFlow);
     EXPECT_NEAR(mixedEnthalpy, state->dataLoopNodes->Node(ATMixer1AirOutNode).Enthalpy, 0.001);
-    EXPECT_TRUE(state->dataLoopNodes->Node(ATMixer1AirOutNode).Temp < state->dataLoopNodes->Node(10).Temp);
+    EXPECT_TRUE(state->dataLoopNodes->Node(ATMixer1AirOutNode).Temp <
+                state->dataLoopNodes->Node(Node::GetNodeIndex(*state, "SPACE1-1 ZONE AIR NODE")).Temp);
 
     // mass balance 1 supply (zone inlet node), 2 outlets (zone exhaust and return)
     // In develop prior to pulling PTUnits into UnitarySystem, this test used nodes 4 compared to 12 + 11
