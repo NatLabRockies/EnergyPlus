@@ -169,11 +169,11 @@ TEST_F(EnergyPlusFixture, SimulationManager_OutputDebuggingData)
     {
         std::string const idf_objects = delimited_string({
             "  Output:DebuggingData,",
-            "    No;                      !- Report Debugging Data",
+            "    No,                      !- Report Debugging Data",
+            "    ;                        !- Report During Warmup",
         });
 
         EXPECT_TRUE(process_idf(idf_objects));
-
         EXPECT_FALSE(state->dataReportFlag->DebugOutput);
         EXPECT_FALSE(state->dataReportFlag->EvenDuringWarmup);
 
@@ -188,8 +188,7 @@ TEST_F(EnergyPlusFixture, SimulationManager_OutputDebuggingData)
             "    ;                        !- Report During Warmup",
         });
 
-        state->clear_state();
-        state->init_state_called = false;
+        clear_state_and_reset_err_stream();
         EXPECT_TRUE(process_idf(idf_objects));
         state->init_state(*state);
 
@@ -207,8 +206,7 @@ TEST_F(EnergyPlusFixture, SimulationManager_OutputDebuggingData)
             "    Yes;                     !- Report During Warmup",
         });
 
-        state->clear_state();
-        state->init_state_called = false;
+        clear_state_and_reset_err_stream();
         EXPECT_TRUE(process_idf(idf_objects));
         state->init_state(*state);
 
@@ -231,7 +229,7 @@ TEST_F(EnergyPlusFixture, SimulationManager_OutputDebuggingData)
             "    No;                      !- Report During Warmup",
         });
 
-        state->clear_state();
+        clear_state_and_reset_err_stream();
         state->init_state_called = false;
         EXPECT_TRUE(compare_err_stream("", true));
         // Input processor with throw a severe, so do not use assertions

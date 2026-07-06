@@ -276,6 +276,9 @@ protected:
     // Opens output files as stringstreams
     void openOutputFiles(EnergyPlusData &state);
 
+    // Clears the EnergyPlus state and restores fixture-owned streams that clear_state() releases.
+    void clear_state_and_reset_err_stream();
+
     // A worker function that keeps trailing spaces in multiline raw string literals
     void replace_pipes_with_spaces(std::string &stringLiteral)
     {

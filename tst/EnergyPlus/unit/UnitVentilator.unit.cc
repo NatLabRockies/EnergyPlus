@@ -71,9 +71,6 @@ TEST_F(EnergyPlusFixture, UnitVentilatorSetOAMassFlowRateForCoolingVariablePerce
     Real64 ExpectedOAMassFlowRate;
     Real64 UnitVentNum;
 
-    state->dataLoopNodes->clear_state();
-    state->dataUnitVentilators->clear_state();
-
     state->dataLoopNodes->Node.allocate(4);
     state->dataUnitVentilators->UnitVent.allocate(1);
 
