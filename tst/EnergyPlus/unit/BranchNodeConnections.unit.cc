@@ -1009,7 +1009,7 @@ TEST_F(EnergyPlusFixture, BranchNodeConnections_ReturnPlenumNodeCheckFailure)
         "  DOAS Cooling Coil Outlet,  !- DX Cooling Coil System Sensor Node Name",
         "  Coil:Cooling:DX:SingleSpeed,  !- Cooling Coil Object Type",
         "  DOAS DX Cooling Coil;    !- Cooling Coil Name",
-#ifdef GET_OUT
+
         "Coil:Cooling:DX:SingleSpeed,",
         "	DOAS DX Cooling Coil,   !- Name",
         " 	AvailSched,            !- Availability Schedule Name",
@@ -1037,8 +1037,9 @@ TEST_F(EnergyPlusFixture, BranchNodeConnections_ReturnPlenumNodeCheckFailure)
         "	,                      !- Evaporative Condenser Air Flow Rate",
         "	autosize,              !- Evaporative Condenser Pump Rated Power Consumption",
         "	0.0,                   !- Crankcase Heater Capacity",
+        "    ,                      !- Crankcase Heater Capacity Function of Temperature Curve Name",
         "	10.0;                  !- Maximum Outdoor DryBulb Temperature for Crankcase Heater Operation",
-#endif // GET_OUT
+
         "Coil:Heating:Fuel,",
         "  DOAS Heating Coil,       !- Name",
         "  AvailSched,              !- Availability Schedule Name",
@@ -2030,7 +2031,7 @@ TEST_F(EnergyPlusFixture, BranchNodeConnections_ReturnPlenumNodeCheck)
         "  DOAS Cooling Coil Outlet,  !- DX Cooling Coil System Sensor Node Name",
         "  Coil:Cooling:DX:SingleSpeed,  !- Cooling Coil Object Type",
         "  DOAS DX Cooling Coil;    !- Cooling Coil Name",
-#ifdef GET_OUT
+
         "Coil:Cooling:DX:SingleSpeed,",
         "	DOAS DX Cooling Coil,   !- Name",
         " 	AvailSched,            !- Availability Schedule Name",
@@ -2058,8 +2059,8 @@ TEST_F(EnergyPlusFixture, BranchNodeConnections_ReturnPlenumNodeCheck)
         "	,                      !- Evaporative Condenser Air Flow Rate",
         "	autosize,              !- Evaporative Condenser Pump Rated Power Consumption",
         "	0.0,                   !- Crankcase Heater Capacity",
+        "    ,                      !- Crankcase Heater Capacity Function of Temperature Curve Name",
         "	10.0;                  !- Maximum Outdoor DryBulb Temperature for Crankcase Heater Operation",
-#endif // GET_OUT
 
         "Coil:Heating:Fuel,",
         "  DOAS Heating Coil,       !- Name",

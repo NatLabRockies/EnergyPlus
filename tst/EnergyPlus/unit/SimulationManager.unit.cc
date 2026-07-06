@@ -178,7 +178,7 @@ TEST_F(EnergyPlusFixture, SimulationManager_OutputDebuggingData)
         EXPECT_FALSE(state->dataReportFlag->EvenDuringWarmup);
 
         // no error message from
-        // EXPECT_TRUE(compare_err_stream("", true)); // why can't this be called after init_state? state.files.err_stream is nullptr?
+        EXPECT_TRUE(compare_err_stream("", true));
     }
 
     {
@@ -197,7 +197,7 @@ TEST_F(EnergyPlusFixture, SimulationManager_OutputDebuggingData)
         EXPECT_FALSE(state->dataReportFlag->EvenDuringWarmup);
 
         // no error message from
-        // EXPECT_TRUE(compare_err_stream("", true)); // why can't this be called after init_state? state.files.err_stream is nullptr?
+        EXPECT_TRUE(compare_err_stream("", true));
     }
 
     {
@@ -216,7 +216,7 @@ TEST_F(EnergyPlusFixture, SimulationManager_OutputDebuggingData)
         EXPECT_TRUE(state->dataReportFlag->EvenDuringWarmup);
 
         // no error message from
-        // EXPECT_TRUE(compare_err_stream("", true)); // why can't this be called after init_state? state.files.err_stream is nullptr?
+        EXPECT_TRUE(compare_err_stream("", true));
     }
 
     // Unicity warning
@@ -233,20 +233,10 @@ TEST_F(EnergyPlusFixture, SimulationManager_OutputDebuggingData)
 
         state->clear_state();
         state->init_state_called = false;
-        // EXPECT_TRUE(compare_err_stream("", true)); // why can't this be called after init_state? state.files.err_stream is nullptr?
+        EXPECT_TRUE(compare_err_stream("", true));
         // Input processor with throw a severe, so do not use assertions
         EXPECT_FALSE(process_idf(idf_objects, false));
         state->init_state(*state);
-#ifdef GET_OUT
-        // Instead do it here, making sure to reset the stream
-        {
-            std::string const expectedError = delimited_string({
-                "   ** Severe  ** <root>[Output:DebuggingData] - Object should have no more than 1 properties.",
-                "   ** Warning ** Output:DebuggingData: More than 1 occurrence of this object found, only first will be used.",
-            });
-            EXPECT_TRUE(compare_err_stream(expectedError, true));
-        }
-#endif // GET_OUT
         EXPECT_FALSE(state->dataReportFlag->DebugOutput);
         EXPECT_TRUE(state->dataReportFlag->EvenDuringWarmup);
     }
