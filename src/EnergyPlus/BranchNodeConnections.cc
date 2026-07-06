@@ -2039,6 +2039,9 @@ void SetUpCompSets(EnergyPlusData &state,
     Node::ConnectionObjectType ComponentTypeEnum = static_cast<Node::ConnectionObjectType>(getEnumValue(ConnectionObjectTypeNamesUC, CompTypeUC));
     assert(ComponentTypeEnum != Node::ConnectionObjectType::Invalid);
 
+    // Classify component sets by how the component/node relationship was discovered.
+    // Later validation only treats BranchTopology records as branch input, so the
+    // source name should describe that role.
     auto const compSetSource = [&]() {
         if (ParentTypeEnum == Node::ConnectionObjectType::Undefined) {
             return Node::CompSetSource::ComponentRegistration;
