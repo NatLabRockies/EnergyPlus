@@ -117,25 +117,30 @@ Coil:Cooling:ITE:ColdPlate,
        \note This curve should evaluate to 1.0 at design conditions.
        \type object-list
        \object-list BivariateFunctions
-  N3 , \field Maximum Allowable Chip Temperature
-       \note The maximum safe operating temperature of the processor.
-       \note Used as the upper thermal limit to calculate the maximum possible heat transfer to the fluid.
+  N3 , \field Target Case Operating Temperature
+       \note The desired operating temperature of the processor case.
+       \note Used as the setpoint to size the design fluid flow rate and control real-time fluid flow.
        \type real
        \units C
-  N4 , \field Design Fluid Flow Rate
+  N4 , \field Maximum Allowable Case Temperature
+       \note The maximum safe operating temperature of the processor case.
+       \note If fluid flow maxes out and this limit is exceeded, excess heat is rejected to the zone air.
+       \type real
+       \units C
+  N5 , \field Design Fluid Flow Rate
        \note The design mass or volume flow rate of the coolant through the IT equipment.
        \required-field
        \type real
        \units m3/s
        \minimum> 0.0
        \autosizable
-  N5 , \field Design Fluid Temperature Difference
+  N6 , \field Design Fluid Temperature Difference
        \note The design temperature difference between the fluid outlet and fluid inlet.
        \type real
        \units deltaC
        \minimum> 0.0
        \autosizable
-  N6 , \field Design Pressure Drop
+  N7 , \field Design Pressure Drop
        \note The fluid pressure drop across the cold plate at the design fluid flow rate.
        \type real
        \units Pa
@@ -181,21 +186,18 @@ ElectricEquipment:ITE:LiquidCooled,
        \required-field
        \type alpha
        \reference ITEAndITEListNames
-  A2 , \field Zone or ZoneList Name
+  A2 , \field Zone or Space Name
        \required-field
        \type object-list
-       \object-list ZoneAndZoneListNames
-       \note Zone the IT equipment is located in.
-  A3 , \field Space or SpaceList Name
-       \type object-list
-       \object-list SpaceAndSpaceListNames
-       \note Overrides the zone specification if used.
-  A4 , \field Availability Schedule Name
+       \object-list ZoneAndSpaceNames
+       \note Zone or Space the IT equipment is located in. 
+       \note Spillover air heat will be rejected to this space's heat balance.
+  A3 , \field Availability Schedule Name
        \type object-list
        \object-list ScheduleNames
        \note Availability schedule name for this equipment. Schedule value > 0 means the equipment is on.
        \note If this field is blank, the equipment is always available.
-  A5 , \field Compute Load Schedule Name
+  A4 , \field Compute Load Schedule Name
        \required-field
        \type object-list
        \object-list ScheduleNames
@@ -216,62 +218,120 @@ ElectricEquipment:ITE:LiquidCooled,
        \minimum 0.0
        \maximum 1.0
        \note Retained for auxiliary server fans contributing to air load.
-  A6 , \field IT Equipment Power Modifier Curve Name
+  A5 , \field IT Equipment Power Modifier Curve Name
        \type object-list
        \object-list BivariateFunctions
        \note Modifies power based on loading and inlet temperature.
-  A7 , \field Cooling Coil Object Type 1
+  N4 , \field Liquid Heat Capture Fraction
+       \type real
+       \minimum 0.0
+       \maximum 1.0
+       \default 0.8
+       \note The fraction of the total ITE heat generation (CPU + Fan) that is removed by the liquid cooling loop at design conditions. The remaining fraction is transferred to the zone air.
+  A6 , \field Liquid Heat Capture Fraction Schedule Name
+       \type object-list
+       \object-list ScheduleNames
+       \note If provided, this schedule multiplies the Liquid Heat Capture Fraction field. This allows the capture effectiveness to vary dynamically during the simulation.
+  A7 , \field Cooling Coil 1 Object Type
        \required-field
        \type choice
        \key Coil:Cooling:ITE:ColdPlate
        \key Coil:Cooling:ITE:UserDefined
        \note The type of the first cooling component handling physical heat transfer.
-  A8 , \field Cooling Coil Name 1
+  A8 , \field Cooling Coil 1 Name
        \required-field
        \type object-list
        \object-list CoilCoolingITENames
        \note The specific name of the first cooling component handling physical heat transfer.
-  A9 , \field Cooling Coil Load Percentage Schedule Name 1
+  N5 , \field Cooling Coil 1 Load Fraction
+       \type real
+       \minimum 0.0
+       \maximum 1.0
+       \note A static fraction (0.0 to 1.0) of the total IT liquid load directed to this coil.
+       \note If this field is used, the Schedule Name field below should be left blank.
+  A9 , \field Cooling Coil 1 Load Fraction Schedule Name
        \type object-list
        \object-list ScheduleNames
-       \note Schedule (0.0 to 1.0) defining the fraction of the total IT liquid load directed to this specific coil.
-       \note If blank, defaults to 1.0.
-  A10, \field Cooling Coil Object Type 2
+       \note Schedule (0.0 to 1.0) defining the fraction of the total IT liquid load directed to this coil.
+       \note If this field is used, the static Load Fraction field above should be left blank.
+  A10, \field Cooling Coil 2 Object Type
        \type choice
        \key Coil:Cooling:ITE:ColdPlate
        \key Coil:Cooling:ITE:UserDefined
        \note The type of the second cooling component, if applicable (e.g., a secondary RDHx).
-  A11, \field Cooling Coil Name 2
+  A11, \field Cooling Coil 2 Name
        \type object-list
        \object-list CoilCoolingITENames
-  A12, \field Cooling Coil Load Percentage Schedule Name 2
+  N6 , \field Cooling Coil 2 Load Fraction
+       \type real
+       \minimum 0.0
+       \maximum 1.0
+  A12, \field Cooling Coil 2 Load Fraction Schedule Name
        \type object-list
        \object-list ScheduleNames
-  A13, \field Cooling Coil Object Type 3
+  A13, \field Cooling Coil 3 Object Type
        \type choice
        \key Coil:Cooling:ITE:ColdPlate
        \key Coil:Cooling:ITE:UserDefined
-  A14, \field Cooling Coil Name 3
+  A14, \field Cooling Coil 3 Name
        \type object-list
        \object-list CoilCoolingITENames
-  A15, \field Cooling Coil Load Percentage Schedule Name 3
+  N7 , \field Cooling Coil 3 Load Fraction
+       \type real
+       \minimum 0.0
+       \maximum 1.0
+  A15, \field Cooling Coil 3 Load Fraction Schedule Name
        \type object-list
        \object-list ScheduleNames
-  A16, \field Cooling Coil Object Type 4
+  A16, \field Cooling Coil 4 Object Type
        \type choice
        \key Coil:Cooling:ITE:ColdPlate
        \key Coil:Cooling:ITE:UserDefined
-  A17, \field Cooling Coil Name 4
+  A17, \field Cooling Coil 4 Name
        \type object-list
        \object-list CoilCoolingITENames
-  A18; \field Cooling Coil Load Percentage Schedule Name 4
+  N8 , \field Cooling Coil 4 Load Fraction
+       \type real
+       \minimum 0.0
+       \maximum 1.0
+  A18; \field Cooling Coil 4 Load Fraction Schedule Name
        \type object-list
        \object-list ScheduleNames
 ```
 
 ## Outputs Description ##
 
-N/A
+The outputs for `ElectricEquipment:ITE:LiquidCooled` are as follows
+```
+   Zone,Average,ITE CPU Electricity Rate [W]
+   Zone,Sum,ITE CPU Electricity Energy [J]
+   Zone,Average,ITE Fan Electricity Rate [W]
+   Zone,Sum,ITE Fan Electricity Energy [J]
+   Zone,Average,ITE Total Electricity Rate [W]
+   Zone,Sum,ITE Total Electricity Energy [J]
+   Zone,Average,ITE Total Heat Generation Rate [W]
+   Zone,Sum,ITE Total Heat Generation Energy [J]
+   Zone,Average,ITE Liquid Heat Capture Fraction []
+   Zone,Average,ITE Liquid Heat Gain Rate [W]
+   Zone,Sum,ITE Liquid Heat Gain Energy [J]
+   Zone,Average,ITE Air Heat Gain to Zone Rate [W]
+   Zone,Sum,ITE Air Heat Gain to Zone Energy [J]
+```
+
+The ITE CPU electricity rate and energy outputs represent the power and energy consumed specifically by the compute components of the IT equipment. The ITE fan electricity rate and energy outputs represent the power and energy consumed by the internal fans used to assist with thermal management within the equipment. The ITE total electricity rate and energy outputs represent the overall power and energy consumption of the liquid-cooled IT equipment, which is the sum of the CPU and fan electricity usage.
+
+The ITE total heat generation rate and energy outputs represent the entire thermal load produced by the equipment, which is inherently equal to the total electricity consumed. The ITE liquid heat capture fraction reports the final fraction of heat being routed to the liquid loop at the current timestep, accounting for the design input field and any modifying schedules. The ITE liquid heat gain rate and energy outputs report the amount of this total heat generation that is captured and removed directly by the attached liquid cooling loop. The ITE air heat gain to zone rate and energy outputs represent the remaining thermal fraction that is not captured by the liquid loop and is instead dissipated into the surrounding zone air as a sensible heat gain. In addition to these core object-level outputs, EnergyPlus will automatically generate corresponding Space and Zone level aggregations for every variable listed above.
+
+The outputs for `Coil:Cooling:ITE:ColdPlate` are as follows.
+```
+   System,Average,Cooling Coil Total Cooling Rate [W]
+   System,Sum,Cooling Coil Total Cooling Energy [J]
+   System,Average,Cooling Coil Fluid Mass Flow Rate [kg/s]
+   System,Average,Cooling Coil Fluid Inlet Temperature [C]
+   System,Average,Cooling Coil Fluid Outlet Temperature [C]
+   System,Average,Cooling Coil Fluid Pressure Drop [Pa]
+   System,Average,Cooling Coil ITE Case Temperature [C]
+```
 
 ## Engineering Reference ##
 
