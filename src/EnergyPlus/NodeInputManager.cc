@@ -87,7 +87,7 @@ void GetNodeNums(EnergyPlusData &state,
                  std::string const &NodeObjectName,               // Node Object Name (i.e. "MyChiller")
                  Node::ConnectionType const nodeConnectionType,   // Node Connection Type (see DataLoopNode)
                  CompFluidStream const NodeFluidStream,           // Which Fluid Stream (1,2,3,...)
-                 bool const ObjectIsParent,                       // True/False
+                 bool const t_ObjectIsParent,                     // True/False
                  bool const IncrementFluidStream,                 // True/False
                  std::string_view const InputFieldName            // Input Field Name
 )
@@ -178,7 +178,7 @@ void GetNodeNums(EnergyPlusData &state,
                                NodeObjectName,
                                nodeConnectionType,
                                FluidStreamNum,
-                               ObjectIsParent,
+                               t_ObjectIsParent,
                                ErrorsFound,
                                InputFieldName);
     }
@@ -741,7 +741,7 @@ int GetOnlySingleNode(EnergyPlusData &state,
                       FluidType const nodeFluidType,             // Fluidtype for checking/setting node FluidType
                       ConnectionType const nodeConnectionType,   // Node Connection Type (see DataLoopNode)
                       CompFluidStream const NodeFluidStream,     // Which Fluid Stream
-                      bool const ObjectIsParent,                 // True/False
+                      bool const t_ObjectIsParent,               // True/False
                       std::string_view const InputFieldName      // Input Field Name
 )
 {
@@ -779,7 +779,7 @@ int GetOnlySingleNode(EnergyPlusData &state,
                 NodeObjectName,
                 nodeConnectionType,
                 NodeFluidStream,
-                ObjectIsParent,
+                t_ObjectIsParent,
                 false,
                 InputFieldName);
 

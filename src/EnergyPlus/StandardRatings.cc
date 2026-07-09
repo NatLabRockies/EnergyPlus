@@ -2300,11 +2300,11 @@ namespace StandardRatings {
         return (0.020 * A) + (0.617 * B) + (0.238 * C) + (0.125 * D);
     }
 
-    Real64 GetOutdoorUnitInletAirDryBulbTempReduced(Real64 const ReducedPLR, DataHeatBalance::RefrigCondenserType const CondenserType)
+    Real64 GetOutdoorUnitInletAirDryBulbTempReduced(Real64 const t_ReducedPLR, DataHeatBalance::RefrigCondenserType const CondenserType)
     {
         Real64 OutdoorUnitInletAirDryBulbTempReduced(0.0);
         // As per Table 9. IEER Part-Load Rating Conditions | AHRI Std.340/360-2022(IP)
-        if (ReducedPLR == 0.25) {
+        if (t_ReducedPLR == 0.25) {
             if (CondenserType == DataHeatBalance::RefrigCondenserType::Air) {
                 // Entering Dry Bulb Temperature (OAT)
                 OutdoorUnitInletAirDryBulbTempReduced = 18.33; // 65F
@@ -2316,7 +2316,7 @@ namespace StandardRatings {
                 // OutdoorUnitInletAirDryBulbTempReduced = 52.8F/65.0F/77.0F
                 OutdoorUnitInletAirDryBulbTempReduced = 18.33;
             }
-        } else if (ReducedPLR == 0.50) {
+        } else if (t_ReducedPLR == 0.50) {
             if (CondenserType == DataHeatBalance::RefrigCondenserType::Air) {
                 OutdoorUnitInletAirDryBulbTempReduced = 20; // 68F
             } else if (CondenserType == DataHeatBalance::RefrigCondenserType::Water) {
@@ -2325,7 +2325,7 @@ namespace StandardRatings {
                 // OutdoorUnitInletAirDryBulbTempReduced = 57.5F / 68.0F / 77.0F EWB / DB / MW
                 OutdoorUnitInletAirDryBulbTempReduced = 20;
             }
-        } else if (ReducedPLR == 0.75) {
+        } else if (t_ReducedPLR == 0.75) {
             if (CondenserType == DataHeatBalance::RefrigCondenserType::Air) {
                 OutdoorUnitInletAirDryBulbTempReduced = 27.5; // 81.5F
             } else if (CondenserType == DataHeatBalance::RefrigCondenserType::Water) {
@@ -2334,7 +2334,7 @@ namespace StandardRatings {
                 // OutdoorUnitInletAirDryBulbTempReduced = 66.2F / 81.5F / 77.0F EWB / DB / MW
                 OutdoorUnitInletAirDryBulbTempReduced = 27.5; // 81.5F
             }
-        } else if (ReducedPLR == 1.0) {
+        } else if (t_ReducedPLR == 1.0) {
             if (CondenserType == DataHeatBalance::RefrigCondenserType::Air) {
                 OutdoorUnitInletAirDryBulbTempReduced = 35; // 95.0F
             } else if (CondenserType == DataHeatBalance::RefrigCondenserType::Water) {
@@ -2351,7 +2351,7 @@ namespace StandardRatings {
                                     Real64 QAFull,
                                     Real64 OutdoorUnitInletAirDryBulbTempReduced,
                                     int CapFTempCurveIndex,
-                                    Real64 CoolingCoilInletAirWetBulbTempRated,
+                                    Real64 t_CoolingCoilInletAirWetBulbTempRated,
                                     Real64 RatedTotalCapacity,
                                     Real64 TotCapFlowModFac,
                                     Real64 FanPowerPerEvapAirFlowRate_2023,
@@ -2359,16 +2359,16 @@ namespace StandardRatings {
                                     Real64 EIRFTempCurveIndex,
                                     Real64 RatedCOP,
                                     Real64 EIRFlowModFac,
-                                    Real64 ReducedPLR)
+                                    Real64 t_ReducedPLR)
     {
         Real64 TotCapTempModFac =
-            Curve::CurveValue(state, CapFTempCurveIndex, CoolingCoilInletAirWetBulbTempRated, OutdoorUnitInletAirDryBulbTempReduced);
+            Curve::CurveValue(state, CapFTempCurveIndex, t_CoolingCoilInletAirWetBulbTempRated, OutdoorUnitInletAirDryBulbTempReduced);
         // TBD: Discuss TotCapTempModFac Calculation for both Evap and Water Cooled.
         // This will be our Qlx
         Real64 NetCoolingCapReduced =
             RatedTotalCapacity * TotCapTempModFac * TotCapFlowModFac - FanPowerPerEvapAirFlowRate_2023 * RatedAirVolFlowRate;
         Real64 EIRTempModFac =
-            Curve::CurveValue(state, EIRFTempCurveIndex, CoolingCoilInletAirWetBulbTempRated, OutdoorUnitInletAirDryBulbTempReduced);
+            Curve::CurveValue(state, EIRFTempCurveIndex, t_CoolingCoilInletAirWetBulbTempRated, OutdoorUnitInletAirDryBulbTempReduced);
 
         Real64 EIR(0.0);
         if (RatedCOP > 0.0) {
@@ -2378,9 +2378,9 @@ namespace StandardRatings {
         }
         Real64 EER(0.0); // Energy Efficiency Rating
 
-        Real64 CD(0.0);               // Degradation Coefficient, (Btu/h)/(Btu/h)
-        Real64 LF(0.0);               // Fraction "on" time for the last stage at the tested load Point | Load Factor
-        Real64 PL = ReducedPLR * 100; // Percent Load
+        Real64 CD(0.0);                 // Degradation Coefficient, (Btu/h)/(Btu/h)
+        Real64 LF(0.0);                 // Fraction "on" time for the last stage at the tested load Point | Load Factor
+        Real64 PL = t_ReducedPLR * 100; // Percent Load
 
         Real64 Qlx = NetCoolingCapReduced; // Part Load Net Capacity (Btu/h) | Previously NetCoolingCapReduced
         if (Qlx > 0.0) {

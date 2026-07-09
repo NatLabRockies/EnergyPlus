@@ -1247,7 +1247,17 @@ The rest of the object is filled with parameters of the key name/output variable
 
 \paragraph{Field: Key Name \#}\label{field-key-name}
 
-A key name field is used when the following field specifies an output variable. If the field is left blank, then all the output variables in the following field are assigned to the meter.
+A key name field is used when the following field specifies an output variable.
+Use ``*'' (or leave the field blank) to assign all instances of the output variable to the meter.
+
+You can also use regular expressions to assign only the instances whose key matches the pattern.
+For example, to include only the lights energy for zones whose names begin with ``SPACE'', you can use ``SPACE.*''.
+
+Consult the following URL for more information about the regular expressions RE2 supports: \url{https://github.com/google/re2/wiki/Syntax}
+
+Note that because the Key Name field does not preserve case, all alphabetic characters in the pattern are converted to uppercase before matching, effectively making this a case-insensitive regex as if ``(?i)<pattern>'' was used.
+
+Additionally, no regular expression can contain a ``,'' because the Input Processor would interpret it as a field separator.
 
 \paragraph{Field: Output Variable or Meter Name \#}\label{field-output-variable-or-meter-name}
 
@@ -1314,7 +1324,17 @@ The rest of the object is filled with parameters of the key name/output variable
 
 \paragraph{Field: Key Name \#}\label{field-key-name-1}
 
-A key name field is used when the following field specifies an output variable. If the field is left blank, then all the output variables in the following field are assigned to the meter.
+A key name field is used when the following field specifies an output variable.
+Use ``*'' (or leave the field blank) to assign all instances of the output variable to the meter.
+
+You can also use regular expressions to assign only the instances whose key matches the pattern.
+For example, to include only the lights energy for zones whose names begin with ``SPACE'', you can use ``SPACE.*''.
+
+Consult the following URL for more information about the regular expressions RE2 supports: \url{https://github.com/google/re2/wiki/Syntax}
+
+Note that because the Key Name field does not preserve case, all alphabetic characters in the pattern are converted to uppercase before matching, effectively making this a case-insensitive regex as if ``(?i)<pattern>'' was used.
+
+Additionally, no regular expression can contain a ``,'' because the Input Processor would interpret it as a field separator.
 
 \paragraph{Field: Output Variable or Meter Name \#}\label{field-output-variable-or-meter-name-1}
 
@@ -1356,6 +1376,12 @@ Meter:CustomDecrement,
   Electricity:Building,       !- Source Meter Name
   ,                           !- Key Name #1
   MyGeneralLights;            !- Output Variable or Meter Name #1
+
+Meter:Custom,
+  SPACE 1-3 Lights,           !- Name
+  Electricity,                !- Resource Type
+  SPACE[1-3]-1,               !- Key Name 1
+  Lights Electricity Energy;  !- Output Variable or Meter Name 1
 \end{lstlisting}
 
 For an example of ``generic'' Resource type, one might put the Building Infiltration Heat Loss \& Heat Gain on a set of custom meters:

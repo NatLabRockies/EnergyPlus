@@ -1274,13 +1274,13 @@ namespace UnitVentilator {
         Real64 rho = 0.0;
         Real64 Cp = 0.0;
 
-        Real64 TempSize;  // autosized value of coil input field
+        Real64 TempSize = 0.0; // autosized value of coil input field
         int SizingMethod; // Integer representation of sizing method name (e.g., CoolingAirflowSizing, HeatingAirflowSizing, CoolingCapacitySizing,
                           // HeatingCapacitySizing, etc.)
         bool PrintFlag;   // TRUE when sizing information is reported in the eio file
-        int CapSizingMethod(0);    // capacity sizing methods (HeatingDesignCapacity, CapacityPerFloorArea, FractionOfAutosizedCoolingCapacity, and
-                                   // FractionOfAutosizedHeatingCapacity )
-        Real64 WaterCoilSizDeltaT; // water coil deltaT for design water flow rate autosizing
+        int CapSizingMethod(0); // capacity sizing methods (HeatingDesignCapacity, CapacityPerFloorArea, FractionOfAutosizedCoolingCapacity, and
+                                // FractionOfAutosizedHeatingCapacity )
+        Real64 WaterCoilSizDeltaT = 0.0; // water coil deltaT for design water flow rate autosizing
 
         int PltSizHeatNum = 0;
         bool ErrorsFound = false;

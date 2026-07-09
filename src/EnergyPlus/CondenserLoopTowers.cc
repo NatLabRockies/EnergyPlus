@@ -6286,7 +6286,7 @@ namespace CondenserLoopTowers {
         static constexpr std::string_view routineName("getDynamicMaxCapacity");
         Real64 outletWaterTemp = 0.0;
         Real64 constexpr designWetBulb = 25.56;
-        Real64 constexpr airFlowRateRatio = 1.0;
+        Real64 constexpr ratedAirFlowRateRatio = 1.0;
         Real64 constexpr waterFlowRateRatio = 1.0;
         Real64 const CpWater =
             this->plantLoc.loop->glycol->getSpecificHeat(state, state.dataLoopNodes->Node(this->WaterInletNodeNum).Temp, routineName);
@@ -6330,7 +6330,7 @@ namespace CondenserLoopTowers {
             Real64 waterFlowRateRatioCapped = 0.0; // Water flow rate ratio passed to VS tower model
             // check independent inputs with respect to model boundaries
             this->checkModelBounds(state, Twb, Tr, Ta, waterFlowRateRatio, TwbCapped, TrCapped, TaCapped, waterFlowRateRatioCapped);
-            outletWaterTemp = this->calculateVariableTowerOutletTemp(state, waterFlowRateRatioCapped, airFlowRateRatio, TwbCapped);
+            outletWaterTemp = this->calculateVariableTowerOutletTemp(state, waterFlowRateRatioCapped, ratedAirFlowRateRatio, TwbCapped);
         } break;
         case DataPlant::PlantEquipmentType::CoolingTower_VarSpdMerkel: {
             // only needed for calculateSimpleTowerOutletTemp
@@ -6341,7 +6341,7 @@ namespace CondenserLoopTowers {
             Real64 const waterMassFlowRatePerCell = waterMassFlowRate / this->NumCell;
             Real64 const WaterFlowRateRatio = waterMassFlowRatePerCell / this->DesWaterMassFlowRatePerCell; // this should always be 1 ?
             Real64 const UAwetbulbAdjFac = Curve::CurveValue(state, this->UAModFuncWetBulbDiffCurvePtr, (designWetBulb - this->AirWetBulb));
-            Real64 const UAairflowAdjFac = Curve::CurveValue(state, this->UAModFuncAirFlowRatioCurvePtr, airFlowRateRatio);
+            Real64 const UAairflowAdjFac = Curve::CurveValue(state, this->UAModFuncAirFlowRatioCurvePtr, ratedAirFlowRateRatio);
             Real64 const UAwaterflowAdjFac = Curve::CurveValue(state, this->UAModFuncWaterFlowRatioCurvePtr, WaterFlowRateRatio);
             Real64 const UAadjustedPerCell = UAdesignPerCell * UAwetbulbAdjFac * UAairflowAdjFac * UAwaterflowAdjFac;
             outletWaterTemp = this->calculateSimpleTowerOutletTemp(state, waterMassFlowRatePerCell, airFlowRatePerCell, UAadjustedPerCell);

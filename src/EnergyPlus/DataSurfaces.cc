@@ -96,9 +96,9 @@ Surface2D::Surface2D(ShapeCat const shapeCat, int const axis, Vertices const &v,
     // If sorting by y for slab method can detect clockwise faster by just comparing edges at bottom or top-most vertex
     Real64 area(0.0); // Actually 2x the signed area
     for (Vertices::size_type i = 0; i < n; ++i) {
-        Vector2D const &v(vertices[i]);
+        Vector2D const &vi(vertices[i]);
         Vector2D const &w(vertices[(i + 1) % n]);
-        area += (v.x * w.y) - (w.x * v.y);
+        area += (vi.x * w.y) - (w.x * vi.y);
     }
     if (area < 0.0) {
         std::reverse(vertices.begin() + 1, vertices.end()); // Vertices in clockwise order: Reverse all but first
@@ -134,16 +134,16 @@ Surface2D::Surface2D(ShapeCat const shapeCat, int const axis, Vertices const &v,
             using CrossEdges = std::vector<CrossEdge>;
             CrossEdges crossEdges;
             for (size_type i = 0; i < n; ++i) { // Find edges crossing slab
-                Vector2D const &v(vertices[i]);
+                Vector2D const &vi(vertices[i]);
                 Vector2D const &w(vertices[(i + 1) % n]);
-                if (((v.y <= yl) && (yu <= w.y)) || // Crosses upward
-                    ((yu <= v.y) && (w.y <= yl)))   // Crosses downward
+                if (((vi.y <= yl) && (yu <= w.y)) || // Crosses upward
+                    ((yu <= vi.y) && (w.y <= yl)))   // Crosses downward
                 {
                     Edge const &e(edges[i]);
                     assert(e.y != 0.0);
                     Real64 const exy(e.x / e.y);
-                    Real64 const xb(v.x + (yl - v.y) * exy); // x_bot coordinate where edge intersects yl
-                    Real64 const xt(v.x + (yu - v.y) * exy); // x_top coordinate where edge intersects yu
+                    Real64 const xb(vi.x + (yl - vi.y) * exy); // x_bot coordinate where edge intersects yl
+                    Real64 const xt(vi.x + (yu - vi.y) * exy); // x_top coordinate where edge intersects yu
                     xl = std::min(xl, std::min(xb, xt));
                     xu = std::max(xu, std::max(xb, xt));
                     crossEdges.emplace_back(xb, xt, i);

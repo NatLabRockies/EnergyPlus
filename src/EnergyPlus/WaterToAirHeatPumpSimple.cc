@@ -1244,7 +1244,7 @@ namespace WaterToAirHeatPumpSimple {
         Real64 ratioTDB;                  // Load-side dry-bulb temperature ratio at cooling design conditions
         Real64 HeatratioTDB;              // Load-side dry-bulb temperature ratio at heating design conditions
         Real64 ratioTWB;                  // Load-side wet-bulb temperature ratio at cooling design conditions
-        Real64 ratioTS;                   // Source-side temperature ratio at cooling design conditions
+        Real64 ratioTS = 0.0;             // Source-side temperature ratio at cooling design conditions
         Real64 HeatratioTS;               // Source-side temperature ratio at heating design conditions
         Real64 RatedratioTDB;             // Rated cooling load-side dry-bulb temperature ratio
         Real64 RatedHeatratioTDB = 0.0;   // Rated cooling load-side dry-bulb temperature ratio
@@ -3480,14 +3480,14 @@ namespace WaterToAirHeatPumpSimple {
         Real64 LatentCapacityTimeConstant; // Latent capacity time constant [s]
         Real64 FanDelayTime;               // Fan delay time, time delay for the HP's fan to
         // shut off after compressor cycle off  [s]
-        Real64 Ton;     // Coil on time (sec)
-        Real64 Toff;    // Coil off time (sec)
-        Real64 Toffa;   // Actual coil off time (sec). Equations valid for Toff <= (2.0 * Twet/Gamma)
-        Real64 aa;      // Intermediate variable
-        Real64 To1;     // Intermediate variable (first guess at To). To = time to the start of moisture removal
-        Real64 To2;     // Intermediate variable (second guess at To). To = time to the start of moisture removal
-        Real64 Error;   // Error for iteration (DO) loop
-        Real64 LHRmult; // Latent Heat Ratio (LHR) multiplier. The effective latent heat ratio LHR = (1-SHRss)*LHRmult
+        Real64 Ton;       // Coil on time (sec)
+        Real64 Toff;      // Coil off time (sec)
+        Real64 Toffa;     // Actual coil off time (sec). Equations valid for Toff <= (2.0 * Twet/Gamma)
+        Real64 aa;        // Intermediate variable
+        Real64 To1;       // Intermediate variable (first guess at To). To = time to the start of moisture removal
+        Real64 To2 = 0.0; // Intermediate variable (second guess at To). To = time to the start of moisture removal
+        Real64 Error;     // Error for iteration (DO) loop
+        Real64 LHRmult;   // Latent Heat Ratio (LHR) multiplier. The effective latent heat ratio LHR = (1-SHRss)*LHRmult
 
         auto const &simpleWAHP = state.dataWaterToAirHeatPumpSimple->SimpleWatertoAirHP(HPNum);
 
@@ -3616,7 +3616,7 @@ namespace WaterToAirHeatPumpSimple {
         // as negative.
 
         // Return value
-        Real64 CoilCapacity; // returned capacity of matched coil
+        Real64 CoilCapacity = 0.0; // returned capacity of matched coil
 
         // FUNCTION LOCAL VARIABLE DECLARATIONS:
         int WhichCoil;
@@ -3679,7 +3679,7 @@ namespace WaterToAirHeatPumpSimple {
         // as negative.
 
         // Return value
-        Real64 CoilAirFlowRate; // returned air volume flow rate of matched coil
+        Real64 CoilAirFlowRate = 0.0; // returned air volume flow rate of matched coil
 
         // FUNCTION LOCAL VARIABLE DECLARATIONS:
         int WhichCoil;
@@ -3726,7 +3726,7 @@ namespace WaterToAirHeatPumpSimple {
         // as zero.
 
         // Return value
-        int NodeNumber; // returned outlet node of matched coil
+        int NodeNumber = 0; // returned outlet node of matched coil
 
         // FUNCTION LOCAL VARIABLE DECLARATIONS:
         int WhichCoil;
@@ -3768,7 +3768,7 @@ namespace WaterToAirHeatPumpSimple {
         // as zero.
 
         // Return value
-        int NodeNumber; // returned outlet node of matched coil
+        int NodeNumber = 0; // returned outlet node of matched coil
 
         // FUNCTION LOCAL VARIABLE DECLARATIONS:
         int WhichCoil;

@@ -1265,7 +1265,7 @@ namespace WindowComplexManager {
         Real64 Theta;                // Basis theta angle
         Real64 Phi;                  // Basis phi angle
         Real64 HitDsq;               // Squared distance to current hit pt
-        Real64 LeastHitDsq;          // Squared distance to closest hit pt
+        Real64 LeastHitDsq = 0.0;    // Squared distance to closest hit pt
         Array1D<Real64> V(3);        // vector array
         Array1D_int TmpRfSfInd;      // Temporary RefSurfIndex
         Array1D_int TmpRfRyNH;       // Temporary RefRayNHits
@@ -1277,7 +1277,7 @@ namespace WindowComplexManager {
         Array2D<Real64> TmpSjdotN;   // Temporary dot prod of ray angle w bk surf norm
         Array1D_int ITemp1D;         // Temporary INT 1D array
         Array2D<Real64> Temp2D;      // Temporary real 2D array
-        Real64 TransRSurf;           // Norminal transmittance of shading surface
+        Real64 TransRSurf = 0.0;     // Norminal transmittance of shading surface
         Real64 WtSum;                // Sum for normalizing various weights
         Real64 DotProd;              // Temporary variable for manipulating dot product .dot.
 
@@ -2692,12 +2692,12 @@ namespace WindowComplexManager {
 
         int TotLay; // Total number of layers in a construction
         //   (sum of solid layers and gap layers)
-        int Lay;                  // Layer number
-        int IGlass;               // glass layer number (1,2,3,...)
-        int IGap;                 // Gap layer number (1,2,...)
-        int k;                    // Layer counter
-        int SurfNumAdj;           // An interzone surface's number in the adjacent zone
-        WinShadingType ShadeFlag; // Flag indicating whether shade or blind is on, and shade/blind position
+        int Lay;                                            // Layer number
+        int IGlass;                                         // glass layer number (1,2,3,...)
+        int IGap;                                           // Gap layer number (1,2,...)
+        int k;                                              // Layer counter
+        int SurfNumAdj = 0;                                 // An interzone surface's number in the adjacent zone
+        WinShadingType ShadeFlag = WinShadingType::Invalid; // Flag indicating whether shade or blind is on, and shade/blind position
         int IMix;
 
         // Real64 IncidentSolar;       // Solar incident on outside of window (W)
@@ -2743,8 +2743,8 @@ namespace WindowComplexManager {
         int ngllayer;
         int nglface;
         int ThermalModelNum;
-        Real64 rmir; // IR radiance of window's interior surround (W/m2)
-        Real64 outir;
+        Real64 rmir = 0.0; // IR radiance of window's interior surround (W/m2)
+        Real64 outir = 0.0;
         Real64 Ebout;
         Real64 dominantGapWidth; // store value for dominant gap width.  Used for airflow calculations
         Real64 edgeGlCorrFac;

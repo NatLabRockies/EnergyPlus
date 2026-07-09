@@ -2561,8 +2561,8 @@ TEST_F(EnergyPlusFixture, DXCoil_ValidateADPFunctionAlone)
 {
     state->init_state(*state);
     // Define coil parameters
-    Real64 constexpr RatedInletAirTemp(26.666699999999999);
-    Real64 constexpr RatedInletAirHumRat(0.011184700000000001);
+    Real64 constexpr testRatedInletAirTemp(26.666699999999999);
+    Real64 constexpr testRatedInletAirHumRat(0.011184700000000001);
     state->dataDXCoils->DXCoil.allocate(1);
     state->dataDXCoils->DXCoil(1).coilType = HVAC::CoilType::CoolingDXSingleSpeed;
     state->dataDXCoils->DXCoil(1).Name = "Test Coil";
@@ -2575,23 +2575,23 @@ TEST_F(EnergyPlusFixture, DXCoil_ValidateADPFunctionAlone)
     Real64 newSHR = ValidateADP(*state,
                                 HVAC::coilTypeNames[(int)state->dataDXCoils->DXCoil(1).coilType],
                                 state->dataDXCoils->DXCoil(1).Name,
-                                RatedInletAirTemp,
-                                RatedInletAirHumRat,
+                                testRatedInletAirTemp,
+                                testRatedInletAirHumRat,
                                 state->dataDXCoils->DXCoil(1).RatedTotCap(1),
                                 state->dataDXCoils->DXCoil(1).RatedAirVolFlowRate(1),
                                 state->dataDXCoils->DXCoil(1).RatedSHR(1),
                                 CallingRoutine);
 
     // Make sure that the outlet conditions are below the saturation
-    Real64 airMassFlowRate =
-        state->dataDXCoils->DXCoil(1).RatedAirVolFlowRate(1) *
-        Psychrometrics::PsyRhoAirFnPbTdbW(*state, DataEnvironment::StdPressureSeaLevel, RatedInletAirTemp, RatedInletAirHumRat, CallingRoutine);
+    Real64 airMassFlowRate = state->dataDXCoils->DXCoil(1).RatedAirVolFlowRate(1) *
+                             Psychrometrics::PsyRhoAirFnPbTdbW(
+                                 *state, DataEnvironment::StdPressureSeaLevel, testRatedInletAirTemp, testRatedInletAirHumRat, CallingRoutine);
     Real64 deltaH = state->dataDXCoils->DXCoil(1).RatedTotCap(1) / airMassFlowRate;
-    Real64 inletAirEnthalpy = Psychrometrics::PsyHFnTdbW(RatedInletAirTemp, RatedInletAirHumRat);
+    Real64 inletAirEnthalpy = Psychrometrics::PsyHFnTdbW(testRatedInletAirTemp, testRatedInletAirHumRat);
     Real64 hTinHumRatOut = inletAirEnthalpy - (1.0 - newSHR) * deltaH;
-    Real64 outletAirHumRat = Psychrometrics::PsyWFnTdbH(*state, RatedInletAirTemp, hTinHumRatOut); // 0.0098703703931385892
-    Real64 outletAirEnthalpy = inletAirEnthalpy - deltaH;                                          // 38853.039955973931
-    Real64 outletAirTemp = Psychrometrics::PsyTdbFnHW(outletAirEnthalpy, outletAirHumRat);         // 13.846750113203081
+    Real64 outletAirHumRat = Psychrometrics::PsyWFnTdbH(*state, testRatedInletAirTemp, hTinHumRatOut); // 0.0098703703931385892
+    Real64 outletAirEnthalpy = inletAirEnthalpy - deltaH;                                              // 38853.039955973931
+    Real64 outletAirTemp = Psychrometrics::PsyTdbFnHW(outletAirEnthalpy, outletAirHumRat);             // 13.846750113203081
     Real64 dewPointTempOutHumRat = Psychrometrics::PsyTdpFnWPb(*state, outletAirHumRat, DataEnvironment::StdPressureSeaLevel);
     ASSERT_TRUE(dewPointTempOutHumRat < outletAirTemp);
 }
@@ -2721,15 +2721,15 @@ TEST_F(EnergyPlusFixture, DXCoil_ValidateADPFunction)
 
     SizeDXCoil(*state, 1); // normal sizing
 
-    Real64 constexpr RatedInletAirTemp(26.6667);   // 26.6667C or 80F
-    Real64 constexpr RatedInletAirHumRat(0.01125); // Humidity ratio corresponding to 80F dry bulb/67F wet bulb
+    Real64 constexpr testRatedInletAirTemp(26.6667);   // 26.6667C or 80F
+    Real64 constexpr testRatedInletAirHumRat(0.01125); // Humidity ratio corresponding to 80F dry bulb/67F wet bulb
     std::string const CallingRoutine("DXCoil_ValidateADPFunction");
 
     Real64 CBF_calculated = CalcCBF(*state,
                                     HVAC::coilTypeNames[(int)state->dataDXCoils->DXCoil(1).coilType],
                                     state->dataDXCoils->DXCoil(1).Name,
-                                    RatedInletAirTemp,
-                                    RatedInletAirHumRat,
+                                    testRatedInletAirTemp,
+                                    testRatedInletAirHumRat,
                                     state->dataDXCoils->DXCoil(1).RatedTotCap(1),
                                     state->dataDXCoils->DXCoil(1).RatedAirVolFlowRate(1),
                                     state->dataDXCoils->DXCoil(1).RatedSHR(1),
@@ -2745,8 +2745,8 @@ TEST_F(EnergyPlusFixture, DXCoil_ValidateADPFunction)
     CBF_calculated = CalcCBF(*state,
                              HVAC::coilTypeNames[(int)state->dataDXCoils->DXCoil(1).coilType],
                              state->dataDXCoils->DXCoil(1).Name,
-                             RatedInletAirTemp,
-                             RatedInletAirHumRat,
+                             testRatedInletAirTemp,
+                             testRatedInletAirHumRat,
                              state->dataDXCoils->DXCoil(1).RatedTotCap(1),
                              state->dataDXCoils->DXCoil(1).RatedAirVolFlowRate(1),
                              state->dataDXCoils->DXCoil(1).RatedSHR(1),
@@ -2762,8 +2762,8 @@ TEST_F(EnergyPlusFixture, DXCoil_ValidateADPFunction)
     CBF_calculated = CalcCBF(*state,
                              HVAC::coilTypeNames[(int)state->dataDXCoils->DXCoil(1).coilType],
                              state->dataDXCoils->DXCoil(1).Name,
-                             RatedInletAirTemp,
-                             RatedInletAirHumRat,
+                             testRatedInletAirTemp,
+                             testRatedInletAirHumRat,
                              state->dataDXCoils->DXCoil(1).RatedTotCap(1),
                              state->dataDXCoils->DXCoil(1).RatedAirVolFlowRate(1),
                              state->dataDXCoils->DXCoil(1).RatedSHR(1),

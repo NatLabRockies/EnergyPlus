@@ -10640,11 +10640,11 @@ void RefrigRackData::CalcRackSystem(EnergyPlusData &state)
     //  Florida Solar Energy Center, FSEC-CR-910-96, Final Report, Oct. 1996
 
     Real64 COPFTempOutput;                // Curve value for COPFTemp curve object
-    Real64 OutWbTemp;                     // Outdoor wet bulb temp at condenser air inlet node [C]
-    Real64 OutDbTemp;                     // Outdoor dry bulb temp at condenser air inlet node [C]
-    Real64 EffectTemp;                    // Effective outdoor temp when using evap condenser cooling [C]
-    Real64 HumRatIn;                      // Humidity ratio of inlet air to condenser [kg/kg]
-    Real64 BPress;                        // Barometric pressure at condenser air inlet node [Pa]
+    Real64 OutWbTemp = 0.0;               // Outdoor wet bulb temp at condenser air inlet node [C]
+    Real64 OutDbTemp = 0.0;               // Outdoor dry bulb temp at condenser air inlet node [C]
+    Real64 EffectTemp = 0.0;              // Effective outdoor temp when using evap condenser cooling [C]
+    Real64 HumRatIn = 0.0;                // Humidity ratio of inlet air to condenser [kg/kg]
+    Real64 BPress = 0.0;                  // Barometric pressure at condenser air inlet node [Pa]
     Real64 TotalHeatRejectedToZone = 0.0; // Total compressor and condenser fan heat rejected to zone (based on CaseRAFactor)
     Real64 CondenserFrac = 0.0;           // Fraction of condenser power as a function of outdoor temperature
     bool EvapAvail = true;                // Control for evap condenser availability
@@ -12514,10 +12514,10 @@ void TransRefrigSystemData::CalcDetailedTransSystem(EnergyPlusData &state, int c
 
     Real64 constexpr ErrorTol(0.001); // Iterative solution tolerance
 
-    int NumIter(0);            // Iteration counter
-    bool NotBalanced(true);    // Flag to indicate convergence, based on system balance
-    Real64 MassFlowStart(0.5); // Initial refrigerant mass flow through receiver bypass
-    Real64 ErrorMassFlow;      // Error in calculated refrigerant mass flow through receiver bypass
+    int NumIter(0);             // Iteration counter
+    bool NotBalanced(true);     // Flag to indicate convergence, based on system balance
+    Real64 MassFlowStart(0.5);  // Initial refrigerant mass flow through receiver bypass
+    Real64 ErrorMassFlow = 0.0; // Error in calculated refrigerant mass flow through receiver bypass
 
     while (NotBalanced) {
         ++NumIter;
@@ -13490,6 +13490,12 @@ void RefrigSystemData::CalculateCompressors(EnergyPlusData &state)
     this->TotHiStageCompCoolingEnergy = this->TotHiStageCompCapacity * localTimeStepSec;
 }
 
+Real64 CalcTransMTActualEnthalpyChange(Real64 const hCompInHP, Real64 const hGasCoolerOut, Real64 const delHSubcoolerDis)
+{
+    // Use post-subcooler discharge enthalpy at gas-cooler outlet
+    return hCompInHP - (hGasCoolerOut + delHSubcoolerDis);
+}
+
 void TransRefrigSystemData::CalculateTransCompressors(EnergyPlusData &state)
 {
 
@@ -13542,11 +13548,11 @@ void TransRefrigSystemData::CalculateTransCompressors(EnergyPlusData &state)
     Real64 DensityActualMT;             // Density of superheated gas at HP compressor inlet, m3/kg
     Real64 DensityRatedHP;              // Density of high pressure compressor inlet gas at rated superheat, m3/kg
     Real64 DensityRatedLP;              // Density of low pressure compressor inlet gas at rated superheat, m3/kg
-    Real64 HCaseInRatedLT;              // Enthalpy entering low temperature cases at rated subcooling, J/kg
-    Real64 HCaseInRatedMT;              // Enthalpy entering medium temperature cases at rated subcooling, J/kg
+    Real64 HCaseInRatedLT = 0.0;        // Enthalpy entering low temperature cases at rated subcooling, J/kg
+    Real64 HCaseInRatedMT = 0.0;        // Enthalpy entering medium temperature cases at rated subcooling, J/kg
     Real64 HCompInRatedHP(0.0);         // Enthalpy entering high pressure compressor at rated superheat, J/kg
-    Real64 HCompInRatedLP;              // Enthalpy entering low pressure compressor at rated superheat, J/kg
-    Real64 HGCOutlet;                   // Enthalpy at gas cooler outlet, J/kg
+    Real64 HCompInRatedLP = 0.0;        // Enthalpy entering low pressure compressor at rated superheat, J/kg
+    Real64 HGCOutlet = 0.0;             // Enthalpy at gas cooler outlet, J/kg
     Real64 HIdeal;                      // Ideal enthalpy at subcooler (for 100% effectiveness)
     Real64 HsatLiqforTevapNeededMT;     // Enthalpy of saturated liquid at MT evaporator, J/kg
     Real64 HsatVaporforTevapneededMT;   // Enthalpy of saturated vapor at MT evaporator (transcritical cycle), J/kg
@@ -13561,10 +13567,10 @@ void TransRefrigSystemData::CalculateTransCompressors(EnergyPlusData &state)
     Real64 PGCOutlet;                   // Gas cooler outlet pressure, Pa
     Real64 QualityReceiver(0.0);        // Refrigerant quality in the receiver
     Real64 SubcoolEffect;               // Heat exchanger effectiveness of the subcooler
-    Real64 TempInRatedHP;               // Temperature entering high pressure compressor at rated superheat, C
-    Real64 TempInRatedLP;               // Temperature entering low pressure compressor at rated superheat, C
+    Real64 TempInRatedHP = 0.0;         // Temperature entering high pressure compressor at rated superheat, C
+    Real64 TempInRatedLP = 0.0;         // Temperature entering low pressure compressor at rated superheat, C
     Real64 TsatforPdisLT;               // Low temperature saturated discharge temperature (transcritical cycle), C
-    Real64 TsatforPdisMT;               // Medium temperature saturated discharge temperature (transcritical cycle), C
+    Real64 TsatforPdisMT = 0.0;         // Medium temperature saturated discharge temperature (transcritical cycle), C
     Real64 TsatforPsucLT;               // Low temperature saturated suction temperature (transcritical cycle), C
     Real64 TsatforPsucMT;               // Medium temperature saturated suction temperature (transcritical cycle), C
     Real64 TSubcoolerColdIn;            // Suction gas temperature at the inlet of the subcooler, C
@@ -13792,7 +13798,8 @@ void TransRefrigSystemData::CalculateTransCompressors(EnergyPlusData &state)
     //  to constitute the "load".  The actual and rated conditions at the exit of the gas cooler and the inlet of the
     //  HP compressors are used for capacity correction calculations.
     DensityActualMT = this->refrig->getSupHeatDensity(state, this->TCompInHP, PSuctionMT, RoutineName);
-    TotalEnthalpyChangeActualMT = this->HCompInHP - GasCooler(this->GasCoolerNum(1)).HGasCoolerOut;
+    TotalEnthalpyChangeActualMT =
+        CalcTransMTActualEnthalpyChange(this->HCompInHP, GasCooler(this->GasCoolerNum(1)).HGasCoolerOut, this->DelHSubcoolerDis);
 
     // Dispatch HP compressors
     // Before dispatching HP compressors, zero sum of compressor outputs and zero each compressor
@@ -15195,26 +15202,26 @@ void SecondaryLoopData::CalculateSecondary(EnergyPlusData &state, int const Seco
 
     Real64 constexpr ErrorTol(0.001); // Iterative solution tolerance
 
-    bool AtPartLoad;          // Whether or not need to iterate on pump power
-    Real64 CpBrine;           // Specific heat (W/kg)
-    Real64 DensityBrine;      // Density (kg/m3)
-    Real64 DiffTemp;          // (C)
-    Real64 distPipeHeatGain;  // Optional (W)
-    Real64 Error;             // Used in iterative soln for pumps needed to meet load (that has to include pump energy)
-    Real64 FlowVolNeeded;     // Flow rate needed to meet load (m3/s)
-    Real64 PartLdFrac;        // Used to ratio pump power
-    Real64 PartPumpFrac;      // Used to see if part pumps dispatched meets part pump load
-    Real64 PrevTotalLoad;     // Used in pump energy convergence test
-    Real64 RefrigerationLoad; // Load for cases and walk-ins served by loop, does not include pump energy (W)
-    Real64 StoredEnergyRate;  // Used to meet loads unmet in previous time step (related to defrost cycles
+    bool AtPartLoad;           // Whether or not need to iterate on pump power
+    Real64 CpBrine = 0.0;      // Specific heat (W/kg)
+    Real64 DensityBrine = 0.0; // Density (kg/m3)
+    Real64 DiffTemp;           // (C)
+    Real64 distPipeHeatGain;   // Optional (W)
+    Real64 Error;              // Used in iterative soln for pumps needed to meet load (that has to include pump energy)
+    Real64 FlowVolNeeded;      // Flow rate needed to meet load (m3/s)
+    Real64 PartLdFrac;         // Used to ratio pump power
+    Real64 PartPumpFrac;       // Used to see if part pumps dispatched meets part pump load
+    Real64 PrevTotalLoad;      // Used in pump energy convergence test
+    Real64 RefrigerationLoad;  // Load for cases and walk-ins served by loop, does not include pump energy (W)
+    Real64 StoredEnergyRate;   // Used to meet loads unmet in previous time step (related to defrost cycles
     //     on cases/walk-ins served)(W)
-    Real64 TBrineIn;                  // Brine temperature going to heat exchanger, C
+    Real64 TBrineIn = 0.0;            // Brine temperature going to heat exchanger, C
     Real64 TotalHotDefrostCondCredit; // Used to credit condenser when heat reclaim used for hot gas/brine defrost (W)
     Real64 TotalPumpPower;            // Total Pumping power for loop, W
     Real64 TotalLoad;                 // Total Cooling Load on secondary loop, W
     Real64 TPipesReceiver(0.0);       // Temperature used for contents of pipes and/or receiver in calculating shell losses (C)
     Real64 VarFrac;                   // Pump power fraction for variable speed pump, dimensionless
-    Real64 VolFlowRate;               // Used in dispatching pumps to meet load (m3/s)
+    Real64 VolFlowRate = 0.0;         // Used in dispatching pumps to meet load (m3/s)
 
     Real64 localTimeStep = (state.dataRefrigCase->UseSysTimeStep) ? state.dataHVACGlobal->TimeStepSys : state.dataGlobal->TimeStepZone;
     Real64 localTimeStepSec = localTimeStep * Constant::rSecsInHour;

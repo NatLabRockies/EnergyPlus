@@ -457,9 +457,8 @@ TEST_F(EnergyPlusFixture, VariableSpeedCoils_DOASDXCoilTest)
     thisSys->CoolCoilOutletNodeNum = 2;
     thisSys->CoolCtrlNode = 2;
     bool errorsFound = thisSys->checkNodeSetPoint(*state, AirLoopNum, thisSys->CoolCtrlNode, CoolingCoil, OAUCoilOutTemp);
-    EXPECT_FALSE(errorsFound); // no errors when TempSetPoint is set on the control node
-    expected_error = "";
-    EXPECT_TRUE(compare_err_stream_substring(expected_error, true)); // no warnings when control node = cooling coil outlet node
+    EXPECT_FALSE(errorsFound);                 // no errors when TempSetPoint is set on the control node
+    EXPECT_TRUE(compare_err_stream("", true)); // no warnings when control node = cooling coil outlet node
 
     state->dataLoopNodes->Node(2).TempSetPoint = -999.0; // reset to invalid setpoint to test error case
     errorsFound = thisSys->checkNodeSetPoint(*state, AirLoopNum, thisSys->CoolCtrlNode, CoolingCoil, OAUCoilOutTemp);

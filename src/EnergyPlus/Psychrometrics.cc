@@ -914,7 +914,7 @@ namespace Psychrometrics {
         // ASHRAE HANDBOOK OF FUNDAMENTALS, 1972, P99, EQN 22
 
         // Return value
-        Real64 T; // result=> saturation temperature {C}
+        Real64 T = 0.0; // result=> saturation temperature {C}
 
         // FUNCTION LOCAL VARIABLE DECLARATIONS:
         Real64 T1; // APPROXIMATE SATURATION TEMPERATURE (C)

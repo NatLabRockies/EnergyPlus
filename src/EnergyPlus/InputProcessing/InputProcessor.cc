@@ -2456,10 +2456,10 @@ void InputProcessor::addRecordToOutputVariableStructure(EnergyPlusData &state, s
                  DataOutputs::OutputReportingVariables,
                  // Util::case_insensitive_hasher,
                  Util::case_insensitive_comparator>
-            data;
-        // data.reserve(32);
-        data.emplace(KeyValue, DataOutputs::OutputReportingVariables(state, KeyValue, VarName));
-        state.dataOutput->OutputVariablesForSimulation.emplace(VarName, std::move(data));
+            newVarData;
+        // newVarData.reserve(32);
+        newVarData.emplace(KeyValue, DataOutputs::OutputReportingVariables(state, KeyValue, VarName));
+        state.dataOutput->OutputVariablesForSimulation.emplace(VarName, std::move(newVarData));
     } else {
         found->second.emplace(KeyValue, DataOutputs::OutputReportingVariables(state, KeyValue, VarName));
     }

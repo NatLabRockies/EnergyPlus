@@ -3806,12 +3806,12 @@ namespace Fluid {
             int SolFla;                       // Flag of RegulaFalsi solver
 
             auto f = [&state, this, Enthalpy, Pressure](Real64 Temp) {
-                static constexpr std::string_view routineName = "GetSupHeatTempRefrigResidual";
+                static constexpr std::string_view residualRoutineName = "GetSupHeatTempRefrigResidual";
                 Real64 Enthalpy_Req = Enthalpy;
                 if (std::abs(Enthalpy_Req) < 100.0) {
                     Enthalpy_Req = sign(100.0, Enthalpy_Req);
                 }
-                Real64 Enthalpy_Act = this->getSupHeatEnthalpy(state, Temp, Pressure, routineName);
+                Real64 Enthalpy_Act = this->getSupHeatEnthalpy(state, Temp, Pressure, residualRoutineName);
                 return (Enthalpy_Act - Enthalpy_Req) / Enthalpy_Req;
             };
 

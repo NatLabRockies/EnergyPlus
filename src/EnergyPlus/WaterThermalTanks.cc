@@ -13095,9 +13095,9 @@ Real64 WaterThermalTankData::FindStratifiedTankSensedTemp(EnergyPlusData &state,
         ControlSensor2Temp = this->Node(HPWH.ControlSensor2Node).Temp;
     }
 
-    Real64 SensedTemp = ControlSensor1Temp * HPWH.ControlSensor1Weight + ControlSensor2Temp * HPWH.ControlSensor2Weight;
+    Real64 calcSensedTemp = ControlSensor1Temp * HPWH.ControlSensor1Weight + ControlSensor2Temp * HPWH.ControlSensor2Weight;
 
-    return SensedTemp;
+    return calcSensedTemp;
 }
 
 Real64 WaterThermalTankData::getDeadBandTemp()

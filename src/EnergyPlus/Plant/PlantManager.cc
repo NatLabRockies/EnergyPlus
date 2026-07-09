@@ -2660,12 +2660,12 @@ void ReInitPlantLoopsAtFirstHVACIteration(EnergyPlusData &state)
 
     // SUBROUTINE LOCAL VARIABLE DECLARATIONS:
     int LoopNum;                      // plant loop counter
-    Real64 LoopMaxMassFlowRate;       // maximum allowable loop mass flow rate
-    Real64 LoopSetPointTemp;          // the loop control or setpoint temperature
+    Real64 LoopMaxMassFlowRate = 0.0; // maximum allowable loop mass flow rate
+    Real64 LoopSetPointTemp = 0.0;    // the loop control or setpoint temperature
     Real64 LoopMaxTemp;               // maximum allowable loop temperature
     Real64 LoopMinTemp;               // minimum allowable loop temperature
-    Real64 LoopSetPointTempLo;        // the loop control or setpoint temperature
-    Real64 LoopSetPointTempHi;        // the loop control or setpoint temperature
+    Real64 LoopSetPointTempLo = 0.0;  // the loop control or setpoint temperature
+    Real64 LoopSetPointTempHi = 0.0;  // the loop control or setpoint temperature
     Real64 SecondaryLoopSetPointTemp; // loop setpoint temperature for common pipes with different secondary setpt
     int BranchNum;                    // branch loop counter
     int OpNum;                        // operation scheme counter
@@ -2673,10 +2673,10 @@ void ReInitPlantLoopsAtFirstHVACIteration(EnergyPlusData &state)
     int ComponentInlet;               // component inlet node number
     int ComponentOutlet;              // component outlet node number
 
-    Real64 LoopMinMassFlowRate; // minimum allowable loop mass flow rate
+    Real64 LoopMinMassFlowRate = 0.0; // minimum allowable loop mass flow rate
     Real64 SteamDensity;
     Real64 SteamTemp;
-    Real64 StartEnthalpy;
+    Real64 StartEnthalpy = 0.0;
     Real64 Cp;
     Real64 rho;
     Real64 LoopSetPointTemperatureHi;

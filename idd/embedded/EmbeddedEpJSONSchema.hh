@@ -48,9 +48,9 @@
 #ifndef InputProcessing_EmbeddedEpJSONSchema_HH
 #define InputProcessing_EmbeddedEpJSONSchema_HH
 
-#include <GSL/span.h>
 #include <cstddef>
 #include <cstdint>
+#include <span>
 #include <string_view>
 #include <utility>
 
@@ -58,7 +58,7 @@ namespace EnergyPlus {
 
 namespace EmbeddedEpJSONSchema {
 
-const gsl::span<const std::uint8_t> embeddedEpJSONSchema();
+const std::span<const std::uint8_t> embeddedEpJSONSchema();
 
 const std::string_view embeddedEpJSONSchemaView();
 }  // namespace EmbeddedEpJSONSchema

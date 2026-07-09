@@ -2296,9 +2296,9 @@ namespace Avail {
         bool OverNightStartFlag(false); // Flag to indicate the optimum start starts before mid night.
         bool CycleOnFlag(false);
         bool OSReportVarFlag(true);
-        int NumPreDays;
-        Real64 AdaTempGradHeat;
-        Real64 AdaTempGradCool;
+        int NumPreDays = 0;
+        Real64 AdaTempGradHeat = 0.0;
+        Real64 AdaTempGradCool = 0.0;
         Real64 ATGUpdateTime1(0.0);
         Real64 ATGUpdateTime2(0.0);
         Real64 ATGUpdateTemp1(0.0);
@@ -4540,21 +4540,21 @@ namespace Avail {
         using Psychrometrics::PsyTdpFnWPb;
         using Psychrometrics::PsyWFnTdbRhPb;
 
-        Real64 ZoneAirEnthalpy;             // Zone air enthalpy
-        Real64 ZoneAirRH;                   // Zone air relative humidity
-        Real64 TempExt;                     // Outdoor dry bulb temperature at zone height
-        Real64 WindExt;                     // Outdoor wind speed at zone height
-        Real64 WSetPoint;                   // Humidity ratio setpoint from a given RH setpoint schedule
-        Real64 OASetPoint;                  // Outdoor air setpoint from a given OA setpoint schedule
-        Real64 ACH;                         // Zone air change per hour
-        Real64 ZoneRHHumidifyingSetPoint;   // Zone humidifying setpoint (%)
-        Real64 ZoneRHDehumidifyingSetPoint; // Zone dehumidifying setpoint (%)
-        int SimpleControlType;              // Simple control type from a schedule: 0 individual, 1 global
-        int i;                              // Array index
-        Real64 minAdaTem;                   // minimum adaptive temperature for adaptive temperature control
-        Real64 maxAdaTem;                   // maximum adaptive temperature for adaptive temperature control
-        bool KeepStatus;                    // true, if minimum time operation is needed
-        Status availStatus;
+        Real64 ZoneAirEnthalpy;                   // Zone air enthalpy
+        Real64 ZoneAirRH;                         // Zone air relative humidity
+        Real64 TempExt;                           // Outdoor dry bulb temperature at zone height
+        Real64 WindExt;                           // Outdoor wind speed at zone height
+        Real64 WSetPoint;                         // Humidity ratio setpoint from a given RH setpoint schedule
+        Real64 OASetPoint;                        // Outdoor air setpoint from a given OA setpoint schedule
+        Real64 ACH;                               // Zone air change per hour
+        Real64 ZoneRHHumidifyingSetPoint = 0.0;   // Zone humidifying setpoint (%)
+        Real64 ZoneRHDehumidifyingSetPoint = 0.0; // Zone dehumidifying setpoint (%)
+        int SimpleControlType;                    // Simple control type from a schedule: 0 individual, 1 global
+        int i;                                    // Array index
+        Real64 minAdaTem;                         // minimum adaptive temperature for adaptive temperature control
+        Real64 maxAdaTem;                         // maximum adaptive temperature for adaptive temperature control
+        bool KeepStatus;                          // true, if minimum time operation is needed
+        Status availStatus = Status::Invalid;
 
         KeepStatus = false;
         auto &hybridVentMgr = state.dataAvail->HybridVentData(SysAvailNum);

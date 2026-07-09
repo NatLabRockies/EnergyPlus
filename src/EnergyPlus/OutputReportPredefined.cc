@@ -320,6 +320,16 @@ namespace OutputReportPredefined {
         s->pdchMechIPLVSI = newPreDefColumn(state, s->pdstMech, "IPLV in SI Units [W/W]");
         s->pdchMechIPLVIP = newPreDefColumn(state, s->pdstMech, "IPLV in IP Units [Btu/W-h]");
 
+        s->pdstGLHE = newPreDefSubTable(state, s->pdrEquip, "Ground Loop Heat Exchangers");
+
+        s->pdchGLHEType = newPreDefColumn(state, s->pdstGLHE, "Type");
+        s->pdchGLHETubeLength = newPreDefColumn(state, s->pdstGLHE, "Total Tube Length [m]");
+        s->pdchGLHEVolFlow = newPreDefColumn(state, s->pdstGLHE, "Design Volume Flow Rate [m3/s]");
+        s->pdchGLHEbhDepth = newPreDefColumn(state, s->pdstGLHE, "Depth [m]");
+        s->pdchGLHEbhDiam = newPreDefColumn(state, s->pdstGLHE, "Diameter [m]");
+        s->pdchGLHEbhLeng = newPreDefColumn(state, s->pdstGLHE, "Length [m]");
+        s->pdchGLHENumHolesTrenches = newPreDefColumn(state, s->pdstGLHE, "Number of Holes/Trenches");
+
         // Ok Constant                        Object Name                            Module                   Example File
         // -- ------------------------------- -------------------------------------- ------------------------ -----------------
         // o  CoilDX_CoolingSingleSpeed       Coil:Cooling:DX:SingleSpeed            DXCoil                   FurnaceWithDXSystem

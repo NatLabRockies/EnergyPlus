@@ -4017,13 +4017,13 @@ namespace LowTempRadiantSystem {
         constexpr std::string_view RoutineName("CalcLowTempCFloRadiantSystem");
 
         // SUBROUTINE LOCAL VARIABLE DECLARATIONS:
-        Real64 CpFluid;         // Specific heat of the fluid in the radiant system
+        Real64 CpFluid = 0.0;   // Specific heat of the fluid in the radiant system
         Real64 InjectFlowRate;  // Calculated injection flow rate that will meet the inlet temperature requirement
         Real64 OffTempCool;     // temperature at which the cooling shuts down
         Real64 OffTempHeat;     // temperature at which the heating shuts down
         Real64 PumpPartLoadRat; // Pump part load ratio (based on user schedule, or 1.0 for no schedule)
         Real64 PumpTempRise;    // Temperature rise of the fluid as it passes through the pump
-        Real64 RadInTemp;       // "Desired" radiant system water inlet temperature [Celsius]
+        Real64 RadInTemp = 0.0; // "Desired" radiant system water inlet temperature [Celsius]
         Real64 SetPointTemp;    // temperature that will be used to control the radiant system [Celsius]
         Real64 SetPointTempHi;  // Current high point in setpoint temperature range
         Real64 SetPointTempLo;  // Current low point in setpoint temperature range
@@ -5408,10 +5408,10 @@ namespace LowTempRadiantSystem {
     Real64 RadiantSystemBaseData::setOffTemperatureLowTemperatureRadiantSystem(EnergyPlusData &state,
                                                                                Sched::Schedule const *sched,
                                                                                const Real64 throttlingRange,
-                                                                               SetpointType setpointType)
+                                                                               SetpointType t_setpointType)
     {
         Real64 scheduleValue = sched->getCurrentVal();
-        switch (setpointType) {
+        switch (t_setpointType) {
         case SetpointType::HalfFlowPower:
             return scheduleValue + 0.5 * throttlingRange;
         case SetpointType::ZeroFlowPower:

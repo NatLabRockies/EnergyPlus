@@ -1618,9 +1618,9 @@ namespace HeatBalanceHAMTManager {
 
         // SUBROUTINE LOCAL VARIABLE DECLARATIONS:
         Real64 xxlow;
-        Real64 xxhigh;
+        Real64 xxhigh = 0.0;
         Real64 yylow;
-        Real64 yyhigh;
+        Real64 yyhigh = 0.0;
         Real64 mygrad;
 
         mygrad = 0.0;

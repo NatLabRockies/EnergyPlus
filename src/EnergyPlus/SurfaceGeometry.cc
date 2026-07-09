@@ -5713,17 +5713,17 @@ namespace SurfaceGeometry {
         // This routine performs checks on WindowShadingControl settings and Frame/Divider Settings.
 
         // SUBROUTINE LOCAL VARIABLE DECLARATIONS:
-        int ConstrNumSh;    // Construction number with Shade
-        int ShDevNum;       // Shading Device number
-        int Lay;            // Layer number
-        int TotGlassLayers; // Number of glass layers in window construction
-        int TotLayers;      // Number of layers in unshaded construction
-        int TotShLayers;    // Number of layers in shaded construction
-        int MatGap;         // Gap material number
-        int MatGap1;        // Material number of gap to left (outer side) of between-glass shade/blind
-        int MatGap2;        // Material number of gap to right (inner side) of between-glass shade/blind
-        int MatSh;          // Between-glass shade/blind material number
-        Real64 MatGapCalc;  // Calculated MatGap diff for shaded vs non-shaded constructions
+        int ConstrNumSh = 0; // Construction number with Shade
+        int ShDevNum;        // Shading Device number
+        int Lay;             // Layer number
+        int TotGlassLayers;  // Number of glass layers in window construction
+        int TotLayers;       // Number of layers in unshaded construction
+        int TotShLayers;     // Number of layers in shaded construction
+        int MatGap;          // Gap material number
+        int MatGap1;         // Material number of gap to left (outer side) of between-glass shade/blind
+        int MatGap2;         // Material number of gap to right (inner side) of between-glass shade/blind
+        int MatSh;           // Between-glass shade/blind material number
+        Real64 MatGapCalc;   // Calculated MatGap diff for shaded vs non-shaded constructions
 
         // If WindowShadingControl has been specified for this window --
         // Set shaded construction number if shaded construction was specified in WindowShadingControl.
@@ -6502,7 +6502,7 @@ namespace SurfaceGeometry {
         int NumAlphas;
         int NumNumbers;
         int IOStat; // IO Status when calling get input subroutine
-        Real64 Depth;
+        Real64 Depth = 0.0;
         Real64 Length;
         Real64 Xp;
         Real64 Yp;
@@ -8296,7 +8296,7 @@ namespace SurfaceGeometry {
         int CountHTAlgoObjectsMultiSurf;
         int CountHTAlgoObjectsSurfList;
         int IOStatus; // Used in GetObjectItem
-        DataSurfaces::HeatTransferModel tmpAlgoInput;
+        DataSurfaces::HeatTransferModel tmpAlgoInput = DataSurfaces::HeatTransferModel::Invalid;
         int Item;
         int Item1;
         int NumAlphas;
@@ -12298,7 +12298,7 @@ namespace SurfaceGeometry {
 
         // construct list of unique edges
         Vector curVertex;
-        int curVertexIndex;
+        int curVertexIndex = 0;
         for (int iFace = 1; iFace <= zonePoly.NumSurfaceFaces; ++iFace) {
             Vector prevVertex;
             int prevVertexIndex;

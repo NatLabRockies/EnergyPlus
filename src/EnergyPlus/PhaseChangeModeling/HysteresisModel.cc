@@ -276,10 +276,13 @@ namespace Material {
 
     Real64 MaterialPhaseChange::getConductivity(Real64 T) const
     {
-        if (T < this->peakTempMelting) {
+        Real64 const lowerPeakTemp = std::min(this->peakTempMelting, this->peakTempFreezing);
+        Real64 const upperPeakTemp = std::max(this->peakTempMelting, this->peakTempFreezing);
+
+        if (T < lowerPeakTemp) {
             return this->fullySolidThermalConductivity;
         }
-        if (T > this->peakTempFreezing) {
+        if (T > upperPeakTemp) {
             return this->fullyLiquidThermalConductivity;
         }
         return (this->fullySolidThermalConductivity + this->fullyLiquidThermalConductivity) / 2.0;
@@ -287,10 +290,13 @@ namespace Material {
 
     Real64 MaterialPhaseChange::getDensity(Real64 T) const
     {
-        if (T < this->peakTempMelting) {
+        Real64 const lowerPeakTemp = std::min(this->peakTempMelting, this->peakTempFreezing);
+        Real64 const upperPeakTemp = std::max(this->peakTempMelting, this->peakTempFreezing);
+
+        if (T < lowerPeakTemp) {
             return this->fullySolidDensity;
         }
-        if (T > this->peakTempFreezing) {
+        if (T > upperPeakTemp) {
             return this->fullyLiquidDensity;
         }
         return (this->fullySolidDensity + this->fullyLiquidDensity) / 2.0;

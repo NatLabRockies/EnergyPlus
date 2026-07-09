@@ -1886,18 +1886,6 @@ namespace HeatingCoils {
         heatingCoil.OutletAirEnthalpy = Psychrometrics::PsyHFnTdbW(heatingCoil.OutletAirTemp, heatingCoil.OutletAirHumRat);
 
         QCoilActual = HeatingCoilLoad;
-        if (std::abs(heatingCoil.NominalCapacity) < 1.e-8) {
-            if (heatingCoil.AirLoopNum > 0) {
-                state.dataAirLoop->AirLoopAFNInfo(heatingCoil.AirLoopNum).AFNLoopHeatingCoilMaxRTF =
-                    max(state.dataAirLoop->AirLoopAFNInfo(heatingCoil.AirLoopNum).AFNLoopHeatingCoilMaxRTF, 0.0);
-            }
-        } else {
-            if (heatingCoil.AirLoopNum > 0) {
-                state.dataAirLoop->AirLoopAFNInfo(heatingCoil.AirLoopNum).AFNLoopHeatingCoilMaxRTF =
-                    max(state.dataAirLoop->AirLoopAFNInfo(heatingCoil.AirLoopNum).AFNLoopHeatingCoilMaxRTF,
-                        HeatingCoilLoad / heatingCoil.NominalCapacity);
-            }
-        }
 
         // set outlet node temp so parent objects can call calc directly without have to simulate entire model
         state.dataLoopNodes->Node(heatingCoil.AirOutletNodeNum).Temp = heatingCoil.OutletAirTemp;
@@ -2266,10 +2254,6 @@ namespace HeatingCoils {
         heatingCoil.OutletAirEnthalpy = Psychrometrics::PsyHFnTdbW(heatingCoil.OutletAirTemp, heatingCoil.OutletAirHumRat);
 
         QCoilActual = HeatingCoilLoad;
-        if (heatingCoil.AirLoopNum > 0) {
-            state.dataAirLoop->AirLoopAFNInfo(heatingCoil.AirLoopNum).AFNLoopHeatingCoilMaxRTF =
-                max(state.dataAirLoop->AirLoopAFNInfo(heatingCoil.AirLoopNum).AFNLoopHeatingCoilMaxRTF, heatingCoil.RTF);
-        }
         state.dataHVACGlobal->ElecHeatingCoilPower = heatingCoil.ElecUseLoad;
 
         // set outlet node temp so parent objects can call calc directly without have to simulate entire model
@@ -2933,7 +2917,7 @@ namespace HeatingCoils {
         // as negative.
 
         // Return value
-        Real64 CoilCapacity; // returned capacity of matched coil
+        Real64 CoilCapacity = 0.0; // returned capacity of matched coil
 
         // FUNCTION LOCAL VARIABLE DECLARATIONS:
         int WhichCoil;

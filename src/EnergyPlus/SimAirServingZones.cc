@@ -293,7 +293,7 @@ void GetAirPathData(EnergyPlusData &state)
     Array1D_int NodeNums;             // node numbers returned by GetNodeNums
     int NodeNum;                      // a node number
     int AirSysNum;                    // an air system (air loop) number
-    int OANum;                        // outside air system index
+    int OANum = 0;                    // outside air system index
     int OAMixNum;                     // outside air mixer index
     int IOStat;                       // status number returned by GetObjectItem
     int NumControllers;               // number of controllers
@@ -2469,7 +2469,7 @@ void SimAirLoops(EnergyPlusData &state, bool const FirstHVACIteration, bool &Sim
     int AirLoopPass;
     // Flag set by ResolveSysFlow; if TRUE, mass balance failed and there must be a second pass
     bool SysReSim;
-    DataConvergParams::CalledFrom CalledFrom;
+    DataConvergParams::CalledFrom CalledFrom = DataConvergParams::CalledFrom::Invalid;
 
     auto &AirToZoneNodeInfo = state.dataAirLoop->AirToZoneNodeInfo;
     auto &AirLoopControlInfo = state.dataAirLoop->AirLoopControlInfo;
@@ -4589,8 +4589,8 @@ void SizeSysOutdoorAir(EnergyPlusData &state)
     using namespace OutputReportPredefined;
 
     Real64 MinOAFlow;                // design minimum outside air flow for a system
-    Real64 ZoneOAFracCooling;        // zone OA fraction for cooling design air flow
-    Real64 ZoneOAFracHeating;        // zone OA fraction for heating design air flow
+    Real64 ZoneOAFracCooling = 0.0;  // zone OA fraction for cooling design air flow
+    Real64 ZoneOAFracHeating = 0.0;  // zone OA fraction for heating design air flow
     Real64 ZoneSA;                   // Zone supply air flow rate
     Real64 ZonePA;                   // Zone primary air flow rate
     Real64 ClgSupplyAirAdjustFactor; // temporary variable
@@ -5092,40 +5092,40 @@ void UpdateSysSizing(EnergyPlusData &state, Constant::CallIndicator const CallIn
     int numOfTimeStepInDay; // number of zone time steps in a day
 
     // SUBROUTINE LOCAL VARIABLE DECLARATIONS:
-    int AirLoopNum;                // primary air system index
-    Real64 SysCoolRetTemp;         // system cooling return temperature for a time step [C]
-    Real64 SysHeatRetTemp;         // system heating return temperature for a time step [C]
-    Real64 RhoAir;                 // density of air kg/m3
-    Real64 OutAirFrac;             // outside air fraction
-    Real64 SysCoolMixTemp;         // system cooling mixed air temperature [C]
-    Real64 SysHeatMixTemp;         // system heating mixed air temperature [C]
-    Real64 SysSensCoolCap;         // system sensible cooling capacity [W]
-    Real64 SysTotCoolCap;          // system total cooling capacity [W]
-    Real64 SysCoolZoneAvgTemp;     // system cooling zone average temperature [C]
-    Real64 SysHeatZoneAvgTemp;     // system heating zone average temperature [C]
-    Real64 SysHeatCap;             // system heating capacity [W]
-    Real64 OutAirTemp;             // outside air temperature
-    Real64 OutAirHumRat;           // outside air humifity ratio
-    Real64 SysCoolMixHumRat;       // system cooling mixed air humidity ratio [kg water/kg dry air]
-    Real64 SysCoolRetHumRat;       // system coolingreturn air humifity ratio [kg water/kg dry air]
-    Real64 SysHeatMixHumRat;       // system heating mixed air humidity ratio [kg water/kg dry air]
-    Real64 SysHeatRetHumRat;       // system heatingreturn air humifity ratio [kg water/kg dry air]
-    Real64 SysCoolOutTemp;         // system cooling outside air temperature [C]
-    Real64 SysCoolOutHumRat;       // system cooling outside air humidity ratio [kg water/kg dry air]
-    Real64 SysHeatOutTemp;         // system heating outside air temperature [C]
-    Real64 SysHeatOutHumRat;       // system heating outside air humidity ratio [kg water/kg dry air]
-    Real64 SysDOASHeatAdd;         // system DOAS heat addition rate [W]
-    Real64 SysDOASLatAdd;          // system DOAS latent heat addition rate [W]
-    Real64 SysCoolSizingRat;       // ratio of user input design flow for cooling divided by calculated design cooling flow
-    Real64 SysHeatSizingRat;       // ratio of user input design flow for heating divided by calculated design heating flow
-    Real64 ZoneOARatio;            // ratio of zone OA flow to zone design cooling or heating flow
-    Real64 RetTempRise;            // difference between zone return temperature and zone temperature [delta K]
-    Real64 SysCoolingEv;           // System level ventilation effectiveness for cooling mode
-    Real64 SysHeatingEv;           // System level ventilation effectiveness for heating mode
-    Real64 SysHtgPeakAirflow;      // Peak heating airflow
-    Real64 termunitsizingtempfrac; // 1.0/(1.0+termunitsizing(ctrlzone)%inducrat)
-    Real64 termunitsizingtemp;     // (1.0+termunitsizing(ctrlzone)%inducrat)
-    Real64 VozClg(0.0);            // corrected (for ventilation efficiency) zone outside air flow rate [m3/s]
+    int AirLoopNum;                      // primary air system index
+    Real64 SysCoolRetTemp;               // system cooling return temperature for a time step [C]
+    Real64 SysHeatRetTemp;               // system heating return temperature for a time step [C]
+    Real64 RhoAir = 0.0;                 // density of air kg/m3
+    Real64 OutAirFrac;                   // outside air fraction
+    Real64 SysCoolMixTemp;               // system cooling mixed air temperature [C]
+    Real64 SysHeatMixTemp;               // system heating mixed air temperature [C]
+    Real64 SysSensCoolCap;               // system sensible cooling capacity [W]
+    Real64 SysTotCoolCap;                // system total cooling capacity [W]
+    Real64 SysCoolZoneAvgTemp;           // system cooling zone average temperature [C]
+    Real64 SysHeatZoneAvgTemp;           // system heating zone average temperature [C]
+    Real64 SysHeatCap;                   // system heating capacity [W]
+    Real64 OutAirTemp;                   // outside air temperature
+    Real64 OutAirHumRat;                 // outside air humifity ratio
+    Real64 SysCoolMixHumRat;             // system cooling mixed air humidity ratio [kg water/kg dry air]
+    Real64 SysCoolRetHumRat;             // system coolingreturn air humifity ratio [kg water/kg dry air]
+    Real64 SysHeatMixHumRat;             // system heating mixed air humidity ratio [kg water/kg dry air]
+    Real64 SysHeatRetHumRat;             // system heatingreturn air humifity ratio [kg water/kg dry air]
+    Real64 SysCoolOutTemp;               // system cooling outside air temperature [C]
+    Real64 SysCoolOutHumRat;             // system cooling outside air humidity ratio [kg water/kg dry air]
+    Real64 SysHeatOutTemp;               // system heating outside air temperature [C]
+    Real64 SysHeatOutHumRat;             // system heating outside air humidity ratio [kg water/kg dry air]
+    Real64 SysDOASHeatAdd;               // system DOAS heat addition rate [W]
+    Real64 SysDOASLatAdd;                // system DOAS latent heat addition rate [W]
+    Real64 SysCoolSizingRat;             // ratio of user input design flow for cooling divided by calculated design cooling flow
+    Real64 SysHeatSizingRat;             // ratio of user input design flow for heating divided by calculated design heating flow
+    Real64 ZoneOARatio;                  // ratio of zone OA flow to zone design cooling or heating flow
+    Real64 RetTempRise;                  // difference between zone return temperature and zone temperature [delta K]
+    Real64 SysCoolingEv;                 // System level ventilation effectiveness for cooling mode
+    Real64 SysHeatingEv;                 // System level ventilation effectiveness for heating mode
+    Real64 SysHtgPeakAirflow;            // Peak heating airflow
+    Real64 termunitsizingtempfrac = 1.0; // 1.0/(1.0+termunitsizing(ctrlzone)%inducrat)
+    Real64 termunitsizingtemp;           // (1.0+termunitsizing(ctrlzone)%inducrat)
+    Real64 VozClg(0.0);                  // corrected (for ventilation efficiency) zone outside air flow rate [m3/s]
 
     numOfTimeStepInDay = state.dataGlobal->TimeStepsInHour * Constant::iHoursInDay;
 

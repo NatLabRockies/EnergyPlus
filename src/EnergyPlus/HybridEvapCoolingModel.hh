@@ -389,7 +389,7 @@ namespace HybridEvapCoolingModel {
         // methods
         int CurrentPrimaryMode();
         Real64 CurrentPrimaryRuntimeFraction();
-        Real64 CalculatePartRuntimeFraction(Real64 MinOA_Msa,
+        Real64 CalculatePartRuntimeFraction(Real64 t_MinOA_Msa,
                                             Real64 Mvent,
                                             Real64 RequestedCoolingLoad,
                                             Real64 RequestedHeatingLoad,

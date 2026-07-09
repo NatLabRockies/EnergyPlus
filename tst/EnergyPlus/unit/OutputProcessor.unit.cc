@@ -5505,6 +5505,116 @@ namespace OutputProcessor {
         EXPECT_GT(state->dataGlobal->StdOutputRecordCount, 0);
         EXPECT_GT(state->dataGlobal->StdMeterRecordCount, 0);
     }
+
+    TEST_F(EnergyPlusFixture, OutputProcessor_GetCustomMeterInput_RegexKeyName)
+    {
+        auto &op = state->dataOutputProcessor;
+
+        std::string const idf_objects = delimited_string({
+            "Meter:Custom,",
+            "LightsRegexMeter,           !- Name",
+            "Electricity,                !- Fuel Type",
+            "SPACE[1-3]-1 LIGHTS.*,      !- Key Name 1",
+            "Lights Electricity Energy;  !- Output Variable or Meter Name 1",
+        });
+
+        ASSERT_TRUE(process_idf(idf_objects));
+        state->init_state(*state);
+
+        Real64 light_consumption = 0.0;
+        for (int i = 1; i <= 5; ++i) {
+            SetupOutputVariable(*state,
+                                "Lights Electricity Energy",
+                                Constant::Units::J,
+                                light_consumption,
+                                TimeStepType::Zone,
+                                StoreType::Sum,
+                                std::format("SPACE{}-1 LIGHTS 1", i),
+                                Constant::eResource::Electricity,
+                                Group::Building,
+                                EndUseCat::InteriorLights,
+                                "GeneralLights",
+                                std::format("SPACE{}-1", i),
+                                1,
+                                1);
+        }
+
+        bool errors_found = false;
+        GetCustomMeterInput(*state, errors_found);
+        ASSERT_FALSE(errors_found);
+
+        int const meterIdx = GetMeterIndex(*state, "LIGHTSREGEXMETER");
+        ASSERT_NE(-1, meterIdx);
+        auto const *meter = op->meters[meterIdx];
+
+        // Regex SPACE[1-3]-1 LIGHTS.* should match SPACE1-1, SPACE2-1, SPACE3-1 but not SPACE4-1 or SPACE5-1
+        ASSERT_EQ(3u, meter->srcVarNums.size());
+
+        std::vector<std::string> matchedKeys;
+        matchedKeys.reserve(meter->srcVarNums.size());
+        for (int const varIdx : meter->srcVarNums) {
+            matchedKeys.push_back(op->outVars[varIdx]->key);
+        }
+        std::sort(matchedKeys.begin(), matchedKeys.end());
+        EXPECT_EQ((std::vector<std::string>{"SPACE1-1 LIGHTS 1", "SPACE2-1 LIGHTS 1", "SPACE3-1 LIGHTS 1"}), matchedKeys);
+    }
+
+    TEST_F(EnergyPlusFixture, OutputProcessor_GetCustomMeterDecrement_RegexKeyName)
+    {
+        auto &op = state->dataOutputProcessor;
+
+        // The extensible group subtracts the matched variables from the source meter.
+        // Regex SPACE[4-5]-1 LIGHTS.* should subtract only SPACE4-1 and SPACE5-1 from Electricity:Building.
+        std::string const idf_objects = delimited_string({
+            "Meter:CustomDecrement,",
+            "LightsDecMeter,              !- Name",
+            "Electricity,                 !- Fuel Type",
+            "Electricity:Building,        !- Source Meter Name",
+            "SPACE[4-5]-1 LIGHTS.*,       !- Key Name 1",
+            "Lights Electricity Energy;   !- Output Variable or Meter Name 1",
+        });
+
+        ASSERT_TRUE(process_idf(idf_objects));
+        state->init_state(*state);
+
+        Real64 light_consumption = 0.0;
+        for (int i = 1; i <= 5; ++i) {
+            SetupOutputVariable(*state,
+                                "Lights Electricity Energy",
+                                Constant::Units::J,
+                                light_consumption,
+                                TimeStepType::Zone,
+                                StoreType::Sum,
+                                std::format("SPACE{}-1 LIGHTS 1", i),
+                                Constant::eResource::Electricity,
+                                Group::Building,
+                                EndUseCat::InteriorLights,
+                                "GeneralLights",
+                                std::format("SPACE{}-1", i),
+                                1,
+                                1);
+        }
+
+        bool errors_found = false;
+        GetCustomMeterInput(*state, errors_found);
+        ASSERT_FALSE(errors_found);
+
+        int const meterIdx = GetMeterIndex(*state, "LIGHTSDECMETER");
+        ASSERT_NE(-1, meterIdx);
+        auto const *meter = op->meters[meterIdx];
+
+        // srcVarNums for a CustomDecrement holds the additive variables (what is subtracted from the source meter)
+        ASSERT_EQ(2u, meter->srcVarNums.size());
+
+        std::vector<std::string> matchedKeys;
+        matchedKeys.reserve(meter->srcVarNums.size());
+        for (int const varIdx : meter->srcVarNums) {
+            matchedKeys.push_back(op->outVars[varIdx]->key);
+        }
+        std::sort(matchedKeys.begin(), matchedKeys.end());
+        EXPECT_EQ((std::vector<std::string>{"SPACE4-1 LIGHTS 1", "SPACE5-1 LIGHTS 1"}), matchedKeys);
+    }
+
 } // namespace OutputProcessor
 
 } // namespace EnergyPlus

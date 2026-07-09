@@ -780,11 +780,11 @@ namespace GroundTemp {
         for (int cell = 1; cell <= totalNumCells; ++cell) {
             auto &thisCell = cellArray(cell);
 
-            Real64 depth = (thisCell.maxZValue + thisCell.minZValue) / 2.0;
+            Real64 cellDepth = (thisCell.maxZValue + thisCell.minZValue) / 2.0;
 
             // Initialize temperatures
             if (tempModel) {
-                thisCell.temperature = tempModel->getGroundTempAtTimeInSeconds(state, depth, 0.0); // Initialized at first day of year
+                thisCell.temperature = tempModel->getGroundTempAtTimeInSeconds(state, cellDepth, 0.0); // Initialized at first day of year
             }
             thisCell.temperature_finalConvergence = thisCell.temperature;
             thisCell.temperature_prevIteration = thisCell.temperature;

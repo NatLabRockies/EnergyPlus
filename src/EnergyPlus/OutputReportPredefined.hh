@@ -237,6 +237,16 @@ struct OutputReportPredefinedData : BaseGlobalStruct
     int pdchMechIPLVSI = 0;
     int pdchMechIPLVIP = 0;
 
+    // ground loop heat exchanger report
+    int pdstGLHE = 0;
+    int pdchGLHEType = 0;
+    int pdchGLHETubeLength = 0;
+    int pdchGLHEVolFlow = 0;
+    int pdchGLHEbhDepth = 0;
+    int pdchGLHEbhDiam = 0;
+    int pdchGLHEbhLeng = 0;
+    int pdchGLHENumHolesTrenches = 0;
+
     // Fan subtable
     int pdstFan = 0;
     int pdchFanType = 0;

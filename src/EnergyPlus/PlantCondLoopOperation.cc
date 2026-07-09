@@ -1372,9 +1372,9 @@ void FindCompSPInput(EnergyPlusData &state,
     Real64 CompFlowRate(0.0);
     std::string LoopOpSchemeObj; // Used to identify the object name for loop equipment operation scheme
     bool SchemeNameFound;        // Set to FALSE if a match of OpScheme object and OpScheme name is not found
-    Real64 NonChargCHWTemp;
-    Real64 OffPeakCHWTemp;
-    CtrlType CompOpType; // 1=cooling, 2=dual(or other)
+    Real64 NonChargCHWTemp = 0.0;
+    Real64 OffPeakCHWTemp = 0.0;
+    CtrlType CompOpType = CtrlType::Invalid; // 1=cooling, 2=dual(or other)
 
     SchemeNameFound = true;
 
@@ -1388,7 +1388,7 @@ void FindCompSPInput(EnergyPlusData &state,
     }
 
     if (NumSchemes > 0) {
-        int NumAlphas;
+        int NumAlphas = 0;
         int NumNums;
         int IOStat;
         for (int Num = 1; Num <= NumSchemes; ++Num) {
@@ -1440,8 +1440,8 @@ void FindCompSPInput(EnergyPlusData &state,
             if (state.dataPlnt->PlantLoop(LoopNum).OpScheme(SchemeNum).EquipList(1).NumComps > 0) {
                 state.dataPlnt->PlantLoop(LoopNum).OpScheme(SchemeNum).EquipList(1).Comp.allocate(
                     state.dataPlnt->PlantLoop(LoopNum).OpScheme(SchemeNum).EquipList(1).NumComps);
-                int CompNumA;
-                int CompNumN;
+                int CompNumA = 0;
+                int CompNumN = 0;
                 for (int CompNum = 1; CompNum <= state.dataPlnt->PlantLoop(LoopNum).OpScheme(SchemeNum).EquipList(1).NumComps; ++CompNum) {
                     if (CurrentModuleObject == "PlantEquipmentOperation:ComponentSetPoint") {
                         CompNumA = CompNum * 5;
@@ -2418,7 +2418,7 @@ void GetUserDefinedOpSchemeInput(EnergyPlusData &state,
     }
 
     if (NumSchemes > 0) {
-        int NumAlphas, NumNums, Num, IOStat;
+        int NumAlphas = 0, NumNums, Num, IOStat;
 
         for (Num = 1; Num <= NumSchemes; ++Num) {
             state.dataInputProcessing->inputProcessor->getObjectItem(state,

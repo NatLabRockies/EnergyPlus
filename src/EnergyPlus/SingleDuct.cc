@@ -2540,15 +2540,15 @@ void SingleDuctAirTerminal::SizeSys(EnergyPlusData &state)
     // if a sizing run has been done, check if system sizing has been done for this system
     bool SizingDesRunThisAirSys = false;
     if (state.dataSize->SysSizingRunDone) {
-        int AirLoopNum = state.dataZoneEquip->ZoneEquipConfig(this->CtrlZoneNum).InletNodeAirLoopNum(this->CtrlZoneInNodeIndex);
-        if (AirLoopNum > 0) {
-            CheckThisAirSystemForSizing(state, AirLoopNum, SizingDesRunThisAirSys);
+        int inletAirLoopNum = state.dataZoneEquip->ZoneEquipConfig(this->CtrlZoneNum).InletNodeAirLoopNum(this->CtrlZoneInNodeIndex);
+        if (inletAirLoopNum > 0) {
+            CheckThisAirSystemForSizing(state, inletAirLoopNum, SizingDesRunThisAirSys);
         }
 
         // get system sizing id if a sizing run has been done for this system
         if (SizingDesRunThisAirSys) {
             SysSizNum = Util::FindItemInList(
-                state.dataSize->FinalSysSizing(AirLoopNum).AirPriLoopName, state.dataSize->SysSizInput, &SystemSizingInputData::AirPriLoopName);
+                state.dataSize->FinalSysSizing(inletAirLoopNum).AirPriLoopName, state.dataSize->SysSizInput, &SystemSizingInputData::AirPriLoopName);
             if (SysSizNum == 0) {
                 SysSizNum = 1; // use first when none applicable
             }
@@ -3859,11 +3859,11 @@ void SingleDuctAirTerminal::CalcOAMassFlow(EnergyPlusData &state,
     // initialize OA flow rate and OA report variable
     SAMassFlow = 0.0;
     AirLoopOAFrac = 0.0;
-    int AirLoopNum = this->AirLoopNum;
+    int airLoopNum = this->AirLoopNum;
 
     // Calculate the amount of OA based on optional user inputs
-    if (AirLoopNum > 0) {
-        AirLoopOAFrac = state.dataAirLoop->AirLoopFlow(AirLoopNum).OAFrac;
+    if (airLoopNum > 0) {
+        AirLoopOAFrac = state.dataAirLoop->AirLoopFlow(airLoopNum).OAFrac;
         // If no additional input from user, RETURN from subroutine
         if (this->NoOAFlowInputFromUser) {
             return;
@@ -3871,7 +3871,7 @@ void SingleDuctAirTerminal::CalcOAMassFlow(EnergyPlusData &state,
         // Calculate outdoor air flow rate, zone multipliers are applied in GetInput
         if (AirLoopOAFrac > 0.0) {
             OAVolumeFlowRate = DataSizing::calcDesignSpecificationOutdoorAir(
-                state, this->OARequirementsPtr, this->CtrlZoneNum, state.dataAirLoop->AirLoopControlInfo(AirLoopNum).AirLoopDCVFlag, UseMinOASchFlag);
+                state, this->OARequirementsPtr, this->CtrlZoneNum, state.dataAirLoop->AirLoopControlInfo(airLoopNum).AirLoopDCVFlag, UseMinOASchFlag);
             OAMassFlow = OAVolumeFlowRate * state.dataEnvrn->StdRhoAir;
 
             // convert OA mass flow rate to supply air flow rate based on air loop OA fraction
@@ -4275,7 +4275,7 @@ void SingleDuctAirTerminal::SimVAVVS(EnergyPlusData &state, bool const FirstHVAC
     Real64 QHeatFanOffMax;       // max heating - fan off, hot water flow at max [W]
     Real64 QNoHeatFanOff;        // min heating - fan off, hot water at min flow [W]
     HVAC::CoilType heatCoilType; // heating coil type
-    HVAC::FanType fanType;       // fan type (as a number)
+    HVAC::FanType fanTypeLocal;  // fan type (as a number)
     int FanOp;                   // 1 if fan is on; 0 if off.
     Real64 MaxCoolMassFlow;      // air flow at max cooling [kg/s]
     Real64 MaxHeatMassFlow;      // air flow at max heating [kg/s]
@@ -4293,7 +4293,7 @@ void SingleDuctAirTerminal::SimVAVVS(EnergyPlusData &state, bool const FirstHVAC
     SysInletNode = this->InletNodeNum;
     CpAirZn = PsyCpAirFnW(state.dataLoopNodes->Node(ZoneNodeNum).HumRat);
     heatCoilType = this->reheatCoilType;
-    fanType = this->fanType;
+    fanTypeLocal = this->fanType;
     MaxCoolMassFlow = this->sd_airterminalInlet.AirMassFlowRateMaxAvail;
     MaxHeatMassFlow = min(this->HeatAirMassFlowRateMax, this->sd_airterminalInlet.AirMassFlowRateMaxAvail);
     MinMassFlow = MaxCoolMassFlow * this->ZoneMinAirFrac;
@@ -4303,7 +4303,7 @@ void SingleDuctAirTerminal::SimVAVVS(EnergyPlusData &state, bool const FirstHVAC
     if (this->sd_airterminalInlet.AirMassFlowRateMaxAvail <= 0.0 || state.dataZoneEnergyDemand->CurDeadBandOrSetback(ZoneNum)) {
         MassFlow = 0.0;
         FanOp = 0;
-        this->CalcVAVVS(state, FirstHVACIteration, ZoneNodeNum, 0.0, 0.0, fanType, MassFlow, FanOp, QDelivered);
+        this->CalcVAVVS(state, FirstHVACIteration, ZoneNodeNum, 0.0, 0.0, fanTypeLocal, MassFlow, FanOp, QDelivered);
         return;
     }
 
@@ -4343,26 +4343,26 @@ void SingleDuctAirTerminal::SimVAVVS(EnergyPlusData &state, bool const FirstHVAC
     FanOp = 1;
     if (heatCoilType == HVAC::CoilType::HeatingSteam) {
         bool ErrorsFound; // returned from mining function call
-        this->CalcVAVVS(state, FirstHVACIteration, ZoneNodeNum, MinFlowSteam, 0.0, fanType, MaxCoolMassFlow, FanOp, QCoolFanOnMax);
-        this->CalcVAVVS(state, FirstHVACIteration, ZoneNodeNum, MinFlowSteam, 0.0, fanType, MinMassFlow, FanOp, QCoolFanOnMin);
+        this->CalcVAVVS(state, FirstHVACIteration, ZoneNodeNum, MinFlowSteam, 0.0, fanTypeLocal, MaxCoolMassFlow, FanOp, QCoolFanOnMax);
+        this->CalcVAVVS(state, FirstHVACIteration, ZoneNodeNum, MinFlowSteam, 0.0, fanTypeLocal, MinMassFlow, FanOp, QCoolFanOnMin);
         // region 2: active heating with fan on
-        this->CalcVAVVS(state, FirstHVACIteration, ZoneNodeNum, MaxFlowSteam, BigLoad, fanType, MaxHeatMassFlow, FanOp, QHeatFanOnMax);
+        this->CalcVAVVS(state, FirstHVACIteration, ZoneNodeNum, MaxFlowSteam, BigLoad, fanTypeLocal, MaxHeatMassFlow, FanOp, QHeatFanOnMax);
         MaxSteamCap = GetCoilCapacity(state, this->ReheatComp, this->ReheatName, ErrorsFound);
-        this->CalcVAVVS(state, FirstHVACIteration, ZoneNodeNum, MaxFlowSteam, 0.0, fanType, MinMassFlow, FanOp, QHeatFanOnMin);
+        this->CalcVAVVS(state, FirstHVACIteration, ZoneNodeNum, MaxFlowSteam, 0.0, fanTypeLocal, MinMassFlow, FanOp, QHeatFanOnMin);
         // region 3: active heating with fan off
         FanOp = 0;
-        this->CalcVAVVS(state, FirstHVACIteration, ZoneNodeNum, MaxFlowSteam, BigLoad, fanType, MinMassFlow, FanOp, QHeatFanOffMax);
-        this->CalcVAVVS(state, FirstHVACIteration, ZoneNodeNum, MinFlowSteam, 0.0, fanType, MinMassFlow, FanOp, QNoHeatFanOff);
+        this->CalcVAVVS(state, FirstHVACIteration, ZoneNodeNum, MaxFlowSteam, BigLoad, fanTypeLocal, MinMassFlow, FanOp, QHeatFanOffMax);
+        this->CalcVAVVS(state, FirstHVACIteration, ZoneNodeNum, MinFlowSteam, 0.0, fanTypeLocal, MinMassFlow, FanOp, QNoHeatFanOff);
     } else {
-        this->CalcVAVVS(state, FirstHVACIteration, ZoneNodeNum, MinFlowWater, 0.0, fanType, MaxCoolMassFlow, FanOp, QCoolFanOnMax);
-        this->CalcVAVVS(state, FirstHVACIteration, ZoneNodeNum, MinFlowWater, 0.0, fanType, MinMassFlow, FanOp, QCoolFanOnMin);
+        this->CalcVAVVS(state, FirstHVACIteration, ZoneNodeNum, MinFlowWater, 0.0, fanTypeLocal, MaxCoolMassFlow, FanOp, QCoolFanOnMax);
+        this->CalcVAVVS(state, FirstHVACIteration, ZoneNodeNum, MinFlowWater, 0.0, fanTypeLocal, MinMassFlow, FanOp, QCoolFanOnMin);
         // region 2: active heating with fan on
-        this->CalcVAVVS(state, FirstHVACIteration, ZoneNodeNum, MaxFlowWater, BigLoad, fanType, MaxHeatMassFlow, FanOp, QHeatFanOnMax);
-        this->CalcVAVVS(state, FirstHVACIteration, ZoneNodeNum, MaxFlowWater, 0.0, fanType, MinMassFlow, FanOp, QHeatFanOnMin);
+        this->CalcVAVVS(state, FirstHVACIteration, ZoneNodeNum, MaxFlowWater, BigLoad, fanTypeLocal, MaxHeatMassFlow, FanOp, QHeatFanOnMax);
+        this->CalcVAVVS(state, FirstHVACIteration, ZoneNodeNum, MaxFlowWater, 0.0, fanTypeLocal, MinMassFlow, FanOp, QHeatFanOnMin);
         // region 3: active heating with fan off
         FanOp = 0;
-        this->CalcVAVVS(state, FirstHVACIteration, ZoneNodeNum, MaxFlowWater, BigLoad, fanType, MinMassFlow, FanOp, QHeatFanOffMax);
-        this->CalcVAVVS(state, FirstHVACIteration, ZoneNodeNum, MinFlowWater, 0.0, fanType, MinMassFlow, FanOp, QNoHeatFanOff);
+        this->CalcVAVVS(state, FirstHVACIteration, ZoneNodeNum, MaxFlowWater, BigLoad, fanTypeLocal, MinMassFlow, FanOp, QHeatFanOffMax);
+        this->CalcVAVVS(state, FirstHVACIteration, ZoneNodeNum, MinFlowWater, 0.0, fanTypeLocal, MinMassFlow, FanOp, QNoHeatFanOff);
     }
 
     // Active cooling with fix for issue #5592
@@ -4373,11 +4373,11 @@ void SingleDuctAirTerminal::SimVAVVS(EnergyPlusData &state, bool const FirstHVAC
         if (QCoolFanOnMax < QTotLoad - SmallLoad) {
             Real64 MinHWFlow = (heatCoilType == HVAC::CoilType::HeatingSteam) ? MinFlowSteam : MinFlowWater;
 
-            auto f = [&state, this, FirstHVACIteration, ZoneNodeNum, MinHWFlow, fanType, FanOp, QTotLoad](Real64 const SupplyAirMassFlow) {
+            auto f = [&state, this, FirstHVACIteration, ZoneNodeNum, MinHWFlow, fanTypeLocal, FanOp, QTotLoad](Real64 const SupplyAirMassFlow) {
                 Real64 UnitOutput = 0.0; // cooling output [W] (cooling is negative)
 
                 state.dataSingleDuct->sd_airterminal(this->SysNum)
-                    .CalcVAVVS(state, FirstHVACIteration, ZoneNodeNum, MinHWFlow, 0.0, fanType, SupplyAirMassFlow, FanOp, UnitOutput);
+                    .CalcVAVVS(state, FirstHVACIteration, ZoneNodeNum, MinHWFlow, 0.0, fanTypeLocal, SupplyAirMassFlow, FanOp, UnitOutput);
                 return (QTotLoad - UnitOutput) / QTotLoad;
             };
 
@@ -4410,9 +4410,9 @@ void SingleDuctAirTerminal::SimVAVVS(EnergyPlusData &state, bool const FirstHVAC
             MassFlow = MaxCoolMassFlow;
 
             if (heatCoilType == HVAC::CoilType::HeatingSteam) {
-                this->CalcVAVVS(state, FirstHVACIteration, ZoneNodeNum, MinFlowSteam, 0.0, fanType, MassFlow, FanOp, QDelivered);
+                this->CalcVAVVS(state, FirstHVACIteration, ZoneNodeNum, MinFlowSteam, 0.0, fanTypeLocal, MassFlow, FanOp, QDelivered);
             } else {
-                this->CalcVAVVS(state, FirstHVACIteration, ZoneNodeNum, MinFlowWater, 0.0, fanType, MassFlow, FanOp, QDelivered);
+                this->CalcVAVVS(state, FirstHVACIteration, ZoneNodeNum, MinFlowWater, 0.0, fanTypeLocal, MassFlow, FanOp, QDelivered);
             }
         }
 
@@ -4423,9 +4423,9 @@ void SingleDuctAirTerminal::SimVAVVS(EnergyPlusData &state, bool const FirstHVAC
         MassFlow = MinMassFlow;
         FanOp = 0;
         if (heatCoilType == HVAC::CoilType::HeatingSteam) {
-            this->CalcVAVVS(state, FirstHVACIteration, ZoneNodeNum, MinFlowSteam, QTotLoad, fanType, MassFlow, FanOp, QNoHeatFanOff);
+            this->CalcVAVVS(state, FirstHVACIteration, ZoneNodeNum, MinFlowSteam, QTotLoad, fanTypeLocal, MassFlow, FanOp, QNoHeatFanOff);
         } else {
-            this->CalcVAVVS(state, FirstHVACIteration, ZoneNodeNum, MinFlowWater, 0.0, fanType, MassFlow, FanOp, QNoHeatFanOff);
+            this->CalcVAVVS(state, FirstHVACIteration, ZoneNodeNum, MinFlowWater, 0.0, fanTypeLocal, MassFlow, FanOp, QNoHeatFanOff);
         }
 
         // active heating
@@ -4439,12 +4439,12 @@ void SingleDuctAirTerminal::SimVAVVS(EnergyPlusData &state, bool const FirstHVAC
                 MassFlow = MinMassFlow;
                 FanOp = 0;
 
-                auto f = [&state, this, FirstHVACIteration, ZoneNodeNum, MassFlow, fanType, FanOp, QTotLoad](Real64 const HWMassFlow) {
+                auto f = [&state, this, FirstHVACIteration, ZoneNodeNum, MassFlow, fanTypeLocal, FanOp, QTotLoad](Real64 const HWMassFlow) {
                     Real64 UnitOutput = 0.0; // heating output [W]
                     Real64 QSteamLoad = 0.0; // proportional load to calculate steam flow [W]
 
                     state.dataSingleDuct->sd_airterminal(this->SysNum)
-                        .CalcVAVVS(state, FirstHVACIteration, ZoneNodeNum, HWMassFlow, QSteamLoad, fanType, MassFlow, FanOp, UnitOutput);
+                        .CalcVAVVS(state, FirstHVACIteration, ZoneNodeNum, HWMassFlow, QSteamLoad, fanTypeLocal, MassFlow, FanOp, UnitOutput);
 
                     return (QTotLoad - UnitOutput) / QTotLoad;
                 };
@@ -4461,7 +4461,7 @@ void SingleDuctAirTerminal::SimVAVVS(EnergyPlusData &state, bool const FirstHVAC
                     ShowRecurringWarningErrorAtEnd(state, "Hot Water flow control failed in VS VAV terminal unit " + this->SysName, this->ErrCount1);
                     ShowRecurringContinueErrorAtEnd(
                         state, "...Iteration limit (500) exceeded in calculating the hot water flow rate", this->ErrCount1c);
-                    this->CalcVAVVS(state, FirstHVACIteration, ZoneNodeNum, HWFlow, 0.0, fanType, MassFlow, FanOp, QDelivered);
+                    this->CalcVAVVS(state, FirstHVACIteration, ZoneNodeNum, HWFlow, 0.0, fanTypeLocal, MassFlow, FanOp, QDelivered);
                 } else if (SolFlag == General::SOLVEROOT_ERROR_INIT) {
                     ShowRecurringWarningErrorAtEnd(
                         state, "Hot Water flow control failed (bad air flow limits) in VS VAV terminal unit " + this->SysName, this->ErrCount2);
@@ -4469,17 +4469,19 @@ void SingleDuctAirTerminal::SimVAVVS(EnergyPlusData &state, bool const FirstHVAC
             } else if (QTotLoad >= QHeatFanOffMax - SmallLoad && QTotLoad <= QHeatFanOnMin + SmallLoad) {
                 MassFlow = MinMassFlow;
                 FanOp = 0;
-                this->CalcVAVVS(state, FirstHVACIteration, ZoneNodeNum, MaxFlowWater, 0.0, fanType, MassFlow, FanOp, QDelivered);
+                this->CalcVAVVS(state, FirstHVACIteration, ZoneNodeNum, MaxFlowWater, 0.0, fanTypeLocal, MassFlow, FanOp, QDelivered);
             } else if (QTotLoad > QHeatFanOnMin + SmallLoad && QTotLoad < QHeatFanOnMax - SmallLoad) {
                 // set hot water flow to max and vary the supply air flow rate
                 FanOp = 1;
-                auto f = [&state, this, FirstHVACIteration, ZoneNodeNum, MaxFlowWater, fanType, FanOp, QTotLoad](Real64 const SupplyAirMassFlow) {
-                    Real64 UnitOutput = 0.0; // heating output [W]
-                    state.dataSingleDuct->sd_airterminal(this->SysNum)
-                        .CalcVAVVS(state, FirstHVACIteration, ZoneNodeNum, MaxFlowWater, QTotLoad, fanType, SupplyAirMassFlow, FanOp, UnitOutput);
+                auto f =
+                    [&state, this, FirstHVACIteration, ZoneNodeNum, MaxFlowWater, fanTypeLocal, FanOp, QTotLoad](Real64 const SupplyAirMassFlow) {
+                        Real64 UnitOutput = 0.0; // heating output [W]
+                        state.dataSingleDuct->sd_airterminal(this->SysNum)
+                            .CalcVAVVS(
+                                state, FirstHVACIteration, ZoneNodeNum, MaxFlowWater, QTotLoad, fanTypeLocal, SupplyAirMassFlow, FanOp, UnitOutput);
 
-                    return (QTotLoad - UnitOutput) / QTotLoad;
-                };
+                        return (QTotLoad - UnitOutput) / QTotLoad;
+                    };
 
                 MassFlow = General::SolveRoot2(state,
                                                UnitFlowToler,
@@ -4507,7 +4509,7 @@ void SingleDuctAirTerminal::SimVAVVS(EnergyPlusData &state, bool const FirstHVAC
             } else {
                 MassFlow = MaxHeatMassFlow;
                 FanOp = 1;
-                this->CalcVAVVS(state, FirstHVACIteration, ZoneNodeNum, MaxFlowWater, 0.0, fanType, MassFlow, FanOp, QDelivered);
+                this->CalcVAVVS(state, FirstHVACIteration, ZoneNodeNum, MaxFlowWater, 0.0, fanTypeLocal, MassFlow, FanOp, QDelivered);
             }
         } else if (heatCoilType == HVAC::CoilType::HeatingSteam) {
             //      IF (QTotLoad > QNoHeatFanOff + SmallLoad .AND. QTotLoad < QHeatFanOffMax - SmallLoad) THEN
@@ -4515,23 +4517,24 @@ void SingleDuctAirTerminal::SimVAVVS(EnergyPlusData &state, bool const FirstHVAC
                 ErrTolerance = this->ControllerOffset;
                 MassFlow = MinMassFlow;
                 FanOp = 0;
-                auto f = [&state, this, FirstHVACIteration, ZoneNodeNum, MassFlow, fanType, FanOp, QTotLoad, MinFlowSteam, MaxFlowSteam, MaxSteamCap](
-                             Real64 const HWMassFlow) {
-                    Real64 UnitOutput = 0.0; // heating output [W]
-                    Real64 QSteamLoad = 0.0; // proportional load to calculate steam flow [W]
+                auto f =
+                    [&state, this, FirstHVACIteration, ZoneNodeNum, MassFlow, fanTypeLocal, FanOp, QTotLoad, MinFlowSteam, MaxFlowSteam, MaxSteamCap](
+                        Real64 const HWMassFlow) {
+                        Real64 UnitOutput = 0.0; // heating output [W]
+                        Real64 QSteamLoad = 0.0; // proportional load to calculate steam flow [W]
 
-                    // vary the load to be met by the steam coil to converge on a steam flow rate to meet the load
-                    //   backwards way of varying steam flow rate. Steam coil calculates a flow rate to meet a load.
-                    if ((MaxFlowSteam - MinFlowSteam) == 0.0) {
-                        QSteamLoad = QTotLoad; // Use QTotLoad, bad starting value error for RegulaFalsi will occur
-                    } else {
-                        QSteamLoad = MaxSteamCap * HWMassFlow / (MaxFlowSteam - MinFlowSteam);
-                    }
-                    state.dataSingleDuct->sd_airterminal(this->SysNum)
-                        .CalcVAVVS(state, FirstHVACIteration, ZoneNodeNum, HWMassFlow, QSteamLoad, fanType, MassFlow, FanOp, UnitOutput);
+                        // vary the load to be met by the steam coil to converge on a steam flow rate to meet the load
+                        //   backwards way of varying steam flow rate. Steam coil calculates a flow rate to meet a load.
+                        if ((MaxFlowSteam - MinFlowSteam) == 0.0) {
+                            QSteamLoad = QTotLoad; // Use QTotLoad, bad starting value error for RegulaFalsi will occur
+                        } else {
+                            QSteamLoad = MaxSteamCap * HWMassFlow / (MaxFlowSteam - MinFlowSteam);
+                        }
+                        state.dataSingleDuct->sd_airterminal(this->SysNum)
+                            .CalcVAVVS(state, FirstHVACIteration, ZoneNodeNum, HWMassFlow, QSteamLoad, fanTypeLocal, MassFlow, FanOp, UnitOutput);
 
-                    return (QTotLoad - UnitOutput) / QTotLoad;
-                };
+                        return (QTotLoad - UnitOutput) / QTotLoad;
+                    };
 
                 HWFlow = General::SolveRoot2(state,
                                              ErrTolerance,
@@ -4545,7 +4548,7 @@ void SingleDuctAirTerminal::SimVAVVS(EnergyPlusData &state, bool const FirstHVAC
                     ShowRecurringWarningErrorAtEnd(state, "Steam flow control failed in VS VAV terminal unit " + this->SysName, this->ErrCount1);
                     ShowRecurringContinueErrorAtEnd(
                         state, "...Iteration limit (500) exceeded in calculating the hot water flow rate", this->ErrCount1c);
-                    this->CalcVAVVS(state, FirstHVACIteration, ZoneNodeNum, HWFlow, 0.0, fanType, MassFlow, FanOp, QDelivered);
+                    this->CalcVAVVS(state, FirstHVACIteration, ZoneNodeNum, HWFlow, 0.0, fanTypeLocal, MassFlow, FanOp, QDelivered);
                 } else if (SolFlag == General::SOLVEROOT_ERROR_INIT) {
                     ShowRecurringWarningErrorAtEnd(
                         state, "Steam flow control failed (bad air flow limits) in VS VAV terminal unit " + this->SysName, this->ErrCount2);
@@ -4553,18 +4556,20 @@ void SingleDuctAirTerminal::SimVAVVS(EnergyPlusData &state, bool const FirstHVAC
             } else if (QTotLoad >= QHeatFanOffMax - SmallLoad && QTotLoad <= QHeatFanOnMin + SmallLoad) {
                 MassFlow = MinMassFlow;
                 FanOp = 0;
-                this->CalcVAVVS(state, FirstHVACIteration, ZoneNodeNum, MaxFlowWater, 0.0, fanType, MassFlow, FanOp, QDelivered);
+                this->CalcVAVVS(state, FirstHVACIteration, ZoneNodeNum, MaxFlowWater, 0.0, fanTypeLocal, MassFlow, FanOp, QDelivered);
             } else if (QTotLoad > QHeatFanOnMin + SmallLoad && QTotLoad < QHeatFanOnMax - SmallLoad) {
                 FanOp = 1;
 
-                auto f = [&state, this, FirstHVACIteration, ZoneNodeNum, MaxFlowSteam, fanType, FanOp, QTotLoad](Real64 const SupplyAirMassFlow) {
-                    Real64 UnitOutput = 0.0; // heating output [W]
+                auto f =
+                    [&state, this, FirstHVACIteration, ZoneNodeNum, MaxFlowSteam, fanTypeLocal, FanOp, QTotLoad](Real64 const SupplyAirMassFlow) {
+                        Real64 UnitOutput = 0.0; // heating output [W]
 
-                    state.dataSingleDuct->sd_airterminal(this->SysNum)
-                        .CalcVAVVS(state, FirstHVACIteration, ZoneNodeNum, MaxFlowSteam, QTotLoad, fanType, SupplyAirMassFlow, FanOp, UnitOutput);
+                        state.dataSingleDuct->sd_airterminal(this->SysNum)
+                            .CalcVAVVS(
+                                state, FirstHVACIteration, ZoneNodeNum, MaxFlowSteam, QTotLoad, fanTypeLocal, SupplyAirMassFlow, FanOp, UnitOutput);
 
-                    return (QTotLoad - UnitOutput) / QTotLoad;
-                };
+                        return (QTotLoad - UnitOutput) / QTotLoad;
+                    };
 
                 MassFlow = General::SolveRoot2(state,
                                                UnitFlowToler,
@@ -4592,18 +4597,18 @@ void SingleDuctAirTerminal::SimVAVVS(EnergyPlusData &state, bool const FirstHVAC
             } else {
                 MassFlow = MaxHeatMassFlow;
                 FanOp = 1;
-                this->CalcVAVVS(state, FirstHVACIteration, ZoneNodeNum, QTotLoad, QTotLoad, fanType, MassFlow, FanOp, QDelivered);
+                this->CalcVAVVS(state, FirstHVACIteration, ZoneNodeNum, QTotLoad, QTotLoad, fanTypeLocal, MassFlow, FanOp, QDelivered);
             }
         } else if (heatCoilType == HVAC::CoilType::HeatingGasOrOtherFuel || heatCoilType == HVAC::CoilType::HeatingElectric) {
             if (QTotLoad <= QHeatFanOnMin + SmallLoad) {
                 // vary heating coil power, leave mass flow at minimum
                 MassFlow = MinMassFlow;
                 FanOp = 0;
-                this->CalcVAVVS(state, FirstHVACIteration, ZoneNodeNum, 0.0, QTotLoad, fanType, MassFlow, FanOp, QDelivered);
+                this->CalcVAVVS(state, FirstHVACIteration, ZoneNodeNum, 0.0, QTotLoad, fanTypeLocal, MassFlow, FanOp, QDelivered);
             } else if (QTotLoad > QHeatFanOnMin + SmallLoad && QTotLoad < QHeatFanOnMax - SmallLoad) {
                 FanOp = 1;
 
-                auto f = [&state, this, FirstHVACIteration, ZoneNodeNum, fanType, FanOp, QTotLoad](Real64 const HeatingFrac) {
+                auto f = [&state, this, FirstHVACIteration, ZoneNodeNum, fanTypeLocal, FanOp, QTotLoad](Real64 const HeatingFrac) {
                     Real64 MaxHeatOut{this->ReheatCoilMaxCapacity}; // maximum heating output [W]
                     Real64 UnitOutput;                              // heating output [W]
                     Real64 AirMassFlowRate;                         // [kg/s]
@@ -4615,7 +4620,7 @@ void SingleDuctAirTerminal::SimVAVVS(EnergyPlusData &state, bool const FirstHVAC
                                               state.dataSingleDuct->sd_airterminal(this->SysNum).ZoneMinAirFrac);
 
                     state.dataSingleDuct->sd_airterminal(this->SysNum)
-                        .CalcVAVVS(state, FirstHVACIteration, ZoneNodeNum, 0.0, HeatOut, fanType, AirMassFlowRate, FanOp, UnitOutput);
+                        .CalcVAVVS(state, FirstHVACIteration, ZoneNodeNum, 0.0, HeatOut, fanTypeLocal, AirMassFlowRate, FanOp, UnitOutput);
 
                     return (QTotLoad - UnitOutput) / QTotLoad;
                 };
@@ -4641,7 +4646,7 @@ void SingleDuctAirTerminal::SimVAVVS(EnergyPlusData &state, bool const FirstHVAC
             } else {
                 MassFlow = MaxHeatMassFlow;
                 FanOp = 1;
-                this->CalcVAVVS(state, FirstHVACIteration, ZoneNodeNum, 0.0, QTotLoad, fanType, MassFlow, FanOp, QDelivered);
+                this->CalcVAVVS(state, FirstHVACIteration, ZoneNodeNum, 0.0, QTotLoad, fanTypeLocal, MassFlow, FanOp, QDelivered);
             }
         } else {
             ShowFatalError(state, std::format("Invalid Reheat Component={}", this->ReheatComp));
@@ -4651,7 +4656,7 @@ void SingleDuctAirTerminal::SimVAVVS(EnergyPlusData &state, bool const FirstHVAC
 
         MassFlow = 0.0;
         FanOp = 0;
-        this->CalcVAVVS(state, FirstHVACIteration, ZoneNodeNum, 0.0, 0.0, fanType, MassFlow, FanOp, QDelivered);
+        this->CalcVAVVS(state, FirstHVACIteration, ZoneNodeNum, 0.0, 0.0, fanTypeLocal, MassFlow, FanOp, QDelivered);
     }
 
     // Move mass flow rates to the damper outlet node
@@ -4850,14 +4855,14 @@ void SingleDuctAirTerminal::SimConstVolNoReheat(EnergyPlusData &state)
 }
 
 void SingleDuctAirTerminal::CalcVAVVS(EnergyPlusData &state,
-                                      bool const FirstHVACIteration,          // flag for 1st HVAV iteration in the time step
-                                      int const ZoneNode,                     // zone node number
-                                      Real64 const HWFlow,                    // hot water flow (kg/s)
-                                      Real64 const HCoilReq,                  // gas or elec coil demand requested
-                                      [[maybe_unused]] HVAC::FanType fanType, // type of fan
-                                      Real64 const AirFlow,                   // air flow rate (kg/s)
-                                      int const FanOn,                        // 1 means fan is on
-                                      Real64 &LoadMet                         // load met by unit (watts)
+                                      bool const FirstHVACIteration,            // flag for 1st HVAV iteration in the time step
+                                      int const ZoneNode,                       // zone node number
+                                      Real64 const HWFlow,                      // hot water flow (kg/s)
+                                      Real64 const HCoilReq,                    // gas or elec coil demand requested
+                                      [[maybe_unused]] HVAC::FanType t_fanType, // type of fan
+                                      Real64 const AirFlow,                     // air flow rate (kg/s)
+                                      int const FanOn,                          // 1 means fan is on
+                                      Real64 &LoadMet                           // load met by unit (watts)
 )
 {
 

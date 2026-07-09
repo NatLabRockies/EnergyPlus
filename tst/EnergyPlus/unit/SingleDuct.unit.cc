@@ -1333,6 +1333,13 @@ TEST_F(EnergyPlusFixture, SingleDuct_ZeroFloorAreaTest)
     EXPECT_GT(state->dataSingleDuct->sd_airterminal(2).ZoneFloorArea, 0.0);
     EXPECT_NEAR(state->dataSingleDuct->sd_airterminal(2).MaxAirVolFlowRateDuringReheat, MaxAirVolFlowRateDuringReheatDes, 0.0000000000001);
     EXPECT_NEAR(MaxAirVolFractionDuringReheatDes, state->dataSingleDuct->sd_airterminal(2).MaxAirVolFractionDuringReheat, 0.0000000000001);
+
+    // Check system minimum heating air flow ratio warning when DesHeatVolFlow/DesMainVolFlow is grater than SysAirMinFlowRat
+    EXPECT_NEAR(0.8831, state->dataSize->FinalSysSizing(1).DesHeatVolFlow / state->dataSize->FinalSysSizing(1).DesMainVolFlow, 0.0001);
+    EXPECT_NEAR(0.3, state->dataSize->FinalSysSizing(1).SysAirMinFlowRat, 0.0001);
+    std::string error_string = delimited_string(
+        {"The central heating coil may undersize if autosized. Consider increasing the Central Heating Maximum System Air Flow Ratio."});
+    EXPECT_TRUE(compare_err_stream_substring(error_string));
 }
 
 TEST_F(EnergyPlusFixture, TestOAMassFlowRateUsingStdRhoAir)

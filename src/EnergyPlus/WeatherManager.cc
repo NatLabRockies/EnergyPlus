@@ -1541,10 +1541,10 @@ namespace Weather {
 
         static constexpr std::string_view RoutineName("SetDSTDateRanges: ");
 
-        int ActStartMonth; // Actual Start Month
-        int ActStartDay;   // Actual Start Day of Month
-        int ActEndMonth;   // Actual End Month
-        int ActEndDay;     // Actual End Day of Month
+        int ActStartMonth = 0; // Actual Start Month
+        int ActStartDay = 0;   // Actual Start Day of Month
+        int ActEndMonth;       // Actual End Month
+        int ActEndDay;         // Actual End Day of Month
 
         bool ErrorsFound = false;
         if (state.dataWeather->DST.StDateType == DateType::MonthDay) {
@@ -2304,22 +2304,22 @@ namespace Weather {
         int WDay;
         int WHour;
         int WMinute;
-        Real64 DryBulb;
-        Real64 DewPoint;
-        Real64 RelHum;
-        Real64 AtmPress;
+        Real64 DryBulb = 0.0;
+        Real64 DewPoint = 0.0;
+        Real64 RelHum = 0.0;
+        Real64 AtmPress = 0.0;
         Real64 ETHoriz;
         Real64 ETDirect;
         Real64 IRHoriz;
         Real64 GLBHoriz;
-        Real64 DirectRad;
-        Real64 DiffuseRad;
+        Real64 DirectRad = 0.0;
+        Real64 DiffuseRad = 0.0;
         Real64 GLBHorizIllum;
         Real64 DirectNrmIllum;
         Real64 DiffuseHorizIllum;
         Real64 ZenLum;
-        Real64 WindDir;
-        Real64 WindSpeed;
+        Real64 WindDir = 0.0;
+        Real64 WindSpeed = 0.0;
         Real64 TotalSkyCover;
         Real64 OpaqueSkyCover;
         Real64 Visibility;
@@ -3682,8 +3682,8 @@ namespace Weather {
         // set the values.  For the scheduled values, these are already set in the DDxxx array.
 
         state.dataGlobal->CurrentTime = 25.0;
-        Real64 HumidityRatio; // Humidity Ratio -- when constant for day
-        bool ConstantHumidityRatio;
+        Real64 HumidityRatio = 0.0; // Humidity Ratio -- when constant for day
+        bool ConstantHumidityRatio = false;
 
         switch (desDayInput.HumIndType) {
         case DesDayHumIndType::WetBulb: {
@@ -3853,8 +3853,8 @@ namespace Weather {
                 // Generate solar values for timestep
                 //    working results = BeamRad and DiffRad
                 //    stored to program globals at end of loop
-                Real64 BeamRad;
-                Real64 DiffRad;
+                Real64 BeamRad = 0.0;
+                Real64 DiffRad = 0.0;
                 if (desDayInput.solarModel == DesDaySolarModel::SolarModel_Schedule) {
                     // scheduled: set value unconditionally (whether sun up or not)
                     BeamRad = desDayModsTS.BeamSolarRad;
@@ -5987,7 +5987,7 @@ namespace Weather {
         static constexpr std::string_view routineName = "GetDesignDayData";
 
         // SUBROUTINE LOCAL VARIABLE DECLARATIONS:
-        Constant::Units unitType;
+        Constant::Units unitType = Constant::Units::None;
 
         state.dataWeather->DesDayInput.allocate(TotDesDays); // Allocate the array to the # of DD's
         state.dataWeather->desDayMods.allocate(TotDesDays);
@@ -6723,7 +6723,7 @@ namespace Weather {
         static constexpr std::string_view routineName = "GetWeatherProperties";
 
         int Found;
-        int envFound;
+        int envFound = 0;
 
         auto const &ipsc = state.dataIPShortCut;
         ipsc->cCurrentModuleObject = "WeatherProperty:SkyTemperature";
@@ -6817,7 +6817,7 @@ namespace Weather {
 
             // Validate Calculation Type.
             // std::string units;
-            Constant::Units unitType;
+            Constant::Units unitType = Constant::Units::None;
             wpSkyTemp.skyTempModel = static_cast<SkyTempModel>(getEnumValue(Weather::SkyTempModelNamesUC, ipsc->cAlphaArgs(2)));
 
             switch (wpSkyTemp.skyTempModel) {

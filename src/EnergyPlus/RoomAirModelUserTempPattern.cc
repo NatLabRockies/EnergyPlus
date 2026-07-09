@@ -361,7 +361,7 @@ void FigureTwoGradInterpPattern(EnergyPlusData &state, int const PattrnID, int c
     // calculations vary by mode
 
     // SUBROUTINE LOCAL VARIABLE DECLARATIONS:
-    Real64 Grad; // vertical temperature gradient C/m
+    Real64 Grad = 0.0; // vertical temperature gradient C/m
 
     auto &patternZoneInfo = state.dataRoomAir->AirPatternZoneInfo(ZoneNum);
     auto const &pattern = state.dataRoomAir->AirPattern(PattrnID);

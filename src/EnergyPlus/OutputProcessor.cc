@@ -850,9 +850,29 @@ namespace OutputProcessor {
 
                         itemsAssigned = true;
                     } else { // Key is not "*"
+                        std::string const &keyArg = ipsc->cAlphaArgs(fldIndex);
+                        bool keyIsRegex = DataOutputs::isKeyRegexLike(keyArg);
+                        std::unique_ptr<RE2> keyPattern;
+                        if (keyIsRegex) {
+                            // keyArg is already uppercased (no \retaincase in IDD), and keyUC is uppercase too,
+                            // so matching uppercase pattern against uppercase key is effectively case-insensitive.
+                            keyPattern = std::make_unique<RE2>(keyArg);
+                            if (!keyPattern->ok()) {
+                                ShowSevereError(state,
+                                                std::format("Regular expression \"{}\" for {} in {}=\"{}\" is invalid",
+                                                            keyArg,
+                                                            ipsc->cAlphaFieldNames(fldIndex),
+                                                            ipsc->cCurrentModuleObject,
+                                                            ipsc->cAlphaArgs(1)));
+                                ShowContinueError(state, keyPattern->error());
+                                ShowFatalError(state, "Error found in regular expression. Previous error(s) cause program termination.");
+                            }
+                        }
                         bool foundKey = false;
                         for (int keyOutVarNum : srcDDVar->keyOutVarNums) {
-                            if (op->outVars[keyOutVarNum]->keyUC == ipsc->cAlphaArgs(fldIndex)) {
+                            bool matched = keyIsRegex ? RE2::FullMatch(op->outVars[keyOutVarNum]->keyUC, *keyPattern)
+                                                      : (op->outVars[keyOutVarNum]->keyUC == keyArg);
+                            if (matched) {
                                 foundKey = true;
                                 itemsAssigned = true;
                                 break;
@@ -983,8 +1003,18 @@ namespace OutputProcessor {
                             }
                         }
                     } else { // Key is not "*"
+                        std::string const &keyArg = ipsc->cAlphaArgs(fldIndex);
+                        bool keyIsRegex = DataOutputs::isKeyRegexLike(keyArg);
+                        std::unique_ptr<RE2> keyPattern;
+                        if (keyIsRegex) {
+                            // keyArg is already uppercased (no \retaincase in IDD), and keyUC is uppercase too,
+                            // so matching uppercase pattern against uppercase key is effectively case-insensitive.
+                            keyPattern = std::make_unique<RE2>(keyArg);
+                        }
                         for (int keyOutVarNum : srcDDVar->keyOutVarNums) {
-                            if (op->outVars[keyOutVarNum]->keyUC == ipsc->cAlphaArgs(fldIndex)) {
+                            bool matched = keyIsRegex ? RE2::FullMatch(op->outVars[keyOutVarNum]->keyUC, *keyPattern)
+                                                      : (op->outVars[keyOutVarNum]->keyUC == keyArg);
+                            if (matched) {
                                 if (std::find(meter->srcVarNums.begin(), meter->srcVarNums.end(), keyOutVarNum) != meter->srcVarNums.end()) {
                                     ShowWarningCustom(state,
                                                       eoh,
@@ -994,7 +1024,9 @@ namespace OutputProcessor {
                                     meter->srcVarNums.push_back(keyOutVarNum);
                                     op->outVars[keyOutVarNum]->meterNums.push_back(meterNum);
                                 }
-                                break;
+                                if (!keyIsRegex) {
+                                    break;
+                                }
                             }
                         }
                     } // if (keyIsStar)
@@ -1180,9 +1212,29 @@ namespace OutputProcessor {
 
                         itemsAssigned = true;
                     } else { // Key is not "*"
+                        std::string const &keyArg = ipsc->cAlphaArgs(fldIndex);
+                        bool keyIsRegex = DataOutputs::isKeyRegexLike(keyArg);
+                        std::unique_ptr<RE2> keyPattern;
+                        if (keyIsRegex) {
+                            // keyArg is already uppercased (no \retaincase in IDD), and keyUC is uppercase too,
+                            // so matching uppercase pattern against uppercase key is effectively case-insensitive.
+                            keyPattern = std::make_unique<RE2>(keyArg);
+                            if (!keyPattern->ok()) {
+                                ShowSevereError(state,
+                                                std::format("Regular expression \"{}\" for {} in {}=\"{}\" is invalid",
+                                                            keyArg,
+                                                            ipsc->cAlphaFieldNames(fldIndex),
+                                                            ipsc->cCurrentModuleObject,
+                                                            ipsc->cAlphaArgs(1)));
+                                ShowContinueError(state, keyPattern->error());
+                                ShowFatalError(state, "Error found in regular expression. Previous error(s) cause program termination.");
+                            }
+                        }
                         bool foundKey = false;
                         for (int keyOutVarNum : srcDDVar->keyOutVarNums) {
-                            if (op->outVars[keyOutVarNum]->keyUC == ipsc->cAlphaArgs(fldIndex)) {
+                            bool matched = keyIsRegex ? RE2::FullMatch(op->outVars[keyOutVarNum]->keyUC, *keyPattern)
+                                                      : (op->outVars[keyOutVarNum]->keyUC == keyArg);
+                            if (matched) {
                                 foundKey = true;
                                 itemsAssigned = true;
                                 break;
@@ -1327,8 +1379,18 @@ namespace OutputProcessor {
                             }
                         }
                     } else { // Key is not "*"
+                        std::string const &keyArg = ipsc->cAlphaArgs(fldIndex);
+                        bool keyIsRegex = DataOutputs::isKeyRegexLike(keyArg);
+                        std::unique_ptr<RE2> keyPattern;
+                        if (keyIsRegex) {
+                            // keyArg is already uppercased (no \retaincase in IDD), and keyUC is uppercase too,
+                            // so matching uppercase pattern against uppercase key is effectively case-insensitive.
+                            keyPattern = std::make_unique<RE2>(keyArg);
+                        }
                         for (int keyOutVarNum : srcDDVar->keyOutVarNums) {
-                            if (op->outVars[keyOutVarNum]->keyUC == ipsc->cAlphaArgs(fldIndex)) {
+                            bool matched = keyIsRegex ? RE2::FullMatch(op->outVars[keyOutVarNum]->keyUC, *keyPattern)
+                                                      : (op->outVars[keyOutVarNum]->keyUC == keyArg);
+                            if (matched) {
                                 if (std::find(meter->srcVarNums.begin(), meter->srcVarNums.end(), keyOutVarNum) != meter->srcVarNums.end()) {
                                     ShowWarningCustom(state,
                                                       eoh,
@@ -1338,7 +1400,9 @@ namespace OutputProcessor {
                                     meter->srcVarNums.push_back(keyOutVarNum);
                                     op->outVars[keyOutVarNum]->meterNums.push_back(meterNum);
                                 }
-                                break;
+                                if (!keyIsRegex) {
+                                    break;
+                                }
                             }
                         }
                     } // if (keyIsStar)

@@ -1752,8 +1752,8 @@ namespace TranspiredCollector {
         Real64 LocalOutHumRat;        // OutHumRat for here
         bool ICSCollectorIsOn(false); // ICS collector has OSCM on
         int CollectorNum;             // current solar collector index
-        Real64 ICSWaterTemp;          // ICS solar collector water temp
-        Real64 ICSULossbottom;        // ICS solar collector bottom loss Conductance
+        Real64 ICSWaterTemp = 0.0;    // ICS solar collector water temp
+        Real64 ICSULossbottom = 0.0;  // ICS solar collector bottom loss Conductance
         Real64 sum_area = 0.0;
         Real64 sum_produc_area_drybulb = 0.0;
         Real64 sum_produc_area_wetbulb = 0.0;
@@ -1963,7 +1963,7 @@ namespace TranspiredCollector {
         Real64 constexpr Pr(0.71); // Prandtl number for air
 
         // SUBROUTINE LOCAL VARIABLE DECLARATIONS
-        Real64 gnu901; // Nusselt number temporary variables for
+        Real64 gnu901 = 0.0; // Nusselt number temporary variables for
 
         Real64 tiltr = Tilt * Constant::DegToRad;
         Real64 Ra = Gr * Pr; // Rayleigh number

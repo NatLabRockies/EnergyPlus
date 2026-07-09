@@ -2745,8 +2745,8 @@ namespace Sched {
         std::string::size_type sFld;
 
         int totalMinutes;
-        Real64 incrementPerMinute;
-        Real64 curValue;
+        Real64 incrementPerMinute = 0.0;
+        Real64 curValue = 0.0;
 
         std::fill(minuteVals.begin(), minuteVals.end(), 0.0);
         std::fill(setMinuteVals.begin(), setMinuteVals.end(), false);
@@ -2776,7 +2776,7 @@ namespace Sched {
                     sFld = 5;
                 }
                 DecodeHHMMField(state, until.substr(sFld), HHField, MMField, ErrorsFound, DayScheduleName, until, interpolation);
-            } else if (Pos == (int)std::string::npos) {
+            } else if (Pos == -1) {
                 DecodeHHMMField(state, until, HHField, MMField, ErrorsFound, DayScheduleName, until, interpolation);
             } else { // Until found but wasn't first field
                 ShowSevereError(state, std::format("ProcessScheduleInput: ProcessIntervalFields, Invalid \"Until\" field encountered={}", until));

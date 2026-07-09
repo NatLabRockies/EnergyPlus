@@ -56,7 +56,6 @@
 #include <ObjexxFCL/Array.functions.hh>
 #include <ObjexxFCL/Fmath.hh>
 #include <ObjexxFCL/Vector3.hh>
-// #include <ObjexxFCL/Vector4.hh>
 #include <ObjexxFCL/member.functions.hh>
 #include <ObjexxFCL/random.hh>
 #include <ObjexxFCL/string.functions.hh>
@@ -766,10 +765,10 @@ void CalcDayltgCoeffsRefPoints(EnergyPlusData &state, int const daylightCtrlNum)
     int BlNum;             // Window Blind Number
     int LSHCAL;            // Interior shade calculation flag: 0=not yet
     //  calculated, 1=already calculated
-    int NWX;     // Number of window elements in x direction for dayltg calc
-    int NWY;     // Number of window elements in y direction for dayltg calc
-    int NWYlim;  // For triangle, largest NWY for a given IX
-    Real64 COSB; // Cosine of angle between window outward normal and ray from
+    int NWX;        // Number of window elements in x direction for dayltg calc
+    int NWY;        // Number of window elements in y direction for dayltg calc
+    int NWYlim = 0; // For triangle, largest NWY for a given IX
+    Real64 COSB;    // Cosine of angle between window outward normal and ray from
     //  reference point to window element
     Real64 PHRAY;  // Altitude of ray from reference point to window element (radians)
     Real64 THRAY;  // Azimuth of ray from reference point to window element (radians)
@@ -1124,12 +1123,12 @@ void CalcDayltgCoeffsMapPoints(EnergyPlusData &state, int const mapNum)
     int BlNum;             // Window Blind Number
     int LSHCAL;            // Interior shade calculation flag: 0=not yet
     //  calculated, 1=already calculated
-    int NWX;     // Number of window elements in x direction for dayltg calc
-    int NWY;     // Number of window elements in y direction for dayltg calc
-    int NWYlim;  // For triangle, largest NWY for a given IX
-    Real64 DWX;  // Horizontal dimension of window element (m)
-    Real64 DWY;  // Vertical dimension of window element (m)
-    Real64 COSB; // Cosine of angle between window outward normal and ray from
+    int NWX;        // Number of window elements in x direction for dayltg calc
+    int NWY;        // Number of window elements in y direction for dayltg calc
+    int NWYlim = 0; // For triangle, largest NWY for a given IX
+    Real64 DWX;     // Horizontal dimension of window element (m)
+    Real64 DWY;     // Vertical dimension of window element (m)
+    Real64 COSB;    // Cosine of angle between window outward normal and ray from
     //  reference point to window element
     Real64 PHRAY;  // Altitude of ray from reference point to window element (radians)
     Real64 THRAY;  // Azimuth of ray from reference point to window element (radians)
@@ -2105,7 +2104,7 @@ void FigureDayltgCoeffsAtPointsForWindowElements(
             } else if (CalledFrom == CalledFor::MapPoint) {
                 NReflSurf = complexWinDayltgGeom.IlluminanceMap(iRefPoint, MapNum).NReflSurf(WinEl);
             }
-            int RayIndex;
+            int RayIndex = 0;
             for (int ICplxFen = 1; ICplxFen <= NReflSurf; ++ICplxFen) {
                 if (CalledFrom == CalledFor::RefPoint) {
                     RayIndex = complexWinDayltgGeom.RefPoint(iRefPoint).RefSurfIndex(ICplxFen, WinEl);
@@ -2337,9 +2336,9 @@ void InitializeCFSStateData(EnergyPlusData &state,
     int NGnd;
     int NReflSurf;
     int MaxTotHits;
-    Real64 LeastHitDsq; // dist^2 from window element center to hit point
+    Real64 LeastHitDsq = 0.0; // dist^2 from window element center to hit point
     Real64 HitDsq;
-    Real64 TransRSurf;
+    Real64 TransRSurf = 0.0;
     int J;
 
     Vector3<Real64> RWin;
@@ -3196,7 +3195,7 @@ void FigureDayltgCoeffsAtPointsForSunPosition(
                     // Does RAYCOS pass through interior window in zone containing RP?
                     // Loop over zone surfaces looking for interior windows between reference point and sun
                     // Surface number of int window intersected by ray betw ref pt and sun
-                    int IntWinDiskHitNum;
+                    int IntWinDiskHitNum = 0;
                     // Intersection point on an interior window for ray from ref pt to sun (m)
                     Vector3<Real64> HitPtIntWinDisk;
                     auto const &thisZone = state.dataHeatBal->Zone(zoneNum);
@@ -6422,7 +6421,7 @@ void DayltgInteriorIllum(EnergyPlusData &state,
     }
 
     if (GlareFlag) {
-        bool blnCycle;
+        bool blnCycle = false;
         bool GlareOK;
         Real64 tmpMult;
         // Glare is too high at a ref pt.  Loop through windows.
@@ -7206,33 +7205,33 @@ void DayltgInterReflectedIllum(EnergyPlusData &state,
     //  (times light well efficiency, if appropriate)
     Real64 ZSU1; // Transmitted direct normal illuminance (lux)
     //  CHARACTER(len=32) :: ShType                    ! Window shading device type
-    bool ShadeOn;                // True if exterior or interior window shade present
-    bool BlindOn;                // True if exterior or interior window blind present
-    bool ScreenOn;               // True if exterior window screen present
-                                 //        int ScNum; // Screen number //Unused Set but never used
-    int PipeNum;                 // TDD pipe object number
-    int ShelfNum;                // Daylighting shelf object number
-    int InShelfSurf;             // Inside daylighting shelf surface number
-    int OutShelfSurf;            // Outside daylighting shelf surface number
-    Real64 TransBlBmDiffFront;   // Isolated blind vis beam-diffuse front transmittance
-    Real64 TransScBmDiffFront;   // Isolated screen vis beam-diffuse front transmittance
-    Real64 ReflGlDiffDiffBack;   // Bare glazing system vis diffuse back reflectance
-    Real64 ReflGlDiffDiffFront;  // Bare glazing system vis diffuse front reflectance
-    Real64 ReflBlBmDiffFront;    // Isolated blind vis beam-diffuse front reflectance
-    Real64 TransBlDiffDiffFront; // Isolated blind vis diffuse-diffuse front transmittance
-    Real64 ReflBlDiffDiffFront;  // Isolated blind vis diffuse-diffuse front reflectance
-    Real64 ReflBlDiffDiffBack;   // Isolated blind vis diffuse-diffuse back reflectance
-    Real64 ReflScDiffDiffBack;   // Isolated screen vis diffuse-diffuse back reflectance
+    bool ShadeOn;                     // True if exterior or interior window shade present
+    bool BlindOn;                     // True if exterior or interior window blind present
+    bool ScreenOn;                    // True if exterior window screen present
+                                      //        int ScNum; // Screen number //Unused Set but never used
+    int PipeNum = 0;                  // TDD pipe object number
+    int ShelfNum;                     // Daylighting shelf object number
+    int InShelfSurf;                  // Inside daylighting shelf surface number
+    int OutShelfSurf;                 // Outside daylighting shelf surface number
+    Real64 TransBlBmDiffFront;        // Isolated blind vis beam-diffuse front transmittance
+    Real64 TransScBmDiffFront;        // Isolated screen vis beam-diffuse front transmittance
+    Real64 ReflGlDiffDiffBack = 0.0;  // Bare glazing system vis diffuse back reflectance
+    Real64 ReflGlDiffDiffFront = 0.0; // Bare glazing system vis diffuse front reflectance
+    Real64 ReflBlBmDiffFront;         // Isolated blind vis beam-diffuse front reflectance
+    Real64 TransBlDiffDiffFront;      // Isolated blind vis diffuse-diffuse front transmittance
+    Real64 ReflBlDiffDiffFront;       // Isolated blind vis diffuse-diffuse front reflectance
+    Real64 ReflBlDiffDiffBack;        // Isolated blind vis diffuse-diffuse back reflectance
+    Real64 ReflScDiffDiffBack = 0.0;  // Isolated screen vis diffuse-diffuse back reflectance
 
-    Real64 td2; // Diffuse-diffuse vis trans of bare glass layers 2 and 3
-    Real64 td3;
-    Real64 rbd1; // Beam-diffuse back vis reflectance of bare glass layers 1 and 2
-    Real64 rbd2;
-    Real64 rfd2; // Beam-diffuse front vis reflectance of bare glass layers 2 and 3
-    Real64 rfd3;
-    Real64 tfshd;      // Diffuse-diffuse front vis trans of bare blind
-    Real64 rbshd;      // Diffuse-diffuse back vis reflectance of bare blind
-    Real64 ZSUObsRefl; // Illuminance on window from beam solar reflected by an
+    Real64 td2 = 0.0; // Diffuse-diffuse vis trans of bare glass layers 2 and 3
+    Real64 td3 = 0.0;
+    Real64 rbd1 = 0.0; // Beam-diffuse back vis reflectance of bare glass layers 1 and 2
+    Real64 rbd2 = 0.0;
+    Real64 rfd2 = 0.0; // Beam-diffuse front vis reflectance of bare glass layers 2 and 3
+    Real64 rfd3 = 0.0;
+    Real64 tfshd = 0.0; // Diffuse-diffuse front vis trans of bare blind
+    Real64 rbshd = 0.0; // Diffuse-diffuse back vis reflectance of bare blind
+    Real64 ZSUObsRefl;  // Illuminance on window from beam solar reflected by an
     //  obstruction (for unit beam normal illuminance)
     int NearestHitSurfNum;  // Surface number of nearest obstruction
     int NearestHitSurfNumX; // Surface number to use when obstruction is a shadowing surface
@@ -7250,13 +7249,13 @@ void DayltgInterReflectedIllum(EnergyPlusData &state,
     Real64 ZSU1refl; // Beam normal illuminance times ZSU1refl = illuminance on window
     //  due to specular reflection from exterior surfaces
 
-    ExtWinType extWinType;      // Exterior window type (InZoneExtWin, AdjZoneExtWin, NotInOrAdjZoneExtWin)
-    Real64 EnclInsideSurfArea;  // temporary for calculations, total surface area of enclosure surfaces m2
-    int IntWinAdjZoneExtWinNum; // the index of the exterior window in IntWinAdjZoneExtWin nested struct
-    int IntWinNum;              // window index for interior windows associated with exterior windows
+    ExtWinType extWinType;          // Exterior window type (InZoneExtWin, AdjZoneExtWin, NotInOrAdjZoneExtWin)
+    Real64 EnclInsideSurfArea;      // temporary for calculations, total surface area of enclosure surfaces m2
+    int IntWinAdjZoneExtWinNum = 0; // the index of the exterior window in IntWinAdjZoneExtWin nested struct
+    int IntWinNum;                  // window index for interior windows associated with exterior windows
     Real64 COSBintWin;
 
-    WinShadingType ShType;
+    WinShadingType ShType = WinShadingType::NoShade;
 
     auto &s_mat = state.dataMaterial;
     auto &dl = state.dataDayltg;
@@ -8409,11 +8408,11 @@ void DayltgDirectIllumComplexFenestration(EnergyPlusData &state,
     // Array1D<Real64> ElementLuminanceSunDisk; // sun related luminance at window element (exterior side),
     // due to sun beam
 
-    int RefPointIndex; // reference point patch number
+    int RefPointIndex = 0; // reference point patch number
 
-    Real64 dirTrans;    // directional BSDF transmittance
-    Real64 dOmega;      // solid view angle of current element
-    Real64 zProjection; // z-axe projection of solid view angle (used to calculate amount of light at horizontal surface
+    Real64 dirTrans;          // directional BSDF transmittance
+    Real64 dOmega = 0.0;      // solid view angle of current element
+    Real64 zProjection = 0.0; // z-axe projection of solid view angle (used to calculate amount of light at horizontal surface
     // laying at reference point)
 
     int CurCplxFenState = s_surf->SurfaceWindow(IWin).ComplexFen.CurrentState;
@@ -9244,7 +9243,7 @@ void ReportIllumMap(EnergyPlusData &state, int const MapNum)
                 for (int R = RefPt; R <= RefPt + illumMap.Xnum - 1; ++R) {
                     int IllumOut = nint(illumMap.refPts(R).lumsHr[iLum_Illum]);
                     std::string String = std::to_string(IllumOut);
-                    ;
+
                     if (!illumMap.refPts(R).inBounds) {
                         String = "*" + String;
                     }

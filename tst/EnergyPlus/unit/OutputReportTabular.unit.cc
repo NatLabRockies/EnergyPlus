@@ -568,8 +568,8 @@ TEST_F(EnergyPlusFixture, OutputReportTabularTest_ConfirmConvertToEscaped)
     EXPECT_EQ("Xml string with &quot; in it", ConvertToEscaped(R"(Xml string with \" in it)", true));
     EXPECT_EQ("Xml string with &apos; in it", ConvertToEscaped(R"(Xml string with \' in it)", true));
     EXPECT_EQ("気", ConvertToEscaped("気", true)); // Don't mangle the Japanese character for air in unicode.
-    EXPECT_EQ(std::string("Xml string with ") + char(176) + std::string(" in it"),
-              ConvertToEscaped(std::string("Xml string with ") + char(176) + std::string(" in it"), true));
+    EXPECT_EQ(std::string("Xml string with ") + '\xB0' + std::string(" in it"),
+              ConvertToEscaped(std::string("Xml string with ") + '\xB0' + std::string(" in it"), true));
     // Don't escape degree symbol with &deg; in xml since it is not a valid escape.
 
     EXPECT_EQ("Xml string with \xC2 in it", ConvertToEscaped("Xml string with \xC2 in it", true));
@@ -587,7 +587,7 @@ TEST_F(EnergyPlusFixture, OutputReportTabularTest_ConfirmConvertToEscaped)
     EXPECT_EQ("Html string with &gt; in it", ConvertToEscaped("Html string with > in it", false));
     EXPECT_EQ("Html string with &lt; in it", ConvertToEscaped("Html string with < in it", false));
     EXPECT_EQ("Html string with &amp; in it", ConvertToEscaped("Html string with & in it", false));
-    EXPECT_EQ("Html string with &deg; in it", ConvertToEscaped(std::string("Html string with ") + char(176) + std::string(" in it"), false));
+    EXPECT_EQ("Html string with &deg; in it", ConvertToEscaped(std::string("Html string with ") + '\xB0' + std::string(" in it"), false));
     EXPECT_EQ("Html string with &deg; in it", ConvertToEscaped("Html string with \u00B0 in it", false));
     EXPECT_EQ("Html string with &deg; in it", ConvertToEscaped("Html string with \xB0 in it", false));
     EXPECT_EQ("Html string with &deg; in it", ConvertToEscaped("Html string with \xC2\xB0 in it", false));
@@ -8106,7 +8106,7 @@ TEST_F(SQLiteFixture, OutputReportTabular_EndUseBySubcategorySQL)
     std::string rowName = endUseName + ":" + endUseSubCategoryName;
     std::string columnName = "Electricity";
 
-    for (auto &endUseSubCategoryName : endUseSubCategoryNames) {
+    for (auto &subCatName : endUseSubCategoryNames) {
         for (auto &reportName : testReportNames) {
 
             std::string query("SELECT Value From TabularDataWithStrings"
@@ -8116,7 +8116,7 @@ TEST_F(SQLiteFixture, OutputReportTabular_EndUseBySubcategorySQL)
                               reportName +
                               "'"
                               "  AND RowName = '" +
-                              endUseName + ":" + endUseSubCategoryName + "'"); // Now Like 'Exterior Lighting:General'
+                              endUseName + ":" + subCatName + "'"); // Now Like 'Exterior Lighting:General'
 
             auto result = queryResult(query, "TabularDataWithStrings");
 
@@ -8153,89 +8153,89 @@ TEST_F(SQLiteFixture, OutputReportTabular_EndUseBySubcategorySQL)
 
     // Get all Interior Lighting End Uses (all subcats) for Electricity
     {
-        std::string query("SELECT Value From TabularDataWithStrings"
-                          "  WHERE TableName = 'End Uses By Subcategory'"
-                          "  AND ReportName = 'AnnualBuildingUtilityPerformanceSummary'"
-                          "  AND ColumnName = 'Electricity'"
-                          "  AND RowName LIKE 'Exterior Lighting:%'");
-        auto result = queryResult(query, "TabularDataWithStrings");
+        std::string blockQuery("SELECT Value From TabularDataWithStrings"
+                               "  WHERE TableName = 'End Uses By Subcategory'"
+                               "  AND ReportName = 'AnnualBuildingUtilityPerformanceSummary'"
+                               "  AND ColumnName = 'Electricity'"
+                               "  AND RowName LIKE 'Exterior Lighting:%'");
+        auto result = queryResult(blockQuery, "TabularDataWithStrings");
 
-        ASSERT_EQ(2u, result.size()) << "Failed for query: " << query;
+        ASSERT_EQ(2u, result.size()) << "Failed for blockQuery: " << blockQuery;
     }
 
     // Get all subcat usage for all fuels (13)
     {
-        std::string query("SELECT Value From TabularDataWithStrings"
-                          "  WHERE TableName = 'End Uses By Subcategory'"
-                          "  AND ReportName = 'AnnualBuildingUtilityPerformanceSummary'"
-                          "  AND RowName = 'Exterior Lighting:AnotherEndUseSubCat'");
-        auto result = queryResult(query, "TabularDataWithStrings");
+        std::string blockQuery("SELECT Value From TabularDataWithStrings"
+                               "  WHERE TableName = 'End Uses By Subcategory'"
+                               "  AND ReportName = 'AnnualBuildingUtilityPerformanceSummary'"
+                               "  AND RowName = 'Exterior Lighting:AnotherEndUseSubCat'");
+        auto result = queryResult(blockQuery, "TabularDataWithStrings");
 
-        ASSERT_EQ(14u, result.size()) << "Failed for query: " << query;
+        ASSERT_EQ(14u, result.size()) << "Failed for blockQuery: " << blockQuery;
     }
 
     // Specifically get the each fuel (Coal, Gasoline, and Propane) usage for End Use = Heating,
     // and make sure it's the right number that's returned
 
     {
-        std::string query("SELECT Value From TabularDataWithStrings"
-                          "  WHERE TableName = 'End Uses'"
-                          "  AND ReportName = 'AnnualBuildingUtilityPerformanceSummary'"
-                          "  AND ColumnName = 'Coal'"
-                          "  AND RowName = 'Heating'");
-        auto result = queryResult(query, "TabularDataWithStrings");
-        Real64 return_val1 = execAndReturnFirstDouble(query);
+        std::string blockQuery("SELECT Value From TabularDataWithStrings"
+                               "  WHERE TableName = 'End Uses'"
+                               "  AND ReportName = 'AnnualBuildingUtilityPerformanceSummary'"
+                               "  AND ColumnName = 'Coal'"
+                               "  AND RowName = 'Heating'");
+        auto result = queryResult(blockQuery, "TabularDataWithStrings");
+        Real64 return_val1 = execAndReturnFirstDouble(blockQuery);
 
-        ASSERT_EQ(1u, result.size()) << "Failed for query: " << query;
-        EXPECT_NEAR(CoalHeating * 3 / 3.6e6, return_val1, 0.01) << "Failed for query: " << query;
+        ASSERT_EQ(1u, result.size()) << "Failed for blockQuery: " << blockQuery;
+        EXPECT_NEAR(CoalHeating * 3 / 3.6e6, return_val1, 0.01) << "Failed for blockQuery: " << blockQuery;
     }
 
     {
-        std::string query("SELECT Value From TabularDataWithStrings"
-                          "  WHERE TableName = 'End Uses'"
-                          "  AND ReportName = 'AnnualBuildingUtilityPerformanceSummary'"
-                          "  AND ColumnName = 'Gasoline'"
-                          "  AND RowName = 'Heating'");
-        auto result = queryResult(query, "TabularDataWithStrings");
-        Real64 return_val2 = execAndReturnFirstDouble(query);
+        std::string blockQuery("SELECT Value From TabularDataWithStrings"
+                               "  WHERE TableName = 'End Uses'"
+                               "  AND ReportName = 'AnnualBuildingUtilityPerformanceSummary'"
+                               "  AND ColumnName = 'Gasoline'"
+                               "  AND RowName = 'Heating'");
+        auto result = queryResult(blockQuery, "TabularDataWithStrings");
+        Real64 return_val2 = execAndReturnFirstDouble(blockQuery);
 
-        ASSERT_EQ(1u, result.size()) << "Failed for query: " << query;
-        EXPECT_NEAR(GasolineHeating * 3 / 3.6e6, return_val2, 0.01) << "Failed for query: " << query;
+        ASSERT_EQ(1u, result.size()) << "Failed for blockQuery: " << blockQuery;
+        EXPECT_NEAR(GasolineHeating * 3 / 3.6e6, return_val2, 0.01) << "Failed for blockQuery: " << blockQuery;
     }
 
     {
-        std::string query("SELECT Value From TabularDataWithStrings"
-                          "  WHERE TableName = 'End Uses'"
-                          "  AND ReportName = 'AnnualBuildingUtilityPerformanceSummary'"
-                          "  AND ColumnName = 'Propane'"
-                          "  AND RowName = 'Heating'");
-        auto result = queryResult(query, "TabularDataWithStrings");
-        Real64 return_val3 = execAndReturnFirstDouble(query);
+        std::string blockQuery("SELECT Value From TabularDataWithStrings"
+                               "  WHERE TableName = 'End Uses'"
+                               "  AND ReportName = 'AnnualBuildingUtilityPerformanceSummary'"
+                               "  AND ColumnName = 'Propane'"
+                               "  AND RowName = 'Heating'");
+        auto result = queryResult(blockQuery, "TabularDataWithStrings");
+        Real64 return_val3 = execAndReturnFirstDouble(blockQuery);
 
-        ASSERT_EQ(1u, result.size()) << "Failed for query: " << query;
-        EXPECT_NEAR(PropaneHeating * 3 / 3.6e6, return_val3, 0.01) << "Failed for query: " << query;
+        ASSERT_EQ(1u, result.size()) << "Failed for blockQuery: " << blockQuery;
+        EXPECT_NEAR(PropaneHeating * 3 / 3.6e6, return_val3, 0.01) << "Failed for blockQuery: " << blockQuery;
     }
 
     // Check the heating category has the result size of 13 (including all disaggregated additional fuels) in both reports)
 
     {
-        std::string query("SELECT Value From TabularDataWithStrings"
-                          "  WHERE TableName = 'End Uses'"
-                          "  AND ReportName = 'AnnualBuildingUtilityPerformanceSummary'"
-                          "  AND RowName = 'Heating'");
-        auto result = queryResult(query, "TabularDataWithStrings");
+        std::string blockQuery("SELECT Value From TabularDataWithStrings"
+                               "  WHERE TableName = 'End Uses'"
+                               "  AND ReportName = 'AnnualBuildingUtilityPerformanceSummary'"
+                               "  AND RowName = 'Heating'");
+        auto result = queryResult(blockQuery, "TabularDataWithStrings");
 
-        ASSERT_EQ(14u, result.size()) << "Failed for query: " << query;
+        ASSERT_EQ(14u, result.size()) << "Failed for blockQuery: " << blockQuery;
     }
 
     {
-        std::string query("SELECT Value From TabularDataWithStrings"
-                          "  WHERE TableName = 'End Uses'"
-                          "  AND ReportName = 'DemandEndUseComponentsSummary'"
-                          "  AND RowName = 'Heating'");
-        auto result = queryResult(query, "TabularDataWithStrings");
+        std::string blockQuery("SELECT Value From TabularDataWithStrings"
+                               "  WHERE TableName = 'End Uses'"
+                               "  AND ReportName = 'DemandEndUseComponentsSummary'"
+                               "  AND RowName = 'Heating'");
+        auto result = queryResult(blockQuery, "TabularDataWithStrings");
 
-        ASSERT_EQ(14u, result.size()) << "Failed for query: " << query;
+        ASSERT_EQ(14u, result.size()) << "Failed for blockQuery: " << blockQuery;
     }
 }
 
@@ -9678,7 +9678,7 @@ TEST_F(SQLiteFixture, ORT_EndUseBySubcategorySQL_DualUnits)
     std::string rowName = endUseName + ":" + endUseSubCategoryName;
     std::string columnName = "Electricity";
 
-    for (auto &endUseSubCategoryName : endUseSubCategoryNames) {
+    for (auto &subCatName : endUseSubCategoryNames) {
         for (auto &reportName : testReportNames) {
 
             std::string query("SELECT Value From TabularDataWithStrings"
@@ -9688,7 +9688,7 @@ TEST_F(SQLiteFixture, ORT_EndUseBySubcategorySQL_DualUnits)
                               reportName +
                               "'"
                               "  AND RowName = '" +
-                              endUseName + ":" + endUseSubCategoryName + "'"); // Now Like 'Exterior Lighting:General'
+                              endUseName + ":" + subCatName + "'"); // Now Like 'Exterior Lighting:General'
 
             auto result = queryResult(query, "TabularDataWithStrings");
 
@@ -9727,93 +9727,93 @@ TEST_F(SQLiteFixture, ORT_EndUseBySubcategorySQL_DualUnits)
 
     // Get all Interior Lighting End Uses (all subcats) for Electricity
     {
-        std::string query("SELECT Value From TabularDataWithStrings"
-                          "  WHERE TableName = 'End Uses By Subcategory'"
-                          "  AND ReportName = 'AnnualBuildingUtilityPerformanceSummary'"
-                          "  AND ColumnName = 'Electricity'"
-                          "  AND RowName LIKE 'Exterior Lighting:%'");
-        auto result = queryResult(query, "TabularDataWithStrings");
+        std::string blockQuery("SELECT Value From TabularDataWithStrings"
+                               "  WHERE TableName = 'End Uses By Subcategory'"
+                               "  AND ReportName = 'AnnualBuildingUtilityPerformanceSummary'"
+                               "  AND ColumnName = 'Electricity'"
+                               "  AND RowName LIKE 'Exterior Lighting:%'");
+        auto result = queryResult(blockQuery, "TabularDataWithStrings");
 
-        ASSERT_EQ(2u, result.size()) << "Failed for query: " << query;
+        ASSERT_EQ(2u, result.size()) << "Failed for blockQuery: " << blockQuery;
     }
 
     // Get all subcat usage for all fuels (13)
     {
-        std::string query("SELECT Value From TabularDataWithStrings"
-                          "  WHERE TableName = 'End Uses By Subcategory'"
-                          "  AND ReportName = 'AnnualBuildingUtilityPerformanceSummary'"
-                          "  AND RowName = 'Exterior Lighting:AnotherEndUseSubCat'");
-        auto result = queryResult(query, "TabularDataWithStrings");
+        std::string blockQuery("SELECT Value From TabularDataWithStrings"
+                               "  WHERE TableName = 'End Uses By Subcategory'"
+                               "  AND ReportName = 'AnnualBuildingUtilityPerformanceSummary'"
+                               "  AND RowName = 'Exterior Lighting:AnotherEndUseSubCat'");
+        auto result = queryResult(blockQuery, "TabularDataWithStrings");
 
-        ASSERT_EQ(14u, result.size()) << "Failed for query: " << query;
+        ASSERT_EQ(14u, result.size()) << "Failed for blockQuery: " << blockQuery;
     }
 
     // Specifically get the each fuel (Coal, Gasoline, and Propane) usage for End Use = Heating,
     // and make sure it's the right number that's returned
 
     {
-        std::string query("SELECT Value From TabularDataWithStrings"
-                          "  WHERE TableName = 'End Uses'"
-                          "  AND ReportName = 'AnnualBuildingUtilityPerformanceSummary'"
-                          "  AND ColumnName = 'Coal'"
-                          "  AND RowName = 'Heating'");
-        auto result = queryResult(query, "TabularDataWithStrings");
-        Real64 return_val1 = execAndReturnFirstDouble(query);
+        std::string blockQuery("SELECT Value From TabularDataWithStrings"
+                               "  WHERE TableName = 'End Uses'"
+                               "  AND ReportName = 'AnnualBuildingUtilityPerformanceSummary'"
+                               "  AND ColumnName = 'Coal'"
+                               "  AND RowName = 'Heating'");
+        auto result = queryResult(blockQuery, "TabularDataWithStrings");
+        Real64 return_val1 = execAndReturnFirstDouble(blockQuery);
 
-        ASSERT_EQ(1u, result.size()) << "Failed for query: " << query;
-        // EXPECT_NEAR(CoalHeating * 3 / 3.6e6, return_val1, 0.01) << "Failed for query: " << query;
+        ASSERT_EQ(1u, result.size()) << "Failed for blockQuery: " << blockQuery;
+        // EXPECT_NEAR(CoalHeating * 3 / 3.6e6, return_val1, 0.01) << "Failed for blockQuery: " << blockQuery;
         Real64 expected_coalHt = CoalHeating * 3 / 1.0e9 / enerConv;
-        EXPECT_NEAR(expected_coalHt, return_val1, 0.01) << "Failed for query: " << query;
+        EXPECT_NEAR(expected_coalHt, return_val1, 0.01) << "Failed for blockQuery: " << blockQuery;
     }
 
     {
-        std::string query("SELECT Value From TabularDataWithStrings"
-                          "  WHERE TableName = 'End Uses'"
-                          "  AND ReportName = 'AnnualBuildingUtilityPerformanceSummary'"
-                          "  AND ColumnName = 'Gasoline'"
-                          "  AND RowName = 'Heating'");
-        auto result = queryResult(query, "TabularDataWithStrings");
-        Real64 return_val2 = execAndReturnFirstDouble(query);
+        std::string blockQuery("SELECT Value From TabularDataWithStrings"
+                               "  WHERE TableName = 'End Uses'"
+                               "  AND ReportName = 'AnnualBuildingUtilityPerformanceSummary'"
+                               "  AND ColumnName = 'Gasoline'"
+                               "  AND RowName = 'Heating'");
+        auto result = queryResult(blockQuery, "TabularDataWithStrings");
+        Real64 return_val2 = execAndReturnFirstDouble(blockQuery);
 
-        ASSERT_EQ(1u, result.size()) << "Failed for query: " << query;
-        // EXPECT_NEAR(GasolineHeating * 3 / 3.6e6, return_val2, 0.01) << "Failed for query: " << query;
-        EXPECT_NEAR(GasolineHeating * 3 / 1.0e9 / enerConv, return_val2, 0.01) << "Failed for query: " << query;
+        ASSERT_EQ(1u, result.size()) << "Failed for blockQuery: " << blockQuery;
+        // EXPECT_NEAR(GasolineHeating * 3 / 3.6e6, return_val2, 0.01) << "Failed for blockQuery: " << blockQuery;
+        EXPECT_NEAR(GasolineHeating * 3 / 1.0e9 / enerConv, return_val2, 0.01) << "Failed for blockQuery: " << blockQuery;
     }
 
     {
-        std::string query("SELECT Value From TabularDataWithStrings"
-                          "  WHERE TableName = 'End Uses'"
-                          "  AND ReportName = 'AnnualBuildingUtilityPerformanceSummary'"
-                          "  AND ColumnName = 'Propane'"
-                          "  AND RowName = 'Heating'");
-        auto result = queryResult(query, "TabularDataWithStrings");
-        Real64 return_val3 = execAndReturnFirstDouble(query);
+        std::string blockQuery("SELECT Value From TabularDataWithStrings"
+                               "  WHERE TableName = 'End Uses'"
+                               "  AND ReportName = 'AnnualBuildingUtilityPerformanceSummary'"
+                               "  AND ColumnName = 'Propane'"
+                               "  AND RowName = 'Heating'");
+        auto result = queryResult(blockQuery, "TabularDataWithStrings");
+        Real64 return_val3 = execAndReturnFirstDouble(blockQuery);
 
-        ASSERT_EQ(1u, result.size()) << "Failed for query: " << query;
-        // EXPECT_NEAR(PropaneHeating * 3 / 3.6e6, return_val3, 0.01) << "Failed for query: " << query;
-        EXPECT_NEAR(PropaneHeating * 3 / 1.0e9 / enerConv, return_val3, 0.01) << "Failed for query: " << query;
+        ASSERT_EQ(1u, result.size()) << "Failed for blockQuery: " << blockQuery;
+        // EXPECT_NEAR(PropaneHeating * 3 / 3.6e6, return_val3, 0.01) << "Failed for blockQuery: " << blockQuery;
+        EXPECT_NEAR(PropaneHeating * 3 / 1.0e9 / enerConv, return_val3, 0.01) << "Failed for blockQuery: " << blockQuery;
     }
 
     // Check the heating category has the result size of 13 (including all disaggregated additional fuels) in both reports)
 
     {
-        std::string query("SELECT Value From TabularDataWithStrings"
-                          "  WHERE TableName = 'End Uses'"
-                          "  AND ReportName = 'AnnualBuildingUtilityPerformanceSummary'"
-                          "  AND RowName = 'Heating'");
-        auto result = queryResult(query, "TabularDataWithStrings");
+        std::string blockQuery("SELECT Value From TabularDataWithStrings"
+                               "  WHERE TableName = 'End Uses'"
+                               "  AND ReportName = 'AnnualBuildingUtilityPerformanceSummary'"
+                               "  AND RowName = 'Heating'");
+        auto result = queryResult(blockQuery, "TabularDataWithStrings");
 
-        ASSERT_EQ(14u, result.size()) << "Failed for query: " << query;
+        ASSERT_EQ(14u, result.size()) << "Failed for blockQuery: " << blockQuery;
     }
 
     {
-        std::string query("SELECT Value From TabularDataWithStrings"
-                          "  WHERE TableName = 'End Uses'"
-                          "  AND ReportName = 'DemandEndUseComponentsSummary'"
-                          "  AND RowName = 'Heating'");
-        auto result = queryResult(query, "TabularDataWithStrings");
+        std::string blockQuery("SELECT Value From TabularDataWithStrings"
+                               "  WHERE TableName = 'End Uses'"
+                               "  AND ReportName = 'DemandEndUseComponentsSummary'"
+                               "  AND RowName = 'Heating'");
+        auto result = queryResult(blockQuery, "TabularDataWithStrings");
 
-        ASSERT_EQ(14u, result.size()) << "Failed for query: " << query;
+        ASSERT_EQ(14u, result.size()) << "Failed for query: " << blockQuery;
     }
 
     // Check JSON output - no units conversion, no formatting
@@ -10041,7 +10041,7 @@ TEST_F(SQLiteFixture, ORT_EndUseBySubcategorySQL_DualUnits2)
     std::string rowName = endUseName + ":" + endUseSubCategoryName;
     std::string columnName = "Electricity";
 
-    for (auto &endUseSubCategoryName : endUseSubCategoryNames) {
+    for (auto &subCatName : endUseSubCategoryNames) {
         for (auto &reportName : testReportNames) {
 
             std::string query("SELECT Value From TabularDataWithStrings"
@@ -10051,7 +10051,7 @@ TEST_F(SQLiteFixture, ORT_EndUseBySubcategorySQL_DualUnits2)
                               reportName +
                               "'"
                               "  AND RowName = '" +
-                              endUseName + ":" + endUseSubCategoryName + "'"); // Now Like 'Exterior Lighting:General'
+                              endUseName + ":" + subCatName + "'"); // Now Like 'Exterior Lighting:General'
 
             auto result = queryResult(query, "TabularDataWithStrings");
 
@@ -10090,93 +10090,93 @@ TEST_F(SQLiteFixture, ORT_EndUseBySubcategorySQL_DualUnits2)
 
     // Get all Interior Lighting End Uses (all subcats) for Electricity
     {
-        std::string query("SELECT Value From TabularDataWithStrings"
-                          "  WHERE TableName = 'End Uses By Subcategory'"
-                          "  AND ReportName = 'AnnualBuildingUtilityPerformanceSummary'"
-                          "  AND ColumnName = 'Electricity'"
-                          "  AND RowName LIKE 'Exterior Lighting:%'");
-        auto result = queryResult(query, "TabularDataWithStrings");
+        std::string blockQuery("SELECT Value From TabularDataWithStrings"
+                               "  WHERE TableName = 'End Uses By Subcategory'"
+                               "  AND ReportName = 'AnnualBuildingUtilityPerformanceSummary'"
+                               "  AND ColumnName = 'Electricity'"
+                               "  AND RowName LIKE 'Exterior Lighting:%'");
+        auto result = queryResult(blockQuery, "TabularDataWithStrings");
 
-        ASSERT_EQ(2u, result.size()) << "Failed for query: " << query;
+        ASSERT_EQ(2u, result.size()) << "Failed for blockQuery: " << blockQuery;
     }
 
     // Get all subcat usage for all fuels (13)
     {
-        std::string query("SELECT Value From TabularDataWithStrings"
-                          "  WHERE TableName = 'End Uses By Subcategory'"
-                          "  AND ReportName = 'AnnualBuildingUtilityPerformanceSummary'"
-                          "  AND RowName = 'Exterior Lighting:AnotherEndUseSubCat'");
-        auto result = queryResult(query, "TabularDataWithStrings");
+        std::string blockQuery("SELECT Value From TabularDataWithStrings"
+                               "  WHERE TableName = 'End Uses By Subcategory'"
+                               "  AND ReportName = 'AnnualBuildingUtilityPerformanceSummary'"
+                               "  AND RowName = 'Exterior Lighting:AnotherEndUseSubCat'");
+        auto result = queryResult(blockQuery, "TabularDataWithStrings");
 
-        ASSERT_EQ(14u, result.size()) << "Failed for query: " << query;
+        ASSERT_EQ(14u, result.size()) << "Failed for blockQuery: " << blockQuery;
     }
 
     // Specifically get the each fuel (Coal, Gasoline, and Propane) usage for End Use = Heating,
     // and make sure it's the right number that's returned
 
     {
-        std::string query("SELECT Value From TabularDataWithStrings"
-                          "  WHERE TableName = 'End Uses'"
-                          "  AND ReportName = 'AnnualBuildingUtilityPerformanceSummary'"
-                          "  AND ColumnName = 'Coal'"
-                          "  AND RowName = 'Heating'");
-        auto result = queryResult(query, "TabularDataWithStrings");
-        Real64 return_val1 = execAndReturnFirstDouble(query);
+        std::string blockQuery("SELECT Value From TabularDataWithStrings"
+                               "  WHERE TableName = 'End Uses'"
+                               "  AND ReportName = 'AnnualBuildingUtilityPerformanceSummary'"
+                               "  AND ColumnName = 'Coal'"
+                               "  AND RowName = 'Heating'");
+        auto result = queryResult(blockQuery, "TabularDataWithStrings");
+        Real64 return_val1 = execAndReturnFirstDouble(blockQuery);
 
-        ASSERT_EQ(1u, result.size()) << "Failed for query: " << query;
-        // EXPECT_NEAR(CoalHeating * 3 / 3.6e6, return_val1, 0.01) << "Failed for query: " << query;
+        ASSERT_EQ(1u, result.size()) << "Failed for blockQuery: " << blockQuery;
+        // EXPECT_NEAR(CoalHeating * 3 / 3.6e6, return_val1, 0.01) << "Failed for blockQuery: " << blockQuery;
         Real64 expected_coalHt = CoalHeating * 3 / 1.0e9;
-        EXPECT_NEAR(expected_coalHt, return_val1, 0.01) << "Failed for query: " << query;
+        EXPECT_NEAR(expected_coalHt, return_val1, 0.01) << "Failed for blockQuery: " << blockQuery;
     }
 
     {
-        std::string query("SELECT Value From TabularDataWithStrings"
-                          "  WHERE TableName = 'End Uses'"
-                          "  AND ReportName = 'AnnualBuildingUtilityPerformanceSummary'"
-                          "  AND ColumnName = 'Gasoline'"
-                          "  AND RowName = 'Heating'");
-        auto result = queryResult(query, "TabularDataWithStrings");
-        Real64 return_val2 = execAndReturnFirstDouble(query);
+        std::string blockQuery("SELECT Value From TabularDataWithStrings"
+                               "  WHERE TableName = 'End Uses'"
+                               "  AND ReportName = 'AnnualBuildingUtilityPerformanceSummary'"
+                               "  AND ColumnName = 'Gasoline'"
+                               "  AND RowName = 'Heating'");
+        auto result = queryResult(blockQuery, "TabularDataWithStrings");
+        Real64 return_val2 = execAndReturnFirstDouble(blockQuery);
 
-        ASSERT_EQ(1u, result.size()) << "Failed for query: " << query;
-        // EXPECT_NEAR(GasolineHeating * 3 / 3.6e6, return_val2, 0.01) << "Failed for query: " << query;
-        EXPECT_NEAR(GasolineHeating * 3 / 1.0e9, return_val2, 0.01) << "Failed for query: " << query;
+        ASSERT_EQ(1u, result.size()) << "Failed for blockQuery: " << blockQuery;
+        // EXPECT_NEAR(GasolineHeating * 3 / 3.6e6, return_val2, 0.01) << "Failed for blockQuery: " << blockQuery;
+        EXPECT_NEAR(GasolineHeating * 3 / 1.0e9, return_val2, 0.01) << "Failed for blockQuery: " << blockQuery;
     }
 
     {
-        std::string query("SELECT Value From TabularDataWithStrings"
-                          "  WHERE TableName = 'End Uses'"
-                          "  AND ReportName = 'AnnualBuildingUtilityPerformanceSummary'"
-                          "  AND ColumnName = 'Propane'"
-                          "  AND RowName = 'Heating'");
-        auto result = queryResult(query, "TabularDataWithStrings");
-        Real64 return_val3 = execAndReturnFirstDouble(query);
+        std::string blockQuery("SELECT Value From TabularDataWithStrings"
+                               "  WHERE TableName = 'End Uses'"
+                               "  AND ReportName = 'AnnualBuildingUtilityPerformanceSummary'"
+                               "  AND ColumnName = 'Propane'"
+                               "  AND RowName = 'Heating'");
+        auto result = queryResult(blockQuery, "TabularDataWithStrings");
+        Real64 return_val3 = execAndReturnFirstDouble(blockQuery);
 
-        ASSERT_EQ(1u, result.size()) << "Failed for query: " << query;
-        // EXPECT_NEAR(PropaneHeating * 3 / 3.6e6, return_val3, 0.01) << "Failed for query: " << query;
-        EXPECT_NEAR(PropaneHeating * 3 / 1.0e9, return_val3, 0.01) << "Failed for query: " << query;
+        ASSERT_EQ(1u, result.size()) << "Failed for blockQuery: " << blockQuery;
+        // EXPECT_NEAR(PropaneHeating * 3 / 3.6e6, return_val3, 0.01) << "Failed for blockQuery: " << blockQuery;
+        EXPECT_NEAR(PropaneHeating * 3 / 1.0e9, return_val3, 0.01) << "Failed for blockQuery: " << blockQuery;
     }
 
     // Check the heating category has the result size of 13 (including all disaggregated additional fuels) in both reports)
 
     {
-        std::string query("SELECT Value From TabularDataWithStrings"
-                          "  WHERE TableName = 'End Uses'"
-                          "  AND ReportName = 'AnnualBuildingUtilityPerformanceSummary'"
-                          "  AND RowName = 'Heating'");
-        auto result = queryResult(query, "TabularDataWithStrings");
+        std::string blockQuery("SELECT Value From TabularDataWithStrings"
+                               "  WHERE TableName = 'End Uses'"
+                               "  AND ReportName = 'AnnualBuildingUtilityPerformanceSummary'"
+                               "  AND RowName = 'Heating'");
+        auto result = queryResult(blockQuery, "TabularDataWithStrings");
 
-        ASSERT_EQ(14u, result.size()) << "Failed for query: " << query;
+        ASSERT_EQ(14u, result.size()) << "Failed for blockQuery: " << blockQuery;
     }
 
     {
-        std::string query("SELECT Value From TabularDataWithStrings"
-                          "  WHERE TableName = 'End Uses'"
-                          "  AND ReportName = 'DemandEndUseComponentsSummary'"
-                          "  AND RowName = 'Heating'");
-        auto result = queryResult(query, "TabularDataWithStrings");
+        std::string blockQuery("SELECT Value From TabularDataWithStrings"
+                               "  WHERE TableName = 'End Uses'"
+                               "  AND ReportName = 'DemandEndUseComponentsSummary'"
+                               "  AND RowName = 'Heating'");
+        auto result = queryResult(blockQuery, "TabularDataWithStrings");
 
-        ASSERT_EQ(14u, result.size()) << "Failed for query: " << query;
+        ASSERT_EQ(14u, result.size()) << "Failed for blockQuery: " << blockQuery;
     }
 
     // Check JSON output - InchPoundExceptElectricity units conversion, yes formatting
@@ -14030,7 +14030,7 @@ TEST_F(SQLiteFixture, ORT_EndUseBySubcategorySQL_IPUnitExceptElec)
     std::string rowName = endUseName + ":" + endUseSubCategoryName;
     std::string columnName = "Electricity";
 
-    for (auto &endUseSubCategoryName : endUseSubCategoryNames) {
+    for (auto &subCatName : endUseSubCategoryNames) {
         for (auto &reportName : testReportNames) {
 
             std::string query("SELECT Value From TabularDataWithStrings"
@@ -14040,7 +14040,7 @@ TEST_F(SQLiteFixture, ORT_EndUseBySubcategorySQL_IPUnitExceptElec)
                               reportName +
                               "'"
                               "  AND RowName = '" +
-                              endUseName + ":" + endUseSubCategoryName + "'"); // Now Like 'Exterior Lighting:General'
+                              endUseName + ":" + subCatName + "'"); // Now Like 'Exterior Lighting:General'
 
             auto result = queryResult(query, "TabularDataWithStrings");
 
@@ -14079,93 +14079,93 @@ TEST_F(SQLiteFixture, ORT_EndUseBySubcategorySQL_IPUnitExceptElec)
 
     // Get all Interior Lighting End Uses (all subcats) for Electricity
     {
-        std::string query("SELECT Value From TabularDataWithStrings"
-                          "  WHERE TableName = 'End Uses By Subcategory'"
-                          "  AND ReportName = 'AnnualBuildingUtilityPerformanceSummary'"
-                          "  AND ColumnName = 'Electricity'"
-                          "  AND RowName LIKE 'Exterior Lighting:%'");
-        auto result = queryResult(query, "TabularDataWithStrings");
+        std::string blockQuery("SELECT Value From TabularDataWithStrings"
+                               "  WHERE TableName = 'End Uses By Subcategory'"
+                               "  AND ReportName = 'AnnualBuildingUtilityPerformanceSummary'"
+                               "  AND ColumnName = 'Electricity'"
+                               "  AND RowName LIKE 'Exterior Lighting:%'");
+        auto result = queryResult(blockQuery, "TabularDataWithStrings");
 
-        ASSERT_EQ(2u, result.size()) << "Failed for query: " << query;
+        ASSERT_EQ(2u, result.size()) << "Failed for blockQuery: " << blockQuery;
     }
 
     // Get all subcat usage for all fuels (13)
     {
-        std::string query("SELECT Value From TabularDataWithStrings"
-                          "  WHERE TableName = 'End Uses By Subcategory'"
-                          "  AND ReportName = 'AnnualBuildingUtilityPerformanceSummary'"
-                          "  AND RowName = 'Exterior Lighting:AnotherEndUseSubCat'");
-        auto result = queryResult(query, "TabularDataWithStrings");
+        std::string blockQuery("SELECT Value From TabularDataWithStrings"
+                               "  WHERE TableName = 'End Uses By Subcategory'"
+                               "  AND ReportName = 'AnnualBuildingUtilityPerformanceSummary'"
+                               "  AND RowName = 'Exterior Lighting:AnotherEndUseSubCat'");
+        auto result = queryResult(blockQuery, "TabularDataWithStrings");
 
-        ASSERT_EQ(14u, result.size()) << "Failed for query: " << query;
+        ASSERT_EQ(14u, result.size()) << "Failed for blockQuery: " << blockQuery;
     }
 
     // Specifically get the each fuel (Coal, Gasoline, and Propane) usage for End Use = Heating,
     // and make sure it's the right number that's returned
 
     {
-        std::string query("SELECT Value From TabularDataWithStrings"
-                          "  WHERE TableName = 'End Uses'"
-                          "  AND ReportName = 'AnnualBuildingUtilityPerformanceSummary'"
-                          "  AND ColumnName = 'Coal'"
-                          "  AND RowName = 'Heating'");
-        auto result = queryResult(query, "TabularDataWithStrings");
-        Real64 return_val1 = execAndReturnFirstDouble(query);
+        std::string blockQuery("SELECT Value From TabularDataWithStrings"
+                               "  WHERE TableName = 'End Uses'"
+                               "  AND ReportName = 'AnnualBuildingUtilityPerformanceSummary'"
+                               "  AND ColumnName = 'Coal'"
+                               "  AND RowName = 'Heating'");
+        auto result = queryResult(blockQuery, "TabularDataWithStrings");
+        Real64 return_val1 = execAndReturnFirstDouble(blockQuery);
 
-        ASSERT_EQ(1u, result.size()) << "Failed for query: " << query;
-        // EXPECT_NEAR(CoalHeating * 3 / 3.6e6, return_val1, 0.01) << "Failed for query: " << query;
+        ASSERT_EQ(1u, result.size()) << "Failed for blockQuery: " << blockQuery;
+        // EXPECT_NEAR(CoalHeating * 3 / 3.6e6, return_val1, 0.01) << "Failed for blockQuery: " << blockQuery;
         Real64 expected_coalHt = CoalHeating * 3 / 1.0e9 / enerConv;
-        EXPECT_NEAR(expected_coalHt, return_val1, 0.01) << "Failed for query: " << query;
+        EXPECT_NEAR(expected_coalHt, return_val1, 0.01) << "Failed for blockQuery: " << blockQuery;
     }
 
     {
-        std::string query("SELECT Value From TabularDataWithStrings"
-                          "  WHERE TableName = 'End Uses'"
-                          "  AND ReportName = 'AnnualBuildingUtilityPerformanceSummary'"
-                          "  AND ColumnName = 'Gasoline'"
-                          "  AND RowName = 'Heating'");
-        auto result = queryResult(query, "TabularDataWithStrings");
-        Real64 return_val2 = execAndReturnFirstDouble(query);
+        std::string blockQuery("SELECT Value From TabularDataWithStrings"
+                               "  WHERE TableName = 'End Uses'"
+                               "  AND ReportName = 'AnnualBuildingUtilityPerformanceSummary'"
+                               "  AND ColumnName = 'Gasoline'"
+                               "  AND RowName = 'Heating'");
+        auto result = queryResult(blockQuery, "TabularDataWithStrings");
+        Real64 return_val2 = execAndReturnFirstDouble(blockQuery);
 
-        ASSERT_EQ(1u, result.size()) << "Failed for query: " << query;
-        // EXPECT_NEAR(GasolineHeating * 3 / 3.6e6, return_val2, 0.01) << "Failed for query: " << query;
-        EXPECT_NEAR(GasolineHeating * 3 / 1.0e9 / enerConv, return_val2, 0.01) << "Failed for query: " << query;
+        ASSERT_EQ(1u, result.size()) << "Failed for blockQuery: " << blockQuery;
+        // EXPECT_NEAR(GasolineHeating * 3 / 3.6e6, return_val2, 0.01) << "Failed for blockQuery: " << blockQuery;
+        EXPECT_NEAR(GasolineHeating * 3 / 1.0e9 / enerConv, return_val2, 0.01) << "Failed for blockQuery: " << blockQuery;
     }
 
     {
-        std::string query("SELECT Value From TabularDataWithStrings"
-                          "  WHERE TableName = 'End Uses'"
-                          "  AND ReportName = 'AnnualBuildingUtilityPerformanceSummary'"
-                          "  AND ColumnName = 'Propane'"
-                          "  AND RowName = 'Heating'");
-        auto result = queryResult(query, "TabularDataWithStrings");
-        Real64 return_val3 = execAndReturnFirstDouble(query);
+        std::string blockQuery("SELECT Value From TabularDataWithStrings"
+                               "  WHERE TableName = 'End Uses'"
+                               "  AND ReportName = 'AnnualBuildingUtilityPerformanceSummary'"
+                               "  AND ColumnName = 'Propane'"
+                               "  AND RowName = 'Heating'");
+        auto result = queryResult(blockQuery, "TabularDataWithStrings");
+        Real64 return_val3 = execAndReturnFirstDouble(blockQuery);
 
-        ASSERT_EQ(1u, result.size()) << "Failed for query: " << query;
-        // EXPECT_NEAR(PropaneHeating * 3 / 3.6e6, return_val3, 0.01) << "Failed for query: " << query;
-        EXPECT_NEAR(PropaneHeating * 3 / 1.0e9 / enerConv, return_val3, 0.01) << "Failed for query: " << query;
+        ASSERT_EQ(1u, result.size()) << "Failed for blockQuery: " << blockQuery;
+        // EXPECT_NEAR(PropaneHeating * 3 / 3.6e6, return_val3, 0.01) << "Failed for blockQuery: " << blockQuery;
+        EXPECT_NEAR(PropaneHeating * 3 / 1.0e9 / enerConv, return_val3, 0.01) << "Failed for blockQuery: " << blockQuery;
     }
 
     // Check the heating category has the result size of 13 (including all disaggregated additional fuels) in both reports)
 
     {
-        std::string query("SELECT Value From TabularDataWithStrings"
-                          "  WHERE TableName = 'End Uses'"
-                          "  AND ReportName = 'AnnualBuildingUtilityPerformanceSummary'"
-                          "  AND RowName = 'Heating'");
-        auto result = queryResult(query, "TabularDataWithStrings");
+        std::string blockQuery("SELECT Value From TabularDataWithStrings"
+                               "  WHERE TableName = 'End Uses'"
+                               "  AND ReportName = 'AnnualBuildingUtilityPerformanceSummary'"
+                               "  AND RowName = 'Heating'");
+        auto result = queryResult(blockQuery, "TabularDataWithStrings");
 
-        ASSERT_EQ(14u, result.size()) << "Failed for query: " << query;
+        ASSERT_EQ(14u, result.size()) << "Failed for blockQuery: " << blockQuery;
     }
 
     {
-        std::string query("SELECT Value From TabularDataWithStrings"
-                          "  WHERE TableName = 'End Uses'"
-                          "  AND ReportName = 'DemandEndUseComponentsSummary'"
-                          "  AND RowName = 'Heating'");
-        auto result = queryResult(query, "TabularDataWithStrings");
+        std::string blockQuery("SELECT Value From TabularDataWithStrings"
+                               "  WHERE TableName = 'End Uses'"
+                               "  AND ReportName = 'DemandEndUseComponentsSummary'"
+                               "  AND RowName = 'Heating'");
+        auto result = queryResult(blockQuery, "TabularDataWithStrings");
 
-        ASSERT_EQ(14u, result.size()) << "Failed for query: " << query;
+        ASSERT_EQ(14u, result.size()) << "Failed for blockQuery: " << blockQuery;
     }
 }
 

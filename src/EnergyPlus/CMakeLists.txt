@@ -756,7 +756,8 @@ if(LINK_WITH_PYTHON)
 
   # now we need to get the Python libs and add the include path for further compiling
   # The Development (libs) was already found in the root level CMakeLists.txt
-  include_directories("${Python_INCLUDE_DIRS}")
+  # Marked SYSTEM so MSVC treats it as an external header (/external:I) and doesn't apply /W4 /WX to it
+  target_include_directories(project_options SYSTEM INTERFACE "${Python_INCLUDE_DIRS}")
 endif()
 
 add_library(energyplusparser STATIC ${INPUTPARSING_SRC})

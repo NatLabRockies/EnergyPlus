@@ -529,7 +529,7 @@ namespace HVACVariableRefrigerantFlow {
                              Real64 MaxOutdoorUnitTc,   // The maximum temperature that Tc can be at heating mode [C]
                              Real64 &OUCondHeatRelease, // Condenser heat release (cooling mode) [W]
                              Real64 &CompSpdActual,     // Actual compressor running speed [rps]
-                             Real64 &Ncomp,             // Compressor power [W]
+                             Real64 &t_Ncomp,           // Compressor power [W]
                              Real64 &CyclingRatio       // Cycling Ratio [W]
         );
 
@@ -545,7 +545,7 @@ namespace HVACVariableRefrigerantFlow {
                         Real64 Pipe_Q,             // Piping Loss Algorithm Parameter: Heat loss [W]
                         Real64 &OUEvapHeatExtract, // Condenser heat release (cooling mode) [W]
                         Real64 &CompSpdActual,     // Actual compressor running speed [rps]
-                        Real64 &Ncomp,             // Compressor power [W]
+                        Real64 &t_Ncomp,           // Compressor power [W]
                         Real64 &CyclingRatio       // Compressor cycling ratio
         );
 
@@ -567,7 +567,7 @@ namespace HVACVariableRefrigerantFlow {
                               Real64 &m_ref_OU_cond, // mass flow rate of Refrigerant through OU condenser [kg/s]
                               Real64 &N_fan_OU,      // outdoor unit fan power [W]
                               Real64 &CompSpdActual, // Actual compressor running speed [rps]
-                              Real64 &Ncomp          // compressor power [W]
+                              Real64 &t_Ncomp        // compressor power [W]
         );
 
         void VRFOU_CompSpd(EnergyPlusData &state,
@@ -587,7 +587,7 @@ namespace HVACVariableRefrigerantFlow {
                            Real64 h_IU_evap_in,  // Enthalpy of IU at inlet, for C_cap_operation calculation [kJ/kg]
                            Real64 h_comp_in,     // Enthalpy after piping loss (compressor inlet), for C_cap_operation calculation [kJ/kg]
                            Real64 &Q_c_tot,      // Compressor evaporative capacity [W]
-                           Real64 &Ncomp         // Compressor power [W]
+                           Real64 &t_Ncomp       // Compressor power [W]
         );
 
         void VRFOU_PipeLossC(EnergyPlusData &state,

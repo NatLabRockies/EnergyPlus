@@ -1335,6 +1335,7 @@ void SizePurchasedAir(EnergyPlusData &state, int const PurchAirNum)
 
     // Using/Aliasing
     using namespace DataSizing;
+    using HVAC::CoolingAirflowSizing;
     using HVAC::CoolingCapacitySizing;
     using HVAC::HeatingAirflowSizing;
     using HVAC::HeatingCapacitySizing;
@@ -1358,7 +1359,7 @@ void SizePurchasedAir(EnergyPlusData &state, int const PurchAirNum)
     Real64 MaxCoolTotCapUser;         // Hardsized maximum sensible cooling capacity for reporting
     std::string CompName;             // component name
     std::string CompType;             // component type
-    Real64 TempSize;                  // autosized value of coil input field
+    Real64 TempSize = 0.0;            // autosized value of coil input field
                                       // FractionOfAutosizedHeatingCapacity )
     Real64 CoolingAirVolFlowDes(0.0); // cooling supply air flow rate
     Real64 HeatingAirVolFlowDes(0.0); // heating supply air flow rate
@@ -1490,6 +1491,7 @@ void SizePurchasedAir(EnergyPlusData &state, int const PurchAirNum)
                         ZoneEqSizing.HeatingCapacity = true;
                         ZoneEqSizing.DesHeatingLoad = state.dataSize->ZoneHVACSizing(zoneHVACIndex).ScaledHeatingCapacity *
                                                       state.dataHeatBal->Zone(state.dataSize->DataZoneNumber).FloorArea;
+                        TempSize = ZoneEqSizing.DesHeatingLoad;
                         state.dataSize->DataScalableSizingON = true;
                     } else if (CapSizingMethod == FractionOfAutosizedHeatingCapacity) {
                         state.dataSize->DataFracOfAutosizedHeatingCapacity = state.dataSize->ZoneHVACSizing(zoneHVACIndex).ScaledHeatingCapacity;
@@ -1537,6 +1539,7 @@ void SizePurchasedAir(EnergyPlusData &state, int const PurchAirNum)
             PrintFlag = true;
             if (state.dataSize->ZoneHVACSizing(zoneHVACIndex).CoolingSAFMethod > 0) {
                 state.dataSize->ZoneCoolingOnlyFan = true;
+                SizingMethod = CoolingAirflowSizing;
                 SAFMethod = state.dataSize->ZoneHVACSizing(zoneHVACIndex).CoolingSAFMethod;
                 ZoneEqSizing.SizingMethod(SizingMethod) = SAFMethod;
                 if (SAFMethod == SupplyAirFlowRate || SAFMethod == FlowPerFloorArea || SAFMethod == FractionOfAutosizedCoolingAirflow) {

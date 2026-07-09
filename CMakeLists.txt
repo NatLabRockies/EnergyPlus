@@ -336,7 +336,7 @@ if(OPENGL_FOUND)
 endif()
 target_include_directories(project_options INTERFACE ${PROJECT_SOURCE_DIR}/third_party/kiva/src)
 target_include_directories(project_options INTERFACE "${kiva_BINARY_DIR}/src/libkiva")
-target_include_directories(project_options SYSTEM INTERFACE "${kiva_SOURCE_DIR}/vendor/boost-1.61.0/")
+target_include_directories(project_options SYSTEM INTERFACE "${kiva_SOURCE_DIR}/vendor/boost-1.88.0/")
 
 if(OPENGL_FOUND)
   set(BUILD_PENUMBRA_TESTING

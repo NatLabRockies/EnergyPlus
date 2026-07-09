@@ -654,9 +654,9 @@ void GatherForPredefinedReport(EnergyPlusData &state)
 
     // the following variables are for the CalcNominalWindowCond call but only SHGCSummer is needed
     Real64 nomCond;
-    Real64 SHGCSummer;
+    Real64 SHGCSummer = 0.0;
     Real64 TransSolNorm;
-    Real64 TransVisNorm;
+    Real64 TransVisNorm = 0.0;
     Real64 nomUfact;
     int errFlag;
     int curWSC;
@@ -3419,8 +3419,8 @@ void InitSolarHeatGains(EnergyPlusData &state)
                             Real64 CosIncAngHorProj = 0.0;  // Cosine of incidence angle of sun on horizontal faces of a frame or divider projection
                             Real64 CosIncAngVertProj = 0.0; // Cosine of incidence angle of sun on vertical faces of a frame or divider projection
                             Real64 FracSunLit = 0.0;        // Fraction of window sunlit this time step
-                            Real64 BeamFaceInc;             // Beam solar incident window plane this time step (W/m2)
-                            Real64 DifSolarFaceInc;         // Diffuse solar incident on window plane this time step (W/m2)
+                            Real64 BeamFaceInc = 0.0;       // Beam solar incident window plane this time step (W/m2)
+                            Real64 DifSolarFaceInc = 0.0;   // Diffuse solar incident on window plane this time step (W/m2)
                             Real64 SurfIncSolarMultiplier = state.dataSurface->Surface(SurfNum).IncSolMultiplier;
                             Real64 currBeamSolarRad = state.dataEnvrn->BeamSolarRad * SurfIncSolarMultiplier;
                             if (FrArea > 0.0 || DivArea > 0.0) {
@@ -7852,8 +7852,8 @@ void CalcHeatBalanceInsideSurf2(EnergyPlusData &state,
     constexpr std::string_view HBSurfManInsideSurf("HB,SurfMan:InsideSurf");
     constexpr std::string_view Inside("Inside");
 
-    Real64 TempSurfOutTmp; // Local Temporary Surface temperature for the outside surface face
-    Real64 SurfTempInSat;  // Local temporary surface dew point temperature
+    Real64 TempSurfOutTmp = 0.0; // Local Temporary Surface temperature for the outside surface face
+    Real64 SurfTempInSat = 0.0;  // Local temporary surface dew point temperature
 
     Real64 Wsurf;         // Moisture ratio for HAMT
     Real64 RhoAirZone;    // Zone moisture density for HAMT
@@ -9495,7 +9495,7 @@ void CalcOutsideSurfTemp(EnergyPlusData &state,
     // Determine whether or not movable insulation is present
     bool MovInsulPresent = (HMovInsul > 0.0); // .TRUE. if movable insulation is currently present for surface
     bool QuickConductionSurf;                 // .TRUE. if the cross CTF term is relatively large
-    Real64 F1;                                // Intermediate calculation variable
+    Real64 F1 = 0.0;                          // Intermediate calculation variable
     Real64 F2;                                // Intermediate calculation variable
     // Determine whether this surface is a "slow conductive" or "quick conductive"
     // surface.  Designates are inherited from BLAST.  Basically, a "quick" surface

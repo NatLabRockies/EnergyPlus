@@ -200,10 +200,6 @@ namespace VariableSpeedCoils {
         // two additional output variables
         varSpeedCoil.SpeedNumReport = SpeedCal;
         varSpeedCoil.SpeedRatioReport = SpeedRatio;
-
-        if (varSpeedCoil.AirLoopNum > 0 && state.afn->distribution_simulated) {
-            state.dataAirLoop->AirLoopAFNInfo(varSpeedCoil.AirLoopNum).AFNLoopDXCoilRTF = max(varSpeedCoil.RunFracCool, varSpeedCoil.RunFracHeat);
-        }
     }
 
     void GetVarSpeedCoilInput(EnergyPlusData &state)
@@ -3889,26 +3885,26 @@ namespace VariableSpeedCoils {
         bool RatedCapCoolTotalAutoSized;
         bool RatedCapCoolSensAutoSized;
         Real64 SystemCapacity;
-        Real64 rho;
+        Real64 rho = 0.0;
         Real64 cp;
-        int Mode;                     // speed level
-        Real64 rhoW;                  // water density
-        Real64 SHR;                   // sensible heat transfer ratio
-        Real64 RatedAirMassFlowRate;  // rated air mass flow rate
-        Real64 CBFRated;              // bypass factor at the rated condition, considering difference in flow rates
-        Real64 RatedInletEnth;        // rated inlet air enthalpy
-        Real64 QLoadTotal1;           // placeholder for calculating SHR
-        Real64 QLoadTotal2;           // placeholder for calculating SHR
-        Real64 QLoadTotal;            // placeholder for calculating SHR
-        Real64 AirMassFlowRatio;      // air mass flow ratio
-        Real64 WaterMassFlowRatio;    // water mass flow rate
-        Real64 RatedSourceTempCool;   // rated source temperature, space cooling mode
-        std::string CurrentObjSubfix; // Object subfix type for printing
-        bool HardSizeNoDesRun;        // Indicator to hardsize without sizing runs
-        bool SizingDesRunThisAirSys;  // true if a particular air system had a Sizing:System object and system sizing done
-        bool SizingDesRunThisZone;    // true if a particular zone had a Sizing:Zone object and zone sizing was done
-        Real64 HPInletAirHumRat;      // Rated inlet air humidity ratio for heat pump water heater [kgWater/kgDryAir]
-        Real64 HPWHCoolCapacity;      // estimate cooling capacity in HPWH
+        int Mode;                      // speed level
+        Real64 rhoW;                   // water density
+        Real64 SHR;                    // sensible heat transfer ratio
+        Real64 RatedAirMassFlowRate;   // rated air mass flow rate
+        Real64 CBFRated;               // bypass factor at the rated condition, considering difference in flow rates
+        Real64 RatedInletEnth;         // rated inlet air enthalpy
+        Real64 QLoadTotal1;            // placeholder for calculating SHR
+        Real64 QLoadTotal2;            // placeholder for calculating SHR
+        Real64 QLoadTotal;             // placeholder for calculating SHR
+        Real64 AirMassFlowRatio;       // air mass flow ratio
+        Real64 WaterMassFlowRatio;     // water mass flow rate
+        Real64 RatedSourceTempCool;    // rated source temperature, space cooling mode
+        std::string CurrentObjSubfix;  // Object subfix type for printing
+        bool HardSizeNoDesRun;         // Indicator to hardsize without sizing runs
+        bool SizingDesRunThisAirSys;   // true if a particular air system had a Sizing:System object and system sizing done
+        bool SizingDesRunThisZone;     // true if a particular zone had a Sizing:Zone object and zone sizing was done
+        Real64 HPInletAirHumRat = 0.0; // Rated inlet air humidity ratio for heat pump water heater [kgWater/kgDryAir]
+        Real64 HPWHCoolCapacity;       // estimate cooling capacity in HPWH
 
         int UpperSpeed = varSpeedCoil.NumOfSpeeds;
         int NormSpeed = varSpeedCoil.NormSpedLevel;
@@ -5249,18 +5245,18 @@ namespace VariableSpeedCoils {
         Real64 MaxOutletEnth;            // max possible outlet enthalpy
 
         // ADDED VARIABLES FOR air source coil
-        Real64 CondInletTemp; // Condenser inlet temperature (C). Outdoor dry-bulb temp for air-cooled condenser.
+        Real64 CondInletTemp = 0.0; // Condenser inlet temperature (C). Outdoor dry-bulb temp for air-cooled condenser.
         // Outdoor Wetbulb +(1 - effectiveness)*(outdoor drybulb - outdoor wetbulb) for evap condenser.
-        Real64 CondInletHumRat; // Condenser inlet humidity ratio (kg/kg). Zero for air-cooled condenser.
+        Real64 CondInletHumRat = 0.0; // Condenser inlet humidity ratio (kg/kg). Zero for air-cooled condenser.
         // For evap condenser, its the humidity ratio of the air leaving the evap cooling pads.
-        Real64 CondAirMassFlow;    // Condenser air mass flow rate [kg/s]
-        Real64 RhoSourceAir;       // Density of air [kg/m3]
-        Real64 RhoEvapCondWater;   // Density of water used for evaporative condenser [kg/m3]
-        Real64 EvapCondEffectSped; // condenser evaporative effectiveness at the speed level
-        Real64 RhoWater;           // condensed water density
-        Real64 SpecHumIn;          // inlet air specific humidity
-        Real64 SpecHumOut;         // outlet air specific humidity
-        Real64 rhoair(0);          // entering air density
+        Real64 CondAirMassFlow = 0.0; // Condenser air mass flow rate [kg/s]
+        Real64 RhoSourceAir;          // Density of air [kg/m3]
+        Real64 RhoEvapCondWater;      // Density of water used for evaporative condenser [kg/m3]
+        Real64 EvapCondEffectSped;    // condenser evaporative effectiveness at the speed level
+        Real64 RhoWater;              // condensed water density
+        Real64 SpecHumIn;             // inlet air specific humidity
+        Real64 SpecHumOut;            // outlet air specific humidity
+        Real64 rhoair(0);             // entering air density
 
         if (state.dataVariableSpeedCoils->firstTime) {
             // Set indoor air conditions to the rated condition
@@ -6927,7 +6923,7 @@ namespace VariableSpeedCoils {
         // as negative.
 
         // Return value
-        Real64 CoilCapacity; // returned capacity of matched coil
+        Real64 CoilCapacity = 0.0; // returned capacity of matched coil
 
         // FUNCTION LOCAL VARIABLE DECLARATIONS:
         int WhichCoil;
@@ -7016,7 +7012,7 @@ namespace VariableSpeedCoils {
         // coil type or name is given, ErrorsFound is returned as true and capacity is returned as negative.
 
         // Return value
-        Real64 CoilAirFlowRate; // returned air volume flow rate of matched coil
+        Real64 CoilAirFlowRate = 0.0; // returned air volume flow rate of matched coil
 
         // FUNCTION LOCAL VARIABLE DECLARATIONS:
         int WhichCoil;
@@ -7073,7 +7069,7 @@ namespace VariableSpeedCoils {
         // coil type or name is given, ErrorsFound is returned as true and value is returned as zero.
 
         // Return value
-        int PLRNumber; // returned outlet node of matched coil
+        int PLRNumber = 0; // returned outlet node of matched coil
 
         // FUNCTION LOCAL VARIABLE DECLARATIONS:
         int WhichCoil;
@@ -7149,7 +7145,7 @@ namespace VariableSpeedCoils {
         // coil type or name is given, ErrorsFound is returned as true and value is returned as zero.
 
         // Return value
-        int NodeNumber; // returned outlet node of matched coil
+        int NodeNumber = 0; // returned outlet node of matched coil
 
         // FUNCTION LOCAL VARIABLE DECLARATIONS:
         int WhichCoil;
@@ -7190,7 +7186,7 @@ namespace VariableSpeedCoils {
         // coil type or name is given, ErrorsFound is returned as true and value is returned as zero.
 
         // Return value
-        int NodeNumber; // returned outlet node of matched coil
+        int NodeNumber = 0; // returned outlet node of matched coil
 
         // FUNCTION LOCAL VARIABLE DECLARATIONS:
         int WhichCoil;
@@ -7663,15 +7659,15 @@ namespace VariableSpeedCoils {
         // at the current operating conditions (sec)
         Real64 Gamma; // Initial moisture evaporation rate divided by steady-state AC latent capacity
         // at the current operating conditions
-        Real64 Twet_max; // Maximum allowed value for Twet
-        Real64 Ton;      // Coil on time (sec)
-        Real64 Toff;     // Coil off time (sec)
-        Real64 Toffa;    // Actual coil off time (sec). Equations valid for Toff <= (2.0 * Twet/Gamma)
-        Real64 aa;       // Intermediate variable
-        Real64 To1;      // Intermediate variable (first guess at To). To = time to the start of moisture removal
-        Real64 To2;      // Intermediate variable (second guess at To). To = time to the start of moisture removal
-        Real64 Error;    // Error for iteration (DO) loop
-        Real64 LHRmult;  // Latent Heat Ratio (LHR) multiplier. The effective latent heat ratio LHR = (1-SHRss)*LHRmult
+        Real64 Twet_max;  // Maximum allowed value for Twet
+        Real64 Ton;       // Coil on time (sec)
+        Real64 Toff;      // Coil off time (sec)
+        Real64 Toffa;     // Actual coil off time (sec). Equations valid for Toff <= (2.0 * Twet/Gamma)
+        Real64 aa;        // Intermediate variable
+        Real64 To1;       // Intermediate variable (first guess at To). To = time to the start of moisture removal
+        Real64 To2 = 0.0; // Intermediate variable (second guess at To). To = time to the start of moisture removal
+        Real64 Error;     // Error for iteration (DO) loop
+        Real64 LHRmult;   // Latent Heat Ratio (LHR) multiplier. The effective latent heat ratio LHR = (1-SHRss)*LHRmult
 
         const auto &varSpeedCoil = state.dataVariableSpeedCoils->VarSpeedCoil(DXCoilNum);
         Real64 Twet_Rated = varSpeedCoil.Twet_Rated; // [s]
@@ -7811,9 +7807,9 @@ namespace VariableSpeedCoils {
         Real64 TotCapTempModFac2;      // Total capacity modifier (function of entering wetbulb, outside water inlet temp) at high speed
         Real64 TotCapAirFlowModFac2;   // Total capacity modifier (function of actual supply air flow vs nominal flow) at high speed
         Real64 TotCapWaterFlowModFac2; // Total capacity modifier (function of actual supply water flow vs nominal flow) at high speed
-        Real64 TotCapCalc;             // temporary calculated value of total capacity [W]
-        Real64 TotCapCalc1;            // temporary calculated value of total capacity [W] at low speed
-        Real64 TotCapCalc2;            // temporary calculated value of total capacity [W] at high speed
+        Real64 TotCapCalc = 0.0;       // temporary calculated value of total capacity [W]
+        Real64 TotCapCalc1 = 0.0;      // temporary calculated value of total capacity [W] at low speed
+        Real64 TotCapCalc2 = 0.0;      // temporary calculated value of total capacity [W] at high speed
 
         int Counter = 0;                        // Error tolerance for dry evaporator iterations
         Real64 RF = 0.4;                        // Relaxation factor for dry evaporator iterations

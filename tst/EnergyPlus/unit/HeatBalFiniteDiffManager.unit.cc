@@ -296,6 +296,74 @@ TEST_F(EnergyPlusFixture, HeatBalFiniteDiffManager_adjustPropertiesForPhaseChang
     SurfaceFD.deallocate();
 }
 
+TEST_F(EnergyPlusFixture, HeatBalFiniteDiffManager_adjustPropertiesForPhaseChangeNonPositiveMeltingAndFreezing)
+{
+    // Test for #10472: Allow negative peak temperatures for PhaseChangeHysteresis
+    auto &s_mat = state->dataMaterial;
+
+    // create a single PCM object in the input and process it
+    std::string const idf_objects = delimited_string({"  MaterialProperty:PhaseChangeHysteresis,",
+                                                      "    PCMNAME,   !- Name",
+                                                      "    10000,                   !- Latent Heat during the Entire Phase Change Process {J/kg}",
+                                                      "    1.5,                     !- Liquid State Thermal Conductivity {W/m-K}",
+                                                      "    2200,                    !- Liquid State Density {kg/m3}",
+                                                      "    2000,                    !- Liquid State Specific Heat {J/kg-K}",
+                                                      "    1,                       !- High Temperature Difference of Melting Curve {deltaC}",
+                                                      "    0.0,                     !- Peak Melting Temperature {C}",
+                                                      "    1,                       !- Low Temperature Difference of Melting Curve {deltaC}",
+                                                      "    1.8,                     !- Solid State Thermal Conductivity {W/m-K}",
+                                                      "    2300,                    !- Solid State Density {kg/m3}",
+                                                      "    2000,                    !- Solid State Specific Heat {J/kg-K}",
+                                                      "    1,                       !- High Temperature Difference of Freezing Curve {deltaC}",
+                                                      "    -2.0,                    !- Peak Freezing Temperature {C}",
+                                                      "    1;                       !- Low Temperature Difference of Freezing Curve {deltaC}"});
+    ASSERT_TRUE(process_idf(idf_objects, false));
+
+    // allocate a finite difference surface object and needed member variables
+    int constexpr surfaceIndex = 1;
+    int constexpr finiteDiffLayerIndex = 1;
+    auto &SurfaceFD = state->dataHeatBalFiniteDiffMgr->SurfaceFD;
+    SurfaceFD.allocate(1);
+    SurfaceFD(surfaceIndex).PhaseChangeTemperatureReverse.allocate(1);
+    SurfaceFD(surfaceIndex).PhaseChangeTemperatureReverse(finiteDiffLayerIndex) = 0.0;
+    SurfaceFD(surfaceIndex).PhaseChangeState.allocate(1);
+    SurfaceFD(surfaceIndex).PhaseChangeState(finiteDiffLayerIndex) = Material::Phase::Liquid;
+    SurfaceFD(surfaceIndex).PhaseChangeStateOld.allocate(1);
+    SurfaceFD(surfaceIndex).PhaseChangeStateOld(finiteDiffLayerIndex) = Material::Phase::Melting;
+    SurfaceFD(surfaceIndex).PhaseChangeStateRep.allocate(1);
+    SurfaceFD(surfaceIndex).PhaseChangeStateRep(finiteDiffLayerIndex) = Material::phaseInts[(int)Material::Phase::Liquid];
+    SurfaceFD(surfaceIndex).PhaseChangeStateOldRep.allocate(1);
+    SurfaceFD(surfaceIndex).PhaseChangeStateOldRep(finiteDiffLayerIndex) = Material::phaseInts[(int)Material::Phase::Melting];
+
+    // create a materials data object and assign the phase change variable based on above IDF processing
+    auto *mat = new Material::MaterialBase;
+    mat->Name = "PCMNAME";
+    mat->group = Material::Group::Regular;
+    s_mat->materials.push_back(mat);
+    mat->Num = s_mat->materials.isize();
+    s_mat->materialMap.insert_or_assign(mat->Name, mat->Num);
+
+    bool ErrorsFound = false;
+    Material::GetHysteresisData(*state, ErrorsFound);
+    ASSERT_FALSE(ErrorsFound);
+
+    auto *matPC = dynamic_cast<Material::MaterialPhaseChange *>(s_mat->materials(Material::GetMaterialNum(*state, "PCMNAME")));
+    ASSERT_NE(matPC, nullptr);
+
+    // create local variables to calculate and call the new worker function
+    Real64 newSpecificHeat, newDensity, newThermalConductivity;
+    adjustPropertiesForPhaseChange(
+        *state, finiteDiffLayerIndex, surfaceIndex, matPC, -1.0, -0.9, newSpecificHeat, newDensity, newThermalConductivity);
+
+    // check the values are correct
+    EXPECT_NEAR(3652.9, newSpecificHeat, 0.1);
+    EXPECT_NEAR(2250, newDensity, 0.1);
+    EXPECT_NEAR(1.65, newThermalConductivity, 0.1);
+
+    // deallocate
+    SurfaceFD.deallocate();
+}
+
 // I'm not sure how this test was intended to work, there doesn't appear to be anything setting the constructions
 // to finite difference, and there aren't any surfaces.  So it fails when enabled.  Feel free to fix it up and get it running.
 // TEST_F(EnergyPlusFixture, HeatBalFiniteDiffManager_skipNotUsedConstructionAndAirLayer)

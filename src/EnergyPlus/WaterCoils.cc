@@ -960,17 +960,17 @@ void InitWaterCoil(EnergyPlusData &state, int const CoilNum, bool const FirstHVA
     static constexpr std::string_view RoutineName("InitWaterCoil");
 
     // SUBROUTINE LOCAL VARIABLE DECLARATIONS:
-    int tempCoilNum;                   // loop variable
-    Real64 DesInletAirEnth;            // Entering air enthalpy at rating (J/kg)
-    Real64 DesOutletAirEnth;           // Leaving air enthalpy at rating(J/kg)
-    Real64 DesAirApparatusDewPtEnth;   // Air enthalpy at apparatus dew point at rating(J/kg)
-    Real64 DesSatEnthAtWaterInTemp;    // Saturated enthalpy at entering liquid temp(J/kg)
-    Real64 DesHumRatAtWaterInTemp;     // Enthalpy at water inlet temp and entering air HumRat (J/kg)
-    Real64 CapacitanceAir;             // Air-side capacity rate(W/C)
-    Real64 DesAirTempApparatusDewPt;   // Temperature apparatus dew point at design capacity
-    Real64 DesAirHumRatApparatusDewPt; // Humidity Ratio at apparatus dew point at design capacity
-    Real64 DesBypassFactor;            // ByPass Factor at design condition
-    Real64 SlopeTempVsHumRatio;        // Ratio temperature difference to humidity difference
+    int tempCoilNum;                      // loop variable
+    Real64 DesInletAirEnth;               // Entering air enthalpy at rating (J/kg)
+    Real64 DesOutletAirEnth;              // Leaving air enthalpy at rating(J/kg)
+    Real64 DesAirApparatusDewPtEnth;      // Air enthalpy at apparatus dew point at rating(J/kg)
+    Real64 DesSatEnthAtWaterInTemp = 0.0; // Saturated enthalpy at entering liquid temp(J/kg)
+    Real64 DesHumRatAtWaterInTemp = 0.0;  // Enthalpy at water inlet temp and entering air HumRat (J/kg)
+    Real64 CapacitanceAir;                // Air-side capacity rate(W/C)
+    Real64 DesAirTempApparatusDewPt;      // Temperature apparatus dew point at design capacity
+    Real64 DesAirHumRatApparatusDewPt;    // Humidity Ratio at apparatus dew point at design capacity
+    Real64 DesBypassFactor;               // ByPass Factor at design condition
+    Real64 SlopeTempVsHumRatio;           // Ratio temperature difference to humidity difference
     // between entering and leaving air states
     Real64 TempApparatusDewPtEstimate; // Estimate of TAdp from SlopeTempVsHumRatio
     Real64 Y1;                         // Previous values of dependent variable in ITERATE
@@ -2786,8 +2786,8 @@ void CalcSimpleHeatingCoil(EnergyPlusData &state,
     Real64 UA;
     Real64 CapacitanceAir;
     Real64 CapacitanceWater;
-    Real64 CapacitanceMin;
-    Real64 CapacitanceMax;
+    Real64 CapacitanceMin = 0.0;
+    Real64 CapacitanceMax = 0.0;
     Real64 HeatingCoilLoad;
     Real64 NTU;
     Real64 ETA;
@@ -2963,7 +2963,7 @@ void CalcDetailFlatFinCoolingCoil(EnergyPlusData &state,
     Real64 AirEnthAtWetDryIntrfcSurfTemp;
     Real64 AirSideDrySurfFilmCoef;
     Real64 AirSideWetSurfFilmCoef;
-    Real64 AirWetDryInterfcTemp;
+    Real64 AirWetDryInterfcTemp = 0.0;
     Real64 CoilToAirThermResistDrySurf;
     Real64 CoilToAirThermResistWetSurf;
     Real64 DryAirSpecHeat;
@@ -2975,41 +2975,41 @@ void CalcDetailFlatFinCoolingCoil(EnergyPlusData &state,
     Real64 DrySideEffectiveWaterTemp;
     Real64 EnterAirDewPoint;
     Real64 EnterAirHumRatDiff;
-    Real64 WetDryInterSurfTempErrorLast;
+    Real64 WetDryInterSurfTempErrorLast = 0.0;
     Real64 WetDryInterSurfTempError;
     Real64 expon;
     Real64 FilmCoefEqnFactor;
     Real64 FilmCoefReynldsCorrelatnFact;
     Real64 FinToTotSurfAreaRatio;
-    Real64 InCoilSurfTemp;
+    Real64 InCoilSurfTemp = 0.0;
     Real64 InsdToOutsdThermResistRatio;
     Real64 InSurfTempSatAirEnthl;
     Real64 K1;
-    Real64 MeanWaterTemp;
+    Real64 MeanWaterTemp = 0.0;
     Real64 MoistAirSpecificHeat;
-    Real64 OutCoilSurfTemp;
+    Real64 OutCoilSurfTemp = 0.0;
     Real64 OutSurfTempSatAirEnthl;
     Real64 RaisedInletWaterTemp;
     Real64 RsdInletWaterTempSatAirHumRat;
     Real64 ScaledAirMassFlowRate;
-    Real64 ScaledCoilAirThermResistWetSurf;
+    Real64 ScaledCoilAirThermResistWetSurf = 0.0;
     Real64 ScaledWaterSpecHeat;
-    Real64 ScaledWaterToTubeThermResist;
+    Real64 ScaledWaterToTubeThermResist = 0.0;
     Real64 SensToTotEnthDiffRatio;
-    Real64 SurfAreaWet;
+    Real64 SurfAreaWet = 0.0;
     Real64 TubeFoulThermResist;
     Real64 TubeWaterVel;
-    Real64 UACoilAllWet;
+    Real64 UACoilAllWet = 0.0;
     Real64 UACoilPartWet;
     Real64 UADryCoil;
     Real64 WaterToTubeThermResist;
     Real64 WetAreaChange;
-    Real64 WetAreaLast;
+    Real64 WetAreaLast = 0.0;
     Real64 WetCoilCoeff;
     Real64 WetCoilFinEfficncy;
     Real64 WetDryInterfcAirEnthl;
     Real64 WetDryInterfcSurfTemp;
-    Real64 WetDryInterfcWaterTemp;
+    Real64 WetDryInterfcWaterTemp = 0.0;
     Real64 WetFinEfficncy;
     Real64 WetSideEffctvWaterTemp;
     Real64 y;
@@ -3022,8 +3022,8 @@ void CalcDetailFlatFinCoolingCoil(EnergyPlusData &state,
     Real64 WaterMassFlowRate;
     Real64 AirMassFlow;
     Real64 TempWaterIn;
-    Real64 TempWaterOut;
-    Real64 TotWaterCoilLoad;
+    Real64 TempWaterOut = 0.0;
+    Real64 TotWaterCoilLoad = 0.0;
     Real64 SenWaterCoilLoad;
     Real64 AirDensity;
     Real64 AirVelocity;
@@ -4255,11 +4255,11 @@ Real64 CalcCoilUAbyEffectNTU(EnergyPlusData &state,
     Real64 X1;                    // Previous values of independent variable in iteration
     Real64 Y1;
     Real64 ResultX;
-    Real64 EnergyOutStreamOne;        // Intermediate Variable used
-    Real64 EnergyOutStreamTwo;        // Intermediate variable used
-    Real64 DesTotalHeatTransferCheck; // Check value to keep design total heat transfer in range
-    int iter;                         // Iteration index
-    int icvg;                         // Iteration convergence flag
+    Real64 EnergyOutStreamOne;              // Intermediate Variable used
+    Real64 EnergyOutStreamTwo;              // Intermediate variable used
+    Real64 DesTotalHeatTransferCheck = 0.0; // Check value to keep design total heat transfer in range
+    int iter;                               // Iteration index
+    int icvg;                               // Iteration convergence flag
 
     // Check for Q out of range (effectiveness > 1)
     MaxHeatTransfer = std::abs(min(CapacityStream1, CapacityStream2) * (EnergyInStreamOne - EnergyInStreamTwo));
@@ -5385,7 +5385,7 @@ Real64 GetCoilMaxWaterFlowRate(EnergyPlusData &state,
     // as negative.
 
     // Return value
-    Real64 MaxWaterFlowRate; // returned max water flow rate of matched coil
+    Real64 MaxWaterFlowRate = 0.0; // returned max water flow rate of matched coil
 
     // FUNCTION LOCAL VARIABLE DECLARATIONS:
 
@@ -6241,8 +6241,8 @@ void EstimateCoilInletWaterTemp(EnergyPlusData &state,
     Real64 UA;
     Real64 CapacitanceAir;
     Real64 CapacitanceWater;
-    Real64 CapacitanceMin;
-    Real64 CapacitanceMax;
+    Real64 CapacitanceMin = 0.0;
+    Real64 CapacitanceMax = 0.0;
     Real64 NTU;
     Real64 ETA;
     Real64 A;

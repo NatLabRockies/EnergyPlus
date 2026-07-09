@@ -785,7 +785,7 @@ namespace RoomAir {
         Real64 HeightFrac; // Fractional height of transition between occupied and upper subzones
         Real64 Gamma;      // dimensionless height parameter; higher gamma means interface height will be
         // higher, smaller gamma means interface height will be lower.
-        Real64 ZTAveraged;
+        Real64 ZTAveraged = 0.0;
 
         // Exact solution or Euler method
         if (state.dataHeatBal->ZoneAirSolutionAlgo != DataHeatBalance::SolutionAlgo::ThirdOrder) {
@@ -1209,7 +1209,7 @@ namespace RoomAir {
         // SUBROUTINE LOCAL VARIABLE DECLARATIONS:
 
         Real64 PowerInPlumesPerMeter; // Power in Plumes per meter of window length [W/m]
-        Real64 ZTAveraged;
+        Real64 ZTAveraged = 0.0;
 
         // Exact solution or Euler method
         if (state.dataHeatBal->ZoneAirSolutionAlgo != DataHeatBalance::SolutionAlgo::ThirdOrder) {

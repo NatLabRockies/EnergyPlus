@@ -810,13 +810,13 @@ namespace UnitHeater {
         Real64 EnthSteamOutWet;
         Real64 LatentHeatSteam;
         Real64 SteamDensity;
-        Real64 Cp;                 // local temporary for fluid specific heat
-        Real64 rho;                // local temporary for fluid density
-        std::string SizingString;  // input field sizing description (e.g., Nominal Capacity)
-        Real64 TempSize;           // autosized value of coil input field
-        bool PrintFlag;            // TRUE when sizing information is reported in the eio file
-        int zoneHVACIndex;         // index of zoneHVAC equipment sizing specification
-        Real64 WaterCoilSizDeltaT; // water coil deltaT for design water flow rate autosizing
+        Real64 Cp;                       // local temporary for fluid specific heat
+        Real64 rho;                      // local temporary for fluid density
+        std::string SizingString;        // input field sizing description (e.g., Nominal Capacity)
+        Real64 TempSize = 0.0;           // autosized value of coil input field
+        bool PrintFlag;                  // TRUE when sizing information is reported in the eio file
+        int zoneHVACIndex;               // index of zoneHVAC equipment sizing specification
+        Real64 WaterCoilSizDeltaT = 0.0; // water coil deltaT for design water flow rate autosizing
 
         int &CurZoneEqNum = state.dataSize->CurZoneEqNum;
 
@@ -988,6 +988,7 @@ namespace UnitHeater {
                                         ZoneEqSizing.DesHeatingLoad = state.dataSize->ZoneHVACSizing(zoneHVACIndex).ScaledHeatingCapacity *
                                                                       state.dataHeatBal->Zone(state.dataSize->DataZoneNumber).FloorArea;
                                         state.dataSize->DataScalableCapSizingON = true;
+                                        TempSize = DataSizing::AutoSize;
                                     } else if (CapSizingMethod == DataSizing::FractionOfAutosizedHeatingCapacity) {
                                         state.dataSize->DataFracOfAutosizedHeatingCapacity =
                                             state.dataSize->ZoneHVACSizing(zoneHVACIndex).ScaledHeatingCapacity;
@@ -1116,6 +1117,7 @@ namespace UnitHeater {
                                         ZoneEqSizing.DesHeatingLoad = state.dataSize->ZoneHVACSizing(zoneHVACIndex).ScaledHeatingCapacity *
                                                                       state.dataHeatBal->Zone(state.dataSize->DataZoneNumber).FloorArea;
                                         state.dataSize->DataScalableCapSizingON = true;
+                                        TempSize = DataSizing::AutoSize;
                                     } else if (CapSizingMethod == DataSizing::FractionOfAutosizedHeatingCapacity) {
                                         state.dataSize->DataFracOfAutosizedHeatingCapacity =
                                             state.dataSize->ZoneHVACSizing(zoneHVACIndex).ScaledHeatingCapacity;

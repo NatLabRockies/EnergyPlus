@@ -1680,10 +1680,14 @@ The Loop Demand Side design flow rate,\({\dot V_{Dmd,des}}\) , is set equal to t
 {\dot V_{Dmd,des}} = {\dot V_{Sup,des}}
 \end{equation}
 
-The design heat transfer capacity and UA for the heat exchanger are calculated using the design temperatures for the two plant loops. The loop design temperature difference for the Loop Supply Side, \(\Delta {T_{SupLoop,Des}}\) , is used to determine a nominal capacity.
+The design heat transfer capacity and UA for the heat exchanger are calculated using the design temperatures for the two plant loops. The loop design temperature difference for the Loop Supply Side, \(\Delta {T_{SupLoop,Des}}\) , is entered in a Sizing:Plant object and is used to determine a nominal capacity for autosized UA. For autosized UA, \(c_p\) and \(\rho\) are calculated at an initialization temperature of 5.05 C. When UA is not autosized, the reference capacity is based on the user-entered UA and the temperature difference between the loop set point temperatures, or the average of the loop high and low set point temperatures for DualSetpointDeadband control. The following equations are used to calculate the reference capacity for autosized UA and for user-entered UA:
 
 \begin{equation}
 \dot Q = V_{Sup,des} \rho {c_p} \Delta {T_{SupLoop,Des}}
+\end{equation}
+
+\begin{equation}
+\dot Q = UA \Delta {T_{SupLoop,Setpoint - DemLoop,Setpoint}}
 \end{equation}
 
 A loop-to-loop design temperature difference, \(\Delta {T_{LoopToLoop,Des}}\), is determined depending on the nature of the plant loop connected to the Loop Supply Side. The Sizing:Plant object includes classifications for the type of loop that include Heating, Steam, Cooling, or Condenser. For Cooling and Condenser loop types, the loop design temperature difference is added to the design exit temperature for the Loop Supply Side, \({T_{SupLoop,Exit}}\). For Heating and Stem loop types, the loop design temperature difference is subtracted from the design exit temperature. This adjusted supply side temperature is then compared to the design exit temperature for the Loop Demand Side,~\({T_{DmdLoop,Exit}}\).
@@ -1702,7 +1706,7 @@ The UA (U-Factor Time Area Value) is determined by assuming that the target capa
 UA = \frac{{{{\mathop {V}\limits }_{Sup,des}}\rho {c_p}\Delta {T_{SupLoop,Des}}}}{{\Delta {T_{LoopToLoop,Des}}}}
 \end{equation}
 
-A nominal capacity for the heat exchanger is determined from the design flow rates and UA (regardless of if they were automatically sized or input by the user) and the expected operating temperatures of the two loops. The loop operating temperatures are obtained from the input in Sizing:Plant object if it is present for that loop. If no Sizing:Plant is present then the loop's overall setpoint is used (if the loop's load scheme is DualSetpointDeadband then the average of the high and low setpoints is used). The full heat exchanger model is then calculated for the maximum loop flow rates and expected loop temperatures as inlets to the heat exchanger. The absolute value for the model result for heat transfer rate is then used as the capacity of the heat exchanger. This capacity is reported and may be used for controls based on operation scheme.
+A reference capacity for the heat exchanger is determined from either the design flow rate and supply loop design temperature difference or the user-entered UA and heat exchanger temperature difference. When UA is autosized the loop temperature difference is obtained from the inputs in Sizing:Plant objects. If UA is not autosized then the loop's setpoint temperatures are used (if the loop's load scheme is DualSetpointDeadband then the average of the high and low setpoints are used). This capacity is reported and may be used for controls based on operation scheme.
 
 \subsection{Humidifier Sizing}\label{humidifier-sizing}
 
@@ -2533,7 +2537,7 @@ These are all the EnergyPlus components whose names begin with ``\emph{AirTermin
 
 \subsubsection{Maximum Primary and Secondary Air Flow Rates}\label{maximum-primary-and-secondary-air-flow-rates}
 
-For the PIU terminal units, the maximum primary and secondary air flow rates are sized to the same value as the maximum total air flow rate.
+For the series PIU terminal units, the maximum primary air flow rate is sized to the same value as the maximum total air flow rate. For the parallel PIU the secondary air flow rate is sized to the difference between the maximum primary air flow rate and the minimum primary air flow rate.
 
 \subsubsection{Minimum Air Flow Rate}\label{minimum-air-flow-rate}
 

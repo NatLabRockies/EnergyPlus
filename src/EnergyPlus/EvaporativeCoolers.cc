@@ -1162,8 +1162,8 @@ void SizeEvapCooler(EnergyPlusData &state, int const EvapCoolNum)
     // SUBROUTINE LOCAL VARIABLE DECLARATIONS:
     bool IsAutoSize; // Indicator to autosize
 
-    Real64 volFlowRateDes; // Autosized volume flow rate for reporting
-    std::string CompType;  // for ease in getting objects
+    Real64 volFlowRateDes = 0.0; // Autosized volume flow rate for reporting
+    std::string CompType;        // for ease in getting objects
 
     // inits
     bool CoolerOnOApath = false;

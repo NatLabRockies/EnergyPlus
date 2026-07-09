@@ -279,9 +279,8 @@ char **getObjectNames(EnergyPlusState state, const char *objectType, unsigned in
     auto &instancesValue = instances.value();
     *resultingSize = instancesValue.size();
     char **data = new char *[*resultingSize];
-    unsigned int i = -1;
-    for (auto instance = instancesValue.begin(); instance != instancesValue.end(); ++instance) {
-        i++;
+    unsigned int i = 0;
+    for (auto instance = instancesValue.begin(); instance != instancesValue.end(); ++instance, ++i) {
         data[i] = new char[std::strlen(instance.key().data()) + 1];
         std::strcpy(data[i], instance.key().data());
     }
