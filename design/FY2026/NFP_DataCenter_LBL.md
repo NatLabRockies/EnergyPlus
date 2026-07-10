@@ -80,105 +80,6 @@ N/A
 The following new IDD objects will be added.
 
 ```
-Coil:Cooling:ITE:ColdPlate,
-  A1 , \field Name
-       \required-field
-       \type alpha
-       \reference CoilCoolingITENames
-  A2 , \field Availability Schedule Name
-       \note Availability schedule name for this system. Schedule value > 0 means the system is available.
-       \note If this field is blank, the system is always available.
-       \type object-list
-       \object-list ScheduleNames
-  A3 , \field Heat Transfer Parameter Input Method
-       \note Determines how the thermal performance of the cold plate and thermal interface is defined.
-       \note UFactorTimesArea uses the overall heat transfer coefficient.
-       \note ThermalResistance uses the overall thermal resistance in K/W or C/W.
-       \type choice
-       \key UFactorTimesArea
-       \key ThermalResistance
-       \default UFactorTimesArea
-  N1 , \field Cold Plate Heat Transfer Coefficient
-       \note The design overall heat transfer coefficient (UA value) of the cold plate.
-       \note This lumps the internal surface area, material conductivity, and thermal interface material.
-       \note Used only if Heat Transfer Parameter Input Method is UFactorTimesArea.
-       \type real
-       \units W/K
-       \minimum> 0.0
-  N2 , \field Cold Plate Thermal Resistance
-       \note The design overall thermal resistance of the cold plate.
-       \note Used only if Heat Transfer Parameter Input Method is ThermalResistance.
-       \type real
-       \units K/W
-       \minimum> 0.0
-  A4 , \field Heat Transfer Modifier Curve Name
-       \note Name of a bivariate curve that modifies the design heat transfer coefficient or thermal resistance.
-       \note For single-phase cooling, independent variables are typically fluid mass flow rate and fluid temperature.
-       \note This curve should evaluate to 1.0 at design conditions.
-       \type object-list
-       \object-list BivariateFunctions
-  N3 , \field Target Case Operating Temperature
-       \note The desired operating temperature of the processor case.
-       \note Used as the setpoint to size the design fluid flow rate and control real-time fluid flow.
-       \type real
-       \units C
-  N4 , \field Maximum Allowable Case Temperature
-       \note The maximum safe operating temperature of the processor case.
-       \note If fluid flow maxes out and this limit is exceeded, excess heat is rejected to the zone air.
-       \type real
-       \units C
-  N5 , \field Design Fluid Flow Rate
-       \note The design mass or volume flow rate of the coolant through the IT equipment.
-       \required-field
-       \type real
-       \units m3/s
-       \minimum> 0.0
-       \autosizable
-  N6 , \field Design Fluid Temperature Difference
-       \note The design temperature difference between the fluid outlet and fluid inlet.
-       \type real
-       \units deltaC
-       \minimum> 0.0
-       \autosizable
-  N7 , \field Design Pressure Drop
-       \note The fluid pressure drop across the cold plate at the design fluid flow rate.
-       \type real
-       \units Pa
-       \minimum 0.0
-  A5 , \field Pressure Drop Function of Flow Fraction Curve Name
-       \note The name of a single-variable curve that modifies the pressure drop as a function of fluid flow fraction.
-       \note This captures the changing resistance as fluid flow ramps up or down.
-       \note This curve should equal 1.0 at design conditions.
-       \type object-list
-       \object-list UnivariateFunctions
-  A6 , \field Cooling Fluid Inlet Node Name
-       \note Node connecting the cold plate to the supply side of the plant loop.
-       \required-field
-       \type node
-  A7 ; \field Cooling Fluid Outlet Node Name
-       \note Node connecting the cold plate to the return side of the plant loop.
-       \required-field
-       \type node
-```
-
-```
-Coil:Cooling:ITE:UserDefined,
-  \memo Allows users to define custom liquid cooling technologies (e.g., Two-Phase Cold Plates,
-  \memo Rear Door Heat Exchangers, Immersion) via Energy Management System (EMS) programs.
-  A1 , \field Name
-       \required-field
-  A2 , \field Liquid Inlet Node Name
-       \required-field
-  A3 , \field Liquid Outlet Node Name
-       \required-field
-  A4 , \field EMS Program Calling Manager Name
-       \note Links to the EMS program that dictates the heat split between liquid and air.
-  N1 ; \field Design Liquid Volume Flow Rate
-       \units m3/s
-       \autosizable
-```
-
-```
 ElectricEquipment:ITE:LiquidCooled,
   \memo Represents liquid-cooled data center IT equipment racks.
   \memo Calculates power consumption and rejects heat to ITE cooling coils.
@@ -321,17 +222,6 @@ The outputs for `ElectricEquipment:ITE:LiquidCooled` are as follows
 The ITE CPU electricity rate and energy outputs represent the power and energy consumed specifically by the compute components of the IT equipment. The ITE fan electricity rate and energy outputs represent the power and energy consumed by the internal fans used to assist with thermal management within the equipment. The ITE total electricity rate and energy outputs represent the overall power and energy consumption of the liquid-cooled IT equipment, which is the sum of the CPU and fan electricity usage.
 
 The ITE total heat generation rate and energy outputs represent the entire thermal load produced by the equipment, which is inherently equal to the total electricity consumed. The ITE liquid heat capture fraction reports the final fraction of heat being routed to the liquid loop at the current timestep, accounting for the design input field and any modifying schedules. The ITE liquid heat gain rate and energy outputs report the amount of this total heat generation that is captured and removed directly by the attached liquid cooling loop. The ITE air heat gain to zone rate and energy outputs represent the remaining thermal fraction that is not captured by the liquid loop and is instead dissipated into the surrounding zone air as a sensible heat gain. In addition to these core object-level outputs, EnergyPlus will automatically generate corresponding Space and Zone level aggregations for every variable listed above.
-
-The outputs for `Coil:Cooling:ITE:ColdPlate` are as follows.
-```
-   System,Average,Cooling Coil Total Cooling Rate [W]
-   System,Sum,Cooling Coil Total Cooling Energy [J]
-   System,Average,Cooling Coil Fluid Mass Flow Rate [kg/s]
-   System,Average,Cooling Coil Fluid Inlet Temperature [C]
-   System,Average,Cooling Coil Fluid Outlet Temperature [C]
-   System,Average,Cooling Coil Fluid Pressure Drop [Pa]
-   System,Average,Cooling Coil ITE Case Temperature [C]
-```
 
 ## Engineering Reference ##
 
