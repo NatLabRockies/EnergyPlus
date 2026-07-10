@@ -47,6 +47,8 @@ _Figure 1 - Cross Section of a Cold Plate_ (source: [[6]][Martinez et al.])
 
 [[2]][Wang et al.], [[3]][Cheng et al.], and [[4]][Shaeri et al.] show that the thermal resistance varies as a function of coolant flow rate and heat flux (for two-phase flow), so the nominal thermal resistance will be adjusted using a user-defined empirical curve.
 
+A target operating temperature will also be available as an input. It will be used to size the liquid coolant flow rate through the device. During operation, the flow rate will be adjusted to target this temperature. If the maximum flow rate is reached, the case temperature will be allowed to rise to the user-specified maximum value.
+
 The proposed object will be added by users to the demand side of a `PlantLoop` and, together with a `HeatExchanger:FluidToFluid` object and a pump (on the supply side of the same `PlantLoop`), will represent a coolant distribution unit (CDU). As requested by [[0]][Issue #11408], this approach allows D2C to "_be connected to existing EnergyPlus PlantLoop architecture_" and "_support for liquids with other heat transfer properties would be handled at the loop level with the fluid_type and user_defined_fluid_type fields_". Coolant properties can be specified using the `FluidProperties` family of objects. Note that PG25, which according to the literature (see [[2]][Wang et al.]) is a widely used single-phase coolant (a mixture of 25% propylene glycol and water), is natively supported by EnergyPlus when using the `FluidProperties:GlycolConcentration` object. Two-phase heat transfer is not currently handled in EnergyPlus, so we propose to focus on single-phase D2C this FY and add capabilities for two-phase D2C in the next FY.
 
 Moreover, [[6]][Martinez et al.] propose an LMTD-based thermal resistance ($R_{LMTD}$) definition for single-phase liquid-cooled cold plates. The default implementation uses the $R_{th}$ approach, though users may optionally apply the $R_{LMTD}$ approach instead.
@@ -87,7 +89,14 @@ Coil:Cooling:ITE:ColdPlate
         \units K/W
     N2, \field Maximum Case Temperature
         \note Maximum allowed case temperature
+        \required-field
         \minimum> 0.0
+        \units C
+    N3, \field Target Case Operating Temperature
+        \note Targeted operating case temperature, used to size and control liquid flow rate through the cold plate
+        \note It defaults to the Maximum Case Temperature and cannot exceed it
+        \minimum> 0.0
+        \units C
     A5, \field Thermal Resistance Degradation Curve Name
         \type object-list
         \object-list UnivariateFunctions
@@ -107,12 +116,12 @@ Coil:Cooling:ITE:ColdPlate
         \key Yes
         \key No
         \default No
-    N3, \field Nominal Liquid Flow Rate
+    N4, \field Nominal Liquid Flow Rate
         \note Nominal liquid flow rate of the device
         \autosizable
         \minimum> 0.0
         \units m3/s
-    N4, \field Auxiliary Electric Power
+    N5, \field Auxiliary Electric Power
         \type real
         \units W
         \minimum 0.0
@@ -132,7 +141,10 @@ Coil:Cooling:ITE:ColdPlate
 
 ## Outputs Description ##
 
-TBD
+The following outputs will be added:
+- Case temperature
+- Heat transfer rate/energy
+- Inlet/outlet mass flow rate and temperature
 
 ## Engineering Reference ##
 
