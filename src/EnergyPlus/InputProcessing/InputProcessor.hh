@@ -182,7 +182,7 @@ public:
                              int &NumNumeric                    // How many Numeric arguments (max) this Object can have
     );
 
-    void preProcessorCheck(EnergyPlusData &state, bool &PreP_Fatal); // True if a preprocessor flags a fatal error
+    bool preProcessorCheck(EnergyPlusData &state); // Returns true if a preprocessor flags a fatal error
 
     void preScanReportingVariables(EnergyPlusData &state);
 
@@ -287,13 +287,13 @@ private:
 
     json const &getPatternProperties(EnergyPlusData &state, json const &schema_obj);
 
-    inline std::string convertToUpper(std::string_view s)
+    inline std::string convertToUpper(std::string_view sv)
     {
         std::string s2;
-        size_t len = s.size();
+        size_t len = sv.size();
         s2.resize(len);
         for (size_t i = 0; i < len; ++i) {
-            char c = s[i];
+            char c = sv[i];
             s2[i] = ('a' <= c && c <= 'z') ? c ^ 0x20 : c; // ASCII only
         }
         s2[len] = '\0';

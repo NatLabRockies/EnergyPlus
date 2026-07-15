@@ -218,8 +218,9 @@ namespace SteamBaseboardRadiator {
                                     std::format("SimSteamBaseboard: Errors in Baseboard={}",
                                                 state.dataSteamBaseboardRadiator->SteamBaseboard(BaseboardNum).Name));
                     ShowContinueError(state,
-                                      EnergyPlus::format("Invalid or unimplemented equipment type={}",
-                                                         state.dataSteamBaseboardRadiator->SteamBaseboard(BaseboardNum).EquipType));
+                                      std::format("Invalid or unimplemented equipment type={}",
+                                                  DataPlant::PlantEquipTypeNames[static_cast<int>(
+                                                      state.dataSteamBaseboardRadiator->SteamBaseboard(BaseboardNum).EquipType)]));
                     ShowFatalError(state, "Preceding condition causes termination.");
                 } break;
                 }

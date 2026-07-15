@@ -748,7 +748,7 @@
     1,                       !- Mode 4 Minimum Outdoor Air Fraction
     1,                       !- Mode 4 Maximum Outdoor Air Fraction
     0.7039,                  !- Mode 4 Minimum Supply Air Mass Flow Rate Ratio
-    0.957,                   !- Mode 4 Maximum Supply Air Mass Flow Rate Ratio
+    1,                       !- Mode 4 Maximum Supply Air Mass Flow Rate Ratio
     Mode5_Heat,              !- Mode 5 Name
     Mode5_TSA_lookup,        !- Mode 5 Supply Air Temperature Lookup Table Name
     Mode5_wSA_lookup,        !- Mode 5 Supply Air Humidity Ratio Lookup Table Name

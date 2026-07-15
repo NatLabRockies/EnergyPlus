@@ -4855,14 +4855,14 @@ TEST_F(EnergyPlusFixture, CondenserLoopTowers_VSCoolingTower_OutputReport)
     std::string const TowerName = VSTower.Name;
     EXPECT_EQ("CoolingTower:VariableSpeed", OutputReportPredefined::RetrievePreDefTableEntry(*state, orp.pdchCTFCType, TowerName));
     EXPECT_EQ("WATER", OutputReportPredefined::RetrievePreDefTableEntry(*state, orp.pdchCTFCFluidType, TowerName));
-    EXPECT_EQ(fmt::format("{:.2f}", expectedDesingRange), OutputReportPredefined::RetrievePreDefTableEntry(*state, orp.pdchCTFCRange, TowerName));
-    EXPECT_EQ(fmt::format("{:.2f}", expectedDesingApproach),
+    EXPECT_EQ(std::format("{:.2f}", expectedDesingRange), OutputReportPredefined::RetrievePreDefTableEntry(*state, orp.pdchCTFCRange, TowerName));
+    EXPECT_EQ(std::format("{:.2f}", expectedDesingApproach),
               OutputReportPredefined::RetrievePreDefTableEntry(*state, orp.pdchCTFCApproach, TowerName));
     EXPECT_EQ("1000.00", OutputReportPredefined::RetrievePreDefTableEntry(*state, orp.pdchCTFCDesFanPwr, TowerName));
-    EXPECT_EQ(fmt::format("{:.2f}", expectedDesignInletWB),
+    EXPECT_EQ(std::format("{:.2f}", expectedDesignInletWB),
               OutputReportPredefined::RetrievePreDefTableEntry(*state, orp.pdchCTFCDesInletAirWBT, TowerName));
     EXPECT_EQ("0.020000", OutputReportPredefined::RetrievePreDefTableEntry(*state, orp.pdchCTFCDesWaterFlowRate, TowerName));
-    EXPECT_EQ(fmt::format("{:.2f}", expectedDesOutletWaterTemp),
+    EXPECT_EQ(std::format("{:.2f}", expectedDesOutletWaterTemp),
               OutputReportPredefined::RetrievePreDefTableEntry(*state, orp.pdchCTFCLevWaterSPTemp, TowerName));
     EXPECT_EQ("COOLINGTOWER LOOP", OutputReportPredefined::RetrievePreDefTableEntry(*state, orp.pdchCTFCCondLoopName, TowerName));
     EXPECT_EQ("COOLINGTOWER SUPPLY EQUIPMENT BRANCH 1",
@@ -5397,14 +5397,14 @@ TEST_F(EnergyPlusFixture, CondenserLoopTowers_VSMerkelCoolingTower_OutputReport)
     std::string const TowerName = VSTower.Name;
     EXPECT_EQ("CoolingTower:VariableSpeed:Merkel", OutputReportPredefined::RetrievePreDefTableEntry(*state, orp.pdchCTFCType, TowerName));
     EXPECT_EQ("WATER", OutputReportPredefined::RetrievePreDefTableEntry(*state, orp.pdchCTFCFluidType, TowerName));
-    EXPECT_EQ(fmt::format("{:.2f}", expectedDesingRange), OutputReportPredefined::RetrievePreDefTableEntry(*state, orp.pdchCTFCRange, TowerName));
-    EXPECT_EQ(fmt::format("{:.2f}", expectedDesingApproach),
+    EXPECT_EQ(std::format("{:.2f}", expectedDesingRange), OutputReportPredefined::RetrievePreDefTableEntry(*state, orp.pdchCTFCRange, TowerName));
+    EXPECT_EQ(std::format("{:.2f}", expectedDesingApproach),
               OutputReportPredefined::RetrievePreDefTableEntry(*state, orp.pdchCTFCApproach, TowerName));
     EXPECT_EQ("4000.00", OutputReportPredefined::RetrievePreDefTableEntry(*state, orp.pdchCTFCDesFanPwr, TowerName));
-    EXPECT_EQ(fmt::format("{:.2f}", expectedDesignInletWB),
+    EXPECT_EQ(std::format("{:.2f}", expectedDesignInletWB),
               OutputReportPredefined::RetrievePreDefTableEntry(*state, orp.pdchCTFCDesInletAirWBT, TowerName));
     EXPECT_EQ("0.020000", OutputReportPredefined::RetrievePreDefTableEntry(*state, orp.pdchCTFCDesWaterFlowRate, TowerName));
-    EXPECT_EQ(fmt::format("{:.2f}", expectedDesOutletWaterTemp),
+    EXPECT_EQ(std::format("{:.2f}", expectedDesOutletWaterTemp),
               OutputReportPredefined::RetrievePreDefTableEntry(*state, orp.pdchCTFCLevWaterSPTemp, TowerName));
     EXPECT_EQ("COOLINGTOWER LOOP", OutputReportPredefined::RetrievePreDefTableEntry(*state, orp.pdchCTFCCondLoopName, TowerName));
     EXPECT_EQ("COOLINGTOWER SUPPLY EQUIPMENT BRANCH 1",

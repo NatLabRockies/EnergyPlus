@@ -38,7 +38,7 @@ jobs:
 
     steps:
 
-    - uses: actions/checkout@v6
+    - uses: actions/checkout@v7
 
     - name: Setup System
       id: setup-runner
@@ -67,7 +67,7 @@ jobs:
         echo "ENABLE_PCH=ON" >> $GITHUB_ENV
 
     - name: Baseline Regression Testing caching
-      uses: actions/cache@v5
+      uses: actions/cache@v6
       id: cachebaselineregression
       with:
         path: |
@@ -85,7 +85,7 @@ jobs:
 
     # Note: should you want to include a hash of PCH files in the cache keys for windows, revert a9a9da32a5d51bd00fddc6e273f4059ffae5f735
     - name: Restore Cache CCACHE
-      uses: actions/cache/restore@v5
+      uses: actions/cache/restore@v6
       id: cacheccache-restore
       with:
         path: |
@@ -138,7 +138,7 @@ jobs:
     # Checkout baseline, overrides the branch basically
     - name: Baseline Checkout
       if: matrix.run_regressions && steps.cachebaselineregression.outputs.cache-hit != 'true'
-      uses: actions/checkout@v6
+      uses: actions/checkout@v7
       with:
         ref: develop
         clean: false # Do NOT wipe the build/ and .ccache folder (`git clean -ffdx && git reset --hard HEAD`)
@@ -183,7 +183,7 @@ jobs:
 
     - name: Checkout Branch again
       if: matrix.run_regressions && steps.cachebaselineregression.outputs.cache-hit != 'true'
-      uses: actions/checkout@v6
+      uses: actions/checkout@v7
       with:
         clean: false # Do NOT wipe the build/ and .ccache folder (`git clean -ffdx && git reset --hard HEAD`)
 
@@ -209,7 +209,7 @@ jobs:
 
     - name: Upload CCache debug logs
       if: always() && env.CCACHE_DEBUG == '1'
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v7
       with:
         name: ccache-debug-${{ matrix.os }}
         path: .ccache-debug
@@ -218,7 +218,7 @@ jobs:
 
     - name: Save CCache cache
       if: always() && steps.cacheccache-restore.outputs.cache-hit != 'true'
-      uses: actions/cache/save@v5
+      uses: actions/cache/save@v6
       with:
         path: |
           ${{ steps.setup-runner.outputs.ccache-dir }}

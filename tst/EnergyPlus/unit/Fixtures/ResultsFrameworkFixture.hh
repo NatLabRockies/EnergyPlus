@@ -86,19 +86,19 @@ protected:
     }
 
     std::map<std::string, std::vector<std::string>>
-    getCSVOutputs(EnergyPlusData &state, json const &data, OutputProcessor::ReportFreq freq, std::vector<std::string> const &outputVariables)
+    getCSVOutputs(EnergyPlusData &t_state, json const &data, OutputProcessor::ReportFreq freq, std::vector<std::string> const &outputVariables)
     {
         ResultsFramework::CSVWriter csv(outputVariables.size());
-        csv.parseTSOutputs(state, data, outputVariables, freq);
+        csv.parseTSOutputs(t_state, data, outputVariables, freq);
         return csv.outputs;
     }
 
-    std::map<std::string, std::vector<std::string>> getCSVOutputs(EnergyPlusData &state,
+    std::map<std::string, std::vector<std::string>> getCSVOutputs(EnergyPlusData &t_state,
                                                                   json const &data,
                                                                   ResultsFramework::ResultsFramework const &resultsFramework,
                                                                   OutputProcessor::ReportFreq freq)
     {
-        return getCSVOutputs(state, data, freq, resultsFramework.outputVariables);
+        return getCSVOutputs(t_state, data, freq, resultsFramework.outputVariables);
     }
 };
 

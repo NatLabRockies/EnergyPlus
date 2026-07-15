@@ -51,6 +51,7 @@
 #include <EnergyPlus/GroundHeatExchangers/Slinky.hh>
 #include <EnergyPlus/GroundHeatExchangers/State.hh>
 #include <EnergyPlus/NodeInputManager.hh>
+#include <EnergyPlus/OutputReportPredefined.hh>
 #include <EnergyPlus/Plant/DataPlant.hh>
 #include <EnergyPlus/PlantUtilities.hh>
 #include <EnergyPlus/UtilityRoutines.hh>
@@ -61,7 +62,7 @@ GLHESlinky::GLHESlinky(EnergyPlusData &state, std::string const &objName, nlohma
     // Check for duplicates
     for (const auto &existingObj : state.dataGroundHeatExchanger->singleBoreholesVector) {
         if (objName == existingObj->name) {
-            ShowFatalError(state, EnergyPlus::format("Invalid input for {} object: Duplicate name found: {}", this->moduleName, existingObj->name));
+            ShowFatalError(state, std::format("Invalid input for {} object: Duplicate name found: {}", this->moduleName, existingObj->name));
         }
     }
 
@@ -150,9 +151,9 @@ GLHESlinky::GLHESlinky(EnergyPlusData &state, std::string const &objName, nlohma
         // Vertical configuration
         if (this->trenchDepth - this->coilDiameter < 0.0) {
             // Error: part of the coil is above ground
-            ShowSevereError(state, EnergyPlus::format("{}=\"{}\", invalid value in field.", this->moduleName, this->name));
-            ShowContinueError(state, EnergyPlus::format("...{}=[{:.3G}].", "Trench Depth", this->trenchDepth));
-            ShowContinueError(state, EnergyPlus::format("...{}=[{:.3G}].", "Coil Depth", this->coilDepth));
+            ShowSevereError(state, std::format("{}=\"{}\", invalid value in field.", this->moduleName, this->name));
+            ShowContinueError(state, std::format("...{}=[{:.3G}].", "Trench Depth", this->trenchDepth));
+            ShowContinueError(state, std::format("...{}=[{:.3G}].", "Coil Depth", this->coilDepth));
             ShowContinueError(state, "...Part of coil will be above ground.");
             errorsFound = true;
 
@@ -173,9 +174,9 @@ GLHESlinky::GLHESlinky(EnergyPlusData &state, std::string const &objName, nlohma
     this->prevTimeSteps = 0.0;
 
     if (this->pipe.thickness >= this->pipe.outDia / 2.0) {
-        ShowSevereError(state, EnergyPlus::format("{}=\"{}\", invalid value in field.", this->moduleName, this->name));
-        ShowContinueError(state, EnergyPlus::format("...{}=[{:.3G}].", "Pipe Thickness", this->pipe.thickness));
-        ShowContinueError(state, EnergyPlus::format("...{}=[{:.3G}].", "Pipe Outer Diameter", this->pipe.outDia));
+        ShowSevereError(state, std::format("{}=\"{}\", invalid value in field.", this->moduleName, this->name));
+        ShowContinueError(state, std::format("...{}=[{:.3G}].", "Pipe Thickness", this->pipe.thickness));
+        ShowContinueError(state, std::format("...{}=[{:.3G}].", "Pipe Outer Diameter", this->pipe.outDia));
         ShowContinueError(state, "...Radius will be <=0.");
         errorsFound = true;
     }
@@ -190,8 +191,20 @@ GLHESlinky::GLHESlinky(EnergyPlusData &state, std::string const &objName, nlohma
 
     // Check for Errors
     if (errorsFound) {
-        ShowFatalError(state, EnergyPlus::format("Errors found in processing input for {}", this->moduleName));
+        ShowFatalError(state, std::format("Errors found in processing input for {}", this->moduleName));
     }
+
+    OutputReportPredefined::PreDefTableEntry(state,
+                                             state.dataOutRptPredefined->pdchGLHEType,
+                                             objName,
+                                             DataPlant::PlantEquipTypeNames[static_cast<int>(DataPlant::PlantEquipmentType::GrndHtExchgSlinky)]);
+    OutputReportPredefined::PreDefTableEntry(state, state.dataOutRptPredefined->pdchGLHETubeLength, objName, this->totalTubeLength);
+    OutputReportPredefined::PreDefTableEntry(state, state.dataOutRptPredefined->pdchGLHEVolFlow, objName, this->designFlow, 6);
+    OutputReportPredefined::PreDefTableEntry(state, state.dataOutRptPredefined->pdchGLHEbhDepth, objName, this->trenchDepth);
+    OutputReportPredefined::PreDefTableEntry(state, state.dataOutRptPredefined->pdchGLHEbhDiam, objName, this->coilDiameter);
+    OutputReportPredefined::PreDefTableEntry(state, state.dataOutRptPredefined->pdchGLHEbhLeng, objName, this->trenchLength);
+    OutputReportPredefined::PreDefTableEntry(
+        state, state.dataOutRptPredefined->pdchGLHENumHolesTrenches, objName, static_cast<Real64>(this->numTrenches));
 }
 
 void GLHESlinky::getAnnualTimeConstant()

@@ -199,9 +199,7 @@ namespace AirflowNetwork {
             if (FirstHVACIteration) {
                 if (allocated(m_state.dataAirLoop->AirLoopAFNInfo)) {
                     for (i = 1; i <= DisSysNumOfCVFs; i++) {
-                        m_state.dataAirLoop->AirLoopAFNInfo(i).AFNLoopHeatingCoilMaxRTF = 0.0;
                         m_state.dataAirLoop->AirLoopAFNInfo(i).AFNLoopOnOffFanRTF = 0.0;
-                        m_state.dataAirLoop->AirLoopAFNInfo(i).AFNLoopDXCoilRTF = 0.0;
                         m_state.dataAirLoop->AirLoopAFNInfo(i).LoopOnOffFanPartLoadRatio = 0.0;
                     }
                 }
@@ -363,10 +361,10 @@ namespace AirflowNetwork {
                     }
                     if (pressure <= 31000.0) {
                         ShowSevereError(m_state,
-                                        EnergyPlus::format("{}: {}: {}. Reference Barometric Pressure must be greater than 31000 Pa.",
-                                                           RoutineName,
-                                                           CurrentModuleObject,
-                                                           thisObjectName));
+                                        std::format("{}: {}: {}. Reference Barometric Pressure must be greater than 31000 Pa.",
+                                                    RoutineName,
+                                                    CurrentModuleObject,
+                                                    thisObjectName));
                         success = false;
                     }
                 }
@@ -422,11 +420,11 @@ namespace AirflowNetwork {
 
                         if (result == referenceConditions.end()) {
                             ShowSevereError(m_state,
-                                            EnergyPlus::format("{}: {}: {}. Cannot find reference crack conditions object \"{}\".",
-                                                               RoutineName,
-                                                               CurrentModuleObject,
-                                                               thisObjectName,
-                                                               refCrackCondName));
+                                            std::format("{}: {}: {}. Cannot find reference crack conditions object \"{}\".",
+                                                        RoutineName,
+                                                        CurrentModuleObject,
+                                                        thisObjectName,
+                                                        refCrackCondName));
                             success = false;
                         } else {
                             refT = result->second.temperature;
@@ -478,7 +476,7 @@ namespace AirflowNetwork {
                 if (fanIndex == 0) {
                     ShowSevereError(
                         m_state,
-                        EnergyPlus::format("{}: {} = {} is not found in Fan:ZoneExhaust objects.", RoutineName, CurrentModuleObject, thisObjectName));
+                        std::format("{}: {} = {} is not found in Fan:ZoneExhaust objects.", RoutineName, CurrentModuleObject, thisObjectName));
                     success = false;
                 }
 
@@ -491,10 +489,10 @@ namespace AirflowNetwork {
                 HVAC::FanType fanType = fan->type;
                 if (fanType != HVAC::FanType::Exhaust) {
                     ShowSevereError(m_state,
-                                    EnergyPlus::format("{}: {} = {}. The specified Name is not found as a valid Fan:ZoneExhaust object.",
-                                                       RoutineName,
-                                                       CurrentModuleObject,
-                                                       thisObjectName));
+                                    std::format("{}: {} = {}. The specified Name is not found as a valid Fan:ZoneExhaust object.",
+                                                RoutineName,
+                                                CurrentModuleObject,
+                                                thisObjectName));
                     success = false;
                 }
 
@@ -507,11 +505,11 @@ namespace AirflowNetwork {
                         auto result = referenceConditions.find(Util::makeUPPER(refCrackCondName));
                         if (result == referenceConditions.end()) {
                             ShowSevereError(m_state,
-                                            EnergyPlus::format("{}: {}: {}. Cannot find reference crack conditions object \"{}\".",
-                                                               RoutineName,
-                                                               CurrentModuleObject,
-                                                               thisObjectName,
-                                                               fields.at("reference_crack_conditions").get<std::string>()));
+                                            std::format("{}: {}: {}. Cannot find reference crack conditions object \"{}\".",
+                                                        RoutineName,
+                                                        CurrentModuleObject,
+                                                        thisObjectName,
+                                                        fields.at("reference_crack_conditions").get<std::string>()));
                             success = false;
                         } else {
                             refT = result->second.temperature;
@@ -541,7 +539,7 @@ namespace AirflowNetwork {
                 } else {
                     ShowSevereError(
                         m_state,
-                        EnergyPlus::format(
+                        std::format(
                             "{}: {}: Duplicated airflow element names are found = \"{}\".", RoutineName, CurrentModuleObject, thisObjectName));
                     // ShowContinueError(state, "A unique component name is required in both objects " + CompName(1) + " and " + CompName(2));
                     success = false;
@@ -574,11 +572,11 @@ namespace AirflowNetwork {
                 int OAMixerNum = MixedAir::GetOAMixerNumber(m_state, mixer_name);
                 if (OAMixerNum == 0) {
                     ShowSevereError(m_state,
-                                    EnergyPlus::format("{}: {}: {}. Invalid Outdoor Air Mixer Name \"{}\" given.",
-                                                       RoutineName,
-                                                       CurrentModuleObject,
-                                                       thisObjectName,
-                                                       mixer_name));
+                                    std::format("{}: {}: {}. Invalid Outdoor Air Mixer Name \"{}\" given.",
+                                                RoutineName,
+                                                CurrentModuleObject,
+                                                thisObjectName,
+                                                mixer_name));
                     success = false;
                 }
 
@@ -591,11 +589,11 @@ namespace AirflowNetwork {
                         auto result = referenceConditions.find(Util::makeUPPER(refCrackCondName));
                         if (result == referenceConditions.end()) {
                             ShowSevereError(m_state,
-                                            EnergyPlus::format("{}: {}: {}. Cannot find reference crack conditions object \"{}\".",
-                                                               RoutineName,
-                                                               CurrentModuleObject,
-                                                               thisObjectName,
-                                                               refCrackCondName));
+                                            std::format("{}: {}: {}. Cannot find reference crack conditions object \"{}\".",
+                                                        RoutineName,
+                                                        CurrentModuleObject,
+                                                        thisObjectName,
+                                                        refCrackCondName));
                             success = false;
                         } else {
                             refT = result->second.temperature;
@@ -623,7 +621,7 @@ namespace AirflowNetwork {
                 } else {
                     ShowSevereError(
                         m_state,
-                        EnergyPlus::format(
+                        std::format(
                             "{}: {}: Duplicated airflow element names are found = \"{}\".", RoutineName, CurrentModuleObject, thisObjectName));
                     // ShowContinueError(state, "A unique component name is required in both objects " + CompName(1) + " and " + CompName(2));
                     success = false;
@@ -656,7 +654,7 @@ namespace AirflowNetwork {
                 int OAMixerNum{MixedAir::GetOAMixerNumber(m_state, mixer_name)};
                 if (OAMixerNum == 0) {
                     ShowSevereError(m_state,
-                                    EnergyPlus::format(RoutineName) + ": " + CurrentModuleObject + " object " + thisObjectName + ". Invalid " +
+                                    std::format(RoutineName) + ": " + CurrentModuleObject + " object " + thisObjectName + ". Invalid " +
                                         "Outdoor Air Mixer Name" + " \"" + mixer_name + "\" given.");
                     success = false;
                 }
@@ -670,11 +668,11 @@ namespace AirflowNetwork {
                         auto result = referenceConditions.find(Util::makeUPPER(refCrackCondName));
                         if (result == referenceConditions.end()) {
                             ShowSevereError(m_state,
-                                            EnergyPlus::format("{}: {}: {}. Cannot find reference crack conditions object \"{}\".",
-                                                               RoutineName,
-                                                               CurrentModuleObject,
-                                                               thisObjectName,
-                                                               refCrackCondName));
+                                            std::format("{}: {}: {}. Cannot find reference crack conditions object \"{}\".",
+                                                        RoutineName,
+                                                        CurrentModuleObject,
+                                                        thisObjectName,
+                                                        refCrackCondName));
                             success = false;
                         } else {
                             refT = result->second.temperature;
@@ -700,7 +698,7 @@ namespace AirflowNetwork {
                 } else {
                     ShowSevereError(
                         m_state,
-                        EnergyPlus::format(
+                        std::format(
                             "{}: {}: Duplicated airflow element names are found = \"{}\".", RoutineName, CurrentModuleObject, thisObjectName));
                     // ShowContinueError(state, "A unique component name is required in both objects " + CompName(1) + " and " + CompName(2));
                     success = false;
@@ -741,8 +739,8 @@ namespace AirflowNetwork {
                     } else {
                         // Code will never be executed, validation will catch invalid input
                         ShowSevereError(m_state,
-                                        EnergyPlus::format(RoutineName) + "Invalid Type of Rectangular Large Vertical Opening (LVO) = " + LVOstring +
-                                            "in " + CurrentModuleObject + " = " + thisObjectName);
+                                        std::format(RoutineName) + "Invalid Type of Rectangular Large Vertical Opening (LVO) = " + LVOstring + "in " +
+                                            CurrentModuleObject + " = " + thisObjectName);
                         ShowContinueError(m_state, "Valid choices are NonPivoted and HorizontallyPivoted.");
                         success = false;
                     }
@@ -897,7 +895,7 @@ namespace AirflowNetwork {
                 MultizoneCompDetOpeningData(i).StartHFac4 = 0.0;  // Start height factor for opening factor #4
                 if (N == 2) {
                     if (factors[1] != 1.0) {
-                        ShowWarningError(m_state, EnergyPlus::format("{}: {} = {}", RoutineName, CurrentModuleObject, thisObjectName));
+                        ShowWarningError(m_state, std::format("{}: {} = {}", RoutineName, CurrentModuleObject, thisObjectName));
                         ShowContinueError(
                             m_state,
                             "..This object specifies that only 3 opening factors will be used. So, the value of Opening Factor #2 is set to 1.0.");
@@ -913,7 +911,7 @@ namespace AirflowNetwork {
                     if (N >= 4) {
                         MultizoneCompDetOpeningData(i).OpenFac4 = factors[3]; // Opening factor #4
                         if (factors[3] != 1.0) {
-                            ShowWarningError(m_state, EnergyPlus::format("{}: {} = {}", RoutineName, CurrentModuleObject, thisObjectName));
+                            ShowWarningError(m_state, std::format("{}: {} = {}", RoutineName, CurrentModuleObject, thisObjectName));
                             ShowContinueError(m_state,
                                               "..This object specifies that 4 opening factors will be used. So, the value of Opening Factor #4 "
                                               "is set to 1.0.");
@@ -926,7 +924,7 @@ namespace AirflowNetwork {
                         MultizoneCompDetOpeningData(i).StartHFac4 = start_height_factors[3]; // Start height factor for opening factor #4
                     } else {
                         if (factors[2] != 1.0) {
-                            ShowWarningError(m_state, EnergyPlus::format("{}: {} = {}", RoutineName, CurrentModuleObject, thisObjectName));
+                            ShowWarningError(m_state, std::format("{}: {} = {}", RoutineName, CurrentModuleObject, thisObjectName));
                             ShowContinueError(m_state,
                                               "..This object specifies that only 3 opening factors will be used. So, the value of Opening Factor #3 "
                                               "is set to 1.0.");
@@ -938,13 +936,13 @@ namespace AirflowNetwork {
 
                 // Sanity checks, check sum of Height Factor and the Start Height Factor
                 if (MultizoneCompDetOpeningData(i).HeightFac1 + MultizoneCompDetOpeningData(i).StartHFac1 > 1.0) {
-                    ShowSevereError(m_state, EnergyPlus::format("{}: {} = {}", RoutineName, CurrentModuleObject, thisObjectName));
+                    ShowSevereError(m_state, std::format("{}: {} = {}", RoutineName, CurrentModuleObject, thisObjectName));
                     ShowContinueError(
                         m_state, "..The sum of Height Factor for Opening Factor 1 and Start Height Factor for Opening Factor 1 is greater than 1.0");
                     success = false;
                 }
                 if (MultizoneCompDetOpeningData(i).HeightFac2 + MultizoneCompDetOpeningData(i).StartHFac2 > 1.0) {
-                    ShowSevereError(m_state, EnergyPlus::format("{}: {} = {}", RoutineName, CurrentModuleObject, thisObjectName));
+                    ShowSevereError(m_state, std::format("{}: {} = {}", RoutineName, CurrentModuleObject, thisObjectName));
                     ShowContinueError(
                         m_state, "..The sum of Height Factor for Opening Factor 2 and Start Height Factor for Opening Factor 2 is greater than 1.0");
                     success = false;
@@ -9480,6 +9478,59 @@ namespace AirflowNetwork {
         }
     }
 
+    void Solver::update_onoff_fan_runtime_fractions()
+    {
+        auto &NumPrimaryAirSys = m_state.dataHVACGlobal->NumPrimaryAirSys;
+        auto &Node(m_state.dataLoopNodes->Node);
+        using HVAC::VerySmallMassFlow;
+
+        int AirLoopNum;
+        int FanNum;
+        Real64 MaxPartLoadRatio = 0.0;
+        MaxOnOffFanRunTimeFraction = 0.0;
+        for (AirLoopNum = 1; AirLoopNum <= NumPrimaryAirSys; ++AirLoopNum) {
+            MaxPartLoadRatio = max(MaxPartLoadRatio, m_state.dataAirLoop->AirLoopAFNInfo(AirLoopNum).LoopOnOffFanPartLoadRatio);
+            MaxOnOffFanRunTimeFraction = max(MaxOnOffFanRunTimeFraction, LoopOnOffFanRunTimeFraction(AirLoopNum));
+        }
+        for (AirLoopNum = 1; AirLoopNum <= NumPrimaryAirSys; ++AirLoopNum) {
+            for (FanNum = 1; FanNum <= DisSysNumOfCVFs; ++FanNum) {
+                if (DisSysCompCVFData(FanNum).AirLoopNum == AirLoopNum) {
+                    break;
+                }
+            }
+            LoopPartLoadRatio(AirLoopNum) = 1.0;
+            LoopOnOffFanRunTimeFraction(AirLoopNum) = 1.0;
+            // Calculate the part load ratio, can't be greater than 1 for a simple ONOFF fan
+            if (DisSysCompCVFData(FanNum).fanType == HVAC::FanType::OnOff &&
+                Node(DisSysCompCVFData(FanNum).InletNode).MassFlowRate > VerySmallMassFlow &&
+                m_state.dataAirLoop->AirLoopAFNInfo(AirLoopNum).LoopFanOperationMode == HVAC::FanOp::Cycling) {
+                // Hard code here
+                LoopPartLoadRatio(AirLoopNum) = m_state.dataAirLoop->AirLoopAFNInfo(AirLoopNum).LoopOnOffFanPartLoadRatio;
+                LoopOnOffFanRunTimeFraction(AirLoopNum) = m_state.dataAirLoop->AirLoopAFNInfo(AirLoopNum).AFNLoopOnOffFanRTF;
+            }
+
+            if (DisSysCompCVFData(FanNum).fanType == HVAC::FanType::OnOff && LoopPartLoadRatio(AirLoopNum) < 1.0) {
+                for (std::size_t i = 0; i < linkReport.size(); ++i) {
+                    auto &r(linkReport[i]);
+                    auto const &s(AirflowNetworkLinkSimu[i]);
+                    auto const &t(AirflowNetworkLinkageData[i]);
+                    if (t.AirLoopNum == AirLoopNum) {
+                        r.FLOW = s.FLOW * LoopPartLoadRatio(AirLoopNum);
+                        r.FLOW2 = s.FLOW2 * LoopPartLoadRatio(AirLoopNum);
+                        r.VolFLOW = s.VolFLOW * LoopPartLoadRatio(AirLoopNum);
+                        r.VolFLOW2 = s.VolFLOW2 * LoopPartLoadRatio(AirLoopNum);
+                    }
+                    if (t.AirLoopNum == 0) {
+                        r.FLOW = s.FLOW * MaxPartLoadRatio;
+                        r.FLOW2 = s.FLOW2 * MaxPartLoadRatio;
+                        r.VolFLOW = s.VolFLOW * MaxPartLoadRatio;
+                        r.VolFLOW2 = s.VolFLOW2 * MaxPartLoadRatio;
+                    }
+                }
+            }
+        }
+    }
+
     void Solver::update(ObjexxFCL::Optional_bool_const FirstHVACIteration) // True when solution technique on first iteration
     {
 
@@ -9508,7 +9559,6 @@ namespace AirflowNetwork {
         Real64 Qlat;
         Real64 AirDensity;
         Real64 Tamb;
-        Real64 PartLoadRatio;
         Real64 OnOffRatio;
         Real64 NodeMass;
         Real64 AFNMass;
@@ -9734,61 +9784,16 @@ namespace AirflowNetwork {
             }
         }
 
+        update_onoff_fan_runtime_fractions();
+
         int AirLoopNum;
         int FanNum;
         Real64 MaxPartLoadRatio = 0.0;
-        Real64 OnOffFanRunTimeFraction = 0.0;
-        MaxOnOffFanRunTimeFraction = 0.0;
         for (AirLoopNum = 1; AirLoopNum <= NumPrimaryAirSys; ++AirLoopNum) {
             MaxPartLoadRatio = max(MaxPartLoadRatio, m_state.dataAirLoop->AirLoopAFNInfo(AirLoopNum).LoopOnOffFanPartLoadRatio);
-            MaxOnOffFanRunTimeFraction = max(MaxOnOffFanRunTimeFraction, LoopOnOffFanRunTimeFraction(AirLoopNum));
         }
-        for (AirLoopNum = 1; AirLoopNum <= NumPrimaryAirSys; ++AirLoopNum) {
-            for (FanNum = 1; FanNum <= DisSysNumOfCVFs; ++FanNum) {
-                if (DisSysCompCVFData(FanNum).AirLoopNum == AirLoopNum) {
-                    break;
-                }
-            }
-            PartLoadRatio = 1.0;
-            LoopPartLoadRatio(AirLoopNum) = 1.0;
-            OnOffFanRunTimeFraction = 1.0;
-            LoopOnOffFanRunTimeFraction(AirLoopNum) = 1.0;
-            // Calculate the part load ratio, can't be greater than 1 for a simple ONOFF fan
-            if (DisSysCompCVFData(FanNum).fanType == HVAC::FanType::OnOff &&
-                Node(DisSysCompCVFData(FanNum).InletNode).MassFlowRate > VerySmallMassFlow &&
-                m_state.dataAirLoop->AirLoopAFNInfo(AirLoopNum).LoopFanOperationMode == HVAC::FanOp::Cycling) {
-                // Hard code here
-                PartLoadRatio = m_state.dataAirLoop->AirLoopAFNInfo(AirLoopNum).LoopOnOffFanPartLoadRatio;
-                LoopPartLoadRatio(AirLoopNum) = m_state.dataAirLoop->AirLoopAFNInfo(AirLoopNum).LoopOnOffFanPartLoadRatio;
-                OnOffFanRunTimeFraction = max(m_state.dataAirLoop->AirLoopAFNInfo(AirLoopNum).AFNLoopHeatingCoilMaxRTF,
-                                              m_state.dataAirLoop->AirLoopAFNInfo(AirLoopNum).AFNLoopOnOffFanRTF,
-                                              m_state.dataAirLoop->AirLoopAFNInfo(AirLoopNum).AFNLoopDXCoilRTF);
-                LoopOnOffFanRunTimeFraction(AirLoopNum) = max(m_state.dataAirLoop->AirLoopAFNInfo(AirLoopNum).AFNLoopHeatingCoilMaxRTF,
-                                                              m_state.dataAirLoop->AirLoopAFNInfo(AirLoopNum).AFNLoopOnOffFanRTF,
-                                                              m_state.dataAirLoop->AirLoopAFNInfo(AirLoopNum).AFNLoopDXCoilRTF);
-            }
-            m_state.dataAirLoop->AirLoopAFNInfo(AirLoopNum).AFNLoopHeatingCoilMaxRTF = 0.0;
-
-            if (DisSysCompCVFData(FanNum).fanType == HVAC::FanType::OnOff && LoopPartLoadRatio(AirLoopNum) < 1.0) {
-                for (std::size_t i = 0; i < linkReport.size(); ++i) {
-                    auto &r(linkReport[i]);
-                    auto const &s(AirflowNetworkLinkSimu[i]);
-                    auto const &t(AirflowNetworkLinkageData[i]);
-                    if (t.AirLoopNum == AirLoopNum) {
-                        r.FLOW = s.FLOW * LoopPartLoadRatio(AirLoopNum);
-                        r.FLOW2 = s.FLOW2 * LoopPartLoadRatio(AirLoopNum);
-                        r.VolFLOW = s.VolFLOW * LoopPartLoadRatio(AirLoopNum);
-                        r.VolFLOW2 = s.VolFLOW2 * LoopPartLoadRatio(AirLoopNum);
-                    }
-                    if (t.AirLoopNum == 0) {
-                        r.FLOW = s.FLOW * MaxPartLoadRatio;
-                        r.FLOW2 = s.FLOW2 * MaxPartLoadRatio;
-                        r.VolFLOW = s.VolFLOW * MaxPartLoadRatio;
-                        r.VolFLOW2 = s.VolFLOW2 * MaxPartLoadRatio;
-                    }
-                }
-            }
-        }
+        Real64 OnOffFanRunTimeFraction = (NumPrimaryAirSys > 0) ? LoopOnOffFanRunTimeFraction(NumPrimaryAirSys) : 1.0;
+        Real64 PartLoadRatio = 1.0;
 
         // One time warning
         if (UpdateAirflowNetworkMyOneTimeFlag) {
@@ -11582,11 +11587,11 @@ namespace AirflowNetwork {
                         }
                         if (!found) {
                             ShowSevereError(m_state, std::format("{}Fan:ZoneExhaust is not defined in {}", RoutineName, CurrentModuleObject));
-                            ShowContinueError(m_state,
-                                              EnergyPlus::format(
-                                                  "The inlet node of the {} Fan:ZoneExhaust is not defined in the {}'s ZoneHVAC:EquipmentConnections",
-                                                  m_state.dataZoneEquip->ZoneEquipList(j).EquipName,
-                                                  m_state.dataZoneEquip->ZoneEquipConfig(j).ZoneName));
+                            ShowContinueError(
+                                m_state,
+                                std::format("The inlet node of the {} Fan:ZoneExhaust is not defined in the {}'s ZoneHVAC:EquipmentConnections",
+                                            m_state.dataZoneEquip->ZoneEquipList(j).EquipName(EquipTypeNum),
+                                            m_state.dataZoneEquip->ZoneEquipConfig(j).ZoneName));
                             ErrorsFound = true;
                         }
                     }
@@ -13310,7 +13315,7 @@ namespace AirflowNetwork {
         if (Toperative > (Tcomfort + ComfortBand)) {
             if (opening_probability(state, ZoneNum, TimeCloseDuration)) {
                 OpeningProbStatus = ProbabilityCheck::ForceChange;
-                ; // forced to open
+                // forced to open
             } else {
                 OpeningProbStatus = ProbabilityCheck::KeepStatus; // Keep previous status
             }

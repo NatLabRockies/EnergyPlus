@@ -118,9 +118,8 @@ SwimmingPoolData *SwimmingPoolData::factory(EnergyPlusData &state, std::string c
         }
     }
     // If we didn't find it, fatal
-    ShowFatalError(
-        state,
-        EnergyPlus::format("LocalSwimmingPoolFactory: Error getting inputs or index for swimming pool named: {}", objectName)); // LCOV_EXCL_LINE
+    ShowFatalError(state,
+                   std::format("LocalSwimmingPoolFactory: Error getting inputs or index for swimming pool named: {}", objectName)); // LCOV_EXCL_LINE
     // Shut up the compiler
     return nullptr; // LCOV_EXCL_LINE
 }
@@ -249,12 +248,10 @@ void GetSwimmingPool(EnergyPlusData &state)
 
         state.dataSwimmingPools->Pool(Item).AvgDepth = Numbers(1);
         if (state.dataSwimmingPools->Pool(Item).AvgDepth < MinDepth) {
-            ShowWarningError(state,
-                             EnergyPlus::format("{}{}=\"{} has an average depth that is too small.", RoutineName, CurrentModuleObject, Alphas(1)));
+            ShowWarningError(state, std::format("{}{}=\"{} has an average depth that is too small.", RoutineName, CurrentModuleObject, Alphas(1)));
             ShowContinueError(state, "The pool average depth has been reset to the minimum allowed depth.");
         } else if (state.dataSwimmingPools->Pool(Item).AvgDepth > MaxDepth) {
-            ShowSevereError(state,
-                            EnergyPlus::format("{}{}=\"{} has an average depth that is too large.", RoutineName, CurrentModuleObject, Alphas(1)));
+            ShowSevereError(state, std::format("{}{}=\"{} has an average depth that is too large.", RoutineName, CurrentModuleObject, Alphas(1)));
             ShowContinueError(state, "The pool depth must be less than the maximum average depth of 10 meters.");
             ErrorsFound = true;
         }
@@ -282,27 +279,26 @@ void GetSwimmingPool(EnergyPlusData &state)
 
         state.dataSwimmingPools->Pool(Item).CoverEvapFactor = Numbers(2);
         if (state.dataSwimmingPools->Pool(Item).CoverEvapFactor < MinCoverFactor) {
-            ShowWarningError(
-                state, EnergyPlus::format("{}{}=\"{} has an evaporation cover factor less than zero.", RoutineName, CurrentModuleObject, Alphas(1)));
+            ShowWarningError(state,
+                             std::format("{}{}=\"{} has an evaporation cover factor less than zero.", RoutineName, CurrentModuleObject, Alphas(1)));
             ShowContinueError(state, "The evaporation cover factor has been reset to zero.");
             state.dataSwimmingPools->Pool(Item).CoverEvapFactor = MinCoverFactor;
         } else if (state.dataSwimmingPools->Pool(Item).CoverEvapFactor > MaxCoverFactor) {
-            ShowWarningError(
-                state,
-                EnergyPlus::format("{}{}=\"{} has an evaporation cover factor greater than one.", RoutineName, CurrentModuleObject, Alphas(1)));
+            ShowWarningError(state,
+                             std::format("{}{}=\"{} has an evaporation cover factor greater than one.", RoutineName, CurrentModuleObject, Alphas(1)));
             ShowContinueError(state, "The evaporation cover factor has been reset to one.");
             state.dataSwimmingPools->Pool(Item).CoverEvapFactor = MaxCoverFactor;
         }
 
         state.dataSwimmingPools->Pool(Item).CoverConvFactor = Numbers(3);
         if (state.dataSwimmingPools->Pool(Item).CoverConvFactor < MinCoverFactor) {
-            ShowWarningError(
-                state, EnergyPlus::format("{}{}=\"{} has a convection cover factor less than zero.", RoutineName, CurrentModuleObject, Alphas(1)));
+            ShowWarningError(state,
+                             std::format("{}{}=\"{} has a convection cover factor less than zero.", RoutineName, CurrentModuleObject, Alphas(1)));
             ShowContinueError(state, "The convection cover factor has been reset to zero.");
             state.dataSwimmingPools->Pool(Item).CoverConvFactor = MinCoverFactor;
         } else if (state.dataSwimmingPools->Pool(Item).CoverConvFactor > MaxCoverFactor) {
-            ShowWarningError(
-                state, EnergyPlus::format("{}{}=\"{} has a convection cover factor greater than one.", RoutineName, CurrentModuleObject, Alphas(1)));
+            ShowWarningError(state,
+                             std::format("{}{}=\"{} has a convection cover factor greater than one.", RoutineName, CurrentModuleObject, Alphas(1)));
             ShowContinueError(state, "The convection cover factor has been reset to one.");
             state.dataSwimmingPools->Pool(Item).CoverConvFactor = MaxCoverFactor;
         }
@@ -311,14 +307,13 @@ void GetSwimmingPool(EnergyPlusData &state)
         if (state.dataSwimmingPools->Pool(Item).CoverSWRadFactor < MinCoverFactor) {
             ShowWarningError(
                 state,
-                EnergyPlus::format(
-                    "{}{}=\"{} has a short-wavelength radiation cover factor less than zero.", RoutineName, CurrentModuleObject, Alphas(1)));
+                std::format("{}{}=\"{} has a short-wavelength radiation cover factor less than zero.", RoutineName, CurrentModuleObject, Alphas(1)));
             ShowContinueError(state, "The short-wavelength radiation cover factor has been reset to zero.");
             state.dataSwimmingPools->Pool(Item).CoverSWRadFactor = MinCoverFactor;
         } else if (state.dataSwimmingPools->Pool(Item).CoverSWRadFactor > MaxCoverFactor) {
             ShowWarningError(
                 state,
-                EnergyPlus::format(
+                std::format(
                     "{}{}=\"{} has a short-wavelength radiation cover factor greater than one.", RoutineName, CurrentModuleObject, Alphas(1)));
             ShowContinueError(state, "The short-wavelength radiation cover factor has been reset to one.");
             state.dataSwimmingPools->Pool(Item).CoverSWRadFactor = MaxCoverFactor;
@@ -328,15 +323,13 @@ void GetSwimmingPool(EnergyPlusData &state)
         if (state.dataSwimmingPools->Pool(Item).CoverLWRadFactor < MinCoverFactor) {
             ShowWarningError(
                 state,
-                EnergyPlus::format(
-                    "{}{}=\"{} has a long-wavelength radiation cover factor less than zero.", RoutineName, CurrentModuleObject, Alphas(1)));
+                std::format("{}{}=\"{} has a long-wavelength radiation cover factor less than zero.", RoutineName, CurrentModuleObject, Alphas(1)));
             ShowContinueError(state, "The long-wavelength radiation cover factor has been reset to zero.");
             state.dataSwimmingPools->Pool(Item).CoverLWRadFactor = MinCoverFactor;
         } else if (state.dataSwimmingPools->Pool(Item).CoverLWRadFactor > MaxCoverFactor) {
             ShowWarningError(
                 state,
-                EnergyPlus::format(
-                    "{}{}=\"{} has a long-wavelength radiation cover factor greater than one.", RoutineName, CurrentModuleObject, Alphas(1)));
+                std::format("{}{}=\"{} has a long-wavelength radiation cover factor greater than one.", RoutineName, CurrentModuleObject, Alphas(1)));
             ShowContinueError(state, "The long-wavelength radiation cover factor has been reset to one.");
             state.dataSwimmingPools->Pool(Item).CoverLWRadFactor = MaxCoverFactor;
         }
@@ -367,8 +360,8 @@ void GetSwimmingPool(EnergyPlusData &state)
         state.dataSwimmingPools->Pool(Item).WaterVolFlowMax = Numbers(6);
         state.dataSwimmingPools->Pool(Item).MiscPowerFactor = Numbers(7);
         if (state.dataSwimmingPools->Pool(Item).MiscPowerFactor < MinPowerFactor) {
-            ShowWarningError(
-                state, EnergyPlus::format("{}{}=\"{} has a miscellaneous power factor less than zero.", RoutineName, CurrentModuleObject, Alphas(1)));
+            ShowWarningError(state,
+                             std::format("{}{}=\"{} has a miscellaneous power factor less than zero.", RoutineName, CurrentModuleObject, Alphas(1)));
             ShowContinueError(state, "The miscellaneous power factor has been reset to zero.");
             state.dataSwimmingPools->Pool(Item).MiscPowerFactor = MinPowerFactor;
         }
@@ -384,8 +377,7 @@ void GetSwimmingPool(EnergyPlusData &state)
         state.dataSwimmingPools->Pool(Item).MaxNumOfPeople = Numbers(8);
         if (state.dataSwimmingPools->Pool(Item).MaxNumOfPeople < 0.0) {
             ShowWarningError(
-                state,
-                EnergyPlus::format("{}{}=\"{} was entered with negative people.  This is not allowed.", RoutineName, CurrentModuleObject, Alphas(1)));
+                state, std::format("{}{}=\"{} was entered with negative people.  This is not allowed.", RoutineName, CurrentModuleObject, Alphas(1)));
             ShowContinueError(state, "The number of people has been reset to zero.");
             state.dataSwimmingPools->Pool(Item).MaxNumOfPeople = 0.0;
         }
@@ -411,7 +403,7 @@ void GetSwimmingPool(EnergyPlusData &state)
     lNumericBlanks.deallocate();
 
     if (ErrorsFound) {
-        ShowFatalError(state, EnergyPlus::format("{}Errors found in swimming pool input. Preceding conditions cause termination.", RoutineName));
+        ShowFatalError(state, std::format("{}Errors found in swimming pool input. Preceding conditions cause termination.", RoutineName));
     }
 }
 
@@ -423,13 +415,12 @@ void SwimmingPoolData::ErrorCheckSetupPoolSurface(
     static constexpr std::string_view CurrentModuleObject("SwimmingPool:Indoor");
 
     if (this->SurfacePtr <= 0) {
-        ShowSevereError(state, EnergyPlus::format("{}Invalid {} = {}", RoutineName, cAlphaField2, Alpha2));
-        ShowContinueError(state, EnergyPlus::format("Occurs in {} = {}", CurrentModuleObject, Alpha1));
+        ShowSevereError(state, std::format("{}Invalid {} = {}", RoutineName, cAlphaField2, Alpha2));
+        ShowContinueError(state, std::format("Occurs in {} = {}", CurrentModuleObject, Alpha1));
         ErrorsFound = true;
     } else if (state.dataSurface->SurfIsRadSurfOrVentSlabOrPool(this->SurfacePtr)) {
-        ShowSevereError(state, EnergyPlus::format("{}{}=\"{}\", Invalid Surface", RoutineName, CurrentModuleObject, Alpha1));
-        ShowContinueError(state,
-                          EnergyPlus::format("{}=\"{}\" has been used in another radiant system, ventilated slab, or pool.", cAlphaField2, Alpha2));
+        ShowSevereError(state, std::format("{}{}=\"{}\", Invalid Surface", RoutineName, CurrentModuleObject, Alpha1));
+        ShowContinueError(state, std::format("{}=\"{}\" has been used in another radiant system, ventilated slab, or pool.", cAlphaField2, Alpha2));
         ShowContinueError(state,
                           "A single surface can only be a radiant system, a ventilated slab, or a pool.  It CANNOT be more than one of these.");
         ErrorsFound = true;

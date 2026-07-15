@@ -2561,8 +2561,8 @@ TEST_F(EnergyPlusFixture, DXCoil_ValidateADPFunctionAlone)
 {
     state->init_state(*state);
     // Define coil parameters
-    Real64 constexpr RatedInletAirTemp(26.666699999999999);
-    Real64 constexpr RatedInletAirHumRat(0.011184700000000001);
+    Real64 constexpr testRatedInletAirTemp(26.666699999999999);
+    Real64 constexpr testRatedInletAirHumRat(0.011184700000000001);
     state->dataDXCoils->DXCoil.allocate(1);
     state->dataDXCoils->DXCoil(1).coilType = HVAC::CoilType::CoolingDXSingleSpeed;
     state->dataDXCoils->DXCoil(1).Name = "Test Coil";
@@ -2575,23 +2575,23 @@ TEST_F(EnergyPlusFixture, DXCoil_ValidateADPFunctionAlone)
     Real64 newSHR = ValidateADP(*state,
                                 HVAC::coilTypeNames[(int)state->dataDXCoils->DXCoil(1).coilType],
                                 state->dataDXCoils->DXCoil(1).Name,
-                                RatedInletAirTemp,
-                                RatedInletAirHumRat,
+                                testRatedInletAirTemp,
+                                testRatedInletAirHumRat,
                                 state->dataDXCoils->DXCoil(1).RatedTotCap(1),
                                 state->dataDXCoils->DXCoil(1).RatedAirVolFlowRate(1),
                                 state->dataDXCoils->DXCoil(1).RatedSHR(1),
                                 CallingRoutine);
 
     // Make sure that the outlet conditions are below the saturation
-    Real64 airMassFlowRate =
-        state->dataDXCoils->DXCoil(1).RatedAirVolFlowRate(1) *
-        Psychrometrics::PsyRhoAirFnPbTdbW(*state, DataEnvironment::StdPressureSeaLevel, RatedInletAirTemp, RatedInletAirHumRat, CallingRoutine);
+    Real64 airMassFlowRate = state->dataDXCoils->DXCoil(1).RatedAirVolFlowRate(1) *
+                             Psychrometrics::PsyRhoAirFnPbTdbW(
+                                 *state, DataEnvironment::StdPressureSeaLevel, testRatedInletAirTemp, testRatedInletAirHumRat, CallingRoutine);
     Real64 deltaH = state->dataDXCoils->DXCoil(1).RatedTotCap(1) / airMassFlowRate;
-    Real64 inletAirEnthalpy = Psychrometrics::PsyHFnTdbW(RatedInletAirTemp, RatedInletAirHumRat);
+    Real64 inletAirEnthalpy = Psychrometrics::PsyHFnTdbW(testRatedInletAirTemp, testRatedInletAirHumRat);
     Real64 hTinHumRatOut = inletAirEnthalpy - (1.0 - newSHR) * deltaH;
-    Real64 outletAirHumRat = Psychrometrics::PsyWFnTdbH(*state, RatedInletAirTemp, hTinHumRatOut); // 0.0098703703931385892
-    Real64 outletAirEnthalpy = inletAirEnthalpy - deltaH;                                          // 38853.039955973931
-    Real64 outletAirTemp = Psychrometrics::PsyTdbFnHW(outletAirEnthalpy, outletAirHumRat);         // 13.846750113203081
+    Real64 outletAirHumRat = Psychrometrics::PsyWFnTdbH(*state, testRatedInletAirTemp, hTinHumRatOut); // 0.0098703703931385892
+    Real64 outletAirEnthalpy = inletAirEnthalpy - deltaH;                                              // 38853.039955973931
+    Real64 outletAirTemp = Psychrometrics::PsyTdbFnHW(outletAirEnthalpy, outletAirHumRat);             // 13.846750113203081
     Real64 dewPointTempOutHumRat = Psychrometrics::PsyTdpFnWPb(*state, outletAirHumRat, DataEnvironment::StdPressureSeaLevel);
     ASSERT_TRUE(dewPointTempOutHumRat < outletAirTemp);
 }
@@ -2721,15 +2721,15 @@ TEST_F(EnergyPlusFixture, DXCoil_ValidateADPFunction)
 
     SizeDXCoil(*state, 1); // normal sizing
 
-    Real64 constexpr RatedInletAirTemp(26.6667);   // 26.6667C or 80F
-    Real64 constexpr RatedInletAirHumRat(0.01125); // Humidity ratio corresponding to 80F dry bulb/67F wet bulb
+    Real64 constexpr testRatedInletAirTemp(26.6667);   // 26.6667C or 80F
+    Real64 constexpr testRatedInletAirHumRat(0.01125); // Humidity ratio corresponding to 80F dry bulb/67F wet bulb
     std::string const CallingRoutine("DXCoil_ValidateADPFunction");
 
     Real64 CBF_calculated = CalcCBF(*state,
                                     HVAC::coilTypeNames[(int)state->dataDXCoils->DXCoil(1).coilType],
                                     state->dataDXCoils->DXCoil(1).Name,
-                                    RatedInletAirTemp,
-                                    RatedInletAirHumRat,
+                                    testRatedInletAirTemp,
+                                    testRatedInletAirHumRat,
                                     state->dataDXCoils->DXCoil(1).RatedTotCap(1),
                                     state->dataDXCoils->DXCoil(1).RatedAirVolFlowRate(1),
                                     state->dataDXCoils->DXCoil(1).RatedSHR(1),
@@ -2745,8 +2745,8 @@ TEST_F(EnergyPlusFixture, DXCoil_ValidateADPFunction)
     CBF_calculated = CalcCBF(*state,
                              HVAC::coilTypeNames[(int)state->dataDXCoils->DXCoil(1).coilType],
                              state->dataDXCoils->DXCoil(1).Name,
-                             RatedInletAirTemp,
-                             RatedInletAirHumRat,
+                             testRatedInletAirTemp,
+                             testRatedInletAirHumRat,
                              state->dataDXCoils->DXCoil(1).RatedTotCap(1),
                              state->dataDXCoils->DXCoil(1).RatedAirVolFlowRate(1),
                              state->dataDXCoils->DXCoil(1).RatedSHR(1),
@@ -2762,8 +2762,8 @@ TEST_F(EnergyPlusFixture, DXCoil_ValidateADPFunction)
     CBF_calculated = CalcCBF(*state,
                              HVAC::coilTypeNames[(int)state->dataDXCoils->DXCoil(1).coilType],
                              state->dataDXCoils->DXCoil(1).Name,
-                             RatedInletAirTemp,
-                             RatedInletAirHumRat,
+                             testRatedInletAirTemp,
+                             testRatedInletAirHumRat,
                              state->dataDXCoils->DXCoil(1).RatedTotCap(1),
                              state->dataDXCoils->DXCoil(1).RatedAirVolFlowRate(1),
                              state->dataDXCoils->DXCoil(1).RatedSHR(1),
@@ -5021,10 +5021,10 @@ TEST_F(EnergyPlusFixture, TestMultiSpeedCoilsAutoSizingOutput)
     EXPECT_NEAR(16365.95, state->dataDXCoils->DXCoil(1).MSRatedTotCap(1), 0.01);
     // Check EIO reporting
     std::string clg_coil_eio_output = R"EIO(! <Component Sizing Information>, Component Type, Component Name, Input Field Description, Value
- Component Sizing Information, Coil:Cooling:DX:MultiSpeed, ASHP CLG COIL, Design Size Speed 2 Rated Air Flow Rate [m3/s], 1.75000
- Component Sizing Information, Coil:Cooling:DX:MultiSpeed, ASHP CLG COIL, Design Size Speed 1 Rated Air Flow Rate [m3/s], 0.875000
+ Component Sizing Information, Coil:Cooling:DX:MultiSpeed, ASHP CLG COIL, Design Size Speed 2 Rated Air Flow Rate [m3/s], 1.75
+ Component Sizing Information, Coil:Cooling:DX:MultiSpeed, ASHP CLG COIL, Design Size Speed 1 Rated Air Flow Rate [m3/s], 0.875
  Component Sizing Information, Coil:Cooling:DX:MultiSpeed, ASHP CLG COIL, Design Size Speed 2 Gross Rated Total Cooling Capacity [W], 32731.9
- Component Sizing Information, Coil:Cooling:DX:MultiSpeed, ASHP CLG COIL, Design Size Speed 1 Gross Rated Total Cooling Capacity [W], 16366.0
+ Component Sizing Information, Coil:Cooling:DX:MultiSpeed, ASHP CLG COIL, Design Size Speed 1 Gross Rated Total Cooling Capacity [W], 16366
  Component Sizing Information, Coil:Cooling:DX:MultiSpeed, ASHP CLG COIL, Design Size Speed 2 Rated Sensible Heat Ratio, 0.803695
  Component Sizing Information, Coil:Cooling:DX:MultiSpeed, ASHP CLG COIL, Design Size Speed 1 Rated Sensible Heat Ratio, 0.803695
  Component Sizing Information, Coil:Cooling:DX:MultiSpeed, ASHP CLG COIL, Design Size Speed 1 Evaporative Condenser Air Flow Rate [m3/s], 1.86572
@@ -5052,11 +5052,11 @@ TEST_F(EnergyPlusFixture, TestMultiSpeedCoilsAutoSizingOutput)
     EXPECT_NEAR(16365.95, state->dataDXCoils->DXCoil(2).MSRatedTotCap(1), 0.01);
     // Check EIO reporting
     const std::string htg_coil_eio_output =
-        R"EIO( Component Sizing Information, Coil:Heating:DX:MultiSpeed, ASHP HTG COIL, Design Size Speed 2 Rated Air Flow Rate [m3/s], 1.75000
- Component Sizing Information, Coil:Heating:DX:MultiSpeed, ASHP HTG COIL, Design Size Speed 1 Rated Air Flow Rate [m3/s], 0.875000
+        R"EIO( Component Sizing Information, Coil:Heating:DX:MultiSpeed, ASHP HTG COIL, Design Size Speed 2 Rated Air Flow Rate [m3/s], 1.75
+ Component Sizing Information, Coil:Heating:DX:MultiSpeed, ASHP HTG COIL, Design Size Speed 1 Rated Air Flow Rate [m3/s], 0.875
  Component Sizing Information, Coil:Heating:DX:MultiSpeed, ASHP HTG COIL, Design Size Speed 2 Gross Rated Heating Capacity [W], 32731.9
- Component Sizing Information, Coil:Heating:DX:MultiSpeed, ASHP HTG COIL, Design Size Speed 1 Gross Rated Heating Capacity [W], 16366.0
- Component Sizing Information, Coil:Heating:DX:MultiSpeed, ASHP HTG COIL, Design Size Resistive Defrost Heater Capacity, 0.00000
+ Component Sizing Information, Coil:Heating:DX:MultiSpeed, ASHP HTG COIL, Design Size Speed 1 Gross Rated Heating Capacity [W], 16366
+ Component Sizing Information, Coil:Heating:DX:MultiSpeed, ASHP HTG COIL, Design Size Resistive Defrost Heater Capacity, 0
 ! <DX Heating Coil Standard Rating Information>, Component Type, Component Name, High Temperature Heating (net) Rating Capacity {W}, Low Temperature Heating (net) Rating Capacity {W}, HSPF {Btu/W-h}, Region Number
  DX Heating Coil Standard Rating Information, Coil:Heating:DX:MultiSpeed, ASHP HTG COIL, 34415.4, 20666.4, 6.56, 4
 ! <DX Heating Coil AHRI 2023 Standard Rating Information>, Component Type, Component Name, High Temperature Heating (net) Rating Capacity {W}, Low Temperature Heating (net) Rating Capacity {W}, HSPF2 {Btu/W-h}, Region Number
@@ -7509,11 +7509,11 @@ TEST_F(EnergyPlusFixture, MultiSpeedDXHeatingCoilsHSPF2Test)
 
     // Check EIO reporting
     const std::string htg_coil_eio_output = R"EIO(! <Component Sizing Information>, Component Type, Component Name, Input Field Description, Value
- Component Sizing Information, Coil:Heating:DX:MultiSpeed, ASHP HTG COIL, Design Size Speed 2 Rated Air Flow Rate [m3/s], 0.580000
- Component Sizing Information, Coil:Heating:DX:MultiSpeed, ASHP HTG COIL, Design Size Speed 1 Rated Air Flow Rate [m3/s], 0.290000
+ Component Sizing Information, Coil:Heating:DX:MultiSpeed, ASHP HTG COIL, Design Size Speed 2 Rated Air Flow Rate [m3/s], 0.58
+ Component Sizing Information, Coil:Heating:DX:MultiSpeed, ASHP HTG COIL, Design Size Speed 1 Rated Air Flow Rate [m3/s], 0.29
  Component Sizing Information, Coil:Heating:DX:MultiSpeed, ASHP HTG COIL, Design Size Speed 2 Gross Rated Heating Capacity [W], 14402.8
  Component Sizing Information, Coil:Heating:DX:MultiSpeed, ASHP HTG COIL, Design Size Speed 1 Gross Rated Heating Capacity [W], 7201.39
- Component Sizing Information, Coil:Heating:DX:MultiSpeed, ASHP HTG COIL, Design Size Resistive Defrost Heater Capacity, 0.00000
+ Component Sizing Information, Coil:Heating:DX:MultiSpeed, ASHP HTG COIL, Design Size Resistive Defrost Heater Capacity, 0
 ! <DX Heating Coil Standard Rating Information>, Component Type, Component Name, High Temperature Heating (net) Rating Capacity {W}, Low Temperature Heating (net) Rating Capacity {W}, HSPF {Btu/W-h}, Region Number
  DX Heating Coil Standard Rating Information, Coil:Heating:DX:MultiSpeed, ASHP HTG COIL, 14996.6, 8946.7, 8.12, 4
 ! <DX Heating Coil AHRI 2023 Standard Rating Information>, Component Type, Component Name, High Temperature Heating (net) Rating Capacity {W}, Low Temperature Heating (net) Rating Capacity {W}, HSPF2 {Btu/W-h}, Region Number
@@ -7770,11 +7770,11 @@ TEST_F(EnergyPlusFixture, MultiSpeedDXHeatingCoilsHSPF2Test1)
 
     // Check EIO reporting
     const std::string htg_coil_eio_output = R"EIO(! <Component Sizing Information>, Component Type, Component Name, Input Field Description, Value
- Component Sizing Information, Coil:Heating:DX:MultiSpeed, ASHP HTG COIL, Design Size Speed 2 Rated Air Flow Rate [m3/s], 0.580000
- Component Sizing Information, Coil:Heating:DX:MultiSpeed, ASHP HTG COIL, Design Size Speed 1 Rated Air Flow Rate [m3/s], 0.290000
+ Component Sizing Information, Coil:Heating:DX:MultiSpeed, ASHP HTG COIL, Design Size Speed 2 Rated Air Flow Rate [m3/s], 0.58
+ Component Sizing Information, Coil:Heating:DX:MultiSpeed, ASHP HTG COIL, Design Size Speed 1 Rated Air Flow Rate [m3/s], 0.29
  Component Sizing Information, Coil:Heating:DX:MultiSpeed, ASHP HTG COIL, Design Size Speed 2 Gross Rated Heating Capacity [W], 14402.8
  Component Sizing Information, Coil:Heating:DX:MultiSpeed, ASHP HTG COIL, Design Size Speed 1 Gross Rated Heating Capacity [W], 7201.39
- Component Sizing Information, Coil:Heating:DX:MultiSpeed, ASHP HTG COIL, Design Size Resistive Defrost Heater Capacity, 0.00000
+ Component Sizing Information, Coil:Heating:DX:MultiSpeed, ASHP HTG COIL, Design Size Resistive Defrost Heater Capacity, 0
 ! <DX Heating Coil Standard Rating Information>, Component Type, Component Name, High Temperature Heating (net) Rating Capacity {W}, Low Temperature Heating (net) Rating Capacity {W}, HSPF {Btu/W-h}, Region Number
  DX Heating Coil Standard Rating Information, Coil:Heating:DX:MultiSpeed, ASHP HTG COIL, 14996.6, 8946.7, 8.12, 4
 ! <DX Heating Coil AHRI 2023 Standard Rating Information>, Component Type, Component Name, High Temperature Heating (net) Rating Capacity {W}, Low Temperature Heating (net) Rating Capacity {W}, HSPF2 {Btu/W-h}, Region Number
@@ -8031,11 +8031,11 @@ TEST_F(EnergyPlusFixture, MultiSpeedDXHeatingCoilsHSPF2Test2)
 
     // Check EIO reporting
     const std::string htg_coil_eio_output = R"EIO(! <Component Sizing Information>, Component Type, Component Name, Input Field Description, Value
- Component Sizing Information, Coil:Heating:DX:MultiSpeed, ASHP HTG COIL, Design Size Speed 2 Rated Air Flow Rate [m3/s], 0.580000
- Component Sizing Information, Coil:Heating:DX:MultiSpeed, ASHP HTG COIL, Design Size Speed 1 Rated Air Flow Rate [m3/s], 0.290000
+ Component Sizing Information, Coil:Heating:DX:MultiSpeed, ASHP HTG COIL, Design Size Speed 2 Rated Air Flow Rate [m3/s], 0.58
+ Component Sizing Information, Coil:Heating:DX:MultiSpeed, ASHP HTG COIL, Design Size Speed 1 Rated Air Flow Rate [m3/s], 0.29
  Component Sizing Information, Coil:Heating:DX:MultiSpeed, ASHP HTG COIL, Design Size Speed 2 Gross Rated Heating Capacity [W], 14402.8
  Component Sizing Information, Coil:Heating:DX:MultiSpeed, ASHP HTG COIL, Design Size Speed 1 Gross Rated Heating Capacity [W], 7201.39
- Component Sizing Information, Coil:Heating:DX:MultiSpeed, ASHP HTG COIL, Design Size Resistive Defrost Heater Capacity, 0.00000
+ Component Sizing Information, Coil:Heating:DX:MultiSpeed, ASHP HTG COIL, Design Size Resistive Defrost Heater Capacity, 0
 ! <DX Heating Coil Standard Rating Information>, Component Type, Component Name, High Temperature Heating (net) Rating Capacity {W}, Low Temperature Heating (net) Rating Capacity {W}, HSPF {Btu/W-h}, Region Number
  DX Heating Coil Standard Rating Information, Coil:Heating:DX:MultiSpeed, ASHP HTG COIL, 14996.6, 8946.7, 8.57, 4
 ! <DX Heating Coil AHRI 2023 Standard Rating Information>, Component Type, Component Name, High Temperature Heating (net) Rating Capacity {W}, Low Temperature Heating (net) Rating Capacity {W}, HSPF2 {Btu/W-h}, Region Number

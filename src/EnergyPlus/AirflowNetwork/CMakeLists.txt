@@ -19,4 +19,4 @@ if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID STREQUAL "Clang" OR CMAKE_C
 endif()
 
 target_include_directories(airflownetworklib PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)
-target_link_libraries(airflownetworklib PUBLIC btwxt fmt::fmt PRIVATE nlohmann_json)
+target_link_libraries(airflownetworklib PUBLIC btwxt PRIVATE nlohmann_json)

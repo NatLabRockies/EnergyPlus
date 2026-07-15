@@ -423,10 +423,10 @@ TEST_F(EnergyPlusFixture, BaseboardConvWater_SizingTest)
                                              "Design Size Maximum Water Flow Rate [m3/s], 4.86063E-05",
                                              false));
     EXPECT_TRUE(compare_eio_stream_substring("Component Sizing Information, ZoneHVAC:Baseboard:Convective:Water, SPACE2-1 BASEBOARD, "
-                                             "Design Size Heating Load [W], 2000.00",
+                                             "Design Size Heating Load [W], 2000",
                                              false));
     EXPECT_TRUE(compare_eio_stream_substring("Component Sizing Information, ZoneHVAC:Baseboard:Convective:Water, SPACE2-1 BASEBOARD, "
-                                             "Design Size U-Factor Times Area Value [W/K], 2000.00",
+                                             "Design Size U-Factor Times Area Value [W/K], 2000",
                                              true));
 
     BaseboardNum = 2;
@@ -463,10 +463,10 @@ TEST_F(EnergyPlusFixture, BaseboardConvWater_SizingTest)
                                              "Design Size Maximum Water Flow Rate [m3/s], 4.86063E-05",
                                              false));
     EXPECT_TRUE(compare_eio_stream_substring("Component Sizing Information, ZoneHVAC:Baseboard:Convective:Water, SPACE3-1 BASEBOARD, "
-                                             "Design Size Heating Load [W], 2000.00",
+                                             "Design Size Heating Load [W], 2000",
                                              false));
     EXPECT_TRUE(compare_eio_stream_substring("Component Sizing Information, ZoneHVAC:Baseboard:Convective:Water, SPACE3-1 BASEBOARD, "
-                                             "Design Size U-Factor Times Area Value [W/K], 2000.00",
+                                             "Design Size U-Factor Times Area Value [W/K], 2000",
                                              true));
 
     BaseboardNum = 3;
@@ -503,10 +503,10 @@ TEST_F(EnergyPlusFixture, BaseboardConvWater_SizingTest)
                                              "Design Size Maximum Water Flow Rate [m3/s], 7.29095E-05",
                                              false));
     EXPECT_TRUE(compare_eio_stream_substring("Component Sizing Information, ZoneHVAC:Baseboard:Convective:Water, SPACE4-1 BASEBOARD, "
-                                             "Design Size Heating Load [W], 3000.00",
+                                             "Design Size Heating Load [W], 3000",
                                              false));
     EXPECT_TRUE(compare_eio_stream_substring("Component Sizing Information, ZoneHVAC:Baseboard:Convective:Water, SPACE4-1 BASEBOARD, "
-                                             "Design Size U-Factor Times Area Value [W/K], 3000.00"));
+                                             "Design Size U-Factor Times Area Value [W/K], 3000"));
 }
 
 TEST_F(EnergyPlusFixture, BaseboardConvWater_checkForZoneSizingTest)

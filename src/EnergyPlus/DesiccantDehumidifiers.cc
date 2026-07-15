@@ -224,28 +224,28 @@ namespace DesiccantDehumidifiers {
         static std::string const dehumidifierDesiccantNoFans("Dehumidifier:Desiccant:NoFans");
 
         // SUBROUTINE LOCAL VARIABLE DECLARATIONS:
-        int NumAlphas;                  // Number of Alphas for each GetObjectItem call
-        int NumNumbers;                 // Number of Numbers for each GetObjectItem call
-        int IOStatus;                   // Used in GetObjectItem
-        bool ErrorsFound(false);        // Set to true if errors in input, fatal at end of routine
-        bool ErrorsFound2(false);       // Set to true if errors in input, fatal at end of routine
-        bool ErrorsFoundGeneric(false); // Set to true if errors in input, fatal at end of routine
-        bool IsNotOK;                   // Flag to verify name
-        bool OANodeError;               // Flag for check on outside air node
-        std::string RegenCoilInlet;     // Desiccant system regeneration air heater inlet node
-        std::string RegenCoilOutlet;    // Desiccant system regeneration air heater outlet node
-        int DesuperHeaterIndex;         // Index of desuperheater heating coil
-        int RegenCoilControlNodeNum;    // Control node number of regen heating coil
-        Real64 CoilBypassedFlowFrac;    // Bypass air fraction for multimode DX coils
-        Array1D_string Alphas;          // Alpha input items for object
-        Array1D_string cAlphaFields;    // Alpha field names
-        Array1D_string cNumericFields;  // Numeric field names
-        Array1D<Real64> Numbers;        // Numeric input items for object
-        Array1D_bool lAlphaBlanks;      // Logical array, alpha field input BLANK = .TRUE.
-        Array1D_bool lNumericBlanks;    // Logical array, numeric field input BLANK = .TRUE.
-        bool errFlag;                   // local error flag
-        std::string RegenCoilName;      // Regen heating coil name
-        bool RegairHeatingCoilFlag;     // local error flag
+        int NumAlphas;                     // Number of Alphas for each GetObjectItem call
+        int NumNumbers;                    // Number of Numbers for each GetObjectItem call
+        int IOStatus;                      // Used in GetObjectItem
+        bool ErrorsFound(false);           // Set to true if errors in input, fatal at end of routine
+        bool ErrorsFound2(false);          // Set to true if errors in input, fatal at end of routine
+        bool ErrorsFoundGeneric(false);    // Set to true if errors in input, fatal at end of routine
+        bool IsNotOK;                      // Flag to verify name
+        bool OANodeError;                  // Flag for check on outside air node
+        std::string RegenCoilInlet;        // Desiccant system regeneration air heater inlet node
+        std::string RegenCoilOutlet;       // Desiccant system regeneration air heater outlet node
+        int DesuperHeaterIndex;            // Index of desuperheater heating coil
+        int RegenCoilControlNodeNum;       // Control node number of regen heating coil
+        Real64 CoilBypassedFlowFrac = 0.0; // Bypass air fraction for multimode DX coils
+        Array1D_string Alphas;             // Alpha input items for object
+        Array1D_string cAlphaFields;       // Alpha field names
+        Array1D_string cNumericFields;     // Numeric field names
+        Array1D<Real64> Numbers;           // Numeric input items for object
+        Array1D_bool lAlphaBlanks;         // Logical array, alpha field input BLANK = .TRUE.
+        Array1D_bool lNumericBlanks;       // Logical array, numeric field input BLANK = .TRUE.
+        bool errFlag;                      // local error flag
+        std::string RegenCoilName;         // Regen heating coil name
+        bool RegairHeatingCoilFlag;        // local error flag
 
         int TotalArgs = 0;
 
@@ -2383,21 +2383,21 @@ namespace DesiccantDehumidifiers {
         // min vol flow per rated evaporator capacity
 
         // SUBROUTINE LOCAL VARIABLE DECLARATIONS:
-        Real64 DDPartLoadRatio;        // fraction of dehumidification capacity required to meet setpoint
-        Real64 MassFlowRateNew;        // new required mass flow rate calculated to keep regen setpoint temperature (kg/s)
-        Real64 CondenserWasteHeat;     // Condenser waste heat (W)
-        Real64 CpAir;                  // Specific heat of air (J/kg-K)
-        Real64 NewRegenInTemp;         // new temp calculated from condenser waste heat (C)
-        Real64 ExhaustFanMassFlowRate; // exhaust fan mass flow rate (kg/s)
-        Real64 ExhaustFanPLR;          // exhaust fan run time fraction calculated from new mass flow rate for regen side
-        Real64 ExhaustFanPowerMod;     // used to calculate exhaust fan power from flow fraction
-        Real64 VolFlowPerRatedTotQ;    // flow rate per rated total cooling capacity of the companion coil (m3/s/W)
-        Real64 FanDeltaT;              // used to account for fan heat when calculating regeneration heater energy (C)
-        Real64 OnOffFanPLF;            // save air loop fan part load fracton while calculating exhaust fan power
-        Real64 RegenSetPointTemp;      // regeneration temperature setpoint (C)
-        int RegenCoilIndex;            // index to regeneration heating coil, 0 when not used
-        int CompanionCoilIndexNum;     // index for companion DX cooling coil, 0 when DX coil is not used
-        bool UnitOn;                   // unit on flag
+        Real64 DDPartLoadRatio;          // fraction of dehumidification capacity required to meet setpoint
+        Real64 MassFlowRateNew;          // new required mass flow rate calculated to keep regen setpoint temperature (kg/s)
+        Real64 CondenserWasteHeat = 0.0; // Condenser waste heat (W)
+        Real64 CpAir;                    // Specific heat of air (J/kg-K)
+        Real64 NewRegenInTemp;           // new temp calculated from condenser waste heat (C)
+        Real64 ExhaustFanMassFlowRate;   // exhaust fan mass flow rate (kg/s)
+        Real64 ExhaustFanPLR;            // exhaust fan run time fraction calculated from new mass flow rate for regen side
+        Real64 ExhaustFanPowerMod;       // used to calculate exhaust fan power from flow fraction
+        Real64 VolFlowPerRatedTotQ;      // flow rate per rated total cooling capacity of the companion coil (m3/s/W)
+        Real64 FanDeltaT;                // used to account for fan heat when calculating regeneration heater energy (C)
+        Real64 OnOffFanPLF;              // save air loop fan part load fracton while calculating exhaust fan power
+        Real64 RegenSetPointTemp;        // regeneration temperature setpoint (C)
+        int RegenCoilIndex;              // index to regeneration heating coil, 0 when not used
+        int CompanionCoilIndexNum;       // index for companion DX cooling coil, 0 when DX coil is not used
+        bool UnitOn;                     // unit on flag
         //  LOGICAL       :: SimFlag                    ! used to turn off additional simulation if DX Coil is off
         Real64 QRegen_OASysFanAdjust; // temporary variable used to adjust regen heater load during iteration
 

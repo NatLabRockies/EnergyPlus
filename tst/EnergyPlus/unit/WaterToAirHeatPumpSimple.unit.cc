@@ -215,9 +215,9 @@ TEST_F(EnergyPlusFixture, WaterToAirHeatPumpSimpleTest_SizeHVACWaterToAir)
     EXPECT_GE(wahpSimple1.RatedCapCoolTotal, wahpSimple1.RatedCapCoolSens);
 
     if (wahpSimple1.RatedCapCoolTotal != 0.0) {
-        ShowMessage(*state,
-                    EnergyPlus::format("SizeHVACWaterToAir: Rated Sensible Heat Ratio = {:.2f} [-]",
-                                       wahpSimple1.RatedCapCoolSens / wahpSimple1.RatedCapCoolTotal));
+        ShowMessage(
+            *state,
+            std::format("SizeHVACWaterToAir: Rated Sensible Heat Ratio = {:.2f} [-]", wahpSimple1.RatedCapCoolSens / wahpSimple1.RatedCapCoolTotal));
     }
     EXPECT_TRUE(compare_eio_stream_substring("Design Size Rated Air Flow Rate", false));
     EXPECT_TRUE(compare_eio_stream_substring("Design Size Rated Total Cooling Capacity", false));

@@ -148,25 +148,25 @@ namespace WindowAC {
         if (CompIndex == 0) {
             WindACNum = Util::FindItemInList(CompName, state.dataWindowAC->WindAC);
             if (WindACNum == 0) {
-                ShowFatalError(state, EnergyPlus::format("SimWindowAC: Unit not found={}", CompName));
+                ShowFatalError(state, std::format("SimWindowAC: Unit not found={}", CompName));
             }
             CompIndex = WindACNum;
         } else {
             WindACNum = CompIndex;
             if (WindACNum > state.dataWindowAC->NumWindAC || WindACNum < 1) {
                 ShowFatalError(state,
-                               EnergyPlus::format("SimWindowAC:  Invalid CompIndex passed={}, Number of Units={}, Entered Unit name={}",
-                                                  WindACNum,
-                                                  state.dataWindowAC->NumWindAC,
-                                                  CompName));
+                               std::format("SimWindowAC:  Invalid CompIndex passed={}, Number of Units={}, Entered Unit name={}",
+                                           WindACNum,
+                                           state.dataWindowAC->NumWindAC,
+                                           CompName));
             }
             if (state.dataWindowAC->CheckEquipName(WindACNum)) {
                 if (CompName != state.dataWindowAC->WindAC(WindACNum).Name) {
                     ShowFatalError(state,
-                                   EnergyPlus::format("SimWindowAC: Invalid CompIndex passed={}, Unit name={}, stored Unit Name for that index={}",
-                                                      WindACNum,
-                                                      CompName,
-                                                      state.dataWindowAC->WindAC(WindACNum).Name));
+                                   std::format("SimWindowAC: Invalid CompIndex passed={}, Unit name={}, stored Unit Name for that index={}",
+                                               WindACNum,
+                                               CompName,
+                                               state.dataWindowAC->WindAC(WindACNum).Name));
                 }
                 state.dataWindowAC->CheckEquipName(WindACNum) = false;
             }
@@ -333,13 +333,13 @@ namespace WindowAC {
             bool errFlag = false;
             ValidateComponent(state, windAC.OAMixType, windAC.OAMixName, errFlag, CurrentModuleObject);
             if (errFlag) {
-                ShowContinueError(state, EnergyPlus::format("specified in {} = \"{}\".", CurrentModuleObject, windAC.Name));
+                ShowContinueError(state, std::format("specified in {} = \"{}\".", CurrentModuleObject, windAC.Name));
                 ErrorsFound = true;
             } else {
                 // Get outdoor air mixer node numbers
                 OANodeNums = GetOAMixerNodeNumbers(state, windAC.OAMixName, errFlag);
                 if (errFlag) {
-                    ShowContinueError(state, EnergyPlus::format("that was specified in {} = \"{}\"", CurrentModuleObject, windAC.Name));
+                    ShowContinueError(state, std::format("that was specified in {} = \"{}\"", CurrentModuleObject, windAC.Name));
                     ShowContinueError(state, "..OutdoorAir:Mixer is required. Enter an OutdoorAir:Mixer object with this name.");
                     ErrorsFound = true;
                 } else {
@@ -368,17 +368,15 @@ namespace WindowAC {
                 if (FanVolFlow != AutoSize) {
                     if (FanVolFlow < windAC.MaxAirVolFlow) {
                         ShowWarningError(state,
-                                         EnergyPlus::format("Air flow rate = {:.7f} in fan object {} is less than the maximum supply air flow "
-                                                            "rate ({:.7f}) in the {} object.",
-                                                            FanVolFlow,
-                                                            windAC.FanName,
-                                                            windAC.MaxAirVolFlow,
-                                                            CurrentModuleObject));
+                                         std::format("Air flow rate = {:.7f} in fan object {} is less than the maximum supply air flow "
+                                                     "rate ({:.7f}) in the {} object.",
+                                                     FanVolFlow,
+                                                     windAC.FanName,
+                                                     windAC.MaxAirVolFlow,
+                                                     CurrentModuleObject));
                         ShowContinueError(
-                            state,
-                            EnergyPlus::format(" The fan flow rate must be >= to the {} in the {} object.", cNumericFields(1), CurrentModuleObject));
-                        ShowContinueError(state,
-                                          EnergyPlus::format(" Occurs in {} = {}", CurrentModuleObject, state.dataWindowAC->WindAC(WindACNum).Name));
+                            state, std::format(" The fan flow rate must be >= to the {} in the {} object.", cNumericFields(1), CurrentModuleObject));
+                        ShowContinueError(state, std::format(" Occurs in {} = {}", CurrentModuleObject, state.dataWindowAC->WindAC(WindACNum).Name));
                         ErrorsFound = true;
                     }
                 }
@@ -405,7 +403,7 @@ namespace WindowAC {
                     windAC.DXCoilNumOfSpeeds = VariableSpeedCoils::GetVSCoilNumOfSpeeds(state, windAC.DXCoilName, ErrorsFound);
                 }
                 if (CoilNodeErrFlag) {
-                    ShowContinueError(state, EnergyPlus::format(" that was specified in {} = \"{}\".", CurrentModuleObject, windAC.Name));
+                    ShowContinueError(state, std::format(" that was specified in {} = \"{}\".", CurrentModuleObject, windAC.Name));
                     ErrorsFound = true;
                 }
             } else {
@@ -457,12 +455,11 @@ namespace WindowAC {
                 }
                 if (ZoneNodeNotFound) {
                     ShowSevereError(state,
-                                    EnergyPlus::format("{} = \"{}\". Window AC air inlet node name must be the same as a zone exhaust node name.",
-                                                       CurrentModuleObject,
-                                                       windAC.Name));
+                                    std::format("{} = \"{}\". Window AC air inlet node name must be the same as a zone exhaust node name.",
+                                                CurrentModuleObject,
+                                                windAC.Name));
                     ShowContinueError(state, "..Zone exhaust node name is specified in ZoneHVAC:EquipmentConnections object.");
-                    ShowContinueError(state,
-                                      EnergyPlus::format("..Window AC air inlet node name = {}", state.dataLoopNodes->NodeID(windAC.AirInNode)));
+                    ShowContinueError(state, std::format("..Window AC air inlet node name = {}", state.dataLoopNodes->NodeID(windAC.AirInNode)));
                     ErrorsFound = true;
                 }
                 // check that Window AC air outlet node is a zone inlet node.
@@ -481,12 +478,11 @@ namespace WindowAC {
                 }
                 if (ZoneNodeNotFound) {
                     ShowSevereError(state,
-                                    EnergyPlus::format("{} = \"{}\". Window AC air outlet node name must be the same as a zone inlet node name.",
-                                                       CurrentModuleObject,
-                                                       windAC.Name));
+                                    std::format("{} = \"{}\". Window AC air outlet node name must be the same as a zone inlet node name.",
+                                                CurrentModuleObject,
+                                                windAC.Name));
                     ShowContinueError(state, "..Zone inlet node name is specified in ZoneHVAC:EquipmentConnections object.");
-                    ShowContinueError(state,
-                                      EnergyPlus::format("..Window AC air outlet node name = {}", state.dataLoopNodes->NodeID(windAC.AirOutNode)));
+                    ShowContinueError(state, std::format("..Window AC air outlet node name = {}", state.dataLoopNodes->NodeID(windAC.AirOutNode)));
                     ErrorsFound = true;
                 }
                 CompSetFanInlet = state.dataLoopNodes->NodeID(windAC.MixedAirNode);
@@ -509,11 +505,11 @@ namespace WindowAC {
                 }
                 if (ZoneNodeNotFound) {
                     ShowSevereError(state,
-                                    EnergyPlus::format("{} = \"{}\". Window AC air inlet node name must be the same as a zone exhaust node name.",
-                                                       CurrentModuleObject,
-                                                       windAC.Name));
+                                    std::format("{} = \"{}\". Window AC air inlet node name must be the same as a zone exhaust node name.",
+                                                CurrentModuleObject,
+                                                windAC.Name));
                     ShowContinueError(state, "..Zone exhaust node name is specified in ZoneHVAC:EquipmentConnections object.");
-                    ShowContinueError(state, EnergyPlus::format("..Window AC inlet node name = {}", state.dataLoopNodes->NodeID(windAC.AirInNode)));
+                    ShowContinueError(state, std::format("..Window AC inlet node name = {}", state.dataLoopNodes->NodeID(windAC.AirInNode)));
                     ErrorsFound = true;
                 }
                 // check that Window AC air outlet node is the same as a zone inlet node.
@@ -532,11 +528,11 @@ namespace WindowAC {
                 }
                 if (ZoneNodeNotFound) {
                     ShowSevereError(state,
-                                    EnergyPlus::format("{} = \"{}\". Window AC air outlet node name must be the same as a zone inlet node name.",
-                                                       CurrentModuleObject,
-                                                       windAC.Name));
+                                    std::format("{} = \"{}\". Window AC air outlet node name must be the same as a zone inlet node name.",
+                                                CurrentModuleObject,
+                                                windAC.Name));
                     ShowContinueError(state, "..Zone inlet node name is specified in ZoneHVAC:EquipmentConnections object.");
-                    ShowContinueError(state, EnergyPlus::format("..Window AC outlet node name = {}", state.dataLoopNodes->NodeID(windAC.AirOutNode)));
+                    ShowContinueError(state, std::format("..Window AC outlet node name = {}", state.dataLoopNodes->NodeID(windAC.AirOutNode)));
                     ErrorsFound = true;
                 }
                 CompSetFanInlet = state.dataLoopNodes->NodeID(windAC.CoilOutletNodeNum);
@@ -581,8 +577,7 @@ namespace WindowAC {
 
         if (ErrorsFound) {
             ShowFatalError(
-                state,
-                EnergyPlus::format("{}Errors found in getting {} input.  Preceding condition causes termination.", RoutineName, CurrentModuleObject));
+                state, std::format("{}Errors found in getting {} input.  Preceding condition causes termination.", RoutineName, CurrentModuleObject));
         }
 
         for (WindACNum = 1; WindACNum <= state.dataWindowAC->NumWindAC; ++WindACNum) {

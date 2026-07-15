@@ -100,8 +100,8 @@ void GASSES90(EnergyPlusData &state,
 {
 
     static Real64 const two_sqrt_2(2.0 * std::sqrt(2.0));
-    Real64 molmix;
-    Real64 cpmixm;
+    Real64 molmix = 0.0;
+    Real64 cpmixm = 0.0;
     Real64 phimup;
     Real64 downer;
     Real64 psiup;

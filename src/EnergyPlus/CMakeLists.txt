@@ -288,6 +288,7 @@ set(SRC
     FluidCoolers.hh
     FluidProperties.cc
     FluidProperties.hh
+    Formatters.hh
     FromChars.hh
     FuelCellElectricGenerator.cc
     FuelCellElectricGenerator.hh
@@ -548,6 +549,8 @@ set(SRC
     PurchasedAirManager.hh
     PythonEngine.cc
     PythonEngine.hh
+    PythonHelpers.cc
+    PythonHelpers.hh
     RefrigeratedCase.cc
     RefrigeratedCase.hh
     ReportCoilSelection.cc
@@ -753,11 +756,12 @@ if(LINK_WITH_PYTHON)
 
   # now we need to get the Python libs and add the include path for further compiling
   # The Development (libs) was already found in the root level CMakeLists.txt
-  include_directories("${Python_INCLUDE_DIRS}")
+  # Marked SYSTEM so MSVC treats it as an external header (/external:I) and doesn't apply /W4 /WX to it
+  target_include_directories(project_options SYSTEM INTERFACE "${Python_INCLUDE_DIRS}")
 endif()
 
 add_library(energyplusparser STATIC ${INPUTPARSING_SRC})
-target_link_libraries(energyplusparser PUBLIC embedded_epjson_source nlohmann_json re2 fmt::fmt ${CMAKE_DL_LIBS})
+target_link_libraries(energyplusparser PUBLIC embedded_epjson_source nlohmann_json re2 ${CMAKE_DL_LIBS})
 target_link_libraries(energyplusparser PRIVATE project_options project_fp_options project_warnings)
 if(WIN32)
   target_link_libraries(energyplusparser PUBLIC Shlwapi)
@@ -775,6 +779,14 @@ endif()
 # statically to create the DLL and also the unit tests
 add_library(energypluslib STATIC ${SRC})
 
+# Debug Python Config
+option(DEBUG_PYTHON_CONFIG "Debug Python PyPreConfig and PyConfig initialization" OFF)
+mark_as_advanced(DEBUG_PYTHON_CONFIG)
+if(DEBUG_PYTHON_CONFIG)
+  # Linking PUBLIC so it reaches energyplusapi too
+  target_compile_definitions(energypluslib PUBLIC DEBUG_PYTHON_CONFIG=1)
+endif()
+
 if(ENABLE_UNITY)
   set_target_properties(energypluslib PROPERTIES UNITY_BUILD ON)
 endif()
@@ -782,7 +794,6 @@ endif()
 target_link_libraries(
   energypluslib
   PUBLIC embedded_epjson_source
-         fmt::fmt
          nlohmann_json
          objexx
          sqlite

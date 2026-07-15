@@ -1687,7 +1687,7 @@ namespace DataPlant {
     void HalfLoopData::SimulateLoopSideBranchGroup(EnergyPlusData &state,
                                                    int const FirstBranchNum,
                                                    int const LastBranchNum,
-                                                   Real64 FlowRequest,
+                                                   Real64 t_FlowRequest,
                                                    bool const FirstHVACIteration,
                                                    bool &LoopShutDownFlag)
     {
@@ -1746,7 +1746,7 @@ namespace DataPlant {
                     if (this->BranchPumpsExist) {
                         SimulateSinglePump(state, this_comp.location, branch.RequestedMassFlow);
                     } else {
-                        SimulateSinglePump(state, this_comp.location, FlowRequest);
+                        SimulateSinglePump(state, this_comp.location, t_FlowRequest);
                     }
                     break;
                 case DataPlant::OpScheme::CompSetPtBased:
@@ -1985,8 +1985,8 @@ namespace DataPlant {
         auto const &this_comp(this->Branch(BranchNum).Comp(CompNum));
 
         // Get information
-        int const InletNode(this_comp.NodeNumIn);
-        int const OutletNode(this_comp.NodeNumOut);
+        int const compInletNode(this_comp.NodeNumIn);
+        int const compOutletNode(this_comp.NodeNumOut);
 
         if (this->FlowLock == DataPlant::FlowLock::Unlocked) {
 
@@ -1998,7 +1998,7 @@ namespace DataPlant {
 
             default: {
                 // pumps pipes, etc. will be lumped in here with other component types, but they will have no delta T anyway
-                ComponentMassFlowRate = state.dataLoopNodes->Node(InletNode).MassFlowRateRequest;
+                ComponentMassFlowRate = state.dataLoopNodes->Node(compInletNode).MassFlowRateRequest;
                 // make sure components like economizers use the mass flow request
                 break;
             }
@@ -2015,7 +2015,7 @@ namespace DataPlant {
             }
             default: {
                 // pumps pipes, etc. will be lumped in here with other component types, but they will have no delta T anyway
-                ComponentMassFlowRate = state.dataLoopNodes->Node(OutletNode).MassFlowRate;
+                ComponentMassFlowRate = state.dataLoopNodes->Node(compOutletNode).MassFlowRate;
             }
             }
 
@@ -2028,8 +2028,8 @@ namespace DataPlant {
         }
 
         // Get an average temperature for the property call
-        Real64 const InletTemp(state.dataLoopNodes->Node(InletNode).Temp);
-        Real64 const OutletTemp(state.dataLoopNodes->Node(OutletNode).Temp);
+        Real64 const InletTemp(state.dataLoopNodes->Node(compInletNode).Temp);
+        Real64 const OutletTemp(state.dataLoopNodes->Node(compOutletNode).Temp);
         Real64 const AverageTemp((InletTemp + OutletTemp) / 2.0);
         Real64 const ComponentCp(state.dataPlnt->PlantLoop(this->plantLoc.loopNum).glycol->getSpecificHeat(state, AverageTemp, RoutineName));
 

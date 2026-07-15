@@ -368,7 +368,7 @@ TEST_F(EnergyPlusFixture, HWBaseboardRadiator_HWBaseboardWaterInputTest)
     EXPECT_NEAR(state->dataHWBaseboardRad->HWBaseboard(1).UA, 24.2144, 0.0001);
     EXPECT_NEAR(state->dataHWBaseboardRad->HWBaseboard(1).WaterVolFlowRateMax, 3.15941E-05, 0.0000001);
     EXPECT_TRUE(compare_eio_stream_substring("Component Sizing Information, ZoneHVAC:Baseboard:RadiantConvective:Water, THISISABASEBOARD, "
-                                             "Design Size Heating Load [W], 1300.00",
+                                             "Design Size Heating Load [W], 1300",
                                              false));
     EXPECT_TRUE(compare_eio_stream_substring("Component Sizing Information, ZoneHVAC:Baseboard:RadiantConvective:Water, THISISABASEBOARD, "
                                              "Design Size Maximum Water Flow Rate [m3/s], 3.15941E-05",

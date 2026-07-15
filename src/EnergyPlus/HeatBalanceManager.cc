@@ -6010,6 +6010,8 @@ namespace HeatBalanceManager {
 
                 // ALLOCATE(Construct(ConstrNum)%BSDFInput%Layer(NumOfOpticalLayers))
                 for (int Layer = 1; Layer <= thisConstruct.TotLayers; ++Layer) {
+                    AlphaIndex = 9 + (Layer * 3) - 2;
+                    currentOpticalLayer = int(Layer / 2) + 1;
 
                     if (mod(Layer, 2) != 0) {
                         thisConstruct.BSDFInput.Layer(currentOpticalLayer).MaterialIndex = thisConstruct.LayerPoint(Layer);

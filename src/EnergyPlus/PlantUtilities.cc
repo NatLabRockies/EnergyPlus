@@ -679,10 +679,10 @@ void CheckForRunawayPlantTemps(EnergyPlusData &state, int const LoopNum, const D
     std::string hotcold;
     bool makefatalerror;
     Real64 LoopCapacity;
-    Real64 LoopDemandSideCapacity;
+    Real64 LoopDemandSideCapacity = 0.0;
     Real64 LoopSupplySideCapacity;
     Real64 DispatchedCapacity;
-    Real64 LoopDemandSideDispatchedCapacity;
+    Real64 LoopDemandSideDispatchedCapacity = 0.0;
     Real64 LoopSupplySideDispatchedCapacity;
 
     makefatalerror = false;

@@ -95,7 +95,6 @@ struct SimulationManagerData : BaseGlobalStruct
 {
     bool RunPeriodsInInput = false;
     bool RunControlInInput = false;
-    bool PreP_Fatal = false;
     bool WarningOut = true;
 
     void init_constant_state([[maybe_unused]] EnergyPlusData &state) override
@@ -112,7 +111,6 @@ struct SimulationManagerData : BaseGlobalStruct
     {
         this->RunPeriodsInInput = false;
         this->RunControlInInput = false;
-        this->PreP_Fatal = false;
         this->WarningOut = true;
     }
 };

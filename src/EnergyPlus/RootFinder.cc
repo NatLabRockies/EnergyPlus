@@ -1881,7 +1881,7 @@ void WriteRootFinderTrace(InputOutputFile &TraceFile,              // Unit for t
     // This subroutine writes the current state of the root finder data to the trace file
     // unit using CSV formatting.
 
-    print(TraceFile, "{},{},", RootFinderData.StatusFlag, RootFinderData.CurrentMethodType);
+    print(TraceFile, "{},{},", static_cast<int>(RootFinderData.StatusFlag), static_cast<int>(RootFinderData.CurrentMethodType));
 
     // Only show current point if defined.
     WritePoint(TraceFile, RootFinderData.CurrentPoint, false);

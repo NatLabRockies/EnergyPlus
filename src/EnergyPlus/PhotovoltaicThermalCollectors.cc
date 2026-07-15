@@ -1360,7 +1360,7 @@ namespace PhotovoltaicThermalCollectors {
         Real64 hconvt(0.0);                           // htc external total
         Real64 hpvg_pv;                               // conductance of pv glass cover (W/m2-K)
         Real64 hpv_1;                                 // conductance of pv backing (W/m2-K)
-        Real64 hrad12;                                // radiative heat transfer coefficient between bldg surface and pv backing surface (W/m2-K)
+        Real64 hrad12 = 0.0;                          // radiative heat transfer coefficient between bldg surface and pv backing surface (W/m2-K)
         Real64 hrad_surr;                             // radiative heat transfer coefficient between pv glass cover and surrounding (W/m2-K)
         constexpr Real64 sigma(5.67e-8);              // stephan bolzmann constant
         Real64 reynolds(0.0);                         // Reynolds inside collector
@@ -1660,7 +1660,7 @@ namespace PhotovoltaicThermalCollectors {
         // PURPOSE OF THIS SUBROUTINE:
         // Solve a system of linear equations using Gaussian elimination and back substitution method.
 
-        int p;
+        int p = 0;
         int constexpr m = 3;
         Real64 constexpr small = 1.0e-10;
 

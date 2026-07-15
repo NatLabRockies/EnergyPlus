@@ -173,13 +173,6 @@ target_link_libraries(DElight PRIVATE turn_off_warnings)
 add_subdirectory(re2)
 set_target_properties(re2 PROPERTIES FOLDER ThirdParty/re2)
 
-add_subdirectory(fmt-8.0.1)
-target_compile_definitions(fmt PRIVATE FMT_USE_FULL_CACHE_DRAGONBOX=1)
-set_target_properties(fmt PROPERTIES FOLDER ThirdParty/fmt)
-target_compile_options(fmt PUBLIC $<$<COMPILE_LANG_AND_ID:CXX,Clang>:-Wno-deprecated-literal-operator>)
-target_compile_definitions(fmt PUBLIC $<$<COMPILE_LANG_AND_ID:CXX,Clang,AppleClang>:FMT_CONSTEVAL=>)
-mark_as_advanced(FORCE FMT_SYSTEM_HEADERS)
-
 # Kiva
 option(BUILD_GROUND_PLOT "Build ground plotting library (for Kiva debugging only)" OFF)
 mark_as_advanced(FORCE BUILD_GROUND_PLOT)

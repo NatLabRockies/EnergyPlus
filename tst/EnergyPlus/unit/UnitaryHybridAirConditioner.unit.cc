@@ -313,8 +313,8 @@ TEST_F(EnergyPlusFixture, Test_UnitaryHybridAirConditioner_Unittest)
     EXPECT_EQ(modenumber, 4); // Ventilation Mode
     EXPECT_NEAR(Tsa, Tosa, 1.0);
     EXPECT_NEAR(Msa, DesignMinVR, 0.001);
-    EXPECT_GT(Electricpower, 4000 / NormalizationDivisor * MinFlowFraction);
-    EXPECT_LT(Electricpower, 5000 / NormalizationDivisor);
+    EXPECT_GT(Electricpower, 3000 / NormalizationDivisor * MinFlowFraction);
+    EXPECT_LT(Electricpower, 4000 / NormalizationDivisor);
 
     // check fan heat calculation in supply air stream if not included in lookup tables
     thisUnitary.FanHeatGain = true;

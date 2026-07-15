@@ -2804,7 +2804,7 @@ namespace InternalHeatGains {
                 }
                 print(state.files.eio, "{},", (people.workEffSched != nullptr) ? people.workEffSched->Name : "");
 
-                print(state.files.eio, clothingTypeEIOStrings[(int)people.clothingType]);
+                print(state.files.eio, "{}", clothingTypeEIOStrings[(int)people.clothingType]);
 
                 if (people.clothingType == ClothingType::CalculationSchedule) {
                     print(state.files.eio, "{},", people.clothingMethodSched->Name);
@@ -7068,10 +7068,9 @@ namespace InternalHeatGains {
                                                  thisBBHeat.LowTemperature);
                     if (state.dataGlobal->DisplayExtraWarnings) {
                         if (std::abs(LowTemperatureDes - thisBBHeat.LowTemperature) > state.dataSize->AutoVsHardSizingDeltaTempThreshold) {
-                            ShowMessage(state,
-                                        EnergyPlus::format("{}: Potential issue with equipment sizing for {} {}", RoutineName, CompType, CompName));
-                            ShowContinueError(state, EnergyPlus::format("User-Specified {} = {:.2f}", SizingString, thisBBHeat.LowTemperature));
-                            ShowContinueError(state, EnergyPlus::format("differs from Design Size {} = {:.2f}", SizingString, LowTemperatureDes));
+                            ShowMessage(state, std::format("{}: Potential issue with equipment sizing for {} {}", RoutineName, CompType, CompName));
+                            ShowContinueError(state, std::format("User-Specified {} = {:.2f}", SizingString, thisBBHeat.LowTemperature));
+                            ShowContinueError(state, std::format("differs from Design Size {} = {:.2f}", SizingString, LowTemperatureDes));
                             ShowContinueError(state, "This may, or may not, indicate mismatched component sizes.");
                             ShowContinueError(state, "Verify that the value entered is intended and is consistent with other components.");
                         }
@@ -7102,10 +7101,9 @@ namespace InternalHeatGains {
                                                  thisBBHeat.HighTemperature);
                     if (state.dataGlobal->DisplayExtraWarnings) {
                         if (std::abs(HighTemperatureDes - thisBBHeat.HighTemperature) > state.dataSize->AutoVsHardSizingDeltaTempThreshold) {
-                            ShowMessage(state,
-                                        EnergyPlus::format("{}: Potential issue with equipment sizing for {} {}", RoutineName, CompType, CompName));
-                            ShowContinueError(state, EnergyPlus::format("User-Specified {} = {:.2f}", SizingString, thisBBHeat.HighTemperature));
-                            ShowContinueError(state, EnergyPlus::format("differs from Design Size {} = {:.2f}", SizingString, HighTemperatureDes));
+                            ShowMessage(state, std::format("{}: Potential issue with equipment sizing for {} {}", RoutineName, CompType, CompName));
+                            ShowContinueError(state, std::format("User-Specified {} = {:.2f}", SizingString, thisBBHeat.HighTemperature));
+                            ShowContinueError(state, std::format("differs from Design Size {} = {:.2f}", SizingString, HighTemperatureDes));
                             ShowContinueError(state, "This may, or may not, indicate mismatched component sizes.");
                             ShowContinueError(state, "Verify that the value entered is intended and is consistent with other components.");
                         }
@@ -7123,11 +7121,11 @@ namespace InternalHeatGains {
                 DeltaTMax = thisBBHeat.ZnHtgSetTemp - LowTemperatureDes;
                 DeltaTMin = thisBBHeat.ZnHtgSetTemp - thisBBHeat.HighTemperature;
                 if (DeltaTMax < 0.0) {
-                    ShowSevereMessage(state, EnergyPlus::format("{} = {}", RoutineName, CompName));
+                    ShowSevereMessage(state, std::format("{} = {}", RoutineName, CompName));
                     ShowContinueError(state, "Minimum outdoor temperature is greater than zone setpoint temperature.");
                     ShowContinueError(state, "Check if a heating design day was attached and temperature settings were correct.");
                 } else if (DeltaTMin < 0.0) {
-                    ShowSevereMessage(state, EnergyPlus::format("{} = {}", RoutineName, CompName));
+                    ShowSevereMessage(state, std::format("{} = {}", RoutineName, CompName));
                     ShowContinueError(state, "High temperature is greater than zone setpoint temperature.");
                     ShowContinueError(state, "Check if temperature settings were correct.");
                 }
@@ -8359,7 +8357,7 @@ namespace InternalHeatGains {
     Real64 SumInternalConvectionGainsByTypes(
         EnergyPlusData &state,
         int const ZoneNum,                                         // zone index pointer for which zone to sum gains for
-        gsl::span<const DataHeatBalance::IntGainType> GainTypeARR, // variable length 1-d array of enum valued gain types
+        std::span<const DataHeatBalance::IntGainType> GainTypeARR, // variable length 1-d array of enum valued gain types
         int const spaceIndex)                                      // space index pointer, sum gains only for this space
     {
 
@@ -8446,7 +8444,7 @@ namespace InternalHeatGains {
     Real64 SumReturnAirConvectionGainsByTypes(
         EnergyPlusData &state,
         int const ZoneNum,                                         // zone index pointer for which zone to sum gains for
-        gsl::span<const DataHeatBalance::IntGainType> GainTypeARR, // variable length 1-d array of integer valued gain types
+        std::span<const DataHeatBalance::IntGainType> GainTypeARR, // variable length 1-d array of integer valued gain types
         int const spaceIndex                                       // space index pointer, sum gains only for this space
     )
     {
@@ -8522,7 +8520,7 @@ namespace InternalHeatGains {
     Real64
     SumInternalRadiationGainsByTypes(EnergyPlusData &state,
                                      int const ZoneNum,                                         // zone index pointer for which zone to sum gains for
-                                     gsl::span<const DataHeatBalance::IntGainType> GainTypeARR, // variable length 1-d array of enum valued gain types
+                                     std::span<const DataHeatBalance::IntGainType> GainTypeARR, // variable length 1-d array of enum valued gain types
                                      int const spaceIndex)                                      // space index pointer, sum gains only for this space
     {
 
@@ -8568,7 +8566,7 @@ namespace InternalHeatGains {
     Real64 SumEnclosureInternalRadiationGainsByTypes(
         EnergyPlusData &state,
         int const enclosureNum,                                    // enclosure to sum gains for
-        gsl::span<const DataHeatBalance::IntGainType> GainTypeARR) // variable length 1-d array of enum valued gain types
+        std::span<const DataHeatBalance::IntGainType> GainTypeARR) // variable length 1-d array of enum valued gain types
     {
         // Return value
         Real64 SumRadiationGainRate(0.0);
@@ -8650,7 +8648,7 @@ namespace InternalHeatGains {
     Real64
     SumInternalLatentGainsByTypes(EnergyPlusData &state,
                                   int const ZoneNum,                                         // zone index pointer for which zone to sum gains for
-                                  gsl::span<const DataHeatBalance::IntGainType> GainTypeARR, // variable length 1-d array of enum valued gain types
+                                  std::span<const DataHeatBalance::IntGainType> GainTypeARR, // variable length 1-d array of enum valued gain types
                                   int const spaceIndex)                                      // space index pointer, sum gains only for this space
     {
         // SUBROUTINE INFORMATION:
@@ -8777,7 +8775,7 @@ namespace InternalHeatGains {
     Real64
     SumInternalCO2GainsByTypes(EnergyPlusData &state,
                                int const ZoneNum,                                        // zone index pointer for which zone to sum gains for
-                               gsl::span<const DataHeatBalance::IntGainType> GainTypeARR // variable length 1-d array of integer valued gain types
+                               std::span<const DataHeatBalance::IntGainType> GainTypeARR // variable length 1-d array of integer valued gain types
     )
     {
 
@@ -8924,7 +8922,7 @@ namespace InternalHeatGains {
         // the subroutine returns the index of matched internal gain device or -1 if no match found.
 
         int DeviceNum;
-        int DeviceIndex;
+        int DeviceIndex = -1;
         if (state.dataHeatBal->spaceIntGainDevices(spaceNum).numberOfDevices == 0) {
             DeviceIndex = -1;
             return DeviceIndex;

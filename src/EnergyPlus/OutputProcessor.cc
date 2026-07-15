@@ -47,6 +47,7 @@
 
 // C++ Headers
 #include <algorithm>
+#include <array>
 #include <cassert>
 #include <format>
 #include <memory>
@@ -849,9 +850,29 @@ namespace OutputProcessor {
 
                         itemsAssigned = true;
                     } else { // Key is not "*"
+                        std::string const &keyArg = ipsc->cAlphaArgs(fldIndex);
+                        bool keyIsRegex = DataOutputs::isKeyRegexLike(keyArg);
+                        std::unique_ptr<RE2> keyPattern;
+                        if (keyIsRegex) {
+                            // keyArg is already uppercased (no \retaincase in IDD), and keyUC is uppercase too,
+                            // so matching uppercase pattern against uppercase key is effectively case-insensitive.
+                            keyPattern = std::make_unique<RE2>(keyArg);
+                            if (!keyPattern->ok()) {
+                                ShowSevereError(state,
+                                                std::format("Regular expression \"{}\" for {} in {}=\"{}\" is invalid",
+                                                            keyArg,
+                                                            ipsc->cAlphaFieldNames(fldIndex),
+                                                            ipsc->cCurrentModuleObject,
+                                                            ipsc->cAlphaArgs(1)));
+                                ShowContinueError(state, keyPattern->error());
+                                ShowFatalError(state, "Error found in regular expression. Previous error(s) cause program termination.");
+                            }
+                        }
                         bool foundKey = false;
                         for (int keyOutVarNum : srcDDVar->keyOutVarNums) {
-                            if (op->outVars[keyOutVarNum]->keyUC == ipsc->cAlphaArgs(fldIndex)) {
+                            bool matched = keyIsRegex ? RE2::FullMatch(op->outVars[keyOutVarNum]->keyUC, *keyPattern)
+                                                      : (op->outVars[keyOutVarNum]->keyUC == keyArg);
+                            if (matched) {
                                 foundKey = true;
                                 itemsAssigned = true;
                                 break;
@@ -982,8 +1003,18 @@ namespace OutputProcessor {
                             }
                         }
                     } else { // Key is not "*"
+                        std::string const &keyArg = ipsc->cAlphaArgs(fldIndex);
+                        bool keyIsRegex = DataOutputs::isKeyRegexLike(keyArg);
+                        std::unique_ptr<RE2> keyPattern;
+                        if (keyIsRegex) {
+                            // keyArg is already uppercased (no \retaincase in IDD), and keyUC is uppercase too,
+                            // so matching uppercase pattern against uppercase key is effectively case-insensitive.
+                            keyPattern = std::make_unique<RE2>(keyArg);
+                        }
                         for (int keyOutVarNum : srcDDVar->keyOutVarNums) {
-                            if (op->outVars[keyOutVarNum]->keyUC == ipsc->cAlphaArgs(fldIndex)) {
+                            bool matched = keyIsRegex ? RE2::FullMatch(op->outVars[keyOutVarNum]->keyUC, *keyPattern)
+                                                      : (op->outVars[keyOutVarNum]->keyUC == keyArg);
+                            if (matched) {
                                 if (std::find(meter->srcVarNums.begin(), meter->srcVarNums.end(), keyOutVarNum) != meter->srcVarNums.end()) {
                                     ShowWarningCustom(state,
                                                       eoh,
@@ -993,7 +1024,9 @@ namespace OutputProcessor {
                                     meter->srcVarNums.push_back(keyOutVarNum);
                                     op->outVars[keyOutVarNum]->meterNums.push_back(meterNum);
                                 }
-                                break;
+                                if (!keyIsRegex) {
+                                    break;
+                                }
                             }
                         }
                     } // if (keyIsStar)
@@ -1179,9 +1212,29 @@ namespace OutputProcessor {
 
                         itemsAssigned = true;
                     } else { // Key is not "*"
+                        std::string const &keyArg = ipsc->cAlphaArgs(fldIndex);
+                        bool keyIsRegex = DataOutputs::isKeyRegexLike(keyArg);
+                        std::unique_ptr<RE2> keyPattern;
+                        if (keyIsRegex) {
+                            // keyArg is already uppercased (no \retaincase in IDD), and keyUC is uppercase too,
+                            // so matching uppercase pattern against uppercase key is effectively case-insensitive.
+                            keyPattern = std::make_unique<RE2>(keyArg);
+                            if (!keyPattern->ok()) {
+                                ShowSevereError(state,
+                                                std::format("Regular expression \"{}\" for {} in {}=\"{}\" is invalid",
+                                                            keyArg,
+                                                            ipsc->cAlphaFieldNames(fldIndex),
+                                                            ipsc->cCurrentModuleObject,
+                                                            ipsc->cAlphaArgs(1)));
+                                ShowContinueError(state, keyPattern->error());
+                                ShowFatalError(state, "Error found in regular expression. Previous error(s) cause program termination.");
+                            }
+                        }
                         bool foundKey = false;
                         for (int keyOutVarNum : srcDDVar->keyOutVarNums) {
-                            if (op->outVars[keyOutVarNum]->keyUC == ipsc->cAlphaArgs(fldIndex)) {
+                            bool matched = keyIsRegex ? RE2::FullMatch(op->outVars[keyOutVarNum]->keyUC, *keyPattern)
+                                                      : (op->outVars[keyOutVarNum]->keyUC == keyArg);
+                            if (matched) {
                                 foundKey = true;
                                 itemsAssigned = true;
                                 break;
@@ -1326,8 +1379,18 @@ namespace OutputProcessor {
                             }
                         }
                     } else { // Key is not "*"
+                        std::string const &keyArg = ipsc->cAlphaArgs(fldIndex);
+                        bool keyIsRegex = DataOutputs::isKeyRegexLike(keyArg);
+                        std::unique_ptr<RE2> keyPattern;
+                        if (keyIsRegex) {
+                            // keyArg is already uppercased (no \retaincase in IDD), and keyUC is uppercase too,
+                            // so matching uppercase pattern against uppercase key is effectively case-insensitive.
+                            keyPattern = std::make_unique<RE2>(keyArg);
+                        }
                         for (int keyOutVarNum : srcDDVar->keyOutVarNums) {
-                            if (op->outVars[keyOutVarNum]->keyUC == ipsc->cAlphaArgs(fldIndex)) {
+                            bool matched = keyIsRegex ? RE2::FullMatch(op->outVars[keyOutVarNum]->keyUC, *keyPattern)
+                                                      : (op->outVars[keyOutVarNum]->keyUC == keyArg);
+                            if (matched) {
                                 if (std::find(meter->srcVarNums.begin(), meter->srcVarNums.end(), keyOutVarNum) != meter->srcVarNums.end()) {
                                     ShowWarningCustom(state,
                                                       eoh,
@@ -1337,7 +1400,9 @@ namespace OutputProcessor {
                                     meter->srcVarNums.push_back(keyOutVarNum);
                                     op->outVars[keyOutVarNum]->meterNums.push_back(meterNum);
                                 }
-                                break;
+                                if (!keyIsRegex) {
+                                    break;
+                                }
                             }
                         }
                     } // if (keyIsStar)
@@ -2335,17 +2400,17 @@ namespace OutputProcessor {
         case ReportFreq::EachCall:
         case ReportFreq::TimeStep: {
             assert(Month != -1 && DayOfMonth != -1 && Hour != -1 && StartMinute != -1 && EndMinute != -1 && DST != -1 && !DayType.empty());
-            print<FormatSyntax::FMT>(outputFile,
-                                     "{},{},{:2d},{:2d},{:2d},{:2d},{:5.2f},{:5.2f},{}\n",
-                                     reportStr,
-                                     DayOfSimChr,
-                                     Month,
-                                     DayOfMonth,
-                                     DST,
-                                     Hour,
-                                     StartMinute,
-                                     EndMinute,
-                                     DayType);
+            print(outputFile,
+                  "{},{},{:2d},{:2d},{:2d},{:2d},{:5.2f},{:5.2f},{}\n",
+                  reportStr,
+                  DayOfSimChr,
+                  Month,
+                  DayOfMonth,
+                  DST,
+                  Hour,
+                  StartMinute,
+                  EndMinute,
+                  DayType);
 
             if (writeToSQL && sql) {
                 sql->createSQLiteTimeIndexRecord(reportingInterval,
@@ -2367,17 +2432,17 @@ namespace OutputProcessor {
 
         case ReportFreq::Hour: {
             assert(Month != -1 && DayOfMonth != -1 && Hour != -1 && DST != -1 && !DayType.empty());
-            print<FormatSyntax::FMT>(outputFile,
-                                     "{},{},{:2d},{:2d},{:2d},{:2d},{:5.2f},{:5.2f},{}\n",
-                                     reportStr,
-                                     DayOfSimChr,
-                                     Month,
-                                     DayOfMonth,
-                                     DST,
-                                     Hour,
-                                     0.0,
-                                     60.0,
-                                     DayType);
+            print(outputFile,
+                  "{},{},{:2d},{:2d},{:2d},{:2d},{:5.2f},{:5.2f},{}\n",
+                  reportStr,
+                  DayOfSimChr,
+                  Month,
+                  DayOfMonth,
+                  DST,
+                  Hour,
+                  0.0,
+                  60.0,
+                  DayType);
             if (writeToSQL && sql) {
                 sql->createSQLiteTimeIndexRecord(reportingInterval,
                                                  reportID,
@@ -2397,7 +2462,7 @@ namespace OutputProcessor {
         } break;
         case ReportFreq::Day: {
             assert(Month != -1 && DayOfMonth != -1 && DST != -1 && !DayType.empty());
-            print<FormatSyntax::FMT>(outputFile, "{},{},{:2d},{:2d},{:2d},{}\n", reportStr, DayOfSimChr, Month, DayOfMonth, DST, DayType);
+            print(outputFile, "{},{},{:2d},{:2d},{:2d},{}\n", reportStr, DayOfSimChr, Month, DayOfMonth, DST, DayType);
             if (writeToSQL && sql) {
                 sql->createSQLiteTimeIndexRecord(reportingInterval,
                                                  reportID,
@@ -2418,7 +2483,7 @@ namespace OutputProcessor {
 
         case ReportFreq::Month: {
             assert(Month != -1);
-            print<FormatSyntax::FMT>(outputFile, "{},{},{:2d}\n", reportStr, DayOfSimChr, Month);
+            print(outputFile, "{},{},{:2d}\n", reportStr, DayOfSimChr, Month);
             if (writeToSQL && sql) {
                 sql->createSQLiteTimeIndexRecord(reportingInterval,
                                                  reportID,
@@ -2431,7 +2496,7 @@ namespace OutputProcessor {
         } break;
 
         case ReportFreq::Simulation: {
-            print<FormatSyntax::FMT>(outputFile, "{},{}\n", reportStr, DayOfSimChr);
+            print(outputFile, "{},{}\n", reportStr, DayOfSimChr);
             if (writeToSQL && sql) {
                 sql->createSQLiteTimeIndexRecord(reportingInterval,
                                                  reportID,
@@ -2444,7 +2509,7 @@ namespace OutputProcessor {
         default: {
             if (sql) {
                 sql->sqliteWriteMessage(
-                    format<FormatSyntax::FMT>("Illegal reportingInterval passed to WriteTimeStampFormatData: {}", (int)reportingInterval));
+                    std::format("Illegal reportingInterval passed to WriteTimeStampFormatData: {}", static_cast<int>(reportingInterval)));
             }
         } break;
         } // switch (reportFreq)
@@ -2700,20 +2765,34 @@ namespace OutputProcessor {
         } else { // if ( ( reportingInterval == ReportDaily ) || ( reportingInterval == ReportMonthly ) || ( reportingInterval == ReportSim ) ) {
                  // // 2, 3, 4
             // Append the min and max strings with date information
-            char minValString[128], maxValString[128];
-            dtoa(MinVal, minValString);
-            dtoa(MaxVal, maxValString);
+            std::array<char, 128> minValString{}, maxValString{};
+            dtoa(MinVal, minValString.data());
+            dtoa(MaxVal, maxValString.data());
 
             std::string minDateString = produceDateString(MinValDate, freq);
             std::string maxDateString = produceDateString(MaxValDate, freq);
 
             if (state.files.mtr.good()) {
-                print(state.files.mtr, "{},{},{},{},{},{}\n", RptNum, NumberOut, minValString, minDateString, maxValString, maxDateString);
+                print(state.files.mtr,
+                      "{},{},{},{},{},{}\n",
+                      RptNum,
+                      NumberOut,
+                      minValString.data(),
+                      minDateString,
+                      maxValString.data(),
+                      maxDateString);
             }
 
             ++state.dataGlobal->StdMeterRecordCount;
             if (state.files.eso.good() && !RptFO) {
-                print(state.files.eso, "{},{},{},{},{},{}\n", RptNum, NumberOut, minValString, minDateString, maxValString, maxDateString);
+                print(state.files.eso,
+                      "{},{},{},{},{},{}\n",
+                      RptNum,
+                      NumberOut,
+                      minValString.data(),
+                      minDateString,
+                      maxValString.data(),
+                      maxDateString);
                 ++state.dataGlobal->StdOutputRecordCount;
             }
         }
@@ -2749,9 +2828,9 @@ namespace OutputProcessor {
         }
 
         if (state.files.eso.good()) {
-            char numericData[129];
-            dtoa(repValue, numericData);
-            print<FormatSyntax::FMT>(state.files.eso, "{},{}\n", reportID, numericData);
+            std::array<char, 129> numericData{};
+            dtoa(repValue, numericData.data());
+            print(state.files.eso, "{},{}\n", reportID, numericData.data());
         }
     } // WriteNumericData()
 
@@ -2783,7 +2862,7 @@ namespace OutputProcessor {
         }
 
         if (state.files.eso.good()) {
-            print<FormatSyntax::FMT>(state.files.eso, "{},{}\n", reportID, repValue);
+            print(state.files.eso, "{},{}\n", reportID, repValue);
         }
     } // WriteNumericData()
 
@@ -2832,14 +2911,21 @@ namespace OutputProcessor {
             if ((freq == ReportFreq::EachCall) || (freq == ReportFreq::TimeStep) || (freq == ReportFreq::Hour)) { // -1, 0, 1
                 print(state.files.eso, "{},{}\n", ReportID, NumberOut);
             } else {
-                char minValString[128], maxValString[128];
-                dtoa(MinValue, minValString);
-                dtoa(MaxValue, maxValString);
+                std::array<char, 128> minValString{}, maxValString{};
+                dtoa(MinValue, minValString.data());
+                dtoa(MaxValue, maxValString.data());
 
                 std::string minDateString = produceDateString(minValueDate, freq);
                 std::string maxDateString = produceDateString(maxValueDate, freq);
 
-                print(state.files.eso, "{},{},{},{},{},{}\n", ReportID, NumberOut, minValString, minDateString, maxValString, maxDateString);
+                print(state.files.eso,
+                      "{},{},{},{},{},{}\n",
+                      ReportID,
+                      NumberOut,
+                      minValString.data(),
+                      minDateString,
+                      maxValString.data(),
+                      maxDateString);
             }
         }
     } // OutVar::WriteReportData()

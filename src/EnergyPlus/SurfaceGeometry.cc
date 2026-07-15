@@ -527,8 +527,8 @@ namespace SurfaceGeometry {
                                             RoutineName,
                                             thisZone.Name));
                             static constexpr std::string_view ValFmt("{:.2F}");
-                            std::string String1 = EnergyPlus::format(ValFmt, thisZone.CeilingHeight);
-                            std::string String2 = EnergyPlus::format(ValFmt, AverageHeight);
+                            std::string String1 = std::format(ValFmt, thisZone.CeilingHeight);
+                            std::string String2 = std::format(ValFmt, AverageHeight);
                             ShowContinueError(
                                 state,
                                 std::format("{}Entered Ceiling Height={}, Calculated Ceiling Height={}, entered height will be used in calculations.",
@@ -5713,17 +5713,17 @@ namespace SurfaceGeometry {
         // This routine performs checks on WindowShadingControl settings and Frame/Divider Settings.
 
         // SUBROUTINE LOCAL VARIABLE DECLARATIONS:
-        int ConstrNumSh;    // Construction number with Shade
-        int ShDevNum;       // Shading Device number
-        int Lay;            // Layer number
-        int TotGlassLayers; // Number of glass layers in window construction
-        int TotLayers;      // Number of layers in unshaded construction
-        int TotShLayers;    // Number of layers in shaded construction
-        int MatGap;         // Gap material number
-        int MatGap1;        // Material number of gap to left (outer side) of between-glass shade/blind
-        int MatGap2;        // Material number of gap to right (inner side) of between-glass shade/blind
-        int MatSh;          // Between-glass shade/blind material number
-        Real64 MatGapCalc;  // Calculated MatGap diff for shaded vs non-shaded constructions
+        int ConstrNumSh = 0; // Construction number with Shade
+        int ShDevNum;        // Shading Device number
+        int Lay;             // Layer number
+        int TotGlassLayers;  // Number of glass layers in window construction
+        int TotLayers;       // Number of layers in unshaded construction
+        int TotShLayers;     // Number of layers in shaded construction
+        int MatGap;          // Gap material number
+        int MatGap1;         // Material number of gap to left (outer side) of between-glass shade/blind
+        int MatGap2;         // Material number of gap to right (inner side) of between-glass shade/blind
+        int MatSh;           // Between-glass shade/blind material number
+        Real64 MatGapCalc;   // Calculated MatGap diff for shaded vs non-shaded constructions
 
         // If WindowShadingControl has been specified for this window --
         // Set shaded construction number if shaded construction was specified in WindowShadingControl.
@@ -6261,7 +6261,7 @@ namespace SurfaceGeometry {
         //  IF (SurfaceTmp(SurfNum)%Class == SurfaceClass::Roof .and. SurfTilt > 80.) THEN
         //    WRITE(TiltString,'(F5.1)') SurfTilt
         //    TiltString=ADJUSTL(TiltString)
-        //    CALL ShowWarningError(state, format("Roof/Ceiling Tilt={}{}{}{}{}{}{}{}{}{} for Surface={}{}{}, in
+        //    CALL ShowWarningError(state, std::format("Roof/Ceiling Tilt={}{}{}{}{}{}{}{}{}{} for Surface={}{}{}, in
         //    Zone={}{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}", //TRIM(TiltString)//',,
         //    much, greater, than, expected, tilt, of, 0,'//, &, //, //TRIM(SurfaceTmp(SurfNum)%Name)//, &, //, //TRIM(SurfaceTmp(SurfNum)%ZoneName)),
         //    //, ENDIF, //, IF, (SurfaceTmp(SurfNum)%Class, ==, SurfaceClass::Floor, .and., SurfTilt, <, 170.), THEN, //, WRITE(TiltString,'(F5.1)'),
@@ -6502,7 +6502,7 @@ namespace SurfaceGeometry {
         int NumAlphas;
         int NumNumbers;
         int IOStat; // IO Status when calling get input subroutine
-        Real64 Depth;
+        Real64 Depth = 0.0;
         Real64 Length;
         Real64 Xp;
         Real64 Yp;
@@ -7765,11 +7765,11 @@ namespace SurfaceGeometry {
             if (calculationMethod != CalculationMethod::TotalExposedPerimeter && calculationMethod != CalculationMethod::ExposedPerimeterFraction &&
                 calculationMethod != CalculationMethod::Bysegment) {
                 ShowSevereError(state,
-                                EnergyPlus::format("{}=\"{}\", {} is not a valid choice for {}",
-                                                   s_ipsc->cCurrentModuleObject,
-                                                   s_ipsc->cAlphaArgs(1),
-                                                   calculationMethod,
-                                                   s_ipsc->cAlphaFieldNames(alpF)));
+                                std::format("{}=\"{}\", {} is not a valid choice for {}",
+                                            s_ipsc->cCurrentModuleObject,
+                                            s_ipsc->cAlphaArgs(1),
+                                            s_ipsc->cAlphaArgs(alpF),
+                                            s_ipsc->cAlphaFieldNames(alpF)));
                 ErrorsFound = true;
             }
             alpF++;
@@ -7802,22 +7802,21 @@ namespace SurfaceGeometry {
 
                     data.useDetailedExposedPerimeter = false;
                 } else {
-                    ShowWarningError(
-                        state,
-                        EnergyPlus::format("{}: {}, {} set as calculation method, but a value has been set for {}. This value will be ignored.",
-                                           s_ipsc->cCurrentModuleObject,
-                                           state.dataSurface->Surface(Found).Name,
-                                           calculationMethod,
-                                           s_ipsc->cNumericFieldNames(numF)));
+                    ShowWarningError(state,
+                                     std::format("{}: {}, {} set as calculation method, but a value has been set for {}. This value will be ignored.",
+                                                 s_ipsc->cCurrentModuleObject,
+                                                 state.dataSurface->Surface(Found).Name,
+                                                 CalculationMethodUC[static_cast<int>(calculationMethod)],
+                                                 s_ipsc->cNumericFieldNames(numF)));
                 }
             } else {
                 if (calculationMethod == CalculationMethod::TotalExposedPerimeter) {
                     ShowSevereError(state,
-                                    EnergyPlus::format("{}: {}, {} set as calculation method, but no value has been set for {}",
-                                                       s_ipsc->cCurrentModuleObject,
-                                                       state.dataSurface->Surface(Found).Name,
-                                                       calculationMethod,
-                                                       s_ipsc->cNumericFieldNames(numF)));
+                                    std::format("{}: {}, {} set as calculation method, but no value has been set for {}",
+                                                s_ipsc->cCurrentModuleObject,
+                                                state.dataSurface->Surface(Found).Name,
+                                                CalculationMethodUC[static_cast<int>(calculationMethod)],
+                                                s_ipsc->cNumericFieldNames(numF)));
                     ErrorsFound = true;
                 }
             }
@@ -7828,22 +7827,21 @@ namespace SurfaceGeometry {
                     data.exposedFraction = s_ipsc->rNumericArgs(numF);
                     data.useDetailedExposedPerimeter = false;
                 } else {
-                    ShowWarningError(
-                        state,
-                        EnergyPlus::format("{}: {}, {} set as calculation method, but a value has been set for {}. This value will be ignored.",
-                                           s_ipsc->cCurrentModuleObject,
-                                           state.dataSurface->Surface(Found).Name,
-                                           calculationMethod,
-                                           s_ipsc->cNumericFieldNames(numF)));
+                    ShowWarningError(state,
+                                     std::format("{}: {}, {} set as calculation method, but a value has been set for {}. This value will be ignored.",
+                                                 s_ipsc->cCurrentModuleObject,
+                                                 state.dataSurface->Surface(Found).Name,
+                                                 CalculationMethodUC[static_cast<int>(calculationMethod)],
+                                                 s_ipsc->cNumericFieldNames(numF)));
                 }
             } else {
                 if (calculationMethod == CalculationMethod::ExposedPerimeterFraction) {
                     ShowSevereError(state,
-                                    EnergyPlus::format("{}: {}, {} set as calculation method, but no value has been set for {}",
-                                                       s_ipsc->cCurrentModuleObject,
-                                                       state.dataSurface->Surface(Found).Name,
-                                                       calculationMethod,
-                                                       s_ipsc->cNumericFieldNames(numF)));
+                                    std::format("{}: {}, {} set as calculation method, but no value has been set for {}",
+                                                s_ipsc->cCurrentModuleObject,
+                                                state.dataSurface->Surface(Found).Name,
+                                                CalculationMethodUC[static_cast<int>(calculationMethod)],
+                                                s_ipsc->cNumericFieldNames(numF)));
                     ErrorsFound = true;
                 }
             }
@@ -7883,12 +7881,11 @@ namespace SurfaceGeometry {
                 }
             } else {
                 if (calculationMethod == CalculationMethod::Bysegment) {
-                    ShowSevereError(
-                        state,
-                        EnergyPlus::format("{}: {}, {} set as calculation method, but no values have been set for Surface Segments Exposed",
-                                           s_ipsc->cCurrentModuleObject,
-                                           state.dataSurface->Surface(Found).Name,
-                                           calculationMethod));
+                    ShowSevereError(state,
+                                    std::format("{}: {}, {} set as calculation method, but no values have been set for Surface Segments Exposed",
+                                                s_ipsc->cCurrentModuleObject,
+                                                state.dataSurface->Surface(Found).Name,
+                                                CalculationMethodUC[static_cast<int>(calculationMethod)]));
                     ErrorsFound = true;
                 }
             }
@@ -8299,7 +8296,7 @@ namespace SurfaceGeometry {
         int CountHTAlgoObjectsMultiSurf;
         int CountHTAlgoObjectsSurfList;
         int IOStatus; // Used in GetObjectItem
-        DataSurfaces::HeatTransferModel tmpAlgoInput;
+        DataSurfaces::HeatTransferModel tmpAlgoInput = DataSurfaces::HeatTransferModel::Invalid;
         int Item;
         int Item1;
         int NumAlphas;
@@ -12186,7 +12183,7 @@ namespace SurfaceGeometry {
                     if (faceNum <= NActFaces) {
                         auto &thisSurface = state.dataSurface->Surface(thisFace.SurfNum);
                         print(state.files.debug, "surface={} nsides={}\n", thisFace.SurfNum, thisFace.NSides);
-                        print(state.files.debug, "surface name={} class={}\n", thisSurface.Name, thisSurface.Class);
+                        print(state.files.debug, "surface name={} class={}\n", thisSurface.Name, DataSurfaces::cSurfaceClass(thisSurface.Class));
                         print(state.files.debug, "area={}\n", thisSurface.GrossArea);
                         for (int iside = 1; iside <= thisFace.NSides; ++iside) {
                             auto const &FacePoint(thisFace.FacePoints(iside));
@@ -12202,7 +12199,7 @@ namespace SurfaceGeometry {
                           "notused:surface={} name={} class={}\n",
                           surfacenotused(SurfNum),
                           state.dataSurface->Surface(surfacenotused(SurfNum)).Name,
-                          state.dataSurface->Surface(surfacenotused(SurfNum)).Class);
+                          DataSurfaces::cSurfaceClass(state.dataSurface->Surface(surfacenotused(SurfNum)).Class));
                 }
             }
 
@@ -12301,7 +12298,7 @@ namespace SurfaceGeometry {
 
         // construct list of unique edges
         Vector curVertex;
-        int curVertexIndex;
+        int curVertexIndex = 0;
         for (int iFace = 1; iFace <= zonePoly.NumSurfaceFaces; ++iFace) {
             Vector prevVertex;
             int prevVertexIndex;
@@ -12784,12 +12781,12 @@ namespace SurfaceGeometry {
         Real64 ThisReveal;
         Real64 ThisWidth;
         Real64 ThisHeight;
-        Real64 FrWidth;      // Frame width for exterior windows (m)
-        Real64 FrArea;       // Frame area for exterior windows(m2)
-        Real64 DivWidth;     // Divider width for exterior windows (m)
-        Real64 DivArea;      // Divider area for exterior windows (m2)
-        Real64 DivFrac;      // Fraction of divider area without overlaps
-        bool ErrorInSurface; // false/true, depending on pass through routine
+        Real64 FrWidth = 0.0;  // Frame width for exterior windows (m)
+        Real64 FrArea = 0.0;   // Frame area for exterior windows(m2)
+        Real64 DivWidth = 0.0; // Divider width for exterior windows (m)
+        Real64 DivArea = 0.0;  // Divider area for exterior windows (m2)
+        Real64 DivFrac = 0.0;  // Fraction of divider area without overlaps
+        bool ErrorInSurface;   // false/true, depending on pass through routine
         bool HeatTransSurf;
         Real64 OutOfLine;
 
@@ -15139,7 +15136,7 @@ namespace SurfaceGeometry {
                     for (int n = 1; n <= surfaceTmp.Sides; ++n) {
                         auto const &point = vertices(n);
                         static constexpr std::string_view ErrFmt = " ({:8.3F},{:8.3F},{:8.3F})";
-                        ShowContinueError(state, EnergyPlus::format(ErrFmt, point.x, point.y, point.z));
+                        ShowContinueError(state, std::format(ErrFmt, point.x, point.y, point.z));
                     }
                 }
             }
@@ -15216,8 +15213,8 @@ namespace SurfaceGeometry {
                     ShowContinueError(state, std::format("...vertex {}=[{:.2f},{:.2f},{:.2f}]", n, X(n), Y(n), Z(n)));
                     ShowContinueError(state, std::format("...vertex {}=[{:.2f},{:.2f},{:.2f}]", Np1, X(n + 1), Y(n + 1), Z(n + 1)));
                     ShowContinueError(state, std::format("...vertex {}=[{:.2f},{:.2f},{:.2f}]", Np2, X(n + 2), Y(n + 2), Z(n + 2)));
-                    // ShowContinueError(state, format("...theta angle=[{:.6f}]", Theta));
-                    // ShowContinueError(state, format("...last theta angle=[{:.6f}]", LastTheta));
+                    // ShowContinueError(state, std::format("...theta angle=[{:.6f}]", Theta));
+                    // ShowContinueError(state, std::format("...last theta angle=[{:.6f}]", LastTheta));
                 }
                 surfaceTmp.IsConvex = false;
                 // #10103 - We do not want to break early, because we do want to consistently remove colinear vertices

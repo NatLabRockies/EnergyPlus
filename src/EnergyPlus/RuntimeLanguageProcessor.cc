@@ -2775,8 +2775,8 @@ void GetRuntimeLanguageUserInput(EnergyPlusData &state)
     constexpr std::string_view RoutineName = "GetRuntimeLanguageUserInput: ";
 
     // SUBROUTINE LOCAL VARIABLE DECLARATIONS:
-    OutputProcessor::TimeStepType sovTimeStepType; // temporary
-    OutputProcessor::StoreType sovStoreType;       // temporary
+    OutputProcessor::TimeStepType sovTimeStepType = OutputProcessor::TimeStepType::Invalid; // temporary
+    OutputProcessor::StoreType sovStoreType = OutputProcessor::StoreType::Invalid;          // temporary
 
     Array1D_string cAlphaFieldNames;
     Array1D_string cNumericFieldNames;
@@ -2803,7 +2803,7 @@ void GetRuntimeLanguageUserInput(EnergyPlusData &state)
         int TotalArgs(0);     // argument for call to GetObjectDefMaxArgs
         bool ErrorsFound(false);
         bool Found;
-        bool errFlag;
+        bool errFlag = false;
 
         std::string cCurrentModuleObject;
         std::string UnitsA;
@@ -3614,7 +3614,7 @@ void GetRuntimeLanguageUserInput(EnergyPlusData &state)
                 }
 
                 // Group Type
-                OutputProcessor::Group sovGroup;
+                OutputProcessor::Group sovGroup = OutputProcessor::Group::Invalid;
 
                 if (cAlphaArgs(6) == "BUILDING") {
                     sovGroup = OutputProcessor::Group::Building;
@@ -3631,7 +3631,7 @@ void GetRuntimeLanguageUserInput(EnergyPlusData &state)
                 }
 
                 // End Use Type
-                OutputProcessor::EndUseCat sovEndUseCat;
+                OutputProcessor::EndUseCat sovEndUseCat = OutputProcessor::EndUseCat::Invalid;
 
                 if (cAlphaArgs(7) == "HEATING") {
                     sovEndUseCat = OutputProcessor::EndUseCat::Heating;

@@ -1246,12 +1246,12 @@ void SQLite::initializeTabularDataTable()
 
     sqliteExecuteCommand(sql);
 
-    sqliteExecuteCommand(EnergyPlus::format("INSERT INTO StringTypes VALUES({},'ReportName');", ReportNameId));
-    sqliteExecuteCommand(EnergyPlus::format("INSERT INTO StringTypes VALUES({},'ReportForString');", ReportForStringId));
-    sqliteExecuteCommand(EnergyPlus::format("INSERT INTO StringTypes VALUES({},'TableName');", TableNameId));
-    sqliteExecuteCommand(EnergyPlus::format("INSERT INTO StringTypes VALUES({},'RowName');", RowNameId));
-    sqliteExecuteCommand(EnergyPlus::format("INSERT INTO StringTypes VALUES({},'ColumnName');", ColumnNameId));
-    sqliteExecuteCommand(EnergyPlus::format("INSERT INTO StringTypes VALUES({},'Units');", UnitsId));
+    sqliteExecuteCommand(std::format("INSERT INTO StringTypes VALUES({},'ReportName');", ReportNameId));
+    sqliteExecuteCommand(std::format("INSERT INTO StringTypes VALUES({},'ReportForString');", ReportForStringId));
+    sqliteExecuteCommand(std::format("INSERT INTO StringTypes VALUES({},'TableName');", TableNameId));
+    sqliteExecuteCommand(std::format("INSERT INTO StringTypes VALUES({},'RowName');", RowNameId));
+    sqliteExecuteCommand(std::format("INSERT INTO StringTypes VALUES({},'ColumnName');", ColumnNameId));
+    sqliteExecuteCommand(std::format("INSERT INTO StringTypes VALUES({},'Units');", UnitsId));
 
     constexpr std::string_view sql2 = "CREATE TABLE Strings ( "
                                       "StringIndex INTEGER PRIMARY KEY, "
@@ -1924,7 +1924,7 @@ void SQLite::createSQLiteTabularDataRecords(Array2D_string const &body, // html 
         int const reportNameIndex = createSQLiteStringTableRecord(reportName, ReportNameId);
         int const reportForStringIndex = createSQLiteStringTableRecord(reportForString, ReportForStringId);
         int const tableNameIndex = createSQLiteStringTableRecord(tableName, TableNameId);
-        int unitsIndex;
+        int unitsIndex = 0;
 
         for (size_t iCol = 0, k = body.index(1, 1); iCol < sizeColumnLabels; ++iCol) {
             std::string colUnits;

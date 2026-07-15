@@ -654,14 +654,13 @@ namespace Sched {
                         isJSON = false;
                     }
                     if (!isCSV && !isJSON) {
-                        ShowSevereError(
-                            state,
-                            EnergyPlus::format(R"({}: {}="{}", {}="{}" has an unknown file extension and cannot be read by this program.)",
-                                               routineName,
-                                               CurrentModuleObject,
-                                               Alphas(1),
-                                               cAlphaFields(3),
-                                               Alphas(3)));
+                        ShowSevereError(state,
+                                        std::format(R"({}: {}="{}", {}="{}" has an unknown file extension and cannot be read by this program.)",
+                                                    routineName,
+                                                    CurrentModuleObject,
+                                                    Alphas(1),
+                                                    cAlphaFields(3),
+                                                    Alphas(3)));
                         ShowFatalError(state, "Program terminates due to previous condition.");
                     }
                 }
@@ -2746,8 +2745,8 @@ namespace Sched {
         std::string::size_type sFld;
 
         int totalMinutes;
-        Real64 incrementPerMinute;
-        Real64 curValue;
+        Real64 incrementPerMinute = 0.0;
+        Real64 curValue = 0.0;
 
         std::fill(minuteVals.begin(), minuteVals.end(), 0.0);
         std::fill(setMinuteVals.begin(), setMinuteVals.end(), false);
@@ -2777,7 +2776,7 @@ namespace Sched {
                     sFld = 5;
                 }
                 DecodeHHMMField(state, until.substr(sFld), HHField, MMField, ErrorsFound, DayScheduleName, until, interpolation);
-            } else if (Pos == (int)std::string::npos) {
+            } else if (Pos == -1) {
                 DecodeHHMMField(state, until, HHField, MMField, ErrorsFound, DayScheduleName, until, interpolation);
             } else { // Until found but wasn't first field
                 ShowSevereError(state, std::format("ProcessScheduleInput: ProcessIntervalFields, Invalid \"Until\" field encountered={}", until));
@@ -3024,9 +3023,7 @@ namespace Sched {
         }
 
         if (nonIntegral) {
-            std::string hHour; // these haven't been initialized?
-            std::string mMinute;
-            ShowContinueError(state, EnergyPlus::format("Until value to be used will be: {:2.2F}:{:2.2F}", hHour, mMinute));
+            ShowContinueError(state, std::format("Until value to be used will be: {:02}:{:02}", RetHH, RetMM));
         }
         if (interpolation == Interpolation::No) {
             if (!isMinuteMultipleOfTimestep(RetMM, s_glob->MinutesInTimeStep)) {

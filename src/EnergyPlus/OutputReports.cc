@@ -209,34 +209,34 @@ void LinesOut(EnergyPlusData &state, std::string const &option)
             if (thisSurface.Sides == 0) {
                 continue;
             }
-            print<FormatSyntax::FMT>(slnfile, "{}:{}\n", thisSurface.ZoneName, thisSurface.Name);
+            print(slnfile, "{}:{}\n", thisSurface.ZoneName, thisSurface.Name);
             for (int vert = 1; vert <= thisSurface.Sides; ++vert) {
                 static constexpr std::string_view fmt700("{:10.2F},{:10.2F},{:10.2F},{:10.2F},{:10.2F},{:10.2F}\n");
 
                 if (vert != thisSurface.Sides) {
-                    print<check_syntax(fmt700)>(slnfile,
-                                                fmt700,
-                                                thisSurface.Vertex(vert).x,
-                                                thisSurface.Vertex(vert).y,
-                                                thisSurface.Vertex(vert).z,
-                                                thisSurface.Vertex(vert + 1).x,
-                                                thisSurface.Vertex(vert + 1).y,
-                                                thisSurface.Vertex(vert + 1).z);
+                    print(slnfile,
+                          fmt700,
+                          thisSurface.Vertex(vert).x,
+                          thisSurface.Vertex(vert).y,
+                          thisSurface.Vertex(vert).z,
+                          thisSurface.Vertex(vert + 1).x,
+                          thisSurface.Vertex(vert + 1).y,
+                          thisSurface.Vertex(vert + 1).z);
                 } else {
-                    print<check_syntax(fmt700)>(slnfile,
-                                                fmt700,
-                                                thisSurface.Vertex(vert).x,
-                                                thisSurface.Vertex(vert).y,
-                                                thisSurface.Vertex(vert).z,
-                                                thisSurface.Vertex(1).x,
-                                                thisSurface.Vertex(1).y,
-                                                thisSurface.Vertex(1).z);
+                    print(slnfile,
+                          fmt700,
+                          thisSurface.Vertex(vert).x,
+                          thisSurface.Vertex(vert).y,
+                          thisSurface.Vertex(vert).z,
+                          thisSurface.Vertex(1).x,
+                          thisSurface.Vertex(1).y,
+                          thisSurface.Vertex(1).z);
                 }
             }
         }
     } else {
-        print<FormatSyntax::FMT>(slnfile, "{}\n", " Building North Axis = 0");
-        print<FormatSyntax::FMT>(slnfile, "{}\n", "GlobalGeometryRules,UpperLeftCorner,CounterClockwise,WorldCoordinates;");
+        print(slnfile, "{}\n", " Building North Axis = 0");
+        print(slnfile, "{}\n", "GlobalGeometryRules,UpperLeftCorner,CounterClockwise,WorldCoordinates;");
         for (int surf : state.dataSurface->AllSurfaceListReportOrder) {
             auto &thisSurface = state.dataSurface->Surface(surf);
             if (thisSurface.Class == DataSurfaces::SurfaceClass::IntMass) {
@@ -247,21 +247,21 @@ void LinesOut(EnergyPlusData &state, std::string const &option)
             }
             // process heat transfer surfaces
             print(slnfile, " Surface={}, Name={}, Azimuth={:.1f}\n", cSurfaceClass(thisSurface.Class), thisSurface.Name, thisSurface.Azimuth);
-            print<FormatSyntax::FMT>(slnfile, "  {},  !- Number of (X,Y,Z) groups in this surface\n", thisSurface.Sides);
+            print(slnfile, "  {},  !- Number of (X,Y,Z) groups in this surface\n", thisSurface.Sides);
             for (int vert = 1; vert <= thisSurface.Sides; ++vert) {
                 std::string optcommasemi = ",";
                 if (vert == thisSurface.Sides) {
                     optcommasemi = ";";
                 }
                 static constexpr std::string_view fmtcoord("  {:10.2F},{:10.2F},{:10.2F}{}  !- {} {}\n");
-                print<check_syntax(fmtcoord)>(slnfile,
-                                              fmtcoord,
-                                              thisSurface.Vertex(vert).x,
-                                              thisSurface.Vertex(vert).y,
-                                              thisSurface.Vertex(vert).z,
-                                              optcommasemi,
-                                              vertexstring,
-                                              vert);
+                print(slnfile,
+                      fmtcoord,
+                      thisSurface.Vertex(vert).x,
+                      thisSurface.Vertex(vert).y,
+                      thisSurface.Vertex(vert).z,
+                      optcommasemi,
+                      vertexstring,
+                      vert);
             }
         }
     }
@@ -350,17 +350,16 @@ static void WriteDXFCommon(EnergyPlusData &state, InputOutputFile &of, const std
 
     // This writes "True North" above the Arrow Head
     print(of, Format_710, "Text - True North");
-    print<check_syntax(Format_800)>(
-        of, Format_800, DXFcolorno[static_cast<int>(DataSurfaceColors::ColorNo::Text)], StemX[0] - 1.0, StemY[0], StemZ[0]);
+    print(of, Format_800, DXFcolorno[static_cast<int>(DataSurfaceColors::ColorNo::Text)], StemX[0] - 1.0, StemY[0], StemZ[0]);
 
     print(of, Format_710, "Text - Building Title");
-    print<check_syntax(Format_801)>(of,
-                                    Format_801,
-                                    DXFcolorno[static_cast<int>(DataSurfaceColors::ColorNo::Text)],
-                                    StemX[0] - 4.0,
-                                    StemY[0] - 4.0,
-                                    StemZ[0],
-                                    "Building - " + state.dataHeatBal->BuildingName);
+    print(of,
+          Format_801,
+          DXFcolorno[static_cast<int>(DataSurfaceColors::ColorNo::Text)],
+          StemX[0] - 4.0,
+          StemY[0] - 4.0,
+          StemZ[0],
+          "Building - " + state.dataHeatBal->BuildingName);
 
     // We want to point the north arrow to true north
     print(of, Format_710, "North Arrow Stem");
@@ -408,7 +407,7 @@ static void WriteDXFCommon(EnergyPlusData &state, InputOutputFile &of, const std
     print(of, Format_710, "Zone Names");
 
     for (int zones = 1; zones <= state.dataGlobal->NumOfZones; ++zones) {
-        print<check_syntax(Format_710)>(of, Format_710, std::format("Zone={}:{}", zones, normalizeName(state.dataHeatBal->Zone(zones).Name)));
+        print(of, Format_710, std::format("Zone={}:{}", zones, normalizeName(state.dataHeatBal->Zone(zones).Name)));
     }
 }
 
@@ -430,15 +429,15 @@ static void DXFDaylightingReferencePoints(EnergyPlusData &state, InputOutputFile
             }
 
             for (auto const &refPt : thisDaylightControl.refPts) {
-                print<FormatSyntax::FMT>(of, "999\n{}:{}:{}\n", thisDaylightControl.ZoneName, refPtType, state.dataDayltg->DaylRefPt(refPt.num).Name);
-                print<check_syntax(Format_709)>(of,
-                                                Format_709,
-                                                normalizeName(thisDaylightControl.ZoneName),
-                                                state.dataSurfColor->DXFcolorno[static_cast<int>(curcolorno)],
-                                                refPt.absCoords.x,
-                                                refPt.absCoords.y,
-                                                refPt.absCoords.z,
-                                                0.2);
+                print(of, "999\n{}:{}:{}\n", thisDaylightControl.ZoneName, refPtType, state.dataDayltg->DaylRefPt(refPt.num).Name);
+                print(of,
+                      Format_709,
+                      normalizeName(thisDaylightControl.ZoneName),
+                      state.dataSurfColor->DXFcolorno[static_cast<int>(curcolorno)],
+                      refPt.absCoords.x,
+                      refPt.absCoords.y,
+                      refPt.absCoords.z,
+                      0.2);
                 curcolorno = DataSurfaceColors::ColorNo::DaylSensor2; // ref pts 2 and later are this color
             }
         }
@@ -1460,14 +1459,14 @@ void CostInfoOut(EnergyPlusData &state)
         if (thisSurface.Construction != 0) {
             // Formats
             static constexpr std::string_view Format_801("{:5},{},{},{},{:14.5F},{:14.5F}\n");
-            print<check_syntax(Format_801)>(scifile,
-                                            Format_801,
-                                            surf,
-                                            thisSurface.Name,
-                                            state.dataConstruction->Construct(thisSurface.Construction).Name,
-                                            cSurfaceClass(thisSurface.Class),
-                                            thisSurface.Area,
-                                            thisSurface.GrossArea);
+            print(scifile,
+                  Format_801,
+                  surf,
+                  thisSurface.Name,
+                  state.dataConstruction->Construct(thisSurface.Construction).Name,
+                  cSurfaceClass(thisSurface.Class),
+                  thisSurface.Area,
+                  thisSurface.GrossArea);
         }
     }
 
@@ -1547,11 +1546,9 @@ void VRMLOut(EnergyPlusData &state, const std::string &PolygonAction, const std:
     print(wrlfile, Format_702);
 
     if (ColorScheme.empty()) {
-        print<check_syntax(Format_707)>(
-            wrlfile, Format_707, state.dataHeatBal->BuildingName, state.dataStrGlobals->VerStringVar, "Default"); // World Info
+        print(wrlfile, Format_707, state.dataHeatBal->BuildingName, state.dataStrGlobals->VerStringVar, "Default"); // World Info
     } else {
-        print<check_syntax(Format_707)>(
-            wrlfile, Format_707, state.dataHeatBal->BuildingName, state.dataStrGlobals->VerStringVar, ColorScheme); // World Info
+        print(wrlfile, Format_707, state.dataHeatBal->BuildingName, state.dataStrGlobals->VerStringVar, ColorScheme); // World Info
     }
 
     print(wrlfile, "# Zone Names\n");
@@ -1561,16 +1558,16 @@ void VRMLOut(EnergyPlusData &state, const std::string &PolygonAction, const std:
 
     // Define the colors:
 
-    print<check_syntax(Format_800)>(wrlfile, Format_800, "FLOOR", "0.502 0.502 0.502");
-    print<check_syntax(Format_800)>(wrlfile, Format_800, "ROOF", "1 1 0");
-    print<check_syntax(Format_800)>(wrlfile, Format_800, "WALL", "0 1 0");
-    print<check_syntax(Format_800)>(wrlfile, Format_800, "WINDOW", "0 1 1");
-    print<check_syntax(Format_800)>(wrlfile, Format_800, "DOOR", "0 1 1");
-    print<check_syntax(Format_800)>(wrlfile, Format_800, "GLASSDOOR", "0 1 1");
-    print<check_syntax(Format_800)>(wrlfile, Format_800, "FIXEDSHADE", "1 0 1");
-    print<check_syntax(Format_800)>(wrlfile, Format_800, "BLDGSHADE", "0 0 1");
-    print<check_syntax(Format_800)>(wrlfile, Format_800, "SUBSHADE", "1 0 1");
-    print<check_syntax(Format_800)>(wrlfile, Format_800, "BACKCOLOR", "0.502 0.502 0.784");
+    print(wrlfile, Format_800, "FLOOR", "0.502 0.502 0.502");
+    print(wrlfile, Format_800, "ROOF", "1 1 0");
+    print(wrlfile, Format_800, "WALL", "0 1 0");
+    print(wrlfile, Format_800, "WINDOW", "0 1 1");
+    print(wrlfile, Format_800, "DOOR", "0 1 1");
+    print(wrlfile, Format_800, "GLASSDOOR", "0 1 1");
+    print(wrlfile, Format_800, "FIXEDSHADE", "1 0 1");
+    print(wrlfile, Format_800, "BLDGSHADE", "0 0 1");
+    print(wrlfile, Format_800, "SUBSHADE", "1 0 1");
+    print(wrlfile, Format_800, "BACKCOLOR", "0.502 0.502 0.784");
 
     Color colorindex = Color::Invalid;
 
@@ -1600,19 +1597,19 @@ void VRMLOut(EnergyPlusData &state, const std::string &PolygonAction, const std:
         } else if (thisSurface.Class == DataSurfaces::SurfaceClass::Detached_B) {
             print(wrlfile, "# Building Shading:{}", thisSurface.Name);
         }
-        print<check_syntax(Format_801)>(wrlfile, Format_801, colorstring[static_cast<int>(colorindex)], "Surf", surf);
+        print(wrlfile, Format_801, colorstring[static_cast<int>(colorindex)], "Surf", surf);
         for (int vert = 1; vert <= thisSurface.Sides; ++vert) {
-            print<check_syntax(Format_802)>(wrlfile, Format_802, thisSurface.Vertex(vert).x, thisSurface.Vertex(vert).y, thisSurface.Vertex(vert).z);
+            print(wrlfile, Format_802, thisSurface.Vertex(vert).x, thisSurface.Vertex(vert).y, thisSurface.Vertex(vert).z);
         }
-        print<check_syntax(Format_803)>(wrlfile, Format_803);
+        print(wrlfile, Format_803);
         if (thisSurface.Sides <= 4 || !TriangulateFace) {
             for (int vert = 1; vert <= thisSurface.Sides; ++vert) {
-                print<FormatSyntax::FMT>(wrlfile, " {}", vert - 1);
+                print(wrlfile, " {}", vert - 1);
                 if (vert == thisSurface.Sides) {
                     print(wrlfile, " -1\n");
                 }
             }
-            print<check_syntax(Format_805)>(wrlfile, Format_805);
+            print(wrlfile, Format_805);
         } else { // will be >4 sided polygon with triangulate option
             Array1D<DataVectorTypes::dTriangle> mytriangles;
             const int ntri = DXFEarClipping::Triangulate(state,
@@ -1668,11 +1665,11 @@ void VRMLOut(EnergyPlusData &state, const std::string &PolygonAction, const std:
             }
 
             print(wrlfile, "# {}:{}\n", thisSurface.ZoneName, thisSurface.Name);
-            print<check_syntax(Format_801)>(wrlfile, Format_801, colorstring[static_cast<int>(colorindex)], "Surf", oldSurfNum);
+            print(wrlfile, Format_801, colorstring[static_cast<int>(colorindex)], "Surf", oldSurfNum);
             for (int vert = 1; vert <= thisSurface.Sides; ++vert) {
                 print(wrlfile, Format_802, thisSurface.Vertex(vert).x, thisSurface.Vertex(vert).y, thisSurface.Vertex(vert).z);
             }
-            print<check_syntax(Format_803)>(wrlfile, Format_803);
+            print(wrlfile, Format_803);
             if (thisSurface.Sides <= 4 || !TriangulateFace) {
                 for (int vert = 1; vert <= thisSurface.Sides; ++vert) {
                     print(wrlfile, " {}", vert - 1);
@@ -1680,7 +1677,7 @@ void VRMLOut(EnergyPlusData &state, const std::string &PolygonAction, const std:
                         print(wrlfile, " -1\n");
                     }
                 }
-                print<check_syntax(Format_805)>(wrlfile, Format_805);
+                print(wrlfile, Format_805);
             } else { // will be >4 sided polygon with triangulate option
                 Array1D<DataVectorTypes::dTriangle> mytriangles;
                 const int ntri = DXFEarClipping::Triangulate(state,
@@ -1716,7 +1713,7 @@ void VRMLOut(EnergyPlusData &state, const std::string &PolygonAction, const std:
                 continue;
             }
             print(wrlfile, "# {}:{}\n", thisSurface.ZoneName, thisSurface.Name);
-            print<check_syntax(Format_801)>(wrlfile, Format_801, colorstring[static_cast<int>(colorindex)], "Surf", surf);
+            print(wrlfile, Format_801, colorstring[static_cast<int>(colorindex)], "Surf", surf);
             for (int vert = 1; vert <= thisSurface.Sides; ++vert) {
                 print(wrlfile, Format_802, thisSurface.Vertex(vert).x, thisSurface.Vertex(vert).y, thisSurface.Vertex(vert).z);
             }

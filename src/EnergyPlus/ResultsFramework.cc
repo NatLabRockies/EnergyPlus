@@ -821,18 +821,18 @@ namespace ResultsFramework {
     {
         outputFile.ensure_open(state, "OpenOutputFiles", outputControl);
 
-        print<FormatSyntax::FMT>(outputFile, "{}", "Date/Time,");
+        print(outputFile, "{}", "Date/Time,");
         std::string sep;
         for (auto it = outputVariables.begin(); it != outputVariables.end(); ++it) {
             if (!outputVariableIndices[std::distance(outputVariables.begin(), it)]) {
                 continue;
             }
-            print<FormatSyntax::FMT>(outputFile, "{}{}", sep, *it);
+            print(outputFile, "{}{}", sep, *it);
             if (sep.empty()) {
                 sep = ",";
             }
         }
-        print<FormatSyntax::FMT>(outputFile, "{}", '\n');
+        print(outputFile, "{}", '\n');
 
         for (auto &item : outputs) {
             std::string datetime = item.first;
@@ -843,7 +843,7 @@ namespace ResultsFramework {
                     convertToMonth(datetime);
                 }
             }
-            print<FormatSyntax::FMT>(outputFile, " {},", datetime);
+            print(outputFile, " {},", datetime);
             item.second.erase(std::remove_if(item.second.begin(),
                                              item.second.end(),
                                              [&](const std::string &d) {
@@ -857,8 +857,8 @@ namespace ResultsFramework {
                 last = (result + 1).base();
             }
 
-            print<FormatSyntax::FMT>(outputFile, "{},", std::format("{}", EnergyPlus::join(std::ranges::subrange(item.second.begin(), last), ",")));
-            print<FormatSyntax::FMT>(outputFile, "{}\n", *last);
+            print(outputFile, "{},", std::format("{}", EnergyPlus::join(std::ranges::subrange(item.second.begin(), last), ",")));
+            print(outputFile, "{}\n", *last);
         }
 
         outputFile.close();

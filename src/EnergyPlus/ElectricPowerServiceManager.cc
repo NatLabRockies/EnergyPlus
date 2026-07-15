@@ -1587,7 +1587,7 @@ void ElectPowerLoadCenter::dispatchStorage(EnergyPlusData &state,
     } // end switch bus type
 
     // 2.  determine subpanel feed in and draw requests based on storage operation control scheme
-    Real64 subpanelFeedInRequest = 0.0;
+    Real64 localSubpanelFeedInRequest = 0.0;
     Real64 subpanelDrawRequest = 0.0;
     switch (storageScheme_) {
     case StorageOpScheme::Invalid: {
@@ -1595,13 +1595,13 @@ void ElectPowerLoadCenter::dispatchStorage(EnergyPlusData &state,
         break;
     }
     case StorageOpScheme::FacilityDemandStoreExcessOnSite: {
-        subpanelFeedInRequest = originalFeedInRequest; // legacy behavior, storage dispatched to meet building load
+        localSubpanelFeedInRequest = originalFeedInRequest; // legacy behavior, storage dispatched to meet building load
         subpanelDrawRequest = 0.0;
         break;
     }
     case StorageOpScheme::MeterDemandStoreExcessOnSite: {
         // Get meter rate
-        subpanelFeedInRequest =
+        localSubpanelFeedInRequest =
             GetInstantMeterValue(state, trackStorageOpMeterIndex_, OutputProcessor::TimeStepType::Zone) / state.dataGlobal->TimeStepZoneSec +
             GetInstantMeterValue(state, trackStorageOpMeterIndex_, OutputProcessor::TimeStepType::System) / (state.dataHVACGlobal->TimeStepSysSec);
         subpanelDrawRequest = 0.0;
@@ -1617,11 +1617,11 @@ void ElectPowerLoadCenter::dispatchStorage(EnergyPlusData &state,
         Real64 deltaLoad = originalFeedInRequest - demandTarget;
         if (deltaLoad >= 0.0) {
             // subpanel should feed main panel
-            subpanelFeedInRequest = deltaLoad;
+            localSubpanelFeedInRequest = deltaLoad;
             subpanelDrawRequest = 0.0;
         } else {
             // subpanel should draw from main panel
-            subpanelFeedInRequest = 0.0;
+            localSubpanelFeedInRequest = 0.0;
             subpanelDrawRequest = std::abs(deltaLoad);
         }
         break;
@@ -1644,10 +1644,10 @@ void ElectPowerLoadCenter::dispatchStorage(EnergyPlusData &state,
     case ElectricBussType::ACBussStorage:
     case ElectricBussType::DCBussInverterACStorage: {
         if (transformerObj == nullptr) {
-            adjustedFeedInRequest = subpanelFeedInRequest;
+            adjustedFeedInRequest = localSubpanelFeedInRequest;
             adjustedDrawRequest = subpanelDrawRequest;
         } else {
-            adjustedFeedInRequest = subpanelFeedInRequest + transformerObj->getLossRateForOutputPower(state, subpanelFeedInRequest);
+            adjustedFeedInRequest = localSubpanelFeedInRequest + transformerObj->getLossRateForOutputPower(state, localSubpanelFeedInRequest);
             adjustedDrawRequest = subpanelDrawRequest - transformerObj->getLossRateForInputPower(state, subpanelDrawRequest);
         }
         break;
@@ -1655,15 +1655,15 @@ void ElectPowerLoadCenter::dispatchStorage(EnergyPlusData &state,
     case ElectricBussType::DCBussInverterDCStorage: {
         // can we get updated power conditioning losses here?
         if (transformerObj == nullptr) {
-            adjustedFeedInRequest = subpanelFeedInRequest + inverterObj->getLossRateForOutputPower(state, subpanelFeedInRequest);
+            adjustedFeedInRequest = localSubpanelFeedInRequest + inverterObj->getLossRateForOutputPower(state, localSubpanelFeedInRequest);
             if (converterObj == nullptr) { // some operation schemes will never need a converter
                 adjustedDrawRequest = subpanelDrawRequest;
             } else {
                 adjustedDrawRequest = subpanelDrawRequest - converterObj->getLossRateForInputPower(state, subpanelDrawRequest);
             }
         } else {
-            adjustedFeedInRequest = subpanelFeedInRequest + inverterObj->getLossRateForOutputPower(state, subpanelFeedInRequest) +
-                                    transformerObj->getLossRateForOutputPower(state, subpanelFeedInRequest);
+            adjustedFeedInRequest = localSubpanelFeedInRequest + inverterObj->getLossRateForOutputPower(state, localSubpanelFeedInRequest) +
+                                    transformerObj->getLossRateForOutputPower(state, localSubpanelFeedInRequest);
             if (converterObj == nullptr) {
                 adjustedDrawRequest = subpanelDrawRequest - transformerObj->getLossRateForInputPower(state, subpanelDrawRequest);
             } else {

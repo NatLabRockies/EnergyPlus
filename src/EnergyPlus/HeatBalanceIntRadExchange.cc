@@ -1560,7 +1560,7 @@ namespace HeatBalanceIntRadExchange {
         Real64 constexpr DifferenceConvergence(0.00001);
 
         // SUBROUTINE LOCAL VARIABLE DECLARATIONS:
-        Real64 ConvrgNew;
+        Real64 ConvrgNew = 0.0;
         Real64 CheckConvergeTolerance; // check value for actual warning
 
         bool Converged;
@@ -1644,7 +1644,7 @@ namespace HeatBalanceIntRadExchange {
                 // this max summation.  This will provide a cap on radiation so that no row has a sum greater than unity
                 // and will still maintain reciprocity.
                 Array1D<Real64> sumFixedF;
-                Real64 MaxFixedFRowSum;
+                Real64 MaxFixedFRowSum = 0.0;
                 sumFixedF.allocate(N);
                 sumFixedF = 0.0;
                 for (int i = 1; i <= N; ++i) {

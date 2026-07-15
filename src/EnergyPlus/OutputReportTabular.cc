@@ -489,7 +489,7 @@ void AddMonthlyFieldSetInput(
     // SUBROUTINE ARGUMENT DEFINITIONS:
 
     // SUBROUTINE PARAMETER DEFINITIONS:
-    int constexpr sizeIncrement(50);
+    int constexpr localSizeIncrement(50);
     auto &ort = state.dataOutRptTab;
 
     // INTERFACE BLOCK SPECIFICATIONS:
@@ -502,8 +502,8 @@ void AddMonthlyFieldSetInput(
     // na
 
     if (!allocated(ort->MonthlyFieldSetInput)) {
-        ort->MonthlyFieldSetInput.allocate(sizeIncrement);
-        ort->sizeMonthlyFieldSetInput = sizeIncrement;
+        ort->MonthlyFieldSetInput.allocate(localSizeIncrement);
+        ort->sizeMonthlyFieldSetInput = localSizeIncrement;
         ort->MonthlyFieldSetInputCount = 1;
     } else {
         ++ort->MonthlyFieldSetInputCount;
@@ -2082,22 +2082,16 @@ void InitializePredefinedMonthlyTitles(EnergyPlusData &state)
     ort->namedMonthly(62).title = "MechanicalVentilationLoadsMonthly";
     ort->namedMonthly(63).title = "HeatEmissionsReportMonthly";
 
-    if (numNamedMonthly != NumMonthlyReports) {
-        ShowFatalError(
-            state,
-            std::format("InitializePredefinedMonthlyTitles: Number of Monthly Reports in OutputReportTabular=[{}] does not match number in "
-                        "DataOutputs=[{}].",
-                        numNamedMonthly,
-                        NumMonthlyReports));
-    } else {
-        for (int xcount = 1; xcount <= numNamedMonthly; ++xcount) {
-            if (!Util::SameString(MonthlyNamedReports(xcount), ort->namedMonthly(xcount).title)) {
-                ShowSevereError(state,
-                                "InitializePredefinedMonthlyTitles: Monthly Report Titles in OutputReportTabular do not match titles in DataOutput.");
-                ShowContinueError(state, std::format("first mismatch at ORT [{}] =\"{}\".", numNamedMonthly, ort->namedMonthly(xcount).title));
-                ShowContinueError(state, std::format("same location in DO =\"{}\".", MonthlyNamedReports(xcount)));
-                ShowFatalError(state, "Preceding condition causes termination.");
-            }
+    static_assert(numNamedMonthly == NumMonthlyReports,
+                  "InitializePredefinedMonthlyTitles: Number of Monthly Reports in OutputReportTabular does not match number in DataOutputs.");
+
+    for (int xcount = 1; xcount <= numNamedMonthly; ++xcount) {
+        if (!Util::SameString(MonthlyNamedReports(xcount), ort->namedMonthly(xcount).title)) {
+            ShowSevereError(state,
+                            "InitializePredefinedMonthlyTitles: Monthly Report Titles in OutputReportTabular do not match titles in DataOutput.");
+            ShowContinueError(state, std::format("first mismatch at ORT [{}] =\"{}\".", numNamedMonthly, ort->namedMonthly(xcount).title));
+            ShowContinueError(state, std::format("same location in DO =\"{}\".", MonthlyNamedReports(xcount)));
+            ShowFatalError(state, "Preceding condition causes termination.");
         }
     }
 }
@@ -11739,8 +11733,8 @@ void WriteVeriSumTable(EnergyPlusData &state)
                                       std::format("differs ~{:.1f}% from user entered Wall class surfaces. Degree calculation based on ASHRAE "
                                                   "90.1 wall definitions.",
                                                   pdiff * 100.0));
-                    //      CALL ShowContinueError(state, format("Calculated based on degrees=[{}{}{}{}{}{}] m2, Calculated from user entered Wall
-                    //      class surfaces=[{}{}{}{}{}{}", //, &, //, TRIM(ADJUSTL(RealToStr(currentStyle.formatReals, (wallAreaN + wallAreaS +
+                    //      CALL ShowContinueError(state, std::format("Calculated based on degrees=[{}{}{}{}{}{}] m2, Calculated from user entered
+                    //      Wall class surfaces=[{}{}{}{}{}{}", //, &, //, TRIM(ADJUSTL(RealToStr(currentStyle.formatReals, (wallAreaN + wallAreaS +
                     //      wallAreaE + wallAreaW),3)))//, &, //, //, &, //, TRIM(ADJUSTL(RealToStr(currentStyle.formatReals,
                     //      SUM(Zone(1:NumOfZones)%ExtGrossWallArea_Multiplied),3)))//', m2.'), ShowContinueError(state, "Check classes of surfaces
                     //      and tilts for discrepancies."));
@@ -18031,12 +18025,14 @@ std::string ConvertToEscaped(std::string const &inString, bool isXML) // Input S
             s += "&lt;";
         } else if (c == '>') {
             s += "&gt;";
-        } else if (c == char(176) && !isXML) {
+        } else if (static_cast<unsigned char>(c) == 176 && !isXML) {
             s += "&deg;";
-        } else if (c == char(226) && char(inString[index]) == char(137) && char(inString[index + 1]) == char(164) && !isXML) { // ≤
+        } else if (static_cast<unsigned char>(c) == 226 && static_cast<unsigned char>(inString[index]) == 137 &&
+                   static_cast<unsigned char>(inString[index + 1]) == 164 && !isXML) { // ≤
             s += "&le;";
             index += 2;
-        } else if (c == char(226) && char(inString[index]) == char(137) && char(inString[index + 1]) == char(165) && !isXML) { // ≥
+        } else if (static_cast<unsigned char>(c) == 226 && static_cast<unsigned char>(inString[index]) == 137 &&
+                   static_cast<unsigned char>(inString[index + 1]) == 165 && !isXML) { // ≥
             s += "&ge;";
             index += 2;
         } else if (c == '\xC2') {
@@ -18574,7 +18570,7 @@ std::string RealToStr(bool const formatReals, Real64 const RealIn, int const num
     //   Abstract away the internal write concept
 
     static constexpr std::array<const char *, 10> formDigitsA{
-        "{:#11.0F}", "{:12.1F}", "{:12.2F}", "{:12.3F}", "{:12.4F}", "{:12.5F}", "{:12.6F}", "{:12.7F}", "{:12.8F}", "{:12.9F}"};
+        "{:#12.0F}", "{:12.1F}", "{:12.2F}", "{:12.3F}", "{:12.4F}", "{:12.5F}", "{:12.6F}", "{:12.7F}", "{:12.8F}", "{:12.9F}"};
 
     static constexpr std::array<Real64, 10> maxvalDigitsA(
         {9999999999.0, 999999999.0, 99999999.0, 9999999.0, 999999.0, 99999.0, 9999.0, 999.0, 99.0, 9.0});
@@ -18599,7 +18595,7 @@ std::string RealToStr(bool const formatReals, Real64 const RealIn, int const num
     if (std::abs(RealIn) > maxvalDigitsA.at(nDigits)) {
         return std::format("{:12.6E}", RealIn);
     }
-    return format<FormatSyntax::FMT>(formDigitsA.at(nDigits), RealIn);
+    return std::vformat(formDigitsA.at(nDigits), std::make_format_args(RealIn));
 
     //  WRITE(FMT=, UNIT=stringOut) RealIn
     // check if it did not fit
@@ -18675,7 +18671,7 @@ bool isNumber(std::string const &s)
     char *p;
     strtod(s.c_str(), &p);
     for (; isspace(*p) != 0; ++p) {
-        ; // handle trailing whitespace
+        // handle trailing whitespace
     }
     return *p == 0;
 }

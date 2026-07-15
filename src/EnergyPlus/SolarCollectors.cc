@@ -217,7 +217,7 @@ namespace SolarCollectors {
                 //                    // CASE('AIR')
                 //                    //  Parameters(ParametersNum)%TestFluid = AIR
                 //                } else {
-                //                    ShowSevereError(state, format("{}{} = {}:  {}{} is an unsupported Test Fluid for {}{}", //,
+                //                    ShowSevereError(state, std::format("{}{} = {}:  {}{} is an unsupported Test Fluid for {}{}", //,
                 //                    CurrentModuleParamObject, state.dataIPShortCut->cAlphaArgs(1), //, state.dataIPShortCut->cAlphaArgs(2), //,
                 //                    state.dataIPShortCut->cAlphaFieldNames(2))); ErrorsFound = true;
                 //                }
@@ -452,7 +452,7 @@ namespace SolarCollectors {
                 //                if (Util::SameString(state.dataIPShortCut->cAlphaArgs(2), "RectangularTank")) {
                 //                    state.dataSolarCollectors->Parameters(ParametersNum).ICSType_Num = TankTypeEnum::ICSRectangularTank;
                 //                } else {
-                //                    ShowSevereError(state, format("{}{} not found={}{} in {}{} ={}{}", //,
+                //                    ShowSevereError(state, std::format("{}{} not found={}{} in {}{} ={}{}", //,
                 //                    state.dataIPShortCut->cAlphaFieldNames(2), state.dataIPShortCut->cAlphaArgs(2), //, //,
                 //                    CurrentModuleParamObject, //, state.dataSolarCollectors->Parameters(ParametersNum).Name)); ErrorsFound = true;
                 //                }

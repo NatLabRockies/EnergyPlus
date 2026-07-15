@@ -119,13 +119,12 @@ namespace GroundTemp {
             state.dataEnvrn->GroundTempInputs[static_cast<int>(DataEnvironment::GroundTempType::BuildingSurface)] = true;
 
             if (genErrorMessage) {
-                ShowWarningError(state,
-                                 EnergyPlus::format("{}: Some values fall outside the range of 15-25C.", GroundTemp::modelTypeNames[(int)modelType]));
+                ShowWarningError(state, std::format("{}: Some values fall outside the range of 15-25C.", GroundTemp::modelTypeNames[(int)modelType]));
                 ShowContinueError(state, "These values may be inappropriate.  Please consult the Input Output Reference for more details.");
             }
 
         } else if (numCurrObjects > 1) {
-            ShowSevereError(state, EnergyPlus::format("{}: Too many objects entered. Only one allowed.", GroundTemp::modelTypeNames[(int)modelType]));
+            ShowSevereError(state, std::format("{}: Too many objects entered. Only one allowed.", GroundTemp::modelTypeNames[(int)modelType]));
             errorsFound = true;
         } else {
             std::fill(thisModel->buildingSurfaceGroundTemps.begin(), thisModel->buildingSurfaceGroundTemps.end(), 18.0);
@@ -139,8 +138,7 @@ namespace GroundTemp {
             return thisModel;
         }
 
-        ShowFatalError(state,
-                       EnergyPlus::format("{}--Errors getting input for ground temperature model", GroundTemp::modelTypeNames[(int)modelType]));
+        ShowFatalError(state, std::format("{}--Errors getting input for ground temperature model", GroundTemp::modelTypeNames[(int)modelType]));
         return nullptr;
     }
 

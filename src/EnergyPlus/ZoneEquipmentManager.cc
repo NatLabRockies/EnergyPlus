@@ -2413,7 +2413,7 @@ std::string sizingPeakTimeStamp(EnergyPlusData const &state, int timeStepIndex)
 
     Real64 timeInSeconds = timeStepIndex * state.dataGlobal->MinutesInTimeStep * minToSec;
     General::ParseTime(timeInSeconds, hour, minute, second);
-    return EnergyPlus::format(PeakHrMinFmt, hour, minute);
+    return std::format(PeakHrMinFmt, hour, minute);
 }
 
 void writeZszSpsz(EnergyPlusData &state,

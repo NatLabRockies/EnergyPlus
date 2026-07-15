@@ -850,7 +850,7 @@ void MicroCHPDataStruct::CalcMicroCHPNoNormalizeGeneratorModel(EnergyPlusData &s
     static constexpr std::string_view RoutineName("CalcMicroCHPNoNormalizeGeneratorModel");
 
     DataGenerators::OperatingMode CurrentOpMode = DataGenerators::OperatingMode::Invalid;
-    Real64 NdotFuel;
+    Real64 NdotFuel = 0.0;
     Real64 AllowedLoad = 0.0;
     Real64 PLRforSubtimestepStartUp(1.0);
     Real64 PLRforSubtimestepShutDown(0.0);

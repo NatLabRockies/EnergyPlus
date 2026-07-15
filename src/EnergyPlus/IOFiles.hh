@@ -50,6 +50,7 @@
 
 // C++ Headers
 #include <cassert>
+#include <format>
 #include <fstream>
 #include <iostream>
 #include <limits>
@@ -57,305 +58,19 @@
 #include <vector>
 
 // Third Party Headers
-#include <fmt/compile.h>
-#include <fmt/format.h>
-#include <fmt/os.h>
-#include <fmt/ostream.h>
-#include <fmt/printf.h>
 #include <nlohmann/json.hpp>
 
 // EnergyPlus Headers
 #include <EnergyPlus/EnergyPlus.hh>
 #include <EnergyPlus/FileSystem.hh>
 
-namespace {
-struct DoubleWrapper
-{
-    // this cannot be marked explicit
-    // we need the implicit conversion for it to work
-    // clang-format off
-    DoubleWrapper(double val) : value(val) {};
-    // clang-format on
-    operator double() const
-    {
-        return value;
-    };
-    DoubleWrapper &operator=(const double &other)
-    {
-        value = other;
-        return *this;
-    }
-
-private:
-    double value;
-};
-} // namespace
-
-namespace fmt {
-template <> struct formatter<DoubleWrapper>
-{
-private:
-    fmt::detail::dynamic_format_specs<char> specs_;
-    const char *format_str_;
-    fmt::memory_buffer buffer = fmt::memory_buffer();
-
-    struct null_handler : detail::error_handler
-    {
-        void on_align(align_t)
-        {
-        }
-        void on_sign(sign_t)
-        {
-        }
-        void on_hash()
-        {
-        }
-    };
-
-    static constexpr bool should_be_fixed_output(const double value)
-    {
-        return (value >= 0.099999999999999995 || value <= -0.099999999999999995) || (value == 0.0) || (value == -0.0);
-    }
-
-    static constexpr bool fixed_will_fit(const double value, const int places)
-    {
-        if (value < 1.0 && value > -1.0) {
-            return true;
-        }
-        return static_cast<int>(std::log10(std::abs(value))) < places;
-    }
-
-    static std::string &zero_pad_exponent(std::string &str)
-    {
-        // if necessary, pad the exponent with a 0 to match the old formatting from Objexx
-        if (str.size() > 3) {
-            if (std::isdigit(str[str.size() - 3]) == 0) {
-                // wants a 0 inserted
-                str.insert(str.size() - 2, "0");
-            }
-        }
-        return str;
-    }
-
-    std::string_view spec_builder()
-    {
-        buffer.clear();
-        buffer.push_back('{');
-        buffer.push_back(':');
-        //    [[fill]align][sign]["#"]["0"][width]["." precision]["L"][type]
-
-        //    [[fill]align]
-        switch (specs_.align) {
-        case align_t::left:
-            if (specs_.fill.size() != 0u) {
-                buffer.append(specs_.fill);
-            }
-            buffer.push_back('<');
-            break;
-        case align_t::right:
-            if (specs_.fill.size() != 0u) {
-                buffer.append(specs_.fill);
-            }
-            buffer.push_back('>');
-            break;
-        case align_t::center:
-            if (specs_.fill.size() != 0u) {
-                buffer.append(specs_.fill);
-            }
-            buffer.push_back('^');
-            break;
-        case align_t::none:
-        case align_t::numeric:
-            break;
-        default:
-            throw fmt::format_error("Bad alignment");
-        }
-
-        //    [sign]
-        switch (specs_.sign) {
-        case sign_t::plus:
-            buffer.push_back('+');
-            break;
-        case sign_t::minus:
-            buffer.push_back('-');
-            break;
-        case sign_t::space:
-            buffer.push_back(' ');
-            break;
-        case sign_t::none:
-            break;
-        default:
-            throw fmt::format_error("Bad sign");
-        }
-
-        //    [alt]
-        if (specs_.alt) {
-            buffer.push_back('#');
-        }
-
-        //    [width]
-        if (specs_.width >= 0) {
-            if (specs_.fill[0] == '0') {
-                buffer.push_back('0');
-            }
-            auto fmt_int = fmt::format_int(specs_.width);
-            buffer.append(fmt_int.data(), fmt_int.data() + fmt_int.size());
-        }
-
-        //    [precision]
-        if (specs_.precision >= 0) {
-            buffer.push_back('.');
-
-            auto fmt_int = fmt::format_int(specs_.precision);
-            buffer.append(fmt_int.data(), fmt_int.data() + fmt_int.size());
-        }
-
-        //    [locale]
-        if (specs_.localized) {
-            buffer.push_back('L');
-        }
-
-        //    [type]
-        buffer.push_back(specs_.type);
-
-        buffer.push_back('}');
-
-        return {buffer.data(), buffer.size()};
-    }
-
-    template <typename Context> void handle_specs(Context &ctx)
-    {
-        detail::handle_dynamic_spec<detail::width_checker>(specs_.width, specs_.width_ref, ctx);
-        detail::handle_dynamic_spec<detail::precision_checker>(specs_.precision, specs_.precision_ref, ctx);
-    }
-
-public:
-    template <typename ParseContext> constexpr auto parse(ParseContext &ctx)
-    {
-        auto begin = ctx.begin(), end = ctx.end();
-        format_str_ = begin;
-        if (begin == end) {
-            return begin;
-        }
-        using handler_type = fmt::detail::dynamic_specs_handler<ParseContext>;
-        auto it = fmt::detail::parse_format_specs(begin, end, handler_type(specs_, ctx));
-        return it;
-    }
-
-    template <typename FormatContext> auto format(const DoubleWrapper &doubleWrapper, FormatContext &ctx)
-    {
-        const auto next_float = [](const double value) {
-            if (std::signbit(value)) {
-                if (value == -0.0) {
-                    return value;
-                }
-                return std::nextafter(value, std::numeric_limits<decltype(value)>::lowest());
-            }
-            if (value == 0.0) {
-                return value;
-            }
-            return std::nextafter(value, std::numeric_limits<decltype(value)>::max());
-        };
-
-        double val = doubleWrapper;
-
-        handle_specs(ctx);
-        detail::specs_checker<null_handler> checker(null_handler(), detail::mapped_type_constant<double, FormatContext>::value);
-        checker.on_align(specs_.align);
-        if (specs_.sign != sign::none) {
-            checker.on_sign(specs_.sign);
-        }
-        if (specs_.alt) {
-            checker.on_hash();
-        }
-        if (specs_.precision >= 0) {
-            checker.end_precision();
-        }
-
-        if (specs_.type == 'R') { // matches RoundSigDigits() behavior
-            // push the value up a tad to get the same rounding behavior as Objexx
-            const auto fixed_output = should_be_fixed_output(val);
-
-            if (fixed_output) {
-                specs_.type = 'F';
-
-                if (val > 100000.0) {
-                    const auto digits10 = static_cast<int>(std::log10(val));
-                    // we cannot represent this val to the required precision, truncate the floating
-                    // point portion
-                    if (digits10 + specs_.precision >= std::numeric_limits<decltype(val)>::max_digits10) {
-                        specs_.precision = 0;
-                        spec_builder();
-                        // add '.' to match old RoundSigDigits
-                        buffer.push_back('.');
-                        std::string_view fmt_buffer(buffer.data(), buffer.size());
-                        return fmt::format_to(ctx.out(), fmt::runtime(fmt_buffer), val);
-                    }
-                    return fmt::format_to(ctx.out(), fmt::runtime(spec_builder()), val);
-                }
-                if (val == 0.0 || val == -0.0) {
-                    return fmt::format_to(ctx.out(), fmt::runtime(spec_builder()), 0.0);
-                } // nudge up to next rounded val
-                return fmt::format_to(ctx.out(), fmt::runtime(spec_builder()), next_float(next_float(next_float(val))));
-            }
-            specs_.type = 'E';
-            auto str = fmt::format(fmt::runtime(spec_builder()), next_float(val));
-            return fmt::format_to(ctx.out(), "{}", zero_pad_exponent(str));
-        }
-        return fmt::format_to(ctx.out(), fmt::runtime(spec_builder()), val);
-    }
-};
-} // namespace fmt
-
 namespace EnergyPlus {
 
 // Forward declarations
 struct EnergyPlusData;
 
-enum class FormatSyntax
-{
-    Invalid = -1,
-    Fortran,
-    FMT,
-    Printf,
-    Num
-};
-
-inline constexpr bool is_fortran_syntax(const std::string_view format_str)
-{
-    bool within_fmt_str = false;
-    for (auto const c : format_str) {
-        switch (c) {
-        case '{':
-            within_fmt_str = true;
-            break;
-        case '}':
-            within_fmt_str = false;
-            break;
-        case 'R':
-            if (within_fmt_str) {
-                return true;
-            } else {
-                break;
-            }
-        default:
-            break;
-        }
-    }
-    return false;
-}
-
 class InputOutputFile;
-template <FormatSyntax formatSyntax = FormatSyntax::Fortran, typename... Args>
-void print(InputOutputFile &outputFile, std::string_view format_str, Args &&...args);
-
-inline constexpr FormatSyntax check_syntax(const std::string_view format_str)
-{
-    if (is_fortran_syntax(format_str)) {
-        return FormatSyntax::Fortran;
-    }
-    return FormatSyntax::FMT;
-}
+template <typename... Args> void print(InputOutputFile &outputFile, std::format_string<Args...> format_str, Args &&...args);
 
 class InputFile
 {
@@ -463,7 +178,7 @@ public:
 private:
     std::unique_ptr<std::iostream> os;
     bool print_to_dev_null = false;
-    template <FormatSyntax, typename... Args> friend void print(InputOutputFile &outputFile, std::string_view format_str, Args &&...args);
+    template <typename... Args> friend void print(InputOutputFile &outputFile, std::format_string<Args...>, Args &&...args);
     friend class IOFiles;
 };
 
@@ -667,63 +382,7 @@ public:
     }
 };
 
-template <typename... Args> void vprint(std::ostream &os, std::string_view format_str, const Args &...args)
-{
-    //    assert(os.good());
-    auto buffer = fmt::memory_buffer();
-    try {
-        fmt::format_to(std::back_inserter(buffer), fmt::runtime(format_str), args...);
-    } catch (const fmt::format_error &) {
-        throw EnergyPlus::FatalError(fmt::format("Error with format, '{}', passed {} args", format_str, sizeof...(Args)));
-    }
-    os.write(buffer.data(), buffer.size());
-}
-
-template <typename... Args> std::string vprint(std::string_view format_str, const Args &...args)
-{
-    auto buffer = fmt::memory_buffer();
-    try {
-        fmt::format_to(std::back_inserter(buffer), fmt::runtime(format_str), args...);
-    } catch (const fmt::format_error &) {
-        throw EnergyPlus::FatalError(fmt::format("Error with format, '{}', passed {} args", format_str, sizeof...(Args)));
-    }
-    return fmt::to_string(buffer);
-}
-
-// Uses lib {fmt} (which has been accepted for C++20)
-// Formatting syntax guide is here: https://fmt.dev/latest/syntax.html
-// The syntax is similar to printf, but uses {} to indicate parameters to be formatted
-// you must escape any {} that you want with {}, like `{{}}`
-//
-// Defines a custom formatting type 'R' (round_ which chooses between `E` and `G` depending
-// on the value being printed.
-// This is necessary for parity with the old "RoundSigDigits" utility function
-
-namespace {
-    template <typename... Args> void print_fortran_syntax(std::ostream &os, std::string_view format_str, const Args &...args)
-    {
-        EnergyPlus::vprint<std::conditional_t<std::is_same_v<double, Args>, DoubleWrapper, Args>...>(os, format_str, args...);
-    }
-
-    template <typename... Args> std::string format_fortran_syntax(std::string_view format_str, const Args &...args)
-    {
-        return EnergyPlus::vprint<std::conditional_t<std::is_same_v<double, Args>, DoubleWrapper, Args>...>(format_str, args...);
-    }
-} // namespace
-
-template <FormatSyntax formatSyntax = FormatSyntax::Fortran, typename... Args>
-void print(std::ostream &os, std::string_view format_str, Args &&...args)
-{
-    if constexpr (formatSyntax == FormatSyntax::Fortran) {
-        print_fortran_syntax(os, format_str, args...);
-    } else if constexpr (formatSyntax == FormatSyntax::FMT) {
-        fmt::print(os, fmt::runtime(format_str), std::forward<Args>(args)...);
-    } else {
-        static_assert(!(formatSyntax == FormatSyntax::Fortran || formatSyntax == FormatSyntax::FMT), "Invalid FormatSyntax selection");
-    }
-}
-
-template <FormatSyntax formatSyntax, typename... Args> void print(InputOutputFile &outputFile, std::string_view format_str, Args &&...args)
+template <typename... Args> void print(InputOutputFile &outputFile, std::format_string<Args...> format_str, Args &&...args)
 {
     auto *outputStream = [&]() -> std::ostream * {
         if (outputFile.os) {
@@ -735,76 +394,9 @@ template <FormatSyntax formatSyntax, typename... Args> void print(InputOutputFil
         assert(outputFile.os);
         return nullptr;
     }();
-    if constexpr (formatSyntax == FormatSyntax::Fortran) {
-        print_fortran_syntax(*outputStream, format_str, args...);
-    } else if constexpr (formatSyntax == FormatSyntax::FMT) {
-        fmt::print(*outputStream, format_str, std::forward<Args>(args)...);
-    } else {
-        static_assert(!(formatSyntax == FormatSyntax::Fortran || formatSyntax == FormatSyntax::FMT), "Invalid FormatSyntax selection");
-    }
-}
-
-template <FormatSyntax formatSyntax = FormatSyntax::Fortran, typename... Args> std::string format(std::string_view format_str, Args &&...args)
-{
-    if constexpr (formatSyntax == FormatSyntax::Fortran) {
-        return format_fortran_syntax(format_str, args...);
-    } else if constexpr (formatSyntax == FormatSyntax::FMT) {
-        return fmt::format(fmt::runtime(format_str), std::forward<Args>(args)...);
-    } else if constexpr (formatSyntax == FormatSyntax::Printf) {
-        return fmt::sprintf(format_str, std::forward<Args>(args)...);
-    }
+    *outputStream << std::format(format_str, std::forward<Args>(args)...);
 }
 
 } // namespace EnergyPlus
-
-// extern template the most commonly used format function calls
-// to save on compilation time. They will be explicitly instantiated
-// in IOFiles.cc
-extern template std::string EnergyPlus::format<EnergyPlus::FormatSyntax::Fortran, int>(std::string_view, int &&);
-extern template std::string EnergyPlus::format<EnergyPlus::FormatSyntax::Fortran, const char *const &>(std::string_view, const char *const &);
-extern template std::string EnergyPlus::format<EnergyPlus::FormatSyntax::Fortran, int &, std::string &>(std::string_view, int &, std::string &);
-extern template std::string EnergyPlus::format<EnergyPlus::FormatSyntax::Fortran, std::string &, std::string &, std::string &, double &>(
-    std::string_view, std::string &, std::string &, std::string &, double &);
-extern template std::string EnergyPlus::format<EnergyPlus::FormatSyntax::Fortran, const std::string_view &>(std::string_view,
-                                                                                                            const std::string_view &);
-extern template std::string EnergyPlus::format<EnergyPlus::FormatSyntax::Fortran, const std::string_view &, std::string &>(std::string_view,
-                                                                                                                           const std::string_view &,
-                                                                                                                           std::string &);
-extern template std::string
-EnergyPlus::format<EnergyPlus::FormatSyntax::Fortran, std::string &, double &, double &>(std::string_view, std::string &, double &, double &);
-extern template std::string
-EnergyPlus::format<EnergyPlus::FormatSyntax::Fortran, std::string &, std::string &, int &>(std::string_view, std::string &, std::string &, int &);
-extern template std::string
-EnergyPlus::format<EnergyPlus::FormatSyntax::Fortran, double &, double &, double &>(std::string_view, double &, double &, double &);
-extern template std::string EnergyPlus::format<EnergyPlus::FormatSyntax::Fortran, double &, std::string &>(std::string_view, double &, std::string &);
-extern template std::string EnergyPlus::format<EnergyPlus::FormatSyntax::Fortran, std::string &>(std::string_view, std::string &);
-extern template std::string EnergyPlus::format<EnergyPlus::FormatSyntax::Fortran, const int &, int &>(std::string_view, const int &, int &);
-extern template std::string EnergyPlus::format<EnergyPlus::FormatSyntax::Fortran, double>(std::string_view, double &&);
-extern template std::string EnergyPlus::format<EnergyPlus::FormatSyntax::Fortran, int &, int &>(std::string_view, int &, int &);
-extern template std::string EnergyPlus::format<EnergyPlus::FormatSyntax::Fortran, const double &>(std::string_view, const double &);
-extern template std::string EnergyPlus::format<EnergyPlus::FormatSyntax::Fortran, std::string &, int &>(std::string_view, std::string &, int &);
-extern template std::string EnergyPlus::format<EnergyPlus::FormatSyntax::Fortran, std::string &, std::string &, double &>(std::string_view,
-                                                                                                                          std::string &,
-                                                                                                                          std::string &,
-                                                                                                                          double &);
-extern template std::string EnergyPlus::format<EnergyPlus::FormatSyntax::Fortran, std::string &, double &, std::string &, double &>(
-    std::string_view, std::string &, double &, std::string &, double &);
-extern template std::string EnergyPlus::format<EnergyPlus::FormatSyntax::Fortran, const int &>(std::string_view, const int &);
-extern template std::string EnergyPlus::format<EnergyPlus::FormatSyntax::Fortran, int &, const std::string &, std::string &>(std::string_view,
-                                                                                                                             int &,
-                                                                                                                             const std::string &,
-                                                                                                                             std::string &);
-extern template std::string
-EnergyPlus::format<EnergyPlus::FormatSyntax::Fortran, int &, int &, const std::string &>(std::string_view, int &, int &, const std::string &);
-extern template std::string
-EnergyPlus::format<EnergyPlus::FormatSyntax::Fortran, int &, int &, std::string_view &>(std::string_view, int &, int &, std::string_view &);
-extern template std::string EnergyPlus::format<EnergyPlus::FormatSyntax::Fortran, int &, std::string_view &, std::string &>(std::string_view,
-                                                                                                                            int &,
-                                                                                                                            std::string_view &,
-                                                                                                                            std::string &);
-extern template std::string EnergyPlus::format<EnergyPlus::FormatSyntax::Fortran, double &, double &>(std::string_view, double &, double &);
-extern template std::string EnergyPlus::format<EnergyPlus::FormatSyntax::Fortran, int &>(std::string_view, int &);
-extern template std::string EnergyPlus::format<EnergyPlus::FormatSyntax::Fortran, std::string &, double &>(std::string_view, std::string &, double &);
-extern template std::string EnergyPlus::format<EnergyPlus::FormatSyntax::Fortran, double &>(std::string_view, double &);
 
 #endif

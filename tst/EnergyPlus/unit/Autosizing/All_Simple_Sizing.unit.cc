@@ -104,8 +104,8 @@ TEST_F(AutoSizingFixture, AutoCalculateSizingGauntlet)
 
     std::string eiooutput = std::string(
         "! <Component Sizing Information>, Component Type, Component Name, Input Field Description, Value\n"
-        " Component Sizing Information, Coil:Heating:Water, MyWaterCoil, Design Size Any sizing that requires AutoCalculate [], 30.0000\n"
-        " Component Sizing Information, Coil:Heating:Water, MyWaterCoil, User-Specified Any sizing that requires AutoCalculate [], 37.5000\n");
+        " Component Sizing Information, Coil:Heating:Water, MyWaterCoil, Design Size Any sizing that requires AutoCalculate [], 30\n"
+        " Component Sizing Information, Coil:Heating:Water, MyWaterCoil, User-Specified Any sizing that requires AutoCalculate [], 37.5\n");
 
     EXPECT_TRUE(compare_eio_stream(eiooutput, true));
 
@@ -149,7 +149,7 @@ TEST_F(AutoSizingFixture, AutoCalculateSizingGauntlet)
     sizer.autoSizedValue = 0.0;            // reset for next test
     // <Component Sizing Information> header already reported above (and flag set false). Only coil sizing information reported here.
     eiooutput = std::string(
-        " Component Sizing Information, Coil:Heating:Water, MyWaterCoil, User-Specified Any sizing that requires AutoCalculate [], 33.4000\n");
+        " Component Sizing Information, Coil:Heating:Water, MyWaterCoil, User-Specified Any sizing that requires AutoCalculate [], 33.4\n");
     EXPECT_TRUE(compare_eio_stream(eiooutput, true));
 
     // reset eio stream
@@ -166,7 +166,7 @@ TEST_F(AutoSizingFixture, AutoCalculateSizingGauntlet)
     sizer.autoSizedValue = 0.0;            // reset for next test
     // <Component Sizing Information> header already reported above (and flag set false). Only coil sizing information reported here.
     eiooutput = std::string(
-        " Component Sizing Information, Coil:Heating:Water, MyWaterCoil, User-Specified Any sizing that requires AutoCalculate [], 33.4000\n");
+        " Component Sizing Information, Coil:Heating:Water, MyWaterCoil, User-Specified Any sizing that requires AutoCalculate [], 33.4\n");
     EXPECT_TRUE(compare_eio_stream(eiooutput, true));
 }
 
@@ -212,7 +212,7 @@ TEST_F(AutoSizingFixture, MaxHeaterOutletTempSizingGauntlet)
 
     std::string eiooutput =
         std::string("! <Component Sizing Information>, Component Type, Component Name, Input Field Description, Value\n"
-                    " Component Sizing Information, Coil:Heating:Water, MyWaterCoil, User-Specified Maximum Supply Air Temperature [C], 37.5000\n");
+                    " Component Sizing Information, Coil:Heating:Water, MyWaterCoil, User-Specified Maximum Supply Air Temperature [C], 37.5\n");
 
     EXPECT_TRUE(compare_eio_stream(eiooutput, true));
     state->dataSize->ZoneSizingInput.allocate(1);
@@ -283,8 +283,7 @@ TEST_F(AutoSizingFixture, MaxHeaterOutletTempSizingGauntlet)
     sizer.autoSizedValue = 0.0; // reset for next test
 
     // <Component Sizing Information> header already reported above (and flag set false). Only coil sizing information reported here.
-    eiooutput =
-        std::string(" Component Sizing Information, Coil:Heating:Water, MyWaterCoil, Design Size Maximum Supply Air Temperature [C], 25.8000\n");
+    eiooutput = std::string(" Component Sizing Information, Coil:Heating:Water, MyWaterCoil, Design Size Maximum Supply Air Temperature [C], 25.8\n");
 
     EXPECT_TRUE(compare_eio_stream(eiooutput, true));
 
@@ -299,8 +298,8 @@ TEST_F(AutoSizingFixture, MaxHeaterOutletTempSizingGauntlet)
     sizer.autoSizedValue = 0.0; // reset for next test
     // <Component Sizing Information> header already reported above (and flag set false). Only coil sizing information reported here.
     eiooutput =
-        std::string(" Component Sizing Information, Coil:Heating:Water, MyWaterCoil, Design Size Maximum Supply Air Temperature [C], 25.8000\n"
-                    " Component Sizing Information, Coil:Heating:Water, MyWaterCoil, User-Specified Maximum Supply Air Temperature [C], 28.8000\n");
+        std::string(" Component Sizing Information, Coil:Heating:Water, MyWaterCoil, Design Size Maximum Supply Air Temperature [C], 25.8\n"
+                    " Component Sizing Information, Coil:Heating:Water, MyWaterCoil, User-Specified Maximum Supply Air Temperature [C], 28.8\n");
     EXPECT_TRUE(compare_eio_stream(eiooutput, true));
 }
 
@@ -346,7 +345,7 @@ TEST_F(AutoSizingFixture, ZoneCoolingLoadSizingGauntlet)
 
     std::string eiooutput =
         std::string("! <Component Sizing Information>, Component Type, Component Name, Input Field Description, Value\n"
-                    " Component Sizing Information, Coil:Cooling:Water, MyWaterCoil, User-Specified Zone Cooling Sensible Load [W], 3007.50\n");
+                    " Component Sizing Information, Coil:Cooling:Water, MyWaterCoil, User-Specified Zone Cooling Sensible Load [W], 3007.5\n");
 
     EXPECT_TRUE(compare_eio_stream(eiooutput, true));
     state->dataSize->ZoneSizingInput.allocate(1);
@@ -417,7 +416,7 @@ TEST_F(AutoSizingFixture, ZoneCoolingLoadSizingGauntlet)
     sizer.autoSizedValue = 0.0; // reset for next test
 
     // <Component Sizing Information> header already reported above (and flag set false). Only coil sizing information reported here.
-    eiooutput = std::string(" Component Sizing Information, Coil:Cooling:Water, MyWaterCoil, Design Size Zone Cooling Sensible Load [W], 0.00000\n");
+    eiooutput = std::string(" Component Sizing Information, Coil:Cooling:Water, MyWaterCoil, Design Size Zone Cooling Sensible Load [W], 0\n");
 
     EXPECT_TRUE(compare_eio_stream(eiooutput, true));
 
@@ -433,8 +432,7 @@ TEST_F(AutoSizingFixture, ZoneCoolingLoadSizingGauntlet)
     EXPECT_EQ(sizer.originalValue, 2880.0);
     sizer.autoSizedValue = 0.0; // reset for next test
     // <Component Sizing Information> header already reported above (and flag set false). Only coil sizing information reported here.
-    eiooutput =
-        std::string(" Component Sizing Information, Coil:Cooling:Water, MyWaterCoil, User-Specified Zone Cooling Sensible Load [W], 2880.00\n");
+    eiooutput = std::string(" Component Sizing Information, Coil:Cooling:Water, MyWaterCoil, User-Specified Zone Cooling Sensible Load [W], 2880\n");
     EXPECT_TRUE(compare_eio_stream(eiooutput, true));
 }
 
@@ -480,7 +478,7 @@ TEST_F(AutoSizingFixture, ZoneHeatingLoadSizingGauntlet)
 
     std::string eiooutput =
         std::string("! <Component Sizing Information>, Component Type, Component Name, Input Field Description, Value\n"
-                    " Component Sizing Information, Coil:Heating:Water, MyWaterCoil, User-Specified Zone Heating Sensible Load [W], 3007.50\n");
+                    " Component Sizing Information, Coil:Heating:Water, MyWaterCoil, User-Specified Zone Heating Sensible Load [W], 3007.5\n");
 
     EXPECT_TRUE(compare_eio_stream(eiooutput, true));
     state->dataSize->ZoneSizingInput.allocate(1);
@@ -550,7 +548,7 @@ TEST_F(AutoSizingFixture, ZoneHeatingLoadSizingGauntlet)
     sizer.autoSizedValue = 0.0; // reset for next test
 
     // <Component Sizing Information> header already reported above (and flag set false). Only coil sizing information reported here.
-    eiooutput = std::string(" Component Sizing Information, Coil:Heating:Water, MyWaterCoil, Design Size Zone Heating Sensible Load [W], 0.00000\n");
+    eiooutput = std::string(" Component Sizing Information, Coil:Heating:Water, MyWaterCoil, Design Size Zone Heating Sensible Load [W], 0\n");
 
     EXPECT_TRUE(compare_eio_stream(eiooutput, true));
 
@@ -566,8 +564,7 @@ TEST_F(AutoSizingFixture, ZoneHeatingLoadSizingGauntlet)
     EXPECT_EQ(sizer.originalValue, 2880.0);
     sizer.autoSizedValue = 0.0; // reset for next test
     // <Component Sizing Information> header already reported above (and flag set false). Only coil sizing information reported here.
-    eiooutput =
-        std::string(" Component Sizing Information, Coil:Heating:Water, MyWaterCoil, User-Specified Zone Heating Sensible Load [W], 2880.00\n");
+    eiooutput = std::string(" Component Sizing Information, Coil:Heating:Water, MyWaterCoil, User-Specified Zone Heating Sensible Load [W], 2880\n");
     EXPECT_TRUE(compare_eio_stream(eiooutput, true));
 }
 
@@ -613,7 +610,7 @@ TEST_F(AutoSizingFixture, ASHRAEMinSATCoolingSizingGauntlet)
 
     std::string eiooutput = std::string("! <Component Sizing Information>, Component Type, Component Name, Input Field Description, Value\n"
                                         " Component Sizing Information, Coil:Cooling:Water, MyWaterCoil, User-Specified Minimum Supply Air "
-                                        "Temperature in Cooling Mode [C], 16.5000\n");
+                                        "Temperature in Cooling Mode [C], 16.5\n");
 
     EXPECT_TRUE(compare_eio_stream(eiooutput, true));
     state->dataSize->ZoneSizingInput.allocate(1);
@@ -734,7 +731,7 @@ TEST_F(AutoSizingFixture, ASHRAEMinSATCoolingSizingGauntlet)
     eiooutput = std::string(
         " Component Sizing Information, Coil:Cooling:Water, MyWaterCoil, Design Size Minimum Supply Air Temperature in Cooling Mode [C], 7.58525\n"
         " Component Sizing Information, Coil:Cooling:Water, MyWaterCoil, User-Specified Minimum Supply Air Temperature in Cooling Mode [C], "
-        "9.00000\n");
+        "9\n");
     EXPECT_TRUE(compare_eio_stream(eiooutput, true));
 }
 
@@ -780,7 +777,7 @@ TEST_F(AutoSizingFixture, ASHRAEMaxSATHeatingSizingGauntlet)
 
     std::string eiooutput = std::string("! <Component Sizing Information>, Component Type, Component Name, Input Field Description, Value\n"
                                         " Component Sizing Information, Coil:Heating:Water, MyWaterCoil, User-Specified Maximum Supply Air "
-                                        "Temperature in Heating Mode [C], 26.5000\n");
+                                        "Temperature in Heating Mode [C], 26.5\n");
 
     EXPECT_TRUE(compare_eio_stream(eiooutput, true));
     state->dataSize->ZoneSizingInput.allocate(1);
@@ -882,7 +879,7 @@ TEST_F(AutoSizingFixture, ASHRAEMaxSATHeatingSizingGauntlet)
     eiooutput = std::string(
         " Component Sizing Information, Coil:Heating:Water, MyWaterCoil, Design Size Maximum Supply Air Temperature in Heating Mode [C], 38.2743\n"
         " Component Sizing Information, Coil:Heating:Water, MyWaterCoil, User-Specified Maximum Supply Air Temperature in Heating Mode [C], "
-        "32.3000\n");
+        "32.3\n");
     EXPECT_TRUE(compare_eio_stream(eiooutput, true));
 
     // test sizer method failure with DataCapacityUsedForSizing = 0
@@ -941,7 +938,7 @@ TEST_F(AutoSizingFixture, DesiccantDehumidifierBFPerfDataFaceVelocitySizingGaunt
 
     std::string eiooutput = std::string("! <Component Sizing Information>, Component Type, Component Name, Input Field Description, Value\n"
                                         " Component Sizing Information, " +
-                                        std::string{compType} + ", MyDesiccantHX, User-Specified Nominal Air Face Velocity [m/s], 4.50000\n");
+                                        std::string{compType} + ", MyDesiccantHX, User-Specified Nominal Air Face Velocity [m/s], 4.5\n");
 
     EXPECT_TRUE(compare_eio_stream(eiooutput, true));
     state->dataSize->ZoneSizingInput.allocate(1);
@@ -1042,7 +1039,7 @@ TEST_F(AutoSizingFixture, DesiccantDehumidifierBFPerfDataFaceVelocitySizingGaunt
     eiooutput = std::string(" Component Sizing Information, " + std::string{compType} +
                             ", MyDesiccantHX, Design Size Nominal Air Face Velocity [m/s], 4.30797\n"
                             " Component Sizing Information, " +
-                            std::string{compType} + ", MyDesiccantHX, User-Specified Nominal Air Face Velocity [m/s], 3.20000\n");
+                            std::string{compType} + ", MyDesiccantHX, User-Specified Nominal Air Face Velocity [m/s], 3.2\n");
     EXPECT_TRUE(compare_eio_stream(eiooutput, true));
 }
 
@@ -1130,7 +1127,7 @@ TEST_F(AutoSizingFixture, HeatingCoilDesAirInletTempSizingGauntlet)
 
     std::string eiooutput =
         std::string("! <Component Sizing Information>, Component Type, Component Name, Input Field Description, Value\n Component Sizing "
-                    "Information, Coil:Heating:Water, MyWaterCoil, Design Size Rated Inlet Air Temperature, 15.8000\n");
+                    "Information, Coil:Heating:Water, MyWaterCoil, Design Size Rated Inlet Air Temperature, 15.8\n");
 
     EXPECT_TRUE(compare_eio_stream(eiooutput, true));
 
@@ -1157,8 +1154,8 @@ TEST_F(AutoSizingFixture, HeatingCoilDesAirInletTempSizingGauntlet)
     EXPECT_NEAR(19.8, sizedValue, 0.0001);
     sizer.autoSizedValue = 0.0; // reset for next test
     // <Component Sizing Information> header already reported above (and flag set false). Only coil sizing information reported here.
-    eiooutput = std::string(" Component Sizing Information, Coil:Heating:Water, MyWaterCoil, Design Size Rated Inlet Air Temperature, 13.8000\n"
-                            " Component Sizing Information, Coil:Heating:Water, MyWaterCoil, User-Specified Rated Inlet Air Temperature, 19.8000\n");
+    eiooutput = std::string(" Component Sizing Information, Coil:Heating:Water, MyWaterCoil, Design Size Rated Inlet Air Temperature, 13.8\n"
+                            " Component Sizing Information, Coil:Heating:Water, MyWaterCoil, User-Specified Rated Inlet Air Temperature, 19.8\n");
     EXPECT_TRUE(compare_eio_stream(eiooutput, true));
 }
 
@@ -1247,7 +1244,7 @@ TEST_F(AutoSizingFixture, HeatingCoilDesAirOutletTempSizingGauntlet)
 
     std::string eiooutput =
         std::string("! <Component Sizing Information>, Component Type, Component Name, Input Field Description, Value\n Component Sizing "
-                    "Information, Coil:Heating:Water, MyWaterCoil, Design Size Rated Outlet Air Temperature, 26.4000\n");
+                    "Information, Coil:Heating:Water, MyWaterCoil, Design Size Rated Outlet Air Temperature, 26.4\n");
 
     EXPECT_TRUE(compare_eio_stream(eiooutput, true));
 
@@ -1261,8 +1258,8 @@ TEST_F(AutoSizingFixture, HeatingCoilDesAirOutletTempSizingGauntlet)
     EXPECT_NEAR(32.8, sizedValue, 0.0001);
     sizer.autoSizedValue = 0.0; // reset for next test
     // <Component Sizing Information> header already reported above (and flag set false). Only coil sizing information reported here.
-    eiooutput = std::string(" Component Sizing Information, Coil:Heating:Water, MyWaterCoil, Design Size Rated Outlet Air Temperature, 26.4000\n"
-                            " Component Sizing Information, Coil:Heating:Water, MyWaterCoil, User-Specified Rated Outlet Air Temperature, 32.8000\n");
+    eiooutput = std::string(" Component Sizing Information, Coil:Heating:Water, MyWaterCoil, Design Size Rated Outlet Air Temperature, 26.4\n"
+                            " Component Sizing Information, Coil:Heating:Water, MyWaterCoil, User-Specified Rated Outlet Air Temperature, 32.8\n");
     EXPECT_TRUE(compare_eio_stream(eiooutput, true));
 }
 

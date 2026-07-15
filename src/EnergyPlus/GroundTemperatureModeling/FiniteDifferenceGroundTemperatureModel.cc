@@ -91,8 +91,7 @@ namespace GroundTemp {
         auto *inputProcessor = state.dataInputProcessing->inputProcessor.get();
         auto const modelInstances = inputProcessor->epJSON.find(currentModuleObject);
         if (modelInstances == inputProcessor->epJSON.end()) {
-            ShowFatalError(state,
-                           EnergyPlus::format("{}--Errors getting input for ground temperature model", GroundTemp::modelTypeNames[(int)modelType]));
+            ShowFatalError(state, std::format("{}--Errors getting input for ground temperature model", GroundTemp::modelTypeNames[(int)modelType]));
         }
         auto const &modelSchemaProps = inputProcessor->getObjectSchemaProps(state, currentModuleObject);
 
@@ -131,8 +130,7 @@ namespace GroundTemp {
             return thisModel;
         }
 
-        ShowFatalError(state,
-                       EnergyPlus::format("{}--Errors getting input for ground temperature model", GroundTemp::modelTypeNames[(int)modelType]));
+        ShowFatalError(state, std::format("{}--Errors getting input for ground temperature model", GroundTemp::modelTypeNames[(int)modelType]));
         return nullptr;
     }
 
@@ -782,11 +780,11 @@ namespace GroundTemp {
         for (int cell = 1; cell <= totalNumCells; ++cell) {
             auto &thisCell = cellArray(cell);
 
-            Real64 depth = (thisCell.maxZValue + thisCell.minZValue) / 2.0;
+            Real64 cellDepth = (thisCell.maxZValue + thisCell.minZValue) / 2.0;
 
             // Initialize temperatures
             if (tempModel) {
-                thisCell.temperature = tempModel->getGroundTempAtTimeInSeconds(state, depth, 0.0); // Initialized at first day of year
+                thisCell.temperature = tempModel->getGroundTempAtTimeInSeconds(state, cellDepth, 0.0); // Initialized at first day of year
             }
             thisCell.temperature_finalConvergence = thisCell.temperature;
             thisCell.temperature_prevIteration = thisCell.temperature;

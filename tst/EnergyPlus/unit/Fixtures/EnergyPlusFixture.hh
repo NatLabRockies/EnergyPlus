@@ -175,7 +175,7 @@ protected:
     // It is easier to test successive functions if the EIO stream is 'empty' before the next call.
     // This calls EXPECT_* within the function as well as returns a boolean so you can call [ASSERT/EXPECT]_[TRUE/FALSE] depending
     // if it makes sense for the unit test to continue after returning from function.
-    // Will return true if string matches the stream and false if it does not
+    // Will return true if a non-empty string is found in the stream and false if it is not
     bool compare_eio_stream_substring(std::string const &expected_string, bool reset_stream = true);
 
     // Compare an expected string against the MTR stream. The default is to reset the MTR stream after every call.
@@ -196,7 +196,7 @@ protected:
     // It is easier to test successive functions if the ERR stream is 'empty' before the next call.
     // This calls EXPECT_* within the function as well as returns a boolean so you can call [ASSERT/EXPECT]_[TRUE/FALSE] depending
     // if it makes sense for the unit test to continue after returning from function.
-    // Will return true if string is found in the stream and false if it is not
+    // Will return true if a non-empty string is found in the stream and false if it is not
     bool compare_err_stream_substring(std::string const &search_string, bool reset_stream = true, bool call_expect = true);
 
     // Compare an expected string against the COUT stream. The default is to reset the COUT stream after every call.
@@ -210,7 +210,7 @@ protected:
     // It is easier to test successive functions if the COUT stream is 'empty' before the next call.
     // This returns a boolean so you can call [ASSERT/EXPECT]_[TRUE/FALSE] depending
     // if it makes sense for the unit test to continue after returning from function.
-    // Will return true if string is found in the stream and false if it is not
+    // Will return true if a non-empty string is found in the stream and false if it is not
     bool compare_cout_stream_substring(std::string const &search_string, bool reset_stream = true);
 
     // Compare an expected string against the CERR stream. The default is to reset the CERR stream after every call.
@@ -271,8 +271,10 @@ protected:
     // Will return false if no errors found and true if errors found
     bool process_idf(std::string_view const idf_snippet, bool use_assertions = true);
 
+    bool process_json(nlohmann::json const &epJSON, bool use_assertions = true);
+
     // Opens output files as stringstreams
-    void openOutputFiles(EnergyPlusData &state);
+    void openOutputFiles(EnergyPlusData &t_state);
 
     // A worker function that keeps trailing spaces in multiline raw string literals
     void replace_pipes_with_spaces(std::string &stringLiteral)
@@ -294,6 +296,8 @@ public:
     EnergyPlusData *state;
 
 private:
+    bool common_process_json(bool use_assertions);
+
     friend class InputProcessorFixture;
 
     // Function to process the Energy+.schema.epJSON, should not normally be called.

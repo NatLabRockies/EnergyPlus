@@ -65,7 +65,7 @@ std::string format_errors_or_warnings(std::vector<std::pair<std::string, bool>> 
 
     std::string errs;
     for (auto const &[error, isContinued] : errors) {
-        errs += fmt::format("{}{}\n", isContinued ? "**   ~~~   **" : base, error);
+        errs += std::format("{}{}\n", isContinued ? "**   ~~~   **" : base, error);
     }
     return errs;
 }

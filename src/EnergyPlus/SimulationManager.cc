@@ -53,7 +53,6 @@
 // ObjexxFCL Headers
 #include <ObjexxFCL/Array.functions.hh>
 #include <ObjexxFCL/Array1D.hh>
-#include <ObjexxFCL/environment.hh>
 #include <ObjexxFCL/string.functions.hh>
 
 // Third Party Headers
@@ -67,7 +66,6 @@ extern "C" {
 #include <EnergyPlus/CostEstimateManager.hh>
 #include <EnergyPlus/CurveManager.hh>
 #include <EnergyPlus/Data/EnergyPlusData.hh>
-#include <EnergyPlus/DataAirLoop.hh>
 #include <EnergyPlus/DataBranchNodeConnections.hh>
 #include <EnergyPlus/DataConvergParams.hh>
 #include <EnergyPlus/DataErrorTracking.hh>
@@ -95,7 +93,6 @@ extern "C" {
 #include <EnergyPlus/ExternalInterface.hh>
 #include <EnergyPlus/FaultsManager.hh>
 #include <EnergyPlus/FileSystem.hh>
-#include <EnergyPlus/FluidProperties.hh>
 #include <EnergyPlus/GeneralRoutines.hh>
 #include <EnergyPlus/HVACControllers.hh>
 #include <EnergyPlus/HVACManager.hh>
@@ -109,7 +106,6 @@ extern "C" {
 #include <EnergyPlus/NodeInputManager.hh>
 #include <EnergyPlus/OutAirNodeManager.hh>
 #include <EnergyPlus/OutputProcessor.hh>
-#include <EnergyPlus/OutputReportPredefined.hh>
 #include <EnergyPlus/OutputReportTabular.hh>
 #include <EnergyPlus/OutputReports.hh>
 #include <EnergyPlus/Plant/PlantManager.hh>
@@ -118,7 +114,6 @@ extern "C" {
 #include <EnergyPlus/PollutionModule.hh>
 #include <EnergyPlus/Psychrometrics.hh>
 #include <EnergyPlus/RefrigeratedCase.hh>
-#include <EnergyPlus/ReportCoilSelection.hh>
 #include <EnergyPlus/ResultsFramework.hh>
 #include <EnergyPlus/SetPointManager.hh>
 #include <EnergyPlus/SimulationManager.hh>
@@ -728,7 +723,7 @@ namespace SimulationManager {
         Array1D_string Alphas(10);
         Array1D<Real64> Number(4);
         int NumAlpha;
-        int NumNumber;
+        int NumNumber = 0;
         int IOStat;
         int NumDebugOut;
         int MinInt;
@@ -2164,7 +2159,7 @@ namespace SimulationManager {
                   Node::ConnectionObjectTypeNamesUC[static_cast<int>(state.dataBranchNodeConnections->NodeConnections(Loop).ObjectType)],
                   state.dataBranchNodeConnections->NodeConnections(Loop).ObjectName,
                   Node::ConnectionTypeNames[static_cast<int>(state.dataBranchNodeConnections->NodeConnections(Loop).ConnectionType)],
-                  state.dataBranchNodeConnections->NodeConnections(Loop).FluidStream);
+                  static_cast<int>(state.dataBranchNodeConnections->NodeConnections(Loop).FluidStream));
             // Build ParentNodeLists
             if ((state.dataBranchNodeConnections->NodeConnections(Loop).ConnectionType == Node::ConnectionType::Inlet) ||
                 (state.dataBranchNodeConnections->NodeConnections(Loop).ConnectionType == Node::ConnectionType::Outlet)) {
@@ -2230,7 +2225,7 @@ namespace SimulationManager {
                   Node::ConnectionObjectTypeNamesUC[static_cast<int>(state.dataBranchNodeConnections->NodeConnections(Loop).ObjectType)],
                   state.dataBranchNodeConnections->NodeConnections(Loop).ObjectName,
                   Node::ConnectionTypeNames[static_cast<int>(state.dataBranchNodeConnections->NodeConnections(Loop).ConnectionType)],
-                  state.dataBranchNodeConnections->NodeConnections(Loop).FluidStream);
+                  static_cast<int>(state.dataBranchNodeConnections->NodeConnections(Loop).FluidStream));
         }
 
         int NumNonConnected = 0;
@@ -2839,12 +2834,9 @@ namespace SimulationManager {
         // using SQLiteProcedures::CreateSQLiteDatabase;
         state.dataGlobal->DoingInputProcessing = false;
 
-        state.dataInputProcessing->inputProcessor->preProcessorCheck(
-            state, state.dataSimulationManager->PreP_Fatal); // Check Preprocessor objects for warning, severe, etc errors.
-
-        if (state.dataSimulationManager->PreP_Fatal) {
-            ShowFatalError(state, "Preprocessor condition(s) cause termination.");
-        }
+        // Preprocessor objects (Output:PreprocessorMessage) are now checked in InputProcessor::processInput(),
+        // before epJSON schema validation can abort the run, so that a Fatal preprocessor message is not hidden
+        // behind unrelated schema errors caused by the preprocessor's malformed output.
 
         state.dataInputProcessing->inputProcessor->preScanReportingVariables(state);
     }

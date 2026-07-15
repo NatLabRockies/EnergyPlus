@@ -851,7 +851,7 @@ void processZoneEquipmentInput(EnergyPlusData &state,
         bool UniqueNodeError = false;
         Node::CheckUniqueNodeNames(state, cAlphaFields(5 + spaceFieldShift), UniqueNodeError, AlphArray(5 + spaceFieldShift), AlphArray(1));
         if (UniqueNodeError) {
-            // ShowContinueError(state, format("Occurs for {} = {}", trim( cAlphaFields( 1 ) ), trim( AlphArray( 1 ) )));
+            // ShowContinueError(state, std::format("Occurs for {} = {}", trim( cAlphaFields( 1 ) ), trim( AlphArray( 1 ) )));
             state.dataZoneEquip->GetZoneEquipmentDataErrorsFound = true;
         }
     }
@@ -1145,7 +1145,7 @@ void processZoneEquipmentInput(EnergyPlusData &state,
             bool UniqueNodeError = false;
             Node::CheckUniqueNodeNumbers(state, "Zone Air Exhaust Nodes", UniqueNodeError, NodeNums(NodeNum), thisEquipConfig.ZoneName);
             if (UniqueNodeError) {
-                // ShowContinueError(state, format("Occurs for Zone = {}", trim( AlphArray( 1 ) )));
+                // ShowContinueError(state, std::format("Occurs for Zone = {}", trim( AlphArray( 1 ) )));
                 state.dataZoneEquip->GetZoneEquipmentDataErrorsFound = true;
             }
         }
@@ -1200,7 +1200,7 @@ void processZoneEquipmentInput(EnergyPlusData &state,
             bool UniqueNodeError = false;
             Node::CheckUniqueNodeNumbers(state, "Zone Return Air Nodes", UniqueNodeError, NodeNums(NodeNum), thisEquipConfig.ZoneName);
             if (UniqueNodeError) {
-                // ShowContinueError(state, format("Occurs for Zone = {}", trim( AlphArray( 1 ) )));
+                // ShowContinueError(state, std::format("Occurs for Zone = {}", trim( AlphArray( 1 ) )));
                 state.dataZoneEquip->GetZoneEquipmentDataErrorsFound = true;
             }
         }

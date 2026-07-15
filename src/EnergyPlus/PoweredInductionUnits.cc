@@ -1081,57 +1081,6 @@ void SizePIU(EnergyPlusData &state, int const PIUNum)
     }
 
     IsAutoSize = false;
-    if (thisPIU.MaxSecAirVolFlow == AutoSize) {
-        IsAutoSize = true;
-    }
-    if ((state.dataSize->CurZoneEqNum > 0) && (CurTermUnitSizingNum > 0)) {
-        if (!IsAutoSize && !state.dataSize->ZoneSizingRunDone) { // Simulation continue
-            if (thisPIU.MaxSecAirVolFlow > 0.0) {
-                BaseSizer::reportSizerOutput(
-                    state, thisPIU.UnitType, thisPIU.Name, "User-Specified Maximum Secondary Air Flow Rate [m3/s]", thisPIU.MaxSecAirVolFlow);
-            }
-        } else {
-            CheckZoneSizing(state, thisPIU.UnitType, thisPIU.Name);
-            // Autosized maximum secondary air flow for reporting
-            Real64 MaxSecAirVolFlowDes = max(state.dataSize->TermUnitFinalZoneSizing(CurTermUnitSizingNum).DesCoolVolFlow,
-                                             state.dataSize->TermUnitFinalZoneSizing(CurTermUnitSizingNum).DesHeatVolFlow);
-            if (MaxSecAirVolFlowDes < SmallAirVolFlow) {
-                MaxSecAirVolFlowDes = 0.0;
-            }
-            if (IsAutoSize) {
-                thisPIU.MaxSecAirVolFlow = MaxSecAirVolFlowDes;
-                BaseSizer::reportSizerOutput(
-                    state, thisPIU.UnitType, thisPIU.Name, "Design Size Maximum Secondary Air Flow Rate [m3/s]", MaxSecAirVolFlowDes);
-            } else {
-                if (thisPIU.MaxSecAirVolFlow > 0.0 && MaxSecAirVolFlowDes > 0.0) {
-                    // Harsized maximum secondary air flow for reporting
-                    Real64 const MaxSecAirVolFlowUser = thisPIU.MaxSecAirVolFlow;
-                    BaseSizer::reportSizerOutput(state,
-                                                 thisPIU.UnitType,
-                                                 thisPIU.Name,
-                                                 "Design Size Maximum Secondary Air Flow Rate [m3/s]",
-                                                 MaxSecAirVolFlowDes,
-                                                 "User-Specified Maximum Secondary Air Flow Rate [m3/s]",
-                                                 MaxSecAirVolFlowUser);
-                    if (state.dataGlobal->DisplayExtraWarnings) {
-                        if ((std::abs(MaxSecAirVolFlowDes - MaxSecAirVolFlowUser) / MaxSecAirVolFlowUser) >
-                            state.dataSize->AutoVsHardSizingThreshold) {
-                            ShowMessage(state,
-                                        std::format("SizePIU: Potential issue with equipment sizing for {} {}", thisPIU.UnitType, thisPIU.Name));
-                            ShowContinueError(state,
-                                              std::format("User-Specified Maximum Secondary Air Flow Rate of {:.5f} [m3/s]", MaxSecAirVolFlowUser));
-                            ShowContinueError(
-                                state, std::format("differs from Design Size Maximum Secondary Air Flow Rate of {:.5f} [m3/s]", MaxSecAirVolFlowDes));
-                            ShowContinueError(state, "This may, or may not, indicate mismatched component sizes.");
-                            ShowContinueError(state, "Verify that the value entered is intended and is consistent with other components.");
-                        }
-                    }
-                }
-            }
-        }
-    }
-
-    IsAutoSize = false;
     if (thisPIU.MinPriAirFlowFrac == AutoSize) {
         IsAutoSize = true;
     }
@@ -1212,6 +1161,57 @@ void SizePIU(EnergyPlusData &state, int const PIUNum)
                                               std::format("User-Specified Minimum Primary Air Flow Fraction of {:.1f}", MinPriAirFlowFracUser));
                             ShowContinueError(
                                 state, std::format("differs from Design Size Minimum Primary Air Flow Fraction of {:.1f}", MinPriAirFlowFracDes));
+                            ShowContinueError(state, "This may, or may not, indicate mismatched component sizes.");
+                            ShowContinueError(state, "Verify that the value entered is intended and is consistent with other components.");
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    IsAutoSize = false;
+    if (thisPIU.MaxSecAirVolFlow == AutoSize) {
+        IsAutoSize = true;
+    }
+    if ((state.dataSize->CurZoneEqNum > 0) && (CurTermUnitSizingNum > 0)) {
+        if (!IsAutoSize && !state.dataSize->ZoneSizingRunDone) { // Simulation continue
+            if (thisPIU.MaxSecAirVolFlow > 0.0) {
+                BaseSizer::reportSizerOutput(
+                    state, thisPIU.UnitType, thisPIU.Name, "User-Specified Maximum Secondary Air Flow Rate [m3/s]", thisPIU.MaxSecAirVolFlow);
+            }
+        } else {
+            CheckZoneSizing(state, thisPIU.UnitType, thisPIU.Name);
+            // Autosized maximum secondary air flow for reporting, only used for parallel PIU that does not have a total air flow rate input field
+            // series PIU does not have a secondary air flow rate input field so will not hit this code path
+            Real64 MaxSecAirVolFlowDes = thisPIU.MaxPriAirVolFlow - (thisPIU.MaxPriAirVolFlow * thisPIU.MinPriAirFlowFrac);
+            if (MaxSecAirVolFlowDes < SmallAirVolFlow) {
+                MaxSecAirVolFlowDes = 0.0;
+            }
+            if (IsAutoSize) {
+                thisPIU.MaxSecAirVolFlow = MaxSecAirVolFlowDes;
+                BaseSizer::reportSizerOutput(
+                    state, thisPIU.UnitType, thisPIU.Name, "Design Size Maximum Secondary Air Flow Rate [m3/s]", MaxSecAirVolFlowDes);
+            } else {
+                if (thisPIU.MaxSecAirVolFlow > 0.0 && MaxSecAirVolFlowDes > 0.0) {
+                    // Harsized maximum secondary air flow for reporting
+                    Real64 const MaxSecAirVolFlowUser = thisPIU.MaxSecAirVolFlow;
+                    BaseSizer::reportSizerOutput(state,
+                                                 thisPIU.UnitType,
+                                                 thisPIU.Name,
+                                                 "Design Size Maximum Secondary Air Flow Rate [m3/s]",
+                                                 MaxSecAirVolFlowDes,
+                                                 "User-Specified Maximum Secondary Air Flow Rate [m3/s]",
+                                                 MaxSecAirVolFlowUser);
+                    if (state.dataGlobal->DisplayExtraWarnings) {
+                        if ((std::abs(MaxSecAirVolFlowDes - MaxSecAirVolFlowUser) / MaxSecAirVolFlowUser) >
+                            state.dataSize->AutoVsHardSizingThreshold) {
+                            ShowMessage(state,
+                                        std::format("SizePIU: Potential issue with equipment sizing for {} {}", thisPIU.UnitType, thisPIU.Name));
+                            ShowContinueError(state,
+                                              std::format("User-Specified Maximum Secondary Air Flow Rate of {:.5f} [m3/s]", MaxSecAirVolFlowUser));
+                            ShowContinueError(
+                                state, std::format("differs from Design Size Maximum Secondary Air Flow Rate of {:.5f} [m3/s]", MaxSecAirVolFlowDes));
                             ShowContinueError(state, "This may, or may not, indicate mismatched component sizes.");
                             ShowContinueError(state, "Verify that the value entered is intended and is consistent with other components.");
                         }
@@ -1573,13 +1573,11 @@ void CalcSeriesPIU(EnergyPlusData &state,
                 thisPIU.SecAirMassFlow = 0.0;
                 state.dataHVACGlobal->TurnFansOn = false;
             } else {
-                if (thisPIU.fanControlType == FanCntrlType::VariableSpeedFan &&
-                    thisPIU.heatingControlType == HeatCntrlBehaviorType::StagedHeaterBehavior) {
+                if (thisPIU.heatingControlType == HeatCntrlBehaviorType::StagedHeaterBehavior) {
                     CalcVariableSpeedPIUStagedHeatingBehavior(state, PIUNum, ZoneNode, QZnReq, PriOn, thisPIU.PriAirMassFlow);
-                } else if (thisPIU.fanControlType == FanCntrlType::VariableSpeedFan &&
-                           thisPIU.heatingControlType == HeatCntrlBehaviorType::ModulatedHeaterBehavior) {
+                } else if (thisPIU.heatingControlType == HeatCntrlBehaviorType::ModulatedHeaterBehavior) {
                     CalcVariableSpeedPIUModulatedHeatingBehavior(state, PIUNum, ZoneNode, QZnReq, PriOn, thisPIU.PriAirMassFlow);
-                } else if (thisPIU.fanControlType == FanCntrlType::ConstantSpeedFan) {
+                } else { // FanCntrlType::ConstantSpeedFan
                     thisPIU.heatingOperatingMode = HeatOpModeType::ConstantVolumeHeat;
                     thisPIU.SecAirMassFlow = thisPIU.MaxTotAirMassFlow;
                 }
@@ -1597,13 +1595,11 @@ void CalcSeriesPIU(EnergyPlusData &state,
             // heating: set primary air flow to the minimum
             thisPIU.PriAirMassFlow = PriAirMassFlowMin;
             // determine secondary flow rate
-            if (thisPIU.fanControlType == FanCntrlType::VariableSpeedFan &&
-                thisPIU.heatingControlType == HeatCntrlBehaviorType::StagedHeaterBehavior) {
+            if (thisPIU.heatingControlType == HeatCntrlBehaviorType::StagedHeaterBehavior) {
                 CalcVariableSpeedPIUStagedHeatingBehavior(state, PIUNum, ZoneNode, QZnReq, PriOn, thisPIU.PriAirMassFlow);
-            } else if (thisPIU.fanControlType == FanCntrlType::VariableSpeedFan &&
-                       thisPIU.heatingControlType == HeatCntrlBehaviorType::ModulatedHeaterBehavior) {
+            } else if (thisPIU.heatingControlType == HeatCntrlBehaviorType::ModulatedHeaterBehavior) {
                 CalcVariableSpeedPIUModulatedHeatingBehavior(state, PIUNum, ZoneNode, QZnReq, PriOn, thisPIU.PriAirMassFlow);
-            } else if (thisPIU.fanControlType == FanCntrlType::ConstantSpeedFan) {
+            } else { // FanCntrlType::ConstantSpeedFan
                 thisPIU.heatingOperatingMode = HeatOpModeType::ConstantVolumeHeat;
                 thisPIU.SecAirMassFlow = max(0.0, thisPIU.MaxTotAirMassFlow - thisPIU.PriAirMassFlow);
             }
@@ -1907,13 +1903,11 @@ void CalcParallelPIU(EnergyPlusData &state,
                 thisPIU.SecAirMassFlow = 0.0;
                 state.dataHVACGlobal->TurnFansOn = false;
             } else {
-                if (thisPIU.fanControlType == FanCntrlType::VariableSpeedFan &&
-                    thisPIU.heatingControlType == HeatCntrlBehaviorType::StagedHeaterBehavior) {
+                if (thisPIU.heatingControlType == HeatCntrlBehaviorType::StagedHeaterBehavior) {
                     CalcVariableSpeedPIUStagedHeatingBehavior(state, PIUNum, ZoneNode, QZnReq, PriOn, thisPIU.PriAirMassFlow);
-                } else if (thisPIU.fanControlType == FanCntrlType::VariableSpeedFan &&
-                           thisPIU.heatingControlType == HeatCntrlBehaviorType::ModulatedHeaterBehavior) {
+                } else if (thisPIU.heatingControlType == HeatCntrlBehaviorType::ModulatedHeaterBehavior) {
                     CalcVariableSpeedPIUModulatedHeatingBehavior(state, PIUNum, ZoneNode, QZnReq, PriOn, thisPIU.PriAirMassFlow);
-                } else if (thisPIU.fanControlType == FanCntrlType::ConstantSpeedFan) {
+                } else { // FanCntrlType::ConstantSpeedFan
                     thisPIU.heatingOperatingMode = HeatOpModeType::ConstantVolumeHeat;
                     thisPIU.SecAirMassFlow = thisPIU.MaxSecAirMassFlow;
                 }
@@ -1927,7 +1921,7 @@ void CalcParallelPIU(EnergyPlusData &state,
                 if (thisPIU.fanControlType == FanCntrlType::ConstantSpeedFan) {
                     thisPIU.heatingOperatingMode = HeatOpModeType::ConstantVolumeHeat;
                     thisPIU.SecAirMassFlow = thisPIU.MaxSecAirMassFlow;
-                } else if (thisPIU.fanControlType == FanCntrlType::VariableSpeedFan) {
+                } else { // FanCntrlType::VariableSpeedFan
                     if (thisPIU.heatingControlType == HeatCntrlBehaviorType::StagedHeaterBehavior) {
                         thisPIU.heatingOperatingMode = HeatOpModeType::StagedHeatFirstStage;
                     } else {
@@ -1953,13 +1947,11 @@ void CalcParallelPIU(EnergyPlusData &state,
             // set primary air flow to the minimum
             thisPIU.PriAirMassFlow = PriAirMassFlowMin;
             // determine secondary flow rate
-            if (thisPIU.fanControlType == FanCntrlType::VariableSpeedFan &&
-                thisPIU.heatingControlType == HeatCntrlBehaviorType::StagedHeaterBehavior) {
+            if (thisPIU.heatingControlType == HeatCntrlBehaviorType::StagedHeaterBehavior) {
                 CalcVariableSpeedPIUStagedHeatingBehavior(state, PIUNum, ZoneNode, QZnReq, PriOn, thisPIU.PriAirMassFlow);
-            } else if (thisPIU.fanControlType == FanCntrlType::VariableSpeedFan &&
-                       thisPIU.heatingControlType == HeatCntrlBehaviorType::ModulatedHeaterBehavior) {
+            } else if (thisPIU.heatingControlType == HeatCntrlBehaviorType::ModulatedHeaterBehavior) {
                 CalcVariableSpeedPIUModulatedHeatingBehavior(state, PIUNum, ZoneNode, QZnReq, PriOn, thisPIU.PriAirMassFlow);
-            } else if (thisPIU.fanControlType == FanCntrlType::ConstantSpeedFan) {
+            } else { // FanCntrlType::ConstantSpeedFan
                 thisPIU.heatingOperatingMode = HeatOpModeType::ConstantVolumeHeat;
                 thisPIU.SecAirMassFlow = thisPIU.MaxSecAirMassFlow;
             }
@@ -2202,8 +2194,7 @@ void ReportCurOperatingControlStage(EnergyPlusData &state, int const piuNum, boo
             } else {
                 state.dataPowerInductionUnits->PIU(piuNum).CurOperationControlStage = deadband;
             }
-        }
-        if (state.dataPowerInductionUnits->PIU(piuNum).fanControlType == FanCntrlType::VariableSpeedFan) {
+        } else { // FanCntrlType::VariableSpeedFan
             if (heaterMode != HeatOpModeType::HeaterOff) {
                 if (state.dataPowerInductionUnits->PIU(piuNum).heatingControlType == HeatCntrlBehaviorType::StagedHeaterBehavior) {
                     if (heaterMode == HeatOpModeType::StagedHeatFirstStage) {

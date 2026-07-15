@@ -656,7 +656,7 @@ namespace DElightManagerF {
                                           RefPt_WCS_Coord.z * M2FT,
                                           znDayl.refPts(refPt.indexToFracAndIllum).fracZoneDaylit,
                                           znDayl.refPts(refPt.indexToFracAndIllum).illumSetPoint * LUX2FC,
-                                          znDayl.LightControlType);
+                                          static_cast<int>(znDayl.LightControlType));
                                     // RJH 2008-03-07: Set up DaylIllumAtRefPt for output for this DElight zone RefPt
                                     SetupOutputVariable(state,
                                                         "Daylighting Reference Point Illuminance",
@@ -674,7 +674,8 @@ namespace DElightManagerF {
                                           RefPt_WCS_Coord.z * M2FT,
                                           0.0,
                                           0.0 * LUX2FC,
-                                          znDayl.LightControlType); // should never happen but just in case send zero fraction and illuminance
+                                          static_cast<int>(
+                                              znDayl.LightControlType)); // should never happen but just in case send zero fraction and illuminance
                                 }
                             } // Max 100 RefPt test
                         } // RefPt in current DElight Zone test

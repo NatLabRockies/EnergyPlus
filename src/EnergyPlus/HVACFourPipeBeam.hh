@@ -100,8 +100,8 @@ namespace FourPipeBeam {
         ///// Note use of shared_ptr here is not a good pattern, not to be replicated without further discussion.
         static std::shared_ptr<AirTerminalUnit> fourPipeBeamFactory(EnergyPlusData &state, std::string objectName);
         void simulate(EnergyPlusData &state,
-                      bool const FirstHVACIteration, // TRUE if first HVAC iteration in time step
-                      Real64 &NonAirSysOutput        // convective cooling by the beam system [W]
+                      bool FirstHVACIteration, // TRUE if first HVAC iteration in time step
+                      Real64 &NonAirSysOutput  // convective cooling by the beam system [W]
         );
 
         int getZoneIndex();

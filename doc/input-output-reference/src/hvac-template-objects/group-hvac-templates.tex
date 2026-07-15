@@ -393,11 +393,36 @@ The name of a schedule (ref: Schedule) that denotes whether cooling is available
 
 \paragraph{Field: Dehumidification Control Type}\label{field-dehumidification-control-type-000}
 
-Select from \emph{ConstantSensibleHeatRatio}, \emph{Humidistat, None, or ConstantSupplyHumidityRatio}. \emph{ConstantSensibleHeatRatio} (the default) means that the ideal loads system will be controlled to meet the sensible cooling load, and the latent cooling rate will be computed using a constant sensible heat ratio (SHR) (see next field). \emph{Humidistat} means that there is a \hyperref[zonecontrolhumidistat]{ZoneControl:Humidistat} for this zone and the ideal loads system will attempt to meet the humidistat request (i.e.~will dehumidify according to the Dehumidifying Relative Humidity Schedule in the \hyperref[zonecontrolhumidistat]{ZoneControl:Humidistat} object). \emph{None} means that there is no dehumidification. \emph{ConstantSupplyHumidityRatio} means that during cooling the supply air will always be at the Minimum Cooling Supply Humidity Ratio. For \emph{ConstantSensibleHeatRatio} and \emph{Humidistat}, if the mixed air humidity ratio is less than the target humidity ratio, then the mixed air humidity ratio will be used. For all options, the supply air humidity ratio will never be allowed to exceed saturation at the supply dry bulb temperature.
+Select from the following:
+
+\begin{itemize}
+\item
+  \emph{ConstantSensibleHeatRatio} (the default): the ideal loads system will be controlled to meet the sensible cooling load, and the latent cooling rate will be computed using a constant sensible heat ratio (SHR) (see the Cooling Sensible Heat Ratio field below).
+\item
+  \emph{Humidistat}: there is a \hyperref[zonecontrolhumidistat]{ZoneControl:Humidistat} for this zone and the ideal loads system will attempt to meet the humidistat request (i.e.~will dehumidify according to the Dehumidifying Relative Humidity Schedule in the \hyperref[zonecontrolhumidistat]{ZoneControl:Humidistat} object).
+\item
+  \emph{None}: there is no dehumidification.
+\item
+  \emph{ConstantSupplyHumidityRatio}: during cooling the supply air will always be at the Minimum Cooling Supply Humidity Ratio.
+\end{itemize}
+
+For \emph{ConstantSensibleHeatRatio} and \emph{Humidistat}, if the mixed air humidity ratio is less than the target humidity ratio, then the mixed air humidity ratio will be used. For all options, the supply air humidity ratio will never be allowed to exceed saturation at the supply dry bulb temperature.
 
 The selected dehumidification control type is always applied when the unit is in cooling mode. If the unit is in deadband mode (not actively heating the supply air) control type \emph{Humidistat} will be active. If the unit is in heating mode, control type \emph{Humidistat} will be active if the Humidification Control Type field below is set to \emph{Humidistat} or \emph{None}.
 
 This allows the ideal loads system to heat and dehumidify at the same time.
+
+\begin{center}\rule{0.5\linewidth}{0.4pt}\end{center}
+
+\textbf{Note: About the creation of ZoneControl:Humidistat}
+
+When the \hyperref[field-dehumidification-control-type-000]{Dehumidification Control Type} or the \hyperref[field-humidification-control-type]{Humidification Control Type} (or both) is set to \emph{Humidistat}, ExpandObjects checks whether a \hyperref[zonecontrolhumidistat]{ZoneControl:Humidistat} object already references this zone.
+
+If none is found, ExpandObjects automatically creates one, with its Dehumidifying and/or Humidifying Relative Humidity Setpoint Schedule Name fields generated from the Dehumidification Setpoint and Humidification Setpoint fields above (using \emph{HVACTemplate-Always} schedules).
+If only one of the two control types is set to \emph{Humidistat}, the other setpoint schedule of the generated object is set so that it never triggers: 1\% for the Humidifying Relative Humidity Setpoint Schedule when only Dehumidification Control Type = \emph{Humidistat}, or 100\% for the Dehumidifying Relative Humidity Setpoint Schedule when only Humidification Control Type = \emph{Humidistat}.
+
+If a \hyperref[zonecontrolhumidistat]{ZoneControl:Humidistat} object already exists for the zone, ExpandObjects will not create a new one (a warning is issued) and the existing object is used as-is. In that case, if Dehumidification Control Type = \emph{Humidistat}, the existing object's Dehumidifying Relative Humidity Setpoint Schedule Name field must not be blank, and if Humidification Control Type = \emph{Humidistat}, its Humidifying Relative Humidity Setpoint Schedule Name field must not be blank; otherwise ExpandObjects will issue a fatal error.
+
 
 \paragraph{Field: Cooling Sensible Heat Ratio}\label{field-cooling-sensible-heat-ratio}
 
@@ -409,7 +434,18 @@ This field specifies the zone humidistat relative humidity setpoint for dehumidi
 
 \paragraph{Field: Humidification Control Type}\label{field-humidification-control-type}
 
-Select from \emph{None}, \emph{Humidistat, or ConstantSupplyHumidityRatio}. \emph{None} means that there is no humidification. \emph{Humidistat} means that there is a \hyperref[zonecontrolhumidistat]{ZoneControl:Humidistat} for this zone and the ideal loads system will attempt to meet the humidistat request (i.e., humidify according to the Humidifying Relative Humidity Setpoint Schedule in the \hyperref[zonecontrolhumidistat]{ZoneControl:Humidistat} object). \emph{ConstantSupplyHumidityRatio} means that during heating the supply air will always be at the Maximum Heating Supply Humidity Ratio. The default is \emph{None}. For \emph{Humidistat}, if the mixed air humidity ratio is greater than the target humidity ratio, then the mixed air humidity ratio will be used. For all options, the supply air humidity ratio will never be allowed to exceed saturation at the supply dry bulb temperature.
+Select from the following:
+
+\begin{itemize}
+\item
+  \emph{None} (the default): there is no humidification.
+\item
+  \emph{Humidistat}: there is a \hyperref[zonecontrolhumidistat]{ZoneControl:Humidistat} for this zone and the ideal loads system will attempt to meet the humidistat request (i.e.~will humidify according to the Humidifying Relative Humidity Setpoint Schedule in the \hyperref[zonecontrolhumidistat]{ZoneControl:Humidistat} object).
+\item
+  \emph{ConstantSupplyHumidityRatio}: during heating the supply air will always be at the Maximum Heating Supply Humidity Ratio.
+\end{itemize}
+
+For \emph{Humidistat}, if the mixed air humidity ratio is greater than the target humidity ratio, then the mixed air humidity ratio will be used. For all options, the supply air humidity ratio will never be allowed to exceed saturation at the supply dry bulb temperature.
 
 The selected humidification control type is always applied when the unit is in heating mode. If the unit is in deadband mode (not actively heating the supply air) control type \emph{Humidistat} will be active. If the unit is in cooling mode, control type \emph{Humidistat} will be active if the Dehumidification Control Type field above is set to \emph{Humidistat} or \emph{None}.
 

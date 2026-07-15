@@ -3187,8 +3187,8 @@ TEST_F(EnergyPlusFixture, SurfaceGeometry_CheckConvexityTest_9118)
     EXPECT_EQ(4, surface.Sides);
     EXPECT_TRUE(surface.IsConvex);
 
-    for (int i = 1; i <= 4; ++i) {
-        EXPECT_EQ(baseVertices[i - 1], vertices(i)) << "Failed for Vertex " << i;
+    for (int vertNum = 1; vertNum <= 4; ++vertNum) {
+        EXPECT_EQ(baseVertices[vertNum - 1], vertices(vertNum)) << "Failed for Vertex " << vertNum;
     }
 
     // Now perform the same test, except the first vertices is colinear, to ensure we also get that case covered
@@ -3219,8 +3219,8 @@ TEST_F(EnergyPlusFixture, SurfaceGeometry_CheckConvexityTest_9118)
     EXPECT_EQ(4, surface.Sides);
     EXPECT_TRUE(surface.IsConvex);
 
-    for (int i = 1; i <= 4; ++i) {
-        EXPECT_EQ(baseVertices[i - 1], vertices(i)) << "Failed for Vertex " << i;
+    for (int vertNum = 1; vertNum <= 4; ++vertNum) {
+        EXPECT_EQ(baseVertices[vertNum - 1], vertices(vertNum)) << "Failed for Vertex " << vertNum;
     }
 }
 
@@ -13155,7 +13155,7 @@ TEST_F(EnergyPlusFixture, SurfaceGeometry_GetVerticesDropDuplicates_Once)
 
     constexpr double perimeter = 2 * ((max_x - min_x) + (max_y - min_y));
 
-    std::string const idf_objects = fmt::format(R"idf(
+    std::string const idf_objects = std::format(R"idf(
   BuildingSurface:Detailed,
     Zn002:Flr002,            !- Name
     Floor,                   !- Surface Type
@@ -13168,12 +13168,12 @@ TEST_F(EnergyPlusFixture, SurfaceGeometry_GetVerticesDropDuplicates_Once)
     NoWind,                  !- Wind Exposure
     ,                        !- View Factor to Ground
     ,                        !- Number of Vertices
-    {min_x:.2f}, {min_y:.2f}, 0.00,    !- X,Y,Z ==> Vertex 1
-    {min_x:.2f}, {max_y:.2f}, 0.00,    !- X,Y,Z ==> Vertex 2
-    {max_x:.2f}, {max_y:.2f}, 0.00,    !- X,Y,Z ==> Vertex 3
-    {max_x:.2f}, {off_y:.2f}, 0.00,    !- X,Y,Z ==> Vertex 4
-    {off_x:.2f}, {off_y:.2f}, 0.00,    !- X,Y,Z ==> Vertex 5
-    {off_x:.2f}, {min_y:.2f}, 0.00;    !- X,Y,Z ==> Vertex 6
+    {0:.2f}, {3:.2f}, 0.00,    !- X,Y,Z ==> Vertex 1
+    {0:.2f}, {4:.2f}, 0.00,    !- X,Y,Z ==> Vertex 2
+    {1:.2f}, {4:.2f}, 0.00,    !- X,Y,Z ==> Vertex 3
+    {1:.2f}, {5:.2f}, 0.00,    !- X,Y,Z ==> Vertex 4
+    {2:.2f}, {5:.2f}, 0.00,    !- X,Y,Z ==> Vertex 5
+    {2:.2f}, {3:.2f}, 0.00;    !- X,Y,Z ==> Vertex 6
 
   BuildingSurface:Detailed,
     Zn001:Ceiling002,        !- Name
@@ -13187,19 +13187,19 @@ TEST_F(EnergyPlusFixture, SurfaceGeometry_GetVerticesDropDuplicates_Once)
     NoWind,                  !- Wind Exposure
     ,                        !- View Factor to Ground
     ,                        !- Number of Vertices
-    {off_x:.2f}, {min_y:.2f}, 0.00,    !- X,Y,Z ==> Vertex 1
-    {off_x:.2f}, {off_y:.2f}, 0.00,    !- X,Y,Z ==> Vertex 2
-    {max_x:.2f}, {off_y:.2f}, 0.00,    !- X,Y,Z ==> Vertex 3
-    {max_x:.2f}, {max_y:.2f}, 0.00,    !- X,Y,Z ==> Vertex 4
-    {min_x:.2f}, {max_y:.2f}, 0.00,    !- X,Y,Z ==> Vertex 5
-    {min_x:.2f}, {min_y:.2f}, 0.00;    !- X,Y,Z ==> Vertex 6
+    {2:.2f}, {3:.2f}, 0.00,    !- X,Y,Z ==> Vertex 1
+    {2:.2f}, {5:.2f}, 0.00,    !- X,Y,Z ==> Vertex 2
+    {1:.2f}, {5:.2f}, 0.00,    !- X,Y,Z ==> Vertex 3
+    {1:.2f}, {4:.2f}, 0.00,    !- X,Y,Z ==> Vertex 4
+    {0:.2f}, {4:.2f}, 0.00,    !- X,Y,Z ==> Vertex 5
+    {0:.2f}, {3:.2f}, 0.00;    !- X,Y,Z ==> Vertex 6
     )idf",
-                                                fmt::arg("min_x", min_x),
-                                                fmt::arg("max_x", max_x),
-                                                fmt::arg("off_x", off_x),
-                                                fmt::arg("min_y", min_y),
-                                                fmt::arg("max_y", max_y),
-                                                fmt::arg("off_y", off_y));
+                                                min_x,
+                                                max_x,
+                                                off_x,
+                                                min_y,
+                                                max_y,
+                                                off_y);
     ASSERT_TRUE(process_idf(idf_objects));
     state->init_state(*state);
 
@@ -13239,12 +13239,12 @@ TEST_F(EnergyPlusFixture, SurfaceGeometry_GetVerticesDropDuplicates_Once)
     EXPECT_EQ(2, SurfNum);
     auto const error_string = delimited_string({
         "   ** Warning ** GetVertices: Distance between two vertices < .01, possibly coincident. for Surface=ZN002:FLR002, in Zone=ZONE 2",
-        fmt::format("   **   ~~~   ** Vertex [6]=({:.2f},{:.2f},0.00)", off_x, min_y),
-        fmt::format("   **   ~~~   ** Vertex [1]=({:.2f},{:.2f},0.00)", min_x, min_y),
+        std::format("   **   ~~~   ** Vertex [6]=({:.2f},{:.2f},0.00)", off_x, min_y),
+        std::format("   **   ~~~   ** Vertex [1]=({:.2f},{:.2f},0.00)", min_x, min_y),
         "   **   ~~~   ** Dropping Vertex [6].",
         "   ** Warning ** GetVertices: Distance between two vertices < .01, possibly coincident. for Surface=ZN001:CEILING002, in Zone=ZONE 1",
-        fmt::format("   **   ~~~   ** Vertex [1]=({:.2f},{:.2f},0.00)", off_x, min_y),
-        fmt::format("   **   ~~~   ** Vertex [2]=({:.2f},{:.2f},0.00)", off_x, off_y),
+        std::format("   **   ~~~   ** Vertex [1]=({:.2f},{:.2f},0.00)", off_x, min_y),
+        std::format("   **   ~~~   ** Vertex [2]=({:.2f},{:.2f},0.00)", off_x, off_y),
         "   **   ~~~   ** Dropping Vertex [1].",
     });
     EXPECT_TRUE(compare_err_stream(error_string, true));

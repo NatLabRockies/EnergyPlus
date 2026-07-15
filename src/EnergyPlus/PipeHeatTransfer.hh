@@ -237,9 +237,9 @@ namespace PipeHeatTransfer {
         Real64 OutsidePipeHeatTransCoef(EnergyPlusData &state);
 
         Real64 CalcPipeHeatTransCoef(EnergyPlusData &state,
-                                     Real64 Temperature,  // Temperature of water entering the surface, in C
-                                     Real64 MassFlowRate, // Mass flow rate, in kg/s
-                                     Real64 Diameter      // Pipe diameter, m
+                                     Real64 Temperature,    // Temperature of water entering the surface, in C
+                                     Real64 t_MassFlowRate, // Mass flow rate, in kg/s
+                                     Real64 Diameter        // Pipe diameter, m
         );
 
         void ReportPipesHeatTransfer(EnergyPlusData &state); // Index for the surface under consideration
@@ -250,7 +250,7 @@ namespace PipeHeatTransfer {
                                       std::string const &PipeType,         // module object of pipe (error messages)
                                       std::string const &ConstructionName, // construction name of pipe (error messages)
                                       std::string_view FieldName,          // fieldname of pipe (error messages)
-                                      int ConstructionNum,                 // pointer into construction data
+                                      int t_ConstructionNum,               // pointer into construction data
                                       bool &ErrorsFound                    // set to true if errors found here
         );
 

@@ -53,41 +53,72 @@
 #include <format>
 #include <ranges>
 #include <string>
-
-#if __cplusplus >= 202302L
-#    error "std::formattable is defined, remove C++ 20 implementation"
+#ifdef __cpp_lib_print
+#    include <print>
 #endif
 
+#if 0
+#    define DO_PRAGMA_FORMATTERS(x) _Pragma(#x)
+#    define DEBUG_PRAGMA(msg) DO_PRAGMA_FORMATTERS(message(#msg))
+#else
+#    define DEBUG_PRAGMA(msg)
+#endif
+
+// ===============================  EnergyPlus::formattable  =================================
+namespace EnergyPlus {
+#if __cplusplus >= 202302L
+// #error "std::formattable is defined, remove C++ 20 implementation"
+DEBUG_PRAGMA("Using std::formattable")
+using std::formattable;
+#else
 template <typename T, typename CharT = char>
 concept formattable =
-    requires(std::remove_reference_t<T> & v, std::basic_format_context<std::back_insert_iterator<std::basic_string<CharT>>, CharT> ctx)
-{
-    std::formatter<std::remove_reference_t<T>, CharT>{}.format(v, ctx);
-    std::formatter<std::remove_reference_t<T>, CharT>{}.parse(std::declval<std::basic_format_parse_context<CharT> &>());
-};
+    requires(std::remove_reference_t<T> &v, std::basic_format_context<std::back_insert_iterator<std::basic_string<CharT>>, CharT> ctx) {
+        std::formatter<std::remove_reference_t<T>, CharT>{}.format(v, ctx);
+        std::formatter<std::remove_reference_t<T>, CharT>{}.parse(std::declval<std::basic_format_parse_context<CharT> &>());
+    };
+#endif
+} // namespace EnergyPlus
 
-template <typename T> concept set_like = std::ranges::range<T> && requires
-{
-    typename T::key_type;
-};
+// ===============================  formatting ranges  =================================
+#if __cpp_lib_format_ranges >= 202207L
+DEBUG_PRAGMA("Formatting ranges is built-in")
+#else
+template <typename T>
+concept set_like = std::ranges::range<T> && requires { typename T::key_type; };
 
 template <typename T>
 concept formattable_range =
     // A range
     std::ranges::range<T>
-    // A range of formattable elements. It'd be a nicer error message to include it, but that prevents using it for a range of range
-    // eg : std::vector<std::vector<int>>.
-    // && std::formattable<std::ranges::range_value_t<T>, char>
-    // But we exclude the ones that are already formattable as a whole, like std::string and std::string_view, char*.
+    // A range of formattable elements. It'd be a nicer error message to include
+    // it, but that prevents using it for a range of range eg :
+    // std::vector<std::vector<int>>.
+    // && EnergyPlus::formattable<std::ranges::range_value_t<T>, char>
+    // But we exclude the ones that are already formattable as a whole, like
+    // std::string and std::string_view, char*.
     && !std::is_same_v<T, std::string> && !std::is_same_v<T, std::string_view> && !std::is_same_v<std::ranges::range_value_t<T>, char>;
 
 template <formattable_range Container> struct std::formatter<Container>
 {
     using T = std::ranges::range_value_t<Container>;
     std::formatter<T> element_formatter;
+    bool no_brackets = false;
 
     constexpr auto parse(std::format_parse_context &ctx) -> std::format_parse_context::iterator
     {
+        auto it = ctx.begin();
+        // Accept the standard range-format-spec's 'n' range-type, which suppresses the
+        // surrounding brackets, eg "{:n:.2f}" for a range of double.
+        if (it != ctx.end() && *it == 'n') {
+            no_brackets = true;
+            ctx.advance_to(++it);
+        }
+        // Accept the optional ':' that separates the range-spec from the underlying
+        // element-spec, eg "{::.2f}" or "{:n:.2f}" for a range of double.
+        if (it != ctx.end() && *it == ':') {
+            ctx.advance_to(++it);
+        }
         return element_formatter.parse(ctx);
     }
 
@@ -98,7 +129,9 @@ template <formattable_range Container> struct std::formatter<Container>
         constexpr bool quoted = std::is_same_v<T, std::string> || std::is_same_v<T, std::string_view>;
 
         auto it = ctx.out();
-        *it++ = open;
+        if (!no_brackets) {
+            *it++ = open;
+        }
         for (bool first = true; const auto &elem : v) {
             if (!first) {
                 it = std::format_to(it, ", ");
@@ -112,16 +145,23 @@ template <formattable_range Container> struct std::formatter<Container>
                 it = element_formatter.format(elem, ctx);
             }
         }
-        *it++ = close;
+        if (!no_brackets) {
+            *it++ = close;
+        }
         return it;
     }
 };
-
-#ifdef __cpp_lib_print
-#    error "std::print is defined, remove C++ 20 implementation"
 #endif
 
-namespace std {
+// ===============================  EnergyPlus::print  =================================
+namespace EnergyPlus {
+#ifdef __cpp_lib_print
+
+DEBUG_PRAGMA("__cpp_lib_print is defined, using std::print")
+using std::print;
+
+#else
+
 template <class... Args> void print(FILE *stream, std::format_string<Args...> fmt, Args &&...args)
 {
     std::string formatted = std::format(fmt, std::forward<Args>(args)...);
@@ -133,8 +173,10 @@ template <class... Args> void print(std::format_string<Args...> fmt, Args &&...a
 {
     print(stdout, fmt, std::forward<Args>(args)...);
 }
-} // namespace std
+#endif
+} // namespace EnergyPlus
 
+// ===============================  EnergyPlus::join  =================================
 namespace detail {
 template <typename R> struct format_join_view
 {
@@ -168,6 +210,8 @@ template <typename R> struct std::formatter<::detail::format_join_view<R>>
 };
 
 namespace EnergyPlus {
+
+// Usage: std::format("{:.4f}", EnergyPlus::join(range, "|"))
 template <typename R> auto join(const R &r, std::string_view sep)
 {
     return ::detail::format_join_view<R>{r, sep};

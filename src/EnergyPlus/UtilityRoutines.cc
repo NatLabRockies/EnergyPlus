@@ -1594,7 +1594,7 @@ void ShowSevereInvalidKey(
     ShowSevereError(state, std::format("{}: {} = {}", eoh.routineName, eoh.objectType, eoh.objectName));
     ShowContinueError(state, std::format("{} = {}, invalid key.", fieldName, fieldVal));
     if (!msg.empty()) {
-        ShowContinueError(state, EnergyPlus::format(msg));
+        ShowContinueError(state, std::string(msg));
     }
 }
 
@@ -1706,7 +1706,7 @@ void ShowWarningInvalidKey(EnergyPlusData &state,
     ShowWarningError(state, std::format("{}: {} = {}", eoh.routineName, eoh.objectType, eoh.objectName));
     ShowContinueError(state, std::format("{} = {}, invalid key, {} will be used.", fieldName, fieldVal, defaultVal));
     if (!msg.empty()) {
-        ShowContinueError(state, EnergyPlus::format(msg));
+        ShowContinueError(state, std::string(msg));
     }
 }
 

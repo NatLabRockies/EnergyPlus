@@ -68,7 +68,7 @@ VendorType Penumbra::get_vendor_name() {
     vendor_type = VendorType::mesa;
   } else {
     throw PenumbraException(
-        fmt::format("Failed to find GPU or vendor name ({}) is not in list.", vendor_name),
+        std::format("Failed to find GPU or vendor name ({}) is not in list.", vendor_name),
         *(penumbra->logger));
   }
   return vendor_type;

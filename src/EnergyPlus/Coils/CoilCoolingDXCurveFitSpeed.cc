@@ -441,7 +441,7 @@ void CoilCoolingDXCurveFitSpeed::size(EnergyPlus::EnergyPlusData &state)
 void CoilCoolingDXCurveFitSpeed::CalcSpeedOutput(EnergyPlus::EnergyPlusData &state,
                                                  const Node::NodeData &inletNode,
                                                  Node::NodeData &outletNode,
-                                                 Real64 const PLR,
+                                                 Real64 const t_PLR,
                                                  HVAC::FanOp const fanOp,
                                                  const Real64 condInletTemp)
 {
@@ -449,7 +449,7 @@ void CoilCoolingDXCurveFitSpeed::CalcSpeedOutput(EnergyPlus::EnergyPlusData &sta
     // SUBROUTINE PARAMETER DEFINITIONS:
     static constexpr std::string_view RoutineName("CalcSpeedOutput: ");
 
-    if ((PLR == 0.0) || (AirMassFlow == 0.0)) {
+    if ((t_PLR == 0.0) || (AirMassFlow == 0.0)) {
         outletNode.Temp = inletNode.Temp;
         outletNode.HumRat = inletNode.HumRat;
         outletNode.Enthalpy = inletNode.Enthalpy;
@@ -545,7 +545,7 @@ void CoilCoolingDXCurveFitSpeed::CalcSpeedOutput(EnergyPlus::EnergyPlusData &sta
 
     Real64 PLF = 1.0; // part load factor as a function of PLR, RTF = PLR / PLF
     if (indexPLRFPLF > 0) {
-        PLF = Curve::CurveValue(state, indexPLRFPLF, PLR); // Calculate part-load factor
+        PLF = Curve::CurveValue(state, indexPLRFPLF, t_PLR); // Calculate part-load factor
     }
     if (fanOp == HVAC::FanOp::Cycling) {
         state.dataHVACGlobal->OnOffFanPartLoadFraction = PLF;
@@ -570,7 +570,7 @@ void CoilCoolingDXCurveFitSpeed::CalcSpeedOutput(EnergyPlus::EnergyPlusData &sta
     }
 
     Real64 EIR = RatedEIR * EIRFlowModFac * EIRTempModFac;
-    RTF = PLR / PLF;
+    RTF = t_PLR / PLF;
     fullLoadPower = TotCap * EIR;
     fullLoadWasteHeat = ratedWasteHeatFractionOfPowerInput * wasteHeatTempModFac * fullLoadPower;
 
@@ -762,7 +762,7 @@ Real64 CoilCoolingDXCurveFitSpeed::CalcBypassFactor(EnergyPlus::EnergyPlusData &
 Real64 CoilCoolingDXCurveFitSpeed::calcEffectiveSHR(const Node::NodeData &inletNode,
                                                     Real64 const inletWetBulb,
                                                     Real64 const SHRss,      // Steady-state sensible heat ratio
-                                                    Real64 const RTF,        // Compressor run-time fraction
+                                                    Real64 const t_RTF,      // Compressor run-time fraction
                                                     Real64 const QLatRated,  // Rated latent capacity
                                                     Real64 const QLatActual, // Actual latent capacity
                                                     Real64 const HeatingRTF  // Used to recalculate Toff for cycling fan systems
@@ -794,15 +794,15 @@ Real64 CoilCoolingDXCurveFitSpeed::calcEffectiveSHR(const Node::NodeData &inletN
     //   at the current operating conditions (sec)
     Real64 Gamma; // Initial moisture evaporation rate divided by steady-state AC latent capacity
     //   at the current operating conditions
-    Real64 Twet_max; // Maximum allowed value for Twet
-    Real64 Ton;      // Coil on time (sec)
-    Real64 Toff;     // Coil off time (sec)
-    Real64 Toffa;    // Actual coil off time (sec). Equations valid for Toff <= (2.0 * Twet/Gamma)
-    Real64 aa;       // Intermediate variable
-    Real64 To1;      // Intermediate variable (first guess at To). To = time to the start of moisture removal
-    Real64 To2;      // Intermediate variable (second guess at To). To = time to the start of moisture removal
-    Real64 Error;    // Error for iteration (DO) loop
-    Real64 LHRmult;  // Latent Heat Ratio (LHR) multiplier. The effective latent heat ratio LHR = (1-SHRss)*LHRmult
+    Real64 Twet_max;  // Maximum allowed value for Twet
+    Real64 Ton;       // Coil on time (sec)
+    Real64 Toff;      // Coil off time (sec)
+    Real64 Toffa;     // Actual coil off time (sec). Equations valid for Toff <= (2.0 * Twet/Gamma)
+    Real64 aa;        // Intermediate variable
+    Real64 To1;       // Intermediate variable (first guess at To). To = time to the start of moisture removal
+    Real64 To2 = 0.0; // Intermediate variable (second guess at To). To = time to the start of moisture removal
+    Real64 Error;     // Error for iteration (DO) loop
+    Real64 LHRmult;   // Latent Heat Ratio (LHR) multiplier. The effective latent heat ratio LHR = (1-SHRss)*LHRmult
     Real64 Ton_heating;
     Real64 Toff_heating;
 
@@ -814,7 +814,7 @@ Real64 CoilCoolingDXCurveFitSpeed::calcEffectiveSHR(const Node::NodeData &inletN
     //  No moisture evaporation (latent degradation) occurs for runtime fraction of 1.0
     //  All latent degradation model parameters cause divide by 0.0 if not greater than 0.0
     //  Latent degradation model parameters initialize to 0.0 meaning no evaporation model used.
-    if (RTF >= 1.0) {
+    if (t_RTF >= 1.0) {
         SHReff = SHRss;
         return SHReff;
     }
@@ -826,8 +826,8 @@ Real64 CoilCoolingDXCurveFitSpeed::calcEffectiveSHR(const Node::NodeData &inletN
     Gamma = Gamma_Rated * QLatRated * (inletNode.Temp - inletWetBulb) / ((26.7 - 19.4) * QLatActual + 1.e-10);
 
     //  Calculate the compressor on and off times using a converntional thermostat curve
-    Ton = 3600.0 / (4.0 * Nmax * (1.0 - RTF)); // duration of cooling coil on-cycle (sec)
-    Toff = 3600.0 / (4.0 * Nmax * RTF);        // duration of cooling coil off-cycle (sec)
+    Ton = 3600.0 / (4.0 * Nmax * (1.0 - t_RTF)); // duration of cooling coil on-cycle (sec)
+    Toff = 3600.0 / (4.0 * Nmax * t_RTF);        // duration of cooling coil off-cycle (sec)
 
     //  Cap Toff to meet the equation restriction
     if (Gamma > 0.0) {
@@ -845,7 +845,7 @@ Real64 CoilCoolingDXCurveFitSpeed::calcEffectiveSHR(const Node::NodeData &inletN
     //  coil is not always active. This additional fan run time has not been accounted for at this time.
     //  Recalculate Toff for cycling fan systems when heating is active
     if (HeatingRTF > 0.0) {
-        if (HeatingRTF < 1.0 && HeatingRTF > RTF) {
+        if (HeatingRTF < 1.0 && HeatingRTF > t_RTF) {
             Ton_heating = 3600.0 / (4.0 * Nmax * (1.0 - HeatingRTF));
             Toff_heating = 3600.0 / (4.0 * Nmax * HeatingRTF);
             //    add additional heating coil operation during cooling coil off cycle (due to cycling rate difference of coils)

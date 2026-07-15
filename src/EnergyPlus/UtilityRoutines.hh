@@ -51,13 +51,12 @@
 // C++ Headers
 #include <functional>
 #include <optional>
+#include <span>
 
 // ObjexxFCL Headers
 #include <ObjexxFCL/Array1D.hh>
 #include <ObjexxFCL/Array1S.fwd.hh>
 #include <ObjexxFCL/string.functions.hh>
-
-#include <GSL/span.h>
 
 // EnergyPlus Headers
 #include <EnergyPlus/Data/BaseData.hh>
@@ -680,7 +679,7 @@ namespace Util {
 
 } // namespace Util
 
-constexpr int getEnumValue(const gsl::span<const std::string_view> sList, const std::string_view s)
+constexpr int getEnumValue(const std::span<const std::string_view> sList, const std::string_view s)
 {
     for (unsigned int i = 0; i < sList.size(); ++i) {
         if (sList[i] == s) {

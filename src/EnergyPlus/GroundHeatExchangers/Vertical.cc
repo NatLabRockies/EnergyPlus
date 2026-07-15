@@ -60,6 +60,7 @@
 #include <EnergyPlus/GroundHeatExchangers/State.hh>
 #include <EnergyPlus/GroundHeatExchangers/Vertical.hh>
 #include <EnergyPlus/InputProcessing/InputProcessor.hh>
+#include <EnergyPlus/OutputReportPredefined.hh>
 #include <EnergyPlus/Plant/DataPlant.hh>
 #include <EnergyPlus/PlantUtilities.hh>
 #include <EnergyPlus/WeatherManager.hh>
@@ -70,7 +71,7 @@ GLHEVert::GLHEVert(EnergyPlusData &state, std::string const &objName, nlohmann::
     // Check for duplicates
     for (auto &existingObj : state.dataGroundHeatExchanger->verticalGLHE) {
         if (objName == existingObj.name) {
-            ShowFatalError(state, EnergyPlus::format("Invalid input for {} object: Duplicate name found: {}", moduleName, existingObj.name));
+            ShowFatalError(state, std::format("Invalid input for {} object: Duplicate name found: {}", moduleName, existingObj.name));
         }
     }
 
@@ -134,7 +135,7 @@ GLHEVert::GLHEVert(EnergyPlusData &state, std::string const &objName, nlohmann::
                 this->gFuncCalcMethod = GFuncCalcMethod::FullDesign;
             } else {
                 errorsFound = true;
-                ShowSevereError(state, EnergyPlus::format("g-Function Calculation Method: \"{}\" is invalid", gFunctionMethodStr));
+                ShowSevereError(state, std::format("g-Function Calculation Method: \"{}\" is invalid", gFunctionMethodStr));
             }
         }
 
@@ -149,16 +150,16 @@ GLHEVert::GLHEVert(EnergyPlusData &state, std::string const &objName, nlohmann::
             bool objNameFound = j.find("ghe_vertical_sizing_object_name") != j.end();
 
             if (!objTypeFound) {
-                ShowSevereError(state, EnergyPlus::format("GroundHeatExchanger:System \"{}\"", this->name));
-                ShowContinueError(
-                    state, EnergyPlus::format("g-Function Calculation Method = \"{}\"", j["g_function_calculation_method"].get<std::string>()));
+                ShowSevereError(state, std::format("GroundHeatExchanger:System \"{}\"", this->name));
+                ShowContinueError(state,
+                                  std::format("g-Function Calculation Method = \"{}\"", j["g_function_calculation_method"].get<std::string>()));
                 ShowContinueError(state, "GHE:Vertical:Sizing Object Type not specified.");
                 errorsFound = true;
             }
             if (!objNameFound) {
-                ShowSevereError(state, EnergyPlus::format("GroundHeatExchanger:System \"{}\"", this->name));
-                ShowContinueError(
-                    state, EnergyPlus::format("g-Function Calculation Method = \"{}\"", j["g_function_calculation_method"].get<std::string>()));
+                ShowSevereError(state, std::format("GroundHeatExchanger:System \"{}\"", this->name));
+                ShowContinueError(state,
+                                  std::format("g-Function Calculation Method = \"{}\"", j["g_function_calculation_method"].get<std::string>()));
                 ShowContinueError(state, "GHE:Vertical:Sizing Object Name not specified.");
                 errorsFound = true;
             }
@@ -167,16 +168,15 @@ GLHEVert::GLHEVert(EnergyPlusData &state, std::string const &objName, nlohmann::
             this->sizingData.type = j.at("ghe_vertical_sizing_object_type");
 
             if (Util::makeUPPER(this->sizingData.type) != "GROUNDHEATEXCHANGER:VERTICAL:SIZING:RECTANGLE") {
-                ShowSevereError(state, EnergyPlus::format("GroundHeatExchanger:System \"{}\"", this->name));
-                ShowContinueError(state, EnergyPlus::format("GHE:Vertical:Sizing Object Type not supported \"{}\"", this->sizingData.type));
+                ShowSevereError(state, std::format("GroundHeatExchanger:System \"{}\"", this->name));
+                ShowContinueError(state, std::format("GHE:Vertical:Sizing Object Type not supported \"{}\"", this->sizingData.type));
                 errorsFound = true;
             }
 
             auto const instances = state.dataInputProcessing->inputProcessor->epJSON.find("GroundHeatExchanger:Vertical:Sizing:Rectangle");
             if (instances == state.dataInputProcessing->inputProcessor->epJSON.end()) {
                 ShowSevereError(
-                    state,
-                    EnergyPlus::format("Expected to find GroundHeatExchanger:Vertical:Sizing named {}, but it was missing", this->sizingData.name));
+                    state, std::format("Expected to find GroundHeatExchanger:Vertical:Sizing named {}, but it was missing", this->sizingData.name));
                 errorsFound = true;
             }
 
@@ -192,8 +192,8 @@ GLHEVert::GLHEVert(EnergyPlusData &state, std::string const &objName, nlohmann::
                     auto const spInstances = state.dataInputProcessing->inputProcessor->epJSON.find("SizingPeriod:WeatherFileDays");
                     if (spInstances == state.dataInputProcessing->inputProcessor->epJSON.end()) {
                         ShowSevereError(state,
-                                        EnergyPlus::format("Expected to find SizingPeriod:WeatherFileDays named {}, but it was missing",
-                                                           this->sizingData.sizingPeriodName));
+                                        std::format("Expected to find SizingPeriod:WeatherFileDays named {}, but it was missing",
+                                                    this->sizingData.sizingPeriodName));
                         errorsFound = true;
                     }
 
@@ -208,8 +208,8 @@ GLHEVert::GLHEVert(EnergyPlusData &state, std::string const &objName, nlohmann::
 
                     if (!spIsAnnual) {
                         ShowSevereError(state,
-                                        EnergyPlus::format("SizingPeriod:WeatherFileDays named {}, must be an annual design period of 365 days",
-                                                           this->sizingData.sizingPeriodName));
+                                        std::format("SizingPeriod:WeatherFileDays named {}, must be an annual design period of 365 days",
+                                                    this->sizingData.sizingPeriodName));
                         errorsFound = true;
                     }
 
@@ -280,7 +280,7 @@ GLHEVert::GLHEVert(EnergyPlusData &state, std::string const &objName, nlohmann::
             if (j.find("vertical_well_locations") == j.end()) {
                 ShowSevereError(state, "For a full design GHE simulation, you must provide a GHE:Vertical:Single object");
                 ShowContinueError(state, "If you enter more than one, only the first is used to specify the borehole design");
-                ShowContinueError(state, EnergyPlus::format("Check references to these objects for GHE:System object: {}", this->name));
+                ShowContinueError(state, std::format("Check references to these objects for GHE:System object: {}", this->name));
                 errorsFound = true;
             }
 
@@ -308,7 +308,7 @@ GLHEVert::GLHEVert(EnergyPlusData &state, std::string const &objName, nlohmann::
             if (j.find("vertical_well_locations") == j.end()) {
                 // No ResponseFactors, GHEArray, or SingleBH object are referenced
                 ShowSevereError(state, "No GHE:ResponseFactors, GHE:Vertical:Array, or GHE:Vertical:Single objects found");
-                ShowContinueError(state, EnergyPlus::format("Check references to these objects for GHE:System object: {}", this->name));
+                ShowContinueError(state, std::format("Check references to these objects for GHE:System object: {}", this->name));
                 errorsFound = true;
             }
 
@@ -392,8 +392,20 @@ GLHEVert::GLHEVert(EnergyPlusData &state, std::string const &objName, nlohmann::
 
     // Check for Errors
     if (errorsFound) {
-        ShowFatalError(state, EnergyPlus::format("Errors found in processing input for {}", moduleName));
+        ShowFatalError(state, std::format("Errors found in processing input for {}", moduleName));
     }
+
+    OutputReportPredefined::PreDefTableEntry(state,
+                                             state.dataOutRptPredefined->pdchGLHEType,
+                                             this->name,
+                                             DataPlant::PlantEquipTypeNames[static_cast<int>(DataPlant::PlantEquipmentType::GrndHtExchgSystem)]);
+    OutputReportPredefined::PreDefTableEntry(state, state.dataOutRptPredefined->pdchGLHETubeLength, this->name, this->totalTubeLength);
+    OutputReportPredefined::PreDefTableEntry(state, state.dataOutRptPredefined->pdchGLHEVolFlow, this->name, this->designFlow, 6);
+    OutputReportPredefined::PreDefTableEntry(state, state.dataOutRptPredefined->pdchGLHEbhDepth, this->name, this->myRespFactors->props->bhTopDepth);
+    OutputReportPredefined::PreDefTableEntry(state, state.dataOutRptPredefined->pdchGLHEbhDiam, this->name, this->myRespFactors->props->bhDiameter);
+    OutputReportPredefined::PreDefTableEntry(state, state.dataOutRptPredefined->pdchGLHEbhLeng, this->name, this->myRespFactors->props->bhLength);
+    OutputReportPredefined::PreDefTableEntry(
+        state, state.dataOutRptPredefined->pdchGLHENumHolesTrenches, this->name, static_cast<Real64>(this->myRespFactors->numBoreholes));
 }
 
 void GLHEVert::simulate(EnergyPlusData &state,
@@ -656,7 +668,7 @@ nlohmann::json GLHEVert::getCommonGHEDesignerInputs(EnergyPlusData &state) const
     gheDesignerInputs["version"] = 2; // If you update GHEDesigner, you may need to use a new input version here
     gheDesignerInputs["topology"] = {{{"type", "ground_heat_exchanger"}, {"name", "ghe1"}}};
 
-    std::string const p = EnergyPlus::format("[G-Function Calculation for GHE Named: {}] ", this->name);
+    std::string const p = std::format("[G-Function Calculation for GHE Named: {}] ", this->name);
 
     // set up the fluid to use in GHEDesigner, note that the concentration is more restrictive than in EnergyPlus
     nlohmann::json fluidObject;
@@ -723,10 +735,10 @@ fs::path GLHEVert::runGHEDesigner(EnergyPlusData &state, nlohmann::json const &i
         exePath = FileSystem::getAbsolutePath(FileSystem::getProgramPath()); // could be /path/to/energyplus(.exe) or /path/to/energyplus_tests(.exe)
         exePath = exePath.parent_path() / ("energyplus" + FileSystem::exeExtension);
     }
-    std::string const cmd = EnergyPlus::format(R"("{}" auxiliary ghedesigner "{}" "{}")",
-                                               FileSystem::toString(exePath),
-                                               FileSystem::toGenericString(ghe_designer_input_file_path),
-                                               FileSystem::toGenericString(ghe_designer_output_directory));
+    std::string const cmd = std::format(R"("{}" auxiliary ghedesigner "{}" "{}")",
+                                        FileSystem::toString(exePath),
+                                        FileSystem::toGenericString(ghe_designer_input_file_path),
+                                        FileSystem::toGenericString(ghe_designer_output_directory));
     int const status = FileSystem::systemCall(cmd);
     if (status != 0) {
         ShowFatalError(state, "GHEDesigner failed to calculate G-functions.");
@@ -740,20 +752,20 @@ void GLHEVert::performBoreholeFieldDesignAndSizingWithGHEDesigner(EnergyPlusData
     nlohmann::json gheDesignerInputs = this->getCommonGHEDesignerInputs(state);
 
     // grab thermal and borehole properties
-    nlohmann::json grout = {{"conductivity", this->grout.k}, {"rho_cp", this->grout.rhoCp}};
-    nlohmann::json soil = {
+    nlohmann::json groutJson = {{"conductivity", this->grout.k}, {"rho_cp", this->grout.rhoCp}};
+    nlohmann::json soilJson = {
         {"conductivity", this->soil.k},
         {"rho_cp", this->soil.rhoCp},
         {"undisturbed_temp", this->tempGround},
     };
     Real64 const shankSpacingForGHEDesigner = this->bhUTubeDist - this->pipe.outDia;
-    nlohmann::json pipe = {{"inner_diameter", this->pipe.innerDia},
-                           {"outer_diameter", this->pipe.outDia},
-                           {"shank_spacing", shankSpacingForGHEDesigner},
-                           {"roughness", 0.000001}, // TODO: This doesn't seem to be available on inputs
-                           {"conductivity", this->pipe.k},
-                           {"rho_cp", this->pipe.rhoCp},
-                           {"arrangement", "SINGLEUTUBE"}};
+    nlohmann::json pipeJson = {{"inner_diameter", this->pipe.innerDia},
+                               {"outer_diameter", this->pipe.outDia},
+                               {"shank_spacing", shankSpacingForGHEDesigner},
+                               {"roughness", 0.000001}, // TODO: This doesn't seem to be available on inputs
+                               {"conductivity", this->pipe.k},
+                               {"rho_cp", this->pipe.rhoCp},
+                               {"arrangement", "SINGLEUTUBE"}};
     nlohmann::json borehole = {{"buried_depth", this->myRespFactors->props->bhTopDepth}, // TODO: Confirm this is ready for access
                                {"diameter", this->bhDiameter}};
 
@@ -779,9 +791,9 @@ void GLHEVert::performBoreholeFieldDesignAndSizingWithGHEDesigner(EnergyPlusData
     nlohmann::json ghe1 = {{"flow_rate", this->sizingData.designFlowRatePerBorehole * 1000}, // convert m3/s to lps
                            {"flow_type", "BOREHOLE"}, //"SYSTEM"},  // TODO: I could NOT get it to size with SYSTEM...do I need to adjust flow rate?
                            // We should just delete SYSTEM from GHEDesigner.
-                           {"grout", grout},
-                           {"soil", soil},
-                           {"pipe", pipe},
+                           {"grout", groutJson},
+                           {"soil", soilJson},
+                           {"pipe", pipeJson},
                            {"borehole", borehole},
                            {"geometric_constraints", geometricConstraints},
                            {"design", design},
@@ -891,7 +903,7 @@ void GLHEVert::calcUniformBHWallTempGFunctionsWithGHEDesigner(EnergyPlusData &st
 {
     nlohmann::json gheDesignerInputs = this->getCommonGHEDesignerInputs(state);
 
-    std::string const p = EnergyPlus::format("[GHEDesigner Calculation for GHE Named: {}] ", this->name);
+    std::string const p = std::format("[GHEDesigner Calculation for GHE Named: {}] ", this->name);
 
     // check the heights of the EnergyPlus boreholes to make sure they don't vary
     auto const &bhs = this->myRespFactors->myBorholes;
@@ -905,20 +917,20 @@ void GLHEVert::calcUniformBHWallTempGFunctionsWithGHEDesigner(EnergyPlusData &st
     Real64 const height = this->myRespFactors->myBorholes[0]->props->bhLength;
 
     // grab thermal and borehole properties
-    nlohmann::json grout = {{"conductivity", this->grout.k}, {"rho_cp", this->grout.rhoCp}};
-    nlohmann::json soil = {
+    nlohmann::json groutJson = {{"conductivity", this->grout.k}, {"rho_cp", this->grout.rhoCp}};
+    nlohmann::json soilJson = {
         {"conductivity", this->soil.k},
         {"rho_cp", this->soil.rhoCp},
         {"undisturbed_temp", this->tempGround},
     };
     Real64 const shankSpacingForGHEDesigner = this->bhUTubeDist - this->pipe.outDia;
-    nlohmann::json pipe = {{"inner_diameter", this->pipe.innerDia},
-                           {"outer_diameter", this->pipe.outDia},
-                           {"shank_spacing", shankSpacingForGHEDesigner},
-                           {"roughness", 0.000001}, // TODO: This doesn't seem to be available on inputs
-                           {"conductivity", this->pipe.k},
-                           {"rho_cp", this->pipe.rhoCp},
-                           {"arrangement", "SINGLEUTUBE"}};
+    nlohmann::json pipeJson = {{"inner_diameter", this->pipe.innerDia},
+                               {"outer_diameter", this->pipe.outDia},
+                               {"shank_spacing", shankSpacingForGHEDesigner},
+                               {"roughness", 0.000001}, // TODO: This doesn't seem to be available on inputs
+                               {"conductivity", this->pipe.k},
+                               {"rho_cp", this->pipe.rhoCp},
+                               {"arrangement", "SINGLEUTUBE"}};
     nlohmann::json borehole = {{"buried_depth", this->myRespFactors->props->bhTopDepth}, // TODO: Confirm this is ready for access
                                {"diameter", this->bhDiameter}};
 
@@ -933,9 +945,9 @@ void GLHEVert::calcUniformBHWallTempGFunctionsWithGHEDesigner(EnergyPlusData &st
     // set up the final borehole structure to fill out the input file
     nlohmann::json ghe1 = {{"flow_rate", this->designMassFlow},
                            {"flow_type", "SYSTEM"},
-                           {"grout", grout},
-                           {"soil", soil},
-                           {"pipe", pipe},
+                           {"grout", groutJson},
+                           {"soil", soilJson},
+                           {"pipe", pipeJson},
                            {"borehole", borehole},
                            {"pre_designed", preDesigned}};
     gheDesignerInputs["ground_heat_exchanger"] = {{"ghe1", ghe1}};

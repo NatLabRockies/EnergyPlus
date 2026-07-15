@@ -51,7 +51,7 @@
 // EnergyPlus Headers
 #include <EnergyPlus/api/EnergyPlusPgm.hh>
 
-int main(int argc, char **argv)
+int main([[maybe_unused]] int argc, [[maybe_unused]] char **argv)
 {
 #ifdef _WIN32
     const std::vector<std::string> args = CLI::detail::compute_win32_argv();

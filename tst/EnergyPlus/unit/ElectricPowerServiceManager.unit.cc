@@ -1145,7 +1145,7 @@ TEST_F(EnergyPlusFixture, Battery_checkUserEfficiencyInputTest)
     functionResult = checkUserEfficiencyInput(*state, userInputEfficiencyCharge, true, "Tatooine", errorsFound);
     EXPECT_NEAR(functionResult, expectedResult, 0.00001);
     std::string const error_string1 = delimited_string(
-        {EnergyPlus::format("   ** Warning ** Version: missing in IDF, processing for EnergyPlus version=\"{}\"", DataStringGlobals::MatchVersion),
+        {std::format("   ** Warning ** Version: missing in IDF, processing for EnergyPlus version=\"{}\"", DataStringGlobals::MatchVersion),
          "   ** Severe  ** ElectricStorage charge efficiency was too low.  This occurred for electric storage unit named Tatooine",
          "   **   ~~~   ** Please check your input value  for this electric storage unit and fix the charge efficiency."});
     EXPECT_TRUE(compare_err_stream(error_string1, true));

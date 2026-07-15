@@ -216,12 +216,6 @@ namespace Furnaces {
             state.dataFurnaces->GetFurnaceInputFlag = false;
         }
 
-        // Save the current AFNLoopHeatingCoilMaxRTF for comparison with the one calculated below
-        Real64 refAFNLoopHeatingCoilMaxRTF(0.0);
-        if (state.afn->distribution_simulated) {
-            refAFNLoopHeatingCoilMaxRTF = state.dataAirLoop->AirLoopAFNInfo(AirLoopNum).AFNLoopHeatingCoilMaxRTF;
-        }
-
         // Find the correct Furnace
         if (CompIndex == 0) {
             FurnaceNum = Util::FindItemInList(FurnaceName, state.dataFurnaces->Furnace);
@@ -707,8 +701,6 @@ namespace Furnaces {
                 ShowSevereError(state, std::format("The index of \"{}\" is not found", thisFurnace.SuppHeatCoilName));
                 ShowContinueError(state, std::format("...occurs for {}", thisFurnace.Name));
             }
-            state.dataAirLoop->AirLoopAFNInfo(AirLoopNum).AFNLoopHeatingCoilMaxRTF =
-                max(refAFNLoopHeatingCoilMaxRTF, heatingCoilRTF, suppHeatingCoilRTF);
         }
 
         // Reset OnOffFanPartLoadFraction to 1 in case another on/off fan is called without a part-load curve
@@ -5784,11 +5776,6 @@ namespace Furnaces {
                 SetOnOffMassFlowRate(state, FurnaceNum, AirLoopNum, OnOffAirFlowRatio, fanOp, ZoneLoad, MoistureLoad, PartLoadRatio);
             }
         }
-
-        // AirflowNetwork global variable
-        if (state.afn->distribution_simulated) {
-            state.dataAirLoop->AirLoopAFNInfo(AirLoopNum).AFNLoopHeatingCoilMaxRTF = 0.0;
-        }
     }
 
     void SetOnOffMassFlowRate(EnergyPlusData &state,
@@ -5973,12 +5960,12 @@ namespace Furnaces {
         // ACCA Manual S sizing
         bool const isHeatPump = thisFurnace.type == HVAC::UnitarySysType::Unitary_HeatPump_AirToAir ||
                                 thisFurnace.type == HVAC::UnitarySysType::Unitary_HeatPump_WaterToAir;
-        Real64 SysTotCoolingLoad;
-        Real64 SysCoolingLoad;
-        Real64 SysCoolingCapacity;
-        Real64 SysLatCoolingLoad;
-        Real64 SysHeatingCapacity;
-        Real64 SysHeatingLoad;
+        Real64 SysTotCoolingLoad = 0.0;
+        Real64 SysCoolingLoad = 0.0;
+        Real64 SysCoolingCapacity = 0.0;
+        Real64 SysLatCoolingLoad = 0.0;
+        Real64 SysHeatingCapacity = 0.0;
+        Real64 SysHeatingLoad = 0.0;
         if (isHeatPump && !state.dataSize->FinalSysSizing.empty() &&
             state.dataSize->FinalSysSizing(state.dataSize->CurSysNum).heatCoilSizingMethod != DataSizing::HeatCoilSizMethod::None &&
             !thisFurnace.bIsIHP) {
@@ -6778,19 +6765,19 @@ namespace Furnaces {
         Real64 constexpr MinPLR(0.0); // minimum part load ratio allowed
 
         // SUBROUTINE LOCAL VARIABLE DECLARATIONS:
-        Real64 SystemMoistureLoad;   // Total latent load to be removed by furnace/unitary system
-        Real64 deltaT;               // Temperature rise across heating coil (C)
-        Real64 TempOutHeatingCoil;   // Temperature leaving heating coil (C)
-        Real64 FullSensibleOutput;   // Full sensible output of AC (W)
-        Real64 FullLatentOutput;     // Full latent output of AC (W)
-        Real64 NoCoolOutput;         // Sensible output of AC with no cooling allowed (W)
-        Real64 NoHeatOutput;         // Sensible output of heater with no heating allowed (W)
-        Real64 NoLatentOutput;       // Latent output of AC with no cooling allowed (W)
-        Real64 CoolErrorToler;       // Error tolerance in cooling mode
-        Real64 HeatErrorToler;       // Error tolerance in heating mode
-        Real64 ActualSensibleOutput; // Actual furnace sensible capacity
-        Real64 ActualLatentOutput;   // Actual furnace latent capacity
-        Real64 PartLoadRatio;        // Part load ratio (greater of sensible or latent part load ratio for cooling,
+        Real64 SystemMoistureLoad;         // Total latent load to be removed by furnace/unitary system
+        Real64 deltaT;                     // Temperature rise across heating coil (C)
+        Real64 TempOutHeatingCoil;         // Temperature leaving heating coil (C)
+        Real64 FullSensibleOutput;         // Full sensible output of AC (W)
+        Real64 FullLatentOutput;           // Full latent output of AC (W)
+        Real64 NoCoolOutput;               // Sensible output of AC with no cooling allowed (W)
+        Real64 NoHeatOutput;               // Sensible output of heater with no heating allowed (W)
+        Real64 NoLatentOutput;             // Latent output of AC with no cooling allowed (W)
+        Real64 CoolErrorToler;             // Error tolerance in cooling mode
+        Real64 HeatErrorToler;             // Error tolerance in heating mode
+        Real64 ActualSensibleOutput = 0.0; // Actual furnace sensible capacity
+        Real64 ActualLatentOutput;         // Actual furnace latent capacity
+        Real64 PartLoadRatio;              // Part load ratio (greater of sensible or latent part load ratio for cooling,
         // or heating PLR)
         Real64 LatentPartLoadRatio; // Part load ratio to meet dehumidification load
         Real64 TempCoolOutput;      // Temporary Sensible output of AC while iterating on PLR (W)
@@ -6798,7 +6785,7 @@ namespace Furnaces {
         Real64 TempLatentOutput;    // Temporary Latent output of AC at increasing PLR (W)
         //                                           ! (Temp variables are used to find min PLR for positive latent removal)
         Real64 TempMinPLR;             // Temporary min latent PLR when hum control is required and iter is exceeded
-        Real64 TempMinPLR2;            // Temporary min latent PLR when cyc fan hum control is required and iter is exceeded
+        Real64 TempMinPLR2 = 0.0;      // Temporary min latent PLR when cyc fan hum control is required and iter is exceeded
         Real64 TempMaxPLR;             // Temporary max latent PLR when hum control is required and iter is exceeded
         Real64 QToHeatSetPt;           // Load required to meet heating setpoint temp (>0 is a heating load)
         Real64 CoolingHeatingPLRRatio; // ratio of cooling to heating PLR (MAX=1). Used in heating mode.

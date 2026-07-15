@@ -106,7 +106,7 @@ TEST_F(AutoSizingFixture, CoolingWaterDesAirInletTempSizingGauntlet)
 
     eiooutput =
         std::string("! <Component Sizing Information>, Component Type, Component Name, Input Field Description, Value\n"
-                    " Component Sizing Information, Coil:Cooling:Water, MyWaterCoil, User-Specified Design Inlet Air Temperature [C], 23.7000\n");
+                    " Component Sizing Information, Coil:Cooling:Water, MyWaterCoil, User-Specified Design Inlet Air Temperature [C], 23.7\n");
 
     EXPECT_TRUE(compare_eio_stream(eiooutput, true));
 
@@ -143,8 +143,7 @@ TEST_F(AutoSizingFixture, CoolingWaterDesAirInletTempSizingGauntlet)
     EXPECT_TRUE(sizer.wasAutoSized);
     EXPECT_NEAR(22.88, sizedValue, 0.0001);
 
-    eiooutput =
-        std::string(" Component Sizing Information, Coil:Cooling:Water, MyWaterCoil, Design Size Design Inlet Air Temperature [C], 22.8800\n");
+    eiooutput = std::string(" Component Sizing Information, Coil:Cooling:Water, MyWaterCoil, Design Size Design Inlet Air Temperature [C], 22.88\n");
 
     EXPECT_TRUE(compare_eio_stream(eiooutput, true));
 
@@ -326,8 +325,7 @@ TEST_F(AutoSizingFixture, CoolingWaterDesAirInletTempSizingGauntlet)
     sizer.autoSizedValue = 0.0; // reset for next test
 
     // <Component Sizing Information> header already reported above (and flag set false). Only coil sizing information reported here.
-    eiooutput =
-        std::string(" Component Sizing Information, Coil:Cooling:Water, MyWaterCoil, Design Size Design Inlet Air Temperature [C], 20.1500\n");
+    eiooutput = std::string(" Component Sizing Information, Coil:Cooling:Water, MyWaterCoil, Design Size Design Inlet Air Temperature [C], 20.15\n");
 
     EXPECT_TRUE(compare_eio_stream(eiooutput, true));
 
@@ -420,8 +418,8 @@ TEST_F(AutoSizingFixture, CoolingWaterDesAirInletTempSizingGauntlet)
 
     // <Component Sizing Information> header already reported above (and flag set false). Only coil sizing information reported here.
     eiooutput =
-        std::string(" Component Sizing Information, Coil:Cooling:Water, MyWaterCoil, Design Size Design Inlet Air Temperature [C], 27.4400\n"
-                    " Component Sizing Information, Coil:Cooling:Water, MyWaterCoil, User-Specified Design Inlet Air Temperature [C], 24.4400\n");
+        std::string(" Component Sizing Information, Coil:Cooling:Water, MyWaterCoil, Design Size Design Inlet Air Temperature [C], 27.44\n"
+                    " Component Sizing Information, Coil:Cooling:Water, MyWaterCoil, User-Specified Design Inlet Air Temperature [C], 24.44\n");
     EXPECT_TRUE(compare_eio_stream(eiooutput, true));
 
     // call the API clearState

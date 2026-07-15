@@ -58,7 +58,7 @@ GLHEVertSingle::GLHEVertSingle(EnergyPlusData &state, std::string const &objName
     // Check for duplicates
     for (const auto &existingObj : state.dataGroundHeatExchanger->singleBoreholesVector) {
         if (objName == existingObj->name) {
-            ShowFatalError(state, EnergyPlus::format("Invalid input for {} object: Duplicate name found: {}", this->moduleName, existingObj->name));
+            ShowFatalError(state, std::format("Invalid input for {} object: Duplicate name found: {}", this->moduleName, existingObj->name));
         }
     }
 
@@ -81,7 +81,7 @@ std::shared_ptr<GLHEVertSingle> GLHEVertSingle::GetSingleBH(EnergyPlusData &stat
         return *thisObj;
     }
 
-    ShowSevereError(state, EnergyPlus::format("Object=GroundHeatExchanger:Vertical:Single, Name={} - not found.", objectName));
+    ShowSevereError(state, std::format("Object=GroundHeatExchanger:Vertical:Single, Name={} - not found.", objectName));
     ShowFatalError(state, "Preceding errors cause program termination");
 }
 

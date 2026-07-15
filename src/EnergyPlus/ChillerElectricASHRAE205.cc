@@ -187,8 +187,8 @@ void getChillerASHRAE205Input(EnergyPlusData &state)
         //        }
         //        if (thisChiller.RefCap == 0.0) {
         //            ShowSevereError(
-        //                state, format("{}{}=\"{}\"",std::string{RoutineName},state.dataIPShortCut->cCurrentModuleObject,thisChiller.Name);
-        //            ShowContinueError(state, format("Invalid {}={:.2f}", "Rated Capacity", thisChiller.RefCap));
+        //                state, std::format("{}{}=\"{}\"",std::string{RoutineName},state.dataIPShortCut->cCurrentModuleObject,thisChiller.Name);
+        //            ShowContinueError(state, std::format("Invalid {}={:.2f}", "Rated Capacity", thisChiller.RefCap));
         //            ErrorsFound = true;
         //        }
 

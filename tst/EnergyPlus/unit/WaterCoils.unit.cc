@@ -1159,13 +1159,13 @@ TEST_F(WaterCoilsTest, CoilCoolingWaterDetailed_WarningMath)
     Real64 InletAirHumRat = waterCoil1.InletAirHumRat;
     Real64 TempWaterIn = waterCoil1.InletWaterTemp;
     Real64 AirDensity = Psychrometrics::PsyRhoAirFnPbTdbW(*state, state->dataEnvrn->OutBaroPress, TempAirIn, InletAirHumRat, "RoutineName");
-    Real64 MinAirMassFlow = 5.0 * waterCoil1.MinAirFlowArea * AirDensity;
-    waterCoil1.InletAirMassFlowRate = 1.1 * MinAirMassFlow;
+    Real64 testMinAirMassFlow = 5.0 * waterCoil1.MinAirFlowArea * AirDensity;
+    waterCoil1.InletAirMassFlowRate = 1.1 * testMinAirMassFlow;
     Real64 AirMassFlow = waterCoil1.InletAirMassFlowRate / PartLoadRatio;
 
     EXPECT_EQ(0.81060636699999999, waterCoil1.MinAirFlowArea);
     std::string expected_error = delimited_string({
-        EnergyPlus::format("   ** Warning ** Version: missing in IDF, processing for EnergyPlus version=\"{}\"", DataStringGlobals::MatchVersion),
+        std::format("   ** Warning ** Version: missing in IDF, processing for EnergyPlus version=\"{}\"", DataStringGlobals::MatchVersion),
         "   ** Warning ** Coil:Cooling:Water:DetailedGeometry in Coil =Test Detailed Water Cooling Coil",
         "   **   ~~~   ** Air Flow Rate Velocity has greatly exceeded upper design guidelines of ~2.5 m/s",
         std::format("   **   ~~~   ** Air Mass Flow Rate[kg/s]={:.6f}", waterCoil1.InletAirMassFlowRate),
@@ -1183,8 +1183,8 @@ TEST_F(WaterCoilsTest, CoilCoolingWaterDetailed_WarningMath)
     InletAirHumRat = waterCoil1.InletAirHumRat;
     TempWaterIn = waterCoil1.InletWaterTemp;
     AirDensity = Psychrometrics::PsyRhoAirFnPbTdbW(*state, state->dataEnvrn->OutBaroPress, TempAirIn, InletAirHumRat, "RoutineName");
-    MinAirMassFlow = 44.7 * waterCoil1.MinAirFlowArea * AirDensity;
-    waterCoil1.InletAirMassFlowRate = 1.1 * MinAirMassFlow;
+    testMinAirMassFlow = 44.7 * waterCoil1.MinAirFlowArea * AirDensity;
+    waterCoil1.InletAirMassFlowRate = 1.1 * testMinAirMassFlow;
     AirMassFlow = waterCoil1.InletAirMassFlowRate / PartLoadRatio;
 
     std::string expected_fatal_error = delimited_string({

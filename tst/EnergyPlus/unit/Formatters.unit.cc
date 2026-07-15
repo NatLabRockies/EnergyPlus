@@ -87,15 +87,15 @@ TEST(Formatters, Formatters_Ranges_Numeric)
     {
         std::vector<double> vec{1.1, 2.2, 3.3};
         EXPECT_EQ("[1.1, 2.2, 3.3]", std::format("{}", vec));
-        EXPECT_EQ("[1.10, 2.20, 3.30]", std::format("{:.2f}", vec));
-        EXPECT_EQ("[1.100, 2.200, 3.300]", std::format("{:.3f}", vec));
+        EXPECT_EQ("[1.10, 2.20, 3.30]", std::format("{::.2f}", vec));
+        EXPECT_EQ("[1.100, 2.200, 3.300]", std::format("{::.3f}", vec));
     }
 
     {
         std::array<double, 3> vec{1.1, 2.2, 3.3};
         EXPECT_EQ("[1.1, 2.2, 3.3]", std::format("{}", vec));
-        EXPECT_EQ("[1.10, 2.20, 3.30]", std::format("{:.2f}", vec));
-        EXPECT_EQ("[1.100, 2.200, 3.300]", std::format("{:.3f}", vec));
+        EXPECT_EQ("[1.10, 2.20, 3.30]", std::format("{::.2f}", vec));
+        EXPECT_EQ("[1.100, 2.200, 3.300]", std::format("{::.3f}", vec));
     }
 
     {
@@ -105,8 +105,8 @@ TEST(Formatters, Formatters_Ranges_Numeric)
         vec(2) = 2.2;
         vec(3) = 3.3;
         EXPECT_EQ("[1.1, 2.2, 3.3]", std::format("{}", vec));
-        EXPECT_EQ("[1.10, 2.20, 3.30]", std::format("{:.2f}", vec));
-        EXPECT_EQ("[1.100, 2.200, 3.300]", std::format("{:.3f}", vec));
+        EXPECT_EQ("[1.10, 2.20, 3.30]", std::format("{::.2f}", vec));
+        EXPECT_EQ("[1.100, 2.200, 3.300]", std::format("{::.3f}", vec));
     }
 
     {
@@ -115,8 +115,8 @@ TEST(Formatters, Formatters_Ranges_Numeric)
         vec(2) = 2.2;
         vec(3) = 3.3;
         EXPECT_EQ("[1.1, 2.2, 3.3]", std::format("{}", vec));
-        EXPECT_EQ("[1.10, 2.20, 3.30]", std::format("{:.2f}", vec));
-        EXPECT_EQ("[1.100, 2.200, 3.300]", std::format("{:.3f}", vec));
+        EXPECT_EQ("[1.10, 2.20, 3.30]", std::format("{::.2f}", vec));
+        EXPECT_EQ("[1.100, 2.200, 3.300]", std::format("{::.3f}", vec));
     }
 
     {
@@ -171,8 +171,6 @@ TEST(Formatters, Formatters_join)
 {
     {
         std::vector<double> CondTempArray{0.0000, 0.1000, 0.2000, 0.3000, 0.4000, 0.5000, 0.6000, 0.7000, 0.8000, 0.9000, 1.0000};
-        EXPECT_EQ("PLR           =    0.00   0.10   0.20   0.30   0.40   0.50   0.60   0.70   0.80   0.90   1.00",
-                  fmt::format("PLR           = {:7.2F}", fmt::join(CondTempArray, "")));
         EXPECT_EQ("PLR           =    0.00   0.10   0.20   0.30   0.40   0.50   0.60   0.70   0.80   0.90   1.00",
                   std::format("PLR           = {:7.2F}", EnergyPlus::join(CondTempArray, "")));
     }

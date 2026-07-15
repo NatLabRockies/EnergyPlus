@@ -98,7 +98,7 @@ TEST_F(AutoSizingFixture, CoolingWaterDesWaterInletTempSizingGauntlet)
 
     std::string eiooutput =
         std::string("! <Component Sizing Information>, Component Type, Component Name, Input Field Description, Value\n"
-                    " Component Sizing Information, Coil:Cooling:Water, MyWaterCoil, User-Specified Design Inlet Water Temperature [C], 5.00000\n");
+                    " Component Sizing Information, Coil:Cooling:Water, MyWaterCoil, User-Specified Design Inlet Water Temperature [C], 5\n");
 
     EXPECT_TRUE(compare_eio_stream(eiooutput, true));
 
@@ -250,8 +250,7 @@ TEST_F(AutoSizingFixture, CoolingWaterDesWaterInletTempSizingGauntlet)
     sizer.autoSizedValue = 0.0; // reset for next test
 
     // <Component Sizing Information> header already reported above (and flag set false). Only coil sizing information reported here.
-    eiooutput =
-        std::string(" Component Sizing Information, Coil:Cooling:Water, MyWaterCoil, Design Size Design Inlet Water Temperature [C], 15.0000\n");
+    eiooutput = std::string(" Component Sizing Information, Coil:Cooling:Water, MyWaterCoil, Design Size Design Inlet Water Temperature [C], 15\n");
 
     EXPECT_TRUE(compare_eio_stream(eiooutput, true));
 
@@ -377,8 +376,8 @@ TEST_F(AutoSizingFixture, CoolingWaterDesWaterInletTempSizingGauntlet)
 
     // <Component Sizing Information> header already reported above (and flag set false). Only coil sizing information reported here.
     eiooutput =
-        std::string(" Component Sizing Information, Coil:Cooling:Water, MyWaterCoil, Design Size Design Inlet Water Temperature [C], 15.0000\n"
-                    " Component Sizing Information, Coil:Cooling:Water, MyWaterCoil, User-Specified Design Inlet Water Temperature [C], 12.0000\n");
+        std::string(" Component Sizing Information, Coil:Cooling:Water, MyWaterCoil, Design Size Design Inlet Water Temperature [C], 15\n"
+                    " Component Sizing Information, Coil:Cooling:Water, MyWaterCoil, User-Specified Design Inlet Water Temperature [C], 12\n");
     EXPECT_TRUE(compare_eio_stream(eiooutput, true));
 }
 

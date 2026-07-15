@@ -5546,7 +5546,7 @@ namespace PlantChillers {
 
         //  LOAD LOCAL VARIABLES FROM DATA STRUCTURE (for code readability)
         Real64 ChillerNomCap = this->NomCap;
-        Real64 COP = this->COP;
+        Real64 localCOP = this->COP;
         Real64 TempCondIn = state.dataLoopNodes->Node(this->CondInletNodeNum).Temp;
         Real64 TempEvapOut = state.dataLoopNodes->Node(this->EvapOutletNodeNum).Temp;
 
@@ -5555,14 +5555,14 @@ namespace PlantChillers {
             (!state.dataGlobal->KickOffSimulation)) {
             int FaultIndex = this->FaultyChillerFoulingIndex;
             Real64 NomCap_ff = ChillerNomCap;
-            Real64 COP_ff = COP;
+            Real64 COP_ff = localCOP;
 
             // calculate the Faulty Chiller Fouling Factor using fault information
             this->FaultyChillerFoulingFactor = state.dataFaultsMgr->FaultsChillerFouling(FaultIndex).CalFoulingFactor(state);
 
             // update the Chiller nominal capacity and COP at faulty cases
             ChillerNomCap = NomCap_ff * this->FaultyChillerFoulingFactor;
-            COP = COP_ff * this->FaultyChillerFoulingFactor;
+            localCOP = COP_ff * this->FaultyChillerFoulingFactor;
         }
 
         // If there is a fault of Chiller SWT Sensor
@@ -5613,7 +5613,7 @@ namespace PlantChillers {
             } else {
                 FRAC = 1.0;
             }
-            this->Power = FracFullLoadPower * FullLoadPowerRat * AvailChillerCap / COP * FRAC;
+            this->Power = FracFullLoadPower * FullLoadPowerRat * AvailChillerCap / localCOP * FRAC;
 
             // Either set the flow to the Constant value or calculate the flow for the variable volume
             if ((this->FlowMode == DataPlant::FlowMode::Constant) || (this->FlowMode == DataPlant::FlowMode::NotModulated)) {
@@ -5796,7 +5796,7 @@ namespace PlantChillers {
             }
 
             // Chiller is false loading below PLR = minimum unloading ratio, find PLR used for energy calculation
-            this->Power = FracFullLoadPower * FullLoadPowerRat * AvailChillerCap / COP * FRAC;
+            this->Power = FracFullLoadPower * FullLoadPowerRat * AvailChillerCap / localCOP * FRAC;
 
             if (this->EvapMassFlowRate == 0.0) {
                 this->QEvaporator = 0.0;
@@ -6670,7 +6670,7 @@ namespace PlantChillers {
 
         // SUBROUTINE PARAMETER DEFINITIONS:
         static constexpr std::string_view RoutineName("InitConstCOPChiller");
-        constexpr Real64 TempDesCondIn(25.0); // Design condenser inlet temp. C
+        constexpr Real64 localTempDesCondIn(25.0); // Design condenser inlet temp. C
 
         this->oneTimeInit(state);
 
@@ -6684,7 +6684,7 @@ namespace PlantChillers {
             // init maximum available condenser flow rate
             if (this->CondenserType == DataPlant::CondenserType::WaterCooled) {
 
-                state.dataLoopNodes->Node(this->CondInletNodeNum).Temp = TempDesCondIn;
+                state.dataLoopNodes->Node(this->CondInletNodeNum).Temp = localTempDesCondIn;
 
                 rho = this->CDPlantLoc.loop->glycol->getDensity(state, Constant::CWInitConvTemp, RoutineName);
 
@@ -6693,7 +6693,8 @@ namespace PlantChillers {
                 PlantUtilities::InitComponentNodes(state, 0.0, this->CondMassFlowRateMax, this->CondInletNodeNum, this->CondOutletNodeNum);
             } else { // air or evap-air
                 state.dataLoopNodes->Node(this->CondInletNodeNum).MassFlowRate =
-                    this->CondVolFlowRate * Psychrometrics::PsyRhoAirFnPbTdbW(state, state.dataEnvrn->StdBaroPress, TempDesCondIn, 0.0, RoutineName);
+                    this->CondVolFlowRate *
+                    Psychrometrics::PsyRhoAirFnPbTdbW(state, state.dataEnvrn->StdBaroPress, localTempDesCondIn, 0.0, RoutineName);
 
                 state.dataLoopNodes->Node(this->CondOutletNodeNum).MassFlowRate = state.dataLoopNodes->Node(this->CondInletNodeNum).MassFlowRate;
                 state.dataLoopNodes->Node(this->CondInletNodeNum).MassFlowRateMaxAvail =
@@ -7053,7 +7054,7 @@ namespace PlantChillers {
 
         // SUBROUTINE LOCAL VARIABLE DECLARATIONS:
         Real64 TempEvapOutSetPoint(0.0);     // C - evaporator outlet temperature setpoint
-        Real64 COP = this->COP;              // coefficient of performance
+        Real64 localCOP = this->COP;         // coefficient of performance
         Real64 ChillerNomCap = this->NomCap; // chiller nominal capacity
         this->Power = 0.0;
 
@@ -7062,14 +7063,14 @@ namespace PlantChillers {
             (!state.dataGlobal->KickOffSimulation)) {
             int FaultIndex = this->FaultyChillerFoulingIndex;
             Real64 NomCap_ff = ChillerNomCap;
-            Real64 COP_ff = COP;
+            Real64 COP_ff = localCOP;
 
             // calculate the Faulty Chiller Fouling Factor using fault information
             this->FaultyChillerFoulingFactor = state.dataFaultsMgr->FaultsChillerFouling(FaultIndex).CalFoulingFactor(state);
 
             // update the Chiller nominal capacity and COP at faulty cases
             ChillerNomCap = NomCap_ff * this->FaultyChillerFoulingFactor;
-            COP = COP_ff * this->FaultyChillerFoulingFactor;
+            localCOP = COP_ff * this->FaultyChillerFoulingFactor;
         }
 
         if (this->CWPlantLoc.loop->LoopDemandCalcScheme == DataPlant::LoopDemandCalcScheme::SingleSetPoint) {
@@ -7290,7 +7291,7 @@ namespace PlantChillers {
                 }
             } // End of Constant or Variable Flow If Block for FlowLock = 0 (or making a flow request)
             if (this->thermosiphonDisabled(state)) {
-                this->Power = std::abs(MyLoad) / COP;
+                this->Power = std::abs(MyLoad) / localCOP;
             }
 
             // If there is a fault of Chiller SWT Sensor
@@ -7401,7 +7402,7 @@ namespace PlantChillers {
             } else {
                 // Calculate the Power consumption of the Const COP chiller which is a simplified calculation
                 if (this->thermosiphonDisabled(state)) {
-                    this->Power = this->QEvaporator / COP;
+                    this->Power = this->QEvaporator / localCOP;
                 }
             }
             if (this->QEvaporator == 0.0 && this->CondenserType == DataPlant::CondenserType::EvapCooled) {
@@ -7416,13 +7417,13 @@ namespace PlantChillers {
         this->QCondenser = this->Power + this->QEvaporator;
 
         // If not air or evap cooled then set to the condenser node that is attached to a cooling tower
-        Real64 const CondInletTemp = state.dataLoopNodes->Node(this->CondInletNodeNum).Temp;
+        Real64 const localCondInletTemp = state.dataLoopNodes->Node(this->CondInletNodeNum).Temp;
 
         if (this->CondenserType == DataPlant::CondenserType::WaterCooled) {
             // local for fluid specif heat, for condenser
-            Real64 const CpCond = this->CDPlantLoc.loop->glycol->getSpecificHeat(state, CondInletTemp, RoutineName);
+            Real64 const CpCond = this->CDPlantLoc.loop->glycol->getSpecificHeat(state, localCondInletTemp, RoutineName);
             if (this->CondMassFlowRate > DataBranchAirLoopPlant::MassFlowTolerance) {
-                this->CondOutletTemp = this->QCondenser / this->CondMassFlowRate / CpCond + CondInletTemp;
+                this->CondOutletTemp = this->QCondenser / this->CondMassFlowRate / CpCond + localCondInletTemp;
             } else {
                 ShowSevereError(state, std::format("CalcConstCOPChillerModel: Condenser flow = 0, for CONST COP Chiller={}", this->Name));
                 ShowContinueErrorTimeStamp(state, "");
@@ -7430,7 +7431,7 @@ namespace PlantChillers {
         } else { // Air Cooled or Evap Cooled
             //  Set condenser outlet temp to condenser inlet temp for Air Cooled or Evap Cooled
             //  since there is no CondMassFlowRate and would divide by zero
-            this->CondOutletTemp = CondInletTemp;
+            this->CondOutletTemp = localCondInletTemp;
         }
 
         // Calculate Energy
@@ -7443,12 +7444,12 @@ namespace PlantChillers {
 
             if (this->CondenserType == DataPlant::CondenserType::WaterCooled) {
                 // first check for run away condenser loop temps (only reason yet to be observed for this?)
-                if (CondInletTemp > 70.0) {
+                if (localCondInletTemp > 70.0) {
                     ShowSevereError(
                         state,
                         std::format("CalcConstCOPChillerModel: Condenser loop inlet temperatures over 70.0 C for ConstCOPChiller={}", this->Name));
                     ShowContinueErrorTimeStamp(state, "");
-                    ShowContinueError(state, std::format("Condenser loop water temperatures are too high at{:.2f}", CondInletTemp));
+                    ShowContinueError(state, std::format("Condenser loop water temperatures are too high at{:.2f}", localCondInletTemp));
                     ShowContinueError(state, "Check input for condenser plant loop, especially cooling tower");
                     ShowContinueError(state,
                                       std::format("Evaporator inlet temperature: {:.2f}", state.dataLoopNodes->Node(this->EvapInletNodeNum).Temp));

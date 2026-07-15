@@ -140,7 +140,7 @@ TEST_F(AutoSizingFixture, CoolingCapacitySizingGauntlet)
 
     // eio header reported in fan sizing
     std::string eiooutput =
-        std::string(" Component Sizing Information, Coil:Cooling:Water, MyWaterCoil, User-Specified Cooling Design Capacity [W], 5125.30\n");
+        std::string(" Component Sizing Information, Coil:Cooling:Water, MyWaterCoil, User-Specified Cooling Design Capacity [W], 5125.3\n");
 
     EXPECT_TRUE(compare_eio_stream(eiooutput, true));
 
@@ -282,8 +282,8 @@ TEST_F(AutoSizingFixture, CoolingCapacitySizingGauntlet)
     EXPECT_FALSE(errorsFound);
 
     // <Component Sizing Information> header already reported above (and flag set false). Only coil sizing information reported here.
-    eiooutput = std::string(" Component Sizing Information, Coil:Cooling:Water, MyWaterCoil, Design Size Cooling Design Capacity [W], 3500.00\n"
-                            " Component Sizing Information, Coil:Cooling:Water, MyWaterCoil, User-Specified Cooling Design Capacity [W], 5500.00\n");
+    eiooutput = std::string(" Component Sizing Information, Coil:Cooling:Water, MyWaterCoil, Design Size Cooling Design Capacity [W], 3500\n"
+                            " Component Sizing Information, Coil:Cooling:Water, MyWaterCoil, User-Specified Cooling Design Capacity [W], 5500\n");
     EXPECT_TRUE(compare_eio_stream(eiooutput, true));
     eiooutput = "";
 
@@ -535,7 +535,7 @@ TEST_F(AutoSizingFixture, CoolingCapacitySizingGauntlet)
 
     // <Component Sizing Information> header already reported above (and flag set false). Only coil sizing information reported here.
     eiooutput = std::string(" Component Sizing Information, Coil:Cooling:Water, MyWaterCoil, Design Size Cooling Design Capacity [W], 5634.12\n"
-                            " Component Sizing Information, Coil:Cooling:Water, MyWaterCoil, User-Specified Cooling Design Capacity [W], 4200.00\n");
+                            " Component Sizing Information, Coil:Cooling:Water, MyWaterCoil, User-Specified Cooling Design Capacity [W], 4200\n");
     EXPECT_TRUE(compare_eio_stream(eiooutput, true));
 
     // Test 22 - OA Equipment, DOAS Air loop with no fan heat for cooling capacity

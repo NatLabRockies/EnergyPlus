@@ -913,8 +913,8 @@ namespace Avail {
                 }
 
                 if (diffThermoMgr.TempDiffOff > diffThermoMgr.TempDiffOn) {
-                    ShowSevereError(state, EnergyPlus::format("{}{}=\"{}\", invalid", RoutineName, cCurrentModuleObject, cAlphaArgs(1)));
-                    ShowContinueError(state, EnergyPlus::format("The {} is greater than the {}.", cNumericFieldNames(2), cNumericFieldNames(1)));
+                    ShowSevereError(state, std::format("{}{}=\"{}\", invalid", RoutineName, cCurrentModuleObject, cAlphaArgs(1)));
+                    ShowContinueError(state, std::format("The {} is greater than the {}.", cNumericFieldNames(2), cNumericFieldNames(1)));
                     ErrorsFound = true;
                 }
 
@@ -1215,7 +1215,7 @@ namespace Avail {
         lNumericFieldBlanks.deallocate();
 
         if (ErrorsFound) {
-            ShowFatalError(state, EnergyPlus::format("{}Errors found in input.  Preceding condition(s) cause termination.", RoutineName));
+            ShowFatalError(state, std::format("{}Errors found in input.  Preceding condition(s) cause termination.", RoutineName));
         }
     } // GetSysAvailManagerInputs()
 
@@ -1338,19 +1338,18 @@ namespace Avail {
                 if (am.type == ManagerType::DiffThermo && Num != availMgr.NumAvailManagers) {
                     ShowWarningError(
                         state,
-                        EnergyPlus::format("GetPlantLoopData/GetPlantAvailabilityManager: AvailabilityManager:DifferentialThermostat=\"{}\".",
-                                           am.Name));
+                        std::format("GetPlantLoopData/GetPlantAvailabilityManager: AvailabilityManager:DifferentialThermostat=\"{}\".", am.Name));
                     ShowContinueError(
                         state, "...is not the last manager on the AvailabilityManagerAssignmentList.  Any remaining managers will not be used.");
-                    ShowContinueError(state, EnergyPlus::format("Occurs in AvailabilityManagerAssignmentList =\"{}\".", AvailabilityListName));
+                    ShowContinueError(state, std::format("Occurs in AvailabilityManagerAssignmentList =\"{}\".", AvailabilityListName));
                 }
                 if (am.type == ManagerType::NightVent || am.type == ManagerType::NightCycle) {
                     ShowSevereError(
                         state,
-                        EnergyPlus::format("GetPlantLoopData/GetPlantAvailabilityManager: Invalid System Availability Manager Type entered=\"{}\".",
-                                           managerTypeNames[(int)am.type]));
+                        std::format("GetPlantLoopData/GetPlantAvailabilityManager: Invalid System Availability Manager Type entered=\"{}\".",
+                                    managerTypeNames[(int)am.type]));
                     ShowContinueError(state, "...this manager is not used in a Plant Loop.");
-                    ShowContinueError(state, EnergyPlus::format("Occurs in AvailabilityManagerAssignmentList=\"{}\".", AvailabilityListName));
+                    ShowContinueError(state, std::format("Occurs in AvailabilityManagerAssignmentList=\"{}\".", AvailabilityListName));
                     ErrorsFound = true;
                 }
             } // End of Num Loop
@@ -1359,9 +1358,9 @@ namespace Avail {
             if (!AvailabilityListName.empty()) {
                 ShowWarningError(
                     state,
-                    EnergyPlus::format("GetPlantLoopData/GetPlantAvailabilityManager: AvailabilityManagerAssignmentList={} not found in lists.  No "
-                                       "availability will be used.",
-                                       AvailabilityListName));
+                    std::format("GetPlantLoopData/GetPlantAvailabilityManager: AvailabilityManagerAssignmentList={} not found in lists.  No "
+                                "availability will be used.",
+                                AvailabilityListName));
             }
             availMgr.NumAvailManagers = 0;
             availMgr.availStatus = Status::NoAction;
@@ -1421,11 +1420,10 @@ namespace Avail {
                 if (am.type == ManagerType::DiffThermo && Num != availMgr.NumAvailManagers) {
                     ShowWarningError(
                         state,
-                        EnergyPlus::format("GetAirPathData/GetAirLoopAvailabilityManager: AvailabilityManager:DifferentialThermostat=\"{}\".",
-                                           am.Name));
+                        std::format("GetAirPathData/GetAirLoopAvailabilityManager: AvailabilityManager:DifferentialThermostat=\"{}\".", am.Name));
                     ShowContinueError(
                         state, "...is not the last manager on the AvailabilityManagerAssignmentList.  Any remaining managers will not be used.");
-                    ShowContinueError(state, EnergyPlus::format("Occurs in AvailabilityManagerAssignmentList=\"{}\".", am.Name));
+                    ShowContinueError(state, std::format("Occurs in AvailabilityManagerAssignmentList=\"{}\".", am.Name));
                 }
             } // End of Num Loop
 
@@ -1433,9 +1431,9 @@ namespace Avail {
             if (!AvailabilityListName.empty()) {
                 ShowWarningError(
                     state,
-                    EnergyPlus::format("GetAirPathData/GetAirLoopAvailabilityManager: AvailabilityManagerAssignmentList={} not found in lists.  No "
-                                       "availability will be used.",
-                                       AvailabilityListName));
+                    std::format("GetAirPathData/GetAirLoopAvailabilityManager: AvailabilityManagerAssignmentList={} not found in lists.  No "
+                                "availability will be used.",
+                                AvailabilityListName));
             }
             availMgr.NumAvailManagers = 0;
             availMgr.availStatus = Status::NoAction;
@@ -1494,11 +1492,11 @@ namespace Avail {
                     assert(am.type != ManagerType::Invalid);
 
                     if (am.type == ManagerType::DiffThermo && Num != availMgr.NumAvailManagers) {
-                        ShowWarningError(
-                            state, EnergyPlus::format("GetZoneEqAvailabilityManager: AvailabilityManager:DifferentialThermostat=\"{}\".", am.Name));
+                        ShowWarningError(state,
+                                         std::format("GetZoneEqAvailabilityManager: AvailabilityManager:DifferentialThermostat=\"{}\".", am.Name));
                         ShowContinueError(
                             state, "...is not the last manager on the AvailabilityManagerAssignmentList.  Any remaining managers will not be used.");
-                        ShowContinueError(state, EnergyPlus::format("Occurs in AvailabilityManagerAssignmentList=\"{}\".", am.Name));
+                        ShowContinueError(state, std::format("Occurs in AvailabilityManagerAssignmentList=\"{}\".", am.Name));
                     }
                 } // End of Num Loop
             }
@@ -1708,7 +1706,7 @@ namespace Avail {
             if (SysAvailNum > 0) {
                 availStatus = CalcSchedSysAvailMgr(state, SysAvailNum);
             } else {
-                ShowFatalError(state, EnergyPlus::format("SimSysAvailManager: AvailabilityManager:Scheduled not found: {}", SysAvailName));
+                ShowFatalError(state, std::format("SimSysAvailManager: AvailabilityManager:Scheduled not found: {}", SysAvailName));
             }
 
         } break;
@@ -1719,7 +1717,7 @@ namespace Avail {
             if (SysAvailNum > 0) {
                 availStatus = CalcSchedOnSysAvailMgr(state, SysAvailNum);
             } else {
-                ShowFatalError(state, EnergyPlus::format("SimSysAvailManager: AvailabilityManager:ScheduledOn not found: {}", SysAvailName));
+                ShowFatalError(state, std::format("SimSysAvailManager: AvailabilityManager:ScheduledOn not found: {}", SysAvailName));
             }
 
         } break;
@@ -1730,7 +1728,7 @@ namespace Avail {
             if (SysAvailNum > 0) {
                 availStatus = CalcSchedOffSysAvailMgr(state, SysAvailNum);
             } else {
-                ShowFatalError(state, EnergyPlus::format("SimSysAvailManager: AvailabilityManager:ScheduledOff not found: {}", SysAvailName));
+                ShowFatalError(state, std::format("SimSysAvailManager: AvailabilityManager:ScheduledOff not found: {}", SysAvailName));
             }
 
         } break;
@@ -1741,7 +1739,7 @@ namespace Avail {
             if (SysAvailNum > 0) {
                 availStatus = CalcNCycSysAvailMgr(state, SysAvailNum, PriAirSysNum, ZoneEquipType, CompNum);
             } else {
-                ShowFatalError(state, EnergyPlus::format("SimSysAvailManager: AvailabilityManager:NightCycle not found: {}", SysAvailName));
+                ShowFatalError(state, std::format("SimSysAvailManager: AvailabilityManager:NightCycle not found: {}", SysAvailName));
             }
 
         } break;
@@ -1752,7 +1750,7 @@ namespace Avail {
             if (SysAvailNum > 0) {
                 availStatus = CalcOptStartSysAvailMgr(state, SysAvailNum, PriAirSysNum, zoneNum, ZoneEquipType, CompNum);
             } else {
-                ShowFatalError(state, EnergyPlus::format("SimSysAvailManager: AvailabilityManager:OptimumStart not found: {}", SysAvailName));
+                ShowFatalError(state, std::format("SimSysAvailManager: AvailabilityManager:OptimumStart not found: {}", SysAvailName));
             }
 
         } break;
@@ -1821,7 +1819,7 @@ namespace Avail {
         } break;
 
         default: {
-            ShowSevereError(state, EnergyPlus::format("AvailabilityManager Type not found: {}", type));
+            ShowSevereError(state, std::format("AvailabilityManager Type not found: {}", static_cast<int>(type)));
             ShowContinueError(state, std::format("Occurs in Manager={}", SysAvailName));
             ShowFatalError(state, "Preceding condition causes termination.");
         }
@@ -2298,9 +2296,9 @@ namespace Avail {
         bool OverNightStartFlag(false); // Flag to indicate the optimum start starts before mid night.
         bool CycleOnFlag(false);
         bool OSReportVarFlag(true);
-        int NumPreDays;
-        Real64 AdaTempGradHeat;
-        Real64 AdaTempGradCool;
+        int NumPreDays = 0;
+        Real64 AdaTempGradHeat = 0.0;
+        Real64 AdaTempGradCool = 0.0;
         Real64 ATGUpdateTime1(0.0);
         Real64 ATGUpdateTime2(0.0);
         Real64 ATGUpdateTemp1(0.0);
@@ -4542,21 +4540,21 @@ namespace Avail {
         using Psychrometrics::PsyTdpFnWPb;
         using Psychrometrics::PsyWFnTdbRhPb;
 
-        Real64 ZoneAirEnthalpy;             // Zone air enthalpy
-        Real64 ZoneAirRH;                   // Zone air relative humidity
-        Real64 TempExt;                     // Outdoor dry bulb temperature at zone height
-        Real64 WindExt;                     // Outdoor wind speed at zone height
-        Real64 WSetPoint;                   // Humidity ratio setpoint from a given RH setpoint schedule
-        Real64 OASetPoint;                  // Outdoor air setpoint from a given OA setpoint schedule
-        Real64 ACH;                         // Zone air change per hour
-        Real64 ZoneRHHumidifyingSetPoint;   // Zone humidifying setpoint (%)
-        Real64 ZoneRHDehumidifyingSetPoint; // Zone dehumidifying setpoint (%)
-        int SimpleControlType;              // Simple control type from a schedule: 0 individual, 1 global
-        int i;                              // Array index
-        Real64 minAdaTem;                   // minimum adaptive temperature for adaptive temperature control
-        Real64 maxAdaTem;                   // maximum adaptive temperature for adaptive temperature control
-        bool KeepStatus;                    // true, if minimum time operation is needed
-        Status availStatus;
+        Real64 ZoneAirEnthalpy;                   // Zone air enthalpy
+        Real64 ZoneAirRH;                         // Zone air relative humidity
+        Real64 TempExt;                           // Outdoor dry bulb temperature at zone height
+        Real64 WindExt;                           // Outdoor wind speed at zone height
+        Real64 WSetPoint;                         // Humidity ratio setpoint from a given RH setpoint schedule
+        Real64 OASetPoint;                        // Outdoor air setpoint from a given OA setpoint schedule
+        Real64 ACH;                               // Zone air change per hour
+        Real64 ZoneRHHumidifyingSetPoint = 0.0;   // Zone humidifying setpoint (%)
+        Real64 ZoneRHDehumidifyingSetPoint = 0.0; // Zone dehumidifying setpoint (%)
+        int SimpleControlType;                    // Simple control type from a schedule: 0 individual, 1 global
+        int i;                                    // Array index
+        Real64 minAdaTem;                         // minimum adaptive temperature for adaptive temperature control
+        Real64 maxAdaTem;                         // maximum adaptive temperature for adaptive temperature control
+        bool KeepStatus;                          // true, if minimum time operation is needed
+        Status availStatus = Status::Invalid;
 
         KeepStatus = false;
         auto &hybridVentMgr = state.dataAvail->HybridVentData(SysAvailNum);
