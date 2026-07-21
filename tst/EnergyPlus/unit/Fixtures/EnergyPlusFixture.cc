@@ -79,19 +79,19 @@ namespace EnergyPlus {
 //    state->dataInputProcessing->inputProcessor = InputProcessor::factory();
 //}
 
-void EnergyPlusFixture::openOutputFiles(EnergyPlusData &state)
+void EnergyPlusFixture::openOutputFiles(EnergyPlusData &t_state)
 {
-    state.files.eio.open_as_stringstream();
-    state.files.mtr.open_as_stringstream();
-    state.files.eso.open_as_stringstream();
-    state.files.audit.open_as_stringstream();
-    state.files.bnd.open_as_stringstream();
-    state.files.debug.open_as_stringstream();
-    state.files.mtd.open_as_stringstream();
-    state.files.edd.open_as_stringstream();
-    state.files.zsz.open_as_stringstream();
-    state.files.spsz.open_as_stringstream();
-    state.files.ssz.open_as_stringstream();
+    t_state.files.eio.open_as_stringstream();
+    t_state.files.mtr.open_as_stringstream();
+    t_state.files.eso.open_as_stringstream();
+    t_state.files.audit.open_as_stringstream();
+    t_state.files.bnd.open_as_stringstream();
+    t_state.files.debug.open_as_stringstream();
+    t_state.files.mtd.open_as_stringstream();
+    t_state.files.edd.open_as_stringstream();
+    t_state.files.zsz.open_as_stringstream();
+    t_state.files.spsz.open_as_stringstream();
+    t_state.files.ssz.open_as_stringstream();
 }
 
 void EnergyPlusFixture::SetUp()
@@ -192,6 +192,11 @@ bool EnergyPlusFixture::compare_eio_stream(std::string const &expected_string, b
 
 bool EnergyPlusFixture::compare_eio_stream_substring(std::string const &search_string, bool reset_stream)
 {
+    if (search_string.empty()) {
+        ADD_FAILURE() << "compare_eio_stream_substring cannot search for an empty string; use compare_eso_stream or has_eso_output instead.";
+        return false;
+    }
+
     auto const stream_str = state->files.eio.get_output();
     bool const found = stream_str.find(search_string) != std::string::npos;
     EXPECT_TRUE(found);
@@ -225,6 +230,11 @@ bool EnergyPlusFixture::compare_err_stream(std::string const &expected_string, b
 
 bool EnergyPlusFixture::compare_err_stream_substring(std::string const &search_string, bool reset_stream, bool call_expect)
 {
+    if (search_string.empty()) {
+        ADD_FAILURE() << "compare_err_stream_substring cannot search for an empty string; use compare_err_stream or has_err_output instead.";
+        return false;
+    }
+
     auto const stream_str = this->err_stream->str();
     bool const found = stream_str.find(search_string) != std::string::npos;
     if (call_expect) {
@@ -248,6 +258,11 @@ bool EnergyPlusFixture::compare_cout_stream(std::string const &expected_string, 
 }
 bool EnergyPlusFixture::compare_cout_stream_substring(std::string const &search_string, bool reset_stream)
 {
+    if (search_string.empty()) {
+        ADD_FAILURE() << "compare_cout_stream_substring cannot search for an empty string; use compare_cout_stream or has_cout_output instead.";
+        return false;
+    }
+
     auto const stream_str = this->m_cout_buffer->str();
     bool const found = stream_str.find(search_string) != std::string::npos;
     if (reset_stream) {

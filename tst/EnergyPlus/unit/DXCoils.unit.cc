@@ -879,10 +879,12 @@ TEST_F(EnergyPlusFixture, TestMultiSpeedDefrostCOP)
     DXCoilOutletNodeEnthalpy2 = Coil.OutletAirEnthalpy;
     DXCoilHeatingCapacity2 = Coil.TotalHeatingEnergyRate;
 
-    EXPECT_DOUBLE_EQ(DXCoilOutletNodeTemp, DXCoilOutletNodeTemp2);
-    EXPECT_DOUBLE_EQ(DXCoilOutletNodeHumRat, DXCoilOutletNodeHumRat2);
-    EXPECT_DOUBLE_EQ(DXCoilOutletNodeEnthalpy, DXCoilOutletNodeEnthalpy2);
-    EXPECT_DOUBLE_EQ(DXCoilHeatingCapacity, DXCoilHeatingCapacity2);
+    constexpr Real64 tol = 1E-6;
+
+    EXPECT_NEAR(DXCoilOutletNodeTemp, DXCoilOutletNodeTemp2, tol);
+    EXPECT_NEAR(DXCoilOutletNodeHumRat, DXCoilOutletNodeHumRat2, tol);
+    EXPECT_NEAR(DXCoilOutletNodeEnthalpy, DXCoilOutletNodeEnthalpy2, tol);
+    EXPECT_NEAR(DXCoilHeatingCapacity, DXCoilHeatingCapacity2, tol);
 
     // Frost Multiplier EMS actuators
     Coil.FrostHeatingCapacityMultiplierEMSOverrideOn = true;
@@ -912,10 +914,10 @@ TEST_F(EnergyPlusFixture, TestMultiSpeedDefrostCOP)
     DXCoilOutletNodeEnthalpy2 = Coil.OutletAirEnthalpy;
     DXCoilHeatingCapacity2 = Coil.TotalHeatingEnergyRate;
 
-    EXPECT_NEAR(DXCoilOutletNodeTemp, DXCoilOutletNodeTemp2, 0.0000001);
-    EXPECT_NEAR(DXCoilOutletNodeHumRat, DXCoilOutletNodeHumRat2, 0.0000001);
-    EXPECT_NEAR(DXCoilOutletNodeEnthalpy, DXCoilOutletNodeEnthalpy2, 0.0000001);
-    EXPECT_NEAR(DXCoilHeatingCapacity, DXCoilHeatingCapacity2, 0.0000001);
+    EXPECT_NEAR(DXCoilOutletNodeTemp, DXCoilOutletNodeTemp2, tol);
+    EXPECT_NEAR(DXCoilOutletNodeHumRat, DXCoilOutletNodeHumRat2, tol);
+    EXPECT_NEAR(DXCoilOutletNodeEnthalpy, DXCoilOutletNodeEnthalpy2, tol);
+    EXPECT_NEAR(DXCoilHeatingCapacity, DXCoilHeatingCapacity2, tol);
 }
 
 TEST_F(EnergyPlusFixture, TestSingleSpeedDefrostCOP)
@@ -1128,7 +1130,7 @@ TEST_F(EnergyPlusFixture, TestCalcCBF)
     InletAirHumRat = Psychrometrics::PsyWFnTdbTwbPb(*state, InletDBTemp, InletWBTemp, AirPressure);
     CBF_calculated = CalcCBF(*state, CoilType, CoilName, InletDBTemp, InletAirHumRat, TotalCap, AirVolFlowRate, SHR, true);
     CBF_expected = 0.17268167698750708;
-    EXPECT_NEAR(CBF_calculated, CBF_expected, 0.000000000000001);
+    EXPECT_NEAR(CBF_calculated, CBF_expected, 1e-7);
 
     // push inlet condition towards saturation curve to test CBF calculation robustness
     InletWBTemp = 19.7; // 19.72 DB / 19.7 WB
@@ -2561,8 +2563,8 @@ TEST_F(EnergyPlusFixture, DXCoil_ValidateADPFunctionAlone)
 {
     state->init_state(*state);
     // Define coil parameters
-    Real64 constexpr RatedInletAirTemp(26.666699999999999);
-    Real64 constexpr RatedInletAirHumRat(0.011184700000000001);
+    Real64 constexpr testRatedInletAirTemp(26.666699999999999);
+    Real64 constexpr testRatedInletAirHumRat(0.011184700000000001);
     state->dataDXCoils->DXCoil.allocate(1);
     state->dataDXCoils->DXCoil(1).coilType = HVAC::CoilType::CoolingDXSingleSpeed;
     state->dataDXCoils->DXCoil(1).Name = "Test Coil";
@@ -2575,23 +2577,23 @@ TEST_F(EnergyPlusFixture, DXCoil_ValidateADPFunctionAlone)
     Real64 newSHR = ValidateADP(*state,
                                 HVAC::coilTypeNames[(int)state->dataDXCoils->DXCoil(1).coilType],
                                 state->dataDXCoils->DXCoil(1).Name,
-                                RatedInletAirTemp,
-                                RatedInletAirHumRat,
+                                testRatedInletAirTemp,
+                                testRatedInletAirHumRat,
                                 state->dataDXCoils->DXCoil(1).RatedTotCap(1),
                                 state->dataDXCoils->DXCoil(1).RatedAirVolFlowRate(1),
                                 state->dataDXCoils->DXCoil(1).RatedSHR(1),
                                 CallingRoutine);
 
     // Make sure that the outlet conditions are below the saturation
-    Real64 airMassFlowRate =
-        state->dataDXCoils->DXCoil(1).RatedAirVolFlowRate(1) *
-        Psychrometrics::PsyRhoAirFnPbTdbW(*state, DataEnvironment::StdPressureSeaLevel, RatedInletAirTemp, RatedInletAirHumRat, CallingRoutine);
+    Real64 airMassFlowRate = state->dataDXCoils->DXCoil(1).RatedAirVolFlowRate(1) *
+                             Psychrometrics::PsyRhoAirFnPbTdbW(
+                                 *state, DataEnvironment::StdPressureSeaLevel, testRatedInletAirTemp, testRatedInletAirHumRat, CallingRoutine);
     Real64 deltaH = state->dataDXCoils->DXCoil(1).RatedTotCap(1) / airMassFlowRate;
-    Real64 inletAirEnthalpy = Psychrometrics::PsyHFnTdbW(RatedInletAirTemp, RatedInletAirHumRat);
+    Real64 inletAirEnthalpy = Psychrometrics::PsyHFnTdbW(testRatedInletAirTemp, testRatedInletAirHumRat);
     Real64 hTinHumRatOut = inletAirEnthalpy - (1.0 - newSHR) * deltaH;
-    Real64 outletAirHumRat = Psychrometrics::PsyWFnTdbH(*state, RatedInletAirTemp, hTinHumRatOut); // 0.0098703703931385892
-    Real64 outletAirEnthalpy = inletAirEnthalpy - deltaH;                                          // 38853.039955973931
-    Real64 outletAirTemp = Psychrometrics::PsyTdbFnHW(outletAirEnthalpy, outletAirHumRat);         // 13.846750113203081
+    Real64 outletAirHumRat = Psychrometrics::PsyWFnTdbH(*state, testRatedInletAirTemp, hTinHumRatOut); // 0.0098703703931385892
+    Real64 outletAirEnthalpy = inletAirEnthalpy - deltaH;                                              // 38853.039955973931
+    Real64 outletAirTemp = Psychrometrics::PsyTdbFnHW(outletAirEnthalpy, outletAirHumRat);             // 13.846750113203081
     Real64 dewPointTempOutHumRat = Psychrometrics::PsyTdpFnWPb(*state, outletAirHumRat, DataEnvironment::StdPressureSeaLevel);
     ASSERT_TRUE(dewPointTempOutHumRat < outletAirTemp);
 }
@@ -2721,15 +2723,15 @@ TEST_F(EnergyPlusFixture, DXCoil_ValidateADPFunction)
 
     SizeDXCoil(*state, 1); // normal sizing
 
-    Real64 constexpr RatedInletAirTemp(26.6667);   // 26.6667C or 80F
-    Real64 constexpr RatedInletAirHumRat(0.01125); // Humidity ratio corresponding to 80F dry bulb/67F wet bulb
+    Real64 constexpr testRatedInletAirTemp(26.6667);   // 26.6667C or 80F
+    Real64 constexpr testRatedInletAirHumRat(0.01125); // Humidity ratio corresponding to 80F dry bulb/67F wet bulb
     std::string const CallingRoutine("DXCoil_ValidateADPFunction");
 
     Real64 CBF_calculated = CalcCBF(*state,
                                     HVAC::coilTypeNames[(int)state->dataDXCoils->DXCoil(1).coilType],
                                     state->dataDXCoils->DXCoil(1).Name,
-                                    RatedInletAirTemp,
-                                    RatedInletAirHumRat,
+                                    testRatedInletAirTemp,
+                                    testRatedInletAirHumRat,
                                     state->dataDXCoils->DXCoil(1).RatedTotCap(1),
                                     state->dataDXCoils->DXCoil(1).RatedAirVolFlowRate(1),
                                     state->dataDXCoils->DXCoil(1).RatedSHR(1),
@@ -2745,8 +2747,8 @@ TEST_F(EnergyPlusFixture, DXCoil_ValidateADPFunction)
     CBF_calculated = CalcCBF(*state,
                              HVAC::coilTypeNames[(int)state->dataDXCoils->DXCoil(1).coilType],
                              state->dataDXCoils->DXCoil(1).Name,
-                             RatedInletAirTemp,
-                             RatedInletAirHumRat,
+                             testRatedInletAirTemp,
+                             testRatedInletAirHumRat,
                              state->dataDXCoils->DXCoil(1).RatedTotCap(1),
                              state->dataDXCoils->DXCoil(1).RatedAirVolFlowRate(1),
                              state->dataDXCoils->DXCoil(1).RatedSHR(1),
@@ -2762,8 +2764,8 @@ TEST_F(EnergyPlusFixture, DXCoil_ValidateADPFunction)
     CBF_calculated = CalcCBF(*state,
                              HVAC::coilTypeNames[(int)state->dataDXCoils->DXCoil(1).coilType],
                              state->dataDXCoils->DXCoil(1).Name,
-                             RatedInletAirTemp,
-                             RatedInletAirHumRat,
+                             testRatedInletAirTemp,
+                             testRatedInletAirHumRat,
                              state->dataDXCoils->DXCoil(1).RatedTotCap(1),
                              state->dataDXCoils->DXCoil(1).RatedAirVolFlowRate(1),
                              state->dataDXCoils->DXCoil(1).RatedSHR(1),

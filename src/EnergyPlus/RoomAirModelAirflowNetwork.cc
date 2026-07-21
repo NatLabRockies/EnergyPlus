@@ -541,8 +541,8 @@ namespace RoomAir {
         // SUBROUTINE LOCAL VARIABLE DECLARATIONS:
         std::array<Real64, 3> NodeTempX;
         std::array<Real64, 3> NodeHumRatX;
-        Real64 AirTempT1;
-        Real64 HumRatT1;
+        Real64 AirTempT1 = 0.0;
+        Real64 HumRatT1 = 0.0;
 
         auto &afnZoneInfo = state.dataRoomAir->AFNZoneInfo(zoneNum);
         auto &afnNode = afnZoneInfo.Node(roomAirNodeNum);

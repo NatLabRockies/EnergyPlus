@@ -156,21 +156,21 @@ namespace RoomAir {
         //     initialize Mundt-model variables
 
         // SUBROUTINE LOCAL VARIABLE DECLARATIONS:
-        int NodeNum;            // index for air nodes
-        int ZoneIndex;          // index for zones
-        int NumOfAirNodes;      // total number of nodes in each zone
-        int NumOfMundtZones;    // number of zones using the Mundt model
-        int MundtZoneIndex;     // index for zones using the Mundt model
-        int MaxNumOfSurfs;      // maximum of number of surfaces
-        int MaxNumOfFloorSurfs; // maximum of number of surfaces
-        int MaxNumOfAirNodes;   // maximum of number of air nodes
-        int MaxNumOfRoomNodes;  // maximum of number of nodes connected to walls
-        int RoomNodesCount;     // number of nodes connected to walls
-        int FloorSurfCount;     // number of nodes connected to walls
-        int AirNodeBeginNum;    // index number of the first air node for this zone
-        int AirNodeNum;         // index for air nodes
-        bool AirNodeFoundFlag;  // flag used for error check
-        bool ErrorsFound;       // true if errors found in init
+        int NodeNum;                   // index for air nodes
+        int ZoneIndex;                 // index for zones
+        int NumOfAirNodes;             // total number of nodes in each zone
+        int NumOfMundtZones;           // number of zones using the Mundt model
+        int MundtZoneIndex;            // index for zones using the Mundt model
+        int MaxNumOfSurfs;             // maximum of number of surfaces
+        int MaxNumOfFloorSurfs;        // maximum of number of surfaces
+        int MaxNumOfAirNodes;          // maximum of number of air nodes
+        int MaxNumOfRoomNodes;         // maximum of number of nodes connected to walls
+        int RoomNodesCount = 0;        // number of nodes connected to walls
+        int FloorSurfCount = 0;        // number of nodes connected to walls
+        int AirNodeBeginNum = 0;       // index number of the first air node for this zone
+        int AirNodeNum;                // index for air nodes
+        bool AirNodeFoundFlag = false; // flag used for error check
+        bool ErrorsFound;              // true if errors found in init
 
         // allocate and initialize zone data
         state.dataMundtSimMgr->ZoneData.allocate(state.dataGlobal->NumOfZones);
@@ -337,7 +337,7 @@ namespace RoomAir {
         using Psychrometrics::PsyRhoAirFnPbTdbW;
         using Psychrometrics::PsyWFnTdpPb;
 
-        Real64 CpAir;            // specific heat
+        Real64 localCpAir;       // specific heat
         Real64 SumSysMCp;        // zone sum of air system MassFlowRate*Cp
         Real64 SumSysMCpT;       // zone sum of air system MassFlowRate*Cp*T
         Real64 MassFlowRate;     // mass flowrate
@@ -383,9 +383,9 @@ namespace RoomAir {
             for (int NodeNum = 1; NodeNum <= state.dataZoneEquip->ZoneEquipConfig(ZoneEquipConfigNum).NumInletNodes; ++NodeNum) {
                 NodeTemp = state.dataLoopNodes->Node(state.dataZoneEquip->ZoneEquipConfig(ZoneEquipConfigNum).InletNode(NodeNum)).Temp;
                 MassFlowRate = state.dataLoopNodes->Node(state.dataZoneEquip->ZoneEquipConfig(ZoneEquipConfigNum).InletNode(NodeNum)).MassFlowRate;
-                CpAir = PsyCpAirFnW(thisZoneHB.airHumRat);
-                SumSysMCp += MassFlowRate * CpAir;
-                SumSysMCpT += MassFlowRate * CpAir * NodeTemp;
+                localCpAir = PsyCpAirFnW(thisZoneHB.airHumRat);
+                SumSysMCp += MassFlowRate * localCpAir;
+                SumSysMCpT += MassFlowRate * localCpAir * NodeTemp;
             }
             // prevent dividing by zero due to zero supply air flow rate
             if (SumSysMCp <= 0.0) {
@@ -396,9 +396,9 @@ namespace RoomAir {
                 state.dataMundtSimMgr->SupplyAirTemp = SumSysMCpT / SumSysMCp;
             }
             // determine cooling load
-            CpAir = PsyCpAirFnW(thisZoneHB.airHumRat);
+            localCpAir = PsyCpAirFnW(thisZoneHB.airHumRat);
             state.dataMundtSimMgr->QsysCoolTot =
-                -(SumSysMCpT - ZoneMassFlowRate * CpAir * state.dataZoneTempPredictorCorrector->zoneHeatBalance(ZoneNum).MAT);
+                -(SumSysMCpT - ZoneMassFlowRate * localCpAir * state.dataZoneTempPredictorCorrector->zoneHeatBalance(ZoneNum).MAT);
         }
         // determine heat gains
         state.dataMundtSimMgr->ConvIntGain = InternalHeatGains::zoneSumAllInternalConvectionGains(state, ZoneNum);

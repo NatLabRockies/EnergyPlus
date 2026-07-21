@@ -1166,6 +1166,46 @@ TEST_F(EnergyPlusFixture, PlantHXModulatedDualDeadDefectFileHi)
     } // ... End environment loop.
 
     EXPECT_NEAR(state->dataLoopNodes->Node(4).Temp, 20.0, 0.01);
+
+    // check HX sizing
+    auto &fluidHX1 = state->dataPlantHXFluidToFluid->FluidHX(1);
+    Real64 avgSupSPt1 = state->dataLoopNodes->Node(fluidHX1.SupplySideLoop.loop->TempSetPointNodeNum).TempSetPoint;
+    Real64 avgDemSPtHiLo1 = (state->dataLoopNodes->Node(fluidHX1.DemandSideLoop.loop->TempSetPointNodeNum).TempSetPointHi +
+                             state->dataLoopNodes->Node(fluidHX1.DemandSideLoop.loop->TempSetPointNodeNum).TempSetPointLo) /
+                            2.0;
+    Real64 tmpDeltaTLoop1 = std::abs(avgSupSPt1 - avgDemSPtHiLo1);
+    Real64 HX1MaxCapacity = fluidHX1.UA * tmpDeltaTLoop1;
+
+    EXPECT_NEAR(HX1MaxCapacity, fluidHX1.SupplySideLoop.MaxLoad, 0.001);
+    EXPECT_NEAR(48750.0, fluidHX1.SupplySideLoop.MaxLoad, 0.001);
+    EXPECT_NEAR(15000.0, fluidHX1.UA, 0.001);
+    EXPECT_NEAR(3.25, tmpDeltaTLoop1, 0.001);
+
+    auto &fluidHX2 = state->dataPlantHXFluidToFluid->FluidHX(2);
+    Real64 avgSupSPt2 = state->dataLoopNodes->Node(fluidHX2.SupplySideLoop.loop->TempSetPointNodeNum).TempSetPoint;
+    Real64 avgDemSPtHiLo2 = (state->dataLoopNodes->Node(fluidHX2.DemandSideLoop.loop->TempSetPointNodeNum).TempSetPointHi +
+                             state->dataLoopNodes->Node(fluidHX2.DemandSideLoop.loop->TempSetPointNodeNum).TempSetPointLo) /
+                            2.0;
+    Real64 tmpDeltaTLoop2 = std::abs(avgSupSPt2 - avgDemSPtHiLo2);
+    Real64 HX2MaxCapacity = fluidHX2.UA * tmpDeltaTLoop2;
+
+    EXPECT_NEAR(HX2MaxCapacity, fluidHX2.SupplySideLoop.MaxLoad, 0.001);
+    EXPECT_NEAR(101250.0, fluidHX2.SupplySideLoop.MaxLoad, 0.001);
+    EXPECT_NEAR(15000.0, fluidHX2.UA, 0.001);
+    EXPECT_NEAR(6.75, tmpDeltaTLoop2, 0.001);
+
+    auto &fluidHX3 = state->dataPlantHXFluidToFluid->FluidHX(3);
+    Real64 avgSupSPtHiLo3 = (state->dataLoopNodes->Node(fluidHX3.SupplySideLoop.loop->TempSetPointNodeNum).TempSetPointHi +
+                             state->dataLoopNodes->Node(fluidHX3.SupplySideLoop.loop->TempSetPointNodeNum).TempSetPointLo) /
+                            2.0;
+    Real64 avgDemSPt3 = state->dataLoopNodes->Node(fluidHX3.DemandSideLoop.loop->TempSetPointNodeNum).TempSetPoint;
+    Real64 tmpDeltaTLoop3 = std::abs(avgSupSPtHiLo3 - avgDemSPt3);
+    Real64 HX3MaxCapacity = fluidHX3.UA * tmpDeltaTLoop3;
+
+    EXPECT_NEAR(HX3MaxCapacity, fluidHX3.SupplySideLoop.MaxLoad, 0.001);
+    EXPECT_NEAR(26250.0, state->dataPlantHXFluidToFluid->FluidHX(3).SupplySideLoop.MaxLoad, 0.001);
+    EXPECT_NEAR(15000.0, fluidHX3.UA, 0.001);
+    EXPECT_NEAR(1.75, tmpDeltaTLoop3, 0.001);
 }
 
 TEST_F(EnergyPlusFixture, PlantHXModulatedDualDeadDefectFileLo)

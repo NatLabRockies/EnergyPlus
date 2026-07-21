@@ -1073,8 +1073,8 @@ void ExpressAsCashFlows(EnergyPlusData &state)
     int jAdj;
     int kYear;
     int offset;
-    int month; // number of months since base date
-    int firstMonth;
+    int month = 0; // number of months since base date
+    int firstMonth = 0;
     int monthsBaseToService;
 
     std::map<int, std::array<Real64, static_cast<int>(Constant::eResource::Num)>> resourceCosts;
@@ -1440,7 +1440,7 @@ void ComputePresentValue(EnergyPlusData &state)
 
     // SUBROUTINE LOCAL VARIABLE DECLARATIONS:
     Real64 totalPV;
-    Real64 curDiscountRate;
+    Real64 curDiscountRate = 0.0;
     int iCashFlow;
     int jYear;
     int nUsePriceEsc;

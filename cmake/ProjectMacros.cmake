@@ -19,7 +19,7 @@ macro(CREATE_TEST_TARGETS BASE_NAME SRC DEPENDENCIES)
   if(BUILD_TESTING)
 
     add_executable(${BASE_NAME}_tests ${SRC})
-    target_link_libraries(${BASE_NAME}_tests PRIVATE project_options project_warnings)
+    target_link_libraries(${BASE_NAME}_tests PRIVATE project_options project_fp_options project_warnings)
 
     if(ENABLE_GTEST_DEBUG_MODE)
       target_compile_definitions(${BASE_NAME}_tests PRIVATE ENABLE_GTEST_DEBUG_MODE)

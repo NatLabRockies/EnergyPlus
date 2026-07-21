@@ -116,7 +116,6 @@ GshpSpecs *GshpSpecs::factory(EnergyPlusData &state, DataPlant::PlantEquipmentTy
     }
 
     ShowFatalError(state, std::format("EquationFit_WWHP factory: Error getting inputs for wwhp named: {}", eir_wwhp_name));
-    return nullptr;
 }
 
 void GshpSpecs::simulate(EnergyPlusData &state,

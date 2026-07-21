@@ -57,7 +57,7 @@
 
 // Third Party Headers
 extern "C" {
-#include <DElight/DElightManagerC.h>
+#include <DElightManagerC.h>
 }
 
 // EnergyPlus Headers

@@ -108,8 +108,6 @@ PlantComponent *PlantProfileData::factory(EnergyPlusData &state, std::string con
     }
     // If we didn't find it, fatal
     ShowFatalError(state, std::format("PlantLoadProfile::factory: Error getting inputs for pipe named: {}", objectName));
-    // Shut up the compiler
-    return nullptr;
 }
 
 void PlantProfileData::onInitLoopEquip(EnergyPlusData &state, [[maybe_unused]] const PlantLocation &calledFromLocation)
@@ -291,7 +289,7 @@ void PlantProfileData::InitPlantProfile(EnergyPlusData &state)
             } else { //(this->FluidType == PlantLoopFluidType::Steam)
                 FluidDensityInit = this->plantLoc.loop->steam->getSatDensity(state, inletTemp, 1.0, RoutineName);
             }
-            Real64 Cp;
+            Real64 Cp = 0.0;
             if (this->FluidType == PlantLoopFluidType::Water) {
                 Cp = this->plantLoc.loop->glycol->getSpecificHeat(state, inletTemp, RoutineName);
             } else if (this->FluidType == PlantLoopFluidType::Steam) {

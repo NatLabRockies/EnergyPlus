@@ -1679,7 +1679,7 @@ namespace ThermalComfort {
         Real64 CoreSignalWarmMax;       // Maximum value of warm core signal
         Real64 EvapHeatLossDrySweat;    // Evaporative heat loss by sweating when total skin wettedness < 0.4
         Real64 Err;                     // Stop criteria for iteration
-        Real64 ErrPrev;                 // Previous value of stop criteria for iteration
+        Real64 ErrPrev = 0.0;           // Previous value of stop criteria for iteration
         Real64 EvapHeatLossSweatEst;    // Estimated evaporative heat loss by sweating
         Real64 EvapHeatLossSweatEstNew; // New value of estimated evaporative heat loss by sweating
         Real64 IntHeatProdTot;          // Total internal heat production

@@ -145,7 +145,7 @@ jobs:
           path: checkout
 
       - name: Set up Python ${{ env.Python_REQUIRED_VERSION }}
-        uses: actions/setup-python@v6
+        uses: actions/setup-python@v7
         id: setup-python
         with:
           python-version: ${{ env.Python_REQUIRED_VERSION }}

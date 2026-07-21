@@ -1931,7 +1931,7 @@ namespace FaultsManager {
 
         // SUBROUTINE LOCAL VARIABLE DECLARATIONS:
         Real64 FaultFac(0.0); // fault modification factor
-        Real64 FoulingFactor(
+        Real64 foulingFactorLocal(
             1.0); // Actual Nominal Fouling Factor, ratio between the nominal capacity or efficiency at fouling case and that at fault free case
 
         // Check fault availability schedules
@@ -1943,10 +1943,10 @@ namespace FaultsManager {
 
         // The more severe the fouling fault is (i.e., larger FaultFac), the less the FoulingFactor is
         if (FaultFac > 0.0) {
-            FoulingFactor = min(this->FoulingFactor / FaultFac, 1.0);
+            foulingFactorLocal = min(this->FoulingFactor / FaultFac, 1.0);
         }
 
-        return FoulingFactor;
+        return foulingFactorLocal;
     }
 
     Real64 FaultPropertiesTowerFouling::CalFaultyTowerFoulingFactor([[maybe_unused]] EnergyPlusData &state)

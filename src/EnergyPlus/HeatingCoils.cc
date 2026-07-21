@@ -2917,7 +2917,7 @@ namespace HeatingCoils {
         // as negative.
 
         // Return value
-        Real64 CoilCapacity; // returned capacity of matched coil
+        Real64 CoilCapacity = 0.0; // returned capacity of matched coil
 
         // FUNCTION LOCAL VARIABLE DECLARATIONS:
         int WhichCoil;

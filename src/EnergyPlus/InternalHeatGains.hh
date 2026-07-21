@@ -48,6 +48,9 @@
 #ifndef InternalHeatGains_hh_INCLUDED
 #define InternalHeatGains_hh_INCLUDED
 
+// C++ Headers
+#include <span>
+
 // ObjexxFCL Headers
 #include <ObjexxFCL/Array1D.hh>
 #include <ObjexxFCL/Optional.hh>
@@ -56,7 +59,6 @@
 #include <EnergyPlus/Data/BaseData.hh>
 #include <EnergyPlus/EnergyPlus.hh>
 #include <EnergyPlus/OutputReportTabular.hh>
-#include <GSL/span.h>
 
 namespace EnergyPlus {
 
@@ -151,7 +153,7 @@ namespace InternalHeatGains {
     Real64 SumInternalConvectionGainsByTypes(
         EnergyPlusData &state,
         int const ZoneNum,                                         // zone index pointer for which zone to sum gains for
-        gsl::span<const DataHeatBalance::IntGainType> GainTypeARR, // variable length 1-d array of enum valued gain types
+        std::span<const DataHeatBalance::IntGainType> GainTypeARR, // variable length 1-d array of enum valued gain types
         int const spaceIndex = 0);                                 // space index pointer, sum gains only for this space
 
     int GetInternalGainDeviceIndex(EnergyPlusData &state,
@@ -196,7 +198,7 @@ namespace InternalHeatGains {
     Real64 SumReturnAirConvectionGainsByTypes(
         EnergyPlusData &state,
         int const ZoneNum,                                         // zone index pointer for which zone to sum gains for
-        gsl::span<const DataHeatBalance::IntGainType> GainTypeARR, // variable length 1-d array of enum valued gain types
+        std::span<const DataHeatBalance::IntGainType> GainTypeARR, // variable length 1-d array of enum valued gain types
         int const spaceIndex = 0);                                 // space index pointer, sum gains only for this space
 
     Real64 SumAllSpaceInternalRadiationGains(EnergyPlusData &state,
@@ -206,13 +208,13 @@ namespace InternalHeatGains {
     Real64
     SumInternalRadiationGainsByTypes(EnergyPlusData &state,
                                      int const ZoneNum,                                         // zone index pointer for which zone to sum gains for
-                                     gsl::span<const DataHeatBalance::IntGainType> GainTypeARR, // variable length 1-d array of enum valued gain types
+                                     std::span<const DataHeatBalance::IntGainType> GainTypeARR, // variable length 1-d array of enum valued gain types
                                      int const spaceIndex = 0);                                 // space index pointer, sum gains only for this space
 
     Real64 SumEnclosureInternalRadiationGainsByTypes(
         EnergyPlusData &state,
         int const enclosureNum,                                     // enclosure to sum gains for
-        gsl::span<const DataHeatBalance::IntGainType> GainTypeARR); // variable length 1-d array of enum valued gain types
+        std::span<const DataHeatBalance::IntGainType> GainTypeARR); // variable length 1-d array of enum valued gain types
 
     void SumAllInternalLatentGains(EnergyPlusData &state,
                                    int const ZoneNum // zone index pointer for which zone to sum gains for
@@ -226,7 +228,7 @@ namespace InternalHeatGains {
     Real64
     SumInternalLatentGainsByTypes(EnergyPlusData &state,
                                   int const ZoneNum,                                         // zone index pointer for which zone to sum gains for
-                                  gsl::span<const DataHeatBalance::IntGainType> GainTypeARR, // variable length 1-d array of enum valued gain types
+                                  std::span<const DataHeatBalance::IntGainType> GainTypeARR, // variable length 1-d array of enum valued gain types
                                   int const spaceIndex = 0);                                 // space index pointer, sum gains only for this space
 
     Real64 SumAllReturnAirLatentGains(EnergyPlusData &state,
@@ -246,7 +248,7 @@ namespace InternalHeatGains {
     Real64
     SumInternalCO2GainsByTypes(EnergyPlusData &state,
                                int const ZoneNum,                                        // zone index pointer for which zone to sum gains for
-                               gsl::span<const DataHeatBalance::IntGainType> GainTypeARR // variable length 1-d array of integer valued gain types
+                               std::span<const DataHeatBalance::IntGainType> GainTypeARR // variable length 1-d array of integer valued gain types
     );
 
     Real64 SumAllInternalGenericContamGains(EnergyPlusData &state,

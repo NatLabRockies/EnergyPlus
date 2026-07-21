@@ -7157,11 +7157,11 @@ TEST_F(EnergyPlusFixture, HeatBalanceSurfaceManager_TestSurfPropertySurfToGndLWR
     Sched::GetSchedule(*state, "SKY TEMP SCH")->currentVal = 15.0;           // Sky temp
     Sched::GetSchedule(*state, "GROUND TEMP SCH")->currentVal = 22.0;        // Grd temp
 
-    for (int SurfNum = 1; SurfNum <= 6; SurfNum++) {
-        state->dataHeatBalSurf->SurfOutsideTempHist(1)(SurfNum) = 20; // Surf temp
-        state->dataSurface->SurfOutDryBulbTemp(SurfNum) = 22;         // Air temp
-        state->dataSurface->surfExtConv(SurfNum).model = Convect::HcExt::MoWiTTHcOutside;
-        state->dataSurface->SurfAirSkyRadSplit(SurfNum) = 1.0;
+    for (int loopSurfNum = 1; loopSurfNum <= 6; loopSurfNum++) {
+        state->dataHeatBalSurf->SurfOutsideTempHist(1)(loopSurfNum) = 20; // Surf temp
+        state->dataSurface->SurfOutDryBulbTemp(loopSurfNum) = 22;         // Air temp
+        state->dataSurface->surfExtConv(loopSurfNum).model = Convect::HcExt::MoWiTTHcOutside;
+        state->dataSurface->SurfAirSkyRadSplit(loopSurfNum) = 1.0;
     }
 
     // test reset of surface view factors are correct

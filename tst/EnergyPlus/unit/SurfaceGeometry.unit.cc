@@ -3187,8 +3187,8 @@ TEST_F(EnergyPlusFixture, SurfaceGeometry_CheckConvexityTest_9118)
     EXPECT_EQ(4, surface.Sides);
     EXPECT_TRUE(surface.IsConvex);
 
-    for (int i = 1; i <= 4; ++i) {
-        EXPECT_EQ(baseVertices[i - 1], vertices(i)) << "Failed for Vertex " << i;
+    for (int vertNum = 1; vertNum <= 4; ++vertNum) {
+        EXPECT_EQ(baseVertices[vertNum - 1], vertices(vertNum)) << "Failed for Vertex " << vertNum;
     }
 
     // Now perform the same test, except the first vertices is colinear, to ensure we also get that case covered
@@ -3219,8 +3219,8 @@ TEST_F(EnergyPlusFixture, SurfaceGeometry_CheckConvexityTest_9118)
     EXPECT_EQ(4, surface.Sides);
     EXPECT_TRUE(surface.IsConvex);
 
-    for (int i = 1; i <= 4; ++i) {
-        EXPECT_EQ(baseVertices[i - 1], vertices(i)) << "Failed for Vertex " << i;
+    for (int vertNum = 1; vertNum <= 4; ++vertNum) {
+        EXPECT_EQ(baseVertices[vertNum - 1], vertices(vertNum)) << "Failed for Vertex " << vertNum;
     }
 }
 

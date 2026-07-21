@@ -140,8 +140,6 @@ PlantComponent *PondGroundHeatExchangerData::factory(EnergyPlusData &state, std:
     }
     // If we didn't find it, fatal
     ShowFatalError(state, std::format("Pond Heat Exchanger Factory: Error getting inputs for GHX named: {}", objectName));
-    // Shut up the compiler
-    return nullptr;
 }
 
 void PondGroundHeatExchangerData::onInitLoopEquip(EnergyPlusData &state, [[maybe_unused]] const PlantLocation &calledFromLocation)

@@ -196,8 +196,8 @@ void GetStandAloneERV(EnergyPlusData &state)
     int HStatZoneNum;        // used to find zone with humidistat
     int NumHstatZone;        // index to humidity controlled zones
     Real64 HXSupAirFlowRate; // HX supply air flow rate [m3/s]
-    int ZoneInletCZN;        // used for warning when zone node not listed in equipment connections
-    int ZoneExhaustCZN;      // used for warning when zone node not listed in equipment connections
+    int ZoneInletCZN = 0;    // used for warning when zone node not listed in equipment connections
+    int ZoneExhaustCZN = 0;  // used for warning when zone node not listed in equipment connections
 
     state.dataInputProcessing->inputProcessor->getObjectDefMaxArgs(state, "ZoneHVAC:EnergyRecoveryVentilator", NumArg, NumAlphas, NumNumbers);
     int MaxAlphas = NumAlphas;

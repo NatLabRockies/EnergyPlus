@@ -1162,8 +1162,8 @@ void SizeEvapCooler(EnergyPlusData &state, int const EvapCoolNum)
     // SUBROUTINE LOCAL VARIABLE DECLARATIONS:
     bool IsAutoSize; // Indicator to autosize
 
-    Real64 volFlowRateDes; // Autosized volume flow rate for reporting
-    std::string CompType;  // for ease in getting objects
+    Real64 volFlowRateDes = 0.0; // Autosized volume flow rate for reporting
+    std::string CompType;        // for ease in getting objects
 
     // inits
     bool CoolerOnOApath = false;
@@ -3656,8 +3656,8 @@ void GetInputZoneEvaporativeCoolerUnit(EnergyPlusData &state)
     lNumericBlanks.deallocate();
 
     if (ErrorsFound) {
-        ShowFatalError(state, std::format("{}Errors found in getting input.", RoutineName));
         ShowContinueError(state, "... Preceding condition causes termination.");
+        ShowFatalError(state, std::format("{}Errors found in getting input.", RoutineName));
     }
 
     // setup output variables

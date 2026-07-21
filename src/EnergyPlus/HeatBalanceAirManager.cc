@@ -280,8 +280,8 @@ void GetSimpleAirModelInputs(EnergyPlusData &state, bool &ErrorsFound) // IF err
     Array1D<Real64> TotMixingFlow;
     Array1D<Real64> ZoneMixingNum;
     int ConnectionNumber;
-    int ZoneNumA;
-    int ZoneNumB;
+    int ZoneNumA = 0;
+    int ZoneNumB = 0;
 
     // Formats
     static constexpr std::string_view Format_720(" {} Airflow Stats Nominal, {},{},{},{},{:.2f},{:.2f},");

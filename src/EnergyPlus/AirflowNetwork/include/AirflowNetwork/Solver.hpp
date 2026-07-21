@@ -165,7 +165,8 @@ namespace AirflowNetwork {
                                  int ZoneNum,
                                  Real64 TimeCloseDuration); // function to perform calculations of opening probability
 
-        bool closing_probability(EnergyPlusData &state, Real64 TimeCloseDuration); // function to perform calculations of closing probability
+        bool closing_probability([[maybe_unused]] EnergyPlusData &state,
+                                 Real64 TimeCloseDuration); // function to perform calculations of closing probability
     };
 
     enum class DuctSizingMethod

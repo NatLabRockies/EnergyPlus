@@ -226,7 +226,7 @@ namespace HVACCooledBeam {
         bool ErrorsFound(false); // Set to true if errors in input, fatal at end of routine
         int CtrlZone;            // controlled zome do loop index
         int SupAirIn;            // controlled zone supply air inlet index
-        bool AirNodeFound;
+        bool AirNodeFound = false;
         int ADUNum;
 
         auto &CoolBeam = state.dataHVACCooledBeam->CoolBeam;
@@ -435,6 +435,7 @@ namespace HVACCooledBeam {
                 }
             }
             // one assumes if there isn't one assigned, it's an error?
+            AirNodeFound = false;
             if (CoolBeam(CBNum).ADUNum == 0) {
                 ShowSevereError(
                     state,
@@ -444,7 +445,6 @@ namespace HVACCooledBeam {
             } else {
 
                 // Fill the Zone Equipment data with the supply air inlet node number of this unit.
-                AirNodeFound = false;
                 for (CtrlZone = 1; CtrlZone <= state.dataGlobal->NumOfZones; ++CtrlZone) {
                     if (!state.dataZoneEquip->ZoneEquipConfig(CtrlZone).IsControlled) {
                         continue;

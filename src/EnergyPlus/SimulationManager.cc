@@ -53,7 +53,6 @@
 // ObjexxFCL Headers
 #include <ObjexxFCL/Array.functions.hh>
 #include <ObjexxFCL/Array1D.hh>
-#include <ObjexxFCL/environment.hh>
 #include <ObjexxFCL/string.functions.hh>
 
 // Third Party Headers
@@ -67,7 +66,6 @@ extern "C" {
 #include <EnergyPlus/CostEstimateManager.hh>
 #include <EnergyPlus/CurveManager.hh>
 #include <EnergyPlus/Data/EnergyPlusData.hh>
-#include <EnergyPlus/DataAirLoop.hh>
 #include <EnergyPlus/DataBranchNodeConnections.hh>
 #include <EnergyPlus/DataConvergParams.hh>
 #include <EnergyPlus/DataErrorTracking.hh>
@@ -95,7 +93,6 @@ extern "C" {
 #include <EnergyPlus/ExternalInterface.hh>
 #include <EnergyPlus/FaultsManager.hh>
 #include <EnergyPlus/FileSystem.hh>
-#include <EnergyPlus/FluidProperties.hh>
 #include <EnergyPlus/GeneralRoutines.hh>
 #include <EnergyPlus/HVACControllers.hh>
 #include <EnergyPlus/HVACManager.hh>
@@ -109,7 +106,6 @@ extern "C" {
 #include <EnergyPlus/NodeInputManager.hh>
 #include <EnergyPlus/OutAirNodeManager.hh>
 #include <EnergyPlus/OutputProcessor.hh>
-#include <EnergyPlus/OutputReportPredefined.hh>
 #include <EnergyPlus/OutputReportTabular.hh>
 #include <EnergyPlus/OutputReports.hh>
 #include <EnergyPlus/Plant/PlantManager.hh>
@@ -118,7 +114,6 @@ extern "C" {
 #include <EnergyPlus/PollutionModule.hh>
 #include <EnergyPlus/Psychrometrics.hh>
 #include <EnergyPlus/RefrigeratedCase.hh>
-#include <EnergyPlus/ReportCoilSelection.hh>
 #include <EnergyPlus/ResultsFramework.hh>
 #include <EnergyPlus/SetPointManager.hh>
 #include <EnergyPlus/SimulationManager.hh>
@@ -728,12 +723,12 @@ namespace SimulationManager {
         Array1D_string Alphas(10);
         Array1D<Real64> Number(4);
         int NumAlpha;
-        int NumNumber;
+        int NumNumber = 0;
         int IOStat;
         int NumDebugOut;
         int MinInt;
         int Num;
-        int Which;
+        int Which = 1;
         bool ErrorsFound;
         int NumRunControl;
         std::string VersionID;
@@ -908,10 +903,11 @@ namespace SimulationManager {
             } else if (mod(60, state.dataGlobal->TimeStepsInHour) != 0) {
                 MinInt = 9999;
                 for (Num = 1; Num <= 12; ++Num) {
-                    if (std::abs(state.dataGlobal->TimeStepsInHour - Div60[Num - 1]) > MinInt) {
+                    int const ThisDiff = std::abs(state.dataGlobal->TimeStepsInHour - Div60[Num - 1]);
+                    if (ThisDiff > MinInt) {
                         continue;
                     }
-                    MinInt = state.dataGlobal->TimeStepsInHour - Div60[Num - 1];
+                    MinInt = ThisDiff;
                     Which = Num;
                 }
                 ShowWarningError(state,
@@ -1050,7 +1046,8 @@ namespace SimulationManager {
 
             if (instances != state.dataInputProcessing->inputProcessor->epJSON.end()) {
                 auto &instancesValue = instances.value();
-                for (auto instance = instancesValue.begin(); instance != instancesValue.end(); ++instance) {
+                auto instance = instancesValue.begin();
+                if (instance != instancesValue.end()) {
                     auto const &fields = instance.value();
                     std::string const &thisObjectName = instance.key();
                     state.dataInputProcessing->inputProcessor->markObjectAsUsed(CurrentModuleObject, thisObjectName);
@@ -1124,9 +1121,6 @@ namespace SimulationManager {
                             }
                         }
                     }
-
-                    // Don't process the duplicate ones
-                    break;
                 }
             }
         }

@@ -1227,13 +1227,13 @@ namespace Photovoltaics {
         Real64 AA;
         Real64 IO;
         Real64 ISCG1;
-        Real64 ISC;
+        Real64 ISC = 0.0;
         Real64 VOCG1;
-        Real64 VOC;
+        Real64 VOC = 0.0;
         Real64 VLEFT;
         Real64 VRIGHT;
-        Real64 VM;
-        Real64 IM;
+        Real64 VM = 0.0;
+        Real64 IM = 0.0;
         Real64 PM;
         Real64 IA;
         Real64 ISCA;

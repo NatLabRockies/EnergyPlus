@@ -976,7 +976,7 @@ namespace HWBaseboardRadiator {
         Real64 DeltaT2;
         Real64 LMTD;
         Real64 AirMassFlowRate;
-        Real64 WaterMassFlowRateStd;
+        Real64 WaterMassFlowRateStd = 0.0;
         Real64 rho;      // local fluid density
         Real64 Cp;       // local fluid specific heat
         Real64 TempSize; // autosized value of coil input field

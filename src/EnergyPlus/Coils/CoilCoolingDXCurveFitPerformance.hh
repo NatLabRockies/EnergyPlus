@@ -203,7 +203,7 @@ struct CoilCoolingDXCurveFitPerformance : public CoilCoolingDXPerformanceBase
         return static_cast<int>(normalMode.speeds.size());
     }
 
-    virtual void setToHundredPercentDOAS() override
+    void setToHundredPercentDOAS() override
     {
         for (auto &speed : normalMode.speeds) {
             speed.minRatedVolFlowPerRatedTotCap = HVAC::MinRatedVolFlowPerRatedTotCap2;

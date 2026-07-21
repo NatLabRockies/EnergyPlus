@@ -129,8 +129,6 @@ ElectricEIRChillerSpecs *ElectricEIRChillerSpecs::factory(EnergyPlusData &state,
     }
     // If we didn't find it, fatal
     ShowFatalError(state, std::format("LocalElectEIRChillerFactory: Error getting inputs for object named: {}", objectName)); // LCOV_EXCL_LINE
-    // Shut up the compiler
-    return nullptr; // LCOV_EXCL_LINE
 }
 
 void ElectricEIRChillerSpecs::simulate(

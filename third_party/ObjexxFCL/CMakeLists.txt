@@ -155,6 +155,7 @@ set( test_src
 )
 
 add_library( ${target_name} ${src} )
+target_include_directories(${target_name} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/src)
 
 if (BUILD_TESTING AND BUILD_OBJEXXFCL_TESTING)
   create_test_targets(${target_name} "${test_src}" "")

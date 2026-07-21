@@ -362,7 +362,7 @@ static ScalarVariable *getSV(FMU *fmu, char type, fmiValueReference vr)
 ///\param nBuffer The size of the buffer
 ///\param fmu FMU The FMU instance
 ///////////////////////////////////////////////////////////////////////////////
-static void replaceRefsInMessage(const char *msg, char *buffer, int nBuffer, FMU *fmu)
+static void replaceRefsInMessage(const char *msg, char *buffer, size_t nBuffer, FMU *fmu)
 {
     size_t i = 0; // position in msg
     size_t k = 0; // position in buffer

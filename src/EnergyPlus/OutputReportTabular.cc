@@ -489,7 +489,7 @@ void AddMonthlyFieldSetInput(
     // SUBROUTINE ARGUMENT DEFINITIONS:
 
     // SUBROUTINE PARAMETER DEFINITIONS:
-    int constexpr sizeIncrement(50);
+    int constexpr localSizeIncrement(50);
     auto &ort = state.dataOutRptTab;
 
     // INTERFACE BLOCK SPECIFICATIONS:
@@ -502,8 +502,8 @@ void AddMonthlyFieldSetInput(
     // na
 
     if (!allocated(ort->MonthlyFieldSetInput)) {
-        ort->MonthlyFieldSetInput.allocate(sizeIncrement);
-        ort->sizeMonthlyFieldSetInput = sizeIncrement;
+        ort->MonthlyFieldSetInput.allocate(localSizeIncrement);
+        ort->sizeMonthlyFieldSetInput = localSizeIncrement;
         ort->MonthlyFieldSetInputCount = 1;
     } else {
         ++ort->MonthlyFieldSetInputCount;
@@ -2082,22 +2082,16 @@ void InitializePredefinedMonthlyTitles(EnergyPlusData &state)
     ort->namedMonthly(62).title = "MechanicalVentilationLoadsMonthly";
     ort->namedMonthly(63).title = "HeatEmissionsReportMonthly";
 
-    if (numNamedMonthly != NumMonthlyReports) {
-        ShowFatalError(
-            state,
-            std::format("InitializePredefinedMonthlyTitles: Number of Monthly Reports in OutputReportTabular=[{}] does not match number in "
-                        "DataOutputs=[{}].",
-                        numNamedMonthly,
-                        NumMonthlyReports));
-    } else {
-        for (int xcount = 1; xcount <= numNamedMonthly; ++xcount) {
-            if (!Util::SameString(MonthlyNamedReports(xcount), ort->namedMonthly(xcount).title)) {
-                ShowSevereError(state,
-                                "InitializePredefinedMonthlyTitles: Monthly Report Titles in OutputReportTabular do not match titles in DataOutput.");
-                ShowContinueError(state, std::format("first mismatch at ORT [{}] =\"{}\".", numNamedMonthly, ort->namedMonthly(xcount).title));
-                ShowContinueError(state, std::format("same location in DO =\"{}\".", MonthlyNamedReports(xcount)));
-                ShowFatalError(state, "Preceding condition causes termination.");
-            }
+    static_assert(numNamedMonthly == NumMonthlyReports,
+                  "InitializePredefinedMonthlyTitles: Number of Monthly Reports in OutputReportTabular does not match number in DataOutputs.");
+
+    for (int xcount = 1; xcount <= numNamedMonthly; ++xcount) {
+        if (!Util::SameString(MonthlyNamedReports(xcount), ort->namedMonthly(xcount).title)) {
+            ShowSevereError(state,
+                            "InitializePredefinedMonthlyTitles: Monthly Report Titles in OutputReportTabular do not match titles in DataOutput.");
+            ShowContinueError(state, std::format("first mismatch at ORT [{}] =\"{}\".", numNamedMonthly, ort->namedMonthly(xcount).title));
+            ShowContinueError(state, std::format("same location in DO =\"{}\".", MonthlyNamedReports(xcount)));
+            ShowFatalError(state, "Preceding condition causes termination.");
         }
     }
 }
@@ -18031,12 +18025,14 @@ std::string ConvertToEscaped(std::string const &inString, bool isXML) // Input S
             s += "&lt;";
         } else if (c == '>') {
             s += "&gt;";
-        } else if (c == char(176) && !isXML) {
+        } else if (static_cast<unsigned char>(c) == 176 && !isXML) {
             s += "&deg;";
-        } else if (c == char(226) && char(inString[index]) == char(137) && char(inString[index + 1]) == char(164) && !isXML) { // ≤
+        } else if (static_cast<unsigned char>(c) == 226 && static_cast<unsigned char>(inString[index]) == 137 &&
+                   static_cast<unsigned char>(inString[index + 1]) == 164 && !isXML) { // ≤
             s += "&le;";
             index += 2;
-        } else if (c == char(226) && char(inString[index]) == char(137) && char(inString[index + 1]) == char(165) && !isXML) { // ≥
+        } else if (static_cast<unsigned char>(c) == 226 && static_cast<unsigned char>(inString[index]) == 137 &&
+                   static_cast<unsigned char>(inString[index + 1]) == 165 && !isXML) { // ≥
             s += "&ge;";
             index += 2;
         } else if (c == '\xC2') {
@@ -18675,7 +18671,7 @@ bool isNumber(std::string const &s)
     char *p;
     strtod(s.c_str(), &p);
     for (; isspace(*p) != 0; ++p) {
-        ; // handle trailing whitespace
+        // handle trailing whitespace
     }
     return *p == 0;
 }

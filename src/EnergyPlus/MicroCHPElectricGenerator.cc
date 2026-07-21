@@ -119,8 +119,6 @@ PlantComponent *MicroCHPDataStruct::factory(EnergyPlusData &state, std::string c
     }
     // If we didn't find it, fatal
     ShowFatalError(state, std::format("LocalMicroCHPGenFactory: Error getting inputs for micro-CHP gen named: {}", objectName)); // LCOV_EXCL_LINE
-    // Shut up the compiler
-    return nullptr; // LCOV_EXCL_LINE
 }
 
 void GetMicroCHPGeneratorInput(EnergyPlusData &state)
@@ -850,7 +848,7 @@ void MicroCHPDataStruct::CalcMicroCHPNoNormalizeGeneratorModel(EnergyPlusData &s
     static constexpr std::string_view RoutineName("CalcMicroCHPNoNormalizeGeneratorModel");
 
     DataGenerators::OperatingMode CurrentOpMode = DataGenerators::OperatingMode::Invalid;
-    Real64 NdotFuel;
+    Real64 NdotFuel = 0.0;
     Real64 AllowedLoad = 0.0;
     Real64 PLRforSubtimestepStartUp(1.0);
     Real64 PLRforSubtimestepShutDown(0.0);

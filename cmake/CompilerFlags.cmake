@@ -25,6 +25,9 @@ if(MSVC AND NOT ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Intel")) # Visual C++ (VS 
   target_compile_options(project_options INTERFACE /MP) # Enables multi-processor compilation of source within a single project
   target_compile_options(project_options INTERFACE /Zc:externConstexpr)  # allows constexpr to be extern'd in headers, which is part of the standard, and supported by default on non-vs compilers
   target_compile_options(project_options INTERFACE /utf-8)  # Specifies both the source character set and the execution character set as UTF-8
+  target_compile_options(project_options INTERFACE /permissive-)  # Enable standards-conforming compiler behavior
+
+  target_compile_options(project_warnings INTERFACE /W4 /WX)
 
   # string(REGEX REPLACE "/W3" "/W1" CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}"
   # )# Increase to /W2 then /W3 as more serious warnings are addressed (using regex to avoid VC override warnings)
@@ -77,6 +80,7 @@ if(MSVC AND NOT ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Intel")) # Visual C++ (VS 
   target_compile_options(project_options INTERFACE $<$<CONFIG:Debug>:/RTCsu>) # Runtime checks
   target_compile_options(project_fp_options INTERFACE $<$<CONFIG:Debug>:/fp:strict>) # Floating point model
   target_compile_options(turn_off_warnings INTERFACE /W0)
+  target_compile_options(warnings_as_not_error INTERFACE /WX-) # Disable treating warnings as errors
 
   option(FORCE_DEBUG_ARITHM_MSVC "Enable trapping floating point exceptions in non Debug mode" OFF)
   mark_as_advanced(FORCE_DEBUG_ARITHM_MSVC)
@@ -93,11 +97,12 @@ elseif(CMAKE_COMPILER_IS_GNUCXX OR "${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang" O
 
   # COMPILER FLAGS
   target_compile_options(project_options INTERFACE -pipe) # Faster compiler processing
-  target_compile_options(project_options INTERFACE -Werror) # Compiler Driven Development
+  target_compile_options(project_warnings INTERFACE -Werror) # Compiler Driven Development
   target_compile_options(project_warnings INTERFACE -Wpedantic)
   # Turn on warnings about constructs/situations that may be non-portable or outside of the standard
   target_compile_options(project_warnings INTERFACE -Wall) # Turn on warnings
   target_compile_options(project_warnings INTERFACE -Wextra) # Turn on warnings
+  target_compile_options(project_warnings INTERFACE -Wsuggest-override) # Flag virtual overrides missing the `override` keyword
   target_compile_options(project_warnings INTERFACE -Wno-unknown-pragmas)
   if(CMAKE_COMPILER_IS_GNUCXX AND CMAKE_CXX_COMPILER_VERSION VERSION_GREATER 9.0)
     target_compile_options(project_warnings INTERFACE -Wno-deprecated-copy)
@@ -164,6 +169,7 @@ elseif(CMAKE_COMPILER_IS_GNUCXX OR "${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang" O
   # ADD_CXX_RELEASE_DEFINITIONS("-Ofast") # -Ofast (or -ffast-math) needed to auto-vectorize floating point loops
 
   target_compile_options(turn_off_warnings INTERFACE -w)
+  target_compile_options(warnings_as_not_error INTERFACE -Wno-error) # Disable treating warnings as errors
 
 elseif(WIN32 AND "${CMAKE_CXX_COMPILER_ID}" STREQUAL "Intel")
 

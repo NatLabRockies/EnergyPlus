@@ -790,6 +790,7 @@ void ManageSystemSizingAdjustments(EnergyPlusData &state)
         state.dataGlobal->BeginEnvrnFlag = false;
 
         for (int AirLoopNum = 1; AirLoopNum <= state.dataHVACGlobal->NumPrimaryAirSys; ++AirLoopNum) {
+            bool vavTUFound = false;
             auto &finalSysSizing = state.dataSize->FinalSysSizing(AirLoopNum);
             // Mine data from ATUs to find new design heating flow rates and new maximum flow rates
             Real64 airLoopMaxFlowRateSum(0.0);
@@ -820,6 +821,7 @@ void ManageSystemSizingAdjustments(EnergyPlusData &state)
                                 sd_airterminal(singleDuctATUNum).MaxAirVolFlowRate; // store std 62.1 values
 
                         } else {
+                            vavTUFound = true;
                             airLoopHeatingMinimumFlowRateSum +=
                                 sd_airterminal(singleDuctATUNum).MaxAirVolFlowRate * sd_airterminal(singleDuctATUNum).ZoneMinAirFrac;
                             state.dataSize->VpzMinClgByZone(termUnitSizingIndex) =
@@ -1199,6 +1201,31 @@ void ManageSystemSizingAdjustments(EnergyPlusData &state)
                     BaseSizer::reportSizerOutput(state, "AirLoopHVAC", curName, "Calculated Heating Air Flow Ratio []", calcSysAirMinFlowRat);
                     OutputReportPredefined::PreDefTableEntry(
                         state, state.dataOutRptPredefined->pdchSysSizCalcHeatFlowRatio, curName, calcSysAirMinFlowRat, 4);
+
+                    if (calcSysAirMinFlowRat > finalSysSizing.SysAirMinFlowRat && vavTUFound &&
+                        state.dataAirSystemsData->PrimaryAirSystems(AirLoopNum).CentralHeatCoilExists) {
+                        ShowWarningError(
+                            state,
+                            std::format("FinalSystemSizing: AirLoop=\"{}\", Sizing:System Central Heating Maximum System Air Flow Ratio = {:5f},",
+                                        curName,
+                                        finalSysSizing.SysAirMinFlowRat));
+                        ShowContinueError(state,
+                                          std::format("is less than the system heating to maximum air flow ratio. Central Heating Maximum System Air "
+                                                      "Flow Ratio = {:5f}.",
+                                                      calcSysAirMinFlowRat));
+                        ShowContinueError(state,
+                                          "The central heating coil may undersize if autosized. Consider increasing the Central Heating Maximum "
+                                          "System Air Flow Ratio.");
+                        ShowContinueError(state,
+                                          std::format("System heating volumetric air flow rate = {:5f} [m3/s].",
+                                                      state.dataSize->CalcSysSizing(AirLoopNum).DesHeatVolFlow));
+                        ShowContinueError(state,
+                                          std::format("System cooling volumetric air flow rate = {:5f} [m3/s].",
+                                                      state.dataSize->CalcSysSizing(AirLoopNum).DesCoolVolFlow));
+                        ShowContinueError(state,
+                                          std::format("System main volumetric air flow rate = {:5f} [m3/s].",
+                                                      state.dataSize->CalcSysSizing(AirLoopNum).DesMainVolFlow));
+                    }
                 }
             }
         }
@@ -2694,7 +2721,7 @@ void GetZoneSizingInput(EnergyPlusData &state)
     int Item1;
     bool errFlag;
     Array1D_string ZoneNames;
-    int NumZones;
+    int NumZones = 0;
     int NumZoneLists = 0;
 
     struct GlobalMiscObject

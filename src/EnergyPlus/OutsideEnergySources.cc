@@ -102,8 +102,6 @@ PlantComponent *OutsideEnergySourceSpecs::factory(EnergyPlusData &state, DataPla
     }
     // If we didn't find it, fatal
     ShowFatalError(state, std::format("OutsideEnergySourceSpecsFactory: Error getting inputs for source named: {}", objectName)); // LCOV_EXCL_LINE
-    // Shut up the compiler
-    return nullptr; // LCOV_EXCL_LINE
 }
 
 void OutsideEnergySourceSpecs::simulate(EnergyPlusData &state,

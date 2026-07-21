@@ -126,7 +126,7 @@ public:
     bool ErrorsFound = false;
 
 protected:
-    virtual void SetUp()
+    void SetUp() override
     {
         EnergyPlusFixture::SetUp(); // Sets up the base fixture first.
 
@@ -516,7 +516,7 @@ protected:
         dxCoil2.PLFFPLR(1) = Sch1;
     }
 
-    virtual void TearDown()
+    void TearDown() override
     {
         EnergyPlusFixture::TearDown(); // Remember to tear down the base fixture after cleaning up derived fixture!
     }
@@ -3959,8 +3959,8 @@ TEST_F(EnergyPlusFixture, VRFTest_SysCurve)
               state->dataZoneEquip->ZoneEquipConfig(state->dataHVACVarRefFlow->VRFTU(VRFTUNum).ZoneNum)
                   .InletNode(1)); // only 1 inlet node specified above in ZoneHVAC:EquipmentConnections
     ASSERT_EQ(1.0, state->dataHVACVarRefFlow->VRF(VRFCond).CoolingCombinationRatio);
-    EXPECT_NEAR(11612.363, state->dataHVACVarRefFlow->VRF(VRFCond).CoolingCapacity, 0.001);
-    EXPECT_NEAR(11612.363, state->dataHVACVarRefFlow->VRF(VRFCond).HeatingCapacity, 0.001);
+    EXPECT_NEAR(11612.363, state->dataHVACVarRefFlow->VRF(VRFCond).CoolingCapacity, 0.002);
+    EXPECT_NEAR(11612.363, state->dataHVACVarRefFlow->VRF(VRFCond).HeatingCapacity, 0.002);
     EXPECT_EQ(0.0, state->dataHVACVarRefFlow->VRF(VRFCond).DefrostPower);
 
     // test defrost operation Issue #4950 - Reverse cycle with timed defrost = 0

@@ -121,7 +121,7 @@ public:
 
     int getNumSectionsFound(std::string const &SectionWord);
 
-    int getNumObjectsFound(EnergyPlusData &state, std::string_view const ObjectWord);
+    int getNumObjectsFound([[maybe_unused]] EnergyPlusData &state, std::string_view const ObjectWord);
 
     bool findDefault(std::string &default_value, json const &schema_field_obj);
 
@@ -287,13 +287,13 @@ private:
 
     json const &getPatternProperties(EnergyPlusData &state, json const &schema_obj);
 
-    inline std::string convertToUpper(std::string_view s)
+    inline std::string convertToUpper(std::string_view sv)
     {
         std::string s2;
-        size_t len = s.size();
+        size_t len = sv.size();
         s2.resize(len);
         for (size_t i = 0; i < len; ++i) {
-            char c = s[i];
+            char c = sv[i];
             s2[i] = ('a' <= c && c <= 'z') ? c ^ 0x20 : c; // ASCII only
         }
         s2[len] = '\0';

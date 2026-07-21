@@ -188,7 +188,7 @@ namespace Window {
         bool ScreenOn;  // True if construction has an exterior screen
         bool BlindOn;   // True if IntBlind, ExtBlind or BGBlind is true
         bool ShadeOn;   // True if IntShade, ExtShade or BGShade is true
-        int BlNum;      // Blind number
+        int BlNum = 0;  // Blind number
 
         auto &wm = state.dataWindowManager;
         std::array<Real64, nume> sabsPhi; // Glazing system absorptance for a glass layer
@@ -288,8 +288,8 @@ namespace Window {
         // horizontal slats for isotropic ground solar
         Real64 ShadeTransSky; // Diffuse-diffuse transmittance of isolated vertical blind with
         // horizontal slats for isotropic sky solar
-        Real64 tsh;    // = ShadeTrans
-        Real64 tshGnd; // = ShadeTransGnd,ShadeTransSky
+        Real64 tsh = 0.0; // = ShadeTrans
+        Real64 tshGnd;    // = ShadeTransGnd,ShadeTransSky
         Real64 tshSky;
         Real64 tsh2;         // = tsh**2
         Real64 ShadeRefl;    // Solar reflectance of isolated shade
@@ -302,7 +302,7 @@ namespace Window {
         Real64 rbsh;                          // Diffuse solar back reflectance of isolated blind
         Real64 ShadeReflFac;                  // Shade/blind solar reflection factor
         Real64 ShadeTransVis;                 // Visible transmittance of isolated shade/blind
-        Real64 tshv;                          // = ShadeTransVis
+        Real64 tshv = 0.0;                    // = ShadeTransVis
         Real64 tshv2;                         // = tshv**2
         Real64 ShadeReflVis;                  // Visible reflectance of isolated shade
         Real64 rshv;                          // = ShadeReflVis
@@ -1978,7 +1978,7 @@ namespace Window {
         }
     } // SystemPropertiesAtLambdaAndPhi()
 
-    Real64 solarSpectrumAverage(EnergyPlusData const &state, gsl::span<Real64 const> p)
+    Real64 solarSpectrumAverage(EnergyPlusData const &state, std::span<Real64 const> p)
     {
         Real64 num = 0.0;
         Real64 denom = 0.0;
@@ -1992,7 +1992,7 @@ namespace Window {
         return num / denom; // dangerous, doesn't check for zero denominator
     }
 
-    Real64 visibleSpectrumAverage(EnergyPlusData const &state, gsl::span<Real64 const> p)
+    Real64 visibleSpectrumAverage(EnergyPlusData const &state, std::span<Real64 const> p)
     {
         //       AUTHOR         Adapted by F.Winkelmann from WINDOW 5
         //                      subroutine w4vis
@@ -2022,8 +2022,8 @@ namespace Window {
         return num / denom; // dangerous, doesn't check for zero denominator
     }
 
-    Real64 Interpolate(gsl::span<Real64 const> x, // Array of data points for independent variable
-                       gsl::span<Real64 const> y, // Array of data points for dependent variable
+    Real64 Interpolate(std::span<Real64 const> x, // Array of data points for independent variable
+                       std::span<Real64 const> y, // Array of data points for dependent variable
                        int const npts,            // Number of data pairs
                        Real64 const xin           // Given value of x
     )
@@ -2139,8 +2139,8 @@ namespace Window {
         int LayPtr;               // Material number for a layer
         WinShadingType ShadeFlag; // Flag indicating whether shade or blind is on, and shade/blind position
         // REAL(r64) :: tsky                         ! Sky temperature [K]
-        int ShadeLayPtr; // Material number corresponding to a shade layer
-        Real64 dth1;     // Temperature difference across glass layers [K]
+        int ShadeLayPtr = 0; // Material number corresponding to a shade layer
+        Real64 dth1;         // Temperature difference across glass layers [K]
         Real64 dth2;
         Real64 dth3;
         Real64 dth4;
@@ -4801,9 +4801,9 @@ namespace Window {
         // Window5 source code; ISO 15099
 
         // SUBROUTINE LOCAL VARIABLE DECLARATIONS:
-        Real64 asp;    // Aspect ratio: window height to gap width
-        Real64 ra;     // Rayleigh number
-        Real64 gnu901; // Nusselt number temporary variables for
+        Real64 asp;          // Aspect ratio: window height to gap width
+        Real64 ra;           // Rayleigh number
+        Real64 gnu901 = 0.0; // Nusselt number temporary variables for
         Real64 gnu902;
         Real64 gnu90;
         Real64 gnu601;
@@ -5865,29 +5865,29 @@ namespace Window {
         Real64 ShadeRes;          // Thermal resistance of shade
         int MatOutside;           // Material number of outside layer of construction
         int MatInside;            // Material number of inside layer of construction
-        int MatShade;             // Material number of shade layer
+        int MatShade = 0;         // Material number of shade layer
         std::array<Real64, maxGlassLayers> AbsBeamNorm; // Beam absorptance at normal incidence for each glass layer
         Real64 AbsBeamShadeNorm;                        // Shade solar absorptance at normal incidence
-        int ConstrNumBare;                              // Construction without shading device
-        int BlNum;                                      // Blind number
+        int ConstrNumBare = 0;                          // Construction without shading device
+        int BlNum = 0;                                  // Blind number
         Real64 SlatAng;                                 // Slat angle (rad)
         int LayPtrSh;                                   // Layer pointer of blind
-        Real64 TBmBm;                                   // Bare glass normal incidence beam-beam transmittance
+        Real64 TBmBm = 0.0;                             // Bare glass normal incidence beam-beam transmittance
         Real64 TBmBmVis;
-        Real64 TBlBmBm; // Normal incidence blind beam-beam transmittance
-        Real64 TScBmBm; // Screen incident beam-beam transmittance
+        Real64 TBlBmBm = 0.0; // Normal incidence blind beam-beam transmittance
+        Real64 TScBmBm = 0.0; // Screen incident beam-beam transmittance
         Real64 TScBmBmVis;
         Real64 TBmBmBl; // TBmBm * TBlBmBm, TBmBmVis * TBlBmBm
         Real64 TBmBmBlVis;
-        Real64 RGlDiffBack; // Bare glass back sol/vis reflectance
+        Real64 RGlDiffBack = 0.0; // Bare glass back sol/vis reflectance
         Real64 RGlDiffBackVis;
-        Real64 RGlDiffFront; // Bare glass front sol/vis reflectance
+        Real64 RGlDiffFront = 0.0; // Bare glass front sol/vis reflectance
         Real64 RGlDiffFrontVis;
-        Real64 RhoBlFront; // Blind normal front beam-diffuse sol/vis reflectance
+        Real64 RhoBlFront = 0.0; // Blind normal front beam-diffuse sol/vis reflectance
         Real64 RhoBlFrontVis;
-        Real64 RhoBlBack; // Blind normal back beam-diffuse sol/vis reflectance
+        Real64 RhoBlBack = 0.0; // Blind normal back beam-diffuse sol/vis reflectance
         Real64 RhoBlBackVis;
-        Real64 RScBack; // Screen back beam-diffuse sol/vis reflectance (same as front)
+        Real64 RScBack = 0.0; // Screen back beam-diffuse sol/vis reflectance (same as front)
         Real64 RScBackVis;
         Real64 AbsBlFront;     // Blind normal front beam solar absorptance
         Real64 AbsBlBack;      // Blind normal back beam solar absorptance
@@ -5895,17 +5895,17 @@ namespace Window {
         Real64 RhoBlDiffFrontVis;
         Real64 AbsBlDiffFront; // Blind front diffuse solar absorptance
         Real64 AbsBlDiffBack;  // Blind back diffuse solar absorptance
-        Real64 RGlFront;       // Bare glass normal front beam sol/vis reflectance
+        Real64 RGlFront = 0.0; // Bare glass normal front beam sol/vis reflectance
         Real64 RGlFrontVis;
-        Real64 RhoBlDiffBack; // Blind back diffuse-diffuse sol/vis reflectance
+        Real64 RhoBlDiffBack = 0.0; // Blind back diffuse-diffuse sol/vis reflectance
         Real64 RhoBlDiffBackVis;
-        Real64 RScDifBack; // Screen back diffuse-diffuse sol/vis reflectance (doesn't change with sun angle)
+        Real64 RScDifBack = 0.0; // Screen back diffuse-diffuse sol/vis reflectance (doesn't change with sun angle)
         Real64 RScDifBackVis;
-        Real64 TBlBmDif; // Blind front normal beam-diffuse sol/vis transmittance
+        Real64 TBlBmDif = 0.0; // Blind front normal beam-diffuse sol/vis transmittance
         Real64 TBlBmDifVis;
         Real64 TBlDifDif; // Blind front diffuse-diffuse sol/vis transmittance
         Real64 TBlDifDifVis;
-        Real64 TScBmDif; // Screen front beam-diffuse sol/vis transmittance
+        Real64 TScBmDif = 0.0; // Screen front beam-diffuse sol/vis transmittance
         Real64 TScBmDifVis;
         Real64 TDif; // Bare glass diffuse sol/vis transmittance
         Real64 TDifVis;
@@ -6422,7 +6422,7 @@ namespace Window {
         static constexpr std::string_view RoutineName("WindowTempsForNominalCond");
 
         std::array<Real64, maxArraySize> hr; // Radiative conductance (W/m2-K)
-        Real64 hcinprev;                     // Value of hcin from previous iteration
+        Real64 hcinprev = 0.0;               // Value of hcin from previous iteration
         int d;                               // +1 if number of row interchanges is even,
         // -1 if odd (in LU decomposition)
         std::array<int, maxArraySize> indx; // Vector of row permutations in LU decomposition

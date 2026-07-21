@@ -206,11 +206,11 @@ namespace Fans {
 
     struct FanComponent : public FanBase
     {
-        void set_size(EnergyPlusData &state);
+        void set_size(EnergyPlusData &state) override;
 
-        void init(EnergyPlusData &state);
+        void init(EnergyPlusData &state) override;
 
-        Real64 getDesignHeatGain(EnergyPlusData &state, Real64 const FanVolFlow);
+        Real64 getDesignHeatGain(EnergyPlusData &state, Real64 const FanVolFlow) override;
 
         void getInputsForDesignHeatGain(EnergyPlusData &state,
                                         Real64 &deltaP,
@@ -219,11 +219,11 @@ namespace Fans {
                                         Real64 &motInAirFrac,
                                         Real64 &fanShaftPow,
                                         Real64 &motInPower,
-                                        bool &fanCompModel);
+                                        bool &fanCompModel) override;
 
-        void update(EnergyPlusData &state);
+        void update(EnergyPlusData &state) override;
 
-        void report(EnergyPlusData &state);
+        void report(EnergyPlusData &state) override;
 
         void simulateConstant(EnergyPlusData &state);
 
@@ -375,7 +375,7 @@ namespace Fans {
 
         Real64 getDesignTemperatureRise(EnergyPlusData &state) const;
 
-        Real64 getDesignHeatGain(EnergyPlusData &state, Real64 const FanVolFlow);
+        Real64 getDesignHeatGain(EnergyPlusData &state, Real64 const FanVolFlow) override;
 
         void getInputsForDesignHeatGain(EnergyPlusData &state,
                                         Real64 &deltaP,
@@ -384,7 +384,7 @@ namespace Fans {
                                         Real64 &motInAirFrac,
                                         Real64 &fanShaftPow,
                                         Real64 &motInPower,
-                                        bool &fanCompModel);
+                                        bool &fanCompModel) override;
 
         SpeedControl speedControl = SpeedControl::Invalid; // Discrete or Continuous speed control method
         Real64 designElecPower = 0.0;                      // design electric power consumption [W]
@@ -399,9 +399,9 @@ namespace Fans {
         // FEI
         static Real64 report_fei(EnergyPlusData &state, Real64 const designFlowRate, Real64 const designElecPower, Real64 const designDeltaPress);
 
-        void init(EnergyPlusData &state);
+        void init(EnergyPlusData &state) override;
 
-        void set_size(EnergyPlusData &state);
+        void set_size(EnergyPlusData &state) override;
 
         void
         calcSimpleSystemFan(EnergyPlusData &state,
@@ -414,9 +414,9 @@ namespace Fans {
                             ObjexxFCL::Optional<Real64 const> pressureRise2 // Pressure difference to use for operating mode 2
         );
 
-        void update(EnergyPlusData &state);
+        void update(EnergyPlusData &state) override;
 
-        void report(EnergyPlusData &state);
+        void report(EnergyPlusData &state) override;
 
     public:
         // data

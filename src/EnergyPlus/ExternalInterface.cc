@@ -2282,7 +2282,7 @@ void GetReportVariableKey(
     Constant::Units varUnits(Constant::Units::None);                                // Units string, may be blank
     Array1D_string keyNames;
     Array1D_int keyIndexes; // Array index for
-    int Loop, iKey;         // Loop counters
+    int Loop, iKey(0);      // Loop counters
 
     // Get pointers for variables to be sent to Ptolemy
     for (Loop = 1; Loop <= numberOfKeys; ++Loop) {

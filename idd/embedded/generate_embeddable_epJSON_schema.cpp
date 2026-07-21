@@ -71,6 +71,7 @@ static constexpr auto header = R"cpp(
 #include <embedded/EmbeddedEpJSONSchema.hh>
 
 #include <array>
+#include <string>
 
 namespace EnergyPlus {
 
@@ -82,9 +83,9 @@ namespace EmbeddedEpJSONSchema {
 static constexpr auto footer = R"cpp(
     // clang-format on
 
-    const gsl::span<const std::uint8_t> embeddedEpJSONSchema()
+    const std::span<const std::uint8_t> embeddedEpJSONSchema()
     {
-        return gsl::span<const std::uint8_t>(embeddedSchema);
+        return std::span<const std::uint8_t>(embeddedSchema);
     }
 
     const std::string_view embeddedEpJSONSchemaView()

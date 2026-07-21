@@ -2803,7 +2803,6 @@ void SetupAdaptiveConvStaticMetaData(EnergyPlusData &state)
     // do one-time setup needed to store static data for adaptive convection algorithm
 
     // SUBROUTINE LOCAL VARIABLE DECLARATIONS:
-    Real64 thisZoneHorizHydralicDiameter;
     bool DoReport;
 
     Real64 BldgVolumeSum = 0.0;
@@ -2815,6 +2814,7 @@ void SetupAdaptiveConvStaticMetaData(EnergyPlusData &state)
         int ExtWindowCount = 0;         // init
         // model perimeter of bounding horizontal rectangle from max and min x and y values
         Real64 thisZoneSimplePerim = 2.0 * (zone.MaximumY - zone.MinimumY) + 2.0 * (zone.MaximumX - zone.MinimumX);
+        Real64 thisZoneHorizHydralicDiameter = 0.0;
         if (thisZoneSimplePerim > 0.0) {
             thisZoneHorizHydralicDiameter = 4.0 * zone.FloorArea / thisZoneSimplePerim;
         } else if (zone.FloorArea > 0.0) {
@@ -4750,8 +4750,8 @@ Real64 CalcUserDefinedIntHcModel(EnergyPlusData &state, int const SurfNum, int c
     // prepare independent parameters for x values
 
     // SUBROUTINE LOCAL VARIABLE DECLARATIONS:
-    Real64 tmpAirTemp;
-    Real64 AirChangeRate;
+    Real64 tmpAirTemp = 0.0;
+    Real64 AirChangeRate = 0.0;
 
     auto const &surface = state.dataSurface->Surface(SurfNum);
     int zoneNum = state.dataSurface->Surface(SurfNum).Zone;
@@ -4862,7 +4862,7 @@ Real64 CalcUserDefinedExtHcModel(EnergyPlusData &state, int const SurfNum, int c
     // calculate user-defined convection correlations for outside face
 
     // SUBROUTINE LOCAL VARIABLE DECLARATIONS:
-    Real64 windVel;
+    Real64 windVel = 0.0;
     Real64 Theta;
     Real64 ThetaRad;
 
@@ -4880,6 +4880,7 @@ Real64 CalcUserDefinedExtHcModel(EnergyPlusData &state, int const SurfNum, int c
         // WindSpeed , WindDir, surface Azimuth
         Theta = CalcWindSurfaceTheta(state.dataEnvrn->WindDir, surface.Azimuth);
         ThetaRad = Theta * Constant::DegToRad;
+        windVel = std::cos(ThetaRad) * state.dataEnvrn->WindSpeed;
         break;
     case RefWind::ParallelCompAtZ:
         // Surface WindSpeed , Surface WindDir, surface Azimuth

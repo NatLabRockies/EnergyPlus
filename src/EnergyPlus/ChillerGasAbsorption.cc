@@ -125,8 +125,6 @@ GasAbsorberSpecs *GasAbsorberSpecs::factory(EnergyPlusData &state, std::string c
     }
     // If we didn't find it, fatal
     ShowFatalError(state, std::format("LocalGasAbsorberFactory: Error getting inputs for comp named: {}", objectName)); // LCOV_EXCL_LINE
-    // Shut up the compiler
-    return nullptr; // LCOV_EXCL_LINE
 }
 
 void GasAbsorberSpecs::simulate(
@@ -383,7 +381,6 @@ void GetGasAbsorberInput(EnergyPlusData &state)
         if (Get_ErrorsFound) {
             ShowFatalError(state,
                            std::format("Errors found in processing node input for {}={}", s_ipsc->cCurrentModuleObject, s_ipsc->cAlphaArgs(1)));
-            Get_ErrorsFound = false;
         }
 
         // Assign Part Load Ratios
@@ -469,7 +466,6 @@ void GetGasAbsorberInput(EnergyPlusData &state)
         if (Get_ErrorsFound) {
             ShowFatalError(state,
                            std::format("Errors found in processing curve input for {}={}", s_ipsc->cCurrentModuleObject, s_ipsc->cAlphaArgs(1)));
-            Get_ErrorsFound = false;
         }
         if (Util::SameString(s_ipsc->cAlphaArgs(15), "LeavingCondenser")) {
             thisChiller.isEnterCondensTemp = false;

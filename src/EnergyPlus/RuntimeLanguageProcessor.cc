@@ -2315,8 +2315,6 @@ ErlValueType EvaluateExpression(EnergyPlusData &state, int const ExpressionNum, 
                 ShowSevereError(state, "EMS user program found serious problem and is halting simulation");
                 ShowContinueErrorTimeStamp(state, "");
                 ShowFatalError(state, std::format("EMS user program halted simulation with error code = {:.2f}", Operand(1).Number));
-                ReturnValue = SetErlValueNumber(Operand(1).Number); // returns back the error code
-                break;
 
             case ErlFunc::SevereWarnEp:
                 ShowSevereError(state, std::format("EMS user program issued severe warning with error code = {:.2f}", Operand(1).Number));
@@ -2775,8 +2773,8 @@ void GetRuntimeLanguageUserInput(EnergyPlusData &state)
     constexpr std::string_view RoutineName = "GetRuntimeLanguageUserInput: ";
 
     // SUBROUTINE LOCAL VARIABLE DECLARATIONS:
-    OutputProcessor::TimeStepType sovTimeStepType; // temporary
-    OutputProcessor::StoreType sovStoreType;       // temporary
+    OutputProcessor::TimeStepType sovTimeStepType = OutputProcessor::TimeStepType::Invalid; // temporary
+    OutputProcessor::StoreType sovStoreType = OutputProcessor::StoreType::Invalid;          // temporary
 
     Array1D_string cAlphaFieldNames;
     Array1D_string cNumericFieldNames;
@@ -2803,7 +2801,7 @@ void GetRuntimeLanguageUserInput(EnergyPlusData &state)
         int TotalArgs(0);     // argument for call to GetObjectDefMaxArgs
         bool ErrorsFound(false);
         bool Found;
-        bool errFlag;
+        bool errFlag = false;
 
         std::string cCurrentModuleObject;
         std::string UnitsA;
@@ -3614,7 +3612,7 @@ void GetRuntimeLanguageUserInput(EnergyPlusData &state)
                 }
 
                 // Group Type
-                OutputProcessor::Group sovGroup;
+                OutputProcessor::Group sovGroup = OutputProcessor::Group::Invalid;
 
                 if (cAlphaArgs(6) == "BUILDING") {
                     sovGroup = OutputProcessor::Group::Building;
@@ -3631,7 +3629,7 @@ void GetRuntimeLanguageUserInput(EnergyPlusData &state)
                 }
 
                 // End Use Type
-                OutputProcessor::EndUseCat sovEndUseCat;
+                OutputProcessor::EndUseCat sovEndUseCat = OutputProcessor::EndUseCat::Invalid;
 
                 if (cAlphaArgs(7) == "HEATING") {
                     sovEndUseCat = OutputProcessor::EndUseCat::Heating;

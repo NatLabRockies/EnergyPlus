@@ -8357,7 +8357,7 @@ namespace InternalHeatGains {
     Real64 SumInternalConvectionGainsByTypes(
         EnergyPlusData &state,
         int const ZoneNum,                                         // zone index pointer for which zone to sum gains for
-        gsl::span<const DataHeatBalance::IntGainType> GainTypeARR, // variable length 1-d array of enum valued gain types
+        std::span<const DataHeatBalance::IntGainType> GainTypeARR, // variable length 1-d array of enum valued gain types
         int const spaceIndex)                                      // space index pointer, sum gains only for this space
     {
 
@@ -8444,7 +8444,7 @@ namespace InternalHeatGains {
     Real64 SumReturnAirConvectionGainsByTypes(
         EnergyPlusData &state,
         int const ZoneNum,                                         // zone index pointer for which zone to sum gains for
-        gsl::span<const DataHeatBalance::IntGainType> GainTypeARR, // variable length 1-d array of integer valued gain types
+        std::span<const DataHeatBalance::IntGainType> GainTypeARR, // variable length 1-d array of integer valued gain types
         int const spaceIndex                                       // space index pointer, sum gains only for this space
     )
     {
@@ -8520,7 +8520,7 @@ namespace InternalHeatGains {
     Real64
     SumInternalRadiationGainsByTypes(EnergyPlusData &state,
                                      int const ZoneNum,                                         // zone index pointer for which zone to sum gains for
-                                     gsl::span<const DataHeatBalance::IntGainType> GainTypeARR, // variable length 1-d array of enum valued gain types
+                                     std::span<const DataHeatBalance::IntGainType> GainTypeARR, // variable length 1-d array of enum valued gain types
                                      int const spaceIndex)                                      // space index pointer, sum gains only for this space
     {
 
@@ -8566,7 +8566,7 @@ namespace InternalHeatGains {
     Real64 SumEnclosureInternalRadiationGainsByTypes(
         EnergyPlusData &state,
         int const enclosureNum,                                    // enclosure to sum gains for
-        gsl::span<const DataHeatBalance::IntGainType> GainTypeARR) // variable length 1-d array of enum valued gain types
+        std::span<const DataHeatBalance::IntGainType> GainTypeARR) // variable length 1-d array of enum valued gain types
     {
         // Return value
         Real64 SumRadiationGainRate(0.0);
@@ -8648,7 +8648,7 @@ namespace InternalHeatGains {
     Real64
     SumInternalLatentGainsByTypes(EnergyPlusData &state,
                                   int const ZoneNum,                                         // zone index pointer for which zone to sum gains for
-                                  gsl::span<const DataHeatBalance::IntGainType> GainTypeARR, // variable length 1-d array of enum valued gain types
+                                  std::span<const DataHeatBalance::IntGainType> GainTypeARR, // variable length 1-d array of enum valued gain types
                                   int const spaceIndex)                                      // space index pointer, sum gains only for this space
     {
         // SUBROUTINE INFORMATION:
@@ -8775,7 +8775,7 @@ namespace InternalHeatGains {
     Real64
     SumInternalCO2GainsByTypes(EnergyPlusData &state,
                                int const ZoneNum,                                        // zone index pointer for which zone to sum gains for
-                               gsl::span<const DataHeatBalance::IntGainType> GainTypeARR // variable length 1-d array of integer valued gain types
+                               std::span<const DataHeatBalance::IntGainType> GainTypeARR // variable length 1-d array of integer valued gain types
     )
     {
 
@@ -8922,7 +8922,7 @@ namespace InternalHeatGains {
         // the subroutine returns the index of matched internal gain device or -1 if no match found.
 
         int DeviceNum;
-        int DeviceIndex;
+        int DeviceIndex = -1;
         if (state.dataHeatBal->spaceIntGainDevices(spaceNum).numberOfDevices == 0) {
             DeviceIndex = -1;
             return DeviceIndex;

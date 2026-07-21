@@ -1920,7 +1920,7 @@ Real64 GetDWHCoilCapacityIHP(EnergyPlusData &state,
     using VariableSpeedCoils::GetCoilCapacityVariableSpeed;
 
     // Return value
-    Real64 CoilCapacity; // returned capacity of matched coil
+    Real64 CoilCapacity = 0.0; // returned capacity of matched coil
 
     // Obtains and Allocates WatertoAirHP related parameters from input file
     if (state.dataIntegratedHP->GetCoilsInputFlag) { // First time subroutine has been entered

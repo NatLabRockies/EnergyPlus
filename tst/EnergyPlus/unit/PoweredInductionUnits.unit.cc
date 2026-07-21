@@ -2001,6 +2001,47 @@ TEST_F(EnergyPlusFixture, PIU_InducedAir_Plenums)
         "   ************* Beginning System Sizing Calculations",
     });
     EXPECT_TRUE(compare_err_stream(expectedError, true));
+
+    // PIU TU has not been sized yet, so the following should be true:
+    EXPECT_EQ(state->dataPowerInductionUnits->PIU(1).MaxTotAirVolFlow, DataSizing::AutoSize);
+    EXPECT_EQ(state->dataPowerInductionUnits->PIU(1).MaxPriAirVolFlow, DataSizing::AutoSize);
+
+    state->dataGlobal->SysSizingCalc = false; // allow PIU TU to be sized
+    state->dataSize->CurTermUnitSizingNum = 1;
+    state->dataSize->CurZoneEqNum = 1;
+    // Zone sizing has complegted with MinOA = 0 and would size PIU secondary to same value as primary
+    EXPECT_NEAR(state->dataSize->TermUnitFinalZoneSizing(1).MinOA, 0.0, 0.00001);
+    // raise minimum zone OA so that parallel PIU will be sized with a secondary flow less than the primary flow
+    state->dataSize->TermUnitFinalZoneSizing(1).MinOA = 0.05;
+
+    int constexpr PIUNum = 1;
+    bool const FirstHVACIteration = true;
+    PoweredInductionUnits::InitPIU(*state, PIUNum, FirstHVACIteration); // call init to size TU
+
+    // check series PIU sizing results
+    auto &piuUnit = state->dataPowerInductionUnits->PIU(1);
+    EXPECT_NEAR(piuUnit.MaxTotAirVolFlow, 0.25057, 0.00001);
+    EXPECT_NEAR(piuUnit.MaxPriAirVolFlow, 0.25057, 0.00001);
+    EXPECT_NEAR(piuUnit.MinPriAirFlowFrac, 0.19954, 0.00001);
+    EXPECT_NEAR(piuUnit.MaxSecAirVolFlow, 0.0, 0.00001); // not used for series PIU
+    EXPECT_NEAR(state->dataSize->TermUnitFinalZoneSizing(1).MinOA, 0.05, 0.00001);
+    EXPECT_NEAR(state->dataSize->TermUnitFinalZoneSizing(1).MinOA / piuUnit.MaxPriAirVolFlow, piuUnit.MinPriAirFlowFrac, 0.00001);
+
+    // Check sizing for Parallel PIU
+    piuUnit.UnitType_Num = DataDefineEquip::ZnAirLoopEquipType::SingleDuct_ParallelPIU_Reheat;
+    piuUnit.MaxTotAirVolFlow = 0.0; // parallel PIU does not have total air flow rate input field, reset to constructor initialization
+    piuUnit.MaxPriAirVolFlow = DataSizing::AutoSize;
+    piuUnit.MinPriAirFlowFrac = DataSizing::AutoSize; // reset air flow inputs to autosize
+    piuUnit.MaxSecAirVolFlow = DataSizing::AutoSize;
+
+    PoweredInductionUnits::SizePIU(*state, PIUNum); // call sizing directly on second pass (MySizeFlag flag has been set false)
+
+    // check parallel PIU sizing results
+    EXPECT_NEAR(piuUnit.MaxTotAirVolFlow, 0.0, 0.00001); // not used for parallel PIU
+    EXPECT_NEAR(piuUnit.MaxPriAirVolFlow, 0.25057, 0.00001);
+    EXPECT_NEAR(piuUnit.MinPriAirFlowFrac, 0.19954, 0.00001);
+    EXPECT_NEAR(piuUnit.MaxSecAirVolFlow, 0.20057, 0.00001);
+    EXPECT_NEAR(state->dataSize->TermUnitFinalZoneSizing(1).MinOA, 0.05, 0.00001);
 }
 
 TEST_F(EnergyPlusFixture, VSParallelPIUStagedHeat)

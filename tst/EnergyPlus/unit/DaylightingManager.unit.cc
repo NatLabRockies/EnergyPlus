@@ -421,7 +421,6 @@ TEST_F(EnergyPlusFixture, DaylightingManager_GetInputOutputIlluminanceMap_Test)
     dl->enclDaylight.allocate(state->dataViewFactor->NumOfSolarEnclosures);
 
     GetInputIlluminanceMap(*state, foundErrors);
-    // compare_err_stream(""); // expecting errors because zone is not really defined
 
     EXPECT_EQ(1, (int)dl->illumMaps.size());
 

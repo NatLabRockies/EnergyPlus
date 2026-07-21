@@ -211,7 +211,7 @@ int getepvariablesFMU(char const* const fileName, char* const myOutputVarsName, 
 /// Stack operation, this function will pop one element from stack
 /// and will free the resource unused
 ////////////////////////////////////////////////////////////////
-int stackPopBCVTB();
+int stackPopBCVTB(void);
 
 ////////////////////////////////////////////////////////////////
 /// Stack operation, will push one element into the stack

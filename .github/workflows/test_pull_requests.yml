@@ -67,7 +67,7 @@ jobs:
         echo "ENABLE_PCH=ON" >> $GITHUB_ENV
 
     - name: Baseline Regression Testing caching
-      uses: actions/cache@v5
+      uses: actions/cache@v6
       id: cachebaselineregression
       with:
         path: |
@@ -85,7 +85,7 @@ jobs:
 
     # Note: should you want to include a hash of PCH files in the cache keys for windows, revert a9a9da32a5d51bd00fddc6e273f4059ffae5f735
     - name: Restore Cache CCACHE
-      uses: actions/cache/restore@v5
+      uses: actions/cache/restore@v6
       id: cacheccache-restore
       with:
         path: |
@@ -218,7 +218,7 @@ jobs:
 
     - name: Save CCache cache
       if: always() && steps.cacheccache-restore.outputs.cache-hit != 'true'
-      uses: actions/cache/save@v5
+      uses: actions/cache/save@v6
       with:
         path: |
           ${{ steps.setup-runner.outputs.ccache-dir }}

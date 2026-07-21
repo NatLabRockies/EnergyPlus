@@ -248,7 +248,7 @@ int getsockethost(const char* const docname, char* const hostname);
 /// has been installed.
 ///
 /// \return The main version number, or a negative value if an error occured.
-int getmainversionnumber();
+int getmainversionnumber(void);
 
 //////////////////////////////////////////////////////////////////
 /// Establishes a connection to the socket.

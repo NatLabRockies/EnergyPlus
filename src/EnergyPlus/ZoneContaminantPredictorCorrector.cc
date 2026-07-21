@@ -1557,14 +1557,14 @@ void PredictZoneContaminants(EnergyPlusData &state,
 
     static constexpr std::string_view RoutineName("PredictZoneContaminants");
 
-    Real64 A;                  // Coefficient of storage term in a zone balance equation
-    Real64 B;                  // Coefficient of variable term in a zone balance equation
-    Real64 C;                  // Coefficient of constnat term in a zone balance equation
-    Real64 LoadToCO2SetPoint;  // CO2 load at CO2 set point
-    Real64 ZoneAirCO2SetPoint; // Zone CO2 setpoint
-    Real64 LoadToGCSetPoint;   // Generic contaminant load at generic contaminant set point
-    Real64 ZoneAirGCSetPoint;  // Zone generic contaminant setpoint
-    Real64 GCGain;             // Zone generic contaminant internal load
+    Real64 A;                        // Coefficient of storage term in a zone balance equation
+    Real64 B;                        // Coefficient of variable term in a zone balance equation
+    Real64 C;                        // Coefficient of constnat term in a zone balance equation
+    Real64 LoadToCO2SetPoint;        // CO2 load at CO2 set point
+    Real64 ZoneAirCO2SetPoint = 0.0; // Zone CO2 setpoint
+    Real64 LoadToGCSetPoint;         // Generic contaminant load at generic contaminant set point
+    Real64 ZoneAirGCSetPoint = 0.0;  // Zone generic contaminant setpoint
+    Real64 GCGain;                   // Zone generic contaminant internal load
 
     Real64 timeStepSysSec = state.dataHVACGlobal->TimeStepSysSec;
     // Update zone CO2
@@ -2171,12 +2171,12 @@ void CorrectZoneContaminants(EnergyPlusData &state,
 
     static constexpr std::string_view RoutineName("CorrectZoneContaminants");
 
-    Real64 CO2Gain;             // Zone CO2 internal gain
-    Real64 CO2GainExceptPeople; // Added for hybrid model, Zone CO2 internal gain
-    Real64 GCGain;              // Zone generic contaminant internal gain
-    Real64 A;
-    Real64 B;
-    Real64 C;
+    Real64 CO2Gain = 0.0;             // Zone CO2 internal gain
+    Real64 CO2GainExceptPeople = 0.0; // Added for hybrid model, Zone CO2 internal gain
+    Real64 GCGain = 0.0;              // Zone generic contaminant internal gain
+    Real64 A = 0.0;
+    Real64 B = 0.0;
+    Real64 C = 0.0;
 
     // Update zone CO2
     for (int ZoneNum = 1; ZoneNum <= state.dataGlobal->NumOfZones; ++ZoneNum) {

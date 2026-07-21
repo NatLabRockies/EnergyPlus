@@ -285,13 +285,13 @@ namespace LowTempRadiantSystem {
             0.0; // -  Low Temp Radiant system scaled maximum cooling capacity {W} or scalable variable of zone HVAC equipment,
         // {-}, or {W/m2}
 
-        void calculateLowTemperatureRadiantSystem(EnergyPlusData &state, Real64 &LoadMet);
+        void calculateLowTemperatureRadiantSystem(EnergyPlusData &state, Real64 &LoadMet) override;
 
         void calculateLowTemperatureRadiantSystemComponents(EnergyPlusData &state, Real64 &LoadMet, SystemType typeOfRadiantSystem);
 
-        void updateLowTemperatureRadiantSystem(EnergyPlusData &state);
+        void updateLowTemperatureRadiantSystem(EnergyPlusData &state) override;
 
-        void reportLowTemperatureRadiantSystem(EnergyPlusData &state);
+        void reportLowTemperatureRadiantSystem(EnergyPlusData &state) override;
 
         // Default Constructor
         VariableFlowRadiantSystemData() = default;
@@ -375,7 +375,7 @@ namespace LowTempRadiantSystem {
         bool setRunningMeanValuesAtBeginningOfDay =
             true; // flag to help certain variables only being set once per day (running mean temperature variables)
 
-        void calculateLowTemperatureRadiantSystem(EnergyPlusData &state, Real64 &LoadMet);
+        void calculateLowTemperatureRadiantSystem(EnergyPlusData &state, Real64 &LoadMet) override;
 
         void
         calculateLowTemperatureRadiantSystemComponents(EnergyPlusData &state,
@@ -388,9 +388,9 @@ namespace LowTempRadiantSystem {
 
         Real64 calculateCurrentDailyAverageODB(EnergyPlusData &state);
 
-        void updateLowTemperatureRadiantSystem(EnergyPlusData &state);
+        void updateLowTemperatureRadiantSystem(EnergyPlusData &state) override;
 
-        void reportLowTemperatureRadiantSystem(EnergyPlusData &state);
+        void reportLowTemperatureRadiantSystem(EnergyPlusData &state) override;
 
         // Default Constructor
         ConstantFlowRadiantSystemData() = default;
@@ -440,11 +440,11 @@ namespace LowTempRadiantSystem {
             0.0; // -  Low Temp Radiant system scaled maximum heating capacity {W} or scalable variable of zone HVAC equipment,
                  // {-}, or {W/m2}
 
-        void calculateLowTemperatureRadiantSystem(EnergyPlusData &state, Real64 &LoadMet);
+        void calculateLowTemperatureRadiantSystem(EnergyPlusData &state, Real64 &LoadMet) override;
 
-        void updateLowTemperatureRadiantSystem(EnergyPlusData &state);
+        void updateLowTemperatureRadiantSystem(EnergyPlusData &state) override;
 
-        void reportLowTemperatureRadiantSystem(EnergyPlusData &state);
+        void reportLowTemperatureRadiantSystem(EnergyPlusData &state) override;
 
         // Default Constructor
         ElectricRadiantSystemData() = default;

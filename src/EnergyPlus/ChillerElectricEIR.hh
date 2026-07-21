@@ -212,7 +212,7 @@ namespace ChillerElectricEIR {
                       Real64 &CurLoad,
                       bool RunFlag) override;
 
-        virtual void getDesignCapacities(
+        void getDesignCapacities(
             EnergyPlusData &state, const PlantLocation &calledFromLocation, Real64 &MaxLoad, Real64 &MinLoad, Real64 &OptLoad) override;
 
         void getDesignTemperatures(Real64 &TempDesCondIn, Real64 &TempDesEvapOut) override;
