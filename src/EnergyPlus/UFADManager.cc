@@ -692,7 +692,7 @@ namespace RoomAir {
         } // END FLOOR
     }
 
-    static constexpr std::array<DataHeatBalance::IntGainType, 52> IntGainTypesOccupied = {
+    static constexpr std::array<DataHeatBalance::IntGainType, 53> IntGainTypesOccupied = {
         DataHeatBalance::IntGainType::People,
         DataHeatBalance::IntGainType::WaterHeaterMixed,
         DataHeatBalance::IntGainType::WaterHeaterStratified,
@@ -701,6 +701,7 @@ namespace RoomAir {
         DataHeatBalance::IntGainType::ThermalStorageHotWaterStratified,
         DataHeatBalance::IntGainType::ElectricEquipment,
         DataHeatBalance::IntGainType::ElectricEquipmentITEAirCooled,
+        DataHeatBalance::IntGainType::ElectricEquipmentITELiquidCooled,
         DataHeatBalance::IntGainType::GasEquipment,
         DataHeatBalance::IntGainType::HotWaterEquipment,
         DataHeatBalance::IntGainType::SteamEquipment,
