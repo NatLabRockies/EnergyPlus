@@ -129,6 +129,8 @@ namespace InternalHeatGains {
 
     void CalcZoneITEq(EnergyPlusData &state);
 
+    void CalcZoneITEqLiquidCooled(EnergyPlusData &state);
+
     void ReportInternalHeatGains(EnergyPlusData &state);
 
     Real64 GetDesignLightingLevelForZone(EnergyPlusData &state, int const WhichZone); // name of zone
