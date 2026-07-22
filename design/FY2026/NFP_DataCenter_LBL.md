@@ -91,7 +91,7 @@ ElectricEquipment:ITE:LiquidCooled,
        \required-field
        \type object-list
        \object-list ZoneAndSpaceNames
-       \note Zone or Space the IT equipment is located in. 
+       \note Zone or Space the IT equipment is located in.
        \note Spillover air heat will be rejected to this space's heat balance.
   A3 , \field Availability Schedule Name
        \type object-list
