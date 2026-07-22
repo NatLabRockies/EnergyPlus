@@ -1003,6 +1003,7 @@ namespace DataHeatBalance {
 
     enum class LiquidITERptVars
     {
+        Invalid = -1,
         CPU = 0,        // ITE CPU Electric Power/Energy
         Fan,            // ITE Fan Electric Power/Energy
         TotalElectric,  // ITE Total Electric Power/Energy
