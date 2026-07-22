@@ -165,7 +165,8 @@ namespace AirflowNetwork {
                                  int ZoneNum,
                                  Real64 TimeCloseDuration); // function to perform calculations of opening probability
 
-        bool closing_probability(EnergyPlusData &state, Real64 TimeCloseDuration); // function to perform calculations of closing probability
+        bool closing_probability([[maybe_unused]] EnergyPlusData &state,
+                                 Real64 TimeCloseDuration); // function to perform calculations of closing probability
     };
 
     enum class DuctSizingMethod
@@ -305,6 +306,7 @@ namespace AirflowNetwork {
         void calculate_GC_balance();
         void mrxinv(int NORDER);
         void report();
+        void update_onoff_fan_runtime_fractions();
         void update(ObjexxFCL::Optional_bool_const FirstHVACIteration = _); // True when solution technique on first iteration
         void venting_control(int i,                                         // AirflowNetwork surface number
                              Real64 &OpenFactor                             // Window or door opening factor (used to calculate airflow)

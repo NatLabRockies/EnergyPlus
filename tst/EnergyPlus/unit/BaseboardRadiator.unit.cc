@@ -414,9 +414,20 @@ TEST_F(EnergyPlusFixture, BaseboardConvWater_SizingTest)
     state->dataBaseboardRadiator->baseboards(BaseboardNum).ScaledHeatingCapacity = DataSizing::AutoSize;
     state->dataBaseboardRadiator->baseboards(BaseboardNum).WaterVolFlowRateMax = DataSizing::AutoSize;
     state->dataBaseboardRadiator->baseboards(BaseboardNum).UA = DataSizing::AutoSize; // reset to autosize to test new calculation
+    state->files.eio.open_as_stringstream();
     state->dataBaseboardRadiator->baseboards(BaseboardNum).SizeBaseboard(*state, BaseboardNum);
     EXPECT_EQ(state->dataZoneEnergyDemand->ZoneSysEnergyDemand(CntrlZoneNum).RemainingOutputReqToHeatSP, 2000.0); // design load = 2000
     EXPECT_EQ(state->dataBaseboardRadiator->baseboards(BaseboardNum).UA, 2000.0);                                 // UA = design load
+    EXPECT_NEAR(state->dataBaseboardRadiator->baseboards(BaseboardNum).WaterVolFlowRateMax, 4.86063E-05, 0.0000001);
+    EXPECT_TRUE(compare_eio_stream_substring("Component Sizing Information, ZoneHVAC:Baseboard:Convective:Water, SPACE2-1 BASEBOARD, "
+                                             "Design Size Maximum Water Flow Rate [m3/s], 4.86063E-05",
+                                             false));
+    EXPECT_TRUE(compare_eio_stream_substring("Component Sizing Information, ZoneHVAC:Baseboard:Convective:Water, SPACE2-1 BASEBOARD, "
+                                             "Design Size Heating Load [W], 2000",
+                                             false));
+    EXPECT_TRUE(compare_eio_stream_substring("Component Sizing Information, ZoneHVAC:Baseboard:Convective:Water, SPACE2-1 BASEBOARD, "
+                                             "Design Size U-Factor Times Area Value [W/K], 2000",
+                                             true));
 
     BaseboardNum = 2;
     CntrlZoneNum = 2;
@@ -444,8 +455,19 @@ TEST_F(EnergyPlusFixture, BaseboardConvWater_SizingTest)
     // check UA value with autosized UA
     state->dataBaseboardRadiator->baseboards(BaseboardNum).HeatingCapMethod = DataSizing::HeatingDesignCapacity;
     state->dataBaseboardRadiator->baseboards(BaseboardNum).ScaledHeatingCapacity = DataSizing::AutoSize;
+    state->files.eio.open_as_stringstream();
     state->dataBaseboardRadiator->baseboards(BaseboardNum).SizeBaseboard(*state, BaseboardNum);
     EXPECT_EQ(state->dataBaseboardRadiator->baseboards(BaseboardNum).UA, 2000.0);
+    EXPECT_NEAR(state->dataBaseboardRadiator->baseboards(BaseboardNum).WaterVolFlowRateMax, 4.86063E-05, 0.0000001);
+    EXPECT_TRUE(compare_eio_stream_substring("Component Sizing Information, ZoneHVAC:Baseboard:Convective:Water, SPACE3-1 BASEBOARD, "
+                                             "Design Size Maximum Water Flow Rate [m3/s], 4.86063E-05",
+                                             false));
+    EXPECT_TRUE(compare_eio_stream_substring("Component Sizing Information, ZoneHVAC:Baseboard:Convective:Water, SPACE3-1 BASEBOARD, "
+                                             "Design Size Heating Load [W], 2000",
+                                             false));
+    EXPECT_TRUE(compare_eio_stream_substring("Component Sizing Information, ZoneHVAC:Baseboard:Convective:Water, SPACE3-1 BASEBOARD, "
+                                             "Design Size U-Factor Times Area Value [W/K], 2000",
+                                             true));
 
     BaseboardNum = 3;
     CntrlZoneNum = 3;
@@ -473,8 +495,18 @@ TEST_F(EnergyPlusFixture, BaseboardConvWater_SizingTest)
     // check UA value with autosized scaled capacity
     state->dataBaseboardRadiator->baseboards(BaseboardNum).HeatingCapMethod = DataSizing::HeatingDesignCapacity;
     state->dataBaseboardRadiator->baseboards(BaseboardNum).ScaledHeatingCapacity = DataSizing::AutoSize;
+    state->files.eio.open_as_stringstream();
     state->dataBaseboardRadiator->baseboards(BaseboardNum).SizeBaseboard(*state, BaseboardNum);
     EXPECT_EQ(state->dataBaseboardRadiator->baseboards(BaseboardNum).UA, 3000.0);
+    EXPECT_NEAR(state->dataBaseboardRadiator->baseboards(BaseboardNum).WaterVolFlowRateMax, 7.29095E-05, 0.0000001);
+    EXPECT_TRUE(compare_eio_stream_substring("Component Sizing Information, ZoneHVAC:Baseboard:Convective:Water, SPACE4-1 BASEBOARD, "
+                                             "Design Size Maximum Water Flow Rate [m3/s], 7.29095E-05",
+                                             false));
+    EXPECT_TRUE(compare_eio_stream_substring("Component Sizing Information, ZoneHVAC:Baseboard:Convective:Water, SPACE4-1 BASEBOARD, "
+                                             "Design Size Heating Load [W], 3000",
+                                             false));
+    EXPECT_TRUE(compare_eio_stream_substring("Component Sizing Information, ZoneHVAC:Baseboard:Convective:Water, SPACE4-1 BASEBOARD, "
+                                             "Design Size U-Factor Times Area Value [W/K], 3000"));
 }
 
 TEST_F(EnergyPlusFixture, BaseboardConvWater_checkForZoneSizingTest)

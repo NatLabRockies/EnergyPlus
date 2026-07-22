@@ -225,7 +225,6 @@ TEST_F(EnergyPlusFixture, HVACControllers_TestTempAndHumidityRatioCtrlVarType)
     // before controllers are simulated, AirLoopControllerIndex = 0
     ASSERT_EQ(0, state->dataHVACControllers->ControllerProps(1).AirLoopControllerIndex);
 
-    OutputReportPredefined::SetPredefinedTables(*state);
     state->dataSimAirServingZones->GetAirLoopInputFlag = false;
     state->dataHVACGlobal->NumPrimaryAirSys = 1;
     state->dataAirLoop->PriAirSysAvailMgr.allocate(1);
@@ -421,7 +420,6 @@ TEST_F(EnergyPlusFixture, HVACControllers_WaterCoilOnPrimaryLoopCheckTest)
     ASSERT_EQ(state->dataWaterCoils->WaterCoil(1).Name, "CHILLED WATER COIL");
     ASSERT_EQ(state->dataWaterCoils->WaterCoil(1).WaterCoilType, DataPlant::PlantEquipmentType::CoilWaterCooling);
 
-    OutputReportPredefined::SetPredefinedTables(*state);
     state->dataSimAirServingZones->GetAirLoopInputFlag = false;
     state->dataHVACGlobal->NumPrimaryAirSys = 1;
     state->dataAirSystemsData->PrimaryAirSystems.allocate(1);
@@ -515,7 +513,6 @@ TEST_F(EnergyPlusFixture, HVACControllers_WaterCoilOnOutsideAirSystemCheckTest)
     ASSERT_EQ(state->dataWaterCoils->WaterCoil(1).Name, "OA PREHEAT HW COIL");
     ASSERT_EQ(state->dataWaterCoils->WaterCoil(1).WaterCoilType, DataPlant::PlantEquipmentType::CoilWaterSimpleHeating);
 
-    OutputReportPredefined::SetPredefinedTables(*state);
     state->dataSimAirServingZones->GetAirLoopInputFlag = false;
 
     state->dataAirLoop->NumOASystems = 1;
@@ -648,7 +645,6 @@ TEST_F(EnergyPlusFixture, HVACControllers_CoilSystemCoolingWaterOnOutsideAirSyst
     ASSERT_EQ(state->dataWaterCoils->WaterCoil(1).Name, "DETAILED PRE COOLING COIL");
     ASSERT_EQ(state->dataWaterCoils->WaterCoil(1).WaterCoilType, DataPlant::PlantEquipmentType::CoilWaterDetailedFlatCooling);
 
-    OutputReportPredefined::SetPredefinedTables(*state);
     state->dataSimAirServingZones->GetAirLoopInputFlag = false;
 
     state->dataAirLoop->NumOASystems = 1;
@@ -939,7 +935,6 @@ TEST_F(EnergyPlusFixture, HVACControllers_MaxFlowZero)
     // before controllers are simulated, AirLoopControllerIndex = 0
     ASSERT_EQ(0, state->dataHVACControllers->ControllerProps(1).AirLoopControllerIndex);
 
-    OutputReportPredefined::SetPredefinedTables(*state);
     state->dataSimAirServingZones->GetAirLoopInputFlag = false;
     state->dataHVACGlobal->NumPrimaryAirSys = 1;
     state->dataAirLoop->PriAirSysAvailMgr.allocate(1);

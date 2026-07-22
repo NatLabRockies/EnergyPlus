@@ -69,10 +69,10 @@ jobs:
       contents: write
 
     steps:
-    - uses: actions/checkout@v6
+    - uses: actions/checkout@v7
 
     - name: Set up Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v6
+      uses: actions/setup-python@v7
       id: setup-python
       with:
         python-version: ${{ matrix.python-version }}
@@ -146,10 +146,13 @@ jobs:
       shell: bash
       run: |
         set -x
+        Python_EXECUTABLE="${{ steps.setup-python.outputs.python-path }}"
+        Python_EXECUTABLE="${Python_EXECUTABLE//\\//}"
         cmake -G "Visual Studio 17 2022" -A ${{ matrix.vs-generator }} \
               -DLINK_WITH_PYTHON:BOOL=ON -DPYTHON_CLI:BOOL=ON \
               -DPython_REQUIRED_VERSION:STRING=${{ steps.setup-python.outputs.python-version }} \
-              -DPython_ROOT_DIR:PATH=$RUNNER_TOOL_CACHE/Python/${{ steps.setup-python.outputs.python-version }}/${{ matrix.python-arch }}/ \
+              -DPython_EXECUTABLE:FILEPATH="$Python_EXECUTABLE" \
+              -DPython_ROOT_DIR:PATH="$(dirname "$Python_EXECUTABLE")" \
               -DBUILD_FORTRAN:BOOL=ON -DBUILD_PACKAGE:BOOL=ON \
               -DENABLE_HARDENED_RUNTIME:BOOL=${{ matrix.enable_hardened_runtime }} \
               -DDOCUMENTATION_BUILD:STRING="BuildWithAll" -DTEX_INTERACTION:STRING="batchmode" \
@@ -219,12 +222,12 @@ jobs:
           allow_failure: true
 
     steps:
-      - uses: actions/checkout@v6  # Still need E+ checked out to get testing scripts
+      - uses: actions/checkout@v7  # Still need E+ checked out to get testing scripts
         with:
           path: checkout
 
       - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v6
+        uses: actions/setup-python@v7
         id: setup-python
         with:
           python-version: ${{ matrix.python-version }}

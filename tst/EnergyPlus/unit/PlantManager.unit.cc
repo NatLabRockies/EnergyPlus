@@ -250,7 +250,7 @@ namespace PlantManager {
         state->dataSize->PlantSizData(1).LoopType = DataSizing::TypeOfPlantLoop::Heating;
         state->dataPlnt->PlantLoop(1).Name = "HOTH";
         SizePlantLoop(*state, loopNum, okToFinish);
-        const std::string heating_eio_output = "PlantLoop, HOTH, Design Return Temperature [C], 20.0";
+        const std::string heating_eio_output = "PlantLoop, HOTH, Design Return Temperature [C], 20";
         compare_eio_stream_substring(heating_eio_output, true);
 
         // Test 2: Plant/Cooling
@@ -258,14 +258,14 @@ namespace PlantManager {
         state->dataSize->PlantSizData(1).LoopType = DataSizing::TypeOfPlantLoop::Cooling;
         state->dataPlnt->PlantLoop(1).Name = "MUSTAFAR";
         SizePlantLoop(*state, loopNum, okToFinish);
-        const std::string cooling_eio_output = "PlantLoop, MUSTAFAR, Design Return Temperature [C], 30.0";
+        const std::string cooling_eio_output = "PlantLoop, MUSTAFAR, Design Return Temperature [C], 30";
         compare_eio_stream_substring(cooling_eio_output, true);
 
         // Test 2: Condenser
         state->dataPlnt->PlantLoop(1).TypeOfLoop = LoopType::Condenser;
         state->dataPlnt->PlantLoop(1).Name = "KAMINO";
         SizePlantLoop(*state, loopNum, okToFinish);
-        const std::string condenser_eio_output = "CondenserLoop, KAMINO, Design Return Temperature [C], 30.0";
+        const std::string condenser_eio_output = "CondenserLoop, KAMINO, Design Return Temperature [C], 30";
         compare_eio_stream_substring(condenser_eio_output, true);
     }
 

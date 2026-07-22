@@ -511,6 +511,8 @@ namespace DataSizing {
         Real64 CoolLoad = 0.0;                 // current zone heating load (HVAC time step)
         Real64 HeatZoneTemp = 0.0;             // current zone temperature (heating, time step)
         Real64 HeatOutTemp = 0.0;              // current outdoor temperature (heating, time step)
+        Real64 HeatMCPI = 0.0;                 // current infiltration mass flow * air specific heat (heating, time step)
+        Real64 HeatMCPV = 0.0;                 // current ventilation mass flow * air specific heat (heating, time step)
         Real64 HeatZoneRetTemp = 0.0;          // current zone return temperature (heating, time step)
         Real64 HeatTstatTemp = 0.0;            // current zone thermostat temperature (heating, time step)
         Real64 CoolZoneTemp = 0.0;             // current zone temperature (cooling, time step)
@@ -522,6 +524,8 @@ namespace DataSizing {
         Real64 HeatOutHumRat = 0.0;            // current outdoor humidity ratio (heating, time step)
         Real64 CoolOutHumRat = 0.0;            // current outdoor humidity ratio (cooling, time step)
         Real64 OutTempAtHeatPeak = 0.0;        // outdoor temperature at max heating [C]
+        Real64 MCPIAtHeatPeak = 0.0;           // infiltration mass flow * air specific heat at max heating [C]
+        Real64 MCPVAtHeatPeak = 0.0;           // ventilation mass flow * air specific heat at max heating [C]
         Real64 OutTempAtCoolPeak = 0.0;        // outdoor temperature at max cooling [C]
         Real64 OutHumRatAtHeatPeak = 0.0;      // outdoor humidity at max heating [kg/kg]
         Real64 OutHumRatAtCoolPeak = 0.0;      // outdoor humidity at max cooling [kg/kg]
@@ -530,6 +534,8 @@ namespace DataSizing {
         Array1D<Real64> HeatLoadSeq;           // daily sequence of zone heating load (zone time step)
         Array1D<Real64> CoolLoadSeq;           // daily sequence of zone cooling load (zone time step)
         Array1D<Real64> HeatOutTempSeq;        // daily sequence of outdoor temperatures (heating, zone time step)
+        Array1D<Real64> HeatMCPISeq;           // daily sequence of infiltration mass flow * air specific heat (heating, zone time step)
+        Array1D<Real64> HeatMCPVSeq;           // daily sequence of ventilation mass flow * air specific heat (heating, zone time step)
         Array1D<Real64> HeatTstatTempSeq;      // daily sequence of zone thermostat temperatures (heating, zone time step)
         Array1D<Real64> DesHeatSetPtSeq;       // daily sequence of indoor set point temperatures (zone time step)
         Array1D<Real64> CoolOutTempSeq;        // daily sequence of outdoor temperatures (cooling, zone time step)

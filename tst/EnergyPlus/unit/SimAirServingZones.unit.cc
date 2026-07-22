@@ -1168,7 +1168,7 @@ TEST_F(EnergyPlusFixture, SizeAirLoopBranches_0Airflow)
     SimAirServingZones::InitAirLoops(*state, true);
     // Expect warnings about 0 airflow
     std::string error_msg = delimited_string({
-        "   ** Severe  ** SizeAirLoopBranches: AirLoopHVAC VAV SYS 1 has air flow less than 1.0000E-003 m3/s.",
+        "   ** Severe  ** SizeAirLoopBranches: AirLoopHVAC VAV SYS 1 has air flow less than 0.0010 m3/s.",
         "   **   ~~~   ** Primary air system volumetric flow rate = 0.0000 m3/s.",
         "   **   ~~~   ** Check flow rate inputs for components in this air loop and,",
         "   **   ~~~   ** if autosized, check Sizing:Zone and Sizing:System objects and related inputs.",

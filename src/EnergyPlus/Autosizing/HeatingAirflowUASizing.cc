@@ -45,6 +45,7 @@
 // OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 // POSSIBILITY OF SUCH DAMAGE.
 
+// EnergyPlus Headers
 #include <EnergyPlus/Autosizing/HeatingAirflowUASizing.hh>
 #include <EnergyPlus/DataHVACGlobals.hh>
 
@@ -205,9 +206,7 @@ Real64 HeatingAirflowUASizer::size(EnergyPlusData &state, Real64 _originalValue,
         this->autoSizedValue = 0.0;
     }
     if (this->overrideSizeString) {
-        if (this->isEpJSON) {
-            this->sizingString = "heating_coil_airflow_for_ua";
-        }
+        this->sizingString = "Heating Coil Airflow for UA [m3/s]";
     }
     this->selectSizerOutput(state, errorsFound);
     return this->autoSizedValue;

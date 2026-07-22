@@ -125,8 +125,6 @@ protected:
         state->dataPlnt->PlantLoop(1).MaxVolFlowRate = 0.002;
         state->dataPlnt->PlantLoop(1).MaxMassFlowRate = 2.0;
         state->dataPlnt->PlantLoop(1).VolumeWasAutoSized = true;
-
-        SetPredefinedTables(*state);
     }
 
     void TearDown() override

@@ -1265,7 +1265,7 @@ namespace WindowComplexManager {
         Real64 Theta;                // Basis theta angle
         Real64 Phi;                  // Basis phi angle
         Real64 HitDsq;               // Squared distance to current hit pt
-        Real64 LeastHitDsq;          // Squared distance to closest hit pt
+        Real64 LeastHitDsq = 0.0;    // Squared distance to closest hit pt
         Array1D<Real64> V(3);        // vector array
         Array1D_int TmpRfSfInd;      // Temporary RefSurfIndex
         Array1D_int TmpRfRyNH;       // Temporary RefRayNHits
@@ -1277,7 +1277,7 @@ namespace WindowComplexManager {
         Array2D<Real64> TmpSjdotN;   // Temporary dot prod of ray angle w bk surf norm
         Array1D_int ITemp1D;         // Temporary INT 1D array
         Array2D<Real64> Temp2D;      // Temporary real 2D array
-        Real64 TransRSurf;           // Norminal transmittance of shading surface
+        Real64 TransRSurf = 0.0;     // Norminal transmittance of shading surface
         Real64 WtSum;                // Sum for normalizing various weights
         Real64 DotProd;              // Temporary variable for manipulating dot product .dot.
 
@@ -2636,7 +2636,7 @@ namespace WindowComplexManager {
 
         // Deflection
         // Tarcog requires deflection as input parameters.  Deflection is NOT used in EnergyPlus simulations
-        TARCOGParams::DeflectionCalculation CalcDeflection = TARCOGParams::DeflectionCalculation::NONE; // Deflection calculation flag:
+        TARCOGParams::DeflectionCalculation CalcDeflection; // Deflection calculation flag:
         //    0 - no deflection calculations
         //    1 - perform deflection calculation (input is Pressure/Temp)
         //    2 - perform deflection calculation (input is measured deflection)
@@ -2649,7 +2649,7 @@ namespace WindowComplexManager {
         //                 1 - ISO 15099,
         //                 2 - EN673 / ISO 10292 Declared,
         //                 3 - EN673 / ISO 10292 Design.
-        TARCOGParams::TARCOGThermalModel ThermalMod = TARCOGParams::TARCOGThermalModel::ISO15099; // Thermal model:
+        TARCOGParams::TARCOGThermalModel ThermalMod; // Thermal model:
         //                 0 - ISO15099
         //                 1 - Scaled Cavity Width (SCW)
         //                 2 - Convective Scalar Model (CSM)
@@ -2688,16 +2688,16 @@ namespace WindowComplexManager {
         Real64 HcUnshadedOut(0.0);     // Hc value at outdoor surface of an unshaded subsystem [W/m^2.K]
         Real64 HcUnshadedIn(0.0);      // Hc value at indoor surface of an unshaded subsystem [W/m^2.K]
 
-        int ZoneNum; // Zone number corresponding to SurfNum
+        int ZoneNum = 0; // Zone number corresponding to SurfNum
 
         int TotLay; // Total number of layers in a construction
         //   (sum of solid layers and gap layers)
-        int Lay;                  // Layer number
-        int IGlass;               // glass layer number (1,2,3,...)
-        int IGap;                 // Gap layer number (1,2,...)
-        int k;                    // Layer counter
-        int SurfNumAdj;           // An interzone surface's number in the adjacent zone
-        WinShadingType ShadeFlag; // Flag indicating whether shade or blind is on, and shade/blind position
+        int Lay;                                            // Layer number
+        int IGlass;                                         // glass layer number (1,2,3,...)
+        int IGap;                                           // Gap layer number (1,2,...)
+        int k;                                              // Layer counter
+        int SurfNumAdj = 0;                                 // An interzone surface's number in the adjacent zone
+        WinShadingType ShadeFlag = WinShadingType::Invalid; // Flag indicating whether shade or blind is on, and shade/blind position
         int IMix;
 
         // Real64 IncidentSolar;       // Solar incident on outside of window (W)
@@ -2743,8 +2743,8 @@ namespace WindowComplexManager {
         int ngllayer;
         int nglface;
         int ThermalModelNum;
-        Real64 rmir; // IR radiance of window's interior surround (W/m2)
-        Real64 outir;
+        Real64 rmir = 0.0; // IR radiance of window's interior surround (W/m2)
+        Real64 outir = 0.0;
         Real64 Ebout;
         Real64 dominantGapWidth; // store value for dominant gap width.  Used for airflow calculations
         Real64 edgeGlCorrFac;
@@ -2769,8 +2769,6 @@ namespace WindowComplexManager {
         hcin = 0.0;
         hrout = 0.0;
         hcout = 0.0;
-
-        Pa = state.dataEnvrn->OutBaroPress;
 
         ThermalModelNum = state.dataConstruction->Construct(ConstrNum).BSDFInput.ThermalModel;
         standard = state.dataMaterial->WindowThermalModel(ThermalModelNum).CalculationStandard;
@@ -2946,7 +2944,7 @@ namespace WindowComplexManager {
                 auto const *matGap = dynamic_cast<Material::MaterialComplexWindowGap const *>(mat);
                 ++IGap;
                 gap(IGap) = matGap->Thickness;
-                presure(IGap) = matGap->Pressure;
+                presure(IGap + 1) = matGap->Pressure;
 
                 GapDefMax(IGap) = matGap->deflectedThickness;
 
@@ -2992,6 +2990,11 @@ namespace WindowComplexManager {
             }
 
         } // End of loop over glass, gap and blind/shade layers in a window construction
+
+        // gap pressures are already set above, but we still need to set indoor/outdoor environment pressures here
+        Pa = state.dataEnvrn->OutBaroPress;
+        presure(1) = Pa;          // outdoor environment
+        presure(nlayer + 1) = Pa; // indoor environment
 
         if (CalcCondition == DataBSDFWindow::Condition::Invalid) {
             // now calculate correct areas for multipliers
@@ -3042,8 +3045,6 @@ namespace WindowComplexManager {
             // is assumed that nothing is transmitted through
             asol(nlayer) += state.dataHeatBal->SurfQdotRadIntGainsInPerArea(SurfNum);
 
-            presure = state.dataEnvrn->OutBaroPress;
-
             // Instead of doing temperature guess get solution from previous iteration.  That should be much better than guess
             for (k = 1; k <= 2 * nlayer; ++k) {
                 theta(k) = state.dataSurface->SurfaceWindow(SurfNum).thetaFace[k];
@@ -3075,7 +3076,6 @@ namespace WindowComplexManager {
             fclr = 1.0;
             ibc(1) = 0;
             ibc(2) = 0;
-            presure = 101325.0;
             iwd = 0; // Windward wind direction
             isky = 0;
             esky = 1.0;
@@ -3205,15 +3205,16 @@ namespace WindowComplexManager {
                  edgeGlCorrFac);
 
         // process results from TARCOG
+        // cppcheck-suppress knownConditionTrueFalse -- nperr is initialized to 0 but gets modified inside TARCOG90() via reference
         if ((nperr > 0) && (nperr < 1000)) { // process error signal from tarcog
 
             ShowSevereError(state, "Window tarcog returned an error");
             tarcogErrorMessage = "message = \"" + tarcogErrorMessage + "\"";
             ShowContinueErrorTimeStamp(state, tarcogErrorMessage);
             if (CalcCondition == DataBSDFWindow::Condition::Invalid) {
-                ShowContinueError(state, EnergyPlus::format("surface name = {}", state.dataSurface->Surface(SurfNum).Name));
+                ShowContinueError(state, std::format("surface name = {}", state.dataSurface->Surface(SurfNum).Name));
             }
-            ShowContinueError(state, EnergyPlus::format("construction name = {}", state.dataConstruction->Construct(ConstrNum).Name));
+            ShowContinueError(state, std::format("construction name = {}", state.dataConstruction->Construct(ConstrNum).Name));
             ShowFatalError(state, "halting because of error in tarcog");
         }
 
@@ -3415,9 +3416,7 @@ namespace WindowComplexManager {
             // Save hcv for use in divider calc with interior or exterior shade (see CalcWinFrameAndDividerTemps)
             if (ShadeFlag == WinShadingType::IntShade) {
                 state.dataSurface->SurfWinConvCoeffWithShade(SurfNum) = 0.0;
-            }
 
-            if (ShadeFlag == WinShadingType::IntShade) {
                 auto const &surfShade = state.dataSurface->surfShades(SurfNum);
                 SurfInsideTemp = theta(2 * ngllayer + 2) - Constant::Kelvin;
 

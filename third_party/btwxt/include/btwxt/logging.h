@@ -22,9 +22,9 @@ namespace Btwxt {
         void write_message(const std::string_view message_type, const std::string_view message) {
             std::string context_string =
                     message_context
-                    ? fmt::format(" ({})", *(reinterpret_cast<std::string *>(message_context)))
+                    ? std::format(" ({})", *(reinterpret_cast<std::string *>(message_context)))
                     : "";
-            std::cout << fmt::format("  [{}]{} {}", message_type, context_string, message) << std::endl;
+            std::cout << std::format("  [{}]{} {}", message_type, context_string, message) << std::endl;
         }
     };
 

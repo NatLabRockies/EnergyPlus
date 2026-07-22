@@ -275,48 +275,6 @@ namespace HVAC {
 
     extern const std::array<bool, (int)CoilType::Num> coilTypeIsHeatPump;
 
-#ifdef GET_OUT
-    // parameters describing coil types
-    int constexpr NumAllCoilTypes(37);
-    int constexpr CoilDX_CoolingSingleSpeed(1);
-    int constexpr CoilDX_HeatingEmpirical(2);
-    int constexpr CoilDX_CoolingTwoSpeed(3);
-    int constexpr CoilDX_CoolingHXAssisted(4);
-    int constexpr CoilDX_CoolingTwoStageWHumControl(5);
-    int constexpr CoilDX_HeatPumpWaterHeaterPumped(6);
-    int constexpr CoilDX_HeatPumpWaterHeaterWrapped(7);
-    int constexpr CoilDX_MultiSpeedCooling(8);
-    int constexpr CoilDX_MultiSpeedHeating(9);
-    int constexpr Coil_HeatingGasOrOtherFuel(10);
-    int constexpr Coil_HeatingGas_MultiStage(11);
-    int constexpr Coil_HeatingElectric(12);
-    int constexpr Coil_HeatingElectric_MultiStage(13);
-    int constexpr Coil_HeatingDesuperheater(14);
-    int constexpr Coil_CoolingWater(15);
-    int constexpr Coil_CoolingWaterDetailed(16);
-    int constexpr Coil_HeatingWater(17);
-    int constexpr Coil_HeatingSteam(18);
-    int constexpr CoilWater_CoolingHXAssisted(19);
-    int constexpr Coil_CoolingWaterToAirHP(20);
-    int constexpr Coil_HeatingWaterToAirHP(21);
-    int constexpr Coil_CoolingWaterToAirHPSimple(22);
-    int constexpr Coil_HeatingWaterToAirHPSimple(23);
-    int constexpr CoilVRF_Cooling(24);
-    int constexpr CoilVRF_Heating(25);
-    int constexpr Coil_UserDefined(26);
-    int constexpr CoilDX_PackagedThermalStorageCooling(27);
-    int constexpr Coil_CoolingWaterToAirHPVSEquationFit(28);
-    int constexpr Coil_HeatingWaterToAirHPVSEquationFit(29);
-    int constexpr Coil_CoolingAirToAirVariableSpeed(30);
-    int constexpr Coil_HeatingAirToAirVariableSpeed(31);
-    int constexpr CoilDX_HeatPumpWaterHeaterVariableSpeed(32);
-    int constexpr CoilVRF_FluidTCtrl_Cooling(33);
-    int constexpr CoilVRF_FluidTCtrl_Heating(34);
-    int constexpr CoilDX_Cooling(35);
-    //    int constexpr CoilDX_SubcoolReheat(36);
-    int constexpr CoilDX_CurveFit_Speed(37);
-#endif // GET_OUT
-
     enum class CoilMode
     {
         Invalid = -1,
@@ -458,12 +416,6 @@ namespace HVAC {
     Real64 constexpr OscillateMagnitude(0.15);
 
     int constexpr MaxSpeedLevels = 10;
-
-#ifdef GET_OUT
-    extern Array1D_string const cAllCoilTypes;
-    extern Array1D_string const cCoolingCoilTypes;
-    extern Array1D_string const cHeatingCoilTypes;
-#endif // GET_OUT
 
     struct ComponentSetPtData
     {

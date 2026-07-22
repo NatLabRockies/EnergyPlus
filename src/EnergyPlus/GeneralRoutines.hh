@@ -215,6 +215,8 @@ Real64 calcZoneSensibleOutput(Real64 const MassFlow, // air mass flow rate, {kg/
                               Real64 const TDBZone,  // dry-bulb temperature at zone air node {C}
                               Real64 const WZone);
 
+void CheckBranchEquipInZoneHVACEquipList(EnergyPlusData &state, int const branchNum, bool &errorsFound);
+
 struct GeneralRoutinesData : BaseGlobalStruct
 {
 

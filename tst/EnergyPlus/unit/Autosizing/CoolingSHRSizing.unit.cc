@@ -114,9 +114,9 @@ TEST_F(AutoSizingFixture, CoolingSHRSizingGauntlet)
     EXPECT_FALSE(sizer.sizingDesRunThisZone);
     sizer.autoSizedValue = 0.0; // reset for next test
 
-    std::string eiooutput = std::string(
-        "! <Component Sizing Information>, Component Type, Component Name, Input Field Description, Value\n"
-        " Component Sizing Information, Coil:Cooling:DX:SingleSpeed, MyDXCoil, User-Specified Gross Rated Sensible Heat Ratio, 0.85000\n");
+    std::string eiooutput =
+        std::string("! <Component Sizing Information>, Component Type, Component Name, Input Field Description, Value\n"
+                    " Component Sizing Information, Coil:Cooling:DX:SingleSpeed, MyDXCoil, User-Specified Gross Rated Sensible Heat Ratio, 0.85\n");
 
     EXPECT_TRUE(compare_eio_stream(eiooutput, true));
 
@@ -140,7 +140,7 @@ TEST_F(AutoSizingFixture, CoolingSHRSizingGauntlet)
     sizedValue = 0.0;
 
     eiooutput =
-        std::string(" Component Sizing Information, Coil:Cooling:DX:SingleSpeed, MyDXCoil, Design Size Gross Rated Sensible Heat Ratio, 0.77617\n");
+        std::string(" Component Sizing Information, Coil:Cooling:DX:SingleSpeed, MyDXCoil, Design Size Gross Rated Sensible Heat Ratio, 0.776167\n");
 
     EXPECT_TRUE(compare_eio_stream(eiooutput, true));
 
@@ -206,7 +206,7 @@ TEST_F(AutoSizingFixture, CoolingSHRSizingGauntlet)
     sizedValue = 0.0;
 
     eiooutput =
-        std::string(" Component Sizing Information, Coil:Cooling:DX:SingleSpeed, MyDXCoil, Design Size Gross Rated Sensible Heat Ratio, 0.63146\n");
+        std::string(" Component Sizing Information, Coil:Cooling:DX:SingleSpeed, MyDXCoil, Design Size Gross Rated Sensible Heat Ratio, 0.631462\n");
 
     EXPECT_TRUE(compare_eio_stream(eiooutput, true));
 
@@ -291,7 +291,7 @@ TEST_F(AutoSizingFixture, CoolingSHRSizingGauntlet)
 
     // <Component Sizing Information> header already reported above (and flag set false). Only coil sizing information reported here.
     eiooutput =
-        std::string(" Component Sizing Information, Coil:Cooling:DX:SingleSpeed, MyDXCoil, Design Size Gross Rated Sensible Heat Ratio, 0.77617\n");
+        std::string(" Component Sizing Information, Coil:Cooling:DX:SingleSpeed, MyDXCoil, Design Size Gross Rated Sensible Heat Ratio, 0.776167\n");
 
     EXPECT_TRUE(compare_eio_stream(eiooutput, true));
 
@@ -350,9 +350,9 @@ TEST_F(AutoSizingFixture, CoolingSHRSizingGauntlet)
     EXPECT_FALSE(errorsFound);
 
     // <Component Sizing Information> header already reported above (and flag set false). Only coil sizing information reported here.
-    eiooutput = std::string(
-        " Component Sizing Information, Coil:Cooling:DX:SingleSpeed, MyDXCoil, Design Size Gross Rated Sensible Heat Ratio, 0.67508\n"
-        " Component Sizing Information, Coil:Cooling:DX:SingleSpeed, MyDXCoil, User-Specified Gross Rated Sensible Heat Ratio, 0.52000\n");
+    eiooutput =
+        std::string(" Component Sizing Information, Coil:Cooling:DX:SingleSpeed, MyDXCoil, Design Size Gross Rated Sensible Heat Ratio, 0.675083\n"
+                    " Component Sizing Information, Coil:Cooling:DX:SingleSpeed, MyDXCoil, User-Specified Gross Rated Sensible Heat Ratio, 0.52\n");
     EXPECT_TRUE(compare_eio_stream(eiooutput, true));
 }
 

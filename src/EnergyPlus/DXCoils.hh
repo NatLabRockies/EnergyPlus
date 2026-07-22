@@ -107,9 +107,12 @@ namespace DXCoils {
         // Members
         //          Some variables in this type are arrays (dimension=MaxModes) to support coil type
         //          COIL:DX:MultiMode:CoolingEmpirical.  Other coil types only use the first element.
+
         std::string Name;                                  // Name of the DX Coil
         HVAC::CoilType coilType = HVAC::CoilType::Invalid; // Integer equivalent to DXCoilType
-        Sched::Schedule *availSched = nullptr;             // availability schedule
+        int coilReportNum = -1;
+        Sched::Schedule *availSched = nullptr; // availability schedule
+
         //          RatedCoolCap, RatedSHR and RatedCOP do not include the thermal or electrical
         //          effects due to the supply air fan
         Array1D<Real64> RatedTotCap;                      // Gross total cooling capacity at rated conditions [watts]
@@ -641,8 +644,8 @@ namespace DXCoils {
     Real64 ValidateADP(EnergyPlusData &state,
                        std::string_view const UnitType,  // component name
                        std::string const &UnitName,      // component type
-                       Real64 const RatedInletAirTemp,   // coil inlet air temperature [C]
-                       Real64 const RatedInletAirHumRat, // coil inlet air humidity ratio [kg/kg]
+                       Real64 const coilInletAirTemp,    // coil inlet air temperature [C]
+                       Real64 const coilInletAirHumRat,  // coil inlet air humidity ratio [kg/kg]
                        Real64 const TotCap,              // coil total capacity [W]
                        Real64 const AirMassFlow,         // coil air mass flow rate [kg/s]
                        Real64 const InitialSHR,          // coil sensible heat ratio []
@@ -950,8 +953,11 @@ struct DXCoilsData : BaseGlobalStruct
     bool MyOneTimeFlag = true;     // One time flag used to allocate MyEnvrnFlag and MySizeFlag
     bool CalcTwoSpeedDXCoilStandardRatingOneTimeEIOHeaderWrite = true;
     bool CrankcaseHeaterReportVarFlag = true;
-    int NumVRFHeatingCoils = 0;                   // number of VRF heat pump heating coils
-    int NumVRFCoolingCoils = 0;                   // number of VRF heat pump cooling coils
+    int NumVRFHeatingCoils = 0; // number of VRF heat pump heating coils
+    int NumVRFCoolingCoils = 0; // number of VRF heat pump cooling coils
+    // Shared DXCoil array layout: GetDXCoils parses each category in a fixed order and appends via
+    // a shared ++DXCoilNum counter, so indices are grouped by category in parse order — cooling
+    // single-speed (NumDoe2DXCoils) at [1..N], heating single-speed (NumDXHeatingCoils) next, etc.
     int NumDXCoils = 0;                           // Total number of DX coils
     int NumVRFHeatingFluidTCtrlCoils = 0;         // number of VRF heat pump heating coils for FluidTCtrl Model
     int NumVRFCoolingFluidTCtrlCoils = 0;         // number of VRF heat pump cooling coils for FluidTCtrl Model

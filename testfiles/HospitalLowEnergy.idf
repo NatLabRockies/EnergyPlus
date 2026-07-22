@@ -26715,8 +26715,8 @@
   ZoneControl:Humidistat,
     Floor 2 Lab 1 Humidistat,!- Name
     Floor 2 Lab 1,           !- Zone Name
-    MinRelHumSetSch,         !- Humidifying Relative Humidity Setpoint Schedule Name
-    MaxRelHumSetSch;         !- Dehumidifying Relative Humidity Setpoint Schedule Name
+    MinRelHumSetSch,         !- Humidifying Setpoint Schedule Name
+    MaxRelHumSetSch;         !- Dehumidifying Setpoint Schedule Name
 
   ThermostatSetpoint:DualSetpoint,
     Floor 2 Lab 1 DualSPSched,  !- Name
@@ -32853,8 +32853,8 @@
   ZoneControl:Humidistat,
     Floor 2 Operating Humidistat,  !- Name
     Floor 2 Operating,       !- Zone Name
-    MinRelHumSetSch,         !- Humidifying Relative Humidity Setpoint Schedule Name
-    MaxRelHumSetSch;         !- Dehumidifying Relative Humidity Setpoint Schedule Name
+    MinRelHumSetSch,         !- Humidifying Setpoint Schedule Name
+    MaxRelHumSetSch;         !- Dehumidifying Setpoint Schedule Name
 
   ThermostatSetpoint:DualSetpoint,
     Floor 2 Operating DualSPSched,  !- Name
@@ -40679,8 +40679,8 @@
   ZoneControl:Humidistat,
     Floor 2 Triage Humidistat,  !- Name
     Floor 2 Triage,          !- Zone Name
-    MinRelHumSetSch,         !- Humidifying Relative Humidity Setpoint Schedule Name
-    MaxRelHumSetSch;         !- Dehumidifying Relative Humidity Setpoint Schedule Name
+    MinRelHumSetSch,         !- Humidifying Setpoint Schedule Name
+    MaxRelHumSetSch;         !- Dehumidifying Setpoint Schedule Name
 
   ThermostatSetpoint:DualSetpoint,
     Floor 2 Triage DualSPSched,  !- Name
@@ -43502,8 +43502,8 @@
   ZoneControl:Humidistat,
     Floor 3 ICU Humidistat,  !- Name
     Floor 3 ICU,             !- Zone Name
-    MinRelHumSetSch,         !- Humidifying Relative Humidity Setpoint Schedule Name
-    MaxRelHumSetSch;         !- Dehumidifying Relative Humidity Setpoint Schedule Name
+    MinRelHumSetSch,         !- Humidifying Setpoint Schedule Name
+    MaxRelHumSetSch;         !- Dehumidifying Setpoint Schedule Name
 
   ThermostatSetpoint:DualSetpoint,
     Floor 3 ICU DualSPSched, !- Name
@@ -51823,8 +51823,8 @@
   ZoneControl:Humidistat,
     Floor 3 Triage Humidistat,  !- Name
     Floor 3 Triage,          !- Zone Name
-    MinRelHumSetSch,         !- Humidifying Relative Humidity Setpoint Schedule Name
-    MaxRelHumSetSch;         !- Dehumidifying Relative Humidity Setpoint Schedule Name
+    MinRelHumSetSch,         !- Humidifying Setpoint Schedule Name
+    MaxRelHumSetSch;         !- Dehumidifying Setpoint Schedule Name
 
   ThermostatSetpoint:DualSetpoint,
     Floor 3 Triage DualSPSched,  !- Name

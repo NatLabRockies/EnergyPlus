@@ -1863,17 +1863,17 @@
   ZoneControl:Humidistat,
     Zone 1 Humidistat,       !- Name
     West Zone,               !- Zone Name
-    Seasonal Relative Humidity Sch;  !- Humidifying Relative Humidity Setpoint Schedule Name
+    Seasonal Relative Humidity Sch;  !- Humidifying Setpoint Schedule Name
 
   ZoneControl:Humidistat,
     Zone 2 Humidistat,       !- Name
     EAST ZONE,               !- Zone Name
-    Seasonal Relative Humidity Sch;  !- Humidifying Relative Humidity Setpoint Schedule Name
+    Seasonal Relative Humidity Sch;  !- Humidifying Setpoint Schedule Name
 
   ZoneControl:Humidistat,
     Zone 3 Humidistat,       !- Name
     NORTH ZONE,              !- Zone Name
-    Seasonal Relative Humidity Sch;  !- Humidifying Relative Humidity Setpoint Schedule Name
+    Seasonal Relative Humidity Sch;  !- Humidifying Setpoint Schedule Name
 
   ZoneControl:Thermostat,
     Zone 1 Thermostat,       !- Name

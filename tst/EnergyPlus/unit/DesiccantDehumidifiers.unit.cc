@@ -2782,7 +2782,7 @@ TEST_F(EnergyPlusFixture, DesiccantDehum_OnOASystemTest)
         "  ZoneControl:Humidistat,",
         "    SPACE1-1 Humidistat,     !- Name",
         "    SPACE1-1,                !- Zone Name",
-        "    Relative Humidity Sched; !- Humidifying Relative Humidity Setpoint Schedule Name",
+        "    Relative Humidity Sched; !- Humidifying Setpoint Schedule Name",
 
         "  HeatExchanger:Desiccant:BalancedFlow,",
         "    OA Desiccant Heat Exchanger,  !- Name",
@@ -2857,7 +2857,6 @@ TEST_F(EnergyPlusFixture, DesiccantDehum_OnOASystemTest)
     state->dataGlobal->DDOnlySimulation = true;
 
     SimulationManager::GetProjectData(*state);
-    OutputReportPredefined::SetPredefinedTables(*state);
     createFacilityElectricPowerServiceObject(*state);
     SetPreConstructionInputParameters(*state); // establish array bounds for constructions early
     BranchInputManager::ManageBranchInput(*state);
@@ -2873,7 +2872,6 @@ TEST_F(EnergyPlusFixture, DesiccantDehum_OnOASystemTest)
     state->dataSize->CurSysNum = 1;
     state->dataSize->CurOASysNum = 1;
 
-    GetDesiccantDehumidifierInput(*state);
     EXPECT_EQ(1, state->dataDesiccantDehumidifiers->NumDesicDehums);
     EXPECT_EQ("OA DESICCANT SYSTEM", state->dataDesiccantDehumidifiers->DesicDehum(DesicDehumNum).Name);
     EXPECT_EQ("OA DESICCANT REGEN COIL", state->dataDesiccantDehumidifiers->DesicDehum(DesicDehumNum).RegenCoilName);
@@ -3852,7 +3850,7 @@ TEST_F(EnergyPlusFixture, DesiccantDehum_OnPrimaryAirSystemTest)
         "  ZoneControl:Humidistat,",
         "    Main Zone Humidistat,     !- Name",
         "    Main Zone,                !- Zone Name",
-        "    Relative Humidity Sched; !- Humidifying Relative Humidity Setpoint Schedule Name",
+        "    Relative Humidity Sched; !- Humidifying Setpoint Schedule Name",
 
         "  Schedule:Compact,",
         "    Relative Humidity Sched, !- Name",
@@ -4061,7 +4059,6 @@ TEST_F(EnergyPlusFixture, DesiccantDehum_OnPrimaryAirSystemTest)
     state->dataGlobal->DDOnlySimulation = true;
 
     SimulationManager::GetProjectData(*state);
-    OutputReportPredefined::SetPredefinedTables(*state);
     createFacilityElectricPowerServiceObject(*state);
     SetPreConstructionInputParameters(*state); // establish array bounds for constructions early
     BranchInputManager::ManageBranchInput(*state);
@@ -5039,7 +5036,7 @@ TEST_F(EnergyPlusFixture, DesiccantDehum_RegenAirHeaterHWCoilSizingTest)
         "  ZoneControl:Humidistat,",
         "    Main Zone Humidistat,     !- Name",
         "    Main Zone,                !- Zone Name",
-        "    Relative Humidity Sched; !- Humidifying Relative Humidity Setpoint Schedule Name",
+        "    Relative Humidity Sched; !- Humidifying Setpoint Schedule Name",
 
         "  Schedule:Compact,",
         "    Relative Humidity Sched, !- Name",
@@ -5486,7 +5483,6 @@ TEST_F(EnergyPlusFixture, DesiccantDehum_RegenAirHeaterHWCoilSizingTest)
     state->dataGlobal->DDOnlySimulation = true;
 
     SimulationManager::GetProjectData(*state);
-    OutputReportPredefined::SetPredefinedTables(*state);
     createFacilityElectricPowerServiceObject(*state);
     SetPreConstructionInputParameters(*state); // establish array bounds for constructions early
     BranchInputManager::ManageBranchInput(*state);
@@ -6472,7 +6468,7 @@ TEST_F(EnergyPlusFixture, DesiccantDehum_VSCoolingCoilOnPrimaryAirSystemTest)
         "  ZoneControl:Humidistat,",
         "    Main Zone Humidistat,     !- Name",
         "    Main Zone,                !- Zone Name",
-        "    Relative Humidity Sched; !- Humidifying Relative Humidity Setpoint Schedule Name",
+        "    Relative Humidity Sched; !- Humidifying Setpoint Schedule Name",
 
         "  Schedule:Compact,",
         "    Relative Humidity Sched, !- Name",
@@ -6742,7 +6738,6 @@ TEST_F(EnergyPlusFixture, DesiccantDehum_VSCoolingCoilOnPrimaryAirSystemTest)
     state->dataGlobal->DDOnlySimulation = true;
 
     SimulationManager::GetProjectData(*state);
-    OutputReportPredefined::SetPredefinedTables(*state);
     createFacilityElectricPowerServiceObject(*state);
     SetPreConstructionInputParameters(*state); // establish array bounds for constructions early
     BranchInputManager::ManageBranchInput(*state);

@@ -161,8 +161,8 @@ Common Functions
 ****************************************************/
 
 /* Inquire version numbers of header files */
-DllExport const char *fmiGetTypesPlatform();
-DllExport const char *fmiGetVersion();
+DllExport const char *fmiGetTypesPlatform(void);
+DllExport const char *fmiGetVersion(void);
 
 DllExport fmiStatus fmiSetDebugLogging(fmiComponent c, fmiBoolean loggingOn);
 

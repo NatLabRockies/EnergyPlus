@@ -58,7 +58,7 @@ struct HeatingAirflowUASizer : BaseSizer
     HeatingAirflowUASizer()
     {
         this->sizingType = AutoSizingType::HeatingAirflowUASizing;
-        this->sizingString = "Heating Coil Airflow For UA";
+        this->sizingString = "Heating Coil Airflow for UA";
     }
     ~HeatingAirflowUASizer() = default;
 

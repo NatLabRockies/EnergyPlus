@@ -327,6 +327,7 @@ namespace DataRuntimeLanguage {
         bool CheckedOkay;              // set to true once matched to available actuator
         int ErlVariableNum;            // points to global Erl variable, matches Name
         int ActuatorVariableNum;       // points to index match in EMSActuatorAvailable structure
+        bool wasActuated = false;      // issue #10944: true once any Erl program has set this actuator
 
         // Default Constructor
         ActuatorUsedType() : CheckedOkay(false), ErlVariableNum(0), ActuatorVariableNum(0)
@@ -363,9 +364,12 @@ namespace DataRuntimeLanguage {
         int TrendVarPointer; // index to match in TrendVariable structure
         std::string Error;   // holds error message string for reporting
         bool initialized;    // true if number value has been SET (ie. has been on LHS in SET expression)
+        bool SetupInit;      // false when marked by an uninitialized-variable evaluation error so it can be treated as uninitialized later
 
         // Default Constructor
-        ErlValueType() : Type(Value::Null), Number(0.0), Variable(0), Expression(0), TrendVariable(false), TrendVarPointer(0), initialized(false)
+        ErlValueType()
+            : Type(Value::Null), Number(0.0), Variable(0), Expression(0), TrendVariable(false), TrendVarPointer(0), initialized(false),
+              SetupInit(true)
         {
         }
 
@@ -378,9 +382,10 @@ namespace DataRuntimeLanguage {
                      bool const TrendVariable,  // true if Erl variable is really a trend variable
                      int const TrendVarPointer, // index to match in TrendVariable structure
                      std::string const &Error,  // holds error message string for reporting
-                     bool const initialized)
+                     bool const initialized,
+                     bool const SetupInit)
             : Type(Type), Number(Number), String(String), Variable(Variable), Expression(Expression), TrendVariable(TrendVariable),
-              TrendVarPointer(TrendVarPointer), Error(Error), initialized(initialized)
+              TrendVarPointer(TrendVarPointer), Error(Error), initialized(initialized), SetupInit(SetupInit)
         {
         }
     };
@@ -802,11 +807,11 @@ struct RuntimeLanguageData : BaseGlobalStruct
     Array1D<DataRuntimeLanguage::InternalVarsUsedType> EMSInternalVarsUsed;           // internal data that are used
     Array1D<DataRuntimeLanguage::EMSProgramCallManagementType> EMSProgramCallManager; // program calling managers
     DataRuntimeLanguage::ErlValueType Null = DataRuntimeLanguage::ErlValueType(
-        DataRuntimeLanguage::Value::Null, 0.0, "", 0, 0, false, 0, "", true); // special "null" Erl variable value instance
+        DataRuntimeLanguage::Value::Null, 0.0, "", 0, 0, false, 0, "", true, true); // special "null" Erl variable value instance
     DataRuntimeLanguage::ErlValueType False = DataRuntimeLanguage::ErlValueType(
-        DataRuntimeLanguage::Value::Null, 0.0, "", 0, 0, false, 0, "", true); // special "false" Erl variable value instance
+        DataRuntimeLanguage::Value::Null, 0.0, "", 0, 0, false, 0, "", true, true); // special "false" Erl variable value instance
     DataRuntimeLanguage::ErlValueType True = DataRuntimeLanguage::ErlValueType(
-        DataRuntimeLanguage::Value::Null, 0.0, "", 0, 0, false, 0, "", true); // special "True" Erl variable value instance, gets reset
+        DataRuntimeLanguage::Value::Null, 0.0, "", 0, 0, false, 0, "", true, true); // special "True" Erl variable value instance, gets reset
 
     std::map<std::tuple<std::string, std::string, std::string>, int> EMSActuatorAvailableMap;
 
@@ -865,9 +870,9 @@ struct RuntimeLanguageData : BaseGlobalStruct
         this->EMSInternalVarsAvailable.deallocate();
         this->EMSInternalVarsUsed.deallocate();
         this->EMSProgramCallManager.deallocate();
-        this->Null = DataRuntimeLanguage::ErlValueType(DataRuntimeLanguage::Value::Null, 0.0, "", 0, 0, false, 0, "", true);
-        this->False = DataRuntimeLanguage::ErlValueType(DataRuntimeLanguage::Value::Null, 0.0, "", 0, 0, false, 0, "", true);
-        this->True = DataRuntimeLanguage::ErlValueType(DataRuntimeLanguage::Value::Null, 0.0, "", 0, 0, false, 0, "", true);
+        this->Null = DataRuntimeLanguage::ErlValueType(DataRuntimeLanguage::Value::Null, 0.0, "", 0, 0, false, 0, "", true, true);
+        this->False = DataRuntimeLanguage::ErlValueType(DataRuntimeLanguage::Value::Null, 0.0, "", 0, 0, false, 0, "", true, true);
+        this->True = DataRuntimeLanguage::ErlValueType(DataRuntimeLanguage::Value::Null, 0.0, "", 0, 0, false, 0, "", true, true);
 
         this->EMSActuatorAvailableMap.clear();
     }

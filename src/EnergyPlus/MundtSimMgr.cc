@@ -45,6 +45,9 @@
 // OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 // POSSIBILITY OF SUCH DAMAGE.
 
+// C++ Headers
+#include <format>
+
 // ObjexxFCL Headers
 #include <ObjexxFCL/Array.functions.hh>
 #include <ObjexxFCL/Fmath.hh>
@@ -153,21 +156,21 @@ namespace RoomAir {
         //     initialize Mundt-model variables
 
         // SUBROUTINE LOCAL VARIABLE DECLARATIONS:
-        int NodeNum;            // index for air nodes
-        int ZoneIndex;          // index for zones
-        int NumOfAirNodes;      // total number of nodes in each zone
-        int NumOfMundtZones;    // number of zones using the Mundt model
-        int MundtZoneIndex;     // index for zones using the Mundt model
-        int MaxNumOfSurfs;      // maximum of number of surfaces
-        int MaxNumOfFloorSurfs; // maximum of number of surfaces
-        int MaxNumOfAirNodes;   // maximum of number of air nodes
-        int MaxNumOfRoomNodes;  // maximum of number of nodes connected to walls
-        int RoomNodesCount;     // number of nodes connected to walls
-        int FloorSurfCount;     // number of nodes connected to walls
-        int AirNodeBeginNum;    // index number of the first air node for this zone
-        int AirNodeNum;         // index for air nodes
-        bool AirNodeFoundFlag;  // flag used for error check
-        bool ErrorsFound;       // true if errors found in init
+        int NodeNum;                   // index for air nodes
+        int ZoneIndex;                 // index for zones
+        int NumOfAirNodes;             // total number of nodes in each zone
+        int NumOfMundtZones;           // number of zones using the Mundt model
+        int MundtZoneIndex;            // index for zones using the Mundt model
+        int MaxNumOfSurfs;             // maximum of number of surfaces
+        int MaxNumOfFloorSurfs;        // maximum of number of surfaces
+        int MaxNumOfAirNodes;          // maximum of number of air nodes
+        int MaxNumOfRoomNodes;         // maximum of number of nodes connected to walls
+        int RoomNodesCount = 0;        // number of nodes connected to walls
+        int FloorSurfCount = 0;        // number of nodes connected to walls
+        int AirNodeBeginNum = 0;       // index number of the first air node for this zone
+        int AirNodeNum;                // index for air nodes
+        bool AirNodeFoundFlag = false; // flag used for error check
+        bool ErrorsFound;              // true if errors found in init
 
         // allocate and initialize zone data
         state.dataMundtSimMgr->ZoneData.allocate(state.dataGlobal->NumOfZones);
@@ -280,7 +283,7 @@ namespace RoomAir {
 
                         // error check for debugging
                         if (!AirNodeFoundFlag) {
-                            ShowSevereError(state, EnergyPlus::format("InitMundtModel: Air Node in Zone=\"{}\" is not found.", thisZone.Name));
+                            ShowSevereError(state, std::format("InitMundtModel: Air Node in Zone=\"{}\" is not found.", thisZone.Name));
                             ErrorsFound = true;
                             continue;
                         }
@@ -334,7 +337,7 @@ namespace RoomAir {
         using Psychrometrics::PsyRhoAirFnPbTdbW;
         using Psychrometrics::PsyWFnTdpPb;
 
-        Real64 CpAir;            // specific heat
+        Real64 localCpAir;       // specific heat
         Real64 SumSysMCp;        // zone sum of air system MassFlowRate*Cp
         Real64 SumSysMCpT;       // zone sum of air system MassFlowRate*Cp*T
         Real64 MassFlowRate;     // mass flowrate
@@ -351,7 +354,7 @@ namespace RoomAir {
         ZoneEquipConfigNum = ZoneNum;
         // check whether this zone is a controlled zone or not
         if (!Zone(ZoneNum).IsControlled) {
-            ShowFatalError(state, EnergyPlus::format("Zones must be controlled for Mundt air model. No system serves zone {}", Zone(ZoneNum).Name));
+            ShowFatalError(state, std::format("Zones must be controlled for Mundt air model. No system serves zone {}", Zone(ZoneNum).Name));
             return;
         }
 
@@ -380,9 +383,9 @@ namespace RoomAir {
             for (int NodeNum = 1; NodeNum <= state.dataZoneEquip->ZoneEquipConfig(ZoneEquipConfigNum).NumInletNodes; ++NodeNum) {
                 NodeTemp = state.dataLoopNodes->Node(state.dataZoneEquip->ZoneEquipConfig(ZoneEquipConfigNum).InletNode(NodeNum)).Temp;
                 MassFlowRate = state.dataLoopNodes->Node(state.dataZoneEquip->ZoneEquipConfig(ZoneEquipConfigNum).InletNode(NodeNum)).MassFlowRate;
-                CpAir = PsyCpAirFnW(thisZoneHB.airHumRat);
-                SumSysMCp += MassFlowRate * CpAir;
-                SumSysMCpT += MassFlowRate * CpAir * NodeTemp;
+                localCpAir = PsyCpAirFnW(thisZoneHB.airHumRat);
+                SumSysMCp += MassFlowRate * localCpAir;
+                SumSysMCpT += MassFlowRate * localCpAir * NodeTemp;
             }
             // prevent dividing by zero due to zero supply air flow rate
             if (SumSysMCp <= 0.0) {
@@ -393,9 +396,9 @@ namespace RoomAir {
                 state.dataMundtSimMgr->SupplyAirTemp = SumSysMCpT / SumSysMCp;
             }
             // determine cooling load
-            CpAir = PsyCpAirFnW(thisZoneHB.airHumRat);
+            localCpAir = PsyCpAirFnW(thisZoneHB.airHumRat);
             state.dataMundtSimMgr->QsysCoolTot =
-                -(SumSysMCpT - ZoneMassFlowRate * CpAir * state.dataZoneTempPredictorCorrector->zoneHeatBalance(ZoneNum).MAT);
+                -(SumSysMCpT - ZoneMassFlowRate * localCpAir * state.dataZoneTempPredictorCorrector->zoneHeatBalance(ZoneNum).MAT);
         }
         // determine heat gains
         state.dataMundtSimMgr->ConvIntGain = InternalHeatGains::zoneSumAllInternalConvectionGains(state, ZoneNum);
@@ -514,8 +517,7 @@ namespace RoomAir {
                     state.dataMundtSimMgr->MundtAirSurf(state.dataMundtSimMgr->FloorSurfSetIDs(SurfNum), state.dataMundtSimMgr->MundtZoneNum).Area;
             }
         } else {
-            ShowSevereError(state,
-                            EnergyPlus::format("SetupMundtModel: Mundt model has no FloorAirNode, Zone={}", state.dataHeatBal->Zone(ZoneNum).Name));
+            ShowSevereError(state, std::format("SetupMundtModel: Mundt model has no FloorAirNode, Zone={}", state.dataHeatBal->Zone(ZoneNum).Name));
             ErrorsFound = true;
         }
     }

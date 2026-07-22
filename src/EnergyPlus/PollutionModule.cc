@@ -45,7 +45,8 @@
 // OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 // POSSIBILITY OF SUCH DAMAGE.
 
-// ObjexxFCL Headers
+// C++ Headers
+#include <format>
 
 // EnergyPlus Headers
 #include <EnergyPlus/Data/EnergyPlusData.hh>
@@ -173,12 +174,13 @@ void SetupPollutionCalculations(EnergyPlusData &state)
         //  and the like are happening as expected.
         OutputProcessor::ReportFreq freq = OutputProcessor::ReportFreq::Simulation;
 
-        if (!state.dataIPShortCut->lAlphaFieldBlanks(1) &&
-            (freq = static_cast<OutputProcessor::ReportFreq>(
-                 getEnumValue(OutputProcessor::reportFreqNamesUC, Util::makeUPPER(state.dataIPShortCut->cAlphaArgs(1))))) ==
-                OutputProcessor::ReportFreq::Invalid) {
-            ShowSevereError(state, EnergyPlus::format("Invalid reporting frequency {}", state.dataIPShortCut->cAlphaArgs(1)));
-            continue;
+        if (!state.dataIPShortCut->lAlphaFieldBlanks(1)) {
+            freq = static_cast<OutputProcessor::ReportFreq>(
+                getEnumValue(OutputProcessor::reportFreqNamesUC, Util::makeUPPER(state.dataIPShortCut->cAlphaArgs(1))));
+            if (freq == OutputProcessor::ReportFreq::Invalid) {
+                ShowSevereError(state, std::format("Invalid reporting frequency {}", state.dataIPShortCut->cAlphaArgs(1)));
+                continue;
+            }
         }
 
         InitPollutionMeterReporting(state, freq);
@@ -231,7 +233,7 @@ void GetPollutionFactorInput(EnergyPlusData &state)
                           ipsc->cAlphaFieldNames,
                           ipsc->cNumericFieldNames);
     } else if (pm->PollutionReportSetup) {
-        ShowWarningError(state, EnergyPlus::format("{}: not entered.  Values will be defaulted.", ipsc->cCurrentModuleObject));
+        ShowWarningError(state, std::format("{}: not entered.  Values will be defaulted.", ipsc->cCurrentModuleObject));
     }
 
     pm->PurchHeatEffic = 0.3;
@@ -297,10 +299,9 @@ void GetPollutionFactorInput(EnergyPlusData &state)
         Constant::eFuel fuel = pollFuel2fuel[(int)pollFuel];
 
         if (pollCoeff.used) {
-            ShowWarningError(state,
-                             EnergyPlus::format("{}: {} already entered. Previous entry will be used.",
-                                                ipsc->cCurrentModuleObject,
-                                                Constant::eFuelNames[(int)fuel]));
+            ShowWarningError(
+                state,
+                std::format("{}: {} already entered. Previous entry will be used.", ipsc->cCurrentModuleObject, Constant::eFuelNames[(int)fuel]));
             continue;
         }
 
@@ -336,9 +337,8 @@ void GetPollutionFactorInput(EnergyPlusData &state)
         if (!pm->pollCoeffs[(int)PollFuel::Electricity].used && ((pm->facilityMeterNums[(int)PollFacilityMeter::Electricity] > 0) ||
                                                                  (pm->facilityMeterNums[(int)PollFacilityMeter::ElectricityProduced] > 0) ||
                                                                  (pm->facilityMeterNums[(int)PollFacilityMeter::CoolPurchased] > 0))) {
-            ShowSevereError(
-                state,
-                EnergyPlus::format("{} Not Found or Fuel not specified For Pollution Calculation for ELECTRICITY", ipsc->cCurrentModuleObject));
+            ShowSevereError(state,
+                            std::format("{} Not Found or Fuel not specified For Pollution Calculation for ELECTRICITY", ipsc->cCurrentModuleObject));
             ErrorsFound = true;
         }
 
@@ -346,59 +346,55 @@ void GetPollutionFactorInput(EnergyPlusData &state)
         if (!pm->pollCoeffs[(int)PollFuel::NaturalGas].used &&
             ((pm->facilityMeterNums[(int)PollFacilityMeter::NaturalGas] > 0) || (pm->facilityMeterNums[(int)PollFacilityMeter::HeatPurchased] > 0) ||
              (pm->facilityMeterNums[(int)PollFacilityMeter::Steam] > 0))) {
-            ShowSevereError(
-                state,
-                EnergyPlus::format("{} Not Found or Fuel not specified For Pollution Calculation for NATURAL GAS", ipsc->cCurrentModuleObject));
+            ShowSevereError(state,
+                            std::format("{} Not Found or Fuel not specified For Pollution Calculation for NATURAL GAS", ipsc->cCurrentModuleObject));
             ErrorsFound = true;
         }
         // Check for FuelOilNo2 (Residual Oil)
         if (!pm->pollCoeffs[(int)PollFuel::FuelOil2].used && (pm->facilityMeterNums[(int)PollFacilityMeter::FuelOil2] > 0)) {
-            ShowSevereError(
-                state,
-                EnergyPlus::format("{} Not Found or Fuel not specified For Pollution Calculation for FUEL OIL #2", ipsc->cCurrentModuleObject));
+            ShowSevereError(state,
+                            std::format("{} Not Found or Fuel not specified For Pollution Calculation for FUEL OIL #2", ipsc->cCurrentModuleObject));
             ErrorsFound = true;
         }
         // Check for FuelOilNo1 (Distillate Oil)
         if (!pm->pollCoeffs[(int)PollFuel::FuelOil1].used && (pm->facilityMeterNums[(int)PollFacilityMeter::FuelOil1] > 0)) {
-            ShowSevereError(
-                state,
-                EnergyPlus::format("{} Not Found or Fuel not specified For Pollution Calculation for FUEL OIL #1", ipsc->cCurrentModuleObject));
+            ShowSevereError(state,
+                            std::format("{} Not Found or Fuel not specified For Pollution Calculation for FUEL OIL #1", ipsc->cCurrentModuleObject));
             ErrorsFound = true;
         }
         // Check for Coal
         if (!pm->pollCoeffs[(int)PollFuel::Coal].used && (pm->facilityMeterNums[(int)PollFacilityMeter::Coal] > 0)) {
-            ShowSevereError(state,
-                            EnergyPlus::format("{} Not Found or Fuel not specified For Pollution Calculation for COAL", ipsc->cCurrentModuleObject));
+            ShowSevereError(state, std::format("{} Not Found or Fuel not specified For Pollution Calculation for COAL", ipsc->cCurrentModuleObject));
             ErrorsFound = true;
         }
         // Check for Gasoline
         if (!pm->pollCoeffs[(int)PollFuel::Gasoline].used && (pm->facilityMeterNums[(int)PollFacilityMeter::Gasoline] > 0)) {
-            ShowSevereError(
-                state, EnergyPlus::format("{} Not Found or Fuel not specified For Pollution Calculation for GASOLINE", ipsc->cCurrentModuleObject));
+            ShowSevereError(state,
+                            std::format("{} Not Found or Fuel not specified For Pollution Calculation for GASOLINE", ipsc->cCurrentModuleObject));
             ErrorsFound = true;
         }
         // Check for Propane
         if (!pm->pollCoeffs[(int)PollFuel::Propane].used && (pm->facilityMeterNums[(int)PollFacilityMeter::Propane] > 0)) {
-            ShowSevereError(
-                state, EnergyPlus::format("{} Not Found or Fuel not specified For Pollution Calculation for PROPANE", ipsc->cCurrentModuleObject));
+            ShowSevereError(state,
+                            std::format("{} Not Found or Fuel not specified For Pollution Calculation for PROPANE", ipsc->cCurrentModuleObject));
             ErrorsFound = true;
         }
         // Check for Diesel
         if (!pm->pollCoeffs[(int)PollFuel::Diesel].used && (pm->facilityMeterNums[(int)PollFacilityMeter::Diesel] > 0)) {
-            ShowSevereError(
-                state, EnergyPlus::format("{} Not Found or Fuel not specified For Pollution Calculation for DIESEL", ipsc->cCurrentModuleObject));
+            ShowSevereError(state,
+                            std::format("{} Not Found or Fuel not specified For Pollution Calculation for DIESEL", ipsc->cCurrentModuleObject));
             ErrorsFound = true;
         }
         // Check for OtherFuel1
         if (!pm->pollCoeffs[(int)PollFuel::OtherFuel1].used && (pm->facilityMeterNums[(int)PollFacilityMeter::OtherFuel1] > 0)) {
-            ShowSevereError(
-                state, EnergyPlus::format("{} Not Found or Fuel not specified For Pollution Calculation for OTHERFUEL1", ipsc->cCurrentModuleObject));
+            ShowSevereError(state,
+                            std::format("{} Not Found or Fuel not specified For Pollution Calculation for OTHERFUEL1", ipsc->cCurrentModuleObject));
             ErrorsFound = true;
         }
         // Check for OtherFuel2
         if (!pm->pollCoeffs[(int)PollFuel::OtherFuel2].used && (pm->facilityMeterNums[(int)PollFacilityMeter::OtherFuel2] > 0)) {
-            ShowSevereError(
-                state, EnergyPlus::format("{} Not Found or Fuel not specified For Pollution Calculation for OTHERFUEL2", ipsc->cCurrentModuleObject));
+            ShowSevereError(state,
+                            std::format("{} Not Found or Fuel not specified For Pollution Calculation for OTHERFUEL2", ipsc->cCurrentModuleObject));
             ErrorsFound = true;
         }
     }
@@ -462,7 +458,7 @@ void SetupPollutionMeterReporting(EnergyPlusData &state)
 
         // Need to check whether this fuel is used?
         SetupOutputVariable(state,
-                            EnergyPlus::format("Environmental Impact {} Source Energy", Constant::eFuelNames[(int)fuel]),
+                            std::format("Environmental Impact {} Source Energy", Constant::eFuelNames[(int)fuel]),
                             Constant::Units::J,
                             pollComp.sourceVal,
                             OutputProcessor::TimeStepType::System,
@@ -474,7 +470,7 @@ void SetupPollutionMeterReporting(EnergyPlusData &state)
 
         for (int iPollutant = 0; iPollutant < (int)Pollutant::Num; ++iPollutant) {
             SetupOutputVariable(state,
-                                EnergyPlus::format("Environmental Impact {} {}", Constant::eFuelNames[(int)fuel], poll2outVarStrs[iPollutant]),
+                                std::format("Environmental Impact {} {}", Constant::eFuelNames[(int)fuel], poll2outVarStrs[iPollutant]),
                                 pollUnits[iPollutant],
                                 pollComp.pollutantVals[iPollutant],
                                 OutputProcessor::TimeStepType::System,

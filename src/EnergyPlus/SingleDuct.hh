@@ -249,7 +249,7 @@ namespace SingleDuct {
                        int ZoneNode,
                        Real64 HWFlow,
                        Real64 HCoilReq,
-                       HVAC::FanType fanType,
+                       HVAC::FanType t_fanType,
                        Real64 AirFlow,
                        int FanOn,
                        Real64 &LoadMet);

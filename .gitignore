@@ -107,3 +107,5 @@ release/node_modules/*
 # virtual environments
 venv/
 .venv/
+
+.ccache/

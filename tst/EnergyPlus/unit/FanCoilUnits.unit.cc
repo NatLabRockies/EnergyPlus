@@ -2319,7 +2319,6 @@ TEST_F(EnergyPlusFixture, Test_TightenWaterFlowLimits)
 
     GetZoneData(*state, ErrorsFound);
     GetZoneEquipmentData(*state);
-    SetPredefinedTables(*state);
     GetFanInput(*state);
     GetFanCoilUnits(*state);
 

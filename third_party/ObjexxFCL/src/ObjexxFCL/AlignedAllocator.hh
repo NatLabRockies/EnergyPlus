@@ -20,6 +20,8 @@
 #include <cassert>
 #include <cstddef>
 #include <cstdint>
+#include <limits>
+#include <new>
 
 namespace ObjexxFCL {
 
@@ -38,16 +40,29 @@ public: // Types
 
 public: // Static Methods
 
+	// Raw allocation size including optional alignment padding
+	static
+	size_type
+	allocation_size( size_type const n )
+	{
+#ifdef OBJEXXFCL_ALIGN
+		constexpr size_type alignment_overhead( OBJEXXFCL_ALIGN > 0u ? OBJEXXFCL_ALIGN - 1u : 0u );
+#else
+		constexpr size_type alignment_overhead( 0u );
+#endif
+		constexpr size_type max_size( static_cast< size_type >( std::numeric_limits< std::ptrdiff_t >::max() ) );
+		if ( n > ( max_size - alignment_overhead ) / sizeof( T ) ) {
+			throw std::bad_array_new_length();
+		}
+		return ( n * sizeof( T ) ) + alignment_overhead;
+	}
+
 	// Allocate Raw Array Memory with ::operator new
 	static
 	void *
 	allocate( size_type const n )
 	{
-#ifdef OBJEXXFCL_ALIGN
-		void * mem( n > 0u ? ::operator new( ( n * sizeof( T ) ) + ( OBJEXXFCL_ALIGN - 1 ) ) : nullptr );
-#else
-		void * mem( n > 0u ? ::operator new( n * sizeof( T ) ) : nullptr );
-#endif
+		void * mem( n > 0u ? ::operator new( allocation_size( n ) ) : nullptr );
 		assert( ( n == 0u ) || ( mem != nullptr ) );
 		return mem;
 	}
@@ -57,11 +72,7 @@ public: // Static Methods
 	void *
 	allocate_zero( size_type const n )
 	{
-#ifdef OBJEXXFCL_ALIGN
-		void * mem( ::operator new( ( n * sizeof( T ) ) + ( OBJEXXFCL_ALIGN - 1 ) ) );
-#else
-		void * mem( ::operator new( n * sizeof( T ) ) );
-#endif
+		void * mem( ::operator new( allocation_size( n ) ) );
 		assert( ( n == 0u ) || ( mem != nullptr ) );
 		return mem;
 	}

@@ -268,11 +268,12 @@ namespace EIRPlantLoopHeatPumps {
 
         void doPhysicsASHP(EnergyPlusData &state, Real64 currentLoad);
 
-        void calcAvailableCapacity(EnergyPlusData &state, Real64 const currentLoad, int curveIndex, Real64 &availableCapacity, Real64 &partLoadRatio);
+        void
+        calcAvailableCapacity(EnergyPlusData &state, Real64 const currentLoad, int curveIndex, Real64 &availableCapacity, Real64 &t_partLoadRatio);
 
         Real64 heatingCapacityModifierASHP(EnergyPlusData &state) const;
 
-        void setPartLoadAndCyclingRatio(EnergyPlusData &state, Real64 &partLoadRatio);
+        void setPartLoadAndCyclingRatio(EnergyPlusData &state, Real64 &t_partLoadRatio);
 
         void calcLoadSideHeatTransfer(EnergyPlusData &state, Real64 const availableCapacity);
 

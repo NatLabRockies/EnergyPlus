@@ -45,6 +45,7 @@
 // OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 // POSSIBILITY OF SUCH DAMAGE.
 
+// EnergyPlus Headers
 #include <EnergyPlus/Autosizing/HeatingWaterDesCoilWaterVolFlowUsedForUASizing.hh>
 #include <EnergyPlus/Data/EnergyPlusData.hh>
 
@@ -77,16 +78,14 @@ Real64 HeatingWaterDesCoilWaterVolFlowUsedForUASizer::size(EnergyPlusData &state
         }
     }
     if (this->overrideSizeString) {
-        if (this->isEpJSON) {
-            this->sizingString = "design_water_volume_flow_rate_used_for_ua_sizing";
-        }
+        this->sizingString = "Design Water Volume Flow Rate Used for UA Sizing [m3/s]";
     }
     this->selectSizerOutput(state, errorsFound);
     if (this->isCoilReportObject) {
-        state.dataRptCoilSelection->coilSelectionReportObj->setCoilWaterFlowPltSizNum(
-            state, this->compName, this->compType, this->autoSizedValue, this->wasAutoSized, this->dataPltSizHeatNum, this->dataWaterLoopNum);
+        ReportCoilSelection::setCoilWaterFlowPltSizNum(
+            state, this->coilReportNum, this->autoSizedValue, this->wasAutoSized, this->dataPltSizHeatNum, this->dataWaterLoopNum);
         if (this->termUnitSingDuct || this->zoneEqFanCoil || ((this->termUnitPIU || this->termUnitIU) && this->curTermUnitSizingNum > 0)) {
-            state.dataRptCoilSelection->coilSelectionReportObj->setCoilReheatMultiplier(state, this->compName, this->compType, 1.0);
+            ReportCoilSelection::setCoilReheatMultiplier(state, this->coilReportNum, 1.0);
         }
     }
     return this->autoSizedValue;

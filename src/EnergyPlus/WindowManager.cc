@@ -49,6 +49,7 @@
 #include <algorithm>
 #include <cassert>
 #include <cmath>
+#include <format>
 #include <memory>
 #include <string>
 
@@ -187,7 +188,7 @@ namespace Window {
         bool ScreenOn;  // True if construction has an exterior screen
         bool BlindOn;   // True if IntBlind, ExtBlind or BGBlind is true
         bool ShadeOn;   // True if IntShade, ExtShade or BGShade is true
-        int BlNum;      // Blind number
+        int BlNum = 0;  // Blind number
 
         auto &wm = state.dataWindowManager;
         std::array<Real64, nume> sabsPhi; // Glazing system absorptance for a glass layer
@@ -287,8 +288,8 @@ namespace Window {
         // horizontal slats for isotropic ground solar
         Real64 ShadeTransSky; // Diffuse-diffuse transmittance of isolated vertical blind with
         // horizontal slats for isotropic sky solar
-        Real64 tsh;    // = ShadeTrans
-        Real64 tshGnd; // = ShadeTransGnd,ShadeTransSky
+        Real64 tsh = 0.0; // = ShadeTrans
+        Real64 tshGnd;    // = ShadeTransGnd,ShadeTransSky
         Real64 tshSky;
         Real64 tsh2;         // = tsh**2
         Real64 ShadeRefl;    // Solar reflectance of isolated shade
@@ -301,7 +302,7 @@ namespace Window {
         Real64 rbsh;                          // Diffuse solar back reflectance of isolated blind
         Real64 ShadeReflFac;                  // Shade/blind solar reflection factor
         Real64 ShadeTransVis;                 // Visible transmittance of isolated shade/blind
-        Real64 tshv;                          // = ShadeTransVis
+        Real64 tshv = 0.0;                    // = ShadeTransVis
         Real64 tshv2;                         // = tshv**2
         Real64 ShadeReflVis;                  // Visible reflectance of isolated shade
         Real64 rshv;                          // = ShadeReflVis
@@ -564,12 +565,12 @@ namespace Window {
                         // Add warning message for the glazing defined with full spectral data.
                         ShowWarningError(
                             state,
-                            EnergyPlus::format(
+                            std::format(
                                 "Window glazing material \"{}\" was defined with full spectral data and has been converted to average spectral data",
                                 matGlass->Name));
-                        ShowContinueError(state,
-                                          EnergyPlus::format("due to its use with between-glass shades or blinds of the window construction \"{}\".",
-                                                             thisConstruct.Name));
+                        ShowContinueError(
+                            state,
+                            std::format("due to its use with between-glass shades or blinds of the window construction \"{}\".", thisConstruct.Name));
                         ShowContinueError(state, "All occurrences of this glazing material will be modeled as SpectralAverage.");
                         ShowContinueError(state,
                                           "If this material is also used in other window constructions  without between-glass shades or blinds,");
@@ -615,14 +616,13 @@ namespace Window {
                     numpt[iGlass] = numptDAT;
                     if (wm->BGFlag) {
                         // 5/16/2012 CR 8793. Add warning message for the glazing defined with full spectral data.
-                        ShowWarningError(
+                        ShowWarningError(state,
+                                         std::format("Window glazing material \"{}\" was defined with full spectral and angular data and has been "
+                                                     "converted to average spectral data",
+                                                     matGlass->Name));
+                        ShowContinueError(
                             state,
-                            EnergyPlus::format("Window glazing material \"{}\" was defined with full spectral and angular data and has been "
-                                               "converted to average spectral data",
-                                               matGlass->Name));
-                        ShowContinueError(state,
-                                          EnergyPlus::format("due to its use with between-glass shades or blinds of the window construction \"{}\".",
-                                                             thisConstruct.Name));
+                            std::format("due to its use with between-glass shades or blinds of the window construction \"{}\".", thisConstruct.Name));
                         ShowContinueError(state, "All occurrences of this glazing material will be modeled as SpectralAverage.");
                         ShowContinueError(state,
                                           "If this material is also used in other window constructions  without between-glass shades or blinds,");
@@ -1487,7 +1487,6 @@ namespace Window {
                     tsolPhiFit[iPhi] = 0.0;
                     tvisPhiFit[iPhi] = 0.0;
 
-                    //<<<<<<< HEAD
                     for (int CoefNum = 0; CoefNum < maxPolyCoef; ++CoefNum) {
                         tsolPhiFit[iPhi] += thisConstruct.TransSolBeamCoef[CoefNum] * cosPhisLocal[iPhi];
                         tvisPhiFit[iPhi] += thisConstruct.TransVisBeamCoef[CoefNum] * cosPhisLocal[iPhi];
@@ -1500,7 +1499,6 @@ namespace Window {
                         //     cos_pow *= CosPhi;
                         //     tsolPhiFit(IPhi) += thisConstruct.TransSolBeamCoef(CoefNum) * cos_pow;
                         //     tvisPhiFit(IPhi) += thisConstruct.TransVisBeamCoef(CoefNum) * cos_pow;
-                        // >>>>>>> origin/develop
                     }
                 }
 #endif // GET_OUT
@@ -1767,9 +1765,9 @@ namespace Window {
                 ++DifOverrideCount;
                 if (state.dataGlobal->DisplayExtraWarnings) {
                     ShowWarningError(state,
-                                     EnergyPlus::format("W5InitGlassParameters: Window=\"{}\" has interior material with Solar Diffusing=Yes, but "
-                                                        "existing Window Shading Device sets Diffusing=No.",
-                                                        surf.Name));
+                                     std::format("W5InitGlassParameters: Window=\"{}\" has interior material with Solar Diffusing=Yes, but "
+                                                 "existing Window Shading Device sets Diffusing=No.",
+                                                 surf.Name));
                 }
             }
         } // for (SurfNum)
@@ -1778,13 +1776,12 @@ namespace Window {
             if (!state.dataGlobal->DisplayExtraWarnings) {
                 ShowWarningError(
                     state,
-                    EnergyPlus::format("W5InitGlassParameters: {} Windows had Solar Diffusing=Yes overridden by presence of Window Shading Device.",
-                                       DifOverrideCount));
+                    std::format("W5InitGlassParameters: {} Windows had Solar Diffusing=Yes overridden by presence of Window Shading Device.",
+                                DifOverrideCount));
             } else {
-                ShowMessage(
-                    state,
-                    EnergyPlus::format("W5InitGlassParameters: {} Windows had Solar Diffusing=Yes overridden by presence of Window Shading Device.",
-                                       DifOverrideCount));
+                ShowMessage(state,
+                            std::format("W5InitGlassParameters: {} Windows had Solar Diffusing=Yes overridden by presence of Window Shading Device.",
+                                        DifOverrideCount));
             }
         }
     } // W5InitGlassParameters()
@@ -1981,7 +1978,7 @@ namespace Window {
         }
     } // SystemPropertiesAtLambdaAndPhi()
 
-    Real64 solarSpectrumAverage(EnergyPlusData const &state, gsl::span<Real64 const> p)
+    Real64 solarSpectrumAverage(EnergyPlusData const &state, std::span<Real64 const> p)
     {
         Real64 num = 0.0;
         Real64 denom = 0.0;
@@ -1995,7 +1992,7 @@ namespace Window {
         return num / denom; // dangerous, doesn't check for zero denominator
     }
 
-    Real64 visibleSpectrumAverage(EnergyPlusData const &state, gsl::span<Real64 const> p)
+    Real64 visibleSpectrumAverage(EnergyPlusData const &state, std::span<Real64 const> p)
     {
         //       AUTHOR         Adapted by F.Winkelmann from WINDOW 5
         //                      subroutine w4vis
@@ -2025,8 +2022,8 @@ namespace Window {
         return num / denom; // dangerous, doesn't check for zero denominator
     }
 
-    Real64 Interpolate(gsl::span<Real64 const> x, // Array of data points for independent variable
-                       gsl::span<Real64 const> y, // Array of data points for dependent variable
+    Real64 Interpolate(std::span<Real64 const> x, // Array of data points for independent variable
+                       std::span<Real64 const> y, // Array of data points for dependent variable
                        int const npts,            // Number of data pairs
                        Real64 const xin           // Given value of x
     )
@@ -2142,8 +2139,8 @@ namespace Window {
         int LayPtr;               // Material number for a layer
         WinShadingType ShadeFlag; // Flag indicating whether shade or blind is on, and shade/blind position
         // REAL(r64) :: tsky                         ! Sky temperature [K]
-        int ShadeLayPtr; // Material number corresponding to a shade layer
-        Real64 dth1;     // Temperature difference across glass layers [K]
+        int ShadeLayPtr = 0; // Material number corresponding to a shade layer
+        Real64 dth1;         // Temperature difference across glass layers [K]
         Real64 dth2;
         Real64 dth3;
         Real64 dth4;
@@ -2370,9 +2367,9 @@ namespace Window {
                         if (state.dataGlobal->AnyEnergyManagementSystemInModel) {
                             // check to make sure the user hasn't messed up the shade control values
                             if (matShade->group == Material::Group::Blind) {
-                                ShowSevereError(state,
-                                                EnergyPlus::format("CalcWindowHeatBalance: ShadeFlag indicates Shade but Blind=\"{}\" is being used.",
-                                                                   matShade->Name));
+                                ShowSevereError(
+                                    state,
+                                    std::format("CalcWindowHeatBalance: ShadeFlag indicates Shade but Blind=\"{}\" is being used.", matShade->Name));
                                 ShowContinueError(state, "This is most likely a fault of the EMS values for shading control.");
                                 ShowFatalError(state, "Preceding condition terminates program.");
                             }
@@ -2397,10 +2394,9 @@ namespace Window {
                         if (state.dataGlobal->AnyEnergyManagementSystemInModel) {
                             // check to make sure the user hasn't messed up the shade control values
                             if (matShade->group == Material::Group::Shade || matShade->group == Material::Group::Screen) {
-                                ShowSevereError(
-                                    state,
-                                    EnergyPlus::format("CalcWindowHeatBalance: ShadeFlag indicates Blind but Shade/Screen=\"{}\" is being used.",
-                                                       matShade->Name));
+                                ShowSevereError(state,
+                                                std::format("CalcWindowHeatBalance: ShadeFlag indicates Blind but Shade/Screen=\"{}\" is being used.",
+                                                            matShade->Name));
                                 ShowContinueError(state, "This is most likely a fault of the EMS values for shading control.");
                                 ShowFatalError(state, "Preceding condition terminates program.");
                             }
@@ -3188,8 +3184,7 @@ namespace Window {
             }
 
         } else {
-            ShowFatalError(state,
-                           EnergyPlus::format("SolveForWindowTemperatures: Invalid number of Glass Layers={}, up to 4 allowed.", wm->ngllayer));
+            ShowFatalError(state, std::format("SolveForWindowTemperatures: Invalid number of Glass Layers={}, up to 4 allowed.", wm->ngllayer));
         }
     } // GetHeatBalanceEqCoefMatrix()
 
@@ -3605,24 +3600,23 @@ namespace Window {
             }
         } else {
             // No convergence after MaxIterations even with relaxed error tolerance
-            ShowSevereError(state,
-                            EnergyPlus::format("Convergence error in SolveForWindowTemperatures for window {}", s_surf->Surface(SurfNum).Name));
+            ShowSevereError(state, std::format("Convergence error in SolveForWindowTemperatures for window {}", s_surf->Surface(SurfNum).Name));
             ShowContinueErrorTimeStamp(state, "");
 
             if (state.dataGlobal->DisplayExtraWarnings) {
                 // report out temperatures
                 for (int i = 1; i <= wm->nglfacep; ++i) {
                     ShowContinueError(state,
-                                      EnergyPlus::format("Glazing face index = {} ; new temperature ={:.4R}C  ; previous temperature = {:.4R}C",
-                                                         i,
-                                                         wm->thetas[i - 1] - Constant::Kelvin,
-                                                         wm->thetasPrev[i - 1] - Constant::Kelvin));
+                                      std::format("Glazing face index = {} ; new temperature ={:.4f}C  ; previous temperature = {:.4f}C",
+                                                  i,
+                                                  wm->thetas[i - 1] - Constant::Kelvin,
+                                                  wm->thetasPrev[i - 1] - Constant::Kelvin));
                 }
             }
 
             ShowFatalError(state,
-                           EnergyPlus::format("Program halted because of convergence error in SolveForWindowTemperatures for window {}",
-                                              s_surf->Surface(SurfNum).Name));
+                           std::format("Program halted because of convergence error in SolveForWindowTemperatures for window {}",
+                                       s_surf->Surface(SurfNum).Name));
         }
     } // SolveForWindowTemperatures()
 
@@ -4260,7 +4254,7 @@ namespace Window {
         //   as output: decomposed matrix
         //   if odd
 
-        int imax; // Temporary variable
+        int imax = 0; // Temporary variable
         //   as output: decomposed matrix
 
         assert(n <= 10);                   // vv sizing
@@ -4571,16 +4565,15 @@ namespace Window {
         Real64 constexpr gaslaw(8314.51); // Molar gas constant (J/kMol-K)
         Real64 const two_sqrt_2(2.0 * std::sqrt(2.0));
 
-        int NMix;                                          // Number of gases in a mixture
-        Real64 molmix;                                     // Molecular weight of mixture
-        std::array<Real64, Material::maxMixGases> mukpdwn; // Denominator term
-        Real64 mumix;                                      // For accumulating viscosity of gas mixture
-        Real64 phimup;                                     // Numerator factor
-        Real64 downer;                                     // Denominator factor
-        Real64 rhomix;                                     // Density of gas mixture (kg/m3)
-        std::array<Real64, Material::maxMixGases> frct;    // Fraction of each gas in a mixture
-        std::array<Real64, Material::maxMixGases> fvis;    // Viscosity of each gas in a mixture (g/m-s)
-        std::array<Real64, Material::maxMixGases> fdens;   // Density of each gas in a mixture (kg/m3)
+        int NMix;                                        // Number of gases in a mixture
+        Real64 molmix;                                   // Molecular weight of mixture
+        Real64 mumix;                                    // For accumulating viscosity of gas mixture
+        Real64 phimup;                                   // Numerator factor
+        Real64 downer;                                   // Denominator factor
+        Real64 rhomix;                                   // Density of gas mixture (kg/m3)
+        std::array<Real64, Material::maxMixGases> frct;  // Fraction of each gas in a mixture
+        std::array<Real64, Material::maxMixGases> fvis;  // Viscosity of each gas in a mixture (g/m-s)
+        std::array<Real64, Material::maxMixGases> fdens; // Density of each gas in a mixture (kg/m3)
 
         auto const &wm = state.dataWindowManager;
 
@@ -4603,13 +4596,14 @@ namespace Window {
 
             // Initialize summations for eqns 60-66
             mumix = 0.0;
+
+            std::array<Real64, Material::maxMixGases> mukpdwn; // Denominator term
             mukpdwn[0] = 1.0;
 
             // Calculate properties of mixture constituents
             for (int i = 1; i < NMix; ++i) {
                 auto const &wmgas = wm->gaps[iGap].gases[i];
                 fvis[i] = wmgas.vis.c0 + wmgas.vis.c1 * tmean + wmgas.vis.c2 * tmean_2;
-                fdens[i] = pres * wmgas.wght / (gaslaw * tmean);
                 molmix += frct[i] * wmgas.wght; // eq. 56
                 mukpdwn[i] = 1.0;               // initialize denominator of eq. 60
             }
@@ -4664,8 +4658,7 @@ namespace Window {
         constexpr Real64 hrad(5.3);    // Typical radiative conductance (W/m2-K)
         constexpr Real64 resgap(0.21); // Typical gap resistance (m2-K/W)
 
-        WinShadingType ShadeFlag;      // Shading flag
-        std::array<Real64, 11> rguess; // Combined radiative/convective resistance (m2-K/W) of
+        WinShadingType ShadeFlag; // Shading flag
         // inside or outside air film, or gap
         Real64 restot; // Total window resistance including outside
         //   and inside air films (m2-K/W)
@@ -4691,6 +4684,7 @@ namespace Window {
             // Interaction with shade or blind, if one of these is present, is ignored. See below for
             // separate calculation of shade/blind temperature.
 
+            std::array<Real64, 11> rguess; // Combined radiative/convective resistance (m2-K/W) of
             rguess[0] = 1.0 / (wm->hcout + hrad);
             rguess[wm->nglface] = 1.0 / (wm->hcin + hrad);
 
@@ -4807,9 +4801,9 @@ namespace Window {
         // Window5 source code; ISO 15099
 
         // SUBROUTINE LOCAL VARIABLE DECLARATIONS:
-        Real64 asp;    // Aspect ratio: window height to gap width
-        Real64 ra;     // Rayleigh number
-        Real64 gnu901; // Nusselt number temporary variables for
+        Real64 asp;          // Aspect ratio: window height to gap width
+        Real64 ra;           // Rayleigh number
+        Real64 gnu901 = 0.0; // Nusselt number temporary variables for
         Real64 gnu902;
         Real64 gnu90;
         Real64 gnu601;
@@ -5871,29 +5865,29 @@ namespace Window {
         Real64 ShadeRes;          // Thermal resistance of shade
         int MatOutside;           // Material number of outside layer of construction
         int MatInside;            // Material number of inside layer of construction
-        int MatShade;             // Material number of shade layer
+        int MatShade = 0;         // Material number of shade layer
         std::array<Real64, maxGlassLayers> AbsBeamNorm; // Beam absorptance at normal incidence for each glass layer
         Real64 AbsBeamShadeNorm;                        // Shade solar absorptance at normal incidence
-        int ConstrNumBare;                              // Construction without shading device
-        int BlNum;                                      // Blind number
+        int ConstrNumBare = 0;                          // Construction without shading device
+        int BlNum = 0;                                  // Blind number
         Real64 SlatAng;                                 // Slat angle (rad)
         int LayPtrSh;                                   // Layer pointer of blind
-        Real64 TBmBm;                                   // Bare glass normal incidence beam-beam transmittance
+        Real64 TBmBm = 0.0;                             // Bare glass normal incidence beam-beam transmittance
         Real64 TBmBmVis;
-        Real64 TBlBmBm; // Normal incidence blind beam-beam transmittance
-        Real64 TScBmBm; // Screen incident beam-beam transmittance
+        Real64 TBlBmBm = 0.0; // Normal incidence blind beam-beam transmittance
+        Real64 TScBmBm = 0.0; // Screen incident beam-beam transmittance
         Real64 TScBmBmVis;
         Real64 TBmBmBl; // TBmBm * TBlBmBm, TBmBmVis * TBlBmBm
         Real64 TBmBmBlVis;
-        Real64 RGlDiffBack; // Bare glass back sol/vis reflectance
+        Real64 RGlDiffBack = 0.0; // Bare glass back sol/vis reflectance
         Real64 RGlDiffBackVis;
-        Real64 RGlDiffFront; // Bare glass front sol/vis reflectance
+        Real64 RGlDiffFront = 0.0; // Bare glass front sol/vis reflectance
         Real64 RGlDiffFrontVis;
-        Real64 RhoBlFront; // Blind normal front beam-diffuse sol/vis reflectance
+        Real64 RhoBlFront = 0.0; // Blind normal front beam-diffuse sol/vis reflectance
         Real64 RhoBlFrontVis;
-        Real64 RhoBlBack; // Blind normal back beam-diffuse sol/vis reflectance
+        Real64 RhoBlBack = 0.0; // Blind normal back beam-diffuse sol/vis reflectance
         Real64 RhoBlBackVis;
-        Real64 RScBack; // Screen back beam-diffuse sol/vis reflectance (same as front)
+        Real64 RScBack = 0.0; // Screen back beam-diffuse sol/vis reflectance (same as front)
         Real64 RScBackVis;
         Real64 AbsBlFront;     // Blind normal front beam solar absorptance
         Real64 AbsBlBack;      // Blind normal back beam solar absorptance
@@ -5901,17 +5895,17 @@ namespace Window {
         Real64 RhoBlDiffFrontVis;
         Real64 AbsBlDiffFront; // Blind front diffuse solar absorptance
         Real64 AbsBlDiffBack;  // Blind back diffuse solar absorptance
-        Real64 RGlFront;       // Bare glass normal front beam sol/vis reflectance
+        Real64 RGlFront = 0.0; // Bare glass normal front beam sol/vis reflectance
         Real64 RGlFrontVis;
-        Real64 RhoBlDiffBack; // Blind back diffuse-diffuse sol/vis reflectance
+        Real64 RhoBlDiffBack = 0.0; // Blind back diffuse-diffuse sol/vis reflectance
         Real64 RhoBlDiffBackVis;
-        Real64 RScDifBack; // Screen back diffuse-diffuse sol/vis reflectance (doesn't change with sun angle)
+        Real64 RScDifBack = 0.0; // Screen back diffuse-diffuse sol/vis reflectance (doesn't change with sun angle)
         Real64 RScDifBackVis;
-        Real64 TBlBmDif; // Blind front normal beam-diffuse sol/vis transmittance
+        Real64 TBlBmDif = 0.0; // Blind front normal beam-diffuse sol/vis transmittance
         Real64 TBlBmDifVis;
         Real64 TBlDifDif; // Blind front diffuse-diffuse sol/vis transmittance
         Real64 TBlDifDifVis;
-        Real64 TScBmDif; // Screen front beam-diffuse sol/vis transmittance
+        Real64 TScBmDif = 0.0; // Screen front beam-diffuse sol/vis transmittance
         Real64 TScBmDifVis;
         Real64 TDif; // Bare glass diffuse sol/vis transmittance
         Real64 TDifVis;
@@ -6428,14 +6422,12 @@ namespace Window {
         static constexpr std::string_view RoutineName("WindowTempsForNominalCond");
 
         std::array<Real64, maxArraySize> hr; // Radiative conductance (W/m2-K)
-        Real64 hcinprev;                     // Value of hcin from previous iteration
+        Real64 hcinprev = 0.0;               // Value of hcin from previous iteration
         int d;                               // +1 if number of row interchanges is even,
         // -1 if odd (in LU decomposition)
-        std::array<int, maxArraySize> indx;                               // Vector of row permutations in LU decomposition
-        std::array<std::array<Real64, maxArraySize>, maxArraySize> Aface; // Coefficient in equation Aface*thetas = Bface
-        std::array<Real64, maxArraySize> Bface;                           // Coefficient in equation Aface*thetas = Bface
-        int iter;                                                         // Iteration number
-        Real64 errtemp;                                                   // Absolute value of sum of face temperature differences
+        std::array<int, maxArraySize> indx; // Vector of row permutations in LU decomposition
+        int iter;                           // Iteration number
+        Real64 errtemp;                     // Absolute value of sum of face temperature differences
         //   between iterations, divided by number of faces
         Real64 TmeanFilm;       // mean film temperature
         Real64 TmeanFilmKelvin; // mean film temperature for property evaluation
@@ -6470,8 +6462,8 @@ namespace Window {
                 //! fw 3/4/03 if ( iter >= 1 ) hr(i) = 0.5*(hrprev(i)+hr(i))
             }
 
-            Aface = {{0.0}};
-            Bface = {0.0};
+            std::array<std::array<Real64, maxArraySize>, maxArraySize> Aface = {{0.0}}; // Coefficient in equation Aface*thetas = Bface
+            std::array<Real64, maxArraySize> Bface = {0.0};                             // Coefficient in equation Aface*thetas = Bface
 
             // Inside convective film conductance for vertical window
             if (iter >= 1) {
@@ -6527,9 +6519,9 @@ namespace Window {
         // No convergence after MaxIterations; and/or error tolerance
         if (errtemp >= 10 * errtemptol) {
             // Fatal error: didn't converge
-            ShowFatalError(state,
-                           EnergyPlus::format("Convergence error in WindowTempsForNominalCond for construction {}",
-                                              state.dataConstruction->Construct(ConstrNum).Name));
+            ShowFatalError(
+                state,
+                std::format("Convergence error in WindowTempsForNominalCond for construction {}", state.dataConstruction->Construct(ConstrNum).Name));
         }
     } // WindowTempsForNominalCond()
 
@@ -6764,7 +6756,7 @@ namespace Window {
                     WindowComplexManager::CalcComplexWindowThermal(
                         state, 0, i, TempVar, TempVar, TempVar, TempVar, DataBSDFWindow::Condition::Summer);
 
-                    static constexpr std::string_view Format_800(" WindowConstruction:Complex,{},{},{},{:.3R},{:.3R}\n");
+                    static constexpr std::string_view Format_800(" WindowConstruction:Complex,{},{},{},{:.3f},{:.3f}\n");
                     print(state.files.eio,
                           Format_800,
                           construct.Name,
@@ -6786,7 +6778,7 @@ namespace Window {
                         // Construct(ThisNum)%SummerSHGC = SHGCSummer
                         construct.VisTransNorm = 0.0; // TODO list
 
-                        static constexpr std::string_view Format_799(" Construction:WindowEquivalentLayer,{},{},{},{:.3R},{:.3R},{:.3R}\n");
+                        static constexpr std::string_view Format_799(" Construction:WindowEquivalentLayer,{},{},{},{:.3f},{:.3f},{:.3f}\n");
                         print(state.files.eio,
                               Format_799,
                               construct.Name,
@@ -6801,7 +6793,7 @@ namespace Window {
                         CalcNominalWindowCond(state, ThisNum, 1, NominalConductanceWinter, SHGCWinter, TransSolNorm, TransVisNorm, errFlag);
 
                         if (errFlag == 1) {
-                            ShowWarningError(state, EnergyPlus::format("Window construction {} has an interior or exterior blind", construct.Name));
+                            ShowWarningError(state, std::format("Window construction {} has an interior or exterior blind", construct.Name));
                             ShowContinueError(state, "but the corresponding construction without the blind cannot be found.");
                             ShowContinueError(state, "The ReportGlass entry for this construction will not be printed in eplusout.eio.");
                             continue;
@@ -6811,7 +6803,7 @@ namespace Window {
                         // nominal conductance and SHGC.
 
                         if (errFlag == 2) {
-                            ShowWarningError(state, EnergyPlus::format("Window construction {} has a between-glass shade or blind", construct.Name));
+                            ShowWarningError(state, std::format("Window construction {} has a between-glass shade or blind", construct.Name));
                             ShowContinueError(state, "The ReportGlass entry for this construction will not be printed in eplusout.eio.");
                             continue;
                         }
@@ -6825,7 +6817,7 @@ namespace Window {
                         construct.VisTransNorm = TransVisNorm;
                         construct.SolTransNorm = TransSolNorm;
 
-                        static constexpr std::string_view Format_700(" WindowConstruction,{},{},{},{},{:.3R},{:.3R},{:.3R},{:.3R},{:.3R},{:.3R}\n");
+                        static constexpr std::string_view Format_700(" WindowConstruction,{},{},{},{},{:.3f},{:.3f},{:.3f},{:.3f},{:.3f},{:.3f}\n");
                         print(state.files.eio,
                               Format_700,
                               construct.Name,
@@ -6851,7 +6843,7 @@ namespace Window {
                         case Material::Group::Gas: {
                             auto const *matGas = dynamic_cast<Material::MaterialGasMix const *>(mat);
                             assert(matGas != nullptr);
-                            static constexpr std::string_view Format_702(" WindowMaterial:Gas,{},{},{:.3R}\n");
+                            static constexpr std::string_view Format_702(" WindowMaterial:Gas,{},{},{:.3f}\n");
                             print(state.files.eio, Format_702, matGas->Name, Material::gasTypeNames[(int)matGas->gases[0].type], matGas->Thickness);
                             //! fw CASE(WindowGasMixture)
                         } break;
@@ -6860,7 +6852,7 @@ namespace Window {
                             auto const *matShade = dynamic_cast<Material::MaterialShade const *>(mat);
                             assert(matShade != nullptr);
 
-                            static constexpr std::string_view Format_703(" WindowMaterial:Shade,{},{:.3R},{:.3R},{:.3R},{:.3R},{:.3R},{:.3R}\n");
+                            static constexpr std::string_view Format_703(" WindowMaterial:Shade,{},{:.3f},{:.3f},{:.3f},{:.3f},{:.3f},{:.3f}\n");
                             print(state.files.eio,
                                   Format_703,
                                   matShade->Name,
@@ -6876,7 +6868,7 @@ namespace Window {
                             auto const *matBlind = dynamic_cast<Material::MaterialBlind const *>(mat);
 
                             static constexpr std::string_view Format_704(
-                                " WindowMaterial:Blind,{},{:.4R},{:.4R},{:.4R},{:.3R},{:.3R},{:.3R},{:.3R}\n");
+                                " WindowMaterial:Blind,{},{:.4f},{:.4f},{:.4f},{:.3f},{:.3f},{:.3f},{:.3f}\n");
                             print(state.files.eio,
                                   Format_704,
                                   matBlind->Name,
@@ -6895,7 +6887,7 @@ namespace Window {
                             auto const &btar = matScreen->btars[0][0]; // AR: Going with normal incidence here
 
                             static constexpr std::string_view Format_706 =
-                                " WindowMaterial:Screen,{},{:.5R},{:.3R},{:.3R},{:.3R},{:.3R},{:.3R},{:.3R},{:.3R},{:.3R},{:.3R}\n";
+                                " WindowMaterial:Screen,{},{:.5f},{:.3f},{:.3f},{:.3f},{:.3f},{:.3f},{:.3f},{:.3f},{:.3f},{:.3f}\n";
 
                             // AR: assuming normal incidence
                             print(state.files.eio,
@@ -6925,17 +6917,17 @@ namespace Window {
                             if (matGlass->windowOpticalData == Window::OpticalDataModel::Spectral) {
                                 SpectralDataName = s_mat->SpectralData(matGlass->GlassSpectralDataPtr).Name;
                             } else if (matGlass->windowOpticalData == Window::OpticalDataModel::SpectralAndAngle) {
-                                SpectralDataName = EnergyPlus::format("{}, {}, {}",
-                                                                      matGlass->GlassSpecAngTransCurve->Name,
-                                                                      matGlass->GlassSpecAngFReflCurve->Name,
-                                                                      matGlass->GlassSpecAngBReflCurve->Name);
+                                SpectralDataName = std::format("{}, {}, {}",
+                                                               matGlass->GlassSpecAngTransCurve->Name,
+                                                               matGlass->GlassSpecAngFReflCurve->Name,
+                                                               matGlass->GlassSpecAngBReflCurve->Name);
                             } else {
                                 SpectralDataName = "";
                             }
 
                             static constexpr std::string_view Format_707(
-                                " WindowMaterial:Glazing,{},{},{},{:.5R},{:.5R},{:.5R},{:.5R},{:.5R},{:.5R},{:.5R},{"
-                                ":.5R},{:.5R},{:.5R},{:.5R},{:.5R},{}\n");
+                                " WindowMaterial:Glazing,{},{},{},{:.5f},{:.5f},{:.5f},{:.5f},{:.5f},{:.5f},{:.5f},"
+                                "{:.5f},{:.5f},{:.5f},{:.5f},{:.5f},{}\n");
                             print(state.files.eio,
                                   Format_707,
                                   matGlass->Name,
@@ -6962,8 +6954,8 @@ namespace Window {
                             std::string OpticalDataType = "SpectralAverage";
                             SpectralDataName = "";
                             static constexpr std::string_view Format_708(
-                                " WindowMaterial:Glazing:EquivalentLayer,{},{},{},{:.5R},{:.5R},{:.5R},{:.5R},{:.5R}"
-                                ",{:.5R},{:.5R},{:.5R},{:.5R},{:.5R},{:.5R},{:.5R},{:.5R},{:.5R}\n");
+                                " WindowMaterial:Glazing:EquivalentLayer,{},{},{},{:.5f},{:.5f},{:.5f},{:.5f},{:.5f}"
+                                ",{:.5f},{:.5f},{:.5f},{:.5f},{:.5f},{:.5f},{:.5f},{:.5f},{:.5f}\n");
                             print(state.files.eio,
                                   Format_708,
                                   matEQL->Name,
@@ -6989,7 +6981,7 @@ namespace Window {
                             auto const *matEQL = dynamic_cast<Material::MaterialShadeEQL const *>(mat);
                             assert(matEQL != nullptr);
                             static constexpr std::string_view Format_709(
-                                " WindowMaterial:Shade:EquivalentLayer,{},{:.4R},{:.4R},{:.4R},{:.4R},{:.4R},{:.4R},{:.4R},{:.4R},{:.4R}\n");
+                                " WindowMaterial:Shade:EquivalentLayer,{},{:.4f},{:.4f},{:.4f},{:.4f},{:.4f},{:.4f},{:.4f},{:.4f},{:.4f}\n");
                             print(state.files.eio,
                                   Format_709,
                                   matEQL->Name,
@@ -7008,8 +7000,8 @@ namespace Window {
                             auto const *matEQL = dynamic_cast<Material::MaterialDrapeEQL const *>(mat);
                             assert(matEQL != nullptr);
                             static constexpr std::string_view Format_710(
-                                " WindowMaterial:Drape:EquivalentLayer,{},{:.4R},{:.4R},{:.4R},{:.4R},{:.4R},{:.4R},"
-                                "{:.4R},{:.4R},{:.5R},{:.5R}\n");
+                                " WindowMaterial:Drape:EquivalentLayer,{},{:.4f},{:.4f},{:.4f},{:.4f},{:.4f},{:.4f},"
+                                "{:.4f},{:.4f},{:.5f},{:.5f}\n");
                             print(state.files.eio,
                                   Format_710,
                                   matEQL->Name,
@@ -7029,8 +7021,8 @@ namespace Window {
                             auto const *matEQL = dynamic_cast<Material::MaterialScreenEQL const *>(mat);
                             assert(matEQL != nullptr);
                             static constexpr std::string_view Format_711(
-                                " WindowMaterial:Screen:EquivalentLayer,{},{:.4R},{:.4R},{:.4R},{:.4R},{:.4R},{:.4R}"
-                                ",{:.4R},{:.4R},{:.5R},{:.5R}\n");
+                                " WindowMaterial:Screen:EquivalentLayer,{},{:.4f},{:.4f},{:.4f},{:.4f},{:.4f},{:.4f}"
+                                ",{:.4f},{:.4f},{:.5f},{:.5f}\n");
                             print(state.files.eio,
                                   Format_711,
                                   matEQL->Name,
@@ -7052,8 +7044,8 @@ namespace Window {
 
                             // Formats
                             static constexpr std::string_view Format_712(
-                                " WindowMaterial:Blind:EquivalentLayer,{},{},{:.5R},{:.5R},{:.5R},{:.5R},{:.5R},{:."
-                                "5R},{:.5R},{:.5R},{:.5R},{:.5R},{:.5R},{:.5R},{:.5R},{:.5R}");
+                                " WindowMaterial:Blind:EquivalentLayer,{},{},{:.5f},{:.5f},{:.5f},{:.5f},{:.5f},"
+                                "{:.5f},{:.5f},{:.5f},{:.5f},{:.5f},{:.5f},{:.5f},{:.5f},{:.5f}");
                             print(state.files.eio,
                                   Format_712,
                                   matEQL->Name,
@@ -7077,7 +7069,7 @@ namespace Window {
                         case Material::Group::WindowGapEQL: {
                             auto const *matGas = dynamic_cast<Material::MaterialGasMix const *>(mat);
                             assert(matGas != nullptr);
-                            static constexpr std::string_view Format_713(" WindowMaterial:Gap:EquivalentLayer,{},{},{:.3R},{}\n");
+                            static constexpr std::string_view Format_713(" WindowMaterial:Gap:EquivalentLayer,{},{},{:.3f},{}\n");
                             print(state.files.eio,
                                   Format_713,
                                   matGas->Name,
@@ -7533,7 +7525,7 @@ namespace Window {
                                                         screen->btars[ip2][it2].BmTrans,
                                                         coeffs);
                         // bmTrans = screen->btars[ip][it].BmTrans;
-                        print(screenCsvFile, ",{:.6R}", bmTrans);
+                        print(screenCsvFile, ",{:.6f}", bmTrans);
                     }
                     print(screenCsvFile, "\n");
                 }
@@ -7566,7 +7558,7 @@ namespace Window {
                                                         coeffs);
 
                         // dfTrans = screen->btars[ip][it].DfTrans;
-                        print(screenCsvFile, ",{:.6R}", dfTrans);
+                        print(screenCsvFile, ",{:.6f}", dfTrans);
                     }
                     print(screenCsvFile, "\n");
                 }
@@ -7997,7 +7989,6 @@ namespace Window {
 
         std::array<std::array<Real64, maxArraySize>, maxArraySize> X;    // X*J = Q
         std::array<std::array<Real64, maxArraySize>, maxArraySize> Xinv; // J = Xinv*Q
-        std::array<int, maxArraySize> indx;                              // Indices for LU decomposition
 
         Real64 fEdge; // Slat edge correction factor
         Real64 fEdge1;
@@ -8067,7 +8058,7 @@ namespace Window {
                 ++X[k][k];
             }
 
-            indx = {0};
+            std::array<int, maxArraySize> indx = {0}; // Indices for LU decomposition
             // In the following, note that InvertMatrix changes X
             InvertMatrix(state, X, Xinv, indx, 4);
 
@@ -8298,7 +8289,7 @@ namespace Window {
 
         // read custom spectrum data from Site:SolarAndVisibleSpectrum
         if (NumSiteSpectrum > 1) { // throw error
-            ShowSevereError(state, EnergyPlus::format("Only one {} object is allowed", cCurrentModuleObject));
+            ShowSevereError(state, std::format("Only one {} object is allowed", cCurrentModuleObject));
             ErrorsFound = true;
         }
 
@@ -8330,7 +8321,7 @@ namespace Window {
             cCurrentModuleObject = "Site:SpectrumData";
             NumSiteSpectrum = state.dataInputProcessing->inputProcessor->getNumObjectsFound(state, cCurrentModuleObject);
             if (NumSiteSpectrum == 0) { // throw error
-                ShowSevereError(state, EnergyPlus::format("No {} object is found", cCurrentModuleObject));
+                ShowSevereError(state, std::format("No {} object is found", cCurrentModuleObject));
                 ErrorsFound = true;
             }
 
@@ -8358,9 +8349,9 @@ namespace Window {
                     // overwrite the default solar spectrum
                     if (NumNumbers > 2 * nume) {
                         ShowSevereError(state,
-                                        EnergyPlus::format("Solar spectrum data pair is more than 107 - {} - {}",
-                                                           cCurrentModuleObject,
-                                                           state.dataIPShortCut->cAlphaArgs(1)));
+                                        std::format("Solar spectrum data pair is more than 107 - {} - {}",
+                                                    cCurrentModuleObject,
+                                                    state.dataIPShortCut->cAlphaArgs(1)));
                         ErrorsFound = true;
                     } else {
                         // Step 3 - overwrite default solar spectrum data
@@ -8380,9 +8371,9 @@ namespace Window {
                     // overwrite the default solar spectrum
                     if (NumNumbers > 2 * numt3) {
                         ShowSevereError(state,
-                                        EnergyPlus::format("Visible spectrum data pair is more than 81 - {} - {}",
-                                                           cCurrentModuleObject,
-                                                           state.dataIPShortCut->cAlphaArgs(1)));
+                                        std::format("Visible spectrum data pair is more than 81 - {} - {}",
+                                                    cCurrentModuleObject,
+                                                    state.dataIPShortCut->cAlphaArgs(1)));
                         ErrorsFound = true;
                     } else {
                         // Step 3 - overwrite default visible spectrum data

@@ -96,9 +96,9 @@ Surface2D::Surface2D(ShapeCat const shapeCat, int const axis, Vertices const &v,
     // If sorting by y for slab method can detect clockwise faster by just comparing edges at bottom or top-most vertex
     Real64 area(0.0); // Actually 2x the signed area
     for (Vertices::size_type i = 0; i < n; ++i) {
-        Vector2D const &v(vertices[i]);
+        Vector2D const &vi(vertices[i]);
         Vector2D const &w(vertices[(i + 1) % n]);
-        area += (v.x * w.y) - (w.x * v.y);
+        area += (vi.x * w.y) - (w.x * vi.y);
     }
     if (area < 0.0) {
         std::reverse(vertices.begin() + 1, vertices.end()); // Vertices in clockwise order: Reverse all but first
@@ -134,16 +134,16 @@ Surface2D::Surface2D(ShapeCat const shapeCat, int const axis, Vertices const &v,
             using CrossEdges = std::vector<CrossEdge>;
             CrossEdges crossEdges;
             for (size_type i = 0; i < n; ++i) { // Find edges crossing slab
-                Vector2D const &v(vertices[i]);
+                Vector2D const &vi(vertices[i]);
                 Vector2D const &w(vertices[(i + 1) % n]);
-                if (((v.y <= yl) && (yu <= w.y)) || // Crosses upward
-                    ((yu <= v.y) && (w.y <= yl)))   // Crosses downward
+                if (((vi.y <= yl) && (yu <= w.y)) || // Crosses upward
+                    ((yu <= vi.y) && (w.y <= yl)))   // Crosses downward
                 {
                     Edge const &e(edges[i]);
                     assert(e.y != 0.0);
                     Real64 const exy(e.x / e.y);
-                    Real64 const xb(v.x + (yl - v.y) * exy); // x_bot coordinate where edge intersects yl
-                    Real64 const xt(v.x + (yu - v.y) * exy); // x_top coordinate where edge intersects yu
+                    Real64 const xb(vi.x + (yl - vi.y) * exy); // x_bot coordinate where edge intersects yl
+                    Real64 const xt(vi.x + (yu - vi.y) * exy); // x_top coordinate where edge intersects yu
                     xl = std::min(xl, std::min(xb, xt));
                     xu = std::max(xu, std::max(xb, xt));
                     crossEdges.emplace_back(xb, xt, i);
@@ -233,8 +233,8 @@ Real64 SurfaceData::getInsideAirTemperature(EnergyPlusData &state, const int t_S
         // check whether this zone is a controlled zone or not
         if (!state.dataHeatBal->Zone(Zone).IsControlled) {
             ShowFatalError(state,
-                           EnergyPlus::format("Zones must be controlled for Ceiling-Diffuser Convection model. No system serves zone {}",
-                                              state.dataHeatBal->Zone(Zone).Name));
+                           std::format("Zones must be controlled for Ceiling-Diffuser Convection model. No system serves zone {}",
+                                       state.dataHeatBal->Zone(Zone).Name));
             // return;
         }
         // determine supply air conditions
@@ -505,14 +505,14 @@ Real64 SurfaceData::get_average_height(EnergyPlusData &state) const
     if (totalWidth == 0.0) {
         // This should never happen, but if it does, print a somewhat meaningful fatal error
         // (instead of allowing a divide by zero).
-        ShowFatalError(state, EnergyPlus::format("Calculated projected surface width is zero for surface=\"{}\"", Name));
+        ShowFatalError(state, std::format("Calculated projected surface width is zero for surface=\"{}\"", Name));
     }
 
     Real64 averageHeight = 0.0;
     for (Vertices::size_type i = 0; i < n; ++i) {
         Vertex2D const &v(v2d[i]);
 
-        Vertex2D *v2;
+        Vertex2D const *v2;
         if (i == n - 1) {
             v2 = &v2d[0];
         } else {
@@ -770,9 +770,9 @@ void GetVariableAbsorptanceSurfaceList(EnergyPlusData &state)
             if (thisSurface.ExtBoundCond != ExternalEnvironment) {
                 ShowWarningError(
                     state,
-                    EnergyPlus::format("MaterialProperty:VariableAbsorptance defined on an interior surface, {}. This VariableAbsorptance property "
-                                       "will be ignored here",
-                                       thisSurface.Name));
+                    std::format("MaterialProperty:VariableAbsorptance defined on an interior surface, {}. This VariableAbsorptance property "
+                                "will be ignored here",
+                                thisSurface.Name));
             } else {
                 state.dataSurface->AllVaryAbsOpaqSurfaceList.push_back(surfNum);
             }
@@ -787,11 +787,10 @@ void GetVariableAbsorptanceSurfaceList(EnergyPlusData &state)
                 continue;
             }
             if (mat->absorpVarCtrlSignal != Material::VariableAbsCtrlSignal::Invalid) {
-                ShowWarningError(
-                    state,
-                    EnergyPlus::format("MaterialProperty:VariableAbsorptance defined on a inside-layer materials, {}. This VariableAbsorptance "
-                                       "property will be ignored here",
-                                       mat->Name));
+                ShowWarningError(state,
+                                 std::format("MaterialProperty:VariableAbsorptance defined on a inside-layer materials, {}. This VariableAbsorptance "
+                                             "property will be ignored here",
+                                             mat->Name));
             }
         }
     }

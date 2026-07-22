@@ -105,7 +105,7 @@ TEST_F(AutoSizingFixture, CoolingWaterDesAirInletHumRatSizingGauntlet)
 
     eiooutput = std::string("! <Component Sizing Information>, Component Type, Component Name, Input Field Description, Value\n"
                             " Component Sizing Information, Coil:Cooling:Water, MyWaterCoil, User-Specified Design Inlet Air Humidity Ratio "
-                            "[kgWater/kgDryAir], 9.00000E-003\n");
+                            "[kgWater/kgDryAir], 9.000E-03\n");
 
     EXPECT_TRUE(compare_eio_stream(eiooutput, true));
 
@@ -142,7 +142,7 @@ TEST_F(AutoSizingFixture, CoolingWaterDesAirInletHumRatSizingGauntlet)
     EXPECT_NEAR(0.008, sizedValue, 0.0001);
 
     eiooutput = std::string(" Component Sizing Information, Coil:Cooling:Water, MyWaterCoil, Design Size Design Inlet Air Humidity Ratio "
-                            "[kgWater/kgDryAir], 8.00000E-003\n");
+                            "[kgWater/kgDryAir], 8.000E-03\n");
 
     EXPECT_TRUE(compare_eio_stream(eiooutput, true));
 
@@ -274,7 +274,7 @@ TEST_F(AutoSizingFixture, CoolingWaterDesAirInletHumRatSizingGauntlet)
 
     // <Component Sizing Information> header already reported above (and flag set false). Only coil sizing information reported here.
     eiooutput = std::string(" Component Sizing Information, Coil:Cooling:Water, MyWaterCoil, Design Size Design Inlet Air Humidity Ratio "
-                            "[kgWater/kgDryAir], 1.05000E-002\n");
+                            "[kgWater/kgDryAir], 1.050E-02\n");
 
     EXPECT_TRUE(compare_eio_stream(eiooutput, true));
 
@@ -369,9 +369,9 @@ TEST_F(AutoSizingFixture, CoolingWaterDesAirInletHumRatSizingGauntlet)
 
     // <Component Sizing Information> header already reported above (and flag set false). Only coil sizing information reported here.
     eiooutput = std::string(" Component Sizing Information, Coil:Cooling:Water, MyWaterCoil, Design Size Design Inlet Air Humidity Ratio "
-                            "[kgWater/kgDryAir], 3.60000E-003\n"
+                            "[kgWater/kgDryAir], 3.600E-03\n"
                             " Component Sizing Information, Coil:Cooling:Water, MyWaterCoil, User-Specified Design Inlet Air Humidity Ratio "
-                            "[kgWater/kgDryAir], 6.65000E-003\n");
+                            "[kgWater/kgDryAir], 6.650E-03\n");
     EXPECT_TRUE(compare_eio_stream(eiooutput, true));
 }
 

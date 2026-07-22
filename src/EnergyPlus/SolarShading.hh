@@ -101,7 +101,7 @@ namespace SolarShading {
 
     void processShadowingInput(EnergyPlusData &state);
 
-    void checkScheduledSurfacePresent(EnergyPlusData &state);
+    void checkSurfaceExternalShadingSchedules(EnergyPlusData &state);
 
     void AllocateModuleArrays(EnergyPlusData &state);
 

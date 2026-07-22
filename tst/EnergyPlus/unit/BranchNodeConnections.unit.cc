@@ -1167,7 +1167,6 @@ TEST_F(EnergyPlusFixture, BranchNodeConnections_ReturnPlenumNodeCheckFailure)
 
     state->init_state(*state);
 
-    OutputReportPredefined::SetPredefinedTables(*state);
     SetPreConstructionInputParameters(*state); // establish array bounds for constructions early
     createFacilityElectricPowerServiceObject(*state);
     BranchInputManager::ManageBranchInput(*state);
@@ -2189,7 +2188,6 @@ TEST_F(EnergyPlusFixture, BranchNodeConnections_ReturnPlenumNodeCheck)
 
     state->init_state(*state);
 
-    OutputReportPredefined::SetPredefinedTables(*state);
     SetPreConstructionInputParameters(*state); // establish array bounds for constructions early
     createFacilityElectricPowerServiceObject(*state);
     BranchInputManager::ManageBranchInput(*state);

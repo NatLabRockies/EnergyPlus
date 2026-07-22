@@ -334,4 +334,45 @@ TEST_F(EnergyPlusFixture, HWBaseboardRadiator_HWBaseboardWaterInputTest)
     ASSERT_NEAR(state->dataHWBaseboardRad->HWBaseboardDesignObject(1).FracRadiant, 0.4, absTol);
     ASSERT_NEAR(state->dataHWBaseboardRad->HWBaseboardDesignObject(1).FracDistribPerson, 0.2, absTol);
     ASSERT_NEAR(state->dataHWBaseboardRad->HWBaseboard(1).FracConvect, 0.6, absTol);
+
+    state->dataSize->CurZoneEqNum = 1;
+    state->dataSize->ZoneSizingRunDone = true;
+    state->dataSize->FinalZoneSizing.allocate(1);
+    state->dataSize->FinalZoneSizing(1).NonAirSysDesHeatLoad = 1300.0;
+    state->dataSize->ZoneEqSizing.allocate(1);
+    state->dataSize->ZoneEqSizing(1).SizingMethod.allocate(HVAC::NumOfSizingTypes);
+    state->dataHWBaseboardRad->HWBaseboard(1).HeatingCapMethod = DataSizing::HeatingDesignCapacity;
+    state->dataHWBaseboardRad->HWBaseboard(1).ScaledHeatingCapacity = DataSizing::AutoSize;
+    state->dataHWBaseboardRad->HWBaseboard(1).plantLoc.loopNum = 1;
+
+    state->dataPlnt->PlantLoop.allocate(1);
+    state->dataPlnt->PlantLoop(1).PlantSizNum = 1;
+    state->dataSize->PlantSizData.allocate(1);
+    state->dataSize->PlantSizData(1).DeltaT = 10.0;
+    state->dataPlnt->PlantLoop(1).LoopSide[0].Branch.allocate(1);
+    state->dataPlnt->PlantLoop(1).LoopSide[0].Branch(1).Comp.allocate(1);
+
+    auto &this_loop = state->dataPlnt->PlantLoop(1);
+    this_loop.glycol = Fluid::GetWater(*state);
+    auto &this_loop_side = this_loop.LoopSide[0];
+    auto &this_branch = state->dataPlnt->PlantLoop(1).LoopSide[0].Branch(1);
+    auto &this_comp = state->dataPlnt->PlantLoop(1).LoopSide[0].Branch(1).Comp(1);
+
+    state->dataHWBaseboardRad->HWBaseboard(1).plantLoc.loop = &this_loop;
+    state->dataHWBaseboardRad->HWBaseboard(1).plantLoc.side = &this_loop_side;
+    state->dataHWBaseboardRad->HWBaseboard(1).plantLoc.branch = &this_branch;
+    state->dataHWBaseboardRad->HWBaseboard(1).plantLoc.comp = &this_comp;
+
+    state->files.eio.open_as_stringstream();
+    SizeHWBaseboard(*state, 1);
+    EXPECT_NEAR(state->dataHWBaseboardRad->HWBaseboard(1).UA, 24.2144, 0.0001);
+    EXPECT_NEAR(state->dataHWBaseboardRad->HWBaseboard(1).WaterVolFlowRateMax, 3.15941E-05, 0.0000001);
+    EXPECT_TRUE(compare_eio_stream_substring("Component Sizing Information, ZoneHVAC:Baseboard:RadiantConvective:Water, THISISABASEBOARD, "
+                                             "Design Size Heating Load [W], 1300",
+                                             false));
+    EXPECT_TRUE(compare_eio_stream_substring("Component Sizing Information, ZoneHVAC:Baseboard:RadiantConvective:Water, THISISABASEBOARD, "
+                                             "Design Size Maximum Water Flow Rate [m3/s], 3.15941E-05",
+                                             false));
+    EXPECT_TRUE(compare_eio_stream_substring("Component Sizing Information, ZoneHVAC:Baseboard:RadiantConvective:Water, THISISABASEBOARD, "
+                                             "U-Factor times Area [W/C], 24.2144"));
 }

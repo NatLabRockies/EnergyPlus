@@ -1698,6 +1698,18 @@
     0.5,                     !- Fraction Radiant
     Baseboard Heat;          !- End-Use Subcategory
 
+  ZoneBaseboard:OutdoorTemperatureControlled,
+    SPACE5-1 BBHeat 1,       !- Name
+    SPACE5-1,                !- Zone or ZoneList or Space or SpaceList Name
+    EQUIP-1,                 !- Schedule Name
+    autosize,                !- Capacity at Low Temperature {W}
+    autosize,                !- Low Temperature {C}
+    autosize,                !- Capacity at High Temperature {W}
+    autosize,                !- High Temperature {C}
+    0.5,                     !- Fraction Radiant
+    Baseboard Heat,          !- End-Use Subcategory
+    30;                      !- Design Zone Heating Setpoint {C}
+
   BuildingSurface:Detailed,
     LEFT-1,                  !- Name
     WALL,                    !- Surface Type

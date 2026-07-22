@@ -137,69 +137,63 @@ void SetUpSchemeColors(EnergyPlusData &state, std::string const &SchemeName, std
 
     state.dataSurfColor->DXFcolorno = DataSurfaceColors::defaultcolorno;
 
-    // first see if there is a scheme name
-    int numptr = state.dataInputProcessing->inputProcessor->getObjectItemNum(state, CurrentModuleObject, SchemeName);
-    if (numptr > 0) {
-
-        int NumAlphas;
-        int numNumbers;
-        int numargs;
-        int status;
-        Array1D_string cAlphas;
-        Array1D_string cAlphaFields;
-        Array1D_string cNumericFields;
-        Array1D_bool lAlphaBlanks;
-        Array1D_bool lNumericBlanks;
-        Array1D<Real64> rNumerics;
-        state.dataInputProcessing->inputProcessor->getObjectDefMaxArgs(state, CurrentModuleObject, numargs, NumAlphas, numNumbers);
-
-        cAlphas.allocate(NumAlphas);
-        cAlphaFields.allocate(NumAlphas);
-        lAlphaBlanks.allocate(NumAlphas);
-        rNumerics.allocate(numNumbers);
-        cNumericFields.allocate(numNumbers);
-        lNumericBlanks.allocate(numNumbers);
-
-        cAlphas({1, NumAlphas}) = "";
-        rNumerics({1, numNumbers}) = 0.0;
-
-        state.dataInputProcessing->inputProcessor->getObjectItem(state,
-                                                                 CurrentModuleObject,
-                                                                 numptr,
-                                                                 cAlphas,
-                                                                 NumAlphas,
-                                                                 rNumerics,
-                                                                 numNumbers,
-                                                                 status,
-                                                                 lNumericBlanks,
-                                                                 lAlphaBlanks,
-                                                                 cAlphaFields,
-                                                                 cNumericFields);
-        for (numargs = 1; numargs <= numNumbers; ++numargs) {
-            numptr = rNumerics(numargs); // set to integer
-            if (lNumericBlanks(numargs)) {
-                if (!lAlphaBlanks(numargs + 1)) {
-                    ShowWarningError(state,
-                                     EnergyPlus::format("SetUpSchemeColors: {}={}, {}={}, {} was blank.  Default color retained.",
-                                                        cAlphaFields(1),
-                                                        SchemeName,
-                                                        cAlphaFields(numargs + 1),
-                                                        cAlphas(numargs + 1),
-                                                        cNumericFields(numargs)));
-                }
-                continue;
-            }
-            if (!MatchAndSetColorTextString(state, cAlphas(numargs + 1), numptr, ColorType)) {
-                ShowWarningError(state,
-                                 EnergyPlus::format("SetUpSchemeColors: {}={}, {}={}, is invalid.  No color set.",
-                                                    cAlphaFields(1),
-                                                    SchemeName,
-                                                    cAlphaFields(numargs + 1),
-                                                    cAlphas(numargs + 1)));
+    auto *inputProcessor = state.dataInputProcessing->inputProcessor.get();
+    auto const surfaceColorSchemes = inputProcessor->epJSON.find(std::string(CurrentModuleObject));
+    if (surfaceColorSchemes != inputProcessor->epJSON.end()) {
+        auto matchedScheme = surfaceColorSchemes.value().end();
+        for (auto it = surfaceColorSchemes.value().begin(); it != surfaceColorSchemes.value().end(); ++it) {
+            if (Util::SameString(it.key(), SchemeName)) {
+                matchedScheme = it;
+                break;
             }
         }
+
+        if (matchedScheme != surfaceColorSchemes.value().end()) {
+            auto const &schemeFields = matchedScheme.value();
+            inputProcessor->markObjectAsUsed(std::string(CurrentModuleObject), matchedScheme.key());
+
+            for (int numargs = 1;; ++numargs) {
+                auto const drawingElementKey = std::format("drawing_element_{}_type", numargs);
+                auto const colorKey = std::format("color_for_drawing_element_{}", numargs);
+                auto const drawingElementIt = schemeFields.find(drawingElementKey);
+                auto const colorIt = schemeFields.find(colorKey);
+
+                if (drawingElementIt == schemeFields.end() && colorIt == schemeFields.end()) {
+                    break;
+                }
+
+                std::string const drawingElementFieldName = std::format("Drawing Element {} Type", numargs);
+                std::string const colorFieldName = std::format("Color for Drawing Element {}", numargs);
+                std::string const drawingElement = (drawingElementIt != schemeFields.end()) ? drawingElementIt->get<std::string>() : "";
+
+                if (colorIt == schemeFields.end()) {
+                    if (!drawingElement.empty()) {
+                        ShowWarningError(state,
+                                         std::format("SetUpSchemeColors: {}={}, {}={}, {} was blank.  Default color retained.",
+                                                     "Name",
+                                                     SchemeName,
+                                                     drawingElementFieldName,
+                                                     drawingElement,
+                                                     colorFieldName));
+                    }
+                    continue;
+                }
+
+                int const numptr = colorIt->get<int>();
+                if (!MatchAndSetColorTextString(state, drawingElement, numptr, ColorType)) {
+                    ShowWarningError(state,
+                                     std::format("SetUpSchemeColors: {}={}, {}={}, is invalid.  No color set.",
+                                                 "Name",
+                                                 SchemeName,
+                                                 drawingElementFieldName,
+                                                 drawingElement));
+                }
+            }
+        } else {
+            ShowWarningError(state, std::format("SetUpSchemeColors: Name={} not on input file. Default colors will be used.", SchemeName));
+        }
     } else {
-        ShowWarningError(state, EnergyPlus::format("SetUpSchemeColors: Name={} not on input file. Default colors will be used.", SchemeName));
+        ShowWarningError(state, std::format("SetUpSchemeColors: Name={} not on input file. Default colors will be used.", SchemeName));
     }
 }
 

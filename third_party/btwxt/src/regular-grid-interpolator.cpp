@@ -20,7 +20,7 @@ std::vector<GridAxis> construct_grid_axes(const std::vector<std::vector<double>>
     grid_axes.reserve(grid_axis_vectors.size());
     for (const auto& axis : grid_axis_vectors) {
         grid_axes.emplace_back(axis,
-                               fmt::format("Axis {}", grid_axes.size() + 1),
+                               std::format("Axis {}", grid_axes.size() + 1),
                                InterpolationMethod::linear,
                                ExtrapolationMethod::constant,
                                std::pair<double, double> {-DBL_MAX, DBL_MAX},
@@ -36,7 +36,7 @@ construct_grid_point_data_sets(const std::vector<std::vector<double>>& grid_poin
     grid_point_data_sets.reserve(grid_point_data_vectors.size());
     for (const auto& grid_point_data_set : grid_point_data_vectors) {
         grid_point_data_sets.emplace_back(
-            grid_point_data_set, fmt::format("Data Set {}", grid_point_data_sets.size() + 1));
+            grid_point_data_set, std::format("Data Set {}", grid_point_data_sets.size() + 1));
     }
     return grid_point_data_sets;
 }
@@ -132,7 +132,7 @@ RegularGridInterpolator::add_grid_point_data_set(const std::vector<double>& grid
     std::string resolved_name {name};
     if (resolved_name.empty()) {
         resolved_name =
-            fmt::format("Data Set {}", implementation->get_number_of_grid_point_data_sets());
+            std::format("Data Set {}", implementation->get_number_of_grid_point_data_sets());
     }
     return add_grid_point_data_set(GridPointDataSet(grid_point_data_vector, resolved_name));
 }

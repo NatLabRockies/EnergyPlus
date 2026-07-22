@@ -45,7 +45,13 @@
 // OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 // POSSIBILITY OF SUCH DAMAGE.
 
+// C++ Headers
+#include <format>
+
+// Local Headers
 #include "rs0004_factory.h"
+
+// EnergyPlus Headers
 #include <EnergyPlus/Coils/CoilCoolingDXAshrae205Performance.hh>
 #include <EnergyPlus/CurveManager.hh>
 #include <EnergyPlus/Data/EnergyPlusData.hh>
@@ -80,7 +86,7 @@ CoilCoolingDX205Performance::CoilCoolingDX205Performance(EnergyPlus::EnergyPlusD
     auto &ip = state.dataInputProcessing->inputProcessor;
     int numPerformances = ip->getNumObjectsFound(state, CoilCoolingDX205Performance::object_name);
     if (numPerformances <= 0) {
-        ShowSevereError(state, EnergyPlus::format("No {} equipment specified in input file", state.dataIPShortCut->cCurrentModuleObject));
+        ShowSevereError(state, std::format("No {} equipment specified in input file", state.dataIPShortCut->cCurrentModuleObject));
         errorsFound = true;
     }
     auto const &Coil205PerformanceInstances = ip->epJSON.find(state.dataIPShortCut->cCurrentModuleObject).value();
@@ -91,7 +97,7 @@ CoilCoolingDX205Performance::CoilCoolingDX205Performance(EnergyPlus::EnergyPlusD
         name = instance.key();
 
         if (!Util::SameString(name_to_find, name)) {
-            ShowFatalError(state, EnergyPlus::format("Could not find Coil:Cooling:DX:Performance object with name: {}", name_to_find));
+            ShowFatalError(state, std::format("Could not find Coil:Cooling:DX:Performance object with name: {}", name_to_find));
         }
 
         std::string const rep_file_name = ip->getAlphaFieldValue(fields, objectSchemaProps, "representation_file_name");
@@ -104,12 +110,12 @@ CoilCoolingDX205Performance::CoilCoolingDX205Performance(EnergyPlus::EnergyPlusD
             ShowFatalError(state, "Program terminates due to the missing ASHRAE 205 RS0004 representation file.");
         }
         std::shared_ptr<EnergyPlusLogger> coil_logger = std::make_shared<EnergyPlusLogger>();
-        logger_context = std::make_pair(&state, EnergyPlus::format("{} \"{}\"", state.dataIPShortCut->cCurrentModuleObject, name));
+        logger_context = std::make_pair(&state, std::format("{} \"{}\"", state.dataIPShortCut->cCurrentModuleObject, name));
         coil_logger->set_message_context(&logger_context);
         representation =
             std::dynamic_pointer_cast<rs0004_ns::RS0004>(RSInstanceFactory::create("RS0004", rep_file_path.string().c_str(), coil_logger));
         if (nullptr == representation) {
-            ShowSevereError(state, EnergyPlus::format("{} is not an instance of an ASHRAE205 Coil.", rep_file_path.string()));
+            ShowSevereError(state, std::format("{} is not an instance of an ASHRAE205 Coil.", rep_file_path));
             errorsFound = true;
         } else {
             representation->performance.performance_map_cooling.get_logger()->set_message_context(&logger_context);
@@ -136,9 +142,9 @@ CoilCoolingDX205Performance::CoilCoolingDX205Performance(EnergyPlus::EnergyPlusD
 
         if (errorsFound) {
             ShowFatalError(state,
-                           EnergyPlus::format("{} Errors found in getting {} input. Preceding condition(s) causes termination.",
-                                              std::string{routineName},
-                                              object_name));
+                           std::format("{} Errors found in getting {} input. Preceding condition(s) causes termination.",
+                                       std::string{routineName},
+                                       object_name));
         }
     }
 }
@@ -275,8 +281,8 @@ void CoilCoolingDX205Performance::calculate(EnergyPlus::EnergyPlusData &state,
     }
 
     bool is_continuous = representation->performance.compressor_speed_control_type == tk205::ashrae205_ns::SpeedControlType::CONTINUOUS;
-    auto outdoor_coil_entering_dry_bulb_temperature_K = condInletNode.Temp + Constant::Kelvin;
-    auto indoor_coil_entering_dry_bulb_temperature_K = inletNode.Temp + Constant::Kelvin;
+    auto actual_outdoor_coil_entering_dry_bulb_temperature_K = condInletNode.Temp + Constant::Kelvin;
+    auto actual_indoor_coil_entering_dry_bulb_temperature_K = inletNode.Temp + Constant::Kelvin;
     auto ambient_pressure = state.dataEnvrn->OutBaroPress;
     auto indoor_coil_entering_relative_humidity = Psychrometrics::PsyRhFnTdbWPb(state, inletNode.Temp, inletNode.HumRat, ambient_pressure);
 
@@ -284,9 +290,9 @@ void CoilCoolingDX205Performance::calculate(EnergyPlus::EnergyPlusData &state,
 
         // In cycling operation (continuous or discrete) this_speed = 1; compressor_sequence_number = 1;
         const auto &[gross_total_capacity, gross_sensible_capacity, gross_power] =
-            representation->performance.performance_map_cooling.calculate_performance(outdoor_coil_entering_dry_bulb_temperature_K,
+            representation->performance.performance_map_cooling.calculate_performance(actual_outdoor_coil_entering_dry_bulb_temperature_K,
                                                                                       indoor_coil_entering_relative_humidity,
-                                                                                      indoor_coil_entering_dry_bulb_temperature_K,
+                                                                                      actual_indoor_coil_entering_dry_bulb_temperature_K,
                                                                                       air_mass_flow_rate,
                                                                                       this_speed,
                                                                                       ambient_pressure,
@@ -303,9 +309,9 @@ void CoilCoolingDX205Performance::calculate(EnergyPlus::EnergyPlusData &state,
             // For example, a speed number of 2 with a ratio between (0,1) indicates that the compressor is modulating between speeds 1 and 2 with the
             // given ratio. The ASHRAE205 model simply interpolates using a decimal fraction speed.
             [[maybe_unused]] const auto &[gross_total_capacity, gross_sensible_capacity, gross_power] =
-                representation->performance.performance_map_cooling.calculate_performance(outdoor_coil_entering_dry_bulb_temperature_K,
+                representation->performance.performance_map_cooling.calculate_performance(actual_outdoor_coil_entering_dry_bulb_temperature_K,
                                                                                           indoor_coil_entering_relative_humidity,
-                                                                                          indoor_coil_entering_dry_bulb_temperature_K,
+                                                                                          actual_indoor_coil_entering_dry_bulb_temperature_K,
                                                                                           air_mass_flow_rate,
                                                                                           this_speed - 1 + ratio,
                                                                                           ambient_pressure,
@@ -319,9 +325,9 @@ void CoilCoolingDX205Performance::calculate(EnergyPlus::EnergyPlusData &state,
             auto mass_flow_rate_upperspeed = speeds[this_speed - 1].evaporator_air_mass_flow;
 
             const auto &[gross_total_capacity, gross_sensible_capacity, gross_power] =
-                representation->performance.performance_map_cooling.calculate_performance(outdoor_coil_entering_dry_bulb_temperature_K,
+                representation->performance.performance_map_cooling.calculate_performance(actual_outdoor_coil_entering_dry_bulb_temperature_K,
                                                                                           indoor_coil_entering_relative_humidity,
-                                                                                          indoor_coil_entering_dry_bulb_temperature_K,
+                                                                                          actual_indoor_coil_entering_dry_bulb_temperature_K,
                                                                                           mass_flow_rate_upperspeed,
                                                                                           this_speed,
                                                                                           ambient_pressure,
@@ -334,9 +340,9 @@ void CoilCoolingDX205Performance::calculate(EnergyPlus::EnergyPlusData &state,
                 auto mass_flow_rate_lowerspeed = speeds[lowerspeed - 1].evaporator_air_mass_flow;
 
                 const auto &[gross_capacity_lower_speed, gross_sensible_capacity_lower_speed, power_lower_speed] =
-                    representation->performance.performance_map_cooling.calculate_performance(outdoor_coil_entering_dry_bulb_temperature_K,
+                    representation->performance.performance_map_cooling.calculate_performance(actual_outdoor_coil_entering_dry_bulb_temperature_K,
                                                                                               indoor_coil_entering_relative_humidity,
-                                                                                              indoor_coil_entering_dry_bulb_temperature_K,
+                                                                                              actual_indoor_coil_entering_dry_bulb_temperature_K,
                                                                                               mass_flow_rate_lowerspeed,
                                                                                               lowerspeed,
                                                                                               ambient_pressure,

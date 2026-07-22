@@ -15,15 +15,11 @@ macro(CREATE_SRC_GROUPS SRC)
 endmacro()
 
 # Create test targets
-macro(CREATE_TEST_TARGETS BASE_NAME SRC DEPENDENCIES USE_PCH)
+macro(CREATE_TEST_TARGETS BASE_NAME SRC DEPENDENCIES)
   if(BUILD_TESTING)
 
     add_executable(${BASE_NAME}_tests ${SRC})
-    target_link_libraries(${BASE_NAME}_tests PRIVATE project_options project_warnings)
-
-    if(USE_PCH)
-      target_link_libraries(${BASE_NAME}_tests PRIVATE cpp_pch_files)
-    endif()
+    target_link_libraries(${BASE_NAME}_tests PRIVATE project_options project_fp_options project_warnings)
 
     if(ENABLE_GTEST_DEBUG_MODE)
       target_compile_definitions(${BASE_NAME}_tests PRIVATE ENABLE_GTEST_DEBUG_MODE)
@@ -48,9 +44,16 @@ macro(CREATE_TEST_TARGETS BASE_NAME SRC DEPENDENCIES USE_PCH)
 
     target_link_libraries(${BASE_NAME}_tests PRIVATE ${ALL_DEPENDENCIES} gtest)
 
+    if(APPLE AND CMAKE_GENERATOR STREQUAL "Xcode")
+      set(_gtest_discovery_mode PRE_TEST)
+    else()
+      set(_gtest_discovery_mode POST_BUILD)
+    endif()
+
     gtest_discover_tests(${BASE_NAME}_tests
-            DISCOVERY_TIMEOUT 30
-            WORKING_DIRECTORY ${PROJECT_BINARY_DIR}
+      WORKING_DIRECTORY ${PROJECT_BINARY_DIR}
+      DISCOVERY_MODE ${_gtest_discovery_mode}
+      DISCOVERY_TIMEOUT 30
     )
 
   endif()

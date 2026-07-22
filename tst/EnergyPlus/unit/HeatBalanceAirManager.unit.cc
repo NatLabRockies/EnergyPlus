@@ -121,7 +121,7 @@ TEST_F(EnergyPlusFixture, HeatBalanceAirManager_GetInfiltrationAndVentilation)
 {
     // Test input processing of Infiltration objects with spaces
 
-    state->dataInputProcessing->inputProcessor->epJSON = R"(
+    nlohmann::json epJSON = R"(
     {
         "Zone": {
             "Zone 1" : {
@@ -201,8 +201,8 @@ TEST_F(EnergyPlusFixture, HeatBalanceAirManager_GetInfiltrationAndVentilation)
                 "surface_type": "Floor",
                 "construction_name": "ext-slab",
                 "number_of_vertices": 4,
-                "outside_boundary_condition": "adiabatic",
-                "sun_exposure": "nosun",
+                "outside_boundary_condition": "Adiabatic",
+                "sun_exposure": "NoSun",
                 "vertices": [
                     {
                         "vertex_x_coordinate": 45.3375,
@@ -232,8 +232,8 @@ TEST_F(EnergyPlusFixture, HeatBalanceAirManager_GetInfiltrationAndVentilation)
                 "surface_type": "Floor",
                 "construction_name": "ext-slab",
                 "number_of_vertices": 4,
-                "outside_boundary_condition": "adiabatic",
-                "sun_exposure": "nosun",
+                "outside_boundary_condition": "Adiabatic",
+                "sun_exposure": "NoSun",
                 "vertices": [
                     {
                         "vertex_x_coordinate": 45.3375,
@@ -262,8 +262,8 @@ TEST_F(EnergyPlusFixture, HeatBalanceAirManager_GetInfiltrationAndVentilation)
                 "surface_type": "Floor",
                 "construction_name": "ext-slab",
                 "number_of_vertices": 4,
-                "outside_boundary_condition": "adiabatic",
-                "sun_exposure": "nosun",
+                "outside_boundary_condition": "Adiabatic",
+                "sun_exposure": "NoSun",
                 "vertices": [
                     {
                         "vertex_x_coordinate": 45.3375,
@@ -362,46 +362,29 @@ TEST_F(EnergyPlusFixture, HeatBalanceAirManager_GetInfiltrationAndVentilation)
     )"_json;
 
     state->dataGlobal->isEpJSON = true;
-    state->dataInputProcessing->inputProcessor->initializeMaps();
-
-    // GetZoneData and others use GetObjectItem with ipshortcuts so these need to be allocated
-    // copied from InputProcessor::processInput (which expects an input file to be present)
-    int MaxArgs = 0;
-    int MaxAlpha = 0;
-    int MaxNumeric = 0;
-    state->dataInputProcessing->inputProcessor->getMaxSchemaArgs(MaxArgs, MaxAlpha, MaxNumeric);
-
-    state->dataIPShortCut->cAlphaFieldNames.allocate(MaxAlpha);
-    state->dataIPShortCut->cAlphaArgs.allocate(MaxAlpha);
-    state->dataIPShortCut->lAlphaFieldBlanks.dimension(MaxAlpha, false);
-    state->dataIPShortCut->cNumericFieldNames.allocate(MaxNumeric);
-    state->dataIPShortCut->rNumericArgs.dimension(MaxNumeric, 0.0);
-    state->dataIPShortCut->lNumericFieldBlanks.dimension(MaxNumeric, false);
-
-    bool ErrorsFound = false;
-
+    ASSERT_TRUE(process_json(epJSON));
     state->init_state(*state);
 
     HeatBalanceManager::GetHeatBalanceInput(*state);
-    std::string const error_string = delimited_string(
-        {EnergyPlus::format("   ** Warning ** Version: missing in IDF, processing for EnergyPlus version=\"{}\"", DataStringGlobals::MatchVersion),
-         "   ** Warning ** No Timestep object found.  Number of TimeSteps in Hour defaulted to 4.",
-         "   ** Warning ** GetSurfaceData: Entered Space Floor Area(s) differ more than 5% from calculated Space Floor Area(s).",
-         "   **   ~~~   ** ...use Output:Diagnostics,DisplayExtraWarnings; to show more details on individual Spaces.",
-         "   ** Warning ** CalculateZoneVolume: 1 zone is not fully enclosed. For more details use:  Output:Diagnostics,DisplayExtrawarnings; ",
-         "   ** Warning ** CalcApproximateViewFactors: Zero area for all other zone surfaces.",
-         "   **   ~~~   ** Happens for Surface=\"DUMMY SPACE 1A FLOOR\" in Zone=ZONE 1",
-         "   ** Warning ** CalcApproximateViewFactors: Zero area for all other zone surfaces.",
-         "   **   ~~~   ** Happens for Surface=\"DUMMY SPACE 1B FLOOR\" in Zone=ZONE 1",
-         "   ** Warning ** Surfaces in Zone/Enclosure=\"ZONE 1\" do not define an enclosure.",
-         "   **   ~~~   ** Number of surfaces <= 3, view factors are set to force reciprocity but may not fulfill completeness.",
-         "   **   ~~~   ** Reciprocity means that radiant exchange between two surfaces will match and not lead to an energy loss.",
-         "   **   ~~~   ** Completeness means that all of the view factors between a surface and the other surfaces in a zone add up to unity.",
-         "   **   ~~~   ** So, when there are three or less surfaces in a zone, EnergyPlus will make sure there are no losses of energy but",
-         "   **   ~~~   ** it will not exchange the full amount of radiation with the rest of the zone as it would if there was a completed "
-         "enclosure."});
+    std::string const error_string = delimited_string({
+        "   ** Warning ** GetSurfaceData: Entered Space Floor Area(s) differ more than 5% from calculated Space Floor Area(s).",
+        "   **   ~~~   ** ...use Output:Diagnostics,DisplayExtraWarnings; to show more details on individual Spaces.",
+        "   ** Warning ** CalculateZoneVolume: 1 zone is not fully enclosed. For more details use:  Output:Diagnostics,DisplayExtrawarnings; ",
+        "   ** Warning ** CalcApproximateViewFactors: Zero area for all other zone surfaces.",
+        "   **   ~~~   ** Happens for Surface=\"DUMMY SPACE 1A FLOOR\" in Zone=ZONE 1",
+        "   ** Warning ** CalcApproximateViewFactors: Zero area for all other zone surfaces.",
+        "   **   ~~~   ** Happens for Surface=\"DUMMY SPACE 1B FLOOR\" in Zone=ZONE 1",
+        "   ** Warning ** Surfaces in Zone/Enclosure=\"ZONE 1\" do not define an enclosure.",
+        "   **   ~~~   ** Number of surfaces <= 3, view factors are set to force reciprocity but may not fulfill completeness.",
+        "   **   ~~~   ** Reciprocity means that radiant exchange between two surfaces will match and not lead to an energy loss.",
+        "   **   ~~~   ** Completeness means that all of the view factors between a surface and the other surfaces in a zone add up to unity.",
+        "   **   ~~~   ** So, when there are three or less surfaces in a zone, EnergyPlus will make sure there are no losses of energy but",
+        "   **   ~~~   ** it will not exchange the full amount of radiation with the rest of the zone as it would if there was a completed "
+        "enclosure.",
+    });
 
     compare_err_stream(error_string, true);
+    bool ErrorsFound = false;
     EXPECT_FALSE(ErrorsFound);
 
     state->dataHeatBalFanSys->ZoneReOrder.allocate(state->dataGlobal->NumOfZones);
@@ -545,7 +528,7 @@ TEST_F(EnergyPlusFixture, HeatBalanceAirManager_GetMixingAndCrossMixing)
 
     // Test input processing of Infiltration objects with spaces
 
-    state->dataInputProcessing->inputProcessor->epJSON = R"(
+    nlohmann::json epJSON = R"(
     {
     "SimulationControl": {
         "SimulationControl 1": {
@@ -667,8 +650,8 @@ TEST_F(EnergyPlusFixture, HeatBalanceAirManager_GetMixingAndCrossMixing)
                 "surface_type": "Floor",
                 "construction_name": "ext-slab",
                 "number_of_vertices": 4,
-                "outside_boundary_condition": "adiabatic",
-                "sun_exposure": "nosun",
+                "outside_boundary_condition": "Adiabatic",
+                "sun_exposure": "NoSun",
                 "vertices": [
                     {
                         "vertex_x_coordinate": 45.3375,
@@ -698,8 +681,8 @@ TEST_F(EnergyPlusFixture, HeatBalanceAirManager_GetMixingAndCrossMixing)
                 "surface_type": "Floor",
                 "construction_name": "ext-slab",
                 "number_of_vertices": 4,
-                "outside_boundary_condition": "adiabatic",
-                "sun_exposure": "nosun",
+                "outside_boundary_condition": "Adiabatic",
+                "sun_exposure": "NoSun",
                 "vertices": [
                     {
                         "vertex_x_coordinate": 45.3375,
@@ -728,8 +711,8 @@ TEST_F(EnergyPlusFixture, HeatBalanceAirManager_GetMixingAndCrossMixing)
                 "surface_type": "Floor",
                 "construction_name": "ext-slab",
                 "number_of_vertices": 4,
-                "outside_boundary_condition": "adiabatic",
-                "sun_exposure": "nosun",
+                "outside_boundary_condition": "Adiabatic",
+                "sun_exposure": "NoSun",
                 "vertices": [
                     {
                         "vertex_x_coordinate": 45.3375,
@@ -809,54 +792,57 @@ TEST_F(EnergyPlusFixture, HeatBalanceAirManager_GetMixingAndCrossMixing)
     }
     )"_json;
 
-    state->dataGlobal->isEpJSON = true;
-    state->dataInputProcessing->inputProcessor->initializeMaps();
-
-    // GetZoneData and others use GetObjectItem with ipshortcuts so these need to be allocated
-    // copied from InputProcessor::processInput (which expects an input file to be present)
-    int MaxArgs = 0;
-    int MaxAlpha = 0;
-    int MaxNumeric = 0;
-    state->dataInputProcessing->inputProcessor->getMaxSchemaArgs(MaxArgs, MaxAlpha, MaxNumeric);
-
-    state->dataIPShortCut->cAlphaFieldNames.allocate(MaxAlpha);
-    state->dataIPShortCut->cAlphaArgs.allocate(MaxAlpha);
-    state->dataIPShortCut->lAlphaFieldBlanks.dimension(MaxAlpha, false);
-    state->dataIPShortCut->cNumericFieldNames.allocate(MaxNumeric);
-    state->dataIPShortCut->rNumericArgs.dimension(MaxNumeric, 0.0);
-    state->dataIPShortCut->lNumericFieldBlanks.dimension(MaxNumeric, false);
-
+    ASSERT_TRUE(process_json(epJSON));
     state->init_state(*state);
 
     // HeatBalanceManager::GetHeatBalanceInput(*state);
-    std::string const error_string = delimited_string(
-        {EnergyPlus::format("   ** Warning ** Version: missing in IDF, processing for EnergyPlus version=\"{}\"", DataStringGlobals::MatchVersion),
-         "   ** Warning ** No Timestep object found.  Number of TimeSteps in Hour defaulted to 4.",
-         "   ** Warning ** No reporting elements have been requested. No simulation results produced.",
-         "   **   ~~~   ** ...Review requirements such as \"Output:Table:SummaryReports\", \"Output:Table:Monthly\", \"Output:Variable\", "
-         "\"Output:Meter\" and others.",
-         "   ** Warning ** GetSurfaceData: Entered Space Floor Area(s) differ more than 5% from calculated Space Floor Area(s).",
-         "   **   ~~~   ** ...use Output:Diagnostics,DisplayExtraWarnings; to show more details on individual Spaces.",
-         "   ** Warning ** CalculateZoneVolume: 1 zone is not fully enclosed. For more details use:  Output:Diagnostics,DisplayExtrawarnings; ",
-         "   ** Warning ** CalcApproximateViewFactors: Zero area for all other zone surfaces.",
-         "   **   ~~~   ** Happens for Surface=\"DUMMY SPACE 1A FLOOR\" in Zone=ZONE 1",
-         "   ** Warning ** CalcApproximateViewFactors: Zero area for all other zone surfaces.",
-         "   **   ~~~   ** Happens for Surface=\"DUMMY SPACE 1B FLOOR\" in Zone=ZONE 1",
-         "   ** Warning ** Surfaces in Zone/Enclosure=\"ZONE 1\" do not define an enclosure.",
-         "   **   ~~~   ** Number of surfaces <= 3, view factors are set to force reciprocity but may not fulfill completeness.",
-         "   **   ~~~   ** Reciprocity means that radiant exchange between two surfaces will match and not lead to an energy loss.",
-         "   **   ~~~   ** Completeness means that all of the view factors between a surface and the other surfaces in a zone add up to unity.",
-         "   **   ~~~   ** So, when there are three or less surfaces in a zone, EnergyPlus will make sure there are no losses of energy but",
-         "   **   ~~~   ** it will not exchange the full amount of radiation with the rest of the zone as it would if there was a completed "
-         "enclosure.",
-         "   ************* Testing Individual Branch Integrity",
-         "   ************* All Branches passed integrity testing",
-         "   ************* Testing Individual Supply Air Path Integrity",
-         "   ************* All Supply Air Paths passed integrity testing",
-         "   ************* Testing Individual Return Air Path Integrity",
-         "   ************* All Return Air Paths passed integrity testing",
-         "   ************* No node connection errors were found.",
-         "   ************* Beginning Simulation"});
+    std::string const error_string = delimited_string({
+        "   ** Warning ** No reporting elements have been requested. No simulation results produced.",
+        "   **   ~~~   ** ...Review requirements such as \"Output:Table:SummaryReports\", \"Output:Table:Monthly\", \"Output:Variable\", "
+        "\"Output:Meter\" and others.",
+        "   ** Warning ** GetSurfaceData: Entered Space Floor Area(s) differ more than 5% from calculated Space Floor Area(s).",
+        "   **   ~~~   ** ...use Output:Diagnostics,DisplayExtraWarnings; to show more details on individual Spaces.",
+        "   ** Warning ** CalculateZoneVolume: 1 zone is not fully enclosed. For more details use:  Output:Diagnostics,DisplayExtrawarnings; ",
+        "   ** Warning ** CalcApproximateViewFactors: Zero area for all other zone surfaces.",
+        "   **   ~~~   ** Happens for Surface=\"DUMMY SPACE 1A FLOOR\" in Zone=ZONE 1",
+        "   ** Warning ** CalcApproximateViewFactors: Zero area for all other zone surfaces.",
+        "   **   ~~~   ** Happens for Surface=\"DUMMY SPACE 1B FLOOR\" in Zone=ZONE 1",
+        "   ** Warning ** Surfaces in Zone/Enclosure=\"ZONE 1\" do not define an enclosure.",
+        "   **   ~~~   ** Number of surfaces <= 3, view factors are set to force reciprocity but may not fulfill completeness.",
+        "   **   ~~~   ** Reciprocity means that radiant exchange between two surfaces will match and not lead to an energy loss.",
+        "   **   ~~~   ** Completeness means that all of the view factors between a surface and the other surfaces in a zone add up to unity.",
+        "   **   ~~~   ** So, when there are three or less surfaces in a zone, EnergyPlus will make sure there are no losses of energy but",
+        "   **   ~~~   ** it will not exchange the full amount of radiation with the rest of the zone as it would if there was a completed "
+        "enclosure.",
+        "   ** Warning ** GetSimpleAirModelInputs: Mixing and/or CrossMixing into Zone=\"ZONE 1\" is large relative to the zone's air volume and "
+        "the simulation timestep.",
+        "   **   ~~~   ** ...The combined Mixing/CrossMixing flow into this zone corresponds to 38880.0 air changes per hour, more than 5x the "
+        "Number of Timesteps in Hour (4).",
+        "   **   ~~~   ** ...Inter-zone mixing is calculated using the connected zone's temperature/humidity/contaminant level from the previous "
+        "timestep",
+        "   **   ~~~   ** ...so a flow rate this large relative to the zone volume and timestep can introduce a lagged-coupling error (e.g., "
+        "apparent over-dilution of contaminants).",
+        "   **   ~~~   ** ...Even the EnergyPlus maximum of 60 Timesteps in Hour would not eliminate this lag; consider reducing the "
+        "Mixing/CrossMixing flow rate relative to the zone volume instead.",
+        "   ** Warning ** GetSimpleAirModelInputs: Mixing and/or CrossMixing into Zone=\"ZONE 2\" is large relative to the zone's air volume and "
+        "the simulation timestep.",
+        "   **   ~~~   ** ...The combined Mixing/CrossMixing flow into this zone corresponds to 7200.0 air changes per hour, more than 5x the "
+        "Number of Timesteps in Hour (4).",
+        "   **   ~~~   ** ...Inter-zone mixing is calculated using the connected zone's temperature/humidity/contaminant level from the previous "
+        "timestep",
+        "   **   ~~~   ** ...so a flow rate this large relative to the zone volume and timestep can introduce a lagged-coupling error (e.g., "
+        "apparent over-dilution of contaminants).",
+        "   **   ~~~   ** ...Even the EnergyPlus maximum of 60 Timesteps in Hour would not eliminate this lag; consider reducing the "
+        "Mixing/CrossMixing flow rate relative to the zone volume instead.",
+        "   ************* Testing Individual Branch Integrity",
+        "   ************* All Branches passed integrity testing",
+        "   ************* Testing Individual Supply Air Path Integrity",
+        "   ************* All Supply Air Paths passed integrity testing",
+        "   ************* Testing Individual Return Air Path Integrity",
+        "   ************* All Return Air Paths passed integrity testing",
+        "   ************* No node connection errors were found.",
+        "   ************* Beginning Simulation",
+    });
 
     // HeatBalanceManager::GetProjectControlData(*state, ErrorsFound);
     // EXPECT_FALSE(ErrorsFound);
@@ -1022,6 +1008,114 @@ TEST_F(EnergyPlusFixture, HeatBalanceAirManager_InitSimpleMixingConvectiveHeatGa
     HeatBalanceAirManager::InitSimpleMixingConvectiveHeatGains(*state);
     EXPECT_NEAR(expectedResult1, state->dataHeatBal->MassConservation(1).ZoneMixingReceivingFr(1), allowedTolerance);
     EXPECT_NEAR(expectedResult2, state->dataHeatBal->MassConservation(1).ZoneMixingReceivingFr(2), allowedTolerance);
+}
+
+TEST_F(EnergyPlusFixture, HeatBalanceAirManager_MixingCapacitanceWarning_Test)
+{
+    // GitHub issue 10761: ZoneMixing into a small zone at a flow rate that is large relative to the
+    // zone's own volume and the simulation timestep should trigger a warning about the explicit
+    // (lagged) interzone coupling losing accuracy, rather than silently producing an apparently
+    // over-diluted result.
+
+    nlohmann::json epJSON = R"(
+    {
+        "Zone": {
+            "Main Zone" : {
+                "volume": 150.0
+            },
+            "Small Zone" : {
+                "volume": 3.0
+            }
+        },
+        "Construction": {
+            "ext-slab": {
+                "outside_layer": "HW CONCRETE"
+            }
+        },
+        "Material": {
+            "HW CONCRETE": {
+                "conductivity": 1.311,
+                "density": 2240.0,
+                "roughness": "Rough",
+                "solar_absorptance": 0.7,
+                "specific_heat": 836.8,
+                "thermal_absorptance": 0.9,
+                "thickness": 0.1016,
+                "visible_absorptance": 0.7
+            }
+        },
+        "BuildingSurface:Detailed": {
+            "Dummy Main Zone Floor": {
+                "zone_name": "Main Zone",
+                "surface_type": "Floor",
+                "construction_name": "ext-slab",
+                "number_of_vertices": 4,
+                "outside_boundary_condition": "Adiabatic",
+                "sun_exposure": "NoSun",
+                "vertices": [
+                    {"vertex_x_coordinate": 45.3375, "vertex_y_coordinate": 28.7006, "vertex_z_coordinate": 0.0},
+                    {"vertex_x_coordinate": 45.3375, "vertex_y_coordinate": 4.5732, "vertex_z_coordinate": 0.0},
+                    {"vertex_x_coordinate": 4.5732, "vertex_y_coordinate": 4.5732, "vertex_z_coordinate": 0.0},
+                    {"vertex_x_coordinate": 4.5732, "vertex_y_coordinate": 28.7006, "vertex_z_coordinate": 0.0}
+                ]
+            },
+            "Dummy Small Zone Floor": {
+                "zone_name": "Small Zone",
+                "surface_type": "Floor",
+                "construction_name": "ext-slab",
+                "number_of_vertices": 4,
+                "outside_boundary_condition": "Adiabatic",
+                "sun_exposure": "NoSun",
+                "vertices": [
+                    {"vertex_x_coordinate": 45.3375, "vertex_y_coordinate": 28.7006, "vertex_z_coordinate": 0.0},
+                    {"vertex_x_coordinate": 45.3375, "vertex_y_coordinate": 4.5732, "vertex_z_coordinate": 0.0},
+                    {"vertex_x_coordinate": 4.5732, "vertex_y_coordinate": 4.5732, "vertex_z_coordinate": 0.0},
+                    {"vertex_x_coordinate": 4.5732, "vertex_y_coordinate": 28.7006, "vertex_z_coordinate": 0.0}
+                ]
+            }
+        },
+        "ZoneMixing": {
+            "SmallZoneMixing": {
+                "design_flow_rate_calculation_method": "Flow/Zone",
+                "design_flow_rate": 3.0,
+                "zone_or_space_name": "Small Zone",
+                "source_zone_or_space_name": "Main Zone"
+            }
+        }
+    }
+    )"_json;
+
+    state->dataGlobal->isEpJSON = true;
+    ASSERT_TRUE(process_json(epJSON));
+    state->init_state(*state);
+
+    HeatBalanceManager::GetHeatBalanceInput(*state);
+    // Not the focus of this test -- clear out the "** Warning ** CalculateZoneVolume: 2 zones are not fully enclosed. For more details use:
+    // Output:Diagnostics,DisplayExtrawarnings;"
+    has_err_output(true);
+
+    state->dataHeatBalFanSys->ZoneReOrder.allocate(state->dataGlobal->NumOfZones);
+    bool ErrorsFound = false;
+    HeatBalanceAirManager::GetSimpleAirModelInputs(*state, ErrorsFound);
+    EXPECT_FALSE(ErrorsFound);
+
+    // No Timestep object was entered, so Number of TimeSteps in Hour defaults to 4 (already consumed above).
+    // ZoneMixing flow of 3.0 m3/s into the 3.0 m3 "Small Zone" is 3600 air changes per hour, far beyond
+    // what even the maximum of 60 Timesteps in Hour could resolve.
+    compare_err_stream_substring( //
+        delimited_string({
+            "   ** Warning ** GetSimpleAirModelInputs: Mixing and/or CrossMixing into Zone=\"SMALL ZONE\" is large relative "
+            "to the zone's air volume and the simulation timestep.",
+            "   **   ~~~   ** ...The combined Mixing/CrossMixing flow into this zone corresponds to 3600.0 air changes per "
+            "hour, more than 5x the Number of Timesteps in Hour (4).",
+            "   **   ~~~   ** ...Inter-zone mixing is calculated using the connected zone's "
+            "temperature/humidity/contaminant level from the previous timestep",
+            "   **   ~~~   ** ...so a flow rate this large relative to the zone volume and timestep can introduce a "
+            "lagged-coupling error (e.g., apparent over-dilution of contaminants).",
+            "   **   ~~~   ** ...Even the EnergyPlus maximum of 60 Timesteps in Hour would not eliminate this lag; consider "
+            "reducing the Mixing/CrossMixing flow rate relative to the zone volume instead.",
+        }),
+        true);
 }
 
 } // namespace EnergyPlus

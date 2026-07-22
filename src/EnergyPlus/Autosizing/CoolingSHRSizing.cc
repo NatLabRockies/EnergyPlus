@@ -45,6 +45,10 @@
 // OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 // POSSIBILITY OF SUCH DAMAGE.
 
+// C++ Headers
+#include <format>
+
+// EnergyPlus Headers
 #include <EnergyPlus/Autosizing/CoolingSHRSizing.hh>
 #include <EnergyPlus/DXCoils.hh>
 #include <EnergyPlus/Data/EnergyPlusData.hh>
@@ -137,40 +141,18 @@ void CoolingSHRSizer::updateSizingString(EnergyPlusData &state)
     // override sizingString to match existing text
     if (this->coilType == HVAC::CoilType::CoolingDXTwoSpeed) {
         if (this->dataDXSpeedNum == 1) { // mode 1 is high speed in DXCoils loop
-            if (this->isEpJSON) {
-                this->sizingString = "high_speed_rated_sensible_heat_ratio";
-            } else {
-                this->sizingString = "High Speed Rated Sensible Heat Ratio";
-            }
+            this->sizingString = "High Speed Rated Sensible Heat Ratio";
         } else if (this->dataDXSpeedNum == 2) {
-            if (this->isEpJSON) {
-                this->sizingString = "low_speed_gross_rated_sensible_heat_ratio";
-            } else {
-                this->sizingString = "Low Speed Gross Rated Sensible Heat Ratio";
-            }
+            this->sizingString = "Low Speed Gross Rated Sensible Heat Ratio";
         }
     } else if (this->coilType == HVAC::CoilType::CoolingDXMultiSpeed) {
-        if (this->isEpJSON) {
-            this->sizingString = fmt::format("speed_{}_rated_sensible_heat_ratio", state.dataSize->DataDXSpeedNum);
-        } else {
-            this->sizingString = fmt::format("Speed {} Rated Sensible Heat Ratio", state.dataSize->DataDXSpeedNum);
-        }
+        this->sizingString = std::format("Speed {} Rated Sensible Heat Ratio", state.dataSize->DataDXSpeedNum);
     } else if (this->coilType == HVAC::CoilType::CoolingVRFFluidTCtrl) {
-        if (this->isEpJSON) {
-            this->sizingString = "rated_sensible_heat_ratio";
-        } else {
-            this->sizingString = "Rated Sensible Heat Ratio";
-        }
+        this->sizingString = "Rated Sensible Heat Ratio";
     } else if (this->coilType == HVAC::CoilType::CoolingDXCurveFit) {
-        if (this->isEpJSON) {
-            this->sizingString = "gross_sensible_heat_ratio";
-        } else {
-            this->sizingString = "Gross Sensible Heat Ratio";
-        }
+        this->sizingString = "Gross Sensible Heat Ratio";
     } else {
-        if (this->isEpJSON) {
-            this->sizingString = "gross_rated_sensible_heat_ratio";
-        }
+        this->sizingString = "Gross Rated Sensible Heat Ratio";
     }
 }
 

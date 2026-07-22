@@ -4734,7 +4734,7 @@ TEST_F(EnergyPlusFixture, CalcAirFlowSimple_WindAndStackArea)
     // Initial test, for case where winds are "perpendicular" (ASHRAE terminology, meaning blowing directly towards the effective angle)
     auto formatFailure = [&]() {
         Real64 angle = 180.0 - std::abs(std::abs(thisZone.WindDir - thisVentilation.EffAngle) - 180);
-        return fmt::format("Failed for WindDir={} and EffAngle={}, absolute angle between opening and wind dir={}",
+        return std::format("Failed for WindDir={} and EffAngle={}, absolute angle between opening and wind dir={}",
                            thisZone.WindDir,
                            thisVentilation.EffAngle,
                            angle);

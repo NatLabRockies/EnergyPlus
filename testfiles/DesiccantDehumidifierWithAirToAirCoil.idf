@@ -2626,7 +2626,7 @@
   ZoneControl:Humidistat,
     SPACE5-1 Humidistat,     !- Name
     SPACE5-1,                !- Zone Name
-    Relative Humidity Sched; !- Humidifying Relative Humidity Setpoint Schedule Name
+    Relative Humidity Sched; !- Humidifying Setpoint Schedule Name
 
   Schedule:Compact,
     Relative Humidity Sched, !- Name
@@ -3087,7 +3087,7 @@
   ZoneControl:Humidistat,
     SPACE1-1 Humidistat,     !- Name
     SPACE1-1,                !- Zone Name
-    Relative Humidity Sched; !- Humidifying Relative Humidity Setpoint Schedule Name
+    Relative Humidity Sched; !- Humidifying Setpoint Schedule Name
 
   HeatExchanger:Desiccant:BalancedFlow,
     OA Desiccant Heat Exchanger,  !- Name

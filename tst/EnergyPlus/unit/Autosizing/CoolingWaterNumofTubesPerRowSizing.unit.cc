@@ -97,7 +97,7 @@ TEST_F(AutoSizingFixture, CoolingWaterNumofTubesPerRowSizingGauntlet)
 
     std::string eiooutput =
         std::string("! <Component Sizing Information>, Component Type, Component Name, Input Field Description, Value\n"
-                    " Component Sizing Information, Coil:Cooling:Water, MyWaterCoil, User-Specified Number of Tubes per Row, 5.00000\n");
+                    " Component Sizing Information, Coil:Cooling:Water, MyWaterCoil, User-Specified Number of Tubes per Row, 5\n");
 
     EXPECT_TRUE(compare_eio_stream(eiooutput, true));
 
@@ -183,7 +183,7 @@ TEST_F(AutoSizingFixture, CoolingWaterNumofTubesPerRowSizingGauntlet)
     sizer.autoSizedValue = 0.0; // reset for next test
 
     // <Component Sizing Information> header already reported above (and flag set false). Only coil sizing information reported here.
-    eiooutput = std::string(" Component Sizing Information, Coil:Cooling:Water, MyWaterCoil, Design Size Number of Tubes per Row, 4.00000\n");
+    eiooutput = std::string(" Component Sizing Information, Coil:Cooling:Water, MyWaterCoil, Design Size Number of Tubes per Row, 4\n");
 
     EXPECT_TRUE(compare_eio_stream(eiooutput, true));
 
@@ -238,8 +238,8 @@ TEST_F(AutoSizingFixture, CoolingWaterNumofTubesPerRowSizingGauntlet)
     EXPECT_FALSE(errorsFound);
 
     // <Component Sizing Information> header already reported above (and flag set false). Only coil sizing information reported here.
-    eiooutput = std::string(" Component Sizing Information, Coil:Cooling:Water, MyWaterCoil, Design Size Number of Tubes per Row, 4.00000\n"
-                            " Component Sizing Information, Coil:Cooling:Water, MyWaterCoil, User-Specified Number of Tubes per Row, 5.00000\n");
+    eiooutput = std::string(" Component Sizing Information, Coil:Cooling:Water, MyWaterCoil, Design Size Number of Tubes per Row, 4\n"
+                            " Component Sizing Information, Coil:Cooling:Water, MyWaterCoil, User-Specified Number of Tubes per Row, 5\n");
     EXPECT_TRUE(compare_eio_stream(eiooutput, true));
 }
 

@@ -35,7 +35,7 @@ jobs:
       contents: write
 
     steps:
-    - uses: actions/checkout@v6
+    - uses: actions/checkout@v7
 
     - name: Set up Python ${{ env.Python_REQUIRED_VERSION }}
       id: setup-python
@@ -140,12 +140,12 @@ jobs:
             test_key: ubuntu2404-arm64
 
     steps:
-      - uses: actions/checkout@v6  # Still need E+ checked out to get testing scripts
+      - uses: actions/checkout@v7  # Still need E+ checked out to get testing scripts
         with:
           path: checkout
 
       - name: Set up Python ${{ env.Python_REQUIRED_VERSION }}
-        uses: actions/setup-python@v6
+        uses: actions/setup-python@v7
         id: setup-python
         with:
           python-version: ${{ env.Python_REQUIRED_VERSION }}

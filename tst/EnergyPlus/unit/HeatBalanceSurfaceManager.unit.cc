@@ -224,9 +224,9 @@ TEST_F(EnergyPlusFixture, HeatBalanceSurfaceManager_TestSurfTempCalcHeatBalanceI
         delimited_string({"   ** Severe  ** Temperature (high) out of bounds (201.00] for zone=\"TestZone\", for surface=\"TestSurface\"",
                           "   **   ~~~   **  Environment=, at Simulation time= 00:00 - 00:00",
                           "   **   ~~~   ** Zone=\"TestZone\", Diagnostic Details:",
-                          "   **   ~~~   ** ...Internal Heat Gain [2.500E-003] W/m2",
-                          "   **   ~~~   ** ...Infiltration/Ventilation [0.500] m3/s",
-                          "   **   ~~~   ** ...Mixing/Cross Mixing [0.700] m3/s",
+                          "   **   ~~~   ** ...Internal Heat Gain [0.00250] W/m2",
+                          "   **   ~~~   ** ...Infiltration/Ventilation [0.50000] m3/s",
+                          "   **   ~~~   ** ...Mixing/Cross Mixing [0.70000] m3/s",
                           "   **   ~~~   ** ...Zone is part of HVAC controlled system."});
     EXPECT_TRUE(compare_err_stream(error_string01, true));
     EXPECT_TRUE(testZone.TempOutOfBoundsReported);
@@ -260,9 +260,9 @@ TEST_F(EnergyPlusFixture, HeatBalanceSurfaceManager_TestSurfTempCalcHeatBalanceI
         delimited_string({"   ** Severe  ** Temperature (low) out of bounds [-101.00] for zone=\"TestZone\", for surface=\"TestSurface\"",
                           "   **   ~~~   **  Environment=, at Simulation time= 00:00 - 00:00",
                           "   **   ~~~   ** Zone=\"TestZone\", Diagnostic Details:",
-                          "   **   ~~~   ** ...Internal Heat Gain [2.500E-003] W/m2",
-                          "   **   ~~~   ** ...Infiltration/Ventilation [0.500] m3/s",
-                          "   **   ~~~   ** ...Mixing/Cross Mixing [0.700] m3/s",
+                          "   **   ~~~   ** ...Internal Heat Gain [0.00250] W/m2",
+                          "   **   ~~~   ** ...Infiltration/Ventilation [0.50000] m3/s",
+                          "   **   ~~~   ** ...Mixing/Cross Mixing [0.70000] m3/s",
                           "   **   ~~~   ** ...Zone is part of HVAC controlled system."});
     EXPECT_TRUE(compare_err_stream(error_string03, true));
     EXPECT_TRUE(testZone.TempOutOfBoundsReported);
@@ -6518,7 +6518,7 @@ TEST_F(EnergyPlusFixture, HeatBalanceSurfaceManager_TestSurfPropertyViewFactorsI
     EXPECT_TRUE(SrdSurfsProperty_2.IsSkyViewFactorSet);
     EXPECT_DOUBLE_EQ(0.0, GndSurfsProperty_2.GndSurfs(1).ViewFactor);
     EXPECT_FALSE(GndSurfsProperty_2.IsGroundViewFactorSet);
-    EXPECT_DOUBLE_EQ(0.0, SrdSurfsProperty_3.SkyViewFactor);
+    EXPECT_EQ(DataSizing::AutoSize, SrdSurfsProperty_3.SkyViewFactor);
     EXPECT_FALSE(SrdSurfsProperty_3.IsSkyViewFactorSet);
     EXPECT_DOUBLE_EQ(0.0, GndSurfsProperty_3.GndSurfs(1).ViewFactor);
     EXPECT_FALSE(GndSurfsProperty_3.IsGroundViewFactorSet);
@@ -7157,11 +7157,11 @@ TEST_F(EnergyPlusFixture, HeatBalanceSurfaceManager_TestSurfPropertySurfToGndLWR
     Sched::GetSchedule(*state, "SKY TEMP SCH")->currentVal = 15.0;           // Sky temp
     Sched::GetSchedule(*state, "GROUND TEMP SCH")->currentVal = 22.0;        // Grd temp
 
-    for (int SurfNum = 1; SurfNum <= 6; SurfNum++) {
-        state->dataHeatBalSurf->SurfOutsideTempHist(1)(SurfNum) = 20; // Surf temp
-        state->dataSurface->SurfOutDryBulbTemp(SurfNum) = 22;         // Air temp
-        state->dataSurface->surfExtConv(SurfNum).model = Convect::HcExt::MoWiTTHcOutside;
-        state->dataSurface->SurfAirSkyRadSplit(SurfNum) = 1.0;
+    for (int loopSurfNum = 1; loopSurfNum <= 6; loopSurfNum++) {
+        state->dataHeatBalSurf->SurfOutsideTempHist(1)(loopSurfNum) = 20; // Surf temp
+        state->dataSurface->SurfOutDryBulbTemp(loopSurfNum) = 22;         // Air temp
+        state->dataSurface->surfExtConv(loopSurfNum).model = Convect::HcExt::MoWiTTHcOutside;
+        state->dataSurface->SurfAirSkyRadSplit(loopSurfNum) = 1.0;
     }
 
     // test reset of surface view factors are correct
@@ -8404,7 +8404,7 @@ TEST_F(EnergyPlusFixture, HeatBalanceSurfaceManager_TestSurfPropertyViewFactorsR
     auto &GndSurfsProperty_3 = state->dataSurface->GroundSurfsProperty(GndSurfsNum);
 
     // check user input sky view factor is blank
-    EXPECT_DOUBLE_EQ(0.0, SrdSurfsProperty_1.SkyViewFactor);
+    EXPECT_EQ(DataSizing::AutoSize, SrdSurfsProperty_1.SkyViewFactor);
     EXPECT_FALSE(SrdSurfsProperty_1.IsSkyViewFactorSet);
     EXPECT_DOUBLE_EQ(0.2, SrdSurfsProperty_1.SurroundingSurfs(1).ViewFactor);
     // check user input ground view factor is not blank
@@ -8419,7 +8419,7 @@ TEST_F(EnergyPlusFixture, HeatBalanceSurfaceManager_TestSurfPropertyViewFactorsR
     EXPECT_DOUBLE_EQ(0.0, GndSurfsProperty_2.GndSurfs(1).ViewFactor);
     EXPECT_FALSE(GndSurfsProperty_2.IsGroundViewFactorSet);
     // check user input sky and ground view factors are blank
-    EXPECT_DOUBLE_EQ(0.0, SrdSurfsProperty_3.SkyViewFactor);
+    EXPECT_EQ(DataSizing::AutoSize, SrdSurfsProperty_3.SkyViewFactor);
     EXPECT_FALSE(SrdSurfsProperty_3.IsSkyViewFactorSet);
     EXPECT_DOUBLE_EQ(0.4, SrdSurfsProperty_3.SurroundingSurfs(1).ViewFactor);
     EXPECT_DOUBLE_EQ(0.0, GndSurfsProperty_3.GndSurfs(1).ViewFactor);

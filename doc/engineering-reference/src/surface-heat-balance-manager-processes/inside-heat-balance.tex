@@ -792,6 +792,8 @@ Separate from the above model structure, there are also other comprehensive algo
 
 The comprehensive natural convection model, accessed using the keyword ``TARP,'' correlates the convective heat transfer coefficient to the surface orientation and the difference between the surface and zone air temperatures (where $\Delta$T = Surface Temperature - Air Temperature).~ The algorithm is taken directly from Walton (1983).~ Walton derived his algorithm from ASHRAE literature which can be found in the ASHRAE Handbook (for example , the  ASHRAE Handbook of Fundamentals 2001, Table 5 on p.~3.12) which gives equations for natural convection heat transfer coefficients in the turbulent range for large, vertical plates and for large, horizontal plates facing upward when heated (or downward when cooled).~~ A note in the text also gives an approximation for large, horizontal plates facing downward when heated (or upward when cooled) recommending that it should be half of the facing upward value.~ Walton adds a curve fit as a function of the cosine of the tilt angle to provide intermediate values between vertical and horizontal.~ The curve fit values at the extremes match the ASHRAE values very well.
 
+\textbf{Note:} Surface orientation in EnergyPlus is defined by the outward-pointing normal, i.e., the normal directed away from the zone interior. Under this convention, a floor is a \emph{downward facing} surface (its outward normal points down) and a ceiling is an \emph{upward facing} surface (its outward normal points up). The conditional cases below use this convention, which is opposite to the physical orientation referenced in the ASHRAE description above. As noted in the source code, callers passing surface tilt into the routine for interior heat balance use the negative of $\cos(\text{Tilt})$ to account for this.
+
 For no temperature difference OR a vertical surface, the following correlation is used:
 
 \begin{equation}
@@ -800,7 +802,7 @@ h = 1.31{\left| {\Delta T} \right|^{\frac{1}{3}}}
 
 It should be noted that h is zero when the temperature difference is zero.
 
-For ($\Delta$T \textless{} 0.0 AND an upward facing surface)~ OR~ ($\Delta$T \textgreater{} 0.0 AND an downward facing surface), an enhanced convection correlation is used:
+For ($\Delta$T \textless{} 0.0 AND an upward facing surface, e.g., a ceiling cooler than the zone air)~ OR~ ($\Delta$T \textgreater{} 0.0 AND an downward facing surface, e.g., a floor warmer than the zone air), an enhanced convection correlation is used:
 
 \begin{equation}
 h = \frac{{9.482{{\left| {\Delta T} \right|}^{\frac{1}{3}}}}}{{7.238 - \left| {\cos \Sigma } \right|}}
@@ -808,7 +810,7 @@ h = \frac{{9.482{{\left| {\Delta T} \right|}^{\frac{1}{3}}}}}{{7.238 - \left| {\
 
 where $\Sigma$ is the surface tilt angle.
 
-For ($\Delta$T \textgreater{} 0.0 AND an upward facing surface)~ OR~ ($\Delta$T \textless{} 0.0 AND an downward facing surface)], a reduced convection correlation is used:
+For ($\Delta$T \textgreater{} 0.0 AND an upward facing surface, e.g., a ceiling warmer than the zone air)~ OR~ ($\Delta$T \textless{} 0.0 AND an downward facing surface, e.g., a floor cooler than the zone air), a reduced convection correlation is used:
 
 \begin{equation}
 h = \frac{{1.810{{\left| {\Delta T} \right|}^{\frac{1}{3}}}}}{{1.382 + \left| {\cos \Sigma } \right|}}

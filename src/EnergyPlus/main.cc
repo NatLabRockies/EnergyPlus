@@ -45,12 +45,13 @@
 // OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 // POSSIBILITY OF SUCH DAMAGE.
 
+// Third Party Headers
+#include <CLI/CLI11.hpp>
+
 // EnergyPlus Headers
 #include <EnergyPlus/api/EnergyPlusPgm.hh>
 
-#include <CLI/CLI11.hpp>
-
-int main(int argc, char **argv)
+int main([[maybe_unused]] int argc, [[maybe_unused]] char **argv)
 {
 #ifdef _WIN32
     const std::vector<std::string> args = CLI::detail::compute_win32_argv();

@@ -7233,10 +7233,6 @@ Users are required to define three different nodes such as chilled water, hot wa
 
 This alpha field contains the identifying name of the central heat pump system.
 
-\paragraph{Field: Control Method}\label{field-control-method}
-
-This field must contain a keyword defines how the central heat pump system controls the interaction between the chiller-heater modules and the water loops to meet the cooling and heating demands. Currently, the only available option is SmartMixing.
-
 \paragraph{Field: Cooling Loop Inlet Node Name}\label{field-cooling-loop-inlet-node-name}
 
 This alpha field contains the identifying name of the chilled water inlet node.
@@ -7294,7 +7290,6 @@ An example of this statement in an IDF is:
 \begin{lstlisting}
 CentralHeatPumpSystem,
   ChillerBank,                !- Name
-  SmartMixing,                !- Control Method
   Chiller Inlet Node,         !- Cooling Loop Inlet Node Name
   Chiller Outlet Node,        !- Cooling Loop Outlet Node Name
   Condenser Inlet Node,       !- Source Loop Inlet Node Name
@@ -7496,10 +7491,6 @@ This numeric field contains the design hot water flow rate in m\(^{3}\)/s. The m
 
 This numeric field contains the fraction of efficiency of the compressor electrical energy consumption that must be rejected by the condenser. This value must be between 0.0 and 1.0, and the default value is 1.0.
 
-\subsubsection{Field: Condenser Type}\label{field-condenser-type-7}
-
-This alpha field contains the type of condenser.  The two valid options include AirCooled and WaterCooled. If WaterCooled is selected, the full specification of the condenser loop and its associated equipment is required. The default value is WaterCooled.
-
 \subsubsection{Field: Cooling Mode Temperature Curve Condenser Water Independent Variable}\label{field-cooling-mode-temperature-curve-condenser-water-independent-variable}
 
 This alpha field determines whether the entering or leaving condenser water temperature is used in the cooling mode unloading performance curves that follow. Valid variables include EnteringCondenser and LeavingCondenser, and the default variable is EnteringCondenser. The condenser temperature used for the cooling mode unloading performance curves will be dependent on this field input. For example, leaving condenser water temperature will be used when the LeavingCondenser is chosen, otherwise entering condenser water temperature.
@@ -7565,7 +7556,6 @@ ChillerHeaterPerformance:Electric:EIR,
   0.0005525,                  !- Design Condenser Water Flow Rate {m$^{3}$/s}
   0.0003525,                  !- Design Hot Water Flow Rate {m$^{3}$/s}
   1,                          !- Compressor Motor Efficiency
-  WaterCooled,                !- Condenser Type
   EnteringCondenser,          !- Cooling Mode Temperature Curve Condenser Water Independent Variable
   ChillerHeaterClgCapFT,      !- Cooling Mode Cooling Capacity Function of Temperature Curve Name
   ChillerHeaterClgEIRFT,      !- Cooling Mode Electric Input to Cooling Output Ratio Function of

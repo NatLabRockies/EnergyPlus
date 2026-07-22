@@ -3994,11 +3994,16 @@ TEST_F(EnergyPlusFixture, Initialization2_AirSource)
     // do a bit of extra wiring up to the plant
     PLHPPlantLoadSideComp.Name = thisCoolingPLHP->name;
     PLHPPlantLoadSideComp.NodeNumIn = thisCoolingPLHP->loadSideNodes.inlet;
+    PLHPPlantLoadSideComp.NodeNumOut = thisCoolingPLHP->loadSideNodes.outlet;
 
     // call for all initialization
     state->dataGlobal->BeginEnvrnFlag = true;
     state->dataPlnt->PlantFirstSizesOkayToFinalize = true;
     thisCoolingPLHP->onInitLoopEquip(*state, myLocation);
+
+    // Component flow control type
+    auto &comp = DataPlant::CompData::getPlantComponent(*state, thisCoolingPLHP->loadSidePlantLoc);
+    comp.FlowCtrl = DataBranchAirLoopPlant::ControlType::SeriesActive;
 
     // call with run flag off, loose limits on node min/max
     thisCoolingPLHP->running = false;
@@ -4053,6 +4058,19 @@ TEST_F(EnergyPlusFixture, Initialization2_AirSource)
     thisCoolingPLHP->setOperatingFlowRatesASHP(*state, firstHVACIteration, currentLoad);
     EXPECT_NEAR(0.14, thisCoolingPLHP->loadSideMassFlowRate, 0.001);
     EXPECT_NEAR(1.29, thisCoolingPLHP->sourceSideMassFlowRate, 0.1);
+
+    // Change control type
+    comp.FlowCtrl = DataBranchAirLoopPlant::ControlType::Active;
+    state->dataPlnt->PlantLoop(1).LoopSide(DataPlant::LoopSideLocation::Supply).FlowLock = DataPlant::FlowLock::Unlocked;
+    state->dataLoopNodes->Node(thisCoolingPLHP->loadSideNodes.inlet).MassFlowRateMinAvail = 0.0;
+    thisCoolingPLHP->running = true;
+    thisCoolingPLHP->setOperatingFlowRatesASHP(*state, firstHVACIteration, currentLoad); // no load
+    EXPECT_NEAR(0.0, thisCoolingPLHP->loadSideMassFlowRate, 0.001);
+    EXPECT_NEAR(0.0, thisCoolingPLHP->sourceSideMassFlowRate, 0.001);
+    thisCoolingPLHP->running = true;
+    thisCoolingPLHP->setOperatingFlowRatesASHP(*state, firstHVACIteration, -5000);
+    EXPECT_NEAR(1.0, thisCoolingPLHP->loadSideMassFlowRate, 0.01);
+    EXPECT_NEAR(1.29, thisCoolingPLHP->sourceSideMassFlowRate, 0.01);
 }
 
 TEST_F(EnergyPlusFixture, TestSizing_FullyAutosizedCoolingWithCompanion_AirSource)
@@ -5273,6 +5291,10 @@ TEST_F(EnergyPlusFixture, TestOperatingFlowRates_FullyAutosized_AirSource)
 
     // assign the plant sizing data
     state->dataPlnt->PlantLoop(1).PlantSizNum = 1;
+
+    // Component flow control type
+    auto &comp = DataPlant::CompData::getPlantComponent(*state, thisCoolingPLHP->loadSidePlantLoc);
+    comp.FlowCtrl = DataBranchAirLoopPlant::ControlType::SeriesActive;
 
     // call with run flag ON, flow locked at nonzero both
     state->dataPlnt->PlantLoop(1).LoopSide(DataPlant::LoopSideLocation::Supply).FlowLock = DataPlant::FlowLock::Locked;

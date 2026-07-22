@@ -18,7 +18,7 @@ if (${ENABLE_OPENMP})
   endif()
 endif()
 
-target_link_libraries(ConvertInputFormat PRIVATE energyplusparser project_options project_warnings)
+target_link_libraries(ConvertInputFormat PRIVATE cli11 energyplusparser objexx project_options project_warnings)
 
 # See https://en.cppreference.com/w/cpp/filesystem#Notes
 if ((CMAKE_COMPILER_IS_GNUCXX AND CMAKE_CXX_COMPILER_VERSION VERSION_LESS 9.1) OR
@@ -55,7 +55,7 @@ if(BUILD_TESTING)
   add_test(NAME ConvertInputFormat.RegularFile_RelativePath
     COMMAND  "${Python_EXECUTABLE}" "${PROJECT_SOURCE_DIR}/test_convert_input_format.py"
              --convertinputformat-exe $<TARGET_FILE:ConvertInputFormat>
-             --out-dir "RegularFile_AbsolutePath"
+             --out-dir "RegularFile_RelativePath"
              --expected-filename 1ZoneUncontrolled.epJSON
              --input-file "1ZoneUncontrolled.idf"
     WORKING_DIRECTORY ${TEST_DIR}

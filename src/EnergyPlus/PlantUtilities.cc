@@ -47,6 +47,7 @@
 
 // C++ Headers
 #include <cmath>
+#include <format>
 
 // ObjexxFCL Headers
 #include <ObjexxFCL/Array.functions.hh>
@@ -140,8 +141,8 @@ void SetComponentFlowRate(EnergyPlusData &state,
     if (plantLoc.loopNum == 0) { // protect from hard crash below
         if (InletNode > 0) {
             ShowSevereError(state,
-                            EnergyPlus::format("SetComponentFlowRate: trapped plant loop index = 0, check component with inlet node named={}",
-                                               state.dataLoopNodes->NodeID(InletNode)));
+                            std::format("SetComponentFlowRate: trapped plant loop index = 0, check component with inlet node named={}",
+                                        state.dataLoopNodes->NodeID(InletNode)));
         } else {
             ShowSevereError(state, "SetComponentFlowRate: trapped plant loop node id = 0");
         }
@@ -176,12 +177,10 @@ void SetComponentFlowRate(EnergyPlusData &state,
         if (!state.dataGlobal->SysSizingCalc && state.dataPlnt->PlantFirstSizesOkayToFinalize) {
             // throw error for developers, need to change a component model to set hardware limits on inlet
             if (!state.dataLoopNodes->Node(InletNode).plantNodeErrorMsgIssued) {
-                ShowSevereError(
-                    state,
-                    EnergyPlus::format("SetComponentFlowRate: check component model implementation for component with inlet node named={}",
-                                       state.dataLoopNodes->NodeID(InletNode)));
-                ShowContinueError(state,
-                                  EnergyPlus::format("Inlet node MassFlowRatMax = {:.8R}", state.dataLoopNodes->Node(InletNode).MassFlowRateMax));
+                ShowSevereError(state,
+                                std::format("SetComponentFlowRate: check component model implementation for component with inlet node named={}",
+                                            state.dataLoopNodes->NodeID(InletNode)));
+                ShowContinueError(state, std::format("Inlet node MassFlowRatMax = {:.8f}", state.dataLoopNodes->Node(InletNode).MassFlowRateMax));
                 state.dataLoopNodes->Node(InletNode).plantNodeErrorMsgIssued = true;
             }
         }
@@ -390,14 +389,14 @@ void SetActuatedBranchFlowRate(EnergyPlusData &state,
                 (a_node.MassFlowRateMinAvail - CompFlow > DataBranchAirLoopPlant::MassFlowTolerance)) {
                 ShowSevereError(state, "SetActuatedBranchFlowRate: Flow rate is out of range"); // DEBUG error...should never get here
                 ShowContinueErrorTimeStamp(state, "");
-                ShowContinueError(state, EnergyPlus::format("Component flow rate [kg/s] = {:.8R}", CompFlow));
-                ShowContinueError(state, EnergyPlus::format("Node maximum flow rate available [kg/s] = {:.8R}", a_node.MassFlowRateMaxAvail));
-                ShowContinueError(state, EnergyPlus::format("Node minimum flow rate available [kg/s] = {:.8R}", a_node.MassFlowRateMinAvail));
+                ShowContinueError(state, std::format("Component flow rate [kg/s] = {:.8f}", CompFlow));
+                ShowContinueError(state, std::format("Node maximum flow rate available [kg/s] = {:.8f}", a_node.MassFlowRateMaxAvail));
+                ShowContinueError(state, std::format("Node minimum flow rate available [kg/s] = {:.8f}", a_node.MassFlowRateMinAvail));
             }
         } else {
             ShowFatalError(state,
-                           EnergyPlus::format("SetActuatedBranchFlowRate: Flowlock out of range, value={}",
-                                              plantLoc.side->FlowLock)); // DEBUG error...should never get here LCOV_EXCL_LINE
+                           std::format("SetActuatedBranchFlowRate: Flowlock out of range, value={}",
+                                       static_cast<int>(plantLoc.side->FlowLock))); // DEBUG error...should never get here LCOV_EXCL_LINE
         }
 
         Real64 const a_node_MasFlowRate(a_node.MassFlowRate);
@@ -555,20 +554,18 @@ void CheckPlantMixerSplitterConsistency(EnergyPlusData &state,
                 if (state.dataPlnt->PlantLoop(LoopNum).MFErrIndex1 == 0) {
                     ShowSevereMessage(state, "Plant flows do not resolve -- splitter inlet flow does not match mixer outlet flow ");
                     ShowContinueErrorTimeStamp(state, "");
-                    ShowContinueError(state, EnergyPlus::format("PlantLoop name= {}", state.dataPlnt->PlantLoop(LoopNum).Name));
+                    ShowContinueError(state, std::format("PlantLoop name= {}", state.dataPlnt->PlantLoop(LoopNum).Name));
+                    ShowContinueError(
+                        state, std::format("Plant Connector:Mixer name= {}", state.dataPlnt->PlantLoop(LoopNum).LoopSide(LoopSideNum).Mixer.Name));
+                    ShowContinueError(
+                        state, std::format("Mixer outlet mass flow rate= {:.6f} {{kg/s}}", state.dataLoopNodes->Node(MixerOutletNode).MassFlowRate));
                     ShowContinueError(
                         state,
-                        EnergyPlus::format("Plant Connector:Mixer name= {}", state.dataPlnt->PlantLoop(LoopNum).LoopSide(LoopSideNum).Mixer.Name));
+                        std::format("Plant Connector:Splitter name= {}", state.dataPlnt->PlantLoop(LoopNum).LoopSide(LoopSideNum).Splitter.Name));
                     ShowContinueError(
                         state,
-                        EnergyPlus::format("Mixer outlet mass flow rate= {:.6R} {{kg/s}}", state.dataLoopNodes->Node(MixerOutletNode).MassFlowRate));
-                    ShowContinueError(state,
-                                      EnergyPlus::format("Plant Connector:Splitter name= {}",
-                                                         state.dataPlnt->PlantLoop(LoopNum).LoopSide(LoopSideNum).Splitter.Name));
-                    ShowContinueError(state,
-                                      EnergyPlus::format("Splitter inlet mass flow rate= {:.6R} {{kg/s}}",
-                                                         state.dataLoopNodes->Node(SplitterInletNode).MassFlowRate));
-                    ShowContinueError(state, EnergyPlus::format("Difference in two mass flow rates= {:.6R} {{kg/s}}", AbsDifference));
+                        std::format("Splitter inlet mass flow rate= {:.6f} {{kg/s}}", state.dataLoopNodes->Node(SplitterInletNode).MassFlowRate));
+                    ShowContinueError(state, std::format("Difference in two mass flow rates= {:.6f} {{kg/s}}", AbsDifference));
                 }
                 ShowRecurringSevereErrorAtEnd(state,
                                               "Plant Flows (Loop=" + state.dataPlnt->PlantLoop(LoopNum).Name +
@@ -582,20 +579,18 @@ void CheckPlantMixerSplitterConsistency(EnergyPlusData &state,
                 if (AbsDifference > DataBranchAirLoopPlant::MassFlowTolerance * 10.0) {
                     ShowSevereError(state, "Plant flows do not resolve -- splitter inlet flow does not match mixer outlet flow ");
                     ShowContinueErrorTimeStamp(state, "");
-                    ShowContinueError(state, EnergyPlus::format("PlantLoop name= {}", state.dataPlnt->PlantLoop(LoopNum).Name));
+                    ShowContinueError(state, std::format("PlantLoop name= {}", state.dataPlnt->PlantLoop(LoopNum).Name));
+                    ShowContinueError(
+                        state, std::format("Plant Connector:Mixer name= {}", state.dataPlnt->PlantLoop(LoopNum).LoopSide(LoopSideNum).Mixer.Name));
+                    ShowContinueError(
+                        state, std::format("Mixer outlet mass flow rate= {:.6f} {{kg/s}}", state.dataLoopNodes->Node(MixerOutletNode).MassFlowRate));
                     ShowContinueError(
                         state,
-                        EnergyPlus::format("Plant Connector:Mixer name= {}", state.dataPlnt->PlantLoop(LoopNum).LoopSide(LoopSideNum).Mixer.Name));
+                        std::format("Plant Connector:Splitter name= {}", state.dataPlnt->PlantLoop(LoopNum).LoopSide(LoopSideNum).Splitter.Name));
                     ShowContinueError(
                         state,
-                        EnergyPlus::format("Mixer outlet mass flow rate= {:.6R} {{kg/s}}", state.dataLoopNodes->Node(MixerOutletNode).MassFlowRate));
-                    ShowContinueError(state,
-                                      EnergyPlus::format("Plant Connector:Splitter name= {}",
-                                                         state.dataPlnt->PlantLoop(LoopNum).LoopSide(LoopSideNum).Splitter.Name));
-                    ShowContinueError(state,
-                                      EnergyPlus::format("Splitter inlet mass flow rate= {:.6R} {{kg/s}}",
-                                                         state.dataLoopNodes->Node(SplitterInletNode).MassFlowRate));
-                    ShowContinueError(state, EnergyPlus::format("Difference in two mass flow rates= {:.6R} {{kg/s}}", AbsDifference));
+                        std::format("Splitter inlet mass flow rate= {:.6f} {{kg/s}}", state.dataLoopNodes->Node(SplitterInletNode).MassFlowRate));
+                    ShowContinueError(state, std::format("Difference in two mass flow rates= {:.6f} {{kg/s}}", AbsDifference));
                     ShowFatalError(state, "CheckPlantMixerSplitterConsistency: Simulation terminated because of problems in plant flow resolver");
                 }
             }
@@ -618,18 +613,17 @@ void CheckPlantMixerSplitterConsistency(EnergyPlusData &state,
                 if (state.dataPlnt->PlantLoop(LoopNum).MFErrIndex2 == 0) {
                     ShowSevereMessage(state, "Plant flows do not resolve -- splitter inlet flow does not match branch outlet flows");
                     ShowContinueErrorTimeStamp(state, "");
-                    ShowContinueError(state, EnergyPlus::format("PlantLoop name= {}", state.dataPlnt->PlantLoop(LoopNum).Name));
+                    ShowContinueError(state, std::format("PlantLoop name= {}", state.dataPlnt->PlantLoop(LoopNum).Name));
+                    ShowContinueError(
+                        state, std::format("Plant Connector:Mixer name= {}", state.dataPlnt->PlantLoop(LoopNum).LoopSide(LoopSideNum).Mixer.Name));
+                    ShowContinueError(state, std::format("Sum of Branch outlet mass flow rates= {:.6f} {{kg/s}}", SumOutletFlow));
                     ShowContinueError(
                         state,
-                        EnergyPlus::format("Plant Connector:Mixer name= {}", state.dataPlnt->PlantLoop(LoopNum).LoopSide(LoopSideNum).Mixer.Name));
-                    ShowContinueError(state, EnergyPlus::format("Sum of Branch outlet mass flow rates= {:.6R} {{kg/s}}", SumOutletFlow));
-                    ShowContinueError(state,
-                                      EnergyPlus::format("Plant Connector:Splitter name= {}",
-                                                         state.dataPlnt->PlantLoop(LoopNum).LoopSide(LoopSideNum).Splitter.Name));
-                    ShowContinueError(state,
-                                      EnergyPlus::format("Splitter inlet mass flow rate= {:.6R} {{kg/s}}",
-                                                         state.dataLoopNodes->Node(SplitterInletNode).MassFlowRate));
-                    ShowContinueError(state, EnergyPlus::format("Difference in two mass flow rates= {:.6R} {{kg/s}}", AbsDifference));
+                        std::format("Plant Connector:Splitter name= {}", state.dataPlnt->PlantLoop(LoopNum).LoopSide(LoopSideNum).Splitter.Name));
+                    ShowContinueError(
+                        state,
+                        std::format("Splitter inlet mass flow rate= {:.6f} {{kg/s}}", state.dataLoopNodes->Node(SplitterInletNode).MassFlowRate));
+                    ShowContinueError(state, std::format("Difference in two mass flow rates= {:.6f} {{kg/s}}", AbsDifference));
                 }
                 ShowRecurringSevereErrorAtEnd(state,
                                               "Plant Flows (Loop=" + state.dataPlnt->PlantLoop(LoopNum).Name +
@@ -685,10 +679,10 @@ void CheckForRunawayPlantTemps(EnergyPlusData &state, int const LoopNum, const D
     std::string hotcold;
     bool makefatalerror;
     Real64 LoopCapacity;
-    Real64 LoopDemandSideCapacity;
+    Real64 LoopDemandSideCapacity = 0.0;
     Real64 LoopSupplySideCapacity;
     Real64 DispatchedCapacity;
-    Real64 LoopDemandSideDispatchedCapacity;
+    Real64 LoopDemandSideDispatchedCapacity = 0.0;
     Real64 LoopSupplySideDispatchedCapacity;
 
     makefatalerror = false;
@@ -727,16 +721,15 @@ void CheckForRunawayPlantTemps(EnergyPlusData &state, int const LoopNum, const D
     }
 
     if (makefatalerror) {
-        ShowSevereError(state,
-                        EnergyPlus::format("Plant temperatures are getting far too {}, check controls and relative loads and capacities", hotcold));
+        ShowSevereError(state, std::format("Plant temperatures are getting far too {}, check controls and relative loads and capacities", hotcold));
         ShowContinueErrorTimeStamp(state, "");
         ShowContinueError(state,
-                          EnergyPlus::format("PlantLoop Name ({} Side) = {}",
-                                             DataPlant::DemandSupplyNames[static_cast<int>(LoopSideNum)],
-                                             state.dataPlnt->PlantLoop(LoopNum).Name));
+                          std::format("PlantLoop Name ({} Side) = {}",
+                                      DataPlant::DemandSupplyNames[static_cast<int>(LoopSideNum)],
+                                      state.dataPlnt->PlantLoop(LoopNum).Name));
         ShowContinueError(state,
-                          EnergyPlus::format("PlantLoop Setpoint Temperature={:.1R} {{C}}",
-                                             state.dataLoopNodes->Node(state.dataPlnt->PlantLoop(LoopNum).TempSetPointNodeNum).TempSetPoint));
+                          std::format("PlantLoop Setpoint Temperature={:.1f} {{C}}",
+                                      state.dataLoopNodes->Node(state.dataPlnt->PlantLoop(LoopNum).TempSetPointNodeNum).TempSetPoint));
         if (state.dataPlnt->PlantLoop(LoopNum).LoopSide(DataPlant::LoopSideLocation::Supply).InletNodeSetPt) {
             ShowContinueError(state, "PlantLoop Inlet Node (LoopSideLocation::Supply) has a Setpoint.");
         } else {
@@ -758,40 +751,38 @@ void CheckForRunawayPlantTemps(EnergyPlusData &state, int const LoopNum, const D
             ShowContinueError(state, "PlantLoop Outlet Node (LoopSideLocation::Demand) does not have a Setpoint.");
         }
         ShowContinueError(state,
-                          EnergyPlus::format("PlantLoop Outlet Node ({}Side) \"{}\" has temperature={:.1R} {{C}}",
-                                             DataPlant::DemandSupplyNames[static_cast<int>(LoopSideNum)],
-                                             state.dataLoopNodes->NodeID(state.dataPlnt->PlantLoop(LoopNum).LoopSide(LoopSideNum).NodeNumOut),
-                                             state.dataLoopNodes->Node(state.dataPlnt->PlantLoop(LoopNum).LoopSide(LoopSideNum).NodeNumOut).Temp));
+                          std::format("PlantLoop Outlet Node ({}Side) \"{}\" has temperature={:.1f} {{C}}",
+                                      DataPlant::DemandSupplyNames[static_cast<int>(LoopSideNum)],
+                                      state.dataLoopNodes->NodeID(state.dataPlnt->PlantLoop(LoopNum).LoopSide(LoopSideNum).NodeNumOut),
+                                      state.dataLoopNodes->Node(state.dataPlnt->PlantLoop(LoopNum).LoopSide(LoopSideNum).NodeNumOut).Temp));
         ShowContinueError(state,
-                          EnergyPlus::format("PlantLoop Inlet Node ({}Side) \"{}\" has temperature={:.1R} {{C}}",
-                                             DataPlant::DemandSupplyNames[static_cast<int>(LoopSideNum)],
-                                             state.dataLoopNodes->NodeID(state.dataPlnt->PlantLoop(LoopNum).LoopSide(LoopSideNum).NodeNumIn),
-                                             state.dataLoopNodes->Node(state.dataPlnt->PlantLoop(LoopNum).LoopSide(LoopSideNum).NodeNumIn).Temp));
-        ShowContinueError(state, EnergyPlus::format("PlantLoop Minimum Temperature={:.1R} {{C}}", state.dataPlnt->PlantLoop(LoopNum).MinTemp));
-        ShowContinueError(state, EnergyPlus::format("PlantLoop Maximum Temperature={:.1R} {{C}}", state.dataPlnt->PlantLoop(LoopNum).MaxTemp));
+                          std::format("PlantLoop Inlet Node ({}Side) \"{}\" has temperature={:.1f} {{C}}",
+                                      DataPlant::DemandSupplyNames[static_cast<int>(LoopSideNum)],
+                                      state.dataLoopNodes->NodeID(state.dataPlnt->PlantLoop(LoopNum).LoopSide(LoopSideNum).NodeNumIn),
+                                      state.dataLoopNodes->Node(state.dataPlnt->PlantLoop(LoopNum).LoopSide(LoopSideNum).NodeNumIn).Temp));
+        ShowContinueError(state, std::format("PlantLoop Minimum Temperature={:.1f} {{C}}", state.dataPlnt->PlantLoop(LoopNum).MinTemp));
+        ShowContinueError(state, std::format("PlantLoop Maximum Temperature={:.1f} {{C}}", state.dataPlnt->PlantLoop(LoopNum).MaxTemp));
         ShowContinueError(state,
-                          EnergyPlus::format("PlantLoop Flow Request (LoopSideLocation::Supply)={:.1R} {{kg/s}}",
-                                             state.dataPlnt->PlantLoop(LoopNum).LoopSide(DataPlant::LoopSideLocation::Supply).FlowRequest));
+                          std::format("PlantLoop Flow Request (LoopSideLocation::Supply)={:.1f} {{kg/s}}",
+                                      state.dataPlnt->PlantLoop(LoopNum).LoopSide(DataPlant::LoopSideLocation::Supply).FlowRequest));
         ShowContinueError(state,
-                          EnergyPlus::format("PlantLoop Flow Request (LoopSideLocation::Demand)={:.1R} {{kg/s}}",
-                                             state.dataPlnt->PlantLoop(LoopNum).LoopSide(DataPlant::LoopSideLocation::Demand).FlowRequest));
-        ShowContinueError(
-            state,
-            EnergyPlus::format("PlantLoop Node ({}Side) \"{}\" has mass flow rate ={:.1R} {{kg/s}}",
-                               DataPlant::DemandSupplyNames[static_cast<int>(LoopSideNum)],
-                               state.dataLoopNodes->NodeID(state.dataPlnt->PlantLoop(LoopNum).LoopSide(LoopSideNum).NodeNumOut),
-                               state.dataLoopNodes->Node(state.dataPlnt->PlantLoop(LoopNum).LoopSide(LoopSideNum).NodeNumOut).MassFlowRate));
+                          std::format("PlantLoop Flow Request (LoopSideLocation::Demand)={:.1f} {{kg/s}}",
+                                      state.dataPlnt->PlantLoop(LoopNum).LoopSide(DataPlant::LoopSideLocation::Demand).FlowRequest));
         ShowContinueError(state,
-                          EnergyPlus::format("PlantLoop PumpHeat (LoopSideLocation::Supply)={:.1R} {{W}}",
-                                             state.dataPlnt->PlantLoop(LoopNum).LoopSide(DataPlant::LoopSideLocation::Supply).TotalPumpHeat));
+                          std::format("PlantLoop Node ({}Side) \"{}\" has mass flow rate ={:.1f} {{kg/s}}",
+                                      DataPlant::DemandSupplyNames[static_cast<int>(LoopSideNum)],
+                                      state.dataLoopNodes->NodeID(state.dataPlnt->PlantLoop(LoopNum).LoopSide(LoopSideNum).NodeNumOut),
+                                      state.dataLoopNodes->Node(state.dataPlnt->PlantLoop(LoopNum).LoopSide(LoopSideNum).NodeNumOut).MassFlowRate));
         ShowContinueError(state,
-                          EnergyPlus::format("PlantLoop PumpHeat (LoopSideLocation::Demand)={:.1R} {{W}}",
-                                             state.dataPlnt->PlantLoop(LoopNum).LoopSide(DataPlant::LoopSideLocation::Demand).TotalPumpHeat));
-        ShowContinueError(state, EnergyPlus::format("PlantLoop Cooling Demand={:.1R} {{W}}", state.dataPlnt->PlantLoop(LoopNum).CoolingDemand));
-        ShowContinueError(state, EnergyPlus::format("PlantLoop Heating Demand={:.1R} {{W}}", state.dataPlnt->PlantLoop(LoopNum).HeatingDemand));
+                          std::format("PlantLoop PumpHeat (LoopSideLocation::Supply)={:.1f} {{W}}",
+                                      state.dataPlnt->PlantLoop(LoopNum).LoopSide(DataPlant::LoopSideLocation::Supply).TotalPumpHeat));
         ShowContinueError(state,
-                          EnergyPlus::format("PlantLoop Demand not Dispatched={:.1R} {{W}}", state.dataPlnt->PlantLoop(LoopNum).DemandNotDispatched));
-        ShowContinueError(state, EnergyPlus::format("PlantLoop Unmet Demand={:.1R} {{W}}", state.dataPlnt->PlantLoop(LoopNum).UnmetDemand));
+                          std::format("PlantLoop PumpHeat (LoopSideLocation::Demand)={:.1f} {{W}}",
+                                      state.dataPlnt->PlantLoop(LoopNum).LoopSide(DataPlant::LoopSideLocation::Demand).TotalPumpHeat));
+        ShowContinueError(state, std::format("PlantLoop Cooling Demand={:.1f} {{W}}", state.dataPlnt->PlantLoop(LoopNum).CoolingDemand));
+        ShowContinueError(state, std::format("PlantLoop Heating Demand={:.1f} {{W}}", state.dataPlnt->PlantLoop(LoopNum).HeatingDemand));
+        ShowContinueError(state, std::format("PlantLoop Demand not Dispatched={:.1f} {{W}}", state.dataPlnt->PlantLoop(LoopNum).DemandNotDispatched));
+        ShowContinueError(state, std::format("PlantLoop Unmet Demand={:.1f} {{W}}", state.dataPlnt->PlantLoop(LoopNum).UnmetDemand));
 
         LoopCapacity = 0.0;
         DispatchedCapacity = 0.0;
@@ -810,17 +801,15 @@ void CheckForRunawayPlantTemps(EnergyPlusData &state, int const LoopNum, const D
                 LoopSupplySideDispatchedCapacity = DispatchedCapacity - LoopDemandSideDispatchedCapacity;
             }
         }
-        ShowContinueError(state, EnergyPlus::format("PlantLoop Capacity={:.1R} {{W}}", LoopCapacity));
-        ShowContinueError(state, EnergyPlus::format("PlantLoop Capacity (LoopSideLocation::Supply)={:.1R} {{W}}", LoopSupplySideCapacity));
-        ShowContinueError(state, EnergyPlus::format("PlantLoop Capacity (LoopSideLocation::Demand)={:.1R} {{W}}", LoopDemandSideCapacity));
-        ShowContinueError(state, EnergyPlus::format("PlantLoop Operation Scheme={}", state.dataPlnt->PlantLoop(LoopNum).OperationScheme));
-        ShowContinueError(state, EnergyPlus::format("PlantLoop Operation Dispatched Load = {:.1R} {{W}}", DispatchedCapacity));
+        ShowContinueError(state, std::format("PlantLoop Capacity={:.1f} {{W}}", LoopCapacity));
+        ShowContinueError(state, std::format("PlantLoop Capacity (LoopSideLocation::Supply)={:.1f} {{W}}", LoopSupplySideCapacity));
+        ShowContinueError(state, std::format("PlantLoop Capacity (LoopSideLocation::Demand)={:.1f} {{W}}", LoopDemandSideCapacity));
+        ShowContinueError(state, std::format("PlantLoop Operation Scheme={}", state.dataPlnt->PlantLoop(LoopNum).OperationScheme));
+        ShowContinueError(state, std::format("PlantLoop Operation Dispatched Load = {:.1f} {{W}}", DispatchedCapacity));
         ShowContinueError(
-            state,
-            EnergyPlus::format("PlantLoop Operation Dispatched Load (LoopSideLocation::Supply)= {:.1R} {{W}}", LoopSupplySideDispatchedCapacity));
+            state, std::format("PlantLoop Operation Dispatched Load (LoopSideLocation::Supply)= {:.1f} {{W}}", LoopSupplySideDispatchedCapacity));
         ShowContinueError(
-            state,
-            EnergyPlus::format("PlantLoop Operation Dispatched Load (LoopSideLocation::Demand)= {:.1R} {{W}}", LoopDemandSideDispatchedCapacity));
+            state, std::format("PlantLoop Operation Dispatched Load (LoopSideLocation::Demand)= {:.1f} {{W}}", LoopDemandSideDispatchedCapacity));
         ShowContinueError(state, "Branches on the Loop.");
         ShowBranchesOnLoop(state, LoopNum);
         ShowContinueError(state, "*************************");
@@ -830,8 +819,8 @@ void CheckForRunawayPlantTemps(EnergyPlusData &state, int const LoopNum, const D
         ShowContinueError(state, "    lots of node time series data to see what is going wrong.");
         ShowContinueError(state, "  If this is happening during Warmup, you can use Output:Diagnostics,ReportDuringWarmup;");
         ShowContinueError(state, "  This is detected at the loop level, but the typical problems are in the components.");
-        ShowFatalError(
-            state, EnergyPlus::format("CheckForRunawayPlantTemps: Simulation terminated because of run away plant temperatures, too {}", hotcold));
+        ShowFatalError(state,
+                       std::format("CheckForRunawayPlantTemps: Simulation terminated because of run away plant temperatures, too {}", hotcold));
     }
 }
 
@@ -1356,7 +1345,7 @@ void RegisterPlantCompDesignFlow(EnergyPlusData &state,
     int NumPlantComps;
     int PlantCompNum; // component do loop index
     bool Found;
-    int thisCallNodeIndex;
+    int thisCallNodeIndex = 0;
 
     NumPlantComps = state.dataSize->SaveNumPlantComps;
 
@@ -1719,34 +1708,33 @@ void ScanPlantLoopsForObject(EnergyPlusData &state,
         if (CompType != DataPlant::PlantEquipmentType::Invalid && CompType != DataPlant::PlantEquipmentType::Num) {
             if (!present(SingleLoopSearch)) {
                 ShowSevereError(state,
-                                EnergyPlus::format("Plant Component {} called \"{}\" was not found on any plant loops.",
-                                                   DataPlant::PlantEquipTypeNames[static_cast<int>(CompType)],
-                                                   std::string{CompName}));
+                                std::format("Plant Component {} called \"{}\" was not found on any plant loops.",
+                                            DataPlant::PlantEquipTypeNames[static_cast<int>(CompType)],
+                                            std::string{CompName}));
                 AuditBranches(state, true, DataPlant::PlantEquipTypeNames[static_cast<int>(CompType)], CompName);
             } else {
                 ShowSevereError(state,
-                                EnergyPlus::format("Plant Component {} called \"{}\" was not found on plant loop=\"{}\".",
-                                                   DataPlant::PlantEquipTypeNames[static_cast<int>(CompType)],
-                                                   std::string{CompName},
-                                                   state.dataPlnt->PlantLoop(SingleLoopSearch).Name));
+                                std::format("Plant Component {} called \"{}\" was not found on plant loop=\"{}\".",
+                                            DataPlant::PlantEquipTypeNames[static_cast<int>(CompType)],
+                                            std::string{CompName},
+                                            state.dataPlnt->PlantLoop(SingleLoopSearch).Name));
             }
             if (present(InletNodeNumber)) {
                 if (FoundCompName) {
-                    ShowContinueError(state,
-                                      EnergyPlus::format("Looking for matching inlet Node=\"{}\".", state.dataLoopNodes->NodeID(InletNodeNumber)));
+                    ShowContinueError(state, std::format("Looking for matching inlet Node=\"{}\".", state.dataLoopNodes->NodeID(InletNodeNumber)));
                 }
             }
             if (present(SingleLoopSearch)) {
-                ShowContinueError(
-                    state, EnergyPlus::format("Look at Operation Scheme=\"{}\".", state.dataPlnt->PlantLoop(SingleLoopSearch).OperationScheme));
+                ShowContinueError(state,
+                                  std::format("Look at Operation Scheme=\"{}\".", state.dataPlnt->PlantLoop(SingleLoopSearch).OperationScheme));
                 ShowContinueError(state, "Look at Branches and Components on the Loop.");
                 ShowBranchesOnLoop(state, SingleLoopSearch);
             }
             errFlag = true;
         } else {
-            ShowSevereError(state, EnergyPlus::format("ScanPlantLoopsForObject: Invalid CompType passed [{}], Name={}", CompType, CompName));
-            ShowContinueError(state,
-                              EnergyPlus::format("Valid CompTypes are in the range [0 - {}].", static_cast<int>(DataPlant::PlantEquipmentType::Num)));
+            ShowSevereError(state,
+                            std::format("ScanPlantLoopsForObject: Invalid CompType passed [{}], Name={}", static_cast<int>(CompType), CompName));
+            ShowContinueError(state, std::format("Valid CompTypes are in the range [0 - {}].", static_cast<int>(DataPlant::PlantEquipmentType::Num)));
             ShowFatalError(state, "Previous error causes program termination");
         }
     }
@@ -1828,14 +1816,14 @@ void ScanPlantLoopsForNodeNum(EnergyPlusData &state,
 
     if (!FoundNode && reportError) {
         ShowSevereError(state, "ScanPlantLoopsForNodeNum: Plant Node was not found as inlet node (for component) on any plant loops");
-        ShowContinueError(state, EnergyPlus::format("Node Name=\"{}\"", state.dataLoopNodes->NodeID(NodeNum)));
+        ShowContinueError(state, std::format("Node Name=\"{}\"", state.dataLoopNodes->NodeID(NodeNum)));
         if (!state.dataGlobal->DoingSizing) {
-            ShowContinueError(state, EnergyPlus::format("called by {}", CallerName));
+            ShowContinueError(state, std::format("called by {}", CallerName));
         } else {
-            ShowContinueError(state, EnergyPlus::format("during sizing: called by {}", CallerName));
+            ShowContinueError(state, std::format("during sizing: called by {}", CallerName));
         }
         if (outFoundCount > 0) {
-            ShowContinueError(state, EnergyPlus::format("Node was found as outlet node (for component) {} time(s).", outFoundCount));
+            ShowContinueError(state, std::format("Node was found as outlet node (for component) {} time(s).", outFoundCount));
         }
         ShowContinueError(state, "Possible error in Branch inputs.  For more information, look for other error messages related to this node name.");
         // fatal?
@@ -1946,15 +1934,15 @@ void ShowBranchesOnLoop(EnergyPlusData &state, int const LoopNum) // Loop number
     int CpN; // Component (on branch) counter
 
     for (DataPlant::LoopSideLocation LSN : DataPlant::LoopSideKeys) {
-        ShowContinueError(state, EnergyPlus::format("{} Branches:", DataPlant::DemandSupplyNames[static_cast<int>(LSN)]));
+        ShowContinueError(state, std::format("{} Branches:", DataPlant::DemandSupplyNames[static_cast<int>(LSN)]));
         for (BrN = 1; BrN <= state.dataPlnt->PlantLoop(LoopNum).LoopSide(LSN).TotalBranches; ++BrN) {
-            ShowContinueError(state, EnergyPlus::format("  {}", state.dataPlnt->PlantLoop(LoopNum).LoopSide(LSN).Branch(BrN).Name));
+            ShowContinueError(state, std::format("  {}", state.dataPlnt->PlantLoop(LoopNum).LoopSide(LSN).Branch(BrN).Name));
             ShowContinueError(state, "    Components on Branch:");
             for (CpN = 1; CpN <= state.dataPlnt->PlantLoop(LoopNum).LoopSide(LSN).Branch(BrN).TotalComponents; ++CpN) {
                 ShowContinueError(state,
-                                  EnergyPlus::format("      {}:{}",
-                                                     state.dataPlnt->PlantLoop(LoopNum).LoopSide(LSN).Branch(BrN).Comp(CpN).TypeOf,
-                                                     state.dataPlnt->PlantLoop(LoopNum).LoopSide(LSN).Branch(BrN).Comp(CpN).Name));
+                                  std::format("      {}:{}",
+                                              state.dataPlnt->PlantLoop(LoopNum).LoopSide(LSN).Branch(BrN).Comp(CpN).TypeOf,
+                                              state.dataPlnt->PlantLoop(LoopNum).LoopSide(LSN).Branch(BrN).Comp(CpN).Name));
             }
         }
     }
@@ -2011,16 +1999,16 @@ int MyPlantSizingIndex(EnergyPlusData &state,
         }
         if (MyPltSizNum == 0) {
             if (PrintErrorFlag) {
-                ShowSevereError(state,
-                                EnergyPlus::format("MyPlantSizingIndex: Could not find {} in Sizing:Plant objects.",
-                                                   state.dataPlnt->PlantLoop(MyPltLoopNum).Name));
-                ShowContinueError(state, EnergyPlus::format("...reference Component Type=\"{}\", Name=\"{}\".", CompType, CompName));
+                ShowSevereError(
+                    state,
+                    std::format("MyPlantSizingIndex: Could not find {} in Sizing:Plant objects.", state.dataPlnt->PlantLoop(MyPltLoopNum).Name));
+                ShowContinueError(state, std::format("...reference Component Type=\"{}\", Name=\"{}\".", CompType, CompName));
             }
             ErrorsFound = true;
         }
     } else {
         if (PrintErrorFlag) {
-            ShowWarningError(state, EnergyPlus::format("MyPlantSizingIndex: Could not find {} with name {} on any plant loop", CompType, CompName));
+            ShowWarningError(state, std::format("MyPlantSizingIndex: Could not find {} with name {} on any plant loop", CompType, CompName));
         }
         ErrorsFound = true;
     }

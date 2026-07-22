@@ -2044,7 +2044,7 @@
   ZoneControl:Humidistat,
     Zone 2 Humidistat,       !- Name
     EAST ZONE,               !- Zone Name
-    Min rel Hum Set Sch2;    !- Humidifying Relative Humidity Setpoint Schedule Name
+    Min rel Hum Set Sch2;    !- Humidifying Setpoint Schedule Name
 
   ZoneControl:Thermostat,
     Zone 3 Thermostat,       !- Name

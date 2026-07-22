@@ -48,6 +48,7 @@
 // C++ Headers
 #include <cassert>
 #include <cmath>
+#include <format>
 #include <memory>
 #include <set>
 
@@ -157,9 +158,7 @@ namespace PlantPipingSystemsManager {
             }
         }
         // If we didn't find it, fatal
-        ShowFatalError(state, EnergyPlus::format("PipeCircuitInfoFactory: Error getting inputs for circuit named: {}", objectName)); // LCOV_EXCL_LINE
-        // Shut up the compiler
-        return nullptr; // LCOV_EXCL_LINE
+        ShowFatalError(state, std::format("PipeCircuitInfoFactory: Error getting inputs for circuit named: {}", objectName)); // LCOV_EXCL_LINE
     }
 
     void Circuit::simulate(EnergyPlusData &state,
@@ -443,7 +442,7 @@ namespace PlantPipingSystemsManager {
 
         // Report errors that are purely input problems
         if (ErrorsFound) {
-            ShowFatalError(state, EnergyPlus::format("{}: Preceding input errors cause program termination.", RoutineName));
+            ShowFatalError(state, std::format("{}: Preceding input errors cause program termination.", RoutineName));
         }
 
         // Setup output variables
@@ -483,16 +482,15 @@ namespace PlantPipingSystemsManager {
                 for (auto const &thisSegment : thisCircuit->pipeSegments) {
                     if ((thisSegment->PipeLocation.X > thisDomain.Extents.xMax) || (thisSegment->PipeLocation.X < 0.0) ||
                         (thisSegment->PipeLocation.Y > thisDomain.Extents.yMax) || (thisSegment->PipeLocation.Y < 0.0)) {
-                        ShowSevereError(
-                            state,
-                            EnergyPlus::format("PipingSystems::{}: A pipe was outside of the domain extents after performing corrections for "
-                                               "basement or burial depth.",
-                                               RoutineName));
-                        ShowContinueError(state, EnergyPlus::format("Pipe segment name:{}", thisSegment->Name));
+                        ShowSevereError(state,
+                                        std::format("PipingSystems::{}: A pipe was outside of the domain extents after performing corrections for "
+                                                    "basement or burial depth.",
+                                                    RoutineName));
+                        ShowContinueError(state, std::format("Pipe segment name:{}", thisSegment->Name));
                         ShowContinueError(state,
-                                          EnergyPlus::format("Corrected pipe location: ( x,y )=( {:.2T},{:.2T} )",
-                                                             thisSegment->PipeLocation.X,
-                                                             thisSegment->PipeLocation.Y));
+                                          std::format("Corrected pipe location: ( x,y )=( {:.2f},{:.2f} )",
+                                                      thisSegment->PipeLocation.X,
+                                                      thisSegment->PipeLocation.Y));
                     }
                 } // segment loop
             } // circuit loop
@@ -501,7 +499,7 @@ namespace PlantPipingSystemsManager {
 
         // If we encountered any other errors that we couldn't handle separately than stop now
         if (ErrorsFound) {
-            ShowFatalError(state, EnergyPlus::format("{}:{}: Errors found in input.", RoutineName, ObjName_ug_GeneralDomain));
+            ShowFatalError(state, std::format("{}:{}: Errors found in input.", RoutineName, ObjName_ug_GeneralDomain));
         }
     }
 
@@ -560,8 +558,8 @@ namespace PlantPipingSystemsManager {
                 } else if (meshDistribution == "SYMMETRICGEOMETRIC") {
                     thisDomain.Mesh.X.thisMeshDistribution = MeshDistribution::SymmetricGeometric;
                     if (mod(thisDomain.Mesh.X.RegionMeshCount, 2) != 0) {
-                        ShowWarningError(state, EnergyPlus::format("PipingSystems:{}: Invalid mesh type-count combination.", routineName));
-                        ShowContinueError(state, EnergyPlus::format("Instance:{}={}", ObjName_ug_GeneralDomain, thisDomain.Name));
+                        ShowWarningError(state, std::format("PipingSystems:{}: Invalid mesh type-count combination.", routineName));
+                        ShowContinueError(state, std::format("Instance:{}={}", ObjName_ug_GeneralDomain, thisDomain.Name));
                         ShowContinueError(state, "An ODD-valued X mesh count was found in the input for symmetric geometric configuration.");
                         ShowContinueError(state, "This is invalid, mesh count incremented UP by one to next EVEN value.");
                         ++thisDomain.Mesh.X.RegionMeshCount;
@@ -590,8 +588,8 @@ namespace PlantPipingSystemsManager {
                 } else if (meshDistribution == "SYMMETRICGEOMETRIC") {
                     thisDomain.Mesh.Y.thisMeshDistribution = MeshDistribution::SymmetricGeometric;
                     if (mod(thisDomain.Mesh.Y.RegionMeshCount, 2) != 0) {
-                        ShowWarningError(state, EnergyPlus::format("PipingSystems:{}: Invalid mesh type-count combination.", routineName));
-                        ShowContinueError(state, EnergyPlus::format("Instance:{}={}", ObjName_ug_GeneralDomain, thisDomain.Name));
+                        ShowWarningError(state, std::format("PipingSystems:{}: Invalid mesh type-count combination.", routineName));
+                        ShowContinueError(state, std::format("Instance:{}={}", ObjName_ug_GeneralDomain, thisDomain.Name));
                         ShowContinueError(state, "An ODD-valued Y mesh count was found in the input for symmetric geometric configuration.");
                         ShowContinueError(state, "This is invalid, mesh count incremented UP by one to next EVEN value.");
                         ++thisDomain.Mesh.Y.RegionMeshCount;
@@ -620,8 +618,8 @@ namespace PlantPipingSystemsManager {
                 } else if (meshDistribution == "SYMMETRICGEOMETRIC") {
                     thisDomain.Mesh.Z.thisMeshDistribution = MeshDistribution::SymmetricGeometric;
                     if (mod(thisDomain.Mesh.Z.RegionMeshCount, 2) != 0) {
-                        ShowWarningError(state, EnergyPlus::format("PipingSystems:{}: Invalid mesh type-count combination.", routineName));
-                        ShowContinueError(state, EnergyPlus::format("Instance:{}={}", ObjName_ug_GeneralDomain, thisDomain.Name));
+                        ShowWarningError(state, std::format("PipingSystems:{}: Invalid mesh type-count combination.", routineName));
+                        ShowContinueError(state, std::format("Instance:{}={}", ObjName_ug_GeneralDomain, thisDomain.Name));
                         ShowContinueError(state, "An ODD-valued Z mesh count was found in the input for symmetric geometric configuration.");
                         ShowContinueError(state, "This is invalid, mesh count incremented UP by one to next EVEN value.");
                         ++thisDomain.Mesh.Z.RegionMeshCount;
@@ -670,8 +668,7 @@ namespace PlantPipingSystemsManager {
                     state.dataIPShortCut->lAlphaFieldBlanks(8) || state.dataIPShortCut->lAlphaFieldBlanks(9) ||
                     state.dataIPShortCut->lAlphaFieldBlanks(10)) {
                     ShowSevereError(
-                        state,
-                        EnergyPlus::format("Erroneous basement inputs for {}={}", ObjName_ug_GeneralDomain, state.dataIPShortCut->cAlphaArgs(1)));
+                        state, std::format("Erroneous basement inputs for {}={}", ObjName_ug_GeneralDomain, state.dataIPShortCut->cAlphaArgs(1)));
                     ShowContinueError(state, "Object specified to have a basement, while at least one basement input was left blank.");
                     ErrorsFound = true;
                 }
@@ -963,8 +960,8 @@ namespace PlantPipingSystemsManager {
                 } else if (thisDomain.HorizIns == HorizInsulation::Perimeter) {
                     // Horizontal insulation perimeter width
                     if (thisDomain.HorizInsWidth <= 0.0) {
-                        ShowSevereError(state, EnergyPlus::format("Invalid {}", s_ipsc->cNumericFieldNames(10)));
-                        ShowContinueError(state, EnergyPlus::format("Found in: {}", thisDomain.Name));
+                        ShowSevereError(state, std::format("Invalid {}", s_ipsc->cNumericFieldNames(10)));
+                        ShowContinueError(state, std::format("Found in: {}", thisDomain.Name));
                         ErrorsFound = true;
                     }
                 }
@@ -1001,8 +998,8 @@ namespace PlantPipingSystemsManager {
 
                 // vertical insulation depth
                 if (thisDomain.VertInsDepth > thisDomain.Extents.yMax || thisDomain.VertInsDepth <= 0.0) {
-                    ShowSevereError(state, EnergyPlus::format("Invalid {}", s_ipsc->cNumericFieldNames(11)));
-                    ShowContinueError(state, EnergyPlus::format("Found in: {}", thisDomain.Name));
+                    ShowSevereError(state, std::format("Invalid {}", s_ipsc->cNumericFieldNames(11)));
+                    ShowContinueError(state, std::format("Found in: {}", thisDomain.Name));
                     ErrorsFound = true;
                 }
             }
@@ -1015,8 +1012,8 @@ namespace PlantPipingSystemsManager {
             } else if (Util::SameString(s_ipsc->cAlphaArgs(12), "HOURLY")) {
                 thisDomain.SimHourlyFlag = true;
             } else {
-                ShowSevereError(state, EnergyPlus::format("Invalid {}={}", s_ipsc->cAlphaFieldNames(12), s_ipsc->cAlphaArgs(12)));
-                ShowContinueError(state, EnergyPlus::format("Found in: {}", thisDomain.Name));
+                ShowSevereError(state, std::format("Invalid {}={}", s_ipsc->cAlphaFieldNames(12), s_ipsc->cAlphaArgs(12)));
+                ShowContinueError(state, std::format("Found in: {}", thisDomain.Name));
                 ErrorsFound = true;
             }
 #endif // GET_OUT
@@ -1072,10 +1069,10 @@ namespace PlantPipingSystemsManager {
             if (thisDomain.HorizIns == HorizInsulation::Perimeter && ThisArea > 0.0) {
                 if (2 * (thisDomain.HorizInsWidth + thisDomain.VertInsThickness) > thisDomain.SlabWidth ||
                     2 * (thisDomain.HorizInsWidth + thisDomain.VertInsThickness) > thisDomain.SlabLength) {
-                    ShowContinueError(state, EnergyPlus::format("{}: Perimeter insulation width is too large.", routineName));
+                    ShowContinueError(state, std::format("{}: Perimeter insulation width is too large.", routineName));
                     ShowContinueError(state, "This would cause overlapping insulation. Check inputs.");
                     ShowContinueError(state, "Defaulting to full horizontal insulation.");
-                    ShowContinueError(state, EnergyPlus::format("Found in: {}", thisDomain.Name));
+                    ShowContinueError(state, std::format("Found in: {}", thisDomain.Name));
                     thisDomain.HorizIns = HorizInsulation::Full;
                 }
             }
@@ -1209,8 +1206,7 @@ namespace PlantPipingSystemsManager {
 
             // check if there are blank inputs related to the basement,
             if (s_ipsc->lNumericFieldBlanks(11) || s_ipsc->lAlphaFieldBlanks(5) || s_ipsc->lAlphaFieldBlanks(10)) {
-                ShowSevereError(state,
-                                EnergyPlus::format("Erroneous basement inputs for {}={}", ObjName_ZoneCoupled_Basement, s_ipsc->cAlphaArgs(1)));
+                ShowSevereError(state, std::format("Erroneous basement inputs for {}={}", ObjName_ZoneCoupled_Basement, s_ipsc->cAlphaArgs(1)));
                 ShowContinueError(state, "At least one basement input was left blank.");
                 ErrorsFound = true;
             }
@@ -1219,8 +1215,8 @@ namespace PlantPipingSystemsManager {
             int CurIndex = 11;
             thisDomain.BasementZone.Depth = s_ipsc->rNumericArgs(CurIndex);
             if (thisDomain.BasementZone.Depth >= thisDomain.Extents.yMax || thisDomain.BasementZone.Depth <= 0.0) {
-                ShowSevereError(state, EnergyPlus::format("Invalid {}", s_ipsc->cNumericFieldNames(CurIndex)));
-                ShowContinueError(state, EnergyPlus::format("Found in: {}", thisDomain.Name));
+                ShowSevereError(state, std::format("Invalid {}", s_ipsc->cNumericFieldNames(CurIndex)));
+                ShowContinueError(state, std::format("Found in: {}", thisDomain.Name));
                 ErrorsFound = true;
             }
 
@@ -1359,8 +1355,8 @@ namespace PlantPipingSystemsManager {
                 } else if (thisDomain.HorizIns == HorizInsulation::Perimeter) {
                     // Horizontal insulation perimeter width
                     if (thisDomain.HorizInsWidth <= 0.0) {
-                        ShowSevereError(state, EnergyPlus::format("Invalid {}", s_ipsc->cNumericFieldNames(10)));
-                        ShowContinueError(state, EnergyPlus::format("Found in: {}", thisDomain.Name));
+                        ShowSevereError(state, std::format("Invalid {}", s_ipsc->cNumericFieldNames(10)));
+                        ShowContinueError(state, std::format("Found in: {}", thisDomain.Name));
                         ErrorsFound = true;
                     }
                 }
@@ -1381,8 +1377,8 @@ namespace PlantPipingSystemsManager {
             if (thisDomain.VertInsPresentFlag) {
                 // Check if vertical insulation is in domain
                 if (thisDomain.VertInsDepth >= thisDomain.Extents.yMax || thisDomain.VertInsDepth <= 0.0) {
-                    ShowSevereError(state, EnergyPlus::format("Invalid {}", s_ipsc->cNumericFieldNames(12)));
-                    ShowContinueError(state, EnergyPlus::format("Found in: {}", thisDomain.Name));
+                    ShowSevereError(state, std::format("Invalid {}", s_ipsc->cNumericFieldNames(12)));
+                    ShowContinueError(state, std::format("Found in: {}", thisDomain.Name));
                     ErrorsFound = true;
                 }
                 thisDomain.VertInsMaterialNum = Material::GetMaterialNum(state, s_ipsc->cAlphaArgs(10));
@@ -1410,8 +1406,8 @@ namespace PlantPipingSystemsManager {
             } else if (Util::SameString(s_ipsc->cAlphaArgs(11), "HOURLY")) {
                 thisDomain.SimHourlyFlag = true;
             } else {
-                ShowSevereError(state, EnergyPlus::format("Invalid {}={}", s_ipsc->cAlphaFieldNames(11), s_ipsc->cAlphaArgs(11)));
-                ShowContinueError(state, EnergyPlus::format("Found in: {}", thisDomain.Name));
+                ShowSevereError(state, std::format("Invalid {}={}", s_ipsc->cAlphaFieldNames(11), s_ipsc->cAlphaArgs(11)));
+                ShowContinueError(state, std::format("Found in: {}", thisDomain.Name));
                 ErrorsFound = true;
             }
 #endif // GET_OUT
@@ -1445,10 +1441,10 @@ namespace PlantPipingSystemsManager {
             if (thisDomain.HorizIns == HorizInsulation::Perimeter && ThisArea > 0.0) {
                 if ((thisDomain.HorizInsWidth + thisDomain.VertInsThickness) > thisDomain.BasementZone.Width / 2.0 ||
                     (thisDomain.HorizInsWidth + thisDomain.VertInsThickness) > thisDomain.BasementZone.Length / 2.0) {
-                    ShowContinueError(state, EnergyPlus::format("{}: Perimeter insulation width is too large.", routineName));
+                    ShowContinueError(state, std::format("{}: Perimeter insulation width is too large.", routineName));
                     ShowContinueError(state, "This would cause overlapping insulation. Check inputs.");
                     ShowContinueError(state, "Defaulting to full horizontal insulation.");
-                    ShowContinueError(state, EnergyPlus::format("Found in: {}", thisDomain.Name));
+                    ShowContinueError(state, std::format("Found in: {}", thisDomain.Name));
                     thisDomain.HorizIns = HorizInsulation::Full;
                 }
             }
@@ -1480,10 +1476,10 @@ namespace PlantPipingSystemsManager {
                                         std::string const &ObjectName)
     {
 
-        ShowSevereError(state, EnergyPlus::format("Invalid {}={} was found in: {}", FieldName, UserInputField, ObjectName));
+        ShowSevereError(state, std::format("Invalid {}={} was found in: {}", FieldName, UserInputField, ObjectName));
         ShowContinueError(
             state, "The user of no mass materials or ones with no thickness are not allowed for the insulation fields of the following objects:");
-        ShowContinueError(state, EnergyPlus::format("  {} or {}", ObjName_ZoneCoupled_Slab, ObjName_ZoneCoupled_Basement));
+        ShowContinueError(state, std::format("  {} or {}", ObjName_ZoneCoupled_Slab, ObjName_ZoneCoupled_Basement));
         ShowContinueError(
             state, "Change any insulation designations in these objects from no mass materials to regular materials that have a thickness, etc.");
     }
@@ -1675,12 +1671,12 @@ namespace PlantPipingSystemsManager {
 
             // Issue a severe if Inner >= Outer diameter
             if (thisCircuit.PipeSize.InnerDia >= thisCircuit.PipeSize.OuterDia) {
-                ShowSevereError(
-                    state, EnergyPlus::format("{}: {}=\"{}\" has invalid pipe diameters.", routineName, ObjName_HorizTrench, s_ipsc->cAlphaArgs(1)));
+                ShowSevereError(state,
+                                std::format("{}: {}=\"{}\" has invalid pipe diameters.", routineName, ObjName_HorizTrench, s_ipsc->cAlphaArgs(1)));
                 ShowContinueError(state,
-                                  EnergyPlus::format("Outer diameter [{:.3T}] must be greater than inner diameter [{:.3T}].",
-                                                     thisCircuit.PipeSize.OuterDia,
-                                                     thisCircuit.PipeSize.InnerDia));
+                                  std::format("Outer diameter [{:.3f}] must be greater than inner diameter [{:.3f}].",
+                                              thisCircuit.PipeSize.OuterDia,
+                                              thisCircuit.PipeSize.InnerDia));
                 ErrorsFound = true;
             }
 
@@ -1739,10 +1735,7 @@ namespace PlantPipingSystemsManager {
             }
         }
         // If we didn't find it, fatal
-        ShowFatalError(state,
-                       EnergyPlus::format("PipeSegmentInfoFactory: Error getting inputs for segment named: {}", segmentName)); // LCOV_EXCL_LINE
-        // Shut up the compiler
-        return nullptr; // LCOV_EXCL_LINE
+        ShowFatalError(state, std::format("PipeSegmentInfoFactory: Error getting inputs for segment named: {}", segmentName)); // LCOV_EXCL_LINE
     }
 
     Circuit *Circuit::factory(EnergyPlusData &state, const std::string &circuitName, bool &errorsFound)
@@ -1758,10 +1751,7 @@ namespace PlantPipingSystemsManager {
             }
         }
         // If we didn't find it, fatal
-        ShowFatalError(state,
-                       EnergyPlus::format("PipeCircuitInfoFactory: Error getting inputs for circuit named: {}", circuitName)); // LCOV_EXCL_LINE
-        // Shut up the compiler
-        return nullptr; // LCOV_EXCL_LINE
+        ShowFatalError(state, std::format("PipeCircuitInfoFactory: Error getting inputs for circuit named: {}", circuitName)); // LCOV_EXCL_LINE
     }
 
     void ReadPipeSegmentInputs(EnergyPlusData &state, bool &ErrorsFound)
@@ -1897,7 +1887,7 @@ namespace PlantPipingSystemsManager {
             //******* We'll first set up the domain ********
             // the extents will be: zMax = axial length; yMax = burial depth*2; xMax = ( NumPipes+1 )*HorizontalPipeSpacing
             thisDomain.IsActuallyPartOfAHorizontalTrench = true;
-            thisDomain.Name = EnergyPlus::format("HorizontalTrenchDomain{:4}", HorizontalGHXCtr);
+            thisDomain.Name = std::format("HorizontalTrenchDomain{:4}", HorizontalGHXCtr);
             thisDomain.Extents.xMax = (double(NumPipeSegments) + 1.0) * thisInterPipeSpacing;
             thisDomain.Extents.yMax = 2.0 * thisBurialDepth;
             thisDomain.Extents.zMax = s_ipsc->rNumericArgs(2);
@@ -1943,7 +1933,7 @@ namespace PlantPipingSystemsManager {
             //******* Then we'll do the segments *******!
             for (int ThisCircuitPipeSegmentCounter = 1; ThisCircuitPipeSegmentCounter <= NumPipeSegments; ++ThisCircuitPipeSegmentCounter) {
                 Segment segment;
-                segment.Name = EnergyPlus::format("HorizontalTrenchCircuit{}Segment{}", HorizontalGHXCtr, ThisCircuitPipeSegmentCounter);
+                segment.Name = std::format("HorizontalTrenchCircuit{}Segment{}", HorizontalGHXCtr, ThisCircuitPipeSegmentCounter);
                 segment.IsActuallyPartOfAHorizontalTrench = true;
                 segment.PipeLocation = PointF(ThisCircuitPipeSegmentCounter * thisInterPipeSpacing, thisBurialDepth);
 
@@ -2157,7 +2147,7 @@ namespace PlantPipingSystemsManager {
             bool errFlag = false;
             PlantUtilities::ScanPlantLoopsForObject(state, thisCircuit->Name, TypeToLookFor, thisCircuit->plantLoc, errFlag, _, _, _, _, _);
             if (errFlag) {
-                ShowFatalError(state, EnergyPlus::format("PipingSystems:{}: Program terminated due to previous condition(s).", RoutineName));
+                ShowFatalError(state, std::format("PipingSystems:{}: Program terminated due to previous condition(s).", RoutineName));
             }
 
             // Once we find ourselves on the plant loop, we can do other things
@@ -2174,7 +2164,7 @@ namespace PlantPipingSystemsManager {
             for (auto const &thisDomainCircuit : this->circuits) {
                 for (auto const &segment : thisDomainCircuit->pipeSegments) {
                     if (!segment->PipeCellCoordinatesSet) {
-                        ShowSevereError(state, EnergyPlus::format("PipingSystems:{}:Pipe segment index not set.", RoutineName));
+                        ShowSevereError(state, std::format("PipingSystems:{}:Pipe segment index not set.", RoutineName));
                         ShowContinueError(state, "...Possibly because pipe segment was placed outside of the domain.");
                         ShowContinueError(state, "...Verify piping system domain inputs, circuits, and segments.");
                         ShowFatalError(state, "Preceding error causes program termination");
@@ -2261,8 +2251,7 @@ namespace PlantPipingSystemsManager {
 
         ShowSevereError(
             state,
-            EnergyPlus::format(
-                "{}:{}=\"{}\", invalid {}=\"{}\", Condition: {}", RoutineName, ObjectName, InstanceName, FieldName, FieldEntry, Condition));
+            std::format("{}:{}=\"{}\", invalid {}=\"{}\", Condition: {}", RoutineName, ObjectName, InstanceName, FieldName, FieldEntry, Condition));
         ErrorsFound = true;
     }
 
@@ -2284,8 +2273,8 @@ namespace PlantPipingSystemsManager {
 
         ShowSevereError(
             state,
-            EnergyPlus::format(
-                R"({}:{}="{}", invalid {}="{:.3T}", Condition: {})", RoutineName, ObjectName, InstanceName, FieldName, FieldEntry, Condition));
+            std::format(
+                R"({}:{}="{}", invalid {}="{:.3f}", Condition: {})", RoutineName, ObjectName, InstanceName, FieldName, FieldEntry, Condition));
         ErrorsFound = true;
     }
 
@@ -3090,8 +3079,8 @@ namespace PlantPipingSystemsManager {
 
             // check to make sure this location is valid
             if (CellLeft < 0.0 || CellRight > DirExtentMax) {
-                ShowSevereError(state, EnergyPlus::format("PlantPipingSystems::{}: Invalid partition location in domain.", RoutineName));
-                ShowContinueError(state, EnergyPlus::format("Occurs during mesh development for domain={}", this->Name));
+                ShowSevereError(state, std::format("PlantPipingSystems::{}: Invalid partition location in domain.", RoutineName));
+                ShowContinueError(state, std::format("Occurs during mesh development for domain={}", this->Name));
                 ShowContinueError(state, "A pipe or basement is located outside of the domain extents.");
                 ShowFatalError(state, "Preceding error causes program termination.");
             }
@@ -3104,8 +3093,8 @@ namespace PlantPipingSystemsManager {
                     if (IsInRange_BasementModel(CellLeft, thisPartitionRegionSubIndex.Min, thisPartitionRegionSubIndex.Max) ||
                         IsInRangeReal(CellRight, thisPartitionRegionSubIndex.Min, thisPartitionRegionSubIndex.Max)) {
 
-                        ShowSevereError(state, EnergyPlus::format("PlantPipingSystems::{}: Invalid partition location in domain.", RoutineName));
-                        ShowContinueError(state, EnergyPlus::format("Occurs during mesh development for domain={}", this->Name));
+                        ShowSevereError(state, std::format("PlantPipingSystems::{}: Invalid partition location in domain.", RoutineName));
+                        ShowContinueError(state, std::format("Occurs during mesh development for domain={}", this->Name));
                         ShowContinueError(state, "A mesh conflict was encountered where partitions were overlapping.");
                         ShowContinueError(state, "Ensure that all pipes exactly line up or are separated to allow meshing in between them");
                         ShowContinueError(state, "Also verify the pipe and basement dimensions to avoid conflicts there.");
@@ -3117,8 +3106,8 @@ namespace PlantPipingSystemsManager {
                     if (IsInRangeReal(CellLeft, thisPartitionRegionSubIndex.Min, thisPartitionRegionSubIndex.Max) ||
                         IsInRangeReal(CellRight, thisPartitionRegionSubIndex.Min, thisPartitionRegionSubIndex.Max)) {
 
-                        ShowSevereError(state, EnergyPlus::format("PlantPipingSystems::{}: Invalid partition location in domain.", RoutineName));
-                        ShowContinueError(state, EnergyPlus::format("Occurs during mesh development for domain={}", this->Name));
+                        ShowSevereError(state, std::format("PlantPipingSystems::{}: Invalid partition location in domain.", RoutineName));
+                        ShowContinueError(state, std::format("Occurs during mesh development for domain={}", this->Name));
                         ShowContinueError(state, "A mesh conflict was encountered where partitions were overlapping.");
                         ShowContinueError(state, "Ensure that all pipes exactly line up or are separated to allow meshing in between them");
                         ShowContinueError(state, "Also verify the pipe and basement dimensions to avoid conflicts there.");
@@ -3175,15 +3164,15 @@ namespace PlantPipingSystemsManager {
                                   bool const PartitionsExist,
                                   ObjexxFCL::Optional_int BasementWallXIndex,
                                   ObjexxFCL::Optional_int BasementFloorYIndex,
-                                  ObjexxFCL::Optional_int XIndex,
-                                  ObjexxFCL::Optional_int XWallIndex,
-                                  ObjexxFCL::Optional_int InsulationXIndex,
-                                  ObjexxFCL::Optional_int YIndex,
-                                  ObjexxFCL::Optional_int YFloorIndex,
-                                  ObjexxFCL::Optional_int InsulationYIndex,
-                                  ObjexxFCL::Optional_int ZIndex,
-                                  ObjexxFCL::Optional_int ZWallIndex,
-                                  ObjexxFCL::Optional_int InsulationZIndex)
+                                  ObjexxFCL::Optional_int t_XIndex,
+                                  ObjexxFCL::Optional_int t_XWallIndex,
+                                  ObjexxFCL::Optional_int t_InsulationXIndex,
+                                  ObjexxFCL::Optional_int t_YIndex,
+                                  ObjexxFCL::Optional_int t_YFloorIndex,
+                                  ObjexxFCL::Optional_int t_InsulationYIndex,
+                                  ObjexxFCL::Optional_int t_ZIndex,
+                                  ObjexxFCL::Optional_int t_ZWallIndex,
+                                  ObjexxFCL::Optional_int t_InsulationZIndex)
     {
 
         // FUNCTION INFORMATION:
@@ -3241,50 +3230,50 @@ namespace PlantPipingSystemsManager {
                         BasementFloorYIndex = cellCountUpToNow;
                     }
                 } else if (thisPartition.thisRegionType == RegionType::XSide) {
-                    if (present(XIndex)) {
-                        XIndex = cellCountUpToNow;
+                    if (present(t_XIndex)) {
+                        t_XIndex = cellCountUpToNow;
                     }
-                    this->XIndex = XIndex;
+                    this->XIndex = t_XIndex;
                 } else if (thisPartition.thisRegionType == RegionType::XSideWall) {
-                    if (present(XWallIndex)) {
-                        XWallIndex = cellCountUpToNow;
+                    if (present(t_XWallIndex)) {
+                        t_XWallIndex = cellCountUpToNow;
                     }
-                    this->XWallIndex = XWallIndex;
+                    this->XWallIndex = t_XWallIndex;
                 } else if (thisPartition.thisRegionType == RegionType::ZSide) {
-                    if (present(ZIndex)) {
-                        ZIndex = cellCountUpToNow;
+                    if (present(t_ZIndex)) {
+                        t_ZIndex = cellCountUpToNow;
                     }
-                    this->ZIndex = ZIndex;
+                    this->ZIndex = t_ZIndex;
                 } else if (thisPartition.thisRegionType == RegionType::ZSideWall) {
-                    if (present(ZWallIndex)) {
-                        ZWallIndex = cellCountUpToNow;
+                    if (present(t_ZWallIndex)) {
+                        t_ZWallIndex = cellCountUpToNow;
                     }
-                    this->ZWallIndex = ZWallIndex;
+                    this->ZWallIndex = t_ZWallIndex;
                 } else if (thisPartition.thisRegionType == RegionType::HorizInsXSide) {
-                    if (present(InsulationXIndex)) {
-                        InsulationXIndex = cellCountUpToNow;
+                    if (present(t_InsulationXIndex)) {
+                        t_InsulationXIndex = cellCountUpToNow;
                     }
-                    this->InsulationXIndex = InsulationXIndex;
+                    this->InsulationXIndex = t_InsulationXIndex;
                 } else if (thisPartition.thisRegionType == RegionType::HorizInsZSide) {
-                    if (present(InsulationZIndex)) {
-                        InsulationZIndex = cellCountUpToNow;
+                    if (present(t_InsulationZIndex)) {
+                        t_InsulationZIndex = cellCountUpToNow;
                     }
-                    this->InsulationZIndex = InsulationZIndex;
+                    this->InsulationZIndex = t_InsulationZIndex;
                 } else if (thisPartition.thisRegionType == RegionType::FloorInside) {
-                    if (present(YFloorIndex)) {
-                        YFloorIndex = cellCountUpToNow;
+                    if (present(t_YFloorIndex)) {
+                        t_YFloorIndex = cellCountUpToNow;
                     }
-                    this->YFloorIndex = YFloorIndex;
+                    this->YFloorIndex = t_YFloorIndex;
                 } else if (thisPartition.thisRegionType == RegionType::UnderFloor) {
-                    if (present(YIndex)) {
-                        YIndex = cellCountUpToNow;
+                    if (present(t_YIndex)) {
+                        t_YIndex = cellCountUpToNow;
                     }
-                    this->YIndex = YIndex;
+                    this->YIndex = t_YIndex;
                 } else if (thisPartition.thisRegionType == RegionType::VertInsLowerEdge) {
-                    if (present(InsulationYIndex)) {
-                        InsulationYIndex = cellCountUpToNow;
+                    if (present(t_InsulationYIndex)) {
+                        t_InsulationYIndex = cellCountUpToNow;
                     }
-                    this->InsulationYIndex = InsulationYIndex;
+                    this->InsulationYIndex = t_InsulationYIndex;
                 }
 
                 // Create region for this partition
@@ -3362,7 +3351,7 @@ namespace PlantPipingSystemsManager {
 
         int TotNumCells = 0;
         int NumCutawayBasementCells = 0;
-        int NumInsulationCells = 0;
+        int localNumInsulationCells = 0;
         int NumGroundSurfaceCells = 0;
 
         //'subtract 2 in each dimension:
@@ -3376,14 +3365,14 @@ namespace PlantPipingSystemsManager {
         int MaxBasementXNodeIndex = this->BasementZone.BasementWallXIndex;
         int MinBasementYNodeIndex = this->BasementZone.BasementFloorYIndex;
         int MinXIndex = this->XIndex;
-        int YIndex = this->YIndex;
+        int localYIndex = this->YIndex;
         int MinZIndex = this->ZIndex;
-        int XWallIndex = this->XWallIndex;
-        int YFloorIndex = this->YFloorIndex;
-        int ZWallIndex = this->ZWallIndex;
-        int InsulationXIndex = this->InsulationXIndex;
-        int InsulationYIndex = this->InsulationYIndex;
-        int InsulationZIndex = this->InsulationZIndex;
+        int localXWallIndex = this->XWallIndex;
+        int localYFloorIndex = this->YFloorIndex;
+        int localZWallIndex = this->ZWallIndex;
+        int localInsulationXIndex = this->InsulationXIndex;
+        int localInsulationYIndex = this->InsulationYIndex;
+        int localInsulationZIndex = this->InsulationZIndex;
 
         auto &cells = this->Cells;
         for (int X = 0, X_end = this->x_max_index; X <= X_end; ++X) {
@@ -3442,19 +3431,19 @@ namespace PlantPipingSystemsManager {
                         if (CellXIndex == MinXIndex && CellZIndex >= MinZIndex) { // Z side interface
                             // Check if vertical insulation present
                             if (this->VertInsPresentFlag) {
-                                if (CellYIndex <= this->y_max_index && CellYIndex >= InsulationYIndex) { // Check depth of vertical insulation
+                                if (CellYIndex <= this->y_max_index && CellYIndex >= localInsulationYIndex) { // Check depth of vertical insulation
                                     cellType = CellType::VertInsulation;
-                                    ++NumInsulationCells;
+                                    ++localNumInsulationCells;
                                 }
                             } else if (CellYIndex == this->y_max_index) {
                                 cellType = CellType::GroundSurface;
                                 ++NumGroundSurfaceCells;
                             }
-                        } else if (CellZIndex == MinZIndex && CellXIndex >= MinXIndex) {                 // X side interface
-                            if (this->VertInsPresentFlag) {                                              // Check if vertical insulation present
-                                if (CellYIndex <= this->y_max_index && CellYIndex >= InsulationYIndex) { // Check depth of vertical insulation
+                        } else if (CellZIndex == MinZIndex && CellXIndex >= MinXIndex) {                      // X side interface
+                            if (this->VertInsPresentFlag) {                                                   // Check if vertical insulation present
+                                if (CellYIndex <= this->y_max_index && CellYIndex >= localInsulationYIndex) { // Check depth of vertical insulation
                                     cellType = CellType::VertInsulation;
-                                    ++NumInsulationCells;
+                                    ++localNumInsulationCells;
                                 }
                             } else if (CellYIndex == this->y_max_index) {
                                 cellType = CellType::GroundSurface;
@@ -3464,7 +3453,7 @@ namespace PlantPipingSystemsManager {
                             if (CellXIndex <= MinXIndex || CellZIndex <= MinZIndex) { // Ground surface
                                 cellType = CellType::GroundSurface;
                                 ++NumGroundSurfaceCells;
-                            } else if (CellXIndex >= MinXIndex || CellZIndex >= MinZIndex) { // Zone-ground interface
+                            } else { // Zone-ground interface
                                 cellType = CellType::ZoneGroundInterface;
                             }
                         }
@@ -3477,14 +3466,14 @@ namespace PlantPipingSystemsManager {
                         if (this->slabPosition == SlabPosition::InGrade) { // In-grade case
                             // This will assign the slab cells and horizontal insulation
 
-                            if (CellZIndex > MinZIndex && CellXIndex > MinXIndex) {     // Cells inside bounds of slab
-                                if (CellYIndex >= YIndex && CellYIndex < y_max_index) { // Slab cells
+                            if (CellZIndex > MinZIndex && CellXIndex > MinXIndex) {          // Cells inside bounds of slab
+                                if (CellYIndex >= localYIndex && CellYIndex < y_max_index) { // Slab cells
                                     cellType = CellType::Slab;
-                                } else if (CellYIndex == (YIndex - 1)) {
+                                } else if (CellYIndex == (localYIndex - 1)) {
                                     if (this->HorizIns == HorizInsulation::Full) { // Full under-slab insulation
                                         cellType = CellType::HorizInsulation;
                                     } else if (this->HorizIns == HorizInsulation::Perimeter) { // Perimeter only under-slab insulation
-                                        if (CellZIndex < InsulationZIndex || CellXIndex < InsulationXIndex) {
+                                        if (CellZIndex < localInsulationZIndex || CellXIndex < localInsulationXIndex) {
                                             cellType = CellType::HorizInsulation;
                                         }
                                     }
@@ -3500,42 +3489,42 @@ namespace PlantPipingSystemsManager {
                         // Set the appropriate cell type
                         if (CellYIndex == 0) { // Farfield cells
                             cellType = CellType::FarfieldBoundary;
-                        } else if (CellXIndex > XWallIndex && CellZIndex > ZWallIndex) {       // Basement cutaway
-                            if (CellYIndex <= this->y_max_index && CellYIndex > YFloorIndex) { // General basement cells
+                        } else if (CellXIndex > localXWallIndex && CellZIndex > localZWallIndex) {  // Basement cutaway
+                            if (CellYIndex <= this->y_max_index && CellYIndex > localYFloorIndex) { // General basement cells
                                 cellType = CellType::BasementCutaway;
                                 // Not counting basement cutaway cells.
-                            } else if (CellYIndex == YFloorIndex) { // Basement Floor cells
+                            } else if (CellYIndex == localYFloorIndex) { // Basement Floor cells
                                 cellType = CellType::BasementFloor;
-                            } else if (CellYIndex == YIndex) {
+                            } else if (CellYIndex == localYIndex) {
                                 // Check if horizontal insulation present
                                 if (this->HorizIns == HorizInsulation::Full) { // Entire underfloor insulated
                                     cellType = CellType::HorizInsulation;
-                                    ++NumInsulationCells;
+                                    ++localNumInsulationCells;
                                 } else if (this->HorizIns == HorizInsulation::Perimeter) { // Perimeter insulation
-                                    if (CellXIndex < InsulationXIndex || CellZIndex < InsulationZIndex) {
+                                    if (CellXIndex < localInsulationXIndex || CellZIndex < localInsulationZIndex) {
                                         cellType = CellType::HorizInsulation;
-                                        ++NumInsulationCells;
+                                        ++localNumInsulationCells;
                                     }
                                 }
                             }
-                        } else if ((CellXIndex == XWallIndex && CellZIndex > ZWallIndex) ||
-                                   (CellZIndex == ZWallIndex && CellXIndex > XWallIndex)) { // Basement Walls
-                            if (CellYIndex <= this->y_max_index && CellYIndex > YFloorIndex) {
+                        } else if ((CellXIndex == localXWallIndex && CellZIndex > localZWallIndex) ||
+                                   (CellZIndex == localZWallIndex && CellXIndex > localXWallIndex)) { // Basement Walls
+                            if (CellYIndex <= this->y_max_index && CellYIndex > localYFloorIndex) {
                                 cellType = CellType::BasementWall;
                             }
-                        } else if ((CellXIndex == MinXIndex && CellZIndex > ZWallIndex) ||
-                                   (CellZIndex == MinZIndex && CellXIndex > XWallIndex)) { // Insulation cells
-                            if (CellYIndex <= this->y_max_index && CellYIndex > YFloorIndex) {
+                        } else if ((CellXIndex == MinXIndex && CellZIndex > localZWallIndex) ||
+                                   (CellZIndex == MinZIndex && CellXIndex > localXWallIndex)) { // Insulation cells
+                            if (CellYIndex <= this->y_max_index && CellYIndex > localYFloorIndex) {
                                 // Check if vertical insulation present
                                 if (this->VertInsPresentFlag) {
-                                    if (InsulationYIndex != 0) { // Partial vertical insulation
-                                        if (CellYIndex > InsulationYIndex) {
+                                    if (localInsulationYIndex != 0) { // Partial vertical insulation
+                                        if (CellYIndex > localInsulationYIndex) {
                                             cellType = CellType::VertInsulation;
-                                            ++NumInsulationCells;
+                                            ++localNumInsulationCells;
                                         }
                                     } else { // Vertical insulation extends to depth of basement floor
                                         cellType = CellType::VertInsulation;
-                                        ++NumInsulationCells;
+                                        ++localNumInsulationCells;
                                     }
                                 }
                             }
@@ -3646,7 +3635,7 @@ namespace PlantPipingSystemsManager {
 
         this->NumDomainCells = TotNumCells;
         this->NumGroundSurfCells = NumGroundSurfaceCells;
-        this->NumInsulationCells = NumInsulationCells;
+        this->NumInsulationCells = localNumInsulationCells;
     }
 
     void Domain::setupCellNeighbors()
@@ -3966,8 +3955,6 @@ namespace PlantPipingSystemsManager {
             return this->Mesh.Z.RegionMeshCount;
         }
         return 1; // it's either a mesh region (X,Y,ZDirection), or it is some form of partition -- so 1
-
-        return 0;
     }
 
     void Domain::getCellWidths(GridRegion &g, RegionType const direction) const
@@ -4591,7 +4578,7 @@ namespace PlantPipingSystemsManager {
         // FUNCTION LOCAL VARIABLE DECLARATIONS:
         Real64 Beta;
         Real64 NeighborTemp = 0.0;
-        Real64 HeatFlux;
+        Real64 localHeatFlux;
         Real64 Numerator = 0.0;
         Real64 Denominator = 0.0;
         Real64 Resistance = 0.0;
@@ -4610,8 +4597,8 @@ namespace PlantPipingSystemsManager {
             Beta = cell.Beta / 2.0;
 
             // get the average basement wall heat flux and add it to the tally
-            HeatFlux = this->GetBasementWallHeatFlux(state);
-            Numerator += Beta * HeatFlux * cell.height();
+            localHeatFlux = this->GetBasementWallHeatFlux(state);
+            Numerator += Beta * localHeatFlux * cell.height();
 
             // then get the +x conduction to continue the heat balance
             this->EvaluateNeighborCharacteristics(cell, Direction::PositiveX, NeighborTemp, Resistance, AdiabaticMultiplier);
@@ -4628,8 +4615,8 @@ namespace PlantPipingSystemsManager {
             Beta = cell.Beta / 2.0;
 
             // get the average basement floor heat flux and add it to the tally
-            HeatFlux = this->GetBasementFloorHeatFlux(state);
-            Numerator += Beta * HeatFlux * cell.width();
+            localHeatFlux = this->GetBasementFloorHeatFlux(state);
+            Numerator += Beta * localHeatFlux * cell.width();
 
             // then get the -y conduction to continue the heat balance
             this->EvaluateNeighborCharacteristics(cell, Direction::NegativeY, NeighborTemp, Resistance, AdiabaticMultiplier);
@@ -4717,7 +4704,7 @@ namespace PlantPipingSystemsManager {
         //       RE-ENGINEERED  na
 
         // FUNCTION LOCAL VARIABLE DECLARATIONS:
-        Real64 HeatFlux;
+        Real64 localHeatFlux;
         Real64 ConductionArea;
         Real64 Numerator = 0.0;
         Real64 Denominator = 0.0;
@@ -4731,24 +4718,24 @@ namespace PlantPipingSystemsManager {
 
         if (cell.cellType == CellType::BasementWall) {
             // Get the average basement wall heat flux and add it to the tally
-            HeatFlux = this->WallHeatFlux;
+            localHeatFlux = this->WallHeatFlux;
             if (cell.X_index == this->XWallIndex) {
                 ConductionArea = cell.depth() * cell.height();
-                Numerator += Beta * HeatFlux * ConductionArea;
+                Numerator += Beta * localHeatFlux * ConductionArea;
             } else if (cell.Z_index == this->ZWallIndex) {
                 ConductionArea = cell.width() * cell.height();
-                Numerator += Beta * HeatFlux * ConductionArea;
+                Numerator += Beta * localHeatFlux * ConductionArea;
             }
         } else if (cell.cellType == CellType::BasementFloor) {
             // Get the average basement floor heat flux and add it to the tally
-            HeatFlux = this->FloorHeatFlux;
+            localHeatFlux = this->FloorHeatFlux;
             ConductionArea = cell.width() * cell.depth();
-            Numerator += Beta * HeatFlux * ConductionArea;
+            Numerator += Beta * localHeatFlux * ConductionArea;
         } else if (cell.cellType == CellType::ZoneGroundInterface) {
             // Get the average slab heat flux and add it to the tally
-            HeatFlux = this->WeightedHeatFlux(cell.X_index, cell.Z_index);
+            localHeatFlux = this->WeightedHeatFlux(cell.X_index, cell.Z_index);
             ConductionArea = cell.width() * cell.depth();
-            Numerator += Beta * HeatFlux * ConductionArea;
+            Numerator += Beta * localHeatFlux * ConductionArea;
         }
 
         // determine the neighbor types based on cell location
@@ -5868,20 +5855,19 @@ namespace PlantPipingSystemsManager {
         bool OutOfRange = this->CheckForOutOfRangeTemps();
         if (OutOfRange) {
             if (this->HasZoneCoupledSlab) {
-                ShowSevereError(
-                    state, EnergyPlus::format("Site:GroundDomain:Slab{}: Out of range temperatures detected in the ground domain.", RoutineName));
+                ShowSevereError(state,
+                                std::format("Site:GroundDomain:Slab{}: Out of range temperatures detected in the ground domain.", RoutineName));
                 ShowContinueError(state, "This could be due to the size of the loads on the domain.");
                 ShowContinueError(state, "Verify inputs are correct. If problem persists, notify EnergyPlus support.");
                 ShowFatalError(state, "Preceding error(s) cause program termination");
             } else if (this->HasZoneCoupledBasement) {
-                ShowSevereError(
-                    state, EnergyPlus::format("Site:GroundDomain:Basement{}: Out of range temperatures detected in the ground domain.", RoutineName));
+                ShowSevereError(state,
+                                std::format("Site:GroundDomain:Basement{}: Out of range temperatures detected in the ground domain.", RoutineName));
                 ShowContinueError(state, "This could be due to the size of the loads on the domain.");
                 ShowContinueError(state, "Verify inputs are correct. If problem persists, notify EnergyPlus support.");
                 ShowFatalError(state, "Preceding error(s) cause program termination");
             } else {
-                ShowSevereError(state,
-                                EnergyPlus::format("PipingSystems:{}: Out of range temperatures detected in piping system simulation.", RoutineName));
+                ShowSevereError(state, std::format("PipingSystems:{}: Out of range temperatures detected in piping system simulation.", RoutineName));
                 ShowContinueError(state, "This could be due to the size of the pipe circuit in relation to the loads being imposed.");
                 ShowContinueError(state, "Try increasing the size of the pipe circuit and investigate sizing effects.");
                 ShowFatalError(state, "Preceding error(s) cause program termination");
