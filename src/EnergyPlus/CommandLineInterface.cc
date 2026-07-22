@@ -966,7 +966,7 @@ state.dataStrGlobals->inputFilePath='{:g}',
                         state,
                         "ERROR: Could not find ReadVarsESO program.  When calling through C API, make sure to call setEnergyPlusRootDirectory");
                 } else {
-                    DisplayString(state, fmt::format("ERROR: Could not find ReadVarsESO program under: {}.",
+                    DisplayString(state, std::format("ERROR: Could not find ReadVarsESO program under: {}.",
                                                      FileSystem::getAbsolutePath(state.dataStrGlobals->exeDirectoryPath)));
                 }
                 return static_cast<int>(ReturnCodes::Failure);
