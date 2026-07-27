@@ -738,21 +738,21 @@ namespace DataHeatBalance {
     struct ZoneMRTPeopleData
     {
         // Members
-        std::string name;     // People name
-        int peopleIndex = 0;  // index to correct People instance
-        Real64 fracMRT = 0.0; // fraction contribution from this People to zone MRT
+        std::string name;                                    // People name
+        int peopleIndex = 0;                                 // index to correct People instance
+        Real64 fracMRT = 0.0;                                // fraction contribution from this People to zone MRT
         Real64 peopleMRT = DataHeatBalance::ZoneInitialTemp; // MRT calculated for this People incidence
     };
 
     struct ZoneMRTData
     {
         // Members
-        std::string name;       // Zone name
-        int zoneIndex = 0;      // Zone index to main zone struct
-        int numPeople = 0;      // Number of people statements referenced by this statement
-        Array1D<ZoneMRTPeopleData> zoneMRTPeople;   // People statement data
-        Real64 sumFracZoneMRT = 0.0;    // Sum of all of the people statement fractions entered by the user (must be between 0.0 and 1.0)
-        Real64 fracZoneStdMRT = 1.0;    // Portion of the MRT coming from the standard zone MRT calculation (must be between 0.0 and 1.0)
+        std::string name;                         // Zone name
+        int zoneIndex = 0;                        // Zone index to main zone struct
+        int numPeople = 0;                        // Number of people statements referenced by this statement
+        Array1D<ZoneMRTPeopleData> zoneMRTPeople; // People statement data
+        Real64 sumFracZoneMRT = 0.0;              // Sum of all of the people statement fractions entered by the user (must be between 0.0 and 1.0)
+        Real64 fracZoneStdMRT = 1.0;              // Portion of the MRT coming from the standard zone MRT calculation (must be between 0.0 and 1.0)
     };
 
     enum class ClothingType

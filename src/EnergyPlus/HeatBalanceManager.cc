@@ -2287,10 +2287,10 @@ namespace HeatBalanceManager {
         // SUBROUTINE INFORMATION:
         //       AUTHOR         Rick Strand, UIUC
         //       DATE WRITTEN   July 2026
-        
+
         // PURPOSE OF THIS SUBROUTINE:
         // Get the input for the object/method being used to calculate the ZoneMRT
-        
+
         static constexpr std::string_view routineName = "getZoneMRTCalculationData";
         std::string const cCurrentModuleObject = "ZoneMRTCalculation";
         auto &s_ip = state.dataInputProcessing->inputProcessor;
@@ -2330,19 +2330,22 @@ namespace HeatBalanceManager {
         }
 
         state.dataHeatBal->totZoneMRT = state.dataHeatBal->zoneMRTCalc.size();
-        
+
         for (int mrtNum = 1; mrtNum <= state.dataHeatBal->totZoneMRT; mrtNum++) { // set up and check zone and people indices
             auto &thisZoneMRT = state.dataHeatBal->zoneMRTCalc(mrtNum);
             thisZoneMRT.zoneIndex = Util::FindItemInList(thisZoneMRT.name, state.dataHeatBal->Zone);
-            if (thisZoneMRT.zoneIndex <= 0) {   // zone was not found so produce an error message alerting the user of the problem
-                ShowSevereError(state,
-                                std::format("{}{}=\"{}, does not refer to a valid zone name when it should match one of the zones in this input file.",
-                                            routineName,
-                                            cCurrentModuleObject,
-                                            thisZoneMRT.name));
-                ShowContinueError(state,
-                                  std::format("This input object will not be used until it is corrected and the zone MRT will be equal to the stadard calculation."));
-            } else {    // zone was found, set the flag to make sure the user specified MRT for this zone is calculated
+            if (thisZoneMRT.zoneIndex <= 0) { // zone was not found so produce an error message alerting the user of the problem
+                ShowSevereError(
+                    state,
+                    std::format("{}{}=\"{}, does not refer to a valid zone name when it should match one of the zones in this input file.",
+                                routineName,
+                                cCurrentModuleObject,
+                                thisZoneMRT.name));
+                ShowContinueError(
+                    state,
+                    std::format(
+                        "This input object will not be used until it is corrected and the zone MRT will be equal to the stadard calculation."));
+            } else { // zone was found, set the flag to make sure the user specified MRT for this zone is calculated
                 state.dataHeatBal->Zone(thisZoneMRT.zoneIndex).useZoneMRTCalc = true;
             }
             for (int pNum = 1; pNum <= thisZoneMRT.numPeople; pNum++) {
@@ -2355,8 +2358,7 @@ namespace HeatBalanceManager {
                                                 cCurrentModuleObject,
                                                 thisZoneMRT.name,
                                                 thisPeople.name));
-                    ShowContinueError(state,
-                                      std::format("The contribution of this People instance will be reset to zero as a result."));
+                    ShowContinueError(state, std::format("The contribution of this People instance will be reset to zero as a result."));
                     thisPeople.fracMRT = 0.0;
                 }
                 if (state.dataHeatBal->People(thisPeople.peopleIndex).ZonePtr != thisZoneMRT.zoneIndex) {
@@ -2366,8 +2368,7 @@ namespace HeatBalanceManager {
                                                 cCurrentModuleObject,
                                                 thisZoneMRT.name,
                                                 thisPeople.name));
-                    ShowContinueError(state,
-                                      std::format("The contribution of this People instance will be reset to zero as a result."));
+                    ShowContinueError(state, std::format("The contribution of this People instance will be reset to zero as a result."));
                     thisPeople.fracMRT = 0.0;
                 }
             }
@@ -2390,8 +2391,8 @@ namespace HeatBalanceManager {
             }
             thisZoneMRT.fracZoneStdMRT = 1.0 - thisZoneMRT.sumFracZoneMRT;
         }
-        
-        for (auto &thisZoneMRT : state.dataHeatBal->zoneMRTCalc) {  // Set up the output variables
+
+        for (auto &thisZoneMRT : state.dataHeatBal->zoneMRTCalc) { // Set up the output variables
             if (state.dataHeatBal->Zone(thisZoneMRT.zoneIndex).useZoneMRTCalc) {
                 SetupOutputVariable(state,
                                     "Zone Standard Mean Radiant Temperature",

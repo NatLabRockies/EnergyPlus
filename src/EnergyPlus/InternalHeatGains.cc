@@ -820,7 +820,7 @@ namespace InternalHeatGains {
                     }
                 }
             }
-            
+
             ThermalComfort::GetAngleFactorList(state);
 
             for (int peopleNum2 = 1; peopleNum2 <= state.dataHeatBal->TotPeople; ++peopleNum2) {

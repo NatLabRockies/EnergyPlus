@@ -5635,7 +5635,7 @@ void CalculateZoneMRT(EnergyPlusData &state,
             continue;
         }
         auto &thisZoneHB = state.dataZoneTempPredictorCorrector->zoneHeatBalance(ZoneNum);
-        if (state.dataHeatBalSurfMgr->ZoneAESum(ZoneNum) > 0.01) {  // Calculate standard area-emissivity weighted MRT
+        if (state.dataHeatBalSurfMgr->ZoneAESum(ZoneNum) > 0.01) { // Calculate standard area-emissivity weighted MRT
             Real64 zoneSumAET = 0.0;
             for (int spaceNum : state.dataHeatBal->Zone(ZoneNum).spaceIndexes) {
                 auto const &thisSpace = state.dataHeatBal->space(spaceNum);

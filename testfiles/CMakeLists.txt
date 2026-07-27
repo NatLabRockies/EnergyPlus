@@ -141,6 +141,7 @@ add_simulation_test(IDF_FILE 5Zone_Unitary_HXAssistedCoil.idf EPW_FILE USA_IL_Ch
 add_simulation_test(IDF_FILE 5Zone_Unitary_VSDesuperheater.idf EPW_FILE USA_IL_Chicago-OHare.Intl.AP.725300_TMY3.epw)
 add_simulation_test(IDF_FILE 5Zone_Unitary_VSDesuperheatWaterHeater.idf EPW_FILE USA_IL_Chicago-OHare.Intl.AP.725300_TMY3.epw)
 add_simulation_test(IDF_FILE 5ZoneWaterSystems.idf EPW_FILE USA_IL_Chicago-OHare.Intl.AP.725300_TMY3.epw)
+add_simulation_test(IDF_FILE 5ZoneWaterSystemsZoneMRTCalc.idf EPW_FILE USA_IL_Chicago-OHare.Intl.AP.725300_TMY3.epw)
 add_simulation_test(IDF_FILE 5ZoneWaterSystems_NoSitePrec.idf EPW_FILE USA_FL_Orlando.Intl.AP.722050_TMY3.epw)
 add_simulation_test(IDF_FILE AbsorptionChiller.idf EPW_FILE USA_IL_Chicago-OHare.Intl.AP.725300_TMY3.epw)
 add_simulation_test(IDF_FILE ActiveTrombeWall.idf EPW_FILE USA_IL_Chicago-OHare.Intl.AP.725300_TMY3.epw)
