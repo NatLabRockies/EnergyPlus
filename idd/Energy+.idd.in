@@ -19187,7 +19187,6 @@ ComplexFenestrationProperty:SolarAbsorbedLayers,
        \type object-list
        \object-list ScheduleNames
 
-
 ZoneProperty:UserViewFactors:BySurfaceName,
        \memo View factors for Surface to Surface in a zone.
        \memo (Number of Surfaces)**2 are expected. Any omitted surface pairs will be assumed to have a view factor of zero.
@@ -19450,6 +19449,157 @@ ZoneProperty:UserViewFactors:BySurfaceName,
   A922,A923,N461,A924,A925,N463,A926,A927,N465,A928,A929,N467,A930,A931,N469,A932,A933,N471,A934,A935,N473,A936,A937,N475,A938,A939,N477,A940,A941,N479,
   A942,A943,N471,A944,A945,N473,A946,A947,N475,A948,A949,N477,A950,A951,N479,A952,A953,N481,A954,A955,N483,A956,A957,N485,A958,A959,N487,A960,A961,N489,
   A962,A963,N481,A964,A965,N483,A966,A967,N485,A968,A969,N487,A970,A971,N489,A972,A973,N491,A974,A975,N493,A976,A977,N495,A978,A979,N497,A980,A981,N499;
+
+ZoneMRTCalculation,
+       \min-fields 3
+       \memo Used to specify portion of zone MRT calculated from MRT in People statements
+       \memo Note that the following weighting factor fractions must sum up to between 0.0 and 1.0
+       \extensible:2 - repeat last two fields, remembering to remove ; from "inner" fields.
+       \memo All People statements listed must be in the same Zone.
+  A1 , \field Zone Name
+       \type alpha
+       \reference ZoneNames
+  A2 , \field People 1 Name
+       \begin-extensible
+       \type object-list
+       \object-list PeopleNames
+  N1 , \field MRT Weighting Factor 1
+       \type real
+       \minimum 0.0
+       \maximum 1.0
+  A3 , \field People 2 Name
+       \type object-list
+       \object-list PeopleNames
+  N2 , \field MRT Weighting Factor 2
+       \type real
+       \minimum 0.0
+       \maximum 1.0
+  A4 , \field People 3 Name
+       \type object-list
+       \object-list PeopleNames
+  N3 , \field MRT Weighting Factor 3
+       \type real
+       \minimum 0.0
+       \maximum 1.0
+  A5 , \field People 4 Name
+       \type object-list
+       \object-list PeopleNames
+  N4 , \field MRT Weighting Factor 4
+       \type real
+       \minimum 0.0
+       \maximum 1.0
+  A6 , \field People 5 Name
+       \type object-list
+       \object-list PeopleNames
+  N5 , \field MRT Weighting Factor 5
+       \type real
+       \minimum 0.0
+       \maximum 1.0
+  A7 , \field People 6 Name
+       \type object-list
+       \object-list PeopleNames
+  N6 , \field MRT Weighting Factor 6
+       \type real
+       \minimum 0.0
+       \maximum 1.0
+  A8 , \field People 7 Name
+       \type object-list
+       \object-list PeopleNames
+  N7 , \field MRT Weighting Factor 7
+       \type real
+       \minimum 0.0
+       \maximum 1.0
+  A9 , \field People 8 Name
+       \type object-list
+       \object-list PeopleNames
+  N8 , \field MRT Weighting Factor 8
+       \type real
+       \minimum 0.0
+       \maximum 1.0
+  A10 , \field People 9 Name
+        \type object-list
+        \object-list PeopleNames
+  N9 ,  \field MRT Weighting Factor 9
+        \type real
+        \minimum 0.0
+        \maximum 1.0
+  A11,  \field People 10 Name
+        \type object-list
+        \object-list PeopleNames
+  N10,  \field MRT Weighting Factor 10
+        \type real
+        \minimum 0.0
+        \maximum 1.0
+  A12,  \field People 11 Name
+        \type object-list
+        \object-list PeopleNames
+  N11,  \field MRT Weighting Factor 11
+        \type real
+        \minimum 0.0
+        \maximum 1.0
+  A13,  \field People 12 Name
+        \type object-list
+        \object-list PeopleNames
+  N12,  \field MRT Weighting Factor 12
+        \type real
+        \minimum 0.0
+        \maximum 1.0
+  A14,  \field People 13 Name
+        \type object-list
+        \object-list PeopleNames
+  N13,  \field MRT Weighting Factor 13
+        \type real
+        \minimum 0.0
+        \maximum 1.0
+  A15,  \field People 14 Name
+        \type object-list
+        \object-list PeopleNames
+  N14,  \field MRT Weighting Factor 14
+        \type real
+        \minimum 0.0
+        \maximum 1.0
+  A16,  \field People 15 Name
+        \type object-list
+        \object-list PeopleNames
+  N15,  \field MRT Weighting Factor 15
+        \type real
+        \minimum 0.0
+        \maximum 1.0
+  A17,  \field People 16 Name
+        \type object-list
+        \object-list PeopleNames
+  N16,  \field MRT Weighting Factor 16
+        \type real
+        \minimum 0.0
+        \maximum 1.0
+  A18,  \field People 17 Name
+        \type object-list
+        \object-list PeopleNames
+  N17,  \field MRT Weighting Factor 17
+        \type real
+        \minimum 0.0
+        \maximum 1.0
+  A19,  \field People 18 Name
+        \type object-list
+        \object-list PeopleNames
+  N18,  \field MRT Weighting Factor 18
+        \type real
+        \minimum 0.0
+        \maximum 1.0
+  A20,  \field People 19 Name
+        \type object-list
+        \object-list PeopleNames
+  N19,  \field MRT Weighting Factor 19
+        \type real
+        \minimum 0.0
+        \maximum 1.0
+  A21,  \field People 20 Name
+        \type object-list
+        \object-list PeopleNames
+  N20;  \field MRT Weighting Factor 20
+        \type real
+        \minimum 0.0
+        \maximum 1.0
 
 \group Detailed Ground Heat Transfer
 

@@ -95,6 +95,7 @@
 #include <EnergyPlus/RefrigeratedCase.hh>
 #include <EnergyPlus/ScheduleManager.hh>
 #include <EnergyPlus/SetPointManager.hh>
+#include <EnergyPlus/ThermalComfort.hh>
 #include <EnergyPlus/UtilityRoutines.hh>
 #include <EnergyPlus/WaterThermalTanks.hh>
 #include <EnergyPlus/WaterUse.hh>
@@ -819,6 +820,8 @@ namespace InternalHeatGains {
                     }
                 }
             }
+            
+            ThermalComfort::GetAngleFactorList(state);
 
             for (int peopleNum2 = 1; peopleNum2 <= state.dataHeatBal->TotPeople; ++peopleNum2) {
                 if (state.dataGlobal->AnyEnergyManagementSystemInModel) {

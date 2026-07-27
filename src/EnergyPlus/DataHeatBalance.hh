@@ -595,6 +595,7 @@ namespace DataHeatBalance {
         Real64 ExtGrossWallArea_Multiplied = 0.0; // Exterior Wall Area for Zone (Gross) with multipliers
         Real64 ExtNetWallArea = 0.0;              // Exterior Wall Area for Zone (Net)
         Real64 TotalSurfArea = 0.0;               // Total surface area for Zone
+        bool useZoneMRTCalc = false;              // set to true when a user specified Zone MRT calculation is selected via input
         // (ignoring windows as they will be included in their base surfaces)
         Real64 ExteriorTotalGroundSurfArea = 0.0;                  // Total surface area of all surfaces for Zone with ground contact
         Real64 ExtGrossGroundWallArea = 0.0;                       // Ground contact Wall Area for Zone (Gross)
@@ -732,6 +733,26 @@ namespace DataHeatBalance {
         std::string Name;   // Zone Group name
         int ZoneList = 0;   // Pointer to the zone list
         int Multiplier = 1; // Zone List multiplier
+    };
+
+    struct ZoneMRTPeopleData
+    {
+        // Members
+        std::string name;     // People name
+        int peopleIndex = 0;  // index to correct People instance
+        Real64 fracMRT = 0.0; // fraction contribution from this People to zone MRT
+        Real64 peopleMRT = DataHeatBalance::ZoneInitialTemp; // MRT calculated for this People incidence
+    };
+
+    struct ZoneMRTData
+    {
+        // Members
+        std::string name;       // Zone name
+        int zoneIndex = 0;      // Zone index to main zone struct
+        int numPeople = 0;      // Number of people statements referenced by this statement
+        Array1D<ZoneMRTPeopleData> zoneMRTPeople;   // People statement data
+        Real64 sumFracZoneMRT = 0.0;    // Sum of all of the people statement fractions entered by the user (must be between 0.0 and 1.0)
+        Real64 fracZoneStdMRT = 1.0;    // Portion of the MRT coming from the standard zone MRT calculation (must be between 0.0 and 1.0)
     };
 
     enum class ClothingType
@@ -1849,6 +1870,7 @@ struct HeatBalanceData : BaseGlobalStruct
     int NumOfZoneLists = 0;    // Total number of zone lists
     int NumOfZoneGroups = 0;   // Total number of zone groups
     int TotPeople = 0;         // Total People instances after expansion to spaces
+    int totZoneMRT = 0;        // Total ZoneMRTCalculation instances
     int TotLights = 0;         // Total Lights instances after expansion to spaces
     int TotElecEquip = 0;      // Total Electric Equipment instances after expansion to spaces
     int TotGasEquip = 0;       // Total Gas Equipment instances after expansion to spaces
@@ -2009,6 +2031,7 @@ struct HeatBalanceData : BaseGlobalStruct
     EPVector<DataHeatBalance::ZoneResilience> Resilience;
     EPVector<DataHeatBalance::ZoneListData> ZoneList;
     EPVector<DataHeatBalance::ZoneGroupData> ZoneGroup;
+    EPVector<DataHeatBalance::ZoneMRTData> zoneMRTCalc;
     EPVector<DataHeatBalance::PeopleData> People;
     EPVector<DataHeatBalance::LightsData> Lights;
     EPVector<DataHeatBalance::ZoneEquipData> ZoneElectric;

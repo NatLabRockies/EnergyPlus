@@ -111,6 +111,8 @@ namespace HeatBalanceManager {
 
     void GetZoneLocalEnvData(EnergyPlusData &state, bool &ErrorsFound); // If errors found in input
 
+    void getZoneMRTCalculationData(EnergyPlusData &state);
+
     void ProcessZoneData(EnergyPlusData &state,
                          std::string const &cCurrentModuleObject,
                          int const ZoneLoop,

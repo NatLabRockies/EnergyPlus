@@ -2282,6 +2282,128 @@ namespace HeatBalanceManager {
         }
     }
 
+    void getZoneMRTCalculationData(EnergyPlusData &state) // Error flag indicator (true if errors found)
+    {
+        // SUBROUTINE INFORMATION:
+        //       AUTHOR         Rick Strand, UIUC
+        //       DATE WRITTEN   July 2026
+        
+        // PURPOSE OF THIS SUBROUTINE:
+        // Get the input for the object/method being used to calculate the ZoneMRT
+        
+        static constexpr std::string_view routineName = "getZoneMRTCalculationData";
+        std::string const cCurrentModuleObject = "ZoneMRTCalculation";
+        auto &s_ip = state.dataInputProcessing->inputProcessor;
+
+        auto const instances = s_ip->epJSON.find(cCurrentModuleObject);
+        if (instances != s_ip->epJSON.end()) {
+            auto &instancesValue = instances.value();
+            for (auto instance = instancesValue.begin(); instance != instancesValue.end(); ++instance) {
+                auto const &fields = instance.value();
+                auto const &thisZoneName = fields.find("zone_name");
+                std::string zone_name = thisZoneName.value().get<std::string>();
+                DataHeatBalance::ZoneMRTData thisZnMRTObj;
+                thisZnMRTObj.name = Util::makeUPPER(zone_name);
+                s_ip->markObjectAsUsed(cCurrentModuleObject, zone_name);
+                auto peoplePairs = fields.find("people_names");
+                if (peoplePairs != fields.end()) {
+                    auto &peoplePairsArray = peoplePairs.value();
+                    thisZnMRTObj.numPeople = peoplePairsArray.size();
+                    for (auto &peoplePair : peoplePairsArray) {
+                        DataHeatBalance::ZoneMRTPeopleData thisPplData;
+                        auto peopleName = peoplePair.find("people_name");
+                        if (peopleName != peoplePair.end()) {
+                            std::string people_name = peopleName.value().get<std::string>();
+                            if (!people_name.empty()) {
+                                thisPplData.name = Util::makeUPPER(people_name);
+                            }
+                        }
+                        auto peopleMRTWeightFactor = peoplePair.find("mrt_weighting_factor");
+                        if (peopleMRTWeightFactor != peoplePair.end()) {
+                            thisPplData.fracMRT = peopleMRTWeightFactor.value().get<Real64>();
+                        }
+                        thisZnMRTObj.zoneMRTPeople.push_back(thisPplData);
+                    }
+                }
+                state.dataHeatBal->zoneMRTCalc.push_back(thisZnMRTObj);
+            } // for (instance)
+        }
+
+        state.dataHeatBal->totZoneMRT = state.dataHeatBal->zoneMRTCalc.size();
+        
+        for (int mrtNum = 1; mrtNum <= state.dataHeatBal->totZoneMRT; mrtNum++) { // set up and check zone and people indices
+            auto &thisZoneMRT = state.dataHeatBal->zoneMRTCalc(mrtNum);
+            thisZoneMRT.zoneIndex = Util::FindItemInList(thisZoneMRT.name, state.dataHeatBal->Zone);
+            if (thisZoneMRT.zoneIndex <= 0) {   // zone was not found so produce an error message alerting the user of the problem
+                ShowSevereError(state,
+                                std::format("{}{}=\"{}, does not refer to a valid zone name when it should match one of the zones in this input file.",
+                                            routineName,
+                                            cCurrentModuleObject,
+                                            thisZoneMRT.name));
+                ShowContinueError(state,
+                                  std::format("This input object will not be used until it is corrected and the zone MRT will be equal to the stadard calculation."));
+            } else {    // zone was found, set the flag to make sure the user specified MRT for this zone is calculated
+                state.dataHeatBal->Zone(thisZoneMRT.zoneIndex).useZoneMRTCalc = true;
+            }
+            for (int pNum = 1; pNum <= thisZoneMRT.numPeople; pNum++) {
+                auto &thisPeople = state.dataHeatBal->zoneMRTCalc(mrtNum).zoneMRTPeople(pNum);
+                thisPeople.peopleIndex = Util::FindItemInList(thisPeople.name, state.dataHeatBal->People);
+                if (thisPeople.peopleIndex <= 0) { // people name was not matched so produce an error message
+                    ShowSevereError(state,
+                                    std::format("{}{}=\"{} has a People name of {} which does not match a People statement in this input file.",
+                                                routineName,
+                                                cCurrentModuleObject,
+                                                thisZoneMRT.name,
+                                                thisPeople.name));
+                    ShowContinueError(state,
+                                      std::format("The contribution of this People instance will be reset to zero as a result."));
+                    thisPeople.fracMRT = 0.0;
+                }
+                if (state.dataHeatBal->People(thisPeople.peopleIndex).ZonePtr != thisZoneMRT.zoneIndex) {
+                    ShowSevereError(state,
+                                    std::format("{}{}=\"{} has a People name of {} which is not in the same ZONE as the Zone referenced",
+                                                routineName,
+                                                cCurrentModuleObject,
+                                                thisZoneMRT.name,
+                                                thisPeople.name));
+                    ShowContinueError(state,
+                                      std::format("The contribution of this People instance will be reset to zero as a result."));
+                    thisPeople.fracMRT = 0.0;
+                }
+            }
+            // Now that error checking is done, calculate sums and fractions that will be used throughout the simulation
+            for (int pNum = 1; pNum <= thisZoneMRT.numPeople; pNum++) {
+                thisZoneMRT.sumFracZoneMRT += thisZoneMRT.zoneMRTPeople(pNum).fracMRT;
+            }
+            if (thisZoneMRT.sumFracZoneMRT > 1.0) {
+                ShowSevereError(state,
+                                std::format("{}{}=\"{}, object has individual People MRT weighting factors that sum up to greater than 1.0.",
+                                            routineName,
+                                            cCurrentModuleObject,
+                                            thisZoneMRT.name));
+                ShowContinueError(state,
+                                  std::format("The weighting factors for this object will be reset to zero and the standard zone MRT will be used."));
+                for (int pNum = 1; pNum <= thisZoneMRT.numPeople; pNum++) {
+                    thisZoneMRT.zoneMRTPeople(pNum).fracMRT = 0.0;
+                }
+                thisZoneMRT.sumFracZoneMRT = 0.0;
+            }
+            thisZoneMRT.fracZoneStdMRT = 1.0 - thisZoneMRT.sumFracZoneMRT;
+        }
+        
+        for (auto &thisZoneMRT : state.dataHeatBal->zoneMRTCalc) {  // Set up the output variables
+            if (state.dataHeatBal->Zone(thisZoneMRT.zoneIndex).useZoneMRTCalc) {
+                SetupOutputVariable(state,
+                                    "Zone Standard Mean Radiant Temperature",
+                                    Constant::Units::C,
+                                    state.dataZoneTempPredictorCorrector->zoneHeatBalance(thisZoneMRT.zoneIndex).stdMRT,
+                                    OutputProcessor::TimeStepType::Zone,
+                                    OutputProcessor::StoreType::Average,
+                                    thisZoneMRT.name);
+            }
+        }
+    }
+
     void ProcessZoneData(EnergyPlusData &state,
                          std::string const &cCurrentModuleObject,
                          int const ZoneLoop,
