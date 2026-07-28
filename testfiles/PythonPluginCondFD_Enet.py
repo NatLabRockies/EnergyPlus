@@ -79,6 +79,8 @@ from pyenergyplus.plugin import EnergyPlusPlugin
 # === Configuration ===
 SURFACE_NAME = "Zn001:Roof001"
 ENET_VALUE = -200.0  # W/m2
+MATERIAL_NAME = "C5 - 4 IN HW CONCRETE"
+THERMAL_ABSORPTANCE_VALUE = 0.75
 
 
 class EnetSkyOverride(EnergyPlusPlugin):
@@ -86,7 +88,32 @@ class EnetSkyOverride(EnergyPlusPlugin):
     def __init__(self):
         super().__init__()
         self.need_to_get_handles = True
+        self.need_to_get_material_handle = True
         self.enet_handle = None
+        self.thermal_absorptance_handle = None
+
+    def on_begin_zone_timestep_before_init_heat_balance(self, state) -> int:
+        if self.need_to_get_material_handle:
+            self.thermal_absorptance_handle = self.api.exchange.get_actuator_handle(
+                state,
+                "Material",
+                "Surface Property Thermal Absorptance",
+                MATERIAL_NAME,
+            )
+            if self.thermal_absorptance_handle == -1:
+                self.api.runtime.issue_severe(
+                    state,
+                    f"EnetSkyOverride: no thermal absorptance actuator for material '{MATERIAL_NAME}'.",
+                )
+                return 1
+            self.need_to_get_material_handle = False
+
+        self.api.exchange.set_actuator_value(
+            state,
+            self.thermal_absorptance_handle,
+            THERMAL_ABSORPTANCE_VALUE,
+        )
+        return 0
 
     def on_begin_timestep_before_predictor(self, state) -> int:
         if self.need_to_get_handles:

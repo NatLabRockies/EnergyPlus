@@ -306,7 +306,7 @@ void GetSetPointManagerInputs(EnergyPlusData &state)
         GetSetPointManagerInputData(state, ErrorsFound);
 
         if (ErrorsFound) {
-            ShowFatalError(state, EnergyPlus::format("{}: Errors found in input.  Program terminates.", routineName));
+            ShowFatalError(state, std::format("{}: Errors found in input.  Program terminates.", routineName));
         }
         state.dataSetPointManager->GetInputFlag = false;
     }
@@ -589,12 +589,11 @@ void GetSetPointManagerInputData(EnergyPlusData &state, bool &ErrorsFound)
                 spm->minSetTemp = ip->getRealFieldValue(fields, props, "minimum_setpoint_temperature");
                 spm->maxSetTemp = ip->getRealFieldValue(fields, props, "maximum_setpoint_temperature");
                 if (spm->maxSetTemp < spm->minSetTemp) {
-                    ShowWarningError(state, EnergyPlus::format("{}: {}=\"{}\",", routineName, cCurrentModuleObject, spm->Name));
-                    ShowContinueError(
-                        state,
-                        EnergyPlus::format("...maximum_supply_air_temperature=[{:.1R}] is less than minimum_supply_air_temperature=[{:.1R}].",
-                                           spm->maxSetTemp,
-                                           spm->minSetTemp));
+                    ShowWarningError(state, std::format("{}: {}=\"{}\",", routineName, cCurrentModuleObject, spm->Name));
+                    ShowContinueError(state,
+                                      std::format("...maximum_supply_air_temperature=[{:.1f}] is less than minimum_supply_air_temperature=[{:.1f}].",
+                                                  spm->maxSetTemp,
+                                                  spm->minSetTemp));
                 }
             } break;
 
@@ -604,12 +603,11 @@ void GetSetPointManagerInputData(EnergyPlusData &state, bool &ErrorsFound)
                 spm->minSetTemp = ip->getRealFieldValue(fields, props, "minimum_supply_air_temperature");
                 spm->maxSetTemp = ip->getRealFieldValue(fields, props, "maximum_supply_air_temperature");
                 if (spm->maxSetTemp < spm->minSetTemp) {
-                    ShowWarningError(state, EnergyPlus::format("{}: {}=\"{}\",", routineName, cCurrentModuleObject, spm->Name));
-                    ShowContinueError(
-                        state,
-                        EnergyPlus::format("...maximum_supply_air_temperature=[{:.1R}] is less than minimum_supply_air_temperature=[{:.1R}].",
-                                           spm->maxSetTemp,
-                                           spm->minSetTemp));
+                    ShowWarningError(state, std::format("{}: {}=\"{}\",", routineName, cCurrentModuleObject, spm->Name));
+                    ShowContinueError(state,
+                                      std::format("...maximum_supply_air_temperature=[{:.1f}] is less than minimum_supply_air_temperature=[{:.1f}].",
+                                                  spm->maxSetTemp,
+                                                  spm->minSetTemp));
                 }
             } break;
 
@@ -617,12 +615,11 @@ void GetSetPointManagerInputData(EnergyPlusData &state, bool &ErrorsFound)
                 spm->minSetTemp = ip->getRealFieldValue(fields, props, "minimum_limit_setpoint_temperature");
                 spm->maxSetTemp = ip->getRealFieldValue(fields, props, "maximum_limit_setpoint_temperature");
                 if (spm->maxSetTemp < spm->minSetTemp) {
-                    ShowWarningError(state, EnergyPlus::format("{}: {}=\"{}\",", routineName, cCurrentModuleObject, spm->Name));
-                    ShowContinueError(
-                        state,
-                        EnergyPlus::format("...maximum_supply_air_temperature=[{:.1R}] is less than minimum_supply_air_temperature=[{:.1R}].",
-                                           spm->maxSetTemp,
-                                           spm->minSetTemp));
+                    ShowWarningError(state, std::format("{}: {}=\"{}\",", routineName, cCurrentModuleObject, spm->Name));
+                    ShowContinueError(state,
+                                      std::format("...maximum_supply_air_temperature=[{:.1f}] is less than minimum_supply_air_temperature=[{:.1f}].",
+                                                  spm->maxSetTemp,
+                                                  spm->minSetTemp));
                 }
             } break;
 
@@ -641,23 +638,23 @@ void GetSetPointManagerInputData(EnergyPlusData &state, bool &ErrorsFound)
                 spm->minSetHum = ip->getRealFieldValue(fields, props, "minimum_setpoint_humidity_ratio");
                 spm->maxSetHum = ip->getRealFieldValue(fields, props, "maximum_setpoint_humidity_ratio");
                 if (spm->maxSetHum < spm->minSetHum) {
-                    ShowWarningError(state, EnergyPlus::format("{}: {}=\"{}\",", routineName, cCurrentModuleObject, spm->Name));
+                    ShowWarningError(state, std::format("{}: {}=\"{}\",", routineName, cCurrentModuleObject, spm->Name));
                     ShowContinueError(
                         state,
-                        EnergyPlus::format("...maximum_setpoint_humidity_ratio=[{:.1R}] is less than minimum_setpoint_humidity_ratio=[{:.1R}].",
-                                           spm->maxSetHum,
-                                           spm->minSetHum));
+                        std::format("...maximum_setpoint_humidity_ratio=[{:.1f}] is less than minimum_setpoint_humidity_ratio=[{:.1f}].",
+                                    spm->maxSetHum,
+                                    spm->minSetHum));
                 }
 
                 // Because a zero humidity ratio setpoint is a special value indicating "off" or "no load"
                 // must not allow MinSetHumRat or MaxSetHumRat to be <=0.0
                 if (spm->minSetHum <= 0.0) {
-                    ShowWarningError(state, EnergyPlus::format("{}: {}=\"{}\", invalid value.", routineName, cCurrentModuleObject, spm->Name));
+                    ShowWarningError(state, std::format("{}: {}=\"{}\", invalid value.", routineName, cCurrentModuleObject, spm->Name));
                     ShowContinueError(state, "Minimum setpoint humidity ratio <=0.0, resetting to 0.00001");
                     spm->minSetHum = 0.00001;
                 }
                 if (spm->maxSetHum <= 0.0) {
-                    ShowWarningError(state, EnergyPlus::format("{}: {}=\"{}\", invalid value.", routineName, cCurrentModuleObject, spm->Name));
+                    ShowWarningError(state, std::format("{}: {}=\"{}\", invalid value.", routineName, cCurrentModuleObject, spm->Name));
                     ShowContinueError(state, "Maximum setpoint humidity ratio <=0.0, resetting to 0.00001");
                     spm->maxSetHum = 0.00001;
                 }
@@ -770,11 +767,11 @@ void GetSetPointManagerInputData(EnergyPlusData &state, bool &ErrorsFound)
                     if (spmOA->high2 < spmOA->low2) {
                         ShowWarningCustom(state,
                                           eoh,
-                                          EnergyPlus::format("...{}=[{:.1R}] is less than {}=[{:.1R}].",
-                                                             "outdoor_high_temperature_2",
-                                                             spmOA->high2,
-                                                             "outdoor_low_temperature_2",
-                                                             spmOA->low2));
+                                          std::format("...{}=[{:.1f}] is less than {}=[{:.1f}].",
+                                                      "outdoor_high_temperature_2",
+                                                      spmOA->high2,
+                                                      "outdoor_low_temperature_2",
+                                                      spmOA->low2));
                     }
                 } else { // !foundSched
                     spmOA->sched = nullptr;
@@ -894,8 +891,8 @@ void GetSetPointManagerInputData(EnergyPlusData &state, bool &ErrorsFound)
 
                 // only allow one control zone for now
                 if (NumNodes > 1) {
-                    ShowSevereError(state, EnergyPlus::format("{}: {}=\"{}\", entered nodelist.", routineName, cCurrentModuleObject, spmSZHum->Name));
-                    ShowContinueError(state, EnergyPlus::format("..invalid ctrl_zone_node_name=\"{}\".", ctrlZoneNodeName));
+                    ShowSevereError(state, std::format("{}: {}=\"{}\", entered nodelist.", routineName, cCurrentModuleObject, spmSZHum->Name));
+                    ShowContinueError(state, std::format("..invalid ctrl_zone_node_name=\"{}\".", ctrlZoneNodeName));
                     ShowContinueError(state, "..only one control zone is allowed.");
                     ErrorsFound = true;
                 }
@@ -986,13 +983,13 @@ void GetSetPointManagerInputData(EnergyPlusData &state, bool &ErrorsFound)
                                                             Node::ObjectIsNotParent);
 
                 if (std::find(spmOAP->ctrlNodeNums.begin(), spmOAP->ctrlNodeNums.end(), spmOAP->refNodeNum) != spmOAP->ctrlNodeNums.end()) {
-                    ShowSevereError(state, EnergyPlus::format("{}: {}=\"{}\", reference node.", routineName, cCurrentModuleObject, spmOAP->Name));
+                    ShowSevereError(state, std::format("{}: {}=\"{}\", reference node.", routineName, cCurrentModuleObject, spmOAP->Name));
                     if (spmOAP->ctrlNodeNums.size() > 1) {
                         ShowContinueError(state, "..Reference Node is the same as one of the nodes in SetPoint NodeList");
                     } else {
                         ShowContinueError(state, "..Reference Node is the same as the SetPoint Node");
                     }
-                    ShowContinueError(state, EnergyPlus::format("Reference Node Name=\"{}\".", state.dataLoopNodes->NodeID(spmOAP->refNodeNum)));
+                    ShowContinueError(state, std::format("Reference Node Name=\"{}\".", state.dataLoopNodes->NodeID(spmOAP->refNodeNum)));
                     ErrorsFound = true;
                 }
             } break;
@@ -1031,8 +1028,8 @@ void GetSetPointManagerInputData(EnergyPlusData &state, bool &ErrorsFound)
 
                 spmWTF->minTurndown = ip->getRealFieldValue(fields, props, "minimum_turndown_ratio");
                 if (spmWTF->minTurndown >= 0.8) {
-                    ShowWarningError(state, EnergyPlus::format("{}: {}=\"{}\",", routineName, cCurrentModuleObject, spmWTF->Name));
-                    ShowContinueError(state, EnergyPlus::format("...minimum_turndown_ratio=[{:.2R}] is greater than 0.8;", spmWTF->minTurndown));
+                    ShowWarningError(state, std::format("{}: {}=\"{}\",", routineName, cCurrentModuleObject, spmWTF->Name));
+                    ShowContinueError(state, std::format("...minimum_turndown_ratio=[{:.2f}] is greater than 0.8;", spmWTF->minTurndown));
                     ShowContinueError(state, "...typical values for minimum_turndown_ratio are less than 0.8.");
                 }
 
@@ -1128,13 +1125,13 @@ void GetSetPointManagerInputData(EnergyPlusData &state, bool &ErrorsFound)
                 if (state.dataSetPointManager->NoGroundTempObjWarning[(int)spmFGT->refTempType]) {
                     if (!state.dataEnvrn->GroundTempInputs[(int)spmFGT->refTempType]) {
                         ShowWarningError(state,
-                                         EnergyPlus::format("{}: {}=\"{}\" requires \"Site:GroundTemperature:BuildingSurface\" in the input..",
-                                                            routineName,
-                                                            cCurrentModuleObject,
-                                                            spmFGT->Name));
+                                         std::format("{}: {}=\"{}\" requires \"Site:GroundTemperature:BuildingSurface\" in the input..",
+                                                     routineName,
+                                                     cCurrentModuleObject,
+                                                     spmFGT->Name));
                         ShowContinueError(state,
-                                          EnergyPlus::format("Defaults, constant throughout the year of ({:.1R}) will be used.",
-                                                             state.dataEnvrn->GroundTemp[(int)spmFGT->refTempType]));
+                                          std::format("Defaults, constant throughout the year of ({:.1f}) will be used.",
+                                                      state.dataEnvrn->GroundTemp[(int)spmFGT->refTempType]));
                     }
                     state.dataSetPointManager->NoGroundTempObjWarning[(int)spmFGT->refTempType] = false;
                 }
@@ -1175,12 +1172,12 @@ void GetSetPointManagerInputData(EnergyPlusData &state, bool &ErrorsFound)
                 spmCET->towerDesignInletAirWetBulbTemp = ip->getRealFieldValue(fields, props, "cooling_tower_design_inlet_air_wet_bulb_temperature");
 
                 if (spmCET->maxCondenserEnteringTemp < spmCET->towerDesignInletAirWetBulbTemp) {
-                    ShowWarningError(state, EnergyPlus::format("{}: {}=\"{}\",", routineName, cCurrentModuleObject, spmCET->Name));
+                    ShowWarningError(state, std::format("{}: {}=\"{}\",", routineName, cCurrentModuleObject, spmCET->Name));
                     ShowContinueError(state,
-                                      EnergyPlus::format("...maximum_condenser_entering_water_temperature=[{:.1R}] is less than "
-                                                         "cooling_tower_design_inlet_air_wet-bulb_temperature=[{:.1R}].",
-                                                         spmCET->maxCondenserEnteringTemp,
-                                                         spmCET->towerDesignInletAirWetBulbTemp));
+                                      std::format("...maximum_condenser_entering_water_temperature=[{:.1f}] is less than "
+                                                  "cooling_tower_design_inlet_air_wet-bulb_temperature=[{:.1f}].",
+                                                  spmCET->maxCondenserEnteringTemp,
+                                                  spmCET->towerDesignInletAirWetBulbTemp));
                 }
 
             } break;
@@ -1210,12 +1207,12 @@ void GetSetPointManagerInputData(EnergyPlusData &state, bool &ErrorsFound)
 
                 if (spmSZOSC->coolingOffSetPt < spmSZOSC->coolingOnSetPt) {
                     // throw warning, off must be warmer than on
-                    ShowWarningError(state, EnergyPlus::format("{}: {}=\"{}\",", routineName, cCurrentModuleObject, spmSZOSC->Name));
+                    ShowWarningError(state, std::format("{}: {}=\"{}\",", routineName, cCurrentModuleObject, spmSZOSC->Name));
                     ShowContinueError(state,
-                                      EnergyPlus::format("...cooling_stage_off_supply_air_setpoint_temperature=[{:.1R}] is less than "
-                                                         "cooling_stage_on_supply_air_setpoint_temperature=[{:.1R}].",
-                                                         spmSZOSC->coolingOffSetPt,
-                                                         spmSZOSC->coolingOnSetPt));
+                                      std::format("...cooling_stage_off_supply_air_setpoint_temperature=[{:.1f}] is less than "
+                                                  "cooling_stage_on_supply_air_setpoint_temperature=[{:.1f}].",
+                                                  spmSZOSC->coolingOffSetPt,
+                                                  spmSZOSC->coolingOnSetPt));
                 }
 
                 std::string ctrlZoneName = ip->getAlphaFieldValue(fields, props, "control_zone_name");
@@ -1228,9 +1225,8 @@ void GetSetPointManagerInputData(EnergyPlusData &state, bool &ErrorsFound)
                     spmSZOSC->zoneNodeNum = GetSystemNodeNumberForZone(state, spmSZOSC->ctrlZoneNum);
                     if (allocated(state.dataZoneCtrls->StageZoneLogic)) {
                         if (!state.dataZoneCtrls->StageZoneLogic(spmSZOSC->ctrlZoneNum)) {
-                            ShowSevereError(state,
-                                            EnergyPlus::format("{}: {}=\"{}\", invalid field.", routineName, cCurrentModuleObject, spmSZOSC->Name));
-                            ShowContinueError(state, EnergyPlus::format("..invalid control_zone_name=\"{}\".", ctrlZoneName));
+                            ShowSevereError(state, std::format("{}: {}=\"{}\", invalid field.", routineName, cCurrentModuleObject, spmSZOSC->Name));
+                            ShowContinueError(state, std::format("..invalid control_zone_name=\"{}\".", ctrlZoneName));
                             ShowContinueError(state, "Zone thermostat must use ZoneControl:Thermostat:StagedDualSetpoint.");
                             ErrorsFound = true;
                         }
@@ -1248,12 +1244,12 @@ void GetSetPointManagerInputData(EnergyPlusData &state, bool &ErrorsFound)
 
                 if (spmSZOSH->heatingOffSetPt > spmSZOSH->heatingOnSetPt) {
                     // throw warning, off must be warmer than on
-                    ShowWarningError(state, EnergyPlus::format("{}: {}=\"{}\",", routineName, cCurrentModuleObject, spmSZOSH->Name));
+                    ShowWarningError(state, std::format("{}: {}=\"{}\",", routineName, cCurrentModuleObject, spmSZOSH->Name));
                     ShowContinueError(state,
-                                      EnergyPlus::format("...heating_stage_off_supply_air_setpoint_temperature=[{:.1R}] is less than "
-                                                         "heating_stage_on_supply_air_setpoint_temperature=[{:.1R}].",
-                                                         spmSZOSH->heatingOffSetPt,
-                                                         spmSZOSH->heatingOnSetPt));
+                                      std::format("...heating_stage_off_supply_air_setpoint_temperature=[{:.1f}] is less than "
+                                                  "heating_stage_on_supply_air_setpoint_temperature=[{:.1f}].",
+                                                  spmSZOSH->heatingOffSetPt,
+                                                  spmSZOSH->heatingOnSetPt));
                 }
 
                 std::string ctrlZoneName = ip->getAlphaFieldValue(fields, props, "control_zone_name");

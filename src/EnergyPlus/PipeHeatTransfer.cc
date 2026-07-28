@@ -138,9 +138,7 @@ PlantComponent *PipeHTData::factory(EnergyPlusData &state, DataPlant::PlantEquip
         return thisObj;
     }
     // If we didn't find it, fatal
-    ShowFatalError(state, EnergyPlus::format("PipeHTFactory: Error getting inputs for pipe named: {}", objectName));
-    // Shut up the compiler
-    return nullptr;
+    ShowFatalError(state, std::format("PipeHTFactory: Error getting inputs for pipe named: {}", objectName));
 }
 
 void PipeHTData::simulate(EnergyPlusData &state,
@@ -274,8 +272,8 @@ void GetPipesHeatTransfer(EnergyPlusData &state)
         state.dataPipeHT->PipeHT(Item).ConstructionNum = Util::FindItemInList(s_ipsc->cAlphaArgs(2), state.dataConstruction->Construct);
 
         if (state.dataPipeHT->PipeHT(Item).ConstructionNum == 0) {
-            ShowSevereError(state, EnergyPlus::format("Invalid {}={}", s_ipsc->cAlphaFieldNames(2), s_ipsc->cAlphaArgs(2)));
-            ShowContinueError(state, EnergyPlus::format("Entered in {}={}", s_ipsc->cCurrentModuleObject, s_ipsc->cAlphaArgs(1)));
+            ShowSevereError(state, std::format("Invalid {}={}", s_ipsc->cAlphaFieldNames(2), s_ipsc->cAlphaArgs(2)));
+            ShowContinueError(state, std::format("Entered in {}={}", s_ipsc->cCurrentModuleObject, s_ipsc->cAlphaArgs(1)));
             ErrorsFound = true;
         }
 
@@ -291,8 +289,8 @@ void GetPipesHeatTransfer(EnergyPlusData &state)
                                                                         Node::CompFluidStream::Primary,
                                                                         Node::ObjectIsNotParent);
         if (state.dataPipeHT->PipeHT(Item).InletNodeNum == 0) {
-            ShowSevereError(state, EnergyPlus::format("Invalid {}={}", s_ipsc->cAlphaFieldNames(3), s_ipsc->cAlphaArgs(3)));
-            ShowContinueError(state, EnergyPlus::format("Entered in {}={}", s_ipsc->cCurrentModuleObject, s_ipsc->cAlphaArgs(1)));
+            ShowSevereError(state, std::format("Invalid {}={}", s_ipsc->cAlphaFieldNames(3), s_ipsc->cAlphaArgs(3)));
+            ShowContinueError(state, std::format("Entered in {}={}", s_ipsc->cCurrentModuleObject, s_ipsc->cAlphaArgs(1)));
             ErrorsFound = true;
         }
 
@@ -308,8 +306,8 @@ void GetPipesHeatTransfer(EnergyPlusData &state)
                                                                          Node::CompFluidStream::Primary,
                                                                          Node::ObjectIsNotParent);
         if (state.dataPipeHT->PipeHT(Item).OutletNodeNum == 0) {
-            ShowSevereError(state, EnergyPlus::format("Invalid {}={}", s_ipsc->cAlphaFieldNames(4), s_ipsc->cAlphaArgs(4)));
-            ShowContinueError(state, EnergyPlus::format("Entered in {}={}", s_ipsc->cCurrentModuleObject, s_ipsc->cAlphaArgs(1)));
+            ShowSevereError(state, std::format("Invalid {}={}", s_ipsc->cAlphaFieldNames(4), s_ipsc->cAlphaArgs(4)));
+            ShowContinueError(state, std::format("Entered in {}={}", s_ipsc->cCurrentModuleObject, s_ipsc->cAlphaArgs(1)));
             ErrorsFound = true;
         }
 
@@ -327,8 +325,8 @@ void GetPipesHeatTransfer(EnergyPlusData &state)
             state.dataPipeHT->PipeHT(Item).EnvironmentPtr = EnvrnPtr::ZoneEnv;
             state.dataPipeHT->PipeHT(Item).EnvrZonePtr = Util::FindItemInList(s_ipsc->cAlphaArgs(6), state.dataHeatBal->Zone);
             if (state.dataPipeHT->PipeHT(Item).EnvrZonePtr == 0) {
-                ShowSevereError(state, EnergyPlus::format("Invalid {}={}", s_ipsc->cAlphaFieldNames(6), s_ipsc->cAlphaArgs(6)));
-                ShowContinueError(state, EnergyPlus::format("Entered in {}={}", s_ipsc->cCurrentModuleObject, s_ipsc->cAlphaArgs(1)));
+                ShowSevereError(state, std::format("Invalid {}={}", s_ipsc->cAlphaFieldNames(6), s_ipsc->cAlphaArgs(6)));
+                ShowContinueError(state, std::format("Entered in {}={}", s_ipsc->cCurrentModuleObject, s_ipsc->cAlphaArgs(1)));
                 ErrorsFound = true;
             }
             break;
@@ -339,20 +337,20 @@ void GetPipesHeatTransfer(EnergyPlusData &state)
             state.dataPipeHT->PipeHT(Item).envrSched = Sched::GetSchedule(state, s_ipsc->cAlphaArgs(7));
             state.dataPipeHT->PipeHT(Item).envrVelSched = Sched::GetSchedule(state, s_ipsc->cAlphaArgs(8));
             if (state.dataPipeHT->PipeHT(Item).envrSched == nullptr) {
-                ShowSevereError(state, EnergyPlus::format("Invalid {}={}", s_ipsc->cAlphaFieldNames(7), s_ipsc->cAlphaArgs(7)));
-                ShowContinueError(state, EnergyPlus::format("Entered in {}={}", s_ipsc->cCurrentModuleObject, s_ipsc->cAlphaArgs(1)));
+                ShowSevereError(state, std::format("Invalid {}={}", s_ipsc->cAlphaFieldNames(7), s_ipsc->cAlphaArgs(7)));
+                ShowContinueError(state, std::format("Entered in {}={}", s_ipsc->cCurrentModuleObject, s_ipsc->cAlphaArgs(1)));
                 ErrorsFound = true;
             }
             if (state.dataPipeHT->PipeHT(Item).envrVelSched == nullptr) {
-                ShowSevereError(state, EnergyPlus::format("Invalid {}={}", s_ipsc->cAlphaFieldNames(8), s_ipsc->cAlphaArgs(8)));
-                ShowContinueError(state, EnergyPlus::format("Entered in {}={}", s_ipsc->cCurrentModuleObject, s_ipsc->cAlphaArgs(1)));
+                ShowSevereError(state, std::format("Invalid {}={}", s_ipsc->cAlphaFieldNames(8), s_ipsc->cAlphaArgs(8)));
+                ShowContinueError(state, std::format("Entered in {}={}", s_ipsc->cCurrentModuleObject, s_ipsc->cAlphaArgs(1)));
                 ErrorsFound = true;
             }
             break;
 
         default:
-            ShowSevereError(state, EnergyPlus::format("Invalid {}={}", s_ipsc->cAlphaFieldNames(5), s_ipsc->cAlphaArgs(5)));
-            ShowContinueError(state, EnergyPlus::format("Entered in {}={}", s_ipsc->cCurrentModuleObject, s_ipsc->cAlphaArgs(1)));
+            ShowSevereError(state, std::format("Invalid {}={}", s_ipsc->cAlphaFieldNames(5), s_ipsc->cAlphaArgs(5)));
+            ShowContinueError(state, std::format("Entered in {}={}", s_ipsc->cCurrentModuleObject, s_ipsc->cAlphaArgs(1)));
             ShowContinueError(state, R"(Should be "ZONE" or "SCHEDULE")"); // TODO rename point
             ErrorsFound = true;
         }
@@ -360,19 +358,17 @@ void GetPipesHeatTransfer(EnergyPlusData &state)
         // dimensions
         state.dataPipeHT->PipeHT(Item).PipeID = s_ipsc->rNumericArgs(1);
         if (s_ipsc->rNumericArgs(1) <= 0.0) { // not really necessary because idd field has "minimum> 0"
-            ShowSevereError(state,
-                            EnergyPlus::format("GetPipesHeatTransfer: invalid {} of {:.4R}", s_ipsc->cNumericFieldNames(1), s_ipsc->rNumericArgs(1)));
-            ShowContinueError(state, EnergyPlus::format("{} must be > 0.0", s_ipsc->cNumericFieldNames(1)));
-            ShowContinueError(state, EnergyPlus::format("Entered in {}={}", s_ipsc->cCurrentModuleObject, s_ipsc->cAlphaArgs(1)));
+            ShowSevereError(state, std::format("GetPipesHeatTransfer: invalid {} of {:.4f}", s_ipsc->cNumericFieldNames(1), s_ipsc->rNumericArgs(1)));
+            ShowContinueError(state, std::format("{} must be > 0.0", s_ipsc->cNumericFieldNames(1)));
+            ShowContinueError(state, std::format("Entered in {}={}", s_ipsc->cCurrentModuleObject, s_ipsc->cAlphaArgs(1)));
 
             ErrorsFound = true;
         }
 
         state.dataPipeHT->PipeHT(Item).Length = s_ipsc->rNumericArgs(2);
         if (s_ipsc->rNumericArgs(2) <= 0.0) { // not really necessary because idd field has "minimum> 0"
-            ShowSevereError(state,
-                            EnergyPlus::format("GetPipesHeatTransfer: invalid {} of {:.4R}", s_ipsc->cNumericFieldNames(2), s_ipsc->rNumericArgs(2)));
-            ShowContinueError(state, EnergyPlus::format("{} must be > 0.0", s_ipsc->cNumericFieldNames(2)));
+            ShowSevereError(state, std::format("GetPipesHeatTransfer: invalid {} of {:.4f}", s_ipsc->cNumericFieldNames(2), s_ipsc->rNumericArgs(2)));
+            ShowContinueError(state, std::format("{} must be > 0.0", s_ipsc->cNumericFieldNames(2)));
             ShowContinueError(state, std::format("Entered in {}={}", s_ipsc->cCurrentModuleObject, s_ipsc->cAlphaArgs(1)));
             ErrorsFound = true;
         }
@@ -491,7 +487,7 @@ void GetPipesHeatTransfer(EnergyPlusData &state)
         // dimensions
         state.dataPipeHT->PipeHT(Item).PipeID = s_ipsc->rNumericArgs(1);
         if (s_ipsc->rNumericArgs(1) <= 0.0) { // not really necessary because idd field has "minimum> 0"
-            ShowSevereError(state, EnergyPlus::format("Invalid {} of {:.4R}", s_ipsc->cNumericFieldNames(1), s_ipsc->rNumericArgs(1)));
+            ShowSevereError(state, std::format("Invalid {} of {:.4f}", s_ipsc->cNumericFieldNames(1), s_ipsc->rNumericArgs(1)));
             ShowContinueError(state, std::format("{} must be > 0.0", s_ipsc->cNumericFieldNames(1)));
             ShowContinueError(state, std::format("Entered in {}={}", s_ipsc->cCurrentModuleObject, s_ipsc->cAlphaArgs(1)));
             ErrorsFound = true;
@@ -499,7 +495,7 @@ void GetPipesHeatTransfer(EnergyPlusData &state)
 
         state.dataPipeHT->PipeHT(Item).Length = s_ipsc->rNumericArgs(2);
         if (s_ipsc->rNumericArgs(2) <= 0.0) { // not really necessary because idd field has "minimum> 0"
-            ShowSevereError(state, EnergyPlus::format("Invalid {} of {:.4R}", s_ipsc->cNumericFieldNames(2), s_ipsc->rNumericArgs(2)));
+            ShowSevereError(state, std::format("Invalid {} of {:.4f}", s_ipsc->cNumericFieldNames(2), s_ipsc->rNumericArgs(2)));
             ShowContinueError(state, std::format("{} must be > 0.0", s_ipsc->cNumericFieldNames(2)));
             ShowContinueError(state, std::format("Entered in {}={}", s_ipsc->cCurrentModuleObject, s_ipsc->cAlphaArgs(1)));
             ErrorsFound = true;
@@ -607,7 +603,7 @@ void GetPipesHeatTransfer(EnergyPlusData &state)
         // dimensions
         state.dataPipeHT->PipeHT(Item).PipeID = s_ipsc->rNumericArgs(1);
         if (s_ipsc->rNumericArgs(1) <= 0.0) { // not really necessary because idd field has "minimum> 0"
-            ShowSevereError(state, EnergyPlus::format("Invalid {} of {:.4R}", s_ipsc->cNumericFieldNames(1), s_ipsc->rNumericArgs(1)));
+            ShowSevereError(state, std::format("Invalid {} of {:.4f}", s_ipsc->cNumericFieldNames(1), s_ipsc->rNumericArgs(1)));
             ShowContinueError(state, std::format("{} must be > 0.0", s_ipsc->cNumericFieldNames(1)));
             ShowContinueError(state, std::format("Entered in {}={}", s_ipsc->cCurrentModuleObject, s_ipsc->cAlphaArgs(1)));
             ErrorsFound = true;
@@ -615,7 +611,7 @@ void GetPipesHeatTransfer(EnergyPlusData &state)
 
         state.dataPipeHT->PipeHT(Item).Length = s_ipsc->rNumericArgs(2);
         if (s_ipsc->rNumericArgs(2) <= 0.0) { // not really necessary because idd field has "minimum> 0"
-            ShowSevereError(state, EnergyPlus::format("Invalid {} of {:.4R}", s_ipsc->cNumericFieldNames(2), s_ipsc->rNumericArgs(2)));
+            ShowSevereError(state, std::format("Invalid {} of {:.4f}", s_ipsc->cNumericFieldNames(2), s_ipsc->rNumericArgs(2)));
             ShowContinueError(state, std::format("{} must be > 0.0", s_ipsc->cNumericFieldNames(2)));
             ShowContinueError(state, std::format("Entered in {}={}", s_ipsc->cCurrentModuleObject, s_ipsc->cAlphaArgs(1)));
             ErrorsFound = true;
@@ -800,7 +796,7 @@ void PipeHTData::ValidatePipeConstruction(EnergyPlusData &state,
                                           std::string const &PipeType,         // module object of pipe (error messages)
                                           std::string const &ConstructionName, // construction name of pipe (error messages)
                                           std::string_view FieldName,          // fieldname of pipe (error messages)
-                                          int const ConstructionNum,           // pointer into construction data
+                                          int const t_ConstructionNum,         // pointer into construction data
                                           bool &ErrorsFound                    // set to true if errors found here
 )
 {
@@ -835,18 +831,18 @@ void PipeHTData::ValidatePipeConstruction(EnergyPlusData &state,
     // na
 
     // SUBROUTINE LOCAL VARIABLE DECLARATIONS:
-    Real64 Density; // average density [kg/m^3]
-    Real64 SpHeat;  // average specific heat [J/kg.K]
+    Real64 Density = 0.0; // average density [kg/m^3]
+    Real64 SpHeat = 0.0;  // average specific heat [J/kg.K]
     Real64 Resistance = 0.0;
     Real64 TotThickness = 0.0;
 
     auto const &s_mat = state.dataMaterial;
 
     // CTF stuff
-    int TotalLayers = state.dataConstruction->Construct(ConstructionNum).TotLayers;
+    int TotalLayers = state.dataConstruction->Construct(t_ConstructionNum).TotLayers;
     // get pipe properties
     if (TotalLayers == 1) { // no insulation layer
-        auto const *mat = s_mat->materials(state.dataConstruction->Construct(ConstructionNum).LayerPoint(1));
+        auto const *mat = s_mat->materials(state.dataConstruction->Construct(t_ConstructionNum).LayerPoint(1));
 
         this->PipeConductivity = mat->Conductivity;
         this->PipeDensity = mat->Density;
@@ -858,7 +854,7 @@ void PipeHTData::ValidatePipeConstruction(EnergyPlusData &state,
     } else if (TotalLayers >= 2) { // first layers are insulation, last layer is pipe
 
         for (int LayerNum = 1; LayerNum <= TotalLayers - 1; ++LayerNum) {
-            auto const *mat = state.dataMaterial->materials(state.dataConstruction->Construct(ConstructionNum).LayerPoint(LayerNum));
+            auto const *mat = state.dataMaterial->materials(state.dataConstruction->Construct(t_ConstructionNum).LayerPoint(LayerNum));
             Resistance += mat->Thickness / mat->Conductivity;
             Density = mat->Density * mat->Thickness;
             TotThickness += mat->Thickness;
@@ -873,7 +869,7 @@ void PipeHTData::ValidatePipeConstruction(EnergyPlusData &state,
         this->InsulationCp = SpHeat / TotThickness;
         this->InsulationThickness = TotThickness;
 
-        auto const *mat = state.dataMaterial->materials(state.dataConstruction->Construct(ConstructionNum).LayerPoint(TotalLayers));
+        auto const *mat = state.dataMaterial->materials(state.dataConstruction->Construct(t_ConstructionNum).LayerPoint(TotalLayers));
         this->PipeConductivity = mat->Conductivity;
         this->PipeDensity = mat->Density;
         this->PipeCp = mat->SpecHeat;
@@ -1244,11 +1240,11 @@ void PipeHTData::CalcPipesHeatTransfer(EnergyPlusData &state, ObjexxFCL::Optiona
 
     if (present(LengthIndex)) { // Just simulate the single section if being called from Pipe:Underground
 
-        int PipeDepth = this->PipeNodeDepth;
+        int pipeNodeDepth = this->PipeNodeDepth;
         int PipeWidth = this->PipeNodeWidth;
-        TempBelow = this->T(PipeWidth, PipeDepth + 1, LengthIndex, TimeIndex::Current);
-        TempBeside = this->T(PipeWidth - 1, PipeDepth, LengthIndex, TimeIndex::Current);
-        TempAbove = this->T(PipeWidth, PipeDepth - 1, LengthIndex, TimeIndex::Current);
+        TempBelow = this->T(PipeWidth, pipeNodeDepth + 1, LengthIndex, TimeIndex::Current);
+        TempBeside = this->T(PipeWidth - 1, pipeNodeDepth, LengthIndex, TimeIndex::Current);
+        TempAbove = this->T(PipeWidth, pipeNodeDepth - 1, LengthIndex, TimeIndex::Current);
         state.dataPipeHT->nsvEnvironmentTemp = (TempBelow + TempBeside + TempAbove) / 3.0;
 
         this->TentativeFluidTemp(LengthIndex) = (A2 * this->TentativeFluidTemp(LengthIndex - 1) +
@@ -1319,7 +1315,7 @@ void PipeHTData::CalcBuriedPipeSoil(EnergyPlusData &state) // Current Simulation
     using Convect::CalcASHRAESimpExtConvCoeff;
 
     // SUBROUTINE PARAMETER DEFINITIONS:
-    int constexpr NumSections(20);
+    int constexpr NumLengthSections(20);
     Real64 constexpr ConvCrit(0.05);
     int constexpr MaxIterations(200);
     Real64 constexpr StefBoltzmann(5.6697e-08); // Stefan-Boltzmann constant
@@ -1331,7 +1327,7 @@ void PipeHTData::CalcBuriedPipeSoil(EnergyPlusData &state) // Current Simulation
     Real64 ConvCoef(0.0);     // Current convection coefficient = f(Wind Speed,Roughness)
     Real64 RadCoef(0.0);      // Current radiation coefficient
     Real64 QSolAbsorbed(0.0); // Current total solar energy absorbed
-    Array3D<Real64> T_O(this->PipeNodeWidth, this->NumDepthNodes, NumSections);
+    Array3D<Real64> T_O(this->PipeNodeWidth, this->NumDepthNodes, NumLengthSections);
 
     // Local variable placeholders for code readability
     Real64 A1(0.0);                                                               // Placeholder for CoefA1
@@ -1662,9 +1658,9 @@ void PipeHTData::CalcZonePipesHeatGain(EnergyPlusData &state)
 //==============================================================================
 
 Real64 PipeHTData::CalcPipeHeatTransCoef(EnergyPlusData &state,
-                                         Real64 const Temperature,  // Temperature of water entering the surface, in C
-                                         Real64 const MassFlowRate, // Mass flow rate, in kg/s
-                                         Real64 const Diameter      // Pipe diameter, m
+                                         Real64 const Temperature,    // Temperature of water entering the surface, in C
+                                         Real64 const t_MassFlowRate, // Mass flow rate, in kg/s
+                                         Real64 const Diameter        // Pipe diameter, m
 )
 {
 
@@ -1739,7 +1735,7 @@ Real64 PipeHTData::CalcPipeHeatTransCoef(EnergyPlusData &state,
                1000.0; // Note fluid properties routine returns mPa-s, we need Pa-s
 
     // Calculate the Reynold's number from RE=(4*Mdot)/(Pi*Mu*Diameter) - as RadiantSysLowTemp
-    ReD = 4.0 * MassFlowRate / (Constant::Pi * MUactual * Diameter);
+    ReD = 4.0 * t_MassFlowRate / (Constant::Pi * MUactual * Diameter);
 
     if (ReD == 0.0) { // No flow
 
@@ -1808,13 +1804,13 @@ Real64 PipeHTData::OutsidePipeHeatTransCoef(EnergyPlusData &state)
     // SUBROUTINE LOCAL VARIABLE DECLARATIONS:
     int idx;
     Real64 NuD;
-    Real64 ReD;
-    Real64 Coef;
-    Real64 rExp;
-    Real64 AirVisc;
-    Real64 AirVel;
-    Real64 AirTemp;
-    Real64 PipeOD;
+    Real64 ReD = 0.0;
+    Real64 Coef = 0.0;
+    Real64 rExp = 0.0;
+    Real64 AirVisc = 0.0;
+    Real64 AirVel = 0.0;
+    Real64 AirTemp = 0.0;
+    Real64 pipeOuterDiam;
     bool ViscositySet;
     bool CoefSet;
 
@@ -1848,7 +1844,7 @@ Real64 PipeHTData::OutsidePipeHeatTransCoef(EnergyPlusData &state)
         break;
     }
 
-    PipeOD = this->InsulationOD;
+    pipeOuterDiam = this->InsulationOD;
 
     ViscositySet = false;
     for (idx = 0; idx < NumOfPropDivisions; ++idx) {
@@ -1870,7 +1866,7 @@ Real64 PipeHTData::OutsidePipeHeatTransCoef(EnergyPlusData &state)
     // Calculate the Reynold's number
     CoefSet = false;
     if (AirVisc > 0.0) {
-        ReD = AirVel * PipeOD / (AirVisc);
+        ReD = AirVel * pipeOuterDiam / (AirVisc);
     }
 
     for (idx = 0; idx < NumOfParamDivisions; ++idx) {
@@ -1898,7 +1894,7 @@ Real64 PipeHTData::OutsidePipeHeatTransCoef(EnergyPlusData &state)
     NuD = max(NuD, NaturalConvNusselt);
 
     // h = (k)(Nu)/D
-    OutsidePipeHeatTransCoef = CondAir * NuD / PipeOD;
+    OutsidePipeHeatTransCoef = CondAir * NuD / pipeOuterDiam;
 
     return OutsidePipeHeatTransCoef;
 }

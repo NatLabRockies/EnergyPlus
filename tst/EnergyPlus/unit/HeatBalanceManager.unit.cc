@@ -70,6 +70,7 @@
 #include <EnergyPlus/HVACSystemRootFindingAlgorithm.hh>
 #include <EnergyPlus/HeatBalanceAirManager.hh>
 #include <EnergyPlus/HeatBalanceManager.hh>
+#include <EnergyPlus/HeatBalanceSurfaceManager.hh>
 #include <EnergyPlus/IOFiles.hh>
 #include <EnergyPlus/InputProcessing/InputProcessor.hh>
 #include <EnergyPlus/Material.hh>
@@ -2400,6 +2401,38 @@ TEST_F(EnergyPlusFixture, HeatBalanceManager_EMSConstructionSwitchTestCondFD)
     EXPECT_TRUE(state->dataSurface->SurfEMSConstructionOverrideON(surfNum));
 }
 
+TEST_F(EnergyPlusFixture, HeatBalanceManager_EMSMaterialThermalAbsorptanceUpdatesConstructionProperties)
+{
+    constexpr Real64 initialThermalAbsorptance = 0.9;
+    constexpr Real64 emsThermalAbsorptance = 0.35;
+
+    state->dataMaterial->materials.allocate(1);
+    auto *mat = new Material::MaterialBase;
+    mat->Name = "ROOF MATERIAL";
+    mat->group = Material::Group::Regular;
+    mat->AbsorpThermal = initialThermalAbsorptance;
+    mat->AbsorpThermalInput = initialThermalAbsorptance;
+    mat->AbsorpThermalEMSOverrideOn = true;
+    mat->AbsorpThermalEMSOverride = emsThermalAbsorptance;
+    state->dataMaterial->materials(1) = mat;
+
+    state->dataHeatBal->TotConstructs = 1;
+    state->dataConstruction->Construct.allocate(1);
+    auto &construction = state->dataConstruction->Construct(1);
+    construction.Name = "ROOF CONSTRUCTION";
+    construction.TotLayers = 1;
+    construction.LayerPoint.allocate(1);
+    construction.LayerPoint(1) = 1;
+    construction.InsideAbsorpThermal = initialThermalAbsorptance;
+    construction.OutsideAbsorpThermal = initialThermalAbsorptance;
+
+    HeatBalanceSurfaceManager::InitEMSControlledSurfaceProperties(*state);
+
+    EXPECT_EQ(mat->AbsorpThermal, emsThermalAbsorptance);
+    EXPECT_EQ(construction.InsideAbsorpThermal, emsThermalAbsorptance);
+    EXPECT_EQ(construction.OutsideAbsorpThermal, emsThermalAbsorptance);
+}
+
 TEST_F(EnergyPlusFixture, HeatBalanceManager_GetSpaceData)
 {
     // Test input processing of Space object
@@ -2878,5 +2911,81 @@ TEST_F(EnergyPlusFixture, ReadIncidentSolarMultiplierInput)
     error_string =
         delimited_string({"   ** Severe  ** Non-compatible shades defined alongside SurfaceProperty:IncidentSolarMultiplier for the same window"});
     EXPECT_TRUE(compare_err_stream(error_string, true));
+}
+
+TEST_F(EnergyPlusFixture, WindowPropertyFrameAndDivider_DividerChecks)
+{
+    // #11589: check input repair for divider width and number of horz/vert dividers.
+    std::string const idf_objects = delimited_string({
+        "  WindowProperty:FrameAndDivider,",
+        "    WindowFrame1,                 !- Name",
+        "    0.05,                         !- Frame Width {m}",
+        "    0.00,                         !- Frame Outside Projection {m}",
+        "    0.00,                         !- Frame Inside Projection {m}",
+        "    5.0,                          !- Frame Conductance {W/m2-K}",
+        "    1.2,                          !- Ratio of Frame-Edge Glass Conductance to Center-Of-Glass Conductance",
+        "    0.8,                          !- Frame Solar Absorptance",
+        "    0.8,                          !- Frame Visible Absorptance",
+        "    0.9,                          !- Frame Thermal Hemispherical Emissivity",
+        "    DividedLite,                  !- Divider Type",
+        "    0.02,                         !- Divider Width {m}",
+        "    0,                            !- Number of Horizontal Dividers",
+        "    0,                            !- Number of Vertical Dividers",
+        "    0.00,                         !- Divider Outside Projection {m}",
+        "    0.00,                         !- Divider Inside Projection {m}",
+        "    5.0,                          !- Divider Conductance {W/m2-K}",
+        "    1.2,                          !- Ratio of Divider-Edge Glass Conductance to Center-Of-Glass Conductance",
+        "    0.8,                          !- Divider Solar Absorptance",
+        "    0.8,                          !- Divider Visible Absorptance",
+        "    0.9;                          !- Divider Thermal Hemispherical Emissivity",
+
+        "  WindowProperty:FrameAndDivider,",
+        "    WindowFrame2,                 !- Name",
+        "    0.05,                         !- Frame Width {m}",
+        "    0.00,                         !- Frame Outside Projection {m}",
+        "    0.00,                         !- Frame Inside Projection {m}",
+        "    5.0,                          !- Frame Conductance {W/m2-K}",
+        "    1.2,                          !- Ratio of Frame-Edge Glass Conductance to Center-Of-Glass Conductance",
+        "    0.8,                          !- Frame Solar Absorptance",
+        "    0.8,                          !- Frame Visible Absorptance",
+        "    0.9,                          !- Frame Thermal Hemispherical Emissivity",
+        "    DividedLite,                  !- Divider Type",
+        "    0.0,                          !- Divider Width {m}",
+        "    1,                            !- Number of Horizontal Dividers",
+        "    1,                            !- Number of Vertical Dividers",
+        "    0.00,                         !- Divider Outside Projection {m}",
+        "    0.00,                         !- Divider Inside Projection {m}",
+        "    5.0,                          !- Divider Conductance {W/m2-K}",
+        "    1.2,                          !- Ratio of Divider-Edge Glass Conductance to Center-Of-Glass Conductance",
+        "    0.8,                          !- Divider Solar Absorptance",
+        "    0.8,                          !- Divider Visible Absorptance",
+        "    0.9;                          !- Divider Thermal Hemispherical Emissivity",
+    });
+
+    ASSERT_TRUE(process_idf(idf_objects));
+    state->init_state(*state);
+
+    HeatBalanceManager::GetFrameAndDividerData(*state);
+
+    EXPECT_EQ(2, state->dataHeatBal->TotFrameDivider);
+    auto &frameDivider1 = state->dataSurface->FrameDivider(1);
+    EXPECT_EQ(0.05, frameDivider1.FrameWidth);
+    EXPECT_EQ(0.0, frameDivider1.DividerWidth);
+    EXPECT_EQ(0, frameDivider1.HorDividers);
+    EXPECT_EQ(0, frameDivider1.VertDividers);
+    auto &frameDivider2 = state->dataSurface->FrameDivider(2);
+    EXPECT_EQ(0.05, frameDivider2.FrameWidth);
+    EXPECT_EQ(0.0, frameDivider2.DividerWidth);
+    EXPECT_EQ(0, frameDivider2.HorDividers);
+    EXPECT_EQ(0, frameDivider2.VertDividers);
+
+    EXPECT_TRUE(compare_err_stream_substring(delimited_string({
+        "   ** Warning ** WindowProperty:FrameAndDivider: In FrameAndDivider WINDOWFRAME1 Divider Width > 0",
+        "   **   ~~~   ** ...but Number of Horizontal Dividers = 0 and Number of Vertical Dividers = 0.",
+        "   **   ~~~   ** ...Divider Width set to 0.",
+        "   ** Warning ** WindowProperty:FrameAndDivider: In FrameAndDivider WINDOWFRAME2 Divider Width = 0",
+        "   **   ~~~   ** ...but Number of Horizontal Dividers > 0 or Number of Vertical Dividers > 0.",
+        "   **   ~~~   ** ...Number of Horizontal Dividers and Number of Vertical Dividers set to 0.",
+    })));
 }
 } // namespace EnergyPlus

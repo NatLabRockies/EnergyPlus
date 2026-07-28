@@ -72,7 +72,6 @@
 
 // Third Party Headers
 #include <fast_float/fast_float.h>
-#include <fmt/format.h>
 
 // EnergyPlus Headers
 #include <EnergyPlus/Boilers.hh>
@@ -107,6 +106,7 @@
 #include <EnergyPlus/Fans.hh>
 #include <EnergyPlus/FileSystem.hh>
 #include <EnergyPlus/FluidCoolers.hh>
+#include <EnergyPlus/Formatters.hh>
 #include <EnergyPlus/General.hh>
 #include <EnergyPlus/HVACVariableRefrigerantFlow.hh>
 #include <EnergyPlus/HeatingCoils.hh>
@@ -204,7 +204,7 @@ std::ofstream &open_tbl_stream(EnergyPlusData &state, int const iStyle, fs::path
     if (output_to_file) {
         tbl_stream.open(filePath);
         if (!tbl_stream) {
-            ShowFatalError(state, EnergyPlus::format("OpenOutputTabularFile: Could not open file \"{}\" for output (write).", filePath.string()));
+            ShowFatalError(state, std::format("OpenOutputTabularFile: Could not open file \"{}\" for output (write).", filePath.string()));
         }
     } else {
         tbl_stream.setstate(std::ios_base::badbit);
@@ -255,8 +255,7 @@ void UpdateTabularReports(EnergyPlusData &state, OutputProcessor::TimeStepType t
                 } else {
                     if (state.dataHeatBal->Resilience(ZoneNum).ColdStressTempThresh != ColdTempThresh) {
                         ShowWarningMessage(
-                            state,
-                            EnergyPlus::format("Zone {} has multiple people objects with different Cold Stress Temperature Threshold.", ZoneNum));
+                            state, std::format("Zone {} has multiple people objects with different Cold Stress Temperature Threshold.", ZoneNum));
                     }
                 }
 
@@ -266,8 +265,7 @@ void UpdateTabularReports(EnergyPlusData &state, OutputProcessor::TimeStepType t
                 } else {
                     if (state.dataHeatBal->Resilience(ZoneNum).HeatStressTempThresh != HeatTempThresh) {
                         ShowWarningMessage(
-                            state,
-                            EnergyPlus::format("Zone {} has multiple people objects with different Heat Stress Temperature Threshold.", ZoneNum));
+                            state, std::format("Zone {} has multiple people objects with different Heat Stress Temperature Threshold.", ZoneNum));
                     }
                 }
             }
@@ -362,10 +360,9 @@ void GetInputTabularMonthly(EnergyPlusData &state)
         if (!state.dataGlobal->DoWeathSim) {
             ShowWarningError(
                 state,
-                EnergyPlus::format(
-                    "{} requested with SimulationControl Run Simulation for Weather File Run Periods set to No so {} will not be generated",
-                    CurrentModuleObject,
-                    CurrentModuleObject));
+                std::format("{} requested with SimulationControl Run Simulation for Weather File Run Periods set to No so {} will not be generated",
+                            CurrentModuleObject,
+                            CurrentModuleObject));
             return;
         }
     }
@@ -384,7 +381,7 @@ void GetInputTabularMonthly(EnergyPlusData &state)
         state.dataInputProcessing->inputProcessor->getObjectItem(state, CurrentModuleObject, TabNum, AlphArray, NumAlphas, NumArray, NumNums, IOStat);
 
         if (NumAlphas < 2) {
-            ShowSevereError(state, EnergyPlus::format("{}: No fields specified.", CurrentModuleObject));
+            ShowSevereError(state, std::format("{}: No fields specified.", CurrentModuleObject));
         }
 
         // add to the data structure
@@ -392,9 +389,9 @@ void GetInputTabularMonthly(EnergyPlusData &state)
         for (int jField = 2; jField <= NumAlphas; jField += 2) {
             if (AlphArray(jField).empty()) {
                 ShowWarningError(state,
-                                 EnergyPlus::format("{}: Blank column specified in '{}', need to provide a variable or meter name ",
-                                                    CurrentModuleObject,
-                                                    ort->MonthlyInput(TabNum).name));
+                                 std::format("{}: Blank column specified in '{}', need to provide a variable or meter name ",
+                                             CurrentModuleObject,
+                                             ort->MonthlyInput(TabNum).name));
                 continue;
             }
             std::string const curAggString = AlphArray(jField + 1);
@@ -402,9 +399,9 @@ void GetInputTabularMonthly(EnergyPlusData &state)
             AggType curAggType = static_cast<AggType>(getEnumValue(AggTypeNamesUC, Util::makeUPPER(curAggString)));
             // set accumulator values to default as appropriate for aggregation type
             if (curAggType == AggType::Invalid) {
-                ShowWarningError(
-                    state, EnergyPlus::format("{}={}, Variable name={}", CurrentModuleObject, ort->MonthlyInput(TabNum).name, AlphArray(jField)));
-                ShowContinueError(state, EnergyPlus::format("Invalid aggregation type=\"{}\"  Defaulting to SumOrAverage.", curAggString));
+                ShowWarningError(state,
+                                 std::format("{}={}, Variable name={}", CurrentModuleObject, ort->MonthlyInput(TabNum).name, AlphArray(jField)));
+                ShowContinueError(state, std::format("Invalid aggregation type=\"{}\"  Defaulting to SumOrAverage.", curAggString));
                 curAggType = AggType::SumOrAvg;
             }
             AddMonthlyFieldSetInput(state, curTable, AlphArray(jField), "", curAggType);
@@ -492,7 +489,7 @@ void AddMonthlyFieldSetInput(
     // SUBROUTINE ARGUMENT DEFINITIONS:
 
     // SUBROUTINE PARAMETER DEFINITIONS:
-    int constexpr sizeIncrement(50);
+    int constexpr localSizeIncrement(50);
     auto &ort = state.dataOutRptTab;
 
     // INTERFACE BLOCK SPECIFICATIONS:
@@ -505,8 +502,8 @@ void AddMonthlyFieldSetInput(
     // na
 
     if (!allocated(ort->MonthlyFieldSetInput)) {
-        ort->MonthlyFieldSetInput.allocate(sizeIncrement);
-        ort->sizeMonthlyFieldSetInput = sizeIncrement;
+        ort->MonthlyFieldSetInput.allocate(localSizeIncrement);
+        ort->sizeMonthlyFieldSetInput = localSizeIncrement;
         ort->MonthlyFieldSetInputCount = 1;
     } else {
         ++ort->MonthlyFieldSetInputCount;
@@ -766,10 +763,9 @@ void InitializeTabularMonthly(EnergyPlusData &state)
             UnitsVar = ort->MonthlyFieldSetInput(FirstColumn + colNum - 1).varUnits;
 
             if (KeyCount == 0 && issueWarnings && !ort->MonthlyInput(TabNum).isNamedMonthly) {
-                ShowWarningError(state,
-                                 EnergyPlus::format("In Output:Table:Monthly '{}' invalid Variable or Meter Name '{}'",
-                                                    ort->MonthlyInput(TabNum).name,
-                                                    curVariMeter));
+                ShowWarningError(
+                    state,
+                    std::format("In Output:Table:Monthly '{}' invalid Variable or Meter Name '{}'", ort->MonthlyInput(TabNum).name, curVariMeter));
             }
             for (int iKey = 1; iKey <= KeyCount; ++iKey) {
                 found = 0;
@@ -928,13 +924,12 @@ void InitializeTabularMonthly(EnergyPlusData &state)
                     // fixing CR5878 removed the showing of the warning once about a specific variable.
                     if (issueWarnings && !ort->MonthlyInput(TabNum).isNamedMonthly) {
                         ShowWarningError(state,
-                                         EnergyPlus::format("In Output:Table:Monthly '{}' invalid Variable or Meter Name '{}'",
-                                                            ort->MonthlyInput(TabNum).name,
-                                                            curVariMeter));
-                        ShowContinueError(state,
-                                          EnergyPlus::format("..i.e., Variable name={}:{} not valid for this simulation.",
-                                                             UniqueKeyNames(kUniqueKey),
-                                                             curVariMeter));
+                                         std::format("In Output:Table:Monthly '{}' invalid Variable or Meter Name '{}'",
+                                                     ort->MonthlyInput(TabNum).name,
+                                                     curVariMeter));
+                        ShowContinueError(
+                            state,
+                            std::format("..i.e., Variable name={}:{} not valid for this simulation.", UniqueKeyNames(kUniqueKey), curVariMeter));
                     }
                     ort->MonthlyColumns(mColumn).varName = curVariMeter;
                     ort->MonthlyColumns(mColumn).varNum = 0;
@@ -1001,17 +996,17 @@ bool isInvalidAggregationOrder(EnergyPlusData &state)
         if (missingMaxOrMinError) {
             ShowSevereError(
                 state,
-                EnergyPlus::format("The Output:Table:Monthly report named=\"{}\" has a valueWhenMaxMin aggregation type for a column without a "
-                                   "previous column that uses either the minimum or maximum aggregation types. The report will not be generated.",
-                                   ort->MonthlyInput(iInput).name));
+                std::format("The Output:Table:Monthly report named=\"{}\" has a valueWhenMaxMin aggregation type for a column without a "
+                            "previous column that uses either the minimum or maximum aggregation types. The report will not be generated.",
+                            ort->MonthlyInput(iInput).name));
             foundError = true;
         }
         if (missingHourAggError) {
             ShowSevereError(
                 state,
-                EnergyPlus::format("The Output:Table:Monthly report named=\"{}\" has a --DuringHoursShown aggregation type for a column without a "
-                                   "previous field that uses one of the Hour-- aggregation types. The report will not be generated.",
-                                   ort->MonthlyInput(iInput).name));
+                std::format("The Output:Table:Monthly report named=\"{}\" has a --DuringHoursShown aggregation type for a column without a "
+                            "previous field that uses one of the Hour-- aggregation types. The report will not be generated.",
+                            ort->MonthlyInput(iInput).name));
             foundError = true;
         }
     }
@@ -1085,10 +1080,9 @@ void GetInputTabularTimeBins(EnergyPlusData &state)
         if (!state.dataGlobal->DoWeathSim) {
             ShowWarningError(
                 state,
-                EnergyPlus::format(
-                    "{} requested with SimulationControl Run Simulation for Weather File Run Periods set to No so {} will not be generated",
-                    CurrentModuleObject,
-                    CurrentModuleObject));
+                std::format("{} requested with SimulationControl Run Simulation for Weather File Run Periods set to No so {} will not be generated",
+                            CurrentModuleObject,
+                            CurrentModuleObject));
             return;
         }
     }
@@ -1124,9 +1118,9 @@ void GetInputTabularTimeBins(EnergyPlusData &state)
             if (!(Util::SameString(AlphArray(4), "ENERGY") || Util::SameString(AlphArray(4), "DEMAND") ||
                   Util::SameString(AlphArray(4), "TEMPERATURE") || Util::SameString(AlphArray(4), "FLOWRATE"))) {
                 ShowWarningError(state,
-                                 EnergyPlus::format("In {} named {} the Variable Type was not energy, demand, temperature, or flowrate.",
-                                                    CurrentModuleObject,
-                                                    AlphArray(1)));
+                                 std::format("In {} named {} the Variable Type was not energy, demand, temperature, or flowrate.",
+                                             CurrentModuleObject,
+                                             AlphArray(1)));
             }
         }
         ort->OutputTableBinned(iInObj).intervalStart = NumArray(1);
@@ -1155,10 +1149,9 @@ void GetInputTabularTimeBins(EnergyPlusData &state)
                                    ort->OutputTableBinned(iInObj).stepType,
                                    ort->OutputTableBinned(iInObj).units);
         if (ort->OutputTableBinned(iInObj).typeOfVar == OutputProcessor::VariableType::Invalid) {
-            ShowWarningError(state,
-                             EnergyPlus::format("{}: User specified meter or variable not found: {}",
-                                                CurrentModuleObject,
-                                                ort->OutputTableBinned(iInObj).varOrMeter));
+            ShowWarningError(
+                state,
+                std::format("{}: User specified meter or variable not found: {}", CurrentModuleObject, ort->OutputTableBinned(iInObj).varOrMeter));
         }
         // If only a single table key is requested than only one should be counted
         // later will reset the numTables array pointer but for now use it to know
@@ -1192,8 +1185,7 @@ void GetInputTabularTimeBins(EnergyPlusData &state)
                 // check if valid meter or number
                 // Why is this here?
                 if (objVarIDs(iTable) == -1) {
-                    ShowWarningError(state,
-                                     EnergyPlus::format("{}: Specified variable or meter not found: {}", CurrentModuleObject, objNames(iTable)));
+                    ShowWarningError(state, std::format("{}: Specified variable or meter not found: {}", CurrentModuleObject, objNames(iTable)));
                 }
             }
         } else {
@@ -1242,10 +1234,10 @@ bool warningAboutKeyNotFound(EnergyPlusData &state, int foundIndex, int inObjInd
 {
     if (foundIndex == 0) {
         ShowWarningError(state,
-                         EnergyPlus::format("{}: Specified key not found: {} for variable: {}",
-                                            moduleName,
-                                            state.dataOutRptTab->OutputTableBinned(inObjIndex).keyValue,
-                                            state.dataOutRptTab->OutputTableBinned(inObjIndex).varOrMeter));
+                         std::format("{}: Specified key not found: {} for variable: {}",
+                                     moduleName,
+                                     state.dataOutRptTab->OutputTableBinned(inObjIndex).keyValue,
+                                     state.dataOutRptTab->OutputTableBinned(inObjIndex).varOrMeter));
         return true;
     }
     return false;
@@ -1440,6 +1432,7 @@ void GetInputOutputTableSummaryReports(EnergyPlusData &state)
     // SUBROUTINE LOCAL VARIABLE DECLARATIONS:
     auto &ort = state.dataOutRptTab;
     bool ErrorsFound = false;
+    bool const standard62Enabled = state.dataGlobal->DoZoneSizing || state.dataGlobal->DoSystemSizing;
 
     if (!state.files.outputControl.writeTabular(state)) {
         ort->WriteTabularFiles = false;
@@ -1580,7 +1573,9 @@ void GetInputOutputTableSummaryReports(EnergyPlusData &state)
                 ort->displayVisualResilienceSummary = true;
                 nameFound = true;
                 for (int jReport = 1; jReport <= state.dataOutRptPredefined->numReportName; ++jReport) {
-                    state.dataOutRptPredefined->reportName(jReport).show = true;
+                    if (!Util::SameString(state.dataOutRptPredefined->reportName(jReport).name, standard62RptSummaryName) || standard62Enabled) {
+                        state.dataOutRptPredefined->reportName(jReport).show = true;
+                    }
                 }
             } else if (Util::SameString(AlphArray(iReport), "AllSummaryAndSizingPeriod")) {
                 ort->WriteTabularFiles = true;
@@ -1603,7 +1598,9 @@ void GetInputOutputTableSummaryReports(EnergyPlusData &state)
                 ort->displayVisualResilienceSummary = true;
                 nameFound = true;
                 for (int jReport = 1; jReport <= state.dataOutRptPredefined->numReportName; ++jReport) {
-                    state.dataOutRptPredefined->reportName(jReport).show = true;
+                    if (!Util::SameString(state.dataOutRptPredefined->reportName(jReport).name, standard62RptSummaryName) || standard62Enabled) {
+                        state.dataOutRptPredefined->reportName(jReport).show = true;
+                    }
                 }
                 // the sizing period reports
                 ort->displayZoneComponentLoadSummary = true;
@@ -1636,7 +1633,9 @@ void GetInputOutputTableSummaryReports(EnergyPlusData &state)
                 ort->displayVisualResilienceSummary = true;
                 nameFound = true;
                 for (int jReport = 1; jReport <= state.dataOutRptPredefined->numReportName; ++jReport) {
-                    state.dataOutRptPredefined->reportName(jReport).show = true;
+                    if (!Util::SameString(state.dataOutRptPredefined->reportName(jReport).name, standard62RptSummaryName) || standard62Enabled) {
+                        state.dataOutRptPredefined->reportName(jReport).show = true;
+                    }
                 }
                 for (int jReport = 1; jReport <= numNamedMonthly; ++jReport) {
                     ort->namedMonthly(jReport).show = true;
@@ -1662,7 +1661,9 @@ void GetInputOutputTableSummaryReports(EnergyPlusData &state)
                 ort->displayVisualResilienceSummary = true;
                 nameFound = true;
                 for (int jReport = 1; jReport <= state.dataOutRptPredefined->numReportName; ++jReport) {
-                    state.dataOutRptPredefined->reportName(jReport).show = true;
+                    if (!Util::SameString(state.dataOutRptPredefined->reportName(jReport).name, standard62RptSummaryName) || standard62Enabled) {
+                        state.dataOutRptPredefined->reportName(jReport).show = true;
+                    }
                 }
                 for (int jReport = 1; jReport <= numNamedMonthly; ++jReport) {
                     ort->namedMonthly(jReport).show = true;
@@ -1675,14 +1676,18 @@ void GetInputOutputTableSummaryReports(EnergyPlusData &state)
             // check the reports that are predefined and are created by OutputReportPredefined
             for (int jReport = 1; jReport <= state.dataOutRptPredefined->numReportName; ++jReport) {
                 if (Util::SameString(AlphArray(iReport), state.dataOutRptPredefined->reportName(jReport).name)) {
-                    ort->WriteTabularFiles = true;
-                    state.dataOutRptPredefined->reportName(jReport).show = true;
-                    nameFound = true;
+                    if (!Util::SameString(state.dataOutRptPredefined->reportName(jReport).name, standard62RptSummaryName) || standard62Enabled) {
+                        ort->WriteTabularFiles = true;
+                        state.dataOutRptPredefined->reportName(jReport).show = true;
+                        nameFound = true;
+                    }
                 }
                 if (Util::SameString(AlphArray(iReport), state.dataOutRptPredefined->reportName(jReport).abrev)) {
-                    ort->WriteTabularFiles = true;
-                    state.dataOutRptPredefined->reportName(jReport).show = true;
-                    nameFound = true;
+                    if (!Util::SameString(state.dataOutRptPredefined->reportName(jReport).name, standard62RptSummaryName) || standard62Enabled) {
+                        ort->WriteTabularFiles = true;
+                        state.dataOutRptPredefined->reportName(jReport).show = true;
+                        nameFound = true;
+                    }
                 }
             }
             // check if the predefined monthly reports are used
@@ -1694,9 +1699,9 @@ void GetInputOutputTableSummaryReports(EnergyPlusData &state)
                 }
             }
             if (!nameFound) {
-                if (Util::SameString(AlphArray(iReport), "Standard62.1Summary")) {
+                if (Util::SameString(AlphArray(iReport), standard62RptSummaryName) || Util::SameString(AlphArray(iReport), "Std62")) {
                     ShowWarningError(state,
-                                     std::format("{} Field[{}]=\"Standard62.1Summary\", Report is not enabled.", CurrentModuleObject, iReport));
+                                     std::format("{} Field[{}]=\"{}\", Report is not enabled.", CurrentModuleObject, iReport, AlphArray(iReport)));
                     ShowContinueError(state, "Do Zone Sizing or Do System Sizing must be enabled in SimulationControl.");
 
                 } else {
@@ -2077,22 +2082,16 @@ void InitializePredefinedMonthlyTitles(EnergyPlusData &state)
     ort->namedMonthly(62).title = "MechanicalVentilationLoadsMonthly";
     ort->namedMonthly(63).title = "HeatEmissionsReportMonthly";
 
-    if (numNamedMonthly != NumMonthlyReports) {
-        ShowFatalError(
-            state,
-            std::format("InitializePredefinedMonthlyTitles: Number of Monthly Reports in OutputReportTabular=[{}] does not match number in "
-                        "DataOutputs=[{}].",
-                        numNamedMonthly,
-                        NumMonthlyReports));
-    } else {
-        for (int xcount = 1; xcount <= numNamedMonthly; ++xcount) {
-            if (!Util::SameString(MonthlyNamedReports(xcount), ort->namedMonthly(xcount).title)) {
-                ShowSevereError(state,
-                                "InitializePredefinedMonthlyTitles: Monthly Report Titles in OutputReportTabular do not match titles in DataOutput.");
-                ShowContinueError(state, std::format("first mismatch at ORT [{}] =\"{}\".", numNamedMonthly, ort->namedMonthly(xcount).title));
-                ShowContinueError(state, std::format("same location in DO =\"{}\".", MonthlyNamedReports(xcount)));
-                ShowFatalError(state, "Preceding condition causes termination.");
-            }
+    static_assert(numNamedMonthly == NumMonthlyReports,
+                  "InitializePredefinedMonthlyTitles: Number of Monthly Reports in OutputReportTabular does not match number in DataOutputs.");
+
+    for (int xcount = 1; xcount <= numNamedMonthly; ++xcount) {
+        if (!Util::SameString(MonthlyNamedReports(xcount), ort->namedMonthly(xcount).title)) {
+            ShowSevereError(state,
+                            "InitializePredefinedMonthlyTitles: Monthly Report Titles in OutputReportTabular do not match titles in DataOutput.");
+            ShowContinueError(state, std::format("first mismatch at ORT [{}] =\"{}\".", numNamedMonthly, ort->namedMonthly(xcount).title));
+            ShowContinueError(state, std::format("same location in DO =\"{}\".", MonthlyNamedReports(xcount)));
+            ShowFatalError(state, "Preceding condition causes termination.");
         }
     }
 }
@@ -5278,24 +5277,31 @@ void WriteTabularReports(EnergyPlusData &state)
     }
 
     constexpr static std::string_view variable_fmt = " {}={:12}\n";
-    constexpr static auto variable_fmt_syntax = check_syntax(variable_fmt); // (AUTO_OK) not sure what this is
     state.files.audit.ensure_open(state, "WriteTabularReports", state.files.outputControl.audit);
-    print<variable_fmt_syntax>(state.files.audit, variable_fmt, "MonthlyInputCount", ort->MonthlyInputCount);
-    print<variable_fmt_syntax>(state.files.audit, variable_fmt, "sizeMonthlyInput", ort->sizeMonthlyInput);
-    print<variable_fmt_syntax>(state.files.audit, variable_fmt, "MonthlyFieldSetInputCount", ort->MonthlyFieldSetInputCount);
-    print<variable_fmt_syntax>(state.files.audit, variable_fmt, "sizeMonthlyFieldSetInput", ort->sizeMonthlyFieldSetInput);
-    print<variable_fmt_syntax>(state.files.audit, variable_fmt, "MonthlyTablesCount", ort->MonthlyTablesCount);
-    print<variable_fmt_syntax>(state.files.audit, variable_fmt, "MonthlyColumnsCount", ort->MonthlyColumnsCount);
-    print<variable_fmt_syntax>(state.files.audit, variable_fmt, "sizeReportName", state.dataOutRptPredefined->sizeReportName);
-    print<variable_fmt_syntax>(state.files.audit, variable_fmt, "numReportName", state.dataOutRptPredefined->numReportName);
-    print<variable_fmt_syntax>(state.files.audit, variable_fmt, "sizeSubTable", state.dataOutRptPredefined->sizeSubTable);
-    print<variable_fmt_syntax>(state.files.audit, variable_fmt, "numSubTable", state.dataOutRptPredefined->numSubTable);
-    print<variable_fmt_syntax>(state.files.audit, variable_fmt, "sizeColumnTag", state.dataOutRptPredefined->sizeColumnTag);
-    print<variable_fmt_syntax>(state.files.audit, variable_fmt, "numColumnTag", state.dataOutRptPredefined->numColumnTag);
-    print<variable_fmt_syntax>(state.files.audit, variable_fmt, "sizeTableEntry", state.dataOutRptPredefined->sizeTableEntry);
-    print<variable_fmt_syntax>(state.files.audit, variable_fmt, "numTableEntry", state.dataOutRptPredefined->numTableEntry);
-    print<variable_fmt_syntax>(state.files.audit, variable_fmt, "sizeCompSizeTableEntry", state.dataOutRptPredefined->sizeCompSizeTableEntry);
-    print<variable_fmt_syntax>(state.files.audit, variable_fmt, "numCompSizeTableEntry", state.dataOutRptPredefined->numCompSizeTableEntry);
+    print(state.files.audit, variable_fmt, "MonthlyInputCount", ort->MonthlyInputCount);
+    print(state.files.audit, variable_fmt, "sizeMonthlyInput", ort->sizeMonthlyInput);
+    print(state.files.audit, variable_fmt, "MonthlyFieldSetInputCount", ort->MonthlyFieldSetInputCount);
+    print(state.files.audit, variable_fmt, "sizeMonthlyFieldSetInput", ort->sizeMonthlyFieldSetInput);
+    print(state.files.audit, variable_fmt, "MonthlyTablesCount", ort->MonthlyTablesCount);
+    print(state.files.audit, variable_fmt, "MonthlyColumnsCount", ort->MonthlyColumnsCount);
+    print(state.files.audit, variable_fmt, "sizeReportName", state.dataOutRptPredefined->sizeReportName);
+    print(state.files.audit, variable_fmt, "numReportName", state.dataOutRptPredefined->numReportName);
+    print(state.files.audit, variable_fmt, "sizeSubTable", state.dataOutRptPredefined->sizeSubTable);
+    print(state.files.audit, variable_fmt, "numSubTable", state.dataOutRptPredefined->numSubTable);
+    print(state.files.audit, variable_fmt, "sizeColumnTag", state.dataOutRptPredefined->sizeColumnTag);
+    print(state.files.audit, variable_fmt, "numColumnTag", state.dataOutRptPredefined->numColumnTag);
+
+    int sizeTableEntry = 0;
+    int numTableEntry = 0;
+    for (int i = 1; i <= state.dataOutRptPredefined->numSubTable; ++i) {
+        sizeTableEntry += state.dataOutRptPredefined->subTable(i).sizeEntries;
+        numTableEntry += state.dataOutRptPredefined->subTable(i).numEntries;
+    }
+
+    print(state.files.audit, variable_fmt, "sizeTableEntry", sizeTableEntry);
+    print(state.files.audit, variable_fmt, "numTableEntry", numTableEntry);
+    print(state.files.audit, variable_fmt, "sizeCompSizeTableEntry", state.dataOutRptPredefined->sizeCompSizeTableEntry);
+    print(state.files.audit, variable_fmt, "numCompSizeTableEntry", state.dataOutRptPredefined->numCompSizeTableEntry);
 }
 
 void setTabularReportStyles(EnergyPlusData &state)
@@ -7895,30 +7901,30 @@ void WriteBEPSTable(EnergyPlusData &state)
 
         if (currentStyle.produceTabular) {
             if (state.dataGlobal->createPerfLog) {
-                Util::appendPerfLog(state, "Electricity ABUPS Total [J]", EnergyPlus::format("{:.3R}", collapsedTotal(1)));
-                Util::appendPerfLog(state, "Natural Gas ABUPS Total [J]", EnergyPlus::format("{:.3R}", collapsedTotal(2)));
-                Util::appendPerfLog(state, "Gasoline ABUPS Total [J]", EnergyPlus::format("{:.3R}", collapsedTotal(3)));
-                Util::appendPerfLog(state, "Diesel ABUPS Total [J]", EnergyPlus::format("{:.3R}", collapsedTotal(4)));
-                Util::appendPerfLog(state, "Coal ABUPS Total [J]", EnergyPlus::format("{:.3R}", collapsedTotal(5)));
-                Util::appendPerfLog(state, "Fuel Oil No 1 ABUPS Total [J]", EnergyPlus::format("{:.3R}", collapsedTotal(6)));
-                Util::appendPerfLog(state, "Fuel Oil No 2 ABUPS Total [J]", EnergyPlus::format("{:.3R}", collapsedTotal(7)));
-                Util::appendPerfLog(state, "Propane ABUPS Total [J]", EnergyPlus::format("{:.3R}", collapsedTotal(8)));
-                Util::appendPerfLog(state, "Other Fuel 1 ABUPS Total [J]", EnergyPlus::format("{:.3R}", collapsedTotal(9)));
-                Util::appendPerfLog(state, "Other Fuel 2 ABUPS Total [J]", EnergyPlus::format("{:.3R}", collapsedTotal(10)));
-                Util::appendPerfLog(state, "District Cooling ABUPS Total [J]", EnergyPlus::format("{:.3R}", collapsedTotal(11)));
-                Util::appendPerfLog(state, "District Heating Water ABUPS Total [J]", EnergyPlus::format("{:.3R}", collapsedTotal(12)));
-                Util::appendPerfLog(state, "District Heating Steam ABUPS Total [J]", EnergyPlus::format("{:.3R}", collapsedTotal(13)));
-                Util::appendPerfLog(state, "Water ABUPS Total [m3]", EnergyPlus::format("{:.3R}", collapsedTotal(14)));
-                Util::appendPerfLog(state, "Values Gathered Over [hours]", EnergyPlus::format("{:.2R}", ort->gatherElapsedTimeBEPS));
+                Util::appendPerfLog(state, "Electricity ABUPS Total [J]", std::format("{:.3f}", collapsedTotal(1)));
+                Util::appendPerfLog(state, "Natural Gas ABUPS Total [J]", std::format("{:.3f}", collapsedTotal(2)));
+                Util::appendPerfLog(state, "Gasoline ABUPS Total [J]", std::format("{:.3f}", collapsedTotal(3)));
+                Util::appendPerfLog(state, "Diesel ABUPS Total [J]", std::format("{:.3f}", collapsedTotal(4)));
+                Util::appendPerfLog(state, "Coal ABUPS Total [J]", std::format("{:.3f}", collapsedTotal(5)));
+                Util::appendPerfLog(state, "Fuel Oil No 1 ABUPS Total [J]", std::format("{:.3f}", collapsedTotal(6)));
+                Util::appendPerfLog(state, "Fuel Oil No 2 ABUPS Total [J]", std::format("{:.3f}", collapsedTotal(7)));
+                Util::appendPerfLog(state, "Propane ABUPS Total [J]", std::format("{:.3f}", collapsedTotal(8)));
+                Util::appendPerfLog(state, "Other Fuel 1 ABUPS Total [J]", std::format("{:.3f}", collapsedTotal(9)));
+                Util::appendPerfLog(state, "Other Fuel 2 ABUPS Total [J]", std::format("{:.3f}", collapsedTotal(10)));
+                Util::appendPerfLog(state, "District Cooling ABUPS Total [J]", std::format("{:.3f}", collapsedTotal(11)));
+                Util::appendPerfLog(state, "District Heating Water ABUPS Total [J]", std::format("{:.3f}", collapsedTotal(12)));
+                Util::appendPerfLog(state, "District Heating Steam ABUPS Total [J]", std::format("{:.3f}", collapsedTotal(13)));
+                Util::appendPerfLog(state, "Water ABUPS Total [m3]", std::format("{:.3f}", collapsedTotal(14)));
+                Util::appendPerfLog(state, "Values Gathered Over [hours]", std::format("{:.2f}", ort->gatherElapsedTimeBEPS));
                 Util::appendPerfLog(state,
                                     "Facility Any Zone Oscillating Temperatures Time [hours]",
-                                    EnergyPlus::format("{:.2R}", state.dataZoneTempPredictorCorrector->AnnualAnyZoneTempOscillate));
+                                    std::format("{:.2f}", state.dataZoneTempPredictorCorrector->AnnualAnyZoneTempOscillate));
                 Util::appendPerfLog(state,
                                     "Facility Any Zone Oscillating Temperatures During Occupancy Time [hours]",
-                                    EnergyPlus::format("{:.2R}", state.dataZoneTempPredictorCorrector->AnnualAnyZoneTempOscillateDuringOccupancy));
+                                    std::format("{:.2f}", state.dataZoneTempPredictorCorrector->AnnualAnyZoneTempOscillateDuringOccupancy));
                 Util::appendPerfLog(state,
                                     "Facility Any Zone Oscillating Temperatures in Deadband Time [hours]",
-                                    EnergyPlus::format("{:.2R}", state.dataZoneTempPredictorCorrector->AnnualAnyZoneTempOscillateInDeadband));
+                                    std::format("{:.2f}", state.dataZoneTempPredictorCorrector->AnnualAnyZoneTempOscillateInDeadband));
             }
         }
         for (int jEndUse = 1; jEndUse <= static_cast<int>(Constant::EndUse::Num); ++jEndUse) {
@@ -11033,7 +11039,7 @@ void WriteCompCostTable(EnergyPlusData &state)
         columnWidth = {7, 30, 16, 10, 16, 16}; // array assignment - for all columns
 
         for (int item = 1; item <= (int)state.dataCostEstimateManager->CostLineItem.size(); ++item) {
-            tableBody(1, item) = fmt::to_string(state.dataCostEstimateManager->CostLineItem(item).LineNumber);
+            tableBody(1, item) = std::to_string(state.dataCostEstimateManager->CostLineItem(item).LineNumber);
             tableBody(2, item) = state.dataCostEstimateManager->CostLineItem(item).LineName;
             if (currentStyle.unitsStyle == OutputReportTabular::UnitsStyle::InchPound ||
                 currentStyle.unitsStyle == OutputReportTabular::UnitsStyle::InchPoundExceptElectricity) {
@@ -11259,7 +11265,7 @@ void WriteVeriSumTable(EnergyPlusData &state)
         tableBody(1, 8) = RealToStr(currentStyle.formatReals, state.dataHeatBal->BuildingAzimuth, 2);                           // north axis angle
         tableBody(1, 9) = RealToStr(currentStyle.formatReals, state.dataHeatBal->BuildingRotationAppendixG, 2); // Rotation for Appendix G
         tableBody(1, 10) = RealToStr(currentStyle.formatReals, ort->gatherElapsedTimeBEPS, 2);                  // hours simulated
-        //  tableBody(9,1) = TRIM(fmt::to_string(numTableEntry)) !number of table entries for predefined tables
+        //  tableBody(9,1) = TRIM(std::to_string(numTableEntry)) !number of table entries for predefined tables
 
         if (currentStyle.produceTabular) {
             WriteSubtitle(state, "General");
@@ -11414,7 +11420,7 @@ void WriteVeriSumTable(EnergyPlusData &state)
                         }
                         if (DetailedWWR) {
                             if (currentStyle.produceTabular) {
-                                print(state.files.debug, "{},Wall,{:.1R},{:.1R}\n", thisSurf.Name, curArea * mult, thisSurf.Tilt);
+                                print(state.files.debug, "{},Wall,{:.1f},{:.1f}\n", thisSurf.Name, curArea * mult, thisSurf.Tilt);
                             }
                         }
                     } break;
@@ -11447,7 +11453,7 @@ void WriteVeriSumTable(EnergyPlusData &state)
                         zoneGlassArea(zonePt) += thisSurf.GrossArea * thisSurf.Multiplier;
                         if (DetailedWWR) {
                             if (currentStyle.produceTabular) {
-                                print(state.files.debug, "{},Window,{:.1R},{:.1R}\n", thisSurf.Name, curArea * mult, thisSurf.Tilt);
+                                print(state.files.debug, "{},Window,{:.1f},{:.1f}\n", thisSurf.Name, curArea * mult, thisSurf.Tilt);
                             }
                         }
                     } break;
@@ -11464,7 +11470,7 @@ void WriteVeriSumTable(EnergyPlusData &state)
                         roofArea += curArea * mult;
                         if (DetailedWWR) {
                             if (currentStyle.produceTabular) {
-                                print(state.files.debug, "{},Roof,{:.1R},{:.1R}\n", thisSurf.Name, curArea * mult, thisSurf.Tilt);
+                                print(state.files.debug, "{},Roof,{:.1f},{:.1f}\n", thisSurf.Name, curArea * mult, thisSurf.Tilt);
                             }
                         }
                     } break;
@@ -11475,7 +11481,7 @@ void WriteVeriSumTable(EnergyPlusData &state)
                         skylightArea += curArea * mult;
                         if (DetailedWWR) {
                             if (currentStyle.produceTabular) {
-                                print(state.files.debug, "{},Skylight,{:.1R},{:.1R}\n", thisSurf.Name, curArea * mult, thisSurf.Tilt);
+                                print(state.files.debug, "{},Skylight,{:.1f},{:.1f}\n", thisSurf.Name, curArea * mult, thisSurf.Tilt);
                             }
                         }
                     } break;
@@ -11496,8 +11502,8 @@ void WriteVeriSumTable(EnergyPlusData &state)
                 print(state.files.debug, "{}\n", "========================");
                 print(state.files.debug, "{}\n", "TotalWallArea,WallAreaN,WallAreaS,WallAreaE,WallAreaW");
                 print(state.files.debug, "{}\n", "TotalWindowArea,WindowAreaN,WindowAreaS,WindowAreaE,WindowAreaW");
-                print(state.files.debug, "{:.2R},{:.2R},{:.2R},{:.2R},{:.2R}\n", TotalWallArea, wallAreaN, wallAreaS, wallAreaE, wallAreaW);
-                print(state.files.debug, "{:.2R},{:.2R},{:.2R},{:.2R},{:.2R}\n", TotalWindowArea, windowAreaN, windowAreaS, windowAreaE, windowAreaW);
+                print(state.files.debug, "{:.2f},{:.2f},{:.2f},{:.2f},{:.2f}\n", TotalWallArea, wallAreaN, wallAreaS, wallAreaE, wallAreaW);
+                print(state.files.debug, "{:.2f},{:.2f},{:.2f},{:.2f},{:.2f}\n", TotalWindowArea, windowAreaN, windowAreaS, windowAreaE, windowAreaW);
             }
         }
 
@@ -11645,7 +11651,7 @@ void WriteVeriSumTable(EnergyPlusData &state)
             if (currentStyle.produceTabular) {
                 print(state.files.debug, "{}\n", "========================");
                 print(state.files.debug, "{}\n", "TotalRoofArea,SkylightArea");
-                print(state.files.debug, "{:.2R},{:.2R}\n", roofArea, skylightArea);
+                print(state.files.debug, "{:.2f},{:.2f}\n", roofArea, skylightArea);
             }
         }
 
@@ -11724,11 +11730,11 @@ void WriteVeriSumTable(EnergyPlusData &state)
                     ShowWarningError(
                         state, "WriteVeriSumTable: InputVerificationsAndResultsSummary: Wall area based on [>=60,<=120] degrees (tilt) as walls");
                     ShowContinueError(state,
-                                      EnergyPlus::format("differs ~{:.1R}% from user entered Wall class surfaces. Degree calculation based on ASHRAE "
-                                                         "90.1 wall definitions.",
-                                                         pdiff * 100.0));
-                    //      CALL ShowContinueError(state, format("Calculated based on degrees=[{}{}{}{}{}{}] m2, Calculated from user entered Wall
-                    //      class surfaces=[{}{}{}{}{}{}", //, &, //, TRIM(ADJUSTL(RealToStr(currentStyle.formatReals, (wallAreaN + wallAreaS +
+                                      std::format("differs ~{:.1f}% from user entered Wall class surfaces. Degree calculation based on ASHRAE "
+                                                  "90.1 wall definitions.",
+                                                  pdiff * 100.0));
+                    //      CALL ShowContinueError(state, std::format("Calculated based on degrees=[{}{}{}{}{}{}] m2, Calculated from user entered
+                    //      Wall class surfaces=[{}{}{}{}{}{}", //, &, //, TRIM(ADJUSTL(RealToStr(currentStyle.formatReals, (wallAreaN + wallAreaS +
                     //      wallAreaE + wallAreaW),3)))//, &, //, //, &, //, TRIM(ADJUSTL(RealToStr(currentStyle.formatReals,
                     //      SUM(Zone(1:NumOfZones)%ExtGrossWallArea_Multiplied),3)))//', m2.'), ShowContinueError(state, "Check classes of surfaces
                     //      and tilts for discrepancies."));
@@ -12208,7 +12214,7 @@ void writeVeriSumSpaceTables(EnergyPlusData &state, const tabularReportStyle &st
                 spaceTableBody(colSpacePlugProcess, spaceTableRowNum) = RealToStr(style.formatReals, 0.0, 4);
             }
 
-            spaceTableBody(colSpaceTags, spaceTableRowNum) = fmt::format("{}", fmt::join(curSpace.tags, ", "));
+            spaceTableBody(colSpaceTags, spaceTableRowNum) = std::format("{}", EnergyPlus::join(curSpace.tags, ", "));
 
             // If not part of total, goes directly to this row
             if (!useSpaceFloorArea) {
@@ -12459,16 +12465,16 @@ void WriteReportHeaderReportingPeriod(EnergyPlusData &state,
         OutputProcessor::StoreType::Average);
 
     WriteSubtitle(state,
-                  EnergyPlus::format("Reporting period: {} -- {}, Total Electricity Usage: {:.2R} kWh",
-                                     formatReportPeriodTimestamp(ReportPeriodInputData(periodIdx).startYear,
-                                                                 ReportPeriodInputData(periodIdx).startMonth,
-                                                                 ReportPeriodInputData(periodIdx).startDay,
-                                                                 ReportPeriodInputData(periodIdx).startHour),
-                                     formatReportPeriodTimestamp(ReportPeriodInputData(periodIdx).endYear,
-                                                                 ReportPeriodInputData(periodIdx).endMonth,
-                                                                 ReportPeriodInputData(periodIdx).endDay,
-                                                                 ReportPeriodInputData(periodIdx).endHour),
-                                     ReportPeriodInputData(periodIdx).totalElectricityUse / 3600000.0));
+                  std::format("Reporting period: {} -- {}, Total Electricity Usage: {:.2f} kWh",
+                              formatReportPeriodTimestamp(ReportPeriodInputData(periodIdx).startYear,
+                                                          ReportPeriodInputData(periodIdx).startMonth,
+                                                          ReportPeriodInputData(periodIdx).startDay,
+                                                          ReportPeriodInputData(periodIdx).startHour),
+                              formatReportPeriodTimestamp(ReportPeriodInputData(periodIdx).endYear,
+                                                          ReportPeriodInputData(periodIdx).endMonth,
+                                                          ReportPeriodInputData(periodIdx).endDay,
+                                                          ReportPeriodInputData(periodIdx).endHour),
+                              ReportPeriodInputData(periodIdx).totalElectricityUse / 3600000.0));
 }
 
 void WriteReportPeriodTimeConsumption(EnergyPlusData &state)
@@ -13978,47 +13984,11 @@ void WritePredefinedTables(EnergyPlusData &state)
     Array2D_string tableBody;
     Array1D_int rowToUnqObjName;
     Array1D_int colHeadToColTag;
-    Array1D_string uniqueObjectName;
-    Array1D_bool useUniqueObjectName;
-    int colCurrent(0);
-    int rowCurrent(0);
     Array1D_int colUnitConv;
     auto const &ort = state.dataOutRptTab;
 
     for (const auto &currentStyle : ort->tabularReportPasses) {
 
-        // loop through the entries and associate them with the subtable and create
-        // list of unique object names
-        // Much of this code is to allow for integer compares instead of string
-        // compares that are nested three levels in a loop.
-        uniqueObjectName.allocate(state.dataOutRptPredefined->numTableEntry);
-        useUniqueObjectName.allocate(state.dataOutRptPredefined->numTableEntry);
-        int numUnqObjName = 0;
-        for (int lTableEntry = 1; lTableEntry <= state.dataOutRptPredefined->numTableEntry; ++lTableEntry) {
-            // associate the subtable with each column
-            int const curColumn = state.dataOutRptPredefined->tableEntry(lTableEntry).indexColumn;
-            if ((curColumn >= 1) && (curColumn <= state.dataOutRptPredefined->numColumnTag)) {
-                state.dataOutRptPredefined->tableEntry(lTableEntry).subTableIndex = state.dataOutRptPredefined->columnTag(curColumn).indexSubTable;
-            }
-            // make a list of unique object names
-            std::string const &curObjectName = state.dataOutRptPredefined->tableEntry(lTableEntry).objectName;
-            int found = 0;
-            for (int mUnqObjNames = 1; mUnqObjNames <= numUnqObjName; ++mUnqObjNames) {
-                if (curObjectName == uniqueObjectName(mUnqObjNames)) {
-                    found = mUnqObjNames;
-                    break;
-                }
-            }
-            // if found then point to the unique object
-            if (found > 0) {
-                state.dataOutRptPredefined->tableEntry(lTableEntry).uniqueObjName = found;
-                // if not found add to the unique object list
-            } else {
-                ++numUnqObjName;
-                uniqueObjectName(numUnqObjName) = curObjectName;
-                state.dataOutRptPredefined->tableEntry(lTableEntry).uniqueObjName = numUnqObjName;
-            }
-        }
         // loop through all reports and include those that have been flagged as 'show'
         for (int iReportName = 1; iReportName <= state.dataOutRptPredefined->numReportName; ++iReportName) {
             if (state.dataOutRptPredefined->reportName(iReportName).show) {
@@ -14028,9 +13998,12 @@ void WritePredefinedTables(EnergyPlusData &state)
                                        "Entire Facility",
                                        OutputProcessor::StoreType::Average);
                 }
+
                 // loop through the subtables and include those that are associated with this report
                 for (int jSubTable = 1, jSubTable_end = state.dataOutRptPredefined->numSubTable; jSubTable <= jSubTable_end; ++jSubTable) {
-                    if (state.dataOutRptPredefined->subTable(jSubTable).indexReportName == iReportName) {
+                    auto &table = state.dataOutRptPredefined->subTable(jSubTable);
+                    if (table.indexReportName == iReportName) {
+
                         // determine how many columns
                         int curNumColumns = 0;
                         for (int kColumnTag = 1; kColumnTag <= state.dataOutRptPredefined->numColumnTag; ++kColumnTag) {
@@ -14038,23 +14011,38 @@ void WritePredefinedTables(EnergyPlusData &state)
                                 ++curNumColumns;
                             }
                         }
+
                         // determine how many rows by going through table entries and setting
                         // flag in useUniqueObjectName to true, then count number of true's.
-                        useUniqueObjectName = false; // array assignment
-                        for (int lTableEntry = 1; lTableEntry <= state.dataOutRptPredefined->numTableEntry; ++lTableEntry) {
-                            if (state.dataOutRptPredefined->tableEntry(lTableEntry).subTableIndex == jSubTable) {
-                                useUniqueObjectName(state.dataOutRptPredefined->tableEntry(lTableEntry).uniqueObjName) = true;
+                        Array1D_string uniqueObjectNames(table.numEntries);
+                        int numUniqueObjectNames = 0;
+
+                        for (int lTableEntry = 1; lTableEntry <= table.numEntries; ++lTableEntry) {
+                            auto &entry = table.entries(lTableEntry);
+
+                            int found = 0;
+                            for (int m = 1; m <= numUniqueObjectNames; ++m) {
+                                if (entry.objectName == uniqueObjectNames(m)) {
+                                    found = m;
+                                    break;
+                                }
+                            }
+                            // if found then point to the unique object
+                            if (found > 0) {
+                                entry.uniqueObjName = found;
+                                // if not found add to the unique object list
+                            } else {
+                                ++numUniqueObjectNames;
+                                uniqueObjectNames(numUniqueObjectNames) = entry.objectName;
+                                entry.uniqueObjName = numUniqueObjectNames;
                             }
                         }
-                        int curNumRows = 0;
-                        for (int mUnqObjNames = 1; mUnqObjNames <= numUnqObjName; ++mUnqObjNames) {
-                            if (useUniqueObjectName(mUnqObjNames)) {
-                                ++curNumRows;
-                            }
-                        }
+
+                        int curNumRows = numUniqueObjectNames;
                         if (curNumRows == 0) {
                             curNumRows = 1;
                         }
+
                         // now create the arrays that are filled with values
                         rowHead.allocate(curNumRows);
                         columnHead.allocate(curNumColumns);
@@ -14071,13 +14059,12 @@ void WritePredefinedTables(EnergyPlusData &state)
                         // set row headings
                         int countRow = 0;
                         rowHead(1) = "None";
-                        for (int mUnqObjNames = 1; mUnqObjNames <= numUnqObjName; ++mUnqObjNames) {
-                            if (useUniqueObjectName(mUnqObjNames)) {
-                                ++countRow;
-                                rowHead(countRow) = uniqueObjectName(mUnqObjNames);
-                                rowToUnqObjName(countRow) = mUnqObjNames;
-                            }
+                        for (int m = 1; m <= numUniqueObjectNames; ++m) {
+                            ++countRow;
+                            rowHead(countRow) = uniqueObjectNames(m);
+                            rowToUnqObjName(countRow) = m;
                         }
+
                         // set column headings
                         int countColumn = 0;
                         for (int kColumnTag = 1; kColumnTag <= state.dataOutRptPredefined->numColumnTag; ++kColumnTag) {
@@ -14104,66 +14091,59 @@ void WritePredefinedTables(EnergyPlusData &state)
                                 colHeadToColTag(countColumn) = kColumnTag;
                             }
                         }
+
                         // fill the body of the table from the entries
                         // find the entries associated with the current subtable
-                        for (int lTableEntry = 1; lTableEntry <= state.dataOutRptPredefined->numTableEntry; ++lTableEntry) {
-                            if (state.dataOutRptPredefined->tableEntry(lTableEntry).subTableIndex == jSubTable) {
-                                // determine what column the current entry is in
-                                int const curColTagIndex = state.dataOutRptPredefined->tableEntry(lTableEntry).indexColumn;
-                                for (int nColHead = 1; nColHead <= curNumColumns; ++nColHead) {
-                                    if (curColTagIndex == colHeadToColTag(nColHead)) {
-                                        colCurrent = nColHead;
-                                        break;
-                                    }
-                                }
-                                // determine what row the current entry is in
-                                int const curRowUnqObjIndex = state.dataOutRptPredefined->tableEntry(lTableEntry).uniqueObjName;
-                                for (int oRowHead = 1; oRowHead <= curNumRows; ++oRowHead) {
-                                    if (curRowUnqObjIndex == rowToUnqObjName(oRowHead)) {
-                                        rowCurrent = oRowHead;
-                                        break;
-                                    }
-                                }
-                                // finally assign the entry to the place in the table body
-                                if (currentStyle.unitsStyle == OutputReportTabular::UnitsStyle::InchPound ||
-                                    currentStyle.unitsStyle == OutputReportTabular::UnitsStyle::InchPoundExceptElectricity ||
-                                    currentStyle.unitsStyle == UnitsStyle::JtoKWH || !currentStyle.formatReals) {
-                                    int columnUnitConv = colUnitConv(colCurrent);
-                                    if (Util::SameString(state.dataOutRptPredefined->subTable(jSubTable).name, "SizingPeriod:DesignDay") &&
-                                        (currentStyle.unitsStyle == OutputReportTabular::UnitsStyle::InchPound ||
-                                         currentStyle.unitsStyle == OutputReportTabular::UnitsStyle::InchPoundExceptElectricity)) {
-                                        if (Util::SameString(columnHead(colCurrent), "Humidity Value")) {
-                                            std::string repTableTag;
-                                            LookupSItoIP(state,
-                                                         state.dataOutRptPredefined->tableEntry(lTableEntry + 1).charEntry,
-                                                         columnUnitConv,
-                                                         repTableTag);
-                                            state.dataOutRptPredefined->tableEntry(lTableEntry + 1).charEntry = repTableTag;
-                                        }
-                                    }
-                                    if (state.dataOutRptPredefined->tableEntry(lTableEntry).origEntryIsReal &&
-                                        ((columnUnitConv != 0) || !currentStyle.formatReals)) {
-                                        Real64 value = state.dataOutRptPredefined->tableEntry(lTableEntry).origRealEntry;
-                                        if (columnUnitConv != 0) {
-                                            value =
-                                                ConvertIP(state, columnUnitConv, state.dataOutRptPredefined->tableEntry(lTableEntry).origRealEntry);
-                                        }
-                                        if (currentStyle.formatReals) {
-                                            tableBody(colCurrent, rowCurrent) =
-                                                RealToStr(currentStyle.formatReals,
-                                                          value,
-                                                          state.dataOutRptPredefined->tableEntry(lTableEntry).significantDigits);
-                                        } else {
-                                            tableBody(colCurrent, rowCurrent) = std::format("{}", value);
-                                        }
-                                    } else {
-                                        tableBody(colCurrent, rowCurrent) = state.dataOutRptPredefined->tableEntry(lTableEntry).charEntry;
-                                    }
-                                } else {
-                                    tableBody(colCurrent, rowCurrent) = state.dataOutRptPredefined->tableEntry(lTableEntry).charEntry;
+                        for (int lTableEntry = 1; lTableEntry <= table.numEntries; ++lTableEntry) {
+                            auto &entry = table.entries(lTableEntry);
+                            // determine what column the current entry is in
+                            int const curColTagIndex = entry.indexColumn;
+                            int colCurrent = 0;
+                            for (int nColHead = 1; nColHead <= curNumColumns; ++nColHead) {
+                                if (curColTagIndex == colHeadToColTag(nColHead)) {
+                                    colCurrent = nColHead;
+                                    break;
                                 }
                             }
-                        }
+
+                            // determine what row the current entry is in
+                            int const rowCurrent = entry.uniqueObjName;
+
+                            // finally assign the entry to the place in the table body
+                            if (currentStyle.unitsStyle == OutputReportTabular::UnitsStyle::InchPound ||
+                                currentStyle.unitsStyle == OutputReportTabular::UnitsStyle::InchPoundExceptElectricity ||
+                                currentStyle.unitsStyle == UnitsStyle::JtoKWH || !currentStyle.formatReals) {
+                                int columnUnitConv = colUnitConv(colCurrent);
+                                if (Util::SameString(state.dataOutRptPredefined->subTable(jSubTable).name, "SizingPeriod:DesignDay") &&
+                                    (currentStyle.unitsStyle == OutputReportTabular::UnitsStyle::InchPound ||
+                                     currentStyle.unitsStyle == OutputReportTabular::UnitsStyle::InchPoundExceptElectricity)) {
+                                    if (Util::SameString(columnHead(colCurrent), "Humidity Value")) {
+                                        std::string repTableTag;
+                                        auto &entry1 = table.entries(lTableEntry + 1); // What the what?
+                                        LookupSItoIP(state, entry1.charEntry, columnUnitConv, repTableTag);
+                                        entry1.charEntry = repTableTag;
+                                    }
+                                }
+                                if (entry.origEntryIsReal && ((columnUnitConv != 0) || !currentStyle.formatReals)) {
+                                    Real64 value = entry.origRealEntry;
+                                    if (columnUnitConv != 0) {
+                                        value = ConvertIP(state, columnUnitConv, entry.origRealEntry);
+                                    }
+                                    if (currentStyle.formatReals) {
+                                        tableBody(colCurrent, rowCurrent) = RealToStr(currentStyle.formatReals, value, entry.significantDigits);
+                                    } else {
+                                        tableBody(colCurrent, rowCurrent) = std::format("{}", value);
+                                    }
+                                } else {
+                                    tableBody(colCurrent, rowCurrent) = entry.charEntry;
+                                }
+                            } else {
+                                tableBody(colCurrent, rowCurrent) = entry.charEntry;
+                            }
+                        } // for (lTableEntry)
+
+                        uniqueObjectNames.deallocate();
+
                         // create the actual output table
                         if (currentStyle.produceTabular) {
                             WriteSubtitle(state, state.dataOutRptPredefined->subTable(jSubTable).name);
@@ -14701,7 +14681,7 @@ void WriteEioTables(EnergyPlusData &state)
                                 break; // should never happen since same test as original could
                             }
                             std::vector<std::string> dataFields = splitCommaString(bodyLine);
-                            rowHead(rowNum) = fmt::to_string(rowNum);
+                            rowHead(rowNum) = std::to_string(rowNum);
                             for (int iCol = 1; iCol <= numCols && iCol < int(dataFields.size()); ++iCol) {
                                 if (currentStyle.unitsStyle == OutputReportTabular::UnitsStyle::InchPound ||
                                     currentStyle.unitsStyle == OutputReportTabular::UnitsStyle::InchPoundExceptElectricity ||
@@ -17236,11 +17216,11 @@ void OutputCompLoadSummary(EnergyPlusData &state,
         }
 
         tableBody(1, 1) = std::format("{:.{}f}", curCompLoad.outsideAirRatio, 4); // outside Air
-        tableBody(1, 2) = fmt::format("{:0.3E}", curCompLoad.airflowPerFlrArea);  // airflow per floor area
-        tableBody(1, 3) = fmt::format("{:0.3E}", curCompLoad.airflowPerTotCap);   // airflow per total capacity
-        tableBody(1, 4) = fmt::format("{:0.3E}", curCompLoad.areaPerTotCap);      // area per total capacity
-        tableBody(1, 5) = fmt::format("{:0.3E}", curCompLoad.totCapPerArea);      // total capacity per area
-        tableBody(1, 6) = fmt::format("{:.{}f}", curCompLoad.numPeople, 1);       // number of people
+        tableBody(1, 2) = std::format("{:0.3E}", curCompLoad.airflowPerFlrArea);  // airflow per floor area
+        tableBody(1, 3) = std::format("{:0.3E}", curCompLoad.airflowPerTotCap);   // airflow per total capacity
+        tableBody(1, 4) = std::format("{:0.3E}", curCompLoad.areaPerTotCap);      // area per total capacity
+        tableBody(1, 5) = std::format("{:0.3E}", curCompLoad.totCapPerArea);      // total capacity per area
+        tableBody(1, 6) = std::format("{:.{}f}", curCompLoad.numPeople, 1);       // number of people
 
         if (style.produceTabular) {
             WriteSubtitle(state, engineeringCheckName);
@@ -17277,7 +17257,7 @@ void OutputCompLoadSummary(EnergyPlusData &state,
 
             columnHead(1) = "Zone Name";
             for (int zi = 1; zi <= maxRow; ++zi) {
-                rowHead(zi) = fmt::to_string(zi);
+                rowHead(zi) = std::to_string(zi);
                 if (curCompLoad.zoneIndices(zi) > 0) {
                     tableBody(1, zi) = state.dataHeatBal->Zone(curCompLoad.zoneIndices(zi)).Name;
                 }
@@ -18045,12 +18025,14 @@ std::string ConvertToEscaped(std::string const &inString, bool isXML) // Input S
             s += "&lt;";
         } else if (c == '>') {
             s += "&gt;";
-        } else if (c == char(176) && !isXML) {
+        } else if (static_cast<unsigned char>(c) == 176 && !isXML) {
             s += "&deg;";
-        } else if (c == char(226) && char(inString[index]) == char(137) && char(inString[index + 1]) == char(164) && !isXML) { // ≤
+        } else if (static_cast<unsigned char>(c) == 226 && static_cast<unsigned char>(inString[index]) == 137 &&
+                   static_cast<unsigned char>(inString[index + 1]) == 164 && !isXML) { // ≤
             s += "&le;";
             index += 2;
-        } else if (c == char(226) && char(inString[index]) == char(137) && char(inString[index + 1]) == char(165) && !isXML) { // ≥
+        } else if (static_cast<unsigned char>(c) == 226 && static_cast<unsigned char>(inString[index]) == 137 &&
+                   static_cast<unsigned char>(inString[index + 1]) == 165 && !isXML) { // ≥
             s += "&ge;";
             index += 2;
         } else if (c == '\xC2') {
@@ -18588,7 +18570,7 @@ std::string RealToStr(bool const formatReals, Real64 const RealIn, int const num
     //   Abstract away the internal write concept
 
     static constexpr std::array<const char *, 10> formDigitsA{
-        "{:#11.0F}", "{:12.1F}", "{:12.2F}", "{:12.3F}", "{:12.4F}", "{:12.5F}", "{:12.6F}", "{:12.7F}", "{:12.8F}", "{:12.9F}"};
+        "{:#12.0F}", "{:12.1F}", "{:12.2F}", "{:12.3F}", "{:12.4F}", "{:12.5F}", "{:12.6F}", "{:12.7F}", "{:12.8F}", "{:12.9F}"};
 
     static constexpr std::array<Real64, 10> maxvalDigitsA(
         {9999999999.0, 999999999.0, 99999999.0, 9999999.0, 999999.0, 99999.0, 9999.0, 999.0, 99.0, 9.0});
@@ -18613,7 +18595,7 @@ std::string RealToStr(bool const formatReals, Real64 const RealIn, int const num
     if (std::abs(RealIn) > maxvalDigitsA.at(nDigits)) {
         return std::format("{:12.6E}", RealIn);
     }
-    return format<FormatSyntax::FMT>(formDigitsA.at(nDigits), RealIn);
+    return std::vformat(formDigitsA.at(nDigits), std::make_format_args(RealIn));
 
     //  WRITE(FMT=, UNIT=stringOut) RealIn
     // check if it did not fit
@@ -18660,10 +18642,10 @@ std::string DateToString(int const codedDate) // word containing encoded month, 
     //   Convert the coded date format into a usable
     //   string
 
-    int Month;  // month in integer EnergyPlus::format(1-12)
-    int Day;    // day in integer EnergyPlus::format(1-31)
-    int Hour;   // hour in integer EnergyPlus::format(1-24)
-    int Minute; // minute in integer EnergyPlus::format(0:59)
+    int Month;  // month in integer std::format(1-12)
+    int Day;    // day in integer std::format(1-31)
+    int Hour;   // hour in integer std::format(1-24)
+    int Minute; // minute in integer std::format(0:59)
     static constexpr std::array<std::string_view, 12> Months{"JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC"};
 
     if (codedDate == 0) {
@@ -18689,7 +18671,7 @@ bool isNumber(std::string const &s)
     char *p;
     strtod(s.c_str(), &p);
     for (; isspace(*p) != 0; ++p) {
-        ; // handle trailing whitespace
+        // handle trailing whitespace
     }
     return *p == 0;
 }

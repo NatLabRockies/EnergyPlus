@@ -2283,7 +2283,7 @@ void TraceAirLoopController(EnergyPlusData &state, InputOutputFile &TraceFile, i
 
     print(TraceFile,
           "{},{},{:.10f},{:.10f},{:.10f},",
-          controllerProps.Mode,
+          state.dataHVACCtrl->ControllerModeTypes(static_cast<int>(controllerProps.Mode)),
           controllerProps.NumCalcCalls,
           state.dataLoopNodes->Node(controllerProps.ActuatedNode).MassFlowRate,
           state.dataLoopNodes->Node(controllerProps.SensedNode).Temp,
@@ -2383,7 +2383,7 @@ void TraceIndividualController(EnergyPlusData &state,
           MakeHVACTimeIntervalString(state),
           AirLoopPass,
           static_cast<int>(FirstHVACIteration),
-          Operation,
+          static_cast<int>(Operation),
           ControllerProps.NumCalcCalls);
 
     // Write detailed diagnostic
@@ -2400,7 +2400,7 @@ void TraceIndividualController(EnergyPlusData &state,
               ControllerProps.SetPointValue,
               ' ',
               ' ',
-              ControllerProps.Mode,
+              state.dataHVACCtrl->ControllerModeTypes(static_cast<int>(ControllerProps.Mode)),
               static_cast<int>(IsConvergedFlag),
               ControllerProps.NextActuatedValue);
         // X | Y | setpoint | DeltaSensed = Y - YRoot | Offset | Mode | IsConvergedFlag
@@ -2425,7 +2425,7 @@ void TraceIndividualController(EnergyPlusData &state,
               ControllerProps.SetPointValue,
               ControllerProps.DeltaSensed,
               ControllerProps.Offset,
-              ControllerProps.Mode,
+              state.dataHVACCtrl->ControllerModeTypes(static_cast<int>(ControllerProps.Mode)),
               static_cast<int>(IsConvergedFlag),
               ControllerProps.NextActuatedValue);
 
@@ -2451,7 +2451,7 @@ void TraceIndividualController(EnergyPlusData &state,
               ControllerProps.SetPointValue,
               ControllerProps.DeltaSensed,
               ControllerProps.Offset,
-              ControllerProps.Mode,
+              state.dataHVACCtrl->ControllerModeTypes(static_cast<int>(ControllerProps.Mode)),
               static_cast<int>(IsConvergedFlag),
               ControllerProps.NextActuatedValue);
 

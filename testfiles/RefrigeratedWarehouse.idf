@@ -13489,15 +13489,15 @@
 
   Output:Variable,*,Zone Mixing Total Heat Gain Energy,hourly;
 
-  Output:Variable,*,Refrigeration Zone Air Chiller Sensible Heat Ratio,hourly;
+  Output:Variable,*,Refrigeration Zone Air Chiller Coil Sensible Heat Ratio,hourly;
 
-  Output:Variable,*,Refrigeration Zone Air Chiller Frost Accumulation Mass,hourly;
+  Output:Variable,*,Refrigeration Zone Air Chiller Coil Frost Accumulation Mass,hourly;
 
-  Output:Variable,*,Refrigeration Zone Air Chiller Total Cooling Rate,hourly;
+  Output:Variable,*,Refrigeration Zone Air Chiller Coil Total Cooling Rate,hourly;
 
-  Output:Variable,*,Refrigeration Zone Air Chiller Latent Cooling Rate,hourly;
+  Output:Variable,*,Refrigeration Zone Air Chiller Coil Latent Cooling Rate,hourly;
 
-  Output:Variable,*,Refrigeration Zone Air Chiller Sensible Cooling Rate,hourly;
+  Output:Variable,*,Refrigeration Zone Air Chiller Coil Sensible Cooling Rate,hourly;
 
   Output:Variable,*,Refrigeration Zone Air Chiller Zone Sensible Cooling Rate,hourly;
 
@@ -13509,11 +13509,11 @@
 
   Output:Variable,*,Refrigeration Zone Air Chiller Heater Electricity Rate,hourly;
 
-  Output:Variable,*,Refrigeration Zone Air Chiller Defrost Electricity Rate,hourly;
+  Output:Variable,*,Refrigeration Zone Air Chiller Coil Defrost Electricity Rate,hourly;
 
   Output:Variable,*,Refrigeration Zone Air Chiller Total Cooling Rate,hourly;
 
-  Output:Variable,*,Refrigeration Zone Air Chiller Water Removed Mass Flow Rate,hourly;
+  Output:Variable,*,Refrigeration Zone Air Chiller Coil Water Removed Mass Flow Rate,hourly;
 
   Output:Variable,*,Refrigeration Zone Air Chiller Sensible Cooling Rate,hourly;
 
@@ -13522,8 +13522,6 @@
   Output:Variable,*,Refrigeration Zone Air Chiller Heating Rate,hourly;
 
   Output:Variable,*,Refrigeration Zone Air Chiller Sensible Heat Transfer Rate,hourly;
-
-  Output:Variable,*,Refrigeration Zone Air Chiller Latent Cooling Rate,hourly;
 
   Output:Variable,*,Refrigeration Zone Air Chiller Heating Rate,hourly;
 

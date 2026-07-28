@@ -169,8 +169,8 @@ TEST_F(EnergyPlusFixture, OutputReports_SurfaceDetailsReport)
          "{deg},~Width {m},~Height {m},Reveal {m}",
          "Zone Surfaces,SPACE1,1",
          "HeatTransfer Surface,FRONT-1,Wall,,CTF - "
-         "ConductionTransferFunction,INT-WALL-1,2.811,1.978,,73.20,73.20,73.20,180.00,90.00,30.50,2.40,0.00,ExternalEnvironment,DOE-2,ASHRAETARP,"
-         "SunExposed,WindExposed,0.50,0.50,0.50,0.50,4"},
+         "ConductionTransferFunction,INT-WALL-1,2.81096,1.97846,,73.20,73.20,73.20,180.00,90.00,30.50,2.40,0.00,ExternalEnvironment,DOE-2,ASHRAETARP,"
+         "SunExposed,WindExposed,0.50000,0.50000,0.50000,0.50000,4"},
         "\n");
 
     EXPECT_TRUE(compare_eio_stream(eiooutput, true));

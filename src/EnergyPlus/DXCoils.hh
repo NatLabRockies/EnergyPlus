@@ -644,8 +644,8 @@ namespace DXCoils {
     Real64 ValidateADP(EnergyPlusData &state,
                        std::string_view const UnitType,  // component name
                        std::string const &UnitName,      // component type
-                       Real64 const RatedInletAirTemp,   // coil inlet air temperature [C]
-                       Real64 const RatedInletAirHumRat, // coil inlet air humidity ratio [kg/kg]
+                       Real64 const coilInletAirTemp,    // coil inlet air temperature [C]
+                       Real64 const coilInletAirHumRat,  // coil inlet air humidity ratio [kg/kg]
                        Real64 const TotCap,              // coil total capacity [W]
                        Real64 const AirMassFlow,         // coil air mass flow rate [kg/s]
                        Real64 const InitialSHR,          // coil sensible heat ratio []

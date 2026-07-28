@@ -189,9 +189,9 @@ void InitSolarCalculations(EnergyPlusData &state)
             state.dataSolarShading->shd_stream =
                 std::make_unique<std::fstream>(state.dataStrGlobals->outputShdFilePath, std::ios_base::out | std::ios_base::trunc);
             if (!static_cast<std::fstream *>(state.dataSolarShading->shd_stream.get())->is_open()) {
-                ShowFatalError(state,
-                               EnergyPlus::format("InitSolarCalculations: Could not open file \"{}\" for output (write).",
-                                                  state.dataStrGlobals->outputShdFilePath.string()));
+                ShowFatalError(
+                    state,
+                    std::format("InitSolarCalculations: Could not open file \"{}\" for output (write).", state.dataStrGlobals->outputShdFilePath));
             }
         } else {
             state.dataSolarShading->shd_stream = std::make_unique<std::iostream>(nullptr);
@@ -407,9 +407,9 @@ void checkShadingSurfaceSchedules(EnergyPlusData &state)
         } else if (!thisSurface.MirroredSurf) {
             // Warning moved here from shading surface input processing (skip warning for mirrored surfaces)
             ShowWarningError(state,
-                             EnergyPlus::format(R"(Shading Surface="{}", Transmittance Schedule Name="{}", is always transparent.)",
-                                                thisSurface.Name,
-                                                thisSurface.shadowSurfSched->Name));
+                             std::format(R"(Shading Surface="{}", Transmittance Schedule Name="{}", is always transparent.)",
+                                         thisSurface.Name,
+                                         thisSurface.shadowSurfSched->Name));
             ShowContinueError(state, "This shading surface will be ignored.");
         }
     }
@@ -444,8 +444,7 @@ void GetShadowingInput(EnergyPlusData &state)
     NumAlphas = 0;
     NumNumbers = 0;
     if (NumItems > 1) {
-        ShowWarningError(state,
-                         EnergyPlus::format("{}: More than 1 occurrence of this object found, only first will be used.", cCurrentModuleObject));
+        ShowWarningError(state, std::format("{}: More than 1 occurrence of this object found, only first will be used.", cCurrentModuleObject));
     }
 
     if (NumItems != 0) {
@@ -469,9 +468,9 @@ void GetShadowingInput(EnergyPlusData &state)
         state.dataSolarShading->ShadowingCalcFrequency = 20;
     }
     if (state.dataSolarShading->ShadowingCalcFrequency > 31) {
-        ShowWarningError(state, EnergyPlus::format("{}: suspect {}", cCurrentModuleObject, state.dataIPShortCut->cNumericFieldNames(1)));
-        ShowContinueError(
-            state, EnergyPlus::format("Value entered=[{:.0R}], Shadowing Calculations will be inaccurate.", state.dataIPShortCut->rNumericArgs(1)));
+        ShowWarningError(state, std::format("{}: suspect {}", cCurrentModuleObject, state.dataIPShortCut->cNumericFieldNames(1)));
+        ShowContinueError(state,
+                          std::format("Value entered=[{:.0f}], Shadowing Calculations will be inaccurate.", state.dataIPShortCut->rNumericArgs(1)));
     }
 
     if (state.dataIPShortCut->rNumericArgs(2) > 199.0) {
@@ -491,11 +490,11 @@ void GetShadowingInput(EnergyPlusData &state)
                 state.dataSysVars->shadingMethod = ShadingMethod::Imported;
                 state.dataIPShortCut->cAlphaArgs(aNum) = "Imported";
             } else {
-                ShowWarningError(state, EnergyPlus::format("{}: invalid {}", cCurrentModuleObject, state.dataIPShortCut->cAlphaFieldNames(aNum)));
+                ShowWarningError(state, std::format("{}: invalid {}", cCurrentModuleObject, state.dataIPShortCut->cAlphaFieldNames(aNum)));
                 ShowContinueError(
                     state,
-                    EnergyPlus::format("Value entered=\"{}\" while no Schedule:File:Shading object is defined, InternalCalculation will be used.",
-                                       state.dataIPShortCut->cAlphaArgs(aNum)));
+                    std::format("Value entered=\"{}\" while no Schedule:File:Shading object is defined, InternalCalculation will be used.",
+                                state.dataIPShortCut->cAlphaArgs(aNum)));
             }
         } else if (Util::SameString(state.dataIPShortCut->cAlphaArgs(aNum), "PolygonClipping")) {
             state.dataSysVars->shadingMethod = ShadingMethod::PolygonClipping;
@@ -507,8 +506,8 @@ void GetShadowingInput(EnergyPlusData &state)
                 pixelRes = (unsigned)state.dataIPShortCut->rNumericArgs(3);
             }
 #ifdef EP_NO_OPENGL
-            ShowWarningError(state, EnergyPlus::format("{}: invalid {}", cCurrentModuleObject, state.dataIPShortCut->cAlphaFieldNames(aNum)));
-            ShowContinueError(state, EnergyPlus::format("Value entered=\"{}\"", state.dataIPShortCut->cAlphaArgs(aNum)));
+            ShowWarningError(state, std::format("{}: invalid {}", cCurrentModuleObject, state.dataIPShortCut->cAlphaFieldNames(aNum)));
+            ShowContinueError(state, std::format("Value entered=\"{}\"", state.dataIPShortCut->cAlphaArgs(aNum)));
             ShowContinueError(state, "This version of EnergyPlus was not compiled to use OpenGL (required for PixelCounting)");
             ShowContinueError(state, "PolygonClipping will be used instead");
             state.dataSysVars->shadingMethod = ShadingMethod::PolygonClipping;
@@ -527,9 +526,8 @@ void GetShadowingInput(EnergyPlusData &state)
             }
 #endif
         } else {
-            ShowWarningError(state, EnergyPlus::format("{}: invalid {}", cCurrentModuleObject, state.dataIPShortCut->cAlphaFieldNames(aNum)));
-            ShowContinueError(state,
-                              EnergyPlus::format("Value entered=\"{}\", PolygonClipping will be used.", state.dataIPShortCut->cAlphaArgs(aNum)));
+            ShowWarningError(state, std::format("{}: invalid {}", cCurrentModuleObject, state.dataIPShortCut->cAlphaFieldNames(aNum)));
+            ShowContinueError(state, std::format("Value entered=\"{}\", PolygonClipping will be used.", state.dataIPShortCut->cAlphaArgs(aNum)));
         }
     } else {
         state.dataIPShortCut->cAlphaArgs(aNum) = "PolygonClipping";
@@ -545,8 +543,8 @@ void GetShadowingInput(EnergyPlusData &state)
             state.dataSysVars->DetailedSolarTimestepIntegration = true;
             state.dataIPShortCut->cAlphaArgs(aNum) = "Timestep";
         } else {
-            ShowWarningError(state, EnergyPlus::format("{}: invalid {}", cCurrentModuleObject, state.dataIPShortCut->cAlphaFieldNames(aNum)));
-            ShowContinueError(state, EnergyPlus::format("Value entered=\"{}\", Periodic will be used.", state.dataIPShortCut->cAlphaArgs(aNum)));
+            ShowWarningError(state, std::format("{}: invalid {}", cCurrentModuleObject, state.dataIPShortCut->cAlphaFieldNames(aNum)));
+            ShowContinueError(state, std::format("Value entered=\"{}\", Periodic will be used.", state.dataIPShortCut->cAlphaArgs(aNum)));
             state.dataSysVars->DetailedSolarTimestepIntegration = false;
             state.dataIPShortCut->cAlphaArgs(aNum) = "Periodic";
         }
@@ -578,18 +576,18 @@ void GetShadowingInput(EnergyPlusData &state)
                 }
             }
         } else {
-            ShowWarningError(state, EnergyPlus::format("{}: invalid {}", cCurrentModuleObject, state.dataIPShortCut->cAlphaFieldNames(aNum)));
+            ShowWarningError(state, std::format("{}: invalid {}", cCurrentModuleObject, state.dataIPShortCut->cAlphaFieldNames(aNum)));
             if (!state.dataSysVars->SutherlandHodgman) {
-                ShowContinueError(
-                    state, EnergyPlus::format("Value entered=\"{}\", ConvexWeilerAtherton will be used.", state.dataIPShortCut->cAlphaArgs(aNum)));
+                ShowContinueError(state,
+                                  std::format("Value entered=\"{}\", ConvexWeilerAtherton will be used.", state.dataIPShortCut->cAlphaArgs(aNum)));
             } else {
                 if (!state.dataSysVars->SlaterBarsky) {
-                    ShowContinueError(
-                        state, EnergyPlus::format("Value entered=\"{}\", SutherlandHodgman will be used.", state.dataIPShortCut->cAlphaArgs(aNum)));
-                } else {
                     ShowContinueError(state,
-                                      EnergyPlus::format("Value entered=\"{}\", SlaterBarskyandSutherlandHodgman will be used.",
-                                                         state.dataIPShortCut->cAlphaArgs(aNum)));
+                                      std::format("Value entered=\"{}\", SutherlandHodgman will be used.", state.dataIPShortCut->cAlphaArgs(aNum)));
+                } else {
+                    ShowContinueError(
+                        state,
+                        std::format("Value entered=\"{}\", SlaterBarskyandSutherlandHodgman will be used.", state.dataIPShortCut->cAlphaArgs(aNum)));
                 }
             }
         }
@@ -617,9 +615,9 @@ void GetShadowingInput(EnergyPlusData &state)
             state.dataSysVars->DetailedSkyDiffuseAlgorithm = false;
             state.dataIPShortCut->cAlphaArgs(aNum) = "SimpleSkyDiffuseModeling";
         } else {
-            ShowWarningError(state, EnergyPlus::format("{}: invalid {}", cCurrentModuleObject, state.dataIPShortCut->cAlphaFieldNames(aNum)));
-            ShowContinueError(
-                state, EnergyPlus::format("Value entered=\"{}\", SimpleSkyDiffuseModeling will be used.", state.dataIPShortCut->cAlphaArgs(aNum)));
+            ShowWarningError(state, std::format("{}: invalid {}", cCurrentModuleObject, state.dataIPShortCut->cAlphaFieldNames(aNum)));
+            ShowContinueError(state,
+                              std::format("Value entered=\"{}\", SimpleSkyDiffuseModeling will be used.", state.dataIPShortCut->cAlphaArgs(aNum)));
         }
     } else {
         state.dataIPShortCut->cAlphaArgs(aNum) = "SimpleSkyDiffuseModeling";
@@ -3366,7 +3364,7 @@ void ComputeIntSolarAbsorpFactors(EnergyPlusData &state)
             thisEnclosure.FloorArea = HorizAreaSum;
             ShowWarningError(state, "ComputeIntSolarAbsorpFactors: Solar distribution model is set to place solar gains on the zone floor,");
             ShowContinueError(state, std::format("...Enclosure=\"{}\" has no floor, but has approximate horizontal surfaces.", thisEnclosure.Name));
-            ShowContinueError(state, EnergyPlus::format("...these Tilt > 120 degrees, (area=[{:.2R}] m2) will be used.", HorizAreaSum));
+            ShowContinueError(state, std::format("...these Tilt > 120 degrees, (area=[{:.2f}] m2) will be used.", HorizAreaSum));
         }
 
         // Compute ISABSF
@@ -4175,7 +4173,7 @@ void CLIPRECT(EnergyPlusData &state, int const NS2, int const NV1, int &NV3)
         const double cornerXs[4] = {minX, minX, maxX, maxX};
         const double cornerYs[4] = {minY, maxY, maxY, minY};
         Real64 edges[4] = {minX, maxY, maxX, minY};
-        Real64 LastEdgeX, LastEdgeY;
+        Real64 LastEdgeX = 0.0, LastEdgeY = 0.0;
         for (int i = 0; i <= arrc; i++) {
             int k = i % arrc;
 
@@ -4311,8 +4309,8 @@ void CLIPRECT(EnergyPlusData &state, int const NS2, int const NV1, int &NV3)
     if (NV3 > 0) {
         Real64 const X_0(state.dataSolarShading->XTEMP[0]);
         Real64 const Y_0(state.dataSolarShading->YTEMP[0]);
-        Real64 XP_0 = X_0, XP_1;
-        Real64 YP_0 = Y_0, YP_1;
+        Real64 XP_0 = X_0, XP_1 = X_0;
+        Real64 YP_0 = Y_0, YP_1 = Y_0;
         for (int P = 0; P < NV3 - 1; ++P) {
             XP_1 = state.dataSolarShading->XTEMP[P + 1];
             YP_1 = state.dataSolarShading->YTEMP[P + 1];
@@ -4560,8 +4558,8 @@ void CLIPPOLY(EnergyPlusData &state,
             if (NVOUT > 2) { // Compute HC values for edges of output polygon
                 Real64 const X_1(state.dataSolarShading->XTEMP(1));
                 Real64 const Y_1(state.dataSolarShading->YTEMP(1));
-                Real64 X_P(X_1), X_P1;
-                Real64 Y_P(Y_1), Y_P1;
+                Real64 X_P(X_1), X_P1 = X_1;
+                Real64 Y_P(Y_1), Y_P1 = Y_1;
                 for (int P = 1; P < NVOUT; ++P) {
                     X_P1 = state.dataSolarShading->XTEMP(P + 1);
                     Y_P1 = state.dataSolarShading->YTEMP(P + 1);
@@ -6701,19 +6699,19 @@ void CalcInteriorSolarDistribution(EnergyPlusData &state)
                 state.dataHeatBal->SurfSunlitFracWithoutReveal(state.dataGlobal->HourOfDay, state.dataGlobal->TimeStep, SurfNum) > 0;
 
             // Calculate interpolated blind properties
-            Real64 FrontDiffDiffTrans; // Bare-blind front diffuse-diffuse solar transmittance
-            Real64 FrontDiffDiffRefl;
-            Real64 FrontDiffAbs;      // Bare-blind front diffuse solar reflectance
-            Real64 BackDiffDiffTrans; // Bare-blind back diffuse-diffuse solar transmittance
-            Real64 BackDiffDiffRefl;
-            Real64 BackDiffAbs; // Bare-blind back diffuse solar reflectance
+            Real64 FrontDiffDiffTrans = 0.0; // Bare-blind front diffuse-diffuse solar transmittance
+            Real64 FrontDiffDiffRefl = 0.0;
+            Real64 FrontDiffAbs = 0.0;      // Bare-blind front diffuse solar reflectance
+            Real64 BackDiffDiffTrans = 0.0; // Bare-blind back diffuse-diffuse solar transmittance
+            Real64 BackDiffDiffRefl = 0.0;
+            Real64 BackDiffAbs = 0.0; // Bare-blind back diffuse solar reflectance
 
-            Real64 FrontBeamDiffTrans; // Blind ProfileAnglesolar front beam-diffuse transmittance
-            Real64 BackBeamDiffTrans;  // Blind solar back beam-diffuse transmittance
-            Real64 FrontBeamDiffRefl;  // Blind solar front beam-diffuse reflectance
-            Real64 BackBeamDiffRefl;   // Blind solar back beam-diffuse reflectance
-            Real64 FrontBeamAbs;       // Blind solar front beam absorptance
-            Real64 BackBeamAbs;        // Blind solar back beam absorptance
+            Real64 FrontBeamDiffTrans = 0.0; // Blind ProfileAnglesolar front beam-diffuse transmittance
+            Real64 BackBeamDiffTrans = 0.0;  // Blind solar back beam-diffuse transmittance
+            Real64 FrontBeamDiffRefl = 0.0;  // Blind solar front beam-diffuse reflectance
+            Real64 BackBeamDiffRefl = 0.0;   // Blind solar back beam-diffuse reflectance
+            Real64 FrontBeamAbs = 0.0;       // Blind solar front beam absorptance
+            Real64 BackBeamAbs = 0.0;        // Blind solar back beam absorptance
 
             if (s_surf->SurfWinWindowModelType(SurfNum) != WindowModel::EQL && ANY_BLIND(ShadeFlag)) {
                 auto const &surfaceShade = s_surf->surfShades(SurfNum);
@@ -7123,7 +7121,7 @@ void CalcInteriorSolarDistribution(EnergyPlusData &state)
                         // Factor for front beam radiation absorbed for equivalent layer window model
                         Real64 AbWinEQL = state.dataSolarShading->SurfWinAbsSolBeamEQL(1, Lay) * CosInc * SunLitFract *
                                           s_surf->SurfaceWindow(SurfNum).InOutProjSLFracMult[state.dataGlobal->HourOfDay];
-                        ;
+
                         if (CFS(EQLNum).L(1).LTYPE != LayerType::GLAZE) {
                             // if the first layer is not glazing (or it is a shade) do not
                             s_surf->SurfWinA(SurfNum, Lay) = AbWinEQL;
@@ -7152,9 +7150,9 @@ void CalcInteriorSolarDistribution(EnergyPlusData &state)
             Real64 SkySolarInc =
                 s_surf->SurfSkySolarInc(SurfNum); // Incident solar radiation on a window: sky diffuse plus beam reflected from obstruction (W/m2)
             Real64 DiffTrans = 0.0;               // Glazing diffuse solar transmittance (including shade/blind/switching, if present)
-            Real64 DiffTransGnd;                  // Ground diffuse solar transmittance for glazing with blind with horiz. slats or complex fen
+            Real64 DiffTransGnd = 0.0;            // Ground diffuse solar transmittance for glazing with blind with horiz. slats or complex fen
             Real64 DiffTransBmGnd;                // Complex fen: diffuse solar transmittance for ground-reflected beam radiation
-            Real64 DiffTransSky;                  // Sky diffuse solar transmittance for glazing with blind with horiz. slats or complex fen
+            Real64 DiffTransSky = 0.0;            // Sky diffuse solar transmittance for glazing with blind with horiz. slats or complex fen
             Real64 NomDiffTrans = 0.0;
 
             if (s_surf->SurfWinWindowModelType(SurfNum) == WindowModel::BSDF) { // complex fenestration
@@ -8178,12 +8176,12 @@ void CalcInteriorSolarDistribution(EnergyPlusData &state)
                                             for (int CurTrnDir = 1;
                                                  CurTrnDir <= state.dataBSDFWindow->ComplexWind(SurfNum).Geom(CurCplxFenState).Trn.NBasis;
                                                  ++CurTrnDir) {
-                                                Real64 bestDot; // complex fenestration hits other complex fenestration, it is important to find
-                                                // matching beam directions.  Beam leaving one window will have certain number for it's basis
+                                                Real64 bestDot = 0.0; // complex fenestration hits other complex fenestration, it is important to
+                                                // find matching beam directions.  Beam leaving one window will have certain number for it's basis
                                                 // while same beam reaching back surface will have different beam number.  This value is used
                                                 // to keep best matching dot product for those directions
-                                                Real64 curDot;   // temporary variable for current dot product
-                                                int bestBackTrn; // Direction corresponding best dot product for back surface window
+                                                Real64 curDot;       // temporary variable for current dot product
+                                                int bestBackTrn = 0; // Direction corresponding best dot product for back surface window
                                                 for (int CurBackDir = 1;
                                                      CurBackDir <= state.dataBSDFWindow->ComplexWind(BackSurfaceNumber).Geom(CurBackState).Trn.NBasis;
                                                      ++CurBackDir) {
@@ -11130,7 +11128,7 @@ void CalcBeamSolarOnWinRevealSurface(EnergyPlusData &state)
     int HorVertReveal;           // Index: 1 = horizontal reveal, 2 = vertical reveal
     Real64 OutsReveal;           // Depth of outside reveal (from outside glazing plane to outside wall plane) (m)
     Real64 InsReveal;            // Depth of inside reveal (from inside glazing plane to inside wall plane (m)
-    Real64 InsSillDepth;         // Depth of inside sill, measured from innermost face of glazing (m)
+    Real64 InsSillDepth = 0.0;   // Depth of inside sill, measured from innermost face of glazing (m)
     Real64 GlazingThickness;     // Thickness of glazing, measured from innermost face to outermost face (m)
     Real64 InsideRevealSolAbs;   // Solar absorptance of inside reveal or inside sill
     Real64 BmSolRefldOutsReveal; // Multiplied by beam solar gives beam solar reflected by horiz or vertical
@@ -11140,8 +11138,8 @@ void CalcBeamSolarOnWinRevealSurface(EnergyPlusData &state)
     WinShadingType ShadeFlag; // Shading flag
     int FrameDivNum;          // Frame/Divider number
     Real64 FrameWidth;        // Frame width (m)
-    Real64 P1;                // Frame outside/inside projection plus half of glazing thickness (m)
-    Real64 P2;
+    Real64 P1 = 0.0;          // Frame outside/inside projection plus half of glazing thickness (m)
+    Real64 P2 = 0.0;
     Real64 f1; // f1=d1-P1, f2=d2-P2 (m)
     Real64 f2;
     Real64 L1; // Average distance of outside/inside illuminated area to frame;

@@ -304,17 +304,17 @@ namespace WaterManager {
                     state.dataWaterData->WaterStorage(Item).ValveOffCapacity = rNumericArgs(6);
                     if (state.dataWaterData->WaterStorage(Item).ControlSupply != ControlSupplyType::NoControlLevel) {
                         if (state.dataWaterData->WaterStorage(Item).ValveOffCapacity < state.dataWaterData->WaterStorage(Item).ValveOnCapacity) {
-                            ShowSevereError(state, EnergyPlus::format("Invalid {} and/or {}", cNumericFieldNames(5), cNumericFieldNames(6)));
-                            ShowContinueError(state, EnergyPlus::format("Entered in {}={}", cCurrentModuleObject, cAlphaArgs(1)));
-                            ShowContinueError(state, EnergyPlus::format("{} must be greater than {}", cNumericFieldNames(6), cNumericFieldNames(5)));
+                            ShowSevereError(state, std::format("Invalid {} and/or {}", cNumericFieldNames(5), cNumericFieldNames(6)));
+                            ShowContinueError(state, std::format("Entered in {}={}", cCurrentModuleObject, cAlphaArgs(1)));
+                            ShowContinueError(state, std::format("{} must be greater than {}", cNumericFieldNames(6), cNumericFieldNames(5)));
                             ShowContinueError(state,
-                                              EnergyPlus::format("Check value for {} = {:.5R}",
-                                                                 cNumericFieldNames(5),
-                                                                 state.dataWaterData->WaterStorage(Item).ValveOnCapacity));
+                                              std::format("Check value for {} = {:.5f}",
+                                                          cNumericFieldNames(5),
+                                                          state.dataWaterData->WaterStorage(Item).ValveOnCapacity));
                             ShowContinueError(state,
-                                              EnergyPlus::format("which must be lower than {} = {:.5R}",
-                                                                 cNumericFieldNames(6),
-                                                                 state.dataWaterData->WaterStorage(Item).ValveOffCapacity));
+                                              std::format("which must be lower than {} = {:.5f}",
+                                                          cNumericFieldNames(6),
+                                                          state.dataWaterData->WaterStorage(Item).ValveOffCapacity));
                             ErrorsFound = true;
                         }
                     }
@@ -377,8 +377,8 @@ namespace WaterManager {
                         state.dataWaterData->WaterStorage(Item).ZoneID = Util::FindItemInList(cAlphaArgs(10), state.dataHeatBal->Zone);
                         if ((state.dataWaterData->WaterStorage(Item).ZoneID == 0) &&
                             (state.dataWaterData->WaterStorage(Item).AmbientTempIndicator == AmbientTempType::Zone)) {
-                            ShowSevereError(state, EnergyPlus::format("Invalid {}={}", cAlphaFieldNames(10), cAlphaArgs(10)));
-                            ShowContinueError(state, EnergyPlus::format("Entered in {}={}", cCurrentModuleObject, cAlphaArgs(1)));
+                            ShowSevereError(state, std::format("Invalid {}={}", cAlphaFieldNames(10), cAlphaArgs(10)));
+                            ShowContinueError(state, std::format("Entered in {}={}", cCurrentModuleObject, cAlphaArgs(1)));
                             ErrorsFound = true;
                         }
                         state.dataWaterData->WaterStorage(Item).SurfArea = rNumericArgs(8);
@@ -423,8 +423,8 @@ namespace WaterManager {
                     state.dataWaterData->RainCollector(Item).StorageTankName = cAlphaArgs(2);
                     state.dataWaterData->RainCollector(Item).StorageTankID = Util::FindItemInList(cAlphaArgs(2), state.dataWaterData->WaterStorage);
                     if (state.dataWaterData->RainCollector(Item).StorageTankID == 0) {
-                        ShowSevereError(state, EnergyPlus::format("Invalid {}={}", cAlphaFieldNames(2), cAlphaArgs(2)));
-                        ShowContinueError(state, EnergyPlus::format("Entered in {}={}", cCurrentModuleObject, cAlphaArgs(1)));
+                        ShowSevereError(state, std::format("Invalid {}={}", cAlphaFieldNames(2), cAlphaArgs(2)));
+                        ShowContinueError(state, std::format("Entered in {}={}", cCurrentModuleObject, cAlphaArgs(1)));
                         ErrorsFound = true;
                     }
 
@@ -438,13 +438,13 @@ namespace WaterManager {
                     }
                     state.dataWaterData->RainCollector(Item).LossFactor = rNumericArgs(1);
                     if (state.dataWaterData->RainCollector(Item).LossFactor > 1.0) {
-                        ShowWarningError(state, EnergyPlus::format("Invalid {}={:.2R}", cNumericFieldNames(1), rNumericArgs(1)));
-                        ShowContinueError(state, EnergyPlus::format("Entered in {}={}", cCurrentModuleObject, cAlphaArgs(1)));
+                        ShowWarningError(state, std::format("Invalid {}={:.2f}", cNumericFieldNames(1), rNumericArgs(1)));
+                        ShowContinueError(state, std::format("Entered in {}={}", cCurrentModuleObject, cAlphaArgs(1)));
                         ShowContinueError(state, "found rain water collection loss factor greater than 1.0, simulation continues");
                     }
                     if (state.dataWaterData->RainCollector(Item).LossFactor < 0.0) {
-                        ShowSevereError(state, EnergyPlus::format("Invalid {}={:.2R}", cNumericFieldNames(1), rNumericArgs(1)));
-                        ShowContinueError(state, EnergyPlus::format("Entered in {}={}", cCurrentModuleObject, cAlphaArgs(1)));
+                        ShowSevereError(state, std::format("Invalid {}={:.2f}", cNumericFieldNames(1), rNumericArgs(1)));
+                        ShowContinueError(state, std::format("Entered in {}={}", cCurrentModuleObject, cAlphaArgs(1)));
                         ShowContinueError(state, "found rain water collection loss factor less than 0.0");
                         ErrorsFound = true;
                     }
@@ -478,10 +478,9 @@ namespace WaterManager {
                         state.dataWaterData->RainCollector(Item).SurfID(SurfNum) =
                             Util::FindItemInList(cAlphaArgs(SurfNum + alphaOffset), state.dataSurface->Surface);
                         if (state.dataWaterData->RainCollector(Item).SurfID(SurfNum) == 0) {
-                            ShowSevereError(
-                                state,
-                                EnergyPlus::format("Invalid {}={}", cAlphaFieldNames(SurfNum + alphaOffset), cAlphaArgs(SurfNum + alphaOffset)));
-                            ShowContinueError(state, EnergyPlus::format("Entered in {}={}", cCurrentModuleObject, cAlphaArgs(1)));
+                            ShowSevereError(state,
+                                            std::format("Invalid {}={}", cAlphaFieldNames(SurfNum + alphaOffset), cAlphaArgs(SurfNum + alphaOffset)));
+                            ShowContinueError(state, std::format("Entered in {}={}", cCurrentModuleObject, cAlphaArgs(1)));
                             ErrorsFound = true;
                         }
                     }
@@ -589,9 +588,9 @@ namespace WaterManager {
                         (state.dataWaterData->WaterStorage(Item).ControlSupply == ControlSupplyType::WellFloatMainsBackup)) {
                         if (state.dataWaterData->WaterStorage(Item).GroundWellID == 0) {
                             ShowSevereError(state,
-                                            EnergyPlus::format("{}= \"{}\" does not have a WaterUse:Well (groundwater well) that names it.",
-                                                               cCurrentModuleObject,
-                                                               state.dataWaterData->WaterStorage(Item).Name));
+                                            std::format("{}= \"{}\" does not have a WaterUse:Well (groundwater well) that names it.",
+                                                        cCurrentModuleObject,
+                                                        state.dataWaterData->WaterStorage(Item).Name));
                             ErrorsFound = true;
                         }
                     }
@@ -604,10 +603,10 @@ namespace WaterManager {
                             Util::FindItemInList(state.dataWaterData->WaterStorage(Item).SupplyTankName, state.dataWaterData->WaterStorage);
                         if (state.dataWaterData->WaterStorage(Item).SupplyTankID == 0) {
                             ShowSevereError(state,
-                                            EnergyPlus::format("Other tank called {} not found for {} Named {}",
-                                                               state.dataWaterData->WaterStorage(Item).SupplyTankName,
-                                                               cCurrentModuleObject,
-                                                               state.dataWaterData->WaterStorage(Item).Name)); // TODO rename point
+                                            std::format("Other tank called {} not found for {} Named {}",
+                                                        state.dataWaterData->WaterStorage(Item).SupplyTankName,
+                                                        cCurrentModuleObject,
+                                                        state.dataWaterData->WaterStorage(Item).Name)); // TODO rename point
                             ErrorsFound = true;
                         }
                         InternalSetupTankDemandComponent(state,
@@ -635,10 +634,10 @@ namespace WaterManager {
                             state.dataWaterData->WaterStorage(Item).OverflowMode = Overflow::Discarded;
                         } else {
                             ShowSevereError(state,
-                                            EnergyPlus::format("Overflow tank name of {} not found for {} Named {}",
-                                                               state.dataWaterData->WaterStorage(Item).OverflowTankName,
-                                                               cCurrentModuleObject,
-                                                               state.dataWaterData->WaterStorage(Item).Name));
+                                            std::format("Overflow tank name of {} not found for {} Named {}",
+                                                        state.dataWaterData->WaterStorage(Item).OverflowTankName,
+                                                        cCurrentModuleObject,
+                                                        state.dataWaterData->WaterStorage(Item).Name));
                             ErrorsFound = true;
                         }
                     } else {
@@ -659,7 +658,7 @@ namespace WaterManager {
             cCurrentModuleObject = "Site:Precipitation";
             state.dataWaterData->NumSiteRainFall = state.dataInputProcessing->inputProcessor->getNumObjectsFound(state, cCurrentModuleObject);
             if (state.dataWaterData->NumSiteRainFall > 1) { // throw error
-                ShowSevereError(state, EnergyPlus::format("Only one {} object is allowed", cCurrentModuleObject));
+                ShowSevereError(state, std::format("Only one {} object is allowed", cCurrentModuleObject));
                 ErrorsFound = true;
             }
 
@@ -673,7 +672,7 @@ namespace WaterManager {
                 if (Util::SameString(cAlphaArgs(1), "ScheduleAndDesignLevel")) {
                     state.dataWaterData->RainFall.ModeID = RainfallMode::RainSchedDesign;
                 } else {
-                    ShowSevereError(state, EnergyPlus::format("Precipitation Model Type of {} is incorrect.", cCurrentModuleObject));
+                    ShowSevereError(state, std::format("Precipitation Model Type of {} is incorrect.", cCurrentModuleObject));
                     ShowContinueError(state, "Only available option is ScheduleAndDesignLevel.");
                     ErrorsFound = true;
                 }
@@ -698,7 +697,7 @@ namespace WaterManager {
             cCurrentModuleObject = "RoofIrrigation";
             NumIrrigation = state.dataInputProcessing->inputProcessor->getNumObjectsFound(state, cCurrentModuleObject);
             if (NumIrrigation > 1) {
-                ShowSevereError(state, EnergyPlus::format("Only one {} object is allowed", cCurrentModuleObject));
+                ShowSevereError(state, std::format("Only one {} object is allowed", cCurrentModuleObject));
                 ErrorsFound = true;
             }
 
@@ -741,8 +740,7 @@ namespace WaterManager {
                 state.dataWaterData->Irrigation.IrrigationThreshold = 0.4;
                 if (state.dataWaterData->Irrigation.ModeID == IrrigationMode::SmartSched && NumNumbers > 0) {
                     if (rNumericArgs(1) > 100.0 || rNumericArgs(1) < 0.0) {
-                        ShowSevereError(state,
-                                        EnergyPlus::format("Irrigation threshold for {} object has values > 100 or < 0.", cCurrentModuleObject));
+                        ShowSevereError(state, std::format("Irrigation threshold for {} object has values > 100 or < 0.", cCurrentModuleObject));
                         ErrorsFound = true;
                     } else {
                         state.dataWaterData->Irrigation.IrrigationThreshold = rNumericArgs(1) / 100.0;

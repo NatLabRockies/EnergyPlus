@@ -105,7 +105,7 @@ TEST_F(AutoSizingFixture, WaterHeatingCapacitySizingGauntlet)
 
     std::string eiooutput =
         std::string("! <Component Sizing Information>, Component Type, Component Name, Input Field Description, Value\n"
-                    " Component Sizing Information, Coil:Heating:Water, MyWaterCoil, User-Specified Rated Capacity [W], 5125.30\n");
+                    " Component Sizing Information, Coil:Heating:Water, MyWaterCoil, User-Specified Rated Capacity [W], 5125.3\n");
 
     EXPECT_TRUE(compare_eio_stream(eiooutput, true));
 
@@ -273,7 +273,7 @@ TEST_F(AutoSizingFixture, WaterHeatingCapacitySizingGauntlet)
 
     // <Component Sizing Information> header already reported above (and flag set false). Only coil sizing information reported here.
     eiooutput = std::string(" Component Sizing Information, Coil:Heating:Water, MyWaterCoil, Design Size Rated Capacity [W], 1012.28\n"
-                            " Component Sizing Information, Coil:Heating:Water, MyWaterCoil, User-Specified Rated Capacity [W], 1500.00\n");
+                            " Component Sizing Information, Coil:Heating:Water, MyWaterCoil, User-Specified Rated Capacity [W], 1500\n");
     EXPECT_TRUE(compare_eio_stream(eiooutput, true));
 
     // AIRLOOP Equipment not supported

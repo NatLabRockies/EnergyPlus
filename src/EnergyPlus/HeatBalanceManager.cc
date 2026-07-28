@@ -1764,7 +1764,7 @@ namespace HeatBalanceManager {
                 DisplayString(state, "--Construction not found");
                 ErrorsFound = true;
                 ShowSevereError(state, std::format("No match on WINDOW5 data file for Construction={}, or error in data file.", ConstructAlphas(0)));
-                ShowContinueError(state, std::format("...Looking on file={}", window5DataFilePath.string())); // TODO: call getAbsolutePath maybe?
+                ShowContinueError(state, std::format("...Looking on file={}", window5DataFilePath)); // TODO: call getAbsolutePath maybe?
                 continue;
             }
 
@@ -2612,6 +2612,11 @@ namespace HeatBalanceManager {
         using OutAirNodeManager::SetOutAirNodes;
         using WindowEquivalentLayer::InitEquivalentLayerWindowCalculations;
 
+        if (state.dataGlobal->AnyEnergyManagementSystemInModel) {
+            HeatBalanceSurfaceManager::InitEMSControlledConstructions(state);
+            HeatBalanceSurfaceManager::InitEMSControlledSurfaceProperties(state);
+        }
+
         if (state.dataGlobal->BeginSimFlag) {
             AllocateHeatBalArrays(state); // Allocate the Module Arrays
             if (state.dataHeatBal->AnyCTF || state.dataHeatBal->AnyEMPD) {
@@ -2654,11 +2659,6 @@ namespace HeatBalanceManager {
                     state.dataSurface->SurfaceWindow(SurfNum).thetaFace.begin(), state.dataSurface->SurfaceWindow(SurfNum).thetaFace.end(), 296.15);
                 state.dataSurface->SurfWinEffInsSurfTemp(SurfNum) = 23.0;
             }
-        }
-
-        if (state.dataGlobal->AnyEnergyManagementSystemInModel) {
-            HeatBalanceSurfaceManager::InitEMSControlledConstructions(state);
-            HeatBalanceSurfaceManager::InitEMSControlledSurfaceProperties(state);
         }
 
         // Init storm window pointers
@@ -3029,7 +3029,7 @@ namespace HeatBalanceManager {
                         print(state.files.eio, Format_732);
                         state.dataHeatBalMgr->FirstWarmupWrite = false;
                     }
-                    constexpr const char *Format_731{" Warmup Convergence Information - Detailed, {},{},{},{:.10R},{:.10R}\n"};
+                    constexpr const char *Format_731{" Warmup Convergence Information - Detailed, {},{},{},{:.10G},{:.10G}\n"};
                     print(state.files.eio,
                           Format_731,
                           state.dataHeatBal->Zone(ZoneNum).Name,
@@ -3277,7 +3277,7 @@ namespace HeatBalanceManager {
                 StdDevZoneLoad = std::sqrt(sum(state.dataHeatBalMgr->LoadZoneRptStdDev({1, state.dataHeatBalMgr->CountWarmupDayPoints})) /
                                            double(state.dataHeatBalMgr->CountWarmupDayPoints));
 
-                constexpr const char *Format_731(" Warmup Convergence Information,{},{},{:.10R},{:.10R},{},{},{:.10R},{:.10R},{},{}\n");
+                constexpr const char *Format_731(" Warmup Convergence Information,{},{},{:.10G},{:.10G},{},{},{:.10G},{:.10G},{},{}\n");
                 print(state.files.eio,
                       Format_731,
                       state.dataHeatBal->Zone(ZoneNum).Name,
@@ -3551,7 +3551,7 @@ namespace HeatBalanceManager {
 
             if (frameDivider.DividerWidth > 0.0 && (frameDivider.HorDividers == 0 && frameDivider.VertDividers == 0)) {
                 ShowWarningError(state,
-                                 std::format("{}: In FrameAndDivider {} {} > 0 ",
+                                 std::format("{}: In FrameAndDivider {} {} > 0",
                                              state.dataHeatBalMgr->CurrentModuleObject,
                                              frameDivider.Name,
                                              state.dataIPShortCut->cNumericFieldNames(9)));
@@ -3561,6 +3561,23 @@ namespace HeatBalanceManager {
                                               state.dataIPShortCut->cNumericFieldNames(11)));
                 ShowContinueError(state, std::format("...{} set to 0.", state.dataIPShortCut->cNumericFieldNames(9)));
                 frameDivider.DividerWidth = 0.0;
+            }
+            if (frameDivider.DividerWidth == 0.0 && (frameDivider.HorDividers > 0 || frameDivider.VertDividers > 0)) {
+                ShowWarningError(state,
+                                 std::format("{}: In FrameAndDivider {} {} = 0",
+                                             state.dataHeatBalMgr->CurrentModuleObject,
+                                             frameDivider.Name,
+                                             state.dataIPShortCut->cNumericFieldNames(9)));
+                ShowContinueError(state,
+                                  std::format("...but {} > 0 or {} > 0.",
+                                              state.dataIPShortCut->cNumericFieldNames(10),
+                                              state.dataIPShortCut->cNumericFieldNames(11)));
+                ShowContinueError(state,
+                                  std::format("...{} and {} set to 0.",
+                                              state.dataIPShortCut->cNumericFieldNames(10),
+                                              state.dataIPShortCut->cNumericFieldNames(11)));
+                frameDivider.HorDividers = 0;
+                frameDivider.VertDividers = 0;
             }
             // Prevent InsideSillDepth < InsideReveal
             if (frameDivider.InsideSillDepth < state.dataSurface->FrameDivider(FrameDividerNum).InsideReveal) {
@@ -3736,7 +3753,7 @@ namespace HeatBalanceManager {
                 ShowSevereError(state,
                                 std::format("SearchWindow5DataFile: For \"{}\" in {} file, appears to be a Unicode or binary file.",
                                             DesiredConstructionName,
-                                            DesiredFilePath.string()));
+                                            DesiredFilePath));
                 ShowContinueError(state, "...This file cannot be read by this program. Please save as PC or Unix file and try again");
                 ShowFatalError(state, "Program terminates due to previous condition.");
             }
@@ -3750,7 +3767,7 @@ namespace HeatBalanceManager {
         }
         ++FileLineCount;
         if (!has_prefixi(NextLine.data, "WINDOW5")) {
-            ShowSevereError(state, std::format("HeatBalanceManager: SearchWindow5DataFile: Error in Data File={}", DesiredFilePath.string()));
+            ShowSevereError(state, std::format("HeatBalanceManager: SearchWindow5DataFile: Error in Data File={}", DesiredFilePath));
             ShowFatalError(
                 state,
                 std::format("Error reading Window5 Data File: first word of window entry is \"{}\", should be Window5.", NextLine.data.substr(0, 7)));
@@ -5993,6 +6010,8 @@ namespace HeatBalanceManager {
 
                 // ALLOCATE(Construct(ConstrNum)%BSDFInput%Layer(NumOfOpticalLayers))
                 for (int Layer = 1; Layer <= thisConstruct.TotLayers; ++Layer) {
+                    AlphaIndex = 9 + (Layer * 3) - 2;
+                    currentOpticalLayer = int(Layer / 2) + 1;
 
                     if (mod(Layer, 2) != 0) {
                         thisConstruct.BSDFInput.Layer(currentOpticalLayer).MaterialIndex = thisConstruct.LayerPoint(Layer);

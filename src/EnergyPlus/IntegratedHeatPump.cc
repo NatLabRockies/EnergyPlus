@@ -113,25 +113,24 @@ void SimIHP(EnergyPlusData &state,
     if (CompIndex == 0) {
         DXCoilNum = Util::FindItemInList(CompName, state.dataIntegratedHP->IntegratedHeatPumps);
         if (DXCoilNum == 0) {
-            ShowFatalError(state, EnergyPlus::format("Integrated Heat Pump not found={}", CompName));
+            ShowFatalError(state, std::format("Integrated Heat Pump not found={}", CompName));
         }
         CompIndex = DXCoilNum;
     } else {
         DXCoilNum = CompIndex;
         if (DXCoilNum > static_cast<int>(state.dataIntegratedHP->IntegratedHeatPumps.size()) || DXCoilNum < 1) {
             ShowFatalError(state,
-                           EnergyPlus::format("SimIHP: Invalid CompIndex passed={}, Number of Integrated HPs={}, IHP name={}",
-                                              DXCoilNum,
-                                              state.dataIntegratedHP->IntegratedHeatPumps.size(),
-                                              CompName));
+                           std::format("SimIHP: Invalid CompIndex passed={}, Number of Integrated HPs={}, IHP name={}",
+                                       DXCoilNum,
+                                       state.dataIntegratedHP->IntegratedHeatPumps.size(),
+                                       CompName));
         }
         if (!CompName.empty() && CompName != state.dataIntegratedHP->IntegratedHeatPumps(DXCoilNum).Name) {
-            ShowFatalError(
-                state,
-                EnergyPlus::format("SimIHP: Invalid CompIndex passed={}, Integrated HP name={}, stored Integrated HP Name for that index={}",
-                                   DXCoilNum,
-                                   CompName,
-                                   state.dataIntegratedHP->IntegratedHeatPumps(DXCoilNum).Name));
+            ShowFatalError(state,
+                           std::format("SimIHP: Invalid CompIndex passed={}, Integrated HP name={}, stored Integrated HP Name for that index={}",
+                                       DXCoilNum,
+                                       CompName,
+                                       state.dataIntegratedHP->IntegratedHeatPumps(DXCoilNum).Name));
         }
     };
 
@@ -486,13 +485,13 @@ void GetIHPInput(EnergyPlusData &state)
 
         ValidateComponent(state, ihp.SCCoilType, ihp.SCCoilName, IsNotOK, CurrentModuleObject);
         if (IsNotOK) {
-            ShowContinueError(state, EnergyPlus::format("...specified in {}=\"{}\".", CurrentModuleObject, AlphArray(1)));
+            ShowContinueError(state, std::format("...specified in {}=\"{}\".", CurrentModuleObject, AlphArray(1)));
             ErrorsFound = true;
         } else {
             errFlag = false;
             ihp.SCCoilIndex = GetCoilIndexVariableSpeed(state, ihp.SCCoilType, ihp.SCCoilName, errFlag);
             if (errFlag) {
-                ShowContinueError(state, EnergyPlus::format("...specified in {}=\"{}\".", CurrentModuleObject, AlphArray(1)));
+                ShowContinueError(state, std::format("...specified in {}=\"{}\".", CurrentModuleObject, AlphArray(1)));
                 ErrorsFound = true;
             }
         }
@@ -503,13 +502,13 @@ void GetIHPInput(EnergyPlusData &state)
 
         ValidateComponent(state, ihp.SHCoilType, ihp.SHCoilName, IsNotOK, CurrentModuleObject);
         if (IsNotOK) {
-            ShowContinueError(state, EnergyPlus::format("...specified in {}=\"{}\".", CurrentModuleObject, AlphArray(1)));
+            ShowContinueError(state, std::format("...specified in {}=\"{}\".", CurrentModuleObject, AlphArray(1)));
             ErrorsFound = true;
         } else {
             errFlag = false;
             ihp.SHCoilIndex = GetCoilIndexVariableSpeed(state, ihp.SHCoilType, ihp.SHCoilName, errFlag);
             if (errFlag) {
-                ShowContinueError(state, EnergyPlus::format("...specified in {}=\"{}\".", CurrentModuleObject, AlphArray(1)));
+                ShowContinueError(state, std::format("...specified in {}=\"{}\".", CurrentModuleObject, AlphArray(1)));
                 ErrorsFound = true;
             }
         }
@@ -520,13 +519,13 @@ void GetIHPInput(EnergyPlusData &state)
 
         ValidateComponent(state, ihp.DWHCoilType, ihp.DWHCoilName, IsNotOK, CurrentModuleObject);
         if (IsNotOK) {
-            ShowContinueError(state, EnergyPlus::format("...specified in {}=\"{}\".", CurrentModuleObject, AlphArray(1)));
+            ShowContinueError(state, std::format("...specified in {}=\"{}\".", CurrentModuleObject, AlphArray(1)));
             ErrorsFound = true;
         } else {
             errFlag = false;
             ihp.DWHCoilIndex = GetCoilIndexVariableSpeed(state, ihp.DWHCoilType, ihp.DWHCoilName, errFlag);
             if (errFlag) {
-                ShowContinueError(state, EnergyPlus::format("...specified in {}=\"{}\".", CurrentModuleObject, AlphArray(1)));
+                ShowContinueError(state, std::format("...specified in {}=\"{}\".", CurrentModuleObject, AlphArray(1)));
                 ErrorsFound = true;
             }
         }
@@ -537,13 +536,13 @@ void GetIHPInput(EnergyPlusData &state)
 
         ValidateComponent(state, ihp.SCWHCoilType, ihp.SCWHCoilName, IsNotOK, CurrentModuleObject);
         if (IsNotOK) {
-            ShowContinueError(state, EnergyPlus::format("...specified in {}=\"{}\".", CurrentModuleObject, AlphArray(1)));
+            ShowContinueError(state, std::format("...specified in {}=\"{}\".", CurrentModuleObject, AlphArray(1)));
             ErrorsFound = true;
         } else {
             errFlag = false;
             ihp.SCWHCoilIndex = GetCoilIndexVariableSpeed(state, ihp.SCWHCoilType, ihp.SCWHCoilName, errFlag);
             if (errFlag) {
-                ShowContinueError(state, EnergyPlus::format("...specified in {}=\"{}\".", CurrentModuleObject, AlphArray(1)));
+                ShowContinueError(state, std::format("...specified in {}=\"{}\".", CurrentModuleObject, AlphArray(1)));
                 ErrorsFound = true;
             }
         }
@@ -554,13 +553,13 @@ void GetIHPInput(EnergyPlusData &state)
 
         ValidateComponent(state, ihp.SCDWHCoolCoilType, ihp.SCDWHCoolCoilName, IsNotOK, CurrentModuleObject);
         if (IsNotOK) {
-            ShowContinueError(state, EnergyPlus::format("...specified in {}=\"{}\".", CurrentModuleObject, AlphArray(1)));
+            ShowContinueError(state, std::format("...specified in {}=\"{}\".", CurrentModuleObject, AlphArray(1)));
             ErrorsFound = true;
         } else {
             errFlag = false;
             ihp.SCDWHCoolCoilIndex = GetCoilIndexVariableSpeed(state, ihp.SCDWHCoolCoilType, ihp.SCDWHCoolCoilName, errFlag);
             if (errFlag) {
-                ShowContinueError(state, EnergyPlus::format("...specified in {}=\"{}\".", CurrentModuleObject, AlphArray(1)));
+                ShowContinueError(state, std::format("...specified in {}=\"{}\".", CurrentModuleObject, AlphArray(1)));
                 ErrorsFound = true;
             }
         }
@@ -571,13 +570,13 @@ void GetIHPInput(EnergyPlusData &state)
 
         ValidateComponent(state, ihp.SCDWHWHCoilType, ihp.SCDWHWHCoilName, IsNotOK, CurrentModuleObject);
         if (IsNotOK) {
-            ShowContinueError(state, EnergyPlus::format("...specified in {}=\"{}\".", CurrentModuleObject, AlphArray(1)));
+            ShowContinueError(state, std::format("...specified in {}=\"{}\".", CurrentModuleObject, AlphArray(1)));
             ErrorsFound = true;
         } else {
             errFlag = false;
             ihp.SCDWHWHCoilIndex = GetCoilIndexVariableSpeed(state, ihp.SCDWHWHCoilType, ihp.SCDWHWHCoilName, errFlag);
             if (errFlag) {
-                ShowContinueError(state, EnergyPlus::format("...specified in {}=\"{}\".", CurrentModuleObject, AlphArray(1)));
+                ShowContinueError(state, std::format("...specified in {}=\"{}\".", CurrentModuleObject, AlphArray(1)));
                 ErrorsFound = true;
             } else {
                 state.dataVariableSpeedCoils->VarSpeedCoil(ihp.SCDWHWHCoilIndex).bIsDesuperheater = true;
@@ -590,13 +589,13 @@ void GetIHPInput(EnergyPlusData &state)
 
         ValidateComponent(state, ihp.SHDWHHeatCoilType, ihp.SHDWHHeatCoilName, IsNotOK, CurrentModuleObject);
         if (IsNotOK) {
-            ShowContinueError(state, EnergyPlus::format("...specified in {}=\"{}\".", CurrentModuleObject, AlphArray(1)));
+            ShowContinueError(state, std::format("...specified in {}=\"{}\".", CurrentModuleObject, AlphArray(1)));
             ErrorsFound = true;
         } else {
             errFlag = false;
             ihp.SHDWHHeatCoilIndex = GetCoilIndexVariableSpeed(state, ihp.SHDWHHeatCoilType, ihp.SHDWHHeatCoilName, errFlag);
             if (errFlag) {
-                ShowContinueError(state, EnergyPlus::format("...specified in {}=\"{}\".", CurrentModuleObject, AlphArray(1)));
+                ShowContinueError(state, std::format("...specified in {}=\"{}\".", CurrentModuleObject, AlphArray(1)));
                 ErrorsFound = true;
             }
         }
@@ -607,7 +606,7 @@ void GetIHPInput(EnergyPlusData &state)
 
         ValidateComponent(state, ihp.SHDWHWHCoilType, ihp.SHDWHWHCoilName, IsNotOK, CurrentModuleObject);
         if (IsNotOK) {
-            ShowContinueError(state, EnergyPlus::format("...specified in {}=\"{}\".", CurrentModuleObject, AlphArray(1)));
+            ShowContinueError(state, std::format("...specified in {}=\"{}\".", CurrentModuleObject, AlphArray(1)));
             ErrorsFound = true;
         } else {
             errFlag = false;
@@ -1921,7 +1920,7 @@ Real64 GetDWHCoilCapacityIHP(EnergyPlusData &state,
     using VariableSpeedCoils::GetCoilCapacityVariableSpeed;
 
     // Return value
-    Real64 CoilCapacity; // returned capacity of matched coil
+    Real64 CoilCapacity = 0.0; // returned capacity of matched coil
 
     // Obtains and Allocates WatertoAirHP related parameters from input file
     if (state.dataIntegratedHP->GetCoilsInputFlag) { // First time subroutine has been entered

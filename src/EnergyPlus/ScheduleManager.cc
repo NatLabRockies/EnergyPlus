@@ -551,8 +551,7 @@ namespace Sched {
         NumAlphas = 0;
         NumNumbers = 0;
         if (NumCommaFileShading > 1) {
-            ShowWarningError(state,
-                             EnergyPlus::format("{}: More than 1 occurrence of this object found, only first will be used.", CurrentModuleObject));
+            ShowWarningError(state, std::format("{}: More than 1 occurrence of this object found, only first will be used.", CurrentModuleObject));
         }
 
         std::map<fs::path, nlohmann::json>::iterator schedule_file_shading_result;
@@ -603,7 +602,7 @@ namespace Sched {
                                 ShowSevereError(state, error);
                             }
                         }
-                        ShowContinueError(state, EnergyPlus::format("Error Occurred in {}", state.files.TempFullFilePath.filePath.string()));
+                        ShowContinueError(state, std::format("Error Occurred in {}", state.files.TempFullFilePath.filePath));
                         ShowFatalError(state, "Program terminates due to previous condition.");
                     }
                     for (const auto &[warning, isContinued] : csvParser.warnings()) {
@@ -632,8 +631,8 @@ namespace Sched {
                         if (!csvParser.hasErrors()) {
                             isCSV = true;
                             ShowWarningMessage(state,
-                                               EnergyPlus::format("Extension of file {} is unrecognized, but parsed as CSV successfully",
-                                                                  state.files.TempFullFilePath.filePath.string()));
+                                               std::format("Extension of file {} is unrecognized, but parsed as CSV successfully",
+                                                           state.files.TempFullFilePath.filePath));
                             schedule_file_shading_result = it.first;
                         }
                     } catch (...) {
@@ -647,22 +646,21 @@ namespace Sched {
                             s_sched->UniqueProcessedExternalFiles.emplace(state.files.TempFullFilePath.filePath, std::move(schedule_data));
                         schedule_file_shading_result = it.first;
                         ShowWarningMessage(state,
-                                           EnergyPlus::format("Extension of file {} is unrecognized, but parsed as JSON successfully",
-                                                              state.files.TempFullFilePath.filePath.string()));
+                                           std::format("Extension of file {} is unrecognized, but parsed as JSON successfully",
+                                                       state.files.TempFullFilePath.filePath));
                         isJSON = true;
                     } catch (...) {
                         // We're testing to see if this is json, if any exception exists, then throw the standard error about an unknown extension
                         isJSON = false;
                     }
                     if (!isCSV && !isJSON) {
-                        ShowSevereError(
-                            state,
-                            EnergyPlus::format(R"({}: {}="{}", {}="{}" has an unknown file extension and cannot be read by this program.)",
-                                               routineName,
-                                               CurrentModuleObject,
-                                               Alphas(1),
-                                               cAlphaFields(3),
-                                               Alphas(3)));
+                        ShowSevereError(state,
+                                        std::format(R"({}: {}="{}", {}="{}" has an unknown file extension and cannot be read by this program.)",
+                                                    routineName,
+                                                    CurrentModuleObject,
+                                                    Alphas(1),
+                                                    cAlphaFields(3),
+                                                    Alphas(3)));
                         ShowFatalError(state, "Program terminates due to previous condition.");
                     }
                 }
@@ -675,10 +673,10 @@ namespace Sched {
                 int NumCSVAllColumnsSchedules =
                     schedule_file_shading_result->second["header"].get<std::set<std::string>>().size() - 1; // -1 to account for timestamp column
                 ShowWarningError(state,
-                                 EnergyPlus::format("{}: {}=\"{}\" Removing last column of the CSV since it has '()' for the surface name.",
-                                                    routineName,
-                                                    CurrentModuleObject,
-                                                    Alphas(1)));
+                                 std::format("{}: {}=\"{}\" Removing last column of the CSV since it has '()' for the surface name.",
+                                             routineName,
+                                             CurrentModuleObject,
+                                             Alphas(1)));
                 ShowContinueError(state, "This was a problem in E+ 22.2.0 and below, consider removing it from the file to suppress this warning.");
                 schedule_file_shading_result->second["header"].erase(NumCSVAllColumnsSchedules);
                 assert(schedule_file_shading_result->second["header"].size() == schedule_file_shading_result->second["values"].size());
@@ -686,16 +684,13 @@ namespace Sched {
 
             if (rowCnt != rowLimitCount) {
                 if (rowCnt < rowLimitCount) {
-                    ShowSevereError(state,
-                                    EnergyPlus::format("{}: {}=\"{}\" {} data values read.", routineName, CurrentModuleObject, Alphas(1), rowCnt));
+                    ShowSevereError(state, std::format("{}: {}=\"{}\" {} data values read.", routineName, CurrentModuleObject, Alphas(1), rowCnt));
                 } else if (rowCnt > rowLimitCount) {
-                    ShowSevereError(state,
-                                    EnergyPlus::format("{}: {}=\"{}\" too many data values read.", routineName, CurrentModuleObject, Alphas(1)));
+                    ShowSevereError(state, std::format("{}: {}=\"{}\" too many data values read.", routineName, CurrentModuleObject, Alphas(1)));
                 }
                 ShowContinueError(
                     state,
-                    EnergyPlus::format("Number of rows in the shading file must be a full year multiplied by the simulation TimeStep: {}.",
-                                       rowLimitCount));
+                    std::format("Number of rows in the shading file must be a full year multiplied by the simulation TimeStep: {}.", rowLimitCount));
                 ShowFatalError(state, "Program terminates due to previous condition.");
             }
 
@@ -705,7 +700,7 @@ namespace Sched {
             if (numerrors > 0) {
                 ShowWarningError(
                     state,
-                    EnergyPlus::format(
+                    std::format(
                         "{}:{}=\"{}\" {} records had errors - these values are set to 0.", routineName, CurrentModuleObject, Alphas(1), numerrors));
             }
         }
@@ -782,12 +777,12 @@ namespace Sched {
                     ShowSevereCustom(
                         state,
                         eoh,
-                        EnergyPlus::format("{} [{:.2R}] > {} [{:.2R}].", cNumericFields(1), schedType->minVal, cNumericFields(2), schedType->maxVal));
+                        std::format("{} [{:.2f}] > {} [{:.2f}].", cNumericFields(1), schedType->minVal, cNumericFields(2), schedType->maxVal));
                 } else {
                     ShowSevereCustom(
                         state,
                         eoh,
-                        EnergyPlus::format("{} [{:.0R}] > {} [{:.0R}].", cNumericFields(1), schedType->minVal, cNumericFields(2), schedType->maxVal));
+                        std::format("{} [{:.0f}] > {} [{:.0f}].", cNumericFields(1), schedType->minVal, cNumericFields(2), schedType->maxVal));
                 }
                 ShowContinueError(state, "  Other warning/severes about schedule values may appear.");
             }
@@ -842,11 +837,11 @@ namespace Sched {
             }
 
             if (daySched->checkValsForLimitViolations(state)) {
-                ShowWarningCustom(state, eoh, EnergyPlus::format("Values are outside of range for {}={}", cAlphaFields(2), Alphas(2)));
+                ShowWarningCustom(state, eoh, std::format("Values are outside of range for {}={}", cAlphaFields(2), Alphas(2)));
             }
 
             if (daySched->checkValsForBadIntegers(state)) {
-                ShowWarningCustom(state, eoh, EnergyPlus::format("One or more values are not integer in {}={}", cAlphaFields(2), Alphas(2)));
+                ShowWarningCustom(state, eoh, std::format("One or more values are not integer in {}={}", cAlphaFields(2), Alphas(2)));
             }
 
         } // for (Loop)
@@ -892,9 +887,9 @@ namespace Sched {
             if (NumFields == 0) {
                 ShowSevereCustom(state,
                                  eoh,
-                                 EnergyPlus::format("Insufficient data entered for a full schedule day."
-                                                    "Number of interval fields == [{}].",
-                                                    NumFields));
+                                 std::format("Insufficient data entered for a full schedule day."
+                                             "Number of interval fields == [{}].",
+                                             NumFields));
                 ErrorsFound = true;
             }
 
@@ -921,11 +916,11 @@ namespace Sched {
             daySched->populateFromMinuteVals(state, minuteVals);
 
             if (daySched->checkValsForLimitViolations(state)) {
-                ShowWarningCustom(state, eoh, EnergyPlus::format("Values are outside of range for {}={}", cAlphaFields(2), Alphas(2)));
+                ShowWarningCustom(state, eoh, std::format("Values are outside of range for {}={}", cAlphaFields(2), Alphas(2)));
             }
 
             if (daySched->checkValsForBadIntegers(state)) {
-                ShowWarningCustom(state, eoh, EnergyPlus::format("One or more values are not integer in {}={}", cAlphaFields(2), Alphas(2)));
+                ShowWarningCustom(state, eoh, std::format("One or more values are not integer in {}={}", cAlphaFields(2), Alphas(2)));
             }
         }
 
@@ -972,19 +967,19 @@ namespace Sched {
             if (Numbers(1) <= 0.0) {
                 ShowSevereCustom(state,
                                  eoh,
-                                 EnergyPlus::format("Insufficient data entered for a full schedule day."
-                                                    "...Minutes per Item field = [{}].",
-                                                    Numbers(1)));
+                                 std::format("Insufficient data entered for a full schedule day."
+                                             "...Minutes per Item field = [{}].",
+                                             Numbers(1)));
                 ErrorsFound = true;
                 continue;
             }
             if (NumNumbers < 25) {
                 ShowSevereCustom(state,
                                  eoh,
-                                 EnergyPlus::format("Insufficient data entered for a full schedule day."
-                                                    "...Minutes per Item field = [{}] and only [{}] to apply to list fields.",
-                                                    Numbers(1),
-                                                    NumNumbers - 1));
+                                 std::format("Insufficient data entered for a full schedule day."
+                                             "...Minutes per Item field = [{}] and only [{}] to apply to list fields.",
+                                             Numbers(1),
+                                             NumNumbers - 1));
                 ErrorsFound = true;
                 continue;
             }
@@ -994,12 +989,12 @@ namespace Sched {
             if ((NumNumbers - 1) != NumExpectedItems) {
                 ShowSevereCustom(state,
                                  eoh,
-                                 EnergyPlus::format("Number of Entered Items={} not equal number of expected items={}"
-                                                    "based on {}={}",
-                                                    NumNumbers - 1,
-                                                    NumExpectedItems,
-                                                    cNumericFields(1),
-                                                    MinutesPerItem));
+                                 std::format("Number of Entered Items={} not equal number of expected items={}"
+                                             "based on {}={}",
+                                             NumNumbers - 1,
+                                             NumExpectedItems,
+                                             cNumericFields(1),
+                                             MinutesPerItem));
                 ErrorsFound = true;
                 continue;
             }
@@ -1688,7 +1683,7 @@ namespace Sched {
                                     ShowSevereCustom(state, eoh, error);
                                 }
                             }
-                            ShowContinueError(state, std::format("Error Occurred in {}", state.files.TempFullFilePath.filePath.string()));
+                            ShowContinueError(state, std::format("Error Occurred in {}", state.files.TempFullFilePath.filePath));
                             ShowFatalError(state, "Program terminates due to previous condition.");
                         }
                         for (const auto &[warning, isContinued] : csvParser.warnings()) {
@@ -1716,7 +1711,7 @@ namespace Sched {
                                 isCSV = true;
                                 ShowWarningMessage(state,
                                                    std::format("Extension of file {} is unrecognized, but parsed as CSV successfully",
-                                                               state.files.TempFullFilePath.filePath.string()));
+                                                               state.files.TempFullFilePath.filePath));
                             }
                         } catch (...) {
                             // We're testing to see if this is a csv, if any exception exists, then throw the standard error about an unknown
@@ -1730,7 +1725,7 @@ namespace Sched {
                                 result = it.first;
                                 ShowWarningMessage(state,
                                                    std::format("Extension of file {} is unrecognized, but parsed as JSON successfully",
-                                                               state.files.TempFullFilePath.filePath.string()));
+                                                               state.files.TempFullFilePath.filePath));
                                 isJSON = true;
                             } catch (...) {
                                 // We're testing to see if this is json, if any exception exists, then throw the standard error about an unknown
@@ -1754,7 +1749,7 @@ namespace Sched {
                         state,
                         eoh,
                         std::format("Requested column number {}, but found only {} columns.", curcolCount, result->second["values"].size()));
-                    ShowContinueError(state, std::format("Error Occurred in {}", state.files.TempFullFilePath.filePath.string()));
+                    ShowContinueError(state, std::format("Error Occurred in {}", state.files.TempFullFilePath.filePath));
                     ShowFatalError(state, "Program terminates due to previous condition.");
                 }
                 auto const &column_json = result->second["values"][curcolCount - 1];
@@ -1766,7 +1761,7 @@ namespace Sched {
                 } catch (nlohmann::json::type_error &e) {
                     ShowSevereCustom(state, eoh, std::format("Column number {} has non-numeric data.", curcolCount));
                     ShowContinueError(state, e.what());
-                    ShowContinueError(state, std::format("Error Occurred in {}", state.files.TempFullFilePath.filePath.string()));
+                    ShowContinueError(state, std::format("Error Occurred in {}", state.files.TempFullFilePath.filePath));
                     ShowFatalError(state, "Program terminates due to previous condition.");
                 }
 
@@ -1883,7 +1878,7 @@ namespace Sched {
                         eoh,
                         std::format(
                             "For header '{}', Requested column number {}, but found only {} columns.", header, column + 1, values_json.size()));
-                    ShowContinueError(state, std::format("Error Occurred in {}", schedule_file_shading_result->first.string()));
+                    ShowContinueError(state, std::format("Error Occurred in {}", schedule_file_shading_result->first));
                     ShowFatalError(state, "Program terminates due to previous condition.");
                 }
 
@@ -1893,7 +1888,7 @@ namespace Sched {
                 } catch (nlohmann::json::type_error &e) {
                     ShowSevereCustom(state, eoh, std::format("Column number {} has non-numeric data.", column + 1));
                     ShowContinueError(state, e.what());
-                    ShowContinueError(state, std::format("Error Occurred in {}", schedule_file_shading_result->first.string()));
+                    ShowContinueError(state, std::format("Error Occurred in {}", schedule_file_shading_result->first));
                     ShowFatalError(state, "Program terminates due to previous condition.");
                 }
 
@@ -2264,16 +2259,16 @@ namespace Sched {
         for (auto const *schedType : state.dataSched->scheduleTypes) {
             if (schedType->isLimited) {
                 YesNoLimited = "Yes";
-                minValStr = EnergyPlus::format("{:.2R}", schedType->minVal);
+                minValStr = std::format("{:.2f}", schedType->minVal);
                 strip(minValStr);
-                maxValStr = EnergyPlus::format("{:.2R}", schedType->maxVal);
+                maxValStr = std::format("{:.2f}", schedType->maxVal);
                 strip(maxValStr);
                 if (schedType->isReal) {
                     YesNoContinous = "Yes";
                 } else {
                     YesNoContinous = "No";
-                    minValStr = fmt::to_string((int)schedType->minVal);
-                    maxValStr = fmt::to_string((int)schedType->maxVal);
+                    minValStr = std::to_string((int)schedType->minVal);
+                    maxValStr = std::to_string((int)schedType->maxVal);
                 }
             } else {
                 YesNoLimited = "No";
@@ -2381,12 +2376,12 @@ namespace Sched {
 
             if (LevelOfDetail == ReportLevel::Hourly) {
                 for (int hr = 0; hr < Constant::iHoursInDay; ++hr) {
-                    print(state.files.eio, ",{:.2R}", daySched->tsVals[(hr + 1) * s_glob->TimeStepsInHour - 1]);
+                    print(state.files.eio, ",{:.2f}", daySched->tsVals[(hr + 1) * s_glob->TimeStepsInHour - 1]);
                 }
             } else if (LevelOfDetail == ReportLevel::TimeStep) {
                 for (int hr = 0; hr < Constant::iHoursInDay; ++hr) {
                     for (int ts = 0; ts < s_glob->TimeStepsInHour; ++ts) {
-                        print(state.files.eio, ",{:.2R}", daySched->tsVals[hr * s_glob->TimeStepsInHour + ts]);
+                        print(state.files.eio, ",{:.2f}", daySched->tsVals[hr * s_glob->TimeStepsInHour + ts]);
                     }
                 }
             } else {
@@ -2750,8 +2745,8 @@ namespace Sched {
         std::string::size_type sFld;
 
         int totalMinutes;
-        Real64 incrementPerMinute;
-        Real64 curValue;
+        Real64 incrementPerMinute = 0.0;
+        Real64 curValue = 0.0;
 
         std::fill(minuteVals.begin(), minuteVals.end(), 0.0);
         std::fill(setMinuteVals.begin(), setMinuteVals.end(), false);
@@ -2773,7 +2768,7 @@ namespace Sched {
 
         for (int Count = 1; Count <= NumUntils; ++Count) {
             std::string const &until = Untils(Count);
-            int Pos = index(until, "UNTIL");
+            std::string::size_type Pos = index(until, "UNTIL");
             if (Pos == 0) {
                 if (until[5] == ':') {
                     sFld = 6;
@@ -2781,7 +2776,7 @@ namespace Sched {
                     sFld = 5;
                 }
                 DecodeHHMMField(state, until.substr(sFld), HHField, MMField, ErrorsFound, DayScheduleName, until, interpolation);
-            } else if (Pos == (int)std::string::npos) {
+            } else if (Pos == std::string::npos) {
                 DecodeHHMMField(state, until, HHField, MMField, ErrorsFound, DayScheduleName, until, interpolation);
             } else { // Until found but wasn't first field
                 ShowSevereError(state, std::format("ProcessScheduleInput: ProcessIntervalFields, Invalid \"Until\" field encountered={}", until));
@@ -3028,9 +3023,7 @@ namespace Sched {
         }
 
         if (nonIntegral) {
-            std::string hHour; // these haven't been initialized?
-            std::string mMinute;
-            ShowContinueError(state, EnergyPlus::format("Until value to be used will be: {:2.2F}:{:2.2F}", hHour, mMinute));
+            ShowContinueError(state, std::format("Until value to be used will be: {:02}:{:02}", RetHH, RetMM));
         }
         if (interpolation == Interpolation::No) {
             if (!isMinuteMultipleOfTimestep(RetMM, s_glob->MinutesInTimeStep)) {

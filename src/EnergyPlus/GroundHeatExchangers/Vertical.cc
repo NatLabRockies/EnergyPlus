@@ -60,6 +60,7 @@
 #include <EnergyPlus/GroundHeatExchangers/State.hh>
 #include <EnergyPlus/GroundHeatExchangers/Vertical.hh>
 #include <EnergyPlus/InputProcessing/InputProcessor.hh>
+#include <EnergyPlus/OutputReportPredefined.hh>
 #include <EnergyPlus/Plant/DataPlant.hh>
 #include <EnergyPlus/PlantUtilities.hh>
 #include <EnergyPlus/WeatherManager.hh>
@@ -70,7 +71,7 @@ GLHEVert::GLHEVert(EnergyPlusData &state, std::string const &objName, nlohmann::
     // Check for duplicates
     for (auto &existingObj : state.dataGroundHeatExchanger->verticalGLHE) {
         if (objName == existingObj.name) {
-            ShowFatalError(state, EnergyPlus::format("Invalid input for {} object: Duplicate name found: {}", moduleName, existingObj.name));
+            ShowFatalError(state, std::format("Invalid input for {} object: Duplicate name found: {}", moduleName, existingObj.name));
         }
     }
 
@@ -134,7 +135,7 @@ GLHEVert::GLHEVert(EnergyPlusData &state, std::string const &objName, nlohmann::
                 this->gFuncCalcMethod = GFuncCalcMethod::FullDesign;
             } else {
                 errorsFound = true;
-                ShowSevereError(state, EnergyPlus::format("g-Function Calculation Method: \"{}\" is invalid", gFunctionMethodStr));
+                ShowSevereError(state, std::format("g-Function Calculation Method: \"{}\" is invalid", gFunctionMethodStr));
             }
         }
 
@@ -142,137 +143,140 @@ GLHEVert::GLHEVert(EnergyPlusData &state, std::string const &objName, nlohmann::
         if (this->gFuncCalcMethod == GFuncCalcMethod::FullDesign) {
 #ifndef PYTHON_CLI
             ShowFatalError(state, "Attempted to use borehole field design in a build without PYTHON_CLI, which is invalid");
-#endif
+#else
             // g-functions won't be calculated until after sizing is complete
             bool foundSizing = false;
             bool objTypeFound = j.find("ghe_vertical_sizing_object_type") != j.end();
             bool objNameFound = j.find("ghe_vertical_sizing_object_name") != j.end();
 
             if (!objTypeFound) {
-                ShowSevereError(state, EnergyPlus::format("GroundHeatExchanger:System \"{}\"", this->name));
-                ShowContinueError(
-                    state, EnergyPlus::format("g-Function Calculation Method = \"{}\"", j["g_function_calculation_method"].get<std::string>()));
+                ShowSevereError(state, std::format("GroundHeatExchanger:System \"{}\"", this->name));
+                ShowContinueError(state,
+                                  std::format("g-Function Calculation Method = \"{}\"", j["g_function_calculation_method"].get<std::string>()));
                 ShowContinueError(state, "GHE:Vertical:Sizing Object Type not specified.");
                 errorsFound = true;
             }
-            if (!objNameFound) {
-                ShowSevereError(state, EnergyPlus::format("GroundHeatExchanger:System \"{}\"", this->name));
-                ShowContinueError(
-                    state, EnergyPlus::format("g-Function Calculation Method = \"{}\"", j["g_function_calculation_method"].get<std::string>()));
-                ShowContinueError(state, "GHE:Vertical:Sizing Object Name not specified.");
-                errorsFound = true;
+
+            if (objNameFound) {
+                this->sizingData.name = j.at("ghe_vertical_sizing_object_name");
+            }
+            if (objTypeFound) {
+                this->sizingData.type = j.at("ghe_vertical_sizing_object_type");
             }
 
-            this->sizingData.name = j.at("ghe_vertical_sizing_object_name");
-            this->sizingData.type = j.at("ghe_vertical_sizing_object_type");
-
-            if (Util::makeUPPER(this->sizingData.type) != "GROUNDHEATEXCHANGER:VERTICAL:SIZING:RECTANGLE") {
-                ShowSevereError(state, EnergyPlus::format("GroundHeatExchanger:System \"{}\"", this->name));
-                ShowContinueError(state, EnergyPlus::format("GHE:Vertical:Sizing Object Type not supported \"{}\"", this->sizingData.type));
+            // Only the rectangle sizing object is currently supported for full-design sizing.
+            // Keep this as a gate before touching fields that only exist on that object type.
+            bool const validSizingObjectType =
+                objTypeFound && Util::makeUPPER(this->sizingData.type) == "GROUNDHEATEXCHANGER:VERTICAL:SIZING:RECTANGLE";
+            if (objTypeFound && !validSizingObjectType) {
+                ShowSevereError(state, std::format("GroundHeatExchanger:System \"{}\"", this->name));
+                ShowContinueError(state, std::format("GHE:Vertical:Sizing Object Type not supported \"{}\"", this->sizingData.type));
                 errorsFound = true;
             }
 
             auto const instances = state.dataInputProcessing->inputProcessor->epJSON.find("GroundHeatExchanger:Vertical:Sizing:Rectangle");
-            if (instances == state.dataInputProcessing->inputProcessor->epJSON.end()) {
+            if (validSizingObjectType && instances == state.dataInputProcessing->inputProcessor->epJSON.end()) {
                 ShowSevereError(
-                    state,
-                    EnergyPlus::format("Expected to find GroundHeatExchanger:Vertical:Sizing named {}, but it was missing", this->sizingData.name));
+                    state, std::format("Expected to find GroundHeatExchanger:Vertical:Sizing named {}, but it was missing", this->sizingData.name));
                 errorsFound = true;
-            }
+            } else if (validSizingObjectType && objNameFound) {
+                auto &instanceValues = instances.value();
+                for (auto instance = instanceValues.begin(); instance != instanceValues.end(); ++instance) {
+                    auto const &fields = instance.value();
+                    std::string const &thisSizingObjName = instance.key();
+                    std::string const &objNameUC = Util::makeUPPER(thisSizingObjName);
+                    // Copy sizing fields only from the named rectangle object referenced by this GHE.
+                    if (objNameUC == Util::makeUPPER(this->sizingData.name)) {
+                        foundSizing = true;
 
-            auto &instanceValues = instances.value();
-            for (auto instance = instanceValues.begin(); instance != instanceValues.end(); ++instance) {
-                auto const &fields = instance.value();
-                std::string const &thisSizingObjName = instance.key();
-                std::string const &objNameUC = Util::makeUPPER(thisSizingObjName);
-                if (objNameUC == Util::makeUPPER(this->sizingData.name)) {
-                    foundSizing = true;
-
-                    this->sizingData.sizingPeriodName = fields.at("sizingperiod_weatherfiledays_name");
-                    auto const spInstances = state.dataInputProcessing->inputProcessor->epJSON.find("SizingPeriod:WeatherFileDays");
-                    if (spInstances == state.dataInputProcessing->inputProcessor->epJSON.end()) {
-                        ShowSevereError(state,
-                                        EnergyPlus::format("Expected to find SizingPeriod:WeatherFileDays named {}, but it was missing",
-                                                           this->sizingData.sizingPeriodName));
-                        errorsFound = true;
-                    }
-
-                    bool spIsAnnual = false;
-                    for (auto &designPeriod : state.dataWeather->RunPeriodDesignInput) {
-                        if (Util::makeUPPER(designPeriod.title) == Util::makeUPPER((this->sizingData.sizingPeriodName)) &&
-                            (designPeriod.totalDays == 365)) {
-                            spIsAnnual = true;
-                            break;
+                        this->sizingData.sizingPeriodName = fields.at("sizingperiod_weatherfiledays_name");
+                        auto const spInstances = state.dataInputProcessing->inputProcessor->epJSON.find("SizingPeriod:WeatherFileDays");
+                        if (spInstances == state.dataInputProcessing->inputProcessor->epJSON.end()) {
+                            ShowSevereError(state,
+                                            std::format("Expected to find SizingPeriod:WeatherFileDays named {}, but it was missing",
+                                                        this->sizingData.sizingPeriodName));
+                            errorsFound = true;
                         }
+
+                        bool spIsAnnual = false;
+                        for (auto &designPeriod : state.dataWeather->RunPeriodDesignInput) {
+                            if (Util::makeUPPER(designPeriod.title) == Util::makeUPPER((this->sizingData.sizingPeriodName)) &&
+                                (designPeriod.totalDays == 365)) {
+                                spIsAnnual = true;
+                                break;
+                            }
+                        }
+
+                        if (!spIsAnnual) {
+                            ShowSevereError(state,
+                                            std::format("SizingPeriod:WeatherFileDays named {}, must be an annual design period of 365 days",
+                                                        this->sizingData.sizingPeriodName));
+                            errorsFound = true;
+                        }
+
+                        // Some sizing fields have IDD defaults and may be absent from epJSON.
+                        // Required fields without defaults can be read directly with at().
+                        if (auto it = fields.find("design_flow_rate_per_borehole"); it != fields.end()) {
+                            this->sizingData.designFlowRatePerBorehole = it.value().get<Real64>();
+                        } else {
+                            state.dataInputProcessing->inputProcessor->getDefaultValue(
+                                state, this->sizingData.type, "design_flow_rate_per_borehole", this->sizingData.designFlowRatePerBorehole);
+                        }
+
+                        this->sizingData.length = fields.at("available_borehole_field_length");
+                        this->sizingData.width = fields.at("available_borehole_field_width");
+                        this->sizingData.numBoreholes = fields.at("maximum_number_of_boreholes");
+
+                        if (auto it = fields.find("minimum_borehole_spacing"); it != fields.end()) {
+                            this->sizingData.minSpacing = it.value().get<Real64>();
+                        } else {
+                            state.dataInputProcessing->inputProcessor->getDefaultValue(
+                                state, this->sizingData.type, "minimum_borehole_spacing", this->sizingData.minSpacing);
+                        }
+
+                        if (auto it = fields.find("maximum_borehole_spacing"); it != fields.end()) {
+                            this->sizingData.maxSpacing = it.value().get<Real64>();
+                        } else {
+                            state.dataInputProcessing->inputProcessor->getDefaultValue(
+                                state, this->sizingData.type, "maximum_borehole_spacing", this->sizingData.maxSpacing);
+                        }
+
+                        if (auto it = fields.find("minimum_borehole_vertical_length"); it != fields.end()) {
+                            this->sizingData.minLength = it.value().get<Real64>();
+                        } else {
+                            state.dataInputProcessing->inputProcessor->getDefaultValue(
+                                state, this->sizingData.type, "minimum_borehole_vertical_length", this->sizingData.minLength);
+                        }
+
+                        if (auto it = fields.find("maximum_borehole_vertical_length"); it != fields.end()) {
+                            this->sizingData.maxLength = it.value().get<Real64>();
+                        } else {
+                            state.dataInputProcessing->inputProcessor->getDefaultValue(
+                                state, this->sizingData.type, "maximum_borehole_vertical_length", this->sizingData.maxLength);
+                        }
+
+                        if (auto it = fields.find("minimum_exiting_fluid_temperature_for_sizing"); it != fields.end()) {
+                            this->sizingData.minEFT = it.value().get<Real64>();
+                        } else {
+                            state.dataInputProcessing->inputProcessor->getDefaultValue(
+                                state, this->sizingData.type, "minimum_exiting_fluid_temperature_for_sizing", this->sizingData.minEFT);
+                        }
+
+                        if (auto it = fields.find("maximum_exiting_fluid_temperature_for_sizing"); it != fields.end()) {
+                            this->sizingData.maxEFT = it.value().get<Real64>();
+                        } else {
+                            state.dataInputProcessing->inputProcessor->getDefaultValue(
+                                state, this->sizingData.type, "maximum_exiting_fluid_temperature_for_sizing", this->sizingData.maxEFT);
+                        }
+
+                        state.dataInputProcessing->inputProcessor->markObjectAsUsed("GroundHeatExchanger:Vertical:Sizing:Rectangle",
+                                                                                    this->sizingData.name);
+                        break;
                     }
-
-                    if (!spIsAnnual) {
-                        ShowSevereError(state,
-                                        EnergyPlus::format("SizingPeriod:WeatherFileDays named {}, must be an annual design period of 365 days",
-                                                           this->sizingData.sizingPeriodName));
-                        errorsFound = true;
-                    }
-
-                    if (auto it = fields.find("design_flow_rate_per_borehole"); it != fields.end()) {
-                        this->sizingData.designFlowRatePerBorehole = it.value().get<Real64>();
-                    } else {
-                        state.dataInputProcessing->inputProcessor->getDefaultValue(
-                            state, this->sizingData.type, "design_flow_rate_per_borehole", this->sizingData.designFlowRatePerBorehole);
-                    }
-
-                    this->sizingData.length = fields.at("available_borehole_field_length");
-                    this->sizingData.width = fields.at("available_borehole_field_width");
-                    this->sizingData.numBoreholes = fields.at("maximum_number_of_boreholes");
-
-                    if (auto it = fields.find("minimum_borehole_spacing"); it != fields.end()) {
-                        this->sizingData.minSpacing = it.value().get<Real64>();
-                    } else {
-                        state.dataInputProcessing->inputProcessor->getDefaultValue(
-                            state, this->sizingData.type, "minimum_borehole_spacing", this->sizingData.minSpacing);
-                    }
-
-                    if (auto it = fields.find("maximum_borehole_spacing"); it != fields.end()) {
-                        this->sizingData.maxSpacing = it.value().get<Real64>();
-                    } else {
-                        state.dataInputProcessing->inputProcessor->getDefaultValue(
-                            state, this->sizingData.type, "maximum_borehole_spacing", this->sizingData.maxSpacing);
-                    }
-
-                    if (auto it = fields.find("minimum_borehole_vertical_length"); it != fields.end()) {
-                        this->sizingData.minLength = it.value().get<Real64>();
-                    } else {
-                        state.dataInputProcessing->inputProcessor->getDefaultValue(
-                            state, this->sizingData.type, "minimum_borehole_vertical_length", this->sizingData.minLength);
-                    }
-
-                    if (auto it = fields.find("maximum_borehole_vertical_length"); it != fields.end()) {
-                        this->sizingData.maxLength = it.value().get<Real64>();
-                    } else {
-                        state.dataInputProcessing->inputProcessor->getDefaultValue(
-                            state, this->sizingData.type, "maximum_borehole_vertical_length", this->sizingData.maxLength);
-                    }
-
-                    if (auto it = fields.find("minimum_exiting_fluid_temperature_for_sizing"); it != fields.end()) {
-                        this->sizingData.minEFT = it.value().get<Real64>();
-                    } else {
-                        state.dataInputProcessing->inputProcessor->getDefaultValue(
-                            state, this->sizingData.type, "minimum_exiting_fluid_temperature_for_sizing", this->sizingData.minEFT);
-                    }
-
-                    if (auto it = fields.find("maximum_exiting_fluid_temperature_for_sizing"); it != fields.end()) {
-                        this->sizingData.maxEFT = it.value().get<Real64>();
-                    } else {
-                        state.dataInputProcessing->inputProcessor->getDefaultValue(
-                            state, this->sizingData.type, "maximum_exiting_fluid_temperature_for_sizing", this->sizingData.maxEFT);
-                    }
-
-                    state.dataInputProcessing->inputProcessor->markObjectAsUsed("GroundHeatExchanger:Vertical:Sizing:Rectangle",
-                                                                                this->sizingData.name);
-                    break;
                 }
             }
 
-            if (!foundSizing) {
+            if (validSizingObjectType && objNameFound && !foundSizing) {
                 ShowSevereError(state, "Could not find matching GroundHeatExchanger:Vertical:Sizing:Rectangle");
                 errorsFound = true;
             }
@@ -280,25 +284,28 @@ GLHEVert::GLHEVert(EnergyPlusData &state, std::string const &objName, nlohmann::
             if (j.find("vertical_well_locations") == j.end()) {
                 ShowSevereError(state, "For a full design GHE simulation, you must provide a GHE:Vertical:Single object");
                 ShowContinueError(state, "If you enter more than one, only the first is used to specify the borehole design");
-                ShowContinueError(state, EnergyPlus::format("Check references to these objects for GHE:System object: {}", this->name));
+                ShowContinueError(state, std::format("Check references to these objects for GHE:System object: {}", this->name));
                 errorsFound = true;
-            }
-
-            std::vector<std::shared_ptr<GLHEVertSingle>> tempVectOfBHObjects;
-            auto const &vars = j.at("vertical_well_locations");
-            for (auto const &var : vars) {
-                if (!var.at("ghe_vertical_single_object_name").empty()) {
-                    std::shared_ptr<GLHEVertSingle> tempBHptr =
-                        GLHEVertSingle::GetSingleBH(state, Util::makeUPPER(var.at("ghe_vertical_single_object_name").get<std::string>()));
-                    tempVectOfBHObjects.push_back(tempBHptr);
-                    this->myRespFactors = BuildAndGetResponseFactorsObjectFromSingleBHs(state, tempVectOfBHObjects);
+            } else {
+                std::vector<std::shared_ptr<GLHEVertSingle>> tempVectOfBHObjects;
+                auto const &vars = j.at("vertical_well_locations");
+                // FullDesign uses a single borehole only to seed temporary response factors;
+                // the designed borefield replaces the g-functions after HVAC sizing.
+                if (!vars.empty()) {
+                    auto const &var = vars.front();
+                    if (!var.at("ghe_vertical_single_object_name").empty()) {
+                        std::shared_ptr<GLHEVertSingle> tempBHptr =
+                            GLHEVertSingle::GetSingleBH(state, Util::makeUPPER(var.at("ghe_vertical_single_object_name").get<std::string>()));
+                        tempVectOfBHObjects.push_back(tempBHptr);
+                        this->myRespFactors = BuildAndGetResponseFactorsObjectFromSingleBHs(state, tempVectOfBHObjects);
+                    }
                 }
-                break;
             }
             if (!this->myRespFactors) {
                 ShowSevereError(state, "Something went wrong creating response factor for GroundHeatExchanger, check previous errors.");
                 errorsFound = true;
             }
+#endif
 
         } else if (j.find("ghe_vertical_array_object_name") != j.end()) {
             // Response factors come from array object
@@ -308,32 +315,39 @@ GLHEVert::GLHEVert(EnergyPlusData &state, std::string const &objName, nlohmann::
             if (j.find("vertical_well_locations") == j.end()) {
                 // No ResponseFactors, GHEArray, or SingleBH object are referenced
                 ShowSevereError(state, "No GHE:ResponseFactors, GHE:Vertical:Array, or GHE:Vertical:Single objects found");
-                ShowContinueError(state, EnergyPlus::format("Check references to these objects for GHE:System object: {}", this->name));
+                ShowContinueError(state, std::format("Check references to these objects for GHE:System object: {}", this->name));
                 errorsFound = true;
-            }
+            } else {
+                auto const &vars = j.at("vertical_well_locations");
 
-            auto const &vars = j.at("vertical_well_locations");
+                // Calculate response factors from individual boreholes
+                std::vector<std::shared_ptr<GLHEVertSingle>> tempVectOfBHObjects;
 
-            // Calculate response factors from individual boreholes
-            std::vector<std::shared_ptr<GLHEVertSingle>> tempVectOfBHObjects;
+                for (auto const &var : vars) {
+                    if (!var.at("ghe_vertical_single_object_name").empty()) {
+                        std::shared_ptr<GLHEVertSingle> tempBHptr =
+                            GLHEVertSingle::GetSingleBH(state, Util::makeUPPER(var.at("ghe_vertical_single_object_name").get<std::string>()));
+                        tempVectOfBHObjects.push_back(tempBHptr);
+                    } else {
+                        break;
+                    }
+                }
 
-            for (auto const &var : vars) {
-                if (!var.at("ghe_vertical_single_object_name").empty()) {
-                    std::shared_ptr<GLHEVertSingle> tempBHptr =
-                        GLHEVertSingle::GetSingleBH(state, Util::makeUPPER(var.at("ghe_vertical_single_object_name").get<std::string>()));
-                    tempVectOfBHObjects.push_back(tempBHptr);
+                // Avoid calling BuildAndGetResponseFactorsObjectFromSingleBHs with no boreholes;
+                // it averages properties by the borehole count.
+                if (tempVectOfBHObjects.empty()) {
+                    ShowSevereError(state, "GroundHeatExchanger:Vertical:Single objects not found.");
+                    errorsFound = true;
                 } else {
-                    break;
+                    this->myRespFactors = BuildAndGetResponseFactorsObjectFromSingleBHs(state, tempVectOfBHObjects);
                 }
             }
-
-            this->myRespFactors = BuildAndGetResponseFactorsObjectFromSingleBHs(state, tempVectOfBHObjects);
-
-            if (!this->myRespFactors) {
-                ShowSevereError(state, "GroundHeatExchanger:Vertical:Single objects not found.");
-                errorsFound = true;
-            }
         }
+    }
+
+    // Stop before dereferencing response factor data if input processing already found fatal errors.
+    if (errorsFound) {
+        ShowFatalError(state, std::format("Errors found in processing input for {}", moduleName));
     }
 
     this->bhDiameter = this->myRespFactors->props->bhDiameter;
@@ -390,10 +404,17 @@ GLHEVert::GLHEVert(EnergyPlusData &state, std::string const &objName, nlohmann::
     this->groundTempModel =
         GroundTemp::GetGroundTempModelAndInit(state, modelType, Util::makeUPPER(j["undisturbed_ground_temperature_model_name"].get<std::string>()));
 
-    // Check for Errors
-    if (errorsFound) {
-        ShowFatalError(state, EnergyPlus::format("Errors found in processing input for {}", moduleName));
-    }
+    OutputReportPredefined::PreDefTableEntry(state,
+                                             state.dataOutRptPredefined->pdchGLHEType,
+                                             this->name,
+                                             DataPlant::PlantEquipTypeNames[static_cast<int>(DataPlant::PlantEquipmentType::GrndHtExchgSystem)]);
+    OutputReportPredefined::PreDefTableEntry(state, state.dataOutRptPredefined->pdchGLHETubeLength, this->name, this->totalTubeLength);
+    OutputReportPredefined::PreDefTableEntry(state, state.dataOutRptPredefined->pdchGLHEVolFlow, this->name, this->designFlow, 6);
+    OutputReportPredefined::PreDefTableEntry(state, state.dataOutRptPredefined->pdchGLHEbhDepth, this->name, this->myRespFactors->props->bhTopDepth);
+    OutputReportPredefined::PreDefTableEntry(state, state.dataOutRptPredefined->pdchGLHEbhDiam, this->name, this->myRespFactors->props->bhDiameter);
+    OutputReportPredefined::PreDefTableEntry(state, state.dataOutRptPredefined->pdchGLHEbhLeng, this->name, this->myRespFactors->props->bhLength);
+    OutputReportPredefined::PreDefTableEntry(
+        state, state.dataOutRptPredefined->pdchGLHENumHolesTrenches, this->name, static_cast<Real64>(this->myRespFactors->numBoreholes));
 }
 
 void GLHEVert::simulate(EnergyPlusData &state,
@@ -656,7 +677,7 @@ nlohmann::json GLHEVert::getCommonGHEDesignerInputs(EnergyPlusData &state) const
     gheDesignerInputs["version"] = 2; // If you update GHEDesigner, you may need to use a new input version here
     gheDesignerInputs["topology"] = {{{"type", "ground_heat_exchanger"}, {"name", "ghe1"}}};
 
-    std::string const p = EnergyPlus::format("[G-Function Calculation for GHE Named: {}] ", this->name);
+    std::string const p = std::format("[G-Function Calculation for GHE Named: {}] ", this->name);
 
     // set up the fluid to use in GHEDesigner, note that the concentration is more restrictive than in EnergyPlus
     nlohmann::json fluidObject;
@@ -723,10 +744,10 @@ fs::path GLHEVert::runGHEDesigner(EnergyPlusData &state, nlohmann::json const &i
         exePath = FileSystem::getAbsolutePath(FileSystem::getProgramPath()); // could be /path/to/energyplus(.exe) or /path/to/energyplus_tests(.exe)
         exePath = exePath.parent_path() / ("energyplus" + FileSystem::exeExtension);
     }
-    std::string const cmd = EnergyPlus::format(R"("{}" auxiliary ghedesigner "{}" "{}")",
-                                               FileSystem::toString(exePath),
-                                               FileSystem::toGenericString(ghe_designer_input_file_path),
-                                               FileSystem::toGenericString(ghe_designer_output_directory));
+    std::string const cmd = std::format(R"("{}" auxiliary ghedesigner "{}" "{}")",
+                                        FileSystem::toString(exePath),
+                                        FileSystem::toGenericString(ghe_designer_input_file_path),
+                                        FileSystem::toGenericString(ghe_designer_output_directory));
     int const status = FileSystem::systemCall(cmd);
     if (status != 0) {
         ShowFatalError(state, "GHEDesigner failed to calculate G-functions.");
@@ -740,20 +761,20 @@ void GLHEVert::performBoreholeFieldDesignAndSizingWithGHEDesigner(EnergyPlusData
     nlohmann::json gheDesignerInputs = this->getCommonGHEDesignerInputs(state);
 
     // grab thermal and borehole properties
-    nlohmann::json grout = {{"conductivity", this->grout.k}, {"rho_cp", this->grout.rhoCp}};
-    nlohmann::json soil = {
+    nlohmann::json groutJson = {{"conductivity", this->grout.k}, {"rho_cp", this->grout.rhoCp}};
+    nlohmann::json soilJson = {
         {"conductivity", this->soil.k},
         {"rho_cp", this->soil.rhoCp},
         {"undisturbed_temp", this->tempGround},
     };
     Real64 const shankSpacingForGHEDesigner = this->bhUTubeDist - this->pipe.outDia;
-    nlohmann::json pipe = {{"inner_diameter", this->pipe.innerDia},
-                           {"outer_diameter", this->pipe.outDia},
-                           {"shank_spacing", shankSpacingForGHEDesigner},
-                           {"roughness", 0.000001}, // TODO: This doesn't seem to be available on inputs
-                           {"conductivity", this->pipe.k},
-                           {"rho_cp", this->pipe.rhoCp},
-                           {"arrangement", "SINGLEUTUBE"}};
+    nlohmann::json pipeJson = {{"inner_diameter", this->pipe.innerDia},
+                               {"outer_diameter", this->pipe.outDia},
+                               {"shank_spacing", shankSpacingForGHEDesigner},
+                               {"roughness", 0.000001}, // TODO: This doesn't seem to be available on inputs
+                               {"conductivity", this->pipe.k},
+                               {"rho_cp", this->pipe.rhoCp},
+                               {"arrangement", "SINGLEUTUBE"}};
     nlohmann::json borehole = {{"buried_depth", this->myRespFactors->props->bhTopDepth}, // TODO: Confirm this is ready for access
                                {"diameter", this->bhDiameter}};
 
@@ -779,9 +800,9 @@ void GLHEVert::performBoreholeFieldDesignAndSizingWithGHEDesigner(EnergyPlusData
     nlohmann::json ghe1 = {{"flow_rate", this->sizingData.designFlowRatePerBorehole * 1000}, // convert m3/s to lps
                            {"flow_type", "BOREHOLE"}, //"SYSTEM"},  // TODO: I could NOT get it to size with SYSTEM...do I need to adjust flow rate?
                            // We should just delete SYSTEM from GHEDesigner.
-                           {"grout", grout},
-                           {"soil", soil},
-                           {"pipe", pipe},
+                           {"grout", groutJson},
+                           {"soil", soilJson},
+                           {"pipe", pipeJson},
                            {"borehole", borehole},
                            {"geometric_constraints", geometricConstraints},
                            {"design", design},
@@ -891,7 +912,7 @@ void GLHEVert::calcUniformBHWallTempGFunctionsWithGHEDesigner(EnergyPlusData &st
 {
     nlohmann::json gheDesignerInputs = this->getCommonGHEDesignerInputs(state);
 
-    std::string const p = EnergyPlus::format("[GHEDesigner Calculation for GHE Named: {}] ", this->name);
+    std::string const p = std::format("[GHEDesigner Calculation for GHE Named: {}] ", this->name);
 
     // check the heights of the EnergyPlus boreholes to make sure they don't vary
     auto const &bhs = this->myRespFactors->myBorholes;
@@ -905,20 +926,20 @@ void GLHEVert::calcUniformBHWallTempGFunctionsWithGHEDesigner(EnergyPlusData &st
     Real64 const height = this->myRespFactors->myBorholes[0]->props->bhLength;
 
     // grab thermal and borehole properties
-    nlohmann::json grout = {{"conductivity", this->grout.k}, {"rho_cp", this->grout.rhoCp}};
-    nlohmann::json soil = {
+    nlohmann::json groutJson = {{"conductivity", this->grout.k}, {"rho_cp", this->grout.rhoCp}};
+    nlohmann::json soilJson = {
         {"conductivity", this->soil.k},
         {"rho_cp", this->soil.rhoCp},
         {"undisturbed_temp", this->tempGround},
     };
     Real64 const shankSpacingForGHEDesigner = this->bhUTubeDist - this->pipe.outDia;
-    nlohmann::json pipe = {{"inner_diameter", this->pipe.innerDia},
-                           {"outer_diameter", this->pipe.outDia},
-                           {"shank_spacing", shankSpacingForGHEDesigner},
-                           {"roughness", 0.000001}, // TODO: This doesn't seem to be available on inputs
-                           {"conductivity", this->pipe.k},
-                           {"rho_cp", this->pipe.rhoCp},
-                           {"arrangement", "SINGLEUTUBE"}};
+    nlohmann::json pipeJson = {{"inner_diameter", this->pipe.innerDia},
+                               {"outer_diameter", this->pipe.outDia},
+                               {"shank_spacing", shankSpacingForGHEDesigner},
+                               {"roughness", 0.000001}, // TODO: This doesn't seem to be available on inputs
+                               {"conductivity", this->pipe.k},
+                               {"rho_cp", this->pipe.rhoCp},
+                               {"arrangement", "SINGLEUTUBE"}};
     nlohmann::json borehole = {{"buried_depth", this->myRespFactors->props->bhTopDepth}, // TODO: Confirm this is ready for access
                                {"diameter", this->bhDiameter}};
 
@@ -933,9 +954,9 @@ void GLHEVert::calcUniformBHWallTempGFunctionsWithGHEDesigner(EnergyPlusData &st
     // set up the final borehole structure to fill out the input file
     nlohmann::json ghe1 = {{"flow_rate", this->designMassFlow},
                            {"flow_type", "SYSTEM"},
-                           {"grout", grout},
-                           {"soil", soil},
-                           {"pipe", pipe},
+                           {"grout", groutJson},
+                           {"soil", soilJson},
+                           {"pipe", pipeJson},
                            {"borehole", borehole},
                            {"pre_designed", preDesigned}};
     gheDesignerInputs["ground_heat_exchanger"] = {{"ghe1", ghe1}};

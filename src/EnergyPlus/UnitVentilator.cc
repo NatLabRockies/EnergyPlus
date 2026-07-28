@@ -150,26 +150,25 @@ namespace UnitVentilator {
         if (CompIndex == 0) {
             UnitVentNum = Util::FindItemInList(CompName, state.dataUnitVentilators->UnitVent);
             if (UnitVentNum == 0) {
-                ShowFatalError(state, EnergyPlus::format("SimUnitVentilator: Unit not found={}", CompName));
+                ShowFatalError(state, std::format("SimUnitVentilator: Unit not found={}", CompName));
             }
             CompIndex = UnitVentNum;
         } else {
             UnitVentNum = CompIndex;
             if (UnitVentNum > state.dataUnitVentilators->NumOfUnitVents || UnitVentNum < 1) {
                 ShowFatalError(state,
-                               EnergyPlus::format("SimUnitVentilator:  Invalid CompIndex passed={}, Number of Units={}, Entered Unit name={}",
-                                                  UnitVentNum,
-                                                  state.dataUnitVentilators->NumOfUnitVents,
-                                                  CompName));
+                               std::format("SimUnitVentilator:  Invalid CompIndex passed={}, Number of Units={}, Entered Unit name={}",
+                                           UnitVentNum,
+                                           state.dataUnitVentilators->NumOfUnitVents,
+                                           CompName));
             }
             if (state.dataUnitVentilators->CheckEquipName(UnitVentNum)) {
                 if (CompName != state.dataUnitVentilators->UnitVent(UnitVentNum).Name) {
-                    ShowFatalError(
-                        state,
-                        EnergyPlus::format("SimUnitVentilator: Invalid CompIndex passed={}, Unit name={}, stored Unit Name for that index={}",
-                                           UnitVentNum,
-                                           CompName,
-                                           state.dataUnitVentilators->UnitVent(UnitVentNum).Name));
+                    ShowFatalError(state,
+                                   std::format("SimUnitVentilator: Invalid CompIndex passed={}, Unit name={}, stored Unit Name for that index={}",
+                                               UnitVentNum,
+                                               CompName,
+                                               state.dataUnitVentilators->UnitVent(UnitVentNum).Name));
                 }
                 state.dataUnitVentilators->CheckEquipName(UnitVentNum) = false;
             }
@@ -406,23 +405,23 @@ namespace UnitVentilator {
                 unitVent.fanAvailSched = fan->availSched; // Get the fan's availability schedule
                 FanVolFlow = fan->maxAirFlowRate;
                 if (FanVolFlow != DataSizing::AutoSize && unitVent.MaxAirVolFlow != DataSizing::AutoSize && FanVolFlow < unitVent.MaxAirVolFlow) {
-                    ShowSevereError(state, EnergyPlus::format("{}{}=\"{}\".", RoutineName, CurrentModuleObject, unitVent.Name));
+                    ShowSevereError(state, std::format("{}{}=\"{}\".", RoutineName, CurrentModuleObject, unitVent.Name));
                     ShowContinueError(state,
-                                      EnergyPlus::format("...air flow rate [{:.7f}] in fan object {} is less than the unit ventilator maximum "
-                                                         "supply air flow rate [{:.7f}].",
-                                                         FanVolFlow,
-                                                         unitVent.FanName,
-                                                         unitVent.MaxAirVolFlow));
+                                      std::format("...air flow rate [{:.7f}] in fan object {} is less than the unit ventilator maximum "
+                                                  "supply air flow rate [{:.7f}].",
+                                                  FanVolFlow,
+                                                  unitVent.FanName,
+                                                  unitVent.MaxAirVolFlow));
                     ShowContinueError(state,
                                       "...the fan flow rate must be greater than or equal to the unit ventilator maximum supply "
                                       "air flow rate.");
                     ErrorsFound = true;
                 } else if (FanVolFlow == DataSizing::AutoSize && unitVent.MaxAirVolFlow != DataSizing::AutoSize) {
-                    ShowWarningError(state, EnergyPlus::format("{}{}=\"{}\".", RoutineName, CurrentModuleObject, unitVent.Name));
+                    ShowWarningError(state, std::format("{}{}=\"{}\".", RoutineName, CurrentModuleObject, unitVent.Name));
                     ShowContinueError(state, "...the fan flow rate is autosized while the unit ventilator flow rate is not.");
                     ShowContinueError(state, "...this can lead to unexpected results where the fan flow rate is less than required.");
                 } else if (FanVolFlow != DataSizing::AutoSize && unitVent.MaxAirVolFlow == DataSizing::AutoSize) {
-                    ShowWarningError(state, EnergyPlus::format("{}{}=\"{}\".", RoutineName, CurrentModuleObject, unitVent.Name));
+                    ShowWarningError(state, std::format("{}{}=\"{}\".", RoutineName, CurrentModuleObject, unitVent.Name));
                     ShowContinueError(state, "...the unit ventilator flow rate is autosized while the fan flow rate is not.");
                     ShowContinueError(state, "...this can lead to unexpected results where the fan flow rate is less than required.");
                 }
@@ -447,8 +446,7 @@ namespace UnitVentilator {
                 if (!lAlphaBlanks(8)) {
                     OutAirNodeManager::CheckAndAddAirNodeNumber(state, unitVent.OutsideAirNode, IsValid);
                     if (!IsValid) {
-                        ShowWarningError(state,
-                                         EnergyPlus::format("{}{} Adding {}={}", RoutineName, CurrentModuleObject, cAlphaFields(8), Alphas(8)));
+                        ShowWarningError(state, std::format("{}{} Adding {}={}", RoutineName, CurrentModuleObject, cAlphaFields(8), Alphas(8)));
                     }
                 }
 
@@ -475,19 +473,18 @@ namespace UnitVentilator {
                 unitVent.OutsideAirNode = unitVent.ATMixerPriNode;
                 unitVent.OAMixerOutNode = unitVent.ATMixerOutNode;
                 if (!lAlphaBlanks(8) || !lAlphaBlanks(9) || !lAlphaBlanks(10)) {
-                    ShowWarningError(state,
-                                     EnergyPlus::format("{}{}=\"{}\" is connected to central DOA.", RoutineName, CurrentModuleObject, unitVent.Name));
+                    ShowWarningError(state, std::format("{}{}=\"{}\" is connected to central DOA.", RoutineName, CurrentModuleObject, unitVent.Name));
                     if (!lAlphaBlanks(8)) {
-                        ShowContinueError(
-                            state, EnergyPlus::format("... input field {} should have been blank. Specified = {}", cAlphaFields(8), Alphas(8)));
+                        ShowContinueError(state,
+                                          std::format("... input field {} should have been blank. Specified = {}", cAlphaFields(8), Alphas(8)));
                     }
                     if (!lAlphaBlanks(9)) {
-                        ShowContinueError(
-                            state, EnergyPlus::format("... input field {} should have been blank. Specified = {}", cAlphaFields(9), Alphas(9)));
+                        ShowContinueError(state,
+                                          std::format("... input field {} should have been blank. Specified = {}", cAlphaFields(9), Alphas(9)));
                     }
                     if (!lAlphaBlanks(10)) {
-                        ShowContinueError(
-                            state, EnergyPlus::format("... input field {} should have been blank. Specified = {}", cAlphaFields(10), Alphas(10)));
+                        ShowContinueError(state,
+                                          std::format("... input field {} should have been blank. Specified = {}", cAlphaFields(10), Alphas(10)));
                     }
                 }
             }
@@ -537,8 +534,8 @@ namespace UnitVentilator {
             if (!lAlphaBlanks(20)) {
                 unitVent.HVACSizingIndex = Util::FindItemInList(Alphas(20), state.dataSize->ZoneHVACSizing);
                 if (unitVent.HVACSizingIndex == 0) {
-                    ShowSevereError(state, EnergyPlus::format("{} = {} not found.", cAlphaFields(20), Alphas(20)));
-                    ShowContinueError(state, EnergyPlus::format("Occurs in {} = \"{}\".", CurrentModuleObject, unitVent.Name));
+                    ShowSevereError(state, std::format("{} = {} not found.", cAlphaFields(20), Alphas(20)));
+                    ShowContinueError(state, std::format("Occurs in {} = \"{}\".", CurrentModuleObject, unitVent.Name));
                     ErrorsFound = true;
                 }
             }
@@ -571,7 +568,7 @@ namespace UnitVentilator {
                     unitVent.HCoilName = Alphas(16);
                     ValidateComponent(state, cHeatingCoilType, unitVent.HCoilName, IsNotOK, CurrentModuleObject);
                     if (IsNotOK) {
-                        ShowContinueError(state, EnergyPlus::format("...specified in {} = \"{}\".", CurrentModuleObject, unitVent.Name));
+                        ShowContinueError(state, std::format("...specified in {} = \"{}\".", CurrentModuleObject, unitVent.Name));
                         ErrorsFound = true;
                     } else {
                         // The heating coil control node is necessary for a hot water coil, but not necessary for electric or gas.
@@ -601,8 +598,8 @@ namespace UnitVentilator {
                         unitVent.HotControlOffset = 0.001;
                     }
                 } else { // heating coil is required for these options
-                    ShowSevereError(state, EnergyPlus::format("{}{}=\"{}\".", RoutineName, CurrentModuleObject, unitVent.Name));
-                    ShowContinueError(state, EnergyPlus::format("a heating coil is required for {}=\"{}\".", cAlphaFields(13), Alphas(13)));
+                    ShowSevereError(state, std::format("{}{}=\"{}\".", RoutineName, CurrentModuleObject, unitVent.Name));
+                    ShowContinueError(state, std::format("a heating coil is required for {}=\"{}\".", cAlphaFields(13), Alphas(13)));
                     ErrorsFound = true;
                 } // IF (.NOT. lAlphaBlanks(15)) THEN - from the start of heating coil information
             } // is option both or heating only
@@ -628,7 +625,7 @@ namespace UnitVentilator {
                         } else if (Util::SameString(unitVent.CCoilPlantType, "Coil:Cooling:Water:DetailedGeometry")) {
                             unitVent.CoolingCoilType = DataPlant::PlantEquipmentType::CoilWaterDetailedFlatCooling;
                         } else {
-                            ShowSevereError(state, EnergyPlus::format("{}{}=\"{}\".", RoutineName, CurrentModuleObject, unitVent.Name));
+                            ShowSevereError(state, std::format("{}{}=\"{}\".", RoutineName, CurrentModuleObject, unitVent.Name));
                             ShowContinueError(state, std::format("For: {}=\"{}\".", cAlphaFields(17), Alphas(17)));
                             ShowContinueError(state, std::format("Invalid Coil Type={}, Name={}", unitVent.CCoilPlantType, unitVent.CCoilPlantName));
                             ShowContinueError(state,
@@ -1277,13 +1274,13 @@ namespace UnitVentilator {
         Real64 rho = 0.0;
         Real64 Cp = 0.0;
 
-        Real64 TempSize;  // autosized value of coil input field
+        Real64 TempSize = 0.0; // autosized value of coil input field
         int SizingMethod; // Integer representation of sizing method name (e.g., CoolingAirflowSizing, HeatingAirflowSizing, CoolingCapacitySizing,
                           // HeatingCapacitySizing, etc.)
         bool PrintFlag;   // TRUE when sizing information is reported in the eio file
-        int CapSizingMethod(0);    // capacity sizing methods (HeatingDesignCapacity, CapacityPerFloorArea, FractionOfAutosizedCoolingCapacity, and
-                                   // FractionOfAutosizedHeatingCapacity )
-        Real64 WaterCoilSizDeltaT; // water coil deltaT for design water flow rate autosizing
+        int CapSizingMethod(0); // capacity sizing methods (HeatingDesignCapacity, CapacityPerFloorArea, FractionOfAutosizedCoolingCapacity, and
+                                // FractionOfAutosizedHeatingCapacity )
+        Real64 WaterCoilSizDeltaT = 0.0; // water coil deltaT for design water flow rate autosizing
 
         int PltSizHeatNum = 0;
         bool ErrorsFound = false;
@@ -1677,11 +1674,10 @@ namespace UnitVentilator {
                                             std::format("SizeUnitVentilator: Potential issue with equipment sizing for {} {}",
                                                         state.dataUnitVentilators->cMO_UnitVentilator,
                                                         unitVent.Name));
+                                ShowContinueError(state,
+                                                  std::format("User-Specified Maximum Outdoor Air Flow Rate of {:.5f} [m3/s]", OutAirVolFlowUser));
                                 ShowContinueError(
-                                    state, EnergyPlus::format("User-Specified Maximum Outdoor Air Flow Rate of {:.5R} [m3/s]", OutAirVolFlowUser));
-                                ShowContinueError(
-                                    state,
-                                    EnergyPlus::format("differs from Design Size Maximum Outdoor Air Flow Rate of {:.5R} [m3/s]", OutAirVolFlowDes));
+                                    state, std::format("differs from Design Size Maximum Outdoor Air Flow Rate of {:.5f} [m3/s]", OutAirVolFlowDes));
                                 ShowContinueError(state, "This may, or may not, indicate mismatched component sizes.");
                                 ShowContinueError(state, "Verify that the value entered is intended and is consistent with other components.");
                             }
@@ -1740,11 +1736,11 @@ namespace UnitVentilator {
                                             std::format("SizeUnitVentilator: Potential issue with equipment sizing for {} = \"{}\".",
                                                         state.dataUnitVentilators->cMO_UnitVentilator,
                                                         unitVent.Name));
-                                ShowContinueError(
-                                    state, EnergyPlus::format("User-Specified Minimum Outdoor Air Flow Rate of {:.5R} [m3/s]", MinOutAirVolFlowUser));
                                 ShowContinueError(state,
-                                                  EnergyPlus::format("differs from Design Size Minimum Outdoor Air Flow Rate of {:.5R} [m3/s]",
-                                                                     MinOutAirVolFlowDes));
+                                                  std::format("User-Specified Minimum Outdoor Air Flow Rate of {:.5f} [m3/s]", MinOutAirVolFlowUser));
+                                ShowContinueError(
+                                    state,
+                                    std::format("differs from Design Size Minimum Outdoor Air Flow Rate of {:.5f} [m3/s]", MinOutAirVolFlowDes));
                                 ShowContinueError(state, "This may, or may not, indicate mismatched component sizes.");
                                 ShowContinueError(state, "Verify that the value entered is intended and is consistent with other components.");
                             }
@@ -1882,11 +1878,11 @@ namespace UnitVentilator {
                                                 std::format("SizeUnitVentilator: Potential issue with equipment sizing for {} {}",
                                                             state.dataUnitVentilators->cMO_UnitVentilator,
                                                             unitVent.Name));
-                                    ShowContinueError(
-                                        state, EnergyPlus::format("User-Specified Maximum Hot Water Flow of {:.5R} [m3/s]", MaxVolHotWaterFlowUser));
                                     ShowContinueError(state,
-                                                      EnergyPlus::format("differs from Design Size Maximum Hot Water Flow of {:.5R} [m3/s]",
-                                                                         MaxVolHotWaterFlowDes));
+                                                      std::format("User-Specified Maximum Hot Water Flow of {:.5f} [m3/s]", MaxVolHotWaterFlowUser));
+                                    ShowContinueError(
+                                        state,
+                                        std::format("differs from Design Size Maximum Hot Water Flow of {:.5f} [m3/s]", MaxVolHotWaterFlowDes));
                                     ShowContinueError(state, "This may, or may not, indicate mismatched component sizes.");
                                     ShowContinueError(state, "Verify that the value entered is intended and is consistent with other components.");
                                 }
@@ -2015,11 +2011,10 @@ namespace UnitVentilator {
                                                 std::format("SizeUnitVentilator: Potential issue with equipment sizing for {} = \"{}\"",
                                                             state.dataUnitVentilators->cMO_UnitVentilator,
                                                             unitVent.Name));
+                                    ShowContinueError(state,
+                                                      std::format("User-Specified Maximum Steam Flow of {:.5f} [m3/s]", MaxVolHotSteamFlowUser));
                                     ShowContinueError(
-                                        state, EnergyPlus::format("User-Specified Maximum Steam Flow of {:.5R} [m3/s]", MaxVolHotSteamFlowUser));
-                                    ShowContinueError(
-                                        state,
-                                        EnergyPlus::format("differs from Design Size Maximum Steam Flow of {:.5R} [m3/s]", MaxVolHotSteamFlowDes));
+                                        state, std::format("differs from Design Size Maximum Steam Flow of {:.5f} [m3/s]", MaxVolHotSteamFlowDes));
                                     ShowContinueError(state, "This may, or may not, indicate mismatched component sizes.");
                                     ShowContinueError(state, "Verify that the value entered is intended and is consistent with other components.");
                                 }
@@ -2173,11 +2168,10 @@ namespace UnitVentilator {
                                                             state.dataUnitVentilators->cMO_UnitVentilator,
                                                             unitVent.Name));
                                     ShowContinueError(
+                                        state, std::format("User-Specified Maximum Cold Water Flow of {:.5f} [m3/s]", MaxVolColdWaterFlowUser));
+                                    ShowContinueError(
                                         state,
-                                        EnergyPlus::format("User-Specified Maximum Cold Water Flow of {:.5R} [m3/s]", MaxVolColdWaterFlowUser));
-                                    ShowContinueError(state,
-                                                      EnergyPlus::format("differs from Design Size Maximum Cold Water Flow of {:.5R} [m3/s]",
-                                                                         MaxVolColdWaterFlowDes));
+                                        std::format("differs from Design Size Maximum Cold Water Flow of {:.5f} [m3/s]", MaxVolColdWaterFlowDes));
                                     ShowContinueError(state, "This may, or may not, indicate mismatched component sizes.");
                                     ShowContinueError(state, "Verify that the value entered is intended and is consistent with other components.");
                                 }

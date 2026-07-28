@@ -295,7 +295,7 @@ namespace HeatBalFiniteDiffManager {
                                                 s_ipsc->cCurrentModuleObject,
                                                 MaterialNames(1)));
                     ShowContinueError(
-                        state, std::format("...occurs first at item=[{}], value=[{:#G}].", fmt::to_string(inegptr), matFD.TempEnth(1, inegptr)));
+                        state, std::format("...occurs first at item=[{}], value=[{:#G}].", std::to_string(inegptr), matFD.TempEnth(1, inegptr)));
                     ErrorsFound = true;
                 }
                 nonInc = false;

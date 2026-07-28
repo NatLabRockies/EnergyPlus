@@ -179,10 +179,10 @@ namespace Psychrometrics {
                     if (!PsyReportIt[Loop]) {
                         continue;
                     }
-                    const std::string istring = fmt::to_string(state.dataPsychCache->NumTimesCalled[Loop]);
+                    const std::string istring = std::to_string(state.dataPsychCache->NumTimesCalled[Loop]);
                     if (state.dataPsychCache->NumIterations[Loop] > 0) {
                         AverageIterations = double(state.dataPsychCache->NumIterations[Loop]) / double(state.dataPsychCache->NumTimesCalled[Loop]);
-                        print(auditFile, "{},{},{:.2R}\n", PsyRoutineNames[Loop], istring, AverageIterations);
+                        print(auditFile, "{},{},{:.2f}\n", PsyRoutineNames[Loop], istring, AverageIterations);
                     } else {
                         print(auditFile, "{},{}\n", PsyRoutineNames[Loop], istring);
                     }
@@ -204,10 +204,10 @@ namespace Psychrometrics {
         // Using/Aliasing
 
         if (rhoair < 0.0) {
-            ShowSevereError(state, EnergyPlus::format("PsyRhoAirFnPbTdbW: RhoAir (Density of Air) is calculated <= 0 [{:.5R}].", rhoair));
-            ShowContinueError(state, EnergyPlus::format("pb =[{:.2R}], tdb=[{:.2R}], w=[{:.7R}].", pb, tdb, dw));
+            ShowSevereError(state, std::format("PsyRhoAirFnPbTdbW: RhoAir (Density of Air) is calculated <= 0 [{:.5f}].", rhoair));
+            ShowContinueError(state, std::format("pb =[{:.2f}], tdb=[{:.2f}], w=[{:.7f}].", pb, tdb, dw));
             if (!CalledFrom.empty()) {
-                ShowContinueErrorTimeStamp(state, EnergyPlus::format(" Routine={}", CalledFrom));
+                ShowContinueErrorTimeStamp(state, std::format(" Routine={}", CalledFrom));
             } else {
                 ShowContinueErrorTimeStamp(state, " Routine=Unknown,");
             }
@@ -227,11 +227,11 @@ namespace Psychrometrics {
         if (RHValue > 1.01) {
             if (!state.dataGlobal->WarmupFlag) {
                 if (state.dataPsychrometrics->iPsyErrIndex[static_cast<int>(PsychrometricFunction::RhFnTdbRhovLBnd0C)] == 0) {
-                    state.dataPsychrometrics->String = EnergyPlus::format(
-                        " Dry-Bulb= {:.2f} Rhovapor= {:.3f} Calculated Relative Humidity [%]= {:.2f}", Tdb, Rhovapor, RHValue * 100.0);
+                    state.dataPsychrometrics->String =
+                        std::format(" Dry-Bulb= {:.2f} Rhovapor= {:.3f} Calculated Relative Humidity [%]= {:.2f}", Tdb, Rhovapor, RHValue * 100.0);
                     ShowWarningMessage(state, "Calculated Relative Humidity out of range (PsyRhFnTdbRhovLBnd0C) ");
                     if (!CalledFrom.empty()) {
-                        ShowContinueErrorTimeStamp(state, EnergyPlus::format(" Routine={}", CalledFrom));
+                        ShowContinueErrorTimeStamp(state, std::format(" Routine={}", CalledFrom));
                     } else {
                         ShowContinueErrorTimeStamp(state, " Routine=Unknown,");
                     }
@@ -250,11 +250,11 @@ namespace Psychrometrics {
         } else if (RHValue < -0.05) {
             if (!state.dataGlobal->WarmupFlag) {
                 if (state.dataPsychrometrics->iPsyErrIndex[static_cast<int>(PsychrometricFunction::RhFnTdbRhovLBnd0C)] == 0) {
-                    state.dataPsychrometrics->String = EnergyPlus::format(
-                        " Dry-Bulb= {:.2f} Rhovapor= {:.3f} Calculated Relative Humidity [%]= {:.2f}", Tdb, Rhovapor, RHValue * 100.0);
+                    state.dataPsychrometrics->String =
+                        std::format(" Dry-Bulb= {:.2f} Rhovapor= {:.3f} Calculated Relative Humidity [%]= {:.2f}", Tdb, Rhovapor, RHValue * 100.0);
                     ShowWarningMessage(state, "Calculated Relative Humidity out of range (PsyRhFnTdbRhovLBnd0C) ");
                     if (!CalledFrom.empty()) {
-                        ShowContinueErrorTimeStamp(state, EnergyPlus::format(" Routine={}", CalledFrom));
+                        ShowContinueErrorTimeStamp(state, std::format(" Routine={}", CalledFrom));
                     } else {
                         ShowContinueErrorTimeStamp(state, " Routine=Unknown,");
                     }
@@ -404,11 +404,11 @@ namespace Psychrometrics {
                 if (state.dataPsychrometrics->iPsyErrIndex[static_cast<int>(PsychrometricFunction::TwbFnTdbWPb)] == 0) {
                     ShowWarningMessage(state, "Temperature out of range [-100. to 200.] (PsyTwbFnTdbWPb)");
                     if (!CalledFrom.empty()) {
-                        ShowContinueErrorTimeStamp(state, EnergyPlus::format(" Routine={}", CalledFrom));
+                        ShowContinueErrorTimeStamp(state, std::format(" Routine={}", CalledFrom));
                     } else {
                         ShowContinueErrorTimeStamp(state, " Routine=Unknown,");
                     }
-                    ShowContinueError(state, EnergyPlus::format(" Input Temperature={:.2f}", TDB));
+                    ShowContinueError(state, std::format(" Input Temperature={:.2f}", TDB));
                     FlagError = true;
                 }
                 ShowRecurringWarningErrorAtEnd(state,
@@ -429,17 +429,16 @@ namespace Psychrometrics {
             if (W <= -0.0001) {
                 if (!state.dataGlobal->WarmupFlag) {
                     if (state.dataPsychrometrics->iPsyErrIndex[static_cast<int>(PsychrometricFunction::TwbFnTdbWPb2)] == 0) {
-                        state.dataPsychrometrics->String =
-                            EnergyPlus::format(" Dry-Bulb= {:.2f} Humidity Ratio= {:.3e} Pressure= {:.2f}", TDB, W, Patm);
+                        state.dataPsychrometrics->String = std::format(" Dry-Bulb= {:.2f} Humidity Ratio= {:.3e} Pressure= {:.2f}", TDB, W, Patm);
                         ShowWarningMessage(state, "Entered Humidity Ratio invalid (PsyTwbFnTdbWPb)");
                         if (!CalledFrom.empty()) {
-                            ShowContinueErrorTimeStamp(state, EnergyPlus::format(" Routine={}", CalledFrom));
+                            ShowContinueErrorTimeStamp(state, std::format(" Routine={}", CalledFrom));
                         } else {
                             ShowContinueErrorTimeStamp(state, " Routine=Unknown,");
                         }
                         ShowContinueError(state, state.dataPsychrometrics->String);
-                        state.dataPsychrometrics->String = EnergyPlus::format("Humidity Ratio= {:.4e}", W);
-                        ShowContinueError(state, EnergyPlus::format("{} ... Humidity Ratio set to .00001", state.dataPsychrometrics->String));
+                        state.dataPsychrometrics->String = std::format("Humidity Ratio= {:.4e}", W);
+                        ShowContinueError(state, std::format("{} ... Humidity Ratio set to .00001", state.dataPsychrometrics->String));
                     }
                     ShowRecurringWarningErrorAtEnd(state,
                                                    "Entered Humidity Ratio invalid (PsyTwbFnTdbWPb)",
@@ -518,15 +517,15 @@ namespace Psychrometrics {
         if (iter > itmax) {
             if (!state.dataGlobal->WarmupFlag) {
                 if (state.dataPsychrometrics->iPsyErrIndex[static_cast<int>(PsychrometricFunction::TwbFnTdbWPb3)] == 0) {
-                    ShowWarningMessage(state, EnergyPlus::format("WetBulb not converged after {} iterations(PsyTwbFnTdbWPb)", iter));
+                    ShowWarningMessage(state, std::format("WetBulb not converged after {} iterations(PsyTwbFnTdbWPb)", iter));
                     if (!CalledFrom.empty()) {
-                        ShowContinueErrorTimeStamp(state, EnergyPlus::format(" Routine={},", CalledFrom));
+                        ShowContinueErrorTimeStamp(state, std::format(" Routine={},", CalledFrom));
                     } else {
                         ShowContinueErrorTimeStamp(state, " Routine=Unknown,");
                     }
-                    ShowContinueError(state, EnergyPlus::format(" Input Temperature = {:.2f}", TDB));
-                    ShowContinueError(state, EnergyPlus::format(" Input Humidity Ratio= {:.6e}", W));
-                    ShowContinueError(state, EnergyPlus::format(" Input Pressure = {:.2f}", Patm));
+                    ShowContinueError(state, std::format(" Input Temperature = {:.2f}", TDB));
+                    ShowContinueError(state, std::format(" Input Humidity Ratio= {:.6e}", W));
+                    ShowContinueError(state, std::format(" Input Pressure = {:.2f}", Patm));
                     FlagError = true;
                 }
                 ShowRecurringWarningErrorAtEnd(state,
@@ -541,7 +540,7 @@ namespace Psychrometrics {
 
 #ifdef EP_psych_errors
         if (FlagError) {
-            ShowContinueError(state, EnergyPlus::format(" Resultant Temperature= {:.4f}", WBT));
+            ShowContinueError(state, std::format(" Resultant Temperature= {:.4f}", WBT));
         }
 #endif
 
@@ -569,7 +568,7 @@ namespace Psychrometrics {
         if (V <= -0.01) {
             if (!state.dataGlobal->WarmupFlag) {
                 if (state.dataPsychrometrics->iPsyErrIndex[static_cast<int>(PsychrometricFunction::VFnTdbWPb)] == 0) {
-                    state.dataPsychrometrics->String = EnergyPlus::format(" Dry-Bulb= {:.2f} Humidity Ratio= {:.3e} Pressure= {:.2f}", TDB, w, PB);
+                    state.dataPsychrometrics->String = std::format(" Dry-Bulb= {:.2f} Humidity Ratio= {:.3e} Pressure= {:.2f}", TDB, w, PB);
                     ShowWarningMessage(state, "Calculated Specific Volume out of range (PsyVFnTdbWPb)");
                     if (!CalledFrom.empty()) {
                         ShowContinueErrorTimeStamp(state, std::format(" Routine={}", CalledFrom));
@@ -915,7 +914,7 @@ namespace Psychrometrics {
         // ASHRAE HANDBOOK OF FUNDAMENTALS, 1972, P99, EQN 22
 
         // Return value
-        Real64 T; // result=> saturation temperature {C}
+        Real64 T = 0.0; // result=> saturation temperature {C}
 
         // FUNCTION LOCAL VARIABLE DECLARATIONS:
         Real64 T1; // APPROXIMATE SATURATION TEMPERATURE (C)

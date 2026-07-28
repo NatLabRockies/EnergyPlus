@@ -65,10 +65,6 @@ namespace fs = std::experimental::filesystem;
 #include <string>
 
 // Third Party Headers
-// #include <fmt/format.h>
-#include <fmt/os.h>
-#include <fmt/ostream.h>
-#include <fmt/ranges.h>
 #include <nlohmann/json.hpp>
 
 // EnergyPlus Headers
@@ -208,104 +204,31 @@ namespace FileSystem {
         }
     }
 
-    template <class T, class... Ts> struct is_any : std::disjunction<std::is_same<std::remove_cv_t<T>, std::remove_cv_t<Ts>>...>
-    {
-    };
-
-    template <class T>
-    inline constexpr bool enable_unique_ptr_v =
-        is_any<T, std::unique_ptr<fs::path>, std::unique_ptr<fmt::ostream>, std::unique_ptr<std::ostream>, std::unique_ptr<FILE *>>::value;
-
-    template <class T, FileTypes fileType>
-    inline constexpr bool enable_json_v =
-        is_all_json_type(fileType) && is_any<T, nlohmann::json>::value && !is_any<T, std::string_view, std::string, char *>::value;
-
     template <FileTypes fileType> void writeFile(fs::path const &filePath, const std::string_view data)
     {
         static_assert(is_all_json_type(fileType) || is_flat_file_type(fileType), "Must be a valid file type");
 #ifdef _WIN32
         auto filePathStr = filePath.string();
-        auto path = filePathStr.c_str();
+        auto path_c_str = filePathStr.c_str();
 #else
-        auto path = filePath.c_str();
+        auto path_c_str = filePath.c_str();
 #endif
 
-        if constexpr (is_json_type(fileType) || is_flat_file_type(fileType)) {
-            auto f = fmt::output_file(path, fmt::buffer_size = (2 << 17));
-            f.print("{}", data);
-        } else if constexpr (is_binary_json_type(fileType)) {
-            auto close_file = [](FILE *f) { fclose(f); };
-            auto holder = std::unique_ptr<FILE, decltype(close_file)>(fopen(path, "wb"), close_file);
-            if (!holder) {
-                throw FatalError(fmt::format("Could not open file: {}", static_cast<std::string>(path)));
-            }
-
-            auto f = holder.get();
-            fmt::print(f, "{}", data);
+        auto close_file = [](FILE *f) { std::fclose(f); };
+        constexpr const char *mode = is_binary_json_type(fileType) ? "wb" : "w";
+        auto holder = std::unique_ptr<FILE, decltype(close_file)>(std::fopen(path_c_str, mode), close_file);
+        if (!holder) {
+            throw FatalError(std::format("Could not open file: {}", filePath.string()));
         }
+        std::fwrite(data.data(), 1, data.size(), holder.get());
     }
 
-    template <FileTypes fileType> void writeFile(fmt::ostream &os, const std::string_view data)
-    {
-        static_assert(fileType > FileTypes::Invalid, "Must be a valid file type");
-        os.print("{}", data);
-    }
-
-    template <FileTypes fileType> void writeFile(std::ostream &os, const std::string_view data)
-    {
-        static_assert(fileType > FileTypes::Invalid, "Must be a valid file type");
-        fmt::print(os, "{}", data);
-    }
-
-    template <FileTypes fileType> void writeFile(FILE *f, const std::string_view data)
-    {
-        static_assert(fileType > FileTypes::Invalid, "Must be a valid file type");
-        fmt::print(f, "{}", data);
-    }
-
-    template <class T, FileTypes fileType, typename = std::enable_if_t<enable_unique_ptr_v<T>>> void writeFile(T &os, const std::string_view data)
-    {
-        static_assert(fileType > FileTypes::Invalid, "Must be a valid file type");
-        if (os) {
-            writeFile<fileType>(*os, data);
-        }
-    }
-
-    template <FileTypes fileType, class T, typename = std::enable_if_t<enable_json_v<T, fileType>>>
-    void writeFile(fs::path const &filePath, T &data, int const indent = 4)
+    template <FileTypes fileType, std::same_as<nlohmann::json> T>
+        requires(is_all_json_type(fileType))
+    void writeFile(fs::path const &filePath, const T &data, int const indent = 4)
     {
         auto const json_str = getJSON<fileType>(data, indent);
         writeFile<fileType>(filePath, std::string_view(json_str));
-    }
-
-    template <FileTypes fileType, class T, typename = std::enable_if_t<enable_json_v<T, fileType>>>
-    void writeFile(fmt::ostream &os, T &data, int const indent = 4)
-    {
-        auto const json_str = getJSON<fileType>(data, indent);
-        writeFile<fileType>(os, std::string_view(json_str));
-    }
-
-    template <FileTypes fileType, class T, typename = std::enable_if_t<enable_json_v<T, fileType>>>
-    void writeFile(std::ostream &os, T &data, int const indent = 4)
-    {
-        auto const json_str = getJSON<fileType>(data, indent);
-        writeFile<fileType>(os, std::string_view(json_str));
-    }
-
-    template <FileTypes fileType, class T, typename = std::enable_if_t<enable_json_v<T, fileType>>>
-    void writeFile(FILE *f, T &data, int const indent = 4)
-    {
-        auto const json_str = getJSON<fileType>(data, indent);
-        writeFile<fileType>(f, std::string_view(json_str));
-    }
-
-    template <FileTypes fileType, class T, class T2, typename = std::enable_if_t<enable_json_v<T2, fileType> && enable_unique_ptr_v<T>>>
-    void writeFile(T &os, T2 &data, int const indent = 4)
-    {
-        if (os) {
-            auto const json_str = getJSON<fileType>(data, indent);
-            writeFile<fileType>(*os, std::string_view(json_str));
-        }
     }
 
     std::string toString(fs::path const &p);
@@ -316,34 +239,39 @@ namespace FileSystem {
 } // namespace FileSystem
 } // namespace EnergyPlus
 
-// Add a custom formatter for fmt
-template <> struct fmt::formatter<fs::path>
+#if __cpp_lib_format_path >= 202403L
+#    error                                                                                                                                           \
+        "std::formatter specialization for std::filesystem::path is available in the STL, so the custom specialization in FileSystem.hh should be removed"
+#endif
+template <> struct std::formatter<fs::path>
 {
-    // Presentation format: 's' - string, 'g' - generic_string.
-    char presentation = 's';
+    bool generic_string = false;
 
-    // Parses format specifications of the form ['s' | 'g'].
-    constexpr auto parse(format_parse_context &ctx) -> decltype(ctx.begin())
+    // parse is inherited from formatter<string_view>.
+    constexpr auto parse(std::format_parse_context &ctx) -> std::format_parse_context::iterator
     {
         // Parse the presentation format and store it in the formatter:
-        auto it = ctx.begin(), end = ctx.end();
+        auto it = ctx.begin();
+        auto end = ctx.end();
         if (it != end && (*it == 's' || *it == 'g')) {
-            presentation = *it++;
+            generic_string = (*it++) == 'g';
         }
 
         // Check if reached the end of the range:
         if (it != end && *it != '}') {
-            throw format_error("invalid format");
+            throw std::format_error("invalid format");
         };
 
         // Return an iterator past the end of the parsed range:
         return it;
     }
 
-    template <typename FormatContext> auto format(const fs::path &p, FormatContext &ctx) -> decltype(ctx.out())
+    // For older clang/apple-clang, use a templated FormatContext and no trailing return
+    // https://github.com/llvm/llvm-project/issues/66466#issuecomment-1720807809
+    // auto format(const fs::path &p, std::format_context &ctx) const -> std::format_context::iterator
+    template <typename FormatContext> auto format(const fs::path &p, FormatContext &ctx) const
     {
-        return fmt::format_to(
-            ctx.out(), "{}", presentation == 'g' ? EnergyPlus::FileSystem::toGenericString(p) : EnergyPlus::FileSystem::toString(p));
+        return std::format_to(ctx.out(), "{}", generic_string ? EnergyPlus::FileSystem::toGenericString(p) : EnergyPlus::FileSystem::toString(p));
     }
 };
 

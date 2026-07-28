@@ -313,11 +313,8 @@ void BaseSizer::reportSizerOutput(EnergyPlusData &state,
 
     static constexpr std::string_view Format_990(
         "! <Component Sizing Information>, Component Type, Component Name, Input Field Description, Value\n");
-    static constexpr std::string_view Format_991(" Component Sizing Information, {}, {}, {}, {:#G}\n");
+    static constexpr std::string_view Format_991(" Component Sizing Information, {}, {}, {}, {:.6G}\n");
     static constexpr std::string_view Format_991_HumRat(" Component Sizing Information, {}, {}, {}, {:.3E}\n");
-    auto const sizingFormat = [](std::string_view description) {
-        return description.find("Humidity Ratio") != std::string_view::npos ? Format_991_HumRat : Format_991;
-    };
 
     // to do, make this a parameter. Unfortunately this function is used in MANY
     // places so it involves touching most of E+
@@ -326,12 +323,20 @@ void BaseSizer::reportSizerOutput(EnergyPlusData &state,
         state.dataEnvrn->oneTimeCompRptHeaderFlag = false;
     }
 
-    print(state.files.eio, sizingFormat(VarDesc), CompType, CompName, VarDesc, VarValue);
+    if (VarDesc.find("Humidity Ratio") != std::string_view::npos) {
+        print(state.files.eio, Format_991_HumRat, CompType, CompName, VarDesc, VarValue);
+    } else {
+        print(state.files.eio, Format_991, CompType, CompName, VarDesc, VarValue);
+    }
     // add to tabular output reports
     OutputReportPredefined::AddCompSizeTableEntry(state, CompType, CompName, VarDesc, VarValue);
 
     if (present(UsrDesc) && present(UsrValue)) {
-        print(state.files.eio, sizingFormat(UsrDesc()), CompType, CompName, UsrDesc(), UsrValue());
+        if (UsrDesc().find("Humidity Ratio") != std::string_view::npos) {
+            print(state.files.eio, Format_991_HumRat, CompType, CompName, UsrDesc(), UsrValue());
+        } else {
+            print(state.files.eio, Format_991, CompType, CompName, UsrDesc(), UsrValue());
+        }
         OutputReportPredefined::AddCompSizeTableEntry(state, CompType, CompName, UsrDesc(), UsrValue);
     } else if (present(UsrDesc) || present(UsrValue)) {
         ShowFatalError(state, "ReportSizingOutput: (Developer Error) - called with user-specified description or value but not both.");

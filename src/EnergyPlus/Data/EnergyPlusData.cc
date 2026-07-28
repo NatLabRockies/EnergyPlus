@@ -593,6 +593,7 @@ void EnergyPlusData::init_constant_state(EnergyPlusData &state)
     this->dataFluid->init_constant_state(state);
     this->dataSched->init_constant_state(state);
     this->dataCurveManager->init_constant_state(state);
+    this->dataOutRptPredefined->init_constant_state(state);
 
     this->dataAirLoop->init_constant_state(state);
     this->dataAirLoopHVACDOAS->init_constant_state(state);
@@ -723,7 +724,6 @@ void EnergyPlusData::init_constant_state(EnergyPlusData &state)
     this->dataMundtSimMgr->init_constant_state(state);
     this->dataNodeInputMgr->init_constant_state(state);
     this->dataOutAirNodeMgr->init_constant_state(state);
-    this->dataOutRptPredefined->init_constant_state(state);
     this->dataOutRptTab->init_constant_state(state);
     this->dataOutdoorAirUnit->init_constant_state(state);
     this->dataOutput->init_constant_state(state);
@@ -857,6 +857,7 @@ void EnergyPlusData::init_state(EnergyPlusData &state)
     this->dataFluid->init_state(state);             // GetFluidPropertiesData
     this->dataSched->init_state(state);             // GetScheduleData
     this->dataCurveManager->init_state(state);      // GetCurveInput
+    this->dataOutRptPredefined->init_state(state);
 
     this->dataAirLoop->init_state(state);
     this->dataAirLoopHVACDOAS->init_state(state);
@@ -987,7 +988,6 @@ void EnergyPlusData::init_state(EnergyPlusData &state)
     this->dataMundtSimMgr->init_state(state);
     this->dataNodeInputMgr->init_state(state);
     this->dataOutAirNodeMgr->init_state(state);
-    this->dataOutRptPredefined->init_state(state);
     this->dataOutRptTab->init_state(state);
     this->dataOutdoorAirUnit->init_state(state);
     this->dataOutput->init_state(state);

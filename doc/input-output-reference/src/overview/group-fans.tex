@@ -104,7 +104,7 @@ This optional numeric field is the total system pressure rise experienced by the
 
 \paragraph{Field: Night Ventilation Mode Flow Fraction}\label{field-nite-vent-flow-fraction-fansysmodel}
 
-This numeric field is the air flow fraction for the fan speed used when operating in night mode using AvailabilityManager:NighVentilation. This field corresponds to the input field called Maximum Flow Rate in the \hyperref[fanperformancenightventilation]{FanPerformance:NightVentilation} object and, as is the case there, this field is not currently used by the night ventilation manager (which has its own flow fraction field at present). This is a fraction between 0 and 1 and describes the speed level for the fan relative to the Design Maximum Air Flow Rate. This field and the previous one replace the \hyperref[fanperformancenightventilation]{FanPerformance:NightVentilation} object which is not needed with this fan.
+This numeric field is the air flow fraction for the fan speed used when operating in night mode using \hyperref[availabilitymanagernightventilation]{AvailabilityManager:NightVentilation}. This field corresponds to the input field called Maximum Flow Rate in the \hyperref[fanperformancenightventilation]{FanPerformance:NightVentilation} object and, as is the case there, this field is not currently used by the night ventilation manager (which has its own flow fraction field at present). This is a fraction between 0 and 1 and describes the speed level for the fan relative to the Design Maximum Air Flow Rate. This field and the previous one replace the \hyperref[fanperformancenightventilation]{FanPerformance:NightVentilation} object which is not needed with this fan.
 
 \paragraph{Field: Motor Loss Zone Name}\label{field-loss-zone-name-fansysmodel}
 
@@ -685,7 +685,7 @@ This field is optional. If it is not used then there will be no temperature-rela
 
 \paragraph{Field: Balanced Exhaust Fraction Schedule Name}\label{field-balanced-exhaust-fraction-schedule-name}
 
-This field is optional. If it is not used, then all the exhaust air flow is assumed to be unbalanced by any simple airflows, such as infiltration, ventilation, or zone mixing. Unbalanced exhaust is then modeled as being provided by the outdoor air system in the central air system. The modeling of unbalanced will reduce the flow rates at the zone's return air node by the flow rate that is being exhausted and will ensure that the outdoor air flow rate is sufficient to serve the exhaust. If this field is used, then enter the name of a schedule with fractional values between 0.0 and 1.0, inclusive. This fraction is applied to the exhaust fan flow rate and the model tracks the portion of the exhaust that is balanced. Balanced exhaust is then modeled as being provided by simple airflows and does not impact the central air system return air or outdoor air flow rates. For example, if a kitchen zone with an exhaust fan is designed to draw half of its make up air from a neighboring dining room and the other half from the outdoor air system, then a schedule value of 0.5 could be used here. This input field must be blank when the zone air flow balance is enforced. If user specifies a schedule and zone air flow balance is enforced, then EnergyPlus throws a warning error message, ignores the schedule and simulation continues.
+This field is optional. If it is not used, then all the exhaust air flow is assumed to be unbalanced by any simple airflows, such as infiltration, ventilation, or zone mixing. Unbalanced exhaust is then modeled as being provided by the outdoor air system in the central air system. The modeling of unbalanced will reduce the flow rates at the zone's return air node by the flow rate that is being exhausted and will ensure that the outdoor air flow rate is sufficient to serve the exhaust. If this field is used, then enter the name of a schedule with fractional values between 0.0 and 1.0, inclusive. This fraction is applied to the exhaust fan flow rate and the model tracks the portion of the exhaust that is balanced. Balanced exhaust is then modeled as being provided by simple airflows and does not impact the central air system return air or outdoor air flow rates. For example, consider a kitchen zone with an exhaust fan designed to draw 70\% of its make-up air from a neighboring dining room (via zone mixing or infiltration) and the remaining 30\% from the central outdoor air system. Because this field specifies the \emph{balanced} fraction (i.e., the portion supplied by simple airflows rather than the central OA system), a schedule value of 0.7 would be used here. This input field must be blank when the zone air flow balance is enforced. If user specifies a schedule and zone air flow balance is enforced, then EnergyPlus throws a warning error message, ignores the schedule and simulation continues.
 
 \subsubsection{Outputs}\label{outputs-3-007}
 
@@ -785,16 +785,18 @@ Fan:OnOff,
 
 \subsection{FanPerformance:NightVentilation}\label{fanperformancenightventilation}
 
-This object is used for specifying an alternate set of performance parameters for a fan.
-These alternate parameters are used when a system manager (such as \emph{\hyperref[availabilitymanagernightventilation]{AvailabilityManager:NightVentilation}}) sets a specified flow rate for a central forced air system.
-At this time, it can be used with \hyperref[fanconstantvolume]{Fan:ConstantVolume}, \hyperref[fanvariablevolume]{Fan:VariableVolume}, \hyperref[fanzoneexhaust]{Fan:ZoneExhaust}, \hyperref[fanonoff]{Fan:OnOff} and \hyperref[fansystemmodel]{Fan:SystemModel} fans, but not with \hyperref[fancomponentmodel]{Fan:ComponentModel} fans.
+This object is used for specifying an alternate set of performance parameters for a fan (i.e., the performance of the fan during night venting may be very different than during normal operation).
+These alternate parameters are used when a system manager (such as \hyperref[availabilitymanagernightventilation]{AvailabilityManager:NightVentilation}) sets a specified flow rate for a central forced air system.
+At this time, it can be used with \hyperref[fanconstantvolume]{Fan:ConstantVolume}, \hyperref[fanvariablevolume]{Fan:VariableVolume}, \hyperref[fanzoneexhaust]{Fan:ZoneExhaust}, and \hyperref[fanonoff]{Fan:OnOff} fans, but not with \hyperref[fansystemmodel]{Fan:SystemModel} or \hyperref[fancomponentmodel]{Fan:ComponentModel} fans.
+\hyperref[fansystemmodel]{Fan:SystemModel} fans have replaced \hyperref[fanperformancenightventilation]{FanPerformance:NightVentilation} (i.e., provides built-in night ventilation settings so \hyperref[fanperformancenightventilation]{FanPerformance:NightVentilation} is not applicable/needed for that fan type).
+
 The fan model checks whether a fixed flow rate has been set; if it has the fan model will use these alternate performance parameters. Note that it is assumed that the fan will run at a fixed speed in the alternate mode. The inputs needed by this object are the fan name, fan total efficiency, pressure rise, flow rate, motor efficiency, and motor in airstream fraction.
 
 \subsubsection{Inputs}\label{inputs-4-013}
 
 \paragraph{Field: Fan Name}\label{field-fan-name-001}
 
-This is the name of a fan defined elsewhere in the input file. The night vent performance parameters will be applied to the named fan when a system manager has set the air system flow rate.
+This is the name of a fan defined elsewhere in the input file. The night vent performance parameters will be applied to the named fan when a system manager (such as \hyperref[availabilitymanagernightventilation]{AvailabilityManager:NightVentilation}) has set the air system flow rate.
 
 \paragraph{Field: Fan Total Efficiency}\label{field-fan-total-efficiency-4}
 
@@ -802,11 +804,11 @@ This value is the overall efficiency of the fan, i.e., the ratio of the power de
 
 \paragraph{Field: Pressure Rise}\label{field-pressure-rise-4}
 
-The pressure rise in Pascals at full flow and standard (sea level) conditions (20 °C and 101325 Pa).
+The pressure rise in Pascals at full flow and standard (sea level) conditions (20 °C and 101325 Pa). This is a required field with no default.
 
 \paragraph{Field: Maximum Flow Rate}\label{field-maximum-flow-rate-4}
 
-The design volumetric flow rate of the fan (m\(^{3}\)/sec) at standard conditions. This input is not currently used by the night ventilation manager. The flow rate during night ventilation is specified using the System\hyperref[availabilitymanagernightventilation]{AvailabilityManager:NightVentilation} ``Night Venting Flow Fraction'' field. This fraction is multiplied times the fan object's design flow rate.
+The design volumetric flow rate of the fan (m\(^{3}\)/sec) at standard conditions. This input is not currently used by the night ventilation manager. The flow rate during night ventilation is specified using the \hyperref[availabilitymanagernightventilation]{AvailabilityManager:NightVentilation} ``Night Venting Flow Fraction'' field. This fraction is multiplied by the fan object's design flow rate.
 
 \paragraph{Field: Motor Efficiency}\label{field-motor-efficiency-3}
 
@@ -822,10 +824,12 @@ An example of use in an IDF:
 Fan:VariableVolume,
   Supply Fan 1,               !- Name
   FanAvailSched,              !- Availability Schedule Name
-  0.7,                        !- Fan Efficiency
+  0.7,                        !- Fan Total Efficiency
   600.0,                      !- Pressure Rise {Pa}
   autosize,                   !- Maximum Flow Rate {m3/s}
-  autosize,                   !- Minimum Flow Rate {m3/s}
+  Fraction,                   !- Fan Power Minimum Flow Rate Input Method
+  0.25,                       !- Fan Power Minimum Flow Fraction
+  ,                           !- Fan Power Minimum Air Flow Rate {m3/s}
   0.9,                        !- Motor Efficiency
   1.0,                        !- Motor In Airstream Fraction
   0.35071223,                 !- Fan Coefficient 1

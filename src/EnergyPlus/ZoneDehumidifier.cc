@@ -140,7 +140,7 @@ namespace ZoneDehumidifier {
         if (CompIndex == 0) {
             ZoneDehumidNum = Util::FindItemInList(CompName, state.dataZoneDehumidifier->ZoneDehumid);
             if (ZoneDehumidNum == 0) {
-                ShowFatalError(state, EnergyPlus::format("SimZoneDehumidifier: Unit not found= {}", CompName));
+                ShowFatalError(state, std::format("SimZoneDehumidifier: Unit not found= {}", CompName));
             }
             CompIndex = ZoneDehumidNum;
         } else {
@@ -148,19 +148,18 @@ namespace ZoneDehumidifier {
             int NumDehumidifiers = (int)state.dataZoneDehumidifier->ZoneDehumid.size();
             if (ZoneDehumidNum > NumDehumidifiers || ZoneDehumidNum < 1) {
                 ShowFatalError(state,
-                               EnergyPlus::format("SimZoneDehumidifier:  Invalid CompIndex passed= {}, Number of Units= {}, Entered Unit name= {}",
-                                                  ZoneDehumidNum,
-                                                  NumDehumidifiers,
-                                                  CompName));
+                               std::format("SimZoneDehumidifier:  Invalid CompIndex passed= {}, Number of Units= {}, Entered Unit name= {}",
+                                           ZoneDehumidNum,
+                                           NumDehumidifiers,
+                                           CompName));
             }
             if (state.dataZoneDehumidifier->ZoneDehumid(ZoneDehumidNum).CheckEquipName) {
                 if (CompName != state.dataZoneDehumidifier->ZoneDehumid(ZoneDehumidNum).Name) {
-                    ShowFatalError(
-                        state,
-                        EnergyPlus::format("SimZoneDehumidifier: Invalid CompIndex passed={}, Unit name= {}, stored Unit Name for that index= {}",
-                                           ZoneDehumidNum,
-                                           CompName,
-                                           state.dataZoneDehumidifier->ZoneDehumid(ZoneDehumidNum).Name));
+                    ShowFatalError(state,
+                                   std::format("SimZoneDehumidifier: Invalid CompIndex passed={}, Unit name= {}, stored Unit Name for that index= {}",
+                                               ZoneDehumidNum,
+                                               CompName,
+                                               state.dataZoneDehumidifier->ZoneDehumid(ZoneDehumidNum).Name));
                 }
                 state.dataZoneDehumidifier->ZoneDehumid(ZoneDehumidNum).CheckEquipName = false;
             }
@@ -272,8 +271,8 @@ namespace ZoneDehumidifier {
                 dehumid.RatedWaterRemoval = inputProcessor->getRealFieldValue(dehumidFields, objectSchemaProps, "rated_water_removal");
                 if (dehumid.RatedWaterRemoval <= 0.0) {
                     ShowSevereError(state, "Rated Water Removal must be greater than zero.");
-                    ShowContinueError(state, EnergyPlus::format("Value specified = {:.5f}", dehumid.RatedWaterRemoval));
-                    ShowContinueError(state, EnergyPlus::format("Occurs in {} = {}", CurrentModuleObject, dehumid.Name));
+                    ShowContinueError(state, std::format("Value specified = {:.5f}", dehumid.RatedWaterRemoval));
+                    ShowContinueError(state, std::format("Occurs in {} = {}", CurrentModuleObject, dehumid.Name));
                     ErrorsFound = true;
                 }
 
@@ -281,8 +280,8 @@ namespace ZoneDehumidifier {
                 dehumid.RatedEnergyFactor = inputProcessor->getRealFieldValue(dehumidFields, objectSchemaProps, "rated_energy_factor");
                 if (dehumid.RatedEnergyFactor <= 0.0) {
                     ShowSevereError(state, "Rated Energy Factor must be greater than zero.");
-                    ShowContinueError(state, EnergyPlus::format("Value specified = {:.5f}", dehumid.RatedEnergyFactor));
-                    ShowContinueError(state, EnergyPlus::format("Occurs in {} = {}", CurrentModuleObject, dehumid.Name));
+                    ShowContinueError(state, std::format("Value specified = {:.5f}", dehumid.RatedEnergyFactor));
+                    ShowContinueError(state, std::format("Occurs in {} = {}", CurrentModuleObject, dehumid.Name));
                     ErrorsFound = true;
                 }
 
@@ -290,8 +289,8 @@ namespace ZoneDehumidifier {
                 dehumid.RatedAirVolFlow = inputProcessor->getRealFieldValue(dehumidFields, objectSchemaProps, "rated_air_flow_rate");
                 if (dehumid.RatedAirVolFlow <= 0.0) {
                     ShowSevereError(state, "Rated Air Flow Rate must be greater than zero.");
-                    ShowContinueError(state, EnergyPlus::format("Value specified = {:.5f}", dehumid.RatedAirVolFlow));
-                    ShowContinueError(state, EnergyPlus::format("Occurs in {} = {}", CurrentModuleObject, dehumid.Name));
+                    ShowContinueError(state, std::format("Value specified = {:.5f}", dehumid.RatedAirVolFlow));
+                    ShowContinueError(state, std::format("Occurs in {} = {}", CurrentModuleObject, dehumid.Name));
                     ErrorsFound = true;
                 }
 
@@ -310,8 +309,8 @@ namespace ZoneDehumidifier {
                     Real64 CurveVal = dehumid.WaterRemovalCurve->value(state, RatedInletAirTemp, RatedInletAirRH);
                     if (CurveVal > 1.10 || CurveVal < 0.90) {
                         ShowWarningError(state, "Water Removal Curve Name output is not equal to 1.0");
-                        ShowContinueError(state, EnergyPlus::format("(+ or -10%) at rated conditions for {} = {}", CurrentModuleObject, dehumidName));
-                        ShowContinueError(state, EnergyPlus::format("Curve output at rated conditions = {:.3f}", CurveVal));
+                        ShowContinueError(state, std::format("(+ or -10%) at rated conditions for {} = {}", CurrentModuleObject, dehumidName));
+                        ShowContinueError(state, std::format("Curve output at rated conditions = {:.3f}", CurveVal));
                     }
                 }
 
@@ -330,8 +329,8 @@ namespace ZoneDehumidifier {
                     Real64 CurveVal = dehumid.EnergyFactorCurve->value(state, RatedInletAirTemp, RatedInletAirRH);
                     if (CurveVal > 1.10 || CurveVal < 0.90) {
                         ShowWarningError(state, "Energy Factor Curve Name output is not equal to 1.0");
-                        ShowContinueError(state, EnergyPlus::format("(+ or -10%) at rated conditions for {} = {}", CurrentModuleObject, dehumidName));
-                        ShowContinueError(state, EnergyPlus::format("Curve output at rated conditions = {:.3f}", CurveVal));
+                        ShowContinueError(state, std::format("(+ or -10%) at rated conditions for {} = {}", CurrentModuleObject, dehumidName));
+                        ShowContinueError(state, std::format("Curve output at rated conditions = {:.3f}", CurveVal));
                     }
                 }
 
@@ -363,15 +362,13 @@ namespace ZoneDehumidifier {
                     ShowSevereError(state,
                                     "Maximum Dry-Bulb Temperature for Dehumidifier Operation must be greater than Minimum Dry-Bulb Temperature for "
                                     "Dehumidifier Operation");
-                    ShowContinueError(state,
-                                      EnergyPlus::format("{} specified = {:.1f}",
-                                                         "Maximum Dry-Bulb Temperature for Dehumidifier Operation",
-                                                         dehumid.MaxInletAirTemp));
-                    ShowContinueError(state,
-                                      EnergyPlus::format("{} specified = {:.1f}",
-                                                         "Minimum Dry-Bulb Temperature for Dehumidifier Operation",
-                                                         dehumid.MinInletAirTemp));
-                    ShowContinueError(state, EnergyPlus::format("Occurs in {} = {}", CurrentModuleObject, dehumid.Name));
+                    ShowContinueError(
+                        state,
+                        std::format("{} specified = {:.1f}", "Maximum Dry-Bulb Temperature for Dehumidifier Operation", dehumid.MaxInletAirTemp));
+                    ShowContinueError(
+                        state,
+                        std::format("{} specified = {:.1f}", "Minimum Dry-Bulb Temperature for Dehumidifier Operation", dehumid.MinInletAirTemp));
+                    ShowContinueError(state, std::format("Occurs in {} = {}", CurrentModuleObject, dehumid.Name));
                     ErrorsFound = true;
                 }
 
@@ -381,8 +378,8 @@ namespace ZoneDehumidifier {
 
                 if (dehumid.OffCycleParasiticLoad < 0.0) {
                     ShowSevereError(state, "Off-Cycle Parasitic Electric Load must be >= zero.");
-                    ShowContinueError(state, EnergyPlus::format("Value specified = {:.2f}", dehumid.OffCycleParasiticLoad));
-                    ShowContinueError(state, EnergyPlus::format("Occurs in {} = {}", CurrentModuleObject, dehumid.Name));
+                    ShowContinueError(state, std::format("Value specified = {:.2f}", dehumid.OffCycleParasiticLoad));
+                    ShowContinueError(state, std::format("Occurs in {} = {}", CurrentModuleObject, dehumid.Name));
                     ErrorsFound = true;
                 }
 

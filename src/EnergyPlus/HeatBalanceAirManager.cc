@@ -46,6 +46,8 @@
 // POSSIBILITY OF SUCH DAMAGE.
 
 // C++ Headers
+#include <algorithm>
+#include <array>
 #include <format>
 #include <string>
 
@@ -278,8 +280,8 @@ void GetSimpleAirModelInputs(EnergyPlusData &state, bool &ErrorsFound) // IF err
     Array1D<Real64> TotMixingFlow;
     Array1D<Real64> ZoneMixingNum;
     int ConnectionNumber;
-    int ZoneNumA;
-    int ZoneNumB;
+    int ZoneNumA = 0;
+    int ZoneNumB = 0;
 
     // Formats
     static constexpr std::string_view Format_720(" {} Airflow Stats Nominal, {},{},{},{},{:.2f},{:.2f},");
@@ -1616,7 +1618,7 @@ void GetSimpleAirModelInputs(EnergyPlusData &state, bool &ErrorsFound) // IF err
                 if (Item1 == 1) { // Item check prevents this error from printing multiple times
                     if (lAlphaFieldBlanks(6)) {
                         if (lNumericFieldBlanks(11)) {
-                            // ShowWarningEmptyField(state, eoh, cNumericFieldNames(11), format("The default value will be used ({:.2f})",
+                            // ShowWarningEmptyField(state, eoh, cNumericFieldNames(11), std::format("The default value will be used ({:.2f})",
                             // -VentilTempLimit));
                         }
                     } else if (thisVentilation.minIndoorTempSched == nullptr) {
@@ -1657,7 +1659,7 @@ void GetSimpleAirModelInputs(EnergyPlusData &state, bool &ErrorsFound) // IF err
                 if (Item1 == 1) { // Item check prevents this error from printing multiple times
                     if (lAlphaFieldBlanks(7)) {
                         if (lNumericFieldBlanks(12)) {
-                            // ShowWarningEmptyField(state, eoh, cNumericFieldNames(12), format("The default value will be used ({:.2f})",
+                            // ShowWarningEmptyField(state, eoh, cNumericFieldNames(12), std::format("The default value will be used ({:.2f})",
                             // VentilTempLimit));
                         }
                     } else if (thisVentilation.maxIndoorTempSched == nullptr) {
@@ -1689,7 +1691,7 @@ void GetSimpleAirModelInputs(EnergyPlusData &state, bool &ErrorsFound) // IF err
                 if (Item1 == 1) { // Item check prevents this error from printing multiple times
                     if (lAlphaFieldBlanks(8)) {
                         if (lNumericFieldBlanks(13)) {
-                            // ShowWarningEmptyField(state, eoh, cNumericFieldNames(13), format("The default value will be used ({:.2f})",
+                            // ShowWarningEmptyField(state, eoh, cNumericFieldNames(13), std::format("The default value will be used ({:.2f})",
                             // VentilTempLimit));
                         }
                     } else if (thisVentilation.deltaTempSched == nullptr) {
@@ -1729,7 +1731,7 @@ void GetSimpleAirModelInputs(EnergyPlusData &state, bool &ErrorsFound) // IF err
                 if (Item1 == 1) { // Item check prevents this error from printing multiple times
                     if (lAlphaFieldBlanks(9)) {
                         if (lNumericFieldBlanks(14)) {
-                            // ShowWarningEmptyField(state, eoh, cNumericFieldNames(14), format("The default value will be used ({:.2f})",
+                            // ShowWarningEmptyField(state, eoh, cNumericFieldNames(14), std::format("The default value will be used ({:.2f})",
                             // VentilTempLimit));
                         }
                     } else if (thisVentilation.minOutdoorTempSched == nullptr) {
@@ -1772,7 +1774,7 @@ void GetSimpleAirModelInputs(EnergyPlusData &state, bool &ErrorsFound) // IF err
                 if (Item1 == 1) { // Item check prevents this error from printing multiple times
                     if (lAlphaFieldBlanks(10)) {
                         if (lNumericFieldBlanks(15)) {
-                            // ShowWarningEmptyField(state, eoh, cNumericFieldNames(15), format("The default value will be used ({:.2f})",
+                            // ShowWarningEmptyField(state, eoh, cNumericFieldNames(15), std::format("The default value will be used ({:.2f})",
                             // VentilTempLimit));
                         }
                     } else if (thisVentilation.maxOutdoorTempSched == nullptr) {
@@ -2067,7 +2069,7 @@ void GetSimpleAirModelInputs(EnergyPlusData &state, bool &ErrorsFound) // IF err
 
                 if (lAlphaFieldBlanks(4)) {
                     if (lNumericFieldBlanks(6)) {
-                        // ShowWarningEmptyField(state, eoh, cAlphaFieldNames(12), format("The default value will be used ({:.2f})",
+                        // ShowWarningEmptyField(state, eoh, cAlphaFieldNames(12), std::format("The default value will be used ({:.2f})",
                         // VentilTempLimit));
                     }
                 } else if (thisVentilation.minIndoorTempSched == nullptr) {
@@ -2105,7 +2107,7 @@ void GetSimpleAirModelInputs(EnergyPlusData &state, bool &ErrorsFound) // IF err
 
                 if (lAlphaFieldBlanks(5)) {
                     if (lNumericFieldBlanks(7)) {
-                        // ShowWarningEmptyField(state, eoh, cNumericFieldNames(7), format("The default value will be used ({:.2f})",
+                        // ShowWarningEmptyField(state, eoh, cNumericFieldNames(7), std::format("The default value will be used ({:.2f})",
                         // VentilTempLimit));
                     }
                 } else if (thisVentilation.maxIndoorTempSched == nullptr) {
@@ -2137,7 +2139,7 @@ void GetSimpleAirModelInputs(EnergyPlusData &state, bool &ErrorsFound) // IF err
 
                 if (lAlphaFieldBlanks(6)) {
                     if (lNumericFieldBlanks(8)) {
-                        // ShowWarningEmptyField(state, eoh, cNumericFieldNames(8), format("The default value will be used ({:.2f})",
+                        // ShowWarningEmptyField(state, eoh, cNumericFieldNames(8), std::format("The default value will be used ({:.2f})",
                         // VentilTempLimit));
                     }
                 } else if (thisVentilation.deltaTempSched == nullptr) {
@@ -2174,7 +2176,7 @@ void GetSimpleAirModelInputs(EnergyPlusData &state, bool &ErrorsFound) // IF err
 
                 if (lAlphaFieldBlanks(7)) {
                     if (lNumericFieldBlanks(9)) {
-                        // ShowWarningEmptyField(state, eoh, cNumericFieldNames(9), format("The default value will be used ({:.2f})",
+                        // ShowWarningEmptyField(state, eoh, cNumericFieldNames(9), std::format("The default value will be used ({:.2f})",
                         // VentilTempLimit));
                     }
                 } else if (thisVentilation.minOutdoorTempSched == nullptr) {
@@ -2213,7 +2215,7 @@ void GetSimpleAirModelInputs(EnergyPlusData &state, bool &ErrorsFound) // IF err
 
                 if (lAlphaFieldBlanks(8)) {
                     if (lNumericFieldBlanks(10)) {
-                        // ShowWarningEmptyField(state, eoh, cNumericFieldNames(10), format("The default value will be used ({:.2f})",
+                        // ShowWarningEmptyField(state, eoh, cNumericFieldNames(10), std::format("The default value will be used ({:.2f})",
                         // VentilTempLimit));
                     }
                 } else if (thisVentilation.maxOutdoorTempSched == nullptr) {
@@ -4123,9 +4125,74 @@ void GetSimpleAirModelInputs(EnergyPlusData &state, bool &ErrorsFound) // IF err
         } // ZoneNumA
     } //(TotRefDoorMixing .GT. 0)
 
+    // Valid values for the Number of Timesteps in Hour (see "Timestep" object); used below to recommend a value.
+    static constexpr std::array<int, 12> ValidTimeStepsInHour = {1, 2, 3, 4, 5, 6, 10, 12, 15, 20, 30, 60};
+
+    // Moderate mixing flow relative to the zone volume and timestep (e.g., a few air changes per timestep) only
+    // introduces a modest lagged-coupling error and is common in legitimate models (atria, stairwells, return
+    // plenums modeled as zones, etc.). Only warn once the mixing flow dominates the zone's own air capacitance
+    // term by at least this factor, which is the regime where the lag becomes a significant source of error.
+    // Q = Zone Mixing Flow [m3/s]
+    // V = Zone Volume [m3]
+    // Δt = Timestep [s] = 3600 / TimestepsInHour
+    // Air changes per hour (ACH) = Q * 3600 / V
+
+    // R = Q / (V/Δt) = Q * Δt / V
+    // R = Q * (3600 / TimestepsInHour) / V
+    // R = ACH / TimestepsInHour
+    // When R > MixingACHWarningFactor, the lagged-coupling error is significant and a warning is issued.
+    //
+    // The zone retains 1 / (1 + R) of its own air in a timestep, and the rest is replaced by mixing.
+    // For example, if R = 5, the zone retains only 1/6 (~ 16.6%) of its own air in a single timestep, and the rest is replaced by mixing.
+    //
+    // Typical models will use Timestep = 6 (Default), meaning we allow MixingACHWarningFactor * 6 = 30 ACH before issuing a warning,
+    // so we only warn in really pathological cases.
+    Real64 constexpr MixingACHWarningFactor = 5.0;
+
     for (int ZoneNum = 1; ZoneNum <= state.dataGlobal->NumOfZones; ++ZoneNum) {
         state.dataHeatBal->Zone(ZoneNum).NominalInfilVent = TotInfilVentFlow(ZoneNum);
         state.dataHeatBal->Zone(ZoneNum).NominalMixing = TotMixingFlow(ZoneNum);
+
+        // Check that the mixing flow into this zone is not so large, relative to the zone's own air volume, that the explicit
+        // (lagged) treatment of interzone mixing in the zone air heat/moisture/contaminant balance loses accuracy.  The zone's
+        // own "capacitance" term in that balance is proportional to Volume/TimeStepZoneSec; once the mixing flow dominates that
+        // term, the zone's air is effectively replaced by mixing within a single timestep, and the mixing source
+        // concentration/temperature used is a full timestep old.
+        if (TotMixingFlow(ZoneNum) > 0.0 && state.dataHeatBal->Zone(ZoneNum).Volume > 0.0) {
+            Real64 const MixingACH = TotMixingFlow(ZoneNum) * Constant::rSecsInHour / state.dataHeatBal->Zone(ZoneNum).Volume;
+            Real64 const WarningThresholdACH = MixingACHWarningFactor * double(state.dataGlobal->TimeStepsInHour);
+            if (MixingACH > WarningThresholdACH) {
+                ShowWarningError(state,
+                                 std::format("{}Mixing and/or CrossMixing into Zone=\"{}\" is large relative to the zone's air volume "
+                                             "and the simulation timestep.",
+                                             RoutineName,
+                                             state.dataHeatBal->Zone(ZoneNum).Name));
+                ShowContinueError(state,
+                                  std::format("...The combined Mixing/CrossMixing flow into this zone corresponds to {:.1f} air changes per hour, "
+                                              "more than {:.0f}x the Number of Timesteps in Hour ({}).",
+                                              MixingACH,
+                                              MixingACHWarningFactor,
+                                              state.dataGlobal->TimeStepsInHour));
+                ShowContinueError(state,
+                                  "...Inter-zone mixing is calculated using the connected zone's temperature/humidity/contaminant level "
+                                  "from the previous timestep");
+                ShowContinueError(state,
+                                  "...so a flow rate this large relative to the zone volume and timestep can introduce a lagged-coupling error "
+                                  "(e.g., apparent over-dilution of contaminants).");
+                auto const recommendedIt = std::find_if(
+                    ValidTimeStepsInHour.begin(), ValidTimeStepsInHour.end(), [=](int n) { return double(n) * MixingACHWarningFactor >= MixingACH; });
+                if (recommendedIt != ValidTimeStepsInHour.end()) {
+                    ShowContinueError(state,
+                                      std::format("...Consider increasing the Number of Timesteps in Hour to at least {} for this zone, or reducing "
+                                                  "the Mixing/CrossMixing flow rate relative to the zone volume.",
+                                                  *recommendedIt));
+                } else {
+                    ShowContinueError(state,
+                                      "...Even the EnergyPlus maximum of 60 Timesteps in Hour would not eliminate this lag; consider "
+                                      "reducing the Mixing/CrossMixing flow rate relative to the zone volume instead.");
+                }
+            }
+        }
     }
 
     if (state.dataHeatBal->ZoneAirMassFlow.EnforceZoneMassBalance) {

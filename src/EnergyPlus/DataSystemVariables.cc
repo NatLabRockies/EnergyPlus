@@ -193,10 +193,10 @@ namespace DataSystemVariables {
         }
 
         // If we get here, we didn't find the file
-        ShowSevereError(state, std::format("{}\"{}\" not found.", contextString, originalInputFilePath.string()));
+        ShowSevereError(state, std::format("{}\"{}\" not found.", contextString, originalInputFilePath));
         ShowContinueError(state, "  Paths searched:");
         for (auto &path : pathsChecked) {
-            ShowContinueError(state, std::format("    {}: \"{}\"", path.second, path.first.string()));
+            ShowContinueError(state, std::format("    {}: \"{}\"", path.second, path.first));
         }
 
         return foundFilePath;

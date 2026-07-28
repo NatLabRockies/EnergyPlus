@@ -45,6 +45,9 @@
 // OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 // POSSIBILITY OF SUCH DAMAGE.
 
+// C++ Headers
+#include <format>
+
 // ObjexxFCL Headers
 #include <ObjexxFCL/Fmath.hh>
 
@@ -224,8 +227,8 @@ namespace OutAirNodeManager {
                                 cAlphaFields(AlphaNum));
                     NextFluidStreamNum += NumNodes;
                     if (ErrInList) {
-                        ShowContinueError(
-                            state, EnergyPlus::format("Occurred in {}, {} = {}", CurrentModuleObject, cAlphaFields(AlphaNum), Alphas(AlphaNum)));
+                        ShowContinueError(state,
+                                          std::format("Occurred in {}, {} = {}", CurrentModuleObject, cAlphaFields(AlphaNum), Alphas(AlphaNum)));
                         ErrorsFound = true;
                     }
                     for (int NodeNum = 1; NodeNum <= NumNodes; ++NodeNum) {
@@ -242,7 +245,7 @@ namespace OutAirNodeManager {
             }
 
             if (ErrorsFound) {
-                ShowFatalError(state, EnergyPlus::format("{}Errors found in getting {} input.", RoutineName, CurrentModuleObject));
+                ShowFatalError(state, std::format("{}Errors found in getting {} input.", RoutineName, CurrentModuleObject));
             }
         }
 
@@ -284,12 +287,12 @@ namespace OutAirNodeManager {
                             cAlphaFields(1));
                 NextFluidStreamNum += NumNodes;
                 if (ErrInList) {
-                    ShowContinueError(state, EnergyPlus::format("Occurred in {}, {} = {}", CurrentModuleObject, cAlphaFields(1), Alphas(1)));
+                    ShowContinueError(state, std::format("Occurred in {}, {} = {}", CurrentModuleObject, cAlphaFields(1), Alphas(1)));
                     ErrorsFound = true;
                 }
 
                 if (NumNodes > 1) {
-                    ShowSevereError(state, EnergyPlus::format("{}, {} = {}", CurrentModuleObject, cAlphaFields(1), Alphas(1)));
+                    ShowSevereError(state, std::format("{}, {} = {}", CurrentModuleObject, cAlphaFields(1), Alphas(1)));
                     ShowContinueError(state, "...appears to point to a node list, not a single node.");
                     ErrorsFound = true;
                     continue;
@@ -302,8 +305,8 @@ namespace OutAirNodeManager {
                     }
                     TmpNums(ListSize) = NodeNums(1);
                 } else { // Duplicates are a problem
-                    ShowSevereError(state, EnergyPlus::format("{}, duplicate {} = {}", CurrentModuleObject, cAlphaFields(1), Alphas(1)));
-                    ShowContinueError(state, EnergyPlus::format("Duplicate {} might be found in an OutdoorAir:NodeList.", cAlphaFields(1)));
+                    ShowSevereError(state, std::format("{}, duplicate {} = {}", CurrentModuleObject, cAlphaFields(1), Alphas(1)));
+                    ShowContinueError(state, std::format("Duplicate {} might be found in an OutdoorAir:NodeList.", cAlphaFields(1)));
                     ErrorsFound = true;
                     continue;
                 }
@@ -342,7 +345,7 @@ namespace OutAirNodeManager {
                 }
 
                 if (NumAlphas > 8) {
-                    ShowSevereError(state, EnergyPlus::format("{}, {} = {}", CurrentModuleObject, cAlphaFields(1), Alphas(1)));
+                    ShowSevereError(state, std::format("{}, {} = {}", CurrentModuleObject, cAlphaFields(1), Alphas(1)));
                     ShowContinueError(state, "Object Definition indicates more than 7 Alpha Objects.");
                     ErrorsFound = true;
                     continue;
@@ -353,7 +356,7 @@ namespace OutAirNodeManager {
                 }
             }
             if (ErrorsFound) {
-                ShowFatalError(state, EnergyPlus::format("{}Errors found in getting {} input.", RoutineName, CurrentModuleObject));
+                ShowFatalError(state, std::format("{}Errors found in getting {} input.", RoutineName, CurrentModuleObject));
             }
         }
 

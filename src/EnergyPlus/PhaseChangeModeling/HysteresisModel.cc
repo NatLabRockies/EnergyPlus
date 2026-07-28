@@ -276,10 +276,13 @@ namespace Material {
 
     Real64 MaterialPhaseChange::getConductivity(Real64 T) const
     {
-        if (T < this->peakTempMelting) {
+        Real64 const lowerPeakTemp = std::min(this->peakTempMelting, this->peakTempFreezing);
+        Real64 const upperPeakTemp = std::max(this->peakTempMelting, this->peakTempFreezing);
+
+        if (T < lowerPeakTemp) {
             return this->fullySolidThermalConductivity;
         }
-        if (T > this->peakTempFreezing) {
+        if (T > upperPeakTemp) {
             return this->fullyLiquidThermalConductivity;
         }
         return (this->fullySolidThermalConductivity + this->fullyLiquidThermalConductivity) / 2.0;
@@ -287,10 +290,13 @@ namespace Material {
 
     Real64 MaterialPhaseChange::getDensity(Real64 T) const
     {
-        if (T < this->peakTempMelting) {
+        Real64 const lowerPeakTemp = std::min(this->peakTempMelting, this->peakTempFreezing);
+        Real64 const upperPeakTemp = std::max(this->peakTempMelting, this->peakTempFreezing);
+
+        if (T < lowerPeakTemp) {
             return this->fullySolidDensity;
         }
-        if (T > this->peakTempFreezing) {
+        if (T > upperPeakTemp) {
             return this->fullyLiquidDensity;
         }
         return (this->fullySolidDensity + this->fullyLiquidDensity) / 2.0;
@@ -340,25 +346,25 @@ namespace Material {
 
             auto *mat = s_mat->materials(matNum);
             if (mat->group != Group::Regular) {
-                ShowSevereCustom(state, eoh, EnergyPlus::format("Material {} is not a Regular material.", mat->Name));
+                ShowSevereCustom(state, eoh, std::format("Material {} is not a Regular material.", mat->Name));
                 ErrorsFound = true;
                 continue;
             }
 
             if (mat->hasPCM) {
-                ShowSevereCustom(state, eoh, EnergyPlus::format("Material {} already has {} properties defined.", mat->Name, currentModuleObject));
+                ShowSevereCustom(state, eoh, std::format("Material {} already has {} properties defined.", mat->Name, currentModuleObject));
                 ErrorsFound = true;
                 continue;
             }
 
             if (mat->hasEMPD) {
-                ShowSevereCustom(state, eoh, EnergyPlus::format("Material {} already has EMPD properties defined.", mat->Name));
+                ShowSevereCustom(state, eoh, std::format("Material {} already has EMPD properties defined.", mat->Name));
                 ErrorsFound = true;
                 continue;
             }
 
             if (mat->hasHAMT) {
-                ShowSevereCustom(state, eoh, EnergyPlus::format("Material {} already has HAMT properties defined.", mat->Name));
+                ShowSevereCustom(state, eoh, std::format("Material {} already has HAMT properties defined.", mat->Name));
                 ErrorsFound = true;
                 continue;
             }

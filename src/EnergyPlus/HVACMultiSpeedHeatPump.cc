@@ -723,7 +723,6 @@ namespace HVACMultiSpeedHeatPump {
                                    std::format("{}Errors found in getting {} input. Preceding condition(s) causes termination.",
                                                RoutineName,
                                                state.dataHVACMultiSpdHP->CurrentModuleObject));
-                    ErrorsFound = true;
                 }
                 LocalError = false;
                 DXCoils::GetDXCoilIndex(state, thisMSHP.DXHeatCoilName, thisMSHP.DXHeatCoilIndex, LocalError, "Coil:Heating:DX:MultiSpeed");
@@ -776,7 +775,6 @@ namespace HVACMultiSpeedHeatPump {
                                        std::format("{}Errors found in getting {} input. Preceding condition(s) causes termination.",
                                                    RoutineName,
                                                    state.dataHVACMultiSpdHP->CurrentModuleObject));
-                        ErrorsFound = true;
                     }
                 } else {
                     thisMSHP.heatCoilType = HVAC::CoilType::HeatingGasMultiStage;
@@ -791,7 +789,6 @@ namespace HVACMultiSpeedHeatPump {
                                        std::format("{}Errors found in getting {} input. Preceding condition(s) causes termination.",
                                                    RoutineName,
                                                    state.dataHVACMultiSpdHP->CurrentModuleObject));
-                        ErrorsFound = true;
                     }
                 }
                 thisMSHP.HeatCoilName = Alphas(11);
@@ -969,7 +966,6 @@ namespace HVACMultiSpeedHeatPump {
                                    std::format("{}Errors found in getting {} input. Preceding condition(s) causes termination.",
                                                RoutineName,
                                                state.dataHVACMultiSpdHP->CurrentModuleObject));
-                    ErrorsFound = true;
                 }
                 LocalError = false;
                 DXCoils::GetDXCoilIndex(state, thisMSHP.DXCoolCoilName, thisMSHP.DXCoolCoilIndex, LocalError, "Coil:Cooling:DX:MultiSpeed");

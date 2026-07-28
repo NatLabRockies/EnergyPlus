@@ -84,12 +84,9 @@ runs:
       elif [ "$RUNNER_OS" == "macOS" ]; then
         brew update
         brew install tcl-tk
-        brew reinstall gcc@13
-        echo "FC=$(brew --prefix gcc@13)/bin/gfortran-13" >> $GITHUB_ENV
         echo "MACOSX_DEPLOYMENT_TARGET=${{ matrix.macos_dev_target }}" >> $GITHUB_ENV
 
         brew install ccache
-        ccache --set-config=compiler_check=content # darwin only
         # clang-19
         COMPILER="clang-$(clang -dumpversion | cut -d'.' -f 1)"
       fi;
@@ -106,18 +103,30 @@ runs:
       ccache --set-config=cache_dir=$CCACHE_DIR
       ccache --set-config=max_size=500M
       ccache --set-config=compression=true
+      # mtime-based compiler check is unreliable across fresh runner VMs (eg windows-11-arm),
+      # where the compiler binary's mtime differs even though its content doesn't, causing cache misses
+      ccache --set-config=compiler_check=content
       ccache --set-config=sloppiness=pch_defines,time_macros
-      ccache --set-config=base_dir="${{ github.workspace }}"
       ccache -p
       echo "::endgroup::"
 
+      if [ "${RUNNER_DEBUG:-0}" == "1" ]; then
+        begin_group "Enabling CCache debug logging (RUNNER_DEBUG=1)"
+        echo "CCACHE_DEBUG=1" >> $GITHUB_ENV
+        echo "CCACHE_DEBUGDIR=${{ github.workspace }}${DIR_SEP}.ccache-debug" >> $GITHUB_ENV
+        echo "::endgroup::"
+      fi;
+
       begin_group "App Python_ROOT_DIR env variable"
-      Python_ROOT_DIR="$RUNNER_TOOL_CACHE/Python/${{ steps.setup-python.outputs.python-version }}/${{ inputs.python-arch }}"
-      if [ "$RUNNER_OS" == "Windows" ]; then
-        Python_EXECUTABLE="$Python_ROOT_DIR/python.exe"
-      else
-        Python_EXECUTABLE="$Python_ROOT_DIR/bin/python"
-      fi
+
+      Python_EXECUTABLE="${{ steps.setup-python.outputs.python-path }}"
+      Python_ROOT_DIR=$(dirname "${Python_EXECUTABLE//\\//}")
+      # Python_ROOT_DIR="$RUNNER_TOOL_CACHE/Python/${{ steps.setup-python.outputs.python-version }}/${{ inputs.python-arch }}"
+      # if [ "$RUNNER_OS" == "Windows" ]; then
+      #   Python_EXECUTABLE="$Python_ROOT_DIR/python.exe"
+      # else
+      #   Python_EXECUTABLE="$Python_ROOT_DIR/bin/python"
+      # fi
       echo "Python_ROOT_DIR=$Python_ROOT_DIR" >> $GITHUB_ENV
       echo "Python_EXECUTABLE=$Python_EXECUTABLE" >> $GITHUB_ENV
       echo "python-root-dir=$Python_ROOT_DIR" >> $GITHUB_OUTPUT

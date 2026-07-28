@@ -47,6 +47,7 @@
 
 // C++ Headers
 #include <cmath>
+#include <format>
 
 // ObjexxFCL Headers
 #include <ObjexxFCL/Array.functions.hh>
@@ -128,24 +129,23 @@ namespace WaterToAirHeatPump {
         if (CompIndex == 0) {
             HPNum = Util::FindItemInList(CompName, state.dataWaterToAirHeatPump->WatertoAirHP);
             if (HPNum == 0) {
-                ShowFatalError(state, EnergyPlus::format("WaterToAir HP not found={}", CompName));
+                ShowFatalError(state, std::format("WaterToAir HP not found={}", CompName));
             }
             CompIndex = HPNum;
         } else {
             HPNum = CompIndex;
             if (HPNum > state.dataWaterToAirHeatPump->NumWatertoAirHPs || HPNum < 1) {
-                ShowFatalError(
-                    state,
-                    EnergyPlus::format("SimWatertoAirHP: Invalid CompIndex passed={}, Number of Water to Air HPs={}, WaterToAir HP name={}",
-                                       HPNum,
-                                       state.dataWaterToAirHeatPump->NumWatertoAirHPs,
-                                       CompName));
+                ShowFatalError(state,
+                               std::format("SimWatertoAirHP: Invalid CompIndex passed={}, Number of Water to Air HPs={}, WaterToAir HP name={}",
+                                           HPNum,
+                                           state.dataWaterToAirHeatPump->NumWatertoAirHPs,
+                                           CompName));
             }
             if (state.dataWaterToAirHeatPump->CheckEquipName(HPNum)) {
                 if (!CompName.empty() && CompName != state.dataWaterToAirHeatPump->WatertoAirHP(HPNum).Name) {
                     ShowFatalError(
                         state,
-                        EnergyPlus::format(
+                        std::format(
                             "SimWatertoAirHP: Invalid CompIndex passed={}, WaterToAir HP name={}, stored WaterToAir HP Name for that index={}",
                             HPNum,
                             CompName,
@@ -242,7 +242,7 @@ namespace WaterToAirHeatPump {
                 heatPump.WAHPType = DataPlant::PlantEquipmentType::CoilWAHPCoolingParamEst;
                 ErrorObjectHeader eoh{routineName, CurrentModuleObject, heatPump.Name};
                 GlobalNames::VerifyUniqueCoilName(
-                    state, CurrentModuleObject, heatPump.Name, ErrorsFound, EnergyPlus::format("{} Name", CurrentModuleObject));
+                    state, CurrentModuleObject, heatPump.Name, ErrorsFound, std::format("{} Name", CurrentModuleObject));
                 std::string const availSchedName = s_ip->getAlphaFieldValue(fields, schemaProps, "availability_schedule_name");
                 if (availSchedName.empty()) {
                     heatPump.availSched = Sched::GetScheduleAlwaysOn(state);
@@ -312,7 +312,7 @@ namespace WaterToAirHeatPump {
                 heatPump.LoadSideTotalUACoeff = s_ip->getRealFieldValue(fields, schemaProps, "load_side_total_heat_transfer_coefficient");
                 heatPump.LoadSideOutsideUACoeff = s_ip->getRealFieldValue(fields, schemaProps, "load_side_outside_surface_heat_transfer_coefficient");
                 if ((heatPump.LoadSideOutsideUACoeff < Constant::rTinyValue) || (heatPump.LoadSideTotalUACoeff < Constant::rTinyValue)) {
-                    ShowSevereError(state, EnergyPlus::format("Input problem for {}={}", CurrentModuleObject, heatPump.Name));
+                    ShowSevereError(state, std::format("Input problem for {}={}", CurrentModuleObject, heatPump.Name));
                     ShowContinueError(state, " One or both load side UA values entered are below tolerance, likely zero or blank.");
                     ShowContinueError(state, " Verify inputs, as the parameter syntax for this object went through a change with");
                     ShowContinueError(state, "  the release of EnergyPlus version 5.");
@@ -483,7 +483,7 @@ namespace WaterToAirHeatPump {
                 heatPump.WAHPType = DataPlant::PlantEquipmentType::CoilWAHPHeatingParamEst;
                 ErrorObjectHeader eoh{routineName, CurrentModuleObject, heatPump.Name};
                 GlobalNames::VerifyUniqueCoilName(
-                    state, CurrentModuleObject, heatPump.Name, ErrorsFound, EnergyPlus::format("{} Name", CurrentModuleObject));
+                    state, CurrentModuleObject, heatPump.Name, ErrorsFound, std::format("{} Name", CurrentModuleObject));
                 std::string const availSchedName = s_ip->getAlphaFieldValue(fields, schemaProps, "availability_schedule_name");
                 if (availSchedName.empty()) {
                     heatPump.availSched = Sched::GetScheduleAlwaysOn(state);
@@ -550,7 +550,7 @@ namespace WaterToAirHeatPump {
 
                 heatPump.LoadSideTotalUACoeff = s_ip->getRealFieldValue(fields, schemaProps, "load_side_total_heat_transfer_coefficient");
                 if (heatPump.LoadSideTotalUACoeff < Constant::rTinyValue) {
-                    ShowSevereError(state, EnergyPlus::format("Input problem for {}={}", CurrentModuleObject, heatPump.Name));
+                    ShowSevereError(state, std::format("Input problem for {}={}", CurrentModuleObject, heatPump.Name));
                     ShowContinueError(state, " Load side UA value is less than tolerance, likely zero or blank.");
                     ShowContinueError(state, " Verify inputs, as the parameter syntax for this object went through a change with");
                     ShowContinueError(state, "  the release of EnergyPlus version 5.");
@@ -681,7 +681,7 @@ namespace WaterToAirHeatPump {
         }
 
         if (ErrorsFound) {
-            ShowFatalError(state, EnergyPlus::format("{}Errors found getting input. Program terminates.", RoutineName));
+            ShowFatalError(state, std::format("{}Errors found getting input. Program terminates.", RoutineName));
         }
 
         for (HPNum = 1; HPNum <= state.dataWaterToAirHeatPump->NumWatertoAirHPs; ++HPNum) {
@@ -952,7 +952,7 @@ namespace WaterToAirHeatPump {
 
             if (heatPump.plantLoc.loop->FluidName == "WATER") {
                 if (heatPump.SourceSideUACoeff < Constant::rTinyValue) {
-                    ShowSevereError(state, EnergyPlus::format("Input problem for water to air heat pump, \"{}\".", heatPump.Name));
+                    ShowSevereError(state, std::format("Input problem for water to air heat pump, \"{}\".", heatPump.Name));
                     ShowContinueError(state, " Source side UA value is less than tolerance, likely zero or blank.");
                     ShowContinueError(state, " Verify inputs, as the parameter syntax for this object went through a change with");
                     ShowContinueError(state, "  the release of EnergyPlus version 5.");
@@ -960,7 +960,7 @@ namespace WaterToAirHeatPump {
                 }
             } else {
                 if ((heatPump.SourceSideHTR1 < Constant::rTinyValue) || (heatPump.SourceSideHTR2 < Constant::rTinyValue)) {
-                    ShowSevereError(state, EnergyPlus::format("Input problem for water to air heat pump, \"{}\".", heatPump.Name));
+                    ShowSevereError(state, std::format("Input problem for water to air heat pump, \"{}\".", heatPump.Name));
                     ShowContinueError(state, " A source side heat transfer resistance value is less than tolerance, likely zero or blank.");
                     ShowContinueError(state, " Verify inputs, as the parameter syntax for this object went through a change with");
                     ShowContinueError(state, "  the release of EnergyPlus version 5.");
@@ -1146,10 +1146,10 @@ namespace WaterToAirHeatPump {
         Real64 LoadSideAirOutletEnth;     // Load Side Outlet Enthalpy [J/kg]
         Real64 EffectiveSurfaceTemp;      // Effective Surface Temperature [C]
         Real64 EffectiveSatEnth;          // Saturated Enthalpy of Air Corresponding to the Effective Surface Temperature [J/kg]
-        Real64 QSource;                   // Source Side Heat Transfer Rate [W]
-        Real64 QLoadTotal;                // Load Side Total Heat Transfer Rate [W]
-        Real64 QSensible;                 // Load Side Sensible Heat Transfer Rate [W]
-        Real64 Power;                     // Power Consumption [W]
+        Real64 QSource = 0.0;             // Source Side Heat Transfer Rate [W]
+        Real64 QLoadTotal = 0.0;          // Load Side Total Heat Transfer Rate [W]
+        Real64 QSensible = 0.0;           // Load Side Sensible Heat Transfer Rate [W]
+        Real64 Power = 0.0;               // Power Consumption [W]
         Real64 EvapTemp;                  // Evaporating Temperature [C]
         Real64 ANTUWET;                   // Number of Transfer Unit for Wet Condition
         Real64 EffectWET;                 // Load Side Heat Exchanger Effectiveness
@@ -1159,18 +1159,18 @@ namespace WaterToAirHeatPump {
         Real64 LoadSideTemp;              // Load Side Saturated Refrigerant Temperature [C]
         Real64 SourceSidePressure;        // Source Side Saturated Refrigerant Pressure [Pa]
         Real64 LoadSidePressure;          // Load Side Saturated Refrigerant Pressure [Pa]
-        Real64 SuctionPr;                 // Compressor Suction Pressure [Pa]
-        Real64 DischargePr;               // Compressor Discharge Pressure [Pa]
+        Real64 SuctionPr = 0.0;           // Compressor Suction Pressure [Pa]
+        Real64 DischargePr = 0.0;         // Compressor Discharge Pressure [Pa]
         Real64 CompressInletTemp;         // Temperature of the Refrigerant Entering the Compressor [C]
-        Real64 MassRef;                   // Mass Flow Rate of Refrigerant [kg/s]
+        Real64 MassRef = 0.0;             // Mass Flow Rate of Refrigerant [kg/s]
         Real64 SourceSideOutletEnth;      // Enthalpy of Refrigerant leaving the Source Side Heat Exchanger [J/kg]
         Real64 LoadSideOutletEnth;        // Enthalpy of Refrigerant leaving the Load Side Heat Exchanger [J/kg]
         Real64 CpAir;                     // Specific Heat of Air [J/kg_C]
         Real64 SuperHeatEnth;             // Enthalpy of the Superheated Refrigerant [J/kg]
-        Real64 CompSuctionTemp1;          // Guess of the Temperature of the Refrigerant Entering the Compressor #1 [C]
-        Real64 CompSuctionTemp2;          // Guess of the Temperature of the Refrigerant Entering the Compressor #2 [C]
+        Real64 CompSuctionTemp1 = 0.0;    // Guess of the Temperature of the Refrigerant Entering the Compressor #1 [C]
+        Real64 CompSuctionTemp2 = 0.0;    // Guess of the Temperature of the Refrigerant Entering the Compressor #2 [C]
         Real64 CompSuctionEnth;           // Enthalpy of the Refrigerant Entering the Compressor [J/kg]
-        Real64 CompSuctionDensity;        // Density of the Refrigerant Entering the Compressor [kg/m3]
+        Real64 CompSuctionDensity = 0.0;  // Density of the Refrigerant Entering the Compressor [kg/m3]
         Real64 CompSuctionSatTemp;        // Temperature of Saturated Refrigerant at Compressor Suction Pressure [C]
         bool LatDegradModelSimFlag;       // Latent degradation model simulation flag
         bool StillSimulatingFlag;         // Final Simulation Flag
@@ -1347,9 +1347,9 @@ namespace WaterToAirHeatPump {
                     if (LoadSidePressure < heatPump.LowPressCutoff && !FirstHVACIteration) {
                         if (!state.dataGlobal->WarmupFlag) {
                             ShowRecurringWarningErrorAtEnd(state,
-                                                           EnergyPlus::format("WaterToAir Heat pump:cooling [{}] shut off on low pressure < {:.0R}",
-                                                                              heatPump.Name,
-                                                                              heatPump.LowPressCutoff),
+                                                           std::format("WaterToAir Heat pump:cooling [{}] shut off on low pressure < {:.0f}",
+                                                                       heatPump.Name,
+                                                                       heatPump.LowPressCutoff),
                                                            heatPump.LowPressClgError,
                                                            LoadSidePressure,
                                                            LoadSidePressure,
@@ -1364,9 +1364,9 @@ namespace WaterToAirHeatPump {
                     if (SourceSidePressure > heatPump.HighPressCutoff && !FirstHVACIteration) {
                         if (!state.dataGlobal->WarmupFlag) {
                             ShowRecurringWarningErrorAtEnd(state,
-                                                           EnergyPlus::format("WaterToAir Heat pump:cooling [{}] shut off on high pressure > {:.0R}",
-                                                                              heatPump.Name,
-                                                                              heatPump.HighPressCutoff),
+                                                           std::format("WaterToAir Heat pump:cooling [{}] shut off on high pressure > {:.0f}",
+                                                                       heatPump.Name,
+                                                                       heatPump.HighPressCutoff),
                                                            heatPump.HighPressClgError,
                                                            heatPump.InletWaterTemp,
                                                            heatPump.InletWaterTemp,
@@ -1621,35 +1621,35 @@ namespace WaterToAirHeatPump {
         Real64 LoadSideAirOutletEnth; // Load Side Outlet Enthalpy [J/kg]
         Real64 CpAir;                 // Specific Heat of Air [J/kg_C]
         Real64 DegradFactor;          // Degradation Factor [~]
-        Real64 QSource;               // Source Side Heat Transfer Rate [W]
-        Real64 QLoadTotal;            // Load Side Heat Transfer Rate [W]
-        Real64 Power;                 // Power Consumption [W]
+        Real64 QSource = 0.0;         // Source Side Heat Transfer Rate [W]
+        Real64 QLoadTotal = 0.0;      // Load Side Heat Transfer Rate [W]
+        Real64 Power = 0.0;           // Power Consumption [W]
 
-        Real64 SourceSideEffect;     // Source Side Heat Exchanger Effectiveness
-        Real64 SourceSideTemp;       // Source Side Saturated Refrigerant Temperature [C]
-        Real64 LoadSideTemp;         // Load Side Saturated Refrigerant Temperature [C]
-        Real64 SourceSidePressure;   // Source Side Saturated Refrigerant Pressure [Pa]
-        Real64 LoadSidePressure;     // Load Side Saturated Refrigerant Pressure [Pa]
-        Real64 SuctionPr;            // Compressor Suction Pressure [Pa]
-        Real64 DischargePr;          // Compressor Discharge Pressure [Pa]
-        Real64 CompressInletTemp;    // Temperature of the Refrigerant Entering the Compressor [C]
-        Real64 MassRef;              // Mass Flow Rate of Refrigerant [kg/s]
-        Real64 SourceSideOutletEnth; // Enthalpy of Refrigerant leaving the Source Side Heat Exchanger [J/kg]
-        Real64 LoadSideOutletEnth;   // Enthalpy of Refrigerant leaving the Load Side Heat Exchanger [J/kg]
-        Real64 SuperHeatEnth;        // Enthalpy of the Superheated Refrigerant [J/kg]
-        Real64 CompSuctionTemp1;     // Guess of the Temperature of the Refrigerant Entering the
+        Real64 SourceSideEffect;       // Source Side Heat Exchanger Effectiveness
+        Real64 SourceSideTemp;         // Source Side Saturated Refrigerant Temperature [C]
+        Real64 LoadSideTemp;           // Load Side Saturated Refrigerant Temperature [C]
+        Real64 SourceSidePressure;     // Source Side Saturated Refrigerant Pressure [Pa]
+        Real64 LoadSidePressure;       // Load Side Saturated Refrigerant Pressure [Pa]
+        Real64 SuctionPr = 0.0;        // Compressor Suction Pressure [Pa]
+        Real64 DischargePr = 0.0;      // Compressor Discharge Pressure [Pa]
+        Real64 CompressInletTemp;      // Temperature of the Refrigerant Entering the Compressor [C]
+        Real64 MassRef = 0.0;          // Mass Flow Rate of Refrigerant [kg/s]
+        Real64 SourceSideOutletEnth;   // Enthalpy of Refrigerant leaving the Source Side Heat Exchanger [J/kg]
+        Real64 LoadSideOutletEnth;     // Enthalpy of Refrigerant leaving the Load Side Heat Exchanger [J/kg]
+        Real64 SuperHeatEnth;          // Enthalpy of the Superheated Refrigerant [J/kg]
+        Real64 CompSuctionTemp1 = 0.0; // Guess of the Temperature of the Refrigerant Entering the
         // Compressor #1 [C]
-        Real64 CompSuctionTemp2; // Guess of the Temperature of the Refrigerant Entering the
+        Real64 CompSuctionTemp2 = 0.0; // Guess of the Temperature of the Refrigerant Entering the
         // Compressor #2 [C]
-        Real64 CompSuctionTemp;    // Temperature of the Refrigerant Entering the Compressor [C]
-        Real64 CompSuctionEnth;    // Enthalpy of the Refrigerant Entering the Compressor [J/kg]
-        Real64 CompSuctionDensity; // Density of the Refrigerant Entering the Compressorkg/m3
-        Real64 CompSuctionSatTemp; // Temperature of Saturated Refrigerant at Compressor Suction Pressure [C]
-        bool StillSimulatingFlag;  // Final Simulation Flag
-        bool Converged;            // Overall convergence Flag
-        int SolFlag;               // Solution flag returned from RegulaFalsi function
-        Real64 LoadResidual;       // loop convergence criteria
-        Real64 SourceResidual;     // loop convergence criteria
+        Real64 CompSuctionTemp;          // Temperature of the Refrigerant Entering the Compressor [C]
+        Real64 CompSuctionEnth;          // Enthalpy of the Refrigerant Entering the Compressor [J/kg]
+        Real64 CompSuctionDensity = 0.0; // Density of the Refrigerant Entering the Compressorkg/m3
+        Real64 CompSuctionSatTemp;       // Temperature of Saturated Refrigerant at Compressor Suction Pressure [C]
+        bool StillSimulatingFlag;        // Final Simulation Flag
+        bool Converged;                  // Overall convergence Flag
+        int SolFlag;                     // Solution flag returned from RegulaFalsi function
+        Real64 LoadResidual;             // loop convergence criteria
+        Real64 SourceResidual;           // loop convergence criteria
 
         //  LOAD LOCAL VARIABLES FROM DATA STRUCTURE (for code readability)
 
@@ -1745,9 +1745,9 @@ namespace WaterToAirHeatPump {
                 if (SourceSidePressure < heatPump.LowPressCutoff && !FirstHVACIteration) {
                     if (!state.dataGlobal->WarmupFlag) {
                         ShowRecurringWarningErrorAtEnd(state,
-                                                       EnergyPlus::format("WaterToAir Heat pump:heating [{}] shut off on low pressure < {:.0R}",
-                                                                          heatPump.Name,
-                                                                          heatPump.LowPressCutoff),
+                                                       std::format("WaterToAir Heat pump:heating [{}] shut off on low pressure < {:.0f}",
+                                                                   heatPump.Name,
+                                                                   heatPump.LowPressCutoff),
                                                        heatPump.LowPressHtgError,
                                                        SourceSidePressure,
                                                        SourceSidePressure,
@@ -1762,9 +1762,9 @@ namespace WaterToAirHeatPump {
                 if (LoadSidePressure > heatPump.HighPressCutoff && !FirstHVACIteration) {
                     if (!state.dataGlobal->WarmupFlag) {
                         ShowRecurringWarningErrorAtEnd(state,
-                                                       EnergyPlus::format("WaterToAir Heat pump:heating [{}] shut off on high pressure > {:.0R}",
-                                                                          heatPump.Name,
-                                                                          heatPump.HighPressCutoff),
+                                                       std::format("WaterToAir Heat pump:heating [{}] shut off on high pressure > {:.0f}",
+                                                                   heatPump.Name,
+                                                                   heatPump.HighPressCutoff),
                                                        heatPump.HighPressHtgError,
                                                        heatPump.InletWaterTemp,
                                                        heatPump.InletWaterTemp,
@@ -2093,14 +2093,14 @@ namespace WaterToAirHeatPump {
         Real64 Twet_max; // Maximum allowed value for Twet
         // shut off after compressor cycle off  [s]
 
-        Real64 Ton;     // Coil on time (sec)
-        Real64 Toff;    // Coil off time (sec)
-        Real64 Toffa;   // Actual coil off time (sec). Equations valid for Toff <= (2.0 * Twet/Gamma)
-        Real64 aa;      // Intermediate variable
-        Real64 To1;     // Intermediate variable (first guess at To). To = time to the start of moisture removal
-        Real64 To2;     // Intermediate variable (second guess at To). To = time to the start of moisture removal
-        Real64 Error;   // Error for iteration (DO) loop
-        Real64 LHRmult; // Latent Heat Ratio (LHR) multiplier. The effective latent heat ratio LHR = (1-SHRss)*LHRmult
+        Real64 Ton;       // Coil on time (sec)
+        Real64 Toff;      // Coil off time (sec)
+        Real64 Toffa;     // Actual coil off time (sec). Equations valid for Toff <= (2.0 * Twet/Gamma)
+        Real64 aa;        // Intermediate variable
+        Real64 To1;       // Intermediate variable (first guess at To). To = time to the start of moisture removal
+        Real64 To2 = 0.0; // Intermediate variable (second guess at To). To = time to the start of moisture removal
+        Real64 Error;     // Error for iteration (DO) loop
+        Real64 LHRmult;   // Latent Heat Ratio (LHR) multiplier. The effective latent heat ratio LHR = (1-SHRss)*LHRmult
 
         //  No moisture evaporation (latent degradation) occurs for runtime fraction of 1.0
         //  All latent degradation model parameters cause divide by 0.0 if not greater than 0.0
@@ -2246,7 +2246,7 @@ namespace WaterToAirHeatPump {
         int IndexNum = Util::FindItemInList(CoilName, state.dataWaterToAirHeatPump->WatertoAirHP);
 
         if (IndexNum == 0) {
-            ShowSevereError(state, EnergyPlus::format("Could not find CoilType=\"{}\" with Name=\"{}\"", CoilType, CoilName));
+            ShowSevereError(state, std::format("Could not find CoilType=\"{}\" with Name=\"{}\"", CoilType, CoilName));
             ErrorsFound = true;
         }
 
@@ -2270,7 +2270,7 @@ namespace WaterToAirHeatPump {
         // as negative.
 
         // Return value
-        Real64 CoilCapacity; // returned capacity of matched coil
+        Real64 CoilCapacity = 0.0; // returned capacity of matched coil
 
         // FUNCTION LOCAL VARIABLE DECLARATIONS:
         int WhichCoil;
@@ -2296,7 +2296,7 @@ namespace WaterToAirHeatPump {
         }
 
         if (WhichCoil == 0) {
-            ShowSevereError(state, EnergyPlus::format("Could not find CoilType=\"{}\" with Name=\"{}\"", CoilType, CoilName));
+            ShowSevereError(state, std::format("Could not find CoilType=\"{}\" with Name=\"{}\"", CoilType, CoilName));
             ErrorsFound = true;
             CoilCapacity = -1000.0;
         }
@@ -2321,7 +2321,7 @@ namespace WaterToAirHeatPump {
         // as zero.
 
         // Return value
-        int NodeNumber; // returned outlet node of matched coil
+        int NodeNumber = 0; // returned outlet node of matched coil
 
         // Obtains and Allocates WatertoAirHP related parameters from input file
         if (state.dataWaterToAirHeatPump->GetCoilsInputFlag) { // First time subroutine has been entered
@@ -2335,7 +2335,7 @@ namespace WaterToAirHeatPump {
         }
 
         if (WhichCoil == 0) {
-            ShowSevereError(state, EnergyPlus::format("Could not find CoilType=\"{}\" with Name=\"{}\"", CoilType, CoilName));
+            ShowSevereError(state, std::format("Could not find CoilType=\"{}\" with Name=\"{}\"", CoilType, CoilName));
             ErrorsFound = true;
             NodeNumber = 0;
         }
@@ -2360,7 +2360,7 @@ namespace WaterToAirHeatPump {
         // as zero.
 
         // Return value
-        int NodeNumber; // returned outlet node of matched coil
+        int NodeNumber = 0; // returned outlet node of matched coil
 
         // Obtains and Allocates WatertoAirHP related parameters from input file
         if (state.dataWaterToAirHeatPump->GetCoilsInputFlag) { // First time subroutine has been entered
@@ -2374,7 +2374,7 @@ namespace WaterToAirHeatPump {
         }
 
         if (WhichCoil == 0) {
-            ShowSevereError(state, EnergyPlus::format("Could not find CoilType=\"{}\" with Name=\"{}\"", CoilType, CoilName));
+            ShowSevereError(state, std::format("Could not find CoilType=\"{}\" with Name=\"{}\"", CoilType, CoilName));
             ErrorsFound = true;
             NodeNumber = 0;
         }

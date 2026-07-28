@@ -143,26 +143,25 @@ namespace SteamBaseboardRadiator {
         if (CompIndex == 0) {
             BaseboardNum = Util::FindItemInList(EquipName, state.dataSteamBaseboardRadiator->SteamBaseboard, &SteamBaseboardParams::Name);
             if (BaseboardNum == 0) {
-                ShowFatalError(state, EnergyPlus::format("SimSteamBaseboard: Unit not found={}", EquipName));
+                ShowFatalError(state, std::format("SimSteamBaseboard: Unit not found={}", EquipName));
             }
             CompIndex = BaseboardNum;
         } else {
             BaseboardNum = CompIndex;
             if (BaseboardNum > state.dataSteamBaseboardRadiator->NumSteamBaseboards || BaseboardNum < 1) {
                 ShowFatalError(state,
-                               EnergyPlus::format("SimSteamBaseboard:  Invalid CompIndex passed={}, Number of Units={}, Entered Unit name={}",
-                                                  BaseboardNum,
-                                                  state.dataSteamBaseboardRadiator->NumSteamBaseboards,
-                                                  EquipName));
+                               std::format("SimSteamBaseboard:  Invalid CompIndex passed={}, Number of Units={}, Entered Unit name={}",
+                                           BaseboardNum,
+                                           state.dataSteamBaseboardRadiator->NumSteamBaseboards,
+                                           EquipName));
             }
             if (state.dataSteamBaseboardRadiator->CheckEquipName(BaseboardNum)) {
                 if (EquipName != state.dataSteamBaseboardRadiator->SteamBaseboard(BaseboardNum).Name) {
-                    ShowFatalError(
-                        state,
-                        EnergyPlus::format("SimSteamBaseboard: Invalid CompIndex passed={}, Unit name={}, stored Unit Name for that index={}",
-                                           BaseboardNum,
-                                           EquipName,
-                                           state.dataSteamBaseboardRadiator->SteamBaseboard(BaseboardNum).Name));
+                    ShowFatalError(state,
+                                   std::format("SimSteamBaseboard: Invalid CompIndex passed={}, Unit name={}, stored Unit Name for that index={}",
+                                               BaseboardNum,
+                                               EquipName,
+                                               state.dataSteamBaseboardRadiator->SteamBaseboard(BaseboardNum).Name));
                 }
                 state.dataSteamBaseboardRadiator->CheckEquipName(BaseboardNum) = false;
             }
@@ -216,11 +215,12 @@ namespace SteamBaseboardRadiator {
                 } break;
                 default: {
                     ShowSevereError(state,
-                                    EnergyPlus::format("SimSteamBaseboard: Errors in Baseboard={}",
-                                                       state.dataSteamBaseboardRadiator->SteamBaseboard(BaseboardNum).Name));
+                                    std::format("SimSteamBaseboard: Errors in Baseboard={}",
+                                                state.dataSteamBaseboardRadiator->SteamBaseboard(BaseboardNum).Name));
                     ShowContinueError(state,
-                                      EnergyPlus::format("Invalid or unimplemented equipment type={}",
-                                                         state.dataSteamBaseboardRadiator->SteamBaseboard(BaseboardNum).EquipType));
+                                      std::format("Invalid or unimplemented equipment type={}",
+                                                  DataPlant::PlantEquipTypeNames[static_cast<int>(
+                                                      state.dataSteamBaseboardRadiator->SteamBaseboard(BaseboardNum).EquipType)]));
                     ShowFatalError(state, "Preceding condition causes termination.");
                 } break;
                 }
@@ -242,7 +242,7 @@ namespace SteamBaseboardRadiator {
             ReportSteamBaseboard(state, BaseboardNum);
 
         } else {
-            ShowFatalError(state, EnergyPlus::format("SimSteamBaseboard: Unit not found={}", EquipName));
+            ShowFatalError(state, std::format("SimSteamBaseboard: Unit not found={}", EquipName));
         }
     }
 
@@ -360,44 +360,44 @@ namespace SteamBaseboardRadiator {
                         state.dataIPShortCut->rNumericArgs(iHeatCapacityPerFloorAreaNumericNum);
                     if (state.dataSteamBaseboardRadiator->SteamBaseboardDesign(BaseboardDesignNum).DesignScaledHeatingCapacity <= 0.0) {
                         ShowSevereError(state,
-                                        EnergyPlus::format("{} = {}",
-                                                           state.dataSteamBaseboardRadiator->cCMO_BBRadiator_Steam_Design,
-                                                           state.dataSteamBaseboardRadiator->SteamBaseboardDesign(BaseboardDesignNum).designName));
+                                        std::format("{} = {}",
+                                                    state.dataSteamBaseboardRadiator->cCMO_BBRadiator_Steam_Design,
+                                                    state.dataSteamBaseboardRadiator->SteamBaseboardDesign(BaseboardDesignNum).designName));
                         ShowContinueError(state,
-                                          EnergyPlus::format("Input for {} = {}",
-                                                             state.dataIPShortCut->cAlphaFieldNames(iHeatCAPMAlphaNum),
-                                                             state.dataIPShortCut->cAlphaArgs(iHeatCAPMAlphaNum)));
+                                          std::format("Input for {} = {}",
+                                                      state.dataIPShortCut->cAlphaFieldNames(iHeatCAPMAlphaNum),
+                                                      state.dataIPShortCut->cAlphaArgs(iHeatCAPMAlphaNum)));
                         ShowContinueError(state,
-                                          EnergyPlus::format("Illegal {} = {:.7f}",
-                                                             state.dataIPShortCut->cNumericFieldNames(iHeatCapacityPerFloorAreaNumericNum),
-                                                             state.dataIPShortCut->rNumericArgs(iHeatCapacityPerFloorAreaNumericNum)));
+                                          std::format("Illegal {} = {:.7f}",
+                                                      state.dataIPShortCut->cNumericFieldNames(iHeatCapacityPerFloorAreaNumericNum),
+                                                      state.dataIPShortCut->rNumericArgs(iHeatCapacityPerFloorAreaNumericNum)));
                         ErrorsFound = true;
                     } else if (state.dataSteamBaseboardRadiator->SteamBaseboardDesign(BaseboardDesignNum).DesignScaledHeatingCapacity == AutoSize) {
                         ShowSevereError(state,
-                                        EnergyPlus::format("{} = {}",
-                                                           state.dataSteamBaseboardRadiator->cCMO_BBRadiator_Steam_Design,
-                                                           state.dataSteamBaseboardRadiator->SteamBaseboardDesign(BaseboardDesignNum).designName));
+                                        std::format("{} = {}",
+                                                    state.dataSteamBaseboardRadiator->cCMO_BBRadiator_Steam_Design,
+                                                    state.dataSteamBaseboardRadiator->SteamBaseboardDesign(BaseboardDesignNum).designName));
                         ShowContinueError(state,
-                                          EnergyPlus::format("Input for {} = {}",
-                                                             state.dataIPShortCut->cAlphaFieldNames(iHeatCAPMAlphaNum),
-                                                             state.dataIPShortCut->cAlphaArgs(iHeatCAPMAlphaNum)));
-                        ShowContinueError(state,
-                                          EnergyPlus::format("Illegal {} = Autosize",
-                                                             state.dataIPShortCut->cNumericFieldNames(iHeatCapacityPerFloorAreaNumericNum)));
+                                          std::format("Input for {} = {}",
+                                                      state.dataIPShortCut->cAlphaFieldNames(iHeatCAPMAlphaNum),
+                                                      state.dataIPShortCut->cAlphaArgs(iHeatCAPMAlphaNum)));
+                        ShowContinueError(
+                            state,
+                            std::format("Illegal {} = Autosize", state.dataIPShortCut->cNumericFieldNames(iHeatCapacityPerFloorAreaNumericNum)));
                         ErrorsFound = true;
                     }
                 } else {
                     ShowSevereError(state,
-                                    EnergyPlus::format("{} = {}",
-                                                       state.dataSteamBaseboardRadiator->cCMO_BBRadiator_Steam_Design,
-                                                       state.dataSteamBaseboardRadiator->SteamBaseboardDesign(BaseboardDesignNum).designName));
+                                    std::format("{} = {}",
+                                                state.dataSteamBaseboardRadiator->cCMO_BBRadiator_Steam_Design,
+                                                state.dataSteamBaseboardRadiator->SteamBaseboardDesign(BaseboardDesignNum).designName));
                     ShowContinueError(state,
-                                      EnergyPlus::format("Input for {} = {}",
-                                                         state.dataIPShortCut->cAlphaFieldNames(iHeatCAPMAlphaNum),
-                                                         state.dataIPShortCut->cAlphaArgs(iHeatCAPMAlphaNum)));
-                    ShowContinueError(state,
-                                      EnergyPlus::format("Blank field not allowed for {}",
-                                                         state.dataIPShortCut->cNumericFieldNames(iHeatCapacityPerFloorAreaNumericNum)));
+                                      std::format("Input for {} = {}",
+                                                  state.dataIPShortCut->cAlphaFieldNames(iHeatCAPMAlphaNum),
+                                                  state.dataIPShortCut->cAlphaArgs(iHeatCAPMAlphaNum)));
+                    ShowContinueError(
+                        state,
+                        std::format("Blank field not allowed for {}", state.dataIPShortCut->cNumericFieldNames(iHeatCapacityPerFloorAreaNumericNum)));
                     ErrorsFound = true;
                 }
             } else if (Util::SameString(state.dataIPShortCut->cAlphaArgs(iHeatCAPMAlphaNum), "FractionOfAutosizedHeatingCapacity")) {
@@ -407,24 +407,24 @@ namespace SteamBaseboardRadiator {
                         state.dataIPShortCut->rNumericArgs(iHeatFracOfAutosizedCapacityNumericNum);
                     if (state.dataSteamBaseboardRadiator->SteamBaseboardDesign(BaseboardDesignNum).DesignScaledHeatingCapacity < 0.0) {
                         ShowSevereError(state,
-                                        EnergyPlus::format("{} = {}",
-                                                           state.dataSteamBaseboardRadiator->cCMO_BBRadiator_Steam_Design,
-                                                           state.dataSteamBaseboardRadiator->SteamBaseboardDesign(BaseboardDesignNum).designName));
+                                        std::format("{} = {}",
+                                                    state.dataSteamBaseboardRadiator->cCMO_BBRadiator_Steam_Design,
+                                                    state.dataSteamBaseboardRadiator->SteamBaseboardDesign(BaseboardDesignNum).designName));
                         ShowContinueError(state,
-                                          EnergyPlus::format("Illegal {} = {:.7f}",
-                                                             state.dataIPShortCut->cNumericFieldNames(iHeatFracOfAutosizedCapacityNumericNum),
-                                                             state.dataIPShortCut->rNumericArgs(iHeatFracOfAutosizedCapacityNumericNum)));
+                                          std::format("Illegal {} = {:.7f}",
+                                                      state.dataIPShortCut->cNumericFieldNames(iHeatFracOfAutosizedCapacityNumericNum),
+                                                      state.dataIPShortCut->rNumericArgs(iHeatFracOfAutosizedCapacityNumericNum)));
                         ErrorsFound = true;
                     }
                 } else {
                     ShowSevereError(state,
-                                    EnergyPlus::format("{} = {}",
-                                                       state.dataSteamBaseboardRadiator->cCMO_BBRadiator_Steam_Design,
-                                                       state.dataSteamBaseboardRadiator->SteamBaseboardDesign(BaseboardDesignNum).designName));
+                                    std::format("{} = {}",
+                                                state.dataSteamBaseboardRadiator->cCMO_BBRadiator_Steam_Design,
+                                                state.dataSteamBaseboardRadiator->SteamBaseboardDesign(BaseboardDesignNum).designName));
                     ShowContinueError(state,
-                                      EnergyPlus::format("Input for {} = {}",
-                                                         state.dataIPShortCut->cAlphaFieldNames(iHeatCAPMAlphaNum),
-                                                         state.dataIPShortCut->cAlphaArgs(iHeatCAPMAlphaNum)));
+                                      std::format("Input for {} = {}",
+                                                  state.dataIPShortCut->cAlphaFieldNames(iHeatCAPMAlphaNum),
+                                                  state.dataIPShortCut->cAlphaArgs(iHeatCAPMAlphaNum)));
                     ShowContinueError(state,
                                       std::format("Blank field not allowed for {}",
                                                   state.dataIPShortCut->cNumericFieldNames(iHeatFracOfAutosizedCapacityNumericNum)));
@@ -464,7 +464,7 @@ namespace SteamBaseboardRadiator {
                                              state.dataSteamBaseboardRadiator->cCMO_BBRadiator_Steam_Design,
                                              state.dataIPShortCut->cAlphaArgs(1),
                                              state.dataIPShortCut->cNumericFieldNames(4)));
-                ShowContinueError(state, EnergyPlus::format("...reset to minimum value=[{:.3R}].", MinFraction));
+                ShowContinueError(state, std::format("...reset to minimum value=[{:.3f}].", MinFraction));
                 state.dataSteamBaseboardRadiator->SteamBaseboardDesign(BaseboardDesignNum).FracRadiant = MinFraction;
             } else if (state.dataSteamBaseboardRadiator->SteamBaseboardDesign(BaseboardDesignNum).FracRadiant > MaxFraction) {
                 ShowWarningError(state,
@@ -473,7 +473,7 @@ namespace SteamBaseboardRadiator {
                                              state.dataSteamBaseboardRadiator->cCMO_BBRadiator_Steam_Design,
                                              state.dataIPShortCut->cAlphaArgs(1),
                                              state.dataIPShortCut->cNumericFieldNames(4)));
-                ShowContinueError(state, EnergyPlus::format("...reset to maximum value=[{:.3R}].", MaxFraction));
+                ShowContinueError(state, std::format("...reset to maximum value=[{:.3f}].", MaxFraction));
                 state.dataSteamBaseboardRadiator->SteamBaseboardDesign(BaseboardDesignNum).FracRadiant = MaxFraction;
             }
 
@@ -486,7 +486,7 @@ namespace SteamBaseboardRadiator {
                                              state.dataSteamBaseboardRadiator->cCMO_BBRadiator_Steam_Design,
                                              state.dataIPShortCut->cAlphaArgs(1),
                                              state.dataIPShortCut->cNumericFieldNames(5)));
-                ShowContinueError(state, EnergyPlus::format("...reset to minimum value=[{:.3R}].", MinFraction));
+                ShowContinueError(state, std::format("...reset to minimum value=[{:.3f}].", MinFraction));
                 state.dataSteamBaseboardRadiator->SteamBaseboardDesign(BaseboardDesignNum).FracDistribPerson = MinFraction;
             }
             if (state.dataSteamBaseboardRadiator->SteamBaseboardDesign(BaseboardDesignNum).FracDistribPerson > MaxFraction) {
@@ -496,7 +496,7 @@ namespace SteamBaseboardRadiator {
                                              state.dataSteamBaseboardRadiator->cCMO_BBRadiator_Steam_Design,
                                              state.dataIPShortCut->cAlphaArgs(1),
                                              state.dataIPShortCut->cNumericFieldNames(5)));
-                ShowContinueError(state, EnergyPlus::format("...reset to maximum value=[{:.3R}].", MaxFraction));
+                ShowContinueError(state, std::format("...reset to maximum value=[{:.3f}].", MaxFraction));
                 state.dataSteamBaseboardRadiator->SteamBaseboardDesign(BaseboardDesignNum).FracDistribPerson = MaxFraction;
             }
         }
@@ -638,7 +638,7 @@ namespace SteamBaseboardRadiator {
                                              state.dataSteamBaseboardRadiator->cCMO_BBRadiator_Steam,
                                              state.dataIPShortCut->cAlphaArgs(1),
                                              state.dataIPShortCut->cNumericFieldNames(3)));
-                ShowContinueError(state, EnergyPlus::format("...reset to maximum value=[{:.2R}].", MaxSteamFlowRate));
+                ShowContinueError(state, std::format("...reset to maximum value=[{:.2f}].", MaxSteamFlowRate));
                 state.dataSteamBaseboardRadiator->SteamBaseboard(BaseboardNum).SteamVolFlowRateMax = MaxSteamFlowRate;
             } else if (state.dataSteamBaseboardRadiator->SteamBaseboard(BaseboardNum).SteamVolFlowRateMax <= MinSteamFlowRate &&
                        state.dataSteamBaseboardRadiator->SteamBaseboard(BaseboardNum).SteamVolFlowRateMax != AutoSize) {
@@ -648,7 +648,7 @@ namespace SteamBaseboardRadiator {
                                              state.dataSteamBaseboardRadiator->cCMO_BBRadiator_Steam,
                                              state.dataIPShortCut->cAlphaArgs(1),
                                              state.dataIPShortCut->cNumericFieldNames(3)));
-                ShowContinueError(state, EnergyPlus::format("...reset to minimum value=[{:.2R}].", MinSteamFlowRate));
+                ShowContinueError(state, std::format("...reset to minimum value=[{:.2f}].", MinSteamFlowRate));
                 state.dataSteamBaseboardRadiator->SteamBaseboard(BaseboardNum).SteamVolFlowRateMax = MinSteamFlowRate;
             }
             // Remaining fraction is added to the zone as convective heat transfer
@@ -735,7 +735,7 @@ namespace SteamBaseboardRadiator {
                                                  state.dataSteamBaseboardRadiator->cCMO_BBRadiator_Steam,
                                                  state.dataIPShortCut->cAlphaArgs(1),
                                                  state.dataIPShortCut->cNumericFieldNames(SurfNum + 3)));
-                    ShowContinueError(state, EnergyPlus::format("...reset to maximum value=[{:.1R}].", MaxFraction));
+                    ShowContinueError(state, std::format("...reset to maximum value=[{:.1f}].", MaxFraction));
                     state.dataSteamBaseboardRadiator->SteamBaseboard(BaseboardNum).TotSurfToDistrib = MaxFraction;
                 }
                 if (state.dataSteamBaseboardRadiator->SteamBaseboard(BaseboardNum).FracDistribToSurf(SurfNum) < MinFraction) {
@@ -745,7 +745,7 @@ namespace SteamBaseboardRadiator {
                                                  state.dataSteamBaseboardRadiator->cCMO_BBRadiator_Steam,
                                                  state.dataIPShortCut->cAlphaArgs(1),
                                                  state.dataIPShortCut->cNumericFieldNames(SurfNum + 3)));
-                    ShowContinueError(state, EnergyPlus::format("...reset to maximum value=[{:.1R}].", MinFraction));
+                    ShowContinueError(state, std::format("...reset to maximum value=[{:.1f}].", MinFraction));
                     state.dataSteamBaseboardRadiator->SteamBaseboard(BaseboardNum).TotSurfToDistrib = MinFraction;
                 }
                 if (state.dataSteamBaseboardRadiator->SteamBaseboard(BaseboardNum).SurfacePtr(SurfNum) != 0) {
@@ -1200,11 +1200,10 @@ namespace SteamBaseboardRadiator {
                                                             "ZoneHVAC:Baseboard:RadiantConvective:Steam=\"{}\".",
                                                             state.dataSteamBaseboardRadiator->SteamBaseboard(BaseboardNum).Name));
                                     ShowContinueError(
+                                        state, std::format("User-Specified Maximum Steam Flow Rate of {:.5f} [m3/s]", SteamVolFlowRateMaxUser));
+                                    ShowContinueError(
                                         state,
-                                        EnergyPlus::format("User-Specified Maximum Steam Flow Rate of {:.5R} [m3/s]", SteamVolFlowRateMaxUser));
-                                    ShowContinueError(state,
-                                                      EnergyPlus::format("differs from Design Size Maximum Steam Flow Rate of {:.5R} [m3/s]",
-                                                                         SteamVolFlowRateMaxDes));
+                                        std::format("differs from Design Size Maximum Steam Flow Rate of {:.5f} [m3/s]", SteamVolFlowRateMaxDes));
                                     ShowContinueError(state, "This may, or may not, indicate mismatched component sizes.");
                                     ShowContinueError(state, "Verify that the value entered is intended and is consistent with other components.");
                                 }
@@ -1497,12 +1496,12 @@ namespace SteamBaseboardRadiator {
                     if (ThisSurfIntensity > MaxRadHeatFlux) { // CR 8074, trap for excessive intensity (throws off surface balance )
                         ShowSevereError(state, "DistributeBBSteamRadGains:  excessive thermal radiation heat flux intensity detected");
                         ShowContinueError(state, std::format("Surface = {}", state.dataSurface->Surface(SurfNum).Name));
-                        ShowContinueError(state, EnergyPlus::format("Surface area = {:.3R} [m2]", state.dataSurface->Surface(SurfNum).Area));
+                        ShowContinueError(state, std::format("Surface area = {:.3f} [m2]", state.dataSurface->Surface(SurfNum).Area));
                         ShowContinueError(state,
                                           std::format("Occurs in {} = {}",
                                                       state.dataSteamBaseboardRadiator->cCMO_BBRadiator_Steam,
                                                       state.dataSteamBaseboardRadiator->SteamBaseboard(BaseboardNum).Name));
-                        ShowContinueError(state, EnergyPlus::format("Radiation intensity = {:.2R} [W/m2]", ThisSurfIntensity));
+                        ShowContinueError(state, std::format("Radiation intensity = {:.2f} [W/m2]", ThisSurfIntensity));
                         ShowContinueError(state,
                                           std::format("Assign a larger surface area or more surfaces in {}",
                                                       state.dataSteamBaseboardRadiator->cCMO_BBRadiator_Steam));
@@ -1511,7 +1510,7 @@ namespace SteamBaseboardRadiator {
                 } else { // small surface
                     ShowSevereError(state, "DistributeBBSteamRadGains:  surface not large enough to receive thermal radiation heat flux");
                     ShowContinueError(state, std::format("Surface = {}", state.dataSurface->Surface(SurfNum).Name));
-                    ShowContinueError(state, EnergyPlus::format("Surface area = {:.3R} [m2]", state.dataSurface->Surface(SurfNum).Area));
+                    ShowContinueError(state, std::format("Surface area = {:.3f} [m2]", state.dataSurface->Surface(SurfNum).Area));
                     ShowContinueError(state,
                                       std::format("Occurs in {} = {}",
                                                   state.dataSteamBaseboardRadiator->cCMO_BBRadiator_Steam,

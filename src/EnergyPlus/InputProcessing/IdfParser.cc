@@ -51,7 +51,6 @@
 
 // Third Party Headers
 #include <fast_float/fast_float.h>
-#include <fmt/format.h>
 #include <milo/dtoa.h>
 #include <milo/itoa.h>
 
@@ -245,7 +244,7 @@ json IdfParser::parse_idf(std::string_view idf, size_t &index, bool &success, js
             continue;
         }
         if (token == Token::COMMA) {
-            errors_.emplace_back(fmt::format("Line: {} Index: {} - Extraneous comma found.", cur_line_num, index_into_cur_line));
+            errors_.emplace_back(std::format("Line: {} Index: {} - Extraneous comma found.", cur_line_num, index_into_cur_line));
             success = false;
             return root;
         }
@@ -257,7 +256,7 @@ json IdfParser::parse_idf(std::string_view idf, size_t &index, bool &success, js
             std::string const obj_name = normalizeObjectType(parsed_obj_name);
             if (obj_name.empty()) {
                 errors_.emplace_back(
-                    fmt::format("Line: {} Index: {} - \"{}\" is not a valid Object Type.", cur_line_num, index_into_cur_line, parsed_obj_name));
+                    std::format("Line: {} Index: {} - \"{}\" is not a valid Object Type.", cur_line_num, index_into_cur_line, parsed_obj_name));
                 while (token != Token::SEMICOLON && token != Token::END) {
                     token = next_token(idf, index);
                 }
@@ -275,13 +274,12 @@ json IdfParser::parse_idf(std::string_view idf, size_t &index, bool &success, js
                     line = idf.substr(beginning_of_line_index, found_index - beginning_of_line_index - 1);
                 }
                 errors_.emplace_back(
-                    fmt::format("Line: {} Index: {} - Error parsing \"{}\". Error in following line.", cur_line_num, index_into_cur_line, obj_name));
-                errors_.emplace_back(fmt::format("~~~ {}", line));
+                    std::format("Line: {} Index: {} - Error parsing \"{}\". Error in following line.", cur_line_num, index_into_cur_line, obj_name));
+                errors_.emplace_back(std::format("~~~ {}", line));
                 success = false;
                 continue;
             }
-            u64toa(root[obj_name].size() + 1, s);
-            std::string name = fmt::format("{} {}", obj_name, s);
+            std::string name = std::format("{} {}", obj_name, root[obj_name].size() + 1);
 
             if (!obj.is_null()) {
                 auto const name_iter = obj.find("name");
@@ -301,7 +299,7 @@ json IdfParser::parse_idf(std::string_view idf, size_t &index, bool &success, js
 
             if (root[obj_name].find(name) != root[obj_name].end()) {
                 errors_.emplace_back(
-                    fmt::format(R"(Duplicate name found for object of type "{}" named "{}". Overwriting existing object.)", obj_name, name));
+                    std::format(R"(Duplicate name found for object of type "{}" named "{}". Overwriting existing object.)", obj_name, name));
             }
 
             root[obj_name][name] = std::move(obj);
@@ -411,14 +409,14 @@ json IdfParser::parse_object(
         } else if (legacy_idd_index >= legacy_idd_fields_array.size()) {
             if (legacy_idd_extensibles_iter == legacy_idd.end()) {
                 errors_.emplace_back(
-                    fmt::format("Line: {} Index: {} - Object contains more field values than maximum number of IDD fields and is not extensible.",
+                    std::format("Line: {} Index: {} - Object contains more field values than maximum number of IDD fields and is not extensible.",
                                 cur_line_num,
                                 index_into_cur_line));
                 success = false;
                 return root;
             }
             if (schema_obj_extensions == nullptr) {
-                errors_.emplace_back(fmt::format("Line: {} Index: {} - Object does not have extensible fields but should. Likely a parsing error.",
+                errors_.emplace_back(std::format("Line: {} Index: {} - Object does not have extensible fields but should. Likely a parsing error.",
                                                  cur_line_num,
                                                  index_into_cur_line));
                 success = false;
@@ -446,8 +444,7 @@ json IdfParser::parse_object(
                 if (field == "name") {
                     root[field] = parse_string(idf, index);
                 } else {
-                    u64toa(cur_line_num, s);
-                    errors_.emplace_back(fmt::format("Line: {} - Field \"{}\" was not found.", s, field));
+                    errors_.emplace_back(std::format("Line: {} - Field \"{}\" was not found.", cur_line_num, field));
                 }
             } else {
                 json val = parse_value(idf, index, success, find_field_iter.value());
@@ -648,7 +645,7 @@ json IdfParser::parse_value(std::string_view idf, size_t &index, bool &success, 
 
             if (anyOf_it == field_loc.end()) {
                 errors_.emplace_back(
-                    fmt::format("Line: {} Index: {} - Field cannot be Autosize or Autocalculate", cur_line_num, index_into_cur_line));
+                    std::format("Line: {} Index: {} - Field cannot be Autosize or Autocalculate", cur_line_num, index_into_cur_line));
                 return parsed_string;
             }
             // The following is hacky because it abuses knowing the consistent generated structure
@@ -784,8 +781,6 @@ IdfParser::Token IdfParser::next_token(std::string_view idf, size_t &index)
         }
         return Token::STRING;
     }
-    decrement_both_index(index, index_into_cur_line);
-    return Token::NONE;
 }
 
 IdfParser::Token IdfParser::next_limited_token(std::string_view idf, size_t &index)

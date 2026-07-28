@@ -6,7 +6,7 @@
 ! Basic file description:  1 story building divided into 4 exterior and one interior conditioned zones and return plenum.
 !
 ! Highlights:              Illustrates night ventilation using night ventilation system availability manager and
-!                          night ventilation fan performance.
+!                          Fan:SystemModel built-in night ventilation settings.
 !
 ! Simulation Location/Run: FRESNO_CA_USA TMY2-93193, 2 design days, 1 run period,
 !                          Run Control executes the run period using the weather file
@@ -86,7 +86,7 @@
 !                                object. We ventilate the building in the early morning hours.
 !                                The runperiod is a summer week in Fresno. We assume a ventilation rate of 1/3 the
 !                                supply air design value and adjust the night ventilation fan performance
-!                                (FanPerformance:NightVentilation) object inputs accordingly.
+!                                (Fan:SystemModel) object inputs accordingly.
 !                                Successful night ventilation modeling depends
 !                                critically on getting the ventilation fan consumption right. In
 !                                this case, we see no benefit with night ventilation compared to the
@@ -1652,6 +1652,8 @@
     For: AllDays,            !- Field 2
     Until: 24:00,18.;        !- Field 3
 
+  Schedule:Constant,AlwaysOn,On/Off,1.0;
+
   People,
     SPACE1-1 People 1,       !- Name
     SPACE1-1,                !- Zone or ZoneList or Space or SpaceList Name
@@ -3104,7 +3106,7 @@
 
   AirTerminal:SingleDuct:VAV:Reheat,
     SPACE1-1 VAV Reheat,     !- Name
-    FanAvailSched,           !- Availability Schedule Name
+    AlwaysOn,                !- Availability Schedule Name
     SPACE1-1 Zone Coil Air In Node,  !- Damper Air Outlet Node Name
     SPACE1-1 ATU In Node,    !- Air Inlet Node Name
     autosize,                !- Maximum Air Flow Rate {m3/s}
@@ -3124,7 +3126,7 @@
 
   AirTerminal:SingleDuct:VAV:Reheat,
     SPACE2-1 VAV Reheat,     !- Name
-    FanAvailSched,           !- Availability Schedule Name
+    AlwaysOn,                !- Availability Schedule Name
     SPACE2-1 Zone Coil Air In Node,  !- Damper Air Outlet Node Name
     SPACE2-1 ATU In Node,    !- Air Inlet Node Name
     autosize,                !- Maximum Air Flow Rate {m3/s}
@@ -3144,7 +3146,7 @@
 
   AirTerminal:SingleDuct:VAV:Reheat,
     SPACE3-1 VAV Reheat,     !- Name
-    FanAvailSched,           !- Availability Schedule Name
+    AlwaysOn,                !- Availability Schedule Name
     SPACE3-1 Zone Coil Air In Node,  !- Damper Air Outlet Node Name
     SPACE3-1 ATU In Node,    !- Air Inlet Node Name
     autosize,                !- Maximum Air Flow Rate {m3/s}
@@ -3164,7 +3166,7 @@
 
   AirTerminal:SingleDuct:VAV:Reheat,
     SPACE4-1 VAV Reheat,     !- Name
-    FanAvailSched,           !- Availability Schedule Name
+    AlwaysOn,                !- Availability Schedule Name
     SPACE4-1 Zone Coil Air In Node,  !- Damper Air Outlet Node Name
     SPACE4-1 ATU In Node,    !- Air Inlet Node Name
     autosize,                !- Maximum Air Flow Rate {m3/s}
@@ -3184,7 +3186,7 @@
 
   AirTerminal:SingleDuct:VAV:Reheat,
     SPACE5-1 VAV Reheat,     !- Name
-    FanAvailSched,           !- Availability Schedule Name
+    AlwaysOn,                !- Availability Schedule Name
     SPACE5-1 Zone Coil Air In Node,  !- Damper Air Outlet Node Name
     SPACE5-1 ATU In Node,    !- Air Inlet Node Name
     autosize,                !- Maximum Air Flow Rate {m3/s}

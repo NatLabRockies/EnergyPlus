@@ -143,7 +143,6 @@ TEST_F(EnergyPlusFixture, ExerciseHVACDXHeatPumpSystem)
     [[maybe_unused]] auto *curve = Curve::AddCurve(*state, "Curve1");
 
     // setup some outputs
-    OutputReportPredefined::SetPredefinedTables(*state);
 
     int compIndex = 0;
     HVACDXHeatPumpSystem::SimDXHeatPumpSystem(*state, "HEATPUMP DX COIL 1", true, -1, compIndex, -1, 0.0);

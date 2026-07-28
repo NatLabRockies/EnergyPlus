@@ -47,6 +47,7 @@
 
 // C++ Headers
 #include <algorithm>
+#include <format>
 #include <list>
 #include <ostream>
 #include <string>
@@ -109,10 +110,9 @@ void GetInputTabularAnnual(EnergyPlusData &state)
         if (!state.dataGlobal->DoWeathSim) {
             ShowWarningError(
                 state,
-                EnergyPlus::format(
-                    "{} requested with SimulationControl Run Simulation for Weather File Run Periods set to No so {} will not be generated",
-                    currentModuleObject,
-                    currentModuleObject));
+                std::format("{} requested with SimulationControl Run Simulation for Weather File Run Periods set to No so {} will not be generated",
+                            currentModuleObject,
+                            currentModuleObject));
             return;
         }
     }
@@ -127,11 +127,10 @@ void GetInputTabularAnnual(EnergyPlusData &state)
             for (int jAlpha = 4; jAlpha <= numAlphas; jAlpha += 2) {
                 std::string curVarMtr = alphArray(jAlpha);
                 if (curVarMtr.empty()) {
-                    ShowWarningError(
-                        state,
-                        EnergyPlus::format("{}: Blank column specified in '{}', need to provide a variable or meter or EMS variable name ",
-                                           currentModuleObject,
-                                           alphArray(1)));
+                    ShowWarningError(state,
+                                     std::format("{}: Blank column specified in '{}', need to provide a variable or meter or EMS variable name ",
+                                                 currentModuleObject,
+                                                 alphArray(1)));
                 }
                 if (jAlpha <= numAlphas) {
                     const std::string &aggregationString = alphArray(jAlpha + 1);
@@ -152,7 +151,7 @@ void GetInputTabularAnnual(EnergyPlusData &state)
             }
             annualTables.back().setupGathering(state);
         } else {
-            ShowSevereError(state, EnergyPlus::format("{}: Must enter at least the first six fields.", currentModuleObject));
+            ShowSevereError(state, std::format("{}: Must enter at least the first six fields.", currentModuleObject));
         }
     }
 }
@@ -303,16 +302,15 @@ bool AnnualTable::invalidAggregationOrder(EnergyPlusData &state)
     if (missingMaxOrMinError) {
         ShowSevereError(
             state,
-            EnergyPlus::format("The Output:Table:Annual report named=\"{}\" has a valueWhenMaxMin aggregation type for a column without a previous "
-                               "column that uses either the minimum or maximum aggregation types. The report will not be generated.",
-                               m_name));
+            std::format("The Output:Table:Annual report named=\"{}\" has a valueWhenMaxMin aggregation type for a column without a previous "
+                        "column that uses either the minimum or maximum aggregation types. The report will not be generated.",
+                        m_name));
     }
     if (missingHourAggError) {
-        ShowSevereError(
-            state,
-            EnergyPlus::format("The Output:Table:Annual report named=\"{}\" has a --DuringHoursShown aggregation type for a column without a "
-                               "previous field that uses one of the Hour-- aggregation types. The report will not be generated.",
-                               m_name));
+        ShowSevereError(state,
+                        std::format("The Output:Table:Annual report named=\"{}\" has a --DuringHoursShown aggregation type for a column without a "
+                                    "previous field that uses one of the Hour-- aggregation types. The report will not be generated.",
+                                    m_name));
     }
     return (missingHourAggError || missingMaxOrMinError);
 }
@@ -718,7 +716,7 @@ void AnnualTable::writeTable(EnergyPlusData &state, OutputReportTabular::tabular
         switch (style.unitsStyle) {
         case OutputReportTabular::UnitsStyle::InchPound:
         case OutputReportTabular::UnitsStyle::InchPoundExceptElectricity: {
-            varNameWithUnits = EnergyPlus::format("{} [{}]", fldSt.m_variMeter, Constant::unitNames[static_cast<int>(fldSt.m_varUnits)]);
+            varNameWithUnits = std::format("{} [{}]", fldSt.m_variMeter, Constant::unitNames[static_cast<int>(fldSt.m_varUnits)]);
             OutputReportTabular::LookupSItoIP(state, varNameWithUnits, indexUnitConv, curUnits);
             OutputReportTabular::GetUnitConversion(state, indexUnitConv, curConversionFactor, curConversionOffset, curUnits);
             break;
@@ -1183,7 +1181,7 @@ AnnualFieldSet::AggregationKind stringToAggKind(EnergyPlusData &state, std::stri
         outAggType = AnnualFieldSet::AggregationKind::minimumDuringHoursShown;
     } else {
         outAggType = AnnualFieldSet::AggregationKind::sumOrAvg;
-        ShowWarningError(state, EnergyPlus::format("Invalid aggregation type=\"{}\"  Defaulting to SumOrAverage.", inString));
+        ShowWarningError(state, std::format("Invalid aggregation type=\"{}\"  Defaulting to SumOrAverage.", inString));
     }
     return outAggType;
 }
@@ -1372,8 +1370,7 @@ void AnnualTable::convertUnitForDeferredResults(EnergyPlusData &state, AnnualFie
     case OutputReportTabular::UnitsStyle::InchPound:
     case OutputReportTabular::UnitsStyle::InchPoundExceptElectricity: {
         int indexUnitConv;
-        const std::string varNameWithUnits =
-            EnergyPlus::format("{} [{}]", fldSt.m_variMeter, Constant::unitNames[static_cast<int>(fldSt.m_varUnits)]);
+        const std::string varNameWithUnits = std::format("{} [{}]", fldSt.m_variMeter, Constant::unitNames[static_cast<int>(fldSt.m_varUnits)]);
         OutputReportTabular::LookupSItoIP(state, varNameWithUnits, indexUnitConv, curUnits);
         OutputReportTabular::GetUnitConversion(state, indexUnitConv, curConversionFactor, curConversionOffset, curUnits);
         break;

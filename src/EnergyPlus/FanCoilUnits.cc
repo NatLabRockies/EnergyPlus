@@ -1186,13 +1186,13 @@ namespace FanCoilUnits {
         Real64 Cp;
         int zoneHVACIndex;        // index of zoneHVAC equipment sizing specification
         std::string SizingString; // input field sizing description (e.g., Nominal Capacity)
-        Real64 TempSize;          // autosized value of coil input field
+        Real64 TempSize = 0.0;    // autosized value of coil input field
         int SizingMethod; // Integer representation of sizing method name (e.g., CoolingAirflowSizing, HeatingAirflowSizing, CoolingCapacitySizing,
                           // HeatingCapacitySizing, etc.)
         bool PrintFlag;   // TRUE when sizing information is reported in the eio file
                           // FractionOfAutosizedHeatingAirflow ...)
-        Real64 WaterCoilSizDeltaT; // water coil deltaT for design water flow rate autosizing
-        int CoilNum;               // index of water coil object
+        Real64 WaterCoilSizDeltaT = 0.0; // water coil deltaT for design water flow rate autosizing
+        int CoilNum;                     // index of water coil object
 
         bool ErrorsFound = false;             // TRUE if errors found during sizing
         bool IsAutoSize = false;              // Indicator to autosize for reporting
@@ -1730,12 +1730,6 @@ namespace FanCoilUnits {
 
                     if (DoWaterCoilSizing) {
                         SizingMethod = HVAC::CoolingCapacitySizing;
-                        if (state.dataSize->FinalZoneSizing(state.dataSize->CurZoneEqNum).DesCoolMassFlow > 0.0) {
-                            state.dataSize->FinalZoneSizing(state.dataSize->CurZoneEqNum).DesCoolOAFlowFrac =
-                                min(fanCoil.OutAirVolFlow / state.dataSize->FinalZoneSizing(state.dataSize->CurZoneEqNum).DesCoolMassFlow, 1.0);
-                        } else {
-                            state.dataSize->FinalZoneSizing(state.dataSize->CurZoneEqNum).DesCoolOAFlowFrac = 0.0;
-                        }
                         if (fanCoil.HVACSizingIndex > 0) {
                             zoneHVACIndex = fanCoil.HVACSizingIndex;
                             int CapSizingMethod = state.dataSize->ZoneHVACSizing(zoneHVACIndex).CoolingCapMethod;

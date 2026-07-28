@@ -626,7 +626,7 @@ TEST_F(EnergyPlusFixture, EconomicLifeCycleCost_GetInput_EnsureFuelTypesAllRecog
         // WHY IS COMPARE ENUMS THIS WAY?
         EXPECT_ENUM_NE(Constant::eResource::Invalid, resource);
 
-        idf_objects += fmt::format(R"idf(
+        idf_objects += std::format(R"idf(
 LifeCycleCost:UsePriceEscalation,
   LCCUsePriceEscalation {0},             !- Name
   {0},                                   !- Resource

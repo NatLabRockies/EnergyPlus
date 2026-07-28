@@ -55,7 +55,6 @@
 // EnergyPlus Headers
 #include <EnergyPlus/Data/BaseData.hh>
 #include <EnergyPlus/DataGlobalConstants.hh>
-#include <EnergyPlus/DataGlobals.hh>
 #include <EnergyPlus/DataHeatBalance.hh>
 #include <EnergyPlus/EnergyPlus.hh>
 #include <EnergyPlus/FluidProperties.hh>
@@ -64,7 +63,6 @@
 #include <EnergyPlus/SingleDuct.hh>
 #include <EnergyPlus/StandardRatings.hh>
 #include <EnergyPlus/UnitarySystem.hh>
-#include <EnergyPlus/UtilityRoutines.hh>
 
 namespace EnergyPlus {
 
@@ -86,17 +84,19 @@ namespace HVACVariableRefrigerantFlow {
     {
         Invalid = -1,
         LoadPriority,             // total of zone loads dictate operation in cooling or heating
-        ZonePriority,             // # of zones requiring cooling or heating dictate operation in cooling or heating
-        ThermostatOffsetPriority, // zone with largest deviation from setpoint dictates operation
-        ScheduledPriority,        // cooling and heating modes are scheduled
         MasterThermostatPriority, // Master zone thermostat dictates operation
-        FirstOnPriority,          // first unit to respond dictates operation (not used at this time)
+        Scheduled,                // cooling and heating modes are scheduled
+        ThermostatOffsetPriority, // zone with largest deviation from setpoint dictates operation
+        ZonePriority,             // # of zones requiring cooling or heating dictate operation in cooling or heating
         Num
     };
 
     static constexpr std::array<std::string_view, static_cast<int>(ThermostatCtrlType::Num)> ThermostatCtrlTypeUC = {
-        "LOADPRIORITY", "ZONEPRIORITY", "THERMOSTATOFFSETPRIORITY", "SCHEDULEDPRIORITY", "MASTERTHERMOSTATPRIORITY",
-        // "FIRSTONPRIORITY",
+        "LOADPRIORITY",
+        "MASTERTHERMOSTATPRIORITY",
+        "SCHEDULED",
+        "THERMOSTATOFFSETPRIORITY",
+        "ZONEPRIORITY",
     };
 
     enum class EvapWaterSupply
@@ -389,7 +389,9 @@ namespace HVACVariableRefrigerantFlow {
         Real64 SCHigh;                    // VRF outdoor unit subcooling degrees upper limit [C]
         Real64 VRFOperationSimPath;       // simulation path indicating the VRF operation mode [--]
         bool checkPlantCondTypeOneTime;
-        int CondenserCapErrIdx; // recurring condenser capacity error index
+        int CondenserCapErrIdx;              // recurring condenser capacity error index
+        int CondenserCoolingIterLimitErrIdx; // recurring cooling compressor iteration limit error index
+        int CondenserHeatingIterLimitErrIdx; // recurring heating compressor iteration limit error index
         bool adjustedTe;
 
         // Default Constructor
@@ -430,7 +432,8 @@ namespace HVACVariableRefrigerantFlow {
               RatedHeatCapacity(0.0), RatedCompPower(14000.0), RatedCompPowerPerCapcity(0.35), RatedOUFanPower(0.0), RatedOUFanPowerPerCapcity(0.0),
               RateBFOUEvap(0.45581), RateBFOUCond(0.21900), RefPipDiaSuc(0.0), RefPipDiaDis(0.0), RefPipLen(0.0), RefPipEquLen(0.0), RefPipHei(0.0),
               RefPipInsThi(0.0), RefPipInsCon(0.0), SH(0.0), SC(0.0), SCHE(0.0), SHLow(0.0), SCLow(0.0), SHHigh(0.0), SCHigh(0.0),
-              VRFOperationSimPath(0.0), checkPlantCondTypeOneTime(true), CondenserCapErrIdx(0), adjustedTe(false)
+              VRFOperationSimPath(0.0), checkPlantCondTypeOneTime(true), CondenserCapErrIdx(0), CondenserCoolingIterLimitErrIdx(0),
+              CondenserHeatingIterLimitErrIdx(0), adjustedTe(false)
         {
         }
 
@@ -529,7 +532,7 @@ namespace HVACVariableRefrigerantFlow {
                              Real64 MaxOutdoorUnitTc,   // The maximum temperature that Tc can be at heating mode [C]
                              Real64 &OUCondHeatRelease, // Condenser heat release (cooling mode) [W]
                              Real64 &CompSpdActual,     // Actual compressor running speed [rps]
-                             Real64 &Ncomp,             // Compressor power [W]
+                             Real64 &t_Ncomp,           // Compressor power [W]
                              Real64 &CyclingRatio       // Cycling Ratio [W]
         );
 
@@ -545,7 +548,7 @@ namespace HVACVariableRefrigerantFlow {
                         Real64 Pipe_Q,             // Piping Loss Algorithm Parameter: Heat loss [W]
                         Real64 &OUEvapHeatExtract, // Condenser heat release (cooling mode) [W]
                         Real64 &CompSpdActual,     // Actual compressor running speed [rps]
-                        Real64 &Ncomp,             // Compressor power [W]
+                        Real64 &t_Ncomp,           // Compressor power [W]
                         Real64 &CyclingRatio       // Compressor cycling ratio
         );
 
@@ -567,7 +570,7 @@ namespace HVACVariableRefrigerantFlow {
                               Real64 &m_ref_OU_cond, // mass flow rate of Refrigerant through OU condenser [kg/s]
                               Real64 &N_fan_OU,      // outdoor unit fan power [W]
                               Real64 &CompSpdActual, // Actual compressor running speed [rps]
-                              Real64 &Ncomp          // compressor power [W]
+                              Real64 &t_Ncomp        // compressor power [W]
         );
 
         void VRFOU_CompSpd(EnergyPlusData &state,
@@ -587,7 +590,7 @@ namespace HVACVariableRefrigerantFlow {
                            Real64 h_IU_evap_in,  // Enthalpy of IU at inlet, for C_cap_operation calculation [kJ/kg]
                            Real64 h_comp_in,     // Enthalpy after piping loss (compressor inlet), for C_cap_operation calculation [kJ/kg]
                            Real64 &Q_c_tot,      // Compressor evaporative capacity [W]
-                           Real64 &Ncomp         // Compressor power [W]
+                           Real64 &t_Ncomp       // Compressor power [W]
         );
 
         void VRFOU_PipeLossC(EnergyPlusData &state,

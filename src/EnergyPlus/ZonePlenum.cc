@@ -122,7 +122,7 @@ void SimAirZonePlenum(EnergyPlusData &state,
         if (CompIndex == 0) {
             ZonePlenumNum = Util::FindItemInList(CompName, state.dataZonePlenum->ZoneRetPlenCond, &ZoneReturnPlenumConditions::ZonePlenumName);
             if (ZonePlenumNum == 0) {
-                ShowFatalError(state, EnergyPlus::format("SimAirZonePlenum: AirLoopHVAC:ReturnPlenum not found={}", CompName));
+                ShowFatalError(state, std::format("SimAirZonePlenum: AirLoopHVAC:ReturnPlenum not found={}", CompName));
             }
             CompIndex = ZonePlenumNum;
         } else {
@@ -130,7 +130,7 @@ void SimAirZonePlenum(EnergyPlusData &state,
             if (ZonePlenumNum > state.dataZonePlenum->NumZoneReturnPlenums || ZonePlenumNum < 1) {
                 ShowFatalError(
                     state,
-                    EnergyPlus::format(
+                    std::format(
                         "SimAirZonePlenum: Invalid CompIndex passed={}, Number of AirLoopHVAC:ReturnPlenum={}, AirLoopHVAC:ReturnPlenum name={}",
                         ZonePlenumNum,
                         state.dataZonePlenum->NumZoneReturnPlenums,
@@ -139,11 +139,11 @@ void SimAirZonePlenum(EnergyPlusData &state,
             if (state.dataZonePlenum->ZoneRetPlenCond(ZonePlenumNum).checkEquipName) {
                 if (CompName != state.dataZonePlenum->ZoneRetPlenCond(ZonePlenumNum).ZonePlenumName) {
                     ShowFatalError(state,
-                                   EnergyPlus::format("SimAirZonePlenum: Invalid CompIndex passed={}, AirLoopHVAC:ReturnPlenum name={}, stored "
-                                                      "AirLoopHVAC:ReturnPlenum Name for that index={}",
-                                                      ZonePlenumNum,
-                                                      CompName,
-                                                      state.dataZonePlenum->ZoneRetPlenCond(ZonePlenumNum).ZonePlenumName));
+                                   std::format("SimAirZonePlenum: Invalid CompIndex passed={}, AirLoopHVAC:ReturnPlenum name={}, stored "
+                                               "AirLoopHVAC:ReturnPlenum Name for that index={}",
+                                               ZonePlenumNum,
+                                               CompName,
+                                               state.dataZonePlenum->ZoneRetPlenCond(ZonePlenumNum).ZonePlenumName));
                 }
                 state.dataZonePlenum->ZoneRetPlenCond(ZonePlenumNum).checkEquipName = false;
             }
@@ -160,7 +160,7 @@ void SimAirZonePlenum(EnergyPlusData &state,
         if (CompIndex == 0) {
             ZonePlenumNum = Util::FindItemInList(CompName, state.dataZonePlenum->ZoneSupPlenCond, &ZoneSupplyPlenumConditions::ZonePlenumName);
             if (ZonePlenumNum == 0) {
-                ShowFatalError(state, EnergyPlus::format("SimAirZonePlenum: AirLoopHVAC:SupplyPlenum not found={}", CompName));
+                ShowFatalError(state, std::format("SimAirZonePlenum: AirLoopHVAC:SupplyPlenum not found={}", CompName));
             }
             CompIndex = ZonePlenumNum;
         } else {
@@ -168,7 +168,7 @@ void SimAirZonePlenum(EnergyPlusData &state,
             if (ZonePlenumNum > state.dataZonePlenum->NumZoneSupplyPlenums || ZonePlenumNum < 1) {
                 ShowFatalError(
                     state,
-                    EnergyPlus::format(
+                    std::format(
                         "SimAirZonePlenum: Invalid CompIndex passed={}, Number of AirLoopHVAC:SupplyPlenum={}, AirLoopHVAC:SupplyPlenum name={}",
                         ZonePlenumNum,
                         state.dataZonePlenum->NumZoneReturnPlenums,
@@ -177,11 +177,11 @@ void SimAirZonePlenum(EnergyPlusData &state,
             if (state.dataZonePlenum->ZoneSupPlenCond(ZonePlenumNum).checkEquipName) {
                 if (CompName != state.dataZonePlenum->ZoneSupPlenCond(ZonePlenumNum).ZonePlenumName) {
                     ShowFatalError(state,
-                                   EnergyPlus::format("SimAirZonePlenum: Invalid CompIndex passed={}, AirLoopHVAC:SupplyPlenum name={}, stored "
-                                                      "AirLoopHVAC:SupplyPlenum Name for that index={}",
-                                                      ZonePlenumNum,
-                                                      CompName,
-                                                      state.dataZonePlenum->ZoneSupPlenCond(ZonePlenumNum).ZonePlenumName));
+                                   std::format("SimAirZonePlenum: Invalid CompIndex passed={}, AirLoopHVAC:SupplyPlenum name={}, stored "
+                                               "AirLoopHVAC:SupplyPlenum Name for that index={}",
+                                               ZonePlenumNum,
+                                               CompName,
+                                               state.dataZonePlenum->ZoneSupPlenCond(ZonePlenumNum).ZonePlenumName));
                 }
                 state.dataZonePlenum->ZoneSupPlenCond(ZonePlenumNum).checkEquipName = false;
             }
@@ -194,8 +194,9 @@ void SimAirZonePlenum(EnergyPlusData &state,
         UpdateAirZoneSupplyPlenum(state, ZonePlenumNum, PlenumInletChanged, FirstCall);
 
     } else {
-        ShowSevereError(state, EnergyPlus::format("SimAirZonePlenum: Errors in Plenum={}", CompName));
-        ShowContinueError(state, EnergyPlus::format("ZonePlenum: Unhandled plenum type found:{}", iCompType));
+        ShowSevereError(state, std::format("SimAirZonePlenum: Errors in Plenum={}", CompName));
+        ShowContinueError(
+            state, std::format("ZonePlenum: Unhandled plenum type found:{}", DataZoneEquipment::AirLoopHVACTypeNamesCC[static_cast<int>(iCompType)]));
         ShowFatalError(state, "Preceding conditions cause termination.");
     }
 }
@@ -306,10 +307,9 @@ void GetZonePlenumInput(EnergyPlusData &state)
         IOStat = Util::FindItemInList(AlphArray(2), state.dataZonePlenum->ZoneRetPlenCond, &ZoneReturnPlenumConditions::ZoneName, ZonePlenumNum - 1);
         if (IOStat != 0) {
             ShowSevereError(
-                state,
-                EnergyPlus::format("{}{} \"{}\" is used more than once as a {}.", RoutineName, cAlphaFields(2), AlphArray(2), CurrentModuleObject));
-            ShowContinueError(state, EnergyPlus::format("..Only one {} object may be connected to a given zone.", CurrentModuleObject));
-            ShowContinueError(state, EnergyPlus::format("..occurs in {} = {}", CurrentModuleObject, AlphArray(1)));
+                state, std::format("{}{} \"{}\" is used more than once as a {}.", RoutineName, cAlphaFields(2), AlphArray(2), CurrentModuleObject));
+            ShowContinueError(state, std::format("..Only one {} object may be connected to a given zone.", CurrentModuleObject));
+            ShowContinueError(state, std::format("..occurs in {} = {}", CurrentModuleObject, AlphArray(1)));
             ErrorsFound = true;
         }
         retPlenum.ZoneName = AlphArray(2);
@@ -329,9 +329,9 @@ void GetZonePlenumInput(EnergyPlusData &state)
         if (ZoneEquipConfigLoop != 0) {
             ShowSevereError(
                 state,
-                EnergyPlus::format(
+                std::format(
                     "{}{} \"{}\" is a controlled zone. It cannot be used as a {}", RoutineName, cAlphaFields(2), AlphArray(2), CurrentModuleObject));
-            ShowContinueError(state, EnergyPlus::format("..occurs in {} = {}", CurrentModuleObject, AlphArray(1)));
+            ShowContinueError(state, std::format("..occurs in {} = {}", CurrentModuleObject, AlphArray(1)));
             ErrorsFound = true;
         }
 
@@ -405,16 +405,16 @@ void GetZonePlenumInput(EnergyPlusData &state)
                 if (!CheckPurchasedAirForReturnPlenum(state, ZonePlenumNum)) {
                     CheckUniqueNodeNumbers(state, "Return Plenum Induced Air Nodes", UniqueNodeError, NodeNums(NodeNum), CurrentModuleObject);
                     if (UniqueNodeError) {
-                        ShowContinueError(state, EnergyPlus::format("Occurs for ReturnPlenum = {}", AlphArray(1)));
+                        ShowContinueError(state, std::format("Occurs for ReturnPlenum = {}", AlphArray(1)));
                         ErrorsFound = true;
                     }
                     PIUInducesPlenumAir(state, retPlenum.InducedNode(NodeNum), ZonePlenumNum);
                 }
             }
         } else {
-            ShowContinueError(state,
-                              EnergyPlus::format("Invalid Induced Air Outlet Node or NodeList name in AirLoopHVAC:ReturnPlenum object = {}",
-                                                 retPlenum.ZonePlenumName));
+            ShowContinueError(
+                state,
+                std::format("Invalid Induced Air Outlet Node or NodeList name in AirLoopHVAC:ReturnPlenum object = {}", retPlenum.ZonePlenumName));
             ErrorsFound = true;
         }
 
@@ -494,21 +494,20 @@ void GetZonePlenumInput(EnergyPlusData &state)
         IOStat = Util::FindItemInList(AlphArray(2), state.dataZonePlenum->ZoneSupPlenCond, &ZoneSupplyPlenumConditions::ZoneName, ZonePlenumNum - 1);
         if (IOStat != 0) {
             ShowSevereError(
-                state,
-                EnergyPlus::format("{}{} \"{}\" is used more than once as a {}.", RoutineName, cAlphaFields(2), AlphArray(2), CurrentModuleObject));
-            ShowContinueError(state, EnergyPlus::format("..Only one {} object may be connected to a given zone.", CurrentModuleObject));
-            ShowContinueError(state, EnergyPlus::format("..occurs in {} = {}", CurrentModuleObject, AlphArray(1)));
+                state, std::format("{}{} \"{}\" is used more than once as a {}.", RoutineName, cAlphaFields(2), AlphArray(2), CurrentModuleObject));
+            ShowContinueError(state, std::format("..Only one {} object may be connected to a given zone.", CurrentModuleObject));
+            ShowContinueError(state, std::format("..occurs in {} = {}", CurrentModuleObject, AlphArray(1)));
             ErrorsFound = true;
         }
         if (state.dataZonePlenum->NumZoneReturnPlenums > 0) { // Check if this zone is also used in another plenum
             IOStat = Util::FindItemInList(AlphArray(2), state.dataZonePlenum->ZoneRetPlenCond, &ZoneReturnPlenumConditions::ZoneName);
             if (IOStat != 0) {
                 ShowSevereError(state,
-                                EnergyPlus::format("{}{} \"{}\" is used more than once as a {} or AirLoopHVAC:ReturnPlenum.",
-                                                   RoutineName,
-                                                   cAlphaFields(2),
-                                                   AlphArray(2),
-                                                   CurrentModuleObject));
+                                std::format("{}{} \"{}\" is used more than once as a {} or AirLoopHVAC:ReturnPlenum.",
+                                            RoutineName,
+                                            cAlphaFields(2),
+                                            AlphArray(2),
+                                            CurrentModuleObject));
                 ShowContinueError(
                     state, std::format("..Only one {} or AirLoopHVAC:ReturnPlenum object may be connected to a given zone.", CurrentModuleObject));
                 ShowContinueError(state, std::format("..occurs in {} = {}", CurrentModuleObject, AlphArray(1)));

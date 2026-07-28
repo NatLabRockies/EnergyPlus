@@ -115,8 +115,6 @@ namespace CTElectricGenerator {
         ShowFatalError(state,
                        std::format("LocalCombustionTurbineGeneratorFactory: Error getting inputs for combustion turbine generator named: {}",
                                    objectName)); // LCOV_EXCL_LINE
-        // Shut up the compiler
-        return nullptr; // LCOV_EXCL_LINE
     }
 
     void CTGeneratorData::simulate([[maybe_unused]] EnergyPlusData &state,

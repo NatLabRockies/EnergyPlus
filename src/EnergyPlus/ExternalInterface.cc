@@ -406,7 +406,7 @@ void InitExternalInterface(EnergyPlusData &state)
                 state.dataExternalInterface->ErrorsFound = true;
             }
         } else {
-            ShowSevereError(state, std::format("ExternalInterface: Did not find file \"{}\".", state.dataExternalInterface->socCfgFilPath.string()));
+            ShowSevereError(state, std::format("ExternalInterface: Did not find file \"{}\".", state.dataExternalInterface->socCfgFilPath));
             ShowContinueError(state, "This file needs to be in same directory as in.idf.");
             ShowContinueError(state, "Check the documentation for the ExternalInterface.");
             state.dataExternalInterface->ErrorsFound = true;
@@ -2282,7 +2282,7 @@ void GetReportVariableKey(
     Constant::Units varUnits(Constant::Units::None);                                // Units string, may be blank
     Array1D_string keyNames;
     Array1D_int keyIndexes; // Array index for
-    int Loop, iKey;         // Loop counters
+    int Loop, iKey(0);      // Loop counters
 
     // Get pointers for variables to be sent to Ptolemy
     for (Loop = 1; Loop <= numberOfKeys; ++Loop) {

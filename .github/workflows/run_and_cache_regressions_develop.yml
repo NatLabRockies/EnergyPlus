@@ -7,6 +7,8 @@ on:
 env:
   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
   FC: gfortran-13
+  # IMPORTANT: If you change this: modify test_pull_requests.yml in accordance for the ENABLE_PCH value when we found regression tests
+  ENABLE_PCH: ON
 
 jobs:
   build_and_test:
@@ -53,7 +55,7 @@ jobs:
 
     steps:
 
-    - uses: actions/checkout@v6
+    - uses: actions/checkout@v7
 
     - name: Setup System
       id: setup-runner
@@ -71,15 +73,14 @@ jobs:
         echo "CURRENT_SHA=$CURRENT_SHA" >> $GITHUB_ENV
 
     - name: Restore Cache CCACHE
-      uses: actions/cache/restore@v5
+      uses: actions/cache/restore@v6
       id: cacheccache-restore
       with:
         path: |
           ${{ steps.setup-runner.outputs.ccache-dir }}
-        key: ccache-${{ matrix.os }}-${{ steps.setup-runner.outputs.compiler-id }}-${{ env.CURRENT_SHA }}
+        key: ccache-${{ matrix.os }}-${{ steps.setup-runner.outputs.compiler-id }}-pch=${{ env.ENABLE_PCH }}-${{ env.CURRENT_SHA }}
         restore-keys: |
-          ccache-${{ matrix.os }}-${{ steps.setup-runner.outputs.compiler-id }}-
-          ccache-${{ matrix.os }}-
+          ccache-${{ matrix.os }}-${{ steps.setup-runner.outputs.compiler-id }}-pch=${{ env.ENABLE_PCH }}-
 
     - name: Did restoring the CCache-cache work?
       shell: bash
@@ -128,7 +129,7 @@ jobs:
     - name: Configure and Build
       uses: ./.github/actions/configure-and-build
       with:
-        enable-pch: OFF
+        enable-pch: ${{ env.ENABLE_PCH }}
         minimal-targets: false
         build-directory: ./build
         nproc: ${{ steps.setup-runner.outputs.nproc }}
@@ -140,9 +141,18 @@ jobs:
       shell: bash
       run: echo "::remove-matcher owner=gcc-problem-matcher::"
 
+    - name: Upload CCache debug logs
+      if: always() && env.CCACHE_DEBUG == '1'
+      uses: actions/upload-artifact@v7
+      with:
+        name: ccache-debug-${{ matrix.os }}
+        path: .ccache-debug
+        include-hidden-files: true
+        retention-days: 7
+
     - name: Save CCache cache
       if: always() && steps.cacheccache-restore.outputs.cache-hit != 'true'
-      uses: actions/cache/save@v5
+      uses: actions/cache/save@v6
       with:
         path: |
           ${{ steps.setup-runner.outputs.ccache-dir }}
@@ -173,7 +183,7 @@ jobs:
         fi;
         mv testfiles testfiles-develop
 
-    - uses: actions/cache/save@v5
+    - uses: actions/cache/save@v6
       with:
         path: |
           ./build/testfiles-develop

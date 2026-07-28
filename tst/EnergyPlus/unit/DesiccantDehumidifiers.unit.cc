@@ -2857,7 +2857,6 @@ TEST_F(EnergyPlusFixture, DesiccantDehum_OnOASystemTest)
     state->dataGlobal->DDOnlySimulation = true;
 
     SimulationManager::GetProjectData(*state);
-    OutputReportPredefined::SetPredefinedTables(*state);
     createFacilityElectricPowerServiceObject(*state);
     SetPreConstructionInputParameters(*state); // establish array bounds for constructions early
     BranchInputManager::ManageBranchInput(*state);
@@ -2873,7 +2872,6 @@ TEST_F(EnergyPlusFixture, DesiccantDehum_OnOASystemTest)
     state->dataSize->CurSysNum = 1;
     state->dataSize->CurOASysNum = 1;
 
-    GetDesiccantDehumidifierInput(*state);
     EXPECT_EQ(1, state->dataDesiccantDehumidifiers->NumDesicDehums);
     EXPECT_EQ("OA DESICCANT SYSTEM", state->dataDesiccantDehumidifiers->DesicDehum(DesicDehumNum).Name);
     EXPECT_EQ("OA DESICCANT REGEN COIL", state->dataDesiccantDehumidifiers->DesicDehum(DesicDehumNum).RegenCoilName);
@@ -4061,7 +4059,6 @@ TEST_F(EnergyPlusFixture, DesiccantDehum_OnPrimaryAirSystemTest)
     state->dataGlobal->DDOnlySimulation = true;
 
     SimulationManager::GetProjectData(*state);
-    OutputReportPredefined::SetPredefinedTables(*state);
     createFacilityElectricPowerServiceObject(*state);
     SetPreConstructionInputParameters(*state); // establish array bounds for constructions early
     BranchInputManager::ManageBranchInput(*state);
@@ -5486,7 +5483,6 @@ TEST_F(EnergyPlusFixture, DesiccantDehum_RegenAirHeaterHWCoilSizingTest)
     state->dataGlobal->DDOnlySimulation = true;
 
     SimulationManager::GetProjectData(*state);
-    OutputReportPredefined::SetPredefinedTables(*state);
     createFacilityElectricPowerServiceObject(*state);
     SetPreConstructionInputParameters(*state); // establish array bounds for constructions early
     BranchInputManager::ManageBranchInput(*state);
@@ -6742,7 +6738,6 @@ TEST_F(EnergyPlusFixture, DesiccantDehum_VSCoolingCoilOnPrimaryAirSystemTest)
     state->dataGlobal->DDOnlySimulation = true;
 
     SimulationManager::GetProjectData(*state);
-    OutputReportPredefined::SetPredefinedTables(*state);
     createFacilityElectricPowerServiceObject(*state);
     SetPreConstructionInputParameters(*state); // establish array bounds for constructions early
     BranchInputManager::ManageBranchInput(*state);

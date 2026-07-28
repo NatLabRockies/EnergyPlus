@@ -4155,19 +4155,19 @@ Refrigeration:AirChiller,
 
 \begin{itemize}
 \item
-  HVAC,Average,Refrigeration Zone Air Chiller Total Cooling Rate {[}W{]}
+  HVAC,Average,Refrigeration Zone Air Chiller Coil Total Cooling Rate {[}W{]}
 \item
-  HVAC,Sum,Refrigeration Zone Air Chiller Total Cooling Energy {[}J{]}
+  HVAC,Sum,Refrigeration Zone Air Chiller Coil Total Cooling Energy {[}J{]}
 \item
-  HVAC,Average,Refrigeration Zone Air Chiller Sensible Cooling Rate {[}W{]}
+  HVAC,Average,Refrigeration Zone Air Chiller Coil Sensible Cooling Rate {[}W{]}
 \item
-  HVAC,Sum,Refrigeration Zone Air Chiller Sensible Cooling Energy {[}J{]}
+  HVAC,Sum,Refrigeration Zone Air Chiller Coil Sensible Cooling Energy {[}J{]}
 \item
-  HVAC,Average,Refrigeration Zone Air Chiller Latent Cooling Rate {[}W{]}
+  HVAC,Average,Refrigeration Zone Air Chiller Coil Latent Cooling Rate {[}W{]}
 \item
-  HVAC,Sum,Refrigeration Zone Air Chiller Latent Cooling Energy {[}J{]}
+  HVAC,Sum,Refrigeration Zone Air Chiller Coil Latent Cooling Energy {[}J{]}
 \item
-  HVAC,Average, Refrigeration Zone Air Chiller Water Removed Mass Flow Rate {[}kg/s{]}
+  HVAC,Average, Refrigeration Zone Air Chiller Coil Water Removed Mass Flow Rate {[}kg/s{]}
 \item
   HVAC,Average,Refrigeration Zone Air Chiller Total Electricity Rate {[}W{]}
 \item
@@ -4181,9 +4181,9 @@ Refrigeration:AirChiller,
 \item
   HVAC,Sum,Refrigeration Zone Air Chiller Heater Electricity Energy {[}J{]}
 \item
-  HVAC,Average,Refrigeration Zone Air Chiller Sensible Heat Ratio {[]}
+  HVAC,Average,Refrigeration Zone Air Chiller Coil Sensible Heat Ratio {[]}
 \item
-  HVAC,Average,Refrigeration Zone Air Chiller Frost Accumulation Mass {[}kg{]}
+  HVAC,Average,Refrigeration Zone Air Chiller Coil Frost Accumulation Mass {[}kg{]}
 \item
   HVAC,Average,Refrigeration Zone Air Chiller Zone Total Cooling Rate {[}W{]}
 \item
@@ -4202,9 +4202,9 @@ Refrigeration:AirChiller,
 
 \begin{itemize}
 \item
-  HVAC,Average,Refrigeration Zone Air Chiller Defrost Electricity Rate {[}W{]}
+  HVAC,Average,Refrigeration Zone Air Chiller Coil Defrost Electricity Rate {[}W{]}
 \item
-  HVAC,Sum,Refrigeration Zone Air Chiller Defrost Electricity Energy {[}J{]}
+  HVAC,Sum,Refrigeration Zone Air Chiller Coil Defrost Electricity Energy {[}J{]}
 \end{itemize}
 
 \textbf{\emph{Report for each Zone exchanging energy with the Air Chiller}}
@@ -4230,35 +4230,35 @@ Refrigeration:AirChiller,
   HVAC,Average,Refrigeration Zone Air Chiller Water Removed Mass Flow Rate {[}kg/s{]}
 \end{itemize}
 
-\paragraph{Refrigeration Zone Air Chiller Total Cooling Rate {[}W{]}}\label{refrigeration-zone-air-chiller-total-cooling-rate-w-1}
+\paragraph{Refrigeration Zone Air Chiller Coil Total Cooling Rate {[}W{]}}\label{refrigeration-zone-air-chiller-coil-total-cooling-rate-w-1}
 
 This field is the total (sensible plus latent) cooling rate of the Air Chiller evaporator coil in Watts.
 
-\paragraph{Refrigeration Zone Air Chiller Total Cooling Energy {[}J{]}}\label{refrigeration-zone-air-chiller-total-cooling-energy-j}
+\paragraph{Refrigeration Zone Air Chiller Coil Total Cooling Energy {[}J{]}}\label{refrigeration-zone-air-chiller-coil-total-cooling-energy-j}
 
 This field is the total (sensible plus latent) cooling of the Air Chiller evaporator coil in Joules over the timestep being reported. This output is also added to a meter with Resource Type = EnergyTransfer, End Use Key = Refrigeration, Group Key = Building (Ref. Output:Meter objects).
 
-\paragraph{Refrigeration Zone Air Chiller Sensible Cooling Rate {[}W{]}}\label{refrigeration-zone-air-chiller-sensible-cooling-rate-w-1}
+\paragraph{Refrigeration Zone Air Chiller Coil Sensible Cooling Rate {[}W{]}}\label{refrigeration-zone-air-chiller-coil-sensible-cooling-rate-w-1}
 
 \paragraph{Refrigeration Zone Air Chiller Sensible Heat Transfer Rate {[}W{]}}\label{refrigeration-zone-air-chiller-sensible-heat-transfer-rate-w-1}
 
 This field is the sensible cooling rate of the Air Chiller evaporator coil in Watts.
 
-\paragraph{Refrigeration Zone Air Chiller Sensible Cooling Energy ~{[}J{]}}\label{refrigeration-zone-air-chiller-sensible-cooling-energy-j}
+\paragraph{Refrigeration Zone Air Chiller Coil Sensible Cooling Energy ~{[}J{]}}\label{refrigeration-zone-air-chiller-coil-sensible-cooling-energy-j}
 
 \paragraph{Refrigeration Zone Air Chiller Sensible Heat Transfer Energy {[}J{]}}\label{refrigeration-zone-air-chiller-sensible-heat-transfer-energy-j-1}
 
 This field is the sensible cooling of the Air Chiller evaporator coil in Joules over the timestep being reported.
 
-\paragraph{Refrigeration Zone Air Chiller Latent Cooling Rate ~{[}W{]}}\label{refrigeration-zone-air-chiller-latent-cooling-rate-w-1}
+\paragraph{Refrigeration Zone Air Chiller Coil Latent Cooling Rate ~{[}W{]}}\label{refrigeration-zone-air-chiller-coil-latent-cooling-rate-w-1}
 
 This field is the latent cooling (dehumidification) rate of the Air Chiller evaporator coil in Watts.
 
-\paragraph{Refrigeration Zone Air Chiller Latent Cooling Energy ~{[}J{]}}\label{refrigeration-zone-air-chiller-latent-cooling-energy-j}
+\paragraph{Refrigeration Zone Air Chiller Coil Latent Cooling Energy ~{[}J{]}}\label{refrigeration-zone-air-chiller-coil-latent-cooling-energy-j}
 
 This field is the latent cooling (dehumidification) of the Air Chiller evaporator coil in Joules over the timestep being reported.
 
-\paragraph{Refrigeration Zone Air Chiller Water Removed Mass Flow Rate ~{[}kg/s{]}}\label{refrigeration-zone-air-chiller-water-removed-mass-flow-rate-kgs-1}
+\paragraph{Refrigeration Zone Air Chiller Coil Water Removed Mass Flow Rate ~{[}kg/s{]}}\label{refrigeration-zone-air-chiller-coil-water-removed-mass-flow-rate-kgs-1}
 
 This field is the latent cooling (dehumidification) of the Air Chiller evaporator coil in kilograms per second over the timestep being reported.
 
@@ -4286,19 +4286,19 @@ This field is the electric power input to the Air Chiller heaters in Watts.
 
 This field is the total electricity consumption of the Air Chiller heaters in Joules over the timestep being reported. This output is also added to a meter with Resource Type = Electricity, End Use Key = Refrigeration, Group Key = Building (Ref. Output:Meter objects).
 
-\paragraph{Refrigeration Zone Air Chiller Defrost Electricity Rate~ {[}W{]}}\label{refrigeration-zone-air-chiller-defrost-electric-power-w}
+\paragraph{Refrigeration Zone Air Chiller Coil Defrost Electricity Rate~ {[}W{]}}\label{refrigeration-zone-air-chiller-coil-defrost-electric-power-w}
 
 This field is the electric power input to the Air Chiller electric defrost heater(s) in Watts. This output is available if case defrost type is Electric.
 
-\paragraph{Refrigeration Zone Air Chiller Defrost Electricity Energy {[}J{]}}\label{refrigeration-zone-air-chiller-defrost-electric-energy-j}
+\paragraph{Refrigeration Zone Air Chiller Coil Defrost Electricity Energy {[}J{]}}\label{refrigeration-zone-air-chiller-coil-defrost-electric-energy-j}
 
 This field is the total electricity consumption of the Air Chiller electric defrost heater(s) in Joules over the timestep being reported. This output is also added to a meter with Resource Type = Electricity, End Use Key = Refrigeration, Group Key = Building (Ref. Output:Meter objects). This output is available if case defrost type is Electric.
 
-\paragraph{Refrigeration Zone Air Chiller Sensible Heat Ratio}\label{refrigeration-zone-air-chiller-sensible-heat-ratio}
+\paragraph{Refrigeration Zone Air Chiller Coil Sensible Heat Ratio}\label{refrigeration-zone-air-chiller-coil-sensible-heat-ratio}
 
-This field is the Sensible Cooling Energy ~Rate divided by the Total Cooling Energy Rate.
+This field is the Coil Sensible Cooling Energy Rate divided by the Coil Total Cooling Energy Rate.
 
-\paragraph{Refrigeration Zone Air Chiller Frost Accumulation Mass {[}kg{]}}\label{refrigeration-zone-air-chiller-frost-accumulation-mass-kg}
+\paragraph{Refrigeration Zone Air Chiller Coil Frost Accumulation Mass {[}kg{]}}\label{refrigeration-zone-air-chiller-coil-frost-accumulation-mass-kg}
 
 This field is the total amount of frost present on the coil during the timestep being reported.
 

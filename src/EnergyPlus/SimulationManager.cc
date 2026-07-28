@@ -53,7 +53,6 @@
 // ObjexxFCL Headers
 #include <ObjexxFCL/Array.functions.hh>
 #include <ObjexxFCL/Array1D.hh>
-#include <ObjexxFCL/environment.hh>
 #include <ObjexxFCL/string.functions.hh>
 
 // Third Party Headers
@@ -67,7 +66,6 @@ extern "C" {
 #include <EnergyPlus/CostEstimateManager.hh>
 #include <EnergyPlus/CurveManager.hh>
 #include <EnergyPlus/Data/EnergyPlusData.hh>
-#include <EnergyPlus/DataAirLoop.hh>
 #include <EnergyPlus/DataBranchNodeConnections.hh>
 #include <EnergyPlus/DataConvergParams.hh>
 #include <EnergyPlus/DataErrorTracking.hh>
@@ -95,7 +93,6 @@ extern "C" {
 #include <EnergyPlus/ExternalInterface.hh>
 #include <EnergyPlus/FaultsManager.hh>
 #include <EnergyPlus/FileSystem.hh>
-#include <EnergyPlus/FluidProperties.hh>
 #include <EnergyPlus/GeneralRoutines.hh>
 #include <EnergyPlus/HVACControllers.hh>
 #include <EnergyPlus/HVACManager.hh>
@@ -109,7 +106,6 @@ extern "C" {
 #include <EnergyPlus/NodeInputManager.hh>
 #include <EnergyPlus/OutAirNodeManager.hh>
 #include <EnergyPlus/OutputProcessor.hh>
-#include <EnergyPlus/OutputReportPredefined.hh>
 #include <EnergyPlus/OutputReportTabular.hh>
 #include <EnergyPlus/OutputReports.hh>
 #include <EnergyPlus/Plant/PlantManager.hh>
@@ -118,7 +114,6 @@ extern "C" {
 #include <EnergyPlus/PollutionModule.hh>
 #include <EnergyPlus/Psychrometrics.hh>
 #include <EnergyPlus/RefrigeratedCase.hh>
-#include <EnergyPlus/ReportCoilSelection.hh>
 #include <EnergyPlus/ResultsFramework.hh>
 #include <EnergyPlus/SetPointManager.hh>
 #include <EnergyPlus/SimulationManager.hh>
@@ -292,7 +287,7 @@ namespace SimulationManager {
 
         CheckForMisMatchedEnvironmentSpecifications(state);
         CheckForRequestedReporting(state);
-        OutputReportPredefined::SetPredefinedTables(state);
+        // OutputReportPredefined::SetPredefinedTables(state); // this is being called via init_constant_state now
         SetPreConstructionInputParameters(state); // establish array bounds for constructions early
 
         OutputProcessor::SetupTimePointers(
@@ -523,7 +518,7 @@ namespace SimulationManager {
                 }
 
                 ++state.dataGlobal->DayOfSim;
-                state.dataGlobal->DayOfSimChr = fmt::to_string(state.dataGlobal->DayOfSim);
+                state.dataGlobal->DayOfSimChr = std::to_string(state.dataGlobal->DayOfSim);
                 if (!state.dataGlobal->WarmupFlag) {
                     ++state.dataEnvrn->CurrentOverallSimDay;
                     DisplaySimDaysProgress(state, state.dataEnvrn->CurrentOverallSimDay, state.dataEnvrn->TotalOverallSimDays);
@@ -535,7 +530,7 @@ namespace SimulationManager {
 
                 if (state.dataGlobal->WarmupFlag) {
                     ++state.dataReportFlag->NumOfWarmupDays;
-                    state.dataReportFlag->cWarmupDay = fmt::to_string(state.dataReportFlag->NumOfWarmupDays);
+                    state.dataReportFlag->cWarmupDay = std::to_string(state.dataReportFlag->NumOfWarmupDays);
                     DisplayString(state, "Warming up {" + state.dataReportFlag->cWarmupDay + '}');
                 } else if (state.dataGlobal->DayOfSim == 1) {
                     if (state.dataSysVars->ReportDuringWarmup) {
@@ -728,12 +723,12 @@ namespace SimulationManager {
         Array1D_string Alphas(10);
         Array1D<Real64> Number(4);
         int NumAlpha;
-        int NumNumber;
+        int NumNumber = 0;
         int IOStat;
         int NumDebugOut;
         int MinInt;
         int Num;
-        int Which;
+        int Which = 1;
         bool ErrorsFound;
         int NumRunControl;
         std::string VersionID;
@@ -902,16 +897,17 @@ namespace SimulationManager {
                 state.dataGlobal->TimeStepsInHour = 2; // Force 30 minute time steps on CI
             }
             if (state.dataGlobal->TimeStepsInHour <= 0 || state.dataGlobal->TimeStepsInHour > 60) {
-                Alphas(1) = fmt::to_string(state.dataGlobal->TimeStepsInHour);
+                Alphas(1) = std::to_string(state.dataGlobal->TimeStepsInHour);
                 ShowWarningError(state, std::format("{}: Requested number ({}) invalid, Defaulted to 4", CurrentModuleObject, Alphas(1)));
                 state.dataGlobal->TimeStepsInHour = 4;
             } else if (mod(60, state.dataGlobal->TimeStepsInHour) != 0) {
                 MinInt = 9999;
                 for (Num = 1; Num <= 12; ++Num) {
-                    if (std::abs(state.dataGlobal->TimeStepsInHour - Div60[Num - 1]) > MinInt) {
+                    int const ThisDiff = std::abs(state.dataGlobal->TimeStepsInHour - Div60[Num - 1]);
+                    if (ThisDiff > MinInt) {
                         continue;
                     }
-                    MinInt = state.dataGlobal->TimeStepsInHour - Div60[Num - 1];
+                    MinInt = ThisDiff;
                     Which = Num;
                 }
                 ShowWarningError(state,
@@ -1050,7 +1046,8 @@ namespace SimulationManager {
 
             if (instances != state.dataInputProcessing->inputProcessor->epJSON.end()) {
                 auto &instancesValue = instances.value();
-                for (auto instance = instancesValue.begin(); instance != instancesValue.end(); ++instance) {
+                auto instance = instancesValue.begin();
+                if (instance != instancesValue.end()) {
                     auto const &fields = instance.value();
                     std::string const &thisObjectName = instance.key();
                     state.dataInputProcessing->inputProcessor->markObjectAsUsed(CurrentModuleObject, thisObjectName);
@@ -1124,9 +1121,6 @@ namespace SimulationManager {
                             }
                         }
                     }
-
-                    // Don't process the duplicate ones
-                    break;
                 }
             }
         }
@@ -1360,16 +1354,16 @@ namespace SimulationManager {
                             state.dataConvergeParams->MaxZoneTempDiff = fields.at("maxzonetempdiff").get<Real64>();
                             ShowWarningError(
                                 state,
-                                EnergyPlus::format("PerformancePrecisionTradeoffs using the Advanced Override Mode, MaxZoneTempDiff set to: {:.4R}",
-                                                   state.dataConvergeParams->MaxZoneTempDiff));
+                                std::format("PerformancePrecisionTradeoffs using the Advanced Override Mode, MaxZoneTempDiff set to: {:.4f}",
+                                            state.dataConvergeParams->MaxZoneTempDiff));
                             advancedModeUsed = true;
                         }
                         if (fields.find("maxalloweddeltemp") != fields.end()) { // not required field, has default value
                             state.dataHeatBal->MaxAllowedDelTemp = fields.at("maxalloweddeltemp").get<Real64>();
                             ShowWarningError(
                                 state,
-                                EnergyPlus::format("PerformancePrecisionTradeoffs using the Advanced Override Mode, MaxAllowedDelTemp set to: {:.4R}",
-                                                   state.dataHeatBal->MaxAllowedDelTemp));
+                                std::format("PerformancePrecisionTradeoffs using the Advanced Override Mode, MaxAllowedDelTemp set to: {:.4f}",
+                                            state.dataHeatBal->MaxAllowedDelTemp));
                             advancedModeUsed = true;
                         }
                         if (advancedModeUsed) {
@@ -1526,21 +1520,21 @@ namespace SimulationManager {
             Alphas(2) = "ScriptF";
         }
         Alphas(3) = overrideModeValue;
-        Alphas(4) = fmt::to_string(state.dataGlobal->TimeStepsInHour);
+        Alphas(4) = std::to_string(state.dataGlobal->TimeStepsInHour);
         if (state.dataHeatBal->OverrideZoneAirSolutionAlgo) {
             Alphas(5) = "Yes";
         } else {
             Alphas(5) = "No";
         }
-        Alphas(6) = fmt::to_string(state.dataHeatBal->MinNumberOfWarmupDays);
+        Alphas(6) = std::to_string(state.dataHeatBal->MinNumberOfWarmupDays);
         if (state.dataEnvrn->forceBeginEnvResetSuppress) {
             Alphas(7) = "Yes";
         } else {
             Alphas(7) = "No";
         }
-        Alphas(8) = EnergyPlus::format("{:.1R}", state.dataConvergeParams->MinTimeStepSys * 60.0);
-        Alphas(9) = EnergyPlus::format("{:.3R}", state.dataConvergeParams->MaxZoneTempDiff);
-        Alphas(10) = EnergyPlus::format("{:.4R}", state.dataHeatBal->MaxAllowedDelTemp);
+        Alphas(8) = std::format("{:.1f}", state.dataConvergeParams->MinTimeStepSys * 60.0);
+        Alphas(9) = std::format("{:.3f}", state.dataConvergeParams->MaxZoneTempDiff);
+        Alphas(10) = std::format("{:.4f}", state.dataHeatBal->MaxAllowedDelTemp);
         std::string pptHeader = "! <Performance Precision Tradeoffs>, Use Coil Direct Simulation, "
                                 "Zone Radiant Exchange Algorithm, Override Mode, Number of Timestep In Hour, "
                                 "Force Euler Method, Minimum Number of Warmup Days, Force Suppress All Begin Environment Resets, "
@@ -1556,7 +1550,7 @@ namespace SimulationManager {
               "{}\n",
               "! <Output Reporting Tolerances>, Tolerance for Time Heating Setpoint Not Met, Tolerance for Zone Cooling Setpoint Not Met Time");
         // Formats
-        static constexpr std::string_view Format_751(" Output Reporting Tolerances, {:.3R}, {:.3R}, \n");
+        static constexpr std::string_view Format_751(" Output Reporting Tolerances, {:.3f}, {:.3f}, \n");
 
         print(state.files.eio, Format_751, std::abs(deviationFromSetPtThresholdHtg), deviationFromSetPtThresholdClg);
 
@@ -1595,12 +1589,12 @@ namespace SimulationManager {
             Util::appendPerfLog(state, "Zone Radiant Exchange Algorithm", "ScriptF");
         }
         Util::appendPerfLog(state, "Override Mode", currentOverrideModeValue);
-        Util::appendPerfLog(state, "Number of Timesteps per Hour", fmt::to_string(state.dataGlobal->TimeStepsInHour));
-        Util::appendPerfLog(state, "Minimum Number of Warmup Days", fmt::to_string(state.dataHeatBal->MinNumberOfWarmupDays));
+        Util::appendPerfLog(state, "Number of Timesteps per Hour", std::to_string(state.dataGlobal->TimeStepsInHour));
+        Util::appendPerfLog(state, "Minimum Number of Warmup Days", std::to_string(state.dataHeatBal->MinNumberOfWarmupDays));
         Util::appendPerfLog(state, "SuppressAllBeginEnvironmentResets", bool_to_string(state.dataEnvrn->forceBeginEnvResetSuppress));
-        Util::appendPerfLog(state, "Minimum System Timestep", EnergyPlus::format("{:.1R}", state.dataConvergeParams->MinTimeStepSys * 60.0));
-        Util::appendPerfLog(state, "MaxZoneTempDiff", EnergyPlus::format("{:.2R}", state.dataConvergeParams->MaxZoneTempDiff));
-        Util::appendPerfLog(state, "MaxAllowedDelTemp", EnergyPlus::format("{:.4R}", state.dataHeatBal->MaxAllowedDelTemp));
+        Util::appendPerfLog(state, "Minimum System Timestep", std::format("{:.1f}", state.dataConvergeParams->MinTimeStepSys * 60.0));
+        Util::appendPerfLog(state, "MaxZoneTempDiff", std::format("{:.2f}", state.dataConvergeParams->MaxZoneTempDiff));
+        Util::appendPerfLog(state, "MaxAllowedDelTemp", std::format("{:.4f}", state.dataHeatBal->MaxAllowedDelTemp));
     }
 
     std::string bool_to_string(bool logical)
@@ -1780,26 +1774,7 @@ namespace SimulationManager {
     {
         auto result = std::make_unique<std::ofstream>(filePath, mode); // (AUTO_OK_UPTR)
         if (!result->good()) {
-            ShowFatalError(state, std::format("OpenOutputFiles: Could not open file {} for output (write).", filePath.string()));
-        }
-        return result;
-    }
-
-    std::unique_ptr<fmt::ostream> OpenFmtStreamFile(EnergyPlusData &state, const fs::path &filePath)
-    {
-        std::unique_ptr<fmt::ostream> result = nullptr;
-#ifdef _WIN32
-        std::string filePathStr = FileSystem::toString(filePath);
-        const char *path = filePathStr.c_str();
-#else
-        const char *path = filePath.c_str();
-#endif
-        try {
-            auto f = fmt::output_file(path, fmt::buffer_size = (2 << 17)); // (AUTO_OK_OBJ)
-            result = std::make_unique<fmt::ostream>(std::move(f));
-        } catch (const std::system_error &error) {
-            ShowSevereError(state, error.what());
-            ShowFatalError(state, std::format("OpenOutputFiles: Could not open file {} for output (write).", filePath.string()));
+            ShowFatalError(state, std::format("OpenOutputFiles: Could not open file {} for output (write).", filePath));
         }
         return result;
     }
@@ -1942,7 +1917,7 @@ namespace SimulationManager {
             print(
                 state.files.eio, "{}\n", "! <ConductionFiniteDifference Numerical Parameters>, Starting Relaxation Factor, Final Relaxation Factor");
             print(state.files.eio,
-                  "ConductionFiniteDifference Numerical Parameters, {:.3R}, {:.3R}\n",
+                  "ConductionFiniteDifference Numerical Parameters, {:.3f}, {:.3f}\n",
                   state.dataHeatBal->CondFDRelaxFactorInput,
                   state.dataHeatBal->CondFDRelaxFactor);
         }
@@ -1958,17 +1933,17 @@ namespace SimulationManager {
             if (state.dataSysVars->iEnvSetThreads == 0) {
                 cEnvSetThreads = "Not Set";
             } else {
-                cEnvSetThreads = fmt::to_string(state.dataSysVars->iEnvSetThreads);
+                cEnvSetThreads = std::to_string(state.dataSysVars->iEnvSetThreads);
             }
             if (state.dataSysVars->iepEnvSetThreads == 0) {
                 cepEnvSetThreads = "Not Set";
             } else {
-                cepEnvSetThreads = fmt::to_string(state.dataSysVars->iepEnvSetThreads);
+                cepEnvSetThreads = std::to_string(state.dataSysVars->iepEnvSetThreads);
             }
             if (state.dataSysVars->iIDFSetThreads == 0) {
                 cIDFSetThreads = "Not Set";
             } else {
-                cIDFSetThreads = fmt::to_string(state.dataSysVars->iIDFSetThreads);
+                cIDFSetThreads = std::to_string(state.dataSysVars->iIDFSetThreads);
             }
             if (state.dataSysVars->lnumActiveSims) {
                 print(state.files.eio,
@@ -2183,7 +2158,7 @@ namespace SimulationManager {
                   Node::ConnectionObjectTypeNamesUC[static_cast<int>(state.dataBranchNodeConnections->NodeConnections(Loop).ObjectType)],
                   state.dataBranchNodeConnections->NodeConnections(Loop).ObjectName,
                   Node::ConnectionTypeNames[static_cast<int>(state.dataBranchNodeConnections->NodeConnections(Loop).ConnectionType)],
-                  state.dataBranchNodeConnections->NodeConnections(Loop).FluidStream);
+                  static_cast<int>(state.dataBranchNodeConnections->NodeConnections(Loop).FluidStream));
             // Build ParentNodeLists
             if ((state.dataBranchNodeConnections->NodeConnections(Loop).ConnectionType == Node::ConnectionType::Inlet) ||
                 (state.dataBranchNodeConnections->NodeConnections(Loop).ConnectionType == Node::ConnectionType::Outlet)) {
@@ -2249,7 +2224,7 @@ namespace SimulationManager {
                   Node::ConnectionObjectTypeNamesUC[static_cast<int>(state.dataBranchNodeConnections->NodeConnections(Loop).ObjectType)],
                   state.dataBranchNodeConnections->NodeConnections(Loop).ObjectName,
                   Node::ConnectionTypeNames[static_cast<int>(state.dataBranchNodeConnections->NodeConnections(Loop).ConnectionType)],
-                  state.dataBranchNodeConnections->NodeConnections(Loop).FluidStream);
+                  static_cast<int>(state.dataBranchNodeConnections->NodeConnections(Loop).FluidStream));
         }
 
         int NumNonConnected = 0;
@@ -2858,12 +2833,9 @@ namespace SimulationManager {
         // using SQLiteProcedures::CreateSQLiteDatabase;
         state.dataGlobal->DoingInputProcessing = false;
 
-        state.dataInputProcessing->inputProcessor->preProcessorCheck(
-            state, state.dataSimulationManager->PreP_Fatal); // Check Preprocessor objects for warning, severe, etc errors.
-
-        if (state.dataSimulationManager->PreP_Fatal) {
-            ShowFatalError(state, "Preprocessor condition(s) cause termination.");
-        }
+        // Preprocessor objects (Output:PreprocessorMessage) are now checked in InputProcessor::processInput(),
+        // before epJSON schema validation can abort the run, so that a Fatal preprocessor message is not hidden
+        // behind unrelated schema errors caused by the preprocessor's malformed output.
 
         state.dataInputProcessing->inputProcessor->preScanReportingVariables(state);
     }

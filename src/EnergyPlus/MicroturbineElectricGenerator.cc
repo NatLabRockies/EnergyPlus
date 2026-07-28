@@ -110,10 +110,8 @@ PlantComponent *MTGeneratorSpecs::factory(EnergyPlusData &state, std::string con
     }
     // If we didn't find it, fatal
     ShowFatalError(state,
-                   EnergyPlus::format("LocalMicroTurbineGeneratorFactory: Error getting inputs for microturbine generator named: {}",
-                                      objectName)); // LCOV_EXCL_LINE
-    // Shut up the compiler
-    return nullptr; // LCOV_EXCL_LINE
+                   std::format("LocalMicroTurbineGeneratorFactory: Error getting inputs for microturbine generator named: {}",
+                               objectName)); // LCOV_EXCL_LINE
 }
 
 void GetMTGeneratorInput(EnergyPlusData &state)
@@ -134,7 +132,7 @@ void GetMTGeneratorInput(EnergyPlusData &state)
         state.dataInputProcessing->inputProcessor->getNumObjectsFound(state, state.dataIPShortCut->cCurrentModuleObject);
 
     if (state.dataMircoturbElectGen->NumMTGenerators <= 0) {
-        ShowSevereError(state, EnergyPlus::format("No {} equipment specified in input file", state.dataIPShortCut->cCurrentModuleObject));
+        ShowSevereError(state, std::format("No {} equipment specified in input file", state.dataIPShortCut->cCurrentModuleObject));
         ErrorsFound = true;
     }
 
@@ -165,9 +163,9 @@ void GetMTGeneratorInput(EnergyPlusData &state)
 
         state.dataMircoturbElectGen->MTGenerator(GeneratorNum).RefElecPowerOutput = NumArray(1);
         if (state.dataMircoturbElectGen->MTGenerator(GeneratorNum).RefElecPowerOutput <= 0.0) {
-            ShowSevereError(state, EnergyPlus::format("Invalid {}={:.2R}", state.dataIPShortCut->cNumericFieldNames(1), NumArray(1)));
-            ShowContinueError(state, EnergyPlus::format("Entered in {}={}", state.dataIPShortCut->cCurrentModuleObject, AlphArray(1)));
-            ShowContinueError(state, EnergyPlus::format("{} must be greater than 0.", state.dataIPShortCut->cNumericFieldNames(1)));
+            ShowSevereError(state, std::format("Invalid {}={:.2f}", state.dataIPShortCut->cNumericFieldNames(1), NumArray(1)));
+            ShowContinueError(state, std::format("Entered in {}={}", state.dataIPShortCut->cCurrentModuleObject, AlphArray(1)));
+            ShowContinueError(state, std::format("{} must be greater than 0.", state.dataIPShortCut->cNumericFieldNames(1)));
             ErrorsFound = true;
         }
 
@@ -175,9 +173,9 @@ void GetMTGeneratorInput(EnergyPlusData &state)
         state.dataMircoturbElectGen->MTGenerator(GeneratorNum).MaxElecPowerOutput = NumArray(3);
 
         if (state.dataMircoturbElectGen->MTGenerator(GeneratorNum).MinElecPowerOutput < 0.0) {
-            ShowSevereError(state, EnergyPlus::format("Invalid {}={:.2R}", state.dataIPShortCut->cNumericFieldNames(2), NumArray(2)));
-            ShowContinueError(state, EnergyPlus::format("Entered in {}={}", state.dataIPShortCut->cCurrentModuleObject, AlphArray(1)));
-            ShowContinueError(state, EnergyPlus::format("{} must be greater than 0.", state.dataIPShortCut->cNumericFieldNames(2)));
+            ShowSevereError(state, std::format("Invalid {}={:.2f}", state.dataIPShortCut->cNumericFieldNames(2), NumArray(2)));
+            ShowContinueError(state, std::format("Entered in {}={}", state.dataIPShortCut->cCurrentModuleObject, AlphArray(1)));
+            ShowContinueError(state, std::format("{} must be greater than 0.", state.dataIPShortCut->cNumericFieldNames(2)));
             ErrorsFound = true;
         }
 
@@ -186,24 +184,24 @@ void GetMTGeneratorInput(EnergyPlusData &state)
                 state.dataMircoturbElectGen->MTGenerator(GeneratorNum).RefElecPowerOutput;
         } else {
             if (state.dataMircoturbElectGen->MTGenerator(GeneratorNum).MaxElecPowerOutput <= 0.0) {
-                ShowSevereError(state, EnergyPlus::format("Invalid {}={:.2R}", state.dataIPShortCut->cNumericFieldNames(3), NumArray(3)));
-                ShowContinueError(state, EnergyPlus::format("Entered in {}={}", state.dataIPShortCut->cCurrentModuleObject, AlphArray(1)));
-                ShowContinueError(state, EnergyPlus::format("{} must be greater than 0.", state.dataIPShortCut->cNumericFieldNames(3)));
+                ShowSevereError(state, std::format("Invalid {}={:.2f}", state.dataIPShortCut->cNumericFieldNames(3), NumArray(3)));
+                ShowContinueError(state, std::format("Entered in {}={}", state.dataIPShortCut->cCurrentModuleObject, AlphArray(1)));
+                ShowContinueError(state, std::format("{} must be greater than 0.", state.dataIPShortCut->cNumericFieldNames(3)));
                 ErrorsFound = true;
             }
         }
 
         if (state.dataMircoturbElectGen->MTGenerator(GeneratorNum).MinElecPowerOutput >=
             state.dataMircoturbElectGen->MTGenerator(GeneratorNum).MaxElecPowerOutput) {
-            ShowSevereError(state,
-                            EnergyPlus::format(
-                                "{}= {}", state.dataIPShortCut->cCurrentModuleObject, state.dataMircoturbElectGen->MTGenerator(GeneratorNum).Name));
+            ShowSevereError(
+                state,
+                std::format("{}= {}", state.dataIPShortCut->cCurrentModuleObject, state.dataMircoturbElectGen->MTGenerator(GeneratorNum).Name));
             ShowContinueError(state,
-                              EnergyPlus::format("{} [{:.2R}] > {} [{:.2R}]",
-                                                 state.dataIPShortCut->cNumericFieldNames(2),
-                                                 NumArray(2),
-                                                 state.dataIPShortCut->cNumericFieldNames(3),
-                                                 NumArray(3)));
+                              std::format("{} [{:.2f}] > {} [{:.2f}]",
+                                          state.dataIPShortCut->cNumericFieldNames(2),
+                                          NumArray(2),
+                                          state.dataIPShortCut->cNumericFieldNames(3),
+                                          NumArray(3)));
             ShowContinueError(state, "Minimum Full Load Electrical Power Output must be less than or equal");
             ShowContinueError(state, "to Maximum Full Load Electrical Power Output.");
             ErrorsFound = true;
@@ -213,27 +211,25 @@ void GetMTGeneratorInput(EnergyPlusData &state)
                 state.dataMircoturbElectGen->MTGenerator(GeneratorNum).MaxElecPowerOutput ||
             state.dataMircoturbElectGen->MTGenerator(GeneratorNum).RefElecPowerOutput <
                 state.dataMircoturbElectGen->MTGenerator(GeneratorNum).MinElecPowerOutput) {
-            ShowSevereError(state,
-                            EnergyPlus::format(
-                                "{}= {}", state.dataIPShortCut->cCurrentModuleObject, state.dataMircoturbElectGen->MTGenerator(GeneratorNum).Name));
-            ShowContinueError(
+            ShowSevereError(
                 state,
-                EnergyPlus::format("{} must be >= {}", state.dataIPShortCut->cNumericFieldNames(1), state.dataIPShortCut->cNumericFieldNames(2)));
+                std::format("{}= {}", state.dataIPShortCut->cCurrentModuleObject, state.dataMircoturbElectGen->MTGenerator(GeneratorNum).Name));
             ShowContinueError(
-                state,
-                EnergyPlus::format("{} must be <= {}", state.dataIPShortCut->cNumericFieldNames(1), state.dataIPShortCut->cNumericFieldNames(3)));
-            ShowContinueError(state, EnergyPlus::format("{} = {:.2R}", state.dataIPShortCut->cNumericFieldNames(1), NumArray(1)));
-            ShowContinueError(state, EnergyPlus::format("{} = {:.2R}", state.dataIPShortCut->cNumericFieldNames(2), NumArray(2)));
-            ShowContinueError(state, EnergyPlus::format("{} = {:.2R}", state.dataIPShortCut->cNumericFieldNames(3), NumArray(3)));
+                state, std::format("{} must be >= {}", state.dataIPShortCut->cNumericFieldNames(1), state.dataIPShortCut->cNumericFieldNames(2)));
+            ShowContinueError(
+                state, std::format("{} must be <= {}", state.dataIPShortCut->cNumericFieldNames(1), state.dataIPShortCut->cNumericFieldNames(3)));
+            ShowContinueError(state, std::format("{} = {:.2f}", state.dataIPShortCut->cNumericFieldNames(1), NumArray(1)));
+            ShowContinueError(state, std::format("{} = {:.2f}", state.dataIPShortCut->cNumericFieldNames(2), NumArray(2)));
+            ShowContinueError(state, std::format("{} = {:.2f}", state.dataIPShortCut->cNumericFieldNames(3), NumArray(3)));
             ErrorsFound = true;
         }
 
         state.dataMircoturbElectGen->MTGenerator(GeneratorNum).RefElecEfficiencyLHV = NumArray(4);
 
         if (state.dataMircoturbElectGen->MTGenerator(GeneratorNum).RefElecEfficiencyLHV <= 0.0) {
-            ShowSevereError(state, EnergyPlus::format("Invalid {}={:.2R}", state.dataIPShortCut->cNumericFieldNames(4), NumArray(4)));
-            ShowContinueError(state, EnergyPlus::format("Entered in {}={}", state.dataIPShortCut->cCurrentModuleObject, AlphArray(1)));
-            ShowContinueError(state, EnergyPlus::format("{} must be greater than 0.", state.dataIPShortCut->cNumericFieldNames(4)));
+            ShowSevereError(state, std::format("Invalid {}={:.2f}", state.dataIPShortCut->cNumericFieldNames(4), NumArray(4)));
+            ShowContinueError(state, std::format("Entered in {}={}", state.dataIPShortCut->cCurrentModuleObject, AlphArray(1)));
+            ShowContinueError(state, std::format("{} must be greater than 0.", state.dataIPShortCut->cNumericFieldNames(4)));
             ErrorsFound = true;
         }
 
@@ -242,9 +238,9 @@ void GetMTGeneratorInput(EnergyPlusData &state)
         state.dataMircoturbElectGen->MTGenerator(GeneratorNum).RefElevation = NumArray(7);
 
         if (state.dataMircoturbElectGen->MTGenerator(GeneratorNum).RefCombustAirInletHumRat <= 0.0) {
-            ShowSevereError(state, EnergyPlus::format("Invalid {}={:.2R}", state.dataIPShortCut->cNumericFieldNames(6), NumArray(6)));
-            ShowContinueError(state, EnergyPlus::format("Entered in {}={}", state.dataIPShortCut->cCurrentModuleObject, AlphArray(1)));
-            ShowContinueError(state, EnergyPlus::format("{} must be greater than 0.", state.dataIPShortCut->cNumericFieldNames(6)));
+            ShowSevereError(state, std::format("Invalid {}={:.2f}", state.dataIPShortCut->cNumericFieldNames(6), NumArray(6)));
+            ShowContinueError(state, std::format("Entered in {}={}", state.dataIPShortCut->cCurrentModuleObject, AlphArray(1)));
+            ShowContinueError(state, std::format("{} must be greater than 0.", state.dataIPShortCut->cNumericFieldNames(6)));
             ErrorsFound = true;
         } else {
             // Reference barometric pressure, adjusted for reference elevation (Pa)
@@ -260,8 +256,8 @@ void GetMTGeneratorInput(EnergyPlusData &state)
         state.dataMircoturbElectGen->MTGenerator(GeneratorNum).ElecPowFTempElevCurveNum =
             Curve::GetCurveIndex(state, AlphArray(2)); // Convert curve name to number
         if (state.dataMircoturbElectGen->MTGenerator(GeneratorNum).ElecPowFTempElevCurveNum == 0) {
-            ShowSevereError(state, EnergyPlus::format("Invalid {}={}", state.dataIPShortCut->cAlphaFieldNames(2), AlphArray(2)));
-            ShowContinueError(state, EnergyPlus::format("Entered in {}={}", state.dataIPShortCut->cCurrentModuleObject, AlphArray(1)));
+            ShowSevereError(state, std::format("Invalid {}={}", state.dataIPShortCut->cAlphaFieldNames(2), AlphArray(2)));
+            ShowContinueError(state, std::format("Entered in {}={}", state.dataIPShortCut->cCurrentModuleObject, AlphArray(1)));
             ErrorsFound = true;
         } else {
             // Verify curve object, only legal type is BiQuadratic
@@ -372,14 +368,14 @@ void GetMTGeneratorInput(EnergyPlusData &state)
         state.dataMircoturbElectGen->MTGenerator(GeneratorNum).FuelLowerHeatingValue = NumArray(9);
 
         if (state.dataMircoturbElectGen->MTGenerator(GeneratorNum).FuelLowerHeatingValue <= 0.0) {
-            ShowSevereError(state, EnergyPlus::format("Invalid {}={:.2R}", state.dataIPShortCut->cNumericFieldNames(9), NumArray(9)));
+            ShowSevereError(state, std::format("Invalid {}={:.2f}", state.dataIPShortCut->cNumericFieldNames(9), NumArray(9)));
             ShowContinueError(state, std::format("Entered in {}={}", state.dataIPShortCut->cCurrentModuleObject, AlphArray(1)));
             ShowContinueError(state, std::format("{} must be greater than 0.", state.dataIPShortCut->cNumericFieldNames(9)));
             ErrorsFound = true;
         }
 
         if (state.dataMircoturbElectGen->MTGenerator(GeneratorNum).FuelHigherHeatingValue <= 0.0) {
-            ShowSevereError(state, EnergyPlus::format("Invalid {}={:.2R}", state.dataIPShortCut->cNumericFieldNames(8), NumArray(8)));
+            ShowSevereError(state, std::format("Invalid {}={:.2f}", state.dataIPShortCut->cNumericFieldNames(8), NumArray(8)));
             ShowContinueError(state, std::format("Entered in {}={}", state.dataIPShortCut->cCurrentModuleObject, AlphArray(1)));
             ShowContinueError(state, std::format("{} must be greater than 0.", state.dataIPShortCut->cNumericFieldNames(8)));
             ErrorsFound = true;
@@ -394,14 +390,14 @@ void GetMTGeneratorInput(EnergyPlusData &state)
                               std::format("{} must be greater than the {}",
                                           state.dataIPShortCut->cNumericFieldNames(8),
                                           state.dataIPShortCut->cNumericFieldNames(9)));
-            ShowContinueError(state, EnergyPlus::format("{}={:.2R}", state.dataIPShortCut->cNumericFieldNames(8), NumArray(8)));
-            ShowContinueError(state, EnergyPlus::format("{}={:.2R}", state.dataIPShortCut->cNumericFieldNames(9), NumArray(9)));
+            ShowContinueError(state, std::format("{}={:.2f}", state.dataIPShortCut->cNumericFieldNames(8), NumArray(8)));
+            ShowContinueError(state, std::format("{}={:.2f}", state.dataIPShortCut->cNumericFieldNames(9), NumArray(9)));
             ErrorsFound = true;
         }
 
         state.dataMircoturbElectGen->MTGenerator(GeneratorNum).StandbyPower = NumArray(10);
         if (state.dataMircoturbElectGen->MTGenerator(GeneratorNum).StandbyPower < 0.0) {
-            ShowWarningError(state, EnergyPlus::format("Invalid {}={:.2R}", state.dataIPShortCut->cNumericFieldNames(10), NumArray(10)));
+            ShowWarningError(state, std::format("Invalid {}={:.2f}", state.dataIPShortCut->cNumericFieldNames(10), NumArray(10)));
             ShowContinueError(state, std::format("Entered in {}={}", state.dataIPShortCut->cCurrentModuleObject, AlphArray(1)));
             ShowContinueError(state, std::format("{} must be greater than 0.", state.dataIPShortCut->cNumericFieldNames(10)));
             ShowContinueError(state, "Resetting to 0 and the simulation continues.");
@@ -410,7 +406,7 @@ void GetMTGeneratorInput(EnergyPlusData &state)
 
         state.dataMircoturbElectGen->MTGenerator(GeneratorNum).AncillaryPower = NumArray(11);
         if (state.dataMircoturbElectGen->MTGenerator(GeneratorNum).AncillaryPower < 0.0) {
-            ShowWarningError(state, EnergyPlus::format("Invalid {}={:.2R}", state.dataIPShortCut->cNumericFieldNames(11), NumArray(11)));
+            ShowWarningError(state, std::format("Invalid {}={:.2f}", state.dataIPShortCut->cNumericFieldNames(11), NumArray(11)));
             ShowContinueError(state, std::format("Entered in {}={}", state.dataIPShortCut->cCurrentModuleObject, AlphArray(1)));
             ShowContinueError(state, std::format("{} must be greater than 0.", state.dataIPShortCut->cNumericFieldNames(11)));
             ShowContinueError(state, "Resetting to 0 and the simulation continues.");
@@ -553,7 +549,7 @@ void GetMTGeneratorInput(EnergyPlusData &state)
             state.dataMircoturbElectGen->MTGenerator(GeneratorNum).RefHeatRecVolFlowRate = NumArray(14);
 
             if (state.dataMircoturbElectGen->MTGenerator(GeneratorNum).RefHeatRecVolFlowRate <= 0.0) {
-                ShowSevereError(state, EnergyPlus::format("Invalid {}={:.2R}", state.dataIPShortCut->cNumericFieldNames(14), NumArray(14)));
+                ShowSevereError(state, std::format("Invalid {}={:.2f}", state.dataIPShortCut->cNumericFieldNames(14), NumArray(14)));
                 ShowContinueError(state, std::format("Entered in {}={}", state.dataIPShortCut->cCurrentModuleObject, AlphArray(1)));
                 ShowContinueError(state, std::format("{} must be greater than 0.", state.dataIPShortCut->cNumericFieldNames(14)));
                 ErrorsFound = true;
@@ -814,7 +810,7 @@ void GetMTGeneratorInput(EnergyPlusData &state)
             state.dataMircoturbElectGen->MTGenerator(GeneratorNum).RefExhaustAirMassFlowRate = NumArray(18);
             if (state.dataMircoturbElectGen->MTGenerator(GeneratorNum).RefExhaustAirMassFlowRate <= 0.0 &&
                 !state.dataIPShortCut->lNumericFieldBlanks(18)) {
-                ShowSevereError(state, EnergyPlus::format("Invalid {}={:.2R}", state.dataIPShortCut->cNumericFieldNames(18), NumArray(18)));
+                ShowSevereError(state, std::format("Invalid {}={:.2f}", state.dataIPShortCut->cNumericFieldNames(18), NumArray(18)));
                 ShowContinueError(state, std::format("Entered in {}={}", state.dataIPShortCut->cCurrentModuleObject, AlphArray(1)));
                 ShowContinueError(state, std::format("{} must be greater than 0.", state.dataIPShortCut->cNumericFieldNames(18)));
                 ErrorsFound = true;

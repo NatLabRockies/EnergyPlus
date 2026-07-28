@@ -259,7 +259,7 @@ TEST_F(EnergyPlusFixture, WindowFrameTest)
     HeatBalanceManager::ManageHeatBalance(*state);
 
     // This test will emulate NFRC 100 U-factor test
-    int winNum;
+    int winNum = 0;
 
     for (size_t i = 1; i <= state->dataSurface->Surface.size(); ++i) {
         if (state->dataSurface->Surface(i).Class == DataSurfaces::SurfaceClass::Window) {
@@ -267,7 +267,7 @@ TEST_F(EnergyPlusFixture, WindowFrameTest)
         }
     }
 
-    int cNum;
+    int cNum = 0;
 
     for (size_t i = 1; i <= state->dataConstruction->Construct.size(); ++i) {
         if (state->dataConstruction->Construct(i).TypeIsWindow) {
@@ -318,7 +318,7 @@ TEST_F(EnergyPlusFixture, WindowFrameTest)
     Real64 inSurfTempDiff;
 
     int maxIterations = 20;
-    Real64 tolerance = 0.1; // deg C
+    Real64 testTolerance = 0.1; // deg C
 
     // Save tilt information for natural convection calculations
     Real64 tiltSave = state->dataSurface->Surface(winNum).Tilt;
@@ -351,7 +351,7 @@ TEST_F(EnergyPlusFixture, WindowFrameTest)
         outSurfTempDiff = std::fabs(outSurfTemp - outSurfTempPrev);
         inSurfTempDiff = std::fabs(inSurfTemp - inSurfTempPrev);
 
-        if ((outSurfTempDiff < tolerance) && (inSurfTempDiff < tolerance)) {
+        if ((outSurfTempDiff < testTolerance) && (inSurfTempDiff < testTolerance)) {
             break;
         }
 

@@ -159,7 +159,7 @@ void getChillerASHRAE205Input(EnergyPlusData &state)
         thisChiller.Representation = std::dynamic_pointer_cast<tk205::rs0001_ns::RS0001>(
             RSInstanceFactory::create("RS0001", FileSystem::toString(rep_file_path).c_str(), std::make_shared<EnergyPlusLogger>()));
         if (nullptr == thisChiller.Representation) {
-            ShowSevereError(state, std::format("{} is not an instance of an ASHRAE205 Chiller.", rep_file_path.string()));
+            ShowSevereError(state, std::format("{} is not an instance of an ASHRAE205 Chiller.", rep_file_path));
             ErrorsFound = true;
         }
         thisChiller.Representation->performance.performance_map_cooling.get_logger()->set_message_context(&thisChiller.LoggerContext);
@@ -187,8 +187,8 @@ void getChillerASHRAE205Input(EnergyPlusData &state)
         //        }
         //        if (thisChiller.RefCap == 0.0) {
         //            ShowSevereError(
-        //                state, format("{}{}=\"{}\"",std::string{RoutineName},state.dataIPShortCut->cCurrentModuleObject,thisChiller.Name);
-        //            ShowContinueError(state, format("Invalid {}={:.2f}", "Rated Capacity", thisChiller.RefCap));
+        //                state, std::format("{}{}=\"{}\"",std::string{RoutineName},state.dataIPShortCut->cCurrentModuleObject,thisChiller.Name);
+        //            ShowContinueError(state, std::format("Invalid {}={:.2f}", "Rated Capacity", thisChiller.RefCap));
         //            ErrorsFound = true;
         //        }
 
@@ -460,7 +460,6 @@ ASHRAE205ChillerSpecs *ASHRAE205ChillerSpecs::factory(EnergyPlusData &state, std
     }
     // If we didn't find it, fatal
     ShowFatalError(state, std::format("ASHRAE205ChillerSpecs::factory: Error getting inputs for object named: {}", objectName)); // LCOV_EXCL_LINE
-    return nullptr;                                                                                                              // LCOV_EXCL_LINE
 }
 
 void ASHRAE205ChillerSpecs::oneTimeInit_new(EnergyPlusData &state)

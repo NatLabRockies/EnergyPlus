@@ -1073,8 +1073,8 @@ void ExpressAsCashFlows(EnergyPlusData &state)
     int jAdj;
     int kYear;
     int offset;
-    int month; // number of months since base date
-    int firstMonth;
+    int month = 0; // number of months since base date
+    int firstMonth = 0;
     int monthsBaseToService;
 
     std::map<int, std::array<Real64, static_cast<int>(Constant::eResource::Num)>> resourceCosts;
@@ -1440,7 +1440,7 @@ void ComputePresentValue(EnergyPlusData &state)
 
     // SUBROUTINE LOCAL VARIABLE DECLARATIONS:
     Real64 totalPV;
-    Real64 curDiscountRate;
+    Real64 curDiscountRate = 0.0;
     int iCashFlow;
     int jYear;
     int nUsePriceEsc;
@@ -1745,7 +1745,7 @@ void WriteTabularLifeCycleCostReport(EnergyPlusData &state)
             }
             tableBody(1, 7) = std::format("{} {}", Util::MonthNamesCC[static_cast<int>(elcc->baseDateMonth)], elcc->baseDateYear);
             tableBody(1, 8) = std::format("{} {}", Util::MonthNamesCC[static_cast<int>(elcc->serviceDateMonth)], elcc->serviceDateYear);
-            tableBody(1, 9) = fmt::to_string(elcc->lengthStudyYears);
+            tableBody(1, 9) = std::to_string(elcc->lengthStudyYears);
             tableBody(1, 10) = OutputReportTabular::RealToStr(currentStyle.formatReals, elcc->taxRate, 4);
             tableBody(1, 11) = DeprMethodNames[static_cast<int>(elcc->depreciationMethod)];
 
@@ -1782,7 +1782,7 @@ void WriteTabularLifeCycleCostReport(EnergyPlusData &state)
             rowHead(1) = "Resource";
             rowHead(2) = "Start Date";
             for (int iYear = 1; iYear <= elcc->lengthStudyYears; ++iYear) {
-                rowHead(iYear + 2) = fmt::to_string(iYear);
+                rowHead(iYear + 2) = std::to_string(iYear);
             }
             for (int jObj = 1; jObj <= elcc->numUsePriceEscalation; ++jObj) { // loop through objects not columns to add names
                 columnHead(jObj) = elcc->UsePriceEscalation(jObj).name;
@@ -2243,7 +2243,7 @@ void WriteTabularLifeCycleCostReport(EnergyPlusData &state)
                 columnHead(kMonth) = Util::MonthNamesCC[static_cast<int>(kMonth - 1)];
             }
             for (int iYear = 1; iYear <= elcc->lengthStudyYears; ++iYear) {
-                rowHead(iYear) = fmt::to_string(elcc->baseDateYear + iYear - 1);
+                rowHead(iYear) = std::to_string(elcc->baseDateYear + iYear - 1);
                 for (int kMonth = 1; kMonth <= 12; ++kMonth) {
                     tableBody(kMonth, iYear) = OutputReportTabular::RealToStr(
                         currentStyle.formatReals, elcc->CashFlow[CostCategory::TotGrand].mnAmount((iYear - 1) * 12 + kMonth), 2);

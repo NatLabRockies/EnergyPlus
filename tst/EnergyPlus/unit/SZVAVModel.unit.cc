@@ -269,7 +269,6 @@ TEST_F(EnergyPlusFixture, SZVAV_PTUnit_Testing)
 
     state->dataEnvrn->OutDryBulbTemp = 30.0;
     state->dataEnvrn->OutBaroPress = 101325.0;
-    OutputReportPredefined::SetPredefinedTables(*state);
 
     int UnitNum = 0;
     bool FirstHVACIteration = true;
@@ -1215,8 +1214,6 @@ TEST_F(EnergyPlusFixture, SZVAV_UnitarySys_VarSpeed_Testing)
     UnitarySystems::UnitarySys *thisSys = &state->dataUnitarySystems->unitarySys[0];
     state->dataZoneEquip->ZoneEquipInputsFilled = true;
     thisSys->getUnitarySystemInputData(*state, compName, zoneEquipment, 0, ErrorsFound);
-
-    OutputReportPredefined::SetPredefinedTables(*state);
 
     FirstHVACIteration = false;
     state->dataGlobal->BeginEnvrnFlag = false;

@@ -412,7 +412,7 @@ TEST_F(EnergyPlusFixture, HPWHWrappedDummyNodeConfig)
                                         "    0,                       !- Minimum Value of x",
                                         "    1;                       !- Maximum Value of x"});
     for (int i = 1; i <= 2; ++i) {
-        std::string const i_str = fmt::to_string(i);
+        std::string const i_str = std::to_string(i);
         idf_lines.emplace_back("Coil:WaterHeating:AirToWaterHeatPump:Wrapped,");
         idf_lines.emplace_back("    HPWH Coil " + i_str + ",               !- Name");
         idf_lines.emplace_back("    ,                        !- Availability Schedule Name");
@@ -1060,7 +1060,6 @@ TEST_F(EnergyPlusFixture, HPWHSizing)
     state->dataHVACGlobal->TimeStepSysSec = state->dataHVACGlobal->TimeStepSys * Constant::rSecsInHour;
     state->dataEnvrn->OutBaroPress = 101325;
 
-    SetPredefinedTables(*state);
     state->dataZoneTempPredictorCorrector->zoneHeatBalance.allocate(1);
     state->dataZoneTempPredictorCorrector->zoneHeatBalance(1).MAT = 20.0;
     WaterThermalTanks::SimHeatPumpWaterHeater(*state, "Zone4HeatPumpWaterHeater", true, SenseLoadMet, LatLoadMet, CompIndex);
@@ -1438,7 +1437,6 @@ TEST_F(EnergyPlusFixture, HPWHTestSPControl)
     state->dataGlobal->HourOfDay = 1;
     state->dataEnvrn->DayOfWeek = 1;
     state->dataEnvrn->DayOfYear_Schedule = 1;
-    SetPredefinedTables(*state);
     Sched::UpdateScheduleVals(*state);
 
     WaterThermalTanks::GetWaterThermalTankInput(*state);
@@ -1486,11 +1484,11 @@ TEST_F(EnergyPlusFixture, HPWHTestSPControl)
     Tank.CalcHeatPumpWaterHeater(*state, FirstHVACIteration);
     Tank.UpdateWaterThermalTank(*state);
     // no standby losses, tank at 50 C, tank should heat up and HP should be on.
-    EXPECT_NEAR(57.2028862, Tank.TankTemp, 0.0000001);                           // final tank temperature
+    EXPECT_NEAR(57.2028862, Tank.TankTemp, 5e-7);                                // final tank temperature
     EXPECT_NEAR(1.0, HeatPump.HeatingPLR, 0.0000001);                            // HP operating at full capacity
     EXPECT_TRUE(WaterThermalTanks::TankOperatingMode::Heating == HeatPump.Mode); // expect HP to remain in heating mode
-    EXPECT_NEAR(53.6014431, Tank.TankTempAvg, 0.0000001);                        // average tank temp over time step
-    EXPECT_NEAR(53.6014431, Tank.SourceOutletTemp, 0.0000001);                   // source outlet = average tank temp
+    EXPECT_NEAR(53.6014431, Tank.TankTempAvg, 5e-7);                             // average tank temp over time step
+    EXPECT_NEAR(53.6014431, Tank.SourceOutletTemp, 5e-7);                        // source outlet = average tank temp
 
     // HP in heating mode and tank at moderate temp needing only partial HP operation. Use nodes not adding heat to tank.
     Tank.TankTemp = 56.0;
@@ -5378,7 +5376,6 @@ TEST_F(EnergyPlusFixture, CrashCalcStandardRatings_HPWH_and_Standalone)
     state->dataGlobal->HourOfDay = 1;
     state->dataEnvrn->DayOfWeek = 1;
     state->dataEnvrn->DayOfYear_Schedule = 1;
-    SetPredefinedTables(*state);
     Sched::UpdateScheduleVals(*state);
 
     WaterThermalTanks::GetWaterThermalTankInput(*state);

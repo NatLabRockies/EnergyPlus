@@ -1679,7 +1679,7 @@ namespace ThermalComfort {
         Real64 CoreSignalWarmMax;       // Maximum value of warm core signal
         Real64 EvapHeatLossDrySweat;    // Evaporative heat loss by sweating when total skin wettedness < 0.4
         Real64 Err;                     // Stop criteria for iteration
-        Real64 ErrPrev;                 // Previous value of stop criteria for iteration
+        Real64 ErrPrev = 0.0;           // Previous value of stop criteria for iteration
         Real64 EvapHeatLossSweatEst;    // Estimated evaporative heat loss by sweating
         Real64 EvapHeatLossSweatEstNew; // New value of estimated evaporative heat loss by sweating
         Real64 IntHeatProdTot;          // Total internal heat production
@@ -2029,9 +2029,9 @@ namespace ThermalComfort {
                                 std::format("{}=\"{}\", invalid - Sum[AngleFactors]", cCurrentModuleObject, state.dataIPShortCut->cAlphaArgs(1)));
                 ShowContinueError(
                     state,
-                    EnergyPlus::format("...Sum of Angle Factors [{:.3R}] should not deviate from expected sum [1.0] by more than limit [{:.3R}].",
-                                       AllAngleFacSummed,
-                                       AngleFacLimit));
+                    std::format("...Sum of Angle Factors [{:.3f}] should not deviate from expected sum [1.0] by more than limit [{:.3f}].",
+                                AllAngleFacSummed,
+                                AngleFacLimit));
                 ErrorsFound = true;
             }
         }
@@ -2433,7 +2433,7 @@ namespace ThermalComfort {
             }
             // if any zones should be warning print it out
             if (showWarning) {
-                ShowWarningError(state, EnergyPlus::format("More than 4% of time ({:.1R} hours) uncomfortable in one or more zones ", allowedHours));
+                ShowWarningError(state, std::format("More than 4% of time ({:.1f} hours) uncomfortable in one or more zones ", allowedHours));
                 ShowContinueError(state, "Based on ASHRAE 55-2004 graph (Section 5.2.1.1)");
                 if (state.dataEnvrn->RunPeriodEnvironment) {
                     ShowContinueError(
@@ -2448,9 +2448,9 @@ namespace ThermalComfort {
                     if (state.dataThermalComforts->ThermalComfortInASH55(iZone).Enable55Warning) {
                         if (state.dataThermalComforts->ThermalComfortInASH55(iZone).totalTimeNotEither > allowedHours) {
                             ShowContinueError(state,
-                                              EnergyPlus::format("{:.1R} hours were uncomfortable in zone: {}",
-                                                                 state.dataThermalComforts->ThermalComfortInASH55(iZone).totalTimeNotEither,
-                                                                 state.dataHeatBal->Zone(iZone).Name));
+                                              std::format("{:.1f} hours were uncomfortable in zone: {}",
+                                                          state.dataThermalComforts->ThermalComfortInASH55(iZone).totalTimeNotEither,
+                                                          state.dataHeatBal->Zone(iZone).Name));
                         }
                     }
                 }

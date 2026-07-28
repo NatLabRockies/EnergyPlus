@@ -227,9 +227,7 @@ namespace DataAirLoop {
         Real64 LoopSystemOffMassFlowrate = 0.0;                  // Loop mass flow rate during off cycle using an OnOff fan
         Real64 LoopOnOffFanPartLoadRatio = 0.0;                  // OnOff fan part load ratio
         Real64 LoopCompCycRatio = 0.0;                           // Loop compressor cycling ratio for multispeed heat pump
-        Real64 AFNLoopHeatingCoilMaxRTF = 0.0;                   // Maximum run time fraction for electric or gas heating coil in an HVAC Air Loop
         Real64 AFNLoopOnOffFanRTF = 0.0;                         // OnOff fan run time fraction in an HVAC Air Loop
-        Real64 AFNLoopDXCoilRTF = 0.0;                           // OnOff fan run time fraction in an HVAC Air Loop
     };
 
 } // namespace DataAirLoop

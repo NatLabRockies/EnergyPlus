@@ -496,7 +496,6 @@ namespace FourPipeBeam {
             return thisBeam;
         }
         ShowFatalError(state, std::format("{}Errors found in getting input. Preceding conditions cause termination.", routineName));
-        return nullptr;
     }
 
     int HVACFourPipeBeam::getAirLoopNum()
@@ -826,13 +825,13 @@ namespace FourPipeBeam {
                 this->coolingAvailable = true;
                 this->heatingAvailable = false;
                 auto f = [&state, this](Real64 const airFlow) {
-                    static constexpr std::string_view routineName("Real64 HVACFourPipeBeam::residualSizing ");
+                    static constexpr std::string_view residualRoutineName("Real64 HVACFourPipeBeam::residualSizing ");
                     this->mDotSystemAir = airFlow;
                     this->vDotDesignPrimAir = this->mDotSystemAir / state.dataEnvrn->StdRhoAir;
                     this->totBeamLength = this->vDotDesignPrimAir / this->vDotNormRatedPrimAir;
                     if (this->vDotDesignCWWasAutosized) {
                         this->vDotDesignCW = this->vDotNormRatedCW * this->totBeamLength;
-                        Real64 const rho = this->cWplantLoc.loop->glycol->getDensity(state, Constant::CWInitConvTemp, routineName);
+                        Real64 const rho = this->cWplantLoc.loop->glycol->getDensity(state, Constant::CWInitConvTemp, residualRoutineName);
                         this->mDotNormRatedCW = this->vDotNormRatedCW * rho;
                         this->mDotCW = this->vDotDesignCW * rho;
                         if (this->beamCoolingPresent) {
@@ -841,7 +840,7 @@ namespace FourPipeBeam {
                     }
                     if (vDotDesignHWWasAutosized) {
                         this->vDotDesignHW = this->vDotNormRatedHW * this->totBeamLength;
-                        Real64 const rho = this->hWplantLoc.loop->glycol->getDensity(state, Constant::HWInitConvTemp, routineName);
+                        Real64 const rho = this->hWplantLoc.loop->glycol->getDensity(state, Constant::HWInitConvTemp, residualRoutineName);
                         this->mDotNormRatedHW = this->vDotNormRatedHW * rho;
                         this->mDotHW = this->vDotDesignHW * rho;
                         if (this->beamHeatingPresent) {
@@ -897,13 +896,13 @@ namespace FourPipeBeam {
                 this->heatingAvailable = true;
                 this->coolingAvailable = false;
                 auto f = [&state, this](Real64 const airFlow) {
-                    static constexpr std::string_view routineName("Real64 HVACFourPipeBeam::residualSizing ");
+                    static constexpr std::string_view residualRoutineName("Real64 HVACFourPipeBeam::residualSizing ");
                     this->mDotSystemAir = airFlow;
                     this->vDotDesignPrimAir = this->mDotSystemAir / state.dataEnvrn->StdRhoAir;
                     this->totBeamLength = this->vDotDesignPrimAir / this->vDotNormRatedPrimAir;
                     if (this->vDotDesignCWWasAutosized) {
                         this->vDotDesignCW = this->vDotNormRatedCW * this->totBeamLength;
-                        Real64 const rho = this->cWplantLoc.loop->glycol->getDensity(state, Constant::CWInitConvTemp, routineName);
+                        Real64 const rho = this->cWplantLoc.loop->glycol->getDensity(state, Constant::CWInitConvTemp, residualRoutineName);
                         this->mDotNormRatedCW = this->vDotNormRatedCW * rho;
                         this->mDotCW = this->vDotDesignCW * rho;
                         if (this->beamCoolingPresent) {
@@ -912,7 +911,7 @@ namespace FourPipeBeam {
                     }
                     if (vDotDesignHWWasAutosized) {
                         this->vDotDesignHW = this->vDotNormRatedHW * this->totBeamLength;
-                        Real64 const rho = this->hWplantLoc.loop->glycol->getDensity(state, Constant::HWInitConvTemp, routineName);
+                        Real64 const rho = this->hWplantLoc.loop->glycol->getDensity(state, Constant::HWInitConvTemp, residualRoutineName);
                         this->mDotNormRatedHW = this->vDotNormRatedHW * rho;
                         this->mDotHW = this->vDotDesignHW * rho;
                         if (this->beamHeatingPresent) {

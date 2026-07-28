@@ -124,8 +124,6 @@ namespace PhotovoltaicThermalCollectors {
 
         // If we didn't find it, fatal
         ShowFatalError(state, std::format("Solar Thermal Collector Factory: Error getting inputs for object named: {}", objectName));
-        // Shut up the compiler
-        return nullptr;
     }
 
     void PVTCollectorStruct::onInitLoopEquip(EnergyPlusData &state, [[maybe_unused]] const PlantLocation &calledFromLocation)
@@ -378,8 +376,8 @@ namespace PhotovoltaicThermalCollectors {
                         state, std::format("Entered in {} = {}", state.dataIPShortCut->cCurrentModuleObject, state.dataIPShortCut->cAlphaArgs(1)));
                     ShowContinueError(state, "Surface used for solar collector faces down");
                     ShowContinueError(state,
-                                      EnergyPlus::format("Surface tilt angle (degrees from ground outward normal) = {:.2R}",
-                                                         state.dataSurface->Surface(thisPVT.SurfNum).Tilt));
+                                      std::format("Surface tilt angle (degrees from ground outward normal) = {:.2f}",
+                                                  state.dataSurface->Surface(thisPVT.SurfNum).Tilt));
                 }
             } // check surface
 
@@ -854,9 +852,8 @@ namespace PhotovoltaicThermalCollectors {
                         if ((std::abs(DesignVolFlowRateDes - DesignVolFlowRateUser) / DesignVolFlowRateUser) >
                             state.dataSize->AutoVsHardSizingThreshold) {
                             ShowMessage(state, std::format("SizeSolarCollector: Potential issue with equipment sizing for {}", this->Name));
-                            ShowContinueError(state, EnergyPlus::format("User-Specified Design Flow Rate of {:.5R} [W]", DesignVolFlowRateUser));
-                            ShowContinueError(state,
-                                              EnergyPlus::format("differs from Design Size Design Flow Rate of {:.5R} [W]", DesignVolFlowRateDes));
+                            ShowContinueError(state, std::format("User-Specified Design Flow Rate of {:.5f} [W]", DesignVolFlowRateUser));
+                            ShowContinueError(state, std::format("differs from Design Size Design Flow Rate of {:.5f} [W]", DesignVolFlowRateDes));
                             ShowContinueError(state, "This may, or may not, indicate mismatched component sizes.");
                             ShowContinueError(state, "Verify that the value entered is intended and is consistent with other components.");
                         }
@@ -924,10 +921,9 @@ namespace PhotovoltaicThermalCollectors {
                                 if ((std::abs(DesignVolFlowRateDes - DesignVolFlowRateUser) / DesignVolFlowRateUser) >
                                     state.dataSize->AutoVsHardSizingThreshold) {
                                     ShowMessage(state, std::format("SizeSolarCollector: Potential issue with equipment sizing for {}", this->Name));
+                                    ShowContinueError(state, std::format("User-Specified Design Flow Rate of {:.5f} [W]", DesignVolFlowRateUser));
                                     ShowContinueError(state,
-                                                      EnergyPlus::format("User-Specified Design Flow Rate of {:.5R} [W]", DesignVolFlowRateUser));
-                                    ShowContinueError(
-                                        state, EnergyPlus::format("differs from Design Size Design Flow Rate of {:.5R} [W]", DesignVolFlowRateDes));
+                                                      std::format("differs from Design Size Design Flow Rate of {:.5f} [W]", DesignVolFlowRateDes));
                                     ShowContinueError(state, "This may, or may not, indicate mismatched component sizes.");
                                     ShowContinueError(state, "Verify that the value entered is intended and is consistent with other components.");
                                 }
@@ -1362,7 +1358,7 @@ namespace PhotovoltaicThermalCollectors {
         Real64 hconvt(0.0);                           // htc external total
         Real64 hpvg_pv;                               // conductance of pv glass cover (W/m2-K)
         Real64 hpv_1;                                 // conductance of pv backing (W/m2-K)
-        Real64 hrad12;                                // radiative heat transfer coefficient between bldg surface and pv backing surface (W/m2-K)
+        Real64 hrad12 = 0.0;                          // radiative heat transfer coefficient between bldg surface and pv backing surface (W/m2-K)
         Real64 hrad_surr;                             // radiative heat transfer coefficient between pv glass cover and surrounding (W/m2-K)
         constexpr Real64 sigma(5.67e-8);              // stephan bolzmann constant
         Real64 reynolds(0.0);                         // Reynolds inside collector
@@ -1662,7 +1658,7 @@ namespace PhotovoltaicThermalCollectors {
         // PURPOSE OF THIS SUBROUTINE:
         // Solve a system of linear equations using Gaussian elimination and back substitution method.
 
-        int p;
+        int p = 0;
         int constexpr m = 3;
         Real64 constexpr small = 1.0e-10;
 
@@ -1935,8 +1931,6 @@ namespace PhotovoltaicThermalCollectors {
 
         // If we didn't find it, fatal
         ShowFatalError(state, std::format("Solar Thermal Collector GetIndexFromName: Error getting inputs for object named: {}", objectName));
-        assert(false);
-        return 0; // Shutup compiler
     }
 
     void simPVTfromOASys(EnergyPlusData &state, int const index, bool const FirstHVACIteration)

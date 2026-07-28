@@ -22,7 +22,7 @@ PenumbraImplementation::PenumbraImplementation(int size,
 void PenumbraImplementation::add_surface(const Surface &surface) {
   surface.surface->logger = logger;
   if (surface.surface->name.empty()) {
-    surface.surface->name = fmt::format("Surface {}", surfaces.size());
+    surface.surface->name = std::format("Surface {}", surfaces.size());
   }
   surfaces.push_back(*surface.surface);
 }

@@ -2396,14 +2396,12 @@ namespace Curve {
                             std::string tmp = indVarInstance.at("external_file_name").get<std::string>();
                             fs::path filePath(tmp);
                             if (indVarInstance.count("external_file_column_number") == 0u) {
-                                ShowSevereError(
-                                    state, std::format("{}: No column number defined for external file \"{}\"", contextString, filePath.string()));
+                                ShowSevereError(state, std::format("{}: No column number defined for external file \"{}\"", contextString, filePath));
                                 ErrorsFound = true;
                             }
                             if (indVarInstance.count("external_file_starting_row_number") == 0u) {
-                                ShowSevereError(
-                                    state,
-                                    std::format("{}: No starting row number defined for external file \"{}\"", contextString, filePath.string()));
+                                ShowSevereError(state,
+                                                std::format("{}: No starting row number defined for external file \"{}\"", contextString, filePath));
                                 ErrorsFound = true;
                             }
 
@@ -2605,14 +2603,13 @@ namespace Curve {
                     fs::path filePath(tmp);
 
                     if (fields.count("external_file_column_number") == 0u) {
-                        ShowSevereError(
-                            state, std::format("{}: No column number defined for external file \"{}\"", thisCurve->contextString, filePath.string()));
+                        ShowSevereError(state,
+                                        std::format("{}: No column number defined for external file \"{}\"", thisCurve->contextString, filePath));
                         ErrorsFound = true;
                     }
                     if (fields.count("external_file_starting_row_number") == 0u) {
                         ShowSevereError(
-                            state,
-                            std::format("{}: No starting row number defined for external file \"{}\"", thisCurve->contextString, filePath.string()));
+                            state, std::format("{}: No starting row number defined for external file \"{}\"", thisCurve->contextString, filePath));
                         ErrorsFound = true;
                     }
 
@@ -2784,14 +2781,12 @@ namespace Curve {
             std::size_t row = colAndRow.second; // 0 indexed
             auto &content = contents[col];
             if (col >= numColumns) {
-                ShowFatalError(
-                    state,
-                    std::format("File \"{}\" : Requested column ({}) exceeds the number of columns ({}).", filePath.string(), col + 1, numColumns));
+                ShowFatalError(state,
+                               std::format("File \"{}\" : Requested column ({}) exceeds the number of columns ({}).", filePath, col + 1, numColumns));
             }
             if (row >= numRows) {
-                ShowFatalError(
-                    state,
-                    std::format("File \"{}\" : Requested starting row ({}) exceeds the number of rows ({}).", filePath.string(), row + 1, numRows));
+                ShowFatalError(state,
+                               std::format("File \"{}\" : Requested starting row ({}) exceeds the number of rows ({}).", filePath, row + 1, numRows));
             }
             std::vector<double> array(numRows - row);
             std::transform(content.begin() + row, content.end(), array.begin(), [](std::string_view str) {
@@ -2828,7 +2823,7 @@ namespace Curve {
         // SUBROUTINE LOCAL VARIABLE DECLARATIONS:
         for (auto *thisCurve : state.dataCurveManager->curves) {
             for (int dim = 1; dim <= thisCurve->numDims; ++dim) {
-                std::string numStr = fmt::to_string(dim);
+                std::string numStr = std::to_string(dim);
                 SetupOutputVariable(state,
                                     std::format("Performance Curve Input Variable {} Value", numStr),
                                     Constant::Units::None,
@@ -3070,7 +3065,7 @@ namespace Curve {
 
         ErrorObjectHeader eoh{routineName, objectType, objectName};
 
-        std::string validDimsString = fmt::to_string(validDims[0]);
+        std::string validDimsString = std::to_string(validDims[0]);
         for (std::size_t i = 1; i < validDims.size(); i++) {
             validDimsString += std::format(" or {}", validDims[i]);
         }

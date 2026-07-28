@@ -1333,6 +1333,13 @@ TEST_F(EnergyPlusFixture, SingleDuct_ZeroFloorAreaTest)
     EXPECT_GT(state->dataSingleDuct->sd_airterminal(2).ZoneFloorArea, 0.0);
     EXPECT_NEAR(state->dataSingleDuct->sd_airterminal(2).MaxAirVolFlowRateDuringReheat, MaxAirVolFlowRateDuringReheatDes, 0.0000000000001);
     EXPECT_NEAR(MaxAirVolFractionDuringReheatDes, state->dataSingleDuct->sd_airterminal(2).MaxAirVolFractionDuringReheat, 0.0000000000001);
+
+    // Check system minimum heating air flow ratio warning when DesHeatVolFlow/DesMainVolFlow is grater than SysAirMinFlowRat
+    EXPECT_NEAR(0.8831, state->dataSize->FinalSysSizing(1).DesHeatVolFlow / state->dataSize->FinalSysSizing(1).DesMainVolFlow, 0.0001);
+    EXPECT_NEAR(0.3, state->dataSize->FinalSysSizing(1).SysAirMinFlowRat, 0.0001);
+    std::string error_string = delimited_string(
+        {"The central heating coil may undersize if autosized. Consider increasing the Central Heating Maximum System Air Flow Ratio."});
+    EXPECT_TRUE(compare_err_stream_substring(error_string));
 }
 
 TEST_F(EnergyPlusFixture, TestOAMassFlowRateUsingStdRhoAir)
@@ -2535,6 +2542,34 @@ TEST_F(EnergyPlusFixture, SingleDuct_VAVWaterCoilSizing)
     EXPECT_EQ(ZoneDesTemp, 17.0);
     EXPECT_EQ(ZoneDesHumRat, 0.008);
     EXPECT_NEAR(DesCoilLoad, 120.5, 0.1);
+
+    // Check TU sizing
+    auto &tu1 = state->dataSingleDuct->sd_airterminal(1);
+    Real64 minOA = state->dataSize->TermUnitFinalZoneSizing(1).MinOA;
+    Real64 maxAirFlow = tu1.MaxAirVolFlowRate;
+    EXPECT_NEAR(minOA, 0.05, 0.001);
+    EXPECT_NEAR(maxAirFlow, 0.327, 0.001);
+
+    // reset to autosize for next test
+    tu1.MaxAirVolFlowRate = DataSizing::AutoSize;
+    tu1.MaxHeatAirVolFlowRate = DataSizing::AutoSize;
+    tu1.ZoneMinAirFracDes = DataSizing::AutoSize;
+    tu1.ZoneFixedMinAir = DataSizing::AutoSize;
+    // expect a TU connected to a 100% OA system to size to the OA flow rate, not the zone design flow rate
+    state->dataSize->SysSizInput(1).loadSizingType = LoadSizing::Ventilation;
+    state->dataSize->SysSizInput(1).CoolOAOption = OAControl::AllOA;
+    state->dataSize->SysSizInput(1).HeatOAOption = OAControl::AllOA;
+    EXPECT_FALSE(state->dataAirSystemsData->PrimaryAirSystems(1).isAllOA);
+    state->dataSize->CurTermUnitSizingNum = 1;
+    state->files.eio.ensure_open(*state, "OpenOutputFiles", state->files.outputControl.eio);
+    tu1.SizeSys(*state);
+    EXPECT_NEAR(tu1.MaxAirVolFlowRate, 0.05, 0.001);
+    EXPECT_NEAR(tu1.MaxHeatAirVolFlowRate, 0.05, 0.001);
+    EXPECT_NEAR(tu1.ZoneMinAirFracDes, 1.0, 0.001);
+    EXPECT_EQ(tu1.ZoneMinAirFracMethod, SingleDuct::MinFlowFraction::Constant);
+    EXPECT_NEAR(tu1.ZoneFixedMinAir, 0.0, 0.001);
+    // minimum flow is actually MaxAirVolFlowRate * ZoneMinAirFracDes * ZoneTurndownMinAirFrac
+    EXPECT_NEAR(tu1.MaxAirVolFlowRate * tu1.ZoneMinAirFracDes * tu1.ZoneTurndownMinAirFrac, 0.05, 0.001);
 }
 
 TEST_F(EnergyPlusFixture, TerminalUnitMixerInitTest)
@@ -3083,8 +3118,6 @@ TEST_F(EnergyPlusFixture, SingleDuctAirTerminal_reportTerminalUnit)
     using namespace EnergyPlus::OutputReportPredefined;
     auto &orp = *state->dataOutRptPredefined;
 
-    SetPredefinedTables(*state);
-
     auto *schA = Sched::AddScheduleConstant(*state, "schA");
     [[maybe_unused]] auto *schB = Sched::AddScheduleConstant(*state, "schB");
 
@@ -3101,6 +3134,8 @@ TEST_F(EnergyPlusFixture, SingleDuctAirTerminal_reportTerminalUnit)
     siz(1).HeatDesTemp = 40.0;
     siz(1).DesHeatLoad = 2000.0;
     siz(1).DesCoolLoad = 3000.0;
+    siz(1).ZoneName = "Zone A";
+    siz(1).TotalZoneFloorArea = 100.0;
 
     auto &sdat = state->dataSingleDuct->sd_airterminal;
     sdat.allocate(2);
@@ -3113,6 +3148,8 @@ TEST_F(EnergyPlusFixture, SingleDuctAirTerminal_reportTerminalUnit)
     sdat(1).ReheatComp = "watercoil";
     sdat(1).fanType = HVAC::FanType::VAV;
     sdat(1).FanName = "FanA";
+    sdat(1).ZoneMinAirFracDes = 0.2;
+    sdat(1).ZoneTurndownMinAirFrac = 0.8;
 
     sdat(1).reportTerminalUnit(*state);
 
@@ -3133,6 +3170,11 @@ TEST_F(EnergyPlusFixture, SingleDuctAirTerminal_reportTerminalUnit)
     EXPECT_EQ("Fan:VariableVolume", RetrievePreDefTableEntry(*state, orp.pdchAirTermFanType, "ADU a"));
     EXPECT_EQ("FanA", RetrievePreDefTableEntry(*state, orp.pdchAirTermFanName, "ADU a"));
 
+    EXPECT_EQ("0.000480", RetrievePreDefTableEntry(*state, orp.pdchLeedVentMinFlowPerArea, "Zone A"));
+    EXPECT_EQ("0.048000", RetrievePreDefTableEntry(*state, orp.pdchLeedVentMinFlowPerZone, "Zone A"));
+    EXPECT_EQ("0.000500", RetrievePreDefTableEntry(*state, orp.pdchLeedVentMinVentPerArea, "Zone A"));
+    EXPECT_EQ("0.050000", RetrievePreDefTableEntry(*state, orp.pdchLeedVentMinVentPerZone, "Zone A"));
+
     adu(2).Name = "ADU b";
     adu(2).TermUnitSizingNum = 2;
 
@@ -3142,6 +3184,8 @@ TEST_F(EnergyPlusFixture, SingleDuctAirTerminal_reportTerminalUnit)
     siz(2).HeatDesTemp = 41.0;
     siz(2).DesHeatLoad = 2100.0;
     siz(2).DesCoolLoad = 3100.0;
+    siz(2).ZoneName = "Zone B";
+    siz(2).TotalZoneFloorArea = 100.0;
 
     sdat(2).ADUNum = 2;
     sdat(2).sysType = "AirTerminal:SingleDuct:ConstantVolume:Reheat";
@@ -3152,6 +3196,8 @@ TEST_F(EnergyPlusFixture, SingleDuctAirTerminal_reportTerminalUnit)
     sdat(2).ReheatComp = "furncoil";
     sdat(2).fanType = HVAC::FanType::OnOff;
     sdat(2).FanName = "FanB";
+    sdat(2).ZoneMinAirFracDes = 0.2;
+    sdat(2).ZoneTurndownMinAirFrac = 0.8;
 
     auto &oa = state->dataSize->OARequirements;
     oa.allocate(1);
@@ -3175,4 +3221,9 @@ TEST_F(EnergyPlusFixture, SingleDuctAirTerminal_reportTerminalUnit)
     EXPECT_EQ("n/a", RetrievePreDefTableEntry(*state, orp.pdchAirTermCoolCoilType, "ADU b"));
     EXPECT_EQ("Fan:OnOff", RetrievePreDefTableEntry(*state, orp.pdchAirTermFanType, "ADU b"));
     EXPECT_EQ("FanB", RetrievePreDefTableEntry(*state, orp.pdchAirTermFanName, "ADU b"));
+
+    EXPECT_EQ("0.000496", RetrievePreDefTableEntry(*state, orp.pdchLeedVentMinFlowPerArea, "Zone B"));
+    EXPECT_EQ("0.049600", RetrievePreDefTableEntry(*state, orp.pdchLeedVentMinFlowPerZone, "Zone B"));
+    EXPECT_EQ("0.000600", RetrievePreDefTableEntry(*state, orp.pdchLeedVentMinVentPerArea, "Zone B"));
+    EXPECT_EQ("0.060000", RetrievePreDefTableEntry(*state, orp.pdchLeedVentMinVentPerZone, "Zone B"));
 }

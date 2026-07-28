@@ -249,12 +249,12 @@ void GetZoneContaminanInputs(EnergyPlusData &state)
         contam.ActualZoneNum = Util::FindItemInList(AlphaName(2), state.dataHeatBal->Zone);
         if (contam.ActualZoneNum == 0) {
             ShowSevereError(state,
-                            EnergyPlus::format("{}{}=\"{}\", invalid {} entered={}",
-                                               RoutineName,
-                                               CurrentModuleObject,
-                                               AlphaName(1),
-                                               state.dataIPShortCut->cAlphaFieldNames(2),
-                                               AlphaName(2)));
+                            std::format("{}{}=\"{}\", invalid {} entered={}",
+                                        RoutineName,
+                                        CurrentModuleObject,
+                                        AlphaName(1),
+                                        state.dataIPShortCut->cAlphaFieldNames(2),
+                                        AlphaName(2)));
             ErrorsFound = true;
         }
 
@@ -350,12 +350,12 @@ void GetZoneContaminanInputs(EnergyPlusData &state)
         contam.SurfNum = Util::FindItemInList(AlphaName(2), state.afn->MultizoneSurfaceData, &AirflowNetwork::MultizoneSurfaceProp::SurfName);
         if (contam.SurfNum == 0) {
             ShowSevereError(state,
-                            EnergyPlus::format("{}{}=\"{}\", invalid {} entered={}",
-                                               RoutineName,
-                                               CurrentModuleObject,
-                                               AlphaName(1),
-                                               state.dataIPShortCut->cAlphaFieldNames(2),
-                                               AlphaName(2)));
+                            std::format("{}{}=\"{}\", invalid {} entered={}",
+                                        RoutineName,
+                                        CurrentModuleObject,
+                                        AlphaName(1),
+                                        state.dataIPShortCut->cAlphaFieldNames(2),
+                                        AlphaName(2)));
             ShowContinueError(state, "which is not listed in AirflowNetwork:MultiZone:Surface.");
             ErrorsFound = true;
         }
@@ -364,7 +364,7 @@ void GetZoneContaminanInputs(EnergyPlusData &state)
             state.dataSurface->Surface(state.afn->MultizoneSurfaceData(contam.SurfNum).SurfNum).ExtBoundCond != DataSurfaces::ExternalEnvironment) {
             ShowSevereError(
                 state,
-                EnergyPlus::format(
+                std::format(
                     "{}{}=\"{}. The entered surface ({}) is not an exterior surface", RoutineName, CurrentModuleObject, AlphaName(1), AlphaName(2)));
             ErrorsFound = true;
         }
@@ -383,34 +383,34 @@ void GetZoneContaminanInputs(EnergyPlusData &state)
         contam.GenRateCoef = IHGNumbers(1);
         if (IHGNumbers(1) < 0.0) {
             ShowSevereError(state,
-                            EnergyPlus::format("{}Negative values are not allowed for {} in {} = {}",
-                                               RoutineName,
-                                               state.dataIPShortCut->cNumericFieldNames(1),
-                                               CurrentModuleObject,
-                                               AlphaName(1)));
-            ShowContinueError(state, EnergyPlus::format("The input value is {:.2R}", IHGNumbers(1)));
+                            std::format("{}Negative values are not allowed for {} in {} = {}",
+                                        RoutineName,
+                                        state.dataIPShortCut->cNumericFieldNames(1),
+                                        CurrentModuleObject,
+                                        AlphaName(1)));
+            ShowContinueError(state, std::format("The input value is {:.2f}", IHGNumbers(1)));
             ErrorsFound = true;
         }
 
         contam.Expo = IHGNumbers(2);
         if (IHGNumbers(2) <= 0.0) {
             ShowSevereError(state,
-                            EnergyPlus::format("{}Negative or zero value is not allowed for {} in {} = {}",
-                                               RoutineName,
-                                               state.dataIPShortCut->cNumericFieldNames(2),
-                                               CurrentModuleObject,
-                                               AlphaName(1)));
-            ShowContinueError(state, EnergyPlus::format("The input value is {:.2R}", IHGNumbers(2)));
+                            std::format("{}Negative or zero value is not allowed for {} in {} = {}",
+                                        RoutineName,
+                                        state.dataIPShortCut->cNumericFieldNames(2),
+                                        CurrentModuleObject,
+                                        AlphaName(1)));
+            ShowContinueError(state, std::format("The input value is {:.2f}", IHGNumbers(2)));
             ErrorsFound = true;
         }
         if (IHGNumbers(2) > 1.0) {
             ShowSevereError(state,
-                            EnergyPlus::format("{}The value greater than 1.0 is not allowed for {} in {} = {}",
-                                               RoutineName,
-                                               state.dataIPShortCut->cNumericFieldNames(2),
-                                               CurrentModuleObject,
-                                               AlphaName(1)));
-            ShowContinueError(state, EnergyPlus::format("The input value is {:.2R}", IHGNumbers(2)));
+                            std::format("{}The value greater than 1.0 is not allowed for {} in {} = {}",
+                                        RoutineName,
+                                        state.dataIPShortCut->cNumericFieldNames(2),
+                                        CurrentModuleObject,
+                                        AlphaName(1)));
+            ShowContinueError(state, std::format("The input value is {:.2f}", IHGNumbers(2)));
             ErrorsFound = true;
         }
 
@@ -483,12 +483,12 @@ void GetZoneContaminanInputs(EnergyPlusData &state)
         contam.ActualZoneNum = Util::FindItemInList(AlphaName(2), state.dataHeatBal->Zone);
         if (contam.ActualZoneNum == 0) {
             ShowSevereError(state,
-                            EnergyPlus::format("{}{}=\"{}\", invalid {} entered={}",
-                                               RoutineName,
-                                               CurrentModuleObject,
-                                               AlphaName(1),
-                                               state.dataIPShortCut->cAlphaFieldNames(2),
-                                               AlphaName(2)));
+                            std::format("{}{}=\"{}\", invalid {} entered={}",
+                                        RoutineName,
+                                        CurrentModuleObject,
+                                        AlphaName(1),
+                                        state.dataIPShortCut->cAlphaFieldNames(2),
+                                        AlphaName(2)));
             ErrorsFound = true;
         }
 
@@ -508,22 +508,22 @@ void GetZoneContaminanInputs(EnergyPlusData &state)
 
         if (IHGNumbers(1) < 0.0) {
             ShowSevereError(state,
-                            EnergyPlus::format("{}Negative values are not allowed for {} in {} = {}",
-                                               RoutineName,
-                                               state.dataIPShortCut->cNumericFieldNames(1),
-                                               CurrentModuleObject,
-                                               AlphaName(1)));
-            ShowContinueError(state, EnergyPlus::format("The input value is {:.2R}", IHGNumbers(1)));
+                            std::format("{}Negative values are not allowed for {} in {} = {}",
+                                        RoutineName,
+                                        state.dataIPShortCut->cNumericFieldNames(1),
+                                        CurrentModuleObject,
+                                        AlphaName(1)));
+            ShowContinueError(state, std::format("The input value is {:.2f}", IHGNumbers(1)));
             ErrorsFound = true;
         }
         if (IHGNumbers(2) <= 0.0) {
             ShowSevereError(state,
-                            EnergyPlus::format("{}Negative values or zero are not allowed for {} in {} = {}",
-                                               RoutineName,
-                                               state.dataIPShortCut->cNumericFieldNames(2),
-                                               CurrentModuleObject,
-                                               AlphaName(1)));
-            ShowContinueError(state, EnergyPlus::format("The input value is {:.2R}", IHGNumbers(2)));
+                            std::format("{}Negative values or zero are not allowed for {} in {} = {}",
+                                        RoutineName,
+                                        state.dataIPShortCut->cNumericFieldNames(2),
+                                        CurrentModuleObject,
+                                        AlphaName(1)));
+            ShowContinueError(state, std::format("The input value is {:.2f}", IHGNumbers(2)));
             ErrorsFound = true;
         }
 
@@ -591,12 +591,12 @@ void GetZoneContaminanInputs(EnergyPlusData &state)
         contam.ActualZoneNum = Util::FindItemInList(AlphaName(2), state.dataHeatBal->Zone);
         if (contam.ActualZoneNum == 0) {
             ShowSevereError(state,
-                            EnergyPlus::format("{}{}=\"{}\", invalid {} entered={}",
-                                               RoutineName,
-                                               CurrentModuleObject,
-                                               AlphaName(1),
-                                               state.dataIPShortCut->cAlphaFieldNames(2),
-                                               AlphaName(2)));
+                            std::format("{}{}=\"{}\", invalid {} entered={}",
+                                        RoutineName,
+                                        CurrentModuleObject,
+                                        AlphaName(1),
+                                        state.dataIPShortCut->cAlphaFieldNames(2),
+                                        AlphaName(2)));
             ErrorsFound = true;
         }
 
@@ -616,22 +616,22 @@ void GetZoneContaminanInputs(EnergyPlusData &state)
 
         if (IHGNumbers(1) < 0.0) {
             ShowSevereError(state,
-                            EnergyPlus::format("{}Negative values are not allowed for {} in {} = {}",
-                                               RoutineName,
-                                               state.dataIPShortCut->cNumericFieldNames(1),
-                                               CurrentModuleObject,
-                                               AlphaName(1)));
-            ShowContinueError(state, EnergyPlus::format("The input value is {:.2R}", IHGNumbers(1)));
+                            std::format("{}Negative values are not allowed for {} in {} = {}",
+                                        RoutineName,
+                                        state.dataIPShortCut->cNumericFieldNames(1),
+                                        CurrentModuleObject,
+                                        AlphaName(1)));
+            ShowContinueError(state, std::format("The input value is {:.2f}", IHGNumbers(1)));
             ErrorsFound = true;
         }
         if (IHGNumbers(2) <= 0.0) {
             ShowSevereError(state,
-                            EnergyPlus::format("{}Negative values or zero are not allowed for {} in {} = {}",
-                                               RoutineName,
-                                               state.dataIPShortCut->cNumericFieldNames(2),
-                                               CurrentModuleObject,
-                                               AlphaName(1)));
-            ShowContinueError(state, EnergyPlus::format("The input value is {:.2R}", IHGNumbers(2)));
+                            std::format("{}Negative values or zero are not allowed for {} in {} = {}",
+                                        RoutineName,
+                                        state.dataIPShortCut->cNumericFieldNames(2),
+                                        CurrentModuleObject,
+                                        AlphaName(1)));
+            ShowContinueError(state, std::format("The input value is {:.2f}", IHGNumbers(2)));
             ErrorsFound = true;
         }
 
@@ -704,12 +704,12 @@ void GetZoneContaminanInputs(EnergyPlusData &state)
         contam.SurfNum = Util::FindItemInList(AlphaName(2), state.dataSurface->Surface);
         if (contam.SurfNum == 0) {
             ShowSevereError(state,
-                            EnergyPlus::format("{}{}=\"{}\", invalid {} entered={}",
-                                               RoutineName,
-                                               CurrentModuleObject,
-                                               AlphaName(1),
-                                               state.dataIPShortCut->cAlphaFieldNames(2),
-                                               AlphaName(2)));
+                            std::format("{}{}=\"{}\", invalid {} entered={}",
+                                        RoutineName,
+                                        CurrentModuleObject,
+                                        AlphaName(1),
+                                        state.dataIPShortCut->cAlphaFieldNames(2),
+                                        AlphaName(2)));
             ErrorsFound = true;
         }
 
@@ -728,22 +728,22 @@ void GetZoneContaminanInputs(EnergyPlusData &state)
         contam.HenryCoef = IHGNumbers(2);
         if (IHGNumbers(1) < 0.0) {
             ShowSevereError(state,
-                            EnergyPlus::format("{}Negative values are not allowed for {} in {} = {}",
-                                               RoutineName,
-                                               state.dataIPShortCut->cNumericFieldNames(1),
-                                               CurrentModuleObject,
-                                               AlphaName(1)));
-            ShowContinueError(state, EnergyPlus::format("The input value is {:.2R}", IHGNumbers(1)));
+                            std::format("{}Negative values are not allowed for {} in {} = {}",
+                                        RoutineName,
+                                        state.dataIPShortCut->cNumericFieldNames(1),
+                                        CurrentModuleObject,
+                                        AlphaName(1)));
+            ShowContinueError(state, std::format("The input value is {:.2f}", IHGNumbers(1)));
             ErrorsFound = true;
         }
         if (IHGNumbers(2) <= 0.0) {
             ShowSevereError(state,
-                            EnergyPlus::format("{}Negative values or zero are not allowed for {} in {} = {}",
-                                               RoutineName,
-                                               state.dataIPShortCut->cNumericFieldNames(2),
-                                               CurrentModuleObject,
-                                               AlphaName(1)));
-            ShowContinueError(state, EnergyPlus::format("The input value is {:.2R}", IHGNumbers(2)));
+                            std::format("{}Negative values or zero are not allowed for {} in {} = {}",
+                                        RoutineName,
+                                        state.dataIPShortCut->cNumericFieldNames(2),
+                                        CurrentModuleObject,
+                                        AlphaName(1)));
+            ShowContinueError(state, std::format("The input value is {:.2f}", IHGNumbers(2)));
             ErrorsFound = true;
         }
 
@@ -819,12 +819,12 @@ void GetZoneContaminanInputs(EnergyPlusData &state)
         contam.SurfNum = Util::FindItemInList(AlphaName(2), state.dataSurface->Surface);
         if (contam.SurfNum == 0) {
             ShowSevereError(state,
-                            EnergyPlus::format("{}{}=\"{}\", invalid {} entered={}",
-                                               RoutineName,
-                                               CurrentModuleObject,
-                                               AlphaName(1),
-                                               state.dataIPShortCut->cAlphaFieldNames(2),
-                                               AlphaName(2)));
+                            std::format("{}{}=\"{}\", invalid {} entered={}",
+                                        RoutineName,
+                                        CurrentModuleObject,
+                                        AlphaName(1),
+                                        state.dataIPShortCut->cAlphaFieldNames(2),
+                                        AlphaName(2)));
             ErrorsFound = true;
         }
 
@@ -842,12 +842,12 @@ void GetZoneContaminanInputs(EnergyPlusData &state)
         contam.DepoVelo = IHGNumbers(1);
         if (IHGNumbers(1) < 0.0) {
             ShowSevereError(state,
-                            EnergyPlus::format("{}Negative values are not allowed for {} in {} = {}",
-                                               RoutineName,
-                                               state.dataIPShortCut->cNumericFieldNames(1),
-                                               CurrentModuleObject,
-                                               AlphaName(1)));
-            ShowContinueError(state, EnergyPlus::format("The input value is {:.2R}", IHGNumbers(1)));
+                            std::format("{}Negative values are not allowed for {} in {} = {}",
+                                        RoutineName,
+                                        state.dataIPShortCut->cNumericFieldNames(1),
+                                        CurrentModuleObject,
+                                        AlphaName(1)));
+            ShowContinueError(state, std::format("The input value is {:.2f}", IHGNumbers(1)));
             ErrorsFound = true;
         }
 
@@ -914,12 +914,12 @@ void GetZoneContaminanInputs(EnergyPlusData &state)
         contam.ActualZoneNum = Util::FindItemInList(AlphaName(2), state.dataHeatBal->Zone);
         if (contam.ActualZoneNum == 0) {
             ShowSevereError(state,
-                            EnergyPlus::format("{}{}=\"{}\", invalid {} entered={}",
-                                               RoutineName,
-                                               CurrentModuleObject,
-                                               AlphaName(1),
-                                               state.dataIPShortCut->cAlphaFieldNames(2),
-                                               AlphaName(2)));
+                            std::format("{}{}=\"{}\", invalid {} entered={}",
+                                        RoutineName,
+                                        CurrentModuleObject,
+                                        AlphaName(1),
+                                        state.dataIPShortCut->cAlphaFieldNames(2),
+                                        AlphaName(2)));
             ErrorsFound = true;
         }
 
@@ -943,7 +943,7 @@ void GetZoneContaminanInputs(EnergyPlusData &state)
                                         state.dataIPShortCut->cNumericFieldNames(1),
                                         CurrentModuleObject,
                                         AlphaName(1)));
-            ShowContinueError(state, EnergyPlus::format("The input value is {:.2R}", IHGNumbers(1)));
+            ShowContinueError(state, std::format("The input value is {:.2f}", IHGNumbers(1)));
             ErrorsFound = true;
         }
 
@@ -1557,14 +1557,14 @@ void PredictZoneContaminants(EnergyPlusData &state,
 
     static constexpr std::string_view RoutineName("PredictZoneContaminants");
 
-    Real64 A;                  // Coefficient of storage term in a zone balance equation
-    Real64 B;                  // Coefficient of variable term in a zone balance equation
-    Real64 C;                  // Coefficient of constnat term in a zone balance equation
-    Real64 LoadToCO2SetPoint;  // CO2 load at CO2 set point
-    Real64 ZoneAirCO2SetPoint; // Zone CO2 setpoint
-    Real64 LoadToGCSetPoint;   // Generic contaminant load at generic contaminant set point
-    Real64 ZoneAirGCSetPoint;  // Zone generic contaminant setpoint
-    Real64 GCGain;             // Zone generic contaminant internal load
+    Real64 A;                        // Coefficient of storage term in a zone balance equation
+    Real64 B;                        // Coefficient of variable term in a zone balance equation
+    Real64 C;                        // Coefficient of constnat term in a zone balance equation
+    Real64 LoadToCO2SetPoint;        // CO2 load at CO2 set point
+    Real64 ZoneAirCO2SetPoint = 0.0; // Zone CO2 setpoint
+    Real64 LoadToGCSetPoint;         // Generic contaminant load at generic contaminant set point
+    Real64 ZoneAirGCSetPoint = 0.0;  // Zone generic contaminant setpoint
+    Real64 GCGain;                   // Zone generic contaminant internal load
 
     Real64 timeStepSysSec = state.dataHVACGlobal->TimeStepSysSec;
     // Update zone CO2
@@ -2171,12 +2171,12 @@ void CorrectZoneContaminants(EnergyPlusData &state,
 
     static constexpr std::string_view RoutineName("CorrectZoneContaminants");
 
-    Real64 CO2Gain;             // Zone CO2 internal gain
-    Real64 CO2GainExceptPeople; // Added for hybrid model, Zone CO2 internal gain
-    Real64 GCGain;              // Zone generic contaminant internal gain
-    Real64 A;
-    Real64 B;
-    Real64 C;
+    Real64 CO2Gain = 0.0;             // Zone CO2 internal gain
+    Real64 CO2GainExceptPeople = 0.0; // Added for hybrid model, Zone CO2 internal gain
+    Real64 GCGain = 0.0;              // Zone generic contaminant internal gain
+    Real64 A = 0.0;
+    Real64 B = 0.0;
+    Real64 C = 0.0;
 
     // Update zone CO2
     for (int ZoneNum = 1; ZoneNum <= state.dataGlobal->NumOfZones; ++ZoneNum) {

@@ -892,8 +892,8 @@ namespace UnitarySystems {
 
         static void getUnitarySysHeatCoolCoil(EnergyPlusData &state,
                                               std::string_view UnitarySysName, // Name of Unitary System object
-                                              bool &CoolingCoil,               // Cooling coil exists
-                                              bool &HeatingCoil,               // Heating coil exists
+                                              bool &t_CoolingCoil,             // Cooling coil exists
+                                              bool &t_HeatingCoil,             // Heating coil exists
                                               int const ZoneOAUnitNum          // index to zone OA unit
         );
 
@@ -914,7 +914,7 @@ namespace UnitarySystems {
                                                   bool const iterWaterAirOrNot);
 
         void simulate(EnergyPlusData &state,
-                      std::string_view Name,
+                      std::string_view t_Name,
                       bool const firstHVACIteration,
                       int AirLoopNum,
                       int &CompIndex,

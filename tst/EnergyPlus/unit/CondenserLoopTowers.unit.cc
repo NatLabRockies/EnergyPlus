@@ -482,8 +482,6 @@ TEST_F(EnergyPlusFixture, CondenserLoopTowers_MerkelNoCooling)
 
     state->init_state(*state);
 
-    OutputReportPredefined::SetPredefinedTables(*state);
-
     // OutputProcessor::TimeValue.allocate(2);
     OutputProcessor::SetupTimePointers(
         *state, OutputProcessor::TimeStepType::Zone, state->dataGlobal->TimeStepZone); // Set up Time pointer for HB/Zone Simulation
@@ -863,8 +861,6 @@ TEST_F(EnergyPlusFixture, CondenserLoopTowers_SingleSpeedSizing)
     state->dataGlobal->BeginSimFlag = true;
 
     state->init_state(*state);
-
-    OutputReportPredefined::SetPredefinedTables(*state);
 
     // OutputProcessor::TimeValue.allocate(2);
     OutputProcessor::SetupTimePointers(
@@ -1290,8 +1286,6 @@ TEST_F(EnergyPlusFixture, CondenserLoopTowers_SingleSpeedUserInputTowerSizing)
 
     state->dataGlobal->BeginSimFlag = true;
 
-    OutputReportPredefined::SetPredefinedTables(*state);
-
     // OutputProcessor::TimeValue.allocate(2);
     OutputProcessor::SetupTimePointers(
         *state, OutputProcessor::TimeStepType::Zone, state->dataGlobal->TimeStepZone); // Set up Time pointer for HB/Zone Simulation
@@ -1697,7 +1691,6 @@ TEST_F(EnergyPlusFixture, CondenserLoopTowers_TwoSpeedUserInputTowerSizing)
     bool ErrorsFound = false;
 
     state->dataGlobal->BeginSimFlag = true;
-    OutputReportPredefined::SetPredefinedTables(*state);
 
     // OutputProcessor::TimeValue.allocate(2);
     OutputProcessor::SetupTimePointers(
@@ -2174,7 +2167,6 @@ TEST_F(EnergyPlusFixture, CondenserLoopTowers_MerkelUserInputTowerSizing)
     bool ErrorsFound = false;
 
     state->dataGlobal->BeginSimFlag = true;
-    OutputReportPredefined::SetPredefinedTables(*state);
 
     // OutputProcessor::TimeValue.allocate(2);
     OutputProcessor::SetupTimePointers(
@@ -2594,7 +2586,6 @@ TEST_F(EnergyPlusFixture, CondenserLoopTowers_TwoSpeedTowerLowSpeedNomCapSizing)
     bool ErrorsFound = false;
 
     state->dataGlobal->BeginSimFlag = true;
-    OutputReportPredefined::SetPredefinedTables(*state);
 
     // OutputProcessor::TimeValue.allocate(2);
     OutputProcessor::SetupTimePointers(
@@ -2983,8 +2974,6 @@ TEST_F(EnergyPlusFixture, CondenserLoopTowers_SingleSpeedUser_SizingError_Sizing
     state->init_state(*state);
 
     state->dataGlobal->BeginSimFlag = true;
-
-    OutputReportPredefined::SetPredefinedTables(*state);
 
     // OutputProcessor::TimeValue.allocate(2);
     OutputProcessor::SetupTimePointers(
@@ -3376,7 +3365,6 @@ TEST_F(EnergyPlusFixture, CondenserLoopTowers_SingleSpeedUser_SizingError_UserSp
     state->init_state(*state);
 
     state->dataGlobal->BeginSimFlag = true;
-    OutputReportPredefined::SetPredefinedTables(*state);
 
     // OutputProcessor::TimeValue.allocate(2);
     OutputProcessor::SetupTimePointers(
@@ -3837,7 +3825,6 @@ TEST_F(EnergyPlusFixture, VSCoolingTowers_WaterOutletTempTest)
     state->init_state(*state);
 
     state->dataGlobal->BeginSimFlag = true;
-    OutputReportPredefined::SetPredefinedTables(*state);
 
     OutputProcessor::SetupTimePointers(*state, OutputProcessor::TimeStepType::Zone, state->dataGlobal->TimeStepZone);
     OutputProcessor::SetupTimePointers(*state, OutputProcessor::TimeStepType::System, state->dataHVACGlobal->TimeStepSys);
@@ -4815,7 +4802,6 @@ TEST_F(EnergyPlusFixture, CondenserLoopTowers_VSCoolingTower_OutputReport)
 
     state->dataGlobal->BeginSimFlag = true;
     SimulationManager::GetProjectData(*state);
-    OutputReportPredefined::SetPredefinedTables(*state);
 
     OutputProcessor::SetupTimePointers(*state, OutputProcessor::TimeStepType::Zone, state->dataGlobal->TimeStepZone);
     OutputProcessor::SetupTimePointers(*state, OutputProcessor::TimeStepType::System, state->dataHVACGlobal->TimeStepSys);
@@ -4869,14 +4855,14 @@ TEST_F(EnergyPlusFixture, CondenserLoopTowers_VSCoolingTower_OutputReport)
     std::string const TowerName = VSTower.Name;
     EXPECT_EQ("CoolingTower:VariableSpeed", OutputReportPredefined::RetrievePreDefTableEntry(*state, orp.pdchCTFCType, TowerName));
     EXPECT_EQ("WATER", OutputReportPredefined::RetrievePreDefTableEntry(*state, orp.pdchCTFCFluidType, TowerName));
-    EXPECT_EQ(fmt::format("{:.2f}", expectedDesingRange), OutputReportPredefined::RetrievePreDefTableEntry(*state, orp.pdchCTFCRange, TowerName));
-    EXPECT_EQ(fmt::format("{:.2f}", expectedDesingApproach),
+    EXPECT_EQ(std::format("{:.2f}", expectedDesingRange), OutputReportPredefined::RetrievePreDefTableEntry(*state, orp.pdchCTFCRange, TowerName));
+    EXPECT_EQ(std::format("{:.2f}", expectedDesingApproach),
               OutputReportPredefined::RetrievePreDefTableEntry(*state, orp.pdchCTFCApproach, TowerName));
     EXPECT_EQ("1000.00", OutputReportPredefined::RetrievePreDefTableEntry(*state, orp.pdchCTFCDesFanPwr, TowerName));
-    EXPECT_EQ(fmt::format("{:.2f}", expectedDesignInletWB),
+    EXPECT_EQ(std::format("{:.2f}", expectedDesignInletWB),
               OutputReportPredefined::RetrievePreDefTableEntry(*state, orp.pdchCTFCDesInletAirWBT, TowerName));
     EXPECT_EQ("0.020000", OutputReportPredefined::RetrievePreDefTableEntry(*state, orp.pdchCTFCDesWaterFlowRate, TowerName));
-    EXPECT_EQ(fmt::format("{:.2f}", expectedDesOutletWaterTemp),
+    EXPECT_EQ(std::format("{:.2f}", expectedDesOutletWaterTemp),
               OutputReportPredefined::RetrievePreDefTableEntry(*state, orp.pdchCTFCLevWaterSPTemp, TowerName));
     EXPECT_EQ("COOLINGTOWER LOOP", OutputReportPredefined::RetrievePreDefTableEntry(*state, orp.pdchCTFCCondLoopName, TowerName));
     EXPECT_EQ("COOLINGTOWER SUPPLY EQUIPMENT BRANCH 1",
@@ -5355,7 +5341,6 @@ TEST_F(EnergyPlusFixture, CondenserLoopTowers_VSMerkelCoolingTower_OutputReport)
 
     state->dataGlobal->BeginSimFlag = true;
     SimulationManager::GetProjectData(*state);
-    OutputReportPredefined::SetPredefinedTables(*state);
 
     OutputProcessor::SetupTimePointers(*state, OutputProcessor::TimeStepType::Zone, state->dataGlobal->TimeStepZone);
     OutputProcessor::SetupTimePointers(*state, OutputProcessor::TimeStepType::System, state->dataHVACGlobal->TimeStepSys);
@@ -5412,14 +5397,14 @@ TEST_F(EnergyPlusFixture, CondenserLoopTowers_VSMerkelCoolingTower_OutputReport)
     std::string const TowerName = VSTower.Name;
     EXPECT_EQ("CoolingTower:VariableSpeed:Merkel", OutputReportPredefined::RetrievePreDefTableEntry(*state, orp.pdchCTFCType, TowerName));
     EXPECT_EQ("WATER", OutputReportPredefined::RetrievePreDefTableEntry(*state, orp.pdchCTFCFluidType, TowerName));
-    EXPECT_EQ(fmt::format("{:.2f}", expectedDesingRange), OutputReportPredefined::RetrievePreDefTableEntry(*state, orp.pdchCTFCRange, TowerName));
-    EXPECT_EQ(fmt::format("{:.2f}", expectedDesingApproach),
+    EXPECT_EQ(std::format("{:.2f}", expectedDesingRange), OutputReportPredefined::RetrievePreDefTableEntry(*state, orp.pdchCTFCRange, TowerName));
+    EXPECT_EQ(std::format("{:.2f}", expectedDesingApproach),
               OutputReportPredefined::RetrievePreDefTableEntry(*state, orp.pdchCTFCApproach, TowerName));
     EXPECT_EQ("4000.00", OutputReportPredefined::RetrievePreDefTableEntry(*state, orp.pdchCTFCDesFanPwr, TowerName));
-    EXPECT_EQ(fmt::format("{:.2f}", expectedDesignInletWB),
+    EXPECT_EQ(std::format("{:.2f}", expectedDesignInletWB),
               OutputReportPredefined::RetrievePreDefTableEntry(*state, orp.pdchCTFCDesInletAirWBT, TowerName));
     EXPECT_EQ("0.020000", OutputReportPredefined::RetrievePreDefTableEntry(*state, orp.pdchCTFCDesWaterFlowRate, TowerName));
-    EXPECT_EQ(fmt::format("{:.2f}", expectedDesOutletWaterTemp),
+    EXPECT_EQ(std::format("{:.2f}", expectedDesOutletWaterTemp),
               OutputReportPredefined::RetrievePreDefTableEntry(*state, orp.pdchCTFCLevWaterSPTemp, TowerName));
     EXPECT_EQ("COOLINGTOWER LOOP", OutputReportPredefined::RetrievePreDefTableEntry(*state, orp.pdchCTFCCondLoopName, TowerName));
     EXPECT_EQ("COOLINGTOWER SUPPLY EQUIPMENT BRANCH 1",

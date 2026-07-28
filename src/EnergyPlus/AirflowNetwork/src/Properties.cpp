@@ -45,6 +45,9 @@
 // OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 // POSSIBILITY OF SUCH DAMAGE.
 
+// C++ Headers
+#include <format>
+
 // Local Headers
 #include "AirflowNetwork/Properties.hpp"
 
@@ -96,9 +99,9 @@ namespace AirflowNetwork {
             }
             ShowRecurringWarningErrorAtEnd(
                 m_state,
-                EnergyPlus::format("Air temperature below lower limit of -20C for conductivity calculation. Air temperature of {:.1R} "
-                                   "used for conductivity calculation.",
-                                   LowerLimit),
+                std::format("Air temperature below lower limit of -20C for conductivity calculation. Air temperature of {:.1f} "
+                            "used for conductivity calculation.",
+                            LowerLimit),
                 lowerLimitErrIdx);
             T = LowerLimit;
         } else if (T > UpperLimit) {
@@ -107,9 +110,9 @@ namespace AirflowNetwork {
             }
             ShowRecurringWarningErrorAtEnd(
                 m_state,
-                EnergyPlus::format("Air temperature above upper limit of 70C for conductivity calculation. Air temperature of {:.1R} "
-                                   "used for conductivity calculation.",
-                                   UpperLimit),
+                std::format("Air temperature above upper limit of 70C for conductivity calculation. Air temperature of {:.1f} "
+                            "used for conductivity calculation.",
+                            UpperLimit),
                 upperLimitErrIdx);
             T = UpperLimit;
         }

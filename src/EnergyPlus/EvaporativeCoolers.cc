@@ -1162,8 +1162,8 @@ void SizeEvapCooler(EnergyPlusData &state, int const EvapCoolNum)
     // SUBROUTINE LOCAL VARIABLE DECLARATIONS:
     bool IsAutoSize; // Indicator to autosize
 
-    Real64 volFlowRateDes; // Autosized volume flow rate for reporting
-    std::string CompType;  // for ease in getting objects
+    Real64 volFlowRateDes = 0.0; // Autosized volume flow rate for reporting
+    std::string CompType;        // for ease in getting objects
 
     // inits
     bool CoolerOnOApath = false;
@@ -1381,9 +1381,9 @@ void SizeEvapCooler(EnergyPlusData &state, int const EvapCoolNum)
             //"User-Specified Secondary Fan Flow Rate [m3/s]", IndirectVolFlowRateUser );
             // if ( DisplayExtraWarnings ) {
             // if ( ( std::abs( IndirectVolFlowRateDes - IndirectVolFlowRateUser ) / IndirectVolFlowRateUser ) > AutoVsHardSizingThreshold ) {
-            // ShowMessage(state, format("SizeEvaporativeCooler:Indirect:ResearchSpecial: \nPotential issue with equipment sizing for {}", EvapCond(
-            // EvapCoolNum
-            // ).Name));  ShowContinueError(state, format("User-Specified Secondary Fan Flow Rate of {} [m3/s]", RoundSigDigits(
+            // ShowMessage(state, std::format("SizeEvaporativeCooler:Indirect:ResearchSpecial: \nPotential issue with equipment sizing for {}",
+            // EvapCond( EvapCoolNum
+            // ).Name));  ShowContinueError(state, std::format("User-Specified Secondary Fan Flow Rate of {} [m3/s]", RoundSigDigits(
             // IndirectVolFlowRateUser, 5 ))); ShowContinueError(state,  format("differs from Design Size Secondary Fan Flow Rate of
             // {:.5f}", IndirectVolFlowRateDes) + " [m3/s]" ); ShowContinueError(state,  "This may, or may not, indicate mismatched component
             // sizes." ); ShowContinueError(state,  "Verify that the value entered is intended and is consistent with other components." );
@@ -3656,8 +3656,8 @@ void GetInputZoneEvaporativeCoolerUnit(EnergyPlusData &state)
     lNumericBlanks.deallocate();
 
     if (ErrorsFound) {
-        ShowFatalError(state, std::format("{}Errors found in getting input.", RoutineName));
         ShowContinueError(state, "... Preceding condition causes termination.");
+        ShowFatalError(state, std::format("{}Errors found in getting input.", RoutineName));
     }
 
     // setup output variables

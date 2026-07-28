@@ -170,28 +170,27 @@ namespace Photovoltaics {
         if (GeneratorIndex == 0) {
             PVnum = Util::FindItemInList(GeneratorName, state.dataPhotovoltaic->PVarray);
             if (PVnum == 0) {
-                ShowFatalError(
-                    state, EnergyPlus::format("SimPhotovoltaicGenerator: Specified PV not one of valid Photovoltaic Generators {}", GeneratorName));
+                ShowFatalError(state,
+                               std::format("SimPhotovoltaicGenerator: Specified PV not one of valid Photovoltaic Generators {}", GeneratorName));
             }
             GeneratorIndex = PVnum;
         } else {
             PVnum = GeneratorIndex;
             if (PVnum > state.dataPhotovoltaic->NumPVs || PVnum < 1) {
                 ShowFatalError(state,
-                               EnergyPlus::format("SimPhotovoltaicGenerator: Invalid GeneratorIndex passed={}, Number of PVs={}, Generator name={}",
-                                                  PVnum,
-                                                  state.dataPhotovoltaic->NumPVs,
-                                                  GeneratorName));
+                               std::format("SimPhotovoltaicGenerator: Invalid GeneratorIndex passed={}, Number of PVs={}, Generator name={}",
+                                           PVnum,
+                                           state.dataPhotovoltaic->NumPVs,
+                                           GeneratorName));
             }
             if (state.dataPhotovoltaicState->CheckEquipName(PVnum)) {
                 if (GeneratorName != state.dataPhotovoltaic->PVarray(PVnum).Name) {
                     ShowFatalError(
                         state,
-                        EnergyPlus::format(
-                            "SimPhotovoltaicGenerator: Invalid GeneratorIndex passed={}, Generator name={}, stored PV Name for that index={}",
-                            PVnum,
-                            GeneratorName,
-                            state.dataPhotovoltaic->PVarray(PVnum).Name));
+                        std::format("SimPhotovoltaicGenerator: Invalid GeneratorIndex passed={}, Generator name={}, stored PV Name for that index={}",
+                                    PVnum,
+                                    GeneratorName,
+                                    state.dataPhotovoltaic->PVarray(PVnum).Name));
                 }
                 state.dataPhotovoltaicState->CheckEquipName(PVnum) = false;
             }
@@ -212,7 +211,7 @@ namespace Photovoltaics {
             CalcSandiaPV(state, PVnum, RunFlag);
         } break;
         default: {
-            ShowFatalError(state, EnergyPlus::format("Specified generator model type not found for PV generator = {}", GeneratorName));
+            ShowFatalError(state, std::format("Specified generator model type not found for PV generator = {}", GeneratorName));
         } break;
         }
 
@@ -308,7 +307,7 @@ namespace Photovoltaics {
             state.dataInputProcessing->inputProcessor->getNumObjectsFound(state, pvModelNames[(int)PVModel::Sandia]);
 
         if (state.dataPhotovoltaic->NumPVs <= 0) {
-            ShowSevereError(state, EnergyPlus::format("Did not find any {}", cPVGeneratorObjectName));
+            ShowSevereError(state, std::format("Did not find any {}", cPVGeneratorObjectName));
             return;
         }
 
@@ -340,14 +339,14 @@ namespace Photovoltaics {
             state.dataPhotovoltaic->PVarray(PVnum).SurfacePtr = Util::FindItemInList(s_ipsc->cAlphaArgs(2), state.dataSurface->Surface);
             // required-surface
             if (s_ipsc->lAlphaFieldBlanks(2)) {
-                ShowSevereError(state, EnergyPlus::format("Invalid {} = {}", s_ipsc->cAlphaFieldNames(2), s_ipsc->cAlphaArgs(2)));
-                ShowContinueError(state, EnergyPlus::format("Entered in {} = {}", s_ipsc->cCurrentModuleObject, s_ipsc->cAlphaArgs(1)));
+                ShowSevereError(state, std::format("Invalid {} = {}", s_ipsc->cAlphaFieldNames(2), s_ipsc->cAlphaArgs(2)));
+                ShowContinueError(state, std::format("Entered in {} = {}", s_ipsc->cCurrentModuleObject, s_ipsc->cAlphaArgs(1)));
                 ShowContinueError(state, "Surface name cannot be blank");
                 ErrorsFound = true;
             }
             if (state.dataPhotovoltaic->PVarray(PVnum).SurfacePtr == 0) {
-                ShowSevereError(state, EnergyPlus::format("Invalid {} = {}", s_ipsc->cAlphaFieldNames(2), s_ipsc->cAlphaArgs(2)));
-                ShowContinueError(state, EnergyPlus::format("Entered in {} = {}", s_ipsc->cCurrentModuleObject, s_ipsc->cAlphaArgs(1)));
+                ShowSevereError(state, std::format("Invalid {} = {}", s_ipsc->cAlphaFieldNames(2), s_ipsc->cAlphaArgs(2)));
+                ShowContinueError(state, std::format("Entered in {} = {}", s_ipsc->cCurrentModuleObject, s_ipsc->cAlphaArgs(1)));
                 ErrorsFound = true;
             } else {
                 // Found one -- make sure has right parameters for PV
@@ -355,21 +354,20 @@ namespace Photovoltaics {
                 state.dataSurface->SurfIsPV(SurfNum) = true;
 
                 if (!state.dataSurface->Surface(SurfNum).ExtSolar) {
-                    ShowWarningError(state, EnergyPlus::format("Invalid {} = {}", s_ipsc->cAlphaFieldNames(2), s_ipsc->cAlphaArgs(2)));
-                    ShowContinueError(state, EnergyPlus::format("Entered in {} = {}", s_ipsc->cCurrentModuleObject, s_ipsc->cAlphaArgs(1)));
+                    ShowWarningError(state, std::format("Invalid {} = {}", s_ipsc->cAlphaFieldNames(2), s_ipsc->cAlphaArgs(2)));
+                    ShowContinueError(state, std::format("Entered in {} = {}", s_ipsc->cCurrentModuleObject, s_ipsc->cAlphaArgs(1)));
                     ShowContinueError(state, "Surface is not exposed to solar, check surface boundary condition");
                 }
                 state.dataPhotovoltaic->PVarray(PVnum).Zone = GetPVZone(state, state.dataPhotovoltaic->PVarray(PVnum).SurfacePtr);
 
                 // check surface orientation, warn if upside down
                 if ((state.dataSurface->Surface(SurfNum).Tilt < -95.0) || (state.dataSurface->Surface(SurfNum).Tilt > 95.0)) {
-                    ShowWarningError(state,
-                                     EnergyPlus::format("Suspected input problem with {} = {}", s_ipsc->cAlphaFieldNames(2), s_ipsc->cAlphaArgs(2)));
-                    ShowContinueError(state, EnergyPlus::format("Entered in {} = {}", s_ipsc->cCurrentModuleObject, s_ipsc->cAlphaArgs(1)));
+                    ShowWarningError(state, std::format("Suspected input problem with {} = {}", s_ipsc->cAlphaFieldNames(2), s_ipsc->cAlphaArgs(2)));
+                    ShowContinueError(state, std::format("Entered in {} = {}", s_ipsc->cCurrentModuleObject, s_ipsc->cAlphaArgs(1)));
                     ShowContinueError(state, "Surface used for solar collector faces down");
-                    ShowContinueError(state,
-                                      EnergyPlus::format("Surface tilt angle (degrees from ground outward normal) = {:.2R}",
-                                                         state.dataSurface->Surface(SurfNum).Tilt));
+                    ShowContinueError(
+                        state,
+                        std::format("Surface tilt angle (degrees from ground outward normal) = {:.2f}", state.dataSurface->Surface(SurfNum).Tilt));
                 }
             }
 
@@ -413,25 +411,25 @@ namespace Photovoltaics {
                 if (dupPtr != 0) {
                     auto &thisPVarray = state.dataPhotovoltaic->PVarray(dupPtr);
                     if (thisPVarray.CellIntegrationMode == CellIntegration::SurfaceOutsideFace) {
-                        ShowSevereError(state, EnergyPlus::format("{}: problem detected with multiple PV arrays.", s_ipsc->cCurrentModuleObject));
+                        ShowSevereError(state, std::format("{}: problem detected with multiple PV arrays.", s_ipsc->cCurrentModuleObject));
                         ShowContinueError(state, "When using IntegratedSurfaceOutsideFace heat transfer mode, only one PV array can be coupled");
                         ShowContinueError(state,
-                                          EnergyPlus::format("Both {} and {} are using surface {}",
-                                                             state.dataPhotovoltaic->PVarray(PVnum).Name,
-                                                             thisPVarray.Name,
-                                                             state.dataPhotovoltaic->PVarray(PVnum).SurfaceName));
+                                          std::format("Both {} and {} are using surface {}",
+                                                      state.dataPhotovoltaic->PVarray(PVnum).Name,
+                                                      thisPVarray.Name,
+                                                      state.dataPhotovoltaic->PVarray(PVnum).SurfaceName));
                         ErrorsFound = true;
                     } else if (thisPVarray.CellIntegrationMode == CellIntegration::TranspiredCollector) {
-                        ShowSevereError(state, EnergyPlus::format("{}: problem detected with multiple PV arrays.", s_ipsc->cCurrentModuleObject));
+                        ShowSevereError(state, std::format("{}: problem detected with multiple PV arrays.", s_ipsc->cCurrentModuleObject));
                         ShowContinueError(state, "When using IntegratedTranspiredCollector heat transfer mode, only one PV array can be coupled");
                         ShowContinueError(state,
-                                          EnergyPlus::format("Both {} and {} are using UTSC surface = {}",
-                                                             state.dataPhotovoltaic->PVarray(PVnum).Name,
-                                                             thisPVarray.Name,
-                                                             state.dataPhotovoltaic->PVarray(PVnum).SurfaceName));
+                                          std::format("Both {} and {} are using UTSC surface = {}",
+                                                      state.dataPhotovoltaic->PVarray(PVnum).Name,
+                                                      thisPVarray.Name,
+                                                      state.dataPhotovoltaic->PVarray(PVnum).SurfaceName));
                         ErrorsFound = true;
                     } else if (thisPVarray.CellIntegrationMode == CellIntegration::ExteriorVentedCavity) {
-                        ShowSevereError(state, EnergyPlus::format("{}: problem detected with multiple PV arrays.", s_ipsc->cCurrentModuleObject));
+                        ShowSevereError(state, std::format("{}: problem detected with multiple PV arrays.", s_ipsc->cCurrentModuleObject));
                         ShowContinueError(state, "When using IntegratedExteriorVentedCavity heat transfer mode, only one PV array can be coupled");
                         ShowContinueError(state,
                                           std::format("Both {} and {} are using exterior vented surface = {}",
@@ -1229,13 +1227,13 @@ namespace Photovoltaics {
         Real64 AA;
         Real64 IO;
         Real64 ISCG1;
-        Real64 ISC;
+        Real64 ISC = 0.0;
         Real64 VOCG1;
-        Real64 VOC;
+        Real64 VOC = 0.0;
         Real64 VLEFT;
         Real64 VRIGHT;
-        Real64 VM;
-        Real64 IM;
+        Real64 VM = 0.0;
+        Real64 IM = 0.0;
         Real64 PM;
         Real64 IA;
         Real64 ISCA;
@@ -1628,8 +1626,8 @@ namespace Photovoltaics {
             ShowSevereError(state, "EquivalentOneDiode Photovoltaic model failed to find maximum power point");
             ShowContinueError(state, "Numerical solver failed trying to take exponential of too large a number");
             ShowContinueError(state, std::format("Check input data in {}", pvModelNames[(int)PVModel::TRNSYS]));
-            ShowContinueError(state, EnergyPlus::format("VV (voltage) = {:.5R}", VV));
-            ShowContinueError(state, EnergyPlus::format("II (current) = {:.5R}", II));
+            ShowContinueError(state, std::format("VV (voltage) = {:.5f}", VV));
+            ShowContinueError(state, std::format("II (current) = {:.5f}", II));
             ShowFatalError(state, "FUN: EnergyPlus terminates because of numerical problem in EquivalentOne-Diode PV model");
         }
 
@@ -1661,8 +1659,8 @@ namespace Photovoltaics {
             ShowSevereError(state, "EquivalentOneDiode Photovoltaic model failed to find maximum power point");
             ShowContinueError(state, "Numerical solver failed trying to take exponential of too large a number");
             ShowContinueError(state, std::format("Check input data in {}", pvModelNames[(int)PVModel::TRNSYS]));
-            ShowContinueError(state, EnergyPlus::format("VV (voltage) = {:.5R}", VV));
-            ShowContinueError(state, EnergyPlus::format("II (current) = {:.5R}", II));
+            ShowContinueError(state, std::format("VV (voltage) = {:.5f}", VV));
+            ShowContinueError(state, std::format("II (current) = {:.5f}", II));
             ShowFatalError(state, "FI: EnergyPlus terminates because of numerical problem in EquivalentOne-Diode PV model");
         }
 
@@ -1694,8 +1692,8 @@ namespace Photovoltaics {
             ShowSevereError(state, "EquivalentOneDiode Photovoltaic model failed to find maximum power point");
             ShowContinueError(state, "Numerical solver failed trying to take exponential of too large a number");
             ShowContinueError(state, std::format("Check input data in {}", pvModelNames[(int)PVModel::TRNSYS]));
-            ShowContinueError(state, EnergyPlus::format("VV (voltage) = {:.5R}", VV));
-            ShowContinueError(state, EnergyPlus::format("II (current) = {:.5R}", II));
+            ShowContinueError(state, std::format("VV (voltage) = {:.5f}", VV));
+            ShowContinueError(state, std::format("II (current) = {:.5f}", II));
             ShowFatalError(state, "FI: EnergyPlus terminates because of numerical problem in EquivalentOne-Diode PV model");
         }
 

@@ -311,16 +311,16 @@ TEST_F(EnergyPlusFixture, SolarShadingTest_CalcPerSolarBeamTestResetsFrac)
 
     // Check that the fraction Sunlit is properly set to 1.0 when the sun is Up and ZERO otherwise: it does NOT remember previously set values
     for (int surfNum = 1; surfNum <= state->dataSurface->TotSurfaces; ++surfNum) {
-        SCOPED_TRACE(fmt::format("Surface {}='{}'", surfNum, state->dataSurface->Surface(surfNum).Name));
+        SCOPED_TRACE(std::format("Surface {}='{}'", surfNum, state->dataSurface->Surface(surfNum).Name));
         for (int hour = 1; hour <= Constant::iHoursInDay; ++hour) {
-            SCOPED_TRACE(fmt::format("Hour={}", hour));
+            SCOPED_TRACE(std::format("Hour={}", hour));
             if (isSunUp(hour, state->dataGlobal->TimeStepsInHour)) {
                 EXPECT_DOUBLE_EQ(1.0, state->dataHeatBal->SurfSunlitFracHR(hour, surfNum)) << "Failed when Sun is Up";
             } else {
                 EXPECT_DOUBLE_EQ(0.0, state->dataHeatBal->SurfSunlitFracHR(hour, surfNum)) << "Failed when Sun is Down";
             }
             for (int timestep = 1; timestep <= state->dataGlobal->TimeStepsInHour; ++timestep) {
-                SCOPED_TRACE(fmt::format("Timestep={}", timestep));
+                SCOPED_TRACE(std::format("Timestep={}", timestep));
                 if (isSunUp(hour, timestep)) {
                     EXPECT_DOUBLE_EQ(1.0, state->dataHeatBal->SurfSunlitFrac(hour, timestep, surfNum)) << "Failed when Sun is Up";
                 } else {
@@ -350,9 +350,9 @@ TEST_F(EnergyPlusFixture, SolarShadingTest_CalcPerSolarBeamTestResetsFrac)
     CalcPerSolarBeam(*state, AvgEqOfTime, AvgSinSolarDeclin, AvgCosSolarDeclin);
 
     for (int surfNum = 1; surfNum <= state->dataSurface->TotSurfaces; ++surfNum) {
-        SCOPED_TRACE(fmt::format("Surface {}='{}'", surfNum, state->dataSurface->Surface(surfNum).Name));
+        SCOPED_TRACE(std::format("Surface {}='{}'", surfNum, state->dataSurface->Surface(surfNum).Name));
         for (int hour = 1; hour <= Constant::iHoursInDay; ++hour) {
-            SCOPED_TRACE(fmt::format("Hour={}", hour));
+            SCOPED_TRACE(std::format("Hour={}", hour));
             if (hour == state->dataGlobal->HourOfDay) {
                 EXPECT_EQ(1.0, state->dataSurface->SurfaceWindow(surfNum).OutProjSLFracMult[hour]);
                 EXPECT_EQ(1.0, state->dataSurface->SurfaceWindow(surfNum).InOutProjSLFracMult[hour]);
@@ -363,7 +363,7 @@ TEST_F(EnergyPlusFixture, SolarShadingTest_CalcPerSolarBeamTestResetsFrac)
                 EXPECT_DOUBLE_EQ(0.5, state->dataHeatBal->SurfSunlitFracHR(hour, surfNum));
             }
             for (int timestep = 1; timestep <= state->dataGlobal->TimeStepsInHour; ++timestep) {
-                SCOPED_TRACE(fmt::format("Timestep={}", timestep));
+                SCOPED_TRACE(std::format("Timestep={}", timestep));
                 if (hour == state->dataGlobal->HourOfDay && timestep == state->dataGlobal->TimeStep) {
                     EXPECT_DOUBLE_EQ(0.0, state->dataHeatBal->SurfSunlitFrac(hour, timestep, surfNum));
                 } else {
@@ -3994,13 +3994,13 @@ TEST_F(EnergyPlusFixture, SolarShadingTest_CTRANS)
         transformedVertices.emplace_back(xs(i), ys(i), zs(i));
     }
     double perimeter = 0.0;
-    for (auto it = transformedVertices.begin(); it != transformedVertices.end(); ++it) {
+    for (auto vertIt = transformedVertices.begin(); vertIt != transformedVertices.end(); ++vertIt) {
 
-        auto itnext = std::next(it);
+        auto itnext = std::next(vertIt);
         if (itnext == std::end(transformedVertices)) {
             itnext = std::begin(transformedVertices);
         }
-        perimeter += SurfaceGeometry::distance(*it, *itnext);
+        perimeter += SurfaceGeometry::distance(*vertIt, *itnext);
     }
     EXPECT_DOUBLE_EQ(expected_perimeter, perimeter);
 
@@ -4490,13 +4490,13 @@ TEST_F(EnergyPlusFixture, ShadowCalculation_CSV)
     for (int iHour = 1; iHour <= 24; ++iHour) { // Do for all hours.
         for (int TS = 1; TS <= state->dataGlobal->TimeStepsInHour; ++TS) {
             if (TS == state->dataGlobal->TimeStepsInHour) {
-                expected_values += fmt::format(" 01/25 {:02}:00,", iHour);
+                expected_values += std::format(" 01/25 {:02}:00,", iHour);
             } else {
-                expected_values += fmt::format(" 01/25 {:02}:30,", iHour - 1);
+                expected_values += std::format(" 01/25 {:02}:30,", iHour - 1);
             }
 
             for (int SurfNum = 1; SurfNum <= state->dataSurface->TotSurfaces; ++SurfNum) {
-                expected_values += fmt::format("{:10.8F},", 0.0);
+                expected_values += std::format("{:10.8F},", 0.0);
             }
             expected_values += "\n";
         }
@@ -7928,7 +7928,7 @@ TEST_F(EnergyPlusFixture, CLIPLINE_Full)
         Real64 y1 = t.line_ori.p1.y;
         bool is_rev = x0 > x1;
 
-        std::string const msg = fmt::format("From ({}, {}) to ({}, {})", t.line_ori.p0.x, t.line_ori.p0.y, t.line_ori.p1.x, t.line_ori.p1.y);
+        std::string const msg = std::format("From ({}, {}) to ({}, {})", t.line_ori.p0.x, t.line_ori.p0.y, t.line_ori.p1.x, t.line_ori.p1.y);
 
         bool visible = false;
         CLIPLINE(x0, x1, y0, y1, maxX, minX, maxY, minY, visible);
@@ -8106,7 +8106,7 @@ TEST_F(EnergyPlusFixture, CLIPLINE_Full)
     for (const auto &t : test_cases) {
         ++i;
         std::string const msg =
-            fmt::format("test_case {}: From ({}, {}) to ({}, {})", i, t.line_ori.p0.x, t.line_ori.p0.y, t.line_ori.p1.x, t.line_ori.p1.y);
+            std::format("test_case {}: From ({}, {}) to ({}, {})", i, t.line_ori.p0.x, t.line_ori.p0.y, t.line_ori.p1.x, t.line_ori.p1.y);
         SCOPED_TRACE(msg);
         testclipline(t);
     }
@@ -8141,7 +8141,7 @@ TEST_F(EnergyPlusFixture, CLIPLINE_Full)
     for (const auto &t : boundary_lines) {
         ++i;
         std::string const msg =
-            fmt::format("Boundary Line {}: From ({}, {}) to ({}, {})", i, t.line_ori.p0.x, t.line_ori.p0.y, t.line_ori.p1.x, t.line_ori.p1.y);
+            std::format("Boundary Line {}: From ({}, {}) to ({}, {})", i, t.line_ori.p0.x, t.line_ori.p0.y, t.line_ori.p1.x, t.line_ori.p1.y);
         SCOPED_TRACE(msg);
         testclipline(t);
     }

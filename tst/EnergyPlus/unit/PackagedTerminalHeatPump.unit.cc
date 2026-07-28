@@ -531,7 +531,6 @@ namespace EnergyPlus {
 //     state->dataSize->FinalZoneSizing(state->dataSize->CurZoneEqNum).CoolDesHumRat = 0.007807825;
 //     state->dataEnvrn->OutBaroPress = 101325;
 //     state->dataEnvrn->StdRhoAir = 1.0;
-//     OutputReportPredefined::SetPredefinedTables(*state);
 //     thisSys.sizeSystem(*state, firstHVACIteration, airLoopNum);
 //
 //     // This VS coil is rather quirky. It sizes the capacity based on zone sizing air flow rate.
@@ -839,7 +838,6 @@ TEST_F(EnergyPlusFixture, AirTerminalSingleDuctMixer_SimPTAC_HeatingCoilTest)
     state->init_state(*state);
 
     state->dataGlobal->TimeStep = 1;
-    OutputReportPredefined::SetPredefinedTables(*state);
 
     GetZoneData(*state, ErrorsFound);
     ASSERT_FALSE(ErrorsFound);
@@ -1191,7 +1189,6 @@ TEST_F(EnergyPlusFixture, SimPTAC_SZVAVTest)
     state->init_state(*state);
 
     state->dataGlobal->TimeStep = 1;
-    OutputReportPredefined::SetPredefinedTables(*state);
 
     GetZoneData(*state, ErrorsFound);
     ASSERT_FALSE(ErrorsFound);
@@ -3912,7 +3909,6 @@ TEST_F(EnergyPlusFixture, PTACDrawAirfromReturnNodeAndPlenum_Test)
     GetZoneAirSetPoints(*state);
     state->dataHeatBalFanSys->TempControlType.allocate(6);
     state->dataHeatBalFanSys->TempControlType = HVAC::SetptType::DualHeatCool;
-    EnergyPlus::OutputReportPredefined::SetPredefinedTables(*state);
 
     Sched::GetSchedule(*state, "OCCUPY-1")->currentVal = 1.0;
     Sched::GetSchedule(*state, "LIGHTS-1")->currentVal = 1.0;
@@ -4899,7 +4895,6 @@ TEST_F(EnergyPlusFixture, PTAC_AvailabilityManagerTest)
     state->init_state(*state);
 
     state->dataGlobal->TimeStep = 1;
-    OutputReportPredefined::SetPredefinedTables(*state);
     GetZoneData(*state, ErrorsFound);
     ASSERT_FALSE(ErrorsFound);
     GetZoneEquipmentData(*state);

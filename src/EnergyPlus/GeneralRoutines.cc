@@ -59,6 +59,7 @@
 
 // EnergyPlus Headers
 #include <EnergyPlus/BaseboardRadiator.hh>
+#include <EnergyPlus/BranchInputManager.hh>
 #include <EnergyPlus/Construction.hh>
 #include <EnergyPlus/ConvectionCoefficients.hh>
 #include <EnergyPlus/Data/EnergyPlusData.hh>
@@ -1685,5 +1686,51 @@ Real64 calcZoneSensibleOutput(Real64 const MassFlow, // air mass flow rate, {kg/
         sensibleOutput = MassFlow * Psychrometrics::PsyDeltaHSenFnTdb2Tdb1W(TDBEquip, TDBZone, WZone); // sensible addition/removal rate, {W};
     }
     return sensibleOutput;
+}
+
+void CheckBranchEquipInZoneHVACEquipList(EnergyPlusData &state, int const branchNum, bool &errorsFound)
+{
+    // #4787 only interested in zone equipment connected to plant loop.  Assumes other ZoneHVAC equipment types will have less criptic errors.
+    for (int comp = 1; comp <= state.dataBranchInputManager->Branch(branchNum).NumOfComponents; ++comp) {
+        bool found = false;
+        DataZoneEquipment::ZoneEquipType eqType = static_cast<DataZoneEquipment::ZoneEquipType>(
+            getEnumValue(DataZoneEquipment::zoneEquipTypeNamesUC, state.dataBranchInputManager->Branch(branchNum).Component(comp).CType));
+        switch (eqType) {
+        case DataZoneEquipment::ZoneEquipType::BaseboardConvectiveWater:
+        case DataZoneEquipment::ZoneEquipType::BaseboardSteam:
+        case DataZoneEquipment::ZoneEquipType::BaseboardWater:
+        case DataZoneEquipment::ZoneEquipType::LowTemperatureRadiantConstFlow:
+        case DataZoneEquipment::ZoneEquipType::LowTemperatureRadiantVarFlow:
+        case DataZoneEquipment::ZoneEquipType::CoolingPanel:
+            for (int eqList = 1; eqList <= static_cast<int>(state.dataZoneEquip->ZoneEquipList.size()); ++eqList) {
+                for (int eqNum = 1; eqNum <= state.dataZoneEquip->ZoneEquipList(eqList).NumOfEquipTypes; ++eqNum) {
+                    // search name string first as it is more likely to be unique
+                    if (Util::SameString(state.dataBranchInputManager->Branch(branchNum).Component(comp).Name,
+                                         state.dataZoneEquip->ZoneEquipList(eqList).EquipName(eqNum))) {
+                        if (Util::SameString(state.dataBranchInputManager->Branch(branchNum).Component(comp).CType,
+                                             state.dataZoneEquip->ZoneEquipList(eqList).EquipTypeName(eqNum))) {
+                            found = true;
+                            break;
+                        }
+                    }
+                }
+                if (found) {
+                    break;
+                }
+            }
+            if (!found) {
+                ShowSevereError(state,
+                                std::format("CheckBranchEquipInZoneHVACEquipList: Branch = {}, contains a component of type {} with name = {}",
+                                            state.dataBranchInputManager->Branch(branchNum).Name,
+                                            state.dataBranchInputManager->Branch(branchNum).Component(comp).CType,
+                                            state.dataBranchInputManager->Branch(branchNum).Component(comp).Name));
+                ShowContinueError(state, "but that component is not listed in any ZoneHVAC:EquipmentList.");
+                errorsFound = true;
+            }
+            break;
+        default:
+            continue;
+        }
+    }
 }
 } // namespace EnergyPlus

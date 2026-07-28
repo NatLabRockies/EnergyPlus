@@ -68,8 +68,6 @@ TEST_F(EnergyPlusFixture, Construction_reportLayers)
     auto &m = state->dataMaterial;
     auto &orp = *state->dataOutRptPredefined;
 
-    SetPredefinedTables(*state);
-
     auto *mata = new Material::MaterialBase;
     mata->Name = "mat a";
     m->materials.push_back(mata);

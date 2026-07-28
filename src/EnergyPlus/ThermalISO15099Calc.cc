@@ -47,6 +47,7 @@
 
 // C++ Headers
 #include <cassert>
+#include <format>
 
 // EnergyPlus Headers
 #include <EnergyPlus/Data/EnergyPlusData.hh>
@@ -258,7 +259,7 @@ void Calc_ISO15099(EnergyPlusData &state,
                    Array1D<Real64> &ShadeGapKeffConv,
                    Real64 const SDScalar,
                    int const SHGCCalc,
-                   int &NumOfIterations,
+                   int &t_NumOfIterations,
                    Real64 const edgeGlCorrFac)
 {
 
@@ -311,15 +312,15 @@ void Calc_ISO15099(EnergyPlusData &state,
     EP_SIZE_CHECK(ShadeGapKeffConv, MaxGap);
 
     //  REAL(r64) :: grho(maxgas,3)
-    Real64 shgct_NOSD;
+    Real64 shgct_NOSD = 0.0;
     Real64 trmout;
 
     Real64 Gout;
     Real64 Gin;
     Real64 AchievedErrorTolerance;
     Real64 AchievedErrorToleranceSolar;
-    int NumOfIter;
-    int NumOfIterSolar;
+    int NumOfIter = 0;
+    int NumOfIterSolar = 0;
 
     Real64 tgg;
     Real64 qc1;
@@ -566,7 +567,7 @@ void Calc_ISO15099(EnergyPlusData &state,
                 NumOfIterSolar,
                 edgeGlCorrFac);
 
-        NumOfIterations = NumOfIterSolar;
+        t_NumOfIterations = NumOfIterSolar;
         // exit on error:
 
         if (nlayer > 1) {
@@ -720,7 +721,7 @@ void Calc_ISO15099(EnergyPlusData &state,
                 NumOfIter,
                 edgeGlCorrFac);
 
-        NumOfIterations = NumOfIter;
+        t_NumOfIterations = NumOfIter;
 
         // exit on error:
         if (!(GoAhead(nperr))) {
@@ -977,7 +978,7 @@ void Calc_ISO15099(EnergyPlusData &state,
                     NumOfIter_NOSD,
                     edgeGlCorrFac);
 
-            NumOfIterations = NumOfIter_NOSD;
+            t_NumOfIterations = NumOfIter_NOSD;
             // exit on error
             if (!(GoAhead(nperr))) {
                 return;
@@ -2956,15 +2957,15 @@ void storeIterationResults(EnergyPlusData &state,
             dynFormat = "";
         }
         if (mod(i, 2) == 1) {
-            dynFormat += fmt::format("Ebf({:3})", (i + 1) / 2);
+            dynFormat += std::format("Ebf({:3})", (i + 1) / 2);
         } else {
-            dynFormat += fmt::format("Ebb({:3})", (i + 1) / 2);
+            dynFormat += std::format("Ebb({:3})", (i + 1) / 2);
         }
         if (i != 2 * nlayer) {
             dynFormat += "===";
         }
     }
-    print(files.TarcogIterationsFile, dynFormat);
+    print(files.TarcogIterationsFile, "{}", dynFormat);
     print(files.TarcogIterationsFile, "\n");
 
     // write Ebb and Ebf
@@ -2976,7 +2977,7 @@ void storeIterationResults(EnergyPlusData &state,
 
     // Write headers for Rb and Rf
     for (i = 1; i <= 2 * nlayer; ++i) {
-        const std::string a = fmt::format("{:3}", (i + 1) / 2); // this is just to simulate correct integer in brackets
+        const std::string a = std::format("{:3}", (i + 1) / 2); // this is just to simulate correct integer in brackets
         if (i == 1) {
             dynFormat = "";
         }
@@ -2989,7 +2990,7 @@ void storeIterationResults(EnergyPlusData &state,
             dynFormat += "===";
         }
     }
-    print(files.TarcogIterationsFile, dynFormat);
+    print(files.TarcogIterationsFile, "{}", dynFormat);
     print(files.TarcogIterationsFile, "\n");
     // write Rb and Rf
     print(files.TarcogIterationsFile, "{:16.8F}   {:16.8F}", Rf(1), Rb(1));
@@ -3000,7 +3001,7 @@ void storeIterationResults(EnergyPlusData &state,
 
     // Write header for temperatures
     for (i = 1; i <= 2 * nlayer; ++i) {
-        const std::string a = fmt::format("{:3}", i);
+        const std::string a = std::format("{:3}", i);
         if (i == 1) {
             dynFormat = "";
         }
@@ -3009,7 +3010,7 @@ void storeIterationResults(EnergyPlusData &state,
             dynFormat += "==";
         }
     }
-    print(files.TarcogIterationsFile, dynFormat);
+    print(files.TarcogIterationsFile, "{}", dynFormat);
     print(files.TarcogIterationsFile, "\n");
 
     // write temperatures
@@ -3025,14 +3026,14 @@ void storeIterationResults(EnergyPlusData &state,
     if (index == 0) {
         dynFormat = "  ";
         for (i = 1; i <= 2 * nlayer; ++i) {
-            const std::string a = fmt::format("{:3}", i);
+            const std::string a = std::format("{:3}", i);
             if (i != 2 * nlayer) {
                 dynFormat += "theta(" + a + "),";
             } else {
                 dynFormat += "theta(" + a + ')';
             }
         }
-        print(files.IterationCSVFile, dynFormat);
+        print(files.IterationCSVFile, "{}", dynFormat);
         print(files.IterationCSVFile, "\n");
     }
     print(files.IterationCSVFile, "{:16.8F}   \n", theta(1) - Constant::Kelvin);

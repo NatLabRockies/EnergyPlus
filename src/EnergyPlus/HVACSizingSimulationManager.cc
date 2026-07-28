@@ -275,7 +275,7 @@ void ManageHVACSizingSimulation(EnergyPlusData &state, bool &ErrorsFound)
                 }
                 // }
                 ++state.dataGlobal->DayOfSim;
-                state.dataGlobal->DayOfSimChr = fmt::to_string(state.dataGlobal->DayOfSim);
+                state.dataGlobal->DayOfSimChr = std::to_string(state.dataGlobal->DayOfSim);
                 if (!state.dataGlobal->WarmupFlag) {
                     ++state.dataEnvrn->CurrentOverallSimDay;
                     DisplaySimDaysProgress(state, state.dataEnvrn->CurrentOverallSimDay, state.dataEnvrn->TotalOverallSimDays);
@@ -287,7 +287,7 @@ void ManageHVACSizingSimulation(EnergyPlusData &state, bool &ErrorsFound)
 
                 if (state.dataGlobal->WarmupFlag) {
                     ++state.dataReportFlag->NumOfWarmupDays;
-                    state.dataReportFlag->cWarmupDay = fmt::to_string(state.dataReportFlag->NumOfWarmupDays);
+                    state.dataReportFlag->cWarmupDay = std::to_string(state.dataReportFlag->NumOfWarmupDays);
                     DisplayString(state, "Warming up {" + state.dataReportFlag->cWarmupDay + '}');
                 } else if (state.dataGlobal->DayOfSim == 1) {
                     DisplayString(

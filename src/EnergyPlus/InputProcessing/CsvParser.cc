@@ -50,7 +50,6 @@
 
 // Third Party Headers
 #include <fast_float/fast_float.h>
-#include <fmt/format.h>
 
 // EnergyPlus Headers
 #include <EnergyPlus/InputProcessing/CsvParser.hh>
@@ -118,7 +117,7 @@ void CsvParser::skip_rows(std::string_view csv, size_t &index)
 int CsvParser::find_number_columns(std::string_view csv, size_t &index)
 {
     Token token;
-    Token prev_token;
+    Token prev_token = Token::NONE;
     int num_columns = 0;
 
     size_t save_index = index;

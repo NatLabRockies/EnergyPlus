@@ -740,7 +740,6 @@ TEST_F(EnergyPlusFixture, PlantLoopSourceSideTest)
 
     state->dataGlobal->BeginSimFlag = true;
 
-    OutputReportPredefined::SetPredefinedTables(*state);
     HeatBalanceManager::SetPreConstructionInputParameters(*state); // establish array bounds for constructions early
     // OutputProcessor::TimeValue.allocate(2);
     OutputProcessor::SetupTimePointers(
@@ -1524,7 +1523,6 @@ TEST_F(EnergyPlusFixture, WWHP_AutosizeTest1)
 
     state->dataGlobal->BeginSimFlag = true;
 
-    OutputReportPredefined::SetPredefinedTables(*state);
     HeatBalanceManager::SetPreConstructionInputParameters(*state); // establish array bounds for constructions early
     // OutputProcessor::TimeValue.allocate(2);
     OutputProcessor::SetupTimePointers(

@@ -599,8 +599,6 @@ TEST_F(EnergyPlusFixture, AirTerminalSingleDuctMixer_SimPTAC_ATMInletSide)
     state->dataGlobal->MinutesInTimeStep = 60;
     state->init_state(*state);
 
-    OutputReportPredefined::SetPredefinedTables(*state);
-
     GetZoneData(*state, ErrorsFound);
     ASSERT_FALSE(ErrorsFound);
 
@@ -951,8 +949,6 @@ TEST_F(EnergyPlusFixture, AirTerminalSingleDuctMixer_SimPTAC_ATMSupplySide)
     state->dataGlobal->TimeStep = 1;
     state->dataGlobal->MinutesInTimeStep = 60;
     state->init_state(*state);
-
-    OutputReportPredefined::SetPredefinedTables(*state);
 
     GetZoneData(*state, ErrorsFound);
     ASSERT_FALSE(ErrorsFound);
@@ -1391,8 +1387,6 @@ TEST_F(EnergyPlusFixture, AirTerminalSingleDuctMixer_SimPTHP_ATMInletSide)
     state->dataGlobal->MinutesInTimeStep = 60;
     state->init_state(*state);
 
-    OutputReportPredefined::SetPredefinedTables(*state);
-
     GetZoneData(*state, ErrorsFound);
     ASSERT_FALSE(ErrorsFound);
 
@@ -1828,8 +1822,6 @@ TEST_F(EnergyPlusFixture, AirTerminalSingleDuctMixer_SimPTHP_ATMSupplySide)
     state->dataGlobal->TimeStep = 1;
     state->dataGlobal->MinutesInTimeStep = 60;
     state->init_state(*state);
-
-    OutputReportPredefined::SetPredefinedTables(*state);
 
     GetZoneData(*state, ErrorsFound);
     ASSERT_FALSE(ErrorsFound);
@@ -2532,8 +2524,6 @@ TEST_F(EnergyPlusFixture, AirTerminalSingleDuctMixer_SimVRF_ATMInletSide)
 
     state->dataGlobal->TimeStep = 1;
 
-    OutputReportPredefined::SetPredefinedTables(*state);
-
     GetZoneData(*state, ErrorsFound);
     ASSERT_FALSE(ErrorsFound);
 
@@ -3215,8 +3205,6 @@ TEST_F(EnergyPlusFixture, AirTerminalSingleDuctMixer_SimVRF_ATMSupplySide)
     state->dataEnvrn->OutHumRat = 0.0098;
     state->dataEnvrn->OutEnthalpy = Psychrometrics::PsyHFnTdbW(state->dataEnvrn->OutDryBulbTemp, state->dataEnvrn->OutHumRat);
     state->dataEnvrn->StdRhoAir = 1.20;
-
-    OutputReportPredefined::SetPredefinedTables(*state);
 
     GetZoneData(*state, ErrorsFound);
     ASSERT_FALSE(ErrorsFound);
@@ -4980,8 +4968,6 @@ TEST_F(EnergyPlusFixture, AirTerminalSingleDuctMixer_SimVRFfluidCntrl_ATMInletSi
     state->dataGlobal->TimeStep = 1;
     state->dataGlobal->MinutesInTimeStep = 60;
     state->init_state(*state);
-
-    OutputReportPredefined::SetPredefinedTables(*state);
 
     GetZoneData(*state, ErrorsFound);
     ASSERT_FALSE(ErrorsFound);
@@ -6761,8 +6747,6 @@ TEST_F(EnergyPlusFixture, AirTerminalSingleDuctMixer_SimVRFfluidCntrl_ATMSupplyS
     state->dataGlobal->MinutesInTimeStep = 60;
     state->init_state(*state);
 
-    OutputReportPredefined::SetPredefinedTables(*state);
-
     GetZoneData(*state, ErrorsFound);
     ASSERT_FALSE(ErrorsFound);
 
@@ -7014,8 +6998,6 @@ TEST_F(EnergyPlusFixture, AirTerminalSingleDuctMixer_SimUnitVent_ATMInletSide)
     state->dataGlobal->MinutesInTimeStep = 60;
     state->init_state(*state);
 
-    OutputReportPredefined::SetPredefinedTables(*state);
-
     GetZoneData(*state, ErrorsFound);
     ASSERT_FALSE(ErrorsFound);
 
@@ -7259,8 +7241,6 @@ TEST_F(EnergyPlusFixture, AirTerminalSingleDuctMixer_SimUnitVent_ATMSupplySide)
     state->dataGlobal->TimeStep = 1;
     state->dataGlobal->MinutesInTimeStep = 60;
     state->init_state(*state);
-
-    OutputReportPredefined::SetPredefinedTables(*state);
 
     GetZoneData(*state, ErrorsFound);
     ASSERT_FALSE(ErrorsFound);
@@ -7711,7 +7691,6 @@ TEST_F(EnergyPlusFixture, AirTerminalSingleDuctMixer_SimFCU_ATMInletSideTest)
     state->dataEnvrn->OutBaroPress = 101325.0;
     state->dataEnvrn->StdRhoAir = Psychrometrics::PsyRhoAirFnPbTdbW(*state, state->dataEnvrn->OutBaroPress, 20.0, 0.0);
     state->dataWaterCoils->GetWaterCoilsInputFlag = true;
-    OutputReportPredefined::SetPredefinedTables(*state);
     GetZoneData(*state, ErrorsFound);
     ASSERT_FALSE(ErrorsFound);
 
@@ -8135,7 +8114,6 @@ TEST_F(EnergyPlusFixture, AirTerminalSingleDuctMixer_FCU_NightCycleTest)
     state->dataGlobal->MinutesInTimeStep = 60;
     state->init_state(*state);
 
-    OutputReportPredefined::SetPredefinedTables(*state);
     GetZoneData(*state, ErrorsFound);
     ASSERT_FALSE(ErrorsFound);
 

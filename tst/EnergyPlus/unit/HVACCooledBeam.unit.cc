@@ -70,8 +70,6 @@ TEST_F(EnergyPlusFixture, HVACCooledBeam_reportTerminalUnit)
     using namespace EnergyPlus::OutputReportPredefined;
     auto &orp = *state->dataOutRptPredefined;
 
-    SetPredefinedTables(*state);
-
     [[maybe_unused]] auto *schedA = Sched::AddScheduleConstant(*state, "schA");
     [[maybe_unused]] auto *schedB = Sched::AddScheduleConstant(*state, "schB");
 

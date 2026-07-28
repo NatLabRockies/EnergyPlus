@@ -537,8 +537,6 @@ TEST_F(EnergyPlusFixture, DualDuctAirTerminal_reportTerminalUnit)
 
     auto &orp = *state->dataOutRptPredefined;
 
-    SetPredefinedTables(*state);
-
     auto *schedA = Sched::AddScheduleConstant(*state, "schA");
     auto *schedB = Sched::AddScheduleConstant(*state, "schB");
 

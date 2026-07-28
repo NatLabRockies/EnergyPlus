@@ -403,7 +403,7 @@ namespace SurfaceGeometry {
                         thisZone.ExtWindowArea + thisSurface.GrossArea * thisSurface.Multiplier * thisZone.Multiplier * thisZone.ListMultiplier;
                     if (DetailedWWR) {
                         print(state.files.debug,
-                              "{},Window,{:.2R},{:.1R}\n",
+                              "{},Window,{:.2f},{:.1f}\n",
                               thisSurface.Name,
                               thisSurface.GrossArea * thisSurface.Multiplier * thisZone.Multiplier * thisZone.ListMultiplier,
                               thisSurface.Tilt);
@@ -423,7 +423,7 @@ namespace SurfaceGeometry {
                         thisSpace.extPerimeter += thisSurface.Width;
                         if (DetailedWWR) {
                             print(state.files.debug,
-                                  "{},Wall,{:.2R},{:.1R}\n",
+                                  "{},Wall,{:.2f},{:.1f}\n",
                                   thisSurface.Name,
                                   thisSurface.GrossArea * thisZone.Multiplier * thisZone.ListMultiplier,
                                   thisSurface.Tilt);
@@ -437,7 +437,7 @@ namespace SurfaceGeometry {
                         thisZone.ExtGrossGroundWallArea_Multiplied += thisSurface.GrossArea * thisZone.Multiplier * thisZone.ListMultiplier;
                         if (DetailedWWR) {
                             print(state.files.debug,
-                                  "{},Wall-GroundContact,{:.2R},{:.1R}\n",
+                                  "{},Wall-GroundContact,{:.2f},{:.1f}\n",
                                   thisSurface.Name,
                                   thisSurface.GrossArea * thisZone.Multiplier * thisZone.ListMultiplier,
                                   thisSurface.Tilt);
@@ -463,7 +463,7 @@ namespace SurfaceGeometry {
             Real64 ZCeilAvg = 0.0;
             Real64 ZFlrAvg = 0.0;
             if (DetailedWWR) {
-                print(state.files.debug, "{},{:.2R},{:.2R}\n", thisZone.Name, thisZone.ExtGrossWallArea, thisZone.ExtWindowArea);
+                print(state.files.debug, "{},{:.2f},{:.2f}\n", thisZone.Name, thisZone.ExtGrossWallArea, thisZone.ExtWindowArea);
             }
             for (int spaceNum : thisZone.spaceIndexes) {
                 auto const &thisSpace = state.dataHeatBal->space(spaceNum);
@@ -527,8 +527,8 @@ namespace SurfaceGeometry {
                                             RoutineName,
                                             thisZone.Name));
                             static constexpr std::string_view ValFmt("{:.2F}");
-                            std::string String1 = EnergyPlus::format(ValFmt, thisZone.CeilingHeight);
-                            std::string String2 = EnergyPlus::format(ValFmt, AverageHeight);
+                            std::string String1 = std::format(ValFmt, thisZone.CeilingHeight);
+                            std::string String2 = std::format(ValFmt, AverageHeight);
                             ShowContinueError(
                                 state,
                                 std::format("{}Entered Ceiling Height={}, Calculated Ceiling Height={}, entered height will be used in calculations.",
@@ -756,8 +756,8 @@ namespace SurfaceGeometry {
 
             static constexpr std::string_view Format_720(
                 " Zone Information, "
-                "{},{:.1R},{:.2R},{:.2R},{:.2R},{:.2R},{:.2R},{:.2R},{},{},{},{:.2R},{:.2R},{:.2R},{:.2R},{:.2R},{:.2R},"
-                "{:.2R},{:.2R},{},{},{:.2R},{:.2R},{:.2R},{:.2R},{},{},{},{}\n");
+                "{},{:.1f},{:.2f},{:.2f},{:.2f},{:.2f},{:.2f},{:.2f},{},{},{},{:.2f},{:.2f},{:.2f},{:.2f},{:.2f},{:.2f},"
+                "{:.2f},{:.2f},{},{},{:.2f},{:.2f},{:.2f},{:.2f},{},{},{},{}\n");
 
             print(state.files.eio,
                   Format_720,
@@ -1903,9 +1903,8 @@ namespace SurfaceGeometry {
                                                       "back side values");
                                     ShowContinueError(
                                         state,
-                                        EnergyPlus::format(
-                                            "...but Nominal U values are similar, diff=[{:.4R}] ... simulation proceeds.",
-                                            std::abs(state.dataHeatBal->NominalU(ConstrNum) - state.dataHeatBal->NominalU(ConstrNumFound))));
+                                        std::format("...but Nominal U values are similar, diff=[{:.4f}] ... simulation proceeds.",
+                                                    std::abs(state.dataHeatBal->NominalU(ConstrNum) - state.dataHeatBal->NominalU(ConstrNumFound))));
                                     if (!izConstDiffMsg) {
                                         ShowContinueError(state,
                                                           "...if the two zones are expected to have significantly different temperatures, the proper "
@@ -2321,27 +2320,25 @@ namespace SurfaceGeometry {
                                 if (ErrCount == 1 && !state.dataGlobal->DisplayExtraWarnings) {
                                     ShowWarningError(
                                         state,
-                                        EnergyPlus::format(
-                                            "{}Entered Space Floor Area(s) differ more than {:.0R}% from calculated Space Floor Area(s).",
-                                            std::string(RoutineName),
-                                            floorAreaPercentTolerance));
+                                        std::format("{}Entered Space Floor Area(s) differ more than {:.0f}% from calculated Space Floor Area(s).",
+                                                    std::string(RoutineName),
+                                                    floorAreaPercentTolerance));
                                     ShowContinueError(state,
                                                       "...use Output:Diagnostics,DisplayExtraWarnings; to show more details on individual Spaces.");
                                 }
                                 if (state.dataGlobal->DisplayExtraWarnings) {
                                     // Warn user of using specified Space Floor Area
-                                    ShowWarningError(state,
-                                                     EnergyPlus::format(
-                                                         "{}Entered Floor Area for Space=\"{}\" is {:.1R}% different from the calculated Floor Area.",
-                                                         std::string(RoutineName),
-                                                         thisSpace.Name,
-                                                         diffp * 100.0));
-                                    ShowContinueError(
+                                    ShowWarningError(
                                         state,
-                                        EnergyPlus::format("Entered Space Floor Area={:.2R}, Calculated Space Floor Area={:.2R}, entered "
-                                                           "Floor Area will be used.",
-                                                           thisSpace.userEnteredFloorArea,
-                                                           calcFloorArea));
+                                        std::format("{}Entered Floor Area for Space=\"{}\" is {:.1f}% different from the calculated Floor Area.",
+                                                    std::string(RoutineName),
+                                                    thisSpace.Name,
+                                                    diffp * 100.0));
+                                    ShowContinueError(state,
+                                                      std::format("Entered Space Floor Area={:.2f}, Calculated Space Floor Area={:.2f}, entered "
+                                                                  "Floor Area will be used.",
+                                                                  thisSpace.userEnteredFloorArea,
+                                                                  calcFloorArea));
                                 }
                             }
                         }
@@ -2371,26 +2368,24 @@ namespace SurfaceGeometry {
                                 if (ErrCount == 1 && !state.dataGlobal->DisplayExtraWarnings) {
                                     ShowWarningError(
                                         state,
-                                        EnergyPlus::format(
-                                            "{}Entered Zone Floor Area(s) differ more than {:.0R}% from the sum of the Space Floor Area(s).",
-                                            std::string(RoutineName),
-                                            floorAreaPercentTolerance));
+                                        std::format("{}Entered Zone Floor Area(s) differ more than {:.0f}% from the sum of the Space Floor Area(s).",
+                                                    std::string(RoutineName),
+                                                    floorAreaPercentTolerance));
                                     ShowContinueError(state,
                                                       "...use Output:Diagnostics,DisplayExtraWarnings; to show more details on individual zones.");
                                 }
                                 if (state.dataGlobal->DisplayExtraWarnings) {
                                     // Warn user of using specified Zone Floor Area
-                                    ShowWarningError(
-                                        state,
-                                        EnergyPlus::format("{}Entered Floor Area for Zone=\"{}\" is {:.1R}% different from the sum of the "
-                                                           "Space Floor Area(s).",
-                                                           std::string(RoutineName),
-                                                           thisZone.Name,
-                                                           diffp * 100.0));
+                                    ShowWarningError(state,
+                                                     std::format("{}Entered Floor Area for Zone=\"{}\" is {:.1f}% different from the sum of the "
+                                                                 "Space Floor Area(s).",
+                                                                 std::string(RoutineName),
+                                                                 thisZone.Name,
+                                                                 diffp * 100.0));
                                     ShowContinueError(state,
-                                                      EnergyPlus::format("Entered Zone Floor Area={:.2R}, Sum of Space Floor Area(s)={:.2R}",
-                                                                         thisZone.UserEnteredFloorArea,
-                                                                         zoneCalcFloorArea));
+                                                      std::format("Entered Zone Floor Area={:.2f}, Sum of Space Floor Area(s)={:.2f}",
+                                                                  thisZone.UserEnteredFloorArea,
+                                                                  zoneCalcFloorArea));
                                     ShowContinueError(
                                         state, "Entered Zone Floor Area will be used and Space Floor Area(s) will be adjusted proportionately.");
                                 }
@@ -2446,18 +2441,18 @@ namespace SurfaceGeometry {
         for (int SurfNum = 1; SurfNum <= MovedSurfs; ++SurfNum) { // TotSurfaces
             if (state.dataSurface->Surface(SurfNum).Area < 1.e-06) {
                 ShowSevereError(state,
-                                EnergyPlus::format("{}Zero or negative surface area[{:.5R}], Surface={}",
-                                                   RoutineName,
-                                                   state.dataSurface->Surface(SurfNum).Area,
-                                                   state.dataSurface->Surface(SurfNum).Name));
+                                std::format("{}Zero or negative surface area[{:.5f}], Surface={}",
+                                            RoutineName,
+                                            state.dataSurface->Surface(SurfNum).Area,
+                                            state.dataSurface->Surface(SurfNum).Name));
                 SurfError = true;
             }
             if (state.dataSurface->Surface(SurfNum).Area >= 1.e-06 && state.dataSurface->Surface(SurfNum).Area < 0.001) {
                 ShowWarningError(state,
-                                 EnergyPlus::format("{}Very small surface area[{:.5R}], Surface={}",
-                                                    RoutineName,
-                                                    state.dataSurface->Surface(SurfNum).Area,
-                                                    state.dataSurface->Surface(SurfNum).Name));
+                                 std::format("{}Very small surface area[{:.5f}], Surface={}",
+                                             RoutineName,
+                                             state.dataSurface->Surface(SurfNum).Area,
+                                             state.dataSurface->Surface(SurfNum).Name));
             }
         }
 
@@ -3099,40 +3094,36 @@ namespace SurfaceGeometry {
             if (((General::rotAzmDiffDeg(baseSurface.Azimuth, subSurface.Azimuth) > errorTolerance) && !baseSurfHoriz) ||
                 (std::abs(baseSurface.Tilt - subSurface.Tilt) > errorTolerance)) {
                 surfaceError = true;
-                ShowSevereError(state,
-                                EnergyPlus::format(
-                                    "checkSubSurfAzTiltNorm: Outward facing angle of subsurface differs more than {:.1R} degrees from base surface.",
-                                    errorTolerance));
+                ShowSevereError(
+                    state,
+                    std::format("checkSubSurfAzTiltNorm: Outward facing angle of subsurface differs more than {:.1f} degrees from base surface.",
+                                errorTolerance));
+                ShowContinueError(
+                    state, std::format("Subsurface=\"{}\" Tilt = {:.1f}  Azimuth = {:.1f}", subSurface.Name, subSurface.Tilt, subSurface.Azimuth));
                 ShowContinueError(
                     state,
-                    EnergyPlus::format("Subsurface=\"{}\" Tilt = {:.1R}  Azimuth = {:.1R}", subSurface.Name, subSurface.Tilt, subSurface.Azimuth));
-                ShowContinueError(
-                    state,
-                    EnergyPlus::format(
-                        "Base surface=\"{}\" Tilt = {:.1R}  Azimuth = {:.1R}", baseSurface.Name, baseSurface.Tilt, baseSurface.Azimuth));
+                    std::format("Base surface=\"{}\" Tilt = {:.1f}  Azimuth = {:.1f}", baseSurface.Name, baseSurface.Tilt, baseSurface.Azimuth));
             } else if (((General::rotAzmDiffDeg(baseSurface.Azimuth, subSurface.Azimuth) > warningTolerance) && !baseSurfHoriz) ||
                        (std::abs(baseSurface.Tilt - subSurface.Tilt) > warningTolerance)) {
                 ++state.dataSurfaceGeometry->checkSubSurfAzTiltNormErrCount;
                 if (state.dataSurfaceGeometry->checkSubSurfAzTiltNormErrCount == 1 && !state.dataGlobal->DisplayExtraWarnings) {
                     ShowWarningError(state,
-                                     EnergyPlus::format("checkSubSurfAzTiltNorm: Some Outward Facing angles of subsurfaces differ more than {:.1R} "
-                                                        "degrees from base surface.",
-                                                        warningTolerance));
+                                     std::format("checkSubSurfAzTiltNorm: Some Outward Facing angles of subsurfaces differ more than {:.1f} "
+                                                 "degrees from base surface.",
+                                                 warningTolerance));
                     ShowContinueError(state, "...use Output:Diagnostics,DisplayExtraWarnings; to show more details on individual surfaces.");
                 }
                 if (state.dataGlobal->DisplayExtraWarnings) {
                     ShowWarningError(
                         state,
-                        EnergyPlus::format(
-                            "checkSubSurfAzTiltNorm: Outward facing angle of subsurface differs more than {:.1R} degrees from base surface.",
-                            warningTolerance));
-                    ShowContinueError(state,
-                                      EnergyPlus::format(
-                                          "Subsurface=\"{}\" Tilt = {:.1R}  Azimuth = {:.1R}", subSurface.Name, subSurface.Tilt, subSurface.Azimuth));
+                        std::format("checkSubSurfAzTiltNorm: Outward facing angle of subsurface differs more than {:.1f} degrees from base surface.",
+                                    warningTolerance));
                     ShowContinueError(
                         state,
-                        EnergyPlus::format(
-                            "Base surface=\"{}\" Tilt = {:.1R}  Azimuth = {:.1R}", baseSurface.Name, baseSurface.Tilt, baseSurface.Azimuth));
+                        std::format("Subsurface=\"{}\" Tilt = {:.1f}  Azimuth = {:.1f}", subSurface.Name, subSurface.Tilt, subSurface.Azimuth));
+                    ShowContinueError(
+                        state,
+                        std::format("Base surface=\"{}\" Tilt = {:.1f}  Azimuth = {:.1f}", baseSurface.Name, baseSurface.Tilt, baseSurface.Azimuth));
                 }
             }
         }
@@ -3517,11 +3508,10 @@ namespace SurfaceGeometry {
                     if (mod(NumNumbers - 1, 3) != 0) {
                         ShowWarningError(
                             state,
-                            std::format(
-                                "{}=\"{}\", {}",
-                                s_ipsc->cCurrentModuleObject,
-                                surfTemp.Name,
-                                EnergyPlus::format("{} not even multiple of 3. Will read in {}", s_ipsc->cNumericFieldNames(1), surfTemp.Sides)));
+                            std::format("{}=\"{}\", {}",
+                                        s_ipsc->cCurrentModuleObject,
+                                        surfTemp.Name,
+                                        std::format("{} not even multiple of 3. Will read in {}", s_ipsc->cNumericFieldNames(1), surfTemp.Sides)));
                     }
                     if (numSides < 3) {
                         ShowSevereError(state,
@@ -3542,7 +3532,7 @@ namespace SurfaceGeometry {
                                                      s_ipsc->cCurrentModuleObject,
                                                      surfTemp.Name,
                                                      s_ipsc->cNumericFieldNames(1),
-                                                     fmt::to_string(surfTemp.Sides)));
+                                                     std::to_string(surfTemp.Sides)));
                         ShowContinueError(
                             state,
                             std::format("...but {} were entered. Only the indicated {} will be used.", numSides, s_ipsc->cNumericFieldNames(1)));
@@ -4009,8 +3999,8 @@ namespace SurfaceGeometry {
                                              "GetHTSurfaceData: Surfaces with interface to Ground found but no \"Ground Temperatures\" were input.");
                             ShowContinueError(state, std::format("Found first in surface={}", s_ipsc->cAlphaArgs(1)));
                             ShowContinueError(state,
-                                              EnergyPlus::format("Defaults, constant throughout the year of ({:.1R}) will be used.",
-                                                                 state.dataEnvrn->GroundTemp[(int)DataEnvironment::GroundTempType::BuildingSurface]));
+                                              std::format("Defaults, constant throughout the year of ({:.1f}) will be used.",
+                                                          state.dataEnvrn->GroundTemp[(int)DataEnvironment::GroundTempType::BuildingSurface]));
                         }
                         state.dataSurfaceGeometry->NoGroundTempObjWarning = false;
                     }
@@ -4276,11 +4266,10 @@ namespace SurfaceGeometry {
                     if (mod(SurfaceNumProp - 2, 3) != 0) {
                         ShowWarningError(
                             state,
-                            std::format(
-                                "{}=\"{}\", {}",
-                                s_ipsc->cCurrentModuleObject,
-                                surfTemp.Name,
-                                EnergyPlus::format("{} not even multiple of 3. Will read in {}", s_ipsc->cNumericFieldNames(2), surfTemp.Sides)));
+                            std::format("{}=\"{}\", {}",
+                                        s_ipsc->cCurrentModuleObject,
+                                        surfTemp.Name,
+                                        std::format("{} not even multiple of 3. Will read in {}", s_ipsc->cNumericFieldNames(2), surfTemp.Sides)));
                     }
                     if (numSides < 3) {
                         ShowSevereError(state,
@@ -4301,7 +4290,7 @@ namespace SurfaceGeometry {
                                                      s_ipsc->cCurrentModuleObject,
                                                      surfTemp.Name,
                                                      s_ipsc->cNumericFieldNames(2),
-                                                     fmt::to_string(surfTemp.Sides)));
+                                                     std::to_string(surfTemp.Sides)));
                         ShowContinueError(
                             state,
                             std::format("...but {} were entered. Only the indicated {} will be used.", numSides, s_ipsc->cNumericFieldNames(2)));
@@ -4675,8 +4664,8 @@ namespace SurfaceGeometry {
                                              "GetRectSurfaces: Surfaces with interface to Ground found but no \"Ground Temperatures\" were input.");
                             ShowContinueError(state, std::format("Found first in surface={}", s_ipsc->cAlphaArgs(1)));
                             ShowContinueError(state,
-                                              EnergyPlus::format("Defaults, constant throughout the year of ({:.1R}) will be used.",
-                                                                 state.dataEnvrn->GroundTemp[(int)DataEnvironment::GroundTempType::BuildingSurface]));
+                                              std::format("Defaults, constant throughout the year of ({:.1f}) will be used.",
+                                                          state.dataEnvrn->GroundTemp[(int)DataEnvironment::GroundTempType::BuildingSurface]));
                         }
                         state.dataSurfaceGeometry->NoGroundTempObjWarning = false;
                     }
@@ -5247,7 +5236,7 @@ namespace SurfaceGeometry {
                         std::format("{}=\"{}\", {}",
                                     s_ipsc->cCurrentModuleObject,
                                     surfTemp.Name,
-                                    EnergyPlus::format("{} not even multiple of 3. Will read in {}", s_ipsc->cNumericFieldNames(3), surfTemp.Sides)));
+                                    std::format("{} not even multiple of 3. Will read in {}", s_ipsc->cNumericFieldNames(3), surfTemp.Sides)));
                 }
                 if (s_ipsc->rNumericArgs(3) < 3) {
                     ShowSevereError(state,
@@ -5268,7 +5257,7 @@ namespace SurfaceGeometry {
                                                  s_ipsc->cCurrentModuleObject,
                                                  surfTemp.Name,
                                                  s_ipsc->cNumericFieldNames(3),
-                                                 fmt::to_string(surfTemp.Sides)));
+                                                 std::to_string(surfTemp.Sides)));
                     ShowContinueError(
                         state, std::format("...but {} were entered. Only the indicated {} will be used.", numSides, s_ipsc->cNumericFieldNames(3)));
                 }
@@ -5724,17 +5713,17 @@ namespace SurfaceGeometry {
         // This routine performs checks on WindowShadingControl settings and Frame/Divider Settings.
 
         // SUBROUTINE LOCAL VARIABLE DECLARATIONS:
-        int ConstrNumSh;    // Construction number with Shade
-        int ShDevNum;       // Shading Device number
-        int Lay;            // Layer number
-        int TotGlassLayers; // Number of glass layers in window construction
-        int TotLayers;      // Number of layers in unshaded construction
-        int TotShLayers;    // Number of layers in shaded construction
-        int MatGap;         // Gap material number
-        int MatGap1;        // Material number of gap to left (outer side) of between-glass shade/blind
-        int MatGap2;        // Material number of gap to right (inner side) of between-glass shade/blind
-        int MatSh;          // Between-glass shade/blind material number
-        Real64 MatGapCalc;  // Calculated MatGap diff for shaded vs non-shaded constructions
+        int ConstrNumSh = 0; // Construction number with Shade
+        int ShDevNum;        // Shading Device number
+        int Lay;             // Layer number
+        int TotGlassLayers;  // Number of glass layers in window construction
+        int TotLayers;       // Number of layers in unshaded construction
+        int TotShLayers;     // Number of layers in shaded construction
+        int MatGap;          // Gap material number
+        int MatGap1;         // Material number of gap to left (outer side) of between-glass shade/blind
+        int MatGap2;         // Material number of gap to right (inner side) of between-glass shade/blind
+        int MatSh;           // Between-glass shade/blind material number
+        Real64 MatGapCalc;   // Calculated MatGap diff for shaded vs non-shaded constructions
 
         // If WindowShadingControl has been specified for this window --
         // Set shaded construction number if shaded construction was specified in WindowShadingControl.
@@ -5897,18 +5886,18 @@ namespace SurfaceGeometry {
                                                       state.dataConstruction->Construct(ConstrNumSh).Name);
                                 ShowContinueError(state, "for window " + surfTemp.Name + ", which has a between-glass blind.");
                                 ShowContinueError(state,
-                                                  EnergyPlus::format("..Material={} thickness={:.3R} -",
-                                                                     s_mat->materials(MatGap)->Name,
-                                                                     s_mat->materials(MatGap)->Thickness));
+                                                  std::format("..Material={} thickness={:.3f} -",
+                                                              s_mat->materials(MatGap)->Name,
+                                                              s_mat->materials(MatGap)->Thickness));
                                 ShowContinueError(state,
-                                                  EnergyPlus::format("..( Material={} thickness={:.3R} +",
-                                                                     s_mat->materials(MatGap1)->Name,
-                                                                     s_mat->materials(MatGap1)->Thickness));
+                                                  std::format("..( Material={} thickness={:.3f} +",
+                                                              s_mat->materials(MatGap1)->Name,
+                                                              s_mat->materials(MatGap1)->Thickness));
                                 ShowContinueError(state,
-                                                  EnergyPlus::format("..Material={} thickness={:.3R} )=[{:.3R}] >.001",
-                                                                     s_mat->materials(MatGap2)->Name,
-                                                                     s_mat->materials(MatGap2)->Thickness,
-                                                                     MatGapCalc));
+                                                  std::format("..Material={} thickness={:.3f} )=[{:.3f}] >.001",
+                                                              s_mat->materials(MatGap2)->Name,
+                                                              s_mat->materials(MatGap2)->Thickness,
+                                                              MatGapCalc));
                                 ErrorsFound = true;
                             }
                         } else { // Between-glass shade
@@ -5925,22 +5914,22 @@ namespace SurfaceGeometry {
                                                       state.dataConstruction->Construct(ConstrNumSh).Name);
                                 ShowContinueError(state, "for window " + surfTemp.Name + ", which has a between-glass shade.");
                                 ShowContinueError(state,
-                                                  EnergyPlus::format("..Material={} thickness={:.3R} -",
-                                                                     s_mat->materials(MatGap)->Name,
-                                                                     s_mat->materials(MatGap)->Thickness));
+                                                  std::format("..Material={} thickness={:.3f} -",
+                                                              s_mat->materials(MatGap)->Name,
+                                                              s_mat->materials(MatGap)->Thickness));
                                 ShowContinueError(state,
-                                                  EnergyPlus::format("...( Material={} thickness={:.3R} +",
-                                                                     s_mat->materials(MatGap1)->Name,
-                                                                     s_mat->materials(MatGap1)->Thickness));
+                                                  std::format("...( Material={} thickness={:.3f} +",
+                                                              s_mat->materials(MatGap1)->Name,
+                                                              s_mat->materials(MatGap1)->Thickness));
                                 ShowContinueError(state,
-                                                  EnergyPlus::format("..Material={} thickness={:.3R} +",
-                                                                     s_mat->materials(MatGap2)->Name,
-                                                                     s_mat->materials(MatGap2)->Thickness));
+                                                  std::format("..Material={} thickness={:.3f} +",
+                                                              s_mat->materials(MatGap2)->Name,
+                                                              s_mat->materials(MatGap2)->Thickness));
                                 ShowContinueError(state,
-                                                  EnergyPlus::format("..Material={} thickness={:.3R} )=[{:.3R}] >.001",
-                                                                     s_mat->materials(MatSh)->Name,
-                                                                     s_mat->materials(MatSh)->Thickness,
-                                                                     MatGapCalc));
+                                                  std::format("..Material={} thickness={:.3f} )=[{:.3f}] >.001",
+                                                              s_mat->materials(MatSh)->Name,
+                                                              s_mat->materials(MatSh)->Thickness,
+                                                              MatGapCalc));
                                 ErrorsFound = true;
                             }
                         }
@@ -6010,8 +5999,8 @@ namespace SurfaceGeometry {
                                                           "Divider cannot be specified because the construction has a between-glass shade or blind.");
                                         ShowContinueError(state, "Calculation will proceed without the divider for this window.");
                                         ShowContinueError(state,
-                                                          EnergyPlus::format("Divider width = [{:.2R}].",
-                                                                             state.dataSurface->FrameDivider(surfTemp.FrameDivider).DividerWidth));
+                                                          std::format("Divider width = [{:.2f}].",
+                                                                      state.dataSurface->FrameDivider(surfTemp.FrameDivider).DividerWidth));
                                         state.dataSurface->FrameDivider(surfTemp.FrameDivider).DividerWidth = 0.0;
                                     }
                                 } // End of check if window has divider
@@ -6272,7 +6261,7 @@ namespace SurfaceGeometry {
         //  IF (SurfaceTmp(SurfNum)%Class == SurfaceClass::Roof .and. SurfTilt > 80.) THEN
         //    WRITE(TiltString,'(F5.1)') SurfTilt
         //    TiltString=ADJUSTL(TiltString)
-        //    CALL ShowWarningError(state, format("Roof/Ceiling Tilt={}{}{}{}{}{}{}{}{}{} for Surface={}{}{}, in
+        //    CALL ShowWarningError(state, std::format("Roof/Ceiling Tilt={}{}{}{}{}{}{}{}{}{} for Surface={}{}{}, in
         //    Zone={}{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}", //TRIM(TiltString)//',,
         //    much, greater, than, expected, tilt, of, 0,'//, &, //, //TRIM(SurfaceTmp(SurfNum)%Name)//, &, //, //TRIM(SurfaceTmp(SurfNum)%ZoneName)),
         //    //, ENDIF, //, IF, (SurfaceTmp(SurfNum)%Class, ==, SurfaceClass::Floor, .and., SurfTilt, <, 170.), THEN, //, WRITE(TiltString,'(F5.1)'),
@@ -6453,7 +6442,7 @@ namespace SurfaceGeometry {
                         std::format("{}=\"{}\", {}",
                                     s_ipsc->cCurrentModuleObject,
                                     surfTemp.Name,
-                                    EnergyPlus::format("{} not even multiple of 3. Will read in {}", s_ipsc->cNumericFieldNames(1), surfTemp.Sides)));
+                                    std::format("{} not even multiple of 3. Will read in {}", s_ipsc->cNumericFieldNames(1), surfTemp.Sides)));
                 }
                 if (s_ipsc->rNumericArgs(1) < 3) {
                     ShowSevereError(state,
@@ -6513,7 +6502,7 @@ namespace SurfaceGeometry {
         int NumAlphas;
         int NumNumbers;
         int IOStat; // IO Status when calling get input subroutine
-        Real64 Depth;
+        Real64 Depth = 0.0;
         Real64 Length;
         Real64 Xp;
         Real64 Yp;
@@ -6647,10 +6636,10 @@ namespace SurfaceGeometry {
 
                     if (Length * Depth <= 0.0) {
                         ShowSevereError(state,
-                                        EnergyPlus::format("{}=\"{}\", illegal surface area=[{:.2R}]. Surface will NOT be entered.",
-                                                           s_ipsc->cCurrentModuleObject,
-                                                           s_ipsc->cAlphaArgs(1),
-                                                           Length * Depth));
+                                        std::format("{}=\"{}\", illegal surface area=[{:.2f}]. Surface will NOT be entered.",
+                                                    s_ipsc->cCurrentModuleObject,
+                                                    s_ipsc->cAlphaArgs(1),
+                                                    Length * Depth));
                         continue;
                     }
 
@@ -6730,10 +6719,10 @@ namespace SurfaceGeometry {
                     MakeFin = true;
                     if (Length * Depth <= 0.0) {
                         ShowWarningError(state,
-                                         EnergyPlus::format("{}=Left Fin of \"{}\", illegal surface area=[{:.2R}]. Surface will NOT be entered.",
-                                                            s_ipsc->cCurrentModuleObject,
-                                                            s_ipsc->cAlphaArgs(1),
-                                                            Length * Depth));
+                                         std::format("{}=Left Fin of \"{}\", illegal surface area=[{:.2f}]. Surface will NOT be entered.",
+                                                     s_ipsc->cCurrentModuleObject,
+                                                     s_ipsc->cAlphaArgs(1),
+                                                     Length * Depth));
                         MakeFin = false;
                     }
 
@@ -6833,10 +6822,10 @@ namespace SurfaceGeometry {
                     MakeFin = true;
                     if (Length * Depth <= 0.0) {
                         ShowWarningError(state,
-                                         EnergyPlus::format("{}=Right Fin of \"{}\", illegal surface area=[{:.2R}]. Surface will NOT be entered.",
-                                                            s_ipsc->cCurrentModuleObject,
-                                                            s_ipsc->cAlphaArgs(1),
-                                                            Length * Depth));
+                                         std::format("{}=Right Fin of \"{}\", illegal surface area=[{:.2f}]. Surface will NOT be entered.",
+                                                     s_ipsc->cCurrentModuleObject,
+                                                     s_ipsc->cAlphaArgs(1),
+                                                     Length * Depth));
                         MakeFin = false;
                     }
 
@@ -7355,7 +7344,7 @@ namespace SurfaceGeometry {
                 continue;
             }
 
-            constexpr std::string_view fmt = "ShadingProperty Reflectance,{},{},{:.2R},{:.2R},{:.2R}, {}\n";
+            constexpr std::string_view fmt = "ShadingProperty Reflectance,{},{},{:.2f},{:.2f},{:.2f}, {}\n";
             if (state.dataSurface->SurfShadowGlazingConstruct(SurfNum) != 0) {
                 print(state.files.eio,
                       fmt,
@@ -7776,11 +7765,11 @@ namespace SurfaceGeometry {
             if (calculationMethod != CalculationMethod::TotalExposedPerimeter && calculationMethod != CalculationMethod::ExposedPerimeterFraction &&
                 calculationMethod != CalculationMethod::Bysegment) {
                 ShowSevereError(state,
-                                EnergyPlus::format("{}=\"{}\", {} is not a valid choice for {}",
-                                                   s_ipsc->cCurrentModuleObject,
-                                                   s_ipsc->cAlphaArgs(1),
-                                                   calculationMethod,
-                                                   s_ipsc->cAlphaFieldNames(alpF)));
+                                std::format("{}=\"{}\", {} is not a valid choice for {}",
+                                            s_ipsc->cCurrentModuleObject,
+                                            s_ipsc->cAlphaArgs(1),
+                                            s_ipsc->cAlphaArgs(alpF),
+                                            s_ipsc->cAlphaFieldNames(alpF)));
                 ErrorsFound = true;
             }
             alpF++;
@@ -7813,22 +7802,21 @@ namespace SurfaceGeometry {
 
                     data.useDetailedExposedPerimeter = false;
                 } else {
-                    ShowWarningError(
-                        state,
-                        EnergyPlus::format("{}: {}, {} set as calculation method, but a value has been set for {}. This value will be ignored.",
-                                           s_ipsc->cCurrentModuleObject,
-                                           state.dataSurface->Surface(Found).Name,
-                                           calculationMethod,
-                                           s_ipsc->cNumericFieldNames(numF)));
+                    ShowWarningError(state,
+                                     std::format("{}: {}, {} set as calculation method, but a value has been set for {}. This value will be ignored.",
+                                                 s_ipsc->cCurrentModuleObject,
+                                                 state.dataSurface->Surface(Found).Name,
+                                                 CalculationMethodUC[static_cast<int>(calculationMethod)],
+                                                 s_ipsc->cNumericFieldNames(numF)));
                 }
             } else {
                 if (calculationMethod == CalculationMethod::TotalExposedPerimeter) {
                     ShowSevereError(state,
-                                    EnergyPlus::format("{}: {}, {} set as calculation method, but no value has been set for {}",
-                                                       s_ipsc->cCurrentModuleObject,
-                                                       state.dataSurface->Surface(Found).Name,
-                                                       calculationMethod,
-                                                       s_ipsc->cNumericFieldNames(numF)));
+                                    std::format("{}: {}, {} set as calculation method, but no value has been set for {}",
+                                                s_ipsc->cCurrentModuleObject,
+                                                state.dataSurface->Surface(Found).Name,
+                                                CalculationMethodUC[static_cast<int>(calculationMethod)],
+                                                s_ipsc->cNumericFieldNames(numF)));
                     ErrorsFound = true;
                 }
             }
@@ -7839,22 +7827,21 @@ namespace SurfaceGeometry {
                     data.exposedFraction = s_ipsc->rNumericArgs(numF);
                     data.useDetailedExposedPerimeter = false;
                 } else {
-                    ShowWarningError(
-                        state,
-                        EnergyPlus::format("{}: {}, {} set as calculation method, but a value has been set for {}. This value will be ignored.",
-                                           s_ipsc->cCurrentModuleObject,
-                                           state.dataSurface->Surface(Found).Name,
-                                           calculationMethod,
-                                           s_ipsc->cNumericFieldNames(numF)));
+                    ShowWarningError(state,
+                                     std::format("{}: {}, {} set as calculation method, but a value has been set for {}. This value will be ignored.",
+                                                 s_ipsc->cCurrentModuleObject,
+                                                 state.dataSurface->Surface(Found).Name,
+                                                 CalculationMethodUC[static_cast<int>(calculationMethod)],
+                                                 s_ipsc->cNumericFieldNames(numF)));
                 }
             } else {
                 if (calculationMethod == CalculationMethod::ExposedPerimeterFraction) {
                     ShowSevereError(state,
-                                    EnergyPlus::format("{}: {}, {} set as calculation method, but no value has been set for {}",
-                                                       s_ipsc->cCurrentModuleObject,
-                                                       state.dataSurface->Surface(Found).Name,
-                                                       calculationMethod,
-                                                       s_ipsc->cNumericFieldNames(numF)));
+                                    std::format("{}: {}, {} set as calculation method, but no value has been set for {}",
+                                                s_ipsc->cCurrentModuleObject,
+                                                state.dataSurface->Surface(Found).Name,
+                                                CalculationMethodUC[static_cast<int>(calculationMethod)],
+                                                s_ipsc->cNumericFieldNames(numF)));
                     ErrorsFound = true;
                 }
             }
@@ -7894,12 +7881,11 @@ namespace SurfaceGeometry {
                 }
             } else {
                 if (calculationMethod == CalculationMethod::Bysegment) {
-                    ShowSevereError(
-                        state,
-                        EnergyPlus::format("{}: {}, {} set as calculation method, but no values have been set for Surface Segments Exposed",
-                                           s_ipsc->cCurrentModuleObject,
-                                           state.dataSurface->Surface(Found).Name,
-                                           calculationMethod));
+                    ShowSevereError(state,
+                                    std::format("{}: {}, {} set as calculation method, but no values have been set for Surface Segments Exposed",
+                                                s_ipsc->cCurrentModuleObject,
+                                                state.dataSurface->Surface(Found).Name,
+                                                CalculationMethodUC[static_cast<int>(calculationMethod)]));
                     ErrorsFound = true;
                 }
             }
@@ -8310,7 +8296,7 @@ namespace SurfaceGeometry {
         int CountHTAlgoObjectsMultiSurf;
         int CountHTAlgoObjectsSurfList;
         int IOStatus; // Used in GetObjectItem
-        DataSurfaces::HeatTransferModel tmpAlgoInput;
+        DataSurfaces::HeatTransferModel tmpAlgoInput = DataSurfaces::HeatTransferModel::Invalid;
         int Item;
         int Item1;
         int NumAlphas;
@@ -8910,7 +8896,7 @@ namespace SurfaceGeometry {
 
         int numberOfHeatTransferAlgosUsed = 0;
         // Formats
-        static constexpr std::string_view Format_725("Surface Heat Transfer Algorithm, {},{:.0R},{:.2R},{:.1R}\n");
+        static constexpr std::string_view Format_725("Surface Heat Transfer Algorithm, {},{:.0f},{:.2f},{:.1f}\n");
 
         if (state.dataHeatBal->AnyCTF) {
             constexpr std::string_view AlgoName = "CTF - ConductionTransferFunction";
@@ -9289,13 +9275,11 @@ namespace SurfaceGeometry {
                                                                                         : (poppedVertexIndex == nSides && keptVertexIndex == 1);
 
                     if (printPoppedFirst) {
-                        ShowContinueError(state, EnergyPlus::format("Vertex [{}]=({:.2R},{:.2R},{:.2R})", poppedVertexIndex, it->x, it->y, it->z));
-                        ShowContinueError(state,
-                                          EnergyPlus::format("Vertex [{}]=({:.2R},{:.2R},{:.2R})", keptVertexIndex, itKept->x, itKept->y, itKept->z));
+                        ShowContinueError(state, std::format("Vertex [{}]=({:.2f},{:.2f},{:.2f})", poppedVertexIndex, it->x, it->y, it->z));
+                        ShowContinueError(state, std::format("Vertex [{}]=({:.2f},{:.2f},{:.2f})", keptVertexIndex, itKept->x, itKept->y, itKept->z));
                     } else {
-                        ShowContinueError(state,
-                                          EnergyPlus::format("Vertex [{}]=({:.2R},{:.2R},{:.2R})", keptVertexIndex, itKept->x, itKept->y, itKept->z));
-                        ShowContinueError(state, EnergyPlus::format("Vertex [{}]=({:.2R},{:.2R},{:.2R})", poppedVertexIndex, it->x, it->y, it->z));
+                        ShowContinueError(state, std::format("Vertex [{}]=({:.2f},{:.2f},{:.2f})", keptVertexIndex, itKept->x, itKept->y, itKept->z));
+                        ShowContinueError(state, std::format("Vertex [{}]=({:.2f},{:.2f},{:.2f})", poppedVertexIndex, it->x, it->y, it->z));
                     }
                 }
                 ++state.dataErrTracking->TotalCoincidentVertices;
@@ -9333,7 +9317,7 @@ namespace SurfaceGeometry {
                 surfTemp.Vertex, SurfWorldAz, SurfTilt, surfTemp.lcsx, surfTemp.lcsy, surfTemp.lcsz, surfTemp.NewellSurfaceNormalVector);
             dotp = dot(surfTemp.NewellSurfaceNormalVector, TestVector);
             if (surfTemp.Class == SurfaceClass::Roof && dotp < -0.000001) {
-                TiltString = EnergyPlus::format("{:.1R}", SurfTilt);
+                TiltString = std::format("{:.1f}", SurfTilt);
                 ShowWarningError(state,
                                  std::format("{}Roof/Ceiling is upside down! Tilt angle=[{}], should be near 0, Surface=\"{}\", in Zone=\"{}\".",
                                              RoutineName,
@@ -9343,7 +9327,7 @@ namespace SurfaceGeometry {
                 ShowContinueError(state, "Automatic fix is attempted.");
                 ReverseAndRecalculate(state, SurfNum, surfTemp.Sides, SurfWorldAz, SurfTilt);
             } else if (surfTemp.Class == SurfaceClass::Roof && SurfTilt > 80.0) {
-                TiltString = EnergyPlus::format("{:.1R}", SurfTilt);
+                TiltString = std::format("{:.1f}", SurfTilt);
                 ShowWarningError(
                     state,
                     std::format("{}Roof/Ceiling is not oriented correctly! Tilt angle=[{}], should be near 0, Surface=\"{}\", in Zone=\"{}\".",
@@ -9353,7 +9337,7 @@ namespace SurfaceGeometry {
                                 surfTemp.ZoneName));
             }
             if (surfTemp.Class == SurfaceClass::Floor && dotp > 0.000001) {
-                TiltString = EnergyPlus::format("{:.1R}", SurfTilt);
+                TiltString = std::format("{:.1f}", SurfTilt);
                 ShowWarningError(state,
                                  std::format("{}Floor is upside down! Tilt angle=[{}], should be near 180, Surface=\"{}\", in Zone=\"{}\".",
                                              RoutineName,
@@ -9363,7 +9347,7 @@ namespace SurfaceGeometry {
                 ShowContinueError(state, "Automatic fix is attempted.");
                 ReverseAndRecalculate(state, SurfNum, surfTemp.Sides, SurfWorldAz, SurfTilt);
             } else if (surfTemp.Class == SurfaceClass::Floor && SurfTilt < 158.2) { // slope/grade = 40%!
-                TiltString = EnergyPlus::format("{:.1R}", SurfTilt);
+                TiltString = std::format("{:.1f}", SurfTilt);
                 ShowWarningError(
                     state,
                     std::format("{}Floor is not oriented correctly! Tilt angle=[{}], should be near 180, Surface=\"{}\", in Zone=\"{}\".",
@@ -9477,7 +9461,7 @@ namespace SurfaceGeometry {
         Vectors::DetermineAzimuthAndTilt(
             surfTemp.Vertex, SurfAzimuth, SurfTilt, surfTemp.lcsx, surfTemp.lcsy, surfTemp.lcsz, surfTemp.NewellSurfaceNormalVector);
         if (surfTemp.Class == SurfaceClass::Roof && SurfTilt > 80.0) {
-            TiltString = EnergyPlus::format("{:.1R}", SurfTilt);
+            TiltString = std::format("{:.1f}", SurfTilt);
             ShowWarningError(
                 state,
                 std::format("{}Roof/Ceiling is still upside down! Tilt angle=[{}], should be near 0, please fix manually.", RoutineName, TiltString));
@@ -10434,8 +10418,8 @@ namespace SurfaceGeometry {
                                                   state.dataSurface->StormWindow(StormWinNum).DayOfMonthOn,
                                                   state.dataSurface->StormWindow(StormWinNum).MonthOff,
                                                   state.dataSurface->StormWindow(StormWinNum).DayOfMonthOff));
-                    ShowContinueError(
-                        state, EnergyPlus::format("these times may be reversed for your building latitude={:.2R} deg.", state.dataEnvrn->Latitude));
+                    ShowContinueError(state,
+                                      std::format("these times may be reversed for your building latitude={:.2f} deg.", state.dataEnvrn->Latitude));
                 }
             }
         }
@@ -11511,14 +11495,14 @@ namespace SurfaceGeometry {
             if (!s_ipsc->lNumericFieldBlanks(10)) {
                 state.dataSurface->OSC(OSCNum).MinLimitPresent = true;
                 state.dataSurface->OSC(OSCNum).MinTempLimit = s_ipsc->rNumericArgs(10);
-                cOSCLimitsString = EnergyPlus::format("{:.3R}", s_ipsc->rNumericArgs(10));
+                cOSCLimitsString = std::format("{:.3f}", s_ipsc->rNumericArgs(10));
             } else {
                 cOSCLimitsString = "N/A";
             }
             if (!s_ipsc->lNumericFieldBlanks(11)) {
                 state.dataSurface->OSC(OSCNum).MaxLimitPresent = true;
                 state.dataSurface->OSC(OSCNum).MaxTempLimit = s_ipsc->rNumericArgs(11);
-                cOSCLimitsString += EnergyPlus::format(",{:.3R}", s_ipsc->rNumericArgs(10));
+                cOSCLimitsString += std::format(",{:.3f}", s_ipsc->rNumericArgs(10));
             } else {
                 cOSCLimitsString += ",N/A";
             }
@@ -11536,7 +11520,7 @@ namespace SurfaceGeometry {
                 print(state.files.eio, "{}\n", OSCFormat1);
             }
             if (state.dataSurface->OSC(Loop).SurfFilmCoef > 0.0) {
-                s_ipsc->cAlphaArgs(1) = EnergyPlus::format("{:.3R}", state.dataSurface->OSC(Loop).SurfFilmCoef);
+                s_ipsc->cAlphaArgs(1) = std::format("{:.3f}", state.dataSurface->OSC(Loop).SurfFilmCoef);
                 SetupOutputVariable(state,
                                     "Surface Other Side Coefficients Exterior Air Drybulb Temperature",
                                     Constant::Units::C,
@@ -11549,11 +11533,10 @@ namespace SurfaceGeometry {
             }
 
             print(state.files.eio,
-                  "Other Side Coefficients,{},{},{},{:.3R},{:.3R},{:.3R},{:.3R},{:.3R},{},{},{:.3R},{:.3R},{}\n",
+                  "Other Side Coefficients,{},{},{},{:.3f},{:.3f},{:.3f},{:.3f},{:.3f},{},{},{:.3f},{:.3f},{}\n",
                   state.dataSurface->OSC(Loop).Name,
                   s_ipsc->cAlphaArgs(1),
-                  (state.dataSurface->OSC(Loop).constTempSched != nullptr) ? "N/A"
-                                                                           : EnergyPlus::format("{:.2R}", state.dataSurface->OSC(Loop).ConstTemp),
+                  (state.dataSurface->OSC(Loop).constTempSched != nullptr) ? "N/A" : std::format("{:.2f}", state.dataSurface->OSC(Loop).ConstTemp),
                   state.dataSurface->OSC(Loop).ConstTempCoef,
                   state.dataSurface->OSC(Loop).ExtDryBulbCoef,
                   state.dataSurface->OSC(Loop).GroundTempCoef,
@@ -11842,9 +11825,9 @@ namespace SurfaceGeometry {
                                                     s_ipsc->cAlphaArgs(2)));
                         ShowContinueError(state, "\"Outside\", invalid material for movable insulation.");
                         ShowContinueError(state,
-                                          EnergyPlus::format("Material=\"{}\",Resistance=[{:.3R}], must be > 0 for use in Movable Insulation.",
-                                                             thisMaterial->Name,
-                                                             thisMaterial->Resistance));
+                                          std::format("Material=\"{}\",Resistance=[{:.3f}], must be > 0 for use in Movable Insulation.",
+                                                      thisMaterial->Name,
+                                                      thisMaterial->Resistance));
                         ErrorsFound = true;
                     } else if (thisMaterial->Conductivity > 0.0) {
                         thisMaterial->Resistance = thisMaterial->Thickness / thisMaterial->Conductivity;
@@ -11860,9 +11843,9 @@ namespace SurfaceGeometry {
                                                     s_ipsc->cAlphaArgs(2)));
                         ShowContinueError(state, "\"Outside\", invalid material for movable insulation.");
                         ShowContinueError(state,
-                                          EnergyPlus::format("Material=\"{}\",Conductivity=[{:.3R}], must be > 0 for use in Movable Insulation.",
-                                                             thisMaterial->Name,
-                                                             thisMaterial->Conductivity));
+                                          std::format("Material=\"{}\",Conductivity=[{:.3f}], must be > 0 for use in Movable Insulation.",
+                                                      thisMaterial->Name,
+                                                      thisMaterial->Conductivity));
                         ErrorsFound = true;
                     }
                 }
@@ -11889,9 +11872,9 @@ namespace SurfaceGeometry {
                                                     s_ipsc->cAlphaArgs(2)));
                         ShowContinueError(state, "\"Inside\", invalid material for movable insulation.");
                         ShowContinueError(state,
-                                          EnergyPlus::format("Material=\"{}\",Resistance=[{:.3R}], must be > 0 for use in Movable Insulation.",
-                                                             thisMaterial->Name,
-                                                             thisMaterial->Resistance));
+                                          std::format("Material=\"{}\",Resistance=[{:.3f}], must be > 0 for use in Movable Insulation.",
+                                                      thisMaterial->Name,
+                                                      thisMaterial->Resistance));
                         ErrorsFound = true;
                     } else if (thisMaterial->Conductivity > 0.0) {
                         thisMaterial->Resistance = thisMaterial->Thickness / thisMaterial->Conductivity;
@@ -12101,10 +12084,9 @@ namespace SurfaceGeometry {
                             }
                             ShowContinueError(state, surfaceNames);
                         }
-                        ShowContinueError(
-                            state, EnergyPlus::format("    Vertex start {{ {:.4R}, {:.4R}, {:.4R}}}", edge.start.x, edge.start.y, edge.start.z));
                         ShowContinueError(state,
-                                          EnergyPlus::format("    Vertex end   {{ {:.4R}, {:.4R}, {:.4R}}}", edge.end.x, edge.end.y, edge.end.z));
+                                          std::format("    Vertex start {{ {:.4f}, {:.4f}, {:.4f}}}", edge.start.x, edge.start.y, edge.start.z));
+                        ShowContinueError(state, std::format("    Vertex end   {{ {:.4f}, {:.4f}, {:.4f}}}", edge.end.x, edge.end.y, edge.end.z));
                     }
                 }
             }
@@ -12133,10 +12115,10 @@ namespace SurfaceGeometry {
                                 std::format("Entered Volume entered for Zone=\"{}\" significantly different from calculated Volume", thisZone.Name));
                             ShowContinueError(
                                 state,
-                                EnergyPlus::format("Entered Zone Volume value={:.2R}, Calculated Zone Volume value={:.2R}, entered volume will be "
-                                                   "used in calculations.",
-                                                   thisZone.Volume,
-                                                   CalcVolume));
+                                std::format("Entered Zone Volume value={:.2f}, Calculated Zone Volume value={:.2f}, entered volume will be "
+                                            "used in calculations.",
+                                            thisZone.Volume,
+                                            CalcVolume));
                         }
                     }
                 }
@@ -12152,7 +12134,7 @@ namespace SurfaceGeometry {
 
             if (thisZone.Volume <= 0.0) {
                 ShowWarningError(state, std::format("Indicated Zone Volume <= 0.0 for Zone={}", thisZone.Name));
-                ShowContinueError(state, EnergyPlus::format("The calculated Zone Volume was={:.2R}", thisZone.Volume));
+                ShowContinueError(state, std::format("The calculated Zone Volume was={:.2f}", thisZone.Volume));
                 ShowContinueError(state, "The simulation will continue with the Zone Volume set to 10.0 m3. ");
                 ShowContinueError(state, "...use Output:Diagnostics,DisplayExtraWarnings; to show more details on individual zones.");
                 thisZone.Volume = 10.;
@@ -12201,7 +12183,7 @@ namespace SurfaceGeometry {
                     if (faceNum <= NActFaces) {
                         auto &thisSurface = state.dataSurface->Surface(thisFace.SurfNum);
                         print(state.files.debug, "surface={} nsides={}\n", thisFace.SurfNum, thisFace.NSides);
-                        print(state.files.debug, "surface name={} class={}\n", thisSurface.Name, thisSurface.Class);
+                        print(state.files.debug, "surface name={} class={}\n", thisSurface.Name, DataSurfaces::cSurfaceClass(thisSurface.Class));
                         print(state.files.debug, "area={}\n", thisSurface.GrossArea);
                         for (int iside = 1; iside <= thisFace.NSides; ++iside) {
                             auto const &FacePoint(thisFace.FacePoints(iside));
@@ -12217,7 +12199,7 @@ namespace SurfaceGeometry {
                           "notused:surface={} name={} class={}\n",
                           surfacenotused(SurfNum),
                           state.dataSurface->Surface(surfacenotused(SurfNum)).Name,
-                          state.dataSurface->Surface(surfacenotused(SurfNum)).Class);
+                          DataSurfaces::cSurfaceClass(state.dataSurface->Surface(surfacenotused(SurfNum)).Class));
                 }
             }
 
@@ -12316,7 +12298,7 @@ namespace SurfaceGeometry {
 
         // construct list of unique edges
         Vector curVertex;
-        int curVertexIndex;
+        int curVertexIndex = 0;
         for (int iFace = 1; iFace <= zonePoly.NumSurfaceFaces; ++iFace) {
             Vector prevVertex;
             int prevVertexIndex;
@@ -12799,12 +12781,12 @@ namespace SurfaceGeometry {
         Real64 ThisReveal;
         Real64 ThisWidth;
         Real64 ThisHeight;
-        Real64 FrWidth;      // Frame width for exterior windows (m)
-        Real64 FrArea;       // Frame area for exterior windows(m2)
-        Real64 DivWidth;     // Divider width for exterior windows (m)
-        Real64 DivArea;      // Divider area for exterior windows (m2)
-        Real64 DivFrac;      // Fraction of divider area without overlaps
-        bool ErrorInSurface; // false/true, depending on pass through routine
+        Real64 FrWidth = 0.0;  // Frame width for exterior windows (m)
+        Real64 FrArea = 0.0;   // Frame area for exterior windows(m2)
+        Real64 DivWidth = 0.0; // Divider width for exterior windows (m)
+        Real64 DivArea = 0.0;  // Divider area for exterior windows (m2)
+        Real64 DivFrac = 0.0;  // Fraction of divider area without overlaps
+        bool ErrorInSurface;   // false/true, depending on pass through routine
         bool HeatTransSurf;
         Real64 OutOfLine;
 
@@ -13035,56 +13017,69 @@ namespace SurfaceGeometry {
                     // If exterior window has divider, subtract divider area to get glazed area
                     DivWidth = state.dataSurface->FrameDivider(surf.FrameDivider).DividerWidth;
                     if (DivWidth > 0.0 && !ErrorInSurface) {
-                        DivArea = DivWidth * (state.dataSurface->FrameDivider(FrDivNum).HorDividers * surf.Width +
-                                              state.dataSurface->FrameDivider(FrDivNum).VertDividers * surf.Height -
-                                              state.dataSurface->FrameDivider(FrDivNum).HorDividers *
-                                                  state.dataSurface->FrameDivider(FrDivNum).VertDividers * DivWidth);
-                        state.dataSurface->SurfWinDividerArea(ThisSurf) = DivArea * surf.Multiplier;
-                        if ((surf.Area - state.dataSurface->SurfWinDividerArea(ThisSurf)) <= 0.0) {
-                            ShowSevereError(state, std::format("{}Divider area exceeds glazed opening for window {}", RoutineName, surf.Name));
-                            ShowContinueError(state,
-                                              std::format("Window surface area=[{:.2f}] m2, divider area=[{:.2f}] m2.",
-                                                          surf.Area,
-                                                          state.dataSurface->SurfWinDividerArea(ThisSurf)));
+                        if (DivWidth * state.dataSurface->FrameDivider(FrDivNum).HorDividers > surf.Height) {
+                            ShowSevereError(state,
+                                            std::format("{}Horizontal dividers exceed glazed opening height for window {}", RoutineName, surf.Name));
+                            ShowContinueError(
+                                state,
+                                std::format("Number of horizontal dividers=[{}], divider width=[{:.2f}] m, glazed opening height=[{:.2f}] m.",
+                                            state.dataSurface->FrameDivider(FrDivNum).HorDividers,
+                                            DivWidth,
+                                            surf.Height));
                             ErrorInSurface = true;
                         }
-                        surf.Area -= state.dataSurface->SurfWinDividerArea(ThisSurf); // Glazed area
-                        if (DivArea <= 0.0) {
-                            ShowWarningError(state, std::format("{}Calculated Divider Area <= 0.0 for Window={}", RoutineName, surf.Name));
-                            if (state.dataSurface->FrameDivider(FrDivNum).HorDividers == 0) {
-                                ShowContinueError(state, "..Number of Horizontal Dividers = 0.");
-                            }
-                            if (state.dataSurface->FrameDivider(FrDivNum).VertDividers == 0) {
-                                ShowContinueError(state, "..Number of Vertical Dividers = 0.");
-                            }
-                        } else {
-                            auto &surfWin = state.dataSurface->SurfaceWindow(ThisSurf);
-                            surfWin.glazedFrac = surf.Area / (surf.Area + state.dataSurface->SurfWinDividerArea(ThisSurf));
-                            // Correction factor for portion of divider subject to divider projection correction
-                            DivFrac = (1.0 - state.dataSurface->FrameDivider(FrDivNum).HorDividers *
-                                                 state.dataSurface->FrameDivider(FrDivNum).VertDividers * pow_2(DivWidth) / DivArea);
-                            state.dataSurface->SurfWinProjCorrDivOut(ThisSurf) =
-                                DivFrac * state.dataSurface->FrameDivider(FrDivNum).DividerProjectionOut / DivWidth;
-                            state.dataSurface->SurfWinProjCorrDivIn(ThisSurf) =
-                                DivFrac * state.dataSurface->FrameDivider(FrDivNum).DividerProjectionIn / DivWidth;
-                            // Correction factor for portion of frame subject to frame projection correction
-                            if (FrWidth > 0.0) {
-                                state.dataSurface->SurfWinProjCorrFrOut(ThisSurf) =
-                                    (state.dataSurface->FrameDivider(FrDivNum).FrameProjectionOut / FrWidth) *
-                                    (ThisHeight + ThisWidth -
-                                     (state.dataSurface->FrameDivider(FrDivNum).HorDividers +
-                                      state.dataSurface->FrameDivider(FrDivNum).VertDividers) *
-                                         DivWidth) /
-                                    (ThisHeight + ThisWidth + 2 * FrWidth);
-                                state.dataSurface->SurfWinProjCorrFrIn(ThisSurf) =
-                                    (state.dataSurface->FrameDivider(FrDivNum).FrameProjectionIn / FrWidth) *
-                                    (ThisHeight + ThisWidth -
-                                     (state.dataSurface->FrameDivider(FrDivNum).HorDividers +
-                                      state.dataSurface->FrameDivider(FrDivNum).VertDividers) *
-                                         DivWidth) /
-                                    (ThisHeight + ThisWidth + 2 * FrWidth);
-                            }
+                        if (DivWidth * state.dataSurface->FrameDivider(FrDivNum).VertDividers > surf.Width) {
+                            ShowSevereError(state,
+                                            std::format("{}Vertical dividers exceed glazed opening width for window {}", RoutineName, surf.Name));
+                            ShowContinueError(
+                                state,
+                                std::format("Number of vertical dividers=[{}], divider width=[{:.2f}] m, glazed opening width=[{:.2f}] m.",
+                                            state.dataSurface->FrameDivider(FrDivNum).VertDividers,
+                                            DivWidth,
+                                            surf.Width));
+                            ErrorInSurface = true;
                         }
+                        if (!ErrorInSurface) {
+                            // total divider length
+                            Real64 const DivLenTotal = state.dataSurface->FrameDivider(FrDivNum).HorDividers * surf.Width +
+                                                       state.dataSurface->FrameDivider(FrDivNum).VertDividers * surf.Height;
+                            // length of dividers overlapping themselves
+                            Real64 const DivLenOvlp = state.dataSurface->FrameDivider(FrDivNum).HorDividers *
+                                                      state.dataSurface->FrameDivider(FrDivNum).VertDividers * DivWidth;
+                            // actual divider area minus self-overlap
+                            DivArea = DivWidth * (DivLenTotal - DivLenOvlp);
+                            state.dataSurface->SurfWinDividerArea(ThisSurf) = DivArea * surf.Multiplier;
+                            // Glazed area
+                            surf.Area -= state.dataSurface->SurfWinDividerArea(ThisSurf);
+                        }
+                    }
+
+                    if ((FrWidth > 0.0) && (FrArea > 0.0) && !ErrorInSurface) {
+                        // Correction factor for portion of frame subject to frame projection correction
+                        state.dataSurface->SurfWinProjCorrFrOut(ThisSurf) =
+                            (state.dataSurface->FrameDivider(FrDivNum).FrameProjectionOut / FrWidth) *
+                            (ThisHeight + ThisWidth -
+                             (state.dataSurface->FrameDivider(FrDivNum).HorDividers + state.dataSurface->FrameDivider(FrDivNum).VertDividers) *
+                                 DivWidth) /
+                            (ThisHeight + ThisWidth + 2 * FrWidth);
+                        state.dataSurface->SurfWinProjCorrFrIn(ThisSurf) =
+                            (state.dataSurface->FrameDivider(FrDivNum).FrameProjectionIn / FrWidth) *
+                            (ThisHeight + ThisWidth -
+                             (state.dataSurface->FrameDivider(FrDivNum).HorDividers + state.dataSurface->FrameDivider(FrDivNum).VertDividers) *
+                                 DivWidth) /
+                            (ThisHeight + ThisWidth + 2 * FrWidth);
+                    }
+
+                    if ((DivWidth > 0.0) && (DivArea > 0.0) && !ErrorInSurface) {
+                        auto &surfWin = state.dataSurface->SurfaceWindow(ThisSurf);
+                        surfWin.glazedFrac = surf.Area / (surf.Area + state.dataSurface->SurfWinDividerArea(ThisSurf));
+                        // Correction factor for portion of divider subject to divider projection correction
+                        DivFrac = (1.0 - state.dataSurface->FrameDivider(FrDivNum).HorDividers *
+                                             state.dataSurface->FrameDivider(FrDivNum).VertDividers * pow_2(DivWidth) / DivArea);
+                        state.dataSurface->SurfWinProjCorrDivOut(ThisSurf) =
+                            DivFrac * state.dataSurface->FrameDivider(FrDivNum).DividerProjectionOut / DivWidth;
+                        state.dataSurface->SurfWinProjCorrDivIn(ThisSurf) =
+                            DivFrac * state.dataSurface->FrameDivider(FrDivNum).DividerProjectionIn / DivWidth;
                     }
                 }
             } break;
@@ -13525,7 +13520,7 @@ namespace SurfaceGeometry {
             }
 
             // create unshaded construction with storm window
-            const std::string ChrNum = fmt::to_string(StormWinNum);
+            const std::string ChrNum = std::to_string(StormWinNum);
             std::string ConstrNameSt = "BARECONSTRUCTIONWITHSTORMWIN:" + ChrNum; // Name of unshaded construction with storm window
             // If this construction name already exists, set the surface's storm window construction number to it
             int ConstrNewSt = Util::FindItemInList(ConstrNameSt,
@@ -13800,10 +13795,9 @@ namespace SurfaceGeometry {
                                      std::format("SurfaceGeometry: ModifyWindow: Window {} uses the Window5 Data File Construction {}",
                                                  surfTemp.Name,
                                                  state.dataConstruction->Construct(IConst).Name));
+                    ShowContinueError(state, std::format("The height {:.3f}(m) or width  (m) of this window differs by more than 10%{:.3f}", H, W));
                     ShowContinueError(state,
-                                      EnergyPlus::format("The height {:.3R}(m) or width  (m) of this window differs by more than 10%{:.3R}", H, W));
-                    ShowContinueError(
-                        state, EnergyPlus::format("from the corresponding height {:.3R} (m) or width  (m) on the Window5 Data file.{:.3R}", h1, w1));
+                                      std::format("from the corresponding height {:.3f} (m) or width  (m) on the Window5 Data file.{:.3f}", h1, w1));
                     ShowContinueError(state, "This will affect the frame heat transfer calculation if the frame in the Data File entry");
                     ShowContinueError(state, "is not uniform, i.e., has sections with different geometry and/or thermal properties.");
                 } else {
@@ -14051,8 +14045,7 @@ namespace SurfaceGeometry {
                                         state.dataSurfaceGeometry->SurfaceTmp(surfTemp.BaseSurf).Name));
             ShowContinueError(state, std::format("Subsurface (window) creating error={}", surfTemp.Name));
             ShowContinueError(
-                state,
-                EnergyPlus::format("This window has been replaced by two windows from the Window5 Data File of total area {:.2R} m2", AreaNew));
+                state, std::format("This window has been replaced by two windows from the Window5 Data File of total area {:.2f} m2", AreaNew));
             ErrorsFound = true;
         }
 
@@ -14560,10 +14553,9 @@ namespace SurfaceGeometry {
         if (negZcount > 0) {
             ShowWarningError(state, std::format("CalcSurfaceCentroid: {} Surfaces have the Z coordinate < 0.", negZcount));
             ShowContinueError(state, "...in any calculations, Wind Speed will be 0.0 for these surfaces.");
-            ShowContinueError(
-                state,
-                EnergyPlus::format("...in any calculations, Outside temperatures will be the outside temperature + {:.3R} for these surfaces.",
-                                   state.dataEnvrn->WeatherFileTempModCoeff));
+            ShowContinueError(state,
+                              std::format("...in any calculations, Outside temperatures will be the outside temperature + {:.3f} for these surfaces.",
+                                          state.dataEnvrn->WeatherFileTempModCoeff));
             ShowContinueError(state, "...that is, these surfaces will have conditions as though at ground level.");
         }
     }
@@ -15144,7 +15136,7 @@ namespace SurfaceGeometry {
                     for (int n = 1; n <= surfaceTmp.Sides; ++n) {
                         auto const &point = vertices(n);
                         static constexpr std::string_view ErrFmt = " ({:8.3F},{:8.3F},{:8.3F})";
-                        ShowContinueError(state, EnergyPlus::format(ErrFmt, point.x, point.y, point.z));
+                        ShowContinueError(state, std::format(ErrFmt, point.x, point.y, point.z));
                     }
                 }
             }
@@ -15218,11 +15210,11 @@ namespace SurfaceGeometry {
                         Np2 -= NSides;
                     }
                     ShowContinueError(state, std::format("...vertex {} to vertex {} to vertex {}", n, Np1, Np2));
-                    ShowContinueError(state, EnergyPlus::format("...vertex {}=[{:.2R},{:.2R},{:.2R}]", n, X(n), Y(n), Z(n)));
-                    ShowContinueError(state, EnergyPlus::format("...vertex {}=[{:.2R},{:.2R},{:.2R}]", Np1, X(n + 1), Y(n + 1), Z(n + 1)));
-                    ShowContinueError(state, EnergyPlus::format("...vertex {}=[{:.2R},{:.2R},{:.2R}]", Np2, X(n + 2), Y(n + 2), Z(n + 2)));
-                    // ShowContinueError(state, format("...theta angle=[{:.6R}]", Theta));
-                    // ShowContinueError(state, format("...last theta angle=[{:.6R}]", LastTheta));
+                    ShowContinueError(state, std::format("...vertex {}=[{:.2f},{:.2f},{:.2f}]", n, X(n), Y(n), Z(n)));
+                    ShowContinueError(state, std::format("...vertex {}=[{:.2f},{:.2f},{:.2f}]", Np1, X(n + 1), Y(n + 1), Z(n + 1)));
+                    ShowContinueError(state, std::format("...vertex {}=[{:.2f},{:.2f},{:.2f}]", Np2, X(n + 2), Y(n + 2), Z(n + 2)));
+                    // ShowContinueError(state, std::format("...theta angle=[{:.6f}]", Theta));
+                    // ShowContinueError(state, std::format("...last theta angle=[{:.6f}]", LastTheta));
                 }
                 surfaceTmp.IsConvex = false;
                 // #10103 - We do not want to break early, because we do want to consistently remove colinear vertices

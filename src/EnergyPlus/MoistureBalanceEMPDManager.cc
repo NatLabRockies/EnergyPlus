@@ -49,6 +49,9 @@
 #include <cmath>
 #include <string>
 
+// C++ Headers
+#include <format>
+
 // ObjexxFCL Headers
 #include <ObjexxFCL/Fmath.hh>
 
@@ -168,7 +171,7 @@ void GetMoistureBalanceEMPDInput(EnergyPlusData &state)
     EMPDMat = s_ip->getNumObjectsFound(state, s_ipsc->cCurrentModuleObject);
 
     if (EMPDMat == 0) {
-        ShowSevereError(state, EnergyPlus::format("EMPD Solution requested, but no \"{}\" objects were found.", s_ipsc->cCurrentModuleObject));
+        ShowSevereError(state, std::format("EMPD Solution requested, but no \"{}\" objects were found.", s_ipsc->cCurrentModuleObject));
         ErrorsFound = true;
     }
 
@@ -234,7 +237,7 @@ void GetMoistureBalanceEMPDInput(EnergyPlusData &state)
         matEMPD->muCoating = MaterialProps(9);
 
         if (matEMPD->deepDepth <= matEMPD->surfaceDepth && matEMPD->deepDepth != 0.0) {
-            ShowWarningError(state, EnergyPlus::format("{}: material=\"{}\"", s_ipsc->cCurrentModuleObject, matEMPD->Name));
+            ShowWarningError(state, std::format("{}: material=\"{}\"", s_ipsc->cCurrentModuleObject, matEMPD->Name));
             ShowContinueError(state, "Deep-layer penetration depth should be zero or greater than the surface-layer penetration depth.");
         }
     }
@@ -259,14 +262,12 @@ void GetMoistureBalanceEMPDInput(EnergyPlusData &state)
         } else {
             ++state.dataMoistureBalEMPD->ErrCount;
             if (state.dataMoistureBalEMPD->ErrCount == 1 && !state.dataGlobal->DisplayExtraWarnings) {
-                ShowMessage(state, "GetMoistureBalanceEMPDInput: EMPD properties are not assigned to the inside layer of Surfaces");
+                ShowMessage(state, std::format("{}: EMPD properties are not assigned to the inside layer of Surfaces", routineName));
                 ShowContinueError(state, "...use Output:Diagnostics,DisplayExtraWarnings; to show more details on individual surfaces.");
             }
             if (state.dataGlobal->DisplayExtraWarnings) {
-                ShowMessage(
-                    state,
-                    EnergyPlus::format("GetMoistureBalanceEMPDInput: EMPD properties are not assigned to the inside layer in Surface={}", surf.Name));
-                ShowContinueError(state, EnergyPlus::format("with Construction={}", constr.Name));
+                ShowMessage(state, std::format("{}: EMPD properties are not assigned to the inside layer in Surface={}", routineName, surf.Name));
+                ShowContinueError(state, std::format("with Construction={}", constr.Name));
             }
         }
 
@@ -277,9 +278,9 @@ void GetMoistureBalanceEMPDInput(EnergyPlusData &state)
         // Multiple layer construction
         auto const *mat1 = s_mat->materials(constr.LayerPoint(1));
         if (mat1->hasEMPD && surf.ExtBoundCond <= 0) { // The external layer is not exposed to zone
-            ShowSevereError(
-                state, EnergyPlus::format("{}: EMPD properties are assigned to the outside layer in Construction = {}", routineName, constr.Name));
-            ShowContinueError(state, EnergyPlus::format("..Outside layer material with EMPD properties = {}", mat1->Name));
+            ShowSevereError(state,
+                            std::format("{}: EMPD properties are assigned to the outside layer in Construction = {}", routineName, constr.Name));
+            ShowContinueError(state, std::format("..Outside layer material with EMPD properties = {}", mat1->Name));
             ShowContinueError(state, "..A material with EMPD properties must be assigned to the inside layer of a construction.");
             ErrorsFound = true;
             continue;
@@ -288,9 +289,9 @@ void GetMoistureBalanceEMPDInput(EnergyPlusData &state)
         for (int Layer = 2; Layer <= constr.TotLayers - 1; ++Layer) {
             auto const *matL = s_mat->materials(constr.LayerPoint(Layer));
             if (matL->hasEMPD) {
-                ShowSevereError(
-                    state, EnergyPlus::format("{}: EMPD properties are assigned to a middle layer in Construction = {}", routineName, constr.Name));
-                ShowContinueError(state, EnergyPlus::format("..Middle layer material with EMPD properties = {}", matL->Name));
+                ShowSevereError(state,
+                                std::format("{}: EMPD properties are assigned to a middle layer in Construction = {}", routineName, constr.Name));
+                ShowContinueError(state, std::format("..Middle layer material with EMPD properties = {}", matL->Name));
                 ShowContinueError(state, "..A material with EMPD properties must be assigned to the inside layer of a construction.");
                 ErrorsFound = true;
             }
@@ -300,9 +301,9 @@ void GetMoistureBalanceEMPDInput(EnergyPlusData &state)
     for (int Loop = 1; Loop <= state.dataGlobal->NumOfZones; ++Loop) {
         if (!EMPDzone(Loop)) {
             ShowSevereError(state,
-                            EnergyPlus::format("{}: None of the constructions for zone = {} has an inside layer with EMPD properties",
-                                               routineName,
-                                               state.dataHeatBal->Zone(Loop).Name));
+                            std::format("{}: None of the constructions for zone = {} has an inside layer with EMPD properties",
+                                        routineName,
+                                        state.dataHeatBal->Zone(Loop).Name));
             ShowContinueError(state, "..For each zone, the inside layer of at least one construction must have EMPD properties");
             ErrorsFound = true;
         }
@@ -313,7 +314,7 @@ void GetMoistureBalanceEMPDInput(EnergyPlusData &state)
     ReportMoistureBalanceEMPD(state);
 
     if (ErrorsFound) {
-        ShowFatalError(state, "GetMoistureBalanceEMPDInput: Errors found getting EMPD material properties, program terminated.");
+        ShowFatalError(state, std::format("{}: Errors found getting EMPD material properties, program terminated.", routineName));
     }
 }
 
@@ -367,7 +368,6 @@ void InitMoistureBalanceEMPD(EnergyPlusData &state)
         return;
     }
     // Initialize the report variable
-
     GetMoistureBalanceEMPDInput(state);
 
     for (int SurfNum = 1; SurfNum <= state.dataSurface->TotSurfaces; ++SurfNum) {
@@ -539,10 +539,17 @@ void CalcMoistureBalanceEMPD(EnergyPlusData &state,
 
     auto const &constr = state.dataConstruction->Construct(surface.Construction);
     auto const *mat = dynamic_cast<MaterialEMPD const *>(s_mat->materials(constr.LayerPoint(constr.TotLayers)));
-    assert(mat != nullptr);
-    if (mat->mu <= 0.0) {
+    // assert(mat != nullptr);
+
+    if ((mat != nullptr) && mat->mu <= 0.0) {
         rv_surface =
             PsyRhovFnTdbWPb(TempZone, state.dataZoneTempPredictorCorrector->zoneHeatBalance(surface.Zone).airHumRat, state.dataEnvrn->OutBaroPress);
+        return;
+    } else if (mat == nullptr) {
+        // Surface/construction without EMPD properties: treat as no moisture buffering for this surface.
+        rv_surface = rho_vapor_air_in;
+        rv_surf_layer = rv_surface;
+        rv_deep_layer = rv_surface;
         return;
     }
 

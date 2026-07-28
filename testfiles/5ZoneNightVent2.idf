@@ -5,7 +5,7 @@
 ! 5ZoneNightVent2.idf
 ! Basic file description:  1 story building divided into 4 exterior and one interior conditioned zones and return plenum.
 !
-! Highlights:              Illustrates night ventilation using the Ventilation object
+! Highlights:              Illustrates night ventilation using the ZoneVentilation:DesignFlowRate object
 !
 ! Simulation Location/Run: FRESNO_CA_USA TMY2-93193, 2 design days, 1 run period,
 !                          Run Control executes the run period using the weather file

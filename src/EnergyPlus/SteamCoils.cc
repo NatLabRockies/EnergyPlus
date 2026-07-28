@@ -138,26 +138,26 @@ namespace SteamCoils {
         if (CompIndex == 0) {
             CoilNum = Util::FindItemInList(CompName, state.dataSteamCoils->SteamCoil);
             if (CoilNum == 0) {
-                ShowFatalError(state, EnergyPlus::format("SimulateSteamCoilComponents: Coil not found={}", CompName));
+                ShowFatalError(state, std::format("SimulateSteamCoilComponents: Coil not found={}", CompName));
             }
             CompIndex = CoilNum;
         } else {
             CoilNum = CompIndex;
             if (CoilNum > state.dataSteamCoils->NumSteamCoils || CoilNum < 1) {
                 ShowFatalError(state,
-                               EnergyPlus::format("SimulateSteamCoilComponents: Invalid CompIndex passed={}, Number of Steam Coils={}, Coil name={}",
-                                                  CoilNum,
-                                                  state.dataSteamCoils->NumSteamCoils,
-                                                  CompName));
+                               std::format("SimulateSteamCoilComponents: Invalid CompIndex passed={}, Number of Steam Coils={}, Coil name={}",
+                                           CoilNum,
+                                           state.dataSteamCoils->NumSteamCoils,
+                                           CompName));
             }
             if (state.dataSteamCoils->CheckEquipName(CoilNum)) {
                 if (CompName != state.dataSteamCoils->SteamCoil(CoilNum).Name) {
-                    ShowFatalError(state,
-                                   EnergyPlus::format(
-                                       "SimulateSteamCoilComponents: Invalid CompIndex passed={}, Coil name={}, stored Coil Name for that index={}",
-                                       CoilNum,
-                                       CompName,
-                                       state.dataSteamCoils->SteamCoil(CoilNum).Name));
+                    ShowFatalError(
+                        state,
+                        std::format("SimulateSteamCoilComponents: Invalid CompIndex passed={}, Coil name={}, stored Coil Name for that index={}",
+                                    CoilNum,
+                                    CompName,
+                                    state.dataSteamCoils->SteamCoil(CoilNum).Name));
                 }
                 state.dataSteamCoils->CheckEquipName(CoilNum) = false;
             }
@@ -349,23 +349,23 @@ namespace SteamCoils {
                                                                   Node::CompFluidStream::Primary,
                                                                   Node::ObjectIsNotParent);
                 if (steamCoil.TempSetPointNodeNum == 0) {
-                    ShowSevereError(
-                        state, EnergyPlus::format("{}{} not found for {} = {}", RoutineName, cAlphaFields(8), CurrentModuleObject, AlphArray(1)));
+                    ShowSevereError(state,
+                                    std::format("{}{} not found for {} = {}", RoutineName, cAlphaFields(8), CurrentModuleObject, AlphArray(1)));
                     ShowContinueError(state, "..required for Temperature Setpoint Controlled Coils.");
                     ErrorsFound = true;
                 }
                 break;
             case CoilControlType::ZoneLoadControl:
                 if (!lAlphaBlanks(8)) {
-                    ShowWarningError(state, EnergyPlus::format("{}ZoneLoad Controlled Coil, so {} not needed", RoutineName, cAlphaFields(8)));
-                    ShowContinueError(state, EnergyPlus::format("for {} = {}", CurrentModuleObject, AlphArray(1)));
+                    ShowWarningError(state, std::format("{}ZoneLoad Controlled Coil, so {} not needed", RoutineName, cAlphaFields(8)));
+                    ShowContinueError(state, std::format("for {} = {}", CurrentModuleObject, AlphArray(1)));
                     steamCoil.TempSetPointNodeNum = 0;
                 }
                 break;
             default:
                 ShowSevereError(
                     state,
-                    EnergyPlus::format(
+                    std::format(
                         "{}Invalid {} [{}] specified for {} = {}", RoutineName, cAlphaFields(7), AlphArray(7), CurrentModuleObject, AlphArray(1)));
                 ErrorsFound = true;
             }
@@ -375,7 +375,7 @@ namespace SteamCoils {
 
             steamCoil.steam = Fluid::GetSteam(state);
             if (steamCoil.steam == nullptr && CoilNum == 1) {
-                ShowSevereError(state, EnergyPlus::format("{}Steam Properties for {} not found.", RoutineName, AlphArray(1)));
+                ShowSevereError(state, std::format("{}Steam Properties for {} not found.", RoutineName, AlphArray(1)));
                 ShowContinueError(state, "Steam Fluid Properties should have been included in the input file.");
                 ErrorsFound = true;
             }
@@ -434,7 +434,7 @@ namespace SteamCoils {
         }
 
         if (ErrorsFound) {
-            ShowFatalError(state, EnergyPlus::format("{}Errors found in getting input.", RoutineName));
+            ShowFatalError(state, std::format("{}Errors found in getting input.", RoutineName));
         }
 
         AlphArray.deallocate();
@@ -793,7 +793,7 @@ namespace SteamCoils {
                         //             PlantSizData(PltSizSteamNum)%DeltaT*CPHW(PlantSizData(PltSizSteamNum)%ExitTemp)))
                     } else {
                         steamCoil.MaxSteamVolFlowRate = 0.0;
-                        ShowWarningError(state, EnergyPlus::format("The design coil load is zero for COIL:Heating:Steam {}", steamCoil.Name));
+                        ShowWarningError(state, std::format("The design coil load is zero for COIL:Heating:Steam {}", steamCoil.Name));
                     }
                     BaseSizer::reportSizerOutput(
                         state, "Coil:Heating:Steam", steamCoil.Name, "Maximum Steam Flow Rate [m3/s]", steamCoil.MaxSteamVolFlowRate);
@@ -855,7 +855,7 @@ namespace SteamCoils {
                     }
                     // issue warning if hw coil has zero flow
                     if (steamCoil.MaxSteamVolFlowRate == 0.0) {
-                        ShowWarningError(state, EnergyPlus::format("The design coil load is zero for COIL:Heating:Steam {}", steamCoil.Name));
+                        ShowWarningError(state, std::format("The design coil load is zero for COIL:Heating:Steam {}", steamCoil.Name));
                         ShowContinueError(state, "The autosize value for max Steam flow rate is zero");
                     }
                     BaseSizer::reportSizerOutput(
@@ -867,7 +867,7 @@ namespace SteamCoils {
             // if there is no heating Plant Sizing object and autosizng was requested, issue an error message
             if (steamCoil.MaxSteamVolFlowRate == AutoSize) {
                 ShowSevereError(state, "Autosizing of Steam coil requires a heating loop Sizing:Plant object");
-                ShowContinueError(state, EnergyPlus::format("Occurs in Steam coil object= {}", steamCoil.Name));
+                ShowContinueError(state, std::format("Occurs in Steam coil object= {}", steamCoil.Name));
                 ErrorsFound = true;
             }
         } // end of heating Plant Sizing existence IF - ELSE
@@ -1427,7 +1427,7 @@ namespace SteamCoils {
         }
 
         if (IndexNum == 0) {
-            ShowSevereError(state, EnergyPlus::format(R"(GetSteamCoilIndex: Could not find CoilType="{}" with Name="{}")", CoilType, CoilName));
+            ShowSevereError(state, std::format(R"(GetSteamCoilIndex: Could not find CoilType="{}" with Name="{}")", CoilType, CoilName));
             ErrorsFound = true;
         }
 
@@ -1444,8 +1444,7 @@ namespace SteamCoils {
         int indexNum = Util::FindItemInList(coilName, state.dataSteamCoils->SteamCoil);
 
         if (indexNum == 0) { // may not find coil name
-            ShowSevereError(state,
-                            EnergyPlus::format("GetSteamCoilIndex: Could not find CoilType = Coil:Heating:Steam with Name = \"{}\"", coilName));
+            ShowSevereError(state, std::format("GetSteamCoilIndex: Could not find CoilType = Coil:Heating:Steam with Name = \"{}\"", coilName));
         }
 
         return indexNum;
@@ -1477,7 +1476,7 @@ namespace SteamCoils {
         if (CompIndex == 0) {
             CoilNum = Util::FindItemInList(CompName, state.dataSteamCoils->SteamCoil);
             if (CoilNum == 0) {
-                ShowFatalError(state, EnergyPlus::format("CheckSteamCoilSchedule: Coil not found={}", CompName));
+                ShowFatalError(state, std::format("CheckSteamCoilSchedule: Coil not found={}", CompName));
             }
             CompIndex = CoilNum;
             auto &steamCoil = state.dataSteamCoils->SteamCoil(CoilNum);
@@ -1486,19 +1485,19 @@ namespace SteamCoils {
             CoilNum = CompIndex;
             if (CoilNum > state.dataSteamCoils->NumSteamCoils || CoilNum < 1) {
                 ShowFatalError(state,
-                               EnergyPlus::format("SimulateSteamCoilComponents: Invalid CompIndex passed={}, Number of Steam Coils={}, Coil name={}",
-                                                  CoilNum,
-                                                  state.dataSteamCoils->NumSteamCoils,
-                                                  CompName));
+                               std::format("SimulateSteamCoilComponents: Invalid CompIndex passed={}, Number of Steam Coils={}, Coil name={}",
+                                           CoilNum,
+                                           state.dataSteamCoils->NumSteamCoils,
+                                           CompName));
             }
             auto &steamCoil = state.dataSteamCoils->SteamCoil(CoilNum);
             if (CompName != steamCoil.Name) {
                 ShowFatalError(
                     state,
-                    EnergyPlus::format("SimulateSteamCoilComponents: Invalid CompIndex passed={}, Coil name={}, stored Coil Name for that index={}",
-                                       CoilNum,
-                                       CompName,
-                                       steamCoil.Name));
+                    std::format("SimulateSteamCoilComponents: Invalid CompIndex passed={}, Coil name={}, stored Coil Name for that index={}",
+                                CoilNum,
+                                CompName,
+                                steamCoil.Name));
             }
             Value = steamCoil.availSched->getCurrentVal(); // not scheduled?
         }
@@ -1523,7 +1522,7 @@ namespace SteamCoils {
         // as negative.
 
         // Return value
-        Real64 MaxWaterFlowRate; // returned max water flow rate of matched coil
+        Real64 MaxWaterFlowRate = 0.0; // returned max water flow rate of matched coil
 
         // FUNCTION LOCAL VARIABLE DECLARATIONS:
         int WhichCoil;
@@ -1546,8 +1545,7 @@ namespace SteamCoils {
         }
 
         if (WhichCoil == 0) {
-            ShowSevereError(state,
-                            EnergyPlus::format("GetCoilMaxWaterFlowRate: Could not find CoilType=\"{}\" with Name=\"{}\"", CoilType, CoilName));
+            ShowSevereError(state, std::format("GetCoilMaxWaterFlowRate: Could not find CoilType=\"{}\" with Name=\"{}\"", CoilType, CoilName));
             ErrorsFound = true;
             MaxWaterFlowRate = -1000.0;
         }
@@ -1911,7 +1909,7 @@ namespace SteamCoils {
         // as zero.
 
         // Return value
-        Real64 Capacity; // returned operating capacity of matched coil (W)
+        Real64 Capacity = 0.0; // returned operating capacity of matched coil (W)
 
         // FUNCTION LOCAL VARIABLE DECLARATIONS:
         int WhichCoil;

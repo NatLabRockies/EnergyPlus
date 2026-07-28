@@ -2534,7 +2534,7 @@ namespace BranchInputManager {
         // SUBROUTINE LOCAL VARIABLE DECLARATIONS:
         int Loop;
         int Count;
-        int MatchNode;                    // Node Number for match
+        int MatchNode = 0;                // Node Number for match
         std::string MatchNodeName;        // Name for error message if not matched
         std::string BranchInletNodeName;  // Branch Inlet Node Name
         std::string BranchOutletNodeName; // Branch Outlet Node Name
@@ -2547,7 +2547,7 @@ namespace BranchInputManager {
         //  LOGICAL UniqueNodeError
         int Loop2;
         Node::FluidType BranchFluidType;
-        int InitialBranchFluidNode;
+        int InitialBranchFluidNode = 0;
         Array1D_int BranchFluidNodes;
         Array1D_int FoundBranches;
         Array1D_int BranchPtrs;
@@ -2636,6 +2636,7 @@ namespace BranchInputManager {
                     MatchNode = state.dataBranchInputManager->Branch(Found).Component(1).InletNode;
                     MatchNodeName = state.dataBranchInputManager->Branch(Found).Component(1).InletNodeName;
                     BranchInletNodeName = state.dataBranchInputManager->Branch(Found).Component(1).InletNodeName;
+                    CheckBranchEquipInZoneHVACEquipList(state, Found, ErrFound);
                 } else {
                     ShowWarningError(state, std::format("Branch has no components={}", state.dataBranchInputManager->Branch(Found).Name));
                 }

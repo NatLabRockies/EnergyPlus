@@ -133,7 +133,7 @@ void SimTESCoil(EnergyPlusData &state,
     if (CompIndex == 0) {
         TESCoilNum = Util::FindItemInList(CompName, state.dataPackagedThermalStorageCoil->TESCoil);
         if (TESCoilNum == 0) {
-            ShowFatalError(state, EnergyPlus::format("Thermal Energy Storage Cooling Coil not found={}", CompName));
+            ShowFatalError(state, std::format("Thermal Energy Storage Cooling Coil not found={}", CompName));
         }
         CompIndex = TESCoilNum;
     } else {
@@ -141,18 +141,18 @@ void SimTESCoil(EnergyPlusData &state,
         if (TESCoilNum > state.dataPackagedThermalStorageCoil->NumTESCoils || TESCoilNum < 1) {
             ShowFatalError(
                 state,
-                EnergyPlus::format("SimTESCoil: Invalid CompIndex passed={}, Number of Thermal Energy Storage Cooling Coil Coils={}, Coil name={}",
-                                   TESCoilNum,
-                                   state.dataPackagedThermalStorageCoil->NumTESCoils,
-                                   CompName));
+                std::format("SimTESCoil: Invalid CompIndex passed={}, Number of Thermal Energy Storage Cooling Coil Coils={}, Coil name={}",
+                            TESCoilNum,
+                            state.dataPackagedThermalStorageCoil->NumTESCoils,
+                            CompName));
         }
         if (state.dataPackagedThermalStorageCoil->CheckEquipName(TESCoilNum)) {
             if (!CompName.empty() && CompName != state.dataPackagedThermalStorageCoil->TESCoil(TESCoilNum).Name) {
                 ShowFatalError(state,
-                               EnergyPlus::format("SimTESCoil: Invalid CompIndex passed={}, Coil name={}, stored Coil Name for that index={}",
-                                                  TESCoilNum,
-                                                  CompName,
-                                                  state.dataPackagedThermalStorageCoil->TESCoil(TESCoilNum).Name));
+                               std::format("SimTESCoil: Invalid CompIndex passed={}, Coil name={}, stored Coil Name for that index={}",
+                                           TESCoilNum,
+                                           CompName,
+                                           state.dataPackagedThermalStorageCoil->TESCoil(TESCoilNum).Name));
             }
             state.dataPackagedThermalStorageCoil->CheckEquipName(TESCoilNum) = false;
         }
@@ -253,9 +253,8 @@ void GetTESCoilInput(EnergyPlusData &state)
 
         thisTESCoil.ModeControlType = static_cast<PTSCCtrlType>(getEnumValue(modeControlStrings, state.dataIPShortCut->cAlphaArgs(3)));
         if (thisTESCoil.ModeControlType == PTSCCtrlType::Invalid) {
-            ShowSevereError(state, EnergyPlus::format("{}{}=\"{}\", invalid", RoutineName, cCurrentModuleObject, thisTESCoil.Name));
-            ShowContinueError(state,
-                              EnergyPlus::format("...{}=\"{}\".", state.dataIPShortCut->cAlphaFieldNames(3), state.dataIPShortCut->cAlphaArgs(3)));
+            ShowSevereError(state, std::format("{}{}=\"{}\", invalid", RoutineName, cCurrentModuleObject, thisTESCoil.Name));
+            ShowContinueError(state, std::format("...{}=\"{}\".", state.dataIPShortCut->cAlphaFieldNames(3), state.dataIPShortCut->cAlphaArgs(3)));
             ShowContinueError(state, "Available choices are ScheduledModes or EMSControlled");
             ErrorsFound = true;
         }
@@ -281,9 +280,8 @@ void GetTESCoilInput(EnergyPlusData &state)
             thisTESCoil.glycol = Fluid::GetWater(state);
             break;
         default:
-            ShowSevereError(state, EnergyPlus::format("{}{}=\"{}\", invalid", RoutineName, cCurrentModuleObject, thisTESCoil.Name));
-            ShowContinueError(state,
-                              EnergyPlus::format("...{}=\"{}\".", state.dataIPShortCut->cAlphaFieldNames(5), state.dataIPShortCut->cAlphaArgs(5)));
+            ShowSevereError(state, std::format("{}{}=\"{}\", invalid", RoutineName, cCurrentModuleObject, thisTESCoil.Name));
+            ShowContinueError(state, std::format("...{}=\"{}\".", state.dataIPShortCut->cAlphaFieldNames(5), state.dataIPShortCut->cAlphaArgs(5)));
             ShowContinueError(state, "Available choices are Ice, Water, or UserDefindedFluidType");
             ErrorsFound = true;
         }
@@ -305,9 +303,8 @@ void GetTESCoilInput(EnergyPlusData &state)
             if (!state.dataIPShortCut->lNumericFieldBlanks(1)) {
                 thisTESCoil.FluidStorageVolume = state.dataIPShortCut->rNumericArgs(1);
             } else {
-                ShowSevereError(state, EnergyPlus::format("{}{}=\"{}\", invalid", RoutineName, cCurrentModuleObject, thisTESCoil.Name));
-                ShowContinueError(state,
-                                  EnergyPlus::format("{} cannot be blank for Water storage type", state.dataIPShortCut->cNumericFieldNames(1)));
+                ShowSevereError(state, std::format("{}{}=\"{}\", invalid", RoutineName, cCurrentModuleObject, thisTESCoil.Name));
+                ShowContinueError(state, std::format("{} cannot be blank for Water storage type", state.dataIPShortCut->cNumericFieldNames(1)));
                 ShowContinueError(state, "Enter fluid storage tank volume in m3/s.");
                 ErrorsFound = true;
             }
@@ -321,8 +318,8 @@ void GetTESCoilInput(EnergyPlusData &state)
                         state.dataIPShortCut->rNumericArgs(2) * gigaJoulesToJoules; // input in giga joules, used as joules internally
                 }
             } else if (state.dataIPShortCut->lNumericFieldBlanks(2)) {
-                ShowSevereError(state, EnergyPlus::format("{}{}=\"{}\", invalid", RoutineName, cCurrentModuleObject, thisTESCoil.Name));
-                ShowContinueError(state, EnergyPlus::format("{} cannot be blank for Ice storage type", state.dataIPShortCut->cNumericFieldNames(2)));
+                ShowSevereError(state, std::format("{}{}=\"{}\", invalid", RoutineName, cCurrentModuleObject, thisTESCoil.Name));
+                ShowContinueError(state, std::format("{} cannot be blank for Ice storage type", state.dataIPShortCut->cNumericFieldNames(2)));
                 ShowContinueError(state, "Enter ice storage tank capacity in GJ.");
                 ErrorsFound = true;
             }
@@ -387,9 +384,8 @@ void GetTESCoilInput(EnergyPlusData &state)
             break;
         default:
             thisTESCoil.CoolingOnlyModeIsAvailable = false;
-            ShowSevereError(state, EnergyPlus::format("{}{}=\"{}\", invalid", RoutineName, cCurrentModuleObject, thisTESCoil.Name));
-            ShowContinueError(state,
-                              EnergyPlus::format("...{}=\"{}\".", state.dataIPShortCut->cAlphaFieldNames(10), state.dataIPShortCut->cAlphaArgs(10)));
+            ShowSevereError(state, std::format("{}{}=\"{}\", invalid", RoutineName, cCurrentModuleObject, thisTESCoil.Name));
+            ShowContinueError(state, std::format("...{}=\"{}\".", state.dataIPShortCut->cAlphaFieldNames(10), state.dataIPShortCut->cAlphaArgs(10)));
             ShowContinueError(state, "Available choices are Yes or No.");
             ErrorsFound = true;
         }
@@ -403,13 +399,12 @@ void GetTESCoilInput(EnergyPlusData &state)
             thisTESCoil.CoolingOnlyCapFTempCurve = GetCurveIndex(state, state.dataIPShortCut->cAlphaArgs(11));
             if (thisTESCoil.CoolingOnlyCapFTempCurve == 0) {
                 if (state.dataIPShortCut->lAlphaFieldBlanks(11)) {
-                    ShowSevereError(state, EnergyPlus::format("{}{}=\"{}\", invalid", RoutineName, cCurrentModuleObject, thisTESCoil.Name));
-                    ShowContinueError(state, EnergyPlus::format("Required {}is blank.", state.dataIPShortCut->cAlphaFieldNames(11)));
+                    ShowSevereError(state, std::format("{}{}=\"{}\", invalid", RoutineName, cCurrentModuleObject, thisTESCoil.Name));
+                    ShowContinueError(state, std::format("Required {}is blank.", state.dataIPShortCut->cAlphaFieldNames(11)));
                 } else {
-                    ShowSevereError(state, EnergyPlus::format("{}{}=\"{}\", invalid", RoutineName, cCurrentModuleObject, thisTESCoil.Name));
+                    ShowSevereError(state, std::format("{}{}=\"{}\", invalid", RoutineName, cCurrentModuleObject, thisTESCoil.Name));
                     ShowContinueError(
-                        state,
-                        EnergyPlus::format("Not found {}=\"{}\".", state.dataIPShortCut->cAlphaFieldNames(11), state.dataIPShortCut->cAlphaArgs(11)));
+                        state, std::format("Not found {}=\"{}\".", state.dataIPShortCut->cAlphaFieldNames(11), state.dataIPShortCut->cAlphaArgs(11)));
                 }
                 ErrorsFound = true;
             } else {
@@ -426,7 +421,7 @@ void GetTESCoilInput(EnergyPlusData &state)
             thisTESCoil.CoolingOnlyCapFFlowCurve = GetCurveIndex(state, state.dataIPShortCut->cAlphaArgs(12));
             if (thisTESCoil.CoolingOnlyCapFFlowCurve == 0) {
                 if (state.dataIPShortCut->lAlphaFieldBlanks(12)) {
-                    ShowSevereError(state, EnergyPlus::format("{}{}=\"{}\", invalid", RoutineName, cCurrentModuleObject, thisTESCoil.Name));
+                    ShowSevereError(state, std::format("{}{}=\"{}\", invalid", RoutineName, cCurrentModuleObject, thisTESCoil.Name));
                     ShowContinueError(state, std::format("Required {}is blank.", state.dataIPShortCut->cAlphaFieldNames(12)));
                 } else {
                     ShowSevereError(state, std::format("{}{}=\"{}\", invalid", RoutineName, cCurrentModuleObject, thisTESCoil.Name));
@@ -1988,7 +1983,7 @@ void InitTESCoil(EnergyPlusData &state, int &TESCoilNum)
                 if (thisTESCoil.ControlModeErrorIndex == 0) {
                     ShowSevereMessage(state, "InitTESCoil: Invalid control schedule value for operating mode");
                     ShowContinueError(state, std::format("Occurs for Coil:Cooling:DX:SingleSpeed:ThermalStorage name = {}", thisTESCoil.Name));
-                    ShowContinueError(state, EnergyPlus::format("Value returned from schedule ={:.8R}", tmpSchedValue));
+                    ShowContinueError(state, std::format("Value returned from schedule ={:.8f}", tmpSchedValue));
                     ShowContinueError(state, "Operating mode will be set to Off, and the simulation continues");
                 }
                 ShowRecurringSevereErrorAtEnd(state,
@@ -2008,7 +2003,7 @@ void InitTESCoil(EnergyPlusData &state, int &TESCoilNum)
                     if (thisTESCoil.ControlModeErrorIndex == 0) {
                         ShowSevereMessage(state, "InitTESCoil: Invalid control value for operating mode");
                         ShowContinueError(state, std::format("Occurs for Coil:Cooling:DX:SingleSpeed:ThermalStorage name = {}", thisTESCoil.Name));
-                        ShowContinueError(state, EnergyPlus::format("Value returned from EMS ={:.8R}", thisTESCoil.EMSControlModeValue));
+                        ShowContinueError(state, std::format("Value returned from EMS ={:.8f}", thisTESCoil.EMSControlModeValue));
                         ShowContinueError(state, "Operating mode will be set to Off, and the simulation continues");
                     }
                     ShowRecurringSevereErrorAtEnd(state,
@@ -2488,10 +2483,10 @@ void CalcTESCoilCoolingOnlyMode(EnergyPlusData &state, int const TESCoilNum, [[m
     static constexpr std::string_view RoutineName("CalcTESCoilCoolingOnlyMode");
 
     // SUBROUTINE LOCAL VARIABLE DECLARATIONS:
-    Real64 CondInletTemp; // Condenser inlet temperature (C). Outdoor dry-bulb temp for air-cooled condenser.
+    Real64 CondInletTemp = 0.0; // Condenser inlet temperature (C). Outdoor dry-bulb temp for air-cooled condenser.
     // Outdoor Wetbulb +(1 - effectiveness)*(outdoor drybulb - outdoor wetbulb) for evap condenser.
-    Real64 CondInletHumRat; // Condenser inlet humidity ratio (kg/kg). Zero for air-cooled condenser.
-                            // For evap condenser, its the humidity ratio of the air leaving the evap cooling pads.
+    Real64 CondInletHumRat = 0.0; // Condenser inlet humidity ratio (kg/kg). Zero for air-cooled condenser.
+                                  // For evap condenser, its the humidity ratio of the air leaving the evap cooling pads.
 
     auto &thisTESCoil = state.dataPackagedThermalStorageCoil->TESCoil(TESCoilNum);
 
@@ -2754,10 +2749,10 @@ void CalcTESCoilCoolingAndChargeMode(EnergyPlusData &state,
     static constexpr std::string_view RoutineName("CalcTESCoilCoolingAndChargeMode");
 
     // SUBROUTINE LOCAL VARIABLE DECLARATIONS:
-    Real64 CondInletTemp;   // Condenser inlet temperature (C). Outdoor dry-bulb temp for air-cooled condenser.
-                            // Outdoor Wetbulb +(1 - effectiveness)*(outdoor drybulb - outdoor wetbulb) for evap condenser.
-    Real64 CondInletHumRat; // Condenser inlet humidity ratio (kg/kg). Zero for air-cooled condenser.
-                            // For evap condenser, its the humidity ratio of the air leaving the evap cooling pads.
+    Real64 CondInletTemp = 0.0;   // Condenser inlet temperature (C). Outdoor dry-bulb temp for air-cooled condenser.
+                                  // Outdoor Wetbulb +(1 - effectiveness)*(outdoor drybulb - outdoor wetbulb) for evap condenser.
+    Real64 CondInletHumRat = 0.0; // Condenser inlet humidity ratio (kg/kg). Zero for air-cooled condenser.
+                                  // For evap condenser, its the humidity ratio of the air leaving the evap cooling pads.
 
     auto &thisTESCoil = state.dataPackagedThermalStorageCoil->TESCoil(TESCoilNum);
 
@@ -2788,9 +2783,9 @@ void CalcTESCoilCoolingAndChargeMode(EnergyPlusData &state,
         CondInletHumRat = PsyWFnTdbTwbPb(state, CondInletTemp, OutdoorWetBulb, CondAirSidePressure, RoutineName);
     }
 
-    Real64 QdotChargeLimit; // limit for charge cooling power to hit limit of storage.
-    Real64 sTES;            // stat of Thermal energy storage [C or fraction of ice]
-    bool TESCanBeCharged;
+    Real64 QdotChargeLimit = 0.0; // limit for charge cooling power to hit limit of storage.
+    Real64 sTES = 0.0;            // stat of Thermal energy storage [C or fraction of ice]
+    bool TESCanBeCharged = false;
 
     switch (state.dataPackagedThermalStorageCoil->TESCoil(TESCoilNum).StorageMedia) {
     case MediaType::Water:
@@ -3162,10 +3157,10 @@ void CalcTESCoilCoolingAndDischargeMode(EnergyPlusData &state,
     static constexpr std::string_view RoutineName("CalcTESCoilCoolingAndDischargeMode");
 
     // SUBROUTINE LOCAL VARIABLE DECLARATIONS:
-    Real64 CondInletTemp;   // Condenser inlet temperature (C). Outdoor dry-bulb temp for air-cooled condenser.
-                            // Outdoor Wetbulb +(1 - effectiveness)*(outdoor drybulb - outdoor wetbulb) for evap condenser.
-    Real64 CondInletHumRat; // Condenser inlet humidity ratio (kg/kg). Zero for air-cooled condenser.
-                            // For evap condenser, its the humidity ratio of the air leaving the evap cooling pads.
+    Real64 CondInletTemp = 0.0;   // Condenser inlet temperature (C). Outdoor dry-bulb temp for air-cooled condenser.
+                                  // Outdoor Wetbulb +(1 - effectiveness)*(outdoor drybulb - outdoor wetbulb) for evap condenser.
+    Real64 CondInletHumRat = 0.0; // Condenser inlet humidity ratio (kg/kg). Zero for air-cooled condenser.
+                                  // For evap condenser, its the humidity ratio of the air leaving the evap cooling pads.
 
     auto &thisTESCoil = state.dataPackagedThermalStorageCoil->TESCoil(TESCoilNum);
 
@@ -3196,8 +3191,8 @@ void CalcTESCoilCoolingAndDischargeMode(EnergyPlusData &state,
         CondInletHumRat = PsyWFnTdbTwbPb(state, CondInletTemp, OutdoorWetBulb, CondAirSidePressure, RoutineName);
     }
 
-    Real64 QdotDischargeLimit; // limit for discharge cooling power to hit limit of storage.
-    Real64 sTES;               // stat of Thermal energy storage [C or fraction of ice]
+    Real64 QdotDischargeLimit = 0.0; // limit for discharge cooling power to hit limit of storage.
+    Real64 sTES = 0.0;               // stat of Thermal energy storage [C or fraction of ice]
     bool TESHasSomeCharge = false;
 
     switch (thisTESCoil.StorageMedia) {
@@ -3504,10 +3499,10 @@ void CalcTESCoilChargeOnlyMode(EnergyPlusData &state, int const TESCoilNum)
     static constexpr std::string_view RoutineName("CalcTESCoilChargeOnlyMode");
 
     // SUBROUTINE LOCAL VARIABLE DECLARATIONS:
-    Real64 CondInletTemp; // Condenser inlet temperature (C). Outdoor dry-bulb temp for air-cooled condenser.
+    Real64 CondInletTemp = 0.0; // Condenser inlet temperature (C). Outdoor dry-bulb temp for air-cooled condenser.
     // Outdoor Wetbulb +(1 - effectiveness)*(outdoor drybulb - outdoor wetbulb) for evap condenser.
-    Real64 CondInletHumRat; // Condenser inlet humidity ratio (kg/kg). Zero for air-cooled condenser.
-                            // For evap condenser, its the humidity ratio of the air leaving the evap cooling pads.
+    Real64 CondInletHumRat = 0.0; // Condenser inlet humidity ratio (kg/kg). Zero for air-cooled condenser.
+                                  // For evap condenser, its the humidity ratio of the air leaving the evap cooling pads.
 
     auto &thisTESCoil = state.dataPackagedThermalStorageCoil->TESCoil(TESCoilNum);
 
@@ -3551,8 +3546,8 @@ void CalcTESCoilChargeOnlyMode(EnergyPlusData &state, int const TESCoilNum)
     }
 
     bool TESCanBeCharged = false; // true if room for tank to be charged.
-    Real64 QdotChargeLimit;       // limit for charge cooling power to hit limit of storage.
-    Real64 sTES;                  // local state of Thermal Energy Storage (C or ice fraction)
+    Real64 QdotChargeLimit = 0.0; // limit for charge cooling power to hit limit of storage.
+    Real64 sTES = 0.0;            // local state of Thermal Energy Storage (C or ice fraction)
 
     switch (thisTESCoil.StorageMedia) {
     case MediaType::Water:
@@ -3671,9 +3666,9 @@ void CalcTESCoilDischargeOnlyMode(EnergyPlusData &state, int const TESCoilNum, R
 
     auto &thisTESCoil = state.dataPackagedThermalStorageCoil->TESCoil(TESCoilNum);
 
-    Real64 QdotDischargeLimit;     // limit for how much storage can be discharged without overshooting
-    Real64 sTES = 0.0;             // state of charge of Thermal Energy Storage
-    bool TESHasSomeCharge = false; // true when there is something available in storage
+    Real64 QdotDischargeLimit = 0.0; // limit for how much storage can be discharged without overshooting
+    Real64 sTES = 0.0;               // state of charge of Thermal Energy Storage
+    bool TESHasSomeCharge = false;   // true when there is something available in storage
 
     switch (thisTESCoil.StorageMedia) {
     case MediaType::Water:
@@ -3763,8 +3758,8 @@ void CalcTESCoilDischargeOnlyMode(EnergyPlusData &state, int const TESCoilNum, R
         Real64 const PartLoadDryCoilOutAirTemp = PsyTdbFnHW(PartLoadOutAirEnth, EvapInletHumRat);
 
         bool CoilMightBeDry = false;
-        Real64 DryCoilTestEvapInletHumRat;
-        Real64 SHRadp;
+        Real64 DryCoilTestEvapInletHumRat = 0.0;
+        Real64 SHRadp = 0.0;
         if (PartLoadDryCoilOutAirTemp > PsyTsatFnHPb(state, PartLoadOutAirEnth, state.dataEnvrn->OutBaroPress, RoutineName)) {
             CoilMightBeDry = true;
             // find wADP, humidity ratio at apparatus dewpoint and inlet hum rat that would have dry coil
