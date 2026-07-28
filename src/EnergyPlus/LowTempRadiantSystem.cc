@@ -5388,7 +5388,6 @@ namespace LowTempRadiantSystem {
         default:
             ShowSevereError(state, std::format("Illegal control type in low temperature radiant system or it's design object: {}", this->Name));
             ShowFatalError(state, "Preceding condition causes termination.");
-            return 0.0; // hush the compiler
         }
     }
 
@@ -5419,7 +5418,6 @@ namespace LowTempRadiantSystem {
         default:
             ShowSevereError(state, std::format("Illegal setpoint type in low temperature radiant system: {}", this->Name));
             ShowFatalError(state, "Preceding condition causes termination.");
-            return scheduleValue + 0.5 * throttlingRange; // hush the compiler
         }
     }
 

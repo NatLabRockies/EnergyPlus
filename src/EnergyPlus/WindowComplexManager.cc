@@ -2688,7 +2688,7 @@ namespace WindowComplexManager {
         Real64 HcUnshadedOut(0.0);     // Hc value at outdoor surface of an unshaded subsystem [W/m^2.K]
         Real64 HcUnshadedIn(0.0);      // Hc value at indoor surface of an unshaded subsystem [W/m^2.K]
 
-        int ZoneNum; // Zone number corresponding to SurfNum
+        int ZoneNum = 0; // Zone number corresponding to SurfNum
 
         int TotLay; // Total number of layers in a construction
         //   (sum of solid layers and gap layers)
@@ -2769,8 +2769,6 @@ namespace WindowComplexManager {
         hcin = 0.0;
         hrout = 0.0;
         hcout = 0.0;
-
-        Pa = state.dataEnvrn->OutBaroPress;
 
         ThermalModelNum = state.dataConstruction->Construct(ConstrNum).BSDFInput.ThermalModel;
         standard = state.dataMaterial->WindowThermalModel(ThermalModelNum).CalculationStandard;
@@ -2946,7 +2944,7 @@ namespace WindowComplexManager {
                 auto const *matGap = dynamic_cast<Material::MaterialComplexWindowGap const *>(mat);
                 ++IGap;
                 gap(IGap) = matGap->Thickness;
-                presure(IGap) = matGap->Pressure;
+                presure(IGap + 1) = matGap->Pressure;
 
                 GapDefMax(IGap) = matGap->deflectedThickness;
 
@@ -2992,6 +2990,11 @@ namespace WindowComplexManager {
             }
 
         } // End of loop over glass, gap and blind/shade layers in a window construction
+
+        // gap pressures are already set above, but we still need to set indoor/outdoor environment pressures here
+        Pa = state.dataEnvrn->OutBaroPress;
+        presure(1) = Pa;          // outdoor environment
+        presure(nlayer + 1) = Pa; // indoor environment
 
         if (CalcCondition == DataBSDFWindow::Condition::Invalid) {
             // now calculate correct areas for multipliers
@@ -3042,8 +3045,6 @@ namespace WindowComplexManager {
             // is assumed that nothing is transmitted through
             asol(nlayer) += state.dataHeatBal->SurfQdotRadIntGainsInPerArea(SurfNum);
 
-            presure = state.dataEnvrn->OutBaroPress;
-
             // Instead of doing temperature guess get solution from previous iteration.  That should be much better than guess
             for (k = 1; k <= 2 * nlayer; ++k) {
                 theta(k) = state.dataSurface->SurfaceWindow(SurfNum).thetaFace[k];
@@ -3075,7 +3076,6 @@ namespace WindowComplexManager {
             fclr = 1.0;
             ibc(1) = 0;
             ibc(2) = 0;
-            presure = 101325.0;
             iwd = 0; // Windward wind direction
             isky = 0;
             esky = 1.0;

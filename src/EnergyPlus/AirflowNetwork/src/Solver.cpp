@@ -144,7 +144,7 @@ namespace AirflowNetwork {
     using Psychrometrics::PsyHFnTdbW;
     using Psychrometrics::PsyRhoAirFnPbTdbW;
 
-    Solver::Solver(EnergyPlusData &state) : m_state(state), properties(state)
+    Solver::Solver(EnergyPlusData &state) : properties(state), m_state(state)
     {
     }
 
@@ -10739,8 +10739,8 @@ namespace AirflowNetwork {
 
         // Set AirLoopNum to fans and coils
         for (int i = AirflowNetworkNumOfSurfaces + 1; i <= AirflowNetworkNumOfLinks; ++i) {
-            int j = AirflowNetworkLinkageData(i).NodeNums[0];
-            int k = AirflowNetworkLinkageData(i).NodeNums[1];
+            [[maybe_unused]] int j = AirflowNetworkLinkageData(i).NodeNums[0];
+            [[maybe_unused]] int k = AirflowNetworkLinkageData(i).NodeNums[1];
             if (AirflowNetworkCompData(AirflowNetworkLinkageData(i).CompNum).EPlusTypeNum == iEPlusComponentType::FAN) {
                 n = m_state.afn->DisSysCompCVFData(AirflowNetworkCompData(AirflowNetworkLinkageData(i).CompNum).TypeNum).FanIndex;
                 m_state.afn->DisSysCompCVFData(AirflowNetworkCompData(AirflowNetworkLinkageData(i).CompNum).TypeNum).AirLoopNum =
@@ -13212,7 +13212,7 @@ namespace AirflowNetwork {
         Real64 viscosity{AirflowNetwork::AIRDYNAMICVISCOSITY_CONSTEXPR(20)};
         velocity = flowrate / A;
 
-        if (LamFriCoef >= 0.001) {
+        if constexpr (LamFriCoef >= 0.001) {
             A2 = LamFriCoef / (2.0 * m_state.dataEnvrn->StdRhoAir * A * A);
             A1 = (viscosity * LamDynCoef * ld) / (2.0 * m_state.dataEnvrn->StdRhoAir * A * hydraulicDiameter);
             A0 = -DeltaP;
@@ -13390,7 +13390,7 @@ namespace AirflowNetwork {
         return false;
     }
 
-    bool OccupantVentilationControlProp::closing_probability(EnergyPlusData &state,
+    bool OccupantVentilationControlProp::closing_probability([[maybe_unused]] EnergyPlusData &state,
                                                              Real64 const TimeOpenDuration) // function to perform calculations of closing probability
     {
         Real64 SchValue;

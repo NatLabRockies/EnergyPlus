@@ -38,8 +38,8 @@
 #include "fmiModelFunctions.h"
 #include "xml_parser_cosim.h"
 
-typedef const char *(*fGetTypesPlatform)();
-typedef const char *(*fGetVersion)();
+typedef const char *(*fGetTypesPlatform)(void);
+typedef const char *(*fGetVersion)(void);
 typedef fmiComponent (*fInstantiateSlave)(fmiString instanceName,
                                           fmiString GUID,
                                           fmiString fmuLocation,

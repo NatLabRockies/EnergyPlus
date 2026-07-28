@@ -393,6 +393,20 @@ SUBROUTINE CreateNewIDFUsingRules(EndOfFile,DiffOnly,InLfn,AskForInput,InputFile
                   OutArgs(10:CurArgs+1)=InArgs(9:CurArgs)
                   CurArgs = CurArgs + 1
 
+              CASE('CENTRALHEATPUMPSYSTEM')
+                  CALL GetNewObjectDefInIDD(ObjectName,NwNumArgs,NwAorN,NwReqFld,NwObjMinFlds,NwFldNames,NwFldDefaults,NwFldUnits)
+                  nodiff=.false.
+                  OutArgs(1:1)=InArgs(1:1)
+                  OutArgs(2:CurArgs-1)=InArgs(3:CurArgs)
+                  CurArgs = CurArgs - 1
+
+              CASE('CHILLERHEATERPERFORMANCE:ELECTRIC:EIR')
+                  CALL GetNewObjectDefInIDD(ObjectName,NwNumArgs,NwAorN,NwReqFld,NwObjMinFlds,NwFldNames,NwFldDefaults,NwFldUnits)
+                  nodiff=.false.
+                  OutArgs(1:17)=InArgs(1:17)
+                  OutArgs(18:CurArgs-1)=InArgs(19:CurArgs)
+                  CurArgs = CurArgs - 1
+
               ! If your original object starts with D, insert the rules here
 
               ! If your original object starts with E, insert the rules here

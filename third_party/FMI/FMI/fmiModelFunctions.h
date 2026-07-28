@@ -204,8 +204,8 @@ Common Functions
 /* Inquire version numbers of header files */
 /* Inquire version numbers of header files */
 // DllExport const char* fmiGetModelTypesPlatform();	//Zuo: definition in model-ex V1.0
-DllExport const char *fmiGetTypesPlatform(); // Zuo: definition in co-sim V1.0
-DllExport const char *fmiGetVersion();
+DllExport const char *fmiGetTypesPlatform(void); // Zuo: definition in co-sim V1.0
+DllExport const char *fmiGetVersion(void);
 
 DllExport fmiStatus fmiSetDebugLogging(fmiComponent c, fmiBoolean loggingOn); // Zuo: definition in co-sim V1.0
 

@@ -16,11 +16,11 @@ COOLER_2,Refrigeration Zone Air Chiller Water Removed Mass Flow Rate
 Zone Chillers Latent  Cooling Rate
 Refrigeration Zone Air Chiller Sensible Heat Transfer Rate
 LowTemp_1Condenser,Refrigeration Air Chiller System Condenser Total Recovered Heat Transfer Rate
-Freezer_1AirChiller_1,Refrigeration Zone Air Chiller Frost Accumulation Mass
-Freezer_1AirChiller_2,Refrigeration Zone Air Chiller Frost Accumulation Mass
-Freezer_1AirChiller_3,Refrigeration Zone Air Chiller Frost Accumulation Mass
-Freezer_1AirChiller_4,Refrigeration Zone Air Chiller Frost Accumulation Mass
-Freezer_1AirChiller_5,Refrigeration Zone Air Chiller Frost Accumulation Mass
+Freezer_1AirChiller_1,Refrigeration Zone Air Chiller Coil Frost Accumulation Mass
+Freezer_1AirChiller_2,Refrigeration Zone Air Chiller Coil Frost Accumulation Mass
+Freezer_1AirChiller_3,Refrigeration Zone Air Chiller Coil Frost Accumulation Mass
+Freezer_1AirChiller_4,Refrigeration Zone Air Chiller Coil Frost Accumulation Mass
+Freezer_1AirChiller_5,Refrigeration Zone Air Chiller Coil Frost Accumulation Mass
 Freezer_1AirChiller_1,Refrigeration Zone Air Chiller Zone Sensible Cooling Rate
 Freezer_1AirChiller_2,Refrigeration Zone Air Chiller Zone Sensible Cooling Rate
 Freezer_1AirChiller_3,Refrigeration Zone Air Chiller Zone Sensible Cooling Rate
@@ -40,14 +40,14 @@ Zone Mixing Latent Heat Gain Energy
 Zone Mixing Total Heat Loss Energy
 Zone Mixing Total Heat Gain Energy
 Zone Unit Heater Heating Rate
-Freezer_1AirChiller_1,Refrigeration Zone Air Chiller Sensible Heat Ratio
-Freezer_1AirChiller_2,Refrigeration Zone Air Chiller Sensible Heat Ratio
-Freezer_1AirChiller_3,Refrigeration Zone Air Chiller Sensible Heat Ratio
-Freezer_1AirChiller_4,Refrigeration Zone Air Chiller Sensible Heat Ratio
-Freezer_1AirChiller_5,Refrigeration Zone Air Chiller Sensible Heat Ratio
-Freezer_1AirChiller_1,Refrigeration Zone Air Chiller Defrost Electricity Rate
-Freezer_1AirChiller_2,Refrigeration Zone Air Chiller Defrost Electricity Rate
-Freezer_1AirChiller_3,Refrigeration Zone Air Chiller Defrost Electricity Rate
-Freezer_1AirChiller_4,Refrigeration Zone Air Chiller Defrost Electricity Rate
-Freezer_1AirChiller_5,Refrigeration Zone Air Chiller Defrost Electricity Rate
+Freezer_1AirChiller_1,Refrigeration Zone Air Chiller Coil Sensible Heat Ratio
+Freezer_1AirChiller_2,Refrigeration Zone Air Chiller Coil Sensible Heat Ratio
+Freezer_1AirChiller_3,Refrigeration Zone Air Chiller Coil Sensible Heat Ratio
+Freezer_1AirChiller_4,Refrigeration Zone Air Chiller Coil Sensible Heat Ratio
+Freezer_1AirChiller_5,Refrigeration Zone Air Chiller Coil Sensible Heat Ratio
+Freezer_1AirChiller_1,Refrigeration Zone Air Chiller Coil Defrost Electricity Rate
+Freezer_1AirChiller_2,Refrigeration Zone Air Chiller Coil Defrost Electricity Rate
+Freezer_1AirChiller_3,Refrigeration Zone Air Chiller Coil Defrost Electricity Rate
+Freezer_1AirChiller_4,Refrigeration Zone Air Chiller Coil Defrost Electricity Rate
+Freezer_1AirChiller_5,Refrigeration Zone Air Chiller Coil Defrost Electricity Rate
 0

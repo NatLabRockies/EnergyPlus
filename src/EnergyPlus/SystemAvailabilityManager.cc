@@ -4420,7 +4420,7 @@ namespace Avail {
             // Ensure an airloop name is not used more than once in the hybrid ventilation control objects
             for (AirLoopNum = 1; AirLoopNum <= state.dataHVACGlobal->NumPrimaryAirSys; ++AirLoopNum) { // loop over the primary air systems
                 int AirLoopCount = 0;                                                                  // Air loop name count
-                int SysAvailIndex;                                                                     // Hybrid Ventilation Sys Avail Manager index
+                int SysAvailIndex = 0;                                                                 // Hybrid Ventilation Sys Avail Manager index
                 for (int SysAvailNum = 1; SysAvailNum <= state.dataAvail->NumHybridVentSysAvailMgrs; ++SysAvailNum) {
                     if (Util::SameString(state.dataAirSystemsData->PrimaryAirSystems(AirLoopNum).Name,
                                          state.dataAvail->HybridVentData(SysAvailNum).AirLoopName)) {

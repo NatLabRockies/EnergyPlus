@@ -156,7 +156,6 @@ namespace PlantChillers {
             }
         }
         ShowFatalError(state, std::format("Could not locate electric chiller with name: {}", chillerName));
-        return nullptr;
     }
 
     void ElectricChillerSpecs::getInput(EnergyPlusData &state)
@@ -2140,7 +2139,6 @@ namespace PlantChillers {
             }
         }
         ShowFatalError(state, std::format("Could not locate engine driven chiller with name: {}", chillerName));
-        return nullptr;
     }
 
     void EngineDrivenChillerSpecs::simulate(
@@ -4181,7 +4179,6 @@ namespace PlantChillers {
             }
         }
         ShowFatalError(state, std::format("Could not locate gas turbine chiller with name: {}", chillerName));
-        return nullptr;
     }
 
     void
@@ -6143,7 +6140,6 @@ namespace PlantChillers {
             }
         }
         ShowFatalError(state, std::format("Could not locate constant COP chiller with name: {}", chillerName));
-        return nullptr;
     }
 
     void ConstCOPChillerSpecs::simulate(

@@ -18,7 +18,7 @@ if (${ENABLE_OPENMP})
   endif()
 endif()
 
-target_link_libraries(ConvertInputFormat PRIVATE energyplusparser project_options project_warnings)
+target_link_libraries(ConvertInputFormat PRIVATE cli11 energyplusparser objexx project_options project_warnings)
 
 # See https://en.cppreference.com/w/cpp/filesystem#Notes
 if ((CMAKE_COMPILER_IS_GNUCXX AND CMAKE_CXX_COMPILER_VERSION VERSION_LESS 9.1) OR

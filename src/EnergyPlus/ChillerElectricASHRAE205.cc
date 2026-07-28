@@ -460,7 +460,6 @@ ASHRAE205ChillerSpecs *ASHRAE205ChillerSpecs::factory(EnergyPlusData &state, std
     }
     // If we didn't find it, fatal
     ShowFatalError(state, std::format("ASHRAE205ChillerSpecs::factory: Error getting inputs for object named: {}", objectName)); // LCOV_EXCL_LINE
-    return nullptr;                                                                                                              // LCOV_EXCL_LINE
 }
 
 void ASHRAE205ChillerSpecs::oneTimeInit_new(EnergyPlusData &state)

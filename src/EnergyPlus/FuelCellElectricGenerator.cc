@@ -161,8 +161,6 @@ namespace FuelCellElectricGenerator {
 
         // If we didn't find it, fatal
         ShowFatalError(state, std::format("LocalFuelCellGenFactory: Error getting inputs for object named: {}", objectName)); // LCOV_EXCL_LINE
-        // Shut up the compiler
-        return nullptr; // LCOV_EXCL_LINE
     }
 
     PlantComponent *FCDataStruct::factory_exhaust(EnergyPlusData &state, std::string const &objectName)
@@ -181,8 +179,6 @@ namespace FuelCellElectricGenerator {
         }
         // If we didn't find it, fatal
         ShowFatalError(state, std::format("LocalFuelCellGenFactory: Error getting inputs for object named: {}", objectName)); // LCOV_EXCL_LINE
-        // Shut up the compiler
-        return nullptr; // LCOV_EXCL_LINE
     }
 
     void FCDataStruct::SimFuelCellGenerator(EnergyPlusData &state,

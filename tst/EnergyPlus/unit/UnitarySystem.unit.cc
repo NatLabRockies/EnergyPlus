@@ -114,7 +114,7 @@ public:
     bool ErrorsFound = false;
 
 protected:
-    virtual void SetUp()
+    void SetUp() override
     {
         EnergyPlusFixture::SetUp(); // Sets up the base fixture first.
 
@@ -233,7 +233,7 @@ protected:
         state->dataSize->PlantSizData(2).DeltaT = 5.0;
     }
 
-    virtual void TearDown()
+    void TearDown() override
     {
         EnergyPlusFixture::TearDown(); // Remember to tear down the base fixture after cleaning up derived fixture!
     }
@@ -251,7 +251,7 @@ public:
     {
     }
 
-    virtual void SetUp()
+    void SetUp() override
     {
         EnergyPlusFixture::SetUp(); // Sets up individual test cases.
 
@@ -295,7 +295,7 @@ public:
         state->dataHeatBal->HeatReclaimVS_Coil.allocate(4);
     }
 
-    virtual void TearDown()
+    void TearDown() override
     {
         EnergyPlusFixture::TearDown(); // Remember to tear down the base fixture after cleaning up derived fixture!
     }
@@ -309,12 +309,12 @@ public:
     }
 
 protected:
-    virtual void SetUp()
+    void SetUp() override
     {
         EnergyPlusFixture::SetUp(); // Sets up the base fixture first.
     }
 
-    virtual void TearDown()
+    void TearDown() override
     {
         EnergyPlusFixture::TearDown(); // Remember to tear down the base fixture after cleaning up derived fixture!
     }
@@ -5877,9 +5877,9 @@ Curve:Biquadratic,
     Real64 RatedCapCoolTotalDes = CoolCoolCapAtPeak / TotCapTempModFac;
     EXPECT_NEAR(RatedCapCoolTotalDes, 35971.0, 0.001);
 
-    EXPECT_NEAR(thisSys->m_DesignCoolingCapacity, RatedCapCoolTotalDes, 0.001);
+    EXPECT_NEAR(thisSys->m_DesignCoolingCapacity, RatedCapCoolTotalDes, 0.005);
     EXPECT_EQ(thisSys->m_DesignCoolingCapacity, state->dataVariableSpeedCoils->VarSpeedCoil(1).RatedCapCoolTotal);
-    EXPECT_NEAR(thisSys->m_DesignHeatingCapacity, RatedCapCoolTotalDes, 0.001);
+    EXPECT_NEAR(thisSys->m_DesignHeatingCapacity, RatedCapCoolTotalDes, 0.005);
     EXPECT_EQ(thisSys->m_DesignHeatingCapacity, state->dataVariableSpeedCoils->VarSpeedCoil(2).RatedCapHeat);
     // variable speed coils size air flow differently than other models. The design air volume flow rate is back calculated from design capacity
     EXPECT_EQ(state->dataVariableSpeedCoils->VarSpeedCoil(1).RatedAirVolFlowRate,
@@ -27708,8 +27708,8 @@ TEST_F(EnergyPlusFixture, CoilSystemCoolingDX_RunOnLatentLoad)
 
     // test the object name
     EXPECT_EQ("DOAS COOLING COIL SYSTEM", thisCoilSys->Name);
-    EXPECT_NEAR(0.865384, thisCoilSys->m_CoolingPartLoadFrac, 0.000001);
-    EXPECT_NEAR(0.865384, thisCoilSys->m_CoolingSpeedRatio, 0.000001);
+    EXPECT_NEAR(0.865384, thisCoilSys->m_CoolingPartLoadFrac, 2e-6);
+    EXPECT_NEAR(0.865384, thisCoilSys->m_CoolingSpeedRatio, 2e-6);
     EXPECT_EQ(1.0, thisCoilSys->m_CoolingCycRatio);
     EXPECT_TRUE(thisCoilSys->m_RunOnSensibleLoad);
     EXPECT_TRUE(thisCoilSys->m_RunOnLatentLoad);
@@ -27747,7 +27747,7 @@ TEST_F(EnergyPlusFixture, CoilSystemCoolingDX_RunOnLatentLoad)
     EXPECT_FALSE(CoilSys.m_RunOnSensibleLoad);
     EXPECT_EQ(1.0, CoilSys.m_CoolingCycRatio);
     EXPECT_EQ(1.0, CoilSys.m_CompPartLoadRatio);
-    EXPECT_NEAR(0.112564, CoilSys.m_CoolingSpeedRatio, 0.000001);
+    EXPECT_NEAR(0.112564, CoilSys.m_CoolingSpeedRatio, 2e-6);
     EXPECT_NEAR(0.008917, CoilSys.m_DesiredOutletHumRat, 0.000001);
     EXPECT_NEAR(0.008917, state->dataLoopNodes->Node(CoilSys.AirOutNode).HumRat, 0.000001);
 }

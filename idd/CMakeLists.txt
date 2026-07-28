@@ -13,7 +13,7 @@ add_custom_command(
 )
 
 add_executable(generate_embeddable_epJSON_schema embedded/generate_embeddable_epJSON_schema.cpp)
-target_link_libraries(generate_embeddable_epJSON_schema PRIVATE project_options project_fp_options project_warnings)
+target_link_libraries(generate_embeddable_epJSON_schema PRIVATE nlohmann_json project_options project_fp_options project_warnings)
 target_compile_options(generate_embeddable_epJSON_schema PRIVATE $<$<COMPILE_LANG_AND_ID:CXX,Clang,AppleClang>:-Wno-shorten-64-to-32>)
 set_target_properties(generate_embeddable_epJSON_schema PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/scripts")
 # See https://en.cppreference.com/w/cpp/filesystem#Notes

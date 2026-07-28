@@ -4199,7 +4199,7 @@ TEST_F(EnergyPlusFixture, HeatRecovery_HeatExchangerGenericCalcTest)
     EXPECT_EQ(1, state->dataAirLoop->NumOASystems);
     EXPECT_EQ("VAV WITH REHEAT_OA", thisOASys.Name);
     // get HR HX generic
-    GetHeatRecoveryInput(*state);
+    EXPECT_THROW(GetHeatRecoveryInput(*state), std::runtime_error);
     int ExchNum = 1;
     auto &thisHX = state->dataHeatRecovery->ExchCond(ExchNum);
     EXPECT_EQ(thisHX.Name, "HEATRECOVERY HX GENERIC");

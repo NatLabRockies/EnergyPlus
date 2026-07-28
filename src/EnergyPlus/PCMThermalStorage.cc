@@ -90,7 +90,6 @@ namespace PCMStorage {
         }
 
         ShowFatalError(state, "PCMStorage factory: No PCM storage found with name: " + objectName);
-        return nullptr;
     }
 
     void SimulatePCMStorage(EnergyPlusData &state, PlantLocation const &plantLoc, bool FirstHVACIteration, Real64 &CurLoad, bool RunFlag)

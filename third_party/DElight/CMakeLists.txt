@@ -98,4 +98,5 @@ SET( delight_src
 )
 
 ADD_LIBRARY( DElight STATIC ${delight_src} )
+target_include_directories(DElight PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 

@@ -7297,7 +7297,8 @@ namespace VariableSpeedCoils {
         Node::ConnectionObjectType HeatingCoilTypeNum =
             static_cast<Node::ConnectionObjectType>(getEnumValue(Node::ConnectionObjectTypeNamesUC, Util::makeUPPER(HeatingCoilType)));
 
-        Node::ConnectionObjectType CompSetsParentType; // Parent object type which uses DX heating coil pass into this function
+        Node::ConnectionObjectType CompSetsParentType =
+            Node::ConnectionObjectType::Invalid; // Parent object type which uses DX heating coil pass into this function
         std::string CompSetsParentName;
         for (WhichComp = 1; WhichComp <= state.dataBranchNodeConnections->NumCompSets; ++WhichComp) {
             if (HeatingCoilTypeNum != state.dataBranchNodeConnections->CompSets(WhichComp).ComponentObjectType ||

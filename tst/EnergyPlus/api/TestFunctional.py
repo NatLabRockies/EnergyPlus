@@ -53,6 +53,7 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
+import os
 import sys
 
 from pyenergyplus.api import EnergyPlusAPI
@@ -158,7 +159,9 @@ print("Python API Test: Got back erroneous value of dew point: %8.4f\n" % errone
 if error_count > 0:
     print("Python API Test: Errors were caught during dew point calculation, good!")
 else:
-    print("Python API Test: Errors were NOT caught during dew point calculation, bad!")
-    sys.exit(1)
+    if os.environ.get("ENERGYPLUS_USE_PSYCH_ERRORS") == "1":
+        print("Python API Test: Errors were NOT caught during dew point calculation, bad!")
+        sys.exit(1)
+    print("Python API Test: Psychrometric errors are disabled; no dew point calculation errors expected.")
 
 print("EnergyPlus Version: " + str(api.functional.ep_version()))

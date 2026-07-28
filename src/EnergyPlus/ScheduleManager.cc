@@ -2768,7 +2768,7 @@ namespace Sched {
 
         for (int Count = 1; Count <= NumUntils; ++Count) {
             std::string const &until = Untils(Count);
-            int Pos = index(until, "UNTIL");
+            std::string::size_type Pos = index(until, "UNTIL");
             if (Pos == 0) {
                 if (until[5] == ':') {
                     sFld = 6;
@@ -2776,7 +2776,7 @@ namespace Sched {
                     sFld = 5;
                 }
                 DecodeHHMMField(state, until.substr(sFld), HHField, MMField, ErrorsFound, DayScheduleName, until, interpolation);
-            } else if (Pos == -1) {
+            } else if (Pos == std::string::npos) {
                 DecodeHHMMField(state, until, HHField, MMField, ErrorsFound, DayScheduleName, until, interpolation);
             } else { // Until found but wasn't first field
                 ShowSevereError(state, std::format("ProcessScheduleInput: ProcessIntervalFields, Invalid \"Until\" field encountered={}", until));

@@ -7999,7 +7999,7 @@ void SizeDXCoil(EnergyPlusData &state, int const DXCoilNum)
                 }
 
                 if (thisDXCoil.RatedAirVolFlowRate2 > thisDXCoil.RatedAirVolFlowRate(Mode)) {
-                    ShowFatalError(
+                    ShowSevereError(
                         state,
                         std::format("SizeDXCoil: {} {}, Rated Air Volume Flow Rate, low speed must be less than or equal to Rated Air Volume "
                                     "Flow Rate, high speed.",
@@ -15918,7 +15918,8 @@ int GetHPCoolingCoilIndex(EnergyPlusData &state,
     Node::ConnectionObjectType HeatingCoilTypeNum =
         static_cast<Node::ConnectionObjectType>(getEnumValue(Node::ConnectionObjectTypeNamesUC, Util::makeUPPER(HeatingCoilType)));
 
-    Node::ConnectionObjectType CompSetsParentType; // Parent object type which uses DX heating coil pass into this function
+    Node::ConnectionObjectType CompSetsParentType =
+        Node::ConnectionObjectType::Invalid; // Parent object type which uses DX heating coil pass into this function
     std::string CompSetsParentName;
     for (WhichComp = 1; WhichComp <= state.dataBranchNodeConnections->NumCompSets; ++WhichComp) {
         if (HeatingCoilTypeNum != state.dataBranchNodeConnections->CompSets(WhichComp).ComponentObjectType ||

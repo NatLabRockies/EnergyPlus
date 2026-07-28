@@ -16,7 +16,19 @@ endif()
 
 if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID STREQUAL "Clang" OR CMAKE_CXX_COMPILER_ID STREQUAL "AppleClang") # g++/Clang
   target_compile_options(airflownetworklib PRIVATE -Wno-attributes) # Don't warn on attributes that g++ and Clang don't know
+elseif(MSVC)
+  # TODO: fix these ideally
+  # Ignore C4458 - declaration hides class member
+  # Ignore C4701 - potentially uninitialized local variable used
+  target_compile_options(airflownetworklib PRIVATE /wd4458 /wd4701)
 endif()
 
 target_include_directories(airflownetworklib PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)
-target_link_libraries(airflownetworklib PUBLIC btwxt PRIVATE nlohmann_json)
+target_link_libraries(airflownetworklib
+  PUBLIC
+    objexx
+  PRIVATE
+    btwxt nlohmann_json re2 Windows-CalcEngine
+    project_options project_fp_options
+    project_warnings
+)

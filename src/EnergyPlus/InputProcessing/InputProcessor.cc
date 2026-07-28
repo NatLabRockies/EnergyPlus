@@ -262,7 +262,6 @@ void InputProcessor::processInput(EnergyPlusData &state)
 {
     if (!FileSystem::fileExists(state.dataStrGlobals->inputFilePath)) {
         ShowFatalError(state, std::format("Input file path {} not found", state.dataStrGlobals->inputFilePath));
-        return;
     }
 
     try {
@@ -511,7 +510,7 @@ int InputProcessor::getNumSectionsFound(std::string const &SectionWord)
     return static_cast<int>(SectionWord_iter.value().size());
 }
 
-int InputProcessor::getNumObjectsFound(EnergyPlusData &state, std::string_view const ObjectWord)
+int InputProcessor::getNumObjectsFound([[maybe_unused]] EnergyPlusData &state, std::string_view const ObjectWord)
 {
 
     // FUNCTION INFORMATION:
@@ -539,14 +538,6 @@ int InputProcessor::getNumObjectsFound(EnergyPlusData &state, std::string_view c
         return static_cast<int>(epJSON[tmp_umit->second].size());
     }
     return static_cast<int>(find_obj.value().size());
-
-    if (schema()["properties"].find(std::string(ObjectWord)) == schema()["properties"].end()) {
-        auto tmp_umit = caseInsensitiveObjectMap.find(convertToUpper(ObjectWord));
-        if (tmp_umit == caseInsensitiveObjectMap.end()) {
-            ShowWarningError(state, std::format("Requested Object not found in Definitions: {}", ObjectWord));
-        }
-    }
-    return 0;
 }
 
 bool InputProcessor::findDefault(std::string &default_value, json const &schema_field_obj)
@@ -944,7 +935,6 @@ const json &InputProcessor::getJSONObjectItem(EnergyPlusData &state, std::string
 
     ShowFatalError(state,
                    std::format(R"(Name "{}" requested was not found in input for ObjectType "{}")", objectInfo.objectType, objectInfo.objectName));
-    throw;
 }
 
 void InputProcessor::getObjectItem(EnergyPlusData &state,

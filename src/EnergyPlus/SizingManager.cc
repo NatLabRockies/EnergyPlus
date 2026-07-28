@@ -5415,12 +5415,6 @@ void UpdateTermUnitFinalZoneSizing(EnergyPlusData &state)
                 max(thisTUFZSizing.DesHeatMaxAirFlow,
                     thisTUFZSizing.DesHeatMaxAirFlow2,
                     max(thisTUFZSizing.DesCoolVolFlow, thisTUFZSizing.DesHeatVolFlow) * thisTUFZSizing.DesHeatMaxAirFlowFrac);
-            // Outdoor air fractions
-            if (thisTUFZSizing.DesCoolVolFlow > 0.0) {
-                thisTUFZSizing.DesCoolOAFlowFrac = min(thisFZSizing.MinOA / thisTUFZSizing.DesCoolVolFlow, 1.0);
-            } else {
-                thisTUFZSizing.DesCoolOAFlowFrac = 0.0;
-            }
             if (thisTUFZSizing.DesHeatVolFlow > 0.0) {
                 thisTUFZSizing.DesHeatOAFlowFrac = min(thisFZSizing.MinOA / thisTUFZSizing.DesHeatVolFlow, 1.0);
             } else {

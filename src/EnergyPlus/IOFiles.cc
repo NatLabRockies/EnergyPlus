@@ -353,7 +353,6 @@ void IOFiles::OutputControl::getInput(EnergyPlusData &state)
                 return false;
             }
             ShowFatalError(state, "Invalid boolean Yes/No choice input");
-            return true;
         };
 
         auto &instancesValue = instances.value();

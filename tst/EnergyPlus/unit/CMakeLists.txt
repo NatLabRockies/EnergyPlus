@@ -2,6 +2,12 @@ if(USE_GLYCOL_CACHING)
   add_compile_definitions(EP_cache_GlycolSpecificHeat)
 endif()
 
+if(USE_PSYCHROMETRICS_CACHING)
+  # Caching defaulted ON
+else()
+  add_compile_definitions(EP_nocache_Psychrometrics)
+endif()
+
 if(USE_PSYCH_ERRORS)
   add_compile_definitions(EP_psych_errors)
 endif()

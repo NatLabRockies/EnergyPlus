@@ -440,7 +440,7 @@ int getsocketportnumber(const char* const docname) {
 /// has been installed.
 ///
 /// \return The main version number, or a negative value if an error occured.
-int getmainversionnumber() {
+int getmainversionnumber(void) {
   return MAINVERSION;
 }
 

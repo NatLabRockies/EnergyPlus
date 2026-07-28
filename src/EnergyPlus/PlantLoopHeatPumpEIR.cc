@@ -184,7 +184,6 @@ Real64 EIRPlantLoopHeatPump::getLoadSideOutletSetPointTemp(EnergyPlusData &state
     // lines, they simply should not be able to get here.  But a fatal is here anyway just in case,
     // and the lines are excluded from coverage.
     ShowFatalError(state, "Unsupported loop demand calculation scheme in EIR heat pump"); // LCOV_EXCL_LINE
-    return -999; // not actually returned with Fatal Error call above  // LCOV_EXCL_LINE
 }
 
 void EIRPlantLoopHeatPump::resetReportingVariables()
@@ -1831,7 +1830,6 @@ PlantComponent *EIRPlantLoopHeatPump::factory(EnergyPlusData &state, DataPlant::
     }
 
     ShowFatalError(state, std::format("EIR Plant Loop Heat Pump factory: Error getting inputs for PLHP named: {}", hp_name));
-    return nullptr; // LCOV_EXCL_LINE
 }
 
 void EIRPlantLoopHeatPump::pairUpCompanionCoils(EnergyPlusData &state)
@@ -3280,7 +3278,6 @@ PlantComponent *EIRFuelFiredHeatPump::factory(EnergyPlusData &state, DataPlant::
     }
 
     ShowFatalError(state, std::format("EIR Fuel-Fired Heat Pump factory: Error getting inputs for PLFFHP named: {}.", hp_name));
-    return nullptr; // LCOV_EXCL_LINE
 }
 
 PlantComponent *HeatPumpAirToWater::factory(
@@ -3306,7 +3303,6 @@ PlantComponent *HeatPumpAirToWater::factory(
     }
 
     ShowFatalError(state, std::format("Air To Water Heat Pump factory: Error getting inputs for AWHP named: {}.", hp_name));
-    return nullptr; // LCOV_EXCL_LINE
 }
 
 void EIRFuelFiredHeatPump::pairUpCompanionCoils(EnergyPlusData &state)

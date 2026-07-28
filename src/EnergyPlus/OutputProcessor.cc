@@ -2986,8 +2986,6 @@ namespace OutputProcessor {
         {
             return -11;
         }
-
-        return -1;
     } // DetermineIndexGroupKeyFromMeterName()
 
     std::string DetermineIndexGroupFromMeterGroup(Meter const *meter) // the meter
@@ -4314,8 +4312,8 @@ Real64 GetInternalVariableValue(EnergyPlusData &state,
         resultVal = 0.0;
     } else if (varType == VariableType::Integer || varType == VariableType::Real) {
         if (keyVarIndex < 0 || keyVarIndex >= (int)op->outVars.size()) {
-            ShowFatalError(state, "GetInternalVariableValue: passed variable index beyond range of array.");
             ShowContinueError(state, std::format("Index = {} Number of variables = {}", keyVarIndex, op->outVars.size()));
+            ShowFatalError(state, "GetInternalVariableValue: passed variable index beyond range of array.");
         }
 
         // must use %Which, %Value is always zero if variable is not a requested report variable

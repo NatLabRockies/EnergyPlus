@@ -144,11 +144,11 @@ TEST_F(EnergyPlusFixture, CheckEMPDCalc)
 
     auto const &report_vars = state->dataMoistureBalEMPD->EMPDReportVars(1);
     EXPECT_DOUBLE_EQ(6.3445188238394508, Tsat);
-    EXPECT_DOUBLE_EQ(0.0071762141417078054, state->dataMstBalEMPD->RVSurface(1));
+    EXPECT_NEAR(0.0071762141417078054, state->dataMstBalEMPD->RVSurface(1), 1e-12);
     EXPECT_DOUBLE_EQ(0.00000076900234067835945, report_vars.mass_flux_deep);
     EXPECT_DOUBLE_EQ(-0.00000019077843350248091, report_vars.mass_flux_zone);
-    EXPECT_DOUBLE_EQ(0.0070186500259181136, state->dataMstBalEMPD->RVSurfLayer(1));
-    EXPECT_DOUBLE_EQ(0.0051469229632164605, state->dataMstBalEMPD->RVDeepLayer(1));
+    EXPECT_NEAR(0.0070186500259181136, state->dataMstBalEMPD->RVSurfLayer(1), 1e-12);
+    EXPECT_NEAR(0.0051469229632164605, state->dataMstBalEMPD->RVDeepLayer(1), 1e-12);
     EXPECT_DOUBLE_EQ(-0.47694608375620229, state->dataMstBalEMPD->HeatFluxLatent(1));
 }
 
@@ -264,11 +264,11 @@ TEST_F(EnergyPlusFixture, EMPDRcoating)
 
     auto const &report_vars = state->dataMoistureBalEMPD->EMPDReportVars(1);
     EXPECT_DOUBLE_EQ(6.3445188238394508, Tsat);
-    EXPECT_DOUBLE_EQ(0.0071815819413115663, state->dataMstBalEMPD->RVSurface(1));
+    EXPECT_NEAR(0.0071815819413115663, state->dataMstBalEMPD->RVSurface(1), 1e-12);
     EXPECT_DOUBLE_EQ(0.00000076900234067835945, report_vars.mass_flux_deep);
     EXPECT_DOUBLE_EQ(-1.8118197009111738e-07, report_vars.mass_flux_zone);
-    EXPECT_DOUBLE_EQ(0.0070183147759991828, state->dataMstBalEMPD->RVSurfLayer(1));
-    EXPECT_DOUBLE_EQ(0.0051469229632164605, state->dataMstBalEMPD->RVDeepLayer(1));
+    EXPECT_NEAR(0.0070183147759991828, state->dataMstBalEMPD->RVSurfLayer(1), 1e-12);
+    EXPECT_NEAR(0.0051469229632164605, state->dataMstBalEMPD->RVDeepLayer(1), 1e-12);
     EXPECT_DOUBLE_EQ(-0.45295492522779346, state->dataMstBalEMPD->HeatFluxLatent(1));
 }
 

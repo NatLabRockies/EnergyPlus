@@ -396,7 +396,6 @@ namespace DataSizing {
         Real64 DesHeatOAFlowFrac = 0.0;     // zone design heating OA air volume fraction [-]
         Real64 DesCoolMassFlow = 0.0;       // zone design cooling air mass flow rate [kg/s]
         Real64 DesCoolMassFlowNoOA = 0.0;   // zone design cooling air mass flow rate without applying MinOA as a limit [kg/s]
-        Real64 DesCoolOAFlowFrac = 0.0;     // zone design cooling OA air volume fraction [-]
         Real64 DesHeatLoad = 0.0;           // zone design heating load including sizing factor and scaled to match airflow sizing [W]
         Real64 NonAirSysDesHeatLoad = 0.0;  // base zone design heating load including sizing factor [W]
         Real64 DesCoolLoad = 0.0;           // zone design cooling load including sizing factor and scaled to match airflow sizing [W]

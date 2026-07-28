@@ -496,7 +496,6 @@ namespace FourPipeBeam {
             return thisBeam;
         }
         ShowFatalError(state, std::format("{}Errors found in getting input. Preceding conditions cause termination.", routineName));
-        return nullptr;
     }
 
     int HVACFourPipeBeam::getAirLoopNum()

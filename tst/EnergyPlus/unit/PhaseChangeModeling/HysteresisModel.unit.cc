@@ -57,7 +57,7 @@ class HysteresisTest : public testing::Test
 {
 public:
     Material::MaterialPhaseChange ModelA;
-    virtual void SetUp()
+    void SetUp() override
     {
         this->ModelA.Name = "PCM Name";
         this->ModelA.totalLatentHeat = 25000;     // J/kg ?
@@ -77,7 +77,7 @@ public:
         this->ModelA.fullyLiquidDensity = 4.0;
     }
 
-    virtual void TearDown()
+    void TearDown() override
     {
     }
 };
