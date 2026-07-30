@@ -189,7 +189,6 @@ extension_renaming = {
     "MaterialProperty:PhaseChange": "values",
     "MaterialProperty:VariableThermalConductivity": "values",
     "ComfortViewFactorAngles": "angles",
-    "ZoneMRTCalculation": "people_names",
 }
 remaining_objects = [
     "Site:SpectrumData",

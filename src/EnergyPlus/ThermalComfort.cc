@@ -494,6 +494,8 @@ namespace ThermalComfort {
                             OutputProcessor::StoreType::Sum,
                             "Facility");
 
+        GetAngleFactorList(state);
+
         state.dataThermalComforts->ZoneOccHrs.dimension(state.dataGlobal->NumOfZones, 0.0);
     }
 
