@@ -228,7 +228,7 @@ TEST_F(EnergyPlusFixture, SetupCommonPipesCommonPipeVariablePrimaryPumpSetsVaria
     EXPECT_EQ(FlowType::Variable, commonPipe.SupplySideInletPumpType);
 }
 
-TEST_F(EnergyPlusFixture, SetupCommonPipesTwoWayVariablePrimaryPumpSetsVariableSupplyPumpType)
+TEST_F(EnergyPlusFixture, SetupCommonPipesTwoWayVariablePrimaryPumpBankSetsVariableSupplyPumpType)
 {
     using namespace DataPlant;
     using namespace HVACInterfaceManager;
@@ -246,14 +246,14 @@ TEST_F(EnergyPlusFixture, SetupCommonPipesTwoWayVariablePrimaryPumpSetsVariableS
     supplySide.Branch.allocate(1);
     supplySide.Branch(1).TotalComponents = 1;
     supplySide.Branch(1).Comp.allocate(1);
-    supplySide.Branch(1).Comp(1).Type = PlantEquipmentType::PumpVariableSpeed;
+    supplySide.Branch(1).Comp(1).Type = PlantEquipmentType::PumpBankVariableSpeed;
 
     auto &demandSide = plantLoop.LoopSide(LoopSideLocation::Demand);
     demandSide.TotalBranches = 1;
     demandSide.Branch.allocate(1);
     demandSide.Branch(1).TotalComponents = 1;
     demandSide.Branch(1).Comp.allocate(1);
-    demandSide.Branch(1).Comp(1).Type = PlantEquipmentType::PumpConstantSpeed;
+    demandSide.Branch(1).Comp(1).Type = PlantEquipmentType::PumpBankConstantSpeed;
 
     SetupCommonPipes(*state);
 
@@ -263,7 +263,7 @@ TEST_F(EnergyPlusFixture, SetupCommonPipesTwoWayVariablePrimaryPumpSetsVariableS
     EXPECT_EQ(FlowType::Constant, commonPipe.DemandSideInletPumpType);
 }
 
-TEST_F(EnergyPlusFixture, SetupLoopFlowRequestTwoWayVariablePrimaryPumpTurnsLoopOn)
+TEST_F(EnergyPlusFixture, SetupLoopFlowRequestTwoWayVariablePrimaryPumpFollowsCommonPipeRequest)
 {
     using namespace DataPlant;
 
@@ -315,25 +315,38 @@ TEST_F(EnergyPlusFixture, SetupLoopFlowRequestTwoWayVariablePrimaryPumpTurnsLoop
     state->dataLoopNodes->Node(primaryInletNode).MassFlowRateRequest = commonPipeMassFlowRequest;
     Real64 const loopFlow = supplySide.SetupLoopFlowRequest(*state, LoopSideLocation::Demand);
 
-    EXPECT_NEAR(pumpMaxMassFlow, loopFlow, 0.0000001);
+    EXPECT_NEAR(commonPipeMassFlowRequest, loopFlow, 0.0000001);
     EXPECT_NEAR(commonPipeMassFlowRequest, supplySide.flowRequestNeedAndTurnOn, 0.0000001);
-    EXPECT_NEAR(pumpMaxMassFlow, supplySide.flowRequestNeedIfOn, 0.0000001);
-    EXPECT_NEAR(pumpMaxMassFlow, supplySide.flowRequestFinal, 0.0000001);
+    EXPECT_NEAR(commonPipeMassFlowRequest, supplySide.flowRequestNeedIfOn, 0.0000001);
+    EXPECT_NEAR(commonPipeMassFlowRequest, supplySide.flowRequestFinal, 0.0000001);
     EXPECT_NEAR(0.0, demandSide.flowRequestFinal, 0.0000001);
     EXPECT_FALSE(pump.LoopSolverOverwriteFlag);
 
-    state->dataLoopNodes->Node(primaryInletNode).MassFlowRateRequest = 0.0;
+    constexpr Real64 lowerCommonPipeMassFlowRequest = 0.1;
+    state->dataLoopNodes->Node(primaryInletNode).MassFlowRateRequest = lowerCommonPipeMassFlowRequest;
     pump.PumpControl = Pumps::PumpControlType::Continuous;
     pump.LoopSolverOverwriteFlag = true;
     Real64 const continuousLoopFlow = supplySide.SetupLoopFlowRequest(*state, LoopSideLocation::Demand);
 
-    EXPECT_NEAR(pumpMaxMassFlow, continuousLoopFlow, 0.0000001);
-    EXPECT_NEAR(pumpMaxMassFlow, supplySide.flowRequestNeedAndTurnOn, 0.0000001);
-    EXPECT_NEAR(pumpMaxMassFlow, supplySide.flowRequestFinal, 0.0000001);
+    EXPECT_NEAR(lowerCommonPipeMassFlowRequest, continuousLoopFlow, 0.0000001);
+    EXPECT_NEAR(lowerCommonPipeMassFlowRequest, supplySide.flowRequestNeedAndTurnOn, 0.0000001);
+    EXPECT_NEAR(lowerCommonPipeMassFlowRequest, supplySide.flowRequestFinal, 0.0000001);
+    EXPECT_FALSE(pump.LoopSolverOverwriteFlag);
+
+    constexpr Real64 pumpMinMassFlow = 0.05;
+    state->dataLoopNodes->Node(primaryInletNode).MassFlowRateRequest = 0.0;
+    pump.MassFlowRateMin = pumpMinMassFlow;
+    pump.LoopSolverOverwriteFlag = true;
+    Real64 const minimumLoopFlow = supplySide.SetupLoopFlowRequest(*state, LoopSideLocation::Demand);
+
+    EXPECT_NEAR(pumpMinMassFlow, minimumLoopFlow, 0.0000001);
+    EXPECT_NEAR(pumpMinMassFlow, supplySide.flowRequestNeedAndTurnOn, 0.0000001);
+    EXPECT_NEAR(0.0, supplySide.flowRequestNeedIfOn, 0.0000001);
+    EXPECT_NEAR(pumpMinMassFlow, supplySide.flowRequestFinal, 0.0000001);
     EXPECT_FALSE(pump.LoopSolverOverwriteFlag);
 }
 
-TEST_F(EnergyPlusFixture, ManageTwoWayCommonPipeVariablePrimaryPumpRequestsFlowForPrimaryInletSetPoint)
+TEST_F(EnergyPlusFixture, ManageTwoWayCommonPipeVariablePrimaryPumpBankVariesFlowToMeetPrimaryInletSetPoint)
 {
     using namespace DataPlant;
     using namespace HVACInterfaceManager;
@@ -360,7 +373,7 @@ TEST_F(EnergyPlusFixture, ManageTwoWayCommonPipeVariablePrimaryPumpRequestsFlowF
     supplySide.Branch.allocate(1);
     supplySide.Branch(1).TotalComponents = 1;
     supplySide.Branch(1).Comp.allocate(1);
-    supplySide.Branch(1).Comp(1).Type = PlantEquipmentType::PumpVariableSpeed;
+    supplySide.Branch(1).Comp(1).Type = PlantEquipmentType::PumpBankVariableSpeed;
     supplySide.Branch(1).Comp(1).NodeNumIn = priInNode;
     supplySide.Branch(1).Comp(1).NodeNumOut = priOutNode;
 
@@ -378,12 +391,22 @@ TEST_F(EnergyPlusFixture, ManageTwoWayCommonPipeVariablePrimaryPumpRequestsFlowF
     state->dataLoopNodes->Node(priInNode).TempSetPoint = 10.0;
     state->dataLoopNodes->Node(priInNode).MassFlowRateMax = 10.0;
     state->dataLoopNodes->Node(priInNode).MassFlowRateMaxAvail = 10.0;
-    state->dataLoopNodes->Node(secOutNode).MassFlowRate = 1.0;
 
     PlantLocation plantLoc{loopNum, LoopSideLocation::Supply, 1, 0};
+
+    state->dataLoopNodes->Node(secOutNode).MassFlowRate = 0.4;
     ManageTwoWayCommonPipe(*state, plantLoc, 12.0);
 
     auto const &commonPipe = state->dataHVACInterfaceMgr->PlantCommonPipe(loopNum);
+    EXPECT_NEAR(0.6, state->dataLoopNodes->Node(priInNode).MassFlowRateRequest, 0.0000001);
+    EXPECT_NEAR(0.6, state->dataLoopNodes->Node(priInNode).MassFlowRate, 0.0000001);
+    EXPECT_NEAR(0.4, commonPipe.PriToSecFlow, 0.0000001);
+    EXPECT_NEAR(0.2, commonPipe.PriCPLegFlow, 0.0000001);
+    EXPECT_NEAR(10.0, state->dataLoopNodes->Node(priInNode).Temp, 0.0000001);
+
+    state->dataLoopNodes->Node(secOutNode).MassFlowRate = 1.0;
+    ManageTwoWayCommonPipe(*state, plantLoc, 12.0);
+
     EXPECT_NEAR(1.5, state->dataLoopNodes->Node(priInNode).MassFlowRateRequest, 0.0000001);
     EXPECT_NEAR(1.5, state->dataLoopNodes->Node(priInNode).MassFlowRate, 0.0000001);
     EXPECT_NEAR(1.0, commonPipe.PriToSecFlow, 0.0000001);

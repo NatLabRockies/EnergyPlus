@@ -1276,9 +1276,11 @@ void SetupCommonPipes(EnergyPlusData &state)
                                 OutputProcessor::StoreType::Average,
                                 thisPlantLoop.Name);
 
-            if (first_supply_component_type == DataPlant::PlantEquipmentType::PumpConstantSpeed) {
+            if (first_supply_component_type == DataPlant::PlantEquipmentType::PumpConstantSpeed ||
+                first_supply_component_type == DataPlant::PlantEquipmentType::PumpBankConstantSpeed) {
                 thisCommonPipe.SupplySideInletPumpType = FlowType::Constant;
-            } else if (first_supply_component_type == DataPlant::PlantEquipmentType::PumpVariableSpeed) {
+            } else if (first_supply_component_type == DataPlant::PlantEquipmentType::PumpVariableSpeed ||
+                       first_supply_component_type == DataPlant::PlantEquipmentType::PumpBankVariableSpeed) {
                 thisCommonPipe.SupplySideInletPumpType = FlowType::Variable;
             }
             break;
@@ -1314,15 +1316,19 @@ void SetupCommonPipes(EnergyPlusData &state)
                                 thisPlantLoop.Name);
 
             // check type of pump on supply side inlet
-            if (first_supply_component_type == DataPlant::PlantEquipmentType::PumpConstantSpeed) {
+            if (first_supply_component_type == DataPlant::PlantEquipmentType::PumpConstantSpeed ||
+                first_supply_component_type == DataPlant::PlantEquipmentType::PumpBankConstantSpeed) {
                 thisCommonPipe.SupplySideInletPumpType = FlowType::Constant;
-            } else if (first_supply_component_type == DataPlant::PlantEquipmentType::PumpVariableSpeed) {
+            } else if (first_supply_component_type == DataPlant::PlantEquipmentType::PumpVariableSpeed ||
+                       first_supply_component_type == DataPlant::PlantEquipmentType::PumpBankVariableSpeed) {
                 thisCommonPipe.SupplySideInletPumpType = FlowType::Variable;
             }
             // check type of pump on demand side inlet
-            if (first_demand_component_type == DataPlant::PlantEquipmentType::PumpConstantSpeed) {
+            if (first_demand_component_type == DataPlant::PlantEquipmentType::PumpConstantSpeed ||
+                first_demand_component_type == DataPlant::PlantEquipmentType::PumpBankConstantSpeed) {
                 thisCommonPipe.DemandSideInletPumpType = FlowType::Constant;
-            } else if (first_demand_component_type == DataPlant::PlantEquipmentType::PumpVariableSpeed) {
+            } else if (first_demand_component_type == DataPlant::PlantEquipmentType::PumpVariableSpeed ||
+                       first_demand_component_type == DataPlant::PlantEquipmentType::PumpBankVariableSpeed) {
                 thisCommonPipe.DemandSideInletPumpType = FlowType::Variable;
             }
             break;

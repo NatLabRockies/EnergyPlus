@@ -975,21 +975,31 @@ namespace DataPlant {
                             // special primary side flow request for two way common pipe
                             int const CompIndex = component.CompNum;
                             switch (component.Type) {
-                            // remove var speed pumps from this case statement if can set MassFlowRateRequest
                             case DataPlant::PlantEquipmentType::PumpConstantSpeed:
-                            case DataPlant::PlantEquipmentType::PumpVariableSpeed:
-                            case DataPlant::PlantEquipmentType::PumpBankVariableSpeed:
                                 if (CompIndex > 0) {
-                                    auto &primaryPump = state.dataPumps->PumpEquip(CompIndex);
+                                    auto const &primaryPump = state.dataPumps->PumpEquip(CompIndex);
                                     Real64 const primaryPumpFlowRequest = primaryPump.MassFlowRateMax;
                                     Real64 const primaryPumpTurnOnRequest = (primaryPump.PumpControl == Pumps::PumpControlType::Continuous)
                                                                                 ? min(primaryPumpFlowRequest, node_with_request.MassFlowRateMaxAvail)
                                                                                 : node_with_request.MassFlowRateRequest;
                                     ThisBranchFlowRequestNeedIfOn = max(ThisBranchFlowRequestNeedIfOn, primaryPumpFlowRequest);
                                     ThisBranchFlowRequestNeedAndTurnOn = max(ThisBranchFlowRequestNeedAndTurnOn, primaryPumpTurnOnRequest);
-                                    if ((component.Type == DataPlant::PlantEquipmentType::PumpVariableSpeed ||
-                                         component.Type == DataPlant::PlantEquipmentType::PumpBankVariableSpeed) &&
-                                        (primaryPumpTurnOnRequest > DataBranchAirLoopPlant::MassFlowTolerance)) {
+                                }
+                                break;
+                            case DataPlant::PlantEquipmentType::PumpVariableSpeed:
+                            case DataPlant::PlantEquipmentType::PumpBankVariableSpeed:
+                                if (CompIndex > 0) {
+                                    auto &primaryPump = state.dataPumps->PumpEquip(CompIndex);
+                                    Real64 const primaryPumpMaxAvail =
+                                        max(0.0, min(primaryPump.MassFlowRateMax, node_with_request.MassFlowRateMaxAvail));
+                                    Real64 const commonPipeFlowRequest = std::clamp(node_with_request.MassFlowRateRequest, 0.0, primaryPumpMaxAvail);
+                                    Real64 const primaryPumpTurnOnRequest =
+                                        (primaryPump.PumpControl == Pumps::PumpControlType::Continuous)
+                                            ? max(commonPipeFlowRequest, min(primaryPump.MassFlowRateMin, primaryPumpMaxAvail))
+                                            : commonPipeFlowRequest;
+                                    ThisBranchFlowRequestNeedIfOn = max(ThisBranchFlowRequestNeedIfOn, commonPipeFlowRequest);
+                                    ThisBranchFlowRequestNeedAndTurnOn = max(ThisBranchFlowRequestNeedAndTurnOn, primaryPumpTurnOnRequest);
+                                    if (primaryPumpTurnOnRequest > DataBranchAirLoopPlant::MassFlowTolerance) {
                                         primaryPump.LoopSolverOverwriteFlag = false;
                                     }
                                 }
