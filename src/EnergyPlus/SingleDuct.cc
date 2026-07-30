@@ -5926,14 +5926,14 @@ void SingleDuctAirTerminal::reportTerminalUnit(EnergyPlusData &state)
     auto &adu = state.dataDefineEquipment->AirDistUnit(this->ADUNum);
     if (!state.dataSize->TermUnitFinalZoneSizing.empty()) {
         auto &sizing = state.dataSize->TermUnitFinalZoneSizing(adu.TermUnitSizingNum);
-        OutputReportPredefined::PreDefTableEntry(state, orp->pdchAirTermMinFlow, adu.Name, sizing.DesCoolVolFlowMin);
-        OutputReportPredefined::PreDefTableEntry(state, orp->pdchAirTermMinOutdoorFlow, adu.Name, sizing.MinOA);
+        Real64 minZoneFlow = this->MaxAirVolFlowRate * this->ZoneMinAirFracDes * this->ZoneTurndownMinAirFrac;
+        OutputReportPredefined::PreDefTableEntry(state, orp->pdchAirTermMinFlow, adu.Name, minZoneFlow, 4);
+        OutputReportPredefined::PreDefTableEntry(state, orp->pdchAirTermMinOutdoorFlow, adu.Name, sizing.MinOA, 4);
         OutputReportPredefined::PreDefTableEntry(state, orp->pdchAirTermSupCoolingSP, adu.Name, sizing.CoolDesTemp);
         OutputReportPredefined::PreDefTableEntry(state, orp->pdchAirTermSupHeatingSP, adu.Name, sizing.HeatDesTemp);
         OutputReportPredefined::PreDefTableEntry(state, orp->pdchAirTermHeatingCap, adu.Name, sizing.DesHeatLoad);
         OutputReportPredefined::PreDefTableEntry(state, orp->pdchAirTermCoolingCap, adu.Name, sizing.DesCoolLoad);
 
-        Real64 minZoneFlow = this->MaxAirVolFlowRate * this->ZoneMinAirFracDes * this->ZoneTurndownMinAirFrac;
         OutputReportPredefined::PreDefTableEntry(state, orp->pdchLeedVentMinFlowPerZone, sizing.ZoneName, minZoneFlow, 6);
         Real64 minZoneFlowPerFloorArea = (sizing.TotalZoneFloorArea != 0.0) ? minZoneFlow / sizing.TotalZoneFloorArea : 0.0;
         OutputReportPredefined::PreDefTableEntry(state, orp->pdchLeedVentMinFlowPerArea, sizing.ZoneName, minZoneFlowPerFloorArea, 6);

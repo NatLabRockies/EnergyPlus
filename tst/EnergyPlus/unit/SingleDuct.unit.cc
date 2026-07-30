@@ -3153,8 +3153,8 @@ TEST_F(EnergyPlusFixture, SingleDuctAirTerminal_reportTerminalUnit)
 
     sdat(1).reportTerminalUnit(*state);
 
-    EXPECT_EQ("0.15", RetrievePreDefTableEntry(*state, orp.pdchAirTermMinFlow, "ADU a"));
-    EXPECT_EQ("0.05", RetrievePreDefTableEntry(*state, orp.pdchAirTermMinOutdoorFlow, "ADU a"));
+    EXPECT_EQ("0.0480", RetrievePreDefTableEntry(*state, orp.pdchAirTermMinFlow, "ADU a"));
+    EXPECT_EQ("0.0500", RetrievePreDefTableEntry(*state, orp.pdchAirTermMinOutdoorFlow, "ADU a"));
     EXPECT_EQ("12.50", RetrievePreDefTableEntry(*state, orp.pdchAirTermSupCoolingSP, "ADU a"));
     EXPECT_EQ("40.00", RetrievePreDefTableEntry(*state, orp.pdchAirTermSupHeatingSP, "ADU a"));
     EXPECT_EQ("2000.00", RetrievePreDefTableEntry(*state, orp.pdchAirTermHeatingCap, "ADU a"));
@@ -3178,7 +3178,6 @@ TEST_F(EnergyPlusFixture, SingleDuctAirTerminal_reportTerminalUnit)
     adu(2).Name = "ADU b";
     adu(2).TermUnitSizingNum = 2;
 
-    siz(2).DesCoolVolFlowMin = 0.16;
     siz(2).MinOA = 0.06;
     siz(2).CoolDesTemp = 12.6;
     siz(2).HeatDesTemp = 41.0;
@@ -3205,8 +3204,8 @@ TEST_F(EnergyPlusFixture, SingleDuctAirTerminal_reportTerminalUnit)
 
     sdat(2).reportTerminalUnit(*state);
 
-    EXPECT_EQ("0.16", RetrievePreDefTableEntry(*state, orp.pdchAirTermMinFlow, "ADU b"));
-    EXPECT_EQ("0.06", RetrievePreDefTableEntry(*state, orp.pdchAirTermMinOutdoorFlow, "ADU b"));
+    EXPECT_EQ("0.0496", RetrievePreDefTableEntry(*state, orp.pdchAirTermMinFlow, "ADU b"));
+    EXPECT_EQ("0.0600", RetrievePreDefTableEntry(*state, orp.pdchAirTermMinOutdoorFlow, "ADU b"));
     EXPECT_EQ("12.60", RetrievePreDefTableEntry(*state, orp.pdchAirTermSupCoolingSP, "ADU b"));
     EXPECT_EQ("41.00", RetrievePreDefTableEntry(*state, orp.pdchAirTermSupHeatingSP, "ADU b"));
     EXPECT_EQ("2100.00", RetrievePreDefTableEntry(*state, orp.pdchAirTermHeatingCap, "ADU b"));

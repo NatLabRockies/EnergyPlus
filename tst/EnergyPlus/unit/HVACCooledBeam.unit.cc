@@ -80,7 +80,6 @@ TEST_F(EnergyPlusFixture, HVACCooledBeam_reportTerminalUnit)
 
     auto &siz = state->dataSize->TermUnitFinalZoneSizing;
     siz.allocate(2);
-    siz(1).DesCoolVolFlowMin = 0.15;
     siz(1).MinOA = 0.05;
     siz(1).CoolDesTemp = 12.5;
     siz(1).HeatDesTemp = 40.0;
@@ -96,8 +95,8 @@ TEST_F(EnergyPlusFixture, HVACCooledBeam_reportTerminalUnit)
 
     cb(1).reportTerminalUnit(*state);
 
-    EXPECT_EQ("0.15", RetrievePreDefTableEntry(*state, orp.pdchAirTermMinFlow, "ADU a"));
-    EXPECT_EQ("0.05", RetrievePreDefTableEntry(*state, orp.pdchAirTermMinOutdoorFlow, "ADU a"));
+    EXPECT_EQ("0.3000", RetrievePreDefTableEntry(*state, orp.pdchAirTermMinFlow, "ADU a"));
+    EXPECT_EQ("0.0500", RetrievePreDefTableEntry(*state, orp.pdchAirTermMinOutdoorFlow, "ADU a"));
     EXPECT_EQ("12.50", RetrievePreDefTableEntry(*state, orp.pdchAirTermSupCoolingSP, "ADU a"));
     EXPECT_EQ("40.00", RetrievePreDefTableEntry(*state, orp.pdchAirTermSupHeatingSP, "ADU a"));
     EXPECT_EQ("2000.00", RetrievePreDefTableEntry(*state, orp.pdchAirTermHeatingCap, "ADU a"));
