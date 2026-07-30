@@ -1334,6 +1334,50 @@ TEST_F(EnergyPlusFixture, CondenserLoopTowers_SingleSpeedUserInputTowerSizing)
     EXPECT_DOUBLE_EQ(state->dataCondenserLoopTowers->towers(1).FreeConvAirFlowRate,
                      state->dataCondenserLoopTowers->towers(1).FreeConvAirFlowRateSizingFactor *
                          state->dataCondenserLoopTowers->towers(1).HighSpeedAirFlowRate);
+
+    // setup a plant sizing object
+    state->dataCondenserLoopTowers->towers(1).plantLoc.loop->PlantSizNum = 1;
+    state->dataSize->PlantSizData.allocate(1);
+    state->dataSize->PlantSizData(1).ExitTemp = 30.0;
+    state->dataSize->PlantSizData(1).DeltaT = 5.5;
+    state->dataSize->PlantSizData(1).DesVolFlowRate = 0.005382;
+
+    // sized using modified user inputs (e.g., UFactorTimesAreaAndDesignWaterFlowRate) in cooling tower
+    state->dataCondenserLoopTowers->towers(1).PerformanceInputMethod_Num = CondenserLoopTowers::PIM::UFactor;
+    state->dataCondenserLoopTowers->towers(1).DesignApproach = 4.4;
+
+    state->dataCondenserLoopTowers->towers(1).HighSpeedTowerUAWasAutoSized = true;
+    state->dataCondenserLoopTowers->towers(1).HighSpeedFanPowerWasAutoSized = true;
+    state->dataCondenserLoopTowers->towers(1).FreeConvAirFlowRateWasAutoSized = true;
+    state->dataCondenserLoopTowers->towers(1).HighSpeedTowerUA = DataSizing::AutoSize;
+    state->dataCondenserLoopTowers->towers(1).HighSpeedFanPower = DataSizing::AutoSize;
+    state->dataCondenserLoopTowers->towers(1).FreeConvAirFlowRate = DataSizing::AutoSize;
+
+    state->dataCondenserLoopTowers->towers(1).SizeTower(*state);
+
+    EXPECT_NEAR(state->dataCondenserLoopTowers->towers(1).HighSpeedAirFlowRate, 3.497, 0.001);
+    EXPECT_NEAR(state->dataCondenserLoopTowers->towers(1).HighSpeedTowerUA, 7389.232, 0.001);
+    EXPECT_NEAR(state->dataCondenserLoopTowers->towers(1).HighSpeedFanPower, 1299.024, 0.001);
+    EXPECT_NEAR(state->dataCondenserLoopTowers->towers(1).FreeConvAirFlowRate, 0.350, 0.001);
+    EXPECT_NEAR(state->dataCondenserLoopTowers->towers(1).TowerNominalCapacity, 98973.280, 0.001);
+
+    // sized using modified user inputs (e.g., lower design inlet air WB temp) in cooling tower
+    state->dataCondenserLoopTowers->towers(1).DesignInletWB = 15.0;
+
+    state->dataCondenserLoopTowers->towers(1).HighSpeedTowerUAWasAutoSized = true;
+    state->dataCondenserLoopTowers->towers(1).HighSpeedFanPowerWasAutoSized = true;
+    state->dataCondenserLoopTowers->towers(1).FreeConvAirFlowRateWasAutoSized = true;
+    state->dataCondenserLoopTowers->towers(1).HighSpeedTowerUA = DataSizing::AutoSize;
+    state->dataCondenserLoopTowers->towers(1).HighSpeedFanPower = DataSizing::AutoSize;
+    state->dataCondenserLoopTowers->towers(1).FreeConvAirFlowRate = DataSizing::AutoSize;
+
+    state->dataCondenserLoopTowers->towers(1).SizeTower(*state);
+
+    EXPECT_NEAR(state->dataCondenserLoopTowers->towers(1).HighSpeedAirFlowRate, 3.497, 0.001);
+    EXPECT_NEAR(state->dataCondenserLoopTowers->towers(1).HighSpeedTowerUA, 2908.995, 0.001); // tower UA much lower at lower design inlet air WB temp
+    EXPECT_NEAR(state->dataCondenserLoopTowers->towers(1).HighSpeedFanPower, 1299.024, 0.001);
+    EXPECT_NEAR(state->dataCondenserLoopTowers->towers(1).FreeConvAirFlowRate, 0.350, 0.001);
+    EXPECT_NEAR(state->dataCondenserLoopTowers->towers(1).TowerNominalCapacity, 98973.280, 0.001); // at same tower capacity
 }
 
 TEST_F(EnergyPlusFixture, CondenserLoopTowers_TwoSpeedUserInputTowerSizing)
