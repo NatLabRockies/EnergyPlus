@@ -241,6 +241,8 @@ namespace ChillerElectricEIR {
         virtual void update(EnergyPlusData &state, Real64 MyLoad, bool RunFlag);
 
         bool thermosiphonDisabled(EnergyPlusData &state);
+
+        Real64 getDynamicMaxCapacity(EnergyPlusData &state) override;
     };
 
     void GetElectricEIRChillerInput(EnergyPlusData &state);

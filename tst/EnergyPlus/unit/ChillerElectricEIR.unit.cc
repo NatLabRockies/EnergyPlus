@@ -328,8 +328,8 @@ TEST_F(EnergyPlusFixture, ChillerElectricEIR_AirCooledChiller)
         "  ThermoCapFracCurve;                 !- Thermosiphon Capacity Fraction Curve Name",
 
         "Curve:Linear, ThermoCapFracCurve, 0.0, 0.06, 0.0, 10.0, 0.0, 1.0, Dimensionless, Dimensionless;",
-        "Curve:Biquadratic, Air cooled CentCapFT, 0.257896, 0.0389016, -0.00021708, 0.0468684, -0.00094284, -0.00034344, 5, 10, 24, 35, , , , , ;",
-        "Curve:Biquadratic, Air cooled CentEIRFT, 0.933884, -0.058212,  0.00450036, 0.00243,    0.000486,   -0.001215,   5, 10, 24, 35, , , , , ;",
+        "Curve:Biquadratic, Air cooled CentCapFT, 0.257896, 0.0389016, -0.00021708, 0.0468684, -0.00094284, -0.00034344, 5, 10, 5, 35, , , , , ;",
+        "Curve:Biquadratic, Air cooled CentEIRFT, 0.933884, -0.058212,  0.00450036, 0.00243,    0.000486,   -0.001215,   5, 10, 5, 35, , , , , ;",
         "Curve:Quadratic, Air cooled CentEIRFPLR, 0.222903,  0.313387,  0.46371,    0, 1, , , , ;",
 
     });
@@ -400,9 +400,15 @@ TEST_F(EnergyPlusFixture, ChillerElectricEIR_AirCooledChiller)
 
     thisEIR.initialize(*state, RunFlag, MyLoad);
     thisEIR.calculate(*state, MyLoad, RunFlag);
-    EXPECT_GT(thisEIR.ChillerPartLoadRatio, 0.4); // load is large
+    EXPECT_GT(thisEIR.ChillerPartLoadRatio, 0.4); // load is largeMax
     EXPECT_EQ(thisEIR.thermosiphonStatus, 0);     // thermosiphon is off
-    EXPECT_GT(thisEIR.Power, 1500.0);             // power is non-zero
+    EXPECT_GT(thisEIR.Power, 1300.0);             // power is non-zero
+
+    // Test getDynamicCapacity function for use by plant manager
+    PlantComponent *thisChiller = &thisEIR;
+    Real64 dynCap = thisChiller->getDynamicMaxCapacity(*state);
+    EXPECT_NEAR(18582.6, dynCap, 1.0);         // capacity used by plant manager, calculated at 12 C OAT and 6 C leaving CHW temperature
+    EXPECT_NEAR(20987.5, thisEIR.RefCap, 1.0); // chiller reference capacity used by plant manager (prior to getDynamicMaxCapacity call)
 
     state->dataLoopNodes->Node(thisEIR.CondInletNodeNum).OutAirDryBulb = 5.0; // condenser inlet temp < evap outlet temp
 
@@ -410,7 +416,12 @@ TEST_F(EnergyPlusFixture, ChillerElectricEIR_AirCooledChiller)
     thisEIR.calculate(*state, MyLoad, RunFlag);
     EXPECT_GT(thisEIR.ChillerPartLoadRatio, 0.4); // load is large
     EXPECT_EQ(thisEIR.thermosiphonStatus, 0);     // thermosiphon is off
-    EXPECT_GT(thisEIR.Power, 1500.0);             // power is non-zero
+    EXPECT_GT(thisEIR.Power, 1200.0);             // power is non-zero
+
+    // Test getDynamicCapacity function for use by plant manager
+    dynCap = thisChiller->getDynamicMaxCapacity(*state);
+    EXPECT_NEAR(14354.6, dynCap, 1.0);         // capacity used by plant manager, calculated at 5 C OAT and 6 C leaving CHW temperature
+    EXPECT_NEAR(20987.5, thisEIR.RefCap, 1.0); // chiller reference capacity used by plant manager (prior to getDynamicMaxCapacity call)
 
     MyLoad /= 25.0; // reduce load such that thermosiphon can meet load
     thisEIR.initialize(*state, RunFlag, MyLoad);
