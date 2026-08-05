@@ -361,6 +361,7 @@ if(BUILD_TESTING)
 endif()
 
 add_subdirectory(src/ConvertInputFormat)
+add_subdirectory(src/ReadVars)
 
 if(BUILD_FORTRAN)
   include(CMakeAddFortranSubdirectory)
@@ -369,10 +370,6 @@ if(BUILD_FORTRAN)
   cmake_add_fortran_subdirectory(
     src/ExpandObjects
     PROJECT ExpandObjects
-    NO_EXTERNAL_INSTALL)
-  cmake_add_fortran_subdirectory(
-    src/ReadVars
-    PROJECT ReadVars
     NO_EXTERNAL_INSTALL)
   set(TRANSITION_EXTRA_FLAGS "-DCMAKE_VERSION_MAJOR:STRING=${CMAKE_VERSION_MAJOR}" "-DCMAKE_VERSION_MINOR:STRING=${CMAKE_VERSION_MINOR}"
                              "-DCMAKE_VERSION_PATCH:STRING=${CMAKE_VERSION_PATCH}")

@@ -85,7 +85,6 @@ set(CPACK_INSTALL_CMAKE_PROJECTS "${PROJECT_BINARY_DIR};EnergyPlus;ALL;/")
 
 if(BUILD_FORTRAN)
   list(APPEND CPACK_INSTALL_CMAKE_PROJECTS "${PROJECT_BINARY_DIR}/src/ExpandObjects/;ExpandObjects;ALL;/")
-  list(APPEND CPACK_INSTALL_CMAKE_PROJECTS "${PROJECT_BINARY_DIR}/src/ReadVars/;ReadVars;ALL;/")
   list(APPEND CPACK_INSTALL_CMAKE_PROJECTS "${PROJECT_BINARY_DIR}/src/Transition/;Transition;ALL;/")
   list(APPEND CPACK_INSTALL_CMAKE_PROJECTS "${PROJECT_BINARY_DIR}/src/Basement/;Basement;ALL;/")
   list(APPEND CPACK_INSTALL_CMAKE_PROJECTS "${PROJECT_BINARY_DIR}/src/HVAC-Diagram/;HVAC-Diagram;ALL;/")
@@ -699,7 +698,7 @@ include(CPackIFW)
 
 #cpack_add_component(AuxiliaryPrograms
 #DISPLAY_NAME "Auxiliary Programs"
-#DESCRIPTION "The suite of Fortran auxiliary programs such as ReadVarsESO, ExpandObjects, etc"
+#DESCRIPTION "The suite of auxiliary programs such as ReadVarsESO, ExpandObjects, etc"
 #REQUIRED
 #)
 

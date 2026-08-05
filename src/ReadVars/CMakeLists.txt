@@ -1,33 +1,53 @@
-project(ReadVars Fortran)
+project(ReadVars NONE)
 
 cmake_minimum_required(VERSION 3.5.1...4.0.3)
 
-set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/../../Products")
-set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/../../Products")
-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/../../Products")
+set(READVARS_SCRIPT "${CMAKE_CURRENT_SOURCE_DIR}/ReadVarsESO.py")
+set(READVARS_ROOT_OUTPUT_DIR "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}")
 
-set(SRC ReadVarsESO.f90)
+configure_file("${CMAKE_CURRENT_SOURCE_DIR}/ReadVarsESO.in" "${CMAKE_CURRENT_BINARY_DIR}/ReadVarsESO" @ONLY NEWLINE_STYLE UNIX)
+configure_file("${CMAKE_CURRENT_SOURCE_DIR}/ReadVarsESO.bat.in" "${CMAKE_CURRENT_BINARY_DIR}/ReadVarsESO.bat" @ONLY NEWLINE_STYLE WIN32)
 
-set(CMAKE_SKIP_RPATH ${FORTRAN_SKIP_RPATH})
-set(SKIP_BUILD_RPATH true)
+if(WIN32)
+  set(READVARS_WRAPPER "${CMAKE_CURRENT_BINARY_DIR}/ReadVarsESO.bat")
+  set(READVARS_WRAPPER_NAME "ReadVarsESO.bat")
+else()
+  set(READVARS_WRAPPER "${CMAKE_CURRENT_BINARY_DIR}/ReadVarsESO")
+  set(READVARS_WRAPPER_NAME "ReadVarsESO")
+endif()
 
-add_executable(ReadVarsESO ${SRC})
+set(READVARS_CHMOD_ROOT_COMMAND)
+set(READVARS_CHMOD_CONFIG_COMMAND)
+if(UNIX)
+  set(READVARS_CHMOD_ROOT_COMMAND COMMAND chmod +x "${READVARS_ROOT_OUTPUT_DIR}/${READVARS_WRAPPER_NAME}")
+  set(READVARS_CHMOD_CONFIG_COMMAND COMMAND chmod +x "${READVARS_ROOT_OUTPUT_DIR}/$<CONFIG>/${READVARS_WRAPPER_NAME}")
+endif()
+
+add_custom_target(
+  ReadVarsESO ALL
+  COMMAND "${CMAKE_COMMAND}" -E make_directory "${READVARS_ROOT_OUTPUT_DIR}"
+  COMMAND "${CMAKE_COMMAND}" -E copy_if_different "${READVARS_SCRIPT}" "${READVARS_ROOT_OUTPUT_DIR}/ReadVarsESO.py"
+  COMMAND "${CMAKE_COMMAND}" -E copy_if_different "${READVARS_WRAPPER}" "${READVARS_ROOT_OUTPUT_DIR}/${READVARS_WRAPPER_NAME}"
+  ${READVARS_CHMOD_ROOT_COMMAND}
+  SOURCES "${READVARS_SCRIPT}" "${CMAKE_CURRENT_SOURCE_DIR}/ReadVarsESO.in" "${CMAKE_CURRENT_SOURCE_DIR}/ReadVarsESO.bat.in"
+  VERBATIM)
 set_target_properties(ReadVarsESO PROPERTIES FOLDER Auxiliary)
 
-if(NOT UNIX)  # Need to reinclude it on Windows
-  include("${CMAKE_CURRENT_SOURCE_DIR}/../../cmake/Fortran.cmake")
-endif()
-get_target_property(F_INTERFACE_COMPILE_FLAGS fortran_project_options INTERFACE_COMPILE_OPTIONS)
-message(DEBUG "ReadVars: F_INTERFACE_COMPILE_FLAGS=${F_INTERFACE_COMPILE_FLAGS}")
-target_link_libraries(ReadVarsESO PRIVATE fortran_project_options)
-
-install(TARGETS ReadVarsESO DESTINATION PostProcess)
-if(NOT ${FORTRAN_STATIC_EXE})
-  include("${CMAKE_CURRENT_SOURCE_DIR}/../../cmake/ProjectMacros.cmake")
-  install_target_prereqs(ReadVarsESO PostProcess)
+if(CMAKE_CONFIGURATION_TYPES)
+  add_custom_command(
+    TARGET ReadVarsESO
+    POST_BUILD
+    COMMAND "${CMAKE_COMMAND}" -E make_directory "${READVARS_ROOT_OUTPUT_DIR}/$<CONFIG>"
+    COMMAND "${CMAKE_COMMAND}" -E copy_if_different "${READVARS_SCRIPT}" "${READVARS_ROOT_OUTPUT_DIR}/$<CONFIG>/ReadVarsESO.py"
+    COMMAND "${CMAKE_COMMAND}" -E copy_if_different "${READVARS_WRAPPER}" "${READVARS_ROOT_OUTPUT_DIR}/$<CONFIG>/${READVARS_WRAPPER_NAME}"
+    ${READVARS_CHMOD_CONFIG_COMMAND}
+    VERBATIM)
 endif()
 
-if(APPLE AND CPACK_CODESIGNING_DEVELOPPER_ID_APPLICATION)
-  include("${CMAKE_CURRENT_SOURCE_DIR}/../../cmake/CodeSigning.cmake")
-  register_install_codesign_target(ReadVarsESO PostProcess Unspecified)
+install(FILES "${READVARS_SCRIPT}" DESTINATION PostProcess)
+install(PROGRAMS "${READVARS_WRAPPER}" DESTINATION PostProcess)
+
+if(BUILD_TESTING)
+  add_test(NAME ReadVarsESO.CLI COMMAND "${Python_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/test_readvars_cli.py")
+  set_tests_properties(ReadVarsESO.CLI PROPERTIES LABELS ReadVars)
 endif()

@@ -1,11 +1,11 @@
 set rvpath=
 if EXIST eplusout.inp goto :inp
 rem produces all variables in .eso file to .csv
-%rvpath%readvarseso.exe
+%rvpath%ReadVarsESO.bat
 goto :done
 :inp
 rem reads variable specifications from input file
-%rvpath%ReadVarsESO.exe eplusout.inp
+%rvpath%ReadVarsESO.bat eplusout.inp
 :done
 set rvpath=
 

@@ -1,0 +1,19 @@
+Program Version,EnergyPlus, ReadVars Discovery Test
+1,5,Environment Title[],Latitude[degrees],Longitude[degrees],Time Zone[],Elevation[m]
+2,8,Day of Simulation[],Month[],Day of Month[],DST Indicator[1=yes 0=no],Hour[],StartMinute[],EndMinute[],DayType
+3,5,Cumulative Day of Simulation[],Month[],Day of Month[],DST Indicator[1=yes 0=no],DayType
+4,2,Cumulative Days of Simulation[],Month[]
+5,1,Cumulative Days of Simulation[]
+6,1,Calendar Year of Simulation[] ! When Annual Report Variables Requested
+7,2,Environment,Outdoor Dry Bulb [C] !Hourly
+8,2,ZONE ONE,Zone Mean Air Temperature [C] !Hourly
+9,2,ZONE ONE,Zone Air System Sensible Heating Rate [W] !TimeStep
+End of Data Dictionary
+1,DISCOVERY TEST ENVIRONMENT,0,0,0,0
+2,1,1,1,0,1,0.00,60.00,Monday
+7,-5.0
+8,20.0
+2,1,1,1,0,2,0.00,60.00,Monday
+7,-4.0
+8,21.0
+End of Data
