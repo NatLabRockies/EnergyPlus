@@ -5203,6 +5203,7 @@ void UpdateFinalSurfaceHeatBalance(EnergyPlusData &state)
     bool ElecBaseboardSysOn;  // .TRUE. if a steam baseboard heater is running
     bool CoolingPanelSysOn;   // true if a simple cooling panel is running
     bool SwimmingPoolOn;      // true if a pool is present (running)
+    bool AnyInternalHeatSourceInInput;
 
     LowTempRadiantSystem::UpdateRadSysSourceValAvg(state, LowTempRadSysOn);
     HighTempRadiantSystem::UpdateHTRadSourceValAvg(state, HighTempRadSysOn);
@@ -5211,8 +5212,9 @@ void UpdateFinalSurfaceHeatBalance(EnergyPlusData &state)
     ElectricBaseboardRadiator::UpdateBBElecRadSourceValAvg(state, ElecBaseboardSysOn);
     CoolingPanelSimple::UpdateCoolingPanelSourceValAvg(state, CoolingPanelSysOn);
     SwimmingPool::UpdatePoolSourceValAvg(state, SwimmingPoolOn);
+    AnyInternalHeatSourceInInput = state.dataHeatBal->AnyInternalHeatSourceInInput;
 
-    if (LowTempRadSysOn || HighTempRadSysOn || HWBaseboardSysOn || SteamBaseboardSysOn || ElecBaseboardSysOn || CoolingPanelSysOn || SwimmingPoolOn) {
+    if (LowTempRadSysOn || HighTempRadSysOn || HWBaseboardSysOn || SteamBaseboardSysOn || ElecBaseboardSysOn || CoolingPanelSysOn || SwimmingPoolOn || AnyInternalHeatSourceInInput) {
         // Solve the zone heat balance 'Detailed' solution
         // Call the outside and inside surface heat balances
         CalcHeatBalanceOutsideSurf(state);
@@ -6990,7 +6992,6 @@ void CalcHeatBalanceOutsideSurf(EnergyPlusData &state,
     //    // Locals
     //    // SUBROUTINE ARGUMENT DEFINITIONS:
     //
-    //>>>>>>> origin/develop
     // SUBROUTINE PARAMETER DEFINITIONS:
     constexpr std::string_view RoutineNameGroundTemp("CalcHeatBalanceOutsideSurf:GroundTemp");
     constexpr std::string_view RoutineNameGroundTempFC("CalcHeatBalanceOutsideSurf:GroundTempFC");
@@ -7018,7 +7019,6 @@ void CalcHeatBalanceOutsideSurf(EnergyPlusData &state,
     GetSurroundingSurfacesTemperatureAverage(state);
 
     auto &Surface = state.dataSurface->Surface;
-
     if (state.dataHeatBal->AnyInternalHeatSourceInInput) {
         for (int SurfNum = 1; SurfNum <= state.dataSurface->TotSurfaces; ++SurfNum) {
             // Need to transfer any source/sink for a surface to the local array.  Note that
