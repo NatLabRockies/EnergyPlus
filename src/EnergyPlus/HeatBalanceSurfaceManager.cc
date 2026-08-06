@@ -5214,7 +5214,8 @@ void UpdateFinalSurfaceHeatBalance(EnergyPlusData &state)
     SwimmingPool::UpdatePoolSourceValAvg(state, SwimmingPoolOn);
     AnyInternalHeatSourceInInput = state.dataHeatBal->AnyInternalHeatSourceInInput && !state.dataGlobal->SetupFlag;
 
-    if (LowTempRadSysOn || HighTempRadSysOn || HWBaseboardSysOn || SteamBaseboardSysOn || ElecBaseboardSysOn || CoolingPanelSysOn || SwimmingPoolOn || AnyInternalHeatSourceInInput) {
+    if (LowTempRadSysOn || HighTempRadSysOn || HWBaseboardSysOn || SteamBaseboardSysOn || ElecBaseboardSysOn || CoolingPanelSysOn || SwimmingPoolOn ||
+        AnyInternalHeatSourceInInput) {
         // Solve the zone heat balance 'Detailed' solution
         // Call the outside and inside surface heat balances
         CalcHeatBalanceOutsideSurf(state);

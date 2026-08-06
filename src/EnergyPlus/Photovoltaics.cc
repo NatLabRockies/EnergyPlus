@@ -865,7 +865,8 @@ namespace Photovoltaics {
                 -1.0 * state.dataPhotovoltaic->PVarray(PVnum).SurfaceSink;
         } break;
         case CellIntegration::TranspiredCollector: {
-            TranspiredCollector::SetUTSCQdotSource(state, state.dataPhotovoltaic->PVarray(PVnum).UTSCPtr, -1.0 * state.dataPhotovoltaic->PVarray(PVnum).SurfaceSink);
+            TranspiredCollector::SetUTSCQdotSource(
+                state, state.dataPhotovoltaic->PVarray(PVnum).UTSCPtr, -1.0 * state.dataPhotovoltaic->PVarray(PVnum).SurfaceSink);
         } break;
         case CellIntegration::ExteriorVentedCavity: {
             SetVentedModuleQdotSource(
