@@ -2670,7 +2670,8 @@ Real64 ElectricEIRChillerSpecs::getDynamicMaxCapacity(EnergyPlusData &state)
         loadSideOutletSetpointTemp = state.dataLoopNodes->Node(state.dataPlnt->PlantLoop(this->CWPlantLoc.loopNum).TempSetPointNodeNum).TempSetPoint;
     }
     // evaluate capacity modifier curve and determine load side heat transfer
-    Real64 capacityModifierFuncTemp = Curve::CurveValue(state, this->ChillerCapFTIndex, loadSideOutletSetpointTemp, sourceInletTemp);
+    Real64 capacityModifierFuncTemp =
+        (this->ChillerCapFTIndex > 0) ? Curve::CurveValue(state, this->ChillerCapFTIndex, loadSideOutletSetpointTemp, sourceInletTemp) : 1.0;
     return this->RefCap * capacityModifierFuncTemp;
 }
 
