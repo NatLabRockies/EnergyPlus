@@ -5196,14 +5196,14 @@ void UpdateFinalSurfaceHeatBalance(EnergyPlusData &state)
     // radiant algorithm module.  Finally, using this source value, redo
     // the inside and outside heat balances.
 
-    bool LowTempRadSysOn;     // .TRUE. if a low temperature radiant system is running
-    bool HighTempRadSysOn;    // .TRUE. if a high temperature radiant system is running
-    bool HWBaseboardSysOn;    // .TRUE. if a water baseboard heater is running
-    bool SteamBaseboardSysOn; // .TRUE. if a steam baseboard heater is running
-    bool ElecBaseboardSysOn;  // .TRUE. if a steam baseboard heater is running
-    bool CoolingPanelSysOn;   // true if a simple cooling panel is running
-    bool SwimmingPoolOn;      // true if a pool is present (running)
-    bool AnyInternalHeatSourceInInput;
+    bool LowTempRadSysOn;              // .TRUE. if a low temperature radiant system is running
+    bool HighTempRadSysOn;             // .TRUE. if a high temperature radiant system is running
+    bool HWBaseboardSysOn;             // .TRUE. if a water baseboard heater is running
+    bool SteamBaseboardSysOn;          // .TRUE. if a steam baseboard heater is running
+    bool ElecBaseboardSysOn;           // .TRUE. if a steam baseboard heater is running
+    bool CoolingPanelSysOn;            // true if a simple cooling panel is running
+    bool SwimmingPoolOn;               // true if a pool is present (running)
+    bool AnyInternalHeatSourceInInput; // true if any ConstructionProperty:InternalHeatSource and after initialization
 
     LowTempRadiantSystem::UpdateRadSysSourceValAvg(state, LowTempRadSysOn);
     HighTempRadiantSystem::UpdateHTRadSourceValAvg(state, HighTempRadSysOn);
@@ -5212,7 +5212,7 @@ void UpdateFinalSurfaceHeatBalance(EnergyPlusData &state)
     ElectricBaseboardRadiator::UpdateBBElecRadSourceValAvg(state, ElecBaseboardSysOn);
     CoolingPanelSimple::UpdateCoolingPanelSourceValAvg(state, CoolingPanelSysOn);
     SwimmingPool::UpdatePoolSourceValAvg(state, SwimmingPoolOn);
-    AnyInternalHeatSourceInInput = state.dataHeatBal->AnyInternalHeatSourceInInput;
+    AnyInternalHeatSourceInInput = state.dataHeatBal->AnyInternalHeatSourceInInput && !state.dataGlobal->SetupFlag;
 
     if (LowTempRadSysOn || HighTempRadSysOn || HWBaseboardSysOn || SteamBaseboardSysOn || ElecBaseboardSysOn || CoolingPanelSysOn || SwimmingPoolOn || AnyInternalHeatSourceInInput) {
         // Solve the zone heat balance 'Detailed' solution
@@ -7019,6 +7019,7 @@ void CalcHeatBalanceOutsideSurf(EnergyPlusData &state,
     GetSurroundingSurfacesTemperatureAverage(state);
 
     auto &Surface = state.dataSurface->Surface;
+
     if (state.dataHeatBal->AnyInternalHeatSourceInInput) {
         for (int SurfNum = 1; SurfNum <= state.dataSurface->TotSurfaces; ++SurfNum) {
             // Need to transfer any source/sink for a surface to the local array.  Note that
