@@ -161,7 +161,13 @@ Coil:Cooling:ITE:ColdPlate
         \autosizable
         \minimum> 0.0
         \units m3/s
-    N5, \field Auxiliary Electric Power
+    N5, \field Maximum Liquid Flow Rate
+        \note Maximum liquid flow rate allowed through the cold plate at all times
+        \note If not specified, the flow rate is unconstrained
+        \autosizable
+        \minimum> 0.0
+        \units m3/s
+    N6, \field Auxiliary Electric Power
         \type real
         \units W
         \minimum 0.0
