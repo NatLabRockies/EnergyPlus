@@ -1565,6 +1565,12 @@ struct OutputReportPredefinedData : BaseGlobalStruct
     int pdchLeedSchStPt11pmWednesday = 0;
     int pdchLeedSchStPt11pmWedCnt = 0;
 
+    int pdstLeedVentilation = 0;
+    Real64 pdchLeedVentMinFlowPerArea = 0;
+    Real64 pdchLeedVentMinFlowPerZone = 0;
+    Real64 pdchLeedVentMinVentPerArea = 0;
+    Real64 pdchLeedVentMinVentPerZone = 0;
+
     int pdrThermalResilience = 0;
     int pdstHIHours = 0;
     int pdchHIHourSafe = 0;

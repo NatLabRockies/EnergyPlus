@@ -4392,9 +4392,17 @@ TEST_F(EnergyPlusFixture, AirLoopHVACDOAS_TestOACompOutletNodeIndex)
 
     AirLoopHVACDOAS::AirLoopDOAS::getAirLoopDOASInput(*state);
 
+    int const InletNodeNum1 = Util::FindItemInList(
+        "OUTSIDE AIR INLET NODE 1", state->dataLoopNodes->NodeID({1, state->dataLoopNodes->NumOfNodes}), state->dataLoopNodes->NumOfNodes);
+    int const OutletNodeNum1 = Util::FindItemInList(
+        "OA SUPPLY FAN OUTLET NODE", state->dataLoopNodes->NodeID({1, state->dataLoopNodes->NumOfNodes}), state->dataLoopNodes->NumOfNodes);
+    int const OutletNodeNum2 = Util::FindItemInList(
+        "AIRLOOPDOASSPLITTERINLET", state->dataLoopNodes->NodeID({1, state->dataLoopNodes->NumOfNodes}), state->dataLoopNodes->NumOfNodes);
+
     EXPECT_EQ(state->dataAirLoop->OutsideAirSys(1).ComponentType(2), "HUMIDIFIER:STEAM:ELECTRIC");
-    EXPECT_EQ(state->dataAirLoop->OutsideAirSys(1).InletNodeNum(2), 2);
-    EXPECT_EQ(state->dataAirLoop->OutsideAirSys(1).OutletNodeNum(2), 24);
+    EXPECT_EQ(state->dataAirLoop->OutsideAirSys(1).InletNodeNum(1), InletNodeNum1);
+    EXPECT_EQ(state->dataAirLoop->OutsideAirSys(1).InletNodeNum(2), OutletNodeNum1);
+    EXPECT_EQ(state->dataAirLoop->OutsideAirSys(1).OutletNodeNum(2), OutletNodeNum2);
 }
 
 TEST_F(EnergyPlusFixture, AirLoopHVACDOAS_TestGetDesignDayConditions)
@@ -8865,15 +8873,24 @@ TEST_F(EnergyPlusFixture, AirLoopHVACDOAS_TestOACompFanNoDrawAndBlow)
 
     AirLoopHVACDOAS::AirLoopDOAS::getAirLoopDOASInput(*state);
 
+    int const InletNodeNum1 = Util::FindItemInList(
+        "OUTSIDE AIR INLET NODE 1", state->dataLoopNodes->NodeID({1, state->dataLoopNodes->NumOfNodes}), state->dataLoopNodes->NumOfNodes);
+    int const OutletNodeNum1 = Util::FindItemInList(
+        "DOAS_COOLC_OUTLET", state->dataLoopNodes->NodeID({1, state->dataLoopNodes->NumOfNodes}), state->dataLoopNodes->NumOfNodes);
+    int const OutletNodeNum2 = Util::FindItemInList(
+        "OA SUPPLY FAN OUTLET NODE", state->dataLoopNodes->NodeID({1, state->dataLoopNodes->NumOfNodes}), state->dataLoopNodes->NumOfNodes);
+    int const OutletNodeNum3 = Util::FindItemInList(
+        "AIRLOOPDOASSPLITTERINLET", state->dataLoopNodes->NodeID({1, state->dataLoopNodes->NumOfNodes}), state->dataLoopNodes->NumOfNodes);
+
     EXPECT_EQ(state->dataAirLoop->OutsideAirSys(1).ComponentType(1), "COILSYSTEM:COOLING:DX");
-    EXPECT_EQ(state->dataAirLoop->OutsideAirSys(1).InletNodeNum(1), 1);
-    EXPECT_EQ(state->dataAirLoop->OutsideAirSys(1).OutletNodeNum(1), 2);
+    EXPECT_EQ(state->dataAirLoop->OutsideAirSys(1).InletNodeNum(1), InletNodeNum1);
+    EXPECT_EQ(state->dataAirLoop->OutsideAirSys(1).OutletNodeNum(1), OutletNodeNum1);
     EXPECT_EQ(state->dataAirLoop->OutsideAirSys(1).ComponentType(2), "FAN:SYSTEMMODEL");
-    EXPECT_EQ(state->dataAirLoop->OutsideAirSys(1).InletNodeNum(2), 2);
-    EXPECT_EQ(state->dataAirLoop->OutsideAirSys(1).OutletNodeNum(2), 3);
+    EXPECT_EQ(state->dataAirLoop->OutsideAirSys(1).InletNodeNum(2), OutletNodeNum1);
+    EXPECT_EQ(state->dataAirLoop->OutsideAirSys(1).OutletNodeNum(2), OutletNodeNum2);
     EXPECT_EQ(state->dataAirLoop->OutsideAirSys(1).ComponentType(3), "HUMIDIFIER:STEAM:ELECTRIC");
-    EXPECT_EQ(state->dataAirLoop->OutsideAirSys(1).InletNodeNum(3), 3);
-    EXPECT_EQ(state->dataAirLoop->OutsideAirSys(1).OutletNodeNum(3), 25);
+    EXPECT_EQ(state->dataAirLoop->OutsideAirSys(1).InletNodeNum(3), OutletNodeNum2);
+    EXPECT_EQ(state->dataAirLoop->OutsideAirSys(1).OutletNodeNum(3), OutletNodeNum3);
 }
 
 TEST_F(EnergyPlusFixture, AirLoopHVACDOAS_TestFanHeatAddeToCoolingCoilSize)
@@ -10426,7 +10443,8 @@ TEST_F(EnergyPlusFixture, AirLoopHVACDOAS_TestOACompConnectionError)
 
     state->init_state(*state);
 
-    MixedAir::GetOutsideAirSysInputs(*state);
+    EXPECT_THROW(MixedAir::GetOutsideAirSysInputs(*state), std::runtime_error);
+    compare_err_stream_substring(" ** Severe  ** AirLoopHVAC:OutdoorAirSystem:EquipmentList", true);
     state->dataMixedAir->GetOASysInputFlag = false;
     MixedAir::GetOAMixerInputs(*state);
 
@@ -10456,7 +10474,7 @@ TEST_F(EnergyPlusFixture, AirLoopHVACDOAS_TestOACompConnectionError)
         "AIRLOOPDOASSPLITTERINLET",
         "   **  Fatal  ** getAirLoopHVACDOAS: Previous errors cause termination.",
         "   ...Summary of Errors that led to program termination:",
-        "   ..... Reference severe error count=3",
+        "   ..... Reference severe error count=4",
         "   ..... Last severe error=The outlet node is not the inlet node of AirLoopHVAC:Splitter in AirLoopHVAC:OutdoorAirSystem:EquipmentList = "
         "AIRLOOPHVAC DOAS",
     });
@@ -11708,9 +11726,16 @@ TEST_F(EnergyPlusFixture, AirLoopHVACDOAS_TestFanDrawThroughPlacement)
     EXPECT_NEAR(DOAS_HeatingCOilOutletNode.MassFlowRate, 0.1, 0.0001);
 
     // Issue 10204 Get AirLoopHVAC:Splitter inlet node number using NodeInputManager::GetOnlySingleNode
-    EXPECT_EQ(thisAirLoopDOASObjec.m_CompPointerAirLoopSplitter->InletNodeNum, 17);
-    EXPECT_EQ(thisAirLoopDOASObjec.m_CompPointerAirLoopSplitter->OutletNodeNum[0], 2);
-    EXPECT_EQ(thisAirLoopDOASObjec.m_CompPointerAirLoopMixer->InletNodeNum[0], 18);
+
+    int const SplitterInletNodeNum = Util::FindItemInList(
+        "AIRLOOPDOASSPLITTERINLET", state->dataLoopNodes->NodeID({1, state->dataLoopNodes->NumOfNodes}), state->dataLoopNodes->NumOfNodes);
+    int const ZoneADUOutletNodeNum = Util::FindItemInList(
+        "PSZ-AC:1_OAINLET NODE", state->dataLoopNodes->NodeID({1, state->dataLoopNodes->NumOfNodes}), state->dataLoopNodes->NumOfNodes);
+    int const ZoneADUReliefNodeNum = Util::FindItemInList(
+        "PSZ-AC:1_OARELIEF NODE", state->dataLoopNodes->NodeID({1, state->dataLoopNodes->NumOfNodes}), state->dataLoopNodes->NumOfNodes);
+    EXPECT_EQ(thisAirLoopDOASObjec.m_CompPointerAirLoopSplitter->InletNodeNum, SplitterInletNodeNum);
+    EXPECT_EQ(thisAirLoopDOASObjec.m_CompPointerAirLoopSplitter->OutletNodeNum[0], ZoneADUOutletNodeNum);
+    EXPECT_EQ(thisAirLoopDOASObjec.m_CompPointerAirLoopMixer->InletNodeNum[0], ZoneADUReliefNodeNum);
 }
 
 TEST_F(EnergyPlusFixture, AirLoopHVACDOAS_TestMixerSplitterMissingNodes)

@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.19...4.0.3)  # policy_max is set, so that will impliclty invoke cmake_policy(VERSION <min>[...<max>])
+cmake_minimum_required(VERSION 3.25...4.0.3)  # policy_max is set, so that will impliclty invoke cmake_policy(VERSION <min>[...<max>])
 
 # Use ccache if available, has to be before "project()"
 find_program(CCACHE_PROGRAM NAMES ccache sccache)
@@ -51,7 +51,7 @@ set(EP_CXX_PCH_HEADERS
     "$<$<COMPILE_LANGUAGE:CXX>:${PROJECT_SOURCE_DIR}/src/EnergyPlus/Data/EnergyPlusData.hh>"
     "$<$<COMPILE_LANGUAGE:CXX>:${PROJECT_SOURCE_DIR}/third_party/ObjexxFCL/src/ObjexxFCL/Array.functions.hh>"
     "$<$<COMPILE_LANGUAGE:CXX>:${PROJECT_SOURCE_DIR}/third_party/ObjexxFCL/src/ObjexxFCL/Array1D.hh>"
-    "$<$<COMPILE_LANGUAGE:CXX>:${PROJECT_SOURCE_DIR}/third_party/nlohmann/json.hpp>"
+    "$<$<COMPILE_LANGUAGE:CXX>:${PROJECT_SOURCE_DIR}/third_party/nlohmann/nlohmann/json.hpp>"
     "$<$<COMPILE_LANGUAGE:CXX>:${PROJECT_SOURCE_DIR}/src/EnergyPlus/Formatters.hh>")
 set(EP_TEST_CXX_PCH_HEADERS
     ${EP_CXX_PCH_HEADERS}
@@ -72,7 +72,12 @@ add_library(project_fp_options INTERFACE)
 
 add_library(project_warnings INTERFACE)
 
+# Useful for checking once in a while if a third-party library is generating scary warnings, but too noisy for normal development
+option(ENABLE_WARNINGS_IN_THIRD_PARTY "Enable warnings in third-party libraries" OFF)
+mark_as_advanced(ENABLE_WARNINGS_IN_THIRD_PARTY)
+
 add_library(turn_off_warnings INTERFACE)
+add_library(warnings_as_not_error INTERFACE) # -Wno-error
 
 set(THREADS_PREFER_PTHREAD_FLAG ON)
 find_package(Threads)
@@ -304,45 +309,9 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${PROJECT_BINARY_DIR}/Products")
 include(cmake/ProjectMacros.cmake)
 include(cmake/CompilerFlags.cmake)
 
-add_subdirectory(third_party)
+add_subdirectory(third_party SYSTEM)
 
 target_include_directories(project_options INTERFACE ${PROJECT_SOURCE_DIR}/src)
-target_include_directories(project_options INTERFACE ${PROJECT_SOURCE_DIR}/third_party)
-target_include_directories(project_options INTERFACE ${PROJECT_SOURCE_DIR}/third_party/btwxt/include)
-target_include_directories(project_options INTERFACE ${PROJECT_SOURCE_DIR}/third_party/re2)
-target_include_directories(project_options INTERFACE ${PROJECT_SOURCE_DIR}/third_party/doj)
-target_include_directories(project_options INTERFACE ${PROJECT_SOURCE_DIR}/third_party/nlohmann)
-target_include_directories(project_options INTERFACE ${PROJECT_SOURCE_DIR}/third_party/fast_float)
-target_include_directories(project_options INTERFACE ${PROJECT_SOURCE_DIR}/third_party/valijson)
-target_include_directories(project_options INTERFACE ${PROJECT_SOURCE_DIR}/third_party/ObjexxFCL/src/)
-target_include_directories(project_options SYSTEM INTERFACE ${PROJECT_SOURCE_DIR}/third_party/SQLite/)
-target_include_directories(project_options SYSTEM INTERFACE "${PROJECT_SOURCE_DIR}/third_party/Expat" "${PROJECT_SOURCE_DIR}/third_party/Expat/lib")
-target_include_directories(project_options INTERFACE ${PROJECT_SOURCE_DIR}/third_party/CLI/)
-target_include_directories(project_options SYSTEM INTERFACE ${PROJECT_SOURCE_DIR}/third_party/eigen/)
-target_include_directories(project_options INTERFACE ${PROJECT_SOURCE_DIR}/third_party/Windows-CalcEngine/src/Chromogenics/include)
-target_include_directories(project_options INTERFACE ${PROJECT_SOURCE_DIR}/third_party/Windows-CalcEngine/src/Common/include)
-target_include_directories(project_options INTERFACE ${PROJECT_SOURCE_DIR}/third_party/Windows-CalcEngine/src/Gases/include)
-target_include_directories(project_options INTERFACE ${PROJECT_SOURCE_DIR}/third_party/Windows-CalcEngine/src/MultiLayerOptics/include)
-target_include_directories(project_options INTERFACE ${PROJECT_SOURCE_DIR}/third_party/Windows-CalcEngine/src/SingleLayerOptics/include)
-target_include_directories(project_options INTERFACE ${PROJECT_SOURCE_DIR}/third_party/Windows-CalcEngine/src/SpectralAveraging/include)
-target_include_directories(project_options INTERFACE ${PROJECT_SOURCE_DIR}/third_party/Windows-CalcEngine/src/Tarcog/include)
-target_include_directories(project_options INTERFACE ${PROJECT_SOURCE_DIR}/third_party/Windows-CalcEngine/src/Viewer/include)
-target_include_directories(project_options INTERFACE ${PROJECT_SOURCE_DIR}/third_party/ssc)
-set(SAM_SKIP_TOOLS ON FORCE)
-set(SAM_SKIP_TESTS ON FORCE)
-set(SAMAPI_EXPORT OFF FORCE)
-if(OPENGL_FOUND)
-  target_include_directories(project_options INTERFACE ${PROJECT_SOURCE_DIR}/third_party/penumbra/include)
-endif()
-target_include_directories(project_options INTERFACE ${PROJECT_SOURCE_DIR}/third_party/kiva/src)
-target_include_directories(project_options INTERFACE "${kiva_BINARY_DIR}/src/libkiva")
-target_include_directories(project_options SYSTEM INTERFACE "${kiva_SOURCE_DIR}/vendor/boost-1.88.0/")
-
-if(OPENGL_FOUND)
-  set(BUILD_PENUMBRA_TESTING
-      OFF
-      CACHE BOOL "")
-endif()
 
 # E+ required libraries
 add_subdirectory(idd)

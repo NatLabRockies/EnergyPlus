@@ -104,8 +104,6 @@ namespace BoilerSteam {
 
         // If we didn't find it, fatal
         ShowFatalError(state, std::format("LocalBoilerSteamFactory: Error getting inputs for steam boiler named: {}", objectName)); // LCOV_EXCL_LINE
-        // Shut up the compiler
-        return nullptr; // LCOV_EXCL_LINE
     }
 
     void BoilerSpecs::simulate(

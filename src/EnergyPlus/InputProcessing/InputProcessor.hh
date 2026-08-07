@@ -121,7 +121,7 @@ public:
 
     int getNumSectionsFound(std::string const &SectionWord);
 
-    int getNumObjectsFound(EnergyPlusData &state, std::string_view const ObjectWord);
+    int getNumObjectsFound([[maybe_unused]] EnergyPlusData &state, std::string_view const ObjectWord);
 
     bool findDefault(std::string &default_value, json const &schema_field_obj);
 

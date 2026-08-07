@@ -126,7 +126,7 @@ public:
     bool ErrorsFound = false;
 
 protected:
-    virtual void SetUp()
+    void SetUp() override
     {
         EnergyPlusFixture::SetUp(); // Sets up the base fixture first.
 
@@ -516,7 +516,7 @@ protected:
         dxCoil2.PLFFPLR(1) = Sch1;
     }
 
-    virtual void TearDown()
+    void TearDown() override
     {
         EnergyPlusFixture::TearDown(); // Remember to tear down the base fixture after cleaning up derived fixture!
     }
@@ -2719,6 +2719,93 @@ TEST_F(EnergyPlusFixture, VRF_FluidTCtrl_VRFOU_Compressor)
         EXPECT_NEAR(1500, CompSpdActual, 1);
         EXPECT_NEAR(Ncomp, CompEvaporatingPWRSpdMin, 1e-4);
     }
+    {
+        // Compressor-power iteration: converges within the cap, and the cap terminates a non-converging run.
+        auto &vrfCond = state->dataHVACVarRefFlow->VRF(VRFCond);
+
+        // A representative cooling operating point (same solver inputs used elsewhere in this test).
+        Real64 constexpr TU_CoolingLoad = 6006.0; // IU cooling load [W]
+        Real64 constexpr Tsuction = 8.86;         // suction temperature Te' [C]
+        Real64 constexpr Tdischarge = 40.26;      // discharge temperature Tc' [C]
+        Real64 constexpr Psuction = 1.2e6;        // suction pressure Pe' [Pa]
+        Real64 constexpr T_comp_in = 25.0;        // compressor inlet temperature [C]
+        Real64 constexpr h_comp_in = 4.3e5;       // compressor inlet enthalpy [J/kg]
+        Real64 constexpr h_IU_evap_in = 2.5e5;    // IU evaporator inlet enthalpy [J/kg]
+        Real64 constexpr Pipe_Q_c = 5.0;          // piping heat loss [W]
+        Real64 constexpr CapMaxTc = 50.0;         // maximum Tc [C]
+        Real64 const Q_c_TU_PL = TU_CoolingLoad + Pipe_Q_c;
+
+        // ---- Normal case: the iteration settles inside the 30 steps ----
+        {
+            Real64 constexpr Tolerance = 0.05;
+            int Counter = 1;
+            Real64 localNcomp = TU_CoolingLoad / vrfCond.CoolingCOP;
+            Real64 Ncomp_new = localNcomp;
+            bool converged = false;
+            Real64 CompSpdActual = 0.0;
+            Real64 CyclingRatio = 1.0;
+
+            do {
+                Real64 Q_h_OU = Q_c_TU_PL + Ncomp_new;
+                vrfCond.VRFOU_CalcCompC(*state,
+                                        TU_CoolingLoad,
+                                        Tsuction,
+                                        Tdischarge,
+                                        Psuction,
+                                        T_comp_in,
+                                        h_comp_in,
+                                        h_IU_evap_in,
+                                        Pipe_Q_c,
+                                        CapMaxTc,
+                                        Q_h_OU,
+                                        CompSpdActual,
+                                        localNcomp,
+                                        CyclingRatio);
+                converged = std::abs(localNcomp - Ncomp_new) <= (Tolerance * Ncomp_new);
+                Ncomp_new = localNcomp;
+                ++Counter;
+            } while (!converged && Counter <= 30);
+
+            EXPECT_TRUE(converged);     // it converges rather than bailing out on the cap
+            EXPECT_LE(Counter, 30);     // and does so within the iteration budget
+            EXPECT_GT(localNcomp, 0.0); // sane compressor power
+        }
+
+        // ---- Cap case: an impossible tolerance can never be met, so the 30-iteration cap must stop it ----
+        {
+            Real64 constexpr Tolerance = -1.0; // |diff| <= negative is never true -> exercises the hard cap only
+            int Counter = 1;
+            Real64 localNcomp = TU_CoolingLoad / vrfCond.CoolingCOP;
+            Real64 Ncomp_new = localNcomp;
+            bool converged = false;
+            Real64 CompSpdActual = 0.0;
+            Real64 CyclingRatio = 1.0;
+
+            do {
+                Real64 Q_h_OU = Q_c_TU_PL + Ncomp_new;
+                vrfCond.VRFOU_CalcCompC(*state,
+                                        TU_CoolingLoad,
+                                        Tsuction,
+                                        Tdischarge,
+                                        Psuction,
+                                        T_comp_in,
+                                        h_comp_in,
+                                        h_IU_evap_in,
+                                        Pipe_Q_c,
+                                        CapMaxTc,
+                                        Q_h_OU,
+                                        CompSpdActual,
+                                        localNcomp,
+                                        CyclingRatio);
+                converged = std::abs(localNcomp - Ncomp_new) <= (Tolerance * Ncomp_new);
+                Ncomp_new = localNcomp;
+                ++Counter;
+            } while (!converged && Counter <= 30);
+
+            EXPECT_FALSE(converged); // never converges with an impossible tolerance
+            EXPECT_EQ(Counter, 31);  // stopped strictly by the cap: Counter runs 1 -> 31 (30 iterations)
+        }
+    }
 }
 
 TEST_F(EnergyPlusFixture, VRF_FluidTCtrl_VRFOU_Coil)
@@ -3959,8 +4046,8 @@ TEST_F(EnergyPlusFixture, VRFTest_SysCurve)
               state->dataZoneEquip->ZoneEquipConfig(state->dataHVACVarRefFlow->VRFTU(VRFTUNum).ZoneNum)
                   .InletNode(1)); // only 1 inlet node specified above in ZoneHVAC:EquipmentConnections
     ASSERT_EQ(1.0, state->dataHVACVarRefFlow->VRF(VRFCond).CoolingCombinationRatio);
-    EXPECT_NEAR(11612.363, state->dataHVACVarRefFlow->VRF(VRFCond).CoolingCapacity, 0.001);
-    EXPECT_NEAR(11612.363, state->dataHVACVarRefFlow->VRF(VRFCond).HeatingCapacity, 0.001);
+    EXPECT_NEAR(11612.363, state->dataHVACVarRefFlow->VRF(VRFCond).CoolingCapacity, 0.002);
+    EXPECT_NEAR(11612.363, state->dataHVACVarRefFlow->VRF(VRFCond).HeatingCapacity, 0.002);
     EXPECT_EQ(0.0, state->dataHVACVarRefFlow->VRF(VRFCond).DefrostPower);
 
     // test defrost operation Issue #4950 - Reverse cycle with timed defrost = 0

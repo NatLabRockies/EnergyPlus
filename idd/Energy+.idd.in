@@ -77369,7 +77369,7 @@ PlantComponent:TemperatureSource,
        \note Used if Temperature Specification Type = Scheduled
 
 CentralHeatPumpSystem,
-       \min-fields 14
+       \min-fields 13
        \memo This chiller bank can contain multiple chiller heaters and heat pump performance objects.
        \memo Its function is to encapsulate the extra controls needed to turn individual modules on/off
        \memo and whether they are to operate in cooling-only, heating-only or simultaneous cooling/heating
@@ -77381,26 +77381,22 @@ CentralHeatPumpSystem,
        \reference validPlantEquipmentNames
        \reference-class-name validBranchEquipmentTypes
        \reference validBranchEquipmentNames
-  A2,  \field Control Method
-       \type choice
-       \key SmartMixing
-       \default SmartMixing
-  A3,  \field Cooling Loop Inlet Node Name
+  A2,  \field Cooling Loop Inlet Node Name
        \type node
        \required-field
-  A4,  \field Cooling Loop Outlet Node Name
+  A3,  \field Cooling Loop Outlet Node Name
        \type node
        \required-field
-  A5,  \field Source Loop Inlet Node Name
+  A4,  \field Source Loop Inlet Node Name
        \type node
        \required-field
-  A6,  \field Source Loop Outlet Node Name
+  A5,  \field Source Loop Outlet Node Name
        \type node
        \required-field
-  A7,  \field Heating Loop Inlet Node Name
+  A6,  \field Heating Loop Inlet Node Name
        \type node
        \required-field
-  A8,  \field Heating Loop Outlet Node Name
+  A7,  \field Heating Loop Outlet Node Name
        \type node
        \required-field
   N1,  \field Ancillary Power
@@ -77409,19 +77405,19 @@ CentralHeatPumpSystem,
        \minimum 0.0
        \default 0.0
        \note Power as demanded from any auxiliary controls
-  A9,  \field Ancillary Operation Schedule Name
+  A8,  \field Ancillary Operation Schedule Name
        \type object-list
        \object-list ScheduleNames
        \note This value from this schedule is multiplied times the Ancillary Power
-  A10, \field Chiller Heater Modules Performance Component Object Type 1
+  A9,  \field Chiller Heater Modules Performance Component Object Type 1
        \required-field
        \type choice
        \key ChillerHeaterPerformance:Electric:EIR
-  A11, \field Chiller Heater Modules Performance Component Name 1
+  A10, \field Chiller Heater Modules Performance Component Name 1
        \required-field
        \type object-list
        \object-list ChillerHeaterEIRNames
-  A12, \field Chiller Heater Modules Control Schedule Name 1
+  A11, \field Chiller Heater Modules Control Schedule Name 1
        \type object-list
        \object-list ScheduleNames
        \required-field
@@ -77429,247 +77425,247 @@ CentralHeatPumpSystem,
        \type integer
        \minimum 1
        \default 1
-  A13, \field Chiller Heater Modules Performance Component Object Type 2
+  A12, \field Chiller Heater Modules Performance Component Object Type 2
        \type choice
        \key ChillerHeaterPerformance:Electric:EIR
-  A14, \field Chiller Heater Modules Performance Component Name 2
+  A13, \field Chiller Heater Modules Performance Component Name 2
        \type object-list
        \object-list ChillerHeaterEIRNames
-  A15, \field Chiller Heater Modules Control Schedule Name 2
+  A14, \field Chiller Heater Modules Control Schedule Name 2
        \type object-list
        \object-list ScheduleNames
   N3,  \field Number of Chiller Heater Modules 2
        \type integer
        \minimum 1
        \default 1
-  A16, \field Chiller Heater Performance Component Object Type 3
+  A15, \field Chiller Heater Performance Component Object Type 3
        \type choice
        \key ChillerHeaterPerformance:Electric:EIR
-  A17, \field Chiller Heater Performance Component Name 3
+  A16, \field Chiller Heater Performance Component Name 3
        \type object-list
        \object-list ChillerHeaterEIRNames
-  A18, \field Chiller Heater Modules Control Schedule Name 3
+  A17, \field Chiller Heater Modules Control Schedule Name 3
        \type object-list
        \object-list ScheduleNames
   N4,  \field Number of Chiller Heater Modules 3
        \type integer
        \minimum 1
        \default 1
-  A19, \field Chiller Heater Modules Performance Component Object Type 4
+  A18, \field Chiller Heater Modules Performance Component Object Type 4
        \type choice
        \key ChillerHeaterPerformance:Electric:EIR
-  A20, \field Chiller Heater Modules Performance Component Name 4
+  A19, \field Chiller Heater Modules Performance Component Name 4
        \type object-list
        \object-list ChillerHeaterEIRNames
-  A21, \field Chiller Heater Modules Control Schedule Name 4
+  A20, \field Chiller Heater Modules Control Schedule Name 4
        \type object-list
        \object-list ScheduleNames
   N5,  \field Number of Chiller Heater Modules 4
        \type integer
        \minimum 1
        \default 1
-  A22, \field Chiller Heater Modules Performance Component Object Type 5
+  A21, \field Chiller Heater Modules Performance Component Object Type 5
        \type choice
        \key ChillerHeaterPerformance:Electric:EIR
-  A23, \field Chiller Heater Models Performance Component Name 5
+  A22, \field Chiller Heater Models Performance Component Name 5
        \type object-list
        \object-list ChillerHeaterEIRNames
-  A24, \field Chiller Heater Modules Control Schedule Name 5
+  A23, \field Chiller Heater Modules Control Schedule Name 5
        \type object-list
        \object-list ScheduleNames
   N6,  \field Number of Chiller Heater Modules 5
        \type integer
        \minimum 1
        \default 1
-  A25, \field Chiller Heater Modules Performance Component Object Type 6
+  A24, \field Chiller Heater Modules Performance Component Object Type 6
        \type choice
        \key ChillerHeaterPerformance:Electric:EIR
-  A26, \field Chiller Heater Modules Performance Component Name 6
+  A25, \field Chiller Heater Modules Performance Component Name 6
        \type object-list
        \object-list ChillerHeaterEIRNames
-  A27, \field Chiller Heater Modules Control Schedule Name 6
+  A26, \field Chiller Heater Modules Control Schedule Name 6
        \type object-list
        \object-list ScheduleNames
   N7,  \field Number of Chiller Heater Modules 6
        \type integer
        \minimum 1
        \default 1
-  A28, \field Chiller Heater Modules Performance Component Object Type 7
+  A27, \field Chiller Heater Modules Performance Component Object Type 7
        \type choice
        \key ChillerHeaterPerformance:Electric:EIR
-  A29, \field Chiller Heater Modules Performance Component Name 7
+  A28, \field Chiller Heater Modules Performance Component Name 7
        \type object-list
        \object-list ChillerHeaterEIRNames
-  A30, \field Chiller Heater Modules Control Schedule Name 7
+  A29, \field Chiller Heater Modules Control Schedule Name 7
        \type object-list
        \object-list ScheduleNames
   N8,  \field Number of Chiller Heater Modules 7
        \type integer
        \minimum 1
        \default 1
-  A31, \field Chiller Heater Modules Performance Component Object Type 8
+  A30, \field Chiller Heater Modules Performance Component Object Type 8
        \type choice
        \key ChillerHeaterPerformance:Electric:EIR
-  A32, \field Chiller Heater Modules Performance Component Name 8
+  A31, \field Chiller Heater Modules Performance Component Name 8
        \type object-list
        \object-list ChillerHeaterEIRNames
-  A33, \field Chiller Heater Modules Control Schedule Name 8
+  A32, \field Chiller Heater Modules Control Schedule Name 8
        \type object-list
        \object-list ScheduleNames
   N9,  \field Number of Chiller Heater Modules 8
        \type integer
        \minimum 1
        \default 1
-  A34, \field Chiller Heater Modules Performance Component Object Type 9
+  A33, \field Chiller Heater Modules Performance Component Object Type 9
        \type choice
        \key ChillerHeaterPerformance:Electric:EIR
-  A35, \field Chiller Heater Modules Performance Component Name 9
+  A34, \field Chiller Heater Modules Performance Component Name 9
        \type object-list
        \object-list ChillerHeaterEIRNames
-  A36, \field Chiller Heater Modules Control Schedule Name 9
+  A35, \field Chiller Heater Modules Control Schedule Name 9
        \type object-list
        \object-list ScheduleNames
   N10, \field Number of Chiller Heater Modules 9
        \type integer
        \minimum 1
        \default 1
-  A37, \field Chiller Heater Modules Performance Component Object Type 10
+  A36, \field Chiller Heater Modules Performance Component Object Type 10
        \type choice
        \key ChillerHeaterPerformance:Electric:EIR
-  A38, \field Chiller Heater Modules Performance Component Name 10
+  A37, \field Chiller Heater Modules Performance Component Name 10
        \type object-list
        \object-list ChillerHeaterEIRNames
-  A39, \field Chiller Heater Modules Control Schedule Name 10
+  A38, \field Chiller Heater Modules Control Schedule Name 10
        \type object-list
        \object-list ScheduleNames
   N11, \field Number of Chiller Heater Modules 10
        \type integer
        \minimum 1
        \default 1
-  A40, \field Chiller Heater Modules Performance Component Object Type 11
+  A39, \field Chiller Heater Modules Performance Component Object Type 11
        \type choice
        \key ChillerHeaterPerformance:Electric:EIR
-  A41, \field Chiller Heater Modules Performance Component Name 11
+  A40, \field Chiller Heater Modules Performance Component Name 11
        \type object-list
        \object-list ChillerHeaterEIRNames
-  A42, \field Chiller Heater Module Control Schedule Name 11
+  A41, \field Chiller Heater Module Control Schedule Name 11
        \type object-list
        \object-list ScheduleNames
   N12, \field Number of Chiller Heater Modules 11
        \type integer
        \minimum 1
        \default 1
-  A43, \field Chiller Heater Modules Performance Component Object Type 12
+  A42, \field Chiller Heater Modules Performance Component Object Type 12
        \type choice
        \key ChillerHeaterPerformance:Electric:EIR
-  A44, \field Chiller Heater Modules Performance Component Name 12
+  A43, \field Chiller Heater Modules Performance Component Name 12
        \type object-list
        \object-list ChillerHeaterEIRNames
-  A45, \field Chiller Heater Modules Control Schedule Name 12
+  A44, \field Chiller Heater Modules Control Schedule Name 12
        \type object-list
        \object-list ScheduleNames
   N13, \field Number of Chiller Heater Modules 12
        \type integer
        \minimum 1
        \default 1
-  A46, \field Chiller Heater Modules Performance Component Object Type 13
+  A45, \field Chiller Heater Modules Performance Component Object Type 13
        \type choice
        \key ChillerHeaterPerformance:Electric:EIR
-  A47, \field Chiller Heater Modules Performance Component Name 13
+  A46, \field Chiller Heater Modules Performance Component Name 13
        \type object-list
        \object-list ChillerHeaterEIRNames
-  A48, \field Chiller Heater Modules Control Schedule Name 13
+  A47, \field Chiller Heater Modules Control Schedule Name 13
        \type object-list
        \object-list ScheduleNames
   N14, \field Number of Chiller Heater Modules 13
        \type integer
        \minimum 1
        \default 1
-  A49, \field Chiller Heater Modules Performance Component Object Type 14
+  A48, \field Chiller Heater Modules Performance Component Object Type 14
        \type choice
        \key ChillerHeaterPerformance:Electric:EIR
-  A50, \field Chiller Heater Modules Performance Component Name 14
+  A49, \field Chiller Heater Modules Performance Component Name 14
        \type object-list
        \object-list ChillerHeaterEIRNames
-  A51, \field Chiller Heater Modules Control Schedule Name 14
+  A50, \field Chiller Heater Modules Control Schedule Name 14
        \type object-list
        \object-list ScheduleNames
   N15, \field Number of Chiller Heater Modules 14
        \type integer
        \minimum 1
        \default 1
-  A52, \field Chiller Heater Modules Performance Component Object Type 15
+  A51, \field Chiller Heater Modules Performance Component Object Type 15
        \type choice
        \key ChillerHeaterPerformance:Electric:EIR
-  A53, \field Chiller Heater Modules Performance Component Name 15
+  A52, \field Chiller Heater Modules Performance Component Name 15
        \type object-list
        \object-list ChillerHeaterEIRNames
-  A54, \field Chiller Heater Modules Control Schedule Name 15
+  A53, \field Chiller Heater Modules Control Schedule Name 15
        \type object-list
        \object-list ScheduleNames
   N16, \field Number of Chiller Heater Modules 15
        \type integer
        \minimum 1
        \default 1
-  A55, \field Chiller Heater Modules Performance Component Object Type 16
+  A54, \field Chiller Heater Modules Performance Component Object Type 16
        \type choice
        \key ChillerHeaterPerformance:Electric:EIR
-  A56, \field Chiller Heater Modules Performance Component Name 16
+  A55, \field Chiller Heater Modules Performance Component Name 16
        \type object-list
        \object-list ChillerHeaterEIRNames
-  A57, \field Chiller Heater Modules Control Schedule Name 16
+  A56, \field Chiller Heater Modules Control Schedule Name 16
        \type object-list
        \object-list ScheduleNames
   N17, \field Number of Chiller Heater Modules 16
        \type integer
        \minimum 1
        \default 1
-  A58, \field Chiller Heater Modules Performance Component Object Type 17
+  A57, \field Chiller Heater Modules Performance Component Object Type 17
        \type choice
        \key ChillerHeaterPerformance:Electric:EIR
-  A59, \field Chiller Heater Modules Performance Component Name 17
+  A58, \field Chiller Heater Modules Performance Component Name 17
        \type object-list
        \object-list ChillerHeaterEIRNames
-  A60, \field Chiller Heater Modules Control Schedule Name 17
+  A59, \field Chiller Heater Modules Control Schedule Name 17
        \type object-list
        \object-list ScheduleNames
   N18, \field Number of Chiller Heater Modules 17
        \type integer
        \minimum 1
        \default 1
-  A61, \field Chiller Heater Modules Performance Component Object Type 18
+  A60, \field Chiller Heater Modules Performance Component Object Type 18
        \type choice
        \key ChillerHeaterPerformance:Electric:EIR
-  A62, \field Chiller Heater Modules Performance Component Name 18
+  A61, \field Chiller Heater Modules Performance Component Name 18
        \type object-list
        \object-list ChillerHeaterEIRNames
-  A63, \field Chiller Heater Modules Control Control Schedule Name 18
+  A62, \field Chiller Heater Modules Control Control Schedule Name 18
        \type object-list
        \object-list ScheduleNames
   N19, \field Number of Chiller Heater Modules 18
        \type integer
        \minimum 1
        \default 1
-  A64, \field Chiller Heater Modules Performance Component Object Type 19
+  A63, \field Chiller Heater Modules Performance Component Object Type 19
        \type choice
        \key ChillerHeaterPerformance:Electric:EIR
-  A65, \field Chiller Heater Modules Performance Component Name 19
+  A64, \field Chiller Heater Modules Performance Component Name 19
        \type object-list
        \object-list ChillerHeaterEIRNames
-  A66, \field Chiller Heater Modules Control Schedule Name 19
+  A65, \field Chiller Heater Modules Control Schedule Name 19
        \type object-list
        \object-list ScheduleNames
   N20, \field Number of Chiller Heater Modules 19
        \type integer
        \minimum 1
        \default 1
-  A67, \field Chiller Heater Modules Performance Component Object Type 20
+  A66, \field Chiller Heater Modules Performance Component Object Type 20
        \type choice
        \key ChillerHeaterPerformance:Electric:EIR
-  A68, \field Chiller Heater Modules Performance Component Name 20
+  A67, \field Chiller Heater Modules Performance Component Name 20
        \type object-list
        \object-list ChillerHeaterEIRNames
-  A69, \field Chiller Heater Modules Control Schedule Name 20
+  A68, \field Chiller Heater Modules Control Schedule Name 20
        \type object-list
        \object-list ScheduleNames
   N21; \field Number of Chiller Heater Modules 20
@@ -77678,7 +77674,7 @@ CentralHeatPumpSystem,
        \default 1
 
 ChillerHeaterPerformance:Electric:EIR,
-       \min-fields 29
+       \min-fields 28
        \memo This chiller model is a generic chiller-heater where the cooling mode performance is a
        \memo function of condenser entering or leaving fluid temperature and the heating mode performance
        \memo is typically a function of condenser leaving fluid temperature. Performance at off-reference
@@ -77773,12 +77769,7 @@ ChillerHeaterPerformance:Electric:EIR,
        \minimum 0.0
        \maximum 1.0
        \default 1.0
-  A3 , \field Condenser Type
-       \type choice
-       \key AirCooled
-       \key WaterCooled
-       \default WaterCooled
-  A4 , \field Cooling Mode Temperature Curve Condenser Water Independent Variable
+  A3 , \field Cooling Mode Temperature Curve Condenser Water Independent Variable
        \type choice
        \key EnteringCondenser
        \key LeavingCondenser
@@ -77788,7 +77779,7 @@ ChillerHeaterPerformance:Electric:EIR,
        \note express the performance of their chillers using either the leaving condenser water
        \note temperature (to the tower) or the entering condenser water temperature (from the tower).
        \note Cooling mode is generally a stronger function of Entering Condenser Fluid Temperature
-  A5 , \field Cooling Mode Cooling Capacity Function of Temperature Curve Name
+  A4 , \field Cooling Mode Cooling Capacity Function of Temperature Curve Name
        \note Cooling capacity as a function of leaving chilled water temperature
        \note and either entering or leaving condenser fluid temperature
        \required-field
@@ -77800,7 +77791,7 @@ ChillerHeaterPerformance:Electric:EIR,
        \note CWS = supply (leaving) chilled water temperature(C)
        \note LCT = leaving condenser fluid temperature(C)
        \note ECT = entering condenser fluid temperature(C)
-  A6 , \field Cooling Mode Electric Input to Cooling Output Ratio Function of Temperature Curve Name
+  A5 , \field Cooling Mode Electric Input to Cooling Output Ratio Function of Temperature Curve Name
        \note Electric Input Ratio (EIR) as a function of supply (leaving) chilled water temperature
        \note and leaving condenser fluid temperature. EIR = 1/COP.
        \required-field
@@ -77812,7 +77803,7 @@ ChillerHeaterPerformance:Electric:EIR,
        \note CWS = supply (leaving) chilled water temperature(C)
        \note LCT = leaving condenser fluid temperature(C)
        \note ECT = entering condenser fluid temperature(C)
-  A7 , \field Cooling Mode Electric Input to Cooling Output Ratio Function of Part Load Ratio Curve Name
+  A6 , \field Cooling Mode Electric Input to Cooling Output Ratio Function of Part Load Ratio Curve Name
        \note Electric Input Ratio (EIR) as a function of Part Load Ratio (PLR)
        \note EIR = 1/COP
        \required-field
@@ -77837,7 +77828,7 @@ ChillerHeaterPerformance:Electric:EIR,
        \note The Min/Max PLR are taken from their associated EIR-FPLR curve references.
        \minimum> 0.0
        \default 1.0
-  A8 , \field Heating Mode Temperature Curve Condenser Water Independent Variable
+  A7 , \field Heating Mode Temperature Curve Condenser Water Independent Variable
        \type choice
        \key EnteringCondenser
        \key LeavingCondenser
@@ -77848,7 +77839,7 @@ ChillerHeaterPerformance:Electric:EIR,
        \note temperature (to the tower) or the entering condenser water temperature (from the tower).
        \note Heating mode (or Simul Clg/Htg Load) should be a function of Leaving Condenser Fluid Temperature
        \note Only use EnteringCondenser as a last resort in case no performance data exists for LeavingCondenser
-  A9 , \field Heating Mode Cooling Capacity Function of Temperature Curve Name
+  A8 , \field Heating Mode Cooling Capacity Function of Temperature Curve Name
        \note Evaporator (cooling) capacity as a function of leaving chilled water temperature
        \note and leaving condenser fluid temperature when in heating or simultaneous cool/heat mode
        \required-field
@@ -77860,7 +77851,7 @@ ChillerHeaterPerformance:Electric:EIR,
        \note CWS = supply (leaving) chilled water temperature(C)
        \note LCT = leaving condenser fluid temperature(C)
        \note ECT = entering condenser fluid temperature(C)
-  A10, \field Heating Mode Electric Input to Cooling Output Ratio Function of Temperature Curve Name
+  A9,  \field Heating Mode Electric Input to Cooling Output Ratio Function of Temperature Curve Name
        \note Electric Input Ratio (EIR) as a function of leaving chilled water temperature when in heating or simultaneous cool/heat mode
        \note and leaving condenser fluid temperature. EIR = 1/COP.
        \required-field
@@ -77872,7 +77863,7 @@ ChillerHeaterPerformance:Electric:EIR,
        \note CWS = leaving chilled water temperature(C)
        \note LCT = leaving condenser fluid temperature(C)
        \note ECT = entering condenser fluid temperature(C)
-  A11, \field Heating Mode Electric Input to Cooling Output Ratio Function of Part Load Ratio Curve Name
+  A10, \field Heating Mode Electric Input to Cooling Output Ratio Function of Part Load Ratio Curve Name
        \note Electric Input Ratio (EIR) as a function of Part Load Ratio (PLR) when in heating or simultaneous cool/heat mode
        \note EIR = 1/COP
        \required-field
@@ -78033,7 +78024,7 @@ CoolingTower:SingleSpeed,
        \type real
        \units C
        \default 25.6
-       \minimum 20.0
+       \minimum 10.0
        \note Enter the tower's design inlet air wet-bulb temperature
   N15, \field Design Approach Temperature
        \type real
@@ -78350,7 +78341,7 @@ CoolingTower:TwoSpeed,
        \type real
        \units C
        \default 25.6
-       \minimum 20.0
+       \minimum 10.0
        \note Enter the tower's design inlet air wet-bulb temperature
   N23, \field Design Approach Temperature
        \type real
@@ -78666,7 +78657,7 @@ CoolingTower:VariableSpeed:Merkel,
        \type real
        \units C
        \default 25.6
-       \minimum 20.0
+       \minimum 10.0
        \note Enter the tower's design inlet air wet-bulb temperature
   N19, \field Design Approach Temperature
        \type real
@@ -78830,7 +78821,7 @@ CoolingTower:VariableSpeed,
        \type real
        \units C
        \default 25.6
-       \minimum 20.0
+       \minimum 10.0
        \note Enter the tower's design inlet air wet-bulb temperature
   N2 , \field Design Approach Temperature
        \type real

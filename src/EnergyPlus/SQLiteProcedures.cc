@@ -159,7 +159,6 @@ std::unique_ptr<SQLite> CreateSQLiteDatabase(EnergyPlusData &state)
                                         writeTabularDataToSQLite);
     } catch (const std::runtime_error &error) {
         ShowFatalError(state, error.what());
-        return nullptr;
     }
 }
 

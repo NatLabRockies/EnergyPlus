@@ -728,7 +728,7 @@ namespace SimulationManager {
         int NumDebugOut;
         int MinInt;
         int Num;
-        int Which;
+        int Which = 1;
         bool ErrorsFound;
         int NumRunControl;
         std::string VersionID;
@@ -903,10 +903,11 @@ namespace SimulationManager {
             } else if (mod(60, state.dataGlobal->TimeStepsInHour) != 0) {
                 MinInt = 9999;
                 for (Num = 1; Num <= 12; ++Num) {
-                    if (std::abs(state.dataGlobal->TimeStepsInHour - Div60[Num - 1]) > MinInt) {
+                    int const ThisDiff = std::abs(state.dataGlobal->TimeStepsInHour - Div60[Num - 1]);
+                    if (ThisDiff > MinInt) {
                         continue;
                     }
-                    MinInt = state.dataGlobal->TimeStepsInHour - Div60[Num - 1];
+                    MinInt = ThisDiff;
                     Which = Num;
                 }
                 ShowWarningError(state,
@@ -1045,7 +1046,8 @@ namespace SimulationManager {
 
             if (instances != state.dataInputProcessing->inputProcessor->epJSON.end()) {
                 auto &instancesValue = instances.value();
-                for (auto instance = instancesValue.begin(); instance != instancesValue.end(); ++instance) {
+                auto instance = instancesValue.begin();
+                if (instance != instancesValue.end()) {
                     auto const &fields = instance.value();
                     std::string const &thisObjectName = instance.key();
                     state.dataInputProcessing->inputProcessor->markObjectAsUsed(CurrentModuleObject, thisObjectName);
@@ -1119,9 +1121,6 @@ namespace SimulationManager {
                             }
                         }
                     }
-
-                    // Don't process the duplicate ones
-                    break;
                 }
             }
         }

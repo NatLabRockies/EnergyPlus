@@ -159,8 +159,6 @@ namespace PlantPipingSystemsManager {
         }
         // If we didn't find it, fatal
         ShowFatalError(state, std::format("PipeCircuitInfoFactory: Error getting inputs for circuit named: {}", objectName)); // LCOV_EXCL_LINE
-        // Shut up the compiler
-        return nullptr; // LCOV_EXCL_LINE
     }
 
     void Circuit::simulate(EnergyPlusData &state,
@@ -1738,8 +1736,6 @@ namespace PlantPipingSystemsManager {
         }
         // If we didn't find it, fatal
         ShowFatalError(state, std::format("PipeSegmentInfoFactory: Error getting inputs for segment named: {}", segmentName)); // LCOV_EXCL_LINE
-        // Shut up the compiler
-        return nullptr; // LCOV_EXCL_LINE
     }
 
     Circuit *Circuit::factory(EnergyPlusData &state, const std::string &circuitName, bool &errorsFound)
@@ -1756,8 +1752,6 @@ namespace PlantPipingSystemsManager {
         }
         // If we didn't find it, fatal
         ShowFatalError(state, std::format("PipeCircuitInfoFactory: Error getting inputs for circuit named: {}", circuitName)); // LCOV_EXCL_LINE
-        // Shut up the compiler
-        return nullptr; // LCOV_EXCL_LINE
     }
 
     void ReadPipeSegmentInputs(EnergyPlusData &state, bool &ErrorsFound)

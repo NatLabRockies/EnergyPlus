@@ -781,8 +781,6 @@ IdfParser::Token IdfParser::next_token(std::string_view idf, size_t &index)
         }
         return Token::STRING;
     }
-    decrement_both_index(index, index_into_cur_line);
-    return Token::NONE;
 }
 
 IdfParser::Token IdfParser::next_limited_token(std::string_view idf, size_t &index)

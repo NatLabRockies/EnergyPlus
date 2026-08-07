@@ -571,7 +571,7 @@
     ISO15099,                !- standard
     ISO15099,                !- Thermal Model
     1.0000,                  !- SDScalar
-    NoDeflection,            !- Deflection Model
+    TemperatureAndPressureInput,  !- Deflection Model
     13.238;                  !- Vacuum Pressure Limit {Pa}
 
 !-----------------------------------------------------

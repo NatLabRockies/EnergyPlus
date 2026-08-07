@@ -173,7 +173,7 @@ namespace DataPlant {
 
         void TurnOnAllLoopSideBranches();
 
-        void DisableAnyBranchPumpsConnectedToUnloadedEquipment();
+        void DisableAnyBranchPumpsConnectedToUnloadedEquipment(EnergyPlusData &state);
 
         void DoFlowAndLoadSolutionPass(EnergyPlusData &state, LoopSideLocation OtherSide, int ThisSideInletNode, bool FirstHVACIteration);
 

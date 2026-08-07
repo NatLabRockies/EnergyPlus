@@ -2894,7 +2894,6 @@ namespace Fluid {
             if ((RefrigIndex = GetRefrigNum(state, refrigName)) == 0) {
                 ShowSevereError(state, std::format("Refrigerant \"{}\" not found, called from: {}", refrigName, CalledFrom));
                 ShowFatalError(state, "Program terminates due to preceding condition.");
-                return 0.0;
             }
         }
 
@@ -2989,7 +2988,6 @@ namespace Fluid {
             if ((RefrigIndex = GetRefrigNum(state, refrigName)) == 0) {
                 ShowSevereError(state, std::format("Refrigerant \"{}\" not found, called from: {}", refrigName, CalledFrom));
                 ShowFatalError(state, "Program terminates due to preceding condition.");
-                return 0.0;
             }
         }
 
@@ -3041,7 +3039,6 @@ namespace Fluid {
             if ((RefrigIndex = GetRefrigNum(state, refrigName)) == 0) {
                 ShowSevereError(state, std::format("Refrigerant \"{}\" not found, called from: {}", refrigName, CalledFrom));
                 ShowFatalError(state, "Program terminates due to preceding condition.");
-                return 0.0;
             }
         }
         return df->refrigs(RefrigIndex)->getSatEnthalpy(state, Temperature, Quality, CalledFrom);
@@ -3166,7 +3163,6 @@ namespace Fluid {
             if ((RefrigIndex = GetRefrigNum(state, refrigName)) == 0) {
                 ShowSevereError(state, std::format("Refrigerant \"{}\" not found, called from: {}", refrigName, CalledFrom));
                 ShowFatalError(state, "Program terminates due to preceding condition.");
-                return 0.0;
             }
         }
 
@@ -3226,7 +3222,6 @@ namespace Fluid {
             if ((RefrigIndex = GetRefrigNum(state, refrigName)) == 0) {
                 ShowSevereError(state, std::format("Refrigerant \"{}\" not found, called from: {}", refrigName, CalledFrom));
                 ShowFatalError(state, "Program terminates due to preceding condition.");
-                return 0.0;
             }
         }
 
@@ -3444,7 +3439,6 @@ namespace Fluid {
             if ((RefrigIndex = GetRefrigNum(state, refrigName)) == 0) {
                 ShowSevereError(state, std::format("Refrigerant \"{}\" not found, called from: {}", refrigName, CalledFrom));
                 ShowFatalError(state, "Program terminates due to preceding condition.");
-                return 0.0;
             }
         }
 
@@ -3710,7 +3704,6 @@ namespace Fluid {
             if ((RefrigIndex = GetRefrigNum(state, refrigName)) == 0) {
                 ShowSevereError(state, std::format("Refrigerant \"{}\" not found, called from: {}", refrigName, CalledFrom));
                 ShowFatalError(state, "Program terminates due to preceding condition.");
-                return 0.0;
             }
         }
 
@@ -3839,7 +3832,6 @@ namespace Fluid {
             if ((RefrigIndex = GetRefrigNum(state, refrigName)) == 0) {
                 ShowSevereError(state, std::format("Refrigerant \"{}\" not found, called from: {}", refrigName, CalledFrom));
                 ShowFatalError(state, "Program terminates due to preceding condition.");
-                return 0.0;
             }
         }
 
@@ -4060,7 +4052,6 @@ namespace Fluid {
             if ((RefrigIndex = GetRefrigNum(state, refrigName)) == 0) {
                 ShowSevereError(state, std::format("Refrigerant \"{}\" not found, called from: {}", refrigName, CalledFrom));
                 ShowFatalError(state, "Program terminates due to preceding condition.");
-                return 0.0;
             }
         }
 
@@ -4219,7 +4210,6 @@ namespace Fluid {
             if ((GlycolIndex = GetGlycolNum(state, glycolName)) == 0) {
                 ShowSevereError(state, std::format("Glycol \"{}\" not found, called from: {}", glycolName, CalledFrom));
                 ShowFatalError(state, "Program terminates due to preceding condition.");
-                return 0.0;
             }
         }
 
@@ -4351,7 +4341,6 @@ namespace Fluid {
             if ((GlycolIndex = GetGlycolNum(state, glycolName)) == 0) {
                 ShowSevereError(state, std::format("Glycol \"{}\" not found, called from: {}", glycolName, CalledFrom));
                 ShowFatalError(state, "Program terminates due to preceding condition.");
-                return 0.0;
             }
         }
 
@@ -4400,7 +4389,6 @@ namespace Fluid {
             ShowSevereError(state,
                             std::format("{}: conductivity data not found for glycol \"{}\", called from {}", routineName, this->Name, CalledFrom));
             ShowFatalError(state, "Program terminates due to preceding condition.");
-            return 0.0;
         }
 
         // Now determine the value of specific heat using interpolation
@@ -4488,7 +4476,6 @@ namespace Fluid {
             if ((GlycolIndex = GetGlycolNum(state, glycolName)) == 0) {
                 ShowSevereError(state, std::format("Glycol \"{}\" not found, called from: {}", glycolName, CalledFrom));
                 ShowFatalError(state, "Program terminates due to preceding condition.");
-                return 0.0;
             }
         }
 
@@ -4538,7 +4525,6 @@ namespace Fluid {
             ShowSevereError(state,
                             std::format("{}: viscosity data not found for glycol \"{}\", called from {}", routineName, this->Name, CalledFrom));
             ShowFatalError(state, "Program terminates due to preceding condition.");
-            return 0.0;
         }
 
         // Now determine the value of specific heat using interpolation
@@ -4626,7 +4612,6 @@ namespace Fluid {
             if ((GlycolIndex = GetGlycolNum(state, glycolName)) == 0) {
                 ShowSevereError(state, std::format("Glycol \"{}\" not found, called from: {}", glycolName, CalledFrom));
                 ShowFatalError(state, "Program terminates due to preceding condition.");
-                return 0.0;
             }
         }
 

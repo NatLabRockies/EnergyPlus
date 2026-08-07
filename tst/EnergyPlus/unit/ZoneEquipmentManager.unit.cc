@@ -2227,7 +2227,6 @@ TEST_F(EnergyPlusFixture, ZoneEquipmentManager_RezeroZoneSizingArrays)
             thisSizingType.EMSValueDesHeatMassFlow = 1.0;
             thisSizingType.DesCoolMassFlow = 1.0;
             thisSizingType.DesCoolMassFlowNoOA = 1.0;
-            thisSizingType.DesCoolOAFlowFrac = 1.0;
             thisSizingType.EMSValueDesCoolMassFlow = 1.0;
             thisSizingType.DesHeatLoad = 1.0;
             thisSizingType.NonAirSysDesHeatLoad = 1.0;
@@ -2422,7 +2421,6 @@ TEST_F(EnergyPlusFixture, ZoneEquipmentManager_RezeroZoneSizingArrays)
             thisSizingType2.EMSValueDesHeatMassFlow = 1.0;
             thisSizingType2.DesCoolMassFlow = 1.0;
             thisSizingType2.DesCoolMassFlowNoOA = 1.0;
-            thisSizingType2.DesCoolOAFlowFrac = 1.0;
             thisSizingType2.EMSValueDesCoolMassFlow = 1.0;
             thisSizingType2.DesHeatLoad = 1.0;
             thisSizingType2.NonAirSysDesHeatLoad = 1.0;
@@ -2625,7 +2623,6 @@ TEST_F(EnergyPlusFixture, ZoneEquipmentManager_RezeroZoneSizingArrays)
             // EXPECT_EQ(thisSizingType.EMSValueDesHeatMassFlow, 0.0);
             EXPECT_EQ(thisSizingType.DesCoolMassFlow, 0.0);
             // EXPECT_EQ(thisSizingType.DesCoolMassFlowNoOA, 0.0);
-            // EXPECT_EQ(thisSizingType.DesCoolOAFlowFrac, 0.0);
             // EXPECT_EQ(thisSizingType.EMSValueDesCoolMassFlow, 0.0);
             EXPECT_EQ(thisSizingType.DesHeatLoad, 0.0);
             // EXPECT_EQ(thisSizingType.NonAirSysDesHeatLoad, 0.0);
@@ -2793,7 +2790,6 @@ TEST_F(EnergyPlusFixture, ZoneEquipmentManager_RezeroZoneSizingArrays)
             // EXPECT_EQ(thisSizingType2.EMSValueDesHeatMassFlow, 0.0);
             EXPECT_EQ(thisSizingType2.DesCoolMassFlow, 0.0);
             // EXPECT_EQ(thisSizingType2.DesCoolMassFlowNoOA, 0.0);
-            // EXPECT_EQ(thisSizingType2.DesCoolOAFlowFrac, 0.0);
             // EXPECT_EQ(thisSizingType2.EMSValueDesCoolMassFlow, 0.0);
             EXPECT_EQ(thisSizingType2.DesHeatLoad, 0.0);
             // EXPECT_EQ(thisSizingType2.NonAirSysDesHeatLoad, 0.0);

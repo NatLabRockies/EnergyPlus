@@ -150,8 +150,6 @@ PlantComponent *WaterThermalTankData::factory(EnergyPlusData &state, std::string
     }
     // If we didn't find it, fatal
     ShowFatalError(state, std::format("LocalWaterTankFactory: Error getting inputs for tank named: {}", objectName)); // LCOV_EXCL_LINE
-    // Shut up the compiler
-    return nullptr; // LCOV_EXCL_LINE
 }
 
 void WaterThermalTankData::onInitLoopEquip(EnergyPlusData &state, const PlantLocation &calledFromLocation)
@@ -339,8 +337,6 @@ PlantComponent *HeatPumpWaterHeaterData::factory(EnergyPlusData &state, std::str
     }
     // If we didn't find it, fatal
     ShowFatalError(state, std::format("LocalHeatPumpWaterHeaterFactory: Error getting inputs for object named: {}", objectName)); // LCOV_EXCL_LINE
-    // Shut up the compiler
-    return nullptr; // LCOV_EXCL_LINE
 }
 
 void HeatPumpWaterHeaterData::onInitLoopEquip(EnergyPlusData &state, const PlantLocation &calledFromLocation)

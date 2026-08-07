@@ -2255,11 +2255,6 @@ namespace DesiccantDehumidifiers {
                 ShowFatalError(
                     state,
                     std::format("Invalid performance model in desiccant dehumidifier = {}", static_cast<int>(desicDehum.PerformanceModel_Num)));
-
-                // Suppress uninitialized warnings
-                ProcAirOutTemp = 0.0;
-                SpecRegenEnergy = 0.0;
-                RegenAirVel = 0.0;
             } break;
             } // Performance Model Part B
 

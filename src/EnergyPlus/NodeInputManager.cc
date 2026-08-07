@@ -512,7 +512,8 @@ void SetupNodeVarsForReporting(EnergyPlusData &state)
     }
 }
 
-void GetNodeListsInput(EnergyPlusData &state, bool &ErrorsFound) // Set to true when requested Node List not found, unchanged otherwise
+void GetNodeListsInput(EnergyPlusData &state,
+                       [[maybe_unused]] bool &ErrorsFound) // Set to true when requested Node List not found, unchanged otherwise
 {
 
     // SUBROUTINE INFORMATION:
@@ -642,7 +643,6 @@ void GetNodeListsInput(EnergyPlusData &state, bool &ErrorsFound) // Set to true 
 
     if (localErrorsFound) {
         ShowFatalError(state, std::format("{}{}: Error getting input - causes termination.", RoutineName, CurrentModuleObject));
-        ErrorsFound = true;
     }
 }
 

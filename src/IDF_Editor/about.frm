@@ -81,7 +81,7 @@ Begin VB.Form About
       Begin VB.Label lblVersion
          Alignment       =   1  'Right Justify
          AutoSize        =   -1  'True
-         Caption         =   "Version 1.55"
+         Caption         =   "Version 1.56"
          BeginProperty Font
             Name            =   "Arial"
             Size            =   12
@@ -151,7 +151,7 @@ End Sub
 
 Private Sub Form_Load()
 lblAboutEPVer.Caption = "EnergyPlus and IDD version number: " & IDDVersion
-txtNotice.Text = "Copyright (c) 2000-2025 GARD Analytics, " & vbCrLf
+txtNotice.Text = "Copyright (c) 2000-2026 GARD Analytics, " & vbCrLf
 txtNotice.Text = txtNotice.Text & "Inc.  All rights reserved." & vbCrLf
 txtNotice.Text = txtNotice.Text & "                                        " & vbCrLf
 txtNotice.Text = txtNotice.Text & "The code for quick select dropdowns     " & vbCrLf

@@ -1751,7 +1751,7 @@ namespace TranspiredCollector {
         Real64 LocalWetBulbTemp;      // OutWetBulbTemp for here
         Real64 LocalOutHumRat;        // OutHumRat for here
         bool ICSCollectorIsOn(false); // ICS collector has OSCM on
-        int CollectorNum;             // current solar collector index
+        int CollectorNum = 0;         // current solar collector index
         Real64 ICSWaterTemp = 0.0;    // ICS solar collector water temp
         Real64 ICSULossbottom = 0.0;  // ICS solar collector bottom loss Conductance
         Real64 sum_area = 0.0;

@@ -138,7 +138,7 @@ namespace DataPlant {
         // On constant speed branch pump loop sides we need to re-simulate
         if (this->hasConstSpeedBranchPumps) {
             // turn off any pumps connected to unloaded equipment and re-do the flow/load solution pass
-            this->DisableAnyBranchPumpsConnectedToUnloadedEquipment();
+            this->DisableAnyBranchPumpsConnectedToUnloadedEquipment(state);
             this->DoFlowAndLoadSolutionPass(state, OtherLoopSide, ThisSideInletNode, FirstHVACIteration);
         }
 
@@ -662,8 +662,19 @@ namespace DataPlant {
         }
     }
 
-    void HalfLoopData::DisableAnyBranchPumpsConnectedToUnloadedEquipment()
+    void HalfLoopData::DisableAnyBranchPumpsConnectedToUnloadedEquipment(EnergyPlusData &state)
     {
+        // A tower branch can read zero dispatched load just because the loop has not started circulating yet;
+        // disabling its pump while the other side is turning the loop on deadlocks the cold start.
+        bool demandIsTurningLoopOn = false;
+        // plantLoc on a half loop side carries only loopNum/loopSideNum; its .loop pointer is never set
+        if (this->plantLoc.loopNum > 0 && this->plantLoc.loopNum <= state.dataPlnt->TotNumLoops) {
+            auto &thisLoop = state.dataPlnt->PlantLoop(this->plantLoc.loopNum);
+            auto const otherSide = LoopSideOther[static_cast<int>(this->plantLoc.loopSideNum)];
+            demandIsTurningLoopOn = (thisLoop.TypeOfLoop == DataPlant::LoopType::Condenser) &&
+                                    (thisLoop.LoopSide(otherSide).flowRequestNeedAndTurnOn > DataBranchAirLoopPlant::MassFlowTolerance);
+        }
+
         for (int branchNum = 2; branchNum <= this->TotalBranches - 1; ++branchNum) {
             auto &branch = this->Branch(branchNum);
             Real64 totalDispatchedLoadOnBranch = 0.0;
@@ -677,7 +688,7 @@ namespace DataPlant {
                     totalDispatchedLoadOnBranch += component.MyLoad;
                 }
             }
-            if (std::abs(totalDispatchedLoadOnBranch) < 0.001) {
+            if (std::abs(totalDispatchedLoadOnBranch) < 0.001 && !demandIsTurningLoopOn) {
                 branch.disableOverrideForCSBranchPumping = true;
             }
         }

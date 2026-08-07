@@ -1,7 +1,7 @@
 VERSION 5.00
-Object = "{F9043C88-F6F2-101A-A3C9-08002B2F49FB}#1.2#0"; "ComDlg32.OCX"
-Object = "{831FDD16-0C5C-11D2-A9FC-0000F8754DA1}#2.1#0"; "MSCOMCTL.OCX"
 Object = "{C0A63B80-4B21-11D3-BD95-D426EF2C7949}#1.0#0"; "Vsflex7L.ocx"
+Object = "{831FDD16-0C5C-11D2-A9FC-0000F8754DA1}#2.1#0"; "MSCOMCTL.OCX"
+Object = "{F9043C88-F6F2-101A-A3C9-08002B2F49FB}#1.2#0"; "ComDlg32.OCX"
 Begin VB.Form IDFEdit
    Caption         =   "IDF Edit"
    ClientHeight    =   7275
@@ -396,7 +396,7 @@ Begin VB.Form IDFEdit
       Width           =   4575
    End
    Begin VB.ListBox lstObjectTypes
-      Height          =   2205
+      Height          =   1815
       Left            =   120
       TabIndex        =   9
       Top             =   1725
@@ -664,6 +664,24 @@ Begin VB.Form IDFEdit
       End
       Begin VB.Menu mnuViewWordWrap
          Caption         =   "Word Wrap"
+      End
+      Begin VB.Menu mnuViewFontSize
+         Caption         =   "Font Size"
+         Begin VB.Menu mnuViewFontSize8
+            Caption         =   "8"
+            Checked         =   -1  'True
+            Shortcut        =   {F8}
+         End
+         Begin VB.Menu mnuViewFontSize10
+            Caption         =   "10"
+         End
+         Begin VB.Menu mnuViewFontSize12
+            Caption         =   "12"
+            Shortcut        =   {F12}
+         End
+         Begin VB.Menu mnuViewFontSize14
+            Caption         =   "14"
+         End
       End
       Begin VB.Menu mnuDiv5
          Caption         =   "-"
@@ -2308,6 +2326,9 @@ Call resizeControls(picUpperSplitter.Top, picLowerSplitter.Top, picRightSplitter
 If ShowQuickSelectCombos Then cboClassCategories.SetFocus
 End Sub
 
+
+
+
 '-----------------------------------------------------------------------------
 ' VIEW MENU STUBS
 '-----------------------------------------------------------------------------
@@ -2382,6 +2403,36 @@ defaultColumnWidth = 9000
 numDigitsShown = 18
 Call FillGrid
 End Sub
+
+Private Sub mnuViewFontSize8_Click()
+Call changeFontSize(8)
+mnuViewFontSize8.Checked = True
+End Sub
+Private Sub mnuViewFontSize10_Click()
+Call changeFontSize(10)
+mnuViewFontSize10.Checked = True
+End Sub
+Private Sub mnuViewFontSize12_Click()
+Call changeFontSize(12)
+mnuViewFontSize12.Checked = True
+End Sub
+Private Sub mnuViewFontSize14_Click()
+Call changeFontSize(14)
+mnuViewFontSize14.Checked = True
+End Sub
+Sub changeFontSize(size As Integer)
+mnuViewFontSize8.Checked = False
+mnuViewFontSize10.Checked = False
+mnuViewFontSize12.Checked = False
+mnuViewFontSize14.Checked = False
+lstObjectTypes.FontSize = size
+grdNew.FontSize = size
+txtComment.FontSize = size
+txtExplain.FontSize = size
+cboClassCategories.FontSize = size
+cboClasses.FontSize = size
+End Sub
+
 
 Sub clearViewWidthMenus()
 mnuViewNarrowColumn.Checked = False
@@ -2646,7 +2697,7 @@ For i = 1 To maxUsedClassGroup
     'Debug.Print "Object Count", IDDClassdat(j).name, iddclassdat(j).objectCount
     If curShowAllClasses Then
       If IDDClassObjPt(j).objectCount > 0 Then
-        t = Right("0000" & RTrim(LTrim(Str(IDDClassObjPt(j).objectCount))), 4)
+        t = Right("00000" & RTrim(LTrim(Str(IDDClassObjPt(j).objectCount))), 5)
       Else
         t = "------"
       End If
@@ -2655,7 +2706,7 @@ For i = 1 To maxUsedClassGroup
       IDDClassObjPt(j).lstObjIndx = lstObjectTypes.NewIndex
     Else
       If IDDClassObjPt(j).objectCount > 0 Then
-        t = Right("0000" & RTrim(LTrim(Str(IDDClassObjPt(j).objectCount))), 4)
+        t = Right("00000" & RTrim(LTrim(Str(IDDClassObjPt(j).objectCount))), 5)
         lstObjectTypes.AddItem "[" & t & "]  " & IDDClassDat(j).name
         lstObjectTypes.ItemData(lstObjectTypes.NewIndex) = j
         IDDClassObjPt(j).lstObjIndx = lstObjectTypes.NewIndex

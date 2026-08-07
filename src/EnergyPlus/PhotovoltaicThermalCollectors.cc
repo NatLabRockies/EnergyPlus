@@ -124,8 +124,6 @@ namespace PhotovoltaicThermalCollectors {
 
         // If we didn't find it, fatal
         ShowFatalError(state, std::format("Solar Thermal Collector Factory: Error getting inputs for object named: {}", objectName));
-        // Shut up the compiler
-        return nullptr;
     }
 
     void PVTCollectorStruct::onInitLoopEquip(EnergyPlusData &state, [[maybe_unused]] const PlantLocation &calledFromLocation)
@@ -1933,8 +1931,6 @@ namespace PhotovoltaicThermalCollectors {
 
         // If we didn't find it, fatal
         ShowFatalError(state, std::format("Solar Thermal Collector GetIndexFromName: Error getting inputs for object named: {}", objectName));
-        assert(false);
-        return 0; // Shutup compiler
     }
 
     void simPVTfromOASys(EnergyPlusData &state, int const index, bool const FirstHVACIteration)

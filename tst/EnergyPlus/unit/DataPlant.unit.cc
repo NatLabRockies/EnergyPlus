@@ -127,3 +127,98 @@ TEST_F(EnergyPlusFixture, DataPlant_verifyTwoNodeNumsOnSamePlantLoop)
     state->dataPlnt->PlantLoop(2).LoopSide(DataPlant::LoopSideLocation::Supply).Branch.deallocate();
     state->dataPlnt->PlantLoop.deallocate();
 }
+
+// Three unit tests for the condenser loop constant speed branch pump cold start deadlock
+// (chiller runs and rejects heat, but the cooling tower/condenser pump stay off).
+// See HalfLoopData::DisableAnyBranchPumpsConnectedToUnloadedEquipment in Plant/LoopSide.cc
+TEST_F(EnergyPlusFixture, PlantLoopSide_CondenserTowerBranchPumpNotDisabledWhenDemandCallsForFlow)
+{
+    state->dataPlnt->TotNumLoops = 1;
+    state->dataPlnt->PlantLoop.allocate(1);
+    auto &loop = state->dataPlnt->PlantLoop(1);
+    loop.TypeOfLoop = DataPlant::LoopType::Condenser;
+
+    auto &supply = loop.LoopSide(DataPlant::LoopSideLocation::Supply);
+    supply.TotalBranches = 3; // inlet(1), parallel tower branch(2), outlet(3)
+    supply.Branch.allocate(3);
+    supply.plantLoc.loopNum = 1;
+    supply.plantLoc.loopSideNum = DataPlant::LoopSideLocation::Supply;
+
+    auto &branch = supply.Branch(2);
+    branch.TotalComponents = 2;
+    branch.Comp.allocate(2);
+    branch.Comp(1).Type = DataPlant::PlantEquipmentType::PumpConstantSpeed; // pumps are skipped in the load sum
+    branch.Comp(1).MyLoad = 0.0;
+    branch.Comp(2).Type = DataPlant::PlantEquipmentType::CoolingTower_TwoSpd; // tower, unloaded because no flow yet
+    branch.Comp(2).MyLoad = 0.0;
+    branch.disableOverrideForCSBranchPumping = false;
+
+    // the chiller condenser on the demand side is asking for flow
+    loop.LoopSide(DataPlant::LoopSideLocation::Demand).flowRequestNeedAndTurnOn = 1.0;
+
+    supply.DisableAnyBranchPumpsConnectedToUnloadedEquipment(*state);
+
+    // the branch pump must stay available, otherwise the loop can never start circulating
+    EXPECT_FALSE(supply.Branch(2).disableOverrideForCSBranchPumping);
+}
+
+TEST_F(EnergyPlusFixture, PlantLoopSide_CondenserTowerBranchPumpDisabledWhenNoDemand)
+{
+    state->dataPlnt->TotNumLoops = 1;
+    state->dataPlnt->PlantLoop.allocate(1);
+    auto &loop = state->dataPlnt->PlantLoop(1);
+    loop.TypeOfLoop = DataPlant::LoopType::Condenser;
+
+    auto &supply = loop.LoopSide(DataPlant::LoopSideLocation::Supply);
+    supply.TotalBranches = 3;
+    supply.Branch.allocate(3);
+    supply.plantLoc.loopNum = 1;
+    supply.plantLoc.loopSideNum = DataPlant::LoopSideLocation::Supply;
+
+    auto &branch = supply.Branch(2);
+    branch.TotalComponents = 2;
+    branch.Comp.allocate(2);
+    branch.Comp(1).Type = DataPlant::PlantEquipmentType::PumpConstantSpeed;
+    branch.Comp(1).MyLoad = 0.0;
+    branch.Comp(2).Type = DataPlant::PlantEquipmentType::CoolingTower_TwoSpd;
+    branch.Comp(2).MyLoad = 0.0;
+    branch.disableOverrideForCSBranchPumping = false;
+
+    // nothing on the demand side wants flow
+    loop.LoopSide(DataPlant::LoopSideLocation::Demand).flowRequestNeedAndTurnOn = 0.0;
+
+    supply.DisableAnyBranchPumpsConnectedToUnloadedEquipment(*state);
+
+    // existing behavior is preserved: an unloaded branch pump is still shut off
+    EXPECT_TRUE(supply.Branch(2).disableOverrideForCSBranchPumping);
+}
+
+TEST_F(EnergyPlusFixture, PlantLoopSide_PlantLoopBranchPumpStillDisabledEvenWithDemand)
+{
+    state->dataPlnt->TotNumLoops = 1;
+    state->dataPlnt->PlantLoop.allocate(1);
+    auto &loop = state->dataPlnt->PlantLoop(1);
+    loop.TypeOfLoop = DataPlant::LoopType::Plant; // not a condenser loop
+
+    auto &supply = loop.LoopSide(DataPlant::LoopSideLocation::Supply);
+    supply.TotalBranches = 3;
+    supply.Branch.allocate(3);
+    supply.plantLoc.loopNum = 1;
+    supply.plantLoc.loopSideNum = DataPlant::LoopSideLocation::Supply;
+
+    auto &branch = supply.Branch(2);
+    branch.TotalComponents = 2;
+    branch.Comp.allocate(2);
+    branch.Comp(1).Type = DataPlant::PlantEquipmentType::PumpConstantSpeed;
+    branch.Comp(1).MyLoad = 0.0;
+    branch.Comp(2).Type = DataPlant::PlantEquipmentType::CoolingTower_TwoSpd;
+    branch.Comp(2).MyLoad = 0.0;
+    branch.disableOverrideForCSBranchPumping = false;
+
+    loop.LoopSide(DataPlant::LoopSideLocation::Demand).flowRequestNeedAndTurnOn = 1.0;
+
+    supply.DisableAnyBranchPumpsConnectedToUnloadedEquipment(*state);
+
+    // the new exception is scoped to condenser loops only
+    EXPECT_TRUE(supply.Branch(2).disableOverrideForCSBranchPumping);
+}

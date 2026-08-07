@@ -43,7 +43,7 @@ void printError(const char *msg);
 
 void printfError(const char *str1, const char *str2);
 
-void setDebug();
+void setDebug(void);
 
 int unpack(const char *fmuFilNam, const char *tmpPat);
 

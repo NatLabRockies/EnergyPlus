@@ -1065,7 +1065,6 @@ int PluginManager::getGlobalVariableHandle(EnergyPlusData &state, const std::str
         ShowContinueError(state, std::format("    \"{}\"", gvName));
     }
     ShowFatalError(state, "Plugin global variable problem causes program termination");
-    return -1; // hush the compiler warning
 }
 #else
 int PluginManager::getGlobalVariableHandle([[maybe_unused]] EnergyPlusData &state,
@@ -1238,7 +1237,6 @@ Real64 PluginManager::getGlobalVariableValue(EnergyPlusData &state, int handle)
         ShowContinueError(state, std::format("Available handles range from 0 to {}", state.dataPluginManager->globalVariableValues.size() - 1));
         ShowFatalError(state, "Plugin global variable problem causes program termination");
     }
-    return 0.0;
 }
 #else
 Real64 PluginManager::getGlobalVariableValue([[maybe_unused]] EnergyPlusData &state, [[maybe_unused]] int handle)

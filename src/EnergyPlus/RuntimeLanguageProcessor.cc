@@ -2315,8 +2315,6 @@ ErlValueType EvaluateExpression(EnergyPlusData &state, int const ExpressionNum, 
                 ShowSevereError(state, "EMS user program found serious problem and is halting simulation");
                 ShowContinueErrorTimeStamp(state, "");
                 ShowFatalError(state, std::format("EMS user program halted simulation with error code = {:.2f}", Operand(1).Number));
-                ReturnValue = SetErlValueNumber(Operand(1).Number); // returns back the error code
-                break;
 
             case ErlFunc::SevereWarnEp:
                 ShowSevereError(state, std::format("EMS user program issued severe warning with error code = {:.2f}", Operand(1).Number));

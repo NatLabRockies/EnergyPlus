@@ -1345,7 +1345,7 @@ void RegisterPlantCompDesignFlow(EnergyPlusData &state,
     int NumPlantComps;
     int PlantCompNum; // component do loop index
     bool Found;
-    int thisCallNodeIndex;
+    int thisCallNodeIndex = 0;
 
     NumPlantComps = state.dataSize->SaveNumPlantComps;
 

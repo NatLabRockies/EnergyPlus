@@ -1,9 +1,9 @@
 
-INCLUDE_DIRECTORIES( "${PROJECT_SOURCE_DIR}/third_party/Expat/lib")
-INCLUDE_DIRECTORIES( "${PROJECT_SOURCE_DIR}/third_party/")
-INCLUDE_DIRECTORIES( ${PROJECT_SOURCE_DIR}/third_party/zlib )
+include_directories("${PROJECT_SOURCE_DIR}/third_party/Expat/lib")
+include_directories("${PROJECT_SOURCE_DIR}/third_party/")
+include_directories("${PROJECT_SOURCE_DIR}/third_party/zlib")
 
-SET(SRC
+set(SRC
   parser.h
   parser.c
   fmumini.c
@@ -18,28 +18,28 @@ SET(SRC
   fmiModelTypes.h
 )
 
-#ADD_LIBRARY( parser SHARED ${SRC} )
+#add_library(parser SHARED ${SRC})
 
-IF (UNIX)
-  ADD_DEFINITIONS("-fPIC")
-ENDIF()
+if(UNIX)
+  add_definitions("-fPIC")
+endif()
 
-ADD_EXECUTABLE( parser ${SRC} )
+add_executable(parser ${SRC})
 
-TARGET_LINK_LIBRARIES( parser epexpat miniziplib )
+target_link_libraries(parser PRIVATE epexpat miniziplib)
 
-INSTALL( TARGETS parser
+install(TARGETS parser
   RUNTIME DESTINATION PreProcess/FMUParser
   LIBRARY DESTINATION ./
   ARCHIVE DESTINATION ./
 )
 
-if( UNIX )
-set_target_properties(
-  parser
-  PROPERTIES
-  INSTALL_NAME_DIR "@executable_path"
-)
+if(UNIX)
+  set_target_properties(
+    parser
+    PROPERTIES
+    INSTALL_NAME_DIR "@executable_path"
+  )
 endif()
 
 if(BUILD_TESTING)

@@ -7769,49 +7769,49 @@ void SetupReportInput(EnergyPlusData &state)
             auto &coil = WarehouseCoil(coilNum);
             if (coil.NumSysAttach == 1) { // ensure no unuseds reported
                 SetupOutputVariable(state,
-                                    "Refrigeration Zone Air Chiller Total Cooling Rate",
+                                    "Refrigeration Zone Air Chiller Coil Total Cooling Rate",
                                     Constant::Units::W,
                                     coil.TotalCoolingLoad,
                                     OutputProcessor::TimeStepType::System,
                                     OutputProcessor::StoreType::Average,
                                     coil.Name);
                 SetupOutputVariable(state,
-                                    "Refrigeration Zone Air Chiller Total Cooling Energy",
+                                    "Refrigeration Zone Air Chiller Coil Total Cooling Energy",
                                     Constant::Units::J,
                                     coil.TotalCoolingEnergy,
                                     OutputProcessor::TimeStepType::System,
                                     OutputProcessor::StoreType::Sum,
                                     coil.Name);
                 SetupOutputVariable(state,
-                                    "Refrigeration Zone Air Chiller Sensible Cooling Rate",
+                                    "Refrigeration Zone Air Chiller Coil Sensible Cooling Rate",
                                     Constant::Units::W,
                                     coil.SensCoolingEnergyRate,
                                     OutputProcessor::TimeStepType::System,
                                     OutputProcessor::StoreType::Average,
                                     coil.Name);
                 SetupOutputVariable(state,
-                                    "Refrigeration Zone Air Chiller Sensible Cooling Energy",
+                                    "Refrigeration Zone Air Chiller Coil Sensible Cooling Energy",
                                     Constant::Units::J,
                                     coil.SensCoolingEnergy,
                                     OutputProcessor::TimeStepType::System,
                                     OutputProcessor::StoreType::Sum,
                                     coil.Name);
                 SetupOutputVariable(state,
-                                    "Refrigeration Zone Air Chiller Latent Cooling Rate",
+                                    "Refrigeration Zone Air Chiller Coil Latent Cooling Rate",
                                     Constant::Units::W,
                                     coil.LatCreditRate,
                                     OutputProcessor::TimeStepType::System,
                                     OutputProcessor::StoreType::Average,
                                     coil.Name);
                 SetupOutputVariable(state,
-                                    "Refrigeration Zone Air Chiller Latent Cooling Energy",
+                                    "Refrigeration Zone Air Chiller Coil Latent Cooling Energy",
                                     Constant::Units::J,
                                     coil.LatCreditEnergy,
                                     OutputProcessor::TimeStepType::System,
                                     OutputProcessor::StoreType::Sum,
                                     coil.Name);
                 SetupOutputVariable(state,
-                                    "Refrigeration Zone Air Chiller Water Removed Mass Flow Rate",
+                                    "Refrigeration Zone Air Chiller Coil Water Removed Mass Flow Rate",
                                     Constant::Units::kg_s,
                                     coil.LatKgPerS_ToZone,
                                     OutputProcessor::TimeStepType::System,
@@ -7868,14 +7868,14 @@ void SetupReportInput(EnergyPlusData &state)
                                     OutputProcessor::EndUseCat::Refrigeration,
                                     "General");
                 SetupOutputVariable(state,
-                                    "Refrigeration Zone Air Chiller Sensible Heat Ratio",
+                                    "Refrigeration Zone Air Chiller Coil Sensible Heat Ratio",
                                     Constant::Units::None,
                                     coil.SensHeatRatio,
                                     OutputProcessor::TimeStepType::System,
                                     OutputProcessor::StoreType::Average,
                                     coil.Name);
                 SetupOutputVariable(state,
-                                    "Refrigeration Zone Air Chiller Frost Accumulation Mass",
+                                    "Refrigeration Zone Air Chiller Coil Frost Accumulation Mass",
                                     Constant::Units::kg,
                                     coil.KgFrost,
                                     OutputProcessor::TimeStepType::System,
@@ -7927,14 +7927,14 @@ void SetupReportInput(EnergyPlusData &state)
                 // Report only for Warehouse coils using electric defrost
                 if (coil.defrostType == DefrostType::Elec) {
                     SetupOutputVariable(state,
-                                        "Refrigeration Zone Air Chiller Defrost Electricity Rate",
+                                        "Refrigeration Zone Air Chiller Coil Defrost Electricity Rate",
                                         Constant::Units::W,
                                         coil.ElecDefrostPower,
                                         OutputProcessor::TimeStepType::System,
                                         OutputProcessor::StoreType::Average,
                                         coil.Name);
                     SetupOutputVariable(state,
-                                        "Refrigeration Zone Air Chiller Defrost Electricity Energy",
+                                        "Refrigeration Zone Air Chiller Coil Defrost Electricity Energy",
                                         Constant::Units::J,
                                         coil.ElecDefrostConsumption,
                                         OutputProcessor::TimeStepType::System,
@@ -11426,8 +11426,6 @@ PlantComponent *RefrigCondenserData::factory(EnergyPlusData &state, std::string 
     }
     // If we didn't find it, fatal
     ShowFatalError(state, std::format("LocalRefrigCondenserFactory: Error getting inputs for object named: {}", objectName)); // LCOV_EXCL_LINE
-    // Shut up the compiler
-    return nullptr; // LCOV_EXCL_LINE
 }
 
 void RefrigCondenserData::onInitLoopEquip(EnergyPlusData &state, [[maybe_unused]] const PlantLocation &calledFromLocation)
@@ -11577,8 +11575,6 @@ PlantComponent *RefrigRackData::factory(EnergyPlusData &state, std::string const
     }
     // If we didn't find it, fatal
     ShowFatalError(state, std::format("LocalRefrigRackFactory: Error getting inputs for object named: {}", objectName)); // LCOV_EXCL_LINE
-    // Shut up the compiler
-    return nullptr; // LCOV_EXCL_LINE
 }
 
 void RefrigRackData::onInitLoopEquip(EnergyPlusData &state, [[maybe_unused]] const PlantLocation &calledFromLocation)

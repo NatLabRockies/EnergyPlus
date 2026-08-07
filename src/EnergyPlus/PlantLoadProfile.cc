@@ -108,8 +108,6 @@ PlantComponent *PlantProfileData::factory(EnergyPlusData &state, std::string con
     }
     // If we didn't find it, fatal
     ShowFatalError(state, std::format("PlantLoadProfile::factory: Error getting inputs for pipe named: {}", objectName));
-    // Shut up the compiler
-    return nullptr;
 }
 
 void PlantProfileData::onInitLoopEquip(EnergyPlusData &state, [[maybe_unused]] const PlantLocation &calledFromLocation)

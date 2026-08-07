@@ -506,7 +506,7 @@ int getepvariablesFMU(char const* const fileName, char* const myOutputVarsName, 
 /// Stack operation, this function will pop one element from stack
 /// and will free the resource unused
 ////////////////////////////////////////////////////////////////
-int stackPopBCVTB() {
+int stackPopBCVTB(void) {
   if (0 == expStk.top) return -1;
   free((expStk.head)[expStk.top]);
   expStk.head = (char**)realloc(expStk.head, sizeof(char*) * (expStk.top));

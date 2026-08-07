@@ -4229,12 +4229,12 @@ namespace StandardRatings {
     CapacityAdjustmentFactorsInCoolingModeSEER2(Real64 q_F_low, Real64 q_B_low, Real64 BN, Real64 q_B_full, Real64 q_A_full, Real64 q_E_int)
     {
         // Equation 11.90 (AHRI-2023)
-        Real64 q_87_low = q_F_low + (q_B_low - q_F_low) * ((OutdoorBinTemperatureSEER[BN] - 19.44 / 27.77 - 19.44));
-        Real64 q_87_full = q_B_full + (q_A_full - q_B_full) * ((OutdoorBinTemperatureSEER[BN] - 19.44 / 27.77 - 19.44));
+        Real64 q_87_low = q_F_low + (q_B_low - q_F_low) * ((OutdoorBinTemperatureSEER[BN] - 19.44) / (27.78 - 19.44));
+        Real64 q_87_full = q_B_full + (q_A_full - q_B_full) * ((OutdoorBinTemperatureSEER[BN] - 19.44) / (27.78 - 19.44));
         // Equation 11.96 (AHRI-2023)
-        Real64 N_Cq = (q_E_int - q_87_low) / (q_87_full - q_87_low);
+        Real64 N_Cq = (q_87_full != q_87_low) ? (q_E_int - q_87_low) / (q_87_full - q_87_low) : 0.0;
         // Equation 11.95 (AHRI-2023)
-        Real64 M_Cq = (q_B_low - q_F_low) / (27.77 - 19.44) * (1. - N_Cq) + (q_A_full - q_B_full) / (35.0 - 27.77) * N_Cq;
+        Real64 M_Cq = (q_B_low - q_F_low) / (27.78 - 19.44) * (1. - N_Cq) + (q_A_full - q_B_full) / (35.0 - 27.78) * N_Cq;
         return std::make_tuple(N_Cq, M_Cq);
     }
 
@@ -4244,14 +4244,14 @@ namespace StandardRatings {
     EnergyAdjustmentFactorsInCoolingModeSEER2(Real64 p_F_low, Real64 p_B_low, Real64 BN, Real64 p_B_full, Real64 p_A_full, Real64 p_E_int)
     {
         // Equation 11.91 (AHRI-2023)
-        Real64 p_87_low = p_F_low + (p_B_low - p_F_low) * ((OutdoorBinTemperatureSEER[BN] - 19.44 / 27.77 - 19.44));
-        Real64 p_87_full = p_B_full + (p_A_full - p_B_full) * ((OutdoorBinTemperatureSEER[BN] - 19.44 / 27.77 - 19.44));
+        Real64 p_87_low = p_F_low + (p_B_low - p_F_low) * ((OutdoorBinTemperatureSEER[BN] - 19.44) / (27.78 - 19.44));
+        Real64 p_87_full = p_B_full + (p_A_full - p_B_full) * ((OutdoorBinTemperatureSEER[BN] - 19.44) / (27.78 - 19.44));
 
         // Equation 11.99 (AHRI-2023)
-        Real64 N_CE = (p_E_int - p_87_low) / (p_87_full - p_87_low);
+        Real64 N_CE = (p_87_full != p_87_low) ? (p_E_int - p_87_low) / (p_87_full - p_87_low) : 0.0;
 
         // Equaition 11.98 (AHRI-2023)
-        Real64 M_CE = (p_B_low - p_F_low) / (27.77 - 19.44) * (1. - N_CE) + (p_A_full - p_B_full) / (35.0 - 27.77) * N_CE;
+        Real64 M_CE = (p_B_low - p_F_low) / (27.78 - 19.44) * (1. - N_CE) + (p_A_full - p_B_full) / (35.0 - 27.78) * N_CE;
         return std::make_tuple(N_CE, M_CE);
     }
 
@@ -4315,8 +4315,7 @@ namespace StandardRatings {
         Real64 TotCoolElecPowerBinned_2023(0.0); // Total cooling electric power corresponding to an outdoor bin temperature [W]
 
         Real64 constexpr SF(1.10); // Sizing Factor as per AHRI Std 210/240-2023 | equation 11.68
-        // Real64 constexpr V(1);     // V = 0.93 for Variable Speed Heat Pumps, otherwise V = 1.0
-        Real64 constexpr V(0.93); // V = 0.93 for Variable Speed Heat Pumps, otherwise V = 1.0
+        Real64 constexpr V(0.93);  // V = 0.93 for Variable Speed Heat Pumps, otherwise V = 1.0
         // part-load factor based on user-input PLF curve and C_D value that accounts for the cyclic degradation, [-]
         // Real64 PartLoadFactorUser_2023(0.0);
 
@@ -4585,22 +4584,19 @@ namespace StandardRatings {
                             IntermediateCapacityAndPowerSEER2Case1(state, bl, q_low, n, p_low, PLFFPLRCurveIndex(spnum));
                         // This is the case and speed we're looking for now we exit and try calculating against the next bin
                         goto SpeedLoop3_exit;
-                    } else if (bl < q_full) { // bl > q_low
-                        // Case 2A:
-                        if (bl < q_int) {
-                            // Section 11.2.1.3.2 CASE 2 - Building load can be matched by modulating the compressor speed between low speed & full
-                            // Speed
-                            std::tie(q, e, NetTotCoolCapBinned_2023, TotCoolElecPowerBinned_2023) = IntermediateCapacityAndPowerSEER2Case2A(
-                                p_int, q_int, q_low, bl, n, Q_E_Int(spnum), q_full, P_E_Int(spnum), p_full, p_low);
-                            goto SpeedLoop3_exit;
-                        } else { // bl < q_full
-                            // Section 11.2.1.3.2 CASE 2 - Building load can be matched by modulating the compressor speed between low speed &
-                            // full Speed
-                            std::tie(q, e, NetTotCoolCapBinned_2023, TotCoolElecPowerBinned_2023) = IntermediateCapacityAndPowerSEER2Case2B(
-                                p_int, bl, q_int, n, Q_E_Int(spnum), P_E_Int(spnum), q_low, p_low, q_full, p_full);
-                            goto SpeedLoop3_exit;
-                        }
-                    } else { // bl >= q_full
+                    } else if (bl <= q_int) { // bl > q_low
+                        // Section 11.2.1.3.2 CASE 2 - Building load can be matched by modulating the compressor speed between low speed & full
+                        // Speed
+                        std::tie(q, e, NetTotCoolCapBinned_2023, TotCoolElecPowerBinned_2023) = IntermediateCapacityAndPowerSEER2Case2A(
+                            p_int, q_int, q_low, bl, n, Q_E_Int(spnum), q_full, P_E_Int(spnum), p_full, p_low);
+                        goto SpeedLoop3_exit;
+                    } else if (bl < q_full && spnum == nsp) {
+                        // Section 11.2.1.3.2 CASE 2 - Building load can be matched by modulating the compressor speed between low speed & full
+                        // Speed
+                        std::tie(q, e, NetTotCoolCapBinned_2023, TotCoolElecPowerBinned_2023) = IntermediateCapacityAndPowerSEER2Case2B(
+                            p_int, bl, q_int, n, Q_E_Int(spnum), P_E_Int(spnum), q_low, p_low, q_full, p_full);
+                        goto SpeedLoop3_exit;
+                    } else if (bl >= q_full && spnum == nsp) { // bl >= q_full
                         // Case 3:
                         // Section 11.2.1.3.3 CASE 3 - Building load is equal to or greater than unit capacity at full stage
                         std::tie(q, e, NetTotCoolCapBinned_2023, TotCoolElecPowerBinned_2023) =
@@ -4727,7 +4723,7 @@ namespace StandardRatings {
         Real64 EER2 = 0.0;
 
         Real64 constexpr SF(1.10); // Sizing Factor as per AHRI Std 210/240-2023 | equation 11.68
-        Real64 constexpr V(1);     // V = 0.93 for Variable Speed Heat Pumps, otherwise V = 1.0
+        Real64 constexpr V(1.0);   // V = 0.93 for Variable Speed Heat Pumps, otherwise V = 1.0
 
         Array1D<Real64> FanPowerPerEvapAirFlowRate_2023(nsp); // 2023 Fan power per air volume flow rate through the evaporator coil [W/(m3/s)]
         Array1D<Real64> Q_A_Full(nsp);                        // Total cooling capacity at A2 test condition (High speed) | q_A_Full
@@ -5093,8 +5089,7 @@ namespace StandardRatings {
         Real64 CoolingElecPowerMax_2023(0.0);         // outdoor unit electric power input at Max speed, [W]
 
         Real64 constexpr SF(1.10); // Sizing Factor as per AHRI Std 210/240-2023 | equation 11.68
-        // Real64 constexpr V(1);     // V = 0.93 for Variable Speed Heat Pumps, otherwise V = 1.0
-        Real64 constexpr V(0.93); // V = 0.93 for Variable Speed Heat Pumps, otherwise V = 1.0
+        Real64 constexpr V(1.0);   // V = 0.93 for Variable Speed Heat Pumps, otherwise V = 1.0
 
         Real64 NetCoolingCapRatedMaxSpeed2023 = 0.0;
         Real64 SEER2_User = 0.0;

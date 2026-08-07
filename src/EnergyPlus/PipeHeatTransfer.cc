@@ -139,8 +139,6 @@ PlantComponent *PipeHTData::factory(EnergyPlusData &state, DataPlant::PlantEquip
     }
     // If we didn't find it, fatal
     ShowFatalError(state, std::format("PipeHTFactory: Error getting inputs for pipe named: {}", objectName));
-    // Shut up the compiler
-    return nullptr;
 }
 
 void PipeHTData::simulate(EnergyPlusData &state,

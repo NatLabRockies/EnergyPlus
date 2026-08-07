@@ -75,7 +75,7 @@ public:
     {
     }
 
-    virtual void SetUp()
+    void SetUp() override
     {
         EnergyPlusFixture::SetUp(); // Sets up individual test cases.
 
@@ -122,7 +122,7 @@ public:
             thisBranch.Comp(compNum).MyLoad = 0.0;
         }
     }
-    virtual void TearDown()
+    void TearDown() override
     {
         EnergyPlusFixture::TearDown(); // Remember to tear down the base fixture after cleaning up derived fixture!
     }

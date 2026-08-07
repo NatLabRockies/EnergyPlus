@@ -143,7 +143,7 @@ GLHEVert::GLHEVert(EnergyPlusData &state, std::string const &objName, nlohmann::
         if (this->gFuncCalcMethod == GFuncCalcMethod::FullDesign) {
 #ifndef PYTHON_CLI
             ShowFatalError(state, "Attempted to use borehole field design in a build without PYTHON_CLI, which is invalid");
-#endif
+#else
             // g-functions won't be calculated until after sizing is complete
             bool foundSizing = false;
             bool objTypeFound = j.find("ghe_vertical_sizing_object_type") != j.end();
@@ -156,123 +156,127 @@ GLHEVert::GLHEVert(EnergyPlusData &state, std::string const &objName, nlohmann::
                 ShowContinueError(state, "GHE:Vertical:Sizing Object Type not specified.");
                 errorsFound = true;
             }
-            if (!objNameFound) {
-                ShowSevereError(state, std::format("GroundHeatExchanger:System \"{}\"", this->name));
-                ShowContinueError(state,
-                                  std::format("g-Function Calculation Method = \"{}\"", j["g_function_calculation_method"].get<std::string>()));
-                ShowContinueError(state, "GHE:Vertical:Sizing Object Name not specified.");
-                errorsFound = true;
+
+            if (objNameFound) {
+                this->sizingData.name = j.at("ghe_vertical_sizing_object_name");
+            }
+            if (objTypeFound) {
+                this->sizingData.type = j.at("ghe_vertical_sizing_object_type");
             }
 
-            this->sizingData.name = j.at("ghe_vertical_sizing_object_name");
-            this->sizingData.type = j.at("ghe_vertical_sizing_object_type");
-
-            if (Util::makeUPPER(this->sizingData.type) != "GROUNDHEATEXCHANGER:VERTICAL:SIZING:RECTANGLE") {
+            // Only the rectangle sizing object is currently supported for full-design sizing.
+            // Keep this as a gate before touching fields that only exist on that object type.
+            bool const validSizingObjectType =
+                objTypeFound && Util::makeUPPER(this->sizingData.type) == "GROUNDHEATEXCHANGER:VERTICAL:SIZING:RECTANGLE";
+            if (objTypeFound && !validSizingObjectType) {
                 ShowSevereError(state, std::format("GroundHeatExchanger:System \"{}\"", this->name));
                 ShowContinueError(state, std::format("GHE:Vertical:Sizing Object Type not supported \"{}\"", this->sizingData.type));
                 errorsFound = true;
             }
 
             auto const instances = state.dataInputProcessing->inputProcessor->epJSON.find("GroundHeatExchanger:Vertical:Sizing:Rectangle");
-            if (instances == state.dataInputProcessing->inputProcessor->epJSON.end()) {
+            if (validSizingObjectType && instances == state.dataInputProcessing->inputProcessor->epJSON.end()) {
                 ShowSevereError(
                     state, std::format("Expected to find GroundHeatExchanger:Vertical:Sizing named {}, but it was missing", this->sizingData.name));
                 errorsFound = true;
-            }
+            } else if (validSizingObjectType && objNameFound) {
+                auto &instanceValues = instances.value();
+                for (auto instance = instanceValues.begin(); instance != instanceValues.end(); ++instance) {
+                    auto const &fields = instance.value();
+                    std::string const &thisSizingObjName = instance.key();
+                    std::string const &objNameUC = Util::makeUPPER(thisSizingObjName);
+                    // Copy sizing fields only from the named rectangle object referenced by this GHE.
+                    if (objNameUC == Util::makeUPPER(this->sizingData.name)) {
+                        foundSizing = true;
 
-            auto &instanceValues = instances.value();
-            for (auto instance = instanceValues.begin(); instance != instanceValues.end(); ++instance) {
-                auto const &fields = instance.value();
-                std::string const &thisSizingObjName = instance.key();
-                std::string const &objNameUC = Util::makeUPPER(thisSizingObjName);
-                if (objNameUC == Util::makeUPPER(this->sizingData.name)) {
-                    foundSizing = true;
-
-                    this->sizingData.sizingPeriodName = fields.at("sizingperiod_weatherfiledays_name");
-                    auto const spInstances = state.dataInputProcessing->inputProcessor->epJSON.find("SizingPeriod:WeatherFileDays");
-                    if (spInstances == state.dataInputProcessing->inputProcessor->epJSON.end()) {
-                        ShowSevereError(state,
-                                        std::format("Expected to find SizingPeriod:WeatherFileDays named {}, but it was missing",
-                                                    this->sizingData.sizingPeriodName));
-                        errorsFound = true;
-                    }
-
-                    bool spIsAnnual = false;
-                    for (auto &designPeriod : state.dataWeather->RunPeriodDesignInput) {
-                        if (Util::makeUPPER(designPeriod.title) == Util::makeUPPER((this->sizingData.sizingPeriodName)) &&
-                            (designPeriod.totalDays == 365)) {
-                            spIsAnnual = true;
-                            break;
+                        this->sizingData.sizingPeriodName = fields.at("sizingperiod_weatherfiledays_name");
+                        auto const spInstances = state.dataInputProcessing->inputProcessor->epJSON.find("SizingPeriod:WeatherFileDays");
+                        if (spInstances == state.dataInputProcessing->inputProcessor->epJSON.end()) {
+                            ShowSevereError(state,
+                                            std::format("Expected to find SizingPeriod:WeatherFileDays named {}, but it was missing",
+                                                        this->sizingData.sizingPeriodName));
+                            errorsFound = true;
                         }
+
+                        bool spIsAnnual = false;
+                        for (auto &designPeriod : state.dataWeather->RunPeriodDesignInput) {
+                            if (Util::makeUPPER(designPeriod.title) == Util::makeUPPER((this->sizingData.sizingPeriodName)) &&
+                                (designPeriod.totalDays == 365)) {
+                                spIsAnnual = true;
+                                break;
+                            }
+                        }
+
+                        if (!spIsAnnual) {
+                            ShowSevereError(state,
+                                            std::format("SizingPeriod:WeatherFileDays named {}, must be an annual design period of 365 days",
+                                                        this->sizingData.sizingPeriodName));
+                            errorsFound = true;
+                        }
+
+                        // Some sizing fields have IDD defaults and may be absent from epJSON.
+                        // Required fields without defaults can be read directly with at().
+                        if (auto it = fields.find("design_flow_rate_per_borehole"); it != fields.end()) {
+                            this->sizingData.designFlowRatePerBorehole = it.value().get<Real64>();
+                        } else {
+                            state.dataInputProcessing->inputProcessor->getDefaultValue(
+                                state, this->sizingData.type, "design_flow_rate_per_borehole", this->sizingData.designFlowRatePerBorehole);
+                        }
+
+                        this->sizingData.length = fields.at("available_borehole_field_length");
+                        this->sizingData.width = fields.at("available_borehole_field_width");
+                        this->sizingData.numBoreholes = fields.at("maximum_number_of_boreholes");
+
+                        if (auto it = fields.find("minimum_borehole_spacing"); it != fields.end()) {
+                            this->sizingData.minSpacing = it.value().get<Real64>();
+                        } else {
+                            state.dataInputProcessing->inputProcessor->getDefaultValue(
+                                state, this->sizingData.type, "minimum_borehole_spacing", this->sizingData.minSpacing);
+                        }
+
+                        if (auto it = fields.find("maximum_borehole_spacing"); it != fields.end()) {
+                            this->sizingData.maxSpacing = it.value().get<Real64>();
+                        } else {
+                            state.dataInputProcessing->inputProcessor->getDefaultValue(
+                                state, this->sizingData.type, "maximum_borehole_spacing", this->sizingData.maxSpacing);
+                        }
+
+                        if (auto it = fields.find("minimum_borehole_vertical_length"); it != fields.end()) {
+                            this->sizingData.minLength = it.value().get<Real64>();
+                        } else {
+                            state.dataInputProcessing->inputProcessor->getDefaultValue(
+                                state, this->sizingData.type, "minimum_borehole_vertical_length", this->sizingData.minLength);
+                        }
+
+                        if (auto it = fields.find("maximum_borehole_vertical_length"); it != fields.end()) {
+                            this->sizingData.maxLength = it.value().get<Real64>();
+                        } else {
+                            state.dataInputProcessing->inputProcessor->getDefaultValue(
+                                state, this->sizingData.type, "maximum_borehole_vertical_length", this->sizingData.maxLength);
+                        }
+
+                        if (auto it = fields.find("minimum_exiting_fluid_temperature_for_sizing"); it != fields.end()) {
+                            this->sizingData.minEFT = it.value().get<Real64>();
+                        } else {
+                            state.dataInputProcessing->inputProcessor->getDefaultValue(
+                                state, this->sizingData.type, "minimum_exiting_fluid_temperature_for_sizing", this->sizingData.minEFT);
+                        }
+
+                        if (auto it = fields.find("maximum_exiting_fluid_temperature_for_sizing"); it != fields.end()) {
+                            this->sizingData.maxEFT = it.value().get<Real64>();
+                        } else {
+                            state.dataInputProcessing->inputProcessor->getDefaultValue(
+                                state, this->sizingData.type, "maximum_exiting_fluid_temperature_for_sizing", this->sizingData.maxEFT);
+                        }
+
+                        state.dataInputProcessing->inputProcessor->markObjectAsUsed("GroundHeatExchanger:Vertical:Sizing:Rectangle",
+                                                                                    this->sizingData.name);
+                        break;
                     }
-
-                    if (!spIsAnnual) {
-                        ShowSevereError(state,
-                                        std::format("SizingPeriod:WeatherFileDays named {}, must be an annual design period of 365 days",
-                                                    this->sizingData.sizingPeriodName));
-                        errorsFound = true;
-                    }
-
-                    if (auto it = fields.find("design_flow_rate_per_borehole"); it != fields.end()) {
-                        this->sizingData.designFlowRatePerBorehole = it.value().get<Real64>();
-                    } else {
-                        state.dataInputProcessing->inputProcessor->getDefaultValue(
-                            state, this->sizingData.type, "design_flow_rate_per_borehole", this->sizingData.designFlowRatePerBorehole);
-                    }
-
-                    this->sizingData.length = fields.at("available_borehole_field_length");
-                    this->sizingData.width = fields.at("available_borehole_field_width");
-                    this->sizingData.numBoreholes = fields.at("maximum_number_of_boreholes");
-
-                    if (auto it = fields.find("minimum_borehole_spacing"); it != fields.end()) {
-                        this->sizingData.minSpacing = it.value().get<Real64>();
-                    } else {
-                        state.dataInputProcessing->inputProcessor->getDefaultValue(
-                            state, this->sizingData.type, "minimum_borehole_spacing", this->sizingData.minSpacing);
-                    }
-
-                    if (auto it = fields.find("maximum_borehole_spacing"); it != fields.end()) {
-                        this->sizingData.maxSpacing = it.value().get<Real64>();
-                    } else {
-                        state.dataInputProcessing->inputProcessor->getDefaultValue(
-                            state, this->sizingData.type, "maximum_borehole_spacing", this->sizingData.maxSpacing);
-                    }
-
-                    if (auto it = fields.find("minimum_borehole_vertical_length"); it != fields.end()) {
-                        this->sizingData.minLength = it.value().get<Real64>();
-                    } else {
-                        state.dataInputProcessing->inputProcessor->getDefaultValue(
-                            state, this->sizingData.type, "minimum_borehole_vertical_length", this->sizingData.minLength);
-                    }
-
-                    if (auto it = fields.find("maximum_borehole_vertical_length"); it != fields.end()) {
-                        this->sizingData.maxLength = it.value().get<Real64>();
-                    } else {
-                        state.dataInputProcessing->inputProcessor->getDefaultValue(
-                            state, this->sizingData.type, "maximum_borehole_vertical_length", this->sizingData.maxLength);
-                    }
-
-                    if (auto it = fields.find("minimum_exiting_fluid_temperature_for_sizing"); it != fields.end()) {
-                        this->sizingData.minEFT = it.value().get<Real64>();
-                    } else {
-                        state.dataInputProcessing->inputProcessor->getDefaultValue(
-                            state, this->sizingData.type, "minimum_exiting_fluid_temperature_for_sizing", this->sizingData.minEFT);
-                    }
-
-                    if (auto it = fields.find("maximum_exiting_fluid_temperature_for_sizing"); it != fields.end()) {
-                        this->sizingData.maxEFT = it.value().get<Real64>();
-                    } else {
-                        state.dataInputProcessing->inputProcessor->getDefaultValue(
-                            state, this->sizingData.type, "maximum_exiting_fluid_temperature_for_sizing", this->sizingData.maxEFT);
-                    }
-
-                    state.dataInputProcessing->inputProcessor->markObjectAsUsed("GroundHeatExchanger:Vertical:Sizing:Rectangle",
-                                                                                this->sizingData.name);
-                    break;
                 }
             }
 
-            if (!foundSizing) {
+            if (validSizingObjectType && objNameFound && !foundSizing) {
                 ShowSevereError(state, "Could not find matching GroundHeatExchanger:Vertical:Sizing:Rectangle");
                 errorsFound = true;
             }
@@ -282,23 +286,26 @@ GLHEVert::GLHEVert(EnergyPlusData &state, std::string const &objName, nlohmann::
                 ShowContinueError(state, "If you enter more than one, only the first is used to specify the borehole design");
                 ShowContinueError(state, std::format("Check references to these objects for GHE:System object: {}", this->name));
                 errorsFound = true;
-            }
-
-            std::vector<std::shared_ptr<GLHEVertSingle>> tempVectOfBHObjects;
-            auto const &vars = j.at("vertical_well_locations");
-            for (auto const &var : vars) {
-                if (!var.at("ghe_vertical_single_object_name").empty()) {
-                    std::shared_ptr<GLHEVertSingle> tempBHptr =
-                        GLHEVertSingle::GetSingleBH(state, Util::makeUPPER(var.at("ghe_vertical_single_object_name").get<std::string>()));
-                    tempVectOfBHObjects.push_back(tempBHptr);
-                    this->myRespFactors = BuildAndGetResponseFactorsObjectFromSingleBHs(state, tempVectOfBHObjects);
+            } else {
+                std::vector<std::shared_ptr<GLHEVertSingle>> tempVectOfBHObjects;
+                auto const &vars = j.at("vertical_well_locations");
+                // FullDesign uses a single borehole only to seed temporary response factors;
+                // the designed borefield replaces the g-functions after HVAC sizing.
+                if (!vars.empty()) {
+                    auto const &var = vars.front();
+                    if (!var.at("ghe_vertical_single_object_name").empty()) {
+                        std::shared_ptr<GLHEVertSingle> tempBHptr =
+                            GLHEVertSingle::GetSingleBH(state, Util::makeUPPER(var.at("ghe_vertical_single_object_name").get<std::string>()));
+                        tempVectOfBHObjects.push_back(tempBHptr);
+                        this->myRespFactors = BuildAndGetResponseFactorsObjectFromSingleBHs(state, tempVectOfBHObjects);
+                    }
                 }
-                break;
             }
             if (!this->myRespFactors) {
                 ShowSevereError(state, "Something went wrong creating response factor for GroundHeatExchanger, check previous errors.");
                 errorsFound = true;
             }
+#endif
 
         } else if (j.find("ghe_vertical_array_object_name") != j.end()) {
             // Response factors come from array object
@@ -310,30 +317,37 @@ GLHEVert::GLHEVert(EnergyPlusData &state, std::string const &objName, nlohmann::
                 ShowSevereError(state, "No GHE:ResponseFactors, GHE:Vertical:Array, or GHE:Vertical:Single objects found");
                 ShowContinueError(state, std::format("Check references to these objects for GHE:System object: {}", this->name));
                 errorsFound = true;
-            }
+            } else {
+                auto const &vars = j.at("vertical_well_locations");
 
-            auto const &vars = j.at("vertical_well_locations");
+                // Calculate response factors from individual boreholes
+                std::vector<std::shared_ptr<GLHEVertSingle>> tempVectOfBHObjects;
 
-            // Calculate response factors from individual boreholes
-            std::vector<std::shared_ptr<GLHEVertSingle>> tempVectOfBHObjects;
+                for (auto const &var : vars) {
+                    if (!var.at("ghe_vertical_single_object_name").empty()) {
+                        std::shared_ptr<GLHEVertSingle> tempBHptr =
+                            GLHEVertSingle::GetSingleBH(state, Util::makeUPPER(var.at("ghe_vertical_single_object_name").get<std::string>()));
+                        tempVectOfBHObjects.push_back(tempBHptr);
+                    } else {
+                        break;
+                    }
+                }
 
-            for (auto const &var : vars) {
-                if (!var.at("ghe_vertical_single_object_name").empty()) {
-                    std::shared_ptr<GLHEVertSingle> tempBHptr =
-                        GLHEVertSingle::GetSingleBH(state, Util::makeUPPER(var.at("ghe_vertical_single_object_name").get<std::string>()));
-                    tempVectOfBHObjects.push_back(tempBHptr);
+                // Avoid calling BuildAndGetResponseFactorsObjectFromSingleBHs with no boreholes;
+                // it averages properties by the borehole count.
+                if (tempVectOfBHObjects.empty()) {
+                    ShowSevereError(state, "GroundHeatExchanger:Vertical:Single objects not found.");
+                    errorsFound = true;
                 } else {
-                    break;
+                    this->myRespFactors = BuildAndGetResponseFactorsObjectFromSingleBHs(state, tempVectOfBHObjects);
                 }
             }
-
-            this->myRespFactors = BuildAndGetResponseFactorsObjectFromSingleBHs(state, tempVectOfBHObjects);
-
-            if (!this->myRespFactors) {
-                ShowSevereError(state, "GroundHeatExchanger:Vertical:Single objects not found.");
-                errorsFound = true;
-            }
         }
+    }
+
+    // Stop before dereferencing response factor data if input processing already found fatal errors.
+    if (errorsFound) {
+        ShowFatalError(state, std::format("Errors found in processing input for {}", moduleName));
     }
 
     this->bhDiameter = this->myRespFactors->props->bhDiameter;
@@ -389,11 +403,6 @@ GLHEVert::GLHEVert(EnergyPlusData &state, std::string const &objName, nlohmann::
     // Initialize ground temperature model and get pointer reference
     this->groundTempModel =
         GroundTemp::GetGroundTempModelAndInit(state, modelType, Util::makeUPPER(j["undisturbed_ground_temperature_model_name"].get<std::string>()));
-
-    // Check for Errors
-    if (errorsFound) {
-        ShowFatalError(state, std::format("Errors found in processing input for {}", moduleName));
-    }
 
     OutputReportPredefined::PreDefTableEntry(state,
                                              state.dataOutRptPredefined->pdchGLHEType,

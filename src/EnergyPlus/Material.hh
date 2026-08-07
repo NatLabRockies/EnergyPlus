@@ -325,7 +325,7 @@ namespace Material {
             group = Group::Invalid;
         }
         ~MaterialShadingDevice() = default;
-        virtual bool can_instantiate() = 0; // Prevents this class from being instantiated
+        bool can_instantiate() override = 0; // Prevents this class from being instantiated
     };
 
     // Class for WindowMaterial:Shade
@@ -532,7 +532,7 @@ namespace Material {
             group = Group::Blind;
         }
         ~MaterialBlind() = default;
-        bool can_instantiate()
+        bool can_instantiate() override
         {
             return true;
         } // This function allows this class to be instantiated
@@ -561,7 +561,7 @@ namespace Material {
             group = Group::ComplexShade;
         }
         ~MaterialComplexShade() = default;
-        bool can_instantiate()
+        bool can_instantiate() override
         {
             return true;
         } // This function allows this class to be instantiated
@@ -866,7 +866,7 @@ namespace Material {
             group = Group::Glass;
         }
         ~MaterialGlass() = default;
-        bool can_instantiate()
+        bool can_instantiate() override
         {
             return true;
         }
@@ -884,7 +884,7 @@ namespace Material {
             group = Group::GlassEQL;
         }
         ~MaterialGlassEQL() = default;
-        bool can_instantiate()
+        bool can_instantiate() override
         {
             return true;
         }

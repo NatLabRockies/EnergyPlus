@@ -95,7 +95,6 @@ std::shared_ptr<CoilCoolingDXPerformanceBase> CoilCoolingDX::makePerformanceSubc
     }
 
     ShowFatalError(state, std::format("Could not find Coil:Cooling:DX:Performance object with name: {}", performance_object_name));
-    return nullptr;
 }
 
 int CoilCoolingDX::factory(EnergyPlus::EnergyPlusData &state, std::string const &coilName)

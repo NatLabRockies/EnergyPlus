@@ -74,6 +74,80 @@ namespace MixedAir {
     // Data
     // MODULE PARAMETER DEFINITIONS
 
+    // the equipment list object has its own subset of E+ components that are valid, this covers that list
+    enum class ValidEquipListType
+    {
+        Invalid = -1,
+        OutdoorAirMixer,
+        FanConstantVolume,
+        FanVariableVolume,
+        FanSystemModel,
+        FanComponentModel,
+        CoilCoolingWater,
+        CoilHeatingWater,
+        CoilHeatingSteam,
+        CoilCoolingWaterDetailedGeometry,
+        CoilHeatingElectric,
+        CoilHeatingFuel,
+        CoilSystemCoolingWater,
+        CoilSystemCoolingWaterHeatExchangerAssisted,
+        CoilSystemCoolingDX,
+        CoilSystemHeatingDX,
+        AirLoopHVACUnitarySystem,
+        CoilUserDefined,
+        HeatExchangerAirToAirFlatPlate,
+        HeatExchangerAirToAirSensibleAndLatent,
+        HeatExchangerDesiccantBalancedFlow,
+        DehumidifierDesiccantNoFans,
+        DehumidifierDesiccantSystem,
+        HumidifierSteamElectric,
+        HumidifierSteamGas,
+        SolarCollectorUnglazedTranspired,
+        SolarCollectorFlatPlatePhotovoltaicThermal,
+        EvaporativeCoolerDirectCeldekPad,
+        EvaporativeCoolerIndirectCeldekPad,
+        EvaporativeCoolerIndirectWetCoil,
+        EvaporativeCoolerIndirectResearchSpecial,
+        EvaporativeCoolerDirectResearchSpecial,
+        ZoneHVACTerminalUnitVariableRefrigerantFlow,
+        Num
+    };
+
+    constexpr std::array<std::string_view, static_cast<int>(ValidEquipListType::Num)> validEquipNamesUC = {
+        "OUTDOORAIR:MIXER",
+        "FAN:CONSTANTVOLUME",
+        "FAN:VARIABLEVOLUME",
+        "FAN:SYSTEMMODEL",
+        "FAN:COMPONENTMODEL",
+        "COIL:COOLING:WATER",
+        "COIL:HEATING:WATER",
+        "COIL:HEATING:STEAM",
+        "COIL:COOLING:WATER:DETAILEDGEOMETRY",
+        "COIL:HEATING:ELECTRIC",
+        "COIL:HEATING:FUEL",
+        "COILSYSTEM:COOLING:WATER",
+        "COILSYSTEM:COOLING:WATER:HEATEXCHANGERASSISTED",
+        "COILSYSTEM:COOLING:DX",
+        "COILSYSTEM:HEATING:DX",
+        "AIRLOOPHVAC:UNITARYSYSTEM",
+        "COIL:USERDEFINED",
+        "HEATEXCHANGER:AIRTOAIR:FLATPLATE",
+        "HEATEXCHANGER:AIRTOAIR:SENSIBLEANDLATENT",
+        "HEATEXCHANGER:DESICCANT:BALANCEDFLOW",
+        "DEHUMIDIFIER:DESICCANT:NOFANS",
+        "DEHUMIDIFIER:DESICCANT:SYSTEM",
+        "HUMIDIFIER:STEAM:ELECTRIC",
+        "HUMIDIFIER:STEAM:GAS",
+        "SOLARCOLLECTOR:UNGLAZEDTRANSPIRED",
+        "SOLARCOLLECTOR:FLATPLATE:PHOTOVOLTAICTHERMAL",
+        "EVAPORATIVECOOLER:DIRECT:CELDEKPAD",
+        "EVAPORATIVECOOLER:INDIRECT:CELDEKPAD",
+        "EVAPORATIVECOOLER:INDIRECT:WETCOIL",
+        "EVAPORATIVECOOLER:INDIRECT:RESEARCHSPECIAL",
+        "EVAPORATIVECOOLER:DIRECT:RESEARCHSPECIAL",
+        "ZONEHVAC:TERMINALUNIT:VARIABLEREFRIGERANTFLOW",
+    };
+
     enum class LockoutType
     {
         Invalid = -1,
@@ -450,6 +524,8 @@ namespace MixedAir {
     int GetNumOASystems(EnergyPlusData &state);
 
     int GetOACompListNumber(EnergyPlusData &state, int OASysNum); // OA Sys Number
+
+    void GetOACompNodeNumbers(EnergyPlusData &state, int const OASysNum, bool &errorsFound); // OA Sys Number
 
     std::string GetOACompName(EnergyPlusData &state,
                               int OASysNum, // OA Sys Number

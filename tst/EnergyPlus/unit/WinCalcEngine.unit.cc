@@ -55,7 +55,6 @@
 
 // EnergyPlus Headers
 #include "Fixtures/EnergyPlusFixture.hh"
-#include "Windows-CalcEngine/src/Common/src/FenestrationCommon.hpp"
 #include <EnergyPlus/Data/EnergyPlusData.hh>
 #include <EnergyPlus/DataIPShortCuts.hh>
 #include <EnergyPlus/HeatBalanceManager.hh>

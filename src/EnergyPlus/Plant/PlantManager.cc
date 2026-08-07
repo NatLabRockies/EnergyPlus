@@ -3310,9 +3310,8 @@ void SizePlantLoop(EnergyPlusData &state,
             }
         } else {
             if (state.dataPlnt->PlantFirstSizesOkayToFinalize) {
-                ShowFatalError(state, "Autosizing of plant loop requires a loop Sizing:Plant object");
                 ShowContinueError(state, "Occurs in PlantLoop object=" + loop.Name);
-                ErrorsFound = true;
+                ShowFatalError(state, "Autosizing of plant loop requires a loop Sizing:Plant object");
             }
         }
     }

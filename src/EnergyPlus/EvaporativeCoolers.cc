@@ -3656,8 +3656,8 @@ void GetInputZoneEvaporativeCoolerUnit(EnergyPlusData &state)
     lNumericBlanks.deallocate();
 
     if (ErrorsFound) {
-        ShowFatalError(state, std::format("{}Errors found in getting input.", RoutineName));
         ShowContinueError(state, "... Preceding condition causes termination.");
+        ShowFatalError(state, std::format("{}Errors found in getting input.", RoutineName));
     }
 
     // setup output variables

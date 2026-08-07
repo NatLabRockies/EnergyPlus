@@ -389,7 +389,9 @@ namespace HVACVariableRefrigerantFlow {
         Real64 SCHigh;                    // VRF outdoor unit subcooling degrees upper limit [C]
         Real64 VRFOperationSimPath;       // simulation path indicating the VRF operation mode [--]
         bool checkPlantCondTypeOneTime;
-        int CondenserCapErrIdx; // recurring condenser capacity error index
+        int CondenserCapErrIdx;              // recurring condenser capacity error index
+        int CondenserCoolingIterLimitErrIdx; // recurring cooling compressor iteration limit error index
+        int CondenserHeatingIterLimitErrIdx; // recurring heating compressor iteration limit error index
         bool adjustedTe;
 
         // Default Constructor
@@ -430,7 +432,8 @@ namespace HVACVariableRefrigerantFlow {
               RatedHeatCapacity(0.0), RatedCompPower(14000.0), RatedCompPowerPerCapcity(0.35), RatedOUFanPower(0.0), RatedOUFanPowerPerCapcity(0.0),
               RateBFOUEvap(0.45581), RateBFOUCond(0.21900), RefPipDiaSuc(0.0), RefPipDiaDis(0.0), RefPipLen(0.0), RefPipEquLen(0.0), RefPipHei(0.0),
               RefPipInsThi(0.0), RefPipInsCon(0.0), SH(0.0), SC(0.0), SCHE(0.0), SHLow(0.0), SCLow(0.0), SHHigh(0.0), SCHigh(0.0),
-              VRFOperationSimPath(0.0), checkPlantCondTypeOneTime(true), CondenserCapErrIdx(0), adjustedTe(false)
+              VRFOperationSimPath(0.0), checkPlantCondTypeOneTime(true), CondenserCapErrIdx(0), CondenserCoolingIterLimitErrIdx(0),
+              CondenserHeatingIterLimitErrIdx(0), adjustedTe(false)
         {
         }
 

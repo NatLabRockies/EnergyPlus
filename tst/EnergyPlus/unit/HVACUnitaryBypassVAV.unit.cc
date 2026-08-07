@@ -95,7 +95,7 @@ public:
     bool ErrorsFound = false;
 
 protected:
-    virtual void SetUp() // Please don't do this
+    void SetUp() override // Please don't do this
     {
         EnergyPlusFixture::SetUp(); // Sets up the base fixture first.
 
@@ -311,7 +311,7 @@ protected:
         state->dataAirLoop->AirLoopControlInfo.allocate(1);
     }
 
-    virtual void TearDown()
+    void TearDown() override
     {
         EnergyPlusFixture::TearDown(); // Remember to tear down the base fixture after cleaning up derived fixture!
     }

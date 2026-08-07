@@ -1735,6 +1735,12 @@ namespace OutputReportPredefined {
         s->pdchLeedSchStPt11pmWednesday = newPreDefColumn(state, s->pdstLeedSchedSetPts, "11pm First Wednesday [C]");
         s->pdchLeedSchStPt11pmWedCnt = newPreDefColumn(state, s->pdstLeedSchedSetPts, "Days with Same 11pm Value");
 
+        s->pdstLeedVentilation = newPreDefSubTable(state, s->pdrLeed, "Ventilation");
+        s->pdchLeedVentMinVentPerArea = newPreDefColumn(state, s->pdstLeedVentilation, "Minimum Ventilation Per Area [m3/s-m2]");
+        s->pdchLeedVentMinVentPerZone = newPreDefColumn(state, s->pdstLeedVentilation, "Minimum Ventilation Per Zone [m3/s]");
+        s->pdchLeedVentMinFlowPerArea = newPreDefColumn(state, s->pdstLeedVentilation, "Minimum Flow Per Area [m3/s-m2]");
+        s->pdchLeedVentMinFlowPerZone = newPreDefColumn(state, s->pdstLeedVentilation, "Minimum Flow Per Zone [m3/s]");
+
         s->pdrCO2Resilience = newPreDefReport(state, "CO2ResilienceSummary", "CO2R", "Annual CO2 Resilience Summary");
 
         s->pdstCO2Hours = newPreDefSubTable(state, s->pdrCO2Resilience, "CO2 Level Hours");

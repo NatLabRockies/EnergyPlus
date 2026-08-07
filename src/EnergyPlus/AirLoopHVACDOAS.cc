@@ -89,78 +89,6 @@ namespace EnergyPlus {
 
 namespace AirLoopHVACDOAS {
 
-    // the equipment list object has its own subset of E+ components that are valid, this covers that list
-    enum class ValidEquipListType
-    {
-        Invalid = -1,
-        OutdoorAirMixer,
-        FanConstantVolume,
-        FanVariableVolume,
-        FanSystemModel,
-        FanComponentModel,
-        CoilCoolingWater,
-        CoilHeatingWater,
-        CoilHeatingSteam,
-        CoilCoolingWaterDetailedGeometry,
-        CoilHeatingElectric,
-        CoilHeatingFuel,
-        CoilSystemCoolingWaterHeatExchangerAssisted,
-        CoilSystemCoolingDX,
-        CoilSystemHeatingDX,
-        AirLoopHVACUnitarySystem,
-        CoilUserDefined,
-        HeatExchangerAirToAirFlatPlate,
-        HeatExchangerAirToAirSensibleAndLatent,
-        HeatExchangerDesiccantBalancedFlow,
-        DehumidifierDesiccantNoFans,
-        DehumidifierDesiccantSystem,
-        HumidifierSteamElectric,
-        HumidifierSteamGas,
-        SolarCollectorUnglazedTranspired,
-        SolarCollectorFlatPlatePhotovoltaicThermal,
-        EvaporativeCoolerDirectCeldekPad,
-        EvaporativeCoolerIndirectCeldekPad,
-        EvaporativeCoolerIndirectWetCoil,
-        EvaporativeCoolerIndirectResearchSpecial,
-        EvaporativeCoolerDirectResearchSpecial,
-        ZoneHVACTerminalUnitVariableRefrigerantFlow,
-        Num
-    };
-
-    constexpr std::array<std::string_view, static_cast<int>(ValidEquipListType::Num)> validEquipNamesUC = {
-        "OUTDOORAIR:MIXER",
-        "FAN:CONSTANTVOLUME",
-        "FAN:VARIABLEVOLUME",
-        "FAN:SYSTEMMODEL",
-        "FAN:COMPONENTMODEL",
-        "COIL:COOLING:WATER",
-        "COIL:HEATING:WATER",
-        "COIL:HEATING:STEAM",
-        "COIL:COOLING:WATER:DETAILEDGEOMETRY",
-        "COIL:HEATING:ELECTRIC",
-        "COIL:HEATING:FUEL",
-        "COILSYSTEM:COOLING:WATER:HEATEXCHANGERASSISTED",
-        "COILSYSTEM:COOLING:DX",
-        "COILSYSTEM:HEATING:DX",
-        "AIRLOOPHVAC:UNITARYSYSTEM",
-        "COIL:USERDEFINED",
-        "HEATEXCHANGER:AIRTOAIR:FLATPLATE",
-        "HEATEXCHANGER:AIRTOAIR:SENSIBLEANDLATENT",
-        "HEATEXCHANGER:DESICCANT:BALANCEDFLOW",
-        "DEHUMIDIFIER:DESICCANT:NOFANS",
-        "DEHUMIDIFIER:DESICCANT:SYSTEM",
-        "HUMIDIFIER:STEAM:ELECTRIC",
-        "HUMIDIFIER:STEAM:GAS",
-        "SOLARCOLLECTOR:UNGLAZEDTRANSPIRED",
-        "SOLARCOLLECTOR:FLATPLATE:PHOTOVOLTAICTHERMAL",
-        "EVAPORATIVECOOLER:DIRECT:CELDEKPAD",
-        "EVAPORATIVECOOLER:INDIRECT:CELDEKPAD",
-        "EVAPORATIVECOOLER:INDIRECT:WETCOIL",
-        "EVAPORATIVECOOLER:INDIRECT:RESEARCHSPECIAL",
-        "EVAPORATIVECOOLER:DIRECT:RESEARCHSPECIAL",
-        "ZONEHVAC:TERMINALUNIT:VARIABLEREFRIGERANTFLOW",
-    };
-
     void AirLoopDOAS::SimAirLoopHVACDOAS(EnergyPlusData &state, bool const FirstHVACIteration, int &CompIndex)
     {
 
@@ -519,62 +447,39 @@ namespace AirLoopHVACDOAS {
                 CurrentModuleObject = "AirLoopHVAC:OutdoorAirSystem:EquipmentList";
                 int CoolingCoilOrder = 0;
                 int FanOrder = 0;
-                int fanNum = 0;
                 for (int CompNum = 1; CompNum <= thisOutsideAirSys.NumComponents; ++CompNum) {
-                    std::string const &CompType = thisOutsideAirSys.ComponentType(CompNum);
                     std::string const &CompName = thisOutsideAirSys.ComponentName(CompNum);
 
-                    bool InletNodeErrFlag = false;
-                    bool OutletNodeErrFlag = false;
                     bool isFan = false;
 
                     const std::string typeNameUC = Util::makeUPPER(thisOutsideAirSys.ComponentType(CompNum));
-                    switch (static_cast<ValidEquipListType>(getEnumValue(validEquipNamesUC, typeNameUC))) {
-                    case ValidEquipListType::OutdoorAirMixer:
-                    case ValidEquipListType::FanConstantVolume:
-                    case ValidEquipListType::FanVariableVolume:
-                    case ValidEquipListType::CoilUserDefined:
+                    switch (static_cast<MixedAir::ValidEquipListType>(getEnumValue(MixedAir::validEquipNamesUC, typeNameUC))) {
+                    case MixedAir::ValidEquipListType::OutdoorAirMixer:
+                    case MixedAir::ValidEquipListType::FanConstantVolume:
+                    case MixedAir::ValidEquipListType::FanVariableVolume:
+                    case MixedAir::ValidEquipListType::CoilUserDefined:
                         ShowSevereError(state,
                                         std::format("When {} = {} is used in AirLoopHVAC:DedicatedOutdoorAirSystem,", CurrentModuleObject, CompName));
                         ShowContinueError(state, std::format(" the {} can not be used as a component. Please remove it", typeNameUC));
                         errorsFound = true;
                         break;
-                    case ValidEquipListType::FanSystemModel:
+                    case MixedAir::ValidEquipListType::FanSystemModel:
                         isFan = true;
-                        fanNum = Fans::GetFanIndex(state, CompName);
-                        thisOutsideAirSys.InletNodeNum(CompNum) = state.dataFans->fans(fanNum)->inletNodeNum;
-                        if (thisOutsideAirSys.InletNodeNum(CompNum) == 0) {
-                            InletNodeErrFlag = true;
-                        }
-                        thisOutsideAirSys.OutletNodeNum(CompNum) = state.dataFans->fans(fanNum)->outletNodeNum;
-                        if (thisOutsideAirSys.OutletNodeNum(CompNum) == 0) {
-                            OutletNodeErrFlag = true;
-                        }
                         if (thisDOAS.m_FanInletNodeNum == 0) {
                             thisDOAS.m_FanInletNodeNum = thisOutsideAirSys.InletNodeNum(CompNum);
                             thisDOAS.m_FanOutletNodeNum = thisOutsideAirSys.OutletNodeNum(CompNum);
                             FanOrder = CompNum;
                             thisDOAS.FanName = CompName;
                             thisDOAS.m_FanTypeNum = SimAirServingZones::CompType::Fan_System_Object;
-                            thisDOAS.m_FanIndex = fanNum;
+                            thisDOAS.m_FanIndex = Fans::GetFanIndex(state, CompName);
                         }
                         if (CompNum == 1) {
                             thisDOAS.FanBeforeCoolingCoilFlag = true;
                         }
                         break;
 
-                    case ValidEquipListType::FanComponentModel:
+                    case MixedAir::ValidEquipListType::FanComponentModel:
                         isFan = true;
-                        fanNum = Fans::GetFanIndex(state, CompName);
-                        thisOutsideAirSys.InletNodeNum(CompNum) = state.dataFans->fans(thisDOAS.m_FanIndex)->inletNodeNum;
-                        if (thisOutsideAirSys.InletNodeNum(CompNum) == 0) {
-                            InletNodeErrFlag = true;
-                        }
-                        thisOutsideAirSys.OutletNodeNum(CompNum) = state.dataFans->fans(thisDOAS.m_FanIndex)->outletNodeNum;
-                        if (thisOutsideAirSys.OutletNodeNum(CompNum) == 0) {
-                            OutletNodeErrFlag = true;
-                        }
-
                         if (thisDOAS.m_FanInletNodeNum == 0) {
                             thisDOAS.m_FanInletNodeNum = thisOutsideAirSys.InletNodeNum(CompNum);
                             thisDOAS.m_FanOutletNodeNum = thisOutsideAirSys.OutletNodeNum(CompNum);
@@ -588,9 +493,7 @@ namespace AirLoopHVACDOAS {
                         }
                         break;
 
-                    case ValidEquipListType::CoilCoolingWater:
-                        thisOutsideAirSys.InletNodeNum(CompNum) = WaterCoils::GetCoilInletNode(state, typeNameUC, CompName, InletNodeErrFlag);
-                        thisOutsideAirSys.OutletNodeNum(CompNum) = WaterCoils::GetCoilOutletNode(state, typeNameUC, CompName, OutletNodeErrFlag);
+                    case MixedAir::ValidEquipListType::CoilCoolingWater:
                         thisDOAS.CWCtrlNodeNum = WaterCoils::GetCoilWaterInletNode(state, "COIL:COOLING:WATER", CompName, errorsFound);
                         if (errorsFound) {
                             ShowContinueError(state, std::format("The control node number is not found in {} = {}", CurrentModuleObject, CompName));
@@ -604,9 +507,7 @@ namespace AirLoopHVACDOAS {
                         CoolingCoilOrder = CompNum;
                         break;
 
-                    case ValidEquipListType::CoilHeatingWater:
-                        thisOutsideAirSys.InletNodeNum(CompNum) = WaterCoils::GetCoilInletNode(state, typeNameUC, CompName, InletNodeErrFlag);
-                        thisOutsideAirSys.OutletNodeNum(CompNum) = WaterCoils::GetCoilOutletNode(state, typeNameUC, CompName, OutletNodeErrFlag);
+                    case MixedAir::ValidEquipListType::CoilHeatingWater:
                         thisDOAS.HWCtrlNodeNum = WaterCoils::GetCoilWaterInletNode(state, "Coil:Heating:Water", CompName, errorsFound);
                         if (errorsFound) {
                             ShowContinueError(state, std::format("The control node number is not found in {} = {}", CurrentModuleObject, CompName));
@@ -619,14 +520,10 @@ namespace AirLoopHVACDOAS {
                         }
                         break;
 
-                    case ValidEquipListType::CoilHeatingSteam:
-                        thisOutsideAirSys.InletNodeNum(CompNum) = SteamCoils::GetCoilSteamInletNode(state, CompType, CompName, InletNodeErrFlag);
-                        thisOutsideAirSys.OutletNodeNum(CompNum) = SteamCoils::GetCoilSteamOutletNode(state, CompType, CompName, OutletNodeErrFlag);
+                    case MixedAir::ValidEquipListType::CoilHeatingSteam:
                         break;
 
-                    case ValidEquipListType::CoilCoolingWaterDetailedGeometry:
-                        thisOutsideAirSys.InletNodeNum(CompNum) = WaterCoils::GetCoilInletNode(state, typeNameUC, CompName, InletNodeErrFlag);
-                        thisOutsideAirSys.OutletNodeNum(CompNum) = WaterCoils::GetCoilOutletNode(state, typeNameUC, CompName, OutletNodeErrFlag);
+                    case MixedAir::ValidEquipListType::CoilCoolingWaterDetailedGeometry:
                         thisDOAS.CWCtrlNodeNum =
                             WaterCoils::GetCoilWaterInletNode(state, "Coil:Cooling:Water:DetailedGeometry", CompName, errorsFound);
                         if (errorsFound) {
@@ -649,85 +546,53 @@ namespace AirLoopHVACDOAS {
                         CoolingCoilOrder = CompNum;
                         break;
 
-                    case ValidEquipListType::CoilHeatingElectric:
-                    case ValidEquipListType::CoilHeatingFuel:
-                        thisOutsideAirSys.InletNodeNum(CompNum) = HeatingCoils::GetCoilInletNode(state, typeNameUC, CompName, InletNodeErrFlag);
-                        thisOutsideAirSys.OutletNodeNum(CompNum) = HeatingCoils::GetCoilOutletNode(state, typeNameUC, CompName, OutletNodeErrFlag);
+                    case MixedAir::ValidEquipListType::CoilHeatingElectric:
+                    case MixedAir::ValidEquipListType::CoilHeatingFuel:
                         break;
 
-                    case ValidEquipListType::CoilSystemCoolingWaterHeatExchangerAssisted:
-                        thisOutsideAirSys.InletNodeNum(CompNum) =
-                            HVACHXAssistedCoolingCoil::GetCoilInletNode(state, CompType, CompName, InletNodeErrFlag);
-                        thisOutsideAirSys.OutletNodeNum(CompNum) =
-                            HVACHXAssistedCoolingCoil::GetCoilOutletNode(state, CompType, CompName, OutletNodeErrFlag);
+                    case MixedAir::ValidEquipListType::CoilSystemCoolingWaterHeatExchangerAssisted:
                         break;
 
-                    case ValidEquipListType::CoilSystemCoolingDX:
-                    case ValidEquipListType::AirLoopHVACUnitarySystem:
+                    case MixedAir::ValidEquipListType::CoilSystemCoolingDX:
+                    case MixedAir::ValidEquipListType::AirLoopHVACUnitarySystem:
                         if (thisOutsideAirSys.compPointer[CompNum] == nullptr) {
                             UnitarySystems::UnitarySys const thisSys;
                             thisOutsideAirSys.compPointer[CompNum] =
                                 UnitarySystems::UnitarySys::factory(state, HVAC::UnitarySysType::Unitary_AnyCoilType, CompName, false, 0);
                         }
-                        thisOutsideAirSys.InletNodeNum(CompNum) =
-                            thisOutsideAirSys.compPointer[CompNum]->getAirInNode(state, CompName, 0, InletNodeErrFlag);
-                        thisOutsideAirSys.OutletNodeNum(CompNum) =
-                            thisOutsideAirSys.compPointer[CompNum]->getAirOutNode(state, CompName, 0, OutletNodeErrFlag);
                         CoolingCoilOrder = CompNum;
                         break;
 
-                    case ValidEquipListType::CoilSystemHeatingDX:
-                        thisOutsideAirSys.InletNodeNum(CompNum) = HVACDXHeatPumpSystem::GetHeatingCoilInletNodeNum(state, CompName, InletNodeErrFlag);
-                        thisOutsideAirSys.OutletNodeNum(CompNum) =
-                            HVACDXHeatPumpSystem::GetHeatingCoilOutletNodeNum(state, CompName, OutletNodeErrFlag);
+                    case MixedAir::ValidEquipListType::CoilSystemHeatingDX:
                         break;
-                    case ValidEquipListType::HeatExchangerAirToAirFlatPlate:
-                    case ValidEquipListType::HeatExchangerAirToAirSensibleAndLatent:
-                    case ValidEquipListType::HeatExchangerDesiccantBalancedFlow:
+                    case MixedAir::ValidEquipListType::HeatExchangerAirToAirFlatPlate:
+                    case MixedAir::ValidEquipListType::HeatExchangerAirToAirSensibleAndLatent:
+                    case MixedAir::ValidEquipListType::HeatExchangerDesiccantBalancedFlow:
                         thisOutsideAirSys.HeatExchangerFlag = true;
-                        thisOutsideAirSys.InletNodeNum(CompNum) = HeatRecovery::GetSupplyInletNode(state, CompName, InletNodeErrFlag);
-                        thisOutsideAirSys.OutletNodeNum(CompNum) = HeatRecovery::GetSupplyOutletNode(state, CompName, OutletNodeErrFlag);
                         break;
 
-                    case ValidEquipListType::DehumidifierDesiccantNoFans:
-                    case ValidEquipListType::DehumidifierDesiccantSystem:
-                        thisOutsideAirSys.InletNodeNum(CompNum) = DesiccantDehumidifiers::GetProcAirInletNodeNum(state, CompName, InletNodeErrFlag);
-                        thisOutsideAirSys.OutletNodeNum(CompNum) =
-                            DesiccantDehumidifiers::GetProcAirOutletNodeNum(state, CompName, OutletNodeErrFlag);
+                    case MixedAir::ValidEquipListType::DehumidifierDesiccantNoFans:
+                    case MixedAir::ValidEquipListType::DehumidifierDesiccantSystem:
                         break;
 
-                    case ValidEquipListType::HumidifierSteamElectric:
-                    case ValidEquipListType::HumidifierSteamGas:
-                        thisOutsideAirSys.InletNodeNum(CompNum) = Humidifiers::GetAirInletNodeNum(state, CompName, InletNodeErrFlag);
-                        thisOutsideAirSys.OutletNodeNum(CompNum) = Humidifiers::GetAirOutletNodeNum(state, CompName, OutletNodeErrFlag);
+                    case MixedAir::ValidEquipListType::HumidifierSteamElectric:
+                    case MixedAir::ValidEquipListType::HumidifierSteamGas:
                         break;
 
-                    case ValidEquipListType::SolarCollectorUnglazedTranspired:
-                        thisOutsideAirSys.InletNodeNum(CompNum) = TranspiredCollector::GetAirInletNodeNum(state, CompName, InletNodeErrFlag);
-                        thisOutsideAirSys.OutletNodeNum(CompNum) = TranspiredCollector::GetAirOutletNodeNum(state, CompName, OutletNodeErrFlag);
+                    case MixedAir::ValidEquipListType::SolarCollectorUnglazedTranspired:
                         break;
 
-                    case ValidEquipListType::SolarCollectorFlatPlatePhotovoltaicThermal:
-                        thisOutsideAirSys.InletNodeNum(CompNum) =
-                            PhotovoltaicThermalCollectors::GetAirInletNodeNum(state, CompName, InletNodeErrFlag);
-                        thisOutsideAirSys.OutletNodeNum(CompNum) =
-                            PhotovoltaicThermalCollectors::GetAirOutletNodeNum(state, CompName, OutletNodeErrFlag);
+                    case MixedAir::ValidEquipListType::SolarCollectorFlatPlatePhotovoltaicThermal:
                         break;
 
-                    case ValidEquipListType::EvaporativeCoolerDirectCeldekPad:
-                    case ValidEquipListType::EvaporativeCoolerIndirectCeldekPad:
-                    case ValidEquipListType::EvaporativeCoolerIndirectWetCoil:
-                    case ValidEquipListType::EvaporativeCoolerIndirectResearchSpecial:
-                    case ValidEquipListType::EvaporativeCoolerDirectResearchSpecial:
-                        thisOutsideAirSys.InletNodeNum(CompNum) = EvaporativeCoolers::GetInletNodeNum(state, CompName, InletNodeErrFlag);
-                        thisOutsideAirSys.OutletNodeNum(CompNum) = EvaporativeCoolers::GetOutletNodeNum(state, CompName, OutletNodeErrFlag);
+                    case MixedAir::ValidEquipListType::EvaporativeCoolerDirectCeldekPad:
+                    case MixedAir::ValidEquipListType::EvaporativeCoolerIndirectCeldekPad:
+                    case MixedAir::ValidEquipListType::EvaporativeCoolerIndirectWetCoil:
+                    case MixedAir::ValidEquipListType::EvaporativeCoolerIndirectResearchSpecial:
+                    case MixedAir::ValidEquipListType::EvaporativeCoolerDirectResearchSpecial:
                         break;
 
-                    case ValidEquipListType::ZoneHVACTerminalUnitVariableRefrigerantFlow:
-                        thisOutsideAirSys.InletNodeNum(CompNum) =
-                            HVACVariableRefrigerantFlow::GetVRFTUInAirNodeFromName(state, CompName, InletNodeErrFlag);
-                        thisOutsideAirSys.OutletNodeNum(CompNum) =
-                            HVACVariableRefrigerantFlow::GetVRFTUOutAirNodeFromName(state, CompName, OutletNodeErrFlag);
+                    case MixedAir::ValidEquipListType::ZoneHVACTerminalUnitVariableRefrigerantFlow:
                         break;
 
                     default:
@@ -741,14 +606,7 @@ namespace AirLoopHVACDOAS {
                     if (CoolingCoilOrder > FanOrder && !thisDOAS.FanBeforeCoolingCoilFlag) {
                         thisDOAS.FanBeforeCoolingCoilFlag = true;
                     }
-                    if (InletNodeErrFlag) {
-                        ShowSevereError(state, std::format("Inlet node number is not found in {} = {}", CurrentModuleObject, CompName));
-                        errorsFound = true;
-                    }
-                    if (OutletNodeErrFlag) {
-                        ShowSevereError(state, std::format("Outlet node number is not found in {} = {}", CurrentModuleObject, CompName));
-                        errorsFound = true;
-                    }
+
                     // Check node connection to ensure that the outlet node of the previous component is the inlet node of the current component
                     if (CompNum > 1) {
                         if (thisOutsideAirSys.InletNodeNum(CompNum) != thisOutsideAirSys.OutletNodeNum(CompNum - 1)) {
@@ -757,11 +615,11 @@ namespace AirLoopHVACDOAS {
                                 thisDOAS.m_exhaustFanIndex = Fans::GetFanIndex(state, CompName);
                                 thisDOAS.m_exhaustFanInletNodeNum = thisOutsideAirSys.InletNodeNum(CompNum);
                                 thisDOAS.m_exhaustFanOutletNodeNum = thisOutsideAirSys.OutletNodeNum(CompNum);
-                                if (static_cast<ValidEquipListType>(getEnumValue(validEquipNamesUC, typeNameUC)) ==
-                                    ValidEquipListType::FanSystemModel) {
+                                if (static_cast<MixedAir::ValidEquipListType>(getEnumValue(MixedAir::validEquipNamesUC, typeNameUC)) ==
+                                    MixedAir::ValidEquipListType::FanSystemModel) {
                                     thisDOAS.m_exhaustFanTypeNum = SimAirServingZones::CompType::Fan_System_Object;
-                                } else if (static_cast<ValidEquipListType>(getEnumValue(validEquipNamesUC, typeNameUC)) ==
-                                           ValidEquipListType::FanComponentModel) {
+                                } else if (static_cast<MixedAir::ValidEquipListType>(getEnumValue(MixedAir::validEquipNamesUC, typeNameUC)) ==
+                                           MixedAir::ValidEquipListType::FanComponentModel) {
                                     thisDOAS.m_exhaustFanTypeNum = SimAirServingZones::CompType::Fan_ComponentModel;
                                 }
                             } else {

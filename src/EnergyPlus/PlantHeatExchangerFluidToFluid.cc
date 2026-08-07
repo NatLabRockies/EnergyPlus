@@ -151,8 +151,6 @@ PlantComponent *HeatExchangerStruct::factory(EnergyPlusData &state, std::string 
     }
     // If we didn't find it, fatal
     ShowFatalError(state, std::format("LocalPlantFluidHXFactory: Error getting inputs for object named: {}", objectName)); // LCOV_EXCL_LINE
-    // Shut up the compiler
-    return nullptr; // LCOV_EXCL_LINE
 }
 
 void HeatExchangerStruct::onInitLoopEquip(EnergyPlusData &state, [[maybe_unused]] const PlantLocation &calledFromLocation)

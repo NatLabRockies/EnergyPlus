@@ -341,7 +341,6 @@ namespace UnitarySystems {
             }
         }
         ShowFatalError(state, std::format("UnitarySystem factory: Error getting inputs for system named: {}", objectName));
-        return nullptr;
     }
 
     int getDesignSpecMSHPIndex(
@@ -2765,7 +2764,6 @@ namespace UnitarySystems {
                 if (childCCIndex < 0) {
                     ShowWarningError(state, "Occurs in sizing HeatExchangerAssistedCoolingCoil.");
                     ShowFatalError(state, "No cooling coil = Coil:Cooling:DX found.");
-                    ErrFound = true;
                 }
                 auto &newCoil = state.dataCoilCoolingDX->coilCoolingDXs[childCCIndex];
                 this->m_NumOfSpeedCooling = newCoil.performance->numSpeeds();
