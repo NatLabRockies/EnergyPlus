@@ -182,6 +182,26 @@ void ManageSurfaceHeatBalance(EnergyPlusData &state)
     }
     HeatBalanceAirManager::ManageAirHeatBalance(state);
 
+    // Following is intentionally after ManageAirHeatBalance so that QPVSysSource is available
+    auto &Surface = state.dataSurface->Surface;
+    if (state.dataHeatBal->AnyInternalHeatSourceInInput) {
+        for (int SurfNum = 1; SurfNum <= state.dataSurface->TotSurfaces; ++SurfNum) {
+            // Need to transfer any source/sink for a surface to the local array.  Note that
+            // the local array is flux (W/m2) while the QRadSysSource is heat transfer (W).
+            // This must be done at this location so that this is always updated correctly.
+            if (Surface(SurfNum).Area > 0.0) {
+                state.dataHeatBalSurf->SurfQsrcHist(SurfNum, 1) =
+                    state.dataHeatBalFanSys->QRadSysSource(SurfNum) / Surface(SurfNum).Area; // Make sure we don't divide by zero...
+            }
+
+            // next we add source (actually a sink) from any integrated PV
+            if (Surface(SurfNum).Area > 0.0) {
+                state.dataHeatBalSurf->SurfQsrcHist(SurfNum, 1) +=
+                    state.dataHeatBalFanSys->QPVSysSource(SurfNum) / Surface(SurfNum).Area; // Make sure we don't divide by zero...
+            }
+        }
+    }
+
     // IF NECESSARY, do one final "average" heat balance pass.  This is only
     // necessary if a radiant system is present and it was actually on for
     // part or all of the time step.
@@ -5203,7 +5223,6 @@ void UpdateFinalSurfaceHeatBalance(EnergyPlusData &state)
     bool ElecBaseboardSysOn;           // .TRUE. if a steam baseboard heater is running
     bool CoolingPanelSysOn;            // true if a simple cooling panel is running
     bool SwimmingPoolOn;               // true if a pool is present (running)
-    bool AnyInternalHeatSourceInInput; // true if any ConstructionProperty:InternalHeatSource and after initialization
 
     LowTempRadiantSystem::UpdateRadSysSourceValAvg(state, LowTempRadSysOn);
     HighTempRadiantSystem::UpdateHTRadSourceValAvg(state, HighTempRadSysOn);
@@ -5212,10 +5231,8 @@ void UpdateFinalSurfaceHeatBalance(EnergyPlusData &state)
     ElectricBaseboardRadiator::UpdateBBElecRadSourceValAvg(state, ElecBaseboardSysOn);
     CoolingPanelSimple::UpdateCoolingPanelSourceValAvg(state, CoolingPanelSysOn);
     SwimmingPool::UpdatePoolSourceValAvg(state, SwimmingPoolOn);
-    AnyInternalHeatSourceInInput = state.dataHeatBal->AnyInternalHeatSourceInInput && !state.dataGlobal->SetupFlag;
 
-    if (LowTempRadSysOn || HighTempRadSysOn || HWBaseboardSysOn || SteamBaseboardSysOn || ElecBaseboardSysOn || CoolingPanelSysOn || SwimmingPoolOn ||
-        AnyInternalHeatSourceInInput) {
+    if (LowTempRadSysOn || HighTempRadSysOn || HWBaseboardSysOn || SteamBaseboardSysOn || ElecBaseboardSysOn || CoolingPanelSysOn || SwimmingPoolOn) {
         // Solve the zone heat balance 'Detailed' solution
         // Call the outside and inside surface heat balances
         CalcHeatBalanceOutsideSurf(state);
@@ -7020,24 +7037,6 @@ void CalcHeatBalanceOutsideSurf(EnergyPlusData &state,
     GetSurroundingSurfacesTemperatureAverage(state);
 
     auto &Surface = state.dataSurface->Surface;
-
-    if (state.dataHeatBal->AnyInternalHeatSourceInInput) {
-        for (int SurfNum = 1; SurfNum <= state.dataSurface->TotSurfaces; ++SurfNum) {
-            // Need to transfer any source/sink for a surface to the local array.  Note that
-            // the local array is flux (W/m2) while the QRadSysSource is heat transfer (W).
-            // This must be done at this location so that this is always updated correctly.
-            if (Surface(SurfNum).Area > 0.0) {
-                state.dataHeatBalSurf->SurfQsrcHist(SurfNum, 1) =
-                    state.dataHeatBalFanSys->QRadSysSource(SurfNum) / Surface(SurfNum).Area; // Make sure we don't divide by zero...
-            }
-
-            // next we add source (actually a sink) from any integrated PV
-            if (Surface(SurfNum).Area > 0.0) {
-                state.dataHeatBalSurf->SurfQsrcHist(SurfNum, 1) +=
-                    state.dataHeatBalFanSys->QPVSysSource(SurfNum) / Surface(SurfNum).Area; // Make sure we don't divide by zero...
-            }
-        }
-    }
 
     if (present(ZoneToResimulate)) {
         HeatBalanceIntRadExchange::CalcInteriorRadExchange(
