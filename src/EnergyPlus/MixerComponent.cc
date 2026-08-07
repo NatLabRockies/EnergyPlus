@@ -527,11 +527,14 @@ void CalcAirMixer(EnergyPlusData &state, int &MixerNum)
 
     } else {
         // Mass Flow in air loop is zero and loop is not operating.
-        // Arbitrarily set the output to the first inlet leg
-        mixer.OutletHumRat = mixer.InletHumRat(1);
-        mixer.OutletPressure = mixer.InletPressure(1);
-        mixer.OutletEnthalpy = mixer.InletEnthalpy(1);
-        mixer.OutletTemp = mixer.InletTemp(1);
+        // Average the inlet legs so changes in mixer inlet branch order does not change results
+        // (previously set outlet equal to the first inlet leg which could change results when mixer branches are reordered)
+        for (InletNodeNum = 1; InletNodeNum <= mixer.NumInletNodes; ++InletNodeNum) {
+            mixer.OutletHumRat += mixer.InletHumRat(InletNodeNum) / mixer.NumInletNodes;
+            mixer.OutletPressure += mixer.InletPressure(InletNodeNum) / mixer.NumInletNodes;
+            mixer.OutletEnthalpy += mixer.InletEnthalpy(InletNodeNum) / mixer.NumInletNodes;
+            mixer.OutletTemp += mixer.InletTemp(InletNodeNum) / mixer.NumInletNodes;
+        }
     }
 
     // make sure MassFlowRateMaxAvail is >= MassFlowRate
