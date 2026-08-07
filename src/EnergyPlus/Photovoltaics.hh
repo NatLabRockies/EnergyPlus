@@ -101,6 +101,9 @@ namespace Photovoltaics {
 
     void ReportPV(EnergyPlusData &state, int const PVnum);
 
+    void AnyCellIntegrationMode(EnergyPlusData &state,
+                                bool &AnyCellIntegrationMode);
+
     // *************
 
     void CalcSandiaPV(EnergyPlusData &state,
