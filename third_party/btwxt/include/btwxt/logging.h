@@ -30,8 +30,8 @@ namespace Btwxt {
 
     class BtwxtException : public Courierr::CourierrException {
     public:
-        explicit BtwxtException(const std::string &message, Courierr::Courierr &logger)
-                : CourierrException(message, logger) {
+        explicit BtwxtException(const std::string &t_message, Courierr::Courierr &logger)
+                : CourierrException(t_message, logger) {
         }
     };
 }

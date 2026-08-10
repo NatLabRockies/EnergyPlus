@@ -220,7 +220,6 @@ namespace PlantPipingSystemsManager {
         Real64 Temperature_PrevIteration = 0.0; // C
         Real64 Temperature_PrevTimeStep = 0.0;  // C
         Real64 Beta = 0.0;                      // K/W
-        BaseThermalPropertySet Properties;
 
         // Default Constructor
         BaseCell() = default;
@@ -247,6 +246,7 @@ namespace PlantPipingSystemsManager {
         Real64 RadialCentroid = 0.0;
         Real64 InnerRadius = 0.0;
         Real64 OuterRadius = 0.0;
+        BaseThermalPropertySet Properties;
 
         // Default Constructor
         RadialCellInformation() = default;
@@ -463,6 +463,7 @@ namespace PlantPipingSystemsManager {
         CellType cellType = CellType::Invalid;
         std::map<Direction, NeighborInformation> NeighborInfo;
         CartesianPipeCellInformation PipeCellData;
+        BaseThermalPropertySet Properties;
 
         // Default Constructor
         CartesianCell() = default;

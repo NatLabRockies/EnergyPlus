@@ -279,9 +279,9 @@ size_t getnumberofxmlvalues(char const* const fileName, char const* const exp);
 ///\param atrName the attribute name.
 ///\param nVal number of attribute values found.
 ///\param str string to store the found values, semicolon separated.
-///\param strLen the string length allocated
+///\param myStrLen the string length allocated
 ////////////////////////////////////////////////////////////////
-int getxmlvaluesf(char const* const fileName, char const* const exp, char const* const atrName, size_t* const nVal, char* str, size_t* const strLen);
+int getxmlvaluesf(char const* const fileName, char const* const exp, char const* const atrName, size_t* const nVal, char* str, size_t* const myStrLen);
 
 ////////////////////////////////////////////////////////////////
 /// This method returns one xmlvalue for a given xPath expressions.
@@ -302,9 +302,9 @@ int getxmlvaluesf(char const* const fileName, char const* const exp, char const*
 ///\param exp the xPath expression.
 ///\param str string to store the found values, semicolon separated.
 ///\param nVals number of values found.
-///\param strLen the string length allocated.
+///\param myStrLen the string length allocated.
 ////////////////////////////////////////////////////////////////
-int getxmlvalue(char const* const fileName, char const* const exp, char* const str, size_t* const nVals, int const strLen);
+int getxmlvalue(char const* const fileName, char const* const exp, char* const str, size_t* const nVals, int const myStrLen);
 
 ////////////////////////////////////////////////////////////////
 /// This method checks the validity of the variables

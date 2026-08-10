@@ -401,9 +401,7 @@ namespace LowTempRadiantSystem {
     {
         // Members
         // This data could be shared between multiple constant flow LowTempRad Systems
-        std::string designName; // name of the design object
-        Real64 runningMeanOutdoorAirTemperatureWeightingFactor =
-            0.8;                                       // Weighting factor for running mean outdoor air temperature equation (user input)
+        std::string designName;                        // name of the design object
         CtrlType ConstFlowControlType = CtrlType::MAT; // Control type for the system (MAT, MRT, Op temp, ODB, OWB,
                                                        // Surface Face Temp, Surface Interior Temp, Running Mean Temp
                                                        // for Constant Flow systems only)
@@ -419,7 +417,12 @@ namespace LowTempRadiantSystem {
         CondCtrlType condCtrlType = CondCtrlType::SimpleOff; // Condensation control type (initialize to simple off)
         Real64 CondDewPtDeltaT = 1.0;                        // Diff between surface temperature and dew point for cond. shut-off
 
-        ConstantFlowRadDesignData() = default;
+        ConstantFlowRadDesignData() : ConstantFlowRadiantSystemData()
+        {
+            // Weighting factor for running mean outdoor air temperature equation (user input): different default than base than doesn't use it (0.0)
+            // IDD default is 0.8, so this is set here for clarity (Could let the GetInput routine set it...)
+            runningMeanOutdoorAirTemperatureWeightingFactor = 0.8;
+        }
         ~ConstantFlowRadDesignData() = default;
     };
 
