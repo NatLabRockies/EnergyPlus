@@ -5213,7 +5213,7 @@ void UpdateFinalSurfaceHeatBalance(EnergyPlusData &state)
     ElectricBaseboardRadiator::UpdateBBElecRadSourceValAvg(state, ElecBaseboardSysOn);
     CoolingPanelSimple::UpdateCoolingPanelSourceValAvg(state, CoolingPanelSysOn);
     SwimmingPool::UpdatePoolSourceValAvg(state, SwimmingPoolOn);
-    Photovoltaics::AnyCellIntegrationMode(state, AnyCellIntegrationMode);
+    Photovoltaics::HasBuildingIntegratedPV(state, AnyCellIntegrationMode);
 
     if (LowTempRadSysOn || HighTempRadSysOn || HWBaseboardSysOn || SteamBaseboardSysOn || ElecBaseboardSysOn || CoolingPanelSysOn || SwimmingPoolOn ||
         AnyCellIntegrationMode) {

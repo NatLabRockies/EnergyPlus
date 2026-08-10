@@ -881,15 +881,14 @@ namespace Photovoltaics {
         }
     }
 
-    void AnyCellIntegrationMode(EnergyPlusData &state,
+    void HasBuildingIntegratedPV(EnergyPlusData &state,
                                 bool &AnyCellIntegrationMode)
     {
         AnyCellIntegrationMode = false;
         for (int PVnum = 1; PVnum <= state.dataPhotovoltaic->NumPVs; ++PVnum) {
             if (state.dataPhotovoltaic->PVarray(PVnum).CellIntegrationMode == CellIntegration::SurfaceOutsideFace ||
                 state.dataPhotovoltaic->PVarray(PVnum).CellIntegrationMode == CellIntegration::TranspiredCollector ||
-                state.dataPhotovoltaic->PVarray(PVnum).CellIntegrationMode == CellIntegration::ExteriorVentedCavity ||
-                state.dataPhotovoltaic->PVarray(PVnum).CellIntegrationMode == CellIntegration::PVTSolarCollector) {
+                state.dataPhotovoltaic->PVarray(PVnum).CellIntegrationMode == CellIntegration::ExteriorVentedCavity) {
                 AnyCellIntegrationMode = true;
             }
         }
