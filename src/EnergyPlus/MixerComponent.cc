@@ -533,8 +533,9 @@ void CalcAirMixer(EnergyPlusData &state, int &MixerNum)
             mixer.OutletHumRat += mixer.InletHumRat(InletNodeNum) / mixer.NumInletNodes;
             mixer.OutletPressure += mixer.InletPressure(InletNodeNum) / mixer.NumInletNodes;
             mixer.OutletEnthalpy += mixer.InletEnthalpy(InletNodeNum) / mixer.NumInletNodes;
-            mixer.OutletTemp += mixer.InletTemp(InletNodeNum) / mixer.NumInletNodes;
         }
+        // Use Enthalpy and humidity ratio to get outlet temperature from psych chart
+        mixer.OutletTemp = PsyTdbFnHW(mixer.OutletEnthalpy, mixer.OutletHumRat);
     }
 
     // make sure MassFlowRateMaxAvail is >= MassFlowRate
@@ -576,28 +577,32 @@ void UpdateAirMixer(EnergyPlusData &state, int const MixerNum)
     outletNode.Quality = inletNode.Quality;
 
     if (state.dataContaminantBalance->Contaminant.CO2Simulation) {
+        outletNode.CO2 = 0.0;
         if (mixer.OutletMassFlowRate > 0.0) {
             // CO2 balance to get outlet air CO2
-            outletNode.CO2 = 0.0;
             for (InletNodeNum = 1; InletNodeNum <= mixer.NumInletNodes; ++InletNodeNum) {
                 outletNode.CO2 +=
                     state.dataLoopNodes->Node(mixer.InletNode(InletNodeNum)).CO2 * mixer.InletMassFlowRate(InletNodeNum) / mixer.OutletMassFlowRate;
             }
         } else {
-            outletNode.CO2 = inletNode.CO2;
+            for (InletNodeNum = 1; InletNodeNum <= mixer.NumInletNodes; ++InletNodeNum) {
+                outletNode.CO2 += state.dataLoopNodes->Node(mixer.InletNode(InletNodeNum)).CO2 / mixer.NumInletNodes;
+            }
         }
     }
 
     if (state.dataContaminantBalance->Contaminant.GenericContamSimulation) {
+        outletNode.GenContam = 0.0;
         if (mixer.OutletMassFlowRate > 0.0) {
             // Generic contaminant balance to get outlet air CO2
-            outletNode.GenContam = 0.0;
             for (InletNodeNum = 1; InletNodeNum <= mixer.NumInletNodes; ++InletNodeNum) {
                 outletNode.GenContam += state.dataLoopNodes->Node(mixer.InletNode(InletNodeNum)).GenContam * mixer.InletMassFlowRate(InletNodeNum) /
                                         mixer.OutletMassFlowRate;
             }
         } else {
-            outletNode.GenContam = inletNode.GenContam;
+            for (InletNodeNum = 1; InletNodeNum <= mixer.NumInletNodes; ++InletNodeNum) {
+                outletNode.GenContam += state.dataLoopNodes->Node(mixer.InletNode(InletNodeNum)).GenContam / mixer.NumInletNodes;
+            }
         }
     }
 }
