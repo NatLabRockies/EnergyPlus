@@ -101,7 +101,7 @@ namespace Photovoltaics {
 
     void ReportPV(EnergyPlusData &state, int const PVnum);
 
-    void HasBuildingIntegratedPV(EnergyPlusData &state, bool &AnyCellIntegrationMode);
+    bool HasBuildingIntegratedPV(EnergyPlusData &state);
 
     // *************
 

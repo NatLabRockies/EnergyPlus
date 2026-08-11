@@ -881,9 +881,9 @@ namespace Photovoltaics {
         }
     }
 
-    void HasBuildingIntegratedPV(EnergyPlusData &state, bool &AnyIntegratedMode)
+    bool HasBuildingIntegratedPV(EnergyPlusData &state)
     {
-        AnyIntegratedMode = false;
+        bool AnyIntegratedMode = false;
         for (int PVnum = 1; PVnum <= state.dataPhotovoltaic->NumPVs; ++PVnum) {
             auto const mode = state.dataPhotovoltaic->PVarray(PVnum).CellIntegrationMode;
             if (mode == CellIntegration::SurfaceOutsideFace || mode == CellIntegration::TranspiredCollector ||
@@ -892,6 +892,7 @@ namespace Photovoltaics {
                 break;
             }
         }
+        return AnyIntegratedMode;
     }
 
     // *************

@@ -9769,8 +9769,7 @@ TEST_F(EnergyPlusFixture, HeatBalanceSurfaceManager_QPVSysSource_AffectsSurfQsrc
     state->dataPhotovoltaic->PVarray(1).SurfacePtr = surfNum;
 
     {
-        bool anyIntegrated = false;
-        Photovoltaics::HasBuildingIntegratedPV(*state, anyIntegrated);
+        bool anyIntegrated = Photovoltaics::HasBuildingIntegratedPV(*state);
         ASSERT_TRUE(anyIntegrated) << "Precondition: PV must be in an integrated mode for the re-pass to fire.";
     }
 
