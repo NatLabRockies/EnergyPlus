@@ -241,6 +241,16 @@ TEST_F(EnergyPlusFixture, OutputReportTabularTest_unitsFromHeading)
     EXPECT_EQ(0, unitsFromHeading(*state, unitString));
     EXPECT_EQ("Fictional field {nonsense}", unitString);
 
+    // #11710 - Material CTF Summary table: Conductivity {W/m-K} and ThermalResistance {m2-K/W}
+    // headers (from HeatBalanceManager::ReportCTFs eio output) were not converted to IP
+    unitString = "Conductivity {W/m-K}";
+    EXPECT_EQ(119, unitsFromHeading(*state, unitString));
+    EXPECT_EQ("Conductivity {Btu-in/hr-ft2-F}", unitString);
+
+    unitString = "ThermalResistance {m2-K/W}";
+    EXPECT_EQ(120, unitsFromHeading(*state, unitString));
+    EXPECT_EQ("ThermalResistance {ft2-F-hr/Btu}", unitString);
+
     // Check a few report column headings too
     unitString = "Standard Rated Net Cooling Capacity [W]";
     indexUnitConv = unitsFromHeading(*state, unitString);

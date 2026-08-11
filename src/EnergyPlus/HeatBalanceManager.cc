@@ -6176,9 +6176,9 @@ namespace HeatBalanceManager {
                   "! <Construction CTF>,Construction Name,Index,#Layers,#CTFs,Time Step {{hours}},ThermalConductance "
                   "{{w/m2-K}},OuterThermalAbsorptance,InnerThermalAbsorptance,OuterSolarAbsorptance,InnerSolarAbsorptance,Roughness\n");
             print(state.files.eio,
-                  "! <Material CTF Summary>,Material Name,Thickness {{m}},Conductivity {{w/m-K}},Density {{kg/m3}},Specific Heat "
-                  "{{J/kg-K}},ThermalResistance {{m2-K/w}}\n");
-            print(state.files.eio, "! <Material:Air CTF Summary>,Material Name,ThermalResistance {{m2-K/w}}\n");
+                  "! <Material CTF Summary>,Material Name,Thickness {{m}},Conductivity {{W/m-K}},Density {{kg/m3}},Specific Heat "
+                  "{{J/kg-K}},ThermalResistance {{m2-K/W}}\n");
+            print(state.files.eio, "! <Material:Air CTF Summary>,Material Name,ThermalResistance {{m2-K/W}}\n");
             print(state.files.eio, "! <CTF>,Time,Outside,Cross,Inside,Flux (except final one)\n");
 
             int cCounter = 0; // just used to keep construction index in output report

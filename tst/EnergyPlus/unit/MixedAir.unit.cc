@@ -74,8 +74,10 @@
 #include <EnergyPlus/OutAirNodeManager.hh>
 #include <EnergyPlus/Psychrometrics.hh>
 #include <EnergyPlus/ScheduleManager.hh>
+#include <EnergyPlus/SimAirServingZones.hh>
 #include <EnergyPlus/SingleDuct.hh>
 #include <EnergyPlus/SizingManager.hh>
+#include <EnergyPlus/UnitarySystem.hh>
 #include <EnergyPlus/ZoneAirLoopEquipmentManager.hh>
 #include <EnergyPlus/ZoneEquipmentManager.hh>
 
@@ -8054,6 +8056,59 @@ TEST_F(EnergyPlusFixture, MixedAir_TemperatureError)
 
     // T_db must be >= T_sat at the mixed-air node to remain physical
     EXPECT_TRUE(state->dataMixedAir->OAMixer(1).MixTemp >= T_sat);
+}
+
+TEST_F(EnergyPlusFixture, MixedAir_EconomizerFirstValidationWarning)
+{
+    state->dataMixedAir->GetOAControllerInputFlag = false;
+    state->dataGlobal->SysSizingCalc = true;
+
+    state->dataMixedAir->NumOAControllers = 1;
+    state->dataMixedAir->OAController.allocate(1);
+    auto &oaCtrl = state->dataMixedAir->OAController(1);
+    oaCtrl.Name = "OA CTRL 1";
+    oaCtrl.EconomizerStagingType = HVAC::EconomizerStagingType::EconomizerFirst;
+
+    state->dataAirSystemsData->PrimaryAirSystems.allocate(1);
+    auto &airSys = state->dataAirSystemsData->PrimaryAirSystems(1);
+    airSys.NumBranches = 1;
+    airSys.Branch.allocate(1);
+    airSys.Branch(1).TotalComponents = 1;
+    airSys.Branch(1).Comp.allocate(1);
+    airSys.Branch(1).Comp(1).CompType_Num = SimAirServingZones::CompType::UnitarySystemModel;
+    airSys.Branch(1).Comp(1).Name = "UNITARY SYS 1";
+
+    state->dataUnitarySystems->numUnitarySystems = 1;
+    state->dataUnitarySystems->unitarySys.resize(1);
+    state->dataUnitarySystems->unitarySys[0].Name = "UNITARY SYS 1";
+    state->dataUnitarySystems->unitarySys[0].m_ControlType = UnitarySystems::UnitarySys::UnitarySysCtrlType::Load;
+    state->dataUnitarySystems->unitarySys[0].m_coolCoilType = HVAC::CoilType::CoolingDXTwoSpeed;
+
+    state->dataLoopNodes->Node.allocate(3);
+    oaCtrl.OANode = 1;
+    oaCtrl.InletNode = 1;
+    oaCtrl.RetNode = 2;
+    oaCtrl.RelNode = 2;
+    oaCtrl.MixNode = 3;
+    state->dataLoopNodes->Node(3).MassFlowRateMaxAvail = 0.0;
+    state->dataAirLoop->AirLoopControlInfo.emplace_back();
+    state->dataAirLoop->AirLoopFlow.emplace_back();
+
+    state->dataMixedAir->InitOAControllerOneTimeFlag = false;
+    state->dataMixedAir->OAControllerMyOneTimeFlag.dimension(1, false);
+    state->dataMixedAir->OAControllerMyEnvrnFlag.dimension(1, false);
+    state->dataMixedAir->OAControllerMySizeFlag.dimension(1, false);
+    state->dataMixedAir->MechVentCheckFlag.dimension(1, false);
+    state->dataMixedAir->InitOAControllerSetPointCheckFlag.dimension(1, false);
+
+    EXPECT_FALSE(airSys.EconomizerStagingCheckFlag);
+
+    int ctrlIndex = 1;
+    MixedAir::SimOAController(*state, "OA CTRL 1", ctrlIndex, false, 1);
+
+    EXPECT_TRUE(airSys.EconomizerStagingCheckFlag);
+    EXPECT_EQ(oaCtrl.EconomizerStagingType, HVAC::EconomizerStagingType::InterlockedWithMechanicalCooling);
+    EXPECT_TRUE(match_err_stream("EconomizerFirst will not be enforced"));
 }
 
 } // namespace EnergyPlus

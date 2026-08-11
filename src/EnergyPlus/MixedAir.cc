@@ -830,6 +830,8 @@ void SimOAController(EnergyPlusData &state, std::string const &CtrlName, int &Ct
                             "following types: Coil:Cooling:DX:MultiSpeed,"
                             " Coil:Cooling:DX:VariableSpeed, or Coil:Cooling:DX. EconomizerFirst will not be enforced.",
                             state.dataMixedAir->OAController(OAControllerNum).Name));
+                    state.dataMixedAir->OAController(OAControllerNum).EconomizerStagingType =
+                        HVAC::EconomizerStagingType::InterlockedWithMechanicalCooling;
                 }
             }
             primaryAirSystems.EconomizerStagingCheckFlag = true;

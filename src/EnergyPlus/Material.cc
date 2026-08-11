@@ -2740,11 +2740,11 @@ void GetMaterialData(EnergyPlusData &state, bool &ErrorsFound) // set to true if
     if (DoReport) {
 
         print(state.files.eio,
-              "! <Material Details>,Material Name,ThermalResistance {{m2-K/w}},Roughness,Thickness {{m}},Conductivity "
-              "{{w/m-K}},Density {{kg/m3}},Specific Heat "
+              "! <Material Details>,Material Name,ThermalResistance {{m2-K/W}},Roughness,Thickness {{m}},Conductivity "
+              "{{W/m-K}},Density {{kg/m3}},Specific Heat "
               "{{J/kg-K}},Absorptance:Thermal,Absorptance:Solar,Absorptance:Visible\n");
 
-        print(state.files.eio, "! <Material:Air>,Material Name,ThermalResistance {{m2-K/w}}\n");
+        print(state.files.eio, "! <Material:Air>,Material Name,ThermalResistance {{m2-K/W}}\n");
 
         // Formats
         constexpr std::string_view Format_701(" Material Details,{},{:.5f},{},{:.4f},{:.3f},{:.3f},{:.3f},{:.4f},{:.4f},{:.4f}\n");

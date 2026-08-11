@@ -4113,15 +4113,7 @@ void DynamicIntConvSurfaceClassification(EnergyPlusData &state, int const SurfNu
                 case DataZoneEquipment::ZoneEquipType::BaseboardSteam:
                 case DataZoneEquipment::ZoneEquipType::BaseboardConvectiveWater:
                 case DataZoneEquipment::ZoneEquipType::BaseboardConvectiveElectric:
-                case DataZoneEquipment::ZoneEquipType::BaseboardWater: {
-                    if (zoneEquipList.EquipData(EquipNum).ON) {
-                        EquipOnCount = min(EquipOnCount + 1, MaxZoneEquipmentIdx);
-                        FlowRegimeStack[EquipOnCount] = InConvFlowRegime::B;
-                        HeatingPriorityStack[EquipOnCount] = zoneEquipList.HeatingPriority(EquipNum);
-                        CoolingPriorityStack[EquipOnCount] = zoneEquipList.CoolingPriority(EquipNum);
-                    }
-                } break;
-                    // Is this the same case as above?
+                case DataZoneEquipment::ZoneEquipType::BaseboardWater:
                 case DataZoneEquipment::ZoneEquipType::BaseboardElectric:
                 case DataZoneEquipment::ZoneEquipType::HighTemperatureRadiant: {
                     if (zoneEquipList.EquipData(EquipNum).ON) {
@@ -4180,6 +4172,7 @@ void DynamicIntConvSurfaceClassification(EnergyPlusData &state, int const SurfNu
                                                        state.dataZoneTempPredictorCorrector->spaceHeatBalance(spaceNumLoop).MAT;
                                 if (DeltaTempLoop < ActiveDelTempThreshold) { // assume cooling with ceiling
                                     // system ON is not enough because  surfaces can continue to cool because of thermal capacity
+                                    // but system could be OFF and then you WOULD want to use the ON flag (zoneEquipList.EquipData(EquipNum).ON)?
                                     EquipOnCount = min(EquipOnCount + 1, MaxZoneEquipmentIdx);
                                     FlowRegimeStack[EquipOnCount] = InConvFlowRegime::A1;
                                     HeatingPriorityStack[EquipOnCount] = zoneEquipList.HeatingPriority(EquipNum);

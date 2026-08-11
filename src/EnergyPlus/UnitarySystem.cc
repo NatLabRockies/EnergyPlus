@@ -471,7 +471,7 @@ namespace UnitarySystems {
             }
         }
 
-        if (this->m_MyFanFlag) { // should include " && !this->m_MySizingCheckFlag"
+        if (this->m_MyFanFlag && !this->m_MySizingCheckFlag) {
             if (this->m_ActualFanVolFlowRate != DataSizing::AutoSize) {
                 if (this->m_ActualFanVolFlowRate > 0.0) {
                     this->m_HeatingFanSpeedRatio = this->m_MaxHeatAirVolFlow / this->m_ActualFanVolFlowRate;
@@ -2244,13 +2244,16 @@ namespace UnitarySystems {
         // If not set, set DesignFanVolFlowRate as greater of cooling and heating to make sure this value > 0.
         // If fan is hard-sized, use that value, otherwise the fan will size to DesignFanVolFlowRate
         if (this->m_DesignFanVolFlowRate <= 0.0) {
+            // use max air flow if fan air flow is autosized
             this->m_DesignFanVolFlowRate = max(this->m_MaxCoolAirVolFlow, this->m_MaxHeatAirVolFlow);
+            // use fan air flow if fan is hard sized
             if (this->m_ActualFanVolFlowRate > 0.0) {
                 this->m_DesignFanVolFlowRate = this->m_ActualFanVolFlowRate;
             }
             if (this->m_DesignFanVolFlowRate <= 0.0) {
                 ShowWarningError(state, std::format("{}: {} = {}", RoutineName, CompType, CompName));
-                ShowFatalError(state, "Unable to determine fan air flow rate.");
+                ShowContinueError(state, "Unable to determine fan or system air flow rate.");
+                this->m_DesignFanVolFlowRate = 0.0; // reset so it's not negative, should rarely ever get here (e.g., no load)
             }
         }
         if (!this->m_FanExists) {
@@ -15825,10 +15828,6 @@ namespace UnitarySystems {
         Real64 TotalOutput = 0.0;    // total output rate, {W}
         Real64 QTotUnitOut = 0.0;
         Real64 QSensUnitOut = 0.0;
-        this->m_PartLoadFrac = 0.0;
-        this->m_CompPartLoadRatio = 0.0;
-        this->m_CycRatio = 0.0;
-        this->m_SpeedRatio = 0.0;
         this->FanPartLoadRatio = 0.0;
         this->m_TotalAuxElecPower = 0.0;
         this->m_HeatingAuxElecConsumption = 0.0;
@@ -15887,9 +15886,17 @@ namespace UnitarySystems {
         }
 
         // set the system part-load ratio report variable
-        this->m_PartLoadFrac = max(this->m_CoolingPartLoadFrac, this->m_HeatingPartLoadFrac);
-        // set the compressor part-load ratio report variable
-        this->m_CompPartLoadRatio = max(this->m_CoolCompPartLoadRatio, this->m_HeatCompPartLoadRatio);
+        if (this->m_CoolingPartLoadFrac > 0.0) {
+            // SingleMode means pick a speed and cycle the coil at that speed
+            this->m_PartLoadFrac = (this->m_CoolingSpeedNum > 1 && !this->m_SingleMode) ? 1.0 : this->m_CoolingPartLoadFrac;
+            this->m_CompPartLoadRatio = (this->m_CoolingSpeedNum > 1 && !this->m_SingleMode) ? 1.0 : this->m_CoolCompPartLoadRatio;
+        } else if (this->m_HeatingPartLoadFrac > 0.0) {
+            this->m_PartLoadFrac = (this->m_HeatingSpeedNum > 1 && !this->m_SingleMode) ? 1.0 : this->m_HeatingPartLoadFrac;
+            this->m_CompPartLoadRatio = (this->m_HeatingSpeedNum > 1 && !this->m_SingleMode) ? 1.0 : this->m_HeatCompPartLoadRatio;
+        } else {
+            this->m_PartLoadFrac = 0.0;
+            this->m_CompPartLoadRatio = max(this->m_CoolCompPartLoadRatio, this->m_HeatCompPartLoadRatio);
+        }
 
         // logic difference in PTUnit *Rate reporting vs UnitarySystem. Use PTUnit more compact method for 9093.
         if (this->m_sysType == SysType::PackagedAC || this->m_sysType == SysType::PackagedHP || this->m_sysType == SysType::PackagedWSHP) {
@@ -15943,19 +15950,6 @@ namespace UnitarySystems {
         this->m_SensCoolEnergy = m_SensCoolEnergyRate * ReportingConstant;
         this->m_LatHeatEnergy = m_LatHeatEnergyRate * ReportingConstant;
         this->m_LatCoolEnergy = m_LatCoolEnergyRate * ReportingConstant;
-
-        if (this->m_FanExists && this->AirOutNode > 0) {
-            if (state.dataUnitarySystems->CompOnMassFlow > 0.0) {
-                this->FanPartLoadRatio = state.dataLoopNodes->Node(this->AirOutNode).MassFlowRate / state.dataUnitarySystems->CompOnMassFlow;
-            }
-            if (AirLoopNum > 0) {
-                if (this->m_FanOpMode == HVAC::FanOp::Cycling) {
-                    state.dataAirLoop->AirLoopFlow(AirLoopNum).FanPLR = this->FanPartLoadRatio;
-                } else {
-                    state.dataAirLoop->AirLoopFlow(AirLoopNum).FanPLR = 1.0;
-                }
-            }
-        }
 
         Real64 locFanElecPower = (this->m_FanIndex == 0) ? 0.0 : state.dataFans->fans(this->m_FanIndex)->totalPower;
 
@@ -16022,6 +16016,9 @@ namespace UnitarySystems {
             }
             this->m_ElecPower = locFanElecPower;
             this->m_ElecPowerConsumption = this->m_ElecPower * ReportingConstant;
+            if (this->m_CoolingPartLoadFrac > 0.0) {
+                this->m_CompPartLoadRatio = 0.0; // not used for water coils or non-compressor coils
+            }
         } break;
             // May not need
         case HVAC::CoilType::CoolingWAHPSimple: {
@@ -16084,6 +16081,9 @@ namespace UnitarySystems {
             if (this->m_LastMode == CoolingMode) {
                 this->m_CoolingAuxElecConsumption += this->m_AncillaryOffPower * (1.0 - this->m_PartLoadFrac) * ReportingConstant;
             }
+            if (this->m_CoolingPartLoadFrac > 0.0 && this->m_coolCoilType != HVAC::CoilType::CoolingDXPackagedThermalStorage) {
+                this->m_CompPartLoadRatio = 0.0; // not used for water coils or non-compressor coils
+            }
             // these coil types do not consume electricity or report electricity at the plant
         } break;
         default: { // all other DX cooling coils
@@ -16121,6 +16121,7 @@ namespace UnitarySystems {
         case HVAC::CoilType::HeatingElectricMultiStage: {
             this->m_CycRatio = max(this->m_CoolingCycRatio, this->m_HeatingCycRatio);
             this->m_SpeedRatio = max(this->m_CoolingSpeedRatio, this->m_HeatingSpeedRatio);
+            this->m_SpeedNum = max(this->m_CoolingSpeedNum, this->m_HeatingSpeedNum);
 
             if (state.dataUnitarySystems->HeatingLoad) {
                 this->m_TotalAuxElecPower =
@@ -16132,6 +16133,9 @@ namespace UnitarySystems {
             }
 
             elecHeatingPower = state.dataHVACGlobal->ElecHeatingCoilPower;
+            if (this->m_HeatingPartLoadFrac > 0.0) {
+                this->m_CompPartLoadRatio = 0.0; // not used for water coils or non-compressor coils
+            }
         } break;
         case HVAC::CoilType::HeatingDXSingleSpeed:
         case HVAC::CoilType::HeatingWAHP:
@@ -16178,6 +16182,23 @@ namespace UnitarySystems {
             if (this->m_LastMode == HeatingMode) {
                 this->m_HeatingAuxElecConsumption += this->m_AncillaryOffPower * (1.0 - this->m_PartLoadFrac) * ReportingConstant;
             }
+            if (this->m_HeatingPartLoadFrac > 0.0) {
+                this->m_CompPartLoadRatio = 0.0; // not used for water coils or non-compressor coils
+            }
+        } break;
+        case HVAC::CoilType::HeatingElectric:
+        case HVAC::CoilType::HeatingGasOrOtherFuel: {
+            if (state.dataUnitarySystems->HeatingLoad) {
+                this->m_TotalAuxElecPower =
+                    this->m_AncillaryOnPower * this->m_PartLoadFrac + this->m_AncillaryOffPower * (1.0 - this->m_PartLoadFrac);
+                this->m_HeatingAuxElecConsumption = this->m_AncillaryOnPower * this->m_PartLoadFrac * ReportingConstant;
+            }
+            if (this->m_LastMode == HeatingMode) {
+                this->m_HeatingAuxElecConsumption += this->m_AncillaryOffPower * (1.0 - this->m_PartLoadFrac) * ReportingConstant;
+            }
+            if (this->m_HeatingPartLoadFrac > 0.0) {
+                this->m_CompPartLoadRatio = 0.0; // not used for water coils or non-compressor coils
+            }
         } break;
         default: {
             if (this->m_HeatCoilExists) {
@@ -16193,6 +16214,39 @@ namespace UnitarySystems {
                 elecHeatingPower = state.dataHVACGlobal->ElecHeatingCoilPower;
             }
         } break;
+        }
+
+        if (this->m_FanExists && this->AirOutNode > 0) {
+            if (this->m_ControlType == UnitarySysCtrlType::Setpoint && !this->m_SingleMode) {
+                if (this->m_DesignMassFlowRate > 0.0) {
+                    if (this->m_SpeedNum > 1 || (this->m_FanOpMode == HVAC::FanOp::Continuous)) {
+                        this->FanPartLoadRatio = 1.0;
+                    } else if (this->m_SpeedNum == 1) {
+                        if (state.dataUnitarySystems->CoolingLoad && this->m_CoolingCycRatio > 0.0) {
+                            this->FanPartLoadRatio = this->m_CoolingCycRatio;
+                        } else if (state.dataUnitarySystems->HeatingLoad && this->m_HeatingCycRatio > 0.0) {
+                            this->FanPartLoadRatio = this->m_HeatingCycRatio;
+                        } else {
+                            this->FanPartLoadRatio = AirMassFlow / this->m_DesignMassFlowRate;
+                        }
+                    } else {
+                        this->FanPartLoadRatio = AirMassFlow / this->m_DesignMassFlowRate;
+                    }
+                }
+            } else {
+                if (state.dataUnitarySystems->CompOnMassFlow > 0.0) {
+                    this->FanPartLoadRatio =
+                        (this->m_SpeedNum > 1 && !this->m_SingleMode) ? 1.0 : AirMassFlow / state.dataUnitarySystems->CompOnMassFlow;
+                }
+            }
+
+            if (AirLoopNum > 0) {
+                if (this->m_FanOpMode == HVAC::FanOp::Cycling) {
+                    state.dataAirLoop->AirLoopFlow(AirLoopNum).FanPLR = this->FanPartLoadRatio;
+                } else {
+                    state.dataAirLoop->AirLoopFlow(AirLoopNum).FanPLR = 1.0;
+                }
+            }
         }
 
         if (!state.dataUnitarySystems->HeatingLoad && !state.dataUnitarySystems->CoolingLoad) {
@@ -17445,7 +17499,6 @@ namespace UnitarySystems {
                                             state.dataUnitarySystems->unitarySys[sysNum].Name);
                     }
 
-                    //        IF(UnitarySystem(UnitarySysNum)%m_DehumidControlType_Num .EQ. dehumidm_ControlType::CoolReheat)THEN
                     SetupOutputVariable(state,
                                         "Unitary System Dehumidification Induced Heating Demand Rate",
                                         Constant::Units::W,
@@ -17453,7 +17506,6 @@ namespace UnitarySystems {
                                         OutputProcessor::TimeStepType::System,
                                         OutputProcessor::StoreType::Average,
                                         state.dataUnitarySystems->unitarySys[sysNum].Name);
-                    //        END IF
 
                     if (state.dataUnitarySystems->unitarySys[sysNum].m_FanExists) {
                         SetupOutputVariable(state,
