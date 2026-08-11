@@ -9719,12 +9719,12 @@ TEST_F(EnergyPlusFixture, HeatBalanceSurfaceManager_QPVSysSource_AffectsSurfQsrc
     auto &oscm = state->dataSurface->OSCM(1);
     oscm.TConv = 0.0;
     oscm.HConv = 0.0;
-    oscm.TRad  = 0.0;
-    oscm.HRad  = 0.0;
+    oscm.TRad = 0.0;
+    oscm.HRad = 0.0;
     oscm.EMSOverrideOnTConv = false;
     oscm.EMSOverrideOnHConv = false;
-    oscm.EMSOverrideOnTRad  = false;
-    oscm.EMSOverrideOnHrad  = false;
+    oscm.EMSOverrideOnTRad = false;
+    oscm.EMSOverrideOnHrad = false;
 
     // --- Construction with source/sink.
     //     CTFSourceOut[0] = 2.0 makes the temperature effect clearly non-zero.
@@ -9732,10 +9732,11 @@ TEST_F(EnergyPlusFixture, HeatBalanceSurfaceManager_QPVSysSource_AffectsSurfQsrc
     state->dataConstruction->Construct.allocate(constrNum);
     auto &constr = state->dataConstruction->Construct(constrNum);
     constr.SourceSinkPresent = true;
-    constr.CTFOutside.fill(0.0);  constr.CTFOutside[0]  = 1.0;
-    constr.CTFCross.fill(0.0);    // slow conduction: cross term is zero
+    constr.CTFOutside.fill(0.0);
+    constr.CTFOutside[0] = 1.0;
+    constr.CTFCross.fill(0.0); // slow conduction: cross term is zero
     constr.CTFSourceOut[0] = 2.0;
-    constr.CTFSourceIn[0]  = 0.0;
+    constr.CTFSourceIn[0] = 0.0;
     constr.CTFInside.fill(0.0);
 
     // --- Heat balance arrays (all zero; only SurfQsrcHist is varied). ---
@@ -9764,15 +9765,13 @@ TEST_F(EnergyPlusFixture, HeatBalanceSurfaceManager_QPVSysSource_AffectsSurfQsrc
     // --- Confirm HasBuildingIntegratedPV identifies the integrated mode. ---
     state->dataPhotovoltaic->NumPVs = 1;
     state->dataPhotovoltaic->PVarray.allocate(1);
-    state->dataPhotovoltaic->PVarray(1).CellIntegrationMode =
-        DataPhotovoltaics::CellIntegration::SurfaceOutsideFace;
+    state->dataPhotovoltaic->PVarray(1).CellIntegrationMode = DataPhotovoltaics::CellIntegration::SurfaceOutsideFace;
     state->dataPhotovoltaic->PVarray(1).SurfacePtr = surfNum;
 
     {
         bool anyIntegrated = false;
         Photovoltaics::HasBuildingIntegratedPV(*state, anyIntegrated);
-        ASSERT_TRUE(anyIntegrated)
-            << "Precondition: PV must be in an integrated mode for the re-pass to fire.";
+        ASSERT_TRUE(anyIntegrated) << "Precondition: PV must be in an integrated mode for the re-pass to fire.";
     }
 
     // Helper: apply QPVSysSource, update SurfQsrcHist (the formula from the
@@ -9781,13 +9780,10 @@ TEST_F(EnergyPlusFixture, HeatBalanceSurfaceManager_QPVSysSource_AffectsSurfQsrc
     auto runRepass = [&](Real64 pvPowerW) {
         state->dataHeatBalFanSys->QPVSysSource(surfNum) = pvPowerW;
         state->dataHeatBalSurf->SurfQsrcHist(surfNum, 1) =
-            (state->dataHeatBalFanSys->QRadSysSource(surfNum) +
-             state->dataHeatBalFanSys->QPVSysSource(surfNum)) /
-            surf.Area;
+            (state->dataHeatBalFanSys->QRadSysSource(surfNum) + state->dataHeatBalFanSys->QPVSysSource(surfNum)) / surf.Area;
 
         bool errorFlag = false;
-        HeatBalanceSurfaceManager::CalcOutsideSurfTemp(
-            *state, surfNum, spaceNum, constrNum, /*HMovInsul=*/0.0, /*TempExt=*/0.0, errorFlag);
+        HeatBalanceSurfaceManager::CalcOutsideSurfTemp(*state, surfNum, spaceNum, constrNum, /*HMovInsul=*/0.0, /*TempExt=*/0.0, errorFlag);
         EXPECT_FALSE(errorFlag);
     };
 
@@ -9806,18 +9802,14 @@ TEST_F(EnergyPlusFixture, HeatBalanceSurfaceManager_QPVSysSource_AffectsSurfQsrc
     const Real64 T_withPV = state->dataHeatBalSurf->SurfOutsideTempHist(1)(surfNum);
 
     // SurfQsrcHist must reflect the PV sink (W/m2, negative).
-    EXPECT_NEAR(Q_withPV, -pvPower / surfArea, 1e-6)
-        << "SurfQsrcHist must incorporate QPVSysSource (regression guard for #11698).";
+    EXPECT_NEAR(Q_withPV, -pvPower / surfArea, 1e-6) << "SurfQsrcHist must incorporate QPVSysSource (regression guard for #11698).";
 
     // A heat sink must lower the outside surface temperature.
-    EXPECT_LT(T_withPV, T_noPV)
-        << "Outside face temperature must decrease when QPVSysSource is a sink.";
+    EXPECT_LT(T_withPV, T_noPV) << "Outside face temperature must decrease when QPVSysSource is a sink.";
 
     // Quantitative check: deltaT = CTFSourceOut[0] * deltaQ / CTFOutside[0].
-    const Real64 expectedDeltaT =
-        constr.CTFSourceOut[0] * (Q_withPV - Q_noPV) / constr.CTFOutside[0];
-    EXPECT_NEAR(T_withPV - T_noPV, expectedDeltaT, 1e-6)
-        << "Outside temperature delta must match the CTF source-out contribution.";
+    const Real64 expectedDeltaT = constr.CTFSourceOut[0] * (Q_withPV - Q_noPV) / constr.CTFOutside[0];
+    EXPECT_NEAR(T_withPV - T_noPV, expectedDeltaT, 1e-6) << "Outside temperature delta must match the CTF source-out contribution.";
 }
 
 } // namespace EnergyPlus
