@@ -5204,7 +5204,7 @@ void UpdateFinalSurfaceHeatBalance(EnergyPlusData &state)
     bool ElecBaseboardSysOn;  // .TRUE. if a steam baseboard heater is running
     bool CoolingPanelSysOn;   // true if a simple cooling panel is running
     bool SwimmingPoolOn;      // true if a pool is present (running)
-    bool AnyCellIntegrationMode;
+    bool AnyIntegratedMode;
 
     LowTempRadiantSystem::UpdateRadSysSourceValAvg(state, LowTempRadSysOn);
     HighTempRadiantSystem::UpdateHTRadSourceValAvg(state, HighTempRadSysOn);
@@ -5213,10 +5213,10 @@ void UpdateFinalSurfaceHeatBalance(EnergyPlusData &state)
     ElectricBaseboardRadiator::UpdateBBElecRadSourceValAvg(state, ElecBaseboardSysOn);
     CoolingPanelSimple::UpdateCoolingPanelSourceValAvg(state, CoolingPanelSysOn);
     SwimmingPool::UpdatePoolSourceValAvg(state, SwimmingPoolOn);
-    Photovoltaics::HasBuildingIntegratedPV(state, AnyCellIntegrationMode);
+    Photovoltaics::HasBuildingIntegratedPV(state, AnyIntegratedMode);
 
     if (LowTempRadSysOn || HighTempRadSysOn || HWBaseboardSysOn || SteamBaseboardSysOn || ElecBaseboardSysOn || CoolingPanelSysOn || SwimmingPoolOn ||
-        AnyCellIntegrationMode) {
+        AnyIntegratedMode) {
         // Solve the zone heat balance 'Detailed' solution
         // Call the outside and inside surface heat balances
         CalcHeatBalanceOutsideSurf(state);
