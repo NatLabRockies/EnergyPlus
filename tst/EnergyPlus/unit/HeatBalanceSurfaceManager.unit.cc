@@ -64,6 +64,7 @@
 #include <EnergyPlus/DataHeatBalance.hh>
 #include <EnergyPlus/DataLoopNode.hh>
 #include <EnergyPlus/DataMoistureBalance.hh>
+#include <EnergyPlus/DataPhotovoltaics.hh>
 #include <EnergyPlus/DataSizing.hh>
 #include <EnergyPlus/DataSurfaces.hh>
 #include <EnergyPlus/DataZoneEquipment.hh>
@@ -78,6 +79,7 @@
 #include <EnergyPlus/Material.hh>
 #include <EnergyPlus/OutAirNodeManager.hh>
 #include <EnergyPlus/OutputReportTabular.hh>
+#include <EnergyPlus/Photovoltaics.hh>
 #include <EnergyPlus/ScheduleManager.hh>
 #include <EnergyPlus/SolarShading.hh>
 #include <EnergyPlus/SurfaceGeometry.hh>
@@ -9688,6 +9690,134 @@ TEST_F(EnergyPlusFixture, HeatBalanceSurfaceManager_ZoneFaceConductionVariableTe
     EXPECT_NEAR(dHB->ZoneOpaqSurfExtFaceCondLossRep(1), 21.0, closeEnough);
     EXPECT_NEAR(dHB->ZnOpqSurfExtFaceCondGnRepEnrg(1), 0.0, closeEnough);
     EXPECT_NEAR(dHB->ZnOpqSurfExtFaceCondLsRepEnrg(1), 1260.0, closeEnough);
+}
+
+TEST_F(EnergyPlusFixture, HeatBalanceSurfaceManager_QPVSysSource_AffectsSurfQsrcHistAndOutsideSurfaceTemp)
+{
+    constexpr int surfNum = 1;
+    constexpr int constrNum = 1;
+    constexpr int spaceNum = 1;
+    constexpr Real64 surfArea = 10.0;
+
+    // --- Surface: OtherSideCondModeledExt so CalcOutsideSurfTemp takes the
+    //     OSCM branch, which needs no convection-coefficient infrastructure. ---
+    state->dataSurface->TotSurfaces = surfNum;
+    state->dataSurface->Surface.allocate(surfNum);
+    auto &surf = state->dataSurface->Surface(surfNum);
+    surf.Area = surfArea;
+    surf.HeatTransSurf = true;
+    surf.Class = DataSurfaces::SurfaceClass::Wall;
+    surf.ExtBoundCond = DataSurfaces::OtherSideCondModeledExt;
+    surf.HeatTransferAlgorithm = DataSurfaces::HeatTransferModel::CTF;
+    surf.Construction = constrNum;
+    surf.OSCMPtr = 1;
+    surf.SurfHasSurroundingSurfProperty = false;
+    surf.UseSurfPropertyGndSurfTemp = false;
+
+    // --- OSCM: all driving terms zero so only the CTF source term contributes. ---
+    state->dataSurface->OSCM.allocate(1);
+    auto &oscm = state->dataSurface->OSCM(1);
+    oscm.TConv = 0.0;
+    oscm.HConv = 0.0;
+    oscm.TRad  = 0.0;
+    oscm.HRad  = 0.0;
+    oscm.EMSOverrideOnTConv = false;
+    oscm.EMSOverrideOnHConv = false;
+    oscm.EMSOverrideOnTRad  = false;
+    oscm.EMSOverrideOnHrad  = false;
+
+    // --- Construction with source/sink.
+    //     CTFSourceOut[0] = 2.0 makes the temperature effect clearly non-zero.
+    //     CTFOutside[0]   = 1.0 gives a known denominator. ---
+    state->dataConstruction->Construct.allocate(constrNum);
+    auto &constr = state->dataConstruction->Construct(constrNum);
+    constr.SourceSinkPresent = true;
+    constr.CTFOutside.fill(0.0);  constr.CTFOutside[0]  = 1.0;
+    constr.CTFCross.fill(0.0);    // slow conduction: cross term is zero
+    constr.CTFSourceOut[0] = 2.0;
+    constr.CTFSourceIn[0]  = 0.0;
+    constr.CTFInside.fill(0.0);
+
+    // --- Heat balance arrays (all zero; only SurfQsrcHist is varied). ---
+    state->dataHeatBalSurf->SurfCTFConstOutPart.dimension(surfNum, 0.0);
+    state->dataHeatBalSurf->SurfOpaqQRadSWOutAbs.dimension(surfNum, 0.0);
+    state->dataHeatBalSurf->SurfHConvExt.dimension(surfNum, 0.0);
+    state->dataHeatBalSurf->SurfHAirExt.dimension(surfNum, 0.0);
+    state->dataHeatBalSurf->SurfHSkyExt.dimension(surfNum, 0.0);
+    state->dataHeatBalSurf->SurfHGrdExt.dimension(surfNum, 0.0);
+    state->dataHeatBalSurf->SurfHSrdSurfExt.dimension(surfNum, 0.0);
+    state->dataHeatBalSurf->SurfQAdditionalHeatSourceOutside.dimension(surfNum, 0.0);
+    state->dataHeatBalSurf->SurfTempIn.dimension(surfNum, 0.0);
+    state->dataHeatBalSurf->SurfQdotRadOutRepPerArea.dimension(surfNum, 0.0);
+    state->dataHeatBalSurf->SurfOutsideTempHist.allocate(1);
+    state->dataHeatBalSurf->SurfOutsideTempHist(1).dimension(surfNum, 0.0);
+    state->dataHeatBalSurf->SurfQsrcHist.dimension(surfNum, 1, 0.0);
+
+    // Written by CalcOutsideSurfTemp when SourceSinkPresent.
+    state->dataHeatBalFanSys->RadSysToHBConstCoef.dimension(surfNum, 0.0);
+    state->dataHeatBalFanSys->RadSysToHBTinCoef.dimension(surfNum, 0.0);
+    state->dataHeatBalFanSys->RadSysToHBQsrcCoef.dimension(surfNum, 0.0);
+
+    state->dataHeatBalFanSys->QRadSysSource.dimension(surfNum, 0.0);
+    state->dataHeatBalFanSys->QPVSysSource.dimension(surfNum, 0.0);
+
+    // --- Confirm HasBuildingIntegratedPV identifies the integrated mode. ---
+    state->dataPhotovoltaic->NumPVs = 1;
+    state->dataPhotovoltaic->PVarray.allocate(1);
+    state->dataPhotovoltaic->PVarray(1).CellIntegrationMode =
+        DataPhotovoltaics::CellIntegration::SurfaceOutsideFace;
+    state->dataPhotovoltaic->PVarray(1).SurfacePtr = surfNum;
+
+    {
+        bool anyIntegrated = false;
+        Photovoltaics::HasBuildingIntegratedPV(*state, anyIntegrated);
+        ASSERT_TRUE(anyIntegrated)
+            << "Precondition: PV must be in an integrated mode for the re-pass to fire.";
+    }
+
+    // Helper: apply QPVSysSource, update SurfQsrcHist (the formula from the
+    // AnyInternalHeatSourceInInput block at the top of CalcHeatBalanceOutsideSurf),
+    // then call CalcOutsideSurfTemp to compute the outside surface temperature.
+    auto runRepass = [&](Real64 pvPowerW) {
+        state->dataHeatBalFanSys->QPVSysSource(surfNum) = pvPowerW;
+        state->dataHeatBalSurf->SurfQsrcHist(surfNum, 1) =
+            (state->dataHeatBalFanSys->QRadSysSource(surfNum) +
+             state->dataHeatBalFanSys->QPVSysSource(surfNum)) /
+            surf.Area;
+
+        bool errorFlag = false;
+        HeatBalanceSurfaceManager::CalcOutsideSurfTemp(
+            *state, surfNum, spaceNum, constrNum, /*HMovInsul=*/0.0, /*TempExt=*/0.0, errorFlag);
+        EXPECT_FALSE(errorFlag);
+    };
+
+    // --- Baseline: no PV source → both SurfQsrcHist and T_outside are zero. ---
+    runRepass(0.0);
+    const Real64 Q_noPV = state->dataHeatBalSurf->SurfQsrcHist(surfNum, 1);
+    const Real64 T_noPV = state->dataHeatBalSurf->SurfOutsideTempHist(1)(surfNum);
+    EXPECT_NEAR(Q_noPV, 0.0, 1e-6);
+    EXPECT_NEAR(T_noPV, 0.0, 1e-6);
+
+    // --- Re-pass with PV acting as a heat sink (negative = extracting energy). ---
+    constexpr Real64 pvPower = 500.0; // W
+    runRepass(-pvPower);
+
+    const Real64 Q_withPV = state->dataHeatBalSurf->SurfQsrcHist(surfNum, 1);
+    const Real64 T_withPV = state->dataHeatBalSurf->SurfOutsideTempHist(1)(surfNum);
+
+    // SurfQsrcHist must reflect the PV sink (W/m2, negative).
+    EXPECT_NEAR(Q_withPV, -pvPower / surfArea, 1e-6)
+        << "SurfQsrcHist must incorporate QPVSysSource (regression guard for #11698).";
+
+    // A heat sink must lower the outside surface temperature.
+    EXPECT_LT(T_withPV, T_noPV)
+        << "Outside face temperature must decrease when QPVSysSource is a sink.";
+
+    // Quantitative check: deltaT = CTFSourceOut[0] * deltaQ / CTFOutside[0].
+    const Real64 expectedDeltaT =
+        constr.CTFSourceOut[0] * (Q_withPV - Q_noPV) / constr.CTFOutside[0];
+    EXPECT_NEAR(T_withPV - T_noPV, expectedDeltaT, 1e-6)
+        << "Outside temperature delta must match the CTF source-out contribution.";
 }
 
 } // namespace EnergyPlus
