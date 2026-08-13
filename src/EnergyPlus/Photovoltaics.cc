@@ -215,7 +215,10 @@ namespace Photovoltaics {
         } break;
         }
 
-        if (state.dataPhotovoltaic->PVarray(PVnum).CellIntegrationMode == CellIntegration::SurfaceOutsideFace) {
+        auto const cellIntegrationMode = state.dataPhotovoltaic->PVarray(PVnum).CellIntegrationMode;
+        if (cellIntegrationMode == CellIntegration::SurfaceOutsideFace || cellIntegrationMode == CellIntegration::TranspiredCollector ||
+            cellIntegrationMode == CellIntegration::ExteriorVentedCavity || cellIntegrationMode == CellIntegration::PVTSolarCollector) {
+            // Surface coupling runs before the electric generator pass, so retain the current schedule state for the next coupling pass.
             state.dataPhotovoltaic->PVarray(PVnum).SurfaceCouplingRunFlag = RunFlag;
         }
 
@@ -877,6 +880,7 @@ namespace Photovoltaics {
 
     void SimSurfaceCoupledPV(EnergyPlusData &state, int const PVnum)
     {
+        // Recalculate PV that depends on a surface or collector temperature before the heat balance uses its current sink.
         auto &pv = state.dataPhotovoltaic->PVarray(PVnum);
         switch (pv.CellIntegrationMode) {
         case CellIntegration::SurfaceOutsideFace:
@@ -908,6 +912,7 @@ namespace Photovoltaics {
 
     void UpdatePVIntegrationSource(EnergyPlusData &state, int const PVnum)
     {
+        // Publish the PV sink to its coupled thermal model and request another pass when the sink changes materially.
         auto &pv = state.dataPhotovoltaic->PVarray(PVnum);
         Real64 const previousSource = pv.SurfaceCouplingSource;
 
@@ -935,13 +940,11 @@ namespace Photovoltaics {
         pv.SurfaceCouplingSource = pv.SurfaceSink;
         if (pv.SurfaceCouplingNeedsResim) {
             state.dataHVACGlobal->SimElecCircuitsFlag = true;
-            if (pv.CellIntegrationMode == CellIntegration::SurfaceOutsideFace ||
-                pv.CellIntegrationMode == CellIntegration::ExteriorVentedCavity ||
+            if (pv.CellIntegrationMode == CellIntegration::SurfaceOutsideFace || pv.CellIntegrationMode == CellIntegration::ExteriorVentedCavity ||
                 pv.CellIntegrationMode == CellIntegration::TranspiredCollector) {
                 state.dataHVACGlobal->PVSurfaceHeatBalanceResimFlag = true;
             }
-            if (pv.CellIntegrationMode == CellIntegration::TranspiredCollector ||
-                pv.CellIntegrationMode == CellIntegration::PVTSolarCollector) {
+            if (pv.CellIntegrationMode == CellIntegration::TranspiredCollector || pv.CellIntegrationMode == CellIntegration::PVTSolarCollector) {
                 state.dataHVACGlobal->SimAirLoopsFlag = true;
                 state.dataHVACGlobal->SimPlantLoopsFlag = true;
             }

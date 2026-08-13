@@ -54,11 +54,12 @@
 #include "Fixtures/EnergyPlusFixture.hh"
 #include <EnergyPlus/Data/EnergyPlusData.hh>
 #include <EnergyPlus/DataHVACGlobals.hh>
-#include <EnergyPlus/DataHeatBalance.hh>
 #include <EnergyPlus/DataHeatBalFanSys.hh>
+#include <EnergyPlus/DataHeatBalance.hh>
 #include <EnergyPlus/DataPhotovoltaics.hh>
 #include <EnergyPlus/DataSurfaces.hh>
 #include <EnergyPlus/Photovoltaics.hh>
+#include <EnergyPlus/PhotovoltaicThermalCollectors.hh>
 #include <EnergyPlus/TranspiredCollector.hh>
 
 using namespace EnergyPlus;
@@ -185,6 +186,23 @@ TEST_F(EnergyPlusFixture, PV_SurfaceCouplingSourceRequestsResimulation)
     Photovoltaics::UpdatePVIntegrationSource(*state, 1);
 
     EXPECT_TRUE(state->dataHVACGlobal->PVSurfaceHeatBalanceResimFlag);
+    EXPECT_TRUE(state->dataHVACGlobal->SimElecCircuitsFlag);
+    EXPECT_TRUE(state->dataHVACGlobal->SimAirLoopsFlag);
+    EXPECT_TRUE(state->dataHVACGlobal->SimPlantLoopsFlag);
+
+    state->dataHVACGlobal->PVSurfaceHeatBalanceResimFlag = false;
+    state->dataHVACGlobal->SimElecCircuitsFlag = false;
+    state->dataHVACGlobal->SimAirLoopsFlag = false;
+    state->dataHVACGlobal->SimPlantLoopsFlag = false;
+    state->dataPhotovoltaicThermalCollector->PVT.allocate(1);
+    state->dataPhotovoltaicThermalCollector->PVT(1).AreaCol = 2.0;
+    state->dataPhotovoltaic->PVarray(1).CellIntegrationMode = DataPhotovoltaics::CellIntegration::PVTSolarCollector;
+    state->dataPhotovoltaic->PVarray(1).PVTPtr = 1;
+    state->dataPhotovoltaic->PVarray(1).SurfaceSink = 40.0;
+    Photovoltaics::UpdatePVIntegrationSource(*state, 1);
+
+    EXPECT_DOUBLE_EQ(state->dataPhotovoltaicThermalCollector->PVT(1).QdotSource, -20.0);
+    EXPECT_FALSE(state->dataHVACGlobal->PVSurfaceHeatBalanceResimFlag);
     EXPECT_TRUE(state->dataHVACGlobal->SimElecCircuitsFlag);
     EXPECT_TRUE(state->dataHVACGlobal->SimAirLoopsFlag);
     EXPECT_TRUE(state->dataHVACGlobal->SimPlantLoopsFlag);

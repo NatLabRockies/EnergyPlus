@@ -166,6 +166,7 @@ void ManageSurfaceHeatBalance(EnergyPlusData &state)
     }
     InitSurfaceHeatBalance(state); // Initialize all heat balance related parameters
 
+    // Surface-coupled PV must be initialized before its first temperature-dependent calculation.
     if (state.dataPhotovoltaicState->GetInputFlag &&
         state.dataInputProcessing->inputProcessor->getNumObjectsFound(state, "Generator:Photovoltaic") > 0) {
         Photovoltaics::GetPVInput(state);
@@ -247,6 +248,7 @@ void ManageSurfaceHeatBalance(EnergyPlusData &state)
 
 void ResimulateSurfaceHeatBalanceForPV(EnergyPlusData &state)
 {
+    // Repeat the coupled surface and PV calculations after electric simulation changes the PV heat sink.
     if (!state.dataHVACGlobal->PVSurfaceHeatBalanceResimFlag) {
         return;
     }
