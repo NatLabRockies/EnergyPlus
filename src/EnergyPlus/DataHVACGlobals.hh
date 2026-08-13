@@ -457,8 +457,8 @@ struct HVACGlobalsData : BaseGlobalStruct
     Real64 deviationFromSetPtThresholdHtg = -0.2; // heating threshold for reporting setpoint deviation
     Real64 deviationFromSetPtThresholdClg = 0.2;  // cooling threshold for reporting setpoint deviation
 
-    bool SimAirLoopsFlag = false;           // True when the air loops need to be (re)simulated
-    bool SimElecCircuitsFlag = false;       // True when electic circuits need to be (re)simulated
+    bool SimAirLoopsFlag = false;     // True when the air loops need to be (re)simulated
+    bool SimElecCircuitsFlag = false; // True when electic circuits need to be (re)simulated
     bool PVSurfaceHeatBalanceResimFlag = false;
     bool SimPlantLoopsFlag = false;         // True when the main plant loops need to be (re)simulated
     bool SimZoneEquipmentFlag = false;      // True when zone equipment components need to be (re)simulated

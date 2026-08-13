@@ -53,10 +53,13 @@
 // EnergyPlus Headers
 #include "Fixtures/EnergyPlusFixture.hh"
 #include <EnergyPlus/Data/EnergyPlusData.hh>
+#include <EnergyPlus/DataHVACGlobals.hh>
 #include <EnergyPlus/DataHeatBalance.hh>
+#include <EnergyPlus/DataHeatBalFanSys.hh>
 #include <EnergyPlus/DataPhotovoltaics.hh>
 #include <EnergyPlus/DataSurfaces.hh>
 #include <EnergyPlus/Photovoltaics.hh>
+#include <EnergyPlus/TranspiredCollector.hh>
 
 using namespace EnergyPlus;
 
@@ -132,4 +135,57 @@ TEST_F(EnergyPlusFixture, PV_ReportPV_ZoneIndexNonZero)
     Photovoltaics::ReportPV(*state, 3);
     EXPECT_EQ(state->dataPhotovoltaic->PVarray(3).Zone, 0);
     EXPECT_NEAR(state->dataPhotovoltaic->PVarray(3).Report.DCPower, 1000.0, 0.1);
+}
+
+TEST_F(EnergyPlusFixture, PV_SurfaceCouplingSourceRequestsResimulation)
+{
+    state->dataPhotovoltaic->PVarray.allocate(1);
+    state->dataPhotovoltaic->NumPVs = 1;
+    state->dataPhotovoltaic->PVarray(1).CellIntegrationMode = DataPhotovoltaics::CellIntegration::SurfaceOutsideFace;
+    state->dataPhotovoltaic->PVarray(1).SurfacePtr = 1;
+    state->dataPhotovoltaic->PVarray(1).SurfaceSink = 100.0;
+    state->dataHeatBalFanSys->QPVSysSource.allocate(1);
+
+    Photovoltaics::UpdatePVIntegrationSource(*state, 1);
+
+    EXPECT_DOUBLE_EQ(state->dataHeatBalFanSys->QPVSysSource(1), -100.0);
+    EXPECT_TRUE(state->dataHVACGlobal->PVSurfaceHeatBalanceResimFlag);
+    EXPECT_TRUE(state->dataHVACGlobal->SimElecCircuitsFlag);
+    EXPECT_TRUE(state->dataPhotovoltaic->PVarray(1).SurfaceCouplingNeedsResim);
+
+    state->dataHVACGlobal->PVSurfaceHeatBalanceResimFlag = false;
+    state->dataHVACGlobal->SimElecCircuitsFlag = false;
+    state->dataPhotovoltaic->PVarray(1).SurfaceSink = 100.0;
+    Photovoltaics::UpdatePVIntegrationSource(*state, 1);
+
+    EXPECT_FALSE(state->dataHVACGlobal->PVSurfaceHeatBalanceResimFlag);
+    EXPECT_FALSE(state->dataHVACGlobal->SimElecCircuitsFlag);
+    EXPECT_FALSE(state->dataPhotovoltaic->PVarray(1).SurfaceCouplingNeedsResim);
+
+    state->dataHeatBal->ExtVentedCavity.allocate(1);
+    state->dataHeatBal->ExtVentedCavity(1).ProjArea = 1.0;
+    state->dataPhotovoltaic->PVarray(1).CellIntegrationMode = DataPhotovoltaics::CellIntegration::ExteriorVentedCavity;
+    state->dataPhotovoltaic->PVarray(1).ExtVentCavPtr = 1;
+    state->dataPhotovoltaic->PVarray(1).SurfaceSink = 50.0;
+    Photovoltaics::UpdatePVIntegrationSource(*state, 1);
+
+    EXPECT_TRUE(state->dataHVACGlobal->PVSurfaceHeatBalanceResimFlag);
+    EXPECT_TRUE(state->dataHVACGlobal->SimElecCircuitsFlag);
+    EXPECT_FALSE(state->dataHVACGlobal->SimAirLoopsFlag);
+    EXPECT_FALSE(state->dataHVACGlobal->SimPlantLoopsFlag);
+
+    state->dataHVACGlobal->PVSurfaceHeatBalanceResimFlag = false;
+    state->dataHVACGlobal->SimElecCircuitsFlag = false;
+    state->dataHeatBal->ExtVentedCavity(1).QdotSource = 0.0;
+    state->dataPhotovoltaic->PVarray(1).CellIntegrationMode = DataPhotovoltaics::CellIntegration::TranspiredCollector;
+    state->dataPhotovoltaic->PVarray(1).UTSCPtr = 1;
+    state->dataPhotovoltaic->PVarray(1).SurfaceSink = 25.0;
+    state->dataTranspiredCollector->UTSC.allocate(1);
+    state->dataTranspiredCollector->UTSC(1).ProjArea = 1.0;
+    Photovoltaics::UpdatePVIntegrationSource(*state, 1);
+
+    EXPECT_TRUE(state->dataHVACGlobal->PVSurfaceHeatBalanceResimFlag);
+    EXPECT_TRUE(state->dataHVACGlobal->SimElecCircuitsFlag);
+    EXPECT_TRUE(state->dataHVACGlobal->SimAirLoopsFlag);
+    EXPECT_TRUE(state->dataHVACGlobal->SimPlantLoopsFlag);
 }

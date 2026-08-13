@@ -916,7 +916,8 @@ namespace Photovoltaics {
             state.dataHeatBalFanSys->QPVSysSource(pv.SurfacePtr) = -pv.SurfaceSink;
             break;
         case CellIntegration::TranspiredCollector: {
-            TranspiredCollector::SetUTSCQdotSource(state, state.dataPhotovoltaic->PVarray(PVnum).UTSCPtr, -1.0 * state.dataPhotovoltaic->PVarray(PVnum).SurfaceSink);
+            TranspiredCollector::SetUTSCQdotSource(
+                state, state.dataPhotovoltaic->PVarray(PVnum).UTSCPtr, -1.0 * state.dataPhotovoltaic->PVarray(PVnum).SurfaceSink);
         } break;
         case CellIntegration::ExteriorVentedCavity: {
             SetVentedModuleQdotSource(
@@ -934,9 +935,13 @@ namespace Photovoltaics {
         pv.SurfaceCouplingSource = pv.SurfaceSink;
         if (pv.SurfaceCouplingNeedsResim) {
             state.dataHVACGlobal->SimElecCircuitsFlag = true;
-            if (pv.CellIntegrationMode == CellIntegration::SurfaceOutsideFace) {
+            if (pv.CellIntegrationMode == CellIntegration::SurfaceOutsideFace ||
+                pv.CellIntegrationMode == CellIntegration::ExteriorVentedCavity ||
+                pv.CellIntegrationMode == CellIntegration::TranspiredCollector) {
                 state.dataHVACGlobal->PVSurfaceHeatBalanceResimFlag = true;
-            } else {
+            }
+            if (pv.CellIntegrationMode == CellIntegration::TranspiredCollector ||
+                pv.CellIntegrationMode == CellIntegration::PVTSolarCollector) {
                 state.dataHVACGlobal->SimAirLoopsFlag = true;
                 state.dataHVACGlobal->SimPlantLoopsFlag = true;
             }

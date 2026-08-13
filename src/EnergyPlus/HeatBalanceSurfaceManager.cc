@@ -166,7 +166,8 @@ void ManageSurfaceHeatBalance(EnergyPlusData &state)
     }
     InitSurfaceHeatBalance(state); // Initialize all heat balance related parameters
 
-    if (state.dataPhotovoltaicState->GetInputFlag) {
+    if (state.dataPhotovoltaicState->GetInputFlag &&
+        state.dataInputProcessing->inputProcessor->getNumObjectsFound(state, "Generator:Photovoltaic") > 0) {
         Photovoltaics::GetPVInput(state);
         state.dataPhotovoltaicState->GetInputFlag = false;
     }
