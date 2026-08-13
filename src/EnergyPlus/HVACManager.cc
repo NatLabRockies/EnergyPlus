@@ -80,6 +80,7 @@
 #include <EnergyPlus/General.hh>
 #include <EnergyPlus/HVACManager.hh>
 #include <EnergyPlus/HVACSizingSimulationManager.hh>
+#include <EnergyPlus/HeatBalanceSurfaceManager.hh>
 #include <EnergyPlus/IceThermalStorage.hh>
 #include <EnergyPlus/IndoorGreen.hh>
 #include <EnergyPlus/InternalHeatGains.hh>
@@ -1804,6 +1805,8 @@ void SimSelectedEquipment(EnergyPlusData &state,
         PlantUtilities::SetAllFlowLocks(state, DataPlant::FlowLock::Unlocked);
     }
     PlantUtilities::ResetAllPlantInterConnectFlags(state);
+
+    HeatBalanceSurfaceManager::ResimulateSurfaceHeatBalanceForPV(state);
 
     if (state.dataGlobal->BeginEnvrnFlag && state.dataHVACMgr->MyEnvrnFlag2) {
         // Following comment is incorrect!  (LKL) Even the first time through this does more than read in data.

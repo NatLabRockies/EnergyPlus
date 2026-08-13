@@ -459,6 +459,7 @@ struct HVACGlobalsData : BaseGlobalStruct
 
     bool SimAirLoopsFlag = false;           // True when the air loops need to be (re)simulated
     bool SimElecCircuitsFlag = false;       // True when electic circuits need to be (re)simulated
+    bool PVSurfaceHeatBalanceResimFlag = false;
     bool SimPlantLoopsFlag = false;         // True when the main plant loops need to be (re)simulated
     bool SimZoneEquipmentFlag = false;      // True when zone equipment components need to be (re)simulated
     bool SimNonZoneEquipmentFlag = false;   // True when non-zone equipment components need to be (re)simulated

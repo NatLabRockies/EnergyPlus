@@ -81,6 +81,7 @@
 #include <EnergyPlus/DataLoopNode.hh>
 #include <EnergyPlus/DataMoistureBalance.hh>
 #include <EnergyPlus/DataMoistureBalanceEMPD.hh>
+#include <EnergyPlus/DataPhotovoltaics.hh>
 #include <EnergyPlus/DataRoomAirModel.hh>
 #include <EnergyPlus/DataRuntimeLanguage.hh>
 #include <EnergyPlus/DataSizing.hh>
@@ -165,6 +166,15 @@ void ManageSurfaceHeatBalance(EnergyPlusData &state)
     }
     InitSurfaceHeatBalance(state); // Initialize all heat balance related parameters
 
+    if (state.dataPhotovoltaicState->GetInputFlag) {
+        Photovoltaics::GetPVInput(state);
+        state.dataPhotovoltaicState->GetInputFlag = false;
+    }
+
+    for (int PVnum = 1; PVnum <= state.dataPhotovoltaic->NumPVs; ++PVnum) {
+        Photovoltaics::SimSurfaceCoupledPV(state, PVnum);
+    }
+
     // Solve the zone heat balance 'Detailed' solution
     // Call the outside and inside surface heat balances
     if (state.dataHeatBalSurfMgr->ManageSurfaceHeatBalancefirstTime) {
@@ -232,6 +242,22 @@ void ManageSurfaceHeatBalance(EnergyPlusData &state)
     }
 
     state.dataHeatBalSurfMgr->ManageSurfaceHeatBalancefirstTime = false;
+}
+
+void ResimulateSurfaceHeatBalanceForPV(EnergyPlusData &state)
+{
+    if (!state.dataHVACGlobal->PVSurfaceHeatBalanceResimFlag) {
+        return;
+    }
+
+    state.dataHVACGlobal->PVSurfaceHeatBalanceResimFlag = false;
+    for (int pass = 1; pass <= 2; ++pass) {
+        CalcHeatBalanceOutsideSurf(state);
+        CalcHeatBalanceInsideSurf(state);
+        for (int PVnum = 1; PVnum <= state.dataPhotovoltaic->NumPVs; ++PVnum) {
+            Photovoltaics::SimSurfaceCoupledPV(state, PVnum);
+        }
+    }
 }
 
 // Beginning Initialization Section of the Module
@@ -5212,10 +5238,8 @@ void UpdateFinalSurfaceHeatBalance(EnergyPlusData &state)
     ElectricBaseboardRadiator::UpdateBBElecRadSourceValAvg(state, ElecBaseboardSysOn);
     CoolingPanelSimple::UpdateCoolingPanelSourceValAvg(state, CoolingPanelSysOn);
     SwimmingPool::UpdatePoolSourceValAvg(state, SwimmingPoolOn);
-    bool AnyIntegratedMode = Photovoltaics::HasBuildingIntegratedPV(state);
 
-    if (LowTempRadSysOn || HighTempRadSysOn || HWBaseboardSysOn || SteamBaseboardSysOn || ElecBaseboardSysOn || CoolingPanelSysOn || SwimmingPoolOn ||
-        AnyIntegratedMode) {
+    if (LowTempRadSysOn || HighTempRadSysOn || HWBaseboardSysOn || SteamBaseboardSysOn || ElecBaseboardSysOn || CoolingPanelSysOn || SwimmingPoolOn) {
         // Solve the zone heat balance 'Detailed' solution
         // Call the outside and inside surface heat balances
         CalcHeatBalanceOutsideSurf(state);

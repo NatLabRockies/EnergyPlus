@@ -215,6 +215,10 @@ namespace Photovoltaics {
         } break;
         }
 
+        if (state.dataPhotovoltaic->PVarray(PVnum).CellIntegrationMode == CellIntegration::SurfaceOutsideFace) {
+            state.dataPhotovoltaic->PVarray(PVnum).SurfaceCouplingRunFlag = RunFlag;
+        }
+
         ReportPV(state, PVnum);
     }
 
@@ -860,13 +864,59 @@ namespace Photovoltaics {
 
         switch (state.dataPhotovoltaic->PVarray(PVnum).CellIntegrationMode) {
             // SurfaceSink is not multiplied...
-        case CellIntegration::SurfaceOutsideFace: {
-            state.dataHeatBalFanSys->QPVSysSource(state.dataPhotovoltaic->PVarray(PVnum).SurfacePtr) =
-                -1.0 * state.dataPhotovoltaic->PVarray(PVnum).SurfaceSink;
-        } break;
+        case CellIntegration::SurfaceOutsideFace:
+        case CellIntegration::TranspiredCollector:
+        case CellIntegration::ExteriorVentedCavity:
+        case CellIntegration::PVTSolarCollector:
+            UpdatePVIntegrationSource(state, PVnum);
+            break;
+        default:
+            break;
+        }
+    }
+
+    void SimSurfaceCoupledPV(EnergyPlusData &state, int const PVnum)
+    {
+        auto &pv = state.dataPhotovoltaic->PVarray(PVnum);
+        switch (pv.CellIntegrationMode) {
+        case CellIntegration::SurfaceOutsideFace:
+        case CellIntegration::TranspiredCollector:
+        case CellIntegration::ExteriorVentedCavity:
+        case CellIntegration::PVTSolarCollector:
+            break;
+        default:
+            return;
+        }
+
+        switch (pv.PVModelType) {
+        case PVModel::Simple:
+            CalcSimplePV(state, PVnum);
+            break;
+        case PVModel::TRNSYS:
+            InitTRNSYSPV(state, PVnum);
+            CalcTRNSYSPV(state, PVnum, pv.SurfaceCouplingRunFlag);
+            break;
+        case PVModel::Sandia:
+            CalcSandiaPV(state, PVnum, pv.SurfaceCouplingRunFlag);
+            break;
+        default:
+            break;
+        }
+
+        UpdatePVIntegrationSource(state, PVnum);
+    }
+
+    void UpdatePVIntegrationSource(EnergyPlusData &state, int const PVnum)
+    {
+        auto &pv = state.dataPhotovoltaic->PVarray(PVnum);
+        Real64 const previousSource = pv.SurfaceCouplingSource;
+
+        switch (pv.CellIntegrationMode) {
+        case CellIntegration::SurfaceOutsideFace:
+            state.dataHeatBalFanSys->QPVSysSource(pv.SurfacePtr) = -pv.SurfaceSink;
+            break;
         case CellIntegration::TranspiredCollector: {
-            TranspiredCollector::SetUTSCQdotSource(
-                state, state.dataPhotovoltaic->PVarray(PVnum).UTSCPtr, -1.0 * state.dataPhotovoltaic->PVarray(PVnum).SurfaceSink);
+            TranspiredCollector::SetUTSCQdotSource(state, state.dataPhotovoltaic->PVarray(PVnum).UTSCPtr, -1.0 * state.dataPhotovoltaic->PVarray(PVnum).SurfaceSink);
         } break;
         case CellIntegration::ExteriorVentedCavity: {
             SetVentedModuleQdotSource(
@@ -879,20 +929,18 @@ namespace Photovoltaics {
         default:
             break;
         }
-    }
 
-    bool HasBuildingIntegratedPV(EnergyPlusData &state)
-    {
-        bool AnyIntegratedMode = false;
-        for (int PVnum = 1; PVnum <= state.dataPhotovoltaic->NumPVs; ++PVnum) {
-            auto const mode = state.dataPhotovoltaic->PVarray(PVnum).CellIntegrationMode;
-            if (mode == CellIntegration::SurfaceOutsideFace || mode == CellIntegration::TranspiredCollector ||
-                mode == CellIntegration::ExteriorVentedCavity) {
-                AnyIntegratedMode = true;
-                break;
+        pv.SurfaceCouplingNeedsResim = std::abs(pv.SurfaceSink - previousSource) > 0.1;
+        pv.SurfaceCouplingSource = pv.SurfaceSink;
+        if (pv.SurfaceCouplingNeedsResim) {
+            state.dataHVACGlobal->SimElecCircuitsFlag = true;
+            if (pv.CellIntegrationMode == CellIntegration::SurfaceOutsideFace) {
+                state.dataHVACGlobal->PVSurfaceHeatBalanceResimFlag = true;
+            } else {
+                state.dataHVACGlobal->SimAirLoopsFlag = true;
+                state.dataHVACGlobal->SimPlantLoopsFlag = true;
             }
         }
-        return AnyIntegratedMode;
     }
 
     // *************
