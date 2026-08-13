@@ -3452,6 +3452,8 @@
 
   Output:Variable,*,Boiler Steam Efficiency,Hourly;
 
+  Output:Variable,*,Boiler Steam Coefficient of Performance,Hourly;
+
 ! Reporting NODES Values
 
   Output:Variable,VAV SYS 1 Air Loop Outlet,System Node Temperature,hourly;

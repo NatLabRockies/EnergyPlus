@@ -739,3 +739,84 @@ TEST_F(EnergyPlusFixture, ZoneContaminantPredictorCorrector_MultiZoneGCControlTe
     EXPECT_NEAR(20.887992514, state->dataContaminantBalance->GCPredictedRate(2), 0.00001);
     EXPECT_NEAR(21.251538064, state->dataContaminantBalance->GCPredictedRate(3), 0.00001);
 }
+
+TEST_F(EnergyPlusFixture, ZoneContaminantPredictorCorrector_MissingGenericContaminantSchedules)
+{
+    std::string const idf_objects = delimited_string({
+        "Zone,",
+        "  Zone1,                                  !- Name",
+        "  0,                                      !- Direction of Relative North {deg}",
+        "  0,                                      !- X Origin {m}",
+        "  0,                                      !- Y Origin {m}",
+        "  0,                                      !- Z Origin {m}",
+        "  ,                                       !- Type",
+        "  1,                                      !- Multiplier",
+        "  ,                                       !- Ceiling Height {m}",
+        "  ,                                       !- Volume {m3}",
+        "  ,                                       !- Floor Area {m2}",
+        "  ,                                       !- Zone Inside Convection Algorithm",
+        "  ,                                       !- Zone Outside Convection Algorithm",
+        "  Yes;                                    !- Part of Total Floor Area",
+
+        "ZoneAirContaminantBalance,",
+        "  Yes,                                    !- Carbon Dioxide Concentration",
+        "  Always 400ppm,                          !- Outdoor Carbon Dioxide Schedule Name",
+        "  Yes,                                    !- Generic Contaminant Concentration",
+        "  Always Generic Outdoor;                 !- Outdoor Generic Contaminant Schedule Name",
+
+        "ZoneControl:ContaminantController,",
+        "  Zone1 Contaminant Controller,           !- Name",
+        "  Zone1,                                  !- Zone Name",
+        "  Always On,                              !- Carbon Dioxide Control Availability Schedule Name",
+        "  Always 1000ppm;                         !- Carbon Dioxide Setpoint Schedule Name",
+
+        "ScheduleTypeLimits,",
+        "  Fraction,                               !- Name",
+        "  0,                                      !- Lower Limit Value",
+        "  1,                                      !- Upper Limit Value",
+        "  Continuous;                             !- Numeric Type",
+
+        "ScheduleTypeLimits,",
+        "  Any Number;                             !- Name",
+
+        "Schedule:Constant,",
+        "  Always On,                              !- Name",
+        "  Fraction,                               !- Schedule Type Limits Name",
+        "  1.0;                                    !- Hourly Value",
+
+        "Schedule:Constant,",
+        "  Always 1000ppm,                         !- Name",
+        "  Any Number,                             !- Schedule Type Limits Name",
+        "  1000.0;                                 !- Hourly Value",
+
+        "Schedule:Constant,",
+        "  Always 400ppm,                          !- Name",
+        "  Any Number,                             !- Schedule Type Limits Name",
+        "  400.0;                                  !- Hourly Value",
+
+        "Schedule:Constant,",
+        "  Always Generic Outdoor,                 !- Name",
+        "  Any Number,                             !- Schedule Type Limits Name",
+        "  1.0;                                    !- Hourly Value",
+    });
+
+    ASSERT_TRUE(process_idf(idf_objects));
+
+    state->dataGlobal->TimeStepsInHour = 1;
+    state->dataGlobal->MinutesInTimeStep = 60;
+    state->init_state(*state);
+
+    bool ErrorsFound(false);
+    GetProjectControlData(*state, ErrorsFound);
+    ASSERT_FALSE(ErrorsFound);
+
+    GetZoneData(*state, ErrorsFound);
+    ASSERT_FALSE(ErrorsFound);
+
+    EXPECT_NO_THROW(GetZoneContaminantSetPoints(*state));
+    AllocateHeatBalArrays(*state);
+    EXPECT_THROW(InitZoneContSetPoints(*state), EnergyPlus::FatalError);
+    EXPECT_TRUE(compare_err_stream_substring("ZoneControl:ContaminantController", false));
+    EXPECT_TRUE(compare_err_stream_substring("Generic Contaminant Setpoint Schedule", false));
+    EXPECT_TRUE(compare_err_stream_substring("Program terminates for preceding reason(s).", true));
+}

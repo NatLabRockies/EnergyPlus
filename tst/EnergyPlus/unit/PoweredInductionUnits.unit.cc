@@ -808,7 +808,17 @@ TEST_F(EnergyPlusFixture, SeriesPIUZoneOAVolumeFlowRateTest)
     EXPECT_EQ(PriMinMassFlow, state->dataLoopNodes->Node(PriNodeNum).MassFlowRate);
     EXPECT_EQ(expect_OutdoorAirFlowRate, thisSeriesAT.OutdoorAirFlowRate);
 
-    // test 3: - Cooling load, at maximum primary air flow rate
+    // test 3: No heating load at 0 primary flow rate
+    FirstHVACIteration = true;
+    state->dataZoneEnergyDemand->ZoneSysEnergyDemand(1).RemainingOutputRequired = 0.0;
+    state->dataLoopNodes->Node(PriNodeNum).MassFlowRate = 0.0;
+    PoweredInductionUnits::InitPIU(*state, PIUNum, FirstHVACIteration);
+    PoweredInductionUnits::CalcSeriesPIU(*state, PIUNum, ZoneNum, ZoneNodeNum, FirstHVACIteration);
+    EXPECT_EQ(0.0, state->dataLoopNodes->Node(PriNodeNum).MassFlowRate);
+    EXPECT_EQ(0.0, state->dataLoopNodes->Node(SecNodeNum).MassFlowRate);
+    EXPECT_EQ(0.0, state->dataLoopNodes->Node(thisSeriesAT.OutAirNode).MassFlowRate); // fails prior to MinAvail fix for 0 flow #11737
+
+    // test 4: - Cooling load, at maximum primary air flow rate
     // set cooling zone and AT unit inlet conditions
     state->dataLoopNodes->Node(ZoneNodeNum).Temp = 24.0;
     state->dataLoopNodes->Node(ZoneNodeNum).HumRat = 0.0080;

@@ -149,7 +149,7 @@ set(INCLUDED_TEX
     ${PROJECT_SOURCE_DIR}/engineering-reference/src/special-modules-reporting/output-table-annual.tex
     ${PROJECT_SOURCE_DIR}/engineering-reference/src/special-modules-reporting/heat-emissions.tex
     ${PROJECT_SOURCE_DIR}/engineering-reference/src/special-modules-reporting/resilience-metrics.tex
-    ${PROJECT_SOURCE_DIR}/title.tex)
+    ${PROJECT_BINARY_DIR}/title.tex)
 
 # to get the list of inluded images, go to the root of the document folder and:
 # grep -r '\\includegraphics' * | cut -d ':' -f 2 | rev | cut -d '{' -f 1 | rev | cut -d '}' -f 1 | sed 's/^/  /g' | sort -n -t'.' -k 1.14

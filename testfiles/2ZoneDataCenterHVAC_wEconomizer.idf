@@ -85,6 +85,15 @@
 !                                 can be modified to allow to the DX and Chilled water coils
 !                                 to run alternately during the day and night or during week
 !                                 days and week ends.
+!                                 NOTE: The two zones intentionally demonstrate the two ITE air
+!                                 flow calculation methods. WestDataCenter_Equip uses
+!                                 FlowFromSystem, so West Zone air temperature follows the
+!                                 thermostat cooling setpoint. EastDataCenter_Equip uses
+!                                 FlowControlWithApproachTemperatures, for which the controlled
+!                                 variable is the supply air temperature and the zone cooling
+!                                 setpoint is ignored. East Zone air temperature therefore runs
+!                                 well above the 23 C cooling setpoint by design, and does not
+!                                 respond to changes in the Cooling Setpoints schedule.
 !
 ! Zonal Equipment:                none
 !

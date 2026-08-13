@@ -69,7 +69,6 @@
 #include <EnergyPlus/DataZoneEquipment.hh>
 #include <EnergyPlus/HeatBalanceManager.hh>
 #include <EnergyPlus/HybridModel.hh>
-#include <EnergyPlus/IOFiles.hh>
 #include <EnergyPlus/OutputReportPredefined.hh>
 #include <EnergyPlus/PoweredInductionUnits.hh>
 #include <EnergyPlus/ScheduleManager.hh>
@@ -2135,6 +2134,150 @@ TEST_F(EnergyPlusFixture, GetZoneAirSetPoints_Test)
     EXPECT_TRUE(compare_err_stream_substring("ZoneControl:Thermostat = ANOTHERZONE THERMOSTAT, control name = THISISINVALID was not found in "
                                              "ThermostatSetpoint object type = ThermostatSetpoint:SingleHeating.",
                                              true));
+}
+
+TEST_F(EnergyPlusFixture, GetZoneAirSetPoints_ITEApproachTempWarning)
+{
+    // issue 10594: Zone cooling setpoint is bypassed when an ITE object uses FlowControlWithApproachTemperatures. Verify the user is warned.
+    std::string const idf_objects = delimited_string({
+        "ScheduleTypeLimits,",
+        "  Any Number;              !- Name",
+        " ",
+        "ScheduleTypeLimits,",
+        " Control Type,            !- Name",
+        " 0,                       !- Lower Limit Value",
+        " 4,                       !- Upper Limit Value",
+        " DISCRETE;                !- Numeric Type",
+        " ",
+        "Schedule:Compact,",
+        " ZONE CONTROL TYPE SCHED, !- Name",
+        " Control Type,            !- Schedule Type Limits Name",
+        " Through: 12/31,          !- Field 1",
+        " For: AllDays,            !- Field 2",
+        " Until: 24:00, 4.0;       !- Field 3",
+        " ",
+        "Schedule:Compact,",
+        " HeatingSetpoints,        !- Name",
+        " Any Number,              !- Schedule Type Limits Name",
+        " Through: 12/31,          !- Field 1",
+        " For: AllDays,            !- Field 2",
+        " Until: 24:00, 20.0;      !- Field 3",
+        " ",
+        "Schedule:Compact,",
+        " CoolingSetpoints,        !- Name",
+        " Any Number,              !- Schedule Type Limits Name",
+        " Through: 12/31,          !- Field 1",
+        " For: AllDays,            !- Field 2",
+        " Until: 24:00, 23.0;      !- Field 3",
+        " ",
+        "ThermostatSetpoint:DualSetpoint,",
+        " DualSetpoints,",
+        " HeatingSetpoints,",
+        " CoolingSetpoints;",
+        " ",
+        "ZoneControl:Thermostat,",
+        " East Zone Thermostat,",
+        " East Zone,",
+        " ZONE CONTROL TYPE SCHED,",
+        " ThermostatSetpoint:DualSetpoint,",
+        " DualSetpoints;",
+        " ",
+        "Zone,",
+        "  East Zone,  !- Name",
+        "  0, 0, 0, 0, !- Origin",
+        "  1,          !- Type",
+        "  1;          !- Multiplier",
+    });
+
+    ASSERT_TRUE(process_idf(idf_objects));
+    state->init_state(*state);
+
+    bool errFlag;
+    GetZoneData(*state, errFlag);
+
+    // Emulate what GetInternalHeatGainsInput does for an ITE object with Air Flow Calculation Method = FlowControlWithApproachTemperatures
+    state->dataHeatBal->TotITEquip = 1;
+    state->dataHeatBal->ZoneITEq.allocate(1);
+    state->dataHeatBal->ZoneITEq(1).Name = "EASTDATACENTER_EQUIP";
+    state->dataHeatBal->ZoneITEq(1).ZonePtr = 1;
+    state->dataHeatBal->ZoneITEq(1).FlowControlWithApproachTemps = true;
+    state->dataHeatBal->Zone(1).HasAdjustedReturnTempByITE = true;
+
+    GetZoneAirSetPoints(*state);
+
+    EXPECT_TRUE(compare_err_stream_substring("EASTDATACENTER_EQUIP", false));
+    EXPECT_TRUE(compare_err_stream_substring("EAST ZONE THERMOSTAT", false));
+    EXPECT_TRUE(compare_err_stream_substring("The zone cooling setpoint is ignored for this zone", false));
+    EXPECT_TRUE(compare_err_stream_substring("FlowFromSystem", true));
+}
+
+TEST_F(EnergyPlusFixture, GetZoneAirSetPoints_ITEApproachTempNoWarningForInactiveCoolingControl)
+{
+    // A cooling-capable setpoint may be declared but never selected by the control type schedule. Do not warn unless cooling
+    // control is active.
+    std::string const idf_objects = delimited_string({
+        "ScheduleTypeLimits,",
+        "  Control Type,           !- Name",
+        "  0,                      !- Lower Limit Value",
+        "  4,                      !- Upper Limit Value",
+        "  DISCRETE;               !- Numeric Type",
+        " ",
+        "Schedule:Constant,",
+        "  Zone Control Type Sched,!- Name",
+        "  Control Type,           !- Schedule Type Limits Name",
+        "  1;                      !- Hourly Value",
+        " ",
+        "Schedule:Constant,",
+        "  Heating Setpoints,      !- Name",
+        "  ,                       !- Schedule Type Limits Name",
+        "  20.0;                   !- Hourly Value",
+        " ",
+        "Schedule:Constant,",
+        "  Cooling Setpoints,      !- Name",
+        "  ,                       !- Schedule Type Limits Name",
+        "  23.0;                   !- Hourly Value",
+        " ",
+        "ThermostatSetpoint:SingleHeating,",
+        "  Heating Only Setpoint,  !- Name",
+        "  Heating Setpoints;      !- Setpoint Temperature Schedule Name",
+        " ",
+        "ThermostatSetpoint:DualSetpoint,",
+        "  Inactive Dual Setpoints,!- Name",
+        "  Heating Setpoints,      !- Heating Setpoint Temperature Schedule Name",
+        "  Cooling Setpoints;      !- Cooling Setpoint Temperature Schedule Name",
+        " ",
+        "ZoneControl:Thermostat,",
+        "  East Zone Thermostat,   !- Name",
+        "  East Zone,              !- Zone or ZoneList or Space or SpaceList Name",
+        "  Zone Control Type Sched,!- Control Type Schedule Name",
+        "  ThermostatSetpoint:SingleHeating, !- Control 1 Object Type",
+        "  Heating Only Setpoint,  !- Control 1 Name",
+        "  ThermostatSetpoint:DualSetpoint, !- Control 2 Object Type",
+        "  Inactive Dual Setpoints;!- Control 2 Name",
+        " ",
+        "Zone,",
+        "  East Zone,  !- Name",
+        "  0, 0, 0, 0, !- Origin",
+        "  1,          !- Type",
+        "  1;          !- Multiplier",
+    });
+
+    ASSERT_TRUE(process_idf(idf_objects));
+    state->init_state(*state);
+
+    bool errFlag;
+    GetZoneData(*state, errFlag);
+
+    state->dataHeatBal->TotITEquip = 1;
+    state->dataHeatBal->ZoneITEq.allocate(1);
+    state->dataHeatBal->ZoneITEq(1).Name = "EASTDATACENTER_EQUIP";
+    state->dataHeatBal->ZoneITEq(1).ZonePtr = 1;
+    state->dataHeatBal->ZoneITEq(1).FlowControlWithApproachTemps = true;
+    state->dataHeatBal->Zone(1).HasAdjustedReturnTempByITE = true;
+
+    GetZoneAirSetPoints(*state);
+
+    EXPECT_FALSE(compare_err_stream_substring("The zone cooling setpoint is ignored for this zone", true, false));
 }
 
 #ifdef GET_OUT

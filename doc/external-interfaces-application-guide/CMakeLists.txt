@@ -12,7 +12,7 @@ set(INCLUDED_TEX
     ${PROJECT_SOURCE_DIR}/external-interfaces-application-guide/src/external-interface-s/fmu-examples.tex
     ${PROJECT_SOURCE_DIR}/external-interfaces-application-guide/src/external-interface-s/exporting-energyplus-as-a-functional-mock-up.tex
     ${PROJECT_SOURCE_DIR}/external-interfaces-application-guide/src/references.tex
-    ${PROJECT_SOURCE_DIR}/title.tex)
+    ${PROJECT_BINARY_DIR}/title.tex)
 
 # to get the list of included images, go to the root of the document folder and:
 # grep -r '\\includegraphics' * | cut -d ':' -f 2 | rev | cut -d '{' -f 1 | rev | cut -d '}' -f 1 | sed 's/^/  /g' | sort -n -t'.' -k 1.14

@@ -22927,6 +22927,9 @@ ElectricEquipment:ITE:AirCooled,
        \note ITE objects defined for one zone, the same calculation method should apply.
        \note The FlowControlWithApproachTemperatures only applies to ITE zones with single duct VAV terminal unit.
        \note Other return air heat gains from window or lights are not allowed when FlowControlWithApproachTemperatures is chosen.
+       \note When FlowControlWithApproachTemperatures is chosen, the controlled variable is the supply air temperature,
+       \note not the well-mixed zone air temperature. The zone cooling setpoint from ZoneControl:Thermostat is ignored
+       \note for this zone and cooling unmet hours do not apply.
        \type choice
        \key FlowFromSystem
        \key FlowControlWithApproachTemperatures
@@ -35785,9 +35788,16 @@ ZoneControl:ContaminantController,
        \type object-list
        \object-list ScheduleNames
   A4 , \field Carbon Dioxide Setpoint Schedule Name
+       \required-field
        \type object-list
        \object-list ScheduleNames
        \note Schedule values should be carbon dioxide concentration in parts per million (ppm)
+       \note This field is required whenever this object is specified.
+       \note The setpoint is used when Carbon Dioxide Concentration = Yes in
+       \note ZoneAirContaminantBalance. The setpoint or resulting outdoor air requirement is used by
+       \note Controller:MechanicalVentilation with System Outdoor Air Method = IndoorAirQualityProcedure
+       \note or IndoorAirQualityProcedureCombined, DesignSpecification:OutdoorAir with Outdoor Air Method =
+       \note IndoorAirQualityProcedure, and AvailabilityManager:HybridVentilation with carbon dioxide control.
   A5 , \field Minimum Carbon Dioxide Concentration Schedule Name
        \type object-list
        \object-list ScheduleNames
@@ -35817,6 +35827,11 @@ ZoneControl:ContaminantController,
        \note million (ppm)
        \note This field is used when the field System Outdoor Air Method =
        \note IndoorAirQualityProcedureGenericContaminant in Controller:MechanicalVentilation
+       \note This field is required when Generic Contaminant Concentration = Yes in
+       \note ZoneAirContaminantBalance; there is no default setpoint.
+       \note The resulting outdoor air requirement is used by Controller:MechanicalVentilation with
+       \note System Outdoor Air Method = IndoorAirQualityProcedureGenericContaminant or
+       \note IndoorAirQualityProcedureCombined.
 
 \group Zone HVAC Forced Air Units
 
