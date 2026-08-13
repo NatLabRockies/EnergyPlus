@@ -138,7 +138,7 @@ TEST_F(EnergyPlusFixture, PV_ReportPV_ZoneIndexNonZero)
     EXPECT_NEAR(state->dataPhotovoltaic->PVarray(3).Report.DCPower, 1000.0, 0.1);
 }
 
-TEST_F(EnergyPlusFixture, PV_SurfaceCouplingSourceRequestsResimulation)
+TEST_F(EnergyPlusFixture, PV_IntegrationSourceRequestsResimulation)
 {
     state->dataPhotovoltaic->PVarray.allocate(1);
     state->dataPhotovoltaic->NumPVs = 1;
