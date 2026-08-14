@@ -4610,7 +4610,7 @@ namespace Window {
 
             for (int i = 0; i < NMix; ++i) {
                 auto const &wmgasI = wm->gaps[iGap].gases[i];
-                for (int j = 0; j <= NMix; ++j) {
+                for (int j = 0; j < NMix; ++j) {
                     auto const &wmgasJ = wm->gaps[iGap].gases[j];
                     // numerator of equation 61
                     phimup = pow_2(1.0 + std::sqrt(fvis[i] / fvis[j]) * root_4(wmgasJ.wght / wmgasI.wght));

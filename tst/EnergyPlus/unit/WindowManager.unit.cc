@@ -7744,3 +7744,53 @@ TEST_F(EnergyPlusFixture, CFS_InteriorSolarDistribution_Test)
     EXPECT_EQ(state->dataSolarShading->SurfWinAbsBeam(1), 0.000);
     EXPECT_EQ(state->dataSolarShading->SurfWinAbsBeam(2), 0.000);
 }
+
+TEST_F(EnergyPlusFixture, WindowManager_WindowGasPropertiesAtTemp_GasMixture)
+{
+    auto &wm = state->dataWindowManager;
+    Real64 constexpr T = 273.15; // gap mean temperature [K]
+
+    // Case 1: two-gas mixture, 10% Air + 90% Argon
+    {
+        int constexpr iGap = 0;
+        auto &gap = wm->gaps[iGap];
+        gap.numGases = 2;
+
+        gap.gasFracts[0] = 0.10;
+        gap.gases[0].wght = 28.97;                    // air weight
+        gap.gases[0].vis = {3.723e-6, 4.940e-8, 0.0}; // air viscosity coefficients
+
+        gap.gasFracts[1] = 0.90;
+        gap.gases[1].wght = 39.948;                   // argon weight
+        gap.gases[1].vis = {3.379e-6, 6.451e-8, 0.0}; // argon viscosity coefficients
+
+        Real64 dens = 0.0;
+        Real64 visc = 0.0;
+        WindowGasPropertiesAtTemp(*state, T, iGap, dens, visc);
+
+        // Expected values from the corrected Wilke mixing (j < NMix).
+        EXPECT_NEAR(visc, 2.066268948946603e-05, 1.0e-11);
+        EXPECT_NEAR(dens, 1.710627281762915, 1.0e-9);
+    }
+
+    // Case 2: full five-gas mixture (NMix == maxMixGases == 5)
+    // The only case where old `j <= NMix` reads truly out of bounds (gases[5] in std::array<Material::Gas, Material::maxMixGases>, and
+    // fvis[5]/frct[5] in std::array<Real64, Material::maxMixGases>, all one past the end).
+    {
+        int constexpr iGap = 1;
+        auto &gap = wm->gaps[iGap];
+        gap.numGases = Material::maxMixGases; // 5
+        for (int k = 0; k < Material::maxMixGases; ++k) {
+            gap.gasFracts[k] = 1.0 / Material::maxMixGases;
+            gap.gases[k].wght = 28.97;
+            gap.gases[k].vis = {3.723e-6, 4.940e-8, 0.0};
+        }
+
+        Real64 dens = 0.0;
+        Real64 visc = 0.0;
+        WindowGasPropertiesAtTemp(*state, T, iGap, dens, visc);
+
+        Real64 const singleGasVisc = 3.723e-6 + 4.940e-8 * T; // = 1.721661e-05
+        EXPECT_NEAR(visc, singleGasVisc, 1.0e-11);
+    }
+}
