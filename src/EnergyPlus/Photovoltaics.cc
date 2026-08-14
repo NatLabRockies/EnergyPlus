@@ -921,16 +921,13 @@ namespace Photovoltaics {
             state.dataHeatBalFanSys->QPVSysSource(pv.SurfacePtr) = -pv.SurfaceSink;
             break;
         case CellIntegration::TranspiredCollector: {
-            TranspiredCollector::SetUTSCQdotSource(
-                state, pv.UTSCPtr, -1.0 * pv.SurfaceSink);
+            TranspiredCollector::SetUTSCQdotSource(state, pv.UTSCPtr, -1.0 * pv.SurfaceSink);
         } break;
         case CellIntegration::ExteriorVentedCavity: {
-            SetVentedModuleQdotSource(
-                state, pv.ExtVentCavPtr, -1.0 * pv.SurfaceSink);
+            SetVentedModuleQdotSource(state, pv.ExtVentCavPtr, -1.0 * pv.SurfaceSink);
         } break;
         case CellIntegration::PVTSolarCollector: {
-            PhotovoltaicThermalCollectors::SetPVTQdotSource(
-                state, pv.PVTPtr, -1.0 * pv.SurfaceSink);
+            PhotovoltaicThermalCollectors::SetPVTQdotSource(state, pv.PVTPtr, -1.0 * pv.SurfaceSink);
         } break;
         default:
             break;
