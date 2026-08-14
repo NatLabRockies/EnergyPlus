@@ -922,15 +922,15 @@ namespace Photovoltaics {
             break;
         case CellIntegration::TranspiredCollector: {
             TranspiredCollector::SetUTSCQdotSource(
-                state, state.dataPhotovoltaic->PVarray(PVnum).UTSCPtr, -1.0 * state.dataPhotovoltaic->PVarray(PVnum).SurfaceSink);
+                state, pv.UTSCPtr, -1.0 * pv.SurfaceSink);
         } break;
         case CellIntegration::ExteriorVentedCavity: {
             SetVentedModuleQdotSource(
-                state, state.dataPhotovoltaic->PVarray(PVnum).ExtVentCavPtr, -1.0 * state.dataPhotovoltaic->PVarray(PVnum).SurfaceSink);
+                state, pv.ExtVentCavPtr, -1.0 * pv.SurfaceSink);
         } break;
         case CellIntegration::PVTSolarCollector: {
             PhotovoltaicThermalCollectors::SetPVTQdotSource(
-                state, state.dataPhotovoltaic->PVarray(PVnum).PVTPtr, -1.0 * state.dataPhotovoltaic->PVarray(PVnum).SurfaceSink);
+                state, pv.PVTPtr, -1.0 * pv.SurfaceSink);
         } break;
         default:
             break;

@@ -58,8 +58,8 @@
 #include <EnergyPlus/DataHeatBalance.hh>
 #include <EnergyPlus/DataPhotovoltaics.hh>
 #include <EnergyPlus/DataSurfaces.hh>
-#include <EnergyPlus/Photovoltaics.hh>
 #include <EnergyPlus/PhotovoltaicThermalCollectors.hh>
+#include <EnergyPlus/Photovoltaics.hh>
 #include <EnergyPlus/TranspiredCollector.hh>
 
 using namespace EnergyPlus;
