@@ -133,8 +133,9 @@ namespace InternalHeatGains {
 
     static constexpr std::array<DataHeatBalance::IntGainType, 1> IntGainTypesPeople = {DataHeatBalance::IntGainType::People};
     static constexpr std::array<DataHeatBalance::IntGainType, 1> IntGainTypesLight = {DataHeatBalance::IntGainType::Lights};
-    static constexpr std::array<DataHeatBalance::IntGainType, 7> IntGainTypesEquip = {DataHeatBalance::IntGainType::ElectricEquipment,
+    static constexpr std::array<DataHeatBalance::IntGainType, 8> IntGainTypesEquip = {DataHeatBalance::IntGainType::ElectricEquipment,
                                                                                       DataHeatBalance::IntGainType::ElectricEquipmentITEAirCooled,
+                                                                                      DataHeatBalance::IntGainType::ElectricEquipmentITELiquidCooled,
                                                                                       DataHeatBalance::IntGainType::GasEquipment,
                                                                                       DataHeatBalance::IntGainType::HotWaterEquipment,
                                                                                       DataHeatBalance::IntGainType::SteamEquipment,
@@ -314,6 +315,7 @@ namespace InternalHeatGains {
         const std::string stmEqModuleObject = "SteamEquipment";
         const std::string othEqModuleObject = "OtherEquipment";
         const std::string itEqModuleObject = "ElectricEquipment:ITE:AirCooled";
+        const std::string itEqLiquidCooledModuleObject = "ElectricEquipment:ITE:LiquidCooled";
         const std::string bbModuleObject = "ZoneBaseboard:OutdoorTemperatureControlled";
         const std::string contamSSModuleObject = "ZoneContaminantSourceAndSink:CarbonDioxide";
 
@@ -340,6 +342,7 @@ namespace InternalHeatGains {
                                            stmEqModuleObject,
                                            othEqModuleObject,
                                            itEqModuleObject,
+                                           itEqLiquidCooledModuleObject,
                                            bbModuleObject,
                                            contamSSModuleObject}) {
                 state.dataInputProcessing->inputProcessor->getObjectDefMaxArgs(state, moduleName, NumParams, IHGNumAlphas, IHGNumNumbers);
@@ -2418,6 +2421,162 @@ namespace InternalHeatGains {
                 }
             }
         } // TotITEquip > 0
+
+        // ElectricEquipment:ITE:LiquidCooled
+        EPVector<InternalHeatGains::GlobalInternalGainMiscObject> iTEqLiquidCooledObjects;
+        int numZoneITEqLiquidCooledStatements = 0;
+        // Note that this object type does not support ZoneList (matches ElectricEquipment:ITE:AirCooled)
+        bool liquidCooledZoneListNotAllowed = true;
+        setupIHGZonesAndSpaces(state,
+                               itEqLiquidCooledModuleObject,
+                               iTEqLiquidCooledObjects,
+                               numZoneITEqLiquidCooledStatements,
+                               state.dataHeatBal->TotITELiquidCooledEquip,
+                               ErrorsFound,
+                               liquidCooledZoneListNotAllowed);
+
+        if (state.dataHeatBal->TotITELiquidCooledEquip > 0) {
+            state.dataHeatBal->ZoneITELiquidCooled.allocate(state.dataHeatBal->TotITELiquidCooledEquip);
+            static constexpr std::array<int, DataHeatBalance::MaxITELiquidCoolingCoils> coilTypeAlphaIdx = {7, 10, 13, 16};
+            static constexpr std::array<int, DataHeatBalance::MaxITELiquidCoolingCoils> coilNameAlphaIdx = {8, 11, 14, 17};
+            static constexpr std::array<int, DataHeatBalance::MaxITELiquidCoolingCoils> coilLoadFracNumIdx = {5, 6, 7, 8};
+            static constexpr std::array<int, DataHeatBalance::MaxITELiquidCoolingCoils> coilLoadFracSchedAlphaIdx = {9, 12, 15, 18};
+
+            int itEqLCNum = 0;
+            for (int itEqLCInputNum = 1; itEqLCInputNum <= numZoneITEqLiquidCooledStatements; ++itEqLCInputNum) {
+
+                state.dataInputProcessing->inputProcessor->getObjectItem(state,
+                                                                         itEqLiquidCooledModuleObject,
+                                                                         itEqLCInputNum,
+                                                                         IHGAlphas,
+                                                                         IHGNumAlphas,
+                                                                         IHGNumbers,
+                                                                         IHGNumNumbers,
+                                                                         IOStat,
+                                                                         IHGNumericFieldBlanks,
+                                                                         IHGAlphaFieldBlanks,
+                                                                         IHGAlphaFieldNames,
+                                                                         IHGNumericFieldNames);
+
+                ErrorObjectHeader eoh{routineName, itEqLiquidCooledModuleObject, IHGAlphas(1)};
+
+                Sched::Schedule *availSchedPtr = nullptr;
+                if (IHGAlphaFieldBlanks(3)) {
+                    availSchedPtr = Sched::GetScheduleAlwaysOn(state);
+                } else if ((availSchedPtr = Sched::GetSchedule(state, IHGAlphas(3))) == nullptr) {
+                    ShowSevereItemNotFound(state, eoh, IHGAlphaFieldNames(3), IHGAlphas(3));
+                    ErrorsFound = true;
+                }
+
+                Sched::Schedule *computeLoadSchedPtr = Sched::GetSchedule(state, IHGAlphas(4));
+                if (computeLoadSchedPtr == nullptr) {
+                    ShowSevereItemNotFound(state, eoh, IHGAlphaFieldNames(4), IHGAlphas(4));
+                    ErrorsFound = true;
+                } else if (!computeLoadSchedPtr->checkMinVal(state, Clusive::In, 0.0)) {
+                    Sched::ShowSevereBadMin(state, eoh, IHGAlphaFieldNames(4), IHGAlphas(4), Clusive::In, 0.0);
+                    ErrorsFound = true;
+                }
+
+                int powerModifierCurve = 0;
+                if (!IHGAlphaFieldBlanks(5)) {
+                    powerModifierCurve = GetCurveIndex(state, IHGAlphas(5));
+                    if (powerModifierCurve == 0) {
+                        ShowSevereItemNotFound(state, eoh, IHGAlphaFieldNames(5), IHGAlphas(5));
+                        ErrorsFound = true;
+                    }
+                }
+
+                Sched::Schedule *liquidHeatCaptureFracSchedPtr = nullptr;
+                if (!IHGAlphaFieldBlanks(6)) {
+                    liquidHeatCaptureFracSchedPtr = Sched::GetSchedule(state, IHGAlphas(6));
+                    if (liquidHeatCaptureFracSchedPtr == nullptr) {
+                        ShowSevereItemNotFound(state, eoh, IHGAlphaFieldNames(6), IHGAlphas(6));
+                        ErrorsFound = true;
+                    } else if (!liquidHeatCaptureFracSchedPtr->checkMinVal(state, Clusive::In, 0.0)) {
+                        Sched::ShowSevereBadMin(state, eoh, IHGAlphaFieldNames(6), IHGAlphas(6), Clusive::In, 0.0);
+                        ErrorsFound = true;
+                    }
+                }
+
+                std::array<DataHeatBalance::ITELiquidCoolingCoilSpec, DataHeatBalance::MaxITELiquidCoolingCoils> coolingCoils;
+                for (int coilIdx = 0; coilIdx < DataHeatBalance::MaxITELiquidCoolingCoils; ++coilIdx) {
+                    int const typeAlpha = coilTypeAlphaIdx[coilIdx];
+                    int const nameAlpha = coilNameAlphaIdx[coilIdx];
+                    int const loadFracNum = coilLoadFracNumIdx[coilIdx];
+                    int const loadFracSchedAlpha = coilLoadFracSchedAlphaIdx[coilIdx];
+                    auto &thisCoil = coolingCoils[coilIdx];
+
+                    if (IHGAlphaFieldBlanks(typeAlpha) && IHGAlphaFieldBlanks(nameAlpha)) {
+                        if (coilIdx == 0) {
+                            ShowSevereEmptyField(state, eoh, IHGAlphaFieldNames(typeAlpha));
+                            ErrorsFound = true;
+                        }
+                        continue; // this coil slot is not used
+                    }
+
+                    thisCoil.CoilType =
+                        static_cast<ITECoolingCoilType>(getEnumValue(ITECoolingCoilTypeNamesUC, Util::makeUPPER(IHGAlphas(typeAlpha))));
+                    if (thisCoil.CoilType == ITECoolingCoilType::Invalid) {
+                        ShowSevereItemNotFound(state, eoh, IHGAlphaFieldNames(typeAlpha), IHGAlphas(typeAlpha));
+                        ErrorsFound = true;
+                    }
+                    if (IHGAlphaFieldBlanks(nameAlpha)) {
+                        ShowSevereEmptyField(state, eoh, IHGAlphaFieldNames(nameAlpha));
+                        ErrorsFound = true;
+                    } else {
+                        thisCoil.CoilName = IHGAlphas(nameAlpha);
+                    }
+
+                    bool const hasLoadFrac = !IHGNumericFieldBlanks(loadFracNum);
+                    bool const hasLoadFracSched = !IHGAlphaFieldBlanks(loadFracSchedAlpha);
+                    if (hasLoadFrac && hasLoadFracSched) {
+                        ShowWarningCustom(state,
+                                         eoh,
+                                         std::format("Both {} and {} are specified; the schedule will be used.",
+                                                     IHGNumericFieldNames(loadFracNum),
+                                                     IHGAlphaFieldNames(loadFracSchedAlpha)));
+                    }
+                    if (hasLoadFracSched) {
+                        thisCoil.LoadFractionSched = Sched::GetSchedule(state, IHGAlphas(loadFracSchedAlpha));
+                        if (thisCoil.LoadFractionSched == nullptr) {
+                            ShowSevereItemNotFound(state, eoh, IHGAlphaFieldNames(loadFracSchedAlpha), IHGAlphas(loadFracSchedAlpha));
+                            ErrorsFound = true;
+                        }
+                    } else if (hasLoadFrac) {
+                        thisCoil.LoadFraction = IHGNumbers(loadFracNum);
+                    }
+                }
+
+                auto &thisITEqLCInput = iTEqLiquidCooledObjects(itEqLCInputNum);
+                for (int Item1 = 1; Item1 <= thisITEqLCInput.numOfSpaces; ++Item1) {
+                    ++itEqLCNum;
+                    auto &thisZoneITELC = state.dataHeatBal->ZoneITELiquidCooled(itEqLCNum);
+                    int const spaceNum = thisITEqLCInput.spaceNums(Item1);
+                    int const zoneNum = state.dataHeatBal->space(spaceNum).zoneNum;
+                    thisZoneITELC.Name = thisITEqLCInput.names(Item1);
+                    thisZoneITELC.spaceIndex = spaceNum;
+                    thisZoneITELC.ZonePtr = zoneNum;
+                    thisZoneITELC.availSched = availSchedPtr;
+                    thisZoneITELC.computeLoadSched = computeLoadSchedPtr;
+                    thisZoneITELC.DesignTotalPower = IHGNumbers(1);
+                    thisZoneITELC.Multiplier = IHGNumericFieldBlanks(2) ? 1.0 : IHGNumbers(2);
+                    thisZoneITELC.DesignFanPowerInputFraction = IHGNumericFieldBlanks(3) ? 0.0 : IHGNumbers(3);
+                    thisZoneITELC.PowerModifierCurve = powerModifierCurve;
+                    thisZoneITELC.LiquidHeatCaptureFractionDesign = IHGNumericFieldBlanks(4) ? 0.8 : IHGNumbers(4);
+                    thisZoneITELC.liquidHeatCaptureFracSched = liquidHeatCaptureFracSchedPtr;
+                    thisZoneITELC.CoolingCoils = coolingCoils;
+
+                    if (!ErrorsFound) {
+                        SetupSpaceInternalGain(state,
+                                               thisZoneITELC.spaceIndex,
+                                               1.0,
+                                               thisZoneITELC.Name,
+                                               DataHeatBalance::IntGainType::ElectricEquipmentITELiquidCooled,
+                                               &thisZoneITELC.PowerRpt[(int)LiquidITERptVars::AirHeatGain]);
+                    }
+                } // for itEqLCInputNum.NumOfSpaces
+            } // for itEqLCInputNum
+        } // TotITELiquidCooledEquip > 0
 
         // ZoneBaseboard:OutdoorTemperatureControlled
         EPVector<InternalHeatGains::GlobalInternalGainMiscObject> zoneBBHeatObjects;
@@ -6228,6 +6387,180 @@ namespace InternalHeatGains {
             addSpaceOutputs(spaceNum) = false;
         }
 
+        // ElectricEquipment:ITE:LiquidCooled
+        // Object report variables
+        for (int itEqLCNum = 1; itEqLCNum <= state.dataHeatBal->TotITELiquidCooledEquip; ++itEqLCNum) {
+            // Set flags for zone and space total report variables
+            addZoneOutputs(state.dataHeatBal->ZoneITELiquidCooled(itEqLCNum).ZonePtr) = true;
+            addSpaceOutputs(state.dataHeatBal->ZoneITELiquidCooled(itEqLCNum).spaceIndex) = true;
+
+            constexpr std::array<std::string_view, (int)LiquidITERptVars::Num> LiquidITEPowerOutputVariableStrings = {
+                "ITE CPU Electricity Rate",
+                "ITE Fan Electricity Rate",
+                "ITE Total Electricity Rate",
+                "ITE Total Heat Generation Rate",
+                "ITE Liquid Heat Gain Rate",
+                "ITE Air Heat Gain to Zone Rate"};
+            constexpr std::array<std::string_view, (int)LiquidITERptVars::Num> LiquidITEEnergyOutputVariableStrings = {
+                "ITE CPU Electricity Energy",
+                "ITE Fan Electricity Energy",
+                "ITE Total Electricity Energy",
+                "ITE Total Heat Generation Energy",
+                "ITE Liquid Heat Gain Energy",
+                "ITE Air Heat Gain to Zone Energy"};
+
+            for (int i = 0; i < (int)LiquidITERptVars::Num; ++i) {
+                SetupOutputVariable(state,
+                                    LiquidITEPowerOutputVariableStrings[i],
+                                    Constant::Units::W,
+                                    state.dataHeatBal->ZoneITELiquidCooled(itEqLCNum).PowerRpt[i],
+                                    OutputProcessor::TimeStepType::Zone,
+                                    OutputProcessor::StoreType::Average,
+                                    state.dataHeatBal->ZoneITELiquidCooled(itEqLCNum).Name);
+            }
+
+            SetupOutputVariable(state,
+                                LiquidITEEnergyOutputVariableStrings[(int)LiquidITERptVars::CPU],
+                                Constant::Units::J,
+                                state.dataHeatBal->ZoneITELiquidCooled(itEqLCNum).EnergyRpt[(int)LiquidITERptVars::CPU],
+                                OutputProcessor::TimeStepType::Zone,
+                                OutputProcessor::StoreType::Sum,
+                                state.dataHeatBal->ZoneITELiquidCooled(itEqLCNum).Name,
+                                Constant::eResource::Electricity,
+                                OutputProcessor::Group::Building,
+                                OutputProcessor::EndUseCat::InteriorEquipment,
+                                "ITE-CPU",
+                                state.dataHeatBal->Zone(state.dataHeatBal->ZoneITELiquidCooled(itEqLCNum).ZonePtr).Name,
+                                state.dataHeatBal->Zone(state.dataHeatBal->ZoneITELiquidCooled(itEqLCNum).ZonePtr).Multiplier,
+                                state.dataHeatBal->Zone(state.dataHeatBal->ZoneITELiquidCooled(itEqLCNum).ZonePtr).ListMultiplier,
+                                state.dataHeatBal->space(state.dataHeatBal->ZoneITELiquidCooled(itEqLCNum).spaceIndex).spaceType);
+            SetupOutputVariable(state,
+                                LiquidITEEnergyOutputVariableStrings[(int)LiquidITERptVars::Fan],
+                                Constant::Units::J,
+                                state.dataHeatBal->ZoneITELiquidCooled(itEqLCNum).EnergyRpt[(int)LiquidITERptVars::Fan],
+                                OutputProcessor::TimeStepType::Zone,
+                                OutputProcessor::StoreType::Sum,
+                                state.dataHeatBal->ZoneITELiquidCooled(itEqLCNum).Name,
+                                Constant::eResource::Electricity,
+                                OutputProcessor::Group::Building,
+                                OutputProcessor::EndUseCat::InteriorEquipment,
+                                "ITE-Fans",
+                                state.dataHeatBal->Zone(state.dataHeatBal->ZoneITELiquidCooled(itEqLCNum).ZonePtr).Name,
+                                state.dataHeatBal->Zone(state.dataHeatBal->ZoneITELiquidCooled(itEqLCNum).ZonePtr).Multiplier,
+                                state.dataHeatBal->Zone(state.dataHeatBal->ZoneITELiquidCooled(itEqLCNum).ZonePtr).ListMultiplier,
+                                state.dataHeatBal->space(state.dataHeatBal->ZoneITELiquidCooled(itEqLCNum).spaceIndex).spaceType);
+            for (int i : {(int)LiquidITERptVars::TotalElectric,
+                         (int)LiquidITERptVars::TotalHeatGen,
+                         (int)LiquidITERptVars::LiquidHeatGain,
+                         (int)LiquidITERptVars::AirHeatGain}) {
+                SetupOutputVariable(state,
+                                    LiquidITEEnergyOutputVariableStrings[i],
+                                    Constant::Units::J,
+                                    state.dataHeatBal->ZoneITELiquidCooled(itEqLCNum).EnergyRpt[i],
+                                    OutputProcessor::TimeStepType::Zone,
+                                    OutputProcessor::StoreType::Sum,
+                                    state.dataHeatBal->ZoneITELiquidCooled(itEqLCNum).Name);
+            }
+
+            SetupOutputVariable(state,
+                                "ITE Liquid Heat Capture Fraction",
+                                Constant::Units::None,
+                                state.dataHeatBal->ZoneITELiquidCooled(itEqLCNum).LiquidHeatCaptureFraction,
+                                OutputProcessor::TimeStepType::Zone,
+                                OutputProcessor::StoreType::Average,
+                                state.dataHeatBal->ZoneITELiquidCooled(itEqLCNum).Name);
+        }
+
+        // Zone total report variables
+        for (int zoneNum = 1; zoneNum <= state.dataGlobal->NumOfZones; ++zoneNum) {
+            if (addZoneOutputs(zoneNum)) {
+                constexpr std::array<std::string_view, (int)LiquidITERptVars::Num> ZoneLiquidITEPowerOutputVariableStrings = {
+                    "Zone ITE CPU Electricity Rate",
+                    "Zone ITE Fan Electricity Rate",
+                    "Zone ITE Total Electricity Rate",
+                    "Zone ITE Total Heat Generation Rate",
+                    "Zone ITE Liquid Heat Gain Rate",
+                    "Zone ITE Air Heat Gain to Zone Rate"};
+                constexpr std::array<std::string_view, (int)LiquidITERptVars::Num> ZoneLiquidITEEnergyOutputVariableStrings = {
+                    "Zone ITE CPU Electricity Energy",
+                    "Zone ITE Fan Electricity Energy",
+                    "Zone ITE Total Electricity Energy",
+                    "Zone ITE Total Heat Generation Energy",
+                    "Zone ITE Liquid Heat Gain Energy",
+                    "Zone ITE Air Heat Gain to Zone Energy"};
+                for (int i = 0; i < (int)LiquidITERptVars::Num; ++i) {
+                    SetupOutputVariable(state,
+                                        ZoneLiquidITEPowerOutputVariableStrings[i],
+                                        Constant::Units::W,
+                                        state.dataHeatBal->ZoneRpt(zoneNum).LiquidITEPowerRpt[i],
+                                        OutputProcessor::TimeStepType::Zone,
+                                        OutputProcessor::StoreType::Average,
+                                        state.dataHeatBal->Zone(zoneNum).Name);
+                    SetupOutputVariable(state,
+                                        ZoneLiquidITEEnergyOutputVariableStrings[i],
+                                        Constant::Units::J,
+                                        state.dataHeatBal->ZoneRpt(zoneNum).LiquidITEEnergyRpt[i],
+                                        OutputProcessor::TimeStepType::Zone,
+                                        OutputProcessor::StoreType::Sum,
+                                        state.dataHeatBal->Zone(zoneNum).Name);
+                }
+                SetupOutputVariable(state,
+                                    "Zone ITE Liquid Heat Capture Fraction",
+                                    Constant::Units::None,
+                                    state.dataHeatBal->ZoneRpt(zoneNum).LiquidITEHeatCaptureFraction,
+                                    OutputProcessor::TimeStepType::Zone,
+                                    OutputProcessor::StoreType::Average,
+                                    state.dataHeatBal->Zone(zoneNum).Name);
+            }
+            // Reset zone output flag
+            addZoneOutputs(zoneNum) = false;
+        }
+
+        // Space total report variables
+        for (int spaceNum = 1; spaceNum <= state.dataGlobal->numSpaces; ++spaceNum) {
+            if (addSpaceOutputs(spaceNum)) {
+                constexpr std::array<std::string_view, (int)LiquidITERptVars::Num> SpaceLiquidITEPowerOutputVariableStrings = {
+                    "Space ITE CPU Electricity Rate",
+                    "Space ITE Fan Electricity Rate",
+                    "Space ITE Total Electricity Rate",
+                    "Space ITE Total Heat Generation Rate",
+                    "Space ITE Liquid Heat Gain Rate",
+                    "Space ITE Air Heat Gain to Zone Rate"};
+                constexpr std::array<std::string_view, (int)LiquidITERptVars::Num> SpaceLiquidITEEnergyOutputVariableStrings = {
+                    "Space ITE CPU Electricity Energy",
+                    "Space ITE Fan Electricity Energy",
+                    "Space ITE Total Electricity Energy",
+                    "Space ITE Total Heat Generation Energy",
+                    "Space ITE Liquid Heat Gain Energy",
+                    "Space ITE Air Heat Gain to Zone Energy"};
+                for (int i = 0; i < (int)LiquidITERptVars::Num; ++i) {
+                    SetupOutputVariable(state,
+                                        SpaceLiquidITEPowerOutputVariableStrings[i],
+                                        Constant::Units::W,
+                                        state.dataHeatBal->spaceRpt(spaceNum).LiquidITEPowerRpt[i],
+                                        OutputProcessor::TimeStepType::Zone,
+                                        OutputProcessor::StoreType::Average,
+                                        state.dataHeatBal->space(spaceNum).Name);
+                    SetupOutputVariable(state,
+                                        SpaceLiquidITEEnergyOutputVariableStrings[i],
+                                        Constant::Units::J,
+                                        state.dataHeatBal->spaceRpt(spaceNum).LiquidITEEnergyRpt[i],
+                                        OutputProcessor::TimeStepType::Zone,
+                                        OutputProcessor::StoreType::Sum,
+                                        state.dataHeatBal->space(spaceNum).Name);
+                }
+                SetupOutputVariable(state,
+                                    "Space ITE Liquid Heat Capture Fraction",
+                                    Constant::Units::None,
+                                    state.dataHeatBal->spaceRpt(spaceNum).LiquidITEHeatCaptureFraction,
+                                    OutputProcessor::TimeStepType::Zone,
+                                    OutputProcessor::StoreType::Average,
+                                    state.dataHeatBal->space(spaceNum).Name);
+            }
+            // Reset space output flag
+            addSpaceOutputs(spaceNum) = false;
+        }
+
         // Object report variables
         for (int bbHeatNum = 1; bbHeatNum <= state.dataHeatBal->TotBBHeat; ++bbHeatNum) {
             // Set flags for zone and space total report variables
@@ -6933,6 +7266,10 @@ namespace InternalHeatGains {
 
         if (state.dataHeatBal->TotITEquip > 0) {
             CalcZoneITEq(state);
+        }
+
+        if (state.dataHeatBal->TotITELiquidCooledEquip > 0) {
+            CalcZoneITEqLiquidCooled(state);
         }
 
         CalcWaterThermalTankZoneGains(state);
@@ -7646,6 +7983,98 @@ namespace InternalHeatGains {
 
     } // End CalcZoneITEq
 
+    void CalcZoneITEqLiquidCooled(EnergyPlusData &state)
+    {
+
+        // PURPOSE OF THIS SUBROUTINE:
+        // This subroutine calculates the power consumption, total heat generation, and the split of that
+        // heat generation between the liquid cooling loop and the zone air for ElectricEquipment:ITE:LiquidCooled.
+        //
+        // Note: The cooling coils referenced by this object (Coil:Cooling:ITE:ColdPlate / Coil:Cooling:ITE:UserDefined)
+        // do not exist yet, so the liquid heat capture fraction is applied directly with no physical capacity limit
+        // imposed by the coil. Once those coil objects exist, Liquid Heat Gain should be capped at the coil's
+        // physical maximum, with any shortfall added to Air Heat Gain to Zone instead.
+
+        using Curve::CurveValue;
+
+        for (int Loop = 1; Loop <= state.dataHeatBal->TotITELiquidCooledEquip; ++Loop) {
+            for (int i = 0; i < (int)LiquidITERptVars::Num; ++i) {
+                state.dataHeatBal->ZoneITELiquidCooled(Loop).PowerRpt[i] = 0.0;
+                state.dataHeatBal->ZoneITELiquidCooled(Loop).EnergyRpt[i] = 0.0;
+            }
+            state.dataHeatBal->ZoneITELiquidCooled(Loop).LiquidHeatCaptureFraction = 0.0;
+        }
+
+        for (int Loop = 1; Loop <= state.dataGlobal->NumOfZones; ++Loop) {
+            for (int i = 0; i < (int)LiquidITERptVars::Num; ++i) {
+                state.dataHeatBal->ZoneRpt(Loop).LiquidITEPowerRpt[i] = 0.0;
+                state.dataHeatBal->ZoneRpt(Loop).LiquidITEEnergyRpt[i] = 0.0;
+            }
+            state.dataHeatBal->ZoneRpt(Loop).LiquidITEHeatCaptureFraction = 0.0;
+        }
+
+        for (int spaceNum = 1; spaceNum <= state.dataGlobal->numSpaces; ++spaceNum) {
+            for (int i = 0; i < (int)LiquidITERptVars::Num; ++i) {
+                state.dataHeatBal->spaceRpt(spaceNum).LiquidITEPowerRpt[i] = 0.0;
+                state.dataHeatBal->spaceRpt(spaceNum).LiquidITEEnergyRpt[i] = 0.0;
+            }
+            state.dataHeatBal->spaceRpt(spaceNum).LiquidITEHeatCaptureFraction = 0.0;
+        }
+
+        for (int Loop = 1; Loop <= state.dataHeatBal->TotITELiquidCooledEquip; ++Loop) {
+            auto &thisEquip = state.dataHeatBal->ZoneITELiquidCooled(Loop);
+            int const NZ = thisEquip.ZonePtr;
+            int const spaceNum = thisEquip.spaceIndex;
+
+            bool const available = (thisEquip.availSched->getCurrentVal() > 0.0);
+            Real64 const computeLoadFrac = thisEquip.computeLoadSched->getCurrentVal();
+            Real64 const zoneMAT = state.dataZoneTempPredictorCorrector->zoneHeatBalance(NZ).MAT;
+
+            Real64 const powerModifier =
+                (thisEquip.PowerModifierCurve != 0) ? CurveValue(state, thisEquip.PowerModifierCurve, computeLoadFrac, zoneMAT) : 1.0;
+
+            Real64 totalPower = 0.0;
+            if (available) {
+                totalPower = max(thisEquip.DesignTotalPower * thisEquip.Multiplier * computeLoadFrac * powerModifier, 0.0);
+            }
+            Real64 const fanPower = totalPower * thisEquip.DesignFanPowerInputFraction;
+            Real64 const cpuPower = totalPower - fanPower;
+            Real64 const totalHeatGen = totalPower; // all electricity input becomes heat
+
+            Real64 liquidHeatCaptureFraction = thisEquip.LiquidHeatCaptureFractionDesign;
+            if (thisEquip.liquidHeatCaptureFracSched != nullptr) {
+                liquidHeatCaptureFraction *= thisEquip.liquidHeatCaptureFracSched->getCurrentVal();
+            }
+            liquidHeatCaptureFraction = min(max(liquidHeatCaptureFraction, 0.0), 1.0);
+
+            // Cooling Coil 1-4 do not yet perform any physical capacity limiting (see function header note),
+            // so the full target liquid load is assumed to be captured by the liquid loop.
+            Real64 const liquidHeatGain = totalHeatGen * liquidHeatCaptureFraction;
+            Real64 const airHeatGain = totalHeatGen - liquidHeatGain;
+
+            thisEquip.PowerRpt[(int)LiquidITERptVars::CPU] = cpuPower;
+            thisEquip.PowerRpt[(int)LiquidITERptVars::Fan] = fanPower;
+            thisEquip.PowerRpt[(int)LiquidITERptVars::TotalElectric] = totalPower;
+            thisEquip.PowerRpt[(int)LiquidITERptVars::TotalHeatGen] = totalHeatGen;
+            thisEquip.PowerRpt[(int)LiquidITERptVars::LiquidHeatGain] = liquidHeatGain;
+            thisEquip.PowerRpt[(int)LiquidITERptVars::AirHeatGain] = airHeatGain;
+            thisEquip.LiquidHeatCaptureFraction = liquidHeatCaptureFraction;
+
+            for (int i = 0; i < (int)LiquidITERptVars::Num; ++i) {
+                thisEquip.EnergyRpt[i] = thisEquip.PowerRpt[i] * state.dataGlobal->TimeStepZoneSec;
+                state.dataHeatBal->ZoneRpt(NZ).LiquidITEPowerRpt[i] += thisEquip.PowerRpt[i];
+                state.dataHeatBal->ZoneRpt(NZ).LiquidITEEnergyRpt[i] += thisEquip.EnergyRpt[i];
+                state.dataHeatBal->spaceRpt(spaceNum).LiquidITEPowerRpt[i] += thisEquip.PowerRpt[i];
+                state.dataHeatBal->spaceRpt(spaceNum).LiquidITEEnergyRpt[i] += thisEquip.EnergyRpt[i];
+            }
+            // Zone/space Liquid Heat Capture Fraction is reported as the last computed instance's value;
+            // combining fractions across multiple instances in the same zone/space is not physically meaningful.
+            state.dataHeatBal->ZoneRpt(NZ).LiquidITEHeatCaptureFraction = liquidHeatCaptureFraction;
+            state.dataHeatBal->spaceRpt(spaceNum).LiquidITEHeatCaptureFraction = liquidHeatCaptureFraction;
+        }
+
+    } // End CalcZoneITEqLiquidCooled
+
     void ReportInternalHeatGains(EnergyPlusData &state)
     {
 
@@ -7667,10 +8096,11 @@ namespace InternalHeatGains {
         // OutputDataStructure.doc (EnergyPlus documentation)
 
         // SUBROUTINE LOCAL VARIABLE DECLARATIONS:
-        static constexpr std::array<DataHeatBalance::IntGainType, 8> TradIntGainTypes = {DataHeatBalance::IntGainType::People,
+        static constexpr std::array<DataHeatBalance::IntGainType, 9> TradIntGainTypes = {DataHeatBalance::IntGainType::People,
                                                                                          DataHeatBalance::IntGainType::Lights,
                                                                                          DataHeatBalance::IntGainType::ElectricEquipment,
                                                                                          DataHeatBalance::IntGainType::ElectricEquipmentITEAirCooled,
+                                                                                         DataHeatBalance::IntGainType::ElectricEquipmentITELiquidCooled,
                                                                                          DataHeatBalance::IntGainType::GasEquipment,
                                                                                          DataHeatBalance::IntGainType::HotWaterEquipment,
                                                                                          DataHeatBalance::IntGainType::SteamEquipment,
