@@ -2799,6 +2799,15 @@ TEST_F(EnergyPlusFixture, HeatBalanceSurfaceManager_TestSurfTempCalcHeatBalanceA
                           "    A1 - 1 IN STUCCO,        !- Outside Layer",
                           "    GP01;                    !- Layer 3",
 
+                          "  ConstructionProperty:InternalHeatSource,",
+                          "    PV Source,               !- Name",
+                          "    EXTWALL:LIVING,          !- Construction Name",
+                          "    1,                       !- Thermal Source Present After Layer Number",
+                          "    1,                       !- Temperature Calculation Requested After Layer Number",
+                          "    1,                       !- Dimensions for the CTF Calculation",
+                          "    0.1524,                  !- Tube Spacing {m}",
+                          "    0.0;                     !- Two-Dimensional Temperature Calculation Position",
+
                           "  Construction,",
                           "    FLOOR:LIVING,            !- Name",
                           "    CC03,                    !- Outside Layer",
@@ -2970,6 +2979,9 @@ TEST_F(EnergyPlusFixture, HeatBalanceSurfaceManager_TestSurfTempCalcHeatBalanceA
     SurfaceGeometry::SetupZoneGeometry(*state, ErrorsFound);
     EXPECT_FALSE(ErrorsFound);
 
+    // IsUsedCTF is only set once surfaces are set up, so CTFs can only be calculated after SetupZoneGeometry.
+    HeatBalanceManager::InitConductionTransferFunctions(*state);
+
     // Clear schedule type warnings
     EXPECT_TRUE(has_err_output(true));
 
@@ -3073,8 +3085,10 @@ TEST_F(EnergyPlusFixture, HeatBalanceSurfaceManager_TestSurfTempCalcHeatBalanceA
 
     // Apply a PV sink after the initial surface pass, as happens when PV is recalculated during HVAC simulation.
     auto const surfaceTemperatureBeforePV = state->dataHeatBalSurf->SurfTempOut(1);
-    auto const sourceHistoryBeforePV = state->dataHeatBalSurf->SurfQsrcHist(1, 1);
     state->dataHeatBal->AnyInternalHeatSourceInInput = true;
+    // SurfQsrcHist is only allocated when AnyInternalHeatSourceInInput is set, so allocate it before reading it below.
+    state->dataHeatBalSurf->SurfQsrcHist.dimension(state->dataSurface->TotSurfaces, Construction::MaxCTFTerms, 0.0);
+    auto const sourceHistoryBeforePV = state->dataHeatBalSurf->SurfQsrcHist(1, 1);
     state->dataHeatBalFanSys->QPVSysSource.dimension(state->dataSurface->TotSurfaces, 0.0);
     state->dataHeatBalFanSys->QPVSysSource(1) = -100.0;
     state->dataHVACGlobal->PVSurfaceHeatBalanceResimFlag = true;
