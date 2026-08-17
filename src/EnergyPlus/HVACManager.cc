@@ -881,8 +881,9 @@ void SimHVAC(EnergyPlusData &state)
 
     // Main iteration loop for HVAC.  If any of the simulation flags are
     // true, then specific components must be resimulated.
-        while ((state.dataHVACGlobal->SimAirLoopsFlag || state.dataHVACGlobal->SimZoneEquipmentFlag || state.dataHVACGlobal->SimNonZoneEquipmentFlag ||
-            state.dataHVACGlobal->SimPlantLoopsFlag || state.dataHVACGlobal->SimElecCircuitsFlag || state.dataHVACGlobal->PVSurfaceHeatBalanceResimFlag) &&
+    while ((state.dataHVACGlobal->SimAirLoopsFlag || state.dataHVACGlobal->SimZoneEquipmentFlag || state.dataHVACGlobal->SimNonZoneEquipmentFlag ||
+            state.dataHVACGlobal->SimPlantLoopsFlag || state.dataHVACGlobal->SimElecCircuitsFlag ||
+            state.dataHVACGlobal->PVSurfaceHeatBalanceResimFlag) &&
            (state.dataHVACMgr->HVACManageIteration <= state.dataConvergeParams->MaxIter)) {
 
         if (state.dataGlobal->stopSimulation) {
