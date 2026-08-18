@@ -4750,7 +4750,8 @@ void InitEMSControlledSurfaceProperties(EnergyPlusData &state)
             continue;
         }
 
-        if ((mat->AbsorpSolarEMSOverrideOn) || (mat->AbsorpThermalEMSOverrideOn) || (mat->AbsorpVisibleEMSOverrideOn)) {
+        if ((mat->AbsorpSolarOutEMSOverrideOn) || (mat->AbsorpThermalOutEMSOverrideOn) || (mat->AbsorpVisibleOutEMSOverrideOn) ||
+            (mat->AbsorpSolarInEMSOverrideOn) || (mat->AbsorpThermalInEMSOverrideOn) || (mat->AbsorpVisibleInEMSOverrideOn)) {
             state.dataGlobal->AnySurfPropOverridesInModel = true;
             break;
         }
@@ -4766,14 +4767,17 @@ void InitEMSControlledSurfaceProperties(EnergyPlusData &state)
         if (mat->group != Material::Group::Regular) {
             continue;
         }
-        mat->AbsorpSolarOut = mat->AbsorpSolarEMSOverrideOn ? max(min(mat->AbsorpSolarEMSOverride, 0.9999), 0.0001) : mat->AbsorpSolarInputOut;
+        mat->AbsorpSolarOut = mat->AbsorpSolarOutEMSOverrideOn ? max(min(mat->AbsorpSolarOutEMSOverride, 0.9999), 0.0001) : mat->AbsorpSolarInputOut;
         mat->AbsorpThermalOut =
-            mat->AbsorpThermalEMSOverrideOn ? max(min(mat->AbsorpThermalEMSOverride, 0.9999), 0.0001) : mat->AbsorpThermalInputOut;
+            mat->AbsorpThermalOutEMSOverrideOn ? max(min(mat->AbsorpThermalOutEMSOverride, 0.9999), 0.0001) : mat->AbsorpThermalInputOut;
         mat->AbsorpVisibleOut =
-            mat->AbsorpVisibleEMSOverrideOn ? max(min(mat->AbsorpVisibleEMSOverride, 0.9999), 0.0001) : mat->AbsorpVisibleInputOut;
-        mat->AbsorpSolarIn = mat->AbsorpSolarEMSOverrideOn ? max(min(mat->AbsorpSolarEMSOverride, 0.9999), 0.0001) : mat->AbsorpSolarInputIn;
-        mat->AbsorpThermalIn = mat->AbsorpThermalEMSOverrideOn ? max(min(mat->AbsorpThermalEMSOverride, 0.9999), 0.0001) : mat->AbsorpThermalInputIn;
-        mat->AbsorpVisibleIn = mat->AbsorpVisibleEMSOverrideOn ? max(min(mat->AbsorpVisibleEMSOverride, 0.9999), 0.0001) : mat->AbsorpVisibleInputIn;
+            mat->AbsorpVisibleOutEMSOverrideOn ? max(min(mat->AbsorpVisibleOutEMSOverride, 0.9999), 0.0001) : mat->AbsorpVisibleInputOut;
+        mat->AbsorpSolarIn = mat->AbsorpSolarInEMSOverrideOn ? max(min(mat->AbsorpSolarInEMSOverride, 0.9999), 0.0001) : mat->AbsorpSolarInputIn;
+        mat->AbsorpThermalIn =
+            mat->AbsorpThermalInEMSOverrideOn ? max(min(mat->AbsorpThermalInEMSOverride, 0.9999), 0.0001) : mat->AbsorpThermalInputIn;
+        mat->AbsorpVisibleIn =
+            mat->AbsorpVisibleInEMSOverrideOn ? max(min(mat->AbsorpVisibleInEMSOverride, 0.9999), 0.0001) : mat->AbsorpVisibleInputIn;
+
     } // loop over materials
 
     // second, loop over constructions

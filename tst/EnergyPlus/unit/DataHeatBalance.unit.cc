@@ -857,7 +857,7 @@ TEST_F(EnergyPlusFixture, DataHeatBalance_CheckConstructLayers)
     SetupWindowShadingControlActuators(*state);
 
     // init_state() checks for EMS so there will be actuators for schedules and materials already
-    EXPECT_EQ(state->dataRuntimeLang->numEMSActuatorsAvailable, 19);
+    EXPECT_EQ(state->dataRuntimeLang->numEMSActuatorsAvailable, 28);
 
     // add a blind layer in between glass
     state->dataConstruction->Construct(4).TotLayers = 5;
@@ -886,13 +886,13 @@ TEST_F(EnergyPlusFixture, DataHeatBalance_CheckConstructLayers)
     state->dataSurface->surfShades(windowSurfNum).blind.movableSlats = true;
     // check if EMS actuator is available when blind layer is added
     SetupWindowShadingControlActuators(*state);
-    EXPECT_EQ(state->dataRuntimeLang->numEMSActuatorsAvailable, 21);
-    EXPECT_EQ(state->dataRuntimeLang->EMSActuatorAvailable(20).ComponentTypeName, "Window Shading Control");
-    EXPECT_EQ(state->dataRuntimeLang->EMSActuatorAvailable(20).ControlTypeName, "Control Status");
-    EXPECT_EQ(state->dataRuntimeLang->EMSActuatorAvailable(20).Units, "[ShadeStatus]");
-    EXPECT_EQ(state->dataRuntimeLang->EMSActuatorAvailable(21).ComponentTypeName, "Window Shading Control");
-    EXPECT_EQ(state->dataRuntimeLang->EMSActuatorAvailable(21).ControlTypeName, "Slat Angle");
-    EXPECT_EQ(state->dataRuntimeLang->EMSActuatorAvailable(21).Units, "[degrees]");
+    EXPECT_EQ(state->dataRuntimeLang->numEMSActuatorsAvailable, 30);
+    EXPECT_EQ(state->dataRuntimeLang->EMSActuatorAvailable(29).ComponentTypeName, "Window Shading Control");
+    EXPECT_EQ(state->dataRuntimeLang->EMSActuatorAvailable(29).ControlTypeName, "Control Status");
+    EXPECT_EQ(state->dataRuntimeLang->EMSActuatorAvailable(29).Units, "[ShadeStatus]");
+    EXPECT_EQ(state->dataRuntimeLang->EMSActuatorAvailable(30).ComponentTypeName, "Window Shading Control");
+    EXPECT_EQ(state->dataRuntimeLang->EMSActuatorAvailable(30).ControlTypeName, "Slat Angle");
+    EXPECT_EQ(state->dataRuntimeLang->EMSActuatorAvailable(30).Units, "[degrees]");
 }
 
 TEST_F(EnergyPlusFixture, DataHeatBalance_setUserTemperatureLocationPerpendicular)

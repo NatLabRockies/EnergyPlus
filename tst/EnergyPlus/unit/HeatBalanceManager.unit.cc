@@ -2414,8 +2414,10 @@ TEST_F(EnergyPlusFixture, HeatBalanceManager_EMSMaterialThermalAbsorptanceUpdate
     mat->AbsorpThermalInputOut = initialThermalAbsorptance;
     mat->AbsorpThermalIn = initialThermalAbsorptance;
     mat->AbsorpThermalInputIn = initialThermalAbsorptance;
-    mat->AbsorpThermalEMSOverrideOn = true;
-    mat->AbsorpThermalEMSOverride = emsThermalAbsorptance;
+    mat->AbsorpThermalOutEMSOverrideOn = true;
+    mat->AbsorpThermalOutEMSOverride = emsThermalAbsorptance;
+    mat->AbsorpThermalInEMSOverrideOn = true;
+    mat->AbsorpThermalInEMSOverride = emsThermalAbsorptance;
     state->dataMaterial->materials(1) = mat;
 
     state->dataHeatBal->TotConstructs = 1;
