@@ -119,7 +119,7 @@ Real64 WaterHeatingCoilUASizer::size(EnergyPlusData &state, Real64 _originalValu
                     this->addErrorMessage(msg);
                     ShowContinueError(state, msg);
                     // TotWaterHeatingCoilRate is set in CALL to CalcSimpleHeatingCoil
-                    msg = std::format("  Design Coil Capacity           = {:.3f} W", this->dataDesignCoilCapacity);
+                    msg = std::format("  Design Coil Capacity           = {:.3f} W", state.dataSize->DataDesignCoilCapacity);
                     this->addErrorMessage(msg);
                     ShowContinueError(state, msg);
                     if (this->dataNomCapInpMeth) {
@@ -178,7 +178,7 @@ Real64 WaterHeatingCoilUASizer::size(EnergyPlusData &state, Real64 _originalValu
                     msg = std::format("  Coil inlet air mass flow rate  = {:.6f} kg/s", this->dataFlowUsedForSizing);
                     this->addErrorMessage(msg);
                     ShowContinueError(state, msg);
-                    msg = std::format("  Design Coil Capacity           = {:.3f} W", this->dataDesignCoilCapacity);
+                    msg = std::format("  Design Coil Capacity           = {:.3f} W", state.dataSize->DataDesignCoilCapacity);
                     this->addErrorMessage(msg);
                     ShowContinueError(state, msg);
                     if (this->dataNomCapInpMeth) {
@@ -208,7 +208,7 @@ Real64 WaterHeatingCoilUASizer::size(EnergyPlusData &state, Real64 _originalValu
                         ShowContinueError(state, msg);
                     }
                     // TotWaterHeatingCoilRate is set in CALL to CalcSimpleHeatingCoil
-                    if (this->dataDesignCoilCapacity < this->dataCapacityUsedForSizing) {
+                    if (state.dataSize->DataDesignCoilCapacity < this->dataCapacityUsedForSizing) {
                         msg = "  Inadequate water side capacity: in Plant Sizing for this hot water loop";
                         this->addErrorMessage(msg);
                         ShowContinueError(state, msg);
@@ -300,7 +300,7 @@ Real64 WaterHeatingCoilUASizer::size(EnergyPlusData &state, Real64 _originalValu
                     msg = std::format("  Coil inlet air mass flow rate  = {:.6f} kg/s", this->dataFlowUsedForSizing);
                     this->addErrorMessage(msg);
                     ShowContinueError(state, msg);
-                    msg = std::format("  Design Coil Capacity           = {:.3f} W", this->dataDesignCoilCapacity);
+                    msg = std::format("  Design Coil Capacity           = {:.3f} W", state.dataSize->DataDesignCoilCapacity);
                     this->addErrorMessage(msg);
                     ShowContinueError(state, msg);
                     msg = std::format("  Design Coil Load               = {:.3f} W", this->dataCapacityUsedForSizing);
@@ -343,7 +343,7 @@ Real64 WaterHeatingCoilUASizer::size(EnergyPlusData &state, Real64 _originalValu
                     msg = std::format("  Coil inlet air mass flow rate  = {:.6f} kg/s", this->dataFlowUsedForSizing);
                     this->addErrorMessage(msg);
                     ShowContinueError(state, msg);
-                    msg = std::format("  Design Coil Capacity           = {:.3f} W", this->dataDesignCoilCapacity);
+                    msg = std::format("  Design Coil Capacity           = {:.3f} W", state.dataSize->DataDesignCoilCapacity);
                     this->addErrorMessage(msg);
                     ShowContinueError(state, msg);
                     msg = std::format("  Design Coil Load               = {:.3f} W", this->dataCapacityUsedForSizing);
@@ -357,7 +357,7 @@ Real64 WaterHeatingCoilUASizer::size(EnergyPlusData &state, Real64 _originalValu
                         this->addErrorMessage(msg);
                         ShowContinueError(state, msg);
                     }
-                    if (this->dataDesignCoilCapacity < this->dataCapacityUsedForSizing && !this->dataNomCapInpMeth) {
+                    if (state.dataSize->DataDesignCoilCapacity < this->dataCapacityUsedForSizing && !this->dataNomCapInpMeth) {
                         msg = "  Inadequate water side capacity: in Plant Sizing for this hot water loop";
                         this->addErrorMessage(msg);
                         ShowContinueError(state, msg);
