@@ -1111,33 +1111,32 @@ void GetAirPathData(EnergyPlusData &state)
                                 }
                             }
                         }
-                        if (!nonLockoutCoilFound) {
-                            //         Coil controllers can be entered either in the air loop controller list or the
-                            //         OA system controller list. The CanBeLockedOutByEcono should only be set for OA coils
-                            //         First get the OA controller actuator node and then compare to the air loop coil water inlet node
-                            //         If these node numbers match, the coil is in the main air loop and the lockout flag should be reset to FALSE
-                            for (BranchNum = 1; BranchNum <= primaryAirSystems.NumBranches; ++BranchNum) {
-                                for (CompNum = 1; CompNum <= primaryAirSystems.Branch(BranchNum).TotalComponents; ++CompNum) {
-                                    if (Util::SameString(primaryAirSystems.Branch(BranchNum).Comp(CompNum).TypeOf, "AirloopHVAC:OutdoorAirSystem")) {
-                                        continue;
-                                    }
-                                    CompType = primaryAirSystems.Branch(BranchNum).Comp(CompNum).TypeOf;
-                                    if (Util::SameString(CompType, "Coil:Cooling:Water:DetailedGeometry") ||
-                                        Util::SameString(CompType, "Coil:Heating:Water") || Util::SameString(CompType, "Coil:Cooling:Water")) {
-                                        WaterCoilNodeNum = GetCoilWaterInletNode(
-                                            state, CompType, primaryAirSystems.Branch(BranchNum).Comp(CompNum).Name, ErrorsFound);
-                                        if (WaterCoilNodeNum == ActuatorNodeNum) {
-                                            nonLockoutCoilFound = true;
-                                            break;
-                                        }
+                    }
+                    if (!nonLockoutCoilFound) {
+                        //         Coil controllers can be entered either in the air loop controller list or the
+                        //         OA system controller list. The CanBeLockedOutByEcono should only be set for OA coils
+                        //         First get the OA controller actuator node and then compare to the air loop coil water inlet node
+                        //         If these node numbers match, the coil is in the main air loop and the lockout flag should be reset to FALSE
+                        for (BranchNum = 1; BranchNum <= primaryAirSystems.NumBranches; ++BranchNum) {
+                            for (CompNum = 1; CompNum <= primaryAirSystems.Branch(BranchNum).TotalComponents; ++CompNum) {
+                                if (Util::SameString(primaryAirSystems.Branch(BranchNum).Comp(CompNum).TypeOf, "AirloopHVAC:OutdoorAirSystem")) {
+                                    continue;
+                                }
+                                CompType = primaryAirSystems.Branch(BranchNum).Comp(CompNum).TypeOf;
+                                if (Util::SameString(CompType, "Coil:Cooling:Water:DetailedGeometry") ||
+                                    Util::SameString(CompType, "Coil:Heating:Water") || Util::SameString(CompType, "Coil:Cooling:Water")) {
+                                    WaterCoilNodeNum =
+                                        GetCoilWaterInletNode(state, CompType, primaryAirSystems.Branch(BranchNum).Comp(CompNum).Name, ErrorsFound);
+                                    if (WaterCoilNodeNum == ActuatorNodeNum) {
+                                        nonLockoutCoilFound = true;
+                                        break;
                                     }
                                 }
                             }
                         }
-                        if (nonLockoutCoilFound) {
-                            primaryAirSystems.CanBeLockedOutByEcono(OASysControllerNum) = false;
-                            nonLockoutCoilFound = false; // reset for next component in OA system
-                        }
+                    }
+                    if (nonLockoutCoilFound) {
+                        primaryAirSystems.CanBeLockedOutByEcono(OASysControllerNum) = false;
                     }
                 }
             }
