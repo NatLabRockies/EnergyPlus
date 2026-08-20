@@ -121,7 +121,7 @@ Real64 CoolingSHRSizer::size(EnergyPlusData &state, Real64 _originalValue, bool 
                         std::string msg = "Developer Error: For autosizing of " + this->compType + ' ' + this->compName +
                                           ", DataFlowUsedForSizing and DataCapacityUsedForSizing " + this->sizingString +
                                           " must both be greater than 0.";
-                        this->errorType = AutoSizingResultType::ErrorType1;
+                        // this->errorType = AutoSizingResultType::ErrorType1;
                         this->addErrorMessage(msg);
                     }
                 }
