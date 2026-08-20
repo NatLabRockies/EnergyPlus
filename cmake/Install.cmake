@@ -551,15 +551,15 @@ endif()
 
 ##########################################################   D O C U M E N T A T I O N   #############################################################
 
-if(BUILD_DOCS)
+if(NOT DOCUMENTATION_BUILD STREQUAL "DoNotBuild")
 
   # If this isn't the case, then docs were already generated since added to the default make rule
-  if(BUILD_DOCS_ONLY_WITH_PACKAGE)
+  if(DOCUMENTATION_BUILD STREQUAL "BuildOnlyWithPackage")
 
     # Call the build of target docs explicitly here.
     # Note: This is because you can't do `add_dependencies(package docs)` (https://gitlab.kitware.com/cmake/cmake/issues/8438)
     # Adding another custom target to be added to the "ALL" one (so it runs) and make it depend on the actual "documentation" target doesn't work
-    # because it'll always run if you have enabled BUILD_DOCS, regardless of whether you are calling the target "package" or not
+    # because it'll always run if documentation is enabled, regardless of whether you are calling the target "package" or not
     #  add_custom_target(run_documentation ALL)
     #  add_dependencies(run_documentation documentation)
     #message(FATAL_ERROR "CMAKE_COMMAND=${CMAKE_COMMAND}")
@@ -591,7 +591,8 @@ if(BUILD_DOCS)
     endif()
 
     # Getting these commands to work (especially with macro expansion) is tricky. Check the resulting `cmake_install.cmake` file in your build folder if need to debug this
-    install(CODE "execute_process(COMMAND \"${CMAKE_COMMAND}\" --build \"${PROJECT_BINARY_DIR}\" ${DOC_CONFIG_FLAG} ${DOC_BUILD_FLAGS} --target docs)"
+    install(CODE
+            "execute_process(COMMAND \"${CMAKE_COMMAND}\" --build \"${PROJECT_BINARY_DIR}\" ${DOC_CONFIG_FLAG} ${DOC_BUILD_FLAGS} --target docs COMMAND_ERROR_IS_FATAL ANY)"
             COMPONENT Documentation)
   endif()
 
@@ -612,7 +613,7 @@ if(BUILD_DOCS)
     install(FILES "${PROJECT_SOURCE_DIR}/doc/urls/EnergyPlusEssentials.url" DESTINATION "./Documentation" COMPONENT Documentation)
   endif()
 else()
-  message(AUTHOR_WARNING "BUILD_DOCS isn't enabled, so package won't include the PDFs")
+  message(AUTHOR_WARNING "DOCUMENTATION_BUILD is DoNotBuild, so package won't include the PDFs")
 endif()
 
 ##########################################################   S Y S T E M    L I B R A R I E S   ######################################################
@@ -643,7 +644,7 @@ if(WIN32 AND NOT UNIX)
   endif()
 endif()
 
-if(APPLE AND CPACK_CODESIGNING_DEVELOPPER_ID_APPLICATION)
+if(APPLE AND CPACK_CODESIGNING_DEVELOPER_ID_APPLICATION)
 
   set(FILES_TO_SIGN
     # Targets are signed already via register_install_codesign_target
@@ -663,7 +664,7 @@ if(APPLE AND CPACK_CODESIGNING_DEVELOPPER_ID_APPLICATION)
 
   # Codesign inner binaries and libraries, in the CPack staging area for the EnergyPlus project, component Unspecified
   # Define some required variables for the script in the scope of the install(SCRIPT) first
-  install(CODE "set(CPACK_CODESIGNING_DEVELOPPER_ID_APPLICATION \"${CPACK_CODESIGNING_DEVELOPPER_ID_APPLICATION}\")" COMPONENT Unspecified)
+  install(CODE "set(CPACK_CODESIGNING_DEVELOPER_ID_APPLICATION \"${CPACK_CODESIGNING_DEVELOPER_ID_APPLICATION}\")" COMPONENT Unspecified)
   install(CODE "set(CPACK_CODESIGNING_MACOS_IDENTIFIER \"${CPACK_CODESIGNING_MACOS_IDENTIFIER}\")" COMPONENT Unspecified)
   install(CODE "set(FILES_TO_SIGN \"${FILES_TO_SIGN}\")" COMPONENT Unspecified)
   # call the script

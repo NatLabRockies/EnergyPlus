@@ -26,3 +26,14 @@ The following old names are fully renamed to coil-level reports and are transiti
 - `Refrigeration Zone Air Chiller Frost Accumulation Mass` -> `Refrigeration Zone Air Chiller Coil Frost Accumulation Mass`
 - `Refrigeration Zone Air Chiller Defrost Electricity Rate` -> `Refrigeration Zone Air Chiller Coil Defrost Electricity Rate`
 - `Refrigeration Zone Air Chiller Defrost Electricity Energy` -> `Refrigeration Zone Air Chiller Coil Defrost Electricity Energy`
+
+### EIO and Initialization Summary Report Changes for Material Conductivity / Thermal Resistance in InchPound
+
+When using `OutputControl:Table:Style` with Unit Conversion = `InchPound`, the tables "Material CTF Summary" and "WindowMaterial:Glazing" were incorrectly reporting some quantities in SI Units. They now report correctly in IP units.
+
+- Conductivity {w/m-K} -> {Btu-in/hr-ft2-F}
+- ThermalResistance {m2-K/w} -> {ft2-F-hr/Btu}
+
+Additionally, the EIO now will use the standard `W` (uppercase) notation for these units, instead of `w` (lowercase).
+
+See pull request [#11736](https://github.com/NatLabRockies/EnergyPlus/pull/11736/files) for more details.

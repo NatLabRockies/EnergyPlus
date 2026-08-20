@@ -731,11 +731,11 @@ size_t getnumberofxmlvalues(char const* const fileName, char const* const exp) {
   size_t n;
   int ret;
   char* str;
-  int strLen = 0;
+  int myStrLen = 0;
   n = 0;
   str = NULL;
   PARSEVALUE = 0;
-  ret = getxmlvalues(fileName, exp, str, &n, strLen);
+  ret = getxmlvalues(fileName, exp, str, &n, myStrLen);
   if (-1 == ret) {
     fprintf(stderr, "Error: In getnumberofxmlvalues.\n");
     return ret;
@@ -767,9 +767,9 @@ size_t getnumberofxmlvalues(char const* const fileName, char const* const exp) {
 ///\param atrName the attribute name.
 ///\param nVal number of attribute values found.
 ///\param str string to store the found values, semicolon separated.
-///\param strLen the string length allocated
+///\param myStrLen the string length allocated
 ////////////////////////////////////////////////////////////////
-int getxmlvaluesf(char const* const fileName, char const* const exp, char const* const atrName, size_t* const nVal, char* str, size_t* const strLen) {
+int getxmlvaluesf(char const* const fileName, char const* const exp, char const* const atrName, size_t* const nVal, char* str, size_t* const myStrLen) {
   ///////////////////////////////////////////////
   /// This part of the code is for compatibility
   /// with the BCVTB version 0.2 and earlier
@@ -778,7 +778,7 @@ int getxmlvaluesf(char const* const fileName, char const* const exp, char const*
   if (-1 == ret) return -1;
   //////////////////////////////////////////////
   PARSEVALUE = 1;
-  ret = getxmlvalues(fileName, exp, str, nVal, *strLen);
+  ret = getxmlvalues(fileName, exp, str, nVal, *myStrLen);
   if (-1 == ret || *nVal > *strLen) return -1;
   if (strlen(str) + 2 >= *strLen) {
     fprintf(stderr,
@@ -810,12 +810,12 @@ int getxmlvaluesf(char const* const fileName, char const* const exp, char const*
 ///\param exp the xPath expression.
 ///\param str string to store the found values, semicolon separated.
 ///\param nVals number of values found.
-///\param strLen the string length allocated.
+///\param myStrLen the string length allocated.
 ////////////////////////////////////////////////////////////////
-int getxmlvalue(char const* const fileName, char const* const exp, char* const str, size_t* const nVals, int const strLen) {
+int getxmlvalue(char const* const fileName, char const* const exp, char* const str, size_t* const nVals, int const myStrLen) {
   int ret;
   PARSEVALUE = 1;
-  ret = getxmlvalues(fileName, exp, str, nVals, strLen);
+  ret = getxmlvalues(fileName, exp, str, nVals, myStrLen);
 
   if (ret != 0) {
     fprintf(stderr, "Error: Error when attempting to parse file '%s'\n", fileName);

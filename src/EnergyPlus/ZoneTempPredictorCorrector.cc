@@ -2167,6 +2167,52 @@ void GetZoneAirSetPoints(EnergyPlusData &state)
         }
     } // NumStageControlledZones > 0
 
+    // Warn when a thermostat-controlled zone contains an ElectricEquipment:ITE:AirCooled object using FlowControlWithApproachTemperatures: in that
+    // case the zone cooling setpoint is bypassed in PredictSystemLoads (LoadToCoolingSetPoint is driven by Zone.AdjustedReturnTempByITE instead), so
+    // the zone air temperature will not track the thermostat
+    for (int TempCtrlZoneNum = 1; TempCtrlZoneNum <= state.dataZoneCtrls->NumTempControlledZones; ++TempCtrlZoneNum) {
+        auto const &tempZone = state.dataZoneCtrls->TempControlledZone(TempCtrlZoneNum);
+        if (tempZone.ActualZoneNum == 0) {
+            continue;
+        }
+        if (!state.dataHeatBal->Zone(tempZone.ActualZoneNum).HasAdjustedReturnTempByITE) {
+            continue;
+        }
+
+        // Only matters if the thermostat actually has a cooling setpoint
+        if (tempZone.setptTypeSched == nullptr) {
+            continue;
+        }
+        bool hasActiveCoolingControl =
+            (tempZone.setpts[(int)HVAC::SetptType::SingleCool].isUsed && tempZone.setptTypeSched->hasVal(state, (int)HVAC::SetptType::SingleCool)) ||
+            (tempZone.setpts[(int)HVAC::SetptType::SingleHeatCool].isUsed &&
+             tempZone.setptTypeSched->hasVal(state, (int)HVAC::SetptType::SingleHeatCool)) ||
+            (tempZone.setpts[(int)HVAC::SetptType::DualHeatCool].isUsed &&
+             tempZone.setptTypeSched->hasVal(state, (int)HVAC::SetptType::DualHeatCool));
+        if (!hasActiveCoolingControl) {
+            continue;
+        }
+
+        std::string iteqName;
+        for (int Loop = 1; Loop <= state.dataHeatBal->TotITEquip; ++Loop) {
+            auto const &thisITEq = state.dataHeatBal->ZoneITEq(Loop);
+            if (thisITEq.ZonePtr == tempZone.ActualZoneNum && thisITEq.FlowControlWithApproachTemps) {
+                iteqName = thisITEq.Name;
+                break;
+            }
+        }
+
+        ShowWarningError(state,
+                         std::format("GetZoneAirSetPoints: ZoneControl:Thermostat=\"{}\" controls Zone=\"{}\", which contains "
+                                     "ElectricEquipment:ITE:AirCooled=\"{}\" with Air Flow Calculation Method="
+                                     "FlowControlWithApproachTemperatures.",
+                                     tempZone.Name,
+                                     tempZone.ZoneName,
+                                     iteqName));
+        ShowContinueError(state, "...The zone cooling setpoint is ignored for this zone; the controlled variable is the supply air temperature.");
+        ShowContinueError(state, "...Zone air temperature may float well above the cooling setpoint and cooling unmet hours do not apply.");
+        ShowContinueError(state, "...Use Air Flow Calculation Method=FlowFromSystem if zone air temperature should follow the thermostat.");
+    }
     if (ErrorsFound) {
         ShowFatalError(state, "Errors getting Zone Control input data.  Preceding condition(s) cause termination.");
     }

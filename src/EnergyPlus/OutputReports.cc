@@ -1356,8 +1356,8 @@ void DetailsForSurfaces(EnergyPlusData &state, int const RptType) // (1=Vertices
                         *eiostream << "Frame/Divider Surface," << state.dataSurface->FrameDivider(fd).Name << "," << "Frame," << thisSurface.Name
                                    << "," << AlgoName << ",";
                         *eiostream << ",N/A,N/A,," << std::format("{:.4f}", state.dataSurface->SurfWinFrameArea(surf)) << ","
-                                   << std::format("{:.4f}", state.dataSurface->SurfWinFrameArea(surf) / thisSurface.Multiplier) << ",*"
-                                   << ",N/A" << ",N/A," << std::format("{:.4f}", state.dataSurface->FrameDivider(fd).FrameWidth) << ",N/A" << '\n';
+                                   << std::format("{:.4f}", state.dataSurface->SurfWinFrameArea(surf) / thisSurface.Multiplier) << ",*" << ",N/A"
+                                   << ",N/A," << std::format("{:.4f}", state.dataSurface->FrameDivider(fd).FrameWidth) << ",N/A" << '\n';
                     }
                     if (state.dataSurface->FrameDivider(fd).DividerWidth > 0.0) {
                         if (state.dataSurface->FrameDivider(fd).DividerType == DataSurfaces::FrameDividerType::DividedLite) {
@@ -1368,8 +1368,8 @@ void DetailsForSurfaces(EnergyPlusData &state, int const RptType) // (1=Vertices
                                        << thisSurface.Name << ",,";
                         }
                         *eiostream << ",N/A,N/A,," << std::format("{:.4f}", state.dataSurface->SurfWinDividerArea(surf)) << ","
-                                   << std::format("{:.4f}", state.dataSurface->SurfWinDividerArea(surf) / thisSurface.Multiplier) << ",*"
-                                   << ",N/A" << ",N/A," << std::format("{:.4f}", state.dataSurface->FrameDivider(fd).DividerWidth) << ",N/A" << '\n';
+                                   << std::format("{:.4f}", state.dataSurface->SurfWinDividerArea(surf) / thisSurface.Multiplier) << ",*" << ",N/A"
+                                   << ",N/A," << std::format("{:.4f}", state.dataSurface->FrameDivider(fd).DividerWidth) << ",N/A" << '\n';
                     }
                 }
             } else { // RptType=1  Vertices only

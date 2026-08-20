@@ -106,6 +106,7 @@ namespace BoilerSteam {
         Real64 FuelUsed = 0.0;           // W - Boiler fuel used
         Real64 BoilerLoad = 0.0;         // W - Boiler Load
         Real64 BoilerEff = 0.0;          // Boiler efficiency
+        Real64 BoilerCOP = 0.0;          // Boiler operating coefficient of performance
         Real64 BoilerMassFlowRate = 0.0; // kg/s - Boiler mass flow rate
         Real64 BoilerOutletTemp = 0.0;   // W - Boiler outlet temperature
 

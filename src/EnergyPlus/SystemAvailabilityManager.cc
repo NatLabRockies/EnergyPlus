@@ -2388,7 +2388,7 @@ namespace Avail {
             FanStartTimeTmr = 0.0;
             bool exitLoop = false; // exit loop on found data
             for (int hr = 0; hr < Constant::iHoursInDay; ++hr) {
-                for (int ts = 0; ts <= state.dataGlobal->TimeStepsInHour; ++ts) {
+                for (int ts = 0; ts < state.dataGlobal->TimeStepsInHour; ++ts) {
                     if (dayVals[hr * state.dataGlobal->TimeStepsInHour + ts] <= 0.0) {
                         continue;
                     }

@@ -135,6 +135,7 @@ namespace Boilers {
         Real64 BoilerOutletTemp = 0.0;   // W - Boiler outlet temperature
         Real64 BoilerPLR = 0.0;          // Boiler operating part-load ratio
         Real64 BoilerEff = 0.0;          // Boiler operating efficiency
+        Real64 BoilerCOP = 0.0;          // Boiler operating coefficient of performance
 
         Real64 BoilerEnergy = 0.0;             // J - Boiler energy integrated over time
         Real64 FuelConsumed = 0.0;             // J - Boiler Fuel consumed integrated over time

@@ -243,10 +243,12 @@ TEST_F(EnergyPlusFixture, BoilerSteam_BoilerEfficiency)
     state->dataGlobal->BeginEnvrnFlag = true;
     thisBoiler.initialize(*state);
     thisBoiler.calculate(*state, MyLoad, RunFlag, DataBranchAirLoopPlant::ControlType::SeriesActive);
+    thisBoiler.update(*state, MyLoad, RunFlag, true);
 
     // check boiler fuel used and the resultant boiler efficiency
     EXPECT_EQ(thisBoiler.BoilerLoad, 1000000);
     EXPECT_NEAR(thisBoiler.FuelUsed, 1562498, 1.0);
     Real64 ExpectedBoilerEff = thisBoiler.BoilerLoad / thisBoiler.FuelUsed;
     EXPECT_NEAR(thisBoiler.BoilerEff, ExpectedBoilerEff, 0.01);
+    EXPECT_NEAR(thisBoiler.BoilerCOP, 0.64, 0.01);
 }

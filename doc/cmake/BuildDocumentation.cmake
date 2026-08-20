@@ -1,10 +1,20 @@
 # Caller needs to set:
-  # XELATEX, the path to the xelatex compiler
+  # XELATEX_COMPILER, the path to the xelatex compiler
   # INNAME, the name of the input tex file
   # OUTNAME, the pretty output name for the pdf
   # ORIGINAL_CMAKE_SOURCE_DIR, the root of the source repo
   # ORIGINAL_CMAKE_BINARY_DIR, the root of the build tree
-# this will get more complicated as we add things like bibtex and makeindex, for now just execute xelatex twice and rename the output
+# This will get more complicated as we add things like bibtex and makeindex. For now, execute xelatex three times and rename the output.
+
+set(DOC_BUILD_DIRECTORY "${ORIGINAL_CMAKE_BINARY_DIR}/${INNAME}")
+file(MAKE_DIRECTORY "${DOC_BUILD_DIRECTORY}")
+
+if(WIN32)
+  set(TEXINPUTS_SEPARATOR ";")
+else()
+  set(TEXINPUTS_SEPARATOR ":")
+endif()
+set(ENV{TEXINPUTS} "${ORIGINAL_CMAKE_BINARY_DIR}${TEXINPUTS_SEPARATOR}$ENV{TEXINPUTS}")
 if ("${TEX_INTERACTION}" STREQUAL "")
   set(THIS_TEX_INTERACTION "batchmode")
 else()
@@ -29,7 +39,7 @@ if(DOCS_TESTING)
     message("XELATEX_MEM_FLAGS=${XELATEX_MEM_FLAGS}")
   endif()
 
-  get_filename_component(XELATEX_BIN_DIR ${XELATEX} DIRECTORY)
+  get_filename_component(XELATEX_BIN_DIR ${XELATEX_COMPILER} DIRECTORY)
   find_program(PDFTOTEXT NAME pdftotext HINTS ${XELATEX_BIN_DIR})
   if(NOT PDFTOTEXT)
     message(AUTHOR_WARNING "pdftotext should be in your path to test whether the Table of Contents worked. On Windows it should be installed via miktex already, on ubuntu it's apt install poppler-utils, on mac brew install poppler")
@@ -38,7 +48,7 @@ if(DOCS_TESTING)
   function(test_toc PASS_NUM DEBUG_DOCS)
     if(PDFTOTEXT)
       execute_process(
-            COMMAND ${PDFTOTEXT} -f 2 -l 2 ${INNAME}.pdf -
+            COMMAND ${PDFTOTEXT} -f 2 -l 2 "${DOC_BUILD_DIRECTORY}/${INNAME}.pdf" -
             OUTPUT_VARIABLE _TOC_PAGE1_CONTENT
       )
       string(REPLACE "\n" ";" _TOC_PAGE_LIST "${_TOC_PAGE1_CONTENT}")
@@ -75,11 +85,11 @@ if(DOCS_TESTING)
     endif()
 
     if(DEBUG_DOCS)
-      file( COPY "${INNAME}.pdf" DESTINATION "${ORIGINAL_CMAKE_BINARY_DIR}/pdf/${INNAME}_Pass${PASS_NUM}.pdf" )
-      file( COPY "${INNAME}.toc" DESTINATION "${ORIGINAL_CMAKE_BINARY_DIR}/pdf/${INNAME}_Pass${PASS_NUM}.toc" )
-      file( COPY "${INNAME}.log" DESTINATION "${ORIGINAL_CMAKE_BINARY_DIR}/pdf/${INNAME}_Pass${PASS_NUM}.log" )
-      file( COPY "${INNAME}.aux" DESTINATION "${ORIGINAL_CMAKE_BINARY_DIR}/pdf/${INNAME}_Pass${PASS_NUM}.aux" )
-      file( COPY "${INNAME}.out" DESTINATION "${ORIGINAL_CMAKE_BINARY_DIR}/pdf/${INNAME}_Pass${PASS_NUM}.out" )
+      configure_file("${DOC_BUILD_DIRECTORY}/${INNAME}.pdf" "${ORIGINAL_CMAKE_BINARY_DIR}/pdf/${INNAME}_Pass${PASS_NUM}.pdf" COPYONLY)
+      configure_file("${DOC_BUILD_DIRECTORY}/${INNAME}.toc" "${ORIGINAL_CMAKE_BINARY_DIR}/pdf/${INNAME}_Pass${PASS_NUM}.toc" COPYONLY)
+      configure_file("${DOC_BUILD_DIRECTORY}/${INNAME}.log" "${ORIGINAL_CMAKE_BINARY_DIR}/pdf/${INNAME}_Pass${PASS_NUM}.log" COPYONLY)
+      configure_file("${DOC_BUILD_DIRECTORY}/${INNAME}.aux" "${ORIGINAL_CMAKE_BINARY_DIR}/pdf/${INNAME}_Pass${PASS_NUM}.aux" COPYONLY)
+      configure_file("${DOC_BUILD_DIRECTORY}/${INNAME}.out" "${ORIGINAL_CMAKE_BINARY_DIR}/pdf/${INNAME}_Pass${PASS_NUM}.out" COPYONLY)
     endif()
   endfunction()
 
@@ -87,7 +97,7 @@ if(DOCS_TESTING)
 endif()
 
 execute_process(
-  COMMAND "${XELATEX}" --interaction=${THIS_TEX_INTERACTION} ${XELATEX_MEM_FLAGS} ${INNAME}.tex
+  COMMAND "${XELATEX_COMPILER}" --interaction=${THIS_TEX_INTERACTION} "-output-directory=${DOC_BUILD_DIRECTORY}" ${XELATEX_MEM_FLAGS} ${INNAME}.tex
   TIMEOUT 600
   RESULT_VARIABLE ERRCODE
   COMMAND_ECHO ${COMMAND_ECHO_MODE}
@@ -102,7 +112,7 @@ if(DOCS_TESTING)
 endif()
 
 execute_process(
-  COMMAND "${XELATEX}" --interaction=${THIS_TEX_INTERACTION} ${XELATEX_MEM_FLAGS} ${INNAME}.tex
+  COMMAND "${XELATEX_COMPILER}" --interaction=${THIS_TEX_INTERACTION} "-output-directory=${DOC_BUILD_DIRECTORY}" ${XELATEX_MEM_FLAGS} ${INNAME}.tex
   TIMEOUT 600
   RESULT_VARIABLE ERRCODE
   COMMAND_ECHO ${COMMAND_ECHO_MODE}
@@ -117,7 +127,7 @@ if(DOCS_TESTING)
 endif()
 
 execute_process(
-  COMMAND "${XELATEX}" --interaction=${THIS_TEX_INTERACTION} ${XELATEX_MEM_FLAGS} ${INNAME}.tex
+  COMMAND "${XELATEX_COMPILER}" --interaction=${THIS_TEX_INTERACTION} "-output-directory=${DOC_BUILD_DIRECTORY}" ${XELATEX_MEM_FLAGS} ${INNAME}.tex
   TIMEOUT 600
   RESULT_VARIABLE ERRCODE
   COMMAND_ECHO ${COMMAND_ECHO_MODE}
@@ -127,5 +137,5 @@ if(DOCS_TESTING)
   test_toc(3 ${_DEBUG_DOCS})
 endif()
 
-file( COPY "${INNAME}.pdf" DESTINATION "${ORIGINAL_CMAKE_BINARY_DIR}/pdf/" )
+file(COPY "${DOC_BUILD_DIRECTORY}/${INNAME}.pdf" DESTINATION "${ORIGINAL_CMAKE_BINARY_DIR}/pdf/")
 file( RENAME "${ORIGINAL_CMAKE_BINARY_DIR}/pdf/${INNAME}.pdf" "${ORIGINAL_CMAKE_BINARY_DIR}/pdf/${OUTNAME}.pdf")

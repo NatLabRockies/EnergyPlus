@@ -3486,8 +3486,6 @@ namespace AirflowNetwork {
 
         // Write wind pressure coefficients in the EIO file
         if (!simulation_control.DuctLoss) {
-            print(m_state.files.eio, "! <AirflowNetwork Model:Wind Direction>, Wind Direction #1 to n (degree)\n");
-            print(m_state.files.eio, "AirflowNetwork Model:Wind Direction, ");
 
             int numWinDirs = 11;
             Real64 angleDelta = 30.0;
@@ -3496,13 +3494,23 @@ namespace AirflowNetwork {
                 angleDelta = 10.0;
             }
 
-            for (int i = 0; i < numWinDirs; ++i) {
-                print(m_state.files.eio, "{:.1f},", i * angleDelta);
+            print(m_state.files.eio, "! <AirflowNetwork Model:Wind Direction (degrees)>");
+            for (int j = 1; j <= numWinDirs; ++j) {
+                print(m_state.files.eio, ", Wind Direction #{}", j);
             }
-            print(m_state.files.eio, "{:.1f}\n", numWinDirs * angleDelta);
+            print(m_state.files.eio, ", Wind Direction #{}\n", numWinDirs + 1);
 
-            print(m_state.files.eio,
-                  "! <AirflowNetwork Model:Wind Pressure Coefficients>, Name, Wind Pressure Coefficients #1 to n (dimensionless)\n");
+            print(m_state.files.eio, "AirflowNetwork Model:Wind Direction (degrees)");
+            for (int j = 0; j < numWinDirs; ++j) {
+                print(m_state.files.eio, ",{:.2f}", j * angleDelta);
+            }
+            print(m_state.files.eio, ",{:.2f}\n", numWinDirs * angleDelta);
+
+            print(m_state.files.eio, "! <AirflowNetwork Model:Wind Pressure Coefficients (dimensionless)>, Name");
+            for (int j = 1; j <= numWinDirs; ++j) {
+                print(m_state.files.eio, ", Coefficient #{}", j);
+            }
+            print(m_state.files.eio, ", Coefficient #{}\n", numWinDirs + 1);
 
             // The old version used to write info with single-sided natural ventilation specific labeling, this version no longer does that.
             std::set<int> curves;
@@ -3510,8 +3518,8 @@ namespace AirflowNetwork {
                 curves.insert(MultizoneExternalNodeData(i).curve);
             }
             for (auto index : curves) {
-                print(m_state.files.eio, "AirflowNetwork Model:Wind Pressure Coefficients, {}, ", Curve::GetCurveName(m_state, index));
-
+                print(
+                    m_state.files.eio, "AirflowNetwork Model:Wind Pressure Coefficients (dimensionless), {}, ", Curve::GetCurveName(m_state, index));
                 for (int j = 0; j < numWinDirs; ++j) {
                     print(m_state.files.eio, "{:.2f},", Curve::CurveValue(m_state, index, j * angleDelta));
                 }

@@ -1,4 +1,4 @@
-GitPython==3.1.54
+GitPython==3.1.58
 rst2pdf==0.102
 sphinx-rtd-theme==2.0.0
 sphinx-sitemap==2.6.0
