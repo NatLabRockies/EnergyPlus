@@ -1108,10 +1108,10 @@ namespace HWBaseboardRadiator {
                         }
                     }
                 }
-                if (hWBaseboard.WaterTempAvg > 0.0 && hWBaseboard.WaterMassFlowRateStd > 0.0 && RatedCapacityUser > 0.0) {
+                if (RatedCapacityUser > 0.0) { // sizing result given any sizing method choice or result
                     DesCoilLoad = RatedCapacityUser;
                     WaterMassFlowRateStd = hWBaseboard.WaterMassFlowRateStd;
-                } else if (hWBaseboard.RatedCapacity == DataSizing::AutoSize || hWBaseboard.RatedCapacity == 0.0) {
+                } else { // use zone NonAirSysDesHeatLoad load instead. It's either 0, or the zone heating load if sizing was requested.
                     DesCoilLoad = RatedCapacityDes;
                     rho = hWBaseboard.plantLoc.loop->glycol->getDensity(state, Constant::HWInitConvTemp, RoutineNameFull);
                     WaterMassFlowRateStd = hWBaseboard.WaterVolFlowRateMax * rho;
