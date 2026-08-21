@@ -365,7 +365,7 @@ TEST_F(EnergyPlusFixture, HWBaseboardRadiator_HWBaseboardWaterInputTest)
 
     state->files.eio.open_as_stringstream();
     SizeHWBaseboard(*state, 1);
-    EXPECT_NEAR(state->dataHWBaseboardRad->HWBaseboard(1).UA, 24.2144, 0.0001);
+    EXPECT_NEAR(state->dataHWBaseboardRad->HWBaseboard(1).UA, 24.38303, 0.0001);
     EXPECT_NEAR(state->dataHWBaseboardRad->HWBaseboard(1).WaterVolFlowRateMax, 3.15941E-05, 0.0000001);
     EXPECT_TRUE(compare_eio_stream_substring("Component Sizing Information, ZoneHVAC:Baseboard:RadiantConvective:Water, THISISABASEBOARD, "
                                              "Design Size Heating Load [W], 1300",
@@ -374,5 +374,50 @@ TEST_F(EnergyPlusFixture, HWBaseboardRadiator_HWBaseboardWaterInputTest)
                                              "Design Size Maximum Water Flow Rate [m3/s], 3.15941E-05",
                                              false));
     EXPECT_TRUE(compare_eio_stream_substring("Component Sizing Information, ZoneHVAC:Baseboard:RadiantConvective:Water, THISISABASEBOARD, "
-                                             "U-Factor times Area [W/C], 24.2144"));
+                                             "U-Factor times Area [W/C], 24.383",
+                                             false));
+    EXPECT_TRUE(compare_eio_stream_substring("Component Sizing Information, ZoneHVAC:Baseboard:RadiantConvective:Water, THISISABASEBOARD, "
+                                             "Design Size Heating Design Capacity [W], 1300"));
+
+    // test other sizing methods
+    state->dataHWBaseboardRad->HWBaseboard(1).HeatingCapMethod = DataSizing::FractionOfAutosizedHeatingCapacity;
+    state->dataHWBaseboardRad->HWBaseboard(1).ScaledHeatingCapacity = 0.5;
+    state->dataHWBaseboardRad->HWBaseboard(1).WaterVolFlowRateMax = DataSizing::AutoSize;
+    SizeHWBaseboard(*state, 1);
+
+    EXPECT_TRUE(compare_eio_stream_substring("Component Sizing Information, ZoneHVAC:Baseboard:RadiantConvective:Water, THISISABASEBOARD, "
+                                             "Design Size Heating Load [W], 1300",
+                                             false));
+    EXPECT_TRUE(compare_eio_stream_substring("Component Sizing Information, ZoneHVAC:Baseboard:RadiantConvective:Water, THISISABASEBOARD, "
+                                             "Design Size Maximum Water Flow Rate [m3/s], 1.57971E-05",
+                                             false));
+    EXPECT_TRUE(compare_eio_stream_substring("Component Sizing Information, ZoneHVAC:Baseboard:RadiantConvective:Water, THISISABASEBOARD, "
+                                             "U-Factor times Area [W/C], 11.7212",
+                                             false));
+    EXPECT_TRUE(compare_eio_stream_substring("Component Sizing Information, ZoneHVAC:Baseboard:RadiantConvective:Water, THISISABASEBOARD, "
+                                             "Design Size Heating Design Capacity [W], 1300",
+                                             false));
+    EXPECT_TRUE(compare_eio_stream_substring("Component Sizing Information, ZoneHVAC:Baseboard:RadiantConvective:Water, THISISABASEBOARD, "
+                                             "User-Specified Heating Design Capacity [W], 650"));
+
+    state->dataHWBaseboardRad->HWBaseboard(1).HeatingCapMethod = DataSizing::CapacityPerFloorArea;
+    state->dataHeatBal->Zone(1).FloorArea = 100.0;
+    state->dataHWBaseboardRad->HWBaseboard(1).ScaledHeatingCapacity = 10.5;
+    state->dataHWBaseboardRad->HWBaseboard(1).WaterVolFlowRateMax = DataSizing::AutoSize;
+    SizeHWBaseboard(*state, 1);
+
+    EXPECT_TRUE(compare_eio_stream_substring("Component Sizing Information, ZoneHVAC:Baseboard:RadiantConvective:Water, THISISABASEBOARD, "
+                                             "Design Size Heating Load [W], 1300",
+                                             false));
+    EXPECT_TRUE(compare_eio_stream_substring("Component Sizing Information, ZoneHVAC:Baseboard:RadiantConvective:Water, THISISABASEBOARD, "
+                                             "Design Size Maximum Water Flow Rate [m3/s], 2.55183E-05",
+                                             false));
+    EXPECT_TRUE(compare_eio_stream_substring("Component Sizing Information, ZoneHVAC:Baseboard:RadiantConvective:Water, THISISABASEBOARD, "
+                                             "U-Factor times Area [W/C], 19.4955",
+                                             false));
+    EXPECT_TRUE(compare_eio_stream_substring("Component Sizing Information, ZoneHVAC:Baseboard:RadiantConvective:Water, THISISABASEBOARD, "
+                                             "Design Size Heating Design Capacity [W], 1300",
+                                             false));
+    EXPECT_TRUE(compare_eio_stream_substring("Component Sizing Information, ZoneHVAC:Baseboard:RadiantConvective:Water, THISISABASEBOARD, "
+                                             "User-Specified Heating Design Capacity [W], 1050"));
 }
