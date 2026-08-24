@@ -5436,6 +5436,113 @@ TEST_F(EnergyPlusFixture, AzimuthToCardinal)
     }
 }
 
+TEST_F(EnergyPlusFixture, ObjectCountSummary_SurfaceClassCounts)
+{
+    // Every SurfaceClass that gets remapped to Window/Door for thermal calcs (FixedWindow, OperableWindow,
+    // Skylight, GlassDoor, TDD_Diffuser, OverheadDoor -- plus the legacy "Window" IDD choice, which is
+    // treated as a FixedWindow for backward compatibility) must be counted exactly once in the Object Count
+    // Summary, under its own OriginalClass row -- never also folded into the generic "Window"/"Door" row.
+
+    state->dataHeatBal->space.allocate(1);
+    state->dataHeatBal->Zone.allocate(1);
+    state->dataHeatBal->Zone(1).Multiplier = 1;
+    state->dataHeatBal->Zone(1).ListMultiplier = 1;
+
+    state->dataConstruction->Construct.allocate(2);
+    state->dataConstruction->Construct(1).Name = "Glazing Construction";
+    // Avoid triggering CalcNominalWindowCond
+    state->dataConstruction->Construct(1).SummerSHGC = 0.70;
+    state->dataConstruction->Construct(1).VisTransNorm = 0.80;
+    state->dataConstruction->Construct(2).Name = "Opaque Construction";
+
+    state->dataHeatBal->NominalU.allocate(2);
+    state->dataHeatBal->NominalU(1) = 2.0;
+    state->dataHeatBal->NominalU(2) = 0.2;
+
+    struct SurfaceSpec
+    {
+        std::string name;
+        DataSurfaces::SurfaceClass Class;
+        DataSurfaces::SurfaceClass OriginalClass;
+        int construction;
+    };
+    // clang-format off
+    std::vector<SurfaceSpec> const specs{
+        {"Wall_1",          DataSurfaces::SurfaceClass::Wall,     DataSurfaces::SurfaceClass::Wall,          2},
+        {"Window_1",        DataSurfaces::SurfaceClass::Window,   DataSurfaces::SurfaceClass::Window,        1}, // legacy IDD choice
+        {"FixedWindow_1",   DataSurfaces::SurfaceClass::Window,   DataSurfaces::SurfaceClass::FixedWindow,   1},
+        {"OperableWindow_1",DataSurfaces::SurfaceClass::Window,   DataSurfaces::SurfaceClass::OperableWindow,1},
+        {"Skylight_1",      DataSurfaces::SurfaceClass::Window,   DataSurfaces::SurfaceClass::Skylight,      1},
+        {"GlassDoor_1",     DataSurfaces::SurfaceClass::Window,   DataSurfaces::SurfaceClass::GlassDoor,     1},
+        {"TDDDiffuser_1",   DataSurfaces::SurfaceClass::Window,   DataSurfaces::SurfaceClass::TDD_Diffuser,  1},
+        {"TDDDome_1",       DataSurfaces::SurfaceClass::TDD_Dome, DataSurfaces::SurfaceClass::TDD_Dome,      1},
+        {"Door_1",          DataSurfaces::SurfaceClass::Door,     DataSurfaces::SurfaceClass::Door,          2},
+        {"OverheadDoor_1",  DataSurfaces::SurfaceClass::Door,     DataSurfaces::SurfaceClass::OverheadDoor,  2},
+    };
+    // clang-format on
+
+    int const numSurfs = static_cast<int>(specs.size());
+    state->dataSurface->TotSurfaces = numSurfs;
+    state->dataSurface->Surface.allocate(numSurfs);
+    state->dataSurface->SurfaceWindow.allocate(numSurfs);
+    SurfaceGeometry::AllocateSurfaceWindows(*state, numSurfs);
+
+    int const wallSurfNum = 1; // "Wall_1", used as the BaseSurf for every subsurface below
+    for (int i = 1; i <= numSurfs; ++i) {
+        auto &surface = state->dataSurface->Surface(i);
+        auto const &spec = specs[i - 1];
+        surface.Name = spec.name;
+        surface.Class = spec.Class;
+        surface.OriginalClass = spec.OriginalClass;
+        surface.Construction = spec.construction;
+        surface.HeatTransSurf = true;
+        surface.ExtBoundCond = ExternalEnvironment;
+        surface.GrossArea = 10.0;
+        surface.Tilt = 90.0;
+        surface.Zone = 1;
+        surface.spaceNum = 1;
+        state->dataSurface->AllSurfaceListReportOrder.push_back(i);
+        if (i != wallSurfNum) {
+            surface.BaseSurf = wallSurfNum;
+            surface.BaseSurfName = specs[wallSurfNum - 1].name;
+        }
+    }
+    // TDD:Dome subsurfaces act as their own base surface (see SurfaceGeometry.cc)
+    state->dataSurface->Surface(8).BaseSurf = 8;
+
+    HeatBalanceSurfaceManager::GatherForPredefinedReport(*state);
+
+    auto &dORP = state->dataOutRptPredefined;
+    // The legacy "Window" is treated as a FixedWindow for backward compatibility, so its count is folded
+    // in with the true FixedWindow -- and the generic "Window" row is never created at all.
+    EXPECT_EQ("NOT FOUND", OutputReportPredefined::RetrievePreDefTableEntry(*state, dORP->pdchSurfCntTot, "Window"));
+    EXPECT_EQ("NOT FOUND", OutputReportPredefined::RetrievePreDefTableEntry(*state, dORP->pdchSurfCntExt, "Window"));
+
+    struct ExpectedCount
+    {
+        std::string rowName;
+        int count;
+    };
+    std::vector<ExpectedCount> const expected{
+        {"Wall", 1},
+        {"Fixed Window", 2}, // legacy "Window_1" + "FixedWindow_1"
+        {"Operable Window", 1},
+        {"Skylight", 1},
+        {"Glass Door", 1},
+        {"Tubular Daylighting Device Diffuser", 1},
+        {"Tubular Daylighting Device Dome", 1},
+        {"Door", 1},
+        {"Overhead Door", 1},
+    };
+    for (auto const &e : expected) {
+        EXPECT_EQ(std::to_string(e.count), OutputReportPredefined::RetrievePreDefTableEntry(*state, dORP->pdchSurfCntTot, e.rowName))
+            << "Row = " << e.rowName;
+        // All surfaces above are exterior, so Outdoors count should match Total count
+        EXPECT_EQ(std::to_string(e.count), OutputReportPredefined::RetrievePreDefTableEntry(*state, dORP->pdchSurfCntExt, e.rowName))
+            << "Row = " << e.rowName;
+    }
+}
+
 // Test for interior surface report
 TEST_F(EnergyPlusFixture, InteriorSurfaceEnvelopeSummaryReport)
 {
