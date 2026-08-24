@@ -1332,20 +1332,16 @@ void GatherForPredefinedReport(EnergyPlusData &state)
                 computedNetArea(surface.BaseSurf) -= surface.GrossArea * mult;
             }
         }
-        int currSurfaceClass = int(surface.Class);
-        assert(currSurfaceClass < int(DataSurfaces::SurfaceClass::Num));
-        assert(currSurfaceClass > int(DataSurfaces::SurfaceClass::None));
+
+        // Object Count Summary
+        // This is only for unit tests: on a real run, GetSurfaceData will unconditionally do OriginalClass = Class
+        assert(surface.OriginalClass < DataSurfaces::SurfaceClass::Num);
+        assert(surface.OriginalClass > DataSurfaces::SurfaceClass::None);
+
+        int const currSurfaceClass = static_cast<int>(surface.OriginalClass);
         ++numSurfaces(currSurfaceClass);
         if (isExterior) {
             ++numExtSurfaces(currSurfaceClass);
-        }
-        if (surface.Class == DataSurfaces::SurfaceClass::Window) {
-            if (surface.OriginalClass == DataSurfaces::SurfaceClass::GlassDoor || surface.OriginalClass == DataSurfaces::SurfaceClass::TDD_Diffuser) {
-                ++numSurfaces((int)surface.OriginalClass);
-                if (isExterior) {
-                    ++numExtSurfaces((int)surface.OriginalClass);
-                }
-            }
         }
     }
     // for fins and overhangs just add them explicitly since not otherwise classified
@@ -1460,6 +1456,18 @@ void GatherForPredefinedReport(EnergyPlusData &state)
     OutputReportPredefined::PreDefTableEntry(
         state, state.dataOutRptPredefined->pdchSurfCntExt, "Window", numExtSurfaces(int(DataSurfaces::SurfaceClass::Window)));
     OutputReportPredefined::PreDefTableEntry(
+        state, state.dataOutRptPredefined->pdchSurfCntTot, "Fixed Window", numSurfaces(int(DataSurfaces::SurfaceClass::FixedWindow)));
+    OutputReportPredefined::PreDefTableEntry(
+        state, state.dataOutRptPredefined->pdchSurfCntExt, "Fixed Window", numExtSurfaces(int(DataSurfaces::SurfaceClass::FixedWindow)));
+    OutputReportPredefined::PreDefTableEntry(
+        state, state.dataOutRptPredefined->pdchSurfCntTot, "Operable Window", numSurfaces(int(DataSurfaces::SurfaceClass::OperableWindow)));
+    OutputReportPredefined::PreDefTableEntry(
+        state, state.dataOutRptPredefined->pdchSurfCntExt, "Operable Window", numExtSurfaces(int(DataSurfaces::SurfaceClass::OperableWindow)));
+    OutputReportPredefined::PreDefTableEntry(
+        state, state.dataOutRptPredefined->pdchSurfCntTot, "Skylight", numSurfaces(int(DataSurfaces::SurfaceClass::Skylight)));
+    OutputReportPredefined::PreDefTableEntry(
+        state, state.dataOutRptPredefined->pdchSurfCntExt, "Skylight", numExtSurfaces(int(DataSurfaces::SurfaceClass::Skylight)));
+    OutputReportPredefined::PreDefTableEntry(
         state, state.dataOutRptPredefined->pdchSurfCntTot, "Door", numSurfaces(int(DataSurfaces::SurfaceClass::Door)));
     OutputReportPredefined::PreDefTableEntry(
         state, state.dataOutRptPredefined->pdchSurfCntExt, "Door", numExtSurfaces(int(DataSurfaces::SurfaceClass::Door)));
@@ -1467,6 +1475,10 @@ void GatherForPredefinedReport(EnergyPlusData &state)
         state, state.dataOutRptPredefined->pdchSurfCntTot, "Glass Door", numSurfaces(int(DataSurfaces::SurfaceClass::GlassDoor)));
     OutputReportPredefined::PreDefTableEntry(
         state, state.dataOutRptPredefined->pdchSurfCntExt, "Glass Door", numExtSurfaces(int(DataSurfaces::SurfaceClass::GlassDoor)));
+    OutputReportPredefined::PreDefTableEntry(
+        state, state.dataOutRptPredefined->pdchSurfCntTot, "Overhead Door", numSurfaces(int(DataSurfaces::SurfaceClass::OverheadDoor)));
+    OutputReportPredefined::PreDefTableEntry(
+        state, state.dataOutRptPredefined->pdchSurfCntExt, "Overhead Door", numExtSurfaces(int(DataSurfaces::SurfaceClass::OverheadDoor)));
     OutputReportPredefined::PreDefTableEntry(
         state, state.dataOutRptPredefined->pdchSurfCntTot, "Shading", numSurfaces(int(DataSurfaces::SurfaceClass::Shading)));
     OutputReportPredefined::PreDefTableEntry(

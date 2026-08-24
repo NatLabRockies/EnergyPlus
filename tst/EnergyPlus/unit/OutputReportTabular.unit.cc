@@ -7590,10 +7590,12 @@ TEST_F(EnergyPlusFixture, AzimuthToCardinal)
         if (i % 2 == 1) {
             // It's a wall
             state->dataSurface->Surface(i).Class = DataSurfaces::SurfaceClass::Wall;
+            state->dataSurface->Surface(i).OriginalClass = state->dataSurface->Surface(i).Class;
             state->dataSurface->Surface(i).Name = std::format("ExtWall_{}_{}", i, entryIndex);
         } else {
             // It's a window
             state->dataSurface->Surface(i).Class = DataSurfaces::SurfaceClass::Window;
+            state->dataSurface->Surface(i).OriginalClass = DataSurfaces::SurfaceClass::OperableWindow;
             state->dataSurface->Surface(i).Name = std::format("ExtWindow_{}_{}", i, entryIndex);
             // Window references the previous wall
             state->dataSurface->Surface(i).BaseSurf = i - 1;
@@ -7691,6 +7693,7 @@ TEST_F(EnergyPlusFixture, InteriorSurfaceEnvelopeSummaryReport)
             state->dataSurface->Surface(i).Name = "Interzonal_Wall_" + std::to_string((i + 1) / 2);
             state->dataSurface->Surface(i).GrossArea = 200.;
             state->dataSurface->Surface(i).Class = DataSurfaces::SurfaceClass::Wall;
+            state->dataSurface->Surface(i).OriginalClass = state->dataSurface->Surface(i).Class;
             state->dataSurface->AllSurfaceListReportOrder.push_back(i);
         } else {
             state->dataSurface->Surface(i).Name = "Interzonal_Door_" + std::to_string((i + 1) / 2);
@@ -7698,6 +7701,7 @@ TEST_F(EnergyPlusFixture, InteriorSurfaceEnvelopeSummaryReport)
             state->dataSurface->Surface(i).BaseSurf = i - 1;
             state->dataSurface->Surface(i).GrossArea = 50.;
             state->dataSurface->Surface(i).Class = DataSurfaces::SurfaceClass::Door;
+            state->dataSurface->Surface(i).OriginalClass = state->dataSurface->Surface(i).Class;
             state->dataSurface->AllSurfaceListReportOrder.push_back(i);
         }
         if ((i + 1) / 2 == 1) {
@@ -14858,6 +14862,7 @@ TEST_F(EnergyPlusFixture, ExteriorFenestrationShadedStateTest)
             dSurf->Surface(i).Name = "Exterior_Wall_" + std::to_string((i + 1) / 2);
             dSurf->Surface(i).GrossArea = 200.;
             dSurf->Surface(i).Class = DataSurfaces::SurfaceClass::Wall;
+            dSurf->Surface(i).OriginalClass = dSurf->Surface(i).Class;
             dSurf->AllSurfaceListReportOrder.push_back(i);
         } else {
             dSurf->Surface(i).Name = "Window_" + std::to_string((i + 1) / 2);
@@ -14865,6 +14870,7 @@ TEST_F(EnergyPlusFixture, ExteriorFenestrationShadedStateTest)
             dSurf->Surface(i).BaseSurf = i - 1;
             dSurf->Surface(i).GrossArea = 50.;
             dSurf->Surface(i).Class = DataSurfaces::SurfaceClass::Window;
+            dSurf->Surface(i).OriginalClass = DataSurfaces::SurfaceClass::FixedWindow;
             dSurf->AllSurfaceListReportOrder.push_back(i);
         }
     }
